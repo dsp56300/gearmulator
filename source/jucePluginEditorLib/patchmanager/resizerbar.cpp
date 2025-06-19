@@ -1,10 +1,11 @@
 #include "resizerbar.h"
 
 #include "patchmanager.h"
+#include "patchmanageruijuce.h"
 
 namespace jucePluginEditorLib::patchManager
 {
-	ResizerBar::ResizerBar(PatchManager& _pm, juce::StretchableLayoutManager* _layout, const int _itemIndexInLayout)
+	ResizerBar::ResizerBar(PatchManagerUiJuce& _pm, juce::StretchableLayoutManager* _layout, const int _itemIndexInLayout)
 	: StretchableLayoutResizerBar(_layout, _itemIndexInLayout, true)
 	, m_patchManager(_pm)
 	{

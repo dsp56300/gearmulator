@@ -1,7 +1,7 @@
 #include "list.h"
 
 #include "defaultskin.h"
-#include "patchmanager.h"
+#include "patchmanageruijuce.h"
 
 #include "juceUiLib/uiObject.h"
 
@@ -9,7 +9,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	List::List(PatchManager& _pm) : ListModel(_pm)
+	List::List(PatchManagerUiJuce& _pm) : ListModel(_pm)
 	{
 		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
 		setColour(textColourId, juce::Colour(defaultSkin::colors::itemText));
@@ -28,7 +28,7 @@ namespace jucePluginEditorLib::patchManager
 		setRowSelectedOnMouseDown(false);
 	}
 
-	void List::applyStyleToViewport(const PatchManager& _pm, juce::Viewport& _viewport)
+	void List::applyStyleToViewport(const PatchManagerUiJuce& _pm, juce::Viewport& _viewport)
 	{
 		if(const auto t = _pm.getTemplate("pm_scrollbar"))
 		{

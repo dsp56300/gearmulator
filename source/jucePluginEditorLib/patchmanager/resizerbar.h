@@ -4,17 +4,17 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	class PatchManager;
+	class PatchManagerUiJuce;
 
 	class ResizerBar : public juce::StretchableLayoutResizerBar
 	{
 	public:
-		ResizerBar(PatchManager& _pm, juce::StretchableLayoutManager* _layout, int _itemIndexInLayout);
+		ResizerBar(PatchManagerUiJuce& _pm, juce::StretchableLayoutManager* _layout, int _itemIndexInLayout);
 		void hasBeenMoved() override;
 		void paint(juce::Graphics& g) override;
 
 		void mouseDoubleClick(const juce::MouseEvent& _e) override;
 	private:
-		PatchManager& m_patchManager;
+		PatchManagerUiJuce& m_patchManager;
 	};
 }

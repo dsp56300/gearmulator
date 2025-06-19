@@ -2,7 +2,8 @@
 
 #include "griditem.h"
 #include "list.h"
-#include "patchmanager.h"
+
+#include "patchmanageruijuce.h"
 
 #include "juceUiLib/uiObject.h"
 
@@ -12,7 +13,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	Grid::Grid(PatchManager& _pm) : ListModel(_pm), m_viewport(*this), m_itemContainer(*this)
+	Grid::Grid(PatchManagerUiJuce& _pm) : ListModel(_pm), m_viewport(*this), m_itemContainer(*this)
 	{
 		m_viewport.setScrollBarsShown(false, true);
 		m_viewport.setViewedComponent(&m_itemContainer, false);

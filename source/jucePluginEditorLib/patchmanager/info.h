@@ -6,17 +6,18 @@
 
 namespace pluginLib::patchDB
 {
+	class DB;
 	class Tags;
 }
 
 namespace jucePluginEditorLib::patchManager
 {
-	class PatchManager;
+	class PatchManagerUiJuce;
 
 	class Info final : public juce::Viewport
 	{
 	public:
-		Info(PatchManager& _pm);
+		Info(PatchManagerUiJuce& _pm);
 		~Info() override;
 
 		void setPatch(const pluginLib::patchDB::PatchPtr& _patch);
@@ -34,7 +35,7 @@ namespace jucePluginEditorLib::patchManager
 		void doLayout() const;
 		void resized() override;
 
-		PatchManager& m_patchManager;
+		pluginLib::patchDB::DB& m_patchManager;
 
 		Component m_content;
 

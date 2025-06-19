@@ -15,7 +15,7 @@ namespace jucePluginEditorLib::patchManager
 	public:
 		static constexpr uint32_t InvalidItem = ~0;
 
-		Grid(PatchManager& _pm);
+		Grid(PatchManagerUiJuce& _pm);
 		~Grid() override;
 
 		Grid(Grid&&) = delete;

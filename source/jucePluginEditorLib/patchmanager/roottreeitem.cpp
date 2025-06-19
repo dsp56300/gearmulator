@@ -2,7 +2,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	RootTreeItem::RootTreeItem(PatchManager& _pm): TreeItem(_pm, "root")
+	RootTreeItem::RootTreeItem(PatchManagerUiJuce& _pm): TreeItem(_pm, "root")
 	{
 	}
 }

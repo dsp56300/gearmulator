@@ -15,6 +15,7 @@ namespace pluginLib
 
 namespace pluginLib::patchDB
 {
+	class DB;
 	struct SearchRequest;
 	struct PatchKey;
 	struct Search;
@@ -23,6 +24,7 @@ namespace pluginLib::patchDB
 namespace jucePluginEditorLib::patchManager
 {
 	class PatchManager;
+	class PatchManagerUiJuce;
 
 	class ListModel : public juce::ListBoxModel, Editable, public juce::DragAndDropTarget, public juce::FileDragAndDropTarget
 	{
@@ -30,7 +32,7 @@ namespace jucePluginEditorLib::patchManager
 		using Patch = pluginLib::patchDB::PatchPtr;
 		using Patches = std::vector<Patch>;
 
-		explicit ListModel(PatchManager& _pm);
+		explicit ListModel(PatchManagerUiJuce& _pm);
 
 		void setContent(const pluginLib::patchDB::SearchHandle& _handle);
 		void setContent(pluginLib::patchDB::SearchRequest&& _request);
@@ -78,10 +80,12 @@ namespace jucePluginEditorLib::patchManager
 		void setFilter(const std::string& _filter);
 		void setFilter(const std::string& _filter, bool _hideDuplicatesByHash, bool _hideDuplicatesByName);
 
-		PatchManager& getPatchManager() const
+		PatchManagerUiJuce& getPatchManager() const
 		{
 			return m_patchManager;
 		}
+
+		PatchManager& getDB() const;
 
 		static void sortPatches(Patches& _patches, pluginLib::patchDB::SourceType _sourceType);
 		void listBoxItemClicked(int _row, const juce::MouseEvent&) override;
@@ -150,7 +154,7 @@ namespace jucePluginEditorLib::patchManager
 		bool onClicked(const juce::MouseEvent&);
 		void cancelSearch();
 
-		PatchManager& m_patchManager;
+		PatchManagerUiJuce& m_patchManager;
 
 		std::shared_ptr<pluginLib::patchDB::Search> m_search;
 		Patches m_patches;

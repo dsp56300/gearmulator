@@ -1,6 +1,7 @@
 #include "tagtreeitem.h"
 
 #include "patchmanager.h"
+#include "patchmanageruijuce.h"
 #include "tree.h"
 
 #if JUCE_MAJOR_VERSION < 8	// they forgot this include but fixed it in version 8+
@@ -9,7 +10,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	TagTreeItem::TagTreeItem(PatchManager& _pm, const GroupType _type, const std::string& _tag) : TreeItem(_pm, _tag), m_group(_type), m_tag(_tag)
+	TagTreeItem::TagTreeItem(PatchManagerUiJuce& _pm, const GroupType _type, const std::string& _tag) : TreeItem(_pm, _tag), m_group(_type), m_tag(_tag)
 	{
 		const auto tagType = toTagType(getGroupType());
 
@@ -57,7 +58,7 @@ namespace jucePluginEditorLib::patchManager
 		search(std::move(sr));
 	}
 
-	void TagTreeItem::modifyTags(PatchManager& _pm, pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	void TagTreeItem::modifyTags(PatchManagerUiJuce& _pm, pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		pluginLib::patchDB::TypedTags tags;
 		if (juce::ModifierKeys::currentModifiers.isShiftDown())
@@ -65,7 +66,7 @@ namespace jucePluginEditorLib::patchManager
 		else
 			tags.add(_type, _tag);
 
-		_pm.modifyTags(_patches, tags);
+		_pm.getDB().modifyTags(_patches, tags);
 		_pm.repaint();
 	}
 
@@ -82,12 +83,12 @@ namespace jucePluginEditorLib::patchManager
 		if(tagType != pluginLib::patchDB::TagType::Invalid && getOwnerView()->getNumSelectedItems() == 1)
 		{
 			juce::PopupMenu menu;
-			const auto& s = getPatchManager().getSearch(getSearchHandle());
+			const auto& s = getDB().getSearch(getSearchHandle());
 			if(s && !s->getResultSize())
 			{
 				menu.addItem("Remove", [this, tagType]
 				{
-					getPatchManager().removeTag(tagType, m_tag);
+					getDB().removeTag(tagType, m_tag);
 				});
 			}
 			menu.addItem("Set Color...", [this, tagType]
@@ -112,7 +113,7 @@ namespace jucePluginEditorLib::patchManager
 			{
 				menu.addItem("Clear Color", [this, tagType]
 				{
-					getPatchManager().setTagColor(tagType, getTag(), pluginLib::patchDB::g_invalidColor);
+					getDB().setTagColor(tagType, getTag(), pluginLib::patchDB::g_invalidColor);
 					getPatchManager().repaint();
 				});
 			}
@@ -125,7 +126,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		const auto tagType = toTagType(getGroupType());
 		if(tagType != pluginLib::patchDB::TagType::Invalid)
-			return getPatchManager().getTagColor(tagType, getTag());
+			return getDB().getTagColor(tagType, getTag());
 		return TreeItem::getColor();
 	}
 }

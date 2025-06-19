@@ -3,10 +3,10 @@
 #include "VirusEditor.h"
 #include "VirusController.h"
 
+#include "jucePluginEditorLib/patchmanager/patchmanageruijuce.h"
+
 #include "jucePluginLib/filetype.h"
 #include "jucePluginLib/patchdb/datasource.h"
-
-#include "jucePluginEditorLib/pluginEditor.h"
 
 #include "virusLib/microcontroller.h"
 #include "virusLib/device.h"
@@ -23,8 +23,12 @@ namespace virus
 
 namespace genericVirusUI
 {
-	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root), m_controller(_editor.getController())
+	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root)
+		: jucePluginEditorLib::patchManager::PatchManager(_editor)
+		, m_controller(_editor.getController())
 	{
+		setUi(std::make_unique<jucePluginEditorLib::patchManager::PatchManagerUiJuce>(_editor, *this, _root, DefaultGroupTypes));
+
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
 		

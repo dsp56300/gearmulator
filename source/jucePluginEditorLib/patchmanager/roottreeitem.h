@@ -6,7 +6,7 @@ namespace jucePluginEditorLib::patchManager
 	class RootTreeItem : public TreeItem
 	{
 	public:
-		explicit RootTreeItem(PatchManager& _pm);
+		explicit RootTreeItem(PatchManagerUiJuce& _pm);
 
 		bool mightContainSubItems() override
 		{

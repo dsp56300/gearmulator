@@ -1,7 +1,7 @@
 #include "listitem.h"
 
 #include "listmodel.h"
-#include "patchmanager.h"
+#include "patchmanageruijuce.h"
 #include "savepatchdesc.h"
 
 #include "synthLib/buildconfig.h"
@@ -96,7 +96,7 @@ namespace jucePluginEditorLib::patchManager
 
 		if(dynamic_cast<const ListModel*>(dragSourceDetails.sourceComponent.get()))
 		{
-			if(!patches.empty() && pm.movePatchesTo(row, patches))
+			if(!patches.empty() && pm.getDB().movePatchesTo(row, patches))
 				m_list.refreshContent();
 		}
 		else if(patches.size() == 1 && savePatchDesc->isPartValid())
@@ -120,7 +120,7 @@ namespace jucePluginEditorLib::patchManager
 						{
 							if (_result == genericUI::MessageBox::Result::Yes)
 							{
-								m_list.getPatchManager().replacePatch(existingPatch, patches.front());
+								m_list.getDB().replacePatch(existingPatch, patches.front());
 							}
 						});
 					return;
@@ -132,11 +132,11 @@ namespace jucePluginEditorLib::patchManager
 #else
 			const auto part = savePatchDesc->getPart();
 
-			pm.copyPatchesTo(source, patches, row, [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+			m_list.getDB().copyPatchesTo(source, patches, row, [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 			{
 				juce::MessageManager::callAsync([this, part, _patches]
 				{
-					m_list.getPatchManager().setSelectedPatch(part, _patches.front());
+					m_list.getDB().setSelectedPatch(part, _patches.front());
 				});
 			});
 #endif

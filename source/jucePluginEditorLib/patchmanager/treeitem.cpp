@@ -2,6 +2,7 @@
 
 #include "listmodel.h"
 #include "patchmanager.h"
+#include "patchmanageruijuce.h"
 #include "savepatchdesc.h"
 #include "tree.h"
 
@@ -10,7 +11,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	TreeItem::TreeItem(PatchManager& _patchManager, const std::string& _title, const uint32_t _count/* = g_invalidCount*/) : m_patchManager(_patchManager), m_count(_count)
+	TreeItem::TreeItem(PatchManagerUiJuce& _patchManager, const std::string& _title, const uint32_t _count/* = g_invalidCount*/) : m_patchManager(_patchManager), m_count(_count)
 	{
 		setTitle(_title);
 	}
@@ -21,9 +22,14 @@ namespace jucePluginEditorLib::patchManager
 
 		if(m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle)
 		{
-			getPatchManager().cancelSearch(m_searchHandle);
+			getDB().cancelSearch(m_searchHandle);
 			m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 		}
+	}
+
+	PatchManager& TreeItem::getDB() const
+	{
+		return m_patchManager.getDB();
 	}
 
 	void TreeItem::setTitle(const std::string& _title)
@@ -47,7 +53,7 @@ namespace jucePluginEditorLib::patchManager
 		if (_dirtySearches.find(m_searchHandle) == _dirtySearches.end())
 			return;
 
-		const auto search = getPatchManager().getSearch(m_searchHandle);
+		const auto search = getDB().getSearch(m_searchHandle);
 		if (!search)
 			return;
 
@@ -156,7 +162,7 @@ namespace jucePluginEditorLib::patchManager
 		cancelSearch();
 		setCount(g_unknownCount);
 		m_searchRequest = _request;
-		m_searchHandle = getPatchManager().search(std::move(_request));
+		m_searchHandle = getDB().search(std::move(_request));
 	}
 
 	void TreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)
@@ -234,7 +240,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::filesDropped(const juce::StringArray& _files, const int _insertIndex)
 	{
-		const auto patches = m_patchManager.loadPatchesFromFiles(_files);
+		const auto patches = getDB().loadPatchesFromFiles(_files);
 
 		if(!patches.empty())
 			patchesDropped(patches);
@@ -297,7 +303,7 @@ namespace jucePluginEditorLib::patchManager
 		if(m_searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
 			return;
 
-		getPatchManager().cancelSearch(m_searchHandle);
+		getDB().cancelSearch(m_searchHandle);
 		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	}
 

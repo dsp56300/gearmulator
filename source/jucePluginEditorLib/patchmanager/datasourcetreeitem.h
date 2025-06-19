@@ -14,7 +14,7 @@ namespace jucePluginEditorLib::patchManager
 	class DatasourceTreeItem : public TreeItem
 	{
 	public:
-		DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourceNodePtr& _ds);
+		DatasourceTreeItem(PatchManagerUiJuce& _pm, const pluginLib::patchDB::DataSourceNodePtr& _ds);
 
 		bool mightContainSubItems() override
 		{

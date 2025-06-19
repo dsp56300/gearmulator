@@ -4,6 +4,7 @@
 
 #include "listmodel.h"
 #include "patchmanager.h"
+#include "patchmanageruijuce.h"
 
 #include "../pluginEditor.h"
 
@@ -63,7 +64,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	DatasourceTreeItem::DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourceNodePtr& _ds) : TreeItem(_pm,{}), m_dataSource(_ds)
+	DatasourceTreeItem::DatasourceTreeItem(PatchManagerUiJuce& _pm, const pluginLib::patchDB::DataSourceNodePtr& _ds) : TreeItem(_pm,{}), m_dataSource(_ds)
 	{
 		setTitle(getDataSourceNodeTitle(_ds));
 
@@ -98,7 +99,7 @@ namespace jucePluginEditorLib::patchManager
 			{
 				if (_result == genericUI::MessageBox::Result::Yes)
 				{
-					getPatchManager().removePatches(m_dataSource, _patches);
+					getDB().removePatches(m_dataSource, _patches);
 				}
 			});
 		}
@@ -109,7 +110,7 @@ namespace jucePluginEditorLib::patchManager
 #else
 			const int part = _savePatchDesc ? _savePatchDesc->getPart() : -1;
 
-			getPatchManager().copyPatchesToLocalStorage(m_dataSource, _patches, part);
+			getDB().copyPatchesToLocalStorage(m_dataSource, _patches, part);
 #endif
 		}
 	}
@@ -126,7 +127,7 @@ namespace jucePluginEditorLib::patchManager
 
 		menu.addItem("Refresh", [this]
 		{
-			getPatchManager().refreshDataSource(m_dataSource);
+			getDB().refreshDataSource(m_dataSource);
 		});
 
 		if(m_dataSource->type == pluginLib::patchDB::SourceType::File || 
@@ -135,13 +136,13 @@ namespace jucePluginEditorLib::patchManager
 		{
 			menu.addItem("Remove", [this]
 			{
-				getPatchManager().removeDataSource(*m_dataSource);
+				getDB().removeDataSource(*m_dataSource);
 			});
 			menu.addItem("Reveal in File Browser", [this]
 			{
 				if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
 				{
-					getPatchManager().getLocalStorageFile(*m_dataSource).revealToUser();
+					getDB().getLocalStorageFile(*m_dataSource).revealToUser();
 				}
 				else
 				{
@@ -160,7 +161,7 @@ namespace jucePluginEditorLib::patchManager
 					{
 						if (_result == genericUI::MessageBox::Result::Yes)
 						{
-							getPatchManager().removeDataSource(*m_dataSource);
+							getDB().removeDataSource(*m_dataSource);
 						}
 					});
 			});
@@ -174,25 +175,25 @@ namespace jucePluginEditorLib::patchManager
 
 			menu.addSubMenu("Export...", getPatchManager().getEditor().createExportFileTypeMenu([this](const pluginLib::FileType& _fileType)
 			{
-				const auto s = getPatchManager().getSearch(getSearchHandle());
+				const auto s = getDB().getSearch(getSearchHandle());
 				if(s)
 				{
 					std::vector<pluginLib::patchDB::PatchPtr> patches(s->results.begin(), s->results.end());
-					getPatchManager().exportPresets(std::move(patches), _fileType);
+					getDB().exportPresets(std::move(patches), _fileType);
 				}
 			}));
 		}
 
 		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
 		{
-			const auto clipboardPatches = getPatchManager().getPatchesFromClipboard();
+			const auto clipboardPatches = getDB().getPatchesFromClipboard();
 
 			if(!clipboardPatches.empty())
 			{
 				menu.addSeparator();
 				menu.addItem("Paste from Clipboard", [this, clipboardPatches]
 				{
-					getPatchManager().copyPatchesToLocalStorage(m_dataSource, clipboardPatches, -1);
+					getDB().copyPatchesToLocalStorage(m_dataSource, clipboardPatches, -1);
 				});
 			}
 		}
@@ -230,7 +231,7 @@ namespace jucePluginEditorLib::patchManager
 		{
 			if(_newName != m_dataSource->name)
 			{
-				getPatchManager().renameDataSource(m_dataSource, _newName);
+				getDB().renameDataSource(m_dataSource, _newName);
 			}
 		});
 		return true;
@@ -267,6 +268,6 @@ namespace jucePluginEditorLib::patchManager
 		for (const auto& patch : patchesVec)
 			patchesMap.insert({i++, patch});
 
-		return new SavePatchDesc(getPatchManager(), std::move(patchesMap), baseLib::filesystem::getFilenameWithoutPath(m_dataSource->name));
+		return new SavePatchDesc(getDB(), std::move(patchesMap), baseLib::filesystem::getFilenameWithoutPath(m_dataSource->name));
 	}
 }

@@ -7,6 +7,7 @@
 #include "roottreeitem.h"
 #include "treeitem.h"
 #include "defaultskin.h"
+#include "patchmanageruijuce.h"
 
 #include "juceUiLib/uiObject.h"
 
@@ -30,7 +31,7 @@ namespace jucePluginEditorLib::patchManager
 
 	static_assert(std::size(g_groupNames) == static_cast<uint32_t>(GroupType::Count));
 
-	Tree::Tree(PatchManager& _patchManager) : m_patchManager(_patchManager)
+	Tree::Tree(PatchManagerUiJuce& _patchManager) : m_patchManager(_patchManager)
 	{
 		// some very basic defaults if no style is available
 		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
@@ -86,7 +87,7 @@ namespace jucePluginEditorLib::patchManager
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> storageDataSources;
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> factoryDataSources;
 
-		m_patchManager.getDataSources(allDataSources);
+		m_patchManager.getDB().getDataSources(allDataSources);
 
 		readOnlyDataSources.reserve(allDataSources.size());
 		storageDataSources.reserve(allDataSources.size());
@@ -118,7 +119,7 @@ namespace jucePluginEditorLib::patchManager
 		if (!item)
 			return;
 		std::set<pluginLib::patchDB::Tag> tags;
-		m_patchManager.getTags(tagType, tags);
+		m_patchManager.getDB().getTags(tagType, tags);
 		item->updateFromTags(tags);
 	}
 

@@ -3,6 +3,7 @@
 #include "defaultskin.h"
 #include "listitem.h"
 #include "patchmanager.h"
+#include "patchmanageruijuce.h"
 #include "savepatchdesc.h"
 #include "search.h"
 #include "treeitem.h"
@@ -12,10 +13,11 @@
 #include "juceUiLib/uiObjectStyle.h"
 
 #include "jucePluginLib/filetype.h"
+#include "jucePluginLib/patchdb/db.h"
 
 namespace jucePluginEditorLib::patchManager
 {
-	ListModel::ListModel(PatchManager& _pm): m_patchManager(_pm)
+	ListModel::ListModel(PatchManagerUiJuce& _pm): m_patchManager(_pm)
 	{
 	}
 
@@ -23,7 +25,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		cancelSearch();
 
-		const auto& search = m_patchManager.getSearch(_handle);
+		const auto& search = m_patchManager.getDB().getSearch(_handle);
 
 		if (!search)
 			return;
@@ -34,7 +36,7 @@ namespace jucePluginEditorLib::patchManager
 	void ListModel::setContent(pluginLib::patchDB::SearchRequest&& _request)
 	{
 		cancelSearch();
-		const auto sh = getPatchManager().search(std::move(_request));
+		const auto sh = getDB().search(std::move(_request));
 		setContent(sh);
 		m_searchHandle = sh;
 	}
@@ -96,7 +98,7 @@ namespace jucePluginEditorLib::patchManager
 		if(patches.empty())
 			return false;
 
-		return getPatchManager().exportPresets(std::move(patches), _fileType);
+		return getDB().exportPresets(std::move(patches), _fileType);
 	}
 
 	bool ListModel::onClicked(const juce::MouseEvent& _mouseEvent)
@@ -138,7 +140,7 @@ namespace jucePluginEditorLib::patchManager
 					beginEdit(dynamic_cast<juce::Component*>(this), pos, patch->getName(), [this, patch](bool _cond, const std::string& _name)
 					{
 						if(_name != patch->getName())
-							getPatchManager().renamePatch(patch, _name);
+							getDB().renamePatch(patch, _name);
 					});
 				});
 
@@ -165,7 +167,7 @@ namespace jucePluginEditorLib::patchManager
 							removeTags.addRemoved(type, tag);
 					}
 
-					m_patchManager.modifyTags(patches, removeTags);
+					getDB().modifyTags(patches, removeTags);
 					m_patchManager.repaint();
 				});
 			}
@@ -178,7 +180,7 @@ namespace jucePluginEditorLib::patchManager
 						if (_result == genericUI::MessageBox::Result::Yes)
 						{
 							const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
-							m_patchManager.removePatches(m_search->request.sourceNode, patches);
+							getDB().removePatches(m_search->request.sourceNode, patches);
 						}
 					});
 				});
@@ -197,7 +199,7 @@ namespace jucePluginEditorLib::patchManager
 					if(t.empty())
 						continue;
 
-					const auto tagTypeName = m_patchManager.getTagTypeName(type);
+					const auto tagTypeName = getDB().getTagTypeName(type);
 
 					if(tagTypeName.empty())
 						continue;
@@ -213,7 +215,7 @@ namespace jucePluginEditorLib::patchManager
 
 						tagMenu.addItem(tag, [this, s = std::move(patches), removeTags]
 						{
-							m_patchManager.modifyTags(s, removeTags);
+							getDB().modifyTags(s, removeTags);
 						});
 					}
 
@@ -234,12 +236,12 @@ namespace jucePluginEditorLib::patchManager
 				{
 					const auto type = static_cast<pluginLib::patchDB::TagType>(i);
 					std::set<pluginLib::patchDB::Tag> availTags;
-					m_patchManager.getTags(type, availTags);
+					getDB().getTags(type, availTags);
 
 					if(availTags.empty())
 						continue;
 
-					const auto tagTypeName = m_patchManager.getTagTypeName(type);
+					const auto tagTypeName = getDB().getTagTypeName(type);
 
 					if(tagTypeName.empty())
 						continue;
@@ -255,7 +257,7 @@ namespace jucePluginEditorLib::patchManager
 
 						tagMenu.addItem(tag, [this, addedTags, s = std::move(patches)]
 						{
-							m_patchManager.modifyTags(s, addedTags);
+							getDB().modifyTags(s, addedTags);
 						});
 					}
 
@@ -282,13 +284,13 @@ namespace jucePluginEditorLib::patchManager
 		menu.addSeparator();
 
 		juce::PopupMenu layoutMenu;
-		layoutMenu.addItem("List + Info", true, m_patchManager.getLayout() == PatchManager::LayoutType::List, [this]
+		layoutMenu.addItem("List + Info", true, m_patchManager.getLayout() == PatchManagerUiJuce::LayoutType::List, [this]
 		{
-			m_patchManager.setLayout(PatchManager::LayoutType::List);
+			m_patchManager.setLayout(PatchManagerUiJuce::LayoutType::List);
 		});
-		layoutMenu.addItem("Grid", true, m_patchManager.getLayout() == PatchManager::LayoutType::Grid, [this]
+		layoutMenu.addItem("Grid", true, m_patchManager.getLayout() == PatchManagerUiJuce::LayoutType::Grid, [this]
 		{
-			m_patchManager.setLayout(PatchManager::LayoutType::Grid);
+			m_patchManager.setLayout(PatchManagerUiJuce::LayoutType::Grid);
 		});
 		menu.addSubMenu("Layout", layoutMenu);
 
@@ -301,7 +303,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		if(m_searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
 			return;
-		getPatchManager().cancelSearch(m_searchHandle);
+		getDB().cancelSearch(m_searchHandle);
 		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	}
 
@@ -378,7 +380,7 @@ namespace jucePluginEditorLib::patchManager
 			}
 		}
 
-		return new SavePatchDesc(m_patchManager, std::move(patches));
+		return new SavePatchDesc(getDB(), std::move(patches));
 	}
 
 	juce::Component* ListModel::refreshComponentForRow(int rowNumber, bool isRowSelected, juce::Component* existingComponentToUpdate)
@@ -484,7 +486,7 @@ namespace jucePluginEditorLib::patchManager
 		const auto patches = getSelectedPatches();
 
 		if(patches.size() == 1)
-			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle);
+			getDB().setSelectedPatch(*patches.begin(), m_search->handle);
 	}
 
 	void ListModel::processDirty(const pluginLib::patchDB::Dirty& _dirty)
@@ -531,6 +533,11 @@ namespace jucePluginEditorLib::patchManager
 		redraw();
 
 		getPatchManager().setListStatus(static_cast<uint32_t>(selected.size()), static_cast<uint32_t>(getPatches().size()));
+	}
+
+	PatchManager& ListModel::getDB() const
+	{
+		return m_patchManager.getDB();
 	}
 
 	void ListModel::sortPatches(Patches& _patches, pluginLib::patchDB::SourceType _sourceType)

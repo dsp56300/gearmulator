@@ -7,9 +7,9 @@ namespace jucePluginEditorLib::patchManager
 	class List : public ListModel, public juce::ListBox
 	{
 	public:
-		explicit List(PatchManager& _pm);
+		explicit List(PatchManagerUiJuce& _pm);
 
-		static void applyStyleToViewport(const PatchManager& _pm, juce::Viewport& _viewport);
+		static void applyStyleToViewport(const PatchManagerUiJuce& _pm, juce::Viewport& _viewport);
 
 	private:
 		// ListModel

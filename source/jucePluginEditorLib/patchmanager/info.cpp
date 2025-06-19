@@ -2,6 +2,7 @@
 
 #include "patchmanager.h"
 #include "defaultskin.h"
+#include "patchmanageruijuce.h"
 
 #include "jucePluginLib/patchdb/patch.h"
 
@@ -11,7 +12,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	Info::Info(PatchManager& _pm) : m_patchManager(_pm)
+	Info::Info(PatchManagerUiJuce& _pm) : m_patchManager(_pm.getDB())
 	{
 		addAndMakeVisible(m_content);
 

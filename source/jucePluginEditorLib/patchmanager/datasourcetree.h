@@ -7,6 +7,6 @@ namespace jucePluginEditorLib::patchManager
 	class DatasourceTree : public Tree
 	{
 	public:
-		explicit DatasourceTree(PatchManager& _pm, const std::initializer_list<GroupType>& _groupTypes);
+		explicit DatasourceTree(PatchManagerUiJuce& _pm, const std::initializer_list<GroupType>& _groupTypes);
 	};
 }

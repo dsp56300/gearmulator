@@ -10,6 +10,7 @@
 
 namespace pluginLib::patchDB
 {
+	class DB;
 	struct Search;
 	struct SearchRequest;
 }
@@ -22,15 +23,16 @@ namespace jucePluginEditorLib::patchManager
 	static constexpr uint32_t g_invalidCount = ~0;
 	static constexpr uint32_t g_unknownCount = g_invalidCount - 1;
 
-	class PatchManager;
+	class PatchManagerUiJuce;
 
 	class TreeItem : public juce::TreeViewItem, protected Editable
 	{
 	public:
-		TreeItem(PatchManager& _patchManager, const std::string& _title, uint32_t _count = g_invalidCount);
+		TreeItem(PatchManagerUiJuce& _patchManager, const std::string& _title, uint32_t _count = g_invalidCount);
 		~TreeItem() override;
 
-		PatchManager& getPatchManager() const { return m_patchManager; }
+		PatchManagerUiJuce& getPatchManager() const { return m_patchManager; }
+		PatchManager& getDB() const;
 
 		void setTitle(const std::string& _title);
 		virtual void setCount(uint32_t _count);
@@ -90,7 +92,7 @@ namespace jucePluginEditorLib::patchManager
 		void updateText();
 		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 
-		PatchManager& m_patchManager;
+		PatchManagerUiJuce& m_patchManager;
 
 		std::string m_title;
 		uint32_t m_count = g_invalidCount;

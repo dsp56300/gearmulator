@@ -5,7 +5,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	TagsTree::TagsTree(PatchManager& _pm) : Tree(_pm)
+	TagsTree::TagsTree(PatchManagerUiJuce& _pm) : Tree(_pm)
 	{
 		addGroup(GroupType::Categories);
 		m_uncategorized = new NoTagTreeItem(_pm, pluginLib::patchDB::TagType::Category, "Uncategorized");

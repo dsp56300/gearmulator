@@ -13,14 +13,14 @@ namespace pluginLib::patchDB
 
 namespace jucePluginEditorLib::patchManager
 {
+	class PatchManagerUiJuce;
 	class DatasourceTreeItem;
-	class PatchManager;
 	class GroupTreeItem;
 
 	class Tree : public juce::TreeView
 	{
 	public:
-		Tree(PatchManager& _patchManager);
+		Tree(PatchManagerUiJuce& _patchManager);
 		~Tree() override;
 
 		void updateDataSources();
@@ -46,7 +46,7 @@ namespace jucePluginEditorLib::patchManager
 		void addGroup(GroupType _type);
 
 	private:
-		PatchManager& m_patchManager;
+		PatchManagerUiJuce& m_patchManager;
 		std::map<GroupType, GroupTreeItem*> m_groupItems;
 		std::string m_filter;
 	};

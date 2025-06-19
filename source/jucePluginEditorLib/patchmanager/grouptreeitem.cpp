@@ -11,7 +11,7 @@ namespace jucePluginEditorLib::patchManager
 {
 	class DatasourceTreeItem;
 
-	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type, const std::string& _groupName) : TreeItem(_pm, _groupName), m_type(_type)
+	GroupTreeItem::GroupTreeItem(PatchManagerUiJuce& _pm, const GroupType _type, const std::string& _groupName) : TreeItem(_pm, _groupName), m_type(_type)
 	{
 		GroupTreeItem::onParentSearchChanged({});
 	}
@@ -153,7 +153,7 @@ namespace jucePluginEditorLib::patchManager
 						ds.type = pluginLib::patchDB::SourceType::Folder;
 						ds.name = result;
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
-						getPatchManager().addDataSource(ds);
+						getDB().addDataSource(ds);
 					}
 
 					m_chooser.reset();
@@ -177,7 +177,7 @@ namespace jucePluginEditorLib::patchManager
 						ds.type = pluginLib::patchDB::SourceType::File;
 						ds.name = result;
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
-						getPatchManager().addDataSource(ds);
+						getDB().addDataSource(ds);
 					}
 
 					m_chooser.reset();
@@ -197,7 +197,7 @@ namespace jucePluginEditorLib::patchManager
 					ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 					ds.timestamp = std::chrono::system_clock::now();
 
-					getPatchManager().addDataSource(ds);
+					getDB().addDataSource(ds);
 				});
 			});
 		}
@@ -208,7 +208,7 @@ namespace jucePluginEditorLib::patchManager
 				beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
 				{
 					if (!_newText.empty())
-						getPatchManager().addTag(toTagType(m_type), _newText);
+						getDB().addTag(toTagType(m_type), _newText);
 				});
 			});
 		}
@@ -315,7 +315,7 @@ namespace jucePluginEditorLib::patchManager
 
 		constexpr const char* const tag = "Favourites";
 
-		getPatchManager().addTag(tagType, tag);
+		getDB().addTag(tagType, tag);
 		TagTreeItem::modifyTags(getPatchManager(), tagType, tag, _patches);
 	}
 
@@ -355,14 +355,14 @@ namespace jucePluginEditorLib::patchManager
 				ds.type = pluginLib::patchDB::SourceType::File;
 				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 
-				getPatchManager().addDataSource(ds);
+				getDB().addDataSource(ds);
 			}
 		}
 		else if(m_type == GroupType::LocalStorage)
 		{
 			for (const auto& file : _files)
 			{
-				auto patches = getPatchManager().loadPatchesFromFiles(std::vector<std::string>{file.toStdString()});
+				auto patches = getDB().loadPatchesFromFiles(std::vector<std::string>{file.toStdString()});
 
 				if(patches.empty())
 					continue;
@@ -372,10 +372,10 @@ namespace jucePluginEditorLib::patchManager
 				ds.type = pluginLib::patchDB::SourceType::LocalStorage;
 				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 
-				getPatchManager().addDataSource(ds, [this, patches](const bool _success, const std::shared_ptr<pluginLib::patchDB::DataSourceNode>& _ds)
+				getDB().addDataSource(ds, [this, patches](const bool _success, const std::shared_ptr<pluginLib::patchDB::DataSourceNode>& _ds)
 				{
 					if(_success)
-						getPatchManager().copyPatchesToLocalStorage(_ds, patches, -1);
+						getDB().copyPatchesToLocalStorage(_ds, patches, -1);
 				});
 			}
 		}

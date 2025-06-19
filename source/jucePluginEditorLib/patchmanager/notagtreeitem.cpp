@@ -2,7 +2,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	NoTagTreeItem::NoTagTreeItem(PatchManager& _pm, const pluginLib::patchDB::TagType _type, const std::string& _title) : TreeItem(_pm, _title), m_tagType(_type)
+	NoTagTreeItem::NoTagTreeItem(PatchManagerUiJuce& _pm, const pluginLib::patchDB::TagType _type, const std::string& _title) : TreeItem(_pm, _title), m_tagType(_type)
 	{
 		onParentSearchChanged({});
 	}
