@@ -20,6 +20,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 	public:
 		PatchManagerUi(Editor& _editor, PatchManager& _db);
+		virtual ~PatchManagerUi() = default;
 
 		Editor& getEditor() const { return m_editor; }
 
