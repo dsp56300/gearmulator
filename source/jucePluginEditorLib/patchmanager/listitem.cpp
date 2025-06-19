@@ -1,6 +1,7 @@
 #include "listitem.h"
 
 #include "listmodel.h"
+#include "patchmanager.h"
 #include "patchmanageruijuce.h"
 #include "savepatchdesc.h"
 
