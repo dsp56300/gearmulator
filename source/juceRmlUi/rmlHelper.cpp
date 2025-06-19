@@ -3,6 +3,9 @@
 #include <cassert>
 
 #include "Core/ElementStyle.h"
+
+#include "rmlDragSource.h"
+
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "RmlUi/Core/Element.h"
@@ -195,6 +198,18 @@ namespace juceRmlUi
 		bool getKeyModAlt(const Rml::Event& _event)
 		{
 			return _event.GetParameter<int>("alt_key", 0) > 0;
+		}
+
+		Rml::Element* getDragElement(const Rml::Event& _event)
+		{
+			auto* dragElem = _event.GetParameter<void*>("drag_element", nullptr);
+			return static_cast<Rml::Element*>(dragElem);
+		}
+
+		DragSource* getDragSource(const Rml::Event& _event)
+		{
+			auto* elem = getDragElement(_event);
+			return dynamic_cast<DragSource*>(elem);
 		}
 
 		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child)

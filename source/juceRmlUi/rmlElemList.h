@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rmlDragTarget.h"
 #include "rmlElement.h"
 #include "rmlList.h"
 #include "RmlUi/Core/EventListener.h"
@@ -8,7 +9,7 @@ namespace juceRmlUi
 {
 	class ElemListEntry;
 
-	class ElemList : public Element, Rml::EventListener
+	class ElemList : public Element, public DragTarget, Rml::EventListener
 	{
 	public:
 		enum class LayoutType : uint8_t

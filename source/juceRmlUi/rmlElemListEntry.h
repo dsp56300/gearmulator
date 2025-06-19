@@ -1,11 +1,13 @@
 #pragma once
 
+#include "rmlDragSource.h"
+#include "rmlDragTarget.h"
 #include "rmlElement.h"
 #include "rmlList.h"
 
 namespace juceRmlUi
 {
-	class ElemListEntry : public Element
+	class ElemListEntry : public Element, public DragSource, public DragTarget
 	{
 	public:
 		explicit ElemListEntry(const Rml::String& _tag);
@@ -15,6 +17,8 @@ namespace juceRmlUi
 		virtual void onEntryChanged();
 
 		void onClick(const Rml::Event& _event);
+
+		std::unique_ptr<DragData> createDragData() override;
 
 	private:
 		void onAdded();

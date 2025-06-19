@@ -1,5 +1,6 @@
 #include "rmlElemList.h"
 
+#include "rmlDragData.h"
 #include "rmlElemListEntry.h"
 #include "rmlHelper.h"
 #include "rmlListEntry.h"

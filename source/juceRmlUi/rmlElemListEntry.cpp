@@ -1,5 +1,8 @@
 #include "rmlElemListEntry.h"
 
+#include "rmlDragData.h"
+#include "rmlDragSource.h"
+#include "rmlDragTarget.h"
 #include "rmlListEntry.h"
 
 #include "rmlEventListener.h"
@@ -13,6 +16,9 @@ namespace juceRmlUi
 		{
 			onClick(_event);
 		});
+
+		DragSource::init(this);
+		DragTarget::init(this);
 	}
 
 	void ElemListEntry::setListItem(const List::EntryPtr& _entry)
@@ -57,6 +63,11 @@ namespace juceRmlUi
 		}
 
 		list.setSelected(m_entry->getIndex(), true, ctrl);
+	}
+
+	std::unique_ptr<DragData> ElemListEntry::createDragData()
+	{
+		return std::make_unique<DragData>();
 	}
 
 	void ElemListEntry::onAdded()

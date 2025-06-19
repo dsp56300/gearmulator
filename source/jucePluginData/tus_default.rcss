@@ -138,6 +138,7 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 	display: block;
 	padding: 2dp;
 	font-size: 12dp;
+	border: 1px transparent;
 }
 
 .listentry:selected, .gridentry:selected {
@@ -149,6 +150,18 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 	min-width: 100dp;
 	opacity: 0.5;
 	position: absolute;
+}
+
+.listentry:dragovertop {
+	border-top: 1px #0f0;
+}
+
+.listentry:dragovercenter {
+	border: 1px #0f0;
+}
+
+.listentry:dragoverbottom {
+	border-bottom: 1px #0f0;
 }
 
 .listspacer {

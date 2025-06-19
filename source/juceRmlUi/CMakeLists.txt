@@ -7,6 +7,9 @@ set(SOURCES
 	juceRmlComponent.cpp juceRmlComponent.h
 	rmlDataProvider.h
 	rmlDocuments.h
+	rmlDragData.h
+	rmlDragSource.cpp rmlDragSource.h
+	rmlDragTarget.cpp rmlDragTarget.h
 	rmlElemComboBox.cpp rmlElemComboBox.h
 	rmlElement.cpp rmlElement.h
 	rmlElemKnob.cpp rmlElemKnob.h

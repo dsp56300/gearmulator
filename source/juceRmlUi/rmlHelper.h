@@ -4,6 +4,11 @@
 #include "RmlUi/Core/Input.h"
 #include "RmlUi/Core/Vector2.h"
 
+namespace juceRmlUi
+{
+	class DragSource;
+}
+
 namespace Rml
 {
 	class ElementInstancer;
@@ -49,6 +54,9 @@ namespace juceRmlUi
 		bool getKeyModCtrl(const Rml::Event& _event);
 		bool getKeyModShift(const Rml::Event& _event);
 		bool getKeyModAlt(const Rml::Event& _event);
+
+		Rml::Element* getDragElement(const Rml::Event& _event);
+		DragSource* getDragSource(const Rml::Event& _event);
 
 		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child);
 
