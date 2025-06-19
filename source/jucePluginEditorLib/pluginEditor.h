@@ -123,6 +123,10 @@ namespace jucePluginEditorLib
 #endif
 		std::string getAbsoluteSkinFolder(const std::string& _skinFolder) const;
 
+#if USE_RMLUI
+		virtual void onRmlDocumentCreated(Rml::ElementDocument* _doc) {}
+#endif
+
 		int getParameterIndexByName(const std::string& _name) override;
 		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
 		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;

@@ -30,7 +30,9 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer
 	{
 	public:
-		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f);
+		using DocumentCreatedCallback = std::function<void(Rml::ElementDocument*)>;
+
+		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f, const DocumentCreatedCallback& _onDocumentCreated = {});
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
@@ -81,6 +83,8 @@ namespace juceRmlUi
 		float m_currentRenderScale = 0.0f;
 
 		std::mutex m_timerMutex;
+
+		DocumentCreatedCallback m_onDocumentCreated;
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
