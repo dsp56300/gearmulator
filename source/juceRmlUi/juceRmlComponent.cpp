@@ -351,4 +351,9 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 		updateRmlContextDimensions();
 	}
+
+	Rml::ElementDocument* RmlComponent::getDocument() const
+	{
+		return m_rmlContext ? m_rmlContext->GetDocument(0) : nullptr;
+	}
 }

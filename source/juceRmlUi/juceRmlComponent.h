@@ -55,6 +55,8 @@ namespace juceRmlUi
 		void resized() override;
 		void parentSizeChanged() override;
 
+		Rml::ElementDocument* getDocument() const;
+
 	private:
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		void update();
