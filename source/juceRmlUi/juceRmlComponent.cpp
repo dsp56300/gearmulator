@@ -284,6 +284,8 @@ namespace juceRmlUi
 
 		m_rmlContext->SetDensityIndependentPixelRatio(static_cast<float>(m_openGLContext.getRenderingScale()) * m_contentScale);
 
+		m_rmlContext->SetDefaultScrollBehavior(Rml::ScrollBehavior::Smooth, 3.0f);
+
 		auto& sys = m_rmlInterfaces->getSystemInterface();
 		sys.beginLogRecording();
 
