@@ -347,7 +347,7 @@ namespace jucePluginEditorLib::patchManager
 		getEditor().selectTabWithComponent(this);
 	}
 
-	void PatchManagerUiJuce::processDirty(const pluginLib::patchDB::Dirty& _dirty) const
+	void PatchManagerUiJuce::processDirty(const pluginLib::patchDB::Dirty& _dirty)
 	{
 		m_treeDS->processDirty(_dirty);
 		m_treeTags->processDirty(_dirty);

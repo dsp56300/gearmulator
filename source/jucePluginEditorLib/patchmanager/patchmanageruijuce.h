@@ -79,7 +79,7 @@ namespace jucePluginEditorLib::patchManager
 		bool createTag(GroupType _group, const std::string& _name) override;
 
 	private:
-		void processDirty(const pluginLib::patchDB::Dirty& _dirty) const override;
+		void processDirty(const pluginLib::patchDB::Dirty& _dirty) override;
 
 		void onSelectedItemsChanged();
 		void changeListenerCallback(juce::ChangeBroadcaster* _source) override;

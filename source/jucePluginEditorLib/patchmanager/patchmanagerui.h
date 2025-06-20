@@ -28,7 +28,7 @@ namespace jucePluginEditorLib::patchManager
 
 		bool isScanning() const;
 
-		virtual void processDirty(const pluginLib::patchDB::Dirty& _dirty) const = 0;
+		virtual void processDirty(const pluginLib::patchDB::Dirty& _dirty) = 0;
 
 		virtual bool setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds) = 0;
 
