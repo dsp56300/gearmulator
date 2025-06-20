@@ -15,22 +15,6 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	constexpr const char* const g_groupNames[] =
-	{
-		"Invalid",
-		"Data Sources",
-		"User",
-		"Factory",
-		"Categories",
-		"Tags",
-		"Favourites",
-		"CustomA",
-		"CustomB",
-		"CustomC"
-	};
-
-	static_assert(std::size(g_groupNames) == static_cast<uint32_t>(GroupType::Count));
-
 	Tree::Tree(PatchManagerUiJuce& _patchManager) : m_patchManager(_patchManager)
 	{
 		// some very basic defaults if no style is available
@@ -206,7 +190,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void Tree::addGroup(const GroupType _type)
 	{
-		addGroup(_type, g_groupNames[static_cast<uint32_t>(_type)]);
+		addGroup(_type, toString(_type));
 	}
 
 	GroupTreeItem* Tree::getItem(const GroupType _type)
