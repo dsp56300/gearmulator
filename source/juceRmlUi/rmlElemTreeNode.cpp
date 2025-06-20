@@ -27,7 +27,6 @@ namespace juceRmlUi
 			m_onChildRemoved.reset();
 			m_onSelectedChanged.reset();
 			m_onOpenedChanged.reset();
-
 		}
 		m_node = _node;
 
@@ -37,7 +36,7 @@ namespace juceRmlUi
 		});
 		m_onChildRemoved.set(m_node->evChildRemoved, [this](const TreeNodePtr&, const TreeNodePtr& _child)
 		{
-			onChildAdded(_child);
+			onChildRemoved(_child);
 		});
 		m_onSelectedChanged.set(m_node->evSelectedChanged, [this](const TreeNodePtr&, const bool _selected)
 		{
