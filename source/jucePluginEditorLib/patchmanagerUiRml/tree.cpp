@@ -1,0 +1,128 @@
+#include "tree.h"
+
+#include "patchmanagerUiRml.h"
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
+
+namespace jucePluginEditorLib::patchManagerRml
+{
+	Tree::Tree(PatchManagerUiRml& _pm, juceRmlUi::ElemTree* _tree)
+	: m_tree(_tree)
+	, m_pm(_pm)
+	, m_instancerGroup(*this)
+	, m_instancerDatasource(*this)
+	, m_instancerTag(*this)
+	{
+		_tree->setNodeInstancerCallback([this](const std::shared_ptr<juceRmlUi::TreeNode>& _node) -> Rml::ElementInstancer*
+		{
+			if (dynamic_cast<GroupNode*>(_node.get()))
+				return &m_instancerGroup;
+			if (dynamic_cast<TagNode*>(_node.get()))
+				return &m_instancerTag;
+			return &m_instancerDatasource;
+		});
+	}
+
+	patchManager::PatchManager& Tree::getDB() const
+	{
+		return m_pm.getDB();
+	}
+
+	bool Tree::addGroup(patchManager::GroupType _type)
+	{
+		if (_type == patchManager::GroupType::Invalid)
+			return false;
+		auto it = m_groupItems.find(_type);
+		if (it != m_groupItems.end())
+			return false;
+
+		auto& tree = getTree()->getTree();
+		auto item = std::make_shared<GroupNode>(tree, _type); 
+
+		m_groupItems.insert({ _type, item });
+
+		tree.getRoot()->addChild(item);
+		return true;
+	}
+
+	void Tree::processDirty(const pluginLib::patchDB::Dirty& _dirty)
+	{
+		if (_dirty.dataSources)
+			updateDataSources();
+
+		for (const auto& tagType : _dirty.tags)
+			updateTags(tagType);
+
+		if (!_dirty.searches.empty())
+		{
+			for (const auto& it : m_groupItems)
+				it.second->processDirty(_dirty.searches);
+		}
+	}
+
+	GroupItemPtr Tree::getItem(const patchManager::GroupType _group)
+	{
+		auto it = m_groupItems.find(_group);
+		if (it != m_groupItems.end())
+			return it->second;
+		return nullptr;
+	}
+
+	void Tree::updateDataSources()
+	{
+		auto itemDs = getItemT<GroupNode>(patchManager::GroupType::DataSources);
+		auto itemLocalStorage = getItemT<GroupNode>(patchManager::GroupType::LocalStorage);
+		auto itemFactory = getItemT<GroupNode>(patchManager::GroupType::Factory);
+
+		if (!itemDs || !itemLocalStorage)
+			return;
+
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> allDataSources;
+
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> readOnlyDataSources;
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> storageDataSources;
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> factoryDataSources;
+
+		getDB().getDataSources(allDataSources);
+
+		readOnlyDataSources.reserve(allDataSources.size());
+		storageDataSources.reserve(allDataSources.size());
+		factoryDataSources.reserve(allDataSources.size());
+
+		for (const auto& ds : allDataSources)
+		{
+			if (ds->type == pluginLib::patchDB::SourceType::LocalStorage)
+				storageDataSources.push_back(ds);
+			else if (ds->type == pluginLib::patchDB::SourceType::Rom)
+				factoryDataSources.push_back(ds);
+			else
+				readOnlyDataSources.push_back(ds);
+		}
+
+		itemDs->updateFromDataSources(readOnlyDataSources);
+		itemLocalStorage->updateFromDataSources(storageDataSources);
+
+		if (itemFactory)
+			itemFactory->updateFromDataSources(factoryDataSources);
+	}
+
+	void Tree::updateTags(const patchManager::GroupType& _type)
+	{
+		const auto tagType = patchManager::toTagType(_type);
+		if (tagType == pluginLib::patchDB::TagType::Invalid)
+			return;
+		auto item = getItem(_type);
+		if (!item)
+			return;
+		std::set<pluginLib::patchDB::Tag> tags;
+		getDB().getTags(tagType, tags);
+		item->updateFromTags(tags);
+	}
+
+	void Tree::updateTags(const pluginLib::patchDB::TagType& _tag)
+	{
+		const auto groupType = patchManager::toGroupType(_tag);
+		if (groupType == patchManager::GroupType::Invalid)
+			return;
+		updateTags(groupType);
+	}
+}

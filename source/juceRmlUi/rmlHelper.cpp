@@ -10,6 +10,7 @@
 
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementInstancer.h"
+#include "RmlUi/Core/ElementUtilities.h"
 #include "RmlUi/Core/Event.h"
 #include "RmlUi/Core/Input.h"
 
@@ -270,6 +271,16 @@ namespace juceRmlUi
 			clone->SetInnerRML(innerRml);
 
 			return clone;
+		}
+
+		Rml::Element* findChild(Rml::Element* _elem, const std::string& _name, const bool _mustExist)
+		{
+			auto* result = Rml::ElementUtilities::GetElementById(_elem, _name);
+
+			if (!result && _mustExist)
+				throw std::runtime_error("Element with id '" + _name + "' not found in '" + _elem->GetId() + "' (" + _elem->GetTagName() + ") element");
+
+			return result;
 		}
 	}
 }

@@ -7,70 +7,9 @@
 
 namespace juceRmlUi
 {
-	class TestNode : public TreeNode
+
+	ElemTree::ElemTree(const Rml::String& _tag) : Element(_tag), m_tree(*this)
 	{
-	public:
-		TestNode(Tree& _tree, std::string _text)
-			: TreeNode(_tree),
-			  m_text(std::move(_text))
-		{
-		}
-
-		const auto& text() const { return m_text; }
-
-	private:
-		std::string m_text;
-	};
-
-	class TestNodeElement : public ElemTreeNode
-	{
-	public:
-		explicit TestNodeElement(const Rml::String& _tag) : ElemTreeNode(_tag)
-		{
-		}
-
-		void setNode(const TreeNodePtr& _node) override
-		{
-			ElemTreeNode::setNode(_node);
-			auto* testNode = dynamic_cast<TestNode*>(_node.get());
-			if (testNode)
-				SetInnerRML(testNode->text());
-		}
-	};
-
-	class TestNodeElementInstancer final : public Rml::ElementInstancer
-	{
-		public:
-		TestNodeElementInstancer() = default;
-		~TestNodeElementInstancer() override = default;
-
-		Rml::ElementPtr InstanceElement(Rml::Element*/* _parent*/, const Rml::String& _tag, const Rml::XMLAttributes&/* _attributes*/) override
-		{
-			return Rml::ElementPtr(new TestNodeElement(_tag));
-		}
-		void ReleaseElement(Rml::Element* element) override
-		{
-			delete element;
-		}
-	};
-
-	static TestNodeElementInstancer g_instancer;
-
-	ElemTree::ElemTree(const Rml::String& _tag) : Element(_tag)
-	{
-		auto r = m_tree.getRoot();
-		const auto child = r->createChild<TestNode>("Entry A");
-		child->createChild<TestNode>("Subentry A");
-		child->createChild<TestNode>("Subentry B");
-
-		const auto child2 = child->createChild<TestNode>("Subentry C");
-		child2->createChild<TestNode>("Subsubentry A");
-		child2->createChild<TestNode>("Subsubentry B");
-
-		for (size_t i=0; i<100; ++i)
-			r->createChild<TestNode>("Entry " + std::to_string(i));
-
-		r->createChild<TestNode>("Entry B");
 	}
 
 	void ElemTree::OnChildAdd(Rml::Element* _child)
@@ -104,6 +43,39 @@ namespace juceRmlUi
 		Element::onPropertyChanged(_key);
 	}
 
+	void ElemTree::setNodeInstancer(Rml::ElementInstancer* _instancer)
+	{
+		m_instancer = _instancer;
+	}
+
+	void ElemTree::setNodeInstancerCallback(InstancerCallback _callback)
+	{
+		m_instancerCallback = std::move(_callback);
+	}
+
+	void ElemTree::childAdded(const TreeNodePtr& _parent, const TreeNodePtr& _child)
+	{
+		createNodeElement(_child);
+	}
+
+	void ElemTree::childRemoved(const TreeNodePtr& _parent, const TreeNodePtr& _child)
+	{
+		auto it = m_activeNodeElements.find(_child);
+		if (it == m_activeNodeElements.end())
+			return;
+
+		Rml::Element* elem = it->second;
+
+		m_activeNodeElements.erase(it);
+
+		if (elem)
+		{
+			auto parentNode = elem->GetParentNode();
+			if (parentNode)
+				parentNode->RemoveChild(elem);
+		}
+	}
+
 	void ElemTree::updateNodeElements()
 	{
 		updateNodeElements(m_tree.getRoot());
@@ -115,9 +87,7 @@ namespace juceRmlUi
 		{
 			const auto it = m_activeNodeElements.find(_node);
 			if (it == m_activeNodeElements.end())
-			{
 				createNodeElement(_node);
-			}
 		}
 		for (const auto& child : _node->getChildren())
 		{
@@ -127,7 +97,16 @@ namespace juceRmlUi
 
 	void ElemTree::createNodeElement(const TreeNodePtr& _node)
 	{
-		Rml::ElementPtr elem = helper::clone(m_template, &g_instancer);
+		Rml::ElementInstancer* instancer = m_instancer;
+
+		if (m_instancerCallback)
+		{
+			instancer = m_instancerCallback(_node);
+			if (!instancer)
+				instancer = m_instancer;
+		}
+
+		Rml::ElementPtr elem = helper::clone(m_template, instancer);
 
 		Rml::Element* insertBefore = nullptr;
 
@@ -190,7 +169,7 @@ namespace juceRmlUi
 		_elem.SetProperty(_targetProperty, prop.ToString());
 	}
 
-	float ElemTree::getIndent(float _base, const TreeNodePtr& _node)
+	float ElemTree::getIndent(const float _base, const TreeNodePtr& _node)
 	{
 		return _base * static_cast<float>(_node->getDepth() - 1);
 	}

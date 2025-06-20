@@ -4,6 +4,7 @@
 #include "VirusController.h"
 
 #include "jucePluginEditorLib/patchmanager/patchmanageruijuce.h"
+#include "jucePluginEditorLib/patchmanagerUiRml/patchmanagerUiRml.h"
 
 #include "jucePluginLib/filetype.h"
 #include "jucePluginLib/patchdb/datasource.h"
@@ -24,10 +25,26 @@ namespace virus
 namespace genericVirusUI
 {
 	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root)
+		: PatchManager(_editor, [this, &_editor, _root]
+		{
+			return std::make_unique<jucePluginEditorLib::patchManager::PatchManagerUiJuce>(_editor, *this, _root, DefaultGroupTypes);
+		})
+	{
+	}
+
+	PatchManager::PatchManager(VirusEditor& _editor, juceRmlUi::RmlComponent& _comp, Rml::Element* _root)
+		: PatchManager(_editor, [this, &_editor, &_comp, _root]
+		{
+			return std::make_unique<jucePluginEditorLib::patchManagerRml::PatchManagerUiRml>(_editor, *this, _comp, _root, DefaultGroupTypes);
+		})
+	{
+	}
+
+	PatchManager::PatchManager(VirusEditor& _editor, const std::function<std::unique_ptr<jucePluginEditorLib::patchManager::PatchManagerUi>()>& _createUiFunc)
 		: jucePluginEditorLib::patchManager::PatchManager(_editor)
 		, m_controller(_editor.getController())
 	{
-		setUi(std::make_unique<jucePluginEditorLib::patchManager::PatchManagerUiJuce>(_editor, *this, _root, DefaultGroupTypes));
+		setUi(_createUiFunc());
 
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");

@@ -1,5 +1,6 @@
 #include "rmlTreeNode.h"
 
+#include "rmlElemTree.h"
 #include "rmlTree.h"
 
 namespace juceRmlUi
@@ -38,6 +39,7 @@ namespace juceRmlUi
 			const auto elem = *it;  // NOLINT(performance-unnecessary-copy-initialization)
 			parent->m_children.erase(it);
 			parent->evChildRemoved(parent, elem);
+			m_tree.childRemoved(parent, elem);
 		}
 
 		m_parent = _parent;
@@ -46,6 +48,7 @@ namespace juceRmlUi
 		{
 			_parent->m_children.push_back(self);
 			_parent->evChildAdded(_parent, self);
+			m_tree.childAdded(_parent, self);
 		}
 		else
 		{

@@ -64,5 +64,16 @@ namespace juceRmlUi
 		bool changeProperty(Rml::Element* _element, Rml::PropertyId _propertyId, const Rml::Property& _property);
 
 		Rml::ElementPtr clone(const Rml::Element* _element, Rml::ElementInstancer* _instancer);
+
+		Rml::Element* findChild(Rml::Element* _elem, const std::string& _name, bool _mustExist = true);
+
+		template<typename T>
+		T* findChildT(Rml::Element* _parent, const std::string& _name, bool _mustExist = true)
+		{
+			auto result = dynamic_cast<T*>(findChild(_parent, _name, _mustExist));
+			if (!result && _mustExist)
+				throw std::runtime_error("Element '" + _name + "' found but has incorrect type");
+			return result;
+		}
 	}
 }

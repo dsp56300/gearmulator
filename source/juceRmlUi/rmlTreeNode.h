@@ -3,12 +3,20 @@
 #include <memory>
 #include <vector>
 #include <limits>
+#include <set>
 
 #include "baseLib/event.h"
+#include "jucePluginLib/patchdb/patchdbtypes.h"
 #include "RmlUi/Core/Input.h"
+
+namespace Rml
+{
+	class Element;
+}
 
 namespace juceRmlUi
 {
+	class ElemTreeNode;
 	class Tree;
 	class TreeNode;
 	using TreeNodePtr = std::shared_ptr<TreeNode>;
@@ -36,6 +44,11 @@ namespace juceRmlUi
 
 		TreeNodePtr getParent() const { return m_parent.lock(); }
 		bool setParent(const TreeNodePtr& _parent);
+
+		void removeFromParent()
+		{
+			setParent(nullptr);
+		}
 
 		const Children& getChildren() const { return m_children; }
 		TreeNodePtr getChild(size_t _index) const;
@@ -75,6 +88,16 @@ namespace juceRmlUi
 
 		Tree& getTree() const { return m_tree; }
 
+		void setElement(ElemTreeNode* _element)
+		{
+			m_element = _element;
+		}
+
+		ElemTreeNode* getElement() const
+		{
+			return m_element;
+		}
+
 	private:
 		void notifyVisibilityChanged();
 
@@ -84,5 +107,6 @@ namespace juceRmlUi
 		Children m_children;
 		bool m_isOpened = true;
 		bool m_isSelected = false;
+		ElemTreeNode* m_element = nullptr;
 	};
 }

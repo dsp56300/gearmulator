@@ -64,6 +64,8 @@ namespace genericVirusUI
 
 		const auto& getLeds() const { return m_leds; }
 
+		void onRmlDocumentCreated(juceRmlUi::RmlComponent& _component, Rml::ElementDocument* _doc) override;
+
 	private:
 		void onProgramChange(int _part);
 		void onPlayModeChanged();

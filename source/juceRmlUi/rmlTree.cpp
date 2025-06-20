@@ -1,8 +1,10 @@
 #include "rmlTree.h"
 
+#include "rmlElemTree.h"
+
 namespace juceRmlUi
 {
-	Tree::Tree() : m_root(std::make_shared<TreeNode>(*this))
+	Tree::Tree(ElemTree& _treeElem) : m_treeElem(_treeElem), m_root(std::make_shared<TreeNode>(*this))
 	{
 	}
 
@@ -10,6 +12,16 @@ namespace juceRmlUi
 	{
 		m_root->clear();
 		m_root.reset();
+	}
+
+	void Tree::childAdded(TreeNodePtr _parent, TreeNodePtr _child)
+	{
+		m_treeElem.childAdded(_parent, _child);
+	}
+
+	void Tree::childRemoved(TreeNodePtr _parent, TreeNodePtr _child)
+	{
+		m_treeElem.childRemoved(_parent, _child);
 	}
 
 	bool Tree::setSelectedNode(const TreeNodePtr& _node)

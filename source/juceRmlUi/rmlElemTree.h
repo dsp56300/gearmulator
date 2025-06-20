@@ -10,12 +10,22 @@ namespace juceRmlUi
 	class ElemTree : public Element
 	{
 	public:
+		using InstancerCallback = std::function<Rml::ElementInstancer*(const TreeNodePtr&)>;
+
 		explicit ElemTree(const Rml::String& _tag);
 
 		void OnChildAdd(Rml::Element* _child) override;
 
 		void OnPropertyChange(const Rml::PropertyIdSet& changed_properties) override;
 		void onPropertyChanged(const std::string& _key) override;
+
+		void setNodeInstancer(Rml::ElementInstancer* _instancer);
+		void setNodeInstancerCallback(InstancerCallback _callback);
+
+		void childAdded(const TreeNodePtr& _parent, const TreeNodePtr& _child);
+		void childRemoved(const TreeNodePtr& _parent, const TreeNodePtr& _child);
+
+		Tree& getTree() { return m_tree; }
 
 	private:
 		void updateNodeElements();
@@ -29,5 +39,7 @@ namespace juceRmlUi
 		Tree m_tree;
 		std::map<TreeNodePtr, Rml::Element*> m_activeNodeElements;
 		ElemTreeNode* m_template = nullptr;
+		Rml::ElementInstancer* m_instancer = nullptr;
+		InstancerCallback m_instancerCallback;
 	};
 }

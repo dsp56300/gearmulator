@@ -11,6 +11,12 @@ namespace juceRmlUi
 		this->AddEventListener(Rml::EventId::Keydown, this);
 	}
 
+	ElemTreeNode::~ElemTreeNode()
+	{
+		if (m_node)
+			m_node->setElement(nullptr);
+	}
+
 	void ElemTreeNode::setTree(ElemTree* _elemTree)
 	{
 		m_tree = _elemTree;
@@ -30,26 +36,31 @@ namespace juceRmlUi
 		}
 		m_node = _node;
 
-		m_onChildAdded.set(m_node->evChildAdded, [this](const TreeNodePtr&, const TreeNodePtr& _child)
+		if (m_node)
 		{
-			onChildAdded(_child);
-		});
-		m_onChildRemoved.set(m_node->evChildRemoved, [this](const TreeNodePtr&, const TreeNodePtr& _child)
-		{
-			onChildRemoved(_child);
-		});
-		m_onSelectedChanged.set(m_node->evSelectedChanged, [this](const TreeNodePtr&, const bool _selected)
-		{
-			onSelectedChanged(_selected);
-		});
-		m_onOpenedChanged.set(m_node->evOpenedChanged, [this](const TreeNodePtr&, const bool _opened)
-		{
-			onOpenedChanged(_opened);
-		});
-		m_onVisibilityChanged.set(m_node->evVisibilityChanged, [this](const TreeNodePtr&, const bool _isVisible)
-		{
-			onVisibilityChanged(_isVisible);
-		});
+			m_node->setElement(this);
+
+			m_onChildAdded.set(m_node->evChildAdded, [this](const TreeNodePtr&, const TreeNodePtr& _child)
+			{
+				onChildAdded(_child);
+			});
+			m_onChildRemoved.set(m_node->evChildRemoved, [this](const TreeNodePtr&, const TreeNodePtr& _child)
+			{
+				onChildRemoved(_child);
+			});
+			m_onSelectedChanged.set(m_node->evSelectedChanged, [this](const TreeNodePtr&, const bool _selected)
+			{
+				onSelectedChanged(_selected);
+			});
+			m_onOpenedChanged.set(m_node->evOpenedChanged, [this](const TreeNodePtr&, const bool _opened)
+			{
+				onOpenedChanged(_opened);
+			});
+			m_onVisibilityChanged.set(m_node->evVisibilityChanged, [this](const TreeNodePtr&, const bool _isVisible)
+			{
+				onVisibilityChanged(_isVisible);
+			});
+		}
 
 		updatePropertiesFromNode();
 	}

@@ -52,11 +52,23 @@ set(SOURCES_PM
 	patchmanager/status.cpp patchmanager/status.h
 )
 
+set(SOURCES_PM_RML
+	patchmanagerUiRml/datasourceTree.cpp patchmanagerUiRml/datasourceTree.h
+	patchmanagerUiRml/datasourceTreeNode.cpp patchmanagerUiRml/datasourceTreeNode.h
+	patchmanagerUiRml/groupTreeNode.cpp patchmanagerUiRml/groupTreeNode.h
+	patchmanagerUiRml/patchmanagerUiRml.cpp patchmanagerUiRml/patchmanagerUiRml.h
+	patchmanagerUiRml/tagsTree.cpp patchmanagerUiRml/tagsTree.h
+	patchmanagerUiRml/tagTreeNode.cpp patchmanagerUiRml/tagTreeNode.h
+	patchmanagerUiRml/tree.cpp patchmanagerUiRml/tree.h
+	patchmanagerUiRml/treeNode.cpp patchmanagerUiRml/treeNode.h
+)
+
 add_library(jucePluginEditorLib STATIC)
 
-target_sources(jucePluginEditorLib PRIVATE ${SOURCES} ${SOURCES_PM})
+target_sources(jucePluginEditorLib PRIVATE ${SOURCES} ${SOURCES_PM} ${SOURCES_PM_RML})
 source_group("source" FILES ${SOURCES})
 source_group("source\\patchmanager" FILES ${SOURCES_PM})
+source_group("source\\patchmanagerUiRml" FILES ${SOURCES_PM_RML})
 
 target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib jucePluginData)
 

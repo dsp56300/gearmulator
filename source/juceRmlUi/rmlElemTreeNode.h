@@ -13,9 +13,12 @@ namespace juceRmlUi
 	{
 	public:
 		explicit ElemTreeNode(const Rml::String& _tag);
+		~ElemTreeNode() override;
 
 		virtual void setTree(ElemTree* _elemTree);
 		virtual void setNode(const TreeNodePtr& _node);
+
+		auto& getNode() const { return m_node; }
 
 		void ProcessEvent(Rml::Event& _event) override;
 

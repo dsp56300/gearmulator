@@ -15,6 +15,8 @@
 
 #include "juceUiLib/messageBox.h"
 
+#include "RmlUi/Core/ElementDocument.h"
+
 namespace genericVirusUI
 {
 	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
@@ -42,6 +44,7 @@ namespace genericVirusUI
 		if(!getConditionCountRecursive())
 			m_fxPage.reset(new FxPage(*this));
 
+		if(false)
 		{
 			auto pmParent = findComponent("ContainerPatchManager", false);
 			if(!pmParent)
@@ -211,6 +214,15 @@ namespace genericVirusUI
 		}
 
 		return Editor::createJuceComponent(_component, _object);
+	}
+
+	void VirusEditor::onRmlDocumentCreated(juceRmlUi::RmlComponent& _component, Rml::ElementDocument* _doc)
+	{
+		auto* elem = _doc->GetElementById("patchmanager");
+		if (elem)
+		{
+			setPatchManager(new PatchManager(*this, _component, elem));
+		}
 	}
 
 	void VirusEditor::onProgramChange(int _part)
