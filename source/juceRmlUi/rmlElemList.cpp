@@ -1,6 +1,5 @@
 #include "rmlElemList.h"
 
-#include "rmlDragData.h"
 #include "rmlElemListEntry.h"
 #include "rmlHelper.h"
 #include "rmlListEntry.h"
@@ -120,9 +119,6 @@ namespace juceRmlUi
 
 		AddEventListener(EventId::Scroll, this);
 		AddEventListener(EventId::Keydown, this);
-
-//		Rml::Debugger::Initialise(GetContext());
-//		Rml::Debugger::SetVisible(true);
 
 		m_list.evEntryAdded.addListener([this](List*, const List::EntryPtr&) { onEntryAdded(); });
 		m_list.evEntryRemoved.addListener([this](List*, const List::EntryPtr&) { onEntryRemoved(); });

@@ -13,6 +13,7 @@
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Debugger/Debugger.h"
 
 namespace juceRmlUi
 {
@@ -310,6 +311,9 @@ namespace juceRmlUi
 				ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
 			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
 		}
+
+//		Rml::Debugger::Initialise(m_rmlContext);
+//		Rml::Debugger::SetVisible(true);
 	}
 
 	void RmlComponent::destroyRmlContext()
