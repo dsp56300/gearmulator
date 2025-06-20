@@ -30,7 +30,7 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer
 	{
 	public:
-		using DocumentCreatedCallback = std::function<void(Rml::ElementDocument*)>;
+		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 
 		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f, const DocumentCreatedCallback& _onDocumentCreated = {});
 		~RmlComponent() override;

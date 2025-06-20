@@ -124,7 +124,7 @@ namespace jucePluginEditorLib
 		std::string getAbsoluteSkinFolder(const std::string& _skinFolder) const;
 
 #if USE_RMLUI
-		virtual void onRmlDocumentCreated(Rml::ElementDocument* _doc) {}
+		virtual void onRmlDocumentCreated(juceRmlUi::RmlComponent& _component, Rml::ElementDocument* _doc) {}
 #endif
 
 		int getParameterIndexByName(const std::string& _name) override;

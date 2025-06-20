@@ -290,7 +290,7 @@ namespace juceRmlUi
         if (document)
         {
 			if (m_onDocumentCreated)
-				m_onDocumentCreated(document);
+				m_onDocumentCreated(*this, document);
 	        document->Show();
         }
 		else
