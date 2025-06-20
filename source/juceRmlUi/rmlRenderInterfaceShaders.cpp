@@ -9,6 +9,8 @@
 
 #include "RmlUi/Core/Log.h"
 
+#include <cmath>	// std::ceil
+
 namespace juceRmlUi::gl2
 {
 	using namespace juce::gl;

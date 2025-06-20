@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <limits>
 
 #include "baseLib/event.h"
 #include "RmlUi/Core/Input.h"

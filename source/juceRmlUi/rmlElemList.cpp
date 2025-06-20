@@ -7,6 +7,8 @@
 
 #include "RmlUi/Core/ElementDocument.h"
 
+#include <cmath> // std::ceil
+
 using namespace Rml;
 
 namespace juceRmlUi
