@@ -3,10 +3,14 @@
 	<link type="text/rcss" href="tus_patchmanager.rcss"/>
 </head>
 <body>
-	<div class="pm-hlayout">
+	<div id = "patchmanager" class="pm-hlayout">
+	
+		<!-- Column A: datasource tree -->
 		<div class="pm-vlayout" style="flex: 3;">
-			<tree class="tree">
+			<tree id="pm-tree-datasources" class="tree" style="flex: 1 1 0">
 				<treenode class="treenode">
+					<div class="pm-name" id="name">Name</div>
+					<div id="count" class="pm-count" countFormat=" (%s)" countUnknown=" (...)"/>
 				</treenode>
 			</tree>
 			<input class="pm-search" type="text">
@@ -14,9 +18,13 @@
 			</input>
 		</div>
 		<splitter/>
+		
+		<!-- Column B: tags tree -->
 		<div class="pm-vlayout" style="flex: 2;">
-			<tree class="tree">
+			<tree id="pm-tree-tags" class="tree" style="flex: 1 1 0">
 				<treenode class="treenode">
+					<div class="pm-name" id="name">Name</div>
+					<div id="count" class="pm-count" countFormat=" (%s)" countUnknown=" (...)"/>
 				</treenode>
 			</tree>
 			<input class="pm-search" type="text">
@@ -24,17 +32,24 @@
 			</input>
 		</div>
 		<splitter/>
+		
+		<!-- Column C: patch list -->
 		<div class="pm-vlayout" style="flex: 2;">
-			<list class="list">
-				<listentry class="listentry"/>
+			<list id="pm-list" class="list" style="flex: 1 1 0">
+				<listentry class="listentry">
+					<img id="color" src="circle_border.png" style="height: 1em; margin-right: 5dp;"/>
+					<div id="name" class="pm-name">Name</div>
+				</listentry>
 			</list>
 			<input class="pm-search" type="text">
 				<div class="input-placeholder">Search...</div>
 			</input>
 		</div>
 		<splitter/>
+		
+		<!-- Column C alternative: grid layout -->
 		<div class="pm-vlayout" style="flex: 5;">
-			<list class="grid">
+			<list id="pm-grid" class="grid" style="flex: 1 1 0">
 				<listentry class="gridentry"/>
 			</list>
 			<input class="pm-search" type="text">

@@ -123,7 +123,7 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 /* vertical lists */
 .list {
 	overflow-x: hidden;
-	overflow-y: scroll;
+	overflow-y: auto;
 	display: block;
 	border: 1dp #ccc;
 	padding: 0dp 4dp 0dp 4dp;
@@ -136,9 +136,9 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 	height: 1em;
 	drag: clone;
 	display: block;
-	padding: 2dp;
+	padding: 0dp;
 	font-size: 12dp;
-	border: 1px transparent;
+	border: 2px transparent;
 }
 
 .listentry:selected, .gridentry:selected {
@@ -150,18 +150,19 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 	min-width: 100dp;
 	opacity: 0.5;
 	position: absolute;
+	white-space: nowrap;
 }
 
-.listentry:dragovertop {
-	border-top: 1px #0f0;
+:dragovertop {
+	border-top: 2px #0f0;
 }
 
-.listentry:dragovercenter {
-	border: 1px #0f0;
+:dragovercenter {
+	border: 2px #0f0;
 }
 
-.listentry:dragoverbottom {
-	border-bottom: 1px #0f0;
+:dragoverbottom {
+	border-bottom: 2px #0f0;
 }
 
 .listspacer {
@@ -191,6 +192,7 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 	display: block;
 	padding: 2dp;
 	font-size: 12dp;
+	white-space: nowrap;
 }
 
 .gridentry:drag {
@@ -203,7 +205,7 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 
 .tree {
 	overflow-x: hidden;
-	overflow-y: scroll;
+	overflow-y: auto;
 	display: block;
 	border: 1dp #ccc;
 	padding: 4dp;
@@ -212,12 +214,12 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 }
 
 .treenode {
-	width: 100%;
 	height: 1em;
 	drag: clone;
 	display: block;
 	padding: 2dp 2dp 2dp 20dp;
 	font-size: 12dp;
+	white-space: nowrap;
 }
 
 .treenode:drag {

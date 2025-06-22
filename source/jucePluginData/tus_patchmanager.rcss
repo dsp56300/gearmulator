@@ -25,3 +25,12 @@
 	flex: 0 0 auto;
 	border: 1dp #fff;
 }
+
+.pm-name {
+}
+
+.pm-count {
+	font-weight: 900;
+	font-style: italic;
+	color: #4ff;
+}
