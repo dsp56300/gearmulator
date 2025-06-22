@@ -282,5 +282,14 @@ namespace juceRmlUi
 
 			return result;
 		}
+
+		void removeFromParent(Rml::Element* _elem)
+		{
+			if (!_elem)
+				return;
+			auto parentNode = _elem->GetParentNode();
+			if (parentNode)
+				parentNode->RemoveChild(_elem);
+		}
 	}
 }

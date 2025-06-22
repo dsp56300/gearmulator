@@ -46,6 +46,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 	public:
 		explicit Tree(PatchManagerUiRml& _pm, juceRmlUi::ElemTree* _tree);
+		virtual ~Tree();
 
 		auto& getPatchManager() const { return m_pm; }	
 
@@ -56,6 +57,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		bool addGroup(patchManager::GroupType _type);
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
+
+		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest) const;
 
 	private:
 		GroupItemPtr getItem(patchManager::GroupType _group);
@@ -73,13 +76,13 @@ namespace jucePluginEditorLib::patchManagerRml
 		void updateTags(const patchManager::GroupType& _type);
 		void updateTags(const pluginLib::patchDB::TagType& _tag);
 
-		juceRmlUi::ElemTree* const m_tree;
-
-		PatchManagerUiRml& m_pm;
-
 		TreeNodeInstancer<Tree, GroupTreeElem> m_instancerGroup;
 		TreeNodeInstancer<Tree, DatasourceTreeElem> m_instancerDatasource;
 		TreeNodeInstancer<Tree, TagTreeElem> m_instancerTag;
+
+		juceRmlUi::ElemTree* const m_tree;
+
+		PatchManagerUiRml& m_pm;
 
 		std::unordered_map<patchManager::GroupType, GroupItemPtr> m_groupItems;
 	};

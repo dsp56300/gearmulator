@@ -89,6 +89,8 @@ namespace juceRmlUi
 				}
 
 				m_node->setSelected(!m_node->isSelected());
+
+				onClick();
 			}
 			break;
 		case Rml::EventId::Keydown:

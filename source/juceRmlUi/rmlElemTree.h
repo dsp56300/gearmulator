@@ -13,6 +13,7 @@ namespace juceRmlUi
 		using InstancerCallback = std::function<Rml::ElementInstancer*(const TreeNodePtr&)>;
 
 		explicit ElemTree(const Rml::String& _tag);
+		~ElemTree() override;
 
 		void OnChildAdd(Rml::Element* _child) override;
 

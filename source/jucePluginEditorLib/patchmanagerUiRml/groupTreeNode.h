@@ -48,6 +48,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _searches);
 
+		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest);
+
 	private:
 		patchManager::GroupType m_type;
 
@@ -62,5 +64,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	public:
 		explicit GroupTreeElem(Tree& _tree, const Rml::String& _tag);
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
+
+		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
 	};
 }

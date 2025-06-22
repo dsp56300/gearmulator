@@ -1,9 +1,8 @@
 #include "groupTreeNode.h"
 
-#include "datasourceTree.h"
 #include "patchmanagerUiRml.h"
-#include "jucePluginEditorLib/patchmanager/search.h"
 
+#include "jucePluginEditorLib/patchmanager/search.h"
 #include "jucePluginEditorLib/patchmanager/types.h"
 
 namespace jucePluginEditorLib::patchManagerRml
@@ -30,7 +29,12 @@ namespace jucePluginEditorLib::patchManagerRml
 				continue;
 			}
 
+			const auto oldCount = size();
+
 			createItemForDataSource(d);
+
+			if (size() == 1 && oldCount == 0)
+				setOpened(true);
 		}
 	}
 
@@ -63,6 +67,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			}
 
 			const auto oldNumSubItems = size();
+
 			createSubItem(tag);
 
 			if (size() == 1 && oldNumSubItems == 0)
@@ -185,6 +190,21 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 	}
 
+	void GroupNode::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest)
+	{
+		for (const auto& [ds, item] : m_itemsByDataSource)
+		{
+			auto* elem = dynamic_cast<TreeElem*>(item->getElement());
+			elem->setParentSearchRequest(_searchRequest);
+		}
+
+		for (const auto& [tag, item] : m_itemsByTag)
+		{
+			auto* elem = dynamic_cast<TreeElem*>(item->getElement());
+			elem->setParentSearchRequest(_searchRequest);
+		}
+	}
+
 	GroupTreeElem::GroupTreeElem(Tree& _tree, const Rml::String& _tag) : TreeElem(_tree, _tag)
 	{
 	}
@@ -203,5 +223,14 @@ namespace jucePluginEditorLib::patchManagerRml
 		auto name = getPatchManager().getGroupName(groupType);
 
 		SetInnerRML(Rml::StringUtilities::EncodeRml(name));
+	}
+
+	void GroupTreeElem::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest)
+	{
+		TreeElem::onParentSearchChanged(_parentSearchRequest);
+
+		auto node = dynamic_cast<GroupNode*>(getNode().get());
+
+		node->onParentSearchChanged(_parentSearchRequest);
 	}
 }

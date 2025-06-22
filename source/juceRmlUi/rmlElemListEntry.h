@@ -20,6 +20,8 @@ namespace juceRmlUi
 
 		std::unique_ptr<DragData> createDragData() override;
 
+		auto& getEntry() const { return m_entry; }
+
 	private:
 		void onAdded();
 		void onRemoved();

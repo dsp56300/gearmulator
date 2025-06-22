@@ -42,6 +42,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		const pluginLib::patchDB::SearchRequest& getParentSearchRequest() const { return m_parentSearchRequest; }
 
 		void setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch);
+		auto& getSearchRequest() { return m_searchRequest; }
+		pluginLib::patchDB::SearchHandle getSearchHandle() const { return m_searchHandle; }
 
 		void setName(const std::string& _name, bool _forceUpdate = false);
 		void setCount(size_t _count, bool _forceUpdate = false);
@@ -49,6 +51,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		void OnChildAdd(Rml::Element* _child) override;
 
 		void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _searches);
+
+		void onClick() override;
 
 	private:
 		Tree& m_treeRef;

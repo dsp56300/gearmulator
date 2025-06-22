@@ -1,7 +1,10 @@
 #include "patchmanagerUiRml.h"
 
+#include "jucePluginEditorLib/pluginEditor.h"
+#include "jucePluginEditorLib/pluginProcessor.h"
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemTree.h"
+#include "juceRmlUi/rmlElemList.h"
 #include "juceRmlUi/rmlHelper.h"
 
 namespace jucePluginEditorLib::patchManagerRml
@@ -11,6 +14,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		, m_rmlComponent(_comp)
 		, m_treeDS(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemTree>(_root, "pm-tree-datasources"))
 		, m_treeTags(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemTree>(_root, "pm-tree-tags"))
+		, m_list(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemList>(_root, "pm-list"))
+		, m_grid(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemList>(_root, "pm-grid"))
 	{
 		for (auto group : _groupTypes)
 			m_treeDS.addGroup(group);
@@ -26,6 +31,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		m_treeDS.processDirty(_dirty);
 		m_treeTags.processDirty(_dirty);
+
+		getListModel().processDirty(_dirty);
 	}
 
 	bool PatchManagerUiRml::setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds)
@@ -71,5 +78,127 @@ namespace jucePluginEditorLib::patchManagerRml
 		if (it != m_customGroupNames.end())
 			return it->second;
 		return patchManager::toString(_type);
+	}
+
+	void PatchManagerUiRml::addSelectedItem(const Tree& _tree, const juceRmlUi::TreeNodePtr& _node)
+	{
+		const auto oldCount = m_selectedItems[&_tree].size();
+		m_selectedItems[&_tree].insert(_node);
+		const auto newCount = m_selectedItems[&_tree].size();
+		if(newCount > oldCount)
+			onSelectedItemsChanged();
+	}
+
+	void PatchManagerUiRml::removeSelectedItem(const Tree& _tree, const juceRmlUi::TreeNodePtr& _node)
+	{
+		const auto it = m_selectedItems.find(&_tree);
+		if(it == m_selectedItems.end())
+			return;
+		if(!it->second.erase(_node))
+			return;
+		onSelectedItemsChanged();
+	}
+
+	void PatchManagerUiRml::setSelectedItem(const Tree& _tree, const juceRmlUi::TreeNodePtr& _node)
+	{
+		m_selectedItems[&_tree] = std::set{_node};
+
+		if(&_tree == &m_treeDS)
+		{
+			auto* elem = dynamic_cast<TreeElem*>(_node.get()->getElement());
+			m_treeTags.onParentSearchChanged(elem->getSearchRequest());
+		}
+
+		onSelectedItemsChanged();
+	}
+
+	void PatchManagerUiRml::onSelectedItemsChanged()
+	{
+		const auto selectedTags = m_selectedItems[&m_treeTags];
+
+		auto selectItem = [&](const juceRmlUi::TreeNodePtr& _item)
+		{
+			auto* elem = dynamic_cast<TreeElem*>(_item.get()->getElement());
+			if(elem->getSearchHandle() != pluginLib::patchDB::g_invalidSearchHandle)
+			{
+				getListModel().setContent(elem->getSearchHandle());
+				return true;
+			}
+			return false;
+		};
+
+		if(!selectedTags.empty())
+		{
+			if(selectedTags.size() == 1)
+			{
+				if(selectItem(*selectedTags.begin()))
+					return;
+			}
+			else
+			{
+				auto* elem = dynamic_cast<TreeElem*>(selectedTags.begin()->get()->getElement());
+				pluginLib::patchDB::SearchRequest search = elem->getSearchRequest();
+				for (const auto& selectedTag : selectedTags)
+				{
+					elem = dynamic_cast<TreeElem*>(selectedTag.get()->getElement());
+					search.tags.add(elem->getSearchRequest().tags);
+				}
+				getListModel().setContent(std::move(search));
+				return;
+			}
+		}
+
+		const auto selectedDataSources = m_selectedItems[&m_treeDS];
+
+		if(!selectedDataSources.empty())
+		{
+			const auto item = *selectedDataSources.begin();
+			selectItem(item);
+		}
+	}
+
+	void PatchManagerUiRml::setLayout(const LayoutType _layout)
+	{
+		if(m_layout == _layout)
+			return;
+
+		auto& oldModel = getListModel();
+
+		m_layout = _layout;
+
+		auto& newModel = getListModel();
+
+//		m_searchList->setListModel(newModel);
+
+		newModel.setContent(oldModel.getSearchHandle());
+		newModel.setSelectedEntries(oldModel.getSelectedEntries());
+
+		newModel.setVisible(true);
+		oldModel.setVisible(false);
+/*
+		if(m_firstTimeGridLayout && _layout == LayoutType::Grid)
+		{
+			m_firstTimeGridLayout = false;
+			setGridLayout128();
+		}
+		else
+		{
+			resized();
+		}
+		*/
+		auto& config = getEditor().getProcessor().getConfig();
+		config.setValue("pm_layout", static_cast<int>(_layout));
+		config.saveIfNeeded();
+	}
+
+	ListModel& PatchManagerUiRml::getListModel()
+	{
+		if (m_layout == LayoutType::List)
+			return m_list;
+		return m_grid;
+	}
+
+	void PatchManagerUiRml::setListStatus(uint32_t _selectedPatchCount, uint32_t _totalPatchCount)
+	{
 	}
 }

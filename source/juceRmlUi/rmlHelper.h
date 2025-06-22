@@ -75,5 +75,7 @@ namespace juceRmlUi
 				throw std::runtime_error("Element '" + _name + "' found but has incorrect type");
 			return result;
 		}
+
+		void removeFromParent(Rml::Element* _elem);
 	}
 }

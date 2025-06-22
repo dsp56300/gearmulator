@@ -6,6 +6,7 @@
 
 #include "RmlUi/Core/ElementDocument.h"
 
+#include <algorithm>
 #include <cmath> // std::ceil
 
 using namespace Rml;
@@ -14,11 +15,6 @@ namespace juceRmlUi
 {
 	ElemList::ElemList(const String& _tag) : Element(_tag)
 	{
-		for (size_t i=0; i<700; ++i)
-		{
-			auto e = std::make_shared<ListEntry>(m_list);
-			m_list.addEntry(std::move(e));
-		}
 	}
 
 	void ElemList::OnChildAdd(Rml::Element* _child)
@@ -179,6 +175,15 @@ namespace juceRmlUi
 
 	bool ElemList::updateLayoutVertical()
 	{
+		if (m_list.empty())
+		{
+			updateActiveEntries(1, 0, false);
+
+			setSpacerTL(0);
+			setSpacerBR(0);
+			return true;
+		}
+
 		const auto box = GetBox();
 		const auto size = box.GetSize(BoxArea::Content);
 		const auto scrollTop = GetScrollTop();
@@ -188,19 +193,41 @@ namespace juceRmlUi
 		if (elementHeight <= 0.0f)
 			return false;
 
-		const auto firstEntry = static_cast<size_t>(scrollTop / elementHeight);
-		const auto lastEntry = static_cast<size_t>(std::ceil((scrollTop + size.y) / elementHeight));
+		auto firstEntry = static_cast<size_t>(scrollTop / elementHeight);
+		auto lastEntry = static_cast<size_t>(std::ceil((scrollTop + size.y) / elementHeight));
+
+		const auto availableEntryCount = lastEntry - firstEntry + 1;
+
+		if (availableEntryCount >= m_list.size())
+		{
+			SetScrollTop(0.0f);
+			firstEntry = 0;
+			lastEntry = m_list.size() - 1;
+		}
+		else
+		{
+			if (lastEntry >= m_list.size())
+			{
+				auto diff = lastEntry;
+				lastEntry = m_list.size() - 1;
+				diff -= lastEntry;
+				firstEntry -= diff;
+			}
+		}
 
 		updateActiveEntries(firstEntry, lastEntry, false);
 
 		setSpacerTL(static_cast<float>(firstEntry) * elementHeight);
-		setSpacerBR(lastEntry < m_list.size() ? static_cast<float>(m_list.size() - lastEntry) * elementHeight : 0);
+		setSpacerBR(lastEntry < m_list.size() - 1 ? static_cast<float>(m_list.size() - lastEntry - 1) * elementHeight : 0);
 
 		return true;
 	}
 
 	bool ElemList::updateLayoutGrid()
 	{
+		if (m_list.empty())
+			return false;
+
 		const auto box = GetBox();
 		const auto size = box.GetSize(BoxArea::Content);
 		const auto scrollLeft = GetScrollLeft();
@@ -277,7 +304,7 @@ namespace juceRmlUi
 		}
 
 		// create new elements for entries that are not active yet
-		if (_lastEntry >= m_list.size())
+		if (!m_list.empty() && _lastEntry >= m_list.size())
 			_lastEntry = m_list.size() - 1;
 
 		for (size_t i = _firstEntry; i <= _lastEntry; ++i)
@@ -295,7 +322,7 @@ namespace juceRmlUi
 			}
 			else
 			{
-				e = m_entryTemplate->Clone();
+				e = helper::clone(m_entryTemplate, m_instancer);
 
 				e->SetProperty(PropertyId::Display, Property(Style::Display::Block));
 			}
@@ -573,13 +600,13 @@ namespace juceRmlUi
 
 	void ElemList::onEntryAdded()
 	{
-		updateLayout();
+		m_layoutDirty = 1;
 		updateActiveEntriesListItems();
 	}
 
 	void ElemList::onEntryRemoved()
 	{
-		updateLayout();
+		m_layoutDirty = 1;
 		updateActiveEntriesListItems();
 	}
 

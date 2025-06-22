@@ -30,6 +30,16 @@ namespace juceRmlUi
 
 		void ProcessEvent(Rml::Event& _event) override;
 
+		void setInstancer(Rml::ElementInstancer* _instancer)
+		{
+			m_instancer = _instancer;
+		}
+
+		List& getList()
+		{
+			return m_list;
+		}
+
 	private:
 		void initialize();
 		Rml::Vector2f updateElementSize();
@@ -78,5 +88,7 @@ namespace juceRmlUi
 		uint32_t m_scrollTargetDirty = 0;
 
 		List m_list;
+
+		Rml::ElementInstancer* m_instancer;
 	};
 }

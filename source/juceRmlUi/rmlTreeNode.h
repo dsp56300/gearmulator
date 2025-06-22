@@ -3,10 +3,9 @@
 #include <memory>
 #include <vector>
 #include <limits>
-#include <set>
 
 #include "baseLib/event.h"
-#include "jucePluginLib/patchdb/patchdbtypes.h"
+
 #include "RmlUi/Core/Input.h"
 
 namespace Rml
@@ -105,7 +104,7 @@ namespace juceRmlUi
 
 		std::weak_ptr<TreeNode> m_parent;
 		Children m_children;
-		bool m_isOpened = true;
+		bool m_isOpened = false;
 		bool m_isSelected = false;
 		ElemTreeNode* m_element = nullptr;
 	};

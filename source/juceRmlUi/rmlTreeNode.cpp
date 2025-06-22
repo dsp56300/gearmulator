@@ -204,7 +204,7 @@ namespace juceRmlUi
 		{
 			auto prev = m_tree.getSelectedNode();
 			m_tree.setSelectedNode(self);
-			if (prev && prev != self)
+			if (!m_tree.isMultiSelectEnabled() && prev && prev != self)
 				prev->setSelected(false);
 		}
 		else if (!_selected && m_tree.getSelectedNode() == self)
@@ -213,6 +213,8 @@ namespace juceRmlUi
 		}
 
 		evSelectedChanged(self, m_isSelected);
+
+		m_tree.evNodeSelectionChanged(self, m_isSelected);
 
 		return true;
 	}

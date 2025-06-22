@@ -22,6 +22,8 @@ namespace juceRmlUi
 
 		void ProcessEvent(Rml::Event& _event) override;
 
+		virtual void onClick() {}
+
 	private:
 		void onSelectedChanged(bool _selected);
 		void onOpenedChanged(bool _opened);

@@ -132,4 +132,9 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		processSearchUpdated(*search);
 	}
+
+	void TreeElem::onClick()
+	{
+		ElemTreeNode::onClick();
+	}
 }

@@ -20,6 +20,24 @@ namespace jucePluginEditorLib::patchManagerRml
 				return &m_instancerTag;
 			return &m_instancerDatasource;
 		});
+
+		_tree->getTree().evNodeSelectionChanged.addListener([this](const std::shared_ptr<juceRmlUi::TreeNode>& _treeNode, const bool& _selected)
+		{
+			if (m_tree->getTree().isMultiSelectEnabled())
+			{
+				if (_selected)
+					m_pm.addSelectedItem(*this, _treeNode);
+				else
+					m_pm.removeSelectedItem(*this, _treeNode);
+			}
+			else if (_selected)
+				m_pm.setSelectedItem(*this, _treeNode);
+		});
+	}
+
+	Tree::~Tree()
+	{
+		m_tree->getTree().getRoot()->clear();
 	}
 
 	patchManager::PatchManager& Tree::getDB() const
@@ -56,6 +74,15 @@ namespace jucePluginEditorLib::patchManagerRml
 		{
 			for (const auto& it : m_groupItems)
 				it.second->processDirty(_dirty.searches);
+		}
+	}
+
+	void Tree::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest) const
+	{
+		for (const auto& [groupType, node] : m_groupItems)
+		{
+			auto* elem = dynamic_cast<TreeElem*>(node->getElement());
+			elem->setParentSearchRequest(_searchRequest);
 		}
 	}
 

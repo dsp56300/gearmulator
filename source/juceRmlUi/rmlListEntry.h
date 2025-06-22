@@ -4,6 +4,7 @@
 
 namespace juceRmlUi
 {
+	class ElemListEntry;
 	class List;
 
 	class ListEntry
@@ -34,6 +35,13 @@ namespace juceRmlUi
 
 		List& getList() const { return m_list; }
 
+		void setElement(ElemListEntry* _elem)
+		{
+			m_element = _elem;
+		}
+
+		ElemListEntry* getElement() const { return m_element; }
+
 	private:
 		void setSelected(bool _selected);
 
@@ -43,5 +51,7 @@ namespace juceRmlUi
 		size_t m_index = InvalidIndex;
 
 		bool m_selected = false;
+
+		ElemListEntry* m_element = nullptr;
 	};
 }

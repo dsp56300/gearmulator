@@ -1,6 +1,8 @@
 #pragma once
 
 #include "datasourceTree.h"
+#include "grid.h"
+#include "list.h"
 #include "tagsTree.h"
 #include "jucePluginEditorLib/patchmanager/patchmanagerui.h"
 
@@ -21,6 +23,12 @@ namespace jucePluginEditorLib::patchManagerRml
 	class PatchManagerUiRml : public patchManager::PatchManagerUi
 	{
 	public:
+		enum class LayoutType
+		{
+			List,
+			Grid
+		};
+
 		PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, const std::initializer_list<patchManager::GroupType>& _groupTypes);
 		~PatchManagerUiRml() override = default;
 
@@ -37,10 +45,30 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		std::string getGroupName(patchManager::GroupType _type) const;
 
+		void addSelectedItem(const Tree& _tree, const juceRmlUi::TreeNodePtr& _node);
+		void removeSelectedItem(const Tree& _tree, const juceRmlUi::TreeNodePtr& _node);
+		void setSelectedItem(const Tree& _tree, const juceRmlUi::TreeNodePtr& _node);
+
+		void onSelectedItemsChanged();
+
+		void setLayout(LayoutType _layout);
+
+		ListModel& getListModel();
+
+		void setListStatus(uint32_t _selectedPatchCount, uint32_t _totalPatchCount);
+
 	private:
 		juceRmlUi::RmlComponent& m_rmlComponent;
 		DatasourceTree m_treeDS;
 		TagsTree m_treeTags;
+
+		List m_list;
+		Grid m_grid;
+
 		std::unordered_map<patchManager::GroupType, std::string> m_customGroupNames;
+
+		std::map<const Tree*, std::set<juceRmlUi::TreeNodePtr>> m_selectedItems;
+
+		LayoutType m_layout = LayoutType::List;
 	};
 }

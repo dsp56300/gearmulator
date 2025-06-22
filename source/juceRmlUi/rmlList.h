@@ -5,6 +5,11 @@
 
 #include "baseLib/event.h"
 
+namespace Rml
+{
+	class ElementInstancer;
+}
+
 namespace Rml::Input
 {
 	enum KeyIdentifier : unsigned char;

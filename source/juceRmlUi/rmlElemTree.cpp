@@ -12,6 +12,11 @@ namespace juceRmlUi
 	{
 	}
 
+	ElemTree::~ElemTree()
+	{
+		m_tree.getRoot()->clear();
+	}
+
 	void ElemTree::OnChildAdd(Rml::Element* _child)
 	{
 		Element::OnChildAdd(_child);
@@ -68,12 +73,7 @@ namespace juceRmlUi
 
 		m_activeNodeElements.erase(it);
 
-		if (elem)
-		{
-			auto parentNode = elem->GetParentNode();
-			if (parentNode)
-				parentNode->RemoveChild(elem);
-		}
+		helper::removeFromParent(elem);
 	}
 
 	void ElemTree::updateNodeElements()

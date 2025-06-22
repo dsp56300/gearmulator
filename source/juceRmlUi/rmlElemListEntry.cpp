@@ -31,22 +31,28 @@ namespace juceRmlUi
 			m_onRemoved.reset();
 			m_onIndexChanged.reset();
 			m_onSelected.reset();
+
+			m_entry->setElement(nullptr);
 		}
+
 		m_entry = _entry;
+
 		if (m_entry)
 		{
 			m_onAdded.set(_entry->evAdded, [this](ListEntry*, List*) {  onAdded(); });
 			m_onRemoved.set(_entry->evRemoved, [this](ListEntry*, List*) {  onRemoved(); });
 			m_onIndexChanged.set(_entry->evIndexChanged, [this](ListEntry*) {  onIndexChanged(); });
 			m_onSelected.set(_entry->evSelected, [this](ListEntry*, bool _selected) {  onSelectedChanged(_selected); });
+
+			m_entry->setElement(this);
 		}
 		onEntryChanged();
+		updateState();
 	}
 
 	void ElemListEntry::onEntryChanged()
 	{
 		SetInnerRML("Entry " + std::to_string(m_entry->getIndex()));
-		updateState();
 	}
 
 	void ElemListEntry::onClick(const Rml::Event& _event)
