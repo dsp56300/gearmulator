@@ -540,29 +540,6 @@ namespace jucePluginEditorLib::patchManager
 		return m_patchManager.getDB();
 	}
 
-	void ListModel::sortPatches(Patches& _patches, pluginLib::patchDB::SourceType _sourceType)
-	{
-		std::sort(_patches.begin(), _patches.end(), [_sourceType](const Patch& _a, const Patch& _b)
-		{
-			const auto sourceType = _sourceType;
-
-			if(sourceType == pluginLib::patchDB::SourceType::Folder)
-			{
-				const auto aSource = _a->source.lock();
-				const auto bSource = _b->source.lock();
-				if (*aSource != *bSource)
-					return *aSource < *bSource;
-			}
-			else if (sourceType == pluginLib::patchDB::SourceType::File || sourceType == pluginLib::patchDB::SourceType::Rom || sourceType == pluginLib::patchDB::SourceType::LocalStorage)
-			{
-				if (_a->program != _b->program)
-					return _a->program < _b->program;
-			}
-
-			return _a->getName().compare(_b->getName()) < 0;
-		});
-	}
-
 	void ListModel::listBoxItemClicked(const int _row, const juce::MouseEvent& _mouseEvent)
 	{
 		if(!onClicked(_mouseEvent))
@@ -619,13 +596,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListModel::sortPatches()
 	{
-		// Note: If this list is no longer sorted by calling this function, be sure to modify the second caller in state.cpp, too, as it is used to track the selected entry across multiple parts
-		sortPatches(m_patches);
-	}
-
-	void ListModel::sortPatches(Patches& _patches) const
-	{
-		sortPatches(_patches, getSourceType());
+		PatchManagerUi::sortPatches(m_patches, getSourceType());
 	}
 
 	void ListModel::filterPatches()

@@ -87,7 +87,6 @@ namespace jucePluginEditorLib::patchManager
 
 		PatchManager& getDB() const;
 
-		static void sortPatches(Patches& _patches, pluginLib::patchDB::SourceType _sourceType);
 		void listBoxItemClicked(int _row, const juce::MouseEvent&) override;
 		void backgroundClicked(const juce::MouseEvent&) override;
 
@@ -146,7 +145,6 @@ namespace jucePluginEditorLib::patchManager
 
 	private:
 		void sortPatches();
-		void sortPatches(Patches& _patches) const;
 		void filterPatches();
 		bool match(const Patch& _patch) const;
 		void setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search);

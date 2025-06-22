@@ -367,7 +367,7 @@ namespace jucePluginEditorLib::patchManager
 		auto exportPatches = [p = std::move(_patches), this, _fileType]
 		{
 			auto patches = p;
-			ListModel::sortPatches(patches, pluginLib::patchDB::SourceType::LocalStorage);
+			PatchManagerUi::sortPatches(patches, pluginLib::patchDB::SourceType::LocalStorage);
 			m_editor.savePreset(_fileType, [this, p = std::move(patches), _fileType](const juce::File& _file)
 			{
 				exportPresets(_file, p, _fileType);

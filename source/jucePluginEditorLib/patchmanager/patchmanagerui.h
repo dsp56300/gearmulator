@@ -42,6 +42,8 @@ namespace jucePluginEditorLib::patchManager
 		virtual pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem) = 0;
 		virtual bool createTag(GroupType _group, const std::string& _name) = 0;
 
+		static void sortPatches(std::vector<pluginLib::patchDB::PatchPtr>& _patches, pluginLib::patchDB::SourceType _sourceType);
+
 	private:
 		Editor& m_editor;
 		PatchManager& m_db;
