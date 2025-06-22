@@ -101,7 +101,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	GroupNode::TagItemPtr GroupNode::createSubItem(const pluginLib::patchDB::Tag& _tag)
 	{
-		auto item = std::make_shared<TagNode>(getTree(), m_type, _tag);
+		auto item = std::make_shared<TagNode>(m_patchManager, getTree(), m_type, _tag);
 
 		validateParent(item);
 

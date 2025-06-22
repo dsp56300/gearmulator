@@ -6,20 +6,28 @@
 
 namespace jucePluginEditorLib::patchManagerRml
 {
+	class PatchManagerUiRml;
+}
+
+namespace jucePluginEditorLib::patchManagerRml
+{
 	class ListElemEntry;
 
 	class ListItem final : public juceRmlUi::ListEntry
 	{
 	public:
-		explicit ListItem(juceRmlUi::List& _list);
+		explicit ListItem(PatchManagerUiRml& _pm, juceRmlUi::List& _list);
 
 		ListElemEntry* getListElemEntry() const;
 
 		bool setPatch(const pluginLib::patchDB::PatchPtr& _patch);
 		const auto& getPatch() const { return m_patch; }
 
+		auto& getPatchManager() const { return m_patchManager; }
+
 	private:
 		pluginLib::patchDB::PatchPtr m_patch;
+		PatchManagerUiRml& m_patchManager;
 	};
 
 	class ListElemEntry final : public juceRmlUi::ElemListEntry
@@ -33,7 +41,17 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onPatchChanged(const pluginLib::patchDB::PatchPtr& _patch);
 
+		void OnChildAdd(Rml::Element* _child) override;
+
+		void setName(const std::string& _name, bool _forceUpdate = false);
+		void setColor(uint32_t _color, bool _forceUpdate = false);
+
 	private:
 		ListItem* m_item = nullptr;
+		Rml::Element* m_elemName = nullptr;
+		Rml::Element* m_elemColor = nullptr;
+
+		std::string m_name;
+		uint32_t m_color = 0xffffffff;
 	};
 }

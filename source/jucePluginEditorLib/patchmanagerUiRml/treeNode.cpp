@@ -59,8 +59,29 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		m_name = _name;
 
-		if (m_elemName)
-			m_elemName->SetInnerRML(Rml::StringUtilities::EncodeRml(_name));
+		if (!m_elemName)
+			return;
+
+		m_elemName->SetInnerRML(Rml::StringUtilities::EncodeRml(_name));
+	}
+
+	void TreeElem::setColor(const uint32_t _color, const bool _forceUpdate)
+	{
+		if (!_forceUpdate && m_color == _color)
+			return;
+
+		m_color = _color;
+
+		if (m_color == pluginLib::patchDB::g_invalidColor)
+		{
+			m_elemName->SetProperty(Rml::PropertyId::Color, Rml::Property(Rml::Colourb(255,255,255,255), Rml::Unit::COLOUR));
+		}
+		else
+		{
+			const Rml::Colourb c = PatchManagerUiRml::toRmlColor(m_color);
+
+			m_elemName->SetProperty(Rml::PropertyId::Color, Rml::Property(c, Rml::Unit::COLOUR));
+		}
 	}
 
 	void TreeElem::setCount(const size_t _count, const bool _forceUpdate/* = false*/)
@@ -96,6 +117,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			{
 				m_elemName = _child;
 				setName(m_name, true);
+				setColor(m_color, true);
 			}
 		}
 		if (m_elemCount == nullptr)

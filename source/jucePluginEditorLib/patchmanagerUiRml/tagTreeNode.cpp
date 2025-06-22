@@ -1,6 +1,9 @@
 #include "tagTreeNode.h"
 
+#include "patchmanagerUiRml.h"
 #include "tagsTree.h"
+
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
@@ -19,6 +22,10 @@ namespace jucePluginEditorLib::patchManagerRml
 		setName(tagItem->getTag());
 
 		const auto tagType = toTagType(tagItem->getGroup());
+
+		const auto color = tagItem->getPatchManager().getDB().getTagColor(tagType, tagItem->getTag());
+
+		setColor(color);
 
 		if (tagType == pluginLib::patchDB::TagType::Favourites)
 		{

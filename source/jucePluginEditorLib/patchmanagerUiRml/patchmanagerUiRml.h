@@ -57,6 +57,10 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void setListStatus(uint32_t _selectedPatchCount, uint32_t _totalPatchCount);
 
+		pluginLib::patchDB::Color getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const;
+
+		static Rml::Colourb toRmlColor(pluginLib::patchDB::Color _color);
+
 	private:
 		juceRmlUi::RmlComponent& m_rmlComponent;
 		DatasourceTree m_treeDS;

@@ -195,7 +195,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			}
 			else
 			{
-				auto entry = std::make_shared<ListItem>(list);
+				auto entry = std::make_shared<ListItem>(m_patchManager, list);
 				entry->setPatch(patches[i]);
 				list.addEntry(std::move(entry));
 			}

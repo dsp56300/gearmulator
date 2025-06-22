@@ -9,8 +9,9 @@ namespace jucePluginEditorLib::patchManagerRml
 {
 	struct TagNode : juceRmlUi::TreeNode
 	{
-		explicit TagNode(juceRmlUi::Tree& _tree, patchManager::GroupType _groupType, pluginLib::patchDB::Tag _tag)
+		explicit TagNode(PatchManagerUiRml& _pm, juceRmlUi::Tree& _tree, patchManager::GroupType _groupType, pluginLib::patchDB::Tag _tag)
 			: TreeNode(_tree)
+			, m_patchManager(_pm)
 			, m_group(_groupType)
 			, m_tag(std::move(_tag))
 		{
@@ -19,7 +20,10 @@ namespace jucePluginEditorLib::patchManagerRml
 		const auto& getGroup() const { return m_group; }
 		const auto& getTag() const { return m_tag; }
 
+		auto& getPatchManager() const { return m_patchManager; }
+
 	private:
+		PatchManagerUiRml& m_patchManager;
 		patchManager::GroupType m_group;
 		pluginLib::patchDB::Tag m_tag;
 	};

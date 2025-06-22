@@ -46,6 +46,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		pluginLib::patchDB::SearchHandle getSearchHandle() const { return m_searchHandle; }
 
 		void setName(const std::string& _name, bool _forceUpdate = false);
+		void setColor(uint32_t _color, bool _forceUpdate = false);
 		void setCount(size_t _count, bool _forceUpdate = false);
 
 		void OnChildAdd(Rml::Element* _child) override;
@@ -63,6 +64,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		uint32_t m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 
 		std::string m_name;
+		uint32_t m_color = pluginLib::patchDB::g_invalidColor;
 		size_t m_count = g_unknownCount;
 
 		Rml::Element* m_elemName = nullptr;

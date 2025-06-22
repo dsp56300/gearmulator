@@ -2,6 +2,8 @@
 
 #include "jucePluginEditorLib/pluginEditor.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
+
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemTree.h"
 #include "juceRmlUi/rmlElemList.h"
@@ -200,5 +202,32 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void PatchManagerUiRml::setListStatus(uint32_t _selectedPatchCount, uint32_t _totalPatchCount)
 	{
+	}
+
+	pluginLib::patchDB::Color PatchManagerUiRml::getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const
+	{
+		// we want to prevent that a whole list is colored with one color just because that list is based on a tag, prefer other tags instead
+		pluginLib::patchDB::TypedTags ignoreTags;
+
+		for (const auto& selectedItem : m_selectedItems)
+		{
+			for (const auto& item : selectedItem.second)
+			{
+				const auto& s = dynamic_cast<TreeElem*>(item->getElement())->getSearchRequest();
+				ignoreTags.add(s.tags);
+			}
+		}
+		return getDB().getPatchColor(_patch, ignoreTags);
+	}
+
+	Rml::Colourb PatchManagerUiRml::toRmlColor(const pluginLib::patchDB::Color _color)
+	{
+		if (_color == pluginLib::patchDB::g_invalidColor)
+			return {0, 0, 0, 0};
+		return Rml::Colourb(
+			(_color >> 16) & 0xFF,
+			(_color >> 8) & 0xFF,
+			_color & 0xFF,
+			(_color >> 24) & 0xFF);
 	}
 }

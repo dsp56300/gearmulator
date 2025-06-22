@@ -10,6 +10,8 @@ set(SOURCES
 	arrow_left.png
 	check.png
 	chevron_right.png
+	circle.png
+	circle_border.png
 	link.png
 	lock.png
 

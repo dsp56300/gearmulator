@@ -21,8 +21,9 @@ namespace jucePluginEditorLib::patchManagerRml
 		using DatasourceItemPtr = std::shared_ptr<DatasourceNode>;
 		using TagItemPtr = std::shared_ptr<TagNode>;
 
-		explicit GroupNode(juceRmlUi::Tree& _tree, const patchManager::GroupType _type)
+		explicit GroupNode(PatchManagerUiRml& _pm, juceRmlUi::Tree& _tree, const patchManager::GroupType _type)
 			: TreeNode(_tree)
+			, m_patchManager(_pm)
 			, m_type(_type)
 		{
 		}
@@ -51,6 +52,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest);
 
 	private:
+		PatchManagerUiRml& m_patchManager;
 		patchManager::GroupType m_type;
 
 		std::map<pluginLib::patchDB::DataSourceNodePtr, DatasourceItemPtr> m_itemsByDataSource;

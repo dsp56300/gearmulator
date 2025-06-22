@@ -54,7 +54,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			return false;
 
 		auto& tree = getTree()->getTree();
-		auto item = std::make_shared<GroupNode>(tree, _type); 
+		auto item = std::make_shared<GroupNode>(m_pm, tree, _type); 
 
 		m_groupItems.insert({ _type, item });
 
