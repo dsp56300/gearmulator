@@ -17,11 +17,11 @@
 
 namespace juceRmlUi
 {
-	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const DocumentCreatedCallback& _onDocumentCreated/* = {}*/)
+	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, DocumentCreatedCallback _onDocumentCreated/* = {}*/)
 		: m_dataProvider(_dataProvider)
 		, m_rootRmlFilename(std::move(_rootRmlFilename))
 		, m_contentScale(_contentScale)
-		, m_onDocumentCreated(_onDocumentCreated)
+		, m_onDocumentCreated(std::move(_onDocumentCreated))
 	{
 		m_renderProxy.reset(new RendererProxy(m_dataProvider));
 
