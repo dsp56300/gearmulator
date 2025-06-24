@@ -12,7 +12,7 @@ add_library(juceRmlPlugin STATIC)
 target_sources(juceRmlPlugin PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(juceRmlPlugin PUBLIC juceRmlUi)
+target_link_libraries(juceRmlPlugin PUBLIC juceRmlUi jucePluginLib)
 
 target_include_directories(juceRmlPlugin PUBLIC ../JUCE/modules)
 target_compile_definitions(juceRmlPlugin PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
