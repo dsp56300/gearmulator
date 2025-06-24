@@ -74,9 +74,11 @@ namespace genericUI
 		const auto& getName() const { return m_name; }
 
 		void updateKeyValueConditions(const std::string& _key, const std::string& _value) const;
+		bool hasComponent(const std::string& _component) const;
+
+		const auto& getChildren() const { return m_children; }
 
 	private:
-		bool hasComponent(const std::string& _component) const;
 		template<typename T, class... Args> T* createJuceObject(Editor& _editor, Args... _args);
 		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
 		void createCondition(const Editor& _editor, juce::Component& _target);
@@ -112,9 +114,4 @@ namespace genericUI
 		TabGroup m_tabGroup;
 		std::vector<std::unique_ptr<ControllerLink>> m_controllerLinks;
 	};
-
-	inline bool UiObject::hasComponent(const std::string& _component) const
-	{
-		return m_components.find(_component) != m_components.end();
-	}
 }

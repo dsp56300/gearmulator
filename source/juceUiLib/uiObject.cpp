@@ -350,6 +350,11 @@ namespace genericUI
 			child->updateKeyValueConditions(_key, _value);
 	}
 
+	bool UiObject::hasComponent(const std::string& _component) const
+	{
+		return m_components.find(_component) != m_components.end();
+	}
+
 	void UiObject::createCondition(const Editor& _editor, juce::Component& _target)
 	{
 		if(!hasComponent("condition"))
