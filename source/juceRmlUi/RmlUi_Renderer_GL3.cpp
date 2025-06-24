@@ -727,7 +727,24 @@ static GLuint CreateTexture(Rml::Span<const Rml::byte> source_data, Rml::Vector2
 
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, source_dimensions.x, source_dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, source_data.data());
+	const auto pixelCount = source_dimensions.x * source_dimensions.y;
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	if (source_data.size() == 4 * pixelCount)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, source_dimensions.x, source_dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, source_data.data());
+	else if (source_data.size() == 3 * pixelCount)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, source_dimensions.x, source_dimensions.y, 0, GL_RGB, GL_UNSIGNED_BYTE, source_data.data());
+	else if (source_data.size() == pixelCount)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, source_dimensions.x, source_dimensions.y, 0, GL_R, GL_UNSIGNED_BYTE, source_data.data());
+	else
+	{
+		RMLUI_ASSERT(false);
+		RMLUI_ERRORMSG("Invalid texture data size %zu for dimensions %dx%d.", source_data.size(), source_dimensions.x, source_dimensions.y);
+		glDeleteTextures(1, &texture_id);
+		return 0;
+	}
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -1303,7 +1320,7 @@ Rml::TextureHandle RenderInterface_GL3::LoadTexture(Rml::Vector2i& texture_dimen
 
 Rml::TextureHandle RenderInterface_GL3::GenerateTexture(Rml::Span<const Rml::byte> source_data, Rml::Vector2i source_dimensions)
 {
-	RMLUI_ASSERT(source_data.data() && source_data.size() == size_t(source_dimensions.x * source_dimensions.y * 4));
+	RMLUI_ASSERT(source_data.data());
 
 	GLuint texture_id = Gfx::CreateTexture(source_data, source_dimensions);
 	if (texture_id == 0)
