@@ -739,8 +739,7 @@ static GLuint CreateTexture(Rml::Span<const Rml::byte> source_data, Rml::Vector2
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, source_dimensions.x, source_dimensions.y, 0, GL_R, GL_UNSIGNED_BYTE, source_data.data());
 	else
 	{
-		RMLUI_ASSERT(false);
-		RMLUI_ERRORMSG("Invalid texture data size %zu for dimensions %dx%d.", source_data.size(), source_dimensions.x, source_dimensions.y);
+		RMLUI_ASSERT(false && "unknown texture format");
 		glDeleteTextures(1, &texture_id);
 		return 0;
 	}
