@@ -18,6 +18,12 @@ namespace genericUI
 
 namespace rmlPlugin::skinConverter
 {
+	namespace
+	{
+		constexpr int g_maxTextureWidth = 2048;
+		constexpr int g_maxTextureHeight = 2048;
+	}
+
 	SkinConverter::SkinConverter(genericUI::Editor& _editor, const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, std::map<std::string, std::string>&& _idReplacements)
 		: m_editor(_editor)
 		, m_rootObject(_root)
@@ -132,7 +138,10 @@ namespace rmlPlugin::skinConverter
 	void SkinConverter::writeStyles(std::stringstream& _out, const uint32_t _depth/* = 0*/)
 	{
 		for (const auto& [name, style] : m_spritesheets)
-			style.write(_out, "@spritesheet " + name, _depth);
+		{
+			if (style.properties.size() > 1)
+				style.write(_out, "@spritesheet " + name, _depth);
+		}
 
 		for (const auto& [name, style] : m_styles)
 			style.write(_out, name, _depth);
@@ -233,7 +242,7 @@ namespace rmlPlugin::skinConverter
 
 			_co.tag = "knob";
 			_co.classes.emplace_back("juceRotary");
-			_co.classes.emplace_back(styleName);
+			_co.classes.emplace_back(styleName.substr(1));
 		}
 	}
 
@@ -320,7 +329,7 @@ namespace rmlPlugin::skinConverter
 		auto spritesheet = m_spritesheets.find(_imageName);
 		if (spritesheet == m_spritesheets.end())
 			return {};
-		const auto frameCount = spritesheet->second.properties.size() - 1; // the first property is the source image
+		const auto frameCount = spritesheet->second.spriteCount;
 		CoStyle style;
 		style.add("frames", std::to_string(frameCount));
 		style.add("spriteprefix", _imageName + "_");
@@ -361,7 +370,16 @@ namespace rmlPlugin::skinConverter
 		const auto w = image.getWidth();
 		const auto h = image.getHeight();
 
-		std::vector<Rml::Rectanglei> sprites;
+		struct Sprite
+		{
+			int page = -1;
+			Rml::Rectanglei rect;
+		};
+
+		std::vector<Sprite> sprites;
+
+		auto maxTextureWidth = std::max(tileSizeX, g_maxTextureWidth);
+		auto maxTextureHeight = std::max(tileSizeY, g_maxTextureHeight);
 
 		for (int y=0; y<h; y += tileSizeY)
 		{
@@ -369,20 +387,141 @@ namespace rmlPlugin::skinConverter
 			{
 				if (x + tileSizeX > w || y + tileSizeY > h)
 					continue; // skip if the tile would be out of bounds
-				sprites.emplace_back(Rml::Rectanglei::FromPositionSize(Rml::Vector2i(x, y), Rml::Vector2i(tileSizeX, tileSizeY)));
+				Sprite sprite;
+				sprite.rect = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(x, y), Rml::Vector2i(tileSizeX, tileSizeY));
+				sprites.emplace_back(sprite);
 			}
 		}
 
-		CoStyle spritesheet;
-		spritesheet.add("src", imageName + ".png");
+		std::vector<CoSpritesheet> pageSpritesheets;
 
-		auto addSprite = [&spritesheet, &imageName](const std::string& _name, const Rml::Rectanglei& _rect)
+		if (w > maxTextureWidth || h > maxTextureHeight)
 		{
-			spritesheet.add(imageName + '_' + _name, 
-				std::to_string(_rect.Left()) + "px " + 
-				std::to_string(_rect.Top()) + "px " + 
-				std::to_string(_rect.Width()) + "px " + 
-				std::to_string(_rect.Height()) + "px");
+			struct RemappedSprite
+			{
+				uint32_t index;
+				Rml::Rectanglei from;
+				Rml::Rectanglei to;
+			};
+
+			struct Page
+			{
+				std::vector<RemappedSprite> sprites;
+				int width = 0;
+				int height = 0;
+			};
+
+			std::vector<Page> pages;
+
+			{
+				int x = 0;
+				int y = 0;
+
+				Page page;
+
+				for (size_t i=0; i<sprites.size(); ++i)
+				{
+					auto& sprite = sprites[i];
+
+					if (x + sprite.rect.Width() > maxTextureWidth)
+					{
+						x = 0;
+						y += tileSizeY;
+					}
+					if (y + sprite.rect.Height() > maxTextureHeight)
+					{
+						pages.push_back(std::move(page));
+						page = {};
+						x = y = 0;
+					}
+
+					RemappedSprite rs;
+
+					rs.index = static_cast<uint32_t>(i);
+					rs.from = sprite.rect;
+					rs.to = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(x, y), Rml::Vector2i(sprite.rect.Width(), sprite.rect.Height()));
+
+					page.width = std::max(page.width, rs.to.Right());
+					page.height = std::max(page.height, rs.to.Bottom());
+
+					page.sprites.push_back(rs);
+
+					sprites[i].page = static_cast<int>(pages.size());
+					sprites[i].rect = rs.to;
+
+					x += tileSizeX;
+				}
+
+				if (!page.sprites.empty())
+					pages.push_back(std::move(page));
+			}
+
+			juce::Image::BitmapData sourceData(const_cast<juce::Image&>(image), 0, 0, w, h, juce::Image::BitmapData::readOnly);
+
+			for (size_t i=0; i<pages.size(); ++i)
+			{
+				const auto& p = pages[i];
+
+				juce::Image spritesheetImage(image.getFormat(), p.width, p.height, true);
+
+				juce::Image::BitmapData destData(spritesheetImage, 0, 0, p.width, p.height, juce::Image::BitmapData::writeOnly);
+
+				for (const auto& s : p.sprites)
+				{
+					const auto& from = s.from;
+					const auto& to = s.to;
+
+					int xSrc = from.Left();
+					int ySrc = from.Top();
+
+					int xDest = to.Left();
+					int yDest = to.Top();
+
+					int width = from.Width();
+					int height = from.Height();
+
+					const auto copySize = width * destData.pixelStride;
+
+					for (int y=0; y<height; ++y)
+					{
+						const auto* srcRow = sourceData.getLinePointer(ySrc + y) + static_cast<ptrdiff_t>(xSrc * destData.pixelStride);
+						auto* destRow = destData.getLinePointer(yDest + y) + static_cast<ptrdiff_t>(xDest * destData.pixelStride);
+
+						std::memcpy(destRow, srcRow, copySize);
+					}
+				}
+
+				const auto filename = m_outputPath + imageName + "_page" + std::to_string(i) + ".png";
+				juce::File file(filename);
+				file.deleteFile();
+				file.create();
+				juce::PNGImageFormat pngFormat;
+				auto filestream = file.createOutputStream();
+
+				pngFormat.writeImageToStream(spritesheetImage, *filestream);
+				filestream->flush();
+
+				auto& pageSpritesheet = pageSpritesheets.emplace_back();
+				pageSpritesheet.add("src", imageName + "_page" + std::to_string(i) + ".png");
+				pageSpritesheet.spriteCount = static_cast<uint32_t>(p.sprites.size());
+			}
+		}
+
+		CoSpritesheet spritesheet;
+		spritesheet.add("src", imageName + ".png");
+		spritesheet.spriteCount = static_cast<uint32_t>(sprites.size());
+
+		auto addSprite = [&spritesheet, &pageSpritesheets, &imageName](const std::string& _name, const Sprite& _sprite)
+		{
+			const auto& rect = _sprite.rect;
+
+			auto& ss = (_sprite.page >= 0) ? pageSpritesheets[_sprite.page] : spritesheet;
+
+			ss.add(imageName + '_' + _name, 
+				std::to_string(rect.Left()) + "px " + 
+				std::to_string(rect.Top()) + "px " + 
+				std::to_string(rect.Width()) + "px " + 
+				std::to_string(rect.Height()) + "px");
 		};
 
 		auto addIndex = [&addSprite, &sprites](const std::string& _name, const size_t _index)
@@ -413,6 +552,14 @@ namespace rmlPlugin::skinConverter
 		}
 
 		m_spritesheets.insert({ imageName, std::move(spritesheet) });
+
+		for (size_t i=0; i<pageSpritesheets.size(); ++i)
+		{
+			auto& ss = pageSpritesheets[i];
+			if (ss.properties.size() <= 1)
+				continue;
+			m_spritesheets.insert({ imageName + "_page" + std::to_string(i), std::move(ss) });
+		}
 
 		return imageName;
 	}

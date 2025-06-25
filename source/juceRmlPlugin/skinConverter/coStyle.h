@@ -23,4 +23,9 @@ namespace rmlPlugin::skinConverter
 			return properties == _other.properties;
 		}
 	};
+
+	struct CoSpritesheet : CoStyle
+	{
+		uint32_t spriteCount = 0;
+	};
 }

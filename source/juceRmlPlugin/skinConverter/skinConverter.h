@@ -54,7 +54,7 @@ namespace rmlPlugin::skinConverter
 		Rml::ElementDocument* m_doc;
 
 		std::map<std::string, CoStyle> m_styles;
-		std::map<std::string, CoStyle> m_spritesheets;
+		std::map<std::string, CoSpritesheet> m_spritesheets;
 
 		std::map<std::string, std::string> m_idReplacements;
 
