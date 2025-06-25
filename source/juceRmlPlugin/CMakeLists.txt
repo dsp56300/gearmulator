@@ -14,6 +14,7 @@ set(SOURCES_SC
 	skinConverter/coPosition.cpp skinConverter/coPosition.h
 	skinConverter/coStyle.cpp skinConverter/coStyle.h
 	skinConverter/rmlWriter.cpp skinConverter/rmlWriter.h
+	skinConverter/scHelper.cpp skinConverter/scHelper.h
 	skinConverter/skinConverter.cpp skinConverter/skinConverter.h
 )
 

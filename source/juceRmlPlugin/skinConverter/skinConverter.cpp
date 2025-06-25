@@ -1,12 +1,20 @@
 #include "skinConverter.h"
 
+#include <cassert>
 #include <fstream>
 
 #include "convertedObject.h"
 #include "scHelper.h"
 #include "dsp56kEmu/logging.h"
 #include "juceUiLib/comboboxStyle.h"
+#include "juceUiLib/editor.h"
+#include "juceUiLib/rotaryStyle.h"
 #include "juceUiLib/uiObject.h"
+
+namespace genericUI
+{
+	class RotaryStyle;
+}
 
 namespace rmlPlugin::skinConverter
 {
@@ -42,7 +50,9 @@ namespace rmlPlugin::skinConverter
 
 		setDefaultProperties(_co, _object);
 
-		if (_object.hasComponent("root"))
+		if (_object.hasComponent("button"))
+			convertUiObjectButton(_co, _object);
+		else if (_object.hasComponent("root"))
 			convertUiObjectRoot(_co, _object);
 		else if (_object.hasComponent("image"))
 			convertUiObjectImage(_co, _object);
@@ -121,16 +131,19 @@ namespace rmlPlugin::skinConverter
 
 	void SkinConverter::writeStyles(std::stringstream& _out, const uint32_t _depth/* = 0*/)
 	{
+		for (const auto& [name, style] : m_spritesheets)
+			style.write(_out, "@spritesheet " + name, _depth);
+
 		for (const auto& [name, style] : m_styles)
-		{
 			style.write(_out, name, _depth);
-		}
 	}
 
 	void SkinConverter::setDefaultProperties(ConvertedObject& _co, const genericUI::UiObject& _object)
 	{
 		_co.set(getId(_object), _object);
-		_co.classes.emplace_back("jucePos");
+
+		if (!_object.hasComponent("root"))
+			_co.classes.emplace_back("jucePos");
 
 		auto param = _object.getProperty("parameter");
 		if (!param.empty())
@@ -168,14 +181,29 @@ namespace rmlPlugin::skinConverter
 		}
 	}
 
+	void SkinConverter::convertUiObjectButton(ConvertedObject& _co, const genericUI::UiObject& _object)
+	{
+		const auto imageName = createSpritesheet(_object);
+
+		createImageStyle(imageName, {});
+		createImageStyle(imageName, {"checked"});
+		createImageStyle(imageName, {"checked", "active"});
+		createImageStyle(imageName, {"checked", "hover"});
+		createImageStyle(imageName, {"hover"});
+
+		_co.classes.emplace_back("juceButton");
+		_co.classes.emplace_back(imageName);
+	}
+
 	void SkinConverter::convertUiObjectComboBox(ConvertedObject& _co, const genericUI::UiObject& _object)
 	{
 		_co.tag = "combo";
 		genericUI::ComboboxStyle style(m_editor);
 		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
 
-		auto className = createTextStyle(style);
+		const auto className = createTextStyle(style);
 
+		// TODO: vertical text alignment, this always centers the text vertically for now
 		_co.style.add("line-height", _object.getProperty("height") + "dp");
 
 		_co.classes.push_back(className.substr(1));
@@ -195,11 +223,23 @@ namespace rmlPlugin::skinConverter
 
 	void SkinConverter::convertUiObjectRotary(ConvertedObject& _co, const genericUI::UiObject& _object)
 	{
+		genericUI::RotaryStyle style(m_editor);
+		(static_cast<genericUI::UiObjectStyle&>(style)).apply(m_editor, _object);
+
+		if (style.getStyle() == genericUI::RotaryStyle::Style::Rotary)
+		{
+			const auto imageName = createSpritesheet(_object);
+			const auto styleName = createKnobStyle(imageName);
+
+			_co.tag = "knob";
+			_co.classes.emplace_back("juceRotary");
+			_co.classes.emplace_back(styleName);
+		}
 	}
 
 	std::string SkinConverter::getId(const genericUI::UiObject& _object)
 	{
-		const auto id = _object.getName();
+		const auto& id = _object.getName();
 		if (id.empty())
 			return {};
 		auto it = m_idReplacements.find(id);
@@ -210,7 +250,7 @@ namespace rmlPlugin::skinConverter
 	{
 		CoStyle style;
 
-		const auto fontName = _style.getFontName();
+		const auto& fontName = _style.getFontName();
 		if (!fontName.empty())
 			style.add("font-family", fontName);
 
@@ -243,6 +283,50 @@ namespace rmlPlugin::skinConverter
 		return addStyle(".text", style);
 	}
 
+	std::string SkinConverter::createImageStyle(const std::string& _imageName, const std::vector<std::string>& _states)
+	{
+		auto styleName = "." + _imageName;
+
+		for (const auto& state : _states)
+			styleName += ":" + state;
+
+		if (m_styles.find(styleName) != m_styles.end())
+			return styleName;
+
+		CoStyle style;
+
+		std::string spriteName = _imageName;
+
+		if (_states.empty())
+		{
+			spriteName += "_default";
+		}
+		else
+		{
+			spriteName += '_' + _states[0];
+
+			for (size_t i=1; i<_states.size(); ++i)
+				spriteName += '-' + _states[i];
+		}
+		style.add("decorator", "image(" + spriteName + " contain)");
+
+		m_styles.insert({ styleName, style });
+
+		return styleName;
+	}
+
+	std::string SkinConverter::createKnobStyle(const std::string& _imageName)
+	{
+		auto spritesheet = m_spritesheets.find(_imageName);
+		if (spritesheet == m_spritesheets.end())
+			return {};
+		const auto frameCount = spritesheet->second.properties.size() - 1; // the first property is the source image
+		CoStyle style;
+		style.add("frames", std::to_string(frameCount));
+		style.add("spriteprefix", _imageName + "_");
+		return addStyle(".knob", style);
+	}
+
 	std::string SkinConverter::addStyle(const std::string& _prefix, const CoStyle& _style)
 	{
 		for (const auto& [name,s] : m_styles)
@@ -255,5 +339,81 @@ namespace rmlPlugin::skinConverter
 		const auto name = _prefix + "Style" + std::to_string(m_styles.size());
 		m_styles.insert({ name, _style });
 		return name;
+	}
+
+	std::string SkinConverter::createSpritesheet(const genericUI::UiObject& _object)
+	{
+		const auto imageName = _object.getProperty("texture");
+
+		if (m_spritesheets.find(imageName) != m_spritesheets.end())
+			return imageName; // already created
+
+		const auto* drawable = dynamic_cast<const juce::DrawableImage*>(m_editor.getImageDrawable(imageName));
+		assert(drawable);
+		if (!drawable)
+			throw std::runtime_error("Failed to find image drawable for '" + imageName + "'");
+
+		const auto tileSizeX = _object.getPropertyInt("tileSizeX");
+		const auto tileSizeY = _object.getPropertyInt("tileSizeY");
+
+		const auto& image = drawable->getImage();
+
+		const auto w = image.getWidth();
+		const auto h = image.getHeight();
+
+		std::vector<Rml::Rectanglei> sprites;
+
+		for (int y=0; y<h; y += tileSizeY)
+		{
+			for (int x=0; x<w; x += tileSizeX)
+			{
+				if (x + tileSizeX > w || y + tileSizeY > h)
+					continue; // skip if the tile would be out of bounds
+				sprites.emplace_back(Rml::Rectanglei::FromPositionSize(Rml::Vector2i(x, y), Rml::Vector2i(tileSizeX, tileSizeY)));
+			}
+		}
+
+		CoStyle spritesheet;
+		spritesheet.add("src", imageName + ".png");
+
+		auto addSprite = [&spritesheet, &imageName](const std::string& _name, const Rml::Rectanglei& _rect)
+		{
+			spritesheet.add(imageName + '_' + _name, 
+				std::to_string(_rect.Left()) + "px " + 
+				std::to_string(_rect.Top()) + "px " + 
+				std::to_string(_rect.Width()) + "px " + 
+				std::to_string(_rect.Height()) + "px");
+		};
+
+		auto addIndex = [&addSprite, &sprites](const std::string& _name, const size_t _index)
+		{
+			if (_index < sprites.size())
+				addSprite(_name, sprites[_index]);
+		};
+
+		// the type of sprite naming is determined by the type of object
+		if (_object.hasComponent("button"))
+		{
+			// create sprites for button states
+			addIndex("default", _object.getPropertyInt("normalImage"));
+			addIndex("hover", _object.getPropertyInt("overImage"));
+			addIndex("active", _object.getPropertyInt("downImage"));
+			addIndex("checked", _object.getPropertyInt("normalImageOn"));
+			addIndex("checked-hover", _object.getPropertyInt("overImageOn"));
+			addIndex("checked-active", _object.getPropertyInt("downImageOn"));
+		}
+		else
+		{
+			for (size_t i=0; i<sprites.size(); ++i)
+			{
+				char n[32];
+				(void)snprintf(n, sizeof(n), "%03u", static_cast<uint32_t>(i));
+				addSprite(n, sprites[i]);
+			}
+		}
+
+		m_spritesheets.insert({ imageName, std::move(spritesheet) });
+
+		return imageName;
 	}
 }

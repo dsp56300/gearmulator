@@ -27,6 +27,7 @@ namespace rmlPlugin::skinConverter
 
 		void setDefaultProperties(ConvertedObject& _co, const genericUI::UiObject& _object);
 
+		void convertUiObjectButton(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectComboBox(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectImage(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectRoot(ConvertedObject& _co, const genericUI::UiObject& _object);
@@ -35,7 +36,12 @@ namespace rmlPlugin::skinConverter
 		std::string getId(const genericUI::UiObject& _object);
 
 		std::string createTextStyle(const genericUI::UiObjectStyle& _style);
+		std::string createImageStyle(const std::string& _imageName, const std::vector<std::string>& _states);
+		std::string createKnobStyle(const std::string& _imageName);
+
 		std::string addStyle(const std::string& _prefix, const CoStyle& _style);
+
+		std::string createSpritesheet(const genericUI::UiObject& _object);
 
 		genericUI::Editor& m_editor;
 		const genericUI::UiObject& m_rootObject;
@@ -48,6 +54,7 @@ namespace rmlPlugin::skinConverter
 		Rml::ElementDocument* m_doc;
 
 		std::map<std::string, CoStyle> m_styles;
+		std::map<std::string, CoStyle> m_spritesheets;
 
 		std::map<std::string, std::string> m_idReplacements;
 
