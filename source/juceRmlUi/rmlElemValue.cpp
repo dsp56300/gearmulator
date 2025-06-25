@@ -31,7 +31,7 @@ namespace juceRmlUi
 
 	void ElemValue::setValue(const float _value)
 	{
-		const auto v = std::clamp(_value, m_min, m_max);
+		const auto v = m_max > m_min ? std::clamp(_value, m_min, m_max) : m_min;
 
 		if (!setProperty(m_value, v, onValueChanged))
 			return;

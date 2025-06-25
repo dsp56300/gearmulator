@@ -77,16 +77,21 @@ namespace juceRmlUi
 
 	void ElemKnob::updateSprite()
 	{
-		if (m_spritesheetPrefix.empty())
+		if (m_spritesheetPrefix.empty() || !m_frames)
 			return;
 
-		const auto value = getValue();
 		const auto min = getMinValue();
 		const auto max = getMaxValue();
+
+		if (max <= min)
+			return;
+
+		const auto value = std::clamp(getValue(), min, max);
+
 		const auto percent = max > min ? (value - min) / (max - min) : 0;
 		const auto frame = static_cast<uint32_t>(percent * static_cast<float>(m_frames - 1));
 
-		char frameAsString[16];
+		char frameAsString[32];
 		(void)snprintf(frameAsString, sizeof(frameAsString), "%03u", frame);
 
 //		const auto currentSprite = GetAttribute<Rml::String>("sprite", "");
