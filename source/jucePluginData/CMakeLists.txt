@@ -19,6 +19,9 @@ set(SOURCES
 	Roboto-Italic-VariableFont_wdth_wght.ttf
 
 	tus_default.rcss
+	tus_juceskin.rcss
+	tus_patchmanager.rcss
+	tus_patchmanager.rml
 )
 
 juce_add_binary_data(jucePluginData HEADER_NAME jucePluginData.h NAMESPACE jucePluginData SOURCES ${SOURCES})

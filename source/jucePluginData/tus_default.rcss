@@ -265,3 +265,8 @@ input {
 	width: 100%;
 	height: 100%;
 }
+
+/* all knobs need the dragging attribute */
+knob {
+	drag: drag;
+}
