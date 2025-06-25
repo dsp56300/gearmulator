@@ -731,7 +731,7 @@ static GLuint CreateTexture(Rml::Span<const Rml::byte> source_data, Rml::Vector2
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	if (source_data.size() == 4 * pixelCount)
+	if (source_data.empty() || source_data.size() == 4 * pixelCount)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, source_dimensions.x, source_dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, source_data.data());
 	else if (source_data.size() == 3 * pixelCount)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, source_dimensions.x, source_dimensions.y, 0, GL_RGB, GL_UNSIGNED_BYTE, source_data.data());
