@@ -1,6 +1,7 @@
 #include "rmlPlugin.h"
 
 #include "rmlParameterBinding.h"
+#include "rmlTabGroup.h"
 
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
@@ -92,6 +93,20 @@ namespace rmlPlugin
 					});
 				}
 			}
+		}
+
+		if (auto* attribTabGroup = _element->GetAttribute("tabgroup"))
+		{
+			const auto name = attribTabGroup->Get<Rml::String>();
+			auto& tabGroup = m_tabGroups[name];
+			if (!tabGroup)
+				tabGroup = std::make_unique<TabGroup>();
+			if (auto* attribPage = _element->GetAttribute("tabpage"))
+				tabGroup->setPage(_element, std::stoi(attribPage->Get<Rml::String>()));
+			else if (auto* attribButton = _element->GetAttribute("tabbutton"))
+				tabGroup->setButton(_element, std::stoi(attribButton->Get<Rml::String>()));
+			else
+				throw std::runtime_error("tabgroup element must have either tabpage or tabbutton attribute set");
 		}
 	}
 }

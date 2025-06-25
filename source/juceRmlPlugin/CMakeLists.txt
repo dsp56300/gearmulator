@@ -5,6 +5,7 @@ set(SOURCES
 	rmlPlugin.cpp rmlPlugin.h
 	rmlParameterBinding.cpp rmlParameterBinding.h
 	rmlParameterRef.cpp rmlParameterRef.h
+	rmlTabGroup.cpp rmlTabGroup.h
 )
 
 set(SOURCES_SC

@@ -12,6 +12,8 @@ namespace pluginLib
 
 namespace rmlPlugin
 {
+	class TabGroup;
+
 	class RmlPlugin : public Rml::Plugin
 	{
 	public:
@@ -32,5 +34,7 @@ namespace rmlPlugin
 	private:
 		pluginLib::Controller& m_controller;
 		std::map<Rml::Context*, std::unique_ptr<rmlPlugin::RmlParameterBinding>> m_bindings;
+
+		std::map<std::string, std::unique_ptr<TabGroup>> m_tabGroups;
 	};
 }
