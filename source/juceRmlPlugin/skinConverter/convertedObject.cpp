@@ -32,6 +32,12 @@ namespace rmlPlugin::skinConverter
 
 		position.write(_ss);
 
+		if (!style.properties.empty())
+		{
+			_ss << ' ';
+			style.writeInline(_ss);
+		}
+
 		_ss << "\"";
 
 		if (innerText.empty() && children.empty())

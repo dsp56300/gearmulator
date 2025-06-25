@@ -30,6 +30,9 @@ namespace genericUI
 
 		bool selectTabWithComponent(const juce::Component* _component) const;
 
+		const auto& getButtonNames() const { return m_buttonNames; }
+		const auto& getPageNames() const { return m_pageNames; }
+
 	private:
 		void setPage(const size_t _page) const;
 

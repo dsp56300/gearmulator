@@ -3,13 +3,16 @@
 #include <fstream>
 
 #include "convertedObject.h"
+#include "scHelper.h"
 #include "dsp56kEmu/logging.h"
+#include "juceUiLib/comboboxStyle.h"
 #include "juceUiLib/uiObject.h"
 
 namespace rmlPlugin::skinConverter
 {
-	SkinConverter::SkinConverter(const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, std::map<std::string, std::string>&& _idReplacements)
-		: m_rootObject(_root)
+	SkinConverter::SkinConverter(genericUI::Editor& _editor, const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, std::map<std::string, std::string>&& _idReplacements)
+		: m_editor(_editor)
+		, m_rootObject(_root)
 		, m_outputPath(std::move(_outputPath))
 		, m_rmlFileName(std::move(_rmlFileName))
 		, m_rcssFileName(std::move(_rcssFileName))
@@ -33,6 +36,9 @@ namespace rmlPlugin::skinConverter
 	{
 		if (_object.hasComponent("rmlui"))
 			return false;
+
+		if (const auto& tabGroup = _object.getTabGroup(); tabGroup.isValid())
+			m_tabGroups.insert({tabGroup.getName(), tabGroup});
 
 		setDefaultProperties(_co, _object);
 
@@ -74,6 +80,7 @@ namespace rmlPlugin::skinConverter
 		ss << "\t<head>\n";
 		ss << "\t\t" << R"(<link type="text/template" href="tus_patchmanager.rml"/>)" << '\n';
 		ss << "\t\t" << R"(<link type="text/rcss" href="tus_default.rcss"/>)" << '\n';
+		ss << "\t\t" << R"(<link type="text/rcss" href="tus_juceskin.rcss"/>)" << '\n';
 
 		if (!m_styles.empty())
 		{
@@ -128,11 +135,50 @@ namespace rmlPlugin::skinConverter
 		auto param = _object.getProperty("parameter");
 		if (!param.empty())
 			_co.attribs.set("param", param);
+
+		// check if object is part of any tab group
+		for (const auto& [name, group] : m_tabGroups)
+		{
+			const auto& buttons = group.getButtonNames();
+			const auto& pages = group.getPageNames();
+
+			bool isButton = false;
+
+			for (size_t i=0; i<buttons.size(); ++i)
+			{
+				if (buttons[i] != _object.getName())
+					continue;
+				_co.attribs.set("tabgroup", name);
+				_co.attribs.set("tabbutton", std::to_string(i));
+				isButton = true;
+				break;
+			}
+
+			if (!isButton)
+			{
+				for (size_t i=0; i<pages.size(); ++i)
+				{
+					if (pages[i] != _object.getName())
+						continue;
+					_co.attribs.set("tabgroup", name);
+					_co.attribs.set("tabpage", std::to_string(i));
+					break;
+				}
+			}
+		}
 	}
 
 	void SkinConverter::convertUiObjectComboBox(ConvertedObject& _co, const genericUI::UiObject& _object)
 	{
 		_co.tag = "combo";
+		genericUI::ComboboxStyle style(m_editor);
+		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
+
+		auto className = createTextStyle(style);
+
+		_co.style.add("line-height", _object.getProperty("height") + "dp");
+
+		_co.classes.push_back(className.substr(1));
 	}
 
 	void SkinConverter::convertUiObjectImage(ConvertedObject& _co, const genericUI::UiObject& _object)
@@ -158,5 +204,56 @@ namespace rmlPlugin::skinConverter
 			return {};
 		auto it = m_idReplacements.find(id);
 		return it != m_idReplacements.end() ? it->second : id;
+	}
+
+	std::string SkinConverter::createTextStyle(const genericUI::UiObjectStyle& _style)
+	{
+		CoStyle style;
+
+		const auto fontName = _style.getFontName();
+		if (!fontName.empty())
+			style.add("font-family", fontName);
+
+		const auto fontSize = _style.getTextHeight();
+		style.add("font-size", std::to_string(fontSize) + "dp");
+
+		if (_style.getBold())
+			style.add("font-weight", "bold");
+
+		if (_style.getItalic())
+			style.add("font-style", "italic");
+
+		juce::Justification alignH = _style.getAlign().getOnlyHorizontalFlags();
+
+		if (alignH == juce::Justification::centred)
+		{
+			style.add("text-align", "center");
+		}
+		else if (alignH == juce::Justification::right)
+		{
+			style.add("text-align", "right");
+		}
+		else
+		{
+			style.add("text-align", "left");
+		}
+
+		style.add("color", helper::toRmlColorString(_style.getColor()));
+
+		return addStyle(".text", style);
+	}
+
+	std::string SkinConverter::addStyle(const std::string& _prefix, const CoStyle& _style)
+	{
+		for (const auto& [name,s] : m_styles)
+		{
+			if (name.size() < _prefix.size() || name.substr(0, _prefix.size()) != _prefix)
+				continue;
+			if (s == _style)
+				return name;
+		}
+		const auto name = _prefix + "Style" + std::to_string(m_styles.size());
+		m_styles.insert({ name, _style });
+		return name;
 	}
 }

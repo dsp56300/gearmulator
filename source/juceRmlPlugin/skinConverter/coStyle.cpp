@@ -10,10 +10,16 @@ namespace rmlPlugin::skinConverter
 
 		_out << prefix << _name << '\n';
 		_out << prefix << "{\n";
+
 		for (const auto& [id, property] : properties)
-		{
-			_out << prefix << "\t" << id << ": " << property << '\n';
-		}
+			_out << prefix << "\t" << id << ": " << property << ";\n";
+
 		_out << prefix << "}\n";
+	}
+
+	void CoStyle::writeInline(std::stringstream& _ss)
+	{
+		for (const auto& [key, value] : properties)
+			_ss << key << ": " << value << ";";
 	}
 }

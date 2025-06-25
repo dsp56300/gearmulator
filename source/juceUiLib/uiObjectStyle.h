@@ -25,8 +25,14 @@ namespace genericUI
 		const auto& getAlign() const { return m_align; }
 
 		std::optional<juce::Font> getFont() const;
+		const auto& getFontName() const { return m_fontName; }
+		const auto& getFontFile() const { return m_fontFile; }
+		int getTextHeight() const { return m_textHeight; }
 
 		bool getAntialiasing() const { return m_antialiasing; }
+
+		bool getBold() const { return m_bold; }
+		bool getItalic() const { return m_italic; }
 
 		static bool parseColor(juce::Colour& _color, const std::string& _colorString);
 

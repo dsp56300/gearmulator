@@ -16,5 +16,11 @@ namespace rmlPlugin::skinConverter
 		}
 
 		void write(std::stringstream& _out, const std::string& _name, uint32_t _depth) const;
+		void writeInline(std::stringstream& _ss);
+
+		bool operator == (const CoStyle& _other) const
+		{
+			return properties == _other.properties;
+		}
 	};
 }

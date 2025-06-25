@@ -78,6 +78,8 @@ namespace genericUI
 
 		const auto& getChildren() const { return m_children; }
 
+		const auto& getTabGroup() const { return m_tabGroup; }
+
 	private:
 		template<typename T, class... Args> T* createJuceObject(Editor& _editor, Args... _args);
 		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
