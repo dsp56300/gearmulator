@@ -45,12 +45,20 @@ namespace rmlPlugin::skinConverter
 			_ss << "/>\n";
 			return;
 		}
-		_ss << ">\n";
+		_ss << ">";
 		if (!innerText.empty())
-			_ss << std::string(_depth + 1, '\t') << innerText << "\n";
-		for (auto& child : children)
-			child.write(_ss, _depth + 1);
-		_ss << std::string(_depth, '\t') << "</" << tag << ">\n";
+		{
+			_ss << innerText;
+			_ss << "</" << tag << ">\n";
+		}
+		else
+		{
+			_ss << '\n';
+
+			for (auto& child : children)
+				child.write(_ss, _depth + 1);
+			_ss << std::string(_depth, '\t') << "</" << tag << ">\n";
+		}
 	}
 
 	void ConvertedObject::set(const std::string& _id, const genericUI::UiObject& _object)
