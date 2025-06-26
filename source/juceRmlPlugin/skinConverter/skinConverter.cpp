@@ -6,6 +6,9 @@
 #include "convertedObject.h"
 #include "scHelper.h"
 #include "dsp56kEmu/logging.h"
+
+#include "juceRmlPlugin/rmlParameterBinding.h"
+
 #include "juceUiLib/comboboxStyle.h"
 #include "juceUiLib/editor.h"
 #include "juceUiLib/labelStyle.h"
@@ -194,6 +197,9 @@ namespace rmlPlugin::skinConverter
 				}
 			}
 		}
+
+		// replicate conditions
+		createCondition(_co, _object);
 	}
 
 	void SkinConverter::convertUiObjectButton(ConvertedObject& _co, const genericUI::UiObject& _object)
@@ -637,5 +643,98 @@ namespace rmlPlugin::skinConverter
 				return true;
 		}
 		return false;
+	}
+
+	bool SkinConverter::createCondition(ConvertedObject& _co, const genericUI::UiObject& _obj)
+	{
+		const auto disabledAlpha = _obj.getPropertyFloat("disabledAlpha", -1.0f);
+
+		if (disabledAlpha >= 1.0f)
+			return true;	// the object is always visible anyway, why would anyone do this?
+
+		auto paramName = _obj.getProperty("enableOnParameter");
+
+		if (!paramName.empty())
+		{
+			const auto paramVar = RmlParameterRef::createVariableName(paramName) + "_value";
+
+			// create groups for contiuous parameter values to have easier if-statements in RML
+			std::vector<std::pair<pluginLib::ParamValue, pluginLib::ParamValue>> valueRanges;
+
+			const auto valueStrings = _obj.readConditionValues();
+			std::vector<pluginLib::ParamValue> values;
+			values.reserve(valueStrings.size());
+
+			for (const auto& v : valueStrings)
+				values.emplace_back(strtol(v.c_str(), nullptr, 10));
+
+			std::sort(values.begin(), values.end());
+
+			for (size_t i=0; i<values.size(); ++i)
+			{
+				auto first = values[i];
+				auto last = first;
+
+				for (size_t j=i+1; j<values.size(); ++j)
+				{
+					if (values[j] != last + 1)
+						break;
+
+					last = values[j];
+					i = j;
+				}
+
+				valueRanges.emplace_back(first, last);
+			}
+
+			// what is the class name? If there is no disabledAlpha, the visibility is toggled. Otherwise, the opacity is modified.
+			std::string className;
+
+			if (disabledAlpha > 0.0f)
+				className = createConditionDisabledAlphaClass(disabledAlpha);
+			else
+				className = "juceConditionDisabled";
+
+			std::string attrib = "data-class-" + className;
+
+			std::stringstream ss;
+			ss << "!(";
+			for (size_t i=0; i<valueRanges.size(); ++i)
+			{
+				if (i > 0)
+					ss << " || ";
+				const auto& range = valueRanges[i];
+				if (range.first == range.second)
+					ss << paramVar << " == " << range.first;
+				else
+					ss << "(" << paramVar << " >= " << range.first << " && " << paramVar << " <= " << range.second << ")";
+			}
+			ss << ")";
+
+			_co.attribs.set(attrib, ss.str());
+			return true;
+		}
+
+		auto key = _obj.getProperty("enableOnKey");
+
+		if (!key.empty())
+		{
+			assert(false && "enableOnKey condition is not implemented yet");
+		}
+
+		return false;
+	}
+
+	std::string SkinConverter::createConditionDisabledAlphaClass(const float _disabledAlpha)
+	{
+		const auto opacity = static_cast<int>(_disabledAlpha * 100.0f);
+
+		const auto className = "juceConditionDisabledAlpha" + std::to_string(opacity);
+		if (m_styles.find("." + className) != m_styles.end())
+			return className; // already exists
+		CoStyle style;
+		style.add("opacity", std::to_string(_disabledAlpha));
+		m_styles.insert({ "." + className, style });
+		return className;
 	}
 }

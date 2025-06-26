@@ -46,6 +46,9 @@ namespace rmlPlugin::skinConverter
 		std::string createSpritesheet(const genericUI::UiObject& _object);
 		bool spriteExists(const std::string& _spriteName) const;
 
+		bool createCondition(ConvertedObject& _co, const genericUI::UiObject& _obj);
+		std::string createConditionDisabledAlphaClass(float _disabledAlpha);
+
 		genericUI::Editor& m_editor;
 		const genericUI::UiObject& m_rootObject;
 		ConvertedObject m_root;

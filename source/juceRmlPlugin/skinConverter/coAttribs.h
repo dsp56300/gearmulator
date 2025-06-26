@@ -13,7 +13,7 @@ namespace rmlPlugin::skinConverter
 
 		void write(std::stringstream& _ss) const;
 
-		void set(const char* _key, const std::string& _value)
+		void set(const std::string& _key, const std::string& _value)
 		{
 			attributes.insert({_key, Rml::Variant(_value)});
 		}

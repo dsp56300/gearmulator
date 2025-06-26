@@ -360,26 +360,8 @@ namespace genericUI
 		if(!hasComponent("condition"))
 			return;
 
-		const auto conditionValues = getProperty("enableOnValues");
+		std::set<std::string> values = readConditionValues();
 
-		size_t start = 0;
-
-		std::set<std::string> values;
-
-		for(size_t i=0; i<=conditionValues.size(); ++i)
-		{
-			const auto isEnd = i == conditionValues.size() || conditionValues[i] == ',' || conditionValues[i] == ';';
-
-			if(!isEnd)
-				continue;
-
-			const auto valueString = conditionValues.substr(start, i - start);
-
-			values.insert(valueString);
-
-			start = i + 1;
-		}
-		
 		if(values.empty())
 			throw std::runtime_error("Condition does not specify any values");
 
@@ -416,6 +398,30 @@ namespace genericUI
 
 			m_condition.reset(new ConditionByKeyValue(_target, std::move(key), std::move(values)));
 		}
+	}
+
+	std::set<std::string> UiObject::readConditionValues() const
+	{
+		std::set<std::string> values;
+
+		const auto conditionValues = getProperty("enableOnValues");
+		size_t start = 0;
+
+		for(size_t i=0; i<=conditionValues.size(); ++i)
+		{
+			const auto isEnd = i == conditionValues.size() || conditionValues[i] == ',' || conditionValues[i] == ';';
+
+			if(!isEnd)
+				continue;
+
+			const auto valueString = conditionValues.substr(start, i - start);
+
+			values.insert(valueString);
+
+			start = i + 1;
+		}
+
+		return values;
 	}
 
 	juce::DynamicObject& UiObject::applyStyle(juce::DynamicObject& _obj, const std::string& _styleName)

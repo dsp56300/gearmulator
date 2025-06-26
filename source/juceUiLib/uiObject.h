@@ -80,6 +80,10 @@ namespace genericUI
 
 		const auto& getTabGroup() const { return m_tabGroup; }
 
+		const auto& getCondition() const { return m_condition; }
+
+		std::set<std::string> readConditionValues() const;
+
 	private:
 		template<typename T, class... Args> T* createJuceObject(Editor& _editor, Args... _args);
 		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
