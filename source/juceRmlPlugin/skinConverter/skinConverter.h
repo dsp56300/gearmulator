@@ -30,8 +30,10 @@ namespace rmlPlugin::skinConverter
 		void convertUiObjectButton(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectComboBox(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectImage(ConvertedObject& _co, const genericUI::UiObject& _object);
+		void convertUiObjectLabel(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectRoot(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectRotary(ConvertedObject& _co, const genericUI::UiObject& _object);
+		void convertUiObjectTextButton(ConvertedObject& _co, const genericUI::UiObject& _object);
 
 		std::string getId(const genericUI::UiObject& _object);
 

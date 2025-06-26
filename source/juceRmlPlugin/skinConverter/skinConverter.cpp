@@ -8,7 +8,9 @@
 #include "dsp56kEmu/logging.h"
 #include "juceUiLib/comboboxStyle.h"
 #include "juceUiLib/editor.h"
+#include "juceUiLib/labelStyle.h"
 #include "juceUiLib/rotaryStyle.h"
+#include "juceUiLib/textbuttonStyle.h"
 #include "juceUiLib/uiObject.h"
 
 namespace genericUI
@@ -58,14 +60,18 @@ namespace rmlPlugin::skinConverter
 
 		if (_object.hasComponent("button"))
 			convertUiObjectButton(_co, _object);
-		else if (_object.hasComponent("root"))
-			convertUiObjectRoot(_co, _object);
-		else if (_object.hasComponent("image"))
-			convertUiObjectImage(_co, _object);
 		else if (_object.hasComponent("combobox"))
 			convertUiObjectComboBox(_co, _object);
+		else if (_object.hasComponent("image"))
+			convertUiObjectImage(_co, _object);
+		else if (_object.hasComponent("label"))
+			convertUiObjectLabel(_co, _object);
+		else if (_object.hasComponent("root"))
+			convertUiObjectRoot(_co, _object);
 		else if (_object.hasComponent("rotary"))
 			convertUiObjectRotary(_co, _object);
+		else if (_object.hasComponent("textbutton"))
+			convertUiObjectTextButton(_co, _object);
 		else
 			LOG("Unknown component type");
 
@@ -216,12 +222,31 @@ namespace rmlPlugin::skinConverter
 		_co.style.add("line-height", _object.getProperty("height") + "dp");
 
 		_co.classes.push_back(className.substr(1));
+
+		_co.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
 	}
 
 	void SkinConverter::convertUiObjectImage(ConvertedObject& _co, const genericUI::UiObject& _object)
 	{
 		_co.tag = "img";
 		_co.attribs.set("src", _object.getProperty("texture") + ".png");
+	}
+
+	void SkinConverter::convertUiObjectLabel(ConvertedObject& _co, const genericUI::UiObject& _object)
+	{
+		_co.tag = "div";
+		genericUI::LabelStyle style(m_editor);
+		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
+
+		const auto className = createTextStyle(style);
+
+		// TODO: vertical text alignment, this always centers the text vertically for now
+		_co.style.add("line-height", _object.getProperty("height") + "dp");
+
+		_co.classes.emplace_back("juceLabel");
+		_co.classes.push_back(className.substr(1));
+
+		_co.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
 	}
 
 	void SkinConverter::convertUiObjectRoot(ConvertedObject& _co, const genericUI::UiObject& _object)
@@ -244,6 +269,23 @@ namespace rmlPlugin::skinConverter
 			_co.classes.emplace_back("juceRotary");
 			_co.classes.emplace_back(styleName.substr(1));
 		}
+	}
+
+	void SkinConverter::convertUiObjectTextButton(ConvertedObject& _co, const genericUI::UiObject& _object)
+	{
+		_co.tag = "div";
+		genericUI::TextButtonStyle style(m_editor);
+		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
+
+		const auto className = createTextStyle(style);
+
+		// TODO: vertical text alignment, this always centers the text vertically for now
+		_co.style.add("line-height", _object.getProperty("height") + "dp");
+
+		_co.classes.emplace_back("juceTextButton");
+		_co.classes.push_back(className.substr(1));
+
+		_co.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
 	}
 
 	std::string SkinConverter::getId(const genericUI::UiObject& _object)
