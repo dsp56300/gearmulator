@@ -208,6 +208,23 @@ namespace rmlPlugin::skinConverter
 
 		_co.classes.emplace_back("juceButton");
 		_co.classes.emplace_back(imageName);
+
+		const auto isToggle = _object.getPropertyInt("isToggle");
+
+		_co.tag = "button";
+		_co.attribs.set("isToggle", isToggle ? "1" : "0");
+
+		auto param = _object.getProperty("parameter");
+		if (!param.empty())
+		{
+			auto valueOn = _object.getPropertyInt("value", -1);
+			if (valueOn != -1)
+				_co.attribs.set("valueOn", std::to_string(valueOn));
+
+			auto valueOff = _object.getPropertyInt("valueOff", -1);
+			if (valueOff != -1)
+				_co.attribs.set("valueOff", std::to_string(valueOff));
+		}
 	}
 
 	void SkinConverter::convertUiObjectComboBox(ConvertedObject& _co, const genericUI::UiObject& _object)
