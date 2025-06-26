@@ -4,6 +4,7 @@
 
 #include "juceRmlComponent.h"
 
+#include "rmlElemButton.h"
 #include "rmlElemComboBox.h"
 #include "rmlElemKnob.h"
 #include "rmlElemList.h"
@@ -25,8 +26,8 @@ namespace juceRmlUi
 		std::mutex g_accessMutex;
 		uint32_t g_instanceCount = 0;
 
-		GenericInstancers<ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemSplitter, ElemTree, ElemTreeNode> g_instancers
-		                 ("combo",      "knob",   "list",   "listentry",   "splitter"  , "tree",   "treenode"  );
+		GenericInstancers<ElemButton, ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemSplitter, ElemTree, ElemTreeNode> g_instancers
+		                 ("button",   "combo",      "knob",   "list",   "listentry",   "splitter"  , "tree",   "treenode"  );
 
 		RmlComponent* g_currentComponent;
 
@@ -63,6 +64,11 @@ namespace juceRmlUi
 		if (++g_instanceCount == 1)
 		{
 			Rml::Initialise();
+
+			// button style elements
+			Rml::StyleSheetSpecification::RegisterProperty("isToggle", "1", false).AddParser("number");
+			Rml::StyleSheetSpecification::RegisterProperty("valueOn", "1", false).AddParser("number");
+			Rml::StyleSheetSpecification::RegisterProperty("valueOff", "-1", false).AddParser("number");
 
 			// knob style elements
 			Rml::StyleSheetSpecification::RegisterProperty("frames", "128", false).AddParser("number");

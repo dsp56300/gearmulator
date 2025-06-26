@@ -12,6 +12,7 @@ set(SOURCES
 	rmlDragTarget.cpp rmlDragTarget.h
 	rmlElemComboBox.cpp rmlElemComboBox.h
 	rmlElement.cpp rmlElement.h
+	rmlElemButton.cpp rmlElemButton.h
 	rmlElemKnob.cpp rmlElemKnob.h
 	rmlElemList.cpp rmlElemList.h
 	rmlElemListEntry.cpp rmlElemListEntry.h
