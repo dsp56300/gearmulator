@@ -10,11 +10,11 @@
 #include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/tools.h"
 
-#if USE_RMLUI
 #include "juceRmlUi/juceRmlComponent.h"
-#endif
 
 #include "jucePluginData.h"
+#include "juceRmlPlugin/rmlPlugin.h"
+#include "juceRmlPlugin/skinConverter/skinConverter.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -50,6 +50,8 @@ namespace jucePluginEditorLib
 	{
 		for (const auto& file : m_dragAndDropFiles)
 			file.deleteFile();
+
+		m_rmlComponent.reset();
 	}
 
 	void Editor::create()
@@ -604,16 +606,12 @@ namespace jucePluginEditorLib
 
 	juce::Component* Editor::createRmlUiComponent(const std::string& _rmlFile)
 	{
-#if USE_RMLUI
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(getProcessor().getController()));
 		return new juceRmlUi::RmlComponent(*this, _rmlFile, 1.0f / getScale(), [this](juceRmlUi::RmlComponent& _comp, Rml::ElementDocument* _elementDocument)
 		{
 			onRmlDocumentCreated(_comp, _elementDocument);
 		});
-#else
-		return genericUI::Editor::createRmlUiComponent(_rmlFile);
-#endif
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)
@@ -706,7 +704,6 @@ namespace jucePluginEditorLib
 		return res;
 	}
 
-#if USE_RMLUI
 	std::vector<std::string> Editor::getAllFilenames()
 	{
 		std::vector<std::string> filenames;
@@ -742,7 +739,6 @@ namespace jucePluginEditorLib
 
 		return filenames;
 	}
-#endif
 
 	std::string Editor::getAbsoluteSkinFolder(const std::string& _skinFolder) const
 	{

@@ -12,11 +12,22 @@
 
 #include "jucePluginLib/types.h"
 
-#if USE_RMLUI
 #include "juceRmlUi/rmlDataProvider.h"
 
-#include "juceRmlPlugin/rmlPlugin.h"
-#endif
+namespace rmlPlugin
+{
+	class RmlPlugin;
+}
+
+namespace Rml
+{
+	class ElementDocument;
+}
+
+namespace juceRmlUi
+{
+	class RmlComponent;
+}
 
 namespace baseLib
 {
@@ -40,10 +51,7 @@ namespace jucePluginEditorLib
 
 	class Processor;
 
-	class Editor : public genericUI::Editor, genericUI::EditorInterface
-#if USE_RMLUI
-		, juceRmlUi::DataProvider
-#endif
+	class Editor : public genericUI::Editor, genericUI::EditorInterface, juceRmlUi::DataProvider
 	{
 	public:
 		baseLib::Event<Editor*, juce::MouseEvent*> onOpenMenu;
@@ -118,14 +126,12 @@ namespace jucePluginEditorLib
 		void onDisclaimerFinished() const;
 
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
-#if USE_RMLUI
+
 		std::vector<std::string> getAllFilenames() override;
-#endif
+
 		std::string getAbsoluteSkinFolder(const std::string& _skinFolder) const;
 
-#if USE_RMLUI
 		virtual void onRmlDocumentCreated(juceRmlUi::RmlComponent& _component, Rml::ElementDocument* _doc) {}
-#endif
 
 		int getParameterIndexByName(const std::string& _name) override;
 		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
@@ -149,8 +155,8 @@ namespace jucePluginEditorLib
 		ImagePool m_imagePool;
 		ParameterOverlays m_overlays;
 
-#if USE_RMLUI
+		std::unique_ptr<juceRmlUi::RmlComponent> m_rmlComponent;
+
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
-#endif
 	};
 }
