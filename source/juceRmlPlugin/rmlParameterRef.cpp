@@ -80,13 +80,14 @@ namespace rmlPlugin
 
 	std::string RmlParameterRef::createVariableName(const std::string& _name)
 	{
-		std::string name = Rml::StringUtilities::ToLower(_name);
+		std::string name = _name;
 
 		// replace all non-alphanumeric characters with underscores
 		for (auto& c : name)
 		{
-			if (!(c == '_' || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')))
-				c = '_';
+			if (c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+				continue;
+			c = '_';
 		}
 		return name;
 	}
