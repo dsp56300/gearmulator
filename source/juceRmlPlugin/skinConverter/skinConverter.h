@@ -42,6 +42,7 @@ namespace rmlPlugin::skinConverter
 		std::string addStyle(const std::string& _prefix, const CoStyle& _style);
 
 		std::string createSpritesheet(const genericUI::UiObject& _object);
+		bool spriteExists(const std::string& _spriteName) const;
 
 		genericUI::Editor& m_editor;
 		const genericUI::UiObject& m_rootObject;

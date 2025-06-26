@@ -317,6 +317,10 @@ namespace rmlPlugin::skinConverter
 			for (size_t i=1; i<_states.size(); ++i)
 				spriteName += '-' + _states[i];
 		}
+
+		if (!spriteExists(spriteName))
+			return {};
+		
 		style.add("decorator", "image(" + spriteName + " contain)");
 
 		m_styles.insert({ styleName, style });
@@ -524,9 +528,9 @@ namespace rmlPlugin::skinConverter
 				std::to_string(rect.Height()) + "px");
 		};
 
-		auto addIndex = [&addSprite, &sprites](const std::string& _name, const size_t _index)
+		auto addIndex = [&addSprite, &sprites](const std::string& _name, const int _index)
 		{
-			if (_index < sprites.size())
+			if (_index >= 0 && static_cast<size_t>(_index) < sprites.size())
 				addSprite(_name, sprites[_index]);
 		};
 
@@ -534,12 +538,12 @@ namespace rmlPlugin::skinConverter
 		if (_object.hasComponent("button"))
 		{
 			// create sprites for button states
-			addIndex("default", _object.getPropertyInt("normalImage"));
-			addIndex("hover", _object.getPropertyInt("overImage"));
-			addIndex("active", _object.getPropertyInt("downImage"));
-			addIndex("checked", _object.getPropertyInt("normalImageOn"));
-			addIndex("checked-hover", _object.getPropertyInt("overImageOn"));
-			addIndex("checked-active", _object.getPropertyInt("downImageOn"));
+			addIndex("default", _object.getPropertyInt("normalImage", -1));
+			addIndex("hover", _object.getPropertyInt("overImage", -1));
+			addIndex("active", _object.getPropertyInt("downImage", -1));
+			addIndex("checked", _object.getPropertyInt("normalImageOn", -1));
+			addIndex("checked-hover", _object.getPropertyInt("overImageOn", -1));
+			addIndex("checked-active", _object.getPropertyInt("downImageOn", -1));
 		}
 		else
 		{
@@ -562,5 +566,17 @@ namespace rmlPlugin::skinConverter
 		}
 
 		return imageName;
+	}
+
+	bool SkinConverter::spriteExists(const std::string& _spriteName) const
+	{
+		for (const auto& spritesheet : m_spritesheets)
+		{
+			const auto& props = spritesheet.second.properties;
+
+			if (props.find(_spriteName) != props.end())
+				return true;
+		}
+		return false;
 	}
 }
