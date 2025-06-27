@@ -51,6 +51,8 @@ namespace jucePluginEditorLib
 		for (const auto& file : m_dragAndDropFiles)
 			file.deleteFile();
 
+		m_patchManager.reset();
+		m_rmlPlugin.reset();
 		m_rmlComponent.reset();
 	}
 
