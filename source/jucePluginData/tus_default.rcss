@@ -120,6 +120,14 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 	border-radius: 4dp;
 }
 
+scrollbarvertical sliderbar {
+	min-height: 8dp;
+}
+
+scrollbarhorizontal sliderbar {
+	min-width: 8dp;
+}
+
 /* vertical lists */
 .list {
 	overflow-x: hidden;
