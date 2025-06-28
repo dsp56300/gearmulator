@@ -1,5 +1,6 @@
 #include "skinConverter.h"
 
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 
@@ -29,13 +30,13 @@ namespace rmlPlugin::skinConverter
 		constexpr int g_maxTextureHeight = 2048;
 	}
 
-	SkinConverter::SkinConverter(genericUI::Editor& _editor, const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, std::map<std::string, std::string>&& _idReplacements)
+	SkinConverter::SkinConverter(genericUI::Editor& _editor, const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, SkinConverterOptions&& _options)
 		: m_editor(_editor)
 		, m_rootObject(_root)
 		, m_outputPath(std::move(_outputPath))
 		, m_rmlFileName(std::move(_rmlFileName))
 		, m_rcssFileName(std::move(_rcssFileName))
-		, m_idReplacements(std::move(_idReplacements))
+		, m_options(std::move(_options))
 	{
 		CoStyle styleJucePos;
 		styleJucePos.add("position", "absolute");
@@ -251,8 +252,23 @@ namespace rmlPlugin::skinConverter
 
 	void SkinConverter::convertUiObjectImage(ConvertedObject& _co, const genericUI::UiObject& _object)
 	{
-		_co.tag = "img";
-		_co.attribs.set("src", _object.getProperty("texture") + ".png");
+		const auto texture = getAndValidateTextureName(_object);
+
+		// if the texture is empty, rmlui displays a white rectangle, so we don't create an image element in that case
+		if (texture.empty())
+			return;
+
+		// if the image size does not match the size of the object, the image is put into the upper left corner. In this case, we use a decorator instead of an image element
+		const auto* drawable = m_editor.getImageDrawable(_object.getProperty("texture"));
+		if (drawable && (drawable->getWidth() != static_cast<int>(_co.position.width) || drawable->getHeight() != static_cast<int>(_co.position.height)))
+		{
+			_co.style.add("decorator", "image(" + texture + ".png scale-none left top)");
+		}
+		else
+		{
+			_co.tag = "img";
+			_co.attribs.set("src", texture + ".png");
+		}
 	}
 
 	void SkinConverter::convertUiObjectLabel(ConvertedObject& _co, const genericUI::UiObject& _object)
@@ -316,8 +332,8 @@ namespace rmlPlugin::skinConverter
 		const auto& id = _object.getName();
 		if (id.empty())
 			return {};
-		auto it = m_idReplacements.find(id);
-		return it != m_idReplacements.end() ? it->second : id;
+		const auto it = m_options.idReplacements.find(id);
+		return it != m_options.idReplacements.end() ? it->second : id;
 	}
 
 	std::string SkinConverter::createTextStyle(const genericUI::UiObjectStyle& _style)
@@ -386,7 +402,7 @@ namespace rmlPlugin::skinConverter
 		if (!spriteExists(spriteName))
 			return {};
 		
-		style.add("decorator", "image(" + spriteName + " contain)");
+		style.add("decorator", "image(" + spriteName + " scale-none left top)");
 
 		m_styles.insert({ styleName, style });
 
@@ -421,23 +437,30 @@ namespace rmlPlugin::skinConverter
 
 	std::string SkinConverter::createSpritesheet(const genericUI::UiObject& _object)
 	{
-		const auto imageName = _object.getProperty("texture");
+		const auto originalImageName = _object.getProperty("texture");
+		if (originalImageName == "Knob Info")
+			int foo=0;
+		const auto imageName = getAndValidateTextureName(_object);
 
 		if (m_spritesheets.find(imageName) != m_spritesheets.end())
 			return imageName; // already created
 
-		const auto* drawable = dynamic_cast<const juce::DrawableImage*>(m_editor.getImageDrawable(imageName));
+		const auto* drawable = dynamic_cast<const juce::DrawableImage*>(m_editor.getImageDrawable(originalImageName));
 		assert(drawable);
 		if (!drawable)
 			throw std::runtime_error("Failed to find image drawable for '" + imageName + "'");
 
-		const auto tileSizeX = _object.getPropertyInt("tileSizeX");
-		const auto tileSizeY = _object.getPropertyInt("tileSizeY");
+		auto tileSizeX = _object.getPropertyInt("tileSizeX");
+		auto tileSizeY = _object.getPropertyInt("tileSizeY");
 
 		const auto& image = drawable->getImage();
 
 		const auto w = image.getWidth();
 		const auto h = image.getHeight();
+
+		// correct tile size if it is too large, some skins have incorrect values
+		tileSizeX = std::min(tileSizeX, w);
+		tileSizeY = std::min(tileSizeY, h);
 
 		struct Sprite
 		{
@@ -620,29 +643,37 @@ namespace rmlPlugin::skinConverter
 			}
 		}
 
-		m_spritesheets.insert({ imageName, std::move(spritesheet) });
+		addSpritesheet(imageName, std::move(spritesheet));
 
 		for (size_t i=0; i<pageSpritesheets.size(); ++i)
 		{
 			auto& ss = pageSpritesheets[i];
 			if (ss.properties.size() <= 1)
 				continue;
-			m_spritesheets.insert({ imageName + "_page" + std::to_string(i), std::move(ss) });
+			addSpritesheet(imageName + "_page" + std::to_string(i), std::move(ss));
 		}
 
 		return imageName;
 	}
 
+	void SkinConverter::addSpritesheet(const std::string& _key, CoSpritesheet&& _spritesheet)
+	{
+		if (m_spritesheets.find(_key) != m_spritesheets.end())
+			return; // already exists
+
+		for (const auto& [k, v] : _spritesheet.properties)
+		{
+			if (k == "src")
+				continue;
+			m_knownSprites.insert(k);
+		}
+
+		m_spritesheets.insert({ _key, std::move(_spritesheet) });
+	}
+
 	bool SkinConverter::spriteExists(const std::string& _spriteName) const
 	{
-		for (const auto& spritesheet : m_spritesheets)
-		{
-			const auto& props = spritesheet.second.properties;
-
-			if (props.find(_spriteName) != props.end())
-				return true;
-		}
-		return false;
+		return m_knownSprites.find(_spriteName) != m_knownSprites.end();
 	}
 
 	bool SkinConverter::createCondition(ConvertedObject& _co, const genericUI::UiObject& _obj)
@@ -734,7 +765,40 @@ namespace rmlPlugin::skinConverter
 			return className; // already exists
 		CoStyle style;
 		style.add("opacity", std::to_string(_disabledAlpha));
+		style.add("pointer-events", "none");
 		m_styles.insert({ "." + className, style });
 		return className;
+	}
+
+	std::string SkinConverter::getAndValidateTextureName(const genericUI::UiObject& _object) const
+	{
+		auto tex = _object.getProperty("texture");
+		if (tex.empty())
+			return tex;
+
+		// spaces need to be replaced with underscores
+		auto newName = tex;
+		for (auto& c : newName)
+		{
+			if (c == ' ')
+				c = '_';
+		}
+
+		if (newName == tex)
+			return tex; // no change needed
+
+		const juce::File source(m_outputPath + tex + ".png");
+		const juce::File target(m_outputPath + newName + ".png");
+
+		if (source.existsAsFile())
+		{
+			if (target.existsAsFile())
+				return newName;	// already copied before
+
+			if (!source.copyFileTo(target))
+				throw std::runtime_error("Failed to copy texture file from '" + source.getFullPathName().toStdString() + "' to '" + target.getFullPathName().toStdString() + "'");
+		}
+
+		return newName;
 	}
 }

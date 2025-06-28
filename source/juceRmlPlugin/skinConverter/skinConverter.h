@@ -4,8 +4,14 @@
 
 #include "convertedObject.h"
 #include "coStyle.h"
+#include "skinConverterOptions.h"
 
 #include "RmlUi/Core/Element.h"
+
+namespace rmlPlugin::skinConverter
+{
+	struct SkinConverterOptions;
+}
 
 namespace genericUI
 {
@@ -17,7 +23,7 @@ namespace rmlPlugin::skinConverter
 	class SkinConverter
 	{
 	public:
-		SkinConverter(genericUI::Editor& _editor, const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, std::map<std::string, std::string>&& _idReplacements = {});
+		SkinConverter(genericUI::Editor& _editor, const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, SkinConverterOptions&& _options);
 
 	private:
 		bool convertUiObject(ConvertedObject& _co, const genericUI::UiObject& _object);
@@ -44,10 +50,13 @@ namespace rmlPlugin::skinConverter
 		std::string addStyle(const std::string& _prefix, const CoStyle& _style);
 
 		std::string createSpritesheet(const genericUI::UiObject& _object);
+		void addSpritesheet(const std::string& _key, CoSpritesheet&& _spritesheet);
 		bool spriteExists(const std::string& _spriteName) const;
 
 		bool createCondition(ConvertedObject& _co, const genericUI::UiObject& _obj);
 		std::string createConditionDisabledAlphaClass(float _disabledAlpha);
+
+		std::string getAndValidateTextureName(const genericUI::UiObject& _object) const;
 
 		genericUI::Editor& m_editor;
 		const genericUI::UiObject& m_rootObject;
@@ -61,8 +70,9 @@ namespace rmlPlugin::skinConverter
 
 		std::map<std::string, CoStyle> m_styles;
 		std::map<std::string, CoSpritesheet> m_spritesheets;
+		std::set<std::string> m_knownSprites;
 
-		std::map<std::string, std::string> m_idReplacements;
+		SkinConverterOptions m_options;
 
 		std::map<std::string, genericUI::TabGroup> m_tabGroups;
 	};
