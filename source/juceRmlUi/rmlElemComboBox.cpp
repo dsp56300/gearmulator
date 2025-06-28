@@ -43,7 +43,7 @@ namespace juceRmlUi
 
 		const auto currentValue = static_cast<uint32_t>(getValue());
 
-		for (uint32_t i=0; i<static_cast<uint32_t>(getMaxValue()); ++i)
+		for (uint32_t i=0; i<=static_cast<uint32_t>(getMaxValue()); ++i)
 		{
 			auto& option = m_options[i];
 
