@@ -145,8 +145,16 @@ namespace rmlPlugin::skinConverter
 	{
 		_co.set(getId(_object), _object);
 
+		genericUI::UiObjectStyle style(m_editor);
+		style.apply(m_editor, _object);
+
 		if (!_object.hasComponent("root"))
 			_co.classes.emplace_back("jucePos");
+
+		const auto backgroundColor = style.getBackgroundColor();
+
+		if (backgroundColor.getAlpha())
+			_co.style.add("background-color", helper::toRmlColorString(backgroundColor));
 
 		auto param = _object.getProperty("parameter");
 		if (!param.empty())
