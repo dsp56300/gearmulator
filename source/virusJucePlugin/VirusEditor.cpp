@@ -13,6 +13,8 @@
 
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
+#include "juceRmlPlugin/skinConverter/skinConverterOptions.h"
+
 #include "juceUiLib/messageBox.h"
 
 #include "RmlUi/Core/ElementDocument.h"
@@ -216,13 +218,18 @@ namespace genericVirusUI
 		return Editor::createJuceComponent(_component, _object);
 	}
 
-	void VirusEditor::onRmlDocumentCreated(juceRmlUi::RmlComponent& _component, Rml::ElementDocument* _doc)
+	void VirusEditor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
 	{
-		auto* elem = _doc->GetElementById("patchmanager");
-		if (elem)
-		{
-			setPatchManager(new PatchManager(*this, _component, elem));
-		}
+		Editor::initSkinConverterOptions(_skinConverterOptions);
+
+		_skinConverterOptions.idReplacements.insert({"page_presets", "container-patchmanager"});
+		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
+		_skinConverterOptions.idReplacements.insert({"page_2_browser", "container-patchmanager"});
+	}
+
+	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent)
+	{
+		return new PatchManager(*this, _rmlCompnent, _parent);
 	}
 
 	void VirusEditor::onProgramChange(int _part)

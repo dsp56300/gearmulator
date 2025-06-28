@@ -64,7 +64,8 @@ namespace genericVirusUI
 
 		const auto& getLeds() const { return m_leds; }
 
-		void onRmlDocumentCreated(juceRmlUi::RmlComponent& _component, Rml::ElementDocument* _doc) override;
+		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
+		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) override;
 
 	private:
 		void onProgramChange(int _part);

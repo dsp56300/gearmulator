@@ -60,10 +60,7 @@ namespace genericUI
 
 		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
 
-		m_rootObject->createJuceTree(*this);
-		m_rootObject->createTabGroups(*this);
-		m_rootObject->createControllerLinks(*this);
-		m_rootObject->registerTemplates(*this);
+		// UI used to be created here, but instead it is converted to RML in the derived class
 	}
 
 	std::string Editor::exportToFolder(const std::string& _folder) const

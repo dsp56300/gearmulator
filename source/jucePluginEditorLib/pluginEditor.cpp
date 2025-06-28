@@ -24,6 +24,8 @@
 #include "patchmanager/patchmanager.h"
 #include "patchmanager/savepatchdesc.h"
 
+#include "RmlUi/Core/ElementDocument.h"
+
 namespace jucePluginEditorLib
 {
 	namespace
@@ -58,7 +60,31 @@ namespace jucePluginEditorLib
 
 	void Editor::create()
 	{
-		genericUI::Editor::create(m_skin.jsonFilename);
+		std::map<std::string, std::string> idReplacements;
+
+		if (juce::String(m_skin.jsonFilename).endsWithIgnoreCase(".json"))
+		{
+			genericUI::Editor::create(m_skin.jsonFilename);
+
+			const auto newName = baseLib::filesystem::stripExtension(m_skin.jsonFilename);
+
+			rmlPlugin::skinConverter::SkinConverterOptions options;
+			initSkinConverterOptions(options);
+
+			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), m_skin.folder, newName + ".rml", newName + ".rcss", std::move(options));
+
+			m_skin.jsonFilename = newName + ".rml";
+		}
+
+		m_rmlComponent.reset(dynamic_cast<juceRmlUi::RmlComponent*>(createRmlUiComponent(m_skin.jsonFilename)));
+
+		auto* elem = m_rmlComponent->getDocument()->GetElementById("patchmanager");
+
+		if (elem)
+			setPatchManager(createPatchManager(*m_rmlComponent, elem));
+
+		addAndMakeVisible(m_rmlComponent.get());
+		setSize(m_rmlComponent->getWidth(), m_rmlComponent->getHeight());
 	}
 
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size) const
@@ -610,10 +636,7 @@ namespace jucePluginEditorLib
 	{
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(getProcessor().getController()));
-		return new juceRmlUi::RmlComponent(*this, _rmlFile, 1.0f / getScale(), [this](juceRmlUi::RmlComponent& _comp, Rml::ElementDocument* _elementDocument)
-		{
-			onRmlDocumentCreated(_comp, _elementDocument);
-		});
+		return new juceRmlUi::RmlComponent(*this, _rmlFile, 1.0f);
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)

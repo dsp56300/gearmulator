@@ -14,8 +14,18 @@
 
 #include "juceRmlUi/rmlDataProvider.h"
 
+namespace Rml
+{
+	class Element;
+}
+
 namespace rmlPlugin
 {
+	namespace skinConverter
+	{
+		struct SkinConverterOptions;
+	}
+
 	class RmlPlugin;
 }
 
@@ -65,6 +75,8 @@ namespace jucePluginEditorLib
 		Editor& operator = (Editor&&) = delete;
 		
 		void create();
+		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) {}
+		virtual patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) { return nullptr; };
 
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
@@ -131,8 +143,6 @@ namespace jucePluginEditorLib
 
 		std::string getAbsoluteSkinFolder(const std::string& _skinFolder) const;
 
-		virtual void onRmlDocumentCreated(juceRmlUi::RmlComponent& _component, Rml::ElementDocument* _doc) {}
-
 		int getParameterIndexByName(const std::string& _name) override;
 		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
 		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;
@@ -143,7 +153,7 @@ namespace jucePluginEditorLib
 		Processor& m_processor;
 		pluginLib::ParameterBinding& m_binding;
 
-		const Skin m_skin;
+		Skin m_skin;
 
 		std::map<std::string, std::vector<char>> m_fileCache;
 

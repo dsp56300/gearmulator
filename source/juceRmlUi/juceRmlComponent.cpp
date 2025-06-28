@@ -17,11 +17,10 @@
 
 namespace juceRmlUi
 {
-	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, DocumentCreatedCallback _onDocumentCreated/* = {}*/)
+	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/)
 		: m_dataProvider(_dataProvider)
 		, m_rootRmlFilename(std::move(_rootRmlFilename))
 		, m_contentScale(_contentScale)
-		, m_onDocumentCreated(std::move(_onDocumentCreated))
 	{
 		m_renderProxy.reset(new RendererProxy(m_dataProvider));
 
@@ -35,15 +34,22 @@ namespace juceRmlUi
 
 		m_rmlInterfaces.reset(new RmlInterfaces(m_dataProvider));
 
-		RmlInterfaces::ScopedAccess access(*this);
+		// set some reasonable default size, correct size will be set when loading the RML document
+		setSize(1280, 720);
 
-		const auto files = m_dataProvider.getAllFilenames();
-
-		for (const auto & file : files)
 		{
-			if (baseLib::filesystem::hasExtension(file, ".ttf"))
-				Rml::LoadFontFace(file, true);
+			RmlInterfaces::ScopedAccess access(*this);
+
+			const auto files = m_dataProvider.getAllFilenames();
+
+			for (const auto & file : files)
+			{
+				if (baseLib::filesystem::hasExtension(file, ".ttf"))
+					Rml::LoadFontFace(file, true);
+			}
 		}
+
+		createRmlContext();
 	}
 
 	RmlComponent::~RmlComponent()
@@ -275,47 +281,60 @@ namespace juceRmlUi
 		if (size.isEmpty())
 			return;
 
-		RmlInterfaces::ScopedAccess access(*this);
+		Rml::Vector2i documentSize;
 
-		if (m_rmlContext)
-			return;
-
-		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
-
-		m_rmlContext->SetDensityIndependentPixelRatio(static_cast<float>(m_openGLContext.getRenderingScale()) * m_contentScale);
-
-		m_rmlContext->SetDefaultScrollBehavior(Rml::ScrollBehavior::Smooth, 3.0f);
-
-		auto& sys = m_rmlInterfaces->getSystemInterface();
-		sys.beginLogRecording();
-
-        auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
-        if (document)
-        {
-			if (m_onDocumentCreated)
-				m_onDocumentCreated(*this, document);
-	        document->Show();
-        }
-		else
 		{
-			assert(false);
+			RmlInterfaces::ScopedAccess access(*this);
+
+			if (m_rmlContext)
+				return;
+
+			m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
+
+			m_rmlContext->SetDensityIndependentPixelRatio(static_cast<float>(m_openGLContext.getRenderingScale()) * m_contentScale);
+
+			m_rmlContext->SetDefaultScrollBehavior(Rml::ScrollBehavior::Smooth, 3.0f);
+
+			auto& sys = m_rmlInterfaces->getSystemInterface();
+			sys.beginLogRecording();
+
+			auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
+			if (document)
+			{
+				const Rml::Vector2f s = document->GetBox().GetSize(Rml::BoxArea::Margin);
+
+				if (s.x > 0 && s.y > 0)
+				{
+					documentSize.x = static_cast<int>(s.x);
+					documentSize.y = static_cast<int>(s.y);
+				}
+				else
+					throw std::runtime_error("RMLUI document '" + m_rootRmlFilename + "' has no valid size, explicit default size needs to be specified on the <body> element.");
+				document->Show();
+			}
+			else
+			{
+				throw std::runtime_error("Failed to load RMLUI document: " + m_rootRmlFilename);
+			}
+
+			sys.endLogRecording();
+
+			const auto logs = sys.getRecordedLogEntries();
+
+			if (!logs.empty())
+			{
+				std::stringstream ss;
+				ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
+				for (const auto& log : logs)
+					ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
+				juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
+			}
+
+			Rml::Debugger::Initialise(m_rmlContext);
+			Rml::Debugger::SetVisible(true);
 		}
 
-		sys.endLogRecording();
-
-		const auto logs = sys.getRecordedLogEntries();
-
-		if (!logs.empty())
-		{
-			std::stringstream ss;
-			ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
-			for (const auto& log : logs)
-				ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
-			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
-		}
-
-//		Rml::Debugger::Initialise(m_rmlContext);
-//		Rml::Debugger::SetVisible(true);
+		setSize(documentSize.x, documentSize.y);
 	}
 
 	void RmlComponent::destroyRmlContext()
@@ -334,6 +353,9 @@ namespace juceRmlUi
 
 	void RmlComponent::updateRmlContextDimensions()
 	{
+		if (!m_rmlContext)
+			return;
+
 		auto contextDims = m_rmlContext->GetDimensions();
 
 		const float renderScale = static_cast<float>(m_openGLContext.getRenderingScale());
@@ -352,7 +374,6 @@ namespace juceRmlUi
 	void RmlComponent::resized()
 	{
 		Component::resized();
-		createRmlContext();
 
 		RmlInterfaces::ScopedAccess access(*this);
 		updateRmlContextDimensions();

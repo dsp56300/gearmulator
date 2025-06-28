@@ -32,7 +32,7 @@ namespace juceRmlUi
 	public:
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 
-		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f, DocumentCreatedCallback _onDocumentCreated = {});
+		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f);
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
