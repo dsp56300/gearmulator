@@ -24,12 +24,6 @@ namespace genericUI
 
 namespace rmlPlugin::skinConverter
 {
-	namespace
-	{
-		constexpr int g_maxTextureWidth = 2048;
-		constexpr int g_maxTextureHeight = 2048;
-	}
-
 	SkinConverter::SkinConverter(genericUI::Editor& _editor, const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, SkinConverterOptions&& _options)
 		: m_editor(_editor)
 		, m_rootObject(_root)
@@ -38,16 +32,6 @@ namespace rmlPlugin::skinConverter
 		, m_rcssFileName(std::move(_rcssFileName))
 		, m_options(std::move(_options))
 	{
-		CoStyle styleJucePos;
-		styleJucePos.add("position", "absolute");
-
-		m_styles.insert({ ".jucePos", styleJucePos });
-
-		CoStyle styleBody;
-		styleBody.add("position", "relative");
-
-		m_styles.insert({ "body", styleBody });
-
 		convertUiObject(m_root, m_rootObject);
 		writeRmlFile(m_rmlFileName);
 		writeRcssFile(m_rcssFileName);
@@ -232,6 +216,13 @@ namespace rmlPlugin::skinConverter
 			if (valueOff != -1)
 				_co.attribs.set("valueOff", std::to_string(valueOff));
 		}
+
+		auto& hitBox = _co.children.emplace_back();
+		hitBox.classes.emplace_back("jucePos");
+		hitBox.position.x = -25;
+		hitBox.position.y = -25;
+		hitBox.position.width = _co.position.width + 50;
+		hitBox.position.height = _co.position.height + 50;
 	}
 
 	void SkinConverter::convertUiObjectComboBox(ConvertedObject& _co, const genericUI::UiObject& _object)
@@ -438,8 +429,7 @@ namespace rmlPlugin::skinConverter
 	std::string SkinConverter::createSpritesheet(const genericUI::UiObject& _object)
 	{
 		const auto originalImageName = _object.getProperty("texture");
-		if (originalImageName == "Knob Info")
-			int foo=0;
+
 		const auto imageName = getAndValidateTextureName(_object);
 
 		if (m_spritesheets.find(imageName) != m_spritesheets.end())
@@ -470,8 +460,8 @@ namespace rmlPlugin::skinConverter
 
 		std::vector<Sprite> sprites;
 
-		auto maxTextureWidth = std::max(tileSizeX, g_maxTextureWidth);
-		auto maxTextureHeight = std::max(tileSizeY, g_maxTextureHeight);
+		auto maxTextureWidth = std::max(tileSizeX, static_cast<int>(m_options.maxTextureWidth));
+		auto maxTextureHeight = std::max(tileSizeY, static_cast<int>(m_options.maxTextureHeight));
 
 		for (int y=0; y<h; y += tileSizeY)
 		{

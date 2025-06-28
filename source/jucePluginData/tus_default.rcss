@@ -101,6 +101,8 @@ combo {
 	width: 100dp;
 	padding: 5dp;
 	decorator: image(arrow_drop_down.png contain right);
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 /* default scrollbars for all scrollable containers */

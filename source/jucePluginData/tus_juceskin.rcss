@@ -1,5 +1,16 @@
 /* this is a compatibility style sheet for json-based juce skins that are converted to rmlui */
 
+/* all positions are predefined and relative to their parent, no automatic layouting */
+
+body {
+	position: relative;
+}
+
+.jucePos {
+	position: absolute;
+	box-sizing: border-box;
+}
+
 /* combo boxes in old skins didn't have anything except the text, remove everything from the default style */
 combo {
 	items-per-column: 16;	/* it was 16, but only if > 24 entries, we cannot replicate that here at the moment */
@@ -7,4 +18,15 @@ combo {
 	border: 0dp transparent;
 	padding: 1dp 30dp 2dp 1dp;
 	decorator: none;
+}
+
+/* juce text buttons have a bunch of padding */
+.juceTextButton {
+	padding-left: 8dp;
+	padding-right: 8dp;
+}
+
+/* this class is added to all elements that are conditionally disabled */
+.juceConditionDisabled {
+	display: none;
 }
