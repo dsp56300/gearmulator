@@ -4,12 +4,17 @@
 
 namespace rmlPlugin::skinConverter
 {
-	void CoPosition::write(std::stringstream& _ss) const
+	bool CoPosition::write(std::stringstream& _ss) const
 	{
+		if (!isValid())
+			return false;
+
 		_ss << "left: " << x << "dp; ";
 		_ss << "top: " << y << "dp; ";
 		_ss << "width: " << width << "dp; ";
 		_ss << "height: " << height << "dp;";
+
+		return true;
 	}
 
 	void CoPosition::set(const genericUI::UiObject& _object)

@@ -28,17 +28,21 @@ namespace rmlPlugin::skinConverter
 			_ss << ' ';
 		attribs.write(_ss);
 
-		_ss << " style=\"";
-
-		position.write(_ss);
-
-		if (!style.properties.empty())
+		if (position.isValid() || !style.properties.empty())
 		{
-			_ss << ' ';
-			style.writeInline(_ss);
-		}
+			_ss << " style=\"";
 
-		_ss << "\"";
+			bool hasWrittenPosition = position.write(_ss);
+
+			if (!style.properties.empty())
+			{
+				if (hasWrittenPosition)
+					_ss << ' ';
+				style.writeInline(_ss);
+			}
+
+			_ss << "\"";
+		}
 
 		if (innerText.empty() && children.empty())
 		{
