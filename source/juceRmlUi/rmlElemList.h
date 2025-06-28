@@ -89,6 +89,6 @@ namespace juceRmlUi
 
 		List m_list;
 
-		Rml::ElementInstancer* m_instancer;
+		Rml::ElementInstancer* m_instancer = nullptr;
 	};
 }
