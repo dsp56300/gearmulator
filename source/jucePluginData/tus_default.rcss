@@ -105,6 +105,12 @@ combo {
 	overflow: hidden;
 }
 
+combotext {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
 /* default scrollbars for all scrollable containers */
 scrollbarvertical {
 	width: 8dp;

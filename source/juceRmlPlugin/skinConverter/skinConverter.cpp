@@ -238,7 +238,9 @@ namespace rmlPlugin::skinConverter
 
 		_co.classes.push_back(className.substr(1));
 
-		_co.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
+		auto& textElem = _co.children.emplace_back();
+		textElem.tag = "combotext";
+		textElem.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
 	}
 
 	void SkinConverter::convertUiObjectImage(ConvertedObject& _co, const genericUI::UiObject& _object)

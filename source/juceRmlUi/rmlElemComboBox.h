@@ -28,5 +28,6 @@ namespace juceRmlUi
 		baseLib::EventListener<Rml::String> m_onOptionSelected;
 
 		std::shared_ptr<Menu> m_menu;
+		Rml::Element* m_textElem = nullptr;
 	};
 }

@@ -1,5 +1,6 @@
 #include "rmlElemComboBox.h"
 
+#include "rmlHelper.h"
 #include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/Context.h"
 
@@ -60,10 +61,41 @@ namespace juceRmlUi
 	{
 		if (m_options.empty())
 			return;
+
 		const auto value = getValue();
+
 		if (value < 0 || value >= static_cast<float>(m_options.size()))
 			return;
+
 		const auto& option = m_options[static_cast<size_t>(value)];
-		SetInnerRML(Rml::StringUtilities::EncodeRml(option));
+		const auto text = Rml::StringUtilities::EncodeRml(option);
+
+//		SetProperty("decorator", "text(\"" + text + "\" inherit-color left center) content-box");
+		if (m_textElem == nullptr)
+		{
+			// it might exist already via rml, find it and use it
+			for (auto i=0; i<GetNumChildren(); ++i)
+			{
+				auto* child = GetChild(i);
+				if (child->GetTagName() != "combotext")
+					continue;
+				m_textElem = child;
+				break;
+			}
+
+			if (!m_textElem)
+			{
+				if (text.empty())
+					return;
+
+				SetInnerRML({});
+
+				auto textElem = GetOwnerDocument()->CreateElement("combotext");
+
+				m_textElem = AppendChild(std::move(textElem));
+			}
+		}
+
+		m_textElem->SetInnerRML(text);
 	}
 }
