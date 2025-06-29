@@ -233,7 +233,7 @@ treenode {
 	height: 1em;
 	drag: clone;
 	display: block;
-	padding: 2dp 2dp 2dp 20dp;
+	padding: 2dp 2dp 2dp 1em;
 	font-size: 12dp;
 	white-space: nowrap;
 }
