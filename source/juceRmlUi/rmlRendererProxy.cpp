@@ -395,7 +395,33 @@ namespace juceRmlUi
 
 	void RendererProxy::setRenderer(Rml::RenderInterface* _renderer)
 	{
-		std::lock_guard lock(m_mutexRender);
+		std::lock_guard lockR(m_mutexRender);
+
+		if (m_renderer)
+		{
+			// old renderer might have functions left that need to be executed, for example to release resources
+			for (const auto& func : m_renderFunctionsToExecute)
+				func();
+
+			{
+				std::lock_guard lock(m_mutex);
+				if (!m_enqueuedFunctions.empty())
+					m_renderFunctions.emplace_back(std::move(m_enqueuedFunctions));
+				m_enqueuedFunctions.clear();
+			}
+
+			for (const auto& funcs : m_renderFunctions)
+			{
+				for (const auto& func : funcs)
+					func();
+			}
+
+			m_renderFunctionsToExecute.clear();
+			m_renderFunctions.clear();
+
+			m_enqueuedFunctions.clear();
+		}
+
 		m_renderer = _renderer;
 	}
 
