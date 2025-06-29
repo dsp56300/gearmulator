@@ -57,9 +57,8 @@ namespace juceRmlUi
 
 	RmlComponent::~RmlComponent()
 	{
-		destroyRmlContext();
-
 		m_openGLContext.detach();
+		destroyRmlContext();
 
 		deleteAllChildren();
 	}
@@ -102,7 +101,8 @@ namespace juceRmlUi
 
 	void RmlComponent::openGLContextClosing()
 	{
-		destroyRmlContext();
+		m_renderProxy->setRenderer(nullptr);
+		m_renderInterface.reset();
 	}
 
 	void RmlComponent::mouseDown(const juce::MouseEvent& _event)
@@ -350,9 +350,6 @@ namespace juceRmlUi
 		m_rmlContext->UnloadAllDocuments();
 		Rml::RemoveContext(m_rmlContext->GetName());
 		m_rmlContext = nullptr;
-
-		m_renderProxy->setRenderer(nullptr);
-		m_renderInterface.reset();
 
 		Rml::ReleaseRenderManagers();
 	}
