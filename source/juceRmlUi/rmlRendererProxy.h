@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <variant>
 
 #include "RmlUi/Core/RenderInterface.h"
 
@@ -19,6 +20,38 @@ namespace juceRmlUi
 		using Func = std::function<void()>;
 		using Handle = uintptr_t;
 		static constexpr Handle InvalidHandle = 0;
+
+		enum HandleType
+		{
+			HandleTypeCompiledGeometry,
+			HandleTypeTexture,
+			HandleTypeCompiledFilter,
+			HandleTypeCompiledShader,
+			HandleTypeLayer
+		};
+
+		// we need strongly typed handles to avoid confusion between different types of handles, they all have the same underlying type
+		template<typename T, HandleType HT>
+		struct StrongHandle
+		{
+			using Type = T;
+			static constexpr HandleType HandleType = HT;
+
+			explicit StrongHandle(const Handle _handle) : handle(_handle) {}
+
+			StrongHandle(StrongHandle&&) noexcept = default;
+			StrongHandle(const StrongHandle&) = default;
+
+			Handle handle;
+		};
+
+		using HandleCompiledGeometry = StrongHandle<Rml::CompiledGeometryHandle, HandleTypeCompiledGeometry>;
+		using HandleTexture = StrongHandle<Rml::TextureHandle, HandleTypeTexture>;
+		using HandleCompiledFilter = StrongHandle<Rml::CompiledFilterHandle, HandleTypeCompiledFilter>;
+		using HandleCompiledShader = StrongHandle<Rml::CompiledShaderHandle, HandleTypeCompiledShader>;
+		using HandleLayer = StrongHandle<Rml::LayerHandle, HandleTypeLayer>;
+
+		using HandleVariant = std::variant<HandleCompiledGeometry, HandleTexture, HandleCompiledFilter, HandleCompiledShader, HandleLayer>;
 
 		explicit RendererProxy(DataProvider& _dataProvider);
 		~RendererProxy() override;
@@ -66,18 +99,27 @@ namespace juceRmlUi
 			return m_nextHandle++;
 		}
 
+		template<typename T>
 		void addHandle(Handle _dummy, Handle _real)
 		{
+			T h(_real);
+			HandleVariant v(h);
 			std::lock_guard lock(m_mutex);
-			m_handles.insert({_dummy, _real});
+			m_handles.insert({_dummy, v});
 		}
 
+		template<typename T>
 		Handle getRealHandle(const Handle _dummy)
 		{
 			std::lock_guard lock(m_mutex);
 			auto it = m_handles.find(_dummy);
 			if (it != m_handles.end())
-				return it->second;
+			{
+				T* strongHandle = std::get_if<T>(&it->second);
+				if (!strongHandle)
+					return InvalidHandle;
+				return strongHandle->handle;
+			}
 			return InvalidHandle;
 		}
 
@@ -85,6 +127,12 @@ namespace juceRmlUi
 		{
 			std::lock_guard lock(m_mutex);
 			m_handles.erase(_dummy);
+		}
+
+		bool exists(const Handle _dummy)
+		{
+			std::lock_guard lock(m_mutex);
+			return m_handles.find(_dummy) != m_handles.end();
 		}
 
 		template<typename T>
@@ -104,7 +152,7 @@ namespace juceRmlUi
 		std::vector<Func> m_enqueuedFunctions;
 		std::vector<std::vector<Func>> m_renderFunctions;
 		std::vector<Func> m_renderFunctionsToExecute;
-		std::unordered_map<Handle, Handle> m_handles;
+		std::unordered_map<Handle, HandleVariant> m_handles;
 
 		std::stack<Handle> m_layerHandles;
 	};
