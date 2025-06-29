@@ -222,7 +222,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			return;
 		auto name = getPatchManager().getGroupName(groupType);
 
-		SetInnerRML(Rml::StringUtilities::EncodeRml(name));
+		setName(name);
 	}
 
 	void GroupTreeElem::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest)
