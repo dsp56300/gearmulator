@@ -81,7 +81,10 @@ namespace jucePluginEditorLib
 		auto* elem = m_rmlComponent->getDocument()->GetElementById("patchmanager");
 
 		if (elem)
+		{
+			juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
 			setPatchManager(createPatchManager(*m_rmlComponent, elem));
+		}
 
 		addAndMakeVisible(m_rmlComponent.get());
 		setSize(m_rmlComponent->getWidth(), m_rmlComponent->getHeight());
