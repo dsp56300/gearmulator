@@ -38,6 +38,8 @@ namespace rmlPlugin
 		}
 		m_bindings.erase(it);
 
+		m_tabGroups.clear();
+
 		Plugin::OnContextDestroy(_context);
 	}
 	
