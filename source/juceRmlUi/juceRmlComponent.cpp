@@ -30,6 +30,9 @@ namespace juceRmlUi
 		m_openGLContext.setContinuousRepainting(true);
 		m_openGLContext.setSwapInterval(1);
 
+		// this is ootional on Win/Linux (but doesn't hurt), but required on macOS to not get a compatibility profile
+		m_openGLContext.setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
+
 		setWantsKeyboardFocus(true);
 
 		m_rmlInterfaces.reset(new RmlInterfaces(m_dataProvider));
