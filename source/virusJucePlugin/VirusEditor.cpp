@@ -28,7 +28,7 @@ namespace genericVirusUI
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
 		create();
-
+		/*
 		m_parts.reset(new Parts(*this));
 		m_leds.reset(new Leds(*this, _processorRef));
 
@@ -168,11 +168,13 @@ namespace genericVirusUI
 			updateKeyValueConditions("deviceModel", virusLib::getModelName(m_processor.getModel()));
 			m_parts->onPlayModeChanged();
 		};
+		*/
 	}
 
 	VirusEditor::~VirusEditor()
 	{
-		m_presetName->removeMouseListener(m_presetNameMouseListener);
+		if (m_presetName)
+			m_presetName->removeMouseListener(m_presetNameMouseListener);
 		delete m_presetNameMouseListener;
 		m_presetNameMouseListener = nullptr;
 
