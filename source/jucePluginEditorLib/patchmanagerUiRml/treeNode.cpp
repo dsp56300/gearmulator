@@ -74,7 +74,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		if (m_color == pluginLib::patchDB::g_invalidColor)
 		{
-			m_elemName->SetProperty(Rml::PropertyId::Color, Rml::Property(Rml::Colourb(255,255,255,255), Rml::Unit::COLOUR));
+			m_elemName->RemoveProperty(Rml::PropertyId::Color);
 		}
 		else
 		{
