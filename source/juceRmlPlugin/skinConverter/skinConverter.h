@@ -39,7 +39,7 @@ namespace rmlPlugin::skinConverter
 		void convertUiObjectLabel(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectRoot(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void convertUiObjectRotary(ConvertedObject& _co, const genericUI::UiObject& _object);
-		void convertUiObjectTextButton(ConvertedObject& _co, const genericUI::UiObject& _object);
+		void convertUiObjectTextButton(ConvertedObject& _co, const genericUI::UiObject& _object, bool _isHyperlink);
 
 		std::string getId(const genericUI::UiObject& _object);
 

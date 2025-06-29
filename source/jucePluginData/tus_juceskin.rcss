@@ -26,6 +26,11 @@ combo {
 	padding-right: 8dp;
 }
 
+/* text buttons that can be clicked to open an URL */
+.juceHyperlinkButton {
+	/*text-decoration: underline;*/
+}
+
 /* this class is added to all elements that are conditionally disabled */
 .juceConditionDisabled {
 	display: none;

@@ -47,22 +47,14 @@ namespace rmlPlugin::skinConverter
 
 		setDefaultProperties(_co, _object);
 
-		if (_object.hasComponent("button"))
-			convertUiObjectButton(_co, _object);
-		else if (_object.hasComponent("combobox"))
-			convertUiObjectComboBox(_co, _object);
-		else if (_object.hasComponent("image"))
-			convertUiObjectImage(_co, _object);
-		else if (_object.hasComponent("label"))
-			convertUiObjectLabel(_co, _object);
-		else if (_object.hasComponent("root"))
-			convertUiObjectRoot(_co, _object);
-		else if (_object.hasComponent("rotary"))
-			convertUiObjectRotary(_co, _object);
-		else if (_object.hasComponent("textbutton"))
-			convertUiObjectTextButton(_co, _object);
-		else
-			LOG("Unknown component type");
+		if (_object.hasComponent("button"))					convertUiObjectButton(_co, _object);
+		else if (_object.hasComponent("combobox"))			convertUiObjectComboBox(_co, _object);
+		else if (_object.hasComponent("image"))				convertUiObjectImage(_co, _object);
+		else if (_object.hasComponent("label"))				convertUiObjectLabel(_co, _object);
+		else if (_object.hasComponent("root"))				convertUiObjectRoot(_co, _object);
+		else if (_object.hasComponent("rotary"))			convertUiObjectRotary(_co, _object);
+		else if (_object.hasComponent("textbutton"))		convertUiObjectTextButton(_co, _object, false);
+		else if (_object.hasComponent("hyperlinkbutton"))	convertUiObjectTextButton(_co, _object, true);
 
 		if (getId(_object) == "container-patchmanager")
 		{
@@ -192,8 +184,15 @@ namespace rmlPlugin::skinConverter
 			}
 		}
 
-		// replicate conditions
 		createCondition(_co, _object);
+
+		auto url = _object.getProperty("url");
+
+		if (!url.empty())
+		{
+			url = Rml::StringUtilities::EncodeRml(url);
+			_co.attribs.set("url", url);
+		}
 	}
 
 	void SkinConverter::convertUiObjectButton(ConvertedObject& _co, const genericUI::UiObject& _object)
@@ -324,7 +323,7 @@ namespace rmlPlugin::skinConverter
 		}
 	}
 
-	void SkinConverter::convertUiObjectTextButton(ConvertedObject& _co, const genericUI::UiObject& _object)
+	void SkinConverter::convertUiObjectTextButton(ConvertedObject& _co, const genericUI::UiObject& _object, const bool _isHyperlink)
 	{
 		_co.tag = "div";
 		genericUI::TextButtonStyle style(m_editor);
@@ -336,6 +335,8 @@ namespace rmlPlugin::skinConverter
 		_co.style.add("line-height", _object.getProperty("height") + "dp");
 
 		_co.classes.emplace_back("juceTextButton");
+		if (_isHyperlink)
+			_co.classes.emplace_back("juceHyperlinkButton");
 		_co.classes.push_back(className.substr(1));
 
 		_co.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
