@@ -1,9 +1,9 @@
 # disable freetype deps, not really needed
-set(FT_DISABLE_ZLIB=TRUE)
-set(FT_DISABLE_BZIP2=TRUE)
-set(FT_DISABLE_PNG=TRUE)
-set(FT_DISABLE_HARFBUZZ=TRUE)
-set(FT_DISABLE_BROTLI=TRUE)
+set(FT_DISABLE_ZLIB TRUE)
+set(FT_DISABLE_BZIP2 TRUE)
+set(FT_DISABLE_PNG TRUE)
+set(FT_DISABLE_HARFBUZZ TRUE)
+set(FT_DISABLE_BROTLI TRUE)
 
 # we don't want to install anything from freetype
 set(SKIP_INSTALL_HEADERS)
