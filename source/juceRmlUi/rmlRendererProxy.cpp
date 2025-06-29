@@ -402,7 +402,6 @@ namespace juceRmlUi
 
 		for (auto& func : m_renderFunctionsToExecute)
 			func();
-		m_renderFunctionsToExecute.clear();
 	}
 
 	void RendererProxy::finishFrame()
