@@ -219,7 +219,7 @@ scrollbarhorizontal sliderbar {
 
 /* tree controls */
 
-.tree {
+tree {
 	overflow-x: hidden;
 	overflow-y: auto;
 	display: block;
@@ -229,7 +229,7 @@ scrollbarhorizontal sliderbar {
 	indent-margin-left: 20dp;
 }
 
-.treenode {
+treenode {
 	height: 1em;
 	drag: clone;
 	display: block;
@@ -238,19 +238,19 @@ scrollbarhorizontal sliderbar {
 	white-space: nowrap;
 }
 
-.treenode:drag {
+treenode:drag {
 	min-width: 150dp;
 }
 
-.treenode:opened {
+treenode:opened {
 	decorator: image(arrow_down.png contain left);
 }
 
-.treenode:closed {
+treenode:closed {
 	decorator: image(arrow_right.png contain left);
 }
 
-.treenode:selected {
+treenode:selected {
 	background-color: #666;
 }
 

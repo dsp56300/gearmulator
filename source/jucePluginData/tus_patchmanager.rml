@@ -7,8 +7,8 @@
 	
 		<!-- Column A: datasource tree -->
 		<div class="pm-vlayout" style="flex: 3;">
-			<tree id="pm-tree-datasources" class="tree" style="flex: 1 1 0">
-				<treenode class="treenode">
+			<tree id="pm-tree-datasources" style="flex: 1 1 0">
+				<treenode>
 					<div class="pm-name" id="name">Name</div>
 					<div id="count" class="pm-count" countFormat=" (%s)" countUnknown=" (...)"/>
 				</treenode>
@@ -21,8 +21,8 @@
 		
 		<!-- Column B: tags tree -->
 		<div class="pm-vlayout" style="flex: 2;">
-			<tree id="pm-tree-tags" class="tree" style="flex: 1 1 0">
-				<treenode class="treenode">
+			<tree id="pm-tree-tags" style="flex: 1 1 0">
+				<treenode>
 					<div class="pm-name" id="name">Name</div>
 					<div id="count" class="pm-count" countFormat=" (%s)" countUnknown=" (...)"/>
 				</treenode>
