@@ -40,6 +40,8 @@ namespace genericUI
 		void drawLabel(juce::Graphics&, juce::Label&) override;
 		void drawButtonText(juce::Graphics&, juce::TextButton&, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
+		const auto& getHitAreaOffset() const { return m_hitAreaOffset; }
+
 	protected:
 		juce::Font getComboBoxFont(juce::ComboBox&) override;
 		juce::Font getLabelFont(juce::Label&) override;

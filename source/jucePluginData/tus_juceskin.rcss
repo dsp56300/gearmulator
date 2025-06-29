@@ -30,3 +30,7 @@ combo {
 .juceConditionDisabled {
 	display: none;
 }
+
+/* used to modify the hit area of image buttons */
+buttonhittest {
+}

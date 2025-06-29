@@ -15,6 +15,10 @@ namespace juceRmlUi
 
 		bool getChecked() const { return m_isChecked; }
 
+		void OnChildAdd(Rml::Element* child) override;
+		void OnChildRemove(Rml::Element* _child) override;
+		bool IsPointWithinElement(Rml::Vector2f _point) override;
+
 	private:
 		void onClick();
 		void onMouseDown();
@@ -27,5 +31,7 @@ namespace juceRmlUi
 
 		pluginLib::ParamValue m_valueOn = -1;
 		pluginLib::ParamValue m_valueOff = -1;
+
+		Rml::Element* m_hitTestElem = nullptr;
 	};
 }

@@ -9,6 +9,7 @@
 #include "dsp56kEmu/logging.h"
 
 #include "juceRmlPlugin/rmlParameterBinding.h"
+#include "juceUiLib/buttonStyle.h"
 
 #include "juceUiLib/comboboxStyle.h"
 #include "juceUiLib/editor.h"
@@ -225,12 +226,24 @@ namespace rmlPlugin::skinConverter
 				_co.attribs.set("valueOff", std::to_string(valueOff));
 		}
 
-		auto& hitBox = _co.children.emplace_back();
-		hitBox.classes.emplace_back("jucePos");
-		hitBox.position.x = -25;
-		hitBox.position.y = -25;
-		hitBox.position.width = _co.position.width + 50;
-		hitBox.position.height = _co.position.height + 50;
+		genericUI::ButtonStyle style(m_editor);
+		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
+
+		const auto& hitAreaOffset = style.getHitAreaOffset();
+
+		if (hitAreaOffset.getX() || hitAreaOffset.getY() || hitAreaOffset.getWidth() || hitAreaOffset.getHeight())
+		{
+			auto& hitBox = _co.children.emplace_back();
+
+			hitBox.tag = "buttonhittest";
+
+			hitBox.classes.emplace_back("jucePos");
+
+			hitBox.position.x = static_cast<float>(hitAreaOffset.getX());
+			hitBox.position.y = static_cast<float>(hitAreaOffset.getY());
+			hitBox.position.width = _co.position.width + static_cast<float>(hitAreaOffset.getWidth());
+			hitBox.position.height = _co.position.height + static_cast<float>(hitAreaOffset.getHeight());
+		}
 	}
 
 	void SkinConverter::convertUiObjectComboBox(ConvertedObject& _co, const genericUI::UiObject& _object)

@@ -28,6 +28,29 @@ namespace juceRmlUi
 		else if (_key == "valueOff")	m_valueOff = getProperty<int>("valueOff", -1);
 	}
 
+	void ElemButton::OnChildAdd(Rml::Element* child)
+	{
+		ElemValue::OnChildAdd(child);
+
+		if (child->GetTagName() == "buttonhittest")
+			m_hitTestElem = child;
+	}
+
+	void ElemButton::OnChildRemove(Rml::Element* _child)
+	{
+		ElemValue::OnChildRemove(_child);
+
+		if (_child == m_hitTestElem)
+			m_hitTestElem = nullptr;
+	}
+
+	bool ElemButton::IsPointWithinElement(const Rml::Vector2f _point)
+	{
+		if (m_hitTestElem)
+			return m_hitTestElem->IsPointWithinElement(_point);
+		return ElemValue::IsPointWithinElement(_point);
+	}
+
 	void ElemButton::onClick()
 	{
 		if (m_isToggle)
