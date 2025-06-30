@@ -17,7 +17,7 @@
 
 namespace juceRmlUi
 {
-	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/)
+	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback)
 		: m_dataProvider(_dataProvider)
 		, m_rootRmlFilename(std::move(_rootRmlFilename))
 		, m_contentScale(_contentScale)
@@ -52,7 +52,7 @@ namespace juceRmlUi
 			}
 		}
 
-		createRmlContext();
+		createRmlContext(_contextCreatedCallback);
 	}
 
 	RmlComponent::~RmlComponent()
@@ -277,7 +277,7 @@ namespace juceRmlUi
 		m_renderProxy->finishFrame();
 	}
 
-	void RmlComponent::createRmlContext()
+	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
 	{
 		const auto size = getScreenBounds();
 
@@ -297,6 +297,9 @@ namespace juceRmlUi
 			m_rmlContext->SetDensityIndependentPixelRatio(static_cast<float>(m_openGLContext.getRenderingScale()) * m_contentScale);
 
 			m_rmlContext->SetDefaultScrollBehavior(Rml::ScrollBehavior::Smooth, 3.0f);
+
+			if (_contextCreatedCallback)
+				_contextCreatedCallback(*this, *m_rmlContext);
 
 			auto& sys = m_rmlInterfaces->getSystemInterface();
 			sys.beginLogRecording();
@@ -392,5 +395,10 @@ namespace juceRmlUi
 	Rml::ElementDocument* RmlComponent::getDocument() const
 	{
 		return m_rmlContext ? m_rmlContext->GetDocument(0) : nullptr;
+	}
+
+	Rml::Context* RmlComponent::getContext() const
+	{
+		return m_rmlContext;
 	}
 }

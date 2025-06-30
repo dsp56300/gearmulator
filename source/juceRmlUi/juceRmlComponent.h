@@ -30,9 +30,10 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer
 	{
 	public:
+		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 
-		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f);
+		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f, const ContextCreatedCallback& _contextCreatedCallback = {});
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
@@ -58,11 +59,12 @@ namespace juceRmlUi
 		void parentSizeChanged() override;
 
 		Rml::ElementDocument* getDocument() const;
+		Rml::Context* getContext() const;
 
 	private:
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		void update();
-		void createRmlContext();
+		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
 

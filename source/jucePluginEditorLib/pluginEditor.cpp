@@ -23,6 +23,7 @@
 
 #include "patchmanager/patchmanager.h"
 #include "patchmanager/savepatchdesc.h"
+#include "patchmanagerUiRml/patchmanagerDataModel.h"
 
 #include "RmlUi/Core/ElementDocument.h"
 
@@ -639,7 +640,15 @@ namespace jucePluginEditorLib
 	{
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(getProcessor().getController()));
-		return new juceRmlUi::RmlComponent(*this, _rmlFile, 1.0f);
+		return new juceRmlUi::RmlComponent(*this, _rmlFile, 1.0f, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+		{
+			onRmlContextCreated(_rmlComponent, _context);
+		});
+	}
+
+	void Editor::onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+	{
+		m_patchManagerDataModel.reset(new patchManagerRml::PatchManagerDataModel(_context));
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)

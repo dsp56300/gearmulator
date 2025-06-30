@@ -16,6 +16,7 @@
 
 namespace Rml
 {
+	class Context;
 	class Element;
 }
 
@@ -54,6 +55,11 @@ namespace pluginLib
 
 namespace jucePluginEditorLib
 {
+	namespace patchManagerRml
+	{
+		class PatchManagerDataModel;
+	}
+
 	namespace patchManager
 	{
 		class PatchManager;
@@ -131,6 +137,8 @@ namespace jucePluginEditorLib
 
 		juce::Component* createRmlUiComponent(const std::string& _rmlFile) override;
 
+		virtual void onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context);
+
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;
 
@@ -159,6 +167,7 @@ namespace jucePluginEditorLib
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		std::unique_ptr<patchManager::PatchManager> m_patchManager;
+		std::unique_ptr<patchManagerRml::PatchManagerDataModel> m_patchManagerDataModel;
 		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
