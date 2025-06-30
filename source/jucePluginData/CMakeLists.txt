@@ -14,6 +14,7 @@ set(SOURCES
 	circle_border.png
 	link.png
 	lock.png
+	pm-dot.png
 
 	Roboto-VariableFont_wdth_wght.ttf
 	Roboto-Italic-VariableFont_wdth_wght.ttf

@@ -84,6 +84,8 @@ namespace genericUI
 
 		std::set<std::string> readConditionValues() const;
 
+		const auto& getTemplates() const { return m_templates; }
+
 	private:
 		template<typename T, class... Args> T* createJuceObject(Editor& _editor, Args... _args);
 		template<typename T> T* createJuceObject(Editor& _editor, T* _object);

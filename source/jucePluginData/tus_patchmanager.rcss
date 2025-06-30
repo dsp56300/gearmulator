@@ -13,15 +13,8 @@
 	min-width: 50dp;
 }
 
-#static-column {
-	flex: 1 1 0;
-	overflow: hidden;
-	border: 1dp #ccc;
-	padding: 4dp;
-}
-
 .pm-search {
-	height: 24dp;
+	height: 1em;
 	flex: 0 0 auto;
 	border: 1dp #fff;
 }
@@ -33,4 +26,33 @@
 	font-weight: 900;
 	font-style: italic;
 	color: #4ff;
+}
+
+.pm-infopanel {
+	overflow-y: auto;
+	padding: 8dp;
+}
+
+.pm-infotext {
+	display: block;
+	font-size: 32dp;
+	padding-bottom: 1em;
+	color: #fff;
+}
+
+.pm-info-name {
+	display: block;
+	font-size: 52dp;
+}
+
+.pm-info-headline {
+	color: #888;
+	padding-bottom: 1dp;
+}
+
+.pm-status {
+	height: 1em;
+	flex: 0 0 auto;
+	border: 1dp #fff;
+	overflow: hidden;
 }

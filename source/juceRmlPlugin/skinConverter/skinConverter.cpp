@@ -34,6 +34,9 @@ namespace rmlPlugin::skinConverter
 		, m_options(std::move(_options))
 	{
 		convertUiObject(m_root, m_rootObject);
+
+		createGlobalStyles();
+
 		writeRmlFile(m_rmlFileName);
 		writeRcssFile(m_rcssFileName);
 	}
@@ -71,6 +74,14 @@ namespace rmlPlugin::skinConverter
 			ConvertedObject childCo;
 			if (convertUiObject(childCo, *child))
 				_co.children.emplace_back(std::move(childCo));
+		}
+
+		for (const auto& t : _object.getTemplates())
+		{
+			const auto name = t->getName();
+
+			if (m_templates.find(name) == m_templates.end())
+				m_templates.insert({name, t});
 		}
 
 		return true;
@@ -251,7 +262,7 @@ namespace rmlPlugin::skinConverter
 		genericUI::ComboboxStyle style(m_editor);
 		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
 
-		const auto className = createTextStyle(style);
+		const auto className = addTextStyle(style);
 
 		// TODO: vertical text alignment, this always centers the text vertically for now
 		_co.style.add("line-height", _object.getProperty("height") + "dp");
@@ -290,7 +301,7 @@ namespace rmlPlugin::skinConverter
 		genericUI::LabelStyle style(m_editor);
 		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
 
-		const auto className = createTextStyle(style);
+		const auto className = addTextStyle(style);
 
 		// TODO: vertical text alignment, this always centers the text vertically for now
 		_co.style.add("line-height", _object.getProperty("height") + "dp");
@@ -329,7 +340,7 @@ namespace rmlPlugin::skinConverter
 		genericUI::TextButtonStyle style(m_editor);
 		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
 
-		const auto className = createTextStyle(style);
+		const auto className = addTextStyle(style);
 
 		// TODO: vertical text alignment, this always centers the text vertically for now
 		_co.style.add("line-height", _object.getProperty("height") + "dp");
@@ -351,16 +362,25 @@ namespace rmlPlugin::skinConverter
 		return it != m_options.idReplacements.end() ? it->second : id;
 	}
 
-	std::string SkinConverter::createTextStyle(const genericUI::UiObjectStyle& _style)
+	std::string SkinConverter::addTextStyle(const genericUI::UiObjectStyle& _style)
+	{
+		CoStyle style = createTextStyle(_style);
+		return addStyle(".text", style);
+	}
+
+	CoStyle SkinConverter::createTextStyle(const genericUI::UiObjectStyle& _style, float _fallbackFontSize/* = 0.0f*/, float _fontSizeScale/* = 1.0f*/)
 	{
 		CoStyle style;
-
 		const auto& fontName = _style.getFontName();
 		if (!fontName.empty())
 			style.add("font-family", fontName);
 
-		const auto fontSize = _style.getTextHeight();
-		style.add("font-size", std::to_string(fontSize) + "dp");
+		float fontSize = static_cast<float>(_style.getTextHeight());
+		if (fontSize <= 0.0f)
+			fontSize = _fallbackFontSize;
+		fontSize *= _fontSizeScale;
+		if (fontSize > 0.0f)
+			style.add("font-size", std::to_string(fontSize) + "dp");
 
 		if (_style.getBold())
 			style.add("font-weight", "bold");
@@ -385,7 +405,7 @@ namespace rmlPlugin::skinConverter
 
 		style.add("color", helper::toRmlColorString(_style.getColor()));
 
-		return addStyle(".text", style);
+		return style;
 	}
 
 	std::string SkinConverter::createImageStyle(const std::string& _imageName, const std::vector<std::string>& _states)
@@ -814,5 +834,137 @@ namespace rmlPlugin::skinConverter
 		}
 
 		return newName;
+	}
+
+	const genericUI::UiObject* SkinConverter::getTemplate(const std::string& _name) const
+	{
+		const auto it = m_templates.find(_name);
+		return it != m_templates.end() ? it->second.get() : nullptr;
+	}
+
+	bool SkinConverter::createGlobalStyles()
+	{
+		bool res = false;
+
+		constexpr float defaultFontSize = 14.0f;	// juce default font size
+		constexpr float fontSizeScale = 2.0f;		// patch manager was scaled by 2.0f
+
+		if(const auto* pmTreeview = getTemplate("pm_treeview"))
+		{
+			genericUI::UiObjectStyle os(m_editor);
+			os.apply(m_editor, *pmTreeview);
+
+			CoStyle styleTree;
+			styleTree.add("background-color", os.getBackgroundColor());
+
+			if (!styleTree.empty())
+				m_styles.insert({ "tree", styleTree });
+
+			CoStyle styleTreeNode = createTextStyle(os, defaultFontSize, fontSizeScale);
+			if (!styleTree.empty())
+				m_styles.insert({ "treenode", styleTreeNode });
+
+			CoStyle styleTreeNodeSelected;
+			styleTreeNodeSelected.add("background-color", os.getSelectedItemBackgroundColor());
+			if (!styleTreeNodeSelected.empty())
+				m_styles.insert({ "treenode:selected", styleTreeNodeSelected });
+
+			res = true;
+		}
+
+		if (const auto* pmSearch = getTemplate("pm_search"))
+		{
+			genericUI::UiObjectStyle os(m_editor);
+			os.apply(m_editor, *pmSearch);
+			CoStyle styleSearch = createTextStyle(os, defaultFontSize, fontSizeScale);
+
+			styleSearch.add("background-color", os.getBackgroundColor());
+
+			if (os.getOutlineColor().getAlpha() > 0)
+				styleSearch.add("border", "1dp " + helper::toRmlColorString(os.getOutlineColor()));
+			else
+				styleSearch.add("border", "0dp transparent");
+
+			m_styles.insert({ ".pm-search", styleSearch });
+
+			res = true;
+		}
+
+		if (const auto* pmScrollbar = getTemplate("pm_scrollbar"))
+		{
+			genericUI::UiObjectStyle os(m_editor);
+			os.apply(m_editor, *pmScrollbar);
+			CoStyle styleScrollbar;
+			styleScrollbar.add("background-color", os.getColor());
+			if (!styleScrollbar.empty())
+			{
+				m_styles.insert({ "scrollbarvertical sliderbar, scrollbarhorizontal sliderbar, splitter:active", styleScrollbar });
+			}
+			res = true;
+		}
+
+		if(const auto* pmListBox = getTemplate("pm_listbox"))
+		{
+			genericUI::UiObjectStyle os(m_editor);
+			os.apply(m_editor, *pmListBox);
+
+			CoStyle styleList;
+			styleList.add("background-color", os.getBackgroundColor());
+
+			if (!styleList.empty())
+				m_styles.insert({ ".list, .grid, .pm-infopanel", styleList });
+
+			CoStyle styleListEntry = createTextStyle(os, defaultFontSize, fontSizeScale);
+			if (!styleList.empty())
+				m_styles.insert({ ".listentry, .gridentry", styleListEntry });
+
+			CoStyle styleListEntrySelected;
+			styleListEntrySelected.add("background-color", os.getSelectedItemBackgroundColor());
+			if (!styleListEntrySelected.empty())
+				m_styles.insert({ ".listentry:selected, .gridentry:selected", styleListEntrySelected });
+
+			res = true;
+		}
+
+		auto creatPatchManagerInfoPanelTextStyle = [&](const std::string& _templateName, const std::string& _styleName)
+		{
+			if (const auto* pmInfoLabel = getTemplate(_templateName))
+			{
+				genericUI::UiObjectStyle os(m_editor);
+				os.apply(m_editor, *pmInfoLabel);
+				CoStyle style;
+				if (os.getTextHeight())
+					style.add("font-size", std::to_string(static_cast<float>(os.getTextHeight()) * fontSizeScale) + "dp");
+				style.add("color", os.getColor());
+				if (!style.empty())
+					m_styles.insert({ _styleName, style });
+				res = true;
+			}
+		};
+
+		creatPatchManagerInfoPanelTextStyle("pm_info_name", ".pm-info-name");
+		creatPatchManagerInfoPanelTextStyle("pm_info_label", ".pm-info-headline");
+		creatPatchManagerInfoPanelTextStyle("pm_info_text", ".pm-info-text");
+
+		if (const auto* pmStatus = getTemplate("pm_status_label"))
+		{
+			genericUI::UiObjectStyle os(m_editor);
+			os.apply(m_editor, *pmStatus);
+			CoStyle style = createTextStyle(os, defaultFontSize, fontSizeScale);
+
+			const auto itSearch = m_styles.find(".pm-search");
+			if (itSearch != m_styles.end())
+			{
+				const auto itBorder = itSearch->second.properties.find("border");
+				if (itBorder != itSearch->second.properties.end())
+					style.add(itBorder->first, itBorder->second);
+			}
+
+			if (!style.empty())
+				m_styles.insert({ ".pm-status", style });
+			res = true;
+		}
+
+		return res;
 	}
 }

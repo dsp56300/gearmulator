@@ -23,6 +23,7 @@ namespace genericUI
 		const auto& getColor() const { return m_color; }
 		const auto& getBackgroundColor() const { return m_bgColor; }
 		const auto& getSelectedItemBackgroundColor() const { return m_selectedItemBgColor; }
+		const auto& getOutlineColor() const { return m_outlineColor; }
 		const auto& getAlign() const { return m_align; }
 
 		std::optional<juce::Font> getFont() const;

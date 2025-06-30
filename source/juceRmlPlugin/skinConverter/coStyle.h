@@ -4,6 +4,11 @@
 
 #include "RmlUi/Core/Property.h"
 
+namespace juce
+{
+	class Colour;
+}
+
 namespace rmlPlugin::skinConverter
 {
 	struct CoStyle
@@ -15,6 +20,8 @@ namespace rmlPlugin::skinConverter
 			properties.insert({ std::move(_key), std::move(_value)});
 		}
 
+		void add(const std::string& _key, const juce::Colour& _color);
+
 		void write(std::stringstream& _out, const std::string& _name, uint32_t _depth) const;
 		void writeInline(std::stringstream& _ss);
 
@@ -22,6 +29,8 @@ namespace rmlPlugin::skinConverter
 		{
 			return properties == _other.properties;
 		}
+
+		bool empty() const { return properties.empty(); }
 	};
 
 	struct CoSpritesheet : CoStyle

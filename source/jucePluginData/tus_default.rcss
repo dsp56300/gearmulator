@@ -141,7 +141,6 @@ scrollbarhorizontal sliderbar {
 	overflow-x: hidden;
 	overflow-y: auto;
 	display: block;
-	border: 1dp #ccc;
 	padding: 0dp 4dp 0dp 4dp;
 	box-sizing: border-box;
 	position: relative;
@@ -155,6 +154,7 @@ scrollbarhorizontal sliderbar {
 	padding: 0dp;
 	font-size: 12dp;
 	border: 2px transparent;
+	white-space: nowrap;
 }
 
 .listentry:selected, .gridentry:selected {
@@ -195,7 +195,6 @@ scrollbarhorizontal sliderbar {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
-	border: 1dp #ccc;
 	padding: 4dp 0dp 4dp 0dp;
 	box-sizing: border-box;
 	position: relative;
@@ -223,7 +222,6 @@ tree {
 	overflow-x: hidden;
 	overflow-y: auto;
 	display: block;
-	border: 1dp #ccc;
 	padding: 4dp;
 	box-sizing: border-box;
 	indent-margin-left: 20dp;
@@ -255,9 +253,9 @@ treenode:selected {
 }
 
 splitter {
-	width: 5dp;
+	width: 8dp;
 	height: 100%;
-	background-color: #222;
+	background-color: #000;
 }
 
 splitter:hover {

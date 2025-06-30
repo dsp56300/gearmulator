@@ -37,7 +37,7 @@
 		<div class="pm-vlayout" style="flex: 2;">
 			<list id="pm-list" class="list" style="flex: 1 1 0">
 				<listentry class="listentry">
-					<img id="color" src="circle_border.png" style="height: 1em; margin-right: 5dp;"/>
+					<img id="color" src="pm-dot.png" style="height: 1em; margin-right: 5dp;"/>
 					<div id="name" class="pm-name">Name</div>
 				</listentry>
 			</list>
@@ -45,10 +45,9 @@
 				<div class="input-placeholder">Search...</div>
 			</input>
 		</div>
-		<splitter/>
 		
 		<!-- Column C alternative: grid layout -->
-		<div class="pm-vlayout" style="flex: 5;">
+		<div class="pm-vlayout" style="flex: 5; display: none;">
 			<list id="pm-grid" class="grid" style="flex: 1 1 0">
 				<listentry class="gridentry"/>
 			</list>
@@ -57,8 +56,22 @@
 			</input>
 		</div>
 		<splitter/>
-		<div id="static-column" style="flex: 3;">
-			<p>This is static text</p>
+
+		<!-- Column D: Selected Patch information panel -->
+		<div class="pm-vlayout" style="flex: 3;">
+			<div class="pm-infopanel" style="flex: 1 1 0">
+				<div class="pm-infotext pm-info-name">Overture CK</div>
+
+				<div class="pm-infotext pm-info-headline">Source</div>
+				<div class="pm-infotext pm-info-text">somefile.syx</div>
+
+				<div class="pm-infotext pm-info-headline">Categories</div>
+				<div class="pm-infotext pm-info-text">Pad, Long, Fancy, Stuff</div>
+
+				<div class="pm-infotext pm-info-headline">Tags</div>
+				<div class="pm-infotext pm-info-text">Big, Wide, Unison</div>
+			</div>
+			<div class="pm-status">1234 Patches, 56 selected</div>
 		</div>
 	</div>
 </body>

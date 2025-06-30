@@ -48,6 +48,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		void setName(const std::string& _name, bool _forceUpdate = false);
 		void setColor(uint32_t _color, bool _forceUpdate = false);
 		void setCount(size_t _count, bool _forceUpdate = false);
+		void setCountEnabled(bool _enabled);
 
 		void OnChildAdd(Rml::Element* _child) override;
 
@@ -72,5 +73,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		std::string m_countFormat;
 		std::string m_countUnknown;
+
+		bool m_countEnabled = true;
 	};
 }

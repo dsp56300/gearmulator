@@ -43,7 +43,9 @@ namespace rmlPlugin::skinConverter
 
 		std::string getId(const genericUI::UiObject& _object);
 
-		std::string createTextStyle(const genericUI::UiObjectStyle& _style);
+		std::string addTextStyle(const genericUI::UiObjectStyle& _style);
+		static CoStyle createTextStyle(const genericUI::UiObjectStyle& _style, float _fallbackFontSize = 0.0f, float _fontSizeScale = 1.0f);
+
 		std::string createImageStyle(const std::string& _imageName, const std::vector<std::string>& _states);
 		std::string createKnobStyle(const std::string& _imageName);
 
@@ -57,6 +59,10 @@ namespace rmlPlugin::skinConverter
 		std::string createConditionDisabledAlphaClass(float _disabledAlpha);
 
 		std::string getAndValidateTextureName(const genericUI::UiObject& _object) const;
+
+		const genericUI::UiObject* getTemplate(const std::string& _name) const;
+
+		bool createGlobalStyles();
 
 		genericUI::Editor& m_editor;
 		const genericUI::UiObject& m_rootObject;
@@ -75,5 +81,7 @@ namespace rmlPlugin::skinConverter
 		SkinConverterOptions m_options;
 
 		std::map<std::string, genericUI::TabGroup> m_tabGroups;
+
+		std::map<std::string, std::shared_ptr<genericUI::UiObject>> m_templates;
 	};
 }

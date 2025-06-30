@@ -94,6 +94,12 @@ namespace jucePluginEditorLib::patchManagerRml
 		if (!m_elemCount)
 			return;
 
+		if (!m_countEnabled)
+		{
+			m_elemCount->SetInnerRML("");
+			return;
+		}
+
 		if (m_count == g_unknownCount)
 		{
 			m_elemCount->SetInnerRML(Rml::StringUtilities::EncodeRml(m_countUnknown));
@@ -105,6 +111,14 @@ namespace jucePluginEditorLib::patchManagerRml
 			(void)snprintf(temp, sizeof(temp)-1, m_countFormat.c_str(), count.c_str());  // NOLINT(clang-diagnostic-format-nonliteral)
 			m_elemCount->SetInnerRML(Rml::StringUtilities::EncodeRml(temp));
 		}
+	}
+
+	void TreeElem::setCountEnabled(const bool _enabled)
+	{
+		if (m_countEnabled == _enabled)
+			return;
+		m_countEnabled = _enabled;
+		setCount(m_count, true);
 	}
 
 	void TreeElem::OnChildAdd(Rml::Element* _child)
