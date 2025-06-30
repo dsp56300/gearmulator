@@ -47,20 +47,20 @@
 				</input>
 			</div>
 			<splitter/>
-			<div class="pm-vlayout" style="flex: 3; display: flex;">
+			<div data-model="patchmanager" class="pm-vlayout" style="flex: 3; display: flex;">
 				<div class="pm-infopanel" style="flex: 1 1 0">
-					<div class="pm-infotext pm-info-name">Overture CK</div>
+					<div class="pm-infotext pm-info-name">{{patchName}}</div>
 
 					<div class="pm-infotext pm-info-headline">Source</div>
-					<div class="pm-infotext pm-info-text">somefile.syx</div>
+					<div class="pm-infotext pm-info-text">{{patchDatasource}}</div>
 
 					<div class="pm-infotext pm-info-headline">Categories</div>
-					<div class="pm-infotext pm-info-text">Pad, Long, Fancy, Stuff</div>
+					<div class="pm-infotext pm-info-text">{{patchCategories}}</div>
 
 					<div class="pm-infotext pm-info-headline">Tags</div>
-					<div class="pm-infotext pm-info-text">Big, Wide, Unison</div>
+					<div class="pm-infotext pm-info-text">{{patchTags}}</div>
 				</div>
-				<div data-model="patchmanager" class="pm-status">{{status}}</div>
+				<div class="pm-status">{{status}}</div>
 			</div>
 		</div>
 		

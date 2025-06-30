@@ -20,6 +20,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void setStatus(const std::string& _status);
 		void setPatchName(const std::string& _name);
+		void setPatchDatasource(const std::string& _name);
 		void setPatchCategories(const std::string& _categories);
 		void setPatchTags(const std::string& _tags);
 
@@ -31,6 +32,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		std::string m_status;
 		std::string m_patchName;
+		std::string m_patchDatasource;
 		std::string m_patchCategories;
 		std::string m_patchTags;
 	};

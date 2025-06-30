@@ -11,6 +11,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		dm.Bind("status", &m_status);
 		dm.Bind("patchName", &m_patchName);
+		dm.Bind("patchDatasource", &m_patchDatasource);
 		dm.Bind("patchCategories", &m_patchCategories);
 		dm.Bind("patchTags", &m_patchTags);
 
@@ -33,6 +34,11 @@ namespace jucePluginEditorLib::patchManagerRml
 	void PatchManagerDataModel::setPatchName(const std::string& _name)
 	{
 		updateVariable("patchName", m_patchName, _name);
+	}
+
+	void PatchManagerDataModel::setPatchDatasource(const std::string& _name)
+	{
+		updateVariable("patchDatasource", m_patchDatasource, _name);
 	}
 
 	void PatchManagerDataModel::setPatchCategories(const std::string& _categories)
