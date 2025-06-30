@@ -33,45 +33,48 @@
 		</div>
 		<splitter/>
 		
-		<!-- Column C: patch list -->
-		<div class="pm-vlayout" style="flex: 2;">
-			<list id="pm-list" class="list" style="flex: 1 1 0">
-				<listentry class="listentry">
-					<img id="color" src="pm-dot.png" style="height: 1em; margin-right: 5dp;"/>
-					<div id="name" class="pm-name">Name</div>
-				</listentry>
-			</list>
-			<input class="pm-search" type="text">
-				<div class="input-placeholder">Search...</div>
-			</input>
+		<!-- Column C: patch list + info on the right -->
+		<div id="pm-layout-list" style="flex: 5; display: flex; height: 100%;">
+			<div class="pm-vlayout" style="flex: 2;">
+				<list id="pm-list" class="list" style="flex: 1 1 0">
+					<listentry class="listentry">
+						<img id="color" src="pm-dot.png" style="height: 1em; margin-right: 5dp;"/>
+						<div id="name" class="pm-name">Name</div>
+					</listentry>
+				</list>
+				<input class="pm-search" type="text">
+					<div class="input-placeholder">Search...</div>
+				</input>
+			</div>
+			<splitter/>
+			<div class="pm-vlayout" style="flex: 3; display: flex;">
+				<div class="pm-infopanel" style="flex: 1 1 0">
+					<div class="pm-infotext pm-info-name">Overture CK</div>
+
+					<div class="pm-infotext pm-info-headline">Source</div>
+					<div class="pm-infotext pm-info-text">somefile.syx</div>
+
+					<div class="pm-infotext pm-info-headline">Categories</div>
+					<div class="pm-infotext pm-info-text">Pad, Long, Fancy, Stuff</div>
+
+					<div class="pm-infotext pm-info-headline">Tags</div>
+					<div class="pm-infotext pm-info-text">Big, Wide, Unison</div>
+				</div>
+				<div data-model="patchmanager" class="pm-status">{{status}}</div>
+			</div>
 		</div>
 		
-		<!-- Column C alternative: grid layout -->
-		<div class="pm-vlayout" style="flex: 5; display: none;">
+		<!-- Column C alternative: larger grid layout, but no info on the right -->
+		<div id="pm-layout-grid" class="pm-vlayout" style="flex: 5; display: none;">
 			<list id="pm-grid" class="grid" style="flex: 1 1 0">
 				<listentry class="gridentry"/>
 			</list>
-			<input class="pm-search" type="text">
-				<div class="input-placeholder">Search...</div>
-			</input>
-		</div>
-		<splitter/>
-
-		<!-- Column D: Selected Patch information panel -->
-		<div class="pm-vlayout" style="flex: 3;">
-			<div class="pm-infopanel" style="flex: 1 1 0">
-				<div class="pm-infotext pm-info-name">Overture CK</div>
-
-				<div class="pm-infotext pm-info-headline">Source</div>
-				<div class="pm-infotext pm-info-text">somefile.syx</div>
-
-				<div class="pm-infotext pm-info-headline">Categories</div>
-				<div class="pm-infotext pm-info-text">Pad, Long, Fancy, Stuff</div>
-
-				<div class="pm-infotext pm-info-headline">Tags</div>
-				<div class="pm-infotext pm-info-text">Big, Wide, Unison</div>
+			<div style="display: flex;">
+				<input class="pm-search" type="text" style="flex: 2;">
+					<div class="input-placeholder">Search...</div>
+				</input>
+				<div class="pm-status" style="flex: 3" data-model="patchmanager">{{status}}</div>
 			</div>
-			<div class="pm-status">1234 Patches, 56 selected</div>
 		</div>
 	</div>
 </body>
