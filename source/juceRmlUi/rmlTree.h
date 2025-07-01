@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "rmlTreeNode.h"
 
 namespace juceRmlUi
@@ -12,7 +14,8 @@ namespace juceRmlUi
 	public:
 		friend class TreeNode;
 
-		baseLib::Event<Tree*, TreeNodePtr> evSelectedNodeChanged;
+		baseLib::Event<Tree*, TreeNodePtr> evNodeSelected;
+		baseLib::Event<Tree*, TreeNodePtr> evNodeDeselected;
 		baseLib::Event<TreeNodePtr, bool> evNodeSelectionChanged;
 
 		Tree(ElemTree& _treeElem);
@@ -22,7 +25,7 @@ namespace juceRmlUi
 
 		bool empty() const { return m_root->empty(); }
 
-		const TreeNodePtr& getSelectedNode() const { return m_selectedNode; }
+		const auto& getSelectedNodes() const { return m_selectedNodes; }
 
 		void childAdded(const TreeNodePtr& _parent, const TreeNodePtr& _child);
 		void childRemoved(const TreeNodePtr& _parent, const TreeNodePtr& _child);
@@ -37,12 +40,13 @@ namespace juceRmlUi
 		}
 
 	private:
-		bool setSelectedNode(const TreeNodePtr& _node);
+		bool addSelectedNode(const TreeNodePtr& _node);
+		bool removeSelectedNode(const TreeNodePtr& _node);
 
 		ElemTree& m_treeElem;
 
 		TreeNodePtr m_root;
-		TreeNodePtr m_selectedNode;
+		std::set<TreeNodePtr> m_selectedNodes;
 
 		bool m_enableMultiselect = false;
 	};

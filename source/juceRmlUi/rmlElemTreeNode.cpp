@@ -79,16 +79,18 @@ namespace juceRmlUi
 				// if we click left of the content, we toggle opened/closed, if we click on the content, we toggle selected
 				if (!m_node->empty())
 				{
+					const auto x = this->GetAbsoluteLeft();
 					auto edgeLeftContent = this->GetBox().GetCumulativeEdge(Rml::BoxArea::Content, Rml::BoxEdge::Left);
 
-					if (mousePos.x < edgeLeftContent)
+					if (mousePos.x - x < edgeLeftContent)
 					{
 						m_node->setOpened(!m_node->isOpened());
 						return;
 					}
 				}
 
-				m_node->setSelected(!m_node->isSelected());
+				const auto allowMultiselect = helper::getKeyModCtrl(_event);
+				m_node->setSelected(!m_node->isSelected(), allowMultiselect);
 
 				onClick();
 			}

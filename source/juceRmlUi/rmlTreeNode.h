@@ -81,7 +81,7 @@ namespace juceRmlUi
 		bool isVisible() const;	// returns true if all nodes in the path to the root are opened
 
 		bool isSelected() const { return m_isSelected; }
-		bool setSelected(bool _selected);
+		bool setSelected(bool _selected, bool _allowMultiselect = false);
 
 		bool handleNavigationKey(Rml::Input::KeyIdentifier _key);
 

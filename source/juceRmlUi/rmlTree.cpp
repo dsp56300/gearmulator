@@ -25,14 +25,21 @@ namespace juceRmlUi
 		m_treeElem.childRemoved(_parent, _child);
 	}
 
-	bool Tree::setSelectedNode(const TreeNodePtr& _node)
+	bool Tree::addSelectedNode(const TreeNodePtr& _node)
 	{
 		if (_node && &_node->getTree() != this)
 			return false;
-		if (_node == m_selectedNode)
+		if (!m_selectedNodes.insert(_node).second)
 			return false;
-		m_selectedNode = _node;
-		evSelectedNodeChanged(this, m_selectedNode);
+		evNodeSelected(this, _node);
+		return true;
+	}
+
+	bool Tree::removeSelectedNode(const TreeNodePtr& _node)
+	{
+		if (m_selectedNodes.erase(_node) == 0)
+			return false;
+		evNodeDeselected(this, _node);
 		return true;
 	}
 }

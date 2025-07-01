@@ -191,7 +191,7 @@ namespace juceRmlUi
 		return parent->isVisible();
 	}
 
-	bool TreeNode::setSelected(const bool _selected)
+	bool TreeNode::setSelected(const bool _selected, bool _allowMultiselect)
 	{
 		if (m_isSelected == _selected)
 			return false;
@@ -202,14 +202,21 @@ namespace juceRmlUi
 
 		if (_selected)
 		{
-			auto prev = m_tree.getSelectedNode();
-			m_tree.setSelectedNode(self);
-			if (!m_tree.isMultiSelectEnabled() && prev && prev != self)
-				prev->setSelected(false);
+			const auto allowMultiselect = _allowMultiselect && m_tree.isMultiSelectEnabled();
+
+			auto prev = m_tree.getSelectedNodes();
+
+			if (!allowMultiselect)
+			{
+				for (const auto& treeNode : prev)
+					treeNode->setSelected(false, false);
+			}
+
+			m_tree.addSelectedNode(self);
 		}
-		else if (!_selected && m_tree.getSelectedNode() == self)
+		else if (!_selected)
 		{
-			m_tree.setSelectedNode(nullptr);
+			m_tree.removeSelectedNode(self);
 		}
 
 		evSelectedChanged(self, m_isSelected);
