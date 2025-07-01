@@ -6,12 +6,13 @@ namespace juceRmlUi
 	{
 	}
 
-	void ListEntry::setSelected(const bool _selected)
+	bool ListEntry::setSelected(const bool _selected)
 	{
 		if (_selected == m_selected)
-			return;
+			return false;
 		m_selected = _selected;
 		evSelected(this, _selected);
+		return true;
 	}
 
 	void ListEntry::setIndex(const size_t _index)

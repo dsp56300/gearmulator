@@ -28,6 +28,7 @@ namespace juceRmlUi
 		baseLib::Event<List*, EntryPtr> evEntryAdded;
 		baseLib::Event<List*, EntryPtr> evEntryRemoved;
 		baseLib::Event<List*> evEntriesMoved;
+		baseLib::Event<List*> evSelectionChanged;
 
 		List();
 		List(const List&) = delete;
@@ -48,7 +49,7 @@ namespace juceRmlUi
 
 		EntryPtr getEntry(size_t _index) const;
 
-		bool setSelected(size_t _index, bool _selected, bool _allowMultiselect = true) const;
+		bool setSelected(size_t _index, bool _selected, bool _allowMultiselect = true, bool _notify = true);
 
 		bool moveEntryTo(size_t _oldIndex, size_t _newIndex);
 		bool moveEntriesTo(const std::vector<size_t>& _entries, size_t _newIndex);
@@ -62,14 +63,16 @@ namespace juceRmlUi
 		void setMultiselect(const bool _enabled) { m_allowMultiselect = _enabled; }
 
 		size_t handleNavigationKey(Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, uint32_t _gridItemsPerColumn);
-		bool selectRangeViaShiftKey(size_t _index) const;
+		bool selectRangeViaShiftKey(size_t _index);
+		bool setSelectedIndices(const std::vector<unsigned long long>& _indices, bool _notify = true);
+		bool deselectAll(bool _notify = true);
 
 	private:
 		bool moveEntryTo(const ListEntry& _e, size_t _newIndex);
 
 		void updateIndices(size_t _first, size_t _last) const;
 
-		std::vector<std::shared_ptr<ListEntry>> m_entries;
+		std::vector<EntryPtr> m_entries;
 
 		bool m_allowMultiselect = false;
 	};

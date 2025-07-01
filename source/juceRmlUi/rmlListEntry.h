@@ -43,7 +43,7 @@ namespace juceRmlUi
 		ElemListEntry* getElement() const { return m_element; }
 
 	private:
-		void setSelected(bool _selected);
+		bool setSelected(bool _selected);
 
 		void setIndex(size_t _index);
 

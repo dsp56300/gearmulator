@@ -39,8 +39,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		patchManager::PatchManager& getDB() const;
 
 		pluginLib::patchDB::SearchHandle getSearchHandle() const;
-		std::set<Patch> getSelectedPatches();
-		void setSelectedPatches(const std::set<Patch>& _patches);
+		std::set<Patch> getSelectedPatches() const;
+		void setSelectedPatches(const std::set<Patch>& _selection);
 
 		std::vector<size_t> getSelectedEntries() const;
 		void setSelectedEntries(const std::vector<size_t>& _indices);
@@ -50,8 +50,6 @@ namespace jucePluginEditorLib::patchManagerRml
 		void setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search);
 
 		void cancelSearch();
-
-		void setVisible(bool _visible);
 
 		const Patches& getPatches() const
 		{
@@ -68,8 +66,12 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
+		void activateSelectedPatch() const;
+
 	private:
-		void updateEntries();
+		void updateEntries() const;
+
+		void onSelectionChanged() const;
 
 		PatchManagerUiRml& m_patchManager;
 		juceRmlUi::ElemList* m_list;
@@ -81,5 +83,6 @@ namespace jucePluginEditorLib::patchManagerRml
 		bool m_hideDuplicatesByHash = false;
 		bool m_hideDuplicatesByName = false;
 		pluginLib::patchDB::SearchHandle m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+		bool m_activateOnSelectionChange = true;
 	};
 }

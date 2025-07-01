@@ -1,6 +1,7 @@
 #include "rmlList.h"
 
 #include <algorithm>
+#include <set>
 
 #include "rmlListEntry.h"
 
@@ -75,23 +76,29 @@ namespace juceRmlUi
 		return _index < m_entries.size() ? m_entries[_index] : nullptr;
 	}
 
-	bool List::setSelected(const size_t _index, const bool _selected, bool _allowMultiselect/* = true*/) const
+	bool List::setSelected(const size_t _index, const bool _selected, const bool _allowMultiselect/* = true*/, const bool _notify/* = true*/)
 	{
 		if (_index >= m_entries.size())
 			return false;
 
 		const auto allowMultiselect = _allowMultiselect && m_allowMultiselect;
 
+		bool changed = false;
+
 		if (_selected && !allowMultiselect)
 		{
 			for (auto& entry : m_entries)
-				entry->setSelected(entry->getIndex() == _index);
+				changed |= entry->setSelected(entry->getIndex() == _index);
 		}
 		else
 		{
-			m_entries[_index]->setSelected(_selected);
+			changed = m_entries[_index]->setSelected(_selected);
 		}
-		return true;
+
+		if (changed && _notify)
+			evSelectionChanged(this);
+
+		return changed;
 	}
 
 	size_t List::handleNavigationKey(const Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, const uint32_t _gridItemsPerColumn)
@@ -165,30 +172,75 @@ namespace juceRmlUi
 		}
 	}
 
-	bool List::selectRangeViaShiftKey(const size_t _index) const
+	bool List::selectRangeViaShiftKey(const size_t _index)
 	{
 		const auto selected = getSelectedEntries();
+
 		if (selected.empty())
 			return false;
 
 		const auto firstSelected = selected.front()->getIndex();
 		const auto lastSelected = selected.back()->getIndex();
 
+		bool changed = false;
+
 		if (_index < firstSelected)
 		{
 			for (size_t i=_index; i<firstSelected; ++i)
-				setSelected(i, true, true);
-			return true;
+				changed |= setSelected(i, true, true, false);
 		}
-		if (_index > lastSelected)
+		else if (_index > lastSelected)
 		{
 			for (size_t i=lastSelected+1; i<=_index; ++i)
-				setSelected(i, true, true);
-			return true;
+				changed |= setSelected(i, true, true, false);
 		}
 
-		// _index is already selected, nothing to do
-		return true;
+		if (changed)
+			evSelectionChanged(this);
+
+		return true;	// key was handled
+	}
+
+	bool List::setSelectedIndices(const std::vector<unsigned long long>& _indices, const bool _notify/* = true*/)
+	{
+		if (_indices.empty())
+			return deselectAll(_notify);
+
+		bool res = false;
+
+		if (_indices.size() == 1)
+		{
+			const auto index = _indices.front();
+			for (auto & entry : m_entries)
+				res |= entry->setSelected(index == entry->getIndex());
+			return res;
+		}
+
+		std::set selection(_indices.begin(), _indices.end());
+
+		for (auto & entry : m_entries)
+		{
+			const auto i = entry->getIndex();
+			res |= entry->setSelected(selection.find(i) != selection.end());
+		}
+
+		if (res && _notify)
+			evSelectionChanged(this);
+
+		return res;
+	}
+
+	bool List::deselectAll(const bool _notify/* = true*/)
+	{
+		bool res = false;
+
+		for (auto& entry : m_entries)
+			res |= entry->setSelected(false);
+
+		if (res && _notify)
+			evSelectionChanged(this);
+
+		return res;
 	}
 
 	bool List::moveEntryTo(const ListEntry& _e, const size_t _newIndex)
@@ -269,22 +321,22 @@ namespace juceRmlUi
 
 	std::vector<size_t> List::getSelectedIndices() const
 	{
+		const auto entries = getSelectedEntries();
 		std::vector<size_t> selectedIndices;
-		for (const auto& entry : m_entries)
-		{
-			if (entry->isSelected())
-				selectedIndices.push_back(entry->getIndex());
-		}
+		selectedIndices.reserve(entries.size());
+		for (const auto& entry : entries)
+			selectedIndices.push_back(entry->getIndex());
 		return selectedIndices;
 	}
 
 	std::vector<List::EntryPtr> List::getSelectedEntries() const
 	{
 		std::vector<EntryPtr> selectedEntries;
-		const auto selectedIndices = getSelectedIndices();
-		selectedEntries.reserve(selectedIndices.size());
-		for (const auto& index : selectedIndices)
-			selectedEntries.push_back(m_entries[index]);
+		for (const auto& entry : m_entries)
+		{
+			if (entry->isSelected())
+				selectedEntries.push_back(entry);
+		}
 		return selectedEntries;
 	}
 

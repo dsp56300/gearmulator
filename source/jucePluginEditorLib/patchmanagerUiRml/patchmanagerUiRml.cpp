@@ -179,8 +179,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		newModel.setContent(oldModel.getSearchHandle());
 		newModel.setSelectedEntries(oldModel.getSelectedEntries());
 
-		newModel.setVisible(true);
-		oldModel.setVisible(false);
+//		newModel.setVisible(true);
+//		oldModel.setVisible(false);
 /*
 		if(m_firstTimeGridLayout && _layout == LayoutType::Grid)
 		{

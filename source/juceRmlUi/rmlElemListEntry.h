@@ -16,7 +16,7 @@ namespace juceRmlUi
 
 		virtual void onEntryChanged();
 
-		void onClick(const Rml::Event& _event);
+		virtual void onClick(const Rml::Event& _event);
 
 		std::unique_ptr<DragData> createDragData() override;
 

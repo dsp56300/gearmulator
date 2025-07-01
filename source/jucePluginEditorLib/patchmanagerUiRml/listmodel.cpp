@@ -18,6 +18,11 @@ namespace jucePluginEditorLib::patchManagerRml
 	ListModel::ListModel(PatchManagerUiRml& _pm, juceRmlUi::ElemList* _list) : m_patchManager(_pm), m_list(_list)
 	{
 		_list->setInstancer(&g_instancer);
+
+		auto& list = _list->getList();
+
+		list.setMultiselect(true);
+		list.evSelectionChanged.addListener([this](juceRmlUi::List* const&) { onSelectionChanged(); });
 	}
 
 	PatchManagerUiRml& ListModel::getPatchManager() const
@@ -37,22 +42,54 @@ namespace jucePluginEditorLib::patchManagerRml
 		return m_search->handle;
 	}
 
-	std::set<ListModel::Patch> ListModel::getSelectedPatches()
+	std::set<ListModel::Patch> ListModel::getSelectedPatches() const
 	{
-		return {};
+		auto indices = getSelectedEntries();
+
+		if (indices.empty())
+			return {};
+
+		std::set<Patch> result;
+
+		const auto& patches = getPatches();
+
+		for (size_t index : indices)
+			result.insert(patches[index]);
+
+		return result;
 	}
 
-	void ListModel::setSelectedPatches(const std::set<Patch>& _patches)
+	void ListModel::setSelectedPatches(const std::set<Patch>& _selection)
 	{
+		if (_selection.empty())
+		{
+			m_list->getList().deselectAll();
+			return;
+		}
+
+		const auto& patches = getPatches();
+
+		std::vector<size_t> indices;
+
+		for (size_t i=0; i<patches.size(); ++i)
+		{
+			if (_selection.find(patches[i]) != _selection.end())
+				indices.push_back(i);
+		}
+
+		setSelectedEntries(indices);
 	}
 
 	std::vector<size_t> ListModel::getSelectedEntries() const
 	{
-		return {};
+		return m_list->getList().getSelectedIndices();
 	}
 
 	void ListModel::setSelectedEntries(const std::vector<size_t>& _indices)
 	{
+		m_activateOnSelectionChange = false;
+		m_list->getList().setSelectedIndices(_indices);
+		m_activateOnSelectionChange = true;
 	}
 
 	void ListModel::setContent(pluginLib::patchDB::SearchHandle _searchHandle)
@@ -103,10 +140,6 @@ namespace jucePluginEditorLib::patchManagerRml
 			return;
 		getDB().cancelSearch(m_searchHandle);
 		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
-	}
-
-	void ListModel::setVisible(bool _visible)
-	{
 	}
 
 	void ListModel::filterPatches()
@@ -175,7 +208,15 @@ namespace jucePluginEditorLib::patchManagerRml
 			setContent(m_search);
 	}
 
-	void ListModel::updateEntries()
+	void ListModel::activateSelectedPatch() const
+	{
+		const auto patches = getSelectedPatches();
+
+		if(patches.size() == 1)
+			getDB().setSelectedPatch(*patches.begin(), m_search->handle);
+	}
+
+	void ListModel::updateEntries() const
 	{
 		const auto& patches = getPatches();
 
@@ -202,5 +243,15 @@ namespace jucePluginEditorLib::patchManagerRml
 				list.addEntry(std::move(entry));
 			}
 		}
+	}
+
+	void ListModel::onSelectionChanged() const
+	{
+		if (m_activateOnSelectionChange)
+			activateSelectedPatch();
+
+		const auto patches = getSelectedPatches();
+
+		getPatchManager().setListStatus(static_cast<uint32_t>(patches.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 }
