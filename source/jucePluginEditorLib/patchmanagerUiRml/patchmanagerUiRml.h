@@ -3,10 +3,16 @@
 #include "datasourceTree.h"
 #include "grid.h"
 #include "list.h"
+#include "status.h"
 #include "tagsTree.h"
 #include "jucePluginEditorLib/patchmanager/patchmanagerui.h"
 
 #include "juceRmlUi/rmlElemTree.h"
+
+namespace jucePluginEditorLib::patchManagerRml
+{
+	class PatchManagerDataModel;
+}
 
 namespace juceRmlUi
 {
@@ -29,7 +35,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			Grid
 		};
 
-		PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, const std::initializer_list<patchManager::GroupType>& _groupTypes);
+		PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, PatchManagerDataModel& _dataModel, const std::initializer_list<patchManager::GroupType>& _groupTypes);
 		~PatchManagerUiRml() override = default;
 
 		// base implementation
@@ -63,11 +69,15 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	private:
 		juceRmlUi::RmlComponent& m_rmlComponent;
+		PatchManagerDataModel& m_dataModel;
+
 		DatasourceTree m_treeDS;
 		TagsTree m_treeTags;
 
 		List m_list;
 		Grid m_grid;
+
+		Status m_status;
 
 		std::unordered_map<patchManager::GroupType, std::string> m_customGroupNames;
 

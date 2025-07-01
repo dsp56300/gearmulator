@@ -6,7 +6,7 @@
 
 namespace jucePluginEditorLib::patchManagerRml
 {
-	ListItem::ListItem(PatchManagerUiRml& _pm, juceRmlUi::List& _list): ListEntry(_list), m_patchManager(_pm)
+	ListItem::ListItem(PatchManagerUiRml& _pm, juceRmlUi::List& _list) : ListEntry(_list), m_patchManager(_pm)
 	{
 	}
 
@@ -22,9 +22,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		m_patch = _patch;
 
 		if (auto* elem = getListElemEntry())
-		{
 			elem->onPatchChanged(_patch);
-		}
+
 		return true;
 	}
 

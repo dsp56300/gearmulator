@@ -63,6 +63,7 @@ set(SOURCES_PM_RML
 	patchmanagerUiRml/listitem.cpp patchmanagerUiRml/listitem.h
 	patchmanagerUiRml/patchmanagerDataModel.cpp patchmanagerUiRml/patchmanagerDataModel.h
 	patchmanagerUiRml/patchmanagerUiRml.cpp patchmanagerUiRml/patchmanagerUiRml.h
+	patchmanagerUiRml/status.cpp patchmanagerUiRml/status.h
 	patchmanagerUiRml/tagsTree.cpp patchmanagerUiRml/tagsTree.h
 	patchmanagerUiRml/tagTreeNode.cpp patchmanagerUiRml/tagTreeNode.h
 	patchmanagerUiRml/tree.cpp patchmanagerUiRml/tree.h

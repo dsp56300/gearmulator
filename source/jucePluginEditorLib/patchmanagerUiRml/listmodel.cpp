@@ -2,8 +2,10 @@
 
 #include "listitem.h"
 #include "patchmanagerUiRml.h"
+
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/search.h"
+
 #include "juceRmlUi/rmlElemList.h"
 
 namespace jucePluginEditorLib::patchManagerRml

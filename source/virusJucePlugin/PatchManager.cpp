@@ -35,7 +35,7 @@ namespace genericVirusUI
 	PatchManager::PatchManager(VirusEditor& _editor, juceRmlUi::RmlComponent& _comp, Rml::Element* _root)
 		: PatchManager(_editor, [this, &_editor, &_comp, _root]
 		{
-			return std::make_unique<jucePluginEditorLib::patchManagerRml::PatchManagerUiRml>(_editor, *this, _comp, _root, DefaultGroupTypes);
+			return std::make_unique<jucePluginEditorLib::patchManagerRml::PatchManagerUiRml>(_editor, *this, _comp, _root, *_editor.getPatchManagerDataModel(), DefaultGroupTypes);
 		})
 	{
 	}

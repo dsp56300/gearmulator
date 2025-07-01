@@ -139,6 +139,8 @@ namespace jucePluginEditorLib
 
 		virtual void onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context);
 
+		const auto& getPatchManagerDataModel() const { return m_patchManagerDataModel; }
+
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;
 

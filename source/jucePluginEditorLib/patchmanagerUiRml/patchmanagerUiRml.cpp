@@ -11,13 +11,15 @@
 
 namespace jucePluginEditorLib::patchManagerRml
 {
-	PatchManagerUiRml::PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, const std::initializer_list<patchManager::GroupType>& _groupTypes)
+	PatchManagerUiRml::PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, PatchManagerDataModel& _dataModel, const std::initializer_list<patchManager::GroupType>& _groupTypes)
 		: PatchManagerUi(_editor, _db)
 		, m_rmlComponent(_comp)
+		, m_dataModel(_dataModel)
 		, m_treeDS(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemTree>(_root, "pm-tree-datasources"))
 		, m_treeTags(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemTree>(_root, "pm-tree-tags"))
 		, m_list(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemList>(_root, "pm-list"))
 		, m_grid(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemList>(_root, "pm-grid"))
+		, m_status(_dataModel)
 	{
 		for (auto group : _groupTypes)
 			m_treeDS.addGroup(group);
@@ -35,6 +37,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		m_treeTags.processDirty(_dirty);
 
 		getListModel().processDirty(_dirty);
+
+		m_status.setScanning(isScanning());
 	}
 
 	bool PatchManagerUiRml::setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds)
@@ -200,8 +204,9 @@ namespace jucePluginEditorLib::patchManagerRml
 		return m_grid;
 	}
 
-	void PatchManagerUiRml::setListStatus(uint32_t _selectedPatchCount, uint32_t _totalPatchCount)
+	void PatchManagerUiRml::setListStatus(const uint32_t _selectedPatchCount, const uint32_t _totalPatchCount)
 	{
+		m_status.setListStatus(_selectedPatchCount, _totalPatchCount);
 	}
 
 	pluginLib::patchDB::Color PatchManagerUiRml::getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const
