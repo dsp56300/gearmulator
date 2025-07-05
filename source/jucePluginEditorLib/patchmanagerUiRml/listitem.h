@@ -46,6 +46,9 @@ namespace jucePluginEditorLib::patchManagerRml
 		void setName(const std::string& _name, bool _forceUpdate = false);
 		void setColor(uint32_t _color, bool _forceUpdate = false);
 
+		void onMouseDown(const Rml::Event& _event);
+		void onRightClick(const Rml::Event& _event);
+
 	private:
 		ListItem* m_item = nullptr;
 		Rml::Element* m_elemName = nullptr;

@@ -158,6 +158,13 @@ namespace juceRmlUi
 			return {x, y};
 		}
 
+		int getMouseButton(const Rml::Event& _event)
+		{
+			// RmlUi uses 0 for left, 1 for right, 2 for middle
+			const auto button = _event.GetParameter<int>("button", 0);
+			return button;
+		}
+
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event)
 		{
 			return static_cast<Rml::Input::KeyIdentifier>(_event.GetParameter<int>("key_identifier", Rml::Input::KI_UNKNOWN));

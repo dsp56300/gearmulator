@@ -4,6 +4,9 @@
 
 #include "jucePluginLib/patchdb/patch.h"
 
+#include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlHelper.h"
+
 namespace jucePluginEditorLib::patchManagerRml
 {
 	ListItem::ListItem(PatchManagerUiRml& _pm, juceRmlUi::List& _list) : ListEntry(_list), m_patchManager(_pm)
@@ -29,6 +32,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	ListElemEntry::ListElemEntry(const Rml::String& _tag) : ElemListEntry(_tag)
 	{
+		juceRmlUi::EventListener::Add(this, Rml::EventId::Mousedown, [this](Rml::Event& _event) { onMouseDown(_event); });
 	}
 
 	void ListElemEntry::onEntryChanged()
@@ -100,5 +104,17 @@ namespace jucePluginEditorLib::patchManagerRml
 		m_elemColor->SetProperty(Rml::PropertyId::ImageColor, Rml::Property(c, Rml::Unit::COLOUR));
 
 		m_elemColor->SetProperty(Rml::PropertyId::Visibility, Rml::Property(Rml::Style::Visibility::Visible));
+	}
+
+	void ListElemEntry::onMouseDown(const Rml::Event& _event)
+	{
+		const auto button = juceRmlUi::helper::getMouseButton(_event);
+		if (button == 1)
+			onRightClick(_event);
+	}
+
+	void ListElemEntry::onRightClick(const Rml::Event& _event)
+	{
+
 	}
 }
