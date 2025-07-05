@@ -1,5 +1,6 @@
 #include "pluginEditorWindow.h"
 #include "pluginEditorState.h"
+#include "juceRmlUi/juceRmlComponent.h"
 
 #include "patchmanager/patchmanager.h"
 
@@ -136,6 +137,8 @@ void EditorWindow::mouseDown(const juce::MouseEvent& event)
 	if(dynamic_cast<juce::TextEditor*>(event.eventComponent))
 		return;
 	if(dynamic_cast<juce::Button*>(event.eventComponent))
+		return;
+	if(dynamic_cast<juceRmlUi::RmlComponent*>(event.eventComponent))
 		return;
 	if(event.eventComponent->findParentComponentOfClass<juce::TreeView>())
 		return;
