@@ -6,6 +6,7 @@
 
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/rmlMenu.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
@@ -32,7 +33,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	ListElemEntry::ListElemEntry(const Rml::String& _tag) : ElemListEntry(_tag)
 	{
-		juceRmlUi::EventListener::Add(this, Rml::EventId::Mousedown, [this](Rml::Event& _event) { onMouseDown(_event); });
+		juceRmlUi::EventListener::Add(this, Rml::EventId::Mousedown, [this](const Rml::Event& _event) { onMouseDown(_event); });
 	}
 
 	void ListElemEntry::onEntryChanged()
@@ -115,6 +116,22 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void ListElemEntry::onRightClick(const Rml::Event& _event)
 	{
+		auto& list = getList();
 
+		const auto selectedPatches = list.getSelectedPatches();
+
+		const auto hasSelectedPatches = !selectedPatches.empty();
+
+		juceRmlUi::Menu* menu = new juceRmlUi::Menu();
+		menu->addEntry("Test", [] {});
+
+		menu->open(this, juceRmlUi::helper::getMousePos(_event));
+	}
+
+	ListModel& ListElemEntry::getList() const
+	{
+		auto* item = getItem();
+		assert(item);
+		return item->getPatchManager().getListModel();
 	}
 }

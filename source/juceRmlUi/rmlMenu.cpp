@@ -166,6 +166,15 @@ namespace juceRmlUi
 		}
 	}
 
+	void Menu::runModal(const Rml::Element* _parent, const Rml::Vector2f& _position, const uint32_t _itemsPerColumn)
+	{
+		open(_parent, _position, _itemsPerColumn);
+
+		std::unique_ptr<Menu> m = std::make_unique<Menu>(std::move(*this));
+
+		m->m_root->AddEventListener(Rml::EventId::Unload)
+	}
+
 	void Menu::closeConfirm()
 	{
 		if (m_parentMenu)

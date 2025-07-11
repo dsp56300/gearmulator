@@ -6,6 +6,11 @@
 
 namespace jucePluginEditorLib::patchManagerRml
 {
+	class ListModel;
+}
+
+namespace jucePluginEditorLib::patchManagerRml
+{
 	class PatchManagerUiRml;
 }
 
@@ -48,6 +53,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onMouseDown(const Rml::Event& _event);
 		void onRightClick(const Rml::Event& _event);
+
+		ListModel& getList() const;
 
 	private:
 		ListItem* m_item = nullptr;
