@@ -853,8 +853,8 @@ namespace rmlPlugin::skinConverter
 	{
 		bool res = false;
 
-		constexpr float defaultFontSize = 14.0f;	// juce default font size
-		constexpr float fontSizeScale = 2.0f;		// patch manager was scaled by 2.0f
+		constexpr float defaultFontSize = 14.0f;					// juce default font size
+		const float fontSizeScale = 1.0f / m_editor.getScale();
 
 		if(const auto* pmTreeview = getTemplate("pm_treeview"))
 		{
@@ -971,6 +971,12 @@ namespace rmlPlugin::skinConverter
 				m_styles.insert({ ".pm-status", style });
 			res = true;
 		}
+
+		CoStyle menuStyle;
+
+		menuStyle.add("font-size", std::to_string(static_cast<int>(defaultFontSize * fontSizeScale)) + "dp");
+
+		m_styles.insert({ ".menubox", menuStyle });
 
 		return res;
 	}
