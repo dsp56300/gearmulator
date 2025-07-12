@@ -65,6 +65,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		pluginLib::patchDB::Color getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const;
 
+		LayoutType getLayout() const { return m_layout; }
+
 		static Rml::Colourb toRmlColor(pluginLib::patchDB::Color _color);
 
 	private:

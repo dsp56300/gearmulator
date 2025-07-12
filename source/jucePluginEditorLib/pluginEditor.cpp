@@ -623,17 +623,17 @@ namespace jucePluginEditorLib
 			m_overlays.refreshAll();
 	}
 
-	juce::PopupMenu Editor::createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const
+	juceRmlUi::Menu Editor::createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const
 	{
-		juce::PopupMenu menu;
+		juceRmlUi::Menu menu;
 		createExportFileTypeMenu(menu, _func);
 		return menu;
 	}
 
-	void Editor::createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const
+	void Editor::createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const
 	{
-		_menu.addItem(".syx", [this, _func]{_func(pluginLib::FileType::Syx);});
-		_menu.addItem(".mid", [this, _func]{_func(pluginLib::FileType::Mid);});
+		_menu.addEntry(".syx", [this, _func]{_func(pluginLib::FileType::Syx);});
+		_menu.addEntry(".mid", [this, _func]{_func(pluginLib::FileType::Mid);});
 	}
 
 	juce::Component* Editor::createRmlUiComponent(const std::string& _rmlFile)

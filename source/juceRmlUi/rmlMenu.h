@@ -29,6 +29,10 @@ namespace juceRmlUi
 		void addEntry(const std::string& _name, bool _checked, std::function<void()> _action);
 		void addSeparator();
 		void addSubMenu(const std::string& _name, const std::shared_ptr<Menu>& _subMenu);
+		void addSubMenu(const std::string& _name, Menu&& _subMenu)
+		{
+			addSubMenu(_name, std::make_shared<Menu>(std::move(_subMenu)));
+		}
 
 		void clear()
 		{
@@ -42,7 +46,7 @@ namespace juceRmlUi
 
 		void ProcessEvent(Rml::Event& _event) override;
 
-		void runModal(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn = 16);
+		void runModal(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn = 100);
 
 	private:
 		void closeAll();

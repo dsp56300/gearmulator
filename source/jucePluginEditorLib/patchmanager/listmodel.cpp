@@ -113,10 +113,11 @@ namespace jucePluginEditorLib::patchManager
 		const auto& editor = getPatchManager().getEditor();
 
 		juce::PopupMenu menu;
+		/*
 		if(hasSelectedPatches)
 			menu.addSubMenu("Export selected...", editor.createExportFileTypeMenu([this](const pluginLib::FileType& _fileType) { exportPresets(true, _fileType); }));
 		menu.addSubMenu("Export all...", editor.createExportFileTypeMenu([this](const pluginLib::FileType& _fileType) { exportPresets(false, _fileType); }));
-
+		*/
 		if(hasSelectedPatches)
 		{
 			menu.addSeparator();

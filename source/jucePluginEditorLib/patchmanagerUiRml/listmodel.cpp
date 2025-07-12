@@ -3,10 +3,16 @@
 #include "listitem.h"
 #include "patchmanagerUiRml.h"
 
+#include "jucePluginEditorLib/pluginEditor.h"
+
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/search.h"
 
 #include "juceRmlUi/rmlElemList.h"
+#include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/rmlMenu.h"
+
+#include "juceUiLib/messageBox.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
@@ -216,6 +222,229 @@ namespace jucePluginEditorLib::patchManagerRml
 			getDB().setSelectedPatch(*patches.begin(), m_search->handle);
 	}
 
+	void ListModel::openContextMenu(const Rml::Event& _event)
+	{
+		const auto selectedPatches = getSelectedPatches();
+
+		const auto hasSelectedPatches = !selectedPatches.empty();
+
+		auto& editor = m_patchManager.getEditor();
+
+		juceRmlUi::Menu menu;
+		menu.addEntry("Test", [] {});
+		if(hasSelectedPatches)
+			menu.addSubMenu("Export selected...", editor.createExportFileTypeMenu([this](const pluginLib::FileType& _fileType) { exportPresets(true, _fileType); }));
+		menu.addSubMenu("Export all...", editor.createExportFileTypeMenu([this](const pluginLib::FileType& _fileType) { exportPresets(false, _fileType); }));
+
+		if(hasSelectedPatches)
+		{
+			menu.addSeparator();
+
+			pluginLib::patchDB::TypedTags tags;
+
+			for (const auto& selectedPatch : selectedPatches)
+				tags.add(selectedPatch->getTags());
+
+			if(selectedPatches.size() == 1)
+			{
+				const auto& patch = *selectedPatches.begin();
+
+				/*
+				const auto row = getSelectedEntry();
+				auto pos = getEntryPosition(row, true);
+
+				pos.setY(pos.getY()-2);
+				pos.setHeight(pos.getHeight()+4);
+
+				menu.addItem("Rename...", [this, patch, pos]
+				{
+					beginEdit(dynamic_cast<juce::Component*>(this), pos, patch->getName(), [this, patch](bool _cond, const std::string& _name)
+					{
+						if(_name != patch->getName())
+							getDB().renamePatch(patch, _name);
+					});
+				});
+				*/
+				menu.addEntry("Locate", [this, patch]
+				{
+					m_patchManager.setSelectedDataSource(patch->source.lock());
+				});
+			}
+
+			if(!m_search->request.tags.empty())
+			{
+				menu.addEntry("Remove selected", [this, s = selectedPatches]
+				{
+					const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
+					pluginLib::patchDB::TypedTags removeTags;
+
+					// converted "added" tags to "removed" tags
+					for (const auto& tags : m_search->request.tags.get())
+					{
+						const pluginLib::patchDB::TagType type = tags.first;
+						const auto& t = tags.second;
+							
+						for (const auto& tag : t.getAdded())
+							removeTags.addRemoved(type, tag);
+					}
+
+					getDB().modifyTags(patches, removeTags);
+//					m_patchManager.repaint();
+				});
+			}
+			else if(getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)
+			{
+				menu.addEntry("Delete selected", [this, s = selectedPatches]
+				{
+					showDeleteConfirmationMessageBox([this, s](genericUI::MessageBox::Result _result)
+					{
+						if (_result == genericUI::MessageBox::Result::Yes)
+						{
+							const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
+							getDB().removePatches(m_search->request.sourceNode, patches);
+						}
+					});
+				});
+			}
+
+			if(tags.containsAdded())
+			{
+				bool haveSeparator = false;
+
+				for (const auto& it : tags.get())
+				{
+					const auto type = it.first;
+
+					const auto& t = it.second;
+
+					if(t.empty())
+						continue;
+
+					const auto tagTypeName = getDB().getTagTypeName(type);
+
+					if(tagTypeName.empty())
+						continue;
+
+					juceRmlUi::Menu tagMenu;
+
+					for (const auto& tag : t.getAdded())
+					{
+						pluginLib::patchDB::TypedTags removeTags;
+						removeTags.addRemoved(type, tag);
+
+						std::vector<pluginLib::patchDB::PatchPtr> patches{selectedPatches.begin(), selectedPatches.end()};
+
+						tagMenu.addEntry(tag, [this, s = std::move(patches), removeTags]
+						{
+							getDB().modifyTags(s, removeTags);
+						});
+					}
+
+					if(!haveSeparator)
+					{
+						menu.addSeparator();
+						haveSeparator = true;
+					}
+
+					menu.addSubMenu("Remove from " + tagTypeName, std::move(tagMenu));
+				}
+			}
+
+			{
+				bool haveSeparator = false;
+
+				for(uint32_t i=0; i<static_cast<uint32_t>(pluginLib::patchDB::TagType::Count); ++i)
+				{
+					const auto type = static_cast<pluginLib::patchDB::TagType>(i);
+					std::set<pluginLib::patchDB::Tag> availTags;
+					getDB().getTags(type, availTags);
+
+					if(availTags.empty())
+						continue;
+
+					const auto tagTypeName = getDB().getTagTypeName(type);
+
+					if(tagTypeName.empty())
+						continue;
+
+					juceRmlUi::Menu tagMenu;
+
+					for (const auto& tag : availTags)
+					{
+						pluginLib::patchDB::TypedTags addedTags;
+						addedTags.add(type, tag);
+
+						std::vector<pluginLib::patchDB::PatchPtr> patches{selectedPatches.begin(), selectedPatches.end()};
+
+						tagMenu.addEntry(tag, [this, addedTags, s = std::move(patches)]
+						{
+							getDB().modifyTags(s, addedTags);
+						});
+					}
+
+					if(!haveSeparator)
+					{
+						menu.addSeparator();
+						haveSeparator = true;
+					}
+
+					menu.addSubMenu("Add to " + tagTypeName, std::move(tagMenu));
+				}
+			}
+		}
+		menu.addSeparator();
+		menu.addEntry("Hide duplicates (by hash)", m_hideDuplicatesByHash, [this]
+		{
+			setFilter(m_filter, !m_hideDuplicatesByHash, m_hideDuplicatesByName);
+		});
+		menu.addEntry("Hide duplicates (by name)", m_hideDuplicatesByName, [this]
+		{
+			setFilter(m_filter, m_hideDuplicatesByHash, !m_hideDuplicatesByName);
+		});
+
+		menu.addSeparator();
+
+		juceRmlUi::Menu layoutMenu;
+		layoutMenu.addEntry("List + Info", m_patchManager.getLayout() == PatchManagerUiRml::LayoutType::List, [this]
+		{
+			m_patchManager.setLayout(PatchManagerUiRml::LayoutType::List);
+		});
+		layoutMenu.addEntry("Grid", m_patchManager.getLayout() == PatchManagerUiRml::LayoutType::Grid, [this]
+		{
+			m_patchManager.setLayout(PatchManagerUiRml::LayoutType::Grid);
+		});
+		menu.addSubMenu("Layout", std::move(layoutMenu));
+
+		menu.runModal(_event.GetTargetElement(), juceRmlUi::helper::getMousePos(_event));
+	}
+
+	bool ListModel::exportPresets(const bool _selectedOnly, const pluginLib::FileType& _fileType) const
+	{
+		Patches patches;
+
+		if(_selectedOnly)
+		{
+			const auto selected = getSelectedPatches();
+			if(selected.empty())
+				return false;
+			patches.assign(selected.begin(), selected.end());
+		}
+		else
+		{
+			patches = getPatches();
+		}
+
+		if(patches.empty())
+			return false;
+
+		return getDB().exportPresets(std::move(patches), _fileType);
+	}
+
+	void ListModel::showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback)
+	{
+		genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "Confirmation needed", "Delete selected patches from bank?", std::move(_callback));
+	}
+
 	void ListModel::updateEntries() const
 	{
 		const auto& patches = getPatches();
@@ -243,6 +472,31 @@ namespace jucePluginEditorLib::patchManagerRml
 				list.addEntry(std::move(entry));
 			}
 		}
+	}
+
+	void ListModel::setFilter(const std::string& _filter)
+	{
+		setFilter(_filter, m_hideDuplicatesByHash, m_hideDuplicatesByName);
+	}
+
+	void ListModel::setFilter(const std::string& _filter, const bool _hideDuplicatesByHash, const bool _hideDuplicatesByName)
+	{
+		if (m_filter == _filter && _hideDuplicatesByHash == m_hideDuplicatesByHash && m_hideDuplicatesByName == _hideDuplicatesByName)
+			return;
+
+		const auto selected = getSelectedPatches();
+
+		m_filter = _filter;
+		m_hideDuplicatesByHash = _hideDuplicatesByHash;
+		m_hideDuplicatesByName = _hideDuplicatesByName;
+
+		filterPatches();
+
+		updateEntries();
+
+		setSelectedPatches(selected);
+
+		getPatchManager().setListStatus(static_cast<uint32_t>(selected.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
 	void ListModel::onSelectionChanged() const

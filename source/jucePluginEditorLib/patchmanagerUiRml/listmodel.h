@@ -4,6 +4,18 @@
 
 #include "jucePluginLib/patchdb/patchdbtypes.h"
 
+#include "juceUiLib/messageBox.h"
+
+namespace Rml
+{
+	class Event;
+}
+
+namespace pluginLib
+{
+	class FileType;
+}
+
 namespace pluginLib::patchDB
 {
 	struct SearchRequest;
@@ -68,8 +80,17 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void activateSelectedPatch() const;
 
+		void openContextMenu(const Rml::Event& _event);
+
 	private:
+		bool exportPresets(bool _selectedOnly, const pluginLib::FileType& _fileType) const;
+
+		static void showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback);
+
 		void updateEntries() const;
+
+		void setFilter(const std::string& _filter);
+		void setFilter(const std::string& _filter, bool _hideDuplicatesByHash, bool _hideDuplicatesByName);
 
 		void onSelectionChanged() const;
 

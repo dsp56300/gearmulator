@@ -13,6 +13,7 @@
 #include "jucePluginLib/types.h"
 
 #include "juceRmlUi/rmlDataProvider.h"
+#include "juceRmlUi/rmlMenu.h"
 
 namespace Rml
 {
@@ -132,8 +133,8 @@ namespace jucePluginEditorLib
 
 		void parentHierarchyChanged() override;
 
-		juce::PopupMenu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
-		virtual void createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
+		juceRmlUi::Menu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
+		virtual void createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
 		juce::Component* createRmlUiComponent(const std::string& _rmlFile) override;
 

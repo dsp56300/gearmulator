@@ -118,14 +118,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 		auto& list = getList();
 
-		const auto selectedPatches = list.getSelectedPatches();
-
-		const auto hasSelectedPatches = !selectedPatches.empty();
-
-		juceRmlUi::Menu menu;
-		menu.addEntry("Test", [] {});
-
-		menu.runModal(this, juceRmlUi::helper::getMousePos(_event));
+		list.openContextMenu(_event);
 	}
 
 	ListModel& ListElemEntry::getList() const

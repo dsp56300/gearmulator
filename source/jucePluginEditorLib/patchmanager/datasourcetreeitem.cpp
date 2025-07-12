@@ -172,7 +172,7 @@ namespace jucePluginEditorLib::patchManager
 			{
 				beginEdit();
 			});
-
+			/*
 			menu.addSubMenu("Export...", getPatchManager().getEditor().createExportFileTypeMenu([this](const pluginLib::FileType& _fileType)
 			{
 				const auto s = getDB().getSearch(getSearchHandle());
@@ -182,6 +182,7 @@ namespace jucePluginEditorLib::patchManager
 					getDB().exportPresets(std::move(patches), _fileType);
 				}
 			}));
+			*/
 		}
 
 		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
