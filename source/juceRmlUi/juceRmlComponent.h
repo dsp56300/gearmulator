@@ -92,6 +92,7 @@ namespace juceRmlUi
 		std::mutex m_timerMutex;
 
 		std::vector<std::function<void()>> m_postFrameCallbacks;
+		std::vector<std::function<void()>> m_tempPostFrameCallbacks;
 
 		DocumentCreatedCallback m_onDocumentCreated;
 

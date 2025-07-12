@@ -276,9 +276,12 @@ namespace juceRmlUi
 		m_rmlContext->Render();
 		m_renderProxy->finishFrame();
 
-		for (const auto& postFrameCallback : m_postFrameCallbacks)
+		// ensure that new post frame callbacks that are added by other post frame callbacks are executed in the next frame
+		std::swap(m_postFrameCallbacks, m_tempPostFrameCallbacks);
+
+		for (const auto& postFrameCallback : m_tempPostFrameCallbacks)
 			postFrameCallback();
-		m_postFrameCallbacks.clear();
+		m_tempPostFrameCallbacks.clear();
 	}
 
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
