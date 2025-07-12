@@ -18,6 +18,7 @@ namespace pluginLib
 
 namespace pluginLib::patchDB
 {
+	struct PatchKey;
 	struct SearchRequest;
 	struct Search;
 }
@@ -52,7 +53,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		pluginLib::patchDB::SearchHandle getSearchHandle() const;
 		std::set<Patch> getSelectedPatches() const;
-		void setSelectedPatches(const std::set<Patch>& _selection);
+		bool setSelectedPatches(const std::set<Patch>& _selection);
+		bool setSelectedPatches(const std::set<pluginLib::patchDB::PatchKey>& _selection);
 
 		std::vector<size_t> getSelectedEntries() const;
 		void setSelectedEntries(const std::vector<size_t>& _indices);

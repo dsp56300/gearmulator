@@ -58,11 +58,12 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void PatchManagerUiRml::setSelectedPatches(const std::set<pluginLib::patchDB::PatchPtr>& _patches)
 	{
+		getListModel().setSelectedPatches(_patches);
 	}
 
 	bool PatchManagerUiRml::setSelectedPatches(const std::set<pluginLib::patchDB::PatchKey>& _patches)
 	{
-		return false;
+		return getListModel().setSelectedPatches(_patches);
 	}
 
 	void PatchManagerUiRml::setCustomSearch(pluginLib::patchDB::SearchHandle _sh)
