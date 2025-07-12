@@ -26,6 +26,7 @@ namespace juceRmlUi
 		bool empty() const { return m_root->empty(); }
 
 		const auto& getSelectedNodes() const { return m_selectedNodes; }
+		void clearSelectedNodes() const;
 
 		void childAdded(const TreeNodePtr& _parent, const TreeNodePtr& _child);
 		void childRemoved(const TreeNodePtr& _parent, const TreeNodePtr& _child);

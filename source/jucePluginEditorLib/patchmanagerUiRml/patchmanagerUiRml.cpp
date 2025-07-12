@@ -66,8 +66,11 @@ namespace jucePluginEditorLib::patchManagerRml
 		return getListModel().setSelectedPatches(_patches);
 	}
 
-	void PatchManagerUiRml::setCustomSearch(pluginLib::patchDB::SearchHandle _sh)
+	void PatchManagerUiRml::setCustomSearch(const pluginLib::patchDB::SearchHandle _sh)
 	{
+		m_treeDS.getTree()->getTree().clearSelectedNodes();
+		m_treeTags.getTree()->getTree().clearSelectedNodes();
+		getListModel().setContent(_sh);
 	}
 
 	void PatchManagerUiRml::bringToFront()
@@ -236,6 +239,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 		if (_color == pluginLib::patchDB::g_invalidColor)
 			return {0, 0, 0, 0};
+
 		return Rml::Colourb(
 			(_color >> 16) & 0xFF,
 			(_color >> 8) & 0xFF,

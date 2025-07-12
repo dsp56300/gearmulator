@@ -15,6 +15,15 @@ namespace juceRmlUi
 		m_root.reset();
 	}
 
+	void Tree::clearSelectedNodes() const
+	{
+		while (!m_selectedNodes.empty())
+		{
+			auto n = *m_selectedNodes.begin();
+			n->setSelected(false, false);
+		}
+	}
+
 	void Tree::childAdded(const TreeNodePtr& _parent, const TreeNodePtr& _child)
 	{
 		m_treeElem.childAdded(_parent, _child);
