@@ -31,4 +31,20 @@ namespace juceRmlUi
 			delete this;
 		}
 	}
+
+	void OnDetachListener::add(Rml::Element* _element, const Callback& _callback)
+	{
+		new OnDetachListener(_element, _callback);
+	}
+
+	OnDetachListener::OnDetachListener(Rml::Element* _element, Callback _callback) : m_callback(std::move(_callback))
+	{
+		_element->AddEventListener(Rml::EventId::Unload, this);
+	}
+
+	void OnDetachListener::OnDetach(Rml::Element* _element)
+	{
+		m_callback(_element);
+		delete this;
+	}
 }

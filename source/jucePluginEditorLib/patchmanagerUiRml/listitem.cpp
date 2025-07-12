@@ -122,10 +122,10 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		const auto hasSelectedPatches = !selectedPatches.empty();
 
-		juceRmlUi::Menu* menu = new juceRmlUi::Menu();
-		menu->addEntry("Test", [] {});
+		juceRmlUi::Menu menu;
+		menu.addEntry("Test", [] {});
 
-		menu->open(this, juceRmlUi::helper::getMousePos(_event));
+		menu.runModal(this, juceRmlUi::helper::getMousePos(_event));
 	}
 
 	ListModel& ListElemEntry::getList() const

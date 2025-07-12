@@ -28,4 +28,22 @@ namespace juceRmlUi
 		const Rml::EventId m_event;
 		std::function<void(Rml::Event&)> m_callback;
 	};
+
+	class OnDetachListener : public Rml::EventListener
+	{
+	public:
+		using Callback = std::function<void(Rml::Element*)>;
+
+		static void add(Rml::Element* _element, const Callback& _callback);
+
+		void ProcessEvent(Rml::Event&) override {}
+
+	private:
+		OnDetachListener(Rml::Element* _element, Callback _callback);
+
+		void OnDetach(Rml::Element*) override;
+
+	private:
+		Callback m_callback;
+	};
 }

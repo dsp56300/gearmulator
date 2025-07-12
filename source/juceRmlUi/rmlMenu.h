@@ -38,6 +38,8 @@ namespace juceRmlUi
 		void open(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn = 16);
 		void close();
 
+		bool isOpen() const;
+
 		void ProcessEvent(Rml::Event& _event) override;
 
 		void runModal(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn = 16);

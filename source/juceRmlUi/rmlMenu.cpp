@@ -37,6 +37,9 @@ namespace juceRmlUi
 
 	void Menu::open(const Rml::Element* _parent, const Rml::Vector2f& _position, const uint32_t _itemsPerColumn)
 	{
+		if (!isOpen())
+			close();
+
 		auto* context = _parent->GetContext();
 		auto* doc = _parent->GetOwnerDocument();
 
@@ -133,9 +136,11 @@ namespace juceRmlUi
 	{
 		closeSubmenu();
 
+		Rml::Element* root = nullptr;
+
 		if (m_root)
 		{
-			m_root->GetParentNode()->RemoveChild(m_root);
+			root = m_root;
 			m_root->RemoveEventListener(Rml::EventId::Mouseover, this);
 			m_root = nullptr;
 		}
@@ -143,9 +148,18 @@ namespace juceRmlUi
 		if (m_document)
 		{
 			m_document->RemoveEventListener(Rml::EventId::Click, this);
+			m_document = nullptr;
 		}
 
 		m_parentMenu = nullptr;
+
+		if (root)
+			root->GetParentNode()->RemoveChild(root);
+	}
+
+	bool Menu::isOpen() const
+	{
+		return m_root != nullptr;
 	}
 
 	void Menu::ProcessEvent(Rml::Event& _event)
@@ -168,11 +182,20 @@ namespace juceRmlUi
 
 	void Menu::runModal(const Rml::Element* _parent, const Rml::Vector2f& _position, const uint32_t _itemsPerColumn)
 	{
-		open(_parent, _position, _itemsPerColumn);
+		if (isOpen())
+			return;
 
-		std::unique_ptr<Menu> m = std::make_unique<Menu>(std::move(*this));
+		// we want to keep the menu alive until it is closed. move it into a unique_ptr
+		auto m = std::make_shared<Menu>(std::move(*this));
 
-		m->m_root->AddEventListener(Rml::EventId::Unload)
+		m->open(_parent, _position, _itemsPerColumn);
+
+		const auto root = m->m_root;
+
+		OnDetachListener::add(root, [menu = std::move(m)](Rml::Element*) mutable
+		{
+			menu.reset();
+		});
 	}
 
 	void Menu::closeConfirm()
