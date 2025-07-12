@@ -86,6 +86,16 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 	}
 
+	bool Tree::setSelectedDatasource(const pluginLib::patchDB::DataSourceNodePtr& _ds)
+	{
+		if (!m_tree)
+			return false;
+		auto item = getItemT<GroupNode>(patchManager::GroupType::DataSources);
+		if (!item)
+			return false;
+		return item->setSelectedDatasource(_ds);
+	}
+
 	GroupItemPtr Tree::getItem(const patchManager::GroupType _group)
 	{
 		auto it = m_groupItems.find(_group);

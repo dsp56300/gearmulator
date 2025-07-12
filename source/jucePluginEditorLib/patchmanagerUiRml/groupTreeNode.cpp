@@ -205,6 +205,32 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 	}
 
+	bool GroupNode::setSelectedDatasource(const pluginLib::patchDB::DataSourceNodePtr& _ds)
+	{
+		const auto it = m_itemsByDataSource.find(_ds);
+		if (it == m_itemsByDataSource.end())
+			return false;
+		auto* node = it->second.get();
+		if (!node)
+			return false;
+		node->setSelected(true, false);
+
+		if (!node->isSelected())
+			return false;
+
+		node->makeVisible();
+
+		// FIXME: this does not work before rmlui has done layout and needs to be delayed for a frame
+		Rml::ScrollIntoViewOptions options;
+
+		options.vertical = Rml::ScrollAlignment::Nearest;
+		options.horizontal = Rml::ScrollAlignment::Nearest;
+		options.behavior = Rml::ScrollBehavior::Smooth;
+		options.parentage = Rml::ScrollParentage::All;
+
+		node->getElement()->ScrollIntoView(options);
+	}
+
 	GroupTreeElem::GroupTreeElem(Tree& _tree, const Rml::String& _tag) : TreeElem(_tree, _tag)
 	{
 	}

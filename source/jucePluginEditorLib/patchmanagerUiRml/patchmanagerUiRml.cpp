@@ -48,7 +48,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	bool PatchManagerUiRml::setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds)
 	{
-		return false;
+		return m_treeDS.setSelectedDatasource(_ds);
 	}
 
 	void PatchManagerUiRml::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch)

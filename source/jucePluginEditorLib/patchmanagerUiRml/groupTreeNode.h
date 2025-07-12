@@ -51,6 +51,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest);
 
+		bool setSelectedDatasource(const pluginLib::patchDB::DataSourceNodePtr& _ds);
+
 	private:
 		PatchManagerUiRml& m_patchManager;
 		patchManager::GroupType m_type;

@@ -40,6 +40,8 @@ namespace juceRmlUi
 			return m_enableMultiselect;
 		}
 
+		ElemTree& getElement() const { return m_treeElem; }
+
 	private:
 		bool addSelectedNode(const TreeNodePtr& _node);
 		bool removeSelectedNode(const TreeNodePtr& _node);

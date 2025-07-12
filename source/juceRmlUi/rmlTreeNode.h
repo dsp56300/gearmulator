@@ -79,6 +79,7 @@ namespace juceRmlUi
 		bool isClosed() const { return !m_isOpened; }
 		bool setOpened(bool _isOpened);
 		bool isVisible() const;	// returns true if all nodes in the path to the root are opened
+		void makeVisible();
 
 		bool isSelected() const { return m_isSelected; }
 		bool setSelected(bool _selected, bool _allowMultiselect = false);

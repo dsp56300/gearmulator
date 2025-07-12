@@ -60,6 +60,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest) const;
 
+		bool setSelectedDatasource(const pluginLib::patchDB::DataSourceNodePtr& _ds);
+
 	private:
 		GroupItemPtr getItem(patchManager::GroupType _group);
 

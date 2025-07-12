@@ -191,6 +191,16 @@ namespace juceRmlUi
 		return parent->isVisible();
 	}
 
+	void TreeNode::makeVisible()
+	{
+		auto p = getParent();
+		while (p)
+		{
+			p->setOpened(true);
+			p = p->getParent();
+		}
+	}
+
 	bool TreeNode::setSelected(const bool _selected, bool _allowMultiselect)
 	{
 		if (m_isSelected == _selected)
