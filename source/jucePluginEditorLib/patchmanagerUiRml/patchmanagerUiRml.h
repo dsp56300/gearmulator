@@ -2,6 +2,7 @@
 
 #include "datasourceTree.h"
 #include "grid.h"
+#include "info.h"
 #include "list.h"
 #include "status.h"
 #include "tagsTree.h"
@@ -80,6 +81,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		Grid m_grid;
 
 		Status m_status;
+		Info m_info;
 
 		std::unordered_map<patchManager::GroupType, std::string> m_customGroupNames;
 

@@ -1,5 +1,7 @@
 #include "patchmanagerUiRml.h"
 
+#include "patchmanagerDataModel.h"
+
 #include "jucePluginEditorLib/pluginEditor.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
@@ -20,6 +22,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		, m_list(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemList>(_root, "pm-list"))
 		, m_grid(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemList>(_root, "pm-grid"))
 		, m_status(_dataModel)
+		, m_info(*this)
 	{
 		for (auto group : _groupTypes)
 			m_treeDS.addGroup(group);
@@ -39,6 +42,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		getListModel().processDirty(_dirty);
 
 		m_status.setScanning(isScanning());
+
+		m_info.processDirty(_dirty);
 	}
 
 	bool PatchManagerUiRml::setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds)
@@ -48,6 +53,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void PatchManagerUiRml::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch)
 	{
+		m_info.setPatch(_patch);
 	}
 
 	void PatchManagerUiRml::setSelectedPatches(const std::set<pluginLib::patchDB::PatchPtr>& _patches)

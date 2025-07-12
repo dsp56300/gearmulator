@@ -58,6 +58,7 @@ set(SOURCES_PM_RML
 	patchmanagerUiRml/grid.cpp patchmanagerUiRml/grid.h
 	patchmanagerUiRml/griditem.cpp patchmanagerUiRml/griditem.h
 	patchmanagerUiRml/groupTreeNode.cpp patchmanagerUiRml/groupTreeNode.h
+	patchmanagerUiRml/info.cpp patchmanagerUiRml/info.h
 	patchmanagerUiRml/list.cpp patchmanagerUiRml/list.h
 	patchmanagerUiRml/listmodel.cpp patchmanagerUiRml/listmodel.h
 	patchmanagerUiRml/listitem.cpp patchmanagerUiRml/listitem.h
