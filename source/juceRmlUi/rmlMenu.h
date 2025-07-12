@@ -13,7 +13,7 @@ namespace Rml
 
 namespace juceRmlUi
 {
-	class Menu : Rml::EventListener
+	class Menu : Rml::EventListener,  public std::enable_shared_from_this<Menu>
 	{
 	public:
 		Menu() = default;
@@ -45,9 +45,9 @@ namespace juceRmlUi
 		void runModal(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn = 16);
 
 	private:
-		void closeConfirm();
+		void closeAll();
 
-		void setParentMenu(Menu* _menu);
+		void setParentMenu(const std::shared_ptr<Menu>& _menu);
 		void openSubmenu(const Rml::ObserverPtr<Rml::Element>& _parentEntry, const std::shared_ptr<Menu>& _submenu);
 		void closeSubmenu();
 
@@ -67,6 +67,6 @@ namespace juceRmlUi
 
 		std::shared_ptr<Menu> m_subMenu;
 		Rml::ObserverPtr<Rml::Element> m_subMenuParentEntry = nullptr;
-		Menu* m_parentMenu = nullptr;
+		std::shared_ptr<Menu> m_parentMenu;
 	};
 }

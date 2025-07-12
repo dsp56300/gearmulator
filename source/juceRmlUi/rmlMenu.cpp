@@ -98,7 +98,7 @@ namespace juceRmlUi
 				{
 					action();
 					_event.StopPropagation();
-					closeConfirm();
+					closeAll();
 				});
 			}
 
@@ -198,14 +198,20 @@ namespace juceRmlUi
 		});
 	}
 
-	void Menu::closeConfirm()
+	void Menu::closeAll()
 	{
-		if (m_parentMenu)
-			m_parentMenu->closeConfirm();
-		close();
+		if (!m_parentMenu)
+		{
+			close();
+			return;
+		}
+
+		const auto p = m_parentMenu;
+		m_parentMenu.reset();
+		p->closeAll();
 	}
 
-	void Menu::setParentMenu(Menu* _menu)
+	void Menu::setParentMenu(const std::shared_ptr<Menu>& _menu)
 	{
 		m_parentMenu = _menu;
 	}
@@ -227,7 +233,7 @@ namespace juceRmlUi
 		const auto size = _parentEntry->GetBox().GetSize(Rml::BoxArea::Border);
 		pos += Rml::Vector2f(size.x, 0);
 		m_subMenu->open(_parentEntry.get(), pos, 16);
-		m_subMenu->setParentMenu(this);
+		m_subMenu->setParentMenu(shared_from_this());
 	}
 
 	void Menu::closeSubmenu()
