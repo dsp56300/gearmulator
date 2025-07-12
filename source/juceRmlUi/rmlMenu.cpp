@@ -53,6 +53,13 @@ namespace juceRmlUi
 
 		for (const auto& entry : m_entries)
 		{
+			// ignore separators at start/end of a column
+			if (entry.separator)
+			{
+				if (counter == 0 || counter == (_itemsPerColumn - 1))
+					continue;
+			}
+
 			if (counter == 0)
 			{
 				auto c = doc->CreateElement("div");
