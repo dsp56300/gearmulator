@@ -49,7 +49,7 @@ namespace juceRmlUi
 		static Rml::ElementInstancerGeneric<T>& getInstancer();
 
 	private:
-		bool m_attached = false;
+		uint32_t m_attached = 0;
 
 		SystemInterface m_systemInterface;
 		Rml::FontEngineInterfaceDefault m_fontEngineInterface;

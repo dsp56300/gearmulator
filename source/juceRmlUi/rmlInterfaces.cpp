@@ -23,7 +23,7 @@ namespace juceRmlUi
 {
 	namespace
 	{
-		std::mutex g_accessMutex;
+		std::recursive_mutex g_accessMutex;
 		uint32_t g_instanceCount = 0;
 
 		GenericInstancers<ElemButton, ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemSplitter, ElemTree, ElemTreeNode> g_instancers
@@ -96,21 +96,21 @@ namespace juceRmlUi
 	{
 		g_accessMutex.lock();
 
-		if (m_attached)
+		if (++m_attached > 1)
 			return;
+
+		assert(!g_currentComponent || g_currentComponent == _component);
 
 		Rml::SetSystemInterface(&m_systemInterface);
 		Rml::SetFontEngineInterface(&m_fontEngineInterface);
 		Rml::SetFileInterface(&m_fileInterface);
 
 		g_currentComponent = _component;
-
-		m_attached = true;
 	}
 
 	void RmlInterfaces::detach()
 	{
-		if (!m_attached)
+		if (--m_attached > 0)
 			return;
 
 		Rml::SetSystemInterface(nullptr);
@@ -118,8 +118,6 @@ namespace juceRmlUi
 		Rml::SetFileInterface(nullptr);
 
 		g_currentComponent = nullptr;
-
-		m_attached = false;
 
 		g_accessMutex.unlock();
 	}
