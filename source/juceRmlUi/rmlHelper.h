@@ -78,5 +78,7 @@ namespace juceRmlUi
 		}
 
 		void removeFromParent(Rml::Element* _elem);
+
+		void callPostFrame(const std::function<void()>& _callback);
 	}
 }

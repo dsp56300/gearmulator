@@ -61,6 +61,11 @@ namespace juceRmlUi
 		Rml::ElementDocument* getDocument() const;
 		Rml::Context* getContext() const;
 
+		void addPostFrameCallback(std::function<void()> _callback)
+		{
+			m_postFrameCallbacks.emplace_back(std::move(_callback));
+		}
+
 	private:
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		void update();
@@ -85,6 +90,8 @@ namespace juceRmlUi
 		float m_currentRenderScale = 0.0f;
 
 		std::mutex m_timerMutex;
+
+		std::vector<std::function<void()>> m_postFrameCallbacks;
 
 		DocumentCreatedCallback m_onDocumentCreated;
 

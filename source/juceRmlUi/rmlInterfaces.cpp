@@ -124,6 +124,7 @@ namespace juceRmlUi
 
 	juceRmlUi::RmlComponent& RmlInterfaces::getCurrentComponent()
 	{
+		std::scoped_lock lock(g_accessMutex);
 		assert(g_currentComponent != nullptr && "RmlInterfaces::getCurrentComponent: No current component set");
 		return *g_currentComponent;
 	}

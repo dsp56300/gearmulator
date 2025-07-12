@@ -4,9 +4,9 @@
 
 #include "Core/ElementStyle.h"
 
+#include "juceRmlComponent.h"
 #include "rmlDragSource.h"
-
-#include "juce_gui_basics/juce_gui_basics.h"
+#include "rmlInterfaces.h"
 
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementInstancer.h"
@@ -297,6 +297,12 @@ namespace juceRmlUi
 			auto parentNode = _elem->GetParentNode();
 			if (parentNode)
 				parentNode->RemoveChild(_elem);
+		}
+
+		void callPostFrame(const std::function<void()>& _callback)
+		{
+			auto& comp = RmlInterfaces::getCurrentComponent();
+			comp.addPostFrameCallback(_callback);
 		}
 	}
 }

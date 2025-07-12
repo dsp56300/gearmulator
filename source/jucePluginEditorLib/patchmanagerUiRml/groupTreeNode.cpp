@@ -5,6 +5,8 @@
 #include "jucePluginEditorLib/patchmanager/search.h"
 #include "jucePluginEditorLib/patchmanager/types.h"
 
+#include "juceRmlUi/rmlHelper.h"
+
 namespace jucePluginEditorLib::patchManagerRml
 {
 	void GroupNode::updateFromDataSources(const std::vector<pluginLib::patchDB::DataSourceNodePtr>& _dataSources)
@@ -220,15 +222,19 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		node->makeVisible();
 
-		// FIXME: this does not work before rmlui has done layout and needs to be delayed for a frame
-		Rml::ScrollIntoViewOptions options;
+		juceRmlUi::helper::callPostFrame([node]
+		{
+			Rml::ScrollIntoViewOptions options;
 
-		options.vertical = Rml::ScrollAlignment::Nearest;
-		options.horizontal = Rml::ScrollAlignment::Nearest;
-		options.behavior = Rml::ScrollBehavior::Smooth;
-		options.parentage = Rml::ScrollParentage::All;
+			options.vertical = Rml::ScrollAlignment::Nearest;
+			options.horizontal = Rml::ScrollAlignment::Nearest;
+			options.behavior = Rml::ScrollBehavior::Smooth;
+			options.parentage = Rml::ScrollParentage::All;
 
-		node->getElement()->ScrollIntoView(options);
+			node->getElement()->ScrollIntoView(options);
+		});
+
+		return true;
 	}
 
 	GroupTreeElem::GroupTreeElem(Tree& _tree, const Rml::String& _tag) : TreeElem(_tree, _tag)
