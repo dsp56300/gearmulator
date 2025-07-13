@@ -19,6 +19,8 @@ set(SOURCES
 	Roboto-VariableFont_wdth_wght.ttf
 	Roboto-Italic-VariableFont_wdth_wght.ttf
 
+	tus_colorpicker.rcss
+	tus_colorpicker.rml
 	tus_default.rcss
 	tus_juceskin.rcss
 	tus_patchmanager.rcss

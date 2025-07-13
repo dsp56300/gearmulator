@@ -1,0 +1,65 @@
+.cp-box {
+	box-shadow: #000a 0dp 0dp 8dp 3dp;
+	background-color: rgb(50,62,68);
+	border: 1dp rgb(172,176,179);
+	border-radius: 0dp;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	font-size: 28dp;
+	padding: 1em;
+}
+
+.cp-table {
+	column-gap: 1em;
+	padding-top: 1em;
+}
+
+.cp-tr {
+}
+
+.cp-td {
+	position: relative;
+}
+.cp-colorvalue {
+	text-align: center;
+	vertical-align: center;
+	color: #000;
+	line-height: 3em;
+	height: 3em;
+}
+
+.cp-colorvalueheadline {
+	text-align: center;
+	padding-bottom: 0.2em;
+}
+
+.cp-inputchannel {
+	width: 100%; 
+	box-sizing: border-box;
+}
+
+.cp-slider {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+input.range.cp-slider slidertrack
+{
+}
+
+input.range.cp-slider sliderbar
+{
+	box-sizing: border-box;
+	width: 0.3em;
+	background-color: #fff;
+	border: 1dp #000;
+}
+
+.cp-canvas {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
