@@ -10,6 +10,7 @@
 
 #include "juceRmlUi/rmlElemList.h"
 #include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/rmlInplaceEditor.h"
 #include "juceRmlUi/rmlMenu.h"
 
 #include "juceUiLib/messageBox.h"
@@ -268,22 +269,21 @@ namespace jucePluginEditorLib::patchManagerRml
 			{
 				const auto& patch = *selectedPatches.begin();
 
-				/*
-				const auto row = getSelectedEntry();
-				auto pos = getEntryPosition(row, true);
+				const auto& listEntry = m_list->getList().getEntry(getSelectedEntries().front());
 
-				pos.setY(pos.getY()-2);
-				pos.setHeight(pos.getHeight()+4);
+				const auto elem = listEntry->getElement();
 
-				menu.addItem("Rename...", [this, patch, pos]
+				if (elem)
 				{
-					beginEdit(dynamic_cast<juce::Component*>(this), pos, patch->getName(), [this, patch](bool _cond, const std::string& _name)
+					menu.addEntry("Rename...", [this, patch, elem]
 					{
-						if(_name != patch->getName())
-							getDB().renamePatch(patch, _name);
+						new juceRmlUi::InplaceEditor(elem, patch->getName(), [this, patch](const std::string& _newName)
+						{
+							getDB().renamePatch(patch, _newName);
+						});
 					});
-				});
-				*/
+				}
+
 				menu.addEntry("Locate", [this, patch]
 				{
 					m_patchManager.setSelectedDataSource(patch->source.lock());
