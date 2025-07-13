@@ -9,6 +9,7 @@ namespace juceRmlUi
 	{
 		this->AddEventListener(Rml::EventId::Click, this);
 		this->AddEventListener(Rml::EventId::Keydown, this);
+		this->AddEventListener(Rml::EventId::Mousedown, this);
 	}
 
 	ElemTreeNode::~ElemTreeNode()
@@ -101,6 +102,13 @@ namespace juceRmlUi
 				const auto keyIdentifier = helper::getKeyIdentifier(_event);
 				if (m_node->handleNavigationKey(keyIdentifier))
 					_event.StopPropagation();
+			}
+			break;
+		case Rml::EventId::Mousedown:
+			{
+				const auto mouseButton = helper::getMouseButton(_event);
+				if (mouseButton == 1)
+					onRightClick(_event);
 			}
 			break;
 		default:
