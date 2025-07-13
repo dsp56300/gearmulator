@@ -2,9 +2,11 @@
 
 #include "patchmanagerUiRml.h"
 #include "tree.h"
-#include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/patchmanagerui.h"
+
+#include "juceRmlUi/rmlEventListener.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
