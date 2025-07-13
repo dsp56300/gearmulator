@@ -38,5 +38,13 @@ namespace jucePluginEditorLib::patchManagerRml
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
+
+		void onRightClick(const Rml::Event& _event) override;
+
+		pluginLib::patchDB::Tag getTag() const;
+		pluginLib::patchDB::TagType getTagType() const;
+		pluginLib::patchDB::Color getColor() const;
+
+	private:
 	};
 }
