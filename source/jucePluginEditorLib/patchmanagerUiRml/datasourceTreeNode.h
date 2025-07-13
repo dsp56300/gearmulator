@@ -33,5 +33,10 @@ namespace jucePluginEditorLib::patchManagerRml
 		explicit DatasourceTreeElem(Tree& _tree, const Rml::String& _tag);
 
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
+
+		void onRightClick(const Rml::Event& _event) override;
+
+	private:
+		pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};
 }

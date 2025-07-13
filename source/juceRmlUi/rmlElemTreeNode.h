@@ -16,6 +16,8 @@ namespace juceRmlUi
 		~ElemTreeNode() override;
 
 		virtual void setTree(ElemTree* _elemTree);
+		ElemTree* getTree() const { return m_tree; }
+
 		virtual void setNode(const TreeNodePtr& _node);
 
 		auto& getNode() const { return m_node; }
