@@ -280,6 +280,7 @@ namespace jucePluginEditorLib::patchManagerRml
 						new juceRmlUi::InplaceEditor(elem, patch->getName(), [this, patch](const std::string& _newName)
 						{
 							getDB().renamePatch(patch, _newName);
+							setContent(m_search);
 						});
 					});
 				}
