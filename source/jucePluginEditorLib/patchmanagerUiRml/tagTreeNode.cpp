@@ -87,12 +87,14 @@ namespace jucePluginEditorLib::patchManagerRml
 
 				juce::CallOutBox::launchAsynchronously(std::unique_ptr<juce::Component>(cs), rect, nullptr);
 				*/
+				setColor(getColor());
 			});
 			if(getColor() != pluginLib::patchDB::g_invalidColor)
 			{
 				menu.addItem("Clear Color", [this]
 				{
 					getDB().setTagColor(getTagType(), getTag(), pluginLib::patchDB::g_invalidColor);
+					setColor(getColor());
 				});
 			}
 
