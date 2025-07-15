@@ -3,13 +3,13 @@
 #include <cassert>
 
 #include "rmlDataProvider.h"
+#include "rmlHelper.h"
 
 #include "baseLib/filesystem.h"
 
 #include "juce_graphics/juce_graphics.h"
 
 #include "RmlUi/Core/Log.h"
-#include "RmlUi/Core/Variant.h"
 
 namespace juceRmlUi
 {
@@ -307,66 +307,10 @@ namespace juceRmlUi
 	{
 		const auto w = _image.getWidth();
 		const auto h = _image.getHeight();
-		const auto pixelCount = w * h;
 
 		std::vector<uint8_t> buffer;
 
-		juce::Image::BitmapData bitmapData(_image, 0, 0, w, h, juce::Image::BitmapData::readOnly);
-
-		uint32_t bufferIndex = 0;
-
-		switch(_image.getFormat())
-		{
-		case juce::Image::ARGB:
-			buffer.resize(pixelCount * 4);
-			for (int y=0; y<h; ++y)
-			{
-				for (int x=0; x<w; ++x)
-				{
-					// juce rturns an unpremultiplied color but we want a premultiplied pixel value
-					// the function getPixelColour casts the pixel pointer to PixelARGB* but this
-					// might change. Verify that its still the case and modify this assert accordingly
-					static_assert(JUCE_MAJOR_VERSION == 7 && JUCE_MINOR_VERSION == 0);
-					const auto pixel = reinterpret_cast<juce::PixelARGB*>(bitmapData.getPixelPointer(x, y));
-
-					buffer[bufferIndex++] = pixel->getRed();
-					buffer[bufferIndex++] = pixel->getGreen();
-					buffer[bufferIndex++] = pixel->getBlue();
-					buffer[bufferIndex++] = pixel->getAlpha();
-				}
-			}
-			break;
-		case juce::Image::RGB:
-			buffer.resize(pixelCount * 3);
-			for (int y=0; y<h; ++y)
-			{
-				for (int x=0; x<w; ++x)
-				{
-					auto pixel = bitmapData.getPixelColour(x,y);
-					buffer[bufferIndex++] = pixel.getRed();
-					buffer[bufferIndex++] = pixel.getGreen();
-					buffer[bufferIndex++] = pixel.getBlue();
-				}
-			}
-			break;
-		case juce::Image::SingleChannel:
-			{
-				buffer.resize(pixelCount * 3);
-
-				uint8_t* pixelPtr = bitmapData.data;
-				for (int i=0; i<pixelCount; ++i, ++pixelPtr)
-				{
-					buffer[bufferIndex++] = *pixelPtr;
-					buffer[bufferIndex++] = *pixelPtr;
-					buffer[bufferIndex++] = *pixelPtr;
-				}
-			}
-			break;
-		default:
-			Rml::Log::Message(Rml::Log::LT_ERROR, "Unsupported image format: %d", static_cast<int>(_image.getFormat()));
-			assert(false && "unsupported image format");
-			return {};
-		}
+		helper::toBuffer(buffer, _image);
 
 		auto dummyHandle = createDummyHandle();
 

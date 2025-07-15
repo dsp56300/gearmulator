@@ -20,6 +20,7 @@ namespace Rml
 
 namespace juce
 {
+	class Image;
 	class KeyPress;
 	class ModifierKeys;
 	class MouseEvent;
@@ -80,5 +81,7 @@ namespace juceRmlUi
 		void removeFromParent(Rml::Element* _elem);
 
 		void callPostFrame(const std::function<void()>& _callback);
+
+		bool toBuffer(std::vector<uint8_t>& _buffer, juce::Image& _image);
 	}
 }

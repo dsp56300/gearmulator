@@ -31,7 +31,7 @@
 			</tr>
 			<tr class="cp-tr">
 				<td class="cp-td" style="width: 80%">
-					<canvas class="cp-canvas" style="background-color: #f0f; width: 100%; height: 100%">
+					<canvas class="cp-canvas" style="width: 100%; height: 100%">
 						<input class="cp-slider" type="range" min="0" max="255" value="90" orientation="horizontal"/>
 					</canvas>
 				</td>

@@ -13,6 +13,7 @@ set(SOURCES
 	rmlElemComboBox.cpp rmlElemComboBox.h
 	rmlElement.cpp rmlElement.h
 	rmlElemButton.cpp rmlElemButton.h
+	rmlElemCanvas.cpp rmlElemCanvas.h
 	rmlElemKnob.cpp rmlElemKnob.h
 	rmlElemList.cpp rmlElemList.h
 	rmlElemListEntry.cpp rmlElemListEntry.h

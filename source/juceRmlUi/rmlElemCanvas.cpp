@@ -1,0 +1,128 @@
+#include "rmlElemCanvas.h"
+
+#include "rmlHelper.h"
+#include "juce_graphics/juce_graphics.h"
+
+#include "RmlUi/Core/ComputedValues.h"
+#include "RmlUi/Core/Geometry.h"
+#include "RmlUi/Core/Mesh.h"
+#include "RmlUi/Core/MeshUtilities.h"
+#include "RmlUi/Core/PropertyIdSet.h"
+#include "RmlUi/Core/RenderManager.h"
+
+namespace juceRmlUi
+{
+	using namespace Rml;
+
+	ElemCanvas::ElemCanvas(const String& _tag): Element(_tag)
+	{
+		m_repaintCallback = [this](std::vector<uint8_t>& _buffer)
+		{
+			updateImage();
+			helper::toBuffer(_buffer, *m_image);
+		};
+
+		m_repaintGraphicsCallback = [this](const juce::Image& _image, juce::Graphics& _g)
+		{
+			_g.setGradientFill(juce::ColourGradient(juce::Colour(0xffff0000), 0, 0, juce::Colour(0xff0000ff), static_cast<float>(_image.getWidth()), static_cast<float>(_image.getHeight()), false));
+			_g.fillAll();
+			_g.setColour(juce::Colour(0xffffffff));
+			_g.drawFittedText("Set Repaint Graphics Callback", 0, 0, _image.getWidth(), _image.getHeight(), juce::Justification::centred, 1);
+		};
+	}
+
+	void ElemCanvas::repaint()
+	{
+		m_textureDirty = true;
+	}
+
+	void ElemCanvas::generateGeometry()
+	{
+		// Release the old geometry before specifying the new vertices
+		auto mesh = m_geometry.Release(Geometry::ReleaseMode::ClearMesh);
+
+		const auto& computed = GetComputedValues();
+		const auto quadColour = computed.image_color().ToPremultiplied(computed.opacity());
+		const auto renderBox = GetRenderBox(BoxArea::Content);
+
+		const auto origin = renderBox.GetFillOffset();
+		const auto size = renderBox.GetFillSize();
+
+		const auto w = static_cast<int>(size.x);
+		const auto h = static_cast<int>(size.y);
+
+		if (w != m_textureSize.x || h != m_textureSize.y)
+		{
+			m_textureSize.x = w;
+			m_textureSize.y = h;
+
+			m_textureDirty = true;
+		}
+
+		MeshUtilities::GenerateQuad(mesh, origin, size, quadColour, Vector2f(0,0), Vector2f(1,1));
+
+		if (RenderManager* rm = GetRenderManager())
+			m_geometry = rm->MakeGeometry(std::move(mesh));
+
+		m_geometryDirty = false;
+	}
+
+	void ElemCanvas::generateTexture()
+	{
+		if (RenderManager* rm = GetRenderManager())
+		{
+			if (m_texture)
+				m_texture.Release();
+
+			if (m_textureSize.x > 0 && m_textureSize.y > 0)
+			{
+				m_texture = rm->MakeCallbackTexture([this](const CallbackTextureInterface& _callbackTextureInterface) -> bool
+				{
+					m_imageBuffer.resize(m_textureSize.x * m_textureSize.y * 4); // RGBA format
+					m_repaintCallback(m_imageBuffer);
+					_callbackTextureInterface.GenerateTexture(Span<const byte>(m_imageBuffer), m_textureSize);
+					return true;
+				});
+			}
+		}
+		m_textureDirty = false;
+	}
+
+	void ElemCanvas::OnRender()
+	{
+		Element::OnRender();
+
+		if (m_geometryDirty)
+			generateGeometry();
+		if (m_textureDirty)
+			generateTexture();
+
+		if (m_textureSize.x > 0 && m_textureSize.y > 0)
+			m_geometry.Render(GetAbsoluteOffset(BoxArea::Border), m_texture);
+	}
+
+	void ElemCanvas::OnResize()
+	{
+		Element::OnResize();
+		m_geometryDirty = true;
+	}
+
+	void ElemCanvas::OnPropertyChange(const Rml::PropertyIdSet& _changedProperties)
+	{
+		Element::OnPropertyChange(_changedProperties);
+
+		if (_changedProperties.Contains(PropertyId::ImageColor) || _changedProperties.Contains(PropertyId::Opacity))
+			m_geometryDirty = true;
+	}
+
+	void ElemCanvas::updateImage()
+	{
+		if (!m_image || m_image->getWidth() != m_textureSize.x || m_image->getHeight() != m_textureSize.y)
+		{
+			m_image.reset(new juce::Image(juce::Image::ARGB, m_textureSize.x, m_textureSize.y, false));
+			m_graphics.reset(new juce::Graphics(*m_image));
+		}
+
+		m_repaintGraphicsCallback(*m_image, *m_graphics);
+	}
+}
