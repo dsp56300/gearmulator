@@ -1,14 +1,25 @@
+.cp-parent {
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	background-color: #0008;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+}
+
 .cp-box {
 	box-shadow: #000a 0dp 0dp 8dp 3dp;
 	background-color: rgb(50,62,68);
 	border: 1dp rgb(172,176,179);
 	border-radius: 0dp;
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	position: absolute;
+	width: 30em;
 	font-size: 28dp;
 	padding: 1em;
+	display: flex;
+	flex-direction: column;
 }
 
 .cp-table {
@@ -97,6 +108,7 @@ input.range.cp-slider-v sliderbar
 	text-align: center;
 	font-size: 1.2em;
 	font-weight: bold;
+	width: 100%;
 }
 
 .cp-label {

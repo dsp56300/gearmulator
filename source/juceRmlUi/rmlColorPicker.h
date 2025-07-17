@@ -32,7 +32,7 @@ namespace juceRmlUi
 	class ColorPicker
 	{
 	public:
-		ColorPicker(Rml::Element* _root, const Rml::Colourb& _initialColor = {});
+		ColorPicker(Rml::Element* _root, const Rml::Colourb& _initialColor = {255,255,255,255});
 
 	private:
 		void paintChannelGradient(const juce::Image& _image, juce::Graphics& _graphics, size_t _channel) const;
@@ -41,6 +41,8 @@ namespace juceRmlUi
 		void paintSaturationGradient(const juce::Image& _image, const juce::Graphics& _graphics) const;
 
 		void setColor(const Rml::Colourb& _color);
+
+		void close(bool _confirmNewColor);
 
 		std::array<Rml::ElementFormControlInput*, 3> m_channelTexts{};
 		std::array<Rml::ElementFormControlInput*, 3> m_channelSliders{};

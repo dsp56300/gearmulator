@@ -97,6 +97,18 @@ namespace juceRmlUi
 
 		m_saturationGradient->setRepaintGraphicsCallback([this](const juce::Image& _image, const juce::Graphics& _graphics) { paintSaturationGradient(_image, _graphics); });
 
+		auto* buttonConfirm = findChild(_root, "buttonConfirm");
+		EventListener::Add(buttonConfirm, Rml::EventId::Click, [this](Rml::Event&)
+		{
+			close(true);
+		});
+
+		auto* buttonCancel = findChild(_root, "buttonCancel");
+		EventListener::Add(buttonCancel, Rml::EventId::Click, [this](Rml::Event&)
+		{
+			close(false);
+		});
+
 		setColorText(m_textColorOld, _initialColor);
 
 		setColor(_initialColor);
@@ -219,5 +231,9 @@ namespace juceRmlUi
 		m_saturationPointer->SetProperty(Rml::PropertyId::Top, Rml::Property(size.y * (1.0f - b), Rml::Unit::PX));
 
 		m_changingColor = false;
+	}
+
+	void ColorPicker::close(bool _confirmNewColor)
+	{
 	}
 }
