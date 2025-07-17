@@ -5,7 +5,16 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
+#include "juceRmlUi/rmlColorPicker.h"
+#include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/rmlInterfaces.h"
+
 #include "juceRmlUi/rmlMenu.h"
+
+namespace juceRmlUi
+{
+	class ColorPicker;
+}
 
 namespace jucePluginEditorLib::patchManagerRml
 {
@@ -59,46 +68,39 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		if(getTagType() != pluginLib::patchDB::TagType::Invalid && getTree()->getTree().getSelectedNodes().size() == 1)
 		{
-			juce::PopupMenu menu;
+			juceRmlUi::Menu menu;
 			const auto& s = getDB().getSearch(getSearchHandle());
 			if(s && !s->getResultSize())
 			{
-				menu.addItem("Remove", [this]
+				menu.addEntry("Remove", [this]
 				{
 					getDB().removeTag(getTagType(), getTag());
 				});
 			}
-			menu.addItem("Set Color...", [this]
+			menu.addEntry("Set Color...", [this]
 			{
-				/*
-				juce::ColourSelector* cs = new juce::ColourSelector(juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace);
+				m_colorPicker = juceRmlUi::ColorPicker::createFromTemplate("colorpicker", GetOwnerDocument(), [this](const bool _confirmed, const Rml::Colourb& _colour)
+				{
+					if (_confirmed)
+					{
+						const auto c = juceRmlUi::helper::toARGB(_colour);
+						getDB().setTagColor(getTagType(), getTag(), c);
+						setColor(c);
+					}
+					m_colorPicker.reset();
+				}, juceRmlUi::helper::fromARGB(getColor()));
 
-				cs->getProperties().set("tagType", static_cast<int>(tagType));
-				cs->getProperties().set("tag", juce::String(getTag()));
-
-				cs->setSize(400,300);
-				cs->setCurrentColour(juce::Colour(getColor()));
-				cs->addChangeListener(&getPatchManager());
-
-				const auto treeRect = getTree()->getScreenBounds();
-				const auto itemRect = getItemPosition(true);
-				auto rect = itemRect;
-				rect.translate(treeRect.getX(), treeRect.getY());
-
-				juce::CallOutBox::launchAsynchronously(std::unique_ptr<juce::Component>(cs), rect, nullptr);
-				*/
-				setColor(getColor());
 			});
 			if(getColor() != pluginLib::patchDB::g_invalidColor)
 			{
-				menu.addItem("Clear Color", [this]
+				menu.addEntry("Clear Color", [this]
 				{
 					getDB().setTagColor(getTagType(), getTag(), pluginLib::patchDB::g_invalidColor);
 					setColor(getColor());
 				});
 			}
 
-			menu.showMenuAsync({});
+			menu.runModal(_event);
 		}
 	}
 

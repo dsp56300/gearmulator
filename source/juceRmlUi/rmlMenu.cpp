@@ -205,6 +205,11 @@ namespace juceRmlUi
 		});
 	}
 
+	void Menu::runModal(const Rml::Event& _mouseEvent, uint32_t _itemsPerColumn)
+	{
+		runModal(_mouseEvent.GetTargetElement(), helper::getMousePos(_mouseEvent), _itemsPerColumn);
+	}
+
 	void Menu::closeAll()
 	{
 		if (!m_parentMenu)

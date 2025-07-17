@@ -4,9 +4,11 @@
 
 #include "rmlElemCanvas.h"
 #include "rmlEventListener.h"
-#include "juceRmlPlugin/skinConverter/scHelper.h"
+#include "Core/Template.h"
+#include "Core/TemplateCache.h"
 
 #include "juce_graphics/juce_graphics.h"
+#include "RmlUi/Core/ElementDocument.h"
 
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
@@ -24,10 +26,24 @@ namespace juceRmlUi
 			const auto colorString = "#" + toJuceColor(_color).toDisplayString(false).toStdString();
 			_elem->SetInnerRML(colorString);
 			_elem->SetProperty("background-color", colorString);
+
+			const auto grey = static_cast<int>(_color.red) + static_cast<int>(_color.green) + static_cast<int>(_color.blue);
+
+			if (grey < 128 * 3)
+			{
+				_elem->SetProperty("color", "white");
+			}
+			else
+			{
+				_elem->SetProperty("color", "black");
+			}
 		}
 	}
 
-	ColorPicker::ColorPicker(Rml::Element* _root, const Rml::Colourb& _initialColor) : m_initialColor(_initialColor)
+	ColorPicker::ColorPicker(Rml::Element* _root, CompletionCallback&& _completionCallback, const Rml::Colourb& _initialColor)
+	: m_root(_root)
+	, m_initialColor(_initialColor)
+	, m_completionCallback(std::move(_completionCallback))
 	{
 		using namespace juceRmlUi::helper;
 
@@ -109,9 +125,48 @@ namespace juceRmlUi
 			close(false);
 		});
 
-		setColorText(m_textColorOld, _initialColor);
+		auto ic = _initialColor;
+		ic.alpha = 255;
+		setColorText(m_textColorOld, ic);
 
-		setColor(_initialColor);
+		setColor(ic);
+	}
+
+	ColorPicker::~ColorPicker()
+	{
+		if (!m_root)
+			return;
+
+		auto* r = m_root;
+		m_root = nullptr;
+		r->GetParentNode()->RemoveChild(r);
+	}
+
+	std::unique_ptr<ColorPicker> ColorPicker::createFromTemplate(const std::string& _templateName, Rml::Element* _parent, CompletionCallback&& _completionCallback, const Rml::Colourb& _initialColor/* = {255,255,255,255}*/)
+	{
+		auto* t = Rml::TemplateCache::GetTemplate(_templateName);
+
+		if (!t)
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "ColorPicker template '%s' not found", _templateName.c_str());
+			return nullptr;
+		}
+
+		auto elem = _parent->GetOwnerDocument()->CreateElement("div");
+
+		auto* parsedElem = t->ParseTemplate(elem.get());
+
+		if (!parsedElem)
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "ColorPicker template '%s' could not be parsed", _templateName.c_str());
+			return nullptr;
+		}
+
+		auto* attachedElem = _parent->AppendChild(std::move(elem));
+
+		attachedElem->SetProperty(Rml::PropertyId::ZIndex, Rml::Property(100, Rml::Unit::NUMBER));
+
+		return std::make_unique<ColorPicker>(attachedElem, std::move(_completionCallback), _initialColor);
 	}
 
 	void ColorPicker::paintChannelGradient(const juce::Image& _image, juce::Graphics& _graphics, const size_t _channel) const
@@ -233,7 +288,8 @@ namespace juceRmlUi
 		m_changingColor = false;
 	}
 
-	void ColorPicker::close(bool _confirmNewColor)
+	void ColorPicker::close(const bool _confirmNewColor) const
 	{
+		m_completionCallback(_confirmNewColor, _confirmNewColor ? m_currentColor : m_initialColor);
 	}
 }

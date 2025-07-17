@@ -32,7 +32,11 @@ namespace juceRmlUi
 	class ColorPicker
 	{
 	public:
-		ColorPicker(Rml::Element* _root, const Rml::Colourb& _initialColor = {255,255,255,255});
+		using CompletionCallback = std::function<void(bool, const Rml::Colourb&)>;
+		ColorPicker(Rml::Element* _root, CompletionCallback&& _completionCallback, const Rml::Colourb& _initialColor = {255,255,255,255});
+		~ColorPicker();
+
+		static std::unique_ptr<ColorPicker> createFromTemplate(const std::string& _templateName, Rml::Element* _parent, CompletionCallback&& _completionCallback, const Rml::Colourb& _initialColor = {255,255,255,255});
 
 	private:
 		void paintChannelGradient(const juce::Image& _image, juce::Graphics& _graphics, size_t _channel) const;
@@ -42,7 +46,12 @@ namespace juceRmlUi
 
 		void setColor(const Rml::Colourb& _color);
 
-		void close(bool _confirmNewColor);
+		void close(bool _confirmNewColor) const;
+
+		Rml::Element* m_root;
+		Rml::Colourb m_initialColor;
+		Rml::Colourb m_currentColor{0,0,0,0};
+		bool m_changingColor = false;
 
 		std::array<Rml::ElementFormControlInput*, 3> m_channelTexts{};
 		std::array<Rml::ElementFormControlInput*, 3> m_channelSliders{};
@@ -56,8 +65,6 @@ namespace juceRmlUi
 		ElemCanvas* m_saturationGradient{};
 		Rml::Element* m_saturationPointer{};
 
-		Rml::Colourb m_initialColor;
-		Rml::Colourb m_currentColor{0,0,0,0};
-		bool m_changingColor = false;
+		CompletionCallback m_completionCallback;
 	};
 }

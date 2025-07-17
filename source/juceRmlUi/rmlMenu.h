@@ -47,6 +47,7 @@ namespace juceRmlUi
 		void ProcessEvent(Rml::Event& _event) override;
 
 		void runModal(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn = 100);
+		void runModal(const Rml::Event& _mouseEvent, uint32_t _itemsPerColumn = 100);
 
 	private:
 		void closeAll();

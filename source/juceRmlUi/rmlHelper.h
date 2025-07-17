@@ -87,5 +87,7 @@ namespace juceRmlUi
 		bool toBuffer(std::vector<uint8_t>& _buffer, juce::Image& _image);
 
 		Rml::Colourb toRmlColor(const juce::Colour& _color);
+		uint32_t toARGB(const Rml::Colourb& _color);
+		Rml::Colourb fromARGB(uint32_t _color);
 	}
 }

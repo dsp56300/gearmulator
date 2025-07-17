@@ -5,6 +5,11 @@
 
 #include "jucePluginLib/patchdb/patchdbtypes.h"
 
+namespace juceRmlUi
+{
+	class ColorPicker;
+}
+
 namespace jucePluginEditorLib::patchManagerRml
 {
 	struct TagNode : juceRmlUi::TreeNode
@@ -46,5 +51,6 @@ namespace jucePluginEditorLib::patchManagerRml
 		pluginLib::patchDB::Color getColor() const;
 
 	private:
+		std::unique_ptr<juceRmlUi::ColorPicker> m_colorPicker;
 	};
 }

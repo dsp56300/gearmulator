@@ -6,6 +6,7 @@
 #include "list.h"
 #include "status.h"
 #include "tagsTree.h"
+
 #include "jucePluginEditorLib/patchmanager/patchmanagerui.h"
 
 #include "juceRmlUi/rmlElemTree.h"

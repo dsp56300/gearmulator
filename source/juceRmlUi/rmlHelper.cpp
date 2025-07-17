@@ -379,5 +379,20 @@ namespace juceRmlUi
 				_color.getAlpha()
 			};
 		}
+
+		uint32_t toARGB(const Rml::Colourb& _color)
+		{
+			return (_color.alpha << 24) | (_color.red << 16) | (_color.green << 8) | _color.blue;
+		}
+
+		Rml::Colourb fromARGB(const uint32_t _color)
+		{
+			return {
+				static_cast<uint8_t>((_color >> 16) & 0xFF),
+				static_cast<uint8_t>((_color >> 8) & 0xFF),
+				static_cast<uint8_t>(_color & 0xFF),
+				static_cast<uint8_t>((_color >> 24) & 0xFF)
+			};
+		}
 	}
 }
