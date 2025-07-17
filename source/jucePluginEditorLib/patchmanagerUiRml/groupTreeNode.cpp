@@ -2,10 +2,13 @@
 
 #include "patchmanagerUiRml.h"
 
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/search.h"
 #include "jucePluginEditorLib/patchmanager/types.h"
 
 #include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/rmlInplaceEditor.h"
+#include "juceRmlUi/rmlMenu.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
@@ -265,5 +268,100 @@ namespace jucePluginEditorLib::patchManagerRml
 		auto node = dynamic_cast<GroupNode*>(getNode().get());
 
 		node->onParentSearchChanged(_parentSearchRequest);
+	}
+
+	void GroupTreeElem::onRightClick(const Rml::Event& _event)
+	{
+		TreeElem::onRightClick(_event);
+
+		juceRmlUi::Menu menu;
+
+		auto node = dynamic_cast<GroupNode*>(getNode().get());
+
+		const auto groupType = node->getGroupType();
+		const auto tagType = toTagType(groupType);
+
+		if (groupType == patchManager::GroupType::DataSources)
+		{
+			menu.addEntry("Add folders...", [this]
+				{
+					m_chooser.reset(new juce::FileChooser("Select Folders"));
+
+					m_chooser->launchAsync(
+						juce::FileBrowserComponent::openMode |
+						juce::FileBrowserComponent::canSelectDirectories |
+						juce::FileBrowserComponent::canSelectMultipleItems
+						, [this](const juce::FileChooser& _fileChooser)
+						{
+							for (const auto& r : _fileChooser.getResults())
+							{
+								const auto result = r.getFullPathName().toStdString();
+								pluginLib::patchDB::DataSource ds;
+								ds.type = pluginLib::patchDB::SourceType::Folder;
+								ds.name = result;
+								ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+								getDB().addDataSource(ds);
+							}
+
+							m_chooser.reset();
+						});
+				});
+
+			menu.addEntry("Add files...", [this]
+				{
+					m_chooser.reset(new juce::FileChooser("Select Files"));
+
+					m_chooser->launchAsync(
+						juce::FileBrowserComponent::openMode |
+						juce::FileBrowserComponent::canSelectFiles |
+						juce::FileBrowserComponent::canSelectMultipleItems,
+						[this](const juce::FileChooser& _fileChooser)
+						{
+							for (const auto& r : _fileChooser.getResults())
+							{
+								const auto result = r.getFullPathName().toStdString();
+								pluginLib::patchDB::DataSource ds;
+								ds.type = pluginLib::patchDB::SourceType::File;
+								ds.name = result;
+								ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+								getDB().addDataSource(ds);
+							}
+
+							m_chooser.reset();
+						});
+				});
+		}
+		else if (groupType == patchManager::GroupType::LocalStorage)
+		{
+			menu.addEntry("Create...", [this]
+				{
+					new juceRmlUi::InplaceEditor(this, "Enter name...",
+						[this](const std::string& _newName)
+						{
+							pluginLib::patchDB::DataSource ds;
+
+							ds.name = _newName;
+							ds.type = pluginLib::patchDB::SourceType::LocalStorage;
+							ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+							ds.timestamp = std::chrono::system_clock::now();
+
+							getDB().addDataSource(ds);
+						});
+				});
+		}
+		if (tagType != pluginLib::patchDB::TagType::Invalid)
+		{
+			menu.addEntry("Add...", [this, tagType]
+				{
+					new juceRmlUi::InplaceEditor(this, "Enter name...",
+						[this, tagType](const std::string& _newText)
+						{
+							if (!_newText.empty())
+								getDB().addTag(tagType, _newText);
+						});
+				});
+		}
+
+		menu.runModal(_event);
 	}
 }

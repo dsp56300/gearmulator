@@ -2,6 +2,11 @@
 
 #include "treeNode.h"
 
+namespace juce
+{
+	class FileChooser;
+}
+
 namespace jucePluginEditorLib::patchManagerRml
 {
 	struct TagNode;
@@ -70,5 +75,10 @@ namespace jucePluginEditorLib::patchManagerRml
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
+
+		void onRightClick(const Rml::Event& _event) override;
+
+	private:
+		std::unique_ptr<juce::FileChooser> m_chooser;
 	};
 }
