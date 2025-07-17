@@ -258,7 +258,14 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		if(hasSelectedPatches)
 		{
-			menu.addSeparator();
+			bool haveSeparator = false;
+
+			auto tryAddSeparator = [&]()
+			{
+				if (!haveSeparator)
+					menu.addSeparator();
+				haveSeparator = true;
+			};
 
 			pluginLib::patchDB::TypedTags tags;
 
@@ -267,6 +274,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 			if(selectedPatches.size() == 1)
 			{
+				tryAddSeparator();
+
 				const auto& patch = *selectedPatches.begin();
 
 				const auto& listEntry = m_list->getList().getEntry(getSelectedEntries().front());
@@ -293,6 +302,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 			if(!m_search->request.tags.empty())
 			{
+				tryAddSeparator();
+
 				menu.addEntry("Remove selected", [this, s = selectedPatches]
 				{
 					const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
@@ -314,6 +325,8 @@ namespace jucePluginEditorLib::patchManagerRml
 			}
 			else if(getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)
 			{
+				tryAddSeparator();
+
 				menu.addEntry("Delete selected", [this, s = selectedPatches]
 				{
 					showDeleteConfirmationMessageBox([this, s](genericUI::MessageBox::Result _result)
