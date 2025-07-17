@@ -108,7 +108,12 @@ namespace juceRmlUi
 			{
 				const auto mouseButton = helper::getMouseButton(_event);
 				if (mouseButton == 1)
+				{
+					if (!getNode()->isSelected())
+						getNode()->setSelected(true, false);
+
 					onRightClick(_event);
+				}
 			}
 			break;
 		default:
