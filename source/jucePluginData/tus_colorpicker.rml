@@ -4,24 +4,25 @@
 </head>
 <body>
 	<div id="tus-colorpicker" class="cp-box">
+		<div class="cp-headline">Select Color</div>
 		<table class="cp-table">
 			<tr class="cp-tr">
 				<td class="cp-td cp-colorvalueheadline">Current</td>
 				<td class="cp-td cp-colorvalueheadline">New</td>
 			</tr>
 			<tr class="cp-tr">
-				<td id="textColorValueOld" class="cp-td cp-colorvalue" style="background-color: #f00">#FF0000</td>
-				<td id="textColorValueNew" class="cp-td cp-colorvalue" style="background-color: #00f">#0000FF</td>
+				<td id="textColorValueOld" class="cp-td cp-colorvalue cp-edge">#FF0000</td>
+				<td id="textColorValueNew" class="cp-td cp-colorvalue cp-edge">#0000FF</td>
 			</tr>
 		</table>
 		<table class="cp-table">
 			<tr class="cp-tr" style="height: 12em">
-				<td class="cp-td" style="width: 80%">
+				<td class="cp-td cp-edge" style="width: 90%">
 					<canvas id="gradientSaturation" class="cp-canvas">
 						<div id="saturationPointer" class="cp-pointer"/>
 					</canvas>
 				</td>
-				<td class="cp-td">
+				<td class="cp-td cp-edge">
 					<canvas id="gradientHue" class="cp-canvas">
 						<input id="sliderH" class="cp-slider-v" type="range" min="0" max="255" value="90" orientation="vertical"/>
 					</canvas>
@@ -30,7 +31,8 @@
 		</table>
 		<table class="cp-table" style="row-gap: 1em">
 			<tr class="cp-tr">
-				<td class="cp-td" style="background-color: #f00; width: 80%">
+				<td class="cp-td" style="width: 3%"><div class="cp-label">R</div></td>
+				<td class="cp-td cp-edge" style="width: 80%">
 					<canvas id="gradientR" class="cp-canvas">
 						<input id="sliderR" class="cp-slider" type="range" min="0" max="255" value="90" orientation="horizontal"/>
 					</canvas>
@@ -38,7 +40,8 @@
 				<td class="cp-td"><input id="textR" class="cp-inputchannel" type="text" maxlength="3" value="255"/></td>
 			</tr>
 			<tr class="cp-tr">
-				<td class="cp-td" style="background-color: #0f0; width: 80%">
+				<td class="cp-td" style="width: 3%"><div class="cp-label">G</div></td>
+				<td class="cp-td cp-edge" style="width: 80%">
 					<canvas id="gradientG" class="cp-canvas">
 						<input id="sliderG" class="cp-slider" type="range" min="0" max="255" value="90" orientation="horizontal"/>
 					</canvas>
@@ -46,12 +49,23 @@
 				<td class="cp-td"><input id="textG" class="cp-inputchannel" type="text" maxlength="3" value="128"/></td>
 			</tr>
 			<tr class="cp-tr">
-				<td class="cp-td" style="width: 80%">
+				<td class="cp-td" style="width: 3%"><div class="cp-label">B</div></td>
+				<td class="cp-td cp-edge" style="width: 80%">
 					<canvas id="gradientB" class="cp-canvas">
 						<input id="sliderB" class="cp-slider" type="range" min="0" max="255" value="90" orientation="horizontal"/>
 					</canvas>
 				</td>
 				<td class="cp-td"><input id="textB" class="cp-inputchannel" type="text" maxlength="3" value="0"/></td>
+			</tr>
+		</table>
+		<table class="cp-table" style="row-gap: 1em; margin-top: 1em; margin-bottom: 1em">
+			<tr class="cp-tr">
+				<td class="cp-td" style="text-align: center">
+					<div id="buttonCancel" class="button cp-button">Cancel</div>
+				</td>
+				<td class="cp-td" style="text-align: center">
+					<div id="buttonConfirm" class="button cp-button">Confirm</div>
+				</td>
 			</tr>
 		</table>
 	</div>

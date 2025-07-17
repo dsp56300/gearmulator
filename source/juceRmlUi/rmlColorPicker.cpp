@@ -62,6 +62,15 @@ namespace juceRmlUi
 				col[c] = static_cast<uint8_t>(::atoi(m_channelSliders[c]->GetValue().c_str()));
 				setColor(col);
 			});
+
+			EventListener::Add(m_channelTexts[c], Rml::EventId::Change, [this, c](Rml::Event&)
+			{
+				auto col = m_currentColor;
+				auto v = ::atoi(m_channelTexts[c]->GetValue().c_str());
+				v = std::clamp(v, 0, 255);
+				col[c] = static_cast<uint8_t>(v);
+				setColor(col);
+			});
 		}
 
 		m_hueGradient->setRepaintGraphicsCallback([](const juce::Image& _image, juce::Graphics& _graphics) { paintHueGradient(_image, _graphics); });
@@ -127,7 +136,7 @@ namespace juceRmlUi
 
 	void ColorPicker::paintHueGradient(const juce::Image& _image, juce::Graphics& _graphics)
 	{
-		for (size_t y=0; y<_image.getHeight(); ++y)
+		for (int y=0; y<_image.getHeight(); ++y)
 		{
 			const auto hue = static_cast<float>(y) / static_cast<float>(_image.getHeight());
 			const auto color = juce::Colour::fromHSV(hue, 1.0f, 1.0f, 1.0f);
@@ -136,7 +145,7 @@ namespace juceRmlUi
 		}
 	}
 
-	void ColorPicker::paintSaturationGradient(const juce::Image& _image, const juce::Graphics&)
+	void ColorPicker::paintSaturationGradient(const juce::Image& _image, const juce::Graphics&) const
 	{
 		const juce::Colour col = toJuceColor(m_currentColor);
 		float h,s,b;
@@ -203,7 +212,8 @@ namespace juceRmlUi
 
 		m_hueSlider->SetValue(std::to_string(static_cast<int>(h * 255.0f)));
 
-		const auto size = m_saturationGradient->GetBox().GetSize(Rml::BoxArea::Content);
+		auto size = m_saturationGradient->GetBox().GetSize(Rml::BoxArea::Content);
+		size -= m_saturationPointer->GetBox().GetSize(Rml::BoxArea::Content);
 
 		m_saturationPointer->SetProperty(Rml::PropertyId::Left, Rml::Property(size.x * s, Rml::Unit::PX));
 		m_saturationPointer->SetProperty(Rml::PropertyId::Top, Rml::Property(size.y * (1.0f - b), Rml::Unit::PX));

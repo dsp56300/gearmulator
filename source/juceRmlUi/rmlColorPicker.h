@@ -38,7 +38,7 @@ namespace juceRmlUi
 		void paintChannelGradient(const juce::Image& _image, juce::Graphics& _graphics, size_t _channel) const;
 		void setColorBySaturationGradient(const Rml::Event& _event);
 		static void paintHueGradient(const juce::Image& _image, juce::Graphics& _graphics);
-		void paintSaturationGradient(const juce::Image& _image, const juce::Graphics& _graphics);
+		void paintSaturationGradient(const juce::Image& _image, const juce::Graphics& _graphics) const;
 
 		void setColor(const Rml::Colourb& _color);
 

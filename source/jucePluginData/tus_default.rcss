@@ -284,3 +284,18 @@ input.text {
 knob {
 	drag: drag;
 }
+
+.button {
+	background-color: rgb(50,62,68);
+	border: 2dp rgb(172,176,179);
+	border-radius: 15dp;
+	padding: 0.5em 1em 0.5em 1em;
+}
+
+.button:hover {
+	background-color: rgb(60,72,78);
+}
+
+.button:active {
+	background-color: rgb(70,82,88);
+}

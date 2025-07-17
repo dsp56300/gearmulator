@@ -22,6 +22,15 @@
 .cp-td {
 	position: relative;
 }
+
+.cp-edge {
+	border-top-color: #0005;
+	border-left-color: #0005;
+	border-right-color: #fff5;
+	border-bottom-color: #fff5;
+	border: 1dp;
+}
+
 .cp-colorvalue {
 	text-align: center;
 	vertical-align: center;
@@ -82,4 +91,23 @@ input.range.cp-slider-v sliderbar
 	border-radius: 4dp;
 	border: 1dp black;
 	background-color: white;
+}
+
+.cp-headline {
+	text-align: center;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+.cp-label {
+	text-align: left;
+	vertical-align: center;
+	font-weight: bold;
+	height: 100%;
+	line-height: 2em;
+}
+
+.cp-button {
+	margin: 0 auto;
+	width: 40%;
 }
