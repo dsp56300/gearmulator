@@ -134,7 +134,7 @@ namespace juceRmlUi
 			m_root->SetProperty("top", std::to_string(dims.y - size.y) + "px");
 
 		m_document = _parent->GetOwnerDocument();
-		m_document->AddEventListener(Rml::EventId::Click, this);
+		m_document->AddEventListener(Rml::EventId::Mousedown, this);
 
 		m_root->AddEventListener(Rml::EventId::Mouseover, this);
 	}
@@ -154,7 +154,7 @@ namespace juceRmlUi
 
 		if (m_document)
 		{
-			m_document->RemoveEventListener(Rml::EventId::Click, this);
+			m_document->RemoveEventListener(Rml::EventId::Mousedown, this);
 			m_document = nullptr;
 		}
 
@@ -173,12 +173,11 @@ namespace juceRmlUi
 	{
 		switch (_event.GetId())
 		{
-		case Rml::EventId::Click:
+		case Rml::EventId::Mousedown:
 			{
 				const auto* target = _event.GetTargetElement();
 				if (target && helper::isChildOf(m_root, target))
 					return;
-				Rml::Log::Message(Rml::Log::LT_INFO, "somewhere else clicked, closing");
 				close();
 			}
 			break;
