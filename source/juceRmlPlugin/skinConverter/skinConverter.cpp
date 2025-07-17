@@ -892,7 +892,7 @@ namespace rmlPlugin::skinConverter
 			else
 				styleSearch.add("border", "0dp transparent");
 
-			m_styles.insert({ ".pm-search", styleSearch });
+			m_styles.insert({ "input.text", styleSearch });
 
 			res = true;
 		}
@@ -959,7 +959,7 @@ namespace rmlPlugin::skinConverter
 			os.apply(m_editor, *pmStatus);
 			CoStyle style = createTextStyle(os, defaultFontSize, fontSizeScale);
 
-			const auto itSearch = m_styles.find(".pm-search");
+			const auto itSearch = m_styles.find("input.text");
 			if (itSearch != m_styles.end())
 			{
 				const auto itBorder = itSearch->second.properties.find("border");
