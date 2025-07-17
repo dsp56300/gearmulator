@@ -92,6 +92,7 @@ namespace rmlPlugin::skinConverter
 		std::stringstream ss;
 		ss << "<rml>\n";
 		ss << "\t<head>\n";
+		ss << "\t\t" << R"(<link type="text/template" href="tus_colorpicker.rml"/>)" << '\n';
 		ss << "\t\t" << R"(<link type="text/template" href="tus_patchmanager.rml"/>)" << '\n';
 		ss << "\t\t" << R"(<link type="text/rcss" href="tus_default.rcss"/>)" << '\n';
 		ss << "\t\t" << R"(<link type="text/rcss" href="tus_juceskin.rcss"/>)" << '\n';
