@@ -79,9 +79,7 @@ namespace jucePluginEditorLib
 
 		m_rmlComponent.reset(dynamic_cast<juceRmlUi::RmlComponent*>(createRmlUiComponent(m_skin.jsonFilename)));
 
-		auto* elem = m_rmlComponent->getDocument()->GetElementById("patchmanager");
-
-		if (elem)
+		if (auto* elem = m_rmlComponent->getDocument()->GetElementById("patchmanager"))
 		{
 			juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
 			setPatchManager(createPatchManager(*m_rmlComponent, elem));

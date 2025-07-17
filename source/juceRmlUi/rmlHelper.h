@@ -20,6 +20,7 @@ namespace Rml
 
 namespace juce
 {
+	class Colour;
 	class Image;
 	class KeyPress;
 	class ModifierKeys;
@@ -72,7 +73,8 @@ namespace juceRmlUi
 		template<typename T>
 		T* findChildT(Rml::Element* _parent, const std::string& _name, bool _mustExist = true)
 		{
-			auto result = dynamic_cast<T*>(findChild(_parent, _name, _mustExist));
+			auto* child = findChild(_parent, _name, _mustExist);
+			auto result = dynamic_cast<T*>(child);
 			if (!result && _mustExist)
 				throw std::runtime_error("Element '" + _name + "' found but has incorrect type");
 			return result;
@@ -83,5 +85,7 @@ namespace juceRmlUi
 		void callPostFrame(const std::function<void()>& _callback);
 
 		bool toBuffer(std::vector<uint8_t>& _buffer, juce::Image& _image);
+
+		Rml::Colourb toRmlColor(const juce::Colour& _color);
 	}
 }

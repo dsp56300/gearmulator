@@ -40,7 +40,7 @@
 	box-sizing: border-box;
 }
 
-.cp-slider {
+.cp-slider, .cp-slider-v {
 	position: absolute;
 	width: 100%;
 	height: 100%;
@@ -50,16 +50,36 @@ input.range.cp-slider slidertrack
 {
 }
 
-input.range.cp-slider sliderbar
+input.range.cp-slider sliderbar, input.range.cp-slider-v sliderbar
 {
 	box-sizing: border-box;
-	width: 0.3em;
 	background-color: #fff;
 	border: 1dp #000;
+}
+
+input.range.cp-slider sliderbar
+{
+	width: 0.3em;
+}
+
+input.range.cp-slider-v sliderbar
+{
+	height: 0.3em;
 }
 
 .cp-canvas {
 	position: absolute;
 	width: 100%;
 	height: 100%;
+}
+
+.cp-pointer {
+	position: absolute;
+	left: 40dp;
+	top: 40dp;
+	width: 8dp;
+	height: 8dp;
+	border-radius: 4dp;
+	border: 1dp black;
+	background-color: white;
 }

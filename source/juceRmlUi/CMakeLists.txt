@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.15)
 project(juceRmlUi VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
-	juceRmlUi.cpp juceRmlUi.h
 	juceRmlComponent.cpp juceRmlComponent.h
+	juceRmlUi.cpp juceRmlUi.h
+	rmlColorPicker.cpp rmlColorPicker.h
 	rmlDataProvider.h
 	rmlDocuments.h
 	rmlDragData.h

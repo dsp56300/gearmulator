@@ -4,16 +4,6 @@
 
 namespace rmlPlugin::skinConverter
 {
-	Rml::Colourb helper::toRmlColor(const juce::Colour& _color)
-	{
-		return {
-			_color.getRed(),
-			_color.getGreen(),
-			_color.getBlue(),
-			_color.getAlpha()
-		};
-	}
-
 	std::string helper::toRmlColorString(const juce::Colour& _color)
 	{
 		char temp[64];

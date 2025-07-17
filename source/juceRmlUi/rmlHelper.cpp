@@ -369,5 +369,15 @@ namespace juceRmlUi
 				return false;
 			}
 		}
+
+		Rml::Colourb toRmlColor(const juce::Colour& _color)
+		{
+			return {
+				_color.getRed(),
+				_color.getGreen(),
+				_color.getBlue(),
+				_color.getAlpha()
+			};
+		}
 	}
 }
