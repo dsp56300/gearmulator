@@ -15,6 +15,12 @@ namespace juceRmlUi
 			init(_elem);
 	}
 
+	DragTarget::~DragTarget()
+	{
+		if (m_element)
+			m_element->RemoveAttribute("dragTarget");
+	}
+
 	bool DragTarget::init(Rml::Element* _elem)
 	{
 		if (m_element)
@@ -29,7 +35,16 @@ namespace juceRmlUi
 
 		setAllowLocations(false, true);
 
+		m_element->SetAttribute("dragTarget", this);
+
 		return true;
+	}
+
+	DragTarget* DragTarget::fromElement(const Rml::Element* _elem)
+	{
+		if (!_elem)
+			return nullptr;
+		return static_cast<DragTarget*>(_elem->GetAttribute<void*>("dragTarget", nullptr));
 	}
 
 	void DragTarget::onDragOver(const Rml::Event& _event)

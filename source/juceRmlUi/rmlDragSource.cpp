@@ -33,8 +33,7 @@ namespace juceRmlUi
 	{
 		if (!_elem)
 			return nullptr;
-		void* p = _elem->GetAttribute("dragSource", static_cast<void*>(nullptr));
-		return static_cast<DragSource*>(p);
+		return static_cast<DragSource*>(_elem->GetAttribute<void*>("dragSource", nullptr));
 	}
 
 	void DragSource::onDragStart(const Rml::Event& _event)

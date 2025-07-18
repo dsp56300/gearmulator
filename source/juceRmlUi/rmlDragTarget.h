@@ -32,7 +32,7 @@ namespace juceRmlUi
 		};
 
 		DragTarget(Rml::Element* _elem = nullptr);
-		~DragTarget() = default;
+		~DragTarget();
 
 		bool init(Rml::Element* _elem);
 
@@ -43,6 +43,8 @@ namespace juceRmlUi
 			m_allowLocationHorizontal = _horizontal;
 			m_allowLocationVertical = _vertical;
 		}
+
+		static DragTarget* fromElement(const Rml::Element* _elem);
 
 	private:
 		void onDragOver(const Rml::Event& _event);
