@@ -4,6 +4,7 @@ project(juceRmlUi VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	juceRmlComponent.cpp juceRmlComponent.h
+	juceRmlDrag.cpp juceRmlDrag.h
 	juceRmlUi.cpp juceRmlUi.h
 	rmlColorPicker.cpp rmlColorPicker.h
 	rmlDataProvider.h

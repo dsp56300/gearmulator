@@ -21,6 +21,7 @@ namespace juceRmlUi
 		: m_dataProvider(_dataProvider)
 		, m_rootRmlFilename(std::move(_rootRmlFilename))
 		, m_contentScale(_contentScale)
+		, m_drag(*this)
 	{
 		m_renderProxy.reset(new RendererProxy(m_dataProvider));
 
@@ -257,9 +258,14 @@ namespace juceRmlUi
 
 	juce::Point<int> RmlComponent::toRmlPosition(const juce::MouseEvent& _e) const
 	{
+		return toRmlPosition(_e.x, _e.y);
+	}
+
+	juce::Point<int> RmlComponent::toRmlPosition(int _x, int _y) const
+	{
 		return {
-			juce::roundToInt(static_cast<float>(_e.x) * m_openGLContext.getRenderingScale()), 
-			juce::roundToInt(static_cast<float>(_e.y) * m_openGLContext.getRenderingScale())
+			juce::roundToInt(static_cast<float>(_x) * m_openGLContext.getRenderingScale()), 
+			juce::roundToInt(static_cast<float>(_y) * m_openGLContext.getRenderingScale())
 		};
 	}
 
@@ -407,5 +413,59 @@ namespace juceRmlUi
 	Rml::Context* RmlComponent::getContext() const
 	{
 		return m_rmlContext;
+	}
+
+	bool RmlComponent::isInterestedInFileDrag(const juce::StringArray& _files)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		return m_drag.isInterestedInFileDrag(_files);
+	}
+
+	void RmlComponent::fileDragEnter(const juce::StringArray& _files, const int _x, const int _y)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.fileDragEnter(_files, _x, _y);
+	}
+
+	void RmlComponent::fileDragMove(const juce::StringArray& _files, const int _x, const int _y)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.fileDragMove(_files, _x, _y);
+	}
+
+	void RmlComponent::fileDragExit(const juce::StringArray& _files)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.fileDragExit(_files);
+	}
+
+	void RmlComponent::filesDropped(const juce::StringArray& _files, int _x, int _y)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.filesDropped(_files, _x, _y);
+	}
+
+	bool RmlComponent::isInterestedInDragSource(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		return m_drag.isInterestedInDragSource(_dragSourceDetails);
+	}
+
+	void RmlComponent::itemDragEnter(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.itemDragEnter(_dragSourceDetails);
+	}
+
+	void RmlComponent::itemDragExit(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.itemDragExit(_dragSourceDetails);
+	}
+
+	void RmlComponent::itemDropped(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.itemDropped(_dragSourceDetails);
 	}
 }

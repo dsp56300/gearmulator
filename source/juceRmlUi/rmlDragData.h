@@ -7,4 +7,9 @@ namespace juceRmlUi
 		DragData() = default;
 		virtual ~DragData() = default;
 	};
+
+	struct FileDragData : DragData
+	{
+		std::vector<std::string> files;
+	};
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "juceRmlDrag.h"
 #include "rmlInterfaces.h"
 #include "rmlRendererProxy.h"
 
@@ -27,7 +28,7 @@ namespace juceRmlUi
 
 	class DataProvider;
 
-	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer
+	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget
 	{
 	public:
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
@@ -66,8 +67,20 @@ namespace juceRmlUi
 			m_postFrameCallbacks.emplace_back(std::move(_callback));
 		}
 
-	private:
+		bool isInterestedInFileDrag(const juce::StringArray& _files) override;
+		void fileDragEnter(const juce::StringArray& _files, int _x, int _y) override;
+		void fileDragMove(const juce::StringArray& _files, int _x, int _y) override;
+		void fileDragExit(const juce::StringArray& _files) override;
+		void filesDropped(const juce::StringArray& _files, int _x, int _y) override;
+		bool isInterestedInDragSource(const SourceDetails& _dragSourceDetails) override;
+		void itemDragEnter(const SourceDetails& _dragSourceDetails) override;
+		void itemDragExit(const SourceDetails& _dragSourceDetails) override;
+		void itemDropped(const SourceDetails& _dragSourceDetails) override;
+
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
+		juce::Point<int> toRmlPosition(int _x, int _y) const;
+
+	private:
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
 		void destroyRmlContext();
@@ -95,6 +108,8 @@ namespace juceRmlUi
 		std::vector<std::function<void()>> m_tempPostFrameCallbacks;
 
 		DocumentCreatedCallback m_onDocumentCreated;
+
+		RmlDrag m_drag;
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
