@@ -1,7 +1,10 @@
 #include "juceRmlDrag.h"
 
 #include "juceRmlComponent.h"
+
 #include "rmlDragData.h"
+#include "rmlHelper.h"
+
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/ElementDocument.h"
 
@@ -28,6 +31,14 @@ namespace juceRmlUi
 
 	RmlDrag::~RmlDrag()
 	= default;
+
+	void RmlDrag::onDocumentLoaded()
+	{
+		auto* doc = m_component.getDocument();
+
+		doc->AddEventListener(Rml::EventId::Dragstart, this);
+		doc->AddEventListener(Rml::EventId::Dragend, this);
+	}
 
 	// ReSharper disable once CppMemberFunctionMayBeStatic
 	bool RmlDrag::isInterestedInFileDrag(const juce::StringArray& _files)
@@ -82,6 +93,43 @@ namespace juceRmlUi
 	{
 	}
 
+	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles)
+	{
+		if (!m_juceDraggable || !m_juceDraggable->data)
+			return false;
+
+		std::vector<std::string> files;
+		m_juceDraggable->data->getFilesForExport(files, _canMoveFiles);
+
+		if (files.empty())
+			return false;
+
+		for (const auto& file : files)
+			_files.add(juce::String(file));
+
+		_canMoveFiles = false;
+		return true;
+	}
+
+	void RmlDrag::processOutOfBoundsDrag(juce::Point<int>)
+	{
+		// we convert an rml drag to a juce drag if the rml drag source allows exporting files
+		if (!m_rmlDragSource)
+			return;
+
+		auto* dd = m_rmlDragSource->getDragData();
+
+		if (!dd || !dd->canExportAsFiles())
+			return;
+
+		if (m_juceDraggable)
+			return;
+
+		m_juceDraggable = new JuceDraggable();
+		m_juceDraggable->data = dd;
+		m_component.startDragging(m_juceDraggable, &m_component);
+	}
+
 	void RmlDrag::startDrag(int _x, int _y, const juce::StringArray& _files)
 	{
 		if (m_draggable)
@@ -94,7 +142,7 @@ namespace juceRmlUi
 		constexpr auto size = 100.0f;
 
 		Rml::ElementPtr draggable = m_component.getDocument()->CreateElement("div");
-		m_dragSource.reset(new FileDragSource(draggable.get(), _files));
+		m_juceDragSource.reset(new FileDragSource(draggable.get(), _files));
 
 		draggable->SetProperty(Rml::PropertyId::Position, Rml::Property(Rml::Style::Position::Absolute));
 
@@ -128,5 +176,21 @@ namespace juceRmlUi
 			return;
 		m_draggable->GetParentNode()->RemoveChild(m_draggable);
 		m_draggable = nullptr;
+	}
+
+	void RmlDrag::ProcessEvent(Rml::Event& _event)
+	{
+		switch (_event.GetId())
+		{
+		case Rml::EventId::Dragstart:
+			Rml::Log::Message(Rml::Log::LT_DEBUG, "Drag started");
+			m_rmlDragSource = helper::getDragSource(_event);
+			break;
+		case Rml::EventId::Dragend:
+			Rml::Log::Message(Rml::Log::LT_DEBUG, "Drag ended");
+			m_rmlDragSource = nullptr;
+			m_juceDraggable = nullptr;
+			break;
+		}
 	}
 }

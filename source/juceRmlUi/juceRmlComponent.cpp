@@ -54,6 +54,8 @@ namespace juceRmlUi
 		}
 
 		createRmlContext(_contextCreatedCallback);
+
+		m_drag.onDocumentLoaded();
 	}
 
 	RmlComponent::~RmlComponent()
@@ -142,7 +144,12 @@ namespace juceRmlUi
 		if (!m_rmlContext)
 			return;
 		const auto pos = toRmlPosition(_event);
+
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, helper::toRmlModifiers(_event));
+
+		// forward out-of-bounds drag events to the drag handler to allow it to convert to a juce drag if the drag source can export files
+		if (pos.x < 0 || pos.y < 0 || pos.x >= m_rmlContext->GetDimensions().x || pos.y >= m_rmlContext->GetDimensions().y)
+			m_drag.processOutOfBoundsDrag(pos);
 	}
 
 	void RmlComponent::mouseExit(const juce::MouseEvent& _event)
@@ -467,5 +474,10 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 		m_drag.itemDropped(_dragSourceDetails);
+	}
+
+	bool RmlComponent::shouldDropFilesWhenDraggedExternally(const SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles)
+	{
+		return m_drag.shouldDropFilesWhenDraggedExternally(_sourceDetails, _files, _canMoveFiles);
 	}
 }

@@ -28,7 +28,7 @@ namespace juceRmlUi
 
 	class DataProvider;
 
-	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget
+	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget, public juce::DragAndDropContainer
 	{
 	public:
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
@@ -76,6 +76,7 @@ namespace juceRmlUi
 		void itemDragEnter(const SourceDetails& _dragSourceDetails) override;
 		void itemDragExit(const SourceDetails& _dragSourceDetails) override;
 		void itemDropped(const SourceDetails& _dragSourceDetails) override;
+		bool shouldDropFilesWhenDraggedExternally(const SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) override;
 
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		juce::Point<int> toRmlPosition(int _x, int _y) const;
