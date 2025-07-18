@@ -217,7 +217,9 @@ namespace juceRmlUi
 		DragSource* getDragSource(const Rml::Event& _event)
 		{
 			auto* elem = getDragElement(_event);
-			return dynamic_cast<DragSource*>(elem);
+			if (!elem)
+				return nullptr;
+			return DragSource::fromElement(elem);
 		}
 
 		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child)

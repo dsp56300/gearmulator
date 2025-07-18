@@ -9,6 +9,12 @@
 
 namespace juceRmlUi
 {
+	DragTarget::DragTarget(Rml::Element* _elem)
+	{
+		if (_elem)
+			init(_elem);
+	}
+
 	bool DragTarget::init(Rml::Element* _elem)
 	{
 		if (m_element)

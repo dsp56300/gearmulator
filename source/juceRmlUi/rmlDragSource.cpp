@@ -2,13 +2,16 @@
 
 #include "RmlUi/Core/Element.h"
 
-#include "rmlDragData.h"
 #include "rmlEventListener.h"
+#include "rmlDragData.h"
 
 namespace juceRmlUi
 {
-	DragSource::DragSource()
-	= default;
+	DragSource::DragSource(Rml::Element* _element)
+	{
+		if (_element)
+			init(_element);
+	}
 
 	DragSource::~DragSource()
 	= default;
@@ -26,13 +29,26 @@ namespace juceRmlUi
 		return true;
 	}
 
+	DragSource* DragSource::fromElement(const Rml::Element* _elem)
+	{
+		if (!_elem)
+			return nullptr;
+		void* p = _elem->GetAttribute("dragSource", static_cast<void*>(nullptr));
+		return static_cast<DragSource*>(p);
+	}
+
 	void DragSource::onDragStart(const Rml::Event& _event)
 	{
 		m_dragData = createDragData();
+
+		m_element->SetAttribute("dragData", m_dragData.get());
+		m_element->SetAttribute("dragSource", this);
 	}
 
 	void DragSource::onDragEnd(const Rml::Event& _event)
 	{
 		m_dragData.reset();
+		m_element->RemoveAttribute("dragData");
+		m_element->RemoveAttribute("dragSource");
 	}
 }

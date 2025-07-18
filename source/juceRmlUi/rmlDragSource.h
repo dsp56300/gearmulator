@@ -15,14 +15,21 @@ namespace juceRmlUi
 	class DragSource
 	{
 	public:
-		DragSource();
+		DragSource(Rml::Element* _element = nullptr);
+		DragSource(const DragSource&) = delete;
+		DragSource(DragSource&&) = delete;
 		virtual ~DragSource();
+
+		DragSource& operator=(const DragSource&) = delete;
+		DragSource& operator=(DragSource&&) = delete;
 
 		bool init(Rml::Element* _element);
 
 		virtual std::unique_ptr<DragData> createDragData() = 0;
 
 		DragData* getDragData() const noexcept { return m_dragData.get(); }
+
+		static DragSource* fromElement(const Rml::Element* _elem);
 
 	private:
 		void onDragStart(const Rml::Event& _event);

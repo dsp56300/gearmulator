@@ -31,7 +31,7 @@ namespace juceRmlUi
 			Bottom = Right,
 		};
 
-		DragTarget() = default;
+		DragTarget(Rml::Element* _elem = nullptr);
 		~DragTarget() = default;
 
 		bool init(Rml::Element* _elem);
