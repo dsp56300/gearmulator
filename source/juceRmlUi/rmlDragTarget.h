@@ -2,6 +2,9 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
+
+#include "rmlDragData.h"
 
 namespace juceRmlUi
 {
@@ -36,7 +39,8 @@ namespace juceRmlUi
 
 		bool init(Rml::Element* _elem);
 
-		virtual bool canDrop(const DragSource* _source) const { return _source != nullptr; }
+		virtual bool canDrop(const DragSource* _source) const;
+		virtual bool canDropFiles(const std::vector<std::string>& _files) const;
 
 		void setAllowLocations(const bool _horizontal, const bool _vertical)
 		{
@@ -45,6 +49,9 @@ namespace juceRmlUi
 		}
 
 		static DragTarget* fromElement(const Rml::Element* _elem);
+
+		virtual void drop(const DragData& _data) {}
+		virtual void dropFiles(const std::vector<std::string>& _files) {}
 
 	private:
 		void onDragOver(const Rml::Event& _event);

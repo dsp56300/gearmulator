@@ -51,7 +51,7 @@ namespace juceRmlUi
 		void itemDragEnter(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
 		void itemDragExit(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
 		void itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
-		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles);
+		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) const;
 
 		void processOutOfBoundsDrag(juce::Point<int> _pos);
 

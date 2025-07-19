@@ -81,19 +81,22 @@ namespace juceRmlUi
 		return true;
 	}
 
+	// ReSharper disable once CppMemberFunctionMayBeStatic
 	void RmlDrag::itemDragEnter(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
 	}
 
+	// ReSharper disable once CppMemberFunctionMayBeStatic
 	void RmlDrag::itemDragExit(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
 	}
 
+	// ReSharper disable once CppMemberFunctionMayBeStatic
 	void RmlDrag::itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
 	}
 
-	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles)
+	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) const
 	{
 		if (!m_juceDraggable || !m_juceDraggable->data)
 			return false;
@@ -183,14 +186,13 @@ namespace juceRmlUi
 		switch (_event.GetId())
 		{
 		case Rml::EventId::Dragstart:
-			Rml::Log::Message(Rml::Log::LT_DEBUG, "Drag started");
 			m_rmlDragSource = helper::getDragSource(_event);
 			break;
 		case Rml::EventId::Dragend:
-			Rml::Log::Message(Rml::Log::LT_DEBUG, "Drag ended");
 			m_rmlDragSource = nullptr;
 			m_juceDraggable = nullptr;
 			break;
+		default:;
 		}
 	}
 }

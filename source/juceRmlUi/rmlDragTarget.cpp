@@ -1,6 +1,7 @@
 #include "rmlDragTarget.h"
 
 #include "juceRmlComponent.h"
+#include "rmlDragData.h"
 #include "rmlElemListEntry.h"
 #include "rmlEventListener.h"
 #include "rmlHelper.h"
@@ -40,6 +41,30 @@ namespace juceRmlUi
 		return true;
 	}
 
+	bool DragTarget::canDrop(const DragSource* _source) const
+	{
+		if (_source == nullptr)
+			return false;
+
+		auto fileDragData = dynamic_cast<FileDragData*>(_source->getDragData());
+
+		if (fileDragData)
+		{
+			if (fileDragData->files.empty())
+				return false;
+
+			return canDropFiles(fileDragData->files);
+		}
+
+		return true;
+	}
+
+	bool DragTarget::canDropFiles(const std::vector<std::string>& _files) const
+	{
+		// to be implemented by derived class
+		return false;
+	}
+
 	DragTarget* DragTarget::fromElement(const Rml::Element* _elem)
 	{
 		if (!_elem)
@@ -71,7 +96,7 @@ namespace juceRmlUi
 		updateDragLocation(_event);
 	}
 
-	void DragTarget::onDragOut(const Rml::Event& _event)
+	void DragTarget::onDragOut(const Rml::Event&)
 	{
 		if (!m_currentDragSource)
 			return;
@@ -81,10 +106,24 @@ namespace juceRmlUi
 		m_currentLocationV = DragLocation::None;
 	}
 
-	void DragTarget::onDragDrop(const Rml::Event& _event)
+	void DragTarget::onDragDrop(const Rml::Event&)
 	{
 		if (!m_currentDragSource)
 			return;
+
+		if (!canDrop(m_currentDragSource))
+			return;
+
+		const auto* data = m_currentDragSource->getDragData();
+		if (!data)
+			return;
+
+		auto* fileDragData = dynamic_cast<const FileDragData*>(data);
+
+		if (fileDragData)
+			dropFiles(fileDragData->files);
+		else
+			drop(*data);
 	}
 
 	void DragTarget::updateDragLocation(const Rml::Event& _event)
