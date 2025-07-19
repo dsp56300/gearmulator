@@ -242,6 +242,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	GroupTreeElem::GroupTreeElem(Tree& _tree, const Rml::String& _tag) : TreeElem(_tree, _tag)
 	{
+		SetProperty(Rml::PropertyId::Drag, Rml::Style::Drag::None);
 	}
 
 	void GroupTreeElem::setNode(const juceRmlUi::TreeNodePtr& _node)
