@@ -3,10 +3,11 @@
 #include <cassert>
 
 #include "rmlEventListener.h"
+#include "rmlHelper.h"
 
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementDocument.h"
-#include "RmlUi/Core/Elements/ElementFormControl.h"
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace juceRmlUi
 {
@@ -31,7 +32,7 @@ namespace juceRmlUi
 		input->SetProperty(Rml::PropertyId::Width, Rml::Property(100, Rml::Unit::PERCENT));
 		input->SetProperty(Rml::PropertyId::Height, Rml::Property(100, Rml::Unit::PERCENT));
 
-		m_input = dynamic_cast<Rml::ElementFormControl*>(_parent->AppendChild(std::move(input)));
+		m_input = dynamic_cast<Rml::ElementFormControlInput*>(_parent->AppendChild(std::move(input)));
 		assert(m_input);
 
 		m_input->SetValue(_initialValue);
@@ -39,8 +40,10 @@ namespace juceRmlUi
 		EventListener::Add(m_input, Rml::EventId::Submit, [this](Rml::Event&) { onSubmit(); });
 		EventListener::Add(m_input, Rml::EventId::Blur, [this](Rml::Event&) { onBlur(); });
 		EventListener::Add(m_input, Rml::EventId::Change, [this](const Rml::Event& _event) { onChange(_event); });
+		EventListener::Add(m_input, Rml::EventId::Keydown, [this](const Rml::Event& _event) { onKeyDown(_event); });
 
 		m_input->Focus(true);
+		m_input->SetSelectionRange(0, static_cast<int>(_initialValue.size()));
 	}
 
 	InplaceEditor::~InplaceEditor()
@@ -66,6 +69,14 @@ namespace juceRmlUi
 	{
 		if (_event.GetParameter("linebreak", false))
 			onSubmit();
+	}
+
+	void InplaceEditor::onKeyDown(const Rml::Event& _event)
+	{
+		const auto key = juceRmlUi::helper::getKeyIdentifier(_event);
+
+		if (key == Rml::Input::KeyIdentifier::KI_ESCAPE)
+			close();
 	}
 
 	void InplaceEditor::deleteInputElement()
