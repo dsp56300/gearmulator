@@ -114,7 +114,7 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseUp(const juce::MouseEvent& _event)
@@ -123,7 +123,7 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseButtonUp(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseButtonUp(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseMove(const juce::MouseEvent& _event)
@@ -134,7 +134,7 @@ namespace juceRmlUi
 			return;
 
 		const auto pos = toRmlPosition(_event);
-		m_rmlContext->ProcessMouseMove(pos.x, pos.y, helper::toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseDrag(const juce::MouseEvent& _event)
@@ -145,7 +145,7 @@ namespace juceRmlUi
 			return;
 		const auto pos = toRmlPosition(_event);
 
-		m_rmlContext->ProcessMouseMove(pos.x, pos.y, helper::toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
 
 		// forward out-of-bounds drag events to the drag handler to allow it to convert to a juce drag if the drag source can export files
 		if (pos.x < 0 || pos.y < 0 || pos.x >= m_rmlContext->GetDimensions().x || pos.y >= m_rmlContext->GetDimensions().y)
@@ -167,7 +167,7 @@ namespace juceRmlUi
 		if (!m_rmlContext)
 			return;
 		const auto pos = toRmlPosition(_event);
-		m_rmlContext->ProcessMouseMove(pos.x, pos.y, helper::toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseWheelMove(const juce::MouseEvent& _event, const juce::MouseWheelDetails& _wheel)
@@ -177,7 +177,7 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(-_wheel.deltaX, -_wheel.deltaY), helper::toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(-_wheel.deltaX, -_wheel.deltaY), toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseDoubleClick(const juce::MouseEvent& _event)
@@ -189,7 +189,7 @@ namespace juceRmlUi
 
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
 */	}
 
 	bool RmlComponent::keyPressed(const juce::KeyPress& _key)
@@ -215,7 +215,7 @@ namespace juceRmlUi
 
 		if (key != Rml::Input::KI_UNKNOWN)
 		{
-			m_rmlContext->ProcessKeyDown(key, helper::toRmlModifiers(_key));
+			m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key));
 			res = true;
 		}
 		return res;
@@ -238,7 +238,7 @@ namespace juceRmlUi
 					if (!it->isCurrentlyDown())
 					{
 						const auto& key = *it;
-						m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), helper::toRmlModifiers(key));
+						m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key));
 						res = true;
 						it = m_pressedKeys.erase(it);
 					}
@@ -252,6 +252,29 @@ namespace juceRmlUi
 		if (res)
 			return res;
 		return Component::keyStateChanged(_isKeyDown);
+	}
+
+	void RmlComponent::modifierKeysChanged(const juce::ModifierKeys& _modifiers)
+	{
+		Component::modifierKeysChanged(_modifiers);
+
+		const auto changes = _modifiers.getRawFlags() - m_currentModifierKeys.getRawFlags();
+
+		if (!changes)
+			return;
+
+		m_currentModifierKeys = _modifiers;
+
+		RmlInterfaces::ScopedAccess access(*this);
+
+		if (!m_rmlContext)
+			return;
+
+		// generate a fake key event to trigger the modifier change
+		if (changes > 0)
+			m_rmlContext->ProcessKeyDown(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
+		else
+			m_rmlContext->ProcessKeyUp(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
 	}
 
 	void RmlComponent::timerCallback()
@@ -395,6 +418,22 @@ namespace juceRmlUi
 			m_rmlContext->SetDensityIndependentPixelRatio(renderScale * m_contentScale);
 			m_rmlContext->SetDimensions({ width, height });
 		}
+	}
+
+	int RmlComponent::toRmlModifiers(const juce::MouseEvent& _event)
+	{
+		return toRmlModifiers(_event.mods);
+	}
+
+	int RmlComponent::toRmlModifiers(const juce::KeyPress& _event)
+	{
+		return toRmlModifiers(_event.getModifiers());
+	}
+
+	int RmlComponent::toRmlModifiers(const juce::ModifierKeys& _mods)
+	{
+		m_currentModifierKeys = _mods;
+		return helper::toRmlModifiers(_mods);
 	}
 
 	void RmlComponent::resized()

@@ -51,6 +51,7 @@ namespace juceRmlUi
 		void mouseExit(const juce::MouseEvent& _event) override;
 		bool keyPressed(const juce::KeyPress& _key) override;
 		bool keyStateChanged(bool _isKeyDown) override;
+		void modifierKeysChanged(const juce::ModifierKeys& _modifiers) override;
 
 		void timerCallback() override;
 
@@ -87,6 +88,10 @@ namespace juceRmlUi
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
 
+		int toRmlModifiers(const juce::MouseEvent& _event);
+		int toRmlModifiers(const juce::KeyPress& _event);
+		int toRmlModifiers(const juce::ModifierKeys& _mods);
+
 		DataProvider& m_dataProvider;
 		const std::string m_rootRmlFilename;
 
@@ -111,6 +116,7 @@ namespace juceRmlUi
 		DocumentCreatedCallback m_onDocumentCreated;
 
 		RmlDrag m_drag;
+		juce::ModifierKeys m_currentModifierKeys;
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
