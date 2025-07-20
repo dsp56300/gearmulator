@@ -379,6 +379,9 @@ namespace juceRmlUi
 
 	void RmlComponent::updateRmlContextDimensions()
 	{
+		if (!m_rmlContext)
+			return;
+
 		auto contextDims = m_rmlContext->GetDimensions();
 
 		const float renderScale = static_cast<float>(m_openGLContext.getRenderingScale());
@@ -421,6 +424,7 @@ namespace juceRmlUi
 	void RmlComponent::parentSizeChanged()
 	{
 		Component::parentSizeChanged();
+
 		RmlInterfaces::ScopedAccess access(*this);
 		updateRmlContextDimensions();
 	}
