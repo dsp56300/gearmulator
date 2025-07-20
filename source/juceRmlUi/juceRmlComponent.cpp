@@ -31,7 +31,7 @@ namespace juceRmlUi
 		m_openGLContext.setContinuousRepainting(true);
 		m_openGLContext.setSwapInterval(1);
 
-		// this is ootional on Win/Linux (but doesn't hurt), but required on macOS to not get a compatibility profile
+		// this is optional on Win/Linux (but doesn't hurt), but required on macOS to get a core profile, not get a compatibility profile
 		m_openGLContext.setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
 
 		setWantsKeyboardFocus(true);
@@ -112,8 +112,6 @@ namespace juceRmlUi
 	{
 		Component::mouseDown(_event);
 		RmlInterfaces::ScopedAccess access(*this);
-		if (!m_rmlContext)
-			return;
 		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
 	}
 
@@ -121,8 +119,6 @@ namespace juceRmlUi
 	{
 		Component::mouseUp(_event);
 		RmlInterfaces::ScopedAccess access(*this);
-		if (!m_rmlContext)
-			return;
 		m_rmlContext->ProcessMouseButtonUp(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
 	}
 
@@ -130,8 +126,6 @@ namespace juceRmlUi
 	{
 		Component::mouseMove(_event);
 		RmlInterfaces::ScopedAccess access(*this);
-		if (!m_rmlContext)
-			return;
 
 		const auto pos = toRmlPosition(_event);
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
@@ -141,8 +135,7 @@ namespace juceRmlUi
 	{
 		Component::mouseDrag(_event);
 		RmlInterfaces::ScopedAccess access(*this);
-		if (!m_rmlContext)
-			return;
+
 		const auto pos = toRmlPosition(_event);
 
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
@@ -164,8 +157,7 @@ namespace juceRmlUi
 	{
 		Component::mouseEnter(_event);
 		RmlInterfaces::ScopedAccess access(*this);
-		if (!m_rmlContext)
-			return;
+
 		const auto pos = toRmlPosition(_event);
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
 	}
@@ -175,8 +167,7 @@ namespace juceRmlUi
 		Component::mouseWheelMove(_event, _wheel);
 
 		RmlInterfaces::ScopedAccess access(*this);
-		if (!m_rmlContext)
-			return;
+
 		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(-_wheel.deltaX, -_wheel.deltaY), toRmlModifiers(_event));
 	}
 
@@ -187,17 +178,12 @@ namespace juceRmlUi
 /*
 		RmlInterfaces::ScopedAccess access(*this);
 
-		if (!m_rmlContext)
-			return;
 		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
 */	}
 
 	bool RmlComponent::keyPressed(const juce::KeyPress& _key)
 	{
 		RmlInterfaces::ScopedAccess access(*this);
-
-		if (!m_rmlContext)
-			return Component::keyPressed(_key);
 
 		m_pressedKeys.push_back(_key);
 
@@ -267,9 +253,6 @@ namespace juceRmlUi
 
 		RmlInterfaces::ScopedAccess access(*this);
 
-		if (!m_rmlContext)
-			return;
-
 		// generate a fake key event to trigger the modifier change
 		if (changes > 0)
 			m_rmlContext->ProcessKeyDown(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
@@ -302,9 +285,6 @@ namespace juceRmlUi
 	void RmlComponent::update()
 	{
 		RmlInterfaces::ScopedAccess access(*this);
-
-		if (!m_rmlContext)
-			return;
 
 		updateRmlContextDimensions();
 
@@ -390,9 +370,6 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
-		if (!m_rmlContext)
-			return;
-
 		m_rmlContext->UnloadAllDocuments();
 		Rml::RemoveContext(m_rmlContext->GetName());
 		m_rmlContext = nullptr;
@@ -402,9 +379,6 @@ namespace juceRmlUi
 
 	void RmlComponent::updateRmlContextDimensions()
 	{
-		if (!m_rmlContext)
-			return;
-
 		auto contextDims = m_rmlContext->GetDimensions();
 
 		const float renderScale = static_cast<float>(m_openGLContext.getRenderingScale());
