@@ -73,46 +73,9 @@ namespace jucePluginEditorLib::patchManager
 		search(std::move(sr));
 	}
 
-	bool DatasourceTreeItem::isInterestedInPatchList(const ListModel* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	bool DatasourceTreeItem::isInterestedInPatchList(const ListModel*, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		return m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
-	}
-
-	bool DatasourceTreeItem::isInterestedInFileDrag(const juce::StringArray& files)
-	{
-		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
-			return true;
-
-		return TreeItem::isInterestedInFileDrag(files);
-	}
-
-	void DatasourceTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc/* = nullptr*/)
-	{
-		TreeItem::patchesDropped(_patches);
-
-		if (m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
-			return;
-
-		if (juce::ModifierKeys::currentModifiers.isShiftDown())
-		{
-			ListModel::showDeleteConfirmationMessageBox([this, _patches](const genericUI::MessageBox::Result _result)
-			{
-				if (_result == genericUI::MessageBox::Result::Yes)
-				{
-					getDB().removePatches(m_dataSource, _patches);
-				}
-			});
-		}
-		else
-		{
-#if SYNTHLIB_DEMO_MODE
-			getPatchManager().getEditor().showDemoRestrictionMessageBox();
-#else
-			const int part = _savePatchDesc ? _savePatchDesc->getPart() : -1;
-
-			getDB().copyPatchesToLocalStorage(m_dataSource, _patches, part);
-#endif
-		}
 	}
 
 	void DatasourceTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
@@ -188,6 +151,6 @@ namespace jucePluginEditorLib::patchManager
 		for (const auto& patch : patchesVec)
 			patchesMap.insert({i++, patch});
 
-		return new SavePatchDesc(getDB(), std::move(patchesMap), baseLib::filesystem::getFilenameWithoutPath(m_dataSource->name));
+		return {};//new SavePatchDesc(getDB(), std::move(patchesMap), baseLib::filesystem::getFilenameWithoutPath(m_dataSource->name));
 	}
 }

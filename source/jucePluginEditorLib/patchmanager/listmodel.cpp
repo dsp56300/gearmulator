@@ -381,7 +381,7 @@ namespace jucePluginEditorLib::patchManager
 			}
 		}
 
-		return new SavePatchDesc(getDB(), std::move(patches));
+		return {};//new SavePatchDesc(getDB(), std::move(patches));
 	}
 
 	juce::Component* ListModel::refreshComponentForRow(int rowNumber, bool isRowSelected, juce::Component* existingComponentToUpdate)

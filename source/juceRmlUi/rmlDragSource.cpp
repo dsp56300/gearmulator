@@ -40,6 +40,9 @@ namespace juceRmlUi
 	{
 		m_dragData = createDragData();
 
+		if (!m_dragData)
+			return;
+
 		m_element->SetAttribute("dragData", m_dragData.get());
 		m_element->SetAttribute("dragSource", this);
 	}

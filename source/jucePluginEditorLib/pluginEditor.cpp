@@ -318,35 +318,7 @@ namespace jucePluginEditorLib
 
 	bool Editor::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles)
 	{
-		const auto* ddObject = DragAndDropObject::fromDragSource(sourceDetails);
-
-		if(!ddObject || !ddObject->canDropExternally())
-			return false;
-
-		// try to create human-readable filename first
-		const auto patchFileName = ddObject->getExportFileName(m_processor);
-		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + patchFileName;
-
-		auto file = juce::File(pathName);
-
-		if(file.hasWriteAccess())
-		{
-			m_dragAndDropFiles.emplace_back(file);
-		}
-		else
-		{
-			// failed, create temp file
-			const auto& tempFile = m_dragAndDropTempFiles.emplace_back(std::make_shared<juce::TemporaryFile>(patchFileName));
-			file = tempFile->getFile();
-		}
-
-		if(!ddObject->writeToFile(file))
-			return false;
-
-		files.add(file.getFullPathName());
-
-		canMoveFiles = true;
-		return true;
+		return false;
 	}
 
 	void Editor::copyCurrentPatchToClipboard() const

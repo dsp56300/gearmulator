@@ -46,6 +46,11 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onRightClick(const Rml::Event& _event) override;
 
+		bool canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const override;
+		void dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
+
+		static void modifyTags(patchManager::PatchManager& _pm, pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches);
+
 		pluginLib::patchDB::Tag getTag() const;
 		pluginLib::patchDB::TagType getTagType() const;
 		pluginLib::patchDB::Color getColor() const;

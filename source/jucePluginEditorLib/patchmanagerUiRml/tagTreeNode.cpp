@@ -104,6 +104,30 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 	}
 
+	bool TagTreeElem::canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const
+	{
+		return hasSearch() && getTagType() != pluginLib::patchDB::TagType::Invalid;
+	}
+
+	void TagTreeElem::dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	{
+		if (getTagType() == pluginLib::patchDB::TagType::Invalid)
+			return;
+		modifyTags(getDB(), getTagType(), getTag(), _patches);
+	}
+
+	void TagTreeElem::modifyTags(patchManager::PatchManager& _pm, const pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	{
+		pluginLib::patchDB::TypedTags tags;
+
+		if (juce::ModifierKeys::currentModifiers.isShiftDown())	// TODO: get rid of juce
+			tags.addRemoved(_type, _tag);
+		else
+			tags.add(_type, _tag);
+
+		_pm.modifyTags(_patches, tags);
+	}
+
 	pluginLib::patchDB::Tag TagTreeElem::getTag() const
 	{
 		auto* tagItem = dynamic_cast<TagNode*>(getNode().get());

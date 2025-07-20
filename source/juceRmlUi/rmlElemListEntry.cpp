@@ -73,7 +73,7 @@ namespace juceRmlUi
 
 	std::unique_ptr<DragData> ElemListEntry::createDragData()
 	{
-		return std::make_unique<DragData>();
+		return {};
 	}
 
 	void ElemListEntry::onAdded()

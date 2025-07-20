@@ -17,24 +17,26 @@ namespace jucePluginEditorLib
 			if(!list)
 				return {};
 
+			return {};/*
 			const auto& patches = patchManager::SavePatchDesc::getPatchesFromDragSource(_source);
 
 			if (patches.size() != 1)
 				return {};
 
-			return {patches.front(), list};
+			return {patches.front(), list};*/
 		}
 	}
 
 	template <typename T> bool PartButton<T>::isInterestedInDragSource(const SourceDetails& _dragSourceDetails)
 	{
+		return false;/*
 		const auto* savePatchDesc = patchManager::SavePatchDesc::fromDragSource(_dragSourceDetails);
 
 		if(savePatchDesc)
 			return !savePatchDesc->isPartValid() || savePatchDesc->getPart() != getPart();
 
 		const auto patch = getPatchFromDragSource(_dragSourceDetails);
-		return patch.first != nullptr;
+		return patch.first != nullptr;*/
 	}
 
 	template <typename T> bool PartButton<T>::isInterestedInFileDrag(const juce::StringArray& _files)
@@ -90,7 +92,7 @@ namespace jucePluginEditorLib
 	template <typename T> void PartButton<T>::itemDropped(const SourceDetails& _dragSourceDetails)
 	{
 		setIsDragTarget(false);
-
+		/*
 		const auto* savePatchDesc = patchManager::SavePatchDesc::fromDragSource(_dragSourceDetails);
 
 		auto* pm = m_editor.getPatchManager();
@@ -119,6 +121,7 @@ namespace jucePluginEditorLib
 		{
 			pm->setSelectedPatch(m_part, patch, list->getSearchHandle());
 		}
+		*/
 	}
 
 	template <typename T> void PartButton<T>::paint(juce::Graphics& g)
@@ -134,9 +137,11 @@ namespace jucePluginEditorLib
 	
 	template <typename T> void PartButton<T>::mouseDrag(const juce::MouseEvent& _event)
 	{
+		/*
 		auto* patchManager = m_editor.getPatchManager();
 		if(patchManager)
 			m_editor.startDragging(new patchManager::SavePatchDesc(*patchManager, m_part), this);
+			*/
 		genericUI::Button<T>::mouseDrag(_event);
 	}
 

@@ -56,6 +56,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		ListModel& getList() const;
 
+		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
+
 	private:
 		ListItem* m_item = nullptr;
 		Rml::Element* m_elemName = nullptr;

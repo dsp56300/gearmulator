@@ -5,6 +5,8 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/patchmanagerui.h"
+#include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "juceRmlUi/rmlDragData.h"
 
 #include "juceRmlUi/rmlEventListener.h"
 
@@ -12,6 +14,10 @@ namespace jucePluginEditorLib::patchManagerRml
 {
 	TreeElem::TreeElem(Tree& _tree, const Rml::String& _tag) : ElemTreeNode(_tag), m_treeRef(_tree)
 	{
+		DragSource::init(this);
+		DragTarget::init(this);
+
+		setAllowLocations(false, false);
 	}
 
 	PatchManagerUiRml& TreeElem::getPatchManager() const
@@ -174,5 +180,40 @@ namespace jucePluginEditorLib::patchManagerRml
 	void TreeElem::onClick()
 	{
 		ElemTreeNode::onClick();
+	}
+
+	std::unique_ptr<juceRmlUi::DragData> TreeElem::createDragData()
+	{
+		return {};
+	}
+
+	bool TreeElem::canDrop(const Rml::Event& _event, const DragSource* _source) const
+	{
+		auto patches = patchManager::SavePatchDesc::getPatchesFromDragSource(*_source);
+		if (patches.empty())
+			return false;
+		return canDropPatchList(_event, _source->getElement(), patches);
+	}
+
+	void TreeElem::drop(const Rml::Event& _event, const juceRmlUi::DragData* _data)
+	{
+		auto savePatchDesc = dynamic_cast<const patchManager::SavePatchDesc*>(_data);
+		if (!savePatchDesc || !savePatchDesc->hasPatches())
+			return;
+		
+		std::vector<pluginLib::patchDB::PatchPtr> patches;
+
+		for (const auto& it : savePatchDesc->getPatches())
+			patches.push_back(it.second);
+
+		dropPatches(_event, savePatchDesc, patches);
+	}
+
+	void TreeElem::dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files)
+	{
+		const auto patches = getDB().loadPatchesFromFiles(_files);
+
+		if (!patches.empty())
+			dropPatches(_event, dynamic_cast<const patchManager::SavePatchDesc*>(_data), patches);
 	}
 }

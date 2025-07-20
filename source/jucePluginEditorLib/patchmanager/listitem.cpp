@@ -66,11 +66,13 @@ namespace jucePluginEditorLib::patchManager
 		if(list && list == &m_list && m_list.canReorderPatches())
 			return true;
 
+		return false;/*
 		const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
 
 		if(!savePatchDesc)
 			return false;
 		return true;
+		*/
 	}
 
 	void ListItem::itemDropped(const SourceDetails& dragSourceDetails)
@@ -86,7 +88,7 @@ namespace jucePluginEditorLib::patchManager
 		repaint();
 
 		const auto row = drag == DragType::Above ? m_row : m_row + 1;
-
+		/*
 		const auto patches = SavePatchDesc::getPatchesFromDragSource(dragSourceDetails);
 
 		if(patches.empty())
@@ -144,6 +146,7 @@ namespace jucePluginEditorLib::patchManager
 
 			repaint();
 		}
+		*/
 
 	}
 
@@ -179,7 +182,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 		else
 		{
-			const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
+			const SavePatchDesc* savePatchDesc = nullptr;//SavePatchDesc::fromDragSource(dragSourceDetails);
 
 			if(savePatchDesc)
 			{

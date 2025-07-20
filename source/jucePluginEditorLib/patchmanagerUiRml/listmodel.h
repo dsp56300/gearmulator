@@ -84,10 +84,10 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void openContextMenu(const Rml::Event& _event);
 
+		static void showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback);
+
 	private:
 		bool exportPresets(bool _selectedOnly, const pluginLib::FileType& _fileType) const;
-
-		static void showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback);
 
 		void updateEntries() const;
 

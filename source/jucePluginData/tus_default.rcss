@@ -181,6 +181,18 @@ scrollbarhorizontal sliderbar {
 	border-bottom: 2px #0f0;
 }
 
+:dragovertop:shift {
+	border-top: 2px #f00;
+}
+
+:dragovercenter:shift {
+	border: 2px #f00;
+}
+
+:dragoverbottom:shift {
+	border-bottom: 2px #f00;
+}
+
 .listspacer {
 	width: 100%;
 	height: 30em;
@@ -231,9 +243,10 @@ treenode {
 	height: 1em;
 	drag: clone;
 	display: block;
-	padding: 2dp 2dp 2dp 1em;
+	padding: 0dp 0dp 0dp 1em;
 	font-size: 12dp;
 	white-space: nowrap;
+	border: 2px #0000;	/* required for drag and drop markers, otherwise entries will start moving as soon as the border is added */
 }
 
 treenode:drag {

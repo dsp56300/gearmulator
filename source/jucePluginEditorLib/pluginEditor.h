@@ -142,6 +142,16 @@ namespace jucePluginEditorLib
 
 		const auto& getPatchManagerDataModel() const { return m_patchManagerDataModel; }
 
+		void registerDragAndDropFile(const juce::File& _file)
+		{
+			m_dragAndDropFiles.push_back(_file);
+		}
+
+		void registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile)
+		{
+			m_dragAndDropTempFiles.push_back(std::move(_tempFile));
+		}
+
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;
 

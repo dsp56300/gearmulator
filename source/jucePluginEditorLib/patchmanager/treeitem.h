@@ -45,7 +45,6 @@ namespace jucePluginEditorLib::patchManager
 		virtual bool beginEdit() { return false; }
 		bool beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback);
 
-		virtual void patchDropped(const pluginLib::patchDB::PatchPtr& _patch) {}
 		virtual void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc = nullptr);
 
 		bool hasSearch() const;

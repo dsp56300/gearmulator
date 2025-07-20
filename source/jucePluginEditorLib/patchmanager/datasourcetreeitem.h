@@ -23,10 +23,6 @@ namespace jucePluginEditorLib::patchManager
 
 		bool isInterestedInPatchList(const ListModel* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
 
-		bool isInterestedInFileDrag(const juce::StringArray& files) override;
-
-		void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc = nullptr) override;
-
 		void itemClicked(const juce::MouseEvent&) override;
 		void refresh();
 

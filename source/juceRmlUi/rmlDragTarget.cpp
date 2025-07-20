@@ -5,11 +5,31 @@
 #include "rmlElemListEntry.h"
 #include "rmlEventListener.h"
 #include "rmlHelper.h"
+#include "RmlUi/Core/Context.h"
 
 #include "RmlUi/Core/Element.h"
 
 namespace juceRmlUi
 {
+	DragTarget::KeyEventListener::KeyEventListener(DragTarget& _target) : m_target(_target), m_rootElement(_target.m_element->GetContext()->GetRootElement())
+	{
+		m_rootElement->AddEventListener(Rml::EventId::Keydown, this);
+		m_rootElement->AddEventListener(Rml::EventId::Keyup, this);
+		m_rootElement->AddEventListener(Rml::EventId::Textinput, this);
+	}
+
+	DragTarget::KeyEventListener::~KeyEventListener()
+	{
+		m_rootElement->RemoveEventListener(Rml::EventId::Keydown, this);
+		m_rootElement->RemoveEventListener(Rml::EventId::Keyup, this);
+		m_rootElement->RemoveEventListener(Rml::EventId::Textinput, this);
+	}
+
+	void DragTarget::KeyEventListener::ProcessEvent(Rml::Event& _event)
+	{
+		m_target.onKeyChange(_event);
+	}
+
 	DragTarget::DragTarget(Rml::Element* _elem)
 	{
 		if (_elem)
@@ -20,6 +40,8 @@ namespace juceRmlUi
 	{
 		if (m_element)
 			m_element->RemoveAttribute("dragTarget");
+
+		m_keyEventListener.reset();
 	}
 
 	bool DragTarget::init(Rml::Element* _elem)
@@ -41,7 +63,7 @@ namespace juceRmlUi
 		return true;
 	}
 
-	bool DragTarget::canDrop(const DragSource* _source) const
+	bool DragTarget::canDrop(const Rml::Event& _event, const DragSource* _source) const
 	{
 		if (_source == nullptr)
 			return false;
@@ -53,13 +75,13 @@ namespace juceRmlUi
 			if (fileDragData->files.empty())
 				return false;
 
-			return canDropFiles(fileDragData->files);
+			return canDropFiles(_event, fileDragData->files);
 		}
 
 		return true;
 	}
 
-	bool DragTarget::canDropFiles(const std::vector<std::string>& _files) const
+	bool DragTarget::canDropFiles(const Rml::Event&, const std::vector<std::string>&) const
 	{
 		// to be implemented by derived class
 		return false;
@@ -81,12 +103,15 @@ namespace juceRmlUi
 		if (!dragSource)
 			return;
 
-		if (!canDrop(dragSource))
+		if (!canDrop(_event, dragSource))
 			return;
 
 		m_currentDragSource = dragSource;
 
 		updateDragLocation(_event);
+
+		if (!m_keyEventListener)
+			m_keyEventListener.reset(new KeyEventListener(*this));
 	}
 
 	void DragTarget::onDragMove(const Rml::Event& _event)
@@ -96,34 +121,58 @@ namespace juceRmlUi
 		updateDragLocation(_event);
 	}
 
-	void DragTarget::onDragOut(const Rml::Event&)
+	void DragTarget::onDragOut(const Rml::Event& _event)
+	{
+		if (_event.GetTargetElement() != _event.GetCurrentElement())
+			return;
+		stopDrag();
+	}
+
+	void DragTarget::onDragDrop(const Rml::Event& _event)
+	{
+		if (!m_currentDragSource)
+			return;
+
+		if (!canDrop(_event, m_currentDragSource))
+		{
+			stopDrag();
+			return;
+		}
+
+		const auto* data = m_currentDragSource->getDragData();
+		if (!data)
+		{
+			stopDrag();
+			return;
+		}
+
+		auto* fileDragData = dynamic_cast<const FileDragData*>(data);
+
+		if (fileDragData && !fileDragData->files.empty())
+			dropFiles(_event, fileDragData, fileDragData->files);
+		else
+			drop(_event, data);
+
+		stopDrag();
+	}
+
+	void DragTarget::onKeyChange(const Rml::Event& _event)
+	{
+		if (!m_currentDragSource)
+			return;
+		updateDragLocation(_event);
+	}
+
+	void DragTarget::stopDrag()
 	{
 		if (!m_currentDragSource)
 			return;
 		m_currentDragSource = nullptr;
-		updatePseudoClass("");
+		updatePseudoClass({});
+		updateShiftPseudoClass(false);
 		m_currentLocationH = DragLocation::None;
 		m_currentLocationV = DragLocation::None;
-	}
-
-	void DragTarget::onDragDrop(const Rml::Event&)
-	{
-		if (!m_currentDragSource)
-			return;
-
-		if (!canDrop(m_currentDragSource))
-			return;
-
-		const auto* data = m_currentDragSource->getDragData();
-		if (!data)
-			return;
-
-		auto* fileDragData = dynamic_cast<const FileDragData*>(data);
-
-		if (fileDragData)
-			dropFiles(fileDragData->files);
-		else
-			drop(*data);
+		m_keyEventListener.reset();
 	}
 
 	void DragTarget::updateDragLocation(const Rml::Event& _event)
@@ -131,6 +180,10 @@ namespace juceRmlUi
 		auto* elem = dynamic_cast<Rml::Element*>(this);
 		if (!elem)
 			return;
+
+		const auto shift = m_allowShift && helper::getKeyModShift(_event);
+
+		updateShiftPseudoClass(shift);
 
 		auto mousePos = helper::getMousePos(_event);
 		
@@ -252,5 +305,21 @@ namespace juceRmlUi
 
 		if (!m_currentLocationPseudoClass.empty())
 			elem->SetPseudoClass(m_currentLocationPseudoClass, true);
+	}
+
+	void DragTarget::updateShiftPseudoClass(bool _shift)
+	{
+		if (m_shiftDown == _shift)
+			return;
+
+		m_shiftDown = _shift;
+
+		auto* elem = dynamic_cast<Rml::Element*>(this);
+		if (!elem)
+			return;
+		if (m_shiftDown)
+			elem->SetPseudoClass("shift", true);
+		else
+			elem->SetPseudoClass("shift", false);
 	}
 }

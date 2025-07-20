@@ -1,9 +1,11 @@
 #include "datasourceTreeNode.h"
 
 #include "patchmanagerUiRml.h"
+#include "baseLib/filesystem.h"
 
 #include "jucePluginEditorLib/pluginEditor.h"
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
+#include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
@@ -170,5 +172,57 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 
 		menu.runModal(this, juceRmlUi::helper::getMousePos(_event));
+	}
+
+	std::unique_ptr<juceRmlUi::DragData> DatasourceTreeElem::createDragData()
+	{
+		if (!m_dataSource || m_dataSource->patches.empty())
+			return {};
+
+		std::vector<pluginLib::patchDB::PatchPtr> patchesVec{ m_dataSource->patches.begin(), m_dataSource->patches.end() };
+		pluginLib::patchDB::DataSource::sortByProgram(patchesVec);
+		uint32_t i = 0;
+		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patchesMap;
+		for (const auto& patch : patchesVec)
+			patchesMap.insert({ i++, patch });
+
+		return std::make_unique<patchManager::SavePatchDesc>(getPatchManager().getEditor(), std::move(patchesMap), baseLib::filesystem::getFilenameWithoutPath(m_dataSource->name));
+	}
+
+	bool DatasourceTreeElem::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) const
+	{
+		return m_dataSource && m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
+	}
+
+	bool DatasourceTreeElem::canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const
+	{
+		return m_dataSource && m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
+	}
+
+	void DatasourceTreeElem::dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	{
+		if (m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
+			return;
+
+		if (juce::ModifierKeys::currentModifiers.isShiftDown())
+		{
+			ListModel::showDeleteConfirmationMessageBox([this, _patches](const genericUI::MessageBox::Result _result)
+			{
+				if (_result == genericUI::MessageBox::Result::Yes)
+				{
+					getDB().removePatches(m_dataSource, _patches);
+				}
+			});
+		}
+		else
+		{
+#if SYNTHLIB_DEMO_MODE
+			getPatchManager().getEditor().showDemoRestrictionMessageBox();
+#else
+			const int part = _data ? _data->getPart() : -1;
+
+			getDB().copyPatchesToLocalStorage(m_dataSource, _patches, part);
+#endif
+		}		
 	}
 }

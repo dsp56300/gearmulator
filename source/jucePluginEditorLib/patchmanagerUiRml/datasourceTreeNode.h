@@ -4,6 +4,11 @@
 
 #include "jucePluginLib/patchdb/patchdbtypes.h"
 
+namespace jucePluginEditorLib::patchManager
+{
+	class SavePatchDesc;
+}
+
 namespace jucePluginEditorLib::patchManagerRml
 {
 	class DatasourceTree;
@@ -35,6 +40,13 @@ namespace jucePluginEditorLib::patchManagerRml
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 
 		void onRightClick(const Rml::Event& _event) override;
+
+		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
+
+		bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) const override;
+		bool canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const override;
+
+		void dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
 
 	private:
 		pluginLib::patchDB::DataSourceNodePtr m_dataSource;

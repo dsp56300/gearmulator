@@ -142,19 +142,20 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
 	{
-		const auto patches = SavePatchDesc::getPatchesFromDragSource(dragSourceDetails);
+//		const auto patches = SavePatchDesc::getPatchesFromDragSource(dragSourceDetails);
 
-		if(!patches.empty())
-			patchesDropped(patches);
+//		if(!patches.empty())
+//			patchesDropped(patches);
 	}
 
 	bool TreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
 		const auto* list = dynamic_cast<ListModel*>(_dragSourceDetails.sourceComponent.get());
 
-		const auto& patches = SavePatchDesc::getPatchesFromDragSource(_dragSourceDetails);
+//		const auto& patches = SavePatchDesc::getPatchesFromDragSource(_dragSourceDetails);
 
-		return isInterestedInPatchList(list, patches);
+//		return isInterestedInPatchList(list, patches);
+		return false;
 	}
 
 	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)
@@ -309,7 +310,5 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc/* = nullptr*/)
 	{
-		for (const auto& patch : _patches)
-			patchDropped(patch);
 	}
 }

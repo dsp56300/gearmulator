@@ -31,6 +31,8 @@ namespace juceRmlUi
 
 		static DragSource* fromElement(const Rml::Element* _elem);
 
+		Rml::Element* getElement() const noexcept { return m_element; }
+
 	private:
 		void onDragStart(const Rml::Event& _event);
 		void onDragEnd(const Rml::Event& _event);

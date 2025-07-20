@@ -1,6 +1,7 @@
 #include "listitem.h"
 
 #include "patchmanagerUiRml.h"
+#include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "jucePluginLib/patchdb/patch.h"
 
@@ -130,5 +131,22 @@ namespace jucePluginEditorLib::patchManagerRml
 		auto* item = getItem();
 		assert(item);
 		return item->getPatchManager().getListModel();
+	}
+
+	std::unique_ptr<juceRmlUi::DragData> ListElemEntry::createDragData()
+	{
+		const auto indices = getList().getSelectedEntries();
+		if (indices.empty())
+			return {};
+
+		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patches;
+
+		for (auto index : indices)
+		{
+			const auto& patch = getList().getPatches()[index];
+			patches.insert({ static_cast<uint32_t>(index), patch });
+		}
+
+		return std::make_unique<patchManager::SavePatchDesc>(getItem()->getPatchManager().getEditor(), std::move(patches));
 	}
 }

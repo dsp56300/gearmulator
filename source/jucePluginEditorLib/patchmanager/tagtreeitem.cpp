@@ -60,66 +60,12 @@ namespace jucePluginEditorLib::patchManager
 
 	void TagTreeItem::modifyTags(PatchManagerUiJuce& _pm, pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
-		pluginLib::patchDB::TypedTags tags;
-		if (juce::ModifierKeys::currentModifiers.isShiftDown())
-			tags.addRemoved(_type, _tag);
-		else
-			tags.add(_type, _tag);
-
-		_pm.getDB().modifyTags(_patches, tags);
 		_pm.repaint();
 	}
 
 	void TagTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
 	{
-		if(!_mouseEvent.mods.isPopupMenu())
-		{
-			TreeItem::itemClicked(_mouseEvent);
-			return;
-		}
-
-		const auto tagType = toTagType(getGroupType());
-
-		if(tagType != pluginLib::patchDB::TagType::Invalid && getOwnerView()->getNumSelectedItems() == 1)
-		{
-			juce::PopupMenu menu;
-			const auto& s = getDB().getSearch(getSearchHandle());
-			if(s && !s->getResultSize())
-			{
-				menu.addItem("Remove", [this, tagType]
-				{
-					getDB().removeTag(tagType, m_tag);
-				});
-			}
-			menu.addItem("Set Color...", [this, tagType]
-			{
-				juce::ColourSelector* cs = new juce::ColourSelector(juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace);
-
-				cs->getProperties().set("tagType", static_cast<int>(tagType));
-				cs->getProperties().set("tag", juce::String(getTag()));
-
-				cs->setSize(400,300);
-				cs->setCurrentColour(juce::Colour(getColor()));
-				cs->addChangeListener(&getPatchManager());
-
-				const auto treeRect = getTree()->getScreenBounds();
-				const auto itemRect = getItemPosition(true);
-				auto rect = itemRect;
-				rect.translate(treeRect.getX(), treeRect.getY());
-
-				juce::CallOutBox::launchAsynchronously(std::unique_ptr<juce::Component>(cs), rect, nullptr);
-			});
-			if(getColor() != pluginLib::patchDB::g_invalidColor)
-			{
-				menu.addItem("Clear Color", [this, tagType]
-				{
-					getDB().setTagColor(tagType, getTag(), pluginLib::patchDB::g_invalidColor);
-					getPatchManager().repaint();
-				});
-			}
-
-			menu.showMenuAsync({});
-		}
+		TreeItem::itemClicked(_mouseEvent);
 	}
 
 	pluginLib::patchDB::Color TagTreeItem::getColor() const
