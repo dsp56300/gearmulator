@@ -4,20 +4,13 @@
 
 #include "listmodel.h"
 #include "patchmanager.h"
-#include "patchmanageruijuce.h"
 
 #include "../pluginEditor.h"
 
 #include "baseLib/filesystem.h"
 
-#include "jucePluginLib/filetype.h"
-
 #include "jucePluginLib/patchdb/datasource.h"
 #include "jucePluginLib/patchdb/search.h"
-
-#include "juceUiLib/messageBox.h"
-
-#include "synthLib/buildconfig.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -103,21 +96,6 @@ namespace jucePluginEditorLib::patchManager
 			return static_cast<int>(dsA->type) - static_cast<int>(dsB->type);
 
 		return TreeItem::compareElements(_a, _b);
-	}
-
-	bool DatasourceTreeItem::beginEdit()
-	{
-		if(m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
-			return TreeItem::beginEdit();
-
-		static_cast<TreeItem&>(*this).beginEdit(m_dataSource->name, [this](bool _success, const std::string& _newName)
-		{
-			if(_newName != m_dataSource->name)
-			{
-				getDB().renameDataSource(m_dataSource, _newName);
-			}
-		});
-		return true;
 	}
 
 	juce::String DatasourceTreeItem::getTooltip()

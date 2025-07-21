@@ -191,7 +191,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 		auto patches = patchManager::SavePatchDesc::getPatchesFromDragSource(*_source);
 		if (patches.empty())
-			return false;
+			return DragTarget::canDrop(_event, _source);
 		return canDropPatchList(_event, _source->getElement(), patches);
 	}
 

@@ -1,9 +1,12 @@
 #include "groupTreeNode.h"
 
 #include "patchmanagerUiRml.h"
+#include "baseLib/filesystem.h"
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
+#include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 #include "jucePluginEditorLib/patchmanager/search.h"
+#include "jucePluginEditorLib/patchmanager/tagtreeitem.h"
 #include "jucePluginEditorLib/patchmanager/types.h"
 
 #include "juceRmlUi/rmlHelper.h"
@@ -393,5 +396,110 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 
 		menu.runModal(_event);
+	}
+
+	bool GroupTreeElem::canDrop(const Rml::Event& _event, const DragSource* _source) const
+	{
+		if (!getNode()->isOpened())
+			getNode()->setOpened(true);
+
+		return TreeElem::canDrop(_event, _source);
+	}
+
+	bool GroupTreeElem::canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const
+	{
+		if (getGroupType() == patchManager::GroupType::Favourites)
+			return true;
+
+		return TreeElem::canDropPatchList(_event, _source, _patches);
+	}
+
+	bool GroupTreeElem::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) const
+	{
+		switch (getGroupType())
+		{
+		case patchManager::GroupType::DataSources:
+			{
+				// do not allow to add data sources from temporary directory
+				const auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString();
+				for (const auto& file : _files)
+				{
+					if(file.find(tempDir) == 0)
+						return false;
+				}
+				return true;
+			}
+		case patchManager::GroupType::LocalStorage:
+			return true;
+		default:
+			return TreeElem::canDropFiles(_event, _files);
+		}
+	}
+
+	void GroupTreeElem::dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files)
+	{
+		if(getGroupType() == patchManager::GroupType::DataSources)
+		{
+			for (const auto& file : _files)
+			{
+				pluginLib::patchDB::DataSource ds;
+				ds.name = file;
+				ds.type = pluginLib::patchDB::SourceType::File;
+				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+
+				getDB().addDataSource(ds);
+			}
+			return;
+		}
+		if(getGroupType() == patchManager::GroupType::LocalStorage)
+		{
+			for (const auto& file : _files)
+			{
+				auto patches = getDB().loadPatchesFromFiles(std::vector{file});
+
+				if(patches.empty())
+					continue;
+
+				pluginLib::patchDB::DataSource ds;
+				ds.name = baseLib::filesystem::getFilenameWithoutPath(file);
+				ds.type = pluginLib::patchDB::SourceType::LocalStorage;
+				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+
+				getDB().addDataSource(ds, [this, patches](const bool _success, const std::shared_ptr<pluginLib::patchDB::DataSourceNode>& _ds)
+				{
+					if(_success)
+						getDB().copyPatchesToLocalStorage(_ds, patches, -1);
+				});
+			}
+			return;
+		}
+
+		TreeElem::dropFiles(_event, _data, _files);
+	}
+
+	void GroupTreeElem::dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	{
+		if (getGroupType() == patchManager::GroupType::Favourites)
+		{
+			const auto tagType = toTagType(getGroupType());
+
+			if (tagType != pluginLib::patchDB::TagType::Invalid)
+			{
+				constexpr const char* const tag = "Favourites";
+
+				getDB().addTag(tagType, tag);
+				TagTreeElem::modifyTags(getDB(), tagType, tag, _patches);
+			}
+
+			return;
+		}
+
+		TreeElem::dropPatches(_event, _data, _patches);
+	}
+
+	patchManager::GroupType GroupTreeElem::getGroupType() const
+	{
+		const auto* node = dynamic_cast<GroupNode*>(getNode().get());
+		return node ? node->getGroupType() : patchManager::GroupType::Invalid;
 	}
 }

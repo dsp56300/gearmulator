@@ -28,8 +28,6 @@ namespace jucePluginEditorLib::patchManager
 
 		int compareElements(const TreeViewItem* _a, const TreeViewItem* _b) override;
 
-		bool beginEdit() override;
-
 		const auto& getDataSource() const { return m_dataSource; }
 
 		juce::String getTooltip() override;

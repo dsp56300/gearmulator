@@ -78,6 +78,15 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onRightClick(const Rml::Event& _event) override;
 
+		bool canDrop(const Rml::Event& _event, const DragSource* _source) const override;
+		bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) const override;
+
+		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
+		void dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
+		bool canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const override;
+
+		patchManager::GroupType getGroupType() const;
+
 	private:
 		std::unique_ptr<juce::FileChooser> m_chooser;
 	};
