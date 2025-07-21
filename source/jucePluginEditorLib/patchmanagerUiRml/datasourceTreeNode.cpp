@@ -117,7 +117,11 @@ namespace jucePluginEditorLib::patchManagerRml
 			{
 				if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
 				{
-					getDB().getLocalStorageFile(*m_dataSource).revealToUser();
+					const auto file = getDB().getLocalStorageFile(*m_dataSource);
+					if (file.existsAsFile())
+						file.revealToUser();
+					else
+						file.getParentDirectory().revealToUser();
 				}
 				else
 				{
