@@ -138,19 +138,6 @@ namespace jucePluginEditorLib::patchManager
 
 	juce::var DatasourceTreeItem::getDragSourceDescription()
 	{
-		if(!m_dataSource || m_dataSource->patches.empty())
-			return TreeItem::getDragSourceDescription();
-
-		std::vector<pluginLib::patchDB::PatchPtr> patchesVec{m_dataSource->patches.begin(), m_dataSource->patches.end()};
-
-		pluginLib::patchDB::DataSource::sortByProgram(patchesVec);
-
-		uint32_t i=0;
-		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patchesMap;
-
-		for (const auto& patch : patchesVec)
-			patchesMap.insert({i++, patch});
-
-		return {};//new SavePatchDesc(getDB(), std::move(patchesMap), baseLib::filesystem::getFilenameWithoutPath(m_dataSource->name));
+		return {};
 	}
 }

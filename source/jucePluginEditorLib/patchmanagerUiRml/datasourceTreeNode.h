@@ -27,6 +27,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		std::string getText() const;
 
 		const auto& getDatasource() const { return m_ds; }
+		void refresh();
 
 	private:
 		pluginLib::patchDB::DataSourceNodePtr m_ds;

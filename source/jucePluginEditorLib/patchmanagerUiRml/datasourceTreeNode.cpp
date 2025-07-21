@@ -63,6 +63,12 @@ namespace jucePluginEditorLib::patchManagerRml
 		return m_ds ? getDataSourceNodeTitle(m_ds) : std::string();
 	}
 
+	void DatasourceNode::refresh()
+	{
+		auto* elem = dynamic_cast<DatasourceTreeElem*>(getElement());
+		elem->setName(getDataSourceNodeTitle(m_ds));
+	}
+
 	DatasourceTreeElem::DatasourceTreeElem(Tree& _tree, const Rml::String& _tag) : TreeElem(_tree, _tag)
 	{
 	}
