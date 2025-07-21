@@ -24,6 +24,8 @@ namespace juceRmlUi
 	{
 	public:
 		using Children = std::vector<TreeNodePtr>;
+		using SortedInsertionComparer = std::function<bool(const TreeNodePtr&, const TreeNodePtr&)>;
+
 		static constexpr size_t InvalidIndex = std::numeric_limits<size_t>::max();
 
 		baseLib::Event<TreeNodePtr> evParentChanged;
@@ -42,7 +44,8 @@ namespace juceRmlUi
 		void clear();
 
 		TreeNodePtr getParent() const { return m_parent.lock(); }
-		bool setParent(const TreeNodePtr& _parent);
+		bool setParent(const TreeNodePtr& _parent, size_t _position = InvalidIndex);
+		bool setParent(const TreeNodePtr& _parent, const SortedInsertionComparer& _sortedInsertionComparer);
 
 		void removeFromParent()
 		{
@@ -52,7 +55,7 @@ namespace juceRmlUi
 		const Children& getChildren() const { return m_children; }
 		TreeNodePtr getChild(size_t _index) const;
 
-		bool addChild(const TreeNodePtr& _child);
+		bool addChild(const TreeNodePtr& _child, size_t _position = InvalidIndex);
 		bool removeChild(const TreeNodePtr& _child);
 
 		template<typename T, typename... Args>

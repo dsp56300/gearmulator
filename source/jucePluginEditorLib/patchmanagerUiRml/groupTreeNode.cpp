@@ -137,15 +137,35 @@ namespace jucePluginEditorLib::patchManagerRml
 			parentNeeded = shared_from_this();
 		}
 
-		_node->setParent(parentNeeded);
+		_node->setParent(parentNeeded, [](const juceRmlUi::TreeNodePtr& _a, const juceRmlUi::TreeNodePtr& _b)
+		{
+			auto* a = dynamic_cast<DatasourceNode*>(_a.get());
+			auto* b = dynamic_cast<DatasourceNode*>(_b.get());
+
+			if (!a || !b)
+				return false;
+
+			return a->getText() < b->getText();
+		});
 	}
 
 	void GroupNode::validateParent(const TagItemPtr& _item)
 	{
+		auto compareNodes = [](const juceRmlUi::TreeNodePtr& _a, const juceRmlUi::TreeNodePtr& _b)
+		{
+			auto* a = dynamic_cast<TagNode*>(_a.get());
+			auto* b = dynamic_cast<TagNode*>(_b.get());
+
+			if (!a || !b)
+				return false;
+
+			return a->getTag() < b->getTag();
+		};
+
 		if (match(_item))
-			_item->setParent(shared_from_this());
+			_item->setParent(shared_from_this(), compareNodes);
 		else
-			_item->setParent(getTree().getRoot());
+			_item->setParent(getTree().getRoot(), compareNodes);
 	}
 
 	bool GroupNode::needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds) const

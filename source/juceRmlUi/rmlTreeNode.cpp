@@ -19,7 +19,7 @@ namespace juceRmlUi
 		}
 	}
 
-	bool TreeNode::setParent(const TreeNodePtr& _parent)
+	bool TreeNode::setParent(const TreeNodePtr& _parent, const size_t _position/* = InvalidIndex*/)
 	{
 		if (m_parent.lock() == _parent)
 			return true;
@@ -46,7 +46,10 @@ namespace juceRmlUi
 
 		if (_parent)
 		{
-			_parent->m_children.push_back(self);
+			if (_position >= _parent->m_children.size())
+				_parent->m_children.push_back(self);
+			else
+				_parent->m_children.insert(_parent->m_children.begin() + static_cast<ptrdiff_t>(_position), self);
 			_parent->evChildAdded(_parent, self);
 			m_tree.childAdded(_parent, self);
 		}
@@ -60,6 +63,27 @@ namespace juceRmlUi
 		return true;
 	}
 
+	bool TreeNode::setParent(const TreeNodePtr& _parent, const SortedInsertionComparer& _sortedInsertionComparer)
+	{
+		if (!_parent || getParent() == _parent)
+			return setParent(_parent);
+
+		const auto self = shared_from_this();
+
+		// insert into dummy array and sort it to extract insert position
+		auto children = _parent->m_children;
+		children.push_back(self);
+		std::sort(children.begin(), children.end(), _sortedInsertionComparer);
+
+		auto it = std::find(children.begin(), children.end(), self);
+		assert(it != children.end());
+
+		const auto position = std::distance(children.begin(), it);
+
+		// now insert at the found position
+		return setParent(_parent, position);
+	}
+
 	TreeNodePtr TreeNode::getChild(const size_t _index) const
 	{
 		if (_index < m_children.size())
@@ -67,9 +91,9 @@ namespace juceRmlUi
 		return nullptr;
 	}
 
-	bool TreeNode::addChild(const TreeNodePtr& _child)
+	bool TreeNode::addChild(const TreeNodePtr& _child, const size_t _position/* = InvalidIndex*/)
 	{
-		return _child->setParent(shared_from_this());
+		return _child->setParent(shared_from_this(), _position);
 	}
 
 	bool TreeNode::removeChild(const TreeNodePtr& _child)
