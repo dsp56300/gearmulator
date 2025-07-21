@@ -211,6 +211,11 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void GroupNode::processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _searches)
 	{
+		auto* elem = dynamic_cast<TreeElem*>(getElement());
+
+		if (elem)
+			elem->processDirty(_searches);
+
 		for (const auto& it : m_itemsByDataSource)
 		{
 			auto* elem = it.second->getElement();
@@ -229,6 +234,11 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void GroupNode::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest)
 	{
+		auto* elem = dynamic_cast<TreeElem*>(getElement());
+
+		if (elem)
+			elem->setParentSearchRequest(_searchRequest);
+
 		for (const auto& [ds, item] : m_itemsByDataSource)
 		{
 			auto* elem = dynamic_cast<TreeElem*>(item->getElement());
@@ -291,7 +301,9 @@ namespace jucePluginEditorLib::patchManagerRml
 		auto name = getPatchManager().getGroupName(groupType);
 
 		setName(name);
-		setCountEnabled(false);
+//		setCountEnabled(false);
+
+		onParentSearchChanged(getParentSearchRequest());
 	}
 
 	void GroupTreeElem::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest)
@@ -301,6 +313,31 @@ namespace jucePluginEditorLib::patchManagerRml
 		auto node = dynamic_cast<GroupNode*>(getNode().get());
 
 		node->onParentSearchChanged(_parentSearchRequest);
+
+		const auto sourceType = toSourceType(getGroupType());
+
+		if(sourceType != pluginLib::patchDB::SourceType::Invalid)
+		{
+			pluginLib::patchDB::SearchRequest req = _parentSearchRequest;
+			req.sourceType = sourceType;
+			search(std::move(req));
+		}
+		else
+		{
+			const auto tagType = toTagType(getGroupType());
+
+			if(tagType != pluginLib::patchDB::TagType::Invalid)
+			{
+				pluginLib::patchDB::SearchRequest req = _parentSearchRequest;
+				req.anyTagOfType.insert(tagType);
+				search(std::move(req));
+			}
+			else
+			{
+				setCountEnabled(false);
+			}
+		}
+
 	}
 
 	void GroupTreeElem::onRightClick(const Rml::Event& _event)
