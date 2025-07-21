@@ -18,6 +18,16 @@ namespace juceRmlUi
 
 namespace jucePluginEditorLib::patchManagerRml
 {
+	const std::string& TagNode::getName() const
+	{
+		if (getTag().empty())
+		{
+			static std::string uncategorizedName = "Uncategorized";
+			return uncategorizedName;
+		}
+		return getTag();
+	}
+
 	TagTreeElem::TagTreeElem(Tree& _tree, const std::string& _rmlElemTag) : TreeElem(_tree, _rmlElemTag)
 	{
 	}
@@ -30,18 +40,27 @@ namespace jucePluginEditorLib::patchManagerRml
 		if (!tagItem)
 			return;
 
-		setName(tagItem->getTag());
+		const auto& tag = tagItem->getTag();
+
+		setName(tagItem->getName());
 
 		const auto tagType = toTagType(tagItem->getGroup());
 
-		const auto color = tagItem->getPatchManager().getDB().getTagColor(tagType, tagItem->getTag());
+		if (!tag.empty())
+		{
+			const auto color = tagItem->getPatchManager().getDB().getTagColor(tagType, tag);
 
-		setColor(color);
+			setColor(color);
+		}
 
 		if (tagType == pluginLib::patchDB::TagType::Favourites)
 		{
 			pluginLib::patchDB::SearchRequest sr;
-			sr.tags.add(tagType, tagItem->getTag());
+
+			if (tag.empty())
+				sr.noTagOfType.insert(tagType);
+			else
+				sr.tags.add(tagType, tag);
 
 			search(std::move(sr));
 		}
@@ -57,7 +76,12 @@ namespace jucePluginEditorLib::patchManagerRml
 			return;
 
 		pluginLib::patchDB::SearchRequest sr = _parentSearchRequest;
-		sr.tags.add(tagType, getTag());
+		const auto tag = getTag();
+
+		if (tag.empty())
+			sr.noTagOfType.insert(tagType);
+		else
+			sr.tags.add(tagType, tag);
 
 		search(std::move(sr));
 	}
@@ -106,12 +130,12 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	bool TagTreeElem::canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const
 	{
-		return hasSearch() && getTagType() != pluginLib::patchDB::TagType::Invalid;
+		return hasSearch() && getTagType() != pluginLib::patchDB::TagType::Invalid && !getTag().empty();
 	}
 
 	void TagTreeElem::dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
-		if (getTagType() == pluginLib::patchDB::TagType::Invalid)
+		if (getTagType() == pluginLib::patchDB::TagType::Invalid || getTag().empty())
 			return;
 		modifyTags(getDB(), getTagType(), getTag(), _patches);
 	}

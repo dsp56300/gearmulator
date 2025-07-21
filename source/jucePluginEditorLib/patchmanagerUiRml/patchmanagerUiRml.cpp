@@ -24,11 +24,15 @@ namespace jucePluginEditorLib::patchManagerRml
 		, m_status(_dataModel)
 		, m_info(*this)
 	{
-		for (auto group : _groupTypes)
+		for (const auto group : _groupTypes)
 			m_treeDS.addGroup(group);
 
 		m_treeTags.addGroup(patchManager::GroupType::Categories);
-		// TODO: add uncategorized group
+
+		const auto groupCategories = m_treeTags.getGroupItem(patchManager::GroupType::Categories);
+		groupCategories->createSubItem({});	// empty tag = Uncategorized
+		groupCategories->setOpened(true);
+
 		m_treeTags.addGroup(patchManager::GroupType::Tags);
 	}
 

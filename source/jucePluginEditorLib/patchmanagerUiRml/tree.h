@@ -62,6 +62,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		bool setSelectedDatasource(const pluginLib::patchDB::DataSourceNodePtr& _ds);
 
+		GroupItemPtr getGroupItem(patchManager::GroupType _group);
+
 	private:
 		GroupItemPtr getItem(patchManager::GroupType _group);
 

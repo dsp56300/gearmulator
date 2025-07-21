@@ -27,6 +27,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		auto& getPatchManager() const { return m_patchManager; }
 
+		const std::string& getName() const;
+
 	private:
 		PatchManagerUiRml& m_patchManager;
 		patchManager::GroupType m_group;

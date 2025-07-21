@@ -48,6 +48,14 @@ namespace jucePluginEditorLib::patchManagerRml
 		for(auto it = m_itemsByTag.begin(); it != m_itemsByTag.end();)
 		{
 			const auto tag = it->first;
+
+			if (tag.empty())
+			{
+				// never delete the Uncategorized tag
+				++it;
+				continue;
+			}
+
 			const auto& item = it->second;
 
 			if(_tags.find(tag) == _tags.end())
@@ -112,8 +120,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		m_itemsByTag.insert({ _tag, item });
 
-		auto childElem = dynamic_cast<patchManagerRml::TreeElem*>(item->getElement());
-		auto* myElem = dynamic_cast<patchManagerRml::TreeElem*>(getElement());
+		auto childElem = dynamic_cast<TreeElem*>(item->getElement());
+		auto* myElem = dynamic_cast<TreeElem*>(getElement());
 
 		childElem->onParentSearchChanged(myElem->getParentSearchRequest());
 
@@ -159,7 +167,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			if (!a || !b)
 				return false;
 
-			return a->getTag() < b->getTag();
+			return a->getName() < b->getName();
 		};
 
 		if (match(_item))
@@ -202,14 +210,14 @@ namespace jucePluginEditorLib::patchManagerRml
 		for (const auto& it : m_itemsByDataSource)
 		{
 			auto* elem = it.second->getElement();
-			auto* treeNode = dynamic_cast<patchManagerRml::TreeElem*>(elem);
+			auto* treeNode = dynamic_cast<TreeElem*>(elem);
 			if (treeNode)
 				treeNode->processDirty(_searches);
 		}
 		for (const auto& it : m_itemsByTag)
 		{
 			auto* elem = it.second->getElement();
-			auto* treeNode = dynamic_cast<patchManagerRml::TreeElem*>(elem);
+			auto* treeNode = dynamic_cast<TreeElem*>(elem);
 			if (treeNode)
 				treeNode->processDirty(_searches);
 		}

@@ -96,6 +96,14 @@ namespace jucePluginEditorLib::patchManagerRml
 		return item->setSelectedDatasource(_ds);
 	}
 
+	GroupItemPtr Tree::getGroupItem(const patchManager::GroupType _group)
+	{
+		auto it = m_groupItems.find(_group);
+		if (it != m_groupItems.end())
+			return it->second;
+		return {};
+	}
+
 	GroupItemPtr Tree::getItem(const patchManager::GroupType _group)
 	{
 		auto it = m_groupItems.find(_group);
