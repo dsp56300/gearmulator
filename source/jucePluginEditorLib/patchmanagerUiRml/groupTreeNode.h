@@ -58,6 +58,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		bool setSelectedDatasource(const pluginLib::patchDB::DataSourceNodePtr& _ds);
 
+		void setFilter(const std::string& _filter);
+
 	private:
 		PatchManagerUiRml& m_patchManager;
 		patchManager::GroupType m_type;

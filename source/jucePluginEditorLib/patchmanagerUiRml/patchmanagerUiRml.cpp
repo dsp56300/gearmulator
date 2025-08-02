@@ -11,6 +11,8 @@
 #include "juceRmlUi/rmlElemList.h"
 #include "juceRmlUi/rmlHelper.h"
 
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
+
 namespace jucePluginEditorLib::patchManagerRml
 {
 	PatchManagerUiRml::PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, PatchManagerDataModel& _dataModel, const std::initializer_list<patchManager::GroupType>& _groupTypes)
@@ -18,9 +20,13 @@ namespace jucePluginEditorLib::patchManagerRml
 		, m_rmlComponent(_comp)
 		, m_dataModel(_dataModel)
 		, m_treeDS(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemTree>(_root, "pm-tree-datasources"))
+		, m_searchTreeDS(juceRmlUi::helper::findChildT<Rml::ElementFormControlInput>(_root, "pm-search-tree-ds"), m_treeDS)
 		, m_treeTags(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemTree>(_root, "pm-tree-tags"))
+		, m_searchTreeTags(juceRmlUi::helper::findChildT<Rml::ElementFormControlInput>(_root, "pm-search-tree-tags"), m_treeTags)
 		, m_list(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemList>(_root, "pm-list"))
+		, m_searchList(juceRmlUi::helper::findChildT<Rml::ElementFormControlInput>(_root, "pm-search-list"), m_list)
 		, m_grid(*this, juceRmlUi::helper::findChildT<juceRmlUi::ElemList>(_root, "pm-grid"))
+		, m_searchGrid(juceRmlUi::helper::findChildT<Rml::ElementFormControlInput>(_root, "pm-search-grid"), m_grid)
 		, m_status(_dataModel)
 		, m_info(*this)
 	{

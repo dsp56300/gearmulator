@@ -64,6 +64,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		GroupItemPtr getGroupItem(patchManager::GroupType _group);
 
+		void setFilter(const std::string& _filter) const;
+
 	private:
 		GroupItemPtr getItem(patchManager::GroupType _group);
 

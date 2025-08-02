@@ -4,6 +4,8 @@
 #include "grid.h"
 #include "info.h"
 #include "list.h"
+#include "searchlist.h"
+#include "searchtree.h"
 #include "status.h"
 #include "tagsTree.h"
 
@@ -76,10 +78,15 @@ namespace jucePluginEditorLib::patchManagerRml
 		PatchManagerDataModel& m_dataModel;
 
 		DatasourceTree m_treeDS;
+		SearchTree m_searchTreeDS;
+
 		TagsTree m_treeTags;
+		SearchTree m_searchTreeTags;
 
 		List m_list;
+		SearchList m_searchList;
 		Grid m_grid;
+		SearchList m_searchGrid;
 
 		Status m_status;
 		Info m_info;

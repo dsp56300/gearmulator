@@ -144,9 +144,21 @@ namespace jucePluginEditorLib::patchManagerRml
 		{
 			parentNeeded = getTree().getRoot();
 		}
-		else if (match(_node))
+		else
 		{
-			parentNeeded = shared_from_this();
+			auto* nodeElem = _node->getElement();
+
+			if (match(_node))
+			{
+				parentNeeded = shared_from_this();
+				if (nodeElem)
+					nodeElem->RemoveProperty(Rml::PropertyId::Display);
+			}
+			else
+			{
+				if (nodeElem)
+					nodeElem->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
+			}
 		}
 
 		_node->setParent(parentNeeded, [](const juceRmlUi::TreeNodePtr& _a, const juceRmlUi::TreeNodePtr& _b)
@@ -175,9 +187,15 @@ namespace jucePluginEditorLib::patchManagerRml
 		};
 
 		if (match(_item))
+		{
 			_item->setParent(shared_from_this(), compareNodes);
+			_item->getElement()->RemoveProperty(Rml::PropertyId::Display);
+		}
 		else
+		{
 			_item->setParent(getTree().getRoot(), compareNodes);
+			_item->getElement()->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
+		}
 	}
 
 	bool GroupNode::needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds) const
@@ -280,6 +298,20 @@ namespace jucePluginEditorLib::patchManagerRml
 		});
 
 		return true;
+	}
+
+	void GroupNode::setFilter(const std::string& _filter)
+	{
+		if (m_filter == _filter)
+			return;
+
+		m_filter = _filter;
+
+		for (const auto& it : m_itemsByDataSource)
+			validateParent(it.first, it.second);
+
+		for (const auto& it : m_itemsByTag)
+			validateParent(it.second);
 	}
 
 	GroupTreeElem::GroupTreeElem(Tree& _tree, const Rml::String& _tag) : TreeElem(_tree, _tag)

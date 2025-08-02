@@ -104,6 +104,12 @@ namespace jucePluginEditorLib::patchManagerRml
 		return {};
 	}
 
+	void Tree::setFilter(const std::string& _filter) const
+	{
+		for (const auto& it : m_groupItems)
+			it.second->setFilter(_filter);
+	}
+
 	GroupItemPtr Tree::getItem(const patchManager::GroupType _group)
 	{
 		auto it = m_groupItems.find(_group);

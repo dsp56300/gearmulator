@@ -13,7 +13,7 @@
 					<div id="count" class="pm-count" countFormat=" (%s)" countUnknown=" (...)"/>
 				</treenode>
 			</tree>
-			<input class="pm-search" type="text">
+			<input id="pm-search-tree-ds" class="pm-search" type="text">
 				<div class="input-placeholder">Search...</div>
 			</input>
 		</div>
@@ -27,7 +27,7 @@
 					<div id="count" class="pm-count" countFormat=" (%s)" countUnknown=" (...)"/>
 				</treenode>
 			</tree>
-			<input class="pm-search" type="text">
+			<input id="pm-search-tree-tags" class="pm-search" type="text">
 				<div class="input-placeholder">Search...</div>
 			</input>
 		</div>
@@ -42,7 +42,7 @@
 						<div id="name" class="pm-name">Name</div>
 					</listentry>
 				</list>
-				<input class="pm-search" type="text">
+				<input id="pm-search-list" class="pm-search" type="text">
 					<div class="input-placeholder">Search...</div>
 				</input>
 			</div>
@@ -70,7 +70,7 @@
 				<listentry class="gridentry"/>
 			</list>
 			<div style="display: flex;">
-				<input class="pm-search" type="text" style="flex: 2;">
+				<input id="pm-search-grid" class="pm-search" type="text" style="flex: 2;">
 					<div class="input-placeholder">Search...</div>
 				</input>
 				<div class="pm-status" style="flex: 3" data-model="patchmanager">{{status}}</div>

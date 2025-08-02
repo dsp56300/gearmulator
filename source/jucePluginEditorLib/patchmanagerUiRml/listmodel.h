@@ -86,12 +86,13 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		static void showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback);
 
+		void setFilter(const std::string& _filter);
+
 	private:
 		bool exportPresets(bool _selectedOnly, const pluginLib::FileType& _fileType) const;
 
 		void updateEntries() const;
 
-		void setFilter(const std::string& _filter);
 		void setFilter(const std::string& _filter, bool _hideDuplicatesByHash, bool _hideDuplicatesByName);
 
 		void onSelectionChanged() const;
