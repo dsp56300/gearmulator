@@ -135,9 +135,13 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	std::unique_ptr<juceRmlUi::DragData> ListElemEntry::createDragData()
 	{
-		const auto indices = getList().getSelectedEntries();
+		auto indices = getList().getSelectedEntries();
 		if (indices.empty())
-			return {};
+		{
+			const auto index = getItem()->getIndex();
+			indices.push_back(index);
+			getItem()->getList().setSelected(index, true, false, true);
+		}
 
 		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patches;
 
