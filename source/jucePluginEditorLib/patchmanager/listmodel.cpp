@@ -103,200 +103,6 @@ namespace jucePluginEditorLib::patchManager
 
 	bool ListModel::onClicked(const juce::MouseEvent& _mouseEvent)
 	{
-		if(!_mouseEvent.mods.isPopupMenu())
-			return false;
-
-		auto selectedPatches = getSelectedPatches();
-
-		const auto hasSelectedPatches = !selectedPatches.empty();
-
-		const auto& editor = getPatchManager().getEditor();
-
-		juce::PopupMenu menu;
-		/*
-		if(hasSelectedPatches)
-			menu.addSubMenu("Export selected...", editor.createExportFileTypeMenu([this](const pluginLib::FileType& _fileType) { exportPresets(true, _fileType); }));
-		menu.addSubMenu("Export all...", editor.createExportFileTypeMenu([this](const pluginLib::FileType& _fileType) { exportPresets(false, _fileType); }));
-		*/
-		if(hasSelectedPatches)
-		{
-			menu.addSeparator();
-
-			pluginLib::patchDB::TypedTags tags;
-
-			for (const auto& selectedPatch : selectedPatches)
-				tags.add(selectedPatch->getTags());
-
-			if(selectedPatches.size() == 1)
-			{
-				const auto& patch = *selectedPatches.begin();
-				const auto row = getSelectedEntry();
-				auto pos = getEntryPosition(row, true);
-
-				pos.setY(pos.getY()-2);
-				pos.setHeight(pos.getHeight()+4);
-
-				menu.addItem("Rename...", [this, patch, pos]
-				{
-					beginEdit(dynamic_cast<juce::Component*>(this), pos, patch->getName(), [this, patch](bool _cond, const std::string& _name)
-					{
-						if(_name != patch->getName())
-							getDB().renamePatch(patch, _name);
-					});
-				});
-
-				menu.addItem("Locate", [this, patch]
-				{
-					m_patchManager.setSelectedDataSource(patch->source.lock());
-				});
-			}
-
-			if(!m_search->request.tags.empty())
-			{
-				menu.addItem("Remove selected", [this, s = selectedPatches]
-				{
-					const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
-					pluginLib::patchDB::TypedTags removeTags;
-
-					// converted "added" tags to "removed" tags
-					for (const auto& tags : m_search->request.tags.get())
-					{
-						const pluginLib::patchDB::TagType type = tags.first;
-						const auto& t = tags.second;
-							
-						for (const auto& tag : t.getAdded())
-							removeTags.addRemoved(type, tag);
-					}
-
-					getDB().modifyTags(patches, removeTags);
-					m_patchManager.repaint();
-				});
-			}
-			else if(getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)
-			{
-				menu.addItem("Delete selected", [this, s = selectedPatches]
-				{
-					showDeleteConfirmationMessageBox([this, s](genericUI::MessageBox::Result _result)
-					{
-						if (_result == genericUI::MessageBox::Result::Yes)
-						{
-							const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
-							getDB().removePatches(m_search->request.sourceNode, patches);
-						}
-					});
-				});
-			}
-
-			if(tags.containsAdded())
-			{
-				bool haveSeparator = false;
-
-				for (const auto& it : tags.get())
-				{
-					const auto type = it.first;
-
-					const auto& t = it.second;
-
-					if(t.empty())
-						continue;
-
-					const auto tagTypeName = getDB().getTagTypeName(type);
-
-					if(tagTypeName.empty())
-						continue;
-
-					juce::PopupMenu tagMenu;
-
-					for (const auto& tag : t.getAdded())
-					{
-						pluginLib::patchDB::TypedTags removeTags;
-						removeTags.addRemoved(type, tag);
-
-						std::vector<pluginLib::patchDB::PatchPtr> patches{selectedPatches.begin(), selectedPatches.end()};
-
-						tagMenu.addItem(tag, [this, s = std::move(patches), removeTags]
-						{
-							getDB().modifyTags(s, removeTags);
-						});
-					}
-
-					if(!haveSeparator)
-					{
-						menu.addSeparator();
-						haveSeparator = true;
-					}
-
-					menu.addSubMenu("Remove from " + tagTypeName, tagMenu);
-				}
-			}
-
-			{
-				bool haveSeparator = false;
-
-				for(uint32_t i=0; i<static_cast<uint32_t>(pluginLib::patchDB::TagType::Count); ++i)
-				{
-					const auto type = static_cast<pluginLib::patchDB::TagType>(i);
-					std::set<pluginLib::patchDB::Tag> availTags;
-					getDB().getTags(type, availTags);
-
-					if(availTags.empty())
-						continue;
-
-					const auto tagTypeName = getDB().getTagTypeName(type);
-
-					if(tagTypeName.empty())
-						continue;
-
-					juce::PopupMenu tagMenu;
-
-					for (const auto& tag : availTags)
-					{
-						pluginLib::patchDB::TypedTags addedTags;
-						addedTags.add(type, tag);
-
-						std::vector<pluginLib::patchDB::PatchPtr> patches{selectedPatches.begin(), selectedPatches.end()};
-
-						tagMenu.addItem(tag, [this, addedTags, s = std::move(patches)]
-						{
-							getDB().modifyTags(s, addedTags);
-						});
-					}
-
-					if(!haveSeparator)
-					{
-						menu.addSeparator();
-						haveSeparator = true;
-					}
-
-					menu.addSubMenu("Add to " + tagTypeName, tagMenu);
-				}
-			}
-		}
-		menu.addSeparator();
-		menu.addItem("Hide duplicates (by hash)", true, m_hideDuplicatesByHash, [this]
-		{
-			setFilter(m_filter, !m_hideDuplicatesByHash, m_hideDuplicatesByName);
-		});
-		menu.addItem("Hide duplicates (by name)", true, m_hideDuplicatesByName, [this]
-		{
-			setFilter(m_filter, m_hideDuplicatesByHash, !m_hideDuplicatesByName);
-		});
-
-		menu.addSeparator();
-
-		juce::PopupMenu layoutMenu;
-		layoutMenu.addItem("List + Info", true, m_patchManager.getLayout() == PatchManagerUiJuce::LayoutType::List, [this]
-		{
-			m_patchManager.setLayout(PatchManagerUiJuce::LayoutType::List);
-		});
-		layoutMenu.addItem("Grid", true, m_patchManager.getLayout() == PatchManagerUiJuce::LayoutType::Grid, [this]
-		{
-			m_patchManager.setLayout(PatchManagerUiJuce::LayoutType::Grid);
-		});
-		menu.addSubMenu("Layout", layoutMenu);
-
-		menu.showMenuAsync({});
-
 		return true;
 	}
 
@@ -510,32 +316,6 @@ namespace jucePluginEditorLib::patchManager
 		return m_search->request.sourceNode;
 	}
 
-	void ListModel::setFilter(const std::string& _filter)
-	{
-		setFilter(_filter, m_hideDuplicatesByHash, m_hideDuplicatesByName);
-	}
-
-	void ListModel::setFilter(const std::string& _filter, const bool _hideDuplicatesByHash, const bool _hideDuplicatesByName)
-	{
-		if (m_filter == _filter && _hideDuplicatesByHash == m_hideDuplicatesByHash && m_hideDuplicatesByName == _hideDuplicatesByName)
-			return;
-
-		const auto selected = getSelectedPatches();
-
-		m_filter = _filter;
-		m_hideDuplicatesByHash = _hideDuplicatesByHash;
-		m_hideDuplicatesByName = _hideDuplicatesByName;
-
-		filterPatches();
-		onModelChanged();
-
-		setSelectedPatches(selected);
-
-		redraw();
-
-		getPatchManager().setListStatus(static_cast<uint32_t>(selected.size()), static_cast<uint32_t>(getPatches().size()));
-	}
-
 	PatchManager& ListModel::getDB() const
 	{
 		return m_patchManager.getDB();
@@ -585,7 +365,7 @@ namespace jucePluginEditorLib::patchManager
 
 	bool ListModel::hasFilters() const
 	{
-		return hasTagFilters() || !m_filter.empty();
+		return hasTagFilters();
 	}
 
 	pluginLib::patchDB::SearchHandle ListModel::getSearchHandle() const
@@ -602,7 +382,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListModel::filterPatches()
 	{
-		if (m_filter.empty() && !m_hideDuplicatesByHash && !m_hideDuplicatesByName)
+		if (!m_hideDuplicatesByHash && !m_hideDuplicatesByName)
 		{
 			m_filteredPatches.clear();
 			return;
@@ -630,16 +410,14 @@ namespace jucePluginEditorLib::patchManager
 				knownNames.insert(patch->getName());
 			}
 
-			if (m_filter.empty() || match(patch))
+			if (true || match(patch))
 				m_filteredPatches.emplace_back(patch);
 		}
 	}
 
 	bool ListModel::match(const Patch& _patch) const
 	{
-		const auto name = _patch->getName();
-		const auto t = Search::lowercase(name);
-		return t.find(m_filter) != std::string::npos;
+		return true;
 	}
 
 	bool ListModel::isInterestedInDragSource(const SourceDetails& dragSourceDetails)

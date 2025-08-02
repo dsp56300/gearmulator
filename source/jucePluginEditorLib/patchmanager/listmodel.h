@@ -50,9 +50,7 @@ namespace jucePluginEditorLib::patchManager
 
 		const Patches& getPatches() const
 		{
-			if (m_filter.empty() && !m_hideDuplicatesByHash && !m_hideDuplicatesByName)
-				return m_patches;
-			return m_filteredPatches;
+			return m_patches;
 		}
 
 		Patch getPatch(const size_t _index) const
@@ -76,9 +74,6 @@ namespace jucePluginEditorLib::patchManager
 				return {};
 			return _patches[_index];
 		}
-
-		void setFilter(const std::string& _filter);
-		void setFilter(const std::string& _filter, bool _hideDuplicatesByHash, bool _hideDuplicatesByName);
 
 		PatchManagerUiJuce& getPatchManager() const
 		{
@@ -157,7 +152,6 @@ namespace jucePluginEditorLib::patchManager
 		std::shared_ptr<pluginLib::patchDB::Search> m_search;
 		Patches m_patches;
 		Patches m_filteredPatches;
-		std::string m_filter;
 		bool m_hideDuplicatesByHash = false;
 		bool m_hideDuplicatesByName = false;
 		pluginLib::patchDB::SearchHandle m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;

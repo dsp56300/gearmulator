@@ -6,8 +6,6 @@
 #include "info.h"
 #include "list.h"
 #include "patchmanager.h"
-#include "searchlist.h"
-#include "searchtree.h"
 #include "status.h"
 #include "tagstree.h"
 #include "tree.h"
@@ -47,12 +45,7 @@ namespace jucePluginEditorLib::patchManager
 		m_treeDS = new DatasourceTree(*this, _groupTypes);
 		m_treeDS->setSize(w - g_padding, rootH - g_searchBarHeight - g_padding);
 
-		m_searchTreeDS = new SearchTree(*m_treeDS);
-		m_searchTreeDS->setSize(m_treeDS->getWidth(), g_searchBarHeight);
-		m_searchTreeDS->setTopLeftPosition(m_treeDS->getX(), m_treeDS->getHeight() + g_padding);
-
 		addAndMakeVisible(m_treeDS);
-		addAndMakeVisible(m_searchTreeDS);
 
 		// 2nd column
 		w = weight(20);
@@ -60,12 +53,7 @@ namespace jucePluginEditorLib::patchManager
 		m_treeTags->setTopLeftPosition(m_treeDS->getRight() + g_padding, 0);
 		m_treeTags->setSize(w - g_padding, rootH - g_searchBarHeight - g_padding);
 
-		m_searchTreeTags = new SearchTree(*m_treeTags);
-		m_searchTreeTags->setTopLeftPosition(m_treeTags->getX(), m_treeTags->getHeight() + g_padding);
-		m_searchTreeTags->setSize(m_treeTags->getWidth(), g_searchBarHeight);
-
 		addAndMakeVisible(m_treeTags);
-		addAndMakeVisible(m_searchTreeTags);
 
 		// 3rd column
 		w = weight(15);
@@ -82,13 +70,8 @@ namespace jucePluginEditorLib::patchManager
 		m_grid->setColour(juce::ListBox::textColourId, m_list->findColour(juce::ListBox::textColourId));
 		m_grid->setColour(juce::ListBox::outlineColourId, m_list->findColour(juce::ListBox::outlineColourId));
 
-		m_searchList = new SearchList(*m_list);
-		m_searchList->setTopLeftPosition(m_list->getX(), m_list->getHeight() + g_padding);
-		m_searchList->setSize(m_list->getWidth(), g_searchBarHeight);
-
 		addAndMakeVisible(m_list);
 		addChildComponent(m_grid);
-		addAndMakeVisible(m_searchList);
 
 		// 4th column
 		m_info = new Info(*this);
@@ -101,17 +84,6 @@ namespace jucePluginEditorLib::patchManager
 
 		addAndMakeVisible(m_info);
 		addAndMakeVisible(m_status);
-
-		if(const auto t = getTemplate("pm_search"))
-		{
-			t->apply(getEditor(), *m_searchList);
-			t->apply(getEditor(), *m_searchTreeDS);
-			t->apply(getEditor(), *m_searchTreeTags);
-		}
-
-		m_searchList->setTextToShowWhenEmpty("Search...", m_searchList->findColour(juce::TextEditor::textColourId).withAlpha(0.5f));
-		m_searchTreeDS->setTextToShowWhenEmpty("Search...", m_searchTreeDS->findColour(juce::TextEditor::textColourId).withAlpha(0.5f));
-		m_searchTreeTags->setTextToShowWhenEmpty("Search...", m_searchTreeTags->findColour(juce::TextEditor::textColourId).withAlpha(0.5f));
 
 		if(const auto t = getTemplate("pm_status_label"))
 		{
@@ -147,7 +119,6 @@ namespace jucePluginEditorLib::patchManager
 	{
 		delete m_status;
 		delete m_info;
-		delete m_searchList;
 		delete m_list;
 		delete m_grid;
 
@@ -155,51 +126,13 @@ namespace jucePluginEditorLib::patchManager
 		m_list = nullptr;
 		m_grid = nullptr;
 
-		delete m_searchTreeTags;
 		delete m_treeTags;
-		delete m_searchTreeDS;
 		delete m_treeDS;
 	}
 
 	void PatchManagerUiJuce::resized()
 	{
-		if(!m_treeDS)
-			return;
-
-		m_info->setVisible(m_layout == LayoutType::List);
-		m_resizerBarC.setVisible(m_layout == LayoutType::List);
-
-		std::vector<Component*> comps = {m_treeDS, &m_resizerBarA, m_treeTags, &m_resizerBarB, dynamic_cast<juce::Component*>(getListModel())};
-		if(m_layout == LayoutType::List)
-		{
-			comps.push_back(&m_resizerBarC);
-			comps.push_back(m_info);
-		}
-
-		m_stretchableManager.layOutComponents(comps.data(), static_cast<int>(comps.size()), 0, 0, getWidth(), getHeight(), false, false);
-
-		auto layoutXAxis = [](Component* _target, const Component* _source)
-		{
-			_target->setTopLeftPosition(_source->getX(), _target->getY());
-			_target->setSize(_source->getWidth(), _target->getHeight());
-		};
-
-		layoutXAxis(m_searchTreeDS, m_treeDS);
-		layoutXAxis(m_searchTreeTags, m_treeTags);
-
-		if(m_layout == LayoutType::List)
-		{
-			layoutXAxis(m_searchList, dynamic_cast<Component*>(getListModel()));
-			layoutXAxis(m_status, m_info);
-		}
-		else
-		{
-			m_searchList->setTopLeftPosition(m_grid->getX(), m_searchList->getY());
-			m_searchList->setSize(m_grid->getWidth()/3 - g_padding, m_searchList->getHeight());
-
-			m_status->setTopLeftPosition(m_searchList->getX() + m_searchList->getWidth() + g_padding, m_searchList->getY());
-			m_status->setSize(m_grid->getWidth()/3*2, m_status->getHeight());
-		}
+	
 	}
 
 	void PatchManagerUiJuce::paint(juce::Graphics& _g)
@@ -234,8 +167,6 @@ namespace jucePluginEditorLib::patchManager
 		m_layout = _layout;
 
 		auto* newModel = getListModel();
-
-		m_searchList->setListModel(newModel);
 
 		newModel->setContent(oldModel->getSearchHandle());
 		newModel->setSelectedEntries(oldModel->getSelectedEntries());

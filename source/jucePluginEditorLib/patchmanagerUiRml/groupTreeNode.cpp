@@ -5,8 +5,6 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
-#include "jucePluginEditorLib/patchmanager/search.h"
-#include "jucePluginEditorLib/patchmanager/tagtreeitem.h"
 #include "jucePluginEditorLib/patchmanager/types.h"
 
 #include "juceRmlUi/rmlHelper.h"
@@ -223,7 +221,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 		if (m_filter.empty())
 			return true;
-		const auto t = patchManager::Search::lowercase(_text);
+		const auto t = Search::lowercase(_text);
 		return t.find(m_filter) != std::string::npos;
 	}
 

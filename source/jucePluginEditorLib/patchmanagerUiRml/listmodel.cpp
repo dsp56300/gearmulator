@@ -6,7 +6,6 @@
 #include "jucePluginEditorLib/pluginEditor.h"
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
-#include "jucePluginEditorLib/patchmanager/search.h"
 
 #include "juceRmlUi/rmlElemList.h"
 #include "juceRmlUi/rmlHelper.h"
@@ -212,7 +211,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	bool ListModel::match(const Patch& _patch) const
 	{
 		const auto name = _patch->getName();
-		const auto t = patchManager::Search::lowercase(name);
+		const auto t = Search::lowercase(name);
 		return t.find(m_filter) != std::string::npos;
 	}
 
