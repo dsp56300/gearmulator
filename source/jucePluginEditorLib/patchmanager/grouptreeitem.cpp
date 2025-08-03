@@ -2,7 +2,6 @@
 
 #include "datasourcetreeitem.h"
 #include "patchmanager.h"
-#include "search.h"
 #include "tagtreeitem.h"
 
 #include "baseLib/filesystem.h"
@@ -271,9 +270,6 @@ namespace jucePluginEditorLib::patchManager
 
 	bool GroupTreeItem::match(const TreeItem& _item) const
 	{
-		if (m_filter.empty())
-			return true;
-		const auto t = Search::lowercase(_item.getText());
-		return t.find(m_filter) != std::string::npos;
+		return true;
 	}
 }
