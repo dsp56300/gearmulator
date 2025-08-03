@@ -35,7 +35,7 @@ namespace juceRmlUi
 		struct StrongHandle
 		{
 			using Type = T;
-			static constexpr HandleType HandleType = HT;
+			static constexpr HandleType MyHandleType = HT;
 
 			explicit StrongHandle(const Handle _handle) : handle(_handle) {}
 
