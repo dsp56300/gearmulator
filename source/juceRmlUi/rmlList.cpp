@@ -201,7 +201,7 @@ namespace juceRmlUi
 		return true;	// key was handled
 	}
 
-	bool List::setSelectedIndices(const std::vector<unsigned long long>& _indices, const bool _notify/* = true*/)
+	bool List::setSelectedIndices(const std::vector<size_t>& _indices, const bool _notify/* = true*/)
 	{
 		if (_indices.empty())
 			return deselectAll(_notify);

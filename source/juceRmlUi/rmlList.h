@@ -64,7 +64,7 @@ namespace juceRmlUi
 
 		size_t handleNavigationKey(Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, uint32_t _gridItemsPerColumn);
 		bool selectRangeViaShiftKey(size_t _index);
-		bool setSelectedIndices(const std::vector<unsigned long long>& _indices, bool _notify = true);
+		bool setSelectedIndices(const std::vector<size_t>& _indices, bool _notify = true);
 		bool deselectAll(bool _notify = true);
 
 	private:

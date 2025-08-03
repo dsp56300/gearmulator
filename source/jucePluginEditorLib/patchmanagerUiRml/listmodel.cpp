@@ -7,6 +7,8 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
+#include "jucePluginLib/filetype.h"
+
 #include "juceRmlUi/rmlElemList.h"
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
