@@ -77,82 +77,10 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListItem::itemDropped(const SourceDetails& dragSourceDetails)
 	{
-		if(m_drag == DragType::Off)
-			return;
-
-		auto& pm = m_list.getPatchManager();
-
-		const auto drag = m_drag;
-		m_drag = DragType::Off;
-
-		repaint();
-
-		const auto row = drag == DragType::Above ? m_row : m_row + 1;
-		/*
-		const auto patches = SavePatchDesc::getPatchesFromDragSource(dragSourceDetails);
-
-		if(patches.empty())
-			return;
-
-		const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
-		assert(savePatchDesc);
-
-		if(dynamic_cast<const ListModel*>(dragSourceDetails.sourceComponent.get()))
-		{
-			if(!patches.empty() && pm.getDB().movePatchesTo(row, patches))
-				m_list.refreshContent();
-		}
-		else if(patches.size() == 1 && savePatchDesc->isPartValid())
-		{
-			const auto& source = m_list.getDataSource();
-			if(!source)
-				return;
-
-			if(drag == DragType::Over)
-			{
-				repaint();
-
-				const auto existingPatch = m_list.getPatch(m_row);
-
-				if(existingPatch)
-				{
-					genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::QuestionIcon,
-						"Replace Patch", 
-						"Do you want to replace the existing patch '" + existingPatch->name + "' with contents of part " + std::to_string(savePatchDesc->getPart() + 1) + "?", 
-						[this, existingPatch, patches](genericUI::MessageBox::Result _result)
-						{
-							if (_result == genericUI::MessageBox::Result::Yes)
-							{
-								m_list.getDB().replacePatch(existingPatch, patches.front());
-							}
-						});
-					return;
-				}
-			}
-
-#if SYNTHLIB_DEMO_MODE
-			pm.getEditor().showDemoRestrictionMessageBox();
-#else
-			const auto part = savePatchDesc->getPart();
-
-			m_list.getDB().copyPatchesTo(source, patches, row, [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
-			{
-				juce::MessageManager::callAsync([this, part, _patches]
-				{
-					m_list.getDB().setSelectedPatch(part, _patches.front());
-				});
-			});
-#endif
-
-			repaint();
-		}
-		*/
-
 	}
 
 	void ListItem::mouseDown(const juce::MouseEvent& event)
 	{
-//		m_list.mouseDown(event);
 	}
 
 	bool ListItem::hitTest(int x, int y)

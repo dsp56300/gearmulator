@@ -72,9 +72,13 @@ namespace jucePluginEditorLib::patchManagerRml
 			return m_filteredPatches;
 		}
 
+		pluginLib::patchDB::PatchPtr getPatch(const size_t _index) const;
+
 		void filterPatches();
 		void sortPatches();
 		bool match(const Patch& _patch) const;
+
+		pluginLib::patchDB::DataSourceNodePtr getDatasource() const;
 
 		pluginLib::patchDB::SourceType getSourceType() const;
 
@@ -87,6 +91,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		static void showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback);
 
 		void setFilter(const std::string& _filter);
+
+		juceRmlUi::ElemList* getElement() const { return m_list; }
 
 	private:
 		bool exportPresets(bool _selectedOnly, const pluginLib::FileType& _fileType) const;

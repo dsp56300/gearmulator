@@ -54,8 +54,8 @@ namespace juceRmlUi
 
 		bool init(Rml::Element* _elem);
 
-		virtual bool canDrop(const Rml::Event& _event, const DragSource* _source) const;
-		virtual bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) const;
+		virtual bool canDrop(const Rml::Event& _event, const DragSource* _source);
+		virtual bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files);
 
 		void setAllowLocations(const bool _horizontal, const bool _vertical)
 		{
@@ -72,6 +72,9 @@ namespace juceRmlUi
 
 		virtual void drop(const Rml::Event& _event, const DragData* _data) {}
 		virtual void dropFiles(const Rml::Event& _event, const FileDragData* _data, const std::vector<std::string>& _files) {}
+
+		DragLocation getDragLocationH() const { return m_currentLocationH; }
+		DragLocation getDragLocationV() const { return m_currentLocationV; }
 
 	private:
 		void onDragOver(const Rml::Event& _event);

@@ -465,7 +465,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		menu.runModal(_event);
 	}
 
-	bool GroupTreeElem::canDrop(const Rml::Event& _event, const DragSource* _source) const
+	bool GroupTreeElem::canDrop(const Rml::Event& _event, const DragSource* _source)
 	{
 		if (!getNode()->isOpened())
 			getNode()->setOpened(true);
@@ -481,7 +481,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		return TreeElem::canDropPatchList(_event, _source, _patches);
 	}
 
-	bool GroupTreeElem::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) const
+	bool GroupTreeElem::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files)
 	{
 		switch (getGroupType())
 		{

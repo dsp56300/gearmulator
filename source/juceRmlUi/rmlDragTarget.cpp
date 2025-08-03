@@ -63,7 +63,7 @@ namespace juceRmlUi
 		return true;
 	}
 
-	bool DragTarget::canDrop(const Rml::Event& _event, const DragSource* _source) const
+	bool DragTarget::canDrop(const Rml::Event& _event, const DragSource* _source)
 	{
 		if (_source == nullptr)
 			return false;
@@ -81,7 +81,7 @@ namespace juceRmlUi
 		return true;
 	}
 
-	bool DragTarget::canDropFiles(const Rml::Event&, const std::vector<std::string>&) const
+	bool DragTarget::canDropFiles(const Rml::Event&, const std::vector<std::string>&)
 	{
 		// to be implemented by derived class
 		return false;

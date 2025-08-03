@@ -1,6 +1,7 @@
 #include "listitem.h"
 
 #include "patchmanagerUiRml.h"
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "jucePluginLib/patchdb/patch.h"
@@ -153,5 +154,129 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 
 		return std::make_unique<patchManager::SavePatchDesc>(getItem()->getPatchManager().getEditor(), std::move(patches));
+	}
+
+	bool ListElemEntry::canDrop(const Rml::Event& _event, const DragSource* _source)
+	{
+		if (getList().getSourceType() != pluginLib::patchDB::SourceType::LocalStorage)
+			return ElemListEntry::canDrop(_event, _source);
+
+		auto* elem = _source->getElement();
+		auto* listElemSource = dynamic_cast<ListElemEntry*>(elem);
+
+		if (listElemSource)
+		{
+			// the list itself is being sorted
+			setAllowLocations(false, true);
+			return true;
+		}
+
+		const auto& patches = patchManager::SavePatchDesc::getPatchesFromDragSource(*_source);
+		if (patches.empty())
+			return ElemListEntry::canDrop(_event, _source);
+
+		// allow to replace only
+		setAllowLocations(false, false);
+
+		return true;
+	}
+
+	bool ListElemEntry::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files)
+	{
+		auto& list = getList();
+		if (list.getSourceType() != pluginLib::patchDB::SourceType::LocalStorage)
+			return false;
+		return true;
+	}
+
+	void ListElemEntry::drop(const Rml::Event& _event, const juceRmlUi::DragData* _data)
+	{
+		const auto* data = dynamic_cast<const patchManager::SavePatchDesc*>(_data);
+		if (!data)
+			return ElemListEntry::drop(_event, _data);
+		const auto& patches = patchManager::SavePatchDesc::getPatchesFromDragData(_data);
+		if (patches.empty())
+			return ElemListEntry::drop(_event, _data);
+
+		auto& db = getList().getPatchManager().getDB();
+
+		auto index = getItem()->getIndex();
+
+		if (getDragLocationV() == DragLocation::Bottom)
+			++index;
+
+		if(dynamic_cast<ListElemEntry*>(juceRmlUi::helper::getDragElement(_event)))
+		{
+			// if the source is a list item entry too, we move the patches around
+			db.movePatchesTo(static_cast<uint32_t>(index), patches);
+			getList().setContent(getList().getSearchHandle());
+		}
+
+		if (patches.size() == 1 && data->isPartValid())
+		{
+			if(getDragLocationV() == DragLocation::Center)
+			{
+				const auto existingPatch = getList().getPatch(index);
+
+				if(existingPatch)
+				{
+					genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::QuestionIcon,
+						"Replace Patch", 
+						"Do you want to replace the existing patch '" + existingPatch->name + "' with contents of part " + std::to_string(data->getPart() + 1) + "?", 
+						[this, existingPatch, patches](const genericUI::MessageBox::Result _result)
+						{
+							if (_result == genericUI::MessageBox::Result::Yes)
+							{
+								getList().getPatchManager().getDB().replacePatch(existingPatch, patches.front());
+							}
+						});
+					return;
+				}
+			}
+
+#if SYNTHLIB_DEMO_MODE
+			pm.getEditor().showDemoRestrictionMessageBox();
+#else
+
+			const auto& source = getList().getDatasource();
+			if(!source)
+				return;
+
+			const auto part = data->getPart();
+
+			getList().getDB().copyPatchesTo(source, patches, static_cast<int>(index), [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+			{
+				juce::MessageManager::callAsync([this, part, _patches]
+				{
+					getList().getDB().setSelectedPatch(part, _patches.front());
+				});
+			});
+#endif
+		}
+	}
+
+	void ListElemEntry::dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files)
+	{
+		auto& list = getList();
+
+		if (list.getSourceType() != pluginLib::patchDB::SourceType::LocalStorage)
+			return;
+
+		const auto patches = getList().getDB().loadPatchesFromFiles(_files);
+
+		if (patches.empty())
+			return;
+
+		const auto ds = getList().getDatasource();
+
+		if (!ds)
+			return;
+
+		auto index = getItem()->getIndex();
+
+		if (getDragLocationV() == DragLocation::Bottom)
+			++index;
+
+		getList().getDB().copyPatchesTo(ds, patches, static_cast<int>(index));
 	}
 }

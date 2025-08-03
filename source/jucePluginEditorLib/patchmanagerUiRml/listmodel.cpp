@@ -170,6 +170,14 @@ namespace jucePluginEditorLib::patchManagerRml
 		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	}
 
+	pluginLib::patchDB::PatchPtr ListModel::getPatch(const size_t _index) const
+	{
+		const auto& patches = getPatches();
+		if (_index >= patches.size())
+			return {};
+		return patches[_index];
+	}
+
 	void ListModel::filterPatches()
 	{
 		if (m_filter.empty() && !m_hideDuplicatesByHash && !m_hideDuplicatesByName)
@@ -215,6 +223,15 @@ namespace jucePluginEditorLib::patchManagerRml
 		const auto name = _patch->getName();
 		const auto t = Search::lowercase(name);
 		return t.find(m_filter) != std::string::npos;
+	}
+
+	pluginLib::patchDB::DataSourceNodePtr ListModel::getDatasource() const
+	{
+		if (!m_search)
+			return {};
+		if (m_search->request.sourceNode)
+			return m_search->request.sourceNode;
+		return {};
 	}
 
 	pluginLib::patchDB::SourceType ListModel::getSourceType() const

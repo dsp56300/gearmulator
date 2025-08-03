@@ -80,8 +80,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onRightClick(const Rml::Event& _event) override;
 
-		bool canDrop(const Rml::Event& _event, const DragSource* _source) const override;
-		bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) const override;
+		bool canDrop(const Rml::Event& _event, const DragSource* _source) override;
+		bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) override;
 
 		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
 		void dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;

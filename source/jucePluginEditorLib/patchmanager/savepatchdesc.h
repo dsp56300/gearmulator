@@ -25,7 +25,7 @@ namespace jucePluginEditorLib::patchManager
 {
 	class PatchManager;
 
-	class SavePatchDesc : public juceRmlUi::FileDragData
+	class SavePatchDesc : public juceRmlUi::DragData
 	{
 		static constexpr int InvalidPart = -1;
 
@@ -52,6 +52,8 @@ namespace jucePluginEditorLib::patchManager
 		static const SavePatchDesc* fromDragSource(const juceRmlUi::DragSource& _source);
 
 		static std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragSource(const juceRmlUi::DragSource& _dragSource);
+		static std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragData(const SavePatchDesc& _desc);
+		static std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragData(const DragData* _data);
 
 	private:
 		jucePluginEditorLib::Editor& m_editor;

@@ -187,7 +187,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		return {};
 	}
 
-	bool TreeElem::canDrop(const Rml::Event& _event, const DragSource* _source) const
+	bool TreeElem::canDrop(const Rml::Event& _event, const DragSource* _source)
 	{
 		auto patches = patchManager::SavePatchDesc::getPatchesFromDragSource(*_source);
 		if (patches.empty())

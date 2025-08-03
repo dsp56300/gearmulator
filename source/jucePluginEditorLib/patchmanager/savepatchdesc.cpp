@@ -166,11 +166,24 @@ namespace jucePluginEditorLib::patchManager
 		if(!savePatchDesc)
 			return {};
 
+		return getPatchesFromDragData(*savePatchDesc);
+	}
+
+	std::vector<pluginLib::patchDB::PatchPtr> SavePatchDesc::getPatchesFromDragData(const SavePatchDesc& _desc)
+	{
 		std::vector<pluginLib::patchDB::PatchPtr> patches;
 
-		for (const auto& it : savePatchDesc->getPatches())
+		for (const auto& it : _desc.getPatches())
 			patches.push_back(it.second);
 
 		return patches;
+	}
+
+	std::vector<pluginLib::patchDB::PatchPtr> SavePatchDesc::getPatchesFromDragData(const DragData* _data)
+	{
+		const auto* savePatchDesc = dynamic_cast<const SavePatchDesc*>(_data);
+		if (!savePatchDesc)
+			return {};
+		return getPatchesFromDragData(*savePatchDesc);
 	}
 }

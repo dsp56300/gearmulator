@@ -201,7 +201,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		return std::make_unique<patchManager::SavePatchDesc>(getPatchManager().getEditor(), std::move(patchesMap), baseLib::filesystem::getFilenameWithoutPath(m_dataSource->name));
 	}
 
-	bool DatasourceTreeElem::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) const
+	bool DatasourceTreeElem::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files)
 	{
 		return m_dataSource && m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
 	}
