@@ -213,7 +213,7 @@ scrollbarhorizontal sliderbar {
 /*	clip: always;*/
 }
 .gridentry {
-	width: 100dp;
+	width: 8em;
 	height: 1em;
 	drag: clone;
 	display: block;

@@ -67,7 +67,10 @@
 		<!-- Column C alternative: larger grid layout, but no info on the right -->
 		<div id="pm-layout-grid" class="pm-vlayout" style="flex: 5; display: none;">
 			<list id="pm-grid" class="grid" style="flex: 1 1 0">
-				<listentry class="gridentry"/>
+				<listentry class="gridentry">
+					<img id="color" src="pm-dot.png" style="height: 1em; margin-right: 5dp;"/>
+					<div id="name" class="pm-name">Name</div>
+				</listentry>
 			</list>
 			<div style="display: flex;">
 				<input id="pm-search-grid" class="pm-search" type="text" style="flex: 2;">

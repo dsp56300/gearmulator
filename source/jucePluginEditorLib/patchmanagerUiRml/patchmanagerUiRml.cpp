@@ -29,6 +29,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		, m_searchGrid(juceRmlUi::helper::findChildT<Rml::ElementFormControlInput>(_root, "pm-search-grid"), m_grid)
 		, m_status(_dataModel)
 		, m_info(*this)
+		, m_rootLayoutList(juceRmlUi::helper::findChild(_root, "pm-layout-list"))
+		, m_rootLayoutGrid(juceRmlUi::helper::findChild(_root, "pm-layout-grid"))
 	{
 		for (const auto group : _groupTypes)
 			m_treeDS.addGroup(group);
@@ -199,8 +201,16 @@ namespace jucePluginEditorLib::patchManagerRml
 		newModel.setContent(oldModel.getSearchHandle());
 		newModel.setSelectedEntries(oldModel.getSelectedEntries());
 
-//		newModel.setVisible(true);
-//		oldModel.setVisible(false);
+		if (_layout == LayoutType::Grid)
+		{
+			m_rootLayoutList->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
+			m_rootLayoutGrid->RemoveProperty(Rml::PropertyId::Display);
+		}
+		else
+		{
+			m_rootLayoutList->RemoveProperty(Rml::PropertyId::Display);
+			m_rootLayoutGrid->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
+		}
 /*
 		if(m_firstTimeGridLayout && _layout == LayoutType::Grid)
 		{

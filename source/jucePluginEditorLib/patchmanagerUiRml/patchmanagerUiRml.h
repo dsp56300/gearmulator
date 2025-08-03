@@ -91,6 +91,9 @@ namespace jucePluginEditorLib::patchManagerRml
 		Status m_status;
 		Info m_info;
 
+		Rml::Element* m_rootLayoutList = nullptr;
+		Rml::Element* m_rootLayoutGrid = nullptr;
+
 		std::unordered_map<patchManager::GroupType, std::string> m_customGroupNames;
 
 		std::map<const Tree*, std::set<juceRmlUi::TreeNodePtr>> m_selectedItems;
