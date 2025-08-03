@@ -176,7 +176,8 @@ namespace juceRmlUi
 		case Rml::EventId::Mousedown:
 			{
 				const auto* target = _event.GetTargetElement();
-				if (target && helper::isChildOf(m_root, target))
+				
+				if (isChildOfThis(target))
 					return;
 				close();
 			}
@@ -255,5 +256,18 @@ namespace juceRmlUi
 		if (m_subMenuParentEntry)
 			m_subMenuParentEntry->SetPseudoClass("active", false);
 		m_subMenuParentEntry.reset();
+	}
+
+	bool Menu::isChildOfThis(const Rml::Element* _elem) const
+	{
+		if (!_elem)
+			return false;
+		if (helper::isChildOf(m_root, _elem))
+			return true;
+		if (m_subMenu && m_subMenu->isChildOfThis(_elem))
+			return true;
+		if (m_parentMenu && m_parentMenu->isChildOfThis(_elem))
+			return true;
+		return false;
 	}
 }
