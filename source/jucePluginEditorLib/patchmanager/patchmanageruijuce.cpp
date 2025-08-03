@@ -85,11 +85,6 @@ namespace jucePluginEditorLib::patchManager
 		addAndMakeVisible(m_info);
 		addAndMakeVisible(m_status);
 
-		if(const auto t = getTemplate("pm_status_label"))
-		{
-			t->apply(getEditor(), *m_status);
-		}
-
 		juce::StretchableLayoutManager lm;
 
 		m_stretchableManager.setItemLayout(0, 100, rootW * 0.5, m_treeDS->getWidth());		m_stretchableManager.setItemLayout(1, 5, 5, 5);
@@ -143,11 +138,6 @@ namespace jucePluginEditorLib::patchManager
 	void PatchManagerUiJuce::setListStatus(const uint32_t _selected, const uint32_t _total) const
 	{
 		m_status->setListStatus(_selected, _total);
-	}
-
-	std::shared_ptr<genericUI::UiObject> PatchManagerUiJuce::getTemplate(const std::string& _name) const
-	{
-		return getEditor().getTemplate(_name);
 	}
 
 	ListModel* PatchManagerUiJuce::getListModel() const

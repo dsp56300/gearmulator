@@ -26,29 +26,16 @@ namespace jucePluginEditorLib::patchManager
 //		setColour(oddItemsColourId, juce::Colour(0xff333333));
 //		setColour(evenItemsColourId, juce::Colour(0xff555555));
 
-		if(const auto t = _patchManager.getTemplate("pm_treeview"))
-		{
-			t->apply(_patchManager.getEditor(), *this);
-		}
-		
 		auto *rootItem = new RootTreeItem(m_patchManager);
 		setRootItem(rootItem);
 		setRootItemVisible(false);
 
 		getViewport()->setScrollBarsShown(true, true);
 
-		if(const auto t = _patchManager.getTemplate("pm_scrollbar"))
-		{
-			t->apply(_patchManager.getEditor(), getViewport()->getVerticalScrollBar());
-			t->apply(_patchManager.getEditor(), getViewport()->getHorizontalScrollBar());
-		}
-		else
-		{
-			getViewport()->getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			getViewport()->getVerticalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			getViewport()->getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			getViewport()->getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
-		}
+		getViewport()->getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
+		getViewport()->getVerticalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
+		getViewport()->getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
+		getViewport()->getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
 	}
 
 	Tree::~Tree()

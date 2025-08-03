@@ -48,8 +48,6 @@ namespace jucePluginEditorLib::patchManager
 
 		void setListStatus(uint32_t _selected, uint32_t _total) const;
 
-		std::shared_ptr<genericUI::UiObject> getTemplate(const std::string& _name) const;
-
 		void addSelectedItem(Tree* _tree, const TreeItem* _item);
 		void removeSelectedItem(Tree* _tree, const TreeItem* _item);
 

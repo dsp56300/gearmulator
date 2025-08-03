@@ -20,9 +20,6 @@ namespace jucePluginEditorLib::patchManager
 		setModel(this);
 		setMultipleSelectionEnabled(true);
 
-		if (const auto& t = _pm.getTemplate("pm_listbox"))
-			t->apply(_pm.getEditor(), *this);
-
 		applyStyleToViewport(_pm, *getViewport());
 
 		setRowSelectedOnMouseDown(false);
@@ -30,18 +27,10 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::applyStyleToViewport(const PatchManagerUiJuce& _pm, juce::Viewport& _viewport)
 	{
-		if(const auto t = _pm.getTemplate("pm_scrollbar"))
-		{
-			t->apply(_pm.getEditor(), _viewport.getVerticalScrollBar());
-			t->apply(_pm.getEditor(), _viewport.getHorizontalScrollBar());
-		}
-		else
-		{
-			_viewport.getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			_viewport.getVerticalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			_viewport.getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			_viewport.getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
-		}
+		_viewport.getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
+		_viewport.getVerticalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
+		_viewport.getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
+		_viewport.getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
 	}
 
 	juce::Colour List::findColor(const int _colorId)

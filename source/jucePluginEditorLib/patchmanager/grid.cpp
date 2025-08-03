@@ -20,9 +20,6 @@ namespace jucePluginEditorLib::patchManager
 
 		addAndMakeVisible(m_viewport);
 
-		if (const auto& t = _pm.getTemplate("pm_listbox"))
-			t->apply(_pm.getEditor(), *this);
-
 		List::applyStyleToViewport(_pm, m_viewport);
 
 		setWantsKeyboardFocus(true);
