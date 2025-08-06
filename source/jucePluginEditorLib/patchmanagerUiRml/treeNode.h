@@ -69,7 +69,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		bool canDrop(const Rml::Event& _event, const DragSource* _source) override;
 		virtual bool canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const { return false; }
 
-		void drop(const Rml::Event& _event, const juceRmlUi::DragData* _data) override;
+		void drop(const Rml::Event& _event, const DragSource* _source, const juceRmlUi::DragData* _data) override;
 
 		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
 		virtual void dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) {}

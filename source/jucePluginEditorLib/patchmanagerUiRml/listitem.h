@@ -60,7 +60,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		bool canDrop(const Rml::Event& _event, const DragSource* _source) override;
 		bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) override;
-		void drop(const Rml::Event& _event, const juceRmlUi::DragData* _data) override;
+		void drop(const Rml::Event& _event, const DragSource* _source, const juceRmlUi::DragData* _data) override;
 		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
 
 	private:

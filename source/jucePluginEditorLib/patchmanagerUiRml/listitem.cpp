@@ -188,14 +188,14 @@ namespace jucePluginEditorLib::patchManagerRml
 		return true;
 	}
 
-	void ListElemEntry::drop(const Rml::Event& _event, const juceRmlUi::DragData* _data)
+	void ListElemEntry::drop(const Rml::Event& _event, const DragSource* _source, const juceRmlUi::DragData* _data)
 	{
 		const auto* data = dynamic_cast<const patchManager::SavePatchDesc*>(_data);
 		if (!data)
-			return ElemListEntry::drop(_event, _data);
+			return ElemListEntry::drop(_event, _source, _data);
 		const auto& patches = patchManager::SavePatchDesc::getPatchesFromDragData(_data);
 		if (patches.empty())
-			return ElemListEntry::drop(_event, _data);
+			return ElemListEntry::drop(_event, _source, _data);
 
 		auto& db = getList().getPatchManager().getDB();
 

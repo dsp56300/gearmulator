@@ -151,7 +151,7 @@ namespace juceRmlUi
 		if (fileDragData && !fileDragData->files.empty())
 			dropFiles(_event, fileDragData, fileDragData->files);
 		else
-			drop(_event, data);
+			drop(_event, m_currentDragSource, data);
 
 		stopDrag();
 	}

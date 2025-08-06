@@ -195,11 +195,11 @@ namespace jucePluginEditorLib::patchManagerRml
 		return canDropPatchList(_event, _source->getElement(), patches);
 	}
 
-	void TreeElem::drop(const Rml::Event& _event, const juceRmlUi::DragData* _data)
+	void TreeElem::drop(const Rml::Event& _event, const DragSource* _source, const juceRmlUi::DragData* _data)
 	{
 		auto savePatchDesc = dynamic_cast<const patchManager::SavePatchDesc*>(_data);
 		if (!savePatchDesc || !savePatchDesc->hasPatches())
-			return;
+			return DragTarget::drop(_event, _source, _data);
 		
 		std::vector<pluginLib::patchDB::PatchPtr> patches;
 

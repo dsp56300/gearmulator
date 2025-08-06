@@ -70,7 +70,7 @@ namespace juceRmlUi
 
 		static DragTarget* fromElement(const Rml::Element* _elem);
 
-		virtual void drop(const Rml::Event& _event, const DragData* _data) {}
+		virtual void drop(const Rml::Event& _event, const DragSource* _source, const DragData* _data) {}
 		virtual void dropFiles(const Rml::Event& _event, const FileDragData* _data, const std::vector<std::string>& _files) {}
 
 		DragLocation getDragLocationH() const { return m_currentLocationH; }
