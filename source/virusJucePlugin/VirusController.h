@@ -124,7 +124,7 @@ namespace virus
 		uint8_t getCurrentPartProgram(uint8_t _part) const;
 		PresetSource getCurrentPartPresetSource(uint8_t _part) const;
 
-		juce::String getCurrentPartPresetName(uint8_t _part) const;
+		std::string getCurrentPartPresetName(uint8_t _part) const;
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		bool parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source) override;
 		bool parseControllerMessage(const synthLib::SMidiEvent&) override;

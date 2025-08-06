@@ -289,7 +289,7 @@ namespace virus
 		return getParameter(g_paramPlayMode, 0)->getUnnormalizedValue();
 	}
 
-	juce::String Controller::getCurrentPartPresetName(const uint8_t _part) const
+	std::string Controller::getCurrentPartPresetName(const uint8_t _part) const
 	{
         std::string name;
 		for (int i=0; i<kNameLength; i++)
