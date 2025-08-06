@@ -29,6 +29,13 @@ namespace juce
 
 namespace juceRmlUi
 {
+	enum class MouseButton : uint8_t
+	{
+		Left,
+		Right,
+		Middle
+	};
+
 	namespace helper
 	{
 		template<typename TClass, typename THandle> TClass* fromHandle(const THandle _handle)
@@ -46,11 +53,11 @@ namespace juceRmlUi
 		int toRmlModifiers(const juce::ModifierKeys _mods);
 		int toRmlModifiers(const juce::MouseEvent& _e);
 		int toRmlModifiers(const juce::KeyPress& _e);
-		int toRmlMouseButton(const juce::MouseEvent& _e);
+		MouseButton toRmlMouseButton(const juce::MouseEvent& _e);
 		Rml::Input::KeyIdentifier toRmlKey(const juce::KeyPress& _key);
 
 		Rml::Vector2<float> getMousePos(const Rml::Event& _event);
-		int getMouseButton(const Rml::Event& _event);
+		MouseButton getMouseButton(const Rml::Event& _event);
 
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event);
 		Rml::Input::KeyModifier getKeyModifiers(const Rml::Event& _event);

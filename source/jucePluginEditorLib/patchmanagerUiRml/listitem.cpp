@@ -111,11 +111,10 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void ListElemEntry::onMouseDown(const Rml::Event& _event)
 	{
-		const auto button = juceRmlUi::helper::getMouseButton(_event);
-		if (button == 1)
+		if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Right)
 		{
 			if (!m_item->isSelected())
-				getList().setSelectedEntries({ m_item->getIndex() });
+				getList().setSelectedEntries({m_item->getIndex()});
 			onRightClick(_event);
 		}
 	}

@@ -107,7 +107,7 @@ namespace juceRmlUi
 		case Rml::EventId::Mousedown:
 			{
 				const auto mouseButton = helper::getMouseButton(_event);
-				if (mouseButton == 1)
+				if (mouseButton == MouseButton::Right)
 				{
 					if (!getNode()->isSelected())
 						getNode()->setSelected(true, false);

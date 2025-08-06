@@ -112,14 +112,14 @@ namespace juceRmlUi
 	{
 		Component::mouseDown(_event);
 		RmlInterfaces::ScopedAccess access(*this);
-		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseButtonDown(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseUp(const juce::MouseEvent& _event)
 	{
 		Component::mouseUp(_event);
 		RmlInterfaces::ScopedAccess access(*this);
-		m_rmlContext->ProcessMouseButtonUp(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseButtonUp(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseMove(const juce::MouseEvent& _event)

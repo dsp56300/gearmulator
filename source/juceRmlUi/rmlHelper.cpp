@@ -39,13 +39,13 @@ namespace juceRmlUi
 		{
 			return toRmlModifiers(_e.getModifiers());
 		}
-		int toRmlMouseButton(const juce::MouseEvent& _e)
+		MouseButton toRmlMouseButton(const juce::MouseEvent& _e)
 		{
 			if (_e.mods.isRightButtonDown())
-				return 1;
+				return MouseButton::Right;
 			if (_e.mods.isMiddleButtonDown())
-				return 2;
-			return 0;
+				return MouseButton::Middle;
+			return MouseButton::Left;
 		}
 		Rml::Input::KeyIdentifier toRmlKey(const juce::KeyPress& _key)
 		{
@@ -158,11 +158,11 @@ namespace juceRmlUi
 			return {x, y};
 		}
 
-		int getMouseButton(const Rml::Event& _event)
+		MouseButton getMouseButton(const Rml::Event& _event)
 		{
 			// RmlUi uses 0 for left, 1 for right, 2 for middle
-			const auto button = _event.GetParameter<int>("button", 0);
-			return button;
+			const int button = _event.GetParameter<int>("button", 0);
+			return static_cast<MouseButton>(button);
 		}
 
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event)
