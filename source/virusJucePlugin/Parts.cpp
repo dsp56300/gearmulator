@@ -13,6 +13,7 @@
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemButton.h"
+#include "juceRmlUi/rmlElemKnob.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 
