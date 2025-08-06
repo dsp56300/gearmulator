@@ -73,6 +73,8 @@ namespace juceRmlUi
 		// apply property only if it is different from the current one
 		bool changeProperty(Rml::Element* _element, Rml::PropertyId _propertyId, const Rml::Property& _property);
 
+		void changeAttribute(Rml::Element* _element, const std::string& _key, const std::string& _value);
+
 		Rml::ElementPtr clone(const Rml::Element* _element, Rml::ElementInstancer* _instancer);
 
 		Rml::Element* findChild(Rml::Element* _elem, const std::string& _name, bool _mustExist = true);

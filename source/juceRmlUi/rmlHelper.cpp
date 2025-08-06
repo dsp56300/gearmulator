@@ -249,6 +249,18 @@ namespace juceRmlUi
 			return false;
 		}
 
+		void changeAttribute(Rml::Element* _element, const std::string& _key, const std::string& _value)
+		{
+			assert(_element);
+
+			auto* existingAttrib = _element->GetAttribute(_key);
+
+			if (existingAttrib && existingAttrib->Get<Rml::String>() == _value)
+				return;
+
+			_element->SetAttribute(_key, _value);
+		}
+
 		Rml::ElementPtr clone(const Rml::Element* _element, Rml::ElementInstancer* _instancer)
 		{
 			// this is a copy of Rml::Element::Clone(), but supports another instancer

@@ -47,32 +47,10 @@ namespace rmlPlugin
 	{
 		Plugin::OnElementCreate(_element);
 
-		auto* attrib = _element->GetAttribute("param");
-
-		if (attrib)
+		if (const auto* attribParam = _element->GetAttribute("param"))
 		{
-			const auto name = attrib->Get<Rml::String>();
-			const auto param = RmlParameterRef::createVariableName(name);
-
-			_element->SetAttribute("data-attr-min", param + "_min");
-			_element->SetAttribute("data-attr-max", param + "_max");
-			_element->SetAttribute("data-value", param + "_value");
-
-			if (auto* combo = dynamic_cast<juceRmlUi::ElemComboBox*>(_element))
-			{
-				std::vector<Rml::String> options;
-				auto* p = m_controller.getParameter(name, 0);	// TODO: which part?
-
-				if (!p)
-				{
-					std::stringstream ss;
-					ss << "Failed to find parameter " << name << " for combo box";
-					Rml::Log::Message(Rml::Log::LT_ERROR, ss.str().c_str());
-					return;
-				}
-
-				combo->setOptions(p->getDescription().valueList.texts);
-			}
+			// TODO: which part?
+			RmlParameterBinding::bind(m_controller, *_element, attribParam->Get<Rml::String>(), 0);
 		}
 
 		if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_element))
