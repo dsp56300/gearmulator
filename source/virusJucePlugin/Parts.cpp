@@ -1,3 +1,5 @@
+#include "juce_core/juce_core.h"
+
 #include "Parts.h"
 
 #include "PartButton.h"
@@ -7,10 +9,12 @@
 #include "VirusProcessor.h"
 #include "ParameterNames.h"
 
-#include "jucePluginEditorLib/pluginProcessor.h"
-#include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "juceRmlPlugin/rmlPlugin.h"
 
-#include "jucePluginLib/parameterbinding.h"
+#include "juceRmlUi/juceRmlComponent.h"
+#include "juceRmlUi/rmlElemButton.h"
+#include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlHelper.h"
 
 #include "virusLib/device.h"
 
@@ -18,45 +22,55 @@ namespace genericVirusUI
 {
 	Parts::Parts(VirusEditor& _editor) : m_editor(_editor)
 	{
-		_editor.findComponents<genericUI::Button<juce::DrawableButton>>(m_partSelect, "SelectPart");
-		_editor.findComponents<juce::Button>(m_presetPrev, "PresetPrev");
-		_editor.findComponents<juce::Button>(m_presetNext, "PresetNext");
+		using namespace juceRmlUi;
+		using namespace juceRmlUi::helper;
 
-		_editor.findComponents<juce::Slider>(m_partVolume, "PartVolume");
-		_editor.findComponents<juce::Slider>(m_partPan, "PartPan");
-		_editor.findComponents<PartButton>(m_presetName, "PresetName");
-		_editor.findComponents<juce::Component>(m_partActive, "PartActive");
+		auto* doc = _editor.getRmlComponent()->getDocument();
+		
+		findChildren(m_partSelect, doc, "SelectPart", 16);
+		findChildren(m_presetPrev, doc, "PresetPrev");
+		findChildren(m_presetNext, doc, "PresetNext");
+
+		findChildren(m_partVolume, doc, "PartVolume");
+		findChildren(m_partPan, doc, "PartPan");
+
+		std::vector<Rml::Element*> presetNames;
+		findChildren(presetNames, doc, "PresetName");
+		findChildren(m_partActive, doc, "PartActive");
 
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
-			m_partSelect[i]->onClick = [this, i]{ selectPart(i); };
-			m_partSelect[i]->onDown = [this, i](const juce::MouseEvent& _e)
+			m_presetName[i] = std::make_unique<PartButton>(presetNames[i], _editor);
+
+			EventListener::Add(m_partSelect[i], Rml::EventId::Click, [this, i](Rml::Event&){ selectPart(i); });
+			EventListener::Add(m_partSelect[i], Rml::EventId::Mousedown, [this, i](const Rml::Event& _e)
 			{
-				if(!_e.mods.isPopupMenu())
-					return false;
+				if (getMouseButton(_e) != MouseButton::Right)
+					return;
 				selectPartMidiChannel(i);
-				return true;
-			};
+			});
 
 			if(i < m_presetPrev.size())
-				m_presetPrev[i]->onClick = [this, i]{ selectPrevPreset(i); };
+				EventListener::AddClick(m_presetPrev[i], [this, i]{ selectPrevPreset(i); });
 
 			if(i < m_presetNext.size())
-				m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
+				EventListener::AddClick(m_presetNext[i], [this, i]{ selectNextPreset(i); });
 
 			m_presetName[i]->initalize(static_cast<uint8_t>(i));
 
 			const auto partVolume = _editor.getController().getParameterIndexByName(virus::g_paramPartVolume);
 			const auto partPanorama = _editor.getController().getParameterIndexByName(virus::g_paramPartPanorama);
 
-			_editor.getParameterBinding().bind(*m_partVolume[i], partVolume, static_cast<uint8_t>(i));
-			_editor.getParameterBinding().bind(*m_partPan[i], partPanorama, static_cast<uint8_t>(i));
+			auto* binding = _editor.getRmlParameterBinding();
 
-			m_partVolume[i]->getProperties().set("parameter", static_cast<int>(partVolume));
-			m_partPan[i]->getProperties().set("parameter", static_cast<int>(partPanorama));
+			binding->bind(*m_partVolume[i], virus::g_paramPartVolume, static_cast<uint8_t>(i));
+			binding->bind(*m_partPan[i], virus::g_paramPartPanorama, static_cast<uint8_t>(i));
 
-			m_partVolume[i]->getProperties().set("part", static_cast<int>(i));
-			m_partPan[i]->getProperties().set("part", static_cast<int>(i));
+			m_partVolume[i]->SetAttribute("parameter", static_cast<int>(partVolume));
+			m_partPan[i]->SetAttribute("parameter", static_cast<int>(partPanorama));
+
+			m_partVolume[i]->SetAttribute("part", static_cast<int>(i));
+			m_partPan[i]->SetAttribute("part", static_cast<int>(i));
 		}
 
 		updateAll();
@@ -65,8 +79,8 @@ namespace genericVirusUI
 		{
 			for (const auto & partActive : m_partActive)
 			{
-				partActive->setInterceptsMouseClicks(false, false);
-				partActive->setVisible(false);
+				partActive->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
+				setVisible(partActive, false);
 			}
 
 			startTimer(1000/20);
@@ -162,18 +176,19 @@ namespace genericVirusUI
 		const auto part = m_editor.getController().getCurrentPart();
 
 		if(part < m_partSelect.size())
-			m_partSelect[part]->setToggleState(true, juce::dontSendNotification);
+			m_partSelect[part]->setChecked(true);
 
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
 			if(i == part)
 				continue;
-			m_partSelect[i]->setToggleState(false, juce::dontSendNotification);
+			m_partSelect[i]->setChecked(false);
 		}
 	}
 
 	void Parts::updateSingleOrMultiMode() const
 	{
+		using namespace juceRmlUi::helper;
 	    const auto multiMode = m_editor.getController().isMultiMode();
 
 		const auto partCount = multiMode ? static_cast<virus::VirusProcessor&>(m_editor.getProcessor()).getPartCount() : 1;
@@ -182,22 +197,25 @@ namespace genericVirusUI
 		{
 			const bool visible = i < partCount;
 
-			VirusEditor::setEnabled(*m_partSelect[i], visible);
-			VirusEditor::setEnabled(*m_partPan[i], visible);
-			VirusEditor::setEnabled(*m_partVolume[i], visible);
+			setEnabled(m_partSelect[i], visible);
+			setEnabled(m_partPan[i], visible);
+			setEnabled(m_partVolume[i], visible);
 
 			if(i < m_presetPrev.size())
-				VirusEditor::setEnabled(*m_presetPrev[i], visible);
+				setEnabled(m_presetPrev[i], visible);
 
 			if(i < m_presetNext.size())
-				VirusEditor::setEnabled(*m_presetNext[i], visible);
+				setEnabled(m_presetNext[i], visible);
 
 			m_presetName[i]->setVisible(visible);
 		}
 
-		const auto volumeParam = m_editor.getController().getParameterIndexByName(multiMode ? virus::g_paramPartVolume : virus::g_paramPatchVolume);
-		m_editor.getParameterBinding().bind(*m_partVolume[0], volumeParam, 0);
-		m_partVolume[0]->getProperties().set("parameter", static_cast<int>(volumeParam));
+		const auto volumeParamName = multiMode ? virus::g_paramPartVolume : virus::g_paramPatchVolume;
+		const auto volumeParam = m_editor.getController().getParameterIndexByName(volumeParamName);
+
+		m_editor.getRmlParameterBinding()->bind(*m_partVolume[0], volumeParamName, 0);
+
+		m_partVolume[0]->SetAttribute("parameter", static_cast<int>(volumeParam));
 	}
 
 	void Parts::timerCallback()
@@ -208,7 +226,7 @@ namespace genericVirusUI
 
 		for(uint32_t i=0; i<m_partActive.size(); ++i)
 		{
-			m_partActive[i]->setVisible(i < maxPart && fpState.m_midiEventReceived[i]);
+			juceRmlUi::helper::setVisible(m_partActive[i], i < maxPart && fpState.m_midiEventReceived[i]);
 			fpState.m_midiEventReceived[i] = false;
 		}
 	}

@@ -26,6 +26,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	ListModel::ListModel(PatchManagerUiRml& _pm, juceRmlUi::ElemList* _list) : m_patchManager(_pm), m_list(_list)
 	{
 		_list->setInstancer(&g_instancer);
+		_list->SetAttribute("model", this);
 
 		auto& list = _list->getList();
 

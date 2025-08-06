@@ -19,6 +19,11 @@ namespace juceRmlUi
 			new EventListener(_element, _event, _callback);
 		}
 
+		static void AddClick(Rml::Element* _element, const std::function<void()>& _callback)
+		{
+			Add(_element, Rml::EventId::Click, [_callback](Rml::Event& _event) { _callback(); });
+		}
+
 		static void Add(const Rml::ElementPtr& _element, const Rml::EventId _event, const std::function<void(Rml::Event&)>& _callback)
 		{
 			Add(_element.get(), _event, _callback);

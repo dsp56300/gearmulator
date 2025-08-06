@@ -19,12 +19,12 @@ namespace juceRmlUi
 		void OnChildRemove(Rml::Element* _child) override;
 		bool IsPointWithinElement(Rml::Vector2f _point) override;
 
+		void setChecked(bool _checked);
+
 	private:
 		void onClick();
 		void onMouseDown();
 		void onMouseUp();
-
-		void setChecked(bool _checked);
 
 		bool m_isToggle = false;
 		bool m_isChecked = false;

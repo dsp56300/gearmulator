@@ -15,6 +15,11 @@
 #include "juceRmlUi/rmlDataProvider.h"
 #include "juceRmlUi/rmlMenu.h"
 
+namespace rmlPlugin
+{
+	class RmlParameterBinding;
+}
+
 namespace Rml
 {
 	class Context;
@@ -151,6 +156,10 @@ namespace jucePluginEditorLib
 		{
 			m_dragAndDropTempFiles.push_back(std::move(_tempFile));
 		}
+
+		rmlPlugin::RmlPlugin* getRmlPlugin() const { return m_rmlPlugin.get(); }
+		juceRmlUi::RmlComponent* getRmlComponent() const { return m_rmlComponent.get(); }
+		rmlPlugin::RmlParameterBinding* getRmlParameterBinding() const;
 
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;

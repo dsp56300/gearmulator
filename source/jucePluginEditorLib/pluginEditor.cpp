@@ -622,6 +622,11 @@ namespace jucePluginEditorLib
 		m_patchManagerDataModel.reset(new patchManagerRml::PatchManagerDataModel(_context));
 	}
 
+	rmlPlugin::RmlParameterBinding* Editor::getRmlParameterBinding() const
+	{
+		return m_rmlPlugin->getParameterBinding(m_rmlComponent->getContext());
+	}
+
 	bool Editor::keyPressed(const juce::KeyPress& _key)
 	{
 		if(_key.getModifiers().isCommandDown())

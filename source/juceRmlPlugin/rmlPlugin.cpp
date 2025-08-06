@@ -89,4 +89,13 @@ namespace rmlPlugin
 				throw std::runtime_error("tabgroup element must have either tabpage or tabbutton attribute set");
 		}
 	}
+
+	// ReSharper disable once CppParameterMayBeConstPtrOrRef
+	RmlParameterBinding* RmlPlugin::getParameterBinding(Rml::Context* _context)
+	{
+		auto it = m_bindings.find(_context);
+		if (it != m_bindings.end())
+			return it->second.get();
+		return nullptr;
+	}
 }

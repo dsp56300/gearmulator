@@ -79,6 +79,33 @@ namespace juceRmlUi
 
 		Rml::Element* findChild(Rml::Element* _elem, const std::string& _name, bool _mustExist = true);
 
+		template<typename T = Rml::Element>
+		void findChildren(std::vector<T*>& _results, const Rml::Element* _parent, const std::string& _name, size_t _expectedCount = 0)
+		{
+			if (!_parent)
+				return;
+
+			if (_expectedCount)
+				_results.reserve(_expectedCount);
+
+			for (int i=0; i<_parent->GetNumChildren(); ++i)
+			{
+				auto* child = _parent->GetChild(i);
+
+				if (child->GetId() == _name)
+				{
+					auto* typedChild = dynamic_cast<T*>(child);
+					if (typedChild)
+						_results.push_back(typedChild);
+				}
+
+				findChildren(_results, child, _name, 0);	// pass 0, we don't want to have error handling in recursive calls
+			}
+
+			if (_expectedCount && _results.size() != _expectedCount)
+				throw std::runtime_error("Expected " + std::to_string(_expectedCount) + " children with name '" + _name + "', found " + std::to_string(_results.size()));
+		}
+
 		template<typename T>
 		T* findChildT(Rml::Element* _parent, const std::string& _name, bool _mustExist = true)
 		{
@@ -98,5 +125,8 @@ namespace juceRmlUi
 		Rml::Colourb toRmlColor(const juce::Colour& _color);
 		uint32_t toARGB(const Rml::Colourb& _color);
 		Rml::Colourb fromARGB(uint32_t _color);
+
+		void setVisible(Rml::Element* _element, bool _visible);
+		void setEnabled(Rml::Element* _element, bool _enabled);
 	}
 }

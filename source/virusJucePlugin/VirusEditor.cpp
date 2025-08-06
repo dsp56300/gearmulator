@@ -173,11 +173,6 @@ namespace genericVirusUI
 
 	VirusEditor::~VirusEditor()
 	{
-		if (m_presetName)
-			m_presetName->removeMouseListener(m_presetNameMouseListener);
-		delete m_presetNameMouseListener;
-		m_presetNameMouseListener = nullptr;
-
 		m_focusedParameter.reset();
 
 		m_parameterBinding.clearBindings();
@@ -198,14 +193,6 @@ namespace genericVirusUI
 				"\n"
 				"* The plugin state is not preserved\n"
 				"* Preset saving is disabled"};
-	}
-
-	genericUI::Button<juce::TextButton>* VirusEditor::createJuceComponent(genericUI::Button<juce::TextButton>* _button, genericUI::UiObject& _object)
-	{
-		if(_object.getName() == "PresetName")
-			return new PartButton(*this);
-
-		return Editor::createJuceComponent(_button, _object);
 	}
 
 	juce::Component* VirusEditor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)

@@ -31,9 +31,11 @@ namespace rmlPlugin
 		void OnContextDestroy(Rml::Context* _context) override;
 		void OnElementCreate(Rml::Element* _element) override;
 
+		RmlParameterBinding* getParameterBinding(Rml::Context* _context);
+
 	private:
 		pluginLib::Controller& m_controller;
-		std::map<Rml::Context*, std::unique_ptr<rmlPlugin::RmlParameterBinding>> m_bindings;
+		std::map<Rml::Context*, std::unique_ptr<RmlParameterBinding>> m_bindings;
 
 		std::map<std::string, std::unique_ptr<TabGroup>> m_tabGroups;
 	};

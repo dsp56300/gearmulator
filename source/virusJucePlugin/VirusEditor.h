@@ -59,7 +59,6 @@ namespace genericVirusUI
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
-		genericUI::Button<juce::TextButton>* createJuceComponent(genericUI::Button<juce::TextButton>*, genericUI::UiObject& _object) override;
 		juce::Component* createJuceComponent(juce::Component*, genericUI::UiObject& _object) override;
 
 		const auto& getLeds() const { return m_leds; }
@@ -98,7 +97,7 @@ namespace genericVirusUI
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
-		PartMouseListener* m_presetNameMouseListener  = nullptr;
+//		PartMouseListener* m_presetNameMouseListener  = nullptr;
 
 		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 

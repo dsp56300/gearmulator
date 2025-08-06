@@ -7,26 +7,26 @@
 
 namespace genericVirusUI
 {
-	PartButton::PartButton(VirusEditor& _editor) : jucePluginEditorLib::PartButton<TextButton>(_editor), m_editor(_editor)  // NOLINT(clang-diagnostic-undefined-func-template)
+	PartButton::PartButton(Rml::Element* _button, VirusEditor& _editor) : jucePluginEditorLib::PartButton(_button, _editor), m_editor(_editor)
 	{
 	}
 
-	bool PartButton::isInterestedInDragSource(const SourceDetails& _dragSourceDetails)
+	bool PartButton::canDrop(const Rml::Event& _event, const juceRmlUi::DragSource* _source)
 	{
 		if(getPart() > 0 && !m_editor.getController().isMultiMode())
 			return false;
 
-		return jucePluginEditorLib::PartButton<TextButton>::isInterestedInDragSource(_dragSourceDetails);  // NOLINT(clang-diagnostic-undefined-func-template)
-	}
-
-	void PartButton::paint(juce::Graphics& g)
-	{
-		jucePluginEditorLib::PartButton<TextButton>::paint(g);
+		return jucePluginEditorLib::PartButton::canDrop(_event, _source);
 	}
 
 	void PartButton::onClick()
 	{
 		selectPreset(getPart());
+	}
+
+	void PartButton::setButtonText(const std::string& _text)
+	{
+		getElement()->SetInnerRML(_text);
 	}
 
 	void PartButton::selectPreset(uint8_t _part) const

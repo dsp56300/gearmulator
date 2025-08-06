@@ -408,5 +408,27 @@ namespace juceRmlUi
 				static_cast<uint8_t>((_color >> 24) & 0xFF)
 			};
 		}
+
+		void setVisible(Rml::Element* _element, bool _visible)
+		{
+			if (!_visible)
+				_element->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
+			else
+				_element->RemoveProperty(Rml::PropertyId::Display);
+		}
+
+		void setEnabled(Rml::Element* _element, bool _enabled)
+		{
+			if (!_enabled)
+			{
+				_element->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
+				_element->SetPseudoClass("disabled", true);
+			}
+			else
+			{
+				_element->RemoveProperty(Rml::PropertyId::PointerEvents);
+				_element->SetPseudoClass("disabled", false);
+			}
+		}
 	}
 }
