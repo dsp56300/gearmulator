@@ -6,9 +6,8 @@
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/patchmanagerui.h"
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
-#include "juceRmlUi/rmlDragData.h"
 
-#include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlDragData.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
