@@ -100,7 +100,11 @@ namespace genericVirusUI
 			});
 		}
 
-		getController().onProgramChange = [this](int _part) { onProgramChange(_part); };
+		getController().onProgramChange = [this](int _part)
+		{
+			const juceRmlUi::RmlInterfaces::ScopedAccess access(*getRmlComponent());
+			onProgramChange(_part);
+		};
 
 		addMouseListener(this, true);
 
