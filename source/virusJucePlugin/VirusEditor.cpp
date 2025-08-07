@@ -89,7 +89,7 @@ namespace genericVirusUI
 				}
 			}
 
-			m_romSelector->setSelectedIndex(static_cast<int>(m_processor.getSelectedRomIndex()) + 1, false);
+			m_romSelector->setSelectedIndex(static_cast<int>(m_processor.getSelectedRomIndex()), false);
 
 			juceRmlUi::EventListener::Add(m_romSelector, Rml::EventId::Change, [this](Rml::Event&)
 			{
