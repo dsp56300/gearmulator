@@ -29,7 +29,7 @@ namespace juceRmlUi
 		checkAttribute(g_attribMaxValue, [&](const float _x) { setMaxValue(_x); });
 	}
 
-	void ElemValue::setValue(const float _value)
+	void ElemValue::setValue(const float _value, bool _sendChangeEvent/* = true*/)
 	{
 		const auto v = m_max > m_min ? std::clamp(_value, m_min, m_max) : m_min;
 
@@ -37,8 +37,9 @@ namespace juceRmlUi
 			return;
 
 		SetAttribute(g_attribValue, v);
-		DispatchEvent(Rml::EventId::Change, {{"value", Rml::Variant(v)}});
 		onChangeValue();
+		if (_sendChangeEvent)
+			DispatchEvent(Rml::EventId::Change, {{"value", Rml::Variant(v)}});
 	}
 
 	void ElemValue::setMinValue(const float _value)

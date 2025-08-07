@@ -17,9 +17,9 @@ namespace juceRmlUi
 
 		void OnAttributeChange(const Rml::ElementAttributes& _changedAttributes) override;
 
-		void setValue(const float _value);
-		void setMinValue(const float _value);
-		void setMaxValue(const float _value);
+		void setValue(float _value, bool _sendChangeEvent = true);
+		void setMinValue(float _value);
+		void setMaxValue(float _value);
 
 		float getValue() const { return m_value; }
 		float getMinValue() const { return m_min; }

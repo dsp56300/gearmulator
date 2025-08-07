@@ -20,6 +20,18 @@ namespace juceRmlUi
 	void ElemComboBox::setOptions(const std::vector<Rml::String>& _options)
 	{
 		m_options = _options;
+		setMaxValue(static_cast<float>(m_options.size()));
+	}
+
+	void ElemComboBox::addOption(const Rml::String& _option)
+	{
+		m_options.push_back(_option);
+		setMaxValue(static_cast<float>(m_options.size()));
+	}
+
+	void ElemComboBox::clearOptions()
+	{
+		m_options.clear();
 	}
 
 	void ElemComboBox::onChangeValue()
@@ -56,6 +68,19 @@ namespace juceRmlUi
 		}
 
 		m_menu->open(this, GetAbsoluteOffset(Rml::BoxArea::Border), getProperty("items-per-column", 16));
+	}
+
+	void ElemComboBox::setSelectedIndex(const size_t _index, const bool _sendChangeEvent/* = true*/)
+	{
+		setValue(static_cast<float>(_index), _sendChangeEvent);
+	}
+
+	int ElemComboBox::getSelectedIndex() const
+	{
+		const auto i = static_cast<int>(getValue());
+		if (i < m_options.size() || i >= m_options.size())
+			return -1;
+		return i;
 	}
 
 	void ElemComboBox::updateValueText()

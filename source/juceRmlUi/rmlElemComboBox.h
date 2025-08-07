@@ -17,10 +17,17 @@ namespace juceRmlUi
 
 		void setOptions(const std::vector<Rml::String>& _options);
 
+		void addOption(const Rml::String& _option);
+
+		void clearOptions();
+
 		void onChangeValue() override;
 
 		void ProcessEvent(Rml::Event& _event) override;
 		void onClick(const Rml::Event& _event);
+
+		void setSelectedIndex(size_t _index, bool _sendChangeEvent = true);
+		int getSelectedIndex() const;
 
 	private:
 		void updateValueText();

@@ -2,8 +2,6 @@
 
 #include "jucePluginLib/patchdb/patchdbtypes.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
-
 namespace jucePluginEditorLib::patchManagerRml
 {
 	class PatchManagerDataModel;

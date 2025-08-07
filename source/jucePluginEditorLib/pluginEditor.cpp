@@ -627,6 +627,13 @@ namespace jucePluginEditorLib
 		return m_rmlPlugin->getParameterBinding(m_rmlComponent->getContext());
 	}
 
+	Rml::Element* Editor::getRmlRootElement() const
+	{
+		if (!m_rmlComponent)
+			return {};
+		return m_rmlComponent->getDocument();
+	}
+
 	bool Editor::keyPressed(const juce::KeyPress& _key)
 	{
 		if(_key.getModifiers().isCommandDown())

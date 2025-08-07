@@ -17,6 +17,8 @@
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 
+#include "RmlUi/Core/ElementDocument.h"
+
 #include "virusLib/device.h"
 
 namespace genericVirusUI
@@ -41,7 +43,7 @@ namespace genericVirusUI
 
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
-			m_presetName[i] = std::make_unique<PartButton>(presetNames[i], _editor);
+			m_presetName.emplace_back(std::make_unique<PartButton>(presetNames[i], _editor));
 
 			EventListener::Add(m_partSelect[i], Rml::EventId::Click, [this, i](Rml::Event&){ selectPart(i); });
 			EventListener::Add(m_partSelect[i], Rml::EventId::Mousedown, [this, i](const Rml::Event& _e)

@@ -1,7 +1,6 @@
 #include "VirusEditor.h"
 
 #include "ArpUserPattern.h"
-#include "PartButton.h"
 
 #include "ParameterNames.h"
 #include "VirusProcessor.h"
@@ -14,6 +13,11 @@
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "juceRmlPlugin/skinConverter/skinConverterOptions.h"
+
+#include "juceRmlUi/juceRmlComponent.h"
+#include "juceRmlUi/rmlElemButton.h"
+#include "juceRmlUi/rmlElemComboBox.h"
+#include "juceRmlUi/rmlEventListener.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -28,23 +32,11 @@ namespace genericVirusUI
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
 		create();
-		/*
+
 		m_parts.reset(new Parts(*this));
 		m_leds.reset(new Leds(*this, _processorRef));
 
-		// be backwards compatible with old skins
-		if(getTabGroupCount() == 0)
-			m_tabs.reset(new Tabs(*this));
-
-		// be backwards compatible with old skins
-		if(getControllerLinkCountRecursive() == 0)
-			m_controllerLinks.reset(new ControllerLinks(*this));
-
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
-
-		// be backwards compatible with old skins
-		if(!getConditionCountRecursive())
-			m_fxPage.reset(new FxPage(*this));
 
 		if(false)
 		{
@@ -56,24 +48,26 @@ namespace genericVirusUI
 			setPatchManager(new PatchManager(*this, pmParent));
 		}
 
-		m_presetName = findComponentT<juce::Label>("PatchName");
+		auto* root = getRmlComponent()->getDocument();
+
+		m_presetName = findChild("PatchName");
 
 		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), m_parameterBinding, *this));
 
-		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
+		m_romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector");
 
-		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle", false);
-		m_playModeMulti = findComponentT<juce::Button>("PlayModeMulti", false);
+		m_playModeSingle = findChild<juceRmlUi::ElemButton>("PlayModeSingle", false);
+		m_playModeMulti = findChild<juceRmlUi::ElemButton>("PlayModeMulti", false);
 
 		if(m_playModeSingle && m_playModeMulti)
 		{
-			m_playModeSingle->onClick = [this]{ if(m_playModeSingle->getToggleState()) setPlayMode(virusLib::PlayMode::PlayModeSingle); };
-			m_playModeMulti->onClick = [this]{ if(m_playModeMulti->getToggleState()) setPlayMode(virusLib::PlayMode::PlayModeMulti); };
+			juceRmlUi::EventListener::AddClick(m_playModeSingle, [this] { setPlayMode(virusLib::PlayMode::PlayModeSingle); });
+			juceRmlUi::EventListener::AddClick(m_playModeMulti, [this] { setPlayMode(virusLib::PlayMode::PlayModeMulti); });
 		}
 		else
 		{
-			m_playModeToggle = findComponentT<juce::Button>("PlayModeToggle");
-			m_playModeToggle->onClick = [this]{ setPlayMode(m_playModeToggle->getToggleState() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); };
+			m_playModeToggle = findChild<juceRmlUi::ElemButton>("PlayModeToggle");
+			juceRmlUi::EventListener::AddClick(m_playModeToggle, [this] { setPlayMode(m_playModeToggle->isChecked() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); });
 		}
 
 		if(m_romSelector)
@@ -82,7 +76,7 @@ namespace genericVirusUI
 
 			if(roms.empty())
 			{
-				m_romSelector->addItem("<No ROM found>", 1);
+				m_romSelector->addOption("<No ROM found>");
 			}
 			else
 			{
@@ -91,46 +85,46 @@ namespace genericVirusUI
 				for (const auto& rom : roms)
 				{
 					const auto name = juce::File(rom.getFilename()).getFileNameWithoutExtension();
-					m_romSelector->addItem(name + " (" + rom.getModelName() + ')', id++);
+					m_romSelector->addOption(name.toStdString() + " (" + rom.getModelName() + ')');
 				}
 			}
 
-			m_romSelector->setSelectedId(static_cast<int>(m_processor.getSelectedRomIndex()) + 1, juce::dontSendNotification);
+			m_romSelector->setSelectedIndex(static_cast<int>(m_processor.getSelectedRomIndex()) + 1, false);
 
-			m_romSelector->onChange = [this]
+			juceRmlUi::EventListener::Add(m_romSelector, Rml::EventId::Change, [this](Rml::Event&)
 			{
 				const auto oldIndex = m_processor.getSelectedRomIndex();
-				const auto newIndex = m_romSelector->getSelectedId() - 1;
+				const auto newIndex = m_romSelector->getSelectedIndex();
 				if(!m_processor.setSelectedRom(newIndex))
-					m_romSelector->setSelectedId(static_cast<int>(oldIndex) + 1);
-			};
+					m_romSelector->setSelectedIndex(static_cast<int>(oldIndex));
+			});
 		}
 
 		getController().onProgramChange = [this](int _part) { onProgramChange(_part); };
 
 		addMouseListener(this, true);
 
-		if(auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false))
+		if(auto* versionInfo = findChild("VersionInfo", false))
 		{
 		    const std::string message = "DSP 56300 Emulator Version " + pluginLib::Version::getVersionString() + " - " + pluginLib::Version::getVersionDateTime();
-			versionInfo->setText(message, juce::dontSendNotification);
+			versionInfo->SetInnerRML(message);
 		}
 
-		if(auto* versionNumber = findComponentT<juce::Label>("VersionNumber", false))
+		if(auto* versionNumber = findChild("VersionNumber", false))
 		{
-			versionNumber->setText(pluginLib::Version::getVersionString(), juce::dontSendNotification);
+			versionNumber->SetInnerRML(pluginLib::Version::getVersionString());
 		}
 
-		m_deviceModel = findComponentT<juce::Label>("DeviceModel", false);
+		m_deviceModel = findChild("DeviceModel", false);
 
-		auto* presetSave = findComponentT<juce::Button>("PresetSave", false);
+		auto* presetSave = findChild("PresetSave", false);
 		if(presetSave)
-			presetSave->onClick = [this] { savePreset(); };
+			juceRmlUi::EventListener::AddClick(presetSave, [this] { savePreset(); });
 
-		auto* presetLoad = findComponentT<juce::Button>("PresetLoad", false);
+		auto* presetLoad = findChild("PresetLoad", false);
 		if(presetLoad)
-			presetLoad->onClick = [this] { loadPreset(); };
-
+			juceRmlUi::EventListener::AddClick(presetLoad, [this] { loadPreset(); });
+		/*
 		m_presetName->setEditable(false, true, true);
 		m_presetName->onTextChange = [this]()
 		{
@@ -146,17 +140,17 @@ namespace genericVirusUI
 		{
 			startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(*getPatchManager(), getController().getCurrentPart()), m_presetName);
 		});
-
 		m_presetName->addMouseListener(m_presetNameMouseListener, false);
+*/
 
-		auto* menuButton = findComponentT<juce::Button>("Menu", false);
+		auto* menuButton = findChild("Menu", false);
 
 		if(menuButton)
 		{
-			menuButton->onClick = [this]()
+			juceRmlUi::EventListener::AddClick(menuButton, [this]()
 			{
 				openMenu(nullptr);
-			};
+			});
 		}
 
 		updatePresetName();
@@ -168,7 +162,6 @@ namespace genericVirusUI
 			updateKeyValueConditions("deviceModel", virusLib::getModelName(m_processor.getModel()));
 			m_parts->onPlayModeChanged();
 		};
-		*/
 	}
 
 	VirusEditor::~VirusEditor()
@@ -252,17 +245,17 @@ namespace genericVirusUI
 
 	void VirusEditor::updatePresetName() const
 	{
-		m_presetName->setText(getController().getCurrentPartPresetName(getController().getCurrentPart()), juce::dontSendNotification);
+		m_presetName->SetInnerRML(getController().getCurrentPartPresetName(getController().getCurrentPart()));
 	}
 
 	void VirusEditor::updatePlayModeButtons() const
 	{
 		if(m_playModeSingle)
-			m_playModeSingle->setToggleState(!getController().isMultiMode(), juce::dontSendNotification);
+			m_playModeSingle->setChecked(!getController().isMultiMode());
 		if(m_playModeMulti)
-			m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+			m_playModeMulti->setChecked(getController().isMultiMode());
 		if(m_playModeToggle)
-			m_playModeToggle->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+			m_playModeToggle->setChecked(getController().isMultiMode());
 	}
 
 	void VirusEditor::updateDeviceModel()
@@ -302,7 +295,7 @@ namespace genericVirusUI
 		case virusLib::DeviceModel::TI2:	m = "TI2";	break;
 		}
 
-		m_deviceModel->setText(m, juce::dontSendNotification);
+		m_deviceModel->SetInnerRML(m);
 	}
 
 	void VirusEditor::savePreset()

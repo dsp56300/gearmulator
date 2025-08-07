@@ -13,6 +13,11 @@
 #include "ControllerLinks.h"
 #include "Leds.h"
 
+namespace juceRmlUi
+{
+	class ElemComboBox;
+}
+
 namespace virusLib
 {
 	class ROMFile;
@@ -91,23 +96,21 @@ namespace genericVirusUI
 
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Leds> m_leds;
-		std::unique_ptr<Tabs> m_tabs;
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
-		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
-		juce::Label* m_presetName = nullptr;
+		Rml::Element* m_presetName = nullptr;
 //		PartMouseListener* m_presetNameMouseListener  = nullptr;
 
 		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 
-		juce::ComboBox* m_romSelector = nullptr;
+		juceRmlUi::ElemComboBox* m_romSelector = nullptr;
 
-		juce::Button* m_playModeSingle = nullptr;
-		juce::Button* m_playModeMulti = nullptr;
-		juce::Button* m_playModeToggle = nullptr;
+		juceRmlUi::ElemButton* m_playModeSingle = nullptr;
+		juceRmlUi::ElemButton* m_playModeMulti = nullptr;
+		juceRmlUi::ElemButton* m_playModeToggle = nullptr;
 
-		juce::Label* m_deviceModel = nullptr;
+		Rml::Element* m_deviceModel = nullptr;
 
 		ArpUserPattern* m_arpUserPattern = nullptr;
 

@@ -13,6 +13,7 @@
 #include "jucePluginLib/types.h"
 
 #include "juceRmlUi/rmlDataProvider.h"
+#include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlMenu.h"
 
 namespace rmlPlugin
@@ -160,7 +161,13 @@ namespace jucePluginEditorLib
 		rmlPlugin::RmlPlugin* getRmlPlugin() const { return m_rmlPlugin.get(); }
 		juceRmlUi::RmlComponent* getRmlComponent() const { return m_rmlComponent.get(); }
 		rmlPlugin::RmlParameterBinding* getRmlParameterBinding() const;
+		Rml::Element* getRmlRootElement() const;
 
+		template<typename T = Rml::Element> T* findChild(const std::string& _name, const bool _mustExist = true) const
+		{
+			auto* root = getRmlRootElement();
+			return juceRmlUi::helper::findChildT<T>(root, _name, _mustExist);
+		}
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;
 

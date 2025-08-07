@@ -294,6 +294,21 @@ namespace juceRmlUi
 			return clone;
 		}
 
+		int getNumChildren(const Rml::Element* _parent)
+		{
+			return _parent->GetNumChildren();
+		}
+
+		Rml::Element* getChild(const Rml::Element* _parent, int _index)
+		{
+			return _parent->GetChild(_index);
+		}
+
+		std::string getId(const Rml::Element* _elem)
+		{
+			return _elem->GetId();
+		}
+
 		Rml::Element* findChild(Rml::Element* _elem, const std::string& _name, const bool _mustExist)
 		{
 			auto* result = Rml::ElementUtilities::GetElementById(_elem, _name);
