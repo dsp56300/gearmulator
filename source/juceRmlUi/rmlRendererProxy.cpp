@@ -10,6 +10,7 @@
 #include "juce_graphics/juce_graphics.h"
 
 #include "RmlUi/Core/Log.h"
+#include "RmlUi/Core/Variant.h"
 
 namespace juceRmlUi
 {

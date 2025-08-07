@@ -5,6 +5,8 @@
 
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
+#include "RmlUi/Core/Element.h"
+
 namespace genericVirusUI
 {
 	PartButton::PartButton(Rml::Element* _button, VirusEditor& _editor) : jucePluginEditorLib::PartButton(_button, _editor), m_editor(_editor)

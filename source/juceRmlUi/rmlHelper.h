@@ -1,8 +1,9 @@
 #pragma once
 
-#include "RmlUi/Core/Element.h"
-#include "RmlUi/Core/Input.h"
-#include "RmlUi/Core/Vector2.h"
+#include <string>
+
+#include "RmlUi/Core/Types.h"	// ElementPtr
+#include "RmlUi/Core/Input.h"	// Rml::Input::KeyIdentifier
 
 namespace juceRmlUi
 {
@@ -79,6 +80,11 @@ namespace juceRmlUi
 
 		Rml::Element* findChild(Rml::Element* _elem, const std::string& _name, bool _mustExist = true);
 
+		// these are used in the template below, the only purpose is to avoid including RmlUi/Core/Element.h in the header file
+		int getNumChildren(const Rml::Element* _parent);
+		Rml::Element* getChild(const Rml::Element* _parent, int _index);
+		std::string getId(const Rml::Element* _elem);
+
 		template<typename T = Rml::Element>
 		void findChildren(std::vector<T*>& _results, const Rml::Element* _parent, const std::string& _name, size_t _expectedCount = 0)
 		{
@@ -88,11 +94,11 @@ namespace juceRmlUi
 			if (_expectedCount)
 				_results.reserve(_expectedCount);
 
-			for (int i=0; i<_parent->GetNumChildren(); ++i)
+			for (int i=0; i<getNumChildren(_parent); ++i)
 			{
-				auto* child = _parent->GetChild(i);
+				auto* child = getChild(_parent, i);;
 
-				if (child->GetId() == _name)
+				if (getId(child) == _name)
 				{
 					auto* typedChild = dynamic_cast<T*>(child);
 					if (typedChild)

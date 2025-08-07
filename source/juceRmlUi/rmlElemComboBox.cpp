@@ -3,6 +3,7 @@
 #include "rmlHelper.h"
 #include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/Context.h"
+#include "RmlUi/Core/ElementDocument.h"
 
 namespace juceRmlUi
 {

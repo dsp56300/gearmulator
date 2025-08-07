@@ -11,6 +11,8 @@
 
 #include "juceRmlUi/rmlMenu.h"
 
+#include "RmlUi/Core/ElementDocument.h"
+
 namespace juceRmlUi
 {
 	class ColorPicker;

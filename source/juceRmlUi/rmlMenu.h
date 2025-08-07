@@ -3,11 +3,11 @@
 #include <functional>
 #include <string>
 
-#include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/EventListener.h"
 
 namespace Rml
 {
+	class ElementDocument;
 	class Element;
 }
 
