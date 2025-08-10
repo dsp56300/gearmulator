@@ -85,7 +85,7 @@ namespace juceRmlUi
 
 			if (entry.submenu)
 			{
-				Rml::ObserverPtr<Rml::Element> parent = div->GetObserverPtr();
+				Rml::ObserverPtr<Rml::Element> parent = div->GetObserverPtr(_parent->GetCoreInstance());
 				juceRmlUi::EventListener::Add(div, Rml::EventId::Mouseover, [this, parent, submenu = entry.submenu](Rml::Event& _event)
 				{
 					openSubmenu(parent, submenu);

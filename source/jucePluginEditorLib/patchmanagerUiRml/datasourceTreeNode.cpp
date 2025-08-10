@@ -71,7 +71,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		elem->setName(getDataSourceNodeTitle(m_ds));
 	}
 
-	DatasourceTreeElem::DatasourceTreeElem(Tree& _tree, const Rml::String& _tag) : TreeElem(_tree, _tag)
+	DatasourceTreeElem::DatasourceTreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : TreeElem(_tree, _coreInstance, _tag)
 	{
 	}
 

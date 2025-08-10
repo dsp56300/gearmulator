@@ -7,7 +7,7 @@
 
 namespace juceRmlUi
 {
-	ElemComboBox::ElemComboBox(const Rml::String& _tag) : ElemValue(_tag)
+	ElemComboBox::ElemComboBox(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : ElemValue(_coreInstance, _tag)
 	{
 		AddEventListener(Rml::EventId::Click, this);
 	}
@@ -93,7 +93,7 @@ namespace juceRmlUi
 
 	void ElemComboBox::updateValueText()
 	{
-		if (m_options.empty())
+		if (m_options.empty() || !GetOwnerDocument())
 			return;
 
 		const auto value = getValue();

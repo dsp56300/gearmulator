@@ -10,7 +10,7 @@
 
 namespace juceRmlUi
 {
-	ElemListEntry::ElemListEntry(const Rml::String& _tag) : Element(_tag)
+	ElemListEntry::ElemListEntry(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : Element(_coreInstance, _tag)
 	{
 		EventListener::Add(this, Rml::EventId::Click, [this](const Rml::Event& _event)
 		{

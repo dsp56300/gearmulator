@@ -12,14 +12,14 @@
 
 namespace rmlPlugin
 {
-	RmlPlugin::RmlPlugin(pluginLib::Controller& _controller) : m_controller(_controller)
+	RmlPlugin::RmlPlugin(Rml::CoreInstance& _coreInstance, pluginLib::Controller& _controller) : m_coreInstance(_coreInstance), m_controller(_controller)
 	{
-		Rml::RegisterPlugin(this);
+		Rml::RegisterPlugin(m_coreInstance, this);
 	}
 
 	RmlPlugin::~RmlPlugin()
 	{
-		Rml::UnregisterPlugin(this);
+		Rml::UnregisterPlugin(m_coreInstance, this);
 	}
 
 	void RmlPlugin::OnContextCreate(Rml::Context* _context)
@@ -50,7 +50,7 @@ namespace rmlPlugin
 		if (const auto* attribParam = _element->GetAttribute("param"))
 		{
 			// TODO: which part?
-			RmlParameterBinding::bind(m_controller, *_element, attribParam->Get<Rml::String>(), 0);
+			RmlParameterBinding::bind(m_controller, *_element, attribParam->Get<Rml::String>(_element->GetCoreInstance()), 0);
 		}
 
 		if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_element))
@@ -61,7 +61,7 @@ namespace rmlPlugin
 			{
 				auto type = input->GetAttribute("type");
 
-				if (type && type->Get<Rml::String>() == "text")
+				if (type && type->Get<Rml::String>(input->GetCoreInstance()) == "text")
 				{
 					juceRmlUi::EventListener::Add(input, Rml::EventId::Change, [input](const Rml::Event&)
 					{
@@ -77,14 +77,14 @@ namespace rmlPlugin
 
 		if (auto* attribTabGroup = _element->GetAttribute("tabgroup"))
 		{
-			const auto name = attribTabGroup->Get<Rml::String>();
+			const auto name = attribTabGroup->Get<Rml::String>(_element->GetCoreInstance());
 			auto& tabGroup = m_tabGroups[name];
 			if (!tabGroup)
 				tabGroup = std::make_unique<TabGroup>();
 			if (auto* attribPage = _element->GetAttribute("tabpage"))
-				tabGroup->setPage(_element, std::stoi(attribPage->Get<Rml::String>()));
+				tabGroup->setPage(_element, std::stoi(attribPage->Get<Rml::String>(_element->GetCoreInstance())));
 			else if (auto* attribButton = _element->GetAttribute("tabbutton"))
-				tabGroup->setButton(_element, std::stoi(attribButton->Get<Rml::String>()));
+				tabGroup->setButton(_element, std::stoi(attribButton->Get<Rml::String>(_element->GetCoreInstance())));
 			else
 				throw std::runtime_error("tabgroup element must have either tabpage or tabbutton attribute set");
 		}

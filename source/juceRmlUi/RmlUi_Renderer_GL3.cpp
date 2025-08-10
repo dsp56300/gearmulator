@@ -823,7 +823,7 @@ static void DestroyShaders(const ProgramData& data)
 
 } // namespace Gfx
 
-RenderInterface_GL3::RenderInterface_GL3()
+RenderInterface_GL3::RenderInterface_GL3(Rml::CoreInstance& in_core_instance) : RenderInterface(in_core_instance)
 {
 	auto mut_program_data = Rml::MakeUnique<Gfx::ProgramData>();
 	if (Gfx::CreateShaders(*mut_program_data))
@@ -1241,7 +1241,7 @@ struct TGAHeader {
 
 Rml::TextureHandle RenderInterface_GL3::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source)
 {
-	Rml::FileInterface* file_interface = Rml::GetFileInterface();
+	Rml::FileInterface* file_interface = Rml::GetFileInterface(core_instance);
 	Rml::FileHandle file_handle = file_interface->Open(source);
 	if (!file_handle)
 	{
@@ -1548,30 +1548,30 @@ Rml::CompiledFilterHandle RenderInterface_GL3::CompileFilter(const Rml::String& 
 	if (name == "opacity")
 	{
 		filter.type = FilterType::Passthrough;
-		filter.blend_factor = Rml::Get(parameters, "value", 1.0f);
+		filter.blend_factor = Rml::Get(core_instance, parameters, "value", 1.0f);
 	}
 	else if (name == "blur")
 	{
 		filter.type = FilterType::Blur;
-		filter.sigma = Rml::Get(parameters, "sigma", 1.0f);
+		filter.sigma = Rml::Get(core_instance, parameters, "sigma", 1.0f);
 	}
 	else if (name == "drop-shadow")
 	{
 		filter.type = FilterType::DropShadow;
-		filter.sigma = Rml::Get(parameters, "sigma", 0.f);
-		filter.color = Rml::Get(parameters, "color", Rml::Colourb()).ToPremultiplied();
-		filter.offset = Rml::Get(parameters, "offset", Rml::Vector2f(0.f));
+		filter.sigma = Rml::Get(core_instance, parameters, "sigma", 0.f);
+		filter.color = Rml::Get(core_instance, parameters, "color", Rml::Colourb()).ToPremultiplied();
+		filter.offset = Rml::Get(core_instance, parameters, "offset", Rml::Vector2f(0.f));
 	}
 	else if (name == "brightness")
 	{
 		filter.type = FilterType::ColorMatrix;
-		const float value = Rml::Get(parameters, "value", 1.0f);
+		const float value = Rml::Get(core_instance, parameters, "value", 1.0f);
 		filter.color_matrix = Rml::Matrix4f::Diag(value, value, value, 1.f);
 	}
 	else if (name == "contrast")
 	{
 		filter.type = FilterType::ColorMatrix;
-		const float value = Rml::Get(parameters, "value", 1.0f);
+		const float value = Rml::Get(core_instance, parameters, "value", 1.0f);
 		const float grayness = 0.5f - 0.5f * value;
 		filter.color_matrix = Rml::Matrix4f::Diag(value, value, value, 1.f);
 		filter.color_matrix.SetColumn(3, Rml::Vector4f(grayness, grayness, grayness, 1.f));
@@ -1579,7 +1579,7 @@ Rml::CompiledFilterHandle RenderInterface_GL3::CompileFilter(const Rml::String& 
 	else if (name == "invert")
 	{
 		filter.type = FilterType::ColorMatrix;
-		const float value = Rml::Math::Clamp(Rml::Get(parameters, "value", 1.0f), 0.f, 1.f);
+		const float value = Rml::Math::Clamp(Rml::Get(core_instance, parameters, "value", 1.0f), 0.f, 1.f);
 		const float inverted = 1.f - 2.f * value;
 		filter.color_matrix = Rml::Matrix4f::Diag(inverted, inverted, inverted, 1.f);
 		filter.color_matrix.SetColumn(3, Rml::Vector4f(value, value, value, 1.f));
@@ -1587,7 +1587,7 @@ Rml::CompiledFilterHandle RenderInterface_GL3::CompileFilter(const Rml::String& 
 	else if (name == "grayscale")
 	{
 		filter.type = FilterType::ColorMatrix;
-		const float value = Rml::Get(parameters, "value", 1.0f);
+		const float value = Rml::Get(core_instance, parameters, "value", 1.0f);
 		const float rev_value = 1.f - value;
 		const Rml::Vector3f gray = value * Rml::Vector3f(0.2126f, 0.7152f, 0.0722f);
 		// clang-format off
@@ -1602,7 +1602,7 @@ Rml::CompiledFilterHandle RenderInterface_GL3::CompileFilter(const Rml::String& 
 	else if (name == "sepia")
 	{
 		filter.type = FilterType::ColorMatrix;
-		const float value = Rml::Get(parameters, "value", 1.0f);
+		const float value = Rml::Get(core_instance, parameters, "value", 1.0f);
 		const float rev_value = 1.f - value;
 		const Rml::Vector3f r_mix = value * Rml::Vector3f(0.393f, 0.769f, 0.189f);
 		const Rml::Vector3f g_mix = value * Rml::Vector3f(0.349f, 0.686f, 0.168f);
@@ -1620,7 +1620,7 @@ Rml::CompiledFilterHandle RenderInterface_GL3::CompileFilter(const Rml::String& 
 	{
 		// Hue-rotation and saturation values based on: https://www.w3.org/TR/filter-effects-1/#attr-valuedef-type-huerotate
 		filter.type = FilterType::ColorMatrix;
-		const float value = Rml::Get(parameters, "value", 1.0f);
+		const float value = Rml::Get(core_instance, parameters, "value", 1.0f);
 		const float s = Rml::Math::Sin(value);
 		const float c = Rml::Math::Cos(value);
 		// clang-format off
@@ -1635,7 +1635,7 @@ Rml::CompiledFilterHandle RenderInterface_GL3::CompileFilter(const Rml::String& 
 	else if (name == "saturate")
 	{
 		filter.type = FilterType::ColorMatrix;
-		const float value = Rml::Get(parameters, "value", 1.0f);
+		const float value = Rml::Get(core_instance, parameters, "value", 1.0f);
 		// clang-format off
 		filter.color_matrix = Rml::Matrix4f::FromRows(
 			{0.213f + 0.787f * value,  0.715f - 0.715f * value,  0.072f - 0.072f * value,  0.f},
@@ -1697,38 +1697,38 @@ Rml::CompiledShaderHandle RenderInterface_GL3::CompileShader(const Rml::String& 
 	if (name == "linear-gradient")
 	{
 		shader.type = CompiledShaderType::Gradient;
-		const bool repeating = Rml::Get(parameters, "repeating", false);
+		const bool repeating = Rml::Get(core_instance, parameters, "repeating", false);
 		shader.gradient_function = (repeating ? ShaderGradientFunction::RepeatingLinear : ShaderGradientFunction::Linear);
-		shader.p = Rml::Get(parameters, "p0", Rml::Vector2f(0.f));
-		shader.v = Rml::Get(parameters, "p1", Rml::Vector2f(0.f)) - shader.p;
+		shader.p = Rml::Get(core_instance, parameters, "p0", Rml::Vector2f(0.f));
+		shader.v = Rml::Get(core_instance, parameters, "p1", Rml::Vector2f(0.f)) - shader.p;
 		ApplyColorStopList(shader, parameters);
 	}
 	else if (name == "radial-gradient")
 	{
 		shader.type = CompiledShaderType::Gradient;
-		const bool repeating = Rml::Get(parameters, "repeating", false);
+		const bool repeating = Rml::Get(core_instance, parameters, "repeating", false);
 		shader.gradient_function = (repeating ? ShaderGradientFunction::RepeatingRadial : ShaderGradientFunction::Radial);
-		shader.p = Rml::Get(parameters, "center", Rml::Vector2f(0.f));
-		shader.v = Rml::Vector2f(1.f) / Rml::Get(parameters, "radius", Rml::Vector2f(1.f));
+		shader.p = Rml::Get(core_instance, parameters, "center", Rml::Vector2f(0.f));
+		shader.v = Rml::Vector2f(1.f) / Rml::Get(core_instance, parameters, "radius", Rml::Vector2f(1.f));
 		ApplyColorStopList(shader, parameters);
 	}
 	else if (name == "conic-gradient")
 	{
 		shader.type = CompiledShaderType::Gradient;
-		const bool repeating = Rml::Get(parameters, "repeating", false);
+		const bool repeating = Rml::Get(core_instance, parameters, "repeating", false);
 		shader.gradient_function = (repeating ? ShaderGradientFunction::RepeatingConic : ShaderGradientFunction::Conic);
-		shader.p = Rml::Get(parameters, "center", Rml::Vector2f(0.f));
-		const float angle = Rml::Get(parameters, "angle", 0.f);
+		shader.p = Rml::Get(core_instance, parameters, "center", Rml::Vector2f(0.f));
+		const float angle = Rml::Get(core_instance, parameters, "angle", 0.f);
 		shader.v = {Rml::Math::Cos(angle), Rml::Math::Sin(angle)};
 		ApplyColorStopList(shader, parameters);
 	}
 	else if (name == "shader")
 	{
-		const Rml::String value = Rml::Get(parameters, "value", Rml::String());
+		const Rml::String value = Rml::Get(core_instance, parameters, "value", Rml::String());
 		if (value == "creation")
 		{
 			shader.type = CompiledShaderType::Creation;
-			shader.dimensions = Rml::Get(parameters, "dimensions", Rml::Vector2f(0.f));
+			shader.dimensions = Rml::Get(core_instance, parameters, "dimensions", Rml::Vector2f(0.f));
 		}
 	}
 
@@ -1770,7 +1770,7 @@ void RenderInterface_GL3::RenderShader(Rml::CompiledShaderHandle shader_handle, 
 	break;
 	case CompiledShaderType::Creation:
 	{
-		const double time = Rml::GetSystemInterface()->GetElapsedTime();
+		const double time = Rml::GetSystemInterface(core_instance)->GetElapsedTime();
 
 		UseProgram(ProgramId::Creation);
 		glUniform1f(GetUniformLocation(UniformId::Value), (float)time);

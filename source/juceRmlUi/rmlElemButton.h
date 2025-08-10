@@ -8,7 +8,7 @@ namespace juceRmlUi
 	class ElemButton : public ElemValue
 	{
 	public:
-		explicit ElemButton(const Rml::String& _tag);
+		explicit ElemButton(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		void onChangeValue() override;
 		void onPropertyChanged(const std::string& _key) override;

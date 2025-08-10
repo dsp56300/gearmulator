@@ -8,7 +8,7 @@ namespace juceRmlUi
 	class ElemSplitter final : public Element, Rml::EventListener
 	{
 	public:
-		explicit ElemSplitter(const Rml::String& _tag);
+		explicit ElemSplitter(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		void ProcessEvent(Rml::Event& _event) override;
 

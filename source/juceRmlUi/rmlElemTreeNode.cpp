@@ -5,7 +5,7 @@
 
 namespace juceRmlUi
 {
-	ElemTreeNode::ElemTreeNode(const Rml::String& _tag) : Element(_tag)
+	ElemTreeNode::ElemTreeNode(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : Element(_coreInstance, _tag)
 	{
 		this->AddEventListener(Rml::EventId::Click, this);
 		this->AddEventListener(Rml::EventId::Keydown, this);

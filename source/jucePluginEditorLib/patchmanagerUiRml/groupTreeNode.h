@@ -73,7 +73,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	class GroupTreeElem : public TreeElem
 	{
 	public:
-		explicit GroupTreeElem(Tree& _tree, const Rml::String& _tag);
+		explicit GroupTreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;

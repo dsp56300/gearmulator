@@ -46,6 +46,7 @@ namespace jucePluginEditorLib
 		, m_binding(_binding)
 		, m_skin(std::move(_skin))
 		, m_overlays(*this, _binding)
+		, m_rmlInterfaces(*this)
 	{
 		showDisclaimer();
 	}
@@ -610,8 +611,8 @@ namespace jucePluginEditorLib
 	juce::Component* Editor::createRmlUiComponent(const std::string& _rmlFile)
 	{
 		if (!m_rmlPlugin)
-			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(getProcessor().getController()));
-		return new juceRmlUi::RmlComponent(*this, _rmlFile, 1.0f, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(m_rmlInterfaces.getCoreInstance(), getProcessor().getController()));
+		return new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 		{
 			onRmlContextCreated(_rmlComponent, _context);
 		});

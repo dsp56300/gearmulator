@@ -53,7 +53,7 @@ namespace juceRmlUi
 
 		using HandleVariant = std::variant<HandleCompiledGeometry, HandleTexture, HandleCompiledFilter, HandleCompiledShader, HandleLayer>;
 
-		explicit RendererProxy(DataProvider& _dataProvider);
+		explicit RendererProxy(Rml::CoreInstance& _coreInstance, DataProvider& _dataProvider);
 		~RendererProxy() override;
 
 		// Rml::RenderInterface overrides

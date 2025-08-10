@@ -17,13 +17,15 @@
 
 namespace juceRmlUi
 {
-	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback)
-		: m_dataProvider(_dataProvider)
+	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback)
+		: m_rmlInterfaces(_interfaces)
+		, m_coreInstance(_interfaces.getCoreInstance())
+		, m_dataProvider(_dataProvider)
 		, m_rootRmlFilename(std::move(_rootRmlFilename))
 		, m_contentScale(_contentScale)
 		, m_drag(*this)
 	{
-		m_renderProxy.reset(new RendererProxy(m_dataProvider));
+		m_renderProxy.reset(new RendererProxy(m_coreInstance, m_dataProvider));
 
 		m_openGLContext.setMultisamplingEnabled(true);
 		m_openGLContext.setRenderer(this);
@@ -35,9 +37,6 @@ namespace juceRmlUi
 		m_openGLContext.setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
 
 		setWantsKeyboardFocus(true);
-
-		m_rmlInterfaces.reset(new RmlInterfaces(m_dataProvider));
-
 		// set some reasonable default size, correct size will be set when loading the RML document
 		setSize(1280, 720);
 
@@ -49,7 +48,7 @@ namespace juceRmlUi
 			for (const auto & file : files)
 			{
 				if (baseLib::filesystem::hasExtension(file, ".ttf"))
-					Rml::LoadFontFace(file, true);
+					Rml::LoadFontFace(m_coreInstance, file, true);
 			}
 		}
 
@@ -70,7 +69,7 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
-		m_renderInterface.reset(new RenderInterface_GL3());
+		m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
 		m_renderProxy->setRenderer(m_renderInterface.get());
 
 		{
@@ -315,7 +314,7 @@ namespace juceRmlUi
 			if (m_rmlContext)
 				return;
 
-			m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
+			m_rmlContext = CreateContext(m_coreInstance, getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
 
 			m_rmlContext->SetDensityIndependentPixelRatio(static_cast<float>(m_openGLContext.getRenderingScale()) * m_contentScale);
 
@@ -324,7 +323,7 @@ namespace juceRmlUi
 			if (_contextCreatedCallback)
 				_contextCreatedCallback(*this, *m_rmlContext);
 
-			auto& sys = m_rmlInterfaces->getSystemInterface();
+			auto& sys = m_rmlInterfaces.getSystemInterface();
 			sys.beginLogRecording();
 
 			auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
@@ -371,10 +370,10 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 
 		m_rmlContext->UnloadAllDocuments();
-		Rml::RemoveContext(m_rmlContext->GetName());
+		Rml::RemoveContext(m_coreInstance, m_rmlContext->GetName());
 		m_rmlContext = nullptr;
 
-		Rml::ReleaseRenderManagers();
+		Rml::ReleaseRenderManagers(m_coreInstance);
 	}
 
 	void RmlComponent::updateRmlContextDimensions()

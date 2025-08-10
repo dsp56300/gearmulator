@@ -14,7 +14,10 @@
 
 #include "juceRmlUi/rmlDataProvider.h"
 #include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/rmlInterfaces.h"
 #include "juceRmlUi/rmlMenu.h"
+
+#include "RmlUi/Core/CoreInstance.h"
 
 namespace rmlPlugin
 {
@@ -203,6 +206,7 @@ namespace jucePluginEditorLib
 		ImagePool m_imagePool;
 		ParameterOverlays m_overlays;
 
+		juceRmlUi::RmlInterfaces m_rmlInterfaces;
 		std::unique_ptr<juceRmlUi::RmlComponent> m_rmlComponent;
 
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;

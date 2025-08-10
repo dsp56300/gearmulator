@@ -11,7 +11,7 @@
 
 namespace jucePluginEditorLib::patchManagerRml
 {
-	TreeElem::TreeElem(Tree& _tree, const Rml::String& _tag) : ElemTreeNode(_tag), m_treeRef(_tree)
+	TreeElem::TreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : ElemTreeNode(_coreInstance, _tag), m_treeRef(_tree)
 	{
 		DragSource::init(this);
 		DragTarget::init(this);
@@ -149,13 +149,13 @@ namespace jucePluginEditorLib::patchManagerRml
 
 				auto attrib = m_elemCount->GetAttribute("countFormat");
 				if (attrib)
-					m_countFormat = attrib->Get<Rml::String>();
+					m_countFormat = attrib->Get<Rml::String>(GetCoreInstance());
 				if (m_countFormat.empty())
 					m_countFormat = " (%s)";
 
 				attrib = m_elemCount->GetAttribute("countUnknown");
 				if (attrib)
-					m_countUnknown = attrib->Get<Rml::String>();
+					m_countUnknown = attrib->Get<Rml::String>(GetCoreInstance());
 				if (m_countUnknown.empty())
 					m_countUnknown = " (?)";
 

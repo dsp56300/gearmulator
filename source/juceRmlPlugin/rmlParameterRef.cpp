@@ -5,8 +5,10 @@
 #include "rmlParameterBinding.h"
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/parameter.h"
+#include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlInterfaces.h"
 
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/DataModelHandle.h"
 #include "RmlUi/Core/Variant.h"
 
@@ -33,7 +35,7 @@ namespace rmlPlugin
 			_dest = m_parameter->getUnnormalizedValue();
 		}, [this](const Rml::Variant& _source)
 		{
-			const auto v = _source.Get<int>();
+			const auto v = _source.Get<int>(m_binding.getRmlComponent().getContext()->GetCoreInstance());
 
 			juce::MessageManager::callAsync([this, v]()
 			{
@@ -47,7 +49,7 @@ namespace rmlPlugin
 			_dest = m_parameter->getCurrentValueAsText().toStdString();
 		}, [this](const Rml::Variant& _source)
 		{
-			auto text = _source.Get<Rml::String>();
+			auto text = _source.Get<Rml::String>(m_binding.getRmlComponent().getContext()->GetCoreInstance());
 			juce::MessageManager::callAsync([this, text]()
 			{
 				const auto v = m_parameter->getValueForText(text);

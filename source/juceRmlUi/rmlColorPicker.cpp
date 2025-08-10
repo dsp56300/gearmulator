@@ -8,6 +8,7 @@
 #include "Core/TemplateCache.h"
 
 #include "juce_graphics/juce_graphics.h"
+#include "RmlUi/Core/CoreInstance.h"
 #include "RmlUi/Core/ElementDocument.h"
 
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
@@ -144,7 +145,7 @@ namespace juceRmlUi
 
 	std::unique_ptr<ColorPicker> ColorPicker::createFromTemplate(const std::string& _templateName, Rml::Element* _parent, CompletionCallback&& _completionCallback, const Rml::Colourb& _initialColor/* = {255,255,255,255}*/)
 	{
-		auto* t = Rml::TemplateCache::GetTemplate(_templateName);
+		auto* t = _parent->GetCoreInstance().template_cache->GetTemplate(_templateName);
 
 		if (!t)
 		{

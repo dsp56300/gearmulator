@@ -35,7 +35,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	public:
 		static constexpr size_t g_unknownCount = std::numeric_limits<size_t>::max();
 
-		explicit TreeElem(Tree& _tree, const Rml::String& _tag);
+		explicit TreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		PatchManagerUiRml& getPatchManager() const;
 		patchManager::PatchManager& getDB() const;

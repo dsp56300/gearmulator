@@ -255,7 +255,7 @@ namespace juceRmlUi
 
 			auto* existingAttrib = _element->GetAttribute(_key);
 
-			if (existingAttrib && existingAttrib->Get<Rml::String>() == _value)
+			if (existingAttrib && existingAttrib->Get<Rml::String>(_element->GetCoreInstance()) == _value)
 				return;
 
 			_element->SetAttribute(_key, _value);
@@ -267,7 +267,7 @@ namespace juceRmlUi
 			if (!_instancer)
 				return _element->Clone();
 
-			auto clone = _instancer->InstanceElement(nullptr, _element->GetTagName(), _element->GetAttributes());
+			auto clone = _instancer->InstanceElement(_element->GetCoreInstance(), nullptr, _element->GetTagName(), _element->GetAttributes());
 			if (!clone)
 				return {};
 

@@ -11,7 +11,7 @@ namespace juceRmlUi::gl2
 	{
 	public:
 		explicit RenderInterfaceFilters(RenderInterfaceShaders& _shaders);
-		CompiledShader* create(const Rml::String& _name, const Rml::Dictionary& _parameters);
+		CompiledShader* create(Rml::CoreInstance& in_core_instance, const Rml::String& _name, const Rml::Dictionary& _parameters);
 
 	private:
 		RenderInterfaceShaders& m_shaders;

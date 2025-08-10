@@ -17,7 +17,7 @@ namespace rmlPlugin
 	class RmlPlugin : public Rml::Plugin
 	{
 	public:
-		RmlPlugin(pluginLib::Controller& _controller);
+		RmlPlugin(Rml::CoreInstance& _coreInstance, pluginLib::Controller& _controller);
 		RmlPlugin(const RmlPlugin&) = delete;
 		RmlPlugin(RmlPlugin&&) = delete;
 
@@ -34,6 +34,7 @@ namespace rmlPlugin
 		RmlParameterBinding* getParameterBinding(Rml::Context* _context);
 
 	private:
+		Rml::CoreInstance& m_coreInstance;
 		pluginLib::Controller& m_controller;
 		std::map<Rml::Context*, std::unique_ptr<RmlParameterBinding>> m_bindings;
 

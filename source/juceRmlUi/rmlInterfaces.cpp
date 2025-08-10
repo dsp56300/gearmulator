@@ -33,17 +33,17 @@ namespace juceRmlUi
 		RmlComponent* g_currentComponent;
 
 		template<size_t... I>
-		void registerOne(std::index_sequence<I...>)
+		void registerOne(Rml::Factory& _factory, std::index_sequence<I...>)
 		{
 			using Tuple = decltype(g_instancers)::MyTypes;
-			(Rml::Factory::RegisterElementInstancer(g_instancers.getName<I>(), &RmlInterfaces::getInstancer<std::tuple_element_t<I, Tuple>>()), ...);
+			(_factory.RegisterElementInstancer(g_instancers.getName<I>(), &RmlInterfaces::getInstancer<std::tuple_element_t<I, Tuple>>()), ...);
 		}
 
-		void registerInstancers()
+		void registerInstancers(Rml::Factory& _factory)
 		{
 			using T = decltype(g_instancers)::MyTypes;
 			constexpr size_t numInstancers = std::tuple_size_v<T>;
-			registerOne(std::make_index_sequence<numInstancers>{});
+			registerOne(_factory, std::make_index_sequence<numInstancers>{});
 		}
 	}
 
@@ -58,30 +58,37 @@ namespace juceRmlUi
 	}
 
 	RmlInterfaces::RmlInterfaces(DataProvider& _dataProvider)
-		: m_fileInterface(_dataProvider)
+		: m_fontEngineInterface(m_coreInstance)
+		, m_fileInterface(_dataProvider)
 	{
 		ScopedAccess access(*this);
 
 		if (++g_instanceCount == 1)
 		{
-			Rml::Initialise();
+			Rml::Initialise(m_coreInstance);
+
+			Rml::SetSystemInterface(m_coreInstance, &m_systemInterface);
+			Rml::SetFontEngineInterface(m_coreInstance, &m_fontEngineInterface);
+			Rml::SetFileInterface(m_coreInstance, &m_fileInterface);
+
+			auto& sss = *m_coreInstance.styleSheetSpecification;
 
 			// button style elements
-			Rml::StyleSheetSpecification::RegisterProperty("isToggle", "1", false).AddParser("number");
-			Rml::StyleSheetSpecification::RegisterProperty("valueOn", "1", false).AddParser("number");
-			Rml::StyleSheetSpecification::RegisterProperty("valueOff", "-1", false).AddParser("number");
+			sss.RegisterProperty("isToggle", "1", false).AddParser("number");
+			sss.RegisterProperty("valueOn", "1", false).AddParser("number");
+			sss.RegisterProperty("valueOff", "-1", false).AddParser("number");
 
 			// knob style elements
-			Rml::StyleSheetSpecification::RegisterProperty("frames", "128", false).AddParser("number");
-			Rml::StyleSheetSpecification::RegisterProperty("speed", "0.01", false).AddParser("number");
-			Rml::StyleSheetSpecification::RegisterProperty("spriteprefix", "frame", false).AddParser("string");
-			Rml::StyleSheetSpecification::RegisterProperty("items-per-column", "16", false).AddParser("number");
+			sss.RegisterProperty("frames", "128", false).AddParser("number");
+			sss.RegisterProperty("speed", "0.01", false).AddParser("number");
+			sss.RegisterProperty("spriteprefix", "frame", false).AddParser("string");
+			sss.RegisterProperty("items-per-column", "16", false).AddParser("number");
 
 			// tree style elements
-			Rml::StyleSheetSpecification::RegisterProperty("indent-margin-left", "0", false).AddParser("length");
-			Rml::StyleSheetSpecification::RegisterProperty("indent-padding-left", "0", false).AddParser("length");
+			sss.RegisterProperty("indent-margin-left", "0", false).AddParser("length");
+			sss.RegisterProperty("indent-padding-left", "0", false).AddParser("length");
 
-			registerInstancers();
+			registerInstancers(*m_coreInstance.factory);
 		}
 	}
 
@@ -90,7 +97,9 @@ namespace juceRmlUi
 		ScopedAccess access(*this);
 
 		if (--g_instanceCount == 0)
-			Rml::Shutdown();
+		{
+			Rml::Shutdown(m_coreInstance);
+		}
 	}
 
 	void RmlInterfaces::attach(RmlComponent* _component)
@@ -102,10 +111,6 @@ namespace juceRmlUi
 
 		assert(!g_currentComponent || g_currentComponent == _component);
 
-		Rml::SetSystemInterface(&m_systemInterface);
-		Rml::SetFontEngineInterface(&m_fontEngineInterface);
-		Rml::SetFileInterface(&m_fileInterface);
-
 		g_currentComponent = _component;
 	}
 
@@ -113,10 +118,6 @@ namespace juceRmlUi
 	{
 		if (--m_attached > 0)
 			return;
-
-		Rml::SetSystemInterface(nullptr);
-		Rml::SetFontEngineInterface(nullptr);
-		Rml::SetFileInterface(nullptr);
 
 		g_currentComponent = nullptr;
 

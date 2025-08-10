@@ -33,7 +33,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		return true;
 	}
 
-	ListElemEntry::ListElemEntry(const Rml::String& _tag) : ElemListEntry(_tag)
+	ListElemEntry::ListElemEntry(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : ElemListEntry(_coreInstance, _tag)
 	{
 		juceRmlUi::EventListener::Add(this, Rml::EventId::Mousedown, [this](const Rml::Event& _event) { onMouseDown(_event); });
 	}

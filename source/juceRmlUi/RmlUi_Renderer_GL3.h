@@ -43,7 +43,7 @@ struct FramebufferData;
 
 class RenderInterface_GL3 : public Rml::RenderInterface {
 public:
-	RenderInterface_GL3();
+	RenderInterface_GL3(Rml::CoreInstance& in_core_instance);
 	~RenderInterface_GL3();
 
 	// Returns true if the renderer was successfully constructed.

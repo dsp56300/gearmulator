@@ -8,7 +8,7 @@
 namespace juceRmlUi
 {
 
-	ElemTree::ElemTree(const Rml::String& _tag) : Element(_tag), m_tree(*this)
+	ElemTree::ElemTree(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : Element(_coreInstance, _tag), m_tree(*this)
 	{
 	}
 
@@ -143,7 +143,7 @@ namespace juceRmlUi
 			return;
 
 		auto prop = *source;
-		const auto base = prop.GetNumericValue();
+		const auto base = prop.GetNumericValue(GetCoreInstance());
 
 		if (base.number <= 0)
 			return;
@@ -151,7 +151,7 @@ namespace juceRmlUi
 		for (auto& [node, elem] : m_activeNodeElements)
 		{
 			prop.value = getIndent(base.number, node);
-			elem->SetProperty(_targetProperty, prop.ToString());
+			elem->SetProperty(_targetProperty, prop.ToString(GetCoreInstance()));
 		}
 	}
 
@@ -162,11 +162,11 @@ namespace juceRmlUi
 			return;
 
 		auto prop = *source;
-		const auto base = prop.GetNumericValue();
+		const auto base = prop.GetNumericValue(GetCoreInstance());
 		if (base.number <= 0)
 			return;
 		prop.value = getIndent(base.number, _node);
-		_elem.SetProperty(_targetProperty, prop.ToString());
+		_elem.SetProperty(_targetProperty, prop.ToString(GetCoreInstance()));
 	}
 
 	float ElemTree::getIndent(const float _base, const TreeNodePtr& _node)

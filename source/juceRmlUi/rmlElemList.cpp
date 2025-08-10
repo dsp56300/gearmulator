@@ -13,7 +13,7 @@ using namespace Rml;
 
 namespace juceRmlUi
 {
-	ElemList::ElemList(const String& _tag) : Element(_tag)
+	ElemList::ElemList(Rml::CoreInstance& _coreInstance, const String& _tag) : Element(_coreInstance, _tag)
 	{
 	}
 
@@ -583,14 +583,14 @@ namespace juceRmlUi
 
 		if (propY)
 		{
-			const auto v = propY->Get<Style::Overflow>();
+			const auto v = propY->Get<Style::Overflow>(GetCoreInstance());
 
 			if (v == Style::Overflow::Scroll || v == Style::Overflow::Auto)
 				return LayoutType::List;
 		}
 		if (propX)
 		{
-			auto v = propX->Get<Style::Overflow>();
+			auto v = propX->Get<Style::Overflow>(GetCoreInstance());
 
 			if (v == Style::Overflow::Scroll || v == Style::Overflow::Auto)
 				return LayoutType::Grid;

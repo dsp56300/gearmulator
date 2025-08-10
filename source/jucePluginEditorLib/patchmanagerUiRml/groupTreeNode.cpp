@@ -312,7 +312,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			validateParent(it.second);
 	}
 
-	GroupTreeElem::GroupTreeElem(Tree& _tree, const Rml::String& _tag) : TreeElem(_tree, _tag)
+	GroupTreeElem::GroupTreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : TreeElem(_tree, _coreInstance, _tag)
 	{
 		SetProperty(Rml::PropertyId::Drag, Rml::Style::Drag::None);
 	}

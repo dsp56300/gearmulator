@@ -10,7 +10,7 @@ namespace juceRmlUi
 	class ElemKnob : public ElemValue, public Rml::EventListener
 	{
 	public:
-		explicit ElemKnob(const Rml::String& _tag);
+		explicit ElemKnob(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 		~ElemKnob() override;
 
 		void onPropertyChanged(const std::string& _key) override;

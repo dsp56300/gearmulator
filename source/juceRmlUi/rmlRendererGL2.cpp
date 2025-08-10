@@ -27,7 +27,7 @@ namespace juceRmlUi::gl2
 		const int g_fullScreenIndices[] = {0,1,2,2,3,0};
 	}
 
-	RendererGL2::RendererGL2() : m_filters(m_shaders)
+	RendererGL2::RendererGL2(Rml::CoreInstance& _coreInstance) : RenderInterface(_coreInstance), m_coreInstance(_coreInstance), m_filters(m_shaders)
 	{
 	}
 
@@ -456,7 +456,7 @@ namespace juceRmlUi::gl2
 
 	Rml::CompiledFilterHandle RendererGL2::CompileFilter(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
-		auto program = m_filters.create(_name, _parameters);
+		auto program = m_filters.create(m_coreInstance, _name, _parameters);
 		return helper::toHandle<Rml::CompiledFilterHandle>(program);
 	}
 

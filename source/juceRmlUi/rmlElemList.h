@@ -20,7 +20,7 @@ namespace juceRmlUi
 			Grid,
 		};
 
-		explicit ElemList(const Rml::String& _tag);
+		explicit ElemList(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		void OnChildAdd(Rml::Element* _child) override;
 		void OnUpdate() override;

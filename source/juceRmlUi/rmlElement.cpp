@@ -1,5 +1,6 @@
 #include "rmlElement.h"
 
+#include "RmlUi/Core/CoreInstance.h"
 #include "RmlUi/Core/StyleSheetSpecification.h"
 
 namespace juceRmlUi
@@ -18,7 +19,7 @@ namespace juceRmlUi
 
 		for (const auto id : _changedProperties)
 		{
-			const auto& name = Rml::StyleSheetSpecification::GetPropertyName(id);
+			const auto& name = GetCoreInstance().styleSheetSpecification->GetPropertyName(id);
 
 			onPropertyChanged(name);
 		}

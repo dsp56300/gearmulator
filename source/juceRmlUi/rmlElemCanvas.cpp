@@ -14,7 +14,7 @@ namespace juceRmlUi
 {
 	using namespace Rml;
 
-	ElemCanvas::ElemCanvas(const String& _tag): Element(_tag)
+	ElemCanvas::ElemCanvas(Rml::CoreInstance& _coreInstance, const String& _tag): Element(_coreInstance, _tag)
 	{
 		m_repaintCallback = [this](std::vector<uint8_t>& _buffer)
 		{

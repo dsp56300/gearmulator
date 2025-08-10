@@ -29,11 +29,11 @@ namespace jucePluginEditorLib::patchManagerRml
 	public:
 		explicit TreeNodeInstancer(TTree& _tree) : m_tree(_tree) {}
 
-		Rml::ElementPtr InstanceElement(Rml::Element*/* _parent*/, const Rml::String& _tag, const Rml::XMLAttributes&/* _attributes*/) override
+		Rml::ElementPtr InstanceElement(Rml::CoreInstance& core_instance, Rml::Element*/* _parent*/, const Rml::String& _tag, const Rml::XMLAttributes&/* _attributes*/) override
 		{
-			return Rml::ElementPtr(new TNode(m_tree, _tag));
+			return Rml::ElementPtr(new TNode(m_tree, core_instance, _tag));
 		}
-		void ReleaseElement(Rml::Element* _element) override
+		void ReleaseElement(Rml::CoreInstance&, Rml::Element* _element) override
 		{
 			delete _element;
 		}

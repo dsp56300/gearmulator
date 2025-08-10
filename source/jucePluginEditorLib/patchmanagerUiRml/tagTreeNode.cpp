@@ -30,7 +30,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		return getTag();
 	}
 
-	TagTreeElem::TagTreeElem(Tree& _tree, const std::string& _rmlElemTag) : TreeElem(_tree, _rmlElemTag)
+	TagTreeElem::TagTreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const std::string& _rmlElemTag) : TreeElem(_tree, _coreInstance, _rmlElemTag)
 	{
 	}
 

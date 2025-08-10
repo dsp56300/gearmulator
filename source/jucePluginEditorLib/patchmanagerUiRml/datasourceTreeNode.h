@@ -36,7 +36,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	class DatasourceTreeElem : public TreeElem
 	{
 	public:
-		explicit DatasourceTreeElem(Tree& _tree, const Rml::String& _tag);
+		explicit DatasourceTreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 

@@ -4,6 +4,7 @@
 #include "rmlSystemInterface.h"
 
 #include "Core/FontEngineDefault/FontEngineInterfaceDefault.h"
+#include "RmlUi/Core/CoreInstance.h"
 
 #include "RmlUi/Core/ElementInstancer.h"
 
@@ -43,6 +44,7 @@ namespace juceRmlUi
 
 		static RmlComponent& getCurrentComponent();
 
+		auto& getCoreInstance() { return m_coreInstance; }
 		SystemInterface& getSystemInterface() { return m_systemInterface; }
 
 		template<typename T>
@@ -50,7 +52,7 @@ namespace juceRmlUi
 
 	private:
 		uint32_t m_attached = 0;
-
+		Rml::CoreInstance m_coreInstance;
 		SystemInterface m_systemInterface;
 		Rml::FontEngineInterfaceDefault m_fontEngineInterface;
 		FileInterface m_fileInterface;

@@ -10,7 +10,7 @@ namespace juceRmlUi
 	class ElemListEntry : public Element, public DragSource, public DragTarget
 	{
 	public:
-		explicit ElemListEntry(const Rml::String& _tag);
+		explicit ElemListEntry(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		void setListItem(const List::EntryPtr& _entry);
 

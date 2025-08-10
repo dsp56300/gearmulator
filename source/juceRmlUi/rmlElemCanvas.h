@@ -23,7 +23,7 @@ namespace juceRmlUi
 		using RepaintCallback = std::function<void(std::vector<uint8_t>&)>;
 		using RepaintGraphicsCallback = std::function<void(juce::Image&, juce::Graphics&)>;
 
-		explicit ElemCanvas(const Rml::String& _tag);
+		explicit ElemCanvas(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		void setRepaintCallback(const RepaintCallback& _callback) { m_repaintCallback = _callback; }
 		void setRepaintGraphicsCallback(const RepaintGraphicsCallback& _callback) { m_repaintGraphicsCallback = _callback; }

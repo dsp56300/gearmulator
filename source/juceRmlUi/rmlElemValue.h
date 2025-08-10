@@ -13,7 +13,7 @@ namespace juceRmlUi
 		baseLib::Event<float> onMinValueChanged;
 		baseLib::Event<float> onMaxValueChanged;
 
-		explicit ElemValue(const Rml::String& _tag) : Element(_tag) {}
+		explicit ElemValue(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : Element(_coreInstance, _tag) {}
 
 		void OnAttributeChange(const Rml::ElementAttributes& _changedAttributes) override;
 

@@ -19,7 +19,7 @@ namespace juceRmlUi::gl2
 	class RendererGL2 : public Rml::RenderInterface
 	{
 	public:
-		RendererGL2();
+		RendererGL2(Rml::CoreInstance& _coreInstance);
 
 		// Rml::RenderInterface overrides
 		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
@@ -71,6 +71,8 @@ namespace juceRmlUi::gl2
 		static void setupBlending(Rml::BlendMode _blendMode);
 
 		void writeFramebufferToFile(const std::string& _name, uint32_t _x = 0, uint32_t _y = 0, uint32_t _width = 0, uint32_t _height = 0) const;
+
+		Rml::CoreInstance& m_coreInstance;
 
 		Rml::CompiledGeometryHandle m_fullScreenGeometry = 0;
 

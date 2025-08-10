@@ -40,7 +40,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	class TagTreeElem : public TreeElem
 	{
 	public:
-		TagTreeElem(Tree& _tree, const std::string& _rmlElemTag);
+		TagTreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const std::string& _rmlElemTag);
 
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 

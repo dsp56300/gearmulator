@@ -4,7 +4,7 @@
 
 namespace juceRmlUi
 {
-	ElemKnob::ElemKnob(const Rml::String& _tag): ElemValue(_tag)
+	ElemKnob::ElemKnob(Rml::CoreInstance& _coreInstance, const Rml::String& _tag): ElemValue(_coreInstance, _tag)
 	{
 		AddEventListener(Rml::EventId::Mousedown, this);
 		AddEventListener(Rml::EventId::Drag, this);

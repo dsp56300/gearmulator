@@ -38,7 +38,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	class ListElemEntry final : public juceRmlUi::ElemListEntry
 	{
 	public:
-		explicit ListElemEntry(const Rml::String& _tag);
+		explicit ListElemEntry(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		void onEntryChanged() override;
 

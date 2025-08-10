@@ -4,7 +4,7 @@
 
 namespace juceRmlUi
 {
-	ElemButton::ElemButton(const Rml::String& _tag): ElemValue(_tag)
+	ElemButton::ElemButton(Rml::CoreInstance& _coreInstance, const Rml::String& _tag): ElemValue(_coreInstance, _tag)
 	{
 		EventListener::Add(this, Rml::EventId::Click, [&](const Rml::Event& _event) { onClick(); });
 		EventListener::Add(this, Rml::EventId::Mousedown, [&](const Rml::Event& _event) { onMouseDown(); });

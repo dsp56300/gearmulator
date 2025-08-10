@@ -17,7 +17,7 @@ namespace juceRmlUi
 	// ReSharper disable once CppCompileTimeConstantCanBeReplacedWithBooleanConstant
 	static_assert(!RendererProxy::InvalidHandle, "expression should return false, is used like that in if expressions");
 
-	RendererProxy::RendererProxy(DataProvider& _dataProvider) : m_dataProvider(_dataProvider)
+	RendererProxy::RendererProxy(Rml::CoreInstance& _coreInstance, DataProvider& _dataProvider) : RenderInterface(_coreInstance), m_dataProvider(_dataProvider)
 	{
 	}
 

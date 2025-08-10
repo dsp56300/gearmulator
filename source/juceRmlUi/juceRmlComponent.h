@@ -34,7 +34,7 @@ namespace juceRmlUi
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 
-		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f, const ContextCreatedCallback& _contextCreatedCallback = {});
+		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f, const ContextCreatedCallback& _contextCreatedCallback = {});
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
@@ -55,7 +55,7 @@ namespace juceRmlUi
 
 		void timerCallback() override;
 
-		RmlInterfaces& getInterfaces() const { return *m_rmlInterfaces; }
+		RmlInterfaces& getInterfaces() const { return m_rmlInterfaces; }
 
 		void resized() override;
 		void parentSizeChanged() override;
@@ -92,12 +92,12 @@ namespace juceRmlUi
 		int toRmlModifiers(const juce::KeyPress& _event);
 		int toRmlModifiers(const juce::ModifierKeys& _mods);
 
+		RmlInterfaces& m_rmlInterfaces;
+		Rml::CoreInstance& m_coreInstance;
 		DataProvider& m_dataProvider;
 		const std::string m_rootRmlFilename;
 
 		juce::OpenGLContext m_openGLContext;
-
-		std::unique_ptr<RmlInterfaces> m_rmlInterfaces;
 
 		std::unique_ptr<RenderInterface_GL3> m_renderInterface;
 		std::unique_ptr<RendererProxy> m_renderProxy;

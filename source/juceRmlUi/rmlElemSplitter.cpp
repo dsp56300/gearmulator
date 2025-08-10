@@ -4,7 +4,7 @@
 
 namespace juceRmlUi
 {
-	ElemSplitter::ElemSplitter(const Rml::String& _tag) : Element(_tag)
+	ElemSplitter::ElemSplitter(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : Element(_coreInstance, _tag)
 	{
 		AddEventListener(Rml::EventId::Mousedown, this);
 		AddEventListener(Rml::EventId::Drag, this);
@@ -39,7 +39,7 @@ namespace juceRmlUi
 				float w = 0.0f;
 				auto* prop = _elem->GetProperty(Rml::PropertyId::FlexBasis);
 				if (prop)
-					w = prop->Get<float>();
+					w = prop->Get<float>(_elem->GetCoreInstance());
 				w += _delta;
 				helper::changeProperty(_elem, Rml::PropertyId::FlexBasis, Rml::Property(w, Rml::Unit::PX));
 			}

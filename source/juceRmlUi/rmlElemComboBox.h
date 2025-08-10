@@ -12,7 +12,7 @@ namespace juceRmlUi
 	class ElemComboBox : public ElemValue, Rml::EventListener
 	{
 	public:
-		explicit ElemComboBox(const Rml::String& _tag);
+		explicit ElemComboBox(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 		~ElemComboBox() override;
 
 		void setOptions(const std::vector<Rml::String>& _options);

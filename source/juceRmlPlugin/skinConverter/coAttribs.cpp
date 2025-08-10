@@ -2,8 +2,15 @@
 
 #include <sstream>
 
+#include "RmlUi/Core/CoreInstance.h"
+
 namespace rmlPlugin::skinConverter
 {
+	namespace
+	{
+		Rml::CoreInstance g_coreInstance;
+	}
+
 	void CoAttribs::write(std::stringstream& _ss) const
 	{
 		if (attributes.empty())
@@ -15,7 +22,7 @@ namespace rmlPlugin::skinConverter
 		{
 			std::string v;
 
-			if (!value.GetInto(v))
+			if (!value.GetInto(g_coreInstance, v))
 				continue;
 
 			if (v.empty())
