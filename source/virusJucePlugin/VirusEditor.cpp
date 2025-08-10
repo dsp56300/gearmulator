@@ -163,7 +163,7 @@ namespace genericVirusUI
 		m_romChangedListener = [this](auto)
 		{
 			updateDeviceModel();
-			updateKeyValueConditions("deviceModel", virusLib::getModelName(m_processor.getModel()));
+//			updateKeyValueConditions("deviceModel", virusLib::getModelName(m_processor.getModel()));
 			m_parts->onPlayModeChanged();
 		};
 	}
