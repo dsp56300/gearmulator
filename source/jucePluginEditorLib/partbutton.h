@@ -24,10 +24,7 @@ namespace jucePluginEditorLib
 	public:
 		explicit PartButton(Rml::Element* _button, Editor& _editor);
 
-		void initalize(const uint8_t _part)
-		{
-			m_part = _part;
-		}
+		void initalize(const uint8_t _part);
 
 		auto getPart() const
 		{

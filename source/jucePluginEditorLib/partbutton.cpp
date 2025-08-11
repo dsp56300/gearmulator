@@ -39,6 +39,16 @@ namespace jucePluginEditorLib
 		{
 			onClick();
 		});
+
+		DragSource::init(_button);
+		DragTarget::init(_button);
+	}
+
+	void PartButton::initalize(const uint8_t _part)
+	{
+		m_part = _part;
+
+		m_button->SetProperty(Rml::PropertyId::Drag, Rml::Style::Drag::Clone);
 	}
 
 	bool PartButton::canDrop(const Rml::Event& _event, const DragSource* _source)
