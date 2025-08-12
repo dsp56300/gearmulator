@@ -93,6 +93,16 @@ namespace jucePluginEditorLib::patchManagerRml
 		auto item = getItemT<GroupNode>(patchManager::GroupType::DataSources);
 		if (!item)
 			return false;
+		if (item->setSelectedDatasource(_ds))
+			return true;
+		item = getItemT<GroupNode>(patchManager::GroupType::Factory);
+		if (!item)
+			return false;
+		if (item->setSelectedDatasource(_ds))
+			return true;
+		item = getItemT<GroupNode>(patchManager::GroupType::LocalStorage);
+		if (!item)
+			return false;
 		return item->setSelectedDatasource(_ds);
 	}
 
