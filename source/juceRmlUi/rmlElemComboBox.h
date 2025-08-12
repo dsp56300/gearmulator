@@ -29,13 +29,17 @@ namespace juceRmlUi
 		void setSelectedIndex(size_t _index, bool _sendChangeEvent = true);
 		int getSelectedIndex() const;
 
+		void OnUpdate() override;
+
 	private:
-		void updateValueText();
+		bool updateValueText();
 
 		std::vector<Rml::String> m_options;
 		baseLib::EventListener<Rml::String> m_onOptionSelected;
 
 		std::shared_ptr<Menu> m_menu;
 		Rml::Element* m_textElem = nullptr;
+
+		bool m_valueTextDirty;
 	};
 }

@@ -91,15 +91,32 @@ namespace juceRmlUi
 		return i;
 	}
 
-	void ElemComboBox::updateValueText()
+	void ElemComboBox::OnUpdate()
 	{
-		if (m_options.empty() || !GetOwnerDocument())
-			return;
+		ElemValue::OnUpdate();
+
+		if (m_valueTextDirty)
+		{
+			if (updateValueText())
+				m_valueTextDirty = false;
+		}
+	}
+
+	bool ElemComboBox::updateValueText()
+	{
+		if (m_options.empty())
+			return false;
+
+		if (!GetOwnerDocument())
+		{
+			m_valueTextDirty = true;
+			return false;
+		}
 
 		const auto value = getValue();
 
 		if (value < 0 || value >= static_cast<float>(m_options.size()))
-			return;
+			return false;
 
 		const auto& option = m_options[static_cast<size_t>(value)];
 		const auto text = Rml::StringUtilities::EncodeRml(option);
@@ -120,7 +137,7 @@ namespace juceRmlUi
 			if (!m_textElem)
 			{
 				if (text.empty())
-					return;
+					return true;
 
 				SetInnerRML({});
 
@@ -131,5 +148,7 @@ namespace juceRmlUi
 		}
 
 		m_textElem->SetInnerRML(text);
+
+		return true;
 	}
 }
