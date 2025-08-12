@@ -249,16 +249,17 @@ namespace juceRmlUi
 			return false;
 		}
 
-		void changeAttribute(Rml::Element* _element, const std::string& _key, const std::string& _value)
+		bool changeAttribute(Rml::Element* _element, const std::string& _key, const std::string& _value)
 		{
 			assert(_element);
 
 			auto* existingAttrib = _element->GetAttribute(_key);
 
 			if (existingAttrib && existingAttrib->Get<Rml::String>(_element->GetCoreInstance()) == _value)
-				return;
+				return false;
 
 			_element->SetAttribute(_key, _value);
+			return true;
 		}
 
 		Rml::ElementPtr clone(const Rml::Element* _element, Rml::ElementInstancer* _instancer)
