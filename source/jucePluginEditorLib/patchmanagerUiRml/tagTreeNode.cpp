@@ -132,6 +132,11 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	bool TagTreeElem::canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const
 	{
+		for (const auto & patch : _patches)
+		{
+			if (patch->source.expired())
+				return false;
+		}
 		return hasSearch() && getTagType() != pluginLib::patchDB::TagType::Invalid && !getTag().empty();
 	}
 
