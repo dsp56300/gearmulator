@@ -169,41 +169,6 @@ scrollbarhorizontal sliderbar {
 	white-space: nowrap;
 }
 
-:dragtarget {
-	border: 2px transparent;
-}
-
-:dragovertop {
-	border-top: 2px #0f0;
-}
-
-:dragovercenter {
-	border: 2px #0f0;
-}
-
-:dragoverbottom {
-	border-bottom: 2px #0f0;
-}
-
-:dragovertop:shift {
-	border-top: 2px #f00;
-}
-
-:dragovercenter:shift {
-	border: 2px #f00;
-}
-
-:dragoverbottom:shift {
-	border-bottom: 2px #f00;
-}
-
-.listspacer {
-	width: 100%;
-	height: 30em;
-	background-color: #f0f;
-	border-radius: 10dp;
-}
-
 /* grid lists */
 .grid {
 	overflow-x: auto;
@@ -269,6 +234,8 @@ treenode:selected {
 	background-color: #666;
 }
 
+/* splitters are draggable vertical elements to adjust the width of two siblings */
+
 splitter {
 	width: 8dp;
 	height: 100%;
@@ -282,6 +249,8 @@ splitter:hover {
 splitter:active {
 	background-color: #999;
 }
+
+/* text inputs */
 
 input.text {
 	color: #fff;
@@ -302,6 +271,8 @@ knob {
 	drag: drag;
 }
 
+/* all buttons */
+
 .button {
 	background-color: rgb(50,62,68);
 	border: 2dp rgb(172,176,179);
@@ -315,4 +286,34 @@ knob {
 
 .button:active {
 	background-color: rgb(70,82,88);
+}
+
+/* everything that is a drag target */
+
+:dragtarget {
+	border: 2px transparent;
+}
+
+:dragovertop {
+	border-top: 2px #0f0;
+}
+
+:dragovercenter {
+	border: 2px #0f0;
+}
+
+:dragoverbottom {
+	border-bottom: 2px #0f0;
+}
+
+:dragovertop:shift {
+	border-top: 2px #f00;
+}
+
+:dragovercenter:shift {
+	border: 2px #f00;
+}
+
+:dragoverbottom:shift {
+	border-bottom: 2px #f00;
 }
