@@ -42,6 +42,8 @@ namespace jucePluginEditorLib
 
 		DragSource::init(_button);
 		DragTarget::init(_button);
+
+		setAllowLocations(false, false);
 	}
 
 	void PartButton::initalize(const uint8_t _part)
