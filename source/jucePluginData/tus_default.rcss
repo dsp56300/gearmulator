@@ -169,6 +169,10 @@ scrollbarhorizontal sliderbar {
 	white-space: nowrap;
 }
 
+:dragtarget {
+	border: 2px transparent;
+}
+
 :dragovertop {
 	border-top: 2px #0f0;
 }

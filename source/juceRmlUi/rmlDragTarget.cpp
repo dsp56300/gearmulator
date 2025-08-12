@@ -60,6 +60,8 @@ namespace juceRmlUi
 
 		m_element->SetAttribute("dragTarget", this);
 
+		m_element->SetPseudoClass("dragtarget", true);
+
 		return true;
 	}
 
