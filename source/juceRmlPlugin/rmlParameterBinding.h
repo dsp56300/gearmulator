@@ -45,8 +45,8 @@ namespace rmlPlugin
 		RmlParameterBinding& operator=(const RmlParameterBinding&) = delete;
 		RmlParameterBinding& operator=(RmlParameterBinding&&) = delete;
 
-		void bind(Rml::Element& _element, const std::string& _parameterName, uint8_t _part) const;
-		static void bind(const pluginLib::Controller& m_controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part);
+		void bind(Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart) const;
+		static void bind(const pluginLib::Controller& m_controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
 
 	private:
 		void setCurrentPart(uint8_t _part);

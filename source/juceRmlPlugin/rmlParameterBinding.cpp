@@ -34,24 +34,32 @@ namespace rmlPlugin
 		bindParametersForPart(_context, CurrentPart, m_controller.getCurrentPart());
 	}
 
-	void RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName, const uint8_t _part) const
+	void RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/) const
 	{
 		bind(m_controller, _element, _parameterName, _part);
 	}
 
-	void RmlParameterBinding::bind(const pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part)
+	void RmlParameterBinding::bind(const pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
 	{
 		const auto param = RmlParameterRef::createVariableName(_parameterName);
 
-		juceRmlUi::helper::changeAttribute(&_element, "param", _parameterName);
+		const auto paramChanged = juceRmlUi::helper::changeAttribute(&_element, "param", _parameterName);
 		juceRmlUi::helper::changeAttribute(&_element, "data-attr-min", param + "_min");
 		juceRmlUi::helper::changeAttribute(&_element, "data-attr-max", param + "_max");
 		juceRmlUi::helper::changeAttribute(&_element, "data-value", param + "_value");
 
+		std::string modelName;
+		if (_part == CurrentPart)
+			modelName = "partCurrent";
+		else
+			modelName = "part" + std::to_string(_part);
+
+		const auto modelChanged = juceRmlUi::helper::changeAttribute(&_element, "data-model", modelName);
+
 		if (auto* combo = dynamic_cast<juceRmlUi::ElemComboBox*>(&_element))
 		{
 			std::vector<Rml::String> options;
-			auto* p = _controller.getParameter(_parameterName, _part);
+			auto* p = _controller.getParameter(_parameterName, _part == CurrentPart ? 0 : _part);
 
 			if (!p)
 			{
@@ -63,6 +71,37 @@ namespace rmlPlugin
 
 			combo->setOptions(p->getDescription().valueList.texts);
 		}
+
+		// determine if we need to rebind at runtime
+		if (!modelChanged && !paramChanged)
+			return;
+
+		// we need to refresh the data model, unfortunately RmlUi does not provide a way to do this directly.
+		// What we do is to remove the element from its parent and reinsert it, which will trigger a refresh of the data model.
+
+		auto* parent = _element.GetParentNode();
+		if (!parent)
+			return;
+
+		const auto count = parent->GetNumChildren();
+		int childIndex = -1;
+
+		for (int i=0; i<count; ++i)
+		{
+			auto* e = parent->GetChild(i);
+			if (e == &_element)
+			{
+				childIndex = i;
+				break;
+			}
+		}
+
+		auto* childAfter = parent->GetChild(childIndex + 1);
+		auto element = parent->RemoveChild(&_element);
+		if (childAfter)
+			parent->InsertBefore(std::move(element), childAfter);
+		else
+			parent->AppendChild(std::move(element));
 	}
 
 	void RmlParameterBinding::setCurrentPart(const uint8_t _part)

@@ -48,10 +48,7 @@ namespace rmlPlugin
 		Plugin::OnElementCreate(_element);
 
 		if (const auto* attribParam = _element->GetAttribute("param"))
-		{
-			// TODO: which part?
-			RmlParameterBinding::bind(m_controller, *_element, attribParam->Get<Rml::String>(_element->GetCoreInstance()), 0);
-		}
+			RmlParameterBinding::bind(m_controller, *_element, attribParam->Get<Rml::String>(_element->GetCoreInstance()));
 
 		if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_element))
 		{
