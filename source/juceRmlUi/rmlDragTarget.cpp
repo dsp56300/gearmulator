@@ -179,7 +179,7 @@ namespace juceRmlUi
 
 	void DragTarget::updateDragLocation(const Rml::Event& _event)
 	{
-		auto* elem = dynamic_cast<Rml::Element*>(this);
+		auto* elem = m_element;
 		if (!elem)
 			return;
 
@@ -292,7 +292,7 @@ namespace juceRmlUi
 
 	void DragTarget::updatePseudoClass(const std::string& _pseudoClass)
 	{
-		auto* elem = dynamic_cast<Rml::Element*>(this);
+		auto* elem = m_element;
 
 		if (!elem)
 			return;
@@ -316,7 +316,7 @@ namespace juceRmlUi
 
 		m_shiftDown = _shift;
 
-		auto* elem = dynamic_cast<Rml::Element*>(this);
+		auto* elem = m_element;
 		if (!elem)
 			return;
 		if (m_shiftDown)
