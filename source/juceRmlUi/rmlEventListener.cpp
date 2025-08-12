@@ -4,18 +4,19 @@
 
 namespace juceRmlUi
 {
-	EventListener::EventListener(Rml::Element* _element, Rml::EventId _event, const std::function<void(Rml::Event&)>& _callback)
+	EventListener::EventListener(Rml::Element* _element, Rml::EventId _event, const std::function<void(Rml::Event&)>& _callback, bool _inCapturePhase/* = false*/)
 	: m_element(_element)
 	, m_event(_event)
 	, m_callback(_callback)
+	, m_inCapturePhase(_inCapturePhase)
 	{
-		_element->AddEventListener(_event, this);
+		_element->AddEventListener(_event, this, _inCapturePhase);
 	}
 
 	EventListener::~EventListener()
 	{
 		if (m_element)
-			m_element->RemoveEventListener(m_event, this);
+			m_element->RemoveEventListener(m_event, this, m_inCapturePhase);
 	}
 
 	void EventListener::ProcessEvent(Rml::Event& _event)
