@@ -28,12 +28,12 @@ namespace juceRmlUi
 		else if (_key == "valueOff")	m_valueOff = getProperty<int>("valueOff", -1);
 	}
 
-	void ElemButton::OnChildAdd(Rml::Element* child)
+	void ElemButton::OnChildAdd(Rml::Element* _child)
 	{
-		ElemValue::OnChildAdd(child);
+		ElemValue::OnChildAdd(_child);
 
-		if (child->GetTagName() == "buttonhittest")
-			m_hitTestElem = child;
+		if (_child->GetTagName() == "buttonhittest")
+			m_hitTestElem = _child;
 	}
 
 	void ElemButton::OnChildRemove(Rml::Element* _child)
@@ -55,6 +55,8 @@ namespace juceRmlUi
 	{
 		if (m_isToggle)
 			setChecked(!getChecked());
+
+		evClick(this);
 	}
 
 	void ElemButton::onMouseDown()

@@ -1,5 +1,6 @@
 #include "rmlTabGroup.h"
 
+#include "juceRmlUi/rmlElemButton.h"
 #include "RmlUi/Core/Element.h"
 
 namespace rmlPlugin
@@ -24,12 +25,20 @@ namespace rmlPlugin
 		resize(_index + 1);
 
 		if (m_buttons[_index])
+		{
 			m_buttons[_index]->RemoveEventListener(Rml::EventId::Click, this);
+			m_buttonListeners[_index].reset();
+		}
 
 		m_buttons[_index] = _button;
 
 		if (m_buttons[_index])
-			m_buttons[_index]->AddEventListener(Rml::EventId::Click, this);
+		{
+			if (auto* button = dynamic_cast<juceRmlUi::ElemButton*>(m_buttons[_index]))
+				m_buttonListeners[_index].set(button->evClick, [this, _index](juceRmlUi::ElemButton*) { onClick(_index); });
+			else
+				m_buttons[_index]->AddEventListener(Rml::EventId::Click, this);
+		}
 
 		setPageActive(_index, m_activePage == _index);
 	}
@@ -56,12 +65,25 @@ namespace rmlPlugin
 	{
 		if (m_buttons.size() >= _size)
 			return;
+
 		m_buttons.resize(_size, nullptr);
+		m_buttonListeners.resize(_size);
+
 		m_pages.resize(_size, nullptr);
 	}
 
 	void TabGroup::onClick(const size_t _index)
 	{
+		if (_index < m_buttons.size())
+		{
+			auto* button = m_buttons[_index];
+
+			if (button && !isChecked(button))
+			{
+				setChecked(button, true);
+				return;
+			}
+		}
 		setActivePage(_index);
 	}
 
@@ -81,7 +103,22 @@ namespace rmlPlugin
 		if (_index < m_buttons.size())
 		{
 			if (auto* button = m_buttons[_index])
-				button->SetPseudoClass("checked", _active);
+				setChecked(button, _active);
 		}
+	}
+
+	bool TabGroup::isChecked(Rml::Element* _button)
+	{
+		if (auto* elemButton = dynamic_cast<juceRmlUi::ElemButton*>(_button))
+			return elemButton->isChecked();
+		return _button->IsPseudoClassSet("checked");
+	}
+
+	void TabGroup::setChecked(Rml::Element* _button, const bool _checked)
+	{
+		if (auto* elemButton = dynamic_cast<juceRmlUi::ElemButton*>(_button))
+			elemButton->setChecked(_checked);
+		else
+			_button->SetPseudoClass("checked", _checked);
 	}
 }

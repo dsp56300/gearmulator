@@ -5,6 +5,13 @@
 
 #include <limits>
 
+#include "baseLib/event.h"
+
+namespace juceRmlUi
+{
+	class ElemButton;
+}
+
 namespace rmlPlugin
 {
 	class TabGroup : Rml::EventListener
@@ -33,7 +40,11 @@ namespace rmlPlugin
 
 		void setPageActive(size_t _index, bool _active) const;
 
+		static bool isChecked(Rml::Element* _button);
+		static void setChecked(Rml::Element* _button, bool _checked);
+
 		std::vector<Rml::Element*> m_buttons;
+		std::vector<baseLib::EventListener<juceRmlUi::ElemButton*>> m_buttonListeners;
 		std::vector<Rml::Element*> m_pages;
 
 		size_t m_activePage = 0;

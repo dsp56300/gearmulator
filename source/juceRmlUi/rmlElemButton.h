@@ -8,6 +8,8 @@ namespace juceRmlUi
 	class ElemButton : public ElemValue
 	{
 	public:
+		baseLib::Event<ElemButton*> evClick;
+
 		explicit ElemButton(Rml::CoreInstance& _coreInstance, const Rml::String& _tag);
 
 		void onChangeValue() override;
@@ -15,7 +17,7 @@ namespace juceRmlUi
 
 		bool getChecked() const { return m_isChecked; }
 
-		void OnChildAdd(Rml::Element* child) override;
+		void OnChildAdd(Rml::Element* _child) override;
 		void OnChildRemove(Rml::Element* _child) override;
 		bool IsPointWithinElement(Rml::Vector2f _point) override;
 
