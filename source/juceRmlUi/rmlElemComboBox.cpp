@@ -147,6 +147,7 @@ namespace juceRmlUi
 			}
 		}
 
+		m_textElem->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 		m_textElem->SetInnerRML(text);
 
 		return true;
