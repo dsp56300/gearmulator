@@ -16,7 +16,7 @@ namespace juceRmlUi
 		ElemValue::onChangeValue();
 
 		const auto v = static_cast<pluginLib::ParamValue>(getValue());
-		setChecked(v == m_valueOn);
+		setChecked(v == getValueOn());
 	}
 
 	void ElemButton::onPropertyChanged(const std::string& _key)
@@ -71,6 +71,16 @@ namespace juceRmlUi
 			setChecked(false);
 	}
 
+	pluginLib::ParamValue ElemButton::getValueOn() const
+	{
+		return m_valueOn == -1 && m_valueOff == -1 ? 1 : -1;
+	}
+
+	pluginLib::ParamValue ElemButton::getValueOff() const
+	{
+		return m_valueOn == -1 && m_valueOff == -1 ? 0 : -1;
+	}
+
 	void ElemButton::setChecked(const bool _checked)
 	{
 		if (m_isChecked == _checked)
@@ -78,10 +88,10 @@ namespace juceRmlUi
 
 		m_isChecked = _checked;
 
-		if (_checked && m_valueOn >= 0)
-			setValue(static_cast<float>(m_valueOn));
-		else if (!_checked && m_valueOff >= 0)
-			setValue(static_cast<float>(m_valueOff));
+		if (_checked && getValueOn() >= 0)
+			setValue(static_cast<float>(getValueOn()));
+		else if (!_checked && getValueOff() >= 0)
+			setValue(static_cast<float>(getValueOff()));
 
 		SetPseudoClass("checked", _checked);
 	}
