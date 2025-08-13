@@ -45,8 +45,10 @@ namespace rmlPlugin
 		RmlParameterBinding& operator=(const RmlParameterBinding&) = delete;
 		RmlParameterBinding& operator=(RmlParameterBinding&&) = delete;
 
-		void bind(Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart) const;
-		static void bind(const pluginLib::Controller& m_controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
+		void bind(Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
+		void bind(const pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
+
+		Rml::Element* getElementForParameter(pluginLib::Parameter* _param, bool _visibleOnly = true) const;
 
 	private:
 		void setCurrentPart(uint8_t _part);
@@ -57,5 +59,8 @@ namespace rmlPlugin
 		juceRmlUi::RmlComponent& m_component;
 		std::array<ParameterList, CurrentPart + 1> m_parametersPerPart;
 		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
+
+		std::unordered_map<Rml::Element*, pluginLib::Parameter*> m_elementToParam;
+		std::unordered_map<pluginLib::Parameter*, std::unordered_set<Rml::Element*>> m_paramToElements;
 	};
 }

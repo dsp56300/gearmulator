@@ -34,13 +34,34 @@ namespace rmlPlugin
 		bindParametersForPart(_context, CurrentPart, m_controller.getCurrentPart());
 	}
 
-	void RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/) const
+	void RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
 	{
 		bind(m_controller, _element, _parameterName, _part);
 	}
 
 	void RmlParameterBinding::bind(const pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
 	{
+		auto* p = _controller.getParameter(_parameterName, _part == CurrentPart ? 0 : _part);
+
+		if (!p)
+		{
+			std::stringstream ss;
+			ss << "Failed to find parameter " << _parameterName << " for combo box";
+			Rml::Log::Message(Rml::Log::LT_ERROR, "%s", ss.str().c_str());
+			return;
+		}
+
+		auto oldParamIt = m_elementToParam.find(&_element);
+		if (oldParamIt != m_elementToParam.end())
+		{
+			m_paramToElements[oldParamIt->second].erase(&_element);
+			m_elementToParam.erase(oldParamIt);
+		}
+
+		m_elementToParam.insert({ &_element, p });
+
+		m_paramToElements[p].insert(&_element);
+
 		const auto param = RmlParameterRef::createVariableName(_parameterName);
 
 		const auto paramChanged = juceRmlUi::helper::changeAttribute(&_element, "param", _parameterName);
@@ -57,20 +78,7 @@ namespace rmlPlugin
 		const auto modelChanged = juceRmlUi::helper::changeAttribute(&_element, "data-model", modelName);
 
 		if (auto* combo = dynamic_cast<juceRmlUi::ElemComboBox*>(&_element))
-		{
-			std::vector<Rml::String> options;
-			auto* p = _controller.getParameter(_parameterName, _part == CurrentPart ? 0 : _part);
-
-			if (!p)
-			{
-				std::stringstream ss;
-				ss << "Failed to find parameter " << _parameterName << " for combo box";
-				Rml::Log::Message(Rml::Log::LT_ERROR, ss.str().c_str());
-				return;
-			}
-
 			combo->setOptions(p->getDescription().valueList.texts);
-		}
 
 		// determine if we need to rebind at runtime
 		if (!modelChanged && !paramChanged)
@@ -102,6 +110,21 @@ namespace rmlPlugin
 			parent->InsertBefore(std::move(element), childAfter);
 		else
 			parent->AppendChild(std::move(element));
+	}
+
+	Rml::Element* RmlParameterBinding::getElementForParameter(pluginLib::Parameter* _param, const bool _visibleOnly) const
+	{
+		const auto it = m_paramToElements.find(_param);
+
+		if (it == m_paramToElements.end())
+			return {};
+
+		for (auto* elem : it->second)
+		{
+			if (!_visibleOnly || elem->IsVisible())
+				return elem;
+		}
+		return {};
 	}
 
 	void RmlParameterBinding::setCurrentPart(const uint8_t _part)

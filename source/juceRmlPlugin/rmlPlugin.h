@@ -34,10 +34,13 @@ namespace rmlPlugin
 		RmlParameterBinding* getParameterBinding(Rml::Context* _context);
 
 	private:
+		void bindElementParameter(Rml::Element* _element);
+
 		Rml::CoreInstance& m_coreInstance;
 		pluginLib::Controller& m_controller;
 		std::map<Rml::Context*, std::unique_ptr<RmlParameterBinding>> m_bindings;
 
 		std::map<std::string, std::unique_ptr<TabGroup>> m_tabGroups;
+		Rml::Context* m_lastCreatedContext = nullptr;
 	};
 }

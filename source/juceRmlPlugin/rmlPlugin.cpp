@@ -26,10 +26,15 @@ namespace rmlPlugin
 	{
 		juce::MessageManagerLock lock;
 		m_bindings.emplace(_context, std::make_unique<RmlParameterBinding>(m_controller, _context));
+
+		m_lastCreatedContext = _context;
 	}
 
 	void RmlPlugin::OnContextDestroy(Rml::Context* _context)
 	{
+		if (m_lastCreatedContext == _context)
+			m_lastCreatedContext = nullptr;
+
 		const auto it = m_bindings.find(_context);
 		if (it == m_bindings.end())
 		{
@@ -42,13 +47,12 @@ namespace rmlPlugin
 
 		Plugin::OnContextDestroy(_context);
 	}
-	
+
 	void RmlPlugin::OnElementCreate(Rml::Element* _element)
 	{
 		Plugin::OnElementCreate(_element);
 
-		if (const auto* attribParam = _element->GetAttribute("param"))
-			RmlParameterBinding::bind(m_controller, *_element, attribParam->Get<Rml::String>(_element->GetCoreInstance()));
+		bindElementParameter(_element);
 
 		if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_element))
 		{
@@ -94,5 +98,38 @@ namespace rmlPlugin
 		if (it != m_bindings.end())
 			return it->second.get();
 		return nullptr;
+	}
+
+	void RmlPlugin::bindElementParameter(Rml::Element* _element)
+	{
+		const auto* attribParam = _element->GetAttribute("param");
+		if (!attribParam)
+			return;
+
+		// this is highly problematic: For elements newly created, there might be no way to know which context this element
+		// belongs to, so we have to assume that the first binding is the one we want
+		Rml::Context* context = _element->GetContext();
+		if (!context)
+		{
+			if (m_bindings.size() == 1)
+				context = m_bindings.begin()->first;
+			else if (m_lastCreatedContext)
+				context = m_lastCreatedContext;
+			else
+			{
+				assert(false);
+				Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnElementCreate: Element '%s' has a 'param' attribute but failed to determine which context this element belongs to", _element->GetId().c_str());
+				return;
+			}
+		}
+		const auto it = m_bindings.find(context);
+
+		if (it == m_bindings.end())
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnElementCreate: Context not found in bindings map");
+			return;
+		}
+
+		it->second->bind(*_element, attribParam->Get<Rml::String>(_element->GetCoreInstance()));
 	}
 }
