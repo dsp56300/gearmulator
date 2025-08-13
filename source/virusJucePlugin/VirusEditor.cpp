@@ -52,7 +52,7 @@ namespace genericVirusUI
 
 		m_presetName = findChild("PatchName");
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), m_parameterBinding, *this));
+		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), *getRmlParameterBinding(), *this));
 
 		m_romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector");
 
@@ -240,11 +240,6 @@ namespace genericVirusUI
 		if(m_arpUserPattern)
 			m_arpUserPattern->onCurrentPartChanged();
 		updatePresetName();
-	}
-
-	void VirusEditor::mouseEnter(const juce::MouseEvent& event)
-	{
-		m_focusedParameter->onMouseEnter(event);
 	}
 
 	void VirusEditor::updatePresetName() const

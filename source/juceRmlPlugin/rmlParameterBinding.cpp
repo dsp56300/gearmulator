@@ -112,9 +112,9 @@ namespace rmlPlugin
 			parent->AppendChild(std::move(element));
 	}
 
-	Rml::Element* RmlParameterBinding::getElementForParameter(pluginLib::Parameter* _param, const bool _visibleOnly) const
+	Rml::Element* RmlParameterBinding::getElementForParameter(const pluginLib::Parameter* _param, const bool _visibleOnly) const
 	{
-		const auto it = m_paramToElements.find(_param);
+		const auto it = m_paramToElements.find(const_cast<pluginLib::Parameter*>(_param));
 
 		if (it == m_paramToElements.end())
 			return {};
@@ -125,6 +125,12 @@ namespace rmlPlugin
 				return elem;
 		}
 		return {};
+	}
+
+	const pluginLib::Parameter* RmlParameterBinding::getParameterForElement(const Rml::Element* _element) const
+	{
+		const auto it = m_elementToParam.find(const_cast<Rml::Element*>(_element));
+		return it != m_elementToParam.end() ? it->second : nullptr;
 	}
 
 	void RmlParameterBinding::setCurrentPart(const uint8_t _part)

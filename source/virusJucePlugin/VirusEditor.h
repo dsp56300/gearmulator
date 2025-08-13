@@ -76,8 +76,6 @@ namespace genericVirusUI
 		void onPlayModeChanged();
 		void onCurrentPartChanged();
 
-		void mouseEnter(const juce::MouseEvent& event) override;
-
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 

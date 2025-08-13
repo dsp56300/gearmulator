@@ -48,7 +48,8 @@ namespace rmlPlugin
 		void bind(Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
 		void bind(const pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
 
-		Rml::Element* getElementForParameter(pluginLib::Parameter* _param, bool _visibleOnly = true) const;
+		Rml::Element* getElementForParameter(const pluginLib::Parameter* _param, bool _visibleOnly = true) const;
+		const pluginLib::Parameter* getParameterForElement(const Rml::Element* _element) const;
 
 	private:
 		void setCurrentPart(uint8_t _part);
