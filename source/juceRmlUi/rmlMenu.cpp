@@ -258,15 +258,22 @@ namespace juceRmlUi
 		m_subMenuParentEntry.reset();
 	}
 
-	bool Menu::isChildOfThis(const Rml::Element* _elem) const
+	bool Menu::isChildOfThis(const Rml::Element* _elem, bool _checkSubmenu/* = true*/, bool _checkParentmenu/* = true*/) const
 	{
 		if (!_elem)
 			return false;
 		if (helper::isChildOf(m_root, _elem))
 			return true;
-		if (m_subMenu && m_subMenu->isChildOfThis(_elem))
+		if (_checkSubmenu && _checkParentmenu)
+		{
+			if (isChildOfThis(_elem, true, false))
+				return true;
+			if (isChildOfThis(_elem, false, true))
+				return true;
+		}
+		if (_checkSubmenu && m_subMenu && m_subMenu->isChildOfThis(_elem, true, false))
 			return true;
-		if (m_parentMenu && m_parentMenu->isChildOfThis(_elem))
+		if (_checkParentmenu && m_parentMenu && m_parentMenu->isChildOfThis(_elem, false, true))
 			return true;
 		return false;
 	}

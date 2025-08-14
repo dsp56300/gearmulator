@@ -56,7 +56,7 @@ namespace juceRmlUi
 		void openSubmenu(const Rml::ObserverPtr<Rml::Element>& _parentEntry, const std::shared_ptr<Menu>& _submenu);
 		void closeSubmenu();
 
-		bool isChildOfThis(const Rml::Element* _elem) const;
+		bool isChildOfThis(const Rml::Element* _elem, bool _checkSubmenu = true, bool _checkParentmenu = true) const;
 
 		struct Entry
 		{
