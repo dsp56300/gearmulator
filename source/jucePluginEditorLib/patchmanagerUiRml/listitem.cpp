@@ -35,7 +35,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	ListElemEntry::ListElemEntry(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : ElemListEntry(_coreInstance, _tag)
 	{
-		juceRmlUi::EventListener::Add(this, Rml::EventId::Mousedown, [this](const Rml::Event& _event) { onMouseDown(_event); });
+		juceRmlUi::EventListener::Add(this, Rml::EventId::Mousedown, [this](Rml::Event& _event) { onMouseDown(_event); });
 	}
 
 	void ListElemEntry::onEntryChanged()
@@ -109,13 +109,14 @@ namespace jucePluginEditorLib::patchManagerRml
 		m_elemColor->SetProperty(Rml::PropertyId::Visibility, Rml::Property(Rml::Style::Visibility::Visible));
 	}
 
-	void ListElemEntry::onMouseDown(const Rml::Event& _event)
+	void ListElemEntry::onMouseDown(Rml::Event& _event)
 	{
 		if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Right)
 		{
 			if (!m_item->isSelected())
 				getList().setSelectedEntries({m_item->getIndex()});
 			onRightClick(_event);
+			_event.StopPropagation();
 		}
 	}
 

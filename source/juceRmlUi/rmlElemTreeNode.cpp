@@ -113,6 +113,7 @@ namespace juceRmlUi
 						getNode()->setSelected(true, false);
 
 					onRightClick(_event);
+					_event.StopPropagation();
 				}
 			}
 			break;

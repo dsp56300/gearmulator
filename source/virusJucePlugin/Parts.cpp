@@ -46,11 +46,12 @@ namespace genericVirusUI
 			m_presetName.emplace_back(std::make_unique<PartButton>(presetNames[i], _editor));
 
 			EventListener::Add(m_partSelect[i], Rml::EventId::Click, [this, i](Rml::Event&){ selectPart(i); });
-			EventListener::Add(m_partSelect[i], Rml::EventId::Mousedown, [this, i](const Rml::Event& _e)
+			EventListener::Add(m_partSelect[i], Rml::EventId::Mousedown, [this, i](Rml::Event& _e)
 			{
 				if (getMouseButton(_e) != MouseButton::Right)
 					return;
 				selectPartMidiChannel(i);
+				_e.StopPropagation();
 			});
 
 			if(i < m_presetPrev.size())
