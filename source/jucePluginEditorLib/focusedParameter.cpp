@@ -58,7 +58,7 @@ namespace jucePluginEditorLib
 		if (m_focusedParameterValue)
 			juceRmlUi::helper::setVisible(m_focusedParameterValue, false);
 
-//		m_tooltip.reset(new FocusedParameterTooltip(_editor.findComponentT<juce::Label>("FocusedParameterTooltip", false), _editor));
+		m_tooltip.reset(new FocusedParameterTooltip(_editor.findChild("FocusedParameterTooltip", false)));
 
 		updateControlLabel(nullptr, Priority::None);
 
@@ -149,7 +149,7 @@ namespace jucePluginEditorLib
 		{
 			m_currentPriority = Priority::None;
 			updateParameter({}, {});
-//			m_tooltip->setVisible(false);
+			m_tooltip->setVisible(false);
 			return;
 		}
 
@@ -157,7 +157,7 @@ namespace jucePluginEditorLib
 
 		updateParameter(_param->getDescription().displayName, value);
 
-//		m_tooltip->initialize(_component, value);
+		m_tooltip->initialize(_elem, value);
 
 		const auto tooltipTime = m_tooltip && m_tooltip->isValid() ? m_tooltip->getTooltipDisplayTime() : g_defaultDisplayTimeout;
 
