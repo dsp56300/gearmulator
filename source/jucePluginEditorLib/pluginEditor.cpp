@@ -11,6 +11,7 @@
 #include "jucePluginLib/tools.h"
 
 #include "juceRmlUi/juceRmlComponent.h"
+#include "juceRmlUi/rmlEventListener.h"
 
 #include "jucePluginData.h"
 
@@ -89,6 +90,15 @@ namespace jucePluginEditorLib
 
 		addAndMakeVisible(m_rmlComponent.get());
 		setSize(m_rmlComponent->getWidth(), m_rmlComponent->getHeight());
+
+		juceRmlUi::EventListener::Add(m_rmlComponent->getDocument(), Rml::EventId::Mousedown, [this](Rml::Event& _event)
+		{
+			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Right)
+			{
+				_event.StopPropagation();
+				openMenu(_event);
+			}
+		});
 	}
 
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size) const
@@ -346,17 +356,14 @@ namespace jucePluginEditorLib
 		return m_patchManager->activatePatchFromClipboard();
 	}
 
-	void Editor::openMenu(juce::MouseEvent* _event)
+	void Editor::openMenu(Rml::Event& _event)
 	{
 		onOpenMenu(this, _event);
 	}
 
-	bool Editor::openContextMenuForParameter(const juce::MouseEvent* _event)
+	bool Editor::openContextMenuForParameter(const Rml::Event& _event)
 	{
-		if(!_event || !_event->originalComponent)
-			return false;
-
-		const auto* param = m_binding.getBoundParameter(_event->originalComponent);
+		const auto* param = getRmlParameterBinding()->getParameterForElement(_event.GetTargetElement());
 		if(!param)
 			return false;
 
@@ -370,7 +377,7 @@ namespace jucePluginEditorLib
 
 		const auto part = param->getPart();
 
-		juce::PopupMenu menu;
+		juceRmlUi::Menu menu;
 
 		// Lock / Unlock
 
@@ -380,7 +387,7 @@ namespace jucePluginEditorLib
 
 			const auto isLocked = controller.getParameterLocking().isRegionLocked(part, regionId);
 
-			menu.addItem(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked, part]
+			menu.addEntry(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked, part]
 			{
 				auto& locking = m_processor.getController().getParameterLocking();
 				if(isLocked)
@@ -398,7 +405,7 @@ namespace jucePluginEditorLib
 		{
 			const auto& regionName = regions.find(regionId)->second.getName();
 
-			menu.addItem(std::string("Copy region '") + regionName + "'", [this, regionId]
+			menu.addEntry(std::string("Copy region '") + regionName + "'", [this, regionId]
 			{
 				copyRegionToClipboard(regionId);
 			});
@@ -434,7 +441,7 @@ namespace jucePluginEditorLib
 
 				const auto& regionName = regions.find(paramRegionId)->second.getName();
 
-				menu.addItem("Paste region '" + regionName + "'", [this, parameterValues]
+				menu.addEntry("Paste region '" + regionName + "'", [this, parameterValues]
 				{
 					setParameters(parameterValues);
 				});
@@ -453,7 +460,7 @@ namespace jucePluginEditorLib
 
 				const auto& valueText = desc.valueList.valueToText(paramValue);
 
-				menu.addItem("Paste value '" + valueText + "' for parameter '" + desc.displayName + "'", [this, paramName, paramValue]
+				menu.addEntry("Paste value '" + valueText + "' for parameter '" + desc.displayName + "'", [this, paramName, paramValue]
 				{
 					pluginLib::Clipboard::Data::ParameterValues params;
 					params.insert({paramName, paramValue});
@@ -464,13 +471,13 @@ namespace jucePluginEditorLib
 
 		// Parameter links
 
-		juce::PopupMenu linkMenu;
+		juceRmlUi::Menu linkMenu;
 
 		menu.addSeparator();
 
 		for (const auto& regionId : paramRegionIds)
 		{
-			juce::PopupMenu regionMenu;
+			juceRmlUi::Menu regionMenu;
 
 			const auto currentPart = controller.getCurrentPart();
 
@@ -481,7 +488,7 @@ namespace jucePluginEditorLib
 
 				const auto isLinked = controller.getParameterLinks().isRegionLinked(regionId, currentPart, p);
 
-				regionMenu.addItem(std::string("Link Part ") + std::to_string(p+1), true, isLinked, [this, regionId, isLinked, currentPart, p]
+				regionMenu.addEntry(std::string("Link Part ") + std::to_string(p+1), isLinked, [this, regionId, isLinked, currentPart, p]
 				{
 					auto& links = m_processor.getController().getParameterLinks();
 
@@ -493,10 +500,10 @@ namespace jucePluginEditorLib
 			}
 
 			const auto& regionName = regions.find(regionId)->second.getName();
-			linkMenu.addSubMenu("Region '" + regionName + "'", regionMenu);
+			linkMenu.addSubMenu("Region '" + regionName + "'", std::move(regionMenu));
 		}
 
-		menu.addSubMenu("Parameter Links", linkMenu);
+		menu.addSubMenu("Parameter Links", std::move(linkMenu));
 
 		auto& midiPackets = m_processor.getController().getParameterDescriptions().getMidiPackets();
 		for (const auto& mp : midiPackets)
@@ -532,17 +539,17 @@ namespace jucePluginEditorLib
 				}
 			};
 
-			juce::PopupMenu subMenu;
-			subMenu.addItem("Exact Match (Value " + param->getCurrentValueAsText() + ")", [this, findSimilar]{ findSimilar(0, 0); });
-			subMenu.addItem("-/+ 4", [this, findSimilar]{ findSimilar(-4, 4); });
-			subMenu.addItem("-/+ 12", [this, findSimilar]{ findSimilar(-12, 12); });
-			subMenu.addItem("-/+ 24", [this, findSimilar]{ findSimilar(-24, 24); });
+			juceRmlUi::Menu subMenu;
+			subMenu.addEntry("Exact Match (Value " + param->getCurrentValueAsText().toStdString() + ")", [this, findSimilar]{ findSimilar(0, 0); });
+			subMenu.addEntry("-/+ 4", [this, findSimilar]{ findSimilar(-4, 4); });
+			subMenu.addEntry("-/+ 12", [this, findSimilar]{ findSimilar(-12, 12); });
+			subMenu.addEntry("-/+ 24", [this, findSimilar]{ findSimilar(-24, 24); });
 
-			menu.addSubMenu("Find similar Patches for parameter " + param->getDescription().displayName, subMenu);
+			menu.addSubMenu("Find similar Patches for parameter " + param->getDescription().displayName, std::move(subMenu));
 
 			break;
 		}
-		menu.showMenuAsync({});
+		menu.runModal(_event);
 
 		return true;
 	}

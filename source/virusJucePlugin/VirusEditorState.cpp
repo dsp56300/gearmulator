@@ -17,23 +17,23 @@ namespace virus
 		return new genericVirusUI::VirusEditor(m_parameterBinding, static_cast<VirusProcessor&>(m_processor), _skin);
 	}
 
-	void VirusEditorState::initContextMenu(juce::PopupMenu& _menu)
+	void VirusEditorState::initContextMenu(juceRmlUi::Menu& _menu)
 	{
 		jucePluginEditorLib::PluginEditorState::initContextMenu(_menu);
 		auto& p = m_processor;
 
 		{
-			juce::PopupMenu gainMenu;
+			juceRmlUi::Menu gainMenu;
 
 			const auto gain = m_processor.getOutputGain();
 
-			gainMenu.addItem("-12 dB", true, gain == 0.25f, [&p] { p.setOutputGain(0.25f); });
-			gainMenu.addItem("-6 dB", true, gain == 0.5f, [&p] { p.setOutputGain(0.5f); });
-			gainMenu.addItem("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
-			gainMenu.addItem("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
-			gainMenu.addItem("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
+			gainMenu.addEntry("-12 dB", true, gain == 0.25f, [&p] { p.setOutputGain(0.25f); });
+			gainMenu.addEntry("-6 dB", true, gain == 0.5f, [&p] { p.setOutputGain(0.5f); });
+			gainMenu.addEntry("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
+			gainMenu.addEntry("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
+			gainMenu.addEntry("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
 
-			_menu.addSubMenu("Output Gain", gainMenu);
+			_menu.addSubMenu("Output Gain", std::move(gainMenu));
 		}
 
 		if(const auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(getEditor()))
@@ -42,7 +42,7 @@ namespace virus
 
 			if(leds && leds->supportsLogoAnimation())
 			{
-				_menu.addItem("Enable Logo Animation", true, leds->isLogoAnimationEnabled(), [this]
+				_menu.addEntry("Enable Logo Animation", true, leds->isLogoAnimationEnabled(), [this]
 				{
 					const auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(getEditor());
 					if(editor)
@@ -55,14 +55,14 @@ namespace virus
 		}
 	}
 
-	bool VirusEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
+	bool VirusEditorState::initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled)
 	{
 		jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
 
 		const auto percent = m_processor.getDspClockPercent();
 		const auto hz = m_processor.getDspClockHz();
 
-		juce::PopupMenu clockMenu;
+		juceRmlUi::Menu clockMenu;
 
 		auto makeEntry = [&](const int _percent)
 		{
@@ -71,7 +71,7 @@ namespace virus
 			ss << _percent << "% (" << mhz << " MHz)";
 			if(_percent == 100)
 				ss << " (Default)";
-			clockMenu.addItem(ss.str(), _enabled, percent == _percent, [this, _percent] { m_processor.setDspClockPercent(_percent); });
+			clockMenu.addEntry(ss.str(), _enabled, percent == _percent, [this, _percent] { m_processor.setDspClockPercent(_percent); });
 		};
 
 		makeEntry(50);
@@ -81,21 +81,21 @@ namespace virus
 		makeEntry(150);
 		makeEntry(200);
 
-		_menu.addSubMenu("DSP Clock", clockMenu);
+		_menu.addSubMenu("DSP Clock", std::move(clockMenu));
 
 		const auto samplerates = m_processor.getDeviceSupportedSamplerates();
 
 		if(samplerates.size() > 1)
 		{
-			juce::PopupMenu srMenu;
+			juceRmlUi::Menu srMenu;
 
 			const auto current = m_processor.getPreferredDeviceSamplerate();
 
 			const auto preferred = m_processor.getDevicePreferredSamplerates();
 
-			srMenu.addItem("Automatic (Match with host)", true, current == 0.0f, [this] { m_processor.setPreferredDeviceSamplerate(0.0f); });
+			srMenu.addEntry("Automatic (Match with host)", true, current == 0.0f, [this] { m_processor.setPreferredDeviceSamplerate(0.0f); });
 			srMenu.addSeparator();
-			srMenu.addSectionHeader("Official, used automatically");
+			srMenu.addEntry("Official, used automatically", false, false, [] {});
 
 			auto addSRs = [&](bool _usePreferred)
 			{
@@ -108,16 +108,16 @@ namespace virus
 
 					const auto title = std::to_string(static_cast<int>(std::floor(samplerate + 0.5f))) + " Hz";
 
-					srMenu.addItem(title, _enabled, std::fabs(samplerate - current) < 1.0f, [this, samplerate] { m_processor.setPreferredDeviceSamplerate(samplerate); });
+					srMenu.addEntry(title, _enabled, std::fabs(samplerate - current) < 1.0f, [this, samplerate] { m_processor.setPreferredDeviceSamplerate(samplerate); });
 				}
 			};
 
 			addSRs(true);
 			srMenu.addSeparator();
-			srMenu.addSectionHeader("Undocumented, use with care");
+			srMenu.addEntry("Undocumented, use with care", false, false, [] {});
 			addSRs(false);
 
-			_menu.addSubMenu("Device Samplerate", srMenu);
+			_menu.addSubMenu("Device Samplerate", std::move(srMenu));
 		}
 
 		return true;

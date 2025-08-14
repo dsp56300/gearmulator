@@ -24,6 +24,11 @@ namespace juceRmlUi
 		m_entries.push_back({ _name, _checked, false, true, std::move(_action), {} });
 	}
 
+	void Menu::addEntry(const std::string& _name, const bool _enabled, const bool _checked, std::function<void()> _action)
+	{
+		m_entries.push_back({ _name, _checked, false, _enabled, std::move(_action), {} });
+	}
+
 	void Menu::addSeparator()
 	{
 		m_entries.push_back({ {}, false, true, true, {}, {} });

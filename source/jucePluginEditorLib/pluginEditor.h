@@ -80,7 +80,7 @@ namespace jucePluginEditorLib
 	class Editor : public genericUI::Editor, genericUI::EditorInterface, juceRmlUi::DataProvider
 	{
 	public:
-		baseLib::Event<Editor*, juce::MouseEvent*> onOpenMenu;
+		baseLib::Event<Editor*, Rml::Event&> onOpenMenu;
 
 		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, Skin _skin);
 		~Editor() override;
@@ -131,8 +131,8 @@ namespace jucePluginEditorLib
 		void copyCurrentPatchToClipboard() const;
 		bool replaceCurrentPatchFromClipboard() const;
 
-		virtual void openMenu(juce::MouseEvent* _event);
-		virtual bool openContextMenuForParameter(const juce::MouseEvent* _event);
+		virtual void openMenu(Rml::Event& _event);
+		virtual bool openContextMenuForParameter(const Rml::Event& _event);
 
 		bool copyRegionToClipboard(const std::string& _regionId) const;
 		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;

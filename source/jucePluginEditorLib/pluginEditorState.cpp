@@ -136,9 +136,9 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		auto* editor = createEditor(skin);
 		m_editor.reset(editor);
 
-		getEditor()->onOpenMenu.addListener([this](Editor*, const juce::MouseEvent* _e)
+		getEditor()->onOpenMenu.addListener([this](Editor*, const Rml::Event& _event)
 		{
-			openMenu(_e);
+			openMenu(_event);
 		});
 
 		m_rootScale = editor->getScale();
@@ -183,20 +183,17 @@ Editor* PluginEditorState::getEditor() const
 	return dynamic_cast<Editor*>(m_editor.get());
 }
 
-void PluginEditorState::openMenu(const juce::MouseEvent* _event)
+void PluginEditorState::openMenu(const Rml::Event& _event)
 {
-	if(_event && _event->mods.isPopupMenu() && getEditor())
-	{
-		if(getEditor()->openContextMenuForParameter(_event))
-			return;
-	}
+	if(getEditor()->openContextMenuForParameter(_event))
+		return;
 
 	const auto& config = m_processor.getConfig();
     const auto scale = juce::roundToInt(config.getDoubleValue("scale", 100));
 
-	juce::PopupMenu menu;
+	juceRmlUi::Menu menu;
 
-	juce::PopupMenu skinMenu;
+	juceRmlUi::Menu skinMenu;
 
 	bool loadedSkinIsPartOfList = false;
 
@@ -213,7 +210,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 		if(isCurrent)
 			loadedSkinIsPartOfList = true;
 
-		skinMenu.addItem(_skin.displayName, true, isCurrent,[this, _skin] {loadSkin(_skin);});
+		skinMenu.addEntry(_skin.displayName, isCurrent,[this, _skin] {loadSkin(_skin);});
 	};
 
 	for (const auto & skin : getIncludedSkins())
@@ -272,31 +269,31 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 	if(getEditor() && m_currentSkin.folder.empty() || m_currentSkin.folder.find(getSkinFolder()) != 0)
 	{
-		skinMenu.addItem("Export current skin to folder '" + getSkinFolder() + "' on disk", true, false, [this]
+		skinMenu.addEntry("Export current skin to folder '" + getSkinFolder() + "' on disk", [this]
 		{
 			exportCurrentSkin();
 		});
 	}
 
-	skinMenu.addItem("Open folder '" + getSkinFolder() + "' in File Browser", true, false, [this]
+	skinMenu.addEntry("Open folder '" + getSkinFolder() + "' in File Browser", [this]
 	{
 		const auto dir = getSkinFolder();
 		baseLib::filesystem::createDirectory(dir);
 		juce::File(dir).revealToUser();
 	});
 
-	juce::PopupMenu scaleMenu;
-	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
-	scaleMenu.addItem("65%", true, scale == 65, [this] { setGuiScale(65); });
-	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
-	scaleMenu.addItem("85%", true, scale == 85, [this] { setGuiScale(85); });
-	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
-	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
-	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
-	scaleMenu.addItem("175%", true, scale == 175, [this] { setGuiScale(175); });
-	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
-	scaleMenu.addItem("250%", true, scale == 250, [this] { setGuiScale(250); });
-	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
+	juceRmlUi::Menu scaleMenu;
+	scaleMenu.addEntry("50%", scale == 50, [this] { setGuiScale(50); });
+	scaleMenu.addEntry("65%", scale == 65, [this] { setGuiScale(65); });
+	scaleMenu.addEntry("75%", scale == 75, [this] { setGuiScale(75); });
+	scaleMenu.addEntry("85%", scale == 85, [this] { setGuiScale(85); });
+	scaleMenu.addEntry("100%", scale == 100, [this] { setGuiScale(100); });
+	scaleMenu.addEntry("125%", scale == 125, [this] { setGuiScale(125); });
+	scaleMenu.addEntry("150%", scale == 150, [this] { setGuiScale(150); });
+	scaleMenu.addEntry("175%", scale == 175, [this] { setGuiScale(175); });
+	scaleMenu.addEntry("200%", scale == 200, [this] { setGuiScale(200); });
+	scaleMenu.addEntry("250%", scale == 250, [this] { setGuiScale(250); });
+	scaleMenu.addEntry("300%", scale == 300, [this] { setGuiScale(300); });
 
 	auto adjustLatency = [this](const int _blocks)
 	{
@@ -308,21 +305,21 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	};
 
 	const auto latency = m_processor.getPlugin().getLatencyBlocks();
-	juce::PopupMenu latencyMenu;
-	latencyMenu.addItem("0 (DAW will report proper CPU usage)", true, latency == 0, [this, adjustLatency] { adjustLatency(0); });
-	latencyMenu.addItem("1 (default)", true, latency == 1, [this, adjustLatency] { adjustLatency(1); });
-	latencyMenu.addItem("2", true, latency == 2, [this, adjustLatency] { adjustLatency(2); });
-	latencyMenu.addItem("4", true, latency == 4, [this, adjustLatency] { adjustLatency(4); });
-	latencyMenu.addItem("8", true, latency == 8, [this, adjustLatency] { adjustLatency(8); });
+	juceRmlUi::Menu latencyMenu;
+	latencyMenu.addEntry("0 (DAW will report proper CPU usage)", latency == 0, [this, adjustLatency] { adjustLatency(0); });
+	latencyMenu.addEntry("1 (default)", latency == 1, [this, adjustLatency] { adjustLatency(1); });
+	latencyMenu.addEntry("2", latency == 2, [this, adjustLatency] { adjustLatency(2); });
+	latencyMenu.addEntry("4", latency == 4, [this, adjustLatency] { adjustLatency(4); });
+	latencyMenu.addEntry("8", latency == 8, [this, adjustLatency] { adjustLatency(8); });
 
 	auto servers = m_remoteServerList.getEntries();
 
-	juce::PopupMenu deviceTypeMenu;
-	deviceTypeMenu.addItem("Local (default)", true, m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
+	juceRmlUi::Menu deviceTypeMenu;
+	deviceTypeMenu.addEntry("Local (default)", m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
 
 	if(servers.empty())
 	{
-		deviceTypeMenu.addItem("- no servers found -", false, false, [this] {});
+		deviceTypeMenu.addEntry("- no servers found -", false, false, [this] {});
 	}
 	else
 	{
@@ -336,7 +333,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 					m_processor.getRemoteDeviceHost() == server.host && 
 					m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
 
-				deviceTypeMenu.addItem(name, true, isSelected, [this, server]
+				deviceTypeMenu.addEntry(name, isSelected, [this, server]
 				{
 					m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
 				});
@@ -344,17 +341,17 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 			else
 			{
 				std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
-				deviceTypeMenu.addItem(name, false, false, [this] {});
+				deviceTypeMenu.addEntry(name, false, false, [this] {});
 			}
 		}
 	}
 
-	menu.addSubMenu("GUI Skin", skinMenu);
-	menu.addSubMenu("GUI Scale", scaleMenu);
-	menu.addSubMenu("Latency (blocks)", latencyMenu);
+	menu.addSubMenu("GUI Skin", std::move(skinMenu));
+	menu.addSubMenu("GUI Scale", std::move(scaleMenu));
+	menu.addSubMenu("Latency (blocks)", std::move(latencyMenu));
 
 	if (m_processor.getConfig().getBoolValue("supportDspBridge", false))
-		menu.addSubMenu("Device Type", deviceTypeMenu);
+		menu.addSubMenu("Device Type", std::move(deviceTypeMenu));
 
 	menu.addSeparator();
 
@@ -364,17 +361,17 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		const auto part = m_processor.getController().getCurrentPart();
 
-		juce::PopupMenu lockRegions;
+		juceRmlUi::Menu lockRegions;
 
 		auto& locking = m_processor.getController().getParameterLocking();
 
-		lockRegions.addItem("Unlock All", [&, part]
+		lockRegions.addEntry("Unlock All", [&, part]
 		{
 			for (const auto& region : regions)
 				locking.unlockRegion(part, region.first);
 		});
 
-		lockRegions.addItem("Lock All", [&, part]
+		lockRegions.addEntry("Lock All", [&, part]
 		{
 			for (const auto& region : regions)
 				locking.lockRegion(part, region.first);
@@ -382,15 +379,13 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 		lockRegions.addSeparator();
 
-		uint32_t count = 0;
-
 		std::map<std::string, pluginLib::ParameterRegion> sortedRegions;
 		for (const auto& region : regions)
 			sortedRegions.insert(region);
 
 		for (const auto& region : sortedRegions)
 		{
-			lockRegions.addItem(region.second.getName(), true, m_processor.getController().getParameterLocking().isRegionLocked(part, region.first), [this, id=region.first, part]
+			lockRegions.addEntry(region.second.getName(), m_processor.getController().getParameterLocking().isRegionLocked(part, region.first), [this, id=region.first, part]
 			{
 				auto& locking = m_processor.getController().getParameterLocking();
 
@@ -399,15 +394,9 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 				else
 					locking.lockRegion(part, id);
 			});
-
-			if(++count == 16)
-			{
-				lockRegions.addColumnBreak();
-				count = 0;
-			}
 		}
 
-		menu.addSubMenu("Lock Regions", lockRegions);
+		menu.addSubMenu("Lock Regions", std::move(lockRegions));
 	}
 
 	initContextMenu(menu);
@@ -415,9 +404,9 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		menu.addSeparator();
 
-		juce::PopupMenu panicMenu;
+		juceRmlUi::Menu panicMenu;
 
-		panicMenu.addItem("Send 'All Notes Off'", [this]
+		panicMenu.addEntry("Send 'All Notes Off'", [this]
 		{
 			for(uint8_t c=0; c<16; ++c)
 			{
@@ -426,7 +415,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 			}
 		});
 
-		panicMenu.addItem("Send 'Note Off' for every Note", [this]
+		panicMenu.addEntry("Send 'Note Off' for every Note", [this]
 		{
 			for(uint8_t c=0; c<16; ++c)
 			{
@@ -438,12 +427,12 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 			}
 		});
 
-		panicMenu.addItem("Reboot Device", [this]
+		panicMenu.addEntry("Reboot Device", [this]
 		{
 			m_processor.rebootDevice();
 		});
 
-		menu.addSubMenu("Panic", panicMenu);
+		menu.addSubMenu("Panic", std::move(panicMenu));
 	}
 
 	if(auto* editor = dynamic_cast<Editor*>(getEditor()))
@@ -458,26 +447,20 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 			const std::string ctrlName = "Ctrl";
 #endif
 			{
-				juce::PopupMenu::Item item("Copy current Patch to Clipboard");
-				item.shortcutKeyDescription = ctrlName + "+C";
-				item.action = [editor]
+				menu.addEntry("Copy current Patch to Clipboard (" + ctrlName + "+C)", [editor]
 				{
 					editor->copyCurrentPatchToClipboard();
-				};
-				menu.addItem(item);
+				});
 			}
 
 			{
 				auto patches = pm->getPatchesFromClipboard();
 				if(!patches.empty())
 				{
-					juce::PopupMenu::Item item("Replace current Patch from Clipboard");
-					item.shortcutKeyDescription = ctrlName + "+V";
-					item.action = [editor]
+					menu.addEntry("Replace current Patch from Clipboard (" + ctrlName + "+V)", [editor]
 					{
 						editor->replaceCurrentPatchFromClipboard();
-					};
-					menu.addItem(item);
+					});
 				}
 			}
 		}
@@ -486,8 +469,8 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
 
-		juce::PopupMenu advancedMenu;
-		advancedMenu.addItem("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
+		juceRmlUi::Menu advancedMenu;
+		advancedMenu.addEntry("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
 		{
 			if(!allowAdvanced)
 			{
@@ -512,11 +495,11 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 		if(initAdvancedContextMenu(advancedMenu, allowAdvanced))
 		{
 			menu.addSeparator();
-			menu.addSubMenu("Advanced...", advancedMenu);
+			menu.addSubMenu("Advanced...", std::move(advancedMenu));
 		}
 	}
 
-	menu.showMenuAsync(juce::PopupMenu::Options());
+	menu.runModal(_event, 16);
 }
 
 void PluginEditorState::exportCurrentSkin() const

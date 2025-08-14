@@ -11,6 +11,16 @@
 
 #include "jucePluginLib/parameterbinding.h"
 
+namespace juceRmlUi
+{
+	class Menu;
+}
+
+namespace Rml
+{
+	class Event;
+}
+
 namespace juce
 {
 	class Component;
@@ -45,7 +55,7 @@ namespace jucePluginEditorLib
 		const Skin& getCurrentSkin() { return m_currentSkin; }
 		const std::vector<Skin>& getIncludedSkins();
 
-		virtual void openMenu(const juce::MouseEvent* _event);
+		virtual void openMenu(const Rml::Event& _event);
 
 		std::function<void(int)> evSetGuiScale;
 		std::function<void(juce::Component*)> evSkinLoaded;
@@ -57,8 +67,8 @@ namespace jucePluginEditorLib
 
 		void loadDefaultSkin();
 
-		virtual void initContextMenu(juce::PopupMenu& _menu) {}
-		virtual bool initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled) { return false; }
+		virtual void initContextMenu(juceRmlUi::Menu& _menu) {}
+		virtual bool initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled) { return false; }
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data);
 		void getPerInstanceConfig(std::vector<uint8_t>& _data);

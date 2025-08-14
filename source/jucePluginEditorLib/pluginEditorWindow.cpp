@@ -115,35 +115,4 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 	setConstrainer(&m_sizeConstrainer);
 }
 
-void EditorWindow::mouseDown(const juce::MouseEvent& event)
-{
-	if(!event.mods.isPopupMenu())
-	{
-		AudioProcessorEditor::mouseDown(event);
-		return;
-	}
-
-	if(event.eventComponent)
-	{
-		// file browsers have their own menu, do not display two menus at once
-		if(event.eventComponent->findParentComponentOfClass<juce::FileBrowserComponent>())
-			return;
-
-		// patch manager has its own context menu, too
-		if (event.eventComponent->findParentComponentOfClass<patchManager::PatchManager>())
-			return;
-	}
-
-	if(dynamic_cast<juce::TextEditor*>(event.eventComponent))
-		return;
-	if(dynamic_cast<juce::Button*>(event.eventComponent))
-		return;
-	if(dynamic_cast<juceRmlUi::RmlComponent*>(event.eventComponent))
-		return;
-	if(event.eventComponent->findParentComponentOfClass<juce::TreeView>())
-		return;
-
-	m_state.openMenu(&event);
-}
-
 }

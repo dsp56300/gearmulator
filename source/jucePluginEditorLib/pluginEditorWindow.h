@@ -13,8 +13,6 @@ namespace jucePluginEditorLib
 	    explicit EditorWindow (juce::AudioProcessor& _p, PluginEditorState& _s, juce::PropertiesFile& _config);
 	    ~EditorWindow() override;
 
-		void mouseDown(const juce::MouseEvent& event) override;
-
 		void paint(juce::Graphics& g) override {}
 
 		void resized() override;

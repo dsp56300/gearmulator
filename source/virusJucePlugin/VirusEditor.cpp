@@ -151,9 +151,9 @@ namespace genericVirusUI
 
 		if(menuButton)
 		{
-			juceRmlUi::EventListener::AddClick(menuButton, [this]()
+			juceRmlUi::EventListener::Add(menuButton, Rml::EventId::Click, [this](Rml::Event& _event)
 			{
-				openMenu(nullptr);
+				openMenu(_event);
 			});
 		}
 
