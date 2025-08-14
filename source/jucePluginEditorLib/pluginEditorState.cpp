@@ -107,6 +107,8 @@ std::string PluginEditorState::getSkinFolder() const
 
 bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)
 {
+	auto skin = _skin;
+
 	if (m_editor)
 	{
 		m_instanceConfig.clear();
@@ -125,12 +127,10 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 	try
 	{
-		auto skin = _skin;
-
 		// if the embedded skin cannot be found, use skin folder as fallback
-		if(_skin.folder.empty() && !m_processor.findResource(_skin.jsonFilename))
+		if(skin.folder.empty() && !m_processor.findResource(skin.jsonFilename))
 		{
-			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + _skin.displayName);
+			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
 		}
 
 		auto* editor = createEditor(skin);
@@ -145,8 +145,8 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		m_editor->setTopLeftPosition(0, 0);
 
-		m_currentSkin = _skin;
-		writeSkinToConfig(_skin);
+		m_currentSkin = skin;
+		writeSkinToConfig(skin);
 
 		if(evSkinLoaded)
 			evSkinLoaded(m_editor.get());
@@ -210,7 +210,13 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 		if(isCurrent)
 			loadedSkinIsPartOfList = true;
 
-		skinMenu.addEntry(_skin.displayName, isCurrent,[this, _skin] {loadSkin(_skin);});
+		skinMenu.addEntry(_skin.displayName, isCurrent,[this, _skin]
+		{
+			juce::MessageManager::callAsync([this, &_skin]
+			{
+				loadSkin(_skin);
+			});
+		});
 	};
 
 	for (const auto & skin : getIncludedSkins())
