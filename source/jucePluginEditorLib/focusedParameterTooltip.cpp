@@ -54,7 +54,7 @@ namespace jucePluginEditorLib
 
 			const auto textWidth = Rml::ElementUtilities::GetStringWidth(m_label, _value);
 
-			const auto labelWidth = static_cast<float>(textWidth);
+			const auto labelWidth = static_cast<float>(textWidth) + 8;
 
 			x += box.GetSize().x * 0.5f - labelWidth * 0.5f;
 			y += box.GetSize().y + (m_label->GetBox().GetSize().y * 0.5f);
