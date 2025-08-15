@@ -64,6 +64,7 @@ namespace jucePluginEditorLib
 
 			m_label->SetProperty(Rml::PropertyId::Left, Rml::Property(x, Rml::Unit::PX));
 			m_label->SetProperty(Rml::PropertyId::Top, Rml::Property(y, Rml::Unit::PX));
+			m_label->SetProperty(Rml::PropertyId::Width, Rml::Property(labelWidth, Rml::Unit::PX));
 
 			m_label->SetInnerRML(_value);
 
