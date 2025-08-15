@@ -398,7 +398,7 @@ namespace rmlPlugin::skinConverter
 
 		juce::Justification alignH = _style.getAlign().getOnlyHorizontalFlags();
 
-		if (alignH == juce::Justification::centred)
+		if (alignH == juce::Justification::horizontallyCentred)
 		{
 			style.add("text-align", "center");
 		}
