@@ -49,7 +49,6 @@ thead, tbody, tfoot {
 	position: absolute;
 	z-index: 100;
 	gap: 4dp;
-	font-size: 16dp;
 	font-weight: 500;
 }
 
@@ -152,7 +151,7 @@ scrollbarhorizontal sliderbar {
 	drag: clone;
 	display: block;
 	padding: 0dp;
-	font-size: 12dp;
+	font-size: 0.75em;
 	border: 2px transparent;
 	white-space: nowrap;
 }
@@ -187,7 +186,7 @@ scrollbarhorizontal sliderbar {
 	drag: clone;
 	display: block;
 	padding: 2dp;
-	font-size: 12dp;
+	font-size: 0.75em;
 	white-space: nowrap;
 }
 
@@ -213,7 +212,7 @@ treenode {
 	drag: clone;
 	display: block;
 	padding: 0dp 0dp 0dp 1em;
-	font-size: 12dp;
+	font-size: 0.75em;
 	white-space: nowrap;
 	border: 2px #0000;	/* required for drag and drop markers, otherwise entries will start moving as soon as the border is added */
 }
