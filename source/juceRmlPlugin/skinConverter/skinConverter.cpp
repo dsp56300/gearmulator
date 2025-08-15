@@ -979,6 +979,11 @@ namespace rmlPlugin::skinConverter
 
 		m_styles.insert({ ".menubox", menuStyle });
 
+		// PM background was always black
+		CoStyle pmBackgroundStyle;
+		pmBackgroundStyle.add("background-color", "black");
+		m_styles.insert({ ".pm-hlayout", pmBackgroundStyle });
+
 		return res;
 	}
 }
