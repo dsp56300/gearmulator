@@ -973,11 +973,11 @@ namespace rmlPlugin::skinConverter
 			res = true;
 		}
 
-		CoStyle menuStyle;
+		CoStyle defaultFontStyle;
 
-		menuStyle.add("font-size", std::to_string(static_cast<int>(defaultFontSize * fontSizeScale)) + "dp");
+		defaultFontStyle.add("font-size", std::to_string(static_cast<int>(defaultFontSize * fontSizeScale)) + "dp");
 
-		m_styles.insert({ ".menubox", menuStyle });
+		m_styles.insert({ "body", defaultFontStyle });
 
 		// PM background was always black
 		CoStyle pmBackgroundStyle;
