@@ -39,7 +39,7 @@ namespace jucePluginEditorLib
 
 		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
 
-		virtual void onClick() {}
+		virtual void onClick(Rml::Event&) {}
 
 		void setVisible(bool _visible);
 

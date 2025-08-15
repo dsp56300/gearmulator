@@ -37,7 +37,7 @@ namespace jucePluginEditorLib
 	{
 		juceRmlUi::EventListener::Add(_button, Rml::EventId::Click, [this](Rml::Event& _event)
 		{
-			onClick();
+			onClick(_event);
 		});
 
 		DragSource::init(_button);

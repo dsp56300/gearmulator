@@ -13,11 +13,11 @@ namespace genericVirusUI
 
 		bool canDrop(const Rml::Event& _event, const juceRmlUi::DragSource* _source) override;
 
-		void onClick() override;
+		void onClick(Rml::Event& _e) override;
 		void setButtonText(const std::string& _text);
 
 	private:
-		void selectPreset(uint8_t _part) const;
+		void selectPreset(const Rml::Event& _event, uint8_t _part) const;
 
 		VirusEditor& m_editor;
 	};
