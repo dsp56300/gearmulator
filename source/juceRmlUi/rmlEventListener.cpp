@@ -48,4 +48,42 @@ namespace juceRmlUi
 		m_callback(_element);
 		delete this;
 	}
+
+	ScopedListener::ScopedListener(Rml::Element* _elem, const Rml::EventId _id, const Callback& _callback, const bool _inCapturePhase)
+	{
+		add(_elem, _id, _callback, _inCapturePhase);
+	}
+
+	ScopedListener::~ScopedListener()
+	{
+		reset();
+	}
+
+	void ScopedListener::add(Rml::Element* _elem, const Rml::EventId _id, const Callback& _callback, const bool _inCapturePhase)
+	{
+		reset();
+
+		m_element = _elem;
+		m_eventId = _id;
+		m_callback = _callback;
+		m_inCapturePhase = _inCapturePhase;
+
+		_elem->AddEventListener(_id, this, _inCapturePhase);
+	}
+
+	void ScopedListener::reset()
+	{
+		if (!m_element)
+			return;
+
+		m_element->RemoveEventListener(m_eventId, this, m_inCapturePhase);
+		m_element = nullptr;
+		m_eventId = Rml::EventId::Invalid;
+		m_callback = nullptr;
+	}
+
+	void ScopedListener::ProcessEvent(Rml::Event& _event)
+	{
+		m_callback(_event);
+	}
 }

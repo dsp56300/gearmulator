@@ -77,7 +77,7 @@ namespace jucePluginEditorLib
 			}
 		}
 
-		juceRmlUi::EventListener::Add(_editor.getRmlComponent()->getDocument(), Rml::EventId::Mouseover, [this](const Rml::Event& _event)
+		m_mouseOver.add(_editor.getRmlComponent()->getDocument(), Rml::EventId::Mouseover, [this](const Rml::Event& _event)
 		{
 			if (auto* element = _event.GetTargetElement())
 				updateControlLabel(element, Priority::High);
@@ -86,6 +86,8 @@ namespace jucePluginEditorLib
 
 	FocusedParameter::~FocusedParameter()
 	{
+		m_mouseOver.reset();
+
 		m_tooltip.reset();
 	
 		m_boundParameters.clear();

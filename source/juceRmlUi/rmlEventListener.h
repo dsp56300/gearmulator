@@ -53,4 +53,26 @@ namespace juceRmlUi
 	private:
 		Callback m_callback;
 	};
+
+	class ScopedListener : Rml::EventListener
+	{
+		using Callback = std::function<void(Rml::Event&)>;
+
+	public:
+		ScopedListener() = default;
+		ScopedListener(Rml::Element* _elem, Rml::EventId _id, const Callback& _callback, bool _inCapturePhase = true);
+
+		~ScopedListener() override;
+
+		void add(Rml::Element* _elem, Rml::EventId _id, const Callback& _callback, bool _inCapturePhase = true);
+		void reset();
+
+	private:
+		void ProcessEvent(Rml::Event& _event) override;
+
+		Rml::Element* m_element = nullptr;
+		Callback m_callback;
+		Rml::EventId m_eventId;
+		bool m_inCapturePhase = false;
+	};
 }

@@ -212,7 +212,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 		skinMenu.addEntry(_skin.displayName, isCurrent,[this, _skin]
 		{
-			juce::MessageManager::callAsync([this, &_skin]
+			juce::MessageManager::callAsync([this, _skin]
 			{
 				loadSkin(_skin);
 			});
