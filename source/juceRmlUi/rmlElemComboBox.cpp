@@ -86,7 +86,7 @@ namespace juceRmlUi
 	int ElemComboBox::getSelectedIndex() const
 	{
 		const auto i = static_cast<int>(getValue());
-		if (i < m_options.size() || i >= m_options.size())
+		if (i < 0|| static_cast<size_t>(i) >= m_options.size())
 			return -1;
 		return i;
 	}
