@@ -10,7 +10,6 @@
 #include "juceRmlUi/rmlInterfaces.h"
 
 #include "juceRmlUi/rmlMenu.h"
-#include "juce_gui_basics/keyboard/juce_ModifierKeys.h"
 
 #include "RmlUi/Core/ElementDocument.h"
 
@@ -145,14 +144,14 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 		if (getTagType() == pluginLib::patchDB::TagType::Invalid || getTag().empty())
 			return;
-		modifyTags(getDB(), getTagType(), getTag(), _patches);
+		modifyTags(_event, getDB(), getTagType(), getTag(), _patches);
 	}
 
-	void TagTreeElem::modifyTags(patchManager::PatchManager& _pm, const pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	void TagTreeElem::modifyTags(const Rml::Event& _event, patchManager::PatchManager& _pm, const pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		pluginLib::patchDB::TypedTags tags;
 
-		if (juce::ModifierKeys::currentModifiers.isShiftDown())	// TODO: get rid of juce
+		if (juceRmlUi::helper::getKeyModShift(_event))
 			tags.addRemoved(_type, _tag);
 		else
 			tags.add(_type, _tag);

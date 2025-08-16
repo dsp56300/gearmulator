@@ -557,7 +557,7 @@ namespace jucePluginEditorLib::patchManagerRml
 				constexpr const char* const tag = "Favourites";
 
 				getDB().addTag(tagType, tag);
-				TagTreeElem::modifyTags(getDB(), tagType, tag, _patches);
+				TagTreeElem::modifyTags(_event, getDB(), tagType, tag, _patches);
 			}
 
 			return;
