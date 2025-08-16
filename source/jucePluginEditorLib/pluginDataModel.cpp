@@ -20,7 +20,7 @@ namespace jucePluginEditorLib
 		, m_versionTime(pluginLib::Version::getVersionTime())
 		, m_versionDateTime(pluginLib::Version::getVersionDateTime())
 	{
-		auto dmc = _context.CreateDataModel("plugin");
+		auto dmc = _context.CreateDataModel(getModelName());
 
 		m_dataModelConstructor = &dmc;
 
@@ -39,6 +39,11 @@ namespace jucePluginEditorLib
 		m_handle = dmc.GetModelHandle();
 
 		m_dataModelConstructor = nullptr;
+	}
+
+	std::string PluginDataModel::getModelName()
+	{
+		return "plugin";
 	}
 
 	void PluginDataModel::set(const std::string& _key, const std::string& _value)

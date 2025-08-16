@@ -11,7 +11,7 @@ namespace jucePluginEditorLib
 	public:
 		PluginDataModel(const Editor& _editor, Rml::Context& _context, const std::function<void(PluginDataModel&)>& _bindCallback);
 
-		void registerKey(const std::string& _key, const std::string& _value);
+		static std::string getModelName();
 
 		void set(const std::string& _key, const std::string& _value);
 
