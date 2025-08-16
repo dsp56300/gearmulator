@@ -33,6 +33,8 @@ namespace rmlPlugin::skinConverter
 		, m_rcssFileName(std::move(_rcssFileName))
 		, m_options(std::move(_options))
 	{
+		collectTabGroupsRecursive(m_rootObject);
+
 		convertUiObject(m_root, m_rootObject);
 
 		createGlobalStyles();
@@ -40,13 +42,20 @@ namespace rmlPlugin::skinConverter
 		writeRmlFile(m_rmlFileName);
 		writeRcssFile(m_rcssFileName);
 	}
+
+	void SkinConverter::collectTabGroupsRecursive(const genericUI::UiObject& _object)
+	{
+		if (const auto& tabGroup = _object.getTabGroup(); tabGroup.isValid())
+			m_tabGroups.insert({tabGroup.getName(), tabGroup});
+
+		for (const auto& child : _object.getChildren())
+			collectTabGroupsRecursive(*child);
+	}
+
 	bool SkinConverter::convertUiObject(ConvertedObject& _co, const genericUI::UiObject& _object)
 	{
 		if (_object.hasComponent("rmlui"))
 			return false;
-
-		if (const auto& tabGroup = _object.getTabGroup(); tabGroup.isValid())
-			m_tabGroups.insert({tabGroup.getName(), tabGroup});
 
 		setDefaultProperties(_co, _object);
 

@@ -26,6 +26,8 @@ namespace rmlPlugin::skinConverter
 		SkinConverter(genericUI::Editor& _editor, const genericUI::UiObject& _root, std::string _outputPath, std::string _rmlFileName, std::string _rcssFileName, SkinConverterOptions&& _options);
 
 	private:
+		void collectTabGroupsRecursive(const genericUI::UiObject& _object);
+
 		bool convertUiObject(ConvertedObject& _co, const genericUI::UiObject& _object);
 		void writeRmlFile(const std::string& _fileName);
 		void writeRcssFile(const std::string& _fileName);
