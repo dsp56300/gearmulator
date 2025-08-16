@@ -81,7 +81,7 @@ namespace genericVirusUI
 
 		void updateDeviceModel();
 
-		void savePreset();
+		void savePreset(Rml::Event& _event);
 		void loadPreset();
 
 		void setPlayMode(uint8_t _playMode);

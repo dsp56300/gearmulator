@@ -123,7 +123,7 @@ namespace genericVirusUI
 
 		auto* presetSave = findChild("PresetSave", false);
 		if(presetSave)
-			juceRmlUi::EventListener::AddClick(presetSave, [this] { savePreset(); });
+			juceRmlUi::EventListener::Add(presetSave, Rml::EventId::Click, [this](Rml::Event& _event) { savePreset(_event); });
 
 		auto* presetLoad = findChild("PresetLoad", false);
 		if(presetLoad)
@@ -297,23 +297,23 @@ namespace genericVirusUI
 		m_deviceModel->SetInnerRML(m);
 	}
 
-	void VirusEditor::savePreset()
+	void VirusEditor::savePreset(Rml::Event& _event)
 	{
-		juce::PopupMenu menu;
+		juceRmlUi::Menu menu;
 
 		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
 
 		if(countAdded)
 			menu.addSeparator();
 
-		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
+		auto addEntry = [&](juceRmlUi::Menu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
-			juce::PopupMenu subMenu;
+			juceRmlUi::Menu subMenu;
 
-			subMenu.addItem(".syx", [_callback](){_callback(pluginLib::FileType::Syx); });
-			subMenu.addItem(".mid", [_callback](){_callback(pluginLib::FileType::Mid); });
+			subMenu.addEntry(".syx", [_callback](){_callback(pluginLib::FileType::Syx); });
+			subMenu.addEntry(".mid", [_callback](){_callback(pluginLib::FileType::Mid); });
 
-			_menu.addSubMenu(_name, subMenu);
+			_menu.addSubMenu(_name, std::move(subMenu));
 		};
 
 		addEntry(menu, "Export Current Single (Edit Buffer)", [this](const pluginLib::FileType& _type)
@@ -329,7 +329,7 @@ namespace genericVirusUI
 			});
 		}
 
-		juce::PopupMenu banksMenu;
+		juceRmlUi::Menu banksMenu;
 		for(uint8_t b=0; b<static_cast<uint8_t>(getController().getBankCount()); ++b)
 		{
 			addEntry(banksMenu, getController().getBankName(b), [this, b](const pluginLib::FileType& _type)
@@ -338,9 +338,9 @@ namespace genericVirusUI
 			});
 		}
 
-		menu.addSubMenu("Export Bank", banksMenu);
+		menu.addSubMenu("Export Bank", std::move(banksMenu));
 
-		menu.showMenuAsync(juce::PopupMenu::Options());
+		menu.runModal(_event);
 	}
 
 	void VirusEditor::loadPreset()
