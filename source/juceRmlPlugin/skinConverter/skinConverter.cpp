@@ -61,12 +61,15 @@ namespace rmlPlugin::skinConverter
 
 		if (getId(_object) == "container-patchmanager")
 		{
-			// create exactly one child, for the patchmanager
-			ConvertedObject pmCo;
-			pmCo.tag = "template";
-			pmCo.attribs.set("src", "patchmanager");
-			_co.children.emplace_back(std::move(pmCo));
-			return true;
+			if (findChildByName(_object, "container-patchmanager") == nullptr)
+			{
+				// create exactly one child, for the patchmanager
+				ConvertedObject pmCo;
+				pmCo.tag = "template";
+				pmCo.attribs.set("src", "patchmanager");
+				_co.children.emplace_back(std::move(pmCo));
+				return true;
+			}
 		}
 
 		for (const auto& child : _object.getChildren())
@@ -1026,5 +1029,18 @@ namespace rmlPlugin::skinConverter
 		m_styles.insert({ ".pm-hlayout", pmBackgroundStyle });
 
 		return res;
+	}
+
+	genericUI::UiObject* SkinConverter::findChildByName(const genericUI::UiObject& _object, const std::string& _name)
+	{
+		for (const std::unique_ptr<genericUI::UiObject>& child : _object.getChildren())
+		{
+			if (getId(*child) == _name)
+				return child.get();
+			auto* found = findChildByName(*child, _name);
+			if (found)
+				return found;
+		}
+		return nullptr;
 	}
 }

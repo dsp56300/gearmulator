@@ -64,6 +64,8 @@ namespace rmlPlugin::skinConverter
 
 		bool createGlobalStyles();
 
+		genericUI::UiObject* findChildByName(const genericUI::UiObject& _object, const std::string& _name);
+
 		genericUI::Editor& m_editor;
 		const genericUI::UiObject& m_rootObject;
 		ConvertedObject m_root;
