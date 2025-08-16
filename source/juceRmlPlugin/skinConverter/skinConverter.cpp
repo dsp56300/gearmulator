@@ -9,8 +9,10 @@
 #include "dsp56kEmu/logging.h"
 
 #include "juceRmlPlugin/rmlParameterBinding.h"
-#include "juceUiLib/buttonStyle.h"
 
+#include "jucePluginEditorLib/pluginDataModel.h"
+
+#include "juceUiLib/buttonStyle.h"
 #include "juceUiLib/comboboxStyle.h"
 #include "juceUiLib/editor.h"
 #include "juceUiLib/labelStyle.h"
@@ -741,6 +743,16 @@ namespace rmlPlugin::skinConverter
 		if (disabledAlpha >= 1.0f)
 			return true;	// the object is always visible anyway, why would anyone do this?
 
+		// what is the class name? If there is no disabledAlpha, the visibility is toggled. Otherwise, the opacity is modified.
+		std::string className;
+
+		if (disabledAlpha > 0.0f)
+			className = createConditionDisabledAlphaClass(disabledAlpha);
+		else
+			className = "juceConditionDisabled";
+
+		std::string attrib = "data-class-" + className;
+
 		auto paramName = _obj.getProperty("enableOnParameter");
 
 		if (!paramName.empty())
@@ -776,16 +788,6 @@ namespace rmlPlugin::skinConverter
 				valueRanges.emplace_back(first, last);
 			}
 
-			// what is the class name? If there is no disabledAlpha, the visibility is toggled. Otherwise, the opacity is modified.
-			std::string className;
-
-			if (disabledAlpha > 0.0f)
-				className = createConditionDisabledAlphaClass(disabledAlpha);
-			else
-				className = "juceConditionDisabled";
-
-			std::string attrib = "data-class-" + className;
-
 			std::stringstream ss;
 			ss << "!(";
 			for (size_t i=0; i<valueRanges.size(); ++i)
@@ -812,7 +814,27 @@ namespace rmlPlugin::skinConverter
 
 		if (!key.empty())
 		{
-			assert(false && "enableOnKey condition is not implemented yet");
+			std::set<std::string> values = _obj.readConditionValues();
+
+			if (!values.empty())
+			{
+				std::stringstream ss;
+
+				bool isFirst = true;
+
+				for (auto v : values)
+				{
+					if (isFirst)
+						isFirst = false;
+					else
+						ss << " && ";
+
+					ss << key << "!='" << v << "'";
+				}
+
+				_co.attribs.set("data-model", jucePluginEditorLib::PluginDataModel::getModelName());
+				_co.attribs.set(attrib, ss.str());
+			}
 		}
 
 		return false;
