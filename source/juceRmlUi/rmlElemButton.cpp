@@ -73,12 +73,12 @@ namespace juceRmlUi
 
 	pluginLib::ParamValue ElemButton::getValueOn() const
 	{
-		return m_valueOn == -1 && m_valueOff == -1 ? 1 : -1;
+		return m_valueOn == -1 && m_valueOff == -1 ? 1 : m_valueOn;
 	}
 
 	pluginLib::ParamValue ElemButton::getValueOff() const
 	{
-		return m_valueOn == -1 && m_valueOff == -1 ? 0 : -1;
+		return m_valueOn == -1 && m_valueOff == -1 ? 0 : m_valueOff;
 	}
 
 	void ElemButton::setChecked(const bool _checked)
