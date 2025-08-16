@@ -1,11 +1,10 @@
 #pragma once
 
-#include "juce_gui_basics/juce_gui_basics.h"
-
 #include "parameterlistener.h"
 
 namespace juce
 {
+	class Label;
 	class Button;
 	class ComboBox;
 	class Component;
@@ -15,25 +14,12 @@ namespace juce
 
 namespace pluginLib
 {
+	class ParameterBindingMouseListener;
 	class Parameter;
 	class Controller;
 
 	class ParameterBinding
 	{
-		class MouseListener : public juce::MouseListener
-		{
-		public:
-			MouseListener(pluginLib::Parameter* _param, juce::Slider& _slider);
-			void mouseDown(const juce::MouseEvent& event) override;
-			void mouseUp(const juce::MouseEvent& event) override;
-			void mouseDrag(const juce::MouseEvent& event) override;
-			void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
-			void mouseDoubleClick(const juce::MouseEvent& event) override;
-
-		private:
-			pluginLib::Parameter *m_param;
-			juce::Slider* m_slider;
-		};
 	public:
 		static constexpr uint8_t CurrentPart = 0xff;
 
@@ -94,6 +80,6 @@ namespace pluginLib
 		std::vector<BoundParameter> m_disabledBindings;
 		std::map<const pluginLib::Parameter*, juce::Component*> m_boundParameters;
 		std::map<const juce::Component*, pluginLib::Parameter*> m_boundComponents;
-		std::map<juce::Slider*, MouseListener*> m_sliderMouseListeners;
+		std::map<juce::Slider*, ParameterBindingMouseListener*> m_sliderMouseListeners;
 	};
 }

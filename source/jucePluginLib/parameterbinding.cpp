@@ -7,35 +7,39 @@
 
 namespace pluginLib
 {
-	ParameterBinding::MouseListener::MouseListener(Parameter* _param, juce::Slider& _slider)
-	: m_param(_param), m_slider(&_slider)
+	class ParameterBindingMouseListener : public juce::MouseListener
 	{
-	}
+	public:
+		ParameterBindingMouseListener(Parameter* _param, juce::Slider& _slider) : m_param(_param), m_slider(&_slider)
+		{
+		}
+		void mouseDown(const juce::MouseEvent& event) override
+		{
+			m_param->pushChangeGesture();
+		}
 
-	void ParameterBinding::MouseListener::mouseDown(const juce::MouseEvent& event)
-	{
-		m_param->pushChangeGesture();
-	}
+		void mouseUp(const juce::MouseEvent& event) override
+		{
+			m_param->popChangeGesture();
+		}	
 
-	void ParameterBinding::MouseListener::mouseUp(const juce::MouseEvent& event)
-	{
-		m_param->popChangeGesture();
-	}
+		void mouseDrag(const juce::MouseEvent& event) override
+		{
+			m_param->setUnnormalizedValueNotifyingHost(static_cast<float>(m_slider->getValue()), Parameter::Origin::Ui);
+		}
+		void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override
+		{
+			m_param->setUnnormalizedValueNotifyingHost(static_cast<float>(m_slider->getValue()), Parameter::Origin::Ui);
+		}
+		void mouseDoubleClick(const juce::MouseEvent& event) override
+		{
+			m_param->setValueNotifyingHost(m_param->getDefaultValue(), Parameter::Origin::Ui);
+		}
 
-	void ParameterBinding::MouseListener::mouseDrag(const juce::MouseEvent& event)
-	{
-		m_param->setUnnormalizedValueNotifyingHost(static_cast<float>(m_slider->getValue()), Parameter::Origin::Ui);
-	}
-
-	void ParameterBinding::MouseListener::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
-	{
-		m_param->setUnnormalizedValueNotifyingHost(static_cast<float>(m_slider->getValue()), Parameter::Origin::Ui);
-	}
-
-	void ParameterBinding::MouseListener::mouseDoubleClick(const juce::MouseEvent& event)
-	{
-		m_param->setValueNotifyingHost(m_param->getDefaultValue(), Parameter::Origin::Ui);
-	}
+	private:
+		Parameter *m_param;
+		juce::Slider* m_slider;
+	};
 
 	ParameterBinding::~ParameterBinding()
 	{
@@ -58,7 +62,7 @@ namespace pluginLib
 
 		removeMouseListener(_slider);
 
-		auto* listener = new MouseListener(param, _slider);
+		auto* listener = new ParameterBindingMouseListener(param, _slider);
 		m_sliderMouseListeners.insert(std::make_pair(&_slider, listener));
 
 		_slider.addMouseListener(listener, false);

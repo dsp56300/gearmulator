@@ -35,7 +35,7 @@ namespace jucePluginEditorLib
 	{
 	public:
 		explicit PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins);
-		virtual ~PluginEditorState() = default;
+		virtual ~PluginEditorState();
 
 		PluginEditorState(PluginEditorState&&) = delete;
 		PluginEditorState(const PluginEditorState&) = delete;

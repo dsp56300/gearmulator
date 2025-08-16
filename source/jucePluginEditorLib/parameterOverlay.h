@@ -1,10 +1,14 @@
 #pragma once
 
 #include "imagePool.h"
+
 #include "jucePluginLib/parameterbinding.h"
+
+#include "juce_graphics/juce_graphics.h"
 
 namespace juce
 {
+	class DrawableImage;
 	class Component;
 }
 

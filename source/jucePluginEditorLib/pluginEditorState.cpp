@@ -38,6 +38,10 @@ PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controlle
 	}
 }
 
+PluginEditorState::~PluginEditorState()
+{
+}
+
 int PluginEditorState::getWidth() const
 {
 	return m_editor ? m_editor->getWidth() : 0;
