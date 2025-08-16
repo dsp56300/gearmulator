@@ -201,15 +201,15 @@ namespace genericVirusUI
 		{
 			const bool visible = i < partCount;
 
-			setEnabled(m_partSelect[i], visible);
-			setEnabled(m_partPan[i], visible);
-			setEnabled(m_partVolume[i], visible);
+			jucePluginEditorLib::Editor::setEnabled(m_partSelect[i], visible);
+			jucePluginEditorLib::Editor::setEnabled(m_partPan[i], visible);
+			jucePluginEditorLib::Editor::setEnabled(m_partVolume[i], visible);
 
 			if(i < m_presetPrev.size())
-				setEnabled(m_presetPrev[i], visible);
+				jucePluginEditorLib::Editor::setEnabled(m_presetPrev[i], visible);
 
 			if(i < m_presetNext.size())
-				setEnabled(m_presetNext[i], visible);
+				jucePluginEditorLib::Editor::setEnabled(m_presetNext[i], visible);
 
 			m_presetName[i]->setVisible(visible);
 		}

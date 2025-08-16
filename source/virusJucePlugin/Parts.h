@@ -51,6 +51,8 @@ namespace genericVirusUI
 
 		void timerCallback() override;
 
+		void setEnabled(Rml::Element* _element, bool _enabled);
+
 		VirusEditor& m_editor;
 
 		std::vector<juceRmlUi::ElemButton*> m_partSelect;

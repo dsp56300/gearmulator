@@ -94,6 +94,8 @@ namespace jucePluginEditorLib
 		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) {}
 		virtual void initPluginDataModel(PluginDataModel& _model) {}
 
+		static void setEnabled(Rml::Element* _element, bool _enabled);
+
 		virtual patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) { return nullptr; };
 
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;

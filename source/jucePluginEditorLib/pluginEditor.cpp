@@ -103,6 +103,24 @@ namespace jucePluginEditorLib
 		});
 	}
 
+	void Editor::setEnabled(Rml::Element* _element, bool _enabled)
+	{
+		if (!_element)
+			return;
+
+		if (const auto opacity = _element->GetAttribute("disabledAlpha", 0.0f); opacity > 0)
+		{
+			_element->SetProperty(Rml::PropertyId::Opacity, Rml::Property(_enabled ? 1.0f : opacity, Rml::Unit::NUMBER));
+			_element->SetProperty(Rml::PropertyId::PointerEvents, _enabled ? Rml::Style::PointerEvents::Auto : Rml::Style::PointerEvents::None);
+
+			juceRmlUi::helper::setVisible(_element, opacity > 0);
+		}
+		else
+		{
+			juceRmlUi::helper::setVisible(_element, _enabled);
+		}
+	}
+
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size) const
 	{
 		auto res = m_processor.findResource(_filename);
