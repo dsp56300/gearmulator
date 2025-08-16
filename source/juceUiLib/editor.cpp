@@ -284,11 +284,6 @@ namespace genericUI
 		m_rootObject->setCurrentPart(*this, _part);
 	}
 
-	void Editor::updateKeyValueConditions(const std::string& _key, const std::string& _value) const
-	{
-		m_rootObject->updateKeyValueConditions(_key, _value);
-	}
-
 	std::shared_ptr<UiObject> Editor::getTemplate(const std::string& _name) const
 	{
 		const auto& it = m_templates.find(_name);

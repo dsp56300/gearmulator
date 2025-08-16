@@ -62,6 +62,8 @@ namespace pluginLib
 
 namespace jucePluginEditorLib
 {
+	class PluginDataModel;
+
 	namespace patchManagerRml
 	{
 		class PatchManagerDataModel;
@@ -88,7 +90,10 @@ namespace jucePluginEditorLib
 		Editor& operator = (Editor&&) = delete;
 		
 		void create();
+
 		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) {}
+		virtual void initPluginDataModel(PluginDataModel& _model) {}
+
 		virtual patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) { return nullptr; };
 
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
@@ -143,6 +148,7 @@ namespace jucePluginEditorLib
 		virtual void onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context);
 
 		const auto& getPatchManagerDataModel() const { return m_patchManagerDataModel; }
+		auto& getPluginDataModel() { return m_pluginDataModel; }
 
 		void registerDragAndDropFile(const juce::File& _file)
 		{
@@ -193,6 +199,7 @@ namespace jucePluginEditorLib
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		std::unique_ptr<patchManager::PatchManager> m_patchManager;
 		std::unique_ptr<patchManagerRml::PatchManagerDataModel> m_patchManagerDataModel;
+		std::unique_ptr<PluginDataModel> m_pluginDataModel;
 		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;

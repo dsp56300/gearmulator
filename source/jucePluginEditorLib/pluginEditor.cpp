@@ -14,6 +14,7 @@
 #include "juceRmlUi/rmlEventListener.h"
 
 #include "jucePluginData.h"
+#include "pluginDataModel.h"
 
 #include "juceRmlPlugin/rmlPlugin.h"
 #include "juceRmlPlugin/skinConverter/skinConverter.h"
@@ -623,6 +624,10 @@ namespace jucePluginEditorLib
 	{
 		m_overlays.reset(new ParameterOverlays(*this, *m_rmlPlugin->getParameterBinding(&_context)));
 
+		m_pluginDataModel.reset(new PluginDataModel(*this, _context, [this](PluginDataModel& _model)
+		{
+			initPluginDataModel(_model);
+		}));
 		m_patchManagerDataModel.reset(new patchManagerRml::PatchManagerDataModel(_context));
 	}
 

@@ -11,6 +11,7 @@
 #include "jucePluginLib/pluginVersion.h"
 
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "jucePluginEditorLib/pluginDataModel.h"
 
 #include "juceRmlPlugin/skinConverter/skinConverterOptions.h"
 
@@ -151,7 +152,7 @@ namespace genericVirusUI
 		m_romChangedListener = [this](auto)
 		{
 			updateDeviceModel();
-//			updateKeyValueConditions("deviceModel", virusLib::getModelName(m_processor.getModel()));
+			getPluginDataModel()->set("deviceModel", virusLib::getModelName(m_processor.getModel()));
 			m_parts->onPlayModeChanged();
 		};
 	}
@@ -199,6 +200,11 @@ namespace genericVirusUI
 		_skinConverterOptions.idReplacements.insert({"page_presets", "container-patchmanager"});
 		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
 		_skinConverterOptions.idReplacements.insert({"page_2_browser", "container-patchmanager"});
+	}
+
+	void VirusEditor::initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model)
+	{
+		_model.set("deviceModel", virusLib::getModelName(m_processor.getModel()));
 	}
 
 	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent)

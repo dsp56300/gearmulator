@@ -11,6 +11,7 @@ set(SOURCES
 	parameterOverlay.cpp parameterOverlay.h
 	parameterOverlays.cpp parameterOverlays.h
 	partbutton.cpp partbutton.h
+	pluginDataModel.cpp pluginDataModel.h
 	pluginEditor.cpp pluginEditor.h
 	pluginEditorWindow.cpp pluginEditorWindow.h
 	pluginEditorState.cpp pluginEditorState.h
