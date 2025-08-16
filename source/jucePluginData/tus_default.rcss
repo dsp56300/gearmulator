@@ -316,3 +316,22 @@ knob {
 :dragoverbottom:shift {
 	border-bottom: 2px #f00;
 }
+
+/* parameter overlays */
+
+.tus-parameteroverlay {
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 100%;
+	height: 1em;
+	pointer-events: none;
+}
+
+.tus-parameteroverlaytype-link {
+	decorator: image(link.png contain right);
+}
+
+.tus-parameteroverlaytype-lock {
+	decorator: image(lock.png contain left);
+}

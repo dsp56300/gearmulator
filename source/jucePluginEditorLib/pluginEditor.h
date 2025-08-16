@@ -1,6 +1,5 @@
 #pragma once
 
-#include "imagePool.h"
 #include "parameterOverlays.h"
 #include "skin.h"
 
@@ -16,8 +15,6 @@
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlInterfaces.h"
 #include "juceRmlUi/rmlMenu.h"
-
-#include "RmlUi/Core/CoreInstance.h"
 
 namespace rmlPlugin
 {
@@ -138,10 +135,6 @@ namespace jucePluginEditorLib
 		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;
 		bool setParameters(const std::map<std::string, pluginLib::ParamValue>& _paramValues) const;
 
-		auto& getImagePool() { return m_imagePool; }
-
-		void parentHierarchyChanged() override;
-
 		juceRmlUi::Menu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
 		virtual void createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
@@ -203,8 +196,7 @@ namespace jucePluginEditorLib
 		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
-		ImagePool m_imagePool;
-		ParameterOverlays m_overlays;
+		std::unique_ptr<ParameterOverlays> m_overlays;
 
 		juceRmlUi::RmlInterfaces m_rmlInterfaces;
 		std::unique_ptr<juceRmlUi::RmlComponent> m_rmlComponent;

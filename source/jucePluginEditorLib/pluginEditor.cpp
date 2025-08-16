@@ -46,7 +46,6 @@ namespace jucePluginEditorLib
 		, m_processor(_processor)
 		, m_binding(_binding)
 		, m_skin(std::move(_skin))
-		, m_overlays(*this, _binding)
 		, m_rmlInterfaces(*this)
 	{
 		showDisclaimer();
@@ -54,6 +53,8 @@ namespace jucePluginEditorLib
 
 	Editor::~Editor()
 	{
+		m_overlays.reset();
+
 		for (const auto& file : m_dragAndDropFiles)
 			file.deleteFile();
 
@@ -594,14 +595,6 @@ namespace jucePluginEditorLib
 		return getProcessor().getController().setParameters(_paramValues, m_processor.getController().getCurrentPart(), pluginLib::Parameter::Origin::Ui);
 	}
 
-	void Editor::parentHierarchyChanged()
-	{
-		genericUI::Editor::parentHierarchyChanged();
-
-		if(isShowing())
-			m_overlays.refreshAll();
-	}
-
 	juceRmlUi::Menu Editor::createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const
 	{
 		juceRmlUi::Menu menu;
@@ -619,6 +612,7 @@ namespace jucePluginEditorLib
 	{
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(m_rmlInterfaces.getCoreInstance(), getProcessor().getController()));
+
 		return new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 		{
 			onRmlContextCreated(_rmlComponent, _context);
@@ -627,6 +621,8 @@ namespace jucePluginEditorLib
 
 	void Editor::onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 	{
+		m_overlays.reset(new ParameterOverlays(*this, *m_rmlPlugin->getParameterBinding(&_context)));
+
 		m_patchManagerDataModel.reset(new patchManagerRml::PatchManagerDataModel(_context));
 	}
 

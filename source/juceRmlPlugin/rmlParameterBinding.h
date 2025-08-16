@@ -30,6 +30,9 @@ namespace rmlPlugin
 	class RmlParameterBinding
 	{
 	public:
+		baseLib::Event<pluginLib::Parameter*, Rml::Element*> evBind;
+		baseLib::Event<pluginLib::Parameter*, Rml::Element*> evUnbind;
+
 		static constexpr uint8_t CurrentPart = pluginLib::MidiPacket::AnyPart;
 
 		explicit RmlParameterBinding(pluginLib::Controller& _controller, Rml::Context* _context);

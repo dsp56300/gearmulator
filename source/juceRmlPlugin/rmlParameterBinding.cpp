@@ -52,8 +52,11 @@ namespace rmlPlugin
 		}
 
 		auto oldParamIt = m_elementToParam.find(&_element);
+
 		if (oldParamIt != m_elementToParam.end())
 		{
+			evUnbind.invoke(oldParamIt->second, oldParamIt->first);
+
 			m_paramToElements[oldParamIt->second].erase(&_element);
 			m_elementToParam.erase(oldParamIt);
 		}
@@ -61,6 +64,8 @@ namespace rmlPlugin
 		m_elementToParam.insert({ &_element, p });
 
 		m_paramToElements[p].insert(&_element);
+
+		evBind.invoke(p, &_element);
 
 		const auto param = RmlParameterRef::createVariableName(_parameterName);
 
