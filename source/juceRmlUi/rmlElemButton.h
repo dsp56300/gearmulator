@@ -22,7 +22,9 @@ namespace juceRmlUi
 		bool IsPointWithinElement(Rml::Vector2f _point) override;
 
 		void setChecked(bool _checked);
+
 		bool isChecked() const { return m_isChecked; }
+		bool isToggle() const { return m_isToggle; }
 
 	private:
 		void onClick();

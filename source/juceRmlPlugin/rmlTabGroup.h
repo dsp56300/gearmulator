@@ -42,6 +42,7 @@ namespace rmlPlugin
 
 		static bool isChecked(Rml::Element* _button);
 		static void setChecked(Rml::Element* _button, bool _checked);
+		static bool isToggle(Rml::Element* _button);
 
 		std::vector<Rml::Element*> m_buttons;
 		std::vector<baseLib::EventListener<juceRmlUi::ElemButton*>> m_buttonListeners;

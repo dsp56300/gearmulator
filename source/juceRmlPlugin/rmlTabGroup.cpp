@@ -78,7 +78,7 @@ namespace rmlPlugin
 		{
 			auto* button = m_buttons[_index];
 
-			if (button && !isChecked(button))
+			if (button && isToggle(button) && !isChecked(button))
 			{
 				setChecked(button, true);
 				return;
@@ -120,5 +120,12 @@ namespace rmlPlugin
 			elemButton->setChecked(_checked);
 		else
 			_button->SetPseudoClass("checked", _checked);
+	}
+
+	bool TabGroup::isToggle(Rml::Element* _button)
+	{
+		if (auto* elemButton = dynamic_cast<juceRmlUi::ElemButton*>(_button))
+			return elemButton->isToggle();
+		return false;
 	}
 }
