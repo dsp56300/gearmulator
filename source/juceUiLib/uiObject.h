@@ -36,31 +36,10 @@ namespace genericUI
 		explicit UiObject(UiObject* _parent, const juce::var& _json, bool _isTemplate = false);
 		~UiObject();
 
-		void createJuceTree(Editor& _editor);
-		void createChildObjects(Editor& _editor, juce::Component& _parent) const;
-		void createTabGroups(Editor& _editor);
-		void createControllerLinks(Editor& _editor) const;
-		void registerTemplates(Editor& _editor) const;
-
-		void apply(const Editor& _editor, juce::Component& _target);
-		void apply(Editor& _editor, juce::Slider& _target);
-		void apply(Editor& _editor, juce::ComboBox& _target);
-		void apply(Editor& _editor, juce::DrawableButton& _target);
-
-		void apply(Editor& _editor, juce::Label& _target);
-		void apply(Editor& _editor, juce::ScrollBar& _target);
-		void apply(Editor& _editor, juce::TextButton& _target);
-		void apply(Editor& _editor, juce::HyperlinkButton& _target);
-		void apply(Editor& _editor, juce::TreeView& _target);
-		void apply(Editor& _editor, juce::ListBox& _target);
-		void apply(Editor& _editor, juce::TextEditor& _target);
-
 		template<typename TComponent, typename TStyle>
 		void applyT(Editor& _editor, TComponent& _target);
 
 		void collectVariants(std::set<std::string>& _dst, const std::string& _property) const;
-
-		juce::Component* createJuceObject(Editor& _editor);
 
 		int getPropertyInt(const std::string& _key, int _default = 0) const;
 		float getPropertyFloat(const std::string& _key, float _default = 0.0f) const;
@@ -87,10 +66,6 @@ namespace genericUI
 		const auto& getTemplates() const { return m_templates; }
 
 	private:
-		template<typename T, class... Args> T* createJuceObject(Editor& _editor, Args... _args);
-		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
-		void createCondition(const Editor& _editor, juce::Component& _target);
-
 		juce::DynamicObject& applyStyle(juce::DynamicObject& _obj, const std::string& _styleName);
 
 		static bool copyPropertiesRecursive(juce::DynamicObject& _target, const juce::DynamicObject& _source);

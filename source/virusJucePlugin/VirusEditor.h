@@ -64,8 +64,6 @@ namespace genericVirusUI
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
-		juce::Component* createJuceComponent(juce::Component*, genericUI::UiObject& _object) override;
-
 		const auto& getLeds() const { return m_leds; }
 
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;

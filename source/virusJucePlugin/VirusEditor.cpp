@@ -179,7 +179,7 @@ namespace genericVirusUI
 				"* The plugin state is not preserved\n"
 				"* Preset saving is disabled"};
 	}
-
+	/*
 	juce::Component* VirusEditor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
 	{
 		if(_object.getName() == "ArpUserGraphics")
@@ -191,7 +191,7 @@ namespace genericVirusUI
 
 		return Editor::createJuceComponent(_component, _object);
 	}
-
+	*/
 	void VirusEditor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
 	{
 		Editor::initSkinConverterOptions(_skinConverterOptions);

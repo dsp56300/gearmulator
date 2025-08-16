@@ -2,9 +2,6 @@
 
 #include <string>
 
-#include "juce_gui_basics/juce_gui_basics.h"
-
-#include "button.h"
 #include "uiObject.h"
 
 #include "editorInterface.h"
@@ -101,13 +98,6 @@ namespace genericUI
 		virtual void setPerInstanceConfig(const std::vector<uint8_t>& _data) {}
 		virtual void getPerInstanceConfig(std::vector<uint8_t>& _data) {}
 
-		virtual Slider* createJuceComponent(Slider*, UiObject& _object) { return nullptr; }
-		virtual juce::Component* createJuceComponent(juce::Component*, UiObject& _object) { return nullptr; }
-		virtual juce::ComboBox* createJuceComponent(juce::ComboBox*, UiObject& _object) { return nullptr; }
-		virtual juce::Label* createJuceComponent(juce::Label*, UiObject& _object) { return nullptr; }
-		virtual Button<juce::HyperlinkButton>* createJuceComponent(Button<juce::HyperlinkButton>*, UiObject& _object) { return nullptr; }
-		virtual Button<juce::DrawableButton>* createJuceComponent(Button<juce::DrawableButton>*, UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) { return nullptr; }
-		virtual Button<juce::TextButton>* createJuceComponent(Button<juce::TextButton>*, UiObject& _object) { return nullptr; }
 		virtual juce::Component* createRmlUiComponent(const std::string& _rmlFile) { return nullptr; }
 
 		const UiObject& getRootObject() const { return *m_rootObject; }

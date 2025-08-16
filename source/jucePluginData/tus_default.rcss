@@ -324,7 +324,7 @@ knob {
 	left: 0dp;
 	top: 0dp;
 	width: 100%;
-	height: 1em;
+	height: 1.2em;
 	pointer-events: none;
 }
 
