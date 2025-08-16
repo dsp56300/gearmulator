@@ -1,37 +1,41 @@
 #pragma once
 
+namespace juceRmlUi
+{
+	class ElemComboBox;
+}
+
+namespace juceRmlUi
+{
+	class Menu;
+}
+
 namespace pluginLib
 {
 	class Processor;
 	class MidiPorts;
 }
 
-namespace genericUI
-{
-	class Editor;
-}
-
 namespace juce
 {
-	class PopupMenu;
 	struct MidiDeviceInfo;
 	class String;
 	class AudioDeviceManager;
-	class ComboBox;
 }
 
 namespace jucePluginEditorLib
 {
+	class Editor;
 	class Processor;
 
 	class MidiPorts
 	{
 	public:
-		explicit MidiPorts(const genericUI::Editor& _editor, Processor& _processor);
+		explicit MidiPorts(const Editor& _editor, Processor& _processor);
 
-		static void createMidiInputMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts&);
-		static void createMidiOutputMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts&);
-		static void createMidiPortsMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts&);
+		static void createMidiInputMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts&);
+		static void createMidiOutputMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts&);
+		static void createMidiPortsMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts&);
 
 	private:
 		pluginLib::MidiPorts& getMidiPorts() const;
@@ -44,7 +48,7 @@ namespace jucePluginEditorLib
 
 		Processor& m_processor;
 
-		juce::ComboBox* m_midiIn = nullptr;
-		juce::ComboBox* m_midiOut = nullptr;
+		juceRmlUi::ElemComboBox* m_midiIn = nullptr;
+		juceRmlUi::ElemComboBox* m_midiOut = nullptr;
 	};
 }

@@ -1,6 +1,10 @@
 #include "midiPorts.h"
 
+#include "pluginEditor.h"
 #include "pluginProcessor.h"
+
+#include "juceRmlUi/rmlElemComboBox.h"
+#include "juceRmlUi/rmlEventListener.h"
 
 #include "juceUiLib/editor.h"
 #include "juceUiLib/messageBox.h"
@@ -9,11 +13,11 @@ namespace
 {
 	constexpr const char* const g_none = "<none>";
 
-	void initComboBox(juce::ComboBox* _combo, const juce::Array<juce::MidiDeviceInfo>& _entries, const juce::String& _selectedEntry)
+	void initComboBox(juceRmlUi::ElemComboBox* _combo, const juce::Array<juce::MidiDeviceInfo>& _entries, const juce::String& _selectedEntry)
 	{
 		int inIndex = 0;
 
-		_combo->addItem(g_none, 1);
+		_combo->addOption(g_none);
 
 		for (int i = 0; i < _entries.size(); i++)
 		{
@@ -22,22 +26,22 @@ namespace
 			if (input.identifier == _selectedEntry)
 				inIndex = i + 1;
 
-			_combo->addItem(input.name, i+2);
+			_combo->addOption(input.name.toStdString());
 		}
 
-		_combo->setSelectedItemIndex(inIndex, juce::dontSendNotification);
+		_combo->setSelectedIndex(inIndex, false);
 	}
 
-	uint32_t createMenu(juce::PopupMenu& _menu, const juce::Array<juce::MidiDeviceInfo>& _devices, const juce::String& _current, const std::function<void(juce::String)>& _onSelect)
+	uint32_t createMenu(juceRmlUi::Menu& _menu, const juce::Array<juce::MidiDeviceInfo>& _devices, const juce::String& _current, const std::function<void(juce::String)>& _onSelect)
 	{
-		_menu.addItem(g_none, true, _current.isEmpty(), [_onSelect]
+		_menu.addEntry(g_none, true, _current.isEmpty(), [_onSelect]
 		{
 			_onSelect({});
 		});
 
 		for (const auto& device : _devices)
 		{
-			_menu.addItem(device.name, true, device.identifier == _current, [id = device.identifier, _onSelect]
+			_menu.addEntry(device.name.toStdString(), true, device.identifier == _current, [id = device.identifier, _onSelect]
 			{
 				_onSelect(id);
 			});
@@ -48,25 +52,32 @@ namespace
 
 namespace jucePluginEditorLib
 {
-	MidiPorts::MidiPorts(const genericUI::Editor& _editor, Processor& _processor) : m_processor(_processor)
+	MidiPorts::MidiPorts(const Editor& _editor, Processor& _processor) : m_processor(_processor)
 	{
-		m_midiIn  = _editor.findComponentT<juce::ComboBox>("MidiIn" , false);
-		m_midiOut = _editor.findComponentT<juce::ComboBox>("MidiOut", false);
+		m_midiIn  = _editor.findChild<juceRmlUi::ElemComboBox>("MidiIn" , false);
+		m_midiOut = _editor.findChild<juceRmlUi::ElemComboBox>("MidiOut", false);
 
 		if(m_midiIn)
 		{
 			initComboBox(m_midiIn, juce::MidiInput::getAvailableDevices(), getMidiPorts().getInputId());
-			m_midiIn->onChange = [this]{ updateMidiInput(m_midiIn->getSelectedItemIndex()); };
+
+			juceRmlUi::EventListener::Add(m_midiIn, Rml::EventId::Change, [this](Rml::Event&)
+			{
+				updateMidiInput(m_midiIn->getSelectedIndex());
+			});
 		}
 
 		if(m_midiOut)
 		{
 			initComboBox(m_midiOut, juce::MidiOutput::getAvailableDevices(), getMidiPorts().getOutputId());
-			m_midiOut->onChange = [this]{ updateMidiOutput(m_midiOut->getSelectedItemIndex()); };
+			juceRmlUi::EventListener::Add(m_midiOut, Rml::EventId::Change, [this](Rml::Event&)
+			{
+				updateMidiOutput(m_midiOut->getSelectedIndex());
+			});
 		}
    	}
 
-	void MidiPorts::createMidiInputMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts& _ports)
+	void MidiPorts::createMidiInputMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts& _ports)
 	{
 		createMenu(_menu, juce::MidiInput::getAvailableDevices(), _ports.getInputId(), [&_ports](const juce::String& _id)
 		{
@@ -75,7 +86,7 @@ namespace jucePluginEditorLib
 		});
 	}
 
-	void MidiPorts::createMidiOutputMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts& _ports)
+	void MidiPorts::createMidiOutputMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts& _ports)
 	{
 		createMenu(_menu, juce::MidiOutput::getAvailableDevices(), _ports.getOutputId(), [&_ports](const juce::String& _id)
 		{
@@ -84,17 +95,17 @@ namespace jucePluginEditorLib
 		});
 	}
 
-	void MidiPorts::createMidiPortsMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts& _ports)
+	void MidiPorts::createMidiPortsMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts& _ports)
 	{
-		juce::PopupMenu inputs, outputs, ports;
+		juceRmlUi::Menu inputs, outputs, ports;
 
 		createMidiInputMenu(inputs, _ports);
 		createMidiOutputMenu(outputs, _ports);
 
-		ports.addSubMenu("Input", inputs);
-		ports.addSubMenu("Output", outputs);
+		ports.addSubMenu("Input", std::move(inputs));
+		ports.addSubMenu("Output", std::move(outputs));
 
-		_menu.addSubMenu("MIDI Ports", ports);
+		_menu.addSubMenu("MIDI Ports", std::move(ports));
 	}
 
 	pluginLib::MidiPorts& MidiPorts::getMidiPorts() const
@@ -120,7 +131,7 @@ namespace jucePluginEditorLib
 
 	    if (_index <= 0)
 	    {
-	        m_midiIn->setSelectedItemIndex(_index, juce::dontSendNotification);
+	        m_midiIn->setSelectedIndex(_index, false);
 			getMidiPorts().setMidiInput({});
 	        return;
 	    }
@@ -132,11 +143,11 @@ namespace jucePluginEditorLib
 	    if (!getMidiPorts().setMidiInput(newInput.identifier))
 	    {
 			showMidiPortFailedMessage("Input");
-	        m_midiIn->setSelectedItemIndex(0, juce::dontSendNotification);
+	        m_midiIn->setSelectedIndex(0, false);
 	        return;
 	    }
 
-	    m_midiIn->setSelectedItemIndex(_index + 1, juce::dontSendNotification);
+	    m_midiIn->setSelectedIndex(_index + 1, false);
 	}
 
 	void MidiPorts::updateMidiOutput(int _index) const
@@ -145,7 +156,7 @@ namespace jucePluginEditorLib
 
 	    if (_index == 0)
 	    {
-	        m_midiOut->setSelectedItemIndex(_index, juce::dontSendNotification);
+	        m_midiOut->setSelectedIndex(_index, false);
 	        getMidiPorts().setMidiOutput({});
 	        return;
 	    }
@@ -154,10 +165,10 @@ namespace jucePluginEditorLib
 	    if (!getMidiPorts().setMidiOutput(newOutput.identifier))
 	    {
 			showMidiPortFailedMessage("Output");
-	        m_midiOut->setSelectedItemIndex(0, juce::dontSendNotification);
+	        m_midiOut->setSelectedIndex(0, false);
 	        return;
 	    }
 	    
-	    m_midiOut->setSelectedItemIndex(_index + 1, juce::dontSendNotification);
+	    m_midiOut->setSelectedIndex(_index + 1, false);
 	}
 }
