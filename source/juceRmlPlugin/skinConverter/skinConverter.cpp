@@ -316,7 +316,11 @@ namespace rmlPlugin::skinConverter
 		_co.classes.emplace_back("juceLabel");
 		_co.classes.push_back(className.substr(1));
 
-		_co.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
+		auto param = _object.getProperty("parameter");
+		if (!param.empty())
+			_co.innerText = "{{" + RmlParameterRef::createVariableName(param) + "_text}}";
+		else
+			_co.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
 	}
 
 	void SkinConverter::convertUiObjectRoot(ConvertedObject& _co, const genericUI::UiObject& _object)
