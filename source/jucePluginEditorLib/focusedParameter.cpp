@@ -108,7 +108,7 @@ namespace jucePluginEditorLib
 			}
 			else
 			{
-				m_focusedParameterName->SetInnerRML(_name);
+				m_focusedParameterName->SetInnerRML(Rml::StringUtilities::EncodeRml(_name));
 				juceRmlUi::helper::setVisible(m_focusedParameterName, true);
 			}
 		}
@@ -120,7 +120,7 @@ namespace jucePluginEditorLib
 			}
 			else
 			{
-				m_focusedParameterValue->SetInnerRML(_value);
+				m_focusedParameterValue->SetInnerRML(Rml::StringUtilities::EncodeRml(_value));
 				juceRmlUi::helper::setVisible(m_focusedParameterValue, true);
 			}
 		}
