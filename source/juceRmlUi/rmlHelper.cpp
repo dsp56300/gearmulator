@@ -425,10 +425,10 @@ namespace juceRmlUi
 			};
 		}
 
-		void setVisible(Rml::Element* _element, bool _visible)
+		void setVisible(Rml::Element* _element, const bool _visible)
 		{
 			if (!_visible)
-				_element->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
+				changeProperty(_element, Rml::PropertyId::Display, Rml::Style::Display::None);
 			else
 				_element->RemoveProperty(Rml::PropertyId::Display);
 		}
