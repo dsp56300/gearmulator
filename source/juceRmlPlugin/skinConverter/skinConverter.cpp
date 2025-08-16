@@ -787,6 +787,7 @@ namespace rmlPlugin::skinConverter
 			}
 			ss << ")";
 
+			_co.attribs.set("data-model", "partCurrent");	// conditions were always based on the current part
 			_co.attribs.set(attrib, ss.str());
 			return true;
 		}
