@@ -121,7 +121,7 @@ namespace rmlPlugin
 
 		for (auto* elem : it->second)
 		{
-			if (!_visibleOnly || elem->IsVisible())
+			if (!_visibleOnly || elem->IsVisible(true))
 				return elem;
 		}
 		return {};

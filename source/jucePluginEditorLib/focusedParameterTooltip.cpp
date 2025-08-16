@@ -43,7 +43,7 @@ namespace jucePluginEditorLib
 		if(!isValid())
 			return;
 
-		if(_component->IsVisible())
+		if(_component->IsVisible(true))
 		{
 			auto* comp = const_cast<Rml::Element*>(_component);
 
