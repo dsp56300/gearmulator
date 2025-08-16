@@ -46,3 +46,13 @@ moment we do not support this, but we might add it in the future */
 	white-space: nowrap;
 	overflow: hidden;
 }
+
+/* sliders, these styles are set for any converted horizontal/vertical slider, at the moment nothing needed here */
+.juceSlider {
+}
+
+.juceSliderH {
+}
+
+.juceSliderV {
+}

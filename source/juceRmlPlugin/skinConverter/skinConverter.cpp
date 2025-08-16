@@ -361,6 +361,34 @@ namespace rmlPlugin::skinConverter
 			_co.classes.emplace_back("juceRotary");
 			_co.classes.emplace_back(styleName.substr(1));
 		}
+		else if (style.getStyle() == genericUI::RotaryStyle::Style::LinearHorizontal || style.getStyle() == genericUI::RotaryStyle::Style::LinearVertical)
+		{
+			const auto isHorizontal = style.getStyle() == genericUI::RotaryStyle::Style::LinearHorizontal;
+
+			_co.tag = "input";
+			_co.attribs.set("type", "range");
+
+			CoStyle sliderStyle;
+
+			const auto styleName = addStyle(isHorizontal ? ".sliderH" : ".sliderV", sliderStyle);
+
+			CoStyle barStyle;
+			barStyle.add("decorator", "image(" + getAndValidateTextureName(_object) + ".png contain)");
+
+			const auto* drawable = m_editor.getImageDrawable(_object.getProperty("texture"));
+			assert(drawable);
+			if (!drawable)
+				throw std::runtime_error("Failed to find image drawable for '" + imageName + "'");
+
+			barStyle.add("width", std::to_string(drawable->getWidth()) + "dp");
+			barStyle.add("height", std::to_string(drawable->getHeight()) + "dp");
+
+			m_styles.insert({ styleName + " sliderbar", barStyle });
+
+			_co.classes.emplace_back(styleName.substr(1));
+			_co.classes.emplace_back("juceSlider");
+			_co.classes.emplace_back("juceSliderH");
+		}
 	}
 
 	void SkinConverter::convertUiObjectTextButton(ConvertedObject& _co, const genericUI::UiObject& _object, const bool _isHyperlink)
