@@ -39,3 +39,10 @@ combo {
 /* used to modify the hit area of image buttons */
 buttonhittest {
 }
+
+/* juce labels didn't support wrap at all. They shrinked the text width if it was too large, at the 
+moment we do not support this, but we might add it in the future */
+.juceLabel {
+	white-space: nowrap;
+	overflow: hidden;
+}
