@@ -38,18 +38,6 @@ namespace genericVirusUI
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
-		if(false)
-		{
-			auto pmParent = findComponent("ContainerPatchManager", false);
-			if(!pmParent)
-				pmParent = findComponent("page_presets", false);
-			if(!pmParent)
-				pmParent = findComponent("page_2_browser");
-			setPatchManager(new PatchManager(*this, pmParent));
-		}
-
-		auto* root = getRmlComponent()->getDocument();
-
 		m_presetName = findChild("PatchName");
 
 		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), *getRmlParameterBinding(), *this));

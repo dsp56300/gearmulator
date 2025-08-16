@@ -3,7 +3,6 @@
 #include "VirusEditor.h"
 #include "VirusController.h"
 
-#include "jucePluginEditorLib/patchmanager/patchmanageruijuce.h"
 #include "jucePluginEditorLib/patchmanagerUiRml/patchmanagerUiRml.h"
 
 #include "jucePluginLib/filetype.h"
@@ -24,14 +23,6 @@ namespace virus
 
 namespace genericVirusUI
 {
-	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root)
-		: PatchManager(_editor, [this, &_editor, _root]
-		{
-			return std::make_unique<jucePluginEditorLib::patchManager::PatchManagerUiJuce>(_editor, *this, _root, DefaultGroupTypes);
-		})
-	{
-	}
-
 	PatchManager::PatchManager(VirusEditor& _editor, juceRmlUi::RmlComponent& _comp, Rml::Element* _root)
 		: PatchManager(_editor, [this, &_editor, &_comp, _root]
 		{

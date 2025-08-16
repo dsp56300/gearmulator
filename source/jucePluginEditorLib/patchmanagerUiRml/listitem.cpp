@@ -10,6 +10,8 @@
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlMenu.h"
 
+#include "juce_gui_basics/juce_gui_basics.h"
+
 namespace jucePluginEditorLib::patchManagerRml
 {
 	ListItem::ListItem(PatchManagerUiRml& _pm, juceRmlUi::List& _list) : ListEntry(_list), m_patchManager(_pm)

@@ -10,6 +10,7 @@
 #include "juceRmlUi/rmlInterfaces.h"
 
 #include "juceRmlUi/rmlMenu.h"
+#include "juce_gui_basics/keyboard/juce_ModifierKeys.h"
 
 #include "RmlUi/Core/ElementDocument.h"
 

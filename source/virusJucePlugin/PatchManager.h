@@ -27,7 +27,6 @@ namespace genericVirusUI
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
-		PatchManager(VirusEditor& _editor, juce::Component* _root);
 		PatchManager(VirusEditor& _editor, juceRmlUi::RmlComponent& _comp, Rml::Element* _root);
 		PatchManager(VirusEditor& _editor, const std::function<std::unique_ptr<jucePluginEditorLib::patchManager::PatchManagerUi>()>& _createUiFunc);
 		~PatchManager() override;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "resizerbar.h"
 #include "state.h"
 #include "types.h"
 
@@ -8,6 +7,7 @@
 
 #include "jucePluginLib/patchdb/db.h"
 
+#include "juce_events/juce_events.h"	// juce::Timer
 
 namespace juceRmlUi
 {
