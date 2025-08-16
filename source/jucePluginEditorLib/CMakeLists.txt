@@ -5,7 +5,6 @@ set(SOURCES
 	dragAndDropObject.cpp dragAndDropObject.h
 	focusedParameter.cpp focusedParameter.h
 	focusedParameterTooltip.cpp focusedParameterTooltip.h
-	imagePool.cpp imagePool.h
 	lcd.cpp lcd.h
 	led.cpp led.h
 	midiPorts.cpp midiPorts.h
