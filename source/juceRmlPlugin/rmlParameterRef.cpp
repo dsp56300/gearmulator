@@ -82,6 +82,9 @@ namespace rmlPlugin
 
 	std::string RmlParameterRef::createVariableName(const std::string& _name)
 	{
+		if (_name.empty())
+			return {};
+
 		std::string name = _name;
 
 		// replace all non-alphanumeric characters with underscores
@@ -90,6 +93,12 @@ namespace rmlPlugin
 			if (c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
 				continue;
 			c = '_';
+		}
+		auto& c = name.front();
+		if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z'))
+		{
+			// first character must be a letter
+			name = "p_" + name;
 		}
 		return name;
 	}
