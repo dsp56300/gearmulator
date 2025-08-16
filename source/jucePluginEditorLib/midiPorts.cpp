@@ -120,7 +120,7 @@ namespace jucePluginEditorLib
 
 	void MidiPorts::showMidiPortFailedMessage(const pluginLib::Processor& _processor, const char* _name)
 	{
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, _processor.getProperties().name, 
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, _processor.getProperties().name, 
 			std::string("Failed to open Midi ") + _name + ".\n\n"
 			"Make sure that the device is not already in use by another program.");
 	}

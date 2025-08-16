@@ -110,7 +110,7 @@ namespace jucePluginEditorLib
 
 		if(!pm->activatePatch(_files.front(), getPart()))
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, 
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, 
 				m_editor.getProcessor().getProperties().name, 
 				"Failed to load patch. Make sure that the format is supported and that the file only contains one patch.\n"
 				"\n"

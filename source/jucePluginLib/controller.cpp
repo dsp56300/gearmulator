@@ -27,7 +27,7 @@ namespace pluginLib
 	{
 		if(!m_descriptions.isValid())
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, 
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, 
 				_processor.getProperties().name + " - Failed to parse Parameter Descriptions json", 
 				"Encountered errors while parsing parameter descriptions:\n\n" + m_descriptions.getErrors());
 		}

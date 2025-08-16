@@ -494,7 +494,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void ListModel::showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback)
 	{
-		genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "Confirmation needed", "Delete selected patches from bank?", std::move(_callback));
+		genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Warning, "Confirmation needed", "Delete selected patches from bank?", std::move(_callback));
 	}
 
 	void ListModel::updateEntries() const

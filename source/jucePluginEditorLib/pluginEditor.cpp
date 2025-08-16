@@ -165,7 +165,7 @@ namespace jucePluginEditorLib
 			}
 			else
 			{
-				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "File exists", "Do you want to overwrite the existing file?", 
+				genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Warning, "File exists", "Do you want to overwrite the existing file?", 
 					[this, _callback, result](const genericUI::MessageBox::Result _result)
 				{
 					if (_result == genericUI::MessageBox::Result::Yes)
@@ -228,7 +228,7 @@ namespace jucePluginEditorLib
 	void Editor::showDemoRestrictionMessageBox() const
 	{
 		const auto &[title, msg] = getDemoRestrictionText();
-		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, title, msg);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, title, msg);
 	}
 
 	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
@@ -671,7 +671,7 @@ namespace jucePluginEditorLib
 
 		const auto& name = m_processor.getProperties().name;
 
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 			name + " - Rosetta detected", 
 			name + " appears to be running in Rosetta mode.\n"
 			"\n"

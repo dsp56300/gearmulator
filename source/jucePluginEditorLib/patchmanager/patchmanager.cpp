@@ -54,7 +54,7 @@ namespace jucePluginEditorLib::patchManager
 					msg += "\n";
 			}
 
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, "Patch Manager Error", msg);
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Patch Manager Error", msg);
 		}
 	}
 
@@ -356,7 +356,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		if(!Editor::savePresets(type, name, patchData))
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
 #endif
 	}
 
@@ -377,7 +377,7 @@ namespace jucePluginEditorLib::patchManager
 		if(patchCount > 128)
 		{
 			genericUI::MessageBox::showOkCancel(
-				juce::MessageBoxIconType::WarningIcon,
+				genericUI::MessageBox::Icon::Warning,
 				"Patch Manager", 
 				"You are trying to export more than 128 presets into a single file. Note that this dump exceeds the size of one bank and may not be compatible with your hardware",
 				[this, exportPatches](const genericUI::MessageBox::Result _result)

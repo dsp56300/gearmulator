@@ -1,6 +1,7 @@
 #include "listitem.h"
 
 #include "patchmanagerUiRml.h"
+
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
@@ -9,8 +10,6 @@
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlMenu.h"
-
-#include "juce_gui_basics/juce_gui_basics.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
@@ -222,7 +221,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 				if(existingPatch)
 				{
-					genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::QuestionIcon,
+					genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Question,
 						"Replace Patch", 
 						"Do you want to replace the existing patch '" + existingPatch->name + "' with contents of part " + std::to_string(data->getPart() + 1) + "?", 
 						[this, existingPatch, patches](const genericUI::MessageBox::Result _result)

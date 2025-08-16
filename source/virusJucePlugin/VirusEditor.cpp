@@ -390,7 +390,7 @@ namespace genericVirusUI
 						const auto title = m_processor.getProductName(true) + " - Load Arrangement Dump?";
 						const auto message = "This file contains an arrangement dump, i.e. one Multi and 16 Singles.\nDo you want to replace the current state by this dump?";
 
-						genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::QuestionIcon, title, message, [this, multi, singles](const genericUI::MessageBox::Result _result)
+						genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Question, title, message, [this, multi, singles](const genericUI::MessageBox::Result _result)
 						{
 							if (_result != genericUI::MessageBox::Result::Yes)
 								return;
@@ -413,7 +413,7 @@ namespace genericVirusUI
 						return;
 					}
 				}
-				genericUI::MessageBox::showOk(juce::AlertWindow::InfoIcon, "Information", 
+				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Information", 
 					"The selected file contains more than one patch. Please add this file as a data source in the Patch Manager instead.\n\n"
 					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
 				);

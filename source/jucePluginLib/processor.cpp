@@ -154,7 +154,7 @@ namespace pluginLib
 				}
 				juce::Timer::callAfterDelay(2000, [this, msg]
 				{
-					genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 						"Device Initialization failed", msg, 
 						[this]
 						{
@@ -475,7 +475,7 @@ namespace pluginLib
 		}
 		catch(synthLib::DeviceException& e)
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 				getName().toStdString() + " - Failed to switch device type",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n");
@@ -859,7 +859,7 @@ namespace pluginLib
 			{
 				juce::MessageManager::callAsync([e]
 				{
-					genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 						"Device creation failed:",
 						std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
 						e.what() + "\n\n");
@@ -890,7 +890,7 @@ namespace pluginLib
 		}
 		catch(const synthLib::DeviceException& e)
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 				"Device creation failed:",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n");

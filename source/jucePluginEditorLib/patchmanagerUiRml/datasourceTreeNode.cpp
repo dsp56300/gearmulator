@@ -135,7 +135,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		{
 			menu.addEntry("Delete", [this]
 			{
-				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, 
+				genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Warning, 
 					"Patch Manager", 
 					"Are you sure that you want to delete your user bank named '" + m_dataSource->name + "'?",
 					[this](const genericUI::MessageBox::Result _result)

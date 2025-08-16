@@ -160,7 +160,7 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 	{
 		LOG("ERROR: Failed to create editor: " << _err.what());
 
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name + " - Skin load failed", _err.what());
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, m_processor.getProperties().name + " - Skin load failed", _err.what());
 
 		m_parameterBinding.clear();
 		m_editor.reset();
@@ -305,7 +305,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 	{
 		m_processor.setLatencyBlocks(_blocks);
 
-		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, "Warning",
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Warning",
 			"Most hosts cannot handle if a plugin changes its latency while being in use.\n"
 			"It is advised to save, close & reopen the project to prevent synchronization issues.");
 	};
@@ -481,7 +481,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 			if(!allowAdvanced)
 			{
 				genericUI::MessageBox::showOkCancel(
-					juce::MessageBoxIconType::WarningIcon, 
+					genericUI::MessageBox::Icon::Warning, 
 					"Warning", 
 					"Changing these settings may cause instability of the plugin.\n\nPlease confirm to continue.", 
 					[this](const genericUI::MessageBox::Result _result)
@@ -519,11 +519,11 @@ void PluginEditorState::exportCurrentSkin() const
 
 	if(!res.empty())
 	{
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, editor);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Export failed", "Failed to export skin:\n\n" + res, editor);
 	}
 	else
 	{
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::InfoIcon, "Export finished", "Skin successfully exported", editor);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Export finished", "Skin successfully exported", editor);
 	}
 }
 
