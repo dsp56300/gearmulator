@@ -106,11 +106,12 @@ namespace rmlPlugin
 		if (!attribParam)
 			return;
 
-		// this is highly problematic: For elements newly created, there might be no way to know which context this element
-		// belongs to, so we have to assume that the first binding is the one we want
 		Rml::Context* context = _element->GetContext();
 		if (!context)
 		{
+			// this is highly problematic: For elements newly created, there might be no way to know which context this element
+			// belongs to because the context is still null. If there is one binding we are safe, if there are multiple bindings
+			// we have to assume the last created context is the one this element belongs to.
 			if (m_bindings.size() == 1)
 				context = m_bindings.begin()->first;
 			else if (m_lastCreatedContext)
