@@ -167,7 +167,7 @@ namespace rmlPlugin::skinConverter
 		auto param = _object.getProperty("parameter");
 		if (!param.empty())
 		{
-			_co.attribs.set("data-model", "partCurrent");
+			_co.attribs.set("data-model", RmlParameterBinding::getDataModelName(RmlParameterBinding::CurrentPart));
 			_co.attribs.set("param", param);
 		}
 
@@ -326,7 +326,7 @@ namespace rmlPlugin::skinConverter
 		// https://mikke89.github.io/RmlUiDoc/pages/data_bindings.html
 		// "Putting the data-model attribute on the <body> tag may cause issues when combined with templates."
 		// yes, causes issues indeed, so we don't do it and use "data-model" for every element that has a parameter instead. Blows up the RML a bit, but works fine.
-//		_co.attribs.set("data-model", "partCurrent");
+//		_co.attribs.set("data-model", RmlParameterBinding::getDataModelName(RmlParameterBinding::CurrentPart));
 	}
 
 	void SkinConverter::convertUiObjectRotary(ConvertedObject& _co, const genericUI::UiObject& _object)
@@ -787,8 +787,11 @@ namespace rmlPlugin::skinConverter
 			}
 			ss << ")";
 
-			_co.attribs.set("data-model", "partCurrent");	// conditions were always based on the current part
+			// conditions were always based on the current part
+			_co.attribs.set("data-model", RmlParameterBinding::getDataModelName(RmlParameterBinding::CurrentPart));
+
 			_co.attribs.set(attrib, ss.str());
+
 			return true;
 		}
 

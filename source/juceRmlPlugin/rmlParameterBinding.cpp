@@ -26,6 +26,13 @@ namespace rmlPlugin
 		bindParameters(_context, 16);
 	}
 
+	std::string RmlParameterBinding::getDataModelName(uint8_t _part)
+	{
+		if (_part == CurrentPart)
+			return "partCurrent";
+		return "part" + std::to_string(_part);
+	}
+
 	void RmlParameterBinding::bindParameters(Rml::Context* _context, const uint8_t _partCount)
 	{
 		for (uint8_t part = 0; part < _partCount; ++part)
@@ -74,11 +81,7 @@ namespace rmlPlugin
 		juceRmlUi::helper::changeAttribute(&_element, "data-attr-max", param + "_max");
 		juceRmlUi::helper::changeAttribute(&_element, "data-value", param + "_value");
 
-		std::string modelName;
-		if (_part == CurrentPart)
-			modelName = "partCurrent";
-		else
-			modelName = "part" + std::to_string(_part);
+		std::string modelName = getDataModelName(_part);
 
 		const auto modelChanged = juceRmlUi::helper::changeAttribute(&_element, "data-model", modelName);
 
@@ -149,9 +152,7 @@ namespace rmlPlugin
 	{
 		const auto& descs = m_controller.getParameterDescriptions().getDescriptions();
 
-		const std::string partName = (_targetPart == CurrentPart ? "Current" : std::to_string(_sourcePart));
-
-		auto model = _context->CreateDataModel("part" + partName);
+		auto model = _context->CreateDataModel(getDataModelName(_targetPart));
 
 		m_parametersPerPart[_targetPart].reserve(descs.size());
 

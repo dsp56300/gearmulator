@@ -40,6 +40,8 @@ namespace rmlPlugin
 		RmlParameterBinding(RmlParameterBinding&&) = default;
 		~RmlParameterBinding() = default;
 
+		static std::string getDataModelName(uint8_t _part);
+
 		void bindParametersForPart(Rml::Context* _context, uint8_t _targetPart, uint8_t _sourcePart);
 		void bindParameters(Rml::Context* _context, uint8_t _partCount);
 
