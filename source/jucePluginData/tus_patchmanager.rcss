@@ -55,4 +55,5 @@
 	flex: 0 0 auto;
 	border: 1dp #fff;
 	overflow: hidden;
+	padding: 4dp;
 }

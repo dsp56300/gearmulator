@@ -857,45 +857,65 @@ namespace rmlPlugin::skinConverter
 		constexpr float defaultFontSize = 14.0f;					// juce default font size
 		const float fontSizeScale = 1.0f / m_editor.getScale();
 
-		if(const auto* pmTreeview = getTemplate("pm_treeview"))
-		{
-			genericUI::UiObjectStyle os(m_editor);
-			os.apply(m_editor, *pmTreeview);
+		// if there are no patch manager styles, we have to specify the old default ones
+		const std::string defaultBackgroundColor = "rgb(32,32,32)";
+		const std::string defaultBorderColor = "rgb(67,67,67)";
 
+		{
 			CoStyle styleTree;
-			styleTree.add("background-color", os.getBackgroundColor());
+
+			if(const auto* pmTreeview = getTemplate("pm_treeview"))
+			{
+				genericUI::UiObjectStyle os(m_editor);
+				os.apply(m_editor, *pmTreeview);
+
+				styleTree.add("background-color", os.getBackgroundColor());
+
+				CoStyle styleTreeNode = createTextStyle(os, defaultFontSize, fontSizeScale);
+				if (!styleTree.empty())
+					m_styles.insert({ "treenode", styleTreeNode });
+
+				CoStyle styleTreeNodeSelected;
+				styleTreeNodeSelected.add("background-color", os.getSelectedItemBackgroundColor());
+				if (!styleTreeNodeSelected.empty())
+					m_styles.insert({ "treenode:selected", styleTreeNodeSelected });
+
+				res = true;
+			}
+			else
+			{
+				styleTree.add("background-color", defaultBackgroundColor);
+			}
 
 			if (!styleTree.empty())
 				m_styles.insert({ "tree", styleTree });
-
-			CoStyle styleTreeNode = createTextStyle(os, defaultFontSize, fontSizeScale);
-			if (!styleTree.empty())
-				m_styles.insert({ "treenode", styleTreeNode });
-
-			CoStyle styleTreeNodeSelected;
-			styleTreeNodeSelected.add("background-color", os.getSelectedItemBackgroundColor());
-			if (!styleTreeNodeSelected.empty())
-				m_styles.insert({ "treenode:selected", styleTreeNodeSelected });
-
-			res = true;
 		}
 
-		if (const auto* pmSearch = getTemplate("pm_search"))
 		{
-			genericUI::UiObjectStyle os(m_editor);
-			os.apply(m_editor, *pmSearch);
-			CoStyle styleSearch = createTextStyle(os, defaultFontSize, fontSizeScale);
+			CoStyle styleSearch;
 
-			styleSearch.add("background-color", os.getBackgroundColor());
+			if (const auto* pmSearch = getTemplate("pm_search"))
+			{
+				genericUI::UiObjectStyle os(m_editor);
+				os.apply(m_editor, *pmSearch);
+				styleSearch = createTextStyle(os, defaultFontSize, fontSizeScale);
 
-			if (os.getOutlineColor().getAlpha() > 0)
-				styleSearch.add("border", "1dp " + helper::toRmlColorString(os.getOutlineColor()));
+				styleSearch.add("background-color", os.getBackgroundColor());
+
+				if (os.getOutlineColor().getAlpha() > 0)
+					styleSearch.add("border", "1dp " + helper::toRmlColorString(os.getOutlineColor()));
+				else
+					styleSearch.add("border", "0dp transparent");
+
+				res = true;
+			}
 			else
-				styleSearch.add("border", "0dp transparent");
+			{
+				styleSearch.add("background-color", defaultBackgroundColor);
+				styleSearch.add("border", "1dp " + defaultBorderColor);
+			}
 
 			m_styles.insert({ "input.text", styleSearch });
-
-			res = true;
 		}
 
 		if (const auto* pmScrollbar = getTemplate("pm_scrollbar"))
@@ -911,27 +931,34 @@ namespace rmlPlugin::skinConverter
 			res = true;
 		}
 
-		if(const auto* pmListBox = getTemplate("pm_listbox"))
 		{
-			genericUI::UiObjectStyle os(m_editor);
-			os.apply(m_editor, *pmListBox);
-
 			CoStyle styleList;
-			styleList.add("background-color", os.getBackgroundColor());
+
+			if(const auto* pmListBox = getTemplate("pm_listbox"))
+			{
+				genericUI::UiObjectStyle os(m_editor);
+				os.apply(m_editor, *pmListBox);
+
+				styleList.add("background-color", os.getBackgroundColor());
+
+				CoStyle styleListEntry = createTextStyle(os, defaultFontSize, fontSizeScale);
+				if (!styleList.empty())
+					m_styles.insert({ ".listentry, .gridentry", styleListEntry });
+
+				CoStyle styleListEntrySelected;
+				styleListEntrySelected.add("background-color", os.getSelectedItemBackgroundColor());
+				if (!styleListEntrySelected.empty())
+					m_styles.insert({ ".listentry:selected, .gridentry:selected", styleListEntrySelected });
+
+				res = true;
+			}
+			else
+			{
+				styleList.add("background-color", defaultBackgroundColor);
+			}
 
 			if (!styleList.empty())
 				m_styles.insert({ ".list, .grid, .pm-infopanel", styleList });
-
-			CoStyle styleListEntry = createTextStyle(os, defaultFontSize, fontSizeScale);
-			if (!styleList.empty())
-				m_styles.insert({ ".listentry, .gridentry", styleListEntry });
-
-			CoStyle styleListEntrySelected;
-			styleListEntrySelected.add("background-color", os.getSelectedItemBackgroundColor());
-			if (!styleListEntrySelected.empty())
-				m_styles.insert({ ".listentry:selected, .gridentry:selected", styleListEntrySelected });
-
-			res = true;
 		}
 
 		auto creatPatchManagerInfoPanelTextStyle = [&](const std::string& _templateName, const std::string& _styleName)
@@ -954,24 +981,38 @@ namespace rmlPlugin::skinConverter
 		creatPatchManagerInfoPanelTextStyle("pm_info_label", ".pm-info-headline");
 		creatPatchManagerInfoPanelTextStyle("pm_info_text", ".pm-info-text");
 
-		if (const auto* pmStatus = getTemplate("pm_status_label"))
 		{
-			genericUI::UiObjectStyle os(m_editor);
-			os.apply(m_editor, *pmStatus);
-			CoStyle style = createTextStyle(os, defaultFontSize, fontSizeScale);
+			CoStyle statusStyle;
 
-			const auto itSearch = m_styles.find("input.text");
-			if (itSearch != m_styles.end())
+			if (const auto* pmStatus = getTemplate("pm_status_label"))
 			{
-				const auto itBorder = itSearch->second.properties.find("border");
-				if (itBorder != itSearch->second.properties.end())
-					style.add(itBorder->first, itBorder->second);
+				genericUI::UiObjectStyle os(m_editor);
+				os.apply(m_editor, *pmStatus);
+				statusStyle = createTextStyle(os, defaultFontSize, fontSizeScale);
+
+				const auto itSearch = m_styles.find("input.text");
+				if (itSearch != m_styles.end())
+				{
+					const auto itBorder = itSearch->second.properties.find("border");
+					if (itBorder != itSearch->second.properties.end())
+						statusStyle.add(itBorder->first, itBorder->second);
+				}
+
+				res = true;
+			}
+			else
+			{
+				statusStyle.add("background-color", defaultBackgroundColor);
+				statusStyle.add("border", "1dp " + defaultBorderColor);
 			}
 
-			if (!style.empty())
-				m_styles.insert({ ".pm-status", style });
-			res = true;
+			if (!statusStyle.empty())
+				m_styles.insert({ ".pm-status", statusStyle });
 		}
+
+		CoStyle style;
+		style.add("gap", "4dp");
+		m_styles.insert({ ".pm-vlayout", style });
 
 		CoStyle defaultFontStyle;
 
