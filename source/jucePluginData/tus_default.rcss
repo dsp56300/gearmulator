@@ -330,8 +330,10 @@ knob {
 
 .tus-parameteroverlaytype-link {
 	decorator: image(link.png contain right);
+	image-color: #63eac9;
 }
 
 .tus-parameteroverlaytype-lock {
 	decorator: image(lock.png contain left);
+	image-color: #e1512a;
 }
