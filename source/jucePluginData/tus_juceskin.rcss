@@ -24,6 +24,8 @@ combo {
 .juceTextButton {
 	padding-left: 8dp;
 	padding-right: 8dp;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 /* text buttons that can be clicked to open an URL */
