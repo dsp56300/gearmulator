@@ -8,11 +8,6 @@ namespace jucePluginEditorLib::patchManager
 	public:
 		explicit RootTreeItem(PatchManagerUiJuce& _pm);
 
-		bool mightContainSubItems() override
-		{
-			return true;
-		}
-
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override
 		{
 			return false;

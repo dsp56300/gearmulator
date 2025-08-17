@@ -23,13 +23,8 @@ namespace jucePluginEditorLib::patchManager
 		Tree(PatchManagerUiJuce& _patchManager);
 		~Tree() override;
 
-		void updateDataSources();
 		void updateTags(GroupType _type);
 		void updateTags(pluginLib::patchDB::TagType _type);
-
-		virtual void processDirty(const pluginLib::patchDB::Dirty& _dirty);
-
-		void paint(juce::Graphics& g) override;
 
 		bool keyPressed(const juce::KeyPress& _key) override;
 

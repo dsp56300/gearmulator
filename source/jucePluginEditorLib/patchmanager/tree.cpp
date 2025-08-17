@@ -4,7 +4,6 @@
 
 #include "grouptreeitem.h"
 #include "patchmanager.h"
-#include "roottreeitem.h"
 #include "treeitem.h"
 #include "defaultskin.h"
 #include "patchmanageruijuce.h"
@@ -17,68 +16,11 @@ namespace jucePluginEditorLib::patchManager
 {
 	Tree::Tree(PatchManagerUiJuce& _patchManager) : m_patchManager(_patchManager)
 	{
-		// some very basic defaults if no style is available
-		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
-//		setColour(backgroundColourId, juce::Colour(0));
-		setColour(linesColourId, juce::Colour(0xffffffff));
-		setColour(dragAndDropIndicatorColourId, juce::Colour(0xff00ff00));
-		setColour(selectedItemBackgroundColourId, juce::Colour(defaultSkin::colors::selectedItem));
-//		setColour(oddItemsColourId, juce::Colour(0xff333333));
-//		setColour(evenItemsColourId, juce::Colour(0xff555555));
-
-		auto *rootItem = new RootTreeItem(m_patchManager);
-		setRootItem(rootItem);
-		setRootItemVisible(false);
-
-		getViewport()->setScrollBarsShown(true, true);
-
-		getViewport()->getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
-		getViewport()->getVerticalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
-		getViewport()->getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
-		getViewport()->getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
 	}
 
 	Tree::~Tree()
 	{
 		deleteRootItem();
-	}
-
-	void Tree::updateDataSources()
-	{
-		auto* itemDs = getItem(GroupType::DataSources);
-		auto* itemLocalStorage = getItem(GroupType::LocalStorage);
-		auto* itemFactory = getItem(GroupType::Factory);
-
-		if (!itemDs || !itemLocalStorage)
-			return;
-
-		std::vector<pluginLib::patchDB::DataSourceNodePtr> allDataSources;
-
-		std::vector<pluginLib::patchDB::DataSourceNodePtr> readOnlyDataSources;
-		std::vector<pluginLib::patchDB::DataSourceNodePtr> storageDataSources;
-		std::vector<pluginLib::patchDB::DataSourceNodePtr> factoryDataSources;
-
-		m_patchManager.getDB().getDataSources(allDataSources);
-
-		readOnlyDataSources.reserve(allDataSources.size());
-		storageDataSources.reserve(allDataSources.size());
-		factoryDataSources.reserve(allDataSources.size());
-
-		for (const auto& ds : allDataSources)
-		{
-			if (ds->type == pluginLib::patchDB::SourceType::LocalStorage)
-				storageDataSources.push_back(ds);
-			else if (ds->type == pluginLib::patchDB::SourceType::Rom)
-				factoryDataSources.push_back(ds);
-			else
-				readOnlyDataSources.push_back(ds);
-		}
-
-		itemDs->updateFromDataSources(readOnlyDataSources);
-		itemLocalStorage->updateFromDataSources(storageDataSources);
-
-		if (itemFactory)
-			itemFactory->updateFromDataSources(factoryDataSources);
 	}
 
 	void Tree::updateTags(const GroupType _type)
@@ -102,39 +44,11 @@ namespace jucePluginEditorLib::patchManager
 		updateTags(groupType);
 	}
 
-	void Tree::processDirty(const pluginLib::patchDB::Dirty& _dirty)
-	{
-		if (_dirty.dataSources)
-			updateDataSources();
-
-		for (const auto& tagType : _dirty.tags)
-			updateTags(tagType);
-
-		if (!_dirty.searches.empty())
-		{
-			for (const auto& it : m_groupItems)
-				it.second->processDirty(_dirty.searches);
-		}
-	}
-
-	void Tree::paint(juce::Graphics& g)
-	{
-		if (findColour(backgroundColourId).getAlpha() > 0)
-			TreeView::paint(g);
-	}
-
 	bool Tree::keyPressed(const juce::KeyPress& _key)
 	{
 		if(_key.getKeyCode() == juce::KeyPress::F2Key)
 		{
-			if(getNumSelectedItems() == 1)
-			{
-				juce::TreeViewItem* item = getSelectedItem(0);
-				auto* myItem = dynamic_cast<TreeItem*>(item);
-
-				if(myItem)
-					return myItem->beginEdit();
-			}
+			// edit the currently selected item
 		}
 		return TreeView::keyPressed(_key);
 	}

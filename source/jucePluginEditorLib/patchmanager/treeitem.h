@@ -1,6 +1,5 @@
 #pragma once
 
-#include "editable.h"
 #include "savepatchdesc.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -25,7 +24,7 @@ namespace jucePluginEditorLib::patchManager
 
 	class PatchManagerUiJuce;
 
-	class TreeItem : public juce::TreeViewItem, protected Editable
+	class TreeItem : public juce::TreeViewItem
 	{
 	public:
 		TreeItem(PatchManagerUiJuce& _patchManager, const std::string& _title, uint32_t _count = g_invalidCount);
@@ -41,9 +40,6 @@ namespace jucePluginEditorLib::patchManager
 		const auto& getSearchRequest() const { return m_searchRequest; }
 
 		virtual void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches);
-
-		virtual bool beginEdit() { return false; }
-		bool beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback);
 
 		virtual void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc = nullptr);
 

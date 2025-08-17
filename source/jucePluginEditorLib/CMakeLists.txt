@@ -22,7 +22,6 @@ set(SOURCES_PM
 	patchmanager/datasourcetree.cpp patchmanager/datasourcetree.h
 	patchmanager/datasourcetreeitem.cpp patchmanager/datasourcetreeitem.h
 	patchmanager/defaultskin.h
-	patchmanager/editable.cpp patchmanager/editable.h
 	patchmanager/grid.cpp patchmanager/grid.h
 	patchmanager/griditem.cpp patchmanager/griditem.h
 	patchmanager/griditemcontainer.cpp patchmanager/griditemcontainer.h

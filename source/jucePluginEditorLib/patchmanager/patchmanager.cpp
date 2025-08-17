@@ -36,6 +36,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManager::timerCallback()
 	{
+		const juceRmlUi::RmlInterfaces::ScopedAccess access(*m_editor.getRmlComponent());
 		uiProcess();
 	}
 

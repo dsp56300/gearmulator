@@ -122,34 +122,6 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManagerUiJuce::setLayout(const LayoutType _layout)
 	{
-		if(m_layout == _layout)
-			return;
-
-		auto* oldModel = getListModel();
-
-		m_layout = _layout;
-
-		auto* newModel = getListModel();
-
-		newModel->setContent(oldModel->getSearchHandle());
-		newModel->setSelectedEntries(oldModel->getSelectedEntries());
-
-		dynamic_cast<Component*>(newModel)->setVisible(true);
-		dynamic_cast<Component*>(oldModel)->setVisible(false);
-
-		if(m_firstTimeGridLayout && _layout == LayoutType::Grid)
-		{
-			m_firstTimeGridLayout = false;
-			setGridLayout128();
-		}
-		else
-		{
-			resized();
-		}
-
-		auto& config = getEditor().getProcessor().getConfig();
-		config.setValue("pm_layout", static_cast<int>(_layout));
-		config.saveIfNeeded();
 	}
 
 	bool PatchManagerUiJuce::setGridLayout128()
@@ -230,10 +202,6 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManagerUiJuce::setCustomSearch(pluginLib::patchDB::SearchHandle _sh)
 	{
-		m_treeDS->clearSelectedItems();
-		m_treeTags->clearSelectedItems();
-
-		getListModel()->setContent(_sh);
 	}
 
 	void PatchManagerUiJuce::bringToFront()
@@ -243,97 +211,19 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManagerUiJuce::processDirty(const pluginLib::patchDB::Dirty& _dirty)
 	{
-		m_treeDS->processDirty(_dirty);
-		m_treeTags->processDirty(_dirty);
-		getListModel()->processDirty(_dirty);
 	}
 
 	void PatchManagerUiJuce::onSelectedItemsChanged()
 	{
-		// trees emit onSelectionChanged in destructor, be sure to guard it 
-		if(!getListModel())
-			return;
-
-		const auto selectedTags = m_selectedItems[m_treeTags];
-
-		auto selectItem = [&](const TreeItem* _item)
-		{
-			if(_item->getSearchHandle() != pluginLib::patchDB::g_invalidSearchHandle)
-			{
-				getListModel()->setContent(_item->getSearchHandle());
-				return true;
-			}
-			return false;
-		};
-
-		if(!selectedTags.empty())
-		{
-			if(selectedTags.size() == 1)
-			{
-				if(selectItem(*selectedTags.begin()))
-					return;
-			}
-			else
-			{
-				pluginLib::patchDB::SearchRequest search = (*selectedTags.begin())->getSearchRequest();
-				for (const auto& selectedTag : selectedTags)
-					search.tags.add(selectedTag->getSearchRequest().tags);
-				getListModel()->setContent(std::move(search));
-				return;
-			}
-		}
-
-		const auto selectedDataSources = m_selectedItems[m_treeDS];
-
-		if(!selectedDataSources.empty())
-		{
-			const auto* item = *selectedDataSources.begin();
-			selectItem(item);
-		}
-	}
-
-	void PatchManagerUiJuce::changeListenerCallback(juce::ChangeBroadcaster* _source)
-	{
-		auto* cs = dynamic_cast<juce::ColourSelector*>(_source);
-
-		if(cs)
-		{
-			const auto tagType = static_cast<pluginLib::patchDB::TagType>(static_cast<int>(cs->getProperties()["tagType"]));
-			const auto tag = cs->getProperties()["tag"].toString().toStdString();
-
-			if(tagType != pluginLib::patchDB::TagType::Invalid && !tag.empty())
-			{
-				const auto color = cs->getCurrentColour();
-				getDB().setTagColor(tagType, tag, color.getARGB());
-
-				repaint();
-			}
-		}
 	}
 
 	void PatchManagerUiJuce::selectTreeItem(TreeItem* _item)
 	{
-		if(!_item)
-			return;
-
-		_item->setSelected(true, true);
-
-		auto* parent = _item->getParentItem();
-		while(parent)
-		{
-			parent->setOpen(true);
-			parent = parent->getParentItem();
-		}
-
-		_item->getOwnerView()->scrollToKeepItemVisible(_item);
 	}
 
 	pluginLib::patchDB::DataSourceNodePtr PatchManagerUiJuce::getSelectedDataSource() const
 	{
-		const auto* item = dynamic_cast<DatasourceTreeItem*>(m_treeDS->getSelectedItem(0));
-		if(!item)
-			return {};
-		return item->getDataSource();
+		return {};
 	}
 
 	TreeItem* PatchManagerUiJuce::getSelectedDataSourceTreeItem() const
@@ -348,18 +238,7 @@ namespace jucePluginEditorLib::patchManager
 
 	pluginLib::patchDB::Color PatchManagerUiJuce::getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
-		// we want to prevent that a whole list is colored with one color just because that list is based on a tag, prefer other tags instead
-		pluginLib::patchDB::TypedTags ignoreTags;
-
-		for (const auto& selectedItem : m_selectedItems)
-		{
-			for (const auto& item : selectedItem.second)
-			{
-				const auto& s = item->getSearchRequest();
-				ignoreTags.add(s.tags);
-			}
-		}
-		return getDB().getPatchColor(_patch, ignoreTags);
+		return {};
 	}
 
 	pluginLib::patchDB::SearchHandle PatchManagerUiJuce::getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem)

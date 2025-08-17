@@ -2,8 +2,6 @@
 
 #include "treeitem.h"
 
-#include "jucePluginLib/patchdb/datasource.h"
-
 namespace pluginLib::patchDB
 {
 	struct DataSource;
@@ -14,19 +12,7 @@ namespace jucePluginEditorLib::patchManager
 	class DatasourceTreeItem : public TreeItem
 	{
 	public:
-		DatasourceTreeItem(PatchManagerUiJuce& _pm, const pluginLib::patchDB::DataSourceNodePtr& _ds);
-
-		bool mightContainSubItems() override
-		{
-			return m_dataSource->type == pluginLib::patchDB::SourceType::Folder;
-		}
-
-		bool isInterestedInPatchList(const ListModel* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
-
-		void itemClicked(const juce::MouseEvent&) override;
-		void refresh();
-
-		int compareElements(const TreeViewItem* _a, const TreeViewItem* _b) override;
+		DatasourceTreeItem(PatchManagerUiJuce& _pm, pluginLib::patchDB::DataSourceNodePtr _ds);
 
 		const auto& getDataSource() const { return m_dataSource; }
 

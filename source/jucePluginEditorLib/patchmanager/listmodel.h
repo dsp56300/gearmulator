@@ -1,7 +1,5 @@
 #pragma once
 
-#include "editable.h"
-
 #include "jucePluginLib/patchdb/patchdbtypes.h"
 
 #include "juceUiLib/messageBox.h"
@@ -26,7 +24,7 @@ namespace jucePluginEditorLib::patchManager
 	class PatchManager;
 	class PatchManagerUiJuce;
 
-	class ListModel : public juce::ListBoxModel, Editable, public juce::DragAndDropTarget, public juce::FileDragAndDropTarget
+	class ListModel : public juce::ListBoxModel, public juce::DragAndDropTarget, public juce::FileDragAndDropTarget
 	{
 	public:
 		using Patch = pluginLib::patchDB::PatchPtr;
@@ -34,19 +32,11 @@ namespace jucePluginEditorLib::patchManager
 
 		explicit ListModel(PatchManagerUiJuce& _pm);
 
-		void setContent(const pluginLib::patchDB::SearchHandle& _handle);
-		void setContent(pluginLib::patchDB::SearchRequest&& _request);
-		void clear();
-
-		void refreshContent();
-
 		// ListBoxModel
-		int getNumRows() override;
-		void paintListBoxItem(int _rowNumber, juce::Graphics& _g, int _width, int _height, bool _rowIsSelected) override;
-		juce::var getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe) override;
-		juce::Component* refreshComponentForRow(int rowNumber, bool isRowSelected, juce::Component* existingComponentToUpdate) override;
+		int getNumRows() override { return 0; };
+		void paintListBoxItem(int _rowNumber, juce::Graphics& _g, int _width, int _height, bool _rowIsSelected) override {}
 
-		void selectedRowsChanged(int lastRowSelected) override;
+		juce::Component* refreshComponentForRow(int rowNumber, bool isRowSelected, juce::Component* existingComponentToUpdate) override { return nullptr; }
 
 		const Patches& getPatches() const
 		{
@@ -63,8 +53,6 @@ namespace jucePluginEditorLib::patchManager
 		bool setSelectedPatches(const std::set<pluginLib::patchDB::PatchKey>& _patches);
 
 		void activateSelectedPatch() const;
-
-		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
 		pluginLib::patchDB::DataSourceNodePtr getDataSource() const;
 

@@ -100,7 +100,6 @@ namespace jucePluginEditorLib::patchManager
 			if (m_itemsByDataSource.find(d) != m_itemsByDataSource.end())
 			{
 				validateParent(itExisting->first, itExisting->second);
-				itExisting->second->refresh();
 				continue;
 			}
 
@@ -227,8 +226,6 @@ namespace jucePluginEditorLib::patchManager
 		validateParent(item);
 
 		m_itemsByTag.insert({ _tag, item });
-
-		item->onParentSearchChanged(getParentSearchRequest());
 
 		return item;
 	}

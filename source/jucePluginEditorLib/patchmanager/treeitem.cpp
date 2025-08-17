@@ -60,14 +60,6 @@ namespace jucePluginEditorLib::patchManager
 		processSearchUpdated(*search);
 	}
 
-	bool TreeItem::beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback)
-	{
-		auto pos = getItemPosition(true);
-		pos.setHeight(getItemHeight());
-
-		return Editable::beginEdit(getOwnerView(), pos, _initialText, std::move(_callback));
-	}
-
 	bool TreeItem::hasSearch() const
 	{
 		return m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle;
