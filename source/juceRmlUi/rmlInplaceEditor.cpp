@@ -55,8 +55,11 @@ namespace juceRmlUi
 	{
 		const auto v = m_input->GetValue();
 
+		deleteInputElement();
+
 		if (v != m_initialValue)
 			m_changeCallback(v);
+
 		close();
 	}
 
