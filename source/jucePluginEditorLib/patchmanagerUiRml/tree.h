@@ -66,6 +66,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void setFilter(const std::string& _filter) const;
 
+		std::shared_ptr<DatasourceNode> getItem(const pluginLib::patchDB::DataSource& _ds) const;
+
 	private:
 		GroupItemPtr getItem(patchManager::GroupType _group);
 

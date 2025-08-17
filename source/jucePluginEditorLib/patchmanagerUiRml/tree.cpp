@@ -120,6 +120,16 @@ namespace jucePluginEditorLib::patchManagerRml
 			it.second->setFilter(_filter);
 	}
 
+	std::shared_ptr<DatasourceNode> Tree::getItem(const pluginLib::patchDB::DataSource& _ds) const
+	{
+		for (const auto& it : m_groupItems)
+		{
+			if (auto res = it.second->getItem(_ds))
+				return res;
+		}
+		return {};
+	}
+
 	GroupItemPtr Tree::getItem(const patchManager::GroupType _group)
 	{
 		auto it = m_groupItems.find(_group);

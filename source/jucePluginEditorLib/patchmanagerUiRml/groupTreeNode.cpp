@@ -8,7 +8,7 @@
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 #include "jucePluginEditorLib/patchmanager/types.h"
 
-#include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
 #include "juceRmlUi/rmlMenu.h"
 
@@ -313,6 +313,16 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		for (const auto& it : m_itemsByTag)
 			validateParent(it.second);
+	}
+
+	GroupNode::DatasourceItemPtr GroupNode::getItem(const pluginLib::patchDB::DataSource& _ds) const
+	{
+		for (auto it : m_itemsByDataSource)
+		{
+			if (*it.first == _ds)
+				return it.second;;
+		}
+		return {};
 	}
 
 	GroupTreeElem::GroupTreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : TreeElem(_tree, _coreInstance, _tag)

@@ -87,10 +87,21 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void PatchManagerUiRml::bringToFront()
 	{
+		// TODO: 
 	}
 
 	pluginLib::patchDB::SearchHandle PatchManagerUiRml::getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem)
 	{
+		if(auto item = m_treeDS.getItem(_ds))
+		{
+			const auto searchHandle = dynamic_cast<DatasourceTreeElem*>(item->getElement())->getSearchHandle();
+
+			// select the tree item that contains the data source and expand all parents to make it visible
+			if(_selectTreeItem)
+				m_treeDS.setSelectedDatasource(item->getDatasource());
+
+			return searchHandle;
+		}
 		return pluginLib::patchDB::g_invalidSearchHandle;
 	}
 
