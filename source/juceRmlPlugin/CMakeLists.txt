@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(juceRmlPlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	rmlControllerLink.cpp rmlControllerLink.h
 	rmlPlugin.cpp rmlPlugin.h
 	rmlParameterBinding.cpp rmlParameterBinding.h
 	rmlParameterRef.cpp rmlParameterRef.h
