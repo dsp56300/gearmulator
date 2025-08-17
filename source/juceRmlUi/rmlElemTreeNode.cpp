@@ -1,5 +1,6 @@
 #include "rmlElemTreeNode.h"
 
+#include "rmlElemTree.h"
 #include "rmlEventListener.h"
 #include "rmlHelper.h"
 
@@ -91,7 +92,16 @@ namespace juceRmlUi
 				}
 
 				const auto allowMultiselect = helper::getKeyModCtrl(_event);
-				m_node->setSelected(!m_node->isSelected(), allowMultiselect);
+
+				if (getTree()->getTree().getAllowDeselectOnSecondClick())
+				{
+					m_node->setSelected(!m_node->isSelected(), allowMultiselect);
+				}
+				else
+				{
+					if (!m_node->isSelected())
+						m_node->setSelected(true, allowMultiselect);
+				}
 
 				onClick();
 			}

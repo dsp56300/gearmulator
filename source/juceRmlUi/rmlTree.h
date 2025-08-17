@@ -40,6 +40,9 @@ namespace juceRmlUi
 			return m_enableMultiselect;
 		}
 
+		void setAllowDeselectOnSecondClick(const bool _allow) { m_allowDeselectOnSecondClick = _allow; }
+		bool getAllowDeselectOnSecondClick() const { return m_allowDeselectOnSecondClick; }
+
 		ElemTree& getElement() const { return m_treeElem; }
 
 	private:
@@ -51,6 +54,7 @@ namespace juceRmlUi
 		TreeNodePtr m_root;
 		std::set<TreeNodePtr> m_selectedNodes;
 
+		bool m_allowDeselectOnSecondClick = false;
 		bool m_enableMultiselect = false;
 	};
 }
