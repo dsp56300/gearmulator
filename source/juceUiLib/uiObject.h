@@ -67,6 +67,8 @@ namespace genericUI
 
 		const auto& getTemplates() const { return m_templates; }
 
+		const std::map<std::string, std::string>& getComponentProperties() const;
+
 	private:
 		juce::DynamicObject& applyStyle(juce::DynamicObject& _obj, const std::string& _styleName);
 

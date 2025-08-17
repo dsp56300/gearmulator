@@ -146,6 +146,18 @@ namespace genericUI
 		return values;
 	}
 
+	const std::map<std::string, std::string>& UiObject::getComponentProperties() const
+	{
+		const auto it = m_components.find("componentProperties");
+		if(it == m_components.end())
+		{
+			static std::map<std::string, std::string> emptyProps;
+			return emptyProps;
+		}
+
+		return it->second;
+	}
+
 	juce::DynamicObject& UiObject::applyStyle(juce::DynamicObject& _obj, const std::string& _styleName)
 	{
 		if (m_parent)

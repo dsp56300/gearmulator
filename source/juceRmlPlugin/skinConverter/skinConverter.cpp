@@ -197,8 +197,10 @@ namespace rmlPlugin::skinConverter
 			_co.attribs.set("param", param);
 		}
 
-		if (const auto disabledAlpha = _object.getPropertyFloat("disabledAlpha", 0.0f); disabledAlpha > 0)
-			_co.attribs.set("disabledAlpha", std::to_string(disabledAlpha));
+		const auto& componentProperties = _object.getComponentProperties();
+
+		for (auto prop : componentProperties)
+			_co.attribs.set(prop.first, prop.second);
 
 		// check if object is part of any tab group
 		for (const auto& [name, group] : m_tabGroups)
