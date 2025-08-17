@@ -3,6 +3,7 @@
 #include "patchmanagerUiRml.h"
 #include "baseLib/filesystem.h"
 
+#include "jucePluginEditorLib/pluginEditor.h"
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 #include "jucePluginEditorLib/patchmanager/types.h"
@@ -285,7 +286,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		node->makeVisible();
 
-		juceRmlUi::helper::callPostFrame([node]
+		m_patchManager.getEditor().getRmlComponent()->addPostFrameCallback([node]
 		{
 			Rml::ScrollIntoViewOptions options;
 
