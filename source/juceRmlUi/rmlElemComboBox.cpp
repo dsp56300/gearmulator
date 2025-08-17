@@ -66,6 +66,9 @@ namespace juceRmlUi
 		{
 			auto& option = m_options[i];
 
+			if (option.empty())
+				continue;
+
 			m_menu->addEntry(option, i == currentValue, [this, i]
 			{
 				setValue(static_cast<float>(i));
