@@ -1,12 +1,12 @@
 #include "rmlPlugin.h"
 
-#include "rmlControllerLink.h"
 #include "rmlParameterBinding.h"
+#include "rmlPluginContext.h"
+#include "rmlPluginDocument.h"
 #include "rmlTabGroup.h"
 
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
-#include "juceRmlUi/rmlHelper.h"
 
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/Element.h"
@@ -27,26 +27,21 @@ namespace rmlPlugin
 
 	void RmlPlugin::OnContextCreate(Rml::Context* _context)
 	{
-		juce::MessageManagerLock lock;
-		m_bindings.emplace(_context, std::make_unique<RmlParameterBinding>(m_controller, _context));
-
-		m_lastCreatedContext = _context;
+		m_contexts.emplace(_context, std::make_unique<RmlPluginContext>(_context, m_controller));
 	}
 
 	void RmlPlugin::OnContextDestroy(Rml::Context* _context)
 	{
-		if (m_lastCreatedContext == _context)
-			m_lastCreatedContext = nullptr;
+		m_documentBeingLoaded.reset();
 
-		const auto it = m_bindings.find(_context);
-		if (it == m_bindings.end())
+		const auto it = m_contexts.find(_context);
+		if (it == m_contexts.end())
 		{
-			assert(false && "RmlPlugin::OnContextDestroy: Context not found in bindings map");
+			assert(false && "RmlPlugin::OnContextDestroy: Context not found");
 			return;
 		}
-		m_bindings.erase(it);
 
-		m_tabGroups.clear();
+		m_contexts.erase(it);
 
 		Plugin::OnContextDestroy(_context);
 	}
@@ -55,7 +50,32 @@ namespace rmlPlugin
 	{
 		Plugin::OnElementCreate(_element);
 
-		bindElementParameter(_element);
+		auto* context = _element->GetContext();
+
+		if (m_documentBeingLoaded)
+		{
+			m_documentBeingLoaded->elementCreated(_element);
+			if (!context)
+				context = m_documentBeingLoaded->getContext();
+		}
+
+		if (!context)
+		{
+			if (m_contexts.size() == 1)
+				context = m_contexts.begin()->second->getContext();
+			else
+				return;
+		}
+
+		const auto it = m_contexts.find(context);
+
+		if (it == m_contexts.end())
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnElementCreate: Context not found in bindings map");
+			return;
+		}
+
+		it->second->elementCreated(_element);
 
 		if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_element))
 		{
@@ -78,90 +98,60 @@ namespace rmlPlugin
 				}
 			}
 		}
+	}
 
-		if (auto* attribTabGroup = _element->GetAttribute("tabgroup"))
+	void RmlPlugin::OnDocumentOpen(Rml::Context* _context, const Rml::String& _documentPath)
+	{
+		auto it = m_contexts.find(_context);
+
+		if (it == m_contexts.end())
 		{
-			const auto name = attribTabGroup->Get<Rml::String>(_element->GetCoreInstance());
-			auto& tabGroup = m_tabGroups[name];
-			if (!tabGroup)
-				tabGroup = std::make_unique<TabGroup>();
-			if (auto* attribPage = _element->GetAttribute("tabpage"))
-				tabGroup->setPage(_element, std::stoi(attribPage->Get<Rml::String>(_element->GetCoreInstance())));
-			else if (auto* attribButton = _element->GetAttribute("tabbutton"))
-				tabGroup->setButton(_element, std::stoi(attribButton->Get<Rml::String>(_element->GetCoreInstance())));
-			else
-				throw std::runtime_error("tabgroup element must have either tabpage or tabbutton attribute set");
+			Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnDocumentOpen: Context not found");
+			return;
 		}
 
-		if (auto* attribLinkTarget = _element->GetAttribute("controllerLinkTarget"))
-		{
-			const auto target = attribLinkTarget->Get<Rml::String>(_element->GetCoreInstance());
-			if (target.empty())
-				throw std::runtime_error("controllerLinkTarget attribute must not be empty");
+		m_documentBeingLoaded = std::make_unique<RmlPluginDocument>(*it->second);
 
-			std::string conditionButton = _element->GetAttribute("controllerLinkCondition", std::string());
-			if (conditionButton.empty())
-				throw std::runtime_error("controllerLinkCondition attribute must not be empty");
-
-			m_controllerLinkDescs.push_back({ _element, target, conditionButton });
-		}
+		Plugin::OnDocumentOpen(_context, _documentPath);
 	}
 
 	void RmlPlugin::OnDocumentLoad(Rml::ElementDocument* _document)
 	{
 		Plugin::OnDocumentLoad(_document);
 
-		for (const auto & desc : m_controllerLinkDescs)
+		if (!m_documentBeingLoaded)
+			return;	// This happens if the debug document is created which is not loaded before but created at runtime
+
+		const auto it = m_contexts.find(_document->GetContext());
+		assert(it != m_contexts.end());
+		RmlPluginContext* pluginContext = it->second.get();
+
+		m_documentBeingLoaded->loadCompleted(_document);
+
+		pluginContext->addDocument(std::move(m_documentBeingLoaded));
+
+		m_documentBeingLoaded.reset();
+	}
+
+	void RmlPlugin::OnDocumentUnload(Rml::ElementDocument* _document)
+	{
+		auto it = m_contexts.find(_document->GetContext());
+		if (it == m_contexts.end())
 		{
-			auto* target = juceRmlUi::helper::findChild(_document, desc.target, true);
-			auto* button = juceRmlUi::helper::findChild(_document, desc.conditionButton, true);
-
-			m_controllerLinks.emplace_back(std::make_unique<ControllerLink>(desc.source, target, button));
+			Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnDocumentUnload: Context not found");
+			return;
 		}
-
-		m_controllerLinkDescs.clear();
+		RmlPluginContext* pluginContext = it->second.get();
+		pluginContext->removeDocument(_document);
+		Plugin::OnDocumentUnload(_document);
 	}
 
 	// ReSharper disable once CppParameterMayBeConstPtrOrRef
 	RmlParameterBinding* RmlPlugin::getParameterBinding(Rml::Context* _context)
 	{
-		auto it = m_bindings.find(_context);
-		if (it != m_bindings.end())
-			return it->second.get();
+		auto it = m_contexts.find(_context);
+		if (it != m_contexts.end())
+			return &it->second->getParameterBinding();
 		return nullptr;
-	}
-
-	void RmlPlugin::bindElementParameter(Rml::Element* _element)
-	{
-		const auto* attribParam = _element->GetAttribute("param");
-		if (!attribParam)
-			return;
-
-		Rml::Context* context = _element->GetContext();
-		if (!context)
-		{
-			// this is highly problematic: For elements newly created, there might be no way to know which context this element
-			// belongs to because the context is still null. If there is one binding we are safe, if there are multiple bindings
-			// we have to assume the last created context is the one this element belongs to.
-			if (m_bindings.size() == 1)
-				context = m_bindings.begin()->first;
-			else if (m_lastCreatedContext)
-				context = m_lastCreatedContext;
-			else
-			{
-				assert(false);
-				Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnElementCreate: Element '%s' has a 'param' attribute but failed to determine which context this element belongs to", _element->GetId().c_str());
-				return;
-			}
-		}
-		const auto it = m_bindings.find(context);
-
-		if (it == m_bindings.end())
-		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnElementCreate: Context not found in bindings map");
-			return;
-		}
-
-		it->second->bind(*_element, attribParam->Get<Rml::String>(_element->GetCoreInstance()));
 	}
 }

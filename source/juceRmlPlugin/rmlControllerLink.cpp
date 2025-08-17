@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "rmlTabGroup.h"
+
 #include "juceRmlUi/rmlElemValue.h"
 
 #include "RmlUi/Core/Element.h"
@@ -23,6 +24,13 @@ namespace rmlPlugin
 		m_source->AddEventListener(Rml::EventId::Change, this);
 
 		m_lastSourceValue = getValue(m_source);
+	}
+
+	ControllerLink::~ControllerLink()
+	{
+		m_source->RemoveEventListener(Rml::EventId::Mousedown, this);
+		m_source->RemoveEventListener(Rml::EventId::Mouseup, this);
+		m_source->RemoveEventListener(Rml::EventId::Change, this);
 	}
 
 	void ControllerLink::ProcessEvent(Rml::Event& _event)

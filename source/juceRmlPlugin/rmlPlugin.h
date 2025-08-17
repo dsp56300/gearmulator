@@ -4,6 +4,11 @@
 
 #include "RmlUi/Core/Plugin.h"
 
+namespace rmlPlugin
+{
+	class RmlPluginDocument;
+}
+
 namespace pluginLib
 {
 	class ParameterDescriptions;
@@ -12,6 +17,7 @@ namespace pluginLib
 
 namespace rmlPlugin
 {
+	class RmlPluginContext;
 	class TabGroup;
 	class ControllerLink;
 
@@ -31,28 +37,19 @@ namespace rmlPlugin
 		void OnContextCreate(Rml::Context* _context) override;
 		void OnContextDestroy(Rml::Context* _context) override;
 		void OnElementCreate(Rml::Element* _element) override;
+		void OnDocumentOpen(Rml::Context* _context, const Rml::String& _documentPath) override;
 		void OnDocumentLoad(Rml::ElementDocument* _document) override;
+		void OnDocumentUnload(Rml::ElementDocument* _document) override;
 
 		RmlParameterBinding* getParameterBinding(Rml::Context* _context);
 
 	private:
-		void bindElementParameter(Rml::Element* _element);
 
 		Rml::CoreInstance& m_coreInstance;
 		pluginLib::Controller& m_controller;
-		std::map<Rml::Context*, std::unique_ptr<RmlParameterBinding>> m_bindings;
 
-		std::map<std::string, std::unique_ptr<TabGroup>> m_tabGroups;
-		Rml::Context* m_lastCreatedContext = nullptr;
+		std::map<Rml::Context*, std::unique_ptr<RmlPluginContext>> m_contexts;
 
-		struct ControllerLinkDesc
-		{
-			Rml::Element* source;
-			std::string target;
-			std::string conditionButton;
-		};
-
-		std::vector<ControllerLinkDesc> m_controllerLinkDescs;
-		std::vector<std::unique_ptr<ControllerLink>> m_controllerLinks;
+		std::unique_ptr<RmlPluginDocument> m_documentBeingLoaded;
 	};
 }

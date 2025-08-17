@@ -13,6 +13,7 @@ namespace rmlPlugin
 	{
 	public:
 		ControllerLink(Rml::Element* _source, Rml::Element* _target, Rml::Element* _conditionButton);
+		~ControllerLink() override;
 
 		void ProcessEvent(Rml::Event& _event) override;
 
