@@ -3,10 +3,8 @@
 #include "datasourcetree.h"
 #include "datasourcetreeitem.h"
 #include "grid.h"
-#include "info.h"
 #include "list.h"
 #include "patchmanager.h"
-#include "status.h"
 #include "tagstree.h"
 #include "tree.h"
 #include "treeitem.h"
@@ -73,24 +71,11 @@ namespace jucePluginEditorLib::patchManager
 		addAndMakeVisible(m_list);
 		addChildComponent(m_grid);
 
-		// 4th column
-		m_info = new Info(*this);
-		m_info->setTopLeftPosition(m_list->getRight() + g_padding, 0);
-		m_info->setSize(getWidth() - m_info->getX(), rootH - g_searchBarHeight - g_padding);
-
-		m_status = new Status();
-		m_status->setTopLeftPosition(m_info->getX(), m_info->getHeight() + g_padding);
-		m_status->setSize(m_info->getWidth(), g_searchBarHeight);
-
-		addAndMakeVisible(m_info);
-		addAndMakeVisible(m_status);
-
 		juce::StretchableLayoutManager lm;
 
 		m_stretchableManager.setItemLayout(0, 100, rootW * 0.5, m_treeDS->getWidth());		m_stretchableManager.setItemLayout(1, 5, 5, 5);
 		m_stretchableManager.setItemLayout(2, 100, rootW * 0.5, m_treeTags->getWidth());	m_stretchableManager.setItemLayout(3, 5, 5, 5);
 		m_stretchableManager.setItemLayout(4, 100, rootW * 0.5, m_list->getWidth());		m_stretchableManager.setItemLayout(5, 5, 5, 5);
-		m_stretchableManager.setItemLayout(6, 100, rootW * 0.5, m_info->getWidth());
 
 		m_resizerBarA.setSize(5, rootH);
 		m_resizerBarB.setSize(5, rootH);
@@ -112,8 +97,6 @@ namespace jucePluginEditorLib::patchManager
 
 	PatchManagerUiJuce::~PatchManagerUiJuce()
 	{
-		delete m_status;
-		delete m_info;
 		delete m_list;
 		delete m_grid;
 
@@ -125,19 +108,9 @@ namespace jucePluginEditorLib::patchManager
 		delete m_treeDS;
 	}
 
-	void PatchManagerUiJuce::resized()
-	{
-	
-	}
-
-	void PatchManagerUiJuce::paint(juce::Graphics& _g)
-	{
-		_g.fillAll(juce::Colour(0,0,0));
-	}
-
 	void PatchManagerUiJuce::setListStatus(const uint32_t _selected, const uint32_t _total) const
 	{
-		m_status->setListStatus(_selected, _total);
+//		m_status->setListStatus(_selected, _total);
 	}
 
 	ListModel* PatchManagerUiJuce::getListModel() const
@@ -242,7 +215,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManagerUiJuce::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch)
 	{
-		m_info->setPatch(_patch);
+//		m_info->setPatch(_patch);
 	}
 
 	void PatchManagerUiJuce::setSelectedPatches(const std::set<pluginLib::patchDB::PatchPtr>& _patches)
@@ -273,10 +246,6 @@ namespace jucePluginEditorLib::patchManager
 		m_treeDS->processDirty(_dirty);
 		m_treeTags->processDirty(_dirty);
 		getListModel()->processDirty(_dirty);
-
-		m_status->setScanning(isScanning());
-
-		m_info->processDirty(_dirty);
 	}
 
 	void PatchManagerUiJuce::onSelectedItemsChanged()

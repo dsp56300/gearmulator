@@ -43,9 +43,6 @@ namespace jucePluginEditorLib::patchManager
 		PatchManagerUiJuce(Editor& _editor, PatchManager& _db, Component* _root, const std::initializer_list<GroupType>& _groupTypes);
 		~PatchManagerUiJuce() override;
 
-		void resized() override;
-		void paint(juce::Graphics& _g) override;
-
 		void setListStatus(uint32_t _selected, uint32_t _total) const;
 
 		void addSelectedItem(Tree* _tree, const TreeItem* _item);

@@ -28,7 +28,6 @@ set(SOURCES_PM
 	patchmanager/griditemcontainer.cpp patchmanager/griditemcontainer.h
 	patchmanager/gridviewport.cpp patchmanager/gridviewport.h
 	patchmanager/grouptreeitem.cpp patchmanager/grouptreeitem.h
-	patchmanager/info.cpp patchmanager/info.h
 	patchmanager/list.cpp patchmanager/list.h
 	patchmanager/listmodel.cpp patchmanager/listmodel.h
 	patchmanager/listitem.cpp patchmanager/listitem.h
@@ -45,7 +44,6 @@ set(SOURCES_PM
 	patchmanager/treeitem.cpp patchmanager/treeitem.h
 	patchmanager/types.cpp patchmanager/types.h
 	patchmanager/state.cpp patchmanager/state.h
-	patchmanager/status.cpp patchmanager/status.h
 )
 
 set(SOURCES_PM_RML
