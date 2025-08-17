@@ -1,11 +1,16 @@
 #include "led.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
+#include "pluginEditor.h"
+
+#include "juceRmlUi/juceRmlComponent.h"
+
+#include "RmlUi/Core/Element.h"
 
 namespace jucePluginEditorLib
 {
-	Led::Led(juce::Component* _targetAlpha, juce::Component* _targetInvAlpha)
-	: m_targetAlpha(_targetAlpha)
+	Led::Led(const Editor& _editor, Rml::Element* _targetAlpha, Rml::Element* _targetInvAlpha)
+	: m_editor(_editor)
+	, m_targetAlpha(_targetAlpha)
 	, m_targetInvAlpha(_targetInvAlpha)
 	{
 	}
@@ -20,30 +25,30 @@ namespace jucePluginEditorLib
 		repaint();
 	}
 
-	void Led::timerCallback()
-	{
-		setValue(m_sourceCallback());
-	}
-
-	void Led::setSourceCallback(SourceCallback&& _func, const int _timerMilliseconds/* = 1000/60*/)
+	void Led::setSourceCallback(SourceCallback&& _func)
 	{
 		m_sourceCallback = std::move(_func);
 
 		if(m_sourceCallback)
-			startTimer(_timerMilliseconds);
+		{
+			m_onPreUpdate.set(m_editor.getRmlComponent()->evPreUpdate, [this](juceRmlUi::RmlComponent*)
+			{
+				setValue(m_sourceCallback());
+			});
+		}
 		else
-			stopTimer();
+		{
+			m_onPreUpdate.reset();
+		}
 	}
 
 	void Led::repaint() const
 	{
-		m_targetAlpha->setOpaque(false);
-		m_targetAlpha->setAlpha(m_value);
+		m_targetAlpha->SetProperty(Rml::PropertyId::Opacity, Rml::Property(m_value, Rml::Unit::NUMBER));
 
 		if(!m_targetInvAlpha)
 			return;
 
-		m_targetInvAlpha->setOpaque(false);
-		m_targetInvAlpha->setAlpha(1.0f - m_value);
+		m_targetAlpha->SetProperty(Rml::PropertyId::Opacity, Rml::Property(1.0f - m_value, Rml::Unit::NUMBER));
 	}
 }

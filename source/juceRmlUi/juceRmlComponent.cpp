@@ -287,8 +287,11 @@ namespace juceRmlUi
 
 		updateRmlContextDimensions();
 
+		evPreUpdate(this);
+
 		m_rmlContext->Update();
 		m_rmlContext->Render();
+
 		m_renderProxy->finishFrame();
 
 		// ensure that new post frame callbacks that are added by other post frame callbacks are executed in the next frame

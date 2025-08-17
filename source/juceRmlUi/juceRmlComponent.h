@@ -3,6 +3,7 @@
 #include "juceRmlDrag.h"
 #include "rmlInterfaces.h"
 #include "rmlRendererProxy.h"
+#include "baseLib/event.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
@@ -31,6 +32,8 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget, public juce::DragAndDropContainer
 	{
 	public:
+		baseLib::Event<RmlComponent*> evPreUpdate;
+
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 

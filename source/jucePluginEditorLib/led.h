@@ -1,35 +1,44 @@
 #pragma once
 
-#include "juce_events/juce_events.h"
+#include "baseLib/event.h"
 
-namespace juce
+namespace juceRmlUi
 {
-	class Component;
+	class RmlComponent;
+}
+
+namespace Rml
+{
+	class Element;
 }
 
 namespace jucePluginEditorLib
 {
-	class Led : public juce::Timer
+	class Editor;
+
+	class Led
 	{
 	public:
 		using SourceCallback = std::function<float()>;
 
-		Led(juce::Component* _targetAlpha, juce::Component* _targetInvAlpha = nullptr);
+		Led(const Editor& _editor, Rml::Element* _targetAlpha, Rml::Element* _targetInvAlpha = nullptr);
 
 		void setValue(float _v);
 
-		void timerCallback() override;
-
-		void setSourceCallback(SourceCallback&& _func, int _timerMilliseconds = 1000/60);
+		void setSourceCallback(SourceCallback&& _func);
 
 	private:
 		void repaint() const;
 
-		juce::Component* m_targetAlpha;
-		juce::Component* m_targetInvAlpha;
+		const Editor& m_editor;
+
+		Rml::Element* m_targetAlpha;
+		Rml::Element* m_targetInvAlpha;
 
 		float m_value = -1.0f;
 
 		SourceCallback m_sourceCallback;
+
+		baseLib::EventListener<juceRmlUi::RmlComponent*> m_onPreUpdate;
 	};
 }
