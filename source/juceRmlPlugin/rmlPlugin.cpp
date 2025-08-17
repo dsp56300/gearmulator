@@ -1,13 +1,16 @@
 #include "rmlPlugin.h"
 
+#include "rmlControllerLink.h"
 #include "rmlParameterBinding.h"
 #include "rmlTabGroup.h"
 
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlHelper.h"
 
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/Element.h"
+#include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace rmlPlugin
@@ -89,6 +92,34 @@ namespace rmlPlugin
 			else
 				throw std::runtime_error("tabgroup element must have either tabpage or tabbutton attribute set");
 		}
+
+		if (auto* attribLinkTarget = _element->GetAttribute("controllerLinkTarget"))
+		{
+			const auto target = attribLinkTarget->Get<Rml::String>(_element->GetCoreInstance());
+			if (target.empty())
+				throw std::runtime_error("controllerLinkTarget attribute must not be empty");
+
+			std::string conditionButton = _element->GetAttribute("controllerLinkCondition", std::string());
+			if (conditionButton.empty())
+				throw std::runtime_error("controllerLinkCondition attribute must not be empty");
+
+			m_controllerLinkDescs.push_back({ _element, target, conditionButton });
+		}
+	}
+
+	void RmlPlugin::OnDocumentLoad(Rml::ElementDocument* _document)
+	{
+		Plugin::OnDocumentLoad(_document);
+
+		for (const auto & desc : m_controllerLinkDescs)
+		{
+			auto* target = juceRmlUi::helper::findChild(_document, desc.target, true);
+			auto* button = juceRmlUi::helper::findChild(_document, desc.conditionButton, true);
+
+			m_controllerLinks.emplace_back(std::make_unique<ControllerLink>(desc.source, target, button));
+		}
+
+		m_controllerLinkDescs.clear();
 	}
 
 	// ReSharper disable once CppParameterMayBeConstPtrOrRef

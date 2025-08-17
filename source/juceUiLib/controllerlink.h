@@ -14,7 +14,7 @@ namespace genericUI
 		ControllerLink(ControllerLink&&) = delete;
 		ControllerLink(const ControllerLink&) = delete;
 
-		ControllerLink(std::string _source = std::string(), std::string _dest = std::string(), std::string _conditionParam = std::string());
+		ControllerLink(std::string _source = std::string(), std::string _dest = std::string(), std::string _conditionButton = std::string());
 		~ControllerLink() override;
 
 		void create(const Editor& _editor);
@@ -23,6 +23,10 @@ namespace genericUI
 
 		void operator = (const ControllerLink&) = delete;
 		void operator = (ControllerLink&&) = delete;
+
+		const std::string& getSourceName() const { return m_sourceName; }
+		const std::string& getDestName() const { return m_destName; }
+		const std::string& getConditionButtonName() const { return m_conditionButton; }
 
 	private:
 		void sliderValueChanged(juce::Slider* _slider) override;
@@ -33,7 +37,7 @@ namespace genericUI
 
 		const std::string m_sourceName;
 		const std::string m_destName;
-		const std::string m_conditionParam;
+		const std::string m_conditionButton;
 
 		juce::Slider* m_source = nullptr;
 		juce::Slider* m_dest = nullptr;

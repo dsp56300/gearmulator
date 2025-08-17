@@ -33,16 +33,16 @@ namespace rmlPlugin
 		TabGroup& operator=(const TabGroup&) = delete;
 		TabGroup& operator=(TabGroup&&) = delete;
 
+		static bool isChecked(Rml::Element* _button);
+		static void setChecked(Rml::Element* _button, bool _checked);
+		static bool isToggle(Rml::Element* _button);
+
 	private:
 		void resize(size_t _size);
 
 		void onClick(size_t _index);
 
 		void setPageActive(size_t _index, bool _active) const;
-
-		static bool isChecked(Rml::Element* _button);
-		static void setChecked(Rml::Element* _button, bool _checked);
-		static bool isToggle(Rml::Element* _button);
 
 		std::vector<Rml::Element*> m_buttons;
 		std::vector<baseLib::EventListener<juceRmlUi::ElemButton*>> m_buttonListeners;

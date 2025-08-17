@@ -59,6 +59,8 @@ namespace genericUI
 
 		const auto& getTabGroup() const { return m_tabGroup; }
 
+		const auto& getControllerLinks() const { return m_controllerLinks; }
+
 		const auto& getCondition() const { return m_condition; }
 
 		std::set<std::string> readConditionValues() const;

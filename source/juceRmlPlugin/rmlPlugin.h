@@ -13,6 +13,7 @@ namespace pluginLib
 namespace rmlPlugin
 {
 	class TabGroup;
+	class ControllerLink;
 
 	class RmlPlugin : public Rml::Plugin
 	{
@@ -30,6 +31,7 @@ namespace rmlPlugin
 		void OnContextCreate(Rml::Context* _context) override;
 		void OnContextDestroy(Rml::Context* _context) override;
 		void OnElementCreate(Rml::Element* _element) override;
+		void OnDocumentLoad(Rml::ElementDocument* _document) override;
 
 		RmlParameterBinding* getParameterBinding(Rml::Context* _context);
 
@@ -42,5 +44,15 @@ namespace rmlPlugin
 
 		std::map<std::string, std::unique_ptr<TabGroup>> m_tabGroups;
 		Rml::Context* m_lastCreatedContext = nullptr;
+
+		struct ControllerLinkDesc
+		{
+			Rml::Element* source;
+			std::string target;
+			std::string conditionButton;
+		};
+
+		std::vector<ControllerLinkDesc> m_controllerLinkDescs;
+		std::vector<std::unique_ptr<ControllerLink>> m_controllerLinks;
 	};
 }

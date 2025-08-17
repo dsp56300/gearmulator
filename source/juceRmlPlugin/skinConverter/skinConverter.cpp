@@ -50,6 +50,21 @@ namespace rmlPlugin::skinConverter
 		if (const auto& tabGroup = _object.getTabGroup(); tabGroup.isValid())
 			m_tabGroups.insert({tabGroup.getName(), tabGroup});
 
+		for (const auto& link : _object.getControllerLinks())
+		{
+			ControllerLinkDesc l;
+
+			l.source = link->getSourceName();
+			l.target = link->getDestName();
+			l.conditionButton = link->getConditionButtonName();
+
+			auto it = m_controllerLinks.find(link->getSourceName());
+			if (it != m_controllerLinks.end())
+				it->second.push_back(l);
+			else
+				m_controllerLinks.insert({ link->getSourceName(), {l} });
+		}
+
 		for (const auto& child : _object.getChildren())
 			collectTabGroupsRecursive(*child);
 	}
@@ -216,6 +231,19 @@ namespace rmlPlugin::skinConverter
 			}
 		}
 
+		// check if any controller link source
+		const auto it = m_controllerLinks.find(_object.getName());
+		if (it != m_controllerLinks.end())
+		{
+			assert(it->second.size() == 1);
+
+			for (const auto& link : it->second)
+			{
+				_co.attribs.set("controllerLinkTarget", link.target);
+				_co.attribs.set("controllerLinkCondition", link.conditionButton);
+			}
+		}
+
 		createCondition(_co, _object);
 
 		auto url = _object.getProperty("url");
@@ -375,10 +403,11 @@ namespace rmlPlugin::skinConverter
 			CoStyle barStyle;
 			barStyle.add("decorator", "image(" + getAndValidateTextureName(_object) + ".png contain)");
 
-			const auto* drawable = m_editor.getImageDrawable(_object.getProperty("texture"));
+			const auto textureName = _object.getProperty("texture");
+			const auto* drawable = m_editor.getImageDrawable(textureName);
 			assert(drawable);
 			if (!drawable)
-				throw std::runtime_error("Failed to find image drawable for '" + imageName + "'");
+				throw std::runtime_error("Failed to find image drawable for '" + textureName + "'");
 
 			barStyle.add("width", std::to_string(drawable->getWidth()) + "dp");
 			barStyle.add("height", std::to_string(drawable->getHeight()) + "dp");
@@ -412,11 +441,15 @@ namespace rmlPlugin::skinConverter
 
 	std::string SkinConverter::getId(const genericUI::UiObject& _object)
 	{
-		const auto& id = _object.getName();
-		if (id.empty())
+		return getId(_object.getName());
+	}
+
+	std::string SkinConverter::getId(const std::string& _sourceId)
+	{
+		if (_sourceId.empty())
 			return {};
-		const auto it = m_options.idReplacements.find(id);
-		return it != m_options.idReplacements.end() ? it->second : id;
+		const auto it = m_options.idReplacements.find(_sourceId);
+		return it != m_options.idReplacements.end() ? it->second : _sourceId;
 	}
 
 	std::string SkinConverter::addTextStyle(const genericUI::UiObjectStyle& _style)

@@ -44,6 +44,7 @@ namespace rmlPlugin::skinConverter
 		void convertUiObjectTextButton(ConvertedObject& _co, const genericUI::UiObject& _object, bool _isHyperlink);
 
 		std::string getId(const genericUI::UiObject& _object);
+		std::string getId(const std::string& _sourceId);
 
 		std::string addTextStyle(const genericUI::UiObjectStyle& _style);
 		static CoStyle createTextStyle(const genericUI::UiObjectStyle& _style, float _fallbackFontSize = 0.0f, float _fontSizeScale = 1.0f);
@@ -85,6 +86,14 @@ namespace rmlPlugin::skinConverter
 		SkinConverterOptions m_options;
 
 		std::map<std::string, genericUI::TabGroup> m_tabGroups;
+
+		struct ControllerLinkDesc
+		{
+			std::string source;
+			std::string target;
+			std::string conditionButton;
+		};
+		std::map<std::string, std::vector<ControllerLinkDesc>> m_controllerLinks;
 
 		std::map<std::string, std::shared_ptr<genericUI::UiObject>> m_templates;
 	};

@@ -4,10 +4,10 @@
 
 namespace genericUI
 {
-	ControllerLink::ControllerLink(std::string _source, std::string _dest, std::string _conditionParam)
+	ControllerLink::ControllerLink(std::string _source, std::string _dest, std::string _conditionButton)
 		: m_sourceName(std::move(_source))
 		, m_destName(std::move(_dest))
-		, m_conditionParam(std::move(_conditionParam))
+		, m_conditionButton(std::move(_conditionButton))
 	{
 	}
 
@@ -25,7 +25,7 @@ namespace genericUI
 		create(
 			_editor.findComponentT<juce::Slider>(m_sourceName),
 			_editor.findComponentT<juce::Slider>(m_destName), 
-			_editor.findComponentT<juce::Button>(m_conditionParam)
+			_editor.findComponentT<juce::Button>(m_conditionButton)
 		);
 	}
 
