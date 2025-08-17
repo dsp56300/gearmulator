@@ -19,6 +19,7 @@
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlInplaceEditor.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -117,18 +118,20 @@ namespace genericVirusUI
 		auto* presetLoad = findChild("PresetLoad", false);
 		if(presetLoad)
 			juceRmlUi::EventListener::AddClick(presetLoad, [this] { loadPreset(); });
-		/*
-		m_presetName->setEditable(false, true, true);
-		m_presetName->onTextChange = [this]()
+
+		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Dblclick, [this](Rml::Event& _event)
 		{
-			const auto text = m_presetName->getText();
-			if (text.trim().length() > 0)
+			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(m_presetName->GetInnerRML()), [this](const std::string& _text)
 			{
+				auto text = Rml::StringUtilities::StripWhitespace(_text);
+				if (text.empty())
+					return;
 				getController().setSinglePresetName(getController().getCurrentPart(), text);
 				onProgramChange(getController().getCurrentPart());
-			}
-		};
+			});
+		});
 
+/*
 		m_presetNameMouseListener = new PartMouseListener(pluginLib::MidiPacket::AnyPart, [this](const juce::MouseEvent&, int)
 		{
 			startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(*getPatchManager(), getController().getCurrentPart()), m_presetName);
