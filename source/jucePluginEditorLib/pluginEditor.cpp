@@ -121,6 +121,13 @@ namespace jucePluginEditorLib
 		}
 	}
 
+	bool Editor::selectTabWithElement(const Rml::Element* _element) const
+	{
+		if (!m_rmlPlugin)
+			return false;
+		return m_rmlPlugin->selectTabWithElement(_element);
+	}
+
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size) const
 	{
 		auto res = m_processor.findResource(_filename);

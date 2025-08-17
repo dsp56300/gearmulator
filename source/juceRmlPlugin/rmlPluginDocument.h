@@ -37,6 +37,8 @@ namespace rmlPlugin
 		Rml::Context* getContext() const;
 		Rml::ElementDocument* getDocument() const { return m_document; }
 
+		bool selectTabWithElement(const Rml::Element* _element) const;
+
 	private:
 		RmlPluginContext& m_context;
 		Rml::ElementDocument* m_document = nullptr;

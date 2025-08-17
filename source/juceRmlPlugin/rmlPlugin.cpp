@@ -154,4 +154,12 @@ namespace rmlPlugin
 			return &it->second->getParameterBinding();
 		return nullptr;
 	}
+
+	bool RmlPlugin::selectTabWithElement(const Rml::Element* _element)
+	{
+		const auto it = m_contexts.find(_element->GetContext());
+		if (it == m_contexts.end())
+			return false;
+		return it->second->selectTabWithElement(_element);
+	}
 }

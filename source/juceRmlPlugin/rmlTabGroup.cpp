@@ -1,6 +1,7 @@
 #include "rmlTabGroup.h"
 
 #include "juceRmlUi/rmlElemButton.h"
+#include "juceRmlUi/rmlHelper.h"
 #include "RmlUi/Core/Element.h"
 
 namespace rmlPlugin
@@ -126,6 +127,20 @@ namespace rmlPlugin
 	{
 		if (auto* elemButton = dynamic_cast<juceRmlUi::ElemButton*>(_button))
 			return elemButton->isToggle();
+		return false;
+	}
+
+	bool TabGroup::selectTabWithElement(const Rml::Element* _element)
+	{
+		for (size_t i = 0; i < m_pages.size(); ++i)
+		{
+			if (m_pages[i] && juceRmlUi::helper::isChildOf(m_pages[i], _element))
+			{
+				setActivePage(i);
+				return true;
+			}
+		}
+
 		return false;
 	}
 }

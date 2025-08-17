@@ -40,6 +40,10 @@ namespace rmlPlugin
 
 		void elementCreated(Rml::Element* _element);
 
+		bool selectTabWithElement(const Rml::Element* _element) const;
+
+		RmlPluginDocument* getDocument(const Rml::Element* _element) const;
+
 	private:
 		Rml::Context* const m_context;
 		RmlParameterBinding m_binding;

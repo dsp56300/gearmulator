@@ -43,6 +43,8 @@ namespace rmlPlugin
 
 		RmlParameterBinding* getParameterBinding(Rml::Context* _context);
 
+		bool selectTabWithElement(const Rml::Element* _element);
+
 	private:
 
 		Rml::CoreInstance& m_coreInstance;

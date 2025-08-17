@@ -96,6 +96,8 @@ namespace jucePluginEditorLib
 
 		static void setEnabled(Rml::Element* _element, bool _enabled);
 
+		bool selectTabWithElement(const Rml::Element* _element) const;
+
 		virtual patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) { return nullptr; };
 
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;

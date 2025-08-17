@@ -206,7 +206,6 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManagerUiJuce::bringToFront()
 	{
-		getEditor().selectTabWithComponent(this);
 	}
 
 	void PatchManagerUiJuce::processDirty(const pluginLib::patchDB::Dirty& _dirty)

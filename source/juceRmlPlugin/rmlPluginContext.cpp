@@ -40,4 +40,21 @@ namespace rmlPlugin
 
 		m_binding.bind(*_element, attribParam->Get<Rml::String>(_element->GetCoreInstance()));
 	}
+
+	bool RmlPluginContext::selectTabWithElement(const Rml::Element* _element) const
+	{
+		if (auto* doc = getDocument(_element))
+			return doc->selectTabWithElement(_element);
+		return false;
+	}
+
+	RmlPluginDocument* RmlPluginContext::getDocument(const Rml::Element* _element) const
+	{
+		for (const auto& doc : m_documents)
+		{
+			if (doc->getDocument() == _element->GetOwnerDocument())
+				return doc.get();
+		}
+		return nullptr;
+	}
 }

@@ -37,6 +37,8 @@ namespace rmlPlugin
 		static void setChecked(Rml::Element* _button, bool _checked);
 		static bool isToggle(Rml::Element* _button);
 
+		bool selectTabWithElement(const Rml::Element* _element);
+
 	private:
 		void resize(size_t _size);
 

@@ -87,7 +87,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void PatchManagerUiRml::bringToFront()
 	{
-		// TODO: 
+		getEditor().selectTabWithElement(m_rootLayoutList);
 	}
 
 	pluginLib::patchDB::SearchHandle PatchManagerUiRml::getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem)

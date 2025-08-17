@@ -26,6 +26,16 @@ namespace rmlPlugin
 		return m_context.getContext();
 	}
 
+	bool RmlPluginDocument::selectTabWithElement(const Rml::Element* _element) const
+	{
+		for (auto& it : m_tabGroups)
+		{
+			if (it.second->selectTabWithElement(_element))
+				return true;
+		}
+		return false;
+	}
+
 	void RmlPluginDocument::loadCompleted(Rml::ElementDocument* _doc)
 	{
 		m_document = _doc;
