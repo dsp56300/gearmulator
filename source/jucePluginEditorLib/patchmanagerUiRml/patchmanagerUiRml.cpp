@@ -94,7 +94,11 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 		if(auto item = m_treeDS.getItem(_ds))
 		{
-			const auto searchHandle = dynamic_cast<DatasourceTreeElem*>(item->getElement())->getSearchHandle();
+			auto* elem = dynamic_cast<DatasourceTreeElem*>(item->getElement());
+			if (!elem)
+				return pluginLib::patchDB::g_invalidSearchHandle;
+
+			const auto searchHandle = elem->getSearchHandle();
 
 			// select the tree item that contains the data source and expand all parents to make it visible
 			if(_selectTreeItem)
