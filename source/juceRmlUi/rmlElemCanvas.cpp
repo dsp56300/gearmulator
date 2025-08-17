@@ -36,6 +36,11 @@ namespace juceRmlUi
 		m_textureDirty = true;
 	}
 
+	void ElemCanvas::setClearEveryFrame(const bool _clearEveryFrame)
+	{
+		m_clearEveryFrame = _clearEveryFrame;
+	}
+
 	void ElemCanvas::generateGeometry()
 	{
 		// Release the old geometry before specifying the new vertices
@@ -121,6 +126,12 @@ namespace juceRmlUi
 		{
 			m_image.reset(new juce::Image(juce::Image::ARGB, m_textureSize.x, m_textureSize.y, false));
 			m_graphics.reset(new juce::Graphics(*m_image));
+		}
+
+		if (m_clearEveryFrame)
+		{
+			juce::Image::BitmapData bitmapData(*m_image, juce::Image::BitmapData::writeOnly);
+			memset(bitmapData.data, 0, bitmapData.size);
 		}
 
 		m_repaintGraphicsCallback(*m_image, *m_graphics);

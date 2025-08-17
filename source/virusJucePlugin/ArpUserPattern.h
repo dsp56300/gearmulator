@@ -1,8 +1,10 @@
 #pragma once
 
-#include "juce_gui_basics/juce_gui_basics.h"
-
 #include "jucePluginLib/parameterlistener.h"
+
+#include "juceRmlUi/rmlElemCanvas.h"
+
+#include "juce_graphics/juce_graphics.h"
 
 namespace pluginLib
 {
@@ -14,14 +16,14 @@ namespace genericVirusUI
 {
 	class VirusEditor;
 
-	class ArpUserPattern : public juce::Component
+	class ArpUserPattern
 	{
 	public:
 		using BoundParam = std::pair<pluginLib::Parameter*, pluginLib::ParameterListener>;
 
-		ArpUserPattern(const VirusEditor& _editor);
+		ArpUserPattern(const VirusEditor& _editor, Rml::Element* _parent);
 
-		void paint(juce::Graphics& g) override;
+		void paint(const juce::Image& _image, juce::Graphics& g);
 
 		void onCurrentPartChanged();
 	private:
@@ -47,5 +49,6 @@ namespace genericVirusUI
 		juce::Colour m_colRectFillActive = juce::Colour(0xddffffff);
 		juce::Colour m_colRectFillInactive = juce::Colour(0x77aaaaaa);
 		float m_gradientStrength = 0.0f;
+		juceRmlUi::ElemCanvas* m_canvas;
 	};
 }

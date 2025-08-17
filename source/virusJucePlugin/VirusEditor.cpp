@@ -158,6 +158,9 @@ namespace genericVirusUI
 			getPluginDataModel()->set("deviceModel", virusLib::getModelName(m_processor.getModel()));
 			m_parts->onPlayModeChanged();
 		};
+
+		if (auto* arpUserGraphics = findChild("ArpUserGraphics", false))
+			m_arpUserPattern = new ArpUserPattern(*this, arpUserGraphics);
 	}
 
 	VirusEditor::~VirusEditor()

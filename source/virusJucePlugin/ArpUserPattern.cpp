@@ -3,36 +3,55 @@
 #include "VirusEditor.h"
 
 #include "VirusController.h"
+#include "juceRmlUi/rmlElemCanvas.h"
 
 #include "juceUiLib/uiObjectStyle.h"
+#include "RmlUi/Core/ElementDocument.h"
 
 namespace genericVirusUI
 {
-	ArpUserPattern::ArpUserPattern(const VirusEditor& _editor) : m_controller(_editor.getController())
+	ArpUserPattern::ArpUserPattern(const VirusEditor& _editor, Rml::Element* _parent) : m_controller(_editor.getController())
 	{
 		bindParameters();
+
+		const auto colorActive = _parent->GetAttribute("colorActive", std::string());
+		const auto colorInactive = _parent->GetAttribute("colorInactive", std::string());
+
+		genericUI::UiObjectStyle::parseColor(m_colRectFillActive, colorActive);
+		genericUI::UiObjectStyle::parseColor(m_colRectFillInactive, colorInactive);
+
+		m_gradientStrength = _parent->GetAttribute("gradient", 0.0f);
+
+		if(m_gradientStrength <= 0.0f)
+			m_gradientStrength = 0.5f;
+
+		auto canvas = _parent->GetOwnerDocument()->CreateElement("canvas");
+
+		m_canvas = dynamic_cast<juceRmlUi::ElemCanvas*>(_parent->AppendChild(std::move(canvas)));
+
+		m_canvas->SetProperty("position", "absolute");
+		m_canvas->SetProperty("left", "0px");
+		m_canvas->SetProperty("top", "0px");
+		m_canvas->SetProperty("width", "100%");
+		m_canvas->SetProperty("height", "100%");
+
+		m_canvas->setClearEveryFrame(true);
+
+		m_canvas->setRepaintGraphicsCallback([this](const juce::Image& _image, juce::Graphics& _graphics)
+		{
+			paint(_image, _graphics);
+		});
 	}
 
-	void ArpUserPattern::paint(juce::Graphics& g)
+	void ArpUserPattern::paint(const juce::Image& _image, juce::Graphics& g)
 	{
 		if(!m_patternLength.first)
 			return;
 
-		if(m_gradientStrength <= 0.0f)
-		{
-			genericUI::UiObjectStyle::parseColor(m_colRectFillActive, getProperties()["colorActive"].toString().toStdString());
-			genericUI::UiObjectStyle::parseColor(m_colRectFillInactive, getProperties()["colorInactive"].toString().toStdString());
+		const auto w = static_cast<float>(_image.getWidth());
+		const auto h = static_cast<float>(_image.getHeight());
 
-			m_gradientStrength = getProperties()["gradient"];
-
-			if(m_gradientStrength <= 0.0f)
-				m_gradientStrength = 0.5f;
-		}
-
-		const auto w = (float)getWidth();
-		const auto h = (float)getHeight();
-
-		const auto maxstepW = static_cast<float>(getWidth()) / static_cast<float>(m_steps.size());
+		const auto maxstepW = w / static_cast<float>(m_steps.size());
 
 		auto makeRectGradient = [&](const juce::Colour& _color)
 		{
@@ -113,6 +132,6 @@ namespace genericVirusUI
 
 	void ArpUserPattern::onParameterChanged()
 	{
-		repaint();
+		m_canvas->repaint();
 	}
 }

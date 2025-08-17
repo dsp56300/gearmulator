@@ -30,6 +30,8 @@ namespace juceRmlUi
 
 		void repaint();
 
+		void setClearEveryFrame(bool _clearEveryFrame);
+
 	private:
 		void generateGeometry();
 		void generateTexture();
@@ -52,5 +54,7 @@ namespace juceRmlUi
 
 		RepaintCallback m_repaintCallback;
 		RepaintGraphicsCallback m_repaintGraphicsCallback;
+
+		bool m_clearEveryFrame = false;
 	};
 }
