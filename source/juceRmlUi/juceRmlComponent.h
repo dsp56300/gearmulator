@@ -121,6 +121,8 @@ namespace juceRmlUi
 		RmlDrag m_drag;
 		juce::ModifierKeys m_currentModifierKeys;
 
+		bool m_updating = false;
+
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
 	};

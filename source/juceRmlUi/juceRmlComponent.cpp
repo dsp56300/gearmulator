@@ -285,6 +285,10 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
+		if (m_updating)
+			return;
+
+		m_updating = true;
 		updateRmlContextDimensions();
 
 		evPreUpdate(this);
@@ -300,6 +304,7 @@ namespace juceRmlUi
 		for (const auto& postFrameCallback : m_tempPostFrameCallbacks)
 			postFrameCallback();
 		m_tempPostFrameCallbacks.clear();
+		m_updating = false;
 	}
 
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
