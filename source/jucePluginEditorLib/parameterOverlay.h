@@ -4,6 +4,8 @@
 
 #include "RmlUi/Core/Vector2.h"
 
+#include <cstdint>
+
 namespace pluginLib
 {
 	class Parameter;

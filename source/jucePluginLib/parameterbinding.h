@@ -2,6 +2,10 @@
 
 #include "parameterlistener.h"
 
+#include <cstdint>
+#include <map>
+#include <vector>
+
 namespace juce
 {
 	class Label;
