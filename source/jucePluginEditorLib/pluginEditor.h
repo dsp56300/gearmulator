@@ -174,6 +174,9 @@ namespace jucePluginEditorLib
 			auto* root = getRmlRootElement();
 			return juceRmlUi::helper::findChildT<T>(root, _name, _mustExist);
 		}
+
+		const auto& getSkin() const { return m_skin; }
+
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;
 

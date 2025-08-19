@@ -149,8 +149,9 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		m_editor->setTopLeftPosition(0, 0);
 
-		m_currentSkin = skin;
-		writeSkinToConfig(skin);
+		m_currentSkin = editor->getSkin();
+
+		writeSkinToConfig(m_currentSkin);
 
 		if(evSkinLoaded)
 			evSkinLoaded(m_editor.get());
