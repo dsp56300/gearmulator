@@ -40,7 +40,6 @@ namespace juceRmlUi
 			break;
 		case Rml::Log::LT_ERROR:
 			LOG("RML LOG [error]: " << _message.c_str());
-			assert(false && "RML error");
 			break;
 		case Rml::Log::LT_ASSERT:
 			LOG("RML LOG [assert]: " << _message.c_str());
