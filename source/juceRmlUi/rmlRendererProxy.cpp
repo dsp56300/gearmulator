@@ -412,13 +412,39 @@ namespace juceRmlUi
 	bool RendererProxy::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const
 	{
 		uint32_t fileSize;
-		auto* ptr = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);
+		const char* ptr = nullptr;
+
+		auto generateDummyImage = [&_image, &_textureDimensions]()
+		{
+			// Generate a dummy image (1x1 transparent pixel)
+			_image = juce::Image(juce::Image::PixelFormat::ARGB, 64, 64, true);
+
+			juce::Graphics g(_image);
+
+			g.fillAll(juce::Colour(0xffff00ff));
+			g.setOpacity(1.0f);
+			g.setColour(juce::Colours::white);
+			g.drawText("Image N/A", 0, 0, _image.getWidth(), _image.getHeight(), juce::Justification::centred, true);
+
+			_textureDimensions.x = _image.getWidth();
+			_textureDimensions.y = _image.getHeight();
+
+			return true;
+		};
+		try
+		{
+			ptr = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);
+		}
+		catch (std::runtime_error& e)
+		{
+			Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "image file not found: %s", e.what());
+			return generateDummyImage();
+		}
 
 		if (!ptr)
 		{
 			Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "image file not found: %s", _source.c_str());
-			assert(false && "file not found");
-			return false;
+			return generateDummyImage();
 		}
 
 		// Load the texture from the file
@@ -426,8 +452,7 @@ namespace juceRmlUi
 		if (_image.isNull())
 		{
 			Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "Failed to load image from source %s", _source.c_str());
-			assert(false && "failed to load image");
-			return false;
+			return generateDummyImage();
 		}
 
 		_textureDimensions.x = _image.getWidth();
