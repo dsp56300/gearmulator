@@ -66,23 +66,21 @@ namespace jucePluginEditorLib
 
 	void Editor::create()
 	{
-		std::map<std::string, std::string> idReplacements;
-
-		if (juce::String(m_skin.jsonFilename).endsWithIgnoreCase(".json"))
+		if (juce::String(m_skin.filename).endsWithIgnoreCase(".json"))
 		{
-			genericUI::Editor::create(m_skin.jsonFilename);
+			genericUI::Editor::create(m_skin.filename);
 
-			const auto newName = baseLib::filesystem::stripExtension(m_skin.jsonFilename);
+			const auto newName = baseLib::filesystem::stripExtension(m_skin.filename);
 
 			rmlPlugin::skinConverter::SkinConverterOptions options;
 			initSkinConverterOptions(options);
 
 			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), m_skin.folder, newName + ".rml", newName + ".rcss", std::move(options));
 
-			m_skin.jsonFilename = newName + ".rml";
+			m_skin.filename = newName + ".rml";
 		}
 
-		m_rmlComponent.reset(dynamic_cast<juceRmlUi::RmlComponent*>(createRmlUiComponent(m_skin.jsonFilename)));
+		m_rmlComponent.reset(dynamic_cast<juceRmlUi::RmlComponent*>(createRmlUiComponent(m_skin.filename)));
 
 		if (auto* elem = m_rmlComponent->getDocument()->GetElementById("patchmanager"))
 		{

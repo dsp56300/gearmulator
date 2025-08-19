@@ -33,7 +33,7 @@ PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controlle
 	// point embedded skins to public data folder if they're not embedded
 	for (auto& skin : m_includedSkins)
 	{
-		if(skin.folder.empty() && !m_processor.findResource(skin.jsonFilename))
+		if(skin.folder.empty() && !m_processor.findResource(skin.filename))
 			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
 	}
 }
@@ -76,7 +76,7 @@ void PluginEditorState::loadDefaultSkin()
 {
 	Skin skin = readSkinFromConfig();
 
-	if(skin.jsonFilename.empty())
+	if(skin.filename.empty())
 	{
 		skin = m_includedSkins[0];
 	}
@@ -132,7 +132,7 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 	try
 	{
 		// if the embedded skin cannot be found, use skin folder as fallback
-		if(skin.folder.empty() && !m_processor.findResource(skin.jsonFilename))
+		if(skin.folder.empty() && !m_processor.findResource(skin.filename))
 		{
 			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
 		}
@@ -206,7 +206,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList, &knownSkins](const Skin& _skin)
 	{
 		// remove dupes by folder
-		if(!_skin.folder.empty() && !knownSkins.insert({_skin.folder, _skin.jsonFilename}).second)
+		if(!_skin.folder.empty() && !knownSkins.insert({_skin.folder, _skin.filename}).second)
 			return;
 
 		const auto isCurrent = _skin == getCurrentSkin();
@@ -537,7 +537,7 @@ Skin PluginEditorState::readSkinFromConfig() const
 
 	Skin skin;
 	skin.displayName = config.getValue("skinDisplayName", "").toStdString();
-	skin.jsonFilename = config.getValue("skinFile", "").toStdString();
+	skin.filename = config.getValue("skinFile", "").toStdString();
 	skin.folder = config.getValue("skinFolder", "").toStdString();
 	return skin;
 }
@@ -547,7 +547,7 @@ void PluginEditorState::writeSkinToConfig(const Skin& _skin) const
 	auto& config = m_processor.getConfig();
 
 	config.setValue("skinDisplayName", _skin.displayName.c_str());
-	config.setValue("skinFile", juce::String::fromUTF8(_skin.jsonFilename.c_str()));
+	config.setValue("skinFile", juce::String::fromUTF8(_skin.filename.c_str()));
 	config.setValue("skinFolder", juce::String::fromUTF8(_skin.folder.c_str()));
 }
 
