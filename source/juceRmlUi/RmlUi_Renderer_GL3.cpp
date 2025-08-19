@@ -486,7 +486,7 @@ struct FramebufferData {
 
 enum class FramebufferAttachment { None, DepthStencil };
 
-static void CheckGLError(const char* operation_name)
+static void CheckGLError(Rml::CoreInstance& in_core_instance, const char* operation_name)
 {
 #ifdef RMLUI_DEBUG
 	GLenum error_code = glGetError();
@@ -503,14 +503,14 @@ static void CheckGLError(const char* operation_name)
 				break;
 			}
 		}
-		Rml::Log::Message(Rml::Log::LT_ERROR, "OpenGL error during %s. Error code 0x%x (%s).", operation_name, error_code, error_str);
+		Rml::Log::Message(in_core_instance, Rml::Log::LT_ERROR, "OpenGL error during %s. Error code 0x%x (%s).", operation_name, error_code, error_str);
 	}
 #endif
 	(void)operation_name;
 }
 
 // Create the shader, 'shader_type' is either GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
-static bool CreateShader(GLuint& out_shader_id, GLenum shader_type, const char* code_string)
+static bool CreateShader(Rml::CoreInstance& in_core_instance, GLuint& out_shader_id, GLenum shader_type, const char* code_string)
 {
 	RMLUI_ASSERT(shader_type == GL_VERTEX_SHADER || shader_type == GL_FRAGMENT_SHADER);
 
@@ -527,19 +527,19 @@ static bool CreateShader(GLuint& out_shader_id, GLenum shader_type, const char* 
 		char* info_log_string = new char[info_log_length + 1];
 		glGetShaderInfoLog(id, info_log_length, NULL, info_log_string);
 
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Compile failure in OpenGL shader: %s", info_log_string);
+		Rml::Log::Message(in_core_instance, Rml::Log::LT_ERROR, "Compile failure in OpenGL shader: %s", info_log_string);
 		delete[] info_log_string;
 		glDeleteShader(id);
 		return false;
 	}
 
-	CheckGLError("CreateShader");
+	CheckGLError(in_core_instance, "CreateShader");
 
 	out_shader_id = id;
 	return true;
 }
 
-static bool CreateProgram(GLuint& out_program, Uniforms& inout_uniform_map, ProgramId program_id, GLuint vertex_shader, GLuint fragment_shader)
+static bool CreateProgram(Rml::CoreInstance& in_core_instance, GLuint& out_program, Uniforms& inout_uniform_map, ProgramId program_id, GLuint vertex_shader, GLuint fragment_shader)
 {
 	GLuint id = glCreateProgram();
 	RMLUI_ASSERT(id);
@@ -547,7 +547,7 @@ static bool CreateProgram(GLuint& out_program, Uniforms& inout_uniform_map, Prog
 	for (GLuint i = 0; i < (GLuint)VertexAttribute::Count; i++)
 		glBindAttribLocation(id, i, vertex_attribute_names[i]);
 
-	CheckGLError("BindAttribLocations");
+	CheckGLError(in_core_instance, "BindAttribLocations");
 
 	glAttachShader(id, vertex_shader);
 	glAttachShader(id, fragment_shader);
@@ -566,7 +566,7 @@ static bool CreateProgram(GLuint& out_program, Uniforms& inout_uniform_map, Prog
 		char* info_log_string = new char[info_log_length + 1];
 		glGetProgramInfoLog(id, info_log_length, NULL, info_log_string);
 
-		Rml::Log::Message(Rml::Log::LT_ERROR, "OpenGL program linking failure: %s", info_log_string);
+		Rml::Log::Message(in_core_instance, Rml::Log::LT_ERROR, "OpenGL program linking failure: %s", info_log_string);
 		delete[] info_log_string;
 		glDeleteProgram(id);
 		return false;
@@ -606,17 +606,17 @@ static bool CreateProgram(GLuint& out_program, Uniforms& inout_uniform_map, Prog
 		}
 		else
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "OpenGL program uses unknown uniform '%s'.", name_buf);
+			Rml::Log::Message(in_core_instance, Rml::Log::LT_ERROR, "OpenGL program uses unknown uniform '%s'.", name_buf);
 			return false;
 		}
 	}
 
-	CheckGLError("CreateProgram");
+	CheckGLError(in_core_instance, "CreateProgram");
 
 	return true;
 }
 
-static bool CreateFramebuffer(FramebufferData& out_fb, int width, int height, int samples, FramebufferAttachment attachment,
+static bool CreateFramebuffer(Rml::CoreInstance& in_core_instance, FramebufferData& out_fb, int width, int height, int samples, FramebufferAttachment attachment,
 	GLuint shared_depth_stencil_buffer)
 {
 #ifdef RMLUI_PLATFORM_EMSCRIPTEN
@@ -683,7 +683,7 @@ static bool CreateFramebuffer(FramebufferData& out_fb, int width, int height, in
 	const GLuint framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE)
 	{
-		Rml::Log::Message(Rml::Log::LT_ERROR, "OpenGL framebuffer could not be generated. Error code %x.", framebuffer_status);
+		Rml::Log::Message(in_core_instance, Rml::Log::LT_ERROR, "OpenGL framebuffer could not be generated. Error code %x.", framebuffer_status);
 		return false;
 	}
 
@@ -691,7 +691,7 @@ static bool CreateFramebuffer(FramebufferData& out_fb, int width, int height, in
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-	CheckGLError("CreateFramebuffer");
+	CheckGLError(in_core_instance, "CreateFramebuffer");
 
 	out_fb = {};
 	out_fb.width = width;
@@ -773,31 +773,31 @@ static void BindTexture(const FramebufferData& fb)
 	glBindTexture(GL_TEXTURE_2D, fb.color_tex_buffer);
 }
 
-static bool CreateShaders(ProgramData& data)
+static bool CreateShaders(Rml::CoreInstance& in_core_instance, ProgramData& data)
 {
 	RMLUI_ASSERT(std::all_of(data.vert_shaders.begin(), data.vert_shaders.end(), [](auto&& value) { return value == 0; }));
 	RMLUI_ASSERT(std::all_of(data.frag_shaders.begin(), data.frag_shaders.end(), [](auto&& value) { return value == 0; }));
 	RMLUI_ASSERT(std::all_of(data.programs.begin(), data.programs.end(), [](auto&& value) { return value == 0; }));
-	auto ReportError = [](const char* type, const char* name) {
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Could not create OpenGL %s: '%s'.", type, name);
+	auto ReportError = [&in_core_instance](const char* type, const char* name) {
+		Rml::Log::Message(in_core_instance, Rml::Log::LT_ERROR, "Could not create OpenGL %s: '%s'.", type, name);
 		return false;
 	};
 
 	for (const VertShaderDefinition& def : vert_shader_definitions)
 	{
-		if (!CreateShader(data.vert_shaders[def.id], GL_VERTEX_SHADER, def.code_str))
+		if (!CreateShader(in_core_instance, data.vert_shaders[def.id], GL_VERTEX_SHADER, def.code_str))
 			return ReportError("vertex shader", def.name_str);
 	}
 
 	for (const FragShaderDefinition& def : frag_shader_definitions)
 	{
-		if (!CreateShader(data.frag_shaders[def.id], GL_FRAGMENT_SHADER, def.code_str))
+		if (!CreateShader(in_core_instance, data.frag_shaders[def.id], GL_FRAGMENT_SHADER, def.code_str))
 			return ReportError("fragment shader", def.name_str);
 	}
 
 	for (const ProgramDefinition& def : program_definitions)
 	{
-		if (!CreateProgram(data.programs[def.id], data.uniforms, def.id, data.vert_shaders[def.vert_shader], data.frag_shaders[def.frag_shader]))
+		if (!CreateProgram(in_core_instance, data.programs[def.id], data.uniforms, def.id, data.vert_shaders[def.vert_shader], data.frag_shaders[def.frag_shader]))
 			return ReportError("program", def.name_str);
 	}
 
@@ -823,10 +823,10 @@ static void DestroyShaders(const ProgramData& data)
 
 } // namespace Gfx
 
-RenderInterface_GL3::RenderInterface_GL3(Rml::CoreInstance& in_core_instance) : RenderInterface(in_core_instance)
+RenderInterface_GL3::RenderInterface_GL3(Rml::CoreInstance& in_core_instance) : RenderInterface(in_core_instance), render_layers(in_core_instance)
 {
 	auto mut_program_data = Rml::MakeUnique<Gfx::ProgramData>();
-	if (Gfx::CreateShaders(*mut_program_data))
+	if (Gfx::CreateShaders(in_core_instance, *mut_program_data))
 	{
 		program_data = std::move(mut_program_data);
 		Rml::Mesh mesh;
@@ -940,7 +940,7 @@ void RenderInterface_GL3::BeginFrame()
 	program_transform_dirty.set();
 	scissor_state = Rml::Rectanglei::MakeInvalid();
 
-	Gfx::CheckGLError("BeginFrame");
+	Gfx::CheckGLError(core_instance, "BeginFrame");
 }
 
 void RenderInterface_GL3::EndFrame()
@@ -1017,7 +1017,7 @@ void RenderInterface_GL3::EndFrame()
 	glStencilOpSeparate(GL_BACK, glstate_backup.stencil_back.fail, glstate_backup.stencil_back.pass_depth_fail,
 		glstate_backup.stencil_back.pass_depth_pass);
 
-	Gfx::CheckGLError("EndFrame");
+	Gfx::CheckGLError(core_instance, "EndFrame");
 }
 
 void RenderInterface_GL3::Clear()
@@ -1060,7 +1060,7 @@ Rml::CompiledGeometryHandle RenderInterface_GL3::CompileGeometry(Rml::Span<const
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	Gfx::CheckGLError("CompileGeometry");
+	Gfx::CheckGLError(core_instance, "CompileGeometry");
 
 	Gfx::CompiledGeometryData* geometry = new Gfx::CompiledGeometryData;
 	geometry->vao = vao;
@@ -1099,7 +1099,7 @@ void RenderInterface_GL3::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	Gfx::CheckGLError("RenderCompiledGeometry");
+	Gfx::CheckGLError(core_instance, "RenderCompiledGeometry");
 }
 
 void RenderInterface_GL3::ReleaseGeometry(Rml::CompiledGeometryHandle handle)
@@ -1147,7 +1147,7 @@ void RenderInterface_GL3::SetScissor(Rml::Rectanglei region, bool vertically_fli
 		glScissor(x, y, region.Width(), region.Height());
 	}
 
-	Gfx::CheckGLError("SetScissorRegion");
+	Gfx::CheckGLError(core_instance, "SetScissorRegion");
 	scissor_state = region;
 }
 
@@ -1254,7 +1254,7 @@ Rml::TextureHandle RenderInterface_GL3::LoadTexture(Rml::Vector2i& texture_dimen
 
 	if (buffer_size <= sizeof(TGAHeader))
 	{
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Texture file size is smaller than TGAHeader, file is not a valid TGA image.");
+		Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "Texture file size is smaller than TGAHeader, file is not a valid TGA image.");
 		file_interface->Close(file_handle);
 		return false;
 	}
@@ -1272,14 +1272,14 @@ Rml::TextureHandle RenderInterface_GL3::LoadTexture(Rml::Vector2i& texture_dimen
 
 	if (header.dataType != 2)
 	{
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Only 24/32bit uncompressed TGAs are supported.");
+		Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "Only 24/32bit uncompressed TGAs are supported.");
 		return false;
 	}
 
 	// Ensure we have at least 3 colors
 	if (color_mode < 3)
 	{
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Only 24 and 32bit textures are supported.");
+		Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "Only 24 and 32bit textures are supported.");
 		return false;
 	}
 
@@ -1325,7 +1325,7 @@ Rml::TextureHandle RenderInterface_GL3::GenerateTexture(Rml::Span<const Rml::byt
 	GLuint texture_id = Gfx::CreateTexture(source_data, source_dimensions);
 	if (texture_id == 0)
 	{
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to generate texture.");
+		Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "Failed to generate texture.");
 		return {};
 	}
 	return (Rml::TextureHandle)texture_id;
@@ -1509,7 +1509,7 @@ void RenderInterface_GL3::RenderBlur(float sigma, const Gfx::FramebufferData& so
 	// Restore render state.
 	SetScissor(original_scissor);
 
-	Gfx::CheckGLError("Blur");
+	Gfx::CheckGLError(core_instance, "Blur");
 }
 
 void RenderInterface_GL3::ReleaseTexture(Rml::TextureHandle texture_handle)
@@ -1649,7 +1649,7 @@ Rml::CompiledFilterHandle RenderInterface_GL3::CompileFilter(const Rml::String& 
 	if (filter.type != FilterType::Invalid)
 		return reinterpret_cast<Rml::CompiledFilterHandle>(new CompiledFilter(std::move(filter)));
 
-	Rml::Log::Message(Rml::Log::LT_WARNING, "Unsupported filter type '%s'.", name.c_str());
+	Rml::Log::Message(core_instance, Rml::Log::LT_WARNING, "Unsupported filter type '%s'.", name.c_str());
 	return {};
 }
 
@@ -1735,7 +1735,7 @@ Rml::CompiledShaderHandle RenderInterface_GL3::CompileShader(const Rml::String& 
 	if (shader.type != CompiledShaderType::Invalid)
 		return reinterpret_cast<Rml::CompiledShaderHandle>(new CompiledShader(std::move(shader)));
 
-	Rml::Log::Message(Rml::Log::LT_WARNING, "Unsupported shader type '%s'.", name.c_str());
+	Rml::Log::Message(core_instance, Rml::Log::LT_WARNING, "Unsupported shader type '%s'.", name.c_str());
 	return {};
 }
 
@@ -1784,12 +1784,12 @@ void RenderInterface_GL3::RenderShader(Rml::CompiledShaderHandle shader_handle, 
 	break;
 	case CompiledShaderType::Invalid:
 	{
-		Rml::Log::Message(Rml::Log::LT_WARNING, "Unhandled render shader %d.", (int)type);
+		Rml::Log::Message(core_instance, Rml::Log::LT_WARNING, "Unhandled render shader %d.", (int)type);
 	}
 	break;
 	}
 
-	Gfx::CheckGLError("RenderShader");
+	Gfx::CheckGLError(core_instance, "RenderShader");
 }
 
 void RenderInterface_GL3::ReleaseShader(Rml::CompiledShaderHandle shader_handle)
@@ -1925,13 +1925,13 @@ void RenderInterface_GL3::RenderFilters(Rml::Span<const Rml::CompiledFilterHandl
 		break;
 		case FilterType::Invalid:
 		{
-			Rml::Log::Message(Rml::Log::LT_WARNING, "Unhandled render filter %d.", (int)type);
+			Rml::Log::Message(core_instance, Rml::Log::LT_WARNING, "Unhandled render filter %d.", (int)type);
 		}
 		break;
 		}
 	}
 
-	Gfx::CheckGLError("RenderFilter");
+	Gfx::CheckGLError(core_instance, "RenderFilter");
 }
 
 Rml::LayerHandle RenderInterface_GL3::PushLayer()
@@ -1974,7 +1974,7 @@ void RenderInterface_GL3::CompositeLayers(Rml::LayerHandle source_handle, Rml::L
 	if (destination_handle != render_layers.GetTopLayerHandle())
 		glBindFramebuffer(GL_FRAMEBUFFER, render_layers.GetTopLayer().framebuffer);
 
-	Gfx::CheckGLError("CompositeLayers");
+	Gfx::CheckGLError(core_instance, "CompositeLayers");
 }
 
 void RenderInterface_GL3::PopLayer()
@@ -1991,7 +1991,7 @@ Rml::TextureHandle RenderInterface_GL3::SaveLayerAsTexture()
 	GLuint render_texture = Gfx::CreateTexture({}, bounds.Size());
 	if (render_texture == 0)
 	{
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to create render texture.");
+		Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "Failed to create render texture.");
 		return {};
 	}
 
@@ -2021,7 +2021,7 @@ Rml::TextureHandle RenderInterface_GL3::SaveLayerAsTexture()
 
 	SetScissor(bounds);
 	glBindFramebuffer(GL_FRAMEBUFFER, render_layers.GetTopLayer().framebuffer);
-	Gfx::CheckGLError("SaveLayerAsTexture");
+	Gfx::CheckGLError(core_instance, "SaveLayerAsTexture");
 
 	return (Rml::TextureHandle)render_texture;
 }
@@ -2042,7 +2042,7 @@ Rml::CompiledFilterHandle RenderInterface_GL3::SaveLayerAsMaskImage()
 
 	glEnable(GL_BLEND);
 	glBindFramebuffer(GL_FRAMEBUFFER, render_layers.GetTopLayer().framebuffer);
-	Gfx::CheckGLError("SaveLayerAsMaskImage");
+	Gfx::CheckGLError(core_instance, "SaveLayerAsMaskImage");
 
 	CompiledFilter filter = {};
 	filter.type = FilterType::MaskImage;
@@ -2078,10 +2078,10 @@ void RenderInterface_GL3::SubmitTransformUniform(Rml::Vector2f translation)
 
 	glUniform2fv(GetUniformLocation(UniformId::Translate), 1, &translation.x);
 
-	Gfx::CheckGLError("SubmitTransformUniform");
+	Gfx::CheckGLError(core_instance, "SubmitTransformUniform");
 }
 
-RenderInterface_GL3::RenderLayerStack::RenderLayerStack()
+RenderInterface_GL3::RenderLayerStack::RenderLayerStack(Rml::CoreInstance& in_core_instance) : core_instance(in_core_instance)
 {
 	fb_postprocess.resize(4);
 }
@@ -2101,7 +2101,7 @@ Rml::LayerHandle RenderInterface_GL3::RenderLayerStack::PushLayer()
 		GLuint shared_depth_stencil = (fb_layers.empty() ? 0 : fb_layers.front().depth_stencil_buffer);
 
 		fb_layers.push_back(Gfx::FramebufferData{});
-		Gfx::CreateFramebuffer(fb_layers.back(), width, height, RMLUI_NUM_MSAA_SAMPLES, Gfx::FramebufferAttachment::DepthStencil,
+		Gfx::CreateFramebuffer(core_instance, fb_layers.back(), width, height, RMLUI_NUM_MSAA_SAMPLES, Gfx::FramebufferAttachment::DepthStencil,
 			shared_depth_stencil);
 	}
 
@@ -2176,7 +2176,7 @@ const Gfx::FramebufferData& RenderInterface_GL3::RenderLayerStack::EnsureFramebu
 	RMLUI_ASSERT(index < (int)fb_postprocess.size())
 	Gfx::FramebufferData& fb = fb_postprocess[index];
 	if (!fb.framebuffer)
-		Gfx::CreateFramebuffer(fb, width, height, 0, Gfx::FramebufferAttachment::None, 0);
+		Gfx::CreateFramebuffer(core_instance, fb, width, height, 0, Gfx::FramebufferAttachment::None, 0);
 	return fb;
 }
 

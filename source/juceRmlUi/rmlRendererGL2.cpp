@@ -70,9 +70,9 @@ namespace juceRmlUi::gl2
 		glTranslatef(_translation.x, _translation.y, 0.0f);
 		CHECK_OPENGL_ERROR;
 
-		auto& shader = m_shaders.getShader(_texture ? ShaderType::DefaultTextured : ShaderType::DefaultColored);
+		auto& shader = m_shaders.getShader(core_instance, _texture ? ShaderType::DefaultTextured : ShaderType::DefaultColored);
 
-		renderGeometry(*geom, shader, { static_cast<uint32_t>(_texture), Rml::Matrix4f::Identity() });
+		renderGeometry(core_instance, *geom, shader, { static_cast<uint32_t>(_texture), Rml::Matrix4f::Identity() });
 
 	    glPopMatrix();
 		CHECK_OPENGL_ERROR;
@@ -233,11 +233,11 @@ namespace juceRmlUi::gl2
 						glBindFramebuffer(GL_FRAMEBUFFER, dest);
 						CHECK_OPENGL_ERROR;
 						if (!dest)
-							setupBlending(_blendMode);
+							setupBlending(core_instance, _blendMode);
 					}
 					auto params = filter->params;
 					params.texture = source->texture;
-					renderGeometry(*geom, m_shaders.getShader(filter->type), params);
+					renderGeometry(core_instance, *geom, m_shaders.getShader(core_instance, filter->type), params);
 				}
 
 				CHECK_OPENGL_ERROR;
@@ -250,10 +250,10 @@ namespace juceRmlUi::gl2
 			if (src)
 			{
 				if (!dest)
-					setupBlending(_blendMode);
+					setupBlending(core_instance, _blendMode);
 				glBindFramebuffer(GL_FRAMEBUFFER, dest);
 				CHECK_OPENGL_ERROR;
-				renderGeometry(*geom, m_shaders.getShader(ShaderType::Fullscreen), { src->texture, Rml::Matrix4f::Identity() });
+				renderGeometry(core_instance, *geom, m_shaders.getShader(core_instance, ShaderType::Fullscreen), { src->texture, Rml::Matrix4f::Identity() });
 			}
 			else
 			{
@@ -281,7 +281,7 @@ namespace juceRmlUi::gl2
 		const auto* layer = m_layers.back();
 		m_layers.pop_back();
 
-		deleteFrameBuffer(layer);
+		deleteFrameBuffer(core_instance, layer);
 
 		if (m_layers.empty())
 		{
@@ -441,7 +441,7 @@ namespace juceRmlUi::gl2
 
 		writeFramebufferToFile("E:\\rmlui_savelayerastexture_" + std::to_string(textureId) + ".png");
 
-		generateMipmaps();
+		generateMipmaps(core_instance);
 
 		CHECK_OPENGL_ERROR;
 
@@ -489,7 +489,7 @@ namespace juceRmlUi::gl2
 
 		if (m_frameBufferWidth == 0 || m_frameBufferHeight == 0)
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "Invalid frame buffer size: %u x %u", m_frameBufferWidth, m_frameBufferHeight);
+			Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "Invalid frame buffer size: %u x %u", m_frameBufferWidth, m_frameBufferHeight);
 			assert(false && "invalid frame buffer size");
 			return;
 		}
@@ -525,7 +525,7 @@ namespace juceRmlUi::gl2
 	{
 	}
 
-	void RendererGL2::checkGLError(const char* _file, const int _line)
+	void RendererGL2::checkGLError(Rml::CoreInstance& _coreInstance, const char* _file, const int _line)
 	{
 		for (;;)
 		{
@@ -534,7 +534,7 @@ namespace juceRmlUi::gl2
 			if (e == GL_NO_ERROR)
 				break;
 
-			Rml::Log::Message (Rml::Log::LT_WARNING, "OpenGL ERROR %u in file %s, line %d", e, _file, _line);
+			Rml::Log::Message(_coreInstance, Rml::Log::LT_WARNING, "OpenGL ERROR %u in file %s, line %d", e, _file, _line);
 			assert(false);
 		}
 	}
@@ -548,7 +548,7 @@ namespace juceRmlUi::gl2
 			std::swap(_rect.p0.y, _rect.p1.y);
 	}
 
-	void RendererGL2::renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams)
+	void RendererGL2::renderGeometry(Rml::CoreInstance& core_instance, const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, _geom.vertexBuffer);
 		CHECK_OPENGL_ERROR;
@@ -587,7 +587,7 @@ namespace juceRmlUi::gl2
 
 			params.blurScale.x = 1.0f / static_cast<float>(frameBufferWidth());
 			params.blurScale.y = 0.0f;
-			renderGeometry(_geom, *_filter->shader, params);
+			renderGeometry(core_instance, _geom, *_filter->shader, params);
 
 			// vertical pass into _target if last, into second temp otherwise
 			const auto isLast = p == _filter->params.blurPasses - 1;
@@ -596,7 +596,7 @@ namespace juceRmlUi::gl2
 				glBindFramebuffer(GL_FRAMEBUFFER, _target ? _target->framebuffer : 0);
 				CHECK_OPENGL_ERROR;
 				if (!_target)
-					setupBlending(_blendMode);
+					setupBlending(core_instance, _blendMode);
 			}
 			else
 			{
@@ -613,7 +613,7 @@ namespace juceRmlUi::gl2
 
 			params.blurScale.x = 0.0f;
 			params.blurScale.y = 1.0f / static_cast<float>(frameBufferHeight());
-			renderGeometry(_geom, *_filter->shader, params);
+			renderGeometry(core_instance, _geom, *_filter->shader, params);
 
 			if (m_blurFrameBuffers.size() > 1)
 				_source = &m_blurFrameBuffers[1]; // next pass will use the target as source
@@ -632,12 +632,12 @@ namespace juceRmlUi::gl2
 
 		for (const auto& layer : m_layers)
 		{
-			deleteFrameBuffer(*layer);
+			deleteFrameBuffer(core_instance, *layer);
 			createFrameBuffer(*layer);
 		}
 
 		for (auto& tempFrameBuffer : m_tempFrameBuffers)
-			deleteFrameBuffer(tempFrameBuffer);
+			deleteFrameBuffer(core_instance, tempFrameBuffer);
 
 		m_tempFrameBuffers.resize(2);
 
@@ -645,7 +645,7 @@ namespace juceRmlUi::gl2
 			createFrameBuffer(m_tempFrameBuffers[i]);
 
 		for (auto& f : m_blurFrameBuffers)
-			deleteFrameBuffer(f);
+			deleteFrameBuffer(core_instance, f);
 		m_blurFrameBuffers.clear(); // recreated only when needed
 
 	}
@@ -720,15 +720,15 @@ namespace juceRmlUi::gl2
 		return true;
 	}
 
-	void RendererGL2::deleteFrameBuffer(const LayerHandleData*& _layer)
+	void RendererGL2::deleteFrameBuffer(Rml::CoreInstance& core_instance, const LayerHandleData*& _layer)
 	{
 		if (!_layer)
 			return;
-		deleteFrameBuffer(*_layer);
+		deleteFrameBuffer(core_instance, *_layer);
 		delete _layer;
 		_layer = nullptr;
 	}
-	void RendererGL2::deleteFrameBuffer(const LayerHandleData& _layer)
+	void RendererGL2::deleteFrameBuffer(Rml::CoreInstance& core_instance, const LayerHandleData& _layer)
 	{
 		glDeleteFramebuffers(1, &_layer.framebuffer);
 		CHECK_OPENGL_ERROR;
@@ -738,7 +738,7 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 	}
 
-	void RendererGL2::generateMipmaps()
+	void RendererGL2::generateMipmaps(Rml::CoreInstance& core_instance)
 	{
 		if (!glGenerateMipmap)
 			return;
@@ -759,7 +759,7 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 	}
 
-	void RendererGL2::setupBlending(Rml::BlendMode _blendMode)
+	void RendererGL2::setupBlending(Rml::CoreInstance& core_instance, Rml::BlendMode _blendMode)
 	{
 		switch (_blendMode)
 		{

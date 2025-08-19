@@ -11,7 +11,7 @@
 
 namespace juceRmlUi
 {
-	FileInterface::FileInterface(DataProvider& _dataProvider) : m_dataProvider(_dataProvider)
+	FileInterface::FileInterface(Rml::CoreInstance& _coreInstance, DataProvider& _dataProvider) : Rml::FileInterface(_coreInstance), m_dataProvider(_dataProvider)
 	{
 	}
 

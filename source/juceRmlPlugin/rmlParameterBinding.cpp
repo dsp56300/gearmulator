@@ -54,7 +54,7 @@ namespace rmlPlugin
 		{
 			std::stringstream ss;
 			ss << "Failed to find parameter " << _parameterName << " for combo box";
-			Rml::Log::Message(Rml::Log::LT_ERROR, "%s", ss.str().c_str());
+			Rml::Log::Message(_element.GetCoreInstance(), Rml::Log::LT_ERROR, "%s", ss.str().c_str());
 			return;
 		}
 

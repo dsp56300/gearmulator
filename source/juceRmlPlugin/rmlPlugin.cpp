@@ -7,6 +7,7 @@
 
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
+#include "RmlUi/Core/Context.h"
 
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/Element.h"
@@ -71,7 +72,7 @@ namespace rmlPlugin
 
 		if (it == m_contexts.end())
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnElementCreate: Context not found in bindings map");
+			Rml::Log::Message(_element->GetCoreInstance(), Rml::Log::LT_ERROR, "RmlPlugin::OnElementCreate: Context not found in bindings map");
 			return;
 		}
 
@@ -106,7 +107,7 @@ namespace rmlPlugin
 
 		if (it == m_contexts.end())
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnDocumentOpen: Context not found");
+			Rml::Log::Message(_context->GetCoreInstance(), Rml::Log::LT_ERROR, "RmlPlugin::OnDocumentOpen: Context not found");
 			return;
 		}
 
@@ -138,7 +139,7 @@ namespace rmlPlugin
 		auto it = m_contexts.find(_document->GetContext());
 		if (it == m_contexts.end())
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "RmlPlugin::OnDocumentUnload: Context not found");
+			Rml::Log::Message(_document->GetCoreInstance(), Rml::Log::LT_ERROR, "RmlPlugin::OnDocumentUnload: Context not found");
 			return;
 		}
 		RmlPluginContext* pluginContext = it->second.get();

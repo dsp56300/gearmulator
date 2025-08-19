@@ -9,21 +9,21 @@ namespace juceRmlUi::gl2
 	{
 	}
 
-	CompiledShader* RenderInterfaceFilters::create(Rml::CoreInstance& in_core_instance, const Rml::String& _name, const Rml::Dictionary& _parameters)
+	CompiledShader* RenderInterfaceFilters::create(Rml::CoreInstance& _coreInstance, const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
 		CompiledShader filter = {};
 
 		if (_name == "opacity")
 		{
-			const auto o = Rml::Get(in_core_instance, _parameters, "value", 1.0f);
+			const auto o = Rml::Get(_coreInstance, _parameters, "value", 1.0f);
 
 			filter.type = ShaderType::FullscreenColorMatrix;
 			filter.params.colorMatrix = Rml::Matrix4f::Diag(o, o, o, o);
 		}
 		else if (_name == "blur")
 		{
-			auto sigma = Rml::Get(in_core_instance, _parameters, "sigma", 1.0f);
-			return m_shaders.createBlurShader(sigma);
+			auto sigma = Rml::Get(_coreInstance, _parameters, "sigma", 1.0f);
+			return m_shaders.createBlurShader(_coreInstance, sigma);
 		}
 		else if (_name == "drop-shadow")
 		{
@@ -38,13 +38,13 @@ namespace juceRmlUi::gl2
 		else if (_name == "brightness")
 		{
 			filter.type = ShaderType::FullscreenColorMatrix;
-			const float value = Rml::Get(in_core_instance, _parameters, "value", 1.0f);
+			const float value = Rml::Get(_coreInstance, _parameters, "value", 1.0f);
 			filter.params.colorMatrix = Rml::Matrix4f::Diag(value, value, value, 1.f);
 		}
 		else if (_name == "contrast")
 		{
 			filter.type = ShaderType::FullscreenColorMatrix;
-			const float value = Rml::Get(in_core_instance, _parameters, "value", 1.0f);
+			const float value = Rml::Get(_coreInstance, _parameters, "value", 1.0f);
 			const float grayness = 0.5f - 0.5f * value;
 			filter.params.colorMatrix = Rml::Matrix4f::Diag(value, value, value, 1.f);
 			filter.params.colorMatrix.SetColumn(3, Rml::Vector4f(grayness, grayness, grayness, 1.f));
@@ -52,7 +52,7 @@ namespace juceRmlUi::gl2
 		else if (_name == "invert")
 		{
 			filter.type = ShaderType::FullscreenColorMatrix;
-			const float value = Rml::Math::Clamp(Rml::Get(in_core_instance, _parameters, "value", 1.0f), 0.f, 1.f);
+			const float value = Rml::Math::Clamp(Rml::Get(_coreInstance, _parameters, "value", 1.0f), 0.f, 1.f);
 			const float inverted = 1.f - 2.f * value;
 			filter.params.colorMatrix = Rml::Matrix4f::Diag(inverted, inverted, inverted, 1.f);
 			filter.params.colorMatrix.SetColumn(3, Rml::Vector4f(value, value, value, 1.f));
@@ -60,7 +60,7 @@ namespace juceRmlUi::gl2
 		else if (_name == "grayscale")
 		{
 			filter.type = ShaderType::FullscreenColorMatrix;
-			const float value = Rml::Get(in_core_instance, _parameters, "value", 1.0f);
+			const float value = Rml::Get(_coreInstance, _parameters, "value", 1.0f);
 			const float valueInv = 1.f - value;
 			const Rml::Vector3f gray = value * Rml::Vector3f(0.2126f, 0.7152f, 0.0722f);
 
@@ -74,7 +74,7 @@ namespace juceRmlUi::gl2
 		else if (_name == "sepia")
 		{
 			filter.type = ShaderType::FullscreenColorMatrix;
-			const float value = Rml::Get(in_core_instance, _parameters, "value", 1.0f);
+			const float value = Rml::Get(_coreInstance, _parameters, "value", 1.0f);
 			const float valueInv = 1.f - value;
 			const Rml::Vector3f r = value * Rml::Vector3f(0.393f, 0.769f, 0.189f);
 			const Rml::Vector3f g = value * Rml::Vector3f(0.349f, 0.686f, 0.168f);
@@ -91,7 +91,7 @@ namespace juceRmlUi::gl2
 		{
 			// Hue-rotation and saturation values based on: https://www.w3.org/TR/filter-effects-1/#attr-valuedef-type-huerotate
 			filter.type = ShaderType::FullscreenColorMatrix;
-			const float value = Rml::Get(in_core_instance, _parameters, "value", 1.0f);
+			const float value = Rml::Get(_coreInstance, _parameters, "value", 1.0f);
 			const float s = Rml::Math::Sin(value);
 			const float c = Rml::Math::Cos(value);
 
@@ -105,7 +105,7 @@ namespace juceRmlUi::gl2
 		else if (_name == "saturate")
 		{
 			filter.type = ShaderType::FullscreenColorMatrix;
-			const float value = Rml::Get(in_core_instance, _parameters, "value", 1.0f);
+			const float value = Rml::Get(_coreInstance, _parameters, "value", 1.0f);
 
 			filter.params.colorMatrix = Rml::Matrix4f::FromRows(
 				{0.213f + 0.787f * value,  0.715f - 0.715f * value,  0.072f - 0.072f * value,  0.f},
@@ -118,7 +118,7 @@ namespace juceRmlUi::gl2
 		if (filter.type != ShaderType::Count)
 			return new CompiledShader(filter);
 
-		Rml::Log::Message(Rml::Log::LT_WARNING, "Unsupported filter type '%s'.", _name.c_str());
+		Rml::Log::Message(_coreInstance, Rml::Log::LT_WARNING, "Unsupported filter type '%s'.", _name.c_str());
 		return nullptr;
 	}
 }

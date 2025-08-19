@@ -126,7 +126,7 @@ namespace juceRmlUi
 
 		void callPostFrame(const std::function<void()>& _callback);
 
-		bool toBuffer(std::vector<uint8_t>& _buffer, juce::Image& _image);
+		bool toBuffer(Rml::CoreInstance& _coreInstance, std::vector<uint8_t>& _buffer, juce::Image& _image);
 
 		Rml::Colourb toRmlColor(const juce::Colour& _color);
 		uint32_t toARGB(const Rml::Colourb& _color);

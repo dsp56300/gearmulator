@@ -106,7 +106,7 @@ namespace juceRmlUi
 
 		if (m_entryTemplate == nullptr)
 		{
-			Log::Message(Log::LT_ERROR, "list needs a child of type 'listitem'");
+			Log::Message(GetCoreInstance(), Log::LT_ERROR, "list needs a child of type 'listitem'");
 			return;
 		}
 

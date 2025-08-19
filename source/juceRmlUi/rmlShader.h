@@ -24,7 +24,7 @@ namespace juceRmlUi::gl2
 			Count
 		};
 
-		explicit RmlShader(uint32_t _programId);
+		explicit RmlShader(Rml::CoreInstance& _coreInstance, uint32_t _programId);
 
 		RmlShader(RmlShader&&) noexcept = default;
 		RmlShader(const RmlShader&) = delete;
@@ -37,7 +37,7 @@ namespace juceRmlUi::gl2
 		bool hasAttribute(AttribType _type) const noexcept;
 		bool hasUniform(AttribType _type) const noexcept;
 
-		static void setUniformMatrix(int _location, const Rml::Matrix4f& _matrix);
+		static void setUniformMatrix(Rml::CoreInstance& core_instance, int _location, const Rml::Matrix4f& _matrix);
 
 		void enableShader(const gl2::ShaderParams& _params);
 		void disableShader();
@@ -47,6 +47,7 @@ namespace juceRmlUi::gl2
 		bool isValid() const noexcept { return m_programId != 0; }
 
 	private:
+		Rml::CoreInstance& core_instance; 
 		uint32_t m_programId;
 
 		std::unordered_map<AttribType, uint32_t> m_vertexAttribLocations;

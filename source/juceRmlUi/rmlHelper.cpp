@@ -335,7 +335,7 @@ namespace juceRmlUi
 			comp.addPostFrameCallback(_callback);
 		}
 
-		bool toBuffer(std::vector<uint8_t>& _buffer, juce::Image& _image)
+		bool toBuffer(Rml::CoreInstance& _coreInstance, std::vector<uint8_t>& _buffer, juce::Image& _image)
 		{
 			const auto w = _image.getWidth();
 			const auto h = _image.getHeight();
@@ -394,8 +394,8 @@ namespace juceRmlUi
 				}
 				return true;
 			default:
-				Rml::Log::Message(Rml::Log::LT_ERROR, "Unsupported image format: %d", static_cast<int>(_image.getFormat()));
 				assert(false && "unsupported image format");
+				Rml::Log::Message(_coreInstance, Rml::Log::LT_ERROR, "Unsupported image format: %d", static_cast<int>(_image.getFormat()));
 				return false;
 			}
 		}

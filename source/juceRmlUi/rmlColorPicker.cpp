@@ -149,7 +149,7 @@ namespace juceRmlUi
 
 		if (!t)
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "ColorPicker template '%s' not found", _templateName.c_str());
+			Rml::Log::Message(_parent->GetCoreInstance(), Rml::Log::LT_ERROR, "ColorPicker template '%s' not found", _templateName.c_str());
 			return nullptr;
 		}
 
@@ -159,7 +159,7 @@ namespace juceRmlUi
 
 		if (!parsedElem)
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "ColorPicker template '%s' could not be parsed", _templateName.c_str());
+			Rml::Log::Message(_parent->GetCoreInstance(), Rml::Log::LT_ERROR, "ColorPicker template '%s' could not be parsed", _templateName.c_str());
 			return nullptr;
 		}
 

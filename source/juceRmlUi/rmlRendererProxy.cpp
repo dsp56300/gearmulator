@@ -311,7 +311,7 @@ namespace juceRmlUi
 
 		std::vector<uint8_t> buffer;
 
-		helper::toBuffer(buffer, _image);
+		helper::toBuffer(core_instance, buffer, _image);
 
 		auto dummyHandle = createDummyHandle();
 
@@ -416,7 +416,7 @@ namespace juceRmlUi
 
 		if (!ptr)
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "image file not found: %s", _source.c_str());
+			Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "image file not found: %s", _source.c_str());
 			assert(false && "file not found");
 			return false;
 		}
@@ -425,7 +425,7 @@ namespace juceRmlUi
 		_image = juce::ImageFileFormat::loadFrom(ptr, fileSize);
 		if (_image.isNull())
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to load image from source %s", _source.c_str());
+			Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "Failed to load image from source %s", _source.c_str());
 			assert(false && "failed to load image");
 			return false;
 		}

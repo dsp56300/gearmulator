@@ -9,7 +9,7 @@ namespace juceRmlUi
 	class FileInterface final : public Rml::FileInterface
 	{
 	public:
-		explicit FileInterface(DataProvider& _dataProvider);
+		explicit FileInterface(Rml::CoreInstance& _coreInstance, DataProvider& _dataProvider);
 		~FileInterface() override = default;
 		FileInterface(const FileInterface&) = delete;
 		FileInterface(FileInterface&&) = delete;

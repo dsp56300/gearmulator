@@ -10,11 +10,11 @@ namespace juceRmlUi::gl2
 	public:
 		CompiledShader* create(const Rml::String& _name, const Rml::Dictionary& _parameters);
 
-		RmlShader& getShader(ShaderType _type);
+		RmlShader& getShader(Rml::CoreInstance& _coreInstance, ShaderType _type);
 
-		RmlShader* getBlurShader(uint32_t& _passCount, float _sigma);
+		RmlShader* getBlurShader(Rml::CoreInstance& _coreInstance, uint32_t& _passCount, float _sigma);
 
-		CompiledShader* createBlurShader(float _sigma);
+		CompiledShader* createBlurShader(Rml::CoreInstance& _coreInstance, float _sigma);
 
 	private:
 		static std::vector<float> generateGaussianKernelWeights(float _sigma);

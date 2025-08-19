@@ -26,7 +26,7 @@ namespace juceRmlUi::gl2
 		static_assert(std::size(g_vertexAttribNames) == static_cast<uint32_t>(RmlShader::AttribType::Count));
 	}
 
-	RmlShader::RmlShader(const uint32_t _programId) : m_programId(_programId)
+	RmlShader::RmlShader(Rml::CoreInstance& _coreInstance, const uint32_t _programId) : core_instance(_coreInstance), m_programId(_programId)
 	{
 		using namespace juce::gl;
 
@@ -70,7 +70,7 @@ namespace juceRmlUi::gl2
 		return m_uniformLocations.find(_type) != m_uniformLocations.end();
 	}
 
-	void RmlShader::setUniformMatrix(const int _location, const Rml::Matrix4f& _matrix)
+	void RmlShader::setUniformMatrix(Rml::CoreInstance& core_instance, const int _location, const Rml::Matrix4f& _matrix)
 	{
 		constexpr bool transpose = std::is_same_v<decltype(_matrix), Rml::RowMajorMatrix4f>;
 		juce::gl::glUniformMatrix4fv(_location, 1, transpose, _matrix.data());
@@ -104,7 +104,7 @@ namespace juceRmlUi::gl2
 				CHECK_OPENGL_ERROR;
 				break;
 			case AttribType::ColorMatrix:
-				setUniformMatrix(loc, _params.colorMatrix);
+				setUniformMatrix(core_instance, loc, _params.colorMatrix);
 				CHECK_OPENGL_ERROR;
 				break;
 			case AttribType::BlurScale:

@@ -58,8 +58,9 @@ namespace juceRmlUi
 	}
 
 	RmlInterfaces::RmlInterfaces(DataProvider& _dataProvider)
-		: m_fontEngineInterface(m_coreInstance)
-		, m_fileInterface(_dataProvider)
+		: m_systemInterface(m_coreInstance)
+		, m_fontEngineInterface(m_coreInstance)
+		, m_fileInterface(m_coreInstance, _dataProvider)
 	{
 		ScopedAccess access(*this);
 

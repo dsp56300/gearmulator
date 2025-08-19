@@ -35,7 +35,7 @@ namespace juceRmlUi::gl2
 
 		const auto g_shaderHeader = "#version 110\n";
 
-		GLuint compileShader(const GLenum _type, const char* _source, const std::vector<std::string>& _defines)
+		GLuint compileShader(Rml::CoreInstance& _coreInstance, const GLenum _type, const char* _source, const std::vector<std::string>& _defines)
 		{
 			auto source = std::string(g_shaderHeader);
 
@@ -56,15 +56,15 @@ namespace juceRmlUi::gl2
 			{
 				char infoLog[512];
 				glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-				Rml::Log::Message(Rml::Log::LT_ERROR, "Shader compilation failed:\n%s", infoLog);
+				Rml::Log::Message(_coreInstance, Rml::Log::LT_ERROR, "Shader compilation failed:\n%s", infoLog);
 			}
 			return shader;
 		}
 
-		GLuint createProgram(const char* _vertexSource, const char* _fragmentSource, const std::vector<std::string>& _defines)
+		GLuint createProgram(Rml::CoreInstance& _coreInstance, const char* _vertexSource, const char* _fragmentSource, const std::vector<std::string>& _defines)
 		{
-		    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, _vertexSource, _defines);
-		    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, _fragmentSource, _defines);
+		    GLuint vertexShader = compileShader(_coreInstance, GL_VERTEX_SHADER, _vertexSource, _defines);
+		    GLuint fragmentShader = compileShader(_coreInstance, GL_FRAGMENT_SHADER, _fragmentSource, _defines);
 		    GLuint program = glCreateProgram();
 		    glAttachShader(program, vertexShader);
 		    glAttachShader(program, fragmentShader);
@@ -107,7 +107,7 @@ namespace juceRmlUi::gl2
 		return nullptr;
 	}
 
-	RmlShader& RenderInterfaceShaders::getShader(ShaderType _type)
+	RmlShader& RenderInterfaceShaders::getShader(Rml::CoreInstance& _coreInstance, ShaderType _type)
 	{
 		auto it = m_shaders.find(_type);
 		if (it != m_shaders.end())
@@ -115,14 +115,14 @@ namespace juceRmlUi::gl2
 
 		const auto& setup = g_shaderSetups[static_cast<uint32_t>(_type)];
 
-		auto prog = createProgram(g_vertexShader, g_fragmentShader, setup.defines);
+		auto prog = createProgram(_coreInstance, g_vertexShader, g_fragmentShader, setup.defines);
 
-		m_shaders.emplace(_type, RmlShader{prog});
+		m_shaders.emplace(_type, RmlShader{_coreInstance, prog});
 
 		return m_shaders.at(_type);
 	}
 
-	RmlShader* RenderInterfaceShaders::getBlurShader(uint32_t& _passCount, const float _sigma)
+	RmlShader* RenderInterfaceShaders::getBlurShader(Rml::CoreInstance& _coreInstance, uint32_t& _passCount, const float _sigma)
 	{
 		float sigmaPerPass;
 
@@ -150,9 +150,9 @@ namespace juceRmlUi::gl2
 			assert(false && "Blur code placeholder not found in fragment shader code");
 		}
 
-		const auto prog = createProgram(g_vertexShader, fsCode.c_str(), setup.defines);
+		const auto prog = createProgram(_coreInstance, g_vertexShader, fsCode.c_str(), setup.defines);
 
-		auto shader = std::make_unique<RmlShader>(prog);
+		auto shader = std::make_unique<RmlShader>(_coreInstance, prog);
 
 		auto* result = shader.get();
 
@@ -161,10 +161,10 @@ namespace juceRmlUi::gl2
 		return result;
 	}
 
-	CompiledShader* RenderInterfaceShaders::createBlurShader(const float _sigma)
+	CompiledShader* RenderInterfaceShaders::createBlurShader(Rml::CoreInstance& _coreInstance, const float _sigma)
 	{
 		uint32_t passCount;
-		RmlShader* shader = getBlurShader(passCount, _sigma);
+		RmlShader* shader = getBlurShader(_coreInstance, passCount, _sigma);
 		if (!shader)
 			return nullptr;
 		auto* compiledShader = new CompiledShader();

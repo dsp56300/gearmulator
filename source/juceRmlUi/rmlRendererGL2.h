@@ -46,7 +46,7 @@ namespace juceRmlUi::gl2
 		void beginFrame(uint32_t _width, uint32_t _height);
 		void endFrame();
 
-		static void checkGLError (const char* _file, int _line);
+		static void checkGLError (Rml::CoreInstance& _coreInstance, const char* _file, int _line);
 		
 		uint32_t frameBufferWidth() const { return m_frameBufferWidth; }
 		uint32_t frameBufferHeight() const { return m_frameBufferHeight; }
@@ -54,21 +54,21 @@ namespace juceRmlUi::gl2
 	private:
 		void verticalFlip(Rml::Rectanglei& _rect) const;
 
-		static void renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
+		static void renderGeometry(Rml::CoreInstance& core_instance, const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
 		void renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target, Rml::BlendMode _blendMode);
 
 		void onResize();
 
 		LayerHandleData* createFrameBuffer() const;
 		bool createFrameBuffer(LayerHandleData& _layer) const;
-		static void deleteFrameBuffer(const LayerHandleData*& _layer);
-		static void deleteFrameBuffer(const LayerHandleData& _layer);
+		static void deleteFrameBuffer(Rml::CoreInstance& core_instance, const LayerHandleData*& _layer);
+		static void deleteFrameBuffer(Rml::CoreInstance& core_instance, const LayerHandleData& _layer);
 
-		static void generateMipmaps();
+		static void generateMipmaps(Rml::CoreInstance& core_instance);
 
 		void copyFramebuffer(uint32_t _dest, uint32_t _source) const;
 
-		static void setupBlending(Rml::BlendMode _blendMode);
+		static void setupBlending(Rml::CoreInstance& core_instance, Rml::BlendMode _blendMode);
 
 		void writeFramebufferToFile(const std::string& _name, uint32_t _x = 0, uint32_t _y = 0, uint32_t _width = 0, uint32_t _height = 0) const;
 
@@ -90,5 +90,5 @@ namespace juceRmlUi::gl2
 		uint32_t m_frameBufferHeight = 0;
 	};
 
-#define CHECK_OPENGL_ERROR do { RendererGL2::checkGLError (__FILE__, __LINE__); } while(0)
+#define CHECK_OPENGL_ERROR do { RendererGL2::checkGLError (core_instance, __FILE__, __LINE__); } while(0)
 }

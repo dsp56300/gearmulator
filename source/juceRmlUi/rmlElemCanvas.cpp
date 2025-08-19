@@ -19,7 +19,7 @@ namespace juceRmlUi
 		m_repaintCallback = [this](std::vector<uint8_t>& _buffer)
 		{
 			updateImage();
-			helper::toBuffer(_buffer, *m_image);
+			helper::toBuffer(GetCoreInstance(), _buffer, *m_image);
 		};
 
 		m_repaintGraphicsCallback = [this](const juce::Image& _image, juce::Graphics& _g)

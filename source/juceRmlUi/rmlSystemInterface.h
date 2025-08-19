@@ -11,7 +11,7 @@ namespace juceRmlUi
 	public:
 		using LogEntry = std::pair<Rml::Log::Type, Rml::String>;
 
-		explicit SystemInterface() = default;
+		explicit SystemInterface(Rml::CoreInstance& _coreInstance);
 		SystemInterface(const SystemInterface&) = delete;
 		SystemInterface(SystemInterface&&) = delete;
 		~SystemInterface() override;
@@ -44,6 +44,8 @@ namespace juceRmlUi
 		static std::string logTypeToString(Rml::Log::Type _type);
 
 	private:
+		Rml::CoreInstance& m_coreInstance;
+
 		std::vector<LogEntry> m_logEntries;
 		bool m_recordingLog = false;
 	};

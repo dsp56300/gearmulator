@@ -149,7 +149,7 @@ private:
 	*/
 	class RenderLayerStack {
 	public:
-		RenderLayerStack();
+		RenderLayerStack(Rml::CoreInstance& in_core_instance);
 		~RenderLayerStack();
 
 		// Push a new layer. All references to previously retrieved layers are invalidated.
@@ -175,6 +175,8 @@ private:
 	private:
 		void DestroyFramebuffers();
 		const Gfx::FramebufferData& EnsureFramebufferPostprocess(int index);
+
+		Rml::CoreInstance& core_instance;
 
 		int width = 0, height = 0;
 

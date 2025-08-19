@@ -8,6 +8,9 @@
 
 namespace juceRmlUi
 {
+	SystemInterface::SystemInterface(Rml::CoreInstance& _coreInstance) : Rml::SystemInterface(_coreInstance), m_coreInstance(_coreInstance)
+	{
+	}
 
 	SystemInterface::~SystemInterface()
 	= default;
@@ -67,7 +70,7 @@ namespace juceRmlUi
 
 	void SystemInterface::SetMouseCursor(const Rml::String& _cursorName)
 	{
-		Rml::Log::Message(Rml::Log::LT_INFO, "SetMouseCursor %s", _cursorName.c_str());
+		Rml::Log::Message(m_coreInstance, Rml::Log::LT_INFO, "SetMouseCursor %s", _cursorName.c_str());
 		Rml::SystemInterface::SetMouseCursor(_cursorName);
 	}
 
