@@ -366,8 +366,11 @@ namespace juceRmlUi
 				juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
 			}
 
-			Rml::Debugger::Initialise(m_rmlContext);
-			Rml::Debugger::SetVisible(true);
+			if (document->GetAttribute("debugger", 0))
+			{
+				Rml::Debugger::Initialise(m_rmlContext);
+				Rml::Debugger::SetVisible(true);
+			}
 		}
 
 		setSize(documentSize.x, documentSize.y);
