@@ -55,6 +55,8 @@ namespace jucePluginEditorLib
 		const Skin& getCurrentSkin() { return m_currentSkin; }
 		const std::vector<Skin>& getIncludedSkins();
 
+		static std::string createSkinDisplayName(std::string _filename);
+
 		virtual void openMenu(const Rml::Event& _event);
 
 		std::function<void(int)> evSetGuiScale;

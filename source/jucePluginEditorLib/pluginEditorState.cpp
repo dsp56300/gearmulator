@@ -57,6 +57,21 @@ const std::vector<Skin>& PluginEditorState::getIncludedSkins()
 	return m_includedSkins;
 }
 
+std::string PluginEditorState::createSkinDisplayName(std::string _filename)
+{
+	const auto pathEndPos = _filename.find_last_of("/\\");
+	if(pathEndPos != std::string::npos)
+		_filename = _filename.substr(pathEndPos+1);
+
+	auto displayName = baseLib::filesystem::stripExtension(_filename);
+
+	const auto isJson = baseLib::filesystem::hasExtension(_filename, ".json");
+	if (isJson)
+		displayName += " (legacy)";
+
+	return displayName;
+}
+
 juce::Component* PluginEditorState::getUiRoot() const
 {
 	return m_editor.get();
@@ -226,7 +241,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 	bool loadedSkinIsPartOfList = false;
 
-	std::set<std::pair<std::string, std::string>> knownSkins;	// folder, jsonFilename
+	std::set<std::pair<std::string, std::string>> knownSkins;	// folder, filename
 
 	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList, &knownSkins](const Skin& _skin)
 	{
@@ -272,8 +287,21 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 		for (const auto& file : files)
 		{
-			if(baseLib::filesystem::hasExtension(file, ".json"))
+			const auto isJson = baseLib::filesystem::hasExtension(file, ".json");
+			const auto isRml = baseLib::filesystem::hasExtension(file, ".rml");
+			if(isJson || isRml)
 			{
+				if (isRml)
+				{
+					// ensure its not a template
+					std::vector<uint8_t> rmlData;
+					baseLib::filesystem::readFile(rmlData, file);
+					constexpr char key[] = "<rml>";
+					if (rmlData.size() < std::size(key))
+						continue;
+					if (std::memcmp(rmlData.data(), key, std::size(key) - 1) != 0)
+						continue;
+				}
 				if(!haveSkinsOnDisk)
 				{
 					haveSkinsOnDisk = true;
@@ -285,12 +313,10 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 					skinPath = entry.substr(modulePath.size());
 				skinPath = baseLib::filesystem::validatePath(skinPath);
 
-				auto jsonName = file;
-				const auto pathEndPos = jsonName.find_last_of("/\\");
-				if(pathEndPos != std::string::npos)
-					jsonName = file.substr(pathEndPos+1);
+				auto filename = file;
 
-				const Skin skin{jsonName.substr(0, jsonName.length() - 5), jsonName, skinPath};
+				auto displayName = createSkinDisplayName(file);
+				const Skin skin{displayName, filename, skinPath};
 
 				addSkinEntry(skin);
 			}

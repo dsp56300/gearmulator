@@ -82,6 +82,7 @@ namespace jucePluginEditorLib
 			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), m_skin.folder, newName + ".rml", newName + ".rcss", std::move(options));
 
 			m_skin.filename = newName + ".rml";
+			m_skin.displayName = PluginEditorState::createSkinDisplayName(m_skin.filename);
 		}
 
 		m_rmlComponent.reset(dynamic_cast<juceRmlUi::RmlComponent*>(createRmlUiComponent(m_skin.filename)));
