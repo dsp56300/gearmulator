@@ -330,7 +330,7 @@ namespace juceRmlUi
 
 			m_rmlContext->SetDensityIndependentPixelRatio(static_cast<float>(m_openGLContext.getRenderingScale()) * m_contentScale);
 
-			m_rmlContext->SetDefaultScrollBehavior(Rml::ScrollBehavior::Smooth, 3.0f);
+			m_rmlContext->SetDefaultScrollBehavior(Rml::ScrollBehavior::Smooth, 5.0f);
 
 			if (_contextCreatedCallback)
 				_contextCreatedCallback(*this, *m_rmlContext);
