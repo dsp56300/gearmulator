@@ -560,7 +560,17 @@ namespace rmlPlugin::skinConverter
 			if (s == _style)
 				return name;
 		}
-		const auto name = _prefix + "Style" + std::to_string(m_styles.size());
+
+		if (m_styles.find(_prefix) == m_styles.end())
+		{
+			m_styles.insert({ _prefix, _style });
+			return _prefix;
+		}
+
+		uint32_t uid = 1;
+		while (m_styles.find(_prefix + std::to_string(uid)) != m_styles.end())
+			++uid;
+		const auto name = _prefix + std::to_string(uid);
 		m_styles.insert({ name, _style });
 		return name;
 	}
