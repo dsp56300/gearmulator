@@ -45,6 +45,18 @@ namespace juceRmlUi
 			m_frames = getProperty<uint32_t>("frames", m_frames);
 			m_spriteDirty = true;
 		}
+		else if (_key == "speedScaleShift")
+		{
+			m_speedScaleShift = getProperty<float>("speedScaleShift", m_speedScaleShift);
+		}
+		else if (_key == "speedScaleCtrl")
+		{
+			m_speedScaleCtrl = getProperty<float>("speedScaleCtrl", m_speedScaleCtrl);
+		}
+		else if (_key == "speedScaleAlt")
+		{
+			m_speedScaleAlt = getProperty<float>("speedScaleAlt", m_speedScaleAlt);
+		}
 	}
 
 	void ElemKnob::OnUpdate()
@@ -63,7 +75,7 @@ namespace juceRmlUi
 			m_mouseDownValue = getValue();
 			break;
 		case Rml::EventId::Drag:
-			processMouseMove(helper::getMousePos(_event) - m_lastMousePos);
+			processMouseMove(_event);
 			break;
 		case Rml::EventId::Mousescroll:
 			processMouseWheel(_event);
@@ -71,11 +83,34 @@ namespace juceRmlUi
 		}
 	}
 
-	void ElemKnob::processMouseMove(const Rml::Vector2f& _delta)
+	void ElemKnob::processMouseMove(const Rml::Event& _event)
 	{
-		const auto delta = (_delta.x - _delta.y) * m_speed;
+		const auto range = getRange();
 
-		const auto value = m_mouseDownValue + delta;
+		if (range <= 0)
+			return;
+
+		float mod = 1.0f;
+
+		if (helper::getKeyModShift(_event))
+			mod = m_speedScaleShift;
+		else if (helper::getKeyModCtrl(_event))
+			mod = m_speedScaleCtrl;
+		else if (helper::getKeyModAlt(_event))
+			mod = m_speedScaleAlt;
+
+		if (mod != m_lastMod)
+		{
+			m_mouseDownValue = getValue();
+			m_lastMod = mod;
+			m_lastMousePos = helper::getMousePos(_event);
+		}
+
+		const auto delta = helper::getMousePos(_event) - m_lastMousePos;
+
+		const auto d = (delta.x - delta.y) * range * mod / m_speed;
+
+		const auto value = m_mouseDownValue + d;
 
 		setValue(value);
 	}
@@ -83,9 +118,9 @@ namespace juceRmlUi
 	void ElemKnob::processMouseWheel(const Rml::Event& _event)
 	{
 		const auto wheel = helper::getMouseWheelDelta(_event);
-		const auto delta = wheel.y * m_speed;
+		const auto delta = wheel.y;
 
-		const auto range = getMaxValue() - getMinValue();
+		const auto range = getRange();
 
 		// we use the default behaviour if ctrl/cmd is not pressed and the range is large enough
 		if(range > 32 && !helper::getKeyModCtrl(_event))

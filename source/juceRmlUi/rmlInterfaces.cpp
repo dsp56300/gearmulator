@@ -83,6 +83,9 @@ namespace juceRmlUi
 			sss.RegisterProperty("frames", "128", false).AddParser("number");
 			sss.RegisterProperty("speed", "0.01", false).AddParser("number");
 			sss.RegisterProperty("spriteprefix", "frame", false).AddParser("string");
+			sss.RegisterProperty("speedScaleShift", "0.1", false).AddParser("number");
+			sss.RegisterProperty("speedScaleCtrl", "0.2", false).AddParser("number");
+			sss.RegisterProperty("speedScaleAlt", "0.5", false).AddParser("number");
 
 			// menu style elements
 			sss.RegisterProperty("items-per-column", "16", false).AddParser("number");

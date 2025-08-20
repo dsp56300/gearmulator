@@ -269,6 +269,10 @@ input.text {
 /* all knobs need the dragging attribute */
 knob {
 	drag: drag;
+	speed: 150;	/* what mouse delta is needed to do a full sweep from 0% to 100% */
+	speedScaleShift: 0.1;
+	speedScaleCtrl: 0.2;
+	speedScaleAlt: 0.5;
 }
 
 /* all buttons */

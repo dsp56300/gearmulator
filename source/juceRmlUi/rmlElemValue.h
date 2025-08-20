@@ -25,6 +25,13 @@ namespace juceRmlUi
 		float getMinValue() const { return m_min; }
 		float getMaxValue() const { return m_max; }
 
+		float getRange() const
+		{
+			if (m_max <= m_min)
+				return 0.0f;
+			return m_max - m_min;
+		}
+
 		virtual void onChangeValue() {}
 		virtual void onChangeMinValue() {}
 		virtual void onChangeMaxValue() {}
