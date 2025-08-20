@@ -211,6 +211,21 @@ namespace genericVirusUI
 	void VirusEditor::initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model)
 	{
 		_model.set("deviceModel", virusLib::getModelName(m_processor.getModel()));
+		_model.setFunc("multiMode", [this]
+		{
+			return getController().isMultiMode() ? "1" : "0";
+		}, [this](const std::string& _multiMode)
+		{
+			try
+			{
+				auto mode = std::stoi(_multiMode);
+				setPlayMode(mode ? virusLib::PlayModeMulti : virusLib::PlayModeSingle);
+			}
+			catch (std::exception&)
+			{
+				// ignore invalid input
+			}
+		});
 	}
 
 	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent)

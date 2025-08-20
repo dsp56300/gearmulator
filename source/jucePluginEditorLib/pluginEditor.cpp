@@ -321,6 +321,8 @@ namespace jucePluginEditorLib
 
 		if(m_patchManager)
 			m_patchManager->setCurrentPart(_part);
+
+		m_pluginDataModel->set("currentPart", std::to_string(_part));
 	}
 
 	void Editor::showDisclaimer() const

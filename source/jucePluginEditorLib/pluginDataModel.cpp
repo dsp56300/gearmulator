@@ -10,7 +10,8 @@
 namespace jucePluginEditorLib
 {
 	PluginDataModel::PluginDataModel(const Editor& _editor, Rml::Context& _context, const std::function<void(PluginDataModel&)>& _bindCallback)
-		: m_name(_editor.getProcessor().getProperties().name)
+		: m_context(_context)
+		, m_name(_editor.getProcessor().getProperties().name)
 		, m_vendor(_editor.getProcessor().getProperties().vendor)
 		, m_fourCC(_editor.getProcessor().getProperties().plugin4CC)
 
@@ -76,5 +77,20 @@ namespace jucePluginEditorLib
 		it->second = _value;
 
 		m_handle.DirtyVariable(_key);
+	}
+
+	void PluginDataModel::setFunc(const std::string& _key, const FuncGet& _get, const FuncSet& _set) const
+	{
+		assert(m_dataModelConstructor && "setFunc can only be called before the data model handle is retrieved");
+		m_dataModelConstructor->BindFunc(_key, 
+			[this, _get](Rml::Variant& _variant)
+			{
+				_variant = _get();
+			}, 
+			[this, _set](const Rml::Variant& _variant)
+			{
+				_set(_variant.Get<std::string>(m_context.GetCoreInstance()));
+			}
+		);
 	}
 }
