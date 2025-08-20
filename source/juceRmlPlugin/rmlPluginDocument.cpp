@@ -28,7 +28,15 @@ namespace rmlPlugin
 
 	RmlPluginDocument::~RmlPluginDocument()
 	{
-		m_documentListener.reset();
+		if (m_documentListener)
+		{
+			m_document->RemoveEventListener(Rml::EventId::Mousedown, m_documentListener.get());
+			m_document->RemoveEventListener(Rml::EventId::Mouseup, m_documentListener.get());
+			m_document->RemoveEventListener(Rml::EventId::Mouseout, m_documentListener.get());
+
+			m_documentListener.reset();
+		}
+
 		m_tabGroups.clear();
 		m_controllerLinks.clear();
 		m_controllerLinkDescs.clear();
