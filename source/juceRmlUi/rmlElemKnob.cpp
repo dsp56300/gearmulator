@@ -8,6 +8,7 @@ namespace juceRmlUi
 	{
 		AddEventListener(Rml::EventId::Mousedown, this);
 		AddEventListener(Rml::EventId::Drag, this);
+		AddEventListener(Rml::EventId::Mousescroll, this);
 
 		auto setSpriteDirty = [this](const float&)
 		{
@@ -23,6 +24,7 @@ namespace juceRmlUi
 	{
 		RemoveEventListener(Rml::EventId::Mousedown, this);
 		RemoveEventListener(Rml::EventId::Drag, this);
+		RemoveEventListener(Rml::EventId::Mousescroll, this);
 	}
 
 	void ElemKnob::onPropertyChanged(const std::string& _key)
@@ -54,15 +56,18 @@ namespace juceRmlUi
 
 	void ElemKnob::ProcessEvent(Rml::Event& _event)
 	{
-		if (_event.GetId() == Rml::EventId::Mousedown)
+		switch (_event.GetId())
 		{
+		case Rml::EventId::Mousedown:
 			m_lastMousePos = helper::getMousePos(_event);
 			m_mouseDownValue = getValue();
-		}
-		else if (_event.GetId() == Rml::EventId::Drag)
-		{
-			auto mousePos = helper::getMousePos(_event);
-			processMouseMove(mousePos - m_lastMousePos);
+			break;
+		case Rml::EventId::Drag:
+			processMouseMove(helper::getMousePos(_event) - m_lastMousePos);
+			break;
+		case Rml::EventId::Mousescroll:
+			processMouseWheel(_event);
+			break;
 		}
 	}
 
@@ -73,6 +78,30 @@ namespace juceRmlUi
 		const auto value = m_mouseDownValue + delta;
 
 		setValue(value);
+	}
+
+	void ElemKnob::processMouseWheel(const Rml::Event& _event)
+	{
+		const auto wheel = helper::getMouseWheelDelta(_event);
+		const auto delta = wheel.y * m_speed;
+
+		const auto range = getMaxValue() - getMinValue();
+
+		// we use the default behaviour if ctrl/cmd is not pressed and the range is large enough
+		if(range > 32 && !helper::getKeyModCtrl(_event))
+		{
+			setValue(getValue() - range * delta / 7.5f);	// this should be pretty close to what Juce did
+			return;
+		}
+
+		// Otherwise inc/dec single steps
+
+		constexpr auto diff = 1;
+
+		if(delta > 0)
+			setValue(getValue() - diff);
+		else
+			setValue(getValue() + diff);
 	}
 
 	void ElemKnob::updateSprite()

@@ -21,6 +21,8 @@ namespace juceRmlUi
 
 	private:
 		void processMouseMove(const Rml::Vector2f& _delta);
+		void processMouseWheel(const Rml::Event& _event);
+
 		void updateSprite();
 
 		Rml::Vector2<float> m_lastMousePos;

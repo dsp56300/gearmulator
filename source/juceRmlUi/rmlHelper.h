@@ -59,6 +59,7 @@ namespace juceRmlUi
 
 		Rml::Vector2<float> getMousePos(const Rml::Event& _event);
 		MouseButton getMouseButton(const Rml::Event& _event);
+		Rml::Vector2f getMouseWheelDelta(const Rml::Event& _event);
 
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event);
 		Rml::Input::KeyModifier getKeyModifiers(const Rml::Event& _event);

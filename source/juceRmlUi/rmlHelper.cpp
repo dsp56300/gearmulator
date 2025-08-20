@@ -165,6 +165,15 @@ namespace juceRmlUi
 			return static_cast<MouseButton>(button);
 		}
 
+		Rml::Vector2f getMouseWheelDelta(const Rml::Event& _event)
+		{
+			return
+			{
+				_event.GetParameter<float>("wheel_delta_x", 0.0f),
+				_event.GetParameter<float>("wheel_delta_y", 0.0f)
+			};
+		}
+
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event)
 		{
 			return static_cast<Rml::Input::KeyIdentifier>(_event.GetParameter<int>("key_identifier", Rml::Input::KI_UNKNOWN));
