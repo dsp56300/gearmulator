@@ -106,7 +106,12 @@ void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 
 std::string PluginEditorState::getSkinFolder() const
 {
-	return baseLib::filesystem::validatePath(m_processor.getDataFolder() + "skins/");
+	return getSkinFolder(m_processor.getDataFolder());
+}
+
+std::string PluginEditorState::getSkinFolder(const std::string& _processorDataFolder)
+{
+	return baseLib::filesystem::validatePath(_processorDataFolder + "skins/");
 }
 
 bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)

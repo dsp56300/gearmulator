@@ -15,6 +15,7 @@
 
 #include "jucePluginData.h"
 #include "pluginDataModel.h"
+#include "pluginEditorState.h"
 
 #include "juceRmlPlugin/rmlPlugin.h"
 #include "juceRmlPlugin/skinConverter/skinConverter.h"
@@ -74,6 +75,9 @@ namespace jucePluginEditorLib
 
 			rmlPlugin::skinConverter::SkinConverterOptions options;
 			initSkinConverterOptions(options);
+
+			if(m_skin.folder.empty())
+				m_skin.folder = PluginEditorState::getSkinFolder(getProcessor().getDataFolder());
 
 			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), m_skin.folder, newName + ".rml", newName + ".rcss", std::move(options));
 

@@ -74,6 +74,7 @@ namespace jucePluginEditorLib
 		void getPerInstanceConfig(std::vector<uint8_t>& _data);
 
 		std::string getSkinFolder() const;
+		static std::string getSkinFolder(const std::string& _processorDataFolder);
 
 		bool hasSkin() const
 		{
