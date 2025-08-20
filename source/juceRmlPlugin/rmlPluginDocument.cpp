@@ -10,12 +10,25 @@
 
 namespace rmlPlugin
 {
+	class DocumentListener : public Rml::EventListener
+	{
+	public:
+		DocumentListener(RmlPluginDocument& _doc) : m_document(_doc) {}
+		void ProcessEvent(Rml::Event& _event) override
+		{
+			m_document.processEvent(_event);
+		}
+
+		RmlPluginDocument& m_document;
+	};
+
 	RmlPluginDocument::RmlPluginDocument(RmlPluginContext& _context) : m_context(_context)
 	{
 	}
 
 	RmlPluginDocument::~RmlPluginDocument()
 	{
+		m_documentListener.reset();
 		m_tabGroups.clear();
 		m_controllerLinks.clear();
 		m_controllerLinkDescs.clear();
@@ -36,9 +49,46 @@ namespace rmlPlugin
 		return false;
 	}
 
+	void RmlPluginDocument::processEvent(const Rml::Event& _event)
+	{
+		switch (_event.GetId())
+		{
+		case Rml::EventId::Mousedown:
+			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Left)
+				setMouseIsDown(true);
+			break;
+		case Rml::EventId::Mouseup:
+			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Left)
+				setMouseIsDown(false);
+			break;
+		case Rml::EventId::Mouseout:
+			if (_event.GetTargetElement() == m_document)
+				setMouseIsDown(false);
+			break;
+		default:
+			break;
+		}
+	}
+
+	void RmlPluginDocument::setMouseIsDown(const bool _isDown)
+	{
+		if (m_mouseIsDown == _isDown)
+			return;
+
+		m_mouseIsDown = _isDown;
+
+		m_context.getParameterBinding().setMouseIsDown(m_document, _isDown);
+	}
+
 	void RmlPluginDocument::loadCompleted(Rml::ElementDocument* _doc)
 	{
 		m_document = _doc;
+
+		m_documentListener.reset(new DocumentListener(*this));
+
+		_doc->AddEventListener(Rml::EventId::Mousedown, m_documentListener.get());
+		_doc->AddEventListener(Rml::EventId::Mouseup, m_documentListener.get());
+		_doc->AddEventListener(Rml::EventId::Mouseout, m_documentListener.get());
 
 		for (const auto & desc : m_controllerLinkDescs)
 		{
@@ -49,7 +99,6 @@ namespace rmlPlugin
 		}
 
 		m_controllerLinkDescs.clear();
-
 	}
 
 	void RmlPluginDocument::elementCreated(Rml::Element* _element)

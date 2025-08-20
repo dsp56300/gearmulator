@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "RmlUi/Core/Event.h"
+
 namespace Rml
 {
 	class Context;
@@ -14,6 +16,7 @@ namespace Rml
 
 namespace rmlPlugin
 {
+	class DocumentListener;
 	class RmlPluginContext;
 	class TabGroup;
 	class ControllerLink;
@@ -39,7 +42,11 @@ namespace rmlPlugin
 
 		bool selectTabWithElement(const Rml::Element* _element) const;
 
+		void processEvent(const Rml::Event& _event);
+
 	private:
+		void setMouseIsDown(bool _isDown);
+
 		RmlPluginContext& m_context;
 		Rml::ElementDocument* m_document = nullptr;
 
@@ -54,5 +61,9 @@ namespace rmlPlugin
 		std::vector<std::unique_ptr<ControllerLink>> m_controllerLinks;
 
 		std::map<std::string, std::unique_ptr<TabGroup>> m_tabGroups;
+
+		std::unique_ptr<DocumentListener> m_documentListener;
+
+		bool m_mouseIsDown = false;
 	};
 }

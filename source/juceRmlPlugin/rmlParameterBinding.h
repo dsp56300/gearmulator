@@ -56,7 +56,14 @@ namespace rmlPlugin
 		Rml::Element* getElementForParameter(const pluginLib::Parameter* _param, bool _visibleOnly = true) const;
 		const pluginLib::Parameter* getParameterForElement(const Rml::Element* _element) const;
 
+		void setMouseIsDown(Rml::ElementDocument* _document, bool _isDown);
+		bool getMouseIsDown() const { return !m_docsWithMouseDown.empty(); }
+
+		void registerPendingGesture(RmlParameterRef* _paramRef);
+
 	private:
+		void releasePendingGestures();
+
 		void setCurrentPart(uint8_t _part);
 
 		using ParameterList = std::vector<RmlParameterRef>;
@@ -68,5 +75,9 @@ namespace rmlPlugin
 
 		std::unordered_map<Rml::Element*, pluginLib::Parameter*> m_elementToParam;
 		std::unordered_map<pluginLib::Parameter*, std::unordered_set<Rml::Element*>> m_paramToElements;
+
+		std::unordered_set<Rml::ElementDocument*> m_docsWithMouseDown;
+
+		std::set<RmlParameterRef*> m_pendingGestures;
 	};
 }

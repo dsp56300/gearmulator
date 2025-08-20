@@ -38,6 +38,11 @@ namespace rmlPlugin
 
 		static std::string createVariableName(const std::string& _name);
 
+		const pluginLib::Parameter* getParameter() const { return m_parameter; }
+
+		void pushGesture() const;
+		void popGesture() const;
+
 	private:
 		void setDirty();
 		void onParameterValueChanged();

@@ -141,6 +141,42 @@ namespace rmlPlugin
 		return it != m_elementToParam.end() ? it->second : nullptr;
 	}
 
+	void RmlParameterBinding::setMouseIsDown(Rml::ElementDocument* _document, bool _isDown)
+	{
+		const auto mouseWasDown = getMouseIsDown();
+
+		if (_isDown)
+			m_docsWithMouseDown.insert(_document);
+		else
+			m_docsWithMouseDown.erase(_document);
+
+		const auto mouseIsDown = getMouseIsDown();
+
+		if (mouseWasDown == mouseIsDown)
+			return;
+
+		if (!mouseIsDown)
+			releasePendingGestures();
+	}
+
+	void RmlParameterBinding::registerPendingGesture(RmlParameterRef* _paramRef)
+	{
+		if (!getMouseIsDown())
+			return;
+		if (!m_pendingGestures.insert(_paramRef).second)
+			return;
+		_paramRef->pushGesture();
+	}
+
+	void RmlParameterBinding::releasePendingGestures()
+	{
+		for (const auto* paramRef : m_pendingGestures)
+		{
+			paramRef->popGesture();
+		}
+		m_pendingGestures.clear();
+	}
+
 	void RmlParameterBinding::setCurrentPart(const uint8_t _part)
 	{
 		juceRmlUi::RmlInterfaces::ScopedAccess access(m_component);

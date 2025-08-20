@@ -14,13 +14,15 @@
 
 namespace rmlPlugin
 {
-	RmlParameterRef::RmlParameterRef(RmlParameterBinding& _binding, pluginLib::Parameter* _param, uint32_t _paramIdx, Rml::DataModelConstructor& _model)
+	RmlParameterRef::RmlParameterRef(RmlParameterBinding& _binding, pluginLib::Parameter* _param, const uint32_t _paramIdx, Rml::DataModelConstructor& _model)
 	: m_binding(_binding)
 	, m_parameter(_param)
 	, m_paramIdx(_paramIdx)
 	, m_prefix(createVariableName(m_parameter->getDescription().name))
 	, m_handle(_model.GetModelHandle())
 	{
+		auto* doc = _binding.getRmlComponent().getDocument();
+
 		assert(m_parameter != nullptr);
 
 		m_listener.set(m_parameter, [this](pluginLib::Parameter* _p)
@@ -39,6 +41,7 @@ namespace rmlPlugin
 
 			juce::MessageManager::callAsync([this, v]()
 			{
+				m_binding.registerPendingGesture(this);
 				m_parameter->setUnnormalizedValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
 			});
 		});
@@ -53,6 +56,7 @@ namespace rmlPlugin
 			juce::MessageManager::callAsync([this, text]()
 			{
 				const auto v = m_parameter->getValueForText(text);
+				m_binding.registerPendingGesture(this);
 				m_parameter->setValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
 			});
 		});
@@ -101,6 +105,16 @@ namespace rmlPlugin
 			name = "p_" + name;
 		}
 		return name;
+	}
+
+	void RmlParameterRef::pushGesture() const
+	{
+		m_parameter->pushChangeGesture();
+	}
+
+	void RmlParameterRef::popGesture() const
+	{
+		m_parameter->popChangeGesture();
 	}
 
 	void RmlParameterRef::setDirty()
