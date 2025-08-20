@@ -167,7 +167,11 @@ namespace juceRmlUi
 
 		RmlInterfaces::ScopedAccess access(*this);
 
-		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(-_wheel.deltaX, -_wheel.deltaY), toRmlModifiers(_event));
+		// wheel direction is right/down for positive values, in juce its the other way around, thats why we flip if NOT reversed
+		const auto deltaX = _wheel.isReversed ? _wheel.deltaX : -_wheel.deltaX;
+		const auto deltaY = _wheel.isReversed ? _wheel.deltaY : -_wheel.deltaY;
+
+		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(deltaX, deltaY), toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseDoubleClick(const juce::MouseEvent& _event)
