@@ -367,9 +367,12 @@ namespace rmlPlugin::skinConverter
 			_co.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
 	}
 
-	void SkinConverter::convertUiObjectRoot(ConvertedObject& _co, const genericUI::UiObject& _object)
+	void SkinConverter::convertUiObjectRoot(ConvertedObject& _co, const genericUI::UiObject& _object) const
 	{
 		_co.tag = "body";
+
+		if (m_editor.getScale() != 1.0f)
+			_co.attribs.set("rootScale", std::to_string(m_editor.getScale()));
 
 		// https://mikke89.github.io/RmlUiDoc/pages/data_bindings.html
 		// "Putting the data-model attribute on the <body> tag may cause issues when combined with templates."

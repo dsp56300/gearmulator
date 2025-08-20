@@ -108,6 +108,8 @@ namespace genericUI
 		
 		bool selectTabWithComponent(const juce::Component* _component) const;
 
+		void initRootScale(const float _scale) { m_scale = _scale; }
+
 	private:
 		EditorInterface& m_interface;
 

@@ -88,7 +88,10 @@ namespace jucePluginEditorLib
 			setPatchManager(createPatchManager(*m_rmlComponent, elem));
 		}
 
+		initRootScale(m_rmlComponent->getDocument()->GetAttribute("rootScale", 1.0f));
+
 		addAndMakeVisible(m_rmlComponent.get());
+
 		setSize(m_rmlComponent->getWidth(), m_rmlComponent->getHeight());
 
 		juceRmlUi::EventListener::Add(m_rmlComponent->getDocument(), Rml::EventId::Mousedown, [this](Rml::Event& _event)
