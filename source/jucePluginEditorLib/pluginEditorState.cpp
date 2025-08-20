@@ -156,6 +156,25 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		m_currentSkin = editor->getSkin();
 
+		if (m_currentSkin.filename != skin.filename)
+		{
+			genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Info, editor->getProcessor().getProperties().name, 
+				"The skin\n"
+				"    '" + baseLib::filesystem::stripExtension(m_currentSkin.filename) + "'\n"
+				" is a legacy skin and has been automatically converted from json format to RmlUI.\n"
+				"\n"
+				"The automatic conversion can be inaccurate. Please contact the author of this skin and ask for an update.\n"
+				"\n"
+				"Do you want to switch to the default skin instead?", [this](const genericUI::MessageBox::Result _result)
+				{
+					if (_result == genericUI::MessageBox::Result::Yes)
+					{
+						auto defaultSkin = getIncludedSkins().front();
+						loadSkin(defaultSkin);
+					}
+				}
+			);
+		}
 		writeSkinToConfig(m_currentSkin);
 
 		if(evSkinLoaded)
