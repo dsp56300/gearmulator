@@ -82,8 +82,8 @@ namespace juceRmlUi
 	{
 		using namespace juce::gl;
 
-		int width = getScreenBounds().getWidth();
-		int height = getScreenBounds().getHeight();
+		const int width = getScreenBounds().getWidth();
+		const int height = getScreenBounds().getHeight();
 
 		glDisable(GL_DEBUG_OUTPUT);
         glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
