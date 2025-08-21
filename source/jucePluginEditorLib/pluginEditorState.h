@@ -82,6 +82,7 @@ namespace jucePluginEditorLib
 		{
 			return m_currentSkin.isValid();
 		}
+
 	protected:
 		virtual Editor* createEditor(const Skin& _skin) = 0;
 
@@ -93,6 +94,7 @@ namespace jucePluginEditorLib
 	private:
 		bool loadSkin(const Skin& _skin, uint32_t _fallbackIndex = 0);
 		void setGuiScale(int _scale) const;
+		std::string exportSkinToFolder(const Skin& _skin, const std::string& _folder) const;
 
 		std::unique_ptr<juce::Component> m_editor;
 		Skin m_currentSkin;

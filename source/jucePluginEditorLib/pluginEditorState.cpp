@@ -14,16 +14,18 @@
 
 #include "synthLib/os.h"
 
-namespace jucePluginEditorLib
-
+namespace
 {
-bridgeLib::PluginDesc getPluginDesc(const pluginLib::Processor& _p)
-{
-	bridgeLib::PluginDesc pd;
-	_p.getPluginDesc(pd);
-	return pd;
+	bridgeLib::PluginDesc getPluginDesc(const pluginLib::Processor& _p)
+	{
+		bridgeLib::PluginDesc pd;
+		_p.getPluginDesc(pd);
+		return pd;
+	}
 }
 
+namespace jucePluginEditorLib
+{
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
 	: m_processor(_processor), m_parameterBinding(_controller), m_includedSkins(std::move(_includedSkins))
 	, m_remoteServerList(getPluginDesc(_processor))
@@ -39,8 +41,7 @@ PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controlle
 }
 
 PluginEditorState::~PluginEditorState()
-{
-}
+= default;
 
 int PluginEditorState::getWidth() const
 {
@@ -222,6 +223,57 @@ void PluginEditorState::setGuiScale(const int _scale) const
 		evSetGuiScale(_scale);
 }
 
+std::string PluginEditorState::exportSkinToFolder(const Skin& _skin, const std::string& _folder) const
+{
+	if (!m_editor)
+		return "no editor to export skin";
+
+	if (_skin.files.empty())
+		return "no files to export";
+
+	baseLib::filesystem::createDirectory(_folder);
+
+	std::string subfolder = baseLib::filesystem::stripExtension(_skin.filename);
+
+	const auto folder = _folder + subfolder + '/';
+
+	baseLib::filesystem::createDirectory(folder);
+
+	std::stringstream errors;
+
+	auto writeFile = [this, &folder, &errors](const std::string& _name)
+	{
+		const auto res = m_processor.findResource(_name);
+
+		if (!res)
+		{
+			errors << "Failed to find resource " << _name << '\n';
+			return;
+		}
+
+		FILE* hFile = baseLib::filesystem::openFile(folder + _name, "wb");
+
+		if(!hFile)
+		{
+			errors << "Failed to create file " << folder << _name << '\n';
+		}
+		else
+		{
+			const auto data = res->first;
+			const auto dataSize = res->second;
+			const auto writtenCount = fwrite(data, 1, dataSize, hFile);
+			(void)fclose(hFile);
+			if(writtenCount != dataSize)
+				errors << "Failed to write " << dataSize << " bytes to " << folder << _name << '\n';
+		}
+	};
+
+	for (const auto& file : _skin.files)
+		writeFile(file);
+
+	return errors.str();
+}
+
 Editor* PluginEditorState::getEditor() const
 {
 	return dynamic_cast<Editor*>(m_editor.get());
@@ -316,7 +368,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 				auto filename = baseLib::filesystem::getFilenameWithoutPath(file);
 
 				auto displayName = createSkinDisplayName(file);
-				const Skin skin{displayName, filename, skinPath};
+				const Skin skin{displayName, filename, skinPath, {}};
 
 				addSkinEntry(skin);
 			}
@@ -570,7 +622,9 @@ void PluginEditorState::exportCurrentSkin() const
 	if(!editor)
 		return;
 
-	const auto res = editor->exportToFolder(getSkinFolder());
+	const auto& skin = editor->getSkin();
+
+	const auto res = exportSkinToFolder(skin, getSkinFolder());
 
 	if(!res.empty())
 	{
