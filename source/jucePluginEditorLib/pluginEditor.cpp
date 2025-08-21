@@ -655,6 +655,8 @@ namespace jucePluginEditorLib
 
 	void Editor::onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 	{
+		m_rmlPlugin->onContextCreate(&_context, _rmlComponent);
+
 		m_overlays.reset(new ParameterOverlays(*this, *m_rmlPlugin->getParameterBinding(&_context)));
 
 		m_pluginDataModel.reset(new PluginDataModel(*this, _context, [this](PluginDataModel& _model)

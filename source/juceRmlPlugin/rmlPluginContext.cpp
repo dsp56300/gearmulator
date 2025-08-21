@@ -4,7 +4,9 @@
 
 namespace rmlPlugin
 {
-	RmlPluginContext::RmlPluginContext(Rml::Context* _context, pluginLib::Controller& _controller) : m_context(_context), m_binding(_controller, _context)
+	RmlPluginContext::RmlPluginContext(Rml::Context* _context, pluginLib::Controller& _controller, juceRmlUi::RmlComponent& _component)
+	: m_context(_context)
+	, m_binding(_controller, _context, _component)
 	{
 	}
 

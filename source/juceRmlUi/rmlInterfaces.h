@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "rmlFileInterface.h"
 #include "rmlSystemInterface.h"
 
@@ -42,8 +44,6 @@ namespace juceRmlUi
 		void attach(RmlComponent* _component);
 		void detach();
 
-		static RmlComponent& getCurrentComponent();
-
 		auto& getCoreInstance() { return m_coreInstance; }
 		SystemInterface& getSystemInterface() { return m_systemInterface; }
 
@@ -56,5 +56,6 @@ namespace juceRmlUi
 		SystemInterface m_systemInterface;
 		Rml::FontEngineInterfaceDefault m_fontEngineInterface;
 		FileInterface m_fileInterface;
+		std::recursive_mutex m_accessMutex;
 	};
 }

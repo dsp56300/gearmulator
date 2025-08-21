@@ -125,8 +125,6 @@ namespace juceRmlUi
 
 		void removeFromParent(Rml::Element* _elem);
 
-		void callPostFrame(const std::function<void()>& _callback);
-
 		bool toBuffer(Rml::CoreInstance& _coreInstance, std::vector<uint8_t>& _buffer, juce::Image& _image);
 
 		Rml::Colourb toRmlColor(const juce::Colour& _color);

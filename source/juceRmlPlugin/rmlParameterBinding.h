@@ -35,9 +35,9 @@ namespace rmlPlugin
 
 		static constexpr uint8_t CurrentPart = pluginLib::MidiPacket::AnyPart;
 
-		explicit RmlParameterBinding(pluginLib::Controller& _controller, Rml::Context* _context);
+		explicit RmlParameterBinding(pluginLib::Controller& _controller, Rml::Context* _context, juceRmlUi::RmlComponent& _component);
 		RmlParameterBinding(const RmlParameterBinding&) = delete;
-		RmlParameterBinding(RmlParameterBinding&&) = default;
+		RmlParameterBinding(RmlParameterBinding&&) = delete;
 		~RmlParameterBinding() = default;
 
 		static std::string getDataModelName(uint8_t _part);

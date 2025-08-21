@@ -26,9 +26,9 @@ namespace rmlPlugin
 		Rml::UnregisterPlugin(m_coreInstance, this);
 	}
 
-	void RmlPlugin::OnContextCreate(Rml::Context* _context)
+	void RmlPlugin::onContextCreate(Rml::Context* _context, juceRmlUi::RmlComponent& _component)
 	{
-		m_contexts.emplace(_context, std::make_unique<RmlPluginContext>(_context, m_controller));
+		m_contexts.emplace(_context, std::make_unique<RmlPluginContext>(_context, m_controller, _component));
 	}
 
 	void RmlPlugin::OnContextDestroy(Rml::Context* _context)

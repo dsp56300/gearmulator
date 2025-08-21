@@ -25,7 +25,7 @@ namespace rmlPlugin
 	class RmlPluginContext
 	{
 	public:
-		RmlPluginContext(Rml::Context* _context, pluginLib::Controller& _controller);
+		RmlPluginContext(Rml::Context* _context, pluginLib::Controller& _controller, juceRmlUi::RmlComponent& _component);
 		RmlPluginContext(const RmlPluginContext&) = delete;
 		RmlPluginContext(RmlPluginContext&&) = delete;
 		~RmlPluginContext();

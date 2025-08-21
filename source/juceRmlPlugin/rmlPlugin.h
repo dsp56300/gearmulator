@@ -33,8 +33,9 @@ namespace rmlPlugin
 		RmlPlugin& operator=(const RmlPlugin&) = delete;
 		RmlPlugin& operator=(RmlPlugin&&) = delete;
 
+		void onContextCreate(Rml::Context* _context, juceRmlUi::RmlComponent& _component);
+
 		// Rml::Plugin overrides
-		void OnContextCreate(Rml::Context* _context) override;
 		void OnContextDestroy(Rml::Context* _context) override;
 		void OnElementCreate(Rml::Element* _element) override;
 		void OnDocumentOpen(Rml::Context* _context, const Rml::String& _documentPath) override;

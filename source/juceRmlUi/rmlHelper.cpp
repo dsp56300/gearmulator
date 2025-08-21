@@ -338,12 +338,6 @@ namespace juceRmlUi
 				parentNode->RemoveChild(_elem);
 		}
 
-		void callPostFrame(const std::function<void()>& _callback)
-		{
-			auto& comp = RmlInterfaces::getCurrentComponent();
-			comp.addPostFrameCallback(_callback);
-		}
-
 		bool toBuffer(Rml::CoreInstance& _coreInstance, std::vector<uint8_t>& _buffer, juce::Image& _image)
 		{
 			const auto w = _image.getWidth();

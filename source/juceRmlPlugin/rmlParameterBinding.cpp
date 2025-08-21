@@ -14,9 +14,9 @@
 
 namespace rmlPlugin
 {
-	RmlParameterBinding::RmlParameterBinding(pluginLib::Controller& _controller, Rml::Context* _context)
+	RmlParameterBinding::RmlParameterBinding(pluginLib::Controller& _controller, Rml::Context* _context, juceRmlUi::RmlComponent& _component)
 	: m_controller(_controller)
-	, m_component(juceRmlUi::RmlInterfaces::getCurrentComponent())
+	, m_component(_component)
 	{
 		m_onCurrentPartChanged.set(_controller.onCurrentPartChanged, [this](const uint8_t _part)
 		{

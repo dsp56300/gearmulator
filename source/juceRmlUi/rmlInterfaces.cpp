@@ -24,13 +24,8 @@ namespace juceRmlUi
 {
 	namespace
 	{
-		std::recursive_mutex g_accessMutex;
-		uint32_t g_instanceCount = 0;
-
 		GenericInstancers<ElemButton, ElemCanvas, ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemSplitter, ElemTree, ElemTreeNode> g_instancers
 		                 ("button",   "canvas",   "combo",      "knob",   "list",   "listentry",   "splitter"  , "tree",   "treenode"  );
-
-		RmlComponent* g_currentComponent;
 
 		template<size_t... I>
 		void registerOne(Rml::Factory& _factory, std::index_sequence<I...>)
@@ -64,77 +59,52 @@ namespace juceRmlUi
 	{
 		ScopedAccess access(*this);
 
-		if (++g_instanceCount == 1)
-		{
-			Rml::Initialise(m_coreInstance);
+		Rml::Initialise(m_coreInstance);
 
-			Rml::SetSystemInterface(m_coreInstance, &m_systemInterface);
-			Rml::SetFontEngineInterface(m_coreInstance, &m_fontEngineInterface);
-			Rml::SetFileInterface(m_coreInstance, &m_fileInterface);
+		Rml::SetSystemInterface(m_coreInstance, &m_systemInterface);
+		Rml::SetFontEngineInterface(m_coreInstance, &m_fontEngineInterface);
+		Rml::SetFileInterface(m_coreInstance, &m_fileInterface);
 
-			auto& sss = *m_coreInstance.styleSheetSpecification;
+		auto& sss = *m_coreInstance.styleSheetSpecification;
 
-			// button style elements
-			sss.RegisterProperty("isToggle", "1", false).AddParser("number");
-			sss.RegisterProperty("valueOn", "1", false).AddParser("number");
-			sss.RegisterProperty("valueOff", "-1", false).AddParser("number");
+		// button style elements
+		sss.RegisterProperty("isToggle", "1", false).AddParser("number");
+		sss.RegisterProperty("valueOn", "1", false).AddParser("number");
+		sss.RegisterProperty("valueOff", "-1", false).AddParser("number");
 
-			// knob style elements
-			sss.RegisterProperty("frames", "128", false).AddParser("number");
-			sss.RegisterProperty("speed", "0.01", false).AddParser("number");
-			sss.RegisterProperty("spriteprefix", "frame", false).AddParser("string");
-			sss.RegisterProperty("speedScaleShift", "0.1", false).AddParser("number");
-			sss.RegisterProperty("speedScaleCtrl", "0.2", false).AddParser("number");
-			sss.RegisterProperty("speedScaleAlt", "0.5", false).AddParser("number");
+		// knob style elements
+		sss.RegisterProperty("frames", "128", false).AddParser("number");
+		sss.RegisterProperty("speed", "0.01", false).AddParser("number");
+		sss.RegisterProperty("spriteprefix", "frame", false).AddParser("string");
+		sss.RegisterProperty("speedScaleShift", "0.1", false).AddParser("number");
+		sss.RegisterProperty("speedScaleCtrl", "0.2", false).AddParser("number");
+		sss.RegisterProperty("speedScaleAlt", "0.5", false).AddParser("number");
 
-			// menu style elements
-			sss.RegisterProperty("items-per-column", "16", false).AddParser("number");
+		// menu style elements
+		sss.RegisterProperty("items-per-column", "16", false).AddParser("number");
 
-			// tree style elements
-			sss.RegisterProperty("indent-margin-left", "0", false).AddParser("length");
-			sss.RegisterProperty("indent-padding-left", "0", false).AddParser("length");
+		// tree style elements
+		sss.RegisterProperty("indent-margin-left", "0", false).AddParser("length");
+		sss.RegisterProperty("indent-padding-left", "0", false).AddParser("length");
 
-			registerInstancers(*m_coreInstance.factory);
-		}
+		registerInstancers(*m_coreInstance.factory);
 	}
 
 	RmlInterfaces::~RmlInterfaces()
 	{
 		ScopedAccess access(*this);
 
-		if (--g_instanceCount == 0)
-		{
-			Rml::Shutdown(m_coreInstance);
-		}
+		Rml::Shutdown(m_coreInstance);
 	}
 
 	void RmlInterfaces::attach(RmlComponent* _component)
 	{
-		g_accessMutex.lock();
-
-		if (++m_attached > 1)
-			return;
-
-		assert(!g_currentComponent || g_currentComponent == _component);
-
-		g_currentComponent = _component;
+		m_accessMutex.lock();
 	}
 
 	void RmlInterfaces::detach()
 	{
-		if (--m_attached > 0)
-			return;
-
-		g_currentComponent = nullptr;
-
-		g_accessMutex.unlock();
-	}
-
-	juceRmlUi::RmlComponent& RmlInterfaces::getCurrentComponent()
-	{
-		std::scoped_lock lock(g_accessMutex);
-		assert(g_currentComponent != nullptr && "RmlInterfaces::getCurrentComponent: No current component set");
-		return *g_currentComponent;
+		m_accessMutex.unlock();
 	}
 
 	template <typename T> Rml::ElementInstancerGeneric<T>& RmlInterfaces::getInstancer()
