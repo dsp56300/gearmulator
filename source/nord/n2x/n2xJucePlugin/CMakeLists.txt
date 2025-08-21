@@ -28,7 +28,7 @@ set(SOURCES
 
 SET(ASSETS "parameterDescriptions_n2x.json")
 
-addSkin("NodalRed2x" "n2xTrancy" "skins/n2xTrancy" "n2xTrancy.json" "ASSETS_n2xTrancy")
+addSkin("NodalRed2x" "n2xTrancy" "skins/n2xTrancy" "n2xTrancy.json")
 
 buildSkinHeader()
 
