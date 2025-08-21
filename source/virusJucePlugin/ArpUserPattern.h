@@ -22,6 +22,7 @@ namespace genericVirusUI
 		using BoundParam = std::pair<pluginLib::Parameter*, pluginLib::ParameterListener>;
 
 		ArpUserPattern(const VirusEditor& _editor, Rml::Element* _parent);
+		~ArpUserPattern();
 
 		void paint(const juce::Image& _image, juce::Graphics& g);
 

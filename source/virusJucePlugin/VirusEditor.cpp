@@ -160,11 +160,13 @@ namespace genericVirusUI
 		};
 
 		if (auto* arpUserGraphics = findChild("ArpUserGraphics", false))
-			m_arpUserPattern = new ArpUserPattern(*this, arpUserGraphics);
+			m_arpUserPattern.reset(new ArpUserPattern(*this, arpUserGraphics));
 	}
 
 	VirusEditor::~VirusEditor()
 	{
+		m_arpUserPattern.reset();
+
 		m_focusedParameter.reset();
 
 		m_parameterBinding.clearBindings();

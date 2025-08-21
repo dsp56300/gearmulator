@@ -110,7 +110,7 @@ namespace genericVirusUI
 
 		Rml::Element* m_deviceModel = nullptr;
 
-		ArpUserPattern* m_arpUserPattern = nullptr;
+		std::unique_ptr<ArpUserPattern> m_arpUserPattern;
 
 		baseLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
 	};

@@ -43,6 +43,11 @@ namespace genericVirusUI
 		});
 	}
 
+	ArpUserPattern::~ArpUserPattern()
+	{
+		unbindParameters();
+	}
+
 	void ArpUserPattern::paint(const juce::Image& _image, juce::Graphics& g)
 	{
 		if(!m_patternLength.first)
