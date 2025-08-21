@@ -313,7 +313,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 					skinPath = entry.substr(modulePath.size());
 				skinPath = baseLib::filesystem::validatePath(skinPath);
 
-				auto filename = file;
+				auto filename = baseLib::filesystem::getFilenameWithoutPath(file);
 
 				auto displayName = createSkinDisplayName(file);
 				const Skin skin{displayName, filename, skinPath};
