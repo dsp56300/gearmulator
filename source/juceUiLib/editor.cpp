@@ -71,104 +71,11 @@ namespace genericUI
 		return it == m_drawables.end() ? nullptr : it->second.get();
 	}
 
-	std::unique_ptr<juce::Drawable> Editor::createImageDrawable(const std::string& _texture)
-	{
-		const auto existing = getImageDrawable(_texture);
-		return existing ? existing->createCopy() : nullptr;
-	}
-
 	const juce::Font& Editor::getFont(const std::string& _fontFile)
 	{
 		const auto it = m_fonts.find(_fontFile);
 		if(it == m_fonts.end())
 			throw std::runtime_error("Unable to find font named " + _fontFile);
 		return it->second;
-	}
-
-	void Editor::registerComponent(const std::string& _name, juce::Component* _component)
-	{
-		const auto itExisting = m_componentsByName.find(_name);
-
-		if(itExisting != m_componentsByName.end())
-		{
-			itExisting->second.push_back(_component);
-		}
-		else
-		{
-			m_componentsByName.insert(std::make_pair(_name, std::vector{_component}));
-		}
-
-		const auto param = _component->getProperties()["parametername"].toString().toStdString();
-		if(param.empty())
-			return;
-	}
-
-	void Editor::registerTabGroup(TabGroup* _group)
-	{
-		const auto& n = _group->getName();
-
-		if(m_tabGroupsByName.find(n) != m_tabGroupsByName.end())
-			throw std::runtime_error("tab group " + n + " is already defined");
-
-		m_tabGroupsByName.insert(std::make_pair(n, _group));
-	}
-
-	const std::vector<juce::Component*>& Editor::findComponents(const std::map<std::string, std::vector<juce::Component*>>& _components, const std::string& _name, const uint32_t _expectedCount, const std::string& _typename)
-	{
-		const auto it = _components.find(_name);
-		if(it != _components.end())
-		{
-			if(_expectedCount && it->second.size() != _expectedCount)
-			{
-				std::stringstream ss;
-				ss << "Expected to find " << _expectedCount << " components with " << _typename << ' ' << _name << " but found " << it->second.size();
-				throw std::runtime_error(ss.str());
-			}
-			return it->second;
-		}
-
-		if(_expectedCount)
-		{
-			std::stringstream ss;
-			ss << "Unable to find component with " << _typename << ' ' << _name << ", expected to find " << _expectedCount << " components";
-			throw std::runtime_error(ss.str());
-		}
-
-		static std::vector<juce::Component*> empty;
-		return empty;
-	}
-
-	const std::vector<juce::Component*>& Editor::findComponents(const std::string& _name, const uint32_t _expectedCount/* = 0*/) const
-	{
-		return findComponents(m_componentsByName, _name, _expectedCount, "name");
-	}
-
-	juce::Component* Editor::findComponent(const std::string& _name, const bool _mustExist/* = true*/) const
-	{
-		const auto comps = findComponents(_name);
-		if(comps.size() > 1)
-			throw std::runtime_error("Failed to find unique component named " + _name + ", found more than one object with that name");
-		if(_mustExist && comps.empty())
-			throw std::runtime_error("Failed to find component named " + _name);
-		return comps.empty() ? nullptr : comps.front();
-	}
-
-	void Editor::setEnabled(juce::Component& _component, const bool _enable)
-	{
-		if(_component.getProperties().contains("disabledAlpha"))
-		{
-			const float a = _component.getProperties()["disabledAlpha"];
-
-			_component.setAlpha(_enable ? 1.0f : a);
-			_component.setEnabled(_enable);
-		}
-		else
-		{
-			_component.setVisible(_enable);
-		}
-	}
-
-	void Editor::setCurrentPart(const uint8_t _part)
-	{
 	}
 }

@@ -326,8 +326,6 @@ namespace jucePluginEditorLib
 
 	void Editor::setCurrentPart(const uint8_t _part)
 	{
-		genericUI::Editor::setCurrentPart(_part);
-
 		if(m_patchManager)
 			m_patchManager->setCurrentPart(_part);
 

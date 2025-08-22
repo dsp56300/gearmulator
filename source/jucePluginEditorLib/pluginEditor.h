@@ -135,7 +135,7 @@ namespace jucePluginEditorLib
 		virtual void saveChunkData(baseLib::BinaryStream& _s);
 		virtual void loadChunkData(baseLib::ChunkReader& _cr);
 
-		void setCurrentPart(uint8_t _part) override;
+		virtual void setCurrentPart(uint8_t _part);
 
 		void showDisclaimer() const;
 
@@ -152,7 +152,7 @@ namespace jucePluginEditorLib
 		juceRmlUi::Menu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
 		virtual void createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
-		juce::Component* createRmlUiComponent(const std::string& _rmlFile) override;
+		juce::Component* createRmlUiComponent(const std::string& _rmlFile);
 
 		virtual void onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context);
 

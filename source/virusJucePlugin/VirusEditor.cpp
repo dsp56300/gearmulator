@@ -531,7 +531,7 @@ namespace genericVirusUI
 #endif
 	}
 
-	void VirusEditor::setPart(size_t _part)
+	void VirusEditor::setPart(const size_t _part)
 	{
 		m_parameterBinding.setPart(static_cast<uint8_t>(_part));
 		onCurrentPartChanged();

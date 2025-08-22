@@ -338,35 +338,6 @@ namespace genericUI
 			_target.getProperties().set(juce::Identifier(prop.first.c_str()), juce::var(prop.second.c_str()));
 	}
 
-	template<typename T>
-	void UiObject::bindParameter(const Editor& _editor, T& _target) const
-	{
-		const std::string param = getProperty("parameter");
-
-		if(param.empty())
-			return;
-
-		const auto index = _editor.getInterface().getParameterIndexByName(param);
-
-		if(index < 0)
-			throw std::runtime_error("Parameter named " + param + " not found");
-
-		_target.getProperties().set("parameter", index);
-		_target.getProperties().set("parametername", juce::String(param));
-		
-		if constexpr(std::is_base_of_v<juce::Button, T>)
-		{
-			auto value = getPropertyInt("value", -1);
-			if(value != -1)
-				_target.getProperties().set("parametervalue", value);
-			auto valueOff = getPropertyInt("valueOff", -1);
-			if(valueOff != -1)
-				_target.getProperties().set("parametervalueoff", valueOff);
-		}
-
-		_editor.getInterface().bindParameter(_target, index);
-	}
-
 	template <typename Target, typename Style> void UiObject::createStyle(Editor& _editor, Target& _target, Style* _style)
 	{
 		if(_style)

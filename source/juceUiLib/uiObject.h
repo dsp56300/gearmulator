@@ -67,8 +67,6 @@ namespace genericUI
 
 		bool parse(juce::DynamicObject* _obj);
 
-		template<typename T> void bindParameter(const Editor& _editor, T& _target) const;
-
 		void readProperties(juce::Component& _target);
 
 		template<typename Target, typename Style>
