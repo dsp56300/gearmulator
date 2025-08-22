@@ -16,27 +16,11 @@
 #include "juceRmlUi/rmlInterfaces.h"
 #include "juceRmlUi/rmlMenu.h"
 
-namespace rmlPlugin
-{
-	class RmlPluginDocument;
-}
-
 namespace juce
 {
 	class FileChooser;
 	class TemporaryFile;
 	class File;
-}
-
-namespace rmlPlugin
-{
-	class RmlParameterBinding;
-}
-
-namespace Rml
-{
-	class Context;
-	class Element;
 }
 
 namespace rmlPlugin
@@ -47,10 +31,14 @@ namespace rmlPlugin
 	}
 
 	class RmlPlugin;
+	class RmlParameterBinding;
+	class RmlPluginDocument;
 }
 
 namespace Rml
 {
+	class Context;
+	class Element;
 	class ElementDocument;
 }
 
@@ -69,7 +57,6 @@ namespace baseLib
 namespace pluginLib
 {
 	class FileType;
-	class ParameterBinding;
 }
 
 namespace jucePluginEditorLib
