@@ -22,7 +22,7 @@ EditorWindow::EditorWindow(juce::AudioProcessor& _p, PluginEditorState& _s, juce
 	m_state.evSetGuiScale = [&](const int _scale)
 	{
 		if(getNumChildComponents() > 0)
-			setGuiScale(getChildComponent(0), static_cast<float>(_scale));
+			setGuiScale(static_cast<float>(_scale));
 	};
 
 	m_state.enableBindings();
@@ -90,7 +90,7 @@ void EditorWindow::resized()
 	});
 }
 
-void EditorWindow::setGuiScale(juce::Component* _comp, const float _percent)
+void EditorWindow::setGuiScale(const float _percent)
 {
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
@@ -118,8 +118,11 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 
     const auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
 
+	_component->setSize(getWidth(), getHeight());
+
 	addAndMakeVisible(_component);
-	setGuiScale(_component, scale);
+
+	setGuiScale(scale);
 
 	m_sizeConstrainer.setMinimumSize(m_state.getWidth() / 10, m_state.getHeight() / 10);
 	m_sizeConstrainer.setMaximumSize(m_state.getWidth() * 4, m_state.getHeight() * 4);

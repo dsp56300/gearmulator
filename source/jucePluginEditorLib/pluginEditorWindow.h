@@ -18,7 +18,7 @@ namespace jucePluginEditorLib
 		void resized() override;
 
 	private:
-		void setGuiScale(juce::Component* _comp, float _percent);
+		void setGuiScale(float _percent);
 		void setUiRoot(juce::Component* _component);
 
 		PluginEditorState& m_state;
