@@ -83,12 +83,12 @@ namespace jucePluginEditorLib
 
 	class Processor;
 
-	class Editor : public genericUI::Editor, genericUI::EditorInterface, juceRmlUi::DataProvider
+	class Editor : public genericUI::Editor, juceRmlUi::DataProvider
 	{
 	public:
 		baseLib::Event<Editor*, Rml::Event&> onOpenMenu;
 
-		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, Skin _skin);
+		Editor(Processor& _processor, Skin _skin);
 		~Editor() override;
 
 		Editor(const Editor&) = delete;
@@ -105,7 +105,7 @@ namespace jucePluginEditorLib
 
 		bool selectTabWithElement(const Rml::Element* _element) const;
 
-		virtual patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) { return nullptr; };
+		virtual patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) { return nullptr; }
 
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
@@ -194,15 +194,7 @@ namespace jucePluginEditorLib
 
 		std::string getAbsoluteSkinFolder(const std::string& _skinFolder) const;
 
-		int getParameterIndexByName(const std::string& _name) override;
-		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
-		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;
-		bool bindParameter(juce::Slider& _target, int _parameterIndex) override;
-		bool bindParameter(juce::Label& _target, int _parameterIndex) override;
-		juce::Value* getParameterValue(int _parameterIndex, uint8_t _part) override;
-
 		Processor& m_processor;
-		pluginLib::ParameterBinding& m_binding;
 
 		Skin m_skin;
 

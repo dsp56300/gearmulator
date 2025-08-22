@@ -2,20 +2,17 @@
 
 #include "uiObject.h"
 
-#include "baseLib/filesystem.h"
-
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace genericUI
 {
-	Editor::Editor(EditorInterface& _interface) : m_interface(_interface)
-	{
-	}
+	Editor::Editor()
+	= default;
 
 	void Editor::create(const std::string& _jsonFilename)
 	{
 		uint32_t jsonSize;
-		const auto jsonData = m_interface.getResourceByFilename(_jsonFilename, jsonSize);
+		const auto jsonData = getResourceByFilename(_jsonFilename, jsonSize);
 
 		juce::var json;
 		const auto error = juce::JSON::parse(juce::String(std::string(jsonData, jsonSize)), json);
@@ -35,7 +32,7 @@ namespace genericUI
 			const auto dataName = texture + ".png";
 
 			uint32_t dataSize;
-			const auto* data = m_interface.getResourceByFilename(dataName, dataSize);
+			const auto* data = getResourceByFilename(dataName, dataSize);
 			if (!data)
 				throw std::runtime_error("Failed to find image named " + dataName);
 			auto drawable = juce::Drawable::createFromImageData(data, dataSize);
@@ -53,7 +50,7 @@ namespace genericUI
 			const auto dataName = fontFile + ".ttf";
 
 			uint32_t dataSize;
-			const auto* data = m_interface.getResourceByFilename(dataName, dataSize);
+			const auto* data = getResourceByFilename(dataName, dataSize);
 			if (!data)
 				throw std::runtime_error("Failed to find font named " + dataName);
 			auto font = juce::Font(juce::Typeface::createSystemTypefaceFor(data, dataSize));

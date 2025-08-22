@@ -28,9 +28,8 @@
 namespace genericVirusUI
 {
 	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
-		Editor(_processorRef, _binding, _skin),
+		Editor(_processorRef, _skin),
 		m_processor(_processorRef),
-		m_parameterBinding(_binding),
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
 		create();
@@ -166,8 +165,6 @@ namespace genericVirusUI
 		m_arpUserPattern.reset();
 
 		m_focusedParameter.reset();
-
-		m_parameterBinding.clearBindings();
 
 		getController().onProgramChange = nullptr;
 	}
@@ -533,7 +530,6 @@ namespace genericVirusUI
 
 	void VirusEditor::setPart(const size_t _part)
 	{
-		m_parameterBinding.setPart(static_cast<uint8_t>(_part));
 		onCurrentPartChanged();
 		setCurrentPart(static_cast<uint8_t>(_part));
 	}

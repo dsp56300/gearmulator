@@ -43,10 +43,8 @@ namespace jucePluginEditorLib
 			jucePluginData::getNamedResource
 		};
 	}
-	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, Skin _skin)
-		: genericUI::Editor(static_cast<EditorInterface&>(*this))
-		, m_processor(_processor)
-		, m_binding(_binding)
+	Editor::Editor(Processor& _processor, Skin _skin)
+		: m_processor(_processor)
 		, m_skin(std::move(_skin))
 		, m_rmlInterfaces(*this)
 	{
@@ -812,39 +810,5 @@ namespace jucePluginEditorLib
 		const auto publicDataPath = m_processor.getDataFolder();
 
 		return baseLib::filesystem::validatePath(_skinFolder.find(modulePath) == 0 || _skinFolder.find(publicDataPath) == 0 ? _skinFolder : modulePath + _skinFolder);
-	}
-
-	int Editor::getParameterIndexByName(const std::string& _name)
-	{
-		return static_cast<int>(m_processor.getController().getParameterIndexByName(_name));
-	}
-
-	bool Editor::bindParameter(juce::Button& _target, int _parameterIndex)
-	{
-		m_binding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool Editor::bindParameter(juce::ComboBox& _target, int _parameterIndex)
-	{
-		m_binding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool Editor::bindParameter(juce::Slider& _target, int _parameterIndex)
-	{
-		m_binding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool Editor::bindParameter(juce::Label& _target, int _parameterIndex)
-	{
-		m_binding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	juce::Value* Editor::getParameterValue(int _parameterIndex, uint8_t _part)
-	{
-		return m_processor.getController().getParamValueObject(_parameterIndex, _part);
 	}
 }

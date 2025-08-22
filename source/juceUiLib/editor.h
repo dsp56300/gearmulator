@@ -1,11 +1,9 @@
 #pragma once
 
-#include <stdexcept>
+#include <map>
+#include <memory>
 #include <string>
-
-#include "uiObject.h"
-
-#include "editorInterface.h"
+#include <vector>
 
 namespace juce
 {
@@ -15,12 +13,17 @@ namespace juce
 
 namespace genericUI
 {
+	class UiObject;
+
 	class Editor
 	{
 	public:
-		explicit Editor(EditorInterface& _interface);
+		explicit Editor();
 		Editor(const Editor&) = delete;
 		Editor(Editor&&) = delete;
+
+		Editor& operator = (const Editor&) = delete;
+		Editor& operator = (Editor&&) = delete;
 
 		void create(const std::string& _jsonFilename);
 
@@ -36,9 +39,9 @@ namespace genericUI
 
 		void initRootScale(const float _scale) { m_scale = _scale; }
 
-	private:
-		EditorInterface& m_interface;
+		virtual const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) = 0;
 
+	private:
 		std::string m_jsonFilename;
 
 		std::map<std::string, std::unique_ptr<juce::Drawable>> m_drawables;

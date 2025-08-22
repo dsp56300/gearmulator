@@ -55,8 +55,6 @@ namespace genericVirusUI
 
 		void setPart(size_t _part);
 
-		pluginLib::ParameterBinding& getParameterBinding() const { return m_parameterBinding; }
-
 		virus::Controller& getController() const;
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
@@ -87,7 +85,6 @@ namespace genericVirusUI
 		bool savePresets(const std::string& _pathName, SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber = 0) const;
 
 		virus::VirusProcessor& m_processor;
-		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Leds> m_leds;

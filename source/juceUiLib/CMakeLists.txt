@@ -5,7 +5,6 @@ set(SOURCES
 	button.cpp button.h
 	controllerlink.cpp controllerlink.h
 	editor.cpp editor.h
-	editorInterface.h
 	image.cpp image.h
 	listBoxStyle.cpp listBoxStyle.h
 	rotaryStyle.cpp rotaryStyle.h
