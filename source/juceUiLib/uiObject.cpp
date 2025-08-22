@@ -4,16 +4,7 @@
 
 #include "editor.h"
 
-#include "buttonStyle.h"
 #include "comboboxStyle.h"
-#include "hyperlinkbuttonStyle.h"
-#include "labelStyle.h"
-#include "listBoxStyle.h"
-#include "rotaryStyle.h"
-#include "scrollbarStyle.h"
-#include "textbuttonStyle.h"
-#include "textEditorStyle.h"
-#include "treeViewStyle.h"
 
 #include <cassert>
 
@@ -76,45 +67,6 @@ namespace genericUI
 			}
 		}
 		return _default;
-	}
-
-	size_t UiObject::getConditionCountRecursive() const
-	{
-		size_t count = m_condition ? 1 : 0;
-
-		for (const auto & c : m_children)
-			count += c->getConditionCountRecursive();
-
-		return count;
-	}
-
-	size_t UiObject::getControllerLinkCountRecursive() const
-	{
-		size_t count = m_controllerLinks.size();
-
-		for (const auto & c : m_children)
-			count += c->getControllerLinkCountRecursive();
-
-		return count;
-	}
-
-	void UiObject::setCurrentPart(Editor& _editor, const uint8_t _part)
-	{
-		if(m_condition)
-			m_condition->setCurrentPart(_editor, _part);
-
-		for (const auto& child : m_children)
-			child->setCurrentPart(_editor, _part);
-	}
-
-	void UiObject::updateKeyValueConditions(const std::string& _key, const std::string& _value) const
-	{
-		auto* cond = dynamic_cast<ConditionByKeyValue*>(m_condition.get());
-		if(cond && cond->getKey() == _key)
-			cond->setValue(_value);
-
-		for (const auto& child : m_children)
-			child->updateKeyValueConditions(_key, _value);
 	}
 
 	bool UiObject::hasComponent(const std::string& _component) const

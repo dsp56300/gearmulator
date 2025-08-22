@@ -4,6 +4,7 @@
 
 namespace genericVirusUI
 {
+#if 0
 	// The only purpose of this class is to provide backwards-compatibility with old skins that do not have their links expressed in the json description file
 	ControllerLinks::ControllerLinks(const VirusEditor& _editor)
 	{
@@ -59,4 +60,5 @@ namespace genericVirusUI
 		link->create(_b, _a, _cond);
 		m_links.emplace_back(link);
 	}
+#endif
 }

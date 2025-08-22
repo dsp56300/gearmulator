@@ -16,6 +16,13 @@
 #include "juceRmlUi/rmlInterfaces.h"
 #include "juceRmlUi/rmlMenu.h"
 
+namespace juce
+{
+	class FileChooser;
+	class TemporaryFile;
+	class File;
+}
+
 namespace rmlPlugin
 {
 	class RmlParameterBinding;

@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "condition.h"
 #include "controllerlink.h"
 #include "tabgroup.h"
 
@@ -45,14 +44,8 @@ namespace genericUI
 		float getPropertyFloat(const std::string& _key, float _default = 0.0f) const;
 		std::string getProperty(const std::string& _key, const std::string& _default = std::string()) const;
 
-		size_t getConditionCountRecursive() const;
-		size_t getControllerLinkCountRecursive() const;
-
-		void setCurrentPart(Editor& _editor, uint8_t _part);
-
 		const auto& getName() const { return m_name; }
 
-		void updateKeyValueConditions(const std::string& _key, const std::string& _value) const;
 		bool hasComponent(const std::string& _component) const;
 
 		const auto& getChildren() const { return m_children; }
@@ -60,8 +53,6 @@ namespace genericUI
 		const auto& getTabGroup() const { return m_tabGroup; }
 
 		const auto& getControllerLinks() const { return m_controllerLinks; }
-
-		const auto& getCondition() const { return m_condition; }
 
 		std::set<std::string> readConditionValues() const;
 
@@ -95,8 +86,6 @@ namespace genericUI
 		std::unique_ptr<UiObjectStyle> m_style;
 
 		std::map<std::string, juce::var> m_styles;
-
-		std::unique_ptr<Condition> m_condition;
 
 		TabGroup m_tabGroup;
 		std::vector<std::unique_ptr<ControllerLink>> m_controllerLinks;

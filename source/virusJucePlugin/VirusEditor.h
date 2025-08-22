@@ -7,10 +7,7 @@
 #include "baseLib/event.h"
 
 #include "Parts.h"
-#include "Tabs.h"
-#include "FxPage.h"
 #include "PatchManager.h"
-#include "ControllerLinks.h"
 #include "Leds.h"
 
 namespace juceRmlUi
@@ -95,7 +92,6 @@ namespace genericVirusUI
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Leds> m_leds;
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
-		std::unique_ptr<FxPage> m_fxPage;
 
 		Rml::Element* m_presetName = nullptr;
 //		PartMouseListener* m_presetNameMouseListener  = nullptr;

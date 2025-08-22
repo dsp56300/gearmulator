@@ -216,7 +216,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		if (m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
 			return;
 
-		if (juce::ModifierKeys::currentModifiers.isShiftDown())
+		if (juceRmlUi::helper::getKeyModShift(_event))
 		{
 			ListModel::showDeleteConfirmationMessageBox([this, _patches](const genericUI::MessageBox::Result _result)
 			{

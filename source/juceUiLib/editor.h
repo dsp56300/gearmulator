@@ -1,10 +1,17 @@
 #pragma once
 
+#include <stdexcept>
 #include <string>
 
 #include "uiObject.h"
 
 #include "editorInterface.h"
+
+namespace juce
+{
+	class Font;
+	class Drawable;
+}
 
 namespace genericUI
 {
@@ -28,7 +35,6 @@ namespace genericUI
 
 		static const std::vector<juce::Component*>& findComponents(const std::map<std::string, std::vector<juce::Component*>>& _components, const std::string& _name, uint32_t _expectedCount, const std::string& _typename);
 		const std::vector<juce::Component*>& findComponents(const std::string& _name, uint32_t _expectedCount = 0) const;
-		const std::vector<juce::Component*>& findComponentsByParam(const std::string& _name, uint32_t _expectedCount = 0) const;
 
 		template<typename T>
 		void findComponents(std::vector<T*>& _dst, const std::string& _name, uint32_t _expectedCount = 0) const
@@ -43,19 +49,11 @@ namespace genericUI
 		}
 
 		juce::Component* findComponent(const std::string& _name, bool _mustExist = true) const;
-		juce::Component* findComponentByParam(const std::string& _param, bool _mustExist = true) const;
 
 		template<typename T>
 		T* findComponentT(const std::string& _name, bool _mustExist = true) const
 		{
 			juce::Component* c = findComponent(_name, _mustExist);
-			return dynamic_cast<T*>(c);
-		}
-
-		template<typename T>
-		T* findComponentByParamT(const std::string& _name, const bool _mustExist = true) const
-		{
-			juce::Component* c = findComponentByParam(_name, _mustExist);
 			return dynamic_cast<T*>(c);
 		}
 
@@ -78,17 +76,9 @@ namespace genericUI
 			return m_tabGroupsByName.size();
 		}
 
-		size_t getConditionCountRecursive() const;
-		size_t getControllerLinkCountRecursive() const;
-		void registerTemplate(const std::shared_ptr<UiObject>& _value);
-
 		static void setEnabled(juce::Component& _component, bool _enable);
 
 		virtual void setCurrentPart(uint8_t _part);
-
-		juce::TooltipWindow& getTooltipWindow() { return m_tooltipWindow; }
-
-		std::shared_ptr<UiObject> getTemplate(const std::string& _name) const;
 
 		virtual void setPerInstanceConfig(const std::vector<uint8_t>& _data) {}
 		virtual void getPerInstanceConfig(std::vector<uint8_t>& _data) {}
@@ -96,10 +86,6 @@ namespace genericUI
 		virtual juce::Component* createRmlUiComponent(const std::string& _rmlFile) { return nullptr; }
 
 		const UiObject& getRootObject() const { return *m_rootObject; }
-
-		static bool resizeDrawableImage(juce::DrawableImage& _drawable, uint32_t _percent);
-		
-		bool selectTabWithComponent(const juce::Component* _component) const;
 
 		void initRootScale(const float _scale) { m_scale = _scale; }
 
@@ -114,11 +100,7 @@ namespace genericUI
 		std::unique_ptr<UiObject> m_rootObject;
 
 		std::map<std::string, std::vector<juce::Component*>> m_componentsByName;
-		std::map<std::string, std::vector<juce::Component*>> m_componentsByParameter;
 		std::map<std::string, TabGroup*> m_tabGroupsByName;
-		std::map<std::string, std::shared_ptr<UiObject>> m_templates;
-
-		juce::TooltipWindow m_tooltipWindow;
 
 		float m_scale = 1.0f;
 	};

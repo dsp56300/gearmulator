@@ -1,5 +1,13 @@
 #pragma once
 
+namespace juce
+{
+	class Button;
+	class ComboBox;
+	class Label;
+	class Value;
+}
+
 namespace genericUI
 {
 	class EditorInterface

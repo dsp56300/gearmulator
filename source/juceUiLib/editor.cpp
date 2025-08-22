@@ -4,6 +4,8 @@
 
 #include "baseLib/filesystem.h"
 
+#include "juce_gui_basics/juce_gui_basics.h"
+
 namespace genericUI
 {
 	Editor::Editor(EditorInterface& _interface) : m_interface(_interface)
@@ -99,17 +101,6 @@ namespace genericUI
 		const auto param = _component->getProperties()["parametername"].toString().toStdString();
 		if(param.empty())
 			return;
-
-		const auto itParamExisting = m_componentsByParameter.find(param);
-
-		if(itParamExisting != m_componentsByParameter.end())
-		{
-			itParamExisting->second.push_back(_component);
-		}
-		else
-		{
-			m_componentsByParameter.insert(std::make_pair(param, std::vector{_component}));
-		}
 	}
 
 	void Editor::registerTabGroup(TabGroup* _group)
@@ -152,11 +143,6 @@ namespace genericUI
 		return findComponents(m_componentsByName, _name, _expectedCount, "name");
 	}
 
-	const std::vector<juce::Component*>& Editor::findComponentsByParam(const std::string& _name, const uint32_t _expectedCount) const
-	{
-		return findComponents(m_componentsByParameter, _name, _expectedCount, "parameter");
-	}
-
 	juce::Component* Editor::findComponent(const std::string& _name, const bool _mustExist/* = true*/) const
 	{
 		const auto comps = findComponents(_name);
@@ -165,39 +151,6 @@ namespace genericUI
 		if(_mustExist && comps.empty())
 			throw std::runtime_error("Failed to find component named " + _name);
 		return comps.empty() ? nullptr : comps.front();
-	}
-
-	juce::Component* Editor::findComponentByParam(const std::string& _param, const bool _mustExist) const
-	{
-		const auto comps = findComponentsByParam(_param);
-		if(comps.size() > 1)
-			throw std::runtime_error("Failed to find unique component with parameter " + _param + ", found more than one object with that parameter");
-		if(_mustExist && comps.empty())
-			throw std::runtime_error("Failed to find component with parameter " + _param);
-		return comps.empty() ? nullptr : comps.front();
-	}
-
-	size_t Editor::getConditionCountRecursive() const
-	{
-		return m_rootObject ? m_rootObject->getConditionCountRecursive() : 0;
-	}
-
-	size_t Editor::getControllerLinkCountRecursive() const
-	{
-		return m_rootObject ? m_rootObject->getControllerLinkCountRecursive() : 0;
-	}
-
-	void Editor::registerTemplate(const std::shared_ptr<UiObject>& _value)
-	{
-		const auto name = _value->getName();
-
-		if (name.empty())
-			throw std::runtime_error("Every template needs to have a name");
-
-		if (m_templates.find(name) != m_templates.end())
-			throw std::runtime_error("Template with name '" + name + "' exists more than once");
-
-		m_templates.insert({ name, _value });
 	}
 
 	void Editor::setEnabled(juce::Component& _component, const bool _enable)
@@ -217,51 +170,5 @@ namespace genericUI
 
 	void Editor::setCurrentPart(const uint8_t _part)
 	{
-		m_rootObject->setCurrentPart(*this, _part);
-	}
-
-	std::shared_ptr<UiObject> Editor::getTemplate(const std::string& _name) const
-	{
-		const auto& it = m_templates.find(_name);
-		if (it == m_templates.end())
-			return {};
-		return it->second;
-	}
-
-	bool Editor::resizeDrawableImage(juce::DrawableImage& _drawable, const uint32_t _percent)
-	{
-		if(_percent == 100)
-			return true;
-		if(_percent < 1)
-			return false;
-
-		auto image = _drawable.getImage();
-		const auto x = image.getBounds().getX();
-		const auto y = image.getBounds().getY();
-		const auto w = image.getWidth();
-		const auto h = image.getHeight();
-
-		const int percent = static_cast<int>(_percent);
-
-		image = image.rescaled(w * percent / 100, h * percent / 100);
-
-		_drawable.setImage(image);
-		auto b = image.getBounds();
-		b.setSize(w, h);
-		b.setPosition(x, y);
-		_drawable.setBounds(b);
-		_drawable.setBoundingBox(b.toFloat());
-		return true;
-	}
-
-	bool Editor::selectTabWithComponent(const juce::Component* _component) const
-	{
-		for (const auto& it : m_tabGroupsByName)
-		{
-			auto* tabGroup = it.second;
-			if (tabGroup->selectTabWithComponent(_component))
-				return true;
-		}
-		return false;
 	}
 }

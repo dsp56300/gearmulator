@@ -3,7 +3,6 @@ project(juceUiLib VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	button.cpp button.h
-	condition.cpp condition.h
 	controllerlink.cpp controllerlink.h
 	editor.cpp editor.h
 	editorInterface.h
