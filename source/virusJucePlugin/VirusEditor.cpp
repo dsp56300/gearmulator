@@ -210,6 +210,8 @@ namespace genericVirusUI
 
 	void VirusEditor::initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model)
 	{
+		Editor::initPluginDataModel(_model);
+
 		_model.set("deviceModel", virusLib::getModelName(m_processor.getModel()));
 		_model.setFunc("multiMode", [this]
 		{

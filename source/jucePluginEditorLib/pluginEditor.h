@@ -99,7 +99,7 @@ namespace jucePluginEditorLib
 		void create();
 
 		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) {}
-		virtual void initPluginDataModel(PluginDataModel& _model) {}
+		virtual void initPluginDataModel(PluginDataModel& _model);
 
 		static void setEnabled(Rml::Element* _element, bool _enabled);
 

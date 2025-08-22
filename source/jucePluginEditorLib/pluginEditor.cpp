@@ -105,6 +105,11 @@ namespace jucePluginEditorLib
 		});
 	}
 
+	void Editor::initPluginDataModel(PluginDataModel& _model)
+	{
+		_model.set("currentPart", std::to_string(getProcessor().getController().getCurrentPart()));
+	}
+
 	void Editor::setEnabled(Rml::Element* _element, bool _enabled)
 	{
 		if (!_element)
