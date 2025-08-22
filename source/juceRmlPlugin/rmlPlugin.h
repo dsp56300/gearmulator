@@ -46,6 +46,8 @@ namespace rmlPlugin
 
 		bool selectTabWithElement(const Rml::Element* _element);
 
+		RmlPluginDocument* getPluginDocument(Rml::ElementDocument* _doc) const;
+
 	private:
 
 		Rml::CoreInstance& m_coreInstance;

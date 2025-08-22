@@ -78,6 +78,19 @@ namespace rmlPlugin
 		}
 	}
 
+	bool RmlPluginDocument::addControllerLink(Rml::Element* _source, Rml::Element* _target, Rml::Element* _conditionButton)
+	{
+		// check for duplicate links
+		for (const auto& link : m_controllerLinks)
+		{
+			if (link->getSource() == _source && link->getTarget() == _target && link->getConditionButton() == _conditionButton)
+				return false; // duplicate link
+		}
+
+		m_controllerLinks.emplace_back(std::make_unique<ControllerLink>(_source, _target, _conditionButton));
+		return true;
+	}
+
 	void RmlPluginDocument::setMouseIsDown(const bool _isDown)
 	{
 		if (m_mouseIsDown == _isDown)

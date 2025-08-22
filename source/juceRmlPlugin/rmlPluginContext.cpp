@@ -52,9 +52,14 @@ namespace rmlPlugin
 
 	RmlPluginDocument* RmlPluginContext::getDocument(const Rml::Element* _element) const
 	{
+		return getPluginDocument(_element->GetOwnerDocument());
+	}
+
+	RmlPluginDocument* RmlPluginContext::getPluginDocument(const Rml::ElementDocument* _doc) const
+	{
 		for (const auto& doc : m_documents)
 		{
-			if (doc->getDocument() == _element->GetOwnerDocument())
+			if (doc->getDocument() == _doc)
 				return doc.get();
 		}
 		return nullptr;

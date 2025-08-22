@@ -16,6 +16,11 @@
 #include "juceRmlUi/rmlInterfaces.h"
 #include "juceRmlUi/rmlMenu.h"
 
+namespace rmlPlugin
+{
+	class RmlPluginDocument;
+}
+
 namespace juce
 {
 	class FileChooser;
@@ -172,6 +177,8 @@ namespace jucePluginEditorLib
 		rmlPlugin::RmlPlugin* getRmlPlugin() const { return m_rmlPlugin.get(); }
 		juceRmlUi::RmlComponent* getRmlComponent() const { return m_rmlComponent.get(); }
 		rmlPlugin::RmlParameterBinding* getRmlParameterBinding() const;
+		rmlPlugin::RmlPluginDocument* getRmlPluginDocument() const;
+
 		Rml::Element* getRmlRootElement() const;
 
 		template<typename T = Rml::Element> T* findChild(const std::string& _name, const bool _mustExist = true) const

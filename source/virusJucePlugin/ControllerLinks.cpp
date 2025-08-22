@@ -1,32 +1,41 @@
 #include "ControllerLinks.h"
 
 #include "VirusEditor.h"
+#include "juceRmlPlugin/rmlPluginDocument.h"
+#include "juceRmlUi/rmlElemButton.h"
 
 namespace genericVirusUI
 {
-#if 0
 	// The only purpose of this class is to provide backwards-compatibility with old skins that do not have their links expressed in the json description file
-	ControllerLinks::ControllerLinks(const VirusEditor& _editor)
+	void ControllerLinks::create(const VirusEditor& _editor)
 	{
-		std::vector<juce::Slider*> lfoSliderL, lfoSliderR, envVel;
-		std::vector<juce::Button*> lfoToggles;
+		auto createLink = [&_editor](Rml::Element* _a, Rml::Element* _b, Rml::Element* _cond)
+		{
+			_editor.getRmlPluginDocument()->addControllerLink(_a, _b, _cond);
+		};
 
-		_editor.findComponents(lfoSliderL, "LfoOsc1Pitch");
-		_editor.findComponents(lfoSliderR, "LfoOsc2Pitch");
+		std::vector<Rml::Element*> lfoSliderL, lfoSliderR, envVel;
+		std::vector<Rml::Element*> lfoToggles;
 
-		_editor.findComponents(lfoToggles, "Lfo1Link");
+		auto* r = _editor.getRmlRootElement();
+
+		juceRmlUi::helper::findChildren(lfoSliderL, r, "LfoOsc1Pitch");
+		juceRmlUi::helper::findChildren(lfoSliderL, r, "LfoOsc1Pitch");
+		juceRmlUi::helper::findChildren(lfoSliderR, r, "LfoOsc2Pitch");
+
+		juceRmlUi::helper::findChildren(lfoToggles, r, "Lfo1Link");
 		if(lfoToggles.empty())
-			_editor.findComponents(lfoToggles, "LfoOscPitchLink");
+			juceRmlUi::helper::findChildren(lfoToggles, r, "LfoOscPitchLink");
 
-		_editor.findComponents(envVel, "EnvVel");
+		juceRmlUi::helper::findChildren(envVel, r, "EnvVel");
 		if(envVel.empty())
-			_editor.findComponents(envVel, "EnvVelo");
+			juceRmlUi::helper::findChildren(envVel, r, "EnvVelo");
 
-		auto* linkEnv = _editor.findComponentT<juce::Button>("LinkEnv", false);
+		auto* linkEnv = _editor.findChild<juceRmlUi::ElemButton>("LinkEnv", false);
 
-		auto* flt1Vel = _editor.findComponentT<juce::Slider>("VelFlt1Freq", false);
-		auto* flt2Vel = _editor.findComponentT<juce::Slider>("VelFlt2Freq", false);
-		
+		auto* flt1Vel = _editor.findChild("VelFlt1Freq", false);
+		auto* flt2Vel = _editor.findChild("VelFlt2Freq", false);
+
 		if(lfoSliderL.size() == 2 && lfoSliderR.size() == 2 && lfoToggles.size() == 2)
 		{
 			for(size_t i=0; i<2; ++i)
@@ -42,23 +51,11 @@ namespace genericVirusUI
 				createLink(flt1Vel, flt2Vel, linkEnv);
 		}
 
-		auto* vocModQ = _editor.findComponentT<juce::Slider>("VocModQ", false);
-		auto* vocCarrSpread = _editor.findComponentT<juce::Slider>("VocCarrSpread", false);
-		auto* vocLink = _editor.findComponentT<juce::Button>("VocoderLink", false);
+		auto* vocModQ = _editor.findChild("VocModQ", false);
+		auto* vocCarrSpread = _editor.findChild("VocCarrSpread", false);
+		auto* vocLink = _editor.findChild("VocoderLink", false);
 
 		if(vocModQ && vocCarrSpread && vocLink)
 			createLink(vocModQ, vocCarrSpread, vocLink);
 	}
-
-	void ControllerLinks::createLink(juce::Slider* _a, juce::Slider* _b, juce::Button* _cond)
-	{
-		auto* link = new genericUI::ControllerLink();
-		link->create(_a, _b, _cond);
-		m_links.emplace_back(link);
-
-		link = new genericUI::ControllerLink();
-		link->create(_b, _a, _cond);
-		m_links.emplace_back(link);
-	}
-#endif
 }

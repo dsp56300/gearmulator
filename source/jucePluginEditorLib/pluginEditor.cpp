@@ -683,6 +683,11 @@ namespace jucePluginEditorLib
 		return m_rmlPlugin->getParameterBinding(m_rmlComponent->getContext());
 	}
 
+	rmlPlugin::RmlPluginDocument* Editor::getRmlPluginDocument() const
+	{
+		return m_rmlPlugin ? m_rmlPlugin->getPluginDocument(m_rmlComponent->getDocument()) : nullptr;
+	}
+
 	Rml::Element* Editor::getRmlRootElement() const
 	{
 		if (!m_rmlComponent)

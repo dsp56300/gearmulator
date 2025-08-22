@@ -163,4 +163,12 @@ namespace rmlPlugin
 			return false;
 		return it->second->selectTabWithElement(_element);
 	}
+
+	RmlPluginDocument* RmlPlugin::getPluginDocument(Rml::ElementDocument* _doc) const
+	{
+		auto it = m_contexts.find(_doc->GetContext());
+		if (it == m_contexts.end())
+			return {};
+		return it->second->getPluginDocument(_doc);
+	}
 }

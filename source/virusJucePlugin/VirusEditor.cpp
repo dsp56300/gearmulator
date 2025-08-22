@@ -1,6 +1,7 @@
 #include "VirusEditor.h"
 
 #include "ArpUserPattern.h"
+#include "ControllerLinks.h"
 
 #include "ParameterNames.h"
 #include "VirusProcessor.h"
@@ -158,6 +159,8 @@ namespace genericVirusUI
 
 		if (auto* arpUserGraphics = findChild("ArpUserGraphics", false))
 			m_arpUserPattern.reset(new ArpUserPattern(*this, arpUserGraphics));
+
+		ControllerLinks::create(*this);
 	}
 
 	VirusEditor::~VirusEditor()

@@ -44,6 +44,8 @@ namespace rmlPlugin
 
 		RmlPluginDocument* getDocument(const Rml::Element* _element) const;
 
+		RmlPluginDocument* getPluginDocument(const Rml::ElementDocument* _doc) const;
+
 	private:
 		Rml::Context* const m_context;
 		RmlParameterBinding m_binding;

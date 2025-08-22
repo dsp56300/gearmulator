@@ -17,6 +17,10 @@ namespace rmlPlugin
 
 		void ProcessEvent(Rml::Event& _event) override;
 
+		Rml::Element* getSource() const { return m_source; }
+		Rml::Element* getTarget() const { return m_target; }
+		Rml::Element* getConditionButton() const { return m_conditionButton; }
+
 		static float getValue(Rml::Element* _element);
 		static void setValue(Rml::Element* _element, float _value);
 
