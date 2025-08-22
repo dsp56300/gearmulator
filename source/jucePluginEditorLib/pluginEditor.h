@@ -132,8 +132,6 @@ namespace jucePluginEditorLib
 
 		void showDisclaimer() const;
 
-		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles) override;
-
 		void copyCurrentPatchToClipboard() const;
 		bool replaceCurrentPatchFromClipboard() const;
 
@@ -177,8 +175,8 @@ namespace jucePluginEditorLib
 
 		const auto& getSkin() const { return m_skin; }
 
-	protected:
-		bool keyPressed(const juce::KeyPress& _key) override;
+		int getDefaultWidth() const;
+		int getDefaultHeight() const;
 
 	private:
 		void onDisclaimerFinished() const;

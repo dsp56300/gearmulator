@@ -29,6 +29,7 @@ namespace juceRmlUi
 
 		m_openGLContext.setMultisamplingEnabled(true);
 		m_openGLContext.setRenderer(this);
+		m_openGLContext.setComponentPaintingEnabled(true);
 		m_openGLContext.attachTo(*this);
 		m_openGLContext.setContinuousRepainting(true);
 		m_openGLContext.setSwapInterval(1);
@@ -318,8 +319,6 @@ namespace juceRmlUi
 		if (size.isEmpty())
 			return;
 
-		Rml::Vector2i documentSize;
-
 		{
 			RmlInterfaces::ScopedAccess access(*this);
 
@@ -345,8 +344,8 @@ namespace juceRmlUi
 
 				if (s.x > 0 && s.y > 0)
 				{
-					documentSize.x = static_cast<int>(s.x);
-					documentSize.y = static_cast<int>(s.y);
+					m_documentSize.x = static_cast<int>(s.x);
+					m_documentSize.y = static_cast<int>(s.y);
 				}
 				else
 					throw std::runtime_error("RMLUI document '" + m_rootRmlFilename + "' has no valid size, explicit default size needs to be specified on the <body> element.");
@@ -377,7 +376,7 @@ namespace juceRmlUi
 			}
 		}
 
-		setSize(documentSize.x, documentSize.y);
+		setSize(m_documentSize.x, m_documentSize.y);
 	}
 
 	void RmlComponent::destroyRmlContext()
@@ -398,7 +397,7 @@ namespace juceRmlUi
 
 		auto contextDims = m_rmlContext->GetDimensions();
 
-		const float renderScale = static_cast<float>(m_openGLContext.getRenderingScale());
+		const float renderScale = static_cast<float>(getWidth()) / static_cast<float>(m_documentSize.x);
 
 		const int width = getScreenBounds().getWidth();
 		const int height = getScreenBounds().getHeight();

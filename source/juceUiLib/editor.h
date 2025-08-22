@@ -8,9 +8,7 @@
 
 namespace genericUI
 {
-	class Slider;
-
-	class Editor : public juce::Component, public juce::DragAndDropContainer
+	class Editor
 	{
 	public:
 		explicit Editor(EditorInterface& _interface);
@@ -87,7 +85,6 @@ namespace genericUI
 		static void setEnabled(juce::Component& _component, bool _enable);
 
 		virtual void setCurrentPart(uint8_t _part);
-		void updateKeyValueConditions(const std::string& _key, const std::string& _value) const;
 
 		juce::TooltipWindow& getTooltipWindow() { return m_tooltipWindow; }
 
@@ -101,8 +98,6 @@ namespace genericUI
 		const UiObject& getRootObject() const { return *m_rootObject; }
 
 		static bool resizeDrawableImage(juce::DrawableImage& _drawable, uint32_t _percent);
-
-		void paint(juce::Graphics& g) override;
 		
 		bool selectTabWithComponent(const juce::Component* _component) const;
 

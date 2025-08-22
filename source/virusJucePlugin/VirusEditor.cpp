@@ -96,8 +96,6 @@ namespace genericVirusUI
 			onProgramChange(_part);
 		};
 
-		addMouseListener(this, true);
-
 		if(auto* versionInfo = findChild("VersionInfo", false))
 		{
 		    const std::string message = "DSP 56300 Emulator Version " + pluginLib::Version::getVersionString() + " - " + pluginLib::Version::getVersionDateTime();

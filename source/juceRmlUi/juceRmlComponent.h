@@ -85,6 +85,8 @@ namespace juceRmlUi
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		juce::Point<int> toRmlPosition(int _x, int _y) const;
 
+		Rml::Vector2i getDocumentSize() const { return m_documentSize; }
+
 	private:
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
@@ -122,6 +124,8 @@ namespace juceRmlUi
 		juce::ModifierKeys m_currentModifierKeys;
 
 		bool m_updating = false;
+
+		Rml::Vector2i m_documentSize{0,0};
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)

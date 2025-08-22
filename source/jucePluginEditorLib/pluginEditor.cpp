@@ -95,10 +95,6 @@ namespace jucePluginEditorLib
 
 		initRootScale(m_rmlComponent->getDocument()->GetAttribute("rootScale", 1.0f));
 
-		addAndMakeVisible(m_rmlComponent.get());
-
-		setSize(m_rmlComponent->getWidth(), m_rmlComponent->getHeight());
-
 		juceRmlUi::EventListener::Add(m_rmlComponent->getDocument(), Rml::EventId::Mousedown, [this](Rml::Event& _event)
 		{
 			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Right)
@@ -360,11 +356,6 @@ namespace jucePluginEditorLib
 		{
 			onDisclaimerFinished();
 		}
-	}
-
-	bool Editor::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles)
-	{
-		return false;
 	}
 
 	void Editor::copyCurrentPatchToClipboard() const
@@ -647,10 +638,30 @@ namespace jucePluginEditorLib
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(m_rmlInterfaces.getCoreInstance(), getProcessor().getController()));
 
-		return new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+		auto* comp = new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 		{
 			onRmlContextCreated(_rmlComponent, _context);
 		});
+
+		auto* doc = comp->getDocument();
+
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](const Rml::Event& _event)
+		{
+			if (!juceRmlUi::helper::getKeyModCtrl(_event))
+				return;
+
+			switch (juceRmlUi::helper::getKeyIdentifier(_event))
+			{
+			case Rml::Input::KI_C:
+				copyCurrentPatchToClipboard();
+				break;
+			case Rml::Input::KI_V:
+				replaceCurrentPatchFromClipboard();
+				break;
+			default:;
+			}
+		});
+		return comp;
 	}
 
 	void Editor::onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
@@ -678,26 +689,14 @@ namespace jucePluginEditorLib
 		return m_rmlComponent->getDocument();
 	}
 
-	bool Editor::keyPressed(const juce::KeyPress& _key)
+	int Editor::getDefaultWidth() const
 	{
-		if(_key.getModifiers().isCommandDown())
-		{
-			switch(_key.getKeyCode())
-			{
-			case 'c':
-			case 'C':
-				copyCurrentPatchToClipboard();
-				return true;
-			case 'v':
-			case 'V':
-				if(replaceCurrentPatchFromClipboard())
-					return true;
-				break;
-			default:
-				return genericUI::Editor::keyPressed(_key);
-			}
-		}
-		return genericUI::Editor::keyPressed(_key);
+		return m_rmlComponent ? m_rmlComponent->getDocumentSize().x : 0;
+	}
+
+	int Editor::getDefaultHeight() const
+	{
+		return m_rmlComponent ? m_rmlComponent->getDocumentSize().y : 0;
 	}
 
 	void Editor::onDisclaimerFinished() const

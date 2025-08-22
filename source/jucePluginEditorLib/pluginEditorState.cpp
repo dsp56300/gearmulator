@@ -12,6 +12,8 @@
 
 #include "dsp56kEmu/logging.h"
 
+#include "juceRmlUi/juceRmlComponent.h"
+
 #include "synthLib/os.h"
 
 namespace
@@ -45,12 +47,12 @@ PluginEditorState::~PluginEditorState()
 
 int PluginEditorState::getWidth() const
 {
-	return m_editor ? m_editor->getWidth() : 0;
+	return m_editor ? m_editor->getDefaultWidth() : 0;
 }
 
 int PluginEditorState::getHeight() const
 {
-	return m_editor ? m_editor->getHeight() : 0;
+	return m_editor ? m_editor->getDefaultHeight() : 0;
 }
 
 const std::vector<Skin>& PluginEditorState::getIncludedSkins()
@@ -75,7 +77,12 @@ std::string PluginEditorState::createSkinDisplayName(std::string _filename)
 
 juce::Component* PluginEditorState::getUiRoot() const
 {
-	return m_editor.get();
+	auto* e = m_editor.get();
+	if (!e)
+		return {};
+	if (auto* c = e->getRmlComponent())
+		return c;
+	return {};
 }
 
 void PluginEditorState::disableBindings()
@@ -141,10 +148,6 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		m_parameterBinding.clearBindings();
 
-		auto* parent = m_editor->getParentComponent();
-
-		if(parent && parent->getIndexOfChildComponent(m_editor.get()) > -1)
-			parent->removeChildComponent(m_editor.get());
 		m_editor.reset();
 	}
 
@@ -167,8 +170,6 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		});
 
 		m_rootScale = editor->getScale();
-
-		m_editor->setTopLeftPosition(0, 0);
 
 		m_currentSkin = editor->getSkin();
 
@@ -194,7 +195,7 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		writeSkinToConfig(m_currentSkin);
 
 		if(evSkinLoaded)
-			evSkinLoaded(m_editor.get());
+			evSkinLoaded(m_editor->getRmlComponent());
 
 		if(!m_instanceConfig.empty())
 			getEditor()->setPerInstanceConfig(m_instanceConfig);
@@ -628,11 +629,11 @@ void PluginEditorState::exportCurrentSkin() const
 
 	if(!res.empty())
 	{
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Export failed", "Failed to export skin:\n\n" + res, editor);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Export failed", "Failed to export skin:\n\n" + res, getUiRoot());
 	}
 	else
 	{
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Export finished", "Skin successfully exported", editor);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Export finished", "Skin successfully exported", getUiRoot());
 	}
 }
 

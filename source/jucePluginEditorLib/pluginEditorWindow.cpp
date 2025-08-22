@@ -1,5 +1,6 @@
 #include "pluginEditorWindow.h"
 #include "pluginEditorState.h"
+#include "dsp56kEmu/logging.h"
 #include "juceRmlUi/juceRmlComponent.h"
 
 #include "patchmanager/patchmanager.h"
@@ -50,27 +51,43 @@ void EditorWindow::resized()
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
 
-	const auto targetW = getWidth();
-	const auto targetH = getHeight();
+	const auto w = getWidth();
+	const auto h = getHeight();
 
-	const auto scaleX = static_cast<float>(getWidth()) / static_cast<float>(m_state.getWidth());
-	const auto scaleY = static_cast<float>(getHeight()) / static_cast<float>(m_state.getHeight());
+	const auto scaleX = static_cast<float>(w) / static_cast<float>(m_state.getWidth());
+	const auto scaleY = static_cast<float>(h) / static_cast<float>(m_state.getHeight());
 
 	const auto scale = std::min(scaleX, scaleY);
 
-	const auto w = scale * static_cast<float>(m_state.getWidth());
-	const auto h = scale * static_cast<float>(m_state.getHeight());
-
-	const auto offX = (static_cast<float>(targetW) - w) * 0.5f;
-	const auto offY = (static_cast<float>(targetH) - h) * 0.5f;
-
-	comp->setTransform(juce::AffineTransform::scale(scale,scale).translated(offX, offY));
+	comp->setSize(w, h);
 
 	const auto percent = 100.f * scale / m_state.getRootScale();
 	m_config.setValue("scale", percent);
 	m_config.saveIfNeeded();
 
 	AudioProcessorEditor::resized();
+
+	// Prettymuch unbelievable Juce VST3 bug, but our root component is a child of the VST3 editor component
+	// and that one is not resized! The host window is, the first child (our editor component) is, but the
+	// root component is not! This is no drama as long as you do not have a juce OpenGL context, because
+	// that one uses the "top level component" to set the clipping rectangle! W T F
+	juce::MessageManager::callAsync([comp, w, h]
+	{
+		auto* parent = comp->getParentComponent();
+
+		while (parent)
+		{
+			if (parent->getWidth() < w || parent->getHeight() < h)
+			{
+				LOG("Parent " << parent->getName() << " has wrong size: " << parent->getName() <<
+					", expected: " << w << "x" << h <<
+					", actual: " << parent->getWidth() << "x" << parent->getHeight());
+				parent->setSize(w, h);
+			}
+
+			parent = parent->getParentComponent();
+		}
+	});
 }
 
 void EditorWindow::setGuiScale(juce::Component* _comp, const float _percent)
@@ -79,7 +96,6 @@ void EditorWindow::setGuiScale(juce::Component* _comp, const float _percent)
 		return;
 
 	const auto s = _percent / 100.0f * m_state.getRootScale();
-	_comp->setTransform(juce::AffineTransform::scale(s,s));
 
 	const auto w = static_cast<int>(static_cast<float>(m_state.getWidth()) * s);
 	const auto h = static_cast<int>(static_cast<float>(m_state.getHeight()) * s);

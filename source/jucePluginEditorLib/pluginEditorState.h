@@ -96,7 +96,7 @@ namespace jucePluginEditorLib
 		void setGuiScale(int _scale) const;
 		std::string exportSkinToFolder(const Skin& _skin, const std::string& _folder) const;
 
-		std::unique_ptr<juce::Component> m_editor;
+		std::unique_ptr<Editor> m_editor;
 		Skin m_currentSkin;
 		float m_rootScale = 1.0f;
 		std::vector<Skin> m_includedSkins;

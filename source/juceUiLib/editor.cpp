@@ -254,15 +254,6 @@ namespace genericUI
 		return true;
 	}
 
-	void Editor::paint(juce::Graphics& g)
-	{
-#if JUCE_MAJOR_VERSION >= 8 && defined(_WIN32)
-		// This makes a huge difference on Windows, especially when the whole window is downscaled
-		g.getInternalContext().setInterpolationQuality(juce::Graphics::highResamplingQuality);
-#endif
-		Component::paint(g);
-	}
-
 	bool Editor::selectTabWithComponent(const juce::Component* _component) const
 	{
 		for (const auto& it : m_tabGroupsByName)
