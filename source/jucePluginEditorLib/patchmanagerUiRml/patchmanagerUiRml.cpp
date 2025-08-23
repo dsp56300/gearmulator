@@ -42,6 +42,11 @@ namespace jucePluginEditorLib::patchManagerRml
 		groupCategories->setOpened(true);
 
 		m_treeTags.addGroup(patchManager::GroupType::Tags);
+
+		const auto& config = getEditor().getProcessor().getConfig();
+
+		if(config.getIntValue("pm_layout", static_cast<int>(LayoutType::List)) == static_cast<int>(LayoutType::Grid))
+			setLayout(LayoutType::Grid);
 	}
 
 	PatchManagerUiRml::~PatchManagerUiRml()
