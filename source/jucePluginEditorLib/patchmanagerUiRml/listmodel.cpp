@@ -476,6 +476,11 @@ namespace jucePluginEditorLib::patchManagerRml
 		menu.runModal(_event.GetTargetElement(), juceRmlUi::helper::getMousePos(_event));
 	}
 
+	bool ListModel::hasFilters() const
+	{
+		return !m_filter.empty() || m_hideDuplicatesByHash || m_hideDuplicatesByName || !m_search->request.tags.empty();
+	}
+
 	bool ListModel::exportPresets(const bool _selectedOnly, const pluginLib::FileType& _fileType) const
 	{
 		Patches patches;

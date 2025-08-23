@@ -88,6 +88,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void openContextMenu(const Rml::Event& _event);
 
+		bool hasFilters() const;
+
 		static void showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback);
 
 		void setFilter(const std::string& _filter);
