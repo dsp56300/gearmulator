@@ -3,10 +3,12 @@
 #include "rmlControllerLink.h"
 #include "rmlPluginContext.h"
 #include "rmlTabGroup.h"
+#include "juceRmlUi/rmlEventListener.h"
 
 #include "juceRmlUi/rmlHelper.h"
 
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace rmlPlugin
 {
@@ -149,6 +151,20 @@ namespace rmlPlugin
 				throw std::runtime_error("controllerLinkCondition attribute must not be empty");
 
 			m_controllerLinkDescs.push_back({ _element, target, conditionButton });
+		}
+
+		if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_element))
+		{
+			// reset sliders to their default value on double click
+			if (input->GetAttribute("type", std::string("")) == "range")
+			{
+				juceRmlUi::EventListener::Add(input, Rml::EventId::Dblclick, [input](const Rml::Event&)
+				{
+					auto defaultValue = input->GetAttribute("default", std::string());
+					if (!defaultValue.empty())
+						input->SetValue(defaultValue);
+				});
+			}
 		}
 	}
 }
