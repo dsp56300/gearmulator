@@ -34,7 +34,7 @@
 		<splitter/>
 		
 		<!-- Column C: patch list + info on the right -->
-		<div id="pm-layout-list" style="flex: 5; display: flex; height: 100%;">
+		<div id="pm-layout-list" class="pm-layout-list" style="flex: 5; height: 100%;">
 			<div class="pm-vlayout" style="flex: 2;">
 				<list id="pm-list" class="list" style="flex: 1 1 0">
 					<listentry class="listentry">

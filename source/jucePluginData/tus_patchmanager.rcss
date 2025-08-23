@@ -57,3 +57,7 @@
 	overflow: hidden;
 	padding: 4dp;
 }
+
+.pm-layout-list {
+	display: flex; 
+}
