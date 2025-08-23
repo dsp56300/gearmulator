@@ -10,6 +10,7 @@
 #include "jucePluginLib/filetype.h"
 
 #include "juceRmlUi/rmlElemList.h"
+#include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
 #include "juceRmlUi/rmlMenu.h"
@@ -32,6 +33,11 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		list.setMultiselect(true);
 		list.evSelectionChanged.addListener([this](juceRmlUi::List* const&) { onSelectionChanged(); });
+
+		juceRmlUi::EventListener::Add(_list, Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			onListKeyDown(_event);
+		});
 	}
 
 	PatchManagerUiRml& ListModel::getPatchManager() const
@@ -559,5 +565,32 @@ namespace jucePluginEditorLib::patchManagerRml
 		const auto patches = getSelectedPatches();
 
 		getPatchManager().setListStatus(static_cast<uint32_t>(patches.size()), static_cast<uint32_t>(getPatches().size()));
+	}
+
+	void ListModel::onListKeyDown(Rml::Event& _event)
+	{
+		const auto key = juceRmlUi::helper::getKeyIdentifier(_event);
+
+		if (key != Rml::Input::KeyIdentifier::KI_F2)
+			return;
+		if (getSelectedEntries().size() != 1)
+			return;
+
+		const auto& listEntry = m_list->getList().getEntry(getSelectedEntries().front());
+
+		const auto elem = listEntry->getElement();
+
+		if (!elem)
+			return;
+
+		const auto patch = getPatch(getSelectedEntries().front());
+
+		new juceRmlUi::InplaceEditor(elem, patch->getName(), [this, patch](const std::string& _newName)
+		{
+			getDB().renamePatch(patch, _newName);
+			setContent(m_search);
+		});
+
+		_event.StopPropagation();
 	}
 }

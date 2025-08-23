@@ -103,6 +103,8 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onSelectionChanged() const;
 
+		void onListKeyDown(Rml::Event& _event);
+
 		PatchManagerUiRml& m_patchManager;
 		juceRmlUi::ElemList* m_list;
 
