@@ -12,8 +12,6 @@
 #include "juceRmlUi/rmlInplaceEditor.h"
 #include "juceRmlUi/rmlMenu.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
-
 namespace jucePluginEditorLib::patchManagerRml
 {
 	void GroupNode::updateFromDataSources(const std::vector<pluginLib::patchDB::DataSourceNodePtr>& _dataSources)

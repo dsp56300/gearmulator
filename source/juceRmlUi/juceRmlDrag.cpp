@@ -10,6 +10,11 @@
 
 namespace juceRmlUi
 {
+	struct JuceDraggable : juce::ReferenceCountedObject
+	{
+		DragData* data = nullptr;
+	};
+
 	RmlDrag::FileDragSource::FileDragSource(Rml::Element* _element, const juce::StringArray& _files) : DragSource(_element)
 	{
 		m_files.reserve(_files.size());

@@ -3,8 +3,8 @@
 #include "rmlParameterRef.h"
 
 #include "jucePluginLib/parameterdescriptions.h"
-#include "juceRmlUi/juceRmlComponent.h"
 
+#include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlDataProvider.h"
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlHelper.h"

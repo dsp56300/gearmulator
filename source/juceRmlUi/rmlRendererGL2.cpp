@@ -2,7 +2,6 @@
 
 #include <cassert>
 
-#include "juceRmlComponent.h"
 #include "rmlHelper.h"
 #include "rmlRendererGL2Types.h"
 #include "baseLib/filesystem.h"

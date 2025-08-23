@@ -11,7 +11,6 @@ set(SOURCES
 	labelStyle.cpp labelStyle.h
 	messageBox.cpp messageBox.h
 	scrollbarStyle.cpp scrollbarStyle.h
-	slider.cpp slider.h
 	textbuttonStyle.cpp textbuttonStyle.h
 	textEditorStyle.cpp textEditorStyle.h
 	treeViewStyle.cpp treeViewStyle.h

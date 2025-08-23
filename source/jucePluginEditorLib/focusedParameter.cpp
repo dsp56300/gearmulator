@@ -5,7 +5,6 @@
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/parameter.h"
 
-#include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlEventListener.h"
 
 #include "RmlUi/Core/ElementDocument.h"
@@ -77,7 +76,7 @@ namespace jucePluginEditorLib
 			}
 		}
 
-		m_mouseOver.add(_editor.getRmlComponent()->getDocument(), Rml::EventId::Mouseover, [this](const Rml::Event& _event)
+		m_mouseOver.add(_editor.getDocument(), Rml::EventId::Mouseover, [this](const Rml::Event& _event)
 		{
 			if (auto* element = _event.GetTargetElement())
 				updateControlLabel(element, Priority::High);

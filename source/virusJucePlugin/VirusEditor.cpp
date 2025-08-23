@@ -15,7 +15,6 @@
 
 #include "juceRmlPlugin/skinConverter/skinConverterOptions.h"
 
-#include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"

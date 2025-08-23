@@ -14,6 +14,7 @@ namespace juce
 
 namespace juceRmlUi
 {
+	struct JuceDraggable;
 	class RmlComponent;
 }
 
@@ -22,11 +23,6 @@ namespace juceRmlUi
 	class RmlDrag : Rml::EventListener
 	{
 	public:
-		struct JuceDraggable : juce::ReferenceCountedObject
-		{
-			DragData* data = nullptr;
-		};
-
 		class FileDragSource : public DragSource
 		{
 		public:

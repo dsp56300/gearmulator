@@ -11,7 +11,6 @@
 
 #include "juceRmlPlugin/rmlPlugin.h"
 
-#include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemKnob.h"
 #include "juceRmlUi/rmlEventListener.h"
@@ -28,7 +27,7 @@ namespace genericVirusUI
 		using namespace juceRmlUi;
 		using namespace juceRmlUi::helper;
 
-		auto* doc = _editor.getRmlComponent()->getDocument();
+		auto* doc = _editor.getDocument();
 		
 		findChildren(m_partSelect, doc, "SelectPart", 16);
 		findChildren(m_presetPrev, doc, "PresetPrev");

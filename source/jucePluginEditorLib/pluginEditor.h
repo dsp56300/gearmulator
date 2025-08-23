@@ -165,6 +165,7 @@ namespace jucePluginEditorLib
 		juceRmlUi::RmlComponent* getRmlComponent() const { return m_rmlComponent.get(); }
 		rmlPlugin::RmlParameterBinding* getRmlParameterBinding() const;
 		rmlPlugin::RmlPluginDocument* getRmlPluginDocument() const;
+		Rml::ElementDocument* getDocument() const;
 
 		Rml::Element* getRmlRootElement() const;
 

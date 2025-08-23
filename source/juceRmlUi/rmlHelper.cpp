@@ -4,9 +4,10 @@
 
 #include "Core/ElementStyle.h"
 
-#include "juceRmlComponent.h"
 #include "rmlDragSource.h"
 #include "rmlInterfaces.h"
+
+#include "juce_gui_basics/juce_gui_basics.h"
 
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementInstancer.h"
