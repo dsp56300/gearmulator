@@ -1,7 +1,8 @@
 #pragma once
 
 #include "patchmanagerui.h"
-#include "resizerbar.h"
+
+#include "juce_gui_basics/juce_gui_basics.h"
 
 namespace pluginLib::patchDB
 {
@@ -95,10 +96,6 @@ namespace jucePluginEditorLib::patchManager
 		std::map<Tree*, std::set<const TreeItem*>> m_selectedItems;
 
 		juce::StretchableLayoutManager m_stretchableManager;
-
-		ResizerBar m_resizerBarA{*this, &m_stretchableManager, 1};
-		ResizerBar m_resizerBarB{*this, &m_stretchableManager, 3};
-		ResizerBar m_resizerBarC{*this, &m_stretchableManager, 5};
 
 		LayoutType m_layout = LayoutType::List;
 		bool m_firstTimeGridLayout = true;

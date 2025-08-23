@@ -3,10 +3,6 @@
 #include "defaultskin.h"
 #include "patchmanageruijuce.h"
 
-#include "juceUiLib/uiObject.h"
-
-#include "../pluginEditor.h"
-
 namespace jucePluginEditorLib::patchManager
 {
 	List::List(PatchManagerUiJuce& _pm) : ListModel(_pm)

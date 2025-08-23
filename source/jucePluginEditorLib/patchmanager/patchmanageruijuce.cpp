@@ -77,14 +77,6 @@ namespace jucePluginEditorLib::patchManager
 		m_stretchableManager.setItemLayout(2, 100, rootW * 0.5, m_treeTags->getWidth());	m_stretchableManager.setItemLayout(3, 5, 5, 5);
 		m_stretchableManager.setItemLayout(4, 100, rootW * 0.5, m_list->getWidth());		m_stretchableManager.setItemLayout(5, 5, 5, 5);
 
-		m_resizerBarA.setSize(5, rootH);
-		m_resizerBarB.setSize(5, rootH);
-		m_resizerBarC.setSize(5, rootH);
-
-		addAndMakeVisible(m_resizerBarA);
-		addAndMakeVisible(m_resizerBarB);
-		addAndMakeVisible(m_resizerBarC);
-
 		PatchManagerUiJuce::resized();
 
 		const auto& config = getEditor().getProcessor().getConfig();
@@ -126,17 +118,6 @@ namespace jucePluginEditorLib::patchManager
 
 	bool PatchManagerUiJuce::setGridLayout128()
 	{
-		if(m_layout != LayoutType::Grid)
-			return false;
-
-		const auto columnCount = 128.0f / static_cast<float>(m_grid->getSuggestedItemsPerRow());
-
-		const auto pos = static_cast<int>(static_cast<float>(getWidth()) - m_grid->getItemWidth() * columnCount - static_cast<float>(m_resizerBarB.getWidth()));
-
-		m_stretchableManager.setItemPosition(3, pos - 1);	// prevent rounding issues
-
-		resized();
-
 		return true;
 	}
 

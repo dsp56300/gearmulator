@@ -46,6 +46,7 @@ namespace rmlPlugin
 		void bindParameters(Rml::Context* _context, uint8_t _partCount);
 
 		juceRmlUi::RmlComponent& getRmlComponent() const { return m_component; }
+		Rml::CoreInstance& getCoreInstance() const;
 
 		RmlParameterBinding& operator=(const RmlParameterBinding&) = delete;
 		RmlParameterBinding& operator=(RmlParameterBinding&&) = delete;

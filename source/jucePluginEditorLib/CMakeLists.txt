@@ -34,7 +34,6 @@ set(SOURCES_PM
 	patchmanager/patchmanager.cpp patchmanager/patchmanager.h
 	patchmanager/patchmanagerui.cpp patchmanager/patchmanagerui.h
 	patchmanager/patchmanageruijuce.cpp patchmanager/patchmanageruijuce.h
-	patchmanager/resizerbar.cpp patchmanager/resizerbar.h
 	patchmanager/roottreeitem.cpp patchmanager/roottreeitem.h
 	patchmanager/savepatchdesc.cpp patchmanager/savepatchdesc.h
 	patchmanager/tagtreeitem.cpp patchmanager/tagtreeitem.h

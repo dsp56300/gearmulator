@@ -21,8 +21,6 @@ namespace rmlPlugin
 	, m_prefix(createVariableName(m_parameter->getDescription().name))
 	, m_handle(_model.GetModelHandle())
 	{
-		auto* doc = _binding.getRmlComponent().getDocument();
-
 		assert(m_parameter != nullptr);
 
 		m_listener.set(m_parameter, [this](pluginLib::Parameter* _p)
@@ -37,7 +35,7 @@ namespace rmlPlugin
 			_dest = m_parameter->getUnnormalizedValue();
 		}, [this](const Rml::Variant& _source)
 		{
-			const auto v = _source.Get<int>(m_binding.getRmlComponent().getContext()->GetCoreInstance());
+			const auto v = _source.Get<int>(m_binding.getCoreInstance());
 
 			juce::MessageManager::callAsync([this, v]()
 			{
@@ -52,7 +50,7 @@ namespace rmlPlugin
 			_dest = m_parameter->getCurrentValueAsText().toStdString();
 		}, [this](const Rml::Variant& _source)
 		{
-			auto text = _source.Get<Rml::String>(m_binding.getRmlComponent().getContext()->GetCoreInstance());
+			auto text = _source.Get<Rml::String>(m_binding.getCoreInstance());
 			juce::MessageManager::callAsync([this, text]()
 			{
 				const auto v = m_parameter->getValueForText(text);

@@ -3,6 +3,7 @@
 #include "rmlParameterRef.h"
 
 #include "jucePluginLib/parameterdescriptions.h"
+#include "juceRmlUi/juceRmlComponent.h"
 
 #include "juceRmlUi/rmlDataProvider.h"
 #include "juceRmlUi/rmlElemComboBox.h"
@@ -39,6 +40,11 @@ namespace rmlPlugin
 			bindParametersForPart(_context, part, part);
 
 		bindParametersForPart(_context, CurrentPart, m_controller.getCurrentPart());
+	}
+
+	Rml::CoreInstance& RmlParameterBinding::getCoreInstance() const
+	{
+		return m_component.getContext()->GetCoreInstance();
 	}
 
 	void RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
