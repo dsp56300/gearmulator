@@ -397,10 +397,10 @@ namespace juceRmlUi
 
 		auto contextDims = m_rmlContext->GetDimensions();
 
-		const float renderScale = static_cast<float>(getWidth()) / static_cast<float>(m_documentSize.x);
-
 		const int width = getScreenBounds().getWidth();
 		const int height = getScreenBounds().getHeight();
+
+		const float renderScale = static_cast<float>(width) / static_cast<float>(m_documentSize.x);
 
 		if (contextDims.x != width || contextDims.y != height || m_currentRenderScale != renderScale)
 		{
