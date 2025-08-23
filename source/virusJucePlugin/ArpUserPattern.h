@@ -24,7 +24,7 @@ namespace genericVirusUI
 		ArpUserPattern(const VirusEditor& _editor, Rml::Element* _parent);
 		~ArpUserPattern();
 
-		void paint(const juce::Image& _image, juce::Graphics& g);
+		void paint(const juce::Image& _image, juce::Graphics& g) const;
 
 		void onCurrentPartChanged();
 	private:
@@ -32,9 +32,9 @@ namespace genericVirusUI
 		void bindParameters();
 		static void unbindParameter(BoundParam& _parameter);
 
-		BoundParam bindParameter(const std::string& _name);
+		BoundParam bindParameter(const std::string& _name) const;
 
-		void onParameterChanged();
+		void onParameterChanged() const;
 
 		struct Step
 		{

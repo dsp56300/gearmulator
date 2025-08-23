@@ -4,6 +4,7 @@
 #include "juce_graphics/juce_graphics.h"
 
 #include "RmlUi/Core/ComputedValues.h"
+#include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/Geometry.h"
 #include "RmlUi/Core/Mesh.h"
 #include "RmlUi/Core/MeshUtilities.h"
@@ -39,6 +40,21 @@ namespace juceRmlUi
 	void ElemCanvas::setClearEveryFrame(const bool _clearEveryFrame)
 	{
 		m_clearEveryFrame = _clearEveryFrame;
+	}
+
+	ElemCanvas* ElemCanvas::create(Rml::Element* _parent)
+	{
+		auto canvas = _parent->GetOwnerDocument()->CreateElement("canvas");
+
+		auto c = dynamic_cast<ElemCanvas*>(_parent->AppendChild(std::move(canvas)));
+
+		c->SetProperty(PropertyId::Position, Style::Position::Absolute);
+		c->SetProperty(PropertyId::Left, Property(0, Unit::PX));
+		c->SetProperty(PropertyId::Top, Property(0, Unit::PX));
+		c->SetProperty(PropertyId::Width, Property(100, Unit::PERCENT));
+		c->SetProperty(PropertyId::Height, Property(100, Unit::PERCENT));
+
+		return c;
 	}
 
 	void ElemCanvas::generateGeometry()

@@ -32,6 +32,8 @@ namespace juceRmlUi
 
 		void setClearEveryFrame(bool _clearEveryFrame);
 
+		static ElemCanvas* create(Rml::Element* _parent);
+
 	private:
 		void generateGeometry();
 		void generateTexture();

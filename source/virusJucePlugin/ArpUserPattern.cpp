@@ -25,15 +25,7 @@ namespace genericVirusUI
 		if(m_gradientStrength <= 0.0f)
 			m_gradientStrength = 0.5f;
 
-		auto canvas = _parent->GetOwnerDocument()->CreateElement("canvas");
-
-		m_canvas = dynamic_cast<juceRmlUi::ElemCanvas*>(_parent->AppendChild(std::move(canvas)));
-
-		m_canvas->SetProperty("position", "absolute");
-		m_canvas->SetProperty("left", "0px");
-		m_canvas->SetProperty("top", "0px");
-		m_canvas->SetProperty("width", "100%");
-		m_canvas->SetProperty("height", "100%");
+		m_canvas = juceRmlUi::ElemCanvas::create(_parent);
 
 		m_canvas->setClearEveryFrame(true);
 
@@ -48,7 +40,7 @@ namespace genericVirusUI
 		unbindParameters();
 	}
 
-	void ArpUserPattern::paint(const juce::Image& _image, juce::Graphics& g)
+	void ArpUserPattern::paint(const juce::Image& _image, juce::Graphics& g) const
 	{
 		if(!m_patternLength.first)
 			return;
@@ -124,7 +116,7 @@ namespace genericVirusUI
 		}
 	}
 
-	ArpUserPattern::BoundParam ArpUserPattern::bindParameter(const std::string& _name)
+	ArpUserPattern::BoundParam ArpUserPattern::bindParameter(const std::string& _name) const
 	{
 		auto* p = m_controller.getParameter(_name, m_controller.getCurrentPart());
 		assert(p);
@@ -135,7 +127,7 @@ namespace genericVirusUI
 		}));
 	}
 
-	void ArpUserPattern::onParameterChanged()
+	void ArpUserPattern::onParameterChanged() const
 	{
 		m_canvas->repaint();
 	}
