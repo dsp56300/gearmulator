@@ -323,6 +323,7 @@ namespace jucePluginEditorLib
 
 	void Editor::setCurrentPart(const uint8_t _part)
 	{
+		getProcessor().getController().setCurrentPart(_part);
 		if(m_patchManager)
 			m_patchManager->setCurrentPart(_part);
 
