@@ -6,7 +6,7 @@
 		<link type="text/template" href="tus_patchmanager.rml"/>
 		<link type="text/rcss" href="VirusTI_Trancy.rcss"/>
 	</head>
-	<body debugger="1" id="Root" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2638dp; height: 1301dp;">
+	<body debugger="0" id="Root" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2638dp; height: 1301dp;">
 		<div id="bg" class="jucePos" style="left: 0dp; top: 0dp; width: 2638dp; height: 1301dp; decorator: image(background.png scale-none left top);"/>
 		<img id="logolight" class="jucePos" src="logo_light.png" style="left: 65dp; top: 15dp; width: 475dp; height: 95dp;"/>
 		<img id="logo" class="jucePos" src="logo.png" style="left: 77dp; top: 25dp; width: 449dp; height: 71dp;"/>
