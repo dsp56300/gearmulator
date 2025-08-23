@@ -8,8 +8,6 @@
 
 #include <cassert>
 
-#include "button.h"
-
 namespace genericUI
 {
 	UiObject::UiObject(UiObject* _parent, const juce::var& _json, const bool _isTemplate/* = false*/) : m_isTemplate(_isTemplate), m_parent(_parent)
