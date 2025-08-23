@@ -901,14 +901,14 @@ namespace rmlPlugin::skinConverter
 
 				bool isFirst = true;
 
-				for (auto v : values)
+				for (const auto& v : values)
 				{
 					if (isFirst)
 						isFirst = false;
 					else
 						ss << " && ";
 
-					ss << key << "!='" << v << "'";
+					ss << key << "!='" << Rml::StringUtilities::EncodeRml(v) << "'";
 				}
 
 				_co.attribs.set("data-model", jucePluginEditorLib::PluginDataModel::getModelName());
