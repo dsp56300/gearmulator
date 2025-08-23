@@ -18,9 +18,17 @@ namespace juceRmlUi
 
 		template<typename T> T getProperty(const std::string& _key, const T& _defaultValue)
 		{
-			if (const Rml::Property* prop = GetProperty(_key))
-				return GetAttribute(_key, prop->Get<T>(GetCoreInstance()));
-			return GetAttribute(_key, _defaultValue);
+			return getProperty<T>(this, _key, _defaultValue);
+		}
+
+		template<typename T> static T getProperty(Rml::Element* _element, const std::string& _key, const T& _defaultValue)
+		{
+			Rml::Variant* attrib = _element->GetAttribute(_key);
+			if (attrib)
+				return attrib->Get<T>(_element->GetCoreInstance());
+			if (const Rml::Property* prop = _element->GetProperty(_key))
+				return _element->GetAttribute(_key, prop->Get<T>(_element->GetCoreInstance()));
+			return _defaultValue;
 		}
 	};
 }
