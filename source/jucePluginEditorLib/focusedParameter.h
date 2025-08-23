@@ -19,7 +19,6 @@ namespace pluginLib
 {
 	class Parameter;
 	class Controller;
-	class ParameterBinding;
 }
 
 namespace jucePluginEditorLib

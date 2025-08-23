@@ -29,7 +29,7 @@ namespace
 namespace jucePluginEditorLib
 {
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
-	: m_processor(_processor), m_parameterBinding(_controller), m_includedSkins(std::move(_includedSkins))
+	: m_processor(_processor), m_includedSkins(std::move(_includedSkins))
 	, m_remoteServerList(getPluginDesc(_processor))
 {
 	juce::File(getSkinFolder()).createDirectory();
@@ -85,16 +85,6 @@ juce::Component* PluginEditorState::getUiRoot() const
 	return {};
 }
 
-void PluginEditorState::disableBindings()
-{
-	m_parameterBinding.disableBindings();
-}
-
-void PluginEditorState::enableBindings()
-{
-	m_parameterBinding.enableBindings();
-}
-
 void PluginEditorState::loadDefaultSkin()
 {
 	Skin skin = readSkinFromConfig();
@@ -145,8 +135,6 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 	{
 		m_instanceConfig.clear();
 		getEditor()->getPerInstanceConfig(m_instanceConfig);
-
-		m_parameterBinding.clearBindings();
 
 		m_editor.reset();
 	}
@@ -208,7 +196,6 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, m_processor.getProperties().name + " - Skin load failed", _err.what());
 
-		m_parameterBinding.clear();
 		m_editor.reset();
 
 		if(_fallbackIndex >= m_includedSkins.size())

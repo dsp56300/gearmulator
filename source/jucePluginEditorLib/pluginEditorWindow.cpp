@@ -25,8 +25,6 @@ EditorWindow::EditorWindow(juce::AudioProcessor& _p, PluginEditorState& _s, juce
 			setGuiScale(static_cast<float>(_scale));
 	};
 
-	m_state.enableBindings();
-
 	setUiRoot(m_state.getUiRoot());
 }
 
@@ -34,8 +32,6 @@ EditorWindow::~EditorWindow()
 {
 	m_state.evSetGuiScale = [&](int){};
 	m_state.evSkinLoaded = [&](juce::Component*){};
-
-	m_state.disableBindings();
 
 	setUiRoot(nullptr);
 }

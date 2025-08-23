@@ -14,7 +14,7 @@ namespace virus
 
 	jucePluginEditorLib::Editor* VirusEditorState::createEditor(const jucePluginEditorLib::Skin& _skin)
 	{
-		return new genericVirusUI::VirusEditor(m_parameterBinding, static_cast<VirusProcessor&>(m_processor), _skin);
+		return new genericVirusUI::VirusEditor(static_cast<VirusProcessor&>(m_processor), _skin);
 	}
 
 	void VirusEditorState::initContextMenu(juceRmlUi::Menu& _menu)

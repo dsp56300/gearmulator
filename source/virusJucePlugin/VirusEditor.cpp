@@ -8,7 +8,6 @@
 #include "VirusController.h"
 
 #include "jucePluginLib/filetype.h"
-#include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/pluginVersion.h"
 
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
@@ -28,7 +27,7 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
+	VirusEditor::VirusEditor(virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
 		Editor(_processorRef, _skin),
 		m_processor(_processorRef),
 		m_romChangedListener(_processorRef.evRomChanged)

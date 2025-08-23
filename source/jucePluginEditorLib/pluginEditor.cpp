@@ -7,7 +7,6 @@
 
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/filetype.h"
-#include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/tools.h"
 
 #include "juceRmlUi/juceRmlComponent.h"

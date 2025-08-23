@@ -28,7 +28,6 @@ namespace jucePluginEditorLib
 namespace pluginLib
 {
 	class Parameter;
-	class ParameterBinding;
 }
 
 namespace virus
@@ -50,7 +49,7 @@ namespace genericVirusUI
 			Arrangement
 		};
 
-		VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin);
+		VirusEditor(virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin);
 		~VirusEditor() override;
 
 		void setPart(size_t _part);

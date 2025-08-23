@@ -9,7 +9,10 @@
 
 #include "skin.h"
 
-#include "jucePluginLib/parameterbinding.h"
+namespace pluginLib
+{
+	class Controller;
+}
 
 namespace juceRmlUi
 {
@@ -64,9 +67,6 @@ namespace jucePluginEditorLib
 
 		juce::Component* getUiRoot() const;
 
-		void disableBindings();
-		void enableBindings();
-
 		void loadDefaultSkin();
 
 		virtual void initContextMenu(juceRmlUi::Menu& _menu) {}
@@ -87,7 +87,6 @@ namespace jucePluginEditorLib
 		virtual Editor* createEditor(const Skin& _skin) = 0;
 
 		Processor& m_processor;
-		pluginLib::ParameterBinding m_parameterBinding;
 
 		Editor* getEditor() const;
 
