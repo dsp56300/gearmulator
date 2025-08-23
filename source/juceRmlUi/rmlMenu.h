@@ -3,6 +3,8 @@
 #include <functional>
 #include <string>
 
+#include "rmlEventListener.h"
+
 #include "RmlUi/Core/EventListener.h"
 
 namespace Rml
@@ -13,6 +15,8 @@ namespace Rml
 
 namespace juceRmlUi
 {
+	class DelayedCall;
+
 	class Menu : Rml::EventListener,  public std::enable_shared_from_this<Menu>
 	{
 	public:
@@ -76,5 +80,7 @@ namespace juceRmlUi
 		std::shared_ptr<Menu> m_subMenu;
 		Rml::ObserverPtr<Rml::Element> m_subMenuParentEntry = nullptr;
 		std::shared_ptr<Menu> m_parentMenu;
+
+		std::unique_ptr<DelayedCall> m_openSubmenuDelay;
 	};
 }

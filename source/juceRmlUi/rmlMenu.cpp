@@ -1,6 +1,5 @@
 #include "rmlMenu.h"
 
-#include "rmlEventListener.h"
 #include "rmlHelper.h"
 
 #include "RmlUi/Core/Context.h"
@@ -9,6 +8,8 @@
 
 namespace juceRmlUi
 {
+	constexpr float g_openSubmenuDelay = 0.5f; // seconds
+
 	Menu::~Menu()
 	{
 		close();
@@ -91,10 +92,19 @@ namespace juceRmlUi
 			if (entry.submenu)
 			{
 				Rml::ObserverPtr<Rml::Element> parent = div->GetObserverPtr(_parent->GetCoreInstance());
+
 				juceRmlUi::EventListener::Add(div, Rml::EventId::Mouseover, [this, parent, submenu = entry.submenu](Rml::Event& _event)
 				{
-					openSubmenu(parent, submenu);
-					_event.StopPropagation();
+					closeSubmenu();
+					m_openSubmenuDelay.reset(new DelayedCall(parent.get(), g_openSubmenuDelay, [this, parent, submenu]
+					{
+						openSubmenu(parent, submenu);
+					}, false));
+				});
+				juceRmlUi::EventListener::Add(div, Rml::EventId::Mouseout, [this, parent](Rml::Event& _event)
+				{
+					if (m_openSubmenuDelay && m_openSubmenuDelay->getElement() == parent.get())
+						m_openSubmenuDelay.reset();
 				});
 			}
 			else
