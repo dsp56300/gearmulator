@@ -45,6 +45,11 @@
 	font-size: 52dp;
 }
 
+.pm-info-empty {
+	display: block;
+	font-size: 32dp;
+}
+
 .pm-info-headline {
 	color: #888;
 	padding-bottom: 1dp;
