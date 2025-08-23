@@ -582,197 +582,197 @@
 		<div id="page_7_arp" class="jucePos" tabgroup="pages" tabpage="6" style="left: 571dp; top: 129dp; width: 1971dp; height: 1026dp; decorator: image(panel_7_arp.png scale-none left top);">
 			<div id="ContainerArpGlobal" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arp_Mode_value >= 1 && Arp_Mode_value <= 7))" data-model="partCurrent" disabledAlpha="0.5" style="left: 0dp; top: 0dp; width: 1971dp; height: 1026dp;">
 				<div id="ContainerArpUser" class="jucePos" data-class-juceConditionDisabledAlpha50="!(Arp_Pattern_Selct_value == 0)" data-model="partCurrent" disabledAlpha="0.5" style="left: 0dp; top: 0dp; width: 1971dp; height: 1026dp;">
-					<div id="ContainerArpUserEnable1" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 0 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 18dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step1Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 1 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step1Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 1 Length" style="left: 0dp; top: 928dp; width: 70dp; height: 70dp;"/>
-						<button id="Step1Bitfield" class="jucePos juceButton button_arp_1" data-model="partCurrent" isToggle="1" param="Step 1 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step1Bitfield" class="jucePos juceButton button_arp_1" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable1" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 0 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 18dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step1Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 1 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step1Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 1 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step1Bitfield" class="jucePos juceButton button_arp_1" data-model="partCurrent" isToggle="1" param="Step 1 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step1Bitfield" class="jucePos juceButton button_arp_1" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable2" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 1 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 78dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step2Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 2 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step2Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 2 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step2Bitfield" class="jucePos juceButton button_arp_2" data-model="partCurrent" isToggle="1" param="Step 2 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step2Bitfield" class="jucePos juceButton button_arp_2" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable2" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 1 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 78dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step2Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 2 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step2Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 2 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step2Bitfield" class="jucePos juceButton button_arp_2" data-model="partCurrent" isToggle="1" param="Step 2 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step2Bitfield" class="jucePos juceButton button_arp_2" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable3" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 2 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 138dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step3Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 3 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step3Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 3 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step3Bitfield" class="jucePos juceButton button_arp_3" data-model="partCurrent" isToggle="1" param="Step 3 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step3Bitfield" class="jucePos juceButton button_arp_3" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable3" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 2 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 138dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step3Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 3 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step3Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 3 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step3Bitfield" class="jucePos juceButton button_arp_3" data-model="partCurrent" isToggle="1" param="Step 3 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step3Bitfield" class="jucePos juceButton button_arp_3" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable4" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 3 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 198dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step4Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 4 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step4Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 4 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step4Bitfield" class="jucePos juceButton button_arp_4" data-model="partCurrent" isToggle="1" param="Step 4 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step4Bitfield" class="jucePos juceButton button_arp_4" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable4" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 3 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 198dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step4Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 4 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step4Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 4 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step4Bitfield" class="jucePos juceButton button_arp_4" data-model="partCurrent" isToggle="1" param="Step 4 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step4Bitfield" class="jucePos juceButton button_arp_4" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable5" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 4 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 258dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step5Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 5 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step5Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 5 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step5Bitfield" class="jucePos juceButton button_arp_5" data-model="partCurrent" isToggle="1" param="Step 5 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step5Bitfield" class="jucePos juceButton button_arp_5" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable5" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 4 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 258dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step5Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 5 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step5Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 5 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step5Bitfield" class="jucePos juceButton button_arp_5" data-model="partCurrent" isToggle="1" param="Step 5 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step5Bitfield" class="jucePos juceButton button_arp_5" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable6" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 5 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 318dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step6Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 6 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step6Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 6 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step6Bitfield" class="jucePos juceButton button_arp_6" data-model="partCurrent" isToggle="1" param="Step 6 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step6Bitfield" class="jucePos juceButton button_arp_6" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable6" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 5 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 318dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step6Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 6 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step6Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 6 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step6Bitfield" class="jucePos juceButton button_arp_6" data-model="partCurrent" isToggle="1" param="Step 6 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step6Bitfield" class="jucePos juceButton button_arp_6" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable7" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 6 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 378dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step7Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 7 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step7Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 7 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step7Bitfield" class="jucePos juceButton button_arp_7" data-model="partCurrent" isToggle="1" param="Step 7 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step7Bitfield" class="jucePos juceButton button_arp_7" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable7" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 6 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 378dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step7Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 7 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step7Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 7 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step7Bitfield" class="jucePos juceButton button_arp_7" data-model="partCurrent" isToggle="1" param="Step 7 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step7Bitfield" class="jucePos juceButton button_arp_7" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable8" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 7 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 438dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step8Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 8 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step8Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 8 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step8Bitfield" class="jucePos juceButton button_arp_8" data-model="partCurrent" isToggle="1" param="Step 8 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step8Bitfield" class="jucePos juceButton button_arp_8" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable8" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 7 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 438dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step8Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 8 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step8Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 8 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step8Bitfield" class="jucePos juceButton button_arp_8" data-model="partCurrent" isToggle="1" param="Step 8 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step8Bitfield" class="jucePos juceButton button_arp_8" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable9" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 8 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 498dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step9Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 9 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step9Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 9 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step9Bitfield" class="jucePos juceButton button_arp_9" data-model="partCurrent" isToggle="1" param="Step 9 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step9Bitfield" class="jucePos juceButton button_arp_9" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable9" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 8 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 498dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step9Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 9 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step9Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 9 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step9Bitfield" class="jucePos juceButton button_arp_9" data-model="partCurrent" isToggle="1" param="Step 9 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step9Bitfield" class="jucePos juceButton button_arp_9" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable10" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 9 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 558dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step10Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 10 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step10Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 10 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step10Bitfield" class="jucePos juceButton button_arp_10" data-model="partCurrent" isToggle="1" param="Step 10 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step10Bitfield" class="jucePos juceButton button_arp_10" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable10" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 9 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 558dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step10Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 10 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step10Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 10 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step10Bitfield" class="jucePos juceButton button_arp_10" data-model="partCurrent" isToggle="1" param="Step 10 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step10Bitfield" class="jucePos juceButton button_arp_10" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable11" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 10 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 618dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step11Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 11 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step11Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 11 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step11Bitfield" class="jucePos juceButton button_arp_11" data-model="partCurrent" isToggle="1" param="Step 11 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step11Bitfield" class="jucePos juceButton button_arp_11" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable11" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 10 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 618dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step11Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 11 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step11Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 11 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step11Bitfield" class="jucePos juceButton button_arp_11" data-model="partCurrent" isToggle="1" param="Step 11 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step11Bitfield" class="jucePos juceButton button_arp_11" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable12" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 11 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 678dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step12Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 12 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step12Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 12 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step12Bitfield" class="jucePos juceButton button_arp_12" data-model="partCurrent" isToggle="1" param="Step 12 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step12Bitfield" class="jucePos juceButton button_arp_12" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable12" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 11 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 678dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step12Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 12 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step12Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 12 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step12Bitfield" class="jucePos juceButton button_arp_12" data-model="partCurrent" isToggle="1" param="Step 12 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step12Bitfield" class="jucePos juceButton button_arp_12" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable13" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 12 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 738dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step13Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 13 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step13Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 13 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step13Bitfield" class="jucePos juceButton button_arp_13" data-model="partCurrent" isToggle="1" param="Step 13 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step13Bitfield" class="jucePos juceButton button_arp_13" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable13" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 12 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 738dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step13Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 13 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step13Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 13 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step13Bitfield" class="jucePos juceButton button_arp_13" data-model="partCurrent" isToggle="1" param="Step 13 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step13Bitfield" class="jucePos juceButton button_arp_13" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable14" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 13 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 798dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step14Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 14 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step14Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 14 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step14Bitfield" class="jucePos juceButton button_arp_14" data-model="partCurrent" isToggle="1" param="Step 14 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step14Bitfield" class="jucePos juceButton button_arp_14" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable14" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 13 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 798dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step14Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 14 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step14Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 14 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step14Bitfield" class="jucePos juceButton button_arp_14" data-model="partCurrent" isToggle="1" param="Step 14 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step14Bitfield" class="jucePos juceButton button_arp_14" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable15" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 14 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 858dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step15Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 15 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step15Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 15 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step15Bitfield" class="jucePos juceButton button_arp_15" data-model="partCurrent" isToggle="1" param="Step 15 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step15Bitfield" class="jucePos juceButton button_arp_15" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable15" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 14 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 858dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step15Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 15 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step15Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 15 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step15Bitfield" class="jucePos juceButton button_arp_15" data-model="partCurrent" isToggle="1" param="Step 15 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step15Bitfield" class="jucePos juceButton button_arp_15" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable16" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 15 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 918dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step16Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 16 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step16Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 16 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step16Bitfield" class="jucePos juceButton button_arp_16" data-model="partCurrent" isToggle="1" param="Step 16 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step16Bitfield" class="jucePos juceButton button_arp_16" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable16" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 15 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 918dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step16Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 16 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step16Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 16 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step16Bitfield" class="jucePos juceButton button_arp_16" data-model="partCurrent" isToggle="1" param="Step 16 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step16Bitfield" class="jucePos juceButton button_arp_16" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable17" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 16 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 978dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step17Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 17 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step17Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 17 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step17Bitfield" class="jucePos juceButton button_arp_17" data-model="partCurrent" isToggle="1" param="Step 17 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step17Bitfield" class="jucePos juceButton button_arp_17" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable17" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 16 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 978dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step17Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 17 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step17Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 17 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step17Bitfield" class="jucePos juceButton button_arp_17" data-model="partCurrent" isToggle="1" param="Step 17 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step17Bitfield" class="jucePos juceButton button_arp_17" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable18" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 17 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1038dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step18Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 18 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step18Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 18 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step18Bitfield" class="jucePos juceButton button_arp_18" data-model="partCurrent" isToggle="1" param="Step 18 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step18Bitfield" class="jucePos juceButton button_arp_18" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable18" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 17 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1038dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step18Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 18 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step18Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 18 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step18Bitfield" class="jucePos juceButton button_arp_18" data-model="partCurrent" isToggle="1" param="Step 18 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step18Bitfield" class="jucePos juceButton button_arp_18" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable19" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 18 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1098dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step19Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 19 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step19Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 19 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step19Bitfield" class="jucePos juceButton button_arp_19" data-model="partCurrent" isToggle="1" param="Step 19 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step19Bitfield" class="jucePos juceButton button_arp_19" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable19" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 18 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1098dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step19Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 19 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step19Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 19 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step19Bitfield" class="jucePos juceButton button_arp_19" data-model="partCurrent" isToggle="1" param="Step 19 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step19Bitfield" class="jucePos juceButton button_arp_19" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable20" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 19 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1158dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step20Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 20 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step20Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 20 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step20Bitfield" class="jucePos juceButton button_arp_20" data-model="partCurrent" isToggle="1" param="Step 20 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step20Bitfield" class="jucePos juceButton button_arp_20" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable20" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 19 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1158dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step20Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 20 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step20Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 20 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step20Bitfield" class="jucePos juceButton button_arp_20" data-model="partCurrent" isToggle="1" param="Step 20 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step20Bitfield" class="jucePos juceButton button_arp_20" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable21" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 20 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1218dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step21Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 21 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step21Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 21 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step21Bitfield" class="jucePos juceButton button_arp_21" data-model="partCurrent" isToggle="1" param="Step 21 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step21Bitfield" class="jucePos juceButton button_arp_21" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable21" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 20 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1218dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step21Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 21 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step21Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 21 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step21Bitfield" class="jucePos juceButton button_arp_21" data-model="partCurrent" isToggle="1" param="Step 21 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step21Bitfield" class="jucePos juceButton button_arp_21" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable22" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 21 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1278dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step22Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 22 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step22Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 22 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step22Bitfield" class="jucePos juceButton button_arp_22" data-model="partCurrent" isToggle="1" param="Step 22 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step22Bitfield" class="jucePos juceButton button_arp_22" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable22" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 21 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1278dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step22Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 22 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step22Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 22 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step22Bitfield" class="jucePos juceButton button_arp_22" data-model="partCurrent" isToggle="1" param="Step 22 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step22Bitfield" class="jucePos juceButton button_arp_22" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable23" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 22 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1338dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step23Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 23 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step23Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 23 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step23Bitfield" class="jucePos juceButton button_arp_23" data-model="partCurrent" isToggle="1" param="Step 23 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step23Bitfield" class="jucePos juceButton button_arp_23" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable23" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 22 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1338dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step23Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 23 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step23Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 23 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step23Bitfield" class="jucePos juceButton button_arp_23" data-model="partCurrent" isToggle="1" param="Step 23 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step23Bitfield" class="jucePos juceButton button_arp_23" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable24" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 23 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1398dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step24Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 24 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step24Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 24 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step24Bitfield" class="jucePos juceButton button_arp_24" data-model="partCurrent" isToggle="1" param="Step 24 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step24Bitfield" class="jucePos juceButton button_arp_24" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable24" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 23 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1398dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step24Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 24 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step24Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 24 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step24Bitfield" class="jucePos juceButton button_arp_24" data-model="partCurrent" isToggle="1" param="Step 24 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step24Bitfield" class="jucePos juceButton button_arp_24" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable25" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 24 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1458dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step25Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 25 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step25Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 25 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step25Bitfield" class="jucePos juceButton button_arp_25" data-model="partCurrent" isToggle="1" param="Step 25 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step25Bitfield" class="jucePos juceButton button_arp_25" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable25" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 24 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1458dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step25Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 25 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step25Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 25 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step25Bitfield" class="jucePos juceButton button_arp_25" data-model="partCurrent" isToggle="1" param="Step 25 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step25Bitfield" class="jucePos juceButton button_arp_25" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable26" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 25 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1518dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step26Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 26 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step26Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 26 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step26Bitfield" class="jucePos juceButton button_arp_26" data-model="partCurrent" isToggle="1" param="Step 26 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step26Bitfield" class="jucePos juceButton button_arp_26" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable26" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 25 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1518dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step26Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 26 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step26Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 26 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step26Bitfield" class="jucePos juceButton button_arp_26" data-model="partCurrent" isToggle="1" param="Step 26 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step26Bitfield" class="jucePos juceButton button_arp_26" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable27" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 26 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1578dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step27Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 27 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step27Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 27 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step27Bitfield" class="jucePos juceButton button_arp_27" data-model="partCurrent" isToggle="1" param="Step 27 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step27Bitfield" class="jucePos juceButton button_arp_27" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable27" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 26 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1578dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step27Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 27 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step27Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 27 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step27Bitfield" class="jucePos juceButton button_arp_27" data-model="partCurrent" isToggle="1" param="Step 27 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step27Bitfield" class="jucePos juceButton button_arp_27" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable28" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 27 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1638dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step28Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 28 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step28Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 28 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step28Bitfield" class="jucePos juceButton button_arp_28" data-model="partCurrent" isToggle="1" param="Step 28 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step28Bitfield" class="jucePos juceButton button_arp_28" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable28" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 27 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1638dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step28Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 28 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step28Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 28 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step28Bitfield" class="jucePos juceButton button_arp_28" data-model="partCurrent" isToggle="1" param="Step 28 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step28Bitfield" class="jucePos juceButton button_arp_28" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable29" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 28 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1698dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step29Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 29 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step29Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 29 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step29Bitfield" class="jucePos juceButton button_arp_29" data-model="partCurrent" isToggle="1" param="Step 29 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step29Bitfield" class="jucePos juceButton button_arp_29" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable29" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 28 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1698dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step29Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 29 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step29Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 29 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step29Bitfield" class="jucePos juceButton button_arp_29" data-model="partCurrent" isToggle="1" param="Step 29 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step29Bitfield" class="jucePos juceButton button_arp_29" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable30" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 29 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1758dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step30Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 30 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step30Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 30 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step30Bitfield" class="jucePos juceButton button_arp_30" data-model="partCurrent" isToggle="1" param="Step 30 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step30Bitfield" class="jucePos juceButton button_arp_30" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable30" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 29 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1758dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step30Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 30 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step30Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 30 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step30Bitfield" class="jucePos juceButton button_arp_30" data-model="partCurrent" isToggle="1" param="Step 30 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step30Bitfield" class="jucePos juceButton button_arp_30" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable31" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 30 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1818dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step31Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 31 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step31Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 31 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step31Bitfield" class="jucePos juceButton button_arp_31" data-model="partCurrent" isToggle="1" param="Step 31 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step31Bitfield" class="jucePos juceButton button_arp_31" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable31" class="jucePos" data-class-juceConditionDisabledAlpha50="!((Arpeggiator_UserPatternLength_value >= 30 && Arpeggiator_UserPatternLength_value <= 31))" data-model="partCurrent" disabledAlpha="0.5" style="left: 1818dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step31Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 31 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step31Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 31 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step31Bitfield" class="jucePos juceButton button_arp_31" data-model="partCurrent" isToggle="1" param="Step 31 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step31Bitfield" class="jucePos juceButton button_arp_31" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
-					<div id="ContainerArpUserEnable32" class="jucePos" data-class-juceConditionDisabledAlpha50="!(Arpeggiator_UserPatternLength_value == 31)" data-model="partCurrent" disabledAlpha="0.5" style="left: 1878dp; top: 0dp; width: 80dp; height: 1301dp;">
-						<knob id="Step32Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 32 Velocity" style="left: 0dp; top: 306dp; width: 70dp; height: 70dp;"/>
-						<knob id="Step32Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 32 Length" style="left: 0dp; top: 926dp; width: 70dp; height: 70dp;"/>
-						<button id="Step32Bitfield" class="jucePos juceButton button_arp_32" data-model="partCurrent" isToggle="1" param="Step 32 Bitfield" style="left: 12dp; top: 893dp; width: 44dp; height: 36dp;"/>
-						<button id="Step32Bitfield" class="jucePos juceButton button_arp_32" isToggle="0" style="left: 12dp; top: 379dp; width: 44dp; height: 36dp;"/>
+					<div id="ContainerArpUserEnable32" class="jucePos" data-class-juceConditionDisabledAlpha50="!(Arpeggiator_UserPatternLength_value == 31)" data-model="partCurrent" disabledAlpha="0.5" style="left: 1878dp; top: 306dp; width: 80dp; height: 692dp;">
+						<knob id="Step32Velocity" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 32 Velocity" style="left: 0dp; top: 0dp; width: 70dp; height: 70dp;"/>
+						<knob id="Step32Length" class="jucePos juceRotary knob" data-model="partCurrent" param="Step 32 Length" style="left: 0dp; top: 622dp; width: 70dp; height: 70dp;"/>
+						<button id="Step32Bitfield" class="jucePos juceButton button_arp_32" data-model="partCurrent" isToggle="1" param="Step 32 Bitfield" style="left: 12dp; top: 587dp; width: 44dp; height: 36dp;"/>
+						<button id="Step32Bitfield" class="jucePos juceButton button_arp_32" isToggle="0" style="left: 12dp; top: 73dp; width: 44dp; height: 36dp;"/>
 					</div>
 					<combo id="ArpPatternLength" class="jucePos text3" data-model="partCurrent" param="Arpeggiator/UserPatternLength" style="left: 1133dp; top: 108dp; width: 176dp; height: 45dp; line-height: 45dp;">
 						<combotext>Wave 42</combotext>
