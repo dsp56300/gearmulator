@@ -44,6 +44,16 @@ namespace jucePluginEditorLib::patchManagerRml
 		m_treeTags.addGroup(patchManager::GroupType::Tags);
 	}
 
+	PatchManagerUiRml::~PatchManagerUiRml()
+	{
+		m_rootLayoutGrid = nullptr;
+		m_rootLayoutList = nullptr;
+
+		// this needs to be done before the trees are destroyed because they call listeners
+		m_treeDS.getTree()->getTree().clear();
+		m_treeTags.getTree()->getTree().clear();
+	}
+
 	void PatchManagerUiRml::processDirty(const pluginLib::patchDB::Dirty& _dirty)
 	{
 		juceRmlUi::RmlInterfaces::ScopedAccess access(m_rmlComponent.getInterfaces());
@@ -134,6 +144,10 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void PatchManagerUiRml::removeSelectedItem(const Tree& _tree, const juceRmlUi::TreeNodePtr& _node)
 	{
+		// ignore if called from destructor
+		if (!m_rootLayoutList)
+			return;
+
 		const auto it = m_selectedItems.find(&_tree);
 		if(it == m_selectedItems.end())
 			return;
