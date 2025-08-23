@@ -72,24 +72,28 @@ namespace juceRmlUi
 
 	Rml::TextureHandle RendererProxy::LoadTexture(Rml::Vector2i& _textureDimensions, const Rml::String& _source)
 	{
+		auto dummyHandle = createDummyHandle();
+
 		juce::Image image;
+
 		if (!loadImage(image, _textureDimensions, _source))
 			return {};
 
-		const auto w = image.getWidth();
-		const auto h = image.getHeight();
-
-		std::vector<uint8_t> buffer;
-
-		helper::toBuffer(core_instance, buffer, image);
-
-		auto dummyHandle = createDummyHandle();
-
-		addRenderFunction(dummyHandle, [this, dummyHandle, b = std::move(buffer), w, h]
+		addRenderFunction(dummyHandle, [this, dummyHandle, img = std::move(image)]
 		{
 			if (exists(dummyHandle))
 				return;
-			const auto handle = m_renderer->GenerateTexture(b, Rml::Vector2i(w, h));
+
+			std::vector<uint8_t> buffer;
+
+			auto i = img;
+
+			helper::toBuffer(core_instance, buffer, i);
+
+			const auto w = i.getWidth();
+			const auto h = i.getHeight();
+
+			const auto handle = m_renderer->GenerateTexture(buffer, Rml::Vector2i(w, h));
 			addHandle<HandleTexture>(dummyHandle, handle);
 		});
 
@@ -437,7 +441,7 @@ namespace juceRmlUi
 			return true;
 		};
 
-		const char* ptr = nullptr;
+		const char* ptr;
 		uint32_t fileSize;
 
 		try
