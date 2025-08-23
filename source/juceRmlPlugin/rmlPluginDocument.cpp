@@ -166,5 +166,18 @@ namespace rmlPlugin
 				});
 			}
 		}
+
+		if (auto* attrib = _element->GetAttribute("url"))
+		{
+			const auto url = attrib->Get<Rml::String>(_element->GetCoreInstance());
+
+			if (url.size() > 4 && url.substr(0,4) == "http")
+			{
+				juceRmlUi::EventListener::Add(_element, Rml::EventId::Click, [url](const Rml::Event&)
+				{
+					juce::URL(url).launchInDefaultBrowser();
+				});
+			}
+		}
 	}
 }
