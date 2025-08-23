@@ -2851,7 +2851,7 @@
 	height: 63dp;
 	width: 63dp;
 }
-.text
+.txt
 {
 	color: #ffffff;
 	font-family: Register;

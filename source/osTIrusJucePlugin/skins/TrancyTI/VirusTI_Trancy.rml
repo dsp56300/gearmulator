@@ -1,27 +1,27 @@
 <rml>
 	<head>
-		<link type="text/template" href="tus_colorpicker.rml"/>
-		<link type="text/template" href="tus_patchmanager.rml"/>
 		<link type="text/rcss" href="tus_default.rcss"/>
 		<link type="text/rcss" href="tus_juceskin.rcss"/>
+		<link type="text/template" href="tus_colorpicker.rml"/>
+		<link type="text/template" href="tus_patchmanager.rml"/>
 		<link type="text/rcss" href="VirusTI_Trancy.rcss"/>
 	</head>
-	<body id="Root" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2638dp; height: 1301dp;">
+	<body debugger="1" id="Root" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2638dp; height: 1301dp;">
 		<div id="bg" class="jucePos" style="left: 0dp; top: 0dp; width: 2638dp; height: 1301dp; decorator: image(background.png scale-none left top);"/>
 		<img id="logolight" class="jucePos" src="logo_light.png" style="left: 65dp; top: 15dp; width: 475dp; height: 95dp;"/>
 		<img id="logo" class="jucePos" src="logo.png" style="left: 77dp; top: 25dp; width: 449dp; height: 71dp;"/>
 		<div id="ContainerChannel16Enable" class="jucePos" data-class-juceConditionDisabled="!((Play_Mode_value >= 1 && Play_Mode_value <= 3))" data-model="partCurrent" style="left: 80dp; top: 90dp; width: 472dp; height: 1093dp;">
 			<img id="ContainerChannel4" class="jucePos" data-class-juceConditionDisabled="deviceModel!='Snow'" data-model="plugin" src="background_channels_4.png" style="left: 0dp; top: 0dp; width: 472dp; height: 1093dp;"/>
-			<div id="ContainerChannel16" class="jucePos" data-class-juceConditionDisabled="deviceModel!='<invalid>' && deviceModel!='TI' && deviceModel!='TI2'" data-model="plugin" style="left: 0dp; top: 0dp; width: 472dp; height: 1093dp; decorator: image(background_channels_16.png scale-none left top);"/>
+			<div id="ContainerChannel16" class="jucePos" data-class-juceConditionDisabled="deviceModel!='&lt;invalid&gt;' && deviceModel!='TI' && deviceModel!='TI2'" data-model="plugin" style="left: 0dp; top: 0dp; width: 472dp; height: 1093dp; decorator: image(background_channels_16.png scale-none left top);"/>
 		</div>
 		<div id="ContainerChannel16Enable" class="jucePos" data-class-juceConditionDisabled="!(Play_Mode_value == 0)" data-model="partCurrent" style="left: 80dp; top: 90dp; width: 472dp; height: 1093dp;">
 			<img id="ContainerChannel4" class="jucePos" data-class-juceConditionDisabled="deviceModel!='Snow'" data-model="plugin" src="background_channels_disable_4.png" style="left: 0dp; top: 0dp; width: 472dp; height: 1093dp;"/>
-			<img id="ContainerChannel16" class="jucePos" data-class-juceConditionDisabled="deviceModel!='<invalid>' && deviceModel!='TI' && deviceModel!='TI2'" data-model="plugin" src="background_channels_disable_16.png" style="left: 0dp; top: 0dp; width: 472dp; height: 1093dp;"/>
+			<img id="ContainerChannel16" class="jucePos" data-class-juceConditionDisabled="deviceModel!='&lt;invalid&gt;' && deviceModel!='TI' && deviceModel!='TI2'" data-model="plugin" src="background_channels_disable_16.png" style="left: 0dp; top: 0dp; width: 472dp; height: 1093dp;"/>
 		</div>
 		<img id="ContainerChannel4" class="jucePos" data-class-juceConditionDisabled="deviceModel!='Snow'" data-model="plugin" src="snow.png" style="left: 103dp; top: 53dp; width: 29dp; height: 31dp;"/>
-		<div id="PatchName" class="jucePos juceLabel text" style="left: 594dp; top: 1186dp; width: 400dp; height: 52dp; line-height: 52dp;">Osc1Shape</div>
+		<div id="PatchName" class="jucePos juceLabel txt" style="left: 594dp; top: 1186dp; width: 400dp; height: 52dp; line-height: 52dp;">Osc1Shape</div>
 		<div id="FocusedParameterValue" class="jucePos juceLabel text1" style="left: 1400dp; top: 1186dp; width: 256.7dp; height: 52dp; line-height: 52dp;">-42</div>
-		<div id="FocusedParameterName" class="jucePos juceLabel text" style="left: 830dp; top: 1186dp; width: 600dp; height: 52dp; line-height: 52dp;">Osc</div>
+		<div id="FocusedParameterName" class="jucePos juceLabel txt" style="left: 830dp; top: 1186dp; width: 600dp; height: 52dp; line-height: 52dp;">Osc</div>
 		<button id="Menu" class="jucePos juceButton button_menu" isToggle="0" style="left: 2314dp; top: 1175dp; width: 213dp; height: 69.5dp;"/>
 		<button id="PlayModeSingle" class="jucePos juceButton button_single" isToggle="1" style="left: 91dp; top: 1199dp; width: 213dp; height: 48dp;"/>
 		<button id="PlayModeMulti" class="jucePos juceButton button_multi" isToggle="1" style="left: 307dp; top: 1199dp; width: 213dp; height: 48dp;"/>

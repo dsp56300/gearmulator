@@ -460,7 +460,7 @@ namespace rmlPlugin::skinConverter
 	std::string SkinConverter::addTextStyle(const genericUI::UiObjectStyle& _style)
 	{
 		CoStyle style = createTextStyle(_style);
-		return addStyle(".text", style);
+		return addStyle(".txt", style);
 	}
 
 	CoStyle SkinConverter::createTextStyle(const genericUI::UiObjectStyle& _style, float _fallbackFontSize/* = 0.0f*/, float _fontSizeScale/* = 1.0f*/)
