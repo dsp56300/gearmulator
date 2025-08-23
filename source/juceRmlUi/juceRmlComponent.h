@@ -87,6 +87,8 @@ namespace juceRmlUi
 
 		Rml::Vector2i getDocumentSize() const { return m_documentSize; }
 
+		static RmlComponent* fromElement(const Rml::Element* _element);
+
 	private:
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);

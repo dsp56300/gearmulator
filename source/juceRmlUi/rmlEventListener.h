@@ -1,6 +1,13 @@
 #pragma once
 
+#include "baseLib/event.h"
+
 #include "RmlUi/Core/EventListener.h"
+
+namespace juceRmlUi
+{
+	class RmlComponent;
+}
 
 namespace juceRmlUi
 {
@@ -41,17 +48,25 @@ namespace juceRmlUi
 	public:
 		using Callback = std::function<void(Rml::Element*)>;
 
+		~OnDetachListener() override;
+
 		static void add(Rml::Element* _element, const Callback& _callback);
 
 		void ProcessEvent(Rml::Event&) override {}
 
-	private:
-		OnDetachListener(Rml::Element* _element, Callback _callback);
+		Rml::Element* getElement() const { return m_element; }
+
+		bool getAutoDestroy() const { return m_autoDestroy; }
+
+	protected:
+		OnDetachListener(Rml::Element* _element, Callback _callback, bool _autoDestroy = true);
 
 		void OnDetach(Rml::Element*) override;
 
 	private:
 		Callback m_callback;
+		Rml::Element* m_element;
+		bool m_autoDestroy;
 	};
 
 	class ScopedListener : Rml::EventListener
@@ -74,5 +89,22 @@ namespace juceRmlUi
 		Callback m_callback;
 		Rml::EventId m_eventId;
 		bool m_inCapturePhase = false;
+	};
+
+	class DelayedCall : OnDetachListener
+	{
+	public:
+		DelayedCall(Rml::Element* _element, float _delaySeconds, const std::function<void()>& _callback, bool _autoDestroy = true);
+
+		static DelayedCall* create(Rml::Element* _element, float _delaySeconds, const std::function<void()>& _callback, bool _autoDestroy = true);
+
+		using OnDetachListener::getElement;
+
+	private:
+		void onPreUpdate();
+
+		baseLib::EventListener<RmlComponent*> m_onPreUpdate;
+		double m_targetTime;
+		std::function<void()> m_callback;
 	};
 }

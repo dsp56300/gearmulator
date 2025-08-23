@@ -1,5 +1,6 @@
 #include "rmlEventListener.h"
 
+#include "juceRmlComponent.h"
 #include "RmlUi/Core/Element.h"
 
 namespace juceRmlUi
@@ -38,15 +39,24 @@ namespace juceRmlUi
 		new OnDetachListener(_element, _callback);
 	}
 
-	OnDetachListener::OnDetachListener(Rml::Element* _element, Callback _callback) : m_callback(std::move(_callback))
+	OnDetachListener::OnDetachListener(Rml::Element* _element, Callback _callback, bool _autoDestroy/* = true*/) : m_callback(std::move(_callback)), m_element(_element), m_autoDestroy(_autoDestroy)
 	{
 		_element->AddEventListener(Rml::EventId::Unload, this);
+	}
+
+	OnDetachListener::~OnDetachListener()
+	{
+		if (m_element)
+			m_element->RemoveEventListener(Rml::EventId::Unload, this);
 	}
 
 	void OnDetachListener::OnDetach(Rml::Element* _element)
 	{
 		m_callback(_element);
-		delete this;
+		if (_element == m_element)
+			m_element = nullptr;
+		if (m_autoDestroy)
+			delete this;
 	}
 
 	ScopedListener::ScopedListener(Rml::Element* _elem, const Rml::EventId _id, const Callback& _callback, const bool _inCapturePhase)
@@ -85,5 +95,45 @@ namespace juceRmlUi
 	void ScopedListener::ProcessEvent(Rml::Event& _event)
 	{
 		m_callback(_event);
+	}
+
+	DelayedCall::DelayedCall(Rml::Element* _element, const float _delaySeconds, const std::function<void()>& _callback, const bool _autoDestroy/* = true*/)
+		: OnDetachListener(_element, [](Rml::Element*) {}, _autoDestroy)
+		, m_targetTime(_element->GetCoreInstance().system_interface->GetElapsedTime() + _delaySeconds)
+		, m_callback(_callback)
+	{
+		auto* comp = RmlComponent::fromElement(_element);
+
+		m_onPreUpdate.set(comp->evPreUpdate, [this](RmlComponent*)
+		{
+			onPreUpdate();
+		});
+	}
+
+	DelayedCall* DelayedCall::create(Rml::Element* _element, const float _delaySeconds, const std::function<void()>& _callback, bool _autoDestroy/* = true*/)
+	{
+		return new DelayedCall(_element, _delaySeconds, _callback, _autoDestroy);
+	}
+
+	void DelayedCall::onPreUpdate()
+	{
+		const auto t = getElement()->GetCoreInstance().system_interface->GetElapsedTime();
+
+		if (t < m_targetTime)
+			return;
+
+		// do not fire again. We cannot remove our event listener here immediately because it does not support altering the list while invoking
+		m_targetTime = std::numeric_limits<double>::max();
+
+		if (getAutoDestroy())
+		{
+			auto c = m_callback;
+			delete this;
+			c();
+		}
+		else
+		{
+			m_callback();
+		}
 	}
 }

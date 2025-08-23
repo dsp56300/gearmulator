@@ -286,6 +286,17 @@ namespace juceRmlUi
 		};
 	}
 
+	RmlComponent* RmlComponent::fromElement(const Rml::Element* _element)
+	{
+		if (!_element)
+			return nullptr;
+		auto* doc = _element->GetOwnerDocument();
+		if (!doc)
+			return nullptr;
+		auto* p = doc->GetAttribute<void*>("rmlComponent", nullptr);
+		return static_cast<RmlComponent*>(p);
+	}
+
 	void RmlComponent::update()
 	{
 		RmlInterfaces::ScopedAccess access(*this);
@@ -340,6 +351,8 @@ namespace juceRmlUi
 			auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
 			if (document)
 			{
+				document->SetAttribute("rmlComponent", static_cast<void*>(this));
+
 				const Rml::Vector2f s = document->GetBox().GetSize(Rml::BoxArea::Margin);
 
 				if (s.x > 0 && s.y > 0)
