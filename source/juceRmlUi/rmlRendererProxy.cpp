@@ -33,7 +33,7 @@ namespace juceRmlUi
 		auto vertices = copySpan(_vertices);
 		auto indices = copySpan(_indices);
 
-		addRenderFunction([this, dummyHandle, v = std::move(vertices), i = std::move(indices)]
+		addRenderFunction(dummyHandle, [this, dummyHandle, v = std::move(vertices), i = std::move(indices)]
 		{
 			if (exists(dummyHandle))
 				return;
@@ -76,7 +76,24 @@ namespace juceRmlUi
 		if (!loadImage(image, _textureDimensions, _source))
 			return {};
 
-		return loadTexture(image);
+		const auto w = image.getWidth();
+		const auto h = image.getHeight();
+
+		std::vector<uint8_t> buffer;
+
+		helper::toBuffer(core_instance, buffer, image);
+
+		auto dummyHandle = createDummyHandle();
+
+		addRenderFunction(dummyHandle, [this, dummyHandle, b = std::move(buffer), w, h]
+		{
+			if (exists(dummyHandle))
+				return;
+			const auto handle = m_renderer->GenerateTexture(b, Rml::Vector2i(w, h));
+			addHandle<HandleTexture>(dummyHandle, handle);
+		});
+
+		return dummyHandle;
 	}
 
 	Rml::TextureHandle RendererProxy::GenerateTexture(const Rml::Span<const unsigned char> _source, Rml::Vector2i _sourceDimensions)
@@ -85,7 +102,7 @@ namespace juceRmlUi
 
 		auto s = copySpan(_source);
 
-		addRenderFunction([this, dummyHandle, source = std::move(s), _sourceDimensions]
+		addRenderFunction(dummyHandle, [this, dummyHandle, source = std::move(s), _sourceDimensions]
 		{
 			if (exists(dummyHandle))
 				return;
@@ -155,7 +172,7 @@ namespace juceRmlUi
 	{
 		auto dummyHandle = createDummyHandle();
 
-		addRenderFunction([this, dummyHandle]
+		addRenderFunction(dummyHandle, [this, dummyHandle]
 		{
 			if (exists(dummyHandle))
 				return;
@@ -211,7 +228,7 @@ namespace juceRmlUi
 	Rml::TextureHandle RendererProxy::SaveLayerAsTexture()
 	{
 		auto dummyHandle = createDummyHandle();
-		addRenderFunction([this, dummyHandle]
+		addRenderFunction(dummyHandle, [this, dummyHandle]
 		{
 			if (exists(dummyHandle))
 				return;
@@ -224,7 +241,7 @@ namespace juceRmlUi
 	Rml::CompiledFilterHandle RendererProxy::SaveLayerAsMaskImage()
 	{
 		auto dummyHandle = createDummyHandle();
-		addRenderFunction([this, dummyHandle]
+		addRenderFunction(dummyHandle, [this, dummyHandle]
 		{
 			if (exists(dummyHandle))
 				return;
@@ -237,7 +254,7 @@ namespace juceRmlUi
 	Rml::CompiledFilterHandle RendererProxy::CompileFilter(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
 		auto dummyHandle = createDummyHandle();
-		addRenderFunction([this, dummyHandle, name = _name, parameters = _parameters]
+		addRenderFunction(dummyHandle, [this, dummyHandle, name = _name, parameters = _parameters]
 		{
 			if (exists(dummyHandle))
 				return;
@@ -262,7 +279,7 @@ namespace juceRmlUi
 	Rml::CompiledShaderHandle RendererProxy::CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
 		auto dummyHandle = createDummyHandle();
-		addRenderFunction([this, dummyHandle, name = _name, parameters = _parameters]
+		addRenderFunction(dummyHandle, [this, dummyHandle, name = _name, parameters = _parameters]
 		{
 			if (exists(dummyHandle))
 				return;
@@ -304,26 +321,10 @@ namespace juceRmlUi
 		m_enqueuedFunctions.push_back(std::move(_func));
 	}
 
-	Rml::TextureHandle RendererProxy::loadTexture(juce::Image& _image)
+	void RendererProxy::addRenderFunction(Handle _dummy, const Func& _func)
 	{
-		const auto w = _image.getWidth();
-		const auto h = _image.getHeight();
-
-		std::vector<uint8_t> buffer;
-
-		helper::toBuffer(core_instance, buffer, _image);
-
-		auto dummyHandle = createDummyHandle();
-
-		addRenderFunction([this, dummyHandle, b = std::move(buffer), w, h]
-		{
-			if (exists(dummyHandle))
-				return;
-			const auto handle = m_renderer->GenerateTexture(b, Rml::Vector2i(w, h));
-			addHandle<HandleTexture>(dummyHandle, handle);
-		});
-
-		return dummyHandle;
+		m_restoreContextFuncs.insert({ _dummy, _func });
+		addRenderFunction(_func);
 	}
 
 	void RendererProxy::executeRenderFunctions()
@@ -407,13 +408,17 @@ namespace juceRmlUi
 		}
 
 		m_renderer = _renderer;
+
+		if (m_renderer)
+		{
+			// restore context for all handles that are still alive
+			for (const auto& restoreContextFunc : m_restoreContextFuncs)
+				restoreContextFunc.second();
+		}
 	}
 
 	bool RendererProxy::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const
 	{
-		uint32_t fileSize;
-		const char* ptr = nullptr;
-
 		auto generateDummyImage = [&_image, &_textureDimensions]()
 		{
 			// Generate a dummy image (1x1 transparent pixel)
@@ -431,6 +436,10 @@ namespace juceRmlUi
 
 			return true;
 		};
+
+		const char* ptr = nullptr;
+		uint32_t fileSize;
+
 		try
 		{
 			ptr = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);

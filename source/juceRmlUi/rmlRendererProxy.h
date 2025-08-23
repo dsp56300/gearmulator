@@ -90,8 +90,8 @@ namespace juceRmlUi
 
 		DataProvider& getDataProvider() const { return m_dataProvider; }
 
-		Rml::TextureHandle loadTexture(juce::Image& _image);
 		void addRenderFunction(Func _func);
+		void addRenderFunction(Handle _dummy, const Func& _func);
 
 		Handle createDummyHandle()
 		{
@@ -127,6 +127,7 @@ namespace juceRmlUi
 		{
 			std::lock_guard lock(m_mutex);
 			m_handles.erase(_dummy);
+			m_restoreContextFuncs.erase(_dummy);
 		}
 
 		bool exists(const Handle _dummy)
@@ -153,6 +154,8 @@ namespace juceRmlUi
 		std::vector<std::vector<Func>> m_renderFunctions;
 		std::vector<Func> m_renderFunctionsToExecute;
 		std::unordered_map<Handle, HandleVariant> m_handles;
+
+		std::unordered_map<Handle, Func> m_restoreContextFuncs;
 
 		std::stack<Handle> m_layerHandles;
 	};
