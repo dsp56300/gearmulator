@@ -51,7 +51,7 @@ namespace rmlPlugin
 		RmlParameterBinding& operator=(RmlParameterBinding&&) = delete;
 
 		void bind(Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
-		void bind(const pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
+		void bind(pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
 
 		Rml::Element* getElementForParameter(const pluginLib::Parameter* _param, bool _visibleOnly = true) const;
 		const pluginLib::Parameter* getParameterForElement(const Rml::Element* _element) const;
@@ -68,12 +68,19 @@ namespace rmlPlugin
 
 		using ParameterList = std::vector<RmlParameterRef>;
 
-		const pluginLib::Controller& m_controller;
+		pluginLib::Controller& m_controller;
 		juceRmlUi::RmlComponent& m_component;
 		std::array<ParameterList, CurrentPart + 1> m_parametersPerPart;
 		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 
-		std::unordered_map<Rml::Element*, pluginLib::Parameter*> m_elementToParam;
+		struct BoundParameter
+		{
+			pluginLib::Parameter* parameter = nullptr;
+			Rml::Element* element = nullptr;
+			baseLib::EventListener<pluginLib::Parameter*> onSoftKnobTargetChanged;
+		};
+
+		std::unordered_map<Rml::Element*, BoundParameter> m_elementToParam;
 		std::unordered_map<pluginLib::Parameter*, std::unordered_set<Rml::Element*>> m_paramToElements;
 
 		std::unordered_set<Rml::ElementDocument*> m_docsWithMouseDown;

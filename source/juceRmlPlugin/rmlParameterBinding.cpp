@@ -46,7 +46,7 @@ namespace rmlPlugin
 		bind(m_controller, _element, _parameterName, _part);
 	}
 
-	void RmlParameterBinding::bind(const pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
+	void RmlParameterBinding::bind(pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
 	{
 		auto* p = _controller.getParameter(_parameterName, _part == CurrentPart ? 0 : _part);
 
@@ -62,13 +62,38 @@ namespace rmlPlugin
 
 		if (oldParamIt != m_elementToParam.end())
 		{
-			evUnbind.invoke(oldParamIt->second, oldParamIt->first);
+			auto oldParam = oldParamIt->second.parameter;
 
-			m_paramToElements[oldParamIt->second].erase(&_element);
+			evUnbind.invoke(oldParam, oldParamIt->first);
+
+			m_paramToElements[oldParam].erase(&_element);
 			m_elementToParam.erase(oldParamIt);
 		}
 
-		m_elementToParam.insert({ &_element, p });
+		BoundParameter bp;
+		bp.parameter = p;
+		bp.element = &_element;
+
+		if (p->getDescription().isSoftKnob())
+		{
+			auto* softknob = _controller.getSoftknob(p);
+			if (softknob)
+			{
+				bp.onSoftKnobTargetChanged.set(softknob->onBind, [&_element](const pluginLib::Parameter* _param)
+				{
+					if (!_param)
+						return;
+
+					const auto& range = _param->getNormalisableRange();
+
+					juceRmlUi::helper::changeAttribute(&_element, "data-attr-min", std::to_string(range.start));
+					juceRmlUi::helper::changeAttribute(&_element, "data-attr-max", std::to_string(range.end));
+					juceRmlUi::helper::changeAttribute(&_element, "min", std::to_string(range.start));
+					juceRmlUi::helper::changeAttribute(&_element, "max", std::to_string(range.end));
+				});
+			}
+		}
+		m_elementToParam.insert(std::make_pair(&_element, std::move(bp)));
 
 		m_paramToElements[p].insert(&_element);
 
@@ -138,7 +163,7 @@ namespace rmlPlugin
 	const pluginLib::Parameter* RmlParameterBinding::getParameterForElement(const Rml::Element* _element) const
 	{
 		const auto it = m_elementToParam.find(const_cast<Rml::Element*>(_element));
-		return it != m_elementToParam.end() ? it->second : nullptr;
+		return it != m_elementToParam.end() ? it->second.parameter : nullptr;
 	}
 
 	void RmlParameterBinding::setMouseIsDown(Rml::ElementDocument* _document, bool _isDown)
