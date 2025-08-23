@@ -1,6 +1,5 @@
 #include "patchmanager.h"
 
-#include "listmodel.h"
 #include "patchmanagerui.h"
 
 #include "../pluginEditor.h"

@@ -1,6 +1,5 @@
 #include "state.h"
 
-#include "listmodel.h"
 #include "patchmanager.h"
 #include "patchmanagerui.h"
 

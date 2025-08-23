@@ -19,27 +19,9 @@ set(SOURCES
 )
 
 set(SOURCES_PM
-	patchmanager/datasourcetree.cpp patchmanager/datasourcetree.h
-	patchmanager/datasourcetreeitem.cpp patchmanager/datasourcetreeitem.h
-	patchmanager/defaultskin.h
-	patchmanager/grid.cpp patchmanager/grid.h
-	patchmanager/griditem.cpp patchmanager/griditem.h
-	patchmanager/griditemcontainer.cpp patchmanager/griditemcontainer.h
-	patchmanager/gridviewport.cpp patchmanager/gridviewport.h
-	patchmanager/grouptreeitem.cpp patchmanager/grouptreeitem.h
-	patchmanager/list.cpp patchmanager/list.h
-	patchmanager/listmodel.cpp patchmanager/listmodel.h
-	patchmanager/listitem.cpp patchmanager/listitem.h
-	patchmanager/notagtreeitem.cpp patchmanager/notagtreeitem.h
 	patchmanager/patchmanager.cpp patchmanager/patchmanager.h
 	patchmanager/patchmanagerui.cpp patchmanager/patchmanagerui.h
-	patchmanager/patchmanageruijuce.cpp patchmanager/patchmanageruijuce.h
-	patchmanager/roottreeitem.cpp patchmanager/roottreeitem.h
 	patchmanager/savepatchdesc.cpp patchmanager/savepatchdesc.h
-	patchmanager/tagtreeitem.cpp patchmanager/tagtreeitem.h
-	patchmanager/tagstree.cpp patchmanager/tagstree.h
-	patchmanager/tree.cpp patchmanager/tree.h
-	patchmanager/treeitem.cpp patchmanager/treeitem.h
 	patchmanager/types.cpp patchmanager/types.h
 	patchmanager/state.cpp patchmanager/state.h
 )
