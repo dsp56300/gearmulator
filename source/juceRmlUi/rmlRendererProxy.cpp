@@ -327,8 +327,9 @@ namespace juceRmlUi
 
 	void RendererProxy::addRenderFunction(Handle _dummy, const Func& _func)
 	{
+		std::lock_guard lock(m_mutex);
 		m_restoreContextFuncs.insert({ _dummy, _func });
-		addRenderFunction(_func);
+		m_enqueuedFunctions.push_back(std::move(_func));
 	}
 
 	void RendererProxy::executeRenderFunctions()
