@@ -160,7 +160,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	bool ListElemEntry::canDrop(const Rml::Event& _event, const DragSource* _source)
 	{
 		if (getList().getSourceType() != pluginLib::patchDB::SourceType::LocalStorage)
-			return ElemListEntry::canDrop(_event, _source);
+			return false;
 
 		auto* elem = _source->getElement();
 		auto* listElemSource = dynamic_cast<ListElemEntry*>(elem);
