@@ -22,6 +22,7 @@ namespace juceRmlUi
 	private:
 		void processMouseMove(const Rml::Event& _event);
 		void processMouseWheel(const Rml::Event& _event);
+		void processDoubleClick(const Rml::Event& _event);
 
 		void updateSprite();
 

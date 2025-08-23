@@ -9,6 +9,7 @@ namespace juceRmlUi
 		AddEventListener(Rml::EventId::Mousedown, this);
 		AddEventListener(Rml::EventId::Drag, this);
 		AddEventListener(Rml::EventId::Mousescroll, this);
+		AddEventListener(Rml::EventId::Dblclick, this);
 
 		auto setSpriteDirty = [this](const float&)
 		{
@@ -25,6 +26,7 @@ namespace juceRmlUi
 		RemoveEventListener(Rml::EventId::Mousedown, this);
 		RemoveEventListener(Rml::EventId::Drag, this);
 		RemoveEventListener(Rml::EventId::Mousescroll, this);
+		RemoveEventListener(Rml::EventId::Dblclick, this);
 	}
 
 	void ElemKnob::onPropertyChanged(const std::string& _key)
@@ -79,6 +81,9 @@ namespace juceRmlUi
 			break;
 		case Rml::EventId::Mousescroll:
 			processMouseWheel(_event);
+			break;
+		case Rml::EventId::Dblclick:
+			processDoubleClick(_event);
 			break;
 		}
 	}
@@ -137,6 +142,13 @@ namespace juceRmlUi
 			setValue(getValue() - diff);
 		else
 			setValue(getValue() + diff);
+	}
+
+	void ElemKnob::processDoubleClick(const Rml::Event&)
+	{
+		const auto d = getDefaultValue();
+		if (isInRange(d))
+			setValue(d);
 	}
 
 	void ElemKnob::updateSprite()

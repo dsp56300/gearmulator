@@ -88,8 +88,10 @@ namespace rmlPlugin
 
 					juceRmlUi::helper::changeAttribute(&_element, "data-attr-min", std::to_string(range.start));
 					juceRmlUi::helper::changeAttribute(&_element, "data-attr-max", std::to_string(range.end));
+					juceRmlUi::helper::changeAttribute(&_element, "data-attr-default", std::to_string(_param->getDefault()));
 					juceRmlUi::helper::changeAttribute(&_element, "min", std::to_string(range.start));
 					juceRmlUi::helper::changeAttribute(&_element, "max", std::to_string(range.end));
+					juceRmlUi::helper::changeAttribute(&_element, "default", std::to_string(_param->getDefault()));
 				});
 			}
 		}
@@ -104,6 +106,7 @@ namespace rmlPlugin
 		const auto paramChanged = juceRmlUi::helper::changeAttribute(&_element, "param", _parameterName);
 		juceRmlUi::helper::changeAttribute(&_element, "data-attr-min", param + "_min");
 		juceRmlUi::helper::changeAttribute(&_element, "data-attr-max", param + "_max");
+		juceRmlUi::helper::changeAttribute(&_element, "data-attr-default", param + "_default");
 		juceRmlUi::helper::changeAttribute(&_element, "data-value", param + "_value");
 
 		std::string modelName = getDataModelName(_part);

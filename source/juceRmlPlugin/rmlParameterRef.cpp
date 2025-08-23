@@ -65,7 +65,7 @@ namespace rmlPlugin
 		_model.BindFunc(m_prefix + "_min", [this](Rml::Variant& _dest)
 		{
 			_dest = m_parameter->getDescription().range.getStart();
-		}, [this](const Rml::Variant& _source)
+		}, [this](const Rml::Variant&)
 		{
 			assert(false && "RmlParameterBinding::createParameterFunc: min value is not settable");
 		});
@@ -74,9 +74,18 @@ namespace rmlPlugin
 		_model.BindFunc(m_prefix + "_max", [this](Rml::Variant& _dest)
 		{
 			_dest = m_parameter->getDescription().range.getEnd();
-		}, [this](const Rml::Variant& _source)
+		}, [this](const Rml::Variant&)
 		{
 			assert(false && "RmlParameterBinding::createParameterFunc: max value is not settable");
+		});
+
+		// default value
+		_model.BindFunc(m_prefix + "_default", [this](Rml::Variant& _dest)
+		{
+			_dest = m_parameter->getDescription().defaultValue;
+		}, [this](const Rml::Variant&)
+		{
+			assert(false && "RmlParameterBinding::createParameterFunc: default value is not settable");
 		});
 
 		setParameter(_param);

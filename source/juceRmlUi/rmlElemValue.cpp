@@ -7,6 +7,7 @@ namespace juceRmlUi
 		constexpr auto g_attribValue = "value";
 		constexpr auto g_attribMinValue = "min";
 		constexpr auto g_attribMaxValue = "max";
+		constexpr auto g_attribDefaultValue = "default";
 	}
 
 	void ElemValue::OnAttributeChange(const Rml::ElementAttributes& _changedAttributes)
@@ -27,6 +28,7 @@ namespace juceRmlUi
 		checkAttribute(g_attribValue, [&](const float _x) { setValue(_x); });
 		checkAttribute(g_attribMinValue, [&](const float _x) { setMinValue(_x); });
 		checkAttribute(g_attribMaxValue, [&](const float _x) { setMaxValue(_x); });
+		checkAttribute(g_attribDefaultValue, [&](const float _x) { setDefaultValue(_x); });
 	}
 
 	void ElemValue::setValue(const float _value, bool _sendChangeEvent/* = true*/)
@@ -58,6 +60,14 @@ namespace juceRmlUi
 		SetAttribute(g_attribMaxValue, _value);
 		onChangeMaxValue();
 		setValue(getValue());	// update value if it is out of range
+	}
+
+	void ElemValue::setDefaultValue(float _value)
+	{
+		if (!setProperty(m_default, _value, onDefaultValueChanged))
+			return;
+		SetAttribute(g_attribDefaultValue, _value);
+		onChangeDefaultValue();
 	}
 
 	bool ElemValue::setProperty(float& _prop, const float _newValue, const baseLib::Event<float>& _event)

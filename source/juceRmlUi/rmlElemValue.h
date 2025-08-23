@@ -12,6 +12,7 @@ namespace juceRmlUi
 		baseLib::Event<float> onValueChanged;
 		baseLib::Event<float> onMinValueChanged;
 		baseLib::Event<float> onMaxValueChanged;
+		baseLib::Event<float> onDefaultValueChanged;
 
 		explicit ElemValue(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : Element(_coreInstance, _tag) {}
 
@@ -20,10 +21,12 @@ namespace juceRmlUi
 		void setValue(float _value, bool _sendChangeEvent = true);
 		void setMinValue(float _value);
 		void setMaxValue(float _value);
+		void setDefaultValue(float _value);
 
 		float getValue() const { return m_value; }
 		float getMinValue() const { return m_min; }
 		float getMaxValue() const { return m_max; }
+		float getDefaultValue() const { return m_default; }
 
 		float getRange() const
 		{
@@ -32,9 +35,15 @@ namespace juceRmlUi
 			return m_max - m_min;
 		}
 
+		bool isInRange(const float _value) const
+		{
+			return _value >= m_min && _value <= m_max;
+		}
+
 		virtual void onChangeValue() {}
 		virtual void onChangeMinValue() {}
 		virtual void onChangeMaxValue() {}
+		virtual void onChangeDefaultValue() {}
 
 		static bool setProperty(float& _prop, float _newValue, const baseLib::Event<float>& _event);
 
@@ -42,5 +51,6 @@ namespace juceRmlUi
 		float m_value = -1.0f;
 		float m_min = 0.0f;
 		float m_max = 1.0f;
+		float m_default = 0.5f;
 	};
 }
