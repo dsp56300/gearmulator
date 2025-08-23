@@ -1,5 +1,7 @@
 #include "rmlElemComboBox.h"
 
+#include <algorithm>
+
 #include "rmlHelper.h"
 #include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/Context.h"
@@ -17,20 +19,50 @@ namespace juceRmlUi
 		RemoveEventListener(Rml::EventId::Click, this);
 	}
 
-	void ElemComboBox::setOptions(const std::vector<Rml::String>& _options)
+	void ElemComboBox::setEntries(const std::vector<Entry>& _options)
 	{
 		m_options = _options;
+
 		if (m_options.empty())
 		{
 			setMaxValue(0.0f);
 			return;
 		}
+
+		int max = m_options.front().value;
+
+		for (const auto& option : m_options)
+			max = std::max(option.value, max);
+
+		setMaxValue(static_cast<float>(max));
+	}
+
+	void ElemComboBox::setOptions(const std::vector<Rml::String>& _options)
+	{
+		if (_options.empty())
+		{
+			m_options.clear();
+			setMaxValue(0.0f);
+			return;
+		}
+
+		m_options.clear();
+
+		m_options.reserve(_options.size());
+
+		for (size_t i = 0; i < _options.size(); ++i)
+		{
+			if (_options[i].empty())
+				continue;
+			m_options.push_back({_options[i], static_cast<int>(i)});
+		}
+
 		setMaxValue(static_cast<float>(m_options.size() - 1));
 	}
 
 	void ElemComboBox::addOption(const Rml::String& _option)
 	{
-		m_options.push_back(_option);
+		m_options.push_back({ _option, static_cast<int>(m_options.size())});
 		setMaxValue(static_cast<float>(m_options.size() - 1));
 	}
 
@@ -60,18 +92,16 @@ namespace juceRmlUi
 
 		m_menu.reset(new Menu());
 
-		const auto currentValue = static_cast<uint32_t>(getValue());
+		const auto currentValue = static_cast<int>(getValue());
 
-		for (uint32_t i=0; i<=static_cast<uint32_t>(getMaxValue()); ++i)
+		for (auto& option : m_options)
 		{
-			auto& option = m_options[i];
-
-			if (option.empty())
+			if (option.text.empty())
 				continue;
 
-			m_menu->addEntry(option, i == currentValue, [this, i]
+			m_menu->addEntry(option.text, option.value == currentValue, [this, v = option.value]
 			{
-				setValue(static_cast<float>(i));
+				setValue(static_cast<float>(v));
 			});
 		}
 
@@ -118,11 +148,18 @@ namespace juceRmlUi
 
 		const auto value = getValue();
 
-		if (value < 0 || value >= static_cast<float>(m_options.size()))
-			return false;
+		std::string text;
 
-		const auto& option = m_options[static_cast<size_t>(value)];
-		const auto text = Rml::StringUtilities::EncodeRml(option);
+		for (const auto & option : m_options)
+		{
+			if (option.value == static_cast<int>(value))
+			{
+				text = option.text;
+				break;
+			}
+		}
+
+		text = Rml::StringUtilities::EncodeRml(text);
 
 //		SetProperty("decorator", "text(\"" + text + "\" inherit-color left center) content-box");
 		if (m_textElem == nullptr)

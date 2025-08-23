@@ -111,7 +111,41 @@ namespace rmlPlugin
 		const auto modelChanged = juceRmlUi::helper::changeAttribute(&_element, "data-model", modelName);
 
 		if (auto* combo = dynamic_cast<juceRmlUi::ElemComboBox*>(&_element))
-			combo->setOptions(p->getDescription().valueList.texts);
+		{
+			std::vector<juceRmlUi::ElemComboBox::Entry> sortedValues;
+
+			const auto& desc = p->getDescription();
+			const auto& valueList = desc.valueList;
+			const auto& range = desc.range;
+
+			if(valueList.order.empty())
+			{
+				int i = 0;
+				const auto& allValues = p->getAllValueStrings();
+				for (const auto& vs : allValues)
+				{
+					if(vs.isNotEmpty() && i >= range.getStart() && i <= range.getEnd())
+						sortedValues.emplace_back(juceRmlUi::ElemComboBox::Entry{ vs.toStdString(), i });
+					++i;
+				}
+			}
+			else
+			{
+				for(uint32_t i=0; i<valueList.order.size(); ++i)
+				{
+					const auto value = valueList.orderToValue(i);
+					if(value == pluginLib::ValueList::InvalidValue)
+						continue;
+					if(value < range.getStart() || value > range.getEnd())
+						continue;
+					const auto text = valueList.valueToText(value);
+					if(text.empty())
+						continue;
+					sortedValues.emplace_back(juceRmlUi::ElemComboBox::Entry{ text, value });
+				}
+			}
+			combo->setEntries(sortedValues);
+		}
 
 		// determine if we need to rebind at runtime
 		if (!modelChanged && !paramChanged)
