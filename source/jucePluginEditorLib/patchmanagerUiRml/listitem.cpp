@@ -168,6 +168,10 @@ namespace jucePluginEditorLib::patchManagerRml
 		if (listElemSource)
 		{
 			// the list itself is being sorted
+			
+			if (getList().hasFilters())
+				return false;	// cannot sort if any filters are active
+
 			setAllowLocations(false, true);
 			return true;
 		}
