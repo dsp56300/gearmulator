@@ -136,9 +136,10 @@ namespace juceRmlUi
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
 
-//		float m_time = 0;
-//		float m_fps = 0;
+		double m_time = 0;
+		float m_fps = 0;
 
 		FrameLimiter m_frameRateLimiter;
+		uint32_t m_pendingUpdates = 0;
 	};
 }

@@ -29,7 +29,7 @@ namespace juceRmlUi
 
 		m_openGLContext.setMultisamplingEnabled(true);
 		m_openGLContext.setRenderer(this);
-		m_openGLContext.setComponentPaintingEnabled(true);
+		m_openGLContext.setComponentPaintingEnabled(false);
 		m_openGLContext.attachTo(*this);
 		m_openGLContext.setContinuousRepainting(true);
 		m_openGLContext.setSwapInterval(1);
@@ -98,7 +98,7 @@ namespace juceRmlUi
 		if (err != GL_NO_ERROR)
 			DBG("OpenGL error: " << juce::String::toHexString((int)err));
 
-//		m_frameRateLimiter.wait();
+		m_frameRateLimiter.wait();
 
 		std::scoped_lock lock(m_timerMutex);
 		startTimer(1);
@@ -330,19 +330,27 @@ namespace juceRmlUi
 		m_renderProxy->finishFrame();
 
 		evPostUpdate(this);
-/*
+
 		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
-		const auto dt = t - m_time;
+		const auto dt = static_cast<float>(t - m_time);
 		m_time = t;
 
 		auto fps = (dt > 0) ? (1.0f / dt) : 0.0f;
 		m_fps += (fps - m_fps) * 0.1f;
 
-		LOG("FPS: " << m_fps << ", next update delay " << m_rmlContext->GetNextUpdateDelay());
-*/
-		m_rmlContext->RequestNextUpdate(0.5f);
+//		LOG("FPS: " << m_fps << ", next update delay " << m_rmlContext->GetNextUpdateDelay());
 
-		m_frameRateLimiter.setDelay(static_cast<float>(m_rmlContext->GetNextUpdateDelay()));
+		if (m_pendingUpdates > 0)
+		{
+			m_frameRateLimiter.setDelay(0);
+			--m_pendingUpdates;
+		}
+		else
+		{
+			// render every 0.5 seconds if there is no update pending
+			m_rmlContext->RequestNextUpdate(5.5f);
+			m_frameRateLimiter.setDelay(static_cast<float>(m_rmlContext->GetNextUpdateDelay()));
+		}
 
 		// ensure that new post frame callbacks that are added by other post frame callbacks are executed in the next frame
 		std::swap(m_postFrameCallbacks, m_tempPostFrameCallbacks);
@@ -350,11 +358,14 @@ namespace juceRmlUi
 		for (const auto& postFrameCallback : m_tempPostFrameCallbacks)
 			postFrameCallback();
 		m_tempPostFrameCallbacks.clear();
+
 		m_updating = false;
 	}
 
 	void RmlComponent::enqueueUpdate()
 	{
+		// One is not enough, because RmlUi might do property changes that in turn require another update. We do three to be sure.
+		m_pendingUpdates = 3;
 		m_frameRateLimiter.wakeEarly();
 	}
 
@@ -480,6 +491,7 @@ namespace juceRmlUi
 
 		RmlInterfaces::ScopedAccess access(*this);
 		updateRmlContextDimensions();
+		enqueueUpdate();
 	}
 
 	void RmlComponent::parentSizeChanged()
@@ -488,6 +500,7 @@ namespace juceRmlUi
 
 		RmlInterfaces::ScopedAccess access(*this);
 		updateRmlContextDimensions();
+		enqueueUpdate();
 	}
 
 	Rml::ElementDocument* RmlComponent::getDocument() const
