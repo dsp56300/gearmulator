@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 project(juceRmlUi VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	frameRateLimiter.cpp frameRateLimiter.h
 	juceRmlComponent.cpp juceRmlComponent.h
 	juceRmlDrag.cpp juceRmlDrag.h
 	juceRmlUi.cpp juceRmlUi.h
