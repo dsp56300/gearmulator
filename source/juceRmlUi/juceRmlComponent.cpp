@@ -348,7 +348,7 @@ namespace juceRmlUi
 		else
 		{
 			// render every 0.5 seconds if there is no update pending
-			m_rmlContext->RequestNextUpdate(5.5f);
+			m_rmlContext->RequestNextUpdate(0.5f);
 			m_frameRateLimiter.setDelay(static_cast<float>(m_rmlContext->GetNextUpdateDelay()));
 		}
 
