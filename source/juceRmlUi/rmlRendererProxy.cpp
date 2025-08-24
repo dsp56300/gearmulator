@@ -332,13 +332,15 @@ namespace juceRmlUi
 		m_enqueuedFunctions.push_back(std::move(_func));
 	}
 
-	void RendererProxy::executeRenderFunctions()
+	bool RendererProxy::executeRenderFunctions()
 	{
+		bool haveMore = false;
+
 		{
 			std::lock_guard lock(m_mutexRender);
 
 			if (!m_renderer)
-				return;
+				return false;
 
 			if (!m_renderFunctions.empty())
 			{
@@ -347,12 +349,17 @@ namespace juceRmlUi
 				if (m_renderFunctions.size() == 1)
 					m_renderFunctions.clear();
 				else
+				{
 					m_renderFunctions.erase(m_renderFunctions.begin());
+					haveMore = true;
+				}
 			}
 		}
 
 		for (auto& func : m_renderFunctionsToExecute)
 			func();
+
+		return haveMore;
 	}
 
 	void RendererProxy::finishFrame()
