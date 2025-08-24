@@ -58,6 +58,6 @@ namespace jucePluginEditorLib
 		if(!m_targetInvAlpha)
 			return;
 
-		m_targetAlpha->SetProperty(Rml::PropertyId::Opacity, Rml::Property(1.0f - m_value, Rml::Unit::NUMBER));
+		m_targetInvAlpha->SetProperty(Rml::PropertyId::Opacity, Rml::Property(1.0f - m_value, Rml::Unit::NUMBER));
 	}
 }
