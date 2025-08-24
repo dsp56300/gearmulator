@@ -30,6 +30,7 @@ namespace rmlPlugin
 		Rml::Element* m_conditionButton = nullptr;
 		bool m_sourceIsBeingDragged = false;
 		float m_lastSourceValue = 0.0f;
+		float m_lastTargetValue = 0.0f;
 		bool m_processingChangeEvent = false;
 	};
 }

@@ -39,6 +39,7 @@ namespace rmlPlugin
 		{
 		case Rml::EventId::Mousedown:
 			m_lastSourceValue = getValue(m_source);
+			m_lastTargetValue = getValue(m_target);
 			m_sourceIsBeingDragged = true;
 			break;
 		case Rml::EventId::Mouseup:
@@ -48,9 +49,9 @@ namespace rmlPlugin
 			{
 				if (m_processingChangeEvent)
 					break;
+
 				const auto current = getValue(m_source);
 				const auto delta = current - m_lastSourceValue;
-				m_lastSourceValue = current;
 
 				if(!m_sourceIsBeingDragged)
 					return;
@@ -61,10 +62,10 @@ namespace rmlPlugin
 				if(m_conditionButton && !TabGroup::isChecked(m_conditionButton))
 					return;
 
-				const auto destValue = getValue(m_target);
-				const auto newDestValue = destValue + delta;
+				const auto currentTargetValue = getValue(m_target);
+				const auto newDestValue = m_lastTargetValue + delta;
 
-				if(std::abs(newDestValue - destValue) < 0.0001)
+				if(std::abs(newDestValue - currentTargetValue) < 0.0001)
 					return;
 
 				m_processingChangeEvent = true;
