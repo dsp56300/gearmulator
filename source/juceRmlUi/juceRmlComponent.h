@@ -33,6 +33,7 @@ namespace juceRmlUi
 	{
 	public:
 		baseLib::Event<RmlComponent*> evPreUpdate;
+		baseLib::Event<RmlComponent*> evPostUpdate;
 
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
