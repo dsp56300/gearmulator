@@ -376,7 +376,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 		});
 	}
 
-	skinMenu.addEntry("Open folder '" + getSkinFolder() + "' in File Browser", [this]
+	skinMenu.addEntry("Open skins folder in File Browser", [this]
 	{
 		const auto dir = getSkinFolder();
 		baseLib::filesystem::createDirectory(dir);
