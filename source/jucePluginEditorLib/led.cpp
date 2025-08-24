@@ -4,6 +4,7 @@
 
 #include "juceRmlUi/juceRmlComponent.h"
 
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Element.h"
 
 namespace jucePluginEditorLib
@@ -35,15 +36,23 @@ namespace jucePluginEditorLib
 			{
 				setValue(m_sourceCallback());
 			});
+			m_onPostUpdate.set(m_editor.getRmlComponent()->evPostUpdate, [this](juceRmlUi::RmlComponent*)
+			{
+				m_targetAlpha->GetContext()->RequestNextUpdate(0.0f);
+			});
 		}
 		else
 		{
 			m_onPreUpdate.reset();
+			m_onPostUpdate.reset();
 		}
 	}
 
 	void Led::repaint() const
 	{
+		if (m_targetAlpha->IsVisible(true))
+			m_editor.getRmlComponent()->enqueueUpdate();
+
 		m_targetAlpha->SetProperty(Rml::PropertyId::Opacity, Rml::Property(m_value, Rml::Unit::NUMBER));
 
 		if(!m_targetInvAlpha)

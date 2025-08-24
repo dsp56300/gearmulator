@@ -1,5 +1,6 @@
 #pragma once
 
+#include "frameRateLimiter.h"
 #include "juceRmlDrag.h"
 #include "rmlInterfaces.h"
 #include "rmlRendererProxy.h"
@@ -90,6 +91,8 @@ namespace juceRmlUi
 
 		static RmlComponent* fromElement(const Rml::Element* _element);
 
+		void enqueueUpdate();
+
 	private:
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
@@ -132,5 +135,10 @@ namespace juceRmlUi
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
+
+//		float m_time = 0;
+//		float m_fps = 0;
+
+		FrameLimiter m_frameRateLimiter;
 	};
 }

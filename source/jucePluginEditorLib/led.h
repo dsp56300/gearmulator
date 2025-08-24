@@ -40,5 +40,6 @@ namespace jucePluginEditorLib
 		SourceCallback m_sourceCallback;
 
 		baseLib::EventListener<juceRmlUi::RmlComponent*> m_onPreUpdate;
+		baseLib::EventListener<juceRmlUi::RmlComponent*> m_onPostUpdate;
 	};
 }

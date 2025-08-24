@@ -98,6 +98,8 @@ namespace juceRmlUi
 		if (err != GL_NO_ERROR)
 			DBG("OpenGL error: " << juce::String::toHexString((int)err));
 
+//		m_frameRateLimiter.wait();
+
 		std::scoped_lock lock(m_timerMutex);
 		startTimer(1);
 	}
@@ -113,6 +115,7 @@ namespace juceRmlUi
 		Component::mouseDown(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 		m_rmlContext->ProcessMouseButtonDown(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
+		enqueueUpdate();
 	}
 
 	void RmlComponent::mouseUp(const juce::MouseEvent& _event)
@@ -120,6 +123,7 @@ namespace juceRmlUi
 		Component::mouseUp(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 		m_rmlContext->ProcessMouseButtonUp(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
+		enqueueUpdate();
 	}
 
 	void RmlComponent::mouseMove(const juce::MouseEvent& _event)
@@ -129,6 +133,7 @@ namespace juceRmlUi
 
 		const auto pos = toRmlPosition(_event);
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+		enqueueUpdate();
 	}
 
 	void RmlComponent::mouseDrag(const juce::MouseEvent& _event)
@@ -143,6 +148,8 @@ namespace juceRmlUi
 		// forward out-of-bounds drag events to the drag handler to allow it to convert to a juce drag if the drag source can export files
 		if (pos.x < 0 || pos.y < 0 || pos.x >= m_rmlContext->GetDimensions().x || pos.y >= m_rmlContext->GetDimensions().y)
 			m_drag.processOutOfBoundsDrag(pos);
+
+		enqueueUpdate();
 	}
 
 	void RmlComponent::mouseExit(const juce::MouseEvent& _event)
@@ -151,6 +158,7 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 		if (m_rmlContext)
 			m_rmlContext->ProcessMouseLeave();
+		enqueueUpdate();
 	}
 
 	void RmlComponent::mouseEnter(const juce::MouseEvent& _event)
@@ -160,6 +168,7 @@ namespace juceRmlUi
 
 		const auto pos = toRmlPosition(_event);
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+		enqueueUpdate();
 	}
 
 	void RmlComponent::mouseWheelMove(const juce::MouseEvent& _event, const juce::MouseWheelDetails& _wheel)
@@ -173,6 +182,7 @@ namespace juceRmlUi
 		const auto deltaY = _wheel.isReversed ? _wheel.deltaY : -_wheel.deltaY;
 
 		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(deltaX, deltaY), toRmlModifiers(_event));
+		enqueueUpdate();
 	}
 
 	void RmlComponent::mouseDoubleClick(const juce::MouseEvent& _event)
@@ -183,6 +193,7 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 
 		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
+		enqueueUpdate();
 */	}
 
 	bool RmlComponent::keyPressed(const juce::KeyPress& _key)
@@ -208,6 +219,7 @@ namespace juceRmlUi
 			m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key));
 			res = true;
 		}
+		enqueueUpdate();
 		return res;
 	}
 
@@ -229,6 +241,7 @@ namespace juceRmlUi
 					{
 						const auto& key = *it;
 						m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key));
+						enqueueUpdate();
 						res = true;
 						it = m_pressedKeys.erase(it);
 					}
@@ -262,6 +275,7 @@ namespace juceRmlUi
 			m_rmlContext->ProcessKeyDown(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
 		else
 			m_rmlContext->ProcessKeyUp(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
+		enqueueUpdate();
 	}
 
 	void RmlComponent::timerCallback()
@@ -316,6 +330,19 @@ namespace juceRmlUi
 		m_renderProxy->finishFrame();
 
 		evPostUpdate(this);
+/*
+		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+		const auto dt = t - m_time;
+		m_time = t;
+
+		auto fps = (dt > 0) ? (1.0f / dt) : 0.0f;
+		m_fps += (fps - m_fps) * 0.1f;
+
+		LOG("FPS: " << m_fps << ", next update delay " << m_rmlContext->GetNextUpdateDelay());
+*/
+		m_rmlContext->RequestNextUpdate(0.5f);
+
+		m_frameRateLimiter.setDelay(static_cast<float>(m_rmlContext->GetNextUpdateDelay()));
 
 		// ensure that new post frame callbacks that are added by other post frame callbacks are executed in the next frame
 		std::swap(m_postFrameCallbacks, m_tempPostFrameCallbacks);
@@ -324,6 +351,11 @@ namespace juceRmlUi
 			postFrameCallback();
 		m_tempPostFrameCallbacks.clear();
 		m_updating = false;
+	}
+
+	void RmlComponent::enqueueUpdate()
+	{
+		m_frameRateLimiter.wakeEarly();
 	}
 
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
