@@ -131,7 +131,7 @@ namespace juceRmlUi
 		RmlDrag m_drag;
 		juce::ModifierKeys m_currentModifierKeys;
 
-		bool m_updating = false;
+		bool m_updating = true;
 
 		Rml::Vector2i m_documentSize{0,0};
 

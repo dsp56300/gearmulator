@@ -56,6 +56,9 @@ namespace juceRmlUi
 		createRmlContext(_contextCreatedCallback);
 
 		m_drag.onDocumentLoaded();
+
+		m_updating = false;
+		enqueueUpdate();
 	}
 
 	RmlComponent::~RmlComponent()
