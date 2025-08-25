@@ -83,13 +83,12 @@ namespace juceRmlUi
 	{
 		using namespace juce::gl;
 
-		const int width = getScreenBounds().getWidth();
-		const int height = getScreenBounds().getHeight();
+		const auto size = getRenderSize();
 
 		glDisable(GL_DEBUG_OUTPUT);
         glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
-		m_renderInterface->SetViewport(width, height);
+		m_renderInterface->SetViewport(size.x, size.y);
 		m_renderInterface->BeginFrame();
 		m_renderProxy->executeRenderFunctions();
 		m_renderInterface->EndFrame();
@@ -456,17 +455,23 @@ namespace juceRmlUi
 
 		auto contextDims = m_rmlContext->GetDimensions();
 
-		const int width = getScreenBounds().getWidth();
-		const int height = getScreenBounds().getHeight();
+		const auto size = getRenderSize();
 
-		const float renderScale = static_cast<float>(width) / static_cast<float>(m_documentSize.x);
+		const float renderScale = static_cast<float>(size.x) / static_cast<float>(m_documentSize.x);// * static_cast<float>(m_openGLContext.getRenderingScale());
 
-		if (contextDims.x != width || contextDims.y != height || m_currentRenderScale != renderScale)
+		if (contextDims.x != size.x || contextDims.y != size.y || m_currentRenderScale != renderScale)
 		{
 			m_currentRenderScale = renderScale;
 			m_rmlContext->SetDensityIndependentPixelRatio(renderScale * m_contentScale);
-			m_rmlContext->SetDimensions({ width, height });
+			m_rmlContext->SetDimensions({ size.x, size.y });
 		}
+	}
+
+	Rml::Vector2i RmlComponent::getRenderSize() const
+	{
+		const auto s = m_openGLContext.getRenderingScale();
+		const auto b = getLocalBounds();
+		return { static_cast<int>(b.getWidth() * s), static_cast<int>(b.getHeight() * s) };
 	}
 
 	int RmlComponent::toRmlModifiers(const juce::MouseEvent& _event)

@@ -99,6 +99,8 @@ namespace juceRmlUi
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
 
+		Rml::Vector2i getRenderSize() const;
+
 		int toRmlModifiers(const juce::MouseEvent& _event);
 		int toRmlModifiers(const juce::KeyPress& _event);
 		int toRmlModifiers(const juce::ModifierKeys& _mods);
