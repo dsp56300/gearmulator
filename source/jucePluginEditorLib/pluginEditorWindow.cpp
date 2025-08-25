@@ -65,23 +65,7 @@ void EditorWindow::resized()
 	// and that one is not resized! The host window is, the first child (our editor component) is, but the
 	// root component is not! This is no drama as long as you do not have a juce OpenGL context, because
 	// that one uses the "top level component" to set the clipping rectangle! W T F
-	juce::MessageManager::callAsync([comp, w, h]
-	{
-		auto* parent = comp->getParentComponent();
-
-		while (parent)
-		{
-			if (parent->getWidth() < w || parent->getHeight() < h)
-			{
-				LOG("Parent " << parent->getName() << " has wrong size: " << parent->getName() <<
-					", expected: " << w << "x" << h <<
-					", actual: " << parent->getWidth() << "x" << parent->getHeight());
-				parent->setSize(w, h);
-			}
-
-			parent = parent->getParentComponent();
-		}
-	});
+	startTimer(1);
 }
 
 void EditorWindow::setGuiScale(const float _percent)
@@ -128,4 +112,30 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 	setConstrainer(&m_sizeConstrainer);
 }
 
+void EditorWindow::timerCallback()
+{
+	fixParentWindowSize();
+	stopTimer();
+}
+
+void EditorWindow::fixParentWindowSize() const
+{
+	const auto w = getWidth();
+	const auto h = getHeight();
+
+	auto* parent = getParentComponent();
+
+	while (parent)
+	{
+		if (parent->getWidth() < w || parent->getHeight() < h)
+		{
+			LOG("Parent " << parent->getName() << " has wrong size: " << parent->getName() <<
+				", expected: " << w << "x" << h <<
+				", actual: " << parent->getWidth() << "x" << parent->getHeight());
+			parent->setSize(w, h);
+		}
+
+		parent = parent->getParentComponent();
+	}
+}
 }
