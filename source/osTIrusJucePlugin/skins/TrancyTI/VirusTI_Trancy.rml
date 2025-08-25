@@ -1108,7 +1108,7 @@
 				<combotext>Wave 42</combotext>
 			</combo>
 		</div>
-		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton text7" url="https://paypal.me/dsp56300" style="left: 65dp; top: 1253dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>
+		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 65dp; top: 1253dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>
 		<div id="VersionNumber" class="jucePos juceLabel text7" style="left: 748dp; top: 1256dp; width: 1200dp; height: 32dp; line-height: 32dp;">1.4.1</div>
 		<div id="DeviceModel" class="jucePos juceLabel text7" style="left: 1050dp; top: 1256dp; width: 100dp; height: 32dp; line-height: 32dp;">TI</div>
 		<combo id="RomSelector" class="jucePos text7" style="left: 1295dp; top: 1256dp; width: 400dp; height: 32dp; line-height: 32dp;">

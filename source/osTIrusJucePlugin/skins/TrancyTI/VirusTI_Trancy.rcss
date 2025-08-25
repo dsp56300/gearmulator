@@ -2901,6 +2901,15 @@
 	font-size: 28.000000dp;
 	text-align: left;
 }
+
+.textDonate
+{
+	color: #009bff;
+	font-size: 26dp;
+	text-align: center;
+	text-decoration: underline;
+}
+
 body
 {
 	font-size: 28dp;
