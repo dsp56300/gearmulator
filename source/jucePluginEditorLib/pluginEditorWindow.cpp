@@ -61,8 +61,6 @@ void EditorWindow::resized()
 	m_config.setValue("scale", percent);
 	m_config.saveIfNeeded();
 
-	AudioProcessorEditor::resized();
-
 	// Prettymuch unbelievable Juce VST3 bug, but our root component is a child of the VST3 editor component
 	// and that one is not resized! The host window is, the first child (our editor component) is, but the
 	// root component is not! This is no drama as long as you do not have a juce OpenGL context, because
