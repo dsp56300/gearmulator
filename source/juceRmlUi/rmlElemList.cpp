@@ -226,7 +226,12 @@ namespace juceRmlUi
 	bool ElemList::updateLayoutGrid()
 	{
 		if (m_list.empty())
-			return false;
+		{
+			updateActiveEntries(1, 0, false);
+			updateActiveColumns(1, 0, m_lastItemsPerColumn, false);
+			SetScrollLeft(0.0f);
+			return true;
+		}
 
 		const auto box = GetBox();
 		const auto size = box.GetSize(BoxArea::Content);
