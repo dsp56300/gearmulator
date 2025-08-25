@@ -46,8 +46,8 @@ namespace rmlPlugin::skinConverter
 		std::string getId(const genericUI::UiObject& _object);
 		std::string getId(const std::string& _sourceId);
 
-		std::string addTextStyle(const genericUI::UiObjectStyle& _style);
-		static CoStyle createTextStyle(const genericUI::UiObjectStyle& _style, float _fallbackFontSize = 0.0f, float _fontSizeScale = 1.0f);
+		std::string addTextStyle(const genericUI::UiObjectStyle& _style, bool _isButton = false);
+		static CoStyle createTextStyle(const genericUI::UiObjectStyle& _style, float _fallbackFontSize = 0.0f, float _fontSizeScale = 1.0f, bool _isButton = false);
 
 		std::string createImageStyle(const std::string& _imageName, const std::vector<std::string>& _states);
 		std::string createKnobStyle(const std::string& _imageName);

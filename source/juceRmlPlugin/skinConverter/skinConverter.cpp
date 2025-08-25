@@ -431,7 +431,7 @@ namespace rmlPlugin::skinConverter
 		genericUI::TextButtonStyle style(m_editor);
 		static_cast<genericUI::UiObjectStyle&>(style).apply(m_editor, _object);
 
-		const auto className = addTextStyle(style);
+		const auto className = addTextStyle(style, true);
 
 		// TODO: vertical text alignment, this always centers the text vertically for now
 		_co.style.add("line-height", _object.getProperty("height") + "dp");
@@ -457,13 +457,13 @@ namespace rmlPlugin::skinConverter
 		return it != m_options.idReplacements.end() ? it->second : _sourceId;
 	}
 
-	std::string SkinConverter::addTextStyle(const genericUI::UiObjectStyle& _style)
+	std::string SkinConverter::addTextStyle(const genericUI::UiObjectStyle& _style, bool _isButton/* = false*/)
 	{
-		CoStyle style = createTextStyle(_style);
+		CoStyle style = createTextStyle(_style, 0, 1, _isButton);
 		return addStyle(".txt", style);
 	}
 
-	CoStyle SkinConverter::createTextStyle(const genericUI::UiObjectStyle& _style, float _fallbackFontSize/* = 0.0f*/, float _fontSizeScale/* = 1.0f*/)
+	CoStyle SkinConverter::createTextStyle(const genericUI::UiObjectStyle& _style, float _fallbackFontSize/* = 0.0f*/, float _fontSizeScale/* = 1.0f*/, bool _isButton/* = false*/)
 	{
 		CoStyle style;
 		const auto& fontName = _style.getFontName();
@@ -483,7 +483,7 @@ namespace rmlPlugin::skinConverter
 		if (_style.getItalic())
 			style.add("font-style", "italic");
 
-		juce::Justification alignH = _style.getAlign().getOnlyHorizontalFlags();
+		juce::Justification alignH = _isButton ? juce::Justification::horizontallyCentred : _style.getAlign().getOnlyHorizontalFlags();
 
 		if (alignH == juce::Justification::horizontallyCentred)
 		{
