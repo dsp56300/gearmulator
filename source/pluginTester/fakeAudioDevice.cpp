@@ -2,12 +2,12 @@
 
 Array<double> FakeAudioIODevice::getAvailableSampleRates()
 {
-	return {44100.0, 48000.0};
+	return {11025.0, 22050.0, 32000.0, 44100.0, 48000.0};
 }
 
 Array<int> FakeAudioIODevice::getAvailableBufferSizes()
 {
-	return {64, 128, 256, 512, 1024};
+	return {64, 128, 256, 512, 1024, 2048, 4096, 8192};
 }
 
 int FakeAudioIODevice::getDefaultBufferSize()
