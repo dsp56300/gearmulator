@@ -101,9 +101,9 @@ namespace juceRmlUi
 		using OnDetachListener::getElement;
 
 	private:
-		void onPreUpdate();
+		void onUpdate();
 
-		baseLib::EventListener<RmlComponent*> m_onPreUpdate;
+		baseLib::EventListener<RmlComponent*> m_onUpdate;
 		double m_targetTime;
 		std::function<void()> m_callback;
 	};

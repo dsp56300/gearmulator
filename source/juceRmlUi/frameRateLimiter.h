@@ -22,7 +22,7 @@ namespace juceRmlUi
 		{
 	        std::lock_guard lock(m_mutex);
 			const auto newDuration = std::chrono::duration<float>(_duration);
-			if (m_frameDuration == newDuration)
+			if (m_frameDuration == newDuration && _duration > 0)
 				return;
 	        m_frameDuration = newDuration;
 	        m_cv.notify_all();

@@ -1,6 +1,8 @@
 #include "rmlEventListener.h"
 
 #include "juceRmlComponent.h"
+
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Element.h"
 
 namespace juceRmlUi
@@ -104,9 +106,11 @@ namespace juceRmlUi
 	{
 		auto* comp = RmlComponent::fromElement(_element);
 
-		m_onPreUpdate.set(comp->evPreUpdate, [this](RmlComponent*)
+		getElement()->GetContext()->RequestNextUpdate(_delaySeconds);
+
+		m_onUpdate.set(comp->evPostUpdate, [this](RmlComponent*)
 		{
-			onPreUpdate();
+			onUpdate();
 		});
 	}
 
@@ -115,12 +119,17 @@ namespace juceRmlUi
 		return new DelayedCall(_element, _delaySeconds, _callback, _autoDestroy);
 	}
 
-	void DelayedCall::onPreUpdate()
+	void DelayedCall::onUpdate()
 	{
 		const auto t = getElement()->GetCoreInstance().system_interface->GetElapsedTime();
 
 		if (t < m_targetTime)
+		{
+			getElement()->GetContext()->RequestNextUpdate(m_targetTime - t);
 			return;
+		}
+
+		getElement()->GetContext()->RequestNextUpdate(0);
 
 		// do not fire again. We cannot remove our event listener here immediately because it does not support altering the list while invoking
 		m_targetTime = std::numeric_limits<double>::max();

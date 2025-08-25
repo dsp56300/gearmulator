@@ -1,5 +1,6 @@
 #include "rmlMenu.h"
 
+#include "juceRmlComponent.h"
 #include "rmlHelper.h"
 
 #include "RmlUi/Core/Context.h"
@@ -138,7 +139,9 @@ namespace juceRmlUi
 
 		auto dims = Rml::Vector2f(context->GetDimensions());
 
+		// we mess with the update loop here, just in case request a new update immediately as this might cause delays because, eventhough we update, we don't render
 		context->Update();
+		RmlComponent::fromElement(m_root)->enqueueUpdate();
 
 		// make sure the dropdown is not outside the document bounds
 		const auto box = m_root->GetBox();
