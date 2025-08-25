@@ -507,6 +507,14 @@ namespace pluginLib
 		// initialisation that you need
 		m_hostSamplerate = static_cast<float>(sampleRate);
 
+		// Our resamplers need very large buffers if the samplerate is too low and the block size very high
+		// No one will ever use this, but the Mac AU validation tool does. Ignore it
+		if (m_hostSamplerate < 32000.0f)
+		{
+			LOG("Warning: Host samplerate too low (" << m_hostSamplerate << " Hz), forcing to 32000 Hz");
+			m_hostSamplerate = 32000.0f;
+		}
+
 		getPlugin().setHostSamplerate(static_cast<float>(sampleRate), m_preferredDeviceSamplerate);
 		getPlugin().setBlockSize(samplesPerBlock);
 
