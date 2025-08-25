@@ -80,6 +80,7 @@ namespace juceRmlUi
 
 		uint32_t m_layoutDirty = 1;
 		uint32_t m_lastItemsPerColumn = 0;
+		size_t m_lastGridLayoutTotalItemCount = 0;
 
 		Rml::Vector2f m_elementSize{ 0,0 };
 

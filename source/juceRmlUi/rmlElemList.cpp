@@ -230,7 +230,8 @@ namespace juceRmlUi
 
 		const auto box = GetBox();
 		const auto size = box.GetSize(BoxArea::Content);
-		const auto scrollLeft = GetScrollLeft();
+		
+		auto scrollLeft = GetScrollLeft();
 
 		const auto elementSize = updateElementSize();
 
@@ -245,7 +246,18 @@ namespace juceRmlUi
 		const auto itemsPerColumnChanged = m_lastItemsPerColumn != itemsPerColumn;
 		m_lastItemsPerColumn = itemsPerColumn;
 
+		const auto totalEntryCountChanged = m_list.size() != m_lastGridLayoutTotalItemCount;
+		m_lastGridLayoutTotalItemCount = m_list.size();
+
 		const auto totalColumns = (m_list.size() + itemsPerColumn - 1) / itemsPerColumn;
+
+		const auto visibleColums = size.x / elementSize.x;
+
+		if (static_cast<size_t>(visibleColums) >= totalColumns)
+		{
+			scrollLeft = 0;
+			SetScrollLeft(0.0f);
+		}
 
 		const auto firstColumn = static_cast<size_t>(scrollLeft / elementSize.x);
 		const auto lastColumn = std::min(static_cast<size_t>(std::ceil((scrollLeft + size.x) / elementSize.x)), totalColumns - 1);
@@ -253,9 +265,11 @@ namespace juceRmlUi
 		const auto firstEntry = firstColumn * itemsPerColumn;
 		const auto lastEntry = lastColumn * itemsPerColumn + itemsPerColumn - 1;
 
-		bool changed = updateActiveEntries(firstEntry, lastEntry, itemsPerColumnChanged);
+		const bool forceRefresh = itemsPerColumnChanged || totalEntryCountChanged;
 
-		changed |= updateActiveColumns(firstColumn, lastColumn, itemsPerColumn, itemsPerColumnChanged);
+		bool changed = updateActiveEntries(firstEntry, lastEntry, forceRefresh);
+
+		changed |= updateActiveColumns(firstColumn, lastColumn, itemsPerColumn, forceRefresh);
 
 		// if the DP ratio changes, the element size will change. Ensure that columns have the correct width
 		for (auto it : m_activeColumns)
@@ -279,6 +293,9 @@ namespace juceRmlUi
 		bool dirty = false;
 
 		const auto layoutType = getLayoutType();
+
+		if (!m_list.empty() && _lastEntry >= m_list.size())
+			_lastEntry = m_list.size() - 1;
 
 		// return elements back to pool that we don't need
 		for (auto it = m_activeEntries.begin(); it != m_activeEntries.end();)
@@ -304,8 +321,6 @@ namespace juceRmlUi
 		}
 
 		// create new elements for entries that are not active yet
-		if (!m_list.empty() && _lastEntry >= m_list.size())
-			_lastEntry = m_list.size() - 1;
 
 		for (size_t i = _firstEntry; i <= _lastEntry; ++i)
 		{
