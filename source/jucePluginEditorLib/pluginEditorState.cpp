@@ -134,6 +134,14 @@ std::string PluginEditorState::getSkinFolder(const std::string& _processorDataFo
 	return baseLib::filesystem::validatePath(_processorDataFolder + "skins/");
 }
 
+std::string PluginEditorState::getSkinSubfolder(const Skin& _skin, const std::string& _folder)
+{
+	std::string subfolder = baseLib::filesystem::stripExtension(_skin.filename);
+
+	const auto folder = _folder + subfolder + '/';
+	return folder;
+}
+
 bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)
 {
 	auto skin = _skin;
@@ -228,9 +236,7 @@ std::string PluginEditorState::exportSkinToFolder(const Skin& _skin, const std::
 
 	baseLib::filesystem::createDirectory(_folder);
 
-	std::string subfolder = baseLib::filesystem::stripExtension(_skin.filename);
-
-	const auto folder = _folder + subfolder + '/';
+	const auto folder = getSkinSubfolder(_skin, _folder);
 
 	baseLib::filesystem::createDirectory(folder);
 
@@ -271,7 +277,7 @@ std::string PluginEditorState::exportSkinToFolder(const Skin& _skin, const std::
 
 Editor* PluginEditorState::getEditor() const
 {
-	return dynamic_cast<Editor*>(m_editor.get());
+	return m_editor.get();
 }
 
 void PluginEditorState::openMenu(const Rml::Event& _event)

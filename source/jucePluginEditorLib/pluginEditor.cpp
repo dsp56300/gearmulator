@@ -74,7 +74,10 @@ namespace jucePluginEditorLib
 			initSkinConverterOptions(options);
 
 			if(m_skin.folder.empty())
+			{
 				m_skin.folder = PluginEditorState::getSkinFolder(getProcessor().getDataFolder());
+				m_skin.folder = PluginEditorState::getSkinSubfolder(m_skin, m_skin.folder);
+			}
 
 			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), m_skin.folder, newName + ".rml", newName + ".rcss", std::move(options));
 
