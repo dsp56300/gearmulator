@@ -11,9 +11,9 @@ set(SOURCES
 
 SET(ASSETS "parameterDescriptions_C.json")
 
-addSkin("Osirus" "Hoverland" "skins/Hoverland" "VirusC_Hoverland.json")
-addSkin("Osirus" "Galaxpel" "skins/Galaxpel" "VirusC_Galaxpel.json")
-addSkin("Osirus" "Trancy" "skins/Trancy" "VirusC_Trancy.json")
+addSkin("Osirus" "Hoverland" "skins/Hoverland" "VirusC_Hoverland.rml")
+addSkin("Osirus" "Galaxpel" "skins/Galaxpel" "VirusC_Galaxpel.rml")
+addSkin("Osirus" "Trancy" "skins/Trancy" "VirusC_Trancy.rml")
 
 buildSkinHeader()
 

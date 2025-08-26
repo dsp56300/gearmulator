@@ -1,0 +1,491 @@
+<rml>
+	<head>
+		<link type="text/template" href="tus_colorpicker.rml"/>
+		<link type="text/template" href="tus_patchmanager.rml"/>
+		<link type="text/rcss" href="tus_default.rcss"/>
+		<link type="text/rcss" href="tus_juceskin.rcss"/>
+		<link type="text/rcss" href="VirusC_Galaxpel.rcss"/>
+	</head>
+	<body id="Root" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2754dp; height: 1600dp;">
+		<img id="bg" class="jucePos" src="main_bg.png" style="left: 0dp; top: 0dp; width: 2754dp; height: 1600dp;"/>
+		<button id="PlayModeSingle" class="jucePos juceButton sngl-btn49x260" isToggle="1" style="left: 151dp; top: 272dp; width: 260dp; height: 49dp;"/>
+		<button id="PlayModeMulti" class="jucePos juceButton mlt-btn49x260" isToggle="1" style="left: 416dp; top: 272dp; width: 260dp; height: 49dp;"/>
+		<div id="PatchName" class="jucePos juceLabel txt" style="left: 818.6dp; top: 95.8999dp; width: 372dp; height: 75dp; line-height: 75dp;">OvertureCK</div>
+		<div id="FocusedParameterName" class="jucePos juceLabel txt1" style="left: 1190.6dp; top: 92.8999dp; width: 295.911dp; height: 35.759dp; line-height: 35.759dp;">Osc 1 Semitone</div>
+		<div id="FocusedParameterValue" class="jucePos juceLabel txt1" style="left: 1190.6dp; top: 128.659dp; width: 295.91dp; height: 42.241dp; line-height: 42.241dp;">-12</div>
+		<button id="PresetSave" class="jucePos juceButton save-push-btn-80x121" isToggle="0" style="left: 1600.7dp; top: 70.3999dp; width: 80dp; height: 121dp;"/>
+		<button id="PresetLoad" class="jucePos juceButton load-push-btn-112x121" isToggle="0" style="left: 1683.9dp; top: 70.3999dp; width: 112dp; height: 121dp;"/>
+		<button id="Presets" class="jucePos juceButton presets-push-btn-118x121" isToggle="1" tabbutton="4" tabgroup="pages" style="left: 1797.5dp; top: 70.3999dp; width: 118dp; height: 121dp;"/>
+		<combo id="RomSelector" class="jucePos txt2" style="left: 2024dp; top: 120dp; width: 520dp; height: 50dp; line-height: 50dp;">
+			<combotext>Access_Virus_C_OS_6.5.bin</combotext>
+		</combo>
+		<button id="TabOsc" class="jucePos juceButton osc-btn-306x83" isToggle="1" tabbutton="0" tabgroup="pages" style="left: 719dp; top: 227dp; width: 306dp; height: 83dp;"/>
+		<button id="TabLfo" class="jucePos juceButton lfo-btn-306x83" isToggle="1" tabbutton="1" tabgroup="pages" style="left: 1026dp; top: 227dp; width: 306dp; height: 83dp;"/>
+		<button id="TabEffects" class="jucePos juceButton efcts-btn-306x83" isToggle="1" tabbutton="2" tabgroup="pages" style="left: 1333dp; top: 227dp; width: 306dp; height: 83dp;"/>
+		<button id="TabArp" class="jucePos juceButton arp-btn-306x83" isToggle="1" tabbutton="3" tabgroup="pages" style="left: 1640dp; top: 227dp; width: 306dp; height: 83dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 324dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 345dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 343dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 343dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 342.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 342.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 396dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 417dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 415dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 415dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 414.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 414.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 468dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 489dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 487dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 487dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 486.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 486.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 540dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 561dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 559dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 559dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 558.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 558.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 612dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 633dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 631dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 631dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 630.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 630.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 684dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 705dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 703dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 703dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 702.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 702.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 756dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 777dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 775dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 775dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 774.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 774.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 828dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 849dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 847dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 847dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 846.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 846.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 900dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 921dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 919dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 919dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 918.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 918.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 972dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 993dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 991dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 991dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 990.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 990.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1044dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1065dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1063dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1063dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1062.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1062.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1116dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1137dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1135dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1135dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1134.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1134.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1188dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1209dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1207dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1207dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1206.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1206.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1260dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1281dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1279dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1279dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1278.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1278.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1332dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1353dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1351dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1351dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1350.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1350.13dp; width: 36dp; height: 36dp;"/>
+		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1404dp; width: 74dp; height: 68dp;"/>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1425dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1423dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
+		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1423dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
+		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1422.13dp; width: 36dp; height: 36dp;"/>
+		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1422.13dp; width: 36dp; height: 36dp;"/>
+		<img id="page_osc" class="jucePos" src="osc_page-sub-fixed.png" tabgroup="pages" tabpage="0" style="left: 724dp; top: 325dp; width: 1970dp; height: 1125dp;">
+			<knob id="Osc1Shape" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc1 Shape" style="left: 223.3dp; top: 58dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc1PW" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc1 Pulsewidth" style="left: 351.3dp; top: 58dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc1Semi" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc1 Semitone" style="left: 479.3dp; top: 58dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc1Keyfollow" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc1 Keyfollow" style="left: 607.3dp; top: 58dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc2Shape" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Shape" style="left: 223.4dp; top: 296dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc2PW" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Pulsewidth" style="left: 351.4dp; top: 296dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc2Semi" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Semitone" style="left: 479.4dp; top: 296dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc2Keyfollow" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Keyfollow" style="left: 607.4dp; top: 296dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc2FM" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 FM Amount" style="left: 223.4dp; top: 480.61dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc2Detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Detune" style="left: 351.4dp; top: 480.61dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc2EnvFM" class="jucePos juceRotary knob1" data-model="partCurrent" param="FM Filt Env Amt" style="left: 479.4dp; top: 480.61dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc2Env" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Filt Env Amt" style="left: 607.4dp; top: 480.61dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc3Semitone" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc3 Semitone" style="left: 223.3dp; top: 726dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc3Detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc3 Detune" style="left: 351.3dp; top: 726dp; width: 104dp; height: 104dp;"/>
+			<knob id="Osc3Level" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc3 Volume" style="left: 479.3dp; top: 726dp; width: 104dp; height: 104dp;"/>
+			<knob id="UnisonDetune" class="jucePos juceRotary knob1" data-model="partCurrent" param="Unison Detune" style="left: 222dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
+			<knob id="UnisonPanSpread" class="jucePos juceRotary knob1" data-model="partCurrent" param="Unison Pan Spread" style="left: 350dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
+			<knob id="UnisonLfoPhase" class="jucePos juceRotary knob1" data-model="partCurrent" param="Unison Lfo Phase" style="left: 478dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
+			<knob id="UnisonPhaseInit" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc Init Phase" style="left: 606dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
+			<combo id="Osc1WaveSelect" class="jucePos txt2" data-model="partCurrent" param="Osc1 Wave Select" style="left: 20dp; top: 92.882dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="Osc2WaveSelect" class="jucePos txt2" data-model="partCurrent" param="Osc2 Wave Select" style="left: 20dp; top: 329.75dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="Osc2FMMode" class="jucePos txt2" data-model="partCurrent" param="Osc FM Mode" style="left: 20dp; top: 515dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="Osc3Mode" class="jucePos txt2" data-model="partCurrent" param="Osc3 Mode" style="left: 20dp; top: 759dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="UnisonVoices" class="jucePos txt2" data-model="partCurrent" param="Unison Mode" style="left: 20dp; top: 985dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Twin</combotext>
+			</combo>
+			<button id="SyncSwitch" class="jucePos juceButton sync-38x38" data-model="partCurrent" isToggle="1" param="Osc2 Sync" style="left: 680.8dp; top: 253.2dp; width: 38dp; height: 38dp;"/>
+			<knob id="OscBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc Balance" style="left: 800.3dp; top: 56.8999dp; width: 104dp; height: 104dp;"/>
+			<knob id="OscLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc Mainvolume" style="left: 939.3dp; top: 56.8999dp; width: 104dp; height: 104dp;"/>
+			<knob id="NoiseLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Noise Volume" style="left: 800.3dp; top: 296dp; width: 104dp; height: 104dp;"/>
+			<knob id="RingModLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Ringmodulator Volume" style="left: 939.3dp; top: 296dp; width: 104dp; height: 104dp;"/>
+			<knob id="NoiseColor" class="jucePos juceRotary knob1" data-model="partCurrent" param="Noise Color" style="left: 800.3dp; top: 480.61dp; width: 104dp; height: 104dp;"/>
+			<knob id="SubLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Suboscillator Volume" style="left: 939.5dp; top: 726dp; width: 104dp; height: 104dp;"/>
+			<knob id="Portamento" class="jucePos juceRotary knob1" data-model="partCurrent" param="Portamento Time" style="left: 800.3dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
+			<button id="SubOscTypeSwitch" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Suboscillator Shape" style="left: 813.8dp; top: 735.2dp; width: 39dp; height: 102dp;"/>
+			<knob id="Cutoff" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff" style="left: 1167.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<knob id="Reso" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Resonance" style="left: 1291.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<knob id="EnvAmt" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Env Amt" style="left: 1415.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<knob id="Keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Keyfollow" style="left: 1539.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<knob id="ResVel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Resonance1 Velocity" style="left: 1663.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<knob id="EnvVel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Flt1 EnvAmt Velocity" style="left: 1787.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<combo id="Mode" class="jucePos txt2" data-model="partCurrent" param="Filter1 Mode" style="left: 1151.4dp; top: 244dp; width: 160dp; height: 50dp; line-height: 50dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="EnvPolarity" class="jucePos juceButton env-pol-radio-btns-38x66" data-model="partCurrent" isToggle="1" param="Filter1 Env Polarity" style="left: 1729.1dp; top: 365.26dp; width: 38dp; height: 66dp;"/>
+			<knob id="Cutoff" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff2" style="left: 1167.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="Reso" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Resonance" style="left: 1291.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="EnvAmt" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Env Amt" style="left: 1415.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="Keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Keyfollow" style="left: 1539.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="ResVel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Resonance2 Velocity" style="left: 1663.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="EnvVel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Flt2 EnvAmt Velocity" style="left: 1787.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<combo id="Mode" class="jucePos txt2" data-model="partCurrent" param="Filter2 Mode" style="left: 1151.2dp; top: 345dp; width: 160dp; height: 50dp; line-height: 50dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="EnvPolarity" class="jucePos juceButton env-pol-radio-btns-38x66" data-model="partCurrent" isToggle="1" param="Filter2 Env Polarity" style="left: 1822.1dp; top: 365.708dp; width: 38dp; height: 66dp;"/>
+			<knob id="FilterBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Balance" style="left: 1373.7dp; top: 284.1dp; width: 104dp; height: 104dp;"/>
+			<combo id="FilterRouting" class="jucePos txt2" data-model="partCurrent" param="Filter Routing" style="left: 1523.2dp; top: 244dp; width: 185dp; height: 50dp; line-height: 50dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="FilterSaturationCurve" class="jucePos txt2" data-model="partCurrent" param="Saturation Curve" style="left: 1523.2dp; top: 345dp; width: 185dp; height: 50dp; line-height: 50dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="FilterKeyfollowBase" class="jucePos txt2" data-model="partCurrent" param="Filter Keytrack Base" style="left: 1727dp; top: 248dp; width: 180dp; height: 42dp; line-height: 42dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="LinkCutoff" class="jucePos juceButton chain-btn-36x62" data-model="partCurrent" isToggle="1" param="Filter2 Cutoff Link" style="left: 1099dp; top: 288.5dp; width: 36dp; height: 62dp;"/>
+			<button id="LinkEnv" class="jucePos juceButton chain-btn-36x62" isToggle="1" style="left: 1925.3dp; top: 288.5dp; width: 36dp; height: 62dp;"/>
+			<knob id="Attack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Attack" style="left: 1162dp; top: 724dp; width: 104dp; height: 104dp;"/>
+			<knob id="Decay" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Decay" style="left: 1318dp; top: 724dp; width: 104dp; height: 104dp;"/>
+			<knob id="SustainLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Sustain" style="left: 1474dp; top: 724dp; width: 104dp; height: 104dp;"/>
+			<knob id="SustainTime" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Sustain Time" style="left: 1630dp; top: 724dp; width: 104dp; height: 104dp;"/>
+			<knob id="Release" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Release" style="left: 1786dp; top: 724dp; width: 104dp; height: 104dp;"/>
+			<knob id="Attack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Amp Env Attack" style="left: 1162dp; top: 955.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="Decay" class="jucePos juceRotary knob1" data-model="partCurrent" param="Amp Env Decay" style="left: 1318dp; top: 955.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="SustainLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Amp Env Sustain" style="left: 1474dp; top: 955.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="SustainTime" class="jucePos juceRotary knob1" data-model="partCurrent" param="Amp Env Sustain Time" style="left: 1630dp; top: 955.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="Release" class="jucePos juceRotary knob1" data-model="partCurrent" param="Amp Env Release" style="left: 1786dp; top: 955.8dp; width: 104dp; height: 104dp;"/>
+		</img>
+		<img id="page_lfo" class="jucePos" src="lfo_page.png" tabgroup="pages" tabpage="1" style="left: 724dp; top: 325dp; width: 1970dp; height: 1125dp;">
+			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo1 Shape" style="left: 22dp; top: 64dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo1 Clock" style="left: 22dp; top: 150dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="LfoMode" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Lfo1 Mode" style="left: 18dp; top: 253.2dp; width: 39dp; height: 102dp;"/>
+			<button id="LfoEnvMode" class="jucePos juceButton btn2-52x36" data-model="partCurrent" isToggle="1" param="Lfo1 Env Mode" style="left: 137.334dp; top: 253.2dp; width: 52dp; height: 36dp;"/>
+			<knob id="LfoRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1 Rate" style="left: 241.2dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoKeytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1 Keyfollow" style="left: 370.2dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoContour" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1 Symmetry" style="left: 242.2dp; top: 211.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoPhase" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1 Keytrigger" style="left: 370.2dp; top: 212.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoOsc1Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc1 Lfo1 Amount" style="left: 520.7dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoOsc2Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Lfo1 Amount" style="left: 649.5dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoFilterGain" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiltGain Lfo1 Amount" style="left: 520.7dp; top: 212.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="LFO1 Assign Amount" style="left: 649.5dp; top: 211.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoPW12" class="jucePos juceRotary knob1" data-model="partCurrent" param="PW Lfo1 Amount" style="left: 778.4dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoReso12" class="jucePos juceRotary knob1" data-model="partCurrent" param="Reso Lfo1 Amount" style="left: 907.2dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
+			<combo id="LfoAssignDestination" class="jucePos txt2" data-model="partCurrent" param="LFO1 Assign Dest" style="left: 782dp; top: 235dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="Lfo1Link" class="jucePos juceButton chain-btn2-62x36" isToggle="1" style="left: 606.5dp; top: 26.8001dp; width: 62dp; height: 36dp;"/>
+			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo2 Shape" style="left: 22dp; top: 440dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo2 Clock" style="left: 22dp; top: 527.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="LfoMode" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Lfo2 Mode" style="left: 18dp; top: 630.5dp; width: 39dp; height: 102dp;"/>
+			<button id="LfoEnvMode" class="jucePos juceButton btn2-52x36" data-model="partCurrent" isToggle="1" param="Lfo2 Env Mode" style="left: 137.334dp; top: 630dp; width: 52dp; height: 36dp;"/>
+			<knob id="LfoRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2 Rate" style="left: 241.2dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoKeytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2 Keyfollow" style="left: 370.9dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoContour" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2 Symmetry" style="left: 242.2dp; top: 587.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoPhase" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2 Keytrigger" style="left: 370.9dp; top: 588.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoOsc1Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff1 Lfo2 Amount" style="left: 520dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoOsc2Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff2 Lfo2 Amount" style="left: 649.2dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoFilterGain" class="jucePos juceRotary knob1" data-model="partCurrent" param="Pan Lfo2 Amount" style="left: 520dp; top: 588.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="LFO2 Assign Amount" style="left: 649.2dp; top: 587.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoPW12" class="jucePos juceRotary knob1" data-model="partCurrent" param="Shape Lfo2 Amount" style="left: 778.4dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoReso12" class="jucePos juceRotary knob1" data-model="partCurrent" param="FM Lfo2 Amount" style="left: 907.6dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
+			<combo id="LfoAssignDestination" class="jucePos txt2" data-model="partCurrent" param="LFO2 Assign Dest" style="left: 782dp; top: 612dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="Lfo1Link" class="jucePos juceButton chain-btn2-62x36" isToggle="1" style="left: 606.7dp; top: 403.9dp; width: 62dp; height: 36dp;"/>
+			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Shape" style="left: 22dp; top: 818.75dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Clock" style="left: 22dp; top: 903.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="LfoMode" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Lfo3 Mode" style="left: 18dp; top: 1008.23dp; width: 39dp; height: 102dp;"/>
+			<knob id="LfoRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Rate" style="left: 241.3dp; top: 800.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Lfo3FadeIn" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Fade-In Time" style="left: 370.3dp; top: 800.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Lfo3Keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Keyfollow" style="left: 241.3dp; top: 966.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Lfo3Amount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc Lfo3 Amount" style="left: 650dp; top: 800.5dp; width: 104dp; height: 104dp;"/>
+			<combo id="Lfo3AssignDestination" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Destination" style="left: 782dp; top: 824.5dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign1 Amount" style="left: 1573.3dp; top: 184.6dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModSource" class="jucePos txt2" data-model="partCurrent" param="Assign1 Source" style="left: 1705dp; top: 115dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="ModDest" class="jucePos txt2" data-model="partCurrent" param="Assign1 Destination" style="left: 1705dp; top: 237.3dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign2 Amount1" style="left: 1106.4dp; top: 776.8dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModSource" class="jucePos txt2" data-model="partCurrent" param="Assign2 Source" style="left: 1236.5dp; top: 709.2dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="ModDest" class="jucePos txt2" data-model="partCurrent" param="Assign2 Destination1" style="left: 1236.5dp; top: 830.9dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount2" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign2 Amount2" style="left: 1106.4dp; top: 929.6dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModDest2" class="jucePos txt2" data-model="partCurrent" param="Assign2 Destination2" style="left: 1236.5dp; top: 982.5dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign3 Amount1" style="left: 1106.4dp; top: 183.6dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModSource" class="jucePos txt2" data-model="partCurrent" param="Assign3 Source" style="left: 1236.5dp; top: 116dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="ModDest" class="jucePos txt2" data-model="partCurrent" param="Assign3 Destination1" style="left: 1236.5dp; top: 238.3dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount2" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign3 Amount2" style="left: 1106.4dp; top: 336.4dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModDest2" class="jucePos txt2" data-model="partCurrent" param="Assign3 Destination2" style="left: 1236.5dp; top: 388.8dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount3" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign3 Amount3" style="left: 1106.4dp; top: 486.6dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModDest3" class="jucePos txt2" data-model="partCurrent" param="Assign3 Destination3" style="left: 1236.5dp; top: 539.5dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign 4 Amount" style="left: 1573.3dp; top: 435.2dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModSource" class="jucePos txt2" data-model="partCurrent" param="Assign 4 Source" style="left: 1705dp; top: 365.6dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="ModDest" class="jucePos txt2" data-model="partCurrent" param="Assign 4 Destination" style="left: 1705dp; top: 486.9dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign 5 Amount" style="left: 1573.3dp; top: 683dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModSource" class="jucePos txt2" data-model="partCurrent" param="Assign 5 Source" style="left: 1705dp; top: 615.4dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="ModDest" class="jucePos txt2" data-model="partCurrent" param="Assign 5 Destination" style="left: 1705dp; top: 737.7dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ModAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Assign 6 Amount" style="left: 1573.3dp; top: 928.9dp; width: 104dp; height: 104dp;"/>
+			<combo id="ModSource" class="jucePos txt2" data-model="partCurrent" param="Assign 6 Source" style="left: 1705dp; top: 861.3dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="ModDest" class="jucePos txt2" data-model="partCurrent" param="Assign 6 Destination" style="left: 1705dp; top: 983.6dp; width: 180dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+		</img>
+		<img id="page_fx" class="jucePos" src="fx_page.png" tabgroup="pages" tabpage="2" style="left: 724dp; top: 325dp; width: 1970dp; height: 1125dp;">
+			<combo id="DistortionType" class="jucePos txt2" data-model="partCurrent" param="Distortion Curve" style="left: 20dp; top: 91.8999dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="DistortionAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Distortion Intensity" style="left: 310.6dp; top: 55.3701dp; width: 104dp; height: 104dp;"/>
+			<knob id="BassIntensity" class="jucePos juceRotary knob1" data-model="partCurrent" param="Bass Intensity" style="left: 646.9dp; top: 56.1001dp; width: 104dp; height: 104dp;"/>
+			<knob id="BassTune" class="jucePos juceRotary knob1" data-model="partCurrent" param="Bass Tune" style="left: 799.2dp; top: 56.1001dp; width: 104dp; height: 104dp;"/>
+			<combo id="PhaserStages" class="jucePos txt2" data-model="partCurrent" param="Phaser Mode" style="left: 17dp; top: 324.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="PhaserRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Rate" style="left: 234dp; top: 272dp; width: 104dp; height: 104dp;"/>
+			<knob id="PhaserFreq" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Frequency" style="left: 359dp; top: 272dp; width: 104dp; height: 104dp;"/>
+			<knob id="PhaserDepth" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Depth" style="left: 484dp; top: 272dp; width: 104dp; height: 104dp;"/>
+			<knob id="PhaserFeedback" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Feedback" style="left: 609dp; top: 272dp; width: 104dp; height: 104dp;"/>
+			<knob id="PhaserSpread" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Spread" style="left: 734dp; top: 272dp; width: 104dp; height: 104dp;"/>
+			<knob id="PhaserMix" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Mix" style="left: 859dp; top: 272dp; width: 104dp; height: 104dp;"/>
+			<combo id="ChorusLfoShape" class="jucePos txt2" data-model="partCurrent" param="Chorus Lfo Shape" style="left: 20dp; top: 562dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ChorusRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Chorus Rate" style="left: 233dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="ChorusDepth" class="jucePos juceRotary knob1" data-model="partCurrent" param="Chorus Depth" style="left: 389dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="ChorusFeedback" class="jucePos juceRotary knob1" data-model="partCurrent" param="Chorus Feedback" style="left: 545dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="ChorusDelay" class="jucePos juceRotary knob1" data-model="partCurrent" param="Chorus Delay" style="left: 701dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="ChorusMix" class="jucePos juceRotary knob1" data-model="partCurrent" param="Chorus Mix" style="left: 857dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Gain" class="jucePos juceRotary knob1" data-model="partCurrent" param="LowEQ Gain" style="left: 74.4dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Freq" class="jucePos juceRotary knob1" data-model="partCurrent" param="LowEQ Frequency" style="left: 201.4dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Gain" class="jucePos juceRotary knob1" data-model="partCurrent" param="MidEQ Gain" style="left: 324.4dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Freq" class="jucePos juceRotary knob1" data-model="partCurrent" param="MidEQ Frequency" style="left: 450.4dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Q" class="jucePos juceRotary knob1" data-model="partCurrent" param="MidEQ Q-Factor" style="left: 575.9dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Gain" class="jucePos juceRotary knob1" data-model="partCurrent" param="HighEQ Gain" style="left: 708.4dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Freq" class="jucePos juceRotary knob1" data-model="partCurrent" param="HighEQ Frequency" style="left: 835.4dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
+			<combo id="InputFollowerMode" class="jucePos txt2" data-model="partCurrent" param="Input Follower Mode" style="left: 20dp; top: 1010.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="InputFollowerGain" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Sustain" style="left: 246dp; top: 965dp; width: 104dp; height: 104dp;"/>
+			<knob id="InputFollowerAttack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Attack" style="left: 372.8dp; top: 965dp; width: 104dp; height: 104dp;"/>
+			<knob id="InputFollowerRelease" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Release" style="left: 496dp; top: 965dp; width: 104dp; height: 104dp;"/>
+			<knob id="PunchIntensity" class="jucePos juceRotary knob1" data-model="partCurrent" param="Punch Intensity" style="left: 776.3dp; top: 965.3dp; width: 104dp; height: 104dp;"/>
+			<img id="ContainerReverb" class="jucePos" data-class-juceConditionDisabled="!((Delay_Reverb_Mode_value >= 2 && Delay_Reverb_Mode_value <= 4))" data-model="partCurrent" src="fx_page_reverbOverlay.png" style="left: 1022dp; top: 0dp; width: 948dp; height: 444dp;">
+				<knob id="ReverbDecay" class="jucePos juceRotary knob1" data-model="partCurrent" param="Dly Rate / Rev Decay" style="left: 256dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<knob id="ReverbDamping" class="jucePos juceRotary knob1" data-model="partCurrent" param="Reverb Damping" style="left: 381dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<knob id="ReverbColor" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Color" style="left: 506dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<knob id="ReverbPreDelay" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Time" style="left: 631dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<knob id="ReverbFeedback" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Feedback" style="left: 756dp; top: 56dp; width: 104dp; height: 104dp;"/>
+			</img>
+			<div id="ContainerDelay" class="jucePos" data-class-juceConditionDisabled="!((Delay_Reverb_Mode_value >= 0 && Delay_Reverb_Mode_value <= 1) || (Delay_Reverb_Mode_value >= 5 && Delay_Reverb_Mode_value <= 26))" data-model="partCurrent" style="left: 1022dp; top: 0dp; width: 948dp; height: 444dp;">
+				<knob id="DelayTime" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Time" style="left: 256dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<knob id="DelayFeedback" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Feedback" style="left: 381dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<knob id="DelayColor" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Color" style="left: 506dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<knob id="DelayRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Dly Rate / Rev Decay" style="left: 631dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<knob id="DelayDepth" class="jucePos juceRotary knob1" data-model="partCurrent" param="Dly Depth " style="left: 756dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<combo id="DelayReverbLfoShape" class="jucePos txt2" data-model="partCurrent" param="Delay Lfo Shape" style="left: 272dp; top: 287dp; width: 160dp; height: 45dp; line-height: 45dp;">
+					<combotext>Wave 42</combotext>
+				</combo>
+			</div>
+			<combo id="DelayReverbMode" class="jucePos txt2" data-model="partCurrent" param="Delay/Reverb Mode" style="left: 1080dp; top: 87dp; width: 160dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="DelayReverbClock" class="jucePos txt2" data-model="partCurrent" param="Delay Clock" style="left: 1080dp; top: 288.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="DelayReverbMix" class="jucePos juceRotary knob1" data-model="partCurrent" param="Effect Send" style="left: 1778.8dp; top: 272.1dp; width: 104dp; height: 104dp;"/>
+			<combo id="VocoderMode" class="jucePos txt2" data-model="partCurrent" param="Vocoder Mode" style="left: 1080dp; top: 542.6dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="VocSourceBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Balance" style="left: 1278.6dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocSpectralBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Sustain Time" style="left: 1403dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocBands" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Release" style="left: 1528.6dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocAttack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Attack" style="left: 1653.3dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocRelease" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Decay" style="left: 1778dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocCarrierCenterFreq" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff" style="left: 1278.5dp; top: 750.9dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocCarrierQFactor" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Resonance" style="left: 1403dp; top: 751.9dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocCarrierSpread" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Keyfollow" style="left: 1528.5dp; top: 751.9dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocModulatorFreqOffset" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff2" style="left: 1278.2dp; top: 967.9dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocModulatorQFactor" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Resonance" style="left: 1403dp; top: 967.9dp; width: 104dp; height: 104dp;"/>
+			<knob id="VocModulatorSpread" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Keyfollow" style="left: 1528.5dp; top: 967.9dp; width: 104dp; height: 104dp;"/>
+			<combo id="VocModulatorInput" class="jucePos txt5" data-model="partCurrent" param="Input Select" style="left: 1080dp; top: 997dp; width: 180dp; height: 40dp; line-height: 40dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+		</img>
+		<img id="page_arp" class="jucePos" src="arp_page_midiPorts.png" tabgroup="pages" tabpage="3" style="left: 724dp; top: 325dp; width: 1970dp; height: 1125dp;">
+			<knob id="VelOsc1Shape" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc1 Shape Velocity" style="left: 58.9973dp; top: 78.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelFlt1Freq" class="jucePos juceRotary knob1" data-model="partCurrent" param="Flt1 EnvAmt Velocity" style="left: 188.997dp; top: 78.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelFlt1Res" class="jucePos juceRotary knob1" data-model="partCurrent" param="Resonance1 Velocity" style="left: 318.997dp; top: 78.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelPW" class="jucePos juceRotary knob1" data-model="partCurrent" param="PulseWidth Velocity" style="left: 448.997dp; top: 78.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelVol" class="jucePos juceRotary knob1" data-model="partCurrent" param="Amp Velocity" style="left: 578.997dp; top: 78.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelPan" class="jucePos juceRotary knob1" data-model="partCurrent" param="Panorama Velocity" style="left: 708.997dp; top: 78.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelOsc2Shape" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Shape Velocity" style="left: 187.997dp; top: 289.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelFlt2Freq" class="jucePos juceRotary knob1" data-model="partCurrent" param="Flt2 EnvAmt Velocity" style="left: 317.997dp; top: 289.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelFlt2Res" class="jucePos juceRotary knob1" data-model="partCurrent" param="Resonance2 Velocity" style="left: 447.997dp; top: 289.542dp; width: 104dp; height: 104dp;"/>
+			<knob id="VelFM" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fm Amount Velocity" style="left: 577.997dp; top: 289.542dp; width: 104dp; height: 104dp;"/>
+			<combo id="InputMode" class="jucePos txt6" data-model="partCurrent" param="Input Mode" style="left: 28dp; top: 569dp; width: 160dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="InputSelect" class="jucePos txt5" data-model="partCurrent" param="Input Select" style="left: 233dp; top: 574dp; width: 160dp; height: 36dp; line-height: 36dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="ArpGlobalTempo" class="jucePos juceRotary knob1" data-model="partCurrent" param="Clock Tempo" style="left: 916.5dp; top: 78.6001dp; width: 104dp; height: 104dp;"/>
+			<knob id="ArpNoteLength" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp Note Length" style="left: 1045.2dp; top: 78.6001dp; width: 104dp; height: 104dp;"/>
+			<knob id="ArpNoteSwing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp Swing" style="left: 1175.5dp; top: 78.6001dp; width: 104dp; height: 104dp;"/>
+			<knob id="ArpModeButton" class="jucePos juceRotary knob2" data-model="partCurrent" param="Arp Mode" style="left: 1354.4dp; top: 73.6001dp; width: 104dp; height: 72.2857dp;">
+				<combo id="ArpModeComboBox" class="jucePos txt7" data-model="partCurrent" param="Arp Mode" style="left: 0dp; top: 0dp; width: 100dp; height: 45dp; line-height: 45dp;">
+					<combotext>Hold</combotext>
+				</combo>
+			</knob>
+			<combo id="ArpPattern" class="jucePos txt6" data-model="partCurrent" param="Arp Pattern Selct" style="left: 1513.6dp; top: 55.5dp; width: 180dp; height: 40dp; line-height: 40dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="ArpOctaveRange" class="jucePos txt6" data-model="partCurrent" param="Arp Octave Range" style="left: 1513.6dp; top: 122dp; width: 180dp; height: 40dp; line-height: 40dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="ArpResolution" class="jucePos txt6" data-model="partCurrent" param="Arp Clock" style="left: 1720dp; top: 55.5dp; width: 180dp; height: 40dp; line-height: 40dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<button id="ArpHold" class="jucePos juceButton arp-onoff-72x37" data-model="partCurrent" isToggle="1" param="Arp Hold Enable" style="left: 1712dp; top: 124dp; width: 72dp; height: 37dp;"/>
+			<combo id="SoftKnobMode" class="jucePos txt2" data-model="partCurrent" param="Soft Knob-1 Mode" style="left: 921.5dp; top: 336.9dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="SoftKnobName" class="jucePos txt2" data-model="partCurrent" param="Soft Knob1 ShortName" style="left: 1154.5dp; top: 336.9dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="SoftKnobMode" class="jucePos txt2" data-model="partCurrent" param="Soft Knob-2 Mode" style="left: 1532.83dp; top: 336.9dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="SoftKnobName" class="jucePos txt2" data-model="partCurrent" param="Soft Knob2 ShortName" style="left: 1760dp; top: 336.9dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="KeyMode" class="jucePos txt2" data-model="partCurrent" param="Key Mode" style="left: 924.45dp; top: 571.32dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="PatchVolume" class="jucePos juceRotary knob1" data-model="partCurrent" param="Patch Volume" style="left: 1133.65dp; top: 534.82dp; width: 104dp; height: 104dp;"/>
+			<knob id="Panning" class="jucePos juceRotary knob1" data-model="partCurrent" param="Panorama" style="left: 1263.25dp; top: 534.82dp; width: 104dp; height: 104dp;"/>
+			<combo id="SecondaryOutput" class="jucePos txt5" data-model="partCurrent" param="Part Output Select" style="left: 920dp; top: 730.42dp; width: 155dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<knob id="OutputBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Second Output Balance" style="left: 1133.75dp; top: 682.32dp; width: 104dp; height: 104dp;"/>
+			<knob id="Transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="Transpose" style="left: 1263.25dp; top: 682.32dp; width: 104dp; height: 104dp;"/>
+			<combo id="BendUp" class="jucePos txt2" data-model="partCurrent" param="Bender Range Up" style="left: 1536.14dp; top: 535.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="BendDown" class="jucePos txt2" data-model="partCurrent" param="Bender Range Down" style="left: 1768.14dp; top: 535.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="BendScale" class="jucePos txt8" data-model="partCurrent" param="Bender Scale" style="left: 1530dp; top: 634dp; width: 160dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="SmoothMode" class="jucePos txt2" data-model="partCurrent" param="Control Smooth Mode" style="left: 1768.14dp; top: 634dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="Category1" class="jucePos txt5" data-model="partCurrent" param="Category1" style="left: 1530dp; top: 734dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="Category2" class="jucePos txt5" data-model="partCurrent" param="Category2" style="left: 1764dp; top: 734dp; width: 185dp; height: 45dp; line-height: 45dp;">
+				<combotext>Wave 42</combotext>
+			</combo>
+			<combo id="MidiIn" class="jucePos txt2" style="left: 468dp; top: 567dp; width: 163dp; height: 45dp; line-height: 45dp;">
+				<combotext>In Device X</combotext>
+			</combo>
+			<combo id="MidiOut" class="jucePos txt2" style="left: 669dp; top: 567dp; width: 163dp; height: 45dp; line-height: 45dp;">
+				<combotext>Out Device X</combotext>
+			</combo>
+		</img>
+		<div id="container-patchmanager" class="jucePos" tabgroup="pages" tabpage="4" style="left: 724dp; top: 325dp; width: 1967dp; height: 1127dp;">
+			<template src="patchmanager"/>
+		</div>
+		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton txt9" url="https://paypal.me/dsp56300" style="left: 150dp; top: 1542dp; width: 533dp; height: 45dp; line-height: 45dp;">To donate: https://paypal.me/dsp56300</div>
+		<div id="VersionInfo" class="jucePos juceLabel txt10" style="left: 1290.77dp; top: 1542dp; width: 1400.62dp; height: 45dp; line-height: 45dp;">DSP56300 Emulator Version 0.8.15 - March 12 2042 12:34:56</div>
+	</body>
+</rml>

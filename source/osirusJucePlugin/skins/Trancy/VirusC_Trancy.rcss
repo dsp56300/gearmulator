@@ -1,0 +1,750 @@
+@spritesheet btn_1
+{
+	btn_1_active: 0px 0px 36px 68px;
+	btn_1_checked: 0px 68px 36px 68px;
+	btn_1_checked-active: 0px 68px 36px 68px;
+	btn_1_checked-hover: 0px 68px 36px 68px;
+	btn_1_default: 0px 0px 36px 68px;
+	btn_1_hover: 0px 0px 36px 68px;
+	src: btn_1.png;
+}
+@spritesheet btn_2
+{
+	btn_2_active: 0px 0px 69px 67px;
+	btn_2_checked: 0px 67px 69px 67px;
+	btn_2_checked-active: 0px 67px 69px 67px;
+	btn_2_checked-hover: 0px 67px 69px 67px;
+	btn_2_default: 0px 0px 69px 67px;
+	btn_2_hover: 0px 0px 69px 67px;
+	src: btn_2.png;
+}
+@spritesheet btn_3
+{
+	btn_3_active: 0px 0px 69px 67px;
+	btn_3_checked: 0px 67px 69px 67px;
+	btn_3_checked-active: 0px 67px 69px 67px;
+	btn_3_checked-hover: 0px 67px 69px 67px;
+	btn_3_default: 0px 0px 69px 67px;
+	btn_3_hover: 0px 0px 69px 67px;
+	src: btn_3.png;
+}
+@spritesheet btn_4
+{
+	btn_4_active: 0px 0px 68px 36px;
+	btn_4_checked: 0px 36px 68px 36px;
+	btn_4_checked-active: 0px 36px 68px 36px;
+	btn_4_checked-hover: 0px 36px 68px 36px;
+	btn_4_default: 0px 0px 68px 36px;
+	btn_4_hover: 0px 0px 68px 36px;
+	src: btn_4.png;
+}
+@spritesheet btn_left
+{
+	btn_left_active: 0px 0px 33px 51px;
+	btn_left_checked: 0px 0px 33px 51px;
+	btn_left_checked-active: 0px 0px 33px 51px;
+	btn_left_checked-hover: 0px 0px 33px 51px;
+	btn_left_default: 0px 0px 33px 51px;
+	btn_left_hover: 0px 0px 33px 51px;
+	src: btn_left.png;
+}
+@spritesheet btn_main_1
+{
+	btn_main_1_active: 0px 53px 268px 53px;
+	btn_main_1_checked: 0px 53px 268px 53px;
+	btn_main_1_checked-active: 0px 53px 268px 53px;
+	btn_main_1_checked-hover: 0px 53px 268px 53px;
+	btn_main_1_default: 0px 0px 268px 53px;
+	btn_main_1_hover: 0px 53px 268px 53px;
+	src: btn_main_1.png;
+}
+@spritesheet btn_main_2
+{
+	btn_main_2_active: 0px 53px 268px 53px;
+	btn_main_2_checked: 0px 53px 268px 53px;
+	btn_main_2_checked-active: 0px 53px 268px 53px;
+	btn_main_2_checked-hover: 0px 53px 268px 53px;
+	btn_main_2_default: 0px 0px 268px 53px;
+	btn_main_2_hover: 0px 53px 268px 53px;
+	src: btn_main_2.png;
+}
+@spritesheet btn_main_3
+{
+	btn_main_3_active: 0px 53px 268px 53px;
+	btn_main_3_checked: 0px 53px 268px 53px;
+	btn_main_3_checked-active: 0px 53px 268px 53px;
+	btn_main_3_checked-hover: 0px 53px 268px 53px;
+	btn_main_3_default: 0px 0px 268px 53px;
+	btn_main_3_hover: 0px 53px 268px 53px;
+	src: btn_main_3.png;
+}
+@spritesheet btn_main_4
+{
+	btn_main_4_active: 0px 53px 268px 53px;
+	btn_main_4_checked: 0px 53px 268px 53px;
+	btn_main_4_checked-active: 0px 53px 268px 53px;
+	btn_main_4_checked-hover: 0px 53px 268px 53px;
+	btn_main_4_default: 0px 0px 268px 53px;
+	btn_main_4_hover: 0px 53px 268px 53px;
+	src: btn_main_4.png;
+}
+@spritesheet btn_main_5
+{
+	btn_main_5_active: 0px 53px 268px 53px;
+	btn_main_5_checked: 0px 53px 268px 53px;
+	btn_main_5_checked-active: 0px 53px 268px 53px;
+	btn_main_5_checked-hover: 0px 53px 268px 53px;
+	btn_main_5_default: 0px 0px 268px 53px;
+	btn_main_5_hover: 0px 53px 268px 53px;
+	src: btn_main_5.png;
+}
+@spritesheet btn_menu
+{
+	btn_menu_active: 0px 0px 172px 50px;
+	btn_menu_checked: 0px 0px 172px 50px;
+	btn_menu_checked-active: 0px 0px 172px 50px;
+	btn_menu_checked-hover: 0px 0px 172px 50px;
+	btn_menu_default: 0px 0px 172px 50px;
+	btn_menu_hover: 0px 0px 172px 50px;
+	src: btn_menu.png;
+}
+@spritesheet btn_right
+{
+	btn_right_active: 0px 0px 33px 51px;
+	btn_right_checked: 0px 0px 33px 51px;
+	btn_right_checked-active: 0px 0px 33px 51px;
+	btn_right_checked-hover: 0px 0px 33px 51px;
+	btn_right_default: 0px 0px 33px 51px;
+	btn_right_hover: 0px 0px 33px 51px;
+	src: btn_right.png;
+}
+@spritesheet btn_save_preset
+{
+	btn_save_preset_default: 0px 0px 171px 50px;
+	btn_save_preset_hover: 0px 0px 171px 50px;
+	src: btn_save_preset.png;
+}
+@spritesheet knob_1_128_page0
+{
+	knob_1_128_000: 0px 0px 75px 75px;
+	knob_1_128_001: 75px 0px 75px 75px;
+	knob_1_128_002: 150px 0px 75px 75px;
+	knob_1_128_003: 225px 0px 75px 75px;
+	knob_1_128_004: 300px 0px 75px 75px;
+	knob_1_128_005: 375px 0px 75px 75px;
+	knob_1_128_006: 450px 0px 75px 75px;
+	knob_1_128_007: 525px 0px 75px 75px;
+	knob_1_128_008: 600px 0px 75px 75px;
+	knob_1_128_009: 675px 0px 75px 75px;
+	knob_1_128_010: 750px 0px 75px 75px;
+	knob_1_128_011: 825px 0px 75px 75px;
+	knob_1_128_012: 900px 0px 75px 75px;
+	knob_1_128_013: 975px 0px 75px 75px;
+	knob_1_128_014: 1050px 0px 75px 75px;
+	knob_1_128_015: 1125px 0px 75px 75px;
+	knob_1_128_016: 1200px 0px 75px 75px;
+	knob_1_128_017: 1275px 0px 75px 75px;
+	knob_1_128_018: 1350px 0px 75px 75px;
+	knob_1_128_019: 1425px 0px 75px 75px;
+	knob_1_128_020: 1500px 0px 75px 75px;
+	knob_1_128_021: 1575px 0px 75px 75px;
+	knob_1_128_022: 1650px 0px 75px 75px;
+	knob_1_128_023: 1725px 0px 75px 75px;
+	knob_1_128_024: 1800px 0px 75px 75px;
+	knob_1_128_025: 1875px 0px 75px 75px;
+	knob_1_128_026: 1950px 0px 75px 75px;
+	knob_1_128_027: 0px 75px 75px 75px;
+	knob_1_128_028: 75px 75px 75px 75px;
+	knob_1_128_029: 150px 75px 75px 75px;
+	knob_1_128_030: 225px 75px 75px 75px;
+	knob_1_128_031: 300px 75px 75px 75px;
+	knob_1_128_032: 375px 75px 75px 75px;
+	knob_1_128_033: 450px 75px 75px 75px;
+	knob_1_128_034: 525px 75px 75px 75px;
+	knob_1_128_035: 600px 75px 75px 75px;
+	knob_1_128_036: 675px 75px 75px 75px;
+	knob_1_128_037: 750px 75px 75px 75px;
+	knob_1_128_038: 825px 75px 75px 75px;
+	knob_1_128_039: 900px 75px 75px 75px;
+	knob_1_128_040: 975px 75px 75px 75px;
+	knob_1_128_041: 1050px 75px 75px 75px;
+	knob_1_128_042: 1125px 75px 75px 75px;
+	knob_1_128_043: 1200px 75px 75px 75px;
+	knob_1_128_044: 1275px 75px 75px 75px;
+	knob_1_128_045: 1350px 75px 75px 75px;
+	knob_1_128_046: 1425px 75px 75px 75px;
+	knob_1_128_047: 1500px 75px 75px 75px;
+	knob_1_128_048: 1575px 75px 75px 75px;
+	knob_1_128_049: 1650px 75px 75px 75px;
+	knob_1_128_050: 1725px 75px 75px 75px;
+	knob_1_128_051: 1800px 75px 75px 75px;
+	knob_1_128_052: 1875px 75px 75px 75px;
+	knob_1_128_053: 1950px 75px 75px 75px;
+	knob_1_128_054: 0px 150px 75px 75px;
+	knob_1_128_055: 75px 150px 75px 75px;
+	knob_1_128_056: 150px 150px 75px 75px;
+	knob_1_128_057: 225px 150px 75px 75px;
+	knob_1_128_058: 300px 150px 75px 75px;
+	knob_1_128_059: 375px 150px 75px 75px;
+	knob_1_128_060: 450px 150px 75px 75px;
+	knob_1_128_061: 525px 150px 75px 75px;
+	knob_1_128_062: 600px 150px 75px 75px;
+	knob_1_128_063: 675px 150px 75px 75px;
+	knob_1_128_064: 750px 150px 75px 75px;
+	knob_1_128_065: 825px 150px 75px 75px;
+	knob_1_128_066: 900px 150px 75px 75px;
+	knob_1_128_067: 975px 150px 75px 75px;
+	knob_1_128_068: 1050px 150px 75px 75px;
+	knob_1_128_069: 1125px 150px 75px 75px;
+	knob_1_128_070: 1200px 150px 75px 75px;
+	knob_1_128_071: 1275px 150px 75px 75px;
+	knob_1_128_072: 1350px 150px 75px 75px;
+	knob_1_128_073: 1425px 150px 75px 75px;
+	knob_1_128_074: 1500px 150px 75px 75px;
+	knob_1_128_075: 1575px 150px 75px 75px;
+	knob_1_128_076: 1650px 150px 75px 75px;
+	knob_1_128_077: 1725px 150px 75px 75px;
+	knob_1_128_078: 1800px 150px 75px 75px;
+	knob_1_128_079: 1875px 150px 75px 75px;
+	knob_1_128_080: 1950px 150px 75px 75px;
+	knob_1_128_081: 0px 225px 75px 75px;
+	knob_1_128_082: 75px 225px 75px 75px;
+	knob_1_128_083: 150px 225px 75px 75px;
+	knob_1_128_084: 225px 225px 75px 75px;
+	knob_1_128_085: 300px 225px 75px 75px;
+	knob_1_128_086: 375px 225px 75px 75px;
+	knob_1_128_087: 450px 225px 75px 75px;
+	knob_1_128_088: 525px 225px 75px 75px;
+	knob_1_128_089: 600px 225px 75px 75px;
+	knob_1_128_090: 675px 225px 75px 75px;
+	knob_1_128_091: 750px 225px 75px 75px;
+	knob_1_128_092: 825px 225px 75px 75px;
+	knob_1_128_093: 900px 225px 75px 75px;
+	knob_1_128_094: 975px 225px 75px 75px;
+	knob_1_128_095: 1050px 225px 75px 75px;
+	knob_1_128_096: 1125px 225px 75px 75px;
+	knob_1_128_097: 1200px 225px 75px 75px;
+	knob_1_128_098: 1275px 225px 75px 75px;
+	knob_1_128_099: 1350px 225px 75px 75px;
+	knob_1_128_100: 1425px 225px 75px 75px;
+	knob_1_128_101: 1500px 225px 75px 75px;
+	knob_1_128_102: 1575px 225px 75px 75px;
+	knob_1_128_103: 1650px 225px 75px 75px;
+	knob_1_128_104: 1725px 225px 75px 75px;
+	knob_1_128_105: 1800px 225px 75px 75px;
+	knob_1_128_106: 1875px 225px 75px 75px;
+	knob_1_128_107: 1950px 225px 75px 75px;
+	knob_1_128_108: 0px 300px 75px 75px;
+	knob_1_128_109: 75px 300px 75px 75px;
+	knob_1_128_110: 150px 300px 75px 75px;
+	knob_1_128_111: 225px 300px 75px 75px;
+	knob_1_128_112: 300px 300px 75px 75px;
+	knob_1_128_113: 375px 300px 75px 75px;
+	knob_1_128_114: 450px 300px 75px 75px;
+	knob_1_128_115: 525px 300px 75px 75px;
+	knob_1_128_116: 600px 300px 75px 75px;
+	knob_1_128_117: 675px 300px 75px 75px;
+	knob_1_128_118: 750px 300px 75px 75px;
+	knob_1_128_119: 825px 300px 75px 75px;
+	knob_1_128_120: 900px 300px 75px 75px;
+	knob_1_128_121: 975px 300px 75px 75px;
+	knob_1_128_122: 1050px 300px 75px 75px;
+	knob_1_128_123: 1125px 300px 75px 75px;
+	knob_1_128_124: 1200px 300px 75px 75px;
+	knob_1_128_125: 1275px 300px 75px 75px;
+	knob_1_128_126: 1350px 300px 75px 75px;
+	knob_1_128_127: 1425px 300px 75px 75px;
+	src: knob_1_128_page0.png;
+}
+@spritesheet knob_2_128_page0
+{
+	knob_2_128_000: 0px 0px 55px 55px;
+	knob_2_128_001: 55px 0px 55px 55px;
+	knob_2_128_002: 110px 0px 55px 55px;
+	knob_2_128_003: 165px 0px 55px 55px;
+	knob_2_128_004: 220px 0px 55px 55px;
+	knob_2_128_005: 275px 0px 55px 55px;
+	knob_2_128_006: 330px 0px 55px 55px;
+	knob_2_128_007: 385px 0px 55px 55px;
+	knob_2_128_008: 440px 0px 55px 55px;
+	knob_2_128_009: 495px 0px 55px 55px;
+	knob_2_128_010: 550px 0px 55px 55px;
+	knob_2_128_011: 605px 0px 55px 55px;
+	knob_2_128_012: 660px 0px 55px 55px;
+	knob_2_128_013: 715px 0px 55px 55px;
+	knob_2_128_014: 770px 0px 55px 55px;
+	knob_2_128_015: 825px 0px 55px 55px;
+	knob_2_128_016: 880px 0px 55px 55px;
+	knob_2_128_017: 935px 0px 55px 55px;
+	knob_2_128_018: 990px 0px 55px 55px;
+	knob_2_128_019: 1045px 0px 55px 55px;
+	knob_2_128_020: 1100px 0px 55px 55px;
+	knob_2_128_021: 1155px 0px 55px 55px;
+	knob_2_128_022: 1210px 0px 55px 55px;
+	knob_2_128_023: 1265px 0px 55px 55px;
+	knob_2_128_024: 1320px 0px 55px 55px;
+	knob_2_128_025: 1375px 0px 55px 55px;
+	knob_2_128_026: 1430px 0px 55px 55px;
+	knob_2_128_027: 1485px 0px 55px 55px;
+	knob_2_128_028: 1540px 0px 55px 55px;
+	knob_2_128_029: 1595px 0px 55px 55px;
+	knob_2_128_030: 1650px 0px 55px 55px;
+	knob_2_128_031: 1705px 0px 55px 55px;
+	knob_2_128_032: 1760px 0px 55px 55px;
+	knob_2_128_033: 1815px 0px 55px 55px;
+	knob_2_128_034: 1870px 0px 55px 55px;
+	knob_2_128_035: 1925px 0px 55px 55px;
+	knob_2_128_036: 1980px 0px 55px 55px;
+	knob_2_128_037: 0px 55px 55px 55px;
+	knob_2_128_038: 55px 55px 55px 55px;
+	knob_2_128_039: 110px 55px 55px 55px;
+	knob_2_128_040: 165px 55px 55px 55px;
+	knob_2_128_041: 220px 55px 55px 55px;
+	knob_2_128_042: 275px 55px 55px 55px;
+	knob_2_128_043: 330px 55px 55px 55px;
+	knob_2_128_044: 385px 55px 55px 55px;
+	knob_2_128_045: 440px 55px 55px 55px;
+	knob_2_128_046: 495px 55px 55px 55px;
+	knob_2_128_047: 550px 55px 55px 55px;
+	knob_2_128_048: 605px 55px 55px 55px;
+	knob_2_128_049: 660px 55px 55px 55px;
+	knob_2_128_050: 715px 55px 55px 55px;
+	knob_2_128_051: 770px 55px 55px 55px;
+	knob_2_128_052: 825px 55px 55px 55px;
+	knob_2_128_053: 880px 55px 55px 55px;
+	knob_2_128_054: 935px 55px 55px 55px;
+	knob_2_128_055: 990px 55px 55px 55px;
+	knob_2_128_056: 1045px 55px 55px 55px;
+	knob_2_128_057: 1100px 55px 55px 55px;
+	knob_2_128_058: 1155px 55px 55px 55px;
+	knob_2_128_059: 1210px 55px 55px 55px;
+	knob_2_128_060: 1265px 55px 55px 55px;
+	knob_2_128_061: 1320px 55px 55px 55px;
+	knob_2_128_062: 1375px 55px 55px 55px;
+	knob_2_128_063: 1430px 55px 55px 55px;
+	knob_2_128_064: 1485px 55px 55px 55px;
+	knob_2_128_065: 1540px 55px 55px 55px;
+	knob_2_128_066: 1595px 55px 55px 55px;
+	knob_2_128_067: 1650px 55px 55px 55px;
+	knob_2_128_068: 1705px 55px 55px 55px;
+	knob_2_128_069: 1760px 55px 55px 55px;
+	knob_2_128_070: 1815px 55px 55px 55px;
+	knob_2_128_071: 1870px 55px 55px 55px;
+	knob_2_128_072: 1925px 55px 55px 55px;
+	knob_2_128_073: 1980px 55px 55px 55px;
+	knob_2_128_074: 0px 110px 55px 55px;
+	knob_2_128_075: 55px 110px 55px 55px;
+	knob_2_128_076: 110px 110px 55px 55px;
+	knob_2_128_077: 165px 110px 55px 55px;
+	knob_2_128_078: 220px 110px 55px 55px;
+	knob_2_128_079: 275px 110px 55px 55px;
+	knob_2_128_080: 330px 110px 55px 55px;
+	knob_2_128_081: 385px 110px 55px 55px;
+	knob_2_128_082: 440px 110px 55px 55px;
+	knob_2_128_083: 495px 110px 55px 55px;
+	knob_2_128_084: 550px 110px 55px 55px;
+	knob_2_128_085: 605px 110px 55px 55px;
+	knob_2_128_086: 660px 110px 55px 55px;
+	knob_2_128_087: 715px 110px 55px 55px;
+	knob_2_128_088: 770px 110px 55px 55px;
+	knob_2_128_089: 825px 110px 55px 55px;
+	knob_2_128_090: 880px 110px 55px 55px;
+	knob_2_128_091: 935px 110px 55px 55px;
+	knob_2_128_092: 990px 110px 55px 55px;
+	knob_2_128_093: 1045px 110px 55px 55px;
+	knob_2_128_094: 1100px 110px 55px 55px;
+	knob_2_128_095: 1155px 110px 55px 55px;
+	knob_2_128_096: 1210px 110px 55px 55px;
+	knob_2_128_097: 1265px 110px 55px 55px;
+	knob_2_128_098: 1320px 110px 55px 55px;
+	knob_2_128_099: 1375px 110px 55px 55px;
+	knob_2_128_100: 1430px 110px 55px 55px;
+	knob_2_128_101: 1485px 110px 55px 55px;
+	knob_2_128_102: 1540px 110px 55px 55px;
+	knob_2_128_103: 1595px 110px 55px 55px;
+	knob_2_128_104: 1650px 110px 55px 55px;
+	knob_2_128_105: 1705px 110px 55px 55px;
+	knob_2_128_106: 1760px 110px 55px 55px;
+	knob_2_128_107: 1815px 110px 55px 55px;
+	knob_2_128_108: 1870px 110px 55px 55px;
+	knob_2_128_109: 1925px 110px 55px 55px;
+	knob_2_128_110: 1980px 110px 55px 55px;
+	knob_2_128_111: 0px 165px 55px 55px;
+	knob_2_128_112: 55px 165px 55px 55px;
+	knob_2_128_113: 110px 165px 55px 55px;
+	knob_2_128_114: 165px 165px 55px 55px;
+	knob_2_128_115: 220px 165px 55px 55px;
+	knob_2_128_116: 275px 165px 55px 55px;
+	knob_2_128_117: 330px 165px 55px 55px;
+	knob_2_128_118: 385px 165px 55px 55px;
+	knob_2_128_119: 440px 165px 55px 55px;
+	knob_2_128_120: 495px 165px 55px 55px;
+	knob_2_128_121: 550px 165px 55px 55px;
+	knob_2_128_122: 605px 165px 55px 55px;
+	knob_2_128_123: 660px 165px 55px 55px;
+	knob_2_128_124: 715px 165px 55px 55px;
+	knob_2_128_125: 770px 165px 55px 55px;
+	knob_2_128_126: 825px 165px 55px 55px;
+	knob_2_128_127: 880px 165px 55px 55px;
+	src: knob_2_128_page0.png;
+}
+.btn_1
+{
+	decorator: image(btn_1_default scale-none left top);
+}
+.btn_1:checked
+{
+	decorator: image(btn_1_checked scale-none left top);
+}
+.btn_1:checked:active
+{
+	decorator: image(btn_1_checked-active scale-none left top);
+}
+.btn_1:checked:hover
+{
+	decorator: image(btn_1_checked-hover scale-none left top);
+}
+.btn_1:hover
+{
+	decorator: image(btn_1_hover scale-none left top);
+}
+.btn_2
+{
+	decorator: image(btn_2_default scale-none left top);
+}
+.btn_2:checked
+{
+	decorator: image(btn_2_checked scale-none left top);
+}
+.btn_2:checked:active
+{
+	decorator: image(btn_2_checked-active scale-none left top);
+}
+.btn_2:checked:hover
+{
+	decorator: image(btn_2_checked-hover scale-none left top);
+}
+.btn_2:hover
+{
+	decorator: image(btn_2_hover scale-none left top);
+}
+.btn_3
+{
+	decorator: image(btn_3_default scale-none left top);
+}
+.btn_3:checked
+{
+	decorator: image(btn_3_checked scale-none left top);
+}
+.btn_3:checked:active
+{
+	decorator: image(btn_3_checked-active scale-none left top);
+}
+.btn_3:checked:hover
+{
+	decorator: image(btn_3_checked-hover scale-none left top);
+}
+.btn_3:hover
+{
+	decorator: image(btn_3_hover scale-none left top);
+}
+.btn_4
+{
+	decorator: image(btn_4_default scale-none left top);
+}
+.btn_4:checked
+{
+	decorator: image(btn_4_checked scale-none left top);
+}
+.btn_4:checked:active
+{
+	decorator: image(btn_4_checked-active scale-none left top);
+}
+.btn_4:checked:hover
+{
+	decorator: image(btn_4_checked-hover scale-none left top);
+}
+.btn_4:hover
+{
+	decorator: image(btn_4_hover scale-none left top);
+}
+.btn_left
+{
+	decorator: image(btn_left_default scale-none left top);
+}
+.btn_left:checked
+{
+	decorator: image(btn_left_checked scale-none left top);
+}
+.btn_left:checked:active
+{
+	decorator: image(btn_left_checked-active scale-none left top);
+}
+.btn_left:checked:hover
+{
+	decorator: image(btn_left_checked-hover scale-none left top);
+}
+.btn_left:hover
+{
+	decorator: image(btn_left_hover scale-none left top);
+}
+.btn_main_1
+{
+	decorator: image(btn_main_1_default scale-none left top);
+}
+.btn_main_1:checked
+{
+	decorator: image(btn_main_1_checked scale-none left top);
+}
+.btn_main_1:checked:active
+{
+	decorator: image(btn_main_1_checked-active scale-none left top);
+}
+.btn_main_1:checked:hover
+{
+	decorator: image(btn_main_1_checked-hover scale-none left top);
+}
+.btn_main_1:hover
+{
+	decorator: image(btn_main_1_hover scale-none left top);
+}
+.btn_main_2
+{
+	decorator: image(btn_main_2_default scale-none left top);
+}
+.btn_main_2:checked
+{
+	decorator: image(btn_main_2_checked scale-none left top);
+}
+.btn_main_2:checked:active
+{
+	decorator: image(btn_main_2_checked-active scale-none left top);
+}
+.btn_main_2:checked:hover
+{
+	decorator: image(btn_main_2_checked-hover scale-none left top);
+}
+.btn_main_2:hover
+{
+	decorator: image(btn_main_2_hover scale-none left top);
+}
+.btn_main_3
+{
+	decorator: image(btn_main_3_default scale-none left top);
+}
+.btn_main_3:checked
+{
+	decorator: image(btn_main_3_checked scale-none left top);
+}
+.btn_main_3:checked:active
+{
+	decorator: image(btn_main_3_checked-active scale-none left top);
+}
+.btn_main_3:checked:hover
+{
+	decorator: image(btn_main_3_checked-hover scale-none left top);
+}
+.btn_main_3:hover
+{
+	decorator: image(btn_main_3_hover scale-none left top);
+}
+.btn_main_4
+{
+	decorator: image(btn_main_4_default scale-none left top);
+}
+.btn_main_4:checked
+{
+	decorator: image(btn_main_4_checked scale-none left top);
+}
+.btn_main_4:checked:active
+{
+	decorator: image(btn_main_4_checked-active scale-none left top);
+}
+.btn_main_4:checked:hover
+{
+	decorator: image(btn_main_4_checked-hover scale-none left top);
+}
+.btn_main_4:hover
+{
+	decorator: image(btn_main_4_hover scale-none left top);
+}
+.btn_main_5
+{
+	decorator: image(btn_main_5_default scale-none left top);
+}
+.btn_main_5:checked
+{
+	decorator: image(btn_main_5_checked scale-none left top);
+}
+.btn_main_5:checked:active
+{
+	decorator: image(btn_main_5_checked-active scale-none left top);
+}
+.btn_main_5:checked:hover
+{
+	decorator: image(btn_main_5_checked-hover scale-none left top);
+}
+.btn_main_5:hover
+{
+	decorator: image(btn_main_5_hover scale-none left top);
+}
+.btn_menu
+{
+	decorator: image(btn_menu_default scale-none left top);
+}
+.btn_menu:checked
+{
+	decorator: image(btn_menu_checked scale-none left top);
+}
+.btn_menu:checked:active
+{
+	decorator: image(btn_menu_checked-active scale-none left top);
+}
+.btn_menu:checked:hover
+{
+	decorator: image(btn_menu_checked-hover scale-none left top);
+}
+.btn_menu:hover
+{
+	decorator: image(btn_menu_hover scale-none left top);
+}
+.btn_right
+{
+	decorator: image(btn_right_default scale-none left top);
+}
+.btn_right:checked
+{
+	decorator: image(btn_right_checked scale-none left top);
+}
+.btn_right:checked:active
+{
+	decorator: image(btn_right_checked-active scale-none left top);
+}
+.btn_right:checked:hover
+{
+	decorator: image(btn_right_checked-hover scale-none left top);
+}
+.btn_right:hover
+{
+	decorator: image(btn_right_hover scale-none left top);
+}
+.btn_save_preset
+{
+	decorator: image(btn_save_preset_default scale-none left top);
+}
+.btn_save_preset:hover
+{
+	decorator: image(btn_save_preset_hover scale-none left top);
+}
+.juceConditionDisabledAlpha30
+{
+	opacity: 0.300000;
+	pointer-events: none;
+}
+.knob
+{
+	frames: 128;
+	spriteprefix: knob_1_128_;
+}
+.knob1
+{
+	frames: 128;
+	spriteprefix: knob_2_128_;
+}
+.list, .grid, .pm-infopanel
+{
+	background-color: rgb(32,32,32);
+}
+.pm-hlayout
+{
+	background-color: black;
+}
+.pm-status
+{
+	background-color: rgb(32,32,32);
+	border: 1dp rgb(67,67,67);
+}
+.pm-vlayout
+{
+	gap: 4dp;
+}
+.txt
+{
+	color: #ffffff;
+	font-family: Register;
+	font-size: 36.000000dp;
+	text-align: left;
+}
+.txt1
+{
+	color: #ffffff;
+	font-family: Register;
+	font-size: 36.000000dp;
+	text-align: right;
+}
+.txt2
+{
+	color: #ffffff;
+	font-family: Register;
+	font-size: 18.000000dp;
+	text-align: left;
+}
+.txt3
+{
+	color: #ffffff;
+	font-family: Register;
+	font-size: 20.000000dp;
+	text-align: left;
+}
+.txt4
+{
+	color: #ffffff;
+	font-family: Register;
+	font-size: 30.000000dp;
+	text-align: center;
+}
+.txt5
+{
+	color: #009bff;
+	font-size: 20.000000dp;
+	text-align: center;
+}
+.txt6
+{
+	color: #009bff;
+	font-size: 18.000000dp;
+	text-align: left;
+}
+.txt7
+{
+	color: #009bff;
+	font-size: 20.000000dp;
+	text-align: right;
+}
+.txt8
+{
+	color: #009bff;
+	font-size: 20.000000dp;
+	text-align: left;
+}
+.txt9
+{
+	color: #ffffff;
+	font-family: Register;
+	font-size: 28.000000dp;
+	text-align: center;
+}
+body
+{
+	font-size: 28dp;
+}
+input.text
+{
+	background-color: rgb(32,32,32);
+	border: 1dp rgb(67,67,67);
+}
+tree
+{
+	background-color: rgb(32,32,32);
+}
+
