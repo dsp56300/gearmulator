@@ -31,10 +31,13 @@ namespace genericVirusUI
 		m_processor(_processorRef),
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
-		create();
+	}
+	void VirusEditor::create()
+	{
+		Editor::create();
 
 		m_parts.reset(new Parts(*this));
-		m_leds.reset(new Leds(*this, _processorRef));
+		m_leds.reset(new Leds(*this, m_processor));
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 

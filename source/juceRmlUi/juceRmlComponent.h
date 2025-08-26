@@ -37,9 +37,10 @@ namespace juceRmlUi
 		baseLib::Event<RmlComponent*> evPostUpdate;
 
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
+		using DocumentLoadFailedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 
-		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale = 1.0f, const ContextCreatedCallback& _contextCreatedCallback = {});
+		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback);
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;

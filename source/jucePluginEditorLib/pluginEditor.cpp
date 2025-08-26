@@ -642,10 +642,14 @@ namespace jucePluginEditorLib
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(m_rmlInterfaces.getCoreInstance(), getProcessor().getController()));
 
-		auto* comp = new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
-		{
-			onRmlContextCreated(_rmlComponent, _context);
-		});
+		auto* comp = new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f
+			, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+			{
+				onRmlContextCreated(_rmlComponent, _context);
+			}, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+			{
+				onRmlDocumentLoadFailed(_rmlComponent, _context);
+			});
 
 		auto* doc = comp->getDocument();
 
@@ -679,6 +683,13 @@ namespace jucePluginEditorLib
 			initPluginDataModel(_model);
 		}));
 		m_patchManagerDataModel.reset(new patchManagerRml::PatchManagerDataModel(_context));
+	}
+
+	void Editor::onRmlDocumentLoadFailed(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+	{
+		m_patchManagerDataModel.reset();
+		m_pluginDataModel.reset();
+		m_overlays.reset();
 	}
 
 	rmlPlugin::RmlParameterBinding* Editor::getRmlParameterBinding() const

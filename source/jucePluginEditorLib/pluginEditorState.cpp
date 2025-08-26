@@ -164,21 +164,21 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
 		}
 
-		auto* editor = createEditor(skin);
-		m_editor.reset(editor);
+		m_editor.reset(createEditor(skin));
+		m_editor->create();
 
 		getEditor()->onOpenMenu.addListener([this](Editor*, const Rml::Event& _event)
 		{
 			openMenu(_event);
 		});
 
-		m_rootScale = editor->getScale();
+		m_rootScale = m_editor->getScale();
 
-		m_currentSkin = editor->getSkin();
+		m_currentSkin = m_editor->getSkin();
 
 		if (m_currentSkin.filename != skin.filename && !skin.folder.empty())	// empty folder = integrated skin => for development only
 		{
-			genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Info, editor->getProcessor().getProperties().name, 
+			genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Info, m_editor->getProcessor().getProperties().name, 
 				"The skin\n"
 				"    '" + baseLib::filesystem::stripExtension(m_currentSkin.filename) + "'\n"
 				" is a legacy skin and has been automatically converted from json format to RmlUI.\n"

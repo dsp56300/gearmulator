@@ -52,6 +52,8 @@ namespace genericVirusUI
 		VirusEditor(virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin);
 		~VirusEditor() override;
 
+		void create() override;
+
 		void setPart(size_t _part);
 
 		virus::Controller& getController() const;

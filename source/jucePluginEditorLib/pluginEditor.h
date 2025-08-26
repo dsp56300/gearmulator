@@ -88,7 +88,7 @@ namespace jucePluginEditorLib
 		Editor& operator = (const Editor&) = delete;
 		Editor& operator = (Editor&&) = delete;
 		
-		void create();
+		virtual void create();
 
 		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) {}
 		virtual void initPluginDataModel(PluginDataModel& _model);
@@ -147,6 +147,7 @@ namespace jucePluginEditorLib
 		juce::Component* createRmlUiComponent(const std::string& _rmlFile);
 
 		virtual void onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context);
+		virtual void onRmlDocumentLoadFailed(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context);
 
 		const auto& getPatchManagerDataModel() const { return m_patchManagerDataModel; }
 		auto& getPluginDataModel() { return m_pluginDataModel; }

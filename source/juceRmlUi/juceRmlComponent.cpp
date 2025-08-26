@@ -17,7 +17,7 @@
 
 namespace juceRmlUi
 {
-	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback)
+	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback)
 		: m_rmlInterfaces(_interfaces)
 		, m_coreInstance(_interfaces.getCoreInstance())
 		, m_dataProvider(_dataProvider)
@@ -53,7 +53,20 @@ namespace juceRmlUi
 			}
 		}
 
-		createRmlContext(_contextCreatedCallback);
+		try
+		{
+			createRmlContext(_contextCreatedCallback);
+		}
+		catch (std::runtime_error& e)
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "%s", e.what());
+
+			m_openGLContext.detach();
+			_docLoadFailedCallback(*this, *m_rmlContext);
+			destroyRmlContext();
+			deleteAllChildren();
+			throw;
+		}
 
 		m_drag.onDocumentLoaded();
 
