@@ -264,8 +264,14 @@ namespace juceRmlUi
 			SetScrollLeft(0.0f);
 		}
 
-		const auto firstColumn = static_cast<size_t>(scrollLeft / elementSize.x);
+		auto firstColumn = static_cast<size_t>(scrollLeft / elementSize.x);
 		const auto lastColumn = std::min(static_cast<size_t>(std::ceil((scrollLeft + size.x) / elementSize.x)), totalColumns - 1);
+
+		if (firstColumn > (lastColumn - static_cast<size_t>(visibleColums)))
+		{
+			firstColumn = lastColumn - static_cast<size_t>(visibleColums);
+			SetScrollLeft(static_cast<float>(firstColumn) * elementSize.x);
+		}
 
 		const auto firstEntry = firstColumn * itemsPerColumn;
 		const auto lastEntry = lastColumn * itemsPerColumn + itemsPerColumn - 1;
