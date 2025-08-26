@@ -9,6 +9,8 @@
 
 #include "baseLib/filesystem.h"
 
+#include "RmlUi/Core/Log.h"
+
 namespace juceRmlUi
 {
 	FileInterface::FileInterface(Rml::CoreInstance& _coreInstance, DataProvider& _dataProvider) : Rml::FileInterface(_coreInstance), m_dataProvider(_dataProvider)
@@ -18,10 +20,21 @@ namespace juceRmlUi
 	Rml::FileHandle FileInterface::Open(const Rml::String& _path)
 	{
 		uint32_t size;
-		auto* data = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_path), size);
+		const char* data = nullptr;
+
+		try
+		{
+			data = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_path), size);
+		}
+		catch (std::runtime_error& e)
+		{
+			Rml::Log::Message(core_instance, Rml::Log::LT_WARNING, "%s", e.what());
+		}
+
 		if (!data)
 			return 0;
-		auto* fileData = new FileInfo{ data, size, 0 };
+
+		auto* fileData = new FileInfo{data, size, 0 };
 		return helper::toHandle<Rml::FileHandle>(fileData);
 	}
 
