@@ -168,7 +168,7 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		m_currentSkin = editor->getSkin();
 
-		if (m_currentSkin.filename != skin.filename)
+		if (m_currentSkin.filename != skin.filename && !skin.folder.empty())	// empty folder = integrated skin => for development only
 		{
 			genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Info, editor->getProcessor().getProperties().name, 
 				"The skin\n"
