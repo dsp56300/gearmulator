@@ -89,6 +89,8 @@ namespace juceRmlUi
 
 		Rml::Vector2i getDocumentSize() const { return m_documentSize; }
 
+		void resize(int _width, int _height);
+
 		static RmlComponent* fromElement(const Rml::Element* _element);
 
 		void enqueueUpdate();
@@ -141,7 +143,8 @@ namespace juceRmlUi
 		double m_time = 0;
 		float m_fps = 0;
 
-		FrameLimiter m_frameRateLimiter;
 		uint32_t m_pendingUpdates = 0;
+		std::atomic<bool> m_renderDone;
+		double m_nextFrameTime;
 	};
 }

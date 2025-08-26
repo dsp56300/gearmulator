@@ -40,10 +40,6 @@ void EditorWindow::resized()
 {
 	AudioProcessorEditor::resized();
 
-	auto* comp = getChildComponent(0);
-	if(!comp)
-		return;
-
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
 
@@ -55,7 +51,8 @@ void EditorWindow::resized()
 
 	const auto scale = std::min(scaleX, scaleY);
 
-	comp->setSize(w, h);
+	if (!m_state.resizeEditor(w,h))
+		return;
 
 	const auto percent = 100.f * scale / m_state.getRootScale();
 	m_config.setValue("scale", percent);

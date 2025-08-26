@@ -55,6 +55,13 @@ int PluginEditorState::getHeight() const
 	return m_editor ? m_editor->getDefaultHeight() : 0;
 }
 
+bool PluginEditorState::resizeEditor(const int _width, const int _height) const
+{
+	if (!m_editor)
+		return false;
+	return m_editor->setSize(_width, _height);
+}
+
 const std::vector<Skin>& PluginEditorState::getIncludedSkins()
 {
 	return m_includedSkins;

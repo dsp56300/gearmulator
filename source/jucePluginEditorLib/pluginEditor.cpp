@@ -710,6 +710,14 @@ namespace jucePluginEditorLib
 		return m_rmlComponent ? m_rmlComponent->getDocumentSize().y : 0;
 	}
 
+	bool Editor::setSize(const int _width, const int _height) const
+	{
+		if (!m_rmlComponent)
+			return false;
+		m_rmlComponent->resize(_width, _height);
+		return true;
+	}
+
 	void Editor::onDisclaimerFinished() const
 	{
 		if(!synthLib::isRunningUnderRosetta())

@@ -55,6 +55,8 @@ namespace jucePluginEditorLib
 		int getWidth() const;
 		int getHeight() const;
 
+		bool resizeEditor(int _width, int _height) const;
+
 		const Skin& getCurrentSkin() { return m_currentSkin; }
 		const std::vector<Skin>& getIncludedSkins();
 

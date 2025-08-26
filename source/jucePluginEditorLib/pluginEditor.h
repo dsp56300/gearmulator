@@ -180,6 +180,8 @@ namespace jucePluginEditorLib
 		int getDefaultWidth() const;
 		int getDefaultHeight() const;
 
+		bool setSize(int _width, int _height) const;
+
 	private:
 		void onDisclaimerFinished() const;
 
