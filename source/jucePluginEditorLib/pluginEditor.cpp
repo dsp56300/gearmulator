@@ -806,6 +806,7 @@ namespace jucePluginEditorLib
 
 		auto addFile = [&filenames](const std::string& _file)
 		{
+			// we can't use a set here, because we want to keep the order
 			if (std::find(filenames.begin(), filenames.end(), _file) == filenames.end())
 				filenames.push_back(_file);
 		};
@@ -829,7 +830,11 @@ namespace jucePluginEditorLib
 				addFile(data.originalFileNames[i]);
 		}
 
-		auto data = g_binaryDefaultData;
+		for (const auto& file : m_skin.files)
+			addFile(file);
+
+		constexpr auto data = g_binaryDefaultData;
+
 		for (size_t i=0; i<data.listSize; ++i)
 			addFile(data.originalFileNames[i]);
 
