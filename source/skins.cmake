@@ -10,8 +10,7 @@ macro(addSkin productName skinName skinFolder skinRootFile)
 		"${skinFolder}/*.ttf"
 	)
 	
-	message(STATUS "Skin files for ${skinFolder}: ${SKIN_FILES}")
-	message(STATUS "Path test: " ${CMAKE_CURRENT_SOURCE_DIR})
+#	message(STATUS "Skin files for ${skinFolder}: ${SKIN_FILES}")
 
 	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${skinFolder}/${skinRootFile})
 		message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/${skinFolder}/${skinRootFile} not found")
