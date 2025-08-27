@@ -37,8 +37,11 @@ namespace rmlPlugin
 		{
 			const auto v = _source.Get<int>(m_binding.getCoreInstance());
 
-			m_binding.registerPendingGesture(this);
-			m_parameter->setUnnormalizedValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
+			if (m_parameter->getUnnormalizedValue() != v)
+			{
+				m_binding.registerPendingGesture(this);
+				m_parameter->setUnnormalizedValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
+			}
 		});
 
 		// parameter value formatted as text
@@ -50,8 +53,12 @@ namespace rmlPlugin
 			auto text = _source.Get<Rml::String>(m_binding.getCoreInstance());
 
 			const auto v = m_parameter->getValueForText(text);
-			m_binding.registerPendingGesture(this);
-			m_parameter->setValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
+
+			if (m_parameter->getValue() != v)
+			{
+				m_binding.registerPendingGesture(this);
+				m_parameter->setValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
+			}
 		});
 
 		// minimum value
