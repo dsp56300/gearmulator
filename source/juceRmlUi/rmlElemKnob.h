@@ -19,6 +19,8 @@ namespace juceRmlUi
 
 		void ProcessEvent(Rml::Event& _event) override;
 
+		void setEndless(bool _endless);
+
 	private:
 		void processMouseMove(const Rml::Event& _event);
 		void processMouseWheel(const Rml::Event& _event);
@@ -38,6 +40,7 @@ namespace juceRmlUi
 		float m_speedScaleAlt = 0.5f;
 
 		float m_lastMod = -1.0f;
+		bool m_endless = false;
 
 		baseLib::EventListener<float> m_onValueChanged;
 		baseLib::EventListener<float> m_onMinValueChanged;

@@ -88,6 +88,11 @@ namespace juceRmlUi
 		}
 	}
 
+	void ElemKnob::setEndless(bool _endless)
+	{
+		m_endless = _endless;
+	}
+
 	void ElemKnob::processMouseMove(const Rml::Event& _event)
 	{
 		const auto range = getRange();
@@ -115,7 +120,15 @@ namespace juceRmlUi
 
 		const auto d = (delta.x - delta.y) * range * mod / m_speed;
 
-		const auto value = m_mouseDownValue + d;
+		auto value = m_mouseDownValue + d;
+
+		if (m_endless)
+		{
+			while (value > getMaxValue())
+				value -= range;
+			while (value < getMinValue())
+				value += range;
+		}
 
 		setValue(value);
 	}
