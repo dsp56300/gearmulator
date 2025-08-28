@@ -534,8 +534,8 @@ namespace rmlPlugin::skinConverter
 
 		if (!spriteExists(spriteName))
 			return {};
-		
-		style.add("decorator", "image(" + spriteName + " scale-none left top)");
+
+		style.add("decorator", "image(" + spriteName + " fill)");
 
 		m_styles.insert({ styleName, style });
 
