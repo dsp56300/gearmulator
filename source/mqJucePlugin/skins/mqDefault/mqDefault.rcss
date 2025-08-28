@@ -1,0 +1,467 @@
+@spritesheet button
+{
+	button_active: 0px 128px 128px 128px;
+	button_checked: 0px 128px 128px 128px;
+	button_checked-active: 0px 128px 128px 128px;
+	button_checked-hover: 0px 128px 128px 128px;
+	button_default: 0px 0px 128px 128px;
+	button_hover: 0px 0px 128px 128px;
+	src: button.png;
+}
+@spritesheet encoder_ranged_page0
+{
+	encoder_ranged_000: 0px 0px 128px 128px;
+	encoder_ranged_001: 128px 0px 128px 128px;
+	encoder_ranged_002: 256px 0px 128px 128px;
+	encoder_ranged_003: 384px 0px 128px 128px;
+	encoder_ranged_004: 512px 0px 128px 128px;
+	encoder_ranged_005: 640px 0px 128px 128px;
+	encoder_ranged_006: 768px 0px 128px 128px;
+	encoder_ranged_007: 896px 0px 128px 128px;
+	encoder_ranged_008: 1024px 0px 128px 128px;
+	encoder_ranged_009: 1152px 0px 128px 128px;
+	encoder_ranged_010: 1280px 0px 128px 128px;
+	encoder_ranged_011: 1408px 0px 128px 128px;
+	encoder_ranged_012: 1536px 0px 128px 128px;
+	encoder_ranged_013: 1664px 0px 128px 128px;
+	encoder_ranged_014: 1792px 0px 128px 128px;
+	encoder_ranged_015: 1920px 0px 128px 128px;
+	encoder_ranged_016: 0px 128px 128px 128px;
+	encoder_ranged_017: 128px 128px 128px 128px;
+	encoder_ranged_018: 256px 128px 128px 128px;
+	encoder_ranged_019: 384px 128px 128px 128px;
+	encoder_ranged_020: 512px 128px 128px 128px;
+	encoder_ranged_021: 640px 128px 128px 128px;
+	encoder_ranged_022: 768px 128px 128px 128px;
+	encoder_ranged_023: 896px 128px 128px 128px;
+	encoder_ranged_024: 1024px 128px 128px 128px;
+	encoder_ranged_025: 1152px 128px 128px 128px;
+	encoder_ranged_026: 1280px 128px 128px 128px;
+	encoder_ranged_027: 1408px 128px 128px 128px;
+	encoder_ranged_028: 1536px 128px 128px 128px;
+	encoder_ranged_029: 1664px 128px 128px 128px;
+	encoder_ranged_030: 1792px 128px 128px 128px;
+	encoder_ranged_031: 1920px 128px 128px 128px;
+	encoder_ranged_032: 0px 256px 128px 128px;
+	encoder_ranged_033: 128px 256px 128px 128px;
+	encoder_ranged_034: 256px 256px 128px 128px;
+	encoder_ranged_035: 384px 256px 128px 128px;
+	encoder_ranged_036: 512px 256px 128px 128px;
+	encoder_ranged_037: 640px 256px 128px 128px;
+	encoder_ranged_038: 768px 256px 128px 128px;
+	encoder_ranged_039: 896px 256px 128px 128px;
+	encoder_ranged_040: 1024px 256px 128px 128px;
+	encoder_ranged_041: 1152px 256px 128px 128px;
+	encoder_ranged_042: 1280px 256px 128px 128px;
+	encoder_ranged_043: 1408px 256px 128px 128px;
+	encoder_ranged_044: 1536px 256px 128px 128px;
+	encoder_ranged_045: 1664px 256px 128px 128px;
+	encoder_ranged_046: 1792px 256px 128px 128px;
+	encoder_ranged_047: 1920px 256px 128px 128px;
+	encoder_ranged_048: 0px 384px 128px 128px;
+	encoder_ranged_049: 128px 384px 128px 128px;
+	encoder_ranged_050: 256px 384px 128px 128px;
+	encoder_ranged_051: 384px 384px 128px 128px;
+	encoder_ranged_052: 512px 384px 128px 128px;
+	encoder_ranged_053: 640px 384px 128px 128px;
+	encoder_ranged_054: 768px 384px 128px 128px;
+	encoder_ranged_055: 896px 384px 128px 128px;
+	encoder_ranged_056: 1024px 384px 128px 128px;
+	encoder_ranged_057: 1152px 384px 128px 128px;
+	encoder_ranged_058: 1280px 384px 128px 128px;
+	encoder_ranged_059: 1408px 384px 128px 128px;
+	encoder_ranged_060: 1536px 384px 128px 128px;
+	encoder_ranged_061: 1664px 384px 128px 128px;
+	encoder_ranged_062: 1792px 384px 128px 128px;
+	encoder_ranged_063: 1920px 384px 128px 128px;
+	encoder_ranged_064: 0px 512px 128px 128px;
+	encoder_ranged_065: 128px 512px 128px 128px;
+	encoder_ranged_066: 256px 512px 128px 128px;
+	encoder_ranged_067: 384px 512px 128px 128px;
+	encoder_ranged_068: 512px 512px 128px 128px;
+	encoder_ranged_069: 640px 512px 128px 128px;
+	encoder_ranged_070: 768px 512px 128px 128px;
+	encoder_ranged_071: 896px 512px 128px 128px;
+	encoder_ranged_072: 1024px 512px 128px 128px;
+	encoder_ranged_073: 1152px 512px 128px 128px;
+	encoder_ranged_074: 1280px 512px 128px 128px;
+	encoder_ranged_075: 1408px 512px 128px 128px;
+	encoder_ranged_076: 1536px 512px 128px 128px;
+	encoder_ranged_077: 1664px 512px 128px 128px;
+	encoder_ranged_078: 1792px 512px 128px 128px;
+	encoder_ranged_079: 1920px 512px 128px 128px;
+	encoder_ranged_080: 0px 640px 128px 128px;
+	encoder_ranged_081: 128px 640px 128px 128px;
+	encoder_ranged_082: 256px 640px 128px 128px;
+	encoder_ranged_083: 384px 640px 128px 128px;
+	encoder_ranged_084: 512px 640px 128px 128px;
+	encoder_ranged_085: 640px 640px 128px 128px;
+	encoder_ranged_086: 768px 640px 128px 128px;
+	encoder_ranged_087: 896px 640px 128px 128px;
+	encoder_ranged_088: 1024px 640px 128px 128px;
+	encoder_ranged_089: 1152px 640px 128px 128px;
+	src: encoder_ranged_page0.png;
+}
+@spritesheet encoder_ranged_red_page0
+{
+	encoder_ranged_red_000: 0px 0px 128px 128px;
+	encoder_ranged_red_001: 128px 0px 128px 128px;
+	encoder_ranged_red_002: 256px 0px 128px 128px;
+	encoder_ranged_red_003: 384px 0px 128px 128px;
+	encoder_ranged_red_004: 512px 0px 128px 128px;
+	encoder_ranged_red_005: 640px 0px 128px 128px;
+	encoder_ranged_red_006: 768px 0px 128px 128px;
+	encoder_ranged_red_007: 896px 0px 128px 128px;
+	encoder_ranged_red_008: 1024px 0px 128px 128px;
+	encoder_ranged_red_009: 1152px 0px 128px 128px;
+	encoder_ranged_red_010: 1280px 0px 128px 128px;
+	encoder_ranged_red_011: 1408px 0px 128px 128px;
+	encoder_ranged_red_012: 1536px 0px 128px 128px;
+	encoder_ranged_red_013: 1664px 0px 128px 128px;
+	encoder_ranged_red_014: 1792px 0px 128px 128px;
+	encoder_ranged_red_015: 1920px 0px 128px 128px;
+	encoder_ranged_red_016: 0px 128px 128px 128px;
+	encoder_ranged_red_017: 128px 128px 128px 128px;
+	encoder_ranged_red_018: 256px 128px 128px 128px;
+	encoder_ranged_red_019: 384px 128px 128px 128px;
+	encoder_ranged_red_020: 512px 128px 128px 128px;
+	encoder_ranged_red_021: 640px 128px 128px 128px;
+	encoder_ranged_red_022: 768px 128px 128px 128px;
+	encoder_ranged_red_023: 896px 128px 128px 128px;
+	encoder_ranged_red_024: 1024px 128px 128px 128px;
+	encoder_ranged_red_025: 1152px 128px 128px 128px;
+	encoder_ranged_red_026: 1280px 128px 128px 128px;
+	encoder_ranged_red_027: 1408px 128px 128px 128px;
+	encoder_ranged_red_028: 1536px 128px 128px 128px;
+	encoder_ranged_red_029: 1664px 128px 128px 128px;
+	encoder_ranged_red_030: 1792px 128px 128px 128px;
+	encoder_ranged_red_031: 1920px 128px 128px 128px;
+	encoder_ranged_red_032: 0px 256px 128px 128px;
+	encoder_ranged_red_033: 128px 256px 128px 128px;
+	encoder_ranged_red_034: 256px 256px 128px 128px;
+	encoder_ranged_red_035: 384px 256px 128px 128px;
+	encoder_ranged_red_036: 512px 256px 128px 128px;
+	encoder_ranged_red_037: 640px 256px 128px 128px;
+	encoder_ranged_red_038: 768px 256px 128px 128px;
+	encoder_ranged_red_039: 896px 256px 128px 128px;
+	encoder_ranged_red_040: 1024px 256px 128px 128px;
+	encoder_ranged_red_041: 1152px 256px 128px 128px;
+	encoder_ranged_red_042: 1280px 256px 128px 128px;
+	encoder_ranged_red_043: 1408px 256px 128px 128px;
+	encoder_ranged_red_044: 1536px 256px 128px 128px;
+	encoder_ranged_red_045: 1664px 256px 128px 128px;
+	encoder_ranged_red_046: 1792px 256px 128px 128px;
+	encoder_ranged_red_047: 1920px 256px 128px 128px;
+	encoder_ranged_red_048: 0px 384px 128px 128px;
+	encoder_ranged_red_049: 128px 384px 128px 128px;
+	encoder_ranged_red_050: 256px 384px 128px 128px;
+	encoder_ranged_red_051: 384px 384px 128px 128px;
+	encoder_ranged_red_052: 512px 384px 128px 128px;
+	encoder_ranged_red_053: 640px 384px 128px 128px;
+	encoder_ranged_red_054: 768px 384px 128px 128px;
+	encoder_ranged_red_055: 896px 384px 128px 128px;
+	encoder_ranged_red_056: 1024px 384px 128px 128px;
+	encoder_ranged_red_057: 1152px 384px 128px 128px;
+	encoder_ranged_red_058: 1280px 384px 128px 128px;
+	encoder_ranged_red_059: 1408px 384px 128px 128px;
+	encoder_ranged_red_060: 1536px 384px 128px 128px;
+	encoder_ranged_red_061: 1664px 384px 128px 128px;
+	encoder_ranged_red_062: 1792px 384px 128px 128px;
+	encoder_ranged_red_063: 1920px 384px 128px 128px;
+	encoder_ranged_red_064: 0px 512px 128px 128px;
+	encoder_ranged_red_065: 128px 512px 128px 128px;
+	encoder_ranged_red_066: 256px 512px 128px 128px;
+	encoder_ranged_red_067: 384px 512px 128px 128px;
+	encoder_ranged_red_068: 512px 512px 128px 128px;
+	encoder_ranged_red_069: 640px 512px 128px 128px;
+	encoder_ranged_red_070: 768px 512px 128px 128px;
+	encoder_ranged_red_071: 896px 512px 128px 128px;
+	encoder_ranged_red_072: 1024px 512px 128px 128px;
+	encoder_ranged_red_073: 1152px 512px 128px 128px;
+	encoder_ranged_red_074: 1280px 512px 128px 128px;
+	encoder_ranged_red_075: 1408px 512px 128px 128px;
+	encoder_ranged_red_076: 1536px 512px 128px 128px;
+	encoder_ranged_red_077: 1664px 512px 128px 128px;
+	encoder_ranged_red_078: 1792px 512px 128px 128px;
+	encoder_ranged_red_079: 1920px 512px 128px 128px;
+	encoder_ranged_red_080: 0px 640px 128px 128px;
+	encoder_ranged_red_081: 128px 640px 128px 128px;
+	encoder_ranged_red_082: 256px 640px 128px 128px;
+	encoder_ranged_red_083: 384px 640px 128px 128px;
+	encoder_ranged_red_084: 512px 640px 128px 128px;
+	encoder_ranged_red_085: 640px 640px 128px 128px;
+	encoder_ranged_red_086: 768px 640px 128px 128px;
+	encoder_ranged_red_087: 896px 640px 128px 128px;
+	encoder_ranged_red_088: 1024px 640px 128px 128px;
+	encoder_ranged_red_089: 1152px 640px 128px 128px;
+	src: encoder_ranged_red_page0.png;
+}
+@spritesheet led
+{
+	led_active: 0px 128px 128px 128px;
+	led_checked: 0px 128px 128px 128px;
+	led_checked-active: 0px 128px 128px 128px;
+	led_checked-hover: 0px 128px 128px 128px;
+	led_default: 0px 0px 128px 128px;
+	led_hover: 0px 128px 128px 128px;
+	src: led.png;
+}
+@spritesheet ledcircle_11_page0
+{
+	ledcircle_11_000: 0px 0px 512px 512px;
+	ledcircle_11_001: 512px 0px 512px 512px;
+	ledcircle_11_002: 1024px 0px 512px 512px;
+	ledcircle_11_003: 1536px 0px 512px 512px;
+	ledcircle_11_004: 0px 512px 512px 512px;
+	ledcircle_11_005: 512px 512px 512px 512px;
+	ledcircle_11_006: 1024px 512px 512px 512px;
+	ledcircle_11_007: 1536px 512px 512px 512px;
+	ledcircle_11_008: 0px 1024px 512px 512px;
+	ledcircle_11_009: 512px 1024px 512px 512px;
+	ledcircle_11_010: 1024px 1024px 512px 512px;
+	src: ledcircle_11_page0.png;
+}
+@spritesheet ledcircle_5_page0
+{
+	ledcircle_5_000: 0px 0px 512px 512px;
+	ledcircle_5_001: 512px 0px 512px 512px;
+	ledcircle_5_002: 1024px 0px 512px 512px;
+	ledcircle_5_003: 1536px 0px 512px 512px;
+	ledcircle_5_004: 0px 512px 512px 512px;
+	src: ledcircle_5_page0.png;
+}
+@spritesheet ledcircle_6_page0
+{
+	ledcircle_6_000: 0px 0px 512px 512px;
+	ledcircle_6_001: 512px 0px 512px 512px;
+	ledcircle_6_002: 1024px 0px 512px 512px;
+	ledcircle_6_003: 1536px 0px 512px 512px;
+	ledcircle_6_004: 0px 512px 512px 512px;
+	ledcircle_6_005: 512px 512px 512px 512px;
+	src: ledcircle_6_page0.png;
+}
+@spritesheet ledcircle_7_page0
+{
+	ledcircle_7_000: 0px 0px 512px 512px;
+	ledcircle_7_001: 512px 0px 512px 512px;
+	ledcircle_7_002: 1024px 0px 512px 512px;
+	ledcircle_7_003: 1536px 0px 512px 512px;
+	ledcircle_7_004: 0px 512px 512px 512px;
+	ledcircle_7_005: 512px 512px 512px 512px;
+	ledcircle_7_006: 1024px 512px 512px 512px;
+	src: ledcircle_7_page0.png;
+}
+@spritesheet ledcircle_9_page0
+{
+	ledcircle_9_000: 0px 0px 512px 512px;
+	ledcircle_9_001: 512px 0px 512px 512px;
+	ledcircle_9_002: 1024px 0px 512px 512px;
+	ledcircle_9_003: 1536px 0px 512px 512px;
+	ledcircle_9_004: 0px 512px 512px 512px;
+	ledcircle_9_005: 512px 512px 512px 512px;
+	ledcircle_9_006: 1024px 512px 512px 512px;
+	ledcircle_9_007: 1536px 512px 512px 512px;
+	ledcircle_9_008: 0px 1024px 512px 512px;
+	src: ledcircle_9_page0.png;
+}
+@spritesheet toggleWithLED
+{
+	src: toggleWithLED.png;
+	toggleWithLED_active: 0px 128px 128px 128px;
+	toggleWithLED_checked: 0px 128px 128px 128px;
+	toggleWithLED_checked-active: 0px 128px 128px 128px;
+	toggleWithLED_checked-hover: 0px 128px 128px 128px;
+	toggleWithLED_default: 0px 0px 128px 128px;
+	toggleWithLED_hover: 0px 0px 128px 128px;
+}
+.btn
+{
+	decorator: image(button_default fill);
+}
+.btn:checked
+{
+	decorator: image(button_checked fill);
+}
+.btn:checked:active
+{
+	decorator: image(button_checked-active fill);
+}
+.btn:checked:hover
+{
+	decorator: image(button_checked-hover fill);
+}
+.btn:hover
+{
+	decorator: image(button_hover fill);
+}
+.knob
+{
+	frames: 9;
+	spriteprefix: ledcircle_9_;
+}
+.knob1
+{
+	frames: 90;
+	spriteprefix: encoder_ranged_;
+}
+.knob2
+{
+	frames: 7;
+	spriteprefix: ledcircle_7_;
+}
+.knob3
+{
+	frames: 5;
+	spriteprefix: ledcircle_5_;
+}
+.knob4
+{
+	frames: 11;
+	spriteprefix: ledcircle_11_;
+}
+.knob5
+{
+	frames: 90;
+	spriteprefix: encoder_ranged_red_;
+}
+.knob6
+{
+	frames: 6;
+	spriteprefix: ledcircle_6_;
+}
+.led
+{
+	decorator: image(led_default fill);
+}
+.led:checked
+{
+	decorator: image(led_checked fill);
+}
+.led:checked:active
+{
+	decorator: image(led_checked-active fill);
+}
+.led:checked:hover
+{
+	decorator: image(led_checked-hover fill);
+}
+.led:hover
+{
+	decorator: image(led_hover fill);
+}
+.list, .grid, .pm-infopanel
+{
+	background-color: #1c1f22;
+}
+.listentry, .gridentry
+{
+	color: #ffda94;
+	font-size: 28.000000dp;
+	font-weight: bold;
+	text-align: left;
+}
+.listentry:selected, .gridentry:selected
+{
+	background-color: #a87a24;
+}
+.pm-hlayout
+{
+	background-color: black;
+}
+.pm-info-headline
+{
+	color: #888888;
+	font-size: 32.000000dp;
+}
+.pm-info-name
+{
+	color: #ffda94;
+	font-size: 64.000000dp;
+}
+.pm-info-text
+{
+	color: #ffda94;
+	font-size: 32.000000dp;
+}
+.pm-status
+{
+	border: 0dp transparent;
+	color: #ffda94;
+	font-size: 32.000000dp;
+	text-align: left;
+}
+.pm-vlayout
+{
+	gap: 4dp;
+}
+.toggleWithLED
+{
+	decorator: image(toggleWithLED_default fill);
+}
+.toggleWithLED:checked
+{
+	decorator: image(toggleWithLED_checked fill);
+}
+.toggleWithLED:checked:active
+{
+	decorator: image(toggleWithLED_checked-active fill);
+}
+.toggleWithLED:checked:hover
+{
+	decorator: image(toggleWithLED_checked-hover fill);
+}
+.toggleWithLED:hover
+{
+	decorator: image(toggleWithLED_hover fill);
+}
+.txt
+{
+	color: #000000;
+	font-family: Register;
+	font-size: 46.000000dp;
+	text-align: left;
+}
+.txt1
+{
+	color: #d1d1d1;
+	font-size: 30.000000dp;
+	font-weight: bold;
+	text-align: left;
+}
+.txt2
+{
+	color: #cf972e;
+	font-size: 40.000000dp;
+	text-align: center;
+}
+body
+{
+	font-size: 28dp;
+}
+input.text
+{
+	background-color: #0e1216;
+	border: 0dp transparent;
+	color: #ffda94;
+	font-size: 28.000000dp;
+	text-align: left;
+}
+scrollbarvertical sliderbar, scrollbarhorizontal sliderbar, splitter:active
+{
+	background-color: #cf972e;
+}
+tree
+{
+	background-color: #1c1f22;
+}
+treenode
+{
+	color: #ffda94;
+	font-size: 28.000000dp;
+	text-align: left;
+}
+treenode:selected
+{
+	background-color: #a87a24;
+}
+
