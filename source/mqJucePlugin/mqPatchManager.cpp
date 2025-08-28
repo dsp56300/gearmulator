@@ -8,14 +8,14 @@
 
 namespace mqJucePlugin
 {
-	static constexpr std::initializer_list<jucePluginEditorLib::patchManager::GroupType> g_groupTypes =
+	static constexpr std::initializer_list g_groupTypes =
 	{
 		jucePluginEditorLib::patchManager::GroupType::Favourites,
 		jucePluginEditorLib::patchManager::GroupType::LocalStorage,
 		jucePluginEditorLib::patchManager::GroupType::DataSources,
 	};
 
-	PatchManager::PatchManager(Editor& _editor, juce::Component* _root)
+	PatchManager::PatchManager(Editor& _editor, Rml::Element* _root)
 		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, g_groupTypes)
 		, m_editor(_editor)
 		, m_controller(_editor.getMqController())

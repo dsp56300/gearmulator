@@ -1,10 +1,11 @@
 #include "mqEditor.h"
 
+#include <juceRmlPlugin/skinConverter/skinConverterOptions.h>
+
 #include "PluginProcessor.h"
 
 #include "mqController.h"
 #include "mqFrontPanel.h"
-#include "mqPartButton.h"
 #include "mqPartSelect.h"
 #include "mqPatchManager.h"
 
@@ -13,46 +14,37 @@
 #include "jucePluginEditorLib/focusedParameter.h"
 
 #include "jucePluginLib/filetype.h"
+#include "juceRmlPlugin/rmlTabGroup.h"
 
 namespace mqJucePlugin
 {
 	static constexpr uint32_t PlayModeListenerId = 1;
 
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
-	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
-	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, const jucePluginEditorLib::Skin& _skin)
+		: jucePluginEditorLib::Editor(_processor, _skin)
+		, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	{
-		create();
+	}
+
+	void Editor::create()
+	{
+		jucePluginEditorLib::Editor::create();
 
 		m_frontPanel.reset(new FrontPanel(*this, m_controller));
 
-		if(auto* container = findComponent("patchbrowser", false))
+		auto disableButton = [](Rml::Element* _comp)
 		{
-			constexpr auto scale = 1.3f;
-			const float x = static_cast<float>(container->getX());
-			const float y = static_cast<float>(container->getY());
-			const float w = static_cast<float>(container->getWidth());
-			const float h = static_cast<float>(container->getHeight());
-			container->setTransform(juce::AffineTransform::scale(scale, scale));
-			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
-			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
-
-			setPatchManager(new PatchManager(*this, container));
-		}
-
-		auto disableButton = [](juce::Component* _comp)
-		{
-			_comp->setAlpha(0.5f);
-			_comp->setEnabled(false);
+			_comp->SetProperty(Rml::PropertyId::Opacity, Rml::Property(0.5f, Rml::Unit::NUMBER));
+			_comp->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 		};
 
 		auto disableByName = [this, &disableButton](const std::string& _button)
 		{
-			if (auto* bt = findComponentT<juce::Button>(_button, false))
+			if (auto* bt = findChild(_button, false))
 				disableButton(bt);
 		};
 
-		m_btPlayModeMulti = findComponentT<juce::Button>("btPlayModeMulti", false);
+		m_btPlayModeMulti = findChild("btPlayModeMulti", false);
 		if(m_btPlayModeMulti)
 		{
 			if constexpr(mqLib::g_pluginDemo)
@@ -61,14 +53,16 @@ namespace mqJucePlugin
 			}
 			else
 			{
-				m_btPlayModeMulti->onClick = [this]()
+				juceRmlUi::EventListener::AddClick(m_btPlayModeMulti, [this]
 				{
-					m_controller.setPlayMode(m_btPlayModeMulti->getToggleState());
-				};
+					const auto checked = m_btPlayModeMulti->IsPseudoClassSet("checked");
+					rmlPlugin::TabGroup::setChecked(m_btPlayModeMulti, !checked);
+					m_controller.setPlayMode(checked);
+				});
 			}
 		}
 
-		m_btSave = findComponentT<juce::Button>("btSave", false);
+		m_btSave = findChild("btSave", false);
 		if (m_btSave)
 		{
 			if constexpr (mqLib::g_pluginDemo)
@@ -77,10 +71,10 @@ namespace mqJucePlugin
 			}
 			else
 			{
-				m_btSave->onClick = [this]()
+				juceRmlUi::EventListener::Add(m_btSave, Rml::EventId::Click, [this](const Rml::Event& _event)
 				{
-					onBtSave();
-				};
+					onBtSave(_event);
+				});
 			}
 		}
 
@@ -90,29 +84,39 @@ namespace mqJucePlugin
 			disableByName("btPageDrum");
 		}
 
-		m_btPresetPrev = findComponentT<juce::Button>("btPresetPrev", false);
-		m_btPresetNext = findComponentT<juce::Button>("btPresetNext", m_btPresetPrev != nullptr);
+		m_btPresetPrev = findChild("btPresetPrev", false);
+		m_btPresetNext = findChild("btPresetNext", m_btPresetPrev != nullptr);
 
 		if (m_btPresetPrev)
 		{
-			m_btPresetPrev->onClick = [this]			{ onBtPresetPrev();	};
-			m_btPresetNext->onClick = [this]			{ onBtPresetNext();	};
+			juceRmlUi::EventListener::AddClick(m_btPresetPrev, [this]			{ onBtPresetPrev(); });
+			juceRmlUi::EventListener::AddClick(m_btPresetNext, [this]			{ onBtPresetNext(); });
 		}
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, _binding, *this));
+		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
 
-		if(!findComponents("partSelectButton", false).empty())
-			m_partSelect.reset(new mqPartSelect(*this, m_controller, _binding));
-
-		addMouseListener(this, true);
+		if(findChild("partSelectButton", false))
+			m_partSelect.reset(new mqPartSelect(*this, m_controller));
 
 		m_controller.onPlayModeChanged.addListener(PlayModeListenerId, [this](bool)
 		{
 			if(m_btPlayModeMulti)
-				m_btPlayModeMulti->setToggleState(m_controller.isMultiMode(), juce::dontSendNotification);
+				rmlPlugin::TabGroup::setChecked(m_btPlayModeMulti, m_controller.isMultiMode());
 			if(m_partSelect)
 				m_partSelect->onPlayModeChanged();
 		});
+	}
+
+	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
+	{
+		return new PatchManager(*this, _parent);
+	}
+
+	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
+	{
+		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);
+
+		_skinConverterOptions.idReplacements.insert({"patchbrowser", "container-patchmanager"});
 	}
 
 	Editor::~Editor()
@@ -131,21 +135,8 @@ namespace mqJucePlugin
 			"\n"
 			"The following features are disabled:\n"
 			"- Saving/Exporting Presets\n"
-			"- Plugin state is not preserve"
+			"- Plugin state is not preserved"
 		};
-	}
-
-	genericUI::Button<juce::DrawableButton>* Editor::createJuceComponent(genericUI::Button<juce::DrawableButton>* _button, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle _buttonStyle)
-	{
-		if(_object.getName() == "partSelectButton")
-			return new mqPartButton(*this, _name, _buttonStyle);
-
-		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object, _name, _buttonStyle);
-	}
-
-	void Editor::mouseEnter(const juce::MouseEvent& _event)
-	{
-		m_focusedParameter->onMouseEnter(_event);
 	}
 
 	void Editor::savePreset(const pluginLib::FileType& _type)
@@ -165,41 +156,41 @@ namespace mqJucePlugin
 		});
 	}
 
-	void Editor::onBtSave()
+	void Editor::onBtSave(const Rml::Event& _event)
 	{
-		juce::PopupMenu menu;
+		juceRmlUi::Menu menu;
 
 		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
 
 		if(countAdded)
 			menu.addSeparator();
 
-		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
+		auto addEntry = [&](juceRmlUi::Menu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
-			juce::PopupMenu subMenu;
+			juceRmlUi::Menu subMenu;
 
-			subMenu.addItem(".syx", [_callback]() {_callback(pluginLib::FileType::Syx); });
-			subMenu.addItem(".mid", [_callback]() {_callback(pluginLib::FileType::Mid); });
+			subMenu.addEntry(".syx", [_callback]() {_callback(pluginLib::FileType::Syx); });
+			subMenu.addEntry(".mid", [_callback]() {_callback(pluginLib::FileType::Mid); });
 
-			_menu.addSubMenu(_name, subMenu);
+			_menu.addSubMenu(_name, std::move(subMenu));
 		};
 
-		addEntry(menu, "Current Single (Edit Buffer)", [this](pluginLib::FileType _type)
+		addEntry(menu, "Current Single (Edit Buffer)", [this](const pluginLib::FileType& _type)
 		{
 			savePreset(_type);
 		});
 
-		menu.showMenuAsync(juce::PopupMenu::Options());
+		menu.runModal(_event);
 	}
 
-	void Editor::onBtPresetPrev()
+	void Editor::onBtPresetPrev() const
 	{
 		if (getPatchManager() && getPatchManager()->selectPrevPreset(m_controller.getCurrentPart()))
 			return;
 		m_controller.selectPrevPreset();
 	}
 
-	void Editor::onBtPresetNext()
+	void Editor::onBtPresetNext() const
 	{
 		if (getPatchManager() && getPatchManager()->selectNextPreset(m_controller.getCurrentPart()))
 			return;
