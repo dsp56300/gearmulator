@@ -8,7 +8,7 @@
 
 namespace mqJucePlugin
 {
-	static constexpr std::initializer_list g_groupTypes =
+	static constexpr std::initializer_list<jucePluginEditorLib::patchManager::GroupType> g_groupTypes =
 	{
 		jucePluginEditorLib::patchManager::GroupType::Favourites,
 		jucePluginEditorLib::patchManager::GroupType::LocalStorage,

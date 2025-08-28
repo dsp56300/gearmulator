@@ -19,7 +19,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	PatchManager::PatchManager(Editor& _editor, Rml::Element* _rootElement, const std::initializer_list<patchManager::GroupType>& _groupTypes/* = DefaultGroupTypes*/)
+	PatchManager::PatchManager(Editor& _editor, Rml::Element* _rootElement, const std::initializer_list<GroupType>& _groupTypes/* = DefaultGroupTypes*/)
 	: DB(juce::File(_editor.getProcessor().getPatchManagerDataFolder(false)))
 	, m_state(*this)
 	, m_editor(_editor)
