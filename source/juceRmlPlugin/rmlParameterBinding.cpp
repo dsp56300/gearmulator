@@ -255,6 +255,10 @@ namespace rmlPlugin
 		{
 			auto* param = m_controller.getParameter(i, _sourcePart);
 
+			// we silenty fail here because _sourcePart might be out of range, that is no issue
+			if (!param)
+				continue;
+
 			if (param->getDescription().isNonPartSensitive())
 			{
 				// non-part sensitive parameters are always bound to the current part and to part 0 but not any other part
