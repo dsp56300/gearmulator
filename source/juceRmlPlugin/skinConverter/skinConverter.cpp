@@ -261,14 +261,14 @@ namespace rmlPlugin::skinConverter
 	{
 		const auto imageName = createSpritesheet(_object);
 
-		createImageStyle(imageName, {});
+		const auto className = createImageStyle(imageName, {}).substr(1);
 		createImageStyle(imageName, {"checked"});
 		createImageStyle(imageName, {"checked", "active"});
 		createImageStyle(imageName, {"checked", "hover"});
 		createImageStyle(imageName, {"hover"});
 
 		_co.classes.emplace_back("juceButton");
-		_co.classes.emplace_back(imageName);
+		_co.classes.emplace_back(className);
 
 		const auto isToggle = _object.getPropertyInt("isToggle");
 
@@ -506,6 +506,9 @@ namespace rmlPlugin::skinConverter
 	std::string SkinConverter::createImageStyle(const std::string& _imageName, const std::vector<std::string>& _states)
 	{
 		auto styleName = "." + _imageName;
+
+		if (styleName == ".button")
+			styleName = ".btn"; // collides with the global button element style
 
 		for (const auto& state : _states)
 			styleName += ":" + state;
