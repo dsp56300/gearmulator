@@ -4,6 +4,7 @@
 #include "juce_graphics/juce_graphics.h"
 
 #include "RmlUi/Core/ComputedValues.h"
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/Geometry.h"
 #include "RmlUi/Core/Mesh.h"
@@ -35,6 +36,7 @@ namespace juceRmlUi
 	void ElemCanvas::repaint()
 	{
 		m_textureDirty = true;
+		GetContext()->RequestNextUpdate(0);
 	}
 
 	void ElemCanvas::setClearEveryFrame(const bool _clearEveryFrame)
