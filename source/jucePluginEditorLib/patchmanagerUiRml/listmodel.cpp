@@ -156,9 +156,17 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		updateEntries();
 
-		setSelectedPatches(selectedPatches);
+		if (setSelectedPatches(selectedPatches))
+		{
+			m_list->scrollIntoView(getSelectedEntries().front());
+		}
+		else
+		{
+			m_list->SetScrollTop(0);
+			m_list->SetScrollLeft(0);
+		}
 
-		getPatchManager().setListStatus(static_cast<uint32_t>(selectedPatches.size()), static_cast<uint32_t>(getPatches().size()));
+		getPatchManager().setListStatus(static_cast<uint32_t>(getSelectedEntries().size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
 	void ListModel::setContent(pluginLib::patchDB::SearchRequest&& _search)
