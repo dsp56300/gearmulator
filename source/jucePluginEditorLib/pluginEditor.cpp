@@ -90,7 +90,7 @@ namespace jucePluginEditorLib
 		if (auto* elem = m_rmlComponent->getDocument()->GetElementById("patchmanager"))
 		{
 			juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
-			setPatchManager(createPatchManager(*m_rmlComponent, elem));
+			setPatchManager(createPatchManager(elem));
 		}
 
 		initRootScale(m_rmlComponent->getDocument()->GetAttribute("rootScale", 1.0f));
@@ -690,6 +690,16 @@ namespace jucePluginEditorLib
 		m_patchManagerDataModel.reset();
 		m_pluginDataModel.reset();
 		m_overlays.reset();
+	}
+
+	void Editor::registerDragAndDropFile(const juce::File& _file)
+	{
+		m_dragAndDropFiles.push_back(_file);
+	}
+
+	void Editor::registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile)
+	{
+		m_dragAndDropTempFiles.push_back(std::move(_tempFile));
 	}
 
 	rmlPlugin::RmlParameterBinding* Editor::getRmlParameterBinding() const

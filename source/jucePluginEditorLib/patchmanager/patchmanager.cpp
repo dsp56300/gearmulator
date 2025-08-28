@@ -11,12 +11,15 @@
 #include "jucePluginLib/filetype.h"
 #include "jucePluginLib/types.h"
 
+#include "jucePluginEditorLib/patchmanagerUiRml/patchmanagerUiRml.h"
+
 #include "dsp56kEmu/logging.h"
+
 #include "juceUiLib/messageBox.h"
 
 namespace jucePluginEditorLib::patchManager
 {
-	PatchManager::PatchManager(Editor& _editor)
+	PatchManager::PatchManager(Editor& _editor, Rml::Element* _rootElement, const std::initializer_list<patchManager::GroupType>& _groupTypes/* = DefaultGroupTypes*/)
 	: DB(juce::File(_editor.getProcessor().getPatchManagerDataFolder(false)))
 	, m_state(*this)
 	, m_editor(_editor)
@@ -26,6 +29,8 @@ namespace jucePluginEditorLib::patchManager
 		setTagTypeName(pluginLib::patchDB::TagType::Favourites, "Favourite");
 
 		startTimer(200);
+
+		setUi(std::make_unique<patchManagerRml::PatchManagerUiRml>(m_editor, *this, *m_editor.getRmlComponent(), _rootElement, *m_editor.getPatchManagerDataModel(), _groupTypes));
 	}
 
 	PatchManager::~PatchManager()

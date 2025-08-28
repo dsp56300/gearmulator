@@ -41,13 +41,13 @@ namespace jucePluginEditorLib
 
 		virtual void onClick(Rml::Event&) {}
 
-		void setVisible(bool _visible);
+		void setVisible(bool _visible) const;
 
 		Rml::Element* getElement() const { return m_button; }
 
-	private:
-		void setIsDragTarget(const bool _isDragTarget);
+		void setChecked(bool _checked) const;
 
+	private:
 		Rml::Element* m_button = nullptr;
 		Editor& m_editor;
 		uint8_t m_part = 0xff;

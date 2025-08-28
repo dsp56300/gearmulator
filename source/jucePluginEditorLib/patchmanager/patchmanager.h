@@ -9,6 +9,11 @@
 
 #include "juce_events/juce_events.h"	// juce::Timer
 
+namespace Rml
+{
+	class Element;
+}
+
 namespace juceRmlUi
 {
 	class Menu;
@@ -35,7 +40,7 @@ namespace jucePluginEditorLib::patchManager
 
 		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
 
-		explicit PatchManager(Editor& _editor);
+		explicit PatchManager(Editor& _editor, Rml::Element* _rootElement, const std::initializer_list<patchManager::GroupType>& _groupTypes = DefaultGroupTypes);
 		~PatchManager() override;
 
 		void timerCallback() override;

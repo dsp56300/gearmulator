@@ -23,20 +23,10 @@ namespace virus
 
 namespace genericVirusUI
 {
-	PatchManager::PatchManager(VirusEditor& _editor, juceRmlUi::RmlComponent& _comp, Rml::Element* _root)
-		: PatchManager(_editor, [this, &_editor, &_comp, _root]
-		{
-			return std::make_unique<jucePluginEditorLib::patchManagerRml::PatchManagerUiRml>(_editor, *this, _comp, _root, *_editor.getPatchManagerDataModel(), DefaultGroupTypes);
-		})
-	{
-	}
-
-	PatchManager::PatchManager(VirusEditor& _editor, const std::function<std::unique_ptr<jucePluginEditorLib::patchManager::PatchManagerUi>()>& _createUiFunc)
-		: jucePluginEditorLib::patchManager::PatchManager(_editor)
+	PatchManager::PatchManager(VirusEditor& _editor, Rml::Element* _root)
+		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root)
 		, m_controller(_editor.getController())
 	{
-		setUi(_createUiFunc());
-
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
 		

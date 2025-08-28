@@ -97,7 +97,7 @@ namespace jucePluginEditorLib
 
 		bool selectTabWithElement(const Rml::Element* _element) const;
 
-		virtual patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) { return nullptr; }
+		virtual patchManager::PatchManager* createPatchManager(Rml::Element* _parent) { return nullptr; }
 
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
@@ -152,15 +152,9 @@ namespace jucePluginEditorLib
 		const auto& getPatchManagerDataModel() const { return m_patchManagerDataModel; }
 		auto& getPluginDataModel() { return m_pluginDataModel; }
 
-		void registerDragAndDropFile(const juce::File& _file)
-		{
-			m_dragAndDropFiles.push_back(_file);
-		}
+		void registerDragAndDropFile(const juce::File& _file);
 
-		void registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile)
-		{
-			m_dragAndDropTempFiles.push_back(std::move(_tempFile));
-		}
+		void registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile);
 
 		rmlPlugin::RmlPlugin* getRmlPlugin() const { return m_rmlPlugin.get(); }
 		juceRmlUi::RmlComponent* getRmlComponent() const { return m_rmlComponent.get(); }

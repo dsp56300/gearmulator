@@ -36,7 +36,7 @@ namespace jucePluginEditorLib
 			High
 		};
 
-		FocusedParameter(const pluginLib::Controller& _controller, const rmlPlugin::RmlParameterBinding& _parameterBinding, const Editor& _editor);
+		FocusedParameter(const pluginLib::Controller& _controller, const Editor& _editor);
 		~FocusedParameter() override;
 
 		void updateByElement(const Rml::Element* _element);

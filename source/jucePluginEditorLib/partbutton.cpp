@@ -2,8 +2,9 @@
 
 #include "pluginEditor.h"
 #include "pluginProcessor.h"
-#include "juceRmlUi/rmlElemList.h"
 
+#include "juceRmlUi/rmlElemButton.h"
+#include "juceRmlUi/rmlElemList.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 
@@ -125,8 +126,13 @@ namespace jucePluginEditorLib
 		return std::make_unique<patchManager::SavePatchDesc>(m_editor, m_part);
 	}
 
-	void PartButton::setVisible(const bool _visible)
+	void PartButton::setVisible(const bool _visible) const
 	{
 		juceRmlUi::helper::setVisible(m_button, _visible);
+	}
+
+	void PartButton::setChecked(bool _checked) const
+	{
+		juceRmlUi::ElemButton::setChecked(m_button, _checked);
 	}
 }

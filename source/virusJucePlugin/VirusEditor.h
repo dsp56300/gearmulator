@@ -65,7 +65,7 @@ namespace genericVirusUI
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 		void initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model) override;
 
-		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent) override;
+		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 
 	private:
 		void onProgramChange(int _part);

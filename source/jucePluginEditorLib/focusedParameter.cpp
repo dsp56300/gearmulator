@@ -45,8 +45,8 @@ namespace jucePluginEditorLib
 		}
 	}
 
-	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const rmlPlugin::RmlParameterBinding& _parameterBinding, const Editor& _editor)
-		: m_parameterBinding(_parameterBinding)
+	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const Editor& _editor)
+		: m_parameterBinding(*_editor.getRmlParameterBinding())
 		, m_controller(_controller)
 	{
 		m_focusedParameterName = _editor.findChild("FocusedParameterName", false);

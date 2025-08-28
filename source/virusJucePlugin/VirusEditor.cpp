@@ -43,7 +43,7 @@ namespace genericVirusUI
 
 		m_presetName = findChild("PatchName");
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), *getRmlParameterBinding(), *this));
+		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), *this));
 
 		m_romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector");
 
@@ -231,9 +231,9 @@ namespace genericVirusUI
 		});
 	}
 
-	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(juceRmlUi::RmlComponent& _rmlCompnent, Rml::Element* _parent)
+	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(Rml::Element* _parent)
 	{
-		return new PatchManager(*this, _rmlCompnent, _parent);
+		return new PatchManager(*this, _parent);
 	}
 
 	void VirusEditor::onProgramChange(int _part)
