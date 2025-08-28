@@ -71,14 +71,9 @@ namespace juceRmlUi
 		const auto self = shared_from_this();
 
 		// insert into dummy array and sort it to extract insert position
-		auto children = _parent->m_children;
-		children.push_back(self);
-		std::sort(children.begin(), children.end(), _sortedInsertionComparer);
+		const auto it = std::lower_bound(m_children.begin(), m_children.end(), self, _sortedInsertionComparer);
 
-		auto it = std::find(children.begin(), children.end(), self);
-		assert(it != children.end());
-
-		const auto position = std::distance(children.begin(), it);
+		const auto position = std::distance(m_children.begin(), it);
 
 		// now insert at the found position
 		return setParent(_parent, position);
