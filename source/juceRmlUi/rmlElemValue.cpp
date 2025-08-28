@@ -1,5 +1,7 @@
 #include "rmlElemValue.h"
 
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
+
 namespace juceRmlUi
 {
 	namespace
@@ -77,5 +79,14 @@ namespace juceRmlUi
 		_prop = _newValue;
 		_event(_newValue);
 		return true;
+	}
+
+	float ElemValue::getValue(const Rml::Element* _elem)
+	{
+		if (auto* e = dynamic_cast<const ElemValue*>(_elem))
+			return e->getValue();
+		if (auto* input = dynamic_cast<const Rml::ElementFormControlInput*>(_elem))
+			return Rml::Variant(input->GetValue()).Get<float>(_elem->GetCoreInstance());
+		return _elem->GetAttribute<float>("value", 0.0f);
 	}
 }

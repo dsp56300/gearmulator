@@ -108,26 +108,19 @@ namespace rmlPlugin
 		}
 	}
 
-	bool TabGroup::isChecked(Rml::Element* _button)
+	bool TabGroup::isChecked(const Rml::Element* _button)
 	{
-		if (auto* elemButton = dynamic_cast<juceRmlUi::ElemButton*>(_button))
-			return elemButton->isChecked();
-		return _button->IsPseudoClassSet("checked");
+		return juceRmlUi::ElemButton::isChecked(_button);
 	}
 
 	void TabGroup::setChecked(Rml::Element* _button, const bool _checked)
 	{
-		if (auto* elemButton = dynamic_cast<juceRmlUi::ElemButton*>(_button))
-			elemButton->setChecked(_checked);
-		else
-			_button->SetPseudoClass("checked", _checked);
+		juceRmlUi::ElemButton::setChecked(_button, _checked);
 	}
 
-	bool TabGroup::isToggle(Rml::Element* _button)
+	bool TabGroup::isToggle(const Rml::Element* _button)
 	{
-		if (auto* elemButton = dynamic_cast<juceRmlUi::ElemButton*>(_button))
-			return elemButton->isToggle();
-		return false;
+		return juceRmlUi::ElemButton::isToggle(_button);
 	}
 
 	bool TabGroup::selectTabWithElement(const Rml::Element* _element)

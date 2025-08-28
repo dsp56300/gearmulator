@@ -47,6 +47,8 @@ namespace juceRmlUi
 
 		static bool setProperty(float& _prop, float _newValue, const baseLib::Event<float>& _event);
 
+		static float getValue(const Rml::Element* _elem);
+
 	private:
 		float m_value = -1.0f;
 		float m_min = 0.0f;

@@ -33,9 +33,9 @@ namespace rmlPlugin
 		TabGroup& operator=(const TabGroup&) = delete;
 		TabGroup& operator=(TabGroup&&) = delete;
 
-		static bool isChecked(Rml::Element* _button);
+		static bool isChecked(const Rml::Element* _button);
 		static void setChecked(Rml::Element* _button, bool _checked);
-		static bool isToggle(Rml::Element* _button);
+		static bool isToggle(const Rml::Element* _button);
 
 		bool selectTabWithElement(const Rml::Element* _element);
 

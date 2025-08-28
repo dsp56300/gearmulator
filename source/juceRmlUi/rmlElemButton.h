@@ -23,8 +23,15 @@ namespace juceRmlUi
 
 		void setChecked(bool _checked);
 
+		static void setChecked(Rml::Element* _button, bool _checked);
+		static bool isChecked(const Rml::Element* _button);
+		static bool isPressed(const Rml::Element* _element);
+
 		bool isChecked() const { return m_isChecked; }
+		bool isPressed() const;
 		bool isToggle() const { return m_isToggle; }
+
+		static bool isToggle(const Rml::Element* _button);
 
 	private:
 		void onClick();

@@ -6,9 +6,11 @@ namespace juceRmlUi
 {
 	ElemButton::ElemButton(Rml::CoreInstance& _coreInstance, const Rml::String& _tag): ElemValue(_coreInstance, _tag)
 	{
-		EventListener::Add(this, Rml::EventId::Click, [&](const Rml::Event& _event) { onClick(); });
-		EventListener::Add(this, Rml::EventId::Mousedown, [&](const Rml::Event& _event) { onMouseDown(); });
-		EventListener::Add(this, Rml::EventId::Mouseup, [&](const Rml::Event& _event) { onMouseUp(); });
+		EventListener::Add(this, Rml::EventId::Click, [&](const Rml::Event&) { onClick(); });
+		EventListener::Add(this, Rml::EventId::Mousedown, [&](const Rml::Event&) { onMouseDown(); });
+		EventListener::Add(this, Rml::EventId::Mouseup, [&](const Rml::Event&) { onMouseUp(); });
+
+		// TODO: mouse out while pressed? Should removed the pressed state
 	}
 
 	void ElemButton::onChangeValue()
@@ -49,6 +51,13 @@ namespace juceRmlUi
 		if (m_hitTestElem)
 			return m_hitTestElem->IsPointWithinElement(_point);
 		return ElemValue::IsPointWithinElement(_point);
+	}
+
+	bool ElemButton::isToggle(const Rml::Element* _button)
+	{
+		if (auto* elemButton = dynamic_cast<const ElemButton*>(_button))
+			return elemButton->isToggle();
+		return false;
 	}
 
 	void ElemButton::onClick()
@@ -94,5 +103,33 @@ namespace juceRmlUi
 			setValue(static_cast<float>(getValueOff()));
 
 		SetPseudoClass("checked", _checked);
+	}
+
+	void ElemButton::setChecked(Rml::Element* _button, bool _checked)
+	{
+		if (auto* elemButton = dynamic_cast<ElemButton*>(_button))
+			elemButton->setChecked(_checked);
+		else
+			_button->SetPseudoClass("checked", _checked);
+	}
+
+	bool ElemButton::isChecked(const Rml::Element* _button)
+	{
+		if (auto* elemButton = dynamic_cast<const ElemButton*>(_button))
+			return elemButton->isChecked();
+		return _button->IsPseudoClassSet("checked");
+	}
+
+	bool ElemButton::isPressed(const Rml::Element* _element)
+	{
+		if (auto* elemButton = dynamic_cast<const ElemButton*>(_element))
+			return elemButton->isPressed();
+		return _element->IsPseudoClassSet("pressed");
+	}
+
+	bool ElemButton::isPressed() const
+	{
+		// FIXME: non-toggles get the "checked" state while pressed, we should add a separate "pressed" state
+		return m_isChecked;
 	}
 }
