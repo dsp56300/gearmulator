@@ -43,6 +43,11 @@ namespace genericUI
 
 		const auto& getHitAreaOffset() const { return m_hitAreaOffset; }
 
+		int getComboOffsetL() const { return m_offsetL; }
+		int getComboOffsetT() const { return m_offsetT; }
+		int getComboOffsetR() const { return m_offsetR; }
+		int getComboOffsetB() const { return m_offsetB; }	
+
 	protected:
 		juce::Font getComboBoxFont(juce::ComboBox&) override;
 		juce::Font getLabelFont(juce::Label&) override;

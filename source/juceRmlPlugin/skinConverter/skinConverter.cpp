@@ -321,8 +321,19 @@ namespace rmlPlugin::skinConverter
 		_co.classes.push_back(className.substr(1));
 
 		auto& textElem = _co.children.emplace_back();
+
 		textElem.tag = "combotext";
+
+		textElem.style.add("pointer-events", "none"); // text element must not block mouse events
+
+		textElem.classes.emplace_back("jucePos");
+
 		textElem.innerText = Rml::StringUtilities::EncodeRml(_object.getProperty("text"));
+
+		textElem.position.x = static_cast<float>(style.getComboOffsetL());
+		textElem.position.y = static_cast<float>(style.getComboOffsetT());
+		textElem.position.width = _co.position.width + static_cast<float>(style.getComboOffsetR());
+		textElem.position.height = _co.position.height + static_cast<float>(style.getComboOffsetB());
 	}
 
 	void SkinConverter::convertUiObjectImage(ConvertedObject& _co, const genericUI::UiObject& _object)
