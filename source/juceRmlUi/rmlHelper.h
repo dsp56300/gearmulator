@@ -97,7 +97,7 @@ namespace juceRmlUi
 
 			for (int i=0; i<getNumChildren(_parent); ++i)
 			{
-				auto* child = getChild(_parent, i);;
+				auto* child = getChild(_parent, i);
 
 				if (getId(child) == _name)
 				{
