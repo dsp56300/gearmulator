@@ -88,6 +88,40 @@ namespace juceRmlUi
 		}
 	}
 
+	bool ElemList::scrollIntoView(const size_t _index)
+	{
+		if (_index == List::InvalidIndex || !m_scrollDummy)
+			return false;
+
+		float x, y;
+
+		const auto elemSize = updateElementSize();
+
+		if (getLayoutType() == LayoutType::Grid)
+		{
+			x = static_cast<float>(static_cast<int>(_index / getItemsPerColumn()));
+			y = static_cast<float>(_index) - x * static_cast<float>(getItemsPerColumn());
+
+			x *= elemSize.x;
+			y *= elemSize.y;
+		}
+		else 
+		{
+			x = 0.0f;
+			y = static_cast<float>(_index) * updateElementSize().y;
+		}
+
+		m_scrollDummy->SetProperty(PropertyId::Left, Property(x, Unit::PX));
+		m_scrollDummy->SetProperty(PropertyId::Top, Property(y, Unit::PX));
+
+		m_scrollDummy->SetProperty(PropertyId::Width, Property(elemSize.x, Unit::PX));
+		m_scrollDummy->SetProperty(PropertyId::Height, Property(elemSize.y, Unit::PX));
+
+		m_scrollTargetDirty = 2;
+
+		return true;
+	}
+
 	void ElemList::initialize()
 	{
 		if (!GetNumChildren())
@@ -570,36 +604,7 @@ namespace juceRmlUi
 
 		auto lastSelected = m_list.handleNavigationKey(key, ctrl, shift, getLayoutType() == LayoutType::Grid ? getItemsPerColumn() : 0);
 
-		if (lastSelected == List::InvalidIndex)
-			return false;
-
-		float x, y;
-
-		const auto elemSize = updateElementSize();
-
-		if (getLayoutType() == LayoutType::Grid)
-		{
-			x = static_cast<float>(static_cast<int>(lastSelected / getItemsPerColumn()));
-			y = static_cast<float>(lastSelected) - x * static_cast<float>(getItemsPerColumn());
-
-			x *= elemSize.x;
-			y *= elemSize.y;
-		}
-		else 
-		{
-			x = 0.0f;
-			y = static_cast<float>(lastSelected) * updateElementSize().y;
-		}
-
-		m_scrollDummy->SetProperty(PropertyId::Left, Property(x, Unit::PX));
-		m_scrollDummy->SetProperty(PropertyId::Top, Property(y, Unit::PX));
-
-		m_scrollDummy->SetProperty(PropertyId::Width, Property(elemSize.x, Unit::PX));
-		m_scrollDummy->SetProperty(PropertyId::Height, Property(elemSize.y, Unit::PX));
-
-		m_scrollTargetDirty = 2;
-
-		return true;
+		return scrollIntoView(lastSelected);
 	}
 
 	ElemList::LayoutType ElemList::getLayoutType()

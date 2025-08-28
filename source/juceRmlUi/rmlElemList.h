@@ -40,6 +40,8 @@ namespace juceRmlUi
 			return m_list;
 		}
 
+		bool scrollIntoView(size_t _index);
+
 	private:
 		void initialize();
 		Rml::Vector2f updateElementSize();
