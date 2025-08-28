@@ -14,6 +14,8 @@ namespace juceRmlUi
 		baseLib::Event<float> onMaxValueChanged;
 		baseLib::Event<float> onDefaultValueChanged;
 
+		static constexpr float UninitializedValue = std::numeric_limits<float>::lowest();
+
 		explicit ElemValue(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : Element(_coreInstance, _tag) {}
 
 		void OnAttributeChange(const Rml::ElementAttributes& _changedAttributes) override;
@@ -50,7 +52,7 @@ namespace juceRmlUi
 		static float getValue(const Rml::Element* _elem);
 
 	private:
-		float m_value = -1.0f;
+		float m_value = UninitializedValue;
 		float m_min = 0.0f;
 		float m_max = 1.0f;
 		float m_default = 0.5f;
