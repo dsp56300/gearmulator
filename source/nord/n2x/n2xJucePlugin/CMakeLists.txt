@@ -20,15 +20,16 @@ set(SOURCES
 	n2xPatchManager.cpp n2xPatchManager.h
 	n2xPluginEditorState.cpp n2xPluginEditorState.h
 	n2xPluginProcessor.cpp n2xPluginProcessor.h
-	n2xSlider.cpp n2xSlider.h
 	n2xVmMap.cpp n2xVmMap.h
 	parameterDescriptions_n2x.json
+
 	skins/n2xTrancy/n2xTrancy.json
+	skins/n2xTrancy/n2xTrancy.rml
 )
 
 SET(ASSETS "parameterDescriptions_n2x.json")
 
-addSkin("NodalRed2x" "n2xTrancy" "skins/n2xTrancy" "n2xTrancy.json")
+addSkin("NodalRed2x" "n2xTrancy" "skins/n2xTrancy" "n2xTrancy.rml")
 
 buildSkinHeader()
 

@@ -7,18 +7,6 @@
 
 #include "baseLib/event.h"
 
-namespace pluginLib
-{
-	class ParameterBinding;
-}
-
-namespace juce
-{
-	class Slider;
-	class Component;
-	class Button;
-}
-
 namespace n2xJucePlugin
 {
 	class Editor;
@@ -28,7 +16,7 @@ namespace n2xJucePlugin
 	class VmMap
 	{
 	public:
-		explicit VmMap(Editor& _editor, pluginLib::ParameterBinding& _binding);
+		explicit VmMap(Editor& _editor);
 
 		void setEnabled(bool _enabled);
 
@@ -43,8 +31,8 @@ namespace n2xJucePlugin
 			pluginLib::Parameter* paramBase = nullptr;
 			pluginLib::Parameter* paramVm = nullptr;
 
-			juce::Slider* compBase = nullptr;
-			juce::Slider* compVm = nullptr;
+			Rml::Element* compBase = nullptr;
+			Rml::Element* compVm = nullptr;
 
 			pluginLib::ParameterListener parameterListenerBase;
 			pluginLib::ParameterListener parameterListenerVm;
@@ -66,7 +54,7 @@ namespace n2xJucePlugin
 		Editor& m_editor;
 
 		std::vector<std::unique_ptr<VmParam>> m_vmParams;
-		juce::Button* m_btVmMap;
+		Rml::Element* m_btVmMap;
 		bool m_enabled = false;
 		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 	};

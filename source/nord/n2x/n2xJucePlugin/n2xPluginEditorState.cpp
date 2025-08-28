@@ -14,7 +14,7 @@ namespace n2xJucePlugin
 		loadDefaultSkin();
 	}
 
-	void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
+	void PluginEditorState::initContextMenu(juceRmlUi::Menu& _menu)
 	{
 		jucePluginEditorLib::PluginEditorState::initContextMenu(_menu);
 
@@ -22,24 +22,19 @@ namespace n2xJucePlugin
 
 		const auto gain = static_cast<int>(std::roundf(p.getOutputGain()));
 
-		juce::PopupMenu gainMenu;
+		juceRmlUi::Menu gainMenu;
 
-		gainMenu.addItem("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
-		gainMenu.addItem("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
-		gainMenu.addItem("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
+		gainMenu.addEntry("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
+		gainMenu.addEntry("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
+		gainMenu.addEntry("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
 
-		_menu.addSubMenu("Output Gain", gainMenu);
+		_menu.addSubMenu("Output Gain", std::move(gainMenu));
 
 		jucePluginEditorLib::MidiPorts::createMidiPortsMenu(_menu, p.getMidiPorts());
 	}
 
-	bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, const bool _enabled)
-	{
-		return jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
-	}
-
 	jucePluginEditorLib::Editor* PluginEditorState::createEditor(const jucePluginEditorLib::Skin& _skin)
 	{
-		return new n2xJucePlugin::Editor(m_processor, m_parameterBinding, _skin);
+		return new n2xJucePlugin::Editor(m_processor, _skin);
 	}
 }

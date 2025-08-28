@@ -1,0 +1,668 @@
+@spritesheet button_a
+{
+	button_a_active: 0px 0px 74px 56px;
+	button_a_checked: 0px 56px 74px 56px;
+	button_a_checked-active: 0px 56px 74px 56px;
+	button_a_checked-hover: 0px 56px 74px 56px;
+	button_a_default: 0px 0px 74px 56px;
+	button_a_hover: 0px 0px 74px 56px;
+	src: button_a.png;
+}
+@spritesheet button_b
+{
+	button_b_active: 0px 0px 74px 56px;
+	button_b_checked: 0px 56px 74px 56px;
+	button_b_checked-active: 0px 56px 74px 56px;
+	button_b_checked-hover: 0px 56px 74px 56px;
+	button_b_default: 0px 0px 74px 56px;
+	button_b_hover: 0px 0px 74px 56px;
+	src: button_b.png;
+}
+@spritesheet button_black
+{
+	button_black_active: 0px 47px 99px 47px;
+	button_black_checked: 0px 0px 99px 47px;
+	button_black_checked-active: 0px 0px 99px 47px;
+	button_black_checked-hover: 0px 0px 99px 47px;
+	button_black_default: 0px 0px 99px 47px;
+	button_black_hover: 0px 0px 99px 47px;
+	src: button_black.png;
+}
+@spritesheet button_browser
+{
+	button_browser_active: 0px 67px 184px 67px;
+	button_browser_checked: 0px 67px 184px 67px;
+	button_browser_checked-active: 0px 67px 184px 67px;
+	button_browser_checked-hover: 0px 67px 184px 67px;
+	button_browser_default: 0px 0px 184px 67px;
+	button_browser_hover: 0px 67px 184px 67px;
+	src: button_browser.png;
+}
+@spritesheet button_c
+{
+	button_c_active: 0px 0px 74px 56px;
+	button_c_checked: 0px 56px 74px 56px;
+	button_c_checked-active: 0px 56px 74px 56px;
+	button_c_checked-hover: 0px 56px 74px 56px;
+	button_c_default: 0px 0px 74px 56px;
+	button_c_hover: 0px 0px 74px 56px;
+	src: button_c.png;
+}
+@spritesheet button_d
+{
+	button_d_active: 0px 0px 74px 56px;
+	button_d_checked: 0px 56px 74px 56px;
+	button_d_checked-active: 0px 56px 74px 56px;
+	button_d_checked-hover: 0px 56px 74px 56px;
+	button_d_default: 0px 0px 74px 56px;
+	button_d_hover: 0px 0px 74px 56px;
+	src: button_d.png;
+}
+@spritesheet button_main
+{
+	button_main_active: 0px 67px 184px 67px;
+	button_main_checked: 0px 67px 184px 67px;
+	button_main_checked-active: 0px 67px 184px 67px;
+	button_main_checked-hover: 0px 67px 184px 67px;
+	button_main_default: 0px 0px 184px 67px;
+	button_main_hover: 0px 67px 184px 67px;
+	src: button_main.png;
+}
+@spritesheet button_perf
+{
+	button_perf_active: 0px 67px 184px 67px;
+	button_perf_checked: 0px 67px 184px 67px;
+	button_perf_checked-active: 0px 67px 184px 67px;
+	button_perf_checked-hover: 0px 67px 184px 67px;
+	button_perf_default: 0px 0px 184px 67px;
+	button_perf_hover: 0px 67px 184px 67px;
+	src: button_perf.png;
+}
+@spritesheet button_red
+{
+	button_red_active: 0px 47px 99px 47px;
+	button_red_checked: 0px 47px 99px 47px;
+	button_red_checked-active: 0px 47px 99px 47px;
+	button_red_checked-hover: 0px 47px 99px 47px;
+	button_red_default: 0px 0px 99px 47px;
+	button_red_hover: 0px 0px 99px 47px;
+	src: button_red.png;
+}
+@spritesheet button_round
+{
+	button_round_active: 0px 0px 70px 70px;
+	button_round_checked: 0px 70px 70px 70px;
+	button_round_checked-active: 0px 70px 70px 70px;
+	button_round_checked-hover: 0px 70px 70px 70px;
+	button_round_default: 0px 0px 70px 70px;
+	button_round_hover: 0px 0px 70px 70px;
+	src: button_round.png;
+}
+@spritesheet knob_big_page0
+{
+	knob_big_000: 0px 0px 113px 113px;
+	knob_big_001: 113px 0px 113px 113px;
+	knob_big_002: 226px 0px 113px 113px;
+	knob_big_003: 339px 0px 113px 113px;
+	knob_big_004: 452px 0px 113px 113px;
+	knob_big_005: 565px 0px 113px 113px;
+	knob_big_006: 678px 0px 113px 113px;
+	knob_big_007: 791px 0px 113px 113px;
+	knob_big_008: 904px 0px 113px 113px;
+	knob_big_009: 1017px 0px 113px 113px;
+	knob_big_010: 1130px 0px 113px 113px;
+	knob_big_011: 1243px 0px 113px 113px;
+	knob_big_012: 1356px 0px 113px 113px;
+	knob_big_013: 1469px 0px 113px 113px;
+	knob_big_014: 1582px 0px 113px 113px;
+	knob_big_015: 1695px 0px 113px 113px;
+	knob_big_016: 1808px 0px 113px 113px;
+	knob_big_017: 1921px 0px 113px 113px;
+	knob_big_018: 0px 113px 113px 113px;
+	knob_big_019: 113px 113px 113px 113px;
+	knob_big_020: 226px 113px 113px 113px;
+	knob_big_021: 339px 113px 113px 113px;
+	knob_big_022: 452px 113px 113px 113px;
+	knob_big_023: 565px 113px 113px 113px;
+	knob_big_024: 678px 113px 113px 113px;
+	knob_big_025: 791px 113px 113px 113px;
+	knob_big_026: 904px 113px 113px 113px;
+	knob_big_027: 1017px 113px 113px 113px;
+	knob_big_028: 1130px 113px 113px 113px;
+	knob_big_029: 1243px 113px 113px 113px;
+	knob_big_030: 1356px 113px 113px 113px;
+	knob_big_031: 1469px 113px 113px 113px;
+	knob_big_032: 1582px 113px 113px 113px;
+	knob_big_033: 1695px 113px 113px 113px;
+	knob_big_034: 1808px 113px 113px 113px;
+	knob_big_035: 1921px 113px 113px 113px;
+	knob_big_036: 0px 226px 113px 113px;
+	knob_big_037: 113px 226px 113px 113px;
+	knob_big_038: 226px 226px 113px 113px;
+	knob_big_039: 339px 226px 113px 113px;
+	knob_big_040: 452px 226px 113px 113px;
+	knob_big_041: 565px 226px 113px 113px;
+	knob_big_042: 678px 226px 113px 113px;
+	knob_big_043: 791px 226px 113px 113px;
+	knob_big_044: 904px 226px 113px 113px;
+	knob_big_045: 1017px 226px 113px 113px;
+	knob_big_046: 1130px 226px 113px 113px;
+	knob_big_047: 1243px 226px 113px 113px;
+	knob_big_048: 1356px 226px 113px 113px;
+	knob_big_049: 1469px 226px 113px 113px;
+	knob_big_050: 1582px 226px 113px 113px;
+	knob_big_051: 1695px 226px 113px 113px;
+	knob_big_052: 1808px 226px 113px 113px;
+	knob_big_053: 1921px 226px 113px 113px;
+	knob_big_054: 0px 339px 113px 113px;
+	knob_big_055: 113px 339px 113px 113px;
+	knob_big_056: 226px 339px 113px 113px;
+	knob_big_057: 339px 339px 113px 113px;
+	knob_big_058: 452px 339px 113px 113px;
+	knob_big_059: 565px 339px 113px 113px;
+	knob_big_060: 678px 339px 113px 113px;
+	knob_big_061: 791px 339px 113px 113px;
+	knob_big_062: 904px 339px 113px 113px;
+	knob_big_063: 1017px 339px 113px 113px;
+	knob_big_064: 1130px 339px 113px 113px;
+	knob_big_065: 1243px 339px 113px 113px;
+	knob_big_066: 1356px 339px 113px 113px;
+	knob_big_067: 1469px 339px 113px 113px;
+	knob_big_068: 1582px 339px 113px 113px;
+	knob_big_069: 1695px 339px 113px 113px;
+	knob_big_070: 1808px 339px 113px 113px;
+	knob_big_071: 1921px 339px 113px 113px;
+	knob_big_072: 0px 452px 113px 113px;
+	knob_big_073: 113px 452px 113px 113px;
+	knob_big_074: 226px 452px 113px 113px;
+	knob_big_075: 339px 452px 113px 113px;
+	knob_big_076: 452px 452px 113px 113px;
+	knob_big_077: 565px 452px 113px 113px;
+	knob_big_078: 678px 452px 113px 113px;
+	knob_big_079: 791px 452px 113px 113px;
+	knob_big_080: 904px 452px 113px 113px;
+	knob_big_081: 1017px 452px 113px 113px;
+	knob_big_082: 1130px 452px 113px 113px;
+	knob_big_083: 1243px 452px 113px 113px;
+	knob_big_084: 1356px 452px 113px 113px;
+	knob_big_085: 1469px 452px 113px 113px;
+	knob_big_086: 1582px 452px 113px 113px;
+	knob_big_087: 1695px 452px 113px 113px;
+	knob_big_088: 1808px 452px 113px 113px;
+	knob_big_089: 1921px 452px 113px 113px;
+	knob_big_090: 0px 565px 113px 113px;
+	knob_big_091: 113px 565px 113px 113px;
+	knob_big_092: 226px 565px 113px 113px;
+	knob_big_093: 339px 565px 113px 113px;
+	knob_big_094: 452px 565px 113px 113px;
+	knob_big_095: 565px 565px 113px 113px;
+	knob_big_096: 678px 565px 113px 113px;
+	knob_big_097: 791px 565px 113px 113px;
+	knob_big_098: 904px 565px 113px 113px;
+	knob_big_099: 1017px 565px 113px 113px;
+	knob_big_100: 1130px 565px 113px 113px;
+	knob_big_101: 1243px 565px 113px 113px;
+	knob_big_102: 1356px 565px 113px 113px;
+	knob_big_103: 1469px 565px 113px 113px;
+	knob_big_104: 1582px 565px 113px 113px;
+	knob_big_105: 1695px 565px 113px 113px;
+	knob_big_106: 1808px 565px 113px 113px;
+	knob_big_107: 1921px 565px 113px 113px;
+	knob_big_108: 0px 678px 113px 113px;
+	knob_big_109: 113px 678px 113px 113px;
+	knob_big_110: 226px 678px 113px 113px;
+	knob_big_111: 339px 678px 113px 113px;
+	knob_big_112: 452px 678px 113px 113px;
+	knob_big_113: 565px 678px 113px 113px;
+	knob_big_114: 678px 678px 113px 113px;
+	knob_big_115: 791px 678px 113px 113px;
+	knob_big_116: 904px 678px 113px 113px;
+	knob_big_117: 1017px 678px 113px 113px;
+	knob_big_118: 1130px 678px 113px 113px;
+	knob_big_119: 1243px 678px 113px 113px;
+	knob_big_120: 1356px 678px 113px 113px;
+	knob_big_121: 1469px 678px 113px 113px;
+	knob_big_122: 1582px 678px 113px 113px;
+	knob_big_123: 1695px 678px 113px 113px;
+	knob_big_124: 1808px 678px 113px 113px;
+	knob_big_125: 1921px 678px 113px 113px;
+	knob_big_126: 0px 791px 113px 113px;
+	knob_big_127: 113px 791px 113px 113px;
+	src: knob_big_page0.png;
+}
+@spritesheet knob_big_sens_page0
+{
+	knob_big_sens_000: 0px 0px 113px 113px;
+	knob_big_sens_001: 113px 0px 113px 113px;
+	knob_big_sens_002: 226px 0px 113px 113px;
+	knob_big_sens_003: 339px 0px 113px 113px;
+	knob_big_sens_004: 452px 0px 113px 113px;
+	knob_big_sens_005: 565px 0px 113px 113px;
+	knob_big_sens_006: 678px 0px 113px 113px;
+	knob_big_sens_007: 791px 0px 113px 113px;
+	knob_big_sens_008: 904px 0px 113px 113px;
+	knob_big_sens_009: 1017px 0px 113px 113px;
+	knob_big_sens_010: 1130px 0px 113px 113px;
+	knob_big_sens_011: 1243px 0px 113px 113px;
+	knob_big_sens_012: 1356px 0px 113px 113px;
+	knob_big_sens_013: 1469px 0px 113px 113px;
+	knob_big_sens_014: 1582px 0px 113px 113px;
+	knob_big_sens_015: 1695px 0px 113px 113px;
+	knob_big_sens_016: 1808px 0px 113px 113px;
+	knob_big_sens_017: 1921px 0px 113px 113px;
+	knob_big_sens_018: 0px 113px 113px 113px;
+	knob_big_sens_019: 113px 113px 113px 113px;
+	knob_big_sens_020: 226px 113px 113px 113px;
+	knob_big_sens_021: 339px 113px 113px 113px;
+	knob_big_sens_022: 452px 113px 113px 113px;
+	knob_big_sens_023: 565px 113px 113px 113px;
+	knob_big_sens_024: 678px 113px 113px 113px;
+	knob_big_sens_025: 791px 113px 113px 113px;
+	knob_big_sens_026: 904px 113px 113px 113px;
+	knob_big_sens_027: 1017px 113px 113px 113px;
+	knob_big_sens_028: 1130px 113px 113px 113px;
+	knob_big_sens_029: 1243px 113px 113px 113px;
+	knob_big_sens_030: 1356px 113px 113px 113px;
+	knob_big_sens_031: 1469px 113px 113px 113px;
+	knob_big_sens_032: 1582px 113px 113px 113px;
+	knob_big_sens_033: 1695px 113px 113px 113px;
+	knob_big_sens_034: 1808px 113px 113px 113px;
+	knob_big_sens_035: 1921px 113px 113px 113px;
+	knob_big_sens_036: 0px 226px 113px 113px;
+	knob_big_sens_037: 113px 226px 113px 113px;
+	knob_big_sens_038: 226px 226px 113px 113px;
+	knob_big_sens_039: 339px 226px 113px 113px;
+	knob_big_sens_040: 452px 226px 113px 113px;
+	knob_big_sens_041: 565px 226px 113px 113px;
+	knob_big_sens_042: 678px 226px 113px 113px;
+	knob_big_sens_043: 791px 226px 113px 113px;
+	knob_big_sens_044: 904px 226px 113px 113px;
+	knob_big_sens_045: 1017px 226px 113px 113px;
+	knob_big_sens_046: 1130px 226px 113px 113px;
+	knob_big_sens_047: 1243px 226px 113px 113px;
+	knob_big_sens_048: 1356px 226px 113px 113px;
+	knob_big_sens_049: 1469px 226px 113px 113px;
+	knob_big_sens_050: 1582px 226px 113px 113px;
+	knob_big_sens_051: 1695px 226px 113px 113px;
+	knob_big_sens_052: 1808px 226px 113px 113px;
+	knob_big_sens_053: 1921px 226px 113px 113px;
+	knob_big_sens_054: 0px 339px 113px 113px;
+	knob_big_sens_055: 113px 339px 113px 113px;
+	knob_big_sens_056: 226px 339px 113px 113px;
+	knob_big_sens_057: 339px 339px 113px 113px;
+	knob_big_sens_058: 452px 339px 113px 113px;
+	knob_big_sens_059: 565px 339px 113px 113px;
+	knob_big_sens_060: 678px 339px 113px 113px;
+	knob_big_sens_061: 791px 339px 113px 113px;
+	knob_big_sens_062: 904px 339px 113px 113px;
+	knob_big_sens_063: 1017px 339px 113px 113px;
+	knob_big_sens_064: 1130px 339px 113px 113px;
+	knob_big_sens_065: 1243px 339px 113px 113px;
+	knob_big_sens_066: 1356px 339px 113px 113px;
+	knob_big_sens_067: 1469px 339px 113px 113px;
+	knob_big_sens_068: 1582px 339px 113px 113px;
+	knob_big_sens_069: 1695px 339px 113px 113px;
+	knob_big_sens_070: 1808px 339px 113px 113px;
+	knob_big_sens_071: 1921px 339px 113px 113px;
+	knob_big_sens_072: 0px 452px 113px 113px;
+	knob_big_sens_073: 113px 452px 113px 113px;
+	knob_big_sens_074: 226px 452px 113px 113px;
+	knob_big_sens_075: 339px 452px 113px 113px;
+	knob_big_sens_076: 452px 452px 113px 113px;
+	knob_big_sens_077: 565px 452px 113px 113px;
+	knob_big_sens_078: 678px 452px 113px 113px;
+	knob_big_sens_079: 791px 452px 113px 113px;
+	knob_big_sens_080: 904px 452px 113px 113px;
+	knob_big_sens_081: 1017px 452px 113px 113px;
+	knob_big_sens_082: 1130px 452px 113px 113px;
+	knob_big_sens_083: 1243px 452px 113px 113px;
+	knob_big_sens_084: 1356px 452px 113px 113px;
+	knob_big_sens_085: 1469px 452px 113px 113px;
+	knob_big_sens_086: 1582px 452px 113px 113px;
+	knob_big_sens_087: 1695px 452px 113px 113px;
+	knob_big_sens_088: 1808px 452px 113px 113px;
+	knob_big_sens_089: 1921px 452px 113px 113px;
+	knob_big_sens_090: 0px 565px 113px 113px;
+	knob_big_sens_091: 113px 565px 113px 113px;
+	knob_big_sens_092: 226px 565px 113px 113px;
+	knob_big_sens_093: 339px 565px 113px 113px;
+	knob_big_sens_094: 452px 565px 113px 113px;
+	knob_big_sens_095: 565px 565px 113px 113px;
+	knob_big_sens_096: 678px 565px 113px 113px;
+	knob_big_sens_097: 791px 565px 113px 113px;
+	knob_big_sens_098: 904px 565px 113px 113px;
+	knob_big_sens_099: 1017px 565px 113px 113px;
+	knob_big_sens_100: 1130px 565px 113px 113px;
+	knob_big_sens_101: 1243px 565px 113px 113px;
+	knob_big_sens_102: 1356px 565px 113px 113px;
+	knob_big_sens_103: 1469px 565px 113px 113px;
+	knob_big_sens_104: 1582px 565px 113px 113px;
+	knob_big_sens_105: 1695px 565px 113px 113px;
+	knob_big_sens_106: 1808px 565px 113px 113px;
+	knob_big_sens_107: 1921px 565px 113px 113px;
+	knob_big_sens_108: 0px 678px 113px 113px;
+	knob_big_sens_109: 113px 678px 113px 113px;
+	knob_big_sens_110: 226px 678px 113px 113px;
+	knob_big_sens_111: 339px 678px 113px 113px;
+	knob_big_sens_112: 452px 678px 113px 113px;
+	knob_big_sens_113: 565px 678px 113px 113px;
+	knob_big_sens_114: 678px 678px 113px 113px;
+	knob_big_sens_115: 791px 678px 113px 113px;
+	knob_big_sens_116: 904px 678px 113px 113px;
+	knob_big_sens_117: 1017px 678px 113px 113px;
+	knob_big_sens_118: 1130px 678px 113px 113px;
+	knob_big_sens_119: 1243px 678px 113px 113px;
+	knob_big_sens_120: 1356px 678px 113px 113px;
+	knob_big_sens_121: 1469px 678px 113px 113px;
+	knob_big_sens_122: 1582px 678px 113px 113px;
+	knob_big_sens_123: 1695px 678px 113px 113px;
+	knob_big_sens_124: 1808px 678px 113px 113px;
+	knob_big_sens_125: 1921px 678px 113px 113px;
+	knob_big_sens_126: 0px 791px 113px 113px;
+	knob_big_sens_127: 113px 791px 113px 113px;
+	src: knob_big_sens_page0.png;
+}
+.button_a
+{
+	decorator: image(button_a_default fill);
+}
+.button_a:checked
+{
+	decorator: image(button_a_checked fill);
+}
+.button_a:checked:active
+{
+	decorator: image(button_a_checked-active fill);
+}
+.button_a:checked:hover
+{
+	decorator: image(button_a_checked-hover fill);
+}
+.button_a:hover
+{
+	decorator: image(button_a_hover fill);
+}
+.button_b
+{
+	decorator: image(button_b_default fill);
+}
+.button_b:checked
+{
+	decorator: image(button_b_checked fill);
+}
+.button_b:checked:active
+{
+	decorator: image(button_b_checked-active fill);
+}
+.button_b:checked:hover
+{
+	decorator: image(button_b_checked-hover fill);
+}
+.button_b:hover
+{
+	decorator: image(button_b_hover fill);
+}
+.button_black
+{
+	decorator: image(button_black_default fill);
+}
+.button_black:checked
+{
+	decorator: image(button_black_checked fill);
+}
+.button_black:checked:active
+{
+	decorator: image(button_black_checked-active fill);
+}
+.button_black:checked:hover
+{
+	decorator: image(button_black_checked-hover fill);
+}
+.button_black:hover
+{
+	decorator: image(button_black_hover fill);
+}
+.button_browser
+{
+	decorator: image(button_browser_default fill);
+}
+.button_browser:checked
+{
+	decorator: image(button_browser_checked fill);
+}
+.button_browser:checked:active
+{
+	decorator: image(button_browser_checked-active fill);
+}
+.button_browser:checked:hover
+{
+	decorator: image(button_browser_checked-hover fill);
+}
+.button_browser:hover
+{
+	decorator: image(button_browser_hover fill);
+}
+.button_c
+{
+	decorator: image(button_c_default fill);
+}
+.button_c:checked
+{
+	decorator: image(button_c_checked fill);
+}
+.button_c:checked:active
+{
+	decorator: image(button_c_checked-active fill);
+}
+.button_c:checked:hover
+{
+	decorator: image(button_c_checked-hover fill);
+}
+.button_c:hover
+{
+	decorator: image(button_c_hover fill);
+}
+.button_d
+{
+	decorator: image(button_d_default fill);
+}
+.button_d:checked
+{
+	decorator: image(button_d_checked fill);
+}
+.button_d:checked:active
+{
+	decorator: image(button_d_checked-active fill);
+}
+.button_d:checked:hover
+{
+	decorator: image(button_d_checked-hover fill);
+}
+.button_d:hover
+{
+	decorator: image(button_d_hover fill);
+}
+.button_main
+{
+	decorator: image(button_main_default fill);
+}
+.button_main:checked
+{
+	decorator: image(button_main_checked fill);
+}
+.button_main:checked:active
+{
+	decorator: image(button_main_checked-active fill);
+}
+.button_main:checked:hover
+{
+	decorator: image(button_main_checked-hover fill);
+}
+.button_main:hover
+{
+	decorator: image(button_main_hover fill);
+}
+.button_perf
+{
+	decorator: image(button_perf_default fill);
+}
+.button_perf:checked
+{
+	decorator: image(button_perf_checked fill);
+}
+.button_perf:checked:active
+{
+	decorator: image(button_perf_checked-active fill);
+}
+.button_perf:checked:hover
+{
+	decorator: image(button_perf_checked-hover fill);
+}
+.button_perf:hover
+{
+	decorator: image(button_perf_hover fill);
+}
+.button_red
+{
+	decorator: image(button_red_default fill);
+}
+.button_red:checked
+{
+	decorator: image(button_red_checked fill);
+}
+.button_red:checked:active
+{
+	decorator: image(button_red_checked-active fill);
+}
+.button_red:checked:hover
+{
+	decorator: image(button_red_checked-hover fill);
+}
+.button_red:hover
+{
+	decorator: image(button_red_hover fill);
+}
+.button_round
+{
+	decorator: image(button_round_default fill);
+}
+.button_round:checked
+{
+	decorator: image(button_round_checked fill);
+}
+.button_round:checked:active
+{
+	decorator: image(button_round_checked-active fill);
+}
+.button_round:checked:hover
+{
+	decorator: image(button_round_checked-hover fill);
+}
+.button_round:hover
+{
+	decorator: image(button_round_hover fill);
+}
+.knob
+{
+	frames: 128;
+	spriteprefix: knob_big_sens_;
+}
+.knob1
+{
+	frames: 128;
+	spriteprefix: knob_big_;
+}
+.list, .grid, .pm-infopanel
+{
+	background-color: rgb(32,32,32);
+}
+.pm-hlayout
+{
+	background-color: black;
+}
+.pm-status
+{
+	background-color: rgb(32,32,32);
+	border: 1dp rgb(67,67,67);
+}
+.pm-vlayout
+{
+	gap: 4dp;
+}
+.sliderH
+{
+}
+.sliderH sliderbar
+{
+	decorator: image(h_slider.png contain);
+	height: 40dp;
+	width: 40dp;
+}
+.txt
+{
+	color: #ff0000;
+	font-family: DSEG7 Classic;
+	font-size: 42dp;
+	font-weight: bold;
+	font-style: italic;
+	text-align: left;
+}
+.txt1
+{
+	color: #ff0000;
+	font-family: DSEG14 Classic;
+	font-size: 23.000000dp;
+	font-weight: bold;
+	font-style: italic;
+	text-align: right;
+}
+.txt2
+{
+	color: #ff0000;
+	font-family: DSEG14 Classic;
+	font-weight: bold;
+	font-style: italic;
+	font-size: 23.000000dp;
+	text-align: left;
+}
+.txt3
+{
+	color: #ffffff;
+	font-size: 32.000000dp;
+	text-align: left;
+}
+.txt4
+{
+	color: #ffffff;
+	font-size: 28.000000dp;
+	text-align: center;
+}
+.txt5
+{
+	color: #ffffff;
+	font-size: 28.000000dp;
+	text-align: left;
+}
+.txt6
+{
+	color: #ff0000;
+	font-family: DSEG14 Classic;
+	font-weight: bold;
+	font-style: italic;
+	font-size: 30.000000dp;
+	text-align: center;
+}
+body
+{
+	font-size: 28dp;
+}
+input.text
+{
+	background-color: rgb(32,32,32);
+	border: 1dp rgb(67,67,67);
+}
+tree
+{
+	background-color: rgb(32,32,32);
+}
+

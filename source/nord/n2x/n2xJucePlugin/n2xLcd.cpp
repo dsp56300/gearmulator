@@ -13,7 +13,7 @@ namespace n2xJucePlugin
 
 	Lcd::Lcd(Editor& _editor) : m_editor(_editor)
 	{
-		m_label = _editor.findComponentT<juce::Label>("PatchName");
+		m_label = _editor.findChild("PatchName");
 		setText("---");
 
 		m_onProgramChanged.set(_editor.getN2xController().onProgramChanged, [this]
@@ -94,6 +94,7 @@ namespace n2xJucePlugin
 	{
 		if(m_clippedText == _text)
 			return;
+
 		m_clippedText = _text;
 
 		auto t = _text;
@@ -104,7 +105,7 @@ namespace n2xJucePlugin
 				c = space;
 		}
 
-		m_label->setText(t, juce::dontSendNotification);
+		m_label->SetInnerRML(Rml::StringUtilities::EncodeRml(t));
 	}
 
 	std::string Lcd::substring(const std::string& _text, uint32_t _offset, uint32_t _len)

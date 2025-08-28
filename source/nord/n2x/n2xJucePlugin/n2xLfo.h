@@ -22,7 +22,7 @@ namespace n2xJucePlugin
 
 		Editor& m_editor;
 		const uint8_t m_index;
-		juce::Slider* m_slider;
+		Rml::Element* m_slider;
 
 		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 	};

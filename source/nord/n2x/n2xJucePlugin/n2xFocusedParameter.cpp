@@ -6,7 +6,7 @@
 namespace n2xJucePlugin
 {
 	FocusedParameter::FocusedParameter(const Editor& _editor)
-	: jucePluginEditorLib::FocusedParameter(_editor.getN2xController(), _editor.getParameterBinding(), _editor)
+	: jucePluginEditorLib::FocusedParameter(_editor.getN2xController(), _editor)
 	, m_editor(_editor)
 	{
 	}
