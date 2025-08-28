@@ -866,8 +866,10 @@
 .txt6
 {
 	color: #fc7576;
-	font-size: 24.000000dp;
+	font-size: 23.000000dp;
 	text-align: center;
+	height: 30dp;
+	line-height: 24dp;
 }
 .txt7
 {

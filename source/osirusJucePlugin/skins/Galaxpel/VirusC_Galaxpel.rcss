@@ -850,6 +850,8 @@
 	color: #75a7fc;
 	font-size: 24.000000dp;
 	text-align: center;
+	height: 30dp; 
+	line-height: 23dp;
 }
 .txt4
 {

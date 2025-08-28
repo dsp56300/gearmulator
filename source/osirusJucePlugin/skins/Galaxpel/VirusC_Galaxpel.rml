@@ -6,7 +6,7 @@
 		<link type="text/rcss" href="tus_juceskin.rcss"/>
 		<link type="text/rcss" href="VirusC_Galaxpel.rcss"/>
 	</head>
-	<body id="Root" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2754dp; height: 1600dp;">
+	<body id="Root" debugger="0" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2754dp; height: 1600dp;">
 		<img id="bg" class="jucePos" src="main_bg.png" style="left: 0dp; top: 0dp; width: 2754dp; height: 1600dp;"/>
 		<button id="PlayModeSingle" class="jucePos juceButton sngl-btn49x260" isToggle="1" style="left: 151dp; top: 272dp; width: 260dp; height: 49dp;"/>
 		<button id="PlayModeMulti" class="jucePos juceButton mlt-btn49x260" isToggle="1" style="left: 416dp; top: 272dp; width: 260dp; height: 49dp;"/>
@@ -24,97 +24,97 @@
 		<button id="TabEffects" class="jucePos juceButton efcts-btn-306x83" isToggle="1" tabbutton="2" tabgroup="pages" style="left: 1333dp; top: 227dp; width: 306dp; height: 83dp;"/>
 		<button id="TabArp" class="jucePos juceButton arp-btn-306x83" isToggle="1" tabbutton="3" tabgroup="pages" style="left: 1640dp; top: 227dp; width: 306dp; height: 83dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 324dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 345dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 345dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 343dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 343dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 342.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 342.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 396dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 417dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 417dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 415dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 415dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 414.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 414.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 468dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 489dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 489dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 487dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 487dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 486.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 486.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 540dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 561dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 561dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 559dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 559dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 558.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 558.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 612dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 633dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 633dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 631dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 631dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 630.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 630.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 684dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 705dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 705dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 703dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 703dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 702.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 702.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 756dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 777dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 777dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 775dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 775dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 774.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 774.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 828dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 849dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 849dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 847dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 847dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 846.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 846.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 900dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 921dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 921dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 919dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 919dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 918.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 918.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 972dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 993dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 993dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 991dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 991dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 990.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 990.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1044dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1065dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1065dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1063dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1063dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1062.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1062.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1116dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1137dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1137dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1135dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1135dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1134.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1134.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1188dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1209dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1209dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1207dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1207dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1206.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1206.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1260dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1281dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1281dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1279dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1279dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1278.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1278.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1332dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1353dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1353dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1351dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1351dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1350.13dp; width: 36dp; height: 36dp;"/>
 		<knob id="PartPan" class="jucePos juceRotary knob" style="left: 608.38dp; top: 1350.13dp; width: 36dp; height: 36dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 1404dp; width: 74dp; height: 68dp;"/>
-		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1425dp; width: 237dp; height: 26dp; line-height: 26dp;">OvertureCK</div>
+		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 1425dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 1423dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
 		<div id="PresetNext" class="jucePos juceTextButton txt4" style="left: 492dp; top: 1423dp; width: 36dp; height: 30dp; line-height: 30dp;">&gt;</div>
 		<knob id="PartVolume" class="jucePos juceRotary knob" style="left: 546.3dp; top: 1422.13dp; width: 36dp; height: 36dp;"/>
