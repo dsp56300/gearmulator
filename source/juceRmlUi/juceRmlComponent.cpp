@@ -49,7 +49,10 @@ namespace juceRmlUi
 			for (const auto & file : files)
 			{
 				if (baseLib::filesystem::hasExtension(file, ".ttf"))
+				{
+					Rml::Log::Message(Rml::Log::LT_INFO, "Loading font face from file %s", file.c_str());
 					Rml::LoadFontFace(m_coreInstance, file, true);
+				}
 			}
 		}
 
