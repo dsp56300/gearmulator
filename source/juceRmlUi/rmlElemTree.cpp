@@ -33,17 +33,17 @@ namespace juceRmlUi
 		}
 	}
 
-	void ElemTree::OnPropertyChange(const Rml::PropertyIdSet& changed_properties)
+	void ElemTree::OnPropertyChange(const Rml::PropertyIdSet& _changedProperties)
 	{
-		Element::OnPropertyChange(changed_properties);
+		Element::OnPropertyChange(_changedProperties);
 	}
 
 	void ElemTree::onPropertyChanged(const std::string& _key)
 	{
 		if (_key == "indent-margin-left")
-			updateElementsDepthProperty("indent-margin-left", "margin-left");
+			updateElementsDepthProperty("indent-margin-left", Rml::PropertyId::MarginLeft);
 		else if (_key == "indent-padding-left")
-			updateElementsDepthProperty("indent-padding-left", "padding-left");
+			updateElementsDepthProperty("indent-padding-left", Rml::PropertyId::PaddingLeft);
 
 		Element::onPropertyChanged(_key);
 	}
@@ -129,13 +129,13 @@ namespace juceRmlUi
 
 		e->SetPseudoClass("depth" + std::to_string(_node->getDepth()), true);
 
-		updateElementDepthProperty(_node, *e, "indent-margin-left", "margin-left");
-		updateElementDepthProperty(_node, *e, "indent-padding-left", "padding-left");
+		updateElementDepthProperty(_node, *e, "indent-margin-left", Rml::PropertyId::MarginLeft);
+		updateElementDepthProperty(_node, *e, "indent-padding-left", Rml::PropertyId::PaddingLeft);
 
 		m_activeNodeElements.insert({_node, e});
 	}
 
-	void ElemTree::updateElementsDepthProperty(const std::string& _sourceProperty, const std::string& _targetProperty)
+	void ElemTree::updateElementsDepthProperty(const std::string& _sourceProperty, const Rml::PropertyId& _targetProperty)
 	{
 		const auto source = GetProperty(_sourceProperty);
 
@@ -151,11 +151,11 @@ namespace juceRmlUi
 		for (auto& [node, elem] : m_activeNodeElements)
 		{
 			prop.value = getIndent(base.number, node);
-			elem->SetProperty(_targetProperty, prop.ToString(GetCoreInstance()));
+			helper::changeProperty(elem, _targetProperty, prop);
 		}
 	}
 
-	void ElemTree::updateElementDepthProperty(const TreeNodePtr& _node, Rml::Element& _elem, const std::string& _sourceProperty, const std::string& _targetProperty)
+	void ElemTree::updateElementDepthProperty(const TreeNodePtr& _node, Rml::Element& _elem, const std::string& _sourceProperty, const Rml::PropertyId& _targetProperty)
 	{
 		const auto source = GetProperty(_sourceProperty);
 		if (!source)
@@ -166,7 +166,7 @@ namespace juceRmlUi
 		if (base.number <= 0)
 			return;
 		prop.value = getIndent(base.number, _node);
-		_elem.SetProperty(_targetProperty, prop.ToString(GetCoreInstance()));
+		_elem.SetProperty(_targetProperty, prop);
 	}
 
 	float ElemTree::getIndent(const float _base, const TreeNodePtr& _node)

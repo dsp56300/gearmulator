@@ -17,7 +17,7 @@ namespace juceRmlUi
 
 		void OnChildAdd(Rml::Element* _child) override;
 
-		void OnPropertyChange(const Rml::PropertyIdSet& changed_properties) override;
+		void OnPropertyChange(const Rml::PropertyIdSet& _changedProperties) override;
 		void onPropertyChanged(const std::string& _key) override;
 
 		void setNodeInstancer(Rml::ElementInstancer* _instancer);
@@ -33,8 +33,8 @@ namespace juceRmlUi
 		void updateNodeElements(const TreeNodePtr& _node);
 		void createNodeElement(const TreeNodePtr& _node);
 
-		void updateElementsDepthProperty(const std::string& _sourceProperty, const std::string& _targetProperty);
-		void updateElementDepthProperty(const TreeNodePtr& _node, Rml::Element& _elem, const std::string& _sourceProperty, const std::string& _targetProperty);
+		void updateElementsDepthProperty(const std::string& _sourceProperty, const Rml::PropertyId& _targetProperty);
+		void updateElementDepthProperty(const TreeNodePtr& _node, Rml::Element& _elem, const std::string& _sourceProperty, const Rml::PropertyId& _targetProperty);
 		static float getIndent(float _base, const TreeNodePtr& _node);
 
 		Tree m_tree;
