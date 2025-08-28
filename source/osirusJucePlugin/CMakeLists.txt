@@ -7,6 +7,13 @@ set(SOURCES
 	OsirusEditorState.h
 	OsirusProcessor.cpp
 	OsirusProcessor.h
+
+	skins/Hoverland/VirusC_Hoverland.rml
+	skins/Hoverland/VirusC_Hoverland.rcss
+	skins/Galaxpel/VirusC_Galaxpel.rml
+	skins/Galaxpel/VirusC_Galaxpel.rcss
+	skins/Trancy/VirusC_Trancy.rml
+	skins/Trancy/VirusC_Trancy.rcss
 )
 
 SET(ASSETS "parameterDescriptions_C.json")
