@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <memory>
 
+#include "mqPartButton.h"
+
 namespace Rml
 {
 	class Element;
@@ -11,7 +13,6 @@ namespace Rml
 
 namespace mqJucePlugin
 {
-	class mqPartButton;
 	class Controller;
 	class Editor;
 
