@@ -50,6 +50,9 @@ namespace juceRmlUi
 		static bool setProperty(float& _prop, float _newValue, const baseLib::Event<float>& _event);
 
 		static float getValue(const Rml::Element* _elem);
+		static void setValue(Rml::Element* _elem, float _value, bool _sendChangeEvent = true);
+
+		static void setRange(Rml::Element* _volume, float _min, float _max);
 
 	private:
 		float m_value = UninitializedValue;

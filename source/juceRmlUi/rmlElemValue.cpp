@@ -92,4 +92,28 @@ namespace juceRmlUi
 			return Rml::Variant(input->GetValue()).Get<float>(_elem->GetCoreInstance());
 		return _elem->GetAttribute<float>("value", 0.0f);
 	}
+
+	void ElemValue::setValue(Rml::Element* _elem, const float _value, const bool _sendChangeEvent)
+	{
+		if (auto* e = dynamic_cast<ElemValue*>(_elem))
+			e->setValue(_value, _sendChangeEvent);
+		else if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_elem))
+			input->SetValue(std::to_string(_value));
+		else
+			_elem->SetAttribute("value", _value);
+	}
+
+	void ElemValue::setRange(Rml::Element* _volume, const float _min, const float _max)
+	{
+		if (auto* e = dynamic_cast<ElemValue*>(_volume))
+		{
+			e->setMinValue(_min);
+			e->setMaxValue(_max);
+		}
+		else
+		{
+			_volume->SetAttribute("min", _min);
+			_volume->SetAttribute("max", _max);
+		}
+	}
 }
