@@ -35,7 +35,27 @@ namespace rmlPlugin
 			_dest = m_parameter->getUnnormalizedValue();
 		}, [this](const Rml::Variant& _source)
 		{
-			const auto v = _source.Get<int>(m_binding.getCoreInstance());
+			auto v = _source.Get<int>(m_binding.getCoreInstance());
+
+			const auto& desc = m_parameter->getDescription();
+
+			if (desc.step > 0)
+			{
+				// snap to step
+				const auto step = desc.step;
+				const auto& range = desc.range;
+
+				const auto min = range.getStart();
+				const auto max = range.getEnd();
+
+				auto stepped = ((v - min + step / 2) / step) * step + min;
+
+				if (stepped < min)
+					stepped = min;
+				else if (stepped > max)
+					stepped = max;
+				v = stepped;
+			}
 
 			if (m_parameter->getUnnormalizedValue() != v)
 			{
