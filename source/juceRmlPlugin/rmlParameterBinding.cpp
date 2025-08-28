@@ -64,17 +64,7 @@ namespace rmlPlugin
 			return;
 		}
 
-		auto oldParamIt = m_elementToParam.find(&_element);
-
-		if (oldParamIt != m_elementToParam.end())
-		{
-			auto oldParam = oldParamIt->second.parameter;
-
-			evUnbind.invoke(oldParam, oldParamIt->first);
-
-			m_paramToElements[oldParam].erase(&_element);
-			m_elementToParam.erase(oldParamIt);
-		}
+		unbind(_element, false);
 
 		BoundParameter bp;
 		bp.parameter = p;
@@ -160,32 +150,33 @@ namespace rmlPlugin
 		if (!modelChanged && !paramChanged)
 			return;
 
-		// we need to refresh the data model, unfortunately RmlUi does not provide a way to do this directly.
-		// What we do is to remove the element from its parent and reinsert it, which will trigger a refresh of the data model.
+		refreshDataModelForElement(_element);
+	}
 
-		auto* parent = _element.GetParentNode();
-		if (!parent)
-			return;
+	void RmlParameterBinding::unbind(Rml::Element& _element, bool _refreshDataModel/* = true*/)
+	{
+		auto it = m_elementToParam.find(&_element);
 
-		const auto count = parent->GetNumChildren();
-		int childIndex = -1;
-
-		for (int i=0; i<count; ++i)
+		if (it != m_elementToParam.end())
 		{
-			auto* e = parent->GetChild(i);
-			if (e == &_element)
-			{
-				childIndex = i;
-				break;
-			}
+			auto oldParam = it->second.parameter;
+			m_paramToElements[oldParam].erase(&_element);
+			m_elementToParam.erase(it);
+
+			evUnbind.invoke(oldParam, &_element);
 		}
 
-		auto* childAfter = parent->GetChild(childIndex + 1);
-		auto element = parent->RemoveChild(&_element);
-		if (childAfter)
-			parent->InsertBefore(std::move(element), childAfter);
-		else
-			parent->AppendChild(std::move(element));
+		if (_refreshDataModel)
+		{
+			_element.RemoveAttribute("param");
+			_element.RemoveAttribute("data-attr-min");
+			_element.RemoveAttribute("data-attr-max");
+			_element.RemoveAttribute("data-attr-default");
+			_element.RemoveAttribute("data-value");
+			_element.RemoveAttribute("data-model");
+
+			refreshDataModelForElement(_element);
+		}
 	}
 
 	Rml::Element* RmlParameterBinding::getElementForParameter(const pluginLib::Parameter* _param, const bool _visibleOnly) const
@@ -273,5 +264,35 @@ namespace rmlPlugin
 
 			m_parametersPerPart[_targetPart].emplace_back(*this, param, i, model);
 		}
+	}
+
+	void RmlParameterBinding::refreshDataModelForElement(Rml::Element& _element)
+	{
+		// we need to refresh the data model, unfortunately RmlUi does not provide a way to do this directly.
+		// What we do is to remove the element from its parent and reinsert it, which will trigger a refresh of the data model.
+
+		auto* parent = _element.GetParentNode();
+		if (!parent)
+			return;	// there is no data model to refresh if the element is not attached to the document
+
+		const auto count = parent->GetNumChildren();
+		int childIndex = -1;
+
+		for (int i=0; i<count; ++i)
+		{
+			auto* e = parent->GetChild(i);
+			if (e == &_element)
+			{
+				childIndex = i;
+				break;
+			}
+		}
+
+		auto* childAfter = parent->GetChild(childIndex + 1);
+		auto element = parent->RemoveChild(&_element);
+		if (childAfter)
+			parent->InsertBefore(std::move(element), childAfter);
+		else
+			parent->AppendChild(std::move(element));
 	}
 }

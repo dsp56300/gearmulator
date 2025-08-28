@@ -54,6 +54,8 @@ namespace rmlPlugin
 		void bind(Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
 		void bind(pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, uint8_t _part = CurrentPart);
 
+		void unbind(Rml::Element& _element, bool _refreshDataModel = true);
+
 		Rml::Element* getElementForParameter(const pluginLib::Parameter* _param, bool _visibleOnly = true) const;
 		const pluginLib::Parameter* getParameterForElement(const Rml::Element* _element) const;
 
@@ -66,6 +68,8 @@ namespace rmlPlugin
 		void releasePendingGestures();
 
 		void setCurrentPart(uint8_t _part);
+
+		static void refreshDataModelForElement(Rml::Element& _element);
 
 		using ParameterList = std::vector<RmlParameterRef>;
 
