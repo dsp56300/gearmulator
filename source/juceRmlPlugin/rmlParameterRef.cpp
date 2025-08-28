@@ -39,7 +39,7 @@ namespace rmlPlugin
 
 			const auto& desc = m_parameter->getDescription();
 
-			if (desc.step > 0)
+			if (desc.step > 1)
 			{
 				// snap to step
 				const auto step = desc.step;
