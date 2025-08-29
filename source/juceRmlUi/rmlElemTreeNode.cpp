@@ -188,6 +188,6 @@ namespace juceRmlUi
 
 	void ElemTreeNode::updateVisibilityProperties()
 	{
-		SetProperty(Rml::PropertyId::Display, Rml::Property(m_node->isVisible() ? Rml::Style::Display::Block : Rml::Style::Display::None));
+		getTree()->setElementVisibility(getNode(), *this, !m_node->getParent() || m_node->getParent()->isOpened());
 	}
 }

@@ -123,7 +123,7 @@ namespace juceRmlUi
 			return result;
 		}
 
-		void removeFromParent(Rml::Element* _elem);
+		Rml::ElementPtr removeFromParent(Rml::Element* _elem);
 
 		bool toBuffer(Rml::CoreInstance& _coreInstance, std::vector<uint8_t>& _buffer, juce::Image& _image);
 

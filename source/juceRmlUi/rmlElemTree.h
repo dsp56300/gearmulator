@@ -28,6 +28,8 @@ namespace juceRmlUi
 
 		Tree& getTree() { return m_tree; }
 
+		void setElementVisibility(const TreeNodePtr& _node, ElemTreeNode& _elem, bool _isVisible);
+
 	private:
 		void updateNodeElements();
 		void updateNodeElements(const TreeNodePtr& _node);
@@ -37,8 +39,11 @@ namespace juceRmlUi
 		void updateElementDepthProperty(const TreeNodePtr& _node, Rml::Element& _elem, const std::string& _sourceProperty, const Rml::PropertyId& _targetProperty);
 		static float getIndent(float _base, const TreeNodePtr& _node);
 
+		Rml::Element* insertElement(const TreeNodePtr& _node, Rml::ElementPtr&& _elem);
+
 		Tree m_tree;
 		std::map<TreeNodePtr, Rml::Element*> m_activeNodeElements;
+		std::map<TreeNodePtr, Rml::ElementPtr> m_inactiveNodeElements;
 		ElemTreeNode* m_template = nullptr;
 		Rml::ElementInstancer* m_instancer = nullptr;
 		InstancerCallback m_instancerCallback;
