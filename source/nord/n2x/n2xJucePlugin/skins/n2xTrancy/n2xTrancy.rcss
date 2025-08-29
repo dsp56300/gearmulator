@@ -625,10 +625,10 @@
 	font-size: 23.000000dp;
 	text-align: left;
 }
-.txt3
+.txtCombo
 {
 	color: #ffffff;
-	font-size: 32.000000dp;
+	font-size: 25dp;
 	text-align: left;
 }
 .txt4

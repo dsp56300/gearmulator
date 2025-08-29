@@ -25,6 +25,7 @@ set(SOURCES
 
 	skins/n2xTrancy/n2xTrancy.json
 	skins/n2xTrancy/n2xTrancy.rml
+	skins/n2xTrancy/n2xTrancy.rcss
 )
 
 SET(ASSETS "parameterDescriptions_n2x.json")
