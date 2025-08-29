@@ -139,7 +139,7 @@
 			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1PanMod" style="left: 1540.69dp; top: 144.834dp; width: 128dp; height: 128dp;"/>
 			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1KeyTrack" style="left: 1211.84dp; top: 331.679dp; width: 128dp; height: 128dp;"/>
 			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1Drive" style="left: 1434.96dp; top: 331.679dp; width: 128dp; height: 128dp;"/>
-			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="FilterRouting" style="left: 890.59dp; top: 774dp; width: 32dp; height: 32dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" valueOn="0" valueOff="1" param="FilterRouting" style="left: 890.59dp; top: 774dp; width: 32dp; height: 32dp;"/>
 			<button id="led (1)" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="FilterRouting" style="left: 669.39dp; top: 774dp; width: 32dp; height: 32dp;"/>
 			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="FilterRouting" style="left: 732.625dp; top: 758dp; width: 128dp; height: 64dp;"/>
 			<knob id="ledknob" class="jucePos juceRotary knob4" data-model="partCurrent" param="F2Type" style="left: 124.04dp; top: 1098.62dp; width: 230dp; height: 230dp;"/>
