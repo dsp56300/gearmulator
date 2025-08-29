@@ -1,5 +1,6 @@
 #include "rmlElemButton.h"
 
+#include "juceRmlComponent.h"
 #include "rmlEventListener.h"
 
 namespace juceRmlUi
@@ -103,6 +104,9 @@ namespace juceRmlUi
 			setValue(static_cast<float>(getValueOff()));
 
 		SetPseudoClass("checked", _checked);
+
+		if (auto* comp = RmlComponent::fromElement(this))
+			comp->enqueueUpdate();
 	}
 
 	void ElemButton::setChecked(Rml::Element* _button, bool _checked)
