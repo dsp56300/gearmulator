@@ -2,6 +2,7 @@
 
 #include "juceRmlUi/rmlElemCanvas.h"
 #include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlHelper.h"
 
 // LCD simulation
 
@@ -63,6 +64,13 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::EventListener::AddClick(m_canvas, [this]
 		{
+			onClicked();
+		});
+
+		juceRmlUi::EventListener::Add(m_canvas, Rml::EventId::Mousedown, [this](Rml::Event& _e)
+		{
+			if (juceRmlUi::helper::getMouseButton(_e) == juceRmlUi::MouseButton::Right)
+				_e.StopPropagation();
 			onClicked();
 		});
 	}
@@ -191,6 +199,7 @@ namespace jucePluginEditorLib
 		}
 
 		startTimer(3000);
+		repaint();
 	}
 
 	void Lcd::repaint() const
