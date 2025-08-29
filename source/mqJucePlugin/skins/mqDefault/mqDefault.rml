@@ -22,7 +22,7 @@
 		<div id="lcdLineA" class="jucePos juceLabel txt" style="left: 1390dp; top: 151.843dp; width: 630dp; height: 64dp; line-height: 64dp;">01234567890123456789</div>
 		<div id="lcdLineB" class="jucePos juceLabel txt" style="left: 1390dp; top: 215.843dp; width: 630dp; height: 64dp; line-height: 64dp;">01234567890123456789</div>
 		<img id="lcdshadow" class="jucePos" src="lcdshadow.png" style="left: 1380dp; top: 151.843dp; width: 640dp; height: 128dp;"/>
-		<button id="ledPower" class="jucePos juceButton led" isToggle="1" style="left: 1988.1dp; top: 289.143dp; width: 32dp; height: 32dp;"/>
+		<button id="ledPower" class="jucePos juceButton ledPower" isToggle="1" style="left: 1988.1dp; top: 289.143dp; width: 32dp; height: 32dp;"/>
 		<img id="pageOsc" class="jucePos" src="pageOsc.png" tabgroup="Root" tabpage="0" style="left: 450dp; top: 428dp; width: 2900dp; height: 1525dp;">
 			<knob id="ledo1octave" class="jucePos juceRotary knob" data-model="partCurrent" param="O1Octave" style="left: 125.233dp; top: 77.4266dp; width: 230dp; height: 230dp;"/>
 			<knob id="o1octave" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1Octave" style="left: 176.233dp; top: 128.427dp; width: 128dp; height: 128dp;"/>

@@ -60,6 +60,6 @@
 		<knob id="encoderMatrix3" class="jucePos juceRotary knob1" style="left: 3052.22dp; top: 534.82dp; width: 140dp; height: 140dp;"/>
 		<knob id="encoderMatrix4" class="jucePos juceRotary knob1" style="left: 3282.22dp; top: 534.82dp; width: 140dp; height: 140dp;"/>
 		<button id="buttonPower" class="jucePos juceButton btn" isToggle="0" style="left: 3499.2dp; top: 578.7dp; width: 128dp; height: 64dp;"/>
-		<button id="ledPower" class="jucePos juceButton led" isToggle="1" style="left: 3547.2dp; top: 540.7dp; width: 32dp; height: 32dp;"/>
+		<button id="ledPower" class="jucePos juceButton ledPower" isToggle="1" style="left: 3547.2dp; top: 540.7dp; width: 32dp; height: 32dp;"/>
 	</body>
 </rml>

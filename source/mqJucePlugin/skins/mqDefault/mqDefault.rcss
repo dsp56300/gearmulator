@@ -349,6 +349,16 @@
 {
 	decorator: image(led_hover fill);
 }
+
+.ledPower
+{
+	decorator: image(led_default fill);
+}
+.ledPower:checked
+{
+	decorator: image(led_checked fill);
+}
+
 .list, .grid, .pm-infopanel
 {
 	background-color: #1c1f22;
