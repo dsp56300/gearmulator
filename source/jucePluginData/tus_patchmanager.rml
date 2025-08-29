@@ -75,7 +75,7 @@
 					<div id="name" class="pm-name">Name</div>
 				</listentry>
 			</list>
-			<div style="display: flex;">
+			<div style="display: flex; align-items: flex-end; gap: 5dp;">
 				<input id="pm-search-grid" class="pm-search" type="text" style="flex: 2;">
 					<div class="input-placeholder">Search...</div>
 				</input>

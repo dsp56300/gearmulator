@@ -715,7 +715,7 @@
 {
 	border: 1dp #476495;
 	color: #79aaff;
-	font-size: 36.000000dp;
+	font-size: 28.000000dp;
 	text-align: left;
 }
 .pm-vlayout
