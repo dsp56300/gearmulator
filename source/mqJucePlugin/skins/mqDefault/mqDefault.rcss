@@ -428,6 +428,49 @@
 	font-weight: bold;
 	text-align: left;
 }
+
+.txtMultiChannel
+{
+	color: #d1d1d1;
+	font-size: 24dp;
+	font-weight: bold;
+	text-align: left;
+	top: 1221.94dp; 
+	width: 90dp; 
+	height: 49dp; 
+	line-height: 49dp;
+}
+
+.txtMultiOutput
+{
+	color: #d1d1d1;
+	font-size: 24dp;
+	font-weight: bold;
+	text-align: left;
+	top: 1341.83dp; 
+	width: 80dp; 
+	height: 49dp; 
+	line-height: 49dp;
+}
+
+.comboMultiChannel
+{
+	left: 5dp; 
+	top: 1dp; 
+	width: 65dp; 
+	height: 48dp; 
+	pointer-events: none;
+}
+
+.comboMultiOutput
+{
+	left: 5dp; 
+	top: 1dp; 
+	width: 65dp; 
+	height: 48dp; 
+	pointer-events: none;
+}
+
 .txt2
 {
 	color: #cf972e;

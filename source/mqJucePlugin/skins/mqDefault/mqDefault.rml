@@ -728,11 +728,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI0Pan" style="left: 45.375dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI0Volume" style="left: 45.375dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI0MidiChannel" style="left: 109.375dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI0MidiChannel" style="left: 109.375dp;">
+					<combotext class="jucePos comboMultiChannel">0</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI0Output" style="left: 109.375dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI0Output" style="left: 109.375dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI1Transpose" style="left: 224.125dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI1Detune" style="left: 224.125dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -750,11 +750,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI1Pan" style="left: 224.125dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI1Volume" style="left: 224.125dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI1MidiChannel" style="left: 288.125dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">1</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI1MidiChannel" style="left: 288.125dp;">
+					<combotext class="jucePos comboMultiChannel">1</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI1Output" style="left: 288.125dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI1Output" style="left: 288.125dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI2Transpose" style="left: 402.875dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI2Detune" style="left: 402.875dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -772,11 +772,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI2Pan" style="left: 402.875dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI2Volume" style="left: 402.875dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI2MidiChannel" style="left: 466.875dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">2</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI2MidiChannel" style="left: 466.875dp;">
+					<combotext class="jucePos comboMultiChannel">2</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI2Output" style="left: 466.875dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI2Output" style="left: 466.875dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI3Transpose" style="left: 581.625dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI3Detune" style="left: 581.625dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -794,11 +794,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI3Pan" style="left: 581.625dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI3Volume" style="left: 581.625dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI3MidiChannel" style="left: 645.625dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">3</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI3MidiChannel" style="left: 645.625dp;">
+					<combotext class="jucePos comboMultiChannel">3</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI3Output" style="left: 645.625dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI3Output" style="left: 645.625dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI4Transpose" style="left: 760.375dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI4Detune" style="left: 760.375dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -816,11 +816,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI4Pan" style="left: 760.375dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI4Volume" style="left: 760.375dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI4MidiChannel" style="left: 824.375dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">4</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI4MidiChannel" style="left: 824.375dp;">
+					<combotext class="jucePos comboMultiChannel">4</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI4Output" style="left: 824.375dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI4Output" style="left: 824.375dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI5Transpose" style="left: 939.125dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI5Detune" style="left: 939.125dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -838,11 +838,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI5Pan" style="left: 939.125dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI5Volume" style="left: 939.125dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI5MidiChannel" style="left: 1003.12dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">5</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI5MidiChannel" style="left: 1003.12dp;">
+					<combotext class="jucePos comboMultiChannel">5</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI5Output" style="left: 1003.12dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI5Output" style="left: 1003.12dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI6Transpose" style="left: 1117.88dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI6Detune" style="left: 1117.88dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -860,11 +860,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI6Pan" style="left: 1117.88dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI6Volume" style="left: 1117.88dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI6MidiChannel" style="left: 1181.88dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">6</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI6MidiChannel" style="left: 1181.88dp;">
+					<combotext class="jucePos comboMultiChannel">6</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI6Output" style="left: 1181.88dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI6Output" style="left: 1181.88dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI7Transpose" style="left: 1296.62dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI7Detune" style="left: 1296.62dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -882,11 +882,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI7Pan" style="left: 1296.62dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI7Volume" style="left: 1296.62dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI7MidiChannel" style="left: 1360.62dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">7</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI7MidiChannel" style="left: 1360.62dp;">
+					<combotext class="jucePos comboMultiChannel">7</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI7Output" style="left: 1360.62dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI7Output" style="left: 1360.62dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI8Transpose" style="left: 1475.38dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI8Detune" style="left: 1475.38dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -904,11 +904,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI8Pan" style="left: 1475.38dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI8Volume" style="left: 1475.38dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI8MidiChannel" style="left: 1539.38dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">8</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI8MidiChannel" style="left: 1539.38dp;">
+					<combotext class="jucePos comboMultiChannel">8</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI8Output" style="left: 1539.38dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI8Output" style="left: 1539.38dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI9Transpose" style="left: 1654.12dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI9Detune" style="left: 1654.12dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -926,11 +926,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI9Pan" style="left: 1654.12dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI9Volume" style="left: 1654.12dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI9MidiChannel" style="left: 1718.12dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">9</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI9MidiChannel" style="left: 1718.12dp;">
+					<combotext class="jucePos comboMultiChannel">9</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI9Output" style="left: 1718.12dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI9Output" style="left: 1718.12dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI10Transpose" style="left: 1832.88dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI10Detune" style="left: 1832.88dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -948,11 +948,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI10Pan" style="left: 1832.88dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI10Volume" style="left: 1832.88dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI10MidiChannel" style="left: 1896.88dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">10</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI10MidiChannel" style="left: 1896.88dp;">
+					<combotext class="jucePos comboMultiChannel">10</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI10Output" style="left: 1896.88dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI10Output" style="left: 1896.88dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI11Transpose" style="left: 2011.62dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI11Detune" style="left: 2011.62dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -970,11 +970,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI11Pan" style="left: 2011.62dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI11Volume" style="left: 2011.62dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI11MidiChannel" style="left: 2075.62dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">11</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI11MidiChannel" style="left: 2075.62dp;">
+					<combotext class="jucePos comboMultiChannel">11</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI11Output" style="left: 2075.62dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI11Output" style="left: 2075.62dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI12Transpose" style="left: 2190.38dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI12Detune" style="left: 2190.38dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -992,11 +992,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI12Pan" style="left: 2190.38dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI12Volume" style="left: 2190.38dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI12MidiChannel" style="left: 2254.38dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">12</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI12MidiChannel" style="left: 2254.38dp;">
+					<combotext class="jucePos comboMultiChannel">12</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI12Output" style="left: 2254.38dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI12Output" style="left: 2254.38dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI13Transpose" style="left: 2369.12dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI13Detune" style="left: 2369.12dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -1014,11 +1014,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI13Pan" style="left: 2369.12dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI13Volume" style="left: 2369.12dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI13MidiChannel" style="left: 2433.12dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">13</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI13MidiChannel" style="left: 2433.12dp;">
+					<combotext class="jucePos comboMultiChannel">13</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI13Output" style="left: 2433.12dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI13Output" style="left: 2433.12dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI14Transpose" style="left: 2547.88dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI14Detune" style="left: 2547.88dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -1036,11 +1036,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI14Pan" style="left: 2547.88dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI14Volume" style="left: 2547.88dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI14MidiChannel" style="left: 2611.88dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">14</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI14MidiChannel" style="left: 2611.88dp;">
+					<combotext class="jucePos comboMultiChannel">14</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI14Output" style="left: 2611.88dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI14Output" style="left: 2611.88dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI15Transpose" style="left: 2726.62dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
 				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI15Detune" style="left: 2726.62dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
@@ -1058,11 +1058,11 @@
 				</combo>
 				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI15Pan" style="left: 2726.62dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
 				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI15Volume" style="left: 2726.62dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
-				<combo id="midichannel" class="jucePos txt1" data-model="partCurrent" param="MI15MidiChannel" style="left: 2790.62dp; top: 1221.94dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">15</combotext>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI15MidiChannel" style="left: 2790.62dp;">
+					<combotext class="jucePos comboMultiChannel">15</combotext>
 				</combo>
-				<combo id="output" class="jucePos txt1" data-model="partCurrent" param="MI15Output" style="left: 2790.62dp; top: 1341.83dp; width: 80dp; height: 49dp; line-height: 49dp;">
-					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI15Output" style="left: 2790.62dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
 				</combo>
 			</div>
 		</img>
