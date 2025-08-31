@@ -44,4 +44,24 @@ namespace juceRmlUi
 		Instancers m_instancers;
 		Names m_names;
 	};
+
+	class CallbackElemInstancer final : public Rml::ElementInstancer
+	{
+	public:
+		using Callback = std::function<Rml::ElementPtr(Rml::CoreInstance&, const Rml::String&)>;
+
+		CallbackElemInstancer(Callback _callback) : m_callback(std::move(_callback)) {}
+
+		Rml::ElementPtr InstanceElement(Rml::CoreInstance& _coreInstance, Rml::Element* _parent, const Rml::String& _tag, const Rml::XMLAttributes&) override
+		{
+			return m_callback(_coreInstance, _tag);
+		}
+		void ReleaseElement(Rml::CoreInstance&, Rml::Element* _element) override
+		{
+			delete _element;
+		}
+
+	private:
+		Callback m_callback;
+	};
 }
