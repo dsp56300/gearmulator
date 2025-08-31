@@ -27,13 +27,14 @@ namespace juceRmlUi
 		virtual void onClick() {}
 		virtual void onRightClick(const Rml::Event& _event) {}
 
-	private:
-		void onSelectedChanged(bool _selected);
-		void onOpenedChanged(bool _opened);
-		void onVisibilityChanged(bool _opened);
-		void onChildAdded(const TreeNodePtr& _child);
-		void onChildRemoved(const TreeNodePtr& _child);
+	protected:
+		virtual void onSelectedChanged(bool _selected);
+		virtual void onOpenedChanged(bool _opened);
+		virtual void onVisibilityChanged(bool _opened);
+		virtual void onChildAdded(const TreeNodePtr& _child);
+		virtual void onChildRemoved(const TreeNodePtr& _child);
 
+	private:
 		void updatePropertiesFromNode();
 		void updateSelectedProperties();
 		void updateOpenClosedProperties();
