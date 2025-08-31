@@ -152,8 +152,9 @@ namespace jucePluginEditorLib
 		const auto& getPatchManagerDataModel() const { return m_patchManagerDataModel; }
 		auto& getPluginDataModel() { return m_pluginDataModel; }
 
-		void registerDragAndDropFile(const juce::File& _file);
+		juce::File createTempFile(const std::string& _filename);
 
+		void registerDragAndDropFile(const juce::File& _file);
 		void registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile);
 
 		rmlPlugin::RmlPlugin* getRmlPlugin() const { return m_rmlPlugin.get(); }

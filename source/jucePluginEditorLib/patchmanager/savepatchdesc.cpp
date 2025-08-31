@@ -99,26 +99,7 @@ namespace jucePluginEditorLib::patchManager
 
 	bool SavePatchDesc::getFilesForExport(std::vector<std::string>& _files, bool& _filesAreTemporary)
 	{
-		if(!canExportAsFiles())
-			return false;
-
-		// try to create human-readable filename first
-		const auto patchFileName = getExportFileName(m_processor);
-		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + patchFileName;
-
-		auto file = juce::File(pathName);
-
-		if(file.hasWriteAccess())
-		{
-			m_editor.registerDragAndDropFile(file);
-		}
-		else
-		{
-			// failed, create temp file
-			auto tempFile = std::make_shared<juce::TemporaryFile>(patchFileName);
-			file = tempFile->getFile();
-			m_editor.registerDragAndDropTempFile(std::move(tempFile));
-		}
+		const auto file = m_editor.createTempFile(getExportFileName(m_processor));
 
 		const auto filename = file.getFullPathName().toStdString();
 

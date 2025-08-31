@@ -692,6 +692,26 @@ namespace jucePluginEditorLib
 		m_overlays.reset();
 	}
 
+	juce::File Editor::createTempFile(const std::string& _filename)
+	{
+		// try to create human-readable filename first
+		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + _filename;
+
+		auto file = juce::File(pathName);
+
+		if(file.hasWriteAccess())
+		{
+			registerDragAndDropFile(file);
+			return file;
+		}
+
+		// failed, create temp file
+		auto tempFile = std::make_shared<juce::TemporaryFile>(_filename);
+		file = tempFile->getFile();
+		registerDragAndDropTempFile(std::move(tempFile));
+		return file;
+	}
+
 	void Editor::registerDragAndDropFile(const juce::File& _file)
 	{
 		m_dragAndDropFiles.push_back(_file);
