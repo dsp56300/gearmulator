@@ -44,6 +44,8 @@ namespace juceRmlUi
 			m_entries.clear();
 		}
 
+		bool empty() const { return m_entries.empty(); }
+
 		void open(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn = 16);
 		void close();
 
