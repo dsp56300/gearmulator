@@ -744,6 +744,36 @@ namespace jucePluginEditorLib
 		return m_rmlComponent->getDocument();
 	}
 
+	std::vector<Rml::Element*> Editor::findChildreByParam(const std::string& _param, uint8_t _part,	const size_t _expectedCount, bool _visibleOnly) const
+	{
+		std::vector<Rml::Element*> results;
+		getRmlParameterBinding()->getElementsForParameter(results, _param, _part, _visibleOnly);
+		if (_expectedCount != 0 && results.size() != _expectedCount)
+			throw std::runtime_error("Failed to find " + std::to_string(_expectedCount) + " elements for parameter " + _param + ", found " + std::to_string(results.size()));
+		return results;
+	}
+
+	Rml::Element* Editor::findChildByParam(const std::string& _param, uint8_t _part, bool _mustExist, bool _visibleOnly) const
+	{
+		auto* res = getRmlParameterBinding()->getElementForParameter(_param, _part, _visibleOnly);
+		if (_mustExist && !res)
+			throw std::runtime_error("Failed to find element for parameter " + _param);
+		return res;
+	}
+
+	Rml::Element* Editor::addClick(const std::string& _elementName, const std::function<void(Rml::Event&)>& _func, const bool _mustExist) const
+	{
+		if (auto* element = findChild(_elementName, _mustExist))
+		{
+			juceRmlUi::EventListener::Add(element, Rml::EventId::Click, [this, _func](Rml::Event& _event)
+			{
+				_func(_event);
+			});
+			return element;
+		}
+		return {};
+	}
+
 	int Editor::getDefaultWidth() const
 	{
 		return m_rmlComponent ? m_rmlComponent->getDocumentSize().x : 0;

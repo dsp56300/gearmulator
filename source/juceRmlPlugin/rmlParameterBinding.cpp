@@ -179,6 +179,28 @@ namespace rmlPlugin
 		}
 	}
 
+	void RmlParameterBinding::getElementsForParameter(std::vector<Rml::Element*>& _results, const std::string& _param, const uint8_t _part, const bool _visibleOnly) const
+	{
+		auto* p = m_controller.getParameter(_param, _part);
+		if (!p)
+			return;
+		getElementsForParameter(_results, p, _visibleOnly);
+	}
+
+	void RmlParameterBinding::getElementsForParameter(std::vector<Rml::Element*>& _results, const pluginLib::Parameter* _param, bool _visibleOnly) const
+	{
+		const auto it = m_paramToElements.find(const_cast<pluginLib::Parameter*>(_param));
+
+		if (it == m_paramToElements.end())
+			return;
+
+		for (auto* elem : it->second)
+		{
+			if (!_visibleOnly || elem->IsVisible(true))
+				_results.push_back(elem);
+		}
+	}
+
 	Rml::Element* RmlParameterBinding::getElementForParameter(const pluginLib::Parameter* _param, const bool _visibleOnly) const
 	{
 		const auto it = m_paramToElements.find(const_cast<pluginLib::Parameter*>(_param));
@@ -192,6 +214,14 @@ namespace rmlPlugin
 				return elem;
 		}
 		return {};
+	}
+
+	Rml::Element* RmlParameterBinding::getElementForParameter(const std::string& _param, const uint8_t _part, const bool _visibleOnly) const
+	{
+		auto* p = m_controller.getParameter(_param, _part);
+		if (!p)
+			return {};
+		return getElementForParameter(p, _visibleOnly);
 	}
 
 	const pluginLib::Parameter* RmlParameterBinding::getParameterForElement(const Rml::Element* _element) const

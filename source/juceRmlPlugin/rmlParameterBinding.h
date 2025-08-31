@@ -56,7 +56,10 @@ namespace rmlPlugin
 
 		void unbind(Rml::Element& _element, bool _refreshDataModel = true);
 
+		void getElementsForParameter(std::vector<Rml::Element*>& _results, const std::string& _param, uint8_t _part = 0, bool _visibleOnly = true) const;
+		void getElementsForParameter(std::vector<Rml::Element*>& _results, const pluginLib::Parameter* _param, bool _visibleOnly = true) const;
 		Rml::Element* getElementForParameter(const pluginLib::Parameter* _param, bool _visibleOnly = true) const;
+		Rml::Element* getElementForParameter(const std::string& _param, uint8_t _part, bool _visibleOnly = true) const;
 		const pluginLib::Parameter* getParameterForElement(const Rml::Element* _element) const;
 
 		void setMouseIsDown(Rml::ElementDocument* _document, bool _isDown);

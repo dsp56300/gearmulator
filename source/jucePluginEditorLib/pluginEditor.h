@@ -171,6 +171,17 @@ namespace jucePluginEditorLib
 			return juceRmlUi::helper::findChildT<T>(root, _name, _mustExist);
 		}
 
+		template<typename T = Rml::Element> void findChildren(std::vector<T*>& _results, const std::string& _name, const size_t _expectedCount = 0) const
+		{
+			auto* root = getRmlRootElement();
+			juceRmlUi::helper::findChildren(_results, root, _name, _expectedCount);
+		}
+
+		std::vector<Rml::Element*> findChildreByParam(const std::string& _param, uint8_t _part = 0, const size_t _expectedCount = 0, bool _visibleOnly = false) const;
+		Rml::Element* findChildByParam(const std::string& _param, uint8_t _part = 0, bool _mustExist = true, bool _visibleOnly = false) const;
+
+		Rml::Element* addClick(const std::string& _elementName, const std::function<void(Rml::Event&)>& _func, const bool _mustExist = false) const;
+
 		const auto& getSkin() const { return m_skin; }
 
 		int getDefaultWidth() const;
