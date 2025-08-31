@@ -103,7 +103,7 @@ namespace juceRmlUi
 
 	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) const
 	{
-		if (!m_juceDraggable || !m_juceDraggable->data)
+		if (!m_juceDraggable || !m_juceDraggable->data || !m_juceDraggable->data->canExportAsFiles())
 			return false;
 
 		std::vector<std::string> files;
