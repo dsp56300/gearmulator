@@ -130,7 +130,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		VST3_AUTO_MANIFEST TRUE                           # While generating a moduleinfo.json is nice, Juce does not properly package using cpack on Win/Linux
 		                                                  # and completely fails on Linux if we change the suffix to .vst3, so we skip that completely for now
 		BUNDLE_ID "com.theusualsuspects.${productName}"
-		LV2URI "http://theusualsuspects.lv2.${productName}"
+		LV2URI "http://theusualsuspects.lv2/${productName}"
 	)
 
 	target_sources(${targetName} PRIVATE ${SOURCES} serverPlugin.cpp)
