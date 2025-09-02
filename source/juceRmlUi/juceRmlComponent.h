@@ -119,6 +119,7 @@ namespace juceRmlUi
 		std::unique_ptr<RendererProxy> m_renderProxy;
 
 		Rml::Context* m_rmlContext = nullptr;
+		Rml::ElementDocument* m_document = nullptr;
 
 		std::vector<juce::KeyPress> m_pressedKeys;
 		float m_contentScale = 1.0f;

@@ -446,12 +446,13 @@ namespace juceRmlUi
 			auto& sys = m_rmlInterfaces.getSystemInterface();
 			sys.beginLogRecording();
 
-			auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
-			if (document)
-			{
-				document->SetAttribute("rmlComponent", static_cast<void*>(this));
+			m_document = m_rmlContext->LoadDocument(m_rootRmlFilename);
 
-				const Rml::Vector2f s = document->GetBox().GetSize(Rml::BoxArea::Margin);
+			if (m_document)
+			{
+				m_document->SetAttribute("rmlComponent", static_cast<void*>(this));
+
+				const Rml::Vector2f s = m_document->GetBox().GetSize(Rml::BoxArea::Margin);
 
 				if (s.x > 0 && s.y > 0)
 				{
@@ -460,7 +461,7 @@ namespace juceRmlUi
 				}
 				else
 					throw std::runtime_error("RMLUI document '" + m_rootRmlFilename + "' has no valid size, explicit default size needs to be specified on the <body> element.");
-				document->Show();
+				m_document->Show();
 			}
 			else
 			{
@@ -480,7 +481,7 @@ namespace juceRmlUi
 				juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
 			}
 
-			if (document->GetAttribute("debugger", 0))
+			if (m_document->GetAttribute("debugger", 0))
 			{
 				Rml::Debugger::Initialise(m_rmlContext);
 				Rml::Debugger::SetVisible(true);
@@ -568,7 +569,7 @@ namespace juceRmlUi
 
 	Rml::ElementDocument* RmlComponent::getDocument() const
 	{
-		return m_rmlContext ? m_rmlContext->GetDocument(0) : nullptr;
+		return m_document;
 	}
 
 	Rml::Context* RmlComponent::getContext() const
