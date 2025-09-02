@@ -492,6 +492,11 @@ namespace juceRmlUi
 
 	void RmlComponent::destroyRmlContext()
 	{
+		{
+			std::scoped_lock lock(m_timerMutex);
+			stopTimer();
+		}
+
 		RmlInterfaces::ScopedAccess access(*this);
 
 		m_rmlContext->UnloadAllDocuments();
