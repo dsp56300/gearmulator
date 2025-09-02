@@ -31,13 +31,18 @@ namespace xtJucePlugin
 	class Editor final : public jucePluginEditorLib::Editor
 	{
 	public:
-		Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin);
+		Editor(jucePluginEditorLib::Processor& _processor, const jucePluginEditorLib::Skin& _skin);
 		~Editor() override;
 
 		Editor(Editor&&) = delete;
 		Editor(const Editor&) = delete;
 		Editor& operator = (Editor&&) = delete;
 		Editor& operator = (const Editor&) = delete;
+
+		void create() override;
+
+		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
+		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
@@ -46,22 +51,14 @@ namespace xtJucePlugin
 		XtLcd* getLcd() const;
 		Parts& getParts() const;
 
-		genericUI::Button<juce::DrawableButton>* createJuceComponent(genericUI::Button<juce::DrawableButton>*, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) override;
-		genericUI::Button<juce::TextButton>* createJuceComponent(genericUI::Button<juce::TextButton>*, genericUI::UiObject& _object) override;
-		juce::Component* createJuceComponent(juce::Component*, genericUI::UiObject& _object) override;
-
 		void setCurrentPart(uint8_t _part) override;
-
-		auto& getParameterBinding() const { return m_parameterBinding; }
 
 		const WaveEditor* getWaveEditor() const { return m_waveEditor; }
 
 	private:
-		void mouseEnter(const juce::MouseEvent& _event) override;
 		void changeWave(int _step) const;
 
 		Controller& m_controller;
-		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<FrontPanel> m_frontPanel;
@@ -73,8 +70,7 @@ namespace xtJucePlugin
 
 		baseLib::EventListener<bool> m_playModeChangeListener;
 
-		juce::Button* m_btMultiMode = nullptr;
-		juce::Button* m_ledMultiMode = nullptr;
-		juce::Button* m_btSave = nullptr;
+		Rml::Element* m_btMultiMode = nullptr;
+		Rml::Element* m_ledMultiMode = nullptr;
 	};
 }

@@ -1,0 +1,38 @@
+.x-we-tree
+{
+	border: 3dp #0008;
+	box-sizing: border-box;
+}
+
+.x-we-treeitem-withcanvas
+{
+	display: flex;
+}
+
+.x-we-treeitem-withcanvas-text
+{
+	flex: 0 0 50%;
+}
+
+.x-we-treeitem-canvas
+{
+	flex: 0 0 50%;
+}
+
+.x-we-treeitem-text
+{
+}
+
+.x-we-graph
+{
+	border: 3dp #0008;
+}
+
+:x-table-algorithmic
+{
+	opacity: 0.75;
+}
+
+:x-table-readonly
+{
+}

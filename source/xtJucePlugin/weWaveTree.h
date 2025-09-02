@@ -10,13 +10,23 @@ namespace xtJucePlugin
 	class WaveTree : public Tree
 	{
 	public:
-		explicit WaveTree(WaveEditor& _editor);
+		enum class NextChildType
+		{
+			Category,
+			Wave
+		};
+
+		explicit WaveTree(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor);
+
+		Rml::ElementPtr createChild(const std::string& _tag) override;
 
 		bool setSelectedWave(xt::WaveId _id);
 
 	private:
 		void addCategory(WaveCategory _category);
 
-		std::map<WaveCategory, WaveCategoryTreeItem*> m_items;
+		std::map<WaveCategory, juceRmlUi::TreeNodePtr> m_items;
+
+		NextChildType m_nextChildType = NextChildType::Category;
 	};
 }

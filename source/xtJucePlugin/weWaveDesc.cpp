@@ -1,18 +1,46 @@
 #include "weWaveDesc.h"
 
+#include "PluginProcessor.h"
 #include "weWaveTreeItem.h"
+#include "xtEditor.h"
 #include "xtWaveEditor.h"
 
 #include "baseLib/filesystem.h"
+
+#include "juceRmlUi/rmlDragSource.h"
 
 #include "synthLib/sysexToMidi.h"
 
 namespace xtJucePlugin
 {
-	WaveDesc* WaveDesc::fromDragSource(const juce::DragAndDropTarget::SourceDetails& _sourceDetails)
+	WaveDesc* WaveDesc::fromDragSource(const juceRmlUi::DragSource* _sourceDetails)
 	{
-		auto* desc = dynamic_cast<WaveDesc*>(_sourceDetails.description.getObject());
+		if (!_sourceDetails)
+			return {};
+		if (auto* data = _sourceDetails->getDragData())
+			return fromDragData(data);
+		return {};
+	}
+
+	WaveDesc* WaveDesc::fromDragData(DragData* _data)
+	{
+		auto* desc = dynamic_cast<WaveDesc*>(_data);
 		return desc;
+	}
+
+	bool WaveDesc::canExportAsFiles() const
+	{
+		return !waveDatas.empty() || !tableDatas.empty();
+	}
+
+	bool WaveDesc::getFilesForExport(std::vector<std::string>& _files, bool& _filesAreTemporary)
+	{
+		const auto filename = getExportFileName(m_editor.getEditor().getProcessor());
+		const auto file = m_editor.getEditor().createTempFile(filename);
+		if (writeToFile(file))
+			_files.push_back(file.getFullPathName().toStdString());
+		_filesAreTemporary = true;
+		return true;
 	}
 
 	bool WaveDesc::writeToFile(const juce::File& _file) const
@@ -40,11 +68,6 @@ namespace xtJucePlugin
 		return synthLib::SysexToMidi::write(_file.getFullPathName().toStdString().c_str(), sysex);
 	}
 
-	bool WaveDesc::canDropExternally() const
-	{
-		return !waveDatas.empty() || !tableDatas.empty();
-	}
-
 	std::string WaveDesc::getExportFileName(const pluginLib::Processor& _processor) const
 	{
 		std::stringstream name;
@@ -59,7 +82,7 @@ namespace xtJucePlugin
 		else if(!waveDatas.empty())
 			name << "Wave " << WaveTreeItem::getWaveName(waveIds.front());
 		else
-			return DragAndDropObject::getExportFileName(_processor);
+			name << "_MidiData";
 
 		if (juce::ModifierKeys::getCurrentModifiers().isShiftDown())
 			name << ".syx";

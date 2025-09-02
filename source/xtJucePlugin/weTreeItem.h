@@ -1,33 +1,40 @@
 #pragma once
 
-#include "juce_gui_basics/juce_gui_basics.h"
+#include "juceRmlUi/rmlDragSource.h"
+#include "juceRmlUi/rmlDragTarget.h"
+#include "juceRmlUi/rmlElemTreeNode.h"
+
+namespace juce
+{
+	class Graphics;
+}
+
+namespace juceRmlUi
+{
+	class ElemCanvas;
+}
 
 namespace xtJucePlugin
 {
-	class TreeItem : public juce::TreeViewItem
+	class TreeItem : public juceRmlUi::ElemTreeNode, public juceRmlUi::DragSource, public juceRmlUi::DragTarget
 	{
 	public:
+		explicit TreeItem(Rml::CoreInstance& _coreInstance, const std::string& _tag);
+
 		void setText(const std::string& _text);
 
 	protected:
-		virtual juce::Colour getTextColor(const juce::Colour _colour) { return _colour; }
+		virtual void paintItem(juce::Graphics& _g, const int _width, const int _height) = 0;
 
-		void paintItem(juce::Graphics& _g, int _width, int _height) override;
+		void repaintItem() const;
 
-		bool paintInBold() const;
+		void OnChildAdd(Rml::Element* _child) override;
 
-		void setPaintRootItemInBold(const bool _enabled)
-		{
-			m_paintRootItemInBold = _enabled;
-		}
+		void hideCanvas() const;
 
 	private:
-		bool mightContainSubItems() override
-		{
-			return true;
-		}
-
 		std::string m_text;
-		bool m_paintRootItemInBold = true;
+		Rml::Element* m_elemText = nullptr;
+		juceRmlUi::ElemCanvas* m_elemCanvas = nullptr;
 	};
 }

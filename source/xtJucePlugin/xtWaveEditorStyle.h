@@ -8,8 +8,8 @@ namespace xtJucePlugin
 	{
 		juce::Colour colGraphLine = juce::Colour(0xffffffff);
 		juce::Colour colGraphLineHighlighted = juce::Colour(0xffffaa00);
-		float graphLineThickness = 3.0f;
-		float graphPointSize = 10.0f;
-		float graphPointSizeHighlighted = 30.0f;
+		float graphLineThickness = 2.0f;
+		float graphPointSize = 6.0f;
+		float graphPointSizeHighlighted = graphPointSize * 2.0f;
 	};
 }

@@ -6,15 +6,14 @@ namespace xtJucePlugin
 {
 	class Editor;
 
-	class PartButton : public jucePluginEditorLib::PartButton<juce::DrawableButton>
+	class PartButton : public jucePluginEditorLib::PartButton
 	{
 	public:
-		PartButton(Editor& _editor, const std::string& _name, ButtonStyle _buttonStyle);
+		PartButton(Rml::Element* _button, Editor& _editor);
 
-		void onClick() override;
+		void onClick(Rml::Event&) override;
 
-		bool isInterestedInDragSource(const SourceDetails& dragSourceDetails) override;
-		void mouseDrag(const juce::MouseEvent& _event) override;
+		bool canDrop(const Rml::Event& _event, const juceRmlUi::DragSource* _source) override;
 
 	private:
 		Editor& m_editor;

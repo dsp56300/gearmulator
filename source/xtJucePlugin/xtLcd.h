@@ -14,7 +14,7 @@ namespace xtJucePlugin
 	class XtLcd final : public jucePluginEditorLib::Lcd
 	{
 	public:
-		explicit XtLcd(Component& _parent, Controller& _controller);
+		explicit XtLcd(Rml::Element* _parent, Controller& _controller);
 		~XtLcd() override;
 
 		void refresh();

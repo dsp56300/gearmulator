@@ -10,33 +10,48 @@ namespace xtJucePlugin
 {
 	class WaveEditor;
 
+	class TablesTreeNode : public juceRmlUi::TreeNode
+	{
+	public:
+		TablesTreeNode(juceRmlUi::Tree& _tree, const xt::TableId _tableIndex) : TreeNode(_tree), m_tableIndex(_tableIndex)
+		{
+		}
+
+		xt::TableId getTableId() const { return m_tableIndex; }
+
+	private:
+		const xt::TableId m_tableIndex;
+	};
+
 	class TablesTreeItem : public TreeItem
 	{
 	public:
-		TablesTreeItem(WaveEditor& _editor, xt::TableId _tableIndex);
+		TablesTreeItem(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor);
 
-		bool mightContainSubItems() override { return false; }
+		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 
-		void itemSelectionChanged(bool _isNowSelected) override;
+		xt::TableId getTableId() const;
 
-		juce::var getDragSourceDescription() override;
-		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
-		void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override;
+		void onSelectedChanged(bool _selected) override;
 
-		bool isInterestedInFileDrag(const juce::StringArray& files) override;
-		void filesDropped(const juce::StringArray& files, int insertIndex) override;
+		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
 
-		void itemClicked(const juce::MouseEvent&) override;
+		bool canDrop(const Rml::Event& _event, const DragSource* _source) override;
+		void drop(const Rml::Event& _event, const DragSource* _source, const juceRmlUi::DragData* _data) override;
 
-		const auto& getTableId() const { return m_index; }
+		bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) override;
+		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
+		void dropFiles(const std::vector<std::string>& _files);
 
-		juce::Colour getTextColor(const juce::Colour _colour) override;
+		void onRightClick(const Rml::Event& _event) override;
+
+		void paintItem(juce::Graphics& _g, const int _width, const int _height) override;
+
 	private:
 		void onTableChanged(xt::TableId _index);
 		void onTableChanged();
 
 		WaveEditor& m_editor;
-		const xt::TableId m_index;
 		baseLib::EventListener<xt::TableId> m_onTableChanged;
 	};
 }

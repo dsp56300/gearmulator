@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 project(xtJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
-	parameterDescriptions_xt.json
-	skins/xtDefault/xtDefault.json
-
 	PluginEditorState.cpp PluginEditorState.h
 	PluginProcessor.cpp PluginProcessor.h
 	weControlTree.cpp weControlTree.h
@@ -37,15 +34,21 @@ set(SOURCES
 	xtPatchManager.cpp xtPatchManager.h
 	xtWaveEditor.cpp xtWaveEditor.h
 	xtWaveEditorStyle.cpp xtWaveEditorStyle.h
+
+	parameterDescriptions_xt.json
+
+	skins/xtDefault/xtDefault.rml
+	skins/xtDefault/xtDefault.rcss
+	skins/xtDefault/xt-waveeditor-defaults.rcss
 )
 
 SET(ASSETS "parameterDescriptions_xt.json")
 
-addSkin("Xenia" "xtDefault" "skins/xtDefault" "xtDefault.json" "ASSETS_xtDefault")
+addSkin("Xenia" "xtDefault" "skins/xtDefault" "xtDefault.rml")
 
 buildSkinHeader()
 
-juce_add_binary_data(xtJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_xtDefault})
+juce_add_binary_data(xtJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_SKINS})
 
 createJucePluginWithFX(xtJucePlugin "Xenia" "Txts" "Txtf" xtJucePlugin_BinaryData xtLib)
 
