@@ -114,11 +114,11 @@ combotext {
 
 /* default scrollbars for all scrollable containers */
 scrollbarvertical {
-	width: 10dp;
+	width: 12dp;
 }
 
 scrollbarhorizontal {
-	height: 10dp;
+	height: 12dp;
 }
 
 scrollbarvertical slidertrack, scrollbarhorizontal slidertrack {
@@ -126,15 +126,15 @@ scrollbarvertical slidertrack, scrollbarhorizontal slidertrack {
 
 scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 	background-color: #999;
-	border-radius: 5dp;
+	border-radius: 6dp;
 }
 
 scrollbarvertical sliderbar {
-	min-height: 10dp;
+	min-height: 12dp;
 }
 
 scrollbarhorizontal sliderbar {
-	min-width: 10dp;
+	min-width: 12dp;
 }
 
 /* vertical lists */
