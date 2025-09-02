@@ -144,7 +144,7 @@ namespace juceRmlUi
 		}
 
 		Rml::ElementPtr elem = helper::clone(m_template, instancer);
-		elem->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::Block);
+		elem->RemoveProperty(Rml::PropertyId::Display);
 
 		updateElementDepthProperty(_node, *elem, "indent-margin-left", Rml::PropertyId::MarginLeft);
 		updateElementDepthProperty(_node, *elem, "indent-padding-left", Rml::PropertyId::PaddingLeft);
