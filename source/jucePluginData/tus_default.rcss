@@ -190,6 +190,7 @@ scrollbarhorizontal sliderbar {
 	padding: 2dp;
 	font-size: 0.75em;
 	white-space: nowrap;
+	overflow: hidden;
 }
 
 .gridentry:drag {
