@@ -126,6 +126,9 @@ namespace rmlPlugin::skinConverter
 		ss << "\t\t" << R"(<link type="text/rcss" href="tus_default.rcss"/>)" << '\n';
 		ss << "\t\t" << R"(<link type="text/rcss" href="tus_juceskin.rcss"/>)" << '\n';
 
+		for (const auto& style : m_options.includeStyles)
+			ss << "\t\t" << R"(<link type="text/rcss" href=")" << style << R"("/>)" << '\n';
+
 		if (!m_styles.empty())
 		{
 			if (!m_rcssFileName.empty())
