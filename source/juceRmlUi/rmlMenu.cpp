@@ -47,6 +47,12 @@ namespace juceRmlUi
 		if (!isOpen())
 			close();
 
+
+		const auto itemsPerColumn = getItemsPerColumn(_itemsPerColumn);
+
+		if (m_itemsPerColumn == UnknownItemsPerColumn && itemsPerColumn != UnknownItemsPerColumn)
+			m_itemsPerColumn = itemsPerColumn;
+
 		auto* context = _parent->GetContext();
 		auto* doc = _parent->GetOwnerDocument();
 
@@ -63,7 +69,7 @@ namespace juceRmlUi
 			// ignore separators at start/end of a column
 			if (entry.separator)
 			{
-				if (counter == 0 || counter == (_itemsPerColumn - 1))
+				if (counter == 0 || counter == (itemsPerColumn - 1))
 					continue;
 			}
 
@@ -74,7 +80,7 @@ namespace juceRmlUi
 				column = menu->AppendChild(std::move(c), true);
 			}
 			++counter;
-			if (counter == _itemsPerColumn)
+			if (counter == itemsPerColumn)
 				counter = 0;
 
 			auto div = doc->CreateElement("div");
@@ -228,6 +234,14 @@ namespace juceRmlUi
 		runModal(_mouseEvent.GetTargetElement(), helper::getMousePos(_mouseEvent), _itemsPerColumn);
 	}
 
+	uint32_t Menu::getItemsPerColumn(const uint32_t _default) const
+	{
+		auto r = getItemsPerColumn();
+		if (r == UnknownItemsPerColumn)
+			return _default;
+		return r;
+	}
+
 	void Menu::closeAll()
 	{
 		if (!m_parentMenu)
@@ -262,7 +276,7 @@ namespace juceRmlUi
 		auto pos = _parentEntry->GetAbsoluteOffset(Rml::BoxArea::Border);
 		const auto size = _parentEntry->GetBox().GetSize(Rml::BoxArea::Border);
 		pos += Rml::Vector2f(size.x, 0);
-		m_subMenu->open(_parentEntry.get(), pos, 16);
+		m_subMenu->open(_parentEntry.get(), pos, getItemsPerColumn());
 		m_subMenu->setParentMenu(shared_from_this());
 	}
 
