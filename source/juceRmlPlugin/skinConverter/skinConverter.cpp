@@ -264,14 +264,18 @@ namespace rmlPlugin::skinConverter
 	{
 		const auto imageName = createSpritesheet(_object);
 
-		const auto className = createImageStyle(imageName, {}).substr(1);
-		createImageStyle(imageName, {"checked"});
-		createImageStyle(imageName, {"checked", "active"});
-		createImageStyle(imageName, {"checked", "hover"});
-		createImageStyle(imageName, {"hover"});
-
 		_co.classes.emplace_back("juceButton");
-		_co.classes.emplace_back(className);
+
+		if (!imageName.empty())
+		{
+			const auto className = createImageStyle(imageName, {}).substr(1);
+			createImageStyle(imageName, {"checked"});
+			createImageStyle(imageName, {"checked", "active"});
+			createImageStyle(imageName, {"checked", "hover"});
+			createImageStyle(imageName, {"hover"});
+
+			_co.classes.emplace_back(className);
+		}
 
 		const auto isToggle = _object.getPropertyInt("isToggle");
 
@@ -402,11 +406,15 @@ namespace rmlPlugin::skinConverter
 		if (style.getStyle() == genericUI::RotaryStyle::Style::Rotary)
 		{
 			const auto imageName = createSpritesheet(_object);
-			const auto styleName = createKnobStyle(imageName);
 
-			_co.tag = "knob";
-			_co.classes.emplace_back("juceRotary");
-			_co.classes.emplace_back(styleName.substr(1));
+			if (!imageName.empty())
+			{
+				const auto styleName = createKnobStyle(imageName);
+
+				_co.tag = "knob";
+				_co.classes.emplace_back("juceRotary");
+				_co.classes.emplace_back(styleName.substr(1));
+			}
 		}
 		else if (style.getStyle() == genericUI::RotaryStyle::Style::LinearHorizontal || style.getStyle() == genericUI::RotaryStyle::Style::LinearVertical)
 		{
@@ -595,6 +603,9 @@ namespace rmlPlugin::skinConverter
 	std::string SkinConverter::createSpritesheet(const genericUI::UiObject& _object)
 	{
 		const auto originalImageName = _object.getProperty("texture");
+
+		if (originalImageName.empty())
+			return {};
 
 		const auto imageName = getAndValidateTextureName(_object);
 
