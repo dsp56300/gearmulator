@@ -10,6 +10,8 @@
 
 #include "baseLib/filesystem.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementDocument.h"
@@ -478,7 +480,7 @@ namespace juceRmlUi
 				ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
 				for (const auto& log : logs)
 					ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
-				juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
+				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Error loading RMLUI document", ss.str(), this);
 			}
 
 			if (m_document->GetAttribute("debugger", 0))
