@@ -38,6 +38,6 @@ namespace n2xJucePlugin
 
 	void Lfo::updateState(const pluginLib::Parameter* _param) const
 	{
-		juceRmlUi::ElemValue::setValue(m_slider, _param->getUnnormalizedValue());
+		juceRmlUi::ElemValue::setValue(m_slider, static_cast<float>(_param->getUnnormalizedValue()));
 	}
 }

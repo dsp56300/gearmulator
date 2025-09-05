@@ -292,6 +292,8 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 	juceRmlUi::Menu skinMenu;
 
+	skinMenu.setItemsPerColumn(32);
+
 	bool loadedSkinIsPartOfList = false;
 
 	std::set<std::pair<std::string, std::string>> knownSkins;	// folder, filename

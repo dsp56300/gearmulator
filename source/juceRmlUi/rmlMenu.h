@@ -20,6 +20,8 @@ namespace juceRmlUi
 	class Menu : Rml::EventListener,  public std::enable_shared_from_this<Menu>
 	{
 	public:
+		static constexpr uint32_t UnknownItemsPerColumn = std::numeric_limits<uint32_t>::max();
+
 		Menu() = default;
 		Menu(Menu&&) noexcept = default;
 		Menu(const Menu&) = delete;
@@ -56,6 +58,10 @@ namespace juceRmlUi
 		void runModal(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn = 100);
 		void runModal(const Rml::Event& _mouseEvent, uint32_t _itemsPerColumn = 100);
 
+		uint32_t getItemsPerColumn() const { return m_itemsPerColumn; }
+		uint32_t getItemsPerColumn(uint32_t _default) const;
+		void setItemsPerColumn(uint32_t _itemsPerColumn) { m_itemsPerColumn = _itemsPerColumn; }
+
 	private:
 		void closeAll();
 
@@ -84,5 +90,7 @@ namespace juceRmlUi
 		std::shared_ptr<Menu> m_parentMenu;
 
 		std::unique_ptr<DelayedCall> m_openSubmenuDelay;
+
+		uint32_t m_itemsPerColumn = UnknownItemsPerColumn;
 	};
 }
