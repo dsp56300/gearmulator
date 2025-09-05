@@ -9,7 +9,6 @@
 namespace jucePluginEditorLib
 {
 	class MidiPorts;
-	class FocusedParameter;
 	class Processor;
 }
 
