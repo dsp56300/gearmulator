@@ -6,7 +6,6 @@
 
 #include "convertedObject.h"
 #include "scHelper.h"
-#include "dsp56kEmu/logging.h"
 
 #include "juceRmlPlugin/rmlParameterBinding.h"
 
@@ -622,6 +621,30 @@ namespace rmlPlugin::skinConverter
 
 		const auto& image = drawable->getImage();
 
+		ButtonProperties buttonProperties;
+
+		if (_object.hasComponent("button"))
+		{
+			buttonProperties.isButton = true;
+
+			buttonProperties.normalImage = _object.getPropertyInt("normalImage", -1);
+			buttonProperties.overImage = _object.getPropertyInt("overImage", -1);
+			buttonProperties.downImage = _object.getPropertyInt("downImage", -1);
+			buttonProperties.normalImageOn = _object.getPropertyInt("normalImageOn", -1);
+			buttonProperties.overImageOn = _object.getPropertyInt("overImageOn", -1);
+			buttonProperties.downImageOn = _object.getPropertyInt("downImageOn", -1);
+		}
+
+		auto spriteSheets = createSpritesheet(m_outputPath, static_cast<int>(m_options.maxTextureWidth), static_cast<int>(m_options.maxTextureHeight), tileSizeX, tileSizeY, imageName, image, buttonProperties);
+
+		for (auto& [key, spritesheet] : spriteSheets)
+			addSpritesheet(key, std::move(spritesheet));
+
+		return imageName;
+	}
+
+	std::vector<std::pair<std::string, CoSpritesheet>> SkinConverter::createSpritesheet(const std::string& _outputPath, int maxTextureWidth, int maxTextureHeight, int tileSizeX, int tileSizeY, const std::string& imageName, const juce::Image& image, const ButtonProperties& _buttonProperties)
+	{
 		const auto w = image.getWidth();
 		const auto h = image.getHeight();
 
@@ -637,8 +660,8 @@ namespace rmlPlugin::skinConverter
 
 		std::vector<Sprite> sprites;
 
-		auto maxTextureWidth = std::max(tileSizeX, static_cast<int>(m_options.maxTextureWidth));
-		auto maxTextureHeight = std::max(tileSizeY, static_cast<int>(m_options.maxTextureHeight));
+		maxTextureWidth = std::max(tileSizeX, maxTextureWidth);
+		maxTextureHeight = std::max(tileSizeY, maxTextureHeight);
 
 		for (int y=0; y<h; y += tileSizeY)
 		{
@@ -750,7 +773,7 @@ namespace rmlPlugin::skinConverter
 					}
 				}
 
-				const auto filename = m_outputPath + imageName + "_page" + std::to_string(i) + ".png";
+				const auto filename = _outputPath + imageName + "_page" + std::to_string(i) + ".png";
 				juce::File file(filename);
 				file.deleteFile();
 				file.create();
@@ -790,15 +813,16 @@ namespace rmlPlugin::skinConverter
 		};
 
 		// the type of sprite naming is determined by the type of object
-		if (_object.hasComponent("button"))
+		if (_buttonProperties.isButton)
 		{
 			// create sprites for button states
-			addIndex("default", _object.getPropertyInt("normalImage", -1));
-			addIndex("hover", _object.getPropertyInt("overImage", -1));
-			addIndex("active", _object.getPropertyInt("downImage", -1));
-			addIndex("checked", _object.getPropertyInt("normalImageOn", -1));
-			addIndex("checked-hover", _object.getPropertyInt("overImageOn", -1));
-			addIndex("checked-active", _object.getPropertyInt("downImageOn", -1));
+			addIndex("default", _buttonProperties.normalImage);
+
+			addIndex("hover", _buttonProperties.overImage);
+			addIndex("active", _buttonProperties.downImage);
+			addIndex("checked", _buttonProperties.normalImageOn);
+			addIndex("checked-hover", _buttonProperties.overImageOn);
+			addIndex("checked-active", _buttonProperties.downImageOn);
 		}
 		else
 		{
@@ -810,17 +834,24 @@ namespace rmlPlugin::skinConverter
 			}
 		}
 
+		std::vector<std::pair<std::string, CoSpritesheet>> result;
+
+		auto addSpritesheet = [&result](const std::string& _key, CoSpritesheet&& _spritesheet)
+		{
+			if (_spritesheet.properties.size() <= 1)
+				return;
+			result.emplace_back(_key, std::move(_spritesheet));
+		};
+
 		addSpritesheet(imageName, std::move(spritesheet));
 
 		for (size_t i=0; i<pageSpritesheets.size(); ++i)
 		{
 			auto& ss = pageSpritesheets[i];
-			if (ss.properties.size() <= 1)
-				continue;
 			addSpritesheet(imageName + "_page" + std::to_string(i), std::move(ss));
 		}
 
-		return imageName;
+		return result;
 	}
 
 	void SkinConverter::addSpritesheet(const std::string& _key, CoSpritesheet&& _spritesheet)

@@ -34,3 +34,19 @@ target_compile_definitions(juceRmlPlugin PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INC
 set_property(TARGET juceRmlPlugin PROPERTY FOLDER "Gearmulator")
 
 target_include_directories(juceRmlPlugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+####################
+
+add_executable(knobConverter)
+
+set(SOURCES
+	knobConverter.cpp knobConverter.h
+)
+
+target_sources(knobConverter PUBLIC ${SOURCES})
+source_group("source" FILES ${SOURCES})
+
+target_link_libraries(knobConverter PRIVATE rmlui_core baseLib juceRmlPlugin juce_plugin_modules)
+target_include_directories(knobConverter PUBLIC ../JUCE/modules)
+target_compile_definitions(knobConverter PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
+set_property(TARGET knobConverter PROPERTY FOLDER "Gearmulator")

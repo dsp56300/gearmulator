@@ -1,8 +1,8 @@
 #pragma once
 
+#include <string>
+#include <sstream>
 #include <map>
-
-#include "RmlUi/Core/Property.h"
 
 namespace juce
 {
@@ -22,7 +22,7 @@ namespace rmlPlugin::skinConverter
 
 		void add(const std::string& _key, const juce::Colour& _color);
 
-		void write(std::stringstream& _out, const std::string& _name, uint32_t _depth) const;
+		void write(std::ostream& _out, const std::string& _name, uint32_t _depth) const;
 		void writeInline(std::stringstream& _ss);
 
 		bool operator == (const CoStyle& _other) const

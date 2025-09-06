@@ -14,7 +14,7 @@ namespace rmlPlugin::skinConverter
 		add(_key, helper::toRmlColorString(_color));
 	}
 
-	void CoStyle::write(std::stringstream& _out, const std::string& _name, uint32_t _depth) const
+	void CoStyle::write(std::ostream& _out, const std::string& _name, uint32_t _depth) const
 	{
 		const auto prefix = std::string(_depth, '\t');
 
