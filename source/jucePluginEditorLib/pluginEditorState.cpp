@@ -641,12 +641,30 @@ void PluginEditorState::exportCurrentSkin() const
 
 Skin PluginEditorState::readSkinFromConfig() const
 {
-	const auto& config = m_processor.getConfig();
+	auto& config = m_processor.getConfig();
 
 	Skin skin;
 	skin.displayName = config.getValue("skinDisplayName", "").toStdString();
 	skin.filename = config.getValue("skinFile", "").toStdString();
 	skin.folder = config.getValue("skinFolder", "").toStdString();
+
+	if (skin.folder.empty())
+	{
+		// if the skin file points to a legacy skin, let it point to the rml skin instead
+		if (baseLib::filesystem::hasExtension(skin.filename, ".json"))
+		{
+			skin.filename = baseLib::filesystem::stripExtension(skin.filename) + ".rml";
+			config.setValue("skinFile", juce::String::fromUTF8(skin.filename.c_str()));
+		}
+
+		// if the skin is embedded, we do not know the files that this skin was made of. Find them
+		for (const auto & s : m_includedSkins)
+		{
+			if (s.filename == skin.filename)
+				skin.files = s.files;
+		}
+	}
+
 	return skin;
 }
 
