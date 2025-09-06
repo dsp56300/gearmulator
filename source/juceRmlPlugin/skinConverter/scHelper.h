@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RmlUi/Core/Types.h"
+#include <string>
 
 namespace juce
 {

@@ -42,11 +42,6 @@ namespace jucePluginEditorLib
 		m_dataModelConstructor = nullptr;
 	}
 
-	std::string PluginDataModel::getModelName()
-	{
-		return "plugin";
-	}
-
 	void PluginDataModel::set(const std::string& _key, const std::string& _value)
 	{
 		if (m_dataModelConstructor)

@@ -8,6 +8,11 @@
 
 #include "RmlUi/Core/Element.h"
 
+namespace juce
+{
+	class Image;
+}
+
 namespace rmlPlugin::skinConverter
 {
 	struct SkinConverterOptions;
@@ -55,6 +60,22 @@ namespace rmlPlugin::skinConverter
 		std::string addStyle(const std::string& _prefix, const CoStyle& _style);
 
 		std::string createSpritesheet(const genericUI::UiObject& _object);
+
+	public:
+		struct ButtonProperties
+		{
+			bool isButton = false;
+			int normalImage = -1;
+			int overImage = -1;
+			int downImage = -1;
+			int normalImageOn = -1;
+			int overImageOn = -1;
+			int downImageOn = -1;
+		};
+
+		static std::vector<std::pair<std::string, CoSpritesheet>> createSpritesheet(const std::string& _outputPath, int maxTextureWidth, int maxTextureHeight, int tileSizeX, int tileSizeY, const std::string& _name, const juce::Image& _image, const ButtonProperties& _buttonProperties);
+
+	private:
 		void addSpritesheet(const std::string& _key, CoSpritesheet&& _spritesheet);
 		bool spriteExists(const std::string& _spriteName) const;
 
