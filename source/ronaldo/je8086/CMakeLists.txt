@@ -4,5 +4,5 @@ add_subdirectory(jeLib)
 #add_subdirectory(jeTestConsole)
 
 if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
-#	add_subdirectory(jeJucePlugin)
+	add_subdirectory(jeJucePlugin)
 endif()

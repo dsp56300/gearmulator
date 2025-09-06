@@ -1,0 +1,12 @@
+<rml>
+	<head>
+		<link type="text/template" href="tus_colorpicker.rml"/>
+		<link type="text/template" href="tus_patchmanager.rml"/>
+		<link type="text/rcss" href="tus_default.rcss"/>
+		<link type="text/rcss" href="tus_juceskin.rcss"/>
+		<link type="text/rcss" href="jeTrancy.rcss"/>
+	</head>
+	<body id="Root" rootScale="0.5" style="left: 0dp; top: 0dp; width: 2772dp; height: 1485dp;">
+		<img id="bg" class="background" src="background.png"/>
+	</body>
+</rml>

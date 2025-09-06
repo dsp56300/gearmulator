@@ -1,0 +1,13 @@
+body
+{
+	font-size: 32dp;
+}
+
+.background
+{
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 100%;
+	height: 100%;
+}
