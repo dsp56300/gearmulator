@@ -3,7 +3,6 @@ set(SkinsHeaderDir ${CMAKE_CURRENT_LIST_DIR})
 macro(addSkin productName skinName skinFolder skinRootFile)
 	file(GLOB SKIN_FILES
 		RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-		"${skinFolder}/*.json"	# we keep these for now, can be removed once all skins are converted to RML
 		"${skinFolder}/*.png"
 		"${skinFolder}/*.rml"
 		"${skinFolder}/*.rcss"
