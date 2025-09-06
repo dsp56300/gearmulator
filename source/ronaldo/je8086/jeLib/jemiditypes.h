@@ -391,4 +391,46 @@ namespace jeLib
 	    ExternalTriggerDestination = 0x00000177            // 00h - 02h | FILTER, AMP, FILTER&AMP
 	};
 
+	enum class UserPatchArea : uint32_t
+	{
+		UserPatch001 = 0x00000000, // A11
+		UserPatch002 = 0x00000200, // A12
+		UserPatch064 = 0x00007E00, // A88
+		UserPatch065 = 0x00010000, // B11
+		UserPatch066 = 0x00010200, // B12
+		UserPatch128 = 0x00017E00  // B88
+	};
+
+	enum class UserPerformanceArea : uint32_t
+	{
+		UserPerformance01 = 0x00000000, // 11
+		UserPerformance02 = 0x00010000, // 12
+		UserPerformance64 = 0x003F0000  // 88
+	};
+
+	enum class MotionControlData : uint32_t
+	{
+		MotionControlData1 = 0x00000000,
+		MotionControlData2 = 0x00400000,
+	};
+
+	enum class SysexByte : uint8_t
+	{
+		SOX = 0xf0,
+
+		ManufacturerID = 0x41,
+
+		DeviceIdDefault = 0x10,
+		DeviceIdMin = 0x10,
+		DeviceIdMax = 0x1F,
+		DeviceIdBroadcast = 0x7F,
+
+		ModelIdMSB = 0x00,
+		ModelIdLSB = 0x06,
+
+		CommandIdDataRequest1 = 0x11,
+		CommandIdDataSet1 = 0x12,
+
+		EOX = 0xf7
+	};
 }
