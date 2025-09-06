@@ -322,7 +322,8 @@ namespace jeLib
 	    ControlFilterEnvSustainLevel = 0x0000007A,         // 00h - FEh | -127 - +127
 	    ControlFilterEnvReleaseTime = 0x0000007C,          // 00h - FEh | -127 - +127
 	    ControlAmpLevel = 0x0000007E,                      // 00h - FEh | -127 - +127
-	    ControlAmpLfo1Depth = 0x00000100,                  // 00h - FEh | -127 - +127
+
+		ControlAmpLfo1Depth = 0x00000100,                  // 00h - FEh | -127 - +127
 	    ControlAmpLfo2Depth = 0x00000102,                  // 00h - FEh | -127 - +127
 	    ControlAmpEnvAttackTime = 0x00000104,              // 00h - FEh | -127 - +127
 	    ControlAmpEnvDecayTime = 0x00000106,               // 00h - FEh | -127 - +127
