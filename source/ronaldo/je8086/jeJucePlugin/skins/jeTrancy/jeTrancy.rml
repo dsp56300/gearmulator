@@ -84,6 +84,24 @@
 
 				<button class="abs btRedLed" style="left: 772dp; top: 76dp;" isToggle="1"/>
 				
+				<!-- OSC 2 -->
+				<div class="abs" style="left: 811dp; top: 30dp; width: 630dp; height: 287dp;">
+					<button class="abs btRedLed" style="left: 128dp; top: 42dp;" isToggle="1"/>
+					<button class="abs btRedLed" style="left: 282dp; top: 42dp;" isToggle="1"/>
+					<div class="abs vlayoutLeds" style="left: 398dp; top: -14dp; height: 140dp; width: 210dp">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+					<div class="knobs_row2" style="left: 45dp; gap: 63dp;">
+						<knob class="knob"/>
+						<knob class="knob"/>
+						<knob class="knob"/>
+						<knob class="knob"/>
+					</div>
+				</div>
+
 			</div>
 				
 			<!-- third row -->
