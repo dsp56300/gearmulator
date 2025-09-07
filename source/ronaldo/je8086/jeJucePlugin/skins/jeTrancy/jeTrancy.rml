@@ -11,7 +11,7 @@
 		<img class="background" src="background.png"/>
 		
 		<!-- MAIN PAGE -->
-		<img class="abs" src="main.png" tabgroup="main" tabpage="0">
+		<img data-model="partCurrent" class="abs" src="main.png" tabgroup="main" tabpage="0">
 		
 			<!-- first row -->
 				
@@ -23,6 +23,7 @@
 					<knob class="knob"/>
 					<knob class="knob"/>
 					<knob class="knob"/>
+					<button class="abs btRedLed" style="left: 872dp; top: 56dp;" param="VoiceModulatorSendSwitch" isToggle="1"/>
 				</div>
 				
 				<!-- voice modulator -->
@@ -50,7 +51,7 @@
 			
 				<!-- LFO 1 -->
 				<div class="abs" style="left: 12dp; top: 30dp; height: 287dp; width: 290dp;">
-					<div class="vlayoutLeds" style="height: 200dp; width: 100%">
+					<div class="vlayoutLeds" style="height: 140dp; width: 100%">
 						<button class="ledRed"/>
 						<button class="ledRed"/>
 						<button class="ledRed"/>
@@ -61,6 +62,28 @@
 						<knob class="knob"/>
 					</div>
 				</div>
+				
+				<!-- OSC 1 -->
+				<div class="abs" style="left: 336dp; top: 30dp; height: 287dp; width: 460dp;">
+					<div class="vlayoutLeds" style="height: 140dp; width: 210dp">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+					<div class="vlayoutLeds" style="position: absolute; top: 0dp; left: 212dp; height: 100dp; width: 210dp">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+					<div class="knobs_row2" style="left: 187dp">
+						<knob class="knob"/>
+						<knob class="knob"/>
+					</div>
+				</div>
+
+				<button class="abs btRedLed" style="left: 772dp; top: 76dp;" isToggle="1"/>
+				
 			</div>
 				
 			<!-- third row -->

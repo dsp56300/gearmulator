@@ -213,8 +213,7 @@ button
 
 .debug
 {
-	background-color: #f0f;
-	opacity: 0.5;
+	background-color: #f0f4;
 }
 
 .vlayoutLeds
