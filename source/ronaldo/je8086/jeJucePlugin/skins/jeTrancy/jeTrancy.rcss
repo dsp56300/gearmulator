@@ -232,3 +232,16 @@ button
 	display: flex;
 	gap: 56dp;
 }
+
+.sliderV sliderbar
+{
+	decorator: image(slider.png contain);
+	height: 74dp;
+	width: 61dp;
+}
+
+.sliderV
+{
+	height: 250dp;
+	width: 61dp;
+}
