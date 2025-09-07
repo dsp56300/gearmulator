@@ -56,6 +56,20 @@ body
 	src: button_red_led.png;
 }
 
+@spritesheet button_white_led
+{
+	button_white_led_off: 0px 0px  69px 50px;
+	button_white_led_on:  0px 50px 69px 50px;
+	src: button_white_led.png;
+}
+
+@spritesheet button_white2_led
+{
+	button_white2_led_off: 0px 0px  109px 45px;
+	button_white2_led_on:  0px 45px 109px 45px;
+	src: button_white2_led.png;
+}
+
 @spritesheet tab_main
 {
 	tab_main_off: 0px 0px 201px 76px;
@@ -124,12 +138,39 @@ button
 {
 	width: 74dp;
 	height: 48dp;
+	isToggle: 1;
 	decorator: image(button_red_led_off fill);	
 }
 
 .btRedLed:hover
 {
 	decorator: image(button_red_led_on fill);	
+}
+
+.btWhiteLed
+{
+	width: 69dp;
+	height: 50dp;
+	isToggle: 1;
+	decorator: image(button_white_led_off fill);	
+}
+
+.btWhiteLed:hover
+{
+	decorator: image(button_white_led_on fill);	
+}
+
+.btWhite2Led
+{
+	width: 109dp;
+	height: 45dp;
+	isToggle: 1;
+	decorator: image(button_white2_led_off fill);	
+}
+
+.btWhite2Led:hover
+{
+	decorator: image(button_white2_led_on fill);	
 }
 
 .layoutTabButtons

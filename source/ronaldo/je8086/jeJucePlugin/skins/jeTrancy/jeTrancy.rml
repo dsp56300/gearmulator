@@ -202,6 +202,58 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- fourth row -->
+			<div class="row" style="top:934dp; height: 160dp;">
+				
+				<!-- Control -->
+				<div class="abs" style="width: 700dp; height: 100%;">
+					<div class="hlayout" style="padding-top: 90dp; justify-content: center; gap: 20dp;">
+						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
+						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
+						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
+						<spacer style="width: 30dp"/>
+						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
+						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
+						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
+					</div>
+				</div>
+
+				<!-- Panel Select / Key Mode -->
+				<div class="abs" style="left: 729dp; width: 466dp; height: 100%;">
+					<div class="hlayout" style="width: 46%; padding-top: 69dp; justify-content: center; gap: 24dp;">
+						<button class="btWhiteLed" style="left: 872dp; top: 56dp;"/>
+						<button class="btWhiteLed" style="left: 872dp; top: 56dp;"/>
+					</div>
+					<div class="abs vlayoutLeds" style="left: 221dp; top: 43dp; height: 100dp; width: 220dp">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+				</div>
+				
+				<div class="abs" style="left: 1754dp; top: 61dp;">
+					
+					<!-- Dec/Inc -->
+					<div class="abs hlayout" style="gap: 20dp;">
+						<button class="btRedLed"/>
+						<button class="btRedLed"/>
+					</div>
+					
+					<!-- Edit/Write -->
+					<div class="abs hlayout" style="top: 173dp; gap: 20dp;">
+						<button class="btRedLed"/>
+						<button class="btRedLed"/>
+					</div>
+					
+					<!-- Shift/Exit -->
+					<div class="abs hlayout" style="top: 291dp; gap: 20dp;">
+						<button class="btRedLed"/>
+						<button class="btRedLed"/>
+					</div>
+				</div>
+
+			</div>
 		</img>
 		
 		<!-- PATCH BROWSER -->
