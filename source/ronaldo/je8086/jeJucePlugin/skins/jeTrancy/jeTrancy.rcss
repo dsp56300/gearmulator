@@ -1,6 +1,10 @@
 body
 {
 	font-size: 32dp;
+	left: 0dp; 
+	top: 0dp; 
+	width: 2772dp; 
+	height: 1458dp;
 }
 
 .background
@@ -36,6 +40,20 @@ body
 	led2_red_off: 0px 0px  27px 17px;
 	led2_red_on:  0px 17px  27px 17px;
 	src: led2_red.png;
+}
+
+@spritesheet button_red
+{
+	button_red_off: 0px 0px 74px 48px;
+	button_red_on:  0px 0px 74px 48px;
+	src: button_red.png;
+}
+
+@spritesheet button_red_led
+{
+	button_red_led_off: 0px 0px  74px 48px;
+	button_red_led_on:  0px 48px 74px 48px;
+	src: button_red_led.png;
 }
 
 @spritesheet tab_main
@@ -102,14 +120,26 @@ button
 	decorator: image(tab_perf_on fill);
 }
 
+.btRedLed
+{
+	width: 74dp;
+	height: 48dp;
+	decorator: image(button_red_led_off fill);	
+}
+
+.btRedLed:hover
+{
+	decorator: image(button_red_led_on fill);	
+}
+
 .layoutTabButtons
 {
 	position: absolute;
 	display: flex;
 	width: 523dp;
 	height: 76dp;
-	left: 178dp;
-	top: 152dp;
+	left: 176dp;
+	top: 150dp;
 	gap: 12dp;
 }
 
@@ -130,4 +160,76 @@ button
 	left: 767dp;
 	top: 145dp;
 	gap: 57.5dp;
+}
+
+.ledBlue
+{
+	position: absolute;
+	left: 25dp;
+	top: -72dp;
+	width: 45dp;
+	height: 45dp;
+	decorator: image(led_blue_off fill);	
+}
+
+.ledBlue:checked
+{
+	decorator: image(led_blue_off fill);	
+}
+
+.ledRed2
+{
+	position: absolute;
+	left: 430dp;
+	width: 200dp;
+	height: 26dp;
+	decorator: image(led2_red_off scale-none left center);
+}
+
+.ledRed2:checked
+{
+	decorator: image(led2_red_on scale-none left center);
+}
+
+.ledRed
+{
+	width: 100%;
+	height: 26dp;
+	flex: 0 0 auto;
+	decorator: image(led_red_off scale-none left center);
+}
+
+.ledRed:checked
+{
+	decorator: image(led_red_on scale-none left center);
+}
+
+.row
+{
+	position: absolute;
+	left: 175dp;
+	width: 2420dp;
+}
+
+.debug
+{
+	background-color: #f0f;
+	opacity: 0.5;
+}
+
+.vlayoutLeds
+{
+	display: flex; 
+	flex-direction: column; 
+	row-gap: 9dp;
+}
+
+.knobs_row2
+{
+	position: absolute;
+	top: 175dp;
+	left: 28dp;
+
+	display: flex;
+	gap: 56dp;
 }

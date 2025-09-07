@@ -7,20 +7,72 @@
 		<link type="text/rcss" href="knob.rcss"/>
 		<link type="text/rcss" href="jeTrancy.rcss"/>
 	</head>
-	<body debugger=1" id="Root" rootScale="0.5" style="left: 0dp; top: 0dp; width: 2772dp; height: 1458dp;">
+	<body debugger=1" id="Root" rootScale="0.5">
 		<img class="background" src="background.png"/>
 		
 		<!-- MAIN PAGE -->
 		<img class="abs" src="main.png" tabgroup="main" tabpage="0">
-			<div class="layoutFxKnobs">
-				<knob class="knob" min="0" max="127" value="40"/>
-				<knob class="knob" min="0" max="127" value="40"/>
-				<knob class="knob" min="0" max="127" value="40"/>
-				<knob class="knob" min="0" max="127" value="40"/>
-				<knob class="knob" min="0" max="127" value="40"/>
-				<knob class="knob" min="0" max="127" value="40"/>
-			</div>			
+		
+			<!-- first row -->
+				
+				<!-- FX section -->
+				<div class="layoutFxKnobs">
+					<knob class="knob"/>
+					<knob class="knob"/>
+					<knob class="knob"/>
+					<knob class="knob"/>
+					<knob class="knob"/>
+					<knob class="knob"/>
+				</div>
+				
+				<!-- voice modulator -->
+				<div class="abs" style="left: 1642dp; top: 90dp;">
+					<button class="abs btRedLed" style=""/>
+					<knob class="abs knob" style="left: 130dp; top: 55dp;"/>
+					<knob class="abs knob" style="left: 276dp; top: 55dp;"/>
+				</div>
+				
+				<!-- ext input -->
+				<div class="abs" style="left: 1942dp; top: 90dp;">
+					<knob class="abs knob" style="left: 130dp; top: 55dp;">
+						<button class="ledBlue"/>
+					</knob>
+					<knob class="abs knob" style="left: 276dp; top: 55dp;">
+						<button class="ledBlue"/>
+					</knob>
+					<button class="abs btRedLed" style="left: 405dp; top: 76dp;"/>
+					<button class="ledRed2" style="top: 5dp;"/>
+					<button class="ledRed2" style="top: 38dp;"/>
+				</div>
+				
+			<!-- second row -->
+			<div class="row" style="top: 270dp; height: 316dp;">
+			
+				<!-- LFO 1 -->
+				<div class="abs" style="left: 12dp; top: 30dp; height: 287dp; width: 290dp;">
+					<div class="vlayoutLeds" style="height: 200dp; width: 100%">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+					<div class="knobs_row2">
+						<knob class="knob"/>
+						<knob class="knob"/>
+					</div>
+				</div>
+			</div>
+				
+			<!-- third row -->
+			<div class="row" style="top: 595dp; height: 326dp;">
+			
+				<!-- Modulation (LFO 2) -->
+				<div class="abs">
+				</div>
+			</div>
+				
 		</img>
+		
 		<!-- PATCH BROWSER -->
 		<img class="abs" src="browser.png" tabgroup="main" tabpage="1">
 			
