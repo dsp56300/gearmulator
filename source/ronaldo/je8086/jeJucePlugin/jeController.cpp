@@ -6,6 +6,15 @@ namespace jeJucePlugin
 {
 	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_je.json")
 	{
+	    registerParams(_p, [](const uint8_t _part, const bool _isNonPartExclusive)
+	    {
+			if(_isNonPartExclusive)
+				return juce::String();
+			char temp[2] = {static_cast<char>('A' + _part),0};
+		    return juce::String(temp);
+	    });
+
+		Controller::onStateLoaded();
 	}
 
 	Controller::~Controller() = default;
