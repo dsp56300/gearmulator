@@ -112,8 +112,8 @@
 					<button class="ledRed2" style="left: 286dp; top: 28dp; width: 140dp;"/>
 					<button class="ledRed2" style="left: 286dp; top: 62dp; width: 140dp;"/>
 
-					<input class="abs sliderV" type="range" orientation="vertical" style="left: 61dp; top: 20dp;"/>
-					<input class="abs sliderV" type="range" orientation="vertical" style="left: 179dp; top: 20dp;"/>
+					<input class="abs sliderV slider_row2" type="range" orientation="vertical" style="left: 61dp;"/>
+					<input class="abs sliderV slider_row2" type="range" orientation="vertical" style="left: 179dp;"/>
 					
 					<div class="knobs_row2" style="left: 306dp; gap: 63dp;">
 						<knob class="knob"/>
@@ -133,15 +133,75 @@
 					</div>
 				</div>
 			</div>
-				
+
 			<!-- third row -->
 			<div class="row" style="top: 595dp; height: 326dp;">
 			
 				<!-- Modulation (LFO 2) -->
-				<div class="abs">
+				<div class="abs" style="left: 0dp; top: 0dp; height: 100%; width: 314dp;">
+					<div class="abs vlayoutLeds" style="left: 11dp; top: 58dp; height: 140dp; width: 100%">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+					<div class="knobs_row3" style="left: 40dp;">
+						<knob class="knob"/>
+						<knob class="knob"/>
+					</div>
+				</div>
+			
+				<!-- Portamento -->
+				<div class="abs vlayout" style="left: 324dp; top: 0dp; width: 158dp; padding-top: 80dp; gap: 80dp;">
+					<button class="btRedLed" style="" isToggle="1"/>
+					<knob class="knob"/>
+				</div>
+			
+				<!-- OSC Common -->
+				<div class="abs" style="left: 494dp; top: 0dp; width: 524dp; height: 100%;">
+					<button class="abs btRedLed" style="left: 36dp; top: 80dp;" isToggle="1"/>
+					<button class="abs btRedLed" style="left: 136dp; top: 80dp;" isToggle="1"/>
+					
+					<div class="abs vlayoutLeds" style="left: 294dp; top: 66dp; height: 140dp; width: 100%">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+
+					<div class="knobs_row3" style="left: 54dp; gap: 81dp;">
+						<knob class="knob"/>
+						<knob class="knob"/>
+						<knob class="knob"/>
+					</div>
+				</div>
+				
+				<!-- Pitch Envelope -->
+				<div class="abs" style="left: 1029dp; width: 372dp; height: 100%;">
+					<input class="abs sliderV slider_row3" type="range" orientation="vertical" style="left: 60dp;"/>
+					<input class="abs sliderV slider_row3" type="range" orientation="vertical" style="left: 182dp;"/>
+					<input class="abs sliderV slider_row3" type="range" orientation="vertical" style="left: 274dp;"/>
+				</div>
+				
+				<!-- Filter Envelope -->
+				<div class="abs" style="left: 1418dp; width: 372dp; height: 100%;">
+					<input class="abs sliderV slider_row3" type="range" orientation="vertical" style="left: 52dp;"/>
+					<div class="abs hlayout slider_row3" style="left: 174dp; gap: 32dp;">
+						<input class="sliderV" type="range" orientation="vertical"/>
+						<input class="sliderV" type="range" orientation="vertical"/>
+						<input class="sliderV" type="range" orientation="vertical"/>
+						<input class="sliderV" type="range" orientation="vertical"/>
+					</div>
+				</div>
+				
+				<!-- Amp Envelope -->
+				<div class="abs" style="left: 1981dp; width: 372dp; height: 100%;">
+					<div class="abs hlayout slider_row3" style="left: 56dp; gap: 32dp;">
+						<input class="sliderV" type="range" orientation="vertical"/>
+						<input class="sliderV" type="range" orientation="vertical"/>
+						<input class="sliderV" type="range" orientation="vertical"/>
+						<input class="sliderV" type="range" orientation="vertical"/>
+					</div>
 				</div>
 			</div>
-				
 		</img>
 		
 		<!-- PATCH BROWSER -->

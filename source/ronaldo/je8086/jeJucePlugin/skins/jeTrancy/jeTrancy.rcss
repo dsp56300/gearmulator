@@ -233,6 +233,16 @@ button
 	gap: 56dp;
 }
 
+.knobs_row3
+{
+	position: absolute;
+	top: 208dp;
+	left: 28dp;
+
+	display: flex;
+	gap: 57dp;
+}
+
 .sliderV sliderbar
 {
 	decorator: image(slider.png contain);
@@ -244,4 +254,27 @@ button
 {
 	height: 250dp;
 	width: 61dp;
+}
+
+.slider_row2
+{
+	top: 20dp;
+}
+
+.slider_row3
+{
+	top: 53dp;
+}
+
+.vlayout
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.hlayout
+{
+	display: flex;
+	align-items: center;
 }
