@@ -12,7 +12,122 @@ body
 	height: 100%;
 }
 
-.pos
+.abs
 {
 	position: absolute;
+}
+
+@spritesheet led_blue
+{
+	led_blue_off: 0px 0px  45px 45px;
+	led_blue_on:  0px 45px 45px 45px;
+	src: led_blue.png;
+}
+
+@spritesheet led_red
+{
+	led_red_off: 0px 0px  45px 45px;
+	led_red_on:  0px 45px 45px 45px;
+	src: led_red.png;
+}
+
+@spritesheet led2_red
+{
+	led2_red_off: 0px 0px  27px 17px;
+	led2_red_on:  0px 17px  27px 17px;
+	src: led2_red.png;
+}
+
+@spritesheet tab_main
+{
+	tab_main_off: 0px 0px 201px 76px;
+	tab_main_on:  0px 76px 201px 76px;
+	src: tab_1_main.png;
+}
+
+@spritesheet tab_browser
+{
+	tab_browser_off: 0px 0px 201px 76px;
+	tab_browser_on:  0px 76px 201px 76px;
+	src: tab_2_browser.png;
+}
+
+@spritesheet tab_perf
+{
+	tab_perf_off: 0px 0px 201px 76px;
+	tab_perf_on:  0px 76px 201px 76px;
+	src: tab_3_perf.png;
+}
+
+button
+{
+	flex: 0 0 auto;
+}
+
+.btTab
+{
+	width: 201dp;
+	height: 76dp;
+	margin: 0dp -20dp 0dp -20dp;
+	/*transition: decorator 2.5s linear-in-out;*/
+}
+
+.btTabMain
+{
+	decorator: image(tab_main_off fill);
+}
+
+.btTabMain:hover, .btTabMain:checked
+{
+	decorator: image(tab_main_on fill);
+}
+
+.btTabPatchManager
+{
+	decorator: image(tab_browser_off fill);
+}
+
+.btTabPatchManager:hover, .btTabPatchManager:checked
+{
+	decorator: image(tab_browser_on fill);
+}
+
+.btTabPerf
+{
+	decorator: image(tab_perf_off fill);
+}
+
+.btTabPerf:hover, .btTabPerf:checked
+{
+	decorator: image(tab_perf_on fill);
+}
+
+.layoutTabButtons
+{
+	position: absolute;
+	display: flex;
+	width: 523dp;
+	height: 76dp;
+	left: 178dp;
+	top: 152dp;
+	gap: 12dp;
+}
+
+.knob
+{
+	frames: 128;
+	spriteprefix: knob_;
+	width: 89dp;
+	height: 89dp;
+}
+
+.layoutFxKnobs
+{
+	position: absolute;
+	display: flex;
+	width: 823dp;
+	height: 89dp;
+	left: 767dp;
+	top: 145dp;
+	gap: 57.5dp;
 }

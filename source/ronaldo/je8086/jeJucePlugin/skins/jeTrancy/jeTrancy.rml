@@ -4,9 +4,37 @@
 		<link type="text/template" href="tus_patchmanager.rml"/>
 		<link type="text/rcss" href="tus_default.rcss"/>
 		<link type="text/rcss" href="tus_juceskin.rcss"/>
+		<link type="text/rcss" href="knob.rcss"/>
 		<link type="text/rcss" href="jeTrancy.rcss"/>
 	</head>
-	<body id="Root" rootScale="0.5" style="left: 0dp; top: 0dp; width: 2772dp; height: 1485dp;">
-		<img id="bg" class="background" src="background.png"/>
+	<body debugger=1" id="Root" rootScale="0.5" style="left: 0dp; top: 0dp; width: 2772dp; height: 1458dp;">
+		<img class="background" src="background.png"/>
+		
+		<!-- MAIN PAGE -->
+		<img class="abs" src="main.png" tabgroup="main" tabpage="0">
+			<div class="layoutFxKnobs">
+				<knob class="knob" min="0" max="127" value="40"/>
+				<knob class="knob" min="0" max="127" value="40"/>
+				<knob class="knob" min="0" max="127" value="40"/>
+				<knob class="knob" min="0" max="127" value="40"/>
+				<knob class="knob" min="0" max="127" value="40"/>
+				<knob class="knob" min="0" max="127" value="40"/>
+			</div>			
+		</img>
+		<!-- PATCH BROWSER -->
+		<img class="abs" src="browser.png" tabgroup="main" tabpage="1">
+			
+		</img>
+		
+		<!-- PERFORMANCE SETTINGS -->
+		<div class="abs" tabgroup="main" tabpage="2">
+		</div>
+		
+		<!-- TAB BUTTONS -->
+		<div class="layoutTabButtons">
+			<button tabbutton="0" tabgroup="main" class="btTab btTabMain"/>
+			<button tabbutton="1" tabgroup="main" class="btTab btTabPatchManager"/>
+			<button tabbutton="2" tabgroup="main" class="btTab btTabPerf"/>
+		</div>
 	</body>
 </rml>

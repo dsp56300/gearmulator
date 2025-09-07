@@ -1,4 +1,4 @@
-knob_page0
+@spritesheet knob_page0
 {
 	knob_000: 0px 0px 89px 89px;
 	knob_001: 89px 0px 89px 89px;
