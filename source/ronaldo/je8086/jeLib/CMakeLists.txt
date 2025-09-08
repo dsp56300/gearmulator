@@ -5,10 +5,12 @@ project(jeLib)
 add_library(jeLib STATIC)
 
 set(SOURCES
-	jetypes.h
-	device.cpp
-	device.h
+	device.cpp device.h
 	jemiditypes.h
+	jetypes.h
+	rom.cpp rom.h
+	romloader.cpp romloader.h
+	types.h
 )
 
 target_sources(jeLib PRIVATE ${SOURCES})
