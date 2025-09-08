@@ -166,6 +166,16 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
 		}
 
+		if (!skin.folder.empty())
+		{
+			// if a folder is specified, the skin must be on disk. We check this expicitly here because a file that has an identical name might get picked
+			// from embedded resources otherwise
+			const auto skinFile = baseLib::filesystem::validatePath(skin.folder) + skin.filename;
+			juce::File f(juce::String::fromUTF8(skinFile.c_str()));
+			if (!f.existsAsFile())
+				throw std::runtime_error("Skin file '" + skinFile + "' not found on disk");
+		}
+
 		m_editor.reset(createEditor(skin));
 		m_editor->create();
 
