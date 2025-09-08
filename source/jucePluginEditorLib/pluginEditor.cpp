@@ -87,15 +87,17 @@ namespace jucePluginEditorLib
 
 		m_rmlComponent.reset(dynamic_cast<juceRmlUi::RmlComponent*>(createRmlUiComponent(m_skin.filename)));
 
-		if (auto* elem = m_rmlComponent->getDocument()->GetElementById("patchmanager"))
+		auto* doc = m_rmlComponent->getDocument();
+
+		if (auto* elem = doc->GetElementById("patchmanager"))
 		{
 			juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
 			setPatchManager(createPatchManager(elem));
 		}
 
-		initRootScale(m_rmlComponent->getDocument()->GetAttribute("rootScale", 1.0f));
+		initRootScale(doc->GetAttribute("rootScale", 1.0f));
 
-		juceRmlUi::EventListener::Add(m_rmlComponent->getDocument(), Rml::EventId::Mousedown, [this](Rml::Event& _event)
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Mousedown, [this](Rml::Event& _event)
 		{
 			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Right)
 			{

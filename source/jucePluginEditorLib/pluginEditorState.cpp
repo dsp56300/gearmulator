@@ -14,6 +14,8 @@
 
 #include "juceRmlUi/juceRmlComponent.h"
 
+#include "RmlUi/Core/ElementDocument.h"
+
 #include "synthLib/os.h"
 
 namespace
@@ -202,6 +204,21 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		if(!m_instanceConfig.empty())
 			getEditor()->setPerInstanceConfig(m_instanceConfig);
+
+
+		auto* doc = m_editor->getDocument();
+
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_F5)
+			{
+				_event.StopPropagation();
+				juce::MessageManager::callAsync([this]
+				{
+					loadSkin(m_currentSkin);
+				});
+			}
+		});
 
 		return true;
 	}
