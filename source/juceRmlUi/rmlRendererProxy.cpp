@@ -329,12 +329,12 @@ namespace juceRmlUi
 	{
 		std::lock_guard lock(m_mutex);
 		m_restoreContextFuncs.insert({ _dummy, _func });
-		m_enqueuedFunctions.push_back(std::move(_func));
+		m_enqueuedFunctions.push_back(_func);
 	}
 
 	bool RendererProxy::executeRenderFunctions()
 	{
-		bool haveMore = false;
+		std::vector<std::vector<Func>> renderFunctions;
 
 		{
 			std::lock_guard lock(m_mutexRender);
@@ -342,24 +342,16 @@ namespace juceRmlUi
 			if (!m_renderer)
 				return false;
 
-			if (!m_renderFunctions.empty())
-			{
-				std::swap(m_renderFunctionsToExecute, m_renderFunctions.front());
-
-				if (m_renderFunctions.size() == 1)
-					m_renderFunctions.clear();
-				else
-				{
-					m_renderFunctions.erase(m_renderFunctions.begin());
-					haveMore = true;
-				}
-			}
+			std::swap(renderFunctions, m_renderFunctions);
 		}
 
-		for (auto& func : m_renderFunctionsToExecute)
-			func();
+		for (const auto& funcs : renderFunctions)
+		{
+			for (const auto& func : funcs)
+				func();
+		}
 
-		return haveMore;
+		return false;
 	}
 
 	void RendererProxy::finishFrame()
@@ -386,8 +378,6 @@ namespace juceRmlUi
 		if (m_renderer)
 		{
 			// old renderer might have functions left that need to be executed, for example to release resources
-			for (const auto& func : m_renderFunctionsToExecute)
-				func();
 
 			{
 				std::lock_guard lock(m_mutex);
@@ -402,7 +392,6 @@ namespace juceRmlUi
 					func();
 			}
 
-			m_renderFunctionsToExecute.clear();
 			m_renderFunctions.clear();
 
 			m_enqueuedFunctions.clear();
