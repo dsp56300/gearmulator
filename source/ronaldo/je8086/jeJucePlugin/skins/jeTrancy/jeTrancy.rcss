@@ -358,3 +358,13 @@ button
 	display: flex;
 	align-items: center;
 }
+
+.bottomText
+{
+	position: absolute;
+	font-size: 26dp;
+	font-weight: bold;
+	vertical-align: bottom;
+	height: 100%;
+	line-height: 100%;
+}

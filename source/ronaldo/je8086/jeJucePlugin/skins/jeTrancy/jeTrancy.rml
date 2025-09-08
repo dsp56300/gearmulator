@@ -344,5 +344,10 @@
 			<button tabbutton="1" tabgroup="main" class="btTab btTabPatchManager"/>
 			<button tabbutton="2" tabgroup="main" class="btTab btTabPerf"/>
 		</div>
+		
+		<!-- bottom texts -->
+		<div data-model="plugin" class="abs" style="left: 0dp; width: 100%; top: 1421dp; height: 22dp;">
+			<div class="bottomText" style="left: 410dp;">{{versionString}}</div>
+		</div>
 	</body>
 </rml>
