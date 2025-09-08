@@ -70,6 +70,9 @@ namespace n2xJucePlugin
 				auto* compBase = binding->getElementForParameter(paramBase, false);
 				auto* compVm = binding->getElementForParameter(paramVm, false);
 
+				if (!compVm || !compBase)
+					continue;
+
 				// on knobs, the shift key adjust the speed scale, we do not want this on vm sliders
 				compVm->SetAttribute("speedScaleShift", 1.0f);
 
