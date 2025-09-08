@@ -46,6 +46,9 @@ int main(int _argc, char** _argv)
 		printf("Failed to open output file for writing\n");
 		return 1;
 	}
+
+	out << "@spritesheet ";
+
 	for (auto& [key, spritesheet] : spriteSheets)
 	{
 		spritesheet.write(out, key, 0);
