@@ -354,6 +354,12 @@ namespace juceRmlUi
 		return false;
 	}
 
+	bool RendererProxy::hasRenderFunctions()
+	{
+		std::lock_guard lock(m_mutexRender);
+		return !m_renderFunctions.empty();
+	}
+
 	void RendererProxy::finishFrame()
 	{
 		std::lock_guard lockR(m_mutexRender);

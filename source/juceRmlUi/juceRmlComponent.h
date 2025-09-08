@@ -126,6 +126,7 @@ namespace juceRmlUi
 		float m_currentRenderScale = 0.0f;
 
 		std::mutex m_timerMutex;
+		std::mutex m_contextRenderMutex;
 
 		std::vector<std::function<void()>> m_postFrameCallbacks;
 		std::vector<std::function<void()>> m_tempPostFrameCallbacks;
