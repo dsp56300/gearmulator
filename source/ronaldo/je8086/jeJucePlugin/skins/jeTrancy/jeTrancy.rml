@@ -23,12 +23,12 @@
 					<knob class="knob"/>
 					<knob class="knob"/>
 					<knob class="knob"/>
-					<button class="abs btRedLed" style="left: 872dp; top: 56dp;" param="VoiceModulatorSendSwitch" isToggle="1"/>
+					<button class="abs btBlackLed" style="left: 872dp; top: 56dp;" param="VoiceModulatorSendSwitch" isToggle="1"/>
 				</div>
 				
 				<!-- voice modulator -->
 				<div class="abs" style="left: 1642dp; top: 90dp;">
-					<button class="abs btRedLed" style=""/>
+					<button class="abs btBlackLed" style=""/>
 					<knob class="abs knob" style="left: 130dp; top: 55dp;"/>
 					<knob class="abs knob" style="left: 276dp; top: 55dp;"/>
 				</div>
@@ -41,7 +41,7 @@
 					<knob class="abs knob" style="left: 276dp; top: 55dp;">
 						<button class="ledBlue"/>
 					</knob>
-					<button class="abs btRedLed" style="left: 405dp; top: 76dp;"/>
+					<button class="abs btBlackLed" style="left: 405dp; top: 76dp;"/>
 					<button class="ledRed2" style="top: 5dp;"/>
 					<button class="ledRed2" style="top: 38dp;"/>
 				</div>
@@ -82,12 +82,12 @@
 					</div>
 				</div>
 
-				<button class="abs btRedLed" style="left: 772dp; top: 76dp;" isToggle="1"/>
+				<button class="abs btBlackLed" style="left: 772dp; top: 76dp;" isToggle="1"/>
 				
 				<!-- OSC 2 -->
 				<div class="abs" style="left: 811dp; top: 30dp; width: 630dp; height: 287dp;">
-					<button class="abs btRedLed" style="left: 128dp; top: 42dp;" isToggle="1"/>
-					<button class="abs btRedLed" style="left: 282dp; top: 42dp;" isToggle="1"/>
+					<button class="abs btBlackLed" style="left: 128dp; top: 42dp;" isToggle="1"/>
+					<button class="abs btBlackLed" style="left: 282dp; top: 42dp;" isToggle="1"/>
 					<div class="abs vlayoutLeds" style="left: 398dp; top: -14dp; height: 140dp; width: 210dp">
 						<button class="ledRed"/>
 						<button class="ledRed"/>
@@ -152,14 +152,14 @@
 			
 				<!-- Portamento -->
 				<div class="abs vlayout" style="left: 324dp; top: 0dp; width: 158dp; padding-top: 80dp; gap: 80dp;">
-					<button class="btRedLed" style="" isToggle="1"/>
+					<button class="btBlackLed" style="" isToggle="1"/>
 					<knob class="knob"/>
 				</div>
 			
 				<!-- OSC Common -->
 				<div class="abs" style="left: 494dp; top: 0dp; width: 524dp; height: 100%;">
-					<button class="abs btRedLed" style="left: 36dp; top: 80dp;" isToggle="1"/>
-					<button class="abs btRedLed" style="left: 136dp; top: 80dp;" isToggle="1"/>
+					<button class="abs btBlackLed" style="left: 36dp; top: 80dp;" isToggle="1"/>
+					<button class="abs btBlackLed" style="left: 136dp; top: 80dp;" isToggle="1"/>
 					
 					<div class="abs vlayoutLeds" style="left: 294dp; top: 66dp; height: 140dp; width: 100%">
 						<button class="ledRed"/>
@@ -209,13 +209,15 @@
 				<!-- Control -->
 				<div class="abs" style="width: 700dp; height: 100%;">
 					<div class="hlayout" style="padding-top: 90dp; justify-content: center; gap: 20dp;">
-						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
-						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
-						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
+						<button class="btBlackLed"/>
+						<button class="btBlackLed"/>
+						<button class="btBlackLed"/>
+						
 						<spacer style="width: 30dp"/>
-						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
-						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
-						<button class="btRedLed" style="left: 872dp; top: 56dp;"/>
+
+						<button class="btBlackLed"/>
+						<button class="btBlackLed"/>
+						<button class="btBlackLed"/>
 					</div>
 				</div>
 
@@ -232,27 +234,64 @@
 					</div>
 				</div>
 				
+				<!-- pairs of two buttons on the right -->
 				<div class="abs" style="left: 1754dp; top: 61dp;">
 					
 					<!-- Dec/Inc -->
 					<div class="abs hlayout" style="gap: 20dp;">
-						<button class="btRedLed"/>
-						<button class="btRedLed"/>
+						<button class="btBlackLed"/>
+						<button class="btBlackLed"/>
 					</div>
 					
 					<!-- Edit/Write -->
 					<div class="abs hlayout" style="top: 173dp; gap: 20dp;">
-						<button class="btRedLed"/>
-						<button class="btRedLed"/>
+						<button class="btBlackLed"/>
+						<button class="btRed"/>
 					</div>
 					
 					<!-- Shift/Exit -->
 					<div class="abs hlayout" style="top: 291dp; gap: 20dp;">
-						<button class="btRedLed"/>
-						<button class="btRedLed"/>
+						<button class="btBlackLed"/>
+						<button class="btBlackLed"/>
 					</div>
 				</div>
 
+				<!-- bottom left, Volume and Unison knobs -->
+				<div class="abs hlayout" style="left: 40dp; top: 292dp; gap: 92dp;">
+					<knob class="knob"/>
+					<knob class="knob"/>
+				</div>
+				
+				<!-- group down/up & preview -->
+				<div class="abs hlayout" style="left: 386dp; top: 372dp; gap: 20dp;">
+					<button class="btBlackLed"/>
+					<button class="btBlackLed"/>
+					<button class="btBlackLed"/>
+				</div>
+				
+				<!-- 16 large white buttons in the lower center -->
+				<div class="abs vlayout" style="left: 715dp; top: 235dp; width: 1010dp; height: 161dp; justify-content: space-between;">
+					<div class="hlayout" style="width: 100%; justify-content: space-between;">
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+					</div>				
+					<div class="hlayout" style="width: 100%; justify-content: space-between;">
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+						<button class="btWhite2Led"/>
+					</div>				
+				</div>				
 			</div>
 		</img>
 		
