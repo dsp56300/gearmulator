@@ -7,10 +7,11 @@
 
 #include "baseLib/filesystem.h"
 
+#include "jeLib/romloader.h"
+
 #include "jucePluginEditorLib/midiPorts.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 
-#include "jucePluginLib/pluginVersion.h"
 #include "juceRmlUi/rmlElemComboBox.h"
 
 #include "RmlUi/Core/ElementDocument.h"
@@ -26,14 +27,13 @@ namespace jeJucePlugin
 	{
 		jucePluginEditorLib::Editor::create();
 
-		/*
-		if(auto* romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector"))
+		if(auto* romSelector = findChild<juceRmlUi::ElemComboBox>("romselector"))
 		{
-			const auto rom = je::RomLoader::findROM();
+			const auto rom = jeLib::RomLoader::findROM();
 
 			if(rom.isValid())
 			{
-				const auto name = baseLib::filesystem::getFilenameWithoutPath(rom.getFilename());
+				const auto& name = rom.getName();
 				romSelector->addOption(name);
 			}
 			else
@@ -43,7 +43,6 @@ namespace jeJucePlugin
 			romSelector->setValue(0);
 			romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 		}
-		*/
 
 		if (auto* lcd = findChild("lcd"))
 			m_lcd.reset(new JeLcd(lcd));

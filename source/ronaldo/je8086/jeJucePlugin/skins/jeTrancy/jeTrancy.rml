@@ -348,6 +348,9 @@
 		<!-- bottom texts -->
 		<div data-model="plugin" class="abs" style="left: 0dp; width: 100%; top: 1421dp; height: 22dp;">
 			<div class="bottomText" style="left: 410dp;">{{versionString}}</div>
+			<combo id="romselector" class="bottomText" style="left: 740dp; width: 300dp; height: 30dp;">
+				<combotext/>
+			</combo>
 		</div>
 	</body>
 </rml>
