@@ -326,7 +326,9 @@
 		
 		<!-- PATCH BROWSER -->
 		<img class="abs" src="browser.png" tabgroup="main" tabpage="1">
-			
+			<div class="abs" style="left: 176dp; top: 269dp; width: 2419dp; height: 1109dp; padding: 10dp; padding-top: 40dp; box-sizing: border-box">
+				<template src="patchmanager"/>
+			</div>			
 		</img>
 		
 		<!-- PERFORMANCE SETTINGS -->
