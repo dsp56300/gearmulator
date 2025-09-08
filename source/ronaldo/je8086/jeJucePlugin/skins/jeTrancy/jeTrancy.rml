@@ -234,6 +234,9 @@
 					</div>
 				</div>
 				
+				<!-- LCD -->
+				<div id="lcd" class="abs" style="left: 1251dp; top: 30dp; width: 455dp; height: 106dp;" lcdBackgroundColor="2a2b2d" lcdTextColor="00fe00"/>
+				
 				<!-- pairs of two buttons on the right -->
 				<div class="abs" style="left: 1754dp; top: 61dp;">
 					

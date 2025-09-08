@@ -12,6 +12,7 @@ namespace jucePluginEditorLib
 
 namespace jeJucePlugin
 {
+	class JeLcd;
 	class Controller;
 
 	class Editor final : public jucePluginEditorLib::Editor
@@ -43,5 +44,7 @@ namespace jeJucePlugin
 		baseLib::EventListener<uint8_t> onPartChanged;
 
 		std::array<std::string, 4> m_activePatchNames;
+
+		std::unique_ptr<JeLcd> m_lcd;
 	};
 }

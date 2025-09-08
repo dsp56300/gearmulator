@@ -5,6 +5,7 @@ project(jeJucePlugin VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	jeController.cpp jeController.h
 	jeEditor.cpp jeEditor.h
+	jeLcd.cpp jeLcd.h
 	jePluginEditorState.cpp jePluginEditorState.h
 	jePluginProcessor.cpp jePluginProcessor.h
 	parameterDescriptions_je.json

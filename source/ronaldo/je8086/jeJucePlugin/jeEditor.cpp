@@ -3,6 +3,7 @@
 #include <juceRmlPlugin/skinConverter/skinConverterOptions.h>
 
 #include "jeController.h"
+#include "jeLcd.h"
 
 #include "baseLib/filesystem.h"
 
@@ -25,10 +26,6 @@ namespace jeJucePlugin
 	{
 		jucePluginEditorLib::Editor::create();
 
-		if(auto* versionNumber = findChild("VersionNumber", false))
-		{
-			versionNumber->SetInnerRML(Rml::StringUtilities::EncodeRml(pluginLib::Version::getVersionString()));
-		}
 		/*
 		if(auto* romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector"))
 		{
@@ -47,6 +44,9 @@ namespace jeJucePlugin
 			romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 		}
 		*/
+
+		if (auto* lcd = findChild("lcd"))
+			m_lcd.reset(new JeLcd(lcd));
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
