@@ -280,7 +280,7 @@
 						<button class="btWhite2Led"/>
 						<button class="btWhite2Led"/>
 						<button class="btWhite2Led"/>
-					</div>				
+					</div>
 					<div class="hlayout" style="width: 100%; justify-content: space-between;">
 						<button class="btWhite2Led"/>
 						<button class="btWhite2Led"/>
@@ -290,8 +290,37 @@
 						<button class="btWhite2Led"/>
 						<button class="btWhite2Led"/>
 						<button class="btWhite2Led"/>
-					</div>				
-				</div>				
+					</div>
+				</div>
+				
+				<!-- Arp -->
+				<div class="abs" style="left: 1953dp; top: 0dp; width: 467dp; height: 444dp;">
+
+					<!-- left column -->
+					<button class="abs btBlackLed" style="left: 40dp; top: 75dp;"/>
+					<button class="abs btBlackLed" style="left: 40dp; top: 180dp;"/>
+					
+					<button class="abs btWhiteLed" style="left: 43dp; top: 275dp;"/>
+					<button class="abs btWhiteLed" style="left: 43dp; top: 350dp;"/>
+					
+					<!-- center column -->
+					<knob class="abs knob" style="left: 177dp; top: 102dp;"/>
+					<button class="abs btRedLed" style="left: 183dp; top: 317dp;"/>
+
+					<!-- right column -->					
+					<div class="abs vlayoutLeds" style="left: 315dp; top: 72dp; height: 140dp; width: 100%">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+					<div class="abs vlayoutLeds" style="left: 315dp; top: 272dp; height: 140dp; width: 100%">
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+						<button class="ledRed"/>
+					</div>
+				</div>
 			</div>
 		</img>
 		
