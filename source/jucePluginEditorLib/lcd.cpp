@@ -207,6 +207,23 @@ namespace jucePluginEditorLib
 		m_canvas->repaint();
 	}
 
+	bool Lcd::getOverrideText(std::vector<std::vector<uint8_t>>& _lines)
+	{
+		std::vector<std::string> strLines;
+
+		if (!getOverrideText(strLines))
+			return false;
+
+		_lines.reserve(2);
+		_lines.emplace_back(m_numCharsX, ' ');
+		_lines.emplace_back(m_numCharsX, ' ');
+
+		for (size_t i=0; i<std::min(strLines.size(), static_cast<size_t>(2)); ++i)
+			memcpy(_lines[i].data(), strLines[i].c_str(), std::min(strLines[i].size(), static_cast<size_t>(m_numCharsX)));
+
+		return true;
+	}
+
 	void Lcd::timerCallback()
 	{
 		stopTimer();

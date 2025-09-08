@@ -32,7 +32,8 @@ namespace jucePluginEditorLib
 
 		void repaint() const;
 
-		virtual bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines) = 0;
+		virtual bool getOverrideText(std::vector<std::string>& _lines) = 0;
+		virtual bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines);
 		virtual const uint8_t* getCharacterData(uint8_t _character) const = 0;
 
 		void timerCallback() override;
