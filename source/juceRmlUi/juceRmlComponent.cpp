@@ -373,7 +373,7 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
-		if (m_updating || !m_renderDone)
+		if (m_updating || !m_renderDone || !m_renderInterface)
 			return;
 
 		m_updating = true;
