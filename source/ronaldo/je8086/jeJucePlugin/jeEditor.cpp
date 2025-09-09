@@ -4,6 +4,7 @@
 
 #include "jeController.h"
 #include "jeLcd.h"
+#include "jePatchManager.h"
 
 #include "baseLib/filesystem.h"
 
@@ -57,7 +58,7 @@ namespace jeJucePlugin
 
 	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
 	{
-		return nullptr;//new PatchManager(*this, _parent);
+		return new PatchManager(*this, _parent);
 	}
 
 	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)

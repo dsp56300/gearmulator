@@ -6,6 +6,7 @@ set(SOURCES
 	jeController.cpp jeController.h
 	jeEditor.cpp jeEditor.h
 	jeLcd.cpp jeLcd.h
+	jePatchManager.cpp jePatchManager.h
 	jePluginEditorState.cpp jePluginEditorState.h
 	jePluginProcessor.cpp jePluginProcessor.h
 	parameterDescriptions_je.json
