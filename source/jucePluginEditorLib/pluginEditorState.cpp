@@ -692,6 +692,10 @@ Skin PluginEditorState::readSkinFromConfig() const
 		}
 	}
 
+	// do not load legacy skins automatically anymore, revert to default skin
+	if (!skin.folder.empty() && baseLib::filesystem::hasExtension(skin.filename, ".json"))
+		skin = {};
+
 	return skin;
 }
 
