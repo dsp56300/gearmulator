@@ -7,7 +7,7 @@
 		<link type="text/rcss" href="xt-waveeditor-defaults.rcss"/>
 		<link type="text/rcss" href="xtDefault.rcss"/>
 	</head>
-	<body id="Root" debugger="1" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 3400dp; height: 2000dp;">
+	<body id="Root" debugger="0" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 3400dp; height: 2000dp;">
 		<img id="bakedBG" class="jucePos" src="xtDefaultBG.png" style="left: 0dp; top: 0dp; width: 3400dp; height: 2000dp;"/>
 		<div id="lcdArea" class="jucePos" lcdBackgroundColor="248727" lcdTextColor="000000" style="left: 154.061dp; top: 143.156dp; width: 1273.88dp; height: 98.4331dp;"/>
 		<knob id="xtKnob" class="jucePos juceRotary knob" data-model="partCurrent" param="PlayParamValueA" style="left: 268.85dp; top: 309.546dp; width: 128dp; height: 128dp;"/>
