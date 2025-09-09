@@ -4,7 +4,7 @@
 
 namespace jeLib
 {
-	enum AddressArea : uint32_t
+	enum class AddressArea : uint32_t
 	{
 		System             = 0x00000000,
 		PerformanceTemp    = 0x01000000,
@@ -13,6 +13,8 @@ namespace jeLib
 		PatternData        = 0x08000000, // Pattern Data (Pattern 1 - 48) - only keyboard?
 		MotionControlDataA = 0x09000000, // Motion Control Data (Motion Set A)
 		MotionControlDataB = 0x0A000000, // Motion Control Data (Motion Set B) - only rack?
+		Invalid			   = 0xFF000000,
+		Mask               = 0xFF000000,
 	};
 
 	enum SystemArea : uint16_t
@@ -432,6 +434,11 @@ namespace jeLib
 		CommandIdDataRequest1 = 0x11,
 		CommandIdDataSet1 = 0x12,
 
+		Checksum = 0x00, // Placeholder for checksum byte
+
 		EOX = 0xf7
 	};
+
+	static constexpr SysexByte g_sysexHeader[] = {SysexByte::SOX, SysexByte::ManufacturerID, SysexByte::DeviceIdDefault, SysexByte::ModelIdMSB, SysexByte::ModelIdLSB};
+	static constexpr SysexByte g_sysexFooter[] = {SysexByte::Checksum, SysexByte::EOX};
 }

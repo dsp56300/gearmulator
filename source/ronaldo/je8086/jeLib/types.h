@@ -8,4 +8,6 @@ namespace jeLib
 		Keyboard,
 		Rack
 	};
+
+	static constexpr uint32_t SinglePatchSysexSize = 0xfe;
 }

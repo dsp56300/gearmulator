@@ -8,8 +8,10 @@ set(SOURCES
 	device.cpp device.h
 	jemiditypes.h
 	jetypes.h
+	patch.cpp patch.h
 	rom.cpp rom.h
 	romloader.cpp romloader.h
+	state.cpp state.h
 	types.h
 )
 
