@@ -80,6 +80,7 @@ namespace juceRmlUi
 		void ReleaseShader(Rml::CompiledShaderHandle _shader) override;
 
 		bool executeRenderFunctions();
+		bool hasRenderFunctions();
 
 		void finishFrame();
 

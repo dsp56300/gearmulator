@@ -838,8 +838,6 @@ namespace rmlPlugin::skinConverter
 
 		auto addSpritesheet = [&result](const std::string& _key, CoSpritesheet&& _spritesheet)
 		{
-			if (_spritesheet.properties.size() <= 1)
-				return;
 			result.emplace_back(_key, std::move(_spritesheet));
 		};
 
@@ -848,6 +846,8 @@ namespace rmlPlugin::skinConverter
 		for (size_t i=0; i<pageSpritesheets.size(); ++i)
 		{
 			auto& ss = pageSpritesheets[i];
+			if (ss.properties.size() <= 1)
+				continue;
 			addSpritesheet(imageName + "_page" + std::to_string(i), std::move(ss));
 		}
 

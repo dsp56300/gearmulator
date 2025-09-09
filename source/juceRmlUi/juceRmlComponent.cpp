@@ -104,6 +104,19 @@ namespace juceRmlUi
 
 	void RmlComponent::renderOpenGL()
 	{
+		{
+			// although we set that we render only manually, juce still calls this function eventhough we didn't
+			// request a repaint, for example when the window is resized.
+			// This results in massive flickering if the render queue is empty so we ask RmlUi to just do a
+			// render for us from the OpenGL thread
+			std::scoped_lock lock(m_contextRenderMutex);
+			if (!m_renderProxy->hasRenderFunctions())
+			{
+				m_rmlContext->Render();
+				m_renderProxy->finishFrame();
+			}
+		}
+
 		using namespace juce::gl;
 
         GLint viewport[4];
@@ -369,10 +382,14 @@ namespace juceRmlUi
 
 		evPreUpdate(this);
 
-		m_rmlContext->Update();
-		m_rmlContext->Render();
+		{
+			std::scoped_lock lock(m_contextRenderMutex);
 
-		m_renderProxy->finishFrame();
+			m_rmlContext->Update();
+			m_rmlContext->Render();
+
+			m_renderProxy->finishFrame();
+		}
 
 		evPostUpdate(this);
 
