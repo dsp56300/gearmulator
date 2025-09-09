@@ -51,4 +51,58 @@ namespace jeLib
 
 		return static_cast<AddressArea>(_addr);
 	}
+
+	uint32_t State::getBankNumber(Address _addr)
+	{
+		const auto area = getAddressArea(_addr);
+
+		switch (area)
+		{
+			case AddressArea::UserPerformance:
+				return 0;
+			case AddressArea::UserPatch:
+				return (_addr & 0x00ffffff) >> 16;
+			default:
+				return 0;
+		}
+	}
+
+	uint32_t State::getProgramNumber(Address _addr)
+	{
+		const auto area = getAddressArea(_addr);
+		switch (area)
+		{
+			case AddressArea::UserPerformance:
+				return (_addr & 0x00ff0000) >> 16;
+			case AddressArea::UserPatch:
+				return (_addr & 0xff00) >> 9;
+			default:
+				return 0;
+		}
+	}
+
+	std::optional<std::string> State::getName(const Dump& _dump)
+	{
+		const auto area = getAddressArea(_dump);
+
+		constexpr size_t start = 10;
+		constexpr size_t size = 16;
+
+		if (area != AddressArea::UserPerformance && area != AddressArea::UserPatch)
+			return {};
+
+		if (_dump.size() < start + size)
+			return {};
+
+		std::string name;
+		name.reserve(size);
+
+		for (size_t i = 0; i < size; ++i)
+		{
+			const auto c = static_cast<char>(_dump[start + i]);
+			name.push_back(c);
+		}
+
+		return name;
+	}
 }

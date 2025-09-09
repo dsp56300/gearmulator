@@ -256,7 +256,7 @@ splitter:active {
 
 input.text {
 	color: #fff;
-	background: #222;
+	background: #111;
 	padding: 4dp;
 	border: 1dp #ccc;
 }

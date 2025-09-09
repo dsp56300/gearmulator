@@ -25,6 +25,35 @@ namespace jeLib
 		TxRxSetting     = 0x00003000,
 	};
 
+	enum class UserPatchArea : uint32_t
+	{
+		UserPatch001 = 0x00000000, // A11
+		UserPatch002 = 0x00000200, // A12
+		UserPatch064 = 0x00007E00, // A88
+		UserPatch065 = 0x00010000, // B11
+		UserPatch066 = 0x00010200, // B12
+		UserPatch128 = 0x00017E00, // B88
+
+		BlockSize = 0x00000200,    // 512 bytes
+		BlockMask = BlockSize - 1, // 511
+	};
+
+	enum class UserPerformanceArea : uint32_t
+	{
+		UserPerformance01 = 0x00000000, // 11
+		UserPerformance02 = 0x00010000, // 12
+		UserPerformance64 = 0x003F0000, // 88
+
+		BlockSize = 0x00010000,         // 65536 bytes
+		BlockMask = BlockSize - 1,      // 65535
+	};
+
+	enum class MotionControlData : uint32_t
+	{
+		MotionControlData1 = 0x00000000,
+		MotionControlData2 = 0x00400000,
+	};
+
 	enum SystemParameter : uint8_t
 	{
 		PerformanceBank,				// User, Preset
@@ -392,29 +421,6 @@ namespace jeLib
 	    PatchGain = 0x00000175,                            // 00h - 02h | 0dB, +6dB, +12dB
 	    ExternalTriggerSwitch = 0x00000176,                // 00h - 01h | OFF, ON
 	    ExternalTriggerDestination = 0x00000177            // 00h - 02h | FILTER, AMP, FILTER&AMP
-	};
-
-	enum class UserPatchArea : uint32_t
-	{
-		UserPatch001 = 0x00000000, // A11
-		UserPatch002 = 0x00000200, // A12
-		UserPatch064 = 0x00007E00, // A88
-		UserPatch065 = 0x00010000, // B11
-		UserPatch066 = 0x00010200, // B12
-		UserPatch128 = 0x00017E00  // B88
-	};
-
-	enum class UserPerformanceArea : uint32_t
-	{
-		UserPerformance01 = 0x00000000, // 11
-		UserPerformance02 = 0x00010000, // 12
-		UserPerformance64 = 0x003F0000  // 88
-	};
-
-	enum class MotionControlData : uint32_t
-	{
-		MotionControlData1 = 0x00000000,
-		MotionControlData2 = 0x00400000,
 	};
 
 	enum class SysexByte : uint8_t
