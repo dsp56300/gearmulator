@@ -1,5 +1,6 @@
 #include "rmlElemCanvas.h"
 
+#include "juceRmlComponent.h"
 #include "rmlHelper.h"
 #include "juce_graphics/juce_graphics.h"
 
@@ -36,7 +37,11 @@ namespace juceRmlUi
 	void ElemCanvas::repaint()
 	{
 		m_textureDirty = true;
-		GetContext()->RequestNextUpdate(0);
+		auto* comp = RmlComponent::fromElement(this);
+		if (comp)
+			comp->enqueueUpdate();
+		else
+			GetContext()->RequestNextUpdate(0);
 	}
 
 	void ElemCanvas::setClearEveryFrame(const bool _clearEveryFrame)
