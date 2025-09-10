@@ -59,9 +59,9 @@
 		{"index":41 , "name":"CutoffFrequency", "min":0, "max":127, "default":127},
 		{"index":42 , "name":"Resonance", "min":0, "max":127, "default":127},
 		{"index":43 , "name":"CutoffFrequencyKeyFollow", "min":0, "max":127, "default":127},
-		{"index":44 , "name":"FilterLfo1Depth", "min":0, "max":127, "default":127},
-		{"index":45 , "name":"FilterLfo2Depth", "min":0, "max":127, "default":127},
-		{"index":46 , "name":"FilterEnvelopeDepth", "min":0, "max":127, "default":127},
+		{"index":44 , "name":"FilterLfo1Depth", "min":0, "max":127, "default":64},
+		{"index":45 , "name":"FilterLfo2Depth", "min":0, "max":127, "default":64},
+		{"index":46 , "name":"FilterEnvelopeDepth", "min":0, "max":127, "default":64},
 		{"index":47 , "name":"FilterEnvelopeAttackTime", "min":0, "max":127, "default":127},
 		{"index":48 , "name":"FilterEnvelopeDecayTime", "min":0, "max":127, "default":127},
 		{"index":49 , "name":"FilterEnvelopeSustainLevel", "min":0, "max":127, "default":127},
@@ -88,7 +88,8 @@
 		{"index":70 , "name":"PortamentoTime", "min":0, "max":127, "default":127},
 		{"index":71 , "name":"MonoSwitch", "min":0, "max":1, "default":0},
 		{"index":72 , "name":"LegatoSwitch", "min":0, "max":1, "default":0},
-		{"index":73 , "name":"OscillatorShift", "min":0, "max":4, "default":0},
+		{"index":73 , "name":"OscillatorShift", "min":0, "max":4, "default":2},
+
 		{"index":74 , "name":"ControlLfo1Rate", "min":-127, "max":127, "toText":"signed255", "default":0},
 		{"index":76 , "name":"ControlLfo1Fade", "min":-127, "max":127, "toText":"signed255", "default":0},
 		{"index":78 , "name":"ControlLfo2Rate", "min":-127, "max":127, "toText":"signed255", "default":0},
@@ -128,8 +129,11 @@
 		{"index":146 , "name":"ControlDelayTime", "min":-127, "max":127, "toText":"signed255", "default":0},
 		{"index":148 , "name":"ControlDelayFeedback", "min":-127, "max":127, "toText":"signed255", "default":0},
 		{"index":150 , "name":"ControlDelayLevel", "min":-127, "max":127, "toText":"signed255", "default":0},
+
 		{"index":152 , "name":"MorphBendAssign", "min":0, "max":1, "default":0},
+
 		{"index":153 , "name":"ControlPortamentoTime", "min":-127, "max":127, "toText":"signed255", "default":0},
+
 		{"index":155 , "name":"VelocitySwitch", "min":0, "max":1, "default":0},
 		{"index":156 , "name":"VelocityLfo1Rate", "min":-127, "max":127, "toText":"signed255", "default":0},
 		{"index":158 , "name":"VelocityLfo1Fade", "min":-127, "max":127, "toText":"signed255", "default":0},
