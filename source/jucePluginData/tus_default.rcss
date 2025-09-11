@@ -211,12 +211,14 @@ tree {
 }
 
 treenode {
-	height: 1em;
+	height: 1.0em;
+	line-height: 1.0em;
 	drag: clone;
 	display: block;
 	padding: 0dp 0dp 0dp 1em;
 	font-size: 0.75em;
 	white-space: nowrap;
+	vertical-align: center;
 	border: 2px #0000;	/* required for drag and drop markers, otherwise entries will start moving as soon as the border is added */
 }
 

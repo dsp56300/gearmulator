@@ -8,6 +8,7 @@
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "juceRmlUi/rmlDragData.h"
+#include "juceRmlUi/rmlEventListener.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
@@ -162,6 +163,21 @@ namespace jucePluginEditorLib::patchManagerRml
 				setCount(m_count, true);
 			}
 		}
+
+		if (m_elemAdd == nullptr)
+		{
+			if (_child->GetId() == "add")
+			{
+				m_elemAdd = _child;
+
+				setCanAdd(m_canAdd);
+
+				juceRmlUi::EventListener::Add(m_elemAdd, Rml::EventId::Click, [this](Rml::Event& _event)
+				{
+					onAddPressed(_event);
+				});
+			}
+		}
 	}
 
 	void TreeElem::processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _searches)
@@ -214,5 +230,25 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		if (!patches.empty())
 			dropPatches(_event, dynamic_cast<const patchManager::SavePatchDesc*>(_data), patches);
+	}
+
+	void TreeElem::onAddPressed(Rml::Event& _event)
+	{
+		onRightClick(_event);
+	}
+
+	void TreeElem::setCanAdd(const bool _enable, const std::string& _image/* = {}*/)
+	{
+		m_canAdd = _enable;
+
+		if (m_elemAdd)
+		{
+			if (_enable)
+				m_elemAdd->RemoveProperty(Rml::PropertyId::Display);
+			else
+				m_elemAdd->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
+
+			m_elemAdd->SetAttribute("src", _image);
+		}
 	}
 }
