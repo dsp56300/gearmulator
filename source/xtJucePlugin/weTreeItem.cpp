@@ -13,6 +13,8 @@ namespace xtJucePlugin
 	{
 		DragSource::init(this);
 		DragTarget::init(this);
+
+		setAllowLocations(false, false);
 	}
 
 	void TreeItem::setText(const std::string& _text)
