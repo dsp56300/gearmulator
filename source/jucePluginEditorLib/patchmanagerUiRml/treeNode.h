@@ -74,6 +74,10 @@ namespace jucePluginEditorLib::patchManagerRml
 		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
 		virtual void dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) {}
 
+		virtual void onAddPressed(Rml::Event& _event);
+
+		void setCanAdd(bool _enable, const std::string& _image = {});
+
 	private:
 		Tree& m_treeRef;
 
@@ -88,10 +92,12 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		Rml::Element* m_elemName = nullptr;
 		Rml::Element* m_elemCount = nullptr;
+		Rml::Element* m_elemAdd = nullptr;
 
 		std::string m_countFormat;
 		std::string m_countUnknown;
 
 		bool m_countEnabled = true;
+		bool m_canAdd = false;
 	};
 }

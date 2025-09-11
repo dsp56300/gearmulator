@@ -66,3 +66,17 @@
 .pm-layout-list {
 	display: flex; 
 }
+
+.pm-add {
+	height: 1em;
+	padding-left: 0.5em;
+	vertical-align: center;
+	image-color: #fff;
+	transition: transform image-color 0.2s;
+}
+
+.pm-add:hover {
+	image-color: #dbe2ae;
+	transition: transform image-color 0.2s;
+	transform: scale(1.2);
+}

@@ -344,6 +344,22 @@ namespace jucePluginEditorLib::patchManagerRml
 		setName(name);
 //		setCountEnabled(false);
 
+		switch (groupType)
+		{
+		case patchManager::GroupType::DataSources:
+			setCanAdd(true, "pm-add-folder.png");
+			break;
+		case patchManager::GroupType::LocalStorage:
+		case patchManager::GroupType::Favourites:
+		case patchManager::GroupType::Categories:
+		case patchManager::GroupType::Tags:
+			setCanAdd(true, "pm-add.png");
+			break;
+		default:
+			setCanAdd(false);
+			break;
+		}
+
 		onParentSearchChanged(getParentSearchRequest());
 	}
 

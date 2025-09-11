@@ -14,6 +14,8 @@ set(DATASOURCES
 	circle_border.png
 	link.png
 	lock.png
+	pm-add.png
+	pm-add-folder.png
 	pm-dot.png
 
 	Roboto-VariableFont_wdth_wght.ttf

@@ -166,9 +166,19 @@ namespace juceRmlUi
 
 	void RendererProxy::SetTransform(const Rml::Matrix4f* _transform)
 	{
-		addRenderFunction([this, matrix = *_transform]
+		const auto isNull = _transform == nullptr;
+
+		Rml::Matrix4f m;
+
+		if (_transform)
+			m = *_transform;
+
+		addRenderFunction([this, isNull, matrix = m]
 		{
-			m_renderer->SetTransform(&matrix);
+			if (isNull)
+				m_renderer->SetTransform({});
+			else
+				m_renderer->SetTransform(&matrix);
 		});
 	}
 
