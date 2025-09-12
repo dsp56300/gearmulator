@@ -59,7 +59,7 @@ namespace rmlPlugin
 
 			if (m_parameter->getUnnormalizedValue() != v)
 			{
-				m_binding.registerPendingGesture(this);
+				m_binding.registerPendingGesture(m_parameter);
 				m_parameter->setUnnormalizedValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
 			}
 		});
@@ -76,7 +76,7 @@ namespace rmlPlugin
 
 			if (m_parameter->getValue() != v)
 			{
-				m_binding.registerPendingGesture(this);
+				m_binding.registerPendingGesture(m_parameter);
 				m_parameter->setValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
 			}
 		});

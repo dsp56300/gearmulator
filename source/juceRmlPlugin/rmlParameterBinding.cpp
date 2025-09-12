@@ -27,11 +27,38 @@ namespace rmlPlugin
 		bindParameters(_context, 16);
 	}
 
-	std::string RmlParameterBinding::getDataModelName(uint8_t _part)
+	RmlParameterBinding::~RmlParameterBinding()
+	{
+		for (auto& [param, boundParam] : m_paramToElements)
+			delete boundParam;
+		m_paramToElements.clear();
+	}
+
+	std::string RmlParameterBinding::getDataModelName(const uint8_t _part)
 	{
 		if (_part == CurrentPart)
 			return "partCurrent";
 		return "part" + std::to_string(_part);
+	}
+
+	uint8_t RmlParameterBinding::getPartFromDataModelName(const std::string& _name)
+	{
+		if (_name == "partCurrent")
+			return CurrentPart;
+
+		if (_name.size() > 4 && _name.substr(0, 4) == "part")
+		{
+			try
+			{
+				const auto part = std::stoul(_name.substr(4));
+				return static_cast<uint8_t>(part);
+			}
+			catch (...)
+			{
+				return CurrentPart;
+			}
+		}
+		return CurrentPart;
 	}
 
 	void RmlParameterBinding::bindParameters(Rml::Context* _context, const uint8_t _partCount)
@@ -47,14 +74,29 @@ namespace rmlPlugin
 		return m_component.getContext()->GetCoreInstance();
 	}
 
-	void RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
+	bool RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName)
 	{
-		bind(m_controller, _element, _parameterName, _part);
+		// determine part from data model
+
+		Rml::Element* elem = &_element;
+
+		while (elem)
+		{
+			const auto model = elem->GetAttribute("data-model", std::string());
+			if (!model.empty())
+			{
+				const auto part = getPartFromDataModelName(model);
+				bind(_element, _parameterName, part);
+				return true;
+			}
+			elem = elem->GetParentNode();
+		}
+		return false;
 	}
 
-	void RmlParameterBinding::bind(pluginLib::Controller& _controller, Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
+	void RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
 	{
-		auto* p = _controller.getParameter(_parameterName, _part == CurrentPart ? 0 : _part);
+		auto* p = m_controller.getParameter(_parameterName, _part == CurrentPart ? 0 : _part);
 
 		if (!p)
 		{
@@ -64,50 +106,30 @@ namespace rmlPlugin
 			return;
 		}
 
-		unbind(_element, false);
+		unbind(_element);
 
-		BoundParameter bp;
-		bp.parameter = p;
-		bp.element = &_element;
+		ParameterToElementsBinding* bp;
 
-		if (p->getDescription().isSoftKnob())
+		auto it = m_paramToElements.find(p);
+
+		if (it == m_paramToElements.end())
 		{
-			auto* softknob = _controller.getSoftknob(p);
-			if (softknob)
-			{
-				bp.onSoftKnobTargetChanged.set(softknob->onBind, [&_element](const pluginLib::Parameter* _param)
-				{
-					if (!_param)
-						return;
-
-					const auto& range = _param->getNormalisableRange();
-
-					juceRmlUi::helper::changeAttribute(&_element, "data-attr-min", std::to_string(range.start));
-					juceRmlUi::helper::changeAttribute(&_element, "data-attr-max", std::to_string(range.end));
-					juceRmlUi::helper::changeAttribute(&_element, "data-attr-default", std::to_string(_param->getDefault()));
-					juceRmlUi::helper::changeAttribute(&_element, "min", std::to_string(range.start));
-					juceRmlUi::helper::changeAttribute(&_element, "max", std::to_string(range.end));
-					juceRmlUi::helper::changeAttribute(&_element, "default", std::to_string(_param->getDefault()));
-				});
-			}
+			bp = new ParameterToElementsBinding(*this, p, &_element);
+			m_paramToElements.insert({ p, bp });
 		}
-		m_elementToParam.insert(std::make_pair(&_element, std::move(bp)));
+		else
+		{
+			bp = it->second;
+			bp->addElement(&_element);
+		}
 
-		m_paramToElements[p].insert(&_element);
+		m_elementToParam.insert(std::make_pair(&_element, bp));
 
 		evBind.invoke(p, &_element);
 
 		const auto param = RmlParameterRef::createVariableName(_parameterName);
 
-		const auto paramChanged = juceRmlUi::helper::changeAttribute(&_element, "param", _parameterName);
-		juceRmlUi::helper::changeAttribute(&_element, "data-attr-min", param + "_min");
-		juceRmlUi::helper::changeAttribute(&_element, "data-attr-max", param + "_max");
-		juceRmlUi::helper::changeAttribute(&_element, "data-attr-default", param + "_default");
-		juceRmlUi::helper::changeAttribute(&_element, "data-value", param + "_value");
-
 		std::string modelName = getDataModelName(_part);
-
-		const auto modelChanged = juceRmlUi::helper::changeAttribute(&_element, "data-model", modelName);
 
 		if (auto* combo = dynamic_cast<juceRmlUi::ElemComboBox*>(&_element))
 		{
@@ -145,37 +167,29 @@ namespace rmlPlugin
 			}
 			combo->setEntries(sortedValues);
 		}
-
-		// determine if we need to rebind at runtime
-		if (!modelChanged && !paramChanged)
-			return;
-
-		refreshDataModelForElement(_element);
 	}
 
-	void RmlParameterBinding::unbind(Rml::Element& _element, bool _refreshDataModel/* = true*/)
+	void RmlParameterBinding::unbind(Rml::Element& _element)
 	{
 		auto it = m_elementToParam.find(&_element);
 
 		if (it != m_elementToParam.end())
 		{
-			auto oldParam = it->second.parameter;
-			m_paramToElements[oldParam].erase(&_element);
+			auto oldParam = it->second->getParameter();
+
+			auto* bp = m_paramToElements.find(oldParam)->second;
+
+			bp->removeElement(&_element);
+
+			if (bp->empty())
+			{
+				delete bp;
+				m_paramToElements.erase(oldParam);
+			}
+
 			m_elementToParam.erase(it);
 
 			evUnbind.invoke(oldParam, &_element);
-		}
-
-		if (_refreshDataModel)
-		{
-			_element.RemoveAttribute("param");
-			_element.RemoveAttribute("data-attr-min");
-			_element.RemoveAttribute("data-attr-max");
-			_element.RemoveAttribute("data-attr-default");
-			_element.RemoveAttribute("data-value");
-			_element.RemoveAttribute("data-model");
-
-			refreshDataModelForElement(_element);
 		}
 	}
 
@@ -194,7 +208,7 @@ namespace rmlPlugin
 		if (it == m_paramToElements.end())
 			return;
 
-		for (auto* elem : it->second)
+		for (auto* elem : it->second->getElements())
 		{
 			if (!_visibleOnly || elem->IsVisible(true))
 				_results.push_back(elem);
@@ -208,7 +222,7 @@ namespace rmlPlugin
 		if (it == m_paramToElements.end())
 			return {};
 
-		for (auto* elem : it->second)
+		for (auto* elem : it->second->getElements())
 		{
 			if (!_visibleOnly || elem->IsVisible(true))
 				return elem;
@@ -227,7 +241,7 @@ namespace rmlPlugin
 	const pluginLib::Parameter* RmlParameterBinding::getParameterForElement(const Rml::Element* _element) const
 	{
 		const auto it = m_elementToParam.find(const_cast<Rml::Element*>(_element));
-		return it != m_elementToParam.end() ? it->second.parameter : nullptr;
+		return it != m_elementToParam.end() ? it->second->getParameter() : nullptr;
 	}
 
 	void RmlParameterBinding::setMouseIsDown(Rml::ElementDocument* _document, bool _isDown)
@@ -248,21 +262,21 @@ namespace rmlPlugin
 			releasePendingGestures();
 	}
 
-	void RmlParameterBinding::registerPendingGesture(RmlParameterRef* _paramRef)
+	void RmlParameterBinding::registerPendingGesture(pluginLib::Parameter* _param)
 	{
 		if (!getMouseIsDown())
 			return;
-		if (!m_pendingGestures.insert(_paramRef).second)
+		if (!m_pendingGestures.insert(_param).second)
 			return;
-		_paramRef->pushGesture();
+
+		_param->pushChangeGesture();
 	}
 
 	void RmlParameterBinding::releasePendingGestures()
 	{
-		for (const auto* paramRef : m_pendingGestures)
-		{
-			paramRef->popGesture();
-		}
+		for (auto* paramRef : m_pendingGestures)
+			paramRef->popChangeGesture();
+
 		m_pendingGestures.clear();
 	}
 
@@ -298,35 +312,5 @@ namespace rmlPlugin
 
 			m_parametersPerPart[_targetPart].emplace_back(*this, param, i, model);
 		}
-	}
-
-	void RmlParameterBinding::refreshDataModelForElement(Rml::Element& _element)
-	{
-		// we need to refresh the data model, unfortunately RmlUi does not provide a way to do this directly.
-		// What we do is to remove the element from its parent and reinsert it, which will trigger a refresh of the data model.
-
-		auto* parent = _element.GetParentNode();
-		if (!parent)
-			return;	// there is no data model to refresh if the element is not attached to the document
-
-		const auto count = parent->GetNumChildren();
-		int childIndex = -1;
-
-		for (int i=0; i<count; ++i)
-		{
-			auto* e = parent->GetChild(i);
-			if (e == &_element)
-			{
-				childIndex = i;
-				break;
-			}
-		}
-
-		auto* childAfter = parent->GetChild(childIndex + 1);
-		auto element = parent->RemoveChild(&_element);
-		if (childAfter)
-			parent->InsertBefore(std::move(element), childAfter);
-		else
-			parent->AppendChild(std::move(element));
 	}
 }
