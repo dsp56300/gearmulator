@@ -46,10 +46,14 @@ namespace rmlPlugin
 
 		RmlPluginDocument* getPluginDocument(const Rml::ElementDocument* _doc) const;
 
+		bool bindPendingElements();
+
 	private:
 		Rml::Context* const m_context;
 		RmlParameterBinding m_binding;
 
 		std::vector<std::unique_ptr<RmlPluginDocument>> m_documents;
+
+		std::set<Rml::Element*> m_pendingElementsToBind;
 	};
 }
