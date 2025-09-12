@@ -18,6 +18,8 @@ namespace rmlPlugin
 	void RmlPluginContext::addDocument(std::unique_ptr<RmlPluginDocument>&& _rmlPluginDocument)
 	{
 		m_documents.emplace_back(std::move(_rmlPluginDocument));
+
+		bindPendingElements();
 	}
 
 	void RmlPluginContext::removeDocument(const Rml::ElementDocument* _document)
@@ -40,7 +42,11 @@ namespace rmlPlugin
 		if (!attribParam)
 			return;
 
-		m_binding.bind(*_element, attribParam->Get<Rml::String>(_element->GetCoreInstance()));
+		// this will usually fail here because the document is not fully loaded
+		// yet, we attempt to bind pending elements later again
+
+		if (!m_binding.bind(*_element, attribParam->Get<Rml::String>(_element->GetCoreInstance())))
+			m_pendingElementsToBind.insert(_element);
 	}
 
 	bool RmlPluginContext::selectTabWithElement(const Rml::Element* _element) const
@@ -63,5 +69,34 @@ namespace rmlPlugin
 				return doc.get();
 		}
 		return nullptr;
+	}
+
+	bool RmlPluginContext::bindPendingElements()
+	{
+		bool allBound = true;
+
+		for (auto it = m_pendingElementsToBind.begin(); it != m_pendingElementsToBind.end();)
+		{
+			auto* elem = *it;
+			const auto param = elem->GetAttribute("param", std::string());
+			if (param.empty())
+			{
+				// param no longer needed
+				++it;
+				continue;
+			}
+
+			if (m_binding.bind(*elem, param))
+			{
+				it = m_pendingElementsToBind.erase(it);
+				continue;
+			}
+
+			assert(false && "RmlPluginContext::bindPendingElements: Binding failed");
+			allBound = false;
+			++it;
+		}
+
+		return allBound;
 	}
 }

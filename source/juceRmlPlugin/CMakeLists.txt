@@ -8,6 +8,7 @@ set(SOURCES
 	rmlPluginDocument.cpp rmlPluginDocument.h
 	rmlParameterBinding.cpp rmlParameterBinding.h
 	rmlParameterRef.cpp rmlParameterRef.h
+	rmlParameterToElementsBinding.cpp rmlParameterToElementsBinding.h
 	rmlTabGroup.cpp rmlTabGroup.h
 )
 
