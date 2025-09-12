@@ -82,7 +82,7 @@ namespace rmlPlugin
 
 		while (elem)
 		{
-			const auto model = _element.GetAttribute("data-model", std::string());
+			const auto model = elem->GetAttribute("data-model", std::string());
 			if (!model.empty())
 			{
 				const auto part = getPartFromDataModelName(model);
