@@ -51,7 +51,7 @@
 		{"index":33 , "name":"Osc2Waveform", "min":0, "max":3, "default":0},
 		{"index":34 , "name":"Osc2SyncSwitch", "min":0, "max":1, "default":0},
 		{"index":35 , "name":"Osc2Range", "min":0, "max":50, "default":50},
-		{"index":36 , "name":"Osc2FineWide", "min":-50, "max":50, "toText":"signed101", "default":50},
+		{"index":36 , "name":"Osc2FineWide", "min":0, "max":100, "toText":"signed101", "default":50},
 		{"index":37 , "name":"Osc2Control1", "min":0, "max":127, "default":127},
 		{"index":38 , "name":"Osc2Control2", "min":0, "max":127, "default":127},
 		{"index":39 , "name":"FilterType", "min":0, "max":2, "default":0},
