@@ -10,6 +10,7 @@
 
 #include "jeLib/romloader.h"
 
+#include "jucePluginEditorLib/focusedParameter.h"
 #include "jucePluginEditorLib/midiPorts.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 
@@ -54,6 +55,8 @@ namespace jeJucePlugin
 		{
 			setCurrentPart(_part);
 		});
+
+		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
 	}
 
 	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
@@ -71,6 +74,7 @@ namespace jeJucePlugin
 	Editor::~Editor()
 	{
 		m_midiPorts.reset();
+		m_focusedParameter.reset();
 	}
 
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const

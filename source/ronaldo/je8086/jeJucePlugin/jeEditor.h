@@ -6,6 +6,7 @@
 
 namespace jucePluginEditorLib
 {
+	class FocusedParameter;
 	class MidiPorts;
 	class Processor;
 }
@@ -46,5 +47,7 @@ namespace jeJucePlugin
 		std::array<std::string, 4> m_activePatchNames;
 
 		std::unique_ptr<JeLcd> m_lcd;
+
+		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 	};
 }
