@@ -218,8 +218,8 @@ button
 	display: flex;
 	width: 523dp;
 	height: 76dp;
-	left: 176dp;
-	top: 150dp;
+	left: 175dp;
+	top: 145dp;
 	gap: 12dp;
 }
 
@@ -237,8 +237,8 @@ button
 	display: flex;
 	width: 823dp;
 	height: 89dp;
-	left: 767dp;
-	top: 145dp;
+	left: 764dp;
+	top: 148dp;
 	gap: 57.5dp;
 }
 
@@ -367,4 +367,23 @@ button
 	vertical-align: bottom;
 	height: 100%;
 	line-height: 100%;
+}
+.text1
+{
+	color: #ffffffff;
+	font-size: 24dp;
+	text-align: right;
+}
+.text2
+{
+	color: #ffffffff;
+	font-size: 24dp;
+	text-align: center;
+}
+.textDonate
+{
+	color: #ffffff;
+	font-size: 26dp;
+	text-align: center;
+	text-decoration: underline;
 }
