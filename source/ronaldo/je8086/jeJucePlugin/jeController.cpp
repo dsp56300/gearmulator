@@ -36,7 +36,7 @@ namespace jeJucePlugin
 		{
 			// patch parameter
 
-			const auto index = desc.index + (desc.page * 128);
+			const auto index = desc.index | (desc.page * 0x100);
 
 			const auto lowerUpper = getCurrentPart() > 0 ? jeLib::PerformanceData::PatchLower : jeLib::PerformanceData::PatchUpper;
 
