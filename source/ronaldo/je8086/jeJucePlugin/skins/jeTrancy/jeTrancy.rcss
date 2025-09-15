@@ -114,7 +114,7 @@ button
 {
 	width: 201dp;
 	height: 76dp;
-	margin: 0dp -20dp 0dp -20dp;
+	margin: 0dp -18dp 0dp -22dp;
 }
 
 .btTabMain
@@ -368,15 +368,15 @@ button
 	height: 100%;
 	line-height: 100%;
 }
-.text1
+.comboxtext1
 {
-	color: #ffffffff;
+	color: #ff6600ff;
 	font-size: 24dp;
 	text-align: right;
 }
-.text2
+.comboxtext2
 {
-	color: #ffffffff;
+	color: #ff6600ff;
 	font-size: 24dp;
 	text-align: center;
 }
