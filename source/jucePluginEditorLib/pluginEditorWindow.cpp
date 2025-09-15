@@ -84,6 +84,7 @@ void EditorWindow::setGuiScale(const float _percent)
 void EditorWindow::setUiRoot(juce::Component* _component)
 {
 	removeAllChildren();
+	setConstrainer(nullptr);
 
 	if(!_component)
 		return;
@@ -91,21 +92,19 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
 
-    const auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
-
-	_component->setSize(getWidth(), getHeight());
-
-	addAndMakeVisible(_component);
-
-	setGuiScale(scale);
-
 	m_sizeConstrainer.setMinimumSize(m_state.getWidth() / 10, m_state.getHeight() / 10);
 	m_sizeConstrainer.setMaximumSize(m_state.getWidth() * 4, m_state.getHeight() * 4);
 
 	m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(m_state.getWidth()) / static_cast<double>(m_state.getHeight()));
 	
+	_component->setSize(getWidth(), getHeight());
+
+	addAndMakeVisible(_component);
+
+    const auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
+	setGuiScale(scale);
+
 	setResizable(true, true);
-	setConstrainer(nullptr);
 	setConstrainer(&m_sizeConstrainer);
 }
 
