@@ -224,6 +224,9 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		{
 			if (juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_F5)
 			{
+				if (!m_processor.getConfig().getBoolValue("reloadSkinViaF5", false))
+					return;
+
 				_event.StopPropagation();
 				juce::MessageManager::callAsync([this]
 				{
@@ -429,6 +432,14 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 	{
 		juceRmlUi::Menu skinDevMenu;
+
+		skinDevMenu.addEntry("Reload skin via F5 key", config.getBoolValue("reloadSkinViaF5", false), [this]
+		{
+			auto& c = m_processor.getConfig();
+			const auto enabled = c.getBoolValue("reloadSkinViaF5", false);
+			c.setValue("reloadSkinViaF5", !enabled);
+			c.saveIfNeeded();
+		});
 
 		skinDevMenu.addEntry("Enable RmlUi Debugger", config.getBoolValue("enableRmlUiDebugger", false), [this]
 		{
