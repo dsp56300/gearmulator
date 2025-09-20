@@ -54,9 +54,10 @@ namespace juceRmlUi
 
 	void OnDetachListener::OnDetach(Rml::Element* _element)
 	{
+		if (_element != m_element)
+			return;
+		m_element = nullptr;
 		m_callback(_element);
-		if (_element == m_element)
-			m_element = nullptr;
 		if (m_autoDestroy)
 			delete this;
 	}
