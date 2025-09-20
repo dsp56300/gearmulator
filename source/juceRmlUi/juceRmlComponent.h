@@ -96,6 +96,8 @@ namespace juceRmlUi
 
 		void enqueueUpdate();
 
+		void enableDebugger(bool _enable);
+
 	private:
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
@@ -149,5 +151,7 @@ namespace juceRmlUi
 		uint32_t m_pendingUpdates = 0;
 		std::atomic<bool> m_renderDone;
 		double m_nextFrameTime;
+
+		bool m_debuggerActive = false;
 	};
 }

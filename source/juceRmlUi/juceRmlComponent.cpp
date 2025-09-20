@@ -81,6 +81,8 @@ namespace juceRmlUi
 
 	RmlComponent::~RmlComponent()
 	{
+		enableDebugger(false);
+
 		m_openGLContext.detach();
 		destroyRmlContext();
 
@@ -440,6 +442,24 @@ namespace juceRmlUi
 			update();
 	}
 
+	void RmlComponent::enableDebugger(const bool _enable)
+	{
+		if (_enable == m_debuggerActive)
+			return;
+
+		m_debuggerActive = _enable;
+
+		if (_enable)
+		{
+			Rml::Debugger::Initialise(m_rmlContext);
+			Rml::Debugger::SetVisible(true);
+		}
+		else
+		{
+			Rml::Debugger::Shutdown();
+		}
+	}
+
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
 	{
 		const auto size = getScreenBounds();
@@ -498,12 +518,6 @@ namespace juceRmlUi
 				for (const auto& log : logs)
 					ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
 				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Error loading RMLUI document", ss.str(), this);
-			}
-
-			if (m_document->GetAttribute("debugger", 0))
-			{
-				Rml::Debugger::Initialise(m_rmlContext);
-				Rml::Debugger::SetVisible(true);
 			}
 		}
 

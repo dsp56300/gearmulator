@@ -179,6 +179,8 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		m_editor.reset(createEditor(skin));
 		m_editor->create();
 
+		m_editor->getRmlComponent()->enableDebugger(m_processor.getConfig().getBoolValue("enableRmlUiDebugger", false));
+
 		getEditor()->onOpenMenu.addListener([this](Editor*, const Rml::Event& _event)
 		{
 			openMenu(_event);
@@ -424,6 +426,24 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 		baseLib::filesystem::createDirectory(dir);
 		juce::File(dir).revealToUser();
 	});
+
+	{
+		juceRmlUi::Menu skinDevMenu;
+
+		skinDevMenu.addEntry("Enable RmlUi Debugger", config.getBoolValue("enableRmlUiDebugger", false), [this]
+		{
+			auto& c = m_processor.getConfig();
+			const auto enabled = !c.getBoolValue("enableRmlUiDebugger", false);
+			c.setValue("enableRmlUiDebugger", enabled);
+			c.saveIfNeeded();
+
+			if (m_editor)
+				m_editor->getRmlComponent()->enableDebugger(enabled);
+		});
+
+		skinMenu.addSeparator();
+		skinMenu.addSubMenu("Developer Options", std::move(skinDevMenu));
+	}
 
 	juceRmlUi::Menu scaleMenu;
 	scaleMenu.addEntry("50%", scale == 50, [this] { setGuiScale(50); });
