@@ -1,5 +1,16 @@
 Release Notes 
 
+2.0.0:
+
+Framework:
+
+- [Imp] RmlUi
+
+Osirus/OsTIrus:
+
+- [Imp] Patch Manager: Added support to extract presets from 
+        SoundDiver .lib files
+
 1.4.5
 
 Framework:
