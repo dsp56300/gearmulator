@@ -417,7 +417,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 	if(getEditor() && m_currentSkin.folder.empty() || m_currentSkin.folder.find(getSkinFolder()) != 0)
 	{
-		skinMenu.addEntry("Export current skin to folder '" + getSkinFolder() + "' on disk", [this]
+		skinMenu.addEntry("Export current skin to disk", [this]
 		{
 			exportCurrentSkin();
 		});
