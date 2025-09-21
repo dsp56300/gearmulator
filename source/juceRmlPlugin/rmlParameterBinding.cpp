@@ -18,6 +18,7 @@ namespace rmlPlugin
 	RmlParameterBinding::RmlParameterBinding(pluginLib::Controller& _controller, Rml::Context* _context, juceRmlUi::RmlComponent& _component)
 	: m_controller(_controller)
 	, m_component(_component)
+	, m_context(_context)
 	{
 		m_onCurrentPartChanged.set(_controller.onCurrentPartChanged, [this](const uint8_t _part)
 		{
@@ -29,8 +30,14 @@ namespace rmlPlugin
 
 	RmlParameterBinding::~RmlParameterBinding()
 	{
+		for (uint8_t p=0; p<16; ++p)
+			m_context->RemoveDataModel(getDataModelName(p));
+
+		m_context->RemoveDataModel(getDataModelName(CurrentPart));
+
 		for (auto& [param, boundParam] : m_paramToElements)
 			delete boundParam;
+
 		m_paramToElements.clear();
 	}
 

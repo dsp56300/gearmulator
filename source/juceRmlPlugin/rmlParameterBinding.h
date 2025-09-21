@@ -80,6 +80,8 @@ namespace rmlPlugin
 
 		pluginLib::Controller& m_controller;
 		juceRmlUi::RmlComponent& m_component;
+		Rml::Context* const m_context;
+
 		std::array<ParameterList, CurrentPart + 1> m_parametersPerPart;
 		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 
