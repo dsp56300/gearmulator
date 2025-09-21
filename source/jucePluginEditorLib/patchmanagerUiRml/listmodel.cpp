@@ -9,6 +9,7 @@
 
 #include "jucePluginLib/filetype.h"
 
+#include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemList.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
@@ -22,6 +23,8 @@ namespace jucePluginEditorLib::patchManagerRml
 	namespace
 	{
 		Rml::ElementInstancerGeneric<ListElemEntry> g_instancer;
+
+		constexpr float g_selectionChangeRateLimit = 0.25f;
 	}
 
 	ListModel::ListModel(PatchManagerUiRml& _pm, juceRmlUi::ElemList* _list) : m_patchManager(_pm), m_list(_list)
@@ -268,12 +271,39 @@ namespace jucePluginEditorLib::patchManagerRml
 			setContent(m_search);
 	}
 
-	void ListModel::activateSelectedPatch() const
+	void ListModel::activateSelectedPatch()
 	{
 		const auto patches = getSelectedPatches();
 
-		if(patches.size() == 1)
+		if(patches.size() != 1)
+			return;
+
+		const auto now = static_cast<float>(m_list->GetCoreInstance().system_interface->GetElapsedTime());
+		const auto elapsed = now - m_lastActivationTime;
+
+		if(elapsed >= g_selectionChangeRateLimit)
+		{
 			getDB().setSelectedPatch(*patches.begin(), m_search->handle);
+			m_lastActivationTime = now;
+		}
+		else
+		{
+			m_activatePatch = *patches.begin();
+			m_activateSearchHandle = m_search->handle;
+
+			m_activatePatchDelay.reset(new juceRmlUi::DelayedCall(m_list, g_selectionChangeRateLimit - elapsed, [this]
+			{
+				if(!m_activatePatch)
+					return;
+
+				getDB().setSelectedPatch(m_activatePatch, m_activateSearchHandle);
+				m_lastActivationTime = static_cast<float>(m_list->GetCoreInstance().system_interface->GetElapsedTime());
+				m_activatePatch = {};
+				m_activateSearchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+
+				juceRmlUi::RmlComponent::fromElement(m_list)->enqueueUpdate();
+			}, false));
+		}
 	}
 
 	void ListModel::openContextMenu(const Rml::Event& _event)
@@ -570,7 +600,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		getPatchManager().setListStatus(static_cast<uint32_t>(selected.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
-	void ListModel::onSelectionChanged() const
+	void ListModel::onSelectionChanged()
 	{
 		if (m_activateOnSelectionChange)
 			activateSelectedPatch();

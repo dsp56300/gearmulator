@@ -6,6 +6,8 @@
 
 #include "juceUiLib/messageBox.h"
 
+#include "juceRmlUi/rmlEventListener.h"
+
 namespace Rml
 {
 	class Event;
@@ -84,7 +86,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
-		void activateSelectedPatch() const;
+		void activateSelectedPatch();
 
 		void openContextMenu(const Rml::Event& _event);
 
@@ -103,7 +105,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void setFilter(const std::string& _filter, bool _hideDuplicatesByHash, bool _hideDuplicatesByName);
 
-		void onSelectionChanged() const;
+		void onSelectionChanged();
 
 		void onListKeyDown(Rml::Event& _event);
 
@@ -118,5 +120,10 @@ namespace jucePluginEditorLib::patchManagerRml
 		bool m_hideDuplicatesByName = false;
 		pluginLib::patchDB::SearchHandle m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 		bool m_activateOnSelectionChange = true;
+
+		float m_lastActivationTime = 0.0f;
+		pluginLib::patchDB::PatchPtr m_activatePatch;
+		pluginLib::patchDB::SearchHandle m_activateSearchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+		std::unique_ptr<juceRmlUi::DelayedCall> m_activatePatchDelay;
 	};
 }
