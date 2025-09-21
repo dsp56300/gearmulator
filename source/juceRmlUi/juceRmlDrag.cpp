@@ -161,7 +161,7 @@ namespace juceRmlUi
 
 		draggable->SetProperty(Rml::PropertyId::ZIndex, Rml::Property(1000, Rml::Unit::NUMBER));
 
-		draggable->SetProperty(Rml::PropertyId::BackgroundColor, Rml::Property(Rml::Colourb(255, 0, 255, 255), Rml::Unit::COLOUR));
+//		draggable->SetProperty(Rml::PropertyId::BackgroundColor, Rml::Property(Rml::Colourb(255, 0, 255, 255), Rml::Unit::COLOUR));
 
 		draggable->SetProperty(Rml::PropertyId::Drag, Rml::Style::Drag::DragDrop);
 
