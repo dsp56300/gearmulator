@@ -170,7 +170,8 @@ namespace juceRmlUi
 
 		if (m_node->isSelected())
 		{
-			Focus();
+			if (IsVisible(true))
+				Focus();
 			Rml::ScrollIntoViewOptions options;
 			options.vertical = Rml::ScrollAlignment::Nearest;
 			options.behavior = Rml::ScrollBehavior::Smooth;
