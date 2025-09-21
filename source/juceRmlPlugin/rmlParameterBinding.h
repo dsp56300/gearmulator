@@ -9,8 +9,6 @@
 
 #include "juceRmlUi/rmlInterfaces.h"
 
-#include "RmlUi/Core/DataModelHandle.h"
-
 namespace juceRmlUi
 {
 	class RmlComponent;
