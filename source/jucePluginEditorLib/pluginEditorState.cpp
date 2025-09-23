@@ -12,20 +12,26 @@
 
 #include "dsp56kEmu/logging.h"
 
+#include "juceRmlUi/juceRmlComponent.h"
+
+#include "RmlUi/Core/ElementDocument.h"
+
 #include "synthLib/os.h"
 
-namespace jucePluginEditorLib
-
+namespace
 {
-bridgeLib::PluginDesc getPluginDesc(const pluginLib::Processor& _p)
-{
-	bridgeLib::PluginDesc pd;
-	_p.getPluginDesc(pd);
-	return pd;
+	bridgeLib::PluginDesc getPluginDesc(const pluginLib::Processor& _p)
+	{
+		bridgeLib::PluginDesc pd;
+		_p.getPluginDesc(pd);
+		return pd;
+	}
 }
 
+namespace jucePluginEditorLib
+{
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
-	: m_processor(_processor), m_parameterBinding(_controller), m_includedSkins(std::move(_includedSkins))
+	: m_processor(_processor), m_includedSkins(std::move(_includedSkins))
 	, m_remoteServerList(getPluginDesc(_processor))
 {
 	juce::File(getSkinFolder()).createDirectory();
@@ -33,19 +39,29 @@ PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controlle
 	// point embedded skins to public data folder if they're not embedded
 	for (auto& skin : m_includedSkins)
 	{
-		if(skin.folder.empty() && !m_processor.findResource(skin.jsonFilename))
+		if(skin.folder.empty() && !m_processor.findResource(skin.filename))
 			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
 	}
 }
 
+PluginEditorState::~PluginEditorState()
+= default;
+
 int PluginEditorState::getWidth() const
 {
-	return m_editor ? m_editor->getWidth() : 0;
+	return m_editor ? m_editor->getDefaultWidth() : 0;
 }
 
 int PluginEditorState::getHeight() const
 {
-	return m_editor ? m_editor->getHeight() : 0;
+	return m_editor ? m_editor->getDefaultHeight() : 0;
+}
+
+bool PluginEditorState::resizeEditor(const int _width, const int _height) const
+{
+	if (!m_editor)
+		return false;
+	return m_editor->setSize(_width, _height);
 }
 
 const std::vector<Skin>& PluginEditorState::getIncludedSkins()
@@ -53,26 +69,36 @@ const std::vector<Skin>& PluginEditorState::getIncludedSkins()
 	return m_includedSkins;
 }
 
+std::string PluginEditorState::createSkinDisplayName(std::string _filename)
+{
+	const auto pathEndPos = _filename.find_last_of("/\\");
+	if(pathEndPos != std::string::npos)
+		_filename = _filename.substr(pathEndPos+1);
+
+	auto displayName = baseLib::filesystem::stripExtension(_filename);
+
+	const auto isJson = baseLib::filesystem::hasExtension(_filename, ".json");
+	if (isJson)
+		displayName += " (legacy)";
+
+	return displayName;
+}
+
 juce::Component* PluginEditorState::getUiRoot() const
 {
-	return m_editor.get();
-}
-
-void PluginEditorState::disableBindings()
-{
-	m_parameterBinding.disableBindings();
-}
-
-void PluginEditorState::enableBindings()
-{
-	m_parameterBinding.enableBindings();
+	auto* e = m_editor.get();
+	if (!e)
+		return {};
+	if (auto* c = e->getRmlComponent())
+		return c;
+	return {};
 }
 
 void PluginEditorState::loadDefaultSkin()
 {
 	Skin skin = readSkinFromConfig();
 
-	if(skin.jsonFilename.empty())
+	if(skin.filename.empty())
 	{
 		skin = m_includedSkins[0];
 	}
@@ -102,22 +128,31 @@ void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 
 std::string PluginEditorState::getSkinFolder() const
 {
-	return baseLib::filesystem::validatePath(m_processor.getDataFolder() + "skins/");
+	return getSkinFolder(m_processor.getDataFolder());
+}
+
+std::string PluginEditorState::getSkinFolder(const std::string& _processorDataFolder)
+{
+	return baseLib::filesystem::validatePath(_processorDataFolder + "skins/");
+}
+
+std::string PluginEditorState::getSkinSubfolder(const Skin& _skin, const std::string& _folder)
+{
+	std::string subfolder = baseLib::filesystem::stripExtension(_skin.filename);
+
+	const auto folder = _folder + subfolder + '/';
+	return folder;
 }
 
 bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)
 {
+	auto skin = _skin;
+
 	if (m_editor)
 	{
 		m_instanceConfig.clear();
 		getEditor()->getPerInstanceConfig(m_instanceConfig);
 
-		m_parameterBinding.clearBindings();
-
-		auto* parent = m_editor->getParentComponent();
-
-		if(parent && parent->getIndexOfChildComponent(m_editor.get()) > -1)
-			parent->removeChildComponent(m_editor.get());
 		m_editor.reset();
 	}
 
@@ -125,34 +160,80 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 	try
 	{
-		auto skin = _skin;
-
 		// if the embedded skin cannot be found, use skin folder as fallback
-		if(_skin.folder.empty() && !m_processor.findResource(_skin.jsonFilename))
+		if(skin.folder.empty() && !m_processor.findResource(skin.filename))
 		{
-			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + _skin.displayName);
+			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
 		}
 
-		auto* editor = createEditor(skin);
-		m_editor.reset(editor);
-
-		getEditor()->onOpenMenu.addListener([this](Editor*, const juce::MouseEvent* _e)
+		if (!skin.folder.empty())
 		{
-			openMenu(_e);
+			// if a folder is specified, the skin must be on disk. We check this expicitly here because a file that has an identical name might get picked
+			// from embedded resources otherwise
+			const auto skinFile = baseLib::filesystem::validatePath(skin.folder) + skin.filename;
+			juce::File f(juce::String::fromUTF8(skinFile.c_str()));
+			if (!f.existsAsFile())
+				throw std::runtime_error("Skin file '" + skinFile + "' not found on disk");
+		}
+
+		m_editor.reset(createEditor(skin));
+		m_editor->create();
+
+		m_editor->getRmlComponent()->enableDebugger(m_processor.getConfig().getBoolValue("enableRmlUiDebugger", false));
+
+		getEditor()->onOpenMenu.addListener([this](Editor*, const Rml::Event& _event)
+		{
+			openMenu(_event);
 		});
 
-		m_rootScale = editor->getScale();
+		m_rootScale = m_editor->getScale();
 
-		m_editor->setTopLeftPosition(0, 0);
+		m_currentSkin = m_editor->getSkin();
 
-		m_currentSkin = _skin;
-		writeSkinToConfig(_skin);
+		if (m_currentSkin.filename != skin.filename && !skin.folder.empty())	// empty folder = integrated skin => for development only
+		{
+			genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Info, m_editor->getProcessor().getProperties().name, 
+				"The skin\n"
+				"    '" + baseLib::filesystem::stripExtension(m_currentSkin.filename) + "'\n"
+				" is a legacy skin and has been automatically converted from json format to RmlUI.\n"
+				"\n"
+				"The automatic conversion can be inaccurate. Please contact the author of this skin and ask for an update.\n"
+				"\n"
+				"Do you want to switch to the default skin instead?", [this](const genericUI::MessageBox::Result _result)
+				{
+					if (_result == genericUI::MessageBox::Result::Yes)
+					{
+						auto defaultSkin = getIncludedSkins().front();
+						loadSkin(defaultSkin);
+					}
+				}
+			);
+		}
+		writeSkinToConfig(m_currentSkin);
 
 		if(evSkinLoaded)
-			evSkinLoaded(m_editor.get());
+			evSkinLoaded(m_editor->getRmlComponent());
 
 		if(!m_instanceConfig.empty())
 			getEditor()->setPerInstanceConfig(m_instanceConfig);
+
+
+		auto* doc = m_editor->getDocument();
+
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_F5)
+			{
+				if (!m_processor.getConfig().getBoolValue("reloadSkinViaF5", false))
+					return;
+
+				_event.StopPropagation();
+				juce::MessageManager::callAsync([this]
+				{
+					loadSkin(m_currentSkin);
+				});
+			}
+		});
 
 		return true;
 	}
@@ -160,9 +241,8 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 	{
 		LOG("ERROR: Failed to create editor: " << _err.what());
 
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name + " - Skin load failed", _err.what());
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, m_processor.getProperties().name + " - Skin load failed", _err.what());
 
-		m_parameterBinding.clear();
 		m_editor.reset();
 
 		if(_fallbackIndex >= m_includedSkins.size())
@@ -178,34 +258,82 @@ void PluginEditorState::setGuiScale(const int _scale) const
 		evSetGuiScale(_scale);
 }
 
-Editor* PluginEditorState::getEditor() const
+std::string PluginEditorState::exportSkinToFolder(const Skin& _skin, const std::string& _folder) const
 {
-	return dynamic_cast<Editor*>(m_editor.get());
+	if (!m_editor)
+		return "no editor to export skin";
+
+	if (_skin.files.empty())
+		return "no files to export";
+
+	baseLib::filesystem::createDirectory(_folder);
+
+	const auto folder = getSkinSubfolder(_skin, _folder);
+
+	baseLib::filesystem::createDirectory(folder);
+
+	std::stringstream errors;
+
+	auto writeFile = [this, &folder, &errors](const std::string& _name)
+	{
+		const auto res = m_processor.findResource(_name);
+
+		if (!res)
+		{
+			errors << "Failed to find resource " << _name << '\n';
+			return;
+		}
+
+		FILE* hFile = baseLib::filesystem::openFile(folder + _name, "wb");
+
+		if(!hFile)
+		{
+			errors << "Failed to create file " << folder << _name << '\n';
+		}
+		else
+		{
+			const auto data = res->first;
+			const auto dataSize = res->second;
+			const auto writtenCount = fwrite(data, 1, dataSize, hFile);
+			(void)fclose(hFile);
+			if(writtenCount != dataSize)
+				errors << "Failed to write " << dataSize << " bytes to " << folder << _name << '\n';
+		}
+	};
+
+	for (const auto& file : _skin.files)
+		writeFile(file);
+
+	return errors.str();
 }
 
-void PluginEditorState::openMenu(const juce::MouseEvent* _event)
+Editor* PluginEditorState::getEditor() const
 {
-	if(_event && _event->mods.isPopupMenu() && getEditor())
-	{
-		if(getEditor()->openContextMenuForParameter(_event))
-			return;
-	}
+	return m_editor.get();
+}
+
+void PluginEditorState::openMenu(const Rml::Event& _event)
+{
+	if(getEditor()->openContextMenuForParameter(_event))
+		return;
 
 	const auto& config = m_processor.getConfig();
     const auto scale = juce::roundToInt(config.getDoubleValue("scale", 100));
 
-	juce::PopupMenu menu;
+	juceRmlUi::Menu menu;
 
-	juce::PopupMenu skinMenu;
+	juceRmlUi::Menu skinMenu;
+
+	skinMenu.setItemsPerColumn(32);
 
 	bool loadedSkinIsPartOfList = false;
 
-	std::set<std::pair<std::string, std::string>> knownSkins;	// folder, jsonFilename
+	std::set<std::pair<std::string, std::string>> knownSkins;	// folder, filename
 
 	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList, &knownSkins](const Skin& _skin)
 	{
 		// remove dupes by folder
-		if(!_skin.folder.empty() && !knownSkins.insert({_skin.folder, _skin.jsonFilename}).second)
+		if(!_skin.folder.empty() && !knownSkins.insert({_skin.folder, _skin.filename}).second)
 			return;
 
 		const auto isCurrent = _skin == getCurrentSkin();
@@ -213,7 +341,13 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 		if(isCurrent)
 			loadedSkinIsPartOfList = true;
 
-		skinMenu.addItem(_skin.displayName, true, isCurrent,[this, _skin] {loadSkin(_skin);});
+		skinMenu.addEntry(_skin.displayName, isCurrent,[this, _skin]
+		{
+			juce::MessageManager::callAsync([this, _skin]
+			{
+				loadSkin(_skin);
+			});
+		});
 	};
 
 	for (const auto & skin : getIncludedSkins())
@@ -240,8 +374,21 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 		for (const auto& file : files)
 		{
-			if(baseLib::filesystem::hasExtension(file, ".json"))
+			const auto isJson = baseLib::filesystem::hasExtension(file, ".json");
+			const auto isRml = baseLib::filesystem::hasExtension(file, ".rml");
+			if(isJson || isRml)
 			{
+				if (isRml)
+				{
+					// ensure its not a template
+					std::vector<uint8_t> rmlData;
+					baseLib::filesystem::readFile(rmlData, file);
+					constexpr char key[] = "<rml>";
+					if (rmlData.size() < std::size(key))
+						continue;
+					if (std::memcmp(rmlData.data(), key, std::size(key) - 1) != 0)
+						continue;
+				}
 				if(!haveSkinsOnDisk)
 				{
 					haveSkinsOnDisk = true;
@@ -253,12 +400,10 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 					skinPath = entry.substr(modulePath.size());
 				skinPath = baseLib::filesystem::validatePath(skinPath);
 
-				auto jsonName = file;
-				const auto pathEndPos = jsonName.find_last_of("/\\");
-				if(pathEndPos != std::string::npos)
-					jsonName = file.substr(pathEndPos+1);
+				auto filename = baseLib::filesystem::getFilenameWithoutPath(file);
 
-				const Skin skin{jsonName.substr(0, jsonName.length() - 5), jsonName, skinPath};
+				auto displayName = createSkinDisplayName(file);
+				const Skin skin{displayName, filename, skinPath, {}};
 
 				addSkinEntry(skin);
 			}
@@ -272,57 +417,83 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 	if(getEditor() && m_currentSkin.folder.empty() || m_currentSkin.folder.find(getSkinFolder()) != 0)
 	{
-		skinMenu.addItem("Export current skin to folder '" + getSkinFolder() + "' on disk", true, false, [this]
+		skinMenu.addEntry("Export current skin to disk", [this]
 		{
 			exportCurrentSkin();
 		});
 	}
 
-	skinMenu.addItem("Open folder '" + getSkinFolder() + "' in File Browser", true, false, [this]
+	skinMenu.addEntry("Open skins folder in File Browser", [this]
 	{
 		const auto dir = getSkinFolder();
 		baseLib::filesystem::createDirectory(dir);
 		juce::File(dir).revealToUser();
 	});
 
-	juce::PopupMenu scaleMenu;
-	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
-	scaleMenu.addItem("65%", true, scale == 65, [this] { setGuiScale(65); });
-	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
-	scaleMenu.addItem("85%", true, scale == 85, [this] { setGuiScale(85); });
-	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
-	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
-	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
-	scaleMenu.addItem("175%", true, scale == 175, [this] { setGuiScale(175); });
-	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
-	scaleMenu.addItem("250%", true, scale == 250, [this] { setGuiScale(250); });
-	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
+	{
+		juceRmlUi::Menu skinDevMenu;
+
+		skinDevMenu.addEntry("Reload skin via F5 key", config.getBoolValue("reloadSkinViaF5", false), [this]
+		{
+			auto& c = m_processor.getConfig();
+			const auto enabled = c.getBoolValue("reloadSkinViaF5", false);
+			c.setValue("reloadSkinViaF5", !enabled);
+			c.saveIfNeeded();
+		});
+
+		skinDevMenu.addEntry("Enable RmlUi Debugger", config.getBoolValue("enableRmlUiDebugger", false), [this]
+		{
+			auto& c = m_processor.getConfig();
+			const auto enabled = !c.getBoolValue("enableRmlUiDebugger", false);
+			c.setValue("enableRmlUiDebugger", enabled);
+			c.saveIfNeeded();
+
+			if (m_editor)
+				m_editor->getRmlComponent()->enableDebugger(enabled);
+		});
+
+		skinMenu.addSeparator();
+		skinMenu.addSubMenu("Developer Options", std::move(skinDevMenu));
+	}
+
+	juceRmlUi::Menu scaleMenu;
+	scaleMenu.addEntry("50%", scale == 50, [this] { setGuiScale(50); });
+	scaleMenu.addEntry("65%", scale == 65, [this] { setGuiScale(65); });
+	scaleMenu.addEntry("75%", scale == 75, [this] { setGuiScale(75); });
+	scaleMenu.addEntry("85%", scale == 85, [this] { setGuiScale(85); });
+	scaleMenu.addEntry("100%", scale == 100, [this] { setGuiScale(100); });
+	scaleMenu.addEntry("125%", scale == 125, [this] { setGuiScale(125); });
+	scaleMenu.addEntry("150%", scale == 150, [this] { setGuiScale(150); });
+	scaleMenu.addEntry("175%", scale == 175, [this] { setGuiScale(175); });
+	scaleMenu.addEntry("200%", scale == 200, [this] { setGuiScale(200); });
+	scaleMenu.addEntry("250%", scale == 250, [this] { setGuiScale(250); });
+	scaleMenu.addEntry("300%", scale == 300, [this] { setGuiScale(300); });
 
 	auto adjustLatency = [this](const int _blocks)
 	{
 		m_processor.setLatencyBlocks(_blocks);
 
-		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, "Warning",
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Warning",
 			"Most hosts cannot handle if a plugin changes its latency while being in use.\n"
 			"It is advised to save, close & reopen the project to prevent synchronization issues.");
 	};
 
 	const auto latency = m_processor.getPlugin().getLatencyBlocks();
-	juce::PopupMenu latencyMenu;
-	latencyMenu.addItem("0 (DAW will report proper CPU usage)", true, latency == 0, [this, adjustLatency] { adjustLatency(0); });
-	latencyMenu.addItem("1 (default)", true, latency == 1, [this, adjustLatency] { adjustLatency(1); });
-	latencyMenu.addItem("2", true, latency == 2, [this, adjustLatency] { adjustLatency(2); });
-	latencyMenu.addItem("4", true, latency == 4, [this, adjustLatency] { adjustLatency(4); });
-	latencyMenu.addItem("8", true, latency == 8, [this, adjustLatency] { adjustLatency(8); });
+	juceRmlUi::Menu latencyMenu;
+	latencyMenu.addEntry("0 (DAW will report proper CPU usage)", latency == 0, [this, adjustLatency] { adjustLatency(0); });
+	latencyMenu.addEntry("1 (default)", latency == 1, [this, adjustLatency] { adjustLatency(1); });
+	latencyMenu.addEntry("2", latency == 2, [this, adjustLatency] { adjustLatency(2); });
+	latencyMenu.addEntry("4", latency == 4, [this, adjustLatency] { adjustLatency(4); });
+	latencyMenu.addEntry("8", latency == 8, [this, adjustLatency] { adjustLatency(8); });
 
 	auto servers = m_remoteServerList.getEntries();
 
-	juce::PopupMenu deviceTypeMenu;
-	deviceTypeMenu.addItem("Local (default)", true, m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
+	juceRmlUi::Menu deviceTypeMenu;
+	deviceTypeMenu.addEntry("Local (default)", m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
 
 	if(servers.empty())
 	{
-		deviceTypeMenu.addItem("- no servers found -", false, false, [this] {});
+		deviceTypeMenu.addEntry("- no servers found -", false, false, [this] {});
 	}
 	else
 	{
@@ -336,7 +507,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 					m_processor.getRemoteDeviceHost() == server.host && 
 					m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
 
-				deviceTypeMenu.addItem(name, true, isSelected, [this, server]
+				deviceTypeMenu.addEntry(name, isSelected, [this, server]
 				{
 					m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
 				});
@@ -344,17 +515,17 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 			else
 			{
 				std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
-				deviceTypeMenu.addItem(name, false, false, [this] {});
+				deviceTypeMenu.addEntry(name, false, false, [this] {});
 			}
 		}
 	}
 
-	menu.addSubMenu("GUI Skin", skinMenu);
-	menu.addSubMenu("GUI Scale", scaleMenu);
-	menu.addSubMenu("Latency (blocks)", latencyMenu);
+	menu.addSubMenu("GUI Skin", std::move(skinMenu));
+	menu.addSubMenu("GUI Scale", std::move(scaleMenu));
+	menu.addSubMenu("Latency (blocks)", std::move(latencyMenu));
 
 	if (m_processor.getConfig().getBoolValue("supportDspBridge", false))
-		menu.addSubMenu("Device Type", deviceTypeMenu);
+		menu.addSubMenu("Device Type", std::move(deviceTypeMenu));
 
 	menu.addSeparator();
 
@@ -364,17 +535,17 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		const auto part = m_processor.getController().getCurrentPart();
 
-		juce::PopupMenu lockRegions;
+		juceRmlUi::Menu lockRegions;
 
 		auto& locking = m_processor.getController().getParameterLocking();
 
-		lockRegions.addItem("Unlock All", [&, part]
+		lockRegions.addEntry("Unlock All", [&, part]
 		{
 			for (const auto& region : regions)
 				locking.unlockRegion(part, region.first);
 		});
 
-		lockRegions.addItem("Lock All", [&, part]
+		lockRegions.addEntry("Lock All", [&, part]
 		{
 			for (const auto& region : regions)
 				locking.lockRegion(part, region.first);
@@ -382,15 +553,13 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 		lockRegions.addSeparator();
 
-		uint32_t count = 0;
-
 		std::map<std::string, pluginLib::ParameterRegion> sortedRegions;
 		for (const auto& region : regions)
 			sortedRegions.insert(region);
 
 		for (const auto& region : sortedRegions)
 		{
-			lockRegions.addItem(region.second.getName(), true, m_processor.getController().getParameterLocking().isRegionLocked(part, region.first), [this, id=region.first, part]
+			lockRegions.addEntry(region.second.getName(), m_processor.getController().getParameterLocking().isRegionLocked(part, region.first), [this, id=region.first, part]
 			{
 				auto& locking = m_processor.getController().getParameterLocking();
 
@@ -399,15 +568,9 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 				else
 					locking.lockRegion(part, id);
 			});
-
-			if(++count == 16)
-			{
-				lockRegions.addColumnBreak();
-				count = 0;
-			}
 		}
 
-		menu.addSubMenu("Lock Regions", lockRegions);
+		menu.addSubMenu("Lock Regions", std::move(lockRegions));
 	}
 
 	initContextMenu(menu);
@@ -415,9 +578,9 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		menu.addSeparator();
 
-		juce::PopupMenu panicMenu;
+		juceRmlUi::Menu panicMenu;
 
-		panicMenu.addItem("Send 'All Notes Off'", [this]
+		panicMenu.addEntry("Send 'All Notes Off'", [this]
 		{
 			for(uint8_t c=0; c<16; ++c)
 			{
@@ -426,7 +589,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 			}
 		});
 
-		panicMenu.addItem("Send 'Note Off' for every Note", [this]
+		panicMenu.addEntry("Send 'Note Off' for every Note", [this]
 		{
 			for(uint8_t c=0; c<16; ++c)
 			{
@@ -438,12 +601,12 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 			}
 		});
 
-		panicMenu.addItem("Reboot Device", [this]
+		panicMenu.addEntry("Reboot Device", [this]
 		{
 			m_processor.rebootDevice();
 		});
 
-		menu.addSubMenu("Panic", panicMenu);
+		menu.addSubMenu("Panic", std::move(panicMenu));
 	}
 
 	if(auto* editor = dynamic_cast<Editor*>(getEditor()))
@@ -458,26 +621,20 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 			const std::string ctrlName = "Ctrl";
 #endif
 			{
-				juce::PopupMenu::Item item("Copy current Patch to Clipboard");
-				item.shortcutKeyDescription = ctrlName + "+C";
-				item.action = [editor]
+				menu.addEntry("Copy current Patch to Clipboard (" + ctrlName + "+C)", [editor]
 				{
 					editor->copyCurrentPatchToClipboard();
-				};
-				menu.addItem(item);
+				});
 			}
 
 			{
 				auto patches = pm->getPatchesFromClipboard();
 				if(!patches.empty())
 				{
-					juce::PopupMenu::Item item("Replace current Patch from Clipboard");
-					item.shortcutKeyDescription = ctrlName + "+V";
-					item.action = [editor]
+					menu.addEntry("Replace current Patch from Clipboard (" + ctrlName + "+V)", [editor]
 					{
 						editor->replaceCurrentPatchFromClipboard();
-					};
-					menu.addItem(item);
+					});
 				}
 			}
 		}
@@ -486,13 +643,13 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
 
-		juce::PopupMenu advancedMenu;
-		advancedMenu.addItem("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
+		juceRmlUi::Menu advancedMenu;
+		advancedMenu.addEntry("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
 		{
 			if(!allowAdvanced)
 			{
 				genericUI::MessageBox::showOkCancel(
-					juce::MessageBoxIconType::WarningIcon, 
+					genericUI::MessageBox::Icon::Warning, 
 					"Warning", 
 					"Changing these settings may cause instability of the plugin.\n\nPlease confirm to continue.", 
 					[this](const genericUI::MessageBox::Result _result)
@@ -512,11 +669,11 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 		if(initAdvancedContextMenu(advancedMenu, allowAdvanced))
 		{
 			menu.addSeparator();
-			menu.addSubMenu("Advanced...", advancedMenu);
+			menu.addSubMenu("Advanced...", std::move(advancedMenu));
 		}
 	}
 
-	menu.showMenuAsync(juce::PopupMenu::Options());
+	menu.runModal(_event, 16);
 }
 
 void PluginEditorState::exportCurrentSkin() const
@@ -526,26 +683,50 @@ void PluginEditorState::exportCurrentSkin() const
 	if(!editor)
 		return;
 
-	const auto res = editor->exportToFolder(getSkinFolder());
+	const auto& skin = editor->getSkin();
+
+	const auto res = exportSkinToFolder(skin, getSkinFolder());
 
 	if(!res.empty())
 	{
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, editor);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Export failed", "Failed to export skin:\n\n" + res, getUiRoot());
 	}
 	else
 	{
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::InfoIcon, "Export finished", "Skin successfully exported", editor);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Export finished", "Skin successfully exported", getUiRoot());
 	}
 }
 
 Skin PluginEditorState::readSkinFromConfig() const
 {
-	const auto& config = m_processor.getConfig();
+	auto& config = m_processor.getConfig();
 
 	Skin skin;
 	skin.displayName = config.getValue("skinDisplayName", "").toStdString();
-	skin.jsonFilename = config.getValue("skinFile", "").toStdString();
+	skin.filename = config.getValue("skinFile", "").toStdString();
 	skin.folder = config.getValue("skinFolder", "").toStdString();
+
+	if (skin.folder.empty())
+	{
+		// if the skin file points to a legacy skin, let it point to the rml skin instead
+		if (baseLib::filesystem::hasExtension(skin.filename, ".json"))
+		{
+			skin.filename = baseLib::filesystem::stripExtension(skin.filename) + ".rml";
+			config.setValue("skinFile", juce::String::fromUTF8(skin.filename.c_str()));
+		}
+
+		// if the skin is embedded, we do not know the files that this skin was made of. Find them
+		for (const auto & s : m_includedSkins)
+		{
+			if (s.filename == skin.filename)
+				skin.files = s.files;
+		}
+	}
+
+	// do not load legacy skins automatically anymore, revert to default skin
+	if (!skin.folder.empty() && baseLib::filesystem::hasExtension(skin.filename, ".json"))
+		skin = {};
+
 	return skin;
 }
 
@@ -554,7 +735,7 @@ void PluginEditorState::writeSkinToConfig(const Skin& _skin) const
 	auto& config = m_processor.getConfig();
 
 	config.setValue("skinDisplayName", _skin.displayName.c_str());
-	config.setValue("skinFile", juce::String::fromUTF8(_skin.jsonFilename.c_str()));
+	config.setValue("skinFile", juce::String::fromUTF8(_skin.filename.c_str()));
 	config.setValue("skinFolder", juce::String::fromUTF8(_skin.folder.c_str()));
 }
 

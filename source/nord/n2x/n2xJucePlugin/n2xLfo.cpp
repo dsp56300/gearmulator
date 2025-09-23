@@ -2,13 +2,15 @@
 
 #include "n2xController.h"
 #include "n2xEditor.h"
+#include "juceRmlPlugin/rmlParameterBinding.h"
+#include "juceRmlUi/rmlElemValue.h"
 
 namespace n2xJucePlugin
 {
 	Lfo::Lfo(Editor& _editor, const uint8_t _index)
 	: m_editor(_editor)
 	, m_index(_index)
-	, m_slider(_editor.findComponentT<juce::Slider>(_index ? "PerfLfo2SyncA" : "PerfLfo1SyncA"))
+	, m_slider(_editor.findChild(_index ? "PerfLfo2SyncA" : "PerfLfo1SyncA"))
 	{
 		m_onCurrentPartChanged.set(_editor.getN2xController().onCurrentPartChanged, [this](const uint8_t&)
 		{
@@ -29,16 +31,13 @@ namespace n2xJucePlugin
 
 		const auto paramName = getSyncMultiParamName(controller.getCurrentPart(), m_index);
 
-		const auto paramIdx = controller.getParameterIndexByName(paramName);
+		auto* binding = m_editor.getRmlParameterBinding();
 
-		auto& binding = m_editor.getParameterBinding();
-
-		binding.unbind(m_slider);
-		binding.bind(*m_slider, paramIdx, 0);
+		binding->bind(*m_slider, paramName);
 	}
 
 	void Lfo::updateState(const pluginLib::Parameter* _param) const
 	{
-		m_slider->setValue(_param->getUnnormalizedValue());
+		juceRmlUi::ElemValue::setValue(m_slider, static_cast<float>(_param->getUnnormalizedValue()));
 	}
 }

@@ -1,78 +1,78 @@
 #include "focusedParameterTooltip.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
+#include "juceRmlUi/rmlHelper.h"
+
+#include "RmlUi/Core/Element.h"
+#include "RmlUi/Core/ElementUtilities.h"
 
 namespace jucePluginEditorLib
 {
-	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label *_label, const juce::Component& _bounds)
-		: m_label(_label), m_defaultWidth(_label ? _label->getWidth() : 0), m_bounds(_bounds)
+	FocusedParameterTooltip::FocusedParameterTooltip(Rml::Element* _label) : m_label(_label)
 	{
 		setVisible(false);
 
 		if(isValid())
-			m_label->setInterceptsMouseClicks(false,false);
+		{
+			m_label->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
+			m_label->SetProperty(Rml::PropertyId::Position, Rml::Style::Position::Absolute);
+		}
 	}
 
 	void FocusedParameterTooltip::setVisible(bool _visible) const
 	{
 		if(isValid())
-			m_label->setVisible(_visible);
+			juceRmlUi::helper::setVisible(m_label, _visible);
 	}
 
 	uint32_t FocusedParameterTooltip::getTooltipDisplayTime() const
 	{
-		if (!isValid() || !m_label->getProperties().contains("displayTime"))
+		if (!isValid())
 			return 0;
 
-		const auto time = static_cast<int>(m_label->getProperties()["displayTime"]);
-		return time > 0 ? time : 0;
+		const auto* attrib = m_label->GetAttribute("displayTime");
+
+		if (!attrib)
+			return 0;
+
+		const int time = attrib->Get<int>(m_label->GetCoreInstance());
+		return time > 0 ? static_cast<uint32_t>(time) : 0;
 	}
 
-	void FocusedParameterTooltip::initialize(juce::Component* _component, const juce::String& _value) const
+	void FocusedParameterTooltip::initialize(const Rml::Element* _component, const std::string& _value) const
 	{
 		if(!isValid())
 			return;
 
-		if(dynamic_cast<juce::Slider*>(_component) && _component->isShowing())
+		if(_component->IsVisible(true))
 		{
-			int x = _component->getX();
-			int y = _component->getY();
+			auto* comp = const_cast<Rml::Element*>(_component);
 
-			// local to global
-			auto parent = _component->getParentComponent();
+			const auto box = comp->GetBox();
 
-			while(parent && parent != m_label->getParentComponent())
-			{
-				x += parent->getX();
-				y += parent->getY();
-				parent = parent->getParentComponent();
-			}
+			float x = comp->GetAbsoluteLeft();
+			float y = comp->GetAbsoluteTop();
 
-			int labelWidth = m_defaultWidth;
+			const auto textWidth = Rml::ElementUtilities::GetStringWidth(m_label, _value);
 
-			if(_value.length() > 3)
-				labelWidth += (m_label->getHeight()>>1) * (_value.length() - 3);
+			const auto labelWidth = static_cast<float>(textWidth) + 8;
 
-			x += (_component->getWidth()>>1) - (labelWidth>>1);
-			y += _component->getHeight() + (m_label->getHeight()>>1);
+			x += box.GetSize().x * 0.5f - labelWidth * 0.5f;
+			y += box.GetSize().y + (m_label->GetBox().GetSize().y * 0.5f);
 
-			if(m_label->getProperties().contains("offsetY"))
-				y += static_cast<int>(m_label->getProperties()["offsetY"]);
+			if(auto* attribOffset = m_label->GetAttribute("offsetY"))
+				y += attribOffset->Get<float>(m_label->GetCoreInstance());
 
-			m_label->setTopLeftPosition(x,y);
-			m_label->setSize(labelWidth, m_label->getHeight());
+			m_label->SetProperty(Rml::PropertyId::Left, Rml::Property(x, Rml::Unit::PX));
+			m_label->SetProperty(Rml::PropertyId::Top, Rml::Property(y, Rml::Unit::PX));
+			m_label->SetProperty(Rml::PropertyId::Width, Rml::Property(labelWidth, Rml::Unit::PX));
 
-			const auto editorRect = m_bounds.getBounds();
-			const auto labelRect = m_label->getBounds();
+			m_label->SetInnerRML(_value);
 
-			m_label->setBounds(labelRect.constrainedWithin(editorRect));
-			m_label->setText(_value, juce::dontSendNotification);
-			m_label->setVisible(true);
-			m_label->toFront(false);
+			juceRmlUi::helper::setVisible(m_label, true);
 		}
 		else if(m_label)
 		{
-			m_label->setVisible(false);
+			juceRmlUi::helper::setVisible(m_label, false);
 		}
 	}
 }

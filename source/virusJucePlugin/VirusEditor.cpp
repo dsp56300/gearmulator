@@ -1,74 +1,64 @@
 #include "VirusEditor.h"
 
 #include "ArpUserPattern.h"
-#include "PartButton.h"
+#include "ControllerLinks.h"
 
 #include "ParameterNames.h"
 #include "VirusProcessor.h"
 #include "VirusController.h"
 
 #include "jucePluginLib/filetype.h"
-#include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/pluginVersion.h"
 
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "jucePluginEditorLib/pluginDataModel.h"
+
+#include "juceRmlPlugin/skinConverter/skinConverterOptions.h"
+
+#include "juceRmlUi/rmlElemButton.h"
+#include "juceRmlUi/rmlElemComboBox.h"
+#include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlInplaceEditor.h"
 
 #include "juceUiLib/messageBox.h"
 
+#include "RmlUi/Core/ElementDocument.h"
+
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
-		Editor(_processorRef, _binding, _skin),
+	VirusEditor::VirusEditor(virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
+		Editor(_processorRef, _skin),
 		m_processor(_processorRef),
-		m_parameterBinding(_binding),
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
-		create();
+	}
+	void VirusEditor::create()
+	{
+		Editor::create();
 
 		m_parts.reset(new Parts(*this));
-		m_leds.reset(new Leds(*this, _processorRef));
-
-		// be backwards compatible with old skins
-		if(getTabGroupCount() == 0)
-			m_tabs.reset(new Tabs(*this));
-
-		// be backwards compatible with old skins
-		if(getControllerLinkCountRecursive() == 0)
-			m_controllerLinks.reset(new ControllerLinks(*this));
+		m_leds.reset(new Leds(*this, m_processor));
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
-		// be backwards compatible with old skins
-		if(!getConditionCountRecursive())
-			m_fxPage.reset(new FxPage(*this));
+		m_presetName = findChild("PatchName");
 
-		{
-			auto pmParent = findComponent("ContainerPatchManager", false);
-			if(!pmParent)
-				pmParent = findComponent("page_presets", false);
-			if(!pmParent)
-				pmParent = findComponent("page_2_browser");
-			setPatchManager(new PatchManager(*this, pmParent));
-		}
+		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), *this));
 
-		m_presetName = findComponentT<juce::Label>("PatchName");
+		m_romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector");
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), m_parameterBinding, *this));
-
-		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
-
-		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle", false);
-		m_playModeMulti = findComponentT<juce::Button>("PlayModeMulti", false);
+		m_playModeSingle = findChild<juceRmlUi::ElemButton>("PlayModeSingle", false);
+		m_playModeMulti = findChild<juceRmlUi::ElemButton>("PlayModeMulti", false);
 
 		if(m_playModeSingle && m_playModeMulti)
 		{
-			m_playModeSingle->onClick = [this]{ if(m_playModeSingle->getToggleState()) setPlayMode(virusLib::PlayMode::PlayModeSingle); };
-			m_playModeMulti->onClick = [this]{ if(m_playModeMulti->getToggleState()) setPlayMode(virusLib::PlayMode::PlayModeMulti); };
+			juceRmlUi::EventListener::AddClick(m_playModeSingle, [this] { setPlayMode(virusLib::PlayMode::PlayModeSingle); });
+			juceRmlUi::EventListener::AddClick(m_playModeMulti, [this] { setPlayMode(virusLib::PlayMode::PlayModeMulti); });
 		}
 		else
 		{
-			m_playModeToggle = findComponentT<juce::Button>("PlayModeToggle");
-			m_playModeToggle->onClick = [this]{ setPlayMode(m_playModeToggle->getToggleState() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); };
+			m_playModeToggle = findChild<juceRmlUi::ElemButton>("PlayModeToggle");
+			juceRmlUi::EventListener::AddClick(m_playModeToggle, [this] { setPlayMode(m_playModeToggle->isChecked() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); });
 		}
 
 		if(m_romSelector)
@@ -77,7 +67,7 @@ namespace genericVirusUI
 
 			if(roms.empty())
 			{
-				m_romSelector->addItem("<No ROM found>", 1);
+				m_romSelector->addOption("<No ROM found>");
 			}
 			else
 			{
@@ -86,72 +76,76 @@ namespace genericVirusUI
 				for (const auto& rom : roms)
 				{
 					const auto name = juce::File(rom.getFilename()).getFileNameWithoutExtension();
-					m_romSelector->addItem(name + " (" + rom.getModelName() + ')', id++);
+					m_romSelector->addOption(name.toStdString() + " (" + rom.getModelName() + ')');
 				}
 			}
 
-			m_romSelector->setSelectedId(static_cast<int>(m_processor.getSelectedRomIndex()) + 1, juce::dontSendNotification);
+			m_romSelector->setSelectedIndex(static_cast<int>(m_processor.getSelectedRomIndex()), false);
 
-			m_romSelector->onChange = [this]
+			juceRmlUi::EventListener::Add(m_romSelector, Rml::EventId::Change, [this](Rml::Event&)
 			{
 				const auto oldIndex = m_processor.getSelectedRomIndex();
-				const auto newIndex = m_romSelector->getSelectedId() - 1;
+				const auto newIndex = m_romSelector->getSelectedIndex();
 				if(!m_processor.setSelectedRom(newIndex))
-					m_romSelector->setSelectedId(static_cast<int>(oldIndex) + 1);
-			};
+					m_romSelector->setSelectedIndex(static_cast<int>(oldIndex));
+			});
 		}
 
-		getController().onProgramChange = [this](int _part) { onProgramChange(_part); };
-
-		addMouseListener(this, true);
-
-		if(auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false))
+		getController().onProgramChange = [this](int _part)
 		{
-		    const std::string message = "DSP 56300 Emulator Version " + pluginLib::Version::getVersionString() + " - " + pluginLib::Version::getVersionDateTime();
-			versionInfo->setText(message, juce::dontSendNotification);
-		}
-
-		if(auto* versionNumber = findComponentT<juce::Label>("VersionNumber", false))
-		{
-			versionNumber->setText(pluginLib::Version::getVersionString(), juce::dontSendNotification);
-		}
-
-		m_deviceModel = findComponentT<juce::Label>("DeviceModel", false);
-
-		auto* presetSave = findComponentT<juce::Button>("PresetSave", false);
-		if(presetSave)
-			presetSave->onClick = [this] { savePreset(); };
-
-		auto* presetLoad = findComponentT<juce::Button>("PresetLoad", false);
-		if(presetLoad)
-			presetLoad->onClick = [this] { loadPreset(); };
-
-		m_presetName->setEditable(false, true, true);
-		m_presetName->onTextChange = [this]()
-		{
-			const auto text = m_presetName->getText();
-			if (text.trim().length() > 0)
-			{
-				getController().setSinglePresetName(getController().getCurrentPart(), text);
-				onProgramChange(getController().getCurrentPart());
-			}
+			const juceRmlUi::RmlInterfaces::ScopedAccess access(*getRmlComponent());
+			onProgramChange(_part);
 		};
 
+		if(auto* versionInfo = findChild("VersionInfo", false))
+		{
+		    const std::string message = "DSP 56300 Emulator Version " + pluginLib::Version::getVersionString() + " - " + pluginLib::Version::getVersionDateTime();
+			versionInfo->SetInnerRML(message);
+		}
+
+		if(auto* versionNumber = findChild("VersionNumber", false))
+		{
+			versionNumber->SetInnerRML(pluginLib::Version::getVersionString());
+		}
+
+		m_deviceModel = findChild("DeviceModel", false);
+
+		auto* presetSave = findChild("PresetSave", false);
+		if(presetSave)
+			juceRmlUi::EventListener::Add(presetSave, Rml::EventId::Click, [this](Rml::Event& _event) { savePreset(_event); });
+
+		auto* presetLoad = findChild("PresetLoad", false);
+		if(presetLoad)
+			juceRmlUi::EventListener::AddClick(presetLoad, [this] { loadPreset(); });
+
+		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Dblclick, [this](Rml::Event& _event)
+		{
+			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(m_presetName->GetInnerRML()), [this](const std::string& _text)
+			{
+				auto text = Rml::StringUtilities::StripWhitespace(_text);
+				if (text.empty())
+					return;
+				getController().setSinglePresetName(getController().getCurrentPart(), text);
+				onProgramChange(getController().getCurrentPart());
+			});
+		});
+
+/*
 		m_presetNameMouseListener = new PartMouseListener(pluginLib::MidiPacket::AnyPart, [this](const juce::MouseEvent&, int)
 		{
 			startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(*getPatchManager(), getController().getCurrentPart()), m_presetName);
 		});
-
 		m_presetName->addMouseListener(m_presetNameMouseListener, false);
+*/
 
-		auto* menuButton = findComponentT<juce::Button>("Menu", false);
+		auto* menuButton = findChild("Menu", false);
 
 		if(menuButton)
 		{
-			menuButton->onClick = [this]()
+			juceRmlUi::EventListener::Add(menuButton, Rml::EventId::Click, [this](Rml::Event& _event)
 			{
-				openMenu(nullptr);
-			};
+				openMenu(_event);
+			});
 		}
 
 		updatePresetName();
@@ -160,20 +154,21 @@ namespace genericVirusUI
 		m_romChangedListener = [this](auto)
 		{
 			updateDeviceModel();
-			updateKeyValueConditions("deviceModel", virusLib::getModelName(m_processor.getModel()));
+			getPluginDataModel()->set("deviceModel", virusLib::getModelName(m_processor.getModel()));
 			m_parts->onPlayModeChanged();
 		};
+
+		if (auto* arpUserGraphics = findChild("ArpUserGraphics", false))
+			m_arpUserPattern.reset(new ArpUserPattern(*this, arpUserGraphics));
+
+		ControllerLinks::create(*this);
 	}
 
 	VirusEditor::~VirusEditor()
 	{
-		m_presetName->removeMouseListener(m_presetNameMouseListener);
-		delete m_presetNameMouseListener;
-		m_presetNameMouseListener = nullptr;
+		m_arpUserPattern.reset();
 
 		m_focusedParameter.reset();
-
-		m_parameterBinding.clearBindings();
 
 		getController().onProgramChange = nullptr;
 	}
@@ -192,15 +187,7 @@ namespace genericVirusUI
 				"* The plugin state is not preserved\n"
 				"* Preset saving is disabled"};
 	}
-
-	genericUI::Button<juce::TextButton>* VirusEditor::createJuceComponent(genericUI::Button<juce::TextButton>* _button, genericUI::UiObject& _object)
-	{
-		if(_object.getName() == "PresetName")
-			return new PartButton(*this);
-
-		return Editor::createJuceComponent(_button, _object);
-	}
-
+	/*
 	juce::Component* VirusEditor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
 	{
 		if(_object.getName() == "ArpUserGraphics")
@@ -211,6 +198,42 @@ namespace genericVirusUI
 		}
 
 		return Editor::createJuceComponent(_component, _object);
+	}
+	*/
+	void VirusEditor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
+	{
+		Editor::initSkinConverterOptions(_skinConverterOptions);
+
+		_skinConverterOptions.idReplacements.insert({"page_presets", "container-patchmanager"});
+		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
+		_skinConverterOptions.idReplacements.insert({"page_2_browser", "container-patchmanager"});
+	}
+
+	void VirusEditor::initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model)
+	{
+		Editor::initPluginDataModel(_model);
+
+		_model.set("deviceModel", virusLib::getModelName(m_processor.getModel()));
+		_model.setFunc("multiMode", [this]
+		{
+			return getController().isMultiMode() ? "1" : "0";
+		}, [this](const std::string& _multiMode)
+		{
+			try
+			{
+				auto mode = std::stoi(_multiMode);
+				setPlayMode(mode ? virusLib::PlayModeMulti : virusLib::PlayModeSingle);
+			}
+			catch (std::exception&)
+			{
+				// ignore invalid input
+			}
+		});
+	}
+
+	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(Rml::Element* _parent)
+	{
+		return new PatchManager(*this, _parent);
 	}
 
 	void VirusEditor::onProgramChange(int _part)
@@ -237,24 +260,19 @@ namespace genericVirusUI
 		updatePresetName();
 	}
 
-	void VirusEditor::mouseEnter(const juce::MouseEvent& event)
-	{
-		m_focusedParameter->onMouseEnter(event);
-	}
-
 	void VirusEditor::updatePresetName() const
 	{
-		m_presetName->setText(getController().getCurrentPartPresetName(getController().getCurrentPart()), juce::dontSendNotification);
+		m_presetName->SetInnerRML(getController().getCurrentPartPresetName(getController().getCurrentPart()));
 	}
 
 	void VirusEditor::updatePlayModeButtons() const
 	{
 		if(m_playModeSingle)
-			m_playModeSingle->setToggleState(!getController().isMultiMode(), juce::dontSendNotification);
+			m_playModeSingle->setChecked(!getController().isMultiMode());
 		if(m_playModeMulti)
-			m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+			m_playModeMulti->setChecked(getController().isMultiMode());
 		if(m_playModeToggle)
-			m_playModeToggle->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+			m_playModeToggle->setChecked(getController().isMultiMode());
 	}
 
 	void VirusEditor::updateDeviceModel()
@@ -294,26 +312,26 @@ namespace genericVirusUI
 		case virusLib::DeviceModel::TI2:	m = "TI2";	break;
 		}
 
-		m_deviceModel->setText(m, juce::dontSendNotification);
+		m_deviceModel->SetInnerRML(m);
 	}
 
-	void VirusEditor::savePreset()
+	void VirusEditor::savePreset(Rml::Event& _event)
 	{
-		juce::PopupMenu menu;
+		juceRmlUi::Menu menu;
 
 		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
 
 		if(countAdded)
 			menu.addSeparator();
 
-		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
+		auto addEntry = [&](juceRmlUi::Menu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
-			juce::PopupMenu subMenu;
+			juceRmlUi::Menu subMenu;
 
-			subMenu.addItem(".syx", [_callback](){_callback(pluginLib::FileType::Syx); });
-			subMenu.addItem(".mid", [_callback](){_callback(pluginLib::FileType::Mid); });
+			subMenu.addEntry(".syx", [_callback](){_callback(pluginLib::FileType::Syx); });
+			subMenu.addEntry(".mid", [_callback](){_callback(pluginLib::FileType::Mid); });
 
-			_menu.addSubMenu(_name, subMenu);
+			_menu.addSubMenu(_name, std::move(subMenu));
 		};
 
 		addEntry(menu, "Export Current Single (Edit Buffer)", [this](const pluginLib::FileType& _type)
@@ -329,7 +347,7 @@ namespace genericVirusUI
 			});
 		}
 
-		juce::PopupMenu banksMenu;
+		juceRmlUi::Menu banksMenu;
 		for(uint8_t b=0; b<static_cast<uint8_t>(getController().getBankCount()); ++b)
 		{
 			addEntry(banksMenu, getController().getBankName(b), [this, b](const pluginLib::FileType& _type)
@@ -338,9 +356,9 @@ namespace genericVirusUI
 			});
 		}
 
-		menu.addSubMenu("Export Bank", banksMenu);
+		menu.addSubMenu("Export Bank", std::move(banksMenu));
 
-		menu.showMenuAsync(juce::PopupMenu::Options());
+		menu.runModal(_event);
 	}
 
 	void VirusEditor::loadPreset()
@@ -402,7 +420,7 @@ namespace genericVirusUI
 						const auto title = m_processor.getProductName(true) + " - Load Arrangement Dump?";
 						const auto message = "This file contains an arrangement dump, i.e. one Multi and 16 Singles.\nDo you want to replace the current state by this dump?";
 
-						genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::QuestionIcon, title, message, [this, multi, singles](const genericUI::MessageBox::Result _result)
+						genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Question, title, message, [this, multi, singles](const genericUI::MessageBox::Result _result)
 						{
 							if (_result != genericUI::MessageBox::Result::Yes)
 								return;
@@ -425,7 +443,7 @@ namespace genericVirusUI
 						return;
 					}
 				}
-				genericUI::MessageBox::showOk(juce::AlertWindow::InfoIcon, "Information", 
+				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Information", 
 					"The selected file contains more than one patch. Please add this file as a data source in the Patch Manager instead.\n\n"
 					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
 				);
@@ -514,10 +532,9 @@ namespace genericVirusUI
 #endif
 	}
 
-	void VirusEditor::setPart(size_t _part)
+	void VirusEditor::setPart(const size_t _part)
 	{
-		m_parameterBinding.setPart(static_cast<uint8_t>(_part));
-		onCurrentPartChanged();
 		setCurrentPart(static_cast<uint8_t>(_part));
+		onCurrentPartChanged();
 	}
 }

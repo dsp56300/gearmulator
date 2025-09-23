@@ -3,11 +3,10 @@
 #include "jucePluginEditorLib/partbutton.h"
 
 #include "xtPartButton.h"
+#include "xtPartName.h"
 
 namespace xtJucePlugin
 {
-	class PartName;
-
 	class Parts
 	{
 	public:
@@ -22,9 +21,9 @@ namespace xtJucePlugin
 
 		struct Part
 		{
-			PartButton* m_button = nullptr;
-			PartName* m_name = nullptr;
-			juce::Button* m_led = nullptr;
+			std::unique_ptr<PartButton> m_button;
+			std::unique_ptr<PartName> m_name;
+			Rml::Element* m_led = nullptr;
 		};
 
 		std::array<Part,8> m_parts;

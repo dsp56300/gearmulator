@@ -1,52 +1,48 @@
 #include "weTree.h"
 
-#include "weTreeItem.h"
-#include "xtEditor.h"
-#include "xtWaveEditor.h"
+#include "RmlUi/Core/ElementDocument.h"
 
 namespace xtJucePlugin
 {
-	Tree::Tree(WaveEditor& _editor) : m_editor(_editor)
+	namespace
 	{
-		setRootItem(new TreeItem());
-		setRootItemVisible(false);
+	const char* g_templateWithCanvas = R"(
+		<treenode class="x-we-treeitem x-we-treeitem-withcanvas">
+			<div id="name" class="x-we-treeitem-withcanvas-text">Name</div>
+			<canvas id="graph" class="x-we-treeitem-canvas"/>
+		</treenode>
+	)";
 
-		auto& editor = _editor.getEditor();
+	const char* g_templateWithoutCanvas = R"(
+		<treenode class="x-we-treeitem x-we-treeitem-nocanvas">
+			<div id="name" class="x-we-treeitem-text">Name</div>
+		</treenode>
+	)";
 
-		if(const auto t = editor.getTemplate("pm_treeview"))
-			t->apply(editor, *this);
+	}
 
-		getViewport()->setScrollBarsShown(true, true);
+	Tree::Tree(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor, bool _withCanvas)
+	: ElemTree(_coreInstance, _tag)
+	, m_editor(_editor)
+	, m_instancer([this](Rml::CoreInstance&, const std::string& _tag)
+	{
+		return createChild(_tag);
+	})
+	{
+		SetClass("x-we-tree", true);
 
-		if(const auto t = editor.getTemplate("pm_scrollbar"))
-		{
-			t->apply(editor, getViewport()->getVerticalScrollBar());
-			t->apply(editor, getViewport()->getHorizontalScrollBar());
-		}
+		// a template is needed
+		SetInnerRML(_withCanvas ? g_templateWithCanvas : g_templateWithoutCanvas);
+
+		setNodeInstancer(&m_instancer);
 	}
 
 	Tree::~Tree()
 	{
-		deleteRootItem();
-	}
-
-	void Tree::parentHierarchyChanged()
-	{
-		TreeView::parentHierarchyChanged();
-
-		const auto* parent = getParentComponent();
-		if(!parent)
-			return;
-
-		const auto w = static_cast<float>(parent->getWidth()) / g_waveEditorScale;
-		const auto h = static_cast<float>(parent->getHeight()) / g_waveEditorScale;
-
-		setTransform(juce::AffineTransform::scale(g_waveEditorScale));
-		setSize(static_cast<int>(w), static_cast<int>(h));
+		getTree().clear();
 	}
 
 	void Tree::paint(juce::Graphics& _g)
 	{
-		juce::TreeView::paint(_g);
 	}
 }

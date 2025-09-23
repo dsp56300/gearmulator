@@ -6,12 +6,13 @@ namespace n2xJucePlugin
 {
 	class Editor;
 
-	class Part : public jucePluginEditorLib::PartButton<juce::DrawableButton>
+	class Part : public jucePluginEditorLib::PartButton
 	{
 	public:
-		Part(Editor& _editor, const std::string& _name, ButtonStyle _buttonStyle);
+		Part(Rml::Element* _button, Editor& _editor);
 
-		void onClick() override;
+		void onClick(Rml::Event&) override;
+
 	private:
 		Editor& m_editor;
 	};

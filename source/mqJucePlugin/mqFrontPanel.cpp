@@ -9,6 +9,7 @@
 #include "mqLib/mqmiditypes.h"
 
 #include "dsp56kEmu/fastmath.h"
+#include "juceRmlUi/rmlElemButton.h"
 
 namespace mqLib
 {
@@ -49,54 +50,62 @@ namespace mqJucePlugin
 		_controller.setFrontPanel(this);
 
 		for(size_t i=0; i<std::size(g_ledNames); ++i)
-			m_leds[i] = _editor.findComponentT<juce::Button>(g_ledNames[i], false);
+			m_leds[i] = _editor.findChild(g_ledNames[i], false);
 
 		for(size_t i=0; i<std::size(g_buttonNames); ++i)
 		{
-			auto* b = _editor.findComponentT<juce::Button>(g_buttonNames[i], false);
+			auto* b = _editor.findChild<juceRmlUi::ElemButton>(g_buttonNames[i], false);
 			m_buttons[i] = b;
 			if(!b)
 				continue;
 
 			const auto index = static_cast<uint32_t>(i);
-			b->onStateChange = [this, index]
+			juceRmlUi::EventListener::Add(b, Rml::EventId::Change, [this, index](Rml::Event& _event)
 			{
 				onButtonStateChanged(index);
-			};
+			});
 		}
 
 		for(size_t i=0; i<std::size(g_encoderNames); ++i)
 		{
-			auto* e = _editor.findComponentT<juce::Slider>(g_encoderNames[i], false);
+			auto* e = _editor.findChild(g_encoderNames[i], false);
 			if(!e)
 				continue;
 
 			m_encoders[i] = e;
 
-			e->setRotaryParameters(0.0f, juce::MathConstants<float>::twoPi, false);
+			auto* knob = dynamic_cast<juceRmlUi::ElemKnob*>(e);
+
+			knob->setMinValue(0.0f);
+			knob->setMaxValue(10.0f);
+			knob->setValue(5.0f);
+
+			knob->setEndless(true);
+
 			const auto index = static_cast<uint32_t>(i);
-			e->onValueChange = [this, index]
+
+			juceRmlUi::EventListener::Add(e, Rml::EventId::Change, [this, index](Rml::Event&)
 			{
 				onEncoderValueChanged(index);
-			};
+			});
 		}
 
-		auto *lcdArea = _editor.findComponentT<juce::Component>("lcdArea", false);
+		auto *lcdArea = _editor.findChild("lcdArea", false);
 
 		if (lcdArea)
-			m_lcd.reset(new MqLcd(*lcdArea));
+			m_lcd.reset(new MqLcd(lcdArea));
 
-		std::array<juce::Label*, 2> lcdLines{};
+		std::array<Rml::Element*, 2> lcdLines{};
 
-		lcdLines[0] = _editor.findComponentT<juce::Label>("lcdLineA", false);
-		lcdLines[1] = _editor.findComponentT<juce::Label>("lcdLineB", lcdLines[0] != nullptr);
+		lcdLines[0] = _editor.findChild("lcdLineA", false);
+		lcdLines[1] = _editor.findChild("lcdLineB", lcdLines[0] != nullptr);
 
 		if (lcdLines[0])
 		{
 			if (m_lcd)
 			{
-				lcdLines[0]->setVisible(false);
-				lcdLines[1]->setVisible(false);
+				juceRmlUi::helper::setVisible(lcdLines[0], false);
+				juceRmlUi::helper::setVisible(lcdLines[1], false);
 			}
 			else
 			{
@@ -104,10 +113,10 @@ namespace mqJucePlugin
 			}
 		}
 
-		auto* shadow = _editor.findComponent("lcdshadow", false);
+		auto* shadow = _editor.findChild("lcdshadow", false);
 
 		if(shadow)
-			shadow->setInterceptsMouseClicks(false, false);
+			shadow->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 
 		_controller.sendSysEx(Controller::EmuRequestLcd);
 		_controller.sendSysEx(Controller::EmuRequestLeds);
@@ -178,7 +187,7 @@ namespace mqJucePlugin
 		for(size_t i=0; i<static_cast<uint32_t>(mqLib::Leds::Led::Count); ++i)
 		{
 			if(m_leds[i])
-				m_leds[i]->setToggleState((leds & (1<<i)) != 0, juce::dontSendNotification);
+				juceRmlUi::ElemButton::setChecked(m_leds[i], ((leds & (1<<i)) != 0));
 		}
 	}
 
@@ -190,10 +199,10 @@ namespace mqJucePlugin
 
 		params[pluginLib::MidiDataType::ParameterIndex] = static_cast<uint8_t>(_index);
 
-		if(b->getClickingTogglesState())
-			params[pluginLib::MidiDataType::ParameterValue] = b->getToggleState() ? 1 : 0;
+		if(juceRmlUi::ElemButton::isToggle(b))
+			params[pluginLib::MidiDataType::ParameterValue] = juceRmlUi::ElemButton::isChecked(b) ? 1 : 0;
 		else
-			params[pluginLib::MidiDataType::ParameterValue] = b->getState() == juce::Button::buttonDown ? 1 : 0;
+			params[pluginLib::MidiDataType::ParameterValue] = juceRmlUi::ElemButton::isPressed(b) ? 1 : 0;
 
 		m_controller.sendSysEx(Controller::EmuSendButton, params);
 	}
@@ -203,7 +212,7 @@ namespace mqJucePlugin
 		const auto* e = m_encoders[_index];
 
 		float& vOld = m_encoderValues[_index];
-		const auto v = static_cast<float>(e->getValue());
+		const auto v = juceRmlUi::ElemValue::getValue(e);
 
 		auto delta = v - vOld;
 

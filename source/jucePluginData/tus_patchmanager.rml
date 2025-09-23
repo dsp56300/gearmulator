@@ -1,0 +1,89 @@
+<template name="patchmanager">
+<head>
+	<link type="text/rcss" href="tus_patchmanager.rcss"/>
+</head>
+<body>
+	<div id = "patchmanager" class="pm-hlayout">
+	
+		<!-- Column A: datasource tree -->
+		<div class="pm-vlayout" style="flex: 3;">
+			<tree id="pm-tree-datasources" style="flex: 1 1 0">
+				<treenode>
+					<div class="pm-name" id="name">Name</div>
+					<div id="count" class="pm-count" countFormat=" (%s)" countUnknown=" (...)"/>
+					<img id="add" class="pm-add" src="folder-open.png"/>
+				</treenode>
+			</tree>
+			<input id="pm-search-tree-ds" class="pm-search" type="text">
+				<div class="input-placeholder">Search...</div>
+			</input>
+		</div>
+		<splitter/>
+		
+		<!-- Column B: tags tree -->
+		<div class="pm-vlayout" style="flex: 2;">
+			<tree id="pm-tree-tags" style="flex: 1 1 0">
+				<treenode>
+					<div class="pm-name" id="name">Name</div>
+					<div id="count" class="pm-count" countFormat=" (%s)" countUnknown=" (...)"/>
+					<img id="add" class="pm-add" src="pm-add.png"/>
+				</treenode>
+			</tree>
+			<input id="pm-search-tree-tags" class="pm-search" type="text">
+				<div class="input-placeholder">Search...</div>
+			</input>
+		</div>
+		<splitter/>
+		
+		<!-- Column C: patch list + info on the right -->
+		<div id="pm-layout-list" class="pm-layout-list" style="flex: 5; height: 100%;">
+			<div class="pm-vlayout" style="flex: 2;">
+				<list id="pm-list" class="list" style="flex: 1 1 0">
+					<listentry class="listentry">
+						<img id="color" src="pm-dot.png" style="height: 1em; margin-right: 5dp;"/>
+						<div id="name" class="pm-name">Name</div>
+					</listentry>
+				</list>
+				<input id="pm-search-list" class="pm-search" type="text">
+					<div class="input-placeholder">Search...</div>
+				</input>
+			</div>
+			<splitter/>
+			<div data-model="patchmanager" class="pm-vlayout" style="flex: 3; display: flex;">
+				<div class="pm-infopanel" style="flex: 1 1 0" data-if="patchName != ''">
+					<div class="pm-infotext pm-info-name">{{patchName}}</div>
+
+					<div class="pm-infotext pm-info-headline">Source</div>
+					<div class="pm-infotext pm-info-text">{{patchDatasource}}</div>
+
+					<div class="pm-infotext pm-info-headline">Categories</div>
+					<div class="pm-infotext pm-info-text">{{patchCategories}}</div>
+
+					<div class="pm-infotext pm-info-headline">Tags</div>
+					<div class="pm-infotext pm-info-text">{{patchTags}}</div>
+				</div>
+				<div class="pm-infopanel" style="flex: 1 1 0" data-if="patchName == ''">
+					<div class="pm-infotext pm-info-empty">No patch selected</div>
+				</div>
+				<div class="pm-status">{{status}}</div>
+			</div>
+		</div>
+		
+		<!-- Column C alternative: larger grid layout, but no info on the right -->
+		<div id="pm-layout-grid" class="pm-vlayout" style="flex: 5; display: none;">
+			<list id="pm-grid" class="grid" style="flex: 1 1 0">
+				<listentry class="gridentry">
+					<img id="color" src="pm-dot.png" style="height: 1em; margin-right: 5dp;"/>
+					<div id="name" class="pm-name">Name</div>
+				</listentry>
+			</list>
+			<div style="display: flex; align-items: flex-end; gap: 5dp;">
+				<input id="pm-search-grid" class="pm-search" type="text" style="flex: 2;">
+					<div class="input-placeholder">Search...</div>
+				</input>
+				<div class="pm-status" style="flex: 3" data-model="patchmanager">{{status}}</div>
+			</div>
+		</div>
+	</div>
+</body>
+</template>

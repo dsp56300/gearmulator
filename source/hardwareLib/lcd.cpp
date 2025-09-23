@@ -137,13 +137,13 @@ namespace hwLib
 
 					if(m_dramAddr >= 20 && m_dramAddr < 0x40)
 					{
-						for(size_t i=1; i<=20; ++i)
+						for(size_t i=1; i<20; ++i)
 							m_dramData[i-1] = m_dramData[i];
 						m_dramData[19] = static_cast<char>(g);
 					}
 					else if(m_dramAddr > 0x53)
 					{
-						for(size_t i=21; i<=40; ++i)
+						for(size_t i=21; i<40; ++i)
 							m_dramData[i-1] = m_dramData[i];
 
 						m_dramData[39] = static_cast<char>(g);

@@ -8,8 +8,12 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "jucePluginLib/midipacket.h"
+#include "juceRmlUi/rmlMenu.h"
 
-#include "juceUiLib/button.h"
+namespace Rml
+{
+	class Element;
+}
 
 namespace xtJucePlugin
 {
@@ -21,14 +25,14 @@ namespace xtJucePlugin
 	class WaveTree;
 	class Editor;
 
-	class WaveEditor : public juce::Component, juce::ComponentMovementWatcher
+	class WaveEditor
 	{
 	public:
-		explicit WaveEditor(Editor& _editor, const juce::File& _cacheDir);
+		explicit WaveEditor(Editor& _editor, Rml::Element* _parent, const juce::File& _cacheDir);
 		WaveEditor() = delete;
 		WaveEditor(const WaveEditor&) = delete;
 		WaveEditor(WaveEditor&&) = delete;
-		~WaveEditor() override;
+		~WaveEditor();
 
 		WaveEditor& operator = (const WaveEditor&) = delete;
 		WaveEditor& operator = (WaveEditor&&) = delete;
@@ -54,12 +58,12 @@ namespace xtJucePlugin
 
 		xt::TableId getSelectedTable() const { return m_selectedTable; }
 
-		juce::PopupMenu createCopyToSelectedTableMenu(xt::WaveId _id);
-		static juce::PopupMenu createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback);
+		juceRmlUi::Menu createCopyToSelectedTableMenu(xt::WaveId _id);
+		static juceRmlUi::Menu createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback);
 
-		void filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const juce::StringArray& _files);
+		void filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const std::vector<std::string>& _files);
 
-		void openGraphPopupMenu(const Graph& _graph, const juce::MouseEvent& _event);
+		void openGraphPopupMenu(const Graph& _graph, Rml::Event& _event);
 
 		void exportAsSyx(const xt::WaveId& _id, const xt::WaveData& _data);
 		void exportAsMid(const xt::WaveId& _id, const xt::WaveData& _data);
@@ -85,11 +89,6 @@ namespace xtJucePlugin
 		std::optional<xt::WaveData> importWaveFile(const std::string& _filename) const;
 
 	private:
-		// ComponentMovementWatcher
-		void componentVisibilityChanged() override { checkFirstTimeVisible(); }
-		void componentPeerChanged() override { checkFirstTimeVisible(); }
-		void componentMovedOrResized(bool wasMoved, bool wasResized) override { checkFirstTimeVisible(); }
-
 		void checkFirstTimeVisible();
 		void onFirstTimeVisible();
 
@@ -101,10 +100,11 @@ namespace xtJucePlugin
 		bool saveWaveTo(xt::WaveId _target);
 
 		Editor& m_editor;
+		Rml::Element* m_parent = nullptr;
 
-		std::unique_ptr<WaveTree> m_waveTree;
-		std::unique_ptr<ControlTree> m_controlTree;
-		std::unique_ptr<TablesTree> m_tablesTree;
+		WaveTree* m_waveTree;
+		ControlTree* m_controlTree;
+		TablesTree* m_tablesTree;
 
 		std::unique_ptr<GraphFreq> m_graphFreq;
 		std::unique_ptr<GraphPhase> m_graphPhase;

@@ -6,8 +6,6 @@ set(SOURCES
 	ArpUserPattern.h
 	ControllerLinks.cpp
 	ControllerLinks.h
-	FxPage.cpp
-	FxPage.h
 	Leds.cpp
 	Leds.h
 	ParameterNames.h
@@ -17,8 +15,6 @@ set(SOURCES
 	Parts.h
 	PatchManager.cpp
 	PatchManager.h
-	Tabs.cpp
-	Tabs.h
 	VirusController.cpp
 	VirusController.h
 	VirusEditor.cpp

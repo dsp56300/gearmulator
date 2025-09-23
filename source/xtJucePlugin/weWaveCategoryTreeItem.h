@@ -7,18 +7,36 @@ namespace xtJucePlugin
 {
 	class WaveEditor;
 
+	class WaveCategoryNode : public juceRmlUi::TreeNode
+	{
+	public:
+		WaveCategoryNode(juceRmlUi::Tree& _tree, const WaveCategory _category) : TreeNode(_tree), m_category(_category)
+		{
+		}
+		~WaveCategoryNode() override = default;
+		WaveCategory getCategory() const { return m_category; }
+
+	private:
+		const WaveCategory m_category;
+	};
+
 	class WaveCategoryTreeItem : public TreeItem
 	{
 	public:
-		explicit WaveCategoryTreeItem(WaveEditor& _editor, WaveCategory _category);
-		bool mightContainSubItems() override { return true; }
+		explicit WaveCategoryTreeItem(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor);
 		bool setSelectedWave(xt::WaveId _id);
 
 		static std::string getCategoryName(WaveCategory _category);
 
-		juce::var getDragSourceDescription() override;
+		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
 
-		void itemClicked(const juce::MouseEvent&) override;
+		void onRightClick(const Rml::Event& _event) override;
+
+		WaveCategory getCategory() const;
+
+		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
+
+		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 
 	private:
 		void addItems(uint16_t _first, uint16_t _count);
@@ -29,6 +47,5 @@ namespace xtJucePlugin
 		std::vector<xt::WaveId> getWaveIds() const;
 
 		WaveEditor& m_editor;
-		const WaveCategory m_category;
 	};
 }

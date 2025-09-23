@@ -109,7 +109,7 @@ namespace pluginLib
 		SoftKnob* getSoftknob(const Parameter* _parameter)
 		{
 			const auto it = m_softKnobs.find(_parameter);
-			return it->second.get();
+			return it != m_softKnobs.end() ? it->second.get() : nullptr;
 		}
 
 		Processor& getProcessor() const { return m_processor; }

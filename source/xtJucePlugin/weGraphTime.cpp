@@ -4,7 +4,7 @@
 
 namespace xtJucePlugin
 {
-	GraphTime::GraphTime(WaveEditor& _editor): Graph(_editor)
+	GraphTime::GraphTime(WaveEditor& _editor, Rml::Element* _parent) : Graph(_editor, _parent)
 	{
 		setUpdateHoveredPositionWhileDragging(true);
 	}

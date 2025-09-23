@@ -3,36 +3,46 @@
 #include "mqController.h"
 #include "mqEditor.h"
 #include "mqPartButton.h"
+#include "juceRmlPlugin/rmlTabGroup.h"
+
+#include "RmlUi/Core/ElementDocument.h"
 
 namespace mqJucePlugin
 {
-	mqPartSelect::mqPartSelect(Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding)
+	mqPartSelect::mqPartSelect(Editor& _editor, Controller& _controller)
 		: m_editor(_editor)
 		, m_controller(_controller)
-		, m_parameterBinding(_parameterBinding)
 	{
-		std::vector<mqPartButton*> buttons;
-		std::vector<juce::Button*> leds;
+		std::vector<Rml::Element*> buttons;
+		std::vector<Rml::Element*> leds;
 
-		_editor.findComponents(buttons, "partSelectButton", 16);
-		_editor.findComponents(leds, "partSelectLED", 16);
+		const auto* doc = _editor.getDocument();
+
+		juceRmlUi::helper::findChildren(buttons, doc, "partSelectButton", 16);
+		juceRmlUi::helper::findChildren(leds, doc, "partSelectLED", 16);
 
 		for(size_t i=0; i<m_parts.size(); ++i)
 		{
 			auto& part = m_parts[i];
 
-			part.button = buttons[i];
+			part.button.reset(new mqPartButton(buttons[i], _editor));
 			part.led = leds[i];
 
 			auto index = static_cast<uint8_t>(i);
 
 			part.button->initalize(static_cast<uint8_t>(i));
 
-			part.led->onClick = [this, index]	{ selectPart(index); };
+			juceRmlUi::EventListener::AddClick(part.led, [this, index]
+			{
+				selectPart(index);
+			});
 		}
 
 		updateUiState();
 	}
+
+	mqPartSelect::~mqPartSelect()
+	= default;
 
 	void mqPartSelect::onPlayModeChanged() const
 	{
@@ -50,13 +60,13 @@ namespace mqJucePlugin
 		{
 			const auto& part = m_parts[i];
 
-			part.button->setToggleState(i == current, juce::dontSendNotification);
-			part.led->setToggleState(i == current, juce::dontSendNotification);
+			part.button->setChecked(i == current);
+			rmlPlugin::TabGroup::setChecked(part.led, i == current);
 
 			if(i > 0)
 			{
 				part.button->setVisible(m_controller.isMultiMode());
-				part.led->setVisible(m_controller.isMultiMode());
+				juceRmlUi::helper::setVisible(part.led, m_controller.isMultiMode());
 				/*
 				part.button->setEnabled(m_controller.isMultiMode());
 				part.led->setEnabled(m_controller.isMultiMode());
@@ -70,7 +80,6 @@ namespace mqJucePlugin
 
 	void mqPartSelect::selectPart(const uint8_t _index) const
 	{
-		m_parameterBinding.setPart(_index);
 		m_editor.setCurrentPart(_index);
 		updateUiState();
 	}

@@ -1,0 +1,1108 @@
+<rml>
+	<head>
+		<link type="text/template" href="tus_colorpicker.rml"/>
+		<link type="text/template" href="tus_patchmanager.rml"/>
+		<link type="text/rcss" href="tus_default.rcss"/>
+		<link type="text/rcss" href="tus_juceskin.rcss"/>
+		<link type="text/rcss" href="mqDefault.rcss"/>
+	</head>
+	<body id="Root" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 3400dp; height: 2000dp;">
+		<img id="bakedBG" class="jucePos" src="mqDefaultBG.png" style="left: 0dp; top: 0dp; width: 3400dp; height: 2000dp;"/>
+		<button id="btPageOsc" class="jucePos juceButton toggleWithLED" isToggle="1" tabbutton="0" tabgroup="Root" style="left: 224.672dp; top: 45.5977dp; width: 128dp; height: 128dp;"/>
+		<button id="btPageFilter" class="jucePos juceButton toggleWithLED" isToggle="1" tabbutton="3" tabgroup="Root" style="left: 470.971dp; top: 45.5977dp; width: 128dp; height: 128dp;"/>
+		<button id="btPageLfo" class="jucePos juceButton toggleWithLED" isToggle="1" tabbutton="4" tabgroup="Root" style="left: 717.269dp; top: 45.5977dp; width: 128dp; height: 128dp;"/>
+		<button id="btPageFx" class="jucePos juceButton toggleWithLED" isToggle="1" tabbutton="5" tabgroup="Root" style="left: 963.568dp; top: 45.5977dp; width: 128dp; height: 128dp;"/>
+		<button id="btPlayModeMulti" class="jucePos juceButton toggleWithLED" isToggle="1" style="left: 224.671dp; top: 220.9dp; width: 128dp; height: 128dp;"/>
+		<button id="btPageMulti" class="jucePos juceButton toggleWithLED" isToggle="1" tabbutton="2" tabgroup="Root" style="left: 717.269dp; top: 220.9dp; width: 128dp; height: 128dp;"/>
+		<button id="btPresetPrev" class="jucePos juceButton toggleWithLED" isToggle="0" style="left: 2301.23dp; top: 223.3dp; width: 128dp; height: 128dp;"/>
+		<button id="btPresetNext" class="jucePos juceButton toggleWithLED" isToggle="0" style="left: 2517.38dp; top: 223.3dp; width: 128dp; height: 128dp;"/>
+		<button id="btPagePatchBrowser" class="jucePos juceButton toggleWithLED" isToggle="1" tabbutton="1" tabgroup="Root" style="left: 2301.23dp; top: 50.464dp; width: 128dp; height: 128dp;"/>
+		<button id="btSave" class="jucePos juceButton toggleWithLED" isToggle="0" style="left: 2517.38dp; top: 50.464dp; width: 128dp; height: 128dp;"/>
+		<div id="lcdArea" class="jucePos" lcdBackgroundColor="248727" lcdTextColor="000000" style="left: 1390dp; top: 161.843dp; width: 620dp; height: 108dp;"/>
+		<div id="lcdLineA" class="jucePos juceLabel txt" style="left: 1390dp; top: 151.843dp; width: 630dp; height: 64dp; line-height: 64dp;">01234567890123456789</div>
+		<div id="lcdLineB" class="jucePos juceLabel txt" style="left: 1390dp; top: 215.843dp; width: 630dp; height: 64dp; line-height: 64dp;">01234567890123456789</div>
+		<img id="lcdshadow" class="jucePos" src="lcdshadow.png" style="left: 1380dp; top: 151.843dp; width: 640dp; height: 128dp;"/>
+		<button id="ledPower" class="jucePos juceButton ledPower" isToggle="1" style="left: 1988.1dp; top: 289.143dp; width: 32dp; height: 32dp;"/>
+		<img id="pageOsc" class="jucePos" src="pageOsc.png" tabgroup="Root" tabpage="0" style="left: 450dp; top: 428dp; width: 2900dp; height: 1525dp;">
+			<knob id="ledo1octave" class="jucePos juceRotary knob" data-model="partCurrent" param="O1Octave" style="left: 125.233dp; top: 77.4266dp; width: 230dp; height: 230dp;"/>
+			<knob id="o1octave" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1Octave" style="left: 176.233dp; top: 128.427dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1semi" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1Semi" style="left: 56.1163dp; top: 303.78dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1Detune" style="left: 296.349dp; top: 303.78dp; width: 128dp; height: 128dp;"/>
+			<knob id="ledo1shape" class="jucePos juceRotary knob2" data-model="partCurrent" param="O1Shape" style="left: 555.582dp; top: 143.853dp; width: 230dp; height: 230dp;"/>
+			<knob id="o1shape" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1Shape" style="left: 606.582dp; top: 194.853dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1pw" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1PulseWidth" style="left: 916.814dp; top: 126.677dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1pwm" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1Pwm" style="left: 1157.05dp; top: 126.677dp; width: 128dp; height: 128dp;"/>
+			<combo id="o1pwmsource" class="jucePos txt1" data-model="partCurrent" param="O1PwmSource" style="left: 1100.93dp; top: 71dp; width: 220.233dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 205.233dp; height: 48dp; pointer-events: none;">LFO 1</combotext>
+			</combo>
+			<knob id="o1keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1KeyTrack" style="left: 916.814dp; top: 301.03dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1bendrange" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1BendRange" style="left: 1157.05dp; top: 301.03dp; width: 128dp; height: 128dp;"/>
+			<combo id="o1fmsource" class="jucePos txt1" data-model="partCurrent" param="O1FmSource" style="left: 1581.4dp; top: 71dp; width: 220.233dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 205.233dp; height: 48dp; pointer-events: none;">LFO 2</combotext>
+			</combo>
+			<knob id="o1fmamount" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1FmAmount" style="left: 1517.4dp; top: 126.677dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1subvolume" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1SubVolume" style="left: 1397.28dp; top: 301.03dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1subfreqdiv" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1SubFreqDiv" style="left: 1637.51dp; top: 301.03dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2octave" class="jucePos juceRotary knob" data-model="partCurrent" param="O2Octave" style="left: 125.233dp; top: 601.573dp; width: 230dp; height: 230dp;"/>
+			<knob id="o2octave" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2Octave" style="left: 176.233dp; top: 652.573dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2semi" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2Semi" style="left: 56.1163dp; top: 827.927dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2Detune" style="left: 296.349dp; top: 827.927dp; width: 128dp; height: 128dp;"/>
+			<knob id="ledo2shape" class="jucePos juceRotary knob2" data-model="partCurrent" param="O2Shape" style="left: 555.582dp; top: 595.147dp; width: 230dp; height: 230dp;"/>
+			<knob id="o2shape" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2Shape" style="left: 606.582dp; top: 646.147dp; width: 128dp; height: 128dp;"/>
+			<button id="toggleWithLED" class="jucePos juceButton toggleWithLED" data-model="partCurrent" isToggle="1" param="Sync" style="left: 606.582dp; top: 828.107dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2pw" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2PulseWidth" style="left: 916.814dp; top: 650.823dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2pwm" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2Pwm" style="left: 1157.05dp; top: 650.823dp; width: 128dp; height: 128dp;"/>
+			<combo id="o2pwmsource" class="jucePos txt1" data-model="partCurrent" param="O2PwmSource" style="left: 1100.93dp; top: 595.147dp; width: 220.233dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 205.233dp; height: 48dp; pointer-events: none;">LFO 1</combotext>
+			</combo>
+			<knob id="o2keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2KeyTrack" style="left: 916.814dp; top: 825.177dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2bendrange" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2BendRange" style="left: 1157.05dp; top: 825.177dp; width: 128dp; height: 128dp;"/>
+			<combo id="o2fmsource" class="jucePos txt1" data-model="partCurrent" param="O2FmSource" style="left: 1581.4dp; top: 595.147dp; width: 220.233dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 205.233dp; height: 48dp; pointer-events: none;">LFO 2</combotext>
+			</combo>
+			<knob id="o2fmamount" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2FmAmount" style="left: 1517.4dp; top: 650.823dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2subvolume" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2SubVolume" style="left: 1397.28dp; top: 825.177dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2subfreqdivide" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2SubFreqDiv" style="left: 1637.51dp; top: 825.177dp; width: 128dp; height: 128dp;"/>
+			<knob id="ledo3octave" class="jucePos juceRotary knob" data-model="partCurrent" param="O3Octave" style="left: 125.233dp; top: 1125.72dp; width: 230dp; height: 230dp;"/>
+			<knob id="o2octave" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3Octave" style="left: 176.233dp; top: 1176.72dp; width: 128dp; height: 128dp;"/>
+			<knob id="o3semi" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3Semi" style="left: 56.1163dp; top: 1352.07dp; width: 128dp; height: 128dp;"/>
+			<knob id="o3detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3Detune" style="left: 296.349dp; top: 1352.07dp; width: 128dp; height: 128dp;"/>
+			<knob id="ledo3shape" class="jucePos juceRotary knob3" data-model="partCurrent" param="O3Shape" style="left: 555.582dp; top: 1192.15dp; width: 230dp; height: 230dp;"/>
+			<knob id="o3shape" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3Shape" style="left: 606.582dp; top: 1243.15dp; width: 128dp; height: 128dp;"/>
+			<knob id="o3pulsewidth" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3PulseWidth" style="left: 916.814dp; top: 1174.97dp; width: 128dp; height: 128dp;"/>
+			<knob id="o3pwm" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3Pwm" style="left: 1157.05dp; top: 1174.97dp; width: 128dp; height: 128dp;"/>
+			<combo id="o3pwmsource" class="jucePos txt1" data-model="partCurrent" param="O3PwmSource" style="left: 1100.93dp; top: 1119.29dp; width: 220.233dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 205.233dp; height: 48dp; pointer-events: none;">LFO 1</combotext>
+			</combo>
+			<knob id="o3keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3KeyTrack" style="left: 916.814dp; top: 1349.32dp; width: 128dp; height: 128dp;"/>
+			<knob id="o3bendrange" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3BendRange" style="left: 1157.05dp; top: 1349.32dp; width: 128dp; height: 128dp;"/>
+			<combo id="o3fmsource" class="jucePos txt1" data-model="partCurrent" param="O3FmSource" style="left: 1581.4dp; top: 1119.29dp; width: 220.233dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 205.233dp; height: 48dp; pointer-events: none;">LFO 2</combotext>
+			</combo>
+			<knob id="o3fm" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3FmAmount" style="left: 1517.4dp; top: 1221.61dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1level" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1Level" style="left: 1892.63dp; top: 103.5dp; width: 128dp; height: 128dp;"/>
+			<knob id="o1balance" class="jucePos juceRotary knob1" data-model="partCurrent" param="O1Balance" style="left: 2031.46dp; top: 191.836dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2level" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2Level" style="left: 1892.63dp; top: 392.666dp; width: 128dp; height: 128dp;"/>
+			<knob id="o2balance" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2Balance" style="left: 2031.46dp; top: 481.002dp; width: 128dp; height: 128dp;"/>
+			<knob id="o3volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3Level" style="left: 1892.63dp; top: 681.832dp; width: 128dp; height: 128dp;"/>
+			<knob id="o3balance" class="jucePos juceRotary knob1" data-model="partCurrent" param="O3Balance" style="left: 2031.46dp; top: 770.168dp; width: 128dp; height: 128dp;"/>
+			<knob id="ringmodLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="RingModLevel" style="left: 1892.63dp; top: 970.998dp; width: 128dp; height: 128dp;"/>
+			<knob id="ringmodBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="RingModBalance" style="left: 2031.46dp; top: 1059.33dp; width: 128dp; height: 128dp;"/>
+			<knob id="noiseLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="NoiseLevel" style="left: 1892.63dp; top: 1260.16dp; width: 128dp; height: 128dp;"/>
+			<knob id="noiseBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="NoiseBalance" style="left: 2031.46dp; top: 1348.5dp; width: 128dp; height: 128dp;"/>
+			<knob id="glideRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="GlideRate" style="left: 2348.93dp; top: 67.0474dp; width: 128dp; height: 128dp;"/>
+			<button id="toggleWithLED" class="jucePos juceButton toggleWithLED" data-model="partCurrent" isToggle="1" param="GlideEnable" style="left: 2634.73dp; top: 50.6964dp; width: 128dp; height: 128dp;"/>
+			<combo id="glidemode" class="jucePos txt1" data-model="partCurrent" param="GlideMode" style="left: 2565.23dp; top: 239.463dp; width: 260.5dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 245.5dp; height: 48dp; pointer-events: none;">Porta</combotext>
+			</combo>
+			<knob id="glideRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="PitchModAmount" style="left: 2268.06dp; top: 422.11dp; width: 128dp; height: 128dp;"/>
+			<combo id="glidemode" class="jucePos txt1" data-model="partCurrent" param="PitchModSrc" style="left: 2661.74dp; top: 481.11dp; width: 218.782dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 203.782dp; height: 48dp; pointer-events: none;">Porta</combotext>
+			</combo>
+			<combo id="unisonocount" class="jucePos txt1" data-model="partCurrent" param="UnisonoCount" style="left: 2475.86dp; top: 724.019dp; width: 223.006dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 208.006dp; height: 48dp; pointer-events: none;">Dual</combotext>
+			</combo>
+			<knob id="unisonoDetune" class="jucePos juceRotary knob1" data-model="partCurrent" param="UnisonoDetune" style="left: 2365.6dp; top: 783.723dp; width: 128dp; height: 128dp;"/>
+			<button id="toggleWithLED" class="jucePos juceButton toggleWithLED" data-model="partCurrent" isToggle="1" param="VoiceMode" style="left: 2729.5dp; top: 740.223dp; width: 128dp; height: 128dp;"/>
+			<combo id="ampmodsource" class="jucePos txt1" data-model="partCurrent" param="AmpModSource" style="left: 2565.23dp; top: 1078.12dp; width: 260.5dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 245.5dp; height: 48dp; pointer-events: none;">LFO 3</combotext>
+			</combo>
+			<knob id="ampVolume" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpVolume" style="left: 2294.12dp; top: 1138.62dp; width: 128dp; height: 128dp;"/>
+			<knob id="ampVelocity" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpVelocity" style="left: 2501.23dp; top: 1138.62dp; width: 128dp; height: 128dp;"/>
+			<knob id="ampModAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpModAmount" style="left: 2708.34dp; top: 1138.62dp; width: 128dp; height: 128dp;"/>
+			<combo id="noisemodef1" class="jucePos txt1" data-model="partCurrent" param="NoiseModeF1" style="left: 2402.85dp; top: 1446.51dp; width: 142.385dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 127.385dp; height: 48dp; pointer-events: none;">Ext L+R</combotext>
+			</combo>
+			<combo id="noisemodef2" class="jucePos txt1" data-model="partCurrent" param="NoiseModeF2" style="left: 2727.61dp; top: 1446.51dp; width: 142.385dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 127.385dp; height: 48dp; pointer-events: none;">Ext L+R</combotext>
+			</combo>
+		</img>
+		<img id="pageFilters" class="jucePos" src="pageFilters.png" tabgroup="Root" tabpage="3" style="left: 450dp; top: 428dp; width: 2900dp; height: 1525dp;">
+			<knob id="ledknob" class="jucePos juceRotary knob4" data-model="partCurrent" param="F1Type" style="left: 124.04dp; top: 93.2dp; width: 230dp; height: 230dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1Type" style="left: 175.04dp; top: 144.2dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob5" data-model="partCurrent" param="F1Cutoff" style="left: 75.04dp; top: 331.679dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1Resonance" style="left: 275.04dp; top: 331.679dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1EnvMod" style="left: 628.444dp; top: 331.679dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1VelMod" style="left: 851.556dp; top: 331.679dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="F1ModSource" style="left: 685.89dp; top: 77.0001dp; width: 176dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 161dp; height: 48dp; pointer-events: none;">Osc 1</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1CutoffMod" style="left: 621.89dp; top: 144.834dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="F1FmSource" style="left: 1092.99dp; top: 77.0001dp; width: 176dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 161dp; height: 48dp; pointer-events: none;">Osc 1</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1FmAmount" style="left: 1028.99dp; top: 144.834dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="F1PanModSource" style="left: 1500.09dp; top: 77.0001dp; width: 176dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 161dp; height: 48dp; pointer-events: none;">Osc 1</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1Pan" style="left: 1331.49dp; top: 144.834dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1PanMod" style="left: 1540.69dp; top: 144.834dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1KeyTrack" style="left: 1211.84dp; top: 331.679dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F1Drive" style="left: 1434.96dp; top: 331.679dp; width: 128dp; height: 128dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" valueOn="0" valueOff="1" param="FilterRouting" style="left: 890.59dp; top: 774dp; width: 32dp; height: 32dp;"/>
+			<button id="led (1)" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="FilterRouting" style="left: 669.39dp; top: 774dp; width: 32dp; height: 32dp;"/>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="FilterRouting" style="left: 732.625dp; top: 758dp; width: 128dp; height: 64dp;"/>
+			<knob id="ledknob" class="jucePos juceRotary knob4" data-model="partCurrent" param="F2Type" style="left: 124.04dp; top: 1098.62dp; width: 230dp; height: 230dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2Type" style="left: 175.04dp; top: 1149.62dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob5" data-model="partCurrent" param="F2Cutoff" style="left: 75.04dp; top: 1337.1dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2Resonance" style="left: 275.04dp; top: 1337.1dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2EnvMod" style="left: 628.444dp; top: 1337.1dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2VelMod" style="left: 851.556dp; top: 1337.1dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="F2ModSource" style="left: 685.89dp; top: 1082.43dp; width: 176dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 161dp; height: 48dp; pointer-events: none;">Osc 1</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2CutoffMod" style="left: 621.89dp; top: 1150.26dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="F2FmSource" style="left: 1092.99dp; top: 1082.43dp; width: 176dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 161dp; height: 48dp; pointer-events: none;">Osc 1</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2FmAmount" style="left: 1028.99dp; top: 1150.26dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="F2PanModSource" style="left: 1500.09dp; top: 1082.43dp; width: 176dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 161dp; height: 48dp; pointer-events: none;">Osc 1</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2Pan" style="left: 1331.49dp; top: 1150.26dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2PanMod" style="left: 1540.69dp; top: 1150.26dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2KeyTrack" style="left: 1211.84dp; top: 1337.1dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="F2Drive" style="left: 1434.96dp; top: 1337.1dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="FilterEnvMode" style="left: 2052.4dp; top: 96.5dp; width: 250dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 235dp; height: 48dp; pointer-events: none;">ADSR</combotext>
+			</combo>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="FilterEnvTriggerMode" style="left: 2619.96dp; top: 89dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="FilterEnvTriggerMode" style="left: 2782.29dp; top: 105dp; width: 32dp; height: 32dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvAttack" style="left: 1793.66dp; top: 177.759dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvAttackLevel" style="left: 1950.17dp; top: 177.759dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvDecay" style="left: 2106.69dp; top: 177.759dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvSustain" style="left: 2263.2dp; top: 177.759dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvDecay2" style="left: 2419.71dp; top: 177.759dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvSustain2" style="left: 2576.23dp; top: 177.759dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvRelease" style="left: 2732.74dp; top: 177.759dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="AmpEnvMode" style="left: 2052.4dp; top: 477.75dp; width: 250dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 235dp; height: 48dp; pointer-events: none;">ADSR</combotext>
+			</combo>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="AmpEnvTriggerMode" style="left: 2619.96dp; top: 470.25dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="AmpEnvTriggerMode" style="left: 2782.29dp; top: 486.25dp; width: 32dp; height: 32dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvAttack" style="left: 1793.66dp; top: 559.009dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvAttackLevel" style="left: 1950.17dp; top: 559.009dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvDecay" style="left: 2106.69dp; top: 559.009dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvSustain" style="left: 2263.2dp; top: 559.009dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvDecay2" style="left: 2419.71dp; top: 559.009dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvSustain2" style="left: 2576.23dp; top: 559.009dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvRelease" style="left: 2732.74dp; top: 559.009dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Env3Mode" style="left: 2052.4dp; top: 859dp; width: 250dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 235dp; height: 48dp; pointer-events: none;">ADSR</combotext>
+			</combo>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Env3TriggerMode" style="left: 2619.96dp; top: 851.5dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Env3TriggerMode" style="left: 2782.29dp; top: 867.5dp; width: 32dp; height: 32dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env3Attack" style="left: 1793.66dp; top: 940.259dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env3AttackLevel" style="left: 1950.17dp; top: 940.259dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env3Decay" style="left: 2106.69dp; top: 940.259dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env3Sustain" style="left: 2263.2dp; top: 940.259dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env3Decay2" style="left: 2419.71dp; top: 940.259dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env3Sustain2" style="left: 2576.23dp; top: 940.259dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env3Release" style="left: 2732.74dp; top: 940.259dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Env4Mode" style="left: 2052.4dp; top: 1240.25dp; width: 250dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 235dp; height: 48dp; pointer-events: none;">ADSR</combotext>
+			</combo>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Env4TriggerMode" style="left: 2619.96dp; top: 1232.75dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Env4TriggerMode" style="left: 2782.29dp; top: 1248.75dp; width: 32dp; height: 32dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env4Attack" style="left: 1793.66dp; top: 1321.51dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env4AttackLevel" style="left: 1950.17dp; top: 1321.51dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env4Decay" style="left: 2106.69dp; top: 1321.51dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env4Sustain" style="left: 2263.2dp; top: 1321.51dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env4Decay2" style="left: 2419.71dp; top: 1321.51dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env4Sustain2" style="left: 2576.23dp; top: 1321.51dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Env4Release" style="left: 2732.74dp; top: 1321.51dp; width: 128dp; height: 128dp;"/>
+		</img>
+		<img id="pageLfo" class="jucePos" src="pageLfo.png" tabgroup="Root" tabpage="4" style="left: 450dp; top: 428dp; width: 2900dp; height: 1525dp;">
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Lfo1Clocked" style="left: 396.095dp; top: 86.1dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Lfo1Clocked" style="left: 558.424dp; top: 102.1dp; width: 32dp; height: 32dp;"/>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Lfo1Sync" style="left: 806.095dp; top: 86.1dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Lfo1Sync" style="left: 968.424dp; top: 102.1dp; width: 32dp; height: 32dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1Fade" style="left: 35.5dp; top: 98.3dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1StartPhase" style="left: 26.8336dp; top: 294.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="notClocked" class="jucePos juceRotary knob1" data-class-juceConditionDisabled="!(Lfo1Clocked_value == 0)" data-model="partCurrent" param="Lfo1Speed" style="left: 215.834dp; top: 294.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="clocked" class="jucePos juceRotary knob1" data-class-juceConditionDisabled="!(Lfo1Clocked_value == 1)" data-model="partCurrent" param="Lfo1SpeedClocked" style="left: 215.834dp; top: 294.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="ledknob" class="jucePos juceRotary knob6" data-model="partCurrent" param="Lfo1Shape" style="left: 423.834dp; top: 210.98dp; width: 230dp; height: 230dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1Shape" style="left: 474.834dp; top: 261.98dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1KeyTrack" style="left: 733.833dp; top: 294.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1Delay" style="left: 922.833dp; top: 294.48dp; width: 128dp; height: 128dp;"/>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Lfo2Clocked" style="left: 396.095dp; top: 601.1dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Lfo2Clocked" style="left: 558.424dp; top: 617.1dp; width: 32dp; height: 32dp;"/>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Lfo2Sync" style="left: 806.095dp; top: 601.1dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Lfo2Sync" style="left: 968.424dp; top: 617.1dp; width: 32dp; height: 32dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2Fade" style="left: 35.5dp; top: 613.3dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2StartPhase" style="left: 26.8336dp; top: 809.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="notClocked" class="jucePos juceRotary knob1" data-class-juceConditionDisabled="!(Lfo2Clocked_value == 0)" data-model="partCurrent" param="Lfo2Speed" style="left: 215.834dp; top: 809.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="clocked" class="jucePos juceRotary knob1" data-class-juceConditionDisabled="!(Lfo2Clocked_value == 1)" data-model="partCurrent" param="Lfo2SpeedClocked" style="left: 215.834dp; top: 809.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="ledknob" class="jucePos juceRotary knob6" data-model="partCurrent" param="Lfo2Shape" style="left: 423.834dp; top: 725.98dp; width: 230dp; height: 230dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2Shape" style="left: 474.834dp; top: 776.98dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2KeyTrack" style="left: 733.833dp; top: 809.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2Delay" style="left: 922.833dp; top: 809.48dp; width: 128dp; height: 128dp;"/>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Lfo3Clocked" style="left: 396.095dp; top: 1116.1dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Lfo3Clocked" style="left: 558.424dp; top: 1132.1dp; width: 32dp; height: 32dp;"/>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Lfo3Sync" style="left: 806.095dp; top: 1116.1dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Lfo3Sync" style="left: 968.424dp; top: 1132.1dp; width: 32dp; height: 32dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3Fade" style="left: 35.5dp; top: 1128.3dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3StartPhase" style="left: 26.8336dp; top: 1324.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="notClocked" class="jucePos juceRotary knob1" data-class-juceConditionDisabled="!(Lfo3Clocked_value == 0)" data-model="partCurrent" param="Lfo3Speed" style="left: 215.834dp; top: 1324.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="clocked" class="jucePos juceRotary knob1" data-class-juceConditionDisabled="!(Lfo3Clocked_value == 1)" data-model="partCurrent" param="Lfo3SpeedClocked" style="left: 215.834dp; top: 1324.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="ledknob" class="jucePos juceRotary knob6" data-model="partCurrent" param="Lfo3Shape" style="left: 423.834dp; top: 1240.98dp; width: 230dp; height: 230dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3Shape" style="left: 474.834dp; top: 1291.98dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3KeyTrack" style="left: 733.833dp; top: 1324.48dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3Delay" style="left: 922.833dp; top: 1324.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot1FSource" style="left: 1263.67dp; top: 101.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot1FAmount" style="left: 1481.75dp; top: 61.8dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot1FDestination" style="left: 1759.83dp; top: 101.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot2FSource" style="left: 1263.67dp; top: 230.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot2FAmount" style="left: 1481.75dp; top: 191.3dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot2FDestination" style="left: 1759.83dp; top: 230.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot3FSource" style="left: 1263.67dp; top: 360.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot3FAmount" style="left: 1481.75dp; top: 320.8dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot3FDestination" style="left: 1759.83dp; top: 360.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot4FSource" style="left: 1263.67dp; top: 489.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot4FAmount" style="left: 1481.75dp; top: 450.3dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot4FDestination" style="left: 1759.83dp; top: 489.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot5FSource" style="left: 1263.67dp; top: 619.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot5FAmount" style="left: 1481.75dp; top: 579.8dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot5FDestination" style="left: 1759.83dp; top: 619.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot6FSource" style="left: 1263.67dp; top: 748.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot6FAmount" style="left: 1481.75dp; top: 709.3dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot6FDestination" style="left: 1759.83dp; top: 748.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot7FSource" style="left: 1263.67dp; top: 878.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot7FAmount" style="left: 1481.75dp; top: 838.8dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot7FDestination" style="left: 1759.83dp; top: 878.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot8FSource" style="left: 1263.67dp; top: 1007.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot8FAmount" style="left: 1481.75dp; top: 968.3dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot8FDestination" style="left: 1759.83dp; top: 1007.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod1Source1" style="left: 1122.67dp; top: 1248.48dp; width: 200dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 185dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod1Operator" style="left: 1317.96dp; top: 1452.38dp; width: 195.292dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 180.292dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod1Source2" style="left: 1122.67dp; top: 1371.28dp; width: 200dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 185dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Mod1Constant" style="left: 1360.07dp; top: 1242.4dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod2Source1" style="left: 1578.25dp; top: 1248.48dp; width: 200dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 185dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod2Operator" style="left: 1773.54dp; top: 1452.38dp; width: 195.292dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 180.292dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod2Source2" style="left: 1578.25dp; top: 1371.28dp; width: 200dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 185dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Mod2Constant" style="left: 1815.65dp; top: 1242.4dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot1SSource" style="left: 2174.83dp; top: 101.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot1SAmount" style="left: 2392.92dp; top: 61.8dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot1SDestination" style="left: 2671dp; top: 101.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot2SSource" style="left: 2174.83dp; top: 230.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot2SAmount" style="left: 2392.92dp; top: 191.3dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot2SDestination" style="left: 2671dp; top: 230.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot3SSource" style="left: 2174.83dp; top: 360.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot3SAmount" style="left: 2392.92dp; top: 320.8dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot3SDestination" style="left: 2671dp; top: 360.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot4SSource" style="left: 2174.83dp; top: 489.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot4SAmount" style="left: 2392.92dp; top: 450.3dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot4SDestination" style="left: 2671dp; top: 489.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot5SSource" style="left: 2174.83dp; top: 619.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot5SAmount" style="left: 2392.92dp; top: 579.8dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot5SDestination" style="left: 2671dp; top: 619.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot6SSource" style="left: 2174.83dp; top: 748.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot6SAmount" style="left: 2392.92dp; top: 709.3dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot6SDestination" style="left: 2671dp; top: 748.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot7SSource" style="left: 2174.83dp; top: 878.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot7SAmount" style="left: 2392.92dp; top: 838.8dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot7SDestination" style="left: 2671dp; top: 878.3dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot8SSource" style="left: 2174.83dp; top: 1007.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Slot8SAmount" style="left: 2392.92dp; top: 968.3dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Slot8SDestination" style="left: 2671dp; top: 1007.8dp; width: 204dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 189dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod3Source1" style="left: 2033.83dp; top: 1248.48dp; width: 200dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 185dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod3Operator" style="left: 2229.12dp; top: 1452.38dp; width: 195.292dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 180.292dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod3Source2" style="left: 2033.83dp; top: 1371.28dp; width: 200dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 185dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Mod3Constant" style="left: 2271.23dp; top: 1242.4dp; width: 128dp; height: 128dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod4Source1" style="left: 2489.42dp; top: 1248.48dp; width: 200dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 185dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod4Operator" style="left: 2684.71dp; top: 1452.38dp; width: 195.292dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 180.292dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Mod4Source2" style="left: 2489.42dp; top: 1371.28dp; width: 200dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 185dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Mod4Constant" style="left: 2726.82dp; top: 1242.4dp; width: 128dp; height: 128dp;"/>
+		</img>
+		<img id="pageFx" class="jucePos" src="pageFx.png" tabgroup="Root" tabpage="5" style="left: 450dp; top: 428dp; width: 2900dp; height: 1525dp;">
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="FX1Type" style="left: 31dp; top: 137dp; width: 268dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 253dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FX1Mix" style="left: 102.12dp; top: 240.19dp; width: 128dp; height: 128dp;"/>
+			<div id="fxChorus" class="jucePos" data-class-juceConditionDisabled="!(FX1Type_value == 1)" data-model="partCurrent" style="left: 338dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Chorus.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1ChorusSpeed" style="left: 171.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1ChorusDepth" style="left: 483.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1ChorusDelay" style="left: 794.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+			</div>
+			<div id="fxFlanger" class="jucePos" data-class-juceConditionDisabled="!(FX1Type_value == 2)" data-model="partCurrent" style="left: 338dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Flanger.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1FlangerSpeed" style="left: 171.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1FlangerDepth" style="left: 483.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1FlangerFeedback" style="left: 794.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Fx1FlangerPolarity" style="left: 669dp; top: 61.6dp; width: 128dp; height: 64dp;"/>
+				<button id="ledNeg" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx1FlangerPolarity" style="left: 808.6dp; top: 77.6dp; width: 32dp; height: 32dp;"/>
+				<button id="ledPos" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx1FlangerPolarity" style="left: 622.8dp; top: 77.6dp; width: 32dp; height: 32dp;"/>
+			</div>
+			<div id="fxPhaser" class="jucePos" data-class-juceConditionDisabled="!(FX1Type_value == 3)" data-model="partCurrent" style="left: 338dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Phaser.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1PhaserSpeed" style="left: 45.45dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1PhaserDepth" style="left: 264.35dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1PhaserFeedback" style="left: 483.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1PhaserCenter" style="left: 702.15dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1PhaserSpacing" style="left: 921.05dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Fx1PhaserPolarity" style="left: 669dp; top: 61.6dp; width: 128dp; height: 64dp;"/>
+				<button id="ledNeg" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx1PhaserPolarity" style="left: 808.6dp; top: 77.6dp; width: 32dp; height: 32dp;"/>
+				<button id="ledPos" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx1PhaserPolarity" style="left: 622.8dp; top: 77.6dp; width: 32dp; height: 32dp;"/>
+			</div>
+			<div id="fxOverdrive" class="jucePos" data-class-juceConditionDisabled="!(FX1Type_value == 4)" data-model="partCurrent" style="left: 338dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Overdrive.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1OverdriveDrive" style="left: 171.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1OverdrivePostGain" style="left: 483.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob5" data-model="partCurrent" param="Fx1OverdriveCutoff" style="left: 794.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+			</div>
+			<div id="fxFiveFX" class="jucePos" data-class-juceConditionDisabled="!(FX1Type_value == 5)" data-model="partCurrent" style="left: 338dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1FiveFX.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX1ChorusSpeed" style="left: 72.8125dp; top: 40.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX1ChorusDepth" style="left: 346.438dp; top: 40.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX1Delay" style="left: 620.062dp; top: 40.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX1ChorusDelayL" style="left: 893.688dp; top: 40.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX1SampleAndHold" style="left: 72.8125dp; top: 289.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX1Overdrive" style="left: 346.438dp; top: 289.785dp; width: 128dp; height: 128dp;"/>
+				<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="FiveFX1RingModSource" style="left: 549.062dp; top: 353.785dp; width: 270dp; height: 41dp; line-height: 41dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 255dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+				</combo>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX1RingModLevel" style="left: 893.688dp; top: 289.785dp; width: 128dp; height: 128dp;"/>
+			</div>
+			<div id="fxVocoder" class="jucePos" data-class-juceConditionDisabled="!(FX1Type_value == 6)" data-model="partCurrent" style="left: 338dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Vocoder.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderBands" style="left: 351.5dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderAnalysisFreqLow" style="left: 460.5dp; top: 14dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderAnalysisFreqHigh" style="left: 610.5dp; top: 14dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderOffsetS" style="left: 808dp; top: 14dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderOffsetHi" style="left: 950.78dp; top: 14dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderBandwidth" style="left: 11dp; top: 321.7dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderResonance" style="left: 161dp; top: 321.703dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderAttack" style="left: 11dp; top: 132dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderDecay" style="left: 161dp; top: 132dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderEQLevelLow" style="left: 462.187dp; top: 322.6dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderEQBandMid" style="left: 614.562dp; top: 322.6dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderEQLevelMid" style="left: 766.937dp; top: 322.6dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx1VocoderEQLevelHigh" style="left: 919.312dp; top: 322.6dp; width: 128dp; height: 128dp;"/>
+				<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Fx1VocoderAnalysisSignal" style="left: 17dp; top: 65dp; width: 298dp; height: 41dp; line-height: 41dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 283dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+				</combo>
+			</div>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="FX2Type" style="left: 1493.5dp; top: 137dp; width: 268dp; height: 41dp; line-height: 41dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 253dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FX2Mix" style="left: 1564.62dp; top: 240.19dp; width: 128dp; height: 128dp;"/>
+			<div id="fxChorus" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 1)" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Chorus.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ChorusSpeed" style="left: 171.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ChorusDepth" style="left: 483.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ChorusDelay" style="left: 794.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+			</div>
+			<div id="fxFlanger" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 2)" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Flanger.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2FlangerSpeed" style="left: 171.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2FlangerDepth" style="left: 483.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2FlangerFeedback" style="left: 794.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Fx2FlangerPolarity" style="left: 669dp; top: 61.6dp; width: 128dp; height: 64dp;"/>
+				<button id="ledNeg" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx2FlangerPolarity" style="left: 808.6dp; top: 77.6dp; width: 32dp; height: 32dp;"/>
+				<button id="ledPos" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx2FlangerPolarity" style="left: 622.8dp; top: 77.6dp; width: 32dp; height: 32dp;"/>
+			</div>
+			<div id="fxPhaser" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 3)" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Phaser.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2PhaserSpeed" style="left: 45.45dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2PhaserDepth" style="left: 264.35dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2PhaserFeedback" style="left: 483.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2PhaserCenter" style="left: 702.15dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2PhaserSpacing" style="left: 921.05dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Fx2PhaserPolarity" style="left: 669dp; top: 61.6dp; width: 128dp; height: 64dp;"/>
+				<button id="ledNeg" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx2PhaserPolarity" style="left: 808.6dp; top: 77.6dp; width: 32dp; height: 32dp;"/>
+				<button id="ledPos" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx2PhaserPolarity" style="left: 622.8dp; top: 77.6dp; width: 32dp; height: 32dp;"/>
+			</div>
+			<div id="fxOverdrive" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 4)" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Overdrive.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2OverdriveDrive" style="left: 171.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2OverdrivePostGain" style="left: 483.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob5" data-model="partCurrent" param="Fx2OverdriveCutoff" style="left: 794.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+			</div>
+			<div id="fxFiveFX" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 5)" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1FiveFX.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX2ChorusSpeed" style="left: 72.8125dp; top: 40.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX2ChorusDepth" style="left: 346.438dp; top: 40.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX2Delay" style="left: 620.062dp; top: 40.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX2ChorusDelayL" style="left: 893.688dp; top: 40.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX2SampleAndHold" style="left: 72.8125dp; top: 289.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX2Overdrive" style="left: 346.438dp; top: 289.785dp; width: 128dp; height: 128dp;"/>
+				<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="FiveFX2RingModSource" style="left: 549.062dp; top: 353.785dp; width: 270dp; height: 41dp; line-height: 41dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 255dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+				</combo>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiveFX2RingModLevel" style="left: 893.688dp; top: 289.785dp; width: 128dp; height: 128dp;"/>
+			</div>
+			<div id="fxVocoder" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 6)" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx1Vocoder.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderBands" style="left: 351.5dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderAnalysisFreqLow" style="left: 460.5dp; top: 14dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderAnalysisFreqHigh" style="left: 610.5dp; top: 14dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderOffsetS" style="left: 808dp; top: 14dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderOffsetHi" style="left: 950.78dp; top: 14dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderBandwidth" style="left: 11dp; top: 321.7dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderResonance" style="left: 161dp; top: 321.703dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderAttack" style="left: 11dp; top: 132dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderDecay" style="left: 161dp; top: 132dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderEQLevelLow" style="left: 462.187dp; top: 322.6dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderEQBandMid" style="left: 614.562dp; top: 322.6dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderEQLevelMid" style="left: 766.937dp; top: 322.6dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2VocoderEQLevelHigh" style="left: 919.312dp; top: 322.6dp; width: 128dp; height: 128dp;"/>
+				<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="Fx2VocoderAnalysisSignal" style="left: 17dp; top: 65dp; width: 298dp; height: 41dp; line-height: 41dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 283dp; height: 40dp; pointer-events: none;">Osc 1 Pitch</combotext>
+				</combo>
+			</div>
+			<div id="fx2Delay" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 7)" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx2Delay.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2DelayFeedback" style="left: 61.75dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2DelayCutoff" style="left: 313.25dp; top: 185.19dp; width: 128dp; height: 128dp;"/>
+				<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Fx2DelayPolarity" style="left: 817.85dp; top: 162.171dp; width: 128dp; height: 64dp;"/>
+				<button id="ledNeg" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx2DelayPolarity" style="left: 957.45dp; top: 178.171dp; width: 32dp; height: 32dp;"/>
+				<button id="ledPos" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx2DelayPolarity" style="left: 771.65dp; top: 178.171dp; width: 32dp; height: 32dp;"/>
+				<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="Fx2DelayAutopan" style="left: 811.711dp; top: 272.21dp; width: 128dp; height: 64dp;"/>
+				<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Fx2DelayAutopan" style="left: 956.25dp; top: 288.21dp; width: 32dp; height: 32dp;"/>
+			</div>
+			<div id="fxReverb" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 8)" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx2Reverb.png scale-none left top);">
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ReverbSize" style="left: 72.8125dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ReverbShape" style="left: 346.438dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ReverbDecay" style="left: 620.062dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ReverbPreDelay" style="left: 893.688dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ReverbLowpass" style="left: 72.8125dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ReverbHighpass" style="left: 346.438dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ReverbDiffusion" style="left: 620.062dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx2ReverbDamping" style="left: 893.688dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+			</div>
+			<div id="fx251Delay" class="jucePos" data-class-juceConditionDisabled="!((FX2Type_value >= 9 && FX2Type_value <= 10))" data-model="partCurrent" style="left: 1800.5dp; top: 55dp; width: 1094.5dp; height: 498.38dp; decorator: image(fx251Delay.png scale-none left top);">
+				<img id="delay" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 9)" data-model="partCurrent" src="fx2DelayNotClocked.png" style="left: 3.17871dp; top: 12.0951dp; width: 150dp; height: 225dp;">
+					<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayDelay" style="left: 11dp; top: 48.5dp; width: 128dp; height: 128dp;"/>
+				</img>
+				<img id="length" class="jucePos" data-class-juceConditionDisabled="!(FX2Type_value == 10)" data-model="partCurrent" src="fx2DelayClocked.png" style="left: 3.17871dp; top: 12.0951dp; width: 150dp; height: 225dp;">
+					<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251ClockDelayDelay" style="left: 11dp; top: 48.5dp; width: 128dp; height: 128dp;"/>
+				</img>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayFeedback" style="left: 170.536dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayDelayML" style="left: 326.893dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayDelayMR" style="left: 483.25dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayDelayS1L" style="left: 639.607dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayDelayS2L" style="left: 795.964dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayDelayS1R" style="left: 952.321dp; top: 60.5951dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayInputHP" style="left: 14.1787dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayLfeLP" style="left: 170.536dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayFSLVolume" style="left: 326.893dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayFSRVolume" style="left: 483.25dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayCenterSVolume" style="left: 639.607dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayRearSLVolume" style="left: 795.964dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+				<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Fx251DelayRearSRVolume" style="left: 952.321dp; top: 309.785dp; width: 128dp; height: 128dp;"/>
+			</div>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="ArpMode" style="left: 42.8992dp; top: 724.49dp; width: 300dp; height: 50dp; line-height: 50dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 285dp; height: 49dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="ArpDirection" style="left: 392.899dp; top: 724.49dp; width: 300dp; height: 50dp; line-height: 50dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 285dp; height: 49dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="ArpVeloMode" style="left: 42.8992dp; top: 874.49dp; width: 300dp; height: 50dp; line-height: 50dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 285dp; height: 49dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="ArpClock" style="left: 392.899dp; top: 874.49dp; width: 300dp; height: 50dp; line-height: 50dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 285dp; height: 49dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="ArpPattern" style="left: 42.8992dp; top: 1024.49dp; width: 300dp; height: 50dp; line-height: 50dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 285dp; height: 49dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="ArpSortOrder" style="left: 392.899dp; top: 1024.49dp; width: 300dp; height: 50dp; line-height: 50dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 285dp; height: 49dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="Tempo" style="left: 63.5795dp; top: 1088.29dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="ArpMaxNotes" style="left: 303.9dp; top: 1088.29dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="ArpTFactor" style="left: 544.219dp; top: 1088.29dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="ArpOctaveRange" style="left: 63.5795dp; top: 1323.09dp; width: 128dp; height: 128dp;"/>
+			<knob id="knob" class="jucePos juceRotary knob1" data-model="partCurrent" param="ArpLength" style="left: 303.9dp; top: 1323.09dp; width: 128dp; height: 128dp;"/>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="ArpSameNoteOverlap" style="left: 1120.97dp; top: 662.29dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="ArpSameNoteOverlap" style="left: 1283.3dp; top: 678.29dp; width: 32dp; height: 32dp;"/>
+			<combo id="txtColLabel" class="jucePos txt1" data-model="partCurrent" param="ArpPatternLength" style="left: 1855.01dp; top: 669.79dp; width: 266.198dp; height: 49dp; line-height: 49dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 251.198dp; height: 48dp; pointer-events: none;">Osc 1 Pitch</combotext>
+			</combo>
+			<button id="buttonH" class="jucePos juceButton btn" data-model="partCurrent" isToggle="1" param="ArpPatternReset" style="left: 2635.97dp; top: 662.29dp; width: 128dp; height: 64dp;"/>
+			<button id="led" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="ArpPatternReset" style="left: 2798.3dp; top: 678.29dp; width: 32dp; height: 32dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp00Glide" style="left: 808.792dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp00Accent" style="left: 760.792dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp00Step" style="left: 778.892dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp00Timing" style="left: 760.792dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp00Length" style="left: 760.792dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp01Glide" style="left: 942.354dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp01Accent" style="left: 894.354dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp01Step" style="left: 912.454dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp01Timing" style="left: 894.354dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp01Length" style="left: 894.354dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp02Glide" style="left: 1075.92dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp02Accent" style="left: 1027.92dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp02Step" style="left: 1046.02dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp02Timing" style="left: 1027.92dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp02Length" style="left: 1027.92dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp03Glide" style="left: 1209.48dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp03Accent" style="left: 1161.48dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp03Step" style="left: 1179.58dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp03Timing" style="left: 1161.48dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp03Length" style="left: 1161.48dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp04Glide" style="left: 1343.04dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp04Accent" style="left: 1295.04dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp04Step" style="left: 1313.14dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp04Timing" style="left: 1295.04dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp04Length" style="left: 1295.04dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp05Glide" style="left: 1476.6dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp05Accent" style="left: 1428.6dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp05Step" style="left: 1446.7dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp05Timing" style="left: 1428.6dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp05Length" style="left: 1428.6dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp06Glide" style="left: 1610.16dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp06Accent" style="left: 1562.16dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp06Step" style="left: 1580.26dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp06Timing" style="left: 1562.16dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp06Length" style="left: 1562.16dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp07Glide" style="left: 1743.72dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp07Accent" style="left: 1695.72dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp07Step" style="left: 1713.82dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp07Timing" style="left: 1695.72dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp07Length" style="left: 1695.72dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp08Glide" style="left: 1877.29dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp08Accent" style="left: 1829.29dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp08Step" style="left: 1847.39dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp08Timing" style="left: 1829.29dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp08Length" style="left: 1829.29dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp09Glide" style="left: 2010.85dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp09Accent" style="left: 1962.85dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp09Step" style="left: 1980.95dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp09Timing" style="left: 1962.85dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp09Length" style="left: 1962.85dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp10Glide" style="left: 2144.41dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp10Accent" style="left: 2096.41dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp10Step" style="left: 2114.51dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp10Timing" style="left: 2096.41dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp10Length" style="left: 2096.41dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp11Glide" style="left: 2277.97dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp11Accent" style="left: 2229.97dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp11Step" style="left: 2248.07dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp11Timing" style="left: 2229.97dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp11Length" style="left: 2229.97dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp12Glide" style="left: 2411.53dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp12Accent" style="left: 2363.53dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp12Step" style="left: 2381.63dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp12Timing" style="left: 2363.53dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp12Length" style="left: 2363.53dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp13Glide" style="left: 2545.09dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp13Accent" style="left: 2497.09dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp13Step" style="left: 2515.2dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp13Timing" style="left: 2497.09dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp13Length" style="left: 2497.09dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp14Glide" style="left: 2678.66dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp14Accent" style="left: 2630.66dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp14Step" style="left: 2648.76dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp14Timing" style="left: 2630.66dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp14Length" style="left: 2630.66dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+			<button id="glide" class="jucePos juceButton led" data-model="partCurrent" isToggle="1" param="Arp15Glide" style="left: 2812.22dp; top: 813.38dp; width: 32dp; height: 32dp;"/>
+			<knob id="accent" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp15Accent" style="left: 2764.22dp; top: 894.48dp; width: 128dp; height: 128dp;"/>
+			<combo id="dropdownArpStep" class="jucePos txt1" data-model="partCurrent" param="Arp15Step" style="left: 2782.32dp; top: 1077.64dp; width: 91.8dp; height: 40dp; line-height: 40dp;">
+				<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 76.8dp; height: 39dp; pointer-events: none;">&gt;&gt;</combotext>
+			</combo>
+			<knob id="timing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp15Timing" style="left: 2764.22dp; top: 1172.8dp; width: 128dp; height: 128dp;"/>
+			<knob id="length" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp15Length" style="left: 2764.22dp; top: 1349.9dp; width: 128dp; height: 128dp;"/>
+		</img>
+		<img id="pageMulti" class="jucePos" src="pageMulti.png" tabgroup="Root" tabpage="2" style="left: 450dp; top: 428dp; width: 2900dp; height: 1525dp;">
+			<div id="controls" class="jucePos" style="left: 0dp; top: 55dp; width: 2900dp; height: 1470dp;">
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI0Transpose" style="left: 45.375dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI0Detune" style="left: 45.375dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI0KeyHigh" style="left: 109.375dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI0KeyLow" style="left: 109.375dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI0VeloHigh" style="left: 109.375dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI0VeloLow" style="left: 109.375dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI0Pan" style="left: 45.375dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI0Volume" style="left: 45.375dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI0MidiChannel" style="left: 109.375dp;">
+					<combotext class="jucePos comboMultiChannel">0</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI0Output" style="left: 109.375dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI1Transpose" style="left: 224.125dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI1Detune" style="left: 224.125dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI1KeyHigh" style="left: 288.125dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI1KeyLow" style="left: 288.125dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI1VeloHigh" style="left: 288.125dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI1VeloLow" style="left: 288.125dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI1Pan" style="left: 224.125dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI1Volume" style="left: 224.125dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI1MidiChannel" style="left: 288.125dp;">
+					<combotext class="jucePos comboMultiChannel">1</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI1Output" style="left: 288.125dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI2Transpose" style="left: 402.875dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI2Detune" style="left: 402.875dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI2KeyHigh" style="left: 466.875dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI2KeyLow" style="left: 466.875dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI2VeloHigh" style="left: 466.875dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI2VeloLow" style="left: 466.875dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI2Pan" style="left: 402.875dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI2Volume" style="left: 402.875dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI2MidiChannel" style="left: 466.875dp;">
+					<combotext class="jucePos comboMultiChannel">2</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI2Output" style="left: 466.875dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI3Transpose" style="left: 581.625dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI3Detune" style="left: 581.625dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI3KeyHigh" style="left: 645.625dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI3KeyLow" style="left: 645.625dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI3VeloHigh" style="left: 645.625dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI3VeloLow" style="left: 645.625dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI3Pan" style="left: 581.625dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI3Volume" style="left: 581.625dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI3MidiChannel" style="left: 645.625dp;">
+					<combotext class="jucePos comboMultiChannel">3</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI3Output" style="left: 645.625dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI4Transpose" style="left: 760.375dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI4Detune" style="left: 760.375dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI4KeyHigh" style="left: 824.375dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI4KeyLow" style="left: 824.375dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI4VeloHigh" style="left: 824.375dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI4VeloLow" style="left: 824.375dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI4Pan" style="left: 760.375dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI4Volume" style="left: 760.375dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI4MidiChannel" style="left: 824.375dp;">
+					<combotext class="jucePos comboMultiChannel">4</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI4Output" style="left: 824.375dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI5Transpose" style="left: 939.125dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI5Detune" style="left: 939.125dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI5KeyHigh" style="left: 1003.12dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI5KeyLow" style="left: 1003.12dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI5VeloHigh" style="left: 1003.12dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI5VeloLow" style="left: 1003.12dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI5Pan" style="left: 939.125dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI5Volume" style="left: 939.125dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI5MidiChannel" style="left: 1003.12dp;">
+					<combotext class="jucePos comboMultiChannel">5</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI5Output" style="left: 1003.12dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI6Transpose" style="left: 1117.88dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI6Detune" style="left: 1117.88dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI6KeyHigh" style="left: 1181.88dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI6KeyLow" style="left: 1181.88dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI6VeloHigh" style="left: 1181.88dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI6VeloLow" style="left: 1181.88dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI6Pan" style="left: 1117.88dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI6Volume" style="left: 1117.88dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI6MidiChannel" style="left: 1181.88dp;">
+					<combotext class="jucePos comboMultiChannel">6</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI6Output" style="left: 1181.88dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI7Transpose" style="left: 1296.62dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI7Detune" style="left: 1296.62dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI7KeyHigh" style="left: 1360.62dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI7KeyLow" style="left: 1360.62dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI7VeloHigh" style="left: 1360.62dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI7VeloLow" style="left: 1360.62dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI7Pan" style="left: 1296.62dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI7Volume" style="left: 1296.62dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI7MidiChannel" style="left: 1360.62dp;">
+					<combotext class="jucePos comboMultiChannel">7</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI7Output" style="left: 1360.62dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI8Transpose" style="left: 1475.38dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI8Detune" style="left: 1475.38dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI8KeyHigh" style="left: 1539.38dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI8KeyLow" style="left: 1539.38dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI8VeloHigh" style="left: 1539.38dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI8VeloLow" style="left: 1539.38dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI8Pan" style="left: 1475.38dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI8Volume" style="left: 1475.38dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI8MidiChannel" style="left: 1539.38dp;">
+					<combotext class="jucePos comboMultiChannel">8</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI8Output" style="left: 1539.38dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI9Transpose" style="left: 1654.12dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI9Detune" style="left: 1654.12dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI9KeyHigh" style="left: 1718.12dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI9KeyLow" style="left: 1718.12dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI9VeloHigh" style="left: 1718.12dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI9VeloLow" style="left: 1718.12dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI9Pan" style="left: 1654.12dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI9Volume" style="left: 1654.12dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI9MidiChannel" style="left: 1718.12dp;">
+					<combotext class="jucePos comboMultiChannel">9</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI9Output" style="left: 1718.12dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI10Transpose" style="left: 1832.88dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI10Detune" style="left: 1832.88dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI10KeyHigh" style="left: 1896.88dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI10KeyLow" style="left: 1896.88dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI10VeloHigh" style="left: 1896.88dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI10VeloLow" style="left: 1896.88dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI10Pan" style="left: 1832.88dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI10Volume" style="left: 1832.88dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI10MidiChannel" style="left: 1896.88dp;">
+					<combotext class="jucePos comboMultiChannel">10</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI10Output" style="left: 1896.88dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI11Transpose" style="left: 2011.62dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI11Detune" style="left: 2011.62dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI11KeyHigh" style="left: 2075.62dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI11KeyLow" style="left: 2075.62dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI11VeloHigh" style="left: 2075.62dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI11VeloLow" style="left: 2075.62dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI11Pan" style="left: 2011.62dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI11Volume" style="left: 2011.62dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI11MidiChannel" style="left: 2075.62dp;">
+					<combotext class="jucePos comboMultiChannel">11</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI11Output" style="left: 2075.62dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI12Transpose" style="left: 2190.38dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI12Detune" style="left: 2190.38dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI12KeyHigh" style="left: 2254.38dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI12KeyLow" style="left: 2254.38dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI12VeloHigh" style="left: 2254.38dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI12VeloLow" style="left: 2254.38dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI12Pan" style="left: 2190.38dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI12Volume" style="left: 2190.38dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI12MidiChannel" style="left: 2254.38dp;">
+					<combotext class="jucePos comboMultiChannel">12</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI12Output" style="left: 2254.38dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI13Transpose" style="left: 2369.12dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI13Detune" style="left: 2369.12dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI13KeyHigh" style="left: 2433.12dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI13KeyLow" style="left: 2433.12dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI13VeloHigh" style="left: 2433.12dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI13VeloLow" style="left: 2433.12dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI13Pan" style="left: 2369.12dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI13Volume" style="left: 2369.12dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI13MidiChannel" style="left: 2433.12dp;">
+					<combotext class="jucePos comboMultiChannel">13</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI13Output" style="left: 2433.12dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI14Transpose" style="left: 2547.88dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI14Detune" style="left: 2547.88dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI14KeyHigh" style="left: 2611.88dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI14KeyLow" style="left: 2611.88dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI14VeloHigh" style="left: 2611.88dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI14VeloLow" style="left: 2611.88dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI14Pan" style="left: 2547.88dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI14Volume" style="left: 2547.88dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI14MidiChannel" style="left: 2611.88dp;">
+					<combotext class="jucePos comboMultiChannel">14</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI14Output" style="left: 2611.88dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+				<knob id="transpose" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI15Transpose" style="left: 2726.62dp; top: 17.7222dp; width: 128dp; height: 128dp;"/>
+				<knob id="detune" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI15Detune" style="left: 2726.62dp; top: 216.611dp; width: 128dp; height: 128dp;"/>
+				<combo id="keyhi" class="jucePos txt1" data-model="partCurrent" param="MI15KeyHigh" style="left: 2790.62dp; top: 415.5dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">G+8</combotext>
+				</combo>
+				<combo id="keylo" class="jucePos txt1" data-model="partCurrent" param="MI15KeyLow" style="left: 2790.62dp; top: 499.944dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">C-2</combotext>
+				</combo>
+				<combo id="velhi" class="jucePos txt1" data-model="partCurrent" param="MI15VeloHigh" style="left: 2790.62dp; top: 619.833dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">127</combotext>
+				</combo>
+				<combo id="vello" class="jucePos txt1" data-model="partCurrent" param="MI15VeloLow" style="left: 2790.62dp; top: 704.278dp; width: 80dp; height: 49dp; line-height: 49dp;">
+					<combotext class="jucePos" style="left: 15dp; top: 1dp; width: 65dp; height: 48dp; pointer-events: none;">0</combotext>
+				</combo>
+				<knob id="pan" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI15Pan" style="left: 2726.62dp; top: 824.167dp; width: 128dp; height: 128dp;"/>
+				<knob id="volume" class="jucePos juceRotary knob1" data-model="partCurrent" param="MI15Volume" style="left: 2726.62dp; top: 1023.06dp; width: 128dp; height: 128dp;"/>
+				<combo id="midichannel" class="jucePos txtMultiChannel" data-model="partCurrent" param="MI15MidiChannel" style="left: 2790.62dp;">
+					<combotext class="jucePos comboMultiChannel">15</combotext>
+				</combo>
+				<combo id="output" class="jucePos txtMultiOutput" data-model="partCurrent" param="MI15Output" style="left: 2790.62dp;">
+					<combotext class="jucePos comboMultiOutput">0</combotext>
+				</combo>
+			</div>
+		</img>
+		<img id="pagePatchBrowser" class="jucePos" src="pagePatchBrowser.png" tabgroup="Root" tabpage="1" style="left: 450dp; top: 428dp; width: 2900dp; height: 1525dp;">
+			<div id="container-patchmanager" class="jucePos" style="left: 5dp; top: 55dp; width: 2890dp; height: 1465dp;">
+				<template src="patchmanager"/>
+			</div>
+		</img>
+		<div id="FocusedParameterTooltip" class="jucePos juceLabel txt2" offsetY="25" style="left: 1385dp; top: 1225.5dp; width: 96dp; height: 55dp; background-color: #000000;line-height: 55dp;">42</div>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 514.594dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 530.594dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 603.781dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 619.781dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 692.969dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 708.969dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 782.156dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 798.156dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 871.344dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 887.344dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 960.531dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 976.531dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1049.72dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1065.72dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1138.91dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1154.91dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1228.09dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1244.09dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1317.28dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1333.28dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1406.47dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1422.47dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1495.66dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1511.66dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1584.84dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1600.84dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1674.03dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1690.03dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1763.22dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1779.22dp; width: 32dp; height: 32dp;"/>
+		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 1852.41dp; width: 128dp; height: 64dp;"/>
+		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 1868.41dp; width: 32dp; height: 32dp;"/>
+	</body>
+</rml>

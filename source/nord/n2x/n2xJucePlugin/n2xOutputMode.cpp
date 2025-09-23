@@ -2,6 +2,7 @@
 
 #include "n2xController.h"
 #include "n2xEditor.h"
+#include "juceRmlUi/rmlElemComboBox.h"
 
 namespace n2xJucePlugin
 {
@@ -23,27 +24,27 @@ namespace n2xJucePlugin
 	};
 
 	OutputMode::OutputMode(const Editor& _editor)
-	: m_outAB(_editor.findComponentT<juce::ComboBox>("PerfOutModeAB"))
-	, m_outCD(_editor.findComponentT<juce::ComboBox>("PerfOutModeCD"))
+	: m_outAB(_editor.findChild<juceRmlUi::ElemComboBox>("PerfOutModeAB"))
+	, m_outCD(_editor.findChild<juceRmlUi::ElemComboBox>("PerfOutModeCD"))
 	, m_parameter(_editor.getN2xController().getParameter("PerfOutModeABCD", 0))
 	{
 		int id = 1;
 		for (const auto* mode : g_outModesAB)
-			m_outAB->addItem(mode, id++);
+			m_outAB->addOption(mode);
 
 		id = 1;
 		for (const auto* mode : g_outModesCD)
-			m_outCD->addItem(mode, id++);
+			m_outCD->addOption(mode);
 
-		m_outAB->onChange = [this]
+		juceRmlUi::EventListener::Add(m_outAB, Rml::EventId::Change, [this](Rml::Event&)
 		{
-			setOutModeAB(static_cast<uint8_t>(m_outAB->getSelectedItemIndex()));
-		};
+			setOutModeAB(static_cast<uint8_t>(m_outAB->getSelectedIndex()));
+		});
 
-		m_outCD->onChange = [this]
+		juceRmlUi::EventListener::Add(m_outCD, Rml::EventId::Change, [this](Rml::Event&)
 		{
-			setOutModeCD(static_cast<uint8_t>(m_outCD->getSelectedItemIndex()));
-		};
+			setOutModeCD(static_cast<uint8_t>(m_outCD->getSelectedIndex()));
+		});
 
 		m_onOutputModeChanged.set(m_parameter, [this](pluginLib::Parameter* const& _parameter)
 		{
@@ -72,7 +73,7 @@ namespace n2xJucePlugin
 		const auto ab = _paramValue & 0xf;
 		const auto cd = (_paramValue >> 4) & 0xf;
 
-		m_outAB->setSelectedItemIndex(ab, juce::dontSendNotification);
-		m_outCD->setSelectedItemIndex(cd, juce::dontSendNotification);
+		m_outAB->setSelectedIndex(ab);
+		m_outCD->setSelectedIndex(cd);
 	}
 }

@@ -3,6 +3,8 @@
 #include "weWaveDesc.h"
 #include "weWaveTreeItem.h"
 #include "xtWaveEditor.h"
+#include "juceRmlUi/rmlElemTree.h"
+#include "juceRmlUi/rmlMenu.h"
 
 #include "xtLib/xtMidiTypes.h"
 
@@ -17,11 +19,88 @@ namespace xtJucePlugin
 
 	static_assert(std::size(g_categoryNames) == static_cast<size_t>(WaveCategory::Count));
 
-	WaveCategoryTreeItem::WaveCategoryTreeItem(WaveEditor& _editor, const WaveCategory _category) : m_editor(_editor), m_category(_category)
+	WaveCategoryTreeItem::WaveCategoryTreeItem(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor)
+	: TreeItem(_coreInstance, _tag)
+	, m_editor(_editor)
 	{
-		setText(getCategoryName(_category));
+	}
 
-		switch (_category)
+	bool WaveCategoryTreeItem::setSelectedWave(const xt::WaveId _id)
+	{
+		for(size_t i=0; i<getNode()->size(); ++i)
+		{
+			auto child = getNode()->getChild(i);
+			auto* subItem = dynamic_cast<WaveTreeItem*>(child->getElement());
+			if(subItem && subItem->getWaveId() == _id)
+			{
+				subItem->getNode()->setSelected(true);
+				getNode()->setOpened(true);
+
+				Rml::ScrollIntoViewOptions options;
+
+				options.vertical = Rml::ScrollAlignment::Nearest;
+				options.horizontal = Rml::ScrollAlignment::Nearest;
+				options.behavior = Rml::ScrollBehavior::Smooth;
+				options.parentage = Rml::ScrollParentage::All;
+
+				subItem->ScrollIntoView(options);
+
+				return true;
+			}
+		}
+		return false;
+	}
+
+	std::string WaveCategoryTreeItem::getCategoryName(WaveCategory _category)
+	{
+		return g_categoryNames[static_cast<uint32_t>(_category)];
+	}
+
+	std::unique_ptr<juceRmlUi::DragData> WaveCategoryTreeItem::createDragData()
+	{
+		std::unique_ptr<WaveDesc> desc = std::make_unique<WaveDesc>(m_editor);
+
+		desc->waveIds = getWaveIds();
+		desc->source = WaveDescSource::WaveList;
+
+		desc->fillData(m_editor.getData());
+
+		return desc;
+	}
+
+	void WaveCategoryTreeItem::onRightClick(const Rml::Event& _event)
+	{
+		if (getCategory() == WaveCategory::Rom)
+			return;
+
+		juceRmlUi::Menu menu;
+		menu.addEntry("Export all as .syx", [this]
+		{
+			exportAll(false);
+		});
+		menu.addEntry("Export all as .mid", [this]
+		{
+			exportAll(true);
+		});
+		menu.runModal(_event);
+	}
+
+	WaveCategory WaveCategoryTreeItem::getCategory() const
+	{
+		if (const auto* node = dynamic_cast<const WaveCategoryNode*>(getNode().get()))
+			return node->getCategory();
+		return WaveCategory::Invalid;
+	}
+
+	void WaveCategoryTreeItem::setNode(const juceRmlUi::TreeNodePtr& _node)
+	{
+		TreeItem::setNode(_node);
+
+		const auto category = getCategory();
+
+		setText(getCategoryName(category));
+
+		switch (category)
 		{
 		case WaveCategory::Rom:
 			addItems(0, xt::wave::g_romWaveCount);
@@ -37,59 +116,10 @@ namespace xtJucePlugin
 		}
 	}
 
-	bool WaveCategoryTreeItem::setSelectedWave(const xt::WaveId _id)
+	void WaveCategoryTreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
-		for(int i=0; i<getNumSubItems(); ++i)
-		{
-			auto* subItem = dynamic_cast<WaveTreeItem*>(getSubItem(i));
-			if(subItem && subItem->getWaveId() == _id)
-			{
-				subItem->setSelected(true, true, juce::dontSendNotification);
-				setOpen(true);
-				getOwnerView()->scrollToKeepItemVisible(subItem);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	std::string WaveCategoryTreeItem::getCategoryName(WaveCategory _category)
-	{
-		return g_categoryNames[static_cast<uint32_t>(_category)];
-	}
-
-	juce::var WaveCategoryTreeItem::getDragSourceDescription()
-	{
-		auto* desc = new WaveDesc(m_editor);
-
-		desc->waveIds = getWaveIds();
-		desc->source = WaveDescSource::WaveList;
-
-		desc->fillData(m_editor.getData());
-
-		return desc;
-	}
-
-	void WaveCategoryTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
-	{
-		if (_mouseEvent.mods.isPopupMenu())
-		{
-			if (m_category != WaveCategory::Rom)
-			{
-				juce::PopupMenu menu;
-				menu.addItem("Export all as .syx", [this]
-				{
-					exportAll(false);
-				});
-				menu.addItem("Export all as .mid", [this]
-				{
-					exportAll(true);
-				});
-				menu.showMenuAsync({});
-				return;
-			}
-		}
-		TreeItem::itemClicked(_mouseEvent);
+		hideCanvas();
+		_g.fillAll(juce::Colours::magenta);
 	}
 
 	void WaveCategoryTreeItem::addItems(const uint16_t _first, const uint16_t _count)
@@ -97,12 +127,13 @@ namespace xtJucePlugin
 		for(uint16_t i=_first; i<_first+_count; ++i)
 			addItem(i);
 
-		setOpen(true);
+		getNode()->setOpened(true);
 	}
 
 	void WaveCategoryTreeItem::addItem(const uint16_t _index)
 	{
-		addSubItem(new WaveTreeItem(m_editor, m_category, xt::WaveId(_index)));
+		getNode()->createChild<WaveTreeNode>(xt::WaveId(_index));
+//		addSubItem();
 	}
 
 	void WaveCategoryTreeItem::exportAll(const bool _midi) const
@@ -115,10 +146,11 @@ namespace xtJucePlugin
 	std::vector<xt::WaveId> WaveCategoryTreeItem::getWaveIds() const
 	{
 		std::vector<xt::WaveId> waveIds;
-		waveIds.reserve(getNumSubItems());
-		for (int i = 0; i < getNumSubItems(); ++i)
+		waveIds.reserve(getNode()->size());
+		for (int i = 0; i < getNode()->size(); ++i)
 		{
-			if (const auto* subItem = dynamic_cast<WaveTreeItem*>(getSubItem(i)))
+			const auto child = getNode()->getChild(i);
+			if (const auto* subItem = dynamic_cast<WaveTreeItem*>(child->getElement()))
 				waveIds.push_back(subItem->getWaveId());
 		}
 		return waveIds;

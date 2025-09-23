@@ -13,7 +13,7 @@ namespace virus
 
 		jucePluginEditorLib::Editor* createEditor(const jucePluginEditorLib::Skin& _skin) override;
 
-		void initContextMenu(juce::PopupMenu& _menu) override;
-		bool initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled) override;
+		void initContextMenu(juceRmlUi::Menu& _menu) override;
+		bool initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled) override;
 	};
 }

@@ -4,8 +4,9 @@
 #include <memory>
 
 #include "baseLib/event.h"
+
 #include "jucePluginEditorLib/led.h"
-#include "juce_gui_basics/juce_gui_basics.h"
+
 #include "virusLib/frontpanelState.h"
 
 namespace juce
@@ -30,23 +31,6 @@ namespace genericVirusUI
 	class Leds
 	{
 	public:
-		class LogoMouseListener final : public juce::MouseListener
-		{
-		public:
-			LogoMouseListener(Leds& _leds) : m_leds(_leds)
-			{
-			}
-			void mouseDown(const juce::MouseEvent& e) override
-			{
-				if(e.mods.isPopupMenu())
-					return;
-				m_leds.toggleLogoAnimation();
-			}
-
-		private:
-			Leds& m_leds;
-		};
-
 		Leds(const VirusEditor& _editor, virus::VirusProcessor& _processor);
 		~Leds();
 
@@ -57,6 +41,7 @@ namespace genericVirusUI
 
 	private:
 		void onFrontPanelStateChanged(const virusLib::FrontpanelState& _frontpanelState) const;
+		void addLogoClickListener(Rml::Element* _logo);
 
 		virus::VirusProcessor& m_processor;
 		bool m_logoAnimationEnabled = true;
@@ -65,10 +50,8 @@ namespace genericVirusUI
 
 		std::unique_ptr<jucePluginEditorLib::Led> m_logoLed;
 
-		juce::Component* m_logo = nullptr;
-		juce::Component* m_logoAnim = nullptr;
-
-		std::unique_ptr<LogoMouseListener> m_logoClickListener;
+		Rml::Element* m_logo = nullptr;
+		Rml::Element* m_logoAnim = nullptr;
 
 		baseLib::EventListener<virusLib::FrontpanelState> m_onFrontPanelStateChanged;
 	};

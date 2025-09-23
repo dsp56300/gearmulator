@@ -5,38 +5,55 @@
 #include "xtController.h"
 #include "xtEditor.h"
 #include "xtWaveEditor.h"
+#include "baseLib/filesystem.h"
+#include "jucePluginEditorLib/pluginProcessor.h"
 
 #include "juceUiLib/messageBox.h"
 
 namespace xtJucePlugin
 {
-	TablesTreeItem::TablesTreeItem(WaveEditor& _editor, const xt::TableId _tableIndex) : m_editor(_editor), m_index(_tableIndex)
+	TablesTreeItem::TablesTreeItem(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor)
+	: TreeItem(_coreInstance, _tag)
+	, m_editor(_editor)
 	{
-		setPaintRootItemInBold(false);
-		setDrawsInLeftMargin(true);
-
-		const auto name = _editor.getTableName(_tableIndex);
-
-		setText(name);
-
 		m_onTableChanged.set(_editor.getData().onTableChanged, [this](const xt::TableId& _index)
 		{
 			onTableChanged(_index);
 		});
 	}
 
-	void TablesTreeItem::itemSelectionChanged(const bool _isNowSelected)
+	void TablesTreeItem::setNode(const juceRmlUi::TreeNodePtr& _node)
 	{
-		TreeItem::itemSelectionChanged(_isNowSelected);
-		if(_isNowSelected)
-			m_editor.setSelectedTable(m_index);
+		TreeItem::setNode(_node);
+
+		SetPseudoClass("x-table-algorithmic", xt::wave::isAlgorithmicTable(getTableId()));
+		SetPseudoClass("x-table-readonly", xt::wave::isReadOnly(getTableId()));
+
+		const auto name = m_editor.getTableName(getTableId());
+
+		setText(name);
 	}
 
-	juce::var TablesTreeItem::getDragSourceDescription()
+	xt::TableId TablesTreeItem::getTableId() const
 	{
-		auto* waveDesc = new WaveDesc(m_editor);
+		auto* node = dynamic_cast<TablesTreeNode*>(getNode().get());
+		if (node)
+			return node->getTableId();
+		return xt::TableId::invalid();
+	}
 
-		waveDesc->tableIds = {m_index};
+	void TablesTreeItem::onSelectedChanged(bool _selected)
+	{
+		TreeItem::onSelectedChanged(_selected);
+		if (_selected)
+			m_editor.setSelectedTable(getTableId());
+	}
+
+	std::unique_ptr<juceRmlUi::DragData> TablesTreeItem::createDragData()
+	{
+		auto waveDesc = std::make_unique<WaveDesc>(m_editor);
+
+		waveDesc->tableIds = {getTableId()};
 		waveDesc->source = WaveDescSource::TablesList;
 
 		waveDesc->fillData(m_editor.getData());
@@ -44,48 +61,54 @@ namespace xtJucePlugin
 		return waveDesc;
 	}
 
-	bool TablesTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
+	bool TablesTreeItem::canDrop(const Rml::Event& _event, const DragSource* _source)
 	{
-		if(xt::wave::isReadOnly(m_index))
-			return false;
-		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
+		if(xt::wave::isReadOnly(getTableId()))
+			return TreeItem::canDrop(_event, _source);
+		const auto* waveDesc = WaveDesc::fromDragSource(_source);
 		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList)
-			return false;
-		if (waveDesc->tableIds.size() != -1)
-			return false;
-		return waveDesc->tableIds.front() != m_index;
+			return TreeItem::canDrop(_event, _source);
+		if (waveDesc->tableIds.size() != 1)
+			return TreeItem::canDrop(_event, _source);
+		return waveDesc->tableIds.front() != getTableId();
 	}
 
-	void TablesTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
+	void TablesTreeItem::drop(const Rml::Event& _event, const DragSource* _source, const juceRmlUi::DragData* _data)
 	{
-		TreeItem::itemDropped(dragSourceDetails, insertIndex);
+		TreeItem::drop(_event, _source, _data);
 
-		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
+		const auto* waveDesc = WaveDesc::fromDragSource(_source);
 
-		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableIds.size() != 1 || waveDesc->tableIds.front() == m_index)
+		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableIds.size() != 1 || waveDesc->tableIds.front() == getTableId())
 			return;
 
 		auto& data = m_editor.getData();
-		if(data.copyTable(m_index, waveDesc->tableIds.front()))
+
+		if(data.copyTable(getTableId(), waveDesc->tableIds.front()))
 		{
-			setSelected(true, true, juce::dontSendNotification);
-			m_editor.setSelectedTable(m_index);
-			data.sendTableToDevice(m_index);
+			getNode()->setSelected(true);
+			m_editor.setSelectedTable(getTableId());
+			data.sendTableToDevice(getTableId());
 		}
 	}
 
-	bool TablesTreeItem::isInterestedInFileDrag(const juce::StringArray& files)
+	bool TablesTreeItem::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files)
 	{
 		if(xt::wave::isReadOnly(getTableId()))
 			return false;
 
-		if(files.size() == 1 && (files[0].endsWithIgnoreCase(".mid") || files[0].endsWithIgnoreCase(".syx")))
+		if(_files.size() == 1 && (baseLib::filesystem::hasExtension(_files.front(), ".mid") || baseLib::filesystem::hasExtension(_files.front(), ".syx")))
 			return true;
 
-		return TreeItem::isInterestedInFileDrag(files);
+		return TreeItem::canDropFiles(_event, _files);
 	}
 
-	void TablesTreeItem::filesDropped(const juce::StringArray& files, int insertIndex)
+	void TablesTreeItem::dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files)
+	{
+		dropFiles(_files);
+	}
+
+	void TablesTreeItem::dropFiles(const std::vector<std::string>& _files)
 	{
 		if(xt::wave::isReadOnly(getTableId()))
 			return;
@@ -94,92 +117,80 @@ namespace xtJucePlugin
 
 		std::map<xt::WaveId, xt::WaveData> waves;
 		std::map<xt::TableId, xt::TableData> tables;
-		m_editor.filesDropped(waves, tables, files);
+		m_editor.filesDropped(waves, tables, _files);
 
 		if (tables.empty())
 		{
 			if (waves.size() == 1)
-				genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "This file doesn't contain a Control Table but a Wave. Please drop on a User Wave slot.");
+				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, errorTitle, "This file doesn't contain a Control Table but a Wave. Please drop on a User Wave slot.");
 			return;
 		}
 
-		m_editor.getData().setTable(m_index, tables.begin()->second);
-		m_editor.getData().sendTableToDevice(m_index);
+		m_editor.getData().setTable(getTableId(), tables.begin()->second);
+		m_editor.getData().sendTableToDevice(getTableId());
 	}
 
-	void TablesTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	void TablesTreeItem::onRightClick(const Rml::Event& _event)
 	{
-		if(!_mouseEvent.mods.isPopupMenu())
-		{
-			TreeItem::itemClicked(_mouseEvent);
-			return;
-		}
+		juceRmlUi::Menu menu;
 
-		juce::PopupMenu menu;
-
-		if (!xt::wave::isAlgorithmicTable(m_index))
+		if (!xt::wave::isAlgorithmicTable(getTableId()))
 		{
-			juce::PopupMenu copyToTableSubMenu;
+			juceRmlUi::Menu copyToTableSubMenu;
 
 			for(auto i = xt::wave::g_firstRamTableIndex; i < xt::wave::g_tableCount; ++i)
 			{
-				if(i > xt::wave::g_firstRamTableIndex && (i&7) == 0)
-					copyToTableSubMenu.addColumnBreak();
-
 				const auto id = xt::TableId(i);
-				copyToTableSubMenu.addItem(m_editor.getTableName(id), [this, id]
+				copyToTableSubMenu.addEntry(m_editor.getTableName(id), [this, id]
 				{
-					m_editor.getData().copyTable(id, m_index);
+					m_editor.getData().copyTable(id, getTableId());
 				});
 			}
 
-			menu.addSubMenu("Copy to", copyToTableSubMenu);
+			menu.addSubMenu("Copy to", std::move(copyToTableSubMenu));
 
-			juce::PopupMenu exportMenu;
-			exportMenu.addItem(".syx", [this]
+			juceRmlUi::Menu exportMenu;
+			exportMenu.addEntry(".syx", [this]
 			{
 				m_editor.exportAsSyxOrMid(getTableId(), false);
 			});
-			exportMenu.addItem(".mid", [this]
+			exportMenu.addEntry(".mid", [this]
 			{
 				m_editor.exportAsSyxOrMid(getTableId(), true);
 			});
-			exportMenu.addItem(".wav", [this]
+			exportMenu.addEntry(".wav", [this]
 			{
 				m_editor.exportAsWav(getTableId());
 			});
-			menu.addSubMenu("Export as...", exportMenu);
+			menu.addSubMenu("Export as...", std::move(exportMenu));
 		}
 
-		if (!xt::wave::isReadOnly(m_index))
+		if (!xt::wave::isReadOnly(getTableId()))
 		{
 			menu.addSeparator();
 
-			menu.addItem("Import .syx/.mid...", [this]
+			menu.addEntry("Import .syx/.mid...", [this]
 			{
 				m_editor.selectImportFile([this](const juce::String& _filename)
 				{
-					juce::StringArray files;
-					files.add(_filename);
-					filesDropped(files, 0);
+					const std::vector<std::string> files{_filename.toStdString()};
+					dropFiles(files);
 				});
 			});
 		}
 
-		if (menu.getNumItems())
-			menu.showMenuAsync({});
+		if (!menu.empty())
+			menu.runModal(_event);
 	}
 
-	juce::Colour TablesTreeItem::getTextColor(const juce::Colour _colour)
+	void TablesTreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
-		if (xt::wave::isAlgorithmicTable(m_index))
-			return _colour.withAlpha(0.7f);
-		return TreeItem::getTextColor(_colour);
+		_g.fillAll(juce::Colours::magenta);
 	}
 
-	void TablesTreeItem::onTableChanged(xt::TableId _index)
+	void TablesTreeItem::onTableChanged(const xt::TableId _index)
 	{
-		if(_index != m_index)
+		if(_index != getTableId())
 			return;
 		onTableChanged();
 	}

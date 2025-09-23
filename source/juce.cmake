@@ -66,6 +66,7 @@ target_link_libraries(juce_plugin_modules PRIVATE
     juce::juce_audio_devices
     juce::juce_audio_processors
 	juce::juce_cryptography
+	juce::juce_opengl
 )
 
 target_compile_definitions(juce_plugin_modules PUBLIC

@@ -1,17 +1,31 @@
 #pragma once
 
-#include "jucePluginLib/parameterbinding.h"
+#include <array>
+#include <cstdint>
+#include <memory>
+
+#include "mqPartButton.h"
+
+namespace Rml
+{
+	class Element;
+}
 
 namespace mqJucePlugin
 {
-	class mqPartButton;
 	class Controller;
 	class Editor;
 
 	class mqPartSelect
 	{
 	public:
-		explicit mqPartSelect(mqJucePlugin::Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding);
+		explicit mqPartSelect(Editor& _editor, Controller& _controller);
+		~mqPartSelect();
+
+		mqPartSelect(mqPartSelect&&) = delete;
+		mqPartSelect(const mqPartSelect&) = delete;
+		mqPartSelect& operator = (mqPartSelect&&) = delete;
+		mqPartSelect& operator = (const mqPartSelect&) = delete;
 
 		void onPlayModeChanged() const;
 
@@ -22,13 +36,12 @@ namespace mqJucePlugin
 
 		struct Part
 		{
-			mqPartButton* button = nullptr;
-			juce::Button* led = nullptr;
+			std::unique_ptr<mqPartButton> button = nullptr;
+			Rml::Element* led = nullptr;
 		};
 
 		mqJucePlugin::Editor& m_editor;
 		Controller& m_controller;
-		pluginLib::ParameterBinding& m_parameterBinding;
 		std::array<Part, 16> m_parts{};
 	};
 }

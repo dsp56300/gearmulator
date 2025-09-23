@@ -154,7 +154,7 @@ namespace pluginLib
 				}
 				juce::Timer::callAfterDelay(2000, [this, msg]
 				{
-					genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 						"Device Initialization failed", msg, 
 						[this]
 						{
@@ -397,20 +397,23 @@ namespace pluginLib
 		return result;
 	}
 
-	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const BinaryDataRef& _binaryData,	const std::string& _filename)
 	{
-		const auto& bd = m_properties.binaryData;
-
-		for(uint32_t i=0; i<bd.listSize; ++i)
+		for(uint32_t i=0; i<_binaryData.listSize; ++i)
 		{
-			if (bd.originalFileNames[i] != _filename)
+			if (_binaryData.originalFileNames[i] != _filename)
 				continue;
 
 			int size = 0;
-			const auto res = bd.getNamedResourceFunc(bd.namedResourceList[i], size);
+			const auto res = _binaryData.getNamedResourceFunc(_binaryData.namedResourceList[i], size);
 			return {std::make_pair(res, static_cast<uint32_t>(size))};
 		}
 		return {};
+	}
+
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
+	{
+		return findResource(m_properties.binaryData, _filename);
 	}
 
 	std::string Processor::getDataFolder(const bool _useFxFolder) const
@@ -472,7 +475,7 @@ namespace pluginLib
 		}
 		catch(synthLib::DeviceException& e)
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 				getName().toStdString() + " - Failed to switch device type",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n");
@@ -856,7 +859,7 @@ namespace pluginLib
 			{
 				juce::MessageManager::callAsync([e]
 				{
-					genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 						"Device creation failed:",
 						std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
 						e.what() + "\n\n");
@@ -887,7 +890,7 @@ namespace pluginLib
 		}
 		catch(const synthLib::DeviceException& e)
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 				"Device creation failed:",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n");

@@ -3,14 +3,14 @@
 #include "n2xController.h"
 #include "n2xEditor.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
+#include "juceRmlUi/rmlElemButton.h"
 
 namespace n2xJucePlugin
 {
 	ParameterDrivenLed::ParameterDrivenLed(Editor& _editor, const std::string& _component, std::string _parameter, uint8_t _part/* = CurrentPart*/)
 		: m_editor(_editor)
 		, m_parameterName(std::move(_parameter))
-		, m_led(_editor.findComponentT<juce::Button>(_component))
+		, m_led(_editor.findChild(_component))
 		, m_part(_part)
 	{
 		auto& c = _editor.getN2xController();
@@ -20,17 +20,17 @@ namespace n2xJucePlugin
 			bind();
 		});
 
-		m_led->onClick = [this]
+		juceRmlUi::EventListener::AddClick(m_led, [this]
 		{
 			if(!m_param)
 				return;
-			onClick(m_param, m_led->getToggleState());
-		};
+			onClick(m_param, juceRmlUi::ElemButton::isChecked(m_led));
+		});
 	}
 
-	void ParameterDrivenLed::updateState(juce::Button& _target, const pluginLib::Parameter* _source) const
+	void ParameterDrivenLed::updateState(Rml::Element& _target, const pluginLib::Parameter* _source) const
 	{
-		_target.setToggleState(updateToggleState(_source), juce::dontSendNotification);
+		juceRmlUi::ElemButton::setChecked(&_target, updateToggleState(_source));
 	}
 
 	void ParameterDrivenLed::bind()
@@ -49,7 +49,7 @@ namespace n2xJucePlugin
 
 	void ParameterDrivenLed::disableClick() const
 	{
-		m_led->setInterceptsMouseClicks(false, false);
+		m_led->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 	}
 
 	void ParameterDrivenLed::updateStateFromParameter(const pluginLib::Parameter* _parameter) const

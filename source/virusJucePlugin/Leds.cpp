@@ -20,29 +20,25 @@ namespace genericVirusUI
 
 		for(size_t i=0; i<m_lfos.size(); ++i)
 		{
-			if(auto* comp = _editor.findComponentT<juce::Component>(g_lfoNames[i], false))
+			if(auto* comp = _editor.findChild(g_lfoNames[i], false))
 			{
-				m_lfos[i].reset(new jucePluginEditorLib::Led(comp));
+				m_lfos[i].reset(new jucePluginEditorLib::Led(_editor, comp));
 			}
 		}
 
-		if(auto* logoAnim = _editor.findComponentT<juce::Component>("logolight", false))
+		if(auto* logoAnim = _editor.findChild("logolight", false))
 		{
 			m_logoAnim = logoAnim;
 
-			m_logoLed.reset(new jucePluginEditorLib::Led(logoAnim));
+			m_logoLed.reset(new jucePluginEditorLib::Led(_editor, logoAnim));
 
-			m_logoClickListener.reset(new LogoMouseListener(*this));
+			addLogoClickListener(logoAnim);
 
-			m_logoAnim->addMouseListener(m_logoClickListener.get(), false);
-			m_logoAnim->setInterceptsMouseClicks(true, true);
-
-			m_logo = _editor.findComponent("logo", false);
+			m_logo = _editor.findChild("logo", false);
 
 			if(m_logo)
 			{
-				m_logo->addMouseListener(m_logoClickListener.get(), false);
-				m_logo->setInterceptsMouseClicks(true, true);
+				addLogoClickListener(m_logo);
 			}
 		}
 
@@ -53,13 +49,6 @@ namespace genericVirusUI
 	{
 		for (auto& led : m_lfos)
 			led.reset();
-
-		if(m_logo)
-			m_logo->removeMouseListener(m_logoClickListener.get());
-		if(m_logoAnim)
-			m_logoAnim->removeMouseListener(m_logoClickListener.get());
-
-		m_logoClickListener.reset();
 	}
 
 	void Leds::toggleLogoAnimation()
@@ -93,5 +82,14 @@ namespace genericVirusUI
 				m_logoLed->setValue(std::pow(1.0f - v, 0.2f));
 			}
 		}
+	}
+
+	void Leds::addLogoClickListener(Rml::Element* _logo)
+	{
+		juceRmlUi::EventListener::Add(_logo, Rml::EventId::Click, [this](Rml::Event& _e)
+		{
+			_e.StopImmediatePropagation();
+			toggleLogoAnimation();
+		});
 	}
 }

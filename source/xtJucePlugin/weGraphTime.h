@@ -7,7 +7,7 @@ namespace xtJucePlugin
 	class GraphTime : public Graph
 	{
 	public:
-		explicit GraphTime(WaveEditor& _editor);
+		explicit GraphTime(WaveEditor& _editor, Rml::Element* _parent);
 
 		float normalize(float _in) const override;
 		float unnormalize(float _in) const override;

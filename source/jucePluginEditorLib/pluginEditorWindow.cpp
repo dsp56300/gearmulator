@@ -1,5 +1,7 @@
 #include "pluginEditorWindow.h"
 #include "pluginEditorState.h"
+#include "dsp56kEmu/logging.h"
+#include "juceRmlUi/juceRmlComponent.h"
 
 #include "patchmanager/patchmanager.h"
 
@@ -20,10 +22,8 @@ EditorWindow::EditorWindow(juce::AudioProcessor& _p, PluginEditorState& _s, juce
 	m_state.evSetGuiScale = [&](const int _scale)
 	{
 		if(getNumChildComponents() > 0)
-			setGuiScale(getChildComponent(0), static_cast<float>(_scale));
+			setGuiScale(static_cast<float>(_scale));
 	};
-
-	m_state.enableBindings();
 
 	setUiRoot(m_state.getUiRoot());
 }
@@ -33,8 +33,6 @@ EditorWindow::~EditorWindow()
 	m_state.evSetGuiScale = [&](int){};
 	m_state.evSkinLoaded = [&](juce::Component*){};
 
-	m_state.disableBindings();
-
 	setUiRoot(nullptr);
 }
 
@@ -42,43 +40,37 @@ void EditorWindow::resized()
 {
 	AudioProcessorEditor::resized();
 
-	auto* comp = getChildComponent(0);
-	if(!comp)
-		return;
-
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
 
-	const auto targetW = getWidth();
-	const auto targetH = getHeight();
+	const auto w = getWidth();
+	const auto h = getHeight();
 
-	const auto scaleX = static_cast<float>(getWidth()) / static_cast<float>(m_state.getWidth());
-	const auto scaleY = static_cast<float>(getHeight()) / static_cast<float>(m_state.getHeight());
+	const auto scaleX = static_cast<float>(w) / static_cast<float>(m_state.getWidth());
+	const auto scaleY = static_cast<float>(h) / static_cast<float>(m_state.getHeight());
 
 	const auto scale = std::min(scaleX, scaleY);
 
-	const auto w = scale * static_cast<float>(m_state.getWidth());
-	const auto h = scale * static_cast<float>(m_state.getHeight());
-
-	const auto offX = (static_cast<float>(targetW) - w) * 0.5f;
-	const auto offY = (static_cast<float>(targetH) - h) * 0.5f;
-
-	comp->setTransform(juce::AffineTransform::scale(scale,scale).translated(offX, offY));
+	if (!m_state.resizeEditor(w,h))
+		return;
 
 	const auto percent = 100.f * scale / m_state.getRootScale();
 	m_config.setValue("scale", percent);
 	m_config.saveIfNeeded();
 
-	AudioProcessorEditor::resized();
+	// Prettymuch unbelievable Juce VST3 bug, but our root component is a child of the VST3 editor component
+	// and that one is not resized! The host window is, the first child (our editor component) is, but the
+	// root component is not! This is no drama as long as you do not have a juce OpenGL context, because
+	// that one uses the "top level component" to set the clipping rectangle! W T F
+	startTimer(1);
 }
 
-void EditorWindow::setGuiScale(juce::Component* _comp, const float _percent)
+void EditorWindow::setGuiScale(const float _percent)
 {
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
 
 	const auto s = _percent / 100.0f * m_state.getRootScale();
-	_comp->setTransform(juce::AffineTransform::scale(s,s));
 
 	const auto w = static_cast<int>(static_cast<float>(m_state.getWidth()) * s);
 	const auto h = static_cast<int>(static_cast<float>(m_state.getHeight()) * s);
@@ -92,6 +84,7 @@ void EditorWindow::setGuiScale(juce::Component* _comp, const float _percent)
 void EditorWindow::setUiRoot(juce::Component* _component)
 {
 	removeAllChildren();
+	setConstrainer(nullptr);
 
 	if(!_component)
 		return;
@@ -99,48 +92,46 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
 
-    const auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
-
-	addAndMakeVisible(_component);
-	setGuiScale(_component, scale);
-
 	m_sizeConstrainer.setMinimumSize(m_state.getWidth() / 10, m_state.getHeight() / 10);
 	m_sizeConstrainer.setMaximumSize(m_state.getWidth() * 4, m_state.getHeight() * 4);
 
 	m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(m_state.getWidth()) / static_cast<double>(m_state.getHeight()));
 	
+	_component->setSize(getWidth(), getHeight());
+
+	addAndMakeVisible(_component);
+
+    const auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
+	setGuiScale(scale);
+
 	setResizable(true, true);
-	setConstrainer(nullptr);
 	setConstrainer(&m_sizeConstrainer);
 }
 
-void EditorWindow::mouseDown(const juce::MouseEvent& event)
+void EditorWindow::timerCallback()
 {
-	if(!event.mods.isPopupMenu())
-	{
-		AudioProcessorEditor::mouseDown(event);
-		return;
-	}
-
-	if(event.eventComponent)
-	{
-		// file browsers have their own menu, do not display two menus at once
-		if(event.eventComponent->findParentComponentOfClass<juce::FileBrowserComponent>())
-			return;
-
-		// patch manager has its own context menu, too
-		if (event.eventComponent->findParentComponentOfClass<patchManager::PatchManager>())
-			return;
-	}
-
-	if(dynamic_cast<juce::TextEditor*>(event.eventComponent))
-		return;
-	if(dynamic_cast<juce::Button*>(event.eventComponent))
-		return;
-	if(event.eventComponent->findParentComponentOfClass<juce::TreeView>())
-		return;
-
-	m_state.openMenu(&event);
+	fixParentWindowSize();
+	stopTimer();
 }
 
+void EditorWindow::fixParentWindowSize() const
+{
+	const auto w = getWidth();
+	const auto h = getHeight();
+
+	auto* parent = getParentComponent();
+
+	while (parent)
+	{
+		if (parent->getWidth() < w || parent->getHeight() < h)
+		{
+			LOG("Parent " << parent->getName() << " has wrong size: " << parent->getName() <<
+				", expected: " << w << "x" << h <<
+				", actual: " << parent->getWidth() << "x" << parent->getHeight());
+			parent->setSize(w, h);
+		}
+
+		parent = parent->getParentComponent();
+	}
+}
 }

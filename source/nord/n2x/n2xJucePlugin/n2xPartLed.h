@@ -10,7 +10,7 @@ namespace n2xJucePlugin
 		PartLed(Editor& _editor, uint8_t _slot);
 
 	protected:
-		void updateState(juce::Button& _target, const pluginLib::Parameter* _source) const override;
+		void updateState(Rml::Element& _target, const pluginLib::Parameter* _source) const override;
 		bool updateToggleState(const pluginLib::Parameter* _parameter) const override;
 
 	private:

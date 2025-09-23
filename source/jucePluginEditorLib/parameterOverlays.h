@@ -5,16 +5,14 @@
 
 #include "parameterOverlay.h"
 
-#include "jucePluginLib/parameterbinding.h"
-
-namespace pluginLib
+namespace Rml
 {
-	class ParameterBinding;
+	class Element;
 }
 
-namespace juce
+namespace rmlPlugin
 {
-	class Component;
+	class RmlParameterBinding;
 }
 
 namespace jucePluginEditorLib
@@ -24,26 +22,26 @@ namespace jucePluginEditorLib
 	class ParameterOverlays
 	{
 	public:
-		explicit ParameterOverlays(Editor& _editor, pluginLib::ParameterBinding& _binding);
+		explicit ParameterOverlays(Editor& _editor, rmlPlugin::RmlParameterBinding& _binding);
 		~ParameterOverlays();
 
-		bool registerComponent(juce::Component* _component);
+		bool registerComponent(Rml::Element* _component);
 
 		Editor& getEditor() const { return m_editor; }
 
 		void refreshAll() const;
 
 	private:
-		void onBind(const pluginLib::ParameterBinding::BoundParameter& _parameter);
-		void onUnbind(const pluginLib::ParameterBinding::BoundParameter& _parameter);
+		void onBind(pluginLib::Parameter* _param, Rml::Element* _elem);
+		void onUnbind(pluginLib::Parameter* _param, Rml::Element* _elem);
 
-		ParameterOverlay* getOverlay(const juce::Component* _comp);
-		ParameterOverlay* getOverlay(const pluginLib::ParameterBinding::BoundParameter& _parameter);
+		ParameterOverlay* getOverlay(const Rml::Element* _comp);
 
 		Editor& m_editor;
-		pluginLib::ParameterBinding& m_binding;
+		rmlPlugin::RmlParameterBinding& m_binding;
 
-		std::map<const juce::Component*, std::unique_ptr<ParameterOverlay>> m_overlays;
+		std::map<const Rml::Element*, std::unique_ptr<ParameterOverlay>> m_overlays;
+
 		size_t m_onBindListenerId;
 		size_t m_onUnbindListenerId;
 	};

@@ -1,64 +1,49 @@
 #include "xtEditor.h"
 
-#include "PluginProcessor.h"
-#include "xtArp.h"
+#include "juceRmlPlugin/skinConverter/skinConverterOptions.h"
 
+#include "PluginProcessor.h"
+
+#include "xtArp.h"
 #include "xtController.h"
 #include "xtFocusedParameter.h"
 #include "xtFrontPanel.h"
-#include "xtPartName.h"
 #include "xtPatchManager.h"
 #include "xtWaveEditor.h"
 
 #include "jucePluginEditorLib/midiPorts.h"
 
-#include "jucePluginLib/parameterbinding.h"
+#include "juceRmlUi/rmlElemButton.h"
 
 namespace xtJucePlugin
 {
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
-	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
-	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
-	, m_parameterBinding(_binding)
-	, m_playModeChangeListener(m_controller.onPlayModeChanged)
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, const jucePluginEditorLib::Skin& _skin)
+		: jucePluginEditorLib::Editor(_processor, _skin)
+		, m_controller(dynamic_cast<Controller&>(_processor.getController()))
+		, m_playModeChangeListener(m_controller.onPlayModeChanged)
 	{
-		create();
+	}
+	void Editor::create()
+	{
+		jucePluginEditorLib::Editor::create();
 
-		m_focusedParameter.reset(new FocusedParameter(m_controller, _binding, *this));
+		m_focusedParameter.reset(new FocusedParameter(m_controller, *this));
 
 		m_frontPanel.reset(new FrontPanel(*this, m_controller));
 
 		m_parts.reset(new Parts(*this));
 
-		addMouseListener(this, true);
+		m_ledMultiMode = findChild("MultiModeLED");
 
+		m_btMultiMode = addClick("MultiModeButton", [this](Rml::Event&)
 		{
-			// Init Patch Manager
-			const auto container = findComponent("ContainerPatchManager");
-			constexpr auto scale = 1.3f;
-			const float x = static_cast<float>(container->getX());
-			const float y = static_cast<float>(container->getY());
-			const float w = static_cast<float>(container->getWidth());
-			const float h = static_cast<float>(container->getHeight());
-			container->setTransform(juce::AffineTransform::scale(scale, scale));
-			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
-			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
-
-			setPatchManager(new PatchManager(*this, container));
-		}
-
-		m_btMultiMode = findComponentT<juce::Button>("MultiModeButton");
-		m_ledMultiMode = findComponentT<juce::Button>("MultiModeLED");
-
-		m_btMultiMode->onClick = [this]
-		{
-			m_controller.setPlayMode(m_btMultiMode->getToggleState());
-		};
+			m_controller.setPlayMode(juceRmlUi::ElemButton::isChecked(m_btMultiMode));
+		}, true);
 
 		auto updateMultiButton = [this](const bool _isMultiMode)
 		{
-			m_btMultiMode->setToggleState(_isMultiMode, juce::dontSendNotification);
-			m_ledMultiMode->setToggleState(_isMultiMode, juce::dontSendNotification);
+			juceRmlUi::ElemButton::setChecked(m_btMultiMode, _isMultiMode);
+			juceRmlUi::ElemButton::setChecked(m_ledMultiMode, _isMultiMode);
 		};
 
 		updateMultiButton(m_controller.isMultiMode());
@@ -72,52 +57,32 @@ namespace xtJucePlugin
 				m_parts->selectPart(0);
 		};
 
-		m_btSave = findComponentT<juce::DrawableButton>("SaveButton");
-		m_btSave->onClick = [this]
+		addClick("SaveButton", [this](const Rml::Event& _event)
 		{
-			juce::PopupMenu menu;
+			juceRmlUi::Menu menu;
 
 			const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
 
 			if(countAdded)
-				menu.showMenuAsync(juce::PopupMenu::Options());
-		};
+				menu.runModal(_event);
+		});
 
-		if(auto* btWavePlus = findComponentT<juce::Button>("wtPlus", false))
+		addClick("wtPlus", [this](Rml::Event&)		{ changeWave(1); });
+		addClick("wtMinus", [this](Rml::Event&)	{ changeWave(-1); });
+		addClick("patchPrev", [this](Rml::Event&)	{ getPatchManager()->selectPrevPreset(m_controller.getCurrentPart()); });
+		addClick("patchNext", [this](Rml::Event&)	{ getPatchManager()->selectNextPreset(m_controller.getCurrentPart()); });
+
+		if (auto* waveEditorParent = findChild("waveEditorContainer"))
 		{
-			btWavePlus->onClick = [this]
-			{
-				changeWave(1);
-			};
+			const auto dir = getProcessor().getDataFolder(false) + "wavetables/";
+
+			m_waveEditor = new WaveEditor(*this, waveEditorParent, juce::File(dir));
+			getXtController().setWaveEditor(m_waveEditor);
 		}
-
-		if(auto* btWaveMinus = findComponentT<juce::Button>("wtMinus", false))
+		else if (auto* waveEditorButtonParent = findChild("waveEditorButtonParent"))
 		{
-			btWaveMinus->onClick = [this]
-			{
-				changeWave(-1);
-			};
+			waveEditorButtonParent->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
 		}
-
-		auto* btPatchPrev = findComponentT<juce::Button>("patchPrev");
-		btPatchPrev->onClick = [this]
-		{
-			getPatchManager()->selectPrevPreset(m_controller.getCurrentPart());
-		};
-
-		auto* btPatchNext = findComponentT<juce::Button>("patchNext");
-		btPatchNext->onClick = [this]
-		{
-			getPatchManager()->selectNextPreset(m_controller.getCurrentPart());
-		};
-
-#if 1
-		if(m_waveEditor)
-			m_waveEditor->initialize();
-#else
-		auto* waveEditorButtonParent = findComponent("waveEditorButtonParent");
-		waveEditorButtonParent->setVisible(false);
-#endif
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
@@ -128,9 +93,26 @@ namespace xtJucePlugin
 	{
 		m_arp.reset();
 		if(m_waveEditor)
-			m_waveEditor->destroy();
+		{
+			delete m_waveEditor;
+			m_waveEditor = nullptr;
+		}
 		getXtController().setWaveEditor(nullptr);
 		m_frontPanel.reset();
+	}
+
+	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
+	{
+		return new PatchManager(*this, _parent);
+	}
+
+	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
+	{
+		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);
+
+		_skinConverterOptions.includeStyles.push_back("xt-waveeditor-defaults.rcss");
+
+		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
 	}
 
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
@@ -140,7 +122,7 @@ namespace xtJucePlugin
 			"\n"
 			"The following features are disabled:\n"
 			"- Saving/Exporting Presets\n"
-			"- Plugin state is not preserve"
+			"- Plugin state is not preserved"
 		};
 	}
 
@@ -155,51 +137,13 @@ namespace xtJucePlugin
 		return *m_parts;
 	}
 
-	genericUI::Button<juce::DrawableButton>* Editor::createJuceComponent(
-		genericUI::Button<juce::DrawableButton>* _button, genericUI::UiObject& _object, const std::string& _name,
-		const juce::DrawableButton::ButtonStyle _buttonStyle)
-	{
-		if(_name == "PartButtonSmall")
-			return new PartButton(*this, _name, _buttonStyle);
-
-		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object, _name, _buttonStyle);
-	}
-
-	genericUI::Button<juce::TextButton>* Editor::createJuceComponent(genericUI::Button<juce::TextButton>* _button,
-		genericUI::UiObject& _object)
-	{
-		if(_object.getName() == "PatchName")
-			return new PartName(*this);
-
-		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object);
-	}
-
-	juce::Component* Editor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
-	{
-		if(_object.getName() == "waveEditorContainer")
-		{
-			const auto dir = getProcessor().getDataFolder(false) + "wavetables/";
-
-			m_waveEditor = new WaveEditor(*this, juce::File(dir));
-			getXtController().setWaveEditor(m_waveEditor);
-			return m_waveEditor;
-		}
-		return jucePluginEditorLib::Editor::createJuceComponent(_component, _object);
-	}
-
 	void Editor::setCurrentPart(const uint8_t _part)
 	{
 		m_controller.setCurrentPart(_part);
-		m_parameterBinding.setPart(_part);
 
 		jucePluginEditorLib::Editor::setCurrentPart(_part);
 
 		m_frontPanel->getLcd()->refresh();
-	}
-
-	void Editor::mouseEnter(const juce::MouseEvent& _event)
-	{
-		m_focusedParameter->onMouseEnter(_event);
 	}
 
 	void Editor::changeWave(const int _step) const

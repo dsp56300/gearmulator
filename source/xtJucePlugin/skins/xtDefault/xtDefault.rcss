@@ -1,0 +1,443 @@
+@spritesheet led
+{
+	led_active: 0px 128px 128px 128px;
+	led_checked: 0px 128px 128px 128px;
+	led_checked-active: 0px 128px 128px 128px;
+	led_checked-hover: 0px 128px 128px 128px;
+	led_default: 0px 0px 128px 128px;
+	led_hover: 0px 128px 128px 128px;
+	src: led.png;
+}
+@spritesheet xt_encoder_ranged_page0
+{
+	src: xt_encoder_ranged_page0.png;
+	xt_encoder_ranged_000: 0px 0px 128px 128px;
+	xt_encoder_ranged_001: 128px 0px 128px 128px;
+	xt_encoder_ranged_002: 256px 0px 128px 128px;
+	xt_encoder_ranged_003: 384px 0px 128px 128px;
+	xt_encoder_ranged_004: 512px 0px 128px 128px;
+	xt_encoder_ranged_005: 640px 0px 128px 128px;
+	xt_encoder_ranged_006: 768px 0px 128px 128px;
+	xt_encoder_ranged_007: 896px 0px 128px 128px;
+	xt_encoder_ranged_008: 1024px 0px 128px 128px;
+	xt_encoder_ranged_009: 1152px 0px 128px 128px;
+	xt_encoder_ranged_010: 1280px 0px 128px 128px;
+	xt_encoder_ranged_011: 1408px 0px 128px 128px;
+	xt_encoder_ranged_012: 1536px 0px 128px 128px;
+	xt_encoder_ranged_013: 1664px 0px 128px 128px;
+	xt_encoder_ranged_014: 1792px 0px 128px 128px;
+	xt_encoder_ranged_015: 1920px 0px 128px 128px;
+	xt_encoder_ranged_016: 0px 128px 128px 128px;
+	xt_encoder_ranged_017: 128px 128px 128px 128px;
+	xt_encoder_ranged_018: 256px 128px 128px 128px;
+	xt_encoder_ranged_019: 384px 128px 128px 128px;
+	xt_encoder_ranged_020: 512px 128px 128px 128px;
+	xt_encoder_ranged_021: 640px 128px 128px 128px;
+	xt_encoder_ranged_022: 768px 128px 128px 128px;
+	xt_encoder_ranged_023: 896px 128px 128px 128px;
+	xt_encoder_ranged_024: 1024px 128px 128px 128px;
+	xt_encoder_ranged_025: 1152px 128px 128px 128px;
+	xt_encoder_ranged_026: 1280px 128px 128px 128px;
+	xt_encoder_ranged_027: 1408px 128px 128px 128px;
+	xt_encoder_ranged_028: 1536px 128px 128px 128px;
+	xt_encoder_ranged_029: 1664px 128px 128px 128px;
+	xt_encoder_ranged_030: 1792px 128px 128px 128px;
+	xt_encoder_ranged_031: 1920px 128px 128px 128px;
+	xt_encoder_ranged_032: 0px 256px 128px 128px;
+	xt_encoder_ranged_033: 128px 256px 128px 128px;
+	xt_encoder_ranged_034: 256px 256px 128px 128px;
+	xt_encoder_ranged_035: 384px 256px 128px 128px;
+	xt_encoder_ranged_036: 512px 256px 128px 128px;
+	xt_encoder_ranged_037: 640px 256px 128px 128px;
+	xt_encoder_ranged_038: 768px 256px 128px 128px;
+	xt_encoder_ranged_039: 896px 256px 128px 128px;
+	xt_encoder_ranged_040: 1024px 256px 128px 128px;
+	xt_encoder_ranged_041: 1152px 256px 128px 128px;
+	xt_encoder_ranged_042: 1280px 256px 128px 128px;
+	xt_encoder_ranged_043: 1408px 256px 128px 128px;
+	xt_encoder_ranged_044: 1536px 256px 128px 128px;
+	xt_encoder_ranged_045: 1664px 256px 128px 128px;
+	xt_encoder_ranged_046: 1792px 256px 128px 128px;
+	xt_encoder_ranged_047: 1920px 256px 128px 128px;
+	xt_encoder_ranged_048: 0px 384px 128px 128px;
+	xt_encoder_ranged_049: 128px 384px 128px 128px;
+	xt_encoder_ranged_050: 256px 384px 128px 128px;
+	xt_encoder_ranged_051: 384px 384px 128px 128px;
+	xt_encoder_ranged_052: 512px 384px 128px 128px;
+	xt_encoder_ranged_053: 640px 384px 128px 128px;
+	xt_encoder_ranged_054: 768px 384px 128px 128px;
+	xt_encoder_ranged_055: 896px 384px 128px 128px;
+	xt_encoder_ranged_056: 1024px 384px 128px 128px;
+	xt_encoder_ranged_057: 1152px 384px 128px 128px;
+	xt_encoder_ranged_058: 1280px 384px 128px 128px;
+	xt_encoder_ranged_059: 1408px 384px 128px 128px;
+	xt_encoder_ranged_060: 1536px 384px 128px 128px;
+	xt_encoder_ranged_061: 1664px 384px 128px 128px;
+	xt_encoder_ranged_062: 1792px 384px 128px 128px;
+	xt_encoder_ranged_063: 1920px 384px 128px 128px;
+	xt_encoder_ranged_064: 0px 512px 128px 128px;
+	xt_encoder_ranged_065: 128px 512px 128px 128px;
+	xt_encoder_ranged_066: 256px 512px 128px 128px;
+	xt_encoder_ranged_067: 384px 512px 128px 128px;
+	xt_encoder_ranged_068: 512px 512px 128px 128px;
+	xt_encoder_ranged_069: 640px 512px 128px 128px;
+	xt_encoder_ranged_070: 768px 512px 128px 128px;
+	xt_encoder_ranged_071: 896px 512px 128px 128px;
+	xt_encoder_ranged_072: 1024px 512px 128px 128px;
+	xt_encoder_ranged_073: 1152px 512px 128px 128px;
+	xt_encoder_ranged_074: 1280px 512px 128px 128px;
+	xt_encoder_ranged_075: 1408px 512px 128px 128px;
+	xt_encoder_ranged_076: 1536px 512px 128px 128px;
+	xt_encoder_ranged_077: 1664px 512px 128px 128px;
+	xt_encoder_ranged_078: 1792px 512px 128px 128px;
+	xt_encoder_ranged_079: 1920px 512px 128px 128px;
+	xt_encoder_ranged_080: 0px 640px 128px 128px;
+	xt_encoder_ranged_081: 128px 640px 128px 128px;
+	xt_encoder_ranged_082: 256px 640px 128px 128px;
+	xt_encoder_ranged_083: 384px 640px 128px 128px;
+	xt_encoder_ranged_084: 512px 640px 128px 128px;
+	xt_encoder_ranged_085: 640px 640px 128px 128px;
+	xt_encoder_ranged_086: 768px 640px 128px 128px;
+	xt_encoder_ranged_087: 896px 640px 128px 128px;
+	xt_encoder_ranged_088: 1024px 640px 128px 128px;
+	xt_encoder_ranged_089: 1152px 640px 128px 128px;
+}
+@spritesheet xt_encoder_ranged_red_page0
+{
+	src: xt_encoder_ranged_red_page0.png;
+	xt_encoder_ranged_red_000: 0px 0px 128px 128px;
+	xt_encoder_ranged_red_001: 128px 0px 128px 128px;
+	xt_encoder_ranged_red_002: 256px 0px 128px 128px;
+	xt_encoder_ranged_red_003: 384px 0px 128px 128px;
+	xt_encoder_ranged_red_004: 512px 0px 128px 128px;
+	xt_encoder_ranged_red_005: 640px 0px 128px 128px;
+	xt_encoder_ranged_red_006: 768px 0px 128px 128px;
+	xt_encoder_ranged_red_007: 896px 0px 128px 128px;
+	xt_encoder_ranged_red_008: 1024px 0px 128px 128px;
+	xt_encoder_ranged_red_009: 1152px 0px 128px 128px;
+	xt_encoder_ranged_red_010: 1280px 0px 128px 128px;
+	xt_encoder_ranged_red_011: 1408px 0px 128px 128px;
+	xt_encoder_ranged_red_012: 1536px 0px 128px 128px;
+	xt_encoder_ranged_red_013: 1664px 0px 128px 128px;
+	xt_encoder_ranged_red_014: 1792px 0px 128px 128px;
+	xt_encoder_ranged_red_015: 1920px 0px 128px 128px;
+	xt_encoder_ranged_red_016: 0px 128px 128px 128px;
+	xt_encoder_ranged_red_017: 128px 128px 128px 128px;
+	xt_encoder_ranged_red_018: 256px 128px 128px 128px;
+	xt_encoder_ranged_red_019: 384px 128px 128px 128px;
+	xt_encoder_ranged_red_020: 512px 128px 128px 128px;
+	xt_encoder_ranged_red_021: 640px 128px 128px 128px;
+	xt_encoder_ranged_red_022: 768px 128px 128px 128px;
+	xt_encoder_ranged_red_023: 896px 128px 128px 128px;
+	xt_encoder_ranged_red_024: 1024px 128px 128px 128px;
+	xt_encoder_ranged_red_025: 1152px 128px 128px 128px;
+	xt_encoder_ranged_red_026: 1280px 128px 128px 128px;
+	xt_encoder_ranged_red_027: 1408px 128px 128px 128px;
+	xt_encoder_ranged_red_028: 1536px 128px 128px 128px;
+	xt_encoder_ranged_red_029: 1664px 128px 128px 128px;
+	xt_encoder_ranged_red_030: 1792px 128px 128px 128px;
+	xt_encoder_ranged_red_031: 1920px 128px 128px 128px;
+	xt_encoder_ranged_red_032: 0px 256px 128px 128px;
+	xt_encoder_ranged_red_033: 128px 256px 128px 128px;
+	xt_encoder_ranged_red_034: 256px 256px 128px 128px;
+	xt_encoder_ranged_red_035: 384px 256px 128px 128px;
+	xt_encoder_ranged_red_036: 512px 256px 128px 128px;
+	xt_encoder_ranged_red_037: 640px 256px 128px 128px;
+	xt_encoder_ranged_red_038: 768px 256px 128px 128px;
+	xt_encoder_ranged_red_039: 896px 256px 128px 128px;
+	xt_encoder_ranged_red_040: 1024px 256px 128px 128px;
+	xt_encoder_ranged_red_041: 1152px 256px 128px 128px;
+	xt_encoder_ranged_red_042: 1280px 256px 128px 128px;
+	xt_encoder_ranged_red_043: 1408px 256px 128px 128px;
+	xt_encoder_ranged_red_044: 1536px 256px 128px 128px;
+	xt_encoder_ranged_red_045: 1664px 256px 128px 128px;
+	xt_encoder_ranged_red_046: 1792px 256px 128px 128px;
+	xt_encoder_ranged_red_047: 1920px 256px 128px 128px;
+	xt_encoder_ranged_red_048: 0px 384px 128px 128px;
+	xt_encoder_ranged_red_049: 128px 384px 128px 128px;
+	xt_encoder_ranged_red_050: 256px 384px 128px 128px;
+	xt_encoder_ranged_red_051: 384px 384px 128px 128px;
+	xt_encoder_ranged_red_052: 512px 384px 128px 128px;
+	xt_encoder_ranged_red_053: 640px 384px 128px 128px;
+	xt_encoder_ranged_red_054: 768px 384px 128px 128px;
+	xt_encoder_ranged_red_055: 896px 384px 128px 128px;
+	xt_encoder_ranged_red_056: 1024px 384px 128px 128px;
+	xt_encoder_ranged_red_057: 1152px 384px 128px 128px;
+	xt_encoder_ranged_red_058: 1280px 384px 128px 128px;
+	xt_encoder_ranged_red_059: 1408px 384px 128px 128px;
+	xt_encoder_ranged_red_060: 1536px 384px 128px 128px;
+	xt_encoder_ranged_red_061: 1664px 384px 128px 128px;
+	xt_encoder_ranged_red_062: 1792px 384px 128px 128px;
+	xt_encoder_ranged_red_063: 1920px 384px 128px 128px;
+	xt_encoder_ranged_red_064: 0px 512px 128px 128px;
+	xt_encoder_ranged_red_065: 128px 512px 128px 128px;
+	xt_encoder_ranged_red_066: 256px 512px 128px 128px;
+	xt_encoder_ranged_red_067: 384px 512px 128px 128px;
+	xt_encoder_ranged_red_068: 512px 512px 128px 128px;
+	xt_encoder_ranged_red_069: 640px 512px 128px 128px;
+	xt_encoder_ranged_red_070: 768px 512px 128px 128px;
+	xt_encoder_ranged_red_071: 896px 512px 128px 128px;
+	xt_encoder_ranged_red_072: 1024px 512px 128px 128px;
+	xt_encoder_ranged_red_073: 1152px 512px 128px 128px;
+	xt_encoder_ranged_red_074: 1280px 512px 128px 128px;
+	xt_encoder_ranged_red_075: 1408px 512px 128px 128px;
+	xt_encoder_ranged_red_076: 1536px 512px 128px 128px;
+	xt_encoder_ranged_red_077: 1664px 512px 128px 128px;
+	xt_encoder_ranged_red_078: 1792px 512px 128px 128px;
+	xt_encoder_ranged_red_079: 1920px 512px 128px 128px;
+	xt_encoder_ranged_red_080: 0px 640px 128px 128px;
+	xt_encoder_ranged_red_081: 128px 640px 128px 128px;
+	xt_encoder_ranged_red_082: 256px 640px 128px 128px;
+	xt_encoder_ranged_red_083: 384px 640px 128px 128px;
+	xt_encoder_ranged_red_084: 512px 640px 128px 128px;
+	xt_encoder_ranged_red_085: 640px 640px 128px 128px;
+	xt_encoder_ranged_red_086: 768px 640px 128px 128px;
+	xt_encoder_ranged_red_087: 896px 640px 128px 128px;
+	xt_encoder_ranged_red_088: 1024px 640px 128px 128px;
+	xt_encoder_ranged_red_089: 1152px 640px 128px 128px;
+}
+@spritesheet xtknob
+{
+	src: xtknob.png;
+	xtknob_active: 0px 128px 128px 128px;
+	xtknob_checked: 0px 128px 128px 128px;
+	xtknob_checked-active: 0px 128px 128px 128px;
+	xtknob_checked-hover: 0px 128px 128px 128px;
+	xtknob_default: 0px 0px 128px 128px;
+	xtknob_hover: 0px 0px 128px 128px;
+}
+@spritesheet xtknob_minus
+{
+	src: xtknob_minus.png;
+	xtknob_minus_active: 0px 64px 64px 64px;
+	xtknob_minus_checked: 0px 64px 64px 64px;
+	xtknob_minus_checked-active: 0px 64px 64px 64px;
+	xtknob_minus_checked-hover: 0px 64px 64px 64px;
+	xtknob_minus_default: 0px 0px 64px 64px;
+	xtknob_minus_hover: 0px 0px 64px 64px;
+}
+@spritesheet xtknob_plus
+{
+	src: xtknob_plus.png;
+	xtknob_plus_active: 0px 64px 64px 64px;
+	xtknob_plus_checked: 0px 64px 64px 64px;
+	xtknob_plus_checked-active: 0px 64px 64px 64px;
+	xtknob_plus_checked-hover: 0px 64px 64px 64px;
+	xtknob_plus_default: 0px 0px 64px 64px;
+	xtknob_plus_hover: 0px 0px 64px 64px;
+}
+@spritesheet xtknob_small
+{
+	src: xtknob_small.png;
+	xtknob_small_active: 0px 64px 64px 64px;
+	xtknob_small_checked: 0px 64px 64px 64px;
+	xtknob_small_checked-active: 0px 64px 64px 64px;
+	xtknob_small_checked-hover: 0px 64px 64px 64px;
+	xtknob_small_default: 0px 0px 64px 64px;
+	xtknob_small_hover: 0px 0px 64px 64px;
+}
+.knob
+{
+	frames: 90;
+	spriteprefix: xt_encoder_ranged_;
+}
+.knob1
+{
+	frames: 90;
+	spriteprefix: xt_encoder_ranged_red_;
+}
+.led
+{
+	decorator: image(led_default fill);
+}
+.led:checked
+{
+	decorator: image(led_checked fill);
+}
+.led:checked:active
+{
+	decorator: image(led_checked-active fill);
+}
+.led:checked:hover
+{
+	decorator: image(led_checked-hover fill);
+}
+.led:hover
+{
+	decorator: image(led_hover fill);
+}
+.list, .grid, .pm-infopanel
+{
+	background-color: #1d1d1d;
+}
+.listentry, .gridentry
+{
+	color: #ff8c00;
+	font-size: 28.000000dp;
+	text-align: left;
+}
+.listentry:selected, .gridentry:selected
+{
+	background-color: #542d01;
+}
+.pm-hlayout
+{
+	background-color: black;
+}
+.pm-info-headline
+{
+	color: #808080;
+	font-size: 32.000000dp;
+}
+.pm-info-name
+{
+	color: #ca6d08;
+	font-size: 64.000000dp;
+}
+.pm-info-text
+{
+	color: #c96d08;
+	font-size: 32.000000dp;
+}
+.pm-status
+{
+	border: 0dp transparent;
+	color: #ff8c00;
+	font-size: 32.000000dp;
+	text-align: left;
+}
+.pm-vlayout
+{
+	gap: 4dp;
+}
+.txt
+{
+	color: #000000;
+	font-size: 30.000000dp;
+	font-weight: bold;
+	text-align: left;
+}
+.txt1
+{
+	color: #323232;
+	font-size: 34.000000dp;
+	font-weight: bold;
+	text-align: center;
+}
+.txt2
+{
+	color: #ff8c00;
+	font-size: 40.000000dp;
+	text-align: center;
+}
+.xtknob
+{
+	decorator: image(xtknob_default fill);
+}
+.xtknob:checked
+{
+	decorator: image(xtknob_checked fill);
+}
+.xtknob:checked:active
+{
+	decorator: image(xtknob_checked-active fill);
+}
+.xtknob:checked:hover
+{
+	decorator: image(xtknob_checked-hover fill);
+}
+.xtknob:hover
+{
+	decorator: image(xtknob_hover fill);
+}
+.xtknob_minus
+{
+	decorator: image(xtknob_minus_default fill);
+}
+.xtknob_minus:checked
+{
+	decorator: image(xtknob_minus_checked fill);
+}
+.xtknob_minus:checked:active
+{
+	decorator: image(xtknob_minus_checked-active fill);
+}
+.xtknob_minus:checked:hover
+{
+	decorator: image(xtknob_minus_checked-hover fill);
+}
+.xtknob_minus:hover
+{
+	decorator: image(xtknob_minus_hover fill);
+}
+.xtknob_plus
+{
+	decorator: image(xtknob_plus_default fill);
+}
+.xtknob_plus:checked
+{
+	decorator: image(xtknob_plus_checked fill);
+}
+.xtknob_plus:checked:active
+{
+	decorator: image(xtknob_plus_checked-active fill);
+}
+.xtknob_plus:checked:hover
+{
+	decorator: image(xtknob_plus_checked-hover fill);
+}
+.xtknob_plus:hover
+{
+	decorator: image(xtknob_plus_hover fill);
+}
+.xtknob_small
+{
+	decorator: image(xtknob_small_default fill);
+}
+.xtknob_small:checked
+{
+	decorator: image(xtknob_small_checked fill);
+}
+.xtknob_small:checked:active
+{
+	decorator: image(xtknob_small_checked-active fill);
+}
+.xtknob_small:checked:hover
+{
+	decorator: image(xtknob_small_checked-hover fill);
+}
+.xtknob_small:hover
+{
+	decorator: image(xtknob_small_hover fill);
+}
+body
+{
+	font-size: 28dp;
+}
+input.text
+{
+	background-color: #1d1d1d;
+	border: 0dp transparent;
+	color: #ff8c00;
+	font-size: 28.000000dp;
+	text-align: left;
+}
+scrollbarvertical sliderbar, scrollbarhorizontal sliderbar, splitter:active
+{
+	background-color: #c66c08;
+}
+tree
+{
+	background-color: #1d1d1d;
+}
+treenode
+{
+	color: #ff8c00;
+	font-size: 28.000000dp;
+	text-align: left;
+}
+treenode:selected
+{
+	background-color: #572d00;
+}
+

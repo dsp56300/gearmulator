@@ -1,0 +1,348 @@
+/* root element, width and height should stay at 100% */
+
+body {
+    font-family: Roboto;
+    font-size: 16dp;
+    font-weight: 500;
+    background-color: #444;
+    color: white;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+}
+
+/* default table setup as explained in the manual: https://mikke89.github.io/RmlUiDoc/pages/rcss/tables.html */
+table {
+	box-sizing: border-box;
+	display: table;
+}
+tr {
+	box-sizing: border-box;
+	display: table-row;
+}
+td {
+	box-sizing: border-box;
+	display: table-cell;
+}
+col {
+	box-sizing: border-box;
+	display: table-column;
+}
+colgroup {
+	display: table-column-group;
+}
+thead, tbody, tfoot {
+	display: table-row-group;
+}
+
+/* all menus */
+
+.menubox {
+	box-shadow: #000a 0dp 0dp 8dp 3dp;
+	background-color: rgba(50,62,68,180);
+	backdrop-filter: blur(12dp);
+	border: 1dp rgb(172,176,179);
+	border-radius: 0dp;
+	display: flex;
+	flex-direction: row;
+	padding: 5dp;
+	position: absolute;
+	z-index: 100;
+	gap: 4dp;
+	font-weight: 500;
+}
+
+.menucolumn {
+	display: flex;
+	flex-direction: column;
+	gap: 1dp;
+}
+
+.menuitem {
+	height: 1em;
+	color: #fff;
+	padding: 5dp;
+	padding-left: 1.5em;
+	padding-right: 2em;
+	white-space: nowrap;
+}
+
+.menuitem:hover, .menuitem:active {
+	background-color: rgb(24,31,34);
+}
+
+.menuitem:hover:disabled {
+	background-color: transparent;
+}
+
+.menuitem:checked {
+	decorator: image(check.png contain left);
+}
+.menuitem:disabled {
+	color: #888;
+}
+
+.menuitem:submenu {
+	decorator: image(chevron_right.png contain right);
+}
+
+.menuitem:separator {
+	height: 2dp;
+	background-color: rgb(111,129,123);
+	padding: 0dp;
+	margin: 4dp 0dp 4dp 0dp;
+}
+
+/* combo boxes use a menu to display the items to select. Number of items per column can be specified as attribute too */
+combo {
+	items-per-column: 8;
+	background-color: rgb(50,62,68);
+	border: 1dp rgb(172,176,179);
+	width: 100dp;
+	padding: 5dp;
+	decorator: image(arrow_drop_down.png contain right);
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+combotext {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+/* default scrollbars for all scrollable containers */
+scrollbarvertical {
+	width: 12dp;
+}
+
+scrollbarhorizontal {
+	height: 12dp;
+}
+
+scrollbarvertical slidertrack, scrollbarhorizontal slidertrack {
+}
+
+scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
+	background-color: #999;
+	border-radius: 6dp;
+}
+
+scrollbarvertical sliderbar {
+	min-height: 12dp;
+}
+
+scrollbarhorizontal sliderbar {
+	min-width: 12dp;
+}
+
+/* vertical lists */
+.list {
+	overflow-x: hidden;
+	overflow-y: auto;
+	display: block;
+	padding: 0dp 4dp 0dp 4dp;
+	box-sizing: border-box;
+	position: relative;
+	clip: always;
+}
+.listentry {
+	width: 100%;
+	height: 1em;
+	drag: clone;
+	display: block;
+	padding: 0dp;
+	font-size: 0.75em;
+	border: 2px transparent;
+	white-space: nowrap;
+}
+
+.listentry:selected, .gridentry:selected {
+	background-color: #666;
+}
+
+.listentry:drag {
+	background-color: #333;
+	min-width: 100dp;
+	opacity: 0.5;
+	position: absolute;
+	white-space: nowrap;
+}
+
+/* grid lists */
+.grid {
+	overflow-x: auto;
+	overflow-y: hidden;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	padding: 4dp 0dp 4dp 0dp;
+	box-sizing: border-box;
+	position: relative;
+/*	clip: always;*/
+}
+.gridentry {
+	width: 8em;
+	height: 1em;
+	drag: clone;
+	display: block;
+	padding: 2dp;
+	font-size: 0.75em;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.gridentry:drag {
+	background-color: #333;
+	min-width: 100dp;
+	opacity: 0.5;
+}
+
+/* tree controls */
+
+tree {
+	overflow-x: hidden;
+	overflow-y: auto;
+	display: block;
+	padding: 4dp;
+	box-sizing: border-box;
+	indent-margin-left: 20dp;
+}
+
+treenode {
+	height: 1.0em;
+	line-height: 1.0em;
+	drag: clone;
+	display: block;
+	padding: 0dp 0dp 0dp 1em;
+	font-size: 0.75em;
+	white-space: nowrap;
+	vertical-align: center;
+	border: 2px #0000;	/* required for drag and drop markers, otherwise entries will start moving as soon as the border is added */
+}
+
+treenode:drag {
+	min-width: 150dp;
+}
+
+treenode:opened {
+	decorator: image(arrow_down.png contain left);
+}
+
+treenode:closed {
+	decorator: image(arrow_right.png contain left);
+}
+
+treenode:selected {
+	background-color: #666;
+}
+
+/* splitters are draggable vertical elements to adjust the width of two siblings */
+
+splitter {
+	width: 8dp;
+	height: 100%;
+	background-color: #000;
+}
+
+splitter:hover {
+	background-color: #555;
+}
+
+splitter:active {
+	background-color: #999;
+}
+
+/* text inputs */
+
+input.text {
+	color: #fff;
+	background: #222;
+	padding: 4dp;
+	border: 1dp #ccc;
+}
+
+.input-placeholder {
+	color: #888;
+	font-style: italic;
+	width: 100%;
+	height: 100%;
+}
+
+/* all knobs need the dragging attribute */
+knob {
+	drag: drag;
+	speed: 150;	/* what mouse delta is needed to do a full sweep from 0% to 100% */
+	speedScaleShift: 0.1;
+	speedScaleCtrl: 0.2;
+	speedScaleAlt: 0.5;
+}
+
+/* all buttons */
+
+.button {
+	background-color: rgb(50,62,68);
+	border: 2dp rgb(172,176,179);
+	border-radius: 15dp;
+	padding: 0.5em 1em 0.5em 1em;
+}
+
+.button:hover {
+	background-color: rgb(60,72,78);
+}
+
+.button:active {
+	background-color: rgb(70,82,88);
+}
+
+/* everything that is a drag target */
+
+:dragtarget {
+	border: 2px transparent;
+}
+
+:dragovertop {
+	border-top: 2px #0f0;
+}
+
+:dragovercenter {
+	border: 2px #0f0;
+}
+
+:dragoverbottom {
+	border-bottom: 2px #0f0;
+}
+
+:dragovertop:shift {
+	border-top: 2px #f00;
+}
+
+:dragovercenter:shift {
+	border: 2px #f00;
+}
+
+:dragoverbottom:shift {
+	border-bottom: 2px #f00;
+}
+
+/* parameter overlays */
+
+.tus-parameteroverlay {
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 100%;
+	height: 1.2em;
+	pointer-events: none;
+}
+
+.tus-parameteroverlaytype-link {
+	decorator: image(link.png contain right);
+	image-color: #63eac9;
+}
+
+.tus-parameteroverlaytype-lock {
+	decorator: image(lock.png contain left);
+	image-color: #e1512a;
+}

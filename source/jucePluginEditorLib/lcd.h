@@ -1,45 +1,61 @@
 #pragma once
 
-#include "juce_gui_basics/juce_gui_basics.h"
+#include <cstdint>
+#include <vector>
+#include <array>
+
+#include "juceRmlUi/rmlElemCanvas.h"
+
+#include "juce_graphics/juce_graphics.h"
+
+namespace Rml
+{
+	class Element;
+}
 
 namespace jucePluginEditorLib
 {
-	class Lcd : public juce::Button, juce::Timer
+	class Lcd : public juce::Timer
 	{
 	public:
-		explicit Lcd(Component& _parent, uint32_t _width, uint32_t _height);
-		~Lcd() override;
+		explicit Lcd(Rml::Element* _parent, uint32_t _numCharsX, uint32_t _numCharsY);
+		virtual ~Lcd();
 
 		void setText(const std::vector<uint8_t> &_text);
 		void setCgRam(const std::array<uint8_t, 64> &_data);
 
-	protected:
-		void postConstruct();
-
 	private:
-		void paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override {}
-		void paint(juce::Graphics& _g) override;
+		void setSize(uint32_t _width, uint32_t _height);
+		void paint(const juce::Image& _image, juce::Graphics& _g);
 		juce::Path createPath(uint8_t _character) const;
 		void onClicked();
-		void timerCallback() override;
+
+		void repaint() const;
 
 		virtual bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines) = 0;
 		virtual const uint8_t* getCharacterData(uint8_t _character) const = 0;
 
-	private:
-		Component& m_parent;
+		void timerCallback() override;
 
 		std::array<juce::Path, 256> m_characterPaths;
 
-		const float m_scaleW;
-		const float m_scaleH;
+		float m_scaleW = 0;
+		float m_scaleH = 0;
 
-		const uint32_t m_width;
-		const uint32_t m_height;
+		uint32_t m_numCharsX = 0;
+		uint32_t m_numCharsY = 0;
+
+		uint32_t m_width = 0;
+		uint32_t m_height = 0;
+
 		std::vector<uint8_t> m_overrideText;
 		std::vector<uint8_t> m_text;
+
 		std::array<std::array<uint8_t, 8>, 8> m_cgData{{{0}}};
+
 		uint32_t m_charBgColor = 0xff000000;
 		uint32_t m_charColor = 0xff000000;
+
+		juceRmlUi::ElemCanvas* m_canvas;
 	};
 }

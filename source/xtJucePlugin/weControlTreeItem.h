@@ -9,28 +9,44 @@ namespace xtJucePlugin
 {
 	class WaveEditor;
 
+	class ControlTreeNode : public juceRmlUi::TreeNode
+	{
+	public:
+		ControlTreeNode(juceRmlUi::Tree& _tree, const xt::TableIndex _index) : TreeNode(_tree), m_index(_index)
+		{
+		}
+		~ControlTreeNode() override = default;
+		xt::TableIndex getIndex() const { return m_index; }
+
+	private:
+		const xt::TableIndex m_index;
+	};
+
 	class ControlTreeItem : public TreeItem
 	{
 	public:
-		ControlTreeItem(WaveEditor& _editor, xt::TableIndex _index);
-
-		bool mightContainSubItems() override { return false; }
+		ControlTreeItem(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor);
 
 		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 
+		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
+
+		xt::TableIndex getTableIndex() const;
+
 		void setWave(xt::WaveId _wave);
 		void setTable(xt::TableId _table, bool _tableHasChanged);
-		juce::var getDragSourceDescription() override;
-		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override;
-		void itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails, int _insertIndex) override;
 
-		void itemClicked(const juce::MouseEvent&) override;
+		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
+
+		bool canDrop(const Rml::Event& _event, const DragSource* _source) override;
+		void drop(const Rml::Event& _event, const DragSource* _source, const juceRmlUi::DragData* _data) override;
+
+		void onRightClick(const Rml::Event& _event) override;
 
 	private:
 		void onWaveChanged() const;
 
 		WaveEditor& m_editor;
-		const xt::TableIndex m_index;
 
 		xt::WaveId m_wave = g_invalidWaveIndex;
 		xt::TableId m_table = g_invalidTableIndex;

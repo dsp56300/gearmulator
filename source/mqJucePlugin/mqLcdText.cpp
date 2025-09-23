@@ -1,11 +1,11 @@
 #include "mqLcdText.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
+#include "RmlUi/Core/Element.h"
 
-MqLcdText::MqLcdText(juce::Label &_lineA, juce::Label &_lineB) : m_lineA(_lineA), m_lineB(_lineB)
+MqLcdText::MqLcdText(Rml::Element& _lineA, Rml::Element& _lineB) : m_lineA(_lineA), m_lineB(_lineB)
 {
-	m_lineA.setJustificationType(juce::Justification::centredLeft);
-	m_lineB.setJustificationType(juce::Justification::centredLeft);
+//	m_lineA.setJustificationType(juce::Justification::centredLeft);
+//	m_lineB.setJustificationType(juce::Justification::centredLeft);
 }
 
 void MqLcdText::setText(const std::array<uint8_t, 40>& _text)
@@ -25,7 +25,6 @@ void MqLcdText::setText(const std::array<uint8_t, 40>& _text)
 
 //	LOG("LCD CONTENT:\n'" << lineA << "'\n'" << lineB << "'");
 
-	// nasty but works: prefix/postfix with byte 1 to prevent juce trimming the text
-	m_lineA.setText("\1" + lineA + "\1", juce::dontSendNotification);
-	m_lineB.setText("\1" + lineB + "\1", juce::dontSendNotification);
+	m_lineA.SetInnerRML(Rml::StringUtilities::EncodeRml(lineA));
+	m_lineB.SetInnerRML(Rml::StringUtilities::EncodeRml(lineB));
 }

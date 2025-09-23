@@ -14,7 +14,7 @@ namespace mqJucePlugin
 		loadDefaultSkin();
 	}
 
-	void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
+	void PluginEditorState::initContextMenu(juceRmlUi::Menu& _menu)
 	{
 		jucePluginEditorLib::PluginEditorState::initContextMenu(_menu);
 
@@ -22,25 +22,25 @@ namespace mqJucePlugin
 
 		const auto gain = static_cast<int>(std::roundf(p.getOutputGain()));
 
-		juce::PopupMenu gainMenu;
+		juceRmlUi::Menu gainMenu;
 
-		gainMenu.addItem("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
-		gainMenu.addItem("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
-		gainMenu.addItem("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
+		gainMenu.addEntry("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
+		gainMenu.addEntry("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
+		gainMenu.addEntry("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
 
-		_menu.addSubMenu("Output Gain", gainMenu);
+		_menu.addSubMenu("Output Gain", std::move(gainMenu));
 
 		jucePluginEditorLib::MidiPorts::createMidiPortsMenu(_menu, p.getMidiPorts());
 	}
 
-	bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
+	bool PluginEditorState::initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled)
 	{
 		jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
 
 		const auto percent = m_processor.getDspClockPercent();
 		const auto hz = m_processor.getDspClockHz();
 
-		juce::PopupMenu clockMenu;
+		juceRmlUi::Menu clockMenu;
 
 		auto makeEntry = [&](const int _percent)
 		{
@@ -49,7 +49,7 @@ namespace mqJucePlugin
 			ss << _percent << "% (" << mhz << " MHz)";
 			if(_percent == 100)
 				ss << " (Default)";
-			clockMenu.addItem(ss.str(), _enabled, percent == _percent, [this, _percent] { m_processor.setDspClockPercent(_percent); });
+			clockMenu.addEntry(ss.str(), _enabled, percent == _percent, [this, _percent] { m_processor.setDspClockPercent(_percent); });
 		};
 
 		makeEntry(50);
@@ -59,13 +59,13 @@ namespace mqJucePlugin
 		makeEntry(150);
 		makeEntry(200);
 
-		_menu.addSubMenu("DSP Clock", clockMenu);
+		_menu.addSubMenu("DSP Clock", std::move(clockMenu));
 
 		return true;
 	}
 
 	jucePluginEditorLib::Editor* PluginEditorState::createEditor(const jucePluginEditorLib::Skin& _skin)
 	{
-		return new mqJucePlugin::Editor(m_processor, m_parameterBinding, _skin);
+		return new mqJucePlugin::Editor(m_processor, _skin);
 	}
 }

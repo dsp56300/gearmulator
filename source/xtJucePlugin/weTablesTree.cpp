@@ -10,8 +10,10 @@
 
 namespace xtJucePlugin
 {
-	TablesTree::TablesTree(WaveEditor& _editor) : Tree(_editor)
+	TablesTree::TablesTree(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor) : Tree(_coreInstance, _tag, _editor, false)
 	{
+		SetClass("x-we-tablestree", true);
+
 		for(uint16_t i=0; i<xt::wave::g_tableCount; ++i)
 		{
 			const xt::TableId tableId(i);
@@ -19,10 +21,8 @@ namespace xtJucePlugin
 			if(xt::wave::isAlgorithmicTable(tableId) && _editor.getTableName(tableId).empty())
 				continue;
 
-			getRootItem()->addSubItem(new TablesTreeItem(_editor, tableId));
+			getTree().getRoot()->createChild<TablesTreeNode>(tableId);
 		}
-
-		setIndentSize(5);
 
 		auto* paramWave = getWaveParameter();
 
@@ -36,7 +36,12 @@ namespace xtJucePlugin
 			onPartChanged();
 		});
 	}
-	
+
+	Rml::ElementPtr TablesTree::createChild(const std::string& _tag)
+	{
+		return Rml::ElementPtr(new TablesTreeItem(GetCoreInstance(), _tag, getWaveEditor()));
+	}
+
 	void TablesTree::setSelectedEntryFromCurrentPreset() const
 	{
 		const auto* paramWave = getWaveParameter();
@@ -45,17 +50,29 @@ namespace xtJucePlugin
 		getWaveEditor().setSelectedTable(tableId);
 	}
 
-	void TablesTree::setSelectedTable(const xt::TableId _id) const
+	void TablesTree::setSelectedTable(const xt::TableId _id)
 	{
-		for(int i=0; i<getRootItem()->getNumSubItems(); ++i)
+		auto& rootNode = getTree().getRoot();
+
+		for(size_t i=0; i<rootNode->size(); ++i)
 		{
-			auto* subItem = dynamic_cast<TablesTreeItem*>(getRootItem()->getSubItem(i));
+			auto child = rootNode->getChild(i);
+
+			auto* subItem = dynamic_cast<TablesTreeItem*>(child->getElement());
 			if(!subItem)
 				continue;
 			if(subItem->getTableId() == _id)
 			{
-				subItem->setSelected(true, true, juce::dontSendNotification);
-				getRootItem()->getOwnerView()->scrollToKeepItemVisible(subItem);
+				child->setSelected(true);
+
+				Rml::ScrollIntoViewOptions options;
+
+				options.vertical = Rml::ScrollAlignment::Nearest;
+				options.horizontal = Rml::ScrollAlignment::Nearest;
+				options.behavior = Rml::ScrollBehavior::Smooth;
+				options.parentage = Rml::ScrollParentage::All;
+
+				subItem->ScrollIntoView(options);
 
 				const auto& data = getWaveEditor().getData();
 

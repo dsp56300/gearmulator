@@ -1,6 +1,5 @@
 #pragma once
 
-#include "imagePool.h"
 #include "parameterOverlays.h"
 #include "skin.h"
 
@@ -12,6 +11,42 @@
 
 #include "jucePluginLib/types.h"
 
+#include "juceRmlUi/rmlDataProvider.h"
+#include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/rmlInterfaces.h"
+#include "juceRmlUi/rmlMenu.h"
+
+namespace juce
+{
+	class FileChooser;
+	class TemporaryFile;
+	class File;
+}
+
+namespace rmlPlugin
+{
+	namespace skinConverter
+	{
+		struct SkinConverterOptions;
+	}
+
+	class RmlPlugin;
+	class RmlParameterBinding;
+	class RmlPluginDocument;
+}
+
+namespace Rml
+{
+	class Context;
+	class Element;
+	class ElementDocument;
+}
+
+namespace juceRmlUi
+{
+	class RmlComponent;
+}
+
 namespace baseLib
 {
 	class ChunkReader;
@@ -22,11 +57,17 @@ namespace baseLib
 namespace pluginLib
 {
 	class FileType;
-	class ParameterBinding;
 }
 
 namespace jucePluginEditorLib
 {
+	class PluginDataModel;
+
+	namespace patchManagerRml
+	{
+		class PatchManagerDataModel;
+	}
+
 	namespace patchManager
 	{
 		class PatchManager;
@@ -34,12 +75,12 @@ namespace jucePluginEditorLib
 
 	class Processor;
 
-	class Editor : public genericUI::Editor, genericUI::EditorInterface
+	class Editor : public genericUI::Editor, juceRmlUi::DataProvider
 	{
 	public:
-		baseLib::Event<Editor*, juce::MouseEvent*> onOpenMenu;
+		baseLib::Event<Editor*, Rml::Event&> onOpenMenu;
 
-		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, Skin _skin);
+		Editor(Processor& _processor, Skin _skin);
 		~Editor() override;
 
 		Editor(const Editor&) = delete;
@@ -47,7 +88,16 @@ namespace jucePluginEditorLib
 		Editor& operator = (const Editor&) = delete;
 		Editor& operator = (Editor&&) = delete;
 		
-		void create();
+		virtual void create();
+
+		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) {}
+		virtual void initPluginDataModel(PluginDataModel& _model);
+
+		static void setEnabled(Rml::Element* _element, bool _enabled);
+
+		bool selectTabWithElement(const Rml::Element* _element) const;
+
+		virtual patchManager::PatchManager* createPatchManager(Rml::Element* _parent) { return nullptr; }
 
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
@@ -77,56 +127,95 @@ namespace jucePluginEditorLib
 		virtual void saveChunkData(baseLib::BinaryStream& _s);
 		virtual void loadChunkData(baseLib::ChunkReader& _cr);
 
-		void setCurrentPart(uint8_t _part) override;
+		virtual void setCurrentPart(uint8_t _part);
 
 		void showDisclaimer() const;
-
-		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles) override;
 
 		void copyCurrentPatchToClipboard() const;
 		bool replaceCurrentPatchFromClipboard() const;
 
-		virtual void openMenu(juce::MouseEvent* _event);
-		virtual bool openContextMenuForParameter(const juce::MouseEvent* _event);
+		virtual void openMenu(Rml::Event& _event);
+		virtual bool openContextMenuForParameter(const Rml::Event& _event);
 
 		bool copyRegionToClipboard(const std::string& _regionId) const;
 		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;
 		bool setParameters(const std::map<std::string, pluginLib::ParamValue>& _paramValues) const;
 
-		auto& getImagePool() { return m_imagePool; }
+		juceRmlUi::Menu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
+		virtual void createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
-		void parentHierarchyChanged() override;
+		juce::Component* createRmlUiComponent(const std::string& _rmlFile);
 
-		juce::PopupMenu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
-		virtual void createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
+		virtual void onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context);
+		virtual void onRmlDocumentLoadFailed(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context);
 
-	protected:
-		bool keyPressed(const juce::KeyPress& _key) override;
+		const auto& getPatchManagerDataModel() const { return m_patchManagerDataModel; }
+		auto& getPluginDataModel() { return m_pluginDataModel; }
+
+		juce::File createTempFile(const std::string& _filename);
+
+		void registerDragAndDropFile(const juce::File& _file);
+		void registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile);
+
+		rmlPlugin::RmlPlugin* getRmlPlugin() const { return m_rmlPlugin.get(); }
+		juceRmlUi::RmlComponent* getRmlComponent() const { return m_rmlComponent.get(); }
+		rmlPlugin::RmlParameterBinding* getRmlParameterBinding() const;
+		rmlPlugin::RmlPluginDocument* getRmlPluginDocument() const;
+		Rml::ElementDocument* getDocument() const;
+
+		Rml::Element* getRmlRootElement() const;
+
+		template<typename T = Rml::Element> T* findChild(const std::string& _name, const bool _mustExist = true) const
+		{
+			auto* root = getRmlRootElement();
+			return juceRmlUi::helper::findChildT<T>(root, _name, _mustExist);
+		}
+
+		template<typename T = Rml::Element> void findChildren(std::vector<T*>& _results, const std::string& _name, const size_t _expectedCount = 0) const
+		{
+			auto* root = getRmlRootElement();
+			juceRmlUi::helper::findChildren(_results, root, _name, _expectedCount);
+		}
+
+		std::vector<Rml::Element*> findChildreByParam(const std::string& _param, uint8_t _part = 0, const size_t _expectedCount = 0, bool _visibleOnly = false) const;
+		Rml::Element* findChildByParam(const std::string& _param, uint8_t _part = 0, bool _mustExist = true, bool _visibleOnly = false) const;
+
+		Rml::Element* addClick(const std::string& _elementName, const std::function<void(Rml::Event&)>& _func, const bool _mustExist = false) const;
+
+		const auto& getSkin() const { return m_skin; }
+
+		int getDefaultWidth() const;
+		int getDefaultHeight() const;
+
+		bool setSize(int _width, int _height) const;
 
 	private:
 		void onDisclaimerFinished() const;
 
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
-		int getParameterIndexByName(const std::string& _name) override;
-		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
-		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;
-		bool bindParameter(juce::Slider& _target, int _parameterIndex) override;
-		bool bindParameter(juce::Label& _target, int _parameterIndex) override;
-		juce::Value* getParameterValue(int _parameterIndex, uint8_t _part) override;
+
+		std::vector<std::string> getAllFilenames() override;
+
+		std::string getAbsoluteSkinFolder(const std::string& _skinFolder) const;
 
 		Processor& m_processor;
-		pluginLib::ParameterBinding& m_binding;
 
-		const Skin m_skin;
+		Skin m_skin;
 
 		std::map<std::string, std::vector<char>> m_fileCache;
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		std::unique_ptr<patchManager::PatchManager> m_patchManager;
+		std::unique_ptr<patchManagerRml::PatchManagerDataModel> m_patchManagerDataModel;
+		std::unique_ptr<PluginDataModel> m_pluginDataModel;
 		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
-		ImagePool m_imagePool;
-		ParameterOverlays m_overlays;
+		std::unique_ptr<ParameterOverlays> m_overlays;
+
+		juceRmlUi::RmlInterfaces m_rmlInterfaces;
+		std::unique_ptr<juceRmlUi::RmlComponent> m_rmlComponent;
+
+		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
 	};
 }

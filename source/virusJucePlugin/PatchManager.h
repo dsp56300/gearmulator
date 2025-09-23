@@ -5,6 +5,16 @@
 
 #include "virusLib/microcontrollerTypes.h"
 
+namespace juceRmlUi
+{
+	class RmlComponent;
+}
+
+namespace Rml
+{
+	class Element;
+}
+
 namespace virus
 {
 	class Controller;
@@ -17,7 +27,7 @@ namespace genericVirusUI
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
-		PatchManager(VirusEditor& _editor, juce::Component* _root);
+		PatchManager(VirusEditor& _editor, Rml::Element* _root);
 		~PatchManager() override;
 
 		// PatchDB impl

@@ -10,7 +10,7 @@ namespace mqJucePlugin
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
-		PatchManager(Editor& _editor, juce::Component* _root);
+		PatchManager(Editor& _editor, Rml::Element* _root);
 		~PatchManager() override;
 
 		// PatchManager overrides

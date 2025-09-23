@@ -6,18 +6,18 @@ namespace genericVirusUI
 {
 	class VirusEditor;
 
-	class PartButton final : public jucePluginEditorLib::PartButton<juce::TextButton>
+	class PartButton final : public jucePluginEditorLib::PartButton
 	{
 	public:
-		explicit PartButton(VirusEditor& _editor);
+		explicit PartButton(Rml::Element* _button, VirusEditor& _editor);
 
-		bool isInterestedInDragSource(const SourceDetails& _dragSourceDetails) override;
+		bool canDrop(const Rml::Event& _event, const juceRmlUi::DragSource* _source) override;
 
-		void paint(juce::Graphics& g) override;
+		void onClick(Rml::Event& _e) override;
+		void setButtonText(const std::string& _text);
 
-		void onClick() override;
 	private:
-		void selectPreset(uint8_t _part) const;
+		void selectPreset(const Rml::Event& _event, uint8_t _part) const;
 
 		VirusEditor& m_editor;
 	};

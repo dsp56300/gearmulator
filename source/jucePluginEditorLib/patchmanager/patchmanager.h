@@ -1,6 +1,5 @@
 #pragma once
 
-#include "resizerbar.h"
 #include "state.h"
 #include "types.h"
 
@@ -8,7 +7,17 @@
 
 #include "jucePluginLib/patchdb/db.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
+#include "juce_events/juce_events.h"	// juce::Timer
+
+namespace Rml
+{
+	class Element;
+}
+
+namespace juceRmlUi
+{
+	class Menu;
+}
 
 namespace jucePluginEditorLib
 {
@@ -22,38 +31,20 @@ namespace genericUI
 
 namespace jucePluginEditorLib::patchManager
 {
-	class Grid;
-	class List;
-	class Status;
-	class TreeItem;
-	class SearchTree;
-	class SearchList;
-	class Info;
-	class ListModel;
-	class Tree;
+	class PatchManagerUi;
 
-	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::ChangeListener
+	class PatchManager : public pluginLib::patchDB::DB, juce::Timer
 	{
 	public:
-		enum class LayoutType
-		{
-			List,
-			Grid
-		};
-
 		baseLib::Event<uint32_t, pluginLib::patchDB::PatchKey> onSelectedPatchChanged;
 
 		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
 
-		explicit PatchManager(Editor& _editor, Component* _root, const std::initializer_list<GroupType>& _groupTypes = DefaultGroupTypes);
+		explicit PatchManager(Editor& _editor, Rml::Element* _rootElement, const std::initializer_list<patchManager::GroupType>& _groupTypes = DefaultGroupTypes);
 		~PatchManager() override;
 
 		void timerCallback() override;
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty) const override;
-
-		void setSelectedItem(Tree* _tree, const TreeItem* _item);
-		void addSelectedItem(Tree* _tree, const TreeItem* _item);
-		void removeSelectedItem(Tree* _tree, const TreeItem* _item);
 
 		bool setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
 
@@ -62,29 +53,15 @@ namespace jucePluginEditorLib::patchManager
 
 		bool selectPatch(uint32_t _part, const pluginLib::patchDB::DataSource& _ds, uint32_t _program);
 
-		void setListStatus(uint32_t _selected, uint32_t _total) const;
-
-		pluginLib::patchDB::Color getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const;
-
 		bool addGroupTreeItemForTag(pluginLib::patchDB::TagType _type) const;
 		bool addGroupTreeItemForTag(pluginLib::patchDB::TagType _type, const std::string& _name) const;
-
-		void paint(juce::Graphics& g) override;
 
 		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const pluginLib::FileType& _fileType) const;
 		bool exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const pluginLib::FileType& _fileType) const;
 
-		void resized() override;
-
-		juce::Colour getResizerBarColor() const;
-
 		bool copyPart(uint8_t _target, uint8_t _source);
 
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
-
-		bool setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds) const;
-		pluginLib::patchDB::DataSourceNodePtr getSelectedDataSource() const;
-		TreeItem* getSelectedDataSourceTreeItem() const;
 
 		const State& getState() const { return m_state; }
 
@@ -93,8 +70,8 @@ namespace jucePluginEditorLib::patchManager
 
 		void copyPatchesToLocalStorage(const pluginLib::patchDB::DataSourceNodePtr& _ds, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, int _part);
 
-		uint32_t createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part, const std::string& _name = "patch", uint64_t _userData = 0);
-		uint32_t createSaveMenuEntries(juce::PopupMenu& _menu, const std::string& _name = "patch", uint64_t _userData = 0)
+		uint32_t createSaveMenuEntries(juceRmlUi::Menu& _menu, uint32_t _part, const std::string& _name = "patch", uint64_t _userData = 0);
+		uint32_t createSaveMenuEntries(juceRmlUi::Menu& _menu, const std::string& _name = "patch", uint64_t _userData = 0)
 		{
 			return createSaveMenuEntries(_menu, getCurrentPart(), _name, _userData);
 		}
@@ -108,21 +85,16 @@ namespace jucePluginEditorLib::patchManager
 		bool activatePatchFromClipboard();
 		std::string toString(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const;
 
-		LayoutType getLayout() const { return m_layout; }
-		void setLayout(LayoutType _layout);
-
-		bool setGridLayout128();
 		void setCustomSearch(pluginLib::patchDB::SearchHandle _sh) const;
 
 		void bringToFront() const;
+
+		void setUi(std::unique_ptr<PatchManagerUi> _ui);
 
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
 
 	public:
-		auto& getEditor() const { return m_editor; }
-		std::shared_ptr<genericUI::UiObject> getTemplate(const std::string& _name) const;
-
 		virtual uint32_t getCurrentPart() const = 0;
 		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) = 0;
 
@@ -143,44 +115,16 @@ namespace jucePluginEditorLib::patchManager
 	protected:
 		void updateStateAsync(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
 
-		ListModel* getListModel() const;
-
 		void startLoaderThread(const juce::File& _migrateFromDir = {}) override;
 
 	private:
 		pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem);
-		void onSelectedItemsChanged();
-
-		void changeListenerCallback (juce::ChangeBroadcaster* _source) override;
-
-		static void selectTreeItem(TreeItem* _item);
-
-		Editor& m_editor;
-
-		Tree* m_treeDS = nullptr;
-		Tree* m_treeTags = nullptr;
-		List* m_list = nullptr;
-		Grid* m_grid = nullptr;
-		Info* m_info = nullptr;
-
-		SearchTree* m_searchTreeDS = nullptr;
-		SearchTree* m_searchTreeTags = nullptr;
-		SearchList* m_searchList = nullptr;
-		Status* m_status = nullptr;
 
 		State m_state;
 
-		std::map<Tree*, std::set<const TreeItem*>> m_selectedItems;
-
-		juce::StretchableLayoutManager m_stretchableManager;
-
-		ResizerBar m_resizerBarA{*this, &m_stretchableManager, 1};
-		ResizerBar m_resizerBarB{*this, &m_stretchableManager, 3};
-		ResizerBar m_resizerBarC{*this, &m_stretchableManager, 5};
-
 		std::unordered_map<pluginLib::patchDB::TagType, std::string> m_tagTypeNames;
 
-		LayoutType m_layout = LayoutType::List;
-		bool m_firstTimeGridLayout = true;
+		Editor& m_editor;
+		std::unique_ptr<PatchManagerUi> m_ui;
 	};
 }
