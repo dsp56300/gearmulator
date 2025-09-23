@@ -699,7 +699,15 @@ namespace pluginLib
 		getPlugin().getMidiOut(m_midiOut);
 
 	    for (auto& e : m_midiOut)
+	    {
 		    addMidiEvent(e);
+
+			if (!getMidiRoutingMatrix().enabled(e, synthLib::MidiEventSource::Host))
+			    continue;
+
+	    	const auto mm = MidiPorts::toJuceMidiMessage(e);
+		    midiMessages.addEvent(mm, 0);
+	    }
 	}
 
 	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)

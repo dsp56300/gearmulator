@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-13, windows-2019 ]
+        os: [ ubuntu-latest, macos-13, windows-2022 ]
       fail-fast: true
     name:  ${{ matrix.os }} build
     steps:
@@ -26,7 +26,7 @@ jobs:
         submodules: "recursive"
 
     - name: Set up MSVC compiler
-      if: matrix.os == 'windows-2019'
+      if: matrix.os == 'windows-2022'
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Configure CMake

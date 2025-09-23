@@ -7,13 +7,16 @@
 #include <vector>
 
 #include "microcontroller.h"
+
+#include "baseLib/filesystem.h"
+
 #include "synthLib/midiTypes.h"
 
 namespace virusLib
 {
 	bool DemoPlaybackTI::loadFile(const std::string& _filename)
 	{
-		auto* hFile = fopen(_filename.c_str(), "rb");
+		auto* hFile = baseLib::filesystem::openFile(_filename, "rb");
 		if(!hFile)
 			return false;
 
