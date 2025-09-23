@@ -599,7 +599,7 @@ namespace juceRmlUi
 	{
 		const auto key = helper::getKeyIdentifier(_event);
 
-		const auto ctrl = helper::getKeyModCtrl(_event);
+		const auto ctrl = helper::getKeyModCommand(_event);
 		const auto shift = helper::getKeyModShift(_event);
 
 		auto lastSelected = m_list.handleNavigationKey(key, ctrl, shift, getLayoutType() == LayoutType::Grid ? getItemsPerColumn() : 0);

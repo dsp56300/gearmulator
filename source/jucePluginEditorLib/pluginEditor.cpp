@@ -659,7 +659,7 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](const Rml::Event& _event)
 		{
-			if (!juceRmlUi::helper::getKeyModCtrl(_event))
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
 				return;
 
 			switch (juceRmlUi::helper::getKeyIdentifier(_event))

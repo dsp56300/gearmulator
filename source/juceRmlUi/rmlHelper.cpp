@@ -208,6 +208,11 @@ namespace juceRmlUi
 			return _event.GetParameter<int>("ctrl_key", 0) > 0;
 		}
 
+		bool getKeyModCommand(const Rml::Event& _event)
+		{
+			return _event.GetParameter<int>("meta_key", 0) > 0;
+		}
+
 		bool getKeyModShift(const Rml::Event& _event)
 		{
 			return _event.GetParameter<int>("shift_key", 0) > 0;

@@ -104,7 +104,7 @@ namespace juceRmlUi
 
 		if (helper::getKeyModShift(_event))
 			mod = m_speedScaleShift;
-		else if (helper::getKeyModCtrl(_event))
+		else if (helper::getKeyModCommand(_event))
 			mod = m_speedScaleCtrl;
 		else if (helper::getKeyModAlt(_event))
 			mod = m_speedScaleAlt;
@@ -141,7 +141,7 @@ namespace juceRmlUi
 		const auto range = getRange();
 
 		// we use the default behaviour if ctrl/cmd is not pressed and the range is large enough
-		if(range > 32 && !helper::getKeyModCtrl(_event))
+		if(range > 32 && !helper::getKeyModCommand(_event))
 		{
 			setValue(getValue() - range * delta / 7.5f);	// this should be pretty close to what Juce did
 			return;

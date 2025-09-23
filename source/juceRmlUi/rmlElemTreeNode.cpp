@@ -91,7 +91,7 @@ namespace juceRmlUi
 					}
 				}
 
-				const auto allowMultiselect = helper::getKeyModCtrl(_event);
+				const auto allowMultiselect = helper::getKeyModCommand(_event);
 
 				if (getTree()->getTree().getAllowDeselectOnSecondClick())
 				{
