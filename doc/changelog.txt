@@ -4,12 +4,19 @@ Release Notes
 
 Framework:
 
-- [Imp] RmlUi
+- [Imp] Juce GUI has been replaced with RmlUi, a HTML/CSS based UI framework.
+		This allows to create more complex and visually appealing UI skins.
+		More information can be found here:
+		https://dsp56300.wordpress.com/2025/08/19/rmlui-new-gui-rendering-engine-skinning-system/
 
 Osirus/OsTIrus:
 
 - [Imp] Patch Manager: Added support to extract presets from 
         SoundDiver .lib files
+
+Xenia / Vavra:
+
+- [Fix] Fix possible crash related to the LCD
 
 1.4.5
 
@@ -29,6 +36,7 @@ DSP Bridge:
 Xenia:
 
 - [Imp] Add support to load MW1 user waves & tables
+- [Imp] Add support for UPAW and Speech tables
 - [Imp] Add ability to export to .syx instead of .mid via drag & drop by 
         holding shift while dragging
 - [Imp] Add export of wave tables as .mid, .syx and .wav via context menu
