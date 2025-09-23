@@ -6,7 +6,7 @@ Framework:
 
 - [Imp] Juce GUI has been replaced with RmlUi, a HTML/CSS based UI framework.
 		This allows to create more complex and visually appealing UI skins.
-		More information can be found here:
+		More information can be found at
 		https://dsp56300.wordpress.com/2025/08/19/rmlui-new-gui-rendering-engine-skinning-system/
 
 Osirus/OsTIrus:
@@ -14,7 +14,7 @@ Osirus/OsTIrus:
 - [Imp] Patch Manager: Added support to extract presets from 
         SoundDiver .lib files
 
-Xenia / Vavra:
+Xenia/Vavra:
 
 - [Fix] Fix possible crash related to the LCD
 
