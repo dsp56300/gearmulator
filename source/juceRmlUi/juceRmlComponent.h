@@ -92,6 +92,8 @@ namespace juceRmlUi
 
 		void resize(int _width, int _height);
 
+		static void requestUpdate(const Rml::Element* _elem);
+
 		static RmlComponent* fromElement(const Rml::Element* _element);
 
 		void enqueueUpdate();

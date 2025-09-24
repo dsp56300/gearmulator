@@ -1,5 +1,7 @@
 #include "rmlElemValue.h"
 
+#include "juceRmlComponent.h"
+
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace juceRmlUi
@@ -47,6 +49,8 @@ namespace juceRmlUi
 		onChangeValue();
 		if (_sendChangeEvent)
 			DispatchEvent(Rml::EventId::Change, {{"value", Rml::Variant(v)}});
+
+		RmlComponent::requestUpdate(this);
 	}
 
 	void ElemValue::setMinValue(const float _value)
