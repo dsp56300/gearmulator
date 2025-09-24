@@ -2,6 +2,10 @@ Release Notes
 
 2.0.1:
 
+Framework:
+
+- [Fix] Patch Manager: Data sources were not sorted
+
 Xenia:
 
 - [Fix] Wave Editor: Copy to selected Table menu now uses a grid to 
