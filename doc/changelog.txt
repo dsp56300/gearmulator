@@ -1,5 +1,12 @@
 Release Notes 
 
+2.0.1:
+
+Xenia:
+
+- [Fix] Wave Editor: Copy to selected Table menu now uses a grid to 
+        prevent that the menu is too long to fit on screen
+
 2.0.0:
 
 Framework:
