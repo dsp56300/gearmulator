@@ -5,6 +5,7 @@ Release Notes
 Framework:
 
 - [Fix] Patch Manager: Data sources were not sorted
+- [Fix] UI didn't repaint immediately when parameter is modified via automation or MIDI
 
 Xenia:
 
