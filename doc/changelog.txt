@@ -5,12 +5,20 @@ Release Notes
 Framework:
 
 - [Fix] Patch Manager: Data sources were not sorted
+- [Fix] Patch Manager: List/Grid cell sizes height increased to cover descenders of letters like 'g' or 'y'
 - [Fix] UI didn't repaint immediately when parameter is modified via automation or MIDI
 
 Xenia:
 
 - [Fix] Wave Editor: Copy to selected Table menu now uses a grid to 
         prevent that the menu is too long to fit on screen
+- [Fix] Octave knobs were not in steps but continuous
+- [Fix] Fix patch manager grid cell width not covering standard patch name size
+
+Vavra:
+
+- [Fix] Octave knobs were not in steps but continuous
+- [Fix] Fix patch manager grid cell width not covering standard patch name size
 
 2.0.0:
 
