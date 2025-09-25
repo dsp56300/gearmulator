@@ -242,7 +242,7 @@ namespace juceRmlUi
 	Rml::TextureHandle RendererProxy::SaveLayerAsTexture()
 	{
 		auto dummyHandle = createDummyHandle();
-		addRenderFunction(dummyHandle, [this, dummyHandle]
+		addRenderFunction([this, dummyHandle]
 		{
 			if (exists(dummyHandle))
 				return;

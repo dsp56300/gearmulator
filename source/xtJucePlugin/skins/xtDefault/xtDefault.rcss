@@ -441,3 +441,6 @@ treenode:selected
 	background-color: #572d00;
 }
 
+.pm-gridentry {
+	width: 11em;
+}

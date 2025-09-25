@@ -360,6 +360,17 @@ namespace juceRmlUi
 		update();
 	}
 
+	void RmlComponent::requestUpdate(const Rml::Element* _elem)
+	{
+		if (!_elem)
+			return;
+		auto* comp = fromElement(_elem);
+		if (comp)
+			comp->enqueueUpdate();
+		else if (auto* context = _elem->GetContext())
+			context->RequestNextUpdate(0.0f);
+	}
+
 	RmlComponent* RmlComponent::fromElement(const Rml::Element* _element)
 	{
 		if (!_element)
