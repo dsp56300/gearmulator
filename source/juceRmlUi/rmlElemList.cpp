@@ -97,7 +97,7 @@ namespace juceRmlUi
 
 		const auto elemSize = updateElementSize();
 
-		if (getLayoutType() == LayoutType::Grid)
+		if (getLayoutType() == LayoutType::Grid && getItemsPerColumn() > 0)
 		{
 			x = static_cast<float>(static_cast<int>(_index / getItemsPerColumn()));
 			y = static_cast<float>(_index) - x * static_cast<float>(getItemsPerColumn());
