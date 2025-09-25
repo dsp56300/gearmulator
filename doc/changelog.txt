@@ -4,11 +4,14 @@ Release Notes
 
 Framework:
 
+- [Imp] Incresed size of RmlUi debugger
+
 - [Fix] Knobs didn't respect the selected part and always displayed/modified part 1
 - [Fix] Patch Manager: Data sources were not sorted
 - [Fix] Patch Manager: List/Grid cell sizes height increased to cover descenders of letters like 'g' or 'y'
 - [Fix] UI didn't repaint immediately when parameter is modified via automation or MIDI
 - [Fix] Skin conversion didn't work when skin was in the legacy location next to the plugin
+- [Fix] Multiple context menus could be opened at the same time
 
 Xenia:
 
