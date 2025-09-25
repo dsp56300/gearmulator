@@ -12,6 +12,7 @@ namespace juceRmlUi
 		constexpr auto g_attribMinValue = "min";
 		constexpr auto g_attribMaxValue = "max";
 		constexpr auto g_attribDefaultValue = "default";
+		constexpr auto g_attribStepSize = "step";
 	}
 
 	void ElemValue::OnAttributeChange(const Rml::ElementAttributes& _changedAttributes)
@@ -33,6 +34,7 @@ namespace juceRmlUi
 		checkAttribute(g_attribMinValue, [&](const float _x) { setMinValue(_x); });
 		checkAttribute(g_attribMaxValue, [&](const float _x) { setMaxValue(_x); });
 		checkAttribute(g_attribDefaultValue, [&](const float _x) { setDefaultValue(_x); });
+		checkAttribute(g_attribStepSize, [&](const float _x) { setStepSize(_x); });
 	}
 
 	void ElemValue::setValue(const float _value, bool _sendChangeEvent/* = true*/)
@@ -40,7 +42,13 @@ namespace juceRmlUi
 		if (_value == UninitializedValue)
 			return;
 
-		const auto v = m_max > m_min ? std::clamp(_value, m_min, m_max) : m_min;
+		auto v = m_max > m_min ? std::clamp(_value, m_min, m_max) : m_min;
+
+		if (m_stepSize > 0.5f)
+		{
+			const int stepSize = static_cast<int>(std::round(m_stepSize));
+			v = static_cast<float>((static_cast<int>(v - m_min) + (stepSize>>1)) / stepSize * stepSize) + m_min;
+		}
 
 		if (!setProperty(m_value, v, onValueChanged))
 			return;
@@ -79,6 +87,14 @@ namespace juceRmlUi
 		onChangeDefaultValue();
 	}
 
+	void ElemValue::setStepSize(float _value)
+	{
+		if (!setProperty(m_stepSize, _value, onStepSizeChanged))
+			return;
+		SetAttribute(g_attribStepSize, _value);
+		onChangeStepSize();
+	}
+
 	bool ElemValue::setProperty(float& _prop, const float _newValue, const baseLib::Event<float>& _event)
 	{
 		if (_prop == _newValue)  // NOLINT(clang-diagnostic-float-equal)
@@ -107,17 +123,17 @@ namespace juceRmlUi
 			_elem->SetAttribute("value", _value);
 	}
 
-	void ElemValue::setRange(Rml::Element* _volume, const float _min, const float _max)
+	void ElemValue::setRange(Rml::Element* _elem, const float _min, const float _max)
 	{
-		if (auto* e = dynamic_cast<ElemValue*>(_volume))
+		if (auto* e = dynamic_cast<ElemValue*>(_elem))
 		{
 			e->setMinValue(_min);
 			e->setMaxValue(_max);
 		}
 		else
 		{
-			_volume->SetAttribute("min", _min);
-			_volume->SetAttribute("max", _max);
+			_elem->SetAttribute("min", _min);
+			_elem->SetAttribute("max", _max);
 		}
 	}
 }

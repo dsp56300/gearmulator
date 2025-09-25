@@ -13,6 +13,7 @@ namespace juceRmlUi
 		baseLib::Event<float> onMinValueChanged;
 		baseLib::Event<float> onMaxValueChanged;
 		baseLib::Event<float> onDefaultValueChanged;
+		baseLib::Event<float> onStepSizeChanged;
 
 		static constexpr float UninitializedValue = std::numeric_limits<float>::lowest();
 
@@ -24,6 +25,7 @@ namespace juceRmlUi
 		void setMinValue(float _value);
 		void setMaxValue(float _value);
 		void setDefaultValue(float _value);
+		void setStepSize(float _value);
 
 		float getValue() const { return m_value; }
 		float getMinValue() const { return m_min; }
@@ -46,18 +48,20 @@ namespace juceRmlUi
 		virtual void onChangeMinValue() {}
 		virtual void onChangeMaxValue() {}
 		virtual void onChangeDefaultValue() {}
+		virtual void onChangeStepSize() {}
 
 		static bool setProperty(float& _prop, float _newValue, const baseLib::Event<float>& _event);
 
 		static float getValue(const Rml::Element* _elem);
 		static void setValue(Rml::Element* _elem, float _value, bool _sendChangeEvent = true);
 
-		static void setRange(Rml::Element* _volume, float _min, float _max);
+		static void setRange(Rml::Element* _elem, float _min, float _max);
 
 	private:
 		float m_value = UninitializedValue;
 		float m_min = 0.0f;
 		float m_max = 1.0f;
 		float m_default = 0.5f;
+		float m_stepSize = 0.0f;
 	};
 }
