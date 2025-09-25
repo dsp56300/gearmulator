@@ -85,6 +85,7 @@ namespace rmlPlugin
 
 		std::unordered_map<Rml::Element*, ParameterToElementsBinding*> m_elementToParam;
 		std::unordered_map<pluginLib::Parameter*, ParameterToElementsBinding*> m_paramToElements;
+		std::set<Rml::Element*> m_elementsBoundToCurrentPart;
 
 		std::unordered_set<Rml::ElementDocument*> m_docsWithMouseDown;
 
