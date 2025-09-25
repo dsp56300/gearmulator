@@ -79,9 +79,11 @@ namespace jucePluginEditorLib
 				m_skin.folder = PluginEditorState::getSkinSubfolder(m_skin, m_skin.folder);
 			}
 
-			juce::File(juce::String::fromUTF8(m_skin.folder.c_str())).createDirectory();
+			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
 
-			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), m_skin.folder, newName + ".rml", newName + ".rcss", std::move(options));
+			juce::File(juce::String::fromUTF8(folder.c_str())).createDirectory();
+
+			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), folder, newName + ".rml", newName + ".rcss", std::move(options));
 
 			m_skin.filename = newName + ".rml";
 			m_skin.displayName = PluginEditorState::createSkinDisplayName(m_skin.filename);
@@ -796,6 +798,14 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
+	std::string Editor::getAbsoluteSkinFolder(const Processor& _processor, const std::string& _skinFolder)
+	{
+		const auto modulePath = synthLib::getModulePath();
+		const auto publicDataPath = _processor.getDataFolder();
+
+		return baseLib::filesystem::validatePath(_skinFolder.find(modulePath) == 0 || _skinFolder.find(publicDataPath) == 0 ? _skinFolder : modulePath + _skinFolder);
+	}
+
 	void Editor::onDisclaimerFinished() const
 	{
 		if(!synthLib::isRunningUnderRosetta())
@@ -907,9 +917,6 @@ namespace jucePluginEditorLib
 
 	std::string Editor::getAbsoluteSkinFolder(const std::string& _skinFolder) const
 	{
-		const auto modulePath = synthLib::getModulePath();
-		const auto publicDataPath = m_processor.getDataFolder();
-
-		return baseLib::filesystem::validatePath(_skinFolder.find(modulePath) == 0 || _skinFolder.find(publicDataPath) == 0 ? _skinFolder : modulePath + _skinFolder);
+		return getAbsoluteSkinFolder(m_processor, _skinFolder);
 	}
 }
