@@ -19,13 +19,11 @@ namespace n2xJucePlugin
 
 		juceRmlUi::EventListener::Add(m_volume, Rml::EventId::Change, [this](Rml::Event& _event)
 		{
-			/*
 			juce::MessageManager::callAsync([this]()
 			{
 				const auto sysex = n2x::State::createKnobSysex(n2x::KnobType::MasterVol, static_cast<uint8_t>(juceRmlUi::ElemValue::getValue(m_volume)));
 				m_editor.getN2xController().sendSysEx(sysex);
 			});
-			*/
 		});
 
 		m_onKnobChanged.set(_editor.getN2xController().onKnobChanged, [this](const n2x::KnobType& _type, const unsigned char& _value)

@@ -20,6 +20,10 @@ Vavra:
 - [Fix] Octave knobs were not in steps but continuous
 - [Fix] Fix patch manager grid cell width not covering standard patch name size
 
+NodalRed2x:
+
+- [Fix] Master Volume knob not working
+
 2.0.0:
 
 Framework:
