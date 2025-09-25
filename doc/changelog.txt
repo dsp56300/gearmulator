@@ -4,6 +4,8 @@ Release Notes
 
 Framework:
 
+- [Imp] Incresed size of RmlUi debugger
+
 - [Fix] Knobs didn't respect the selected part and always displayed/modified part 1
 - [Fix] Patch Manager: Data sources were not sorted
 - [Fix] Patch Manager: List/Grid cell sizes height increased to cover descenders of letters like 'g' or 'y'
