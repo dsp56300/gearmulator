@@ -2,6 +2,11 @@ Release Notes
 
 2.0.2:
 
+Framework:
+
+- [Fix] Disable all DSP Bridge related network activity if DSP Bridge is
+        disabled via config file
+
 Vavra:
 
 - [Fix] Oscillator Shape knobs were continous instead of stepped
