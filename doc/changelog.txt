@@ -1,5 +1,11 @@
 Release Notes 
 
+2.0.2:
+
+Vavra:
+
+- [Fix] Oscillator Shape knobs were continous instead of stepped
+
 2.0.1:
 
 Framework:
