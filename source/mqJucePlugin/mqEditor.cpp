@@ -60,6 +60,8 @@ namespace mqJucePlugin
 					juceRmlUi::ElemButton::setChecked(m_btPlayModeMulti, !checked);
 					m_controller.setPlayMode(checked);
 				});
+
+				juceRmlUi::ElemButton::setChecked(m_btPlayModeMulti, m_controller.isMultiMode());
 			}
 		}
 

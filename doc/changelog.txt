@@ -5,6 +5,7 @@ Release Notes
 Vavra:
 
 - [Fix] Oscillator Shape knobs were continous instead of stepped
+- [Fix] Initial state of multi mode button not restored when reopening UI
 
 2.0.1:
 
