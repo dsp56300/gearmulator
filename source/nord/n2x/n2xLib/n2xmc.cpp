@@ -36,7 +36,7 @@ namespace n2x
 		m_romRam.fill(0);
 		std::copy(std::begin(_rom.data()), std::end(_rom.data()), std::begin(m_romRam));
 
-		m_midi.setSysexDelay(0.0f, 1);
+		m_midi.setSysexDelay(0.05f, 1024);
 
 //		dumpAssembly("n2x_68k.asm", g_romAddress, g_romSize);
 
