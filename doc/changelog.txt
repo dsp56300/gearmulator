@@ -7,6 +7,10 @@ Vavra:
 - [Fix] Oscillator Shape knobs were continous instead of stepped
 - [Fix] Initial state of multi mode button not restored when reopening UI
 
+Xenia:
+
+- [Fix] MIDI LED was not working
+
 2.0.1:
 
 Framework:

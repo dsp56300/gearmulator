@@ -4,6 +4,8 @@
 #include "xtEditor.h"
 #include "xtLcd.h"
 
+#include "juceRmlUi/rmlElemButton.h"
+
 #include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
@@ -18,7 +20,7 @@ namespace xtJucePlugin
 		m_leds.fill(nullptr);
 
 		for(size_t i=0; i<std::size(g_ledNames); ++i)
-			m_leds[i] = _editor.findChild<juce::Button>(g_ledNames[i], false);
+			m_leds[i] = _editor.findChild<juceRmlUi::ElemButton>(g_ledNames[i], false);
 
 		auto *lcdArea = _editor.findChild("lcdArea", false);
 
@@ -87,7 +89,7 @@ namespace xtJucePlugin
 		for(size_t i=0; i<static_cast<uint32_t>(xt::LedType::Count); ++i)
 		{
 			if(m_leds[i])
-				m_leds[i]->setToggleState((leds & (1<<i)) != 0, juce::dontSendNotification);
+				m_leds[i]->setChecked((leds & (1<<i)) != 0);
 		}
 	}
 }

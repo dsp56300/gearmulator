@@ -2,9 +2,12 @@
 
 #include "xtLcd.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
-
 #include "xtLib/xtLeds.h"
+
+namespace juceRmlUi
+{
+	class ElemButton;
+}
 
 class Controller;
 
@@ -29,7 +32,7 @@ namespace xtJucePlugin
 		void processLCDUpdate(const std::vector<uint8_t>& _msg) const;
 		void processLedUpdate(const std::vector<uint8_t>& _msg) const;
 
-		std::array<juce::Button*, static_cast<uint32_t>(xt::LedType::Count)> m_leds{};
+		std::array<juceRmlUi::ElemButton*, static_cast<uint32_t>(xt::LedType::Count)> m_leds{};
 
 		Controller& m_controller;
 		std::unique_ptr<XtLcd> m_lcd;
