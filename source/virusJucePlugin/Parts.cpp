@@ -47,7 +47,7 @@ namespace genericVirusUI
 			EventListener::Add(m_partSelect[i], Rml::EventId::Click, [this, i](Rml::Event&){ selectPart(i); });
 			EventListener::Add(m_partSelect[i], Rml::EventId::Mousedown, [this, i](Rml::Event& _e)
 			{
-				if (getMouseButton(_e) != MouseButton::Right)
+				if (!isContextMenu(_e))
 					return;
 				selectPartMidiChannel(i);
 				_e.StopPropagation();

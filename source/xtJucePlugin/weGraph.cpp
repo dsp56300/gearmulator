@@ -120,7 +120,7 @@ namespace xtJucePlugin
 
 	void Graph::mouseDown(Rml::Event& _e)
 	{
-		if (juceRmlUi::helper::getMouseButton(_e) == juceRmlUi::MouseButton::Right)
+		if (juceRmlUi::helper::isContextMenu(_e))
 		{
 			m_editor.openGraphPopupMenu(*this, _e);
 			return;

@@ -79,7 +79,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
 
-		void onRightClick(const Rml::Event& _event) override;
+		void openContextMenu(const Rml::Event& _event) override;
 
 		bool canDrop(const Rml::Event& _event, const DragSource* _source) override;
 		bool canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files) override;

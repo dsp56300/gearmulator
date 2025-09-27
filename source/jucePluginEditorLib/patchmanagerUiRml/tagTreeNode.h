@@ -46,7 +46,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
 
-		void onRightClick(const Rml::Event& _event) override;
+		void openContextMenu(const Rml::Event& _event) override;
 
 		bool canDropPatchList(const Rml::Event& _event, const Rml::Element* _source, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) const override;
 		void dropPatches(const Rml::Event& _event, const patchManager::SavePatchDesc* _data, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;

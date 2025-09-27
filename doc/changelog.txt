@@ -6,6 +6,7 @@ Framework:
 
 - [Fix] Disable all DSP Bridge related network activity if DSP Bridge is
         disabled via config file
+- [Fix] Context Menus didn't open via Ctrl+Click on macOS
 
 Vavra:
 

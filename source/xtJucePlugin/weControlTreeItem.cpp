@@ -143,7 +143,7 @@ namespace xtJucePlugin
 		}
 	}
 
-	void ControlTreeItem::onRightClick(const Rml::Event& _event)
+	void ControlTreeItem::openContextMenu(const Rml::Event& _event)
 	{
 		juceRmlUi::Menu menu;
 
