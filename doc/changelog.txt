@@ -9,6 +9,8 @@ Framework:
 
 Vavra:
 
+- [Imp] Added patch names below part select buttons
+
 - [Fix] Oscillator Shape knobs were continous instead of stepped
 - [Fix] Initial state of multi mode button not restored when reopening UI
 
