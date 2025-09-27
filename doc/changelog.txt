@@ -21,7 +21,7 @@ Xenia:
 
 NodalRed2x:
 
-- [Fix] Fix Arpeggiator timing on excessive MIDI activity
+- [Fix] Fix incorrect Arpeggiator timing on excessive MIDI activity
 
 2.0.1:
 
