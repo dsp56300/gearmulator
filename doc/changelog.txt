@@ -8,6 +8,18 @@ Framework:
         disabled via config file
 - [Fix] Context Menus didn't open via Ctrl+Click on macOS
 
+
+Osirus/OsTIrus:
+
+- [Fix] Changed default Master Volume from 92 to 127. Master Volume only affects
+		The first stereo output and caused different levels when using multiple outputs.
+		The default value of 92 was initially chosen to match the TI hardware in USB mode
+		but as it affects output pair 1 only it caused more confusion than benefits.
+		In OsTIrus, the Master Volume can be adjusted if needed via the global page.
+		If you need the TI-matching volume of 92 it can easily be restored by double clicking 
+		the knob.
+		Note that saved projects are not affected, only new instances will use the new default.
+
 Vavra:
 
 - [Imp] Added patch names below part select buttons
