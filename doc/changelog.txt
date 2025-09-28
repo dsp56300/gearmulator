@@ -9,6 +9,10 @@ Framework:
 - [Fix] Context Menus didn't open via Ctrl+Click on macOS
 
 
+NodalRed2x:
+
+- [Fix] Fix incorrect Arpeggiator timing on excessive MIDI activity
+
 Osirus/OsTIrus:
 
 - [Fix] Changed default Master Volume from 92 to 127. Master Volume only affects
@@ -30,10 +34,6 @@ Vavra:
 Xenia:
 
 - [Fix] MIDI LED was not working
-
-NodalRed2x:
-
-- [Fix] Fix incorrect Arpeggiator timing on excessive MIDI activity
 
 2.0.1:
 
