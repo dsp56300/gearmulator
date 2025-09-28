@@ -23,7 +23,7 @@ namespace juceRmlUi
 		void onSubmit();
 		void onBlur();
 		void onChange(const Rml::Event& _event);
-		void onKeyDown(const Rml::Event& _event);
+		void onKeyDown(Rml::Event& _event);
 
 		void deleteInputElement();
 		void close();

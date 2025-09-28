@@ -58,7 +58,7 @@ namespace juceRmlUi
 		Rml::Element* createSpacer();
 
 		void onScroll(const Rml::Event& _event);
-		bool onKeypress(const Rml::Event& _event);
+		bool onKeypress(Rml::Event& _event);
 
 		uint32_t getItemsPerColumn();
 

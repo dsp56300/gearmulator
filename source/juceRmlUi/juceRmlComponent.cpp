@@ -19,6 +19,13 @@
 
 namespace juceRmlUi
 {
+	namespace
+	{
+		bool consumed(const bool _keyEventResult)
+		{
+			return _keyEventResult == false;
+		}
+	}
 	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback)
 		: m_rmlInterfaces(_interfaces)
 		, m_coreInstance(_interfaces.getCoreInstance())
@@ -138,7 +145,7 @@ namespace juceRmlUi
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
-		DBG("OpenGL error: " << juce::String::toHexString((int)err));
+			DBG("OpenGL error: " << juce::String::toHexString((int)err));
 
 		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
 
@@ -259,18 +266,19 @@ namespace juceRmlUi
 		if (juce::CharacterFunctions::isPrintable(juceChar) || juceChar == '\n')
 		{
 			auto string = juce::String::charToString(juceChar);
-			m_rmlContext->ProcessTextInput(string.toStdString());
-			res = true;
+			if (consumed(m_rmlContext->ProcessTextInput(string.toStdString())))
+				res = true;
 		}
 
 		const Rml::Input::KeyIdentifier key = helper::toRmlKey(_key);
 
 		if (key != Rml::Input::KI_UNKNOWN)
 		{
-			m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key));
-			res = true;
+			if (consumed(m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key))))
+				res = true;
 		}
-		enqueueUpdate();
+		if (res)
+			enqueueUpdate();
 		return res;
 	}
 
@@ -291,9 +299,11 @@ namespace juceRmlUi
 					if (!it->isCurrentlyDown())
 					{
 						const auto& key = *it;
-						m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key));
-						enqueueUpdate();
-						res = true;
+						if (consumed(m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key))))
+						{
+							res = true;
+							enqueueUpdate();
+						}
 						it = m_pressedKeys.erase(it);
 					}
 					else

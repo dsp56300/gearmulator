@@ -5,9 +5,12 @@ Release Notes
 Framework:
 
 - [Fix] Disable all DSP Bridge related network activity if DSP Bridge is
-        disabled via config file
-- [Fix] Context Menus didn't open via Ctrl+Click on macOS
-
+        not explicitly enabled via config file.
+- [Fix] Context Menus didn't open via Ctrl+Click on macOS.
+- [Fix] Plugins consumed all keyboard events regardless of if they were
+ 		actually handled or not. This caused issues in various hosts. For example,
+		it prevented using the space bar to toggle playback while the plugin was
+		focused.
 
 NodalRed2x:
 

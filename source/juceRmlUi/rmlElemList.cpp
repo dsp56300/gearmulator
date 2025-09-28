@@ -595,7 +595,7 @@ namespace juceRmlUi
 //		m_layoutDirty = 1;
 	}
 
-	bool ElemList::onKeypress(const Event& _event)
+	bool ElemList::onKeypress(Event& _event)
 	{
 		const auto key = helper::getKeyIdentifier(_event);
 
@@ -603,6 +603,9 @@ namespace juceRmlUi
 		const auto shift = helper::getKeyModShift(_event);
 
 		auto lastSelected = m_list.handleNavigationKey(key, ctrl, shift, getLayoutType() == LayoutType::Grid ? getItemsPerColumn() : 0);
+
+		if (lastSelected != List::InvalidIndex)
+			_event.StopPropagation();
 
 		return scrollIntoView(lastSelected);
 	}
