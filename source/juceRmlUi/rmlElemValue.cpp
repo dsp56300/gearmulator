@@ -47,7 +47,8 @@ namespace juceRmlUi
 		if (m_stepSize > 0.5f)
 		{
 			const int stepSize = static_cast<int>(std::round(m_stepSize));
-			v = static_cast<float>((static_cast<int>(v - m_min) + (stepSize>>1)) / stepSize * stepSize) + m_min;
+			const int rounded = static_cast<int>((v - m_min) + m_stepSize * 0.5f);
+			v = static_cast<float>(rounded / stepSize * stepSize) + m_min;
 		}
 
 		if (!setProperty(m_value, v, onValueChanged))

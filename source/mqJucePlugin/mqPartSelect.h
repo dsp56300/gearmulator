@@ -6,6 +6,8 @@
 
 #include "mqPartButton.h"
 
+#include "baseLib/event.h"
+
 namespace Rml
 {
 	class Element;
@@ -32,16 +34,22 @@ namespace mqJucePlugin
 		void selectPart(uint8_t _index) const;
 
 	private:
+		void updatePatchName(uint8_t _part) const;
+		void onPatchNameChanged(uint8_t _part) const;
+
 		void updateUiState() const;
 
 		struct Part
 		{
 			std::unique_ptr<mqPartButton> button = nullptr;
 			Rml::Element* led = nullptr;
+			Rml::Element* patchName = nullptr;
+			std::unique_ptr<mqPartButton> patchNameButton = nullptr;
 		};
 
 		mqJucePlugin::Editor& m_editor;
 		Controller& m_controller;
 		std::array<Part, 16> m_parts{};
+		baseLib::EventListener<uint8_t> m_onPatchNameChanged;
 	};
 }

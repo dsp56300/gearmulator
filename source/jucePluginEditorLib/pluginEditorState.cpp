@@ -32,8 +32,10 @@ namespace jucePluginEditorLib
 {
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
 	: m_processor(_processor), m_includedSkins(std::move(_includedSkins))
-	, m_remoteServerList(getPluginDesc(_processor))
 {
+	if (m_processor.getConfig().getBoolValue("supportDspBridge", false))
+		m_remoteServerList.reset(new bridgeClient::ServerList(getPluginDesc(_processor)));
+
 	juce::File(getSkinFolder()).createDirectory();
 
 	// point embedded skins to public data folder if they're not embedded
@@ -486,46 +488,47 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 	latencyMenu.addEntry("4", latency == 4, [this, adjustLatency] { adjustLatency(4); });
 	latencyMenu.addEntry("8", latency == 8, [this, adjustLatency] { adjustLatency(8); });
 
-	auto servers = m_remoteServerList.getEntries();
-
-	juceRmlUi::Menu deviceTypeMenu;
-	deviceTypeMenu.addEntry("Local (default)", m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
-
-	if(servers.empty())
-	{
-		deviceTypeMenu.addEntry("- no servers found -", false, false, [this] {});
-	}
-	else
-	{
-		for (const auto & server : servers)
-		{
-			if(server.err.code == bridgeLib::ErrorCode::Ok)
-			{
-				std::string name = server.host + ':' + std::to_string(server.serverInfo.portTcp);
-
-				const auto isSelected = m_processor.getDeviceType() == pluginLib::DeviceType::Remote && 
-					m_processor.getRemoteDeviceHost() == server.host && 
-					m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
-
-				deviceTypeMenu.addEntry(name, isSelected, [this, server]
-				{
-					m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
-				});
-			}
-			else
-			{
-				std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
-				deviceTypeMenu.addEntry(name, false, false, [this] {});
-			}
-		}
-	}
-
 	menu.addSubMenu("GUI Skin", std::move(skinMenu));
 	menu.addSubMenu("GUI Scale", std::move(scaleMenu));
 	menu.addSubMenu("Latency (blocks)", std::move(latencyMenu));
 
-	if (m_processor.getConfig().getBoolValue("supportDspBridge", false))
+	if (m_remoteServerList)
+	{
+		auto servers = m_remoteServerList->getEntries();
+
+		juceRmlUi::Menu deviceTypeMenu;
+		deviceTypeMenu.addEntry("Local (default)", m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
+
+		if(servers.empty())
+		{
+			deviceTypeMenu.addEntry("- no servers found -", false, false, [this] {});
+		}
+		else
+		{
+			for (const auto & server : servers)
+			{
+				if(server.err.code == bridgeLib::ErrorCode::Ok)
+				{
+					std::string name = server.host + ':' + std::to_string(server.serverInfo.portTcp);
+
+					const auto isSelected = m_processor.getDeviceType() == pluginLib::DeviceType::Remote && 
+						m_processor.getRemoteDeviceHost() == server.host && 
+						m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
+
+					deviceTypeMenu.addEntry(name, isSelected, [this, server]
+					{
+						m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
+					});
+				}
+				else
+				{
+					std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
+					deviceTypeMenu.addEntry(name, false, false, [this] {});
+				}
+			}
+		}
 		menu.addSubMenu("Device Type", std::move(deviceTypeMenu));
+	}
 
 	menu.addSeparator();
 

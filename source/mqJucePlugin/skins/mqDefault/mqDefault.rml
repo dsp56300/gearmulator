@@ -1072,6 +1072,26 @@
 			</div>
 		</img>
 		<div id="FocusedParameterTooltip" class="jucePos juceLabel txt2" offsetY="25" style="left: 1385dp; top: 1225.5dp; width: 96dp; height: 55dp; background-color: #000000;line-height: 55dp;">42</div>
+
+		<div class="patchnames">
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+			<div id="patchname" class="patchname"/>
+		</div>
+
 		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 514.594dp; width: 128dp; height: 64dp;"/>
 		<button id="partSelectLED" class="jucePos juceButton led" isToggle="1" style="left: 327.29dp; top: 530.594dp; width: 32dp; height: 32dp;"/>
 		<button id="partSelectButton" class="jucePos juceButton btn" isToggle="1" style="left: 164.961dp; top: 603.781dp; width: 128dp; height: 64dp;"/>

@@ -52,7 +52,6 @@ namespace jucePluginEditorLib::patchManagerRml
 		void setColor(uint32_t _color, bool _forceUpdate = false);
 
 		void onMouseDown(Rml::Event& _event);
-		void onRightClick(const Rml::Event& _event);
 
 		ListModel& getList() const;
 

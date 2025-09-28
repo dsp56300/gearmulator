@@ -116,13 +116,12 @@ namespace juceRmlUi
 			break;
 		case Rml::EventId::Mousedown:
 			{
-				const auto mouseButton = helper::getMouseButton(_event);
-				if (mouseButton == MouseButton::Right)
+				if (helper::isContextMenu(_event))
 				{
 					if (!getNode()->isSelected())
 						getNode()->setSelected(true, false);
 
-					onRightClick(_event);
+					openContextMenu(_event);
 					_event.StopPropagation();
 				}
 			}

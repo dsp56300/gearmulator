@@ -43,7 +43,7 @@ namespace xtJucePlugin
 		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
 		void dropFiles(const std::vector<std::string>& _files);
 
-		void onRightClick(const Rml::Event& _event) override;
+		void openContextMenu(const Rml::Event& _event) override;
 
 		void paintItem(juce::Graphics& _g, const int _width, const int _height) override;
 

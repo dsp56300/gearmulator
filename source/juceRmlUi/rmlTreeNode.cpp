@@ -262,27 +262,27 @@ namespace juceRmlUi
 		switch (_key)
 		{
 		case KI_RIGHT:
-			if (!empty() && isClosed())
 			{
-				setOpened(true);
-			}
-			else
-			{
+				if (!empty() && isClosed())
+				{
+					setOpened(true);
+					return true;
+				}
 				auto child = getChild(0);
 				if (child)
 					return child->setSelected(true);
 				auto next = getNextSibling();
 				if (next)
-					next->setSelected(true);
+					return next->setSelected(true);
 			}
 			break;
 		case KI_LEFT:
-			if (!empty() && isOpened())
 			{
-				setOpened(false);
-			}
-			else
-			{
+				if (!empty() && isOpened())
+				{
+					setOpened(false);
+					return true;
+				}
 				auto parent = getParent();
 				if (parent && !parent->isRoot())
 					return parent->setSelected(true);

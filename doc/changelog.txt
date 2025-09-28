@@ -1,5 +1,45 @@
 Release Notes 
 
+2.0.2:
+
+Framework:
+
+- [Fix] Disable all DSP Bridge related network activity if DSP Bridge is
+        not explicitly enabled via config file.
+- [Fix] Context Menus didn't open via Ctrl+Click on macOS.
+- [Fix] Plugins consumed all keyboard events regardless of if they were
+ 		actually handled or not. This caused issues in various hosts. For example,
+		it prevented using the space bar to toggle playback while the plugin was
+		focused.
+- [Fix] Content flickering in some hosts when resizing the plugin window to odd 
+        aspect ratios
+
+NodalRed2x:
+
+- [Fix] Fix incorrect Arpeggiator timing on excessive MIDI activity
+
+Osirus/OsTIrus:
+
+- [Fix] Changed default Master Volume from 92 to 127. Master Volume only affects
+		The first stereo output and caused different levels when using multiple outputs.
+		The default value of 92 was initially chosen to match the TI hardware in USB mode
+		but as it affects output pair 1 only it caused more confusion than benefits.
+		In OsTIrus, the Master Volume can be adjusted if needed via the global page.
+		If you need the TI-matching volume of 92 it can easily be restored by double clicking 
+		the knob.
+		Note that saved projects are not affected, only new instances will use the new default.
+
+Vavra:
+
+- [Imp] Added patch names below part select buttons
+
+- [Fix] Oscillator Shape knobs were continous instead of stepped
+- [Fix] Initial state of multi mode button not restored when reopening UI
+
+Xenia:
+
+- [Fix] MIDI LED was not working
+
 2.0.1:
 
 Framework:

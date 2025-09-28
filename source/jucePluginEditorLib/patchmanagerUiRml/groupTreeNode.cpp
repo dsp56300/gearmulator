@@ -398,9 +398,9 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	}
 
-	void GroupTreeElem::onRightClick(const Rml::Event& _event)
+	void GroupTreeElem::openContextMenu(const Rml::Event& _event)
 	{
-		TreeElem::onRightClick(_event);
+		TreeElem::openContextMenu(_event);
 
 		juceRmlUi::Menu menu;
 

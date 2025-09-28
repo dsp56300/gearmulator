@@ -170,14 +170,22 @@ namespace mqJucePlugin
 
 	    if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::SingleEditBufferSingleMode) && prog == static_cast<uint8_t>(mqLib::MidiSoundLocation::EditBufferCurrentSingle))
 	    {
+			const auto nameChanged = m_singleEditBuffer.name != patch.name;
 		    m_singleEditBuffer = patch;
+			if (nameChanged)
+				onPatchNameChanged(0);
 
 			if(!isMultiMode())
 				applyPatchParameters(_params, 0);
 	    }
 	    else if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::SingleEditBufferMultiMode))
 	    {
+			const auto nameChanged = m_singleEditBuffers[prog].name != patch.name;
+
 		    m_singleEditBuffers[prog] = patch;
+
+			if (nameChanged)
+				onPatchNameChanged(prog);
 
     		if (isMultiMode())
 				applyPatchParameters(_params, prog);
@@ -387,6 +395,17 @@ namespace mqJucePlugin
 	        _values[idx] = static_cast<uint8_t>(_value[i]);
 	    }
 	    return true;
+	}
+
+	const std::string& Controller::getPatchName(const uint8_t _part) const
+	{
+		if (isMultiMode() && _part < m_singleEditBuffers.size())
+			return m_singleEditBuffers[_part].name;
+		if (!isMultiMode() && _part == 0)
+			return m_singleEditBuffer.name;
+
+		static std::string empty;
+		return empty;
 	}
 
 	void Controller::selectPreset(int _offset)

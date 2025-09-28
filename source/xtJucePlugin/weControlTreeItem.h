@@ -41,7 +41,7 @@ namespace xtJucePlugin
 		bool canDrop(const Rml::Event& _event, const DragSource* _source) override;
 		void drop(const Rml::Event& _event, const DragSource* _source, const juceRmlUi::DragData* _data) override;
 
-		void onRightClick(const Rml::Event& _event) override;
+		void openContextMenu(const Rml::Event& _event) override;
 
 	private:
 		void onWaveChanged() const;

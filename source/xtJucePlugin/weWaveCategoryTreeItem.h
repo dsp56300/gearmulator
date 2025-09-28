@@ -30,7 +30,7 @@ namespace xtJucePlugin
 
 		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
 
-		void onRightClick(const Rml::Event& _event) override;
+		void openContextMenu(const Rml::Event& _event) override;
 
 		WaveCategory getCategory() const;
 

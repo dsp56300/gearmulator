@@ -103,7 +103,7 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::EventListener::Add(doc, Rml::EventId::Mousedown, [this](Rml::Event& _event)
 		{
-			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Right)
+			if (juceRmlUi::helper::isContextMenu(_event))
 			{
 				_event.StopPropagation();
 				openMenu(_event);
@@ -659,7 +659,7 @@ namespace jucePluginEditorLib
 
 		auto* doc = comp->getDocument();
 
-		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](const Rml::Event& _event)
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](Rml::Event& _event)
 		{
 			if (!juceRmlUi::helper::getKeyModCommand(_event))
 				return;
@@ -668,9 +668,11 @@ namespace jucePluginEditorLib
 			{
 			case Rml::Input::KI_C:
 				copyCurrentPatchToClipboard();
+				_event.StopPropagation();
 				break;
 			case Rml::Input::KI_V:
 				replaceCurrentPatchFromClipboard();
+				_event.StopPropagation();
 				break;
 			default:;
 			}

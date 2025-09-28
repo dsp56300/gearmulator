@@ -88,9 +88,9 @@ namespace jucePluginEditorLib::patchManagerRml
 		search(std::move(sr));
 	}
 
-	void TagTreeElem::onRightClick(const Rml::Event& _event)
+	void TagTreeElem::openContextMenu(const Rml::Event& _event)
 	{
-		TreeElem::onRightClick(_event);
+		TreeElem::openContextMenu(_event);
 
 		if(getTagType() != pluginLib::patchDB::TagType::Invalid && getTree()->getTree().getSelectedNodes().size() == 1)
 		{

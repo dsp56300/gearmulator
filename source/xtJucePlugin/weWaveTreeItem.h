@@ -45,7 +45,7 @@ namespace xtJucePlugin
 		static WaveCategory getCategory(xt::WaveId _waveIndex);
 
 		void onSelectedChanged(bool _selected) override;
-		void onRightClick(const Rml::Event& _event) override;
+		void openContextMenu(const Rml::Event& _event) override;
 
 		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
 

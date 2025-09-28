@@ -47,6 +47,7 @@ namespace mqJucePlugin
 	    };
 
 		baseLib::Event<bool> onPlayModeChanged;
+		baseLib::Event<uint8_t> onPatchNameChanged;
 
 	    Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 		~Controller() override;
@@ -77,6 +78,8 @@ namespace mqJucePlugin
 	    bool setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
 	    bool setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
 	    bool setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const;
+
+		const std::string& getPatchName(uint8_t _part) const;
 
 	private:
 		void selectPreset(int _offset);
