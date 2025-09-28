@@ -11,6 +11,8 @@ Framework:
  		actually handled or not. This caused issues in various hosts. For example,
 		it prevented using the space bar to toggle playback while the plugin was
 		focused.
+- [Fix] Content flickering in some hosts when resizing the plugin window to odd 
+        aspect ratios
 
 NodalRed2x:
 

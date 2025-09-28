@@ -136,6 +136,9 @@ namespace juceRmlUi
 		glDisable(GL_DEBUG_OUTPUT);
 		glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
 		m_renderInterface->SetViewport(size.x, size.y);
 		m_renderInterface->BeginFrame();
 		bool haveMore = true;
