@@ -188,6 +188,6 @@ namespace juceRmlUi
 
 	void ElemTreeNode::updateVisibilityProperties()
 	{
-		getTree()->setElementVisibility(getNode(), *this, !m_node->getParent() || m_node->getParent()->isOpened());
+		getTree()->setElementVisibility(getNode(), *this, m_node->isVisible());
 	}
 }
