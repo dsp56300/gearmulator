@@ -1,5 +1,11 @@
 Release Notes 
 
+2.0.3:
+
+Framework:
+
+- [Fix] Sliders can now adjusted via mousewheel
+
 2.0.2:
 
 Framework:

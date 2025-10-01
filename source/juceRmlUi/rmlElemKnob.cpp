@@ -93,6 +93,30 @@ namespace juceRmlUi
 		m_endless = _endless;
 	}
 
+	void ElemKnob::processMouseWheel(Rml::Element& _element, const Rml::Event& _event)
+	{
+		const auto wheel = helper::getMouseWheelDelta(_event);
+		const auto delta = wheel.y;
+
+		const auto range = getRange(&_element);
+
+		// we use the default behaviour if ctrl/cmd is not pressed and the range is large enough
+		if(range > 32 && !helper::getKeyModCommand(_event))
+		{
+			setValue(&_element, getValue(&_element) - range * delta / 7.5f);	// this should be pretty close to what Juce did
+			return;
+		}
+
+		// Otherwise inc/dec single steps
+
+		constexpr auto diff = 1;
+
+		if(delta > 0)
+			setValue(&_element, getValue(&_element) - diff);
+		else
+			setValue(&_element, getValue(&_element) + diff);
+	}
+
 	void ElemKnob::processMouseMove(const Rml::Event& _event)
 	{
 		const auto range = getRange();
@@ -135,26 +159,7 @@ namespace juceRmlUi
 
 	void ElemKnob::processMouseWheel(const Rml::Event& _event)
 	{
-		const auto wheel = helper::getMouseWheelDelta(_event);
-		const auto delta = wheel.y;
-
-		const auto range = getRange();
-
-		// we use the default behaviour if ctrl/cmd is not pressed and the range is large enough
-		if(range > 32 && !helper::getKeyModCommand(_event))
-		{
-			setValue(getValue() - range * delta / 7.5f);	// this should be pretty close to what Juce did
-			return;
-		}
-
-		// Otherwise inc/dec single steps
-
-		constexpr auto diff = 1;
-
-		if(delta > 0)
-			setValue(getValue() - diff);
-		else
-			setValue(getValue() + diff);
+		processMouseWheel(*this, _event);
 	}
 
 	void ElemKnob::processDoubleClick(const Rml::Event&)

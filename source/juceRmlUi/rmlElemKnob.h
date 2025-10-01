@@ -21,6 +21,8 @@ namespace juceRmlUi
 
 		void setEndless(bool _endless);
 
+		static void processMouseWheel(Rml::Element& _element, const Rml::Event& _event);
+
 	private:
 		void processMouseMove(const Rml::Event& _event);
 		void processMouseWheel(const Rml::Event& _event);
