@@ -3,6 +3,8 @@
 #include "rmlControllerLink.h"
 #include "rmlPluginContext.h"
 #include "rmlTabGroup.h"
+
+#include "juceRmlUi/rmlElemKnob.h"
 #include "juceRmlUi/rmlEventListener.h"
 
 #include "juceRmlUi/rmlHelper.h"
@@ -155,14 +157,21 @@ namespace rmlPlugin
 
 		if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_element))
 		{
-			// reset sliders to their default value on double click
 			if (input->GetAttribute("type", std::string("")) == "range")
 			{
+				// reset sliders to their default value on double click
+
 				juceRmlUi::EventListener::Add(input, Rml::EventId::Dblclick, [input](const Rml::Event&)
 				{
 					auto defaultValue = input->GetAttribute("default", std::string());
 					if (!defaultValue.empty())
 						input->SetValue(defaultValue);
+				});
+
+				// allow to change slider value with mouse wheel
+				juceRmlUi::EventListener::Add(input, Rml::EventId::Mousescroll, [input](const Rml::Event& _event)
+				{
+					juceRmlUi::ElemKnob::processMouseWheel(*input, _event);
 				});
 			}
 		}

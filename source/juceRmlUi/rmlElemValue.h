@@ -39,6 +39,8 @@ namespace juceRmlUi
 			return m_max - m_min;
 		}
 
+		static float getRange(Rml::Element* _elem);
+
 		bool isInRange(const float _value) const
 		{
 			return _value >= m_min && _value <= m_max;

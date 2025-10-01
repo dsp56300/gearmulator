@@ -96,6 +96,18 @@ namespace juceRmlUi
 		onChangeStepSize();
 	}
 
+	float ElemValue::getRange(Rml::Element* _elem)
+	{
+		if (auto* elemValue = dynamic_cast<ElemValue*>(_elem))
+			return elemValue->getRange();
+
+		const auto min = _elem->GetAttribute("min", 0.0f);
+		const auto max = _elem->GetAttribute("max", 1.0f);
+		if (max <= min)
+			return 0.0f;
+		return max - min;
+	}
+
 	bool ElemValue::setProperty(float& _prop, const float _newValue, const baseLib::Event<float>& _event)
 	{
 		if (_prop == _newValue)  // NOLINT(clang-diagnostic-float-equal)
