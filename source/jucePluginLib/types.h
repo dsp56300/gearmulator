@@ -17,8 +17,9 @@ namespace pluginLib
 
 	enum class DeviceType
 	{
-		Local,
-		Remote,
-		Dummy
+		// note: these values are stored in the plugin state, do not change them!
+		Local = 0,
+		Remote = 1,
+		Dummy = 2
 	};
 }

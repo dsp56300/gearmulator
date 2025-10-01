@@ -259,6 +259,15 @@ namespace pluginLib
 
 	void Processor::saveChunkData(baseLib::BinaryStream& s)
 	{
+		// it is important that this is stored before other chunks to restore state to the remote properly
+		if (m_deviceType == DeviceType::Remote)
+		{
+			baseLib::ChunkWriter cw(s, "REMO", 1);
+			s.write(static_cast<int32_t>(m_deviceType));
+			s.write(m_remoteHost);
+			s.write(m_remotePort);
+		}
+
 		{
 			std::vector<uint8_t> buffer;
 			getPlugin().getState(buffer, synthLib::StateTypeGlobal);
@@ -325,6 +334,15 @@ namespace pluginLib
 		_cr.add("PROG", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
 			m_programName = _binaryStream.readString();
+		});
+
+		_cr.add("REMO", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			const auto type = static_cast<DeviceType>(_binaryStream.read<int32_t>());
+			const auto host = _binaryStream.readString();
+			const auto port = _binaryStream.read<uint32_t>();
+			if (type == DeviceType::Remote)
+				setRemoteDevice(host, port);
 		});
 
 		m_midiPorts.loadChunkData(_cr);
