@@ -3,5 +3,6 @@ cmake_minimum_required(VERSION 3.15)
 add_subdirectory(common)
 
 if(${CMAKE_PROJECT_NAME}_SYNTH_JE8086)
+	add_subdirectory(esp)
 	add_subdirectory(je8086)
 endif()
