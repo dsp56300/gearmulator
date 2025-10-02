@@ -255,13 +255,13 @@ namespace esp
 			if (_write)
 				reg->write();
 
-			auto* rPtr = reg.get();;
+			auto* rPtr = reg.get();
+
+			assert(reg->getDataSize() == dataSize && "data size mismatch");
 
 			// reinsert at the end of the list to mark as most recently used
 			m_usedRegs.erase(it);
 			m_usedRegs.emplace_back(_ptr, std::move(reg));
-
-			assert(reg->getDataSize() == dataSize && "data size mismatch");
 
 			return ScopedPooledReg(rPtr);
 		}
