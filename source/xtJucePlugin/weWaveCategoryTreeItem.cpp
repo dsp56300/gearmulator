@@ -68,7 +68,7 @@ namespace xtJucePlugin
 		return desc;
 	}
 
-	void WaveCategoryTreeItem::onRightClick(const Rml::Event& _event)
+	void WaveCategoryTreeItem::openContextMenu(const Rml::Event& _event)
 	{
 		if (getCategory() == WaveCategory::Rom)
 			return;

@@ -9,8 +9,6 @@
 
 #include "juceRmlUi/rmlInterfaces.h"
 
-#include "RmlUi/Core/DataModelHandle.h"
-
 namespace juceRmlUi
 {
 	class RmlComponent;
@@ -80,11 +78,14 @@ namespace rmlPlugin
 
 		pluginLib::Controller& m_controller;
 		juceRmlUi::RmlComponent& m_component;
+		Rml::Context* const m_context;
+
 		std::array<ParameterList, CurrentPart + 1> m_parametersPerPart;
 		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 
 		std::unordered_map<Rml::Element*, ParameterToElementsBinding*> m_elementToParam;
 		std::unordered_map<pluginLib::Parameter*, ParameterToElementsBinding*> m_paramToElements;
+		std::set<Rml::Element*> m_elementsBoundToCurrentPart;
 
 		std::unordered_set<Rml::ElementDocument*> m_docsWithMouseDown;
 

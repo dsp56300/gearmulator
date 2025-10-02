@@ -40,7 +40,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 
-		void onRightClick(const Rml::Event& _event) override;
+		void openContextMenu(const Rml::Event& _event) override;
 
 		std::unique_ptr<juceRmlUi::DragData> createDragData() override;
 

@@ -162,8 +162,22 @@ namespace juceRmlUi
 		MouseButton getMouseButton(const Rml::Event& _event)
 		{
 			// RmlUi uses 0 for left, 1 for right, 2 for middle
-			const int button = _event.GetParameter<int>("button", 0);
+			const int button = _event.GetParameter<int>("button", static_cast<int>(MouseButton::None));
 			return static_cast<MouseButton>(button);
+		}
+
+		bool isContextMenu(const Rml::Event& _event)
+		{
+			const auto mouseButton = getMouseButton(_event);
+
+			if (mouseButton == MouseButton::Right)
+				return true;
+
+#if JUCE_MAC
+			if (mouseButton == MouseButton::Left && getKeyModCtrl(_event))
+				return true;
+#endif
+			return false;
 		}
 
 		Rml::Vector2f getMouseWheelDelta(const Rml::Event& _event)
@@ -206,6 +220,11 @@ namespace juceRmlUi
 		bool getKeyModCtrl(const Rml::Event& _event)
 		{
 			return _event.GetParameter<int>("ctrl_key", 0) > 0;
+		}
+
+		bool getKeyModCommand(const Rml::Event& _event)
+		{
+			return _event.GetParameter<int>("meta_key", 0) > 0;
 		}
 
 		bool getKeyModShift(const Rml::Event& _event)

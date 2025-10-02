@@ -112,20 +112,15 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void ListElemEntry::onMouseDown(Rml::Event& _event)
 	{
-		if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Right)
+		if (juceRmlUi::helper::isContextMenu(_event))
 		{
 			if (!m_item->isSelected())
 				getList().setSelectedEntries({m_item->getIndex()});
-			onRightClick(_event);
+			auto& list = getList();
+
+			list.openContextMenu(_event);
 			_event.StopPropagation();
 		}
-	}
-
-	void ListElemEntry::onRightClick(const Rml::Event& _event)
-	{
-		auto& list = getList();
-
-		list.openContextMenu(_event);
 	}
 
 	ListModel& ListElemEntry::getList() const

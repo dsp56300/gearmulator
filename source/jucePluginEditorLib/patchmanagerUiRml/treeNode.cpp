@@ -234,7 +234,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void TreeElem::onAddPressed(Rml::Event& _event)
 	{
-		onRightClick(_event);
+		openContextMenu(_event);
 	}
 
 	void TreeElem::setCanAdd(const bool _enable, const std::string& _image/* = {}*/)

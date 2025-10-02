@@ -128,7 +128,7 @@ namespace juceRmlUi
 	{
 		ElemValue::OnUpdate();
 
-		if (m_valueTextDirty)
+		if (m_valueTextDirty || !m_textElem)
 		{
 			if (updateValueText())
 				m_valueTextDirty = false;

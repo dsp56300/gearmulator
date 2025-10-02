@@ -70,10 +70,10 @@ namespace juceRmlUi
 
 		const auto self = shared_from_this();
 
-		// insert into dummy array and sort it to extract insert position
-		const auto it = std::lower_bound(m_children.begin(), m_children.end(), self, _sortedInsertionComparer);
+		const auto& children = _parent->m_children;
+		const auto it = std::lower_bound(children.begin(), children.end(), self, _sortedInsertionComparer);
 
-		const auto position = std::distance(m_children.begin(), it);
+		const auto position = std::distance(children.begin(), it);
 
 		// now insert at the found position
 		return setParent(_parent, position);
@@ -262,27 +262,27 @@ namespace juceRmlUi
 		switch (_key)
 		{
 		case KI_RIGHT:
-			if (!empty() && isClosed())
 			{
-				setOpened(true);
-			}
-			else
-			{
+				if (!empty() && isClosed())
+				{
+					setOpened(true);
+					return true;
+				}
 				auto child = getChild(0);
 				if (child)
 					return child->setSelected(true);
 				auto next = getNextSibling();
 				if (next)
-					next->setSelected(true);
+					return next->setSelected(true);
 			}
 			break;
 		case KI_LEFT:
-			if (!empty() && isOpened())
 			{
-				setOpened(false);
-			}
-			else
-			{
+				if (!empty() && isOpened())
+				{
+					setOpened(false);
+					return true;
+				}
 				auto parent = getParent();
 				if (parent && !parent->isRoot())
 					return parent->setSelected(true);

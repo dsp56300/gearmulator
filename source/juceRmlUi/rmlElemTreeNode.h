@@ -25,7 +25,7 @@ namespace juceRmlUi
 		void ProcessEvent(Rml::Event& _event) override;
 
 		virtual void onClick() {}
-		virtual void onRightClick(const Rml::Event& _event) {}
+		virtual void openContextMenu(const Rml::Event& _event) {}
 
 	protected:
 		virtual void onSelectedChanged(bool _selected);

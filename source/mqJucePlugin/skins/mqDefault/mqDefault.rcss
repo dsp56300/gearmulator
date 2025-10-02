@@ -518,3 +518,32 @@ treenode:selected
 	background-color: #a87a24;
 }
 
+.patchnames {
+	position: absolute;
+	left: 112dp;
+	top: 560dp;
+	height: 1384dp;
+	width: 286dp;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.patchname {
+	font-weight: bold;
+	height: 40dp;
+	font-size: 27dp;
+	line-height: 55dp;
+	padding-left: 10dp;
+	overflow: hidden;
+	color: #f3d08e;
+	drag: clone;
+	width: 270dp;
+
+	/*background-color: #cf972e;
+	border-bottom-left-radius: 15dp;*/
+}
+
+.pm-gridentry {
+	width: 11em;
+}

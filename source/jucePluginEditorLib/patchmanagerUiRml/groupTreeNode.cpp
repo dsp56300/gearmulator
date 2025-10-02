@@ -386,7 +386,8 @@ namespace jucePluginEditorLib::patchManagerRml
 			if(tagType != pluginLib::patchDB::TagType::Invalid)
 			{
 				pluginLib::patchDB::SearchRequest req = _parentSearchRequest;
-				req.anyTagOfType.insert(tagType);
+				if (getGroupType() != patchManager::GroupType::Categories)	// we have an "uncategorized" node as child, we want to count all patches regardless of tag
+					req.anyTagOfType.insert(tagType);
 				search(std::move(req));
 			}
 			else
@@ -397,9 +398,9 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	}
 
-	void GroupTreeElem::onRightClick(const Rml::Event& _event)
+	void GroupTreeElem::openContextMenu(const Rml::Event& _event)
 	{
-		TreeElem::onRightClick(_event);
+		TreeElem::openContextMenu(_event);
 
 		juceRmlUi::Menu menu;
 

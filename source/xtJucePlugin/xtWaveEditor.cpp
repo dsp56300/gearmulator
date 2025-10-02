@@ -209,6 +209,8 @@ namespace xtJucePlugin
 				getData().setTableWave(getSelectedTable(), tableIndex, _id);
 			});
 		}
+
+		controlTableSlotsMenu.setItemsPerColumn(16);
 		return controlTableSlotsMenu;
 	}
 

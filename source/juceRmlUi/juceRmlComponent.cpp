@@ -19,6 +19,13 @@
 
 namespace juceRmlUi
 {
+	namespace
+	{
+		bool consumed(const bool _keyEventResult)
+		{
+			return _keyEventResult == false;
+		}
+	}
 	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback)
 		: m_rmlInterfaces(_interfaces)
 		, m_coreInstance(_interfaces.getCoreInstance())
@@ -81,6 +88,8 @@ namespace juceRmlUi
 
 	RmlComponent::~RmlComponent()
 	{
+		enableDebugger(false);
+
 		m_openGLContext.detach();
 		destroyRmlContext();
 
@@ -127,6 +136,9 @@ namespace juceRmlUi
 		glDisable(GL_DEBUG_OUTPUT);
 		glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
 		m_renderInterface->SetViewport(size.x, size.y);
 		m_renderInterface->BeginFrame();
 		bool haveMore = true;
@@ -136,7 +148,7 @@ namespace juceRmlUi
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
-		DBG("OpenGL error: " << juce::String::toHexString((int)err));
+			DBG("OpenGL error: " << juce::String::toHexString((int)err));
 
 		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
 
@@ -257,18 +269,19 @@ namespace juceRmlUi
 		if (juce::CharacterFunctions::isPrintable(juceChar) || juceChar == '\n')
 		{
 			auto string = juce::String::charToString(juceChar);
-			m_rmlContext->ProcessTextInput(string.toStdString());
-			res = true;
+			if (consumed(m_rmlContext->ProcessTextInput(string.toStdString())))
+				res = true;
 		}
 
 		const Rml::Input::KeyIdentifier key = helper::toRmlKey(_key);
 
 		if (key != Rml::Input::KI_UNKNOWN)
 		{
-			m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key));
-			res = true;
+			if (consumed(m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key))))
+				res = true;
 		}
-		enqueueUpdate();
+		if (res)
+			enqueueUpdate();
 		return res;
 	}
 
@@ -289,9 +302,11 @@ namespace juceRmlUi
 					if (!it->isCurrentlyDown())
 					{
 						const auto& key = *it;
-						m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key));
-						enqueueUpdate();
-						res = true;
+						if (consumed(m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key))))
+						{
+							res = true;
+							enqueueUpdate();
+						}
 						it = m_pressedKeys.erase(it);
 					}
 					else
@@ -356,6 +371,17 @@ namespace juceRmlUi
 		m_renderDone = true;
 		m_updating = false;
 		update();
+	}
+
+	void RmlComponent::requestUpdate(const Rml::Element* _elem)
+	{
+		if (!_elem)
+			return;
+		auto* comp = fromElement(_elem);
+		if (comp)
+			comp->enqueueUpdate();
+		else if (auto* context = _elem->GetContext())
+			context->RequestNextUpdate(0.0f);
 	}
 
 	RmlComponent* RmlComponent::fromElement(const Rml::Element* _element)
@@ -440,6 +466,24 @@ namespace juceRmlUi
 			update();
 	}
 
+	void RmlComponent::enableDebugger(const bool _enable)
+	{
+		if (_enable == m_debuggerActive)
+			return;
+
+		m_debuggerActive = _enable;
+
+		if (_enable)
+		{
+			Rml::Debugger::Initialise(m_rmlContext);
+			Rml::Debugger::SetVisible(true);
+		}
+		else
+		{
+			Rml::Debugger::Shutdown();
+		}
+	}
+
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
 	{
 		const auto size = getScreenBounds();
@@ -498,12 +542,6 @@ namespace juceRmlUi
 				for (const auto& log : logs)
 					ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
 				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Error loading RMLUI document", ss.str(), this);
-			}
-
-			if (m_document->GetAttribute("debugger", 0))
-			{
-				Rml::Debugger::Initialise(m_rmlContext);
-				Rml::Debugger::SetVisible(true);
 			}
 		}
 

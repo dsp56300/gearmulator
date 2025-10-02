@@ -130,7 +130,7 @@ namespace xtJucePlugin
 		m_editor.getData().sendTableToDevice(getTableId());
 	}
 
-	void TablesTreeItem::onRightClick(const Rml::Event& _event)
+	void TablesTreeItem::openContextMenu(const Rml::Event& _event)
 	{
 		juceRmlUi::Menu menu;
 

@@ -96,9 +96,9 @@ namespace jucePluginEditorLib::patchManagerRml
 		search(std::move(sr));
 	}
 
-	void DatasourceTreeElem::onRightClick(const Rml::Event& _event)
+	void DatasourceTreeElem::openContextMenu(const Rml::Event& _event)
 	{
-		TreeElem::onRightClick(_event);
+		TreeElem::openContextMenu(_event);
 
 		juceRmlUi::Menu menu;
 

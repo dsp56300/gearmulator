@@ -18,6 +18,7 @@ namespace rmlPlugin
 	RmlParameterBinding::RmlParameterBinding(pluginLib::Controller& _controller, Rml::Context* _context, juceRmlUi::RmlComponent& _component)
 	: m_controller(_controller)
 	, m_component(_component)
+	, m_context(_context)
 	{
 		m_onCurrentPartChanged.set(_controller.onCurrentPartChanged, [this](const uint8_t _part)
 		{
@@ -29,8 +30,14 @@ namespace rmlPlugin
 
 	RmlParameterBinding::~RmlParameterBinding()
 	{
+		for (uint8_t p=0; p<16; ++p)
+			m_context->RemoveDataModel(getDataModelName(p));
+
+		m_context->RemoveDataModel(getDataModelName(CurrentPart));
+
 		for (auto& [param, boundParam] : m_paramToElements)
 			delete boundParam;
+
 		m_paramToElements.clear();
 	}
 
@@ -96,7 +103,7 @@ namespace rmlPlugin
 
 	void RmlParameterBinding::bind(Rml::Element& _element, const std::string& _parameterName, const uint8_t _part/* = CurrentPart*/)
 	{
-		auto* p = m_controller.getParameter(_parameterName, _part == CurrentPart ? 0 : _part);
+		auto* p = m_controller.getParameter(_parameterName, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
 
 		if (!p)
 		{
@@ -124,6 +131,9 @@ namespace rmlPlugin
 		}
 
 		m_elementToParam.insert(std::make_pair(&_element, bp));
+
+		if (_part == CurrentPart)
+			m_elementsBoundToCurrentPart.insert(&_element);
 
 		evBind.invoke(p, &_element);
 
@@ -188,6 +198,7 @@ namespace rmlPlugin
 			}
 
 			m_elementToParam.erase(it);
+			m_elementsBoundToCurrentPart.erase(&_element);
 
 			evUnbind.invoke(oldParam, &_element);
 		}
@@ -285,6 +296,21 @@ namespace rmlPlugin
 		juceRmlUi::RmlInterfaces::ScopedAccess access(m_component);
 		for (auto& param : m_parametersPerPart[CurrentPart])
 			param.changePart(m_controller, _part);
+
+		std::map<Rml::Element*, std::string> elementsToUpdate;
+
+		for (auto* elem : m_elementsBoundToCurrentPart)
+		{
+			auto* param = getParameterForElement(elem);
+			if (param)
+				elementsToUpdate.insert({ elem, param->getDescription().name });
+		}
+
+		for (auto& [elem, paramName] : elementsToUpdate)
+		{
+			unbind(*elem);
+			bind(*elem, paramName, CurrentPart);
+		}
 	}
 
 	void RmlParameterBinding::bindParametersForPart(Rml::Context* _context, const uint8_t _targetPart, const uint8_t _sourcePart)

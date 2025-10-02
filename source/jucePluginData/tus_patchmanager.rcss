@@ -80,3 +80,15 @@
 	transition: transform image-color 0.2s;
 	transform: scale(1.2);
 }
+
+.pm-list {
+}
+
+.pm-listentry {
+}
+
+.pm-grid {
+}
+
+.pm-gridentry {
+}

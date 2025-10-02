@@ -32,8 +32,10 @@ namespace jucePluginEditorLib
 {
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
 	: m_processor(_processor), m_includedSkins(std::move(_includedSkins))
-	, m_remoteServerList(getPluginDesc(_processor))
 {
+	if (m_processor.getConfig().getBoolValue("supportDspBridge", false))
+		m_remoteServerList.reset(new bridgeClient::ServerList(getPluginDesc(_processor)));
+
 	juce::File(getSkinFolder()).createDirectory();
 
 	// point embedded skins to public data folder if they're not embedded
@@ -168,9 +170,9 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		if (!skin.folder.empty())
 		{
-			// if a folder is specified, the skin must be on disk. We check this expicitly here because a file that has an identical name might get picked
+			// if a folder is specified, the skin must be on disk. We check this explicitly here because a file that has an identical name might get picked
 			// from embedded resources otherwise
-			const auto skinFile = baseLib::filesystem::validatePath(skin.folder) + skin.filename;
+			const auto skinFile = Editor::getAbsoluteSkinFolder(m_processor, skin.folder) + skin.filename;
 			juce::File f(juce::String::fromUTF8(skinFile.c_str()));
 			if (!f.existsAsFile())
 				throw std::runtime_error("Skin file '" + skinFile + "' not found on disk");
@@ -178,6 +180,8 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 		m_editor.reset(createEditor(skin));
 		m_editor->create();
+
+		m_editor->getRmlComponent()->enableDebugger(m_processor.getConfig().getBoolValue("enableRmlUiDebugger", false));
 
 		getEditor()->onOpenMenu.addListener([this](Editor*, const Rml::Event& _event)
 		{
@@ -222,6 +226,9 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		{
 			if (juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_F5)
 			{
+				if (!m_processor.getConfig().getBoolValue("reloadSkinViaF5", false))
+					return;
+
 				_event.StopPropagation();
 				juce::MessageManager::callAsync([this]
 				{
@@ -412,7 +419,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 	if(getEditor() && m_currentSkin.folder.empty() || m_currentSkin.folder.find(getSkinFolder()) != 0)
 	{
-		skinMenu.addEntry("Export current skin to folder '" + getSkinFolder() + "' on disk", [this]
+		skinMenu.addEntry("Export current skin to disk", [this]
 		{
 			exportCurrentSkin();
 		});
@@ -424,6 +431,32 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 		baseLib::filesystem::createDirectory(dir);
 		juce::File(dir).revealToUser();
 	});
+
+	{
+		juceRmlUi::Menu skinDevMenu;
+
+		skinDevMenu.addEntry("Reload skin via F5 key", config.getBoolValue("reloadSkinViaF5", false), [this]
+		{
+			auto& c = m_processor.getConfig();
+			const auto enabled = c.getBoolValue("reloadSkinViaF5", false);
+			c.setValue("reloadSkinViaF5", !enabled);
+			c.saveIfNeeded();
+		});
+
+		skinDevMenu.addEntry("Enable RmlUi Debugger", config.getBoolValue("enableRmlUiDebugger", false), [this]
+		{
+			auto& c = m_processor.getConfig();
+			const auto enabled = !c.getBoolValue("enableRmlUiDebugger", false);
+			c.setValue("enableRmlUiDebugger", enabled);
+			c.saveIfNeeded();
+
+			if (m_editor)
+				m_editor->getRmlComponent()->enableDebugger(enabled);
+		});
+
+		skinMenu.addSeparator();
+		skinMenu.addSubMenu("Developer Options", std::move(skinDevMenu));
+	}
 
 	juceRmlUi::Menu scaleMenu;
 	scaleMenu.addEntry("50%", scale == 50, [this] { setGuiScale(50); });
@@ -455,46 +488,47 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 	latencyMenu.addEntry("4", latency == 4, [this, adjustLatency] { adjustLatency(4); });
 	latencyMenu.addEntry("8", latency == 8, [this, adjustLatency] { adjustLatency(8); });
 
-	auto servers = m_remoteServerList.getEntries();
-
-	juceRmlUi::Menu deviceTypeMenu;
-	deviceTypeMenu.addEntry("Local (default)", m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
-
-	if(servers.empty())
-	{
-		deviceTypeMenu.addEntry("- no servers found -", false, false, [this] {});
-	}
-	else
-	{
-		for (const auto & server : servers)
-		{
-			if(server.err.code == bridgeLib::ErrorCode::Ok)
-			{
-				std::string name = server.host + ':' + std::to_string(server.serverInfo.portTcp);
-
-				const auto isSelected = m_processor.getDeviceType() == pluginLib::DeviceType::Remote && 
-					m_processor.getRemoteDeviceHost() == server.host && 
-					m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
-
-				deviceTypeMenu.addEntry(name, isSelected, [this, server]
-				{
-					m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
-				});
-			}
-			else
-			{
-				std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
-				deviceTypeMenu.addEntry(name, false, false, [this] {});
-			}
-		}
-	}
-
 	menu.addSubMenu("GUI Skin", std::move(skinMenu));
 	menu.addSubMenu("GUI Scale", std::move(scaleMenu));
 	menu.addSubMenu("Latency (blocks)", std::move(latencyMenu));
 
-	if (m_processor.getConfig().getBoolValue("supportDspBridge", false))
+	if (m_remoteServerList)
+	{
+		auto servers = m_remoteServerList->getEntries();
+
+		juceRmlUi::Menu deviceTypeMenu;
+		deviceTypeMenu.addEntry("Local (default)", m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
+
+		if(servers.empty())
+		{
+			deviceTypeMenu.addEntry("- no servers found -", false, false, [this] {});
+		}
+		else
+		{
+			for (const auto & server : servers)
+			{
+				if(server.err.code == bridgeLib::ErrorCode::Ok)
+				{
+					std::string name = server.host + ':' + std::to_string(server.serverInfo.portTcp);
+
+					const auto isSelected = m_processor.getDeviceType() == pluginLib::DeviceType::Remote && 
+						m_processor.getRemoteDeviceHost() == server.host && 
+						m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
+
+					deviceTypeMenu.addEntry(name, isSelected, [this, server]
+					{
+						m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
+					});
+				}
+				else
+				{
+					std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
+					deviceTypeMenu.addEntry(name, false, false, [this] {});
+				}
+			}
+		}
 		menu.addSubMenu("Device Type", std::move(deviceTypeMenu));
+	}
 
 	menu.addSeparator();
 

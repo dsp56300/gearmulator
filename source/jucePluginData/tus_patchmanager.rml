@@ -38,8 +38,8 @@
 		<!-- Column C: patch list + info on the right -->
 		<div id="pm-layout-list" class="pm-layout-list" style="flex: 5; height: 100%;">
 			<div class="pm-vlayout" style="flex: 2;">
-				<list id="pm-list" class="list" style="flex: 1 1 0">
-					<listentry class="listentry">
+				<list id="pm-list" class="list pm-list" style="flex: 1 1 0">
+					<listentry class="listentry pm-listentry">
 						<img id="color" src="pm-dot.png" style="height: 1em; margin-right: 5dp;"/>
 						<div id="name" class="pm-name">Name</div>
 					</listentry>
@@ -71,8 +71,8 @@
 		
 		<!-- Column C alternative: larger grid layout, but no info on the right -->
 		<div id="pm-layout-grid" class="pm-vlayout" style="flex: 5; display: none;">
-			<list id="pm-grid" class="grid" style="flex: 1 1 0">
-				<listentry class="gridentry">
+			<list id="pm-grid" class="grid pm-grid" style="flex: 1 1 0">
+				<listentry class="gridentry pm-gridentry">
 					<img id="color" src="pm-dot.png" style="height: 1em; margin-right: 5dp;"/>
 					<div id="name" class="pm-name">Name</div>
 				</listentry>

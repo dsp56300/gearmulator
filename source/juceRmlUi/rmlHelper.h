@@ -32,9 +32,11 @@ namespace juceRmlUi
 {
 	enum class MouseButton : uint8_t
 	{
-		Left,
-		Right,
-		Middle
+		Left = 0,
+		Right = 1,
+		Middle = 2,
+
+		None = 0xff
 	};
 
 	namespace helper
@@ -59,11 +61,14 @@ namespace juceRmlUi
 
 		Rml::Vector2<float> getMousePos(const Rml::Event& _event);
 		MouseButton getMouseButton(const Rml::Event& _event);
+		bool isContextMenu(const Rml::Event& _event);
+
 		Rml::Vector2f getMouseWheelDelta(const Rml::Event& _event);
 
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event);
 		Rml::Input::KeyModifier getKeyModifiers(const Rml::Event& _event);
 		bool getKeyModCtrl(const Rml::Event& _event);
+		bool getKeyModCommand(const Rml::Event& _event);
 		bool getKeyModShift(const Rml::Event& _event);
 		bool getKeyModAlt(const Rml::Event& _event);
 

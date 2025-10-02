@@ -117,6 +117,7 @@ namespace rmlPlugin
 		_element->SetAttribute("min", range.getStart());
 		_element->SetAttribute("max", range.getEnd());
 		_element->SetAttribute("default", _parameter->getDefault());
+		_element->SetAttribute("step", _parameter->getDescription().step);
 	}
 
 	void ParameterToElementsBinding::setElementsParameterDefaults(const pluginLib::Parameter* _parameter) const

@@ -1,5 +1,8 @@
 #include "rmlPluginContext.h"
 #include "rmlPluginDocument.h"
+
+#include "Debugger/ElementDebugDocument.h"
+
 #include "RmlUi/Core/ElementDocument.h"
 
 namespace rmlPlugin
@@ -24,6 +27,9 @@ namespace rmlPlugin
 
 	void RmlPluginContext::removeDocument(const Rml::ElementDocument* _document)
 	{
+		if (dynamic_cast<const Rml::Debugger::ElementDebugDocument*>(_document))
+			return; // we don't manage debug documents
+
 		for (auto it = m_documents.begin(); it != m_documents.end(); ++it)
 		{
 			if (it->get()->getDocument() == _document)

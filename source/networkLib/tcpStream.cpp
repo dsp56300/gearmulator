@@ -35,7 +35,16 @@ namespace networkLib
 		if (!isValid())
 			return false;
 
-		m_stream->flush();
+		try
+		{
+			m_stream->flush();
+		}
+		catch(ptypes::exception* e)  // NOLINT(misc-throw-by-value-catch-by-reference)
+		{
+			const std::string msg(e->get_message());
+			delete e;
+			throw NetException(ConnectionLost, msg);
+		}
 		return true;
 	}
 

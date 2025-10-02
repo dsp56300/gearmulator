@@ -1,5 +1,7 @@
 #include "rmlElemValue.h"
 
+#include "juceRmlComponent.h"
+
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace juceRmlUi
@@ -10,6 +12,7 @@ namespace juceRmlUi
 		constexpr auto g_attribMinValue = "min";
 		constexpr auto g_attribMaxValue = "max";
 		constexpr auto g_attribDefaultValue = "default";
+		constexpr auto g_attribStepSize = "step";
 	}
 
 	void ElemValue::OnAttributeChange(const Rml::ElementAttributes& _changedAttributes)
@@ -31,6 +34,7 @@ namespace juceRmlUi
 		checkAttribute(g_attribMinValue, [&](const float _x) { setMinValue(_x); });
 		checkAttribute(g_attribMaxValue, [&](const float _x) { setMaxValue(_x); });
 		checkAttribute(g_attribDefaultValue, [&](const float _x) { setDefaultValue(_x); });
+		checkAttribute(g_attribStepSize, [&](const float _x) { setStepSize(_x); });
 	}
 
 	void ElemValue::setValue(const float _value, bool _sendChangeEvent/* = true*/)
@@ -38,7 +42,14 @@ namespace juceRmlUi
 		if (_value == UninitializedValue)
 			return;
 
-		const auto v = m_max > m_min ? std::clamp(_value, m_min, m_max) : m_min;
+		auto v = m_max > m_min ? std::clamp(_value, m_min, m_max) : m_min;
+
+		if (m_stepSize > 0.5f)
+		{
+			const int stepSize = static_cast<int>(std::round(m_stepSize));
+			const int rounded = static_cast<int>((v - m_min) + m_stepSize * 0.5f);
+			v = static_cast<float>(rounded / stepSize * stepSize) + m_min;
+		}
 
 		if (!setProperty(m_value, v, onValueChanged))
 			return;
@@ -47,6 +58,8 @@ namespace juceRmlUi
 		onChangeValue();
 		if (_sendChangeEvent)
 			DispatchEvent(Rml::EventId::Change, {{"value", Rml::Variant(v)}});
+
+		RmlComponent::requestUpdate(this);
 	}
 
 	void ElemValue::setMinValue(const float _value)
@@ -73,6 +86,26 @@ namespace juceRmlUi
 			return;
 		SetAttribute(g_attribDefaultValue, _value);
 		onChangeDefaultValue();
+	}
+
+	void ElemValue::setStepSize(float _value)
+	{
+		if (!setProperty(m_stepSize, _value, onStepSizeChanged))
+			return;
+		SetAttribute(g_attribStepSize, _value);
+		onChangeStepSize();
+	}
+
+	float ElemValue::getRange(Rml::Element* _elem)
+	{
+		if (auto* elemValue = dynamic_cast<ElemValue*>(_elem))
+			return elemValue->getRange();
+
+		const auto min = _elem->GetAttribute("min", 0.0f);
+		const auto max = _elem->GetAttribute("max", 1.0f);
+		if (max <= min)
+			return 0.0f;
+		return max - min;
 	}
 
 	bool ElemValue::setProperty(float& _prop, const float _newValue, const baseLib::Event<float>& _event)
@@ -103,17 +136,17 @@ namespace juceRmlUi
 			_elem->SetAttribute("value", _value);
 	}
 
-	void ElemValue::setRange(Rml::Element* _volume, const float _min, const float _max)
+	void ElemValue::setRange(Rml::Element* _elem, const float _min, const float _max)
 	{
-		if (auto* e = dynamic_cast<ElemValue*>(_volume))
+		if (auto* e = dynamic_cast<ElemValue*>(_elem))
 		{
 			e->setMinValue(_min);
 			e->setMaxValue(_max);
 		}
 		else
 		{
-			_volume->SetAttribute("min", _min);
-			_volume->SetAttribute("max", _max);
+			_elem->SetAttribute("min", _min);
+			_elem->SetAttribute("max", _max);
 		}
 	}
 }

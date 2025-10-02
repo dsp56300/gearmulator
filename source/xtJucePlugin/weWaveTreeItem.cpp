@@ -200,7 +200,7 @@ namespace xtJucePlugin
 		return sysex;
 	}
 
-	void WaveTreeItem::onRightClick(const Rml::Event& _event)
+	void WaveTreeItem::openContextMenu(const Rml::Event& _event)
 	{
 		juceRmlUi::Menu menu;
 

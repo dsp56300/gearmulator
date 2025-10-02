@@ -40,7 +40,7 @@ namespace juceRmlUi
 		EventListener::Add(m_input, Rml::EventId::Submit, [this](Rml::Event&) { onSubmit(); });
 		EventListener::Add(m_input, Rml::EventId::Blur, [this](Rml::Event&) { onBlur(); });
 		EventListener::Add(m_input, Rml::EventId::Change, [this](const Rml::Event& _event) { onChange(_event); });
-		EventListener::Add(m_input, Rml::EventId::Keydown, [this](const Rml::Event& _event) { onKeyDown(_event); });
+		EventListener::Add(m_input, Rml::EventId::Keydown, [this](Rml::Event& _event) { onKeyDown(_event); });
 
 		m_input->Focus(true);
 		m_input->SetSelectionRange(0, static_cast<int>(_initialValue.size()));
@@ -74,12 +74,15 @@ namespace juceRmlUi
 			onSubmit();
 	}
 
-	void InplaceEditor::onKeyDown(const Rml::Event& _event)
+	void InplaceEditor::onKeyDown(Rml::Event& _event)
 	{
 		const auto key = juceRmlUi::helper::getKeyIdentifier(_event);
 
 		if (key == Rml::Input::KeyIdentifier::KI_ESCAPE)
+		{
+			_event.StopPropagation();
 			close();
+		}
 	}
 
 	void InplaceEditor::deleteInputElement()

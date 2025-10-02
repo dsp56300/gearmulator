@@ -59,7 +59,7 @@ namespace juceRmlUi
 	{
 		auto& list = m_entry->getList();
 
-		const auto ctrl = helper::getKeyModCtrl(_event);
+		const auto ctrl = helper::getKeyModCommand(_event);
 		const auto shift = helper::getKeyModShift(_event);
 
 		if (shift && list.getMultiselect())

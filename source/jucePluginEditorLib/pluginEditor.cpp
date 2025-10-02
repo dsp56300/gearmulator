@@ -79,9 +79,11 @@ namespace jucePluginEditorLib
 				m_skin.folder = PluginEditorState::getSkinSubfolder(m_skin, m_skin.folder);
 			}
 
-			juce::File(juce::String::fromUTF8(m_skin.folder.c_str())).createDirectory();
+			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
 
-			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), m_skin.folder, newName + ".rml", newName + ".rcss", std::move(options));
+			juce::File(juce::String::fromUTF8(folder.c_str())).createDirectory();
+
+			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), folder, newName + ".rml", newName + ".rcss", std::move(options));
 
 			m_skin.filename = newName + ".rml";
 			m_skin.displayName = PluginEditorState::createSkinDisplayName(m_skin.filename);
@@ -101,7 +103,7 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::EventListener::Add(doc, Rml::EventId::Mousedown, [this](Rml::Event& _event)
 		{
-			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Right)
+			if (juceRmlUi::helper::isContextMenu(_event))
 			{
 				_event.StopPropagation();
 				openMenu(_event);
@@ -657,18 +659,20 @@ namespace jucePluginEditorLib
 
 		auto* doc = comp->getDocument();
 
-		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](const Rml::Event& _event)
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](Rml::Event& _event)
 		{
-			if (!juceRmlUi::helper::getKeyModCtrl(_event))
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
 				return;
 
 			switch (juceRmlUi::helper::getKeyIdentifier(_event))
 			{
 			case Rml::Input::KI_C:
 				copyCurrentPatchToClipboard();
+				_event.StopPropagation();
 				break;
 			case Rml::Input::KI_V:
 				replaceCurrentPatchFromClipboard();
+				_event.StopPropagation();
 				break;
 			default:;
 			}
@@ -796,6 +800,14 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
+	std::string Editor::getAbsoluteSkinFolder(const Processor& _processor, const std::string& _skinFolder)
+	{
+		const auto modulePath = synthLib::getModulePath();
+		const auto publicDataPath = _processor.getDataFolder();
+
+		return baseLib::filesystem::validatePath(_skinFolder.find(modulePath) == 0 || _skinFolder.find(publicDataPath) == 0 ? _skinFolder : modulePath + _skinFolder);
+	}
+
 	void Editor::onDisclaimerFinished() const
 	{
 		if(!synthLib::isRunningUnderRosetta())
@@ -907,9 +919,6 @@ namespace jucePluginEditorLib
 
 	std::string Editor::getAbsoluteSkinFolder(const std::string& _skinFolder) const
 	{
-		const auto modulePath = synthLib::getModulePath();
-		const auto publicDataPath = m_processor.getDataFolder();
-
-		return baseLib::filesystem::validatePath(_skinFolder.find(modulePath) == 0 || _skinFolder.find(publicDataPath) == 0 ? _skinFolder : modulePath + _skinFolder);
+		return getAbsoluteSkinFolder(m_processor, _skinFolder);
 	}
 }

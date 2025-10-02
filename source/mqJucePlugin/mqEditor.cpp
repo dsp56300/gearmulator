@@ -15,6 +15,7 @@
 
 #include "jucePluginLib/filetype.h"
 #include "juceRmlPlugin/rmlTabGroup.h"
+#include "juceRmlUi/rmlElemButton.h"
 
 namespace mqJucePlugin
 {
@@ -55,10 +56,12 @@ namespace mqJucePlugin
 			{
 				juceRmlUi::EventListener::AddClick(m_btPlayModeMulti, [this]
 				{
-					const auto checked = m_btPlayModeMulti->IsPseudoClassSet("checked");
-					rmlPlugin::TabGroup::setChecked(m_btPlayModeMulti, !checked);
+					const auto checked = juceRmlUi::ElemButton::isChecked(m_btPlayModeMulti);
+					juceRmlUi::ElemButton::setChecked(m_btPlayModeMulti, !checked);
 					m_controller.setPlayMode(checked);
 				});
+
+				juceRmlUi::ElemButton::setChecked(m_btPlayModeMulti, m_controller.isMultiMode());
 			}
 		}
 
