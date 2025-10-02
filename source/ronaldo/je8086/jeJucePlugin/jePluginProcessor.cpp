@@ -6,6 +6,7 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
 #include "jeLib/device.h"
+#include "jeLib/romloader.h"
 #include "jucePluginLib/processorPropertiesInit.h"
 
 #include "synthLib/deviceException.h"
@@ -37,7 +38,17 @@ namespace jeJucePlugin
 
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()
 	{
-		auto* d = new jeLib::Device({});
+		auto rom = jeLib::RomLoader::findROM();
+		if (!rom.isValid())
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (512k .bin) is required, but was not found.");
+
+		synthLib::DeviceCreateParams params;
+
+		params.romData = rom.getData();
+		params.romName = rom.getName();
+		params.homePath = getDataFolder();
+
+		auto* d = new jeLib::Device(params);
 		if(!d->isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (512k .bin) is required, but was not found.");
 		return d;

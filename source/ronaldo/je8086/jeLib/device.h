@@ -1,6 +1,14 @@
 #pragma once
 
+#include <deque>
+#include <memory>
+
 #include "synthLib/device.h"
+
+namespace jeLib
+{
+	class Je8086;
+}
 
 namespace jeLib
 {
@@ -8,6 +16,11 @@ namespace jeLib
 	{
 	public:
 		Device(const synthLib::DeviceCreateParams& _params);
+		Device(const Device&) = delete;
+		Device& operator=(const Device&) = delete;
+		Device(Device&&) = delete;
+		Device& operator=(Device&&) = delete;
+		~Device();
 
 		float getSamplerate() const override;
 		bool isValid() const override;
@@ -23,5 +36,8 @@ namespace jeLib
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
+
+		std::unique_ptr<Je8086> m_je8086;
+		std::deque<synthLib::SMidiEvent> m_midiIn;
 	};
 }
