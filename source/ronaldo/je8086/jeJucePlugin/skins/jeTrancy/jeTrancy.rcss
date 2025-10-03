@@ -151,11 +151,10 @@ button
 {
 	width: 74dp;
 	height: 48dp;
-	isToggle: 1;
 	decorator: image(button_black_led_off fill);	
 }
 
-.btBlackLed:hover
+.btBlackLed:hover, .btBlackLed:checked
 {
 	decorator: image(button_black_led_on fill);	
 }
@@ -164,11 +163,10 @@ button
 {
 	width: 74dp;
 	height: 48dp;
-	isToggle: 1;
 	decorator: image(button_red_led_off fill);	
 }
 
-.btRedLed:hover
+.btRedLed:hover, .btRedLed:chcked
 {
 	decorator: image(button_red_led_on fill);	
 }
@@ -177,11 +175,10 @@ button
 {
 	width: 74dp;
 	height: 48dp;
-	isToggle: 1;
 	decorator: image(button_red_off fill);	
 }
 
-.btRed:hover
+.btRed:hover, .btRed:checked
 {
 	decorator: image(button_red_on fill);	
 }
@@ -190,11 +187,10 @@ button
 {
 	width: 69dp;
 	height: 50dp;
-	isToggle: 1;
 	decorator: image(button_white_led_off fill);	
 }
 
-.btWhiteLed:hover
+.btWhiteLed:hover, .btWhiteLed:checked
 {
 	decorator: image(button_white_led_on fill);	
 }
@@ -203,11 +199,10 @@ button
 {
 	width: 109dp;
 	height: 45dp;
-	isToggle: 1;
 	decorator: image(button_white2_led_off fill);	
 }
 
-.btWhite2Led:hover
+.btWhite2Led:hover, .btWhite2Led:checked
 {
 	decorator: image(button_white2_led_on fill);	
 }
