@@ -266,4 +266,19 @@ namespace jeLib
 
 		return createFooter(dump);
 	}
+
+	State::Dump State::createPerformanceRequest(AddressArea _area, UserPerformanceArea _performanceArea)
+	{
+		assert(_area == AddressArea::PerformanceTemp || _area == AddressArea::UserPerformance);
+
+		auto addr = static_cast<uint32_t>(_area);
+
+		if (_area != AddressArea::PerformanceTemp)
+			addr += static_cast<uint32_t>(_performanceArea);
+
+		Dump dump = createHeader(SysexByte::CommandIdDataRequest1, SysexByte::DeviceIdDefault, toAddress(addr));
+		auto addr4 = toAddress(static_cast<uint32_t>(UserPerformanceArea::BlockSize));
+		dump.insert(dump.end(), addr4.begin(), addr4.end());
+		return createFooter(dump);
+	}
 }

@@ -50,6 +50,8 @@ namespace pluginLib
 
 		const auto& getControllerMap() const { return m_controllerMap; }
 
+		uint32_t getAbsoluteIndex(uint32_t _page, uint8_t _index) const;
+
 	private:
 		std::string loadJson(const std::string& _jsonString);
 
@@ -71,6 +73,7 @@ namespace pluginLib
 		std::vector<ParameterLink> m_parameterLinks;
 		std::unordered_map<std::string, ParameterRegion> m_regions;
 		ControllerMap m_controllerMap;
+		std::map<std::pair<uint32_t, uint8_t>, uint32_t> m_pageAndIndexRemap;	// page, index => description index
 
 		std::string m_errors;
 	};

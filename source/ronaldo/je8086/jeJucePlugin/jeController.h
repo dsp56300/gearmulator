@@ -1,6 +1,7 @@
 #pragma once
 
 #include "jeLcd.h"
+#include "jeLib/jemiditypes.h"
 
 #include "jeLib/sysexRemoteControl.h"
 
@@ -29,9 +30,14 @@ namespace jeJucePlugin
 
 		bool sendSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const;
 
+		void sendTempPerformanceRequest() const;
+		void sendPerformanceRequest(jeLib::AddressArea _area, jeLib::UserPerformanceArea _performance) const;
+
 		jeLib::SysexRemoteControl& getSysexRemote() { return m_sysexRemote; }
 
 	private:
+		void parsePatch(const pluginLib::SysEx& _sysex, synthLib::MidiEventSource _source, uint8_t _part);
+
 		jeLib::SysexRemoteControl m_sysexRemote;
 	};
 }

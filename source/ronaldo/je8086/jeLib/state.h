@@ -45,5 +45,6 @@ namespace jeLib
 
 		static Dump& addParameter(Dump& _dump, Patch _param, int _paramValue);
 		static Dump createParameterChange(PerformanceData _performanceData, Patch _param, int _paramValue);
+		static Dump createPerformanceRequest(AddressArea _area, UserPerformanceArea _performanceArea);
 	};
 }
