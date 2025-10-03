@@ -4,6 +4,7 @@
 
 #include "je8086devices.h"
 #include "synthLib/midiBufferParser.h"
+#include "synthLib/midiRateLimiter.h"
 
 namespace jeLib
 {
@@ -46,5 +47,6 @@ namespace jeLib
 		synthLib::MidiBufferParser m_midiOutParser;
 		std::vector<synthLib::SMidiEvent> m_midiInEvents;
 		SampleBuffer m_sampleBuffer;
+		synthLib::MidiRateLimiter m_midiInRateLimiter;
 	};
 }

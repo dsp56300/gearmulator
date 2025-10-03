@@ -10,6 +10,7 @@ namespace jeLib
 	: ports([this](devices::Port* _port) { onLedsChanged(_port); })
 	, midi(0, [this](uint8_t _byte) { onReceiveMidiByte(_byte); })
 	, m_midiOutParser(synthLib::MidiEventSource::Device)
+	, m_midiInRateLimiter([this](const uint8_t _byte) { midi.provideMIDI(&_byte, 1); })
 	{
 		if (_romData.empty())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "ROM data is empty");
@@ -44,6 +45,11 @@ namespace jeLib
 			runfactoryreset(_ramDataFilename); // Run a factory reset if needs be.
 
 		asics.setPostSample([this](const int32_t _left, const int32_t _right) { onReceiveSample(_left, _right); });
+
+		m_midiInRateLimiter.setSamplerate(88200.0f);
+		m_midiInRateLimiter.setDefaultRateLimit();
+		m_midiInRateLimiter.setSysexPause(0.021f);	// according to manual 20ms pause between sysex patch messages
+		m_midiInRateLimiter.setSysexPauseLengthThreshold(100);
 	}
 
 	void Je8086::addMidiEvent(const synthLib::SMidiEvent& _event)
@@ -59,20 +65,11 @@ namespace jeLib
 	void Je8086::step()
 	{
 		uint64_t now = emu.getCycles();
-		
+
 		if (now > 12776184 && !((++ctr) & 0x3fff))
 		{
 			for (const auto& m : m_midiInEvents)
-			{
-				if (!m.sysex.empty()) midi.provideMIDI(m.sysex.data(), m.sysex.size());
-				else
-				{
-					const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(m.a);
-					if (len > 0) midi.provideMIDI(&m.a, 1);
-					if (len > 1) midi.provideMIDI(&m.b, 1);
-					if (len > 2) midi.provideMIDI(&m.c, 1);
-				}
-			}
+				m_midiInRateLimiter.write(m);
 			m_midiInEvents.clear();
 		}
 
@@ -98,6 +95,7 @@ namespace jeLib
 
 	void Je8086::onReceiveSample(int32_t _left, int32_t _right)
 	{
+		m_midiInRateLimiter.processSample();
 		m_sampleBuffer.emplace_back(_left, _right);
 	}
 
