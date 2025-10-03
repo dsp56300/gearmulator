@@ -117,13 +117,13 @@ namespace juceRmlUi
 		return true;
 	}
 
-	float ElemValue::getValue(const Rml::Element* _elem)
+	float ElemValue::getValue(const Rml::Element* _elem, float _default/* = 0.0f*/)
 	{
 		if (auto* e = dynamic_cast<const ElemValue*>(_elem))
 			return e->getValue();
 		if (auto* input = dynamic_cast<const Rml::ElementFormControlInput*>(_elem))
 			return Rml::Variant(input->GetValue()).Get<float>(_elem->GetCoreInstance());
-		return _elem->GetAttribute<float>("value", 0.0f);
+		return _elem->GetAttribute<float>("value", _default);
 	}
 
 	void ElemValue::setValue(Rml::Element* _elem, const float _value, const bool _sendChangeEvent)

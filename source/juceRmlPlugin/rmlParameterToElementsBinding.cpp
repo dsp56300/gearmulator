@@ -159,7 +159,7 @@ namespace rmlPlugin
 
 	int ParameterToElementsBinding::getElementValue(const Rml::Element* _element, const pluginLib::Parameter* _default)
 	{
-		const auto v = _element->GetAttribute("value", _default->getUnnormalizedValue());
+		const pluginLib::ParamValue v = static_cast<pluginLib::ParamValue>(juceRmlUi::ElemValue::getValue(_element, static_cast<float>(_default->getUnnormalizedValue())));
 
 		if (isReversed(_element))
 		{
@@ -184,10 +184,11 @@ namespace rmlPlugin
 			const auto& desc = _source->getDescription();
 			const auto& range = desc.range;
 			const auto v = range.getEnd() - (newValue - range.getStart());
-			_element->SetAttribute("value", v);
+			juceRmlUi::ElemValue::setValue(_element, static_cast<float>(v));
 			return;
 		}
-		_element->SetAttribute("value", newValue);
+
+		juceRmlUi::ElemValue::setValue(_element, static_cast<float>(newValue));
 	}
 
 	bool ParameterToElementsBinding::isReversed(const Rml::Element* _element)
