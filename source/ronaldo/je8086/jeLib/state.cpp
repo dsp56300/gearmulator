@@ -12,22 +12,28 @@ namespace jeLib
 		{
 			return _byte == static_cast<uint8_t>(_sysexByte);
 		}
+
+		bool validateAddressBasedDump(const State::Dump& _dump)
+		{
+			if (_dump.size() < std::size(g_sysexHeader))
+				return false;
+
+			if (!match(_dump[0], SysexByte::SOX))				return false;
+			if (!match(_dump[1], SysexByte::ManufacturerID))	return false;
+			if (!match(_dump[3], SysexByte::ModelIdMSB))		return false;
+			if (!match(_dump[4], SysexByte::ModelIdLSB))		return false;
+
+			if (!match(_dump[5], SysexByte::CommandIdDataSet1) && !match(_dump[5], SysexByte::CommandIdDataRequest1))
+				return false;
+
+			if (_dump.size() < 10)
+				return false;
+		}
 	}
 
 	uint32_t State::getAddress(const Dump& _dump)
 	{
-		if (_dump.size() < std::size(g_sysexHeader))
-			return InvalidAddress;
-
-		if (!match(_dump[0], SysexByte::SOX))				return InvalidAddress;
-		if (!match(_dump[1], SysexByte::ManufacturerID))	return InvalidAddress;
-		if (!match(_dump[3], SysexByte::ModelIdMSB))		return InvalidAddress;
-		if (!match(_dump[4], SysexByte::ModelIdLSB))		return InvalidAddress;
-
-		if (!match(_dump[5], SysexByte::CommandIdDataSet1) && !match(_dump[5], SysexByte::CommandIdDataRequest1))
-			return InvalidAddress;
-
-		if (_dump.size() < 10)
+		if (!validateAddressBasedDump(_dump))
 			return InvalidAddress;
 
 		const uint32_t address = 
@@ -37,6 +43,23 @@ namespace jeLib
 			static_cast<uint32_t>(_dump[9]);
 
 		return address;
+	}
+
+	bool State::setAddress(Dump& _dump, const Address _address)
+	{
+		if (!validateAddressBasedDump(_dump))
+			return false;
+
+		assert((_address & 0x80808080) == 0); // Only 7 bits per byte are valid
+		if (_address & 0x80808080)
+			return false;
+
+		_dump[6] = static_cast<uint8_t>((_address >> 24) & 0x7f);
+		_dump[7] = static_cast<uint8_t>((_address >> 16) & 0x7f);
+		_dump[8] = static_cast<uint8_t>((_address >> 8) & 0x7f);
+		_dump[9] = static_cast<uint8_t>(_address & 0x7f);
+
+		return true;
 	}
 
 	AddressArea State::getAddressArea(const Dump& _dump)

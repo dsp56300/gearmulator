@@ -5,6 +5,7 @@
 #include "dsp56kEmu/logging.h"
 
 #include "jeLib/state.h"
+#include "synthLib/midiToSysex.h"
 
 namespace jeJucePlugin
 {
@@ -51,5 +52,48 @@ namespace jeJucePlugin
 	bool Controller::parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource)
 	{
 		return false;
+	}
+
+	bool Controller::sendSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const
+	{
+		// patches consist of multiple sysex messages, split them up again
+		std::vector<std::vector<uint8_t>> sysex;
+		synthLib::MidiToSysex::splitMultipleSysex(sysex, _patch->sysex);
+
+		if (sysex.empty())
+			return false;
+
+		// is this a performance or a patch?
+		const auto area = jeLib::State::getAddressArea(_patch->sysex);
+
+		const auto isPerformance = area == jeLib::AddressArea::UserPerformance;
+		const auto isPatch = area == jeLib::AddressArea::UserPatch;
+
+		if (!isPerformance && !isPatch)
+			return false;
+
+		for (auto& s : sysex)
+		{
+			const auto addr = jeLib::State::getAddress(s);
+			LOG(addr);
+
+			if (isPatch)
+			{
+				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
+				LOG(localAddr);
+
+				const auto addr = 
+					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) | 
+					static_cast<uint32_t>(jeLib::PerformanceData::PatchUpper) | 
+					localAddr;
+
+				jeLib::State::setAddress(s, addr);
+				jeLib::State::calcChecksum(s);
+
+				sendSysEx(s);
+			}
+		}
+
+		return true;
 	}
 }

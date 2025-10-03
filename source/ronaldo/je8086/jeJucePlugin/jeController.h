@@ -1,6 +1,7 @@
 #pragma once
 
 #include "jucePluginLib/controller.h"
+#include "jucePluginLib/patchdb/patch.h"
 
 namespace jeJucePlugin
 {
@@ -21,5 +22,7 @@ namespace jeJucePlugin
 
 		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value) override;
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
+
+		bool sendSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const;
 	};
 }

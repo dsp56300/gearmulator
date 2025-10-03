@@ -22,6 +22,8 @@ namespace jeLib
 		static constexpr Address InvalidAddress = 0xFFFFFFFF;
 
 		static Address getAddress(const Dump& _dump);
+		static bool setAddress(Dump& _dump, Address _address);
+
 		static AddressArea getAddressArea(const Dump& _dump);
 		static AddressArea getAddressArea(Address _addr);
 
