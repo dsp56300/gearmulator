@@ -28,6 +28,7 @@ namespace jeLib
 
 			if (_dump.size() < 10)
 				return false;
+			return true;
 		}
 	}
 
