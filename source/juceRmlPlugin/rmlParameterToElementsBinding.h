@@ -53,6 +53,10 @@ namespace rmlPlugin
 		void ProcessEvent(Rml::Event& _event) override;
 		void OnDetach(Rml::Element*) override;
 
+		static int getElementValue(const Rml::Element* _element, const pluginLib::Parameter* _default);
+		static void setElementValue(Rml::Element* _element, const pluginLib::Parameter* _source);
+		static bool isReversed(const Rml::Element* _element);
+
 		RmlParameterBinding& m_binding;
 		pluginLib::Parameter* const m_parameter;
 		pluginLib::ParameterListener m_listener;
