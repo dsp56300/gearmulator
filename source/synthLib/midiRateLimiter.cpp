@@ -46,7 +46,7 @@ namespace synthLib
 		}
 
 		const auto len = MidiBufferParser::lengthFromStatusByte(_event.a);
-
+		/*
 		// we attempt to insert realtime events early, this can only work if there is no sysex message
 		// currently being sent and if no other realtime event is at the end of the queue
 		if (m_sendingSysex || m_pendingBytes.empty() || m_pendingBytes.back() != 0xf7)
@@ -72,11 +72,11 @@ namespace synthLib
 			}
 
 			// no sysex start found, insert at end
-
+*/
 			if (len > 0) m_pendingBytes.push_back(_event.a);
 			if (len > 1) m_pendingBytes.push_back(_event.b);
 			if (len > 2) m_pendingBytes.push_back(_event.c);
-		}
+//		}
 	}
 
 	void MidiRateLimiter::processSample()
