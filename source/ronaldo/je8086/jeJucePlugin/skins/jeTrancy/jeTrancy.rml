@@ -241,22 +241,22 @@
 				<!-- Panel Select / Key Mode / Voice Assign -->
 				<div class="abs" style="left: 788dp; width: 560dp; height: 100%;">
 					<div class="hlayout" style="width: 210dp; padding-top: 69dp; justify-content: center; gap: 24dp;">
-						<button class="btWhiteLed" style="left: 872dp; top: 56dp;" isToggle="1"/>
-						<button class="btWhiteLed" style="left: 872dp; top: 56dp;" isToggle="1"/>
+						<button id="partLower" class="btWhiteLed" style="left: 872dp; top: 56dp;" isToggle="1"/>
+						<button id="partUpper" class="btWhiteLed" style="left: 872dp; top: 56dp;" isToggle="1"/>
 					</div>
-					<div class="abs vlayoutLeds" style="left: 220dp; top: 46dp; height: 100dp; width: 140dp">
-						<button class="ledRed" isToggle="1"/>
-						<button class="ledRed" isToggle="1"/>
-						<button class="ledRed" isToggle="1"/>
+					<div data-model="part0" class="abs vlayoutLeds" style="left: 220dp; top: 46dp; height: 100dp; width: 140dp">
+						<button class="ledRed" isToggle="1" valueOn="0" param="KeyMode"/>
+						<button class="ledRed" isToggle="1" valueOn="1" param="KeyMode"/>
+						<button class="ledRed" isToggle="1" valueOn="2" param="KeyMode"/>
 					</div>
-					
+
 					<!-- Split -->
-					<combo param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 232dp; top: 140dp; width: 135dp; height: 45dp; line-height: 45dp;">
+					<combo data-model="part0" param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 232dp; top: 140dp; width: 135dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
-					</combo>					
-					
+					</combo>
+
 					<!-- Voice Assign -->
-					<combo param="VoiceAssign" id="VoiceAssign" class="jucePos comboxtext2" style="left: 405dp; top: 26dp; width: 135dp; height: 45dp; line-height: 45dp;">
+					<combo data-model="part0" param="VoiceAssign" id="VoiceAssign" class="jucePos comboxtext2" style="left: 405dp; top: 26dp; width: 135dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>					
 				</div>
@@ -268,26 +268,26 @@
 				<div class="abs" style="left: 1754dp; top: 61dp;">
 					
 					<!-- Dec/Inc -->
-					<button class="abs btBlackLed" style="left: 94dp; top: -15dp;"/>
-					<button class="abs btBlackLed" style="left: 94dp; top: 69dp;"/>					
+					<button id="btInc" class="abs btBlackLed" style="left: 94dp; top: -15dp;"/>
+					<button id="btDec" class="abs btBlackLed" style="left: 94dp; top: 69dp;"/>					
 
 					<!-- Edit/Write -->
 					<div class="abs hlayout" style="top: 173dp; gap: 20dp;">
-						<button class="btBlackLed"/>
-						<button class="btRed"/>
+						<button id="btEdit" class="btBlackLed"/>
+						<button id="btWrite" class="btRed"/>
 					</div>
 					
 					<!-- Shift/Exit -->
 					<div class="abs hlayout" style="top: 291dp; gap: 20dp;">
-						<button class="btBlackLed"/>
-						<button class="btBlackLed"/>
+						<button id="btShift" class="btBlackLed"/>
+						<button id="btExit" class="btBlackLed"/>
 					</div>
 				</div>
 
 				<!-- bottom left, Volume and Semitones knobs -->
 				<div class="abs hlayout" style="left: 40dp; top: 304dp; gap: 92dp;">
 					<knob class="knob mainVolume"/>
-					<knob class="knob"/>
+					<knob class="knob" param="PartTranspose"/>
 				</div>
 				
 				<!-- perform & patch select -->
@@ -328,17 +328,17 @@
 				</div>
 				
 				<!-- Arp -->
-				<div class="abs" style="left: 1953dp; top: 0dp; width: 467dp; height: 444dp;">
+				<div data-model="part0" class="abs" style="left: 1953dp; top: 0dp; width: 467dp; height: 444dp;">
 
 					<!-- left column -->
-					<button class="abs btBlackLed" style="left: 40dp; top: 75dp;"/>
-					<button class="abs btBlackLed" style="left: 135dp; top: 75dp;"/>
+					<button class="abs btBlackLed" style="left: 40dp; top: 75dp;" param="ArpSwitch" isToggle="1"/>
+					<button class="abs btBlackLed" style="left: 135dp; top: 75dp;" param="ArpHold" isToggle="1"/>
 					
 					<button class="abs btWhiteLed" style="left: 55dp; top: 353dp;"/>
 					<button class="abs btWhiteLed" style="left: 130dp; top: 353dp;"/>
 					
 					<!-- center column -->
-					<knob class="abs knob" style="left: 84dp; top: 187dp;"/>
+					<knob class="abs knob" style="left: 84dp; top: 187dp;" param="Tempo"/>
 					<button class="abs btRedLed" style="left: 343dp; top: 358dp;"/>
 
 					<!-- Beat Pattern -->
