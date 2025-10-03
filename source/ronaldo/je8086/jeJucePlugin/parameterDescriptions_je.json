@@ -224,6 +224,7 @@
 		{"page":3, "index":25, "name":"ArpBeatPattern", "min":0, "max":96, "toText":"beatPattern", "default":0},
 		{"page":3, "index":26, "name":"ArpRange", "min":0, "max":3, "toText":"range", "default":0},
 		{"page":3, "index":27, "name":"ArpHold", "min":0, "max":1, "default":0},
+		{"page":3, "index":28, "name":"_PerformanceUnused28", "min":0, "max":1, "default":0, "isPublic":false},
 		{"page":3, "index":29, "name":"IndividualTriggerSwitch", "min":0, "max":1, "default":0},
 		{"page":3, "index":30, "name":"IndividualTriggerDestination", "min":0, "max":2, "default":0},
 		{"page":3, "index":31, "name":"IndividualTriggerSourceChannel", "min":0, "max":2, "default":0},

@@ -144,7 +144,7 @@ namespace jeLib
 	    MorphControlDown = 0x00000029       // 00h - 5Fh | OFF, CC#1-31, AFTER, CC#33-95
 	};
 
-	enum PerformanceData : uint16_t
+	enum class PerformanceData : uint16_t
 	{
 		PerformanceCommon = 0x0000,
 		VoiceModulator    = 0x0800,

@@ -33,6 +33,7 @@ namespace jeLib
 		static std::optional<std::string> getName(const Dump& _dump);
 
 		static bool is14BitData(Patch _param);
+		static bool is14BitData(PerformanceCommon _param);
 
 		static Dump createHeader(SysexByte _command, SysexByte _deviceId, const rLib::Storage::Address4& _address);
 		static uint8_t calcChecksum(const Dump& _dump);

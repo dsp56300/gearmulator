@@ -144,6 +144,19 @@ namespace jeLib
 		}
 	}
 
+	bool State::is14BitData(const PerformanceCommon _param)
+	{
+		switch (_param)
+		{
+		case PerformanceCommon::IndividualTriggerSourceNote:
+		case PerformanceCommon::Tempo:
+		case PerformanceCommon::VocalUpperInputJackFrontRear:
+			return true;
+		default:
+			return false;
+		}
+	}
+
 	State::Dump State::createHeader(SysexByte _command, SysexByte _deviceId, const rLib::Storage::Address4& _address)
 	{
 		return {

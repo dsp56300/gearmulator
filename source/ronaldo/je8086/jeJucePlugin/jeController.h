@@ -36,7 +36,9 @@ namespace jeJucePlugin
 		jeLib::SysexRemoteControl& getSysexRemote() { return m_sysexRemote; }
 
 	private:
-		void parsePatch(const pluginLib::SysEx& _sysex, synthLib::MidiEventSource _source, uint8_t _part);
+		void parsePerformanceCommon(const pluginLib::SysEx& _sysex) const;
+		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part) const;
+		void parsePart(const pluginLib::SysEx& _sysex, uint8_t _part) const;
 
 		jeLib::SysexRemoteControl m_sysexRemote;
 	};

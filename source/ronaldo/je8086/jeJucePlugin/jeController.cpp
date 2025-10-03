@@ -9,6 +9,13 @@
 
 namespace jeJucePlugin
 {
+	namespace
+	{
+		constexpr uint8_t g_paramPagePatch = 0;
+		constexpr uint8_t g_paramPagePart = 2;
+		constexpr uint8_t g_paramPagePerformance = 3;
+	}
+
 	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_je.json")
 	{
 	    registerParams(_p, [](const uint8_t _part, const bool _isNonPartExclusive)
@@ -66,9 +73,16 @@ namespace jeJucePlugin
 
 				switch (perfData)
 				{
+				case jeLib::PerformanceData::PerformanceCommon:
+					parsePerformanceCommon(_sysex);
+					break;
 				case jeLib::PerformanceData::PatchUpper:
 				case jeLib::PerformanceData::PatchLower:
-					parsePatch(_sysex, _source, perfData == jeLib::PatchUpper ? 0 : 1);
+					parsePatch(_sysex, perfData == jeLib::PerformanceData::PatchUpper ? 0 : 1);
+					break;
+				case jeLib::PerformanceData::PartUpper:
+				case jeLib::PerformanceData::PartLower:
+					parsePart(_sysex, perfData == jeLib::PerformanceData::PartUpper ? 0 : 1);
 					break;
 				default:;
 				}
@@ -84,8 +98,47 @@ namespace jeJucePlugin
 
 		return false;
 	}
-	
-	void Controller::parsePatch(const pluginLib::SysEx& _sysex, synthLib::MidiEventSource _source, uint8_t _part)
+
+	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex) const
+	{
+		const auto address = jeLib::State::getAddress(_sysex);
+
+		uint32_t addr = address & 0xff;
+
+		constexpr size_t startIndex = std::size(jeLib::g_sysexHeader) + 1/*command*/ + std::tuple_size_v<rLib::Storage::Address4>;
+
+		for (size_t i=startIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
+		{
+			const auto parameterType = static_cast<jeLib::PerformanceCommon>(addr);
+
+			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePerformance, addr);
+
+			auto* param = getParameter(parameterIndex, 0);
+			assert(param && "parameter not found");
+
+			if(!param)
+				break;
+
+			pluginLib::ParamValue value;
+
+			if(jeLib::State::is14BitData(parameterType))
+			{
+				if(i + 1 >= _sysex.size() - std::size(jeLib::g_sysexFooter))
+					break;
+				value = (_sysex[i] << 7) | _sysex[i + 1];
+				++i;
+				++addr;
+			}
+			else
+			{
+				value = _sysex[i];
+			}
+
+			param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
+		}
+	}
+
+	void Controller::parsePatch(const pluginLib::SysEx& _sysex, const uint8_t _part) const
 	{
 		const auto address = jeLib::State::getAddress(_sysex);
 
@@ -125,8 +178,30 @@ namespace jeJucePlugin
 				value = _sysex[i];
 			}
 
-			if (parameterType == jeLib::Patch::Osc1Waveform)
-				int foo=0;
+			param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
+		}
+	}
+
+	void Controller::parsePart(const pluginLib::SysEx& _sysex, const uint8_t _part) const
+	{
+		const auto address = jeLib::State::getAddress(_sysex);
+
+		uint32_t addr = address & 0xff;
+
+		constexpr size_t startIndex = std::size(jeLib::g_sysexHeader) + 1/*command*/ + std::tuple_size_v<rLib::Storage::Address4>;
+
+		for (size_t i=startIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
+		{
+			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePart, addr);
+
+			auto* param = getParameter(parameterIndex, _part);
+			assert(param && "parameter not found");
+
+			if(!param)
+				break;
+
+			pluginLib::ParamValue value = _sysex[i];
+
 			param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 		}
 	}
@@ -159,12 +234,12 @@ namespace jeJucePlugin
 				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
 				LOG(localAddr);
 
-				const auto addr = 
+				const auto a = 
 					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) | 
 					static_cast<uint32_t>(jeLib::PerformanceData::PatchUpper) | 
 					localAddr;
 
-				jeLib::State::setAddress(s, addr);
+				jeLib::State::setAddress(s, a);
 				jeLib::State::calcChecksum(s);
 
 				sendSysEx(s);
@@ -174,11 +249,11 @@ namespace jeJucePlugin
 				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPerformanceArea::BlockMask);
 				LOG(localAddr);
 
-				const auto addr = 
+				const auto a = 
 					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) |
 					localAddr;
 
-				jeLib::State::setAddress(s, addr);
+				jeLib::State::setAddress(s, a);
 				jeLib::State::calcChecksum(s);
 
 				sendSysEx(s);
