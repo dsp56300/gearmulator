@@ -286,7 +286,7 @@
 
 				<!-- bottom left, Volume and Semitones knobs -->
 				<div class="abs hlayout" style="left: 40dp; top: 304dp; gap: 92dp;">
-					<knob class="knob"/>
+					<knob class="knob mainVolume"/>
 					<knob class="knob"/>
 				</div>
 				
