@@ -92,6 +92,20 @@ namespace jeJucePlugin
 
 				sendSysEx(s);
 			}
+			else
+			{
+				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPerformanceArea::BlockMask);
+				LOG(localAddr);
+
+				const auto addr = 
+					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) |
+					localAddr;
+
+				jeLib::State::setAddress(s, addr);
+				jeLib::State::calcChecksum(s);
+
+				sendSysEx(s);
+			}
 		}
 
 		return true;
