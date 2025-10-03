@@ -211,15 +211,15 @@ public:
   
   void setProgramDirty()
   {
-	  m_programDirty = true;
+	  m_programDirty = 3;
   }
 
   void genProgramIfDirty()
   {
-	  if (m_programDirty)
-	  {
-		  genProgram(m_esp);
-		  m_programDirty = false;
+      if (m_programDirty > 0)
+      {
+          if (--m_programDirty == 0)
+              genProgram(m_esp);
 	  }
   }
 
@@ -260,7 +260,7 @@ private:
   ESP<lg2eram_size>* m_esp;
   asmjit::JitRuntime m_rt;
   asmjit::FileLogger logger;
-  bool m_programDirty{ false };
+  uint32_t m_programDirty = 0;
   
   typedef void(*RunCore)(int8_t* coefsPtr, int32_t *iramPtr, int32_t *gramPtr, CoreData *varPtr, uint32_t eramPos, uint32_t iramPos, int64_t unused1, int64_t unused2);
   RunCore runCore0 = nullptr, runCore1 = nullptr;
