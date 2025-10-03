@@ -326,6 +326,14 @@ namespace jeLib
 		return createFooter(dump);
 	}
 
+	State::Dump State::createParameterChange(const SystemParameter _param, const int _paramValue)
+	{
+		const auto addr = toAddress(static_cast<uint32_t>(AddressArea::System) | static_cast<uint32_t>(SystemArea::SystemParameter) | static_cast<uint32_t>(_param));
+		Dump dump = createHeader(SysexByte::CommandIdDataSet1, SysexByte::DeviceIdDefault, addr);
+		addParameter(dump, false, _paramValue);
+		return createFooter(dump);
+	}
+
 	State::Dump State::createPerformanceRequest(AddressArea _area, UserPerformanceArea _performanceArea)
 	{
 		assert(_area == AddressArea::PerformanceTemp || _area == AddressArea::UserPerformance);
@@ -339,5 +347,14 @@ namespace jeLib
 		auto addr4 = toAddress(static_cast<uint32_t>(UserPerformanceArea::BlockSize));
 		dump.insert(dump.end(), addr4.begin(), addr4.end());
 		return createFooter(dump);
+	}
+
+	State::Dump State::createSystemRequest()
+	{
+		Dump dump = createHeader(SysexByte::CommandIdDataRequest1, SysexByte::DeviceIdDefault, toAddress(static_cast<uint32_t>(SystemArea::SystemParameter)));
+		auto addr4 = toAddress(0x4000);
+		dump.insert(dump.end(), addr4.begin(), addr4.end());
+		createFooter(dump);
+		return dump;
 	}
 }

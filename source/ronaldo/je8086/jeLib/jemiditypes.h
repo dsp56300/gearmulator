@@ -17,7 +17,7 @@ namespace jeLib
 		Mask               = 0xFF000000,
 	};
 
-	enum SystemArea : uint16_t
+	enum class SystemArea : uint16_t
 	{
 		SystemParameter = 0x00000000,
 		PatternSetup    = 0x00001000,

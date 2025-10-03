@@ -14,6 +14,8 @@ namespace jeJucePlugin
 		constexpr uint8_t g_paramPagePatch = 0;
 		constexpr uint8_t g_paramPagePart = 2;
 		constexpr uint8_t g_paramPagePerformance = 3;
+
+		constexpr size_t g_dataStartIndex = std::size(jeLib::g_sysexHeader) + 1/*command*/ + std::tuple_size_v<rLib::Storage::Address4>;
 	}
 
 	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_je.json")
@@ -28,6 +30,7 @@ namespace jeJucePlugin
 
 		Controller::onStateLoaded();
 
+		sendSystemRequest();
 		sendTempPerformanceRequest();
 	}
 
@@ -74,6 +77,12 @@ namespace jeJucePlugin
 		}
 	}
 
+	void Controller::sendParameterChange(const jeLib::SystemParameter _parameter, const int _value) const
+	{
+		const auto msg = jeLib::State::createParameterChange(_parameter, _value);
+		sendSysEx(msg);
+	}
+
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _sysex, synthLib::MidiEventSource _source)
 	{
 		if (m_sysexRemote.receive(_sysex))
@@ -110,6 +119,24 @@ namespace jeJucePlugin
 			{
 			}
 			break;
+		case jeLib::AddressArea::System:
+			{
+				auto systemArea = static_cast<jeLib::SystemArea>(addr & 0xffff);
+
+				switch (systemArea)
+				{
+				case jeLib::SystemArea::SystemParameter:
+					parseSystemParameters(_sysex);
+					break;
+				case jeLib::SystemArea::PatternSetup:
+					break;
+				case jeLib::SystemArea::MotionSetup:
+					break;
+				case jeLib::SystemArea::TxRxSetting:
+					break;
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -123,9 +150,7 @@ namespace jeJucePlugin
 
 		uint32_t addr = address & 0xff;
 
-		constexpr size_t startIndex = std::size(jeLib::g_sysexHeader) + 1/*command*/ + std::tuple_size_v<rLib::Storage::Address4>;
-
-		for (size_t i=startIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
+		for (size_t i=g_dataStartIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
 		{
 			const auto parameterType = static_cast<jeLib::PerformanceCommon>(addr);
 
@@ -162,9 +187,7 @@ namespace jeJucePlugin
 
 		uint32_t addr = address & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
 
-		constexpr size_t startIndex = std::size(jeLib::g_sysexHeader) + 1/*command*/ + std::tuple_size_v<rLib::Storage::Address4>;
-
-		for (size_t i=startIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
+		for (size_t i=g_dataStartIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
 		{
 			rLib::Storage::Address4 addr4;
 
@@ -206,9 +229,7 @@ namespace jeJucePlugin
 
 		uint32_t addr = address & 0xff;
 
-		constexpr size_t startIndex = std::size(jeLib::g_sysexHeader) + 1/*command*/ + std::tuple_size_v<rLib::Storage::Address4>;
-
-		for (size_t i=startIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
+		for (size_t i=g_dataStartIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
 		{
 			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePart, static_cast<uint8_t>(addr));
 
@@ -221,6 +242,60 @@ namespace jeJucePlugin
 			pluginLib::ParamValue value = _sysex[i];
 
 			param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
+		}
+	}
+
+	void Controller::parseSystemParameters(const pluginLib::SysEx& _sysex)
+	{
+		// upon receiving the system parameters, we adjust them to our needs if they don't match
+
+		const auto address = jeLib::State::getAddress(_sysex);
+		uint32_t addr = address & 0xff;
+
+		for (size_t i=g_dataStartIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
+		{
+			const auto parameterType = static_cast<jeLib::SystemParameter>(addr);
+			const auto value = _sysex[i];
+
+			auto sendChange = [&](const uint8_t _expectedValue)
+			{
+				if (value == _expectedValue)
+					return;
+				sendParameterChange(parameterType, _expectedValue);
+			};
+
+			switch (parameterType)
+			{
+			case jeLib::SystemParameter::MidiSync:				// Enable sync to external MIDI clock
+				sendChange(1);
+				break;
+			case jeLib::SystemParameter::RemoteControlChannel:	// Set remote channel to 3
+				sendChange(2);
+				break;
+			case jeLib::SystemParameter::MasterTune:
+				sendChange(32);	// 440Hz
+			case jeLib::PerformanceControlChannel:
+				sendChange(0x11);	// off
+				break;
+			case jeLib::LocalSwitch:
+				sendChange(1);
+				break;
+			case jeLib::TxRxEditMode:
+				sendChange(0); // MODE1
+				break;
+			case jeLib::TxRxEditSwitch:
+				break;
+			case jeLib::TxRxProgramChangeSwitch:
+				sendChange(0);	// disable program changes, we handle them ourselves
+				break;
+			case jeLib::KeyboardShift:
+				sendChange(2); // = 0
+				break;
+			case jeLib::RemoteKeyboardChannel:
+				sendChange(4); // only relevant for the rack
+				break;
+			default:;
+			}
 		}
 	}
 
@@ -289,5 +364,10 @@ namespace jeJucePlugin
 	void Controller::sendPerformanceRequest(const jeLib::AddressArea _area, const jeLib::UserPerformanceArea _performance) const
 	{
 		sendSysEx(jeLib::State::createPerformanceRequest(_area, _performance));
+	}
+
+	void Controller::sendSystemRequest() const
+	{
+		sendSysEx(jeLib::State::createSystemRequest());
 	}
 }
