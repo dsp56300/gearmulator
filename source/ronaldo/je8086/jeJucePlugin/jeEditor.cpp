@@ -3,6 +3,7 @@
 #include <juceRmlPlugin/skinConverter/skinConverterOptions.h>
 
 #include "jeController.h"
+#include "jeFocusedParameter.h"
 #include "jeLcd.h"
 #include "jePatchManager.h"
 
@@ -56,7 +57,10 @@ namespace jeJucePlugin
 			setCurrentPart(_part);
 		});
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
+		if (m_lcd)
+			m_focusedParameter.reset(new JeFocusedParameter(*this, *m_lcd));
+		else
+			m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
 	}
 
 	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
