@@ -3,6 +3,7 @@
 #include <h8s/h8sdevices.hpp>
 
 #include "je8086devices.h"
+#include "jeLcd.h"
 #include "synthLib/midiBufferParser.h"
 #include "synthLib/midiRateLimiter.h"
 
@@ -34,7 +35,7 @@ namespace jeLib
 
 		H8SEmulator emu;
 		devices::MultiAsic asics;
-		devices::LCD lcd;
+		Lcd lcd;
 		devices::Port ports;
 		devices::Faders faders;
 		HWRegs hwregs;

@@ -8,6 +8,7 @@ set(SOURCES
 	device.cpp device.h
 	je8086.cpp je8086.h
 	je8086devices.cpp je8086devices.h
+	jeLcd.cpp jeLcd.h
 	jemiditypes.h
 	jetypes.h
 	patch.cpp patch.h

@@ -287,14 +287,6 @@ namespace jeLib
 			void dumpLEDs() const { for (int i = 0; i < 66; i++) if (getLed(i)) printf("%s, ", litnames[i]); printf("\n"); }
 		};
 
-		class LCD : public H8SDevice
-		{
-		public:
-			uint8_t read(uint32_t address) override { return 0x00; 
-			}
-			void write(uint32_t address, uint8_t value) override { /*lcd->write((address & 1), value);*/ }
-		};
-
 		class KeyScanner : public H8SDevice
 		{
 		public:
