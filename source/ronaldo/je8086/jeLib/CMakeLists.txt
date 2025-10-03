@@ -15,6 +15,7 @@ set(SOURCES
 	rom.cpp rom.h
 	romloader.cpp romloader.h
 	state.cpp state.h
+	sysexRemoteControl.cpp sysexRemoteControl.h
 	types.h
 )
 

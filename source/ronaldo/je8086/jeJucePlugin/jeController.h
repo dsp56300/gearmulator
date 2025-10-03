@@ -1,5 +1,9 @@
 #pragma once
 
+#include "jeLcd.h"
+
+#include "jeLib/sysexRemoteControl.h"
+
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/patchdb/patch.h"
 
@@ -24,5 +28,10 @@ namespace jeJucePlugin
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
 
 		bool sendSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const;
+
+		jeLib::SysexRemoteControl& getSysexRemote() { return m_sysexRemote; }
+
+	private:
+		jeLib::SysexRemoteControl m_sysexRemote;
 	};
 }

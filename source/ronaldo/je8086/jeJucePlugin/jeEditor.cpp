@@ -47,7 +47,7 @@ namespace jeJucePlugin
 		}
 
 		if (auto* lcd = findChild("lcd"))
-			m_lcd.reset(new JeLcd(lcd));
+			m_lcd.reset(new JeLcd(*this, lcd));
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 

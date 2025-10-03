@@ -49,8 +49,11 @@ namespace jeJucePlugin
 		}
 	}
 
-	bool Controller::parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource)
+	bool Controller::parseSysexMessage(const pluginLib::SysEx& _sysex, synthLib::MidiEventSource _source)
 	{
+		if (m_sysexRemote.receive(_sysex))
+			return true;
+
 		return false;
 	}
 

@@ -4,6 +4,7 @@
 
 #include "je8086devices.h"
 #include "jeLcd.h"
+#include "sysexRemoteControl.h"
 #include "synthLib/midiBufferParser.h"
 #include "synthLib/midiRateLimiter.h"
 
@@ -30,6 +31,8 @@ namespace jeLib
 		static void onLedsChanged(devices::Port* _port);
 		void onReceiveMidiByte(uint8_t _byte);
 		void onReceiveSample(int32_t _left, int32_t _right);
+		void onLcdDdRamChanged();
+		void onLcdCgRamChanged();
 
 		void runfactoryreset(const std::string& _ramDataFilename);
 
@@ -49,5 +52,7 @@ namespace jeLib
 		std::vector<synthLib::SMidiEvent> m_midiInEvents;
 		SampleBuffer m_sampleBuffer;
 		synthLib::MidiRateLimiter m_midiInRateLimiter;
+		SysexRemoteControl m_sysexRemoteControl;
+		std::vector<synthLib::SMidiEvent> m_midiOutEvents;
 	};
 }

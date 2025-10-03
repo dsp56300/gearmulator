@@ -50,6 +50,9 @@ namespace jeLib
 		m_midiInRateLimiter.setDefaultRateLimit();
 		m_midiInRateLimiter.setSysexPause(0.021f);	// according to manual 20ms pause between sysex patch messages
 		m_midiInRateLimiter.setSysexPauseLengthThreshold(100);
+
+		lcd.setChangeCallback([this] { onLcdDdRamChanged(); });
+		lcd.setCgRamChangeCallback([this] { onLcdCgRamChanged(); });
 	}
 
 	void Je8086::addMidiEvent(const synthLib::SMidiEvent& _event)
@@ -59,7 +62,17 @@ namespace jeLib
 
 	void Je8086::readMidiOut(std::vector<synthLib::SMidiEvent>& _events)
 	{
-		m_midiOutParser.getEvents(_events);
+		m_midiOutParser.getEvents(m_midiOutEvents);
+
+		if (_events.empty())
+		{
+			std::swap(_events, m_midiOutEvents);
+		}
+		else
+		{
+			_events.insert(_events.end(), m_midiOutEvents.begin(), m_midiOutEvents.end());
+			m_midiOutEvents.clear();
+		}
 	}
 
 	void Je8086::step()
@@ -97,6 +110,16 @@ namespace jeLib
 	{
 		m_midiInRateLimiter.processSample();
 		m_sampleBuffer.emplace_back(_left, _right);
+	}
+
+	void Je8086::onLcdDdRamChanged()
+	{
+		SysexRemoteControl::sendSysexLcdDdRam(m_midiOutEvents, lcd);
+	}
+
+	void Je8086::onLcdCgRamChanged()
+	{
+		SysexRemoteControl::sendSysexLcdCgRam(m_midiOutEvents, lcd);
 	}
 
 	void Je8086::runfactoryreset(const std::string& _ramDataFilename)
