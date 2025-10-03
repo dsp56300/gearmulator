@@ -42,10 +42,24 @@ namespace jeJucePlugin
 	{
 		const auto& desc = _parameter.getDescription();
 
-		if (desc.page < 2)
+		if (desc.page == g_paramPagePerformance)
+		{
+			// performance parameter
+			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::PerformanceCommon>(desc.index), _value);
+			sendSysEx(msg);
+		}
+		else if (desc.page == g_paramPagePart)
+		{
+			// part parameter
+			const auto lowerUpper = getCurrentPart() > 0 ? jeLib::PerformanceData::PartLower : jeLib::PerformanceData::PartUpper;
+
+			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Part>(desc.index), _value);
+
+			sendSysEx(msg);
+		}
+		else if (desc.page == g_paramPagePatch || desc.page == g_paramPagePatch + 1)
 		{
 			// patch parameter
-
 			const auto index = desc.index | (desc.page * 0x100);
 
 			const auto lowerUpper = getCurrentPart() > 0 ? jeLib::PerformanceData::PatchLower : jeLib::PerformanceData::PatchUpper;
@@ -53,6 +67,10 @@ namespace jeJucePlugin
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Patch>(index), _value);
 
 			sendSysEx(msg);
+		}
+		else
+		{
+			assert(false && "unsupported parameter page");
 		}
 	}
 
@@ -111,7 +129,7 @@ namespace jeJucePlugin
 		{
 			const auto parameterType = static_cast<jeLib::PerformanceCommon>(addr);
 
-			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePerformance, addr);
+			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePerformance, static_cast<uint8_t>(addr));
 
 			auto* param = getParameter(parameterIndex, 0);
 			assert(param && "parameter not found");
@@ -155,7 +173,7 @@ namespace jeJucePlugin
 
 			const auto parameterType = static_cast<jeLib::Patch>((addr4[2] << 8) + addr4[3]);
 
-			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(addr4[2], addr4[3]);
+			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(addr4[2] + g_paramPagePatch, addr4[3]);
 
 			auto* param = getParameter(parameterIndex, _part);
 			assert(param && "parameter not found");
@@ -192,7 +210,7 @@ namespace jeJucePlugin
 
 		for (size_t i=startIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
 		{
-			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePart, addr);
+			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePart, static_cast<uint8_t>(addr));
 
 			auto* param = getParameter(parameterIndex, _part);
 			assert(param && "parameter not found");

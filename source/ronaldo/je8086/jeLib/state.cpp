@@ -144,6 +144,11 @@ namespace jeLib
 		}
 	}
 
+	bool State::is14BitData(Part)
+	{
+		return false;
+	}
+
 	bool State::is14BitData(const PerformanceCommon _param)
 	{
 		switch (_param)
@@ -250,9 +255,25 @@ namespace jeLib
 		return toAddress(addr);
 	}
 
-	State::Dump& State::addParameter(Dump& _dump, const Patch _param, int _paramValue)
+	rLib::Storage::Address4 State::toAddress(PerformanceData _performanceData, Part _param)
 	{
-		if (is14BitData(_param))
+		uint32_t addr = static_cast<uint32_t>(AddressArea::PerformanceTemp);
+		addr |= static_cast<uint32_t>(_performanceData);
+		addr |= static_cast<uint32_t>(_param);
+		return toAddress(addr);
+	}
+
+	rLib::Storage::Address4 State::toAddress(PerformanceData _performanceData, PerformanceCommon _param)
+	{
+		uint32_t addr = static_cast<uint32_t>(AddressArea::PerformanceTemp);
+		addr |= static_cast<uint32_t>(_performanceData);
+		addr |= static_cast<uint32_t>(_param);
+		return toAddress(addr);
+	}
+
+	State::Dump& State::addParameter(Dump& _dump, const bool _14Bit, const int _paramValue)
+	{
+		if (_14Bit)
 		{
 			_dump.push_back(static_cast<uint8_t>((_paramValue >> 7) & 0x7F));  // MSB
 			_dump.push_back(static_cast<uint8_t>(_paramValue & 0x7F));         // LSB
@@ -273,6 +294,31 @@ namespace jeLib
 		);
 
 		const auto addr = toAddress(_performanceData, _param);
+		Dump dump = createHeader(SysexByte::CommandIdDataSet1, SysexByte::DeviceIdDefault, addr);
+
+		addParameter(dump, _param, _paramValue);
+
+		return createFooter(dump);
+	}
+
+	State::Dump State::createParameterChange(PerformanceData _performanceData, const Part _param, const int _paramValue)
+	{
+		assert(
+			_performanceData == PerformanceData::PartUpper ||
+			_performanceData == PerformanceData::PartLower
+		);
+
+		const auto addr = toAddress(_performanceData, _param);
+		Dump dump = createHeader(SysexByte::CommandIdDataSet1, SysexByte::DeviceIdDefault, addr);
+
+		addParameter(dump, _param, _paramValue);
+
+		return createFooter(dump);
+	}
+
+	State::Dump State::createParameterChange(const PerformanceCommon _param, const int _paramValue)
+	{
+		const auto addr = toAddress(PerformanceData::PerformanceCommon, _param);
 		Dump dump = createHeader(SysexByte::CommandIdDataSet1, SysexByte::DeviceIdDefault, addr);
 
 		addParameter(dump, _param, _paramValue);
