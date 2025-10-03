@@ -14,9 +14,9 @@
 		<img data-model="partCurrent" class="abs" src="main.png" tabgroup="main" tabpage="0">
 		
 			<!-- first row -->
-							
-				<div id="FocusedParameterValue" class="jucePos juceLabel txt1" style="left: 600dp; top: 220dp; width: 256.7dp; height: 38dp; line-height: 38dp;">-42</div>
-				<div id="FocusedParameterName" class="jucePos juceLabel txt" style="left: 200.7dp; top: 220dp; width: 391.35dp; height: 38dp; line-height: 38dp;">Osc</div>				
+
+				<!-- div id="FocusedParameterValue" class="jucePos juceLabel txt1" style="left: 600dp; top: 220dp; width: 256.7dp; height: 38dp; line-height: 38dp;">-42</-->
+				<!-- div id="FocusedParameterName" class="jucePos juceLabel txt" style="left: 200.7dp; top: 220dp; width: 391.35dp; height: 38dp; line-height: 38dp;">Osc</-->
 				
 				<!-- FX section -->
 				<div class="layoutFxKnobs">
