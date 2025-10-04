@@ -41,7 +41,7 @@ namespace jeJucePlugin
 //		requestDump(je::SysexByte::SingleRequestBankEditBuffer, 0);	// single edit buffers A-D
 	}
 
-	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value)
+	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin)
 	{
 		const auto& desc = _parameter.getDescription();
 

@@ -147,7 +147,7 @@ namespace virus
     	bool requestArrangement() const;
 		void requestRomBanks();
         
-		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value) override;
+		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 		bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
 
         using pluginLib::Controller::sendSysEx;

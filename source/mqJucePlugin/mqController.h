@@ -92,7 +92,7 @@ namespace mqJucePlugin
 
 	    bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource _source) override;
 
-		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value) override;
+		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 	    bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);
 		void requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;
 		void requestMulti(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;

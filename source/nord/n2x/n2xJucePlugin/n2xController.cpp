@@ -189,7 +189,7 @@ namespace n2xJucePlugin
 		return true;
 	}
 
-	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value)
+	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin)
 	{
 		if(_parameter.getDescription().page >= g_multiPage)
 		{

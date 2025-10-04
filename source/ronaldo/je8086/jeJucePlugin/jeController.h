@@ -25,7 +25,7 @@ namespace jeJucePlugin
 			return 2;
 		}
 
-		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value) override;
+		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 		void sendParameterChange(jeLib::SystemParameter _parameter, int _value) const;
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
 
