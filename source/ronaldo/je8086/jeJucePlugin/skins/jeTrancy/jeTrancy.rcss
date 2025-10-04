@@ -399,3 +399,7 @@ button
 .mainVolume:hover {
     animation: 0.30s ease-in-out wiggle;
 }
+
+.pm-gridentry {
+	width: 11em;
+}
