@@ -41,7 +41,7 @@ namespace jeJucePlugin
 //		requestDump(je::SysexByte::SingleRequestBankEditBuffer, 0);	// single edit buffers A-D
 	}
 
-	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin)
+	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, const pluginLib::Parameter::Origin _origin)
 	{
 		const auto& desc = _parameter.getDescription();
 
@@ -74,6 +74,18 @@ namespace jeJucePlugin
 		else
 		{
 			assert(false && "unsupported parameter page");
+			return;
+		}
+
+		// if both parts are selected, apply the change to the other part as well
+		if (desc.page != g_paramPagePerformance && isBothSelected() && _parameter.getPart() == getCurrentPart())
+		{
+			if (_origin == pluginLib::Parameter::Origin::Ui || _origin == pluginLib::Parameter::Origin::Midi || _origin == pluginLib::Parameter::Origin::HostAutomation)
+			{
+				auto otherPart = static_cast<uint8_t>((getCurrentPart() + 1) & 1);
+				auto* p = getParameter(_parameter.getParameterIndex(), otherPart);
+				p->setUnnormalizedValueNotifyingHost(_parameter.getUnnormalizedValue(), pluginLib::Parameter::Origin::Ui);
+			}
 		}
 	}
 
@@ -142,6 +154,21 @@ namespace jeJucePlugin
 		}
 
 		return false;
+	}
+
+	bool Controller::isUpperSelected() const
+	{
+		return (getParameter("PanelSelect", 0)->getUnnormalizedValue() + 1) & 1;
+	}
+
+	bool Controller::isLowerSelected() const
+	{
+		return (getParameter("PanelSelect", 0)->getUnnormalizedValue() + 1) & 2;
+	}
+
+	bool Controller::isBothSelected() const
+	{
+		return getParameter("PanelSelect", 0)->getUnnormalizedValue() == 2;
 	}
 
 	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex) const

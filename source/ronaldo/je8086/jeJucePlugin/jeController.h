@@ -37,6 +37,10 @@ namespace jeJucePlugin
 
 		jeLib::SysexRemoteControl& getSysexRemote() { return m_sysexRemote; }
 
+		bool isUpperSelected() const;
+		bool isLowerSelected() const;
+		bool isBothSelected() const;
+
 	private:
 		void parsePerformanceCommon(const pluginLib::SysEx& _sysex) const;
 		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part) const;

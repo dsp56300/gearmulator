@@ -43,7 +43,7 @@ namespace jeJucePlugin
 		m_partButtons[1]->setChecked(part & 2);
 	}
 
-	void PartSelect::onClick(Rml::Event& _event, size_t _part) const
+	void PartSelect::onClick(Rml::Event& _event, const size_t _part) const
 	{
 		const auto current = m_paramPanelSelect->getUnnormalizedValue();
 
