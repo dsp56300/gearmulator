@@ -30,7 +30,7 @@ namespace jeLib
 	{
 		std::vector<synthLib::SMidiEvent> results;
 
-		if (!m_state.getState(results))
+		if (!m_state.createTempPerformanceDumps(results))
 			return false;
 
 		for (const auto& result : results)

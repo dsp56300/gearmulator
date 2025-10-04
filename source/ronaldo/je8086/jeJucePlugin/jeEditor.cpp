@@ -64,6 +64,11 @@ namespace jeJucePlugin
 			m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
 
 		m_partSelect.reset(new PartSelect(*this));
+
+		addClick("btWrite", [this](Rml::Event& _event)
+		{
+			onBtWrite(_event);
+		}, false);
 	}
 
 	Editor::~Editor()
@@ -89,5 +94,25 @@ namespace jeJucePlugin
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
 	{
 		return {};
+	}
+
+	void Editor::onBtWrite(Rml::Event& _event) const
+	{
+		auto* pm = getPatchManager();
+		if (!pm)
+			return;
+
+		_event.StopPropagation();
+
+		juceRmlUi::Menu menu;
+
+		if (pm->createSaveMenuEntries(menu, 0, "Patch Upper", 0) > 1)
+			menu.addSeparator();
+		if (pm->createSaveMenuEntries(menu, 1, "Patch Lower", 1) > 1)
+			menu.addSeparator();
+
+		pm->createSaveMenuEntries(menu, 0, "Performance", 2);
+
+		menu.runModal(_event);
 	}
 }

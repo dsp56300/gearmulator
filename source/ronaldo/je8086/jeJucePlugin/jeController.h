@@ -2,6 +2,7 @@
 
 #include "jeLcd.h"
 #include "jeLib/jemiditypes.h"
+#include "jeLib/state.h"
 
 #include "jeLib/sysexRemoteControl.h"
 
@@ -41,6 +42,8 @@ namespace jeJucePlugin
 		bool isLowerSelected() const;
 		bool isBothSelected() const;
 
+		bool requestPatchForPart(std::vector<uint8_t>& _data, uint32_t _part, uint64_t _userData) const;
+
 	private:
 		void parsePerformanceCommon(const pluginLib::SysEx& _sysex) const;
 		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part) const;
@@ -48,5 +51,6 @@ namespace jeJucePlugin
 		void parseSystemParameters(const pluginLib::SysEx& _sysex);
 
 		jeLib::SysexRemoteControl m_sysexRemote;
+		jeLib::State m_state;
 	};
 }

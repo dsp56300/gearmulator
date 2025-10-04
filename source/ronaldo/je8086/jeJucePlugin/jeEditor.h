@@ -39,6 +39,8 @@ namespace jeJucePlugin
 		Controller& geJeController() const { return m_controller; }
 
 	private:
+		void onBtWrite(Rml::Event& _event) const;
+
 		Controller& m_controller;
 
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;

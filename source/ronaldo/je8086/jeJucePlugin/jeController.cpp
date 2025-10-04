@@ -98,6 +98,8 @@ namespace jeJucePlugin
 		if (m_sysexRemote.receive(_sysex))
 			return true;
 
+		m_state.receive(_sysex);
+
 		const auto addr = jeLib::State::getAddress(_sysex);
 		const auto area = jeLib::State::getAddressArea(addr);
 
@@ -167,6 +169,40 @@ namespace jeJucePlugin
 	bool Controller::isBothSelected() const
 	{
 		return getParameter("PanelSelect", 0)->getUnnormalizedValue() == 2;
+	}
+
+	bool Controller::requestPatchForPart(std::vector<uint8_t>& _data, uint32_t _part, uint64_t _userData) const
+	{
+		std::vector<synthLib::SMidiEvent> results;
+
+		const auto isPerformance = _userData == 2;
+
+		if (_userData == 2)
+		{
+			m_state.createTempPerformanceDumps(results);
+		}
+		else
+		{
+			switch (_part)
+			{
+			case 0:  m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchUpper); break;
+			case 1:  m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchLower); break;
+			default: return false;
+			}
+		}
+
+		for (auto& result : results)
+		{
+			// make sure the address is correct, we do not want to return temp performance but something stored in user memory
+			if (isPerformance)
+				jeLib::State::setAddress(result.sysex, static_cast<uint32_t>(jeLib::AddressArea::UserPerformance));
+			else
+				jeLib::State::setAddress(result.sysex, static_cast<uint32_t>(jeLib::AddressArea::UserPatch));
+
+			_data.insert(_data.end(), result.sysex.begin(), result.sysex.end());
+		}
+
+		return true;
 	}
 
 	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex) const

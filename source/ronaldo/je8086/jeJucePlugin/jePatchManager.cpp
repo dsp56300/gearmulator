@@ -28,7 +28,7 @@ namespace jeJucePlugin
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part, uint64_t _userData)
 	{
-		return false;
+		return m_controller.requestPatchForPart(_data, _part, _userData);
 	}
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program)
