@@ -386,6 +386,8 @@ namespace jeJucePlugin
 			}
 		}
 
+		sendTempPerformanceRequest();
+
 		return true;
 	}
 
