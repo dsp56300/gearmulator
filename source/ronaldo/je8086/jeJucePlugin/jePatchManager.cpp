@@ -113,7 +113,7 @@ namespace jeJucePlugin
 			return false;
 
 		// patches might be split into multiple sysex messages, try to merge them
-		std::map<uint32_t, std::vector<pluginLib::patchDB::Data>> sameAddressPatches;
+		std::vector<std::map<uint32_t, std::vector<pluginLib::patchDB::Data>>> sameAddressPatches;
 
 		for (auto& d : data)
 		{
@@ -136,25 +136,36 @@ namespace jeJucePlugin
 			else
 				mask = static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
 
+			if ((addr & mask) == 0)
+				sameAddressPatches.emplace_back(); // new patch/performance, create new map
+
 			mask = ~mask;
 
 			const auto key = addr & mask;
 
-			sameAddressPatches[key].emplace_back(std::move(d));
+			// this can only happen if the dumps are corrupted
+			assert(!sameAddressPatches.empty());
+			if (sameAddressPatches.empty())
+				continue;
+
+			sameAddressPatches.back()[key].emplace_back(std::move(d));
 		}
 
-		for (auto& [key, patches] : sameAddressPatches)
+		for (const auto& p : sameAddressPatches)
 		{
-			if (patches.size() == 1)
+			for (auto& [key, patches] : p)
 			{
-				_results.emplace_back(std::move(patches.front()));
-				continue;
+				if (patches.size() == 1)
+				{
+					_results.emplace_back(std::move(patches.front()));
+					continue;
+				}
+
+				auto& e = _results.emplace_back();
+
+				for (auto& p : patches)
+					e.insert(e.end(), p.begin(), p.end());
 			}
-
-			auto& e = _results.emplace_back();
-
-			for (auto& p : patches)
-				e.insert(e.end(), p.begin(), p.end());
 		}
 
 		return true;
