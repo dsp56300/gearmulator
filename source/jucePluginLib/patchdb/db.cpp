@@ -603,7 +603,8 @@ namespace pluginLib::patchDB
 	PatchPtr DB::requestPatchForPart(const uint32_t _part, const uint64_t _userData)
 	{
 		Data data;
-		requestPatchForPart(data, _part, _userData);
+		if (!requestPatchForPart(data, _part, _userData) || data.empty())
+			return {};
 		return initializePatch(std::move(data), {});
 	}
 
