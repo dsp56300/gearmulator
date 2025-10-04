@@ -106,12 +106,20 @@ namespace jeJucePlugin
 
 		juceRmlUi::Menu menu;
 
-		if (pm->createSaveMenuEntries(menu, 0, "Patch Upper", 0) > 1)
-			menu.addSeparator();
-		if (pm->createSaveMenuEntries(menu, 1, "Patch Lower", 1) > 1)
-			menu.addSeparator();
+		juceRmlUi::Menu menuLower;
+		juceRmlUi::Menu menuUpper;
+		juceRmlUi::Menu menuPerformance;
 
-		pm->createSaveMenuEntries(menu, 0, "Performance", 2);
+		const auto numUpper = pm->createSaveMenuEntries(menuUpper, 0, "Patch Upper", 0);
+		const auto numLower = pm->createSaveMenuEntries(menuLower, 1, "Patch Lower", 1);
+		const auto numPerformance = pm->createSaveMenuEntries(menuPerformance, 0, "Patch Lower", 2);
+
+		if (numUpper)
+			menu.addSubMenu("Patch Upper", std::move(menuUpper));
+		if (numLower)
+			menu.addSubMenu("Patch Lower", std::move(menuLower));
+		if (numPerformance)
+			menu.addSubMenu("Performance", std::move(menuPerformance));
 
 		menu.runModal(_event);
 	}
