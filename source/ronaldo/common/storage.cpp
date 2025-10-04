@@ -45,13 +45,18 @@ namespace rLib
 		return it->second[_addr.back()];
 	}
 
-	bool Storage::read(std::vector<uint8_t>& _data, const Address4& _addr, const uint32_t _count) const
+	uint32_t Storage::read(std::vector<uint8_t>& _data, const Address4& _addr, const uint32_t _count) const
 	{
-		_data.reserve(_count);
+		_data.reserve(_data.size() + _count);
 		const auto linearAddr = toLinearAddress(_addr);
 		for (uint32_t i = 0; i < _count; ++i)
-			_data.push_back(read(fromLinearAddress(linearAddr + i)));
-		return true;
+		{
+			auto b = read(fromLinearAddress(linearAddr + i));
+			if (b == InvalidData)
+				return i;
+			_data.push_back(b);
+		}
+		return _count;
 	}
 
 	uint32_t Storage::toLinearAddress(const Address4 _addr)

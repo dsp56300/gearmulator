@@ -26,7 +26,7 @@ namespace rLib
 		bool write(const Address4& _addr, uint8_t _data);
 
 		uint8_t read(const Address4& _addr) const;
-		bool read(std::vector<uint8_t>& _data, const Address4& _addr, uint32_t _count) const;
+		uint32_t read(std::vector<uint8_t>& _data, const Address4& _addr, uint32_t _count) const;
 
 		static uint32_t toLinearAddress(Address4 _addr);
 		static Address4 fromLinearAddress(uint32_t _addr);

@@ -27,7 +27,14 @@ namespace jeLib
 
 	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		return false;
+		std::vector<synthLib::SMidiEvent> results;
+
+		if (!m_state.getState(results))
+			return false;
+
+		for (const auto& result : results)
+			_state.insert(_state.end(), result.sysex.begin(), result.sysex.end());
+		return true;
 	}
 
 	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
@@ -63,6 +70,7 @@ namespace jeLib
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
 		m_je8086->readMidiOut(_midiOut);
+		m_state.receive(_midiOut);
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
@@ -81,6 +89,7 @@ namespace jeLib
 				while (!m_midiIn.empty())
 				{
 					auto& e = m_midiIn.front();
+					m_state.receive(e);
 
 					if (e.offset > numSamples)
 						break;

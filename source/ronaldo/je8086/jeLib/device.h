@@ -3,6 +3,7 @@
 #include <deque>
 #include <memory>
 
+#include "state.h"
 #include "synthLib/device.h"
 
 namespace jeLib
@@ -20,7 +21,7 @@ namespace jeLib
 		Device& operator=(const Device&) = delete;
 		Device(Device&&) = delete;
 		Device& operator=(Device&&) = delete;
-		~Device();
+		~Device() override;
 
 		float getSamplerate() const override;
 		bool isValid() const override;
@@ -39,5 +40,6 @@ namespace jeLib
 
 		std::unique_ptr<Je8086> m_je8086;
 		std::deque<synthLib::SMidiEvent> m_midiIn;
+		State m_state;
 	};
 }

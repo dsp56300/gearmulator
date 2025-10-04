@@ -357,4 +357,101 @@ namespace jeLib
 		createFooter(dump);
 		return dump;
 	}
+
+	bool State::receive(const std::vector<synthLib::SMidiEvent>& _events)
+	{
+		bool result = false;
+
+		for (const auto& event : _events)
+		{
+			if (receive(event))
+				result = true;
+		}
+		return result;
+	}
+
+	bool State::receive(const synthLib::SMidiEvent& _event)
+	{
+		if (_event.sysex.empty())
+			return false;
+
+		auto addr = getAddress(_event.sysex);
+		auto area = getAddressArea(addr);
+
+		if (area != AddressArea::PerformanceTemp)
+			return false;
+
+		const auto addr4 = toAddress(addr);
+
+		constexpr auto firstDataOffset = std::size(g_sysexHeader) + 1 + std::tuple_size_v<decltype(addr4)>;
+
+		std::vector<uint8_t> dataToWrite;
+
+		dataToWrite.insert(dataToWrite.end(), _event.sysex.begin() + firstDataOffset, _event.sysex.end() - 2 /*checksum + eox*/);
+
+		m_tempPerformance.write(addr4, dataToWrite);
+
+		return true;
+	}
+
+	bool State::getState(std::vector<synthLib::SMidiEvent>& _results) const
+	{
+		if (rLib::Storage::InvalidData == m_tempPerformance.read(toAddress(static_cast<uint32_t>(AddressArea::PerformanceTemp))))
+			return false;
+
+		auto addDump = [&](const PerformanceData _data, const uint32_t _sizeRack, const uint32_t _sizeKeyboard)
+		{
+			auto addr = static_cast<uint32_t>(AddressArea::PerformanceTemp) | static_cast<uint32_t>(_data);
+			auto addr4 = toAddress(addr);
+
+			synthLib::SMidiEvent event(synthLib::MidiEventSource::Device);
+
+			event.sysex = createHeader(SysexByte::CommandIdDataSet1, SysexByte::DeviceIdDefault, addr4);
+
+			constexpr auto sizeLimit = static_cast<uint32_t>(Patch::DataLengthLimitPerDump);
+
+			auto size = std::min(sizeLimit, std::max(_sizeRack, _sizeKeyboard));
+
+			auto numRead = m_tempPerformance.read(event.sysex, addr4, size);
+			assert(numRead == _sizeRack || numRead == _sizeKeyboard || numRead == sizeLimit);
+
+			if (!numRead)
+				return;
+
+			createFooter(event.sysex);
+
+			_results.push_back(event);
+
+			if (numRead == sizeLimit && (_data == PerformanceData::PatchLower || _data == PerformanceData::PatchUpper))
+			{
+				// single dump size is limited to sizeLimit bytes. Request the second dump if needed
+
+				addr4[2] += sizeLimit >> 7;
+				addr4[3] += sizeLimit & 0x7f;
+
+				event.sysex = createHeader(SysexByte::CommandIdDataSet1, SysexByte::DeviceIdDefault, addr4);
+
+				size = std::max(_sizeRack, _sizeKeyboard) - sizeLimit;
+
+				numRead = m_tempPerformance.read(event.sysex, addr4, std::max(_sizeRack, _sizeKeyboard));
+				assert(numRead == size);
+
+				if (!numRead)
+					return;
+
+				createFooter(event.sysex);
+
+				_results.push_back(event);
+			}
+		};
+
+		addDump(PerformanceData::PerformanceCommon, static_cast<uint32_t>(PerformanceCommon::DataLengthRack), static_cast<uint32_t>(PerformanceCommon::DataLengthKeyboard)  );
+		addDump(PerformanceData::VoiceModulator   , static_cast<uint32_t>(VoiceModulator::DataLengthRack)   , static_cast<uint32_t>(VoiceModulator::DataLengthKeyboard)     );
+		addDump(PerformanceData::PartUpper        , static_cast<uint32_t>(Part::DataLengthRack)             , static_cast<uint32_t>(Part::DataLengthKeyboard)               );
+		addDump(PerformanceData::PartLower        , static_cast<uint32_t>(Part::DataLengthRack)             , static_cast<uint32_t>(Part::DataLengthKeyboard)               );
+		addDump(PerformanceData::PatchUpper       , static_cast<uint32_t>(Patch::DataLengthRack)            , static_cast<uint32_t>(Patch::DataLengthKeyboard)              );
+		addDump(PerformanceData::PatchLower       , static_cast<uint32_t>(Patch::DataLengthRack)            , static_cast<uint32_t>(Patch::DataLengthKeyboard)              );
+
+		return true;
+	}
 }

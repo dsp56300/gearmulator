@@ -190,7 +190,10 @@ namespace jeLib
 	    IndividualTriggerSourceChannel = 0x0000001F,        // 00h - 0Fh | 1 - 16
 	    IndividualTriggerSourceNote = 0x00000020,           // 00h - 80h | 0 - 127 as C-1 - G9, and 128 as ALL
 	    Tempo = 0x00000022,                                 // 14h - FAh | 20 - 250 [beat per minute]
-	    VocalUpperInputJackFrontRear = 0x00000024           // 00h - 01h | REAR, FRONT
+	    VocalUpperInputJackFrontRear = 0x00000024,          // 00h - 01h | REAR, FRONT
+
+		DataLengthKeyboard = 0x00000024,
+		DataLengthRack = 0x00000025,
 	};
 
 	enum class VoiceModulator : uint8_t
@@ -235,7 +238,10 @@ namespace jeLib
 	    VoiceModulatorDelayFeedback = 0x00000025,           // 00h - 7Fh | 0 - 127
 	    VoiceModulatorDelayLevel = 0x00000026,              // 00h - 7Fh | 0 - 127
 	    EnsembleSync = 0x00000027,                          // 00h - 16h | OFF, 1/16, 1/8(3), ..., 8MEASURES
-	    VoiceModulatorDelaySync = 0x00000028                // 00h - 0Ah | OFF, 1/16, 1/8(3), ..., 1/2
+	    VoiceModulatorDelaySync = 0x00000028,               // 00h - 0Ah | OFF, 1/16, 1/8(3), ..., 1/2
+
+		DataLengthKeyboard = 0,
+		DataLengthRack = 0x00000029,
 	};
 
 	enum class Part : uint8_t
@@ -247,7 +253,10 @@ namespace jeLib
 	    DelaySync = 0x00000004,                             // 00h - 0Ah | OFF, 1/16, 1/8(3), ..., 1/2
 	    LfoSync = 0x00000005,                               // 00h - 16h | OFF, 1/16, 1/8(3), ..., 8 MEAS
 	    ChorusSync = 0x00000006,                            // 00h - 17h | OFF, 1/16, 1/8(3), ..., 8 MEAS, LFO1
-	    PatchGroupNo = 0x00000007                           // 00h - 3Fh | Group 1 - Group 64 (**)
+	    PatchGroupNo = 0x00000007,                          // 00h - 3Fh | Group 1 - Group 64 (**)
+
+		DataLengthKeyboard = 0x00000007,
+		DataLengthRack = 0x00000008,
 	};
 
 	enum class Patch : uint16_t
@@ -420,7 +429,11 @@ namespace jeLib
 	    UnisonDetune = 0x00000174,                         // 00h - 32h | 0 - 50 [cent]
 	    PatchGain = 0x00000175,                            // 00h - 02h | 0dB, +6dB, +12dB
 	    ExternalTriggerSwitch = 0x00000176,                // 00h - 01h | OFF, ON
-	    ExternalTriggerDestination = 0x00000177            // 00h - 02h | FILTER, AMP, FILTER&AMP
+	    ExternalTriggerDestination = 0x00000177,           // 00h - 02h | FILTER, AMP, FILTER&AMP
+
+		DataLengthKeyboard = 239,
+		DataLengthRack = 248,
+		DataLengthLimitPerDump = 242						// aka 0x172 in 7 bit bytes
 	};
 
 	enum class SysexByte : uint8_t

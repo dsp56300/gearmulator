@@ -1,14 +1,17 @@
 #pragma once
 
 #include <cstdint>
+#include <iosfwd>
 #include <optional>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "jemiditypes.h"
 #include "common/storage.h"
 
 #include "jucePluginLib/patchdb/patchdbtypes.h"
+#include "synthLib/midiTypes.h"
 
 namespace jeLib
 {
@@ -62,5 +65,14 @@ namespace jeLib
 
 		static Dump createPerformanceRequest(AddressArea _area, UserPerformanceArea _performanceArea);
 		static Dump createSystemRequest();
+
+		bool receive(const std::vector<synthLib::SMidiEvent>& _events);
+		bool receive(const synthLib::SMidiEvent& _event);
+
+		bool getState(std::vector<synthLib::SMidiEvent>& _results) const;
+
+	private:
+		rLib::Storage m_tempPerformance;
+		std::map<uint32_t, Dump> m_stateDumps;
 	};
 }
