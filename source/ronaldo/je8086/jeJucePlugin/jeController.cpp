@@ -29,16 +29,14 @@ namespace jeJucePlugin
 	    });
 
 		Controller::onStateLoaded();
-
-		sendSystemRequest();
-		sendTempPerformanceRequest();
 	}
 
 	Controller::~Controller() = default;
 
 	void Controller::onStateLoaded()
 	{
-//		requestDump(je::SysexByte::SingleRequestBankEditBuffer, 0);	// single edit buffers A-D
+		sendSystemRequest();
+		sendTempPerformanceRequest();
 	}
 
 	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, const pluginLib::Parameter::Origin _origin)
