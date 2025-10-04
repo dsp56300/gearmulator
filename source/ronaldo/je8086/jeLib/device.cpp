@@ -2,6 +2,7 @@
 
 #include "je8086.h"
 #include "dsp56kEmu/audio.h"
+#include "synthLib/midiToSysex.h"
 
 namespace jeLib
 {
@@ -39,7 +40,23 @@ namespace jeLib
 
 	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		return false;
+		if (_state.empty())
+			return false;
+
+		std::vector<std::vector<uint8_t>> messages;
+		synthLib::MidiToSysex::splitMultipleSysex(messages, _state);
+
+		if (messages.empty())
+			return false;
+
+		for (auto message : messages)
+		{
+			synthLib::SMidiEvent e(synthLib::MidiEventSource::Host);
+			e.sysex = std::move(message);
+			m_midiIn.emplace_back(e);
+		}
+		
+		return true;
 	}
 
 	uint32_t Device::getChannelCountIn()
