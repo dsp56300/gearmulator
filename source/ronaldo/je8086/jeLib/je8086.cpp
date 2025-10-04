@@ -81,8 +81,8 @@ namespace jeLib
 
 		if (now > 12776184 && !((++ctr) & 0x3fff))
 		{
-			for (const auto& m : m_midiInEvents)
-				m_midiInRateLimiter.write(m);
+			for (auto& m : m_midiInEvents)
+				m_midiInRateLimiter.write(std::move(m));
 			m_midiInEvents.clear();
 		}
 

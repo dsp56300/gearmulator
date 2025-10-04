@@ -37,46 +37,12 @@ namespace synthLib
 		m_bytesPerSecond = 0.0f;
 	}
 
-	void MidiRateLimiter::write(const SMidiEvent& _event)
+	void MidiRateLimiter::write(SMidiEvent&& _event)
 	{
 		if (!_event.sysex.empty())
-		{
-			m_pendingBytes.insert(m_pendingBytes.end(), _event.sysex.begin(), _event.sysex.end());
-			return;
-		}
-
-		const auto len = MidiBufferParser::lengthFromStatusByte(_event.a);
-		/*
-		// we attempt to insert realtime events early, this can only work if there is no sysex message
-		// currently being sent and if no other realtime event is at the end of the queue
-		if (m_sendingSysex || m_pendingBytes.empty() || m_pendingBytes.back() != 0xf7)
-		{
-			if (len > 0) m_pendingBytes.push_back(_event.a);
-			if (len > 1) m_pendingBytes.push_back(_event.b);
-			if (len > 2) m_pendingBytes.push_back(_event.c);
-		}
+			m_pendingSysex.emplace_back(std::move(_event));
 		else
-		{
-			// insert in front of the next sysex
-			for (auto it = m_pendingBytes.begin(); it != m_pendingBytes.end(); ++it)
-			{
-				if (*it == 0xf0)
-				{
-					// found first sysex, insert before that
-					if (len > 2) it = m_pendingBytes.insert(it, _event.c);
-					if (len > 1) it = m_pendingBytes.insert(it, _event.b);
-					if (len > 0) it = m_pendingBytes.insert(it, _event.a);
-
-					return;
-				}
-			}
-
-			// no sysex start found, insert at end
-*/
-			if (len > 0) m_pendingBytes.push_back(_event.a);
-			if (len > 1) m_pendingBytes.push_back(_event.b);
-			if (len > 2) m_pendingBytes.push_back(_event.c);
-//		}
+			m_pendingRealtime.emplace_back(std::move(_event));
 	}
 
 	void MidiRateLimiter::processSample()
@@ -90,7 +56,31 @@ namespace synthLib
 		}
 
 		if (m_pendingBytes.empty())
-			return;
+		{
+			if (!m_pendingRealtime.empty())
+			{
+				auto e = std::move(m_pendingRealtime.front());
+				m_pendingRealtime.pop_front();
+
+				const auto len = MidiBufferParser::lengthFromStatusByte(e.a);
+
+				if (len > 0) m_pendingBytes.push_back(e.a);
+				if (len > 1) m_pendingBytes.push_back(e.b);
+				if (len > 2) m_pendingBytes.push_back(e.c);
+			}
+			else if (!m_pendingSysex.empty())
+			{
+				auto e = std::move(m_pendingSysex.front());
+				m_pendingSysex.pop_front();
+				m_pendingBytes.insert(m_pendingBytes.end(), e.sysex.begin(), e.sysex.end());
+
+				m_currentSysexLength = static_cast<uint32_t>(e.sysex.size());
+			}
+			else
+			{
+				return;
+			}
+		}
 
 		// if the next byte is a sysex start, we might need to pause first
 		auto b = m_pendingBytes.front();
@@ -139,10 +129,6 @@ namespace synthLib
 			if (m_currentSysexLength > m_sysexPauseLengthThreshold)
 				m_remainingSysexPause = m_sysexPause;
 			m_currentSysexLength = 0;
-		}
-		else if (m_sendingSysex)
-		{
-			++m_currentSysexLength;
 		}
 
 		m_writeCallback(b);

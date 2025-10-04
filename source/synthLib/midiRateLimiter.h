@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <deque>
 
+#include "midiTypes.h"
+
 namespace synthLib
 {
 	struct SMidiEvent;
@@ -22,7 +24,7 @@ namespace synthLib
 		void setDefaultRateLimit();
 		void disableRateLimit();
 
-		void write(const SMidiEvent& _event);
+		void write(SMidiEvent&& _event);
 
 		void processSample();
 
@@ -42,6 +44,9 @@ namespace synthLib
 		float m_remainingBytes = 0.0f;
 
 		std::deque<uint8_t> m_pendingBytes;
+		std::deque<SMidiEvent> m_pendingSysex;
+		std::deque<SMidiEvent> m_pendingRealtime;
+
 		bool m_sendingSysex = false;
 		float m_sysexPause = 0.0f;
 		float m_remainingSysexPause = 0.0f;
