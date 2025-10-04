@@ -5,6 +5,7 @@
 #include "jeController.h"
 #include "jeFocusedParameter.h"
 #include "jeLcd.h"
+#include "jePartSelect.h"
 #include "jePatchManager.h"
 
 #include "baseLib/filesystem.h"
@@ -61,6 +62,16 @@ namespace jeJucePlugin
 			m_focusedParameter.reset(new JeFocusedParameter(*this, *m_lcd));
 		else
 			m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
+
+		m_partSelect.reset(new PartSelect(*this));
+	}
+
+	Editor::~Editor()
+	{
+		m_partSelect.reset();
+		m_midiPorts.reset();
+		m_focusedParameter.reset();
+		m_lcd.reset();
 	}
 
 	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
@@ -73,12 +84,6 @@ namespace jeJucePlugin
 		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);
 
 		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
-	}
-
-	Editor::~Editor()
-	{
-		m_midiPorts.reset();
-		m_focusedParameter.reset();
 	}
 
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const

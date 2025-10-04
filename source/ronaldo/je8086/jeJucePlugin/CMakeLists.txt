@@ -7,6 +7,7 @@ set(SOURCES
 	jeEditor.cpp jeEditor.h
 	jeFocusedParameter.cpp jeFocusedParameter.h
 	jeLcd.cpp jeLcd.h
+	jePartSelect.cpp jePartSelect.h
 	jePatchManager.cpp jePatchManager.h
 	jePluginEditorState.cpp jePluginEditorState.h
 	jePluginProcessor.cpp jePluginProcessor.h
