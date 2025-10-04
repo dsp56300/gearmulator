@@ -351,18 +351,26 @@ namespace jeJucePlugin
 
 			if (isPatch)
 			{
-				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
-				LOG(localAddr);
+				auto sendPatch = [&](jeLib::PerformanceData _upperLower)
+				{
+					const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
+					LOG(localAddr);
 
-				const auto a = 
-					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) | 
-					static_cast<uint32_t>(jeLib::PerformanceData::PatchUpper) | 
-					localAddr;
+					const auto a = 
+						static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) | 
+						static_cast<uint32_t>(_upperLower) | 
+						localAddr;
 
-				jeLib::State::setAddress(s, a);
-				jeLib::State::calcChecksum(s);
+					jeLib::State::setAddress(s, a);
+					jeLib::State::calcChecksum(s);
 
-				sendSysEx(s);
+					sendSysEx(s);
+				};
+
+				if (isUpperSelected())
+					sendPatch(jeLib::PerformanceData::PatchUpper);
+				if (isLowerSelected())
+					sendPatch(jeLib::PerformanceData::PatchLower);
 			}
 			else
 			{
