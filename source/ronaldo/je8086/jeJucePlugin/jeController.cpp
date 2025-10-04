@@ -48,6 +48,7 @@ namespace jeJucePlugin
 			// performance parameter
 			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::PerformanceCommon>(desc.index), _value);
 			sendSysEx(msg);
+			m_state.receive(msg);
 		}
 		else if (desc.page == g_paramPagePart)
 		{
@@ -57,6 +58,7 @@ namespace jeJucePlugin
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Part>(desc.index), _value);
 
 			sendSysEx(msg);
+			m_state.receive(msg);
 		}
 		else if (desc.page == g_paramPagePatch || desc.page == g_paramPagePatch + 1)
 		{
@@ -68,6 +70,7 @@ namespace jeJucePlugin
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Patch>(index), _value);
 
 			sendSysEx(msg);
+			m_state.receive(msg);
 		}
 		else
 		{
