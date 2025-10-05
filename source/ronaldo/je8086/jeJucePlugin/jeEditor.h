@@ -36,7 +36,7 @@ namespace jeJucePlugin
 		
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
-		Controller& geJeController() const { return m_controller; }
+		Controller& getJeController() const { return m_controller; }
 
 	private:
 		void onBtWrite(Rml::Event& _event) const;

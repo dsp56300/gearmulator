@@ -62,7 +62,7 @@ namespace jeLib
 		PowerUpMode,					// Perform P:11, Last-Set
 		MidiSync,						// Off, On
 		LocalSwitch,					// Off, On
-		TxRxEditMode,					// Mode 1, Model 2
+		TxRxEditMode,					// Mode 1, Mode 2
 		TxRxEditSwitch,					// Off, On 
 		TxRxProgramChangeSwitch,		// Off, PC, Bank Sel + PC
 		RemoteControlChannel,			// 1 - 16, All, Off

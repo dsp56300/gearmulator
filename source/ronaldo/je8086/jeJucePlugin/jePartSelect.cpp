@@ -9,7 +9,7 @@ namespace jeJucePlugin
 {
 	PartSelect::PartSelect(Editor& _editor )
 	: m_editor(_editor)
-	, m_paramPanelSelect(_editor.geJeController().getParameter("PanelSelect", 0))
+	, m_paramPanelSelect(_editor.getJeController().getParameter("PanelSelect", 0))
 	{
 		m_partButtons[0] = m_editor.findChild<juceRmlUi::ElemButton>("partUpper");
 		m_partButtons[1] = m_editor.findChild<juceRmlUi::ElemButton>("partLower");

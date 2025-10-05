@@ -13,7 +13,7 @@ namespace jeJucePlugin
 	: jucePluginEditorLib::patchManager::PatchManager(_editor, _rootElement, DefaultGroupTypes)
 	, m_editor(_editor)
 	, m_processor(_editor.getProcessor())
-	, m_controller(_editor.geJeController())
+	, m_controller(_editor.getJeController())
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);

@@ -10,7 +10,7 @@ namespace jeJucePlugin
 {
 	JeLcd::JeLcd(Editor& _editor, Rml::Element* _parent) : Lcd(_parent, 16, 2)
 	{
-		auto& sr = _editor.geJeController().getSysexRemote();
+		auto& sr = _editor.getJeController().getSysexRemote();
 
 		m_onLcdCgDataChanged.set(sr.evLcdCgDataChanged, [this](const std::array<uint8_t, 64>& _data)
 		{

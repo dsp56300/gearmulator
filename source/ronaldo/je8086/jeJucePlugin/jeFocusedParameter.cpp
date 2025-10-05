@@ -7,7 +7,7 @@
 namespace jeJucePlugin
 {
 	JeFocusedParameter::JeFocusedParameter(Editor& _editor, JeLcd& _lcd)
-	: FocusedParameter(_editor.geJeController(), _editor)
+	: FocusedParameter(_editor.getJeController(), _editor)
 	, m_editor(_editor)
 	, m_lcd(_lcd)
 	{
