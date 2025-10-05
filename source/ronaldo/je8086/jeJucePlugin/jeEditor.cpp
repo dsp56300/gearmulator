@@ -2,6 +2,7 @@
 
 #include <juceRmlPlugin/skinConverter/skinConverterOptions.h>
 
+#include "jeAssign.h"
 #include "jeController.h"
 #include "jeFocusedParameter.h"
 #include "jeLcd.h"
@@ -69,10 +70,13 @@ namespace jeJucePlugin
 		{
 			onBtWrite(_event);
 		}, false);
+
+		m_assign.reset(new JeAssign(*this));
 	}
 
 	Editor::~Editor()
 	{
+		m_assign.reset();
 		m_partSelect.reset();
 		m_midiPorts.reset();
 		m_focusedParameter.reset();

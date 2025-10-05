@@ -230,8 +230,8 @@
 						<spacer style="width: 133dp"/>
 
 						<button class="btBlackLed" param="VelocitySwitch" id="VelocitySwitch" isToggle="1"/>
-						<button class="btBlackLed" param="ActiveIndicatorOfVelocityAssign" id="ActiveIndicatorOfVelocityAssign" isToggle="1"/>
-						<button class="btBlackLed" param="ActiveIndicatorOfControlAssign" id="ActiveIndicatorOfControlAssign" isToggle="1"/>
+						<button class="btBlackLed" id="ActiveIndicatorOfVelocityAssign" isToggle="1"/>
+						<button class="btBlackLed" id="ActiveIndicatorOfControlAssign" isToggle="1"/>
 					</div>
 					<div class="abs hlayout" style="left: 334dp; top: 81dp">
 						<knob class="knob" param="UnisonDetune" id="UnisonDetune"/>

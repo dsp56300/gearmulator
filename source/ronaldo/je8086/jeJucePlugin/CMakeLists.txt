@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 project(jeJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	jeAssign.cpp jeAssign.h
 	jeController.cpp jeController.h
 	jeEditor.cpp jeEditor.h
 	jeFocusedParameter.cpp jeFocusedParameter.h

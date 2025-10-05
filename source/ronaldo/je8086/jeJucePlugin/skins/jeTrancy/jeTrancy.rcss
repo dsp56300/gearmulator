@@ -403,3 +403,7 @@ button
 .pm-gridentry {
 	width: 11em;
 }
+
+:assignvelocity, :assigncontrol {
+	background-color: #1f84a099;
+}
