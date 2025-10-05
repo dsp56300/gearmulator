@@ -53,7 +53,7 @@ namespace jeJucePlugin
 		else if (desc.page == g_paramPagePart)
 		{
 			// part parameter
-			const auto lowerUpper = getCurrentPart() > 0 ? jeLib::PerformanceData::PartLower : jeLib::PerformanceData::PartUpper;
+			const auto lowerUpper = _parameter.getPart() > 0 ? jeLib::PerformanceData::PartLower : jeLib::PerformanceData::PartUpper;
 
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Part>(desc.index), _value);
 
@@ -65,7 +65,7 @@ namespace jeJucePlugin
 			// patch parameter
 			const auto index = desc.index | (desc.page * 0x100);
 
-			const auto lowerUpper = getCurrentPart() > 0 ? jeLib::PerformanceData::PatchLower : jeLib::PerformanceData::PatchUpper;
+			const auto lowerUpper = _parameter.getPart() > 0 ? jeLib::PerformanceData::PatchLower : jeLib::PerformanceData::PatchUpper;
 
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Patch>(index), _value);
 
@@ -83,7 +83,7 @@ namespace jeJucePlugin
 		{
 			if (_origin == pluginLib::Parameter::Origin::Ui || _origin == pluginLib::Parameter::Origin::Midi || _origin == pluginLib::Parameter::Origin::HostAutomation)
 			{
-				auto otherPart = static_cast<uint8_t>((getCurrentPart() + 1) & 1);
+				auto otherPart = static_cast<uint8_t>((_parameter.getPart() + 1) & 1);
 				auto* p = getParameter(_parameter.getParameterIndex(), otherPart);
 				p->setUnnormalizedValueNotifyingHost(_parameter.getUnnormalizedValue(), pluginLib::Parameter::Origin::Ui);
 			}
