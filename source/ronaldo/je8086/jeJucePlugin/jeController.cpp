@@ -337,7 +337,8 @@ namespace jeJucePlugin
 				sendChange(2);
 				break;
 			case jeLib::SystemParameter::MasterTune:
-				sendChange(32);	// 440Hz
+				sendChange(50);	// 440Hz
+				break;
 			case jeLib::PerformanceControlChannel:
 				sendChange(0x11);	// off
 				break;
