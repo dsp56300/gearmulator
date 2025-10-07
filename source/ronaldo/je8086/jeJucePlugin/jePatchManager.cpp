@@ -183,7 +183,7 @@ namespace jeJucePlugin
 			sameAddressPatches.back()[key].emplace_back(std::move(d));
 		}
 
-		for (const auto& p : sameAddressPatches)
+		for (auto& p : sameAddressPatches)
 		{
 			for (auto& [key, patches] : p)
 			{
