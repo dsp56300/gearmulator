@@ -401,6 +401,6 @@ button
 	background-color: #1f84a099;
 }
 button:active {
-	transform: scale(0.98);  
-	filter: brightness(0.8);  
+	transform: scale(0.98);
+	image-color: #ccc;
 }
