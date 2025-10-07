@@ -30,7 +30,7 @@ namespace jeJucePlugin
 		void sendParameterChange(jeLib::SystemParameter _parameter, int _value) const;
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
 
-		bool sendSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const;
+		bool sendSingle(const pluginLib::SysEx& _sysex, uint32_t _part) const;
 
 		void sendTempPerformanceRequest() const;
 		void sendPerformanceRequest(jeLib::AddressArea _area, jeLib::UserPerformanceArea _performance) const;

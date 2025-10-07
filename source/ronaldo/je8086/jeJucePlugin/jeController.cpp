@@ -364,17 +364,17 @@ namespace jeJucePlugin
 		}
 	}
 
-	bool Controller::sendSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const
+	bool Controller::sendSingle(const pluginLib::SysEx& _sysex, uint32_t/* _part*/) const
 	{
 		// patches consist of multiple sysex messages, split them up again
 		std::vector<std::vector<uint8_t>> sysex;
-		synthLib::MidiToSysex::splitMultipleSysex(sysex, _patch->sysex);
+		synthLib::MidiToSysex::splitMultipleSysex(sysex, _sysex);
 
 		if (sysex.empty())
 			return false;
 
 		// is this a performance or a patch?
-		const auto area = jeLib::State::getAddressArea(_patch->sysex);
+		const auto area = jeLib::State::getAddressArea(sysex.front());
 
 		const auto isPerformance = area == jeLib::AddressArea::UserPerformance;
 		const auto isPatch = area == jeLib::AddressArea::UserPatch;

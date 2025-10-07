@@ -4,8 +4,11 @@
 
 #include "jeController.h"
 #include "jeLib/state.h"
+#include "jucePluginLib/filetype.h"
 
 #include "juce_cryptography/juce_cryptography.h"
+
+#include "synthLib/midiToSysex.h"
 
 namespace jeJucePlugin
 {
@@ -92,7 +95,36 @@ namespace jeJucePlugin
 
 	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const
 	{
-		return {};
+		std::vector<pluginLib::SysEx> dumps;
+		synthLib::MidiToSysex::splitMultipleSysex(dumps, _patch->sysex);
+
+		if (dumps.empty())
+			return _patch->sysex;
+
+		// apply mods to the first dump only, the rest should be identical
+		auto& s = dumps.front();
+
+		const auto addr = jeLib::State::getAddress(s);
+		const auto area = jeLib::State::getAddressArea(addr);
+
+		if (area != jeLib::AddressArea::UserPatch && area != jeLib::AddressArea::UserPerformance)
+			return _patch->sysex;
+
+		auto bank = _patch->program / 64;
+		const auto program = _patch->program - bank * 64;
+		bank += _patch->bank;
+
+		jeLib::State::setBankNumber(s, static_cast<uint8_t>(bank));
+		jeLib::State::setProgramNumber(s, static_cast<uint8_t>(program));
+		jeLib::State::setName(s, _patch->getName());
+
+		// recalculate checksum
+		jeLib::State::updateChecksum(s);
+
+		auto result = s;
+		for (size_t i=1; i<dumps.size(); ++i)
+			result.insert(result.end(), dumps[i].begin(), dumps[i].end());
+		return result;
 	}
 
 	uint32_t PatchManager::getCurrentPart() const
@@ -102,7 +134,7 @@ namespace jeJucePlugin
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
 	{
-		return m_controller.sendSingle(_patch, _part);
+		return m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), _part);
 	}
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
