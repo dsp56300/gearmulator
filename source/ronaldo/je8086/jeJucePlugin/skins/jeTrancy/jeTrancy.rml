@@ -244,12 +244,12 @@
 				<div class="patchNameText" data-model="part1" id="patchNameTextUpper" style="left: 808dp; top: 128dp;"/>
 				
 				<!-- Panel 1 MIDI CH --> 
-				<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1075dp; top: 50dp; width: 110dp; height: 45dp; line-height: 45dp;">
+				<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1075dp; top: 50dp; width: 110dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>			
 
 				<!-- Panel 2 MIDI CH --> 
-				<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1075dp; top: 117dp; width: 110dp; height: 45dp; line-height: 45dp;">
+				<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1075dp; top: 117dp; width: 110dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>					
 				
@@ -364,12 +364,12 @@
 			<div class="patchNameText" data-model="part1" id="patchNameTextUpper" style="left: 845dp; top: 182dp;"/>
 			
 			<!-- Panel 1 MIDI CH --> 
-			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1112dp; top: 103dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1112dp; top: 103dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>			
 
 			<!-- Panel 2 MIDI CH --> 
-			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1112dp; top: 172dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1112dp; top: 172dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>	
 			
