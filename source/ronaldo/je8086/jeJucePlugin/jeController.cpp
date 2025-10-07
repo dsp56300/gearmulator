@@ -410,7 +410,7 @@ namespace jeJucePlugin
 			}
 			else
 			{
-				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPerformanceArea::BlockMask);
+				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::PerformanceData::BlockMask);
 				LOG(localAddr);
 
 				const auto a = 

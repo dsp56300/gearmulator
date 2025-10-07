@@ -152,6 +152,8 @@ namespace jeLib
 		PartLower         = 0x1100,
 		PatchUpper        = 0x4000,
 		PatchLower        = 0x4200,
+
+		BlockMask         = 0xff00,
 	};
 
 	enum class PerformanceCommon : uint8_t
