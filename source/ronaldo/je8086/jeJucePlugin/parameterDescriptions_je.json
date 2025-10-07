@@ -189,7 +189,7 @@
 		
 		{"page":2, "index":0, "name":"PatchBank", "min":0, "max":3, "default":0, "isPublic":false},
 		{"page":2, "index":1, "name":"PatchNo", "min":0, "max":127, "default":0, "isPublic":false},
-		{"page":2, "index":2, "name":"MidiChannel", "min":0, "max":127, "default":0, "isPublic":false},
+		{"page":2, "index":2, "name":"MidiChannel", "min":0, "max":16, "default":0, "toText":"midiChannel", "isPublic":true},
 		{"page":2, "index":3, "name":"PartTranspose", "min":0, "max":30, "default":0},
 		{"page":2, "index":4, "name":"DelaySync", "min":0, "max":10, "toText":"delaySync", "default":0},
 		{"page":2, "index":5, "name":"LFO1Sync", "min":0, "max":22, "toText":"lFO1Sync", "default":0},	
