@@ -1,6 +1,7 @@
 #include "device.h"
 
 #include "je8086.h"
+#include "jeThread.h"
 #include "dsp56kEmu/audio.h"
 #include "synthLib/midiToSysex.h"
 
@@ -9,10 +10,12 @@ namespace jeLib
 	Device::Device(const synthLib::DeviceCreateParams& _params) : synthLib::Device(_params)
 	{
 		m_je8086.reset(new Je8086(_params.romData, _params.homePath + "/roms/ram_dump.bin"));
+		m_thread.reset(new JeThread(*m_je8086));
 	}
 
 	Device::~Device()
 	{
+		m_thread.reset();
 		m_je8086.reset();
 	}
 
@@ -90,45 +93,20 @@ namespace jeLib
 		m_state.receive(_midiOut);
 	}
 
-	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
+	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _samples)
 	{
-		auto& sampleBuffer = m_je8086->getSampleBuffer();
+		m_thread->processSamples(static_cast<uint32_t>(_samples), getExtraLatencySamples(), m_midiIn, m_midiOut);
+		m_midiIn.clear();
 
-		while (true)
-		{
-			const auto numSamples = sampleBuffer.size();
-
-			if (numSamples >= _samples)
-				break;
-
-			if (!m_midiIn.empty())
-			{
-				while (!m_midiIn.empty())
-				{
-					auto& e = m_midiIn.front();
-					m_state.receive(e);
-
-					if (e.offset > numSamples)
-						break;
-
-					m_je8086->addMidiEvent(e);
-					m_midiIn.pop_front();
-				}
-			}
-
-			m_je8086->step();
-		}
+		auto& sampleBuffer = m_thread->getSampleBuffer();
 
 		for (size_t i=0; i<_samples; ++i)
 		{
-			_outputs[0][i] = dsp56k::dsp2sample<float>(sampleBuffer[i].first);
-			_outputs[1][i] = dsp56k::dsp2sample<float>(sampleBuffer[i].second);
+			const auto s = sampleBuffer.pop_front();
+
+			_outputs[0][i] = dsp56k::dsp2sample<float>(s.first);
+			_outputs[1][i] = dsp56k::dsp2sample<float>(s.second);
 		}
-
-		m_je8086->clearSampleBuffer();
-
-		for (auto & event : m_midiIn)
-			event.offset -= static_cast<uint32_t>(_samples);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)

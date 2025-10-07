@@ -4,10 +4,12 @@
 #include <memory>
 
 #include "state.h"
+
 #include "synthLib/device.h"
 
 namespace jeLib
 {
+	class JeThread;
 	class Je8086;
 }
 
@@ -39,7 +41,11 @@ namespace jeLib
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 
 		std::unique_ptr<Je8086> m_je8086;
-		std::deque<synthLib::SMidiEvent> m_midiIn;
+		std::unique_ptr<JeThread> m_thread;
+
+		std::vector<synthLib::SMidiEvent> m_midiIn;
+		std::vector<synthLib::SMidiEvent> m_midiOut;
+
 		State m_state;
 	};
 }
