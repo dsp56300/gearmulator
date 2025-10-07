@@ -144,9 +144,7 @@ namespace jeJucePlugin
 					parseSystemParameters(_sysex);
 					break;
 				case jeLib::SystemArea::PatternSetup:
-					break;
 				case jeLib::SystemArea::MotionSetup:
-					break;
 				case jeLib::SystemArea::TxRxSetting:
 					break;
 				}
@@ -309,7 +307,7 @@ namespace jeJucePlugin
 		}
 	}
 
-	void Controller::parseSystemParameters(const pluginLib::SysEx& _sysex)
+	void Controller::parseSystemParameters(const pluginLib::SysEx& _sysex) const
 	{
 		// upon receiving the system parameters, we adjust them to our needs if they don't match
 

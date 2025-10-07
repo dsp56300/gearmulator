@@ -48,7 +48,7 @@ namespace jeJucePlugin
 		void parsePerformanceCommon(const pluginLib::SysEx& _sysex) const;
 		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part) const;
 		void parsePart(const pluginLib::SysEx& _sysex, uint8_t _part) const;
-		void parseSystemParameters(const pluginLib::SysEx& _sysex);
+		void parseSystemParameters(const pluginLib::SysEx& _sysex) const;
 
 		jeLib::SysexRemoteControl m_sysexRemote;
 		jeLib::State m_state;
