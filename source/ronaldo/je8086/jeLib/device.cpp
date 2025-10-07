@@ -56,6 +56,11 @@ namespace jeLib
 		{
 			synthLib::SMidiEvent e(synthLib::MidiEventSource::Host);
 			e.sysex = std::move(message);
+
+			// let the state receive it directly, the reason is that a frozen plugin is never processed and if the DSP
+			// is never processed, the state will be lost
+			m_state.receive(e.sysex);
+
 			m_midiIn.emplace_back(e);
 		}
 		
@@ -112,6 +117,7 @@ namespace jeLib
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		m_midiIn.emplace_back(_ev);
+		m_state.receive(_ev);
 		return true;
 	}
 }
