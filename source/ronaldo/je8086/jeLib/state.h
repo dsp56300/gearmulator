@@ -32,8 +32,11 @@ namespace jeLib
 
 		static uint32_t getBankNumber(Address _addr);
 		static uint32_t getProgramNumber(Address _addr);
+		static bool setBankNumber(Dump& _dump, uint8_t _bank);
+		static bool setProgramNumber(Dump& _dump, uint8_t _bank);
 
 		static std::optional<std::string> getName(const Dump& _dump);
+		static bool setName(Dump& _dump, const std::string& _name);
 
 		static bool is14BitData(Patch _param);
 		static bool is14BitData(Part _param);

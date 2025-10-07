@@ -8,6 +8,9 @@ namespace jeLib
 {
 	namespace
 	{
+		constexpr size_t g_nameStart = 10;
+		constexpr size_t g_nameSize = 16;
+
 		bool match(const uint8_t _byte, SysexByte _sysexByte)
 		{
 			return _byte == static_cast<uint8_t>(_sysexByte);
@@ -107,29 +110,81 @@ namespace jeLib
 		}
 	}
 
+	bool State::setBankNumber(Dump& _dump, uint8_t _bank)
+	{
+		const auto area = getAddressArea(_dump);
+
+		if (area != AddressArea::UserPatch)
+			return false;
+
+		auto addr = getAddress(_dump);
+
+		addr &= ~static_cast<uint32_t>(0x00ff0000);
+		addr |= (static_cast<uint32_t>(_bank) << 16) & 0x00ff0000;
+
+		return setAddress(_dump, addr);
+	}
+
+	bool State::setProgramNumber(Dump& _dump, uint8_t _bank)
+	{
+		const auto area = getAddressArea(_dump);
+
+		auto addr = getAddress(_dump);
+
+		switch (area)
+		{
+			case AddressArea::UserPerformance:
+				addr &= ~static_cast<uint32_t>(0x00ff0000);
+				addr |= (static_cast<uint32_t>(_bank) << 16) & 0x00ff0000;
+				return setAddress(_dump, addr);
+			case AddressArea::UserPatch:
+				addr &= ~static_cast<uint32_t>(0xff00);
+				addr |= (static_cast<uint32_t>(_bank) << 9) & 0xff00;
+				return setAddress(_dump, addr);
+			default:
+				return false;
+		}
+	}
+
 	std::optional<std::string> State::getName(const Dump& _dump)
 	{
 		const auto area = getAddressArea(_dump);
 
-		constexpr size_t start = 10;
-		constexpr size_t size = 16;
-
 		if (area != AddressArea::UserPerformance && area != AddressArea::UserPatch)
 			return {};
 
-		if (_dump.size() < start + size)
+		if (_dump.size() < g_nameStart + g_nameSize)
 			return {};
 
 		std::string name;
-		name.reserve(size);
+		name.reserve(g_nameSize);
 
-		for (size_t i = 0; i < size; ++i)
+		for (size_t i = 0; i < g_nameSize; ++i)
 		{
-			const auto c = static_cast<char>(_dump[start + i]);
+			const auto c = static_cast<char>(_dump[g_nameStart + i]);
 			name.push_back(c);
 		}
 
 		return name;
+	}
+
+	bool State::setName(Dump& _dump, const std::string& _name)
+	{
+		const auto area = getAddressArea(_dump);
+
+		if (area != AddressArea::UserPerformance && area != AddressArea::UserPatch)
+			return false;
+
+		if (_dump.size() < g_nameStart + g_nameSize)
+			return false;
+		for (size_t i = 0; i < g_nameSize; ++i)
+		{
+			char c = (i < _name.size()) ? _name[i] : ' ';
+			if (c < 32 || c > 126)
+				c = ' ';
+			_dump[g_nameStart + i] = static_cast<uint8_t>(c);
+		}
+		return true;
 	}
 
 	bool State::is14BitData(const Patch _param)
