@@ -4,6 +4,7 @@
 #include "jeEditor.h"
 
 #include "juceRmlUi/rmlElemButton.h"
+#include "juceRmlUi/rmlInplaceEditor.h"
 
 namespace jeJucePlugin
 {
@@ -34,7 +35,17 @@ namespace jeJucePlugin
 
 			for (size_t i=0; i<m_patchNames[p].size(); ++i)
 			{
-				// TODO: inplace editor
+				auto nameElem = m_patchNames[p][i];
+				auto type = p == 0 ? PatchType::PartUpper : PatchType::PartLower;
+				juceRmlUi::EventListener::Add(nameElem, Rml::EventId::Dblclick, [this, type](Rml::Event& _event)
+				{
+					_event.StopPropagation();
+					new juceRmlUi::InplaceEditor(_event.GetTargetElement(), m_editor.getJeController().getPatchName(type),
+					[this, type](const std::string& _newName)
+					{
+						m_editor.getJeController().changePatchName(type, _newName);
+					});
+				});
 			}
 		}
 

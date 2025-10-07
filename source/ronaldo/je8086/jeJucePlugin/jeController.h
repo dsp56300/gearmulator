@@ -47,6 +47,10 @@ namespace jeJucePlugin
 
 		bool requestPatchForPart(std::vector<uint8_t>& _data, uint32_t _part, uint64_t _userData) const;
 
+		const std::string& getPatchName(PatchType _type) const { return m_patchNames[static_cast<size_t>(_type)]; }
+
+		bool changePatchName(PatchType _type, const std::string& _newName) const;
+
 	private:
 		void parsePerformanceCommon(const pluginLib::SysEx& _sysex);
 		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part);

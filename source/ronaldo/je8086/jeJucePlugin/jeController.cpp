@@ -206,6 +206,23 @@ namespace jeJucePlugin
 		return true;
 	}
 
+	bool Controller::changePatchName(PatchType _type, const std::string& _newName) const
+	{
+		if (getPatchName(_type) == _newName)
+			return false;
+
+		const auto part = _type == PatchType::PartUpper ? 0 : 1;
+
+		std::vector<uint8_t> data;
+		if (!requestPatchForPart(data, part, part))
+			return false;
+
+		if (!jeLib::State::setName(data, _newName))
+			return false;
+
+		return sendSingle(data, part);
+	}
+
 	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex)
 	{
 		const auto address = jeLib::State::getAddress(_sysex);
@@ -372,7 +389,7 @@ namespace jeJucePlugin
 		}
 	}
 
-	bool Controller::sendSingle(const pluginLib::SysEx& _sysex, uint32_t/* _part*/) const
+	bool Controller::sendSingle(const pluginLib::SysEx& _sysex, uint32_t _part) const
 	{
 		// patches consist of multiple sysex messages, split them up again
 		std::vector<std::vector<uint8_t>> sysex;
@@ -413,10 +430,7 @@ namespace jeJucePlugin
 					sendSysEx(s);
 				};
 
-				if (isUpperSelected())
-					sendPatch(jeLib::PerformanceData::PatchUpper);
-				if (isLowerSelected())
-					sendPatch(jeLib::PerformanceData::PatchLower);
+				sendPatch(_part == 0 ? jeLib::PerformanceData::PatchUpper : jeLib::PerformanceData::PatchLower);
 			}
 			else
 			{
