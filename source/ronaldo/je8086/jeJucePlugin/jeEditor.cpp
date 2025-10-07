@@ -15,6 +15,7 @@
 
 #include "jucePluginEditorLib/focusedParameter.h"
 #include "jucePluginEditorLib/midiPorts.h"
+#include "jucePluginEditorLib/pluginDataModel.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 
 #include "juceRmlUi/rmlElemComboBox.h"
@@ -72,6 +73,14 @@ namespace jeJucePlugin
 		}, false);
 
 		m_assign.reset(new JeAssign(*this));
+	}
+
+	void Editor::initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model)
+	{
+		jucePluginEditorLib::Editor::initPluginDataModel(_model);
+
+		// TODO: depends on ROM
+		_model.set("deviceModel", "jp8000");
 	}
 
 	Editor::~Editor()

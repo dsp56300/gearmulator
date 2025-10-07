@@ -281,26 +281,17 @@
 					<knob class="knob" param="PartTranspose"/>
 				</div>	
 
-				<img id="jp8000" class="jucePos" data-model="plugin" src="grid.png" style="left: 380dp; top: 230dp; width: 800dp; height: 200dp;"/>
-				
-			
-				<!-- TODO
-				<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8000'" data-model="plugin" src="grid.png" style="left: 360dp; top: 215dp; width: 846dp; height: 226dp;"/>
-				
-				<img id="jp8080" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" src="grid.png" style="left: 360dp; top: 212dp; width: 844dp; height: 241dp;"/>
-				-->	
+				<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8000'" data-model="plugin" src="grid.png" style="left: 380dp; top: 230dp; width: 800dp; height: 200dp;"/>		
+				<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" src="8080.png" style="left: 360dp; top: 215dp; width: 846dp; height: 226dp;"/>
 					
 				<!-- bottom unision, unision knobs -->
-				<!-- TODO
-				<div class="abs hlayout" style="left: 406dp; top: 304dp; gap: 49dp;">
+				<div data-class-opacityZero="deviceModel!='jp8080'" data-model="plugin" class="abs hlayout" style="left: 406dp; top: 304dp; gap: 49dp;">
 					<button class="btBlackLed" param="UnisonSwitch" id="UnisonSwitch" isToggle="1"/>
 					<knob class="knob" param="UnisonDetune" id="UnisonDetune"/>					
 				</div>					
-				-->	
 					
 				<!-- ext input -->
-				<!-- TODO
-				<div class="abs" style="left: 592dp; top:245dp;">
+				<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" class="abs" style="left: 592dp; top:245dp;">
 					<knob class="abs knob" style="left: 134dp; top: 59dp;">
 						<button class="ledBlue" style="left: 20dp"/>
 					</knob>
@@ -309,8 +300,7 @@
 					</knob>
 					<button class="ledRed2" style="top: 50dp; width: 115dp; left: 483dp"/>
 					<button class="ledRed2" style="top: 87dp; width: 115dp; left: 483dp"/>
-				</div>	
-				-->
+				</div>
 
 				<!-- Key Mode / Voice Assign -->
 				<div class="abs" style="left: 1984dp; top:15dp; width: 440dp; height: 100%;">

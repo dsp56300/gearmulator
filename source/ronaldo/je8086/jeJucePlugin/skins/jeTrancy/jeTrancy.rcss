@@ -404,3 +404,7 @@ button:active {
 	transform: scale(0.98);
 	image-color: #ccc;
 }
+
+.opacityZero {
+	opacity: 0;
+}

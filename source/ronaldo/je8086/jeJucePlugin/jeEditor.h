@@ -31,6 +31,8 @@ namespace jeJucePlugin
 
 		void create() override;
 
+		void initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model) override;
+
 		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
