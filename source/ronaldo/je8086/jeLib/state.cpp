@@ -201,6 +201,14 @@ namespace jeLib
 		return checksum;
 	}
 
+	bool State::updateChecksum(Dump& _dump)
+	{
+		if (_dump.empty() || _dump.back() != 0xf7)
+			return false;
+		_dump[_dump.size() - 2] = calcChecksum(_dump);
+		return true;
+	}
+
 	State::Dump& State::createFooter(Dump& _dump)
 	{
 		assert(!_dump.empty());

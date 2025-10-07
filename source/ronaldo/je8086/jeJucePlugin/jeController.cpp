@@ -400,7 +400,7 @@ namespace jeJucePlugin
 						localAddr;
 
 					jeLib::State::setAddress(s, a);
-					jeLib::State::calcChecksum(s);
+					jeLib::State::updateChecksum(s);
 
 					sendSysEx(s);
 				};
@@ -420,7 +420,7 @@ namespace jeJucePlugin
 					localAddr;
 
 				jeLib::State::setAddress(s, a);
-				jeLib::State::calcChecksum(s);
+				jeLib::State::updateChecksum(s);
 
 				sendSysEx(s);
 			}

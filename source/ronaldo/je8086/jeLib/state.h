@@ -41,6 +41,7 @@ namespace jeLib
 
 		static Dump createHeader(SysexByte _command, SysexByte _deviceId, const rLib::Storage::Address4& _address);
 		static uint8_t calcChecksum(const Dump& _dump);
+		static bool updateChecksum(Dump& _dump);
 		static Dump& createFooter(Dump& _dump);
 
 		static rLib::Storage::Address4 toAddress(uint32_t _addr);
