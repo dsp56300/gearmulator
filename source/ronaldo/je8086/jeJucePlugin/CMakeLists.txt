@@ -12,6 +12,7 @@ set(SOURCES
 	jePatchManager.cpp jePatchManager.h
 	jePluginEditorState.cpp jePluginEditorState.h
 	jePluginProcessor.cpp jePluginProcessor.h
+	jeTypes.h
 	parameterDescriptions_je.json
 
 	skins/jeTrancy/jeTrancy.rml

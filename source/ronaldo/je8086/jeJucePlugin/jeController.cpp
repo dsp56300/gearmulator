@@ -206,7 +206,7 @@ namespace jeJucePlugin
 		return true;
 	}
 
-	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex) const
+	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex)
 	{
 		const auto address = jeLib::State::getAddress(_sysex);
 
@@ -241,13 +241,23 @@ namespace jeJucePlugin
 
 			param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 		}
+
+		if (auto name = jeLib::State::getName(_sysex))
+			setPatchName(PatchType::Performance, *name);
 	}
 
-	void Controller::parsePatch(const pluginLib::SysEx& _sysex, const uint8_t _part) const
+	void Controller::parsePatch(const pluginLib::SysEx& _sysex, const uint8_t _part)
 	{
 		const auto address = jeLib::State::getAddress(_sysex);
 
 		uint32_t addr = address & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
+
+		// might be a partial patch, only set the name if we are at the start
+		if (addr == 0)
+		{
+			if (const auto name = jeLib::State::getName(_sysex))
+				setPatchName(_part == 0 ? PatchType::PartUpper : PatchType::PartLower, *name);
+		}
 
 		for (size_t i=g_dataStartIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
 		{
@@ -442,5 +452,17 @@ namespace jeJucePlugin
 	void Controller::sendSystemRequest() const
 	{
 		sendSysEx(jeLib::State::createSystemRequest());
+	}
+
+	void Controller::setPatchName(PatchType _type, const std::string& _name)
+	{
+		auto& currentName = m_patchNames[static_cast<size_t>(_type)];
+
+		if (currentName == _name)
+			return;
+
+		currentName = _name;
+
+		evPatchNameChanged.retain(_type, _name);
 	}
 }

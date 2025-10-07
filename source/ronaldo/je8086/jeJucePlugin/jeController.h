@@ -1,6 +1,7 @@
 #pragma once
 
 #include "jeLcd.h"
+#include "jeTypes.h"
 #include "jeLib/jemiditypes.h"
 #include "jeLib/state.h"
 
@@ -16,6 +17,8 @@ namespace jeJucePlugin
 	class Controller : public pluginLib::Controller
 	{
 	public:
+		baseLib::Event<PatchType, std::string> evPatchNameChanged;
+
 		Controller(AudioPluginAudioProcessor&);
 		~Controller() override;
 
@@ -45,12 +48,16 @@ namespace jeJucePlugin
 		bool requestPatchForPart(std::vector<uint8_t>& _data, uint32_t _part, uint64_t _userData) const;
 
 	private:
-		void parsePerformanceCommon(const pluginLib::SysEx& _sysex) const;
-		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part) const;
+		void parsePerformanceCommon(const pluginLib::SysEx& _sysex);
+		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part);
 		void parsePart(const pluginLib::SysEx& _sysex, uint8_t _part) const;
 		void parseSystemParameters(const pluginLib::SysEx& _sysex) const;
 
+		void setPatchName(PatchType _type, const std::string& _name);
+
 		jeLib::SysexRemoteControl m_sysexRemote;
 		jeLib::State m_state;
+
+		std::array<std::string, static_cast<size_t>(PatchType::Count)> m_patchNames;
 	};
 }

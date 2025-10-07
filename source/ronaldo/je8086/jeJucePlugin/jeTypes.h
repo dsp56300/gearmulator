@@ -1,0 +1,15 @@
+#pragma once
+
+#include <cstdint>
+
+namespace jeJucePlugin
+{
+	enum class PatchType : uint8_t
+	{
+		PartUpper,
+		PartLower,
+		Performance,
+
+		Count
+	};
+}
