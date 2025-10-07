@@ -63,24 +63,18 @@
 
 @spritesheet tab_main
 {
-	tab_main_off: 0px 0px 201px 76px;
-	tab_main_on:  0px 76px 201px 76px;
+	tab_main_off: 0px 0px 263px 73px;
+	tab_main_on:  0px 73px 263px 73px;
 	src: tab_1_main.png;
 }
 
 @spritesheet tab_browser
 {
-	tab_browser_off: 0px 0px 201px 76px;
-	tab_browser_on:  0px 76px 201px 76px;
+	tab_browser_off: 0px 0px 263px 73px;
+	tab_browser_on:  0px 73px 263px 73px;
 	src: tab_2_browser.png;
 }
 
-@spritesheet tab_perf
-{
-	tab_perf_off: 0px 0px 201px 76px;
-	tab_perf_on:  0px 76px 201px 76px;
-	src: tab_3_perf.png;
-}
 
 body
 {
@@ -112,9 +106,9 @@ button
 
 .btTab
 {
-	width: 201dp;
-	height: 76dp;
-	margin: 0dp -18dp 0dp -22dp;
+	width: 263dp;
+	height: 73dp;
+	margin: 0dp 0dp -10dp -22dp;
 }
 
 .btTabMain
@@ -135,16 +129,6 @@ button
 .btTabPatchManager:hover, .btTabPatchManager:checked
 {
 	decorator: image(tab_browser_on fill);
-}
-
-.btTabPerf
-{
-	decorator: image(tab_perf_off fill);
-}
-
-.btTabPerf:hover, .btTabPerf:checked
-{
-	decorator: image(tab_perf_on fill);
 }
 
 .btBlackLed
@@ -211,11 +195,11 @@ button
 {
 	position: absolute;
 	display: flex;
-	width: 523dp;
-	height: 76dp;
-	left: 175dp;
-	top: 145dp;
-	gap: 12dp;
+	width: 500dp;
+	height: 60dp;
+	left: 189dp;
+	top: 150dp;
+	gap: 22dp;
 }
 
 .knob
@@ -382,6 +366,15 @@ button
 	text-align: center;
 	text-decoration: underline;
 }
+.patchNameText
+{
+	position: absolute;
+	font-size: 26dp;
+	vertical-align: bottom;
+	height: 100%;
+	line-height: 100%;
+	color: #ff6600ff;	
+}
 
 /* Keyframes for a little left-right wiggle */
 @keyframes wiggle {
@@ -406,4 +399,8 @@ button
 
 :assignvelocity, :assigncontrol {
 	background-color: #1f84a099;
+}
+button:active {
+	transform: scale(0.98);  
+	filter: brightness(0.8);  
 }
