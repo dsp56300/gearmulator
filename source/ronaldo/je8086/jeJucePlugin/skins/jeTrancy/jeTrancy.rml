@@ -240,8 +240,8 @@
 				<button class="abs btWhiteLed" style="left: 710dp; top: 48dp;" id="partLower" isToggle="1"/>
 				<button class="abs btWhiteLed" style="left: 710dp; top: 116dp;" id="partUpper" isToggle="1"/>
 				
-				<div class="patchNameText" data-model="part0" id="patchNameTextLower" style="left: 808dp; top: 60dp;">Patchname 1</div>
-				<div class="patchNameText" data-model="part1" id="patchNameTextUpper" style="left: 808dp; top: 128dp;">Patchname 2</div>
+				<div class="patchNameText" data-model="part0" id="patchNameTextLower" style="left: 808dp; top: 60dp;"/>
+				<div class="patchNameText" data-model="part1" id="patchNameTextUpper" style="left: 808dp; top: 128dp;"/>
 				
 				<!-- Panel 1 MIDI CH --> 
 				<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" style="left: 1075dp; top: 50dp; width: 110dp; height: 45dp; line-height: 45dp;">
@@ -370,8 +370,8 @@
 			<button class="abs btWhiteLed" style="left: 751dp; top: 103dp;" id="partLower" isToggle="1"/>
 			<button class="abs btWhiteLed" style="left: 751dp; top: 170dp;" id="partUpper" isToggle="1"/>
 			
-			<div class="patchNameText" data-model="part0" id="patchNameTextLower" style="left: 845dp; top: 115dp;">Patchname 1</div>
-			<div class="patchNameText" data-model="part1" id="patchNameTextUpper" style="left: 845dp; top: 182dp;">Patchname 2</div>
+			<div class="patchNameText" data-model="part0" id="patchNameTextLower" style="left: 845dp; top: 115dp;"/>
+			<div class="patchNameText" data-model="part1" id="patchNameTextUpper" style="left: 845dp; top: 182dp;"/>
 			
 			<!-- Panel 1 MIDI CH --> 
 			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" style="left: 1112dp; top: 103dp; width: 110dp; height: 45dp; line-height: 45dp;">
