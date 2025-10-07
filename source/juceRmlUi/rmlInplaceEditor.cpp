@@ -15,7 +15,10 @@ namespace juceRmlUi
 	: m_initialValue(_initialValue)
 	, m_changeCallback(std::move(_changeCallback))
 	{
-		_parent->SetProperty(Rml::PropertyId::Position, Rml::Style::Position::Relative);
+		auto parentPos = _parent->GetProperty<Rml::Style::Position>("position");
+
+		if (parentPos != Rml::Style::Position::Absolute && parentPos != Rml::Style::Position::Relative)
+			_parent->SetProperty(Rml::PropertyId::Position, Rml::Style::Position::Relative);
 
 		auto input = _parent->GetOwnerDocument()->CreateElement("input");
 
