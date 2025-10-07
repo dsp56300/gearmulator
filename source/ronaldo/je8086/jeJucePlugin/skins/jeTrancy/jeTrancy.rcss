@@ -371,8 +371,9 @@ button
 	position: absolute;
 	font-size: 26dp;
 	vertical-align: bottom;
-	height: 100%;
-	line-height: 100%;
+	width: 260dp;
+	height: 28dp;
+	line-height: 28dp;
 	color: #ff6600ff;	
 }
 
