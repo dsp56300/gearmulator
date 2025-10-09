@@ -193,7 +193,7 @@
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="3" isToggle="1"/>
 						</div>
 					</div>
-					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+					<div data-class-juceConditionDisabled="deviceModel!='jp8000'" data-class-hlayout="deviceModel=='jp8000'" data-model="plugin" class="abs" >
 						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
