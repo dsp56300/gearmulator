@@ -62,19 +62,27 @@ namespace jucePluginEditorLib
 
 		updateControlLabel(nullptr, Priority::None);
 
+		auto bindParameter = [this](pluginLib::Parameter* _p)
+		{
+			m_boundParameters.insert({ _p, pluginLib::ParameterListener(_p, [this](const pluginLib::Parameter* _param)
+			{
+				if (_param->getChangeOrigin() == pluginLib::Parameter::Origin::PresetChange)
+					return;
+				if (auto* comp = m_parameterBinding.getElementForParameter(_param))
+					updateControlLabel(comp, _param);
+			})});
+		};
+
 		for (auto& params : m_controller.getExposedParameters())
 		{
 			for (const auto& param : params.second)
-			{
-				m_boundParameters.insert({ param, pluginLib::ParameterListener(param, [this](const pluginLib::Parameter* _param)
-				{
-					if (_param->getChangeOrigin() == pluginLib::Parameter::Origin::PresetChange ||
-						_param->getChangeOrigin() == pluginLib::Parameter::Origin::Derived)
-						return;
-					if (auto* comp = m_parameterBinding.getElementForParameter(_param))
-						updateControlLabel(comp, _param);
-				}) });
-			}
+				bindParameter(param);
+		}
+
+		for (auto& params : m_controller.getInternalParameters())
+		{
+			for (const auto& param : params.second)
+				bindParameter(param);
 		}
 
 		m_mouseOver.add(_editor.getDocument(), Rml::EventId::Mouseover, [this](const Rml::Event& _event)
