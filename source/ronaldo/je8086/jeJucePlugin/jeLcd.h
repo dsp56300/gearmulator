@@ -23,6 +23,7 @@ namespace jeJucePlugin
 		baseLib::EventListener<std::array<uint8_t ,64>> m_onLcdCgDataChanged;
 		baseLib::EventListener<std::array<char, 40>> m_onLcdDdDataChanged;
 
+		Editor& m_editor;
 		std::array<char, 40> m_lcdText;
 	};
 }

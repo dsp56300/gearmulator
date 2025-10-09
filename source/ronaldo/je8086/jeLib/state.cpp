@@ -187,7 +187,22 @@ namespace jeLib
 	{
 		const auto area = getAddressArea(_dump);
 
-		if (area != AddressArea::UserPerformance && area != AddressArea::UserPatch)
+		if (area == AddressArea::PerformanceTemp)
+		{
+			auto performanceArea = static_cast<PerformanceData>(getAddress(_dump) & static_cast<uint32_t>(PerformanceData::BlockMask));
+			switch (performanceArea)
+			{
+			case PerformanceData::PerformanceCommon:
+			case PerformanceData::PatchUpper:
+			case PerformanceData::PatchLower:
+				// these are fine
+				break;
+			default:
+				// all others are not
+				return false;
+			}
+		}
+		else if (area != AddressArea::UserPerformance && area != AddressArea::UserPatch)
 			return false;
 
 		if (_dump.size() < g_nameStart + g_nameSize)

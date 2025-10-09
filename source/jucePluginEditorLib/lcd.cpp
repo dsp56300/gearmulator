@@ -69,8 +69,10 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::EventListener::Add(m_canvas, Rml::EventId::Mousedown, [this](Rml::Event& _e)
 		{
-			if (juceRmlUi::helper::isContextMenu(_e))
-				_e.StopPropagation();
+			if (!juceRmlUi::helper::isContextMenu(_e))
+				return;
+
+			_e.StopPropagation();
 			onClicked();
 		});
 	}
@@ -102,6 +104,11 @@ namespace jucePluginEditorLib
 		}
 
 		repaint();
+	}
+
+	Rml::Element* Lcd::getElement() const
+	{
+		return m_canvas;
 	}
 
 	void Lcd::setSize(const uint32_t _width, const uint32_t _height)

@@ -24,6 +24,8 @@ namespace jucePluginEditorLib
 		void setText(const std::vector<uint8_t> &_text);
 		void setCgRam(const std::array<uint8_t, 64> &_data);
 
+		Rml::Element* getElement() const;
+
 	private:
 		void setSize(uint32_t _width, uint32_t _height);
 		void paint(const juce::Image& _image, juce::Graphics& _g);

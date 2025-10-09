@@ -5,10 +5,11 @@
 #include "hardwareLib/lcdfonts.h"
 
 #include "jucePluginLib/version.h"
+#include "juceRmlUi/rmlInplaceEditor.h"
 
 namespace jeJucePlugin
 {
-	JeLcd::JeLcd(Editor& _editor, Rml::Element* _parent) : Lcd(_parent, 16, 2)
+	JeLcd::JeLcd(Editor& _editor, Rml::Element* _parent) : Lcd(_parent, 16, 2), m_editor(_editor)
 	{
 		auto& sr = _editor.getJeController().getSysexRemote();
 
@@ -19,6 +20,16 @@ namespace jeJucePlugin
 		m_onLcdDdDataChanged.set(sr.evLcdDdDataChanged, [this](const std::array<char, 40>& _data)
 		{
 			setText(_data);
+		});
+
+		juceRmlUi::EventListener::Add(getElement(), Rml::EventId::Dblclick, [this](Rml::Event& _event)
+		{
+			_event.StopPropagation();
+			new juceRmlUi::InplaceEditor(_event.GetTargetElement(), m_editor.getJeController().getPatchName(PatchType::Performance),
+			[this](const std::string& _newName)
+			{
+				m_editor.getJeController().changePatchName(PatchType::Performance, _newName);
+			});
 		});
 	}
 

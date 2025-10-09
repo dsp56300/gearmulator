@@ -211,6 +211,23 @@ namespace jeJucePlugin
 		if (getPatchName(_type) == _newName)
 			return false;
 
+		if (_type == PatchType::Performance)
+		{
+			std::vector<synthLib::SMidiEvent> dumps;
+
+			if (!m_state.createTempPerformanceDumps(dumps, jeLib::PerformanceData::PerformanceCommon))
+				return false;
+
+			// we only need the first dump as its the only one containing the name
+			auto& sysex = dumps.front();
+			if (!jeLib::State::setName(sysex.sysex, _newName))
+				return false;
+			jeLib::State::updateChecksum(sysex.sysex);
+			sendSysEx(sysex.sysex);
+			sendTempPerformanceRequest();
+			return true;
+		}
+
 		const auto part = _type == PatchType::PartUpper ? 0 : 1;
 
 		std::vector<uint8_t> data;
