@@ -529,7 +529,7 @@
 		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 1290dp; top: 1418dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>
 		<div data-model="plugin" class="abs" style="left: 0dp; width: 100%; top: 1420dp; height: 22dp;">
 			<div class="bottomText" style="left: 410dp;">{{versionString}}</div>
-			<combo id="romselector" class="bottomText" style="left: 740dp; width: 300dp; height: 30dp;"><combotext/></combo>
+			<combo id="romselector" class="bottomText" style="left: 740dp; width: 400dp; height: 30dp;"><combotext/></combo>
 		</div>
 	</body>
 </rml>
