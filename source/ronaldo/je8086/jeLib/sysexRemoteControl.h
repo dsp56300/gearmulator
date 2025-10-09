@@ -48,8 +48,8 @@ namespace jeLib
 		static void sendSysexButtons(std::vector<synthLib::SMidiEvent>& _dst, uint16_t _buttonStates);
 		static void sendSysexLeds(std::vector<synthLib::SMidiEvent>& _dst, const Leds& _ledStates);
 
-		bool receive(const synthLib::SMidiEvent& _input) const;
-		bool receive(const std::vector<uint8_t>& _input) const;
+		bool receive(const synthLib::SMidiEvent& _input);
+		bool receive(const std::vector<uint8_t>& _input);
 	private:
 	};
 }

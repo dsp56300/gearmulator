@@ -88,7 +88,7 @@ namespace jeLib
 		_dst.emplace_back(ev);
 	}
 
-	bool SysexRemoteControl::receive(const synthLib::SMidiEvent& _input) const
+	bool SysexRemoteControl::receive(const synthLib::SMidiEvent& _input)
 	{
 		if (_input.sysex.empty())
 			return false;
@@ -96,7 +96,7 @@ namespace jeLib
 		return receive(_input.sysex);
 	}
 
-	bool SysexRemoteControl::receive(const std::vector<uint8_t>& _input) const
+	bool SysexRemoteControl::receive(const std::vector<uint8_t>& _input)
 	{
 		if(_input.size() < g_headerSize + g_footerSize)
 			return false;
@@ -120,7 +120,7 @@ namespace jeLib
 				for(auto& d : data)
 					d = _input[i++];
 
-				evLcdCgDataChanged(data);
+				evLcdCgDataChanged.retain(data);
 			}
 			return true;
 		case CommandType::LcdDdRam:
@@ -130,7 +130,7 @@ namespace jeLib
 				std::array<char, 40> data;
 				for(auto& c : data)
 					c = static_cast<char>(_input[i++]);
-				evLcdDdDataChanged(data);
+				evLcdDdDataChanged.retain(data);
 			}
 			return true;
 		case CommandType::Buttons:
