@@ -324,11 +324,11 @@
 				</div>
 
 				<!-- Panel Select / Patchnames / Midi Chnnels -->
-				<button class="abs btWhiteLed" style="left: 710dp; top: 58dp;" id="partLower" isToggle="1"/>
-				<button class="abs btWhiteLed" style="left: 710dp; top: 126dp;" id="partUpper" isToggle="1"/>
+				<button class="abs btWhiteLed" style="left: 710dp; top: 58dp;" id="partUpper" isToggle="1"/>
+				<button class="abs btWhiteLed" style="left: 710dp; top: 126dp;" id="partLower" isToggle="1"/>
 				
-				<div class="patchNameText" data-model="part0" id="patchNameTextLower" style="left: 808dp; top: 137dp;"/>
-				<div class="patchNameText" data-model="part1" id="patchNameTextUpper" style="left: 808dp; top: 68dp;"/>
+				<div class="patchNameText" id="patchNameTextUpper" style="left: 808dp; top: 68dp;"/>
+				<div class="patchNameText" id="patchNameTextLower" style="left: 808dp; top: 137dp;"/>
 				
 				<!-- Panel 1 MIDI CH --> 
 				<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1075dp; top: 58dp; width: 110dp; height: 45dp; line-height: 45dp;">
@@ -453,11 +453,11 @@
 
 
 			<!-- Panel Select / Patchnames / Midi Chnnels -->
-			<button class="abs btWhiteLed" style="left: 751dp; top: 112dp;" id="partLower" isToggle="1"/>
-			<button class="abs btWhiteLed" style="left: 751dp; top: 180dp;" id="partUpper" isToggle="1"/>
+			<button class="abs btWhiteLed" style="left: 751dp; top: 112dp;" id="partUpper" isToggle="1"/>
+			<button class="abs btWhiteLed" style="left: 751dp; top: 180dp;" id="partLower" isToggle="1"/>
 			
-			<div class="patchNameText" data-model="part0" id="patchNameTextLower" style="left: 845dp; top: 191dp;"/>
-			<div class="patchNameText" data-model="part1" id="patchNameTextUpper" style="left: 845dp; top: 122dp;"/>
+			<div class="patchNameText" id="patchNameTextUpper" style="left: 845dp; top: 122dp;"/>
+			<div class="patchNameText" id="patchNameTextLower" style="left: 845dp; top: 191dp;"/>
 			
 			<!-- Panel 1 MIDI CH --> 
 			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1112dp; top: 113dp; width: 110dp; height: 45dp; line-height: 45dp;">
