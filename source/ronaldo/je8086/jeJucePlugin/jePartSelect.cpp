@@ -54,12 +54,15 @@ namespace jeJucePlugin
 			}
 		}
 
-		updateButtonStates();
-
 		m_onPatchNameChanged.set(_editor.getJeController().evPatchNameChanged, [this](const PatchType& _patch, const std::string& _name)
 		{
 			onPatchNameChanged(_patch, _name);
 		});
+
+		updateButtonStates();
+
+		onPatchNameChanged(PatchType::PartUpper, m_editor.getJeController().getPatchName(PatchType::PartUpper));
+		onPatchNameChanged(PatchType::PartLower, m_editor.getJeController().getPatchName(PatchType::PartLower));
 	}
 
 	PartSelect::~PartSelect() = default;

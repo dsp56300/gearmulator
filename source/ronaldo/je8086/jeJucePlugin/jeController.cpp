@@ -495,6 +495,6 @@ namespace jeJucePlugin
 
 		currentName = _name;
 
-		evPatchNameChanged.retain(_type, _name);
+		evPatchNameChanged(_type, _name);
 	}
 }
