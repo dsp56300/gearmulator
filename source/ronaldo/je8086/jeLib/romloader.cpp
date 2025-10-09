@@ -2,7 +2,9 @@
 
 #include "baseLib/filesystem.h"
 
-#include <stdio.h>
+#include <algorithm>
+
+#include <cstdio>
 #include <string.h>
 
 static int getInt(FILE *f)
