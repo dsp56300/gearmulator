@@ -84,7 +84,8 @@ namespace jeJucePlugin
 			if (_origin == pluginLib::Parameter::Origin::Ui || _origin == pluginLib::Parameter::Origin::Midi || _origin == pluginLib::Parameter::Origin::HostAutomation)
 			{
 				auto otherPart = static_cast<uint8_t>((_parameter.getPart() + 1) & 1);
-				auto* p = getParameter(_parameter.getParameterIndex(), otherPart);
+				auto* p = getParameter(_parameter.getDescription().name, otherPart);
+				assert(p);
 				p->setUnnormalizedValueNotifyingHost(_parameter.getUnnormalizedValue(), pluginLib::Parameter::Origin::Ui);
 			}
 		}
