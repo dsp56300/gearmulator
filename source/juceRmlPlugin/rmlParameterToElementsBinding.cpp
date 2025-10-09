@@ -193,10 +193,7 @@ namespace rmlPlugin
 
 	bool ParameterToElementsBinding::isReversed(const Rml::Element* _element)
 	{
-		auto* attrib = _element->GetAttribute("orientation");
-		if (!attrib)
-			return false;
-		return attrib->Get(_element->GetCoreInstance(), std::string()) == "vertical";
+		return juceRmlUi::ElemKnob::isReversed(_element);
 	}
 
 	ParameterToElementsBinding::IgnoreChangeEvents::IgnoreChangeEvents(ParameterToElementsBinding& _owner) : m_owner(_owner)
