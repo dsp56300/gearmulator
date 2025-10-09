@@ -47,7 +47,9 @@ namespace hwLib
 					const int cursorOnOff = (g >> 1) & 1;
 					const int cursorBlinking = g & 1;
 
+#ifdef _DEBUG
 					LOG("LCD Display ON/OFF, display=" << displayOnOff << ", cursor=" << cursorOnOff << ", blinking=" << cursorBlinking);
+#endif
 
 					m_displayOn = displayOnOff != 0;
 					m_cursorOn = cursorOnOff != 0;
