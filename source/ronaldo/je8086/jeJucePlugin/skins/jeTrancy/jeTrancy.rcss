@@ -198,7 +198,7 @@ button
 	width: 500dp;
 	height: 60dp;
 	left: 189dp;
-	top: 150dp;
+	top: 174dp;
 	gap: 22dp;
 }
 
@@ -340,6 +340,7 @@ button
 
 .bottomText
 {
+	color: #ff6600ff;
 	position: absolute;
 	font-size: 26dp;
 	font-weight: bold;
@@ -391,6 +392,16 @@ button
 	font-family: Vipnagorgialla;
 }
 
+.labelBlue
+{
+	position: absolute;
+	color: #6cbfffff;
+	font-size: 21dp;
+	line-height: 17dp;
+	
+	text-align: center;
+	font-family: Vipnagorgialla;
+}
 /* Keyframes for a little left-right wiggle */
 @keyframes wiggle {
     0%   { transform: translateX(0px); }

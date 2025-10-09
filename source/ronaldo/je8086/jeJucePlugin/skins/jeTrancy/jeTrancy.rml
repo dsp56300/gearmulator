@@ -169,23 +169,37 @@
 						<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">LFO 1 DEPTH</div>							
 					</div>	
 					
-					<!-- Noise -->
-					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 3)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc2Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 23dp; left: 471dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc2Control2Resonance" id="Osc1Control2" type="range" orientation="vertical" style="top: 23dp; left: 566dp;"/>
-						<div class="label" style="left: 446dp; width:100dp; margin-top:-5dp">CUTOFF FREQ</div>
-						<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">RESO</div>							
-					</div>	
-
+					
+					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+						<!-- Noise -->
+						<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 3)" data-model="partCurrent" >
+							<input class="abs sliderV slider_row2" param="Osc2Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 23dp; left: 471dp;"/>
+							<input class="abs sliderV slider_row2" param="Osc2Control2Resonance" id="Osc1Control2" type="range" orientation="vertical" style="top: 23dp; left: 566dp;"/>
+							<div class="label" style="left: 446dp; width:100dp; margin-top:-5dp">CUTOFF FREQ</div>
+							<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">RESO</div>							
+						</div>	
+					</div>						
 					
 					<button class="abs btBlackLed" param="Osc2SyncSwitch" id="Osc2SyncSwitch" style="left: 60dp; top: 47dp;" isToggle="1"/>
 					<button class="abs btBlackLed" param="Osc2ExternalInputSwitch" id="Osc2ExternalInputSwitch" style="left: 167dp; top: 47dp;" isToggle="1"/>
-					<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
-						<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
-						<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
-						<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
-						<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="3" isToggle="1"/>
+
+					<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp;"/>		
+
+					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="3" isToggle="1"/>
+						</div>
 					</div>
+					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
+						</div>
+					</div>					
 					<div class="knobs_row2" style="left: 45dp; gap: 63dp;">
 						<knob class="knob" param="Osc2Range" id="Osc2Range" />
 						<knob class="knob" param="Osc2FineWide" id="Osc2FineWide" />
@@ -307,20 +321,17 @@
 				
 				<!-- Control -->
 				<div class="abs" style="width: 665dp; height: 100%;">
-					<div class="hlayout" style="padding-top: 118dp; padding-left: 18dp;">
-						<button class="btBlackLed" param="MonoSwitch" id="MonoSwitch" isToggle="1"/>
-						<spacer style="width: 19dp"/>
-						<button class="btBlackLed" param="LegatoSwitch" id="LegatoSwitch" isToggle="1"/>
-						<spacer style="width: 27dp"/>
-						<button class="btBlackLed" param="VoiceModulatorSwitch" id="VoiceModulatorSwitch" isToggle="1"/>
-						<spacer style="width: 32dp"/>
-						<button class="btBlackLed" param="VelocitySwitch" id="VelocitySwitch" isToggle="1" style="left: 12dp"/>
-						<spacer style="width: 47dp"/>						
-						<button class="btBlackLed" id="ActiveIndicatorOfVelocityAssign" isToggle="1"/>
-						<spacer style="width: 50dp"/>
-						<button class="btBlackLed" id="ActiveIndicatorOfControlAssign" isToggle="1"/>
-					</div>
-				
+					<button class="btBlackLed abs" style="left: 20dp; top: 118dp;" param="MonoSwitch" id="MonoSwitch" isToggle="1"/>
+					<button class="btBlackLed abs" style="left: 114dp; top: 118dp;" param="LegatoSwitch" id="LegatoSwitch" isToggle="1"/>
+					
+					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+						<button class="btBlackLed abs" style="left: 215dp; top: 118dp;"  param="VoiceModulatorSwitch" id="VoiceModulatorSwitch" isToggle="1"/>				
+						<div class="labelBlue" style="width:100dp; left: 200dp; top: 78dp;">VOICE MOD</div>	
+					</div>	
+					
+					<button class="btBlackLed abs" style="left: 319dp; top: 118dp;" param="VelocitySwitch" id="VelocitySwitch" isToggle="1"/>					
+					<button class="btBlackLed abs" style="left: 439dp; top: 118dp;" id="ActiveIndicatorOfVelocityAssign" isToggle="1"/>
+					<button class="btBlackLed abs" style="left: 560dp; top: 118dp;" id="ActiveIndicatorOfControlAssign" isToggle="1"/>
 				</div>
 
 				<!-- Panel Select / Patchnames / Midi Chnnels -->
@@ -364,7 +375,7 @@
 
 				<!-- bottom left, Volume and Semitones knobs -->
 				<div class="abs hlayout" style="left: 39dp; top: 304dp; gap: 92dp;">
-					<knob class="knob mainVolume"/>
+					<knob class="knob mainVolume" value="1" min="0" max="1"/>
 					<knob class="knob" param="PartTranspose"/>
 				</div>	
 
@@ -372,7 +383,7 @@
 				<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" src="8080.png" style="left: 360dp; top: 215dp; width: 846dp; height: 226dp;"/>
 					
 				<!-- bottom unision, unision knobs -->
-				<div data-class-opacityZero="deviceModel!='jp8080'" data-model="plugin" class="abs hlayout" style="left: 406dp; top: 304dp; gap: 49dp;">
+				<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" style="left: 406dp; top: 304dp; gap: 49dp;">
 					<button class="btBlackLed" param="UnisonSwitch" id="UnisonSwitch" isToggle="1"/>
 					<knob class="knob" param="UnisonDetune" id="UnisonDetune"/>					
 				</div>					
@@ -528,8 +539,20 @@
 		<!-- bottom texts -->
 		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 1290dp; top: 1418dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>
 		<div data-model="plugin" class="abs" style="left: 0dp; width: 100%; top: 1420dp; height: 22dp;">
-			<div class="bottomText" style="left: 410dp;">{{versionString}}</div>
-			<combo id="romselector" class="bottomText" style="left: 740dp; width: 400dp; height: 30dp;"><combotext/></combo>
+			<div class="bottomText" style="left: 305dp; margin-top: 2dp ">{{versionString}}</div>
+			<combo id="romselector" class="bottomText" style="left: 925dp; width: 400dp; height: 30dp;"><combotext/></combo>
+
+			<div data-class-juceConditionDisabled="deviceModel!='jp8000'" data-model="plugin" class="abs">
+				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">JP-8000</div>		
+			</div>
+			<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" class="abs">
+				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">JP-8080</div>		
+			</div>
+			
 		</div>
+		
+	
+		
+		
 	</body>
 </rml>
