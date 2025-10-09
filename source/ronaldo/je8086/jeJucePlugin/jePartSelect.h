@@ -40,9 +40,9 @@ namespace jeJucePlugin
 
 		Editor& m_editor;
 
-		std::array<std::vector<juceRmlUi::ElemButton*>, 2> m_partButtons;
+		std::array<std::vector<juceRmlUi::ElemButton*>, 2> m_patchButtons;
 		std::array<std::vector<Rml::Element*>, 2> m_patchNames;
-		std::array<std::vector<std::unique_ptr<jucePluginEditorLib::PartButton*>>, 2> m_partButton;
+		std::array<std::vector<std::unique_ptr<jucePluginEditorLib::PartButton>>, 2> m_partButtons;
 
 		pluginLib::Parameter* m_paramPanelSelect = nullptr;
 		pluginLib::ParameterListener m_partSelectListener;

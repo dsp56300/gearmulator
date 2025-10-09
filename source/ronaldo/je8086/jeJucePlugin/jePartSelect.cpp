@@ -5,6 +5,7 @@
 
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
+#include "virusJucePlugin/PartButton.h"
 
 namespace jeJucePlugin
 {
@@ -12,8 +13,8 @@ namespace jeJucePlugin
 	: m_editor(_editor)
 	, m_paramPanelSelect(_editor.getJeController().getParameter("PanelSelect", 0))
 	{
-		m_editor.findChildren<juceRmlUi::ElemButton>(m_partButtons[0], "partUpper");
-		m_editor.findChildren<juceRmlUi::ElemButton>(m_partButtons[1], "partLower");
+		m_editor.findChildren<juceRmlUi::ElemButton>(m_patchButtons[0], "partUpper");
+		m_editor.findChildren<juceRmlUi::ElemButton>(m_patchButtons[1], "partLower");
 
 		m_editor.findChildren(m_patchNames[0], "patchNameTextUpper");
 		m_editor.findChildren(m_patchNames[1], "patchNameTextLower");
@@ -23,11 +24,11 @@ namespace jeJucePlugin
 			onPartSelectChanged();
 		});
 
-		for (size_t p=0; p<m_partButtons.size(); ++p)
+		for (size_t p=0; p<m_patchButtons.size(); ++p)
 		{
-			for (size_t i=0; i<m_partButtons[p].size(); ++i)
+			for (size_t i=0; i<m_patchButtons[p].size(); ++i)
 			{
-				juceRmlUi::EventListener::Add(m_partButtons[p][i], Rml::EventId::Click, [p, this](Rml::Event& _event)
+				juceRmlUi::EventListener::Add(m_patchButtons[p][i], Rml::EventId::Click, [p, this](Rml::Event& _event)
 				{
 					onClick(_event, static_cast<int>(p));
 				});
@@ -35,7 +36,11 @@ namespace jeJucePlugin
 
 			for (size_t i=0; i<m_patchNames[p].size(); ++i)
 			{
-				auto nameElem = m_patchNames[p][i];
+				Rml::Element* nameElem = m_patchNames[p][i];
+
+				m_partButtons[p].emplace_back(std::make_unique<jucePluginEditorLib::PartButton>(nameElem, _editor));
+				m_partButtons[p].back()->initalize(static_cast<uint8_t>(p));
+
 				auto type = p == 0 ? PatchType::PartUpper : PatchType::PartLower;
 				juceRmlUi::EventListener::Add(nameElem, Rml::EventId::Dblclick, [this, type](Rml::Event& _event)
 				{
@@ -68,10 +73,10 @@ namespace jeJucePlugin
 	{
 		const int part = m_paramPanelSelect->getUnnormalizedValue() + 1;
 
-		for (auto& b : m_partButtons[0])
+		for (auto& b : m_patchButtons[0])
 			b->setChecked(part & 1);
 
-		for (auto& b : m_partButtons[1])
+		for (auto& b : m_patchButtons[1])
 			b->setChecked(part & 2);
 	}
 
