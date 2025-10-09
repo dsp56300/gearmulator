@@ -218,7 +218,7 @@ button
 	height: 89dp;
 	left: 764dp;
 	top: 148dp;
-	gap: 57.5dp;
+	gap: 57dp;
 }
 
 .ledBlue
@@ -346,18 +346,21 @@ button
 	vertical-align: bottom;
 	height: 100%;
 	line-height: 100%;
+	font-family: Metropolis;	
 }
 .comboxtext1
 {
 	color: #ff6600ff;
 	font-size: 24dp;
 	text-align: right;
+	font-family: Metropolis;	
 }
 .comboxtext2
 {
 	color: #ff6600ff;
 	font-size: 24dp;
 	text-align: center;
+	font-family: Metropolis;	
 }
 .textDonate
 {
@@ -374,7 +377,18 @@ button
 	width: 260dp;
 	height: 28dp;
 	line-height: 28dp;
-	color: #ff6600ff;	
+	color: #ff6600ff;
+	font-family: Metropolis;
+}
+.label
+{
+	position: absolute;
+	color: #ffffffff;
+	font-size: 18dp;
+	line-height: 17dp;
+	
+	text-align: center;
+	font-family: Vipnagorgialla;
 }
 
 /* Keyframes for a little left-right wiggle */
