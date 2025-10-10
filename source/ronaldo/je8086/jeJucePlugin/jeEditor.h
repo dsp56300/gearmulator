@@ -36,8 +36,6 @@ namespace jeJucePlugin
 
 		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 
-		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
-		
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 		Controller& getJeController() const { return m_controller; }

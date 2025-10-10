@@ -1,7 +1,5 @@
 #include "jeEditor.h"
 
-#include <juceRmlPlugin/skinConverter/skinConverterOptions.h>
-
 #include "jeAssign.h"
 #include "jeController.h"
 #include "jeFocusedParameter.h"
@@ -104,13 +102,6 @@ namespace jeJucePlugin
 	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
 	{
 		return new PatchManager(*this, _parent);
-	}
-
-	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
-	{
-		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);
-
-		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
 	}
 
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
