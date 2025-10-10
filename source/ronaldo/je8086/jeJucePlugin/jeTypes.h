@@ -12,4 +12,11 @@ namespace jeJucePlugin
 
 		Count
 	};
+
+	enum class JePart
+	{
+		PatchUpper = 0,
+		PatchLower = 1,
+		Performance = 2
+	};
 }

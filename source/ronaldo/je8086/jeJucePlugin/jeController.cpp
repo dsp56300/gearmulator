@@ -1,5 +1,6 @@
 #include "jeController.h"
 
+#include "jePartButton.h"
 #include "jePluginProcessor.h"
 
 #include "dsp56kEmu/logging.h"
@@ -173,11 +174,13 @@ namespace jeJucePlugin
 		return getParameter("PanelSelect", 0)->getUnnormalizedValue() == 2;
 	}
 
-	bool Controller::requestPatchForPart(std::vector<uint8_t>& _data, uint32_t _part, uint64_t _userData) const
+	bool Controller::requestPatchForPart(std::vector<uint8_t>& _data, const uint32_t _part, const uint64_t _userData) const
 	{
 		std::vector<synthLib::SMidiEvent> results;
 
-		const auto isPerformance = _userData == 2;
+		const auto part = static_cast<JePart>(_part);
+
+		const auto isPerformance = _userData == 2 || part == JePart::Performance;
 
 		if (_userData == 2)
 		{
@@ -185,10 +188,12 @@ namespace jeJucePlugin
 		}
 		else
 		{
-			switch (_part)
+			switch (part)
 			{
-			case 0:  m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchUpper); break;
-			case 1:  m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchLower); break;
+			case JePart::PatchUpper: m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchUpper); break;
+			case JePart::PatchLower: m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchLower); break;
+			case JePart::Performance: m_state.createTempPerformanceDumps(results); break;
+
 			default: return false;
 			}
 		}
@@ -424,6 +429,9 @@ namespace jeJucePlugin
 
 		if (!isPerformance && !isPatch)
 			return false;
+
+		if (!isPerformance && JePartButton::isPerformance(static_cast<uint8_t>(_part)))
+			return false;	// someone dragging a part patch on the write button, which is for performances
 
 		for (auto& s : sysex)
 		{

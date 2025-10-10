@@ -2,10 +2,10 @@
 
 #include "jeController.h"
 #include "jeEditor.h"
+#include "jePartButton.h"
 
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
-#include "virusJucePlugin/PartButton.h"
 
 namespace jeJucePlugin
 {
@@ -38,7 +38,7 @@ namespace jeJucePlugin
 			{
 				Rml::Element* nameElem = m_patchNames[p][i];
 
-				m_partButtons[p].emplace_back(std::make_unique<jucePluginEditorLib::PartButton>(nameElem, _editor));
+				m_partButtons[p].emplace_back(std::make_unique<JePartButton>(nameElem, _editor));
 				m_partButtons[p].back()->initalize(static_cast<uint8_t>(p));
 
 				auto type = p == 0 ? PatchType::PartUpper : PatchType::PartLower;

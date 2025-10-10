@@ -13,6 +13,7 @@ namespace jucePluginEditorLib
 
 namespace jeJucePlugin
 {
+	class JePartButton;
 	class JeAssign;
 	class PartSelect;
 	class JeLcd;
@@ -56,5 +57,7 @@ namespace jeJucePlugin
 		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 		std::unique_ptr<PartSelect> m_partSelect;
 		std::unique_ptr<JeAssign> m_assign;
+
+		std::vector<std::unique_ptr<JePartButton>> m_writeButtons;
 	};
 }

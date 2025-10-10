@@ -6,6 +6,7 @@
 #include "jeController.h"
 #include "jeFocusedParameter.h"
 #include "jeLcd.h"
+#include "jePartButton.h"
 #include "jePartSelect.h"
 #include "jePatchManager.h"
 
@@ -71,6 +72,9 @@ namespace jeJucePlugin
 
 		for (auto* writeButton : writeButtons)
 		{
+			m_writeButtons.emplace_back(std::make_unique<JePartButton>(writeButton, *this));
+			m_writeButtons.back()->initalize(static_cast<uint8_t>(JePart::Performance));
+
 			juceRmlUi::EventListener::Add(writeButton, Rml::EventId::Click, [this](Rml::Event& _event)
 			{
 				onBtWrite(_event);
