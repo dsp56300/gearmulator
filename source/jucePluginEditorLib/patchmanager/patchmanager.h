@@ -59,7 +59,7 @@ namespace jucePluginEditorLib::patchManager
 		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const pluginLib::FileType& _fileType) const;
 		bool exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const pluginLib::FileType& _fileType) const;
 
-		bool copyPart(uint8_t _target, uint8_t _source);
+		bool copyPart(uint8_t _target, uint8_t _source, uint64_t _userData = 0);
 
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
 
