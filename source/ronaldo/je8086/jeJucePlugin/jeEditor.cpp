@@ -67,10 +67,15 @@ namespace jeJucePlugin
 
 		m_partSelect.reset(new PartSelect(*this));
 
-		addClick("btWrite", [this](Rml::Event& _event)
+		const auto writeButtons = findChildren("btWrite");
+
+		for (auto* writeButton : writeButtons)
 		{
-			onBtWrite(_event);
-		}, false);
+			juceRmlUi::EventListener::Add(writeButton, Rml::EventId::Click, [this](Rml::Event& _event)
+			{
+				onBtWrite(_event);
+			});
+		}
 
 		m_assign.reset(new JeAssign(*this));
 	}
