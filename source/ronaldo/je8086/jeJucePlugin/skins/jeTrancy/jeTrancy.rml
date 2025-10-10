@@ -26,7 +26,10 @@
 					<knob class="knob" param="DelayTime" id="DelayTime"/>
 					<knob class="knob" param="DelayFeedback" id="DelayFeedback"/>
 					<knob class="knob" param="DelayLevel" id="DelayLevel"/>
-					<button class="abs btBlackLed" style="left: 1690dp; top: 23dp;" param="VoiceModulatorSendSwitch" isToggle="1"/>
+					<div data-class-opacityZero="deviceModel!='jp8080'" data-model="plugin" class="abs hlayout" >
+						<button class="abs btBlackLed" style="left: 1690dp; top: 23dp;" param="VoiceModulatorSendSwitch" isToggle="1"/>
+						<div class="label" style="left: 1650dp; width:150dp; margin-top:-18dp">VOICE MOD SEND</div>
+					</div>
 				</div>
 				
 				<!-- FX delay section -->
@@ -375,7 +378,7 @@
 
 				<!-- bottom left, Volume and Semitones knobs -->
 				<div class="abs hlayout" style="left: 39dp; top: 304dp; gap: 92dp;">
-					<knob class="knob mainVolume" value="1" min="0" max="1"/>
+					<knob class="knob mainVolume"/>
 					<knob class="knob" param="PartTranspose"/>
 				</div>	
 
@@ -461,28 +464,30 @@
 		
 		<!-- PATCH BROWSER -->
 		<img data-model="partCurrent" class="abs" src="browser.png" tabgroup="main" tabpage="1">
-
+			
+			<!-- Write -->
+			<button id="btWrite" class="abs btRed" style="left: 758dp; top: 182dp;"/>
 
 			<!-- Panel Select / Patchnames / Midi Chnnels -->
-			<button class="abs btWhiteLed" style="left: 751dp; top: 112dp;" id="partUpper" isToggle="1"/>
-			<button class="abs btWhiteLed" style="left: 751dp; top: 180dp;" id="partLower" isToggle="1"/>
+			<button class="abs btWhiteLed" style="left: 899dp; top: 112dp;" id="partUpper" isToggle="1"/>
+			<button class="abs btWhiteLed" style="left: 899dp; top: 180dp;" id="partLower" isToggle="1"/>
 			
-			<div class="patchNameText" id="patchNameTextUpper" style="left: 845dp; top: 122dp;"/>
-			<div class="patchNameText" id="patchNameTextLower" style="left: 845dp; top: 191dp;"/>
+			<div class="patchNameText" id="patchNameTextUpper" style="left: 993dp; top: 122dp;"/>
+			<div class="patchNameText" id="patchNameTextLower" style="left: 993dp; top: 191dp;"/>
 			
 			<!-- Panel 1 MIDI CH --> 
-			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1112dp; top: 113dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1260dp; top: 113dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>			
 
 			<!-- Panel 2 MIDI CH --> 
-			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1112dp; top: 182dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 1260dp; top: 182dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>	
 			
 			
 			<!-- Key Mode / Voice Assign -->
-			<div class="abs" style="left: 1261dp; top:53dp; width: 430dp; height: 100%;">
+			<div class="abs" style="left: 1409dp; top:53dp; width: 430dp; height: 100%;">
 					<div data-model="part0" class="abs vlayoutLeds" style="left: 19dp; top: 46dp; height: 100dp; width: 140dp">
 					<button class="ledRed" isToggle="1" valueOn="0" param="KeyMode"/>
 					<button class="ledRed" isToggle="1" valueOn="1" param="KeyMode"/>
@@ -510,19 +515,17 @@
 			</div>				
 			
 			<!-- TODO -->
-			<div class="knobs_row3" style="left: 1743dp; top:147dp; gap: 57dp;">
+			<div class="knobs_row3" style="left: 1888dp; top:147dp; gap: 57dp;">
 				<knob class="knob" param="CutoffFrequency" id="CutoffFrequency" />
 				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:-5dp">CUTOFF FREQ</div>				
 				<knob class="knob" param="Resonance" id="Resonance" />
 				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:140dp">RESO</div>	
 				<knob class="knob" param="Osc1Control1" id="Osc1Control1" />
-				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:285dp">OSC 1 CTRL 1</div>					
-				<knob class="knob" param="Osc1Control2" id="Osc1Control2" />
-				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:430dp">OSC 1 CTRL 2</div>				
+				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:285dp">OSC 1 CTRL 1</div>				
 				<knob class="knob" param="ToneControlBass" id="ToneControlBass"/>
-				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:575dp">BASS</div>
+				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:430dp">BASS</div>
 				<knob class="knob" param="ToneControlTreble" id="ToneControlTreble"/>
-				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:720dp">TREBLE</div>
+				<div class="label" style="width:100dp; margin-top:-55dp; margin-left:575dp">TREBLE</div>
 			</div>
 			<div class="abs" style="left: 176dp; top: 269dp; width: 2420dp; height: 1105dp; padding: 10dp; padding-top: 40dp; box-sizing: border-box">
 				<template src="patchmanager"/>
