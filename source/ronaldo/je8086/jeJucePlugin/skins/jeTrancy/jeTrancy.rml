@@ -26,7 +26,7 @@
 					<knob class="knob" param="DelayTime" id="DelayTime"/>
 					<knob class="knob" param="DelayFeedback" id="DelayFeedback"/>
 					<knob class="knob" param="DelayLevel" id="DelayLevel"/>
-					<div data-class-opacityZero="deviceModel!='jp8080'" data-model="plugin" class="abs hlayout" >
+					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
 						<button class="abs btBlackLed" style="left: 1690dp; top: 23dp;" param="VoiceModulatorSendSwitch" isToggle="1"/>
 						<div class="label" style="left: 1650dp; width:150dp; margin-top:-18dp">VOICE MOD SEND</div>
 					</div>
