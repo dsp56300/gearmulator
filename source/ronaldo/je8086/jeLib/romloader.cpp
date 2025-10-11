@@ -77,7 +77,19 @@ namespace jeLib
 		if (fullRom.size() != Rom::RomSizeKeyboard && fullRom.size() != Rom::RomSizeRack)
 			return {};
 
-		return Rom(fullRom, baseLib::filesystem::getFilenameWithoutPath(_files.front()));
+		// come up with a useful name
+		using namespace baseLib::filesystem;
+
+		auto sortedFiles = _files;
+		std::sort(sortedFiles.begin(), sortedFiles.end());
+
+		const auto ext = getExtension(sortedFiles.front());
+		const auto firstName = stripExtension(getFilenameWithoutPath(sortedFiles.front()));
+		const auto lastName = stripExtension(getFilenameWithoutPath(sortedFiles.back()));
+
+		const auto name = firstName + "..." + lastName + ext;
+
+		return Rom(fullRom, name);
 	}
 
 	RomLoader::Range RomLoader::parseSysexDump(std::vector<uint8_t>& _fullRom, const std::vector<uint8_t>& _sysex)
