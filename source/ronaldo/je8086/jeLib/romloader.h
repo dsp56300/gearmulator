@@ -14,9 +14,8 @@ namespace jeLib
 		static Rom findROM();
 
 	private:
-		static Rom loadFromMidiFiles_Keyboard(std::vector<std::string>& files);
+		static Rom loadFromMidiFilesKeyboard(const std::vector<std::string>& _files);
 
-		static constexpr size_t RomSizeKeyboardMidi = 79372;
-		static constexpr size_t RomCountKeyboardMidi = 8;
+		static bool parseSysexDump(std::vector<uint8_t>& _fullRom, const std::vector<uint8_t>& _sysex);
 	};
 }

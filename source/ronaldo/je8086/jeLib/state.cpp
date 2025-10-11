@@ -35,16 +35,32 @@ namespace jeLib
 		}
 	}
 
-	uint32_t State::getAddress(const Dump& _dump)
+	rLib::Storage::Address4 State::getAddress4(const Dump& _dump)
 	{
 		if (!validateAddressBasedDump(_dump))
+			return rLib::Storage::InvalidAddress4;
+
+		return rLib::Storage::Address4
+		{
+			_dump[6],
+			_dump[7],
+			_dump[8],
+			_dump[9]
+		};
+	}
+
+	uint32_t State::getAddress(const Dump& _dump)
+	{
+		const auto a4 = getAddress4(_dump);
+
+		if (!rLib::Storage::isValid(a4))
 			return InvalidAddress;
 
 		const uint32_t address = 
-			(static_cast<uint32_t>(_dump[6]) << 24) | 
-			(static_cast<uint32_t>(_dump[7]) << 16) | 
-			(static_cast<uint32_t>(_dump[8]) << 8) | 
-			static_cast<uint32_t>(_dump[9]);
+			(static_cast<uint32_t>(a4[0]) << 24) | 
+			(static_cast<uint32_t>(a4[1]) << 16) | 
+			(static_cast<uint32_t>(a4[2]) << 8) | 
+			 static_cast<uint32_t>(a4[3]);
 
 		return address;
 	}

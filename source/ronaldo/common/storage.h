@@ -16,6 +16,7 @@ namespace rLib
 		using Address4 = std::array<uint8_t, 4>;
 		using Address3 = std::array<uint8_t, 3>;
 
+		static constexpr Address4 InvalidAddress4{ 0xff, 0xff, 0xff, 0xff };
 		static constexpr uint8_t InvalidData = 0xff;
 		static constexpr uint32_t BlockShift = 7;
 		static constexpr uint32_t BlockSize = 1 << BlockShift;
@@ -35,6 +36,12 @@ namespace rLib
 		{
 			return Address3{ _addr[0], _addr[1], _addr[2] };
 		}
+
+		static bool isValid(const Address4& _addr)
+		{
+			return (_addr[0] & 0x80) == 0 && (_addr[1] & 0x80) == 0 && (_addr[2] & 0x80) == 0 && (_addr[3] & 0x80) == 0;
+		}
+
 	private:
 		std::map<Address3, Block> m_storage;
 	};

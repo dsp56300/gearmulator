@@ -24,6 +24,7 @@ namespace jeLib
 
 		static constexpr Address InvalidAddress = 0xFFFFFFFF;
 
+		static rLib::Storage::Address4 getAddress4(const Dump& _dump);
 		static Address getAddress(const Dump& _dump);
 		static bool setAddress(Dump& _dump, Address _address);
 
