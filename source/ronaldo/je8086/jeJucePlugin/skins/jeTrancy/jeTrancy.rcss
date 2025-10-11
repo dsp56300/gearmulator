@@ -425,10 +425,10 @@ button
 }
 
 :assignvelocity, :assigncontrol {
-	background-color: #1f84a099;
+	background-color: #00a0ad55;
 }
 button:active {
-	transform: scale(0.98);
+	transform: scale(0.92);
 	image-color: #ccc;
 }
 
