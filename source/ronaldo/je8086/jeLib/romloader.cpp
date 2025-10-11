@@ -17,13 +17,23 @@
 namespace jeLib
 {
 	static constexpr size_t FileSizeKeyboardMidi = 79372;
+	static constexpr size_t FileSizeRackMidi = 79373;	// 14 files total, first 8 have the same size as keyboard
 	static constexpr size_t FileCountKeyboardMidi = 8;
+	static constexpr size_t FileCountRackMidi = 6;
 
 	Rom RomLoader::findROM()
 	{
 		auto files = synthLib::RomLoader::findFiles(".mid", FileSizeKeyboardMidi, FileSizeKeyboardMidi);
 		if (!files.empty() && files.size() == FileCountKeyboardMidi)
-			return loadFromMidiFilesKeyboard(files);
+		{
+			auto filesRack = synthLib::RomLoader::findFiles(".mid", FileSizeRackMidi, FileSizeRackMidi);
+
+			if (!filesRack.empty() && filesRack.size() == FileCountRackMidi)
+			{
+				files.insert(files.end(), filesRack.begin(), filesRack.end());
+			}
+			return loadFromMidiFiles(files);
+		}
 
 		files = synthLib::RomLoader::findFiles(".bin", Rom::RomSizeKeyboard, Rom::RomSizeKeyboard);
 		if (!files.empty())
@@ -35,7 +45,7 @@ namespace jeLib
 		return {};
 	}
 
-	Rom RomLoader::loadFromMidiFilesKeyboard(const std::vector<std::string>& _files)
+	Rom RomLoader::loadFromMidiFiles(const std::vector<std::string>& _files)
 	{
 		std::vector<std::vector<uint8_t>> sysexMessages;
 
@@ -45,19 +55,32 @@ namespace jeLib
 				return {};
 		}
 
+		Range totalRange = { std::numeric_limits<uint32_t>::max(), 0 };
+
 		std::vector<uint8_t> fullRom;
 
 		for (const auto& message : sysexMessages)
 		{
-			if (!parseSysexDump(fullRom, message))
+			auto range = parseSysexDump(fullRom, message);
+			if (range.second <= range.first)
 				return {};
+
+			totalRange.first = std::min(totalRange.first, range.first);
+			totalRange.second = std::max(totalRange.second, range.second);
 		}
+
+		fullRom.erase(fullRom.begin() + totalRange.second, fullRom.end());
+		fullRom.erase(fullRom.begin(), fullRom.begin() + totalRange.first);
+
+//		baseLib::filesystem::writeFile("D:\\je8086_rom.bin", fullRom);
 
 		return Rom(fullRom, baseLib::filesystem::getFilenameWithoutPath(_files.front()));
 	}
 
-	bool RomLoader::parseSysexDump(std::vector<uint8_t>& _fullRom, const std::vector<uint8_t>& _sysex)
+	RomLoader::Range RomLoader::parseSysexDump(std::vector<uint8_t>& _fullRom, const std::vector<uint8_t>& _sysex)
 	{
+		Range result = { std::numeric_limits<uint32_t>::max(), 0 };
+
 		try
 		{
 			baseLib::BinaryStream f;
@@ -66,7 +89,7 @@ namespace jeLib
 			const auto addr4 = State::getAddress4(_sysex);
 
 			if (!rLib::Storage::isValid(addr4))
-				return false;
+				return {};
 
 			constexpr auto headerSize = std::size(g_sysexHeader) + 1 /* cmd */ + addr4.size();
 			constexpr auto footerSize = std::size(g_sysexFooter);
@@ -75,16 +98,18 @@ namespace jeLib
 
 			const auto offset = rLib::Storage::toLinearAddress(addr4);
 
+			result.first = std::min(result.first, offset);
+
 			if (State::calcChecksum(_sysex) != _sysex[_sysex.size()-2])
-				return false;
+				return {};
 
 			const auto requiredOutSize = offset + len * 7 / 8;
 
 			if (_fullRom.size() < requiredOutSize)
 				_fullRom.resize(requiredOutSize, 0xff);
 
-			size_t outIndex = offset;
-			size_t inIndex = headerSize;
+			uint32_t outIndex = offset;
+			uint32_t inIndex = headerSize;
 
 			for (size_t i = 0; i < len; i += 8)
 			{
@@ -104,12 +129,14 @@ namespace jeLib
 				}
 			}
 
-			return true;
+			result.second = std::max(result.second, outIndex);
+
+			return result;
 		}
 		catch (std::range_error& e)
 		{
 			LOG("Exception reading sysex dump: " << e.what());
-			return false;
+			return {};
 		}
 	}
 }

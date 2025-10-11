@@ -14,8 +14,10 @@ namespace jeLib
 		static Rom findROM();
 
 	private:
-		static Rom loadFromMidiFilesKeyboard(const std::vector<std::string>& _files);
+		using Range = std::pair<uint32_t, uint32_t>;
 
-		static bool parseSysexDump(std::vector<uint8_t>& _fullRom, const std::vector<uint8_t>& _sysex);
+		static Rom loadFromMidiFiles(const std::vector<std::string>& _files);
+
+		static Range parseSysexDump(std::vector<uint8_t>& _fullRom, const std::vector<uint8_t>& _sysex);
 	};
 }
