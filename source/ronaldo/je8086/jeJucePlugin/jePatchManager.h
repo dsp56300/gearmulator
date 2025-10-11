@@ -1,6 +1,8 @@
 #pragma once
 
-#include "virusJucePlugin/PatchManager.h"
+#include "jeLib/rom.h"
+
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
 namespace jucePluginEditorLib
 {
@@ -37,5 +39,6 @@ namespace jeJucePlugin
 		Editor& m_editor;
 		jucePluginEditorLib::Processor& m_processor;
 		Controller& m_controller;
+		std::vector<jeLib::Rom::Preset> m_presets;
 	};
 }

@@ -3,6 +3,7 @@
 #include "jeEditor.h"
 
 #include "jeController.h"
+#include "jeLib/romloader.h"
 #include "jeLib/state.h"
 #include "jucePluginLib/filetype.h"
 
@@ -22,6 +23,26 @@ namespace jeJucePlugin
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 
 		PatchManager::startLoaderThread();
+
+		auto rom = jeLib::RomLoader::findROM();
+
+		if (rom.isValid())
+		{
+			rom.getPresets(m_presets);
+		}
+
+		auto addRomBank = [this](const uint32_t _bank, const char _name)
+		{
+			pluginLib::patchDB::DataSource ds;
+			ds.type = pluginLib::patchDB::SourceType::Rom;
+			ds.bank = _bank;
+			ds.name = std::string("ROM ") + _name;
+			addDataSource(ds);
+		};
+
+		addRomBank(0, 'A');
+		addRomBank(1, 'b');
+		addRomBank(2, 'P');
 	}
 
 	PatchManager::~PatchManager()
@@ -29,13 +50,31 @@ namespace jeJucePlugin
 		stopLoaderThread();
 	}
 
-	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part, uint64_t _userData)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)
 	{
 		return m_controller.requestPatchForPart(_data, _part, _userData);
 	}
 
-	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program)
+	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, uint32_t _program)
 	{
+		if (_bank < 2)
+		{
+			constexpr auto presetsPerBank = 64;
+			const auto first = _bank * presetsPerBank;
+			const auto last = first + presetsPerBank;
+
+			for (size_t i=first; i<last; ++i)
+			{
+				if (i >= m_presets.size())
+					return !_results.empty();
+
+				pluginLib::patchDB::Data presetData;
+				for (auto& j : m_presets[i])
+					presetData.insert(presetData.end(), j.begin(), j.end());
+				_results.emplace_back(std::move(presetData));
+			}
+			return true;
+		}
 		return false;
 	}
 

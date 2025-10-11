@@ -11,6 +11,9 @@ namespace jeLib
 	class Rom
 	{
 	public:
+		using Sysex = std::vector<uint8_t>;
+		using Preset = std::vector<Sysex>;
+
 		static constexpr size_t RomSizeKeyboard = 512 * 1024;
 		static constexpr size_t RomSizeRack = (1024-128) * 1024;
 
@@ -25,7 +28,11 @@ namespace jeLib
 
 		DeviceType getDeviceType() const;
 
+		bool getPresets(std::vector<Preset>& _presets) const;
+
 	private:
+		Preset getPatch(size_t _index, const Sysex& _presetData) const;
+
 		std::string m_name;
 		std::vector<uint8_t> m_data;
 	};
