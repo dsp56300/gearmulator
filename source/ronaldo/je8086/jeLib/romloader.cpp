@@ -74,6 +74,9 @@ namespace jeLib
 
 //		baseLib::filesystem::writeFile("D:\\je8086_rom.bin", fullRom);
 
+		if (fullRom.size() != Rom::RomSizeKeyboard && fullRom.size() != Rom::RomSizeRack)
+			return {};
+
 		return Rom(fullRom, baseLib::filesystem::getFilenameWithoutPath(_files.front()));
 	}
 
