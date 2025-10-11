@@ -12,7 +12,7 @@ namespace jeLib
 	{
 	public:
 		static constexpr size_t RomSizeKeyboard = 512 * 1024;
-		static constexpr size_t RomSizeRack = 1024 * 1024;
+		static constexpr size_t RomSizeRack = (1024-128) * 1024;
 
 		Rom() = default;
 		explicit Rom(const std::string& _filename);
