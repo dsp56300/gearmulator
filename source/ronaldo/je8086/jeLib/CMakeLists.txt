@@ -17,7 +17,6 @@ set(SOURCES
 	romloader.cpp romloader.h
 	state.cpp state.h
 	sysexRemoteControl.cpp sysexRemoteControl.h
-	types.h
 )
 
 target_sources(jeLib PRIVATE ${SOURCES})
