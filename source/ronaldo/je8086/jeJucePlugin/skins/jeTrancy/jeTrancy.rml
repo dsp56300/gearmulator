@@ -549,10 +549,10 @@
 			<combo id="romselector" class="bottomText" style="left: 925dp; width: 400dp; height: 30dp;"><combotext/></combo>
 
 			<div data-class-juceConditionDisabled="deviceModel!='jp8000'" data-model="plugin" class="abs">
-				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">JP-8000</div>		
+				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">Keyboard</div>		
 			</div>
 			<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" class="abs">
-				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">JP-8080</div>		
+				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">Rack</div>		
 			</div>
 			
 		</div>
