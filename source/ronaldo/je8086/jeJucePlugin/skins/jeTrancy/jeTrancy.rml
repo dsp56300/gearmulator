@@ -130,7 +130,7 @@
 					</div>				
 					
 					
-					<div class="vlayoutLeds" style="height: 240dp; width: 210dp">
+					<div class="vlayoutLeds" style="height: 242dp; width: 210dp">
 						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="0" isToggle="1"/>
 						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="1" isToggle="1"/>
 						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="2" isToggle="1"/>
@@ -203,7 +203,7 @@
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
 						</div>
 					</div>					
-					<div class="knobs_row2" style="left: 45dp; gap: 63dp;">
+					<div class="knobs_row2" style="left: 43dp; gap: 63dp;">
 						<knob class="knob" param="Osc2Range" id="Osc2Range" />
 						<knob class="knob" param="Osc2FineWide" id="Osc2FineWide" />
 					</div>
@@ -211,7 +211,7 @@
 						
 				<!-- Filter -->
 				<div class="abs" style="left: 1490dp; top: 30dp; width: 630dp; height: 287dp;">
-					<div class="abs vlayoutLeds" style="left: 412dp; top: 16dp; height: 140dp; width: 160dp">
+					<div class="abs vlayoutLeds" style="left: 434dp; top: 16dp; height: 140dp; width: 140dp">
 						<button class="ledRed" param="FilterType" id="FilterType" valueOn="0" isToggle="1"/>
 						<button class="ledRed" param="FilterType" id="FilterType" valueOn="1" isToggle="1"/>
 						<button class="ledRed" param="FilterType" id="FilterType" valueOn="2" isToggle="1"/>
@@ -241,7 +241,7 @@
 						<combotext></combotext>
 					</combo>					
 					
-					<div class="knobs_row2" style="left: 29dp; top: 158dp; gap: 63dp;">
+					<div class="knobs_row2" style="left: 29dp; top: 160dp; gap: 63dp;">
 						<knob class="knob" param="AmpLfo1Depth" id="AmpLfo1Depth" />
 						<knob class="knob" param="AmpLevel" id="AmpLevel" />
 					</div>
@@ -253,11 +253,11 @@
 			
 				<!-- Modulation (LFO 2) -->
 				<div class="abs" style="left: -1dp; top: 0dp; height: 100%; width: 314dp;">
-					<div class="knobs_row3" style="top: 67dp; left: 40dp;">
+					<div class="knobs_row3" style="top: 67dp; left: 39dp;">
 						<knob class="knob" param="AmpLfo2Depth" id="AmpLfo2Depth" />
 						<knob class="knob" param="FilterLfo2Depth" id="FilterLfo2Depth" />
 					</div>					
-					<div class="knobs_row3" style="left: 40dp;">
+					<div class="knobs_row3" style="left: 39dp;">
 						<knob class="knob" param="Lfo2Rate" id="Lfo2Rate" />
 						<knob class="knob" param="PitchLfo2Depth" id="PitchLfo2Depth" />
 					</div>
@@ -283,7 +283,7 @@
 						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="2" isToggle="1"/>
 					</div>
 
-					<div class="knobs_row3" style="left: 52dp; gap: 65dp;">
+					<div class="knobs_row3" style="left: 51dp; gap: 65dp;">
 						<knob class="knob" param="OscillatorBalance" id="OscillatorBalance" />
 						<knob class="knob" param="CrossModulationDepth" id="CrossModulationDepth" />
 						<knob class="knob" param="OscLfo1Depth" id="OscLfo1Depth" />
@@ -300,7 +300,7 @@
 				<!-- Filter Envelope -->
 				<div class="abs" style="left: 1412dp; width: 550dp; height: 100%;">
 					<input class="abs sliderV slider_row3"  param="FilterEnvelopeDepth" id="FilterEnvelopeDepth" type="range" orientation="vertical" style="left: 50dp;"/>
-					<div class="abs hlayout slider_row3" style="left: 174dp; gap: 32dp;">
+					<div class="abs hlayout slider_row3" style="left: 174dp; gap: 24dp;">
 						<input class="sliderV" type="range" orientation="vertical" param="FilterEnvelopeAttackTime" id="FilterEnvelopeAttackTime" />
 						<input class="sliderV" type="range" orientation="vertical" param="FilterEnvelopeDecayTime" id="FilterEnvelopeDecayTime" />
 						<input class="sliderV" type="range" orientation="vertical" param="FilterEnvelopeSustainLevel" id="FilterEnvelopeSustainLevel" />
@@ -310,7 +310,7 @@
 				
 				<!-- Amp Envelope -->
 				<div class="abs" style="left: 1981dp; width: 452dp; height: 100%;">
-					<div class="abs hlayout slider_row3" style="left: 56dp; gap: 32dp;">
+					<div class="abs hlayout slider_row3" style="left: 56dp; gap: 24dp;">
 						<input class="sliderV" type="range" orientation="vertical" param="AmpEnvelopeAttackTime" id="AmpEnvelopeAttackTime" />
 						<input class="sliderV" type="range" orientation="vertical" param="AmpEnvelopeDecayTime" id="AmpEnvelopeDecayTime" />
 						<input class="sliderV" type="range" orientation="vertical" param="AmpEnvelopeSustainLevel" id="AmpEnvelopeSustainLevel" />
@@ -356,7 +356,7 @@
 				
 				
 				<!-- LCD -->
-				<div id="lcd" class="abs" style="left: 1259dp; top: 52dp; width: 445dp; height: 106dp;" lcdBackgroundColor="2a2b2d" lcdTextColor="00fe00"/>
+				<div id="lcd" class="abs" style="left: 1250dp; top: 52dp; width: 472dp; height: 106dp;" lcdBackgroundColor="2a2b2d" lcdTextColor="00fe00"/>
 				
 				<!-- pairs of two buttons on the right -->
 				<div class="abs" style="left: 1761dp; top: 14dp;">
@@ -377,7 +377,7 @@
 
 
 				<!-- bottom left, Volume and Semitones knobs -->
-				<div class="abs hlayout" style="left: 39dp; top: 304dp; gap: 92dp;">
+				<div class="abs hlayout" style="left: 37dp; top: 305dp; gap: 91dp;">
 					<knob class="knob mainVolume"/>
 					<knob class="knob" param="PartTranspose"/>
 				</div>	

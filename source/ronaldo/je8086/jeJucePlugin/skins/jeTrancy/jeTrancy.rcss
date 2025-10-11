@@ -198,7 +198,7 @@ button
 	width: 500dp;
 	height: 60dp;
 	left: 189dp;
-	top: 174dp;
+	top: 177dp;
 	gap: 22dp;
 }
 
@@ -216,9 +216,9 @@ button
 	display: flex;
 	width: 823dp;
 	height: 89dp;
-	left: 764dp;
+	left: 762dp;
 	top: 148dp;
-	gap: 57dp;
+	gap: 57.2dp;
 }
 
 .ledBlue
@@ -286,10 +286,10 @@ button
 {
 	position: absolute;
 	top: 175dp;
-	left: 28dp;
+	left: 26dp;
 
 	display: flex;
-	gap: 56dp;
+	gap: 57dp;
 }
 
 .knobs_row3
@@ -305,14 +305,15 @@ button
 .sliderV sliderbar
 {
 	decorator: image(slider.png contain);
-	height: 74dp;
-	width: 61dp;
+	width: 130dp;
+	height: 165dp;
+	margin: -38dp 0dp -20dp -28dp;	
 }
 
 .sliderV
 {
-	height: 250dp;
-	width: 61dp;
+	height: 284dp;
+	width: 69dp;
 }
 
 .slider_row2
