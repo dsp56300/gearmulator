@@ -3,6 +3,7 @@
 #include "jeEditor.h"
 
 #include "jeController.h"
+#include "jePluginProcessor.h"
 #include "jeLib/romloader.h"
 #include "jeLib/state.h"
 #include "jucePluginLib/filetype.h"

@@ -13,6 +13,7 @@ namespace jucePluginEditorLib
 
 namespace jeJucePlugin
 {
+	class AudioPluginAudioProcessor;
 	class JePartButton;
 	class JeAssign;
 	class PartSelect;
@@ -39,6 +40,7 @@ namespace jeJucePlugin
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 		Controller& getJeController() const { return m_controller; }
+		AudioPluginAudioProcessor& getJeProcessor() const;
 
 	private:
 		void onBtWrite(Rml::Event& _event) const;

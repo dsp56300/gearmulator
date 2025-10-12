@@ -7,6 +7,7 @@
 #include "jePartButton.h"
 #include "jePartSelect.h"
 #include "jePatchManager.h"
+#include "jePluginProcessor.h"
 
 #include "baseLib/filesystem.h"
 
@@ -18,8 +19,6 @@
 #include "jucePluginEditorLib/pluginProcessor.h"
 
 #include "juceRmlUi/rmlElemComboBox.h"
-
-#include "RmlUi/Core/ElementDocument.h"
 
 namespace jeJucePlugin
 {
@@ -34,19 +33,25 @@ namespace jeJucePlugin
 
 		if(auto* romSelector = findChild<juceRmlUi::ElemComboBox>("romselector"))
 		{
-			const auto rom = jeLib::RomLoader::findROM();
+			const auto roms = jeLib::RomLoader::findROMs();
 
-			if(rom.isValid())
-			{
-				const auto& name = rom.getName();
-				romSelector->addOption(name);
-			}
-			else
+			if (roms.empty())
 			{
 				romSelector->addOption("<No ROM found>");
 			}
-			romSelector->setValue(0);
-			romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
+			else
+			{
+				for (const auto & rom : roms)
+				{
+					const auto& name = rom.getName();
+					romSelector->addOption(name);
+				}
+			}
+
+			romSelector->setValue(static_cast<float>(getJeProcessor().getSelectedRomIndex()));
+
+			if (roms.size() < 2)
+				romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 		}
 
 		if (auto* lcd = findChild("lcd"))
@@ -86,8 +91,7 @@ namespace jeJucePlugin
 	{
 		jucePluginEditorLib::Editor::initPluginDataModel(_model);
 
-		// TODO: depends on ROM
-		_model.set("deviceModel", "keyboard");
+		_model.set("deviceModel", getJeProcessor().getSelectedRom().getDeviceType() == jeLib::DeviceType::Keyboard ? "keyboard" : "rack");
 	}
 
 	Editor::~Editor()
@@ -107,6 +111,11 @@ namespace jeJucePlugin
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
 	{
 		return {};
+	}
+
+	AudioPluginAudioProcessor& Editor::getJeProcessor() const
+	{
+		return static_cast<AudioPluginAudioProcessor&>(getProcessor());
 	}
 
 	void Editor::onBtWrite(Rml::Event& _event) const

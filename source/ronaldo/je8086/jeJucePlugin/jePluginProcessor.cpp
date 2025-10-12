@@ -21,6 +21,17 @@ namespace jeJucePlugin
 	                   .withInput("Input", juce::AudioChannelSet::stereo(), true)
 		, {}, pluginLib::initProcessorProperties())
 	{
+		m_roms = jeLib::RomLoader::findROMs();
+
+		// default to keyboard for now
+		for (size_t i=0; i<m_roms.size(); ++i)
+		{
+			if (m_roms[i].getDeviceType() != jeLib::DeviceType::Keyboard)
+				continue;
+			m_selectedRom = i;
+			break;
+		}
+
 		getController();
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
 		Processor::setLatencyBlocks(latencyBlocks);
@@ -38,7 +49,8 @@ namespace jeJucePlugin
 
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()
 	{
-		auto rom = jeLib::RomLoader::findROM();
+		const auto& rom = getSelectedRom();
+
 		if (!rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (512k .bin) is required, but was not found.");
 
@@ -70,6 +82,18 @@ namespace jeJucePlugin
 	pluginLib::Controller* AudioPluginAudioProcessor::createController()
 	{
 		return new jeJucePlugin::Controller(*this);
+	}
+
+	const jeLib::Rom& AudioPluginAudioProcessor::getSelectedRom() const
+	{
+		if (m_roms.empty())
+		{
+			static jeLib::Rom emptyRom;
+			return emptyRom;
+		}
+		if (m_selectedRom >= m_roms.size())
+			return m_roms.back();
+		return m_roms[m_selectedRom];
 	}
 }
 
