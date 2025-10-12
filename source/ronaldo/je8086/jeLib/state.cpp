@@ -481,6 +481,8 @@ namespace jeLib
 
 	bool State::receive(const synthLib::SMidiEvent& _event)
 	{
+		if (_event.source == synthLib::MidiEventSource::Internal)
+			return false;
 		return receive(_event.sysex);
 	}
 
@@ -489,13 +491,18 @@ namespace jeLib
 		if (_sysex.empty())
 			return false;
 
-		auto addr = getAddress(_sysex);
-		auto area = getAddressArea(addr);
+		const auto addr = getAddress(_sysex);
 
-		if (area != AddressArea::PerformanceTemp)
+		if (addr == InvalidAddress)
 			return false;
 
+		const auto area = getAddressArea(addr);
+
 		const auto addr4 = toAddress(addr);
+
+		const auto command = _sysex[std::size(g_sysexHeader)];
+		if (command != static_cast<uint8_t>(SysexByte::CommandIdDataSet1))
+			return false;
 
 		constexpr auto firstDataOffset = std::size(g_sysexHeader) + 1 + std::tuple_size_v<decltype(addr4)>;
 
@@ -503,8 +510,31 @@ namespace jeLib
 
 		dataToWrite.insert(dataToWrite.end(), _sysex.begin() + firstDataOffset, _sysex.end() - 2 /*checksum + eox*/);
 
-		m_tempPerformance.write(addr4, dataToWrite);
+		if (area == AddressArea::System)
+		{
+			m_system.write(addr4, dataToWrite);
+			return true;
+		}
 
+		if (area == AddressArea::PerformanceTemp)
+		{
+			m_tempPerformance.write(addr4, dataToWrite);
+			return true;
+		}
+
+		return false;
+	}
+
+	bool State::createSystemDump(synthLib::SMidiEvent& _result) const
+	{
+		auto adr = static_cast<uint32_t>(AddressArea::System);
+		auto addr4 = toAddress(adr);
+		_result.sysex = createHeader(SysexByte::CommandIdDataSet1, SysexByte::DeviceIdDefault, addr4);
+		const auto numRead = m_system.read(_result.sysex, addr4, static_cast<uint32_t>(SystemParameter::DataSizeRack));
+		if (!numRead)
+			return false;
+		assert(numRead == static_cast<uint32_t>(SystemParameter::DataSizeRack) || numRead == static_cast<uint32_t>(SystemParameter::DataSizeKeyboard));
+		createFooter(_result.sysex);
 		return true;
 	}
 

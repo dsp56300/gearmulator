@@ -33,6 +33,9 @@ namespace jeLib
 	{
 		std::vector<synthLib::SMidiEvent> results;
 
+		if (!m_state.createSystemDump(results.emplace_back(synthLib::MidiEventSource::Device)))
+			results.pop_back();
+
 		if (!m_state.createTempPerformanceDumps(results))
 			return false;
 

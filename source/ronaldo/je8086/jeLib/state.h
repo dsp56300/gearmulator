@@ -73,14 +73,16 @@ namespace jeLib
 
 		bool receive(const std::vector<synthLib::SMidiEvent>& _events);
 		bool receive(const synthLib::SMidiEvent& _event);
-		bool receive(const Dump& _event);
+		bool receive(const Dump& _sysex);
 
+		bool createSystemDump(synthLib::SMidiEvent& _result) const;
 		bool createTempPerformanceDumps(std::vector<synthLib::SMidiEvent>& _results, PerformanceData _data, uint32_t _sizeRack, uint32_t _sizeKeyboard) const;
 		bool createTempPerformanceDumps(std::vector<synthLib::SMidiEvent>& _results) const;
 		bool createTempPerformanceDumps(std::vector<synthLib::SMidiEvent>& _results, PerformanceData _data) const;
 
 	private:
 		rLib::Storage m_tempPerformance;
+		rLib::Storage m_system;
 		std::map<uint32_t, Dump> m_stateDumps;
 	};
 }

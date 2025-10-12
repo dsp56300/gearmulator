@@ -54,7 +54,7 @@ namespace jeLib
 		MotionControlData2 = 0x00400000,
 	};
 
-	enum SystemParameter : uint8_t
+	enum class SystemParameter : uint8_t
 	{
 		PerformanceBank,				// User, Preset
 		PerformanceNumber,				// 11 - 88
@@ -81,6 +81,9 @@ namespace jeLib
 		RibbonHold,				        // (keyboard only) Off, On
 		PerformanceGroupNumber,	        // (rack only) Group 1..64
 		RemoteKeyboardChannel,	        // (rack only) 1-16, All
+
+		DataSizeRack,
+		DataSizeKeyboard = PerformanceGroupNumber,
 	};
 
 	enum PatternSetup : uint8_t // total size 48 bytes

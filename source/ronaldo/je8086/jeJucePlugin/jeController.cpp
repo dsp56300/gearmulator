@@ -15,6 +15,7 @@ namespace jeJucePlugin
 		constexpr uint8_t g_paramPagePatch = 0;
 		constexpr uint8_t g_paramPagePart = 2;
 		constexpr uint8_t g_paramPagePerformance = 3;
+		constexpr uint8_t g_paramPageSystem = 5;
 
 		constexpr size_t g_dataStartIndex = std::size(jeLib::g_sysexHeader) + 1/*command*/ + std::tuple_size_v<rLib::Storage::Address4>;
 	}
@@ -70,6 +71,13 @@ namespace jeJucePlugin
 
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Patch>(index), _value);
 
+			sendSysEx(msg);
+			m_state.receive(msg);
+		}
+		else if (desc.page == g_paramPageSystem)
+		{
+			// system parameter
+			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::SystemParameter>(desc.index), _value);
 			sendSysEx(msg);
 			m_state.receive(msg);
 		}
@@ -385,26 +393,30 @@ namespace jeJucePlugin
 				sendChange(2);
 				break;
 			case jeLib::SystemParameter::MasterTune:
-				sendChange(50);	// 440Hz
+				{
+					auto* param = getParameter("MasterTune", 0);
+					if (param)
+						param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
+				}
 				break;
-			case jeLib::PerformanceControlChannel:
+			case jeLib::SystemParameter::PerformanceControlChannel:
 				sendChange(0x11);	// off
 				break;
-			case jeLib::LocalSwitch:
+			case jeLib::SystemParameter::LocalSwitch:
 				sendChange(1);
 				break;
-			case jeLib::TxRxEditMode:
+			case jeLib::SystemParameter::TxRxEditMode:
 				sendChange(0); // MODE1
 				break;
-			case jeLib::TxRxEditSwitch:
+			case jeLib::SystemParameter::TxRxEditSwitch:
 				break;
-			case jeLib::TxRxProgramChangeSwitch:
+			case jeLib::SystemParameter::TxRxProgramChangeSwitch:
 				sendChange(0);	// disable program changes, we handle them ourselves
 				break;
-			case jeLib::KeyboardShift:
+			case jeLib::SystemParameter::KeyboardShift:
 				sendChange(2); // = 0
 				break;
-			case jeLib::RemoteKeyboardChannel:
+			case jeLib::SystemParameter::RemoteKeyboardChannel:
 				sendChange(4); // only relevant for the rack
 				break;
 			default:;
