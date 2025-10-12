@@ -63,5 +63,7 @@ namespace jeJucePlugin
 		jeLib::State m_state;
 
 		std::array<std::string, static_cast<size_t>(PatchType::Count)> m_patchNames;
+
+		baseLib::EventListener<uint8_t, uint8_t, pluginLib::ParamValue> m_onParamChanged;
 	};
 }

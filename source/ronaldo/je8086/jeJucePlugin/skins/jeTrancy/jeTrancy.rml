@@ -388,7 +388,7 @@
 
 				<!-- bottom left, Volume and Semitones knobs -->
 				<div class="abs hlayout" style="left: 37dp; top: 305dp; gap: 91dp;">
-					<knob class="knob mainVolume"/>
+					<knob class="knob mainVolume" param="MasterVolume"/>
 					<knob class="knob" param="PartTranspose"/>
 					<knob class="knob" param="MasterTune"/>
 				</div>	

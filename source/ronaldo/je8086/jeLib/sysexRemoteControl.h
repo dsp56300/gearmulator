@@ -27,7 +27,7 @@ namespace jeLib
 		baseLib::Event<std::array<char, 40>> evLcdDdDataChanged;
 		baseLib::Event<Leds> evLedsChanged;
 		baseLib::Event<uint16_t> evButtonsChanged;
-		baseLib::Event<uint8_t, uint8_t> evParamChanged; // param index, value
+		baseLib::Event<uint8_t, uint8_t, int32_t> evParamChanged; // param page, param index, value
 
 		enum class CommandType : uint8_t
 		{
@@ -47,6 +47,7 @@ namespace jeLib
 
 		static void sendSysexButtons(std::vector<synthLib::SMidiEvent>& _dst, uint16_t _buttonStates);
 		static void sendSysexLeds(std::vector<synthLib::SMidiEvent>& _dst, const Leds& _ledStates);
+		static void sendSysexParameter(std::vector<synthLib::SMidiEvent>& _dst, uint8_t _page, uint8_t _index, const int32_t& _value);
 
 		bool receive(const synthLib::SMidiEvent& _input);
 		bool receive(const std::vector<uint8_t>& _input);

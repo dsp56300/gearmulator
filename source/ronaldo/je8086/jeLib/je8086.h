@@ -52,7 +52,6 @@ namespace jeLib
 		std::vector<synthLib::SMidiEvent> m_midiInEvents;
 		SampleBuffer m_sampleBuffer;
 		synthLib::MidiRateLimiter m_midiInRateLimiter;
-		SysexRemoteControl m_sysexRemoteControl;
 		std::vector<synthLib::SMidiEvent> m_midiOutEvents;
 	};
 }

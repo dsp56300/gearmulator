@@ -85,7 +85,29 @@ namespace jeLib
 			ev.sysex.push_back(_ledStates[i] ? 1 : 0);
 			
 		ev.sysex.push_back(0xf7);
-		_dst.emplace_back(ev);
+	}
+
+	void SysexRemoteControl::sendSysexParameter(std::vector<synthLib::SMidiEvent>& _dst, const uint8_t _page, const uint8_t _index, const int32_t& _value)
+	{
+		auto& ev = _dst.emplace_back(synthLib::MidiEventSource::Internal);
+
+		createSysexHeader(ev.sysex, CommandType::SetParam);
+
+		ev.sysex.push_back((_page >> 4) & 0xf);
+		ev.sysex.push_back(_page & 0xf);
+		ev.sysex.push_back((_index >> 4) & 0xf);
+		ev.sysex.push_back(_index & 0xf);
+
+		ev.sysex.push_back((_value >> 28) & 0xf);
+		ev.sysex.push_back((_value >> 24) & 0xf);
+		ev.sysex.push_back((_value >> 20) & 0xf);
+		ev.sysex.push_back((_value >> 16) & 0xf);
+		ev.sysex.push_back((_value >> 12) & 0xf);
+		ev.sysex.push_back((_value >> 8) & 0xf);
+		ev.sysex.push_back((_value >> 4) & 0xf);
+		ev.sysex.push_back(_value & 0xf);
+
+		ev.sysex.push_back(0xf7);
 	}
 
 	bool SysexRemoteControl::receive(const synthLib::SMidiEvent& _input)
@@ -151,28 +173,28 @@ namespace jeLib
 
 		case CommandType::SetParam:
 			{
-				if(_input.size() != g_headerSize + g_footerSize + 6) // + 6 nibbles
+				if(_input.size() != g_headerSize + g_footerSize + 12) // + 12 nibbles
 					return false;
 				uint8_t paramPage = 0;
 				for(uint32_t b=0; b<2; ++b)
 				{
-					const uint32_t n = _input[i++];
+					const uint8_t n = _input[i++];
 					paramPage = (paramPage<<4) | n;
 				}
 				uint8_t paramIndex = 0;
 				for(uint32_t b=0; b<2; ++b)
 				{
-					const uint32_t n = _input[i++];
+					const uint8_t n = _input[i++];
 					paramIndex = (paramIndex<<4) | n;
 				}
-				uint8_t paramValue = 0;
-				for(uint32_t b=0; b<2; ++b)
+				int32_t paramValue = 0;
+				for(uint32_t b=0; b<8; ++b)
 				{
-					const uint32_t n = _input[i++];
+					const uint8_t n = _input[i++];
 					paramValue = (paramValue<<4) | n;
 				}
-				
-				evParamChanged(paramIndex + paramPage * 128, paramValue);
+
+				evParamChanged(paramPage, paramIndex, paramValue);
 			}
 			return true;
 

@@ -16,20 +16,28 @@ namespace jeJucePlugin
 		constexpr uint8_t g_paramPagePart = 2;
 		constexpr uint8_t g_paramPagePerformance = 3;
 		constexpr uint8_t g_paramPageSystem = 5;
+		constexpr uint8_t g_paramPageCustom = 6;
 
 		constexpr size_t g_dataStartIndex = std::size(jeLib::g_sysexHeader) + 1/*command*/ + std::tuple_size_v<rLib::Storage::Address4>;
 	}
 
 	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_je.json")
 	{
-	    registerParams(_p, [](const uint8_t _part, const bool _isNonPartExclusive)
-	    {
-			if(_isNonPartExclusive)
+		registerParams(_p, [](const uint8_t _part, const bool _isNonPartExclusive)
+		{
+			if (_isNonPartExclusive)
 				return juce::String();
-			char temp[2] = {static_cast<char>('A' + _part),0};
-		    return juce::String(temp);
-	    });
+			char temp[2] = { static_cast<char>('A' + _part),0 };
+			return juce::String(temp);
+		});
 
+		m_onParamChanged.set(m_sysexRemote.evParamChanged, [this](const uint8_t _page, const uint8_t _index, const pluginLib::ParamValue& _value)
+		{
+			auto parameters = findSynthParam(0, _page, _index);
+
+			for (auto* parameter : parameters)
+				parameter->setUnnormalizedValueNotifyingHost(_value, pluginLib::Parameter::Origin::PresetChange);
+		});
 		Controller::onStateLoaded();
 	}
 
@@ -80,6 +88,13 @@ namespace jeJucePlugin
 			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::SystemParameter>(desc.index), _value);
 			sendSysEx(msg);
 			m_state.receive(msg);
+		}
+		else if (desc.page == g_paramPageCustom)
+		{
+			// custom messages
+			std::vector<synthLib::SMidiEvent> events;
+			jeLib::SysexRemoteControl::sendSysexParameter(events, _parameter.getDescription().page,_parameter.getDescription().index, _value);
+			sendSysEx(events.front().sysex);
 		}
 		else
 		{

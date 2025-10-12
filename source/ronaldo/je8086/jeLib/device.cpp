@@ -7,10 +7,21 @@
 
 namespace jeLib
 {
+	constexpr uint8_t g_paramPageMasterVolume = 6;
+	constexpr uint8_t g_paramIndexMasterVolume = 0;
+
 	Device::Device(const synthLib::DeviceCreateParams& _params) : synthLib::Device(_params)
 	{
 		m_je8086.reset(new Je8086(_params.romData, _params.homePath + "/roms/ram_dump.bin"));
 		m_thread.reset(new JeThread(*m_je8086));
+
+		m_paramChangedListener.set(m_sysexRemote.evParamChanged, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
+		{
+			onParamChanged(_page, _index, _value);
+		});
+
+		// inform UI about default master volume
+		createMasterVolumeMessage(m_midiOut);
 	}
 
 	Device::~Device()
@@ -35,6 +46,8 @@ namespace jeLib
 
 		if (!m_state.createSystemDump(results.emplace_back(synthLib::MidiEventSource::Device)))
 			results.pop_back();
+
+		createMasterVolumeMessage(results);
 
 		if (!m_state.createTempPerformanceDumps(results))
 			return false;
@@ -64,9 +77,13 @@ namespace jeLib
 			// is never processed, the state will be lost
 			m_state.receive(e.sysex);
 
-			m_midiIn.emplace_back(e);
+			if (!m_sysexRemote.receive(e.sysex))
+				m_midiIn.emplace_back(e);
 		}
-		
+
+		// feed master volume to the UI directly because there is no request message for it
+		createMasterVolumeMessage(m_midiOut);
+
 		return true;
 	}
 
@@ -116,15 +133,26 @@ namespace jeLib
 		{
 			const auto s = sampleBuffer.pop_front();
 
-			_outputs[0][i] = dsp56k::dsp2sample<float>(s.first);
-			_outputs[1][i] = dsp56k::dsp2sample<float>(s.second);
+			_outputs[0][i] = dsp56k::dsp2sample<float>(s.first) * m_masterVolume;
+			_outputs[1][i] = dsp56k::dsp2sample<float>(s.second) * m_masterVolume;
 		}
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
-		m_midiIn.emplace_back(_ev);
+		if (!m_sysexRemote.receive(_ev.sysex))
+			m_midiIn.emplace_back(_ev);
 		m_state.receive(_ev);
 		return true;
+	}
+
+	void Device::onParamChanged(uint8_t/* _page*/, uint8_t/* _index*/, const int32_t _value)
+	{
+		m_masterVolume = static_cast<float>(_value) * 0.01f;
+	}
+
+	void Device::createMasterVolumeMessage(std::vector<synthLib::SMidiEvent>& _messages) const
+	{
+		SysexRemoteControl::sendSysexParameter(_messages, g_paramPageMasterVolume, g_paramIndexMasterVolume, static_cast<int32_t>(m_masterVolume * 100.0f));
 	}
 }

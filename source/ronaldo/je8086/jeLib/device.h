@@ -1,9 +1,9 @@
 #pragma once
 
-#include <deque>
 #include <memory>
 
 #include "state.h"
+#include "sysexRemoteControl.h"
 
 #include "synthLib/device.h"
 
@@ -40,6 +40,10 @@ namespace jeLib
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 
+		void onParamChanged(uint8_t _page, uint8_t _index, int32_t _value);
+
+		void createMasterVolumeMessage(std::vector<synthLib::SMidiEvent>& _messages) const;
+
 		std::unique_ptr<Je8086> m_je8086;
 		std::unique_ptr<JeThread> m_thread;
 
@@ -47,5 +51,10 @@ namespace jeLib
 		std::vector<synthLib::SMidiEvent> m_midiOut;
 
 		State m_state;
+		SysexRemoteControl m_sysexRemote;
+
+		baseLib::EventListener<uint8_t, uint8_t, int32_t> m_paramChangedListener;
+
+		float m_masterVolume = 1.0f;
 	};
 }
