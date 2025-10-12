@@ -57,25 +57,31 @@ namespace jeJucePlugin
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, uint32_t _program)
 	{
-		if (_bank < 2)
+		if (_bank > 2)
+			return false;
+
+		constexpr auto patchesPerBank = 64;
+		constexpr auto performancesPerBank = 64;
+
+		uint32_t first = std::min(_bank, static_cast<uint32_t>(2)) * patchesPerBank;
+		uint32_t last = first + patchesPerBank;
+
+		if (_bank >= 2)
 		{
-			constexpr auto presetsPerBank = 64;
-			const auto first = _bank * presetsPerBank;
-			const auto last = first + presetsPerBank;
-
-			for (size_t i=first; i<last; ++i)
-			{
-				if (i >= m_presets.size())
-					return !_results.empty();
-
-				pluginLib::patchDB::Data presetData;
-				for (auto& j : m_presets[i])
-					presetData.insert(presetData.end(), j.begin(), j.end());
-				_results.emplace_back(std::move(presetData));
-			}
-			return true;
+			last = first + performancesPerBank;
 		}
-		return false;
+
+		for (size_t i=first; i<last; ++i)
+		{
+			if (i >= m_presets.size())
+				return !_results.empty();
+
+			pluginLib::patchDB::Data presetData;
+			for (auto& j : m_presets[i])
+				presetData.insert(presetData.end(), j.begin(), j.end());
+			_results.emplace_back(std::move(presetData));
+		}
+		return true;
 	}
 
 	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)

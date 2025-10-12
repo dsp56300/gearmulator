@@ -31,7 +31,8 @@ namespace jeLib
 		bool getPresets(std::vector<Preset>& _presets) const;
 
 	private:
-		Preset getPatch(size_t _index, const Sysex& _presetData) const;
+		static Preset getPatch(size_t _index, const Sysex& _presetData);
+		static Preset getPerformance(size_t _size, const Sysex& _presetData);
 
 		std::string m_name;
 		std::vector<uint8_t> m_data;
