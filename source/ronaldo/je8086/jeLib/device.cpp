@@ -94,7 +94,11 @@ namespace jeLib
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		m_je8086->readMidiOut(_midiOut);
+		if (_midiOut.empty())
+			std::swap(m_midiOut, _midiOut);
+		else
+			_midiOut.insert(_midiOut.end(), m_midiOut.begin(), m_midiOut.end());
+
 		m_state.receive(_midiOut);
 	}
 

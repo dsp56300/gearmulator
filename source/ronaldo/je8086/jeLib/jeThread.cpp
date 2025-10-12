@@ -105,5 +105,8 @@ namespace jeLib
 
 		m_audioOut.push_back(m_je8086.getSampleBuffer().front());
 		m_je8086.clearSampleBuffer();
+
+		std::lock_guard lock(m_mutex);
+		m_je8086.readMidiOut(m_midiOutput);
 	}
 }
