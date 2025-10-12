@@ -31,18 +31,18 @@ namespace jeJucePlugin
 			rom.getPresets(m_presets);
 		}
 
-		auto addRomBank = [this](const uint32_t _bank, const char _name)
+		auto addRomBank = [this](const uint32_t _bank, const std::string& _name)
 		{
 			pluginLib::patchDB::DataSource ds;
 			ds.type = pluginLib::patchDB::SourceType::Rom;
 			ds.bank = _bank;
-			ds.name = std::string("ROM ") + _name;
+			ds.name = _name;
 			addDataSource(ds);
 		};
 
-		addRomBank(0, 'A');
-		addRomBank(1, 'b');
-		addRomBank(2, 'P');
+		addRomBank(0, "Patch A");
+		addRomBank(1, "Patch b");
+		addRomBank(2, "Performance");
 	}
 
 	PatchManager::~PatchManager()
