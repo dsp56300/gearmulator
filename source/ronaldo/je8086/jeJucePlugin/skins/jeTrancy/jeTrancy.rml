@@ -144,8 +144,6 @@
 				</div>
 	
 					
-				<button class="abs btBlackLed" param="RingModulatorSwitch" id="RingModulatorSwitch" style="left: 772dp; top: 76dp;" isToggle="1"/>
-				
 				<!-- OSC 2 -->
 				<div class="abs" style="left: 811dp; top: 30dp; width: 460dp; height: 287dp;">
 					
@@ -212,6 +210,8 @@
 					</div>
 				</div>
 						
+				<button class="abs btBlackLed" param="RingModulatorSwitch" id="RingModulatorSwitch" style="left: 772dp; top: 76dp;" isToggle="1"/>
+				
 				<!-- Filter -->
 				<div class="abs" style="left: 1490dp; top: 30dp; width: 630dp; height: 287dp;">
 					<div class="abs vlayoutLeds" style="left: 434dp; top: 16dp; height: 140dp; width: 140dp">
