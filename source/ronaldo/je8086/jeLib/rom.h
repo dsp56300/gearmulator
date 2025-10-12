@@ -28,11 +28,14 @@ namespace jeLib
 
 		DeviceType getDeviceType() const;
 
-		bool getPresets(std::vector<Preset>& _presets) const;
+		bool getPresets(std::vector<std::vector<Preset>>& _presets) const;
 
 	private:
-		static Preset getPatch(size_t _index, const Sysex& _presetData);
-		static Preset getPerformance(size_t _size, const Sysex& _presetData);
+		Preset getPatch(size_t _index, const Sysex& _presetData) const;
+		Preset getPerformance(size_t _index, const Sysex& _presetData) const;
+
+		uint32_t getPresetSize() const;
+		uint32_t getPerformanceSize() const;
 
 		std::string m_name;
 		std::vector<uint8_t> m_data;

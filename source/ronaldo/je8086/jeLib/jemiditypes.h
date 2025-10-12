@@ -424,7 +424,7 @@ namespace jeLib
 	    ActiveIndicatorOfVelocityAssign = 0x0000016D,      // 00h - 01h | NOT ACTIVE, ACTIVE (***)
 	    ActiveIndicatorOfControlAssign = 0x0000016E,       // 00h - 01h | NOT ACTIVE, ACTIVE (***)
 	    EnvelopeTypeInSolo = 0x0000016F,                   // 00h - 01h | STANDARD, ANALOG
-	    // 00 00 01 70 | (reserved) | (reserved) | (reserved)
+	    Reserved170 = 0x00000170,
 	    Osc2ExternalInputSwitch = 0x00000171,              // 00h - 01h | OFF, ON (*)
 	    VoiceModulatorSendSwitch = 0x00000172,             // 00h - 01h | OFF, ON
 	    UnisonSwitch = 0x00000173,                         // 00h - 01h | OFF, ON

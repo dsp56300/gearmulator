@@ -39,6 +39,6 @@ namespace jeJucePlugin
 		Editor& m_editor;
 		jucePluginEditorLib::Processor& m_processor;
 		Controller& m_controller;
-		std::vector<jeLib::Rom::Preset> m_presets;
+		std::vector<std::vector<jeLib::Rom::Preset>> m_presetsPerBank;
 	};
 }

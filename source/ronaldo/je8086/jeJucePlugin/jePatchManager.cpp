@@ -25,25 +25,62 @@ namespace jeJucePlugin
 
 		PatchManager::startLoaderThread();
 
-		auto rom = jeLib::RomLoader::findROM();
+		const auto& roms = _editor.getJeProcessor().getRoms();
 
-		if (rom.isValid())
+		// add each device type only once
+		std::set<jeLib::DeviceType> knownDeviceTypes;
+
+		uint32_t bankIndex = 0;
+
+		for (const auto& rom : roms)
 		{
-			rom.getPresets(m_presets);
+			if (!rom.isValid())
+				continue;
+
+			if (!knownDeviceTypes.insert(rom.getDeviceType()).second)
+				continue;
+
+			std::vector<std::vector<jeLib::Rom::Preset>> presets;
+			rom.getPresets(presets);
+
+			if (presets.empty())
+				continue;
+
+			for (auto p : presets)
+				m_presetsPerBank.emplace_back(std::move(p));
+
+			auto addRomBank = [this, &bankIndex](const std::string& _name)
+			{
+				pluginLib::patchDB::DataSource ds;
+				ds.type = pluginLib::patchDB::SourceType::Rom;
+				ds.bank = bankIndex++;
+				ds.name = _name;
+				addDataSource(ds);
+			};
+
+			if (presets.size() == 3)
+			{
+				// keyboard: two banks of patches, one bank of performances
+				addRomBank("Keyboard - Patch P:A11 - P:A88");
+				addRomBank("Keyboard - Patch P:B11 - P:B88");
+				addRomBank("Keyboard - Performance P:11 - P:88");
+			}
+			else
+			{
+				addRomBank("Rack - Patch P1:A11 - P1:A88");
+				addRomBank("Rack - Patch P1:B11 - P1:B88");
+				addRomBank("Rack - Patch P2:A11 - P2:A88");
+				addRomBank("Rack - Patch P2:B11 - P2:B88");
+				addRomBank("Rack - Patch P3:A11 - P3:A88");
+				addRomBank("Rack - Patch P3:B11 - P3:B88");
+				addRomBank("Rack - Patch P4:A11 - P4:A88");
+				addRomBank("Rack - Patch P4:B11 - P4:B88");
+				addRomBank("Rack - Performance P1:11 - P1:88");
+				addRomBank("Rack - Performance P2:11 - P2:88");
+				addRomBank("Rack - Performance P3:11 - P3:88");
+				addRomBank("Rack - Performance P4:11 - P4:88");
+			}
 		}
-
-		auto addRomBank = [this](const uint32_t _bank, const std::string& _name)
-		{
-			pluginLib::patchDB::DataSource ds;
-			ds.type = pluginLib::patchDB::SourceType::Rom;
-			ds.bank = _bank;
-			ds.name = _name;
-			addDataSource(ds);
-		};
-
-		addRomBank(0, "Patch A");
-		addRomBank(1, "Patch b");
-		addRomBank(2, "Performance");
 	}
 
 	PatchManager::~PatchManager()
@@ -58,30 +95,25 @@ namespace jeJucePlugin
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, uint32_t _program)
 	{
-		if (_bank > 2)
+		if (_bank >= m_presetsPerBank.size())
 			return false;
 
-		constexpr auto patchesPerBank = 64;
-		constexpr auto performancesPerBank = 64;
+		const auto& presets = m_presetsPerBank[_bank];
 
-		uint32_t first = std::min(_bank, static_cast<uint32_t>(2)) * patchesPerBank;
-		uint32_t last = first + patchesPerBank;
+		if (presets.empty())
+			return false;
 
-		if (_bank >= 2)
+		for (auto& p : presets)
 		{
-			last = first + performancesPerBank;
+			auto preset = p.front();
+
+			for (size_t i=1; i<p.size(); ++i)
+			{
+				preset.insert(preset.end(), p[i].begin(), p[i].end());
+			}
+			_results.emplace_back(std::move(preset));
 		}
 
-		for (size_t i=first; i<last; ++i)
-		{
-			if (i >= m_presets.size())
-				return !_results.empty();
-
-			pluginLib::patchDB::Data presetData;
-			for (auto& j : m_presets[i])
-				presetData.insert(presetData.end(), j.begin(), j.end());
-			_results.emplace_back(std::move(presetData));
-		}
 		return true;
 	}
 

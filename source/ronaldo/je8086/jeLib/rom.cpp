@@ -9,8 +9,11 @@
 
 namespace jeLib
 {
-	constexpr uint32_t g_presetSize = 0xa0;
-	constexpr uint32_t g_performanceSize = 0x180;
+	constexpr uint32_t g_presetSizeKeyboard = 0xa0;
+	constexpr uint32_t g_presetSizeRack = 0xb0;
+
+	constexpr uint32_t g_performanceSizeKeyboard = 0x180;
+	constexpr uint32_t g_performanceSizeRack = 0x1e0;
 
 	Rom::Rom(const std::string& _filename)
 	{
@@ -39,58 +42,83 @@ namespace jeLib
 		}
 	}
 
-	bool Rom::getPresets(std::vector<Preset>& _presets) const
+	bool Rom::getPresets(std::vector<std::vector<Preset>>& _presets) const
 	{
 		if (!isValid())
 			return false;
 
-		// find starting point by searching for the first preset name
-		constexpr char key[] = "Spit'n Slide Bs ";
+		const auto rack = getDeviceType() == DeviceType::Rack;
 
-		constexpr size_t nameSize = std::size(key) - 1;
-
-		size_t start = 0;
-
-		for (size_t i = 0; i < m_data.size() - nameSize; ++i)
+		auto findKey = [&](const char* _key) -> size_t
 		{
-			if (std::equal(std::begin(key), std::end(key) - 1, &m_data[i]))
+			auto keySize = std::strlen(_key);
+
+			for (size_t i = 0; i < m_data.size() - keySize; ++i)
 			{
-				start = i;
-				break;
+				if (std::equal(_key, _key + keySize, &m_data[i]))
+					return i;
 			}
-		}
+			return 0;
+		};
+
+		// find starting point by searching for the first preset name
+		size_t start = findKey("Spit'n Slide Bs ");
 
 		if (!start)
 			return false;
 
-		// There are:
-		// 128 patches, each of them having 160 bytes
+		// Keyboard:
+		// 128 patches in 2 banks
 		// 64 performances
 
-		for (size_t p=0; p<128; ++p)
+		// Rack:
+		// 512 patches in 8 banks
+		// 256 performances in 4 banks
+
+		uint32_t presetCount = rack ? 512 : 128;
+		uint32_t performanceCount = rack ? 256 : 64;
+
+		auto presetSize = rack ? g_presetSizeRack : g_presetSizeKeyboard;
+		auto performanceSize = rack ? g_performanceSizeRack : g_performanceSizeKeyboard;
+
+		for (size_t p=0; p<presetCount; ++p)
 		{
 			auto presetStart = start;
-			auto presetEnd = presetStart + g_presetSize;
+			auto presetEnd = presetStart + presetSize;
 			auto presetData = Sysex(m_data.begin() + static_cast<int64_t>(presetStart), m_data.begin() + static_cast<int64_t>(presetEnd));
 			auto patch = getPatch(p, presetData);
 
-			_presets.push_back(patch);
+			if ((p & 63) == 0)
+				_presets.emplace_back();
 
-			start += g_presetSize;
+			_presets.back().emplace_back(std::move(patch));
+
+			start += presetSize;
 		}
 
-		// performances follow immediately after patches
+		// for keyboard, performances follow immediately after patches, not for rack
+		if (rack)
+		{
+			start = findKey("Chariots        ");
 
-		for (size_t p=0; p<64; ++p)
+			if (!start)
+				return false;
+		}
+
+		for (size_t p=0; p<performanceCount; ++p)
 		{
 			auto performanceStart = start;
-			auto performanceEnd = performanceStart + g_performanceSize;
+			auto performanceEnd = performanceStart + performanceSize;
 			auto performanceData = Sysex(m_data.begin() + static_cast<int64_t>(performanceStart), m_data.begin() + static_cast<int64_t>(performanceEnd));
 
 			auto performance = getPerformance(p, performanceData);
-			_presets.push_back(performance);
 
-			start += g_performanceSize;
+			if ((p & 63) == 0)
+				_presets.emplace_back();
+
+			_presets.back().emplace_back(std::move(performance));
+
+			start += performanceSize;
 		}
 
 		return false;
@@ -108,12 +136,16 @@ namespace jeLib
 
 			uint32_t paramIndex = 0;
 
-			for (size_t i=_readOffset; i<std::min(_presetData.size(), _readOffset + _maxSize); ++i, ++paramIndex)
+			for (size_t i=_readOffset; i<_presetData.size(); ++i, ++paramIndex)
 			{
+				if (paramIndex >= _maxSize)
+					break;
+
 				size_t paramAddress = (paramIndex & 0x7f) | ((paramIndex & 0x80) << 1);
 
 				const auto param = static_cast<T>(paramAddress);
-				const auto value = _presetData[i];
+				auto value = _presetData[i];
+
 				if (State::is14BitData(param))
 				{
 					sysex.push_back((value & 0x80) >> 7);
@@ -122,6 +154,21 @@ namespace jeLib
 				}
 				else
 				{
+					if constexpr(std::is_same_v<T, Patch>)
+					{
+						if (paramAddress >= static_cast<uint32_t>(Patch::Reserved170))
+						{
+							// mute assert, for keyboard patches that have been put in the rack, there is crap in here
+							value &= 0x7f;
+						}
+
+						if (param == Patch::EnvelopeTypeInSolo && value == 0xc0)
+						{
+							// one broken patch
+							value = 0;
+						}
+					}
+
 					assert(value <= 0x7f);
 					sysex.push_back(value & 0x7f);
 				}
@@ -133,9 +180,9 @@ namespace jeLib
 		}
 	}
 
-	Rom::Preset Rom::getPatch(size_t _index, const Sysex& _presetData)
+	Rom::Preset Rom::getPatch(size_t _index, const Sysex& _presetData) const
 	{
-		if (_presetData.size() != g_presetSize)
+		if (_presetData.size() != getPresetSize())
 			return {};
 
 		uint32_t address = static_cast<uint32_t>(AddressArea::UserPatch);
@@ -147,18 +194,28 @@ namespace jeLib
 		else
 		{
 			address |= static_cast<uint32_t>(UserPatchArea::UserPatch065);
-			_index -= 64;
 		}
+
+		_index &= 63;
 
 		address += static_cast<uint32_t>(UserPatchArea::BlockSize) * static_cast<uint32_t>(_index);
 
-		return createPreset<Patch>(address, _presetData);
+		const auto maxSize = static_cast<size_t>(getDeviceType() == DeviceType::Rack ? Patch::DataLengthRack : Patch::DataLengthKeyboard);
+
+		return createPreset<Patch>(address, _presetData, 0, maxSize);
 	}
 
-	Rom::Preset Rom::getPerformance(size_t _size, const Sysex& _presetData)
+	Rom::Preset Rom::getPerformance(size_t _index, const Sysex& _presetData) const
 	{
-		if (_presetData.size() != g_performanceSize)
+		if (_presetData.size() != getPerformanceSize())
 			return {};
+
+		const auto rack = getDeviceType() == DeviceType::Rack;
+
+		if (rack)
+		{
+			int foo=0;
+		}
 
 		// A performance consists of:
 		// - PerformanceCommon
@@ -170,40 +227,57 @@ namespace jeLib
 		uint32_t addressBase = static_cast<uint32_t>(AddressArea::UserPerformance);
 
 		addressBase |= static_cast<uint32_t>(UserPerformanceArea::UserPerformance01);
-		addressBase += static_cast<uint32_t>(UserPerformanceArea::BlockSize) * static_cast<uint32_t>(_size);
+		addressBase += static_cast<uint32_t>(UserPerformanceArea::BlockSize) * static_cast<uint32_t>(_index & 63);
 
-		constexpr auto performanceCommonSize = static_cast<size_t>(PerformanceCommon::DataLengthKeyboard) - 3 /* three times 14 bit data which is 8 bit in rom */;
+		const auto performanceCommonSize = static_cast<size_t>(rack ? PerformanceCommon::DataLengthRack : PerformanceCommon::DataLengthKeyboard);
+
+		// we always use the keyboard part size, as the last byte of the rack doesn't seem to be serialized (garbage in there)
+		constexpr auto partSize = static_cast<size_t>(Part::DataLengthKeyboard);
 
 		auto performanceCommon = createPreset<PerformanceCommon>(addressBase, _presetData, 0, performanceCommonSize);
 
-		auto off = performanceCommonSize;
+		auto off = performanceCommonSize - 3; /* three times 14 bit data which is 8 bit in rom */
 
-		// reserved space or something, no useful data in there. What follows next are the two parts
-		off += 0x0f;
+		if (rack)
+		{
+			// TODO is here the voice modulator?
+			off += 0x3e;
+		}
+		else
+		{
+			// reserved space or something, no useful data in there. What follows next are the two parts
+			off += 0x0f;
+		}
 
 		auto address = addressBase | static_cast<uint32_t>(PerformanceData::PartUpper);
-		auto partH = createPreset<Part>(address, _presetData, off, static_cast<size_t>(Part::DataLengthKeyboard));
+		auto partH = createPreset<Part>(address, _presetData, off, partSize);
 
-		off += static_cast<size_t>(Part::DataLengthKeyboard);
+		off += partSize;
 
-		// reserved byte
-		off++;
+		// reserved
+		if (rack)
+			off += 9;
+		else
+			off++;
 
 		address = addressBase | static_cast<uint32_t>(PerformanceData::PartLower);
-		auto partL = createPreset<Part>(address, _presetData, off, static_cast<size_t>(Part::DataLengthKeyboard));
+		auto partL = createPreset<Part>(address, _presetData, off, partSize);
 
-		off += static_cast<size_t>(Part::DataLengthKeyboard);
+		off += partSize;
 
-		// reserved byte
-		off++;
+		// reserved
+		if (rack)
+			off += 9;
+		else
+			off++;
 
 		address = addressBase | static_cast<uint32_t>(PerformanceData::PatchUpper);
-		auto patchUpper = createPreset<Patch>(address, _presetData, off, g_presetSize);
+		auto patchUpper = createPreset<Patch>(address, _presetData, off, static_cast<uint32_t>(rack ? Patch::DataLengthRack : Patch::DataLengthKeyboard));
 
-		off += g_presetSize;
+		off += getPresetSize();
 
 		address = addressBase | static_cast<uint32_t>(PerformanceData::PatchLower);
-		auto patchLower = createPreset<Patch>(address, _presetData, off, g_presetSize);
+		auto patchLower = createPreset<Patch>(address, _presetData, off, static_cast<uint32_t>(rack ? Patch::DataLengthRack : Patch::DataLengthKeyboard));
 
 		auto result = std::move(performanceCommon);
 
@@ -213,5 +287,15 @@ namespace jeLib
 		result.insert(result.end(), patchLower.begin(), patchLower.end());
 
 		return result;
+	}
+
+	uint32_t Rom::getPresetSize() const
+	{
+		return getDeviceType() == DeviceType::Rack ? g_presetSizeRack : g_presetSizeKeyboard;
+	}
+
+	uint32_t Rom::getPerformanceSize() const
+	{
+		return getDeviceType() == DeviceType::Rack ? g_performanceSizeRack : g_performanceSizeKeyboard;
 	}
 }
