@@ -87,7 +87,7 @@ namespace jeJucePlugin
 		jucePluginEditorLib::Editor::initPluginDataModel(_model);
 
 		// TODO: depends on ROM
-		_model.set("deviceModel", "jp8000");
+		_model.set("deviceModel", "keyboard");
 	}
 
 	Editor::~Editor()

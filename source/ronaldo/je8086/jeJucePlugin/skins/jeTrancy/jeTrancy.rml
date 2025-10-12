@@ -26,7 +26,7 @@
 					<knob class="knob" param="DelayTime" id="DelayTime"/>
 					<knob class="knob" param="DelayFeedback" id="DelayFeedback"/>
 					<knob class="knob" param="DelayLevel" id="DelayLevel"/>
-					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
 						<button class="abs btBlackLed" style="left: 1690dp; top: 23dp;" param="VoiceModulatorSendSwitch" isToggle="1"/>
 						<div class="label" style="left: 1650dp; width:150dp; margin-top:-18dp">VOICE MOD SEND</div>
 					</div>
@@ -49,7 +49,7 @@
 					<combotext></combotext>
 				</combo>	
 
-				<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8000'" data-model="plugin" src="grid_small.png" style="left: 2400dp; top: 90dp; width: 150dp; height: 150dp;"/>		
+				<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid_small.png" style="left: 2400dp; top: 90dp; width: 150dp; height: 150dp;"/>		
 				
 			<!-- second row -->
 			<div class="row" style="top: 270dp; height: 316dp;">
@@ -173,7 +173,7 @@
 					</div>	
 					
 					
-					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
 						<!-- Noise -->
 						<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 3)" data-model="partCurrent" >
 							<input class="abs sliderV slider_row2" param="Osc2Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 23dp; left: 471dp;"/>
@@ -186,10 +186,10 @@
 					<button class="abs btBlackLed" param="Osc2SyncSwitch" id="Osc2SyncSwitch" style="left: 60dp; top: 47dp;" isToggle="1"/>
 					<button class="abs btBlackLed" param="Osc2ExternalInputSwitch" id="Osc2ExternalInputSwitch" style="left: 167dp; top: 47dp;" isToggle="1"/>
 
-					<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp"/>		
-					<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp"/>		
+					<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp"/>		
+					<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp"/>		
 
-					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
 						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
@@ -197,7 +197,7 @@
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="3" isToggle="1"/>
 						</div>
 					</div>
-					<div data-class-juceConditionDisabled="deviceModel!='jp8000'" data-class-hlayout="deviceModel=='jp8000'" data-model="plugin" class="abs" >
+					<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-class-hlayout="deviceModel=='keyboard'" data-model="plugin" class="abs" >
 						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
@@ -330,7 +330,7 @@
 					<button class="btBlackLed abs" style="left: 20dp; top: 118dp;" param="MonoSwitch" id="MonoSwitch" isToggle="1"/>
 					<button class="btBlackLed abs" style="left: 114dp; top: 118dp;" param="LegatoSwitch" id="LegatoSwitch" isToggle="1"/>
 					
-					<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" >
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
 						<button class="btBlackLed abs" style="left: 215dp; top: 118dp;"  param="VoiceModulatorSwitch" id="VoiceModulatorSwitch" isToggle="1"/>				
 						<div class="labelBlue" style="width:100dp; left: 200dp; top: 78dp;">VOICE MOD</div>	
 					</div>	
@@ -385,17 +385,17 @@
 					<knob class="knob" param="PartTranspose"/>
 				</div>	
 
-				<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8000'" data-model="plugin" src="grid.png" style="left: 380dp; top: 230dp; width: 800dp; height: 200dp;"/>		
-				<img id="jp8000" class="jucePos" data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" src="8080.png" style="left: 360dp; top: 215dp; width: 844dp; height: 232dp;"/>
+				<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid.png" style="left: 380dp; top: 230dp; width: 800dp; height: 200dp;"/>		
+				<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="8080.png" style="left: 360dp; top: 215dp; width: 844dp; height: 232dp;"/>
 					
 				<!-- bottom unision, unision knobs -->
-				<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-class-hlayout="deviceModel=='jp8080'" data-model="plugin" class="abs" style="left: 405dp; top: 304dp; gap: 50dp;">
+				<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" style="left: 405dp; top: 304dp; gap: 50dp;">
 					<button class="btBlackLed" param="UnisonSwitch" id="UnisonSwitch" isToggle="1"/>
 					<knob class="knob" param="UnisonDetune" id="UnisonDetune"/>					
 				</div>					
 					
 				<!-- ext input -->
-				<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" class="abs" style="left: 592dp; top:245dp;">
+				<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" style="left: 592dp; top:245dp;">
 					<knob class="abs knob" style="left: 134dp; top: 59dp;">
 						<button class="ledBlue" style="left: 20dp"/>
 					</knob>
@@ -548,10 +548,10 @@
 			<div class="bottomText" style="left: 305dp; margin-top: 2dp ">{{versionString}}</div>
 			<combo id="romselector" class="bottomText" style="left: 925dp; width: 400dp; height: 30dp;"><combotext/></combo>
 
-			<div data-class-juceConditionDisabled="deviceModel!='jp8000'" data-model="plugin" class="abs">
+			<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs">
 				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">Keyboard</div>		
 			</div>
-			<div data-class-juceConditionDisabled="deviceModel!='jp8080'" data-model="plugin" class="abs">
+			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
 				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">Rack</div>		
 			</div>
 			
