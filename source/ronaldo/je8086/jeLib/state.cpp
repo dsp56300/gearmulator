@@ -573,10 +573,11 @@ namespace jeLib
 			size = std::max(_sizeRack, _sizeKeyboard) - sizeLimit;
 
 			numRead = m_tempPerformance.read(event.sysex, addr4, std::max(_sizeRack, _sizeKeyboard));
-			assert(numRead == size);
 
 			if (!numRead)
 				return true;
+
+			assert(numRead == size);
 
 			createFooter(event.sysex);
 
