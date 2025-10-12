@@ -184,7 +184,11 @@
 					</div>						
 					
 					<button class="abs btBlackLed" param="Osc2SyncSwitch" id="Osc2SyncSwitch" style="left: 60dp; top: 47dp;" isToggle="1"/>
-					<button class="abs btBlackLed" param="Osc2ExternalInputSwitch" id="Osc2ExternalInputSwitch" style="left: 167dp; top: 47dp;" isToggle="1"/>
+						
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
+						<img id="rack" class="jucePos" src="osc2_ext.png" style="left: 156dp; top: 23dp"/>	
+						<button class="abs btBlackLed" param="Osc2ExternalInputSwitch" id="Osc2ExternalInputSwitch" style="left: 167dp; top: 47dp;" isToggle="1"/>						
+					</div>					
 
 					<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp"/>		
 					<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp"/>		
@@ -240,9 +244,12 @@
 					</div>
 					
 					<!-- Gain -->
-					<combo param="DelayType" id="DelayType" class="jucePos comboxtext2" param="PatchGain" id="PatchGain" style="left: 176dp; top: 24dp; width: 125dp; height: 45dp; line-height: 45dp;">
-						<combotext></combotext>
-					</combo>					
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
+						<img id="keyboard" class="jucePos" src="amp_gain.png" style="left: 170dp; top: -127dp"/>	
+						<combo param="DelayType" id="DelayType" class="jucePos comboxtext2" param="PatchGain" id="PatchGain" style="left: 171dp; top: -113dp; width: 125dp; height: 45dp; line-height: 45dp;">
+							<combotext></combotext>
+						</combo>						
+					</div>		
 					
 					<div class="knobs_row2" style="left: 31dp; top: 160dp; gap: 63dp;">
 						<knob class="knob" param="AmpLfo1Depth" id="AmpLfo1Depth" />
@@ -383,19 +390,20 @@
 				<div class="abs hlayout" style="left: 37dp; top: 305dp; gap: 91dp;">
 					<knob class="knob mainVolume"/>
 					<knob class="knob" param="PartTranspose"/>
+					<knob class="knob" param="MasterTune"/>
 				</div>	
 
-				<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid.png" style="left: 380dp; top: 230dp; width: 800dp; height: 200dp;"/>		
-				<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="8080.png" style="left: 360dp; top: 215dp; width: 844dp; height: 232dp;"/>
+				<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid.png" style="left: 565dp; top: 230dp; width: 800dp; height: 200dp;"/>		
+				<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="8080.png" style="left: 538dp; top: 215dp; width: 844dp; height: 232dp;"/>
 					
 				<!-- bottom unision, unision knobs -->
-				<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" style="left: 405dp; top: 304dp; gap: 50dp;">
+				<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" style="left: 583dp; top: 304dp; gap: 50dp;">
 					<button class="btBlackLed" param="UnisonSwitch" id="UnisonSwitch" isToggle="1"/>
 					<knob class="knob" param="UnisonDetune" id="UnisonDetune"/>					
 				</div>					
 					
 				<!-- ext input -->
-				<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" style="left: 592dp; top:245dp;">
+				<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" style="left: 770dp; top:245dp;">
 					<knob class="abs knob" style="left: 134dp; top: 59dp;">
 						<button class="ledBlue" style="left: 20dp"/>
 					</knob>
@@ -439,26 +447,26 @@
 				<div data-model="part0" class="abs" style="left: 1220dp; top: 210dp; width: 1200dp; height: 444dp;">
 
 					<!-- left column -->
-					<button class="abs btBlackLed" style="left: 59dp; top: 100dp;" param="ArpSwitch" isToggle="1"/>
-					<button class="abs btBlackLed" style="left: 190dp; top: 100dp;" param="ArpHold" isToggle="1"/>
+					<button class="abs btBlackLed" style="left: 257dp; top: 65dp;" param="ArpSwitch" isToggle="1"/>
+					<button class="abs btBlackLed" style="left: 257dp; top: 155dp;" param="ArpHold" isToggle="1"/>
 									
 					<!-- center column -->
-					<knob class="abs knob" style="left: 356dp; top: 90dp;" param="Tempo"/>
+					<knob class="abs knob" style="left: 412dp; top: 90dp;" param="Tempo"/>
 
 					<!-- Beat Pattern -->
-					<combo param="ArpBeatPattern" id="ArpBeatPattern" class="jucePos comboxtext2" style="left: 555dp; top: 69dp; width: 280dp; height: 45dp; line-height: 45dp;">
+					<combo param="ArpBeatPattern" id="ArpBeatPattern" class="jucePos comboxtext2" style="left: 595dp; top: 69dp; width: 280dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>				
 					<!-- Destination -->
-					<combo param="ArpDestination" id="ArpDestination" class="jucePos comboxtext2" style="left: 555dp; top: 147dp; width: 280dp; height: 45dp; line-height: 45dp;">
+					<combo param="ArpDestination" id="ArpDestination" class="jucePos comboxtext2" style="left: 595dp; top: 147dp; width: 280dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>	
 					<!-- Range -->
-					<combo param="ArpRange" id="ArpRange" class="jucePos comboxtext2" style="left: 880dp; top: 69dp; width: 280dp; height: 45dp; line-height: 45dp;">
+					<combo param="ArpRange" id="ArpRange" class="jucePos comboxtext2" style="left: 885dp; top: 69dp; width: 280dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>
 					<!-- Mode -->
-					<combo param="ArpMode" id="ArpMode" class="jucePos comboxtext2" style="left: 880dp; top: 147dp; width: 280dp; height: 45dp; line-height: 45dp;">
+					<combo param="ArpMode" id="ArpMode" class="jucePos comboxtext2" style="left: 885dp; top: 147dp; width: 280dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>
 				</div>
@@ -546,13 +554,13 @@
 		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 1290dp; top: 1418dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>
 		<div data-model="plugin" class="abs" style="left: 0dp; width: 100%; top: 1420dp; height: 22dp;">
 			<div class="bottomText" style="left: 305dp; margin-top: 2dp ">{{versionString}}</div>
-			<combo id="romselector" class="bottomText" style="left: 925dp; width: 400dp; height: 30dp;"><combotext/></combo>
+			<combo id="romselector" class="bottomText" style="left: 935dp; width: 400dp; height: 30dp;"><combotext/></combo>
 
 			<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs">
-				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">Keyboard</div>		
+				<div class="bottomText" style="left: 595dp; width:100dp; margin-top:2dp">Keyboard</div>		
 			</div>
 			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
-				<div class="bottomText" style="left: 605dp; width:100dp; margin-top:2dp">Rack</div>		
+				<div class="bottomText" style="left: 595dp; width:100dp; margin-top:2dp">Rack</div>		
 			</div>
 			
 		</div>
