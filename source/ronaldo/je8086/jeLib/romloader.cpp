@@ -4,8 +4,6 @@
 
 #include <algorithm>
 
-#include <cstdio>
-
 #include "state.h"
 
 #include "baseLib/binarystream.h"
@@ -16,57 +14,85 @@
 
 namespace jeLib
 {
-	static constexpr size_t FileSizeKeyboardMidi = 79372;
-	static constexpr size_t FileSizeRackMidi = 79373;	// 14 files total, first 8 have the same size as keyboard
-	static constexpr size_t FileCountKeyboardMidi = 8;
-	static constexpr size_t FileCountRackMidi = 6;
+	static constexpr size_t g_fileSizeKeyboardMidi = 79372;
+	static constexpr size_t g_fileSizeRackMidi = 79373;	// 14 files total, first 8 have the same size as keyboard
+
+	static constexpr std::initializer_list<const char*> g_keyboardChecksums = {"49F8", "12E3", "A146", "E6EB", "5455", "672D", "C131", "F294"};
+	static constexpr std::initializer_list<const char*> g_rackChecksums = {"EE52", "33A0", "E3CD", "11F1", "C8D9", "A0F8", "E7DB", "61D8", "18FF", "CFFC", "658A", "0DDA", "A88C", "CCAB"};
+
+	static constexpr size_t g_fileCountKeyboardMidi = std::size(g_keyboardChecksums);
+	static constexpr size_t g_fileCountRackMidi = std::size(g_rackChecksums);
 
 	Rom RomLoader::findROM()
 	{
-		auto files = synthLib::RomLoader::findFiles(".mid", FileSizeKeyboardMidi, FileSizeKeyboardMidi);
-		if (!files.empty() && files.size() == FileCountKeyboardMidi)
-		{
-			auto filesRack = synthLib::RomLoader::findFiles(".mid", FileSizeRackMidi, FileSizeRackMidi);
+		auto roms = findROMs();
+		if (roms.empty())
+			return {};
+		return roms.front();
+	}
 
-			if (!filesRack.empty() && filesRack.size() == FileCountRackMidi)
-			{
-				files.insert(files.end(), filesRack.begin(), filesRack.end());
-			}
-			return loadFromMidiFiles(files);
+	std::vector<Rom> RomLoader::findROMs()
+	{
+		std::vector<Rom> results;
+
+		auto append = [&results](Rom&& _r)
+		{
+			if (_r.isValid())
+				results.emplace_back(std::move(_r));
+		};
+
+		auto files = synthLib::RomLoader::findFiles(".mid", g_fileSizeKeyboardMidi, g_fileSizeKeyboardMidi);
+
+		if (files.size() >= g_fileCountKeyboardMidi)
+		{
+			auto filesRack = synthLib::RomLoader::findFiles(".mid", g_fileSizeRackMidi, g_fileSizeRackMidi);
+
+			files.insert(files.end(), filesRack.begin(), filesRack.end());
+
+			std::vector<MidiData> fileDatasKeyboard;
+			std::vector<MidiData> fileDatasRack;
+
+			loadFromMidiFiles(fileDatasKeyboard, fileDatasRack, files);
+
+			if (fileDatasKeyboard.size() == g_fileCountKeyboardMidi)
+				append(loadFromMidiFiles(fileDatasKeyboard));
+
+			if (fileDatasRack.size() == g_fileCountRackMidi)
+				append(loadFromMidiFiles(fileDatasRack));
 		}
 
 		files = synthLib::RomLoader::findFiles(".bin", Rom::RomSizeKeyboard, Rom::RomSizeKeyboard);
-		if (!files.empty())
-			return Rom(files.front());
+		for (const auto& f : files)
+			append(Rom(f));
 
 		files = synthLib::RomLoader::findFiles(".bin", Rom::RomSizeRack, Rom::RomSizeRack);
-		if (!files.empty())
-			return Rom(files.front());
-		return {};
+		for (const auto& f : files)
+			append(Rom(f));
+		return results;
 	}
 
-	Rom RomLoader::loadFromMidiFiles(const std::vector<std::string>& _files)
+	Rom RomLoader::loadFromMidiFiles(const std::vector<MidiData>& _files)
 	{
-		std::vector<std::vector<uint8_t>> sysexMessages;
-
-		for (const auto& file : _files)
-		{
-			if (!synthLib::MidiToSysex::extractSysexFromFile(sysexMessages, file))
-				return {};
-		}
-
 		Range totalRange = { std::numeric_limits<uint32_t>::max(), 0 };
 
 		std::vector<uint8_t> fullRom;
 
-		for (const auto& message : sysexMessages)
+		for (const auto& file : _files)
 		{
-			auto range = parseSysexDump(fullRom, message);
-			if (range.second <= range.first)
+			std::vector<std::vector<uint8_t>> sysexMessages;
+
+			if (!synthLib::MidiToSysex::extractSysexFromData(sysexMessages, file.second))
 				return {};
 
-			totalRange.first = std::min(totalRange.first, range.first);
-			totalRange.second = std::max(totalRange.second, range.second);
+			for (const auto& message : sysexMessages)
+			{
+				auto range = parseSysexDump(fullRom, message);
+				if (range.second <= range.first)
+					return {};
+
+				totalRange.first = std::min(totalRange.first, range.first);
+				totalRange.second = std::max(totalRange.second, range.second);
+			}
 		}
 
 		fullRom.erase(fullRom.begin() + totalRange.second, fullRom.end());
@@ -80,7 +106,12 @@ namespace jeLib
 		// come up with a useful name
 		using namespace baseLib::filesystem;
 
-		auto sortedFiles = _files;
+		std::vector<std::string> sortedFiles;
+		sortedFiles.reserve(_files.size());
+
+		for (const auto& [name, data] : _files)
+			sortedFiles.push_back(name);
+
 		std::sort(sortedFiles.begin(), sortedFiles.end());
 
 		const auto ext = getExtension(sortedFiles.front());
@@ -90,6 +121,55 @@ namespace jeLib
 		const auto name = firstName + "..." + lastName + ext;
 
 		return Rom(fullRom, name);
+	}
+
+	void RomLoader::loadFromMidiFiles(std::vector<MidiData>& _filesKeyboard, std::vector<MidiData>& _filesRack, const std::vector<std::string>& _files)
+	{
+		for (const auto& file : _files)
+		{
+			std::vector<uint8_t> data;
+			if (!baseLib::filesystem::readFile(data, file))
+				continue;
+
+			// check if for keyboard or rack via checksum
+			// find string "CHECK SUM = " in the file
+			constexpr char key[] = "CHECK SUM = ";
+			constexpr size_t keySize = std::size(key) - 1;
+			auto it = std::search(data.begin(), data.end(), key, key + keySize);
+			if (it == data.end())
+				continue;
+			it += keySize;
+			std::string checksum;
+			while (it != data.end() && checksum.size() < 4)
+				checksum.push_back(static_cast<char>(*it++));
+
+			if (checksum.size() != 4)
+				continue;
+
+			bool found = false;
+
+			for (const char* cs : g_keyboardChecksums)
+			{
+				if (checksum == cs)
+				{
+					_filesKeyboard.emplace_back(file, std::move(data));
+					found = true;
+					break;
+				}
+			}
+
+			if (found)
+				continue;
+
+			for (const char* cs : g_rackChecksums)
+			{
+				if (checksum == cs)
+				{
+					_filesRack.emplace_back(file, std::move(data));  // NOLINT(bugprone-use-after-move)
+					break;
+				}
+			}
+		}
 	}
 
 	RomLoader::Range RomLoader::parseSysexDump(std::vector<uint8_t>& _fullRom, const std::vector<uint8_t>& _sysex)
