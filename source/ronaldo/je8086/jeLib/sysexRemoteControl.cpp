@@ -71,8 +71,6 @@ namespace jeLib
 		ev.sysex.push_back(_buttonStates & 0xf);
 
 		ev.sysex.push_back(0xf7);
-
-		_dst.emplace_back(ev);
 	}
 
 	void SysexRemoteControl::sendSysexLeds(std::vector<synthLib::SMidiEvent>& _dst, const Leds& _ledStates)
