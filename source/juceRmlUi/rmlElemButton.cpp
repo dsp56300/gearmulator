@@ -26,9 +26,19 @@ namespace juceRmlUi
 	{
 		ElemValue::onPropertyChanged(_key);
 
-		if (_key == "isToggle")			m_isToggle = getProperty<bool>("isToggle", false);
-		else if (_key == "valueOn")		m_valueOn  = getProperty<int>("valueOn", -1);
-		else if (_key == "valueOff")	m_valueOff = getProperty<int>("valueOff", -1);
+		if (_key == "isToggle")
+		{
+			m_isToggle = getProperty<bool>("isToggle", false);
+		}
+		else if (_key == "valueOn")
+		{
+			m_valueOn = getProperty<int>("valueOn", -1);
+			setChecked(static_cast<pluginLib::ParamValue>(getValue()) == getValueOn());
+		}
+		else if (_key == "valueOff")
+		{
+			m_valueOff = getProperty<int>("valueOff", -1);
+		}
 	}
 
 	void ElemButton::OnChildAdd(Rml::Element* _child)
