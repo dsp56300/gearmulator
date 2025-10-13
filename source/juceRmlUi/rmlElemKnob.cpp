@@ -183,7 +183,8 @@ namespace juceRmlUi
 		const auto value = std::clamp(getValue(), min, max);
 
 		const auto percent = max > min ? (value - min) / (max - min) : 0;
-		const auto frame = static_cast<uint32_t>(percent * static_cast<float>(m_frames - 1));
+		const auto frameF = percent * static_cast<float>(m_frames - 1);
+		const auto frame = static_cast<uint32_t>(std::round(frameF));
 
 		char frameAsString[32];
 		(void)snprintf(frameAsString, sizeof(frameAsString), "%03u", frame);
