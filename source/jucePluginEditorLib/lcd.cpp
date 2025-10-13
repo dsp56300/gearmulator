@@ -106,6 +106,11 @@ namespace jucePluginEditorLib
 		repaint();
 	}
 
+	Rml::Element* Lcd::getElement() const
+	{
+		return m_canvas;
+	}
+
 	void Lcd::setSize(const uint32_t _width, const uint32_t _height)
 	{
 		if (m_width == _width && m_height == _height)
@@ -207,6 +212,23 @@ namespace jucePluginEditorLib
 	void Lcd::repaint() const
 	{
 		m_canvas->repaint();
+	}
+
+	bool Lcd::getOverrideText(std::vector<std::vector<uint8_t>>& _lines)
+	{
+		std::vector<std::string> strLines;
+
+		if (!getOverrideText(strLines))
+			return false;
+
+		_lines.reserve(2);
+		_lines.emplace_back(m_numCharsX, ' ');
+		_lines.emplace_back(m_numCharsX, ' ');
+
+		for (size_t i=0; i<std::min(strLines.size(), static_cast<size_t>(2)); ++i)
+			memcpy(_lines[i].data(), strLines[i].c_str(), std::min(strLines[i].size(), static_cast<size_t>(m_numCharsX)));
+
+		return true;
 	}
 
 	void Lcd::timerCallback()

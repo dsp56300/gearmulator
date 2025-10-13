@@ -24,6 +24,8 @@ namespace jucePluginEditorLib
 		void setText(const std::vector<uint8_t> &_text);
 		void setCgRam(const std::array<uint8_t, 64> &_data);
 
+		Rml::Element* getElement() const;
+
 	private:
 		void setSize(uint32_t _width, uint32_t _height);
 		void paint(const juce::Image& _image, juce::Graphics& _g);
@@ -32,7 +34,8 @@ namespace jucePluginEditorLib
 
 		void repaint() const;
 
-		virtual bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines) = 0;
+		virtual bool getOverrideText(std::vector<std::string>& _lines) { return false; }
+		virtual bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines);
 		virtual const uint8_t* getCharacterData(uint8_t _character) const = 0;
 
 		void timerCallback() override;
