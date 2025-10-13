@@ -763,6 +763,6 @@
 				<template src="patchmanager"/>
 			</div>
 		</div>
-		<div id="FocusedParameterTooltip" class="jucePos juceLabel txt2" offsetY="25" style="left: 1385dp; top: 1225.5dp; width: 96dp; height: 55dp; background-color: #1d1d1d;line-height: 55dp;">42</div>
+		<div id="FocusedParameterTooltip" class="jucePos juceLabel txt2" offsetY="20" style="left: 1385dp; top: 1225.5dp; width: 96dp; height: 55dp; background-color: #1d1d1d;line-height: 55dp;">42</div>
 	</body>
 </rml>
