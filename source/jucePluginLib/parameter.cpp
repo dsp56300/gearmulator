@@ -142,6 +142,8 @@ namespace pluginLib
 
     void Parameter::pushChangeGesture()
     {
+		if (!getDescription().isPublic)
+			return;
 		if(!m_changeGestureCount)
 			beginChangeGesture();
 		++m_changeGestureCount;
@@ -149,6 +151,8 @@ namespace pluginLib
 
     void Parameter::popChangeGesture()
     {
+		if (!getDescription().isPublic)
+			return;
 		assert(m_changeGestureCount > 0);
 		--m_changeGestureCount;
 		if(!m_changeGestureCount)
