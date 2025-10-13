@@ -111,7 +111,11 @@ void RenderInterface_GL2::Clear()
 
 Rml::CompiledGeometryHandle RenderInterface_GL2::CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices)
 {
-	GeometryView* data = new GeometryView{vertices, indices};
+	auto* data = new GeometryView{};
+
+	data->vertices.assign(vertices.begin(), vertices.end());
+	data->indices.assign(indices.begin(), indices.end());
+
 	return reinterpret_cast<Rml::CompiledGeometryHandle>(data);
 }
 

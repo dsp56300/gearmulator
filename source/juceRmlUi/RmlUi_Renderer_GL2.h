@@ -68,8 +68,8 @@ public:
 
 private:
 	struct GeometryView {
-		Rml::Span<const Rml::Vertex> vertices;
-		Rml::Span<const int> indices;
+		std::vector<Rml::Vertex> vertices;
+		std::vector<int> indices;
 	};
 
 	int viewport_width = 0;
