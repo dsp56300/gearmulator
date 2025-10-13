@@ -614,10 +614,10 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 	if(auto* editor = dynamic_cast<Editor*>(getEditor()))
 	{
-		menu.addSeparator();
-
 		if(auto* pm = editor->getPatchManager())
 		{
+			menu.addSeparator();
+
 #ifdef JUCE_MAC
 			const std::string ctrlName = "Cmd";
 #else
