@@ -141,6 +141,15 @@ namespace jucePluginEditorLib
 
 	void FocusedParameter::updateControlLabel(const Rml::Element* _elem, const Priority _prio)
 	{
+		if (_elem)
+		{
+			if (auto* parent = _elem->GetParentNode())
+			{
+				if (dynamic_cast<Rml::ElementFormControlInput*>(parent))
+					_elem = parent;
+			}
+		}
+
 		const auto* param = getParameterFromElement(_elem);
 
 		updateControlLabel(_elem, param, _prio);
