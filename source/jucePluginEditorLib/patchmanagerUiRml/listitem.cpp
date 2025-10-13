@@ -135,10 +135,16 @@ namespace jucePluginEditorLib::patchManagerRml
 		const auto index = getItem()->getIndex();
 
 		auto indices = getList().getSelectedEntries();
-		if (indices.empty() || std::find(indices.begin(), indices.end(), index) == indices.end())
+
+		if (std::find(indices.begin(), indices.end(), index) != indices.end())
 		{
+			// if the entry being dragged is selected, drag all selected entries
 			indices.push_back(index);
-			getItem()->getList().setSelected(index, true, false, true);
+		}
+		else
+		{
+			// otherwise, just drag this entry
+			indices = { index };
 		}
 
 		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patches;
