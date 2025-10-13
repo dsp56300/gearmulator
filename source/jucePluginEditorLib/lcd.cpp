@@ -69,8 +69,10 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::EventListener::Add(m_canvas, Rml::EventId::Mousedown, [this](Rml::Event& _e)
 		{
-			if (juceRmlUi::helper::isContextMenu(_e))
-				_e.StopPropagation();
+			if (!juceRmlUi::helper::isContextMenu(_e))
+				return;
+
+			_e.StopPropagation();
 			onClicked();
 		});
 	}
