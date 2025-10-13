@@ -8,8 +8,13 @@ namespace rmlPlugin
 {
 	TabGroup::~TabGroup()
 	{
-		for (size_t i=0; i<m_buttons.size(); ++i)
-			setButton(nullptr, i);
+		m_buttonListeners.clear();
+
+		for (auto& buttons : m_buttons)
+		{
+			for (auto* button : buttons)
+				button->RemoveEventListener(Rml::EventId::Click, this);
+		}
 	}
 
 	void TabGroup::setPage(Rml::Element* _page, const size_t _index)
@@ -25,21 +30,17 @@ namespace rmlPlugin
 	{
 		resize(_index + 1);
 
-		if (m_buttons[_index])
-		{
-			m_buttons[_index]->RemoveEventListener(Rml::EventId::Click, this);
-			m_buttonListeners[_index].reset();
-		}
+		if (std::find(m_buttons[_index].begin(), m_buttons[_index].end(), _button) != m_buttons[_index].end())
+			return;
 
-		m_buttons[_index] = _button;
+		m_buttons[_index].push_back(_button);
 
-		if (m_buttons[_index])
-		{
-			if (auto* button = dynamic_cast<juceRmlUi::ElemButton*>(m_buttons[_index]))
-				m_buttonListeners[_index].set(button->evClick, [this, _index](juceRmlUi::ElemButton*) { onClick(_index); });
-			else
-				m_buttons[_index]->AddEventListener(Rml::EventId::Click, this);
-		}
+		m_buttonListeners[_index].emplace_back();
+
+		if (auto* button = dynamic_cast<juceRmlUi::ElemButton*>(m_buttons[_index].back()))
+			m_buttonListeners[_index].back().set(button->evClick, [this, _index](juceRmlUi::ElemButton*) { onClick(_index); });
+		else
+			m_buttons[_index].back()->AddEventListener(Rml::EventId::Click, this);
 
 		setPageActive(_index, m_activePage == _index);
 	}
@@ -48,8 +49,11 @@ namespace rmlPlugin
 	{
 		for (size_t i=0; i<m_buttons.size(); ++i)
 		{
-			if (_event.GetCurrentElement() == m_buttons[i])
-				onClick(i);
+			for(const auto* button : m_buttons[i])
+			{
+				if (_event.GetCurrentElement() == button)
+					onClick(i);
+			}
 		}
 	}
 
@@ -67,7 +71,7 @@ namespace rmlPlugin
 		if (m_buttons.size() >= _size)
 			return;
 
-		m_buttons.resize(_size, nullptr);
+		m_buttons.resize(_size);
 		m_buttonListeners.resize(_size);
 
 		m_pages.resize(_size, nullptr);
@@ -77,12 +81,13 @@ namespace rmlPlugin
 	{
 		if (_index < m_buttons.size())
 		{
-			auto* button = m_buttons[_index];
-
-			if (button && isToggle(button) && !isChecked(button))
+			for (auto* button : m_buttons[_index])
 			{
-				setChecked(button, true);
-				return;
+				if (button && isToggle(button) && !isChecked(button))
+				{
+					setChecked(button, true);
+					return;
+				}
 			}
 		}
 		setActivePage(_index);
@@ -103,7 +108,7 @@ namespace rmlPlugin
 
 		if (_index < m_buttons.size())
 		{
-			if (auto* button = m_buttons[_index])
+			for (auto* button : m_buttons[_index])
 				setChecked(button, _active);
 		}
 	}
