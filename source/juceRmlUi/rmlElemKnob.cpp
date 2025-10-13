@@ -2,6 +2,8 @@
 
 #include "rmlHelper.h"
 
+#include <cmath>
+
 namespace juceRmlUi
 {
 	ElemKnob::ElemKnob(Rml::CoreInstance& _coreInstance, const Rml::String& _tag): ElemValue(_coreInstance, _tag)
@@ -93,10 +95,21 @@ namespace juceRmlUi
 		m_endless = _endless;
 	}
 
+	bool ElemKnob::isReversed(const Rml::Element* _element)
+	{
+		auto* attrib = _element->GetAttribute("orientation");
+		if (!attrib)
+			return false;
+		return attrib->Get(_element->GetCoreInstance(), std::string()) == "vertical";
+	}
+
 	void ElemKnob::processMouseWheel(Rml::Element& _element, const Rml::Event& _event)
 	{
 		const auto wheel = helper::getMouseWheelDelta(_event);
-		const auto delta = wheel.y;
+		auto delta = wheel.y;
+
+		if (isReversed(&_element))
+			delta = -delta;
 
 		const auto range = getRange(&_element);
 

@@ -2,6 +2,8 @@
 
 #include "rmlParameterBinding.h"
 
+#include "juceRmlUi/rmlElemKnob.h"
+
 #include "juce_events/juce_events.h"
 
 namespace rmlPlugin
@@ -61,7 +63,7 @@ namespace rmlPlugin
 
 		setElementParameterDefaults(_element, targetParam);
 
-		_element->SetAttribute("value", m_parameter->getUnnormalizedValue());
+		setElementValue(_element, m_parameter);
 
 		_element->AddEventListener(Rml::EventId::Change, this);
 
@@ -103,9 +105,7 @@ namespace rmlPlugin
 		{
 			if (!element)
 				continue;
-			const auto currentValue = element->GetAttribute("value", m_parameter->getUnnormalizedValue());
-			if (currentValue != value)
-				element->SetAttribute("value", value);
+			setElementValue(element, m_parameter);
 		}
 	}
 
@@ -135,7 +135,7 @@ namespace rmlPlugin
 			if (!element)
 				return;
 
-			const auto v = element->GetAttribute("value", m_parameter->getUnnormalizedValue());
+			const auto v = getElementValue(element, m_parameter);
 
 			if (m_parameter->getUnnormalizedValue() == v)
 				return;
@@ -155,6 +155,45 @@ namespace rmlPlugin
 		EventListener::OnDetach(_element);
 
 		m_elements.erase(_element);
+	}
+
+	int ParameterToElementsBinding::getElementValue(const Rml::Element* _element, const pluginLib::Parameter* _default)
+	{
+		const pluginLib::ParamValue v = static_cast<pluginLib::ParamValue>(juceRmlUi::ElemValue::getValue(_element, static_cast<float>(_default->getUnnormalizedValue())));
+
+		if (isReversed(_element))
+		{
+			const auto& desc = _default->getDescription();
+			const auto& range = desc.range;
+			return range.getEnd() - (v - range.getStart());
+		}
+		return v;
+	}
+
+	void ParameterToElementsBinding::setElementValue(Rml::Element* _element, const pluginLib::Parameter* _source)
+	{
+		const auto currentValue = getElementValue(_element, _source);
+
+		const auto newValue = _source->getUnnormalizedValue();
+
+		if (newValue == currentValue)
+			return;
+
+		if (isReversed(_element))
+		{
+			const auto& desc = _source->getDescription();
+			const auto& range = desc.range;
+			const auto v = range.getEnd() - (newValue - range.getStart());
+			juceRmlUi::ElemValue::setValue(_element, static_cast<float>(v));
+			return;
+		}
+
+		juceRmlUi::ElemValue::setValue(_element, static_cast<float>(newValue));
+	}
+
+	bool ParameterToElementsBinding::isReversed(const Rml::Element* _element)
+	{
+		return juceRmlUi::ElemKnob::isReversed(_element);
 	}
 
 	ParameterToElementsBinding::IgnoreChangeEvents::IgnoreChangeEvents(ParameterToElementsBinding& _owner) : m_owner(_owner)
