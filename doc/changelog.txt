@@ -9,11 +9,13 @@ Framework:
 		If a connection cannot be established, the plugin will display a warning message
 		and will automatically fall back to local processing.
 
-- [Fix] BUG-10013 Sliders can now adjusted via mouse wheel.
+- [Fix] BUG-10016 Added OpenGL 2 renderer as fallback if OpenGL 3.3 is not supported to
+		fix crashes on older hardware / Raspberry Pi
+- [Fix] BUG-10013 Sliders can now be adjusted via mouse wheel.
 - [Fix] BUG-10014 Patch Manager: Child data sources were still visible even
         if parent node closed.
 - [Fix] BUG-10017 Tooltips could exceed screen bounds in some cases
-- [Fix] Patch Manager: Fix list entry being force-selected when being dragged
+- [Fix] Patch Manager: List entry was being force-selected when being dragged
 - [Fix] Patch Manager: Patch list didn't refresh after renaming a patch
 - [Fix] Patch Manager: Drag & Drop from patch list to patch slot of UI (depending on plugin) 
         not working
