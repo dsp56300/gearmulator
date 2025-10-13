@@ -65,5 +65,7 @@ namespace jucePluginEditorLib
 		std::map<pluginLib::Parameter*, pluginLib::ParameterListener> m_boundParameters;
 		Priority m_currentPriority = Priority::None;
 		juceRmlUi::ScopedListener m_mouseOver;
+
+		const pluginLib::Parameter* m_currentParameter = nullptr;
 	};
 }

@@ -8,6 +8,7 @@
 #include "juceRmlUi/rmlEventListener.h"
 
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace jucePluginEditorLib
 {
@@ -142,27 +143,36 @@ namespace jucePluginEditorLib
 		if(_priority < m_currentPriority)
 			return;
 
-		stopTimer();
-
 		_param = resolveSoftKnob(_param);
 
 		if(!_param || !_elem)
 		{
+			stopTimer();
+			m_currentParameter = nullptr;
 			m_currentPriority = Priority::None;
 			updateParameter({}, {});
 			m_tooltip->setVisible(false);
 			return;
 		}
 
+		stopTimer();
+
+		const auto tooltipTime = m_tooltip && m_tooltip->isValid() ? m_tooltip->getTooltipDisplayTime() : g_defaultDisplayTimeout;
+
+		startTimer(tooltipTime == 0 ? g_defaultDisplayTimeout : static_cast<int>(tooltipTime));
+
+		// do not allow the displayed parameter to change on same priority to reduce flickering
+		// if multiple values are automated. Only allow for UI as it should immediately reflect user changes
+		if (_priority != getPriority(pluginLib::Parameter::Origin::Ui) && _priority == m_currentPriority && m_currentParameter != _param)
+			return;
+
+		m_currentParameter = _param;
+
 		const auto value = _param->getText(_param->getValue(), 0).toStdString();
 
 		updateParameter(_param->getDescription().displayName, value);
 
 		m_tooltip->initialize(_elem, value);
-
-		const auto tooltipTime = m_tooltip && m_tooltip->isValid() ? m_tooltip->getTooltipDisplayTime() : g_defaultDisplayTimeout;
-
-		startTimer(tooltipTime == 0 ? g_defaultDisplayTimeout : static_cast<int>(tooltipTime));
 
 		m_currentPriority = _priority;
 	}
