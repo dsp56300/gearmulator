@@ -76,6 +76,18 @@ namespace juceRmlUi
 		return {};
 	}
 
+	ElemList* ElemListEntry::getParentListElem() const
+	{
+		auto* parent = GetParentNode();
+		while (parent)
+		{
+			if (auto* list = dynamic_cast<ElemList*>(parent))
+				return list;
+			parent = parent->GetParentNode();
+		}
+		return nullptr;
+	}
+
 	void ElemListEntry::onAdded()
 	{
 	}

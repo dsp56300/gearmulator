@@ -5,8 +5,10 @@
 
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemList.h"
+#include "juceRmlUi/rmlElemListEntry.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
+#include "juceRmlUi/rmlListEntry.h"
 
 #include "patchmanager/patchmanager.h"
 #include "patchmanager/savepatchdesc.h"
@@ -19,9 +21,20 @@ namespace jucePluginEditorLib
 	{
 		std::pair<pluginLib::patchDB::PatchPtr, patchManagerRml::ListModel*> getPatchFromDragSource(const Rml::Event& _event, const juceRmlUi::DragSource* _source)
 		{
-			auto* listElem = dynamic_cast<juceRmlUi::ElemList*>(juceRmlUi::helper::getDragElement(_event));
-			if(!listElem)
+			auto* dragElem = juceRmlUi::helper::getDragElement(_event);
+			if (!dragElem)
 				return {};
+
+			auto* listElem = dynamic_cast<juceRmlUi::ElemList*>(dragElem);
+			if(!listElem)
+			{
+				auto* listEntryElem = dynamic_cast<juceRmlUi::ElemListEntry*>(dragElem);
+				if (!listEntryElem)
+					return {};
+				listElem = listEntryElem->getParentListElem();
+				if (!listElem)
+					return {};
+			}
 
 			patchManagerRml::ListModel* listModel = static_cast<patchManagerRml::ListModel*>(listElem->GetAttribute<void*>("model", nullptr));
 

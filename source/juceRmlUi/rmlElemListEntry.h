@@ -7,6 +7,8 @@
 
 namespace juceRmlUi
 {
+	class ElemList;
+
 	class ElemListEntry : public Element, public DragSource, public DragTarget
 	{
 	public:
@@ -21,6 +23,8 @@ namespace juceRmlUi
 		std::unique_ptr<DragData> createDragData() override;
 
 		auto& getEntry() const { return m_entry; }
+
+		ElemList* getParentListElem() const;
 
 	private:
 		void onAdded();

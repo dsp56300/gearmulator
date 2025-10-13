@@ -24,8 +24,6 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	bool ListItem::setPatch(const pluginLib::patchDB::PatchPtr& _patch)
 	{
-		if (_patch == m_patch)
-			return false;
 		m_patch = _patch;
 
 		if (auto* elem = getListElemEntry())

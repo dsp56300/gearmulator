@@ -14,6 +14,9 @@ Framework:
         if parent node closed.
 - [Fix] BUG-10017 Tooltips could exceed screen bounds in some cases
 - [Fix] Patch Manager: Fix list entry being force-selected when being dragged
+- [Fix] Patch Manager: Patch list didn't refresh after renaming a patch
+- [Fix] Patch Manager: Drag & Drop from patch list to patch slot of UI (depending on plugin) 
+        not working
 
 Xenia:
 
