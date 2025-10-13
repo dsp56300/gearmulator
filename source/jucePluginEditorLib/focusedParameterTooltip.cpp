@@ -58,7 +58,7 @@ namespace jucePluginEditorLib
 			const auto labelWidth = static_cast<float>(textWidth) + 8;
 
 			x += box.GetSize().x * 0.5f - labelWidth * 0.5f;
-			y += box.GetSize().y + (m_label->GetBox().GetSize().y * 0.5f);
+			y += box.GetSize().y;
 
 			if(auto* attribOffset = m_label->GetAttribute("offsetY"))
 				y += attribOffset->Get<float>(m_label->GetCoreInstance());
