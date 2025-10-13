@@ -177,6 +177,13 @@ namespace jucePluginEditorLib
 			juceRmlUi::helper::findChildren(_results, root, _name, _expectedCount);
 		}
 
+		template<typename T = Rml::Element> std::vector<T*> findChildren(const std::string& _name, const size_t _expectedCount = 0) const
+		{
+			std::vector<T*> results;
+			findChildren(results, _name, _expectedCount);
+			return results;
+		}
+
 		std::vector<Rml::Element*> findChildreByParam(const std::string& _param, uint8_t _part = 0, const size_t _expectedCount = 0, bool _visibleOnly = false) const;
 		Rml::Element* findChildByParam(const std::string& _param, uint8_t _part = 0, bool _mustExist = true, bool _visibleOnly = false) const;
 
