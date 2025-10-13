@@ -459,7 +459,7 @@ namespace genericVirusUI
 		param->setUnnormalizedValueNotifyingHost(_playMode, pluginLib::Parameter::Origin::Ui);
 
 		// we send this directly here as we request a new arrangement below, we don't want to wait on juce to inform the knob to have changed
-		getController().sendParameterChange(*param, _playMode);
+		getController().sendParameterChange(*param, _playMode, pluginLib::Parameter::Origin::Ui);
 
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
 			setPart(0);

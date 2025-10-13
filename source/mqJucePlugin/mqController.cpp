@@ -440,7 +440,7 @@ namespace mqJucePlugin
 	*/  }
 	}
 
-	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const pluginLib::ParamValue _value)
+	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin)
 	{
 		const auto &desc = _parameter.getDescription();
 

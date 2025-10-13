@@ -21,7 +21,7 @@ namespace pluginLib
 
     void Parameter::valueChanged(juce::Value&)
     {
-		sendToSynth();
+		sendToSynth(m_lastValueOrigin);
 		onValueChanged(this);
 	}
 
@@ -38,7 +38,7 @@ namespace pluginLib
 		m_value.setValue(newValue);
 	}
 
-    void Parameter::sendToSynth()
+    void Parameter::sendToSynth(const Origin _origin)
     {
 		const float floatValue = m_value.getValue();
 		const auto value = juce::roundToInt(floatValue);
@@ -53,12 +53,12 @@ namespace pluginLib
 		{
 			if(m_rateLimit)
 			{
-				sendParameterChangeDelayed(value, ++m_uniqueDelayCallbackId);
+				sendParameterChangeDelayed(value, ++m_uniqueDelayCallbackId, _origin);
 			}
 			else
 			{
 				m_lastSendTime = milliseconds();
-				m_controller.sendParameterChange(*this, value);
+				m_controller.sendParameterChange(*this, value, _origin);
 			}
 		}
 
@@ -71,7 +71,7 @@ namespace pluginLib
 		return t.count();
     }
 
-    void Parameter::sendParameterChangeDelayed(const ParamValue _value, uint32_t _uniqueId)
+    void Parameter::sendParameterChangeDelayed(const ParamValue _value, uint32_t _uniqueId, Origin _origin)
     {
 		if(_uniqueId != m_uniqueDelayCallbackId)
 			return;
@@ -82,13 +82,13 @@ namespace pluginLib
 		if(elapsed >= m_rateLimit)
 		{
 			m_lastSendTime = ms;
-			m_controller.sendParameterChange(*this, _value);
+			m_controller.sendParameterChange(*this, _value, _origin);
 		}
 		else
 		{
-			juce::Timer::callAfterDelay(static_cast<int>(elapsed), [this, _value, _uniqueId]
+			juce::Timer::callAfterDelay(static_cast<int>(elapsed), [this, _value, _uniqueId, _origin]
 			{
-				sendParameterChangeDelayed(_value, _uniqueId);
+				sendParameterChangeDelayed(_value, _uniqueId, _origin);
 			});
 		}
     }
@@ -180,7 +180,7 @@ namespace pluginLib
 		m_value.setValue(clampValue(_newValue));
 
 		if(_origin != Origin::Derived)
-			sendToSynth();
+			sendToSynth(_origin);
 
 		forwardToDerived(_newValue);
     }

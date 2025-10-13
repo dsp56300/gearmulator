@@ -306,14 +306,14 @@ namespace pluginLib
 		return iti->second;
     }
 
-	void Controller::sendLockedParameters(const uint8_t _part)
+	void Controller::sendLockedParameters(const uint8_t _part, const Parameter::Origin _origin/* = Parameter::Origin::PresetChange*/)
 	{
         const auto lockedParameters = m_locking.getLockedParameters(_part);
 
         for (const auto& p : lockedParameters)
         {
 	        const auto v = p->getUnnormalizedValue();
-	        sendParameterChange(*p, static_cast<uint8_t>(v));
+	        sendParameterChange(*p, static_cast<uint8_t>(v), _origin);
         }
 	}
 
