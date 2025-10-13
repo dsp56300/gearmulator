@@ -44,6 +44,7 @@ set(SOURCES
 	rmlTree.cpp rmlTree.h
 	rmlTreeNode.cpp rmlTreeNode.h
 
+	RmlUi_Renderer_GL2.cpp RmlUi_Renderer_GL2.h
 	RmlUi_Renderer_GL3.cpp RmlUi_Renderer_GL3.h
 )
 
