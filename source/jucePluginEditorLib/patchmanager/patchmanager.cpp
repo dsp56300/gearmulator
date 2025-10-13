@@ -402,12 +402,12 @@ namespace jucePluginEditorLib::patchManager
 	}
 
 
-	bool PatchManager::copyPart(const uint8_t _target, const uint8_t _source)
+	bool PatchManager::copyPart(const uint8_t _target, const uint8_t _source, uint64_t _userData/* = 0*/)
 	{
 		if(_target == _source)
 			return false;
 
-		const auto source = requestPatchForPart(_source);
+		const auto source = requestPatchForPart(_source, _userData);
 		if(!source)
 			return false;
 
