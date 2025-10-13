@@ -17,10 +17,20 @@ Framework:
 - [Fix] Patch Manager: Patch list didn't refresh after renaming a patch
 - [Fix] Patch Manager: Drag & Drop from patch list to patch slot of UI (depending on plugin) 
         not working
+- [Fix] Wrong initial state of toggle buttons bound to a parameter
+- [Fix] Toggle buttons that are part of a radio group shouldn't disable when clicked again
+- [Fix] Vertical sliders being reversed when bound to a parameter
+- [Fix] Erratic behaviour of tooltips/focused parameters when multiple parameters 
+        are automated
+- [Fix] Focused parameter display & tooltips not working for sliders
 
 Xenia:
 
 - [Fix] BUG-10017 Tooltips were placed too far away from knobs
+
+NodalRed2x:
+
+- [Fix] Knobs might not refresh when VM map is switched on/offq
 
 2.0.2:
 
