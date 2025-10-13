@@ -74,7 +74,16 @@ namespace juceRmlUi
 	void ElemButton::onClick()
 	{
 		if (m_isToggle)
-			setChecked(!getChecked());
+		{
+			if (getChecked() && getValueOn() >= 0 && getValueOff() < 0)
+			{
+				// if this toggle has positive values only, don't allow unchecking
+			}
+			else
+			{
+				setChecked(!getChecked());
+			}
+		}
 
 		evClick(this);
 	}
