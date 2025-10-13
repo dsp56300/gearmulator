@@ -1,6 +1,7 @@
 #include "storage.h"
 
 #include <cassert>
+#include <cstddef>
 
 namespace rLib
 {

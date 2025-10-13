@@ -2,6 +2,8 @@
 
 #include "rmlHelper.h"
 
+#include <cmath>
+
 namespace juceRmlUi
 {
 	ElemKnob::ElemKnob(Rml::CoreInstance& _coreInstance, const Rml::String& _tag): ElemValue(_coreInstance, _tag)

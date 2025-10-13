@@ -1,6 +1,7 @@
 #include "rom.h"
 
 #include <algorithm>
+#include <cstring>
 
 #include "baseLib/filesystem.h"
 
@@ -51,7 +52,7 @@ namespace jeLib
 
 		auto findKey = [&](const char* _key) -> size_t
 		{
-			auto keySize = std::strlen(_key);
+			auto keySize = strlen(_key);
 
 			for (size_t i = 0; i < m_data.size() - keySize; ++i)
 			{
