@@ -4,6 +4,7 @@
 #include "rmlDragSource.h"
 #include "rmlDragTarget.h"
 #include "rmlListEntry.h"
+#include "rmlElemList.h"
 
 #include "rmlEventListener.h"
 #include "rmlHelper.h"
