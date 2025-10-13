@@ -19,8 +19,8 @@ namespace juceRmlUi
 		};
 
 		m_onValueChanged.set(onValueChanged, setSpriteDirty);
-		m_onMinValueChanged.set(onValueChanged, setSpriteDirty);
-		m_onMaxValueChanged.set(onValueChanged, setSpriteDirty);
+		m_onMinValueChanged.set(onMinValueChanged, setSpriteDirty);
+		m_onMaxValueChanged.set(onMaxValueChanged, setSpriteDirty);
 	}
 
 	ElemKnob::~ElemKnob()
