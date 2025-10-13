@@ -6,6 +6,7 @@
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
 
+#include "RmlUi_Renderer_GL2.h"
 #include "RmlUi_Renderer_GL3.h"
 
 #include "baseLib/filesystem.h"
@@ -43,8 +44,10 @@ namespace juceRmlUi
 		m_openGLContext.attachTo(*this);
 		m_openGLContext.setContinuousRepainting(false);
 
-		// this is optional on Win/Linux (but doesn't hurt), but required on macOS to get a core profile, not get a compatibility profile
+#if JUCE_MAC
+		// Required on macOS to get a core profile, we don't want a compatibility profile
 		m_openGLContext.setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
+#endif
 
 		setWantsKeyboardFocus(true);
 		// set some reasonable default size, correct size will be set when loading the RML document
@@ -102,7 +105,35 @@ namespace juceRmlUi
 
 		m_openGLContext.setSwapInterval(1);
 
-		m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
+		using namespace juce::gl;
+
+#if JUCE_MAC
+		constexpr auto version = 33;
+#else
+		// clear any previous error
+		while (glGetError() != GL_NO_ERROR) {}
+
+		// attempt to get the actual GL version, this requires a context supporting OpenGL 3.0 or higher
+		int major = 0, minor = 0;
+		glGetIntegerv(GL_MAJOR_VERSION, &major);
+		glGetIntegerv(GL_MINOR_VERSION, &minor);
+
+		// if that fails, we are probably on an old GL version that doesn't support these queries, so fall back to GL2
+		const auto version = glGetError() == GL_NO_ERROR ? (major * 10 + minor) : 20;
+#endif
+		if (version >= 33)
+		{
+			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
+			m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
+		}
+		else
+		{
+			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 2 renderer for RmlUi, version detected: %d.%d", major, minor);
+			m_renderInterface.reset(new RenderInterface_GL2(m_coreInstance));
+		}
+
+		m_openGLversion = version;
+
 		m_renderProxy->setRenderer(m_renderInterface.get());
 
 		{
@@ -139,12 +170,28 @@ namespace juceRmlUi
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		m_renderInterface->SetViewport(size.x, size.y);
-		m_renderInterface->BeginFrame();
+		auto* gl2 = dynamic_cast<RenderInterface_GL2*>(m_renderInterface.get());
+		auto* gl3 = dynamic_cast<RenderInterface_GL3*>(m_renderInterface.get());
+
+		if (gl3)
+		{
+			gl3->SetViewport(size.x, size.y);
+			gl3->BeginFrame();
+		}
+		else if (gl2)
+		{
+			gl2->SetViewport(size.x, size.y);
+			gl2->BeginFrame();
+		}
+
 		bool haveMore = true;
 		while (haveMore)
 			haveMore = m_renderProxy->executeRenderFunctions();
-		m_renderInterface->EndFrame();
+
+		if (gl3)
+			gl3->EndFrame();
+		else if (gl2)
+			gl2->EndFrame();
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
@@ -405,6 +452,13 @@ namespace juceRmlUi
 		m_updating = true;
 
 		updateRmlContextDimensions();
+
+		if (m_openGLversion != m_lastOpenGLversion)
+		{
+			m_lastOpenGLversion = m_openGLversion;
+
+			m_rmlContext->ActivateTheme("advancedrenderer", m_lastOpenGLversion >= 30);
+		}
 
 		evPreUpdate(this);
 

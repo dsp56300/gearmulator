@@ -10,8 +10,6 @@
 
 #include "juce_opengl/juce_opengl.h"
 
-class RenderInterface_GL3;
-
 namespace Rml
 {
 	class Context;
@@ -19,11 +17,6 @@ namespace Rml
 
 namespace juceRmlUi
 {
-	namespace gl2
-	{
-		class RendererGL2;
-	}
-
 	struct RmlInterfaces;
 	class Renderer;
 	class JuceRmlUi;
@@ -119,7 +112,7 @@ namespace juceRmlUi
 
 		juce::OpenGLContext m_openGLContext;
 
-		std::unique_ptr<RenderInterface_GL3> m_renderInterface;
+		std::unique_ptr<Rml::RenderInterface> m_renderInterface;
 		std::unique_ptr<RendererProxy> m_renderProxy;
 
 		Rml::Context* m_rmlContext = nullptr;
@@ -155,5 +148,8 @@ namespace juceRmlUi
 		double m_nextFrameTime;
 
 		bool m_debuggerActive = false;
+
+		uint32_t m_openGLversion = 0;
+		uint32_t m_lastOpenGLversion = 0;
 	};
 }

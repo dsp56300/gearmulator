@@ -44,6 +44,7 @@ set(SOURCES
 	rmlTree.cpp rmlTree.h
 	rmlTreeNode.cpp rmlTreeNode.h
 
+	RmlUi_Renderer_GL2.cpp RmlUi_Renderer_GL2.h
 	RmlUi_Renderer_GL3.cpp RmlUi_Renderer_GL3.h
 )
 
@@ -56,6 +57,15 @@ target_link_libraries(juceRmlUi PUBLIC baseLib rmlui_core rmlui_debugger)
 
 target_include_directories(juceRmlUi PUBLIC ../JUCE/modules)
 target_compile_definitions(juceRmlUi PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
+
+if(APPLE)
+	target_compile_definitions(juceRmlUi PRIVATE JUCE_MAC=1)
+else()
+	target_compile_definitions(juceRmlUi PRIVATE JUCE_MAC=0)
+endif()
+
 set_property(TARGET juceRmlUi PROPERTY FOLDER "Gearmulator")
+
 target_compile_definitions(juceRmlUi PUBLIC RMLUI_GL3_CUSTOM_LOADER="juce_opengl/juce_opengl.h")
+
 target_include_directories(juceRmlUi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

@@ -3,6 +3,7 @@
 #include "juceRmlUi/rmlHelper.h"
 
 #include "RmlUi/Core/Element.h"
+#include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/ElementUtilities.h"
 
 namespace jucePluginEditorLib
@@ -57,7 +58,7 @@ namespace jucePluginEditorLib
 			const auto labelWidth = static_cast<float>(textWidth) + 8;
 
 			x += box.GetSize().x * 0.5f - labelWidth * 0.5f;
-			y += box.GetSize().y + (m_label->GetBox().GetSize().y * 0.5f);
+			y += box.GetSize().y;
 
 			if(auto* attribOffset = m_label->GetAttribute("offsetY"))
 				y += attribOffset->Get<float>(m_label->GetCoreInstance());
@@ -67,6 +68,11 @@ namespace jucePluginEditorLib
 			m_label->SetProperty(Rml::PropertyId::Width, Rml::Property(labelWidth, Rml::Unit::PX));
 
 			m_label->SetInnerRML(_value);
+
+			// clamp height to not exceed height of whole document
+			const auto docHeight = m_label->GetOwnerDocument()->GetClientHeight();
+			if (y + m_label->GetBox().GetSize().y > docHeight)
+				m_label->SetProperty(Rml::PropertyId::Top, Rml::Property(docHeight - m_label->GetBox().GetSize().y, Rml::Unit::PX));
 
 			juceRmlUi::helper::setVisible(m_label, true);
 		}
