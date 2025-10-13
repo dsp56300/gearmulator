@@ -194,7 +194,7 @@ namespace jucePluginEditorLib::patchManager
 					if(*p == key)
 					{
 						++countAdded;
-						_menu.addEntry("Overwrite " + _name + " '" + p->getName() + "' in user bank '" + ds->name + "'", true, false, [this, p, _part, _userData]
+						_menu.addEntry("Overwrite '" + p->getName() + "' in user bank '" + ds->name + "' with " + _name, true, false, [this, p, _part, _userData]
 						{
 							const auto newPatch = requestPatchForPart(_part, _userData);
 							if(newPatch)
