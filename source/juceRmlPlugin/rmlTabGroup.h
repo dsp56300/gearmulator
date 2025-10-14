@@ -2,6 +2,7 @@
 
 #include "RmlUi/Core/EventListener.h"
 #include "RmlUi/Core/Types.h"
+#include "RmlUi/Core/DataModelHandle.h"
 
 #include <limits>
 
@@ -17,7 +18,7 @@ namespace rmlPlugin
 	class TabGroup : Rml::EventListener
 	{
 	public:
-		TabGroup() = default;
+		TabGroup(std::string _name, Rml::Context* _context);
 		TabGroup(const TabGroup&) = delete;
 		TabGroup(TabGroup&&) = delete;
 
@@ -45,6 +46,9 @@ namespace rmlPlugin
 		void onClick(size_t _index);
 
 		void setPageActive(size_t _index, bool _active) const;
+
+		std::string m_name;
+		Rml::DataModelHandle m_dataModel;
 
 		std::vector<std::vector<Rml::Element*>> m_buttons;
 		std::vector<std::vector<baseLib::EventListener<juceRmlUi::ElemButton*>>> m_buttonListeners;
