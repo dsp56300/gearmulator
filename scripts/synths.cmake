@@ -4,6 +4,7 @@ set(synths
 	gearmulator_SYNTH_VAVRA
 	gearmulator_SYNTH_XENIA
 	gearmulator_SYNTH_NODALRED2X
+	gearmulator_SYNTH_JE8086
 	gearmulator_COMPONENT_DSPBRIDGE
 )
 
@@ -12,6 +13,7 @@ set(gearmulator_SYNTH_OSTIRUS_name OsTIrus)
 set(gearmulator_SYNTH_VAVRA_name Vavra)
 set(gearmulator_SYNTH_XENIA_name Xenia)
 set(gearmulator_SYNTH_NODALRED2X_name NodalRed2x)
+set(gearmulator_SYNTH_JE8086_name JE8086)
 set(gearmulator_COMPONENT_DSPBRIDGE_name DSPBridge)
 
 set(gearmulator_SYNTH_OSIRUS_folder osirus)
@@ -19,6 +21,7 @@ set(gearmulator_SYNTH_OSTIRUS_folder ostirus)
 set(gearmulator_SYNTH_VAVRA_folder vavra)
 set(gearmulator_SYNTH_XENIA_folder xenia)
 set(gearmulator_SYNTH_NODALRED2X_folder nodalred2x)
+set(gearmulator_SYNTH_JE8086_folder je8086)
 set(gearmulator_COMPONENT_DSPBRIDGE_folder dspbridge)
 
 macro(validateToggle NAME)
