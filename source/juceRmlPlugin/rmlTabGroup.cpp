@@ -2,10 +2,21 @@
 
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlHelper.h"
+#include "RmlUi/Core/Context.h"
+#include "RmlUi/Core/DataModelHandle.h"
 #include "RmlUi/Core/Element.h"
 
 namespace rmlPlugin
 {
+	TabGroup::TabGroup(std::string _name, Rml::Context* _context) : m_name(std::move(_name))
+	{
+		auto model = _context->CreateDataModel("tabgroup_" + m_name);
+
+		model.Bind("page", &m_activePage);
+
+		m_dataModel = model.GetModelHandle();
+	}
+
 	TabGroup::~TabGroup()
 	{
 		m_buttonListeners.clear();
@@ -61,8 +72,12 @@ namespace rmlPlugin
 	{
 		if (m_activePage == _index)
 			return;
+
 		setPageActive(m_activePage, false);
+
 		m_activePage = _index;
+		m_dataModel.DirtyVariable("page");
+
 		setPageActive(m_activePage, true);
 	}
 

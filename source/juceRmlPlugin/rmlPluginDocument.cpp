@@ -133,7 +133,7 @@ namespace rmlPlugin
 			const auto name = attribTabGroup->Get<Rml::String>(_element->GetCoreInstance());
 			auto& tabGroup = m_tabGroups[name];
 			if (!tabGroup)
-				tabGroup = std::make_unique<TabGroup>();
+				tabGroup = std::make_unique<TabGroup>(name, m_context.getContext());
 			if (auto* attribPage = _element->GetAttribute("tabpage"))
 				tabGroup->setPage(_element, std::stoi(attribPage->Get<Rml::String>(_element->GetCoreInstance())));
 			else if (auto* attribButton = _element->GetAttribute("tabbutton"))
