@@ -26,7 +26,10 @@ namespace juceRmlUi
 		{
 			return _keyEventResult == false;
 		}
+
+		static constexpr uint32_t g_advancedRendererMinimumGLversion = 33;
 	}
+
 	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback)
 		: m_rmlInterfaces(_interfaces)
 		, m_coreInstance(_interfaces.getCoreInstance())
@@ -108,7 +111,7 @@ namespace juceRmlUi
 		using namespace juce::gl;
 
 #if JUCE_MAC
-		constexpr auto version = 33;
+		constexpr auto version = g_advancedRendererMinimumGLversion;
 #else
 		// clear any previous error
 		while (glGetError() != GL_NO_ERROR) {}
@@ -121,7 +124,7 @@ namespace juceRmlUi
 		// if that fails, we are probably on an old GL version that doesn't support these queries, so fall back to GL2
 		const auto version = glGetError() == GL_NO_ERROR ? (major * 10 + minor) : 20;
 #endif
-		if (version >= 33)
+		if (version >= g_advancedRendererMinimumGLversion)
 		{
 			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
 			m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
@@ -457,7 +460,7 @@ namespace juceRmlUi
 		{
 			m_lastOpenGLversion = m_openGLversion;
 
-			m_rmlContext->ActivateTheme("advancedrenderer", m_lastOpenGLversion >= 30);
+			m_rmlContext->ActivateTheme("advancedrenderer", m_lastOpenGLversion >= g_advancedRendererMinimumGLversion);
 		}
 
 		evPreUpdate(this);
