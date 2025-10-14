@@ -24,8 +24,8 @@ namespace jeJucePlugin
 		else
 		{
 			setText({
-				"                    "
-				"                "
+				"Booting...          "
+				"From TUS with <3 "
 			});
 		}
 
