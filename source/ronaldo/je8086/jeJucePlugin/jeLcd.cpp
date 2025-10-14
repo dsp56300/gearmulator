@@ -2,6 +2,7 @@
 
 #include "jeController.h"
 #include "jeEditor.h"
+#include "jePluginProcessor.h"
 #include "hardwareLib/lcdfonts.h"
 
 #include "jucePluginLib/version.h"
@@ -12,6 +13,21 @@ namespace jeJucePlugin
 	JeLcd::JeLcd(Editor& _editor, Rml::Element* _parent) : Lcd(_parent, 16, 2), m_editor(_editor)
 	{
 		auto& sr = _editor.getJeController().getSysexRemote();
+
+		if (!_editor.getJeProcessor().getSelectedRom().isValid())
+		{
+			setText({
+				"No ROM no sound!    "
+				"Error 524288    "
+			});
+		}
+		else
+		{
+			setText({
+				"                    "
+				"                "
+			});
+		}
 
 		m_onLcdCgDataChanged.set(sr.evLcdCgDataChanged, [this](const std::array<uint8_t, 64>& _data)
 		{
