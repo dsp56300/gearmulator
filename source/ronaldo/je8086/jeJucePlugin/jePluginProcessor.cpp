@@ -24,12 +24,20 @@ namespace jeJucePlugin
 		m_roms = jeLib::RomLoader::findROMs();
 
 		// default to keyboard for now
+		m_selectedRom = std::numeric_limits<size_t>::max();
 		for (size_t i=0; i<m_roms.size(); ++i)
 		{
 			if (m_roms[i].getDeviceType() != jeLib::DeviceType::Keyboard)
 				continue;
 			m_selectedRom = i;
 			break;
+		}
+
+		// FIXME clear rom list if there is no keyboard rom to prevent that the rack rom is used
+		if (m_selectedRom == std::numeric_limits<size_t>::max())
+		{
+			m_roms.clear();
+			m_selectedRom = 0;
 		}
 
 		getController();
@@ -91,7 +99,7 @@ namespace jeJucePlugin
 			static jeLib::Rom emptyRom;
 			return emptyRom;
 		}
-		if (m_selectedRom >= m_roms.size())
+		if (getSelectedRomIndex() >= m_roms.size())
 			return m_roms.back();
 		return m_roms[m_selectedRom];
 	}

@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <map>
+#include <string>
+#include <vector>
 
 #include "jeLib/jemiditypes.h"
 
@@ -45,7 +47,7 @@ namespace jeJucePlugin
 
 	private:
 		void setAssignType(AssignType _type);
-		pluginLib::Parameter* getParameter(jeLib::Patch _type) const;
+		std::vector<pluginLib::Parameter*> getParameter(jeLib::Patch _type) const;
 		void onClick(Rml::Event& _event, const juceRmlUi::ElemButton* _button, AssignType _type);
 
 		const Editor& m_editor;
@@ -55,6 +57,6 @@ namespace jeJucePlugin
 
 		AssignType m_assignType = AssignType::None;
 
-		std::map<jeLib::Patch, Rml::Element*> m_controls;
+		std::map<jeLib::Patch, std::vector<std::pair<Rml::Element*, std::string>>> m_controls;
 	};
 }

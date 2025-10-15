@@ -51,6 +51,8 @@ namespace jeJucePlugin
 
 		bool changePatchName(PatchType _type, const std::string& _newName) const;
 
+		using Controller::findSynthParam;
+
 	private:
 		void parsePerformanceCommon(const pluginLib::SysEx& _sysex);
 		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part);

@@ -109,12 +109,19 @@ namespace jeJucePlugin
 
 		for (auto [type, paramVelocity] : g_velocityMap)
 		{
-			const auto param = getParameter(type);
+			const auto params = getParameter(type);
 
-			auto* elem = binding->getElementForParameter(param, false);
-			assert(elem);
+			assert(!params.empty());
 
-			m_controls.insert({ type, elem });
+			for (auto* param : params)
+			{
+				std::vector<Rml::Element*> elements;
+				binding->getElementsForParameter(elements, param, false);
+				assert(!elements.empty());
+
+				for (auto* elem : elements)
+					m_controls[type].emplace_back(elem, param->getDescription().name);
+			}
 		}
 
 		juceRmlUi::EventListener::Add(m_btAssignVelocity, Rml::EventId::Click, [this](Rml::Event& _event)
@@ -139,7 +146,7 @@ namespace jeJucePlugin
 
 		const auto& binding = m_editor.getRmlParameterBinding();
 
-		for (auto [type, control] : m_controls)
+		for (const auto& [type, controls] : m_controls)
 		{
 			auto t = type;
 			switch (m_assignType)
@@ -161,27 +168,46 @@ namespace jeJucePlugin
 			default:;
 			}
 
-			control->SetPseudoClass("assignvelocity", m_assignType == AssignType::Velocity);
-			control->SetPseudoClass("assigncontrol", m_assignType == AssignType::Control);
+			auto parameters = getParameter(t);
 
-			auto* parameter = getParameter(t);
+			if (m_assignType != AssignType::None)
+			{
+				assert(parameters.size() == 1);
+			}
 
-			binding->bind(*control, parameter->getDescription().name);
+			auto& c = m_editor.getJeController();
+
+			for (const auto& it : controls)
+			{
+				auto* control = it.first;
+				pluginLib::Parameter* parameter;
+
+				if (m_assignType != AssignType::None)
+					parameter = parameters.front();
+				else
+					parameter = c.getParameter(it.second, c.getCurrentPart());
+
+				assert(parameter);
+
+				control->SetPseudoClass("assignvelocity", m_assignType == AssignType::Velocity);
+				control->SetPseudoClass("assigncontrol", m_assignType == AssignType::Control);
+
+				binding->bind(*control, parameter->getDescription().name);
+			}
 		}
 	}
 
-	pluginLib::Parameter* JeAssign::getParameter(jeLib::Patch _type) const
+	std::vector<pluginLib::Parameter*> JeAssign::getParameter(jeLib::Patch _type) const
 	{
 		auto& c = m_editor.getJeController();
 
 		const auto p = static_cast<uint32_t>(_type);
-		const auto page = p >> 8;
-		const auto index = p & 0x7f;
-		const auto absIndex = c.getParameterDescriptions().getAbsoluteIndex(page, static_cast<uint8_t>(index));
-		assert(absIndex != std::numeric_limits<uint32_t>::max());
-		auto* result = c.getParameter(absIndex, c.getCurrentPart());
-		assert(result);
-		return result;
+		const uint8_t page = static_cast<uint8_t>(p >> 8);
+		const uint8_t index = p & 0x7f;
+
+		std::vector<pluginLib::Parameter*> parameters = c.findSynthParam(c.getCurrentPart(), page, index);
+		assert(!parameters.empty());
+		return parameters;
 	}
 
 	void JeAssign::onClick(Rml::Event& _event, const juceRmlUi::ElemButton* _button, const AssignType _type)

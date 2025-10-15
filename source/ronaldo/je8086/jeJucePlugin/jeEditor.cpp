@@ -50,7 +50,8 @@ namespace jeJucePlugin
 
 			romSelector->setValue(static_cast<float>(getJeProcessor().getSelectedRomIndex()));
 
-			if (roms.size() < 2)
+			// FIXME disable rom selection to prevent that a rack rom is used
+//			if (roms.size() < 2)
 				romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 		}
 

@@ -50,39 +50,40 @@
 		{"index":31 , "name":"Osc1Control1", "displayName": "OSC1 CTRL", "min":0, "max":127, "default":127},
 		{"index":32 , "name":"Osc1Control2", "displayName": "OSC2 CTRL", "min":0, "max":127, "default":127},
 		
-		{"index":31 , "name":"Osc1Control1Detune", "displayName": "DETUNE", "min":0, "max":127, "default":127, "isPublic":false},
-		{"index":32 , "name":"Osc1Control2Mix", "displayName": "MIX", "min":0, "max":127, "default":127, "isPublic":false},
+		{"index":31 , "name":"Osc1Control1Detune", "displayName": "DETUNE", "min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2Mix", "displayName": "MIX", "min":0, "max":127, "default":127},
 		
-		{"index":31 , "name":"Osc1Control1Offset", "displayName": "OFFSET", "min":0, "max":127, "default":127, "isPublic":false},
-		{"index":32 , "name":"Osc1Control2LFO1Depth", "displayName": "LFO1 DEPTH","min":0, "max":127, "default":127, "isPublic":false},
+		{"index":31 , "name":"Osc1Control1Offset", "displayName": "OFFSET", "min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2LFO1Depth", "displayName": "LFO1 DEPTH","min":0, "max":127, "default":127},
 		
-		{"index":31 , "name":"Osc1Control1CutoffFrq", "displayName": "FLT CUTOFF FREQ","min":0, "max":127, "default":127, "isPublic":false},
-		{"index":32 , "name":"Osc1Control2Resonance", "displayName": "FLT RESONANCE","min":0, "max":127, "default":127, "isPublic":false},
+		{"index":31 , "name":"Osc1Control1CutoffFrq", "displayName": "FLT CUTOFF FREQ","min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2Resonance", "displayName": "FLT RESONANCE","min":0, "max":127, "default":127},
 		
-		{"index":31 , "name":"Osc1Control1Harmonics", "displayName": "HARMONICS","min":0, "max":127, "default":127, "isPublic":false},
-		{"index":32 , "name":"Osc1Control2FeedbackAmount", "displayName": "FEEDBACK AMOUNT","min":0, "max":127, "default":127, "isPublic":false},
+		{"index":31 , "name":"Osc1Control1Harmonics", "displayName": "HARMONICS","min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2FeedbackAmount", "displayName": "FEEDBACK AMOUNT","min":0, "max":127, "default":127},
 		
-		{"index":31 , "name":"Osc1Control1PulseWidth", "displayName": "PULSE WIDTH","min":0, "max":127, "default":127, "isPublic":false},
-		{"index":32 , "name":"Osc1Control2PWMDepth", "displayName": "PWM DEPTH","min":0, "max":127, "default":127, "isPublic":false},
+		{"index":31 , "name":"Osc1Control1PulseWidth", "displayName": "PULSE WIDTH","min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2PWMDepth", "displayName": "PWM DEPTH","min":0, "max":127, "default":127},
 		
-		{"index":31 , "name":"Osc1Control1Shape", "min":0, "displayName": "SHAPE","max":127, "default":127, "isPublic":false},
+		{"index":31 , "name":"Osc1Control1Shape", "min":0, "displayName": "SHAPE","max":127, "default":127},
 				
 		
 		{"index":33 , "name":"Osc2Waveform", "displayName": "OSC2 WAVEFORM", "min":0, "max":3, "toText":"osc2WaveForm", "default":0},
 		{"index":34 , "name":"Osc2SyncSwitch", "displayName": "OSC2 SYNC", "min":0, "max":1, "toText":"offOn", "default":0},
 		{"index":35 , "name":"Osc2Range", "displayName": "OSC2 RANGE", "min":0, "max":50, "toText":"osc2Range", "default":25},
 		{"index":36 , "name":"Osc2FineWide", "displayName": "OSC2 FINE WIDE", "min":0, "max":100, "toText":"signed101", "default":50},
+
 		{"index":37 , "name":"Osc2Control1", "displayName": "OSC2 CTRL1", "min":0, "max":127, "default":127},
 		{"index":38 , "name":"Osc2Control2", "displayName": "OSC2 CTRL2", "min":0, "max":127, "default":127},
 		
-		{"index":37 , "name":"Osc2Control1PulseWidth", "displayName": "PULSE WIDTH","min":0, "max":127, "default":127, "isPublic":false},
-		{"index":38 , "name":"Osc2Control2PWMDepth", "displayName": "PWM DEPTH","min":0, "max":127, "default":127, "isPublic":false},		
+		{"index":37 , "name":"Osc2Control1PulseWidth", "displayName": "PULSE WIDTH","min":0, "max":127, "default":127},
+		{"index":38 , "name":"Osc2Control2PWMDepth", "displayName": "PWM DEPTH","min":0, "max":127, "default":127},		
 		
-		{"index":37 , "name":"Osc2Control1Shape", "min":0, "displayName": "SHAPE","max":127, "default":127, "isPublic":false},
-		{"index":38 , "name":"Osc2Control2LFO1Depth", "displayName": "LFO1 DEPTH","min":0, "max":127, "default":127, "isPublic":false},
+		{"index":37 , "name":"Osc2Control1Shape", "min":0, "displayName": "SHAPE","max":127, "default":127},
+		{"index":38 , "name":"Osc2Control2LFO1Depth", "displayName": "LFO1 DEPTH","min":0, "max":127, "default":127},
 		
-		{"index":37 , "name":"Osc2Control1CutoffFrq", "displayName": "FLT CUTOFF FREQ", "min":0, "max":127, "default":127, "isPublic":false},
-		{"index":38 , "name":"Osc2Control2Resonance", "displayName": "FLT RESONANCE", "min":0, "max":127, "default":127, "isPublic":false},		
+		{"index":37 , "name":"Osc2Control1CutoffFrq", "displayName": "FLT CUTOFF FREQ", "min":0, "max":127, "default":127},
+		{"index":38 , "name":"Osc2Control2Resonance", "displayName": "FLT RESONANCE", "min":0, "max":127, "default":127},		
 		
 		{"index":39 , "name":"FilterType", "displayName": "FLT TYPE", "min":0, "max":2, "toText":"filterType", "default":0},
 		{"index":40 , "name":"CutoffSlope", "displayName": "CUTOFF SLOPE", "min":0, "max":1, "toText":"cutoffSlope", "default":0},
