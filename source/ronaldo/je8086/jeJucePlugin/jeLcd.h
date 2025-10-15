@@ -19,6 +19,8 @@ namespace jeJucePlugin
 		void setText(const std::array<char, 40>& _data);
 		void setParameterDisplay(const std::string& _name, const std::string& _value);
 
+		void renamePerformance() const;
+
 	private:
 		baseLib::EventListener<std::array<uint8_t ,64>> m_onLcdCgDataChanged;
 		baseLib::EventListener<std::array<char, 40>> m_onLcdDdDataChanged;

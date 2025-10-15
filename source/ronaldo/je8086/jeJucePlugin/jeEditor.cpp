@@ -86,6 +86,28 @@ namespace jeJucePlugin
 		}
 
 		m_assign.reset(new JeAssign(*this));
+
+		addClick("btDec", [this](Rml::Event&)
+		{
+			getPatchManager()->selectPrevPreset(getPatchManager()->getCurrentPart());
+		});
+
+		addClick("btInc", [this](Rml::Event&)
+		{
+			getPatchManager()->selectNextPreset(getPatchManager()->getCurrentPart());
+		});
+
+		addClick("btEdit", [this](Rml::Event& _event)
+		{
+			juceRmlUi::Menu menu;
+			menu.addEntry("Rename Performance...", [this]
+			{
+				m_lcd->renamePerformance();
+			});
+
+			_event.StopPropagation();
+			menu.runModal(_event);
+		});
 	}
 
 	void Editor::initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model)

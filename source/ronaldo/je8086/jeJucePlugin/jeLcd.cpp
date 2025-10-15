@@ -41,11 +41,7 @@ namespace jeJucePlugin
 		juceRmlUi::EventListener::Add(getElement(), Rml::EventId::Dblclick, [this](Rml::Event& _event)
 		{
 			_event.StopPropagation();
-			new juceRmlUi::InplaceEditor(_event.GetTargetElement(), m_editor.getJeController().getPatchName(PatchType::Performance),
-			[this](const std::string& _newName)
-			{
-				m_editor.getJeController().changePatchName(PatchType::Performance, _newName);
-			});
+			renamePerformance();
 		});
 	}
 
@@ -104,5 +100,14 @@ namespace jeJucePlugin
 		}
 
 		Lcd::setText(text);
+	}
+
+	void JeLcd::renamePerformance() const
+	{
+		new juceRmlUi::InplaceEditor(getElement(), m_editor.getJeController().getPatchName(PatchType::Performance),
+		[this](const std::string& _newName)
+		{
+			m_editor.getJeController().changePatchName(PatchType::Performance, _newName);
+		});
 	}
 }
