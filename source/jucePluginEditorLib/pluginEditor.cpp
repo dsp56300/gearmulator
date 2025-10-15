@@ -109,6 +109,29 @@ namespace jucePluginEditorLib
 				openMenu(_event);
 			}
 		});
+
+#if _DEBUG
+		juceRmlUi::EventListener::Add(getRmlRootElement(), Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_S)
+			{
+				if (juceRmlUi::helper::getKeyModCommand(_event) && juceRmlUi::helper::getKeyModShift(_event))
+				{
+					_event.StopPropagation();
+
+					getRmlComponent()->takeScreenshot([this](const juce::Image& _image)
+					{
+						// write as png to desktop
+						const auto desktop = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory);
+						const auto file = desktop.getNonexistentChildFile(getProcessor().getProductName(false) + "_screenshot", ".png");
+						juce::PNGImageFormat png;
+						if (auto stream = file.createOutputStream())
+							png.writeImageToStream(_image, *stream);
+					});
+				}
+			}
+		});
+#endif
 	}
 
 	void Editor::initPluginDataModel(PluginDataModel& _model)

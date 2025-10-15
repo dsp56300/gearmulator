@@ -200,6 +200,29 @@ namespace juceRmlUi
 		if (err != GL_NO_ERROR)
 			DBG("OpenGL error: " << juce::String::toHexString((int)err));
 
+		if (m_screenshotState == ScreenshotState::RequestScreenshot)
+		{
+			m_screenshot = juce::Image(juce::Image::ARGB, size.x, size.y, true);
+
+			const juce::Image::BitmapData data(m_screenshot, juce::Image::BitmapData::writeOnly);
+
+			glReadPixels(0, 0, size.x, size.y, GL_BGRA, GL_UNSIGNED_BYTE, data.data);
+
+			// OpenGL has the origin in the lower left, juce in the upper left, so we need to flip the image vertically
+			juce::Image flipped = juce::Image(m_screenshot.getFormat(), m_screenshot.getWidth(), m_screenshot.getHeight(), false);
+
+			juce::Graphics g(flipped);
+
+			// Flip vertically around the image center
+			juce::AffineTransform transform = juce::AffineTransform::scale(1.0f, -1.0f)
+			    .translated(0, (float)m_screenshot.getHeight());
+
+			g.drawImageTransformed(m_screenshot, transform);
+			m_screenshot = flipped;
+
+			m_screenshotState = ScreenshotState::ScreenshotReady;
+		}
+
 		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
 
 		const auto dt = m_nextFrameTime - t;
@@ -449,6 +472,13 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
+		if (m_screenshotState == ScreenshotState::ScreenshotReady)
+		{
+			if (m_screenshotCallback)
+				m_screenshotCallback(m_screenshot);
+			m_screenshotState = ScreenshotState::NoScreenshot;
+		}
+
 		if (m_updating || !m_renderDone || !m_renderInterface)
 			return;
 
@@ -539,6 +569,27 @@ namespace juceRmlUi
 		{
 			Rml::Debugger::Shutdown();
 		}
+	}
+
+	bool RmlComponent::takeScreenshot(const ScreenshotCallback& _callback)
+	{
+		if (!_callback)
+			return false;
+
+		RmlInterfaces::ScopedAccess access(*this);
+
+		if (!m_rmlContext || !m_renderInterface)
+			return false;
+
+		if (m_screenshotState != ScreenshotState::NoScreenshot)
+			return false;
+
+		m_screenshotState = ScreenshotState::RequestScreenshot;
+		m_screenshotCallback = _callback;
+
+		enqueueUpdate();
+
+		return true;
 	}
 
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
