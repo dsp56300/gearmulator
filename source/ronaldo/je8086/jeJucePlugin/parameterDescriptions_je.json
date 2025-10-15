@@ -108,6 +108,7 @@
 		{"index":59 , "name":"ToneControlBass", "displayName": "TONE CTRL BASS", "min":0, "max":127, "toText": "signed", "default":64},
 		{"index":60 , "name":"ToneControlTreble", "displayName": "TONE CTRL TREBLE","min":0, "max":127, "toText": "signed", "default":64},
 		{"index":61,  "name":"ChorusType", "displayName": "CHORUS TYPE", "min":0, "max":11, "toText":"chorusType", "default":0},
+		{"index":61,  "name":"ChorusTypeRack", "displayName": "CHORUS TYPE", "min":0, "max":12, "toText":"chorusType", "default":0},
 		{"index":62 , "name":"MultiEffectsLevel", "displayName": "MULTI EFF LEVEL", "min":0, "max":127, "default":127},
 		{"index":63 , "name":"DelayType", "displayName": "DELAY TYPE", "min":0, "max":4, "toText":"delayType", "default":0},
 		{"index":64 , "name":"DelayTime", "displayName": "DELAY TIME", "min":0, "max":127, "default":127},
