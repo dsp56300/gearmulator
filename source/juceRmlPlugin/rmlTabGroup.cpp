@@ -75,7 +75,7 @@ namespace rmlPlugin
 
 		setPageActive(m_activePage, false);
 
-		m_activePage = _index;
+		m_activePage = static_cast<uint32_t>(_index);
 		m_dataModel.DirtyVariable("page");
 
 		setPageActive(m_activePage, true);

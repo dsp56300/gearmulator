@@ -54,6 +54,6 @@ namespace rmlPlugin
 		std::vector<std::vector<baseLib::EventListener<juceRmlUi::ElemButton*>>> m_buttonListeners;
 		std::vector<Rml::Element*> m_pages;
 
-		size_t m_activePage = 0;
+		uint32_t m_activePage = 0;
 	};
 }
