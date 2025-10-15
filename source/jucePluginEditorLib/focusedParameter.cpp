@@ -66,7 +66,8 @@ namespace jucePluginEditorLib
 		{
 			m_boundParameters.insert({ _p, pluginLib::ParameterListener(_p, [this](const pluginLib::Parameter* _param)
 			{
-				if (_param->getChangeOrigin() == pluginLib::Parameter::Origin::PresetChange)
+				if (_param->getChangeOrigin() == pluginLib::Parameter::Origin::PresetChange || 
+					_param->getChangeOrigin() == pluginLib::Parameter::Origin::Derived)
 					return;
 				if (auto* comp = m_parameterBinding.getElementForParameter(_param))
 					updateControlLabel(comp, _param);
