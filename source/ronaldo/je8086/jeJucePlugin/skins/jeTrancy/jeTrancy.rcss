@@ -28,15 +28,15 @@
 
 @spritesheet button_black_led
 {
-	button_black_led_off: 0px 0px  74px 48px;
-	button_black_led_on:  0px 48px 74px 48px;
+	button_black_led_off: 0px 0px  109px 85px;
+	button_black_led_on:  0px 85px 109px 85px;
 	src: button_black_led.png;
 }
 
 @spritesheet button_red
 {
-	button_red_off: 0px 0px 74px 48px;
-	button_red_on:  0px 0px 74px 48px;
+	button_red_off: 0px 0px 101px 74px;
+	button_red_on:  0px 0px 101px 74px;
 	src: button_red.png;
 }
 
@@ -76,6 +76,27 @@
 }
 
 
+@spritesheet tab_main_rack
+{
+	tab_main_rack_off: 0px 0px 200px 75px;
+	tab_main_rack_on:  0px 75px 200px 75px;
+	src: tab_1_rack_main.png;
+}
+
+@spritesheet tab_browser_rack
+{
+	tab_browser_rack_off: 0px 0px 200px 75px;
+	tab_browser_rack_on:  0px 75px 200px 75px;
+	src: tab_2_rack_browser.png;
+}
+
+@spritesheet tab_voicemod_rack
+{
+	tab_voicemod_rack_off: 0px 0px 200px 75px;
+	tab_voicemod_rack_on:  0px 75px 200px 75px;
+	src: tab_3_rack_voice_mod.png;
+}
+
 body
 {
 	font-size: 32dp;
@@ -111,6 +132,12 @@ button
 	margin: 0dp 0dp -10dp -22dp;
 }
 
+.btTabRack
+{
+	width: 200dp;
+	height: 75dp;
+	margin: 0dp 0dp 0dp -32dp;
+}
 .btTabMain
 {
 	decorator: image(tab_main_off fill);
@@ -131,10 +158,41 @@ button
 	decorator: image(tab_browser_on fill);
 }
 
+.btTabMainRack
+{
+	decorator: image(tab_main_rack_off fill);
+}
+.btTabMainRack:hover, .btTabMainRack:checked
+{
+	decorator: image(tab_main_rack_on fill);
+}
+
+.btTabPatchManagerRack
+{
+	decorator: image(tab_browser_rack_off fill);
+}
+
+.btTabPatchManagerRack:hover, .btTabPatchManagerRack:checked
+{
+	decorator: image(tab_browser_rack_on fill);
+}
+
+.btTabVoiceModRack
+{
+	decorator: image(tab_voicemod_rack_off fill);
+}
+
+.btTabVoiceModRack:hover, .btTabVoiceModRack:checked
+{
+	decorator: image(tab_voicemod_rack_on fill);
+}
+
+
 .btBlackLed
 {
-	width: 74dp;
-	height: 48dp;
+	width: 107dp;
+	height: 80dp;
+	margin: -14dp -0dp 0dp -17dp;	  	
 	decorator: image(button_black_led_off fill);	
 }
 
@@ -157,8 +215,9 @@ button
 
 .btRed
 {
-	width: 74dp;
-	height: 48dp;
+	width: 101dp;
+	height: 74dp;
+	margin: 0dp -0dp 0dp -22dp;		
 	decorator: image(button_red_off fill);	
 }
 
@@ -202,13 +261,29 @@ button
 	gap: 22dp;
 }
 
-.knob
+.layoutTabButtonsRack
 {
-	frames: 128;
-	spriteprefix: knob_;
-	width: 89dp;
-	height: 89dp;
+	position: absolute;
+	display: flex;
+	width: 500dp;
+	height: 60dp;
+	left: 189dp;
+	top: 177dp;
+	gap: 05dp;
 }
+
+
+
+
+.knob {
+    frames: 128;
+    spriteprefix: knob_;
+    width: 160dp;
+    height: 160dp;
+    decorator: image(knob_000);
+    margin: -33dp -35.5dp 0dp -35.5dp;	    
+}
+
 
 .layoutFxKnobs
 {
@@ -216,8 +291,8 @@ button
 	display: flex;
 	width: 823dp;
 	height: 89dp;
-	left: 762dp;
-	top: 148dp;
+	left: 721dp;
+	top: 94dp;
 	gap: 57.2dp;
 }
 
@@ -285,7 +360,7 @@ button
 .knobs_row2
 {
 	position: absolute;
-	top: 175dp;
+	top: 173dp;
 	left: 26dp;
 
 	display: flex;
@@ -364,6 +439,13 @@ button
 	text-align: center;
 	font-family: Metropolis;	
 }
+.comboxtext3
+{
+	color: #ffffffff;
+	font-size: 24dp;
+	text-align: center;
+	font-family: Metropolis;	
+}
 .textDonate
 {
 	color: #ffffff;
@@ -391,6 +473,7 @@ button
 	
 	text-align: center;
 	font-family: Vipnagorgialla;
+
 }
 
 .labelBlue
@@ -425,8 +508,11 @@ button
 }
 
 :assignvelocity, :assigncontrol {
-	background-color: #00a0ad55;
+
+    background-color: #ba000077;      
+    border-radius: 20px;            
 }
+
 button:active {
 	transform: scale(0.92);
 	image-color: #ccc;
