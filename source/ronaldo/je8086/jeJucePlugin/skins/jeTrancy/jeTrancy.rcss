@@ -196,7 +196,7 @@ button
 	decorator: image(button_black_led_off fill);	
 }
 
-.btBlackLed:hover, .btBlackLed:checked
+.btBlackLed:checked
 {
 	decorator: image(button_black_led_on fill);	
 }
@@ -398,7 +398,7 @@ button
 
 .slider_row3
 {
-	top: 53dp;
+	top: 71dp;
 }
 
 .vlayout

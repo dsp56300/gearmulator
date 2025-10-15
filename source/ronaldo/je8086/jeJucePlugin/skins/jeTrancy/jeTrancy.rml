@@ -25,6 +25,10 @@
 			<!--<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid_small.png" style="left: 2400dp; top: 90dp; width: 150dp; height: 150dp;"/>		-->
 			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="grid2.png" style="left: 1061dp; top: 1173dp; width: 469dp; height: 180dp;"/>			
 			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid.png" style="left: 720dp; top: 1178dp; height: 180dp;"/>		
+			<img id="split" class="jucePos" data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" src="cmb_split.png" style="left: 2159dp; top: 204dp; "/>
+			<img id="osc2_noise" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 1304dp; top:426dp"/>					
+			<img id="amp_gain" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="amp_gain.png" style="left: 2445dp; top: 331dp;"/>	
+			
 			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
 			
 			<!-- second row -->
@@ -53,56 +57,56 @@
 				<div class="abs" style="left: 335dp; top: 52dp; height: 250dp; width: 220dp;">
 					<!-- Supersaw -->
 					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 0)" data-model="partCurrent" >
-						<input data-model="partCurrent" class="abs sliderV slider_row2" param="Osc1Control1Detune" id="Osc1Control1" type="range" orientation="vertical" style="top: 5dp; left: 264dp;"/>
-						<input data-model="partCurrent" class="abs sliderV slider_row2" param="Osc1Control2Mix" id="Osc1Control2" type="range" orientation="vertical" style="top: 5dp; left: 357dp;"/>
+						<input data-model="partCurrent" class="abs sliderV slider_row2" param="Osc1Control1Detune" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input data-model="partCurrent" class="abs sliderV slider_row2" param="Osc1Control2Mix" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
 						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">DETUNE</div>
 						<div class="label" style="left: 337dp; width:100dp; margin-top:-9dp">MIX</div>						
 					</div>		
 					
 					<!-- Triangle Modulation -->
 					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 1)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc1Control1Offset" id="Osc1Control1" type="range" orientation="vertical" style="top: 5dp; left: 264dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 5dp; left: 357dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control1Offset" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
 						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">OFFSET</div>
 						<div class="label" style="left: 337dp; width:100dp; margin-top:-18dp">LFO 1 DEPTH</div>						
 					</div>	
 
 					<!-- Noise -->
 					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 2)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc1Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 5dp; left: 264dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc1Control2Resonance" id="Osc1Control2" type="range" orientation="vertical" style="top: 5dp; left: 357dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2Resonance" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
 						<div class="label" style="left: 246dp; width:100dp; margin-top:-20dp">CUTOFF FREQ</div>
 						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">RESO- NANCE</div>							
 					</div>	
 
 					<!-- Feedback Oscillator -->
 					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 3)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc1Control1Harmonics" id="Osc1Control1" type="range" orientation="vertical" style="top: 5dp; left: 264dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc1Control2FeedbackAmount" id="Osc1Control2" type="range" orientation="vertical" style="top: 5dp; left: 357dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control1Harmonics" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2FeedbackAmount" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
 						<div class="label" style="left: 246dp; width:100dp; margin-top:-20dp">HARMO- NICS</div>
 						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">FDBCK AMT</div>						
 					</div>	
 					
 					<!-- Square wave -->
 					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 4)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc1Control1PulseWidth" id="Osc1Control1" type="range" orientation="vertical" style="top: 5dp; left: 264dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc1Control2PWMDepth" id="Osc1Control2" type="range" orientation="vertical" style="top: 5dp; left: 357dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control1PulseWidth" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2PWMDepth" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
 						<div class="label" style="left: 246dp; width:100dp; margin-top:-20dp">PULSE WIDTH</div>
 						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">PWM DEPTH</div>							
 					</div>	
 					
 					<!-- Sawtooth wave -->
 					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 5)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc1Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 5dp; left: 264dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 5dp; left: 357dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
 						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">SHAPE</div>
 						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">LFO 1 DEPTH</div>							
 					</div>	
 					
 					<!-- Triangle wave -->
 					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 6)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc1Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 5dp; left: 264dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 5dp; left: 357dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
 						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">SHAPE</div>
 						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">LFO 1 DEPTH</div>							
 					</div>				
@@ -126,24 +130,24 @@
 				
 					<!-- Square wave -->
 					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 0)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc2Control1PulseWidth" id="Osc1Control1" type="range" orientation="vertical" style="top: 23dp; left: 471dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc2Control2PWMDepth" id="Osc1Control2" type="range" orientation="vertical" style="top: 23dp; left: 566dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control1PulseWidth" id="Osc1Control1" type="range" orientation="vertical" style="top: 28dp; left: 471dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control2PWMDepth" id="Osc1Control2" type="range" orientation="vertical" style="top: 28dp; left: 566dp;"/>
 						<div class="label" style="left: 448dp; width:100dp; margin-top:-5dp">PULSE WIDTH</div>
 						<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">PWM DEPTH</div>						
 					</div>	
 					
 					<!-- Sawtooth wave -->
 					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 1)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc2Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 23dp; left: 471dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc2Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 23dp; left: 566dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 28dp; left: 471dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 28dp; left: 566dp;"/>
 						<div class="label" style="left: 448dp; width:100dp; margin-top:7dp">SHAPE</div>
 						<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">LFO 1 DEPTH</div>	
 					</div>	
 					
 					<!-- Triangle wave -->
 					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 2)" data-model="partCurrent" >
-						<input class="abs sliderV slider_row2" param="Osc2Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 23dp; left: 471dp;"/>
-						<input class="abs sliderV slider_row2" param="Osc2Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 23dp; left: 566dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 28dp; left: 471dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 28dp; left: 566dp;"/>
 						<div class="label" style="left: 448dp; width:100dp; margin-top: 7dp">SHAPE</div>
 						<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">LFO 1 DEPTH</div>							
 					</div>	
@@ -151,8 +155,8 @@
 					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
 						<!-- Noise -->
 						<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 3)" data-model="partCurrent" >
-							<input class="abs sliderV slider_row2" param="Osc2Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 23dp; left: 471dp;"/>
-							<input class="abs sliderV slider_row2" param="Osc2Control2Resonance" id="Osc1Control2" type="range" orientation="vertical" style="top: 23dp; left: 566dp;"/>
+							<input class="abs sliderV slider_row2" param="Osc2Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 28dp; left: 471dp;"/>
+							<input class="abs sliderV slider_row2" param="Osc2Control2Resonance" id="Osc1Control2" type="range" orientation="vertical" style="top: 28dp; left: 566dp;"/>
 							<div class="label" style="left: 448dp; width:100dp; margin-top:-5dp">CUTOFF FREQ</div>
 							<div class="label" style="left: 545dp; width:100dp; margin-top:7dp">RESO</div>							
 						</div>	
@@ -165,8 +169,8 @@
 						<button class="abs btBlackLed" param="Osc2ExternalInputSwitch" id="Osc2ExternalInputSwitch" style="left: 167dp; top: 47dp;" isToggle="1"/>						
 					</div>					
 
-					<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp"/>		
-					<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 318dp; top: 124dp"/>		
+
+	
 
 					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
 						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
@@ -201,8 +205,8 @@
 					<button class="ledRed2" param="CutoffSlope" id="CutoffSlope" valueOn="0" style="left: 282dp; top: 28dp; width: 140dp;" isToggle="1"/>
 					<button class="ledRed2" param="CutoffSlope" id="CutoffSlope" valueOn="1" style="left: 282dp; top: 62dp; width: 140dp;" isToggle="1"/>
 
-					<input class="abs sliderV slider_row2" param="CutoffFrequency" id="CutoffFrequency" type="range" orientation="vertical" style="left: 52dp;"/>
-					<input class="abs sliderV slider_row2" param="Resonance" id="Resonance" type="range" orientation="vertical" style="left: 169dp;"/>
+					<input class="abs sliderV slider_row2" param="CutoffFrequency" id="CutoffFrequency" type="range" orientation="vertical" style="left: 52dp; margin-top:7dp"/>
+					<input class="abs sliderV slider_row2" param="Resonance" id="Resonance" type="range" orientation="vertical" style="left: 169dp; margin-top:7dp"/>
 					
 					<div class="knobs_row2" style="left: 302dp; gap: 63dp;">
 						<knob class="knob" param="CutoffFrequencyKeyFollow" id="CutoffFrequencyKeyFollow"/>
@@ -219,8 +223,7 @@
 					</div>
 					
 					<!-- Gain -->
-					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
-						<img id="keyboard" class="jucePos" src="amp_gain.png" style="left: 170dp; top: -127dp"/>	
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">						
 						<combo param="DelayType" id="DelayType" class="jucePos comboxtext2" param="PatchGain" id="PatchGain" style="left: 171dp; top: -113dp; width: 125dp; height: 45dp; line-height: 45dp;">
 							<combotext></combotext>
 						</combo>						
@@ -249,16 +252,16 @@
 				</div>
 			
 				<!-- Portamento -->
-				<div class="abs vlayout" style="left: 325dp; top: 0dp; width: 188dp; padding-top: 80dp; gap: 64dp; height: 77%">
+				<div class="abs vlayout" style="left: 335dp; top: 0dp; width: 188dp; padding-top: 80dp; gap: 64dp; height: 77%">
 					<button class="btBlackLed" param="PortamentoSwitch" id="PortamentoSwitch" style="" isToggle="1"/>
-					<knob class="knob" param="PortamentoTime" id="PortamentoTime" />
+					<knob class="knob" param="PortamentoTime" id="PortamentoTime" style="margin-left: -58dp" />
 				</div>
 			
 				<!-- OSC Common -->
 				<div class="abs" style="left: 524dp; top: 0dp; width: 490dp; height: 100%;">
 					
 					<!-- OSC Shift -->
-					<combo class="jucePos comboxtext2" param="OscillatorShift" id="OscillatorShift" style="left: 25dp; top: 57dp; width: 180dp; height: 45dp; line-height: 45dp;">
+					<combo class="jucePos comboxtext2" param="OscillatorShift" id="OscillatorShift" style="left: 25dp; top: 59dp; width: 180dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>					
 					
@@ -337,9 +340,17 @@
 					</combo>
 
 					<!-- FX chorus section -->
-					<combo param="ChorusType" id="ChorusType" class="jucePos comboxtext2" style="left: 1215dp; top: -12dp; width: 340dp; height: 45dp; line-height: 45dp;">
-						<combotext></combotext>
-					</combo>				
+					<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-class-hlayout="deviceModel=='keyboard'" data-model="plugin" class="abs" >
+						<combo param="ChorusType" id="ChorusType" class="jucePos comboxtext2" style="left: 1215dp; top: -12dp; width: 340dp; height: 45dp; line-height: 45dp;">
+							<combotext></combotext>
+						</combo>					
+					</div>
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
+						<combo param="ChorusTypeRack" id="ChorusTypeRack" class="jucePos comboxtext2" style="left: 1215dp; top: -12dp; width: 340dp; height: 45dp; line-height: 45dp;">
+							<combotext></combotext>
+						</combo>					
+					</div>
+				
 					<combo param="ChorusSyncRate" id="ChorusSyncRate" class="jucePos comboxtext2" style="left: 1215dp; top: 57dp; width: 340dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>	
@@ -600,10 +611,14 @@
 					</combo>
 				</div>	
 
-				<!-- Split -->
-				<combo data-model="part0" param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 30dp; top: 140dp; width: 165dp; height: 45dp; line-height: 45dp;">
-					<combotext></combotext>
-				</combo>
+				<div data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" class="abs">
+					<!-- Split -->
+					<combo data-model="part0" param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 30dp; top: 140dp; width: 165dp; height: 45dp; line-height: 45dp;">
+						<combotext></combotext>
+					</combo>				
+				</div>	
+
+
 
 				<!-- Bend Up/Down -->
 				<combo data-model="part0" param="BendRangeDown" id="BendRangeDown" class="jucePos comboxtext2" style="left: 257dp; top: 140dp; width: 100dp; height: 45dp; line-height: 45dp;">
