@@ -26,6 +26,15 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget, public juce::DragAndDropContainer
 	{
 	public:
+		enum class ScreenshotState : uint8_t
+		{
+			NoScreenshot,
+			RequestScreenshot,
+			ScreenshotReady
+		};
+
+		using ScreenshotCallback = std::function<void(const juce::Image&)>;
+
 		baseLib::Event<RmlComponent*> evPreUpdate;
 		baseLib::Event<RmlComponent*> evPostUpdate;
 
@@ -93,6 +102,8 @@ namespace juceRmlUi
 
 		void enableDebugger(bool _enable);
 
+		bool takeScreenshot(const ScreenshotCallback& _callback);
+
 	private:
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
@@ -151,5 +162,9 @@ namespace juceRmlUi
 
 		uint32_t m_openGLversion = 0;
 		uint32_t m_lastOpenGLversion = 0;
+
+		juce::Image m_screenshot;
+		ScreenshotState m_screenshotState = ScreenshotState::NoScreenshot;
+		ScreenshotCallback m_screenshotCallback;
 	};
 }
