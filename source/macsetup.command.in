@@ -6,7 +6,7 @@ echo "Location: $CURRENT_LOCATION"
 echo
 find "$CURRENT_LOCATION" -name '${MAC_SETUP_PRODUCT_NAME}*' \
     -exec echo "Clearing attributes for: {}" \; \
-    -exec xattr -c {} \; \
+    -exec xattr -cr {} \; \
      2>&2
 echo
 echo "Done."
