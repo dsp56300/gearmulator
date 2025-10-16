@@ -31,6 +31,10 @@ namespace jeLib
 		bool getPresets(std::vector<std::vector<Preset>>& _presets) const;
 
 	private:
+		size_t findKey(const char* _key) const;
+
+		void validate();
+
 		Preset getPatch(size_t _index, const Sysex& _presetData) const;
 		Preset getPerformance(size_t _index, const Sysex& _presetData) const;
 

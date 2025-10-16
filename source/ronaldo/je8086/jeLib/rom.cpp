@@ -16,16 +16,23 @@ namespace jeLib
 	constexpr uint32_t g_performanceSizeKeyboard = 0x180;
 	constexpr uint32_t g_performanceSizeRack = 0x1e0;
 
+	constexpr char g_firstPresetName[] = "Spit'n Slide Bs ";
+	constexpr char g_firstPerformanceName[] = "Chariots        ";
+
 	Rom::Rom(const std::string& _filename)
 	{
 		baseLib::filesystem::readFile(m_data, _filename);
 		m_name = baseLib::filesystem::getFilenameWithoutPath(_filename);
+
+		validate();
 	}
 
 	Rom::Rom(const std::vector<uint8_t>& _data, const std::string& _name)
 	{
 		m_data = _data;
 		m_name = _name;
+
+		validate();
 	}
 
 	bool Rom::isValid() const
@@ -50,20 +57,8 @@ namespace jeLib
 
 		const auto rack = getDeviceType() == DeviceType::Rack;
 
-		auto findKey = [&](const char* _key) -> size_t
-		{
-			auto keySize = strlen(_key);
-
-			for (size_t i = 0; i < m_data.size() - keySize; ++i)
-			{
-				if (std::equal(_key, _key + keySize, &m_data[i]))
-					return i;
-			}
-			return 0;
-		};
-
 		// find starting point by searching for the first preset name
-		size_t start = findKey("Spit'n Slide Bs ");
+		size_t start = findKey(g_firstPresetName);
 
 		if (!start)
 			return false;
@@ -100,7 +95,7 @@ namespace jeLib
 		// for keyboard, performances follow immediately after patches, not for rack
 		if (rack)
 		{
-			start = findKey("Chariots        ");
+			start = findKey(g_firstPerformanceName);
 
 			if (!start)
 				return false;
@@ -123,6 +118,27 @@ namespace jeLib
 		}
 
 		return false;
+	}
+
+	size_t Rom::findKey(const char* _key) const
+	{
+		auto keySize = strlen(_key);
+
+		for (size_t i = 0; i < m_data.size() - keySize; ++i)
+		{
+			if (std::equal(_key, _key + keySize, &m_data[i]))
+				return i;
+		}
+		return 0;
+	}
+
+	void Rom::validate()
+	{
+		if (getDeviceType() == DeviceType::Invalid || !findKey(g_firstPresetName))
+		{
+			m_data.clear();
+			m_name.clear();
+		}
 	}
 
 	namespace
