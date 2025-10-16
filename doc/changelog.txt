@@ -4,7 +4,10 @@ Release Notes
 
 Framework:
 
-- [Imp] Add ability to cycle through drop down entries via mouse wheel
+- [Imp] Add ability to cycle through drop down entries and radio button groups 
+        via mouse wheel
+
+- [Fix] Fix inverted mouse wheel on Mac if natural scrolling is enabled
 
 2.0.3:
 
