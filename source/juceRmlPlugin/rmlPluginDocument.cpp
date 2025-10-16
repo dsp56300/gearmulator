@@ -242,7 +242,7 @@ namespace rmlPlugin
 					};
 
 					// find the next button along the Y axis, depending on scroll direction
-					const auto buttonTop = checkedButton->GetAbsoluteTop();
+					const auto buttonTop = getCoordValue(checkedButton);
 
 					std::sort(elems.begin(), elems.end(), [getCoordValue, isDown](Rml::Element* _a, Rml::Element* _b)
 					{
