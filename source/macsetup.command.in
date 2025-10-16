@@ -1,3 +1,5 @@
+# Try to remove quarantine from this script first
+xattr -d com.apple.quarantine "$0" >/dev/null 2>&1 || true
 CURRENT_LOCATION=$(dirname "$0")
 cd "$CURRENT_LOCATION"
 echo
