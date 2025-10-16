@@ -33,13 +33,13 @@ namespace juceRmlUi
 
 		static bool isToggle(const Rml::Element* _button);
 
+		pluginLib::ParamValue getValueOn() const;
+		pluginLib::ParamValue getValueOff() const;
+
 	private:
 		void onClick();
 		void onMouseDown();
 		void onMouseUp();
-
-		pluginLib::ParamValue getValueOn() const;
-		pluginLib::ParamValue getValueOff() const;
 
 		bool m_isToggle = false;
 		bool m_isChecked = false;

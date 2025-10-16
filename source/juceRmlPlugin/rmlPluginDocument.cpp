@@ -4,6 +4,7 @@
 #include "rmlPluginContext.h"
 #include "rmlTabGroup.h"
 
+#include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemKnob.h"
 #include "juceRmlUi/rmlEventListener.h"
 
@@ -176,6 +177,7 @@ namespace rmlPlugin
 			}
 		}
 
+		// if an element has a "url" attribute with an http(s) link, open that link in the default browser when the element is clicked
 		if (auto* attrib = _element->GetAttribute("url"))
 		{
 			const auto url = attrib->Get<Rml::String>(_element->GetCoreInstance());
@@ -185,6 +187,84 @@ namespace rmlPlugin
 				juceRmlUi::EventListener::Add(_element, Rml::EventId::Click, [url](const Rml::Event&)
 				{
 					juce::URL(url).launchInDefaultBrowser();
+				});
+			}
+		}
+
+		if (auto* button = dynamic_cast<juceRmlUi::ElemButton*>(_element))
+		{
+			if (button->getValueOn() >= 0 && button->getValueOff() < 0)
+			{
+				// if a button has only a value-on attribute, it might be part of a radio button group. We want to scroll
+				// through the buttons in that group with the mouse wheel
+				juceRmlUi::EventListener::Add(button, Rml::EventId::Mousescroll, [button, this](const Rml::Event& _event)
+				{
+					const auto isUp = juceRmlUi::helper::isMouseWheelUp(_event);
+					const auto isDown = juceRmlUi::helper::isMouseWheelDown(_event);
+
+					if (!isUp && !isDown)
+						return;
+
+					auto& binding = m_context.getParameterBinding();
+					auto* param = binding.getParameterForElement(button);
+					if (!param)
+						return;
+
+					// retrieve all buttons for that parameter that are radio buttons too
+					std::vector<Rml::Element*> elems;
+					binding.getElementsForParameter(elems, param, true);
+
+					juceRmlUi::ElemButton* checkedButton = nullptr;
+
+					for (int i=0; i<static_cast<int>(elems.size()); ++i)
+					{
+						auto* b = dynamic_cast<juceRmlUi::ElemButton*>(elems[i]);
+
+						if (!b || b->getValueOn() < 0 || b->getValueOff() >= 0)
+						{
+							elems.erase(elems.begin() + i);
+							--i;
+						}
+						else if (b->isChecked())
+						{
+							checkedButton = b;
+							elems.erase(elems.begin() + i);
+							--i;
+						}
+					}
+
+					if (!checkedButton)
+						return;
+
+					auto getCoordValue = [](Rml::Element* _e)
+					{
+						return _e->GetAbsoluteTop() + _e->GetAbsoluteLeft();
+					};
+
+					// find the next button along the Y axis, depending on scroll direction
+					const auto buttonTop = checkedButton->GetAbsoluteTop();
+
+					std::sort(elems.begin(), elems.end(), [getCoordValue, isDown](Rml::Element* _a, Rml::Element* _b)
+					{
+						if (isDown)
+							return getCoordValue(_a) < getCoordValue(_b);
+						return getCoordValue(_a) > getCoordValue(_b);
+					});
+
+					const auto it = std::lower_bound(elems.begin(), elems.end(), buttonTop, [isDown, getCoordValue](Rml::Element* _a, const float _b)
+					{
+						if (isDown)
+							return getCoordValue(_a) < _b;
+						return getCoordValue(_a) > _b;
+					});
+
+					if (it == elems.end())
+						return;
+
+					// if we found a button, set it
+					auto* b = dynamic_cast<juceRmlUi::ElemButton*>(*it);
+					if (b)
+						b->setChecked(true);
 				});
 			}
 		}
