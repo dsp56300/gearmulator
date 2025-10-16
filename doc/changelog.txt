@@ -1,5 +1,11 @@
 Release Notes 
 
+2.0.4:
+
+Framework:
+
+- [Imp] Add ability to cycle through drop down entries via mouse wheel
+
 2.0.3:
 
 Framework:
