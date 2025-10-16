@@ -12,7 +12,15 @@ namespace jeLib
 
 	Device::Device(const synthLib::DeviceCreateParams& _params) : synthLib::Device(_params)
 	{
-		m_je8086.reset(new Je8086(_params.romData, _params.homePath + "/roms/ram_dump.bin"));
+		const auto ramDataFilename = _params.homePath + "/roms/ram_dump.bin";
+		m_je8086.reset(new Je8086(_params.romData, ramDataFilename));
+
+		if (m_je8086->hasDoneFactoryReset())
+		{
+			m_je8086.reset();
+			m_je8086.reset(new Je8086(_params.romData, ramDataFilename));
+		}
+
 		m_thread.reset(new JeThread(*m_je8086));
 
 		m_paramChangedListener.set(m_sysexRemote.evParamChanged, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)

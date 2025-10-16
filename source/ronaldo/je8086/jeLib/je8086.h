@@ -27,6 +27,8 @@ namespace jeLib
 
 		void step();
 
+		bool hasDoneFactoryReset() const { return m_factoryreset; }
+
 	private:
 		static void onLedsChanged(devices::Port* _port);
 		void onReceiveMidiByte(uint8_t _byte);
@@ -47,6 +49,8 @@ namespace jeLib
 		Timers timers;
 		CatchAllDevice catchall;
 		int ctr {0};
+
+		bool m_factoryreset = false;
 
 		synthLib::MidiBufferParser m_midiOutParser;
 		std::vector<synthLib::SMidiEvent> m_midiInEvents;

@@ -18,11 +18,11 @@ namespace jeLib
 		std::vector<unsigned char> ram;
 		baseLib::filesystem::readFile(ram, _ramDataFilename);
 
-		bool factoryreset = ram.size() != 256 * 1024;
+		m_factoryreset = ram.size() != 256 * 1024;
 
 		emu.loadmem(_romData.data(),(int)_romData.size(), 0);
 
-		if (!factoryreset) 
+		if (!m_factoryreset) 
 			emu.loadmem(ram.data(), static_cast<int>(ram.size()), 0x200000);
 
 		emu.memmap(&catchall, (int)_romData.size(), 0x200000 - (int)_romData.size());	// access to gap between flash and sram
@@ -41,8 +41,11 @@ namespace jeLib
 		emu.memmap(&midi, 0xffffb0, 6);
 		emu.boot();
 
-		if (factoryreset) 
+		if (m_factoryreset)
+		{
 			runfactoryreset(_ramDataFilename); // Run a factory reset if needs be.
+			return;
+		}
 
 		asics.setPostSample([this](const int32_t _left, const int32_t _right) { onReceiveSample(_left, _right); });
 
