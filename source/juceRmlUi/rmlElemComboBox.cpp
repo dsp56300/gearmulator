@@ -12,11 +12,13 @@ namespace juceRmlUi
 	ElemComboBox::ElemComboBox(Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : ElemValue(_coreInstance, _tag)
 	{
 		AddEventListener(Rml::EventId::Click, this);
+		AddEventListener(Rml::EventId::Mousescroll, this);
 	}
 
 	ElemComboBox::~ElemComboBox()
 	{
 		RemoveEventListener(Rml::EventId::Click, this);
+		RemoveEventListener(Rml::EventId::Mousescroll, this);
 	}
 
 	void ElemComboBox::setEntries(const std::vector<Entry>& _options)
@@ -83,6 +85,10 @@ namespace juceRmlUi
 		{
 			onClick(_event);
 		}
+		else if (_event.GetId() == Rml::EventId::Mousescroll)
+		{
+			onMouseScroll(_event);
+		}
 	}
 
 	void ElemComboBox::onClick(const Rml::Event&)
@@ -106,6 +112,14 @@ namespace juceRmlUi
 		}
 
 		m_menu->open(this, GetAbsoluteOffset(Rml::BoxArea::Border), getProperty("items-per-column", 16));
+	}
+
+	void ElemComboBox::onMouseScroll(const Rml::Event& _event)
+	{
+		if (getSelectedIndex() > 0 && helper::isMouseWheelUp(_event))
+			setSelectedIndex(getSelectedIndex() - 1);
+		else if (getSelectedIndex() + 1 < static_cast<int>(m_options.size()) && helper::isMouseWheelDown(_event))
+			setSelectedIndex(getSelectedIndex() + 1);
 	}
 
 	void ElemComboBox::setSelectedIndex(const size_t _index, const bool _sendChangeEvent/* = true*/)

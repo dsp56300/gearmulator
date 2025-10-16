@@ -189,6 +189,16 @@ namespace juceRmlUi
 			};
 		}
 
+		bool isMouseWheelUp(const Rml::Event& _event)
+		{
+			return getMouseWheelDelta(_event).y < 0.0f;
+		}
+
+		bool isMouseWheelDown(const Rml::Event& _event)
+		{
+			return getMouseWheelDelta(_event).y > 0.0f;
+		}
+
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event)
 		{
 			return static_cast<Rml::Input::KeyIdentifier>(_event.GetParameter<int>("key_identifier", Rml::Input::KI_UNKNOWN));

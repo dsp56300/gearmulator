@@ -32,6 +32,7 @@ namespace juceRmlUi
 
 		void ProcessEvent(Rml::Event& _event) override;
 		void onClick(const Rml::Event& _event);
+		void onMouseScroll(const Rml::Event& _event);
 
 		void setSelectedIndex(size_t _index, bool _sendChangeEvent = true);
 		int getSelectedIndex() const;

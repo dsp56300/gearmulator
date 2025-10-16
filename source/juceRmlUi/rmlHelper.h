@@ -64,6 +64,8 @@ namespace juceRmlUi
 		bool isContextMenu(const Rml::Event& _event);
 
 		Rml::Vector2f getMouseWheelDelta(const Rml::Event& _event);
+		bool isMouseWheelUp(const Rml::Event& _event);
+		bool isMouseWheelDown(const Rml::Event& _event);
 
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event);
 		Rml::Input::KeyModifier getKeyModifiers(const Rml::Event& _event);

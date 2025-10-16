@@ -2,6 +2,10 @@ Release Notes
 
 2.0.4:
 
+Framework:
+
+- [Imp] Add ability to cycle through drop down entries via mouse wheel
+
 JE8086:
 
 - [Fix] Slow boot when opening the plugin for the first time
