@@ -68,6 +68,8 @@ namespace jeLib
 		if (messages.empty())
 			return false;
 
+		m_masterVolume = -1.0f;
+
 		for (auto message : messages)
 		{
 			synthLib::SMidiEvent e(synthLib::MidiEventSource::Host);
@@ -80,6 +82,10 @@ namespace jeLib
 			if (!m_sysexRemote.receive(e.sysex))
 				m_midiIn.emplace_back(e);
 		}
+
+		// if master volume was not part of the state, set it to 1.0f to keep compatibility with older versions that did not store it
+		if (m_masterVolume < 0)
+			m_masterVolume = 1.0f;
 
 		// feed master volume to the UI directly because there is no request message for it
 		createMasterVolumeMessage(m_midiOut);
