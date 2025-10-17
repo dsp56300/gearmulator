@@ -33,6 +33,8 @@ namespace jeJucePlugin
 		void sendParameterChange(jeLib::SystemParameter _parameter, int _value) const;
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
 
+		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) override;
+
 		bool sendSingle(const pluginLib::SysEx& _sysex, uint32_t _part) const;
 
 		void sendTempPerformanceRequest() const;

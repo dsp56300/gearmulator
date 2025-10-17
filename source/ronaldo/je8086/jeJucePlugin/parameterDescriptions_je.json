@@ -684,5 +684,54 @@
  	{
 	},
 	"controllerMap": [
+		{"cc": 16, "param": "Lfo1Rate"},
+		{"cc": 20, "param": "Lfo1Fade"},
+
+		{"cc": 8 , "param": "OscillatorBalance"},
+		{"cc": 70, "param": "CrossModulationDepth"},
+		{"cc": 18, "param": "OscLfo1Depth"},
+		{"cc": 25, "param": "PitchEnvelopeDepth"},
+		{"cc": 26, "param": "PitchEnvelopeAttackTime"},
+		{"cc": 27, "param": "PitchEnvelopeDecayTime"},
+
+		{"cc": 4 , "param": "Osc1Control1"},
+		{"cc": 76, "param": "Osc1Control2"},
+
+		{"cc": 21, "param": "Osc2Range"},
+		{"cc": 77, "param": "Osc2FineWide"},
+		{"cc": 78, "param": "Osc2Control1"},
+		{"cc": 79, "param": "Osc2Control2"},
+
+		{"cc": 74, "param": "CutoffFrequency"},
+		{"cc": 71, "param": "Resonance"},
+		{"cc": 30, "param": "CutoffFrequencyKeyFollow"},
+		{"cc": 19, "param": "FilterLfo1Depth"},
+		{"cc": 81, "param": "FilterEnvelopeDepth"},
+		{"cc": 82, "param": "FilterEnvelopeAttackTime"},
+		{"cc": 83, "param": "FilterEnvelopeDecayTime"},
+		{"cc": 28, "param": "FilterEnvelopeSustainLevel"},
+		{"cc": 29, "param": "FilterEnvelopeReleaseTime"},
+
+		{"cc": 7 , "param": "AmpLevel"},
+		{"cc": 80, "param": "AmpLfo1Depth"},
+		{"cc": 73, "param": "AmpEnvelopeAttackTime"},
+		{"cc": 75, "param": "AmpEnvelopeDecayTime"},
+		{"cc": 31, "param": "AmpEnvelopeSustainLevel"},
+		{"cc": 72, "param": "AmpEnvelopeReleaseTime"},
+
+		{"cc": 92, "param": "ToneControlBass"},
+		{"cc": 95, "param": "ToneControlTreble"},
+
+		{"cc": 93, "param": "MultiEffectsLevel"},
+		{"cc": 12, "param": "DelayTime"},
+		{"cc": 13, "param": "DelayFeedback"},
+		{"cc": 94, "param": "DelayLevel"},
+
+		{"cc": 5 , "param": "PortamentoTime"},
+		
+		{"cc": 17, "param": "Lfo2Rate"},
+		{"cc": 22, "param": "PitchLfo2Depth"},
+		{"cc": 23, "param": "FilterLfo2Depth"},
+		{"cc": 24, "param": "AmpLfo2Depth"}
 	]
 }

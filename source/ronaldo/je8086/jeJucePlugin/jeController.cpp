@@ -182,6 +182,31 @@ namespace jeJucePlugin
 		return false;
 	}
 
+	std::vector<uint8_t> Controller::getPartsForMidiChannel(const uint8_t _channel)
+	{
+		if (_channel == 2)
+		{
+			auto panelSelect = getParameter("PanelSelect", 0)->getUnnormalizedValue();
+			if (panelSelect == 2)
+				return { 0, 1 };     // both parts are modified via remote control channel
+			if (panelSelect == 0)
+				return { 0 };        // upper part only
+			if (panelSelect == 1)
+				return { 1 };        // lower part only
+			return {};
+		}
+
+		std::vector<uint8_t> parts;
+
+		for (uint8_t i=0; i<2; ++i)
+		{
+			if (getParameter("MidiChannel", i)->getUnnormalizedValue() == _channel)
+				parts.push_back(i);
+		}
+
+		return parts;
+	}
+
 	bool Controller::isUpperSelected() const
 	{
 		return (getParameter("PanelSelect", 0)->getUnnormalizedValue() + 1) & 1;
@@ -421,9 +446,10 @@ namespace jeJucePlugin
 				sendChange(1);
 				break;
 			case jeLib::SystemParameter::TxRxEditMode:
-				sendChange(0); // MODE1
+				sendChange(2);  // MODE2 = all possible CCs enabled
 				break;
 			case jeLib::SystemParameter::TxRxEditSwitch:
+				sendChange(1);	// enable edit via CCs
 				break;
 			case jeLib::SystemParameter::TxRxProgramChangeSwitch:
 				sendChange(0);	// disable program changes, we handle them ourselves
