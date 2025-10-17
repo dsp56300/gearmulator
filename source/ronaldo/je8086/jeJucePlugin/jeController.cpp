@@ -253,15 +253,29 @@ namespace jeJucePlugin
 			}
 		}
 
+		// change dump addresses because we do not want to return temp performance but something stored in user memory
+
 		for (auto& result : results)
 		{
-			// make sure the address is correct, we do not want to return temp performance but something stored in user memory
-			if (isPerformance)
-				jeLib::State::setAddress(result.sysex, static_cast<uint32_t>(jeLib::AddressArea::UserPerformance));
-			else
-				jeLib::State::setAddress(result.sysex, static_cast<uint32_t>(jeLib::AddressArea::UserPatch));
+			auto& sysex = result.sysex;
 
-			_data.insert(_data.end(), result.sysex.begin(), result.sysex.end());
+			auto addr = jeLib::State::getAddress(sysex);
+
+			if (isPerformance)
+			{
+				addr &= static_cast<uint32_t>(jeLib::UserPerformanceArea::BlockMask);
+				addr |= static_cast<uint32_t>(jeLib::AddressArea::UserPerformance);
+				jeLib::State::setAddress(sysex, addr);
+			}
+			else
+			{
+				addr &= static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
+				addr |= static_cast<uint32_t>(jeLib::AddressArea::UserPatch);
+			}
+
+			jeLib::State::setAddress(sysex, addr);
+
+			_data.insert(_data.end(), sysex.begin(), sysex.end());
 		}
 
 		return true;
