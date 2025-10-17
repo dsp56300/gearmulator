@@ -63,15 +63,15 @@
 
 @spritesheet tab_main
 {
-	tab_main_off: 0px 0px 263px 73px;
-	tab_main_on:  0px 73px 263px 73px;
+	tab_main_off: 0px 0px 273px 74px;
+	tab_main_on:  0px 74px 273px 74px;
 	src: tab_1_main.png;
 }
 
 @spritesheet tab_browser
 {
-	tab_browser_off: 0px 0px 263px 73px;
-	tab_browser_on:  0px 73px 263px 73px;
+	tab_browser_off: 0px 0px 273px 74px;
+	tab_browser_on:  0px 74px 273px 74px;
 	src: tab_2_browser.png;
 }
 
@@ -127,9 +127,15 @@ button
 
 .btTab
 {
-	width: 263dp;
-	height: 73dp;
+	width: 273dp;
+	height: 74dp;
 	margin: 0dp 0dp -10dp -22dp;
+}
+
+.btTab:active  
+{
+	transform: scale(0.97);
+	image-color: #ccc;
 }
 
 .btTabRack
@@ -196,6 +202,12 @@ button
 	decorator: image(button_black_led_off fill);	
 }
 
+.btBlackLed:active  
+{
+	transform: scale(0.92);
+	image-color: #ccc;
+}
+
 .btBlackLed:checked
 {
 	decorator: image(button_black_led_on fill);	
@@ -238,6 +250,12 @@ button
 	decorator: image(button_white_led_on fill);	
 }
 
+.btWhiteLed:active  
+{
+	transform: scale(0.95);
+	image-color: #ccc;
+}
+
 .btWhite2Led
 {
 	width: 109dp;
@@ -256,9 +274,9 @@ button
 	display: flex;
 	width: 500dp;
 	height: 60dp;
-	left: 189dp;
-	top: 177dp;
-	gap: 22dp;
+	left: 188dp;
+	top: 176dp;
+	gap: 12dp;
 }
 
 .layoutTabButtonsRack
@@ -318,6 +336,8 @@ button
 	width: 200dp;
 	height: 26dp;
 	decorator: image(led2_red_off scale-none left center);
+	transform: scale(1.2, 1.2);
+	margin: 0dp 0dp -2.1dp 10.3dp;		
 }
 
 .ledRed2:checked
@@ -328,10 +348,14 @@ button
 .ledRed
 {
 	width: 100%;
-	height: 26dp;
+	height: 30dp;
 	flex: 0 0 auto;
 	decorator: image(led_red_off scale-none left center);
+	transform: scale(1.1, 1.1);
+	margin: 0dp 0dp -2.1dp 10.3dp;	
 }
+
+
 
 .ledRed:checked
 {
@@ -354,7 +378,7 @@ button
 {
 	display: flex; 
 	flex-direction: column; 
-	row-gap: 9dp;
+	row-gap: 6.7dp;
 }
 
 .knobs_row2
@@ -523,10 +547,12 @@ button
     border-radius: 20px;            
 }
 
+/*
 button:active {
 	transform: scale(0.92);
 	image-color: #ccc;
 }
+*/
 
 .opacityZero {
 	opacity: 0;

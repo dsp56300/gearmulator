@@ -170,7 +170,7 @@
 					</div>					
 
 					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
-						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
+						<div class="abs vlayoutLeds" style="left: 309dp; top: 20dp; height: 135dp; width: 120dp">
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
@@ -178,7 +178,7 @@
 						</div>
 					</div>
 					<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-class-hlayout="deviceModel=='keyboard'" data-model="plugin" class="abs" >
-						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
+						<div class="abs vlayoutLeds" style="left: 306dp; top: 20dp; height: 135dp; width: 120dp">
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
@@ -194,7 +194,7 @@
 				
 				<!-- Filter -->
 				<div class="abs" style="left: 1490dp; top: 32dp; width: 630dp; height: 287dp;">
-					<div class="abs vlayoutLeds" style="left: 434dp; top: 16dp; height: 140dp; width: 140dp">
+					<div class="abs vlayoutLeds" style="left: 430dp; top: 15dp; height: 140dp; width: 140dp">
 						<button class="ledRed" param="FilterType" id="FilterType" valueOn="0" isToggle="1"/>
 						<button class="ledRed" param="FilterType" id="FilterType" valueOn="1" isToggle="1"/>
 						<button class="ledRed" param="FilterType" id="FilterType" valueOn="2" isToggle="1"/>
@@ -212,7 +212,7 @@
 				</div>
 
 				<!-- Amp -->
-				<div class="abs" style="left: 2100dp; top: 48dp; height: 257dp; width: 290dp;">
+				<div class="abs" style="left: 2097dp; top: 46dp; height: 257dp; width: 290dp;">
 					<div class="vlayoutLeds" style="height: 140dp; width: 150dp">
 						<button class="ledRed" param="AutoPanManualPanSwitch" id="AutoPanManualPanSwitch" valueOn="0" isToggle="1"/>
 						<button class="ledRed" param="AutoPanManualPanSwitch" id="AutoPanManualPanSwitch" valueOn="1" isToggle="1"/>
@@ -227,14 +227,14 @@
 					</div>		
 					
 					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 0 || AutoPanManualPanSwitch_value == 1)" data-model="part0" class="abs">
-						<knob class="knob abs" style="left: 32dp; top: 18dp;" param="AmpLfo1Depth" id="AmpLfo1Depth" />	
+						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpLfo1Depth" id="AmpLfo1Depth" />	
 						<div class="label2" style="left: 0dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">LFO1 DEPTH</div>				
 					</div>	
 					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 2)" data-model="part0" class="abs">
-						<knob class="knob abs" style="left: 32dp; top: 18dp;" param="AmpPan" id="AmpPan" />							
+						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpPan" id="AmpPan" />							
 						<div class="label2" style="left:0dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">PAN</div>				
 					</div>						
-					<knob class="knob abs" style="left: 184dp; top: 158dp;" param="AmpLevel" id="AmpLevel" />
+					<knob class="knob abs" style="left: 188dp; top: 158dp;" param="AmpLevel" id="AmpLevel" />
 
 				</div>			
 			</div>
@@ -268,7 +268,7 @@
 						<combotext></combotext>
 					</combo>					
 					
-					<div class="abs vlayoutLeds" style="left: 245dp; top: 71dp; height: 140dp; width: 245dp; row-gap: 10dp;">
+					<div class="abs vlayoutLeds" style="left: 245dp; top: 69dp; height: 140dp; width: 245dp; gap:9dp">
 						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="0" isToggle="1"/>
 						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="1" isToggle="1"/>
 						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="2" isToggle="1"/>
@@ -377,7 +377,7 @@
 			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
 			
 			<!-- OSC Shift -->
-			<div class="abs vlayoutLeds" style="left: 1072dp; top: 1198dp; height: 140dp; width: 186dp; row-gap: 9dp;">
+			<div class="abs vlayoutLeds" style="left: 1072dp; top: 1198dp; height: 140dp; width: 186dp">
 				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="4" isToggle="1"/>
 				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="3" isToggle="1"/>
 				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="2" isToggle="1"/>
@@ -522,8 +522,7 @@
 					<knob class="knob" param="RobotPitch"/>	
 					<knob class="knob" param="RobotControl"/>				
 				</div>	
-			</div>
-			
+			</div>			
 		</div>	
 	
 		<!-- TAB BUTTONS -->
@@ -536,8 +535,6 @@
 				<button tabbutton="0" tabgroup="main" class="btTab btTabMain"/>
 				<button tabbutton="1" tabgroup="main" class="btTab btTabPatchManager"/>		
 			</div>
-			
-				
 		</div>
 	
 		
@@ -595,7 +592,7 @@
 			
 			<!-- Key Mode / Voice Assign -->
 			<div class="abs" style="left: 1408dp; top:-1dp; width: 440dp; height: 100%;">
-					<div data-model="part0" class="abs vlayoutLeds" style="left: 18dp; top: 49dp; height: 100dp; width: 165dp">
+					<div data-model="part0" class="abs vlayoutLeds" style="left: 16dp; top: 47dp; height: 100dp; width: 165dp">
 					<button class="ledRed" isToggle="1" valueOn="0" param="KeyMode"/>
 					<button class="ledRed" isToggle="1" valueOn="1" param="KeyMode"/>
 					<button class="ledRed" isToggle="1" valueOn="2" param="KeyMode"/>
@@ -634,7 +631,6 @@
 		
 		<!-- Arp -->
 		<div data-model="tabgroup_main" data-class-juceConditionDisabled="(page == 1)" class="abs" style="left: 1395dp; top: 1153dp; width: 1200dp; height: 444dp;">
-
 			<!-- left column -->
 			<button class="abs btBlackLed" style="left: 257dp; top: 65dp;" param="ArpSwitch" isToggle="1"/>
 			<button class="abs btBlackLed" style="left: 257dp; top: 155dp;" param="ArpHold" isToggle="1"/>
