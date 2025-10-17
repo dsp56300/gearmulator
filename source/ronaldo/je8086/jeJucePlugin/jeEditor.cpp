@@ -157,7 +157,7 @@ namespace jeJucePlugin
 
 		const auto numUpper = pm->createSaveMenuEntries(menuUpper, 0, "Patch Upper", 0);
 		const auto numLower = pm->createSaveMenuEntries(menuLower, 1, "Patch Lower", 1);
-		const auto numPerformance = pm->createSaveMenuEntries(menuPerformance, 0, "Patch Lower", 2);
+		const auto numPerformance = pm->createSaveMenuEntries(menuPerformance, 0, "Performance", 2);
 
 		if (numUpper)
 			menu.addSubMenu("Patch Upper", std::move(menuUpper));
