@@ -364,7 +364,7 @@ button
 	left: 26dp;
 
 	display: flex;
-	gap: 57dp;
+	gap: 58dp;
 }
 
 .knobs_row3
@@ -374,7 +374,7 @@ button
 	left: 28dp;
 
 	display: flex;
-	gap: 57dp;
+	gap: 58dp;
 }
 
 .sliderV sliderbar
@@ -475,7 +475,17 @@ button
 	font-family: Vipnagorgialla;
 
 }
+.label2
+{
+	position: absolute;
+	color: #ffffffff;
+	font-size: 21dp;
+	line-height: 17dp;
+	
+	text-align: center;
+	font-family: Vipnagorgialla;
 
+}
 .labelBlue
 {
 	position: absolute;

@@ -98,13 +98,14 @@
 		{"index":49 , "name":"FilterEnvelopeSustainLevel", "displayName": "FLT ENV SUSTAIN", "min":0, "max":127, "default":127},
 		{"index":50 , "name":"FilterEnvelopeReleaseTime", "displayName": "FLT ENV RELEASE", "min":0, "max":127, "default":127},
 		{"index":51 , "name":"AmpLevel", "displayName": "AMP LEVEL", "min":0, "max":127, "default":127},
-		{"index":52 , "name":"AmpLfo1Depth", "displayName": "AMP LFO1 DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":52 , "name":"AmpLfo1Depth", "displayName": "AMP LFO1 DEPTH", "min":0, "max":127, "toText":"LFO1DepthPan", "default":64},
+		{"index":52 , "name":"AmpPan", "displayName": "AMP PAN", "min":0, "max":127, "toText":"LFO1DepthPan", "default":64},
 		{"index":53 , "name":"AmpLfo2Depth", "displayName": "AMP LFO2 DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
 		{"index":54 , "name":"AmpEnvelopeAttackTime", "displayName": "AMP ENV ATTACK", "min":0, "max":127, "default":127},
 		{"index":55 , "name":"AmpEnvelopeDecayTime", "displayName": "AMP ENV DECAY", "min":0, "max":127, "default":127},
 		{"index":56 , "name":"AmpEnvelopeSustainLevel", "displayName": "AMP ENV SUSTAIN", "min":0, "max":127, "default":127},
 		{"index":57 , "name":"AmpEnvelopeReleaseTime", "displayName": "AMP ENV RELEASE", "min":0, "max":127, "default":127},
-		{"index":58 , "name":"AutoPanManualPanSwitch", "displayName": "LFO 1 MOD", "min":0, "max":2, "toText":"autoPanManualPanSwitch", "default":0},
+		{"index":58 , "name":"AutoPanManualPanSwitch", "displayName": "LFO1 MOD", "min":0, "max":2, "toText":"autoPanManualPanSwitch", "default":0},
 		{"index":59 , "name":"ToneControlBass", "displayName": "TONE CTRL BASS", "min":0, "max":127, "toText": "signed", "default":64},
 		{"index":60 , "name":"ToneControlTreble", "displayName": "TONE CTRL TREBLE","min":0, "max":127, "toText": "signed", "default":64},
 		{"index":61,  "name":"ChorusType", "displayName": "CHORUS TYPE", "min":0, "max":11, "toText":"chorusType", "default":0},
@@ -247,7 +248,7 @@
 		{"page":3,"index":17,"name":"SplitPoint","displayName":"SPLIT POINT","min":0,"max":127,"toText":"splitPoint","default":0},
 		{"page":3,"index":18,"name":"PanelSelect","displayName":"PANEL SELECT","min":0,"max":2,"default":0},
 		{"page":3,"index":19,"name":"PartDetune","displayName":"PART DETUNE","min":0,"max":100,"toText":"signed101","default":50},
-		{"page":3,"index":20,"name":"OutputAssign","displayName":"OUTPUT ASSIGN","min":0,"max":1,"toText":"offOn","default":0},
+		{"page":3,"index":20,"name":"OutputAssign","displayName":"OUTPUT ASSIGN","min":0,"max":1,"toText":"outputAssign","default":0},
 		{"page":3,"index":21,"name":"ArpDestination","displayName":"ARP DESTINATION","min":0,"max":2,"toText":"destination","default":0},
 		{"page":3,"index":22,"name":"voiceAssignKeyboard","displayName":"VOICE ASSIGN","min":0,"max":4,"toText":"voiceAssignKeyboard","default":0},
 		{"page":3,"index":22,"name":"voiceAssignRack","displayName":"VOICE ASSIGN","min":0,"max":6,"toText":"voiceAssignRack","default":0,"isPublic":false},
@@ -675,8 +676,22 @@
 		"syncType": 
 		[	
 			"OFF","1/16","1/8 TRIPLET","1/16 DOTTED","1/8","1/4 TRIPLET","1/8 DOTTED","1/4","1/2 TRIPLET","1/4 DOTTED","1/2","1/1 TRIPLET","1/2 DOTTED","1/1","2/1 TRIPLET","1/1 DOTTED","2/1","3 MEASURES","4 MEASURES","5 MEASURES","6 MEASURES","7 MEASURES","8 MEASURES"
+		],
+		"outputAssign": 
+		[
+			"MIX OUT", "PARALLEL OUT"
+		],
+ 		"LFO1DepthPan":
+ 		[
+			"LEFT", "L -63", "L -62", "L -61", "L -60", "L -59", "L -58", "L -57", "L -56", "L -55", "L -54", "L -53", "L -52", "L -51", "L -50", "L -49", "L -48",
+			"L -47", "L -46", "L -45", "L -44", "L -43", "L -42", "L -41", "L -40", "L -39", "L -38", "L -37", "L -36", "L -35", "L -34", "L -33", "L -32", "L -31", "L -30", "L -29", "L -28",
+			"L -27", "L -26", "L -25", "L -24", "L -23", "L -22", "L -21", "L -20", "L -19", "L -18", "L -17", "L -16", "L -15", "L -14", "L -13", "L -12", "L -11", "L -10", "L -9", "L -8",
+			"L -7", "L -6", "L -5", "L -4", "L -3", "L -2", "L -1",
+			"0",	"R 1",	"R 2",	"R 3",	"R 4",	"R 5",	"R 6",	"R 7",	"R 8",	"R 9",	"R 10",	"R 11",	"R 12",	"R 13",	"R 14",	"R 15",	"R 16",	"R 17",	"R 18",	"R 19",
+ 			"20",	"R 21",	"R 22",	"R 23",	"R 24",	"R 25",	"R 26",	"R 27",	"R 28",	"R 29",	"R 30",	"R 31",	"R 32",	"R 33",	"R 34",	"R 35",	"R 36",	"R 37",	"R 38",	"R 39",
+			"40",	"R 41",	"R 42",	"R 43",	"R 44",	"R 45",	"R 46",	"R 47",	"R 48",	"R 49",	"R 50",	"R 51",	"R 52",	"R 53",	"R 54",	"R 55",	"R 56",	"R 57",	"R 58",	"R 59",
+			"60",	"R 61",	"R 62",	"RIGHT"
 		]
-
 
 
 	},

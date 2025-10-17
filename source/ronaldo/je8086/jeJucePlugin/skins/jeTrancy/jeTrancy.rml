@@ -15,6 +15,7 @@
 		<img id="bottom" class="jucePos" src="bottom.png" style="left: 173dp; top: 1155dp;"/>	
 		<img id="top" class="jucePos" src="top.png" style="left: 720dp; top: 56dp;"/>
 		<img id="unison" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="unison.png" style="left: 714dp; top: 1155dp;"/>
+		<img id="split" class="jucePos" data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" src="cmb_split.png" style="left: 2159dp; top: 206dp; "/>
 			
 		<!-- MAIN PAGE -->
 		<div data-model="partCurrent" class="abs" tabgroup="main" tabpage="0" >
@@ -25,7 +26,6 @@
 			<!--<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid_small.png" style="left: 2400dp; top: 90dp; width: 150dp; height: 150dp;"/>		-->
 			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="grid2.png" style="left: 1061dp; top: 1173dp; width: 469dp; height: 180dp;"/>			
 			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid.png" style="left: 720dp; top: 1178dp; height: 180dp;"/>		
-			<img id="split" class="jucePos" data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" src="cmb_split.png" style="left: 2159dp; top: 204dp; "/>
 			<img id="osc2_noise" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 1304dp; top:426dp"/>					
 			<img id="amp_gain" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="amp_gain.png" style="left: 2445dp; top: 331dp;"/>	
 			
@@ -38,12 +38,12 @@
 				<div class="abs" style="left: 11dp; top: 32dp; height: 287dp; width: 290dp;">
 					
 					<!-- LFO 1 Waveform -->
-					<combo param="Lfo1Waveform" id="Lfo1Waveform" class="jucePos comboxtext2" style="left: 0dp; top: 21dp; width: 310dp; height: 45dp; line-height: 45dp;">
+					<combo param="Lfo1Waveform" id="Lfo1Waveform" class="jucePos comboxtext2" style="left: 0dp; top: 23dp; width: 310dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>
 					
 					<!-- Sync -->
-					<combo param="LFO1Sync" id="LFO1Sync" class="jucePos comboxtext2" style="left: 0dp; top: 84dp; width: 310dp; height: 45dp; line-height: 45dp;">
+					<combo param="LFO1Sync" id="LFO1Sync" class="jucePos comboxtext2" style="left: 0dp; top: 86dp; width: 310dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>
 					
@@ -162,15 +162,12 @@
 						</div>	
 					</div>						
 					
-					<button class="abs btBlackLed" param="Osc2SyncSwitch" id="Osc2SyncSwitch" style="left: 60dp; top: 47dp;" isToggle="1"/>
+					<button class="abs btBlackLed" param="Osc2SyncSwitch" id="Osc2SyncSwitch" style="left: 60dp; top: 44dp;" isToggle="1"/>
 						
 					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
 						<img id="rack" class="jucePos" src="osc2_ext.png" style="left: 156dp; top: 23dp"/>	
-						<button class="abs btBlackLed" param="Osc2ExternalInputSwitch" id="Osc2ExternalInputSwitch" style="left: 167dp; top: 47dp;" isToggle="1"/>						
+						<button class="abs btBlackLed" param="Osc2ExternalInputSwitch" id="Osc2ExternalInputSwitch" style="left: 167dp; top: 44dp;" isToggle="1"/>						
 					</div>					
-
-
-	
 
 					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
 						<div class="abs vlayoutLeds" style="left: 312dp; top: 20dp; height: 135dp; width: 120dp">
@@ -187,7 +184,7 @@
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
 						</div>
 					</div>					
-					<div class="knobs_row2" style="left: 43dp; gap: 63dp;">
+					<div class="knobs_row2" style="left: 43dp; gap: 84dp;">
 						<knob class="knob" param="Osc2Range" id="Osc2Range" />
 						<knob class="knob" param="Osc2FineWide" id="Osc2FineWide" />
 					</div>
@@ -202,20 +199,20 @@
 						<button class="ledRed" param="FilterType" id="FilterType" valueOn="1" isToggle="1"/>
 						<button class="ledRed" param="FilterType" id="FilterType" valueOn="2" isToggle="1"/>
 					</div>
-					<button class="ledRed2" param="CutoffSlope" id="CutoffSlope" valueOn="0" style="left: 282dp; top: 28dp; width: 140dp;" isToggle="1"/>
-					<button class="ledRed2" param="CutoffSlope" id="CutoffSlope" valueOn="1" style="left: 282dp; top: 62dp; width: 140dp;" isToggle="1"/>
+					<button class="ledRed2" param="CutoffSlope" id="CutoffSlope" valueOn="0" style="left: 282dp; top: 32dp; width: 140dp;" isToggle="1"/>
+					<button class="ledRed2" param="CutoffSlope" id="CutoffSlope" valueOn="1" style="left: 282dp; top: 66dp; width: 140dp;" isToggle="1"/>
 
 					<input class="abs sliderV slider_row2" param="CutoffFrequency" id="CutoffFrequency" type="range" orientation="vertical" style="left: 52dp; margin-top:7dp"/>
 					<input class="abs sliderV slider_row2" param="Resonance" id="Resonance" type="range" orientation="vertical" style="left: 169dp; margin-top:7dp"/>
 					
-					<div class="knobs_row2" style="left: 302dp; gap: 63dp;">
+					<div class="knobs_row2" style="left: 301dp; gap: 64dp;">
 						<knob class="knob" param="CutoffFrequencyKeyFollow" id="CutoffFrequencyKeyFollow"/>
 						<knob class="knob" param="FilterLfo1Depth" id="FilterLfo1Depth" />
 					</div>
 				</div>
 
 				<!-- Amp -->
-				<div class="abs" style="left: 2100dp; top: 45dp; height: 257dp; width: 290dp;">
+				<div class="abs" style="left: 2100dp; top: 48dp; height: 257dp; width: 290dp;">
 					<div class="vlayoutLeds" style="height: 140dp; width: 150dp">
 						<button class="ledRed" param="AutoPanManualPanSwitch" id="AutoPanManualPanSwitch" valueOn="0" isToggle="1"/>
 						<button class="ledRed" param="AutoPanManualPanSwitch" id="AutoPanManualPanSwitch" valueOn="1" isToggle="1"/>
@@ -229,10 +226,16 @@
 						</combo>						
 					</div>		
 					
-					<div class="knobs_row2" style="left: 31dp; top: 160dp; gap: 63dp;">
-						<knob class="knob" param="AmpLfo1Depth" id="AmpLfo1Depth" />
-						<knob class="knob" param="AmpLevel" id="AmpLevel" />
-					</div>
+					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 0 || AutoPanManualPanSwitch_value == 1)" data-model="part0" class="abs">
+						<knob class="knob abs" style="left: 32dp; top: 18dp;" param="AmpLfo1Depth" id="AmpLfo1Depth" />	
+						<div class="label2" style="left: 0dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">LFO1 DEPTH</div>				
+					</div>	
+					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 2)" data-model="part0" class="abs">
+						<knob class="knob abs" style="left: 32dp; top: 18dp;" param="AmpPan" id="AmpPan" />							
+						<div class="label2" style="left:0dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">PAN</div>				
+					</div>						
+					<knob class="knob abs" style="left: 184dp; top: 158dp;" param="AmpLevel" id="AmpLevel" />
+
 				</div>			
 			</div>
 
@@ -241,11 +244,11 @@
 			
 				<!-- Modulation (LFO 2) -->
 				<div class="abs" style="left: -1dp; top: 0dp; height: 100%; width: 314dp;">
-					<div class="knobs_row3" style="top: 67dp; left: 39dp;">
+					<div class="knobs_row3" style="top: 67dp; left: 38dp;">
 						<knob class="knob" param="AmpLfo2Depth" id="AmpLfo2Depth" />
 						<knob class="knob" param="FilterLfo2Depth" id="FilterLfo2Depth" />
 					</div>					
-					<div class="knobs_row3" style="left: 39dp;">
+					<div class="knobs_row3" style="left: 38dp;">
 						<knob class="knob" param="Lfo2Rate" id="Lfo2Rate" />
 						<knob class="knob" param="PitchLfo2Depth" id="PitchLfo2Depth" />
 					</div>
@@ -265,7 +268,7 @@
 						<combotext></combotext>
 					</combo>					
 					
-					<div class="abs vlayoutLeds" style="left: 245dp; top: 69dp; height: 140dp; width: 245dp;">
+					<div class="abs vlayoutLeds" style="left: 245dp; top: 71dp; height: 140dp; width: 245dp; row-gap: 10dp;">
 						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="0" isToggle="1"/>
 						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="1" isToggle="1"/>
 						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="2" isToggle="1"/>
@@ -310,7 +313,7 @@
 			<!-- fourth row -->
 			<div class="row" style="top:934dp; height: 200dp;">
 				<!-- Control -->
-				<div class="abs hlayout" style="left: 47dp; top:118dp; gap: 34dp; width:700dp">
+				<div class="abs hlayout" style="left: 47dp; top:128dp; gap: 34dp; width:700dp">
 					<button class="btBlackLed" param="MonoSwitch" id="MonoSwitch" isToggle="1"/>
 					<button class="btBlackLed" param="LegatoSwitch" id="LegatoSwitch" isToggle="1"/>				
 					<button class="btBlackLed" param="VelocitySwitch" id="VelocitySwitch" isToggle="1"/>					
@@ -374,7 +377,7 @@
 			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
 			
 			<!-- OSC Shift -->
-			<div class="abs vlayoutLeds" style="left: 1066dp; top: 1194dp; height: 140dp; width: 186dp; row-gap: 10dp;">
+			<div class="abs vlayoutLeds" style="left: 1072dp; top: 1198dp; height: 140dp; width: 186dp; row-gap: 9dp;">
 				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="4" isToggle="1"/>
 				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="3" isToggle="1"/>
 				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="2" isToggle="1"/>
@@ -383,7 +386,7 @@
 			</div>			
 			
 			<!-- TODO -->
-			<div class="abs hlayout label" style="left:1306dp; top:1235dp; gap: 41dp; width: 1700dp">
+			<div class="abs hlayout label" style="left:1307dp; top:1232dp; gap: 41dp; width: 1700dp">
 				<div style="width:100dp; margin-top:-55dp;">CUTOFF FREQ</div>				
 				<div style="width:100dp; margin-top:-55dp;">RESO</div>	
 				<div style="width:100dp; margin-top:-55dp;">OSC 1 CTRL 1</div>	
@@ -395,7 +398,7 @@
 				<div style="width:100dp; margin-top:-55dp;">LFO 1 RATE</div>				
 			</div>			
 			
-			<div class="abs hlayout" style="left:1306dp; top:1240dp; gap: 52dp; width: 1700dp">
+			<div class="abs hlayout" style="left:1308dp; top:1239dp; gap: 51.8dp; width: 1700dp">
 				<knob class="knob" param="CutoffFrequency" id="CutoffFrequency" />	
 				<knob class="knob" param="Resonance" id="Resonance" />
 				<knob class="knob" param="Osc1Control1" id="Osc1Control1" />
@@ -425,7 +428,7 @@
 		
 			<!-- second row -->
 			<!-- Global -->
-			<div class="abs hlayout" style="left: 388dp; top:360dp; gap: 78dp; width:500dp">
+			<div class="abs hlayout" style="left: 387dp; top:364dp; gap: 78dp; width:500dp">
 				<knob class="knob" param="VoiceModulatorLevel"/>
 				<knob class="knob" param="VoiceModulatorPan"/>	
 				<knob class="knob" param="VocalMix"/>
@@ -438,7 +441,7 @@
 				<button class="btBlackLed" param="ExternaltoInstSendSwitch" id="ExternaltoInstSendSwitch" isToggle="1"/>
 				<button class="btBlackLed" param="ExternaltoVocalSendSwitch" id="ExternaltoVocalSendSwitch" isToggle="1"/>
 			</div>					
-			<combo param="Algorithm" id="Algorithm" class="jucePos comboxtext3" style="left: 1310dp; top: 385dp; width: 350dp; height: 45dp; line-height: 45dp;">
+			<combo param="Algorithm" id="Algorithm" class="jucePos comboxtext3" style="left: 1350dp; top: 387dp; width: 350dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>
 				
@@ -446,11 +449,11 @@
 			<!-- Vocal Morph -->
 			<button class="btBlackLed abs" style="left: 395dp; top: 615dp;" param="VocalMorphControlSwitch" id="VocalMorphControlSwitch" isToggle="1"/>
 			
-			<div class="abs hlayout" style="left: 310dp; top:780dp; width:1500dp; gap: 73dp;">
+			<div class="abs hlayout" style="left: 309dp; top:782dp; width:1500dp; gap: 73dp;">
 				<knob class="knob" param="VocalMorphThreshold"/>
 				<knob class="knob" param="VocalMorphSensitivity"/>				
 			</div>	
-			<div class="abs hlayout" style="left: 701dp; top:593dp; width:1500dp; gap: 72.7dp;">
+			<div class="abs hlayout" style="left: 700dp; top:595dp; width:1500dp; gap: 72.7dp;">
 				<knob class="knob" param="Character1"/>
 				<knob class="knob" param="Character2"/>
 				<knob class="knob" param="Character3"/>
@@ -458,7 +461,7 @@
 				<knob class="knob" param="Character5"/>
 				<knob class="knob" param="Character6"/>					
 			</div>					
-			<div class="abs hlayout" style="left: 701dp; top:777dp; width:1500dp; gap: 72.7dp;">
+			<div class="abs hlayout" style="left: 700dp; top:779dp; width:1500dp; gap: 72.7dp;">
 				<knob class="knob" param="Character7"/>
 				<knob class="knob" param="Character8"/>
 				<knob class="knob" param="Character9"/>
@@ -468,13 +471,13 @@
 			</div>	
 			
 			<!-- ext input -->
-			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" style="left: 1740dp; top:302dp;">
-				<knob class="abs knob" style="left: 134dp; top: 59dp;"></knob>
+			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" style="left: 1740dp; top:304dp;">
+				<knob class="abs knob" style="left: 133dp; top: 59dp;"></knob>
 				<button class="ledBlue" style="left: 153dp; top: -7dp;"/>
-				<knob class="abs knob" style="left: 457dp; top: 59dp;"></knob>
+				<knob class="abs knob" style="left: 456dp; top: 59dp;"></knob>
 				<button class="ledBlue" style="left: 478dp; top: -7dp;"/>
-				<button class="ledRed2" style="top: 51dp; width: 115dp; left: 604dp"/>
-				<button class="ledRed2" style="top: 90dp; width: 115dp; left: 604dp"/>
+				<button class="ledRed2" style="top: 54dp; width: 115dp; left: 604dp"/>
+				<button class="ledRed2" style="top: 94dp; width: 115dp; left: 604dp"/>
 			</div>	
 			
 			<!-- Dynamic -->
@@ -488,33 +491,33 @@
 			</div>				
 			
 			<!-- Ensemble -->
-			<div class="abs" style="left: 1732dp; top:699dp; height: 220dp;  width: 860dp;">						
+			<div class="abs" style="left: 1732dp; top:698dp; height: 220dp;  width: 860dp;">						
 				<knob class="abs knob" style="left: 61dp; top: 100dp;" param="EnsembleLevel"/>
-				<combo param="EnsembleType" id="EnsembleType" class="jucePos comboxtext3" style="left: 213dp; top: 115dp; width: 290dp; height: 45dp; line-height: 45dp;">
+				<combo param="EnsembleType" id="EnsembleType" class="jucePos comboxtext3" style="left: 213dp; top: 116dp; width: 290dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>
-				<combo param="EnsembleSync" id="EnsembleSync" class="jucePos comboxtext3" style="left: 535dp; top: 115dp; width: 290dp; height: 45dp; line-height: 45dp;">
+				<combo param="EnsembleSync" id="EnsembleSync" class="jucePos comboxtext3" style="left: 535dp; top: 116dp; width: 290dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>	
 			</div>	
 
 			<!-- fourth row -->
-			<div class="row" style="top:936dp; height: 200dp;">
+			<div class="row" style="top:937dp; height: 200dp;">
 				<!-- Delay -->
-				<knob class="abs knob" style="left: 52dp; top: 87dp;" param="VoiceModulatorDelayLevel"/>
+				<knob class="abs knob" style="left: 51dp; top: 85dp;" param="VoiceModulatorDelayLevel"/>
 				
-				<combo param="VoiceModulatorDelayType" id="VoiceModulatorDelayType" class="jucePos comboxtext3" style="left: 240dp; top: 111dp; width: 350dp; height: 45dp; line-height: 45dp;">
+				<combo param="VoiceModulatorDelayType" id="VoiceModulatorDelayType" class="jucePos comboxtext3" style="left: 240dp; top: 109dp; width: 350dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>
-				<combo param="VoiceModulatorDelaySync" id="VoiceModulatorDelaySync" class="jucePos comboxtext3" style="left: 630dp; top: 111dp; width: 350dp; height: 45dp; line-height: 45dp;">
+				<combo param="VoiceModulatorDelaySync" id="VoiceModulatorDelaySync" class="jucePos comboxtext3" style="left: 630dp; top: 109dp; width: 350dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>			
 				
-				<knob class="abs knob" style="left: 1090dp; top: 87dp;" param="VoiceModulatorDelayTime"/>
-				<knob class="abs knob" style="left: 1334dp; top: 87dp;" param="VoiceModulatorDelayFeedback"/>					
+				<knob class="abs knob" style="left: 1091dp; top: 85dp;" param="VoiceModulatorDelayTime"/>
+				<knob class="abs knob" style="left: 1335dp; top: 85dp;" param="VoiceModulatorDelayFeedback"/>					
 				
 				<!-- Rpbot Voice -->				
-				<div class="abs hlayout" style="left: 1612dp; top:87dp; gap: 73dp;">
+				<div class="abs hlayout" style="left: 1617dp; top:85dp; gap: 73dp;">
 					<knob class="knob" param="RobotLevel"/>
 					<knob class="knob" param="RobotPitch"/>	
 					<knob class="knob" param="RobotControl"/>				
@@ -556,16 +559,16 @@
 			<button class="abs btWhiteLed" style="left: 28dp; top: 58dp;" id="partUpper" isToggle="1"/>
 			<button class="abs btWhiteLed" style="left: 28dp; top: 126dp;" id="partLower" isToggle="1"/>
 			
-			<div class="patchNameText" id="patchNameTextUpper" style="left: 120dp; top: 65dp;"/>
-			<div class="patchNameText" id="patchNameTextLower" style="left: 120dp; top: 134dp;"/>
+			<div class="patchNameText" id="patchNameTextUpper" style="left: 120dp; top: 69dp;"/>
+			<div class="patchNameText" id="patchNameTextLower" style="left: 120dp; top: 138dp;"/>
 			
 			<!-- Panel 1 MIDI CH --> 
-			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 58dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 63dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>			
 
 			<!-- Panel 2 MIDI CH --> 
-			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 127dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 131dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>					
 			
@@ -592,7 +595,7 @@
 			
 			<!-- Key Mode / Voice Assign -->
 			<div class="abs" style="left: 1408dp; top:-1dp; width: 440dp; height: 100%;">
-					<div data-model="part0" class="abs vlayoutLeds" style="left: 18dp; top: 46dp; height: 100dp; width: 165dp">
+					<div data-model="part0" class="abs vlayoutLeds" style="left: 18dp; top: 49dp; height: 100dp; width: 165dp">
 					<button class="ledRed" isToggle="1" valueOn="0" param="KeyMode"/>
 					<button class="ledRed" isToggle="1" valueOn="1" param="KeyMode"/>
 					<button class="ledRed" isToggle="1" valueOn="2" param="KeyMode"/>
@@ -600,31 +603,29 @@
 
 				<!-- Voice Assign -->
 				<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs">
-					<combo data-model="part0" param="voiceAssignKeyboard" id="voiceAssignKeyboard" class="jucePos comboxtext2" style="left: 280dp; top: 41dp; width: 165dp; height: 45dp; line-height: 45dp;">
+					<combo data-model="part0" param="voiceAssignKeyboard" id="voiceAssignKeyboard" class="jucePos comboxtext2" style="left: 266dp; top: 45dp; width: 165dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>
 				</div>
 				
 				<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
-					<combo data-model="part0" param="voiceAssignRack" id="voiceAssignRack" class="jucePos comboxtext2" style="left: 280dp; top: 41dp; width: 165dp; height: 45dp; line-height: 45dp;">
+					<combo data-model="part0" param="voiceAssignRack" id="voiceAssignRack" class="jucePos comboxtext2" style="left: 266dp; top: 45dp; width: 165dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>
 				</div>	
 
 				<div data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" class="abs">
 					<!-- Split -->
-					<combo data-model="part0" param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 30dp; top: 140dp; width: 165dp; height: 45dp; line-height: 45dp;">
+					<combo data-model="part0" param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 30dp; top: 142dp; width: 165dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>				
 				</div>	
 
-
-
 				<!-- Bend Up/Down -->
-				<combo data-model="part0" param="BendRangeDown" id="BendRangeDown" class="jucePos comboxtext2" style="left: 257dp; top: 140dp; width: 100dp; height: 45dp; line-height: 45dp;">
+				<combo data-model="part0" param="BendRangeDown" id="BendRangeDown" class="jucePos comboxtext2" style="left: 250dp; top: 142dp; width: 100dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>
-				<combo data-model="part0" param="BendRangeUp" id="BendRangeUp" class="jucePos comboxtext2" style="left: 348dp; top: 140dp; width: 100dp; height: 45dp; line-height: 45dp;">
+				<combo data-model="part0" param="BendRangeUp" id="BendRangeUp" class="jucePos comboxtext2" style="left: 341dp; top: 142dp; width: 100dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>
 				
@@ -662,7 +663,7 @@
 		<!-- Global Bottom Row -->
 		<div class="abs" style="left:175dp; top:1148dp; height: 225dp; width: 850dp" data-model="part0" >
 		<!-- bottom left, Volume and Semitones knobs -->
-			<div class="abs hlayout" style="left: 37dp; top: 91dp; gap: 91dp;">
+			<div class="abs hlayout" style="left: 37dp; top: 90dp; gap: 92dp;">
 				<knob class="knob mainVolume" param="MasterVolume"/>
 				<knob class="knob" param="PartTranspose"/>
 				<knob class="knob" param="MasterTune"/>
