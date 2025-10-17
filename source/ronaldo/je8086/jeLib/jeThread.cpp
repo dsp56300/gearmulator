@@ -26,7 +26,7 @@ namespace jeLib
 			for (const auto& e : _midiIn)
 			{
 				m_midiInput.emplace_back(e);
-				//m_midiInput.back().offset += _requiredLatency;
+				m_midiInput.back().offset += _requiredLatency;
 			}
 		}
 

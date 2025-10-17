@@ -35,6 +35,8 @@ namespace jeLib
 		uint32_t getDspClockPercent() const override;
 		uint64_t getDspClockHz() const override;
 
+		uint32_t getInternalLatencyMidiToOutput() const override;
+
 	protected:
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;

@@ -82,7 +82,7 @@ namespace jeLib
 	{
 		uint64_t now = emu.getCycles();
 
-		if (now > 12776184 && !((++ctr) & 0x3fff))
+		if (now > 12776184)// && !((++ctr) & 0x3fff))
 		{
 			for (auto& m : m_midiInEvents)
 				m_midiInRateLimiter.write(std::move(m));

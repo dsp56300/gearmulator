@@ -38,6 +38,13 @@ namespace jeJucePlugin
 			for (auto* parameter : parameters)
 				parameter->setUnnormalizedValueNotifyingHost(_value, pluginLib::Parameter::Origin::PresetChange);
 		});
+
+		auto& params = getExposedParameters();
+		for (const auto & it : params)
+		{
+			for (auto& p : it.second)
+				p->setRateLimitMilliseconds(1000 / 25);	// limit to 25 changes per second as the midi bandwidth is quite limited on this device
+		}
 		Controller::onStateLoaded();
 	}
 
