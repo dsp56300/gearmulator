@@ -25,10 +25,11 @@ namespace jeLib
 
 			for (const auto& e : _midiIn)
 			{
-				m_midiInput.emplace_back(e);
-				m_midiInput.back().offset += _requiredLatency;
+				m_midiInput.emplace_back(e.offset + _requiredLatency + m_inSampleOffset, e);
 			}
 		}
+
+		m_inSampleOffset += _count;
 
 		// add latency by allowing the DSP to process more samples
 		while (_requiredLatency > m_currentLatency)
@@ -39,7 +40,7 @@ namespace jeLib
 
 		for (size_t i=0; i<_count; ++i)
 		{
-			// rmeove latency by omitting new processing requests
+			// remove latency by omitting new processing requests
 			if (m_currentLatency > _requiredLatency)
 				--m_currentLatency;
 			else
@@ -85,9 +86,9 @@ namespace jeLib
 			{
 				auto& e = m_midiInput.front();
 
-				if (static_cast<int32_t>(e.offset) <= 0)
+				if (e.first <= m_processedSampleOffset)
 				{
-					m_je8086.addMidiEvent(e);
+					m_je8086.addMidiEvent(e.second);
 					it = m_midiInput.erase(it);
 				}
 				else
@@ -95,9 +96,6 @@ namespace jeLib
 					++it;
 				}
 			}
-
-			for (auto& e : m_midiInput)
-				--e.offset;
 		}
 
 		while (m_je8086.getSampleBuffer().empty())
@@ -105,6 +103,8 @@ namespace jeLib
 
 		m_audioOut.push_back(m_je8086.getSampleBuffer().front());
 		m_je8086.clearSampleBuffer();
+
+		++m_processedSampleOffset;
 
 		std::lock_guard lock(m_mutex);
 		m_je8086.readMidiOut(m_midiOutput);

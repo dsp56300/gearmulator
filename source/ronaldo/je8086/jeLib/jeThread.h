@@ -38,11 +38,14 @@ namespace jeLib
 
 		dsp56k::RingBuffer<SampleFrame, 16384, true> m_audioOut;
 
-		std::deque<synthLib::SMidiEvent> m_midiInput;
+		std::deque<std::pair<uint64_t, synthLib::SMidiEvent>> m_midiInput;
 		std::vector<synthLib::SMidiEvent> m_midiOutput;
 
 		baseLib::Semaphore m_inputSem;
 
 		std::mutex m_mutex;
+
+		uint64_t m_inSampleOffset = 0;
+		uint64_t m_processedSampleOffset = 0;
 	};
 }
