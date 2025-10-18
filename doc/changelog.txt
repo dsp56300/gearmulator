@@ -7,6 +7,7 @@ Framework:
 - [Fix] [UI] Pressing a button should not set the "checked" pseudo-class, that is what
 		the "active" state is for. BUG-10026 Furthermore, checked state was kept when 
 		moving out of the button while holding the mouse button down.
+- [Fix] [UI] Missing repaint if parameter changed via Midi CC causing sliders to jump
 
 JE8086:
 
