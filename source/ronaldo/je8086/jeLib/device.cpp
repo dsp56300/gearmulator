@@ -128,7 +128,7 @@ namespace jeLib
 
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
-		return static_cast<uint32_t>(getSamplerate()) * 5 / 1000; // 5 ms
+		return static_cast<uint32_t>(getSamplerate() * 4.5f / 1000.0f); // 4.5 ms
 	}
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
