@@ -38,8 +38,6 @@ namespace juceRmlUi
 
 	private:
 		void onClick();
-		void onMouseDown();
-		void onMouseUp();
 
 		bool m_isToggle = false;
 		bool m_isChecked = false;
