@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include "midiToSysex.h"
+
 namespace synthLib
 {
 	constexpr uint16_t g_ppq = 96;
@@ -38,10 +40,17 @@ namespace synthLib
 
 		for (const auto& message : _messages)
 		{
-			writeVarLen(_dst, g_ppq * g_beatsBetweenMessages);				// delta time
-			writeUInt8(_dst, message.front());								// f0 comes first...
-			writeVarLen(_dst, static_cast<uint32_t>(message.size() - 1));		// ...then the length
-			_dst.write(reinterpret_cast<const char*>(&message[1]), static_cast<std::streamsize>(message.size() - 1));
+			// split them again to support that someone writes multiple sysex messages into one buffer
+			std::vector<std::vector<uint8_t>> messages;
+			MidiToSysex::splitMultipleSysex(messages, message);
+
+			for (const auto& m : messages)
+			{
+				writeVarLen(_dst, g_ppq * g_beatsBetweenMessages);          // delta time
+				writeUInt8(_dst, m.front());                                // f0 comes first...
+				writeVarLen(_dst, static_cast<uint32_t>(m.size() - 1));     // ...then the length
+				_dst.write(reinterpret_cast<const char*>(&m[1]), static_cast<std::streamsize>(m.size() - 1));
+			}
 		}
 		const auto newPos = _dst.tellp();
 		const auto trackChunkLength = newPos - trackChunkBegin - 4;	// exclude the chunk length
