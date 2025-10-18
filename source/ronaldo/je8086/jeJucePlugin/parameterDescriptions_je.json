@@ -48,7 +48,7 @@
 		{"index":30 , "name":"Osc1Waveform", "displayName": "OSC WAVEFORM", "min":0, "max":6, "toText":"osc1WaveForm", "default":0},
 		
 		{"index":31 , "name":"Osc1Control1", "displayName": "OSC1 CTRL 1", "min":0, "max":127, "default":127},
-		{"index":32 , "name":"Osc1Control2", "displayName": "OSC2 CTRL 2", "min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2", "displayName": "OSC1 CTRL 2", "min":0, "max":127, "default":127},
 		
 		{"index":31 , "name":"Osc1Control1Detune", "displayName": "OSC1 DETUNE", "min":0, "max":127, "default":127},
 		{"index":32 , "name":"Osc1Control2Mix", "displayName": "OSC1 MIX", "min":0, "max":127, "default":127},
