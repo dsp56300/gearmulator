@@ -11,7 +11,7 @@ Framework:
 
 JE8086:
 
-- [Fix] Another MIDI timing issue
+- [Fix] Further MIDI timing improvements
 - [Fix] Some controls only affected Upper Part even if Lower Part was selected:
         Amp Pan / Amp LFO1 Depth / Bend Range Up & Down / Transpose
 
