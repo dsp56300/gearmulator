@@ -1,5 +1,13 @@
 Release Notes 
 
+2.0.6:
+
+Framework:
+
+- [Fix] [UI] Pressing a button should not set the "checked" pseudo-class, that is what
+		the "active" state is for. BUG-10026 Furthermore, checked state was kept when 
+		moving out of the button while holding the mouse button down.
+
 2.0.5:
 
 JE8086:

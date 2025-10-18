@@ -8,10 +8,6 @@ namespace juceRmlUi
 	ElemButton::ElemButton(Rml::CoreInstance& _coreInstance, const Rml::String& _tag): ElemValue(_coreInstance, _tag)
 	{
 		EventListener::Add(this, Rml::EventId::Click, [&](const Rml::Event&) { onClick(); });
-		EventListener::Add(this, Rml::EventId::Mousedown, [&](const Rml::Event&) { onMouseDown(); });
-		EventListener::Add(this, Rml::EventId::Mouseup, [&](const Rml::Event&) { onMouseUp(); });
-
-		// TODO: mouse out while pressed? Should removed the pressed state
 	}
 
 	void ElemButton::onChangeValue()
@@ -86,18 +82,6 @@ namespace juceRmlUi
 		}
 
 		evClick(this);
-	}
-
-	void ElemButton::onMouseDown()
-	{
-		if (!m_isToggle)
-			setChecked(true);
-	}
-
-	void ElemButton::onMouseUp()
-	{
-		if (!m_isToggle)
-			setChecked(false);
 	}
 
 	pluginLib::ParamValue ElemButton::getValueOn() const
