@@ -1,5 +1,17 @@
 Release Notes 
 
+2.0.5:
+
+JE8086:
+
+- [Imp] UI polishing and improvements
+- [Imp] Support MIDI Control Changes for all parameters according
+        to specification of original hardware
+
+- [Fix] Performances were saved in a broken state
+- [Fix] Much better MIDI timing & correction of reported latency to host
+- [Fix] Save menu for Performances didn't show "Performance" but "Patch Upper"
+
 2.0.4:
 
 Framework:
