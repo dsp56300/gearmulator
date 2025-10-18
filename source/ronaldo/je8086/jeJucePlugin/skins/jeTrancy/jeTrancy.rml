@@ -226,11 +226,11 @@
 						</combo>						
 					</div>		
 					
-					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 0 || AutoPanManualPanSwitch_value == 1)" data-model="part0" class="abs">
+					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 0 || AutoPanManualPanSwitch_value == 1)" class="abs">
 						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpLfo1Depth" id="AmpLfo1Depth" />	
 						<div class="label2" style="left: 0dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">LFO1 DEPTH</div>				
 					</div>	
-					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 2)" data-model="part0" class="abs">
+					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 2)" class="abs">
 						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpPan" id="AmpPan" />							
 						<div class="label2" style="left:0dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">PAN</div>				
 					</div>						
@@ -619,10 +619,10 @@
 				</div>	
 
 				<!-- Bend Up/Down -->
-				<combo data-model="part0" param="BendRangeDown" id="BendRangeDown" class="jucePos comboxtext2" style="left: 250dp; top: 142dp; width: 100dp; height: 45dp; line-height: 45dp;">
+				<combo data-model="partCurrent" param="BendRangeDown" id="BendRangeDown" class="jucePos comboxtext2" style="left: 250dp; top: 142dp; width: 100dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>
-				<combo data-model="part0" param="BendRangeUp" id="BendRangeUp" class="jucePos comboxtext2" style="left: 341dp; top: 142dp; width: 100dp; height: 45dp; line-height: 45dp;">
+				<combo data-model="partCurrent" param="BendRangeUp" id="BendRangeUp" class="jucePos comboxtext2" style="left: 341dp; top: 142dp; width: 100dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>
 				
@@ -657,11 +657,11 @@
 		</div>		
 		
 		<!-- Global Bottom Row -->
-		<div class="abs" style="left:175dp; top:1148dp; height: 225dp; width: 850dp" data-model="part0" >
+		<div class="abs" style="left:175dp; top:1148dp; height: 225dp; width: 850dp" data-model="part0">
 		<!-- bottom left, Volume and Semitones knobs -->
 			<div class="abs hlayout" style="left: 37dp; top: 90dp; gap: 92dp;">
 				<knob class="knob mainVolume" param="MasterVolume"/>
-				<knob class="knob" param="PartTranspose"/>
+				<knob class="knob" data-model="partCurrent" param="PartTranspose"/>
 				<knob class="knob" param="MasterTune"/>
 			</div>	
 
