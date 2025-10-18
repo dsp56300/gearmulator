@@ -2,6 +2,7 @@
 
 #include "rmlParameterBinding.h"
 
+#include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemKnob.h"
 
 #include "juce_events/juce_events.h"
@@ -185,10 +186,12 @@ namespace rmlPlugin
 			const auto& range = desc.range;
 			const auto v = range.getEnd() - (newValue - range.getStart());
 			juceRmlUi::ElemValue::setValue(_element, static_cast<float>(v));
+			juceRmlUi::RmlComponent::requestUpdate(_element);
 			return;
 		}
 
 		juceRmlUi::ElemValue::setValue(_element, static_cast<float>(newValue));
+		juceRmlUi::RmlComponent::requestUpdate(_element);
 	}
 
 	bool ParameterToElementsBinding::isReversed(const Rml::Element* _element)
