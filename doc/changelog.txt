@@ -8,6 +8,12 @@ Framework:
 		the "active" state is for. BUG-10026 Furthermore, checked state was kept when 
 		moving out of the button while holding the mouse button down.
 
+JE8086:
+
+- [Fix] Another MIDI timing issue
+- [Fix] Some controls only affected Upper Part even if Lower Part was selected:
+        Amp Pan / Amp LFO1 Depth / Bend Range Up & Down / Transpose
+
 2.0.5:
 
 JE8086:
