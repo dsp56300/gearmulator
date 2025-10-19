@@ -8,6 +8,7 @@ Framework:
 		the "active" state is for. BUG-10026 Furthermore, checked state was kept when 
 		moving out of the button while holding the mouse button down.
 - [Fix] [UI] Missing repaint if parameter changed via Midi CC causing sliders to jump
+- [Fix] Possible crash when resizing the editor window
 
 2.0.4:
 
