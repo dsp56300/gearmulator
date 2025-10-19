@@ -484,27 +484,28 @@ namespace juceRmlUi
 
 		m_updating = true;
 
-		updateRmlContextDimensions();
-
-		if (m_openGLversion != m_lastOpenGLversion)
-		{
-			m_lastOpenGLversion = m_openGLversion;
-
-			m_rmlContext->ActivateTheme("advancedrenderer", m_lastOpenGLversion >= g_advancedRendererMinimumGLversion);
-		}
-
-		evPreUpdate(this);
-
 		{
 			std::scoped_lock lock(m_contextRenderMutex);
+
+			updateRmlContextDimensions();
+
+			if (m_openGLversion != m_lastOpenGLversion)
+			{
+				m_lastOpenGLversion = m_openGLversion;
+
+				m_rmlContext->ActivateTheme("advancedrenderer", m_lastOpenGLversion >= g_advancedRendererMinimumGLversion);
+			}
+
+			evPreUpdate(this);
 
 			m_rmlContext->Update();
 			m_rmlContext->Render();
 
 			m_renderProxy->finishFrame();
+
+			evPostUpdate(this);
 		}
 
-		evPostUpdate(this);
 
 		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
 		const auto dt = static_cast<float>(t - m_time);
