@@ -13,28 +13,39 @@ namespace jeLib
 	JeThread::~JeThread()
 	{
 		m_exit = true;
-		m_inputSem.notify();
+		m_pendingJobs.push_back(ProcessJob());
 		m_thread->join();
 		m_thread.reset();
 	}
 
-	void JeThread::processSamples(const uint32_t _count, uint32_t _requiredLatency, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
+	void JeThread::processSamples(const uint32_t _count, uint32_t _requiredLatency, std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
+		ProcessJob job;
 		{
 			std::lock_guard lock(m_mutex);
-
-			for (const auto& e : _midiIn)
+			if (!m_jobPool.empty())
 			{
-				m_midiInput.emplace_back(e.offset + _requiredLatency + m_inSampleOffset, e);
+				job = std::move(m_jobPool.back());
+				m_jobPool.pop_back();
 			}
 		}
+
+		for (auto& e : _midiIn)
+		{
+			const auto offset = e.offset + _requiredLatency + m_inSampleOffset;
+			job.midiEvents.emplace_back(offset, std::move(e));
+		}
+
+		_midiIn.clear();
+
+		job.samplesToProcess = 0;
 
 		m_inSampleOffset += _count;
 
 		// add latency by allowing the DSP to process more samples
 		while (_requiredLatency > m_currentLatency)
 		{
-			m_inputSem.notify();
+			++job.samplesToProcess;
 			++m_currentLatency;
 		}
 
@@ -44,8 +55,10 @@ namespace jeLib
 			if (m_currentLatency > _requiredLatency)
 				--m_currentLatency;
 			else
-				m_inputSem.notify();
+				++job.samplesToProcess;
 		}
+
+		m_pendingJobs.push_back(std::move(job));
 
 		{
 			std::lock_guard lock(m_mutex);
@@ -67,46 +80,75 @@ namespace jeLib
 		dsp56k::ThreadTools::setCurrentThreadName("JE8086");
 		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
 
+		uint64_t processedSampleOffset = 0;
+
+		std::vector<synthLib::SMidiEvent> midiOut;
+
+		std::vector<MidiEvent> midiIn;
+
 		while (!m_exit)
 		{
-			m_inputSem.wait();
+			auto job = m_pendingJobs.pop_front();
+
 			if (m_exit)
 				break;
 
-			processSample();
-		}
-	}
-
-	void JeThread::processSample()
-	{
-		{
-			std::lock_guard lock(m_mutex);
-
-			for(auto it = m_midiInput.begin(); it != m_midiInput.end();)
+			if (midiIn.empty())
 			{
-				auto& e = m_midiInput.front();
+				std::swap(midiIn, job.midiEvents);
+			}
+			else
+			{
+				midiIn.insert(midiIn.end(), job.midiEvents.begin(), job.midiEvents.end());
+				job.midiEvents.clear();
+			}
 
-				if (e.first <= m_processedSampleOffset)
+			for (uint32_t i=0; i<job.samplesToProcess; ++i)
+			{
+				for(auto it = midiIn.begin(); it != midiIn.end();)
 				{
-					m_je8086.addMidiEvent(e.second);
-					it = m_midiInput.erase(it);
+					auto& e = *it;
+
+					if (e.first <= processedSampleOffset)
+					{
+						m_je8086.addMidiEvent(e.second);
+						it = midiIn.erase(it);
+					}
+					else
+					{
+						++it;
+					}
 				}
-				else
+
+				while (m_je8086.getSampleBuffer().empty())
+					m_je8086.step();
+
+				m_audioOut.push_back(m_je8086.getSampleBuffer().front());
+				m_je8086.clearSampleBuffer();
+
+				++processedSampleOffset;
+
+				m_je8086.readMidiOut(midiOut);
+
+				if (!midiOut.empty())
 				{
-					++it;
+					std::lock_guard lock(m_mutex);
+					if (m_midiOutput.empty())
+					{
+						std::swap(m_midiOutput, midiOut);
+					}
+					else
+					{
+						m_midiOutput.insert(m_midiOutput.end(), midiOut.begin(), midiOut.end());
+						midiOut.clear();
+					}
 				}
 			}
+
+			job.samplesToProcess = 0;
+
+			std::lock_guard lock(m_mutex);
+			m_jobPool.push_back(std::move(job));
 		}
-
-		while (m_je8086.getSampleBuffer().empty())
-			m_je8086.step();
-
-		m_audioOut.push_back(m_je8086.getSampleBuffer().front());
-		m_je8086.clearSampleBuffer();
-
-		++m_processedSampleOffset;
-
-		std::lock_guard lock(m_mutex);
-		m_je8086.readMidiOut(m_midiOutput);
 	}
 }

@@ -20,13 +20,19 @@ namespace jeLib
 		JeThread(Je8086& _je8086);
 		~JeThread();
 
-		void processSamples(uint32_t _count, uint32_t _requiredLatency, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut);
+		void processSamples(uint32_t _count, uint32_t _requiredLatency, std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut);
 
 		auto& getSampleBuffer() { return m_audioOut; }
 
 	private:
+		using MidiEvent = std::pair<uint64_t, synthLib::SMidiEvent>;
+		struct ProcessJob
+		{
+			uint32_t samplesToProcess = 0;
+			std::vector<MidiEvent> midiEvents;
+		};
+
 		void threadFunc();
-		void processSample();
 
 		Je8086& m_je8086;
 
@@ -38,14 +44,13 @@ namespace jeLib
 
 		dsp56k::RingBuffer<SampleFrame, 16384, true> m_audioOut;
 
-		std::deque<std::pair<uint64_t, synthLib::SMidiEvent>> m_midiInput;
 		std::vector<synthLib::SMidiEvent> m_midiOutput;
-
-		baseLib::Semaphore m_inputSem;
 
 		std::mutex m_mutex;
 
 		uint64_t m_inSampleOffset = 0;
-		uint64_t m_processedSampleOffset = 0;
+
+		std::vector<ProcessJob> m_jobPool;
+		dsp56k::RingBuffer<ProcessJob, 32, true> m_pendingJobs;
 	};
 }
