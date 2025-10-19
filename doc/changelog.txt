@@ -1,5 +1,12 @@
 Release Notes 
 
+2.0.7:
+
+JE8086:
+
+- [Fix] Incorrect parameter range for Velocity & Control Assign for Oscillator 2
+        Range and Fine/Wide
+
 2.0.6:
 
 Framework:
