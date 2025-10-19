@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "dsp56300/source/dsp56kEmu/logging.h"
+#include "baseLib/logging.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
