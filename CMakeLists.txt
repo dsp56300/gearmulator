@@ -19,7 +19,7 @@ if(APPLE)
 	message("CMAKE_OSX_DEPLOYMENT_TARGET: " ${CMAKE_OSX_DEPLOYMENT_TARGET})
 endif()
 
-project(gearmulator VERSION 2.0.6)
+project(gearmulator VERSION 2.0.7)
 
 include(base.cmake)
 include(CTest)
