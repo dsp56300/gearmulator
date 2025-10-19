@@ -6,6 +6,7 @@ JE8086:
 
 - [Fix] Incorrect parameter range for Velocity & Control Assign for Oscillator 2
         Range and Fine/Wide
+- [Fix] Possibly lost midi events when automating many parameters at once
 
 2.0.6:
 
