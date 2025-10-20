@@ -19,7 +19,7 @@ set(JUCE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 set(juce_formats "")
 
-if(USE_AU)
+if(USE_AU AND APPLE)
 	set(juce_formats AU)
 	add_custom_target(PluginFormat_AU)
 	set_property(TARGET PluginFormat_AU PROPERTY FOLDER CustomTargets)
@@ -295,6 +295,13 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 #	if(USE_CLAP)
 #		addPluginTest(${targetName}_CLAP)
 #	endif()
+
+	set_target_properties(${targetName} PROPERTIES TUS_PRODUCT_NAME "${productName}")
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_FORMATS "${juce_formats}")
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_IS_SYNTH ${isSynth})
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_4CC ${plugin4CC})
+
+	tus_exportTarget(${targetName})
 
 	# --------- Server Plugin ---------
 

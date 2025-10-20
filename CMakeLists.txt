@@ -38,6 +38,21 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 	set(CPACK_SYSTEM_NAME "MacOS")
 endif()
 
+if(NOT DEFINED CPACK_SYSTEM_NAME)
+	if(WIN32)
+		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+			set(CPACK_SYSTEM_NAME "win64")
+		else()
+			set(CPACK_SYSTEM_NAME "win32")
+		endif()
+	elseif(APPLE)
+		set(CPACK_SYSTEM_NAME "MacOS")
+	else()
+		set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}")
+	endif()
+endif()
+message("CPACK_SYSTEM_NAME: " ${CPACK_SYSTEM_NAME})
+
 set(CPACK_PACKAGE_CONTACT "The Usual Suspects")
 set(CPACK_PACKAGE_VENDOR "The Usual Suspects")
 set(CPACK_PACKAGE_NAME "TheUsualSuspects")
@@ -61,12 +76,10 @@ add_subdirectory(doc)
 get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
 list(REMOVE_ITEM CPACK_COMPONENTS_ALL "Unspecified")
 
+# set better archive names
 foreach(comp IN LISTS CPACK_COMPONENTS_ALL)
-	# default is: ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}.${CPACK_GENERATOR}
-	# and the archive name then: ${CPACK_PACKAGE_FILE_NAME}-${COMPONENT}
-
 	string(TOUPPER "${comp}" COMP_UPPER)
-		
+
 	set(archiveName "${CPACK_PACKAGE_NAME}-${comp}-${CMAKE_PROJECT_VERSION}-${CPACK_SYSTEM_NAME}")
 
 	set(varName "CPACK_ARCHIVE_${COMP_UPPER}_FILE_NAME")
@@ -77,6 +90,21 @@ foreach(comp IN LISTS CPACK_COMPONENTS_ALL)
 
 	set(varName "CPACK_RPM_${COMP_UPPER}_FILE_NAME")
 	set(${varName} ${archiveName})
+endforeach()
+
+# add list of all targets that we want to upload
+get_property(CPACK_TUS_TARGETS GLOBAL PROPERTY "TUS_TARGETS")
+
+# add target properties that we need for CPack / upload
+foreach(target IN LISTS CPACK_TUS_TARGETS)
+	get_target_property(comp "${target}" TUS_CMAKE_COMPONENT)
+	if(comp)
+		set(CPACK_TUS_${target}_CMAKE_COMPONENT ${comp})
+	endif()
+	get_target_property(prodName "${target}" TUS_PRODUCT_NAME)
+	if(prodName)
+		set(CPACK_TUS_${target}_PRODUCT_NAME ${prodName})
+	endif()
 endforeach()
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)

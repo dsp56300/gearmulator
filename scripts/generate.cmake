@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/synths.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/products.cmake)
 
 # these need to be specified explicitly
 
