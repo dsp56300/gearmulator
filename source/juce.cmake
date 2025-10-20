@@ -296,6 +296,13 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 #		addPluginTest(${targetName}_CLAP)
 #	endif()
 
+	set_target_properties(${targetName} PROPERTIES TUS_PRODUCT_NAME "${productName}")
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_FORMATS "${juce_formats}")
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_IS_SYNTH ${isSynth})
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_4CC ${plugin4CC})
+
+	tus_exportTarget(${targetName})
+
 	# --------- Server Plugin ---------
 
 	set(serverTarget ${productName}ServerPlugin)

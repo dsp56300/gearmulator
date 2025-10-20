@@ -9,6 +9,7 @@ option(${CMAKE_PROJECT_NAME}_SYNTH_NODALRED2X "Build NodalRed2x" on)
 # ----------------- Add our cmake scripts to IDE
 
 add_custom_target(cmakeScripts SOURCES 
+	exporttarget.cmake
 	findvst2.cmake 
 	juce.cmake 
 	macsetup.cmake 
@@ -40,6 +41,7 @@ add_subdirectory(3rdparty)
 
 include(macsetup.cmake)
 include(skins.cmake)
+include(exporttarget.cmake)
 
 # ----------------- network bridge
 
