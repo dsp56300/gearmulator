@@ -4,7 +4,7 @@
 set IN=..\
 
 :: build system output folder
-set OUT=..\temp\test
+set OUT=%~dp0..\temp\test
 
 :: which synths should be built?
 set SYNTHS=-Dgearmulator_SYNTH_OSIRUS=on -Dgearmulator_SYNTH_OSTIRUS=on -Dgearmulator_SYNTH_VAVRA=on -Dgearmulator_SYNTH_XENIA=on
@@ -27,6 +27,8 @@ pushd %OUT%
 cmake -P %~dp0/pack.cmake
 popd
 
+cmake -Dgearmulator_BINARY_DIR=%OUT% -P packagesource.cmake
+
 :: -------- deploy packages --------
 
-cmake %SYNTHS% -DUPLOAD_LOCAL=1 -DFOLDER=test -Dgearmulator_BINARY_DIR=%OUT% -P deployAll.cmake
+cmake -DUPLOAD_LOCAL=1 -DFOLDER=test -Dgearmulator_BINARY_DIR=%OUT% -P deployAll.cmake

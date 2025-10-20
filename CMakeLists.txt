@@ -86,10 +86,10 @@ foreach(comp IN LISTS CPACK_COMPONENTS_ALL)
 	set(${varName} ${archiveName})
 
 	set(varName "CPACK_DEBIAN_${COMP_UPPER}_FILE_NAME")
-	set(${varName} ${archiveName})
+	set(${varName} "${archiveName}.deb")
 
 	set(varName "CPACK_RPM_${COMP_UPPER}_FILE_NAME")
-	set(${varName} ${archiveName})
+	set(${varName} "${archiveName}.rpm")
 endforeach()
 
 # add list of all targets that we want to upload
@@ -106,6 +106,8 @@ foreach(target IN LISTS CPACK_TUS_TARGETS)
 		set(CPACK_TUS_${target}_PRODUCT_NAME ${prodName})
 	endif()
 endforeach()
+
+set(CPACK_TUS_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 
