@@ -21,3 +21,8 @@ foreach(S IN LISTS CPACK_TUS_TARGETS)
 	message("Processing target " ${S})
 	deploySynth(${CPACK_TUS_${S}_PRODUCT_NAME})
 endforeach()
+
+file(GLOB sourceZips LIST_DIRECTORIES false "${gearmulator_BINARY_DIR}/*-Source.zip")
+if(sourceZips)
+	deploySynth("Source")
+endif()
