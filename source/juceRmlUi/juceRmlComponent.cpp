@@ -269,6 +269,10 @@ namespace juceRmlUi
 		Component::mouseMove(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 
+		// do not activate mouse if we didn't get an enter event (might happen while resizing the window)
+		if (!m_mouseActive)
+			return;
+
 		const auto pos = toRmlPosition(_event);
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
 		enqueueUpdate();
@@ -296,6 +300,7 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 		if (m_rmlContext)
 			m_rmlContext->ProcessMouseLeave();
+		m_mouseActive = false;
 		enqueueUpdate();
 	}
 
@@ -304,6 +309,7 @@ namespace juceRmlUi
 		Component::mouseEnter(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 
+		m_mouseActive = true;
 		const auto pos = toRmlPosition(_event);
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
 		enqueueUpdate();
@@ -419,6 +425,17 @@ namespace juceRmlUi
 		enqueueUpdate();
 	}
 
+	void RmlComponent::focusLost(FocusChangeType cause)
+	{
+		Component::focusLost(cause);
+
+		RmlInterfaces::ScopedAccess access(*this);
+		if (m_rmlContext)
+			m_rmlContext->ProcessMouseLeave();
+		m_mouseActive = false;
+		enqueueUpdate();
+	}
+
 	void RmlComponent::timerCallback()
 	{
 		{
@@ -444,6 +461,18 @@ namespace juceRmlUi
 
 	void RmlComponent::resize(const int _width, const int _height)
 	{
+		{
+			RmlInterfaces::ScopedAccess access(*this);
+
+			if (m_rmlContext)
+			{
+				// weird things are happening if the mouse is not disabled because RmlUi updates the hover chain
+				// and fires Mouseover events that might trigger tooltips etc
+				m_rmlContext->ProcessMouseLeave();
+				m_mouseActive = false;				
+			}
+		}
+
 		setSize(_width, _height);
 		m_renderDone = true;
 		m_updating = false;
@@ -693,6 +722,11 @@ namespace juceRmlUi
 			m_currentRenderScale = renderScale;
 			m_rmlContext->SetDensityIndependentPixelRatio(renderScale * m_contentScale);
 			m_rmlContext->SetDimensions({ size.x, size.y });
+
+			// weird things are happening if the mouse is not disabled because RmlUi updates the hover chain
+			// and fires Mouseover events that might trigger tooltips etc
+			m_rmlContext->ProcessMouseLeave();
+			m_mouseActive = false;
 		}
 	}
 

@@ -7,6 +7,8 @@ Framework:
 - [Imp] Patch Manager: Setting to hide duplicates by name & hash are now 
         remembered when reopening the plugin
 
+- [Fix] Random tooltips shown when resizing the plugin window
+
 2.0.6:
 
 Framework:

@@ -60,6 +60,7 @@ namespace juceRmlUi
 		bool keyPressed(const juce::KeyPress& _key) override;
 		bool keyStateChanged(bool _isKeyDown) override;
 		void modifierKeysChanged(const juce::ModifierKeys& _modifiers) override;
+		void focusLost(FocusChangeType cause) override;
 
 		void timerCallback() override;
 
@@ -166,5 +167,7 @@ namespace juceRmlUi
 		juce::Image m_screenshot;
 		ScreenshotState m_screenshotState = ScreenshotState::NoScreenshot;
 		ScreenshotCallback m_screenshotCallback;
+
+		bool m_mouseActive = false;
 	};
 }
