@@ -481,7 +481,7 @@ namespace jeJucePlugin
 				{
 					auto* param = getParameter("MasterTune", 0);
 					if (param)
-						param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
+						param->setUnnormalizedValueNotifyingHost(value, pluginLib::Parameter::Origin::Ui);
 				}
 				break;
 			case jeLib::SystemParameter::PerformanceControlChannel:

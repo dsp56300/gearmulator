@@ -263,8 +263,7 @@
 		{"page":3,"index":31,"name":"IndividualTriggerSourceChannel","min":0,"max":2,"default":0},
 		{"page":3,"index":32,"name":"IndividualTriggerSourceNote","min":0,"max":128,"toText":"splitPoint","default":0},
 		{"page":3,"index":34,"name":"Tempo","min":20,"max":250,"toText":"unsigned201","default":120},
-		{"page":3,"index":36,"name":"VocalUpperInputJackFrontRear","min":0,"max":1,"toText":"vocalUpperInputJackFrontRear","default":0}
-,
+		{"page":3,"index":36,"name":"VocalUpperInputJackFrontRear","min":0,"max":1,"toText":"vocalUpperInputJackFrontRear","default":0},
 		
 		{"page":4,"index":0,"name":"VoiceModulatorSwitch","displayName":"VOICE MODULATOR","min":0,"max":1,"toText":"offOn","default":0,"isPublic":false},
 		{"page":4,"index":1,"name":"VoiceModulatorPanelMode","displayName":"PANEL MODE","min":0,"max":1,"toText":"offOn","default":0,"isPublic":false},
@@ -308,9 +307,9 @@
 		{"page":4,"index":39,"name":"EnsembleSync","displayName":"ENSEMBLE SYNC","min":0,"max":22,"toText":"syncType","default":0,"isPublic":false},
 		{"page":4,"index":40,"name":"VoiceModulatorDelaySync","displayName":"DELAY SYNC","min":0,"max":10,"toText":"syncType","default":0,"isPublic":false},
 
-		{"page":5, "index":10 , "name":"MasterTune", "displayName": "MASTER TUNE", "min":0, "max":100, "toText":"masterTune", "default":50, "isPublic":false},
+		{"page":5, "index":10, "name":"MasterTune", "displayName": "MASTER TUNE", "class":"NonPartSensitive", "min":0, "max":100, "toText":"masterTune", "default":50, "isPublic":true},
 
-		{"page":6, "index":0 , "name":"MasterVolume", "displayName": "MASTER VOLUME", "min":0, "max":600, "toText":"masterVolume", "default":100, "isPublic":false}				
+		{"page":6, "index":0, "name":"MasterVolume", "displayName": "MASTER VOLUME", "class":"NonPartSensitive", "min":0, "max":600, "toText":"masterVolume", "default":100, "isPublic":true}				
  	],
 	"regions":
 	[
