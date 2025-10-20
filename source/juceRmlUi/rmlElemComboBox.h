@@ -40,6 +40,8 @@ namespace juceRmlUi
 		void OnUpdate() override;
 
 	private:
+		int getIndexFromValue(int _value) const;
+
 		bool updateValueText();
 
 		std::vector<Entry> m_options;

@@ -116,10 +116,20 @@ namespace juceRmlUi
 
 	void ElemComboBox::onMouseScroll(const Rml::Event& _event)
 	{
-		if (getSelectedIndex() > 0 && helper::isMouseWheelUp(_event))
-			setSelectedIndex(getSelectedIndex() - 1);
-		else if (getSelectedIndex() + 1 < static_cast<int>(m_options.size()) && helper::isMouseWheelDown(_event))
-			setSelectedIndex(getSelectedIndex() + 1);
+		auto offset = helper::isMouseWheelUp(_event) ? -1 : 1;
+
+		const auto current = getIndexFromValue(static_cast<int>(getValue()));
+
+		if (current < 0)
+			return;
+
+		const auto next = current + offset;
+
+		const auto nextIndex = getIndexFromValue(next);
+		if (nextIndex < 0)
+			return;
+
+		setSelectedIndex(nextIndex);
 	}
 
 	void ElemComboBox::setSelectedIndex(const size_t _index, const bool _sendChangeEvent/* = true*/)
@@ -147,6 +157,16 @@ namespace juceRmlUi
 			if (updateValueText())
 				m_valueTextDirty = false;
 		}
+	}
+
+	int ElemComboBox::getIndexFromValue(int _value) const
+	{
+		for (size_t i = 0; i < m_options.size(); ++i)
+		{
+			if (m_options[i].value == _value)
+				return static_cast<int>(i);
+		}
+		return -1;
 	}
 
 	bool ElemComboBox::updateValueText()
