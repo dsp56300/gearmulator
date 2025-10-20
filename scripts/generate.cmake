@@ -38,7 +38,7 @@ set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON)
 set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON)
 set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_AU=ON)
 
-foreach(S IN LISTS synths)
+foreach(S IN LISTS products)
 	set(args ${args} -D${S}=${${S}})
 endforeach()
 
