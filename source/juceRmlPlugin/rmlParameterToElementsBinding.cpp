@@ -98,8 +98,6 @@ namespace rmlPlugin
 
 	void ParameterToElementsBinding::updateElementsFromParameter()
 	{
-		const auto value = m_parameter->getUnnormalizedValue();
-
 		IgnoreChangeEvents ignore(*this);
 
 		for (auto* element : m_elements)
@@ -131,7 +129,10 @@ namespace rmlPlugin
 	{
 		if (_event == Rml::EventId::Change)
 		{
-			auto* element = _event.GetTargetElement();
+			if (m_ignoreChangeEvents > 0)
+				return;
+
+			const auto* element = _event.GetTargetElement();
 
 			if (!element)
 				return;
