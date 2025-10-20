@@ -19,7 +19,7 @@ set(JUCE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 set(juce_formats "")
 
-if(USE_AU)
+if(USE_AU AND APPLE)
 	set(juce_formats AU)
 	add_custom_target(PluginFormat_AU)
 	set_property(TARGET PluginFormat_AU PROPERTY FOLDER CustomTargets)
