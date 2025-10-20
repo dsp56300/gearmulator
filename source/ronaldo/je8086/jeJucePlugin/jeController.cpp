@@ -112,12 +112,12 @@ namespace jeJucePlugin
 		// if both parts are selected, apply the change to the other part as well
 		if (desc.page != g_paramPagePerformance && isBothSelected() && _parameter.getPart() == getCurrentPart())
 		{
-			if (_origin == pluginLib::Parameter::Origin::Ui || _origin == pluginLib::Parameter::Origin::Midi || _origin == pluginLib::Parameter::Origin::HostAutomation)
+			if (_origin == pluginLib::Parameter::Origin::Ui || _origin == pluginLib::Parameter::Origin::Midi)
 			{
-				auto otherPart = static_cast<uint8_t>((_parameter.getPart() + 1) & 1);
+				const auto otherPart = static_cast<uint8_t>((_parameter.getPart() + 1) & 1);
 				auto* p = getParameter(_parameter.getDescription().name, otherPart);
 				assert(p);
-				p->setUnnormalizedValueNotifyingHost(_parameter.getUnnormalizedValue(), pluginLib::Parameter::Origin::Ui);
+				p->setUnnormalizedValueNotifyingHost(_parameter.getUnnormalizedValue(), pluginLib::Parameter::Origin::Derived);
 			}
 		}
 	}
