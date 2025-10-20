@@ -11,8 +11,9 @@ Framework:
 
 JE8086:
 
-- [imp] Velocity/Control Assign has been redesigned, now uses new
+- [Imp] Velocity/Control Assign has been redesigned, now uses new
         graphics for knobs/sliders
+- [Imp] Default Master Volume and maximum Master Volume increased by 12db.
 
 - [Fix] Oscillator Shift dropdown was reversed, causing mouse wheel to work
 		in the wrong direction

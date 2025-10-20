@@ -23,6 +23,30 @@ namespace jeJucePlugin
 
 	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_je.json")
 	{
+		// hacky way to set the Master Volume parameter range and value list as it is often changing
+		// and I am fed up of entering hundreds of values manually every time
+		for (const auto& param : getParameterDescriptions().getDescriptions())
+		{
+			if (param.name != "MasterVolume")
+				continue;
+
+			auto& p = const_cast<pluginLib::Description&>(param);
+			p.range = juce::Range<int>(0, 2400);
+			p.defaultValue = p.range.getEnd() >> 1;
+
+			p.valueList.texts.resize(p.range.getEnd() + 1);
+			p.valueList.textToValueMap.clear();
+
+			for (int v = p.range.getStart(); v <= p.range.getEnd(); ++v)
+			{
+				const auto text = std::to_string(v * 200 / p.range.getEnd()) + "%";
+				p.valueList.texts[v] = text;
+
+				if (p.valueList.textToValueMap.find(text) == p.valueList.textToValueMap.end())
+					p.valueList.textToValueMap.insert({ p.valueList.texts[v], v });
+			}
+		}
+
 		registerParams(_p, [](const uint8_t _part, const bool _isNonPartExclusive)
 		{
 			if (_isNonPartExclusive)

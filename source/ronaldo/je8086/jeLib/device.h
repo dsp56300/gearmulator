@@ -57,6 +57,6 @@ namespace jeLib
 
 		baseLib::EventListener<uint8_t, uint8_t, int32_t> m_paramChangedListener;
 
-		float m_masterVolume = 3.0f;
+		float m_masterVolume = 12.0f;
 	};
 }
