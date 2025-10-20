@@ -10,6 +10,7 @@
 #include "RmlUi_Renderer_GL3.h"
 
 #include "baseLib/filesystem.h"
+#include "baseLib/threadtools.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -143,6 +144,9 @@ namespace juceRmlUi
 			std::scoped_lock lock(m_timerMutex);
 			startTimer(1);
 		}
+
+		baseLib::ThreadTools::setCurrentThreadPriority(baseLib::ThreadPriority::Lowest);
+		baseLib::ThreadTools::setCurrentThreadName("RmlUI-Renderer");
 	}
 
 	void RmlComponent::renderOpenGL()

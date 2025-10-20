@@ -10,9 +10,11 @@ set(SOURCES
 	event.cpp event.h
 	filesystem.cpp filesystem.h
 	hybridcontainer.h
+	logging.cpp logging.h
 	md5.cpp md5.h
 	propertyMap.cpp propertyMap.h
 	semaphore.h
+	threadtools.cpp threadtools.h
 )
 
 target_sources(baseLib PRIVATE ${SOURCES})
