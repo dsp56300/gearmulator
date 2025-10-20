@@ -1,5 +1,12 @@
 Release Notes 
 
+2.0.8:
+
+Framework:
+
+- [Imp] Patch Manager: Setting to hide duplicates by name & hash are now 
+        remembered when reopening the plugin
+
 2.0.6:
 
 Framework:
