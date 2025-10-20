@@ -467,7 +467,7 @@ namespace jeJucePlugin
 				sendChange(1);
 				break;
 			case jeLib::SystemParameter::TxRxEditMode:
-				sendChange(2);  // MODE2 = all possible CCs enabled
+				sendChange(1);  // MODE2 = all possible CCs enabled
 				break;
 			case jeLib::SystemParameter::TxRxEditSwitch:
 				sendChange(1);	// enable edit via CCs
