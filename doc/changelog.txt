@@ -2,6 +2,13 @@ Release Notes
 
 2.0.8:
 
+Framework:
+
+- [Imp] Patch Manager: Setting to hide duplicates by name & hash are now 
+        remembered when reopening the plugin
+
+JE8086:
+
 - [imp] Velocity/Control Assign has been redesigned, now uses new
         graphics for knobs/sliders
 

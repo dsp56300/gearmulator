@@ -4,6 +4,7 @@
 #include "patchmanagerUiRml.h"
 
 #include "jucePluginEditorLib/pluginEditor.h"
+#include "jucePluginEditorLib/pluginProcessor.h"
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
@@ -29,6 +30,11 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	ListModel::ListModel(PatchManagerUiRml& _pm, juceRmlUi::ElemList* _list) : m_patchManager(_pm), m_list(_list)
 	{
+		const auto& config = m_patchManager.getEditor().getProcessor().getConfig();
+
+		m_hideDuplicatesByHash = config.getIntValue("pm_hideDuplicatesByHash", 0) != 0;
+		m_hideDuplicatesByName = config.getIntValue("pm_hideDuplicatesByName", 0) != 0;
+
 		_list->setInstancer(&g_instancer);
 		_list->SetAttribute("model", this);
 
@@ -588,8 +594,19 @@ namespace jucePluginEditorLib::patchManagerRml
 		const auto selected = getSelectedPatches();
 
 		m_filter = _filter;
-		m_hideDuplicatesByHash = _hideDuplicatesByHash;
-		m_hideDuplicatesByName = _hideDuplicatesByName;
+
+		auto& config = m_patchManager.getEditor().getProcessor().getConfig();
+
+		if (m_hideDuplicatesByHash != _hideDuplicatesByHash)
+		{
+			m_hideDuplicatesByHash = _hideDuplicatesByHash;
+			config.setValue("pm_hideDuplicatesByHash", m_hideDuplicatesByHash);
+		}
+		if (m_hideDuplicatesByName != _hideDuplicatesByName)
+		{
+			m_hideDuplicatesByName = _hideDuplicatesByName;
+			config.setValue("pm_hideDuplicatesByName", m_hideDuplicatesByName);
+		}
 
 		filterPatches();
 
