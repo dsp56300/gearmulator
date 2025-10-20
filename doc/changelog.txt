@@ -1,5 +1,18 @@
 Release Notes 
 
+2.0.8:
+
+- [imp] Velocity/Control Assign has been redesigned, now uses new
+        graphics for knobs/sliders
+
+- [Fix] Oscillator Shift dropdown was reversed, causing mouse wheel to work
+		in the wrong direction
+- [Fix] Automating a parameter while both parts were selected cuased the other
+		part to be modified too and caused some hosts to disable the automation
+		lane
+- [Fix] Some Midi CCs updated the UI but didn't modify the patch because CC mode
+        was set to Mode 1 instead of Mode 2
+
 2.0.7:
 
 JE8086:
