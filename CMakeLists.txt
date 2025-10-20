@@ -40,8 +40,8 @@ endif()
 
 set(CPACK_PACKAGE_CONTACT "The Usual Suspects")
 set(CPACK_PACKAGE_VENDOR "The Usual Suspects")
-set(CPACK_PACKAGE_NAME "DSP56300Emu")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "DSP 56300 family emulator audio plugin")
+set(CPACK_PACKAGE_NAME "TheUsualSuspects")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Usual Suspects emulated audio plugin")
 
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The Usual Suspects")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://dsp56300.wordpress.com")
@@ -60,6 +60,24 @@ add_subdirectory(doc)
 
 get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
 list(REMOVE_ITEM CPACK_COMPONENTS_ALL "Unspecified")
+
+foreach(comp IN LISTS CPACK_COMPONENTS_ALL)
+	# default is: ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}.${CPACK_GENERATOR}
+	# and the archive name then: ${CPACK_PACKAGE_FILE_NAME}-${COMPONENT}
+
+	string(TOUPPER "${comp}" COMP_UPPER)
+		
+	set(archiveName "${CPACK_PACKAGE_NAME}-${comp}-${CMAKE_PROJECT_VERSION}-${CPACK_SYSTEM_NAME}")
+
+	set(varName "CPACK_ARCHIVE_${COMP_UPPER}_FILE_NAME")
+	set(${varName} ${archiveName})
+
+	set(varName "CPACK_DEBIAN_${COMP_UPPER}_FILE_NAME")
+	set(${varName} ${archiveName})
+
+	set(varName "CPACK_RPM_${COMP_UPPER}_FILE_NAME")
+	set(${varName} ${archiveName})
+endforeach()
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 
