@@ -21,8 +21,8 @@
 
 @spritesheet button_black
 {
-	button_black_off: 0px 0px 74px 48px;
-	button_black_on:  0px 0px 74px 48px;
+	button_black_off: 0px 0px 101px 74px;
+	button_black_on:  0px 0px 101px 74px;
 	src: button_black.png;
 }
 
@@ -229,13 +229,28 @@ button
 {
 	width: 101dp;
 	height: 74dp;
-	margin: 0dp -0dp 0dp -22dp;		
+	margin: 0dp 0dp 0dp -22dp;		
 	decorator: image(button_red_off fill);	
 }
 
-.btRed:hover, .btRed:checked
+.btRed:active  
 {
-	decorator: image(button_red_on fill);	
+	transform: scale(0.92);
+	image-color: #ccc;
+}
+
+.btBlack
+{
+	width: 101dp;
+	height: 74dp;
+	margin: 0dp 0dp 0dp -22dp;		
+	decorator: image(button_black_off fill);	
+}
+
+.btBlack:active  
+{
+	transform: scale(0.92);
+	image-color: #ccc;
 }
 
 .btWhiteLed
@@ -541,10 +556,24 @@ button
 	width: 11em;
 }
 
-:assignvelocity, :assigncontrol {
 
-    background-color: #ba000077;      
-    border-radius: 20px;            
+.knob:assignvelocity, .knob:assigncontrol 
+{
+	frames: 128;
+	spriteprefix: knob2_;
+	width: 160dp;
+	height: 160dp;
+	decorator: image(knob2_000);
+	margin: -33dp -35.5dp 0dp -35.5dp;	    
+}
+
+
+.sliderV:assignvelocity sliderbar, .sliderV:assigncontrol sliderbar
+{
+	decorator: image(slider2.png contain);
+	width: 130dp;
+	height: 165dp;
+	margin: -38dp 0dp -20dp -28dp;	
 }
 
 /*

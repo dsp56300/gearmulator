@@ -228,11 +228,11 @@
 					
 					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 0 || AutoPanManualPanSwitch_value == 1)" class="abs">
 						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpLfo1Depth" id="AmpLfo1Depth" />	
-						<div class="label2" style="left: 0dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">LFO1 DEPTH</div>				
+						<div class="label2" style="left: 3dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">LFO1 DEPTH</div>				
 					</div>	
 					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 2)" class="abs">
 						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpPan" id="AmpPan" />							
-						<div class="label2" style="left:0dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">PAN</div>				
+						<div class="label2" style="left:3dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">PAN</div>				
 					</div>						
 					<knob class="knob abs" style="left: 188dp; top: 158dp;" param="AmpLevel" id="AmpLevel" />
 
@@ -583,8 +583,8 @@
 			
 				</div>
 				<!-- Edit/Write -->
-				<div class="abs hlayout" style="top: 110dp; gap: 24dp;">
-					<button id="btEdit" class="btBlackLed"/>
+				<div class="abs hlayout" style="left: 15dp; top: 110dp; gap: 18dp;">
+					<button id="btEdit" class="btBlack"/>
 					<button id="btWrite" class="btRed"/>
 				</div>
 				
@@ -630,7 +630,7 @@
 		</div>	
 		
 		<!-- Arp -->
-		<div data-model="tabgroup_main" data-class-juceConditionDisabled="(page == 1)" class="abs" style="left: 1395dp; top: 1153dp; width: 1200dp; height: 444dp;">
+		<div data-model="tabgroup_main" data-class-juceConditionDisabled="(page == 1)" class="abs" style="left: 1395dp; top: 1153dp; width: 1200dp; height: 230dp;">
 			<!-- left column -->
 			<button class="abs btBlackLed" style="left: 257dp; top: 65dp;" param="ArpSwitch" isToggle="1"/>
 			<button class="abs btBlackLed" style="left: 257dp; top: 155dp;" param="ArpHold" isToggle="1"/>
@@ -673,8 +673,8 @@
 		</div>
 		
 		<!-- bottom texts -->
-		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 1290dp; top: 1418dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>
-		<div data-model="plugin" class="abs" style="left: 0dp; width: 100%; top: 1420dp; height: 22dp;">
+
+		<div data-model="plugin" class="abs" style="left: 0dp; width: 500dp; top: 1420dp; height: 22dp;">
 			<div class="bottomText" style="left: 305dp; margin-top: 2dp ">{{versionString}}</div>
 			<combo id="romselector" class="bottomText" style="left: 935dp; width: 400dp; height: 30dp;"><combotext/></combo>
 
@@ -686,7 +686,7 @@
 			</div>
 			
 		</div>
-		
+		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 1290dp; top: 1418dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>		
 	
 		
 		
