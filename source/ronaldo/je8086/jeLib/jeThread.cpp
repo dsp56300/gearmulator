@@ -1,7 +1,8 @@
 #include "jeThread.h"
 
 #include "je8086.h"
-#include "dsp56kEmu/threadtools.h"
+
+#include "baseLib/threadtools.h"
 
 namespace jeLib
 {
@@ -77,8 +78,8 @@ namespace jeLib
 
 	void JeThread::threadFunc()
 	{
-		dsp56k::ThreadTools::setCurrentThreadName("JE8086");
-		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
+		baseLib::ThreadTools::setCurrentThreadName("JE8086");
+		baseLib::ThreadTools::setCurrentThreadPriority(baseLib::ThreadPriority::Highest);
 
 		uint64_t processedSampleOffset = 0;
 
