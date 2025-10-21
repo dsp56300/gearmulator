@@ -166,6 +166,11 @@ namespace juceRmlUi
 			return static_cast<MouseButton>(button);
 		}
 
+		bool isAnyMouseButtonDown()
+		{
+			return juce::ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
+		}
+
 		bool isContextMenu(const Rml::Event& _event)
 		{
 			const auto mouseButton = getMouseButton(_event);
