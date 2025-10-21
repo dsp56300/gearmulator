@@ -88,6 +88,10 @@ namespace jucePluginEditorLib
 
 		m_mouseOver.add(_editor.getDocument(), Rml::EventId::Mouseover, [this](const Rml::Event& _event)
 		{
+			// do not update if a mouse button is pressed as that indicates a drag operation
+			// Unfortunately RmlUi does not provide any mouse button state in the event itself
+			if (juceRmlUi::helper::isAnyMouseButtonDown())
+				return;
 			if (auto* element = _event.GetTargetElement())
 				updateControlLabel(element, Priority::High);
 		});

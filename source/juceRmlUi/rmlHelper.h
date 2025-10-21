@@ -61,6 +61,8 @@ namespace juceRmlUi
 
 		Rml::Vector2<float> getMousePos(const Rml::Event& _event);
 		MouseButton getMouseButton(const Rml::Event& _event);
+		bool isAnyMouseButtonDown();
+
 		bool isContextMenu(const Rml::Event& _event);
 
 		Rml::Vector2f getMouseWheelDelta(const Rml::Event& _event);

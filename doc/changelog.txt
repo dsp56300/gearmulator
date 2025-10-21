@@ -8,8 +8,9 @@ Framework:
         remembered when reopening the plugin
 
 - [Fix] Random tooltips shown when resizing the plugin window
-- [Fix] BUG-10035 Automation randomly stopped working in some hosts due to UI sending
-		automation events back to host
+- [Fix] BUG-10035 Automation randomly stopped working in some hosts due to UI 
+        sending automation events back to host
+- [Fix] EMU-25 focused parameter keeps dragged element in focus
 
 JE8086:
 
