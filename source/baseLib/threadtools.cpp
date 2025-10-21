@@ -4,15 +4,14 @@
 
 #ifdef _WIN32
 #	include <Windows.h>
-
-#include <algorithm>
 #else
 #	include <pthread.h>
 #	include <sched.h>
+#	include <sys/resource.h>
 #endif
 
 #ifdef __APPLE__
-#include <mach/mach.h>
+#	include <mach/mach.h>
 #endif
 
 namespace baseLib
@@ -92,7 +91,7 @@ namespace baseLib
 			// Linux SCHED_RR real-time (requires CAP_SYS_NICE)
 	        sched_param sch_params;
 	        sch_params.sched_priority = 10; // small RT priority
-	        result = pthread_setschedparam(pthread_self(), SCHED_RR, &sch_params);
+	        auto result = pthread_setschedparam(pthread_self(), SCHED_RR, &sch_params);
 	        if (result != 0)
 	        {
 				LOG("pthread_setschedparam failed, error " << result << ": " << strerror(result));
