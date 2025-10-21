@@ -8,6 +8,7 @@
 #	include <pthread.h>
 #	include <sched.h>
 #	include <sys/resource.h>
+#	include <string.h>	// strerror
 #endif
 
 #ifdef __APPLE__
