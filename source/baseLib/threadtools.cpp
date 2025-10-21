@@ -4,9 +4,15 @@
 
 #ifdef _WIN32
 #	include <Windows.h>
+
+#include <algorithm>
 #else
 #	include <pthread.h>
 #	include <sched.h>
+#endif
+
+#ifdef __APPLE__
+#include <mach/mach.h>
 #endif
 
 namespace baseLib
@@ -70,36 +76,77 @@ namespace baseLib
 			LOG("Failed to set thread priority to " << prio);
 			return false;
 		}
-#else
-		const auto max = sched_get_priority_max(SCHED_OTHER);
-		const auto min = sched_get_priority_min(SCHED_OTHER);
-		const auto normal = (max - min) >> 1;
-		const auto above = (max + normal) >> 1;
-		const auto below = (min + normal) >> 1;
-
-		int prio;
-		switch(_priority)
+#elif defined(__APPLE__)
+		if (_priority == ThreadPriority::Highest)
 		{
-		case ThreadPriority::Lowest:	prio = min; break;
-		case ThreadPriority::Low:		prio = below; break;
-		case ThreadPriority::Normal:	prio = normal; break;
-		case ThreadPriority::High:		prio = above; break;
-		case ThreadPriority::Highest:	prio = max; break;
-		default: return false;
+			// set some reasonable realtime parameters for audio processing
+			setCurrentThreadRealtimeParameters(44100, 2048);
 		}
-
-		sched_param sch_params;
-		sch_params.sched_priority = prio;
-
-		const auto id = pthread_self();
-
-		const auto result = pthread_setschedparam(id, SCHED_OTHER, &sch_params);
-		if(result)
+		else if (_priority == ThreadPriority::Low || _priority == ThreadPriority::Lowest)
 		{
-			LOG("Failed to set thread priority to " << prio << ", error code " << result);
-			return false;
+			pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0);
+		}
+#else
+		if (_priority == ThreadPriority::Highest)
+		{
+			// Linux SCHED_RR real-time (requires CAP_SYS_NICE)
+	        sched_param sch_params;
+	        sch_params.sched_priority = 10; // small RT priority
+	        result = pthread_setschedparam(pthread_self(), SCHED_RR, &sch_params);
+	        if (result != 0)
+	        {
+				LOG("pthread_setschedparam failed, error " << result << ": " << strerror(result));
+	        }
+			LOG("Success setting thread to real-time priority");
+	        return result == 0;
+		}
+		if (_priority == ThreadPriority::Low || _priority == ThreadPriority::Lowest)
+		{
+			setpriority(PRIO_PROCESS, 0, 10);
 		}
 #endif
 		return true;
+	}
+
+	bool ThreadTools::setCurrentThreadRealtimeParameters(int _samplerate, int _blocksize)
+	{
+#ifdef __APPLE__
+	    // Compute the nominal "period" between activations, in microseconds.
+	    // Example: 44100 Hz, 1024 buffer => 23,219 us
+	    double periodUsec = static_cast<double>(_blocksize) * 1'000'000.0 / static_cast<double>(_samplerate);
+
+	    // Reasonable assumptions:
+		// computation = 25% - 35% of the period
+	    // constraint = equal to or slightly above the period
+	    // The exact numbers aren't critical, but they should stay consistent.
+	    uint32_t computation = static_cast<uint32_t>(periodUsec * 0.30);
+	    uint32_t constraint  = static_cast<uint32_t>(periodUsec * 1.05);
+	    uint32_t period      = static_cast<uint32_t>(periodUsec);
+
+	    // Clamp to sane limits
+	    computation = std::max<uint32_t>(computation, 1000); // >= 1 ms
+	    constraint = std::max<uint32_t>(constraint, computation + 1000); // Always > computation
+
+	    // Prepare Mach real-time policy
+	    thread_time_constraint_policy_data_t policy;
+	    policy.period       = period;        // expected activation interval
+	    policy.computation  = computation;   // estimated CPU time
+	    policy.constraint   = constraint;    // must finish before this
+	    policy.preemptible  = TRUE;
+
+	    thread_port_t thread = pthread_mach_thread_np(pthread_self());
+	    kern_return_t result = thread_policy_set(thread,
+	                                             THREAD_TIME_CONSTRAINT_POLICY,
+	                                             (thread_policy_t)&policy,
+	                                             THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+
+	    if (result == KERN_SUCCESS)
+	    {
+			LOG("Success setting thread realtime parameters: period=" << period << " us, computation=" << computation << " us, constraint=" << constraint << " us");
+	        return false;
+	    }
+		LOG("Failed to set thread realtime parameters, error code " << result);
+#endif
+		return false;
 	}
 }
