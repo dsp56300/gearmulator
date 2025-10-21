@@ -23,9 +23,8 @@
 			<!-- Background Images -->
 			<img id="main" class="jucePos" src="main.png" style="left: 173dp; top: 274dp;"/>
 			<img id="arp" class="jucePos" src="arp.png" style="left: 1574dp; top: 1155dp;"/>
-			<!--<img id="keyboard" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid_small.png" style="left: 2400dp; top: 90dp; width: 150dp; height: 150dp;"/>		-->
-			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="grid2.png" style="left: 1061dp; top: 1173dp; width: 469dp; height: 180dp;"/>			
-			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid.png" style="left: 720dp; top: 1178dp; height: 180dp;"/>		
+			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="grid2.png" style="left: 1105dp; top: 1200dp"/>			
+			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid.png" style="left: 760dp; top: 1205dp; "/>		
 			<img id="osc2_noise" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 1304dp; top:426dp"/>					
 			<img id="amp_gain" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="amp_gain.png" style="left: 2445dp; top: 331dp;"/>	
 			
@@ -170,7 +169,7 @@
 					</div>					
 
 					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
-						<div class="abs vlayoutLeds" style="left: 309dp; top: 20dp; height: 135dp; width: 120dp">
+						<div class="abs vlayoutLeds" style="left: 304dp; top: 20dp; height: 135dp; width: 120dp">
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
@@ -178,13 +177,13 @@
 						</div>
 					</div>
 					<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-class-hlayout="deviceModel=='keyboard'" data-model="plugin" class="abs" >
-						<div class="abs vlayoutLeds" style="left: 306dp; top: 20dp; height: 135dp; width: 120dp">
+						<div class="abs vlayoutLeds" style="left: 304dp; top: 20dp; height: 135dp; width: 120dp">
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
 						</div>
 					</div>					
-					<div class="knobs_row2" style="left: 43dp; gap: 84dp;">
+					<div class="knobs_row2" style="left: 43dp; gap: 68dp;">
 						<knob class="knob" param="Osc2Range" id="Osc2Range" />
 						<knob class="knob" param="Osc2FineWide" id="Osc2FineWide" />
 					</div>
@@ -373,7 +372,7 @@
 			<!-- Background Images -->
 			<img id="browser" class="jucePos" src="browser.png" style="left: 173dp; top: 274dp;"/>
 			<img id="easy" class="jucePos" src="easy.png" style="left: 1040dp; top: 1155dp;"/>
-			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid3.png" style="left: 720dp; top: 1178dp; height: 180dp;"/>		
+			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="grid3.png" style="left: 760dp; top: 1205dp;"/>		
 			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
 			
 			<!-- OSC Shift -->
@@ -422,7 +421,7 @@
 		
 			<img id="voicemod" class="jucePos" src="voice_mod.png" style="left: 173dp; top: 274dp;"/>
 			<img id="arp" class="jucePos" src="arp.png" style="left: 1574dp; top: 1155dp;"/>
-			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="grid2.png" style="left: 1061dp; top: 1173dp; width: 469dp; height: 180dp;"/>	
+			<img id="grid" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="grid2.png" style="left: 1105dp; top: 1200dp"/>	
 			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
 			
 		
@@ -525,39 +524,34 @@
 			</div>			
 		</div>	
 	
-		<!-- TAB BUTTONS -->
+		<!-- TAB BUTTONS 181-->
 		<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs" >	
 			
-			<img id="shadow" class="jucePos" src="tab_shadow.png" style="left: 162dp; top: 179dp;"/>
-			<img id="shadow" class="jucePos" src="tab_shadow.png" style="left: 425dp; top: 179dp;"/>		
-			
-			<div class="layoutTabButtons">
-				<button tabbutton="0" tabgroup="main" class="btTab btTabMain"/>
-				<button tabbutton="1" tabgroup="main" class="btTab btTabPatchManager"/>		
-			</div>
+			<img id="shadow" class="jucePos" src="tab_shadow.png" style="left: 176dp; top: 197dp; width: 254dp; height: 62dp"/>
+			<img id="shadow" class="jucePos" src="tab_shadow.png" style="left: 442dp;  top: 197dp; width: 254dp; height: 62dp"/>		
+			<button tabbutton="0" tabgroup="main" class="abs btTab btTabMain" style="left: 155dp; top: 182dp;"/>
+			<button tabbutton="1" tabgroup="main" class="abs btTab btTabPatchManager" style="left: 421dp; top: 182dp;"/>		
 		</div>
 	
 		
 		<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" >
-			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 157dp; top: 180dp;"/>
-			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 330dp; top: 180dp;"/>
-			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 503dp; top: 180dp;"/>
-			
-			<div class="layoutTabButtonsRack">
-				<button tabbutton="0" tabgroup="main" class="btTabRack btTabMainRack"/>
-				<button tabbutton="1" tabgroup="main" class="btTabRack btTabPatchManagerRack"/>	
-				<button tabbutton="2" tabgroup="main" class="btTabRack btTabVoiceModRack"/>	
-			</div>
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 171dp; top: 201dp;"/>
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 346dp; top: 201dp;"/>
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 521dp; top: 201dp;"/>
+		
+			<button tabbutton="0" tabgroup="main" class="abs btTabRack btTabMainRack" style="left: 157dp; top: 185dp;"/>
+			<button tabbutton="1" tabgroup="main" class="abs btTabRack btTabPatchManagerRack" style="left: 331dp; top: 185dp;"/>	
+			<button tabbutton="2" tabgroup="main" class="abs btTabRack btTabVoiceModRack" style="left: 507dp; top: 185dp;"/>	
 		</div>	
 		
 		<!-- Global Top Row -->
 		<div class="row" style="left:725dp; top:55dp; height: 200dp;">
 			<!-- Panel Select / Patchnames / Midi Chnnels -->
-			<button class="abs btWhiteLed" style="left: 28dp; top: 58dp;" id="partUpper" isToggle="1"/>
-			<button class="abs btWhiteLed" style="left: 28dp; top: 126dp;" id="partLower" isToggle="1"/>
+			<button class="abs btWhiteLed" style="left: 32dp; top: 60dp;" id="partUpper" isToggle="1"/>
+			<button class="abs btWhiteLed" style="left: 32dp; top: 138dp;" id="partLower" isToggle="1"/>
 			
 			<div class="patchNameText" id="patchNameTextUpper" style="left: 120dp; top: 69dp;"/>
-			<div class="patchNameText" id="patchNameTextLower" style="left: 120dp; top: 138dp;"/>
+			<div class="patchNameText" id="patchNameTextLower" style="left: 120dp; top: 148dp;"/>
 			
 			<!-- Panel 1 MIDI CH --> 
 			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 63dp; width: 110dp; height: 45dp; line-height: 45dp;">
@@ -565,7 +559,7 @@
 			</combo>			
 
 			<!-- Panel 2 MIDI CH --> 
-			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 131dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 141dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>					
 			
@@ -574,16 +568,16 @@
 			<div id="lcd" class="abs" style="left: 582dp; top: 52dp; width: 525dp; height: 106dp;" lcdBackgroundColor="2a2b2d" lcdTextColor="00fe00"/>
 			
 			<!-- pairs of two buttons on the right -->
-			<div class="abs" style="left: 1169dp; top: 14dp;">
+			<div class="abs" style="left: 1184dp; top: 14dp;">
 				
 				<!-- Dec/Inc -->
-				<div class="abs hlayout" style="top: 22dp; gap: 10dp;">					
-					<button id="btDec" class="btBlackLed"/>	
-					<button id="btInc" class="btBlackLed"/>
+				<div class="abs hlayout" style="top: 22dp; gap: 21dp;">					
+					<button id="btDec" class="btBlack"/>	
+					<button id="btInc" class="btBlack"/>
 			
 				</div>
 				<!-- Edit/Write -->
-				<div class="abs hlayout" style="left: 15dp; top: 110dp; gap: 18dp;">
+				<div class="abs hlayout" style="top: 110dp; gap: 18dp;">
 					<button id="btEdit" class="btBlack"/>
 					<button id="btWrite" class="btRed"/>
 				</div>
@@ -674,7 +668,7 @@
 		
 		<!-- bottom texts -->
 
-		<div data-model="plugin" class="abs" style="left: 0dp; width: 500dp; top: 1420dp; height: 22dp;">
+		<div data-model="plugin" class="abs" style="left: 0dp; width: 500dp; top: 1418dp; height: 26dp;">
 			<div class="bottomText" style="left: 305dp; margin-top: 2dp ">{{versionString}}</div>
 			<combo id="romselector" class="bottomText" style="left: 935dp; width: 400dp; height: 30dp;"><combotext/></combo>
 
@@ -686,7 +680,7 @@
 			</div>
 			
 		</div>
-		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 1290dp; top: 1418dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>		
+		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 1290dp; top: 1417dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>		
 	
 		
 		

@@ -49,8 +49,8 @@
 
 @spritesheet button_white_led
 {
-	button_white_led_off: 0px 0px  69px 50px;
-	button_white_led_on:  0px 50px 69px 50px;
+	button_white_led_off: 0px 0px  78px 60px;
+	button_white_led_on:  0px 60px 78px 60px;
 	src: button_white_led.png;
 }
 
@@ -63,37 +63,37 @@
 
 @spritesheet tab_main
 {
-	tab_main_off: 0px 0px 273px 74px;
-	tab_main_on:  0px 74px 273px 74px;
+	tab_main_off: 0px 0px 296px 91px;
+	tab_main_on:  0px 91px 296px 91px;
 	src: tab_1_main.png;
 }
 
 @spritesheet tab_browser
 {
-	tab_browser_off: 0px 0px 273px 74px;
-	tab_browser_on:  0px 74px 273px 74px;
+	tab_browser_off: 0px 0px 296px 91px;
+	tab_browser_on:  0px 91px 296px 91px;
 	src: tab_2_browser.png;
 }
 
 
 @spritesheet tab_main_rack
 {
-	tab_main_rack_off: 0px 0px 200px 75px;
-	tab_main_rack_on:  0px 75px 200px 75px;
+	tab_main_rack_off: 0px 0px 198px 91px;
+	tab_main_rack_on:  0px 91px 198px 91px;
 	src: tab_1_rack_main.png;
 }
 
 @spritesheet tab_browser_rack
 {
-	tab_browser_rack_off: 0px 0px 200px 75px;
-	tab_browser_rack_on:  0px 75px 200px 75px;
+	tab_browser_rack_off: 0px 0px 198px 91px;
+	tab_browser_rack_on:  0px 91px 198px 91px;
 	src: tab_2_rack_browser.png;
 }
 
 @spritesheet tab_voicemod_rack
 {
-	tab_voicemod_rack_off: 0px 0px 200px 75px;
-	tab_voicemod_rack_on:  0px 75px 200px 75px;
+	tab_voicemod_rack_off: 0px 0px 198px 91px;
+	tab_voicemod_rack_on:  0px 91px 198px 91px;
 	src: tab_3_rack_voice_mod.png;
 }
 
@@ -127,23 +127,22 @@ button
 
 .btTab
 {
-	width: 273dp;
-	height: 74dp;
-	margin: 0dp 0dp -10dp -22dp;
+	width: 296dp;
+	height: 91dp;
 }
 
-.btTab:active  
+.btTabRack
+{
+	width: 198dp;
+	height: 91dp;
+}
+
+.btTabRack:active, .btTab:active  
 {
 	transform: scale(0.97);
 	image-color: #ccc;
 }
 
-.btTabRack
-{
-	width: 200dp;
-	height: 75dp;
-	margin: 0dp 0dp 0dp -32dp;
-}
 .btTabMain
 {
 	decorator: image(tab_main_off fill);
@@ -255,8 +254,8 @@ button
 
 .btWhiteLed
 {
-	width: 69dp;
-	height: 50dp;
+	width: 75dp;
+	height: 60dp;
 	decorator: image(button_white_led_off fill);	
 }
 
@@ -282,30 +281,6 @@ button
 {
 	decorator: image(button_white2_led_on fill);	
 }
-
-.layoutTabButtons
-{
-	position: absolute;
-	display: flex;
-	width: 500dp;
-	height: 60dp;
-	left: 188dp;
-	top: 176dp;
-	gap: 12dp;
-}
-
-.layoutTabButtonsRack
-{
-	position: absolute;
-	display: flex;
-	width: 500dp;
-	height: 60dp;
-	left: 189dp;
-	top: 177dp;
-	gap: 05dp;
-}
-
-
 
 
 .knob {
@@ -457,7 +432,7 @@ button
 {
 	color: #ff6600ff;
 	position: absolute;
-	font-size: 26dp;
+	font-size: 28dp;
 	font-weight: bold;
 	vertical-align: bottom;
 	height: 100%;
@@ -586,3 +561,102 @@ button:active {
 .opacityZero {
 	opacity: 0;
 }
+.pm-count
+{
+	color: #fd6807;
+	font-size: 18dp;
+	line-height: 17dp;
+	font-style: normal;
+	font-family: Vipnagorgialla;
+}
+
+.pm-name
+{
+	font-size: 22dp;
+	line-height: 17dp;
+	font-style: normal;
+	font-family: metropolis;	
+}
+
+.pm-info-name, .pm-infotext
+{
+	font-style: normal;
+	font-family: metropolis;	
+}
+
+.pm-gridentry, .pm-listentry
+{
+	background-color: #202020;	
+}
+
+
+.input-placeholder
+{
+	color: #fd6807;
+	font-size: 25dp;
+	line-height: 25dp;
+	font-style: normal;
+	font-family: Vipnagorgialla;
+	
+}
+
+.pm-search-grid
+{
+	border-color: #272727;	
+		
+}
+
+.pm-search
+{
+	color: #fd6807;
+	font-size: 25dp;
+	line-height: 25dp;
+	font-style: normal;
+	font-family: Vipnagorgialla;
+
+
+}
+
+splitter
+{
+	width:15dp;
+	background-color: #373737;
+	border-radius: 10dp;
+}
+
+
+scrollbarvertical sliderbar 
+{
+	width:20dp;
+	margin-left: -10dp;
+	min-height: 100dp;
+	border-radius: 10dp;
+	background-color: #bc4d05;
+}
+
+scrollbarhorizontal sliderbar
+{
+	height:20dp;
+	margin-top: -10dp;
+	min-width: 100dp;
+	border-radius: 10dp;	
+	background-color: #bc4d05;	
+}
+
+input.text
+{
+	border-color: #303030;	
+	border-width: 2dp;
+}
+
+.pm-status
+{
+	color: #fd6807;
+	font-size: 25dp;
+	line-height: 25dp;
+	font-style: normal;
+	font-family: Vipnagorgialla;
+	border-color: #303030;	
+	border-width: 2dp;		
+}
+
