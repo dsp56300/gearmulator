@@ -29,6 +29,8 @@ set(RMLSOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_juceskin.rcss
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_patchmanager.rcss
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_patchmanager.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings.rcss
 )
 
 list(APPEND DATASOURCES ${RMLSOURCES})
