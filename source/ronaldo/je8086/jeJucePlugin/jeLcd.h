@@ -4,6 +4,11 @@
 
 #include "jucePluginEditorLib/lcd.h"
 
+namespace juceRmlUi
+{
+	class ElemButton;
+}
+
 namespace jeJucePlugin
 {
 	class Editor;
@@ -22,10 +27,13 @@ namespace jeJucePlugin
 		void renamePerformance() const;
 
 	private:
+		void sendPerfPatchToggle(Rml::Event& _event, bool _pressed) const;
+
 		baseLib::EventListener<std::array<uint8_t ,64>> m_onLcdCgDataChanged;
 		baseLib::EventListener<std::array<char, 40>> m_onLcdDdDataChanged;
 
 		Editor& m_editor;
 		std::array<char, 40> m_lcdText;
+		juceRmlUi::ElemButton* m_btPerfPatch = nullptr;
 	};
 }
