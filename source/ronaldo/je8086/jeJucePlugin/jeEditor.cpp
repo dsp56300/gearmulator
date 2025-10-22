@@ -108,6 +108,22 @@ namespace jeJucePlugin
 			_event.StopPropagation();
 			menu.runModal(_event);
 		});
+
+		addClick("btMenu", [this](Rml::Event& _event)
+		{
+			juceRmlUi::Menu menu;
+			menu.addEntry("Rename Performance...", [this]
+			{
+				m_lcd->renamePerformance();
+			});
+
+			menu.addSeparator();
+
+			createWritePatchesMenu(menu);
+
+			_event.StopPropagation();
+			menu.runModal(_event);
+		});
 	}
 
 	void Editor::initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model)
@@ -151,6 +167,17 @@ namespace jeJucePlugin
 
 		juceRmlUi::Menu menu;
 
+		createWritePatchesMenu(menu);
+
+		menu.runModal(_event);
+	}
+
+	bool Editor::createWritePatchesMenu(juceRmlUi::Menu& _menu) const
+	{
+		auto* pm = getPatchManager();
+		if (!pm)
+			return false;
+
 		juceRmlUi::Menu menuLower;
 		juceRmlUi::Menu menuUpper;
 		juceRmlUi::Menu menuPerformance;
@@ -160,12 +187,12 @@ namespace jeJucePlugin
 		const auto numPerformance = pm->createSaveMenuEntries(menuPerformance, 0, "Performance", 2);
 
 		if (numUpper)
-			menu.addSubMenu("Patch Upper", std::move(menuUpper));
+			_menu.addSubMenu("Patch Upper", std::move(menuUpper));
 		if (numLower)
-			menu.addSubMenu("Patch Lower", std::move(menuLower));
+			_menu.addSubMenu("Patch Lower", std::move(menuLower));
 		if (numPerformance)
-			menu.addSubMenu("Performance", std::move(menuPerformance));
+			_menu.addSubMenu("Performance", std::move(menuPerformance));
 
-		menu.runModal(_event);
+		return numUpper + numLower + numPerformance > 0;
 	}
 }

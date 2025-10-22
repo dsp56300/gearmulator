@@ -44,6 +44,7 @@ namespace jeJucePlugin
 
 	private:
 		void onBtWrite(Rml::Event& _event) const;
+		bool createWritePatchesMenu(juceRmlUi::Menu& _menu) const;
 
 		Controller& m_controller;
 
