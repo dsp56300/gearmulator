@@ -252,6 +252,15 @@ namespace juceRmlUi
 	{
 		Component::mouseDown(_event);
 		RmlInterfaces::ScopedAccess access(*this);
+
+		if (!m_mouseActive)
+		{
+			m_mouseActive = true;
+			const auto pos = toRmlPosition(_event);
+			m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+			mouseMove(_event);
+		}
+
 		m_rmlContext->ProcessMouseButtonDown(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
 		enqueueUpdate();
 	}

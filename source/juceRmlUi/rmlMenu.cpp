@@ -131,6 +131,13 @@ namespace juceRmlUi
 				});
 			}
 
+			// do not allow other context menus to open on right click while we are hovering an entry of an existing menu
+			juceRmlUi::EventListener::Add(div, Rml::EventId::Mousedown, [](Rml::Event& _event)
+			{
+				if (helper::isContextMenu(_event))
+					_event.StopPropagation();
+			});
+
 			div->SetInnerRML(Rml::StringUtilities::EncodeRml(entry.name));
 
 			column->AppendChild(std::move(div), true);

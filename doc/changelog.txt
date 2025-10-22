@@ -1,5 +1,12 @@
 Release Notes 
 
+2.0.9:
+
+Framework:
+
+- [Fix] Thread priorities were not set correctly on Mac/Linux
+- [Fix] Right clicking a menu entry opened a second menu
+
 2.0.8:
 
 Framework:
