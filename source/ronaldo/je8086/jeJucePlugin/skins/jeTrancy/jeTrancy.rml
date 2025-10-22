@@ -15,7 +15,7 @@
 		<img id="bottom" class="jucePos" src="bottom.png" style="left: 173dp; top: 1155dp;"/>	
 		<img id="top" class="jucePos" src="top.png" style="left: 720dp; top: 56dp;"/>
 		<img id="unison" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="unison.png" style="left: 714dp; top: 1155dp;"/>
-		<img id="split" class="jucePos" data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" src="cmb_split.png" style="left: 2159dp; top: 206dp; "/>
+		<img id="split" class="jucePos" data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" src="cmb_split.png" style="left: 2174dp; top: 206dp; "/>
 			
 		<!-- MAIN PAGE -->
 		<div data-model="partCurrent" class="abs" tabgroup="main" tabpage="0" >
@@ -183,10 +183,25 @@
 							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
 						</div>
 					</div>					
-					<div class="knobs_row2" style="left: 43dp; gap: 68dp;">
-						<knob class="knob" param="Osc2Range" id="Osc2Range" />
-						<knob class="knob" param="Osc2FineWide" id="Osc2FineWide" />
-					</div>
+
+					<knob class="abs knob" param="Osc2Range" id="Osc2Range" style="top:172dp; left: 43dp;"/>
+						
+					
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!((Osc2Range_value > 0 && Osc2Range_value < 50))" data-model="partCurrent" >
+						<knob class="abs knob" param="Osc2Fine" id="Osc2Fine" style="top:172dp; left: 200dp;"/>
+						<div class="label2" style="left:172dp; top:142dp;; width:150dp; color: #ffffffDD;">FINE</div>
+					</div>	
+
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Range_value == 50)" data-model="partCurrent" >
+						<knob class="abs knob" param="Osc2WidePos" id="Osc2WidePos" style="top:172dp; left: 200dp;"/>
+						<div class="label2" style="left:172dp; top:142dp;; width:150dp; color: #ff6600ff;">WIDE+</div>
+					</div>					
+
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Range_value == 0)" data-model="partCurrent" >
+						<knob class="abs knob" param="Osc2WideNeg" id="Osc2WideNeg" style="top:172dp; left: 200dp;"/>
+						<div class="label2" style="left:172dp; top:142dp;; width:150dp; color: #ff6600ff;">WIDE-</div>
+					</div>										
+					
 				</div>
 						
 				<button class="abs btBlackLed" param="RingModulatorSwitch" id="RingModulatorSwitch" style="left: 772dp; top: 76dp;" isToggle="1"/>
@@ -231,7 +246,7 @@
 					</div>	
 					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 2)" class="abs">
 						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpPan" id="AmpPan" />							
-						<div class="label2" style="left:3dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">PAN</div>				
+						<div class="label2" style="left:3dp; margin-top:-11dp; width:150dp; color: #ff6600ff;">PAN</div>				
 					</div>						
 					<knob class="knob abs" style="left: 188dp; top: 158dp;" param="AmpLevel" id="AmpLevel" />
 
@@ -535,13 +550,13 @@
 	
 		
 		<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" >
-			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 171dp; top: 201dp;"/>
-			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 346dp; top: 201dp;"/>
-			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 521dp; top: 201dp;"/>
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 171dp; top: 198dp;"/>
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 345dp; top: 198dp;"/>
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 521dp; top: 198dp;"/>
 		
-			<button tabbutton="0" tabgroup="main" class="abs btTabRack btTabMainRack" style="left: 157dp; top: 185dp;"/>
-			<button tabbutton="1" tabgroup="main" class="abs btTabRack btTabPatchManagerRack" style="left: 331dp; top: 185dp;"/>	
-			<button tabbutton="2" tabgroup="main" class="abs btTabRack btTabVoiceModRack" style="left: 507dp; top: 185dp;"/>	
+			<button tabbutton="0" tabgroup="main" class="abs btTabRack btTabMainRack" style="left: 157dp; top: 183dp;"/>
+			<button tabbutton="1" tabgroup="main" class="abs btTabRack btTabPatchManagerRack" style="left: 331dp; top: 183dp;"/>	
+			<button tabbutton="2" tabgroup="main" class="abs btTabRack btTabVoiceModRack" style="left: 507dp; top: 183dp;"/>	
 		</div>	
 		
 		<!-- Global Top Row -->
@@ -550,16 +565,16 @@
 			<button class="abs btWhiteLed" style="left: 32dp; top: 60dp;" id="partUpper" isToggle="1"/>
 			<button class="abs btWhiteLed" style="left: 32dp; top: 138dp;" id="partLower" isToggle="1"/>
 			
-			<div class="patchNameText" id="patchNameTextUpper" style="left: 120dp; top: 69dp;"/>
-			<div class="patchNameText" id="patchNameTextLower" style="left: 120dp; top: 148dp;"/>
+			<div class="patchNameText" id="patchNameTextUpper" style="left: 120dp; top: 70dp;"/>
+			<div class="patchNameText" id="patchNameTextLower" style="left: 120dp; top: 149dp;"/>
 			
 			<!-- Panel 1 MIDI CH --> 
-			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 63dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 62dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>			
 
 			<!-- Panel 2 MIDI CH --> 
-			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 141dp; width: 110dp; height: 45dp; line-height: 45dp;">
+			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 400dp; top: 142dp; width: 110dp; height: 45dp; line-height: 45dp;">
 				<combotext></combotext>
 			</combo>					
 			
@@ -568,25 +583,23 @@
 			<div id="lcd" class="abs" style="left: 582dp; top: 52dp; width: 525dp; height: 106dp;" lcdBackgroundColor="2a2b2d" lcdTextColor="00fe00"/>
 			
 			<!-- pairs of two buttons on the right -->
-			<div class="abs" style="left: 1184dp; top: 14dp;">
-				
-				<!-- Dec/Inc -->
-				<div class="abs hlayout" style="top: 22dp; gap: 21dp;">					
-					<button id="btDec" class="btBlack"/>	
-					<button id="btInc" class="btBlack"/>
-			
-				</div>
-				<!-- Edit/Write -->
-				<div class="abs hlayout" style="top: 110dp; gap: 18dp;">
-					<button id="btEdit" class="btBlack"/>
-					<button id="btWrite" class="btRed"/>
-				</div>
-				
+			<!-- Dec/Inc -->
+			<div class="abs hlayout" style="left: 1199dp; top: 33dp; gap: 52dp;">					
+				<button id="btDec" class="btBlack"/>	
+				<button id="btInc" class="btBlack"/>
+		
 			</div>
+			<!-- Edit/Write -->
+			<div class="abs hlayout" style="left: 1186dp; top: 137dp; gap: 54dp;">
+				<button id="btPerfPatch" class="btBlackLed"/>
+				<button id="btMenu" class="btRed"/>
+			</div>
+				
+
 			
 			<!-- Key Mode / Voice Assign -->
-			<div class="abs" style="left: 1408dp; top:-1dp; width: 440dp; height: 100%;">
-					<div data-model="part0" class="abs vlayoutLeds" style="left: 16dp; top: 47dp; height: 100dp; width: 165dp">
+			<div class="abs" style="left: 1422dp; top:-5dp; width: 440dp; height: 100%;">
+					<div data-model="part0" class="abs vlayoutLeds" style="left: 16dp; top: 48dp; height: 100dp; width: 165dp">
 					<button class="ledRed" isToggle="1" valueOn="0" param="KeyMode"/>
 					<button class="ledRed" isToggle="1" valueOn="1" param="KeyMode"/>
 					<button class="ledRed" isToggle="1" valueOn="2" param="KeyMode"/>
@@ -594,29 +607,29 @@
 
 				<!-- Voice Assign -->
 				<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs">
-					<combo data-model="part0" param="voiceAssignKeyboard" id="voiceAssignKeyboard" class="jucePos comboxtext2" style="left: 266dp; top: 45dp; width: 165dp; height: 45dp; line-height: 45dp;">
+					<combo data-model="part0" param="voiceAssignKeyboard" id="voiceAssignKeyboard" class="jucePos comboxtext2" style="left: 252dp; top: 45dp; width: 165dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>
 				</div>
 				
 				<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
-					<combo data-model="part0" param="voiceAssignRack" id="voiceAssignRack" class="jucePos comboxtext2" style="left: 266dp; top: 45dp; width: 165dp; height: 45dp; line-height: 45dp;">
+					<combo data-model="part0" param="voiceAssignRack" id="voiceAssignRack" class="jucePos comboxtext2" style="left: 252dp; top: 45dp; width: 165dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>
 				</div>	
 
 				<div data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" class="abs">
 					<!-- Split -->
-					<combo data-model="part0" param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 30dp; top: 142dp; width: 165dp; height: 45dp; line-height: 45dp;">
+					<combo data-model="part0" param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 36dp; top: 147dp; width: 169dp; height: 45dp; line-height: 45dp;">
 						<combotext></combotext>
 					</combo>				
 				</div>	
 
 				<!-- Bend Up/Down -->
-				<combo data-model="partCurrent" param="BendRangeDown" id="BendRangeDown" class="jucePos comboxtext2" style="left: 250dp; top: 142dp; width: 100dp; height: 45dp; line-height: 45dp;">
+				<combo data-model="partCurrent" param="BendRangeDown" id="BendRangeDown" class="jucePos comboxtext2" style="left: 237dp; top: 143dp; width: 100dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>
-				<combo data-model="partCurrent" param="BendRangeUp" id="BendRangeUp" class="jucePos comboxtext2" style="left: 341dp; top: 142dp; width: 100dp; height: 45dp; line-height: 45dp;">
+				<combo data-model="partCurrent" param="BendRangeUp" id="BendRangeUp" class="jucePos comboxtext2" style="left: 326dp; top: 143dp; width: 100dp; height: 45dp; line-height: 45dp;">
 					<combotext></combotext>
 				</combo>
 				
@@ -630,7 +643,7 @@
 			<button class="abs btBlackLed" style="left: 257dp; top: 155dp;" param="ArpHold" isToggle="1"/>
 							
 			<!-- center column -->
-			<knob class="abs knob" style="left: 412dp; top: 87dp;" param="Tempo"/>
+			<knob class="abs knob" style="left: 414dp; top: 87dp;" param="Tempo"/>
 
 			<!-- Beat Pattern -->
 			<combo param="ArpBeatPattern" id="ArpBeatPattern" class="jucePos comboxtext2" style="left: 595dp; top: 66dp; width: 280dp; height: 45dp; line-height: 45dp;">
@@ -668,7 +681,7 @@
 		
 		<!-- bottom texts -->
 
-		<div data-model="plugin" class="abs" style="left: 0dp; width: 500dp; top: 1418dp; height: 26dp;">
+		<div data-model="plugin" class="abs" style="left: 0dp; width: 500dp; top: 1420dp; height: 26dp;">
 			<div class="bottomText" style="left: 305dp; margin-top: 2dp ">{{versionString}}</div>
 			<combo id="romselector" class="bottomText" style="left: 935dp; width: 400dp; height: 30dp;"><combotext/></combo>
 

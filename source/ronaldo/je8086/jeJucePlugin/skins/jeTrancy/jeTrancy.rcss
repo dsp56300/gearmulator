@@ -103,7 +103,7 @@ body
 	left: 0dp; 
 	top: 0dp; 
 	width: 2772dp; 
-	height: 1458dp;
+	height: 1460dp;
 }
 
 .background
@@ -529,6 +529,9 @@ button
 
 .pm-gridentry {
 	width: 11em;
+	height: 1.3em;
+	
+
 }
 
 
@@ -589,6 +592,10 @@ button:active {
 	background-color: #202020;	
 }
 
+.grid
+{
+	padding-bottom: 10dp;
+}
 
 .input-placeholder
 {

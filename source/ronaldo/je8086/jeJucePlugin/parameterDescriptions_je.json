@@ -71,8 +71,11 @@
 		{"index":33 , "name":"Osc2Waveform", "displayName": "OSC2 WAVEFORM", "min":0, "max":3, "toText":"osc2WaveForm", "default":0},
 		{"index":34 , "name":"Osc2SyncSwitch", "displayName": "OSC2 SYNC", "min":0, "max":1, "toText":"offOn", "default":0},
 		{"index":35 , "name":"Osc2Range", "displayName": "OSC2 RANGE", "min":0, "max":50, "toText":"osc2Range", "default":25},
-		{"index":36 , "name":"Osc2FineWide", "displayName": "OSC2 FINE WIDE", "min":0, "max":100, "toText":"signed101", "default":50},
-
+		{"index":36 , "name":"Osc2FineWide", "displayName": "OSC2 FINE WIDE", "min":0, "max":100, "toText":"osc2RangeFine", "default":50},
+		{"index":36 , "name":"Osc2Fine", "displayName": "OSC2 FINE", "min":0, "max":100, "toText":"osc2RangeFine", "default":50,"isPublic":false},
+		{"index":36 , "name":"Osc2WidePos", "displayName": "OSC2 WIDE POSITIVE", "min":0, "toText":"osc2RangeWidePos", "max":100,  "default":0 ,"isPublic":false},
+		{"index":36 , "name":"Osc2WideNeg", "displayName": "OSC2 WIDE NEGATIVE", "min":0, "toText":"osc2RangeWideNeg", "max":100,  "default":100 ,"isPublic":false},
+			
 		{"index":37 , "name":"Osc2Control1", "displayName": "OSC2 CTRL1", "min":0, "max":127, "default":127},
 		{"index":38 , "name":"Osc2Control2", "displayName": "OSC2 CTRL2", "min":0, "max":127, "default":127},
 		
@@ -626,7 +629,7 @@
 			"-47", "-46", "-45", "-44", "-43", "-42", "-41", "-40", "-39", "-38", "-37", "-36", "-35", "-34", "-33", "-32", "-31", "-30", "-29", "-28",
 			"-27", "-26", "-25", "-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
 			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
-			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+			"CENTER",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
  			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
 			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
 			"60",	"61",	"62",	"OSC2"
@@ -695,7 +698,7 @@
 		"outputAssign": 
 		[
 			"MIX OUT", "PARALLEL OUT"
-		],
+		], 
  		"LFO1DepthPan":
  		[
 			"LEFT", "L -63", "L -62", "L -61", "L -60", "L -59", "L -58", "L -57", "L -56", "L -55", "L -54", "L -53", "L -52", "L -51", "L -50", "L -49", "L -48",
@@ -706,9 +709,45 @@
  			"20",	"R 21",	"R 22",	"R 23",	"R 24",	"R 25",	"R 26",	"R 27",	"R 28",	"R 29",	"R 30",	"R 31",	"R 32",	"R 33",	"R 34",	"R 35",	"R 36",	"R 37",	"R 38",	"R 39",
 			"40",	"R 41",	"R 42",	"R 43",	"R 44",	"R 45",	"R 46",	"R 47",	"R 48",	"R 49",	"R 50",	"R 51",	"R 52",	"R 53",	"R 54",	"R 55",	"R 56",	"R 57",	"R 58",	"R 59",
 			"60",	"R 61",	"R 62",	"RIGHT"
+		],
+		"osc2RangeFine":
+ 		[
+			"-50 cent", "-49 cent", "-48 cent",
+			"-47 cent", "-46 cent", "-45 cent", "-44 cent", "-43 cent", "-42 cent", "-41 cent", "-40 cent", "-39 cent", "-38 cent", "-37 cent", "-36 cent", "-35 cent", "-34 cent", "-33 cent", "-32 cent", "-31 cent", "-30 cent", "-29 cent", "-28 cent",
+			"-27 cent", "-26 cent", "-25 cent", "-24 cent", "-23 cent", "-22 cent", "-21 cent", "-20 cent", "-19 cent", "-18 cent", "-17 cent", "-16 cent", "-15 cent", "-14 cent", "-13 cent", "-12 cent", "-11 cent", "-10 cent", "-9 cent", "-8 cent",
+			"-7 cent", "-6 cent", "-5 cent", "-4 cent", "-3 cent", "-2 cent", "-1 cent",
+			"0 cent",	"1 cent",	"2 cent",	"3 cent",	"4 cent",	"5 cent",	"6 cent",	"7 cent",	"8 cent",	"9 cent",	"10 cent",	"11 cent",	"12 cent",	"13 cent",	"14 cent",	"15 cent",	"16 cent",	"17 cent",	"18 cent",	"19 cent",
+ 			"20 cent",	"21 cent",	"22 cent",	"23 cent",	"24 cent",	"25 cent",	"26 cent",	"27 cent",	"28 cent",	"29 cent",	"30 cent",	"31 cent",	"32 cent",	"33 cent",	"34 cent",	"35 cent",	"36 cent",	"37 cent",	"38 cent",	"39 cent",
+			"40 cent",	"41 cent",	"42 cent",	"43 cent",	"44 cent",	"45 cent",	"46 cent",	"47 cent",	"48 cent",	"49 cent",	"50 cent"
+ 		],
+		"osc2RangeWidePos": [ 
+		  "0 oct", "0 oct",
+		  
+		  "0 oct 1.0 s", "0 oct 1.5 s", "0 oct 2.0 s", "0 oct 2.5 s", "0 oct 3.0 s", "0 oct 3.5 s", "0 oct 4.0 s", "0 oct 4.5 s", "0 oct 5.0 s", "0 oct 5.5 s", "0 oct 6.0 s", "0 oct 6.5 s",
+		  "0 oct 7.0 s", "0 oct 7.5 s", "0 oct 8.0 s", "0 oct 8.5 s", "0 oct 9.0 s", "0 oct 9.5 s", "0 oct 10.0 s", "0 oct 10.5 s", "0 oct 11.0 s", "0 oct 11.25 s", "0 oct 11.5 s",  "0 oct 11.75 s",  
+		  "1 oct",  "1 oct 0.5 s", "1 oct 1.0 s", "1 oct 1.5 s", "1 oct 2.0 s", "1 oct 2.5 s", "1 oct 3.0 s", "1 oct 3.5 s", "1 oct 4.0 s", "1 oct 4.5 s", "1 oct 5.0 s", "1 oct 5.5 s", "1 oct 6.0 s", "1 oct 6.5 s",
+		  "1 oct 7.0 s", "1 oct 7.5 s", "1 oct 8.0 s", "1 oct 8.5 s", "1 oct 9.0 s", "1 oct 9.5 s", "1 oct 10.0 s", "1 oct 10.5 s", "1 oct 11.0 s", "1 oct 11.33 s", "1 oct 11.66 s",  
+		  "2 oct",  "2 oct 0.5 s", "2 oct 1.0 s", "2 oct 1.5 s", "2 oct 2.0 s", "2 oct 2.5 s", "2 oct 3.0 s", "2 oct 3.5 s", "2 oct 4.0 s", "2 oct 4.5 s", "2 oct 5.0 s", "2 oct 5.5 s", "2 oct 6.0 s", "2 oct 6.5 s",
+		  "2 oct 7.0 s", "2 oct 7.5 s", "2 oct 8.0 s", "2 oct 8.5 s", "2 oct 9.0 s", "2 oct 9.5 s", "2 oct 10.0 s", "2 oct 10.5 s", "2 oct 11.0 s",  
+		  "3 oct", "3 oct 0.5 s", "3 oct 1.0 s", "3 oct 1.5 s", "3 oct 2.0 s", "3 oct 2.5 s", "3 oct 3.0 s", "3 oct 3.5 s", "3 oct 4.0 s", "3 oct 4.5 s", "3 oct 5.0 s", "3 oct 5.5 s", "3 oct 6.0 s", "3 oct 6.5 s",
+		  "3 oct 7.0 s", "3 oct 7.5 s", "3 oct 8.0 s", "3 oct 8.5 s", "3 oct 9.0 s", "3 oct 9.5 s", "3 oct 10.0 s", "3 oct 10.5 s", "3 oct 11.0 s", "3 oct 11.5 s", 	  		  
+		  "4 oct",  "4 oct", "4 oct",
+		],
+
+		"osc2RangeWideNeg": [ 
+		  "0 oct", "0 oct",
+		  "-0 oct 1.0 s", "-0 oct 1.5 s", "-0 oct 2.0 s", "-0 oct 2.5 s", "-0 oct 3.0 s", "-0 oct 3.5 s", "-0 oct 4.0 s", "-0 oct 4.5 s", "-0 oct 5.0 s", "-0 oct 5.5 s", "-0 oct 6.0 s", "-0 oct 6.5 s",
+		  "-0 oct 7.0 s", "-0 oct 7.5 s", "-0 oct 8.0 s", "-0 oct 8.5 s", "-0 oct 9.0 s", "-0 oct 9.5 s", "-0 oct 10.0 s", "-0 oct 10.5 s", "-0 oct 11.0 s", "-0 oct 11.25 s", "-0 oct 11.5 s", "-0 oct 11.75 s",
+		  "-1 oct", "-1 oct 0.5 s", "-1 oct 1.0 s", "-1 oct 1.5 s", "-1 oct 2.0 s", "-1 oct 2.5 s", "-1 oct 3.0 s", "-1 oct 3.5 s", "-1 oct 4.0 s", "-1 oct 4.5 s", "-1 oct 5.0 s", "-1 oct 5.5 s", "-1 oct 6.0 s", "-1 oct 6.5 s",
+		  "-1 oct 7.0 s", "-1 oct 7.5 s", "-1 oct 8.0 s", "-1 oct 8.5 s", "-1 oct 9.0 s", "-1 oct 9.5 s", "-1 oct 10.0 s", "-1 oct 10.5 s", "-1 oct 11.0 s", "-1 oct 11.33 s", "-1 oct 11.66 s",
+		  "-2 oct", "-2 oct 0.5 s", "-2 oct 1.0 s", "-2 oct 1.5 s", "-2 oct 2.0 s", "-2 oct 2.5 s", "-2 oct 3.0 s", "-2 oct 3.5 s", "-2 oct 4.0 s", "-2 oct 4.5 s", "-2 oct 5.0 s", "-2 oct 5.5 s", "-2 oct 6.0 s", "-2 oct 6.5 s",
+		  "-2 oct 7.0 s", "-2 oct 7.5 s", "-2 oct 8.0 s", "-2 oct 8.5 s", "-2 oct 9.0 s", "-2 oct 9.5 s", "-2 oct 10.0 s", "-2 oct 10.5 s", "-2 oct 11.0 s",
+		  "-3 oct", "-3 oct 0.5 s", "-3 oct 1.0 s", "-3 oct 1.5 s", "-3 oct 2.0 s", "-3 oct 2.5 s", "-3 oct 3.0 s", "-3 oct 3.5 s", "-3 oct 4.0 s", "-3 oct 4.5 s", "-3 oct 5.0 s", "-3 oct 5.5 s", "-3 oct 6.0 s", "-3 oct 6.5 s",
+		  "-3 oct 7.0 s", "-3 oct 7.5 s", "-3 oct 8.0 s", "-3 oct 8.5 s", "-3 oct 9.0 s", "-3 oct 9.5 s", "-3 oct 10.0 s", "-3 oct 10.5 s", "-3 oct 11.0 s", "-3 oct 11.5 s",
+		  "-4 oct", "-4 oct", "-4 oct"
 		]
 
-
+		
 	},
  	"midipackets":
  	{
