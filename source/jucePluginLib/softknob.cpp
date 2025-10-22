@@ -82,7 +82,7 @@ namespace pluginLib
 		if(!m_targetParam)
 			return;
 
-		m_targetParamListener.set(m_targetParam, [this](pluginLib::Parameter*)
+		m_targetParamListener.set(m_targetParam, [this](Parameter*)
 		{
 			onTargetValueChanged();
 		});

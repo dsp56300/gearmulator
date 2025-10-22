@@ -3,10 +3,10 @@
 #include "VirusEditor.h"
 #include "VirusController.h"
 
+#include "jucePluginEditorLib/patchmanagerUiRml/patchmanagerUiRml.h"
+
 #include "jucePluginLib/filetype.h"
 #include "jucePluginLib/patchdb/datasource.h"
-
-#include "jucePluginEditorLib/pluginEditor.h"
 
 #include "virusLib/microcontroller.h"
 #include "virusLib/device.h"
@@ -16,6 +16,8 @@
 
 #include "juce_cryptography/hashing/juce_MD5.h"
 
+#include "synthLib/sounddiverLibLoader.h"
+
 namespace virus
 {
 	class Controller;
@@ -23,7 +25,9 @@ namespace virus
 
 namespace genericVirusUI
 {
-	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root), m_controller(_editor.getController())
+	PatchManager::PatchManager(VirusEditor& _editor, Rml::Element* _root)
+		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root)
+		, m_controller(_editor.getController())
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
@@ -263,6 +267,45 @@ namespace genericVirusUI
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
 	{
+		if (synthLib::SounddiverLibLoader::isValidData(_data))
+		{
+			synthLib::SounddiverLibLoader sd2s(_data);
+
+			const auto& results = sd2s.getResults();
+
+			if (!results.empty())
+			{
+				uint8_t prog = 0;
+
+				for (const auto & res : results)
+				{
+					if (res.data.size() != 250)
+						continue;
+
+					// preset, pack into sysex
+
+					std::vector<uint8_t>& sysex = _results.emplace_back(
+						std::vector<uint8_t>{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10,
+							static_cast<uint8_t>(prog >> 7), static_cast<uint8_t>(prog & 0x7f)}
+					);
+
+					sysex.insert(sysex.end(), res.data.begin(), res.data.begin() + 240);
+
+					for (size_t i=0; i<10; ++i)
+						sysex.push_back(i < res.name.size() ? res.name[i] : ' ');
+
+					sysex.insert(sysex.end(), res.data.begin() + 240, res.data.end() - 4);
+
+					sysex.push_back(virusLib::Microcontroller::calcChecksum(sysex));
+					sysex.push_back(0xf7);
+
+					++prog;
+				}
+
+				return true;
+			}
+		}
+
 		{
 			std::vector<synthLib::SMidiEvent> events;
 			virusLib::Device::parseTIcontrolPreset(events, _data);

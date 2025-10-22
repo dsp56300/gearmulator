@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace pluginLib::patchDB
 {
 	enum class SourceType;
@@ -27,4 +29,5 @@ namespace jucePluginEditorLib::patchManager
 	GroupType toGroupType(pluginLib::patchDB::TagType _tagType);
 	GroupType toGroupType(pluginLib::patchDB::SourceType _sourceType);
 	pluginLib::patchDB::SourceType toSourceType(GroupType _groupType);
+	std::string toString(GroupType _groupType);
 }

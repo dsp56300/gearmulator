@@ -11,9 +11,11 @@ namespace xtJucePlugin
 	class TablesTree : public Tree
 	{
 	public:
-		explicit TablesTree(WaveEditor& _editor);
+		explicit TablesTree(Rml::CoreInstance& _coreInstance, const std::string& _tag, WaveEditor& _editor);
 
-		void setSelectedTable(xt::TableId _id) const;
+		Rml::ElementPtr createChild(const std::string& _tag) override;
+
+		void setSelectedTable(xt::TableId _id);
 
 		void setSelectedEntryFromCurrentPreset() const;
 

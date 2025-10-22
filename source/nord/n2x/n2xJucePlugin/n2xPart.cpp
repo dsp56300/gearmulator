@@ -5,17 +5,18 @@
 
 namespace n2xJucePlugin
 {
-	Part::Part(Editor& _editor, const std::string& _name, const ButtonStyle _buttonStyle) : PartButton(_editor, _name, _buttonStyle), m_editor(_editor)
+	Part::Part(Rml::Element* _button, Editor& _editor) : PartButton(_button, _editor), m_editor(_editor)
 	{
 	}
 
-	void Part::onClick()
+	void Part::onClick(Rml::Event& e)
 	{
 		if(!m_editor.getN2xController().setCurrentPart(getPart()))
 		{
 			juce::MessageManager::callAsync([this]
 			{
-				setToggleState(true, juce::dontSendNotification);
+				// FIXME: why?
+				setChecked(true);
 			});
 		}
 	}

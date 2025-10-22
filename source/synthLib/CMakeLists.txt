@@ -19,6 +19,7 @@ set(SOURCES
 	lv2PresetExport.cpp lv2PresetExport.h
 	midiBufferParser.cpp midiBufferParser.h
 	midiClock.cpp midiClock.h
+	midiRateLimiter.cpp midiRateLimiter.h
 	midiRoutingMatrix.cpp midiRoutingMatrix.h
 	midiToSysex.cpp midiToSysex.h
 	midiTranslator.cpp midiTranslator.h
@@ -28,6 +29,7 @@ set(SOURCES
 	resampler.cpp resampler.h
 	resamplerInOut.cpp resamplerInOut.h
 	romLoader.cpp romLoader.h
+	sounddiverLibLoader.cpp sounddiverLibLoader.h
 	sysexToMidi.cpp sysexToMidi.h
 	vstpreset.cpp vstpreset.h
 	wavReader.cpp wavReader.h

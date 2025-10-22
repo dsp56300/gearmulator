@@ -19,7 +19,7 @@ if(APPLE)
 	message("CMAKE_OSX_DEPLOYMENT_TARGET: " ${CMAKE_OSX_DEPLOYMENT_TARGET})
 endif()
 
-project(gearmulator VERSION 1.4.4)
+project(gearmulator VERSION 2.0.8)
 
 include(base.cmake)
 include(CTest)
@@ -38,10 +38,25 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 	set(CPACK_SYSTEM_NAME "MacOS")
 endif()
 
+if(NOT DEFINED CPACK_SYSTEM_NAME)
+	if(WIN32)
+		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+			set(CPACK_SYSTEM_NAME "win64")
+		else()
+			set(CPACK_SYSTEM_NAME "win32")
+		endif()
+	elseif(APPLE)
+		set(CPACK_SYSTEM_NAME "MacOS")
+	else()
+		set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}")
+	endif()
+endif()
+message("CPACK_SYSTEM_NAME: " ${CPACK_SYSTEM_NAME})
+
 set(CPACK_PACKAGE_CONTACT "The Usual Suspects")
 set(CPACK_PACKAGE_VENDOR "The Usual Suspects")
-set(CPACK_PACKAGE_NAME "DSP56300Emu")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "DSP 56300 family emulator audio plugin")
+set(CPACK_PACKAGE_NAME "TheUsualSuspects")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Usual Suspects emulated audio plugin")
 
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The Usual Suspects")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://dsp56300.wordpress.com")
@@ -60,6 +75,39 @@ add_subdirectory(doc)
 
 get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
 list(REMOVE_ITEM CPACK_COMPONENTS_ALL "Unspecified")
+
+# set better archive names
+foreach(comp IN LISTS CPACK_COMPONENTS_ALL)
+	string(TOUPPER "${comp}" COMP_UPPER)
+
+	set(archiveName "${CPACK_PACKAGE_NAME}-${comp}-${CMAKE_PROJECT_VERSION}-${CPACK_SYSTEM_NAME}")
+
+	set(varName "CPACK_ARCHIVE_${COMP_UPPER}_FILE_NAME")
+	set(${varName} ${archiveName})
+
+	set(varName "CPACK_DEBIAN_${COMP_UPPER}_FILE_NAME")
+	set(${varName} "${archiveName}.deb")
+
+	set(varName "CPACK_RPM_${COMP_UPPER}_FILE_NAME")
+	set(${varName} "${archiveName}.rpm")
+endforeach()
+
+# add list of all targets that we want to upload
+get_property(CPACK_TUS_TARGETS GLOBAL PROPERTY "TUS_TARGETS")
+
+# add target properties that we need for CPack / upload
+foreach(target IN LISTS CPACK_TUS_TARGETS)
+	get_target_property(comp "${target}" TUS_CMAKE_COMPONENT)
+	if(comp)
+		set(CPACK_TUS_${target}_CMAKE_COMPONENT ${comp})
+	endif()
+	get_target_property(prodName "${target}" TUS_PRODUCT_NAME)
+	if(prodName)
+		set(CPACK_TUS_${target}_PRODUCT_NAME ${prodName})
+	endif()
+endforeach()
+
+set(CPACK_TUS_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 

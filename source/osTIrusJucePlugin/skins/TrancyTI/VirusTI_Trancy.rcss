@@ -1,0 +1,2926 @@
+@spritesheet button_1
+{
+	button_1_active: 0px 0px 79px 78px;
+	button_1_checked: 0px 78px 79px 78px;
+	button_1_checked-active: 0px 78px 79px 78px;
+	button_1_checked-hover: 0px 78px 79px 78px;
+	button_1_default: 0px 0px 79px 78px;
+	button_1_hover: 0px 0px 79px 78px;
+	src: button_1.png;
+}
+@spritesheet button_arp_1
+{
+	button_arp_1_active: 0px 0px 44px 36px;
+	button_arp_1_checked: 0px 36px 44px 36px;
+	button_arp_1_checked-active: 0px 36px 44px 36px;
+	button_arp_1_checked-hover: 0px 36px 44px 36px;
+	button_arp_1_default: 0px 0px 44px 36px;
+	button_arp_1_hover: 0px 0px 44px 36px;
+	src: button_arp_1.png;
+}
+@spritesheet button_arp_10
+{
+	button_arp_10_active: 0px 0px 44px 36px;
+	button_arp_10_checked: 0px 36px 44px 36px;
+	button_arp_10_checked-active: 0px 36px 44px 36px;
+	button_arp_10_checked-hover: 0px 36px 44px 36px;
+	button_arp_10_default: 0px 0px 44px 36px;
+	button_arp_10_hover: 0px 0px 44px 36px;
+	src: button_arp_10.png;
+}
+@spritesheet button_arp_11
+{
+	button_arp_11_active: 0px 0px 44px 36px;
+	button_arp_11_checked: 0px 36px 44px 36px;
+	button_arp_11_checked-active: 0px 36px 44px 36px;
+	button_arp_11_checked-hover: 0px 36px 44px 36px;
+	button_arp_11_default: 0px 0px 44px 36px;
+	button_arp_11_hover: 0px 0px 44px 36px;
+	src: button_arp_11.png;
+}
+@spritesheet button_arp_12
+{
+	button_arp_12_active: 0px 0px 44px 36px;
+	button_arp_12_checked: 0px 36px 44px 36px;
+	button_arp_12_checked-active: 0px 36px 44px 36px;
+	button_arp_12_checked-hover: 0px 36px 44px 36px;
+	button_arp_12_default: 0px 0px 44px 36px;
+	button_arp_12_hover: 0px 0px 44px 36px;
+	src: button_arp_12.png;
+}
+@spritesheet button_arp_13
+{
+	button_arp_13_active: 0px 0px 44px 36px;
+	button_arp_13_checked: 0px 36px 44px 36px;
+	button_arp_13_checked-active: 0px 36px 44px 36px;
+	button_arp_13_checked-hover: 0px 36px 44px 36px;
+	button_arp_13_default: 0px 0px 44px 36px;
+	button_arp_13_hover: 0px 0px 44px 36px;
+	src: button_arp_13.png;
+}
+@spritesheet button_arp_14
+{
+	button_arp_14_active: 0px 0px 44px 36px;
+	button_arp_14_checked: 0px 36px 44px 36px;
+	button_arp_14_checked-active: 0px 36px 44px 36px;
+	button_arp_14_checked-hover: 0px 36px 44px 36px;
+	button_arp_14_default: 0px 0px 44px 36px;
+	button_arp_14_hover: 0px 0px 44px 36px;
+	src: button_arp_14.png;
+}
+@spritesheet button_arp_15
+{
+	button_arp_15_active: 0px 0px 44px 36px;
+	button_arp_15_checked: 0px 36px 44px 36px;
+	button_arp_15_checked-active: 0px 36px 44px 36px;
+	button_arp_15_checked-hover: 0px 36px 44px 36px;
+	button_arp_15_default: 0px 0px 44px 36px;
+	button_arp_15_hover: 0px 0px 44px 36px;
+	src: button_arp_15.png;
+}
+@spritesheet button_arp_16
+{
+	button_arp_16_active: 0px 0px 44px 36px;
+	button_arp_16_checked: 0px 36px 44px 36px;
+	button_arp_16_checked-active: 0px 36px 44px 36px;
+	button_arp_16_checked-hover: 0px 36px 44px 36px;
+	button_arp_16_default: 0px 0px 44px 36px;
+	button_arp_16_hover: 0px 0px 44px 36px;
+	src: button_arp_16.png;
+}
+@spritesheet button_arp_17
+{
+	button_arp_17_active: 0px 0px 44px 36px;
+	button_arp_17_checked: 0px 36px 44px 36px;
+	button_arp_17_checked-active: 0px 36px 44px 36px;
+	button_arp_17_checked-hover: 0px 36px 44px 36px;
+	button_arp_17_default: 0px 0px 44px 36px;
+	button_arp_17_hover: 0px 0px 44px 36px;
+	src: button_arp_17.png;
+}
+@spritesheet button_arp_18
+{
+	button_arp_18_active: 0px 0px 44px 36px;
+	button_arp_18_checked: 0px 36px 44px 36px;
+	button_arp_18_checked-active: 0px 36px 44px 36px;
+	button_arp_18_checked-hover: 0px 36px 44px 36px;
+	button_arp_18_default: 0px 0px 44px 36px;
+	button_arp_18_hover: 0px 0px 44px 36px;
+	src: button_arp_18.png;
+}
+@spritesheet button_arp_19
+{
+	button_arp_19_active: 0px 0px 44px 36px;
+	button_arp_19_checked: 0px 36px 44px 36px;
+	button_arp_19_checked-active: 0px 36px 44px 36px;
+	button_arp_19_checked-hover: 0px 36px 44px 36px;
+	button_arp_19_default: 0px 0px 44px 36px;
+	button_arp_19_hover: 0px 0px 44px 36px;
+	src: button_arp_19.png;
+}
+@spritesheet button_arp_2
+{
+	button_arp_2_active: 0px 0px 44px 36px;
+	button_arp_2_checked: 0px 36px 44px 36px;
+	button_arp_2_checked-active: 0px 36px 44px 36px;
+	button_arp_2_checked-hover: 0px 36px 44px 36px;
+	button_arp_2_default: 0px 0px 44px 36px;
+	button_arp_2_hover: 0px 0px 44px 36px;
+	src: button_arp_2.png;
+}
+@spritesheet button_arp_20
+{
+	button_arp_20_active: 0px 0px 44px 36px;
+	button_arp_20_checked: 0px 36px 44px 36px;
+	button_arp_20_checked-active: 0px 36px 44px 36px;
+	button_arp_20_checked-hover: 0px 36px 44px 36px;
+	button_arp_20_default: 0px 0px 44px 36px;
+	button_arp_20_hover: 0px 0px 44px 36px;
+	src: button_arp_20.png;
+}
+@spritesheet button_arp_21
+{
+	button_arp_21_active: 0px 0px 44px 36px;
+	button_arp_21_checked: 0px 36px 44px 36px;
+	button_arp_21_checked-active: 0px 36px 44px 36px;
+	button_arp_21_checked-hover: 0px 36px 44px 36px;
+	button_arp_21_default: 0px 0px 44px 36px;
+	button_arp_21_hover: 0px 0px 44px 36px;
+	src: button_arp_21.png;
+}
+@spritesheet button_arp_22
+{
+	button_arp_22_active: 0px 0px 44px 36px;
+	button_arp_22_checked: 0px 36px 44px 36px;
+	button_arp_22_checked-active: 0px 36px 44px 36px;
+	button_arp_22_checked-hover: 0px 36px 44px 36px;
+	button_arp_22_default: 0px 0px 44px 36px;
+	button_arp_22_hover: 0px 0px 44px 36px;
+	src: button_arp_22.png;
+}
+@spritesheet button_arp_23
+{
+	button_arp_23_active: 0px 0px 44px 36px;
+	button_arp_23_checked: 0px 36px 44px 36px;
+	button_arp_23_checked-active: 0px 36px 44px 36px;
+	button_arp_23_checked-hover: 0px 36px 44px 36px;
+	button_arp_23_default: 0px 0px 44px 36px;
+	button_arp_23_hover: 0px 0px 44px 36px;
+	src: button_arp_23.png;
+}
+@spritesheet button_arp_24
+{
+	button_arp_24_active: 0px 0px 44px 36px;
+	button_arp_24_checked: 0px 36px 44px 36px;
+	button_arp_24_checked-active: 0px 36px 44px 36px;
+	button_arp_24_checked-hover: 0px 36px 44px 36px;
+	button_arp_24_default: 0px 0px 44px 36px;
+	button_arp_24_hover: 0px 0px 44px 36px;
+	src: button_arp_24.png;
+}
+@spritesheet button_arp_25
+{
+	button_arp_25_active: 0px 0px 44px 36px;
+	button_arp_25_checked: 0px 36px 44px 36px;
+	button_arp_25_checked-active: 0px 36px 44px 36px;
+	button_arp_25_checked-hover: 0px 36px 44px 36px;
+	button_arp_25_default: 0px 0px 44px 36px;
+	button_arp_25_hover: 0px 0px 44px 36px;
+	src: button_arp_25.png;
+}
+@spritesheet button_arp_26
+{
+	button_arp_26_active: 0px 0px 44px 36px;
+	button_arp_26_checked: 0px 36px 44px 36px;
+	button_arp_26_checked-active: 0px 36px 44px 36px;
+	button_arp_26_checked-hover: 0px 36px 44px 36px;
+	button_arp_26_default: 0px 0px 44px 36px;
+	button_arp_26_hover: 0px 0px 44px 36px;
+	src: button_arp_26.png;
+}
+@spritesheet button_arp_27
+{
+	button_arp_27_active: 0px 0px 44px 36px;
+	button_arp_27_checked: 0px 36px 44px 36px;
+	button_arp_27_checked-active: 0px 36px 44px 36px;
+	button_arp_27_checked-hover: 0px 36px 44px 36px;
+	button_arp_27_default: 0px 0px 44px 36px;
+	button_arp_27_hover: 0px 0px 44px 36px;
+	src: button_arp_27.png;
+}
+@spritesheet button_arp_28
+{
+	button_arp_28_active: 0px 0px 44px 36px;
+	button_arp_28_checked: 0px 36px 44px 36px;
+	button_arp_28_checked-active: 0px 36px 44px 36px;
+	button_arp_28_checked-hover: 0px 36px 44px 36px;
+	button_arp_28_default: 0px 0px 44px 36px;
+	button_arp_28_hover: 0px 0px 44px 36px;
+	src: button_arp_28.png;
+}
+@spritesheet button_arp_29
+{
+	button_arp_29_active: 0px 0px 44px 36px;
+	button_arp_29_checked: 0px 36px 44px 36px;
+	button_arp_29_checked-active: 0px 36px 44px 36px;
+	button_arp_29_checked-hover: 0px 36px 44px 36px;
+	button_arp_29_default: 0px 0px 44px 36px;
+	button_arp_29_hover: 0px 0px 44px 36px;
+	src: button_arp_29.png;
+}
+@spritesheet button_arp_3
+{
+	button_arp_3_active: 0px 0px 44px 36px;
+	button_arp_3_checked: 0px 36px 44px 36px;
+	button_arp_3_checked-active: 0px 36px 44px 36px;
+	button_arp_3_checked-hover: 0px 36px 44px 36px;
+	button_arp_3_default: 0px 0px 44px 36px;
+	button_arp_3_hover: 0px 0px 44px 36px;
+	src: button_arp_3.png;
+}
+@spritesheet button_arp_30
+{
+	button_arp_30_active: 0px 0px 44px 36px;
+	button_arp_30_checked: 0px 36px 44px 36px;
+	button_arp_30_checked-active: 0px 36px 44px 36px;
+	button_arp_30_checked-hover: 0px 36px 44px 36px;
+	button_arp_30_default: 0px 0px 44px 36px;
+	button_arp_30_hover: 0px 0px 44px 36px;
+	src: button_arp_30.png;
+}
+@spritesheet button_arp_31
+{
+	button_arp_31_active: 0px 0px 44px 36px;
+	button_arp_31_checked: 0px 36px 44px 36px;
+	button_arp_31_checked-active: 0px 36px 44px 36px;
+	button_arp_31_checked-hover: 0px 36px 44px 36px;
+	button_arp_31_default: 0px 0px 44px 36px;
+	button_arp_31_hover: 0px 0px 44px 36px;
+	src: button_arp_31.png;
+}
+@spritesheet button_arp_32
+{
+	button_arp_32_active: 0px 0px 44px 36px;
+	button_arp_32_checked: 0px 36px 44px 36px;
+	button_arp_32_checked-active: 0px 36px 44px 36px;
+	button_arp_32_checked-hover: 0px 36px 44px 36px;
+	button_arp_32_default: 0px 0px 44px 36px;
+	button_arp_32_hover: 0px 0px 44px 36px;
+	src: button_arp_32.png;
+}
+@spritesheet button_arp_4
+{
+	button_arp_4_active: 0px 0px 44px 36px;
+	button_arp_4_checked: 0px 36px 44px 36px;
+	button_arp_4_checked-active: 0px 36px 44px 36px;
+	button_arp_4_checked-hover: 0px 36px 44px 36px;
+	button_arp_4_default: 0px 0px 44px 36px;
+	button_arp_4_hover: 0px 0px 44px 36px;
+	src: button_arp_4.png;
+}
+@spritesheet button_arp_5
+{
+	button_arp_5_active: 0px 0px 44px 36px;
+	button_arp_5_checked: 0px 36px 44px 36px;
+	button_arp_5_checked-active: 0px 36px 44px 36px;
+	button_arp_5_checked-hover: 0px 36px 44px 36px;
+	button_arp_5_default: 0px 0px 44px 36px;
+	button_arp_5_hover: 0px 0px 44px 36px;
+	src: button_arp_5.png;
+}
+@spritesheet button_arp_6
+{
+	button_arp_6_active: 0px 0px 44px 36px;
+	button_arp_6_checked: 0px 36px 44px 36px;
+	button_arp_6_checked-active: 0px 36px 44px 36px;
+	button_arp_6_checked-hover: 0px 36px 44px 36px;
+	button_arp_6_default: 0px 0px 44px 36px;
+	button_arp_6_hover: 0px 0px 44px 36px;
+	src: button_arp_6.png;
+}
+@spritesheet button_arp_7
+{
+	button_arp_7_active: 0px 0px 44px 36px;
+	button_arp_7_checked: 0px 36px 44px 36px;
+	button_arp_7_checked-active: 0px 36px 44px 36px;
+	button_arp_7_checked-hover: 0px 36px 44px 36px;
+	button_arp_7_default: 0px 0px 44px 36px;
+	button_arp_7_hover: 0px 0px 44px 36px;
+	src: button_arp_7.png;
+}
+@spritesheet button_arp_8
+{
+	button_arp_8_active: 0px 0px 44px 36px;
+	button_arp_8_checked: 0px 36px 44px 36px;
+	button_arp_8_checked-active: 0px 36px 44px 36px;
+	button_arp_8_checked-hover: 0px 36px 44px 36px;
+	button_arp_8_default: 0px 0px 44px 36px;
+	button_arp_8_hover: 0px 0px 44px 36px;
+	src: button_arp_8.png;
+}
+@spritesheet button_arp_9
+{
+	button_arp_9_active: 0px 0px 44px 36px;
+	button_arp_9_checked: 0px 36px 44px 36px;
+	button_arp_9_checked-active: 0px 36px 44px 36px;
+	button_arp_9_checked-hover: 0px 36px 44px 36px;
+	button_arp_9_default: 0px 0px 44px 36px;
+	button_arp_9_hover: 0px 0px 44px 36px;
+	src: button_arp_9.png;
+}
+@spritesheet button_channel_1
+{
+	button_channel_1_active: 0px 0px 58px 56px;
+	button_channel_1_checked: 0px 56px 58px 56px;
+	button_channel_1_checked-active: 0px 56px 58px 56px;
+	button_channel_1_default: 0px 0px 58px 56px;
+	src: button_channel_1.png;
+}
+@spritesheet button_channel_10
+{
+	button_channel_10_active: 0px 0px 58px 56px;
+	button_channel_10_checked: 0px 56px 58px 56px;
+	button_channel_10_checked-active: 0px 56px 58px 56px;
+	button_channel_10_default: 0px 0px 58px 56px;
+	src: button_channel_10.png;
+}
+@spritesheet button_channel_11
+{
+	button_channel_11_active: 0px 0px 58px 56px;
+	button_channel_11_checked: 0px 56px 58px 56px;
+	button_channel_11_checked-active: 0px 56px 58px 56px;
+	button_channel_11_default: 0px 0px 58px 56px;
+	src: button_channel_11.png;
+}
+@spritesheet button_channel_12
+{
+	button_channel_12_active: 0px 0px 58px 56px;
+	button_channel_12_checked: 0px 56px 58px 56px;
+	button_channel_12_checked-active: 0px 56px 58px 56px;
+	button_channel_12_default: 0px 0px 58px 56px;
+	src: button_channel_12.png;
+}
+@spritesheet button_channel_13
+{
+	button_channel_13_active: 0px 0px 58px 56px;
+	button_channel_13_checked: 0px 56px 58px 56px;
+	button_channel_13_checked-active: 0px 56px 58px 56px;
+	button_channel_13_default: 0px 0px 58px 56px;
+	src: button_channel_13.png;
+}
+@spritesheet button_channel_14
+{
+	button_channel_14_active: 0px 0px 58px 56px;
+	button_channel_14_checked: 0px 56px 58px 56px;
+	button_channel_14_checked-active: 0px 56px 58px 56px;
+	button_channel_14_default: 0px 0px 58px 56px;
+	src: button_channel_14.png;
+}
+@spritesheet button_channel_15
+{
+	button_channel_15_active: 0px 0px 58px 56px;
+	button_channel_15_checked: 0px 56px 58px 56px;
+	button_channel_15_checked-active: 0px 56px 58px 56px;
+	button_channel_15_default: 0px 0px 58px 56px;
+	src: button_channel_15.png;
+}
+@spritesheet button_channel_16
+{
+	button_channel_16_active: 0px 0px 58px 56px;
+	button_channel_16_checked: 0px 56px 58px 56px;
+	button_channel_16_checked-active: 0px 56px 58px 56px;
+	button_channel_16_default: 0px 0px 58px 56px;
+	src: button_channel_16.png;
+}
+@spritesheet button_channel_2
+{
+	button_channel_2_active: 0px 0px 58px 56px;
+	button_channel_2_checked: 0px 56px 58px 56px;
+	button_channel_2_checked-active: 0px 56px 58px 56px;
+	button_channel_2_default: 0px 0px 58px 56px;
+	src: button_channel_2.png;
+}
+@spritesheet button_channel_3
+{
+	button_channel_3_active: 0px 0px 58px 56px;
+	button_channel_3_checked: 0px 56px 58px 56px;
+	button_channel_3_checked-active: 0px 56px 58px 56px;
+	button_channel_3_default: 0px 0px 58px 56px;
+	src: button_channel_3.png;
+}
+@spritesheet button_channel_4
+{
+	button_channel_4_active: 0px 0px 58px 56px;
+	button_channel_4_checked: 0px 56px 58px 56px;
+	button_channel_4_checked-active: 0px 56px 58px 56px;
+	button_channel_4_default: 0px 0px 58px 56px;
+	src: button_channel_4.png;
+}
+@spritesheet button_channel_5
+{
+	button_channel_5_active: 0px 0px 58px 56px;
+	button_channel_5_checked: 0px 56px 58px 56px;
+	button_channel_5_checked-active: 0px 56px 58px 56px;
+	button_channel_5_default: 0px 0px 58px 56px;
+	src: button_channel_5.png;
+}
+@spritesheet button_channel_6
+{
+	button_channel_6_active: 0px 0px 58px 56px;
+	button_channel_6_checked: 0px 56px 58px 56px;
+	button_channel_6_checked-active: 0px 56px 58px 56px;
+	button_channel_6_default: 0px 0px 58px 56px;
+	src: button_channel_6.png;
+}
+@spritesheet button_channel_7
+{
+	button_channel_7_active: 0px 0px 58px 56px;
+	button_channel_7_checked: 0px 56px 58px 56px;
+	button_channel_7_checked-active: 0px 56px 58px 56px;
+	button_channel_7_default: 0px 0px 58px 56px;
+	src: button_channel_7.png;
+}
+@spritesheet button_channel_8
+{
+	button_channel_8_active: 0px 0px 58px 56px;
+	button_channel_8_checked: 0px 56px 58px 56px;
+	button_channel_8_checked-active: 0px 56px 58px 56px;
+	button_channel_8_default: 0px 0px 58px 56px;
+	src: button_channel_8.png;
+}
+@spritesheet button_channel_9
+{
+	button_channel_9_active: 0px 0px 58px 56px;
+	button_channel_9_checked: 0px 56px 58px 56px;
+	button_channel_9_checked-active: 0px 56px 58px 56px;
+	button_channel_9_default: 0px 0px 58px 56px;
+	src: button_channel_9.png;
+}
+@spritesheet button_filter_ap1
+{
+	button_filter_ap1_active: 0px 0px 55px 54px;
+	button_filter_ap1_checked: 0px 54px 55px 54px;
+	button_filter_ap1_checked-active: 0px 54px 55px 54px;
+	button_filter_ap1_checked-hover: 0px 54px 55px 54px;
+	button_filter_ap1_default: 0px 0px 55px 54px;
+	button_filter_ap1_hover: 0px 54px 55px 54px;
+	src: button_filter_ap1.png;
+}
+@spritesheet button_filter_ap2
+{
+	button_filter_ap2_active: 0px 0px 55px 54px;
+	button_filter_ap2_checked: 0px 54px 55px 54px;
+	button_filter_ap2_checked-active: 0px 54px 55px 54px;
+	button_filter_ap2_checked-hover: 0px 54px 55px 54px;
+	button_filter_ap2_default: 0px 0px 55px 54px;
+	button_filter_ap2_hover: 0px 54px 55px 54px;
+	src: button_filter_ap2.png;
+}
+@spritesheet button_filter_ap3
+{
+	button_filter_ap3_active: 0px 0px 55px 54px;
+	button_filter_ap3_checked: 0px 54px 55px 54px;
+	button_filter_ap3_checked-active: 0px 54px 55px 54px;
+	button_filter_ap3_checked-hover: 0px 54px 55px 54px;
+	button_filter_ap3_default: 0px 0px 55px 54px;
+	button_filter_ap3_hover: 0px 54px 55px 54px;
+	src: button_filter_ap3.png;
+}
+@spritesheet button_filter_ap4
+{
+	button_filter_ap4_active: 0px 0px 55px 54px;
+	button_filter_ap4_checked: 0px 54px 55px 54px;
+	button_filter_ap4_checked-active: 0px 54px 55px 54px;
+	button_filter_ap4_checked-hover: 0px 54px 55px 54px;
+	button_filter_ap4_default: 0px 0px 55px 54px;
+	button_filter_ap4_hover: 0px 54px 55px 54px;
+	src: button_filter_ap4.png;
+}
+@spritesheet button_filter_bp
+{
+	button_filter_bp_active: 0px 0px 55px 54px;
+	button_filter_bp_checked: 0px 54px 55px 54px;
+	button_filter_bp_checked-active: 0px 54px 55px 54px;
+	button_filter_bp_checked-hover: 0px 54px 55px 54px;
+	button_filter_bp_default: 0px 0px 55px 54px;
+	button_filter_bp_hover: 0px 54px 55px 54px;
+	src: button_filter_bp.png;
+}
+@spritesheet button_filter_bs
+{
+	button_filter_bs_active: 0px 0px 55px 54px;
+	button_filter_bs_checked: 0px 54px 55px 54px;
+	button_filter_bs_checked-active: 0px 54px 55px 54px;
+	button_filter_bs_checked-hover: 0px 54px 55px 54px;
+	button_filter_bs_default: 0px 0px 55px 54px;
+	button_filter_bs_hover: 0px 54px 55px 54px;
+	src: button_filter_bs.png;
+}
+@spritesheet button_filter_hp
+{
+	button_filter_hp_active: 0px 0px 55px 54px;
+	button_filter_hp_checked: 0px 54px 55px 54px;
+	button_filter_hp_checked-active: 0px 54px 55px 54px;
+	button_filter_hp_checked-hover: 0px 54px 55px 54px;
+	button_filter_hp_default: 0px 0px 55px 54px;
+	button_filter_hp_hover: 0px 54px 55px 54px;
+	src: button_filter_hp.png;
+}
+@spritesheet button_filter_lp
+{
+	button_filter_lp_active: 0px 0px 55px 54px;
+	button_filter_lp_checked: 0px 54px 55px 54px;
+	button_filter_lp_checked-active: 0px 54px 55px 54px;
+	button_filter_lp_checked-hover: 0px 54px 55px 54px;
+	button_filter_lp_default: 0px 0px 55px 54px;
+	button_filter_lp_hover: 0px 54px 55px 54px;
+	src: button_filter_lp.png;
+}
+@spritesheet button_load
+{
+	button_load_active: 0px 69px 213px 69px;
+	button_load_checked: 0px 69px 213px 69px;
+	button_load_checked-active: 0px 69px 213px 69px;
+	button_load_checked-hover: 0px 69px 213px 69px;
+	button_load_default: 0px 0px 213px 69px;
+	button_load_hover: 0px 0px 213px 69px;
+	src: button_load.png;
+}
+@spritesheet button_menu
+{
+	button_menu_active: 0px 69px 213px 69px;
+	button_menu_checked: 0px 0px 213px 69px;
+	button_menu_checked-active: 0px 0px 213px 69px;
+	button_menu_checked-hover: 0px 0px 213px 69px;
+	button_menu_default: 0px 0px 213px 69px;
+	button_menu_hover: 0px 0px 213px 69px;
+	src: button_menu.png;
+}
+@spritesheet button_mono_poly
+{
+	button_mono_poly_active: 0px 0px 98px 96px;
+	button_mono_poly_checked: 0px 96px 98px 96px;
+	button_mono_poly_checked-active: 0px 96px 98px 96px;
+	button_mono_poly_checked-hover: 0px 96px 98px 96px;
+	button_mono_poly_default: 0px 0px 98px 96px;
+	button_mono_poly_hover: 0px 0px 98px 96px;
+	src: button_mono_poly.png;
+}
+@spritesheet button_multi
+{
+	button_multi_active: 0px 48px 213px 48px;
+	button_multi_checked: 0px 48px 213px 48px;
+	button_multi_checked-active: 0px 48px 213px 48px;
+	button_multi_checked-hover: 0px 48px 213px 48px;
+	button_multi_default: 0px 0px 213px 48px;
+	button_multi_hover: 0px 0px 213px 48px;
+	src: button_multi.png;
+}
+@spritesheet button_next
+{
+	button_next_active: 0px 69px 88px 69px;
+	button_next_checked: 0px 0px 88px 69px;
+	button_next_checked-active: 0px 0px 88px 69px;
+	button_next_checked-hover: 0px 0px 88px 69px;
+	button_next_default: 0px 0px 88px 69px;
+	button_next_hover: 0px 0px 88px 69px;
+	src: button_next.png;
+}
+@spritesheet button_plus
+{
+	button_plus_active: 0px 0px 79px 78px;
+	button_plus_checked: 0px 78px 79px 78px;
+	button_plus_checked-active: 0px 78px 79px 78px;
+	button_plus_checked-hover: 0px 78px 79px 78px;
+	button_plus_default: 0px 0px 79px 78px;
+	button_plus_hover: 0px 0px 79px 78px;
+	src: button_plus.png;
+}
+@spritesheet button_prev
+{
+	button_prev_active: 0px 69px 88px 69px;
+	button_prev_checked: 0px 0px 88px 69px;
+	button_prev_checked-active: 0px 0px 88px 69px;
+	button_prev_checked-hover: 0px 0px 88px 69px;
+	button_prev_default: 0px 0px 88px 69px;
+	button_prev_hover: 0px 0px 88px 69px;
+	src: button_prev.png;
+}
+@spritesheet button_save
+{
+	button_save_active: 0px 69px 213px 69px;
+	button_save_checked: 0px 69px 213px 69px;
+	button_save_checked-active: 0px 69px 213px 69px;
+	button_save_checked-hover: 0px 69px 213px 69px;
+	button_save_default: 0px 0px 213px 69px;
+	button_save_hover: 0px 0px 213px 69px;
+	src: button_save.png;
+}
+@spritesheet button_single
+{
+	button_single_active: 0px 48px 213px 48px;
+	button_single_checked: 0px 48px 213px 48px;
+	button_single_checked-active: 0px 48px 213px 48px;
+	button_single_checked-hover: 0px 48px 213px 48px;
+	button_single_default: 0px 0px 213px 48px;
+	button_single_hover: 0px 0px 213px 48px;
+	src: button_single.png;
+}
+@spritesheet button_sub
+{
+	button_sub_active: 0px 0px 98px 96px;
+	button_sub_checked: 0px 96px 98px 96px;
+	button_sub_checked-active: 0px 96px 98px 96px;
+	button_sub_checked-hover: 0px 96px 98px 96px;
+	button_sub_default: 0px 0px 98px 96px;
+	button_sub_hover: 0px 0px 98px 96px;
+	src: button_sub.png;
+}
+@spritesheet filter_mode_par
+{
+	filter_mode_par_active: 0px 0px 120px 16px;
+	filter_mode_par_checked: 0px 16px 120px 16px;
+	filter_mode_par_checked-active: 0px 16px 120px 16px;
+	filter_mode_par_checked-hover: 0px 16px 120px 16px;
+	filter_mode_par_default: 0px 0px 120px 16px;
+	filter_mode_par_hover: 0px 16px 120px 16px;
+	src: filter_mode_par.png;
+}
+@spritesheet filter_mode_ser4
+{
+	filter_mode_ser4_active: 0px 0px 88px 16px;
+	filter_mode_ser4_checked: 0px 16px 88px 16px;
+	filter_mode_ser4_checked-active: 0px 16px 88px 16px;
+	filter_mode_ser4_checked-hover: 0px 16px 88px 16px;
+	filter_mode_ser4_default: 0px 0px 88px 16px;
+	filter_mode_ser4_hover: 0px 16px 88px 16px;
+	src: filter_mode_ser4.png;
+}
+@spritesheet filter_mode_ser6
+{
+	filter_mode_ser6_active: 0px 0px 88px 16px;
+	filter_mode_ser6_checked: 0px 16px 88px 16px;
+	filter_mode_ser6_checked-active: 0px 16px 88px 16px;
+	filter_mode_ser6_checked-hover: 0px 16px 88px 16px;
+	filter_mode_ser6_default: 0px 0px 88px 16px;
+	filter_mode_ser6_hover: 0px 16px 88px 16px;
+	src: filter_mode_ser6.png;
+}
+@spritesheet filter_mode_split
+{
+	filter_mode_split_active: 0px 0px 115px 16px;
+	filter_mode_split_checked: 0px 16px 115px 16px;
+	filter_mode_split_checked-active: 0px 16px 115px 16px;
+	filter_mode_split_checked-hover: 0px 16px 115px 16px;
+	filter_mode_split_default: 0px 0px 115px 16px;
+	filter_mode_split_hover: 0px 16px 115px 16px;
+	src: filter_mode_split.png;
+}
+@spritesheet knob_big_ring_page0
+{
+	knob_big_ring_000: 0px 0px 223px 223px;
+	knob_big_ring_001: 223px 0px 223px 223px;
+	knob_big_ring_002: 446px 0px 223px 223px;
+	knob_big_ring_003: 669px 0px 223px 223px;
+	knob_big_ring_004: 892px 0px 223px 223px;
+	knob_big_ring_005: 1115px 0px 223px 223px;
+	knob_big_ring_006: 1338px 0px 223px 223px;
+	knob_big_ring_007: 1561px 0px 223px 223px;
+	knob_big_ring_008: 1784px 0px 223px 223px;
+	knob_big_ring_009: 0px 223px 223px 223px;
+	knob_big_ring_010: 223px 223px 223px 223px;
+	knob_big_ring_011: 446px 223px 223px 223px;
+	knob_big_ring_012: 669px 223px 223px 223px;
+	knob_big_ring_013: 892px 223px 223px 223px;
+	knob_big_ring_014: 1115px 223px 223px 223px;
+	knob_big_ring_015: 1338px 223px 223px 223px;
+	knob_big_ring_016: 1561px 223px 223px 223px;
+	knob_big_ring_017: 1784px 223px 223px 223px;
+	knob_big_ring_018: 0px 446px 223px 223px;
+	knob_big_ring_019: 223px 446px 223px 223px;
+	knob_big_ring_020: 446px 446px 223px 223px;
+	knob_big_ring_021: 669px 446px 223px 223px;
+	knob_big_ring_022: 892px 446px 223px 223px;
+	knob_big_ring_023: 1115px 446px 223px 223px;
+	knob_big_ring_024: 1338px 446px 223px 223px;
+	knob_big_ring_025: 1561px 446px 223px 223px;
+	knob_big_ring_026: 1784px 446px 223px 223px;
+	knob_big_ring_027: 0px 669px 223px 223px;
+	knob_big_ring_028: 223px 669px 223px 223px;
+	knob_big_ring_029: 446px 669px 223px 223px;
+	knob_big_ring_030: 669px 669px 223px 223px;
+	knob_big_ring_031: 892px 669px 223px 223px;
+	knob_big_ring_032: 1115px 669px 223px 223px;
+	knob_big_ring_033: 1338px 669px 223px 223px;
+	knob_big_ring_034: 1561px 669px 223px 223px;
+	knob_big_ring_035: 1784px 669px 223px 223px;
+	knob_big_ring_036: 0px 892px 223px 223px;
+	knob_big_ring_037: 223px 892px 223px 223px;
+	knob_big_ring_038: 446px 892px 223px 223px;
+	knob_big_ring_039: 669px 892px 223px 223px;
+	knob_big_ring_040: 892px 892px 223px 223px;
+	knob_big_ring_041: 1115px 892px 223px 223px;
+	knob_big_ring_042: 1338px 892px 223px 223px;
+	knob_big_ring_043: 1561px 892px 223px 223px;
+	knob_big_ring_044: 1784px 892px 223px 223px;
+	knob_big_ring_045: 0px 1115px 223px 223px;
+	knob_big_ring_046: 223px 1115px 223px 223px;
+	knob_big_ring_047: 446px 1115px 223px 223px;
+	knob_big_ring_048: 669px 1115px 223px 223px;
+	knob_big_ring_049: 892px 1115px 223px 223px;
+	knob_big_ring_050: 1115px 1115px 223px 223px;
+	knob_big_ring_051: 1338px 1115px 223px 223px;
+	knob_big_ring_052: 1561px 1115px 223px 223px;
+	knob_big_ring_053: 1784px 1115px 223px 223px;
+	knob_big_ring_054: 0px 1338px 223px 223px;
+	knob_big_ring_055: 223px 1338px 223px 223px;
+	knob_big_ring_056: 446px 1338px 223px 223px;
+	knob_big_ring_057: 669px 1338px 223px 223px;
+	knob_big_ring_058: 892px 1338px 223px 223px;
+	knob_big_ring_059: 1115px 1338px 223px 223px;
+	knob_big_ring_060: 1338px 1338px 223px 223px;
+	knob_big_ring_061: 1561px 1338px 223px 223px;
+	knob_big_ring_062: 1784px 1338px 223px 223px;
+	knob_big_ring_063: 0px 1561px 223px 223px;
+	knob_big_ring_064: 223px 1561px 223px 223px;
+	knob_big_ring_065: 446px 1561px 223px 223px;
+	knob_big_ring_066: 669px 1561px 223px 223px;
+	knob_big_ring_067: 892px 1561px 223px 223px;
+	knob_big_ring_068: 1115px 1561px 223px 223px;
+	knob_big_ring_069: 1338px 1561px 223px 223px;
+	knob_big_ring_070: 1561px 1561px 223px 223px;
+	knob_big_ring_071: 1784px 1561px 223px 223px;
+	knob_big_ring_072: 0px 1784px 223px 223px;
+	knob_big_ring_073: 223px 1784px 223px 223px;
+	knob_big_ring_074: 446px 1784px 223px 223px;
+	knob_big_ring_075: 669px 1784px 223px 223px;
+	knob_big_ring_076: 892px 1784px 223px 223px;
+	knob_big_ring_077: 1115px 1784px 223px 223px;
+	knob_big_ring_078: 1338px 1784px 223px 223px;
+	knob_big_ring_079: 1561px 1784px 223px 223px;
+	knob_big_ring_080: 1784px 1784px 223px 223px;
+	src: knob_big_ring_page0.png;
+}
+@spritesheet knob_big_ring_page1
+{
+	knob_big_ring_081: 0px 0px 223px 223px;
+	knob_big_ring_082: 223px 0px 223px 223px;
+	knob_big_ring_083: 446px 0px 223px 223px;
+	knob_big_ring_084: 669px 0px 223px 223px;
+	knob_big_ring_085: 892px 0px 223px 223px;
+	knob_big_ring_086: 1115px 0px 223px 223px;
+	knob_big_ring_087: 1338px 0px 223px 223px;
+	knob_big_ring_088: 1561px 0px 223px 223px;
+	knob_big_ring_089: 1784px 0px 223px 223px;
+	knob_big_ring_090: 0px 223px 223px 223px;
+	knob_big_ring_091: 223px 223px 223px 223px;
+	knob_big_ring_092: 446px 223px 223px 223px;
+	knob_big_ring_093: 669px 223px 223px 223px;
+	knob_big_ring_094: 892px 223px 223px 223px;
+	knob_big_ring_095: 1115px 223px 223px 223px;
+	knob_big_ring_096: 1338px 223px 223px 223px;
+	knob_big_ring_097: 1561px 223px 223px 223px;
+	knob_big_ring_098: 1784px 223px 223px 223px;
+	knob_big_ring_099: 0px 446px 223px 223px;
+	knob_big_ring_100: 223px 446px 223px 223px;
+	knob_big_ring_101: 446px 446px 223px 223px;
+	knob_big_ring_102: 669px 446px 223px 223px;
+	knob_big_ring_103: 892px 446px 223px 223px;
+	knob_big_ring_104: 1115px 446px 223px 223px;
+	knob_big_ring_105: 1338px 446px 223px 223px;
+	knob_big_ring_106: 1561px 446px 223px 223px;
+	knob_big_ring_107: 1784px 446px 223px 223px;
+	knob_big_ring_108: 0px 669px 223px 223px;
+	knob_big_ring_109: 223px 669px 223px 223px;
+	knob_big_ring_110: 446px 669px 223px 223px;
+	knob_big_ring_111: 669px 669px 223px 223px;
+	knob_big_ring_112: 892px 669px 223px 223px;
+	knob_big_ring_113: 1115px 669px 223px 223px;
+	knob_big_ring_114: 1338px 669px 223px 223px;
+	knob_big_ring_115: 1561px 669px 223px 223px;
+	knob_big_ring_116: 1784px 669px 223px 223px;
+	knob_big_ring_117: 0px 892px 223px 223px;
+	knob_big_ring_118: 223px 892px 223px 223px;
+	knob_big_ring_119: 446px 892px 223px 223px;
+	knob_big_ring_120: 669px 892px 223px 223px;
+	knob_big_ring_121: 892px 892px 223px 223px;
+	knob_big_ring_122: 1115px 892px 223px 223px;
+	knob_big_ring_123: 1338px 892px 223px 223px;
+	knob_big_ring_124: 1561px 892px 223px 223px;
+	knob_big_ring_125: 1784px 892px 223px 223px;
+	knob_big_ring_126: 0px 1115px 223px 223px;
+	knob_big_ring_127: 223px 1115px 223px 223px;
+	src: knob_big_ring_page1.png;
+}
+@spritesheet knob_mid_page0
+{
+	knob_mid_000: 0px 0px 98px 98px;
+	knob_mid_001: 98px 0px 98px 98px;
+	knob_mid_002: 196px 0px 98px 98px;
+	knob_mid_003: 294px 0px 98px 98px;
+	knob_mid_004: 392px 0px 98px 98px;
+	knob_mid_005: 490px 0px 98px 98px;
+	knob_mid_006: 588px 0px 98px 98px;
+	knob_mid_007: 686px 0px 98px 98px;
+	knob_mid_008: 784px 0px 98px 98px;
+	knob_mid_009: 882px 0px 98px 98px;
+	knob_mid_010: 980px 0px 98px 98px;
+	knob_mid_011: 1078px 0px 98px 98px;
+	knob_mid_012: 1176px 0px 98px 98px;
+	knob_mid_013: 1274px 0px 98px 98px;
+	knob_mid_014: 1372px 0px 98px 98px;
+	knob_mid_015: 1470px 0px 98px 98px;
+	knob_mid_016: 1568px 0px 98px 98px;
+	knob_mid_017: 1666px 0px 98px 98px;
+	knob_mid_018: 1764px 0px 98px 98px;
+	knob_mid_019: 1862px 0px 98px 98px;
+	knob_mid_020: 0px 98px 98px 98px;
+	knob_mid_021: 98px 98px 98px 98px;
+	knob_mid_022: 196px 98px 98px 98px;
+	knob_mid_023: 294px 98px 98px 98px;
+	knob_mid_024: 392px 98px 98px 98px;
+	knob_mid_025: 490px 98px 98px 98px;
+	knob_mid_026: 588px 98px 98px 98px;
+	knob_mid_027: 686px 98px 98px 98px;
+	knob_mid_028: 784px 98px 98px 98px;
+	knob_mid_029: 882px 98px 98px 98px;
+	knob_mid_030: 980px 98px 98px 98px;
+	knob_mid_031: 1078px 98px 98px 98px;
+	knob_mid_032: 1176px 98px 98px 98px;
+	knob_mid_033: 1274px 98px 98px 98px;
+	knob_mid_034: 1372px 98px 98px 98px;
+	knob_mid_035: 1470px 98px 98px 98px;
+	knob_mid_036: 1568px 98px 98px 98px;
+	knob_mid_037: 1666px 98px 98px 98px;
+	knob_mid_038: 1764px 98px 98px 98px;
+	knob_mid_039: 1862px 98px 98px 98px;
+	knob_mid_040: 0px 196px 98px 98px;
+	knob_mid_041: 98px 196px 98px 98px;
+	knob_mid_042: 196px 196px 98px 98px;
+	knob_mid_043: 294px 196px 98px 98px;
+	knob_mid_044: 392px 196px 98px 98px;
+	knob_mid_045: 490px 196px 98px 98px;
+	knob_mid_046: 588px 196px 98px 98px;
+	knob_mid_047: 686px 196px 98px 98px;
+	knob_mid_048: 784px 196px 98px 98px;
+	knob_mid_049: 882px 196px 98px 98px;
+	knob_mid_050: 980px 196px 98px 98px;
+	knob_mid_051: 1078px 196px 98px 98px;
+	knob_mid_052: 1176px 196px 98px 98px;
+	knob_mid_053: 1274px 196px 98px 98px;
+	knob_mid_054: 1372px 196px 98px 98px;
+	knob_mid_055: 1470px 196px 98px 98px;
+	knob_mid_056: 1568px 196px 98px 98px;
+	knob_mid_057: 1666px 196px 98px 98px;
+	knob_mid_058: 1764px 196px 98px 98px;
+	knob_mid_059: 1862px 196px 98px 98px;
+	knob_mid_060: 0px 294px 98px 98px;
+	knob_mid_061: 98px 294px 98px 98px;
+	knob_mid_062: 196px 294px 98px 98px;
+	knob_mid_063: 294px 294px 98px 98px;
+	knob_mid_064: 392px 294px 98px 98px;
+	knob_mid_065: 490px 294px 98px 98px;
+	knob_mid_066: 588px 294px 98px 98px;
+	knob_mid_067: 686px 294px 98px 98px;
+	knob_mid_068: 784px 294px 98px 98px;
+	knob_mid_069: 882px 294px 98px 98px;
+	knob_mid_070: 980px 294px 98px 98px;
+	knob_mid_071: 1078px 294px 98px 98px;
+	knob_mid_072: 1176px 294px 98px 98px;
+	knob_mid_073: 1274px 294px 98px 98px;
+	knob_mid_074: 1372px 294px 98px 98px;
+	knob_mid_075: 1470px 294px 98px 98px;
+	knob_mid_076: 1568px 294px 98px 98px;
+	knob_mid_077: 1666px 294px 98px 98px;
+	knob_mid_078: 1764px 294px 98px 98px;
+	knob_mid_079: 1862px 294px 98px 98px;
+	knob_mid_080: 0px 392px 98px 98px;
+	knob_mid_081: 98px 392px 98px 98px;
+	knob_mid_082: 196px 392px 98px 98px;
+	knob_mid_083: 294px 392px 98px 98px;
+	knob_mid_084: 392px 392px 98px 98px;
+	knob_mid_085: 490px 392px 98px 98px;
+	knob_mid_086: 588px 392px 98px 98px;
+	knob_mid_087: 686px 392px 98px 98px;
+	knob_mid_088: 784px 392px 98px 98px;
+	knob_mid_089: 882px 392px 98px 98px;
+	knob_mid_090: 980px 392px 98px 98px;
+	knob_mid_091: 1078px 392px 98px 98px;
+	knob_mid_092: 1176px 392px 98px 98px;
+	knob_mid_093: 1274px 392px 98px 98px;
+	knob_mid_094: 1372px 392px 98px 98px;
+	knob_mid_095: 1470px 392px 98px 98px;
+	knob_mid_096: 1568px 392px 98px 98px;
+	knob_mid_097: 1666px 392px 98px 98px;
+	knob_mid_098: 1764px 392px 98px 98px;
+	knob_mid_099: 1862px 392px 98px 98px;
+	knob_mid_100: 0px 490px 98px 98px;
+	knob_mid_101: 98px 490px 98px 98px;
+	knob_mid_102: 196px 490px 98px 98px;
+	knob_mid_103: 294px 490px 98px 98px;
+	knob_mid_104: 392px 490px 98px 98px;
+	knob_mid_105: 490px 490px 98px 98px;
+	knob_mid_106: 588px 490px 98px 98px;
+	knob_mid_107: 686px 490px 98px 98px;
+	knob_mid_108: 784px 490px 98px 98px;
+	knob_mid_109: 882px 490px 98px 98px;
+	knob_mid_110: 980px 490px 98px 98px;
+	knob_mid_111: 1078px 490px 98px 98px;
+	knob_mid_112: 1176px 490px 98px 98px;
+	knob_mid_113: 1274px 490px 98px 98px;
+	knob_mid_114: 1372px 490px 98px 98px;
+	knob_mid_115: 1470px 490px 98px 98px;
+	knob_mid_116: 1568px 490px 98px 98px;
+	knob_mid_117: 1666px 490px 98px 98px;
+	knob_mid_118: 1764px 490px 98px 98px;
+	knob_mid_119: 1862px 490px 98px 98px;
+	knob_mid_120: 0px 588px 98px 98px;
+	knob_mid_121: 98px 588px 98px 98px;
+	knob_mid_122: 196px 588px 98px 98px;
+	knob_mid_123: 294px 588px 98px 98px;
+	knob_mid_124: 392px 588px 98px 98px;
+	knob_mid_125: 490px 588px 98px 98px;
+	knob_mid_126: 588px 588px 98px 98px;
+	knob_mid_127: 686px 588px 98px 98px;
+	src: knob_mid_page0.png;
+}
+@spritesheet knob_small_page0
+{
+	knob_small_000: 0px 0px 70px 70px;
+	knob_small_001: 70px 0px 70px 70px;
+	knob_small_002: 140px 0px 70px 70px;
+	knob_small_003: 210px 0px 70px 70px;
+	knob_small_004: 280px 0px 70px 70px;
+	knob_small_005: 350px 0px 70px 70px;
+	knob_small_006: 420px 0px 70px 70px;
+	knob_small_007: 490px 0px 70px 70px;
+	knob_small_008: 560px 0px 70px 70px;
+	knob_small_009: 630px 0px 70px 70px;
+	knob_small_010: 700px 0px 70px 70px;
+	knob_small_011: 770px 0px 70px 70px;
+	knob_small_012: 840px 0px 70px 70px;
+	knob_small_013: 910px 0px 70px 70px;
+	knob_small_014: 980px 0px 70px 70px;
+	knob_small_015: 1050px 0px 70px 70px;
+	knob_small_016: 1120px 0px 70px 70px;
+	knob_small_017: 1190px 0px 70px 70px;
+	knob_small_018: 1260px 0px 70px 70px;
+	knob_small_019: 1330px 0px 70px 70px;
+	knob_small_020: 1400px 0px 70px 70px;
+	knob_small_021: 1470px 0px 70px 70px;
+	knob_small_022: 1540px 0px 70px 70px;
+	knob_small_023: 1610px 0px 70px 70px;
+	knob_small_024: 1680px 0px 70px 70px;
+	knob_small_025: 1750px 0px 70px 70px;
+	knob_small_026: 1820px 0px 70px 70px;
+	knob_small_027: 1890px 0px 70px 70px;
+	knob_small_028: 1960px 0px 70px 70px;
+	knob_small_029: 0px 70px 70px 70px;
+	knob_small_030: 70px 70px 70px 70px;
+	knob_small_031: 140px 70px 70px 70px;
+	knob_small_032: 210px 70px 70px 70px;
+	knob_small_033: 280px 70px 70px 70px;
+	knob_small_034: 350px 70px 70px 70px;
+	knob_small_035: 420px 70px 70px 70px;
+	knob_small_036: 490px 70px 70px 70px;
+	knob_small_037: 560px 70px 70px 70px;
+	knob_small_038: 630px 70px 70px 70px;
+	knob_small_039: 700px 70px 70px 70px;
+	knob_small_040: 770px 70px 70px 70px;
+	knob_small_041: 840px 70px 70px 70px;
+	knob_small_042: 910px 70px 70px 70px;
+	knob_small_043: 980px 70px 70px 70px;
+	knob_small_044: 1050px 70px 70px 70px;
+	knob_small_045: 1120px 70px 70px 70px;
+	knob_small_046: 1190px 70px 70px 70px;
+	knob_small_047: 1260px 70px 70px 70px;
+	knob_small_048: 1330px 70px 70px 70px;
+	knob_small_049: 1400px 70px 70px 70px;
+	knob_small_050: 1470px 70px 70px 70px;
+	knob_small_051: 1540px 70px 70px 70px;
+	knob_small_052: 1610px 70px 70px 70px;
+	knob_small_053: 1680px 70px 70px 70px;
+	knob_small_054: 1750px 70px 70px 70px;
+	knob_small_055: 1820px 70px 70px 70px;
+	knob_small_056: 1890px 70px 70px 70px;
+	knob_small_057: 1960px 70px 70px 70px;
+	knob_small_058: 0px 140px 70px 70px;
+	knob_small_059: 70px 140px 70px 70px;
+	knob_small_060: 140px 140px 70px 70px;
+	knob_small_061: 210px 140px 70px 70px;
+	knob_small_062: 280px 140px 70px 70px;
+	knob_small_063: 350px 140px 70px 70px;
+	knob_small_064: 420px 140px 70px 70px;
+	knob_small_065: 490px 140px 70px 70px;
+	knob_small_066: 560px 140px 70px 70px;
+	knob_small_067: 630px 140px 70px 70px;
+	knob_small_068: 700px 140px 70px 70px;
+	knob_small_069: 770px 140px 70px 70px;
+	knob_small_070: 840px 140px 70px 70px;
+	knob_small_071: 910px 140px 70px 70px;
+	knob_small_072: 980px 140px 70px 70px;
+	knob_small_073: 1050px 140px 70px 70px;
+	knob_small_074: 1120px 140px 70px 70px;
+	knob_small_075: 1190px 140px 70px 70px;
+	knob_small_076: 1260px 140px 70px 70px;
+	knob_small_077: 1330px 140px 70px 70px;
+	knob_small_078: 1400px 140px 70px 70px;
+	knob_small_079: 1470px 140px 70px 70px;
+	knob_small_080: 1540px 140px 70px 70px;
+	knob_small_081: 1610px 140px 70px 70px;
+	knob_small_082: 1680px 140px 70px 70px;
+	knob_small_083: 1750px 140px 70px 70px;
+	knob_small_084: 1820px 140px 70px 70px;
+	knob_small_085: 1890px 140px 70px 70px;
+	knob_small_086: 1960px 140px 70px 70px;
+	knob_small_087: 0px 210px 70px 70px;
+	knob_small_088: 70px 210px 70px 70px;
+	knob_small_089: 140px 210px 70px 70px;
+	knob_small_090: 210px 210px 70px 70px;
+	knob_small_091: 280px 210px 70px 70px;
+	knob_small_092: 350px 210px 70px 70px;
+	knob_small_093: 420px 210px 70px 70px;
+	knob_small_094: 490px 210px 70px 70px;
+	knob_small_095: 560px 210px 70px 70px;
+	knob_small_096: 630px 210px 70px 70px;
+	knob_small_097: 700px 210px 70px 70px;
+	knob_small_098: 770px 210px 70px 70px;
+	knob_small_099: 840px 210px 70px 70px;
+	knob_small_100: 910px 210px 70px 70px;
+	knob_small_101: 980px 210px 70px 70px;
+	knob_small_102: 1050px 210px 70px 70px;
+	knob_small_103: 1120px 210px 70px 70px;
+	knob_small_104: 1190px 210px 70px 70px;
+	knob_small_105: 1260px 210px 70px 70px;
+	knob_small_106: 1330px 210px 70px 70px;
+	knob_small_107: 1400px 210px 70px 70px;
+	knob_small_108: 1470px 210px 70px 70px;
+	knob_small_109: 1540px 210px 70px 70px;
+	knob_small_110: 1610px 210px 70px 70px;
+	knob_small_111: 1680px 210px 70px 70px;
+	knob_small_112: 1750px 210px 70px 70px;
+	knob_small_113: 1820px 210px 70px 70px;
+	knob_small_114: 1890px 210px 70px 70px;
+	knob_small_115: 1960px 210px 70px 70px;
+	knob_small_116: 0px 280px 70px 70px;
+	knob_small_117: 70px 280px 70px 70px;
+	knob_small_118: 140px 280px 70px 70px;
+	knob_small_119: 210px 280px 70px 70px;
+	knob_small_120: 280px 280px 70px 70px;
+	knob_small_121: 350px 280px 70px 70px;
+	knob_small_122: 420px 280px 70px 70px;
+	knob_small_123: 490px 280px 70px 70px;
+	knob_small_124: 560px 280px 70px 70px;
+	knob_small_125: 630px 280px 70px 70px;
+	knob_small_126: 700px 280px 70px 70px;
+	knob_small_127: 770px 280px 70px 70px;
+	src: knob_small_page0.png;
+}
+@spritesheet knob_small_ring_page0
+{
+	knob_small_ring_000: 0px 0px 128px 128px;
+	knob_small_ring_001: 128px 0px 128px 128px;
+	knob_small_ring_002: 256px 0px 128px 128px;
+	knob_small_ring_003: 384px 0px 128px 128px;
+	knob_small_ring_004: 512px 0px 128px 128px;
+	knob_small_ring_005: 640px 0px 128px 128px;
+	knob_small_ring_006: 768px 0px 128px 128px;
+	knob_small_ring_007: 896px 0px 128px 128px;
+	knob_small_ring_008: 1024px 0px 128px 128px;
+	knob_small_ring_009: 1152px 0px 128px 128px;
+	knob_small_ring_010: 1280px 0px 128px 128px;
+	knob_small_ring_011: 1408px 0px 128px 128px;
+	knob_small_ring_012: 1536px 0px 128px 128px;
+	knob_small_ring_013: 1664px 0px 128px 128px;
+	knob_small_ring_014: 1792px 0px 128px 128px;
+	knob_small_ring_015: 1920px 0px 128px 128px;
+	knob_small_ring_016: 0px 128px 128px 128px;
+	knob_small_ring_017: 128px 128px 128px 128px;
+	knob_small_ring_018: 256px 128px 128px 128px;
+	knob_small_ring_019: 384px 128px 128px 128px;
+	knob_small_ring_020: 512px 128px 128px 128px;
+	knob_small_ring_021: 640px 128px 128px 128px;
+	knob_small_ring_022: 768px 128px 128px 128px;
+	knob_small_ring_023: 896px 128px 128px 128px;
+	knob_small_ring_024: 1024px 128px 128px 128px;
+	knob_small_ring_025: 1152px 128px 128px 128px;
+	knob_small_ring_026: 1280px 128px 128px 128px;
+	knob_small_ring_027: 1408px 128px 128px 128px;
+	knob_small_ring_028: 1536px 128px 128px 128px;
+	knob_small_ring_029: 1664px 128px 128px 128px;
+	knob_small_ring_030: 1792px 128px 128px 128px;
+	knob_small_ring_031: 1920px 128px 128px 128px;
+	knob_small_ring_032: 0px 256px 128px 128px;
+	knob_small_ring_033: 128px 256px 128px 128px;
+	knob_small_ring_034: 256px 256px 128px 128px;
+	knob_small_ring_035: 384px 256px 128px 128px;
+	knob_small_ring_036: 512px 256px 128px 128px;
+	knob_small_ring_037: 640px 256px 128px 128px;
+	knob_small_ring_038: 768px 256px 128px 128px;
+	knob_small_ring_039: 896px 256px 128px 128px;
+	knob_small_ring_040: 1024px 256px 128px 128px;
+	knob_small_ring_041: 1152px 256px 128px 128px;
+	knob_small_ring_042: 1280px 256px 128px 128px;
+	knob_small_ring_043: 1408px 256px 128px 128px;
+	knob_small_ring_044: 1536px 256px 128px 128px;
+	knob_small_ring_045: 1664px 256px 128px 128px;
+	knob_small_ring_046: 1792px 256px 128px 128px;
+	knob_small_ring_047: 1920px 256px 128px 128px;
+	knob_small_ring_048: 0px 384px 128px 128px;
+	knob_small_ring_049: 128px 384px 128px 128px;
+	knob_small_ring_050: 256px 384px 128px 128px;
+	knob_small_ring_051: 384px 384px 128px 128px;
+	knob_small_ring_052: 512px 384px 128px 128px;
+	knob_small_ring_053: 640px 384px 128px 128px;
+	knob_small_ring_054: 768px 384px 128px 128px;
+	knob_small_ring_055: 896px 384px 128px 128px;
+	knob_small_ring_056: 1024px 384px 128px 128px;
+	knob_small_ring_057: 1152px 384px 128px 128px;
+	knob_small_ring_058: 1280px 384px 128px 128px;
+	knob_small_ring_059: 1408px 384px 128px 128px;
+	knob_small_ring_060: 1536px 384px 128px 128px;
+	knob_small_ring_061: 1664px 384px 128px 128px;
+	knob_small_ring_062: 1792px 384px 128px 128px;
+	knob_small_ring_063: 1920px 384px 128px 128px;
+	knob_small_ring_064: 0px 512px 128px 128px;
+	knob_small_ring_065: 128px 512px 128px 128px;
+	knob_small_ring_066: 256px 512px 128px 128px;
+	knob_small_ring_067: 384px 512px 128px 128px;
+	knob_small_ring_068: 512px 512px 128px 128px;
+	knob_small_ring_069: 640px 512px 128px 128px;
+	knob_small_ring_070: 768px 512px 128px 128px;
+	knob_small_ring_071: 896px 512px 128px 128px;
+	knob_small_ring_072: 1024px 512px 128px 128px;
+	knob_small_ring_073: 1152px 512px 128px 128px;
+	knob_small_ring_074: 1280px 512px 128px 128px;
+	knob_small_ring_075: 1408px 512px 128px 128px;
+	knob_small_ring_076: 1536px 512px 128px 128px;
+	knob_small_ring_077: 1664px 512px 128px 128px;
+	knob_small_ring_078: 1792px 512px 128px 128px;
+	knob_small_ring_079: 1920px 512px 128px 128px;
+	knob_small_ring_080: 0px 640px 128px 128px;
+	knob_small_ring_081: 128px 640px 128px 128px;
+	knob_small_ring_082: 256px 640px 128px 128px;
+	knob_small_ring_083: 384px 640px 128px 128px;
+	knob_small_ring_084: 512px 640px 128px 128px;
+	knob_small_ring_085: 640px 640px 128px 128px;
+	knob_small_ring_086: 768px 640px 128px 128px;
+	knob_small_ring_087: 896px 640px 128px 128px;
+	knob_small_ring_088: 1024px 640px 128px 128px;
+	knob_small_ring_089: 1152px 640px 128px 128px;
+	knob_small_ring_090: 1280px 640px 128px 128px;
+	knob_small_ring_091: 1408px 640px 128px 128px;
+	knob_small_ring_092: 1536px 640px 128px 128px;
+	knob_small_ring_093: 1664px 640px 128px 128px;
+	knob_small_ring_094: 1792px 640px 128px 128px;
+	knob_small_ring_095: 1920px 640px 128px 128px;
+	knob_small_ring_096: 0px 768px 128px 128px;
+	knob_small_ring_097: 128px 768px 128px 128px;
+	knob_small_ring_098: 256px 768px 128px 128px;
+	knob_small_ring_099: 384px 768px 128px 128px;
+	knob_small_ring_100: 512px 768px 128px 128px;
+	knob_small_ring_101: 640px 768px 128px 128px;
+	knob_small_ring_102: 768px 768px 128px 128px;
+	knob_small_ring_103: 896px 768px 128px 128px;
+	knob_small_ring_104: 1024px 768px 128px 128px;
+	knob_small_ring_105: 1152px 768px 128px 128px;
+	knob_small_ring_106: 1280px 768px 128px 128px;
+	knob_small_ring_107: 1408px 768px 128px 128px;
+	knob_small_ring_108: 1536px 768px 128px 128px;
+	knob_small_ring_109: 1664px 768px 128px 128px;
+	knob_small_ring_110: 1792px 768px 128px 128px;
+	knob_small_ring_111: 1920px 768px 128px 128px;
+	knob_small_ring_112: 0px 896px 128px 128px;
+	knob_small_ring_113: 128px 896px 128px 128px;
+	knob_small_ring_114: 256px 896px 128px 128px;
+	knob_small_ring_115: 384px 896px 128px 128px;
+	knob_small_ring_116: 512px 896px 128px 128px;
+	knob_small_ring_117: 640px 896px 128px 128px;
+	knob_small_ring_118: 768px 896px 128px 128px;
+	knob_small_ring_119: 896px 896px 128px 128px;
+	knob_small_ring_120: 1024px 896px 128px 128px;
+	knob_small_ring_121: 1152px 896px 128px 128px;
+	knob_small_ring_122: 1280px 896px 128px 128px;
+	knob_small_ring_123: 1408px 896px 128px 128px;
+	knob_small_ring_124: 1536px 896px 128px 128px;
+	knob_small_ring_125: 1664px 896px 128px 128px;
+	knob_small_ring_126: 1792px 896px 128px 128px;
+	knob_small_ring_127: 1920px 896px 128px 128px;
+	src: knob_small_ring_page0.png;
+}
+@spritesheet mainbutton_arp
+{
+	mainbutton_arp_active: 0px 69px 191px 69px;
+	mainbutton_arp_checked: 0px 69px 191px 69px;
+	mainbutton_arp_checked-active: 0px 69px 191px 69px;
+	mainbutton_arp_checked-hover: 0px 69px 191px 69px;
+	mainbutton_arp_default: 0px 0px 191px 69px;
+	mainbutton_arp_hover: 0px 69px 191px 69px;
+	src: mainbutton_arp.png;
+}
+@spritesheet mainbutton_browser
+{
+	mainbutton_browser_active: 0px 69px 191px 69px;
+	mainbutton_browser_checked: 0px 69px 191px 69px;
+	mainbutton_browser_checked-active: 0px 69px 191px 69px;
+	mainbutton_browser_checked-hover: 0px 69px 191px 69px;
+	mainbutton_browser_default: 0px 0px 191px 69px;
+	mainbutton_browser_hover: 0px 69px 191px 69px;
+	src: mainbutton_browser.png;
+}
+@spritesheet mainbutton_common
+{
+	mainbutton_common_active: 0px 69px 191px 69px;
+	mainbutton_common_checked: 0px 69px 191px 69px;
+	mainbutton_common_checked-active: 0px 69px 191px 69px;
+	mainbutton_common_checked-hover: 0px 69px 191px 69px;
+	mainbutton_common_default: 0px 0px 191px 69px;
+	mainbutton_common_hover: 0px 69px 191px 69px;
+	src: mainbutton_common.png;
+}
+@spritesheet mainbutton_filter
+{
+	mainbutton_filter_active: 0px 69px 191px 69px;
+	mainbutton_filter_checked: 0px 69px 191px 69px;
+	mainbutton_filter_checked-active: 0px 69px 191px 69px;
+	mainbutton_filter_checked-hover: 0px 69px 191px 69px;
+	mainbutton_filter_default: 0px 0px 191px 69px;
+	mainbutton_filter_hover: 0px 69px 191px 69px;
+	src: mainbutton_filter.png;
+}
+@spritesheet mainbutton_fx1
+{
+	mainbutton_fx1_active: 0px 69px 191px 69px;
+	mainbutton_fx1_checked: 0px 69px 191px 69px;
+	mainbutton_fx1_checked-active: 0px 69px 191px 69px;
+	mainbutton_fx1_checked-hover: 0px 69px 191px 69px;
+	mainbutton_fx1_default: 0px 0px 191px 69px;
+	mainbutton_fx1_hover: 0px 69px 191px 69px;
+	src: mainbutton_fx1.png;
+}
+@spritesheet mainbutton_fx2
+{
+	mainbutton_fx2_active: 0px 69px 191px 69px;
+	mainbutton_fx2_checked: 0px 69px 191px 69px;
+	mainbutton_fx2_checked-active: 0px 69px 191px 69px;
+	mainbutton_fx2_checked-hover: 0px 69px 191px 69px;
+	mainbutton_fx2_default: 0px 0px 191px 69px;
+	mainbutton_fx2_hover: 0px 69px 191px 69px;
+	src: mainbutton_fx2.png;
+}
+@spritesheet mainbutton_lfo
+{
+	mainbutton_lfo_active: 0px 69px 191px 69px;
+	mainbutton_lfo_checked: 0px 69px 191px 69px;
+	mainbutton_lfo_checked-active: 0px 69px 191px 69px;
+	mainbutton_lfo_checked-hover: 0px 69px 191px 69px;
+	mainbutton_lfo_default: 0px 0px 191px 69px;
+	mainbutton_lfo_hover: 0px 69px 191px 69px;
+	src: mainbutton_lfo.png;
+}
+@spritesheet mainbutton_main
+{
+	mainbutton_main_active: 0px 69px 191px 69px;
+	mainbutton_main_checked: 0px 69px 191px 69px;
+	mainbutton_main_checked-active: 0px 69px 191px 69px;
+	mainbutton_main_checked-hover: 0px 69px 191px 69px;
+	mainbutton_main_default: 0px 0px 191px 69px;
+	mainbutton_main_hover: 0px 69px 191px 69px;
+	src: mainbutton_main.png;
+}
+@spritesheet mainbutton_matrix
+{
+	mainbutton_matrix_active: 0px 69px 191px 69px;
+	mainbutton_matrix_checked: 0px 69px 191px 69px;
+	mainbutton_matrix_checked-active: 0px 69px 191px 69px;
+	mainbutton_matrix_checked-hover: 0px 69px 191px 69px;
+	mainbutton_matrix_default: 0px 0px 191px 69px;
+	mainbutton_matrix_hover: 0px 69px 191px 69px;
+	src: mainbutton_matrix.png;
+}
+@spritesheet mainbutton_osc
+{
+	mainbutton_osc_active: 0px 69px 191px 69px;
+	mainbutton_osc_checked: 0px 69px 191px 69px;
+	mainbutton_osc_checked-active: 0px 69px 191px 69px;
+	mainbutton_osc_checked-hover: 0px 69px 191px 69px;
+	mainbutton_osc_default: 0px 0px 191px 69px;
+	mainbutton_osc_hover: 0px 69px 191px 69px;
+	src: mainbutton_osc.png;
+}
+.button_1
+{
+	decorator: image(button_1_default scale-none left top);
+}
+.button_1:checked
+{
+	decorator: image(button_1_checked scale-none left top);
+}
+.button_1:checked:active
+{
+	decorator: image(button_1_checked-active scale-none left top);
+}
+.button_1:checked:hover
+{
+	decorator: image(button_1_checked-hover scale-none left top);
+}
+.button_1:hover
+{
+	decorator: image(button_1_hover scale-none left top);
+}
+.button_arp_1
+{
+	decorator: image(button_arp_1_default scale-none left top);
+}
+.button_arp_10
+{
+	decorator: image(button_arp_10_default scale-none left top);
+}
+.button_arp_10:checked
+{
+	decorator: image(button_arp_10_checked scale-none left top);
+}
+.button_arp_10:checked:active
+{
+	decorator: image(button_arp_10_checked-active scale-none left top);
+}
+.button_arp_10:checked:hover
+{
+	decorator: image(button_arp_10_checked-hover scale-none left top);
+}
+.button_arp_10:hover
+{
+	decorator: image(button_arp_10_hover scale-none left top);
+}
+.button_arp_11
+{
+	decorator: image(button_arp_11_default scale-none left top);
+}
+.button_arp_11:checked
+{
+	decorator: image(button_arp_11_checked scale-none left top);
+}
+.button_arp_11:checked:active
+{
+	decorator: image(button_arp_11_checked-active scale-none left top);
+}
+.button_arp_11:checked:hover
+{
+	decorator: image(button_arp_11_checked-hover scale-none left top);
+}
+.button_arp_11:hover
+{
+	decorator: image(button_arp_11_hover scale-none left top);
+}
+.button_arp_12
+{
+	decorator: image(button_arp_12_default scale-none left top);
+}
+.button_arp_12:checked
+{
+	decorator: image(button_arp_12_checked scale-none left top);
+}
+.button_arp_12:checked:active
+{
+	decorator: image(button_arp_12_checked-active scale-none left top);
+}
+.button_arp_12:checked:hover
+{
+	decorator: image(button_arp_12_checked-hover scale-none left top);
+}
+.button_arp_12:hover
+{
+	decorator: image(button_arp_12_hover scale-none left top);
+}
+.button_arp_13
+{
+	decorator: image(button_arp_13_default scale-none left top);
+}
+.button_arp_13:checked
+{
+	decorator: image(button_arp_13_checked scale-none left top);
+}
+.button_arp_13:checked:active
+{
+	decorator: image(button_arp_13_checked-active scale-none left top);
+}
+.button_arp_13:checked:hover
+{
+	decorator: image(button_arp_13_checked-hover scale-none left top);
+}
+.button_arp_13:hover
+{
+	decorator: image(button_arp_13_hover scale-none left top);
+}
+.button_arp_14
+{
+	decorator: image(button_arp_14_default scale-none left top);
+}
+.button_arp_14:checked
+{
+	decorator: image(button_arp_14_checked scale-none left top);
+}
+.button_arp_14:checked:active
+{
+	decorator: image(button_arp_14_checked-active scale-none left top);
+}
+.button_arp_14:checked:hover
+{
+	decorator: image(button_arp_14_checked-hover scale-none left top);
+}
+.button_arp_14:hover
+{
+	decorator: image(button_arp_14_hover scale-none left top);
+}
+.button_arp_15
+{
+	decorator: image(button_arp_15_default scale-none left top);
+}
+.button_arp_15:checked
+{
+	decorator: image(button_arp_15_checked scale-none left top);
+}
+.button_arp_15:checked:active
+{
+	decorator: image(button_arp_15_checked-active scale-none left top);
+}
+.button_arp_15:checked:hover
+{
+	decorator: image(button_arp_15_checked-hover scale-none left top);
+}
+.button_arp_15:hover
+{
+	decorator: image(button_arp_15_hover scale-none left top);
+}
+.button_arp_16
+{
+	decorator: image(button_arp_16_default scale-none left top);
+}
+.button_arp_16:checked
+{
+	decorator: image(button_arp_16_checked scale-none left top);
+}
+.button_arp_16:checked:active
+{
+	decorator: image(button_arp_16_checked-active scale-none left top);
+}
+.button_arp_16:checked:hover
+{
+	decorator: image(button_arp_16_checked-hover scale-none left top);
+}
+.button_arp_16:hover
+{
+	decorator: image(button_arp_16_hover scale-none left top);
+}
+.button_arp_17
+{
+	decorator: image(button_arp_17_default scale-none left top);
+}
+.button_arp_17:checked
+{
+	decorator: image(button_arp_17_checked scale-none left top);
+}
+.button_arp_17:checked:active
+{
+	decorator: image(button_arp_17_checked-active scale-none left top);
+}
+.button_arp_17:checked:hover
+{
+	decorator: image(button_arp_17_checked-hover scale-none left top);
+}
+.button_arp_17:hover
+{
+	decorator: image(button_arp_17_hover scale-none left top);
+}
+.button_arp_18
+{
+	decorator: image(button_arp_18_default scale-none left top);
+}
+.button_arp_18:checked
+{
+	decorator: image(button_arp_18_checked scale-none left top);
+}
+.button_arp_18:checked:active
+{
+	decorator: image(button_arp_18_checked-active scale-none left top);
+}
+.button_arp_18:checked:hover
+{
+	decorator: image(button_arp_18_checked-hover scale-none left top);
+}
+.button_arp_18:hover
+{
+	decorator: image(button_arp_18_hover scale-none left top);
+}
+.button_arp_19
+{
+	decorator: image(button_arp_19_default scale-none left top);
+}
+.button_arp_19:checked
+{
+	decorator: image(button_arp_19_checked scale-none left top);
+}
+.button_arp_19:checked:active
+{
+	decorator: image(button_arp_19_checked-active scale-none left top);
+}
+.button_arp_19:checked:hover
+{
+	decorator: image(button_arp_19_checked-hover scale-none left top);
+}
+.button_arp_19:hover
+{
+	decorator: image(button_arp_19_hover scale-none left top);
+}
+.button_arp_1:checked
+{
+	decorator: image(button_arp_1_checked scale-none left top);
+}
+.button_arp_1:checked:active
+{
+	decorator: image(button_arp_1_checked-active scale-none left top);
+}
+.button_arp_1:checked:hover
+{
+	decorator: image(button_arp_1_checked-hover scale-none left top);
+}
+.button_arp_1:hover
+{
+	decorator: image(button_arp_1_hover scale-none left top);
+}
+.button_arp_2
+{
+	decorator: image(button_arp_2_default scale-none left top);
+}
+.button_arp_20
+{
+	decorator: image(button_arp_20_default scale-none left top);
+}
+.button_arp_20:checked
+{
+	decorator: image(button_arp_20_checked scale-none left top);
+}
+.button_arp_20:checked:active
+{
+	decorator: image(button_arp_20_checked-active scale-none left top);
+}
+.button_arp_20:checked:hover
+{
+	decorator: image(button_arp_20_checked-hover scale-none left top);
+}
+.button_arp_20:hover
+{
+	decorator: image(button_arp_20_hover scale-none left top);
+}
+.button_arp_21
+{
+	decorator: image(button_arp_21_default scale-none left top);
+}
+.button_arp_21:checked
+{
+	decorator: image(button_arp_21_checked scale-none left top);
+}
+.button_arp_21:checked:active
+{
+	decorator: image(button_arp_21_checked-active scale-none left top);
+}
+.button_arp_21:checked:hover
+{
+	decorator: image(button_arp_21_checked-hover scale-none left top);
+}
+.button_arp_21:hover
+{
+	decorator: image(button_arp_21_hover scale-none left top);
+}
+.button_arp_22
+{
+	decorator: image(button_arp_22_default scale-none left top);
+}
+.button_arp_22:checked
+{
+	decorator: image(button_arp_22_checked scale-none left top);
+}
+.button_arp_22:checked:active
+{
+	decorator: image(button_arp_22_checked-active scale-none left top);
+}
+.button_arp_22:checked:hover
+{
+	decorator: image(button_arp_22_checked-hover scale-none left top);
+}
+.button_arp_22:hover
+{
+	decorator: image(button_arp_22_hover scale-none left top);
+}
+.button_arp_23
+{
+	decorator: image(button_arp_23_default scale-none left top);
+}
+.button_arp_23:checked
+{
+	decorator: image(button_arp_23_checked scale-none left top);
+}
+.button_arp_23:checked:active
+{
+	decorator: image(button_arp_23_checked-active scale-none left top);
+}
+.button_arp_23:checked:hover
+{
+	decorator: image(button_arp_23_checked-hover scale-none left top);
+}
+.button_arp_23:hover
+{
+	decorator: image(button_arp_23_hover scale-none left top);
+}
+.button_arp_24
+{
+	decorator: image(button_arp_24_default scale-none left top);
+}
+.button_arp_24:checked
+{
+	decorator: image(button_arp_24_checked scale-none left top);
+}
+.button_arp_24:checked:active
+{
+	decorator: image(button_arp_24_checked-active scale-none left top);
+}
+.button_arp_24:checked:hover
+{
+	decorator: image(button_arp_24_checked-hover scale-none left top);
+}
+.button_arp_24:hover
+{
+	decorator: image(button_arp_24_hover scale-none left top);
+}
+.button_arp_25
+{
+	decorator: image(button_arp_25_default scale-none left top);
+}
+.button_arp_25:checked
+{
+	decorator: image(button_arp_25_checked scale-none left top);
+}
+.button_arp_25:checked:active
+{
+	decorator: image(button_arp_25_checked-active scale-none left top);
+}
+.button_arp_25:checked:hover
+{
+	decorator: image(button_arp_25_checked-hover scale-none left top);
+}
+.button_arp_25:hover
+{
+	decorator: image(button_arp_25_hover scale-none left top);
+}
+.button_arp_26
+{
+	decorator: image(button_arp_26_default scale-none left top);
+}
+.button_arp_26:checked
+{
+	decorator: image(button_arp_26_checked scale-none left top);
+}
+.button_arp_26:checked:active
+{
+	decorator: image(button_arp_26_checked-active scale-none left top);
+}
+.button_arp_26:checked:hover
+{
+	decorator: image(button_arp_26_checked-hover scale-none left top);
+}
+.button_arp_26:hover
+{
+	decorator: image(button_arp_26_hover scale-none left top);
+}
+.button_arp_27
+{
+	decorator: image(button_arp_27_default scale-none left top);
+}
+.button_arp_27:checked
+{
+	decorator: image(button_arp_27_checked scale-none left top);
+}
+.button_arp_27:checked:active
+{
+	decorator: image(button_arp_27_checked-active scale-none left top);
+}
+.button_arp_27:checked:hover
+{
+	decorator: image(button_arp_27_checked-hover scale-none left top);
+}
+.button_arp_27:hover
+{
+	decorator: image(button_arp_27_hover scale-none left top);
+}
+.button_arp_28
+{
+	decorator: image(button_arp_28_default scale-none left top);
+}
+.button_arp_28:checked
+{
+	decorator: image(button_arp_28_checked scale-none left top);
+}
+.button_arp_28:checked:active
+{
+	decorator: image(button_arp_28_checked-active scale-none left top);
+}
+.button_arp_28:checked:hover
+{
+	decorator: image(button_arp_28_checked-hover scale-none left top);
+}
+.button_arp_28:hover
+{
+	decorator: image(button_arp_28_hover scale-none left top);
+}
+.button_arp_29
+{
+	decorator: image(button_arp_29_default scale-none left top);
+}
+.button_arp_29:checked
+{
+	decorator: image(button_arp_29_checked scale-none left top);
+}
+.button_arp_29:checked:active
+{
+	decorator: image(button_arp_29_checked-active scale-none left top);
+}
+.button_arp_29:checked:hover
+{
+	decorator: image(button_arp_29_checked-hover scale-none left top);
+}
+.button_arp_29:hover
+{
+	decorator: image(button_arp_29_hover scale-none left top);
+}
+.button_arp_2:checked
+{
+	decorator: image(button_arp_2_checked scale-none left top);
+}
+.button_arp_2:checked:active
+{
+	decorator: image(button_arp_2_checked-active scale-none left top);
+}
+.button_arp_2:checked:hover
+{
+	decorator: image(button_arp_2_checked-hover scale-none left top);
+}
+.button_arp_2:hover
+{
+	decorator: image(button_arp_2_hover scale-none left top);
+}
+.button_arp_3
+{
+	decorator: image(button_arp_3_default scale-none left top);
+}
+.button_arp_30
+{
+	decorator: image(button_arp_30_default scale-none left top);
+}
+.button_arp_30:checked
+{
+	decorator: image(button_arp_30_checked scale-none left top);
+}
+.button_arp_30:checked:active
+{
+	decorator: image(button_arp_30_checked-active scale-none left top);
+}
+.button_arp_30:checked:hover
+{
+	decorator: image(button_arp_30_checked-hover scale-none left top);
+}
+.button_arp_30:hover
+{
+	decorator: image(button_arp_30_hover scale-none left top);
+}
+.button_arp_31
+{
+	decorator: image(button_arp_31_default scale-none left top);
+}
+.button_arp_31:checked
+{
+	decorator: image(button_arp_31_checked scale-none left top);
+}
+.button_arp_31:checked:active
+{
+	decorator: image(button_arp_31_checked-active scale-none left top);
+}
+.button_arp_31:checked:hover
+{
+	decorator: image(button_arp_31_checked-hover scale-none left top);
+}
+.button_arp_31:hover
+{
+	decorator: image(button_arp_31_hover scale-none left top);
+}
+.button_arp_32
+{
+	decorator: image(button_arp_32_default scale-none left top);
+}
+.button_arp_32:checked
+{
+	decorator: image(button_arp_32_checked scale-none left top);
+}
+.button_arp_32:checked:active
+{
+	decorator: image(button_arp_32_checked-active scale-none left top);
+}
+.button_arp_32:checked:hover
+{
+	decorator: image(button_arp_32_checked-hover scale-none left top);
+}
+.button_arp_32:hover
+{
+	decorator: image(button_arp_32_hover scale-none left top);
+}
+.button_arp_3:checked
+{
+	decorator: image(button_arp_3_checked scale-none left top);
+}
+.button_arp_3:checked:active
+{
+	decorator: image(button_arp_3_checked-active scale-none left top);
+}
+.button_arp_3:checked:hover
+{
+	decorator: image(button_arp_3_checked-hover scale-none left top);
+}
+.button_arp_3:hover
+{
+	decorator: image(button_arp_3_hover scale-none left top);
+}
+.button_arp_4
+{
+	decorator: image(button_arp_4_default scale-none left top);
+}
+.button_arp_4:checked
+{
+	decorator: image(button_arp_4_checked scale-none left top);
+}
+.button_arp_4:checked:active
+{
+	decorator: image(button_arp_4_checked-active scale-none left top);
+}
+.button_arp_4:checked:hover
+{
+	decorator: image(button_arp_4_checked-hover scale-none left top);
+}
+.button_arp_4:hover
+{
+	decorator: image(button_arp_4_hover scale-none left top);
+}
+.button_arp_5
+{
+	decorator: image(button_arp_5_default scale-none left top);
+}
+.button_arp_5:checked
+{
+	decorator: image(button_arp_5_checked scale-none left top);
+}
+.button_arp_5:checked:active
+{
+	decorator: image(button_arp_5_checked-active scale-none left top);
+}
+.button_arp_5:checked:hover
+{
+	decorator: image(button_arp_5_checked-hover scale-none left top);
+}
+.button_arp_5:hover
+{
+	decorator: image(button_arp_5_hover scale-none left top);
+}
+.button_arp_6
+{
+	decorator: image(button_arp_6_default scale-none left top);
+}
+.button_arp_6:checked
+{
+	decorator: image(button_arp_6_checked scale-none left top);
+}
+.button_arp_6:checked:active
+{
+	decorator: image(button_arp_6_checked-active scale-none left top);
+}
+.button_arp_6:checked:hover
+{
+	decorator: image(button_arp_6_checked-hover scale-none left top);
+}
+.button_arp_6:hover
+{
+	decorator: image(button_arp_6_hover scale-none left top);
+}
+.button_arp_7
+{
+	decorator: image(button_arp_7_default scale-none left top);
+}
+.button_arp_7:checked
+{
+	decorator: image(button_arp_7_checked scale-none left top);
+}
+.button_arp_7:checked:active
+{
+	decorator: image(button_arp_7_checked-active scale-none left top);
+}
+.button_arp_7:checked:hover
+{
+	decorator: image(button_arp_7_checked-hover scale-none left top);
+}
+.button_arp_7:hover
+{
+	decorator: image(button_arp_7_hover scale-none left top);
+}
+.button_arp_8
+{
+	decorator: image(button_arp_8_default scale-none left top);
+}
+.button_arp_8:checked
+{
+	decorator: image(button_arp_8_checked scale-none left top);
+}
+.button_arp_8:checked:active
+{
+	decorator: image(button_arp_8_checked-active scale-none left top);
+}
+.button_arp_8:checked:hover
+{
+	decorator: image(button_arp_8_checked-hover scale-none left top);
+}
+.button_arp_8:hover
+{
+	decorator: image(button_arp_8_hover scale-none left top);
+}
+.button_arp_9
+{
+	decorator: image(button_arp_9_default scale-none left top);
+}
+.button_arp_9:checked
+{
+	decorator: image(button_arp_9_checked scale-none left top);
+}
+.button_arp_9:checked:active
+{
+	decorator: image(button_arp_9_checked-active scale-none left top);
+}
+.button_arp_9:checked:hover
+{
+	decorator: image(button_arp_9_checked-hover scale-none left top);
+}
+.button_arp_9:hover
+{
+	decorator: image(button_arp_9_hover scale-none left top);
+}
+.button_channel_1
+{
+	decorator: image(button_channel_1_default scale-none left top);
+}
+.button_channel_10
+{
+	decorator: image(button_channel_10_default scale-none left top);
+}
+.button_channel_10:checked
+{
+	decorator: image(button_channel_10_checked scale-none left top);
+}
+.button_channel_10:checked:active
+{
+	decorator: image(button_channel_10_checked-active scale-none left top);
+}
+.button_channel_11
+{
+	decorator: image(button_channel_11_default scale-none left top);
+}
+.button_channel_11:checked
+{
+	decorator: image(button_channel_11_checked scale-none left top);
+}
+.button_channel_11:checked:active
+{
+	decorator: image(button_channel_11_checked-active scale-none left top);
+}
+.button_channel_12
+{
+	decorator: image(button_channel_12_default scale-none left top);
+}
+.button_channel_12:checked
+{
+	decorator: image(button_channel_12_checked scale-none left top);
+}
+.button_channel_12:checked:active
+{
+	decorator: image(button_channel_12_checked-active scale-none left top);
+}
+.button_channel_13
+{
+	decorator: image(button_channel_13_default scale-none left top);
+}
+.button_channel_13:checked
+{
+	decorator: image(button_channel_13_checked scale-none left top);
+}
+.button_channel_13:checked:active
+{
+	decorator: image(button_channel_13_checked-active scale-none left top);
+}
+.button_channel_14
+{
+	decorator: image(button_channel_14_default scale-none left top);
+}
+.button_channel_14:checked
+{
+	decorator: image(button_channel_14_checked scale-none left top);
+}
+.button_channel_14:checked:active
+{
+	decorator: image(button_channel_14_checked-active scale-none left top);
+}
+.button_channel_15
+{
+	decorator: image(button_channel_15_default scale-none left top);
+}
+.button_channel_15:checked
+{
+	decorator: image(button_channel_15_checked scale-none left top);
+}
+.button_channel_15:checked:active
+{
+	decorator: image(button_channel_15_checked-active scale-none left top);
+}
+.button_channel_16
+{
+	decorator: image(button_channel_16_default scale-none left top);
+}
+.button_channel_16:checked
+{
+	decorator: image(button_channel_16_checked scale-none left top);
+}
+.button_channel_16:checked:active
+{
+	decorator: image(button_channel_16_checked-active scale-none left top);
+}
+.button_channel_1:checked
+{
+	decorator: image(button_channel_1_checked scale-none left top);
+}
+.button_channel_1:checked:active
+{
+	decorator: image(button_channel_1_checked-active scale-none left top);
+}
+.button_channel_2
+{
+	decorator: image(button_channel_2_default scale-none left top);
+}
+.button_channel_2:checked
+{
+	decorator: image(button_channel_2_checked scale-none left top);
+}
+.button_channel_2:checked:active
+{
+	decorator: image(button_channel_2_checked-active scale-none left top);
+}
+.button_channel_3
+{
+	decorator: image(button_channel_3_default scale-none left top);
+}
+.button_channel_3:checked
+{
+	decorator: image(button_channel_3_checked scale-none left top);
+}
+.button_channel_3:checked:active
+{
+	decorator: image(button_channel_3_checked-active scale-none left top);
+}
+.button_channel_4
+{
+	decorator: image(button_channel_4_default scale-none left top);
+}
+.button_channel_4:checked
+{
+	decorator: image(button_channel_4_checked scale-none left top);
+}
+.button_channel_4:checked:active
+{
+	decorator: image(button_channel_4_checked-active scale-none left top);
+}
+.button_channel_5
+{
+	decorator: image(button_channel_5_default scale-none left top);
+}
+.button_channel_5:checked
+{
+	decorator: image(button_channel_5_checked scale-none left top);
+}
+.button_channel_5:checked:active
+{
+	decorator: image(button_channel_5_checked-active scale-none left top);
+}
+.button_channel_6
+{
+	decorator: image(button_channel_6_default scale-none left top);
+}
+.button_channel_6:checked
+{
+	decorator: image(button_channel_6_checked scale-none left top);
+}
+.button_channel_6:checked:active
+{
+	decorator: image(button_channel_6_checked-active scale-none left top);
+}
+.button_channel_7
+{
+	decorator: image(button_channel_7_default scale-none left top);
+}
+.button_channel_7:checked
+{
+	decorator: image(button_channel_7_checked scale-none left top);
+}
+.button_channel_7:checked:active
+{
+	decorator: image(button_channel_7_checked-active scale-none left top);
+}
+.button_channel_8
+{
+	decorator: image(button_channel_8_default scale-none left top);
+}
+.button_channel_8:checked
+{
+	decorator: image(button_channel_8_checked scale-none left top);
+}
+.button_channel_8:checked:active
+{
+	decorator: image(button_channel_8_checked-active scale-none left top);
+}
+.button_channel_9
+{
+	decorator: image(button_channel_9_default scale-none left top);
+}
+.button_channel_9:checked
+{
+	decorator: image(button_channel_9_checked scale-none left top);
+}
+.button_channel_9:checked:active
+{
+	decorator: image(button_channel_9_checked-active scale-none left top);
+}
+.button_filter_ap1
+{
+	decorator: image(button_filter_ap1_default scale-none left top);
+}
+.button_filter_ap1:checked
+{
+	decorator: image(button_filter_ap1_checked scale-none left top);
+}
+.button_filter_ap1:checked:active
+{
+	decorator: image(button_filter_ap1_checked-active scale-none left top);
+}
+.button_filter_ap1:checked:hover
+{
+	decorator: image(button_filter_ap1_checked-hover scale-none left top);
+}
+.button_filter_ap1:hover
+{
+	decorator: image(button_filter_ap1_hover scale-none left top);
+}
+.button_filter_ap2
+{
+	decorator: image(button_filter_ap2_default scale-none left top);
+}
+.button_filter_ap2:checked
+{
+	decorator: image(button_filter_ap2_checked scale-none left top);
+}
+.button_filter_ap2:checked:active
+{
+	decorator: image(button_filter_ap2_checked-active scale-none left top);
+}
+.button_filter_ap2:checked:hover
+{
+	decorator: image(button_filter_ap2_checked-hover scale-none left top);
+}
+.button_filter_ap2:hover
+{
+	decorator: image(button_filter_ap2_hover scale-none left top);
+}
+.button_filter_ap3
+{
+	decorator: image(button_filter_ap3_default scale-none left top);
+}
+.button_filter_ap3:checked
+{
+	decorator: image(button_filter_ap3_checked scale-none left top);
+}
+.button_filter_ap3:checked:active
+{
+	decorator: image(button_filter_ap3_checked-active scale-none left top);
+}
+.button_filter_ap3:checked:hover
+{
+	decorator: image(button_filter_ap3_checked-hover scale-none left top);
+}
+.button_filter_ap3:hover
+{
+	decorator: image(button_filter_ap3_hover scale-none left top);
+}
+.button_filter_ap4
+{
+	decorator: image(button_filter_ap4_default scale-none left top);
+}
+.button_filter_ap4:checked
+{
+	decorator: image(button_filter_ap4_checked scale-none left top);
+}
+.button_filter_ap4:checked:active
+{
+	decorator: image(button_filter_ap4_checked-active scale-none left top);
+}
+.button_filter_ap4:checked:hover
+{
+	decorator: image(button_filter_ap4_checked-hover scale-none left top);
+}
+.button_filter_ap4:hover
+{
+	decorator: image(button_filter_ap4_hover scale-none left top);
+}
+.button_filter_bp
+{
+	decorator: image(button_filter_bp_default scale-none left top);
+}
+.button_filter_bp:checked
+{
+	decorator: image(button_filter_bp_checked scale-none left top);
+}
+.button_filter_bp:checked:active
+{
+	decorator: image(button_filter_bp_checked-active scale-none left top);
+}
+.button_filter_bp:checked:hover
+{
+	decorator: image(button_filter_bp_checked-hover scale-none left top);
+}
+.button_filter_bp:hover
+{
+	decorator: image(button_filter_bp_hover scale-none left top);
+}
+.button_filter_bs
+{
+	decorator: image(button_filter_bs_default scale-none left top);
+}
+.button_filter_bs:checked
+{
+	decorator: image(button_filter_bs_checked scale-none left top);
+}
+.button_filter_bs:checked:active
+{
+	decorator: image(button_filter_bs_checked-active scale-none left top);
+}
+.button_filter_bs:checked:hover
+{
+	decorator: image(button_filter_bs_checked-hover scale-none left top);
+}
+.button_filter_bs:hover
+{
+	decorator: image(button_filter_bs_hover scale-none left top);
+}
+.button_filter_hp
+{
+	decorator: image(button_filter_hp_default scale-none left top);
+}
+.button_filter_hp:checked
+{
+	decorator: image(button_filter_hp_checked scale-none left top);
+}
+.button_filter_hp:checked:active
+{
+	decorator: image(button_filter_hp_checked-active scale-none left top);
+}
+.button_filter_hp:checked:hover
+{
+	decorator: image(button_filter_hp_checked-hover scale-none left top);
+}
+.button_filter_hp:hover
+{
+	decorator: image(button_filter_hp_hover scale-none left top);
+}
+.button_filter_lp
+{
+	decorator: image(button_filter_lp_default scale-none left top);
+}
+.button_filter_lp:checked
+{
+	decorator: image(button_filter_lp_checked scale-none left top);
+}
+.button_filter_lp:checked:active
+{
+	decorator: image(button_filter_lp_checked-active scale-none left top);
+}
+.button_filter_lp:checked:hover
+{
+	decorator: image(button_filter_lp_checked-hover scale-none left top);
+}
+.button_filter_lp:hover
+{
+	decorator: image(button_filter_lp_hover scale-none left top);
+}
+.button_load
+{
+	decorator: image(button_load_default scale-none left top);
+}
+.button_load:checked
+{
+	decorator: image(button_load_checked scale-none left top);
+}
+.button_load:checked:active
+{
+	decorator: image(button_load_checked-active scale-none left top);
+}
+.button_load:checked:hover
+{
+	decorator: image(button_load_checked-hover scale-none left top);
+}
+.button_load:hover
+{
+	decorator: image(button_load_hover scale-none left top);
+}
+.button_menu
+{
+	decorator: image(button_menu_default scale-none left top);
+}
+.button_menu:checked
+{
+	decorator: image(button_menu_checked scale-none left top);
+}
+.button_menu:checked:active
+{
+	decorator: image(button_menu_checked-active scale-none left top);
+}
+.button_menu:checked:hover
+{
+	decorator: image(button_menu_checked-hover scale-none left top);
+}
+.button_menu:hover
+{
+	decorator: image(button_menu_hover scale-none left top);
+}
+.button_mono_poly
+{
+	decorator: image(button_mono_poly_default scale-none left top);
+}
+.button_mono_poly:checked
+{
+	decorator: image(button_mono_poly_checked scale-none left top);
+}
+.button_mono_poly:checked:active
+{
+	decorator: image(button_mono_poly_checked-active scale-none left top);
+}
+.button_mono_poly:checked:hover
+{
+	decorator: image(button_mono_poly_checked-hover scale-none left top);
+}
+.button_mono_poly:hover
+{
+	decorator: image(button_mono_poly_hover scale-none left top);
+}
+.button_multi
+{
+	decorator: image(button_multi_default scale-none left top);
+}
+.button_multi:checked
+{
+	decorator: image(button_multi_checked scale-none left top);
+}
+.button_multi:checked:active
+{
+	decorator: image(button_multi_checked-active scale-none left top);
+}
+.button_multi:checked:hover
+{
+	decorator: image(button_multi_checked-hover scale-none left top);
+}
+.button_multi:hover
+{
+	decorator: image(button_multi_hover scale-none left top);
+}
+.button_next
+{
+	decorator: image(button_next_default scale-none left top);
+}
+.button_next:checked
+{
+	decorator: image(button_next_checked scale-none left top);
+}
+.button_next:checked:active
+{
+	decorator: image(button_next_checked-active scale-none left top);
+}
+.button_next:checked:hover
+{
+	decorator: image(button_next_checked-hover scale-none left top);
+}
+.button_next:hover
+{
+	decorator: image(button_next_hover scale-none left top);
+}
+.button_plus
+{
+	decorator: image(button_plus_default scale-none left top);
+}
+.button_plus:checked
+{
+	decorator: image(button_plus_checked scale-none left top);
+}
+.button_plus:checked:active
+{
+	decorator: image(button_plus_checked-active scale-none left top);
+}
+.button_plus:checked:hover
+{
+	decorator: image(button_plus_checked-hover scale-none left top);
+}
+.button_plus:hover
+{
+	decorator: image(button_plus_hover scale-none left top);
+}
+.button_prev
+{
+	decorator: image(button_prev_default scale-none left top);
+}
+.button_prev:checked
+{
+	decorator: image(button_prev_checked scale-none left top);
+}
+.button_prev:checked:active
+{
+	decorator: image(button_prev_checked-active scale-none left top);
+}
+.button_prev:checked:hover
+{
+	decorator: image(button_prev_checked-hover scale-none left top);
+}
+.button_prev:hover
+{
+	decorator: image(button_prev_hover scale-none left top);
+}
+.button_save
+{
+	decorator: image(button_save_default scale-none left top);
+}
+.button_save:checked
+{
+	decorator: image(button_save_checked scale-none left top);
+}
+.button_save:checked:active
+{
+	decorator: image(button_save_checked-active scale-none left top);
+}
+.button_save:checked:hover
+{
+	decorator: image(button_save_checked-hover scale-none left top);
+}
+.button_save:hover
+{
+	decorator: image(button_save_hover scale-none left top);
+}
+.button_single
+{
+	decorator: image(button_single_default scale-none left top);
+}
+.button_single:checked
+{
+	decorator: image(button_single_checked scale-none left top);
+}
+.button_single:checked:active
+{
+	decorator: image(button_single_checked-active scale-none left top);
+}
+.button_single:checked:hover
+{
+	decorator: image(button_single_checked-hover scale-none left top);
+}
+.button_single:hover
+{
+	decorator: image(button_single_hover scale-none left top);
+}
+.button_sub
+{
+	decorator: image(button_sub_default scale-none left top);
+}
+.button_sub:checked
+{
+	decorator: image(button_sub_checked scale-none left top);
+}
+.button_sub:checked:active
+{
+	decorator: image(button_sub_checked-active scale-none left top);
+}
+.button_sub:checked:hover
+{
+	decorator: image(button_sub_checked-hover scale-none left top);
+}
+.button_sub:hover
+{
+	decorator: image(button_sub_hover scale-none left top);
+}
+.filter_mode_par
+{
+	decorator: image(filter_mode_par_default scale-none left top);
+}
+.filter_mode_par:checked
+{
+	decorator: image(filter_mode_par_checked scale-none left top);
+}
+.filter_mode_par:checked:active
+{
+	decorator: image(filter_mode_par_checked-active scale-none left top);
+}
+.filter_mode_par:checked:hover
+{
+	decorator: image(filter_mode_par_checked-hover scale-none left top);
+}
+.filter_mode_par:hover
+{
+	decorator: image(filter_mode_par_hover scale-none left top);
+}
+.filter_mode_ser4
+{
+	decorator: image(filter_mode_ser4_default scale-none left top);
+}
+.filter_mode_ser4:checked
+{
+	decorator: image(filter_mode_ser4_checked scale-none left top);
+}
+.filter_mode_ser4:checked:active
+{
+	decorator: image(filter_mode_ser4_checked-active scale-none left top);
+}
+.filter_mode_ser4:checked:hover
+{
+	decorator: image(filter_mode_ser4_checked-hover scale-none left top);
+}
+.filter_mode_ser4:hover
+{
+	decorator: image(filter_mode_ser4_hover scale-none left top);
+}
+.filter_mode_ser6
+{
+	decorator: image(filter_mode_ser6_default scale-none left top);
+}
+.filter_mode_ser6:checked
+{
+	decorator: image(filter_mode_ser6_checked scale-none left top);
+}
+.filter_mode_ser6:checked:active
+{
+	decorator: image(filter_mode_ser6_checked-active scale-none left top);
+}
+.filter_mode_ser6:checked:hover
+{
+	decorator: image(filter_mode_ser6_checked-hover scale-none left top);
+}
+.filter_mode_ser6:hover
+{
+	decorator: image(filter_mode_ser6_hover scale-none left top);
+}
+.filter_mode_split
+{
+	decorator: image(filter_mode_split_default scale-none left top);
+}
+.filter_mode_split:checked
+{
+	decorator: image(filter_mode_split_checked scale-none left top);
+}
+.filter_mode_split:checked:active
+{
+	decorator: image(filter_mode_split_checked-active scale-none left top);
+}
+.filter_mode_split:checked:hover
+{
+	decorator: image(filter_mode_split_checked-hover scale-none left top);
+}
+.filter_mode_split:hover
+{
+	decorator: image(filter_mode_split_hover scale-none left top);
+}
+.juceConditionDisabledAlpha50
+{
+	opacity: 0.500000;
+	pointer-events: none;
+}
+.knob
+{
+	frames: 128;
+	spriteprefix: knob_small_;
+}
+.knob1
+{
+	frames: 128;
+	spriteprefix: knob_small_ring_;
+}
+.knob2
+{
+	frames: 128;
+	spriteprefix: knob_big_ring_;
+}
+.knob3
+{
+	frames: 128;
+	spriteprefix: knob_mid_;
+}
+.list, .grid, .pm-infopanel
+{
+	background-color: rgb(32,32,32);
+}
+.mainbutton_arp
+{
+	decorator: image(mainbutton_arp_default scale-none left top);
+}
+.mainbutton_arp:checked
+{
+	decorator: image(mainbutton_arp_checked scale-none left top);
+}
+.mainbutton_arp:checked:active
+{
+	decorator: image(mainbutton_arp_checked-active scale-none left top);
+}
+.mainbutton_arp:checked:hover
+{
+	decorator: image(mainbutton_arp_checked-hover scale-none left top);
+}
+.mainbutton_arp:hover
+{
+	decorator: image(mainbutton_arp_hover scale-none left top);
+}
+.mainbutton_browser
+{
+	decorator: image(mainbutton_browser_default scale-none left top);
+}
+.mainbutton_browser:checked
+{
+	decorator: image(mainbutton_browser_checked scale-none left top);
+}
+.mainbutton_browser:checked:active
+{
+	decorator: image(mainbutton_browser_checked-active scale-none left top);
+}
+.mainbutton_browser:checked:hover
+{
+	decorator: image(mainbutton_browser_checked-hover scale-none left top);
+}
+.mainbutton_browser:hover
+{
+	decorator: image(mainbutton_browser_hover scale-none left top);
+}
+.mainbutton_common
+{
+	decorator: image(mainbutton_common_default scale-none left top);
+}
+.mainbutton_common:checked
+{
+	decorator: image(mainbutton_common_checked scale-none left top);
+}
+.mainbutton_common:checked:active
+{
+	decorator: image(mainbutton_common_checked-active scale-none left top);
+}
+.mainbutton_common:checked:hover
+{
+	decorator: image(mainbutton_common_checked-hover scale-none left top);
+}
+.mainbutton_common:hover
+{
+	decorator: image(mainbutton_common_hover scale-none left top);
+}
+.mainbutton_filter
+{
+	decorator: image(mainbutton_filter_default scale-none left top);
+}
+.mainbutton_filter:checked
+{
+	decorator: image(mainbutton_filter_checked scale-none left top);
+}
+.mainbutton_filter:checked:active
+{
+	decorator: image(mainbutton_filter_checked-active scale-none left top);
+}
+.mainbutton_filter:checked:hover
+{
+	decorator: image(mainbutton_filter_checked-hover scale-none left top);
+}
+.mainbutton_filter:hover
+{
+	decorator: image(mainbutton_filter_hover scale-none left top);
+}
+.mainbutton_fx1
+{
+	decorator: image(mainbutton_fx1_default scale-none left top);
+}
+.mainbutton_fx1:checked
+{
+	decorator: image(mainbutton_fx1_checked scale-none left top);
+}
+.mainbutton_fx1:checked:active
+{
+	decorator: image(mainbutton_fx1_checked-active scale-none left top);
+}
+.mainbutton_fx1:checked:hover
+{
+	decorator: image(mainbutton_fx1_checked-hover scale-none left top);
+}
+.mainbutton_fx1:hover
+{
+	decorator: image(mainbutton_fx1_hover scale-none left top);
+}
+.mainbutton_fx2
+{
+	decorator: image(mainbutton_fx2_default scale-none left top);
+}
+.mainbutton_fx2:checked
+{
+	decorator: image(mainbutton_fx2_checked scale-none left top);
+}
+.mainbutton_fx2:checked:active
+{
+	decorator: image(mainbutton_fx2_checked-active scale-none left top);
+}
+.mainbutton_fx2:checked:hover
+{
+	decorator: image(mainbutton_fx2_checked-hover scale-none left top);
+}
+.mainbutton_fx2:hover
+{
+	decorator: image(mainbutton_fx2_hover scale-none left top);
+}
+.mainbutton_lfo
+{
+	decorator: image(mainbutton_lfo_default scale-none left top);
+}
+.mainbutton_lfo:checked
+{
+	decorator: image(mainbutton_lfo_checked scale-none left top);
+}
+.mainbutton_lfo:checked:active
+{
+	decorator: image(mainbutton_lfo_checked-active scale-none left top);
+}
+.mainbutton_lfo:checked:hover
+{
+	decorator: image(mainbutton_lfo_checked-hover scale-none left top);
+}
+.mainbutton_lfo:hover
+{
+	decorator: image(mainbutton_lfo_hover scale-none left top);
+}
+.mainbutton_main
+{
+	decorator: image(mainbutton_main_default scale-none left top);
+}
+.mainbutton_main:checked
+{
+	decorator: image(mainbutton_main_checked scale-none left top);
+}
+.mainbutton_main:checked:active
+{
+	decorator: image(mainbutton_main_checked-active scale-none left top);
+}
+.mainbutton_main:checked:hover
+{
+	decorator: image(mainbutton_main_checked-hover scale-none left top);
+}
+.mainbutton_main:hover
+{
+	decorator: image(mainbutton_main_hover scale-none left top);
+}
+.mainbutton_matrix
+{
+	decorator: image(mainbutton_matrix_default scale-none left top);
+}
+.mainbutton_matrix:checked
+{
+	decorator: image(mainbutton_matrix_checked scale-none left top);
+}
+.mainbutton_matrix:checked:active
+{
+	decorator: image(mainbutton_matrix_checked-active scale-none left top);
+}
+.mainbutton_matrix:checked:hover
+{
+	decorator: image(mainbutton_matrix_checked-hover scale-none left top);
+}
+.mainbutton_matrix:hover
+{
+	decorator: image(mainbutton_matrix_hover scale-none left top);
+}
+.mainbutton_osc
+{
+	decorator: image(mainbutton_osc_default scale-none left top);
+}
+.mainbutton_osc:checked
+{
+	decorator: image(mainbutton_osc_checked scale-none left top);
+}
+.mainbutton_osc:checked:active
+{
+	decorator: image(mainbutton_osc_checked-active scale-none left top);
+}
+.mainbutton_osc:checked:hover
+{
+	decorator: image(mainbutton_osc_checked-hover scale-none left top);
+}
+.mainbutton_osc:hover
+{
+	decorator: image(mainbutton_osc_hover scale-none left top);
+}
+.pm-hlayout
+{
+	background-color: black;
+}
+.pm-status
+{
+	background-color: rgb(32,32,32);
+	border: 1dp rgb(67,67,67);
+}
+.pm-vlayout
+{
+	gap: 4dp;
+}
+.sliderH
+{
+}
+.sliderH sliderbar
+{
+	decorator: image(slider_knob.png contain);
+	height: 63dp;
+	width: 63dp;
+}
+.txt
+{
+	color: #ffffff;
+	font-family: Register;
+	font-size: 25.000000dp;
+	text-align: left;
+}
+.text1
+{
+	color: #ffffff;
+	font-family: Register;
+	font-size: 25.000000dp;
+	text-align: right;
+}
+.text2
+{
+	color: #ffffff;
+	font-size: 28.000000dp;
+	text-align: left;
+}
+.text3
+{
+	color: #ffffff;
+	font-size: 32.000000dp;
+	text-align: left;
+}
+.text4
+{
+	color: #002771;
+	font-size: 35.000000dp;
+	text-align: center;
+}
+.text5
+{
+	color: #002771;
+	font-size: 45.000000dp;
+	text-align: center;
+}
+.text6
+{
+	color: #002771;
+	font-size: 26.000000dp;
+	text-align: center;
+}
+.text7
+{
+	color: #009bff;
+	font-size: 28.000000dp;
+	text-align: left;
+}
+
+.textDonate
+{
+	color: #009bff;
+	font-size: 26dp;
+	text-align: center;
+	text-decoration: underline;
+}
+
+body
+{
+	font-size: 28dp;
+}
+input.text
+{
+	background-color: rgb(32,32,32);
+	border: 1dp rgb(67,67,67);
+}
+tree
+{
+	background-color: rgb(32,32,32);
+}
+

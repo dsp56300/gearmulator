@@ -37,7 +37,7 @@ namespace n2xJucePlugin
 		bool parseMultiDump(const pluginLib::SysEx& _msg);
 		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
 
-		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value) override;
+		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 
 		void setSingleParameter(uint8_t _part, n2x::SingleParam _sp, uint8_t _value);
 		void setMultiParameter(n2x::MultiParam _mp, uint8_t _value);

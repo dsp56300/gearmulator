@@ -113,10 +113,17 @@ namespace networkLib
 
 					const auto host = std::string(ptypes::iptostring(addr));
 
-					if(validateResponse(host, buffer))
+					try
 					{
-						exit(true);
-						break;
+						if(validateResponse(host, buffer))
+						{
+							exit(true);
+							break;
+						}
+					}
+					catch (std::range_error& e)
+					{
+						LOGNET(LogLevel::Warning, e.what());
 					}
 				}
 

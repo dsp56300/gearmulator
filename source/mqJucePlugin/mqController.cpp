@@ -170,14 +170,22 @@ namespace mqJucePlugin
 
 	    if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::SingleEditBufferSingleMode) && prog == static_cast<uint8_t>(mqLib::MidiSoundLocation::EditBufferCurrentSingle))
 	    {
+			const auto nameChanged = m_singleEditBuffer.name != patch.name;
 		    m_singleEditBuffer = patch;
+			if (nameChanged)
+				onPatchNameChanged(0);
 
 			if(!isMultiMode())
 				applyPatchParameters(_params, 0);
 	    }
 	    else if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::SingleEditBufferMultiMode))
 	    {
+			const auto nameChanged = m_singleEditBuffers[prog].name != patch.name;
+
 		    m_singleEditBuffers[prog] = patch;
+
+			if (nameChanged)
+				onPatchNameChanged(prog);
 
     		if (isMultiMode())
 				applyPatchParameters(_params, prog);
@@ -288,12 +296,6 @@ namespace mqJucePlugin
 	    return true;
 	}
 
-	bool Controller::parseControllerMessage(const synthLib::SMidiEvent&)
-	{
-		// TODO
-		return false;
-	}
-
 	bool Controller::parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const
 	{
 		const auto* p = getMidiPacket(g_midiPacketNames[_type]);
@@ -395,6 +397,17 @@ namespace mqJucePlugin
 	    return true;
 	}
 
+	const std::string& Controller::getPatchName(const uint8_t _part) const
+	{
+		if (isMultiMode() && _part < m_singleEditBuffers.size())
+			return m_singleEditBuffers[_part].name;
+		if (!isMultiMode() && _part == 0)
+			return m_singleEditBuffer.name;
+
+		static std::string empty;
+		return empty;
+	}
+
 	void Controller::selectPreset(int _offset)
 	{
 	    auto& current = isMultiMode() ? m_currentSingles[getCurrentPart()] : m_currentSingle;
@@ -427,7 +440,7 @@ namespace mqJucePlugin
 	*/  }
 	}
 
-	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const pluginLib::ParamValue _value)
+	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin)
 	{
 		const auto &desc = _parameter.getDescription();
 
@@ -528,6 +541,27 @@ namespace mqJucePlugin
 			return true;
 
 		return defA->doMasksOverlap(*defB);
+	}
+
+	std::vector<uint8_t> Controller::getPartsForMidiChannel(uint8_t _channel)
+	{
+		if (!isMultiMode())
+			return {0};
+
+		
+		std::vector<uint8_t> parts;
+
+		for (uint8_t p=0; p<getPartCount(); ++p)
+		{
+			char paramName[16];
+			(void)snprintf(paramName, std::size(paramName), "MI%dMidiChannel", static_cast<int>(p));
+			auto* param = getParameter(paramName, 0);
+			assert(param && "parameter not found");
+			const auto v = param->getUnnormalizedValue();
+			if (v < 2 || v - 2 == _channel)	// omni, global, 0, 1, ....
+				parts.push_back(p);
+		}
+		return parts;
 	}
 
 	void Controller::requestAllPatches() const

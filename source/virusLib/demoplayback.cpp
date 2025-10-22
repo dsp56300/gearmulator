@@ -27,7 +27,7 @@ namespace virusLib
 		if(baseLib::filesystem::hasExtension(_filename, ".bin"))
 		{
 			std::vector<uint8_t> data;
-			auto* hFile = fopen(_filename.c_str(), "rb");
+			auto* hFile = baseLib::filesystem::openFile(_filename, "rb");
 			if(!hFile)
 			{
 				LOG("Failed to open demo file " << _filename);
@@ -219,7 +219,7 @@ namespace virusLib
 						break;
 					}
 				}
-				FILE* hFile = fopen(filename.c_str(), "wb");
+				FILE* hFile = baseLib::filesystem::openFile(filename, "wb");
 				fwrite(&s.front(), 1, s.size(), hFile);
 				fclose(hFile);
 			}

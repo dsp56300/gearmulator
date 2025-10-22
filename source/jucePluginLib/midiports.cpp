@@ -87,23 +87,30 @@ namespace pluginLib
 
 	bool MidiPorts::setMidiOutput(const juce::String& _out)
 	{
-		if (m_midiOutput != nullptr)
 		{
-			if (m_midiOutput->isBackgroundThreadRunning())
-				m_midiOutput->stopBackgroundThread();
+			std::lock_guard lock(m_mutexOutput);
+			if (m_midiOutput != nullptr)
+			{
+				if (m_midiOutput->isBackgroundThreadRunning())
+					m_midiOutput->stopBackgroundThread();
+			}
+			m_midiOutput = nullptr;
+
+			// send dummy to wakeup thread
+			m_midiOutMessages.push_back(juce::MidiMessage());
 		}
-		m_midiOutput = nullptr;
 
 		if (m_threadOutput)
 		{
-			// send dummy to wakeup thread
-			send(juce::MidiMessage());
 			m_threadOutput->join();
 			m_threadOutput.reset();
 		}
 
 		if(_out.isEmpty())
 			return false;
+
+		std::lock_guard lock(m_mutexOutput);
+
 		m_midiOutput = juce::MidiOutput::openDevice(_out);
 		if (m_midiOutput != nullptr)
 		{

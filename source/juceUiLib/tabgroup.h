@@ -3,12 +3,6 @@
 #include <string>
 #include <vector>
 
-namespace juce
-{
-	class Button;
-	class Component;
-}
-
 namespace genericUI
 {
 	class Editor;
@@ -24,21 +18,15 @@ namespace genericUI
 			return !m_name.empty() && !m_buttonNames.empty() && m_buttonNames.size() == m_pageNames.size();
 		}
 
-		void create(const Editor& _editor);
-
 		const std::string& getName() const { return m_name; }
 
-		bool selectTabWithComponent(const juce::Component* _component) const;
+		const auto& getButtonNames() const { return m_buttonNames; }
+		const auto& getPageNames() const { return m_pageNames; }
 
 	private:
-		void setPage(const size_t _page) const;
-
 		std::string m_name;
 
 		std::vector<std::string> m_pageNames;
 		std::vector<std::string> m_buttonNames;
-
-		std::vector<juce::Component*> m_tabs;
-		std::vector<juce::Button*> m_tabButtons;
 	};
 }

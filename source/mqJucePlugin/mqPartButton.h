@@ -7,14 +7,12 @@ namespace mqJucePlugin
 	class Editor;
 	class mqPartSelect;
 
-	class mqPartButton : public jucePluginEditorLib::PartButton<juce::DrawableButton>
+	class mqPartButton : public jucePluginEditorLib::PartButton
 	{
 	public:
-		explicit mqPartButton(Editor& _editor, const std::string& _name, ButtonStyle _buttonStyle);
+		explicit mqPartButton(Rml::Element* _button, Editor& _editor);
 
-		bool isInterestedInDragSource(const SourceDetails& dragSourceDetails) override;
-
-		void onClick() override;
+		void onClick(Rml::Event&) override;
 
 	private:
 		Editor& m_mqEditor;

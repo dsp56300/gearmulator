@@ -27,7 +27,7 @@ namespace pluginLib
 	{
 		if(!m_descriptions.isValid())
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, 
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, 
 				_processor.getProperties().name + " - Failed to parse Parameter Descriptions json", 
 				"Encountered errors while parsing parameter descriptions:\n\n" + m_descriptions.getErrors());
 		}
@@ -306,14 +306,14 @@ namespace pluginLib
 		return iti->second;
     }
 
-	void Controller::sendLockedParameters(const uint8_t _part)
+	void Controller::sendLockedParameters(const uint8_t _part, const Parameter::Origin _origin/* = Parameter::Origin::PresetChange*/)
 	{
         const auto lockedParameters = m_locking.getLockedParameters(_part);
 
         for (const auto& p : lockedParameters)
         {
 	        const auto v = p->getUnnormalizedValue();
-	        sendParameterChange(*p, static_cast<uint8_t>(v));
+	        sendParameterChange(*p, static_cast<uint8_t>(v), _origin);
         }
 	}
 
@@ -511,6 +511,34 @@ namespace pluginLib
 		return true;
 	}
 
+	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
+	{
+		const auto& cm = getParameterDescriptions().getControllerMap();
+		const auto paramIndices = cm.getParameters(_e);
+
+		if(paramIndices.empty())
+			return false;
+
+		const auto origin = midiEventSourceToParameterOrigin(_e.source);
+
+		const auto parts = getPartsForMidiEvent(_e);
+
+		if (parts.empty())
+			return false;
+
+		for (const uint8_t part : parts)
+		{
+			for (const auto paramIndex : paramIndices)
+			{
+				auto* param = getParameter(paramIndex, part);
+				assert(param && "parameter not found for control change");
+				param->setValueFromSynth(_e.c, origin);
+			}
+		}
+
+		return true;
+	}
+
 	bool Controller::parseMidiMessage(const synthLib::SMidiEvent& _e)
 	{
 		if(_e.sysex.empty())
@@ -532,11 +560,7 @@ namespace pluginLib
 		for (const auto& e : _events)
 		{
 			if (!matrix.enabled(e, synthLib::MidiEventSource::Editor))
-			{
-				if (!e.sysex.empty())
-					int foo=0;
 				continue;
-			}
 
 			m_midiMessages.push_back(e);
 			++numAdded;

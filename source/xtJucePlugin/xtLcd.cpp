@@ -24,10 +24,8 @@ namespace xtJucePlugin
 {
 	// 40*2 LCD simulation
 
-	XtLcd::XtLcd(Component& _parent, Controller& _controller) : Lcd(_parent, 40, 2), m_controller(_controller)
+	XtLcd::XtLcd(Rml::Element* _parent, Controller& _controller) : Lcd(_parent, 40, 2), m_controller(_controller)
 	{
-		postConstruct();
-
 		m_currentText.fill(' ');
 	}
 

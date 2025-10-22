@@ -7,7 +7,7 @@ namespace xtJucePlugin
 	class GraphPhase : public Graph
 	{
 	public:
-		explicit GraphPhase(WaveEditor& _editor);
+		explicit GraphPhase(WaveEditor& _editor, Rml::Element* _parent);
 
 		float normalize(float _in) const override;
 		float unnormalize(float _in) const override;

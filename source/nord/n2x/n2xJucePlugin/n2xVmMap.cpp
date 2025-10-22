@@ -2,12 +2,14 @@
 
 #include "n2xController.h"
 #include "n2xEditor.h"
+#include "juceRmlUi/rmlElemButton.h"
+#include "juceRmlUi/rmlElemValue.h"
 
 namespace n2xJucePlugin
 {
 	constexpr const char* g_postfix = "Sens";
 
-	class SliderListener : public juce::Slider::Listener
+	class SliderListener : public Rml::EventListener
 	{
 	public:
 		SliderListener() = delete;
@@ -18,31 +20,39 @@ namespace n2xJucePlugin
 		SliderListener& operator=(const SliderListener&) = delete;
 		SliderListener& operator=(SliderListener&&) = default;
 
-		SliderListener(juce::Slider* _slider, const std::function<void(juce::Slider*)>& _onValueChanged) : m_slider(_slider), m_onValueChanged(_onValueChanged)
+		SliderListener(Rml::Element* _slider, const std::function<void(Rml::Element*)>& _onValueChanged) : m_slider(_slider), m_onValueChanged(_onValueChanged)
 		{
-			_slider->addListener(this);
+			_slider->AddEventListener(Rml::EventId::Change, this);
 		}
+
 		~SliderListener() override
 		{
-			m_slider->removeListener(this);
+			m_slider->RemoveEventListener(Rml::EventId::Change, this);
 		}
-		void sliderValueChanged(juce::Slider* _slider) override
+
+		void ProcessEvent(Rml::Event& event) override
 		{
-			if (m_onValueChanged)
-				m_onValueChanged(_slider);
+			if (event.GetId() == Rml::EventId::Change)
+			{
+				if (m_onValueChanged)
+					m_onValueChanged(m_slider);
+			}
 		}
+
 	private:
-		juce::Slider* m_slider;
-		std::function<void(juce::Slider*)> m_onValueChanged;
+		Rml::Element* m_slider;
+		std::function<void(Rml::Element*)> m_onValueChanged;
 	};
 
-	VmMap::VmMap(Editor& _editor, pluginLib::ParameterBinding& _binding)
+	VmMap::VmMap(Editor& _editor)
 	: m_editor(_editor)
-	, m_btVmMap(_editor.findComponentT<juce::Button>("VMMAP"))
+	, m_btVmMap(_editor.findChild("VMMAP"))
 	{
 		auto& c = _editor.getN2xController();
 
 		const auto& descs = c.getParameterDescriptions().getDescriptions();
+
+		auto* binding = _editor.getRmlParameterBinding();
 
 		for (const auto& desc : descs)
 		{
@@ -54,11 +64,20 @@ namespace n2xJucePlugin
 			if(c.getParameterDescriptions().getIndexByName(idxBase, nameBase) &&
 				c.getParameterDescriptions().getIndexByName(idxVm, nameVm))
 			{
-				auto* compBase = _editor.findComponentByParamT<juce::Slider>(nameBase);
-				auto* compVm = _editor.findComponentByParamT<juce::Slider>(nameVm);
+				auto* paramBase = c.getParameter(idxBase, c.getCurrentPart());
+				auto* paramVm = c.getParameter(idxVm, c.getCurrentPart());
+
+				auto* compBase = binding->getElementForParameter(paramBase, false);
+				auto* compVm = binding->getElementForParameter(paramVm, false);
+
+				if (!compVm || !compBase)
+					continue;
+
+				// on knobs, the shift key adjust the speed scale, we do not want this on vm sliders
+				compVm->SetAttribute("speedScaleShift", 1.0f);
 
 				// we do not want vm params to be bound at all, we do this manually. Remove any binding that might still be present in a skin
-				_binding.unbind(compVm);
+				binding->unbind(*compVm);
 
 				auto vmParam = std::make_unique<VmParam>();
 
@@ -67,7 +86,7 @@ namespace n2xJucePlugin
 				vmParam->compBase = compBase;
 				vmParam->compVm = compVm;
 
-				vmParam->sliderListenerVm = new SliderListener(compVm, [this, vmParam = vmParam.get()](juce::Slider* _slider)
+				vmParam->sliderListenerVm = new SliderListener(compVm, [this, vmParam = vmParam.get()](Rml::Element* _slider)
 				{
 					onVmSliderChanged(*vmParam);
 				});
@@ -76,10 +95,11 @@ namespace n2xJucePlugin
 			}
 		}
 
-		m_btVmMap->onClick = [this]
+		juceRmlUi::EventListener::AddClick(m_btVmMap, [this]()
 		{
-			toggleVmMap(m_btVmMap->getToggleState());
-		};
+			toggleVmMap(juceRmlUi::ElemButton::isChecked(m_btVmMap));
+		});
+
 		m_onCurrentPartChanged.set(c.onCurrentPartChanged, [this](const uint8_t&/* _part*/)
 		{
 			onCurrentPartChanged();
@@ -107,13 +127,11 @@ namespace n2xJucePlugin
 
 		for (auto& vmParam : m_vmParams)
 		{
-			vmParam->compVm->setInterceptsMouseClicks(_enabled, _enabled);
-			vmParam->compBase->setInterceptsMouseClicks(!_enabled, !_enabled);
-			vmParam->compVm->setEnabled(_enabled);
-			vmParam->compBase->setEnabled(!_enabled);
+			vmParam->compVm->SetProperty(Rml::PropertyId::PointerEvents, _enabled ? Rml::Style::PointerEvents::Auto : Rml::Style::PointerEvents::None);
+			vmParam->compBase->SetProperty(Rml::PropertyId::PointerEvents, _enabled ? Rml::Style::PointerEvents::None : Rml::Style::PointerEvents::Auto);
 		}
 
-		m_btVmMap->setToggleState(_enabled, juce::dontSendNotification);
+		juceRmlUi::ElemButton::setChecked(m_btVmMap, _enabled);
 	}
 
 	void VmMap::onCurrentPartChanged() const
@@ -154,12 +172,12 @@ namespace n2xJucePlugin
 		if (!_param.paramBase || !_param.paramVm)
 			return;
 
-		int value = juce::roundToInt(_param.compVm->getValue());
+		int value = juce::roundToInt(juceRmlUi::ElemValue::getValue(_param.compVm));
 		value -= _param.paramBase->getUnnormalizedValue();
 
 		_param.paramVm->setUnnormalizedValue(value, pluginLib::Parameter::Origin::Ui);
 
-		m_editor.getFocusedParameter().updateByComponent(_param.compVm);
+		m_editor.getFocusedParameter().updateByElement(_param.compVm);
 	}
 
 	void VmMap::onBaseParamChanged(const VmParam& _vmParam, pluginLib::Parameter*)
@@ -174,16 +192,20 @@ namespace n2xJucePlugin
 
 	void VmMap::updateVmSlider(const VmParam& _vmParam)
 	{
-		const auto& range = _vmParam.compBase->getRange();
-		_vmParam.compVm->setRange(range.getStart(), range.getEnd());
+		const auto valMin = _vmParam.compBase->GetAttribute("min", 0.0f);
+		const auto valMax = _vmParam.compBase->GetAttribute("max", 1.0f);
+
+		_vmParam.compVm->SetAttribute("min", valMin);
+		_vmParam.compVm->SetAttribute("max", valMax);
 
 		const auto baseValue = _vmParam.paramBase->getUnnormalizedValue();
 
 		const auto offset = _vmParam.paramVm->getUnnormalizedValue();
 
-		_vmParam.compVm->setValue(baseValue + offset, juce::dontSendNotification);
-		_vmParam.compVm->setDoubleClickReturnValue(true, baseValue);
+		juceRmlUi::ElemValue::setValue(_vmParam.compVm, static_cast<float>(baseValue + offset), false);
 
-		_vmParam.compVm->setAlpha(offset != 0 ? 1.0f : 0.0f);
+		_vmParam.compVm->SetAttribute("default", baseValue);
+
+		_vmParam.compVm->SetProperty(Rml::PropertyId::Opacity, Rml::Property(offset != 0 ? 1.0f : 0.0f, Rml::Unit::NUMBER));
 	}
 }

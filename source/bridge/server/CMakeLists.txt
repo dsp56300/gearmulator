@@ -23,4 +23,7 @@ target_link_libraries(bridgeServer PUBLIC bridgeLib)
 set_property(TARGET bridgeServer PROPERTY FOLDER "Bridge")
 set_property(TARGET bridgeServer PROPERTY OUTPUT_NAME "dsp56300EmuServer")
 
+set_target_properties(bridgeServer PROPERTIES TUS_PRODUCT_NAME "DSPBridge")
+tus_exportTarget(bridgeServer)
+
 install(TARGETS bridgeServer DESTINATION . COMPONENT DSPBridgeServer)

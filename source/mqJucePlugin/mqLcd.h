@@ -9,7 +9,7 @@
 class MqLcd final : public jucePluginEditorLib::Lcd, public MqLcdBase
 {
 public:
-	explicit MqLcd(Component& _parent);
+	explicit MqLcd(Rml::Element* _parent);
 	~MqLcd() override;
 
 	void setText(const std::array<uint8_t, 40> &_text) override;

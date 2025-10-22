@@ -1,112 +1,74 @@
 #include "parameterOverlay.h"
-#include "parameterOverlays.h"
+
 #include "pluginEditor.h"
-#include "imagePool.h"
 
 #include "jucePluginLib/parameter.h"
-#include "juceUiLib/uiObjectStyle.h"
+
+#include "RmlUi/Core/ElementDocument.h"
 
 namespace jucePluginEditorLib
 {
-	ParameterOverlay::ParameterOverlay(ParameterOverlays& _overlays, juce::Component* _component) : m_overlays(_overlays), m_component(_component)
+	namespace
+	{
+		std::string toString(const ParameterOverlay::Type _type)
+		{
+			switch(_type)
+			{
+				case ParameterOverlay::Type::Lock: return "lock";
+				case ParameterOverlay::Type::Link: return "link";
+				default: return {};
+			}
+		}
+	}
+
+	ParameterOverlay::ParameterOverlay(ParameterOverlays& _overlays, Rml::Element* _component) : m_overlays(_overlays), m_component(_component)
 	{
 	}
 
 	ParameterOverlay::~ParameterOverlay()
 	{
 		setParameter(nullptr);
-
-		for (const auto* image : m_images)
-			delete image;
 	}
 
-	void ParameterOverlay::onBind(const pluginLib::ParameterBinding::BoundParameter& _parameter)
+	void ParameterOverlay::onBind(pluginLib::Parameter* _parameter, Rml::Element*)
 	{
-		setParameter(_parameter.parameter);
+		setParameter(_parameter);
 	}
 
-	void ParameterOverlay::onUnbind(const pluginLib::ParameterBinding::BoundParameter&)
+	void ParameterOverlay::onUnbind(pluginLib::Parameter* _parameter, Rml::Element*)
 	{
 		setParameter(nullptr);
 	}
 
-	ParameterOverlay::OverlayProperties ParameterOverlay::getOverlayProperties() const
+	void ParameterOverlay::toggleOverlay(Type _type, const bool _enable, float _opacity/* = 1.0f*/)
 	{
-		OverlayProperties result;
-
-		const auto& editor = m_overlays.getEditor();
-
-		auto& root = editor.getRootObject();
-		const auto& props = m_component->getProperties();
-
-		result.scale = root.getPropertyFloat("overlayScale", 0.2f);
-		result.scale = props.getWithDefault("overlayScale", result.scale);
-
-		std::string color = root.getProperty("overlayColor", "ffffffff");
-		color = props.getWithDefault("overlayColor", juce::String(color)).toString().toStdString();
-		genericUI::UiObjectStyle::parseColor(result.color, color);
-
-		result.position.x = root.getPropertyFloat("overlayPosX", 0.0f);
-		result.position.y = root.getPropertyFloat("overlayPosY", 0.0f);
-
-		result.position.x = props.getWithDefault("overlayPosX", result.position.x);
-		result.position.y = props.getWithDefault("overlayPosY", result.position.y);
-
-		return result;
-	}
-
-	void ParameterOverlay::toggleOverlay(ImagePool::Type _type, const bool _enable, float _opacity/* = 1.0f*/)
-	{
-		juce::DrawableImage*& drawableImage = m_images[static_cast<uint32_t>(_type)];
-
 		if(_enable)
 		{
-			const auto props = getOverlayProperties();
+			if (m_overlayElements.find(_type) != m_overlayElements.end())
+				return;
 
-			auto updatePosition = [&]()
-			{
-				const auto x = static_cast<int>(props.position.x) + m_component->getPosition().x;
-				const auto y = static_cast<int>(props.position.y) + m_component->getPosition().y;
-				const auto w = drawableImage->getWidth();
-				const auto h = drawableImage->getHeight();
+			auto overlay = m_component->GetOwnerDocument()->CreateElement("div");
 
-				drawableImage->setBoundingBox(juce::Rectangle(x - (w>>1), y - (h>>1), w, h).toFloat());
-			};
+			overlay->SetAttribute("class", "tus-parameteroverlay tus-parameteroverlaytype-" + toString(_type));
 
-			if(!drawableImage)
-			{
-				auto& editor = m_overlays.getEditor();
+			overlay->SetProperty(Rml::PropertyId::Opacity, Rml::Property(_opacity, Rml::Unit::NUMBER));
 
-				auto* image = editor.getImagePool().getImage(_type, props.scale);
-
-				if(image)
-				{
-					drawableImage = new juce::DrawableImage(*image);
-
-//					_image->setOverlayColour(props.color);	// juce cannot do it, it does not multiply but replaced the color entirely
-					drawableImage->setInterceptsMouseClicks(false, false);
-					drawableImage->setAlwaysOnTop(true);
-					m_component->getParentComponent()->addAndMakeVisible(drawableImage);
-				}
-			}
-			else
-			{
-				drawableImage->setVisible(true);
-			}
-
-			drawableImage->setOpacity(_opacity);
-
-			updatePosition();
+			m_overlayElements.insert({ _type, m_component->AppendChild(std::move(overlay)) });
 		}
-		else if(drawableImage)
+		else
 		{
-			drawableImage->setVisible(false);
+			auto it = m_overlayElements.find(_type);
+			if(it == m_overlayElements.end())
+				return;
+			auto* overlay = it->second;
+			m_overlayElements.erase(it);
+			overlay->GetParentNode()->RemoveChild(overlay);
 		}
 	}
 
 	void ParameterOverlay::updateOverlays()
 	{
-		if(m_component->getParentComponent() == nullptr)
+		if(m_component->GetParentNode() == nullptr)
 			return;
 
 		const auto isLocked = m_parameter != nullptr && m_parameter->isLocked();
@@ -115,42 +77,8 @@ namespace jucePluginEditorLib
 
 		const auto linkAlpha = isLinkSource ? 1.0f : 0.5f;
 
-		toggleOverlay(ImagePool::Type::Lock, isLocked);
-		toggleOverlay(ImagePool::Type::Link, isLinkSource || isLinkTarget, linkAlpha);
-
-		std::array<juce::DrawableImage*, OverlayCount> visibleOverlays;
-
-		uint32_t count = 0;
-		int totalWidth = 0;
-
-		for (auto* image : m_images)
-		{
-			if(image && image->isVisible())
-			{
-				visibleOverlays[count++] = image;
-				totalWidth += image->getWidth();
-			}
-		}
-
-		if(count <= 1)
-			return;
-
-		const auto avgWidth = totalWidth / count;
-
-		int x = -static_cast<int>(totalWidth >> 1) + static_cast<int>(avgWidth >> 1) + static_cast<int>(visibleOverlays[0]->getBoundingBox().topLeft.x);
-
-		for(uint32_t i=0; i<count; ++i)
-		{
-			auto bounds = visibleOverlays[i]->getBoundingBox();
-			const auto w = bounds.getWidth();
-			const auto fx = static_cast<float>(x);
-			bounds.topLeft.x = fx;
-			bounds.bottomLeft.x = fx;
-			bounds.topRight.x = fx + w;
-			visibleOverlays[i]->setBoundingBox(bounds);
-
-			x += visibleOverlays[i]->getWidth();
-		}
+		toggleOverlay(Type::Lock, isLocked);
+		toggleOverlay(Type::Link, isLinkSource || isLinkTarget, linkAlpha);
 	}
 
 	void ParameterOverlay::setParameter(pluginLib::Parameter* _parameter)

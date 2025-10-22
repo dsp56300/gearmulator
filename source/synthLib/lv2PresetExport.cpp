@@ -222,7 +222,7 @@ namespace synthLib
 	{
 		const auto manifestFile = getManifestFilename(_path);
 
-		FILE* const hFile = fopen(manifestFile.c_str(), "rb");
+		FILE* const hFile = baseLib::filesystem::openFile(manifestFile, "rb");
 		if(!hFile)
 			return false;
 		(void)fclose(hFile);

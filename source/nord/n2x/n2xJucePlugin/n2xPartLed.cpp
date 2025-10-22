@@ -1,6 +1,7 @@
 #include "n2xPartLed.h"
 
 #include "jucePluginLib/parameter.h"
+#include "RmlUi/Core/Element.h"
 
 namespace n2xJucePlugin
 {
@@ -19,11 +20,14 @@ namespace n2xJucePlugin
 		disableClick();
 	}
 
-	void PartLed::updateState(juce::Button& _target, const pluginLib::Parameter* _source) const
+	void PartLed::updateState(Rml::Element& _target, const pluginLib::Parameter* _source) const
 	{
 		ParameterDrivenLed::updateState(_target, _source);
+
 		const auto ch = _source->getUnnormalizedValue();
-		_target.setAlpha(ch > 0 && ch <= 15 ? 0.5f : 1.0f);
+		const auto alpha = ch > 0 && ch <= 15 ? 0.5f : 1.0f;
+
+		_target.SetProperty(Rml::PropertyId::Opacity, Rml::Property(alpha, Rml::Unit::NUMBER));
 	}
 
 	bool PartLed::updateToggleState(const pluginLib::Parameter* _parameter) const

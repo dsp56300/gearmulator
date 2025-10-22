@@ -7,7 +7,6 @@
 namespace juce
 {
 	class Component;
-	enum class MessageBoxIconType;
 }
 
 namespace genericUI
@@ -15,6 +14,14 @@ namespace genericUI
 	class MessageBox
 	{
 	public:
+		enum class Icon : uint8_t
+		{
+		    None,
+		    Question,
+		    Warning,
+		    Info,
+		};
+
 		enum class Result : uint8_t
 		{
 			Yes = 0,
@@ -25,10 +32,10 @@ namespace genericUI
 
 		using Callback = std::function<void(Result)>;
 
-		static void showYesNo(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, Callback _callback);
-		static void showOkCancel(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, Callback _callback);
-		static void showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent = nullptr);
-		static void showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent, std::function<void()> _callback);
-		static void showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, std::function<void()> _callback);
+		static void showYesNo(Icon _icon, const std::string& _header, const std::string& _message, Callback _callback);
+		static void showOkCancel(Icon _icon, const std::string& _header, const std::string& _message, Callback _callback);
+		static void showOk(Icon _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent = nullptr);
+		static void showOk(Icon _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent, std::function<void()> _callback);
+		static void showOk(Icon _icon, const std::string& _header, const std::string& _message, std::function<void()> _callback);
 	};
 }

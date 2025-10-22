@@ -1,10 +1,16 @@
 #pragma once
-#include "n2xFocusedParameter.h"
-#include "jucePluginLib/types.h"
 
-namespace juce
+#include "jucePluginLib/types.h"
+#include "jucePluginLib/parameterlistener.h"
+
+namespace pluginLib
 {
-	class ComboBox;
+	class Parameter;
+}
+
+namespace juceRmlUi
+{
+	class ElemComboBox;
 }
 
 namespace n2xJucePlugin
@@ -21,8 +27,8 @@ namespace n2xJucePlugin
 		void setOutModeCD(uint8_t _mode);
 		void onOutModeChanged(pluginLib::ParamValue _paramValue);
 
-		juce::ComboBox* m_outAB;
-		juce::ComboBox* m_outCD;
+		juceRmlUi::ElemComboBox* m_outAB;
+		juceRmlUi::ElemComboBox* m_outCD;
 		pluginLib::Parameter* const m_parameter;
 
 		pluginLib::ParameterListener m_onOutputModeChanged;

@@ -5,8 +5,8 @@
 
 namespace xtJucePlugin
 {
-	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const pluginLib::ParameterBinding& _parameterBinding, const Editor& _editor)
-		: jucePluginEditorLib::FocusedParameter(_controller, _parameterBinding, _editor)
+	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const Editor& _editor)
+		: jucePluginEditorLib::FocusedParameter(_controller, _editor)
 		, m_editor(_editor)
 	{
 	}

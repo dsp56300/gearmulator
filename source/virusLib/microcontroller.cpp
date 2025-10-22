@@ -524,7 +524,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		if(!isValid(_dump))
 			return;
 
-		SMidiEvent ev(_source);
+		SMidiEvent ev(MidiEventSource::Device);
 
 		auto& response = ev.sysex;
 
@@ -609,7 +609,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 	auto buildGlobalResponse = [&](const uint8_t _param)
 	{
-		SMidiEvent ev(_source);
+		SMidiEvent ev(MidiEventSource::Device);
 		auto& response = ev.sysex;
 
 		buildResponseHeader(ev);
@@ -666,8 +666,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 		const uint8_t channel = _part == SINGLE ? 0 : _part;
 
-		for (const auto cc : g_pageA)	 _responses.emplace_back(_source, M_CONTROLCHANGE + channel, cc, single[cc], 0);
-		for (const auto cc : g_pageB)	 _responses.emplace_back(_source, M_POLYPRESSURE, cc, single[cc + 128], 0);
+		for (const auto cc : g_pageA)	 _responses.emplace_back(MidiEventSource::Device, M_CONTROLCHANGE + channel, cc, single[cc], 0);
+		for (const auto cc : g_pageB)	 _responses.emplace_back(MidiEventSource::Device, M_POLYPRESSURE, cc, single[cc + 128], 0);
 	};
 
 	auto enqueue = [&]

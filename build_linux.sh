@@ -7,7 +7,7 @@ else
 	threads=$1
 fi
 
-cmake . -B ./temp/cmake_linux_${host} -Dgearmulator_BUILD_JUCEPLUGIN=ON -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON -Dgearmulator_SYNTH_OSIRUS=ON
+cmake . -B ./temp/cmake_linux_${host} -Dgearmulator_BUILD_JUCEPLUGIN=ON -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON -Dgearmulator_SYNTH_OSIRUS=ON -Dgearmulator_SYNTH_OSTIRUS=ON -Dgearmulator_SYNTH_VAVRA=OFF -Dgearmulator_SYNTH_XENIA=OFF -Dgearmulator_SYNTH_NODALRED2X=OFF
 cd ./temp/cmake_linux_${host}
 cmake --build . --config Release -j $threads
 cpack -G DEB

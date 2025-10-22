@@ -17,7 +17,6 @@ set(SOURCES
 	midipacket.cpp midipacket.h
 	midiports.cpp midiports.h
 	parameter.cpp parameter.h
-	parameterbinding.cpp parameterbinding.h
 	parameterdescription.cpp parameterdescription.h
 	parameterdescriptions.cpp parameterdescriptions.h
 	parameterlink.cpp parameterlink.h

@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "parameter.h"
 #include "synthLib/midiTypes.h"
 
 namespace pluginLib
@@ -12,13 +11,31 @@ namespace pluginLib
 	class ControllerMap
 	{
 	public:
-		void add(synthLib::MidiStatusByte _midiStatusByte, uint8_t _cc, uint32_t _paramIndex);
+		using ParamIndex = uint32_t;
+		using ControlType = uint16_t;
+		using MessageType = synthLib::MidiStatusByte;
 
-		const std::vector<uint32_t>& getControlledParameters(const synthLib::SMidiEvent& _ev) const;
-		std::vector<uint8_t> getControlChanges(synthLib::MidiStatusByte _midiStatusByte, uint32_t _paramIndex) const;
+		static constexpr synthLib::MidiStatusByte NrpnType = MessageType::M_SYSTEMRESET;
+
+		struct TwoWayMap
+		{
+			std::unordered_map<ControlType, std::vector<ParamIndex>> ccToParamIndex;
+			std::unordered_map<ParamIndex, std::vector<ControlType>> paramIndexToCC;
+		};
+
+		void add(MessageType _messageType, ControlType _controlType, ParamIndex _paramIndex);
+
+		const std::vector<uint32_t>& getParameters(const synthLib::SMidiEvent& _ev) const;
+		const std::vector<uint32_t>& getParameters(uint8_t _nrpnMsb, uint8_t _nrpnLsb) const;
+
+		std::vector<ControlType> getControlTypes(MessageType _midiStatusByte, ParamIndex _paramIndex) const;
+
+		static constexpr uint16_t nrpn(const uint8_t _nrpnMsb, const uint8_t _nrpnLsb)
+		{
+			return static_cast<uint16_t>(static_cast<uint16_t>(_nrpnMsb & 0x7f) << 7) | static_cast<uint16_t>(_nrpnLsb & 0x7f);
+		}
 
 	private:
-		std::unordered_map<uint8_t, std::unordered_map<uint8_t, std::vector<uint32_t>>> m_ccToParamIndex;	// type (control change, poly pressure) => index (modwheel, main vol, ...) => parameter index
-		std::unordered_map<uint8_t, std::unordered_map<uint32_t, std::vector<uint8_t>>> m_paramIndexToCC;	// type (control change, poly pressure) => parameter index => index (modwheel, main vol, ...)
+		std::unordered_map<MessageType, TwoWayMap> m_mapsPerMessageType;
 	};
 }

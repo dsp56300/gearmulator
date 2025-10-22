@@ -4,8 +4,14 @@
 #include "mqLib/leds.h"
 
 #include "mqLcdBase.h"
+#include "juceRmlUi/rmlElemKnob.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
+
+namespace juceRmlUi
+{
+	class ElemButton;
+}
 
 namespace mqJucePlugin
 {
@@ -28,9 +34,9 @@ namespace mqJucePlugin
 		void onButtonStateChanged(uint32_t _index) const;
 		void onEncoderValueChanged(uint32_t _index);
 
-		std::array<juce::Button*, static_cast<uint32_t>(mqLib::Leds::Led::Count)> m_leds{};
-		std::array<juce::Button*, static_cast<uint32_t>(mqLib::Buttons::ButtonType::Count)> m_buttons{};
-		std::array<juce::Slider*, static_cast<uint32_t>(mqLib::Buttons::Encoders::Count)> m_encoders{};
+		std::array<Rml::Element*, static_cast<uint32_t>(mqLib::Leds::Led::Count)> m_leds{};
+		std::array<Rml::Element*, static_cast<uint32_t>(mqLib::Buttons::ButtonType::Count)> m_buttons{};
+		std::array<Rml::Element*, static_cast<uint32_t>(mqLib::Buttons::Encoders::Count)> m_encoders{};
 		std::array<float, static_cast<uint32_t>(mqLib::Buttons::Encoders::Count)> m_encoderValues{};
 
 		Controller& m_controller;

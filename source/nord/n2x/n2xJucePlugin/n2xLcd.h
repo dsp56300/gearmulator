@@ -6,6 +6,11 @@
 
 #include "juce_events/juce_events.h"
 
+namespace Rml
+{
+	class Element;
+}
+
 namespace juce
 {
 	class Label;
@@ -18,7 +23,7 @@ namespace n2xJucePlugin
 	class Lcd : juce::Timer
 	{
 	public:
-		enum class AnimState
+		enum class AnimState : uint8_t
 		{
 			Start,
 			Scroll,
@@ -45,7 +50,7 @@ namespace n2xJucePlugin
 		const std::string& getCurrentText() const;
 
 		Editor& m_editor;
-		juce::Label* m_label;
+		Rml::Element* m_label;
 		std::string m_text;
 		std::string m_clippedText;
 		uint32_t m_currentOffset = 0;

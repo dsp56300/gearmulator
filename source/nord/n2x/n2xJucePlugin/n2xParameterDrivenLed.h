@@ -5,9 +5,9 @@
 #include <string>
 #include <cstdint>
 
-namespace juce
+namespace Rml
 {
-	class Button;
+	class Element;
 }
 
 namespace n2xJucePlugin
@@ -23,7 +23,7 @@ namespace n2xJucePlugin
 		virtual ~ParameterDrivenLed() = default;
 
 	protected:
-		virtual void updateState(juce::Button& _target, const pluginLib::Parameter* _source) const;
+		virtual void updateState(Rml::Element& _target, const pluginLib::Parameter* _source) const;
 		virtual bool updateToggleState(const pluginLib::Parameter* _parameter) const = 0;
 		virtual void onClick(pluginLib::Parameter* _targetParameter, bool _toggleState) {}
 
@@ -35,7 +35,7 @@ namespace n2xJucePlugin
 
 		Editor& m_editor;
 		const std::string m_parameterName;
-		juce::Button* m_led;
+		Rml::Element* m_led;
 		const uint8_t m_part;
 
 		pluginLib::ParameterListener m_onParamChanged;

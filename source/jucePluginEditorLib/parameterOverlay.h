@@ -1,10 +1,24 @@
 #pragma once
 
-#include "imagePool.h"
-#include "jucePluginLib/parameterbinding.h"
+#include "baseLib/event.h"
+
+#include "RmlUi/Core/Vector2.h"
+
+#include <cstdint>
+
+namespace pluginLib
+{
+	class Parameter;
+}
+
+namespace Rml
+{
+	class Element;
+}
 
 namespace juce
 {
+	class DrawableImage;
 	class Component;
 }
 
@@ -15,14 +29,22 @@ namespace jucePluginEditorLib
 	class ParameterOverlay
 	{
 	public:
-		static constexpr size_t InvalidListenerId = baseLib::Event<int>::InvalidListenerId;
-		static constexpr uint32_t OverlayCount = static_cast<uint32_t>(ImagePool::Type::Count);
+		enum class Type
+		{
+			Lock,
+			Link,
 
-		explicit ParameterOverlay(ParameterOverlays& _overlays, juce::Component* _component);
+			Count
+		};
+
+		static constexpr size_t InvalidListenerId = baseLib::Event<int>::InvalidListenerId;
+		static constexpr uint32_t OverlayCount = static_cast<uint32_t>(Type::Count);
+
+		explicit ParameterOverlay(ParameterOverlays& _overlays, Rml::Element* _component);
 		~ParameterOverlay();
 
-		void onBind(const pluginLib::ParameterBinding::BoundParameter& _parameter);
-		void onUnbind(const pluginLib::ParameterBinding::BoundParameter& _parameter);
+		void onBind(pluginLib::Parameter* _parameter, Rml::Element* _element);
+		void onUnbind(pluginLib::Parameter* _parameter, Rml::Element* _element);
 
 		void refresh()
 		{
@@ -32,25 +54,25 @@ namespace jucePluginEditorLib
 	private:
 		struct OverlayProperties
 		{
-			juce::Colour color = juce::Colour(0xffffffff);
+			uint32_t color = 0xffffffff;
 			float scale = 0.2f;
-			juce::Point<float> position = juce::Point<float>(0,0);
+			Rml::Vector2f position = { 0,0 };
 		};
 
-		OverlayProperties getOverlayProperties() const;
-
-		void toggleOverlay(ImagePool::Type _type, bool _enable, float _opacity = 1.0f);
+		void toggleOverlay(Type _type, bool _enable, float _opacity = 1.0f);
 
 		void updateOverlays();
 		void setParameter(pluginLib::Parameter* _parameter);
 
 		ParameterOverlays& m_overlays;
-		juce::Component* const m_component;
+		Rml::Element* const m_component;
+
 		pluginLib::Parameter* m_parameter = nullptr;
+		std::unordered_map<Type, Rml::Element*> m_overlayElements;
 
 		size_t m_parameterLockChangedListener = InvalidListenerId;
 		size_t m_parameterLinkChangedListener = InvalidListenerId;
 
-		std::array<juce::DrawableImage*, OverlayCount> m_images{nullptr,nullptr};
+//		std::array<juce::DrawableImage*, OverlayCount> m_images{nullptr,nullptr};
 	};
 }

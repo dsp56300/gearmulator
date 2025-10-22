@@ -33,6 +33,7 @@ namespace pluginLib
 {
 	constexpr char g_saveMagic[] = "DSP56300";
 	constexpr uint32_t g_saveVersion = 2;
+	constexpr const char* const g_defaultProgramName = "default";
 
 	bridgeLib::SessionId generateRemoteSessionId()
 	{
@@ -44,6 +45,7 @@ namespace pluginLib
 		, m_properties(std::move(_properties))
 		, m_midiPorts(*this)
 		, m_remoteSessionId(generateRemoteSessionId())
+		, m_programName(g_defaultProgramName)
 	{
 		juce::File(getPublicRomFolder()).createDirectory();
 
@@ -152,7 +154,7 @@ namespace pluginLib
 				}
 				juce::Timer::callAfterDelay(2000, [this, msg]
 				{
-					genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 						"Device Initialization failed", msg, 
 						[this]
 						{
@@ -234,8 +236,38 @@ namespace pluginLib
 		s.toVector(_targetBuffer, true);
 	}
 
+	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	{
+		if(_sourceBuffer.empty())
+			return true;
+
+		// In Vavra, the only data we had was the gain parameters
+		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		{
+			baseLib::BinaryStream ss(_sourceBuffer);
+			readGain(ss);
+			return true;
+		}
+
+		baseLib::BinaryStream s(_sourceBuffer);
+		baseLib::ChunkReader cr(s);
+
+		loadChunkData(cr);
+
+		return _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
+	}
+
 	void Processor::saveChunkData(baseLib::BinaryStream& s)
 	{
+		// it is important that this is stored before other chunks to restore state to the remote properly
+		if (m_deviceType == DeviceType::Remote)
+		{
+			baseLib::ChunkWriter cw(s, "REMO", 1);
+			s.write(static_cast<int32_t>(m_deviceType));
+			s.write(m_remoteHost);
+			s.write(m_remotePort);
+		}
+
 		{
 			std::vector<uint8_t> buffer;
 			getPlugin().getState(buffer, synthLib::StateTypeGlobal);
@@ -264,27 +296,12 @@ namespace pluginLib
 
 		m_midiPorts.saveChunkData(s);
 		m_midiRoutingMatrix.saveChunkData(s);
-	}
 
-	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
-	{
-		if(_sourceBuffer.empty())
-			return true;
-
-		// In Vavra, the only data we had was the gain parameters
-		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		if (m_programName != g_defaultProgramName)
 		{
-			baseLib::BinaryStream ss(_sourceBuffer);
-			readGain(ss);
-			return true;
+			baseLib::ChunkWriter cw(s, "PROG", 1);
+			s.write(m_programName);
 		}
-
-		baseLib::BinaryStream s(_sourceBuffer);
-		baseLib::ChunkReader cr(s);
-
-		loadChunkData(cr);
-
-		return _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
 	}
 
 	void Processor::loadChunkData(baseLib::ChunkReader& _cr)
@@ -312,6 +329,20 @@ namespace pluginLib
 		{
 			const auto sr = _binaryStream.read<float>();
 			setPreferredDeviceSamplerate(sr);
+		});
+
+		_cr.add("PROG", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			m_programName = _binaryStream.readString();
+		});
+
+		_cr.add("REMO", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			const auto type = static_cast<DeviceType>(_binaryStream.read<int32_t>());
+			const auto host = _binaryStream.readString();
+			const auto port = _binaryStream.read<uint32_t>();
+			if (type == DeviceType::Remote)
+				setRemoteDevice(host, port);
 		});
 
 		m_midiPorts.loadChunkData(_cr);
@@ -384,20 +415,23 @@ namespace pluginLib
 		return result;
 	}
 
-	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const BinaryDataRef& _binaryData,	const std::string& _filename)
 	{
-		const auto& bd = m_properties.binaryData;
-
-		for(uint32_t i=0; i<bd.listSize; ++i)
+		for(uint32_t i=0; i<_binaryData.listSize; ++i)
 		{
-			if (bd.originalFileNames[i] != _filename)
+			if (_binaryData.originalFileNames[i] != _filename)
 				continue;
 
 			int size = 0;
-			const auto res = bd.getNamedResourceFunc(bd.namedResourceList[i], size);
+			const auto res = _binaryData.getNamedResourceFunc(_binaryData.namedResourceList[i], size);
 			return {std::make_pair(res, static_cast<uint32_t>(size))};
 		}
 		return {};
+	}
+
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
+	{
+		return findResource(m_properties.binaryData, _filename);
 	}
 
 	std::string Processor::getDataFolder(const bool _useFxFolder) const
@@ -459,7 +493,7 @@ namespace pluginLib
 		}
 		catch(synthLib::DeviceException& e)
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 				getName().toStdString() + " - Failed to switch device type",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n");
@@ -686,7 +720,15 @@ namespace pluginLib
 		getPlugin().getMidiOut(m_midiOut);
 
 	    for (auto& e : m_midiOut)
+	    {
 		    addMidiEvent(e);
+
+			if (!getMidiRoutingMatrix().enabled(e, synthLib::MidiEventSource::Host))
+			    continue;
+
+	    	const auto mm = MidiPorts::toJuceMidiMessage(e);
+		    midiMessages.addEvent(mm, 0);
+	    }
 	}
 
 	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)
@@ -804,12 +846,12 @@ namespace pluginLib
 	const juce::String Processor::getProgramName(int _index)
 	{
 		juce::ignoreUnused(_index);
-		return "default";
+		return m_programName;
 	}
 
 	void Processor::changeProgramName(int _index, const juce::String& _newName)
 	{
-		juce::ignoreUnused(_index, _newName);
+		m_programName = _newName.toStdString();
 	}
 
 	double Processor::getTailLengthSeconds() const
@@ -835,7 +877,7 @@ namespace pluginLib
 			{
 				juce::MessageManager::callAsync([e]
 				{
-					genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 						"Device creation failed:",
 						std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
 						e.what() + "\n\n");
@@ -866,7 +908,7 @@ namespace pluginLib
 		}
 		catch(const synthLib::DeviceException& e)
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 				"Device creation failed:",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n");

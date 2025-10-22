@@ -310,15 +310,9 @@ namespace baseLib::filesystem
     {
 #ifdef _WIN32
         // convert filename
-		std::wstring nameW;
-		nameW.resize(_name.size());
-		const int newSize = MultiByteToWideChar(CP_UTF8, 0, _name.c_str(), static_cast<int>(_name.size()), const_cast<wchar_t *>(nameW.c_str()), static_cast<int>(_name.size()));
-		nameW.resize(newSize);
-
-        // convert mode
-        wchar_t mode[32]{0};
-		MultiByteToWideChar(CP_UTF8, 0, _mode, static_cast<int>(strlen(_mode)), mode, (int)std::size(mode));
-		return _wfopen(nameW.c_str(), mode);
+		std::wstring nameW = utf8ToWide(_name);
+		const auto modeW = utf8ToWide(_mode);
+		return _wfopen(nameW.c_str(), modeW.c_str());
 #else
 		return fopen(_name.c_str(), _mode);
 #endif
@@ -327,9 +321,9 @@ namespace baseLib::filesystem
     std::string getHomeDirectory()
     {
 #ifdef _WIN32
-		std::array<char, MAX_PATH<<1> data;
-		if (SHGetSpecialFolderPathA (nullptr, data.data(), CSIDL_PROFILE, FALSE))
-			return validatePath(data.data());
+		std::array<wchar_t, MAX_PATH<<1> data;
+		if (SHGetSpecialFolderPathW (nullptr, data.data(), CSIDL_PROFILE, FALSE))
+			return validatePath(wideToUtf8(data.data()));
 
 	    const auto* home = getenv("USERPROFILE");
 		if (home)
@@ -356,7 +350,7 @@ namespace baseLib::filesystem
     std::string getSpecialFolderPath(const SpecialFolderType _type)
     {
 #ifdef _WIN32
-		std::array<char, MAX_PATH<<1> path;
+		std::array<wchar_t, MAX_PATH<<1> path;
 
 		int csidl;
 		switch (_type)
@@ -370,8 +364,8 @@ namespace baseLib::filesystem
 		default:
 			return {};
 		}
-		if (SHGetSpecialFolderPathA (nullptr, path.data(), csidl, FALSE))
-			return validatePath(path.data());
+		if (SHGetSpecialFolderPathW (nullptr, path.data(), csidl, FALSE))
+			return validatePath(wideToUtf8(path.data()));
 #else
 		const auto h = std::getenv("HOME");
 		const std::string home = validatePath(getHomeDirectory());
@@ -411,4 +405,22 @@ namespace baseLib::filesystem
 #endif
 		return {};
     }
+#ifdef _WIN32
+	std::wstring utf8ToWide(const std::string& _utf8String)
+	{
+		std::wstring nameW;
+		nameW.resize(_utf8String.size());
+		const int newSize = MultiByteToWideChar(CP_UTF8, 0, _utf8String.c_str(), static_cast<int>(_utf8String.size()), const_cast<wchar_t *>(nameW.c_str()), static_cast<int>(_utf8String.size()));
+		nameW.resize(newSize);
+		return nameW;
+	}
+	std::string wideToUtf8(const std::wstring& _wideString)
+	{
+		std::string name;
+		name.resize(_wideString.size() * 4); // worst case, each wchar_t can be up to 4 bytes in UTF-8
+		const int newSize = WideCharToMultiByte(CP_UTF8, 0, _wideString.c_str(), static_cast<int>(_wideString.size()), name.data(), static_cast<int>(name.size()), nullptr, nullptr);
+		name.resize(newSize);
+		return name;
+	}
+#endif
 }

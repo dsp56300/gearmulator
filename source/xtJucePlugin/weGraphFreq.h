@@ -7,7 +7,7 @@ namespace xtJucePlugin
 	class GraphFreq : public Graph
 	{
 	public:
-		GraphFreq(WaveEditor& _editor) : Graph(_editor)
+		GraphFreq(WaveEditor& _editor, Rml::Element* _parent) : Graph(_editor, _parent)
 		{
 		}
 

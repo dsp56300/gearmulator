@@ -3,30 +3,30 @@
 #include <vector>
 
 #include "baseLib/event.h"
-#include "juceUiLib/button.h"
+
 #include "virusLib/frontpanelState.h"
+
+#include "juce_events/juce_events.h"	// juce:Timer
+
+namespace juceRmlUi
+{
+	class ElemButton;
+}
+
+namespace juceRmlUi
+{
+	class ElemKnob;
+}
+
+namespace Rml
+{
+	class Element;
+}
 
 namespace genericVirusUI
 {
 	class PartButton;
 	class VirusEditor;
-
-	class PartMouseListener : public juce::MouseListener
-	{
-	public:
-		explicit PartMouseListener(const int _part, const std::function<void(const juce::MouseEvent&, int)>& _callback) : m_part(_part), m_callback(_callback)
-		{
-		}
-
-		void mouseDrag(const juce::MouseEvent& _event) override
-		{
-			m_callback(_event, m_part);
-		}
-
-	private:
-		int m_part;
-		std::function<void(const juce::MouseEvent&, int)> m_callback;
-	};
 
 	class Parts : juce::Timer
 	{
@@ -51,17 +51,19 @@ namespace genericVirusUI
 
 		void timerCallback() override;
 
+		void setEnabled(Rml::Element* _element, bool _enabled);
+
 		VirusEditor& m_editor;
 
-		std::vector<genericUI::Button<juce::DrawableButton>*> m_partSelect;
-		std::vector<juce::Button*> m_presetPrev;
-		std::vector<juce::Button*> m_presetNext;
+		std::vector<juceRmlUi::ElemButton*> m_partSelect;
+		std::vector<Rml::Element*> m_presetPrev;
+		std::vector<Rml::Element*> m_presetNext;
 
-		std::vector<juce::Slider*> m_partVolume;
-		std::vector<juce::Slider*> m_partPan;
-		std::vector<juce::Component*> m_partActive;
+		std::vector<juceRmlUi::ElemKnob*> m_partVolume;
+		std::vector<juceRmlUi::ElemKnob*> m_partPan;
+		std::vector<Rml::Element*> m_partActive;
 
-		std::vector<PartButton*> m_presetName;
+		std::vector<std::unique_ptr<PartButton>> m_presetName;
 
 		virusLib::FrontpanelState m_frontpanelState;
 		baseLib::EventListener<virusLib::FrontpanelState> m_onFrontpanelStateChanged;

@@ -18,6 +18,7 @@
 #include "jucePluginEditorLib/pluginProcessor.h"
 
 #include "juceUiLib/messageBox.h"
+#include "RmlUi/Core/Factory.h"
 
 #include "synthLib/sysexToMidi.h"
 #include "synthLib/wavReader.h"
@@ -27,10 +28,8 @@
 
 namespace xtJucePlugin
 {
-	WaveEditor::WaveEditor(Editor& _editor, const juce::File& _cacheDir) : ComponentMovementWatcher(this), m_editor(_editor), m_data(_editor.getXtController(), _cacheDir.getFullPathName().toStdString())
+	WaveEditor::WaveEditor(Editor& _editor, Rml::Element* _parent, const juce::File& _cacheDir) : m_editor(_editor), m_parent(_parent), m_data(_editor.getXtController(), _cacheDir.getFullPathName().toStdString())
 	{
-		addComponentListener(this);
-
 		m_data.onWaveChanged.addListener([this](const xt::WaveId& _waveIndex)
 		{
 			if(_waveIndex != m_selectedWave)
@@ -43,53 +42,68 @@ namespace xtJucePlugin
 		{
 			onWaveDataChanged(_data);
 		});
+
+		juceRmlUi::EventListener::Add(m_parent, Rml::EventId::Resize, [this](Rml::Event& _event)
+		{
+			checkFirstTimeVisible();
+		});
+
+		initialize();
 	}
 
 	WaveEditor::~WaveEditor()
 	{
 		destroy();
-		removeComponentListener(this);
 	}
 
 	void WaveEditor::initialize()
 	{
-		auto* waveListParent = m_editor.findComponent("wecWaveList");
-		auto* tablesListParent = m_editor.findComponent("wecWavetableList");
-		auto* controlListParent = m_editor.findComponent("wecWaveControlTable");
-		auto* waveFreqParent = m_editor.findComponent("wecWaveFreq");
-		auto* wavePhaseParent = m_editor.findComponent("wecWavePhase");
-		auto* waveTimeParent = m_editor.findComponent("wecWaveTime");
+		auto& coreInstance = m_parent->GetCoreInstance();
 
-		m_waveTree.reset(new WaveTree(*this));
-		m_tablesTree.reset(new TablesTree(*this));
-		m_controlTree.reset(new ControlTree(*this));
+		Rml::ElementPtr waveTree(new WaveTree(coreInstance, "tree", *this));
+		Rml::ElementPtr tablesTree(new TablesTree(coreInstance, "tree", *this));
+		Rml::ElementPtr controlTree(new ControlTree(coreInstance, "tree", *this));
 
-		m_graphFreq.reset(new GraphFreq(*this));
-		m_graphPhase.reset(new GraphPhase(*this));
-		m_graphTime.reset(new GraphTime(*this));
+		auto makeFullSize = [](Rml::Element* e)
+		{
+			e->SetProperty(Rml::PropertyId::Position, Rml::Style::Position::Absolute);
+			e->SetProperty(Rml::PropertyId::Left, Rml::Property(0, Rml::Unit::PX));
+			e->SetProperty(Rml::PropertyId::Top, Rml::Property(0, Rml::Unit::PX));
+			e->SetProperty(Rml::PropertyId::Width, Rml::Property(100, Rml::Unit::PERCENT));
+			e->SetProperty(Rml::PropertyId::Height, Rml::Property(100, Rml::Unit::PERCENT));
+		};
 
-		waveListParent->addAndMakeVisible(m_waveTree.get());
-		tablesListParent->addAndMakeVisible(m_tablesTree.get());
-		controlListParent->addAndMakeVisible(m_controlTree.get());
+		makeFullSize(waveTree.get());
+		makeFullSize(tablesTree.get());
+		makeFullSize(controlTree.get());
 
-		waveFreqParent->addAndMakeVisible(m_graphFreq.get());
-		wavePhaseParent->addAndMakeVisible(m_graphPhase.get());
-		waveTimeParent->addAndMakeVisible(m_graphTime.get());
+		auto* waveListParent = m_editor.findChild("wecWaveList");
+		auto* tablesListParent = m_editor.findChild("wecWavetableList");
+		auto* controlListParent = m_editor.findChild("wecWaveControlTable");
 
-		constexpr auto colourId = juce::TreeView::ColourIds::backgroundColourId;
-		const auto colour = m_waveTree->findColour(colourId);
-		m_graphFreq->setColour(colourId, colour);
-		m_graphPhase->setColour(colourId, colour);
-		m_graphTime->setColour(colourId, colour);
+		m_waveTree = dynamic_cast<WaveTree*>(waveListParent->AppendChild(std::move(waveTree)));
+		m_tablesTree = dynamic_cast<TablesTree*>(tablesListParent->AppendChild(std::move(tablesTree)));
+		m_controlTree = dynamic_cast<ControlTree*>(controlListParent->AppendChild(std::move(controlTree)));
+
+		auto* waveFreqParent = m_editor.findChild("wecWaveFreq");
+		auto* wavePhaseParent = m_editor.findChild("wecWavePhase");
+		auto* waveTimeParent = m_editor.findChild("wecWaveTime");
+
+		m_graphFreq.reset(new GraphFreq(*this, waveFreqParent));
+		m_graphPhase.reset(new GraphPhase(*this, wavePhaseParent));
+		m_graphTime.reset(new GraphTime(*this, waveTimeParent));
 
 		m_tablesTree->setSelectedEntryFromCurrentPreset();
 	}
 
 	void WaveEditor::destroy()
 	{
-		m_waveTree.reset();
-		m_tablesTree.reset();
-		m_controlTree.reset();
+		if (m_waveTree)
+		{
+			delete juceRmlUi::helper::removeFromParent(m_waveTree).release();
+			delete juceRmlUi::helper::removeFromParent(m_tablesTree).release();
+			delete juceRmlUi::helper::removeFromParent(m_controlTree).release();
+		}
 		m_graphFreq.reset();
 		m_graphPhase.reset();
 		m_graphTime.reset();
@@ -97,7 +111,7 @@ namespace xtJucePlugin
 
 	void WaveEditor::checkFirstTimeVisible()
 	{
-		if(isShowing() && !m_wasVisible)
+		if(m_parent->IsVisible(true) && !m_wasVisible)
 		{
 			m_wasVisible = true;
 			onFirstTimeVisible();
@@ -183,27 +197,26 @@ namespace xtJucePlugin
 		return wavetableNames->valueToText(_id.rawId());
 	}
 
-	juce::PopupMenu WaveEditor::createCopyToSelectedTableMenu(xt::WaveId _id)
+	juceRmlUi::Menu WaveEditor::createCopyToSelectedTableMenu(xt::WaveId _id)
 	{
-		juce::PopupMenu controlTableSlotsMenu;
+		juceRmlUi::Menu controlTableSlotsMenu;
 		for(uint16_t i=0; i<xt::wave::g_wavesPerTable; ++i)
 		{
 			const auto tableIndex = xt::TableIndex(i);
 
-			if(i && (i & 15) == 0)
-				controlTableSlotsMenu.addColumnBreak();
-
-			controlTableSlotsMenu.addItem("Slot " + std::to_string(i), !xt::wave::isReadOnly(tableIndex), false, [this, tableIndex, _id]
+			controlTableSlotsMenu.addEntry("Slot " + std::to_string(i), !xt::wave::isReadOnly(tableIndex), false, [this, tableIndex, _id]
 			{
 				getData().setTableWave(getSelectedTable(), tableIndex, _id);
 			});
 		}
+
+		controlTableSlotsMenu.setItemsPerColumn(16);
 		return controlTableSlotsMenu;
 	}
 
-	juce::PopupMenu WaveEditor::createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback)
+	juceRmlUi::Menu WaveEditor::createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback)
 	{
-		juce::PopupMenu subMenu;
+		juceRmlUi::Menu subMenu;
 
 		constexpr auto totalCount = (xt::wave::g_ramWaveCount - xt::wave::g_firstRamWaveIndex);
 
@@ -212,7 +225,7 @@ namespace xtJucePlugin
 
 		for (uint16_t i = xt::wave::g_firstRamWaveIndex; i < xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount; i += divide)
 		{
-			juce::PopupMenu subSubMenu;
+			juceRmlUi::Menu subSubMenu;
 
 			const auto idMin = xt::WaveId(i);
 			const auto idMax = xt::WaveId(i+divide-1);
@@ -220,19 +233,19 @@ namespace xtJucePlugin
 			for (uint16_t j=i; j<i+divide; ++j)
 			{
 				const auto id = xt::WaveId(j);
-				subSubMenu.addItem(WaveTreeItem::getWaveName(id), true, false, [id, _callback]
+				subSubMenu.addEntry(WaveTreeItem::getWaveName(id), true, false, [id, _callback]
 				{
 					_callback(id);
 				});
 			}
 
-			subMenu.addSubMenu(WaveTreeItem::getWaveName(idMin) + " - " + WaveTreeItem::getWaveName(idMax), subSubMenu);
+			subMenu.addSubMenu(WaveTreeItem::getWaveName(idMin) + " - " + WaveTreeItem::getWaveName(idMax), std::move(subSubMenu));
 		}
 
 		return subMenu;
 	}
 
-	void WaveEditor::filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const juce::StringArray& _files)
+	void WaveEditor::filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const std::vector<std::string>& _files)
 	{
 		_waves.clear();
 		_tables.clear();
@@ -243,7 +256,7 @@ namespace xtJucePlugin
 
 		if(sysex.empty())
 		{
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, title + "Error", "No Sysex data found in file");
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, title + "Error", "No Sysex data found in file");
 			return;
 		}
 
@@ -370,7 +383,7 @@ namespace xtJucePlugin
 				ss << "\n\n";
 			}
 			ss << "Do you want to import all of them? This will replace existing data.";
-			genericUI::MessageBox::showYesNo(juce::AlertWindow::QuestionIcon, title + "Question", ss.str(), [this, t = std::move(_tables), w = std::move(_waves)](genericUI::MessageBox::Result _result)
+			genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Question, title + "Question", ss.str(), [this, t = std::move(_tables), w = std::move(_waves)](genericUI::MessageBox::Result _result)
 			{
 				if (_result != genericUI::MessageBox::Result::Yes)
 					return;
@@ -390,31 +403,33 @@ namespace xtJucePlugin
 		}
 	}
 
-	void WaveEditor::openGraphPopupMenu(const Graph&, const juce::MouseEvent&)
+	void WaveEditor::openGraphPopupMenu(const Graph&, Rml::Event& _event)
 	{
-		juce::PopupMenu menu;
-		menu.addItem("Init Square", [this]
+		_event.StopPropagation();
+
+		juceRmlUi::Menu menu;
+		menu.addEntry("Init Square", [this]
 		{
 			xt::WaveData data;
 			for (size_t  i = 0; i < data.size(); ++i)
 				data[i] = i < data.size() / 2 ? 127 : -128;
 			m_graphData.set(data);
 		});
-		menu.addItem("Init Triangle", [this]
+		menu.addEntry("Init Triangle", [this]
 		{
 			xt::WaveData data;
 			for (size_t  i = 0; i < data.size(); ++i)
 				data[i] = static_cast<char>((i < data.size() / 2 ? i * 4 : 255 - i * 4) - 128);
 			m_graphData.set(data);
 		});
-		menu.addItem("Init Saw", [this]
+		menu.addEntry("Init Saw", [this]
 		{
 			xt::WaveData data;
 			for (size_t  i = 0; i < data.size(); ++i)
 				data[i] = static_cast<char>(((i+1) << 1) - 129);
 			m_graphData.set(data);
 		});
-		menu.addItem("Init Sine", [this]
+		menu.addEntry("Init Sine", [this]
 		{
 			xt::WaveData data;
 			for (size_t i = 0; i < data.size(); ++i)
@@ -422,7 +437,7 @@ namespace xtJucePlugin
 			m_graphData.set(data);
 		});
 
-		menu.addItem("Clear", [this]
+		menu.addEntry("Clear", [this]
 		{
 			xt::WaveData data;
 			data.fill(0);
@@ -431,7 +446,7 @@ namespace xtJucePlugin
 
 		menu.addSeparator();
 
-		menu.addItem("Invert", [this]
+		menu.addEntry("Invert", [this]
 		{
 			xt::WaveData data = m_graphData.getSource();
 			for (auto& i : data)
@@ -443,7 +458,7 @@ namespace xtJucePlugin
 			m_graphData.set(data);
 		});
 
-		menu.addItem(juce::String::fromUTF8("Phase +180\xC2\xB0"), [this]
+		menu.addEntry(juce::String::fromUTF8("Phase +180\xC2\xB0").toStdString(), [this]
 		{
 			xt::WaveData data = m_graphData.getSource();
 
@@ -454,28 +469,28 @@ namespace xtJucePlugin
 
 		menu.addSeparator();
 
-		menu.addItem("Export as .wav", [this]
+		menu.addEntry("Export as .wav", [this]
 		{
 			exportAsWav(m_graphData.getSource());
 		});
 
 		if (!xt::wave::isReadOnly(m_selectedWave))
 		{
-			menu.addItem("Save (overwrite " + WaveTreeItem::getWaveName(m_selectedWave) + ')', true, false, [this]
+			menu.addEntry("Save (overwrite " + WaveTreeItem::getWaveName(m_selectedWave) + ')', true, false, [this]
 			{
 				saveWaveTo(m_selectedWave);
 			});
 		}
 
 		// open menu and let user select one of the wave slots
-		const auto subMenu = createRamWavesPopupMenu([this](const xt::WaveId _id)
+		auto subMenu = createRamWavesPopupMenu([this](const xt::WaveId _id)
 		{
 			saveWaveTo(_id);
 		});
 
-		menu.addSubMenu("Save to User Wave Slot...", subMenu);
+		menu.addSubMenu("Save to User Wave Slot...", std::move(subMenu));
 
-		menu.showMenuAsync({});
+		menu.runModal(_event);
 	}
 
 	void WaveEditor::exportAsSyx(const xt::WaveId& _id, const xt::WaveData& _data)
@@ -497,18 +512,7 @@ namespace xtJucePlugin
 	void WaveEditor::exportAsSyxOrMid(const std::string& _filename, const xt::WaveId& _id, const xt::WaveData& _data, bool _midi) const
 	{
 		auto sysex = xt::State::createWaveData(_data, _id.rawId(), false);
-
-		bool success;
-		if (_midi)
-			success = synthLib::SysexToMidi::write(_filename.c_str(), {sysex});
-		else
-			success = baseLib::filesystem::writeFile(_filename, sysex);
-
-		if (!success)
-		{
-			const auto productName = getEditor().getProcessor().getProperties().name;
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
-		}
+		exportToFile(_filename, sysex, _midi);
 	}
 
 	void WaveEditor::exportAsSyxOrMid(const std::vector<xt::WaveId>& _ids, bool _midi)
@@ -525,32 +529,14 @@ namespace xtJucePlugin
 				if (!wave)
 				{
 					const auto productName = getEditor().getProcessor().getProperties().name;
-					genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to export wave " + WaveTreeItem::getWaveName(id) + ".\n\nThe wave is not available.");
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, productName + " - Error", "Failed to export wave " + WaveTreeItem::getWaveName(id) + ".\n\nThe wave is not available.");
 					continue;
 				}
 
 				sysex.push_back(xt::State::createWaveData(*wave, id.rawId(), false));
 			}
 
-			bool success;
-
-			if (_midi)
-			{
-				success = synthLib::SysexToMidi::write(_filename.c_str(), sysex);
-			}
-			else
-			{
-				std::vector<uint8_t> data;
-				for (const auto& s : sysex)
-					data.insert(data.end(), s.begin(), s.end());
-				success = baseLib::filesystem::writeFile(_filename, data);
-			}
-
-			if (!success)
-			{
-				const auto productName = getEditor().getProcessor().getProperties().name;
-				genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
-			}
+			exportToFile(_filename, sysex, _midi);
 		});
 	}
 
@@ -564,18 +550,121 @@ namespace xtJucePlugin
 
 	void WaveEditor::exportAsWav(const std::string& _filename, const xt::WaveData& _data) const
 	{
+		return exportAsWav(_filename, std::vector(_data.begin(), _data.end()));
+	}
+
+	void WaveEditor::exportAsSyxOrMid(const xt::TableId& _table, bool _midi)
+	{
+		auto table = m_data.getTable(_table);
+		if (!table)
+			return;
+
+		selectExportFileName(_midi ? "Save Table as .mid" : "Save Table as .syx", _midi ? ".mid" : ".syx", [this, _table, table, _midi](const std::string& _filename)
+		{
+			const auto sysex = xt::State::createTableData(*table, _table.rawId(), false);
+			exportToFile(_filename, sysex, _midi);
+		});
+	}
+
+	void WaveEditor::exportAsWav(const xt::TableId& _table)
+	{
+		selectExportFileName("Save Table as .wav", ".wav", [this, _table](const std::string& _filename)
+		{
+			auto t = m_data.getTable(_table);
+			if (!t)
+				return;
+			const auto& table = *t;
+
+			std::vector<int8_t> data;
+
+			bool first = true;
+
+			for (uint16_t a=0; a<table.size(); ++a)
+			{
+				const auto waveIdA = table[a];
+
+				auto waveA = m_data.getWave(waveIdA);
+
+				if (!waveA)
+					continue;
+
+				for (uint16_t b=a+1; b<table.size(); ++b)
+				{
+					const auto waveIdB = table[b];
+
+					auto waveB = m_data.getWave(waveIdB);
+
+					if (!waveB)
+						continue;
+
+					if (first)
+					{
+						data.insert(data.end(), waveA->begin(), waveA->end());
+						first = false;
+					}
+
+					for (uint16_t c=a+1; c<b; ++c)
+					{
+						auto d = xt::State::createinterpolatedTable(*waveA, *waveB, a, b, c);
+						data.insert(data.end(), d.begin(), d.end());
+					}
+
+					data.insert(data.end(), waveB->begin(), waveB->end());
+
+					a = b - 1;
+					break;
+				}
+			}
+
+			exportAsWav(_filename, data);
+		});
+	}
+
+	void WaveEditor::exportAsWav(const std::string& _filename, const std::vector<int8_t>& _data) const
+	{
 		synthLib::WavWriter w;
 
 		// 8 bit waves are unsigned
-		std::array<uint8_t, std::tuple_size_v<xt::WaveData>> data;
+		std::vector<uint8_t> data;
+		data.reserve(_data.size());
 		for (size_t i=0; i<_data.size(); ++i)
-			data[i] = static_cast<uint8_t>(_data[i] + 128);
+			data.push_back(static_cast<uint8_t>(_data[i] + 128));
 
-		if (!w.write(_filename, 8, false, 1, 32000, data.data(), sizeof(_data)))
+		if (!w.write(_filename, 8, false, 1, 32000, data.data(), _data.size()))
 		{
 			const auto productName = getEditor().getProcessor().getProperties().name;
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
 		}
+	}
+
+	void WaveEditor::exportToFile(const std::string& _filename, const std::vector<std::vector<uint8_t>>& _sysex, const bool _midi) const
+	{
+		bool success;
+
+		if (_midi)
+		{
+			success = synthLib::SysexToMidi::write(_filename.c_str(), _sysex);
+		}
+		else
+		{
+			if (_sysex.size() > 1)
+			{
+				std::vector<uint8_t> sysex;
+				for (const auto& s : _sysex)
+					sysex.insert(sysex.end(), s.begin(), s.end());
+				success = baseLib::filesystem::writeFile(_filename, sysex);
+			}
+			else
+			{
+				success = baseLib::filesystem::writeFile(_filename, _sysex.front());
+			}
+		}
+
+		if (success)
+			return;
+
+		const auto productName = getEditor().getProcessor().getProperties().name;
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
 	}
 
 	void WaveEditor::selectImportFile(const std::function<void(const juce::String&)>& _callback)
@@ -593,7 +682,7 @@ namespace xtJucePlugin
 
 		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		const std::function onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		const std::function onFileChosen = [this, _callback, configKey](const juce::FileChooser& _chooser)
 		{
 			if (_chooser.getResults().isEmpty())
 				return;
@@ -620,7 +709,7 @@ namespace xtJucePlugin
 
 		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		auto onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		auto onFileChosen = [this, _callback, configKey](const juce::FileChooser& _chooser)
 		{
 			if (_chooser.getResults().isEmpty())
 				return;
@@ -634,7 +723,7 @@ namespace xtJucePlugin
 			}
 			else
 			{
-				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "File exists", "Do you want to overwrite the existing file?",
+				genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Warning, "File exists", "Do you want to overwrite the existing file?",
 					[this, _callback, result](const genericUI::MessageBox::Result _result)
 					{
 						if (_result == genericUI::MessageBox::Result::Yes)
@@ -655,7 +744,7 @@ namespace xtJucePlugin
 
 		if (!baseLib::filesystem::readFile(fileData, _filename))
 		{
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to open file\n" + _filename + ".\n\nMake sure that the file exists and " + productName + " has read permissions.");
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, productName + " - Error", "Failed to open file\n" + _filename + ".\n\nMake sure that the file exists and " + productName + " has read permissions.");
 			return {};
 		}
 
@@ -664,7 +753,7 @@ namespace xtJucePlugin
 		synthLib::Data wavData;
 		if (!synthLib::WavReader::load(wavData, nullptr, fileData.data(), fileData.size()))
 		{
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to parse data from file\n" + _filename + "." + formatDesc);
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, productName + " - Error", "Failed to parse data from file\n" + _filename + "." + formatDesc);
 			return {};
 		}
 
@@ -672,7 +761,7 @@ namespace xtJucePlugin
 
 		if (wavData.isFloat || wavData.bitsPerSample != 8 || wavData.channels != 1)
 		{
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Unsupported wav format in file\n" + _filename + "." + formatDesc);
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, productName + " - Error", "Unsupported wav format in file\n" + _filename + "." + formatDesc);
 			return {};
 		}
 
@@ -713,14 +802,14 @@ namespace xtJucePlugin
 			if (valid)
 				return d;
 
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Unsupported file\n" + _filename + ".\n\n" +
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, productName + " - Error", "Unsupported file\n" + _filename + ".\n\n" +
 				"An imported file with a size of 128 samples needs to be a full-cycle wave, i.e. the second half of the file needs to be the first half reversed and inverted.\n" + 
 				"Correct the file or import a file of length 64 only (half-cycle wave). In the latter case, building a full cycle wave is done during import."
 				+ formatDesc);
 			return {};
 		}
 
-		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Unsupported size of file\n" + _filename + "." + formatDesc);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, productName + " - Error", "Unsupported size of file\n" + _filename + "." + formatDesc);
 		return {};
 	}
 }

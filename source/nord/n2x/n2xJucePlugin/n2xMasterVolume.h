@@ -4,6 +4,11 @@
 
 #include <cstdint>
 
+namespace Rml
+{
+	class Element;
+}
+
 namespace n2x
 {
 	enum class KnobType;
@@ -26,7 +31,7 @@ namespace n2xJucePlugin
 	private:
 		const Editor& m_editor;
 
-		juce::Slider* m_volume;
+		Rml::Element* m_volume;
 
 		baseLib::EventListener<n2x::KnobType, uint8_t> m_onKnobChanged;
 	};

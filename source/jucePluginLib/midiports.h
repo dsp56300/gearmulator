@@ -54,11 +54,15 @@ namespace pluginLib
 
 		void send(juce::MidiMessage&& _message)
 		{
+			if(!isMidiOutValid())
+				return;
 			m_midiOutMessages.push_back(std::move(_message));
 		}
 
 		void send(const juce::MidiMessage& _message)
 		{
+			if (!isMidiOutValid())
+				return;
 			m_midiOutMessages.push_back(_message);
 		}
 
@@ -68,6 +72,12 @@ namespace pluginLib
 		}
 
 		static juce::MidiMessage toJuceMidiMessage(const synthLib::SMidiEvent& _e);
+
+		bool isMidiOutValid()
+		{
+			std::lock_guard lock(m_mutexOutput);
+			return m_midiOutput != nullptr;
+		}
 
 	private:
 	    void handleIncomingMidiMessage(juce::MidiInput* _source, const juce::MidiMessage& _message) override;

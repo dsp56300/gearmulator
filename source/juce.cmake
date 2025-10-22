@@ -19,7 +19,7 @@ set(JUCE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 set(juce_formats "")
 
-if(USE_AU)
+if(USE_AU AND APPLE)
 	set(juce_formats AU)
 	add_custom_target(PluginFormat_AU)
 	set_property(TARGET PluginFormat_AU PROPERTY FOLDER CustomTargets)
@@ -66,6 +66,7 @@ target_link_libraries(juce_plugin_modules PRIVATE
     juce::juce_audio_devices
     juce::juce_audio_processors
 	juce::juce_cryptography
+	juce::juce_opengl
 )
 
 target_compile_definitions(juce_plugin_modules PUBLIC
@@ -268,7 +269,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			-DIDPLUGIN=${plugin4CC}
 			-DBINDIR=${CMAKE_BINARY_DIR}
 			-DCOMPONENT_NAME=${productName}
-			-DCPACK_FILE=${CPACK_PACKAGE_NAME}-${CMAKE_PROJECT_VERSION}-${CPACK_SYSTEM_NAME}-${productName}-AU.zip
+			-DCPACK_FILE=${CPACK_PACKAGE_NAME}-${productName}-AU-${CMAKE_PROJECT_VERSION}-${CPACK_SYSTEM_NAME}.zip
 			-P ${JUCE_CMAKE_DIR}/runAuValidation.cmake)
 		set_tests_properties(${targetName}_AU_Validate PROPERTIES LABELS "PluginTest")
 	endif()
@@ -294,6 +295,13 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 #	if(USE_CLAP)
 #		addPluginTest(${targetName}_CLAP)
 #	endif()
+
+	set_target_properties(${targetName} PROPERTIES TUS_PRODUCT_NAME "${productName}")
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_FORMATS "${juce_formats}")
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_IS_SYNTH ${isSynth})
+	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_4CC ${plugin4CC})
+
+	tus_exportTarget(${targetName})
 
 	# --------- Server Plugin ---------
 

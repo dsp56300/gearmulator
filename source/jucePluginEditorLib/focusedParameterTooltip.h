@@ -1,12 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
-namespace juce
+namespace Rml
 {
-	class String;
-	class Component;
-	class Label;
+	class Element;
 }
 
 namespace jucePluginEditorLib
@@ -14,16 +13,14 @@ namespace jucePluginEditorLib
 	class FocusedParameterTooltip
 	{
 	public:
-		FocusedParameterTooltip(juce::Label* _label, const juce::Component& _bounds);
+		FocusedParameterTooltip(Rml::Element* _label);
 
 		bool isValid() const { return m_label != nullptr; }
 		uint32_t getTooltipDisplayTime() const;
 		void setVisible(bool _visible) const;
-		void initialize(juce::Component* _component, const juce::String& _value) const;
+		void initialize(const Rml::Element* _component, const std::string& _value) const;
 
 	private:
-		juce::Label* m_label = nullptr;
-		int m_defaultWidth;
-		const juce::Component& m_bounds;
+		Rml::Element* m_label = nullptr;
 	};
 }

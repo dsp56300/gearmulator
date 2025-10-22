@@ -62,8 +62,15 @@ namespace synthLib
 
 	void MidiBufferParser::getEvents(std::vector<synthLib::SMidiEvent>& _events)
 	{
-		_events.insert(_events.end(), m_midiEvents.begin(), m_midiEvents.end());
-		m_midiEvents.clear();
+		if (_events.empty())
+		{
+			std::swap(_events, m_midiEvents);
+		}
+		else
+		{
+			_events.insert(_events.end(), m_midiEvents.begin(), m_midiEvents.end());
+			m_midiEvents.clear();
+		}
 	}
 
 	void MidiBufferParser::flushSysex()

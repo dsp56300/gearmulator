@@ -63,7 +63,7 @@ namespace virusLib
 				dummyProcess(8);
 		}
 
-		m_mc->sendInitControlCommands();
+		m_mc->sendInitControlCommands(127);
 
 		dummyProcess(8);
 

@@ -9,8 +9,17 @@
 
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/filetype.h"
-#include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/tools.h"
+
+#include "juceRmlUi/juceRmlComponent.h"
+#include "juceRmlUi/rmlEventListener.h"
+
+#include "jucePluginData.h"
+#include "pluginDataModel.h"
+#include "pluginEditorState.h"
+
+#include "juceRmlPlugin/rmlPlugin.h"
+#include "juceRmlPlugin/skinConverter/skinConverter.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -19,35 +28,153 @@
 
 #include "patchmanager/patchmanager.h"
 #include "patchmanager/savepatchdesc.h"
+#include "patchmanagerUiRml/patchmanagerDataModel.h"
+
+#include "RmlUi/Core/ElementDocument.h"
 
 namespace jucePluginEditorLib
 {
-	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, Skin _skin)
-		: genericUI::Editor(static_cast<EditorInterface&>(*this))
-		, m_processor(_processor)
-		, m_binding(_binding)
+	namespace
+	{
+		constexpr Processor::BinaryDataRef g_binaryDefaultData
+		{
+			jucePluginData::namedResourceListSize,
+			jucePluginData::originalFilenames,
+			jucePluginData::namedResourceList,
+			jucePluginData::getNamedResource
+		};
+	}
+	Editor::Editor(Processor& _processor, Skin _skin)
+		: m_processor(_processor)
 		, m_skin(std::move(_skin))
-		, m_overlays(*this, _binding)
+		, m_rmlInterfaces(*this)
 	{
 		showDisclaimer();
 	}
 
 	Editor::~Editor()
 	{
+		m_overlays.reset();
+
 		for (const auto& file : m_dragAndDropFiles)
 			file.deleteFile();
+
+		m_patchManager.reset();
+		m_rmlPlugin.reset();
+		m_rmlComponent.reset();
 	}
 
 	void Editor::create()
 	{
-		genericUI::Editor::create(m_skin.jsonFilename);
+		if (juce::String(m_skin.filename).endsWithIgnoreCase(".json"))
+		{
+			genericUI::Editor::create(m_skin.filename);
+
+			const auto newName = baseLib::filesystem::stripExtension(m_skin.filename);
+
+			rmlPlugin::skinConverter::SkinConverterOptions options;
+			initSkinConverterOptions(options);
+
+			if(m_skin.folder.empty())
+			{
+				m_skin.folder = PluginEditorState::getSkinFolder(getProcessor().getDataFolder());
+				m_skin.folder = PluginEditorState::getSkinSubfolder(m_skin, m_skin.folder);
+			}
+
+			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
+
+			juce::File(juce::String::fromUTF8(folder.c_str())).createDirectory();
+
+			rmlPlugin::skinConverter::SkinConverter sc(*this, getRootObject(), folder, newName + ".rml", newName + ".rcss", std::move(options));
+
+			m_skin.filename = newName + ".rml";
+			m_skin.displayName = PluginEditorState::createSkinDisplayName(m_skin.filename);
+		}
+
+		m_rmlComponent.reset(dynamic_cast<juceRmlUi::RmlComponent*>(createRmlUiComponent(m_skin.filename)));
+
+		auto* doc = m_rmlComponent->getDocument();
+
+		if (auto* elem = doc->GetElementById("patchmanager"))
+		{
+			juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
+			setPatchManager(createPatchManager(elem));
+		}
+
+		initRootScale(doc->GetAttribute("rootScale", 1.0f));
+
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Mousedown, [this](Rml::Event& _event)
+		{
+			if (juceRmlUi::helper::isContextMenu(_event))
+			{
+				_event.StopPropagation();
+				openMenu(_event);
+			}
+		});
+
+#if _DEBUG
+		juceRmlUi::EventListener::Add(getRmlRootElement(), Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_S)
+			{
+				if (juceRmlUi::helper::getKeyModCommand(_event) && juceRmlUi::helper::getKeyModShift(_event))
+				{
+					_event.StopPropagation();
+
+					getRmlComponent()->takeScreenshot([this](const juce::Image& _image)
+					{
+						// write as png to desktop
+						const auto desktop = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory);
+						const auto file = desktop.getNonexistentChildFile(getProcessor().getProductName(false) + "_screenshot", ".png");
+						juce::PNGImageFormat png;
+						if (auto stream = file.createOutputStream())
+							png.writeImageToStream(_image, *stream);
+					});
+				}
+			}
+		});
+#endif
+	}
+
+	void Editor::initPluginDataModel(PluginDataModel& _model)
+	{
+		_model.set("currentPart", std::to_string(getProcessor().getController().getCurrentPart()));
+	}
+
+	void Editor::setEnabled(Rml::Element* _element, bool _enabled)
+	{
+		if (!_element)
+			return;
+
+		if (const auto opacity = _element->GetAttribute("disabledAlpha", 0.0f); opacity > 0)
+		{
+			_element->SetProperty(Rml::PropertyId::Opacity, Rml::Property(_enabled ? 1.0f : opacity, Rml::Unit::NUMBER));
+			_element->SetProperty(Rml::PropertyId::PointerEvents, _enabled ? Rml::Style::PointerEvents::Auto : Rml::Style::PointerEvents::None);
+
+			juceRmlUi::helper::setVisible(_element, opacity > 0);
+		}
+		else
+		{
+			juceRmlUi::helper::setVisible(_element, _enabled);
+		}
+	}
+
+	bool Editor::selectTabWithElement(const Rml::Element* _element) const
+	{
+		if (!m_rmlPlugin)
+			return false;
+		return m_rmlPlugin->selectTabWithElement(_element);
 	}
 
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size) const
 	{
-		const auto res = m_processor.findResource(_filename);
+		auto res = m_processor.findResource(_filename);
 		if(!res)
-			return nullptr;
+		{
+			res = Processor::findResource(g_binaryDefaultData, _filename);
+			if (!res)
+				return nullptr;
+		}
 		_size = res->second;
 		return res->first;
 	}
@@ -103,7 +230,7 @@ namespace jucePluginEditorLib
 			}
 			else
 			{
-				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "File exists", "Do you want to overwrite the existing file?", 
+				genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Warning, "File exists", "Do you want to overwrite the existing file?", 
 					[this, _callback, result](const genericUI::MessageBox::Result _result)
 				{
 					if (_result == genericUI::MessageBox::Result::Yes)
@@ -126,7 +253,7 @@ namespace jucePluginEditorLib
 		if (_type == pluginLib::FileType::Mid)
 			return synthLib::SysexToMidi::write(_pathName.c_str(), _presets);
 
-		FILE* hFile = fopen(_pathName.c_str(), "wb");
+		FILE* hFile = baseLib::filesystem::openFile(_pathName, "wb");
 
 		if (!hFile)
 			return false;
@@ -166,7 +293,7 @@ namespace jucePluginEditorLib
 	void Editor::showDemoRestrictionMessageBox() const
 	{
 		const auto &[title, msg] = getDemoRestrictionText();
-		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, title, msg);
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, title, msg);
 	}
 
 	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
@@ -230,10 +357,11 @@ namespace jucePluginEditorLib
 
 	void Editor::setCurrentPart(const uint8_t _part)
 	{
-		genericUI::Editor::setCurrentPart(_part);
-
+		getProcessor().getController().setCurrentPart(_part);
 		if(m_patchManager)
 			m_patchManager->setCurrentPart(_part);
+
+		m_pluginDataModel->set("currentPart", std::to_string(_part));
 	}
 
 	void Editor::showDisclaimer() const
@@ -265,39 +393,6 @@ namespace jucePluginEditorLib
 		}
 	}
 
-	bool Editor::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles)
-	{
-		const auto* ddObject = DragAndDropObject::fromDragSource(sourceDetails);
-
-		if(!ddObject || !ddObject->canDropExternally())
-			return false;
-
-		// try to create human-readable filename first
-		const auto patchFileName = ddObject->getExportFileName(m_processor);
-		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + patchFileName;
-
-		auto file = juce::File(pathName);
-
-		if(file.hasWriteAccess())
-		{
-			m_dragAndDropFiles.emplace_back(file);
-		}
-		else
-		{
-			// failed, create temp file
-			const auto& tempFile = m_dragAndDropTempFiles.emplace_back(std::make_shared<juce::TemporaryFile>(patchFileName));
-			file = tempFile->getFile();
-		}
-
-		if(!ddObject->writeToFile(file))
-			return false;
-
-		files.add(file.getFullPathName());
-
-		canMoveFiles = true;
-		return true;
-	}
-
 	void Editor::copyCurrentPatchToClipboard() const
 	{
 		// copy patch of current part to Clipboard
@@ -322,17 +417,14 @@ namespace jucePluginEditorLib
 		return m_patchManager->activatePatchFromClipboard();
 	}
 
-	void Editor::openMenu(juce::MouseEvent* _event)
+	void Editor::openMenu(Rml::Event& _event)
 	{
 		onOpenMenu(this, _event);
 	}
 
-	bool Editor::openContextMenuForParameter(const juce::MouseEvent* _event)
+	bool Editor::openContextMenuForParameter(const Rml::Event& _event)
 	{
-		if(!_event || !_event->originalComponent)
-			return false;
-
-		const auto* param = m_binding.getBoundParameter(_event->originalComponent);
+		const auto* param = getRmlParameterBinding()->getParameterForElement(_event.GetTargetElement());
 		if(!param)
 			return false;
 
@@ -346,7 +438,7 @@ namespace jucePluginEditorLib
 
 		const auto part = param->getPart();
 
-		juce::PopupMenu menu;
+		juceRmlUi::Menu menu;
 
 		// Lock / Unlock
 
@@ -356,7 +448,7 @@ namespace jucePluginEditorLib
 
 			const auto isLocked = controller.getParameterLocking().isRegionLocked(part, regionId);
 
-			menu.addItem(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked, part]
+			menu.addEntry(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked, part]
 			{
 				auto& locking = m_processor.getController().getParameterLocking();
 				if(isLocked)
@@ -374,7 +466,7 @@ namespace jucePluginEditorLib
 		{
 			const auto& regionName = regions.find(regionId)->second.getName();
 
-			menu.addItem(std::string("Copy region '") + regionName + "'", [this, regionId]
+			menu.addEntry(std::string("Copy region '") + regionName + "'", [this, regionId]
 			{
 				copyRegionToClipboard(regionId);
 			});
@@ -410,7 +502,7 @@ namespace jucePluginEditorLib
 
 				const auto& regionName = regions.find(paramRegionId)->second.getName();
 
-				menu.addItem("Paste region '" + regionName + "'", [this, parameterValues]
+				menu.addEntry("Paste region '" + regionName + "'", [this, parameterValues]
 				{
 					setParameters(parameterValues);
 				});
@@ -429,7 +521,7 @@ namespace jucePluginEditorLib
 
 				const auto& valueText = desc.valueList.valueToText(paramValue);
 
-				menu.addItem("Paste value '" + valueText + "' for parameter '" + desc.displayName + "'", [this, paramName, paramValue]
+				menu.addEntry("Paste value '" + valueText + "' for parameter '" + desc.displayName + "'", [this, paramName, paramValue]
 				{
 					pluginLib::Clipboard::Data::ParameterValues params;
 					params.insert({paramName, paramValue});
@@ -440,13 +532,13 @@ namespace jucePluginEditorLib
 
 		// Parameter links
 
-		juce::PopupMenu linkMenu;
+		juceRmlUi::Menu linkMenu;
 
 		menu.addSeparator();
 
 		for (const auto& regionId : paramRegionIds)
 		{
-			juce::PopupMenu regionMenu;
+			juceRmlUi::Menu regionMenu;
 
 			const auto currentPart = controller.getCurrentPart();
 
@@ -457,7 +549,7 @@ namespace jucePluginEditorLib
 
 				const auto isLinked = controller.getParameterLinks().isRegionLinked(regionId, currentPart, p);
 
-				regionMenu.addItem(std::string("Link Part ") + std::to_string(p+1), true, isLinked, [this, regionId, isLinked, currentPart, p]
+				regionMenu.addEntry(std::string("Link Part ") + std::to_string(p+1), isLinked, [this, regionId, isLinked, currentPart, p]
 				{
 					auto& links = m_processor.getController().getParameterLinks();
 
@@ -469,10 +561,10 @@ namespace jucePluginEditorLib
 			}
 
 			const auto& regionName = regions.find(regionId)->second.getName();
-			linkMenu.addSubMenu("Region '" + regionName + "'", regionMenu);
+			linkMenu.addSubMenu("Region '" + regionName + "'", std::move(regionMenu));
 		}
 
-		menu.addSubMenu("Parameter Links", linkMenu);
+		menu.addSubMenu("Parameter Links", std::move(linkMenu));
 
 		auto& midiPackets = m_processor.getController().getParameterDescriptions().getMidiPackets();
 		for (const auto& mp : midiPackets)
@@ -508,17 +600,17 @@ namespace jucePluginEditorLib
 				}
 			};
 
-			juce::PopupMenu subMenu;
-			subMenu.addItem("Exact Match (Value " + param->getCurrentValueAsText() + ")", [this, findSimilar]{ findSimilar(0, 0); });
-			subMenu.addItem("-/+ 4", [this, findSimilar]{ findSimilar(-4, 4); });
-			subMenu.addItem("-/+ 12", [this, findSimilar]{ findSimilar(-12, 12); });
-			subMenu.addItem("-/+ 24", [this, findSimilar]{ findSimilar(-24, 24); });
+			juceRmlUi::Menu subMenu;
+			subMenu.addEntry("Exact Match (Value " + param->getCurrentValueAsText().toStdString() + ")", [this, findSimilar]{ findSimilar(0, 0); });
+			subMenu.addEntry("-/+ 4", [this, findSimilar]{ findSimilar(-4, 4); });
+			subMenu.addEntry("-/+ 12", [this, findSimilar]{ findSimilar(-12, 12); });
+			subMenu.addEntry("-/+ 24", [this, findSimilar]{ findSimilar(-24, 24); });
 
-			menu.addSubMenu("Find similar Patches for parameter " + param->getDescription().displayName, subMenu);
+			menu.addSubMenu("Find similar Patches for parameter " + param->getDescription().displayName, std::move(subMenu));
 
 			break;
 		}
-		menu.showMenuAsync({});
+		menu.runModal(_event);
 
 		return true;
 	}
@@ -563,25 +655,17 @@ namespace jucePluginEditorLib
 		return getProcessor().getController().setParameters(_paramValues, m_processor.getController().getCurrentPart(), pluginLib::Parameter::Origin::Ui);
 	}
 
-	void Editor::parentHierarchyChanged()
+	juceRmlUi::Menu Editor::createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const
 	{
-		genericUI::Editor::parentHierarchyChanged();
-
-		if(isShowing())
-			m_overlays.refreshAll();
-	}
-
-	juce::PopupMenu Editor::createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const
-	{
-		juce::PopupMenu menu;
+		juceRmlUi::Menu menu;
 		createExportFileTypeMenu(menu, _func);
 		return menu;
 	}
 
-	void Editor::createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const
+	void Editor::createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const
 	{
-		_menu.addItem(".syx", [this, _func]{_func(pluginLib::FileType::Syx);});
-		_menu.addItem(".mid", [this, _func]{_func(pluginLib::FileType::Mid);});
+		_menu.addEntry(".syx", [this, _func]{_func(pluginLib::FileType::Syx);});
+		_menu.addEntry(".mid", [this, _func]{_func(pluginLib::FileType::Mid);});
 	}
 
 	void Editor::registerSettings(std::vector<std::unique_ptr<SettingsPlugin>>& _plugins)
@@ -590,42 +674,185 @@ namespace jucePluginEditorLib
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)
+
+	juce::Component* Editor::createRmlUiComponent(const std::string& _rmlFile)
+
 	{
-		if(_key.getModifiers().isCommandDown())
-		{
-			switch(_key.getKeyCode())
+		if (!m_rmlPlugin)
+			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(m_rmlInterfaces.getCoreInstance(), getProcessor().getController()));
+
+		auto* comp = new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f
+			, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 			{
-			case 'c':
-			case 'C':
+				onRmlContextCreated(_rmlComponent, _context);
+			}, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+			{
+				onRmlDocumentLoadFailed(_rmlComponent, _context);
+			});
+
+		auto* doc = comp->getDocument();
+
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
+				return;
+
+			switch (juceRmlUi::helper::getKeyIdentifier(_event))
+			{
+			case Rml::Input::KI_C:
 				copyCurrentPatchToClipboard();
-				return true;
-			case 'v':
-			case 'V':
-				if(replaceCurrentPatchFromClipboard())
-					return true;
+				_event.StopPropagation();
 				break;
-			default:
-				return genericUI::Editor::keyPressed(_key);
-			}
-		}
-#ifdef _DEBUG
-		else if (_key.getKeyCode() == juce::KeyPress::escapeKey)
-		{
-			if (m_settings)
-			{
-				m_settings.reset();
+			case Rml::Input::KI_V:
+				replaceCurrentPatchFromClipboard();
+				_event.StopPropagation();
+				break;
+			case Rml::Input::KI_S:
+				if (m_settings)
+				{
+					m_settings.reset();
+					return true;
+				}
+
+				m_settings.reset(new Settings(*this));
+				addAndMakeVisible(m_settings.get());
+				m_settings->setTransform(juce::AffineTransform::scale(1.0f / getScale()));
+				m_settings->centreWithSize(getWidth() * 7 / 8 * getScale(), getHeight() * 7 / 8 * getScale());
+
 				return true;
+				break;
+			default:;
 			}
+		});
+		return comp;
+	}
 
-			m_settings.reset(new Settings(*this));
-			addAndMakeVisible(m_settings.get());
-			m_settings->setTransform(juce::AffineTransform::scale(1.0f / getScale()));
-			m_settings->centreWithSize(getWidth() * 7 / 8 * getScale(), getHeight() * 7 / 8 * getScale());
+	void Editor::onRmlContextCreated(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+	{
+		m_rmlPlugin->onContextCreate(&_context, _rmlComponent);
 
-			return true;
+		m_overlays.reset(new ParameterOverlays(*this, *m_rmlPlugin->getParameterBinding(&_context)));
+
+		m_pluginDataModel.reset(new PluginDataModel(*this, _context, [this](PluginDataModel& _model)
+		{
+			initPluginDataModel(_model);
+		}));
+		m_patchManagerDataModel.reset(new patchManagerRml::PatchManagerDataModel(_context));
+	}
+
+	void Editor::onRmlDocumentLoadFailed(juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
+	{
+		m_patchManagerDataModel.reset();
+		m_pluginDataModel.reset();
+		m_overlays.reset();
+	}
+
+	juce::File Editor::createTempFile(const std::string& _filename)
+	{
+		// try to create human-readable filename first
+		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + _filename;
+
+		auto file = juce::File(pathName);
+
+		if(file.hasWriteAccess())
+		{
+			registerDragAndDropFile(file);
+			return file;
 		}
-#endif
-		return genericUI::Editor::keyPressed(_key);
+
+		// failed, create temp file
+		auto tempFile = std::make_shared<juce::TemporaryFile>(_filename);
+		file = tempFile->getFile();
+		registerDragAndDropTempFile(std::move(tempFile));
+		return file;
+	}
+
+	void Editor::registerDragAndDropFile(const juce::File& _file)
+	{
+		m_dragAndDropFiles.push_back(_file);
+	}
+
+	void Editor::registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile)
+	{
+		m_dragAndDropTempFiles.push_back(std::move(_tempFile));
+	}
+
+	rmlPlugin::RmlParameterBinding* Editor::getRmlParameterBinding() const
+	{
+		return m_rmlPlugin->getParameterBinding(m_rmlComponent->getContext());
+	}
+
+	rmlPlugin::RmlPluginDocument* Editor::getRmlPluginDocument() const
+	{
+		return m_rmlPlugin ? m_rmlPlugin->getPluginDocument(m_rmlComponent->getDocument()) : nullptr;
+	}
+
+	Rml::ElementDocument* Editor::getDocument() const
+	{
+		return m_rmlComponent ? m_rmlComponent->getDocument() : nullptr;
+	}
+
+	Rml::Element* Editor::getRmlRootElement() const
+	{
+		if (!m_rmlComponent)
+			return {};
+		return m_rmlComponent->getDocument();
+	}
+
+	std::vector<Rml::Element*> Editor::findChildreByParam(const std::string& _param, uint8_t _part,	const size_t _expectedCount, bool _visibleOnly) const
+	{
+		std::vector<Rml::Element*> results;
+		getRmlParameterBinding()->getElementsForParameter(results, _param, _part, _visibleOnly);
+		if (_expectedCount != 0 && results.size() != _expectedCount)
+			throw std::runtime_error("Failed to find " + std::to_string(_expectedCount) + " elements for parameter " + _param + ", found " + std::to_string(results.size()));
+		return results;
+	}
+
+	Rml::Element* Editor::findChildByParam(const std::string& _param, uint8_t _part, bool _mustExist, bool _visibleOnly) const
+	{
+		auto* res = getRmlParameterBinding()->getElementForParameter(_param, _part, _visibleOnly);
+		if (_mustExist && !res)
+			throw std::runtime_error("Failed to find element for parameter " + _param);
+		return res;
+	}
+
+	Rml::Element* Editor::addClick(const std::string& _elementName, const std::function<void(Rml::Event&)>& _func, const bool _mustExist) const
+	{
+		if (auto* element = findChild(_elementName, _mustExist))
+		{
+			juceRmlUi::EventListener::Add(element, Rml::EventId::Click, [this, _func](Rml::Event& _event)
+			{
+				_func(_event);
+			});
+			return element;
+		}
+		return {};
+	}
+
+	int Editor::getDefaultWidth() const
+	{
+		return m_rmlComponent ? m_rmlComponent->getDocumentSize().x : 0;
+	}
+
+	int Editor::getDefaultHeight() const
+	{
+		return m_rmlComponent ? m_rmlComponent->getDocumentSize().y : 0;
+	}
+
+	bool Editor::setSize(const int _width, const int _height) const
+	{
+		if (!m_rmlComponent)
+			return false;
+		m_rmlComponent->resize(_width, _height);
+		return true;
+	}
+
+	std::string Editor::getAbsoluteSkinFolder(const Processor& _processor, const std::string& _skinFolder)
+	{
+		const auto modulePath = synthLib::getModulePath();
+		const auto publicDataPath = _processor.getDataFolder();
+
+		return baseLib::filesystem::validatePath(_skinFolder.find(modulePath) == 0 || _skinFolder.find(publicDataPath) == 0 ? _skinFolder : modulePath + _skinFolder);
 	}
 
 	void Editor::onDisclaimerFinished() const
@@ -635,7 +862,7 @@ namespace jucePluginEditorLib
 
 		const auto& name = m_processor.getProperties().name;
 
-		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 			name + " - Rosetta detected", 
 			name + " appears to be running in Rosetta mode.\n"
 			"\n"
@@ -663,12 +890,10 @@ namespace jucePluginEditorLib
 			if(res)
 				return res;
 
-			const auto modulePath = synthLib::getModulePath();
-			const auto publicDataPath = m_processor.getDataFolder();
-			const auto folder = baseLib::filesystem::validatePath(m_skin.folder.find(modulePath) == 0 || m_skin.folder.find(publicDataPath) == 0 ? m_skin.folder : modulePath + m_skin.folder);
+			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
 
 			// try to load from disk first
-			FILE* hFile = fopen((folder + _name).c_str(), "rb");
+			FILE* hFile = baseLib::filesystem::openFile(folder + _name, "rb");
 			if(hFile)
 			{
 				fseek(hFile, 0, SEEK_END);
@@ -698,37 +923,49 @@ namespace jucePluginEditorLib
 		return res;
 	}
 
-	int Editor::getParameterIndexByName(const std::string& _name)
+	std::vector<std::string> Editor::getAllFilenames()
 	{
-		return static_cast<int>(m_processor.getController().getParameterIndexByName(_name));
+		std::vector<std::string> filenames;
+
+		auto addFile = [&filenames](const std::string& _file)
+		{
+			// we can't use a set here, because we want to keep the order
+			if (std::find(filenames.begin(), filenames.end(), _file) == filenames.end())
+				filenames.push_back(_file);
+		};
+
+		if (!m_skin.folder.empty())
+		{
+			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
+
+			juce::File skinFolder(folder);
+			if (skinFolder.exists() && skinFolder.isDirectory())
+			{
+				auto files = skinFolder.findChildFiles(juce::File::findFiles, false, "*");
+				for (const auto& file : files)
+					addFile(file.getFileName().toStdString());
+			}
+		}
+		else
+		{
+			auto data = getProcessor().getProperties().binaryData;
+			for (size_t i=0; i<data.listSize; ++i)
+				addFile(data.originalFileNames[i]);
+		}
+
+		for (const auto& file : m_skin.files)
+			addFile(file);
+
+		constexpr auto data = g_binaryDefaultData;
+
+		for (size_t i=0; i<data.listSize; ++i)
+			addFile(data.originalFileNames[i]);
+
+		return filenames;
 	}
 
-	bool Editor::bindParameter(juce::Button& _target, int _parameterIndex)
+	std::string Editor::getAbsoluteSkinFolder(const std::string& _skinFolder) const
 	{
-		m_binding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool Editor::bindParameter(juce::ComboBox& _target, int _parameterIndex)
-	{
-		m_binding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool Editor::bindParameter(juce::Slider& _target, int _parameterIndex)
-	{
-		m_binding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool Editor::bindParameter(juce::Label& _target, int _parameterIndex)
-	{
-		m_binding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	juce::Value* Editor::getParameterValue(int _parameterIndex, uint8_t _part)
-	{
-		return m_processor.getController().getParamValueObject(_parameterIndex, _part);
+		return getAbsoluteSkinFolder(m_processor, _skinFolder);
 	}
 }

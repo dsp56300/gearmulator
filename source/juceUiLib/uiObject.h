@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "condition.h"
 #include "controllerlink.h"
 #include "tabgroup.h"
 
@@ -36,58 +35,37 @@ namespace genericUI
 		explicit UiObject(UiObject* _parent, const juce::var& _json, bool _isTemplate = false);
 		~UiObject();
 
-		void createJuceTree(Editor& _editor);
-		void createChildObjects(Editor& _editor, juce::Component& _parent) const;
-		void createTabGroups(Editor& _editor);
-		void createControllerLinks(Editor& _editor) const;
-		void registerTemplates(Editor& _editor) const;
-
-		void apply(const Editor& _editor, juce::Component& _target);
-		void apply(Editor& _editor, juce::Slider& _target);
-		void apply(Editor& _editor, juce::ComboBox& _target);
-		void apply(Editor& _editor, juce::DrawableButton& _target);
-
-		void apply(Editor& _editor, juce::Label& _target);
-		void apply(Editor& _editor, juce::ScrollBar& _target);
-		void apply(Editor& _editor, juce::TextButton& _target);
-		void apply(Editor& _editor, juce::HyperlinkButton& _target);
-		void apply(Editor& _editor, juce::TreeView& _target);
-		void apply(Editor& _editor, juce::ListBox& _target);
-		void apply(Editor& _editor, juce::TextEditor& _target);
-
 		template<typename TComponent, typename TStyle>
 		void applyT(Editor& _editor, TComponent& _target);
 
 		void collectVariants(std::set<std::string>& _dst, const std::string& _property) const;
 
-		juce::Component* createJuceObject(Editor& _editor);
-
 		int getPropertyInt(const std::string& _key, int _default = 0) const;
 		float getPropertyFloat(const std::string& _key, float _default = 0.0f) const;
 		std::string getProperty(const std::string& _key, const std::string& _default = std::string()) const;
 
-		size_t getConditionCountRecursive() const;
-		size_t getControllerLinkCountRecursive() const;
-
-		void setCurrentPart(Editor& _editor, uint8_t _part);
-
 		const auto& getName() const { return m_name; }
 
-		void updateKeyValueConditions(const std::string& _key, const std::string& _value) const;
+		bool hasComponent(const std::string& _component) const;
+
+		const auto& getChildren() const { return m_children; }
+
+		const auto& getTabGroup() const { return m_tabGroup; }
+
+		const auto& getControllerLinks() const { return m_controllerLinks; }
+
+		std::set<std::string> readConditionValues() const;
+
+		const auto& getTemplates() const { return m_templates; }
+
+		const std::map<std::string, std::string>& getComponentProperties() const;
 
 	private:
-		bool hasComponent(const std::string& _component) const;
-		template<typename T, class... Args> T* createJuceObject(Editor& _editor, Args... _args);
-		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
-		void createCondition(const Editor& _editor, juce::Component& _target);
-
 		juce::DynamicObject& applyStyle(juce::DynamicObject& _obj, const std::string& _styleName);
 
 		static bool copyPropertiesRecursive(juce::DynamicObject& _target, const juce::DynamicObject& _source);
 
 		bool parse(juce::DynamicObject* _obj);
-
-		template<typename T> void bindParameter(const Editor& _editor, T& _target) const;
 
 		void readProperties(juce::Component& _target);
 
@@ -107,14 +85,7 @@ namespace genericUI
 
 		std::map<std::string, juce::var> m_styles;
 
-		std::unique_ptr<Condition> m_condition;
-
 		TabGroup m_tabGroup;
 		std::vector<std::unique_ptr<ControllerLink>> m_controllerLinks;
 	};
-
-	inline bool UiObject::hasComponent(const std::string& _component) const
-	{
-		return m_components.find(_component) != m_components.end();
-	}
 }

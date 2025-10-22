@@ -1,0 +1,57 @@
+<template name="knob_yellow">
+<head>
+	<style>
+		@spritesheet knob_yellow
+		{
+			src: knob_yellow_grid.png;
+
+			frame000: 0px 0px 128px 128px;		frame001: 128px 0px 128px 128px;	frame002: 256px 0px 128px 128px;	frame003: 384px 0px 128px 128px;
+			frame004: 512px 0px 128px 128px;	frame005: 640px 0px 128px 128px;	frame006: 768px 0px 128px 128px;	frame007: 896px 0px 128px 128px;
+			frame008: 1024px 0px 128px 128px;	frame009: 1152px 0px 128px 128px;	frame010: 1280px 0px 128px 128px;	frame011: 1408px 0px 128px 128px;
+			frame012: 1536px 0px 128px 128px;	frame013: 1664px 0px 128px 128px;	frame014: 1792px 0px 128px 128px;	frame015: 1920px 0px 128px 128px;
+			frame016: 0px 128px 128px 128px;	frame017: 128px 128px 128px 128px;	frame018: 256px 128px 128px 128px;	frame019: 384px 128px 128px 128px;
+			frame020: 512px 128px 128px 128px;	frame021: 640px 128px 128px 128px;	frame022: 768px 128px 128px 128px;	frame023: 896px 128px 128px 128px;
+			frame024: 1024px 128px 128px 128px;	frame025: 1152px 128px 128px 128px;	frame026: 1280px 128px 128px 128px;	frame027: 1408px 128px 128px 128px;
+			frame028: 1536px 128px 128px 128px;	frame029: 1664px 128px 128px 128px;	frame030: 1792px 128px 128px 128px;	frame031: 1920px 128px 128px 128px;
+			frame032: 0px 256px 128px 128px;	frame033: 128px 256px 128px 128px;	frame034: 256px 256px 128px 128px;	frame035: 384px 256px 128px 128px;
+			frame036: 512px 256px 128px 128px;	frame037: 640px 256px 128px 128px;	frame038: 768px 256px 128px 128px;	frame039: 896px 256px 128px 128px;
+			frame040: 1024px 256px 128px 128px;	frame041: 1152px 256px 128px 128px;	frame042: 1280px 256px 128px 128px;	frame043: 1408px 256px 128px 128px;
+			frame044: 1536px 256px 128px 128px;	frame045: 1664px 256px 128px 128px;	frame046: 1792px 256px 128px 128px;	frame047: 1920px 256px 128px 128px;
+			frame048: 0px 384px 128px 128px;	frame049: 128px 384px 128px 128px;	frame050: 256px 384px 128px 128px;	frame051: 384px 384px 128px 128px;
+			frame052: 512px 384px 128px 128px;	frame053: 640px 384px 128px 128px;	frame054: 768px 384px 128px 128px;	frame055: 896px 384px 128px 128px;
+			frame056: 1024px 384px 128px 128px;	frame057: 1152px 384px 128px 128px;	frame058: 1280px 384px 128px 128px;	frame059: 1408px 384px 128px 128px;
+			frame060: 1536px 384px 128px 128px;	frame061: 1664px 384px 128px 128px;	frame062: 1792px 384px 128px 128px;	frame063: 1920px 384px 128px 128px;
+			frame064: 0px 512px 128px 128px;	frame065: 128px 512px 128px 128px;	frame066: 256px 512px 128px 128px;	frame067: 384px 512px 128px 128px;
+			frame068: 512px 512px 128px 128px;	frame069: 640px 512px 128px 128px;	frame070: 768px 512px 128px 128px;	frame071: 896px 512px 128px 128px;
+			frame072: 1024px 512px 128px 128px;	frame073: 1152px 512px 128px 128px;	frame074: 1280px 512px 128px 128px;	frame075: 1408px 512px 128px 128px;
+			frame076: 1536px 512px 128px 128px;	frame077: 1664px 512px 128px 128px;	frame078: 1792px 512px 128px 128px;	frame079: 1920px 512px 128px 128px;
+			frame080: 0px 640px 128px 128px;	frame081: 128px 640px 128px 128px;	frame082: 256px 640px 128px 128px;	frame083: 384px 640px 128px 128px;
+			frame084: 512px 640px 128px 128px;	frame085: 640px 640px 128px 128px;	frame086: 768px 640px 128px 128px;	frame087: 896px 640px 128px 128px;
+			frame088: 1024px 640px 128px 128px;	frame089: 1152px 640px 128px 128px;	frame090: 1280px 640px 128px 128px;	frame091: 1408px 640px 128px 128px;
+			frame092: 1536px 640px 128px 128px;	frame093: 1664px 640px 128px 128px;	frame094: 1792px 640px 128px 128px;	frame095: 1920px 640px 128px 128px;
+			frame096: 0px 768px 128px 128px;	frame097: 128px 768px 128px 128px;	frame098: 256px 768px 128px 128px;	frame099: 384px 768px 128px 128px;
+			frame100: 512px 768px 128px 128px;	frame101: 640px 768px 128px 128px;	frame102: 768px 768px 128px 128px;	frame103: 896px 768px 128px 128px;
+			frame104: 1024px 768px 128px 128px;	frame105: 1152px 768px 128px 128px;	frame106: 1280px 768px 128px 128px;	frame107: 1408px 768px 128px 128px;
+			frame108: 1536px 768px 128px 128px;	frame109: 1664px 768px 128px 128px;	frame110: 1792px 768px 128px 128px;	frame111: 1920px 768px 128px 128px;
+			frame112: 0px 896px 128px 128px;	frame113: 128px 896px 128px 128px;	frame114: 256px 896px 128px 128px;	frame115: 384px 896px 128px 128px;
+			frame116: 512px 896px 128px 128px;	frame117: 640px 896px 128px 128px;	frame118: 768px 896px 128px 128px;	frame119: 896px 896px 128px 128px;
+			frame120: 1024px 896px 128px 128px;	frame121: 1152px 896px 128px 128px;	frame122: 1280px 896px 128px 128px;	frame123: 1408px 896px 128px 128px;
+			frame124: 1536px 896px 128px 128px;	frame125: 1664px 896px 128px 128px;	frame126: 1792px 896px 128px 128px;	frame127: 1920px 896px 128px 128px;
+		}
+		
+		.knob_yellow
+		{
+			width: 128px; height: 128px;
+			display: block;
+			decorator: image(frame010 contain);
+			drag: drag;
+			speed: 0.5;
+			frames: 128;
+			spriteprefix: frame;
+		}
+	</style>
+</head>
+<body>
+	<knob class="knob_yellow" param="{{maloche}}"/>
+</body>
+</template>

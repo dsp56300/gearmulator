@@ -7,21 +7,22 @@ namespace jucePluginEditorLib
 	class PluginEditorState;
 
 	//==============================================================================
-	class EditorWindow : public juce::AudioProcessorEditor
+	class EditorWindow : public juce::AudioProcessorEditor, juce::Timer
 	{
 	public:
 	    explicit EditorWindow (juce::AudioProcessor& _p, PluginEditorState& _s, juce::PropertiesFile& _config);
 	    ~EditorWindow() override;
-
-		void mouseDown(const juce::MouseEvent& event) override;
 
 		void paint(juce::Graphics& g) override {}
 
 		void resized() override;
 
 	private:
-		void setGuiScale(juce::Component* _comp, float _percent);
+		void setGuiScale(float _percent);
 		void setUiRoot(juce::Component* _component);
+
+		void timerCallback() override;
+		void fixParentWindowSize() const;
 
 		PluginEditorState& m_state;
 		juce::PropertiesFile& m_config;

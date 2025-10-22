@@ -116,7 +116,7 @@ void pt_callback(PtTimestamp timestamp, void *userData)
     /* send a note on/off if user requested it */
     if (test_out && (iteration % output_period == 0)) {
         PmEvent buffer[1];
-        buffer[0].timestamp = Pt_Time(NULL);
+        buffer[0].timestamp = Pt_Time();
         if (note_on) {
             /* note off */
             buffer[0].message = Pm_Message(0x90, 60, 0);

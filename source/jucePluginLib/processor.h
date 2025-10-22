@@ -139,6 +139,7 @@ namespace pluginLib
 
 		auto& getMidiPorts() { return m_midiPorts; }
 
+		static std::optional<std::pair<const char*, uint32_t>> findResource(const BinaryDataRef& _binaryData, const std::string& _filename);
 		std::optional<std::pair<const char*, uint32_t>> findResource(const std::string& _filename) const;
 
 		std::string getDataFolder(bool _useFxFolder = false) const;
@@ -222,5 +223,6 @@ namespace pluginLib
 		uint32_t m_remotePort = 0;
 		bridgeLib::SessionId m_remoteSessionId;
 		synthLib::MidiRoutingMatrix m_midiRoutingMatrix;
+		std::string m_programName;
 	};
 }

@@ -4,7 +4,7 @@
 
 namespace xtJucePlugin
 {
-	GraphPhase::GraphPhase(WaveEditor& _editor): Graph(_editor)
+	GraphPhase::GraphPhase(WaveEditor& _editor, Rml::Element* _parent) : Graph(_editor, _parent)
 	{
 	}
 

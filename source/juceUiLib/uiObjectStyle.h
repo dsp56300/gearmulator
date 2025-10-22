@@ -21,17 +21,32 @@ namespace genericUI
 		virtual void apply(Editor& _editor, const UiObject& _object);
 
 		const auto& getColor() const { return m_color; }
+		const auto& getBackgroundColor() const { return m_bgColor; }
 		const auto& getSelectedItemBackgroundColor() const { return m_selectedItemBgColor; }
+		const auto& getOutlineColor() const { return m_outlineColor; }
 		const auto& getAlign() const { return m_align; }
 
 		std::optional<juce::Font> getFont() const;
+		const auto& getFontName() const { return m_fontName; }
+		const auto& getFontFile() const { return m_fontFile; }
+		int getTextHeight() const { return m_textHeight; }
 
 		bool getAntialiasing() const { return m_antialiasing; }
+
+		bool getBold() const { return m_bold; }
+		bool getItalic() const { return m_italic; }
 
 		static bool parseColor(juce::Colour& _color, const std::string& _colorString);
 
 		void drawLabel(juce::Graphics&, juce::Label&) override;
 		void drawButtonText(juce::Graphics&, juce::TextButton&, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
+
+		const auto& getHitAreaOffset() const { return m_hitAreaOffset; }
+
+		int getComboOffsetL() const { return m_offsetL; }
+		int getComboOffsetT() const { return m_offsetT; }
+		int getComboOffsetR() const { return m_offsetR; }
+		int getComboOffsetB() const { return m_offsetB; }	
 
 	protected:
 		juce::Font getComboBoxFont(juce::ComboBox&) override;

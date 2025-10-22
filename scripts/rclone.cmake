@@ -1,5 +1,11 @@
 if(NOT ROOT_DIR)
 	set(ROOT_DIR ${CMAKE_BINARY_DIR})
+	if(NOT ROOT_DIR)
+		set(ROOT_DIR ${gearmulator_BINARY_DIR})
+		if(NOT ROOT_DIR)
+			message(FATAL_ERROR "Unable to determine binary directory")
+		endif()
+	endif()
 endif()
 
 if(NOT RCLONE_CONF)

@@ -3,6 +3,8 @@
 #include "xtController.h"
 #include "xtEditor.h"
 
+#include "juceRmlPlugin/rmlParameterBinding.h"
+
 namespace xtJucePlugin
 {
 	// single/instrument/multi => instrument is prefixed with "MIn" where n is the instrument number from 0-7
@@ -21,24 +23,16 @@ namespace xtJucePlugin
 
 	Arp::Arp(Editor& _editor)
 	: m_editor(_editor)
-		, m_arpMode      (_editor.findComponentByParamT<juce::ComboBox>("ArpMode"))
-		, m_arpClock     (_editor.findComponentByParamT<juce::ComboBox>("ArpClock"))
-		, m_arpPattern   (_editor.findComponentByParamT<juce::ComboBox>("ArpPattern"))
-		, m_arpDirection (_editor.findComponentByParamT<juce::ComboBox>("ArpDirection"))
-		, m_arpOrder     (_editor.findComponentByParamT<juce::ComboBox>("ArpNoteOrder"))
-		, m_arpVelocity  (_editor.findComponentByParamT<juce::ComboBox>("ArpVelocity"))
-		, m_arpTempo     (_editor.findComponentByParamT<juce::Slider>  ("ArpTempo"))
-		, m_arpRange     (_editor.findComponentByParamT<juce::Slider>  ("ArpRange"))
+		, m_arpMode      (_editor.findChildByParam("ArpMode"))
+		, m_arpClock     (_editor.findChildByParam("ArpClock"))
+		, m_arpPattern   (_editor.findChildByParam("ArpPattern"))
+		, m_arpDirection (_editor.findChildByParam("ArpDirection"))
+		, m_arpOrder     (_editor.findChildByParam("ArpNoteOrder"))
+		, m_arpVelocity  (_editor.findChildByParam("ArpVelocity"))
+		, m_arpTempo     (_editor.findChildByParam("ArpTempo"))
+		, m_arpRange     (_editor.findChildByParam("ArpRange"))
 	{
-		const auto resetButtons = _editor.findComponentsByParam("ArpReset", 2);
-
-		for (auto* resetButton : resetButtons)
-		{
-			auto* button = dynamic_cast<juce::Button*>(resetButton);
-			if(!button)
-				continue;
-			m_arpReset.push_back(button);
-		}
+		m_arpReset = _editor.findChildreByParam("ArpReset", 2);
 
 		m_onPartChanged.set(_editor.getXtController().onCurrentPartChanged, [this](const uint8_t& _part)
 		{
@@ -53,7 +47,7 @@ namespace xtJucePlugin
 		bind();
 	}
 	
-	template <typename T> void Arp::bindT(T* _component, const char** _bindings)
+	void Arp::bind(Rml::Element* _component, const char** _bindings) const
 	{
 		const auto multi = m_editor.getXtController().isMultiMode();
 
@@ -69,25 +63,24 @@ namespace xtJucePlugin
 		{
 			paramName = _bindings[0];
 		}
-		
-		auto param = m_editor.getXtController().getParameterIndexByName(paramName);
 
-		m_editor.getParameterBinding().unbind(_component);
-		m_editor.getParameterBinding().bind(*_component, param, 0);
+		// not to current part because in multi mode its the multi arp and single single mode the part is 0
+		constexpr uint8_t part = 0;
+		m_editor.getRmlParameterBinding()->bind(*_component, paramName, part);
 	}
 
-	void Arp::bind()
+	void Arp::bind() const
 	{
-		bindT(m_arpMode, g_bindArpMode);
-		bindT(m_arpClock, g_bindArpClock);
-		bindT(m_arpPattern, g_bindArpPattern);
-		bindT(m_arpDirection, g_bindArpDirection);
-		bindT(m_arpOrder, g_bindArpNoteOrder);
-		bindT(m_arpVelocity, g_bindArpVelocity);
-		bindT(m_arpTempo, g_bindArpTempo);
-		bindT(m_arpRange, g_bindArpRange);
+		bind(m_arpMode, g_bindArpMode);
+		bind(m_arpClock, g_bindArpClock);
+		bind(m_arpPattern, g_bindArpPattern);
+		bind(m_arpDirection, g_bindArpDirection);
+		bind(m_arpOrder, g_bindArpNoteOrder);
+		bind(m_arpVelocity, g_bindArpVelocity);
+		bind(m_arpTempo, g_bindArpTempo);
+		bind(m_arpRange, g_bindArpRange);
 
 		for (auto* arpReset : m_arpReset)
-			bindT(arpReset, g_bindArpReset);
+			bind(arpReset, g_bindArpReset);
 	}
 }

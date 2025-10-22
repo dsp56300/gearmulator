@@ -5,11 +5,9 @@
 #include <vector>
 #include <cstdint>
 
-namespace juce
+namespace Rml
 {
-	class Button;
-	class ComboBox;
-	class Slider;
+	class Element;
 }
 
 namespace xtJucePlugin
@@ -22,20 +20,20 @@ namespace xtJucePlugin
 		explicit Arp(Editor& _editor);
 
 	private:
-		void bind();
-		template<typename T> void bindT(T* _component, const char** _bindings);
+		void bind() const;
+		void bind(Rml::Element* _component, const char** _bindings) const;
 
 		Editor& m_editor;
 
-		juce::ComboBox* m_arpMode;
-		juce::ComboBox* m_arpClock;
-		juce::ComboBox* m_arpPattern;
-		juce::ComboBox* m_arpDirection;
-		juce::ComboBox* m_arpOrder;
-		juce::ComboBox* m_arpVelocity;
-		juce::Slider* m_arpTempo;
-		juce::Slider* m_arpRange;
-		std::vector<juce::Button*> m_arpReset;
+		Rml::Element* m_arpMode;
+		Rml::Element* m_arpClock;
+		Rml::Element* m_arpPattern;
+		Rml::Element* m_arpDirection;
+		Rml::Element* m_arpOrder;
+		Rml::Element* m_arpVelocity;
+		Rml::Element* m_arpTempo;
+		Rml::Element* m_arpRange;
+		std::vector<Rml::Element*> m_arpReset;
 
 		baseLib::EventListener<bool> m_onPlayModeChanged;
 		baseLib::EventListener<uint8_t> m_onPartChanged;

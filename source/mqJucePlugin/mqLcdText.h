@@ -2,6 +2,11 @@
 
 #include "mqLcdBase.h"
 
+namespace Rml
+{
+	class Element;
+}
+
 namespace juce
 {
 	class Label;
@@ -10,12 +15,12 @@ namespace juce
 class MqLcdText final : public MqLcdBase
 {
 public:
-	MqLcdText(juce::Label& _lineA, juce::Label& _lineB);
+	MqLcdText(Rml::Element& _lineA, Rml::Element& _lineB);
 
 	void setText(const std::array<uint8_t,40>& _text) override;
 	void setCgRam(std::array<uint8_t, 64>& _data) override {}
 
 private:
-	juce::Label& m_lineA;
-	juce::Label& m_lineB;
+	Rml::Element& m_lineA;
+	Rml::Element& m_lineB;
 };

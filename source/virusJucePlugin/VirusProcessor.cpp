@@ -62,7 +62,7 @@ namespace virus
 		}
 		catch(const synthLib::DeviceException& e)
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 				"Device creation failed:",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n"

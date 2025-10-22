@@ -4,7 +4,11 @@
 
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/parameter.h"
-#include "jucePluginLib/parameterbinding.h"
+
+#include "juceRmlUi/rmlEventListener.h"
+
+#include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace jucePluginEditorLib
 {
@@ -42,54 +46,69 @@ namespace jucePluginEditorLib
 		}
 	}
 
-	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const pluginLib::ParameterBinding& _parameterBinding, const genericUI::Editor& _editor)
-		: m_parameterBinding(_parameterBinding)
+	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const Editor& _editor)
+		: m_parameterBinding(*_editor.getRmlParameterBinding())
 		, m_controller(_controller)
 	{
-		m_focusedParameterName = _editor.findComponentT<juce::Label>("FocusedParameterName", false);
-		m_focusedParameterValue = _editor.findComponentT<juce::Label>("FocusedParameterValue", false);
+		m_focusedParameterName = _editor.findChild("FocusedParameterName", false);
+		m_focusedParameterValue = _editor.findChild("FocusedParameterValue", false);
 
 		if (m_focusedParameterName)
-			m_focusedParameterName->setVisible(false);
+			juceRmlUi::helper::setVisible(m_focusedParameterName, false);
 		if (m_focusedParameterValue)
-			m_focusedParameterValue->setVisible(false);
+			juceRmlUi::helper::setVisible(m_focusedParameterValue, false);
 
-		m_tooltip.reset(new FocusedParameterTooltip(_editor.findComponentT<juce::Label>("FocusedParameterTooltip", false), _editor));
+		m_tooltip.reset(new FocusedParameterTooltip(_editor.findChild("FocusedParameterTooltip", false)));
 
 		updateControlLabel(nullptr, Priority::None);
+
+		auto bindParameter = [this](pluginLib::Parameter* _p)
+		{
+			m_boundParameters.insert({ _p, pluginLib::ParameterListener(_p, [this](const pluginLib::Parameter* _param)
+			{
+				if (_param->getChangeOrigin() == pluginLib::Parameter::Origin::PresetChange || 
+					_param->getChangeOrigin() == pluginLib::Parameter::Origin::Derived)
+					return;
+				if (auto* comp = m_parameterBinding.getElementForParameter(_param))
+					updateControlLabel(comp, _param);
+			})});
+		};
 
 		for (auto& params : m_controller.getExposedParameters())
 		{
 			for (const auto& param : params.second)
-			{
-				m_boundParameters.insert({param, pluginLib::ParameterListener(param, [this](const pluginLib::Parameter* _param)
-				{
-					if (_param->getChangeOrigin() == pluginLib::Parameter::Origin::PresetChange || 
-						_param->getChangeOrigin() == pluginLib::Parameter::Origin::Derived)
-						return;
-					if(auto* comp = m_parameterBinding.getBoundComponent(_param))
-						updateControlLabel(comp, _param);
-				})});
-			}
+				bindParameter(param);
 		}
+
+		for (auto& params : m_controller.getInternalParameters())
+		{
+			for (const auto& param : params.second)
+				bindParameter(param);
+		}
+
+		m_mouseOver.add(_editor.getDocument(), Rml::EventId::Mouseover, [this](const Rml::Event& _event)
+		{
+			// do not update if a mouse button is pressed as that indicates a drag operation
+			// Unfortunately RmlUi does not provide any mouse button state in the event itself
+			if (juceRmlUi::helper::isAnyMouseButtonDown())
+				return;
+			if (auto* element = _event.GetTargetElement())
+				updateControlLabel(element, Priority::High);
+		});
 	}
 
 	FocusedParameter::~FocusedParameter()
 	{
+		m_mouseOver.reset();
+
 		m_tooltip.reset();
 	
 		m_boundParameters.clear();
 	}
 
-	void FocusedParameter::onMouseEnter(const juce::MouseEvent& _event)
+	void FocusedParameter::updateByElement(const Rml::Element* _element)
 	{
-		updateByComponent(_event.eventComponent);
-	}
-
-	void FocusedParameter::updateByComponent(juce::Component* _comp)
-	{
-		if(_comp && _comp->getProperties().contains("parameter"))
-			updateControlLabel(_comp, Priority::High);
+		updateControlLabel(_element, Priority::High);
 	}
 
 	void FocusedParameter::updateParameter(const std::string& _name, const std::string& _value)
@@ -98,24 +117,24 @@ namespace jucePluginEditorLib
 		{
 			if(_name.empty())
 			{
-				m_focusedParameterName->setVisible(false);
+				juceRmlUi::helper::setVisible(m_focusedParameterName, false);
 			}
 			else
 			{
-				m_focusedParameterName->setText(_name, juce::dontSendNotification);
-				m_focusedParameterName->setVisible(true);
+				m_focusedParameterName->SetInnerRML(Rml::StringUtilities::EncodeRml(_name));
+				juceRmlUi::helper::setVisible(m_focusedParameterName, true);
 			}
 		}
 		if(m_focusedParameterValue)
 		{
 			if(_value.empty())
 			{
-				m_focusedParameterValue->setVisible(false);
+				juceRmlUi::helper::setVisible(m_focusedParameterValue, false);
 			}
 			else
 			{
-				m_focusedParameterValue->setText(_value, juce::dontSendNotification);
-				m_focusedParameterValue->setVisible(true);
+				m_focusedParameterValue->SetInnerRML(Rml::StringUtilities::EncodeRml(_value));
+				juceRmlUi::helper::setVisible(m_focusedParameterValue, true);
 			}
 		}
 	}
@@ -125,68 +144,71 @@ namespace jucePluginEditorLib
 		updateControlLabel(nullptr, Priority::High);
 	}
 
-	void FocusedParameter::updateControlLabel(juce::Component* _component, const Priority _prio)
+	void FocusedParameter::updateControlLabel(const Rml::Element* _elem, const Priority _prio)
 	{
-		if(_component)
+		if (_elem)
 		{
-			// combo boxes report the child label as event source, try the parent in this case
-			if(!_component->getProperties().contains("parameter"))
-				_component = _component->getParentComponent();
+			if (auto* parent = _elem->GetParentNode())
+			{
+				if (dynamic_cast<Rml::ElementFormControlInput*>(parent))
+					_elem = parent;
+			}
 		}
 
-		const auto* param = getParameterFromComponent(_component);
+		const auto* param = getParameterFromElement(_elem);
 
-		updateControlLabel(_component, param, _prio);
+		updateControlLabel(_elem, param, _prio);
 	}
 
-	void FocusedParameter::updateControlLabel(juce::Component* _component, const pluginLib::Parameter* _param, Priority _priority)
+	void FocusedParameter::updateControlLabel(const Rml::Element* _elem, const pluginLib::Parameter* _param, Priority _priority)
 	{
 		if(_priority < m_currentPriority)
 			return;
 
-		stopTimer();
-
 		_param = resolveSoftKnob(_param);
 
-		if(!_param || !_component)
+		if(!_param || !_elem)
 		{
+			stopTimer();
+			m_currentParameter = nullptr;
 			m_currentPriority = Priority::None;
 			updateParameter({}, {});
 			m_tooltip->setVisible(false);
 			return;
 		}
 
-		const auto value = _param->getText(_param->getValue(), 0).toStdString();
-
-		updateParameter(_param->getDescription().displayName, value);
-
-		m_tooltip->initialize(_component, value);
+		stopTimer();
 
 		const auto tooltipTime = m_tooltip && m_tooltip->isValid() ? m_tooltip->getTooltipDisplayTime() : g_defaultDisplayTimeout;
 
 		startTimer(tooltipTime == 0 ? g_defaultDisplayTimeout : static_cast<int>(tooltipTime));
 
+		// do not allow the displayed parameter to change on same priority to reduce flickering
+		// if multiple values are automated. Only allow for UI as it should immediately reflect user changes
+		if (_priority != getPriority(pluginLib::Parameter::Origin::Ui) && _priority == m_currentPriority && m_currentParameter != _param)
+			return;
+
+		m_currentParameter = _param;
+
+		const auto value = _param->getText(_param->getValue(), 0).toStdString();
+
+		updateParameter(_param->getDescription().displayName, value);
+
+		m_tooltip->initialize(_elem, value);
+
 		m_currentPriority = _priority;
 	}
 
-	void FocusedParameter::updateControlLabel(juce::Component* _component, const pluginLib::Parameter* _param)
+	void FocusedParameter::updateControlLabel(const Rml::Element* _elem, const pluginLib::Parameter* _param)
 	{
-		return updateControlLabel(_component, _param, getPriority(_param));
+		return updateControlLabel(_elem, _param, getPriority(_param));
 	}
 
-	const pluginLib::Parameter* FocusedParameter::getParameterFromComponent(juce::Component* _component) const
+	const pluginLib::Parameter* FocusedParameter::getParameterFromElement(const Rml::Element* _elem) const
 	{
-		if(!_component || !_component->getProperties().contains("parameter"))
-			return nullptr;
-
-		const auto& props = _component->getProperties();
-		const int paramIdx = props["parameter"];
-
-		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(m_controller.getCurrentPart());
-
-		const auto* param = m_controller.getParameter(paramIdx, static_cast<uint8_t>(part));
-
-		return param;
+		if (!_elem)
+			return {};
+		return m_parameterBinding.getParameterForElement(_elem);
 	}
 
 	const pluginLib::Parameter* FocusedParameter::resolveSoftKnob(const pluginLib::Parameter* _sourceParam) const

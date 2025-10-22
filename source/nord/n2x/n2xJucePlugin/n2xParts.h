@@ -19,7 +19,7 @@ namespace n2xJucePlugin
 
 		Editor& m_editor;
 
-		std::array<Part*,4> m_parts;
+		std::array<std::unique_ptr<Part>,4> m_parts;
 		std::array<std::unique_ptr<PartLed>,4> m_partLeds;
 		baseLib::EventListener<uint8_t> onCurrentPartChanged;
 

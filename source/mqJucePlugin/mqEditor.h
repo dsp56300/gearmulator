@@ -8,11 +8,6 @@ namespace jucePluginEditorLib
 	class Processor;
 }
 
-namespace pluginLib
-{
-	class ParameterBinding;
-}
-
 namespace mqJucePlugin
 {
 	class mqPartSelect;
@@ -23,7 +18,7 @@ namespace mqJucePlugin
 	class Editor final : public jucePluginEditorLib::Editor
 	{
 	public:
-		Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin);
+		Editor(jucePluginEditorLib::Processor& _processor, const jucePluginEditorLib::Skin& _skin);
 		~Editor() override;
 
 		Editor(Editor&&) = delete;
@@ -31,11 +26,15 @@ namespace mqJucePlugin
 		Editor& operator = (Editor&&) = delete;
 		Editor& operator = (const Editor&) = delete;
 
+		void create() override;
+
+		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
+
+		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
+
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 		Controller& getMqController() const { return m_controller; }
-
-		genericUI::Button<juce::DrawableButton>* createJuceComponent(genericUI::Button<juce::DrawableButton>*, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) override;
 
 		mqPartSelect* getPartSelect() const
 		{
@@ -43,22 +42,20 @@ namespace mqJucePlugin
 		}
 
 	private:
-		void mouseEnter(const juce::MouseEvent& _event) override;
-
 		void savePreset(const pluginLib::FileType& _type);
 
-		void onBtSave();
-		void onBtPresetPrev();
-		void onBtPresetNext();
+		void onBtSave(const Rml::Event& _event);
+		void onBtPresetPrev() const;
+		void onBtPresetNext() const;
 
 		Controller& m_controller;
 
 		std::unique_ptr<FrontPanel> m_frontPanel;
 		std::unique_ptr<mqPartSelect> m_partSelect;
-		juce::Button* m_btPlayModeMulti = nullptr;
-		juce::Button* m_btSave = nullptr;
-		juce::Button* m_btPresetPrev = nullptr;
-		juce::Button* m_btPresetNext = nullptr;
+		Rml::Element* m_btPlayModeMulti = nullptr;
+		Rml::Element* m_btSave = nullptr;
+		Rml::Element* m_btPresetPrev = nullptr;
+		Rml::Element* m_btPresetNext = nullptr;
 
 		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 	};

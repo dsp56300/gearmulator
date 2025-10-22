@@ -3,24 +3,25 @@
 #include "xtController.h"
 #include "xtEditor.h"
 #include "xtPartName.h"
+#include "juceRmlUi/rmlElemButton.h"
 
 namespace xtJucePlugin
 {
 	Parts::Parts(Editor& _editor) : m_editor(_editor)
 	{
-		std::vector<PartButton*> buttons;
-		std::vector<PartName*> names;
-		std::vector<juce::Button*> leds;
+		std::vector<Rml::Element*> buttons;
+		std::vector<Rml::Element*> names;
+		std::vector<Rml::Element*> leds;
 
-		_editor.findComponents<PartButton>(buttons, "PartButtonSmall", 8);
-		_editor.findComponents<PartName>(names, "PatchName", 8);
-		_editor.findComponents<juce::Button>(leds, "PartLedSmall", 8);
+		_editor.findChildren(buttons, "PartButtonSmall", 8);
+		_editor.findChildren(names, "PatchName", 8);
+		_editor.findChildren(leds, "PartLedSmall", 8);
 
 		for(size_t i=0; i<m_parts.size(); ++i)
 		{
 			auto& part = m_parts[i];
-			part.m_button = buttons[i];
-			part.m_name = names[i];
+			part.m_button.reset(new PartButton(buttons[i], _editor));
+			part.m_name.reset(new PartName(names[i], _editor));
 			part.m_led = leds[i];
 
 			part.m_button->initalize(static_cast<uint8_t>(i));
@@ -60,8 +61,8 @@ namespace xtJucePlugin
 		{
 			const auto& part = m_parts[i];
 
-			part.m_led->setToggleState(i == currentPart, juce::dontSendNotification);
-			part.m_button->setToggleState(i == currentPart, juce::dontSendNotification);
+			juceRmlUi::ElemButton::setChecked(part.m_led, i == currentPart);
+			part.m_button->setChecked(i == currentPart);
 		}
 	}
 }

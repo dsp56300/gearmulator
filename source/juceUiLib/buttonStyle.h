@@ -10,7 +10,6 @@ namespace genericUI
 		explicit ButtonStyle(Editor& _editor) : UiObjectStyle(_editor) {}
 
 		void apply(Editor& _editor, const UiObject& _object) override;
-		void apply(juce::DrawableButton& _button) const;
 
 	private:
 		bool m_isToggle = false;

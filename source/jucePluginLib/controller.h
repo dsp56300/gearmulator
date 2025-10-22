@@ -32,8 +32,8 @@ namespace pluginLib
 		explicit Controller(Processor& _processor, const std::string& _parameterDescJsonFilename);
 		~Controller() override;
 
-		virtual void sendParameterChange(const Parameter& _parameter, ParamValue _value) = 0;
-		void sendLockedParameters(uint8_t _part);
+		virtual void sendParameterChange(const Parameter& _parameter, ParamValue _value, pluginLib::Parameter::Origin _origin) = 0;
+		void sendLockedParameters(uint8_t _part, Parameter::Origin _origin = Parameter::Origin::PresetChange);
 
         juce::Value* getParamValueObject(uint32_t _index, uint8_t _part) const;
         Parameter* getParameter(uint32_t _index) const;
@@ -59,13 +59,14 @@ namespace pluginLib
 		bool parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const SysEx& _src) const;
 
 		const auto& getExposedParameters() const { return m_synthParams; }
+		const auto& getInternalParameters() const { return m_synthInternalParams; }
 
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		virtual bool setCurrentPart(uint8_t _part);
 		virtual uint8_t getPartCount() const { return 16; }
 
 		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
-		virtual bool parseControllerMessage(const synthLib::SMidiEvent&) = 0;
+		virtual bool parseControllerMessage(const synthLib::SMidiEvent&);
 
 		virtual bool parseMidiMessage(const synthLib::SMidiEvent& _e);
 
@@ -109,7 +110,7 @@ namespace pluginLib
 		SoftKnob* getSoftknob(const Parameter* _parameter)
 		{
 			const auto it = m_softKnobs.find(_parameter);
-			return it->second.get();
+			return it != m_softKnobs.end() ? it->second.get() : nullptr;
 		}
 
 		Processor& getProcessor() const { return m_processor; }

@@ -1,0 +1,495 @@
+<rml>
+	<head>
+		<link type="text/template" href="tus_colorpicker.rml"/>
+		<link type="text/template" href="tus_patchmanager.rml"/>
+		<link type="text/rcss" href="tus_default.rcss"/>
+		<link type="text/rcss" href="tus_juceskin.rcss"/>
+		<link type="text/rcss" href="n2xTrancy.rcss"/>
+	</head>
+	<body id="Root" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2275dp; height: 1197dp;">
+		<img id="bg" class="jucePos" src="background.png" style="left: 0dp; top: 0dp; width: 2275dp; height: 1197dp;"/>
+		<button id="button_1_main" class="jucePos juceButton button_main" isToggle="1" tabbutton="0" tabgroup="pages" style="left: 1658dp; top: 897dp; width: 184dp; height: 67.5dp;"/>
+		<button id="button_2_browser" class="jucePos juceButton button_browser" isToggle="1" tabbutton="1" tabgroup="pages" style="left: 1839dp; top: 897dp; width: 184dp; height: 67.5dp;"/>
+		<button id="button_3_perf" class="jucePos juceButton button_perf" isToggle="1" tabbutton="2" tabgroup="pages" style="left: 2020dp; top: 897dp; width: 184dp; height: 67.5dp;"/>
+		<knob id="PortamentoSens" class="jucePos juceRotary knob" data-model="partCurrent" param="PortamentoSens" style="left: 715dp; top: 960dp; width: 113dp; height: 113dp;"/>
+		<knob id="MasterVolume" class="jucePos juceRotary knob1" style="left: 74dp; top: 961dp; width: 113dp; height: 113dp;"/>
+		<knob id="PerfUnisonDetune" class="jucePos juceRotary knob1" data-model="partCurrent" param="PerfUnisonDetune" style="left: 892dp; top: 960dp; width: 113dp; height: 113dp;"/>
+		<knob id="Portamento" class="jucePos juceRotary knob1" data-model="partCurrent" param="Portamento" style="left: 715dp; top: 960dp; width: 113dp; height: 113dp;"/>
+		<button id="Auto_LED" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Auto" style="left: 685dp; top: 1071dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 190dp; height: 50dp;"/>
+		</button>
+		<button id="VMMAP" class="jucePos juceButton button_round" isToggle="1" style="left: 41dp; top: 1071dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 190dp; height: 50dp;"/>
+		</button>
+		<button id="Unison" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Unison" style="left: 857dp; top: 881dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 190dp; height: 50dp;"/>
+		</button>
+		<button id="VoiceMode_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="VoiceMode" valueOn="2" style="left: 518dp; top: 927dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 190dp; height: 50dp;"/>
+		</button>
+		<button id="VoiceMode_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="VoiceMode" valueOn="1" style="left: 518dp; top: 964dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 190dp; height: 50dp;"/>
+		</button>
+		<button id="VoiceMode_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="VoiceMode" valueOn="0" style="left: 518dp; top: 1001dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 190dp; height: 50dp;"/>
+		</button>
+		<button id="PerfMidiChannelA" class="jucePos juceButton button_round" isToggle="1" style="left: 203dp; top: 1063dp; width: 70dp; height: 70dp;"/>
+		<button id="PerfMidiChannelB" class="jucePos juceButton button_round" isToggle="1" style="left: 276dp; top: 1063dp; width: 70dp; height: 70dp;"/>
+		<button id="PerfMidiChannelC" class="jucePos juceButton button_round" isToggle="1" style="left: 349dp; top: 1063dp; width: 70dp; height: 70dp;"/>
+		<button id="PerfMidiChannelD" class="jucePos juceButton button_round" isToggle="1" style="left: 422dp; top: 1063dp; width: 70dp; height: 70dp;"/>
+		<button id="PerfSlotActiveA" class="jucePos juceButton button_a" isToggle="1" style="left: 218dp; top: 1023dp; width: 74dp; height: 56dp;"/>
+		<button id="PerfSlotActiveB" class="jucePos juceButton button_b" isToggle="1" style="left: 291dp; top: 1023dp; width: 74dp; height: 56dp;"/>
+		<button id="PerfSlotActiveC" class="jucePos juceButton button_c" isToggle="1" style="left: 364dp; top: 1023dp; width: 74dp; height: 56dp;"/>
+		<button id="PerfSlotActiveD" class="jucePos juceButton button_d" isToggle="1" style="left: 437dp; top: 1023dp; width: 74dp; height: 56dp;"/>
+		<button id="OctaveShift_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="OctaveShift" valueOn="0" style="left: 1053dp; top: 938dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="OctaveShift_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="OctaveShift" valueOn="1" style="left: 1053dp; top: 975dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="OctaveShift_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="OctaveShift" valueOn="2" style="left: 1053dp; top: 1012dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="OctaveShift_4" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="OctaveShift" valueOn="3" style="left: 1053dp; top: 1049dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="OctaveShift_5" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="OctaveShift" valueOn="4" style="left: 1053dp; top: 1087dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="ModWheelDest_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModWheelDest" valueOn="4" style="left: 1222dp; top: 938dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="ModWheelDest_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModWheelDest" valueOn="2" style="left: 1222dp; top: 975dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="ModWheelDest_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModWheelDest" valueOn="0" style="left: 1222dp; top: 1012dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="ModWheelDest_4" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModWheelDest" valueOn="3" style="left: 1222dp; top: 1049dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="ModWheelDest_5" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModWheelDest" valueOn="1" style="left: 1222dp; top: 1087dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="button_store" class="jucePos juceButton button_red" isToggle="0" style="left: 560dp; top: 1065dp; width: 99dp; height: 47dp;"/>
+		<button id="PresetNext" class="jucePos juceButton button_black" isToggle="0" style="left: 225dp; top: 910dp; width: 99dp; height: 47dp;"/>
+		<button id="PresetPrev" class="jucePos juceButton button_black" isToggle="0" style="left: 225dp; top: 957dp; width: 99dp; height: 47dp;"/>
+		<div id="PatchName" class="jucePos juceLabel txt" style="left: 380dp; top: 925dp; width: 150dp; height: 62dp; line-height: 62dp;">666</div>
+		<div id="FocusedParameterValue" class="jucePos juceLabel txt1" style="left: 260dp; top: 1145dp; width: 256.7dp; height: 52dp; line-height: 52dp;">-42</div>
+		<div id="FocusedParameterName" class="jucePos juceLabel txt2" style="left: 40dp; top: 1145dp; width: 600dp; height: 52dp; line-height: 52dp;">Osc</div>
+		<img id="page_1_main" class="jucePos" src="panel_1_main.png" tabgroup="pages" tabpage="0" style="left: 60dp; top: 60dp; width: 2153dp; height: 803dp;">
+			<knob id="O2PitchSens" class="jucePos juceRotary knob" data-model="partCurrent" param="O2PitchSens" style="left: 921dp; top: 107dp; width: 113dp; height: 113dp;"/>
+			<knob id="O2PitchFineSens" class="jucePos juceRotary knob" data-model="partCurrent" param="O2PitchFineSens" style="left: 923dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="MixSens" class="jucePos juceRotary knob" data-model="partCurrent" param="MixSens" style="left: 1102dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="CutoffSens" class="jucePos juceRotary knob" data-model="partCurrent" param="CutoffSens" style="left: 1344dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="ResonanceSens" class="jucePos juceRotary knob" data-model="partCurrent" param="ResonanceSens" style="left: 1504dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvAmountSens" class="jucePos juceRotary knob" data-model="partCurrent" param="FilterEnvAmountSens" style="left: 1664dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="FmDepthSens" class="jucePos juceRotary knob" data-model="partCurrent" param="FmDepthSens" style="left: 719dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="PWSens" class="jucePos juceRotary knob" data-model="partCurrent" param="PWSens" style="left: 719dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvASens" class="jucePos juceRotary knob" data-model="partCurrent" param="FilterEnvASens" style="left: 1344dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvDSens" class="jucePos juceRotary knob" data-model="partCurrent" param="FilterEnvDSens" style="left: 1505dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvSSens" class="jucePos juceRotary knob" data-model="partCurrent" param="FilterEnvSSens" style="left: 1666dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvRSens" class="jucePos juceRotary knob" data-model="partCurrent" param="FilterEnvRSens" style="left: 1826dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="AmpEnvASens" class="jucePos juceRotary knob" data-model="partCurrent" param="AmpEnvASens" style="left: 1344dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="AmpEnvDSens" class="jucePos juceRotary knob" data-model="partCurrent" param="AmpEnvDSens" style="left: 1504dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="AmpEnvSSens" class="jucePos juceRotary knob" data-model="partCurrent" param="AmpEnvSSens" style="left: 1664dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="AmpEnvRSens" class="jucePos juceRotary knob" data-model="partCurrent" param="AmpEnvRSens" style="left: 1824dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="GainSens" class="jucePos juceRotary knob" data-model="partCurrent" param="GainSens" style="left: 1987dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="ModEnvASens" class="jucePos juceRotary knob" data-model="partCurrent" param="ModEnvASens" style="left: 36dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="ModEnvDSens" class="jucePos juceRotary knob" data-model="partCurrent" param="ModEnvDSens" style="left: 196dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="ModEnvLevelSens" class="jucePos juceRotary knob" data-model="partCurrent" param="ModEnvLevelSens" style="left: 508dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="Lfo1RateSens" class="jucePos juceRotary knob" data-model="partCurrent" param="Lfo1RateSens" style="left: 36dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="Lfo1LevelSens" class="jucePos juceRotary knob" data-model="partCurrent" param="Lfo1LevelSens" style="left: 508dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="Gain" class="jucePos juceRotary knob1" data-model="partCurrent" param="Gain" style="left: 1987dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="AmpEnvA" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvA" style="left: 1344dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="AmpEnvD" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvD" style="left: 1504dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="AmpEnvS" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvS" style="left: 1664dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="AmpEnvR" class="jucePos juceRotary knob1" data-model="partCurrent" param="AmpEnvR" style="left: 1824dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="FmDepth" class="jucePos juceRotary knob1" data-model="partCurrent" param="FmDepth" style="left: 719dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<button id="O1Waveform_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O1Waveform" valueOn="3" style="left: 684dp; top: 79dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="O1Waveform_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O1Waveform" valueOn="2" style="left: 684dp; top: 116dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="O1Waveform_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O1Waveform" valueOn="1" style="left: 684dp; top: 153dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="O1Waveform_4" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O1Waveform" valueOn="0" style="left: 684dp; top: 190dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<knob id="O2PitchFine" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2PitchFine" style="left: 923dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="O2Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="O2Pitch" style="left: 921dp; top: 107dp; width: 113dp; height: 113dp;"/>
+			<button id="O2Pitch_LED" class="jucePos juceButton button_round" isToggle="1" style="left: 942dp; top: 27dp; width: 70dp; height: 70dp;"/>
+			<button id="O2Waveform_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O2Waveform" valueOn="2" style="left: 1101dp; top: 79dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="O2Waveform_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O2Waveform" valueOn="1" style="left: 1101dp; top: 116dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="O2Waveform_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O2Waveform" valueOn="0" style="left: 1101dp; top: 153dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="O2Waveform_4" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O2Waveform" valueOn="3" style="left: 1101dp; top: 190dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="O2Keytrack" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="O2Keytrack" style="left: 1082dp; top: 398dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 190dp; height: 50dp;"/>
+			</button>
+			<knob id="Mix" class="jucePos juceRotary knob1" data-model="partCurrent" param="Mix" style="left: 1102dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="PW" class="jucePos juceRotary knob1" data-model="partCurrent" param="PW" style="left: 719dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<button id="Sync" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Sync" style="left: 888dp; top: 602dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+			</button>
+			<button id="RingMod" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="RingMod" style="left: 888dp; top: 565dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+			</button>
+			<knob id="Cutoff" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff" style="left: 1344dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="Resonance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Resonance" style="left: 1504dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvAmount" style="left: 1664dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvA" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvA" style="left: 1344dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvD" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvD" style="left: 1505dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvS" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvS" style="left: 1666dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<knob id="FilterEnvR" class="jucePos juceRotary knob1" data-model="partCurrent" param="FilterEnvR" style="left: 1826dp; top: 377dp; width: 113dp; height: 113dp;"/>
+			<button id="FilterVelocity" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterVelocity" style="left: 1627dp; top: 548dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+			</button>
+			<button id="FilterKeytrack_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterKeytrack" valueOn="0" style="left: 1791dp; top: 592dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+			</button>
+			<button id="FilterKeytrack_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterKeytrack" valueOn="1" style="left: 1791dp; top: 629dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+			</button>
+			<button id="FilterKeytrack_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterKeytrack" valueOn="2" style="left: 1791dp; top: 666dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+			</button>
+			<button id="FilterKeytrack_4" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterKeytrack" valueOn="3" style="left: 1791dp; top: 705dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+			</button>
+			<button id="FilterType_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterType" valueOn="2" style="left: 1954dp; top: 369dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
+			<button id="FilterType_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterType" valueOn="1" style="left: 1954dp; top: 406dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
+			<button id="FilterType_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterType" valueOn="0" style="left: 1954dp; top: 443dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
+			<button id="FilterType_4" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterType" valueOn="3" style="left: 1954dp; top: 480dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
+			<button id="FilterType_5" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterType" valueOn="4" style="left: 1954dp; top: 517dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
+			<button id="Distortion" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Distortion" style="left: 1954dp; top: 705dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+			</button>
+			<input id="PerfLfo1SyncA" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="PerfLfo1SyncA" type="range" style="left: 500dp; top: 2dp; width: 140dp; height: 40dp;"/>
+			<knob id="Lfo1Rate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1Rate" style="left: 36dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<knob id="Lfo1Level" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1Level" style="left: 508dp; top: 88dp; width: 113dp; height: 113dp;"/>
+			<button id="Lfo1Waveform_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Waveform" valueOn="4" style="left: 162dp; top: 50dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Waveform_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Waveform" valueOn="2" style="left: 162dp; top: 87dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Waveform_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Waveform" valueOn="0" style="left: 162dp; top: 124dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Waveform_4" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Waveform" valueOn="3" style="left: 162dp; top: 161dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Waveform_5" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Waveform" valueOn="1" style="left: 162dp; top: 198dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Dest_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Dest" valueOn="4" style="left: 313dp; top: 50dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Dest_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Dest" valueOn="2" style="left: 313dp; top: 87dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Dest_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Dest" valueOn="0" style="left: 313dp; top: 124dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Dest_4" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Dest" valueOn="3" style="left: 313dp; top: 161dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<button id="Lfo1Dest_5" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo1Dest" valueOn="1" style="left: 313dp; top: 198dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+			</button>
+			<img id="LFO2" class="jucePos" data-class-juceConditionDisabled="!((Lfo2Dest_value >= 3 && Lfo2Dest_value <= 4) || Lfo2Dest_value == 7)" data-model="partCurrent" src="panel_1_main_lfo2.png" style="left: 0dp; top: 267dp; width: 661dp; height: 268dp;">
+				<button id="Lfo2Dest_LFO2_OSC1+2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="4" style="left: 162dp; top: 45dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+				</button>
+				<button id="Lfo2Dest_LFO2_AMP" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="3" style="left: 162dp; top: 82dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+				</button>
+				<button id="Lfo2Dest_LFO2_FILTER" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="7" style="left: 162dp; top: 119dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 170dp; height: 50dp;"/>
+				</button>
+			</img>
+			<img id="ARP" class="jucePos" data-class-juceConditionDisabled="!((Lfo2Dest_value >= 0 && Lfo2Dest_value <= 2) || (Lfo2Dest_value >= 5 && Lfo2Dest_value <= 6) || Lfo2Dest_value == 8)" data-model="partCurrent" src="panel_1_main_arpeggiator.png" style="left: 0dp; top: 267dp; width: 661dp; height: 268dp;">
+				<button id="Lfo2Dest_LFO2_ECHO" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="6" style="left: 162dp; top: 45dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+				</button>
+				<button id="Lfo2Dest_LFO2_UP" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="1" style="left: 162dp; top: 82dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+				</button>
+				<button id="Lfo2Dest_LFO2_DOWN" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="0" style="left: 162dp; top: 119dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+				</button>
+				<button id="Lfo2Dest_LFO2_UP_DOWN" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="2" style="left: 162dp; top: 156dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+				</button>
+				<button id="Lfo2Dest_LFO2_RANDOM" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="5" style="left: 162dp; top: 193dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+				</button>
+			</img>
+			<input id="PerfLfo2SyncA" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="PerfLfo2SyncA" type="range" style="left: 352dp; top: 269dp; width: 140dp; height: 40dp;"/>
+			<button id="ArpEnabled" class="jucePos juceButton button_round" isToggle="1" style="left: 485dp; top: 254dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 160dp; height: 50dp;"/>
+			</button>
+			<knob id="Lfo2RateSense" class="jucePos juceRotary knob" data-model="partCurrent" param="Lfo2RateSens" style="left: 36dp; top: 350dp; width: 113dp; height: 113dp;"/>
+			<knob id="ArpRangeSens" class="jucePos juceRotary knob" data-model="partCurrent" param="ArpRangeSens" style="left: 508dp; top: 350dp; width: 113dp; height: 113dp;"/>
+			<knob id="Lfo2Rate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2Rate" style="left: 36dp; top: 350dp; width: 113dp; height: 113dp;"/>
+			<knob id="ArpRange" class="jucePos juceRotary knob1" data-model="partCurrent" param="ArpRange" style="left: 508dp; top: 350dp; width: 113dp; height: 113dp;"/>
+			<knob id="ModEnvA" class="jucePos juceRotary knob1" data-model="partCurrent" param="ModEnvA" style="left: 36dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="ModEnvD" class="jucePos juceRotary knob1" data-model="partCurrent" param="ModEnvD" style="left: 196dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<knob id="ModEnvLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="ModEnvLevel" style="left: 508dp; top: 619dp; width: 113dp; height: 113dp;"/>
+			<button id="ModEnvDest_1" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModEnvDest" valueOn="1" style="left: 323dp; top: 611dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
+			<button id="ModEnvDest_2" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModEnvDest" valueOn="2" style="left: 323dp; top: 648dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
+			<button id="ModEnvDest_3" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModEnvDest" valueOn="0" style="left: 323dp; top: 685dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
+		</img>
+		<div id="page_2_browser" class="jucePos" tabgroup="pages" tabpage="1" style="left: 60dp; top: 60dp; width: 2153dp; height: 803dp; decorator: image(panel_2_browser.png scale-none left top);">
+			<div id="container-patchmanager" class="jucePos" style="left: 15dp; top: 45dp; width: 2128dp; height: 745dp;">
+				<template src="patchmanager"/>
+			</div>
+		</div>
+		<div id="page_3_perf" class="jucePos" tabgroup="pages" tabpage="2" style="left: 60dp; top: 60dp; width: 2153dp; height: 803dp; decorator: image(panel_3_perf.png scale-none left top);">
+			<combo id="PerfMidiChannelA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelA" style="left: 40dp; top: 88dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMidiChannelB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelB" style="left: 450dp; top: 88dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMidiChannelC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelC" style="left: 864dp; top: 88dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMidiChannelD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelD" style="left: 1280dp; top: 88dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfLfo1SyncA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo1SyncA" style="left: 40dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfLfo1SyncB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo1SyncB" style="left: 450dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfLfo1SyncC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo1SyncC" style="left: 864dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfLfo1SyncD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo1SyncD" style="left: 1280dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfLfo2SyncA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo2SyncA" style="left: 205dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfLfo2SyncB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo2SyncB" style="left: 615dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfLfo2SyncC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo2SyncC" style="left: 1029dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfLfo2SyncD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo2SyncD" style="left: 1445dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<button id="PerfFilterEnvTriggerA" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfFilterEnvTriggerA" style="left: 9dp; top: 188dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfFilterEnvTriggerB" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfFilterEnvTriggerB" style="left: 424dp; top: 188dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfFilterEnvTriggerC" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfFilterEnvTriggerC" style="left: 839dp; top: 188dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfFilterEnvTriggerD" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfFilterEnvTriggerD" style="left: 1254dp; top: 188dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<combo id="PerfFilterEnvTriggerMidiChannelA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerMidiChannelA" style="left: 40dp; top: 264dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerMidiChannelB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerMidiChannelB" style="left: 450dp; top: 264dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerMidiChannelC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerMidiChannelC" style="left: 864dp; top: 264dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerMidiChannelD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerMidiChannelD" style="left: 1280dp; top: 264dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerNoteNumberA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerNoteNumberA" style="left: 205dp; top: 264dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerNoteNumberB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerNoteNumberB" style="left: 615dp; top: 264dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerNoteNumberC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerNoteNumberC" style="left: 1029dp; top: 264dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerNoteNumberD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerNoteNumberD" style="left: 1445dp; top: 264dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<button id="PerfAmpEnvTriggerA" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfAmpEnvTriggerA" style="left: 9dp; top: 297dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfAmpEnvTriggerB" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfAmpEnvTriggerB" style="left: 424dp; top: 297dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfAmpEnvTriggerC" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfAmpEnvTriggerC" style="left: 839dp; top: 297dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfAmpEnvTriggerD" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfAmpEnvTriggerD" style="left: 1254dp; top: 297dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<combo id="PerfAmpEnvTriggerMidiChannelA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfAmpEnvTriggerMidiChannelA" style="left: 40dp; top: 375dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfAmpEnvTriggerMidiChannelB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfAmpEnvTriggerMidiChannelB" style="left: 450dp; top: 375dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfAmpEnvTriggerMidiChannelC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfAmpEnvTriggerMidiChannelC" style="left: 864dp; top: 375dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfAmpEnvTriggerMidiChannelD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfAmpEnvTriggerMidiChannelD" style="left: 1280dp; top: 375dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerNoteNumberA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerNoteNumberA" style="left: 205dp; top: 375dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerNoteNumberB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerNoteNumberB" style="left: 615dp; top: 375dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerNoteNumberC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerNoteNumberC" style="left: 1029dp; top: 375dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfFilterEnvTriggerNoteNumberD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfFilterEnvTriggerNoteNumberD" style="left: 1445dp; top: 375dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<button id="PerfMorfTriggerA" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfMorfTriggerA" style="left: 9dp; top: 406dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfMorfTriggerB" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfMorfTriggerB" style="left: 424dp; top: 406dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfMorfTriggerC" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfMorfTriggerC" style="left: 839dp; top: 406dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<button id="PerfMorfTriggerD" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfMorfTriggerD" style="left: 1254dp; top: 406dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 350dp; height: 50dp;"/>
+			</button>
+			<combo id="PerfMorfTriggerMidiChannelA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerMidiChannelA" style="left: 40dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMorfTriggerMidiChannelB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerMidiChannelB" style="left: 450dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMorfTriggerMidiChannelC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerMidiChannelC" style="left: 864dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMorfTriggerMidiChannelD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerMidiChannelD" style="left: 1280dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMorfTriggerNoteNumberA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerNoteNumberA" style="left: 205dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMorfTriggerNoteNumberB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerNoteNumberB" style="left: 615dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMorfTriggerNoteNumberC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerNoteNumberC" style="left: 1029dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfMorfTriggerNoteNumberD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerNoteNumberD" style="left: 1445dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfChannelPressureAmountA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountA" style="left: 40dp; top: 553dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfChannelPressureAmountB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountB" style="left: 450dp; top: 553dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfChannelPressureAmountC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountC" style="left: 864dp; top: 553dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfChannelPressureAmountD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountD" style="left: 1280dp; top: 553dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfChannelPressureDestA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestA" style="left: 40dp; top: 613dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfChannelPressureDestB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestB" style="left: 450dp; top: 613dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfChannelPressureDestC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestC" style="left: 864dp; top: 613dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfChannelPressureDestD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestD" style="left: 1280dp; top: 613dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfExpressionPedalAmountA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountA" style="left: 40dp; top: 685dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfExpressionPedalAmountB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountB" style="left: 450dp; top: 685dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfExpressionPedalAmountC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountC" style="left: 864dp; top: 685dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfExpressionPedalAmountD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountD" style="left: 1280dp; top: 685dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfExpressionPedalDestA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestA" style="left: 40dp; top: 746dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfExpressionPedalDestB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestB" style="left: 450dp; top: 746dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfExpressionPedalDestC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestC" style="left: 864dp; top: 746dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfExpressionPedalDestD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestD" style="left: 1280dp; top: 746dp; width: 300dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<knob id="PerfMasterTune" class="jucePos juceRotary knob1" data-model="partCurrent" param="PerfMasterTune" style="left: 1754dp; top: 80dp; width: 113dp; height: 113dp;"/>
+			<knob id="PerfBendRange" class="jucePos juceRotary knob1" data-model="partCurrent" param="PerfBendRange" style="left: 1931dp; top: 80dp; width: 113dp; height: 113dp;"/>
+			<button id="PerfKeyboardSplit" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfKeyboardSplit" style="left: 1668dp; top: 254dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 420dp; height: 50dp;"/>
+			</button>
+			<combo id="PerfSplitPoint" class="jucePos txtCombo" data-model="partCurrent" param="PerfSplitPoint" style="left: 1700dp; top: 346dp; width: 320dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfOutModeAB" class="jucePos txtCombo" style="left: 1700dp; top: 423dp; width: 320dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="PerfOutModeCD" class="jucePos txtCombo" style="left: 1700dp; top: 483dp; width: 320dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="MidiIn" class="jucePos txtCombo" style="left: 1700dp; top: 552dp; width: 320dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+			<combo id="MidiOut" class="jucePos txtCombo" style="left: 1700dp; top: 613dp; width: 320dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			</combo>
+		</div>
+		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton txt4" url="https://paypal.me/dsp56300" style="left: 1630dp; top: 1150dp; width: 160dp; height: 40dp; line-height: 40dp;">Donate</div>
+		<div id="VersionNumber" class="jucePos juceLabel txt5" style="left: 725dp; top: 1155dp; width: 200dp; height: 32dp; line-height: 32dp;">1.3.2.13</div>
+		<combo id="RomSelector" class="jucePos txt5" style="left: 995dp; top: 1154dp; width: 400dp; height: 32dp; line-height: 32dp;">
+			<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 340dp; height: 30dp; pointer-events: none;">rom.bin</combotext>
+		</combo>
+		<div id="FocusedParameterTooltip" class="jucePos juceLabel txt6" offsetY="25" style="left: 1385dp; top: 1225dp; width: 80dp; height: 45dp; background-color: #220303;line-height: 45dp;"/>
+	</body>
+</rml>

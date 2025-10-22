@@ -5,36 +5,41 @@
 
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
+#include "RmlUi/Core/Element.h"
+
 namespace genericVirusUI
 {
-	PartButton::PartButton(VirusEditor& _editor) : jucePluginEditorLib::PartButton<TextButton>(_editor), m_editor(_editor)  // NOLINT(clang-diagnostic-undefined-func-template)
+	PartButton::PartButton(Rml::Element* _button, VirusEditor& _editor) : jucePluginEditorLib::PartButton(_button, _editor), m_editor(_editor)
 	{
 	}
 
-	bool PartButton::isInterestedInDragSource(const SourceDetails& _dragSourceDetails)
+	bool PartButton::canDrop(const Rml::Event& _event, const juceRmlUi::DragSource* _source)
 	{
 		if(getPart() > 0 && !m_editor.getController().isMultiMode())
 			return false;
 
-		return jucePluginEditorLib::PartButton<TextButton>::isInterestedInDragSource(_dragSourceDetails);  // NOLINT(clang-diagnostic-undefined-func-template)
+		return jucePluginEditorLib::PartButton::canDrop(_event, _source);
 	}
 
-	void PartButton::paint(juce::Graphics& g)
+	void PartButton::onClick(Rml::Event& _e)
 	{
-		jucePluginEditorLib::PartButton<TextButton>::paint(g);
+		selectPreset(_e, getPart());
 	}
 
-	void PartButton::onClick()
+	void PartButton::setButtonText(const std::string& _text)
 	{
-		selectPreset(getPart());
+		getElement()->SetInnerRML(_text);
 	}
 
-	void PartButton::selectPreset(uint8_t _part) const
+	void PartButton::selectPreset(const Rml::Event& _event, uint8_t _part) const
 	{
+		auto eventMousePos = juceRmlUi::helper::getMousePos(_event);
+		auto* eventTargetElem = _event.GetTargetElement();
+
 		pluginLib::patchDB::SearchRequest req;
 		req.sourceType = pluginLib::patchDB::SourceType::Rom;
 
-		m_editor.getPatchManager()->search(std::move(req), [this](const pluginLib::patchDB::Search& _search)
+		m_editor.getPatchManager()->search(std::move(req), [this, eventMousePos, eventTargetElem](const pluginLib::patchDB::Search& _search)
 		{
 			std::map<std::string, std::vector<pluginLib::patchDB::PatchPtr>> patches;
 
@@ -57,25 +62,25 @@ namespace genericVirusUI
 				});
 			}
 
-			juce::MessageManager::callAsync([this, patches = std::move(patches)]
+			juce::MessageManager::callAsync([this, patches = std::move(patches), eventMousePos, eventTargetElem]
 			{
-				juce::PopupMenu selector;
+				juceRmlUi::Menu selector;
 
 				for (const auto& it : patches)
 				{
-		            juce::PopupMenu p;
+					juceRmlUi::Menu p;
 					for (const auto& patch : it.second)
 					{
 		                const auto& presetName = patch->getName();
-		                p.addItem(presetName, [this, patch] 
+		                p.addEntry(presetName, [this, patch] 
 		                {
 							if(m_editor.getPatchManager()->activatePatch(patch, getPart()))
 								m_editor.getPatchManager()->setSelectedPatch(getPart(), patch);
 		                });
 					}
-		            selector.addSubMenu(it.first, p);
+		            selector.addSubMenu(it.first, std::move(p));
 				}
-				selector.showMenuAsync(juce::PopupMenu::Options());
+				selector.runModal(eventTargetElem, eventMousePos, 16);
 			});
 		});
 	}

@@ -1,0 +1,166 @@
+<rml>
+<head>
+	<link type="text/template" href="knob_yellow.rml"/>
+	<style>
+		body {
+		    font-family: Bebas Neue;
+		    font-size: 36px;
+		    padding: 20px;
+		    background-color: #666;
+		    color: white;
+		}
+
+		@spritesheet arpButton
+		{
+			src: arp-btn-306x83.png;
+
+			arp-btn-over: 0px 0px 306px 83px;
+			arp-btn-default: 0px 83px 306px 83px;
+		}
+		[class^="bt_"]
+		{
+			display: block;
+			overflow: hidden;
+			padding: 0;
+			margin: 0;
+			box-sizing: border-box;
+			cursor: pointer;
+		}
+
+		.bt_arp
+		{
+			width: 306px; height: 83px;
+			display: block; overflow: hidden;
+			decorator: image(arp-btn-default)
+		}
+
+		.bt_arp:hover
+		{
+			decorator: image(arp-btn-over)
+		}
+
+		input.range {
+			width: 50%;
+			height: 15dp;
+			transition: opacity 0.2s cubic-out;
+		}
+		input.range:disabled { opacity: 0.3; }
+		input.range slidertrack {
+			background-color: #fff;
+		}
+		input.range sliderbar {
+			width: 15dp;
+			border-radius: 3dp;
+		}
+		input.range:hover sliderbar { background-color: #333; }
+		input.range sliderbar:active { background-color: #111; }
+		input.range sliderbar, input.range sliderbar:disabled { background-color: #555; }
+		input.range sliderarrowdec, input.range sliderarrowinc {
+			width: 12dp;
+			height: 15dp;
+		}
+		input.range sliderarrowdec { border-radius: 2dp 0 0 2dp; }
+		input.range sliderarrowinc { border-radius: 0 2dp 2dp 0; }
+		input.range sliderarrowdec:hover,    input.range sliderarrowinc:hover    { background-color: #ddd; }
+		input.range sliderarrowdec:active,   input.range sliderarrowinc:active   { background-color: #eee; }
+		input.range sliderarrowdec,          input.range sliderarrowinc,
+		input.range sliderarrowdec:disabled, input.range sliderarrowinc:disabled { background-color: #ccc; }
+
+		select {
+		    font-size: 16px;
+		    width: 200px;
+		    padding: 5px;
+		    background-color: #333;
+		    color: #0af;
+		    border-radius: 4px;
+		    decorator: image(arp-btn-over contain)
+		}
+		
+		select selectbox
+		{
+			margin-left: 1px;
+			margin-top: -7px;
+			width: 162px;
+			padding: 1px 4px 4px 4px;
+			background-color: #444;
+		}
+		/* Specifies every second option in the selection box to have a white background. */
+		select selectbox option:nth-child(even)
+		{
+			background: #FFFFFFA0;
+			margin-left: 50px;
+		}
+		select selectbox option:hover
+		{
+			background: #f55;
+		}
+
+		select selectbox option:checked {
+		    background-color: #f0f;
+		}
+
+		combo {
+			items-per-column: 8;
+			font-size: 24px;
+		}
+
+		.dropdownbox {
+			background-color: #bbbbbb88;
+			border: 4px #fff;
+			border-radius: 8px;
+			border-color: #000;
+			display: flex;
+			flex-direction: row;
+			padding: 5px;
+			position: absolute;
+			z-index: 100;
+			gap: 14px;
+			font-size: 24px;
+		}
+
+		.dropdowncolumn {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		.dropdownoption {
+			height: 1em;
+			color: #000;
+		}
+
+		.dropdownoption:hover {
+			background-color: #777;
+		}
+
+		.dropdownoption:checked {
+			background-color: #666;
+		}
+	</style>
+</head>
+<body>
+<div data-model="partCurrent" style="display: flex; flex-direction: column; gap: 10px;">
+	<combo param="Assign1 Source"/>
+	<combo param="Filter1 Mode" items-per-column=3/>
+	<combo param="Filter2 Mode"/>
+	<div style="display: flex; gap: 10px;">
+		<knob class="knob_yellow" param="Cutoff"/>
+		<input type="range" param="filter1_mode"/>
+		<h1>{{filter1_mode_text}}</h1>
+	</div>
+	<div style="display: flex; gap: 10px;">
+		<knob class="knob_yellow" param="Amp Env Attack" style="flex: 0 0 30%; height: 100px;"/>
+		<knob class="knob_yellow" param="Amp Env Decay"/>
+		<knob class="knob_yellow" param="Amp Env Sustain"/>
+		<knob class="knob_yellow" param="Amp Env Sustain Time"/>
+		<knob class="knob_yellow" param="Amp Env Release"/>
+	</div>
+	<div style="display: flex; gap: 10px;">
+		<knob class="knob_yellow" param="cutoff"/>
+		<knob class="knob_yellow" param="cutoff"/>
+		<knob class="knob_yellow" param="cutoff"/>
+	</div>
+	<combo param="Filter2 Mode"/>
+</div>
+</body>
+</rml>

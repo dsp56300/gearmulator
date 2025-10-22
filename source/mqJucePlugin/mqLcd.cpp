@@ -4,9 +4,8 @@
 
 #include "jucePluginLib/pluginVersion.h"
 
-MqLcd::MqLcd(Component& _parent) : Lcd(_parent, 20, 2)
+MqLcd::MqLcd(Rml::Element* _parent) : Lcd(_parent, 20, 2)
 {
-	postConstruct();
 }
 
 MqLcd::~MqLcd() = default;

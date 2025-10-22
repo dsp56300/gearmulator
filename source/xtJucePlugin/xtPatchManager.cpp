@@ -21,7 +21,7 @@ namespace xtJucePlugin
 		jucePluginEditorLib::patchManager::GroupType::DataSources,
 	};
 
-	PatchManager::PatchManager(Editor& _editor, juce::Component* _root)
+	PatchManager::PatchManager(Editor& _editor, Rml::Element* _root)
 		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, g_groupTypes)
 		, m_editor(_editor)
 		, m_controller(_editor.getXtController())
@@ -188,7 +188,7 @@ namespace xtJucePlugin
 	{
 		if(!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), static_cast<uint8_t>(_part)))
 		{
-			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, 
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 				m_editor.getProcessor().getProperties().name + " - Unable to load patch",
 				"MW1 patches can only be loaded to the first part.\n"
 				"\n"

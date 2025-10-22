@@ -1,0 +1,270 @@
+@spritesheet alphadial_page0
+{
+	alphadial_000: 0px 0px 128px 128px;
+	alphadial_001: 128px 0px 128px 128px;
+	alphadial_002: 256px 0px 128px 128px;
+	alphadial_003: 384px 0px 128px 128px;
+	alphadial_004: 512px 0px 128px 128px;
+	alphadial_005: 640px 0px 128px 128px;
+	alphadial_006: 768px 0px 128px 128px;
+	alphadial_007: 896px 0px 128px 128px;
+	alphadial_008: 1024px 0px 128px 128px;
+	alphadial_009: 1152px 0px 128px 128px;
+	alphadial_010: 1280px 0px 128px 128px;
+	alphadial_011: 1408px 0px 128px 128px;
+	alphadial_012: 1536px 0px 128px 128px;
+	alphadial_013: 1664px 0px 128px 128px;
+	alphadial_014: 1792px 0px 128px 128px;
+	alphadial_015: 1920px 0px 128px 128px;
+	alphadial_016: 0px 128px 128px 128px;
+	alphadial_017: 128px 128px 128px 128px;
+	alphadial_018: 256px 128px 128px 128px;
+	alphadial_019: 384px 128px 128px 128px;
+	alphadial_020: 512px 128px 128px 128px;
+	alphadial_021: 640px 128px 128px 128px;
+	alphadial_022: 768px 128px 128px 128px;
+	alphadial_023: 896px 128px 128px 128px;
+	alphadial_024: 1024px 128px 128px 128px;
+	alphadial_025: 1152px 128px 128px 128px;
+	alphadial_026: 1280px 128px 128px 128px;
+	alphadial_027: 1408px 128px 128px 128px;
+	alphadial_028: 1536px 128px 128px 128px;
+	alphadial_029: 1664px 128px 128px 128px;
+	alphadial_030: 1792px 128px 128px 128px;
+	alphadial_031: 1920px 128px 128px 128px;
+	alphadial_032: 0px 256px 128px 128px;
+	alphadial_033: 128px 256px 128px 128px;
+	alphadial_034: 256px 256px 128px 128px;
+	alphadial_035: 384px 256px 128px 128px;
+	alphadial_036: 512px 256px 128px 128px;
+	alphadial_037: 640px 256px 128px 128px;
+	alphadial_038: 768px 256px 128px 128px;
+	alphadial_039: 896px 256px 128px 128px;
+	alphadial_040: 1024px 256px 128px 128px;
+	alphadial_041: 1152px 256px 128px 128px;
+	alphadial_042: 1280px 256px 128px 128px;
+	alphadial_043: 1408px 256px 128px 128px;
+	alphadial_044: 1536px 256px 128px 128px;
+	alphadial_045: 1664px 256px 128px 128px;
+	alphadial_046: 1792px 256px 128px 128px;
+	alphadial_047: 1920px 256px 128px 128px;
+	alphadial_048: 0px 384px 128px 128px;
+	alphadial_049: 128px 384px 128px 128px;
+	alphadial_050: 256px 384px 128px 128px;
+	alphadial_051: 384px 384px 128px 128px;
+	alphadial_052: 512px 384px 128px 128px;
+	alphadial_053: 640px 384px 128px 128px;
+	alphadial_054: 768px 384px 128px 128px;
+	alphadial_055: 896px 384px 128px 128px;
+	alphadial_056: 1024px 384px 128px 128px;
+	alphadial_057: 1152px 384px 128px 128px;
+	alphadial_058: 1280px 384px 128px 128px;
+	alphadial_059: 1408px 384px 128px 128px;
+	alphadial_060: 1536px 384px 128px 128px;
+	alphadial_061: 1664px 384px 128px 128px;
+	alphadial_062: 1792px 384px 128px 128px;
+	alphadial_063: 1920px 384px 128px 128px;
+	alphadial_064: 0px 512px 128px 128px;
+	alphadial_065: 128px 512px 128px 128px;
+	alphadial_066: 256px 512px 128px 128px;
+	alphadial_067: 384px 512px 128px 128px;
+	alphadial_068: 512px 512px 128px 128px;
+	alphadial_069: 640px 512px 128px 128px;
+	alphadial_070: 768px 512px 128px 128px;
+	alphadial_071: 896px 512px 128px 128px;
+	src: alphadial_page0.png;
+}
+@spritesheet button
+{
+	button_active: 0px 128px 128px 128px;
+	button_checked: 0px 128px 128px 128px;
+	button_checked-active: 0px 128px 128px 128px;
+	button_checked-hover: 0px 128px 128px 128px;
+	button_default: 0px 0px 128px 128px;
+	button_hover: 0px 0px 128px 128px;
+	src: button.png;
+}
+@spritesheet encoder_page0
+{
+	encoder_000: 0px 0px 128px 128px;
+	encoder_001: 128px 0px 128px 128px;
+	encoder_002: 256px 0px 128px 128px;
+	encoder_003: 384px 0px 128px 128px;
+	encoder_004: 512px 0px 128px 128px;
+	encoder_005: 640px 0px 128px 128px;
+	encoder_006: 768px 0px 128px 128px;
+	encoder_007: 896px 0px 128px 128px;
+	encoder_008: 1024px 0px 128px 128px;
+	encoder_009: 1152px 0px 128px 128px;
+	encoder_010: 1280px 0px 128px 128px;
+	encoder_011: 1408px 0px 128px 128px;
+	encoder_012: 1536px 0px 128px 128px;
+	encoder_013: 1664px 0px 128px 128px;
+	encoder_014: 1792px 0px 128px 128px;
+	encoder_015: 1920px 0px 128px 128px;
+	encoder_016: 0px 128px 128px 128px;
+	encoder_017: 128px 128px 128px 128px;
+	encoder_018: 256px 128px 128px 128px;
+	encoder_019: 384px 128px 128px 128px;
+	encoder_020: 512px 128px 128px 128px;
+	encoder_021: 640px 128px 128px 128px;
+	encoder_022: 768px 128px 128px 128px;
+	encoder_023: 896px 128px 128px 128px;
+	encoder_024: 1024px 128px 128px 128px;
+	encoder_025: 1152px 128px 128px 128px;
+	encoder_026: 1280px 128px 128px 128px;
+	encoder_027: 1408px 128px 128px 128px;
+	encoder_028: 1536px 128px 128px 128px;
+	encoder_029: 1664px 128px 128px 128px;
+	encoder_030: 1792px 128px 128px 128px;
+	encoder_031: 1920px 128px 128px 128px;
+	encoder_032: 0px 256px 128px 128px;
+	encoder_033: 128px 256px 128px 128px;
+	encoder_034: 256px 256px 128px 128px;
+	encoder_035: 384px 256px 128px 128px;
+	encoder_036: 512px 256px 128px 128px;
+	encoder_037: 640px 256px 128px 128px;
+	encoder_038: 768px 256px 128px 128px;
+	encoder_039: 896px 256px 128px 128px;
+	encoder_040: 1024px 256px 128px 128px;
+	encoder_041: 1152px 256px 128px 128px;
+	encoder_042: 1280px 256px 128px 128px;
+	encoder_043: 1408px 256px 128px 128px;
+	encoder_044: 1536px 256px 128px 128px;
+	encoder_045: 1664px 256px 128px 128px;
+	encoder_046: 1792px 256px 128px 128px;
+	encoder_047: 1920px 256px 128px 128px;
+	encoder_048: 0px 384px 128px 128px;
+	encoder_049: 128px 384px 128px 128px;
+	encoder_050: 256px 384px 128px 128px;
+	encoder_051: 384px 384px 128px 128px;
+	encoder_052: 512px 384px 128px 128px;
+	encoder_053: 640px 384px 128px 128px;
+	encoder_054: 768px 384px 128px 128px;
+	encoder_055: 896px 384px 128px 128px;
+	encoder_056: 1024px 384px 128px 128px;
+	encoder_057: 1152px 384px 128px 128px;
+	encoder_058: 1280px 384px 128px 128px;
+	encoder_059: 1408px 384px 128px 128px;
+	encoder_060: 1536px 384px 128px 128px;
+	encoder_061: 1664px 384px 128px 128px;
+	encoder_062: 1792px 384px 128px 128px;
+	encoder_063: 1920px 384px 128px 128px;
+	encoder_064: 0px 512px 128px 128px;
+	encoder_065: 128px 512px 128px 128px;
+	encoder_066: 256px 512px 128px 128px;
+	encoder_067: 384px 512px 128px 128px;
+	encoder_068: 512px 512px 128px 128px;
+	encoder_069: 640px 512px 128px 128px;
+	encoder_070: 768px 512px 128px 128px;
+	encoder_071: 896px 512px 128px 128px;
+	src: encoder_page0.png;
+}
+@spritesheet led
+{
+	led_active: 0px 128px 128px 128px;
+	led_checked: 0px 128px 128px 128px;
+	led_checked-active: 0px 128px 128px 128px;
+	led_checked-hover: 0px 128px 128px 128px;
+	led_default: 0px 0px 128px 128px;
+	led_hover: 0px 128px 128px 128px;
+	src: led.png;
+}
+.btn
+{
+	decorator: image(button_default fill);
+}
+.btn:checked
+{
+	decorator: image(button_checked fill);
+}
+.btn:checked:active
+{
+	decorator: image(button_checked-active fill);
+}
+.btn:checked:hover
+{
+	decorator: image(button_checked-hover fill);
+}
+.btn:hover
+{
+	decorator: image(button_hover fill);
+}
+.knob
+{
+	frames: 72;
+	spriteprefix: alphadial_;
+}
+.knob1
+{
+	frames: 72;
+	spriteprefix: encoder_;
+}
+.led
+{
+	decorator: image(led_default fill);
+}
+.led:checked
+{
+	decorator: image(led_checked fill);
+}
+.led:checked:active
+{
+	decorator: image(led_checked-active fill);
+}
+.led:checked:hover
+{
+	decorator: image(led_checked-hover fill);
+}
+.led:hover
+{
+	decorator: image(led_hover fill);
+}
+
+.ledPower
+{
+	decorator: image(led_default fill);
+}
+.ledPower:checked
+{
+	decorator: image(led_checked fill);
+}
+
+.list, .grid, .pm-infopanel
+{
+	background-color: rgb(32,32,32);
+}
+.pm-hlayout
+{
+	background-color: black;
+}
+.pm-status
+{
+	background-color: rgb(32,32,32);
+	border: 1dp rgb(67,67,67);
+}
+.pm-vlayout
+{
+	gap: 4dp;
+}
+.txt
+{
+	color: #000000;
+	font-family: Register;
+	font-size: 46.000000dp;
+	text-align: left;
+}
+body
+{
+	font-size: 28dp;
+}
+input.text
+{
+	background-color: rgb(32,32,32);
+	border: 1dp rgb(67,67,67);
+}
+tree
+{
+	background-color: rgb(32,32,32);
+}
+

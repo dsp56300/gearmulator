@@ -109,9 +109,8 @@ namespace xtJucePlugin
 		bool parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const;
 
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
-		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
 
-		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value) override;
+		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 		bool sendGlobalParameterChange(xt::GlobalParameter _param, uint8_t _value);
 		bool sendModeDump() const;
 		void requestSingle(xt::LocationH _buf, uint8_t _location) const;

@@ -1,5 +1,7 @@
 #include "n2xEditor.h"
 
+#include <juceRmlPlugin/skinConverter/skinConverterOptions.h>
+
 #include "n2xArp.h"
 #include "n2xController.h"
 #include "n2xFileType.h"
@@ -9,68 +11,53 @@
 #include "n2xMasterVolume.h"
 #include "n2xOctLed.h"
 #include "n2xOutputMode.h"
-#include "n2xPart.h"
 #include "n2xParts.h"
 #include "n2xPatchManager.h"
 #include "n2xPluginProcessor.h"
-#include "n2xSlider.h"
 #include "n2xVmMap.h"
+#include "baseLib/filesystem.h"
 
 #include "jucePluginEditorLib/midiPorts.h"
 
-#include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/pluginVersion.h"
+#include "juceRmlUi/rmlElemComboBox.h"
 
 #include "n2xLib/n2xdevice.h"
 #include "n2xLib/n2xromloader.h"
 
+#include "RmlUi/Core/ElementDocument.h"
+
 namespace n2xJucePlugin
 {
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
-	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
-	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
-	, m_parameterBinding(_binding)
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, const jucePluginEditorLib::Skin& _skin)
+		: jucePluginEditorLib::Editor(_processor, _skin)
+		, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	{
-		create();
+	}
+	void Editor::create()
+	{
+		jucePluginEditorLib::Editor::create();
 
-		addMouseListener(this, true);
+		if(auto* versionNumber = findChild("VersionNumber", false))
 		{
-			// Init Patch Manager
-			const auto container = findComponent("ContainerPatchManager");
-			constexpr auto scale = 0.8f;
-			const float x = static_cast<float>(container->getX());
-			const float y = static_cast<float>(container->getY());
-			const float w = static_cast<float>(container->getWidth());
-			const float h = static_cast<float>(container->getHeight());
-			container->setTransform(juce::AffineTransform::scale(scale, scale));
-			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
-			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
-
-			setPatchManager(new PatchManager(*this, container));
+			versionNumber->SetInnerRML(Rml::StringUtilities::EncodeRml(pluginLib::Version::getVersionString()));
 		}
 
-		if(auto* versionNumber = findComponentT<juce::Label>("VersionNumber", false))
-		{
-			versionNumber->setText(pluginLib::Version::getVersionString(), juce::dontSendNotification);
-		}
-
-		if(auto* romSelector = findComponentT<juce::ComboBox>("RomSelector"))
+		if(auto* romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector"))
 		{
 			const auto rom = n2x::RomLoader::findROM();
 
 			if(rom.isValid())
 			{
-				constexpr int id = 1;
-
-				const auto name = juce::File(rom.getFilename()).getFileName();
-				romSelector->addItem(name, id);
+				const auto name = baseLib::filesystem::getFilenameWithoutPath(rom.getFilename());
+				romSelector->addOption(name);
 			}
 			else
 			{
-				romSelector->addItem("<No ROM found>", 1);
+				romSelector->addOption("<No ROM found>");
 			}
-			romSelector->setSelectedId(1);
-			romSelector->setInterceptsMouseClicks(false, false);
+			romSelector->setValue(0);
+			romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 		}
 
 		m_arp.reset(new Arp(*this));
@@ -82,43 +69,68 @@ namespace n2xJucePlugin
 		m_octLed.reset(new OctLed(*this));
 		m_outputMode.reset(new OutputMode(*this));
 		m_parts.reset(new Parts(*this));
-		m_vmMap.reset(new VmMap(*this, m_parameterBinding));
+		m_vmMap.reset(new VmMap(*this));
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
 		onPartChanged.set(m_controller.onCurrentPartChanged, [this](const uint8_t& _part)
 		{
 			setCurrentPart(_part);
-			m_parameterBinding.setPart(_part);
 		});
 
-		if(auto* bt = findComponentT<juce::Button>("button_store"))
+		if(auto* bt = findChild("button_store"))
 		{
-			bt->onClick = [this]
+			juceRmlUi::EventListener::Add(bt, Rml::EventId::Click, [this](Rml::Event& _event)
 			{
-				onBtSave();
-			};
+				onBtSave(_event);
+			});
 		}
 
-		if(auto* bt = findComponentT<juce::Button>("PresetPrev"))
+		if(auto* bt = findChild("PresetPrev"))
 		{
-			bt->onClick = [this]
+			juceRmlUi::EventListener::Add(bt, Rml::EventId::Click, [this](Rml::Event& _event)
 			{
-				onBtPrev();
-			};
+				onBtPrev(_event);
+			});
 		}
 
-		if(auto* bt = findComponentT<juce::Button>("PresetNext"))
+		if(auto* bt = findChild("PresetNext"))
 		{
-			bt->onClick = [this]
+			juceRmlUi::EventListener::Add(bt, Rml::EventId::Click, [this](Rml::Event& _event)
 			{
-				onBtNext();
-			};
+				onBtNext(_event);
+			});
 		}
 
 		m_onSelectedPatchChanged.set(getPatchManager()->onSelectedPatchChanged, [this](const uint32_t& _part, const pluginLib::patchDB::PatchKey& _patchKey)
 		{
 			onSelectedPatchChanged(static_cast<uint8_t>(_part), _patchKey);
 		});
+
+		Rml::ElementDocument* doc = getDocument();
+
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](const Rml::Event& _event)
+		{
+			const auto key = juceRmlUi::helper::getKeyModShift(_event);
+			getVmMap().setEnabled(key);
+		}, false);
+
+		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keyup, [this](const Rml::Event& _event)
+		{
+			const auto key = juceRmlUi::helper::getKeyModShift(_event);
+			getVmMap().setEnabled(key);
+		}, false);
+	}
+
+	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
+	{
+		return new PatchManager(*this, _parent);
+	}
+
+	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
+	{
+		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);
+
+		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
 	}
 
 	Editor::~Editor()
@@ -140,17 +152,6 @@ namespace n2xJucePlugin
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
 	{
 		return {};
-	}
-
-	genericUI::Button<juce::DrawableButton>* Editor::createJuceComponent(genericUI::Button<juce::DrawableButton>* _button, genericUI::UiObject& _object, const std::string& _name, const juce::DrawableButton::ButtonStyle _buttonStyle)
-	{
-		if(	_name == "PerfSlotActiveA" || 
-			_name == "PerfSlotActiveB" || 
-			_name == "PerfSlotActiveC" || 
-			_name == "PerfSlotActiveD")
-			return new Part(*this, _name, _buttonStyle);
-
-		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object, _name, _buttonStyle);
 	}
 
 	std::string Editor::getCurrentPatchName() const
@@ -187,47 +188,30 @@ namespace n2xJucePlugin
 		m_lcd->updatePatchName();
 	}
 
-	genericUI::Slider* Editor::createJuceComponent(genericUI::Slider* _slider, genericUI::UiObject& _object)
+	void Editor::createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const
 	{
-		return new Slider(*this);
-	}
-
-	void Editor::modifierKeysChanged(const juce::ModifierKeys& modifiers)
-	{
-		jucePluginEditorLib::Editor::modifierKeysChanged(modifiers);
-
-		m_vmMap->setEnabled(modifiers.isShiftDown());
-	}
-
-	void Editor::createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const
-	{
-		_menu.addItem(".nl2", [this, _func]{_func(fileType::g_nl2);});
+		_menu.addEntry(".nl2", [this, _func]{_func(fileType::g_nl2);});
 		jucePluginEditorLib::Editor::createExportFileTypeMenu(_menu, _func);
 	}
 
-	void Editor::mouseEnter(const juce::MouseEvent& _ev)
+	void Editor::onBtSave(Rml::Event& _event) const
 	{
-		m_focusedParameter->onMouseEnter(_ev);
-	}
-
-	void Editor::onBtSave() const
-	{
-		juce::PopupMenu menu;
+		juceRmlUi::Menu menu;
 
 		if(getPatchManager()->createSaveMenuEntries(menu, "Program"))
 			menu.addSeparator();
 
 		getPatchManager()->createSaveMenuEntries(menu, "Performance", 1);
 
-		menu.showMenuAsync({});
+		menu.runModal(_event);
 	}
 
-	void Editor::onBtPrev() const
+	void Editor::onBtPrev(Rml::Event& _event) const
 	{
 		getPatchManager()->selectPrevPreset(m_controller.getCurrentPart());
 	}
 
-	void Editor::onBtNext() const
+	void Editor::onBtNext(Rml::Event& _event) const
 	{
 		getPatchManager()->selectNextPreset(m_controller.getCurrentPart());
 	}
