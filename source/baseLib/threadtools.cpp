@@ -79,8 +79,7 @@ namespace baseLib
 #elif defined(__APPLE__)
 		if (_priority == ThreadPriority::Highest)
 		{
-			// set some reasonable realtime parameters for audio processing
-			setCurrentThreadRealtimeParameters(44100, 2048);
+			setCurrentThreadRealtimeParameters(0, 0);
 		}
 		else if (_priority == ThreadPriority::Low || _priority == ThreadPriority::Lowest)
 		{
@@ -111,6 +110,14 @@ namespace baseLib
 	bool ThreadTools::setCurrentThreadRealtimeParameters(int _samplerate, int _blocksize)
 	{
 #ifdef __APPLE__
+		bool usePeriod = true;
+		if (_samplerate)
+		{
+			// set some reasonable realtime parameters for audio processing, disable fixed call frequency
+			_samplerate = 44100;
+			_blocksize = 2048;
+			usePeriod = false;
+		}
 	    // Compute the nominal "period" between activations, in microseconds.
 	    // Example: 44100 Hz, 1024 buffer => 23,219 us
 	    double periodUsec = static_cast<double>(_blocksize) * 1'000'000.0 / static_cast<double>(_samplerate);
@@ -121,7 +128,7 @@ namespace baseLib
 	    // The exact numbers aren't critical, but they should stay consistent.
 	    uint32_t computation = static_cast<uint32_t>(periodUsec * 0.30);
 	    uint32_t constraint  = static_cast<uint32_t>(periodUsec * 1.05);
-	    uint32_t period      = static_cast<uint32_t>(periodUsec);
+	    uint32_t period      = usePeriod ? static_cast<uint32_t>(periodUsec) : 0;
 
 	    // Clamp to sane limits
 	    computation = std::max<uint32_t>(computation, 1000); // >= 1 ms
