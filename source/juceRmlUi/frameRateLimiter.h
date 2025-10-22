@@ -6,10 +6,10 @@
 
 namespace juceRmlUi
 {
-	class FrameLimiter
+	class FrameRateLimiter
 	{
 	public:
-		explicit FrameLimiter(const float _hz = 30.0f) : m_frameDuration(std::chrono::duration<float>(1.0f / _hz))
+		explicit FrameRateLimiter(const float _hz = 30.0f) : m_frameDuration(std::chrono::duration<float>(1.0f / _hz))
 	    {
 	    }
 
@@ -25,7 +25,8 @@ namespace juceRmlUi
 			if (m_frameDuration == newDuration && _duration > 0)
 				return;
 	        m_frameDuration = newDuration;
-	        m_cv.notify_all();
+			m_lastTime = std::chrono::steady_clock::now();
+			m_cv.notify_all();
 	    }
 
 	    void wait()
@@ -37,10 +38,14 @@ namespace juceRmlUi
 	            duration = m_frameDuration;
 	        }
 
-	        const auto next = m_lastTime + duration;
+			const auto durationNS = std::chrono::duration_cast<std::chrono::steady_clock::duration>(duration);
+	        const auto next = m_lastTime + durationNS;
 
 	        std::unique_lock lock(m_mutex);
-	        m_cv.wait_until(lock, next);
+	        m_cv.wait_until(lock, next, [next]
+			{
+				return std::chrono::steady_clock::now() >= next;
+			});
 	        m_lastTime = std::chrono::steady_clock::now();
 	    }
 
