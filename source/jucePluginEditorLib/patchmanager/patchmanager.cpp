@@ -352,9 +352,24 @@ namespace jucePluginEditorLib::patchManager
 		const auto name = Editor::createValidFilename(type, _file);
 
 		std::vector<pluginLib::patchDB::Data> patchData;
+
+		uint32_t index = 0;
+
 		for (const auto& patch : _patches)
 		{
-			const auto patchSysex = applyModifications(patch, type, pluginLib::ExportType::File);
+			// create consecutive program numbers for exported patches
+			auto p = std::make_shared<pluginLib::patchDB::Patch>();
+
+			p->replaceData(*patch);
+
+			p->modifications = patch->modifications;
+
+			p->bank = index >> 7;
+			p->program = index & 0x7Ff;
+
+			++index;
+
+			const auto patchSysex = applyModifications(p, type, pluginLib::ExportType::File);
 
 			if(!patchSysex.empty())
 				patchData.push_back(patchSysex);
