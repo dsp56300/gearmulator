@@ -651,7 +651,26 @@ namespace juceRmlUi
 			auto& sys = m_rmlInterfaces.getSystemInterface();
 			sys.beginLogRecording();
 
-			m_document = m_rmlContext->LoadDocument(m_rootRmlFilename);
+			Rml::String rmlString;
+			m_coreInstance.file_interface->LoadFile(m_rootRmlFilename, rmlString);
+
+			// inject more templates to prevent that each GUI has to add them
+			const std::string key = "<head>";
+			auto pos = rmlString.find(key);
+			if (pos != Rml::String::npos)
+			{
+				auto addTemplate = [&](const std::string& _name)
+				{
+					const Rml::String templates = R"(<link type="text/template" href=")" + _name + "\"/>";
+					rmlString.insert(pos + key.length(), templates);
+				};
+
+				addTemplate("tus_patchmanager.rml");
+				addTemplate("tus_colorpicker.rml");
+				addTemplate("tus_settings.rml");
+			}
+
+			m_document = m_rmlContext->LoadDocumentFromMemory(rmlString, m_rootRmlFilename);
 
 			if (m_document)
 			{
