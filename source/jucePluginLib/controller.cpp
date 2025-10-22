@@ -291,19 +291,25 @@ namespace pluginLib
 	const Controller::ParameterList& Controller::findSynthParam(const ParamIndex& _paramIndex) const
     {
 		const auto it = m_synthParams.find(_paramIndex);
-
-		if (it != m_synthParams.end())
-			return it->second;
-
     	const auto iti = m_synthInternalParams.find(_paramIndex);
 
-		if (iti == m_synthInternalParams.end())
+		if (it != m_synthParams.end() && iti == m_synthInternalParams.end())
+			return it->second;
+
+		if (iti != m_synthInternalParams.end() && it == m_synthParams.end())
+			return iti->second;
+
+		if (it == m_synthParams.end() && iti == m_synthInternalParams.end())
 		{
 			static ParameterList empty;
 			return empty;
 		}
 
-		return iti->second;
+		m_tempReturnParameterList.clear();
+		m_tempReturnParameterList.assign(it->second.begin(), it->second.end());
+		m_tempReturnParameterList.insert(m_tempReturnParameterList.end(), iti->second.begin(), iti->second.end());
+
+		return m_tempReturnParameterList;
     }
 
 	void Controller::sendLockedParameters(const uint8_t _part, const Parameter::Origin _origin/* = Parameter::Origin::PresetChange*/)
