@@ -60,7 +60,8 @@ namespace juceRmlUi
 		bool keyPressed(const juce::KeyPress& _key) override;
 		bool keyStateChanged(bool _isKeyDown) override;
 		void modifierKeysChanged(const juce::ModifierKeys& _modifiers) override;
-		void focusLost(FocusChangeType cause) override;
+		void focusLost(FocusChangeType _cause) override;
+		void focusGained(FocusChangeType _cause) override;
 
 		void timerCallback() override;
 

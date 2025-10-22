@@ -441,14 +441,21 @@ namespace juceRmlUi
 		enqueueUpdate();
 	}
 
-	void RmlComponent::focusLost(FocusChangeType cause)
+	void RmlComponent::focusLost(FocusChangeType _cause)
 	{
-		Component::focusLost(cause);
+		Component::focusLost(_cause);
 
 		RmlInterfaces::ScopedAccess access(*this);
 		if (m_rmlContext)
 			m_rmlContext->ProcessMouseLeave();
 		m_mouseActive = false;
+		enqueueUpdate();
+	}
+
+	void RmlComponent::focusGained(const FocusChangeType _cause)
+	{
+		Component::focusGained(_cause);
+		m_mouseActive = true;
 		enqueueUpdate();
 	}
 
