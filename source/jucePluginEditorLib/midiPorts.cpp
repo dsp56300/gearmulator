@@ -57,24 +57,8 @@ namespace jucePluginEditorLib
 		m_midiIn  = _editor.findChild<juceRmlUi::ElemComboBox>("MidiIn" , false);
 		m_midiOut = _editor.findChild<juceRmlUi::ElemComboBox>("MidiOut", false);
 
-		if(m_midiIn)
-		{
-			initComboBox(m_midiIn, juce::MidiInput::getAvailableDevices(), getMidiPorts().getInputId());
-
-			juceRmlUi::EventListener::Add(m_midiIn, Rml::EventId::Change, [this](Rml::Event&)
-			{
-				updateMidiInput(m_midiIn->getSelectedIndex());
-			});
-		}
-
-		if(m_midiOut)
-		{
-			initComboBox(m_midiOut, juce::MidiOutput::getAvailableDevices(), getMidiPorts().getOutputId());
-			juceRmlUi::EventListener::Add(m_midiOut, Rml::EventId::Change, [this](Rml::Event&)
-			{
-				updateMidiOutput(m_midiOut->getSelectedIndex());
-			});
-		}
+		initInputComboBox(m_processor, m_midiIn);
+		initOutputComboBox(m_processor, m_midiOut);
    	}
 
 	void MidiPorts::createMidiInputMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts& _ports)
@@ -108,9 +92,40 @@ namespace jucePluginEditorLib
 		_menu.addSubMenu("MIDI Ports", std::move(ports));
 	}
 
+	void MidiPorts::initInputComboBox(Processor& _processor, juceRmlUi::ElemComboBox* _combo)
+	{
+		if(!_combo)
+			return;
+
+		initComboBox(_combo, juce::MidiInput::getAvailableDevices(), getMidiPorts(_processor).getInputId());
+
+		juceRmlUi::EventListener::Add(_combo, Rml::EventId::Change, [&_processor, _combo](Rml::Event&)
+		{
+			updateMidiInput(_processor, _combo, _combo->getSelectedIndex());
+		});
+	}
+
+	void MidiPorts::initOutputComboBox(Processor& _processor, juceRmlUi::ElemComboBox* _combo)
+	{
+		if(!_combo)
+			return;
+
+		initComboBox(_combo, juce::MidiOutput::getAvailableDevices(), getMidiPorts(_processor).getOutputId());
+
+		juceRmlUi::EventListener::Add(_combo, Rml::EventId::Change, [&_processor, _combo](Rml::Event&)
+		{
+			updateMidiOutput(_processor, _combo, _combo->getSelectedIndex());
+		});
+	}
+
 	pluginLib::MidiPorts& MidiPorts::getMidiPorts() const
 	{
-		return m_processor.getMidiPorts();
+		return getMidiPorts(m_processor);
+	}
+
+	pluginLib::MidiPorts& MidiPorts::getMidiPorts(Processor& _processor)
+	{
+		return _processor.getMidiPorts();
 	}
 
 	void MidiPorts::showMidiPortFailedMessage(const char* _name) const
@@ -127,12 +142,17 @@ namespace jucePluginEditorLib
 
 	void MidiPorts::updateMidiInput(int _index) const
 	{
+		updateMidiInput(m_processor, m_midiIn, _index);
+	}
+
+	void MidiPorts::updateMidiInput(Processor& _processor, juceRmlUi::ElemComboBox* _combo, int _index)
+	{
 	    const auto list = juce::MidiInput::getAvailableDevices();
 
 	    if (_index <= 0)
 	    {
-	        m_midiIn->setSelectedIndex(_index, false);
-			getMidiPorts().setMidiInput({});
+	        _combo->setSelectedIndex(_index, false);
+			getMidiPorts(_processor).setMidiInput({});
 	        return;
 	    }
 
@@ -140,35 +160,40 @@ namespace jucePluginEditorLib
 
 		const auto newInput = list[_index];
 
-	    if (!getMidiPorts().setMidiInput(newInput.identifier))
+	    if (!getMidiPorts(_processor).setMidiInput(newInput.identifier))
 	    {
-			showMidiPortFailedMessage("Input");
-	        m_midiIn->setSelectedIndex(0, false);
+			showMidiPortFailedMessage(_processor, "Input");
+	        _combo->setSelectedIndex(0, false);
 	        return;
 	    }
 
-	    m_midiIn->setSelectedIndex(_index + 1, false);
+	    _combo->setSelectedIndex(_index + 1, false);
 	}
 
-	void MidiPorts::updateMidiOutput(int _index) const
+	void MidiPorts::updateMidiOutput(const int _index) const
+	{
+		updateMidiOutput(m_processor, m_midiOut, _index);
+	}
+
+	void MidiPorts::updateMidiOutput(Processor& _processor, juceRmlUi::ElemComboBox* _combo, int _index)
 	{
 	    const auto list = juce::MidiOutput::getAvailableDevices();
 
 	    if (_index == 0)
 	    {
-	        m_midiOut->setSelectedIndex(_index, false);
-	        getMidiPorts().setMidiOutput({});
+	        _combo->setSelectedIndex(_index, false);
+	        getMidiPorts(_processor).setMidiOutput({});
 	        return;
 	    }
 	    _index--;
 	    const auto newOutput = list[_index];
-	    if (!getMidiPorts().setMidiOutput(newOutput.identifier))
+	    if (!getMidiPorts(_processor).setMidiOutput(newOutput.identifier))
 	    {
-			showMidiPortFailedMessage("Output");
-	        m_midiOut->setSelectedIndex(0, false);
+			showMidiPortFailedMessage(_processor, "Output");
+	        _combo->setSelectedIndex(0, false);
 	        return;
 	    }
 	    
-	    m_midiOut->setSelectedIndex(_index + 1, false);
+	    _combo->setSelectedIndex(_index + 1, false);
 	}
 }

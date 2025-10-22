@@ -31,8 +31,8 @@ namespace jucePluginEditorLib
 		m_midiIn->setName("MidiIn");
 		m_midiOut->setName("MidiOut");
 
-		jucePluginEditorLib::MidiPorts::initInputComboBox(m_processor.getMidiPorts(), m_midiIn.get());
-		jucePluginEditorLib::MidiPorts::initOutputComboBox(m_processor.getMidiPorts(), m_midiOut.get());
+//		MidiPorts::initInputComboBox(m_processor.getMidiPorts(), m_midiIn.get());
+//		MidiPorts::initOutputComboBox(m_processor.getMidiPorts(), m_midiOut.get());
 
 		addAndMakeVisible(m_midiInLabel.get());
 		addAndMakeVisible(m_midiIn.get());

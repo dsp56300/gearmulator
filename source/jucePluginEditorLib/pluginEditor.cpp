@@ -673,10 +673,7 @@ namespace jucePluginEditorLib
 		_plugins.push_back(std::make_unique<SettingsMidi>(getProcessor()));
 	}
 
-	bool Editor::keyPressed(const juce::KeyPress& _key)
-
 	juce::Component* Editor::createRmlUiComponent(const std::string& _rmlFile)
-
 	{
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(m_rmlInterfaces.getCoreInstance(), getProcessor().getController()));
@@ -711,15 +708,15 @@ namespace jucePluginEditorLib
 				if (m_settings)
 				{
 					m_settings.reset();
-					return true;
 				}
-
-				m_settings.reset(new Settings(*this));
-				addAndMakeVisible(m_settings.get());
-				m_settings->setTransform(juce::AffineTransform::scale(1.0f / getScale()));
-				m_settings->centreWithSize(getWidth() * 7 / 8 * getScale(), getHeight() * 7 / 8 * getScale());
-
-				return true;
+				else
+				{
+					m_settings.reset(new Settings(*this));
+//					addAndMakeVisible(m_settings.get());
+//					m_settings->setTransform(juce::AffineTransform::scale(1.0f / getScale()));
+//					m_settings->centreWithSize(getWidth() * 7 / 8 * getScale(), getHeight() * 7 / 8 * getScale());
+				}
+				_event.StopPropagation();
 				break;
 			default:;
 			}
