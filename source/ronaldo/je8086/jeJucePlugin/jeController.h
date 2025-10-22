@@ -55,6 +55,8 @@ namespace jeJucePlugin
 
 		using pluginLib::Controller::findSynthParam;
 
+		void sendButton(uint32_t _button, bool _pressed) const;
+
 	private:
 		void parsePerformanceCommon(const pluginLib::SysEx& _sysex);
 		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part);

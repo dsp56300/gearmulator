@@ -28,6 +28,11 @@ namespace jeLib
 			onParamChanged(_page, _index, _value);
 		});
 
+		m_buttonChangedListener.set(m_sysexRemote.evButtonChanged, [this](const uint32_t _buttonIndex, const bool _pressed)
+		{
+			m_je8086->setButton(static_cast<devices::SwitchType>(_buttonIndex), _pressed);
+		});
+
 		// inform UI about default master volume
 		createMasterVolumeMessage(m_midiOut);
 	}

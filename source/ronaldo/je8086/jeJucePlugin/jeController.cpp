@@ -339,6 +339,14 @@ namespace jeJucePlugin
 		return sendSingle(data, part);
 	}
 
+	void Controller::sendButton(const uint32_t _button, const bool _pressed) const
+	{
+		std::vector<synthLib::SMidiEvent> results;
+		jeLib::SysexRemoteControl::sendSysexButton(results, _button, _pressed);
+		for (auto& ev : results)
+			sendSysEx(ev.sysex);
+	}
+
 	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex)
 	{
 		const auto address = jeLib::State::getAddress(_sysex);

@@ -27,14 +27,14 @@ namespace jeLib
 		baseLib::Event<std::array<uint8_t ,64>> evLcdCgDataChanged;
 		baseLib::Event<std::array<char, 40>> evLcdDdDataChanged;
 		baseLib::Event<Leds> evLedsChanged;
-		baseLib::Event<uint16_t> evButtonsChanged;
+		baseLib::Event<uint32_t, bool> evButtonChanged;
 		baseLib::Event<uint8_t, uint8_t, int32_t> evParamChanged; // param page, param index, value
 
 		enum class CommandType : uint8_t
 		{
 			LcdCgRam,		// device => UI
 			LcdDdRam,		// device => UI
-			Buttons,		// UI => device
+			Button,			// UI => device
 			Rotary,			// UI => device
 			Leds,			// device => UI
 			SetParam
@@ -46,7 +46,7 @@ namespace jeLib
 		static void sendSysexLcdCgRam(std::vector<synthLib::SMidiEvent>& _dst, const hwLib::LCD& _lcd);
 		static void sendSysexLcdDdRam(std::vector<synthLib::SMidiEvent>& _dst, const hwLib::LCD& _lcd);
 
-		static void sendSysexButtons(std::vector<synthLib::SMidiEvent>& _dst, uint16_t _buttonStates);
+		static void sendSysexButton(std::vector<synthLib::SMidiEvent>& _dst, uint32_t _buttonIndex, bool _pressed);
 		static void sendSysexLeds(std::vector<synthLib::SMidiEvent>& _dst, const Leds& _ledStates);
 		static void sendSysexParameter(std::vector<synthLib::SMidiEvent>& _dst, uint8_t _page, uint8_t _index, const int32_t& _value);
 

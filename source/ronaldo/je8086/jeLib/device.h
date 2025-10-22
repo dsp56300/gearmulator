@@ -56,6 +56,7 @@ namespace jeLib
 		SysexRemoteControl m_sysexRemote;
 
 		baseLib::EventListener<uint8_t, uint8_t, int32_t> m_paramChangedListener;
+		baseLib::EventListener<uint32_t, bool> m_buttonChangedListener;
 
 		float m_masterVolume = 12.0f;
 	};

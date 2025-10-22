@@ -59,16 +59,18 @@ namespace jeLib
 		_dst.emplace_back(ev);
 	}
 
-	void SysexRemoteControl::sendSysexButtons(std::vector<synthLib::SMidiEvent>& _dst, const uint16_t _buttonStates)
+	void SysexRemoteControl::sendSysexButton(std::vector<synthLib::SMidiEvent>& _dst, const uint32_t _buttonIndex, bool _pressed)
 	{
 		auto& ev = _dst.emplace_back(synthLib::MidiEventSource::Internal);
 
-		createSysexHeader(ev.sysex, CommandType::Buttons);
+		createSysexHeader(ev.sysex, CommandType::Button);
 
-		ev.sysex.push_back((_buttonStates >> 12) & 0xf);
-		ev.sysex.push_back((_buttonStates >> 8) & 0xf);
-		ev.sysex.push_back((_buttonStates >> 4) & 0xf);
-		ev.sysex.push_back(_buttonStates & 0xf);
+		ev.sysex.push_back((_buttonIndex >> 12) & 0xf);
+		ev.sysex.push_back((_buttonIndex >> 8) & 0xf);
+		ev.sysex.push_back((_buttonIndex >> 4) & 0xf);
+		ev.sysex.push_back(_buttonIndex & 0xf);
+
+		ev.sysex.push_back(_pressed ? 1 : 0);
 
 		ev.sysex.push_back(0xf7);
 	}
@@ -153,9 +155,9 @@ namespace jeLib
 				evLcdDdDataChanged.retain(data);
 			}
 			return true;
-		case CommandType::Buttons:
+		case CommandType::Button:
 			{
-				if(_input.size() != g_headerSize + g_footerSize + 4) // + 4 nibbles
+				if (_input.size() != g_headerSize + g_footerSize + 5) // + 4 nibbles + 1 pressed
 					return false;
 				uint32_t buttons = 0;
 				for(uint32_t b=0; b<4; ++b)
@@ -163,7 +165,8 @@ namespace jeLib
 					const uint32_t n = _input[i++];
 					buttons = (buttons<<4) | n;
 				}
-				evButtonsChanged(static_cast<uint16_t>(buttons));
+				const bool pressed = _input[i] ? true : false;
+				evButtonChanged(buttons, pressed);
 			}
 			return true;
 		case CommandType::Rotary:

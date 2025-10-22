@@ -29,6 +29,8 @@ namespace jeLib
 
 		bool hasDoneFactoryReset() const { return m_factoryreset; }
 
+		void setButton(devices::SwitchType _type, bool _pressed);
+
 	private:
 		static void onLedsChanged(devices::Port* _port);
 		void onReceiveMidiByte(uint8_t _byte);
