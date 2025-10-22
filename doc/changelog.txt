@@ -4,8 +4,9 @@ Release Notes
 
 Framework:
 
-- [Fix] Thread priorities were not set correctly on Mac/Linux
-- [Fix] Right clicking a menu entry opened a second menu
+- [Fix] Thread priorities were not set correctly on Mac/Linux, solves 
+        BUG-10040 Track performance affected by application focus
+- [Fix] BUG-10039 Right clicking a menu entry opened a second menu
 
 2.0.8:
 
