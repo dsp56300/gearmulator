@@ -18,5 +18,6 @@ namespace baseLib
 	public:
 		static void setCurrentThreadName(const std::string& _name);
 		static bool setCurrentThreadPriority(ThreadPriority _priority);
+		static bool setCurrentThreadRealtimeParameters(int _samplerate, int _blocksize);
 	};
 }
