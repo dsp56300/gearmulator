@@ -117,7 +117,6 @@ namespace jeJucePlugin
 			{
 				std::vector<Rml::Element*> elements;
 				binding->getElementsForParameter(elements, param, false);
-				assert(!elements.empty());
 
 				for (auto* elem : elements)
 					m_controls[type].emplace_back(elem, param->getDescription().name);
