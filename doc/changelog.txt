@@ -7,6 +7,7 @@ Framework:
 - [Fix] Thread priorities were not set correctly on Mac/Linux, solves 
         BUG-10040 Track performance affected by application focus
 - [Fix] BUG-10039 Right clicking a menu entry opened a second menu
+- [Fix] Reworked UI frame timing to use less resources
 
 2.0.8:
 

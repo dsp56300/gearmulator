@@ -110,6 +110,7 @@ namespace juceRmlUi
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
+		void startNextFrameTimer();
 
 		Rml::Vector2i getRenderSize() const;
 
@@ -154,6 +155,7 @@ namespace juceRmlUi
 
 		double m_time = 0;
 		float m_fps = 0;
+		float m_targetFPS = 30.0f;
 
 		uint32_t m_pendingUpdates = 0;
 		std::atomic<bool> m_renderDone;

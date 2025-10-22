@@ -1,6 +1,7 @@
 #include "juceRmlComponent.h"
 
 #include <cassert>
+#include <algorithm> // std::transform
 
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
@@ -10,6 +11,7 @@
 #include "RmlUi_Renderer_GL3.h"
 
 #include "baseLib/filesystem.h"
+#include "baseLib/logging.h"
 #include "baseLib/threadtools.h"
 
 #include "juceUiLib/messageBox.h"
@@ -109,6 +111,8 @@ namespace juceRmlUi
 
 		m_openGLContext.setSwapInterval(1);
 
+		m_targetFPS = 30; // default limit is 30 Hz, updated below if renderer is capable
+
 		using namespace juce::gl;
 
 #if JUCE_MAC
@@ -125,10 +129,24 @@ namespace juceRmlUi
 		// if that fails, we are probably on an old GL version that doesn't support these queries, so fall back to GL2
 		const auto version = glGetError() == GL_NO_ERROR ? (major * 10 + minor) : 20;
 #endif
-		if (version >= g_advancedRendererMinimumGLversion)
+		if (version >= static_cast<int>(g_advancedRendererMinimumGLversion))
 		{
 			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
 			m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
+
+			const GLubyte* vendor = glGetString(GL_VENDOR);
+
+			if (vendor)
+			{
+				std::string vendorStr = reinterpret_cast<const char*>(vendor);
+				std::transform(vendorStr.begin(), vendorStr.end(), vendorStr.begin(), ::tolower);
+
+				if (vendorStr.find("nvidia") != std::string::npos || 
+					vendorStr.find("amd") != std::string::npos ||
+					vendorStr.find("advanced micro devices") != std::string::npos
+					)
+					m_targetFPS = 60;
+			}
 		}
 		else
 		{
@@ -142,7 +160,8 @@ namespace juceRmlUi
 
 		{
 			std::scoped_lock lock(m_timerMutex);
-			startTimer(1);
+			m_nextFrameTime = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+			startNextFrameTimer();
 		}
 
 		baseLib::ThreadTools::setCurrentThreadPriority(baseLib::ThreadPriority::Lowest);
@@ -219,7 +238,7 @@ namespace juceRmlUi
 
 			// Flip vertically around the image center
 			juce::AffineTransform transform = juce::AffineTransform::scale(1.0f, -1.0f)
-			    .translated(0, (float)m_screenshot.getHeight());
+			    .translated(0, static_cast<float>(m_screenshot.getHeight()));
 
 			g.drawImageTransformed(m_screenshot, transform);
 			m_screenshot = flipped;
@@ -227,19 +246,7 @@ namespace juceRmlUi
 			m_screenshotState = ScreenshotState::ScreenshotReady;
 		}
 
-		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
-
-		const auto dt = m_nextFrameTime - t;
-		const auto remainingMillis = static_cast<int>(dt * 1000.0f);
-
 		m_renderDone = true;
-
-		std::scoped_lock lockTimer(m_timerMutex);
-
-		if (remainingMillis > 0)
-			startTimer(remainingMillis);
-		else
-			startTimer(1);
 	}
 
 	void RmlComponent::openGLContextClosing()
@@ -451,8 +458,21 @@ namespace juceRmlUi
 			std::scoped_lock lock(m_timerMutex);
 			stopTimer();
 		}
-		m_renderDone = true;
-		update();
+
+		// do not update again while still rendering
+		if (m_renderDone)
+		{
+			// do not update if not yet time
+			const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+			if (t >= m_nextFrameTime)
+			{
+				update();
+				return;
+			}
+		}
+
+		// continue waiting
+		startNextFrameTimer();
 	}
 
 	juce::Point<int> RmlComponent::toRmlPosition(const juce::MouseEvent& _e) const
@@ -524,7 +544,13 @@ namespace juceRmlUi
 		if (m_updating || !m_renderDone || !m_renderInterface)
 			return;
 
+		{
+			std::scoped_lock lockTimer(m_timerMutex);
+			stopTimer();
+		}
+
 		m_updating = true;
+		m_renderDone = false;
 
 		{
 			std::scoped_lock lock(m_contextRenderMutex);
@@ -556,18 +582,25 @@ namespace juceRmlUi
 		auto fps = (dt > 0) ? (1.0f / dt) : 0.0f;
 		m_fps += (fps - m_fps) * 0.1f;
 
-//		LOG("FPS: " << m_fps << ", next update delay " << m_rmlContext->GetNextUpdateDelay());
+//		LOG("FPS: " << m_fps << " avg, " << fps << " current, next update delay " << m_rmlContext->GetNextUpdateDelay());
+
+		// we get a more stable timing by doing increments, but if we are too far off, we just set the next frame time to now + delta instead
+		if ((std::abs(m_nextFrameTime) - t) > 0.5f)
+			m_nextFrameTime = t;
+
+		if (m_targetFPS > 0)
+			m_nextFrameTime += 1.0f / m_targetFPS;
 
 		if (m_pendingUpdates > 0)
 		{
+			// immediate update
 			--m_pendingUpdates;
-			m_nextFrameTime = 0; // force immediate update
 		}
 		else
 		{
 			// render every 0.5 seconds if there is no update pending
 			m_rmlContext->RequestNextUpdate(0.5f);
-			m_nextFrameTime = t + m_rmlContext->GetNextUpdateDelay();
+			m_nextFrameTime = std::max(m_nextFrameTime, t + m_rmlContext->GetNextUpdateDelay());
 		}
 
 		// ensure that new post frame callbacks that are added by other post frame callbacks are executed in the next frame
@@ -580,20 +613,27 @@ namespace juceRmlUi
 		m_updating = false;
 
 		// trigger a repaint and wait for OpenGL to be done with it
-		m_renderDone = false;
 		m_openGLContext.triggerRepaint();
 
-		// just in case the repaint does not happen, we set a timer to ensure we get a new update
 		std::scoped_lock lock(m_timerMutex);
-		startTimer(500);
+		// we make the timer run a bit faster to prevent that we miss the next frame time by a too large margin
+		startNextFrameTimer();
 	}
 
 	void RmlComponent::enqueueUpdate()
 	{
 		// One is not enough, because RmlUi might do property changes that in turn require another update. We do three to be sure.
 		m_pendingUpdates = 3;
-		if (m_renderDone)
-			update();
+
+		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+		auto minTime = t;
+
+		if (m_targetFPS > 0)
+			minTime += 1.0f / m_targetFPS;
+
+		m_nextFrameTime = std::min(m_nextFrameTime, minTime);
+
+		startNextFrameTimer();
 	}
 
 	void RmlComponent::enableDebugger(const bool _enable)
@@ -739,6 +779,12 @@ namespace juceRmlUi
 		}
 	}
 
+	void RmlComponent::startNextFrameTimer()
+	{
+		const auto now = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+		startTimer(std::max(1, static_cast<int>((m_nextFrameTime - now) * 1000.0f * 0.34f)));
+	}
+
 	Rml::Vector2i RmlComponent::getRenderSize() const
 	{
 		const auto s = m_openGLContext.getRenderingScale();
@@ -770,7 +816,8 @@ namespace juceRmlUi
 
 			// enqueueUpdate might cause rendering immediately, we want the update to happen *after* the resize so we queue a timer to do the update
 			std::scoped_lock lock(m_timerMutex);
-			startTimer(1);
+			m_nextFrameTime = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+			startNextFrameTimer();
 		}
 		Component::resized();
 	}
