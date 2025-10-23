@@ -301,7 +301,9 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_IS_SYNTH ${isSynth})
 	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_4CC ${plugin4CC})
 
-	tus_exportTarget(${targetName})
+	if(${isSynth})
+		tus_exportTarget(${targetName})
+	endif()
 
 	# --------- Server Plugin ---------
 
