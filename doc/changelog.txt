@@ -1,5 +1,9 @@
 Release Notes 
 
+2.0.11:
+
+- [Fix] BUG-10045 Vertical sliders won't reset to 0 but to -1 on double click
+
 2.0.10:
 
 Framework:

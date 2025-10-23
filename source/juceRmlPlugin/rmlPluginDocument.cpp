@@ -162,11 +162,23 @@ namespace rmlPlugin
 			{
 				// reset sliders to their default value on double click
 
-				juceRmlUi::EventListener::Add(input, Rml::EventId::Dblclick, [input](const Rml::Event&)
+				juceRmlUi::EventListener::Add(input, Rml::EventId::Dblclick, [this, input](const Rml::Event&)
 				{
-					auto defaultValue = input->GetAttribute("default", std::string());
-					if (!defaultValue.empty())
-						input->SetValue(defaultValue);
+					auto& binding = m_context.getParameterBinding();
+					auto* parameter = binding.getParameterForElement(input);
+
+					// if they are bound to parameter, use the parameter. This is because the mapping might be reversed
+					if (parameter)
+					{
+						parameter->setUnnormalizedValueNotifyingHost(parameter->getDefault(), pluginLib::Parameter::Origin::Ui);
+					}
+					else
+					{
+						// otherwise, just use the default attribute if available
+						auto defaultValue = input->GetAttribute("default", std::string());
+						if (!defaultValue.empty())
+							input->SetValue(defaultValue);
+					}
 				});
 
 				// allow to change slider value with mouse wheel
