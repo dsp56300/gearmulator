@@ -1,5 +1,11 @@
 Release Notes 
 
+2.0.10:
+
+Framework:
+
+- [Fix] UI might not react immediately after being focused
+
 2.0.9:
 
 Framework:
