@@ -4,7 +4,7 @@ Release Notes
 
 Framework:
 
-- [Fix] UI might not react immediately after being focused
+- [Fix] BUG-10043 First GUI event "eaten" on plugin init
 
 2.0.9:
 
