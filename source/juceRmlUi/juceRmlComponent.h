@@ -170,7 +170,5 @@ namespace juceRmlUi
 		juce::Image m_screenshot;
 		ScreenshotState m_screenshotState = ScreenshotState::NoScreenshot;
 		ScreenshotCallback m_screenshotCallback;
-
-		bool m_mouseActive = true;
 	};
 }
