@@ -1,11 +1,21 @@
 Release Notes 
 
+2.0.10:
+
+Framework:
+
+- [Fix] UI might not react immediately after being focused
+
 2.0.9:
 
 Framework:
 
-- [Fix] Thread priorities were not set correctly on Mac/Linux
-- [Fix] Right clicking a menu entry opened a second menu
+- [Fix] Thread priorities were not set correctly on Mac/Linux, solves 
+        BUG-10040 Track performance affected by application focus
+- [Fix] BUG-10039 Right clicking a menu entry opened a second menu
+- [Fix] Reworked UI frame timing to use less resources
+- [Fix] Patch Manager: Exported patches may not have consecutive 
+        bank/program numbers
 
 2.0.8:
 

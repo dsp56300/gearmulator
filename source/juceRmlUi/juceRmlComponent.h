@@ -60,7 +60,8 @@ namespace juceRmlUi
 		bool keyPressed(const juce::KeyPress& _key) override;
 		bool keyStateChanged(bool _isKeyDown) override;
 		void modifierKeysChanged(const juce::ModifierKeys& _modifiers) override;
-		void focusLost(FocusChangeType cause) override;
+		void focusLost(FocusChangeType _cause) override;
+		void focusGained(FocusChangeType _cause) override;
 
 		void timerCallback() override;
 
@@ -110,6 +111,7 @@ namespace juceRmlUi
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
+		void startNextFrameTimer();
 
 		Rml::Vector2i getRenderSize() const;
 
@@ -154,6 +156,7 @@ namespace juceRmlUi
 
 		double m_time = 0;
 		float m_fps = 0;
+		float m_targetFPS = 30.0f;
 
 		uint32_t m_pendingUpdates = 0;
 		std::atomic<bool> m_renderDone;
@@ -167,7 +170,5 @@ namespace juceRmlUi
 		juce::Image m_screenshot;
 		ScreenshotState m_screenshotState = ScreenshotState::NoScreenshot;
 		ScreenshotCallback m_screenshotCallback;
-
-		bool m_mouseActive = true;
 	};
 }

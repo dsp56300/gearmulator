@@ -180,5 +180,6 @@ namespace pluginLib
 		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
 		ParameterLocking m_locking;
 		ParameterLinks m_parameterLinks;
+		mutable ParameterList m_tempReturnParameterList;
 	};
 }
