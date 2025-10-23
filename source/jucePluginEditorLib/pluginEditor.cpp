@@ -691,34 +691,38 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](Rml::Event& _event)
 		{
-			if (!juceRmlUi::helper::getKeyModCommand(_event))
-				return;
-
-			switch (juceRmlUi::helper::getKeyIdentifier(_event))
+			if (juceRmlUi::helper::getKeyModCommand(_event))
 			{
-			case Rml::Input::KI_C:
-				copyCurrentPatchToClipboard();
-				_event.StopPropagation();
-				break;
-			case Rml::Input::KI_V:
-				replaceCurrentPatchFromClipboard();
-				_event.StopPropagation();
-				break;
-			case Rml::Input::KI_S:
-				if (m_settings)
+				switch (juceRmlUi::helper::getKeyIdentifier(_event))
 				{
-					m_settings.reset();
+				case Rml::Input::KI_C:
+					copyCurrentPatchToClipboard();
+					_event.StopPropagation();
+					break;
+				case Rml::Input::KI_V:
+					replaceCurrentPatchFromClipboard();
+					_event.StopPropagation();
+					break;
+				default:;
 				}
-				else
+			}
+			else
+			{
+				switch (juceRmlUi::helper::getKeyIdentifier(_event))
 				{
-					m_settings.reset(new Settings(*this));
-//					addAndMakeVisible(m_settings.get());
-//					m_settings->setTransform(juce::AffineTransform::scale(1.0f / getScale()));
-//					m_settings->centreWithSize(getWidth() * 7 / 8 * getScale(), getHeight() * 7 / 8 * getScale());
+				case Rml::Input::KI_ESCAPE:
+					if (m_settings)
+					{
+						m_settings.reset();
+					}
+					else
+					{
+						m_settings = Settings::createFromTemplate(*this, "settings", getRmlRootElement());
+					}
+					_event.StopPropagation();
+					break;
+				default:;
 				}
-				_event.StopPropagation();
-				break;
-			default:;
 			}
 		});
 		return comp;

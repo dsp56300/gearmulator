@@ -3,27 +3,30 @@
 #include "settingsCategories.h"
 #include "settingsPage.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"
+namespace Rml
+{
+	class Element;
+}
 
 namespace jucePluginEditorLib
 {
 	class Editor;
 
-	class Settings final : public juce::Component
+	class Settings
 	{
 	public:
-		Settings(Editor& _editor);
-		~Settings() override;
-		void paint(juce::Graphics& g) override;
-		void resized() override;
+		Settings(Editor& _editor, Rml::Element* _root);
+		~Settings();
+
 		Editor& getEditor() const { return m_editor; }
 
 		void setSelectedCategory(const SettingsCategory* _settingsCategory);
 
-	private:
-		void doLayout();
+		static std::unique_ptr<Settings> createFromTemplate(Editor& _editor, const std::string& _templateName, Rml::Element* _parent);
 
+	private:
 		Editor& m_editor;
+		Rml::Element* m_root;
 
 		SettingsCategories m_categories;
 		SettingsPage m_page;

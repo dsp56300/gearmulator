@@ -1,0 +1,11 @@
+<template name="settings">
+<head>
+	<link type="text/rcss" href="tus_settings.rcss"/>
+</head>
+<body>
+	<div class="settings-parent">
+		<div id="settings-root" class="settings-root">
+		</div>
+	</div>
+</body>
+</template>
