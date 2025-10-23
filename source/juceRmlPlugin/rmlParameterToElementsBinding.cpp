@@ -161,7 +161,8 @@ namespace rmlPlugin
 
 	int ParameterToElementsBinding::getElementValue(const Rml::Element* _element, const pluginLib::Parameter* _default)
 	{
-		const pluginLib::ParamValue v = static_cast<pluginLib::ParamValue>(juceRmlUi::ElemValue::getValue(_element, static_cast<float>(_default->getUnnormalizedValue())));
+		const auto floatValue = juceRmlUi::ElemValue::getValue(_element, static_cast<float>(_default->getUnnormalizedValue()));
+		const pluginLib::ParamValue v = static_cast<pluginLib::ParamValue>(std::round(floatValue));
 
 		if (isReversed(_element))
 		{

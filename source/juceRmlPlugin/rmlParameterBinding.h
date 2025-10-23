@@ -60,7 +60,7 @@ namespace rmlPlugin
 		void getElementsForParameter(std::vector<Rml::Element*>& _results, const pluginLib::Parameter* _param, bool _visibleOnly = true) const;
 		Rml::Element* getElementForParameter(const pluginLib::Parameter* _param, bool _visibleOnly = true) const;
 		Rml::Element* getElementForParameter(const std::string& _param, uint8_t _part, bool _visibleOnly = true) const;
-		const pluginLib::Parameter* getParameterForElement(const Rml::Element* _element) const;
+		pluginLib::Parameter* getParameterForElement(const Rml::Element* _element) const;
 
 		void setMouseIsDown(Rml::ElementDocument* _document, bool _isDown);
 		bool getMouseIsDown() const { return !m_docsWithMouseDown.empty(); }

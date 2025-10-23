@@ -249,7 +249,7 @@ namespace rmlPlugin
 		return getElementForParameter(p, _visibleOnly);
 	}
 
-	const pluginLib::Parameter* RmlParameterBinding::getParameterForElement(const Rml::Element* _element) const
+	pluginLib::Parameter* RmlParameterBinding::getParameterForElement(const Rml::Element* _element) const
 	{
 		const auto it = m_elementToParam.find(const_cast<Rml::Element*>(_element));
 		return it != m_elementToParam.end() ? it->second->getParameter() : nullptr;
