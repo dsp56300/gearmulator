@@ -300,6 +300,7 @@ knob {
 	border: 2dp rgb(172,176,179);
 	border-radius: 15dp;
 	padding: 0.5em 1em 0.5em 1em;
+	text-align: center;
 }
 
 .button:hover {
