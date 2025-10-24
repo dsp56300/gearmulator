@@ -5,6 +5,14 @@
 <body>
 	<div class="settings-parent">
 		<div id="settings-root" class="settings-root">
+			<div class="settings-categories">
+				<div class="settings-headline">Settings</div>
+				<button class="button settings-category-button">MIDI</button>
+				<button class="button settings-category-button">Device</button>
+				<button class="button settings-category-button">UI</button>
+			</div>
+			<div class="settings-page">
+			</div>
 		</div>
 	</div>
 </body>
