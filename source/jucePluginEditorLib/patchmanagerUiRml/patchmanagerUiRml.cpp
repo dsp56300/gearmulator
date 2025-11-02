@@ -233,7 +233,7 @@ namespace jucePluginEditorLib::patchManagerRml
 //		m_searchList->setListModel(newModel);
 
 		newModel.setContent(oldModel.getSearchHandle());
-		newModel.setSelectedEntries(oldModel.getSelectedEntries());
+		newModel.setSelectedPatches(oldModel.getSelectedPatches());
 
 		if (_layout == LayoutType::Grid)
 		{
