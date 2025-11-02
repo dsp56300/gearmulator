@@ -6,6 +6,10 @@ Framework:
 
 - [Fix] BUG-10045 Vertical sliders won't reset to 0 but to -1 on double click
 
+Osirus:
+
+- [Fix] Incorrect default value for Osc 2 Detune
+
 2.0.10:
 
 Framework:
