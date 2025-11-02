@@ -5,6 +5,8 @@ Release Notes
 Framework:
 
 - [Fix] BUG-10045 Vertical sliders won't reset to 0 but to -1 on double click
+- [Fix] BUG-10051 Do not send gesture begin/end to host if parameter is 
+        changed via midi CCs
 
 Osirus:
 

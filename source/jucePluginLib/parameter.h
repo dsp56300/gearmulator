@@ -93,15 +93,18 @@ namespace pluginLib
 		void pushChangeGesture();
 		void popChangeGesture();
 
+		static bool requiresGesture(Origin _origin);
+
 	private:
 
 		struct ScopedChangeGesture
 		{
-			explicit ScopedChangeGesture(Parameter& _p);
+			explicit ScopedChangeGesture(Parameter& _p, Origin _origin);
 			~ScopedChangeGesture();
 
 		private:
 			Parameter& m_parameter;
+			const Origin m_origin;
 		};
 
         static juce::String genId(const Description &d, int part, int uniqueId);
