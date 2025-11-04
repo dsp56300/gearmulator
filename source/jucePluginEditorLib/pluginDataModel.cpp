@@ -37,17 +37,28 @@ namespace jucePluginEditorLib
 		dmc.Bind("versionTime", &m_versionTime);
 		dmc.Bind("versionDateTime", &m_versionDateTime);
 
-		// current date as string YYYY-MM-DD
-		m_today = []
+		// current date
 		{
 			auto t = std::time(nullptr);
-			auto tm = *std::localtime(&t);
-			std::ostringstream oss;
-			oss << std::put_time(&tm, "%Y-%m-%d");
-			return oss.str();
-		}();
+			const auto tm = *std::localtime(&t);
+
+			// as string YYYY-MM-DD
+			{
+				std::ostringstream oss;
+				oss << std::put_time(&tm, "%Y-%m-%d");
+				m_today = oss.str();
+			}
+
+			// as string MM-DD
+			{
+				std::ostringstream oss;
+				oss << std::put_time(&tm, "%m-%d");
+				m_todayMMDD = oss.str();
+			}
+		}
 
 		dmc.Bind("today", &m_today);
+		dmc.Bind("todayMMDD", &m_todayMMDD);
 
 		_bindCallback(*this);
 
