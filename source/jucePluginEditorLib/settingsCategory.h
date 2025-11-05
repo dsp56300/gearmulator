@@ -1,28 +1,28 @@
 #pragma once
 
-#include "juce_gui_basics/juce_gui_basics.h"
+namespace Rml
+{
+	class Element;
+}
 
 namespace jucePluginEditorLib
 {
 	class SettingsPlugin;
 	class Settings;
 
-	class SettingsCategory final : public juce::Component
+	class SettingsCategory final
 	{
 	public:
 		explicit SettingsCategory(Settings& _settings, SettingsPlugin* _plugin);
-		~SettingsCategory() override;
-		void paint(juce::Graphics& g) override;
-		void resized() override;
+		~SettingsCategory();
 
-		void setSelected(bool _selected);
+		void setSelected(bool _selected) const;
 		SettingsPlugin* getPlugin() const { return m_plugin; }
 
 	private:
 		SettingsPlugin* const m_plugin;
 		Settings& m_settings;
 
-		juce::TextButton m_button;
-		juce::Colour m_buttonColor;
+		Rml::Element* m_button;
 	};
 }

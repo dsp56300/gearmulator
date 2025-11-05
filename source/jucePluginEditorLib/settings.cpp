@@ -70,4 +70,16 @@ namespace jucePluginEditorLib
 
 		return std::make_unique<Settings>(_editor, attachedElem);
 	}
+
+	Rml::Element* Settings::createPageButton(const std::string& _title) const
+	{
+		auto* pageButtonTemplate = juceRmlUi::helper::findChild(m_root, "btPage");
+		pageButtonTemplate->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
+
+		auto* button = pageButtonTemplate->GetParentNode()->AppendChild(pageButtonTemplate->Clone());
+		button->SetInnerRML(Rml::StringUtilities::EncodeRml(_title));
+		button->RemoveProperty(Rml::PropertyId::Display);
+
+		return button;
+	}
 }
