@@ -7,6 +7,8 @@
 
 #include "RmlUi/Core/Context.h"
 
+#include <ctime>
+
 namespace jucePluginEditorLib
 {
 	PluginDataModel::PluginDataModel(const Editor& _editor, Rml::Context& _context, const std::function<void(PluginDataModel&)>& _bindCallback)
@@ -34,6 +36,29 @@ namespace jucePluginEditorLib
 		dmc.Bind("versionDate", &m_versionDate);
 		dmc.Bind("versionTime", &m_versionTime);
 		dmc.Bind("versionDateTime", &m_versionDateTime);
+
+		// current date
+		{
+			auto t = std::time(nullptr);
+			const auto tm = *std::localtime(&t);
+
+			// as string YYYY-MM-DD
+			{
+				std::ostringstream oss;
+				oss << std::put_time(&tm, "%Y-%m-%d");
+				m_today = oss.str();
+			}
+
+			// as string MM-DD
+			{
+				std::ostringstream oss;
+				oss << std::put_time(&tm, "%m-%d");
+				m_todayMMDD = oss.str();
+			}
+		}
+
+		dmc.Bind("today", &m_today);
+		dmc.Bind("todayMMDD", &m_todayMMDD);
 
 		_bindCallback(*this);
 

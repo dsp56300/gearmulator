@@ -35,6 +35,9 @@ namespace jucePluginEditorLib
 		std::string m_versionTime;
 		std::string m_versionDateTime;
 
+		std::string m_today;
+		std::string m_todayMMDD;
+
 		Rml::DataModelConstructor* m_dataModelConstructor = nullptr;
 		Rml::DataModelHandle m_handle;
 

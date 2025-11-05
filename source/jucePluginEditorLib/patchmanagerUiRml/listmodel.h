@@ -46,6 +46,7 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 	public:
 		using Patch = pluginLib::patchDB::PatchPtr;
+		using PatchKey = pluginLib::patchDB::PatchKey;
 		using Patches = std::vector<Patch>;
 
 		explicit ListModel(PatchManagerUiRml& _pm, juceRmlUi::ElemList* _list);
@@ -55,6 +56,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		pluginLib::patchDB::SearchHandle getSearchHandle() const;
 		std::set<Patch> getSelectedPatches() const;
+		std::set<PatchKey> getSelectedPatchKeys() const;
 		bool setSelectedPatches(const std::set<Patch>& _selection);
 		bool setSelectedPatches(const std::set<pluginLib::patchDB::PatchKey>& _selection);
 

@@ -100,21 +100,21 @@ namespace pluginLib
 
     void Parameter::setValueNotifyingHost(const float _value, const Origin _origin)
     {
-		ScopedChangeGesture g(*this);
+		ScopedChangeGesture g(*this, _origin);
 		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_value)), _origin);
 		notifyHost(_value);
 	}
 
     void Parameter::setUnnormalizedValueNotifyingHost(const float _value, const Origin _origin)
     {
-		ScopedChangeGesture g(*this);
+		ScopedChangeGesture g(*this, _origin);
 		setUnnormalizedValue(juce::roundToInt(_value), _origin);
 		notifyHost(convertTo0to1(_value));
     }
 
     void Parameter::setUnnormalizedValueNotifyingHost(const int _value, const Origin _origin)
     {
-		ScopedChangeGesture g(*this);
+		ScopedChangeGesture g(*this, _origin);
 		setUnnormalizedValue(_value, _origin);
 		notifyHost(convertTo0to1(static_cast<float>(_value)));
     }
@@ -157,6 +157,22 @@ namespace pluginLib
 		--m_changeGestureCount;
 		if(!m_changeGestureCount)
 			endChangeGesture();
+    }
+
+    bool Parameter::requiresGesture(Origin _origin)
+    {
+	    switch (_origin)
+	    {
+	    case Origin::Unknown:
+	    case Origin::Ui:
+			return true;
+	    case Origin::Derived:
+	    case Origin::PresetChange:
+	    case Origin::Midi:
+	    case Origin::HostAutomation:
+		default:
+			return false;
+	    }
     }
 
     bool Parameter::isMetaParameter() const
@@ -289,15 +305,15 @@ namespace pluginLib
 		_param->m_derivedParameters.insert(this);
 	}
 
-	Parameter::ScopedChangeGesture::ScopedChangeGesture(Parameter& _p) : m_parameter(_p)
+	Parameter::ScopedChangeGesture::ScopedChangeGesture(Parameter& _p, const Origin _origin) : m_parameter(_p), m_origin(_origin)
     {
-		if(_p.getDescription().isPublic)
+		if(_p.getDescription().isPublic && requiresGesture(_origin))
 		    _p.pushChangeGesture();
     }
 
     Parameter::ScopedChangeGesture::~ScopedChangeGesture()
     {
-		if(m_parameter.getDescription().isPublic)
+		if(m_parameter.getDescription().isPublic && requiresGesture(m_origin))
 		    m_parameter.popChangeGesture();
     }
 

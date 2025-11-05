@@ -83,6 +83,15 @@ namespace jucePluginEditorLib::patchManagerRml
 		return result;
 	}
 
+	std::set<ListModel::PatchKey> ListModel::getSelectedPatchKeys() const
+	{
+		auto patches = getSelectedPatches();
+		std::set<pluginLib::patchDB::PatchKey> result;
+		for (const auto& patch : patches)
+			result.insert(pluginLib::patchDB::PatchKey(*patch));
+		return result;
+	}
+
 	bool ListModel::setSelectedPatches(const std::set<Patch>& _selection)
 	{
 		if (_selection.empty())
@@ -150,7 +159,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void ListModel::setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search)
 	{
-		const std::set<Patch> selectedPatches = getSelectedPatches();
+		auto selectedPatches = getSelectedPatchKeys();
 
 		m_search = _search;
 
@@ -164,6 +173,12 @@ namespace jucePluginEditorLib::patchManagerRml
 		filterPatches();
 
 		updateEntries();
+
+		if (selectedPatches.empty())
+		{
+			// if there is no selection, always select the currently active patch for the current part
+			selectedPatches.insert(getDB().getState().getPatch(getDB().getCurrentPart()));
+		}
 
 		if (setSelectedPatches(selectedPatches))
 		{

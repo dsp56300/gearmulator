@@ -37,7 +37,7 @@
  		{"page":112, "index":23, "name":"Osc2 Pulsewidth", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false},
  		{"page":112, "index":24, "name":"Osc2 Wave Select", "min":0, "max":63, "toText":"oscWave", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":112, "index":25, "name":"Osc2 Semitone", "min":16, "max":112, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
- 		{"page":112, "index":26, "name":"Osc2 Detune", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false},
+ 		{"page":112, "index":26, "name":"Osc2 Detune", "min":0, "max":127, "default":32, "isPublic":true, "isDiscrete":false, "isBool":false},
  		{"page":112, "index":27, "name":"Osc2 FM Amount", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false},
  		{"page":112, "index":28, "name":"Osc2 Sync", "min":0, "max":1, "isPublic":true, "isDiscrete":false, "isBool":true},
  		{"page":112, "index":29, "name":"Osc2 Filt Env Amt", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
