@@ -99,3 +99,18 @@
 	line-height: 1.2em;
 	height: 100%;
 }
+
+.settings-checkbox {
+	display: block;
+	position: relative;
+	width: 1.2em;
+	min-width: 1.2em;
+	height: 1.2em;
+	border: 1dp #aaa;
+	background-color: #0008;
+	border-radius: 0.3em;
+}
+
+.settings-checkbox:checked {
+	decorator: image(check.png fill);
+}

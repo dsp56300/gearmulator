@@ -4,8 +4,8 @@
 </head>
 <body>
 	<div class="settings-page">
-		<h2>MIDI Ports</h2>
-		<table class="settings-table" style="padding-top: 1em; padding-bottom: 1em;">
+		<h2>Physical MIDI Ports</h2>
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
 			<tr class="settings-tr">
 				<td>Input</td>
 				<td>Output</td>
@@ -24,6 +24,43 @@
 			</tr>
 		</table>
 		<h2>MIDI Routing Matrix</h2>
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 1em;">
+			<tr class="settings-tr midimatrix-tr-headline">
+				<td>From \ To</td>
+				<td>Device</td>
+				<td>Editor</td>
+				<td>Host</td>
+				<td>Physical</td>
+			</tr>
+			<tr class="settings-tr midimatrix-tr">
+				<td>Device</td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+			</tr>
+			<tr class="settings-tr midimatrix-tr">
+				<td>Editor</td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+			</tr>
+			<tr class="settings-tr midimatrix-tr">
+				<td>Host</td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+			</tr>
+			<tr class="settings-tr midimatrix-tr">
+				<td>Physical</td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+				<td><button class="settings-checkbox"/></td>
+			</tr>
+		</table>
 	</div>
 </body>
 </template>
