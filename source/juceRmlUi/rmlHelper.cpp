@@ -6,10 +6,13 @@
 
 #include "rmlDragSource.h"
 #include "rmlInterfaces.h"
+#include "Core/Template.h"
+#include "Core/TemplateCache.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "RmlUi/Core/Element.h"
+#include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/ElementInstancer.h"
 #include "RmlUi/Core/ElementUtilities.h"
 #include "RmlUi/Core/Event.h"
@@ -484,6 +487,31 @@ namespace juceRmlUi
 				_element->RemoveProperty(Rml::PropertyId::PointerEvents);
 				_element->SetPseudoClass("disabled", false);
 			}
+		}
+
+		Rml::Element* createTemplate(const std::string& _templateName, Rml::Element* _parent)
+		{
+			auto* t = _parent->GetCoreInstance().template_cache->GetTemplate(_templateName);
+
+			if (!t)
+			{
+				Rml::Log::Message(_parent->GetCoreInstance(), Rml::Log::LT_ERROR, "Template '%s' not found", _templateName.c_str());
+				return nullptr;
+			}
+
+			auto elem = _parent->GetOwnerDocument()->CreateElement("div");
+
+			auto* parsedElem = t->ParseTemplate(elem.get());
+
+			if (!parsedElem)
+			{
+				Rml::Log::Message(_parent->GetCoreInstance(), Rml::Log::LT_ERROR, "Template '%s' could not be parsed", _templateName.c_str());
+				return {};
+			}
+
+			auto* attachedElem = _parent->AppendChild(std::move(elem));
+
+			return attachedElem;
 		}
 	}
 }

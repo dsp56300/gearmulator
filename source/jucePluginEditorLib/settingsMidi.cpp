@@ -56,6 +56,10 @@ namespace jucePluginEditorLib
 
 	SettingsMidi::~SettingsMidi() = default;
 
+	void SettingsMidi::createUi(Rml::Element* _root)
+	{
+	}
+
 	void SettingsMidi::resized()
 	{
 		SettingsPlugin::resized();

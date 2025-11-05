@@ -1,6 +1,7 @@
 <template name="settings">
 <head>
 	<link type="text/rcss" href="tus_settings.rcss"/>
+	<link type="text/template" href="tus_settings_midi.rml"/>
 </head>
 <body>
 	<div class="settings-parent">

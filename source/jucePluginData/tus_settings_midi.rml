@@ -1,0 +1,10 @@
+<template name="tus_settings_midi">
+<head>
+	<link type="text/rcss" href="tus_settings_midi.rcss"/>
+</head>
+<body>
+	<div class="settings-midi">
+		
+	</div>
+</body>
+</template>

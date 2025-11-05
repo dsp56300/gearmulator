@@ -22,6 +22,9 @@ namespace jucePluginEditorLib
 		pluginLib::Processor& getProcessor() const { return m_processor; }
 
 		std::string getCategoryName() const override { return "MIDI"; }
+		std::string getTemplateName() const override { return "tus_settings_midi"; }
+
+		void createUi(Rml::Element* _root) override;
 
 		void resized() override;
 

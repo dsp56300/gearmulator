@@ -54,6 +54,10 @@
 }
 
 .settings-page {
+	flex: 1 1 auto;
+	padding: 1em;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .settings-category-button

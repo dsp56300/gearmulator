@@ -25,6 +25,7 @@ namespace jucePluginEditorLib
 		static std::unique_ptr<Settings> createFromTemplate(Editor& _editor, const std::string& _templateName, Rml::Element* _parent);
 
 		Rml::Element* createPageButton(const std::string& _title) const;
+		Rml::Element* getPageParent() const;
 
 	private:
 		Editor& m_editor;

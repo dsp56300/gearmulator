@@ -19,8 +19,8 @@ namespace jucePluginEditorLib
 	public:
 		explicit SettingsCategories(Settings& _settings);
 		~SettingsCategories();
-		void setSelectedCategory(const SettingsCategory* _settingsCategory);
-		void selectLastCategory();
+		void setSelectedCategory(const SettingsCategory* _settingsCategory) const;
+		void selectLastCategory() const;
 
 	private:
 		Settings& m_settings;
