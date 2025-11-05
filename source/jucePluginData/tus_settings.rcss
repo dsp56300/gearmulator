@@ -28,16 +28,13 @@
 .settings-table {
 	column-gap: 1em;
 	padding-top: 1em;
-	width: 100%;
-	height: 100%;
 }
 
 .settings-tr {
-	height: 100%;
+	padding-top: 0.1em;
 }
 
 .settings-td {
-	height: 100%;
 }
 
 .settings-categories {
@@ -86,4 +83,19 @@
 	padding-bottom: 0.2em;
 	padding-top: 0.2em;
 	font-size: 1.2em;
+}
+
+.settings-combo {
+	border: 1dp #aaa;
+	background-color: #0008;
+	border-radius: 0.4em;
+	width: 16em;
+	height: 1.2em;
+	padding-left: 0.3em;
+}
+
+.settings-combo combotext
+{
+	line-height: 1.2em;
+	height: 100%;
 }

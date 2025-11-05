@@ -5,12 +5,24 @@
 <body>
 	<div class="settings-page">
 		<h2>MIDI Ports</h2>
-		<div style="display: flex;">
-			<label>MIDI Input:</label>
-			<combo id="midiInput"/>
-			<label>MIDI Output:</label>
-			<combo id="midiOutput"/>
-		</div>
+		<table class="settings-table" style="padding-top: 1em; padding-bottom: 1em;">
+			<tr class="settings-tr">
+				<td>Input</td>
+				<td>Output</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<combo class="settings-combo" id="midiInput">
+						<combotext>Input</combotext>
+					</combo>
+				</td>
+				<td class="settings-td">
+					<combo class="settings-combo" id="midiOutput">
+						<combotext>Output</combotext>
+					</combo>
+				</td>
+			</tr>
+		</table>
 		<h2>MIDI Routing Matrix</h2>
 	</div>
 </body>

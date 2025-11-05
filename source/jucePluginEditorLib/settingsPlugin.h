@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include "juce_gui_basics/juce_gui_basics.h"
-
 namespace Rml
 {
 	class Element;
@@ -16,12 +14,12 @@ namespace juce
 
 namespace jucePluginEditorLib
 {
-	class SettingsPlugin : public juce::Component
+	class SettingsPlugin
 	{
 	protected:
 		SettingsPlugin() = default;
 	public:
-		~SettingsPlugin() override = default;
+		virtual ~SettingsPlugin() = default;
 
 		virtual std::string getCategoryName() const = 0;
 		virtual std::string getTemplateName() const = 0;

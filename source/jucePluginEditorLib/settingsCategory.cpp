@@ -15,6 +15,8 @@ namespace jucePluginEditorLib
 
 		m_page = juceRmlUi::helper::createTemplate(_plugin->getTemplateName(), _settings.getPageParent());
 
+		_plugin->createUi(m_page);
+
 		juceRmlUi::EventListener::AddClick(m_button, [this]
 		{
 			m_settings.setSelectedCategory(this);
