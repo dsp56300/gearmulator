@@ -53,7 +53,7 @@
 
 }
 
-.settings-page {
+.settings-pagecontainer {
 	flex: 1 1 auto;
 	padding: 1em;
 	overflow-x: hidden;
@@ -70,4 +70,20 @@
 
 .settings-headline {
 	font-size: 2em;
+}
+
+.settings-page h1 {
+	padding-bottom: 0.2em;
+	padding-top: 0.2em;
+	font-size: 2em;
+}
+.settings-page h2 {
+	padding-bottom: 0.2em;
+	padding-top: 0.2em;
+	font-size: 1.5em;
+}
+.settings-page h3 {
+	padding-bottom: 0.2em;
+	padding-top: 0.2em;
+	font-size: 1.2em;
 }

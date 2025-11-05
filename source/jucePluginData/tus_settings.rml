@@ -10,7 +10,7 @@
 				<div class="settings-headline">Settings</div>
 				<button id="btPage" class="button settings-category-button">...</button>
 			</div>
-			<div id="pageContainer" class="settings-page">
+			<div id="pageContainer" class="settings-pagecontainer">
 			</div>
 		</div>
 	</div>

@@ -3,8 +3,15 @@
 	<link type="text/rcss" href="tus_settings_midi.rcss"/>
 </head>
 <body>
-	<div class="settings-midi">
-		
+	<div class="settings-page">
+		<h2>MIDI Ports</h2>
+		<div style="display: flex;">
+			<label>MIDI Input:</label>
+			<combo id="midiInput"/>
+			<label>MIDI Output:</label>
+			<combo id="midiOutput"/>
+		</div>
+		<h2>MIDI Routing Matrix</h2>
 	</div>
 </body>
 </template>
