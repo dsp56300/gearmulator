@@ -1,8 +1,10 @@
 #include "settingsMidi.h"
 
 #include "midiPorts.h"
+#include "settingsMidiMatrix.h"
 
 #include "juceRmlUi/rmlElemComboBox.h"
+#include "synthLib/midiRoutingMatrix.h"
 
 namespace jucePluginEditorLib
 {
@@ -13,19 +15,6 @@ namespace jucePluginEditorLib
 
 	SettingsMidi::SettingsMidi(Processor& _processor) : m_processor(_processor)
 	{
-		/*
-		m_matrices.push_back(std::make_unique<SettingsMidiMatrix>(*this, synthLib::MidiRoutingMatrix::EventType::Note, "Note"));
-		m_matrices.push_back(std::make_unique<SettingsMidiMatrix>(*this, synthLib::MidiRoutingMatrix::EventType::SysEx, "SysEx"));
-		m_matrices.push_back(std::make_unique<SettingsMidiMatrix>(*this, synthLib::MidiRoutingMatrix::EventType::Controller, "Controller"));
-		m_matrices.push_back(std::make_unique<SettingsMidiMatrix>(*this, synthLib::MidiRoutingMatrix::EventType::PolyPressure, "PolyPressure"));
-		m_matrices.push_back(std::make_unique<SettingsMidiMatrix>(*this, synthLib::MidiRoutingMatrix::EventType::Aftertouch, "Aftertouch"));
-		m_matrices.push_back(std::make_unique<SettingsMidiMatrix>(*this, synthLib::MidiRoutingMatrix::EventType::PitchBend, "PitchBend"));
-		m_matrices.push_back(std::make_unique<SettingsMidiMatrix>(*this, synthLib::MidiRoutingMatrix::EventType::ProgramChange, "ProgramChange"));
-		m_matrices.push_back(std::make_unique<SettingsMidiMatrix>(*this, synthLib::MidiRoutingMatrix::EventType::Other, "Other"));
-
-		for (const auto& matrix : m_matrices)
-			addAndMakeVisible(matrix.get());
-		*/
 	}
 
 	SettingsMidi::~SettingsMidi() = default;
@@ -39,5 +28,27 @@ namespace jucePluginEditorLib
 			MidiPorts::initInputComboBox(m_processor, comboInput);
 		if (comboOutput)
 			MidiPorts::initOutputComboBox(m_processor, comboOutput);
+
+		auto* matrixElem = juceRmlUi::helper::findChild(_root, "matrix");
+
+		auto newMatrixElem = [matrixElem, this]()
+		{
+			return matrixElem->GetParentNode()->AppendChild(matrixElem->Clone());
+		};
+
+		createMatrix(matrixElem, synthLib::MidiRoutingMatrix::EventType::Note, "Note On/Off");
+		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::SysEx, "System Exclusive");
+		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::Controller, "Controller");
+		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::PolyPressure, "Poly Pressure");
+		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::Aftertouch, "Aftertouch");
+		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::PitchBend, "Pitch Bend");
+		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::ProgramChange, "Program Change");
+		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::Other, "Other");
+	}
+
+	void SettingsMidi::createMatrix(Rml::Element* _root, synthLib::MidiRoutingMatrix::EventType _type, const char* _name)
+	{
+		auto matrix = std::make_unique<SettingsMidiMatrix>(*this, _root, _type, _name);
+		m_matrices.push_back(std::move(matrix));
 	}
 }

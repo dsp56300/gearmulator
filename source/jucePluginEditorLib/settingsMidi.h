@@ -3,6 +3,7 @@
 #include "pluginEditor.h"
 
 #include "settingsPlugin.h"
+#include "synthLib/midiRoutingMatrix.h"
 
 namespace pluginLib
 {
@@ -27,6 +28,9 @@ namespace jucePluginEditorLib
 		void createUi(Rml::Element* _root) override;
 
 	private:
+		void createMatrix(Rml::Element* _root, synthLib::MidiRoutingMatrix::EventType _type, const char* _name);
+
 		Processor& m_processor;
+		std::vector<std::unique_ptr<SettingsMidiMatrix>> m_matrices;
 	};
 }

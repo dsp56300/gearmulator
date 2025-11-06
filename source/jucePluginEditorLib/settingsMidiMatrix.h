@@ -1,22 +1,33 @@
 #pragma once
 
-#include "juce_gui_basics/juce_gui_basics.h"
-
 #include "synthLib/midiRoutingMatrix.h"
+
+namespace juceRmlUi
+{
+	class ElemButton;
+}
+
+namespace Rml
+{
+	class Event;
+}
+
+namespace Rml
+{
+	class Element;
+}
 
 namespace jucePluginEditorLib
 {
 	class SettingsMidi;
 
-	class SettingsMidiMatrix : public juce::Component
+	class SettingsMidiMatrix
 	{
 	public:
-		SettingsMidiMatrix(SettingsMidi& _midi, synthLib::MidiRoutingMatrix::EventType _type, std::string _name);
-
-		void resized() override;
+		SettingsMidiMatrix(SettingsMidi& _midi, Rml::Element* _root, synthLib::MidiRoutingMatrix::EventType _type, std::string _name);
 
 	private:
-		void onClicked(const juce::ToggleButton* _button, synthLib::MidiEventSource _source, synthLib::MidiEventSource _dest) const;
+		void onClicked(Rml::Event& _event, juceRmlUi::ElemButton* _button, synthLib::MidiEventSource _source, synthLib::MidiEventSource _dest) const;
 
 		SettingsMidi& m_midi;
 		const synthLib::MidiRoutingMatrix::EventType m_eventType;
@@ -26,13 +37,7 @@ namespace jucePluginEditorLib
 
 		static constexpr uint32_t CellCount = std::size(Cells);
 
-		using CellRow = std::array<std::unique_ptr<juce::ToggleButton>, CellCount>;
+		using CellRow = std::array<juceRmlUi::ElemButton*, CellCount>;
 		std::array<CellRow, CellCount> m_cells;
-
-		std::unique_ptr<juce::Label> m_headline;
-		std::unique_ptr<juce::Label> m_corner;
-
-		std::array<std::unique_ptr<juce::Label>, CellCount> m_sourceLabels;
-		std::array<std::unique_ptr<juce::Label>, CellCount> m_destLabels;
 	};
 }
