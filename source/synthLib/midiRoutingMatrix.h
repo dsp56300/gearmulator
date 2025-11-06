@@ -1,11 +1,17 @@
 #pragma once
 
 #include <array>
+#include <set>
 #include <string_view>
 
 #include "midiTypes.h"
 
 #include "baseLib/binarystream.h"
+
+namespace baseLib
+{
+	class ConfigFile;
+}
 
 namespace synthLib
 {
@@ -27,6 +33,7 @@ namespace synthLib
 			ProgramChange = 0x40,
 			Other         = 0x80,
 
+			Last          = Other,
 			All           = 0xff,
 		};
 
@@ -81,11 +88,19 @@ namespace synthLib
 		}
 
 		static std::string_view toString(MidiEventSource _source);
+		static std::string_view toString(EventType _type);
 
 		const EventType& get(const MidiEventSource _source, const MidiEventSource _destination) const
 		{
 			return const_cast<MidiRoutingMatrix&>(*this).get(_source, _destination);
 		}
+
+		bool writeToFile(const std::string& _filename, const std::set<MidiEventSource>& _skipSources = { MidiEventSource::Internal, MidiEventSource::Unknown }) const;
+		void writeToFile(baseLib::ConfigFile& _configFile, const std::set<MidiEventSource>& _skipSources = { MidiEventSource::Internal, MidiEventSource::Unknown }) const;
+
+		bool readFromFile(const std::string& _filename);
+		bool readFromFile(const baseLib::ConfigFile& _configFile);
+
 	private:
 		EventType& get(const MidiEventSource _source, const MidiEventSource _destination)
 		{
