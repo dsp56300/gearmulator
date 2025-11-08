@@ -54,8 +54,6 @@ namespace synthLib
 
 		// changes sent by the physical midi input should update the UI too
 		setEnabled(MidiEventSource::Physical, MidiEventSource::Editor, EventType::All, true);
-
-		writeToFile("D:\\midirouting.conf");
 	}
 
 	std::string_view MidiRoutingMatrix::toString(MidiEventSource _source)
