@@ -113,6 +113,8 @@ namespace synthLib
 
 	void MidiRoutingMatrix::writeToFile(baseLib::ConfigFile& _configFile, const std::set<MidiEventSource>& _skipSources) const
 	{
+		_configFile.add("version", "1");
+
 		for (uint32_t i=0; i<m_matrix.size(); ++i)
 		{
 			const auto source = static_cast<MidiEventSource>(i);
@@ -163,8 +165,7 @@ namespace synthLib
 			{
 				const auto dest = static_cast<MidiEventSource>(j);
 
-				
-				for (uint32_t e=1; e<=static_cast<uint32_t>(EventType::Last); e <<= 1)
+				for (uint32_t e=static_cast<uint32_t>(EventType::First); e<=static_cast<uint32_t>(EventType::Last); e <<= 1)
 				{
 					auto eventType = static_cast<EventType>(e);
 
@@ -173,14 +174,12 @@ namespace synthLib
 					if (!_configFile.contains(key))
 						continue;
 
-					const auto value = _configFile.get(key);
+					const auto value = _configFile.getInt(key, -1);
 
-					if (value.empty())
+					if (value == -1)
 						continue;
 
-					const auto v = std::stoul(value);
-
-					setEnabled(source, dest, eventType, v != 0);
+					setEnabled(source, dest, eventType, value != 0);
 				}
 
 				res |= true;

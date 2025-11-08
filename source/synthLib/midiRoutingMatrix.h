@@ -33,6 +33,7 @@ namespace synthLib
 			ProgramChange = 0x40,
 			Other         = 0x80,
 
+			First         = Note,
 			Last          = Other,
 			All           = 0xff,
 		};
