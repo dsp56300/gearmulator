@@ -9,3 +9,10 @@
 .midimatrix-tr:nth-child(even) {
 	background-color: #0003;
 }
+
+.midimatrix-presetcontainer {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+	padding: 0.5em;
+}
