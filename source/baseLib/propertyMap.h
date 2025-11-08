@@ -9,7 +9,7 @@ namespace baseLib
 	class PropertyMap
 	{
 	public:
-		bool add(const std::string& _key, const std::string& _value);
+		bool add(const std::string& _key, const std::string& _value, bool _overwrite = false);
 		bool add(const std::string& _key);
 		bool add(const PropertyMap& _other, bool _overwrite = false);
 

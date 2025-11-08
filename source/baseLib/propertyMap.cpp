@@ -4,8 +4,13 @@
 
 namespace baseLib
 {
-	bool PropertyMap::add(const std::string& _key, const std::string& _value)
+	bool PropertyMap::add(const std::string& _key, const std::string& _value, const bool _overwrite/* = false*/)
 	{
+		if (_overwrite)
+		{
+			m_argsWithValues[_key] = _value;
+			return true;
+		}
 		if (m_argsWithValues.find(_key) != m_argsWithValues.end())
 			return false;
 		m_argsWithValues.insert(std::make_pair(_key, _value));
