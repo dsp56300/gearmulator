@@ -56,5 +56,7 @@ namespace baseLib
 		std::wstring utf8ToWide(const std::string& _utf8String);
 		std::string wideToUtf8(const std::wstring& _wideString);
 #endif
+		bool exists(const std::string& _filename);
+		bool remove(const std::string& _filename);
 	};
 }

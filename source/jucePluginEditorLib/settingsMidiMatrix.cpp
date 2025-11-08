@@ -43,6 +43,10 @@ namespace jucePluginEditorLib
 		}
 	}
 
+	void SettingsMidiMatrix::refresh()
+	{
+	}
+
 	void SettingsMidiMatrix::onClicked(Rml::Event& _event, juceRmlUi::ElemButton* _button, const synthLib::MidiEventSource _source, const synthLib::MidiEventSource _dest) const
 	{
 		_event.StopPropagation();

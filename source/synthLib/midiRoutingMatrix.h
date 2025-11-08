@@ -102,11 +102,17 @@ namespace synthLib
 		bool readFromFile(const std::string& _filename);
 		bool readFromFile(const baseLib::ConfigFile& _configFile);
 
+		bool operator == (const MidiRoutingMatrix& _other) const
+		{
+			return m_matrix == _other.m_matrix;
+		}
+
 	private:
 		EventType& get(const MidiEventSource _source, const MidiEventSource _destination)
 		{
 			return m_matrix[static_cast<uint32_t>(_source)][static_cast<uint32_t>(_destination)];
 		}
+
 		std::array<std::array<EventType, Size>, Size> m_matrix;
 	};
 }

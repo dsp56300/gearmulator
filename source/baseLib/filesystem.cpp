@@ -2,6 +2,7 @@
 
 #include <array>
 #include <iostream>
+#include <cstdio>
 
 #ifndef _WIN32
 // filesystem is only available on macOS Catalina 10.15+
@@ -421,6 +422,22 @@ namespace baseLib::filesystem
 		const int newSize = WideCharToMultiByte(CP_UTF8, 0, _wideString.c_str(), static_cast<int>(_wideString.size()), name.data(), static_cast<int>(name.size()), nullptr, nullptr);
 		name.resize(newSize);
 		return name;
+	}
+
+	bool exists(const std::string& _filename)
+	{
+		auto* hFile = openFile(_filename, "r");
+		if (hFile)
+		{
+			fclose(hFile);
+			return true;
+		}
+		return false;
+	}
+
+	bool remove(const std::string& _filename)
+	{
+		return 0 == ::remove(_filename.c_str());
 	}
 #endif
 }

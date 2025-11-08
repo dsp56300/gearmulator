@@ -31,7 +31,7 @@
 			</combo>
 			<button id="btPresetSave" class="button">Save</button>
 			<button id="btPresetSaveAs" class="button">Save as...</button>
-			<button id="btPresetDelete" class="button">Delete selected</button>
+			<button id="btPresetDelete" class="button">Delete</button>
 		</div>
 		<div id="matrix">
 			<h3 id="matrixHeadline">Note On/Off</h3>

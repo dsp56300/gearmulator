@@ -3,6 +3,7 @@
 #include "pluginEditor.h"
 
 #include "settingsPlugin.h"
+#include "juceRmlUi/rmlElemComboBox.h"
 #include "synthLib/midiRoutingMatrix.h"
 
 namespace pluginLib
@@ -30,7 +31,22 @@ namespace jucePluginEditorLib
 	private:
 		void createMatrix(Rml::Element* _root, synthLib::MidiRoutingMatrix::EventType _type, const char* _name);
 
+		void onBtPresetSave();
+		void onBtPresetSaveAs();
+		void onBtPresetDelete();
+
+		void initPresetList();
+
+		void onPresetSelected(int _index);
+
+		std::string getPresetFilename(const std::string& _presetName) const;
+
+		void savePreset(const std::string& _name, bool _needsOverwriteConfirmation = true);
+
 		Processor& m_processor;
+
 		std::vector<std::unique_ptr<SettingsMidiMatrix>> m_matrices;
+		juceRmlUi::ElemComboBox* m_presetList;
+		std::vector<std::pair<std::string, synthLib::MidiRoutingMatrix>> m_presets;
 	};
 }
