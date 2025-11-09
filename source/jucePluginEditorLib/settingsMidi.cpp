@@ -18,6 +18,8 @@ namespace jucePluginEditorLib
 		class Style;
 	}
 
+	constexpr std::string_view g_defaultPresetName = "Default";
+
 	SettingsMidi::SettingsMidi(Processor& _processor) : m_processor(_processor)
 	{
 	}
@@ -86,6 +88,14 @@ namespace jucePluginEditorLib
 	{
 		new juceRmlUi::InplaceEditor(m_presetList, "Enter name...", [this](const std::string& _name)
 		{
+			if (_name == g_defaultPresetName)
+			{
+				genericUI::MessageBox::showOk(
+					genericUI::MessageBox::Icon::Warning, 
+					m_processor.getProductName(), 
+					"Cannot use reserved preset name '" + std::string(g_defaultPresetName) + "'.");
+				return;
+			}
 			savePreset(_name);
 		});
 	}
@@ -122,8 +132,8 @@ namespace jucePluginEditorLib
 		m_presets.clear();
 		m_presetList->clearOptions();
 
-		m_presets.emplace_back("Default", synthLib::MidiRoutingMatrix());
-		m_presetList->addOption("Default");
+		m_presets.emplace_back(g_defaultPresetName, synthLib::MidiRoutingMatrix());
+		m_presetList->addOption(std::string(g_defaultPresetName));
 
 		std::vector<std::string> presetFiles;
 		baseLib::filesystem::findFiles(presetFiles, m_processor.getConfigFolder(), ".mmcfg", 0, std::numeric_limits<size_t>::max());
