@@ -13,6 +13,10 @@ Osirus:
 - [Fix] Incorrect default value for Osc 2 Detune
 - [Fix] Galaxpel/Hoverland skins: dropdown texts overlapping with down arrow
 
+OsTIrus:
+
+- [Fix] Dropdown texts overlapping with down arrow
+
 2.0.10:
 
 Framework:

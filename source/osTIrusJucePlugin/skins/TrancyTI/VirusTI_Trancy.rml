@@ -160,7 +160,7 @@
 			<div id="ContainerOsc2ModeHyperSaw" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 1)" data-model="partCurrent" style="left: 658dp; top: 13dp; width: 660dp; height: 580dp; decorator: image(panel_3_osc_common_hs.png scale-none left top);"/>
 			<div id="ContainerOsc2ModeHyperSaw" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 0 || (Osc2_Mode_value >= 2 && Osc2_Mode_value <= 8))" data-model="partCurrent" style="left: 658dp; top: 13dp; width: 660dp; height: 580dp; decorator: image(panel_3_osc_common.png scale-none left top);"/>
 			<div id="ContainerOsc1ModeClassic" class="jucePos" data-class-juceConditionDisabled="!(Osc1_Mode_value == 0)" data-model="partCurrent" style="left: 24dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_classic.png scale-none left top);">
-				<combo id="WaveSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wave Select" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="WaveSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wave Select" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="PulseWidth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Pulsewidth" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
@@ -173,14 +173,14 @@
 				<knob id="Osc1HyperSaw/Density" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc1 HyperSaw/Density" style="left: 330dp; top: 97dp; width: 190dp; height: 190dp;"/>
 			</div>
 			<div id="ContainerOsc1ModeWavetable" class="jucePos" data-class-juceConditionDisabled="!(Osc1_Mode_value == 2)" data-model="partCurrent" style="left: 24dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_wavetable.png scale-none left top);">
-				<combo id="Osc1Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="Osc1Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="Osc1Wavetable/Interpolation" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Wavetable/Interpolation" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
 				<knob id="Osc1Wavetable/WaveTableIndex" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableIndex" style="left: 498dp; top: 187dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerOsc1ModeWavetable" class="jucePos" data-class-juceConditionDisabled="!(Osc1_Mode_value == 3)" data-model="partCurrent" style="left: 24dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_wave_pwm.png scale-none left top);">
-				<combo id="Osc1Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="Osc1Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="Osc1Wavetable/Interpolation" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Wavetable/Interpolation" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
@@ -189,7 +189,7 @@
 				<knob id="Osc1Pulsewidth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Pulsewidth" style="left: 24dp; top: 32dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerOsc1ModeGrainFormatSimple" class="jucePos" data-class-juceConditionDisabled="!(Osc1_Mode_value == 4 || Osc1_Mode_value == 6)" data-model="partCurrent" style="left: 24dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_grain_simple.png scale-none left top);">
-				<combo id="Osc1Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="Osc1Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="Osc1Wavetable/Interpolation" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Wavetable/Interpolation" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
@@ -197,7 +197,7 @@
 				<input id="Osc1Wavetable/FormantShift" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Osc1 Wavetable/FormantShift" type="range" style="left: 174dp; top: 109dp; width: 286dp; height: 63dp;"/>
 			</div>
 			<div id="ContainerOsc1ModeGrainFormatComplex" class="jucePos" data-class-juceConditionDisabled="!(Osc1_Mode_value == 5 || Osc1_Mode_value == 7)" data-model="partCurrent" style="left: 24dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_grain_complex.png scale-none left top);">
-				<combo id="Osc1Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="Osc1Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc1 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="Osc1Wavetable/Interpolation" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Wavetable/Interpolation" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
@@ -207,7 +207,7 @@
 				<knob id="Osc1Wavetable/Sync" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Wavetable/Sync" style="left: 24dp; top: 32dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerOsc2ModeClassic" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 0)" data-model="partCurrent" style="left: 1317dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_classic.png scale-none left top);">
-				<combo id="WaveSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wave Select" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="WaveSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wave Select" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="PulseWidth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Pulsewidth" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
@@ -220,14 +220,14 @@
 				<knob id="Osc2HyperSaw/Density" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 HyperSaw/Density" style="left: 330dp; top: 97dp; width: 190dp; height: 190dp;"/>
 			</div>
 			<div id="ContainerOsc2ModeWavetable" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 2)" data-model="partCurrent" style="left: 1317dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_wavetable.png scale-none left top);">
-				<combo id="Osc2Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="Osc2Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="Osc2Wavetable/Interpolation" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/Interpolation" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
 				<knob id="Osc2Wavetable/WaveTableIndex" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableIndex" style="left: 498dp; top: 187dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerOsc2ModeWavetable" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 3)" data-model="partCurrent" style="left: 1317dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_wave_pwm.png scale-none left top);">
-				<combo id="Osc2Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="Osc2Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="Osc2Wavetable/Interpolation" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/Interpolation" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
@@ -236,7 +236,7 @@
 				<knob id="Osc2Pulsewidth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Pulsewidth" style="left: 24dp; top: 32dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerOsc2ModeGrainFormatSimple" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 4 || Osc2_Mode_value == 6)" data-model="partCurrent" style="left: 1317dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_grain_simple.png scale-none left top);">
-				<combo id="Osc2Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="Osc2Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="Osc2Wavetable/Interpolation" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/Interpolation" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
@@ -244,7 +244,7 @@
 				<input id="Osc2Wavetable/FormantShift" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Osc2 Wavetable/FormantShift" type="range" style="left: 174dp; top: 109dp; width: 286dp; height: 63dp;"/>
 			</div>
 			<div id="ContainerOsc2ModeGrainFormatComplex" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 5 || Osc2_Mode_value == 7)" data-model="partCurrent" style="left: 1317dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_grain_complex.png scale-none left top);">
-				<combo id="Osc2Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 223dp; height: 45dp; line-height: 45dp;">
+				<combo id="Osc2Wavetable/WaveTableSelect" class="jucePos text3" data-model="partCurrent" param="Osc2 Wavetable/WaveTableSelect" style="left: 181dp; top: 211dp; width: 270dp; height: 45dp; line-height: 45dp;">
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="Osc2Wavetable/Interpolation" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/Interpolation" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
@@ -253,10 +253,10 @@
 				<knob id="Osc2Wavetable/Internal Detune" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/Internal Detune" style="left: 498dp; top: 32dp; width: 98dp; height: 98dp;"/>
 				<knob id="Osc2Wavetable/Sync" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/Sync" style="left: 24dp; top: 32dp; width: 98dp; height: 98dp;"/>
 			</div>
-			<combo id="Osc1Mode" class="jucePos text3" data-model="partCurrent" param="Osc1 Mode" style="left: 202dp; top: 75dp; width: 223dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc1Mode" class="jucePos text3" data-model="partCurrent" param="Osc1 Mode" style="left: 202dp; top: 75dp; width: 270dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Osc2Mode" class="jucePos text3" data-model="partCurrent" param="Osc2 Mode" style="left: 1495dp; top: 75dp; width: 223dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc2Mode" class="jucePos text3" data-model="partCurrent" param="Osc2 Mode" style="left: 1495dp; top: 75dp; width: 270dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 0)" data-model="partCurrent" style="left: 664dp; top: 56dp; width: 643dp; height: 476dp; decorator: image(dummy.png scale-none left top);">
@@ -274,13 +274,13 @@
 				<knob id="Osc2Wavetable/FilterEnv>Pitch" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/FilterEnv > Pitch" style="left: 505dp; top: 20dp; width: 98dp; height: 98dp;"/>
 				<knob id="Osc2Wavetable/FilterEnv>FM" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/FilterEnv > FM" style="left: 33dp; top: 330dp; width: 98dp; height: 98dp;"/>
 			</div>
-			<combo id="Osc FM Mode" class="jucePos text3" data-model="partCurrent" param="Osc FM Mode" style="left: 863dp; top: 412dp; width: 223dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc FM Mode" class="jucePos text3" data-model="partCurrent" param="Osc FM Mode" style="left: 863dp; top: 412dp; width: 240dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Osc3 Mode" class="jucePos text3" data-model="partCurrent" param="Osc3 Mode" style="left: 55dp; top: 670dp; width: 223dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc3 Mode" class="jucePos text3" data-model="partCurrent" param="Osc3 Mode" style="left: 55dp; top: 670dp; width: 240dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="UnisonMode" class="jucePos text3" data-model="partCurrent" param="Unison Mode" style="left: 55dp; top: 906dp; width: 223dp; height: 45dp; line-height: 45dp;">
+			<combo id="UnisonMode" class="jucePos text3" data-model="partCurrent" param="Unison Mode" style="left: 55dp; top: 906dp; width: 240dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="Osc2Sync" class="jucePos juceButton button_1" data-model="partCurrent" isToggle="1" param="Osc2 Sync" style="left: 669dp; top: 251dp; width: 79dp; height: 78dp;">
