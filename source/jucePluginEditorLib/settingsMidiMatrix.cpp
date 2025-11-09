@@ -45,6 +45,17 @@ namespace jucePluginEditorLib
 
 	void SettingsMidiMatrix::refresh()
 	{
+		auto& matrix = m_midi.getProcessor().getMidiRoutingMatrix();
+		for (size_t i=0; i<CellCount; ++i)
+		{
+			auto sourceType = Cells[i];
+			for (size_t j=0; j<CellCount; ++j)
+			{
+				auto destType = Cells[j];
+				auto button = m_cells[i][j];
+				button->setChecked(matrix.enabled(sourceType, destType, m_eventType));
+			}
+		}
 	}
 
 	void SettingsMidiMatrix::onClicked(Rml::Event& _event, juceRmlUi::ElemButton* _button, const synthLib::MidiEventSource _source, const synthLib::MidiEventSource _dest) const
