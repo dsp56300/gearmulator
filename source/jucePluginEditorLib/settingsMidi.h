@@ -37,7 +37,7 @@ namespace jucePluginEditorLib
 
 		void initPresetList();
 
-		void onPresetSelected(int _index);
+		void onPresetSelected(int _index) const;
 
 		std::string getPresetFilename(const std::string& _presetName) const;
 
@@ -46,7 +46,7 @@ namespace jucePluginEditorLib
 		Processor& m_processor;
 
 		std::vector<std::unique_ptr<SettingsMidiMatrix>> m_matrices;
-		juceRmlUi::ElemComboBox* m_presetList;
+		juceRmlUi::ElemComboBox* m_presetList = nullptr;
 		std::vector<std::pair<std::string, synthLib::MidiRoutingMatrix>> m_presets;
 	};
 }

@@ -161,9 +161,9 @@ namespace jucePluginEditorLib
 		}
 	}
 
-	void SettingsMidi::onPresetSelected(int _index)
+	void SettingsMidi::onPresetSelected(const int _index) const
 	{
-		if (_index < 0 || _index >= m_presets.size())
+		if (_index < 0 || _index >= static_cast<int>(m_presets.size()))
 			return;
 
 		const auto p = m_presets[static_cast<size_t>(_index)].second;
