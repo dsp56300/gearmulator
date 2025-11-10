@@ -136,7 +136,6 @@ namespace juceRmlUi
 
 	bool ElemButton::isPressed() const
 	{
-		// FIXME: non-toggles get the "checked" state while pressed, we should add a separate "pressed" state
-		return m_isChecked;
+		return IsPseudoClassSet("active");
 	}
 }
