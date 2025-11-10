@@ -678,7 +678,7 @@ namespace jucePluginEditorLib
 			}, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 			{
 				onRmlDocumentLoadFailed(_rmlComponent, _context);
-			});
+			}, m_processor.getConfig().getIntValue("refreshRateLimitHz", -1));
 
 		auto* doc = comp->getDocument();
 

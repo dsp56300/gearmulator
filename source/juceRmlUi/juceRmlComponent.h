@@ -42,7 +42,7 @@ namespace juceRmlUi
 		using DocumentLoadFailedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 
-		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback);
+		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, int _refreshRateLimitHz = -1);
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
@@ -156,7 +156,7 @@ namespace juceRmlUi
 
 		double m_time = 0;
 		float m_fps = 0;
-		float m_targetFPS = 30.0f;
+		float m_targetFPS = 0;
 
 		uint32_t m_pendingUpdates = 0;
 		std::atomic<bool> m_renderDone;

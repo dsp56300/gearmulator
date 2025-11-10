@@ -33,7 +33,7 @@ namespace juceRmlUi
 		static constexpr uint32_t g_advancedRendererMinimumGLversion = 33;
 	}
 
-	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback)
+	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, int _refreshRateLimitHz/* = -1*/)
 		: m_rmlInterfaces(_interfaces)
 		, m_coreInstance(_interfaces.getCoreInstance())
 		, m_dataProvider(_dataProvider)
@@ -42,6 +42,9 @@ namespace juceRmlUi
 		, m_drag(*this)
 		, m_nextFrameTime(_interfaces.getSystemInterface().GetElapsedTime())
 	{
+		if (_refreshRateLimitHz > 0 && _refreshRateLimitHz <= 300)
+			m_targetFPS = static_cast<float>(_refreshRateLimitHz);
+
 		m_renderProxy.reset(new RendererProxy(m_coreInstance, m_dataProvider));
 
 		m_openGLContext.setMultisamplingEnabled(true);
@@ -111,8 +114,16 @@ namespace juceRmlUi
 
 		m_openGLContext.setSwapInterval(1);
 
-		m_targetFPS = 30; // default limit is 30 Hz, updated below if renderer is capable
+		bool haveCustomFPS = m_targetFPS >= 0;
 
+		if (!haveCustomFPS)
+		{
+#if JUCE_MAC
+			m_targetFPS = 60; // default limit is 60 Hz on macOS
+#else
+			m_targetFPS = 30; // default limit is 30 Hz, updated below if renderer is capable
+#endif
+		}
 		using namespace juce::gl;
 
 #if JUCE_MAC
@@ -134,18 +145,21 @@ namespace juceRmlUi
 			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
 			m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
 
-			const GLubyte* vendor = glGetString(GL_VENDOR);
-
-			if (vendor)
+			if (!haveCustomFPS)
 			{
-				std::string vendorStr = reinterpret_cast<const char*>(vendor);
-				std::transform(vendorStr.begin(), vendorStr.end(), vendorStr.begin(), ::tolower);
+				const GLubyte* vendor = glGetString(GL_VENDOR);
 
-				if (vendorStr.find("nvidia") != std::string::npos || 
-					vendorStr.find("amd") != std::string::npos ||
-					vendorStr.find("advanced micro devices") != std::string::npos
-					)
-					m_targetFPS = 60;
+				if (vendor)
+				{
+					std::string vendorStr = reinterpret_cast<const char*>(vendor);
+					std::transform(vendorStr.begin(), vendorStr.end(), vendorStr.begin(), ::tolower);
+
+					if (vendorStr.find("nvidia") != std::string::npos || 
+						vendorStr.find("amd") != std::string::npos ||
+						vendorStr.find("advanced micro devices") != std::string::npos
+						)
+						m_targetFPS = 60;
+				}
 			}
 		}
 		else
