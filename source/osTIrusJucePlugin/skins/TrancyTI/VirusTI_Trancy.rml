@@ -488,94 +488,94 @@
 			<knob id="OscLfo3Amount" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc Lfo3 Amount" style="left: 1387dp; top: 866dp; width: 98dp; height: 98dp;"/>
 		</div>
 		<div id="page_6_matrix" class="jucePos" tabgroup="pages" tabpage="5" style="left: 571dp; top: 129dp; width: 1971dp; height: 1026dp; decorator: image(panel_6_matrix.png scale-none left top);">
-			<combo id="Assign1Source" class="jucePos text3" data-model="partCurrent" param="Assign1 Source" style="left: 321dp; top: 82dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign1Source" class="jucePos text3" data-model="partCurrent" param="Assign1 Source" style="left: 321dp; top: 82dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<input id="Assign1Amount" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign1 Amount" type="range" style="left: 44dp; top: 181dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign2Amount" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 1 Amount 2" type="range" style="left: 44dp; top: 281dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign3Amount" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 1 Amount 3" type="range" style="left: 44dp; top: 381dp; width: 252dp; height: 63dp;"/>
-			<combo id="Assign1Dest" class="jucePos text3" data-model="partCurrent" param="Assign1 Destination" style="left: 321dp; top: 190dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign1Dest" class="jucePos text3" data-model="partCurrent" param="Assign1 Destination" style="left: 321dp; top: 190dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign2Dest" class="jucePos text3" data-model="partCurrent" param="Assign 1 Destination 2" style="left: 321dp; top: 288dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign2Dest" class="jucePos text3" data-model="partCurrent" param="Assign 1 Destination 2" style="left: 321dp; top: 288dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign3Dest" class="jucePos text3" data-model="partCurrent" param="Assign 1 Destination 3" style="left: 321dp; top: 388dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign3Dest" class="jucePos text3" data-model="partCurrent" param="Assign 1 Destination 3" style="left: 321dp; top: 388dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign2Source" class="jucePos text3" data-model="partCurrent" param="Assign2 Source" style="left: 321dp; top: 606dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign2Source" class="jucePos text3" data-model="partCurrent" param="Assign2 Source" style="left: 321dp; top: 606dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<input id="Assign2Amount1" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign2 Amount1" type="range" style="left: 44dp; top: 705dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign2Amount2" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign2 Amount2" type="range" style="left: 44dp; top: 805dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign2Amount3" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 2 Amount 3" type="range" style="left: 44dp; top: 905dp; width: 252dp; height: 63dp;"/>
-			<combo id="Assign2Dest1" class="jucePos text3" data-model="partCurrent" param="Assign2 Destination1" style="left: 321dp; top: 714dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign2Dest1" class="jucePos text3" data-model="partCurrent" param="Assign2 Destination1" style="left: 321dp; top: 714dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign2Dest2" class="jucePos text3" data-model="partCurrent" param="Assign2 Destination2" style="left: 321dp; top: 813dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign2Dest2" class="jucePos text3" data-model="partCurrent" param="Assign2 Destination2" style="left: 321dp; top: 813dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign2Dest3" class="jucePos text3" data-model="partCurrent" param="Assign 2 Destination 3" style="left: 321dp; top: 912dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign2Dest3" class="jucePos text3" data-model="partCurrent" param="Assign 2 Destination 3" style="left: 321dp; top: 912dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign3Source" class="jucePos text3" data-model="partCurrent" param="Assign3 Source" style="left: 980dp; top: 82dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign3Source" class="jucePos text3" data-model="partCurrent" param="Assign3 Source" style="left: 980dp; top: 82dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<input id="Assign3Amount1" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign3 Amount1" type="range" style="left: 702dp; top: 181dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign3Amount2" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign3 Amount2" type="range" style="left: 702dp; top: 281dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign3Amount3" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign3 Amount3" type="range" style="left: 702dp; top: 381dp; width: 252dp; height: 63dp;"/>
-			<combo id="Assign3Dest1" class="jucePos text3" data-model="partCurrent" param="Assign3 Destination1" style="left: 980dp; top: 190dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign3Dest1" class="jucePos text3" data-model="partCurrent" param="Assign3 Destination1" style="left: 980dp; top: 190dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign3Dest2" class="jucePos text3" data-model="partCurrent" param="Assign3 Destination2" style="left: 980dp; top: 288dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign3Dest2" class="jucePos text3" data-model="partCurrent" param="Assign3 Destination2" style="left: 980dp; top: 288dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign3Dest3" class="jucePos text3" data-model="partCurrent" param="Assign3 Destination3" style="left: 980dp; top: 388dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign3Dest3" class="jucePos text3" data-model="partCurrent" param="Assign3 Destination3" style="left: 980dp; top: 388dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign4Source" class="jucePos text3" data-model="partCurrent" param="Assign 4 Source" style="left: 980dp; top: 606dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign4Source" class="jucePos text3" data-model="partCurrent" param="Assign 4 Source" style="left: 980dp; top: 606dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<input id="Assign4Amount" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 4 Amount" type="range" style="left: 702dp; top: 705dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign4Amount2" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 4 Amount 2" type="range" style="left: 702dp; top: 805dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign4Amount3" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 4 Amount 3" type="range" style="left: 702dp; top: 905dp; width: 252dp; height: 63dp;"/>
-			<combo id="Assign4Dest" class="jucePos text3" data-model="partCurrent" param="Assign 4 Destination" style="left: 980dp; top: 714dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign4Dest" class="jucePos text3" data-model="partCurrent" param="Assign 4 Destination" style="left: 980dp; top: 714dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign4Dest2" class="jucePos text3" data-model="partCurrent" param="Assign 4 Destination 2" style="left: 980dp; top: 813dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign4Dest2" class="jucePos text3" data-model="partCurrent" param="Assign 4 Destination 2" style="left: 980dp; top: 813dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign4Dest3" class="jucePos text3" data-model="partCurrent" param="Assign 4 Destination 3" style="left: 980dp; top: 912dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign4Dest3" class="jucePos text3" data-model="partCurrent" param="Assign 4 Destination 3" style="left: 980dp; top: 912dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign5Source" class="jucePos text3" data-model="partCurrent" param="Assign 5 Source" style="left: 1637dp; top: 82dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign5Source" class="jucePos text3" data-model="partCurrent" param="Assign 5 Source" style="left: 1637dp; top: 82dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<input id="Assign5Amount" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 5 Amount" type="range" style="left: 1361dp; top: 181dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign5Amount2" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 5 Amount 2" type="range" style="left: 1361dp; top: 281dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign5Amount3" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 5 Amount 3" type="range" style="left: 1361dp; top: 381dp; width: 252dp; height: 63dp;"/>
-			<combo id="Assign5Dest" class="jucePos text3" data-model="partCurrent" param="Assign 5 Destination" style="left: 1637dp; top: 190dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign5Dest" class="jucePos text3" data-model="partCurrent" param="Assign 5 Destination" style="left: 1637dp; top: 190dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign5Dest2" class="jucePos text3" data-model="partCurrent" param="Assign 5 Destination 2" style="left: 1637dp; top: 288dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign5Dest2" class="jucePos text3" data-model="partCurrent" param="Assign 5 Destination 2" style="left: 1637dp; top: 288dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign5Dest3" class="jucePos text3" data-model="partCurrent" param="Assign 5 Destination 3" style="left: 1637dp; top: 388dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign5Dest3" class="jucePos text3" data-model="partCurrent" param="Assign 5 Destination 3" style="left: 1637dp; top: 388dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign6Source" class="jucePos text3" data-model="partCurrent" param="Assign 6 Source" style="left: 1637dp; top: 606dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign6Source" class="jucePos text3" data-model="partCurrent" param="Assign 6 Source" style="left: 1637dp; top: 606dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<input id="Assign6Amount" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 6 Amount" type="range" style="left: 1361dp; top: 705dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign6Amount2" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 6 Amount 2" type="range" style="left: 1361dp; top: 805dp; width: 252dp; height: 63dp;"/>
 			<input id="Assign6Amount3" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Assign 6 Amount 3" type="range" style="left: 1361dp; top: 905dp; width: 252dp; height: 63dp;"/>
-			<combo id="Assign6Dest" class="jucePos text3" data-model="partCurrent" param="Assign 6 Destination" style="left: 1637dp; top: 714dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign6Dest" class="jucePos text3" data-model="partCurrent" param="Assign 6 Destination" style="left: 1637dp; top: 714dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign6Dest2" class="jucePos text3" data-model="partCurrent" param="Assign 6 Destination 2" style="left: 1637dp; top: 813dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign6Dest2" class="jucePos text3" data-model="partCurrent" param="Assign 6 Destination 2" style="left: 1637dp; top: 813dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Assign6Dest3" class="jucePos text3" data-model="partCurrent" param="Assign 6 Destination 3" style="left: 1637dp; top: 912dp; width: 278dp; height: 45dp; line-height: 45dp;">
+			<combo id="Assign6Dest3" class="jucePos text3" data-model="partCurrent" param="Assign 6 Destination 3" style="left: 1637dp; top: 912dp; width: 272dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 		</div>

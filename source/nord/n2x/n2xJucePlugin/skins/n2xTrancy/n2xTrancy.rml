@@ -272,16 +272,16 @@
 			</div>
 		</div>
 		<div id="page_3_perf" class="jucePos" tabgroup="pages" tabpage="2" style="left: 60dp; top: 60dp; width: 2153dp; height: 803dp; decorator: image(panel_3_perf.png scale-none left top);">
-			<combo id="PerfMidiChannelA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelA" style="left: 40dp; top: 88dp; width: 300dp; height: 35dp; line-height: 35dp;">
+			<combo id="PerfMidiChannelA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelA" style="left: 40dp; top: 88dp; width: 315dp; height: 35dp; line-height: 35dp;">
 				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfMidiChannelB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelB" style="left: 450dp; top: 88dp; width: 300dp; height: 35dp; line-height: 35dp;">
+			<combo id="PerfMidiChannelB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelB" style="left: 450dp; top: 88dp; width: 315dp; height: 35dp; line-height: 35dp;">
 				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfMidiChannelC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelC" style="left: 864dp; top: 88dp; width: 300dp; height: 35dp; line-height: 35dp;">
+			<combo id="PerfMidiChannelC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelC" style="left: 864dp; top: 88dp; width: 315dp; height: 35dp; line-height: 35dp;">
 				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfMidiChannelD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelD" style="left: 1280dp; top: 88dp; width: 300dp; height: 35dp; line-height: 35dp;">
+			<combo id="PerfMidiChannelD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMidiChannelD" style="left: 1280dp; top: 88dp; width: 315dp; height: 35dp; line-height: 35dp;">
 				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
 			<combo id="PerfLfo1SyncA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfLfo1SyncA" style="left: 40dp; top: 159dp; width: 150dp; height: 35dp; line-height: 35dp;">
@@ -416,73 +416,73 @@
 			<combo id="PerfMorfTriggerNoteNumberD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfMorfTriggerNoteNumberD" style="left: 1445dp; top: 482dp; width: 150dp; height: 35dp; line-height: 35dp;">
 				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 90dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfChannelPressureAmountA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountA" style="left: 40dp; top: 553dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfChannelPressureAmountA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountA" style="left: 40dp; top: 553dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfChannelPressureAmountB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountB" style="left: 450dp; top: 553dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfChannelPressureAmountB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountB" style="left: 450dp; top: 553dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfChannelPressureAmountC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountC" style="left: 864dp; top: 553dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfChannelPressureAmountC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountC" style="left: 864dp; top: 553dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfChannelPressureAmountD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountD" style="left: 1280dp; top: 553dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfChannelPressureAmountD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureAmountD" style="left: 1280dp; top: 553dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfChannelPressureDestA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestA" style="left: 40dp; top: 613dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfChannelPressureDestA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestA" style="left: 40dp; top: 613dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfChannelPressureDestB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestB" style="left: 450dp; top: 613dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfChannelPressureDestB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestB" style="left: 450dp; top: 613dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfChannelPressureDestC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestC" style="left: 864dp; top: 613dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfChannelPressureDestC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestC" style="left: 864dp; top: 613dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfChannelPressureDestD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestD" style="left: 1280dp; top: 613dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfChannelPressureDestD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfChannelPressureDestD" style="left: 1280dp; top: 613dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfExpressionPedalAmountA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountA" style="left: 40dp; top: 685dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfExpressionPedalAmountA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountA" style="left: 40dp; top: 685dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfExpressionPedalAmountB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountB" style="left: 450dp; top: 685dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfExpressionPedalAmountB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountB" style="left: 450dp; top: 685dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfExpressionPedalAmountC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountC" style="left: 864dp; top: 685dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfExpressionPedalAmountC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountC" style="left: 864dp; top: 685dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfExpressionPedalAmountD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountD" style="left: 1280dp; top: 685dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfExpressionPedalAmountD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalAmountD" style="left: 1280dp; top: 685dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfExpressionPedalDestA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestA" style="left: 40dp; top: 746dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfExpressionPedalDestA_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestA" style="left: 40dp; top: 746dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfExpressionPedalDestB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestB" style="left: 450dp; top: 746dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfExpressionPedalDestB_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestB" style="left: 450dp; top: 746dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfExpressionPedalDestC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestC" style="left: 864dp; top: 746dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfExpressionPedalDestC_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestC" style="left: 864dp; top: 746dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfExpressionPedalDestD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestD" style="left: 1280dp; top: 746dp; width: 300dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 240dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfExpressionPedalDestD_CMB" class="jucePos txtCombo" data-model="partCurrent" param="PerfExpressionPedalDestD" style="left: 1280dp; top: 746dp; width: 315dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 250dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
 			<knob id="PerfMasterTune" class="jucePos juceRotary knob1" data-model="partCurrent" param="PerfMasterTune" style="left: 1754dp; top: 80dp; width: 113dp; height: 113dp;"/>
 			<knob id="PerfBendRange" class="jucePos juceRotary knob1" data-model="partCurrent" param="PerfBendRange" style="left: 1931dp; top: 80dp; width: 113dp; height: 113dp;"/>
 			<button id="PerfKeyboardSplit" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="PerfKeyboardSplit" style="left: 1668dp; top: 254dp; width: 70dp; height: 70dp;">
 				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 420dp; height: 50dp;"/>
 			</button>
-			<combo id="PerfSplitPoint" class="jucePos txtCombo" data-model="partCurrent" param="PerfSplitPoint" style="left: 1700dp; top: 346dp; width: 320dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfSplitPoint" class="jucePos txtCombo" data-model="partCurrent" param="PerfSplitPoint" style="left: 1700dp; top: 346dp; width: 420dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 360dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfOutModeAB" class="jucePos txtCombo" style="left: 1700dp; top: 423dp; width: 320dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfOutModeAB" class="jucePos txtCombo" style="left: 1700dp; top: 423dp; width: 420dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 360dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="PerfOutModeCD" class="jucePos txtCombo" style="left: 1700dp; top: 483dp; width: 320dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="PerfOutModeCD" class="jucePos txtCombo" style="left: 1700dp; top: 483dp; width: 420dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 360dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="MidiIn" class="jucePos txtCombo" style="left: 1700dp; top: 552dp; width: 320dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="MidiIn" class="jucePos txtCombo" style="left: 1700dp; top: 560dp; width: 420dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 360dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
-			<combo id="MidiOut" class="jucePos txtCombo" style="left: 1700dp; top: 613dp; width: 320dp; height: 35dp; line-height: 35dp;">
-				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 260dp; height: 33dp; pointer-events: none;">MIDI</combotext>
+			<combo id="MidiOut" class="jucePos txtCombo" style="left: 1700dp; top: 621dp; width: 420dp; height: 35dp; line-height: 35dp;">
+				<combotext class="jucePos" style="left: 1dp; top: 1dp; width: 360dp; height: 33dp; pointer-events: none;">MIDI</combotext>
 			</combo>
 		</div>
 		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton txt4" url="https://paypal.me/dsp56300" style="left: 1630dp; top: 1150dp; width: 160dp; height: 40dp; line-height: 40dp;">Donate</div>
