@@ -2924,3 +2924,7 @@ tree
 	background-color: rgb(32,32,32);
 }
 
+combo {
+	padding: 1dp 54dp 2dp 1dp;
+}
+

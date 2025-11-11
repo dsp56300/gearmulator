@@ -139,19 +139,19 @@
 			<knob id="UnisonPanSpread" class="jucePos juceRotary knob1" data-model="partCurrent" param="Unison Pan Spread" style="left: 350dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
 			<knob id="UnisonLfoPhase" class="jucePos juceRotary knob1" data-model="partCurrent" param="Unison Lfo Phase" style="left: 478dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
 			<knob id="UnisonPhaseInit" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc Init Phase" style="left: 606dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
-			<combo id="Osc1WaveSelect" class="jucePos txt2" data-model="partCurrent" param="Osc1 Wave Select" style="left: 20dp; top: 92.882dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc1WaveSelect" class="jucePos txt2" data-model="partCurrent" param="Osc1 Wave Select" style="left: 20dp; top: 92.882dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Osc2WaveSelect" class="jucePos txt2" data-model="partCurrent" param="Osc2 Wave Select" style="left: 20dp; top: 329.75dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc2WaveSelect" class="jucePos txt2" data-model="partCurrent" param="Osc2 Wave Select" style="left: 20dp; top: 329.75dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Osc2FMMode" class="jucePos txt2" data-model="partCurrent" param="Osc FM Mode" style="left: 20dp; top: 515dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc2FMMode" class="jucePos txt2" data-model="partCurrent" param="Osc FM Mode" style="left: 20dp; top: 515dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="Osc3Mode" class="jucePos txt2" data-model="partCurrent" param="Osc3 Mode" style="left: 20dp; top: 759dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc3Mode" class="jucePos txt2" data-model="partCurrent" param="Osc3 Mode" style="left: 20dp; top: 759dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="UnisonVoices" class="jucePos txt2" data-model="partCurrent" param="Unison Mode" style="left: 20dp; top: 985dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="UnisonVoices" class="jucePos txt2" data-model="partCurrent" param="Unison Mode" style="left: 20dp; top: 985dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Twin</combotext>
 			</combo>
 			<button id="SyncSwitch" class="jucePos juceButton sync-38x38" data-model="partCurrent" isToggle="1" param="Osc2 Sync" style="left: 680.8dp; top: 253.2dp; width: 38dp; height: 38dp;"/>
@@ -184,13 +184,13 @@
 			</combo>
 			<button id="EnvPolarity" class="jucePos juceButton env-pol-radio-btns-38x66" data-model="partCurrent" isToggle="1" param="Filter2 Env Polarity" style="left: 1822.1dp; top: 365.708dp; width: 38dp; height: 66dp;"/>
 			<knob id="FilterBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Balance" style="left: 1373.7dp; top: 284.1dp; width: 104dp; height: 104dp;"/>
-			<combo id="FilterRouting" class="jucePos txt2" data-model="partCurrent" param="Filter Routing" style="left: 1523.2dp; top: 244dp; width: 185dp; height: 50dp; line-height: 50dp;">
+			<combo id="FilterRouting" class="jucePos txt2" data-model="partCurrent" param="Filter Routing" style="left: 1523.2dp; top: 244dp; width: 158dp; height: 50dp; line-height: 50dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="FilterSaturationCurve" class="jucePos txt2" data-model="partCurrent" param="Saturation Curve" style="left: 1523.2dp; top: 345dp; width: 185dp; height: 50dp; line-height: 50dp;">
+			<combo id="FilterSaturationCurve" class="jucePos txt2" data-model="partCurrent" param="Saturation Curve" style="left: 1523.2dp; top: 345dp; width: 158dp; height: 50dp; line-height: 50dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="FilterKeyfollowBase" class="jucePos txt2" data-model="partCurrent" param="Filter Keytrack Base" style="left: 1727dp; top: 248dp; width: 180dp; height: 42dp; line-height: 42dp;">
+			<combo id="FilterKeyfollowBase" class="jucePos txt2" data-model="partCurrent" param="Filter Keytrack Base" style="left: 1727dp; top: 248dp; width: 158dp; height: 42dp; line-height: 42dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="LinkCutoff" class="jucePos juceButton chain-btn-36x62" data-model="partCurrent" isToggle="1" param="Filter2 Cutoff Link" style="left: 1099dp; top: 288.5dp; width: 36dp; height: 62dp;"/>
@@ -207,10 +207,10 @@
 			<knob id="Release" class="jucePos juceRotary knob1" data-model="partCurrent" param="Amp Env Release" style="left: 1786dp; top: 955.8dp; width: 104dp; height: 104dp;"/>
 		</img>
 		<img id="page_lfo" class="jucePos" src="lfo_page.png" tabgroup="pages" tabpage="1" style="left: 724dp; top: 325dp; width: 1970dp; height: 1125dp;">
-			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo1 Shape" style="left: 22dp; top: 64dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo1 Shape" style="left: 22dp; top: 64dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo1 Clock" style="left: 22dp; top: 150dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo1 Clock" style="left: 22dp; top: 150dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="LfoMode" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Lfo1 Mode" style="left: 18dp; top: 253.2dp; width: 39dp; height: 102dp;"/>
@@ -229,10 +229,10 @@
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="Lfo1Link" class="jucePos juceButton chain-btn2-62x36" isToggle="1" style="left: 606.5dp; top: 26.8001dp; width: 62dp; height: 36dp;"/>
-			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo2 Shape" style="left: 22dp; top: 440dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo2 Shape" style="left: 22dp; top: 440dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo2 Clock" style="left: 22dp; top: 527.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo2 Clock" style="left: 22dp; top: 527.5dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="LfoMode" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Lfo2 Mode" style="left: 18dp; top: 630.5dp; width: 39dp; height: 102dp;"/>
@@ -251,10 +251,10 @@
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="Lfo1Link" class="jucePos juceButton chain-btn2-62x36" isToggle="1" style="left: 606.7dp; top: 403.9dp; width: 62dp; height: 36dp;"/>
-			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Shape" style="left: 22dp; top: 818.75dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Shape" style="left: 22dp; top: 818.75dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Clock" style="left: 22dp; top: 903.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="LfoClock" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Clock" style="left: 22dp; top: 903.5dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="LfoMode" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Lfo3 Mode" style="left: 18dp; top: 1008.23dp; width: 39dp; height: 102dp;"/>
@@ -321,13 +321,13 @@
 			</combo>
 		</img>
 		<img id="page_fx" class="jucePos" src="fx_page.png" tabgroup="pages" tabpage="2" style="left: 724dp; top: 325dp; width: 1970dp; height: 1125dp;">
-			<combo id="DistortionType" class="jucePos txt2" data-model="partCurrent" param="Distortion Curve" style="left: 20dp; top: 91.8999dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="DistortionType" class="jucePos txt2" data-model="partCurrent" param="Distortion Curve" style="left: 20dp; top: 91.8999dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<knob id="DistortionAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Distortion Intensity" style="left: 310.6dp; top: 55.3701dp; width: 104dp; height: 104dp;"/>
 			<knob id="BassIntensity" class="jucePos juceRotary knob1" data-model="partCurrent" param="Bass Intensity" style="left: 646.9dp; top: 56.1001dp; width: 104dp; height: 104dp;"/>
 			<knob id="BassTune" class="jucePos juceRotary knob1" data-model="partCurrent" param="Bass Tune" style="left: 799.2dp; top: 56.1001dp; width: 104dp; height: 104dp;"/>
-			<combo id="PhaserStages" class="jucePos txt2" data-model="partCurrent" param="Phaser Mode" style="left: 17dp; top: 324.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="PhaserStages" class="jucePos txt2" data-model="partCurrent" param="Phaser Mode" style="left: 17dp; top: 324.5dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<knob id="PhaserRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Rate" style="left: 234dp; top: 272dp; width: 104dp; height: 104dp;"/>
@@ -336,7 +336,7 @@
 			<knob id="PhaserFeedback" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Feedback" style="left: 609dp; top: 272dp; width: 104dp; height: 104dp;"/>
 			<knob id="PhaserSpread" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Spread" style="left: 734dp; top: 272dp; width: 104dp; height: 104dp;"/>
 			<knob id="PhaserMix" class="jucePos juceRotary knob1" data-model="partCurrent" param="Phaser Mix" style="left: 859dp; top: 272dp; width: 104dp; height: 104dp;"/>
-			<combo id="ChorusLfoShape" class="jucePos txt2" data-model="partCurrent" param="Chorus Lfo Shape" style="left: 20dp; top: 562dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="ChorusLfoShape" class="jucePos txt2" data-model="partCurrent" param="Chorus Lfo Shape" style="left: 20dp; top: 562dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<knob id="ChorusRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Chorus Rate" style="left: 233dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
@@ -351,7 +351,7 @@
 			<knob id="Q" class="jucePos juceRotary knob1" data-model="partCurrent" param="MidEQ Q-Factor" style="left: 575.9dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
 			<knob id="Gain" class="jucePos juceRotary knob1" data-model="partCurrent" param="HighEQ Gain" style="left: 708.4dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
 			<knob id="Freq" class="jucePos juceRotary knob1" data-model="partCurrent" param="HighEQ Frequency" style="left: 835.4dp; top: 749.5dp; width: 104dp; height: 104dp;"/>
-			<combo id="InputFollowerMode" class="jucePos txt2" data-model="partCurrent" param="Input Follower Mode" style="left: 20dp; top: 1010.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="InputFollowerMode" class="jucePos txt2" data-model="partCurrent" param="Input Follower Mode" style="left: 20dp; top: 1010.5dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<knob id="InputFollowerGain" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Sustain" style="left: 246dp; top: 965dp; width: 104dp; height: 104dp;"/>
@@ -378,11 +378,11 @@
 			<combo id="DelayReverbMode" class="jucePos txt2" data-model="partCurrent" param="Delay/Reverb Mode" style="left: 1080dp; top: 87dp; width: 160dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="DelayReverbClock" class="jucePos txt2" data-model="partCurrent" param="Delay Clock" style="left: 1080dp; top: 288.5dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="DelayReverbClock" class="jucePos txt2" data-model="partCurrent" param="Delay Clock" style="left: 1080dp; top: 288.5dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<knob id="DelayReverbMix" class="jucePos juceRotary knob1" data-model="partCurrent" param="Effect Send" style="left: 1778.8dp; top: 272.1dp; width: 104dp; height: 104dp;"/>
-			<combo id="VocoderMode" class="jucePos txt2" data-model="partCurrent" param="Vocoder Mode" style="left: 1080dp; top: 542.6dp; width: 185dp; height: 45dp; line-height: 45dp;">
+			<combo id="VocoderMode" class="jucePos txt2" data-model="partCurrent" param="Vocoder Mode" style="left: 1080dp; top: 542.6dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<knob id="VocSourceBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Balance" style="left: 1278.6dp; top: 497.5dp; width: 104dp; height: 104dp;"/>
@@ -396,7 +396,7 @@
 			<knob id="VocModulatorFreqOffset" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff2" style="left: 1278.2dp; top: 967.9dp; width: 104dp; height: 104dp;"/>
 			<knob id="VocModulatorQFactor" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Resonance" style="left: 1403dp; top: 967.9dp; width: 104dp; height: 104dp;"/>
 			<knob id="VocModulatorSpread" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Keyfollow" style="left: 1528.5dp; top: 967.9dp; width: 104dp; height: 104dp;"/>
-			<combo id="VocModulatorInput" class="jucePos txt5" data-model="partCurrent" param="Input Select" style="left: 1080dp; top: 997dp; width: 180dp; height: 40dp; line-height: 40dp;">
+			<combo id="VocModulatorInput" class="jucePos txt5" data-model="partCurrent" param="Input Select" style="left: 1080dp; top: 997dp; width: 158dp; height: 40dp; line-height: 40dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 		</img>

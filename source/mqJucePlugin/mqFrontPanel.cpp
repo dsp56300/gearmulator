@@ -60,10 +60,27 @@ namespace mqJucePlugin
 				continue;
 
 			const auto index = static_cast<uint32_t>(i);
-			juceRmlUi::EventListener::Add(b, Rml::EventId::Change, [this, index](Rml::Event& _event)
+
+			if (b->isToggle())
 			{
-				onButtonStateChanged(index);
-			});
+				juceRmlUi::EventListener::Add(b, Rml::EventId::Change, [this, index](Rml::Event& _event)
+				{
+					onButtonStateChanged(index);
+				});
+			}
+			else
+			{
+				juceRmlUi::EventListener::Add(b, Rml::EventId::Mousedown, [this, b, index](Rml::Event& _event)
+				{
+					b->setChecked(true);
+					onButtonStateChanged(index);
+				});
+				juceRmlUi::EventListener::Add(b, Rml::EventId::Mouseup, [this, b, index](Rml::Event& _event)
+				{
+					b->setChecked(false);
+					onButtonStateChanged(index);
+				});
+			}
 		}
 
 		for(size_t i=0; i<std::size(g_encoderNames); ++i)
@@ -198,11 +215,7 @@ namespace mqJucePlugin
 		std::map<pluginLib::MidiDataType, uint8_t> params;
 
 		params[pluginLib::MidiDataType::ParameterIndex] = static_cast<uint8_t>(_index);
-
-		if(juceRmlUi::ElemButton::isToggle(b))
-			params[pluginLib::MidiDataType::ParameterValue] = juceRmlUi::ElemButton::isChecked(b) ? 1 : 0;
-		else
-			params[pluginLib::MidiDataType::ParameterValue] = juceRmlUi::ElemButton::isPressed(b) ? 1 : 0;
+		params[pluginLib::MidiDataType::ParameterValue] = juceRmlUi::ElemButton::isChecked(b) ? 1 : 0;
 
 		m_controller.sendSysEx(Controller::EmuSendButton, params);
 	}

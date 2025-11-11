@@ -25,9 +25,9 @@ namespace synthLib
 			// https://en.wikipedia.org/wiki/Linear_congruential_generator
 			constexpr uint32_t a = 1664525;
 			constexpr uint32_t c = 1013904223;
-			constexpr uint32_t m = 0xffffffff;
+//			constexpr uint32_t m = 0xffffffff;
 
-			_state = (a * (_state) + c) & m;
+			_state = (a * (_state) + c);// & m;
 
 			return _state;
 		}

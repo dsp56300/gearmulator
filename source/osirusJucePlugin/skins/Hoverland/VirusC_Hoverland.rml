@@ -474,7 +474,7 @@
 			</combo>
 			<knob id="PatchVolume" class="jucePos juceRotary knob2" data-model="partCurrent" param="Patch Volume" style="left: 1128dp; top: 569.4dp; width: 140dp; height: 140dp;"/>
 			<knob id="Panning" class="jucePos juceRotary knob1" data-model="partCurrent" param="Panorama" style="left: 1252dp; top: 569.4dp; width: 140dp; height: 140dp;"/>
-			<combo id="SecondaryOutput" class="jucePos txt8" data-model="partCurrent" param="Part Output Select" style="left: 969dp; top: 776.5dp; width: 162dp; height: 36dp; line-height: 36dp;">
+			<combo id="SecondaryOutput" class="jucePos txt8" data-model="partCurrent" param="Part Output Select" style="left: 969dp; top: 776.5dp; width: 154dp; height: 36dp; line-height: 36dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<knob id="OutputBalance" class="jucePos juceRotary knob1" data-model="partCurrent" param="Second Output Balance" style="left: 1129dp; top: 728.5dp; width: 140dp; height: 140dp;"/>

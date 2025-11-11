@@ -1,5 +1,11 @@
 Release Notes 
 
+2.0.12:
+
+NodalRed2x/OsTIrus:
+
+- [Fix] Dropdown texts overlapping with down arrows
+
 2.0.11:
 
 Framework:
@@ -11,6 +17,11 @@ Framework:
 Osirus:
 
 - [Fix] Incorrect default value for Osc 2 Detune
+- [Fix] Galaxpel/Hoverland skins: dropdown texts overlapping with down arrow
+
+OsTIrus:
+
+- [Fix] Dropdown texts overlapping with down arrow
 
 2.0.10:
 
