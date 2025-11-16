@@ -40,9 +40,9 @@ namespace xtJucePlugin
 		setText(getWaveName(getWaveId()));
 	}
 
-	void WaveTreeItem::paintWave(const xt::WaveData& _data, juce::Graphics& _g, const int _x, const int _y, const int _width, const int _height, const juce::Colour& _colour)
+	void WaveTreeItem::paintWave(const xt::WaveData& _data, juce::Graphics& _g, const int _x, const int _y, const int _width, const int _height, uint32_t _colourArgb)
 	{
-		_g.setColour(_colour);
+		_g.setColour(juce::Colour(_colourArgb));
 
 		const float scaleX = static_cast<float>(_width)  / static_cast<float>(_data.size());
 		const float scaleY = static_cast<float>(_height) / static_cast<float>(256);
@@ -292,6 +292,6 @@ namespace xtJucePlugin
 	void WaveTreeItem::paintItem(juce::Graphics& g, const int _width, const int _height)
 	{
 		if(const auto wave = m_editor.getData().getWave(getWaveId()))
-			paintWave(*wave, g, 0, 0, _width, _height, juce::Colour(0xffffffff));
+			paintWave(*wave, g, 0, 0, _width, _height, 0xffffffff);
 	}
 }

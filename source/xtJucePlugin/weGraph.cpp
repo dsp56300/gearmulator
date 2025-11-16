@@ -1,6 +1,7 @@
 #include "weGraph.h"
 
 #include "xtWaveEditor.h"
+#include "xtWaveEditorStyle.h"
 #include "baseLib/filesystem.h"
 
 #include "dsp56kEmu/fastmath.h"
@@ -10,6 +11,11 @@
 
 namespace xtJucePlugin
 {
+	namespace
+	{
+		WaveEditorStyle g_style;
+	}
+
 	Graph::Graph(WaveEditor& _editor, Rml::Element* _parent) : m_editor(_editor), m_parent(_parent), m_data(_editor.getGraphData())
 	{
 		_parent->SetClass("x-we-graph", true);
@@ -54,8 +60,6 @@ namespace xtJucePlugin
 
 	void Graph::paint(const float* _data, const size_t _size, juce::Graphics& _g, const int _x, const int _y, const int _width, const int _height) const
 	{
-		const auto& style = m_editor.getStyle();
-
 		const float scaleX = static_cast<float>(_width)  / static_cast<float>(_size);
 		const float scaleY = static_cast<float>(_height);
 
@@ -74,20 +78,20 @@ namespace xtJucePlugin
 
 			if(i)
 			{
-				_g.setColour(juce::Colour(style.colGraphLine));
-				_g.drawLine(x0, y0, x1, y1, style.graphLineThickness);
+				_g.setColour(juce::Colour(static_cast<const WaveEditorStyle&>(g_style).colGraphLine));
+				_g.drawLine(x0, y0, x1, y1, static_cast<const WaveEditorStyle&>(g_style).graphLineThickness);
 			}
 
 			if(m_highlightedIndices.find(i) != m_highlightedIndices.end())
 			{
-				_g.setColour(style.colGraphLineHighlighted);
-				const auto s = style.graphPointSizeHighlighted;
+				_g.setColour(static_cast<const WaveEditorStyle&>(g_style).colGraphLineHighlighted);
+				const auto s = static_cast<const WaveEditorStyle&>(g_style).graphPointSizeHighlighted;
 				_g.fillEllipse(x1 - s * 0.5f, y1 - s * 0.5f, s, s);
 			}
 			else
 			{
-				_g.setColour(style.colGraphLine);
-				const auto s = style.graphPointSize;
+				_g.setColour(static_cast<const WaveEditorStyle&>(g_style).colGraphLine);
+				const auto s = static_cast<const WaveEditorStyle&>(g_style).graphPointSize;
 				_g.fillEllipse(x1 - s * 0.5f, y1 - s * 0.5f, s, s);
 			}
 		}
