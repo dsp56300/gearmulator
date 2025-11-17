@@ -86,6 +86,13 @@ namespace juceRmlUi
 
 		void setRenderer(Rml::RenderInterface* _renderer);
 
+		void setTextureParameters(const uint32_t _maxTextureSize, const bool _npotTextureSupported);
+
+		uint32_t getMaximumTextureSize() const { return m_maxTextureSize; }
+		uint32_t getValidTextureSize(uint32_t _size) const;
+
+		bool supportsNpotTextures() const { return m_npotTextureSupported; }
+
 	private:
 		bool loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const;
 
@@ -146,6 +153,9 @@ namespace juceRmlUi
 		}
 
 		DataProvider& m_dataProvider;
+
+		uint32_t m_maxTextureSize = 4096;
+		bool m_npotTextureSupported = true;
 
 		Handle m_nextHandle = 1;
 		Rml::RenderInterface* m_renderer = nullptr;

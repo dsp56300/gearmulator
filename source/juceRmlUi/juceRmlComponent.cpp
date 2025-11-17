@@ -140,6 +140,9 @@ namespace juceRmlUi
 		// if that fails, we are probably on an old GL version that doesn't support these queries, so fall back to GL2
 		const auto version = glGetError() == GL_NO_ERROR ? (major * 10 + minor) : 20;
 #endif
+		GLint maxSize = 0;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
+
 		if (version >= static_cast<int>(g_advancedRendererMinimumGLversion))
 		{
 			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
@@ -161,10 +164,15 @@ namespace juceRmlUi
 						m_targetFPS = 60;
 				}
 			}
+			m_renderProxy->setTextureParameters(static_cast<uint32_t>(maxSize), true);
 		}
 		else
 		{
-			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 2 renderer for RmlUi, version detected: %d.%d", major, minor);
+			const auto npotSupported = m_openGLContext.isTextureNpotSupported();
+
+			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 2 renderer for RmlUi, version detected: %d.%d, max texture size %d, NPOT supported %d", major, minor, maxSize, npotSupported ? 1 : 0);
+
+			m_renderProxy->setTextureParameters(static_cast<uint32_t>(maxSize), npotSupported);
 			m_renderInterface.reset(new RenderInterface_GL2(m_coreInstance));
 		}
 
@@ -669,6 +677,23 @@ namespace juceRmlUi
 		enqueueUpdate();
 
 		return true;
+	}
+
+	bool RmlComponent::supportsPowerOfTwo() const
+	{
+		return m_renderProxy->supportsNpotTextures();
+	}
+
+	uint32_t RmlComponent::getMaximumTextureSize() const
+	{
+		return m_renderProxy->getMaximumTextureSize();
+	}
+
+	uint32_t RmlComponent::getValidTextureSize(const uint32_t _size) const
+	{
+		if (m_renderProxy)
+			return m_renderProxy->getValidTextureSize(_size);
+		return _size;
 	}
 
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)

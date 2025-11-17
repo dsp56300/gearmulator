@@ -106,6 +106,10 @@ namespace juceRmlUi
 
 		bool takeScreenshot(const ScreenshotCallback& _callback);
 
+		bool supportsPowerOfTwo() const;
+		uint32_t getMaximumTextureSize() const;
+		uint32_t getValidTextureSize(uint32_t _size) const;
+
 	private:
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
