@@ -17,6 +17,8 @@
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 
+#include "juceRmlUi/juceRmlComponent.h"
+
 #include "juceUiLib/messageBox.h"
 
 #include "synthLib/sysexToMidi.h"
@@ -42,12 +44,14 @@ namespace xtJucePlugin
 			onWaveDataChanged(_data);
 		});
 
-		juceRmlUi::EventListener::Add(m_parent, Rml::EventId::Resize, [this](Rml::Event& _event)
+		initialize();
+
+		auto* comp = juceRmlUi::RmlComponent::fromElement(m_parent);
+
+		m_onUpdate.set(comp->evPostUpdate, [this](juceRmlUi::RmlComponent* const&)
 		{
 			checkFirstTimeVisible();
 		});
-
-		initialize();
 	}
 
 	WaveEditor::~WaveEditor()

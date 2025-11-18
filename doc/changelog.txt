@@ -1,5 +1,12 @@
 Release Notes 
 
+2.0.13:
+
+Xenia:
+
+- [Fix] BUG-10067 Wave tables not refreshing when opening Wave Editor 
+        for the first time
+
 2.0.12:
 
 NodalRed2x/OsTIrus:

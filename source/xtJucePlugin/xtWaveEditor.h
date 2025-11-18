@@ -120,5 +120,7 @@ namespace xtJucePlugin
 		xt::WaveId m_selectedWave;
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
+
+		baseLib::EventListener<juceRmlUi::RmlComponent*> m_onUpdate;
 	};
 }
