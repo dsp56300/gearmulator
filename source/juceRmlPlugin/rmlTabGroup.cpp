@@ -112,12 +112,17 @@ namespace rmlPlugin
 	{
 		if (_index < m_pages.size())
 		{
+			Rml::Dictionary parameters;
+			parameters["tab_index"] = _index;
+
 			if (auto* page = m_pages[_index])
 			{
 				if (_active)
 					page->RemoveProperty(Rml::PropertyId::Display);
 				else
 					page->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
+
+				page->DispatchEvent(Rml::EventId::Tabchange, parameters);
 			}
 		}
 
