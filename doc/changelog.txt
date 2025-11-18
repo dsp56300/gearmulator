@@ -6,6 +6,7 @@ Xenia:
 
 - [Fix] BUG-10067 Wave tables not refreshing when opening Wave Editor 
         for the first time
+- [Fix] BUG-10066 Wave/Frequency/Phase editor click+drag not working
 
 2.0.12:
 

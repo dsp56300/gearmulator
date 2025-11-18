@@ -129,7 +129,7 @@ namespace xtJucePlugin
 			m_editor.openGraphPopupMenu(*this, _e);
 			return;
 		}
-
+		updateHoveredIndex(_e);
 		setLastMouseEvent(_e);
 		const auto i = mouseToIndex(_e);
 		if(isValidIndex(i))
@@ -138,7 +138,9 @@ namespace xtJucePlugin
 
 	void Graph::mouseMove(Rml::Event& _e)
 	{
-		updateHoveredIndex(_e);
+		if(!juceRmlUi::helper::getKeyModShift(_e))
+			updateHoveredIndex(_e);
+
 		setLastMouseEvent(_e);
 	}
 
@@ -154,9 +156,6 @@ namespace xtJucePlugin
 
 	void Graph::mouseDrag(Rml::Event& _e)
 	{
-		if (juceRmlUi::helper::getMouseButton(_e) != juceRmlUi::MouseButton::Left)
-			return;
-
 		if(!juceRmlUi::helper::getKeyModShift(_e))
 		{
 			updateHoveredIndex(_e);
