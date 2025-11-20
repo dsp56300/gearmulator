@@ -113,7 +113,7 @@ namespace rmlPlugin
 		if (_index < m_pages.size())
 		{
 			Rml::Dictionary parameters;
-			parameters["tab_index"] = _index;
+			parameters["tab_index"]  = static_cast<int>(_index);
 
 			if (auto* page = m_pages[_index])
 			{
