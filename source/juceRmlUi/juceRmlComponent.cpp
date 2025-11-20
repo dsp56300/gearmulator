@@ -143,7 +143,7 @@ namespace juceRmlUi
 		GLint maxSize = 0;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
 
-		if (version >= static_cast<int>(g_advancedRendererMinimumGLversion))
+		if (version >= static_cast<int>(g_advancedRendererMinimumGLversion) && version < 60)
 		{
 			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
 			m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
