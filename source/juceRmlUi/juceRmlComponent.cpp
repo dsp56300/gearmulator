@@ -128,6 +128,10 @@ namespace juceRmlUi
 
 		int major = 0, minor = 0;
 
+		auto* renderer = glGetString(GL_RENDERER);
+		if (renderer)
+			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s", renderer);
+
 #if JUCE_MAC
 		constexpr auto version = g_advancedRendererMinimumGLversion;
 #else
