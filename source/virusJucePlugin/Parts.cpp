@@ -10,6 +10,7 @@
 #include "ParameterNames.h"
 
 #include "juceRmlPlugin/rmlPlugin.h"
+#include "juceRmlUi/juceRmlComponent.h"
 
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemKnob.h"
@@ -227,11 +228,16 @@ namespace genericVirusUI
 
 		const uint32_t maxPart = m_editor.getController().isMultiMode() ? 16 : 1;
 
+		bool changed = false;
+
 		for(uint32_t i=0; i<m_partActive.size(); ++i)
 		{
-			juceRmlUi::helper::setVisible(m_partActive[i], i < maxPart && fpState.m_midiEventReceived[i]);
+			changed |= juceRmlUi::helper::setVisible(m_partActive[i], i < maxPart && fpState.m_midiEventReceived[i]);
 			fpState.m_midiEventReceived[i] = false;
 		}
+
+		if (changed)
+			juceRmlUi::RmlComponent::requestUpdate(m_partActive.front());
 	}
 
 	void Parts::updateAll() const

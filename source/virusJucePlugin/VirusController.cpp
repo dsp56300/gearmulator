@@ -108,12 +108,7 @@ namespace virus
             else if(name == midiPacketName(MidiPacketType::MultiDump))
                 parseMulti(_msg, data, parameterValues);
             else if(name == midiPacketName(MidiPacketType::ParameterChange))
-            {
-				// TI DSP sends parameter changes back as sysex, unsure why. Ignore them as it stops
-				// host automation because the host thinks we "edit" the parameter
-				if(_source != synthLib::MidiEventSource::Device)
-	                parseParamChange(data, _source);
-            }
+	            parseParamChange(data, _source);
             else
             {
 		        LOG("Controller: Begin unhandled SysEx! --");
@@ -143,6 +138,18 @@ namespace virus
 		const auto value = _data.find(pluginLib::MidiDataType::ParameterValue)->second;
 
         const auto& partParams = findSynthParam(part == virusLib::SINGLE ? 0 : part, page, index);
+
+		if (!partParams.empty() && partParams.front()->getDescription().name == g_paramPlayMode)
+		{
+			// always allow play mode change as the UI will update based on the play mode parameter, we must not
+			// drop it even if sent from the synth as it would desync the UI
+		}
+		else if(_source == synthLib::MidiEventSource::Device)
+		{
+			// TI DSP sends parameter changes back as sysex, unsure why. Ignore them as it stops
+			// host automation because the host thinks we "edit" the parameter
+			return;
+		}
 
     	if (partParams.empty() && part != 0 && part != virusLib::SINGLE)
 		{

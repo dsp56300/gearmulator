@@ -2,6 +2,19 @@ Release Notes
 
 2.0.13:
 
+Framework:
+
+- [Imp] Improved compatiblity with Win 7 and older OpenGL versions
+
+Osirus/OsTIrus:
+
+- [Fix] UI always opened in Single mode even if plugin state was
+        saved in Multi mode
+
+OsTIrus:
+
+- [Fix] Part Midi indicators were slow and only refreshed twice per second
+
 Xenia:
 
 - [Fix] BUG-10067 Wave tables not refreshing when opening Wave Editor 
