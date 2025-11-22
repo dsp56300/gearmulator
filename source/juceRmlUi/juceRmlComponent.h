@@ -92,6 +92,8 @@ namespace juceRmlUi
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		juce::Point<int> toRmlPosition(int _x, int _y) const;
 
+		float getOpenGLRenderingScale() const;
+
 		Rml::Vector2i getDocumentSize() const { return m_documentSize; }
 
 		void resize(int _width, int _height);
@@ -109,6 +111,8 @@ namespace juceRmlUi
 		bool supportsPowerOfTwo() const;
 		uint32_t getMaximumTextureSize() const;
 		uint32_t getValidTextureSize(uint32_t _size) const;
+
+		void paint(juce::Graphics& g) override;
 
 	private:
 		void update();
@@ -128,7 +132,7 @@ namespace juceRmlUi
 		DataProvider& m_dataProvider;
 		const std::string m_rootRmlFilename;
 
-		juce::OpenGLContext m_openGLContext;
+		std::unique_ptr<juce::OpenGLContext> m_openGLContext;
 
 		std::unique_ptr<Rml::RenderInterface> m_renderInterface;
 		std::unique_ptr<RendererProxy> m_renderProxy;
