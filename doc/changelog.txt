@@ -2,6 +2,10 @@ Release Notes
 
 2.0.13:
 
+Framework:
+
+- [Imp] Improved compatiblity with Win 7 and older OpenGL versions
+
 Xenia:
 
 - [Fix] BUG-10067 Wave tables not refreshing when opening Wave Editor 
