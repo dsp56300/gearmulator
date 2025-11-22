@@ -140,7 +140,7 @@ namespace juceRmlUi
 		uint32_t toARGB(const Rml::Colourb& _color);
 		Rml::Colourb fromARGB(uint32_t _color);
 
-		void setVisible(Rml::Element* _element, bool _visible);
+		bool setVisible(Rml::Element* _element, bool _visible);
 		void setEnabled(Rml::Element* _element, bool _enabled);
 	}
 }

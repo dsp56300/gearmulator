@@ -464,12 +464,16 @@ namespace juceRmlUi
 			};
 		}
 
-		void setVisible(Rml::Element* _element, const bool _visible)
+		bool setVisible(Rml::Element* _element, const bool _visible)
 		{
 			if (!_visible)
-				changeProperty(_element, Rml::PropertyId::Display, Rml::Style::Display::None);
-			else
-				_element->RemoveProperty(Rml::PropertyId::Display);
+				return changeProperty(_element, Rml::PropertyId::Display, Rml::Style::Display::None);
+
+			auto* prop = _element->GetProperty(Rml::PropertyId::Display);
+			if (!prop)
+				return false;
+			_element->RemoveProperty(Rml::PropertyId::Display);
+			return true;
 		}
 
 		void setEnabled(Rml::Element* _element, bool _enabled)
