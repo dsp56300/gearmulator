@@ -1,5 +1,12 @@
 Release Notes 
 
+2.0.14:
+
+Osirus/OsTIrus
+
+- [Fix] Single not properly restored if save state was saved while 
+        Multi mode active
+
 2.0.13:
 
 Framework:
