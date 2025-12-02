@@ -81,20 +81,40 @@ namespace juceRmlUi
 				static_assert(std::is_same_v<T,float>);
 				return Color<float>{r * _v, g * _v, b * _v, a * _v};
 			}
+
+			template<typename U = T> std::enable_if_t<std::is_same_v<U, int>, Color<int>>
+			operator * (const int _v) const noexcept
+			{
+				static_assert(std::is_same_v<T,int>);
+				return Color<int>{r * _v, g * _v, b * _v, a * _v};
+			}
+
+			template<typename U = T> std::enable_if_t<std::is_same_v<U, int>, Color<int>>
+			operator >> (const int _v) const noexcept
+			{
+				static_assert(std::is_same_v<T,int>);
+				return Color<int>{r >> _v, g >> _v, b >> _v, a >> _v};
+			}
 		};
 
 		using Colorb = Color<uint8_t>;
+		using Colori = Color<int>;
 		using Colorf = Color<float>;
 
 		float toFloat(uint8_t _v) noexcept { return _v; }
+		int toInt(uint8_t _v) noexcept { return _v; }
+
 		uint8_t toByte(float _v) noexcept { return static_cast<uint8_t>(_v); }
+		uint8_t toByte(int _v) noexcept { return static_cast<uint8_t>(_v); }
 
 		Colorf toFloat(const Colorb& _c) noexcept { return Colorf{ toFloat(_c.r), toFloat(_c.g), toFloat(_c.b), toFloat(_c.a)}; }
+		Colori toInt(const Colorb& _c) noexcept { return Colori{ toInt(_c.r), toInt(_c.g), toInt(_c.b), toInt(_c.a)}; }
 		Colorb toByte(const Colorf& _c) noexcept { return Colorb{ toByte(_c.r), toByte(_c.g), toByte(_c.b), toByte(_c.a) }; }
+		Colorb toByte(const Colori& _c) noexcept { return Colorb{ toByte(_c.r), toByte(_c.g), toByte(_c.b), toByte(_c.a) }; }
 
 		struct Image
 		{
-			static constexpr int PadW = 4;	// up to N bytes of padding to ensure we have pixel groups of width N, required for some SIMD ops
+			static constexpr int PadW = 4;	// minimum 1 and up to N bytes of padding to ensure we have pixel groups of width N, required for some SIMD ops
 			static constexpr int PadH = 1;
 
 			int width = 0;
@@ -178,40 +198,46 @@ namespace juceRmlUi
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH)
 		{
-			float srcY = static_cast<float>(_srcY);
+			static constexpr int scaleBits = 18;	// use 14.18 fixed point for the filtering code
 
-			const float srcXStep = static_cast<float>(_srcW) / static_cast<float>(_dstW);
-			const float srcYStep = static_cast<float>(_srcH) / static_cast<float>(_dstH);
+			int srcY = _srcY << scaleBits;
+
+			const int srcXStep = (_srcW << scaleBits) / _dstW;
+			const int srcYStep = (_srcH << scaleBits) / _dstH;
 
 			for (int y=0; y<_dstH; ++y)
 			{
-				const int srcYi = static_cast<int>(srcY);
-				const float fracY = srcY - static_cast<float>(srcYi);
+				const int srcYi = srcY >> scaleBits;
+				const int fracY = srcY - (srcYi << scaleBits);
 
-				float srcX = static_cast<float>(_srcX);
+				int srcX = _srcX << scaleBits;
 
 				auto* dst = _dst.getColorPointer(_dstX, _dstY + y);
 
 				for (int x=0; x<_dstW; ++x)
 				{
 					// bilinear filtering
-					const int srcXi = static_cast<int>(srcX);
-					const float fracX = srcX - static_cast<float>(srcXi);
+					const int srcXi = srcX >> scaleBits;
+					const int fracX = srcX - (srcXi << scaleBits);
 
-					const Colorb* c00 = _src.getColorPointer(srcXi, srcYi);
-					const Colorb* c10 = c00 + 1;
-					const Colorb* c01 = c00 + _src.paddedWidth;
-					const Colorb* c11 = c01 + 1;
+					// fetch 4 texels
+					const auto* c00 = _src.getColorPointer(srcXi, srcYi);
+					const auto* c10 = c00 + 1;
+					const auto* c01 = c00 + _src.paddedWidth;
+					const auto* c11 = c01 + 1;
 
-					const auto c00f = toFloat(*c00);
-					const auto d0 = toFloat(*c10) - c00f;
-					const auto c0 = c00f + d0 * fracX;
+					// upper row
+					const auto c00f = toInt(*c00);
+					const auto d0 = toInt(*c10) - c00f;
+					const auto c0 = c00f + ((d0 * fracX) >> scaleBits);
 
-					const auto c01f = toFloat(*c01);
-					const auto d1 = toFloat(*c11) - c01f;
-					const auto c1 = c01f + d1 * fracX;
+					// lower row
+					const auto c01f = toInt(*c01);
+					const auto d1 = toInt(*c11) - c01f;
+					const auto c1 = c01f + ((d1 * fracX) >> scaleBits);
 
-					const auto c = c0 + (c1 - c0) * fracY;
+					// final lerp
+					const auto c = c0 + (((c1 - c0) * fracY) >> scaleBits);
 
 					*dst = toByte(c);
 
