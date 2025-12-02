@@ -52,7 +52,6 @@ namespace juceRmlUi
 			template<typename U = T> std::enable_if_t<std::is_same_v<U, uint8_t>, Color<uint8_t>>
 			operator * (const Color<uint8_t>& _c) const noexcept
 			{
-				static_assert(std::is_same_v<T,uint8_t>);
 				return Color<uint8_t>
 				{
 					static_cast<uint8_t>((static_cast<uint16_t>(r) * _c.r) >> 8),
@@ -65,7 +64,6 @@ namespace juceRmlUi
 			template<typename U = T> std::enable_if_t<std::is_same_v<U, uint8_t>, Color<uint8_t>>
 			operator * (const uint8_t _c) const noexcept
 			{
-				static_assert(std::is_same_v<T,uint8_t>);
 				return Color<uint8_t>
 				{
 					static_cast<uint8_t>((static_cast<uint16_t>(r) * _c) >> 8),
@@ -78,21 +76,24 @@ namespace juceRmlUi
 			template<typename U = T> std::enable_if_t<std::is_same_v<U, float>, Color<float>>
 			operator * (const float _v) const noexcept
 			{
-				static_assert(std::is_same_v<T,float>);
 				return Color<float>{r * _v, g * _v, b * _v, a * _v};
 			}
 
 			template<typename U = T> std::enable_if_t<std::is_same_v<U, int>, Color<int>>
 			operator * (const int _v) const noexcept
 			{
-				static_assert(std::is_same_v<T,int>);
 				return Color<int>{r * _v, g * _v, b * _v, a * _v};
+			}
+
+			template<typename U = T> std::enable_if_t<std::is_same_v<U, int>, Color<int>>
+			operator * (const Color<int>& _c) const noexcept
+			{
+				return Color<int>{r * _c.r, g * _c.g, b * _c.b, a * _c.a};
 			}
 
 			template<typename U = T> std::enable_if_t<std::is_same_v<U, int>, Color<int>>
 			operator >> (const int _v) const noexcept
 			{
-				static_assert(std::is_same_v<T,int>);
 				return Color<int>{r >> _v, g >> _v, b >> _v, a >> _v};
 			}
 		};
@@ -194,9 +195,10 @@ namespace juceRmlUi
 			}
 		}
 
-		static void blit(Image& _dst, const Image& _src,
+		static void blit(
+			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
-			const int _dstX, const int _dstY, const int _dstW, const int _dstH)
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colori& _color)
 		{
 			static constexpr int scaleBits = 18;	// use 14.18 fixed point for the filtering code
 
@@ -226,20 +228,28 @@ namespace juceRmlUi
 					const auto* c01 = c00 + _src.paddedWidth;
 					const auto* c11 = c01 + 1;
 
-					// upper row
+					// lerp upper row
 					const auto c00f = toInt(*c00);
 					const auto d0 = toInt(*c10) - c00f;
 					const auto c0 = c00f + ((d0 * fracX) >> scaleBits);
 
-					// lower row
+					// lerp lower row
 					const auto c01f = toInt(*c01);
 					const auto d1 = toInt(*c11) - c01f;
 					const auto c1 = c01f + ((d1 * fracX) >> scaleBits);
 
 					// final lerp
-					const auto c = c0 + (((c1 - c0) * fracY) >> scaleBits);
+					auto c = c0 + (((c1 - c0) * fracY) >> scaleBits);
 
-					*dst = toByte(c);
+					// apply color
+					c = (c * _color) >> 8;
+
+					// alpha blend if needed. Assumes premultiplied alpha in src
+					auto existing = toInt(*dst);
+					const auto invAlpha = 255 - c.a;
+					auto newDst = c + ((existing * invAlpha) >> 8);
+
+					*dst = toByte(newDst);
 
 					srcX += srcXStep;
 					++dst;
@@ -252,8 +262,6 @@ namespace juceRmlUi
 
 	namespace
 	{
-		constexpr float g_oneDiv255 = 0.003921568627451f;
-
 		int roundToInt(const float _in)
 		{
 			// we have values > 0 only so that is fine
@@ -437,32 +445,15 @@ namespace juceRmlUi
 		auto* img = reinterpret_cast<rendererJuce::Image*>(_texture);
 
 		if (!img)
-		{
-			for (const auto& quad : p->quads)
-			{
-				m_graphics->setColour(quad.color);
-				juce::Rectangle r(quad.position.Left(), quad.position.Top(), quad.position.Width(), quad.position.Height());
-				r = r.translated(_translation.x, _translation.y);
-				m_graphics->fillRect(r);
-			}
 			return;
-		}
 
-		Rml::Rectanglei clip;
+		Rml::Rectanglei clip = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0, 0),  Rml::Vector2i(m_renderTarget->width, m_renderTarget->height));
 
 		if (m_scissorEnabled)
-			clip = m_scissorRegion;
-		else
-			clip = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0, 0), Rml::Vector2i(m_renderTarget->width, m_renderTarget->height));
+			clip = clip.Intersect(m_scissorRegion);
 
 		for (const auto& quad : p->quads)
 		{
-			float uvX = quad.uv.Left();
-			float uvY = quad.uv.Top();
-			float uvW = quad.uv.Width();
-			float uvH = quad.uv.Height();
-
-
 			int dstX = roundToInt(quad.position.Left() + _translation.x);
 			int dstY = roundToInt(quad.position.Top() + _translation.y);
 			int dstW = roundToInt(quad.position.Width());
@@ -477,6 +468,11 @@ namespace juceRmlUi
 				continue;
 			if (dstY + dstH <= clip.Top())
 				continue;
+
+			float uvX = quad.uv.Left();
+			float uvY = quad.uv.Top();
+			float uvW = quad.uv.Width();
+			float uvH = quad.uv.Height();
 
 			// clip quad and adjust UVs accordingly
 			if (dstX < clip.Left())
@@ -520,19 +516,26 @@ namespace juceRmlUi
 			const auto requiresColor = quad.hasColor;
 			const auto requiresAlphaBlend = img->hasAlpha;
 
+			rendererJuce::Colori col { quad.color.getRed(), quad.color.getGreen(), quad.color.getBlue(), quad.color.getAlpha() };
+
+			// correction for faster multiplication in blit and downscale via bitshift, so that 255*(255+1)>>8 = 255
+			++col.a;
+
+			if (!requiresScale)
+				int foo=0;
 			if (!quad.hasColor)
 			{
 //				m_graphics->setOpacity(static_cast<float>(quad.color.getAlpha()) * g_oneDiv255);
 
 				rendererJuce::blit(*m_renderTarget, *img,
 							srcX, srcY, srcW, srcH,
-							dstX, dstY, dstW, dstH);//,
+							dstX, dstY, dstW, dstH, col);//,
 			}
 			else
 			{
 				rendererJuce::blit(*m_renderTarget, *img,
 							srcX, srcY, srcW, srcH,
-							dstX, dstY, dstW, dstH);//,
+							dstX, dstY, dstW, dstH, col);//,
 //					quad.color);
 			}
 		}
