@@ -4,14 +4,19 @@
 
 namespace juce
 {
+	class Image;
 	class LowLevelGraphicsContext;
 	class Colour;
-	class Image;
 	class Graphics;
 }
 
 namespace juceRmlUi
 {
+	namespace rendererJuce
+	{
+		struct Image;
+	}
+
 	class RendererJuce : public Rml::RenderInterface
 	{
 	public:
@@ -41,8 +46,6 @@ namespace juceRmlUi
 		void SetScissorRegion(Rml::Rectanglei _region) override;
 
 	private:
-		juce::Image& blit(const juce::Image& _img, int _srcX, int _srcY, int _srcW, int _srcH, const juce::Colour& _color);
-
 		void pushClip();
 
 		bool m_scissorEnabled = false;
@@ -50,7 +53,8 @@ namespace juceRmlUi
 
 		juce::Graphics* m_graphics = nullptr;
 
-		std::unique_ptr<juce::Image> m_tempImage = nullptr;
+		std::unique_ptr<rendererJuce::Image> m_renderTarget;
+		std::unique_ptr<juce::Image> m_renderImage;
 
 		bool m_pushed = false;
 	};
