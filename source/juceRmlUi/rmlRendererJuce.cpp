@@ -5,6 +5,10 @@
 
 #include "juce_graphics/juce_graphics.h"
 
+#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
+#	define HAVE_SSE
+#endif
+
 namespace juceRmlUi
 {
 	namespace rendererJuce
@@ -37,8 +41,8 @@ namespace juceRmlUi
 		{
 			T r,g,b,a;
 
-			Color operator + (const Color& _c) const noexcept { return Color{ r + _c.r, g + _c.g, b + _c.b, a + _c.a }; }
-			Color operator - (const Color& _c) const noexcept { return Color{ r - _c.r, g - _c.g, b - _c.b, a - _c.a }; }
+			Color operator + (const Color& _c) const noexcept { return Color{ T(r + _c.r), T(g + _c.g), T(b + _c.b), T(a + _c.a) }; }
+			Color operator - (const Color& _c) const noexcept { return Color{ T(r - _c.r), T(g - _c.g), T(b - _c.b), T(a - _c.a) }; }
 
 			Color& operator += (const Color& _c) noexcept { r += _c.r; g += _c.g; b += _c.b; a += _c.a; return *this; }
 			Color& operator -= (const Color& _c) noexcept { r -= _c.r; g -= _c.g; b -= _c.b; a -= _c.a; return *this; }
@@ -166,38 +170,50 @@ namespace juceRmlUi
 		static_assert(Image::padWidth(11) == 12);
 		static_assert(Image::padWidth(12) == 16);
 
-		static void blit(Image& _dst, const Image& _src, const int _srcX, const int _srcY, const int _srcW, const int _srcH, const Colorb& _color)
-		{
-			const Colorb* src = _src.getColorPointer(_srcX, _srcY);
-			Colorb* dst = _dst.getColorPointer(0,0);
-
-			for (int y = 0; y < _srcH; ++y)
-			{
-				for (int x = 0; x < _srcW; ++x, ++src, ++dst)
-					*dst = *src * _color;
-
-				src += _src.paddedWidth;
-				dst += _dst.paddedWidth;
-			}
-		}
-
-		static void blit(Image& _dst, const Image& _src, const int _srcX, const int _srcY, const int _srcW, const int _srcH)
+		template<bool HasAlphaBlend, bool HasColor>
+		static void blit(Image& _dst, const int _dstX, const int _dstY, const Image& _src, const int _srcX, const int _srcY, const int _srcW, const int _srcH, const Colorb& _color)
 		{
 			const auto* src = _src.getColorPointer(_srcX, _srcY);
-			auto* dst = _dst.getColorPointer(0,0);
+
+			auto* dst = _dst.getColorPointer(_dstX, _dstY);
 
 			for (int y = 0; y < _srcH; ++y)
 			{
-				memcpy(dst, src, _srcW * sizeof(Colorb));
-				src += _src.paddedWidth;
-				dst += _dst.paddedWidth;
+				if constexpr (HasColor || HasAlphaBlend)
+				{
+					src = _src.getColorPointer(_srcX, _srcY + y);
+					dst = _dst.getColorPointer(_dstX, _dstY + y);
+
+					for (int x = 0; x < _srcW; ++x, ++src, ++dst)
+					{
+						if constexpr (HasAlphaBlend)
+						{
+							auto existing = toInt(*dst);
+							const auto srcCol = toInt(*src * _color);
+							const auto invAlpha = 255 - srcCol.a;
+							auto newDst = srcCol + ((existing * invAlpha) >> 8);
+							*dst = toByte(newDst);
+						}
+						else
+						{
+							*dst = *src * _color;
+						}
+					}
+				}
+				else
+				{
+					memcpy(dst, src, _srcW * sizeof(Colorb));
+					src += _src.paddedWidth;
+					dst += _dst.paddedWidth;
+				}
 			}
 		}
 
+		template<bool AlphaBlend, bool Color>
 		static void blit(
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
-			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colori& _color)
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color)
 		{
 			static constexpr int scaleBits = 18;	// use 14.18 fixed point for the filtering code
 
@@ -205,6 +221,9 @@ namespace juceRmlUi
 
 			const int srcXStep = (_srcW << scaleBits) / _dstW;
 			const int srcYStep = (_srcH << scaleBits) / _dstH;
+
+			auto col = toInt(_color);
+			++col.a;	// adjust for multiplication with right shift later to ensure result is opaque for max alpha, i.e. 255 * (255+1) >> 8 = 255
 
 			for (int y=0; y<_dstH; ++y)
 			{
@@ -221,6 +240,60 @@ namespace juceRmlUi
 					const int srcXi = srcX >> scaleBits;
 					const int fracX = srcX - (srcXi << scaleBits);
 
+#ifdef HAVE_SSE
+					// fetch 4 texels, load two at a time
+					const auto* c00ptr = _src.getColorPointer(srcXi, srcYi);
+					const auto* c01ptr = c00ptr + _src.paddedWidth;
+
+					__m128i c0010 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c00ptr));
+					__m128i c0101 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c01ptr));
+
+					// unpack into 32-bit integers, i.e. 4x RGBA8 -> 4x RGBA32
+					__m128i c00 = _mm_cvtepu8_epi32(c0010);
+					__m128i c10 = _mm_cvtepu8_epi32(_mm_srli_si128(c0010, 4));
+					__m128i c01 = _mm_cvtepu8_epi32(c0101);
+					__m128i c11 = _mm_cvtepu8_epi32(_mm_srli_si128(c0101, 4));
+
+					// calc row differences
+					__m128i d0 = _mm_sub_epi32(c10, c00);
+					__m128i d1 = _mm_sub_epi32(c11, c01);
+
+					__m128i fracXVec = _mm_set1_epi32(fracX);
+
+					// lerp rows
+					__m128i c0 = _mm_add_epi32(c00, _mm_srai_epi32 (_mm_mullo_epi32(d0, fracXVec), scaleBits));
+					__m128i c1 = _mm_add_epi32(c01, _mm_srai_epi32 (_mm_mullo_epi32(d1, fracXVec), scaleBits));
+
+					// final lerp
+					__m128i c = _mm_add_epi32(c0, _mm_srai_epi32 (_mm_mullo_epi32(_mm_sub_epi32(c1, c0), _mm_set1_epi32(fracY)), scaleBits));
+
+					// apply color
+					if constexpr (Color)
+					{
+						__m128i colVec = _mm_load_si128(reinterpret_cast<const __m128i*>(&col));
+						c = _mm_srli_epi32(_mm_mullo_epi32(c, colVec), 8);
+					}
+
+					if constexpr(AlphaBlend)
+					{
+						// load existing dst
+						__m128i existing = _mm_cvtepu8_epi32(_mm_loadu_si32(reinterpret_cast<const int*>(dst)));
+						// calc inv alpha
+						__m128i alpha = _mm_shuffle_epi32(c, _MM_SHUFFLE(3,3,3,3));
+						__m128i invAlpha = _mm_sub_epi32(_mm_set1_epi32(255), alpha);
+						// blend
+						__m128i newDst = _mm_add_epi32(c, _mm_srli_epi32(_mm_mullo_epi32(existing, invAlpha), 8));
+						// store result
+						__m128i newDst8 = _mm_packus_epi16(_mm_packus_epi32(newDst, _mm_setzero_si128()), _mm_setzero_si128());
+						*reinterpret_cast<int*>(dst) = _mm_cvtsi128_si32(newDst8);
+					}
+					else
+					{
+						// store result
+						__m128i c8 = _mm_packus_epi16(_mm_packus_epi32(c, _mm_setzero_si128()), _mm_setzero_si128());
+						*reinterpret_cast<int*>(dst) = _mm_cvtsi128_si32(c8);
+					}
+#else
 					// fetch 4 texels
 					const auto* c00 = _src.getColorPointer(srcXi, srcYi);
 					const auto* c10 = c00 + 1;
@@ -241,14 +314,25 @@ namespace juceRmlUi
 					auto c = c0 + (((c1 - c0) * fracY) >> scaleBits);
 
 					// apply color
-					c = (c * _color) >> 8;
+					if constexpr (Color)
+					{
+						c = (c * col) >> 8;
+					}
 
 					// alpha blend if needed. Assumes premultiplied alpha in src
-					auto existing = toInt(*dst);
-					const auto invAlpha = 255 - c.a;
-					auto newDst = c + ((existing * invAlpha) >> 8);
+					if constexpr(AlphaBlend)
+					{
+						auto existing = toInt(*dst);
+						const auto invAlpha = 255 - c.a;
+						auto newDst = c + ((existing * invAlpha) >> 8);
 
-					*dst = toByte(newDst);
+						*dst = toByte(newDst);
+					}
+					else
+					{
+						*dst = toByte(c);
+					}
+					#endif
 
 					srcX += srcXStep;
 					++dst;
@@ -258,14 +342,67 @@ namespace juceRmlUi
 			}
 		}
 
+		template<bool HasScale, bool HasAlphaBlend, bool HasColor>
+		static void blit(
+			Image& _dst, const Image& _src,
+			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
+			const Colorb& _color
+			)
+		{
+			if constexpr (HasScale)
+			{
+				blit<HasAlphaBlend, HasColor>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color);
+			}
+			else
+			{
+				blit<HasAlphaBlend, HasColor>(_dst, _dstX, _dstY, _src, _srcX, _srcY, _dstW, _dstH, _color);
+			}
+		}
+
+		template<bool HasScale, bool HasAlphaBlend>
+		static void blit(
+			Image& _dst, const Image& _src,
+			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
+			const Colorb& _color, 
+			bool hasColor
+			)
+		{
+			if (hasColor) blit<HasScale, HasAlphaBlend, true >(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color);
+			else          blit<HasScale, HasAlphaBlend, false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color);
+		}
+
+		template<bool HasScale>
+		static void blit(
+			Image& _dst, const Image& _src,
+			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
+			const Colorb& _color, 
+			bool hasAlphablend, bool hasColor
+			)
+		{
+			if (hasAlphablend) blit<HasScale, true >(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasColor);
+			else               blit<HasScale, false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasColor);
+		}
+
+		static void blit(
+			Image& _dst, const Image& _src,
+			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
+			const Colorb& _color, bool hasScale, bool hasAlphablend, bool hasColor)
+		{
+			if (hasScale) blit<true >(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasAlphablend, hasColor);
+			else          blit<false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasAlphablend, hasColor);
+		}
+
 		template<bool AlphaBlend>
 		static void fill(Image& _dst,
-			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colori& _color)
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color)
 		{
 			const auto invAlpha = 255 - _color.a;
 
-			const auto colAsByte = toByte( _color);
-			const uint32_t fill = *reinterpret_cast<const uint32_t*>(&colAsByte);
+			const uint32_t fill = *reinterpret_cast<const uint32_t*>(&_color);
 
 			for (int y=0; y<_dstH; ++y)
 			{
@@ -277,8 +414,8 @@ namespace juceRmlUi
 					{
 						// alpha blend
 						Colori existingC = toInt(*dst);
-						Colori newDst = _color + ((existingC * invAlpha) >> 8);
-						*dst++ = toByte(newDst);
+						Colorb newDst = _color + toByte(((existingC * invAlpha) >> 8));
+						*dst++ = newDst;
 					}
 				}
 				else if constexpr (!AlphaBlend)
@@ -542,7 +679,7 @@ namespace juceRmlUi
 			}
 
 			const auto hasColor = quad.hasColor;
-			rendererJuce::Colori col { quad.color.red, quad.color.green, quad.color.blue, quad.color.alpha };
+			rendererJuce::Colorb col { quad.color.red, quad.color.green, quad.color.blue, quad.color.alpha };
 
 			if (img)
 			{
@@ -554,24 +691,9 @@ namespace juceRmlUi
 
 				// use templated blitting function based on used features
 				const auto hasScale = (srcW != dstW) || (srcH != dstH);
-				const auto hasAlphaBlend = img && img->hasAlpha;
+				const auto hasAlphaBlend = img->hasAlpha || col.a < 255;
 
-				// correction for faster multiplication in blit and downscale via bitshift, so that 255*(255+1)>>8 = 255
-				++col.a;
-
-				if (!quad.hasColor)
-				{
-					rendererJuce::blit(*m_renderTarget, *img,
-								srcX, srcY, srcW, srcH,
-								dstX, dstY, dstW, dstH, col);//,
-				}
-				else
-				{
-					rendererJuce::blit(*m_renderTarget, *img,
-								srcX, srcY, srcW, srcH,
-								dstX, dstY, dstW, dstH, col);//,
-	//					quad.color);
-				}
+				rendererJuce::blit(*m_renderTarget, *img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, col, hasScale, hasAlphaBlend, hasColor);
 			}
 			else
 			{
@@ -767,7 +889,17 @@ namespace juceRmlUi
 			}
 		}
 
-		m_graphics->getInternalContext().drawImage(*m_renderImage, juce::AffineTransform());
+		auto& context = m_graphics->getInternalContext();
+
+		auto* llgsr = dynamic_cast<juce::LowLevelGraphicsSoftwareRenderer*>(&context);
+		if (llgsr)
+		{
+			auto* r = dynamic_cast<juce::RenderingHelpers::StackBasedLowLevelGraphicsContext<juce::RenderingHelpers::SoftwareRendererSavedState>*>(&context);
+
+			int foo=0;
+		}
+
+		context.drawImage(*m_renderImage, juce::AffineTransform());
 
 		m_graphics = nullptr;
 	}
