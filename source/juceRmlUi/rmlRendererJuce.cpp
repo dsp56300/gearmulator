@@ -21,7 +21,7 @@ namespace juceRmlUi
 			Rml::Rectanglef position;
 			Rml::Rectanglef uv;
 			Rml::Vector2f uvPerPixel;
-			juce::Colour color;
+			Rml::ColourbPremultiplied color;
 			bool hasColor;
 		};
 
@@ -30,7 +30,6 @@ namespace juceRmlUi
 			Rml::Rectanglef bounds;
 			Rml::Rectanglef uvBounds;
 			std::vector<Quad> quads;
-			juce::Path path;
 		};
 
 		template<typename T>
@@ -258,6 +257,48 @@ namespace juceRmlUi
 				srcY += srcYStep;
 			}
 		}
+
+		template<bool AlphaBlend>
+		static void fill(Image& _dst,
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colori& _color)
+		{
+			const auto invAlpha = 255 - _color.a;
+
+			const auto colAsByte = toByte( _color);
+			const uint32_t fill = *reinterpret_cast<const uint32_t*>(&colAsByte);
+
+			for (int y=0; y<_dstH; ++y)
+			{
+				if constexpr (AlphaBlend)
+				{
+					auto* dst = _dst.getColorPointer(_dstX, _dstY + y);
+
+					for (int x=0; x<_dstW; ++x)
+					{
+						// alpha blend
+						Colori existingC = toInt(*dst);
+						Colori newDst = _color + ((existingC * invAlpha) >> 8);
+						*dst++ = toByte(newDst);
+					}
+				}
+				else if constexpr (!AlphaBlend)
+				{
+					auto* dst = reinterpret_cast<uint32_t*>(_dst.getColorPointer(_dstX, _dstY + y));
+
+					int x=0;
+					for (; x<_dstW - 4; x += 4)
+					{
+						*dst++ = fill;
+						*dst++ = fill;
+						*dst++ = fill;
+						*dst++ = fill;
+					}
+
+					for (;x<_dstW; ++x)
+						*dst++ = fill;
+				}
+			}
+		}
 	}
 
 	namespace
@@ -281,8 +322,6 @@ namespace juceRmlUi
 	Rml::CompiledGeometryHandle RendererJuce::CompileGeometry(const Rml::Span<const Rml::Vertex> _vertices, const Rml::Span<const int> _indices)
 	{
 		auto* g = new rendererJuce::Geometry();
-
-		g->path.clear();
 
 		Rml::Vector2f posMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 		Rml::Vector2f posMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -393,14 +432,14 @@ namespace juceRmlUi
 				uint32_t bSum = v0.colour.blue + v1.colour.blue + v2.colour.blue + v3.colour.blue;
 				uint32_t aSum = v0.colour.alpha + v1.colour.alpha + v2.colour.alpha + v3.colour.alpha;
 
-				auto quadColor = juce::Colour(
+				auto quadColor = Rml::ColourbPremultiplied(
 					static_cast<uint8_t>(rSum >> 2),
 					static_cast<uint8_t>(gSum >> 2),
 					static_cast<uint8_t>(bSum >> 2),
 					static_cast<uint8_t>(aSum >> 2)
 				);
 
-				const auto hasColor = quadColor.getRed() != 255 || quadColor.getGreen() != 255 || quadColor.getBlue() != 255;
+				const auto hasColor = quadColor.red != 255 || quadColor.green != 255 || quadColor.blue != 255;
 
 				g->quads.emplace_back(rendererJuce::Quad{
 					Rml::Rectanglef::FromCorners(quadPosMin, quadPosMax),
@@ -424,7 +463,7 @@ namespace juceRmlUi
 			const auto& v0 = _vertices[_indices[i]];
 			const auto& v1 = _vertices[_indices[i+1]];
 			const auto& v2 = _vertices[_indices[i+2]];
-			g->path.addTriangle(v0.position.x, v0.position.y, v1.position.x, v1.position.y, v2.position.x, v2.position.y);
+			assert(false);
 		}
 
 		return reinterpret_cast<Rml::CompiledGeometryHandle>(g);
@@ -443,9 +482,6 @@ namespace juceRmlUi
 			return;
 
 		auto* img = reinterpret_cast<rendererJuce::Image*>(_texture);
-
-		if (!img)
-			return;
 
 		Rml::Rectanglei clip = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0, 0),  Rml::Vector2i(m_renderTarget->width, m_renderTarget->height));
 
@@ -505,38 +541,45 @@ namespace juceRmlUi
 				dstH = clip.Bottom() - dstY;
 			}
 
-			// define source rectangle in texture
-			const int srcX = roundToInt(uvX * static_cast<float>(img->width));
-			const int srcY = roundToInt(uvY * static_cast<float>(img->height));
-			const int srcW = roundToInt(uvW * static_cast<float>(img->width));
-			const int srcH = roundToInt(uvH * static_cast<float>(img->height));
+			const auto hasColor = quad.hasColor;
+			rendererJuce::Colori col { quad.color.red, quad.color.green, quad.color.blue, quad.color.alpha };
 
-			// use templated blitting function based on used features
-			const auto requiresScale = (srcW != dstW) || (srcH != dstH);
-			const auto requiresColor = quad.hasColor;
-			const auto requiresAlphaBlend = img->hasAlpha;
-
-			rendererJuce::Colori col { quad.color.getRed(), quad.color.getGreen(), quad.color.getBlue(), quad.color.getAlpha() };
-
-			// correction for faster multiplication in blit and downscale via bitshift, so that 255*(255+1)>>8 = 255
-			++col.a;
-
-			if (!requiresScale)
-				int foo=0;
-			if (!quad.hasColor)
+			if (img)
 			{
-//				m_graphics->setOpacity(static_cast<float>(quad.color.getAlpha()) * g_oneDiv255);
+				// define source rectangle in texture
+				const int srcX = roundToInt(uvX * static_cast<float>(img->width));
+				const int srcY = roundToInt(uvY * static_cast<float>(img->height));
+				const int srcW = roundToInt(uvW * static_cast<float>(img->width));
+				const int srcH = roundToInt(uvH * static_cast<float>(img->height));
 
-				rendererJuce::blit(*m_renderTarget, *img,
-							srcX, srcY, srcW, srcH,
-							dstX, dstY, dstW, dstH, col);//,
+				// use templated blitting function based on used features
+				const auto hasScale = (srcW != dstW) || (srcH != dstH);
+				const auto hasAlphaBlend = img && img->hasAlpha;
+
+				// correction for faster multiplication in blit and downscale via bitshift, so that 255*(255+1)>>8 = 255
+				++col.a;
+
+				if (!quad.hasColor)
+				{
+					rendererJuce::blit(*m_renderTarget, *img,
+								srcX, srcY, srcW, srcH,
+								dstX, dstY, dstW, dstH, col);//,
+				}
+				else
+				{
+					rendererJuce::blit(*m_renderTarget, *img,
+								srcX, srcY, srcW, srcH,
+								dstX, dstY, dstW, dstH, col);//,
+	//					quad.color);
+				}
 			}
 			else
 			{
-				rendererJuce::blit(*m_renderTarget, *img,
-							srcX, srcY, srcW, srcH,
-							dstX, dstY, dstW, dstH, col);//,
-//					quad.color);
+				// fill with solid color
+				if (col.a < 255)
+					rendererJuce::fill<true>(*m_renderTarget, dstX, dstY, dstW, dstH, col);
+				else
+					rendererJuce::fill<false>(*m_renderTarget, dstX, dstY, dstW, dstH, col);
 			}
 		}
 	}
