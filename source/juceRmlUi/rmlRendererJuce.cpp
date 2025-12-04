@@ -260,22 +260,24 @@ namespace juceRmlUi
 				int x=0;
 
 #ifdef HAVE_SSE
+				auto srcXAvec = _mm_set1_epi32(srcX);
+				auto srcXBvec = _mm_set1_epi32(srcX + srcXStep);
+				auto srcXvec = _mm_or_si128(_mm_slli_si128(srcXBvec, 8), _mm_srli_si128(srcXAvec, 8));
+
 				for (; x < _dstW - 2; x += 2)
 				{
 					// bilinear filtering executed for 2 pixels in parallel, doing 2x2 texel fetches i.e. 8 texels per iteration
-					const int srcXiA = srcX >> scaleBits;
-					const int fracXA = srcX - (srcXiA << scaleBits);
-					srcX += srcXStep;
+					srcX += srcXStep << 1;
 
-					const int srcXiB = srcX >> scaleBits;
-					const int fracXB = srcX - (srcXiB << scaleBits);
-					srcX += srcXStep;
+					auto srcXi = _mm_srli_epi32(srcXvec, scaleBits);
+					auto fracX = _mm_sub_epi32(srcXvec, _mm_slli_epi32(srcXi, scaleBits));
+					srcXvec = _mm_add_epi32(srcXvec, _mm_set1_epi32(srcXStep << 1));
 
 					// fetch 8 texels, load 2 at a time
-					const auto* c00ptrA = _src.getColorPointer(srcXiA, srcYi);
+					const auto* c00ptrA = _src.getColorPointer(_mm_cvtsi128_si32(srcXi), srcYi);
 					const auto* c01ptrA = c00ptrA + _src.paddedWidth;
 
-					const auto* c00ptrB = _src.getColorPointer(srcXiB, srcYi);
+					const auto* c00ptrB = _src.getColorPointer(_mm_extract_epi32(srcXi, 2), srcYi);
 					const auto* c01ptrB = c00ptrB + _src.paddedWidth;
 
 					__m128i c0010A = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c00ptrA));
@@ -304,13 +306,8 @@ namespace juceRmlUi
 					constexpr auto fracBits = 7;
 
 					// lerp rows
-					const short fxA = static_cast<short>(fracXA >> (scaleBits - fracBits));
-					const short fxB = static_cast<short>(fracXB >> (scaleBits - fracBits));
-
-					auto fxAvec = _mm_set1_epi16(fxA);
-					auto fxBvec = _mm_set1_epi16(fxB);
-
-					__m128i fracXVec = _mm_or_si128(_mm_slli_si128(fxBvec, 8), _mm_srli_si128(fxAvec, 8));
+					__m128i fracXVec = _mm_srli_epi32(fracX, scaleBits - fracBits);
+					fracXVec = _mm_or_si128(fracXVec, _mm_slli_si128(fracXVec, 2));
 
 					__m128i c0 = _mm_add_epi16(c00, _mm_srai_epi16(_mm_mullo_epi16(d0, fracXVec), fracBits));
 					__m128i c1 = _mm_add_epi16(c01, _mm_srai_epi16(_mm_mullo_epi16(d1, fracXVec), fracBits));
