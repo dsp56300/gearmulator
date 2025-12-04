@@ -122,15 +122,18 @@ namespace juceRmlUi
 		using Colorb = Color<uint8_t>;
 		using Colori = Color<int>;
 		using Colorf = Color<float>;
+		using Colors = Color<int16_t>;
 
 		float toFloat(uint8_t _v) noexcept { return _v; }
 		int toInt(uint8_t _v) noexcept { return _v; }
+		int16_t toShort(uint8_t _v) noexcept { return _v; }
 
 		uint8_t toByte(float _v) noexcept { return static_cast<uint8_t>(_v); }
 		uint8_t toByte(int _v) noexcept { return static_cast<uint8_t>(_v); }
 
 		Colorf toFloat(const Colorb& _c) noexcept { return Colorf{ toFloat(_c.r), toFloat(_c.g), toFloat(_c.b), toFloat(_c.a)}; }
 		Colori toInt(const Colorb& _c) noexcept { return Colori{ toInt(_c.r), toInt(_c.g), toInt(_c.b), toInt(_c.a)}; }
+		Colors toShort(const Colorb& _c) noexcept { return Colors{ toShort(_c.r), toShort(_c.g), toShort(_c.b), toShort(_c.a)}; }
 		Colorb toByte(const Colorf& _c) noexcept { return Colorb{ toByte(_c.r), toByte(_c.g), toByte(_c.b), toByte(_c.a) }; }
 		Colorb toByte(const Colori& _c) noexcept { return Colorb{ toByte(_c.r), toByte(_c.g), toByte(_c.b), toByte(_c.a) }; }
 
@@ -243,6 +246,8 @@ namespace juceRmlUi
 			auto col = toInt(_color);
 			++col.a;	// adjust for multiplication with right shift later to ensure result is opaque for max alpha, i.e. 255 * (255+1) >> 8 = 255
 
+			auto col16 = toShort(_color);
+
 			for (int y=0; y<_dstH; ++y)
 			{
 				const int srcYi = srcY >> scaleBits;
@@ -252,66 +257,105 @@ namespace juceRmlUi
 
 				auto* dst = _dst.getColorPointer(_dstX, _dstY + y);
 
-				for (int x=0; x<_dstW; ++x)
+				int x=0;
+
+#ifdef HAVE_SSE
+				for (; x < _dstW - 2; x += 2)
+				{
+					// bilinear filtering executed for 2 pixels in parallel, doing 2x2 texel fetches i.e. 8 texels per iteration
+					const int srcXiA = srcX >> scaleBits;
+					const int fracXA = srcX - (srcXiA << scaleBits);
+					srcX += srcXStep;
+
+					const int srcXiB = srcX >> scaleBits;
+					const int fracXB = srcX - (srcXiB << scaleBits);
+					srcX += srcXStep;
+
+					// fetch 8 texels, load 2 at a time
+					const auto* c00ptrA = _src.getColorPointer(srcXiA, srcYi);
+					const auto* c01ptrA = c00ptrA + _src.paddedWidth;
+
+					const auto* c00ptrB = _src.getColorPointer(srcXiB, srcYi);
+					const auto* c01ptrB = c00ptrB + _src.paddedWidth;
+
+					__m128i c0010A = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c00ptrA));
+					__m128i c0111A = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c01ptrA));
+
+					__m128i c0010B = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c00ptrB));
+					__m128i c0111B = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c01ptrB));
+
+					// pack into single registers
+					__m128i c0010 = _mm_slli_si128(c0010B, 8);
+					c0010 = _mm_or_si128(c0010, c0010A);
+
+					__m128i c0111 = _mm_slli_si128(c0111B, 8);
+					c0111 = _mm_or_si128(c0111, c0111A);
+
+					// unpack into 16-bit integers, i.e. 4x RGBA8 -> 4x RGBA16
+					__m128i c00 = _mm_cvtepu8_epi16(_mm_shuffle_epi32(c0010, _MM_SHUFFLE(2, 0, 2, 0)));
+					__m128i c10 = _mm_cvtepu8_epi16(_mm_shuffle_epi32(c0010, _MM_SHUFFLE(3, 1, 3, 1)));
+					__m128i c01 = _mm_cvtepu8_epi16(_mm_shuffle_epi32(c0111, _MM_SHUFFLE(2, 0, 2, 0)));
+					__m128i c11 = _mm_cvtepu8_epi16(_mm_shuffle_epi32(c0111, _MM_SHUFFLE(3, 1, 3, 1)));
+
+					// calc row differences
+					__m128i d0 = _mm_sub_epi16(c10, c00);
+					__m128i d1 = _mm_sub_epi16(c11, c01);
+
+					constexpr auto fracBits = 7;
+
+					// lerp rows
+					const short fxA = static_cast<short>(fracXA >> (scaleBits - fracBits));
+					const short fxB = static_cast<short>(fracXB >> (scaleBits - fracBits));
+
+					auto fxAvec = _mm_set1_epi16(fxA);
+					auto fxBvec = _mm_set1_epi16(fxB);
+
+					__m128i fracXVec = _mm_or_si128(_mm_slli_si128(fxBvec, 8), _mm_srli_si128(fxAvec, 8));
+
+					__m128i c0 = _mm_add_epi16(c00, _mm_srai_epi16(_mm_mullo_epi16(d0, fracXVec), fracBits));
+					__m128i c1 = _mm_add_epi16(c01, _mm_srai_epi16(_mm_mullo_epi16(d1, fracXVec), fracBits));
+
+					// calc column differences
+					__m128i d = _mm_sub_epi16(c1, c0);
+
+					// lerp colums
+					auto fracYVec = _mm_set1_epi16(static_cast<int16_t>(fracY >> (scaleBits - fracBits)));
+
+					__m128i c = _mm_add_epi16(c0, _mm_srai_epi16(_mm_mullo_epi16(d, fracYVec), fracBits));
+
+					// apply color
+					if constexpr (Color)
+					{
+						__m128i colVec = _mm_set1_epi64x(*reinterpret_cast<int64_t*>(&col16));
+						c = _mm_srli_epi16(_mm_mullo_epi16(c, colVec), 8);
+					}
+
+					// apply alpha blend if needed. Assumes premultiplied alpha
+					if constexpr (AlphaBlend)
+					{
+						// load existing dst
+						__m128i existing = _mm_cvtepu8_epi16(_mm_loadu_si64(reinterpret_cast<const int*>(dst)));
+						// calc inv alpha
+						__m128i alpha = _mm_shufflelo_epi16(c, _MM_SHUFFLE(3, 3, 3, 3));
+						alpha = _mm_shufflehi_epi16(alpha, _MM_SHUFFLE(3, 3, 3, 3));
+						__m128i invAlpha = _mm_sub_epi16(_mm_set1_epi16(255), alpha);
+						// blend
+						c = _mm_add_epi16(c, _mm_srli_epi16(_mm_mullo_epi16(existing, invAlpha), 8));
+					}
+
+					// convert back to 8-bit and store
+					__m128i newDst8 = _mm_packus_epi16(c, _mm_setzero_si128());
+					*reinterpret_cast<int64_t*>(dst) = _mm_cvtsi128_si64(newDst8);
+
+					dst += 2;
+				}
+#endif
+				for (; x<_dstW; ++x)
 				{
 					// bilinear filtering
 					const int srcXi = srcX >> scaleBits;
 					const int fracX = srcX - (srcXi << scaleBits);
 
-#ifdef HAVE_SSE
-					// fetch 4 texels, load two at a time
-					const auto* c00ptr = _src.getColorPointer(srcXi, srcYi);
-					const auto* c01ptr = c00ptr + _src.paddedWidth;
-
-					__m128i c0010 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c00ptr));
-					__m128i c0101 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c01ptr));
-
-					// unpack into 32-bit integers, i.e. 4x RGBA8 -> 4x RGBA32
-					__m128i c00 = _mm_cvtepu8_epi32(c0010);
-					__m128i c10 = _mm_cvtepu8_epi32(_mm_srli_si128(c0010, 4));
-					__m128i c01 = _mm_cvtepu8_epi32(c0101);
-					__m128i c11 = _mm_cvtepu8_epi32(_mm_srli_si128(c0101, 4));
-
-					// calc row differences
-					__m128i d0 = _mm_sub_epi32(c10, c00);
-					__m128i d1 = _mm_sub_epi32(c11, c01);
-
-					__m128i fracXVec = _mm_set1_epi32(fracX);
-
-					// lerp rows
-					__m128i c0 = _mm_add_epi32(c00, _mm_srai_epi32 (_mm_mullo_epi32(d0, fracXVec), scaleBits));
-					__m128i c1 = _mm_add_epi32(c01, _mm_srai_epi32 (_mm_mullo_epi32(d1, fracXVec), scaleBits));
-
-					// final lerp
-					__m128i c = _mm_add_epi32(c0, _mm_srai_epi32 (_mm_mullo_epi32(_mm_sub_epi32(c1, c0), _mm_set1_epi32(fracY)), scaleBits));
-
-					// apply color
-					if constexpr (Color)
-					{
-						__m128i colVec = _mm_load_si128(reinterpret_cast<const __m128i*>(&col));
-						c = _mm_srli_epi32(_mm_mullo_epi32(c, colVec), 8);
-					}
-
-					if constexpr(AlphaBlend)
-					{
-						// load existing dst
-						__m128i existing = _mm_cvtepu8_epi32(_mm_loadu_si32(reinterpret_cast<const int*>(dst)));
-						// calc inv alpha
-						__m128i alpha = _mm_shuffle_epi32(c, _MM_SHUFFLE(3,3,3,3));
-						__m128i invAlpha = _mm_sub_epi32(_mm_set1_epi32(255), alpha);
-						// blend
-						__m128i newDst = _mm_add_epi32(c, _mm_srli_epi32(_mm_mullo_epi32(existing, invAlpha), 8));
-						// store result
-						__m128i newDst8 = _mm_packus_epi16(_mm_packus_epi32(newDst, _mm_setzero_si128()), _mm_setzero_si128());
-						*reinterpret_cast<int*>(dst) = _mm_cvtsi128_si32(newDst8);
-					}
-					else
-					{
-						// store result
-						__m128i c8 = _mm_packus_epi16(_mm_packus_epi32(c, _mm_setzero_si128()), _mm_setzero_si128());
-						*reinterpret_cast<int*>(dst) = _mm_cvtsi128_si32(c8);
-					}
-#else
 					// fetch 4 texels
 					const auto* c00 = _src.getColorPointer(srcXi, srcYi);
 					const auto* c10 = c00 + 1;
@@ -350,7 +394,6 @@ namespace juceRmlUi
 					{
 						*dst = toByte(c);
 					}
-					#endif
 
 					srcX += srcXStep;
 					++dst;
@@ -421,6 +464,9 @@ namespace juceRmlUi
 			const auto invAlpha = 255 - _color.a;
 
 			const uint32_t fill = *reinterpret_cast<const uint32_t*>(&_color);
+#ifdef HAVE_SSE
+			const __m128i fillVec = _mm_set1_epi32(static_cast<int>(fill));
+#endif
 
 			for (int y=0; y<_dstH; ++y)
 			{
@@ -441,6 +487,20 @@ namespace juceRmlUi
 					auto* dst = reinterpret_cast<uint32_t*>(_dst.getColorPointer(_dstX, _dstY + y));
 
 					int x=0;
+#ifdef HAVE_SSE
+					for (; x<=_dstW - 16; x += 16)
+					{
+						_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), fillVec); dst += 4;
+						_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), fillVec); dst += 4;
+						_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), fillVec); dst += 4;
+						_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), fillVec); dst += 4;
+					}
+					for (; x<=_dstW - 4; x += 4)
+					{
+						_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), fillVec);
+						dst += 4;
+					}
+#else
 					for (; x<_dstW - 4; x += 4)
 					{
 						*dst++ = fill;
@@ -448,6 +508,7 @@ namespace juceRmlUi
 						*dst++ = fill;
 						*dst++ = fill;
 					}
+#endif
 
 					for (;x<_dstW; ++x)
 						*dst++ = fill;
@@ -935,6 +996,7 @@ namespace juceRmlUi
 
 				auto* dst = _dst.getPixelPointer(_x, y);
 #ifdef HAVE_SSE
+				// use SSE to speed up RGBA->ARGB or RGBA->BGRA conversion
 				auto shuffleMask = []
 				{
 					constexpr auto shuffleR = hostEndian() == HostEndian::Big ? static_cast<int8_t>(PixelDataType::indexR) : getAlphaComponentIndex<PixelDataType>()   ;
@@ -951,19 +1013,30 @@ namespace juceRmlUi
 					return shuffleMask;
 				};
 
-				int x;
-				for (x=0; x<_width - 4; x += 4, src += 4, dst += 4 * 4)
+				// process 16 pixels at a time
+				int x = 0;
+				for (; x<_width - 16; x += 16)
 				{
-					auto s = _mm_loadu_si128(reinterpret_cast<const __m128i*>(src));
-					s = _mm_shuffle_epi8(s, shuffleMask());
-					_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), s);
+					_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), _mm_shuffle_epi8(_mm_loadu_si128(reinterpret_cast<const __m128i*>(src)), shuffleMask()));
+					src += 4; dst += 4 * 4;
+					_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), _mm_shuffle_epi8(_mm_loadu_si128(reinterpret_cast<const __m128i*>(src)), shuffleMask()));
+					src += 4; dst += 4 * 4;
+					_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), _mm_shuffle_epi8(_mm_loadu_si128(reinterpret_cast<const __m128i*>(src)), shuffleMask()));
+					src += 4; dst += 4 * 4;
+					_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), _mm_shuffle_epi8(_mm_loadu_si128(reinterpret_cast<const __m128i*>(src)), shuffleMask()));
+					src += 4; dst += 4 * 4;
 				}
 
+				// process 4 pixels at a time
+				for (; x<_width - 4; x += 4, src += 4, dst += 4 * 4)
+				{
+					_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), _mm_shuffle_epi8(_mm_loadu_si128(reinterpret_cast<const __m128i*>(src)), shuffleMask()));
+				}
+
+				// process remaining pixels
 				for (; x<_width; ++x, ++src, dst += 4)
 				{
-					auto s = _mm_loadu_si32(reinterpret_cast<const int*>(src));
-					s = _mm_shuffle_epi8(s, shuffleMask());
-					_mm_storeu_epi32(dst, s);
+					_mm_storeu_si32(dst, _mm_shuffle_epi8(_mm_loadu_si32(reinterpret_cast<const int*>(src)), shuffleMask()));
 				}
 #else
 				for (int x=0; x<_width; ++x, ++src, dst += 4)
