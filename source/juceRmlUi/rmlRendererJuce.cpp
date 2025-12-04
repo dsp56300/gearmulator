@@ -11,6 +11,24 @@
 
 namespace juceRmlUi
 {
+	namespace
+	{
+		enum class HostEndian
+		{
+			Big,
+			Little
+		};
+
+		constexpr HostEndian hostEndian()
+		{
+			constexpr uint32_t test32 = 0x01020304;
+			constexpr uint8_t test8 = static_cast<const uint8_t&>(test32);
+
+			static_assert(test8 == 0x01 || test8 == 0x04, "unable to determine endianess");
+
+			return test8 == 0x01 ? HostEndian::Big : HostEndian::Little;
+		}
+	}
 	namespace rendererJuce
 	{
 		struct Triangle
@@ -796,7 +814,7 @@ namespace juceRmlUi
 
 	void RendererJuce::ReleaseTexture(Rml::TextureHandle _texture)
 	{
-		auto* img = reinterpret_cast<juce::Image*>(_texture);
+		auto* img = reinterpret_cast<rendererJuce::Image*>(_texture);
 		delete img;
 	}
 
@@ -867,39 +885,137 @@ namespace juceRmlUi
 		}
 	}
 
-	void RendererJuce::endFrame()
+	namespace
 	{
-		// copy render target to juce::Image
+		template<typename T>
+		constexpr int getAlphaComponentIndex()
 		{
-			const auto width = m_renderTarget->width;
-			const auto height = m_renderTarget->height;
-
-			juce::Image::BitmapData dstBitmapData(*m_renderImage, juce::Image::BitmapData::writeOnly);
-
-			for (int y=0; y<height; ++y)
+			if constexpr (std::is_same_v<juce::PixelARGB, T>)
+				return juce::PixelARGB::indexA;
+			if constexpr (std::is_same_v<juce::PixelRGB, T>)
 			{
-				const auto* src = m_renderTarget->getColorPointer(0, y);
+				if constexpr(juce::PixelRGB::indexR != 3 && juce::PixelRGB::indexG != 3 && juce::PixelRGB::indexB != 3)
+					return 3;
+				else if constexpr(juce::PixelRGB::indexR != 0 && juce::PixelRGB::indexG != 0 && juce::PixelRGB::indexB != 0)
+					return 0;
+			}
+			return -1;
+		}
 
-				for (int x=0; x<width; ++x)
+		// default implementation that is slow but safe
+		template<typename PixelDataType>
+		void copyToBitmap(const juce::Image::BitmapData& _dst, const rendererJuce::Image& _src, int _x, int _y, int _width, int _height)
+		{
+			const auto yEnd = _y + _height;
+
+			for (int y=_y; y<yEnd; ++y)
+			{
+				const auto* src = _src.getColorPointer(_x, y);
+
+				auto* dst = _dst.getPixelPointer(_x, y);
+
+				for (int x=0; x<_width; ++x, dst += _dst.pixelStride)
 				{
-					auto* dst = reinterpret_cast<juce::PixelRGB*>(dstBitmapData.getPixelPointer(x, y));
-					dst->setARGB(0xff, src->r, src->g, src->b);
+					auto* p = reinterpret_cast<PixelDataType*>(dst);
+					p->setARGB(0xff, src->r, src->g, src->b);
 					++src;
 				}
 			}
 		}
 
-		auto& context = m_graphics->getInternalContext();
-
-		auto* llgsr = dynamic_cast<juce::LowLevelGraphicsSoftwareRenderer*>(&context);
-		if (llgsr)
+		// optimized version for 4-byte stride target bitmaps
+		template<typename PixelDataType>
+		void copyToBitmap4(const juce::Image::BitmapData& _dst, const rendererJuce::Image& _src, int _x, int _y, int _width, int _height)
 		{
-			auto* r = dynamic_cast<juce::RenderingHelpers::StackBasedLowLevelGraphicsContext<juce::RenderingHelpers::SoftwareRendererSavedState>*>(&context);
+			const auto yEnd = _y + _height;
 
-			int foo=0;
+			for (int y=_y; y<yEnd; ++y)
+			{
+				const auto* src = _src.getColorPointer(_x, y);
+
+				auto* dst = _dst.getPixelPointer(_x, y);
+#ifdef HAVE_SSE
+				auto shuffleMask = []
+				{
+					constexpr auto shuffleR = hostEndian() == HostEndian::Big ? static_cast<int8_t>(PixelDataType::indexR) : getAlphaComponentIndex<PixelDataType>()   ;
+					constexpr auto shuffleG = hostEndian() == HostEndian::Big ? static_cast<int8_t>(PixelDataType::indexG) : static_cast<int8_t>(PixelDataType::indexB);
+					constexpr auto shuffleB = hostEndian() == HostEndian::Big ? static_cast<int8_t>(PixelDataType::indexB) : static_cast<int8_t>(PixelDataType::indexG);
+					constexpr auto shuffleA = hostEndian() == HostEndian::Big ? getAlphaComponentIndex<PixelDataType>()    : static_cast<int8_t>(PixelDataType::indexR);
+
+					const __m128i shuffleMask = _mm_set_epi8(
+					         shuffleR + 12, shuffleG + 12, shuffleB + 12, shuffleA + 12,
+					         shuffleR + 8 , shuffleG + 8 , shuffleB + 8 , shuffleA + 8,
+					         shuffleR + 4 , shuffleG + 4 , shuffleB + 4 , shuffleA + 4,
+					         shuffleR + 0 , shuffleG + 0 , shuffleB + 0 , shuffleA + 0
+					    );
+					return shuffleMask;
+				};
+
+				int x;
+				for (x=0; x<_width - 4; x += 4, src += 4, dst += 4 * 4)
+				{
+					auto s = _mm_loadu_si128(reinterpret_cast<const __m128i*>(src));
+					s = _mm_shuffle_epi8(s, shuffleMask());
+					_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), s);
+				}
+
+				for (; x<_width; ++x, ++src, dst += 4)
+				{
+					auto s = _mm_loadu_si32(reinterpret_cast<const int*>(src));
+					s = _mm_shuffle_epi8(s, shuffleMask());
+					_mm_storeu_epi32(dst, s);
+				}
+#else
+				for (int x=0; x<_width; ++x, ++src, dst += 4)
+				{
+					auto* p = reinterpret_cast<PixelDataType*>(dst);
+					p->setARGB(0xff, src->r, src->g, src->b);
+				}
+#endif
+			}
 		}
 
-		context.drawImage(*m_renderImage, juce::AffineTransform());
+		static_assert(getAlphaComponentIndex<juce::PixelRGB>() != -1);
+		static_assert(getAlphaComponentIndex<juce::PixelARGB>() != -1);
+
+		void copyToBitmap(const juce::Image::BitmapData& _dst, const rendererJuce::Image& _src)
+		{
+			const auto w = std::min(_src.width, _dst.width);
+			const auto h = std::min(_src.height, _dst.height);
+
+			if (_dst.pixelStride == 4)
+			{
+				if (_dst.pixelFormat == juce::Image::ARGB)
+					copyToBitmap<juce::PixelARGB>(_dst, _src, 0, 0, w, h);
+				else if (_dst.pixelFormat == juce::Image::RGB)
+					copyToBitmap4<juce::PixelRGB>(_dst, _src, 0, 0, w, h);
+			}
+			else if (_dst.pixelFormat == juce::Image::RGB)
+				copyToBitmap<juce::PixelRGB>(_dst, _src, 0, 0, w, h);
+			else if (_dst.pixelFormat == juce::Image::ARGB)
+				copyToBitmap<juce::PixelARGB>(_dst, _src, 0, 0, w, h);
+		}
+	}
+
+	void RendererJuce::endFrame(const juce::Image& _renderTarget)
+	{
+		// copy render target to juce::Image
+		{
+			const juce::Image::BitmapData dstBitmapData(_renderTarget.isNull() ? *m_renderImage : _renderTarget, juce::Image::BitmapData::writeOnly);
+
+			if (_renderTarget.isNull())
+			{
+				copyToBitmap(dstBitmapData, *m_renderTarget);
+
+				auto& context = m_graphics->getInternalContext();
+
+				context.drawImage(*m_renderImage, juce::AffineTransform());
+			}
+			else
+			{
+				copyToBitmap(dstBitmapData, *m_renderTarget);
+			}
+		}
 
 		m_graphics = nullptr;
 	}

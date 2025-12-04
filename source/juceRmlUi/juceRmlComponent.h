@@ -17,6 +17,7 @@ namespace Rml
 
 namespace juceRmlUi
 {
+	class LookAndFeel;
 	struct RmlInterfaces;
 	class Renderer;
 	class JuceRmlUi;
@@ -62,6 +63,8 @@ namespace juceRmlUi
 		void modifierKeysChanged(const juce::ModifierKeys& _modifiers) override;
 		void focusLost(FocusChangeType _cause) override;
 		void focusGained(FocusChangeType _cause) override;
+
+		void parentHierarchyChanged() override;
 
 		void timerCallback() override;
 
@@ -112,7 +115,7 @@ namespace juceRmlUi
 		uint32_t getMaximumTextureSize() const;
 		uint32_t getValidTextureSize(uint32_t _size) const;
 
-		void paint(juce::Graphics& g) override;
+		void paint(juce::Graphics& _g) override;
 
 	private:
 		void update();
@@ -178,5 +181,8 @@ namespace juceRmlUi
 		juce::Image m_screenshot;
 		ScreenshotState m_screenshotState = ScreenshotState::NoScreenshot;
 		ScreenshotCallback m_screenshotCallback;
+
+		LookAndFeel* m_lookAndFeel = nullptr;
+		juce::Component* m_lookAndFeelParent = nullptr;
 	};
 }

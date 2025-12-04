@@ -3,6 +3,7 @@
 #include <cassert>
 #include <algorithm> // std::transform
 
+#include "juceRmlLookAndFeel.h"
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
@@ -111,6 +112,14 @@ namespace juceRmlUi
 
 	RmlComponent::~RmlComponent()
 	{
+		m_renderProxy->setRenderer(nullptr);
+
+		if (m_lookAndFeelParent)
+			m_lookAndFeelParent->setLookAndFeel(nullptr);
+		m_lookAndFeelParent = nullptr;
+
+		delete m_lookAndFeel;
+
 		enableDebugger(false);
 
 		if (m_openGLContext)
@@ -485,6 +494,19 @@ namespace juceRmlUi
 		enqueueUpdate();
 	}
 
+	void RmlComponent::parentHierarchyChanged()
+	{
+		auto* rootComponent = getTopLevelComponent();
+		if (!m_lookAndFeel)
+			m_lookAndFeel = new LookAndFeel();
+		if (m_lookAndFeelParent)
+			m_lookAndFeelParent->setLookAndFeel(nullptr);
+		m_lookAndFeelParent = rootComponent;
+		rootComponent->setLookAndFeel(m_lookAndFeel);
+
+		Component::parentHierarchyChanged();
+	}
+
 	void RmlComponent::timerCallback()
 	{
 		{
@@ -723,7 +745,7 @@ namespace juceRmlUi
 		return _size;
 	}
 
-	void RmlComponent::paint(juce::Graphics& g)
+	void RmlComponent::paint(juce::Graphics& _g)
 	{
 		if (m_openGLContext)
 			return;
@@ -731,9 +753,23 @@ namespace juceRmlUi
 		auto* r = dynamic_cast<RendererJuce*>(m_renderInterface.get());
 		if (!r)
 			return;
-		r->beginFrame(g);
+
+		r->beginFrame(_g);
+
 		m_renderProxy->executeRenderFunctions();
-		r->endFrame();
+
+		auto* rootComp = getTopLevelComponent();
+		auto* laf = dynamic_cast<LookAndFeel*>(&rootComp->getLookAndFeel());
+
+		if (laf)
+		{
+			r->endFrame(laf->getCurrentImage());
+		}
+		else
+		{
+			static juce::Image nullImage;
+			r->endFrame(nullImage);
+		}
 
 		m_renderDone = true;
 	}
