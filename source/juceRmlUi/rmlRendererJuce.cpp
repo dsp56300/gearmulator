@@ -259,6 +259,8 @@ namespace juceRmlUi
 
 				int x=0;
 
+				auto* src = _src.getColorPointer(0, srcYi);
+
 #ifdef HAVE_SSE
 				auto srcXAvec = _mm_set1_epi32(srcX);
 				auto srcXBvec = _mm_set1_epi32(srcX + srcXStep);
@@ -274,10 +276,13 @@ namespace juceRmlUi
 					srcXvec = _mm_add_epi32(srcXvec, _mm_set1_epi32(srcXStep << 1));
 
 					// fetch 8 texels, load 2 at a time
-					const auto* c00ptrA = _src.getColorPointer(_mm_cvtsi128_si32(srcXi), srcYi);
+					auto srcXi64vec = _mm_shuffle_epi32(srcXi, _MM_SHUFFLE(2,0,2,0));
+					auto srcXi64 = _mm_cvtsi128_si64(srcXi64vec);
+
+					const auto* c00ptrA = src + static_cast<uint32_t>(srcXi64);
 					const auto* c01ptrA = c00ptrA + _src.paddedWidth;
 
-					const auto* c00ptrB = _src.getColorPointer(_mm_extract_epi32(srcXi, 2), srcYi);
+					const auto* c00ptrB = src + (srcXi64 >> 32ull);
 					const auto* c01ptrB = c00ptrB + _src.paddedWidth;
 
 					__m128i c0010A = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c00ptrA));
