@@ -7,6 +7,9 @@
 
 #if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
 #	define HAVE_SSE
+#	include <xmmintrin.h>
+#	include <emmintrin.h>
+#	include <smmintrin.h>	// SSE 4.1
 #endif
 
 namespace juceRmlUi
