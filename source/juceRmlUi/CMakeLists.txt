@@ -6,6 +6,7 @@ set(SOURCES
 	frameRateLimiter.cpp frameRateLimiter.h
 	juceRmlComponent.cpp juceRmlComponent.h
 	juceRmlDrag.cpp juceRmlDrag.h
+	juceRmlLookAndFeel.cpp juceRmlLookAndFeel.h
 	juceRmlUi.cpp juceRmlUi.h
 	rmlColorPicker.cpp rmlColorPicker.h
 	rmlDataProvider.h
