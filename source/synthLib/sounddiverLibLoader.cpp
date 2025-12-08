@@ -1,8 +1,7 @@
 #include "sounddiverLibLoader.h"
 
-#include "vstpreset.h"
-
 #include "baseLib/binarystream.h"
+#include "baseLib/endian.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -206,7 +205,7 @@ namespace synthLib
 	{
 		const auto i = m_stream.read<uint32_t>();
 
-		if (m_littleEndian == (VstPreset::hostEndian() == VstPreset::Endian::Little))
+		if (m_littleEndian == (baseLib::hostEndian() == baseLib::Endian::Little))
 			return i;
 
 		return

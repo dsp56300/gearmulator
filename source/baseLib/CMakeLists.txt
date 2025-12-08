@@ -7,6 +7,7 @@ set(SOURCES
 	binarystream.cpp binarystream.h
 	commandline.cpp commandline.h
 	configFile.cpp configFile.h
+	endian.h
 	event.cpp event.h
 	filesystem.cpp filesystem.h
 	hybridcontainer.h
