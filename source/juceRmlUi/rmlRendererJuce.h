@@ -8,6 +8,12 @@
 #   define IS_X64 0
 #endif
 
+#if defined(__aarch64__) || defined(__ARM_ARCH_8) || defined(_M_ARM64)
+#	define IS_ARM64 1
+#else
+#	define IS_ARM64 0
+#endif
+
 namespace juce
 {
 	class Image;
