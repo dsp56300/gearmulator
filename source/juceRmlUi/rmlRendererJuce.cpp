@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 
+#include "baseLib/endian.h"
 #include "juce_graphics/juce_graphics.h"
 
 #if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
@@ -14,24 +15,6 @@
 
 namespace juceRmlUi
 {
-	namespace
-	{
-		enum class HostEndian
-		{
-			Big,
-			Little
-		};
-
-		constexpr HostEndian hostEndian()
-		{
-			constexpr uint32_t test32 = 0x01020304;
-			constexpr uint8_t test8 = static_cast<const uint8_t&>(test32);
-
-			static_assert(test8 == 0x01 || test8 == 0x04, "unable to determine endianess");
-
-			return test8 == 0x01 ? HostEndian::Big : HostEndian::Little;
-		}
-	}
 	namespace rendererJuce
 	{
 		struct Triangle
@@ -1074,10 +1057,12 @@ namespace juceRmlUi
 				// use SSE to speed up RGBA->ARGB or RGBA->BGRA conversion
 				auto shuffleMask = []
 				{
-					constexpr auto shuffleR = hostEndian() == HostEndian::Big ? static_cast<int8_t>(PixelDataType::indexR) : getAlphaComponentIndex<PixelDataType>()   ;
-					constexpr auto shuffleG = hostEndian() == HostEndian::Big ? static_cast<int8_t>(PixelDataType::indexG) : static_cast<int8_t>(PixelDataType::indexB);
-					constexpr auto shuffleB = hostEndian() == HostEndian::Big ? static_cast<int8_t>(PixelDataType::indexB) : static_cast<int8_t>(PixelDataType::indexG);
-					constexpr auto shuffleA = hostEndian() == HostEndian::Big ? getAlphaComponentIndex<PixelDataType>()    : static_cast<int8_t>(PixelDataType::indexR);
+					constexpr auto isBigEndian = baseLib::hostEndian() == baseLib::Endian::Big;
+
+					constexpr auto shuffleR = isBigEndian ? static_cast<int8_t>(PixelDataType::indexR) : getAlphaComponentIndex<PixelDataType>()   ;
+					constexpr auto shuffleG = isBigEndian ? static_cast<int8_t>(PixelDataType::indexG) : static_cast<int8_t>(PixelDataType::indexB);
+					constexpr auto shuffleB = isBigEndian ? static_cast<int8_t>(PixelDataType::indexB) : static_cast<int8_t>(PixelDataType::indexG);
+					constexpr auto shuffleA = isBigEndian ? getAlphaComponentIndex<PixelDataType>()    : static_cast<int8_t>(PixelDataType::indexR);
 
 					const __m128i shuffleMask = _mm_set_epi8(
 					         shuffleR + 12, shuffleG + 12, shuffleB + 12, shuffleA + 12,
