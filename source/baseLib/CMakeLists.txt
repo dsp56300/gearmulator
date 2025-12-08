@@ -12,6 +12,7 @@ set(SOURCES
 	hybridcontainer.h
 	logging.cpp logging.h
 	md5.cpp md5.h
+	os.cpp os.h
 	propertyMap.cpp propertyMap.h
 	semaphore.h
 	threadtools.cpp threadtools.h

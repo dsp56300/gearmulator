@@ -4,6 +4,7 @@
 #include "skin.h"
 
 #include "baseLib/filesystem.h"
+#include "baseLib/os.h"
 
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/filetype.h"
@@ -833,7 +834,7 @@ namespace jucePluginEditorLib
 
 	void Editor::onDisclaimerFinished() const
 	{
-		if(!synthLib::isRunningUnderRosetta())
+		if(!baseLib::isRunningUnderRosetta())
 			return;
 
 		const auto& name = m_processor.getProperties().name;
