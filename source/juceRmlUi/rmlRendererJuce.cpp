@@ -12,6 +12,9 @@
 #	include <xmmintrin.h>	// SSE
 #	include <emmintrin.h>	// SSE2
 #	include <smmintrin.h>	// SSE 4.1
+#elif IS_ARM64
+#	define HAVE_SSE 1
+#	include "baseLib/sse2neon.h"
 #else
 #	define HAVE_SSE 0
 #endif
