@@ -746,6 +746,9 @@ namespace juceRmlUi
 
 	void RendererJuce::RenderGeometry(Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture)
 	{
+		if (!m_renderTarget)
+			return;
+
 		auto* p = reinterpret_cast<Geometry*>(_geometry);
 		if (!p)
 			return;
