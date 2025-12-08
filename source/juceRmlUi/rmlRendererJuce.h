@@ -2,6 +2,12 @@
 
 #include "RmlUi/Core/RenderInterface.h"
 
+#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
+#   define IS_X64 1
+#else
+#   define IS_X64 0
+#endif
+
 namespace juce
 {
 	class Image;
@@ -44,6 +50,8 @@ namespace juceRmlUi
 
 		void EnableScissorRegion(bool _enable) override;
 		void SetScissorRegion(Rml::Rectanglei _region) override;
+
+		static constexpr bool isX64() { return IS_X64; }
 
 	private:
 		void pushClip();

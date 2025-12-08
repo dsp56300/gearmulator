@@ -4,13 +4,16 @@
 #include <cassert>
 
 #include "baseLib/endian.h"
-#include "juce_graphics/juce_graphics.h"
 
-#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
-#	define HAVE_SSE
-#	include <xmmintrin.h>
-#	include <emmintrin.h>
+#include <juce_graphics/juce_graphics.h>
+
+#ifdef IS_X64
+#	define HAVE_SSE 1
+#	include <xmmintrin.h>	// SSE
+#	include <emmintrin.h>	// SSE2
 #	include <smmintrin.h>	// SSE 4.1
+#else
+#	define HAVE_SSE 0
 #endif
 
 namespace juceRmlUi
@@ -284,7 +287,7 @@ namespace juceRmlUi
 
 				auto* src = _src.getColorPointer(0, srcYi);
 
-#ifdef HAVE_SSE
+#if HAVE_SSE
 				auto srcXAvec = _mm_set1_epi32(srcX);
 				auto srcXBvec = _mm_set1_epi32(srcX + srcXStep);
 				auto srcXvec = _mm_or_si128(_mm_slli_si128(srcXBvec, 8), _mm_srli_si128(srcXAvec, 8));
@@ -489,7 +492,7 @@ namespace juceRmlUi
 			const auto invAlpha = 255 - _color.a;
 
 			const uint32_t fill = *reinterpret_cast<const uint32_t*>(&_color);
-#ifdef HAVE_SSE
+#if HAVE_SSE
 			const __m128i fillVec = _mm_set1_epi32(static_cast<int>(fill));
 #endif
 
@@ -512,7 +515,7 @@ namespace juceRmlUi
 					auto* dst = reinterpret_cast<uint32_t*>(_dst.getColorPointer(_dstX, _dstY + y));
 
 					int x=0;
-#ifdef HAVE_SSE
+#if HAVE_SSE
 					for (; x<=_dstW - 16; x += 16)
 					{
 						_mm_storeu_si128(reinterpret_cast<__m128i*>(dst), fillVec); dst += 4;
@@ -1053,7 +1056,7 @@ namespace juceRmlUi
 				const auto* src = _src.getColorPointer(_x, y);
 
 				auto* dst = _dst.getPixelPointer(_x, y);
-#ifdef HAVE_SSE
+#if HAVE_SSE
 				// use SSE to speed up RGBA->ARGB or RGBA->BGRA conversion
 				auto shuffleMask = []
 				{
