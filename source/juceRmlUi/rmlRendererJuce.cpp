@@ -296,14 +296,20 @@ namespace juceRmlUi
 				auto srcXBvec = _mm_set1_epi32(srcX + srcXStep);
 				auto srcXvec = _mm_or_si128(_mm_slli_si128(srcXBvec, 8), _mm_srli_si128(srcXAvec, 8));
 
-				for (; x < _dstW - 2; x += 2)
+				const auto srcXStepMul2Vec = _mm_set1_epi32(srcXStep << 1);
+
+				constexpr auto fracBits = 7;
+
+				auto fracYVec = _mm_set1_epi16(static_cast<int16_t>(fracY >> (scaleBits - fracBits)));
+
+				for (; x < _dstW - 1; x += 2)
 				{
 					// bilinear filtering executed for 2 pixels in parallel, doing 2x2 texel fetches i.e. 8 texels per iteration
 					srcX += srcXStep << 1;
 
 					auto srcXi = _mm_srli_epi32(srcXvec, scaleBits);
 					auto fracX = _mm_sub_epi32(srcXvec, _mm_slli_epi32(srcXi, scaleBits));
-					srcXvec = _mm_add_epi32(srcXvec, _mm_set1_epi32(srcXStep << 1));
+					srcXvec = _mm_add_epi32(srcXvec, srcXStepMul2Vec);
 
 					// fetch 8 texels, load 2 at a time
 					auto srcXi64vec = _mm_shuffle_epi32(srcXi, _MM_SHUFFLE(2,0,2,0));
@@ -338,8 +344,6 @@ namespace juceRmlUi
 					__m128i d0 = _mm_sub_epi16(c10, c00);
 					__m128i d1 = _mm_sub_epi16(c11, c01);
 
-					constexpr auto fracBits = 7;
-
 					// lerp rows
 					__m128i fracXVec = _mm_srli_epi32(fracX, scaleBits - fracBits);
 					fracXVec = _mm_or_si128(fracXVec, _mm_slli_si128(fracXVec, 2));
@@ -351,8 +355,6 @@ namespace juceRmlUi
 					__m128i d = _mm_sub_epi16(c1, c0);
 
 					// lerp colums
-					auto fracYVec = _mm_set1_epi16(static_cast<int16_t>(fracY >> (scaleBits - fracBits)));
-
 					__m128i c = _mm_add_epi16(c0, _mm_srai_epi16(_mm_mullo_epi16(d, fracYVec), fracBits));
 
 					// apply color
@@ -377,7 +379,7 @@ namespace juceRmlUi
 
 					// convert back to 8-bit and store
 					__m128i newDst8 = _mm_packus_epi16(c, _mm_setzero_si128());
-					*reinterpret_cast<int64_t*>(dst) = _mm_cvtsi128_si64(newDst8);
+					_mm_storel_epi64(reinterpret_cast<__m128i*>(dst), newDst8);
 
 					dst += 2;
 				}
