@@ -33,6 +33,28 @@ namespace juceRmlUi
 		}
 
 		constexpr uint32_t g_advancedRendererMinimumGLversion = 33;
+
+		bool isSoftwareRenderer(const std::string& _glRenderer)
+		{
+		    static const char* indicators[] = {
+		        "llvmpipe",
+		        "softpipe",
+		        "swiftshader",
+		        "gdi generic",
+				"apple software renderer"
+		    };
+
+			// make lowercase
+			std::string r = _glRenderer;
+			std::transform(r.begin(), r.end(), r.begin(), ::tolower);
+
+		    for (auto* s : indicators)
+		    {
+		        if (r.find(s) != std::string::npos)
+		            return true;
+		    }
+			return false;
+		}
 	}
 
 	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, int _refreshRateLimitHz/* = -1*/)
@@ -151,7 +173,7 @@ namespace juceRmlUi
 
 		auto* renderer = glGetString(GL_RENDERER);
 		if (renderer)
-			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s", renderer);
+			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s, is software: %d", renderer, isSoftwareRenderer(reinterpret_cast<const char*>(renderer)));
 
 #if JUCE_MAC
 		constexpr auto version = g_advancedRendererMinimumGLversion;
