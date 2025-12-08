@@ -167,6 +167,8 @@ namespace juceRmlUi
 				return reinterpret_cast<const Colorb*>(data.data()) + getIndex(_x, _y);
 			}
 
+			Image* getMip();
+
 			static constexpr int padWidth(int _width) noexcept
 			{
 				_width += 1;
@@ -185,6 +187,8 @@ namespace juceRmlUi
 			{
 				return _y * paddedWidth + _x;
 			}
+
+			std::unique_ptr<Image> m_nextMip;
 		};
 
 		static_assert(Image::padWidth(7) == 8);
@@ -229,6 +233,39 @@ namespace juceRmlUi
 					memcpy(dst, src, _srcW * sizeof(Colorb));
 					src += _src.paddedWidth;
 					dst += _dst.paddedWidth;
+				}
+			}
+		}
+
+		static void blitDownscale2x2(Image& _dst, const Image& _src)
+		{
+			const auto h = _dst.height;
+			const auto w = _dst.width;
+
+			const auto* srcY = _src.getColorPointer(0, 0);
+			auto* dstY = _dst.getColorPointer(0,0);
+
+			for (int y = 0; y < h; ++y, srcY += _src.paddedWidth << 1, dstY += _dst.paddedWidth)
+			{
+				auto* src = srcY;
+				auto* dst = dstY;
+
+				for (int x = 0; x < w; ++x)
+				{
+					// average 4 pixels
+					const auto* c00 = src;
+					const auto* c10 = c00 + 1;
+					const auto* c01 = c00 + _src.paddedWidth;
+					const auto* c11 = c01 + 1;
+
+					Colori c =
+						toInt(*c00) +
+						toInt(*c10) +
+						toInt(*c01) +
+						toInt(*c11);
+					c = c >> 2;
+					*dst++ = toByte(c);
+					src += 2;
 				}
 			}
 		}
@@ -540,6 +577,27 @@ namespace juceRmlUi
 	RendererJuce::~RendererJuce()
 	= default;
 
+	rendererJuce::Image* rendererJuce::Image::getMip()
+	{
+		if (m_nextMip)
+			return m_nextMip.get();
+
+		if (width < 2 || height < 2)
+			return nullptr;
+
+		m_nextMip.reset(new Image());
+
+		m_nextMip->width = width >> 1;
+		m_nextMip->height = height >> 1;
+		m_nextMip->paddedWidth = padWidth(m_nextMip->width);
+		m_nextMip->hasAlpha = hasAlpha;
+		m_nextMip->data.resize(m_nextMip->paddedWidth * padHeight(m_nextMip->height) * 4);
+
+		blitDownscale2x2(*m_nextMip, *this);
+
+		return m_nextMip.get();
+	}
+
 	Rml::CompiledGeometryHandle RendererJuce::CompileGeometry(const Rml::Span<const Rml::Vertex> _vertices, const Rml::Span<const int> _indices)
 	{
 		auto* g = new rendererJuce::Geometry();
@@ -768,10 +826,22 @@ namespace juceRmlUi
 			if (img)
 			{
 				// define source rectangle in texture
-				const int srcX = roundToInt(uvX * static_cast<float>(img->width));
-				const int srcY = roundToInt(uvY * static_cast<float>(img->height));
-				const int srcW = roundToInt(uvW * static_cast<float>(img->width));
-				const int srcH = roundToInt(uvH * static_cast<float>(img->height));
+				int srcW = roundToInt(uvW * static_cast<float>(img->width));
+				int srcH = roundToInt(uvH * static_cast<float>(img->height));
+
+				// select a mipmap level to prevent that we scale down to less than 50% to reduce aliasing
+				while (srcW > 1 && srcH > 1 && (srcW > (dstW << 1) || srcH > (dstH << 1)))
+				{
+					srcW >>= 1;
+					srcH >>= 1;
+					img = img->getMip();
+				}
+
+				const auto srcX = roundToInt(uvX * static_cast<float>(img->width));
+				const auto srcY = roundToInt(uvY * static_cast<float>(img->height));
+
+				srcW = roundToInt(uvW * static_cast<float>(img->width));
+				srcH = roundToInt(uvH * static_cast<float>(img->height));
 
 				// use templated blitting function based on used features
 				const auto hasScale = (srcW != dstW) || (srcH != dstH);
