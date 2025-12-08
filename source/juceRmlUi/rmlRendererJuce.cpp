@@ -7,7 +7,7 @@
 
 #include <juce_graphics/juce_graphics.h>
 
-#ifdef IS_X64
+#if IS_X64
 #	define HAVE_SSE 1
 #	include <xmmintrin.h>	// SSE
 #	include <emmintrin.h>	// SSE2
