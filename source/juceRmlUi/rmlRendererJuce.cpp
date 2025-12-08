@@ -113,19 +113,6 @@ namespace juceRmlUi
 		using Colorf = Color<float>;
 		using Colors = Color<int16_t>;
 
-		float toFloat(uint8_t _v) noexcept { return _v; }
-		int toInt(uint8_t _v) noexcept { return _v; }
-		int16_t toShort(uint8_t _v) noexcept { return _v; }
-
-		uint8_t toByte(float _v) noexcept { return static_cast<uint8_t>(_v); }
-		uint8_t toByte(int _v) noexcept { return static_cast<uint8_t>(_v); }
-
-		Colorf toFloat(const Colorb& _c) noexcept { return Colorf{ toFloat(_c.r), toFloat(_c.g), toFloat(_c.b), toFloat(_c.a)}; }
-		Colori toInt(const Colorb& _c) noexcept { return Colori{ toInt(_c.r), toInt(_c.g), toInt(_c.b), toInt(_c.a)}; }
-		Colors toShort(const Colorb& _c) noexcept { return Colors{ toShort(_c.r), toShort(_c.g), toShort(_c.b), toShort(_c.a)}; }
-		Colorb toByte(const Colorf& _c) noexcept { return Colorb{ toByte(_c.r), toByte(_c.g), toByte(_c.b), toByte(_c.a) }; }
-		Colorb toByte(const Colori& _c) noexcept { return Colorb{ toByte(_c.r), toByte(_c.g), toByte(_c.b), toByte(_c.a) }; }
-
 		struct Image
 		{
 			static constexpr int PadW = 4;	// minimum 1 and up to N bytes of padding to ensure we have pixel groups of width N, required for some SIMD ops
@@ -159,7 +146,7 @@ namespace juceRmlUi
 			{
 				_width += 1;
 				_width += (PadW - 1);
-				_width -= (_width & (PadW-1));
+				_width -= (_width & (PadW - 1));
 				return _width;
 			}
 
@@ -183,9 +170,23 @@ namespace juceRmlUi
 		static_assert(Image::padWidth(10) == 12);
 		static_assert(Image::padWidth(11) == 12);
 		static_assert(Image::padWidth(12) == 16);
+	}
+
+	namespace
+	{
+		using namespace rendererJuce;
+
+		int toInt(uint8_t _v) noexcept { return _v; }
+		int16_t toShort(uint8_t _v) noexcept { return _v; }
+
+		uint8_t toByte(int _v) noexcept { return static_cast<uint8_t>(_v); }
+
+		Colori toInt(const Colorb& _c) noexcept { return Colori{ toInt(_c.r), toInt(_c.g), toInt(_c.b), toInt(_c.a)}; }
+		Colors toShort(const Colorb& _c) noexcept { return Colors{ toShort(_c.r), toShort(_c.g), toShort(_c.b), toShort(_c.a)}; }
+		Colorb toByte(const Colori& _c) noexcept { return Colorb{ toByte(_c.r), toByte(_c.g), toByte(_c.b), toByte(_c.a) }; }
 
 		template<bool HasAlphaBlend, bool HasColor>
-		static void blit(Image& _dst, const int _dstX, const int _dstY, const Image& _src, const int _srcX, const int _srcY, const int _srcW, const int _srcH, const Colorb& _color)
+		void blit(Image& _dst, const int _dstX, const int _dstY, const Image& _src, const int _srcX, const int _srcY, const int _srcW, const int _srcH, const Colorb& _color)
 		{
 			const auto* src = _src.getColorPointer(_srcX, _srcY);
 
@@ -223,7 +224,7 @@ namespace juceRmlUi
 			}
 		}
 
-		static void blitDownscale2x2(Image& _dst, const Image& _src)
+		void blitDownscale2x2(Image& _dst, const Image& _src)
 		{
 			const auto h = _dst.height;
 			const auto w = _dst.width;
@@ -257,7 +258,7 @@ namespace juceRmlUi
 		}
 
 		template<bool AlphaBlend, bool Color>
-		static void blit(
+		void blit(
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color)
@@ -432,7 +433,7 @@ namespace juceRmlUi
 		}
 
 		template<bool HasScale, bool HasAlphaBlend, bool HasColor>
-		static void blit(
+		void blit(
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
@@ -450,7 +451,7 @@ namespace juceRmlUi
 		}
 
 		template<bool HasScale, bool HasAlphaBlend>
-		static void blit(
+		void blit(
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
@@ -463,7 +464,7 @@ namespace juceRmlUi
 		}
 
 		template<bool HasScale>
-		static void blit(
+		void blit(
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
@@ -475,7 +476,7 @@ namespace juceRmlUi
 			else               blit<HasScale, false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasColor);
 		}
 
-		static void blit(
+		void blit(
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
@@ -486,7 +487,7 @@ namespace juceRmlUi
 		}
 
 		template<bool AlphaBlend>
-		static void fill(Image& _dst,
+		void fill(Image& _dst,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color)
 		{
 			const auto invAlpha = 255 - _color.a;
@@ -639,7 +640,7 @@ namespace juceRmlUi
 			for (size_t j=0; j<6; ++j)
 			{
 				bool found = false;
-				for (size_t k=0; k<indicesUsed; ++k)
+				for (int k=0; k<indicesUsed; ++k)
 				{
 					if (_indices[i + j] == quadIndices[k])
 					{
@@ -736,17 +737,17 @@ namespace juceRmlUi
 
 	void RendererJuce::ReleaseGeometry(Rml::CompiledGeometryHandle _geometry)
 	{
-		auto* p = reinterpret_cast<rendererJuce::Geometry*>(_geometry);
+		auto* p = reinterpret_cast<Geometry*>(_geometry);
 		delete p;
 	}
 
 	void RendererJuce::RenderGeometry(Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture)
 	{
-		auto* p = reinterpret_cast<rendererJuce::Geometry*>(_geometry);
+		auto* p = reinterpret_cast<Geometry*>(_geometry);
 		if (!p)
 			return;
 
-		auto* img = reinterpret_cast<rendererJuce::Image*>(_texture);
+		auto* img = reinterpret_cast<Image*>(_texture);
 
 		Rml::Rectanglei clip = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0, 0),  Rml::Vector2i(m_renderTarget->width, m_renderTarget->height));
 
@@ -833,15 +834,15 @@ namespace juceRmlUi
 				const auto hasScale = (srcW != dstW) || (srcH != dstH);
 				const auto hasAlphaBlend = img->hasAlpha || col.a < 255;
 
-				rendererJuce::blit(*m_renderTarget, *img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, col, hasScale, hasAlphaBlend, hasColor);
+				blit(*m_renderTarget, *img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, col, hasScale, hasAlphaBlend, hasColor);
 			}
 			else
 			{
 				// fill with solid color
 				if (col.a < 255)
-					rendererJuce::fill<true>(*m_renderTarget, dstX, dstY, dstW, dstH, col);
+					fill<true>(*m_renderTarget, dstX, dstY, dstW, dstH, col);
 				else
-					rendererJuce::fill<false>(*m_renderTarget, dstX, dstY, dstW, dstH, col);
+					fill<false>(*m_renderTarget, dstX, dstY, dstW, dstH, col);
 			}
 		}
 	}
@@ -936,37 +937,18 @@ namespace juceRmlUi
 
 	void RendererJuce::ReleaseTexture(Rml::TextureHandle _texture)
 	{
-		auto* img = reinterpret_cast<rendererJuce::Image*>(_texture);
+		auto* img = reinterpret_cast<Image*>(_texture);
 		delete img;
 	}
 
 	void RendererJuce::EnableScissorRegion(bool _enable)
 	{
 		m_scissorEnabled = _enable;
-		return;
-
-		if (m_scissorEnabled)
-			pushClip();
-		else if (m_pushed)
-		{
-			m_graphics->restoreState();
-			m_pushed = false;
-		}
 	}
 
 	void RendererJuce::SetScissorRegion(Rml::Rectanglei _region)
 	{
 		m_scissorRegion = _region;
-		return;
-		if (m_scissorEnabled)
-		{
-			pushClip();
-		}
-		else if (m_pushed)
-		{
-			m_graphics->restoreState();
-			m_pushed = false;
-		}
 	}
 
 	void RendererJuce::pushClip()
