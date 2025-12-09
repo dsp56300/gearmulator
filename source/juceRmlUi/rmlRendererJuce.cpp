@@ -267,6 +267,7 @@ namespace juceRmlUi
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color)
 		{
 			static constexpr int scaleBits = 18;	// use 14.18 fixed point for the filtering code
+			static constexpr int scaleMask = (1 << scaleBits) - 1;
 
 			int srcY = _srcY << scaleBits;
 
@@ -305,10 +306,19 @@ namespace juceRmlUi
 				for (; x < _dstW - 1; x += 2)
 				{
 					// bilinear filtering executed for 2 pixels in parallel, doing 2x2 texel fetches i.e. 8 texels per iteration
+
+					/*
+					    +---+---+   +---+---+
+					    |P0 |+x |   |P1 |   |
+					    +---+---+   +---+---+
+					    |+y |   |   |   |   |
+					    +---+---+   +---+---+
+					*/
+
 					srcX += srcXStep << 1;
 
 					auto srcXi = _mm_srli_epi32(srcXvec, scaleBits);
-					auto fracX = _mm_sub_epi32(srcXvec, _mm_slli_epi32(srcXi, scaleBits));
+					auto fracX = _mm_and_epi32(srcXvec, _mm_set1_epi32(scaleMask));
 					srcXvec = _mm_add_epi32(srcXvec, srcXStepMul2Vec);
 
 					// fetch 8 texels, load 2 at a time
@@ -321,24 +331,46 @@ namespace juceRmlUi
 					const auto* c00ptrB = src + (srcXi64 >> 32ull);
 					const auto* c01ptrB = c00ptrB + _src.paddedWidth;
 
+					/*
+					    we read two adjacent pixels, resulting in 4 registers with two pixels each
+					    +---+---+   +---+---+
+					    |00a|10a|   |00b|10b|
+					    +---+---+   +---+---+
+					    |01a|11a|   |01b|11b|
+					    +---+---+   +---+---+
+					*/
+
 					__m128i c0010A = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c00ptrA));
 					__m128i c0111A = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c01ptrA));
 
 					__m128i c0010B = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c00ptrB));
 					__m128i c0111B = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(c01ptrB));
 
-					// pack into single registers
-					__m128i c0010 = _mm_slli_si128(c0010B, 8);
-					c0010 = _mm_or_si128(c0010, c0010A);
+					/*
+						split into 4 registers with two pixel each
+						low = first pixel, high = second pixel
+					    +---+---+   +---+---+
+					    |00L|10L|   |00H|10H|
+					    +---+---+   +---+---+
+					    |01L|11L|   |01H|11H|
+					    +---+---+   +---+---+
+					*/
 
-					__m128i c0111 = _mm_slli_si128(c0111B, 8);
-					c0111 = _mm_or_si128(c0111, c0111A);
+					__m128i c00 = _mm_unpacklo_epi32(c0010A, c0010B);
+					__m128i c10 = _mm_srli_si128(c00, 8);
+					__m128i c01 = _mm_unpacklo_epi32(c0111A, c0111B);
+					__m128i c11 = _mm_srli_si128(c01, 8);
 
-					// unpack into 16-bit integers, i.e. 4x RGBA8 -> 4x RGBA16
-					__m128i c00 = _mm_cvtepu8_epi16(_mm_shuffle_epi32(c0010, _MM_SHUFFLE(2, 0, 2, 0)));
-					__m128i c10 = _mm_cvtepu8_epi16(_mm_shuffle_epi32(c0010, _MM_SHUFFLE(3, 1, 3, 1)));
-					__m128i c01 = _mm_cvtepu8_epi16(_mm_shuffle_epi32(c0111, _MM_SHUFFLE(2, 0, 2, 0)));
-					__m128i c11 = _mm_cvtepu8_epi16(_mm_shuffle_epi32(c0111, _MM_SHUFFLE(3, 1, 3, 1)));
+					/*
+						convert from RGBA8 to RGBA16
+						Note that this maxes out the registers, i.e.
+						more pixels	at once do not make sense
+					*/
+
+					c00 = _mm_cvtepu8_epi16(c00);
+					c10 = _mm_cvtepu8_epi16(c10);
+					c01 = _mm_cvtepu8_epi16(c01);
+					c11 = _mm_cvtepu8_epi16(c11);
 
 					// calc row differences
 					__m128i d0 = _mm_sub_epi16(c10, c00);
@@ -354,7 +386,7 @@ namespace juceRmlUi
 					// calc column differences
 					__m128i d = _mm_sub_epi16(c1, c0);
 
-					// lerp colums
+					// lerp columns
 					__m128i c = _mm_add_epi16(c0, _mm_srai_epi16(_mm_mullo_epi16(d, fracYVec), fracBits));
 
 					// apply color
@@ -388,7 +420,7 @@ namespace juceRmlUi
 				{
 					// bilinear filtering
 					const int srcXi = srcX >> scaleBits;
-					const int fracX = srcX - (srcXi << scaleBits);
+					const int fracX = srcX & scaleMask;
 
 					// fetch 4 texels
 					const auto* c00 = _src.getColorPointer(srcXi, srcYi);
