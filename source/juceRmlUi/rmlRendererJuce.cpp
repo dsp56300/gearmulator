@@ -373,12 +373,12 @@ namespace juceRmlUi
 					c11 = _mm_cvtepu8_epi16(c11);
 
 					// calc row differences
-					__m128i d0 = _mm_sub_epi16(c10, c00);
-					__m128i d1 = _mm_sub_epi16(c11, c01);
+					__m128i d0 = _mm_sub_epi16(c10, c00);	// range -255 .. +255
+					__m128i d1 = _mm_sub_epi16(c11, c01);	// range -255 .. +255
 
 					// lerp rows
 					__m128i fracXVec = _mm_srli_epi32(fracX, scaleBits - fracBits);
-					fracXVec = _mm_or_si128(fracXVec, _mm_slli_si128(fracXVec, 2));
+					fracXVec = _mm_unpacklo_epi16(fracXVec, fracXVec);
 
 					__m128i c0 = _mm_add_epi16(c00, _mm_srai_epi16(_mm_mullo_epi16(d0, fracXVec), fracBits));
 					__m128i c1 = _mm_add_epi16(c01, _mm_srai_epi16(_mm_mullo_epi16(d1, fracXVec), fracBits));
