@@ -10,6 +10,11 @@
 
 #include "juce_opengl/juce_opengl.h"
 
+namespace juceRmlUi
+{
+	struct RmlComponentConfig;
+}
+
 namespace Rml
 {
 	class Context;
@@ -27,7 +32,7 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget, public juce::DragAndDropContainer
 	{
 	public:
-		enum class Renderer
+		enum class Renderer : uint8_t
 		{
 			None,
 			Gl2,
@@ -51,7 +56,7 @@ namespace juceRmlUi
 		using DocumentLoadFailedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 
-		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, int _refreshRateLimitHz = -1);
+		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, const RmlComponentConfig& _config);
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;

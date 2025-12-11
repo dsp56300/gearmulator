@@ -4,7 +4,8 @@ project(juceRmlUi VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	frameRateLimiter.cpp frameRateLimiter.h
-	juceRmlComponent.cpp juceRmlComponent.h
+	juceRmlComponent.cpp juceRmlComponent.h 
+	juceRmlComponentConfig.h
 	juceRmlDrag.cpp juceRmlDrag.h
 	juceRmlLookAndFeel.cpp juceRmlLookAndFeel.h
 	juceRmlUi.cpp juceRmlUi.h

@@ -19,6 +19,7 @@
 
 #include "juceRmlPlugin/rmlPlugin.h"
 #include "juceRmlPlugin/skinConverter/skinConverter.h"
+#include "juceRmlUi/juceRmlComponentConfig.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -672,14 +673,20 @@ namespace jucePluginEditorLib
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(m_rmlInterfaces.getCoreInstance(), getProcessor().getController()));
 
-		auto* comp = new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f
+		juceRmlUi::RmlComponentConfig config;
+
+		config.refreshRateLimitHz = m_processor.getConfig().getIntValue("refreshRateLimitHz", -1);
+		config.forceSoftwareRenderer = m_processor.getConfig().getBoolValue("forceSoftwareRenderer", false);
+
+		auto* comp = new juceRmlUi::RmlComponent(
+			m_rmlInterfaces, *this, _rmlFile, 1.0f
 			, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 			{
-				onRmlContextCreated(_rmlComponent, _context);
+			 onRmlContextCreated(_rmlComponent, _context);
 			}, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 			{
-				onRmlDocumentLoadFailed(_rmlComponent, _context);
-			}, m_processor.getConfig().getIntValue("refreshRateLimitHz", -1));
+			 onRmlDocumentLoadFailed(_rmlComponent, _context);
+			}, config);
 
 		auto* doc = comp->getDocument();
 

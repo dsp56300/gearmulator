@@ -3,6 +3,7 @@
 #include <cassert>
 #include <algorithm> // std::transform
 
+#include "juceRmlComponentConfig.h"
 #include "juceRmlLookAndFeel.h"
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
@@ -57,7 +58,7 @@ namespace juceRmlUi
 		}
 	}
 
-	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, int _refreshRateLimitHz/* = -1*/)
+	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, const RmlComponentConfig& _config)
 		: m_rmlInterfaces(_interfaces)
 		, m_coreInstance(_interfaces.getCoreInstance())
 		, m_dataProvider(_dataProvider)
@@ -66,25 +67,32 @@ namespace juceRmlUi
 		, m_drag(*this)
 		, m_nextFrameTime(_interfaces.getSystemInterface().GetElapsedTime())
 	{
-		if (_refreshRateLimitHz > 0 && _refreshRateLimitHz <= 300)
-			m_targetFPS = static_cast<float>(_refreshRateLimitHz);
+		if (_config.refreshRateLimitHz > 0 && _config.refreshRateLimitHz <= 300)
+			m_targetFPS = static_cast<float>(_config.refreshRateLimitHz);
 
 		m_renderProxy.reset(new RendererProxy(m_coreInstance, m_dataProvider));
 
-		m_renderProxy->setRenderer(m_renderInterface.get());
+		if (_config.forceSoftwareRenderer)
+		{
+			m_renderInterface.reset(new RendererJuce(m_coreInstance));
+			m_renderType = Renderer::Software;
+			m_renderProxy->setRenderer(m_renderInterface.get());
+		}
+		else
+		{
+			m_openGLContext.reset(new juce::OpenGLContext());
 
-		m_openGLContext.reset(new juce::OpenGLContext());
-
-		m_openGLContext->setMultisamplingEnabled(true);
-		m_openGLContext->setRenderer(this);
-		m_openGLContext->setComponentPaintingEnabled(false);
-		m_openGLContext->attachTo(*this);
-		m_openGLContext->setContinuousRepainting(false);
+			m_openGLContext->setMultisamplingEnabled(true);
+			m_openGLContext->setRenderer(this);
+			m_openGLContext->setComponentPaintingEnabled(false);
+			m_openGLContext->attachTo(*this);
+			m_openGLContext->setContinuousRepainting(false);
 
 #if JUCE_MAC
-		// Required on macOS to get a core profile, we don't want a compatibility profile
-		m_openGLContext->setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
+			// Required on macOS to get a core profile, we don't want a compatibility profile
+			m_openGLContext->setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
 #endif
+		}
 
 		setWantsKeyboardFocus(true);
 
