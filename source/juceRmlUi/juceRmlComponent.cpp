@@ -71,11 +71,8 @@ namespace juceRmlUi
 
 		m_renderProxy.reset(new RendererProxy(m_coreInstance, m_dataProvider));
 
-		m_renderInterface.reset(new RendererJuce(m_coreInstance));
-
 		m_renderProxy->setRenderer(m_renderInterface.get());
 
-		/*
 		m_openGLContext.reset(new juce::OpenGLContext());
 
 		m_openGLContext->setMultisamplingEnabled(true);
@@ -88,7 +85,6 @@ namespace juceRmlUi
 		// Required on macOS to get a core profile, we don't want a compatibility profile
 		m_openGLContext->setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
 #endif
-		*/
 
 		setWantsKeyboardFocus(true);
 
@@ -155,6 +151,30 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
+		using namespace juce::gl;
+
+		auto* renderer = glGetString(GL_RENDERER);
+
+		if (renderer)
+		{
+			const auto software = isSoftwareRenderer(reinterpret_cast<const char*>(renderer));
+
+			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s, is software: %d", renderer, software ? 1 : 0);
+
+			if (software)
+			{
+				Rml::Log::Message(Rml::Log::LT_WARNING, "Detected software OpenGL renderer (%s), falling back to own software renderer instead", renderer);
+				m_renderType = Renderer::Software;
+				return;
+			}
+		}
+		else
+		{
+			Rml::Log::Message(Rml::Log::LT_WARNING, "Could not determine OpenGL renderer, falling back to own software renderer");
+			m_renderType = Renderer::Software;
+			return;
+		}
+
 		m_openGLContext->setSwapInterval(1);
 
 		bool haveCustomFPS = m_targetFPS >= 0;
@@ -167,13 +187,7 @@ namespace juceRmlUi
 			m_targetFPS = 30; // default limit is 30 Hz, updated below if renderer is capable
 #endif
 		}
-		using namespace juce::gl;
-
 		int major = 0, minor = 0;
-
-		auto* renderer = glGetString(GL_RENDERER);
-		if (renderer)
-			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s, is software: %d", renderer, isSoftwareRenderer(reinterpret_cast<const char*>(renderer)));
 
 #if JUCE_MAC
 		constexpr auto version = g_advancedRendererMinimumGLversion;
@@ -195,6 +209,7 @@ namespace juceRmlUi
 		{
 			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
 			m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
+			m_renderType = Renderer::Gl3;
 
 			if (!haveCustomFPS)
 			{
@@ -222,6 +237,7 @@ namespace juceRmlUi
 
 			m_renderProxy->setTextureParameters(static_cast<uint32_t>(maxSize), npotSupported);
 			m_renderInterface.reset(new RenderInterface_GL2(m_coreInstance));
+			m_renderType = Renderer::Gl2;
 		}
 
 		m_openGLversion = version;
@@ -321,6 +337,10 @@ namespace juceRmlUi
 
 	void RmlComponent::openGLContextClosing()
 	{
+		// nothing to be done if using software renderer, this is only done to discard the GL context as we didn't like it
+		if (m_renderType == Renderer::Software)
+			return;
+
 		m_renderProxy->setRenderer(nullptr);
 		m_renderInterface.reset();
 	}
@@ -613,7 +633,15 @@ namespace juceRmlUi
 			m_screenshotState = ScreenshotState::NoScreenshot;
 		}
 
-		if (m_updating || !m_renderDone || !m_renderInterface)
+		if (m_updating || !m_renderDone)
+			return;
+
+		if (m_renderType == Renderer::Software && !m_renderInterface)
+		{
+			m_renderInterface.reset(new RendererJuce(m_coreInstance));
+			m_renderProxy->setRenderer(m_renderInterface.get());
+		}
+		else if (!m_renderInterface)
 			return;
 
 		{
@@ -685,10 +713,20 @@ namespace juceRmlUi
 		m_updating = false;
 
 		// trigger a repaint and wait for OpenGL to be done with it
-		if (m_openGLContext)
-			m_openGLContext->triggerRepaint();
-		else
+		if (m_renderType == Renderer::Software)
+		{
+			// get rid of opengl context if we switched to software rendering
+			if (m_openGLContext)
+			{
+				m_openGLContext->detach();
+				m_openGLContext.reset();
+				return;
+			}
+
 			repaint();
+		}
+		else if (m_openGLContext)
+			m_openGLContext->triggerRepaint();
 
 		std::scoped_lock lock(m_timerMutex);
 		// we make the timer run a bit faster to prevent that we miss the next frame time by a too large margin

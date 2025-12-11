@@ -27,6 +27,14 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget, public juce::DragAndDropContainer
 	{
 	public:
+		enum class Renderer
+		{
+			None,
+			Gl2,
+			Gl3,
+			Software
+		};
+
 		enum class ScreenshotState : uint8_t
 		{
 			NoScreenshot,
@@ -138,6 +146,7 @@ namespace juceRmlUi
 		std::unique_ptr<juce::OpenGLContext> m_openGLContext;
 
 		std::unique_ptr<Rml::RenderInterface> m_renderInterface;
+		Renderer m_renderType = Renderer::None;
 		std::unique_ptr<RendererProxy> m_renderProxy;
 
 		Rml::Context* m_rmlContext = nullptr;
