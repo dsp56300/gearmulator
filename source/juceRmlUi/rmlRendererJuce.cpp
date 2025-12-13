@@ -145,6 +145,11 @@ namespace juceRmlUi
 
 			Image* getMip();
 
+			void clearMip()
+			{
+				m_nextMip.reset();
+			}
+
 			static constexpr int padWidth(int _width) noexcept
 			{
 				_width += 1;
@@ -156,6 +161,21 @@ namespace juceRmlUi
 			static constexpr int padHeight(const int _height) noexcept
 			{
 				return _height + 1;
+			}
+
+			static uint64_t getSizeKey(int _width, int _height) noexcept
+			{
+				return (static_cast<uint64_t>(_height) << 32ull) | static_cast<uint64_t>(_width);
+			}
+
+			static uint64_t getSizeKey(const Rml::Vector2i& _size) noexcept
+			{
+				return getSizeKey(_size.x, _size.y);
+			}
+
+			uint64_t getSizeKey() const noexcept
+			{
+				return getSizeKey(width, height);
 			}
 
 		private:
@@ -901,8 +921,21 @@ namespace juceRmlUi
 
 	Rml::TextureHandle RendererJuce::GenerateTexture(Rml::Span<const uint8_t> _source, Rml::Vector2i _sourceDimensions)
 	{
-		// create juce::Image from raw RGBA data
-		auto* img = new Image();
+		// create image from raw RGBA data
+
+		Image* img = nullptr;
+
+		if (const auto it = m_imagePool.find(Image::getSizeKey(_sourceDimensions)); it != m_imagePool.end())
+		{
+			img = it->second.back().release();
+			it->second.pop_back();
+
+			if (it->second.empty())
+				m_imagePool.erase(it);
+		}
+
+		if (!img)
+			img = new Image();
 
 		const auto srcH = _sourceDimensions.y;
 		const auto srcW = _sourceDimensions.x;
@@ -982,10 +1015,11 @@ namespace juceRmlUi
 		return reinterpret_cast<Rml::TextureHandle>(img);
 	}
 
-	void RendererJuce::ReleaseTexture(Rml::TextureHandle _texture)
+	void RendererJuce::ReleaseTexture(const Rml::TextureHandle _texture)
 	{
 		auto* img = reinterpret_cast<Image*>(_texture);
-		delete img;
+		img->clearMip();
+		m_imagePool[img->getSizeKey()].emplace_back(img);
 	}
 
 	void RendererJuce::EnableScissorRegion(bool _enable)
@@ -1026,6 +1060,11 @@ namespace juceRmlUi
 
 		if (!m_renderTarget || m_renderTarget->width != width || m_renderTarget->height != height)
 		{
+			// for generated images (LCDs) they are created at specific sizes based on the render target size, clear the pool then as the ones
+			// in the pool will most probably not used anyway
+			if (m_renderTarget)
+				m_imagePool.clear();
+
 			m_renderTarget.reset(new Image());
 			m_renderTarget->width = width;
 			m_renderTarget->paddedWidth = Image::padWidth(width);

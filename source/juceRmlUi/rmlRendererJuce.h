@@ -70,6 +70,8 @@ namespace juceRmlUi
 		std::unique_ptr<rendererJuce::Image> m_renderTarget;
 		std::unique_ptr<juce::Image> m_renderImage;
 
+		std::unordered_map<uint64_t, std::vector<std::unique_ptr<rendererJuce::Image>>> m_imagePool;
+
 		bool m_pushed = false;
 	};
 }
