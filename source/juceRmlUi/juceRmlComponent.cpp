@@ -12,7 +12,8 @@
 
 #include "baseLib/filesystem.h"
 #include "baseLib/logging.h"
-#include "baseLib/threadtools.h"
+
+#include "dsp56kBase/threadtools.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -30,7 +31,7 @@ namespace juceRmlUi
 			return _keyEventResult == false;
 		}
 
-		static constexpr uint32_t g_advancedRendererMinimumGLversion = 33;
+		constexpr uint32_t g_advancedRendererMinimumGLversion = 33;
 	}
 
 	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, int _refreshRateLimitHz/* = -1*/)
@@ -191,8 +192,8 @@ namespace juceRmlUi
 			startNextFrameTimer();
 		}
 
-		baseLib::ThreadTools::setCurrentThreadPriority(baseLib::ThreadPriority::Lowest);
-		baseLib::ThreadTools::setCurrentThreadName("RmlUI-Renderer");
+		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Lowest);
+		dsp56k::ThreadTools::setCurrentThreadName("RmlUI-Renderer");
 	}
 
 	void RmlComponent::renderOpenGL()
