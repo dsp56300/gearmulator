@@ -53,7 +53,7 @@ add_library(juceRmlUi STATIC)
 target_sources(juceRmlUi PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(juceRmlUi PUBLIC dsp56kBase rmlui_core rmlui_debugger)
+target_link_libraries(juceRmlUi PUBLIC baseLib dsp56kBase rmlui_core rmlui_debugger)
 
 target_include_directories(juceRmlUi PUBLIC ../JUCE/modules)
 target_compile_definitions(juceRmlUi PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
