@@ -189,7 +189,7 @@ namespace juceRmlUi
 		Colorb toByte(const Colori& _c) noexcept { return Colorb{ toByte(_c.r), toByte(_c.g), toByte(_c.b), toByte(_c.a) }; }
 
 		template<bool HasAlphaBlend, bool HasColor>
-		void blit(Image& _dst, const int _dstX, const int _dstY, const Image& _src, const int _srcX, const int _srcY, const int _srcW, const int _srcH, const Colorb& _color)
+		void blit(Image& _dst, const int _dstX, const int _dstY, const Image& _src, const int _srcX, const int _srcY, const int _srcW, const int _srcH, const Colorb& _color) noexcept
 		{
 			const auto* src = _src.getColorPointer(_srcX, _srcY);
 
@@ -227,7 +227,7 @@ namespace juceRmlUi
 			}
 		}
 
-		void blitDownscale2x2(Image& _dst, const Image& _src)
+		void blitDownscale2x2(Image& _dst, const Image& _src) noexcept
 		{
 			const auto h = _dst.height;
 			const auto w = _dst.width;
@@ -264,7 +264,7 @@ namespace juceRmlUi
 		void blit(
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
-			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color)
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color) noexcept
 		{
 			static constexpr int scaleBits = 18;	// use 14.18 fixed point for the filtering code
 			static constexpr int scaleMask = (1 << scaleBits) - 1;
@@ -482,7 +482,7 @@ namespace juceRmlUi
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
 			const Colorb& _color
-			)
+			) noexcept
 		{
 			if constexpr (HasScale)
 			{
@@ -501,7 +501,7 @@ namespace juceRmlUi
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
 			const Colorb& _color, 
 			bool hasColor
-			)
+			) noexcept
 		{
 			if (hasColor) blit<HasScale, HasAlphaBlend, true >(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color);
 			else          blit<HasScale, HasAlphaBlend, false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color);
@@ -514,7 +514,7 @@ namespace juceRmlUi
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
 			const Colorb& _color, 
 			bool hasAlphablend, bool hasColor
-			)
+			) noexcept
 		{
 			if (hasAlphablend) blit<HasScale, true >(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasColor);
 			else               blit<HasScale, false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasColor);
@@ -524,7 +524,7 @@ namespace juceRmlUi
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
-			const Colorb& _color, bool hasScale, bool hasAlphablend, bool hasColor)
+			const Colorb& _color, bool hasScale, bool hasAlphablend, bool hasColor) noexcept
 		{
 			if (hasScale) blit<true >(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasAlphablend, hasColor);
 			else          blit<false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasAlphablend, hasColor);
@@ -532,7 +532,7 @@ namespace juceRmlUi
 
 		template<bool AlphaBlend>
 		void fill(Image& _dst,
-			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color)
+			const int _dstX, const int _dstY, const int _dstW, const int _dstH, const Colorb& _color) noexcept
 		{
 			const auto invAlpha = 255 - _color.a;
 
@@ -592,7 +592,7 @@ namespace juceRmlUi
 
 	namespace
 	{
-		int roundToInt(const float _in)
+		int roundToInt(const float _in) noexcept
 		{
 			// we have values > 0 only so that is fine
 			return static_cast<int>(_in + 0.5f);
@@ -601,14 +601,14 @@ namespace juceRmlUi
 
 	RendererJuce::RendererJuce(Rml::CoreInstance& _coreInstance) : RenderInterface(_coreInstance)
 	{
-		static_assert(sizeof(rendererJuce::Colorb) == 4);
+		static_assert(sizeof(Colorb) == 4);
 		static_assert(sizeof(Rml::Colourb) == 4);
 	}
 
 	RendererJuce::~RendererJuce()
 	= default;
 
-	rendererJuce::Image* rendererJuce::Image::getMip()
+	Image* Image::getMip()
 	{
 		if (m_nextMip)
 			return m_nextMip.get();
@@ -631,7 +631,7 @@ namespace juceRmlUi
 
 	Rml::CompiledGeometryHandle RendererJuce::CompileGeometry(const Rml::Span<const Rml::Vertex> _vertices, const Rml::Span<const int> _indices)
 	{
-		auto* g = new rendererJuce::Geometry();
+		auto* g = new Geometry();
 
 		Rml::Vector2f posMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 		Rml::Vector2f posMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -751,7 +751,7 @@ namespace juceRmlUi
 
 				const auto hasColor = quadColor.red != 255 || quadColor.green != 255 || quadColor.blue != 255;
 
-				g->quads.emplace_back(rendererJuce::Quad{
+				g->quads.emplace_back(Quad{
 					Rml::Rectanglef::FromCorners(quadPosMin, quadPosMax),
 					Rml::Rectanglef::FromCorners(quadUvMin, quadUvMax),
 					Rml::Vector2f(
@@ -855,7 +855,7 @@ namespace juceRmlUi
 			}
 
 			const auto hasColor = quad.hasColor;
-			rendererJuce::Colorb col { quad.color.red, quad.color.green, quad.color.blue, quad.color.alpha };
+			Colorb col { quad.color.red, quad.color.green, quad.color.blue, quad.color.alpha };
 
 			if (img)
 			{
@@ -902,17 +902,17 @@ namespace juceRmlUi
 	Rml::TextureHandle RendererJuce::GenerateTexture(Rml::Span<const uint8_t> _source, Rml::Vector2i _sourceDimensions)
 	{
 		// create juce::Image from raw RGBA data
-		auto* img = new rendererJuce::Image();
+		auto* img = new Image();
 
 		const auto srcH = _sourceDimensions.y;
 		const auto srcW = _sourceDimensions.x;
 
 		img->width = srcW;
-		img->paddedWidth = rendererJuce::Image::padWidth(srcW);
+		img->paddedWidth = Image::padWidth(srcW);
 		img->height = srcH;
 
-		const auto dstW = rendererJuce::Image::padWidth(srcW);
-		const auto dstH = rendererJuce::Image::padHeight(srcH);
+		const auto dstW = Image::padWidth(srcW);
+		const auto dstH = Image::padHeight(srcH);
 
 		const size_t pixelCountSrc = srcW * srcH;
 		const size_t pixelCountDst = dstW * dstH;
@@ -1026,11 +1026,11 @@ namespace juceRmlUi
 
 		if (!m_renderTarget || m_renderTarget->width != width || m_renderTarget->height != height)
 		{
-			m_renderTarget.reset(new rendererJuce::Image());
+			m_renderTarget.reset(new Image());
 			m_renderTarget->width = width;
-			m_renderTarget->paddedWidth = rendererJuce::Image::padWidth(width);
+			m_renderTarget->paddedWidth = Image::padWidth(width);
 			m_renderTarget->height = height;
-			m_renderTarget->data.resize((rendererJuce::Image::padWidth(width) * rendererJuce::Image::padHeight(height)) << 2);
+			m_renderTarget->data.resize((Image::padWidth(width) * Image::padHeight(height)) << 2);
 
 			m_renderImage.reset(new juce::Image(juce::Image::RGB, width, height, false));
 		}
@@ -1055,7 +1055,7 @@ namespace juceRmlUi
 
 		// default implementation that is slow but safe
 		template<typename PixelDataType>
-		void copyToBitmap(const juce::Image::BitmapData& _dst, const rendererJuce::Image& _src, int _x, int _y, int _width, int _height)
+		void copyToBitmap(const juce::Image::BitmapData& _dst, const Image& _src, int _x, int _y, int _width, int _height)
 		{
 			const auto yEnd = _y + _height;
 
@@ -1076,7 +1076,7 @@ namespace juceRmlUi
 
 		// optimized version for 4-byte stride target bitmaps
 		template<typename PixelDataType>
-		void copyToBitmap4(const juce::Image::BitmapData& _dst, const rendererJuce::Image& _src, int _x, int _y, int _width, int _height)
+		void copyToBitmap4(const juce::Image::BitmapData& _dst, const Image& _src, int _x, int _y, int _width, int _height)
 		{
 			const auto yEnd = _y + _height;
 
@@ -1143,7 +1143,7 @@ namespace juceRmlUi
 		static_assert(getAlphaComponentIndex<juce::PixelRGB>() != -1);
 		static_assert(getAlphaComponentIndex<juce::PixelARGB>() != -1);
 
-		void copyToBitmap(const juce::Image::BitmapData& _dst, const rendererJuce::Image& _src)
+		void copyToBitmap(const juce::Image::BitmapData& _dst, const Image& _src)
 		{
 			const auto w = std::min(_src.width, _dst.width);
 			const auto h = std::min(_src.height, _dst.height);
