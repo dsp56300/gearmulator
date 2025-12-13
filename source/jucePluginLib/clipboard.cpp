@@ -9,7 +9,7 @@
 
 #include "baseLib/filesystem.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include "juce_core/juce_core.h"
 

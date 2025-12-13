@@ -6,7 +6,7 @@
 
 #include "xtLib/xtState.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include "xtFrontPanel.h"
 #include "xtWaveEditor.h"

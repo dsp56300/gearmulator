@@ -7,7 +7,7 @@
 
 #include <chrono>
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #ifndef Pm_MessageData3
 #define Pm_MessageData3(msg) (((msg) >> 24) & 0xFF)

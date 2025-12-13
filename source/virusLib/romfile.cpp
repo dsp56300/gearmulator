@@ -7,7 +7,7 @@
 #include "unpacker.h"
 
 #include "dsp56kEmu/dsp.h"
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include <cstring>	// memcpy
 

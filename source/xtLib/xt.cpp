@@ -2,7 +2,7 @@
 
 #include "synthLib/midiTypes.h"
 
-#include "dsp56kEmu/threadtools.h"
+#include "dsp56kBase/threadtools.h"
 
 #include "xtHardware.h"
 #include "xtRomLoader.h"

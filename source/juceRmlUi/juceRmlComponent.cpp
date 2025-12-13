@@ -15,7 +15,8 @@
 
 #include "baseLib/filesystem.h"
 #include "baseLib/logging.h"
-#include "baseLib/threadtools.h"
+
+#include "dsp56kBase/threadtools.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -258,8 +259,8 @@ namespace juceRmlUi
 			startNextFrameTimer();
 		}
 
-		baseLib::ThreadTools::setCurrentThreadPriority(baseLib::ThreadPriority::Lowest);
-		baseLib::ThreadTools::setCurrentThreadName("RmlUI-Renderer");
+		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Lowest);
+		dsp56k::ThreadTools::setCurrentThreadName("RmlUI-Renderer");
 	}
 
 	void RmlComponent::renderOpenGL()

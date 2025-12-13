@@ -8,7 +8,7 @@
 #include <vector>
 #include <memory>
 
-#include "dsp56kEmu/threadtools.h"
+#include "dsp56kBase/threadtools.h"
 
 namespace pluginLib::patchDB
 {

@@ -1,6 +1,6 @@
 #include "wavWriter.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include <map>
 #include <cassert>
@@ -10,7 +10,7 @@
 
 #include "baseLib/filesystem.h"
 
-#include "dsp56kEmu/threadtools.h"
+#include "dsp56kBase/threadtools.h"
 #include "dsp56kEmu/types.h"
 
 namespace synthLib

@@ -6,7 +6,7 @@
 #include "baseLib/binarystream.h"
 
 #ifdef ZYNTHIAN
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 #endif
 
 namespace jucePluginEditorLib
