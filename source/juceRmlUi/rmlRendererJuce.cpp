@@ -303,6 +303,13 @@ namespace juceRmlUi
 
 				auto fracYVec = _mm_set1_epi16(static_cast<int16_t>(fracY >> (scaleBits - fracBits)));
 
+				const __m128i fracXShuffle = _mm_setr_epi8(
+				     0,  1,  0,  3,
+					 4,  5,  4,  7,
+					 8,  9,  8, 11,
+					12, 13, 12, 15
+				);
+
 				for (; x < _dstW - 1; x += 2)
 				{
 					// bilinear filtering executed for 2 pixels in parallel, doing 2x2 texel fetches i.e. 8 texels per iteration
@@ -378,7 +385,7 @@ namespace juceRmlUi
 
 					// lerp rows
 					__m128i fracXVec = _mm_srli_epi32(fracX, scaleBits - fracBits);
-					fracXVec = _mm_unpacklo_epi16(fracXVec, fracXVec);
+					fracXVec = _mm_shuffle_epi8(fracXVec, fracXShuffle);
 
 					__m128i c0 = _mm_add_epi16(c00, _mm_srai_epi16(_mm_mullo_epi16(d0, fracXVec), fracBits));
 					__m128i c1 = _mm_add_epi16(c01, _mm_srai_epi16(_mm_mullo_epi16(d1, fracXVec), fracBits));
