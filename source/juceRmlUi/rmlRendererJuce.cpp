@@ -11,6 +11,7 @@
 #	define HAVE_SSE 1
 #	include <xmmintrin.h>	// SSE
 #	include <emmintrin.h>	// SSE2
+#	include <tmmintrin.h>	// SSSE3
 #	include <smmintrin.h>	// SSE 4.1
 #elif IS_ARM64
 #	define HAVE_SSE 1
