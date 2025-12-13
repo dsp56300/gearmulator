@@ -1,6 +1,7 @@
 #include "vstpreset.h"
 
 #include "baseLib/binarystream.h"
+#include "baseLib/endian.h"
 
 #include "dsp56kBase/logging.h"
 
@@ -18,12 +19,12 @@ namespace synthLib
 			_stream.read4CC(fourCC);
 			return check4CC(fourCC, _expected);
 		}
-		template<VstPreset::Endian SourceEndian>
+		template<baseLib::Endian SourceEndian>
 		uint32_t readUint32(baseLib::BinaryStream& _s)
 		{
 			const auto i = _s.read<uint32_t>();
 
-			if constexpr (VstPreset::hostEndian() == SourceEndian)
+			if constexpr (baseLib::hostEndian() == SourceEndian)
 				return i;
 			return
 				((i & 0xFF000000) >> 24) |
@@ -31,12 +32,12 @@ namespace synthLib
 				((i & 0x0000FF00) << 8) |
 				((i & 0x000000FF) << 24);
 		}
-        template<VstPreset::Endian SourceEndian>
+        template<baseLib::Endian SourceEndian>
         uint64_t readUint64(baseLib::BinaryStream& _s)
         {
             const auto i = _s.read<uint64_t>();
 
-            if constexpr (VstPreset::hostEndian() == SourceEndian)
+            if constexpr (baseLib::hostEndian() == SourceEndian)
                 return i;
             return
 				((i & 0xFF00000000000000) >> 56) | 
@@ -50,15 +51,15 @@ namespace synthLib
         }
 		uint32_t readUint32Vst2(baseLib::BinaryStream& _s)
 		{
-			return readUint32<VstPreset::Endian::Big>(_s);
+			return readUint32<baseLib::Endian::Big>(_s);
 		}
 		uint32_t readUint32Vst3(baseLib::BinaryStream& _s)
 		{
-			return readUint32<VstPreset::Endian::Little>(_s);
+			return readUint32<baseLib::Endian::Little>(_s);
 		}
 		uint64_t readUint64Vst3(baseLib::BinaryStream& _s)
 		{
-			return readUint64<VstPreset::Endian::Little>(_s);
+			return readUint64<baseLib::Endian::Little>(_s);
 		}
 	}
 

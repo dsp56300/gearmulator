@@ -4,6 +4,7 @@
 #include "skin.h"
 
 #include "baseLib/filesystem.h"
+#include "baseLib/os.h"
 
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/filetype.h"
@@ -18,6 +19,7 @@
 
 #include "juceRmlPlugin/rmlPlugin.h"
 #include "juceRmlPlugin/skinConverter/skinConverter.h"
+#include "juceRmlUi/juceRmlComponentConfig.h"
 
 #include "juceUiLib/messageBox.h"
 
@@ -671,14 +673,23 @@ namespace jucePluginEditorLib
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(m_rmlInterfaces.getCoreInstance(), getProcessor().getController()));
 
-		auto* comp = new juceRmlUi::RmlComponent(m_rmlInterfaces, *this, _rmlFile, 1.0f
+		juceRmlUi::RmlComponentConfig config;
+
+		config.refreshRateLimitHz = m_processor.getConfig().getIntValue("refreshRateLimitHz", -1);
+
+		auto software = m_processor.getConfig().getIntValue("forceSoftwareRenderer", -1);
+		if (software >= 0)
+			config.forceSoftwareRenderer = software > 0 ? juceRmlUi::SoftwareRendererMode::ForceOn : juceRmlUi::SoftwareRendererMode::ForceOff;
+
+		auto* comp = new juceRmlUi::RmlComponent(
+			m_rmlInterfaces, *this, _rmlFile, 1.0f
 			, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 			{
-				onRmlContextCreated(_rmlComponent, _context);
+			 onRmlContextCreated(_rmlComponent, _context);
 			}, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
 			{
-				onRmlDocumentLoadFailed(_rmlComponent, _context);
-			}, m_processor.getConfig().getIntValue("refreshRateLimitHz", -1));
+			 onRmlDocumentLoadFailed(_rmlComponent, _context);
+			}, config);
 
 		auto* doc = comp->getDocument();
 
@@ -833,7 +844,7 @@ namespace jucePluginEditorLib
 
 	void Editor::onDisclaimerFinished() const
 	{
-		if(!synthLib::isRunningUnderRosetta())
+		if(!baseLib::isRunningUnderRosetta())
 			return;
 
 		const auto& name = m_processor.getProperties().name;

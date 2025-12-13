@@ -4,8 +4,10 @@ project(juceRmlUi VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	frameRateLimiter.cpp frameRateLimiter.h
-	juceRmlComponent.cpp juceRmlComponent.h
+	juceRmlComponent.cpp juceRmlComponent.h 
+	juceRmlComponentConfig.h
 	juceRmlDrag.cpp juceRmlDrag.h
+	juceRmlLookAndFeel.cpp juceRmlLookAndFeel.h
 	juceRmlUi.cpp juceRmlUi.h
 	rmlColorPicker.cpp rmlColorPicker.h
 	rmlDataProvider.h
@@ -36,6 +38,7 @@ set(SOURCES
 	rmlRendererProxy.cpp rmlRendererProxy.h
 	rmlRendererGL2.cpp rmlRendererGL2.h
 	rmlRendererGL2Types.h
+	rmlRendererJuce.cpp rmlRendererJuce.h
 	rmlRenderInterfaceFilters.cpp rmlRenderInterfaceFilters.h
 	rmlRenderInterfaceShaders.cpp rmlRenderInterfaceShaders.h
 	rmlShader.cpp rmlShader.h

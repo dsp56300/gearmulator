@@ -110,27 +110,6 @@ namespace synthLib
         return validatePath(path);
     }
 
-	namespace
-	{
-	    std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize, const bool _stripPluginComponentFolders)
-	    {
-	        std::string path = getModulePath(_stripPluginComponentFolders);
-
-	        if(path.empty())
-	            path = getCurrentDirectory();
-
-	        return baseLib::filesystem::findFile(path, _extension, _minSize, _maxSize);
-	    }
-	}
-
-    std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize)
-    {
-        auto res = findFile(_extension, _minSize, _maxSize, true);
-		if (!res.empty())
-			return res;
-		return findFile(_extension, _minSize, _maxSize, false);
-    }
-
 	std::string findROM(const size_t _minSize, const size_t _maxSize)
     {
         std::string path = getModulePath();
@@ -146,35 +125,4 @@ namespace synthLib
 
 		return baseLib::filesystem::findFile(path, ".bin", _minSize, _maxSize);
     }
-
-    std::string findROM(const size_t _expectedSize)
-    {
-	    return findROM(_expectedSize, _expectedSize);
-    }
-
-    void setFlushDenormalsToZero()
-    {
-#if defined(_MSC_VER)
-        _controlfp(_DN_FLUSH, _MCW_DN);
-#elif defined(HAVE_SSE)
-        _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
-#endif
-    }
-
-    bool isRunningUnderRosetta()
-    {
-#ifdef __APPLE__
-		int ret = 0;
-		size_t size = sizeof(ret);
-		if (sysctlbyname("sysctl.proc_translated", &ret, &size, NULL, 0) == -1) 
-		{
-			if (errno == ENOENT)
-				return false;	// no, native
-			return false;		// unable to tell, assume native
-		}
-		return ret == 1;		// Rosetta if result is 1
-#else
-		return false;
-#endif
-   	}
 } // namespace synthLib

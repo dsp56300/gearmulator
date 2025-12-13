@@ -3,9 +3,12 @@
 #include <cassert>
 #include <algorithm> // std::transform
 
+#include "juceRmlComponentConfig.h"
+#include "juceRmlLookAndFeel.h"
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
+#include "rmlRendererJuce.h"
 
 #include "RmlUi_Renderer_GL2.h"
 #include "RmlUi_Renderer_GL3.h"
@@ -32,9 +35,31 @@ namespace juceRmlUi
 		}
 
 		constexpr uint32_t g_advancedRendererMinimumGLversion = 33;
+
+		bool isSoftwareRenderer(const std::string& _glRenderer)
+		{
+		    static const char* indicators[] = {
+		        "llvmpipe",
+		        "softpipe",
+		        "swiftshader",
+		        "gdi generic",
+				"apple software renderer"
+		    };
+
+			// make lowercase
+			std::string r = _glRenderer;
+			std::transform(r.begin(), r.end(), r.begin(), ::tolower);
+
+		    for (auto* s : indicators)
+		    {
+		        if (r.find(s) != std::string::npos)
+		            return true;
+		    }
+			return false;
+		}
 	}
 
-	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, int _refreshRateLimitHz/* = -1*/)
+	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, const RmlComponentConfig& _config)
 		: m_rmlInterfaces(_interfaces)
 		, m_coreInstance(_interfaces.getCoreInstance())
 		, m_dataProvider(_dataProvider)
@@ -42,24 +67,37 @@ namespace juceRmlUi
 		, m_contentScale(_contentScale)
 		, m_drag(*this)
 		, m_nextFrameTime(_interfaces.getSystemInterface().GetElapsedTime())
+		, m_config(_config)
 	{
-		if (_refreshRateLimitHz > 0 && _refreshRateLimitHz <= 300)
-			m_targetFPS = static_cast<float>(_refreshRateLimitHz);
+		if (_config.refreshRateLimitHz > 0 && _config.refreshRateLimitHz <= 300)
+			m_targetFPS = static_cast<float>(_config.refreshRateLimitHz);
 
 		m_renderProxy.reset(new RendererProxy(m_coreInstance, m_dataProvider));
 
-		m_openGLContext.setMultisamplingEnabled(true);
-		m_openGLContext.setRenderer(this);
-		m_openGLContext.setComponentPaintingEnabled(false);
-		m_openGLContext.attachTo(*this);
-		m_openGLContext.setContinuousRepainting(false);
+		if (_config.forceSoftwareRenderer == SoftwareRendererMode::ForceOn)
+		{
+			m_renderInterface.reset(new RendererJuce(m_coreInstance));
+			m_renderType = Renderer::Software;
+			m_renderProxy->setRenderer(m_renderInterface.get());
+		}
+		else
+		{
+			m_openGLContext.reset(new juce::OpenGLContext());
+
+			m_openGLContext->setMultisamplingEnabled(true);
+			m_openGLContext->setRenderer(this);
+			m_openGLContext->setComponentPaintingEnabled(false);
+			m_openGLContext->attachTo(*this);
+			m_openGLContext->setContinuousRepainting(false);
 
 #if JUCE_MAC
-		// Required on macOS to get a core profile, we don't want a compatibility profile
-		m_openGLContext.setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
+			// Required on macOS to get a core profile, we don't want a compatibility profile
+			m_openGLContext->setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
 #endif
+		}
 
 		setWantsKeyboardFocus(true);
+
 		// set some reasonable default size, correct size will be set when loading the RML document
 		setSize(1280, 720);
 
@@ -86,7 +124,8 @@ namespace juceRmlUi
 		{
 			Rml::Log::Message(Rml::Log::LT_ERROR, "%s", e.what());
 
-			m_openGLContext.detach();
+			if (m_openGLContext)
+				m_openGLContext->detach();
 			_docLoadFailedCallback(*this, *m_rmlContext);
 			destroyRmlContext();
 			deleteAllChildren();
@@ -101,9 +140,18 @@ namespace juceRmlUi
 
 	RmlComponent::~RmlComponent()
 	{
+		m_renderProxy->setRenderer(nullptr);
+
+		if (m_lookAndFeelParent)
+			m_lookAndFeelParent->setLookAndFeel(nullptr);
+		m_lookAndFeelParent = nullptr;
+
+		delete m_lookAndFeel;
+
 		enableDebugger(false);
 
-		m_openGLContext.detach();
+		if (m_openGLContext)
+			m_openGLContext->detach();
 		destroyRmlContext();
 
 		deleteAllChildren();
@@ -113,7 +161,36 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
-		m_openGLContext.setSwapInterval(1);
+		using namespace juce::gl;
+
+		auto* renderer = glGetString(GL_RENDERER);
+
+		if (renderer)
+		{
+			const auto software = isSoftwareRenderer(reinterpret_cast<const char*>(renderer));
+
+			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s, is software: %d", renderer, software ? 1 : 0);
+
+			if (software && m_config.forceSoftwareRenderer != SoftwareRendererMode::ForceOff)
+			{
+				Rml::Log::Message(Rml::Log::LT_WARNING, "Detected software OpenGL renderer (%s), falling back to own software renderer instead", renderer);
+				m_renderType = Renderer::Software;
+				return;
+			}
+		}
+		else
+		{
+			if (m_config.forceSoftwareRenderer != SoftwareRendererMode::ForceOff)
+			{
+				Rml::Log::Message(Rml::Log::LT_WARNING, "Could not determine OpenGL renderer, falling back to own software renderer");
+				m_renderType = Renderer::Software;
+				return;
+			}
+
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Could not determine OpenGL renderer");
+		}
+
+		m_openGLContext->setSwapInterval(1);
 
 		bool haveCustomFPS = m_targetFPS >= 0;
 
@@ -125,13 +202,7 @@ namespace juceRmlUi
 			m_targetFPS = 30; // default limit is 30 Hz, updated below if renderer is capable
 #endif
 		}
-		using namespace juce::gl;
-
 		int major = 0, minor = 0;
-
-		auto* renderer = glGetString(GL_RENDERER);
-		if (renderer)
-			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s", renderer);
 
 #if JUCE_MAC
 		constexpr auto version = g_advancedRendererMinimumGLversion;
@@ -153,6 +224,7 @@ namespace juceRmlUi
 		{
 			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
 			m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
+			m_renderType = Renderer::Gl3;
 
 			if (!haveCustomFPS)
 			{
@@ -174,12 +246,13 @@ namespace juceRmlUi
 		}
 		else
 		{
-			const auto npotSupported = m_openGLContext.isTextureNpotSupported();
+			const auto npotSupported = m_openGLContext->isTextureNpotSupported();
 
 			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 2 renderer for RmlUi, version detected: %d.%d, max texture size %d, NPOT supported %d", major, minor, maxSize, npotSupported ? 1 : 0);
 
 			m_renderProxy->setTextureParameters(static_cast<uint32_t>(maxSize), npotSupported);
 			m_renderInterface.reset(new RenderInterface_GL2(m_coreInstance));
+			m_renderType = Renderer::Gl2;
 		}
 
 		m_openGLversion = version;
@@ -279,6 +352,10 @@ namespace juceRmlUi
 
 	void RmlComponent::openGLContextClosing()
 	{
+		// nothing to be done if using software renderer, this is only done to discard the GL context as we didn't like it
+		if (m_renderType == Renderer::Software)
+			return;
+
 		m_renderProxy->setRenderer(nullptr);
 		m_renderInterface.reset();
 	}
@@ -474,6 +551,19 @@ namespace juceRmlUi
 		enqueueUpdate();
 	}
 
+	void RmlComponent::parentHierarchyChanged()
+	{
+		auto* rootComponent = getTopLevelComponent();
+		if (!m_lookAndFeel)
+			m_lookAndFeel = new LookAndFeel();
+		if (m_lookAndFeelParent)
+			m_lookAndFeelParent->setLookAndFeel(nullptr);
+		m_lookAndFeelParent = rootComponent;
+		rootComponent->setLookAndFeel(m_lookAndFeel);
+
+		Component::parentHierarchyChanged();
+	}
+
 	void RmlComponent::timerCallback()
 	{
 		{
@@ -505,9 +595,16 @@ namespace juceRmlUi
 	juce::Point<int> RmlComponent::toRmlPosition(int _x, int _y) const
 	{
 		return {
-			juce::roundToInt(static_cast<float>(_x) * m_openGLContext.getRenderingScale()), 
-			juce::roundToInt(static_cast<float>(_y) * m_openGLContext.getRenderingScale())
+			juce::roundToInt(static_cast<float>(_x) * getOpenGLRenderingScale()),
+			juce::roundToInt(static_cast<float>(_y) * getOpenGLRenderingScale())
 		};
+	}
+
+	float RmlComponent::getOpenGLRenderingScale() const
+	{
+		if (m_openGLContext)
+			return static_cast<float>(m_openGLContext->getRenderingScale());
+		return 1.0f;
 	}
 
 	void RmlComponent::resize(const int _width, const int _height)
@@ -551,7 +648,15 @@ namespace juceRmlUi
 			m_screenshotState = ScreenshotState::NoScreenshot;
 		}
 
-		if (m_updating || !m_renderDone || !m_renderInterface)
+		if (m_updating || !m_renderDone)
+			return;
+
+		if (m_renderType == Renderer::Software && !m_renderInterface)
+		{
+			m_renderInterface.reset(new RendererJuce(m_coreInstance));
+			m_renderProxy->setRenderer(m_renderInterface.get());
+		}
+		else if (!m_renderInterface)
 			return;
 
 		{
@@ -623,7 +728,20 @@ namespace juceRmlUi
 		m_updating = false;
 
 		// trigger a repaint and wait for OpenGL to be done with it
-		m_openGLContext.triggerRepaint();
+		if (m_renderType == Renderer::Software)
+		{
+			// get rid of opengl context if we switched to software rendering
+			if (m_openGLContext)
+			{
+				m_openGLContext->detach();
+				m_openGLContext.reset();
+				return;
+			}
+
+			repaint();
+		}
+		else if (m_openGLContext)
+			m_openGLContext->triggerRepaint();
 
 		std::scoped_lock lock(m_timerMutex);
 		// we make the timer run a bit faster to prevent that we miss the next frame time by a too large margin
@@ -702,6 +820,35 @@ namespace juceRmlUi
 		return _size;
 	}
 
+	void RmlComponent::paint(juce::Graphics& _g)
+	{
+		if (m_openGLContext)
+			return;
+
+		auto* r = dynamic_cast<RendererJuce*>(m_renderInterface.get());
+		if (!r)
+			return;
+
+		r->beginFrame(_g);
+
+		m_renderProxy->executeRenderFunctions();
+
+		auto* rootComp = getTopLevelComponent();
+		auto* laf = dynamic_cast<LookAndFeel*>(&rootComp->getLookAndFeel());
+
+		if (laf)
+		{
+			r->endFrame(laf->getCurrentImage());
+		}
+		else
+		{
+			static juce::Image nullImage;
+			r->endFrame(nullImage);
+		}
+
+		m_renderDone = true;
+	}
+
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
 	{
 		const auto size = getScreenBounds();
@@ -717,7 +864,7 @@ namespace juceRmlUi
 
 			m_rmlContext = CreateContext(m_coreInstance, getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
 
-			m_rmlContext->SetDensityIndependentPixelRatio(static_cast<float>(m_openGLContext.getRenderingScale()) * m_contentScale);
+			m_rmlContext->SetDensityIndependentPixelRatio(getOpenGLRenderingScale() * m_contentScale);
 
 			m_rmlContext->SetDefaultScrollBehavior(Rml::ScrollBehavior::Smooth, 5.0f);
 
@@ -791,7 +938,7 @@ namespace juceRmlUi
 
 		const auto size = getRenderSize();
 
-		const float renderScale = static_cast<float>(size.x) / static_cast<float>(m_documentSize.x);// * static_cast<float>(m_openGLContext.getRenderingScale());
+		const float renderScale = static_cast<float>(size.x) / static_cast<float>(m_documentSize.x);// * getRenderingScale();
 
 		if (contextDims.x != size.x || contextDims.y != size.y || m_currentRenderScale != renderScale)
 		{
@@ -809,7 +956,7 @@ namespace juceRmlUi
 
 	Rml::Vector2i RmlComponent::getRenderSize() const
 	{
-		const auto s = m_openGLContext.getRenderingScale();
+		const auto s = static_cast<double>(getOpenGLRenderingScale());
 		const auto b = getLocalBounds();
 		return { static_cast<int>(b.getWidth() * s), static_cast<int>(b.getHeight() * s) };
 	}

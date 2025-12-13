@@ -1,6 +1,7 @@
 #pragma once
 
 #include "frameRateLimiter.h"
+#include "juceRmlComponentConfig.h"
 #include "juceRmlDrag.h"
 #include "rmlInterfaces.h"
 #include "rmlRendererProxy.h"
@@ -17,6 +18,7 @@ namespace Rml
 
 namespace juceRmlUi
 {
+	class LookAndFeel;
 	struct RmlInterfaces;
 	class Renderer;
 	class JuceRmlUi;
@@ -26,6 +28,14 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget, public juce::DragAndDropContainer
 	{
 	public:
+		enum class Renderer : uint8_t
+		{
+			None,
+			Gl2,
+			Gl3,
+			Software
+		};
+
 		enum class ScreenshotState : uint8_t
 		{
 			NoScreenshot,
@@ -42,7 +52,7 @@ namespace juceRmlUi
 		using DocumentLoadFailedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentCreatedCallback = std::function<void(RmlComponent&, Rml::ElementDocument*)>;
 
-		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, int _refreshRateLimitHz = -1);
+		explicit RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, float _contentScale, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, const RmlComponentConfig& _config);
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
@@ -62,6 +72,8 @@ namespace juceRmlUi
 		void modifierKeysChanged(const juce::ModifierKeys& _modifiers) override;
 		void focusLost(FocusChangeType _cause) override;
 		void focusGained(FocusChangeType _cause) override;
+
+		void parentHierarchyChanged() override;
 
 		void timerCallback() override;
 
@@ -92,6 +104,8 @@ namespace juceRmlUi
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		juce::Point<int> toRmlPosition(int _x, int _y) const;
 
+		float getOpenGLRenderingScale() const;
+
 		Rml::Vector2i getDocumentSize() const { return m_documentSize; }
 
 		void resize(int _width, int _height);
@@ -109,6 +123,8 @@ namespace juceRmlUi
 		bool supportsPowerOfTwo() const;
 		uint32_t getMaximumTextureSize() const;
 		uint32_t getValidTextureSize(uint32_t _size) const;
+
+		void paint(juce::Graphics& _g) override;
 
 	private:
 		void update();
@@ -128,9 +144,10 @@ namespace juceRmlUi
 		DataProvider& m_dataProvider;
 		const std::string m_rootRmlFilename;
 
-		juce::OpenGLContext m_openGLContext;
+		std::unique_ptr<juce::OpenGLContext> m_openGLContext;
 
 		std::unique_ptr<Rml::RenderInterface> m_renderInterface;
+		Renderer m_renderType = Renderer::None;
 		std::unique_ptr<RendererProxy> m_renderProxy;
 
 		Rml::Context* m_rmlContext = nullptr;
@@ -174,5 +191,10 @@ namespace juceRmlUi
 		juce::Image m_screenshot;
 		ScreenshotState m_screenshotState = ScreenshotState::NoScreenshot;
 		ScreenshotCallback m_screenshotCallback;
+
+		LookAndFeel* m_lookAndFeel = nullptr;
+		juce::Component* m_lookAndFeelParent = nullptr;
+
+		RmlComponentConfig m_config;
 	};
 }
