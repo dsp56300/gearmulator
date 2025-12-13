@@ -6,7 +6,7 @@
 #include "mqLib/mqhardware.h"
 
 #include "dsp56kEmu/jitunittests.h"
-#include "dsp56kEmu/threadtools.h"
+#include "dsp56kBase/threadtools.h"
 
 #include <vector>
 

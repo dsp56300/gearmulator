@@ -1,7 +1,7 @@
 #include "commandReader.h"
 
 #include "command.h"
-#include "dsp56300/source/dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 #include "networkLib/stream.h"
 
 namespace bridgeLib

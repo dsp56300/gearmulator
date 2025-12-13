@@ -2,7 +2,7 @@
 
 #include "baseLib/filesystem.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #ifndef _WIN32
 // filesystem is only available on macOS Catalina 10.15+

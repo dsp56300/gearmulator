@@ -20,7 +20,7 @@
 #include "synthLib/romLoader.h"
 
 #include "dsp56kEmu/fastmath.h"
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include "juceUiLib/messageBox.h"
 

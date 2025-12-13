@@ -2,7 +2,7 @@
 
 #include "processor.h"
 
-#include "dsp56kEmu/threadtools.h"
+#include "dsp56kBase/threadtools.h"
 
 #include "juce_audio_devices/juce_audio_devices.h"
 

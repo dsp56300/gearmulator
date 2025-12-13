@@ -4,7 +4,7 @@
 
 #include "bridgeLib/types.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include "networkLib/tcpClient.h"
 #include "networkLib/tcpStream.h"

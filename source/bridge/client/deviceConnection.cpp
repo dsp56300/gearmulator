@@ -1,7 +1,7 @@
 #include "deviceConnection.h"
 
 #include "remoteDevice.h"
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 #include "networkLib/logging.h"
 
 namespace bridgeClient

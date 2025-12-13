@@ -4,7 +4,7 @@
 
 #include "baseLib/binarystream.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 namespace synthLib
 {

@@ -8,7 +8,7 @@
 #include "synthLib/midiToSysex.h"
 #include "synthLib/midiTypes.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include <cstring> // memcpy
 

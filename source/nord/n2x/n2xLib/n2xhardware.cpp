@@ -1,7 +1,7 @@
 #include "n2xhardware.h"
 
 #include "n2xromloader.h"
-#include "dsp56kEmu/threadtools.h"
+#include "dsp56kBase/threadtools.h"
 #include "synthLib/deviceException.h"
 
 namespace n2x
