@@ -676,7 +676,10 @@ namespace jucePluginEditorLib
 		juceRmlUi::RmlComponentConfig config;
 
 		config.refreshRateLimitHz = m_processor.getConfig().getIntValue("refreshRateLimitHz", -1);
-		config.forceSoftwareRenderer = m_processor.getConfig().getBoolValue("forceSoftwareRenderer", false);
+
+		auto software = m_processor.getConfig().getIntValue("forceSoftwareRenderer", -1);
+		if (software >= 0)
+			config.forceSoftwareRenderer = software > 0 ? juceRmlUi::SoftwareRendererMode::ForceOn : juceRmlUi::SoftwareRendererMode::ForceOff;
 
 		auto* comp = new juceRmlUi::RmlComponent(
 			m_rmlInterfaces, *this, _rmlFile, 1.0f

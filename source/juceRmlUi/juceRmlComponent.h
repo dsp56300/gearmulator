@@ -1,6 +1,7 @@
 #pragma once
 
 #include "frameRateLimiter.h"
+#include "juceRmlComponentConfig.h"
 #include "juceRmlDrag.h"
 #include "rmlInterfaces.h"
 #include "rmlRendererProxy.h"
@@ -9,11 +10,6 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "juce_opengl/juce_opengl.h"
-
-namespace juceRmlUi
-{
-	struct RmlComponentConfig;
-}
 
 namespace Rml
 {
@@ -198,5 +194,7 @@ namespace juceRmlUi
 
 		LookAndFeel* m_lookAndFeel = nullptr;
 		juce::Component* m_lookAndFeelParent = nullptr;
+
+		RmlComponentConfig m_config;
 	};
 }

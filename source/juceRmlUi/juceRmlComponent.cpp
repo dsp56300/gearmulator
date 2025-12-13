@@ -67,13 +67,14 @@ namespace juceRmlUi
 		, m_contentScale(_contentScale)
 		, m_drag(*this)
 		, m_nextFrameTime(_interfaces.getSystemInterface().GetElapsedTime())
+		, m_config(_config)
 	{
 		if (_config.refreshRateLimitHz > 0 && _config.refreshRateLimitHz <= 300)
 			m_targetFPS = static_cast<float>(_config.refreshRateLimitHz);
 
 		m_renderProxy.reset(new RendererProxy(m_coreInstance, m_dataProvider));
 
-		if (_config.forceSoftwareRenderer)
+		if (_config.forceSoftwareRenderer == SoftwareRendererMode::ForceOn)
 		{
 			m_renderInterface.reset(new RendererJuce(m_coreInstance));
 			m_renderType = Renderer::Software;
@@ -170,7 +171,7 @@ namespace juceRmlUi
 
 			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s, is software: %d", renderer, software ? 1 : 0);
 
-			if (software)
+			if (software && m_config.forceSoftwareRenderer != SoftwareRendererMode::ForceOff)
 			{
 				Rml::Log::Message(Rml::Log::LT_WARNING, "Detected software OpenGL renderer (%s), falling back to own software renderer instead", renderer);
 				m_renderType = Renderer::Software;
@@ -179,9 +180,14 @@ namespace juceRmlUi
 		}
 		else
 		{
-			Rml::Log::Message(Rml::Log::LT_WARNING, "Could not determine OpenGL renderer, falling back to own software renderer");
-			m_renderType = Renderer::Software;
-			return;
+			if (m_config.forceSoftwareRenderer != SoftwareRendererMode::ForceOff)
+			{
+				Rml::Log::Message(Rml::Log::LT_WARNING, "Could not determine OpenGL renderer, falling back to own software renderer");
+				m_renderType = Renderer::Software;
+				return;
+			}
+
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Could not determine OpenGL renderer");
 		}
 
 		m_openGLContext->setSwapInterval(1);
