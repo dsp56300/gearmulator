@@ -345,7 +345,7 @@ namespace juceRmlUi
 					srcX += srcXStep << 1;
 
 					auto srcXi = _mm_srli_epi32(srcXvec, scaleBits);
-					auto fracX = _mm_and_epi32(srcXvec, _mm_set1_epi32(scaleMask));
+					auto fracX = _mm_and_si128(srcXvec, _mm_set1_epi32(scaleMask));
 					srcXvec = _mm_add_epi32(srcXvec, srcXStepMul2Vec);
 
 					// fetch 8 texels, load 2 at a time
