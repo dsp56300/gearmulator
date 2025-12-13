@@ -67,6 +67,17 @@ else()
 	target_compile_definitions(juceRmlUi PRIVATE JUCE_MAC=0)
 endif()
 
+check_cxx_compiler_flag(-mssse3 HAS_SSSE3)
+check_cxx_compiler_flag(-msse4.1 HAS_SSE41)
+
+if(HAS_SSSE3)
+    target_compile_options(juceRmlUi PRIVATE -mssse3)
+endif()
+
+if(HAS_SSE41)
+    target_compile_options(juceRmlUi PRIVATE -msse4.1)
+endif()
+
 set_property(TARGET juceRmlUi PROPERTY FOLDER "Gearmulator")
 
 target_compile_definitions(juceRmlUi PUBLIC RMLUI_GL3_CUSTOM_LOADER="juce_opengl/juce_opengl.h")
