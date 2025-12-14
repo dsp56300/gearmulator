@@ -54,9 +54,9 @@ namespace baseLib::filesystem
 #ifdef USE_DIRENT
         char temp[1024];
         getcwd(temp, sizeof(temp));
-        return temp;
+        return validatePath(temp);
 #else
-		return std::filesystem::current_path().string();
+		return validatePath(std::filesystem::current_path().string());
 #endif
     }
 
