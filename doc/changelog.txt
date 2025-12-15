@@ -2,6 +2,16 @@ Release Notes
 
 2.0.14:
 
+Framework:
+
+- [Imp] Implemented software renderer that is used if no compatible OpenGL 
+		version is available. Software rendering can be forced via config
+		file: Set forceSoftwareRenderer to 1 
+
+- [Fix] Further attempts to improve thread priority for DSP threads on macOS
+- [Fix] List view in patch manager might not always refresh correctly when
+        selecting a different bank
+
 Osirus/OsTIrus
 
 - [Fix] Single not properly restored if save state was saved while 
