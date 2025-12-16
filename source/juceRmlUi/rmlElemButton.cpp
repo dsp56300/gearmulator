@@ -14,7 +14,7 @@ namespace juceRmlUi
 	{
 		ElemValue::onChangeValue();
 
-		const auto v = static_cast<pluginLib::ParamValue>(getValue());
+		const auto v = static_cast<int>(getValue());
 		setChecked(v == getValueOn());
 	}
 
@@ -29,7 +29,7 @@ namespace juceRmlUi
 		else if (_key == "valueOn")
 		{
 			m_valueOn = getProperty<int>("valueOn", -1);
-			setChecked(static_cast<pluginLib::ParamValue>(getValue()) == getValueOn());
+			setChecked(static_cast<int>(getValue()) == getValueOn());
 		}
 		else if (_key == "valueOff")
 		{
@@ -84,12 +84,12 @@ namespace juceRmlUi
 		evClick(this);
 	}
 
-	pluginLib::ParamValue ElemButton::getValueOn() const
+	int ElemButton::getValueOn() const
 	{
 		return m_valueOn == -1 && m_valueOff == -1 ? 1 : m_valueOn;
 	}
 
-	pluginLib::ParamValue ElemButton::getValueOff() const
+	int ElemButton::getValueOff() const
 	{
 		return m_valueOn == -1 && m_valueOff == -1 ? 0 : m_valueOff;
 	}
