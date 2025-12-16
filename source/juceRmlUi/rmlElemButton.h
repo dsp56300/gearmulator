@@ -1,7 +1,6 @@
 #pragma once
 
 #include "rmlElemValue.h"
-#include "jucePluginLib/types.h"
 
 namespace juceRmlUi
 {
@@ -33,8 +32,8 @@ namespace juceRmlUi
 
 		static bool isToggle(const Rml::Element* _button);
 
-		pluginLib::ParamValue getValueOn() const;
-		pluginLib::ParamValue getValueOff() const;
+		int getValueOn() const;
+		int getValueOff() const;
 
 	private:
 		void onClick();
@@ -42,8 +41,8 @@ namespace juceRmlUi
 		bool m_isToggle = false;
 		bool m_isChecked = false;
 
-		pluginLib::ParamValue m_valueOn = -1;
-		pluginLib::ParamValue m_valueOff = -1;
+		int m_valueOn = -1;
+		int m_valueOff = -1;
 
 		Rml::Element* m_hitTestElem = nullptr;
 	};
