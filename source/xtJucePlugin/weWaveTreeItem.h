@@ -39,7 +39,7 @@ namespace xtJucePlugin
 
 		void setNode(const juceRmlUi::TreeNodePtr& _node) override;
 
-		static void paintWave(const xt::WaveData& _data, juce::Graphics& _g, int _x, int _y, int _width, int _height, const juce::Colour& _colour);
+		static void paintWave(const xt::WaveData& _data, juce::Graphics& _g, int _x, int _y, int _width, int _height, uint32_t _colourArgb);
 
 		static std::string getWaveName(xt::WaveId _waveIndex);
 		static WaveCategory getCategory(xt::WaveId _waveIndex);

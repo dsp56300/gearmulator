@@ -1,5 +1,43 @@
 Release Notes 
 
+2.0.14:
+
+Framework:
+
+- [Imp] Implemented software renderer that is used if no compatible OpenGL 
+		version is available. Software rendering can be forced via config
+		file: Set forceSoftwareRenderer to 1 
+
+- [Fix] Further attempts to improve thread priority for DSP threads on macOS
+- [Fix] List view in patch manager might not always refresh correctly when
+        selecting a different bank
+
+Osirus/OsTIrus
+
+- [Fix] Single not properly restored if save state was saved while 
+        Multi mode active
+
+2.0.13:
+
+Framework:
+
+- [Imp] Improved compatiblity with Win 7 and older OpenGL versions
+
+Osirus/OsTIrus:
+
+- [Fix] UI always opened in Single mode even if plugin state was
+        saved in Multi mode
+
+OsTIrus:
+
+- [Fix] Part Midi indicators were slow and only refreshed twice per second
+
+Xenia:
+
+- [Fix] BUG-10067 Wave tables not refreshing when opening Wave Editor 
+        for the first time
+- [Fix] BUG-10066 Wave/Frequency/Phase editor click+drag not working
+
 2.0.12:
 
 NodalRed2x/OsTIrus:

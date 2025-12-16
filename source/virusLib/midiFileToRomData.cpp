@@ -1,6 +1,6 @@
 #include "midiFileToRomData.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include "synthLib/midiToSysex.h"
 

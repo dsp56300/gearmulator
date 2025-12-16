@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "os.h"
+#include "baseLib/os.h"
 
 using namespace synthLib;
 
@@ -67,7 +67,7 @@ namespace synthLib
 
 	void Plugin::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
 	{
-		setFlushDenormalsToZero();
+		baseLib::setFlushDenormalsToZero();
 
 		TAudioInputs inputs(_inputs);
 		TAudioOutputs outputs(_outputs);

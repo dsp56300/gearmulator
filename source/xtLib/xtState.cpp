@@ -12,7 +12,7 @@
 #include "synthLib/midiToSysex.h"
 #include "synthLib/midiBufferParser.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 namespace xt
 {

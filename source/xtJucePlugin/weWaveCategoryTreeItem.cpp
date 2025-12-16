@@ -6,6 +6,8 @@
 #include "juceRmlUi/rmlElemTree.h"
 #include "juceRmlUi/rmlMenu.h"
 
+#include "juce_graphics/juce_graphics.h"
+
 #include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin

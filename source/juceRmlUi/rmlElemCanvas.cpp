@@ -76,8 +76,10 @@ namespace juceRmlUi
 		const auto origin = renderBox.GetFillOffset();
 		const auto size = renderBox.GetFillSize();
 
-		const auto w = static_cast<int>(size.x);
-		const auto h = static_cast<int>(size.y);
+		const auto* comp = RmlComponent::fromElement(this);
+
+		const auto w = static_cast<int>(comp->getValidTextureSize(static_cast<uint32_t>(size.x)));
+		const auto h = static_cast<int>(comp->getValidTextureSize(static_cast<uint32_t>(size.y)));
 
 		if (w != m_textureSize.x || h != m_textureSize.y)
 		{

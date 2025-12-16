@@ -79,6 +79,7 @@ namespace baseLib
 #elif defined(__APPLE__)
 		if (_priority == ThreadPriority::Highest)
 		{
+			pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
 			setCurrentThreadRealtimeParameters(0, 0);
 		}
 		else if (_priority == ThreadPriority::Low || _priority == ThreadPriority::Lowest)

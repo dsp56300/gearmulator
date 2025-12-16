@@ -1,6 +1,6 @@
 #include "pluginEditorWindow.h"
 #include "pluginEditorState.h"
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 #include "juceRmlUi/juceRmlComponent.h"
 
 #include "patchmanager/patchmanager.h"

@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstring>	// memcmp
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include "baseLib/filesystem.h"
 

@@ -5,7 +5,7 @@
 #include "portaudio/include/portaudio.h"
 
 #include "dsp56kEmu/audio.h"
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 constexpr uint32_t g_blocksize = 256;
 

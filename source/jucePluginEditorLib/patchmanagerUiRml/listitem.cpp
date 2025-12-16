@@ -40,12 +40,12 @@ namespace jucePluginEditorLib::patchManagerRml
 	void ListElemEntry::onEntryChanged()
 	{
 //		ElemListEntry::onEntryChanged();
-		m_item = dynamic_cast<ListItem*>(getEntry().get());
 
-		if (!m_item)
+		const auto* item = getItem();
+		if (!item)
 			return;
 
-		onPatchChanged(m_item->getPatch());
+		onPatchChanged(item->getPatch());
 	}
 
 	void ListElemEntry::onPatchChanged(const pluginLib::patchDB::PatchPtr& _patch)
@@ -53,7 +53,8 @@ namespace jucePluginEditorLib::patchManagerRml
 		if (_patch)
 		{
 			setName(_patch->getName());
-			setColor(getItem()->getPatchManager().getPatchColor(_patch));
+			if (const auto* item = getItem())
+				setColor(item->getPatchManager().getPatchColor(_patch));
 		}
 	}
 
@@ -112,8 +113,9 @@ namespace jucePluginEditorLib::patchManagerRml
 	{
 		if (juceRmlUi::helper::isContextMenu(_event))
 		{
-			if (!m_item->isSelected())
-				getList().setSelectedEntries({m_item->getIndex()});
+			auto* item = getItem();
+			if (!item->isSelected())
+				getList().setSelectedEntries({item->getIndex()});
 			auto& list = getList();
 
 			list.openContextMenu(_event);

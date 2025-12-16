@@ -258,6 +258,28 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 
 	std::lock_guard lock(m_mutex);
 
+	if(isMulti)
+	{
+		m_multiEditBuffer = preset;
+
+		m_globalSettings[PLAY_MODE] = PlayModeMulti;
+	}
+	else
+	{
+		if(program == SINGLE)
+		{
+			m_globalSettings[PLAY_MODE] = PlayModeSingle;
+			m_singleEditBuffer = preset;
+		}
+		else if(program < m_singleEditBuffers.size())
+		{
+			if(program >= getPartCount())
+				return false;
+
+			m_singleEditBuffers[program] = preset;
+		}
+	}
+
 	if(m_loadingState || waitingForPresetReceiveConfirmation())
 	{
 		// if we write a multi or a multi mode single, remove a pending single for single mode
@@ -291,28 +313,6 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 	}
 
 	receiveUpgradedPreset();
-
-	if(isMulti)
-	{
-		m_multiEditBuffer = preset;
-
-		m_globalSettings[PLAY_MODE] = PlayModeMulti;
-	}
-	else
-	{
-		if(program == SINGLE)
-		{
-			m_globalSettings[PLAY_MODE] = PlayModeSingle;
-			m_singleEditBuffer = preset;
-		}
-		else if(program < m_singleEditBuffers.size())
-		{
-			if(program >= getPartCount())
-				return false;
-
-			m_singleEditBuffers[program] = preset;
-		}
-	}
 
 	writeHostBitsWithWait(0,1);
 	// Send header

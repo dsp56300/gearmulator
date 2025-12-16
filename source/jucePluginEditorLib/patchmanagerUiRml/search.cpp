@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 #include "juceRmlUi/rmlEventListener.h"
 

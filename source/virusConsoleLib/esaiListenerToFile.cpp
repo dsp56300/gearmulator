@@ -1,6 +1,6 @@
 #include "esaiListenerToFile.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 EsaiListenerToFile::EsaiListenerToFile(dsp56k::Esai& _esai, uint8_t _outChannels, uint8_t _inChannels, TCallback _callback,	uint32_t _samplerate, std::string _audioFilename)
 	: EsaiListener(_esai, _outChannels, _inChannels, std::move(_callback))

@@ -25,7 +25,12 @@ namespace juceRmlUi
 	void ElemListEntry::setListItem(const List::EntryPtr& _entry)
 	{
 		if (m_entry == _entry)
+		{
+			if (_entry)
+				_entry->setElement(this);
 			return;
+		}
+
 		if (m_entry)
 		{
 			m_onAdded.reset();
@@ -33,7 +38,8 @@ namespace juceRmlUi
 			m_onIndexChanged.reset();
 			m_onSelected.reset();
 
-			m_entry->setElement(nullptr);
+			if (m_entry->getElement() == this)
+				m_entry->setElement(nullptr);
 		}
 
 		m_entry = _entry;

@@ -40,7 +40,7 @@ namespace xtJucePlugin
 	void ControlTreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
 		if(const auto wave = m_editor.getData().getWave(m_wave))
-			WaveTreeItem::paintWave(*wave, _g, 0, 0, _width, _height, juce::Colour(0xffffffff));
+			WaveTreeItem::paintWave(*wave, _g, 0, 0, _width, _height, 0xffffffff);
 	}
 
 	void ControlTreeItem::setWave(const xt::WaveId _wave)

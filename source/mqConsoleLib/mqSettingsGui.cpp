@@ -8,7 +8,7 @@
 #include "portmidi/pm_common/portmidi.h"
 #include "portaudio/include/portaudio.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 using Key = Term::Key;
 

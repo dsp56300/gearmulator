@@ -42,7 +42,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		void onEntryChanged() override;
 
-		ListItem* getItem() const { return m_item; }
+		ListItem* getItem() const { return dynamic_cast<ListItem*>(getEntry().get()); }
 
 		void onPatchChanged(const pluginLib::patchDB::PatchPtr& _patch);
 
@@ -63,7 +63,6 @@ namespace jucePluginEditorLib::patchManagerRml
 		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
 
 	private:
-		ListItem* m_item = nullptr;
 		Rml::Element* m_elemName = nullptr;
 		Rml::Element* m_elemColor = nullptr;
 

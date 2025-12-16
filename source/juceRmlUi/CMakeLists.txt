@@ -4,8 +4,10 @@ project(juceRmlUi VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	frameRateLimiter.cpp frameRateLimiter.h
-	juceRmlComponent.cpp juceRmlComponent.h
+	juceRmlComponent.cpp juceRmlComponent.h 
+	juceRmlComponentConfig.h
 	juceRmlDrag.cpp juceRmlDrag.h
+	juceRmlLookAndFeel.cpp juceRmlLookAndFeel.h
 	juceRmlUi.cpp juceRmlUi.h
 	rmlColorPicker.cpp rmlColorPicker.h
 	rmlDataProvider.h
@@ -36,6 +38,7 @@ set(SOURCES
 	rmlRendererProxy.cpp rmlRendererProxy.h
 	rmlRendererGL2.cpp rmlRendererGL2.h
 	rmlRendererGL2Types.h
+	rmlRendererJuce.cpp rmlRendererJuce.h
 	rmlRenderInterfaceFilters.cpp rmlRenderInterfaceFilters.h
 	rmlRenderInterfaceShaders.cpp rmlRenderInterfaceShaders.h
 	rmlShader.cpp rmlShader.h
@@ -53,7 +56,7 @@ add_library(juceRmlUi STATIC)
 target_sources(juceRmlUi PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(juceRmlUi PUBLIC baseLib rmlui_core rmlui_debugger)
+target_link_libraries(juceRmlUi PUBLIC baseLib dsp56kBase rmlui_core rmlui_debugger)
 
 target_include_directories(juceRmlUi PUBLIC ../JUCE/modules)
 target_compile_definitions(juceRmlUi PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
@@ -62,6 +65,17 @@ if(APPLE)
 	target_compile_definitions(juceRmlUi PRIVATE JUCE_MAC=1)
 else()
 	target_compile_definitions(juceRmlUi PRIVATE JUCE_MAC=0)
+endif()
+
+check_cxx_compiler_flag(-mssse3 HAS_SSSE3)
+check_cxx_compiler_flag(-msse4.1 HAS_SSE41)
+
+if(HAS_SSSE3)
+    target_compile_options(juceRmlUi PRIVATE -mssse3)
+endif()
+
+if(HAS_SSE41)
+    target_compile_options(juceRmlUi PRIVATE -msse4.1)
 endif()
 
 set_property(TARGET juceRmlUi PROPERTY FOLDER "Gearmulator")

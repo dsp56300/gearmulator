@@ -37,10 +37,16 @@ namespace juceRmlUi
 
 		void setElement(ElemListEntry* _elem)
 		{
+			if (m_element == _elem)
+				return;
 			m_element = _elem;
+			onElementChanged(m_element);
 		}
 
 		ElemListEntry* getElement() const { return m_element; }
+
+	protected:
+		virtual void onElementChanged(ElemListEntry* _element) {}
 
 	private:
 		bool setSelected(bool _selected);

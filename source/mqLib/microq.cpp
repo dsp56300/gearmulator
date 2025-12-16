@@ -3,7 +3,7 @@
 #include "synthLib/midiTypes.h"
 #include "synthLib/deviceException.h"
 
-#include "dsp56kEmu/threadtools.h"
+#include "dsp56kBase/threadtools.h"
 
 #include "mqhardware.h"
 #include "romloader.h"

@@ -88,10 +88,21 @@ namespace juceRmlUi
 
 			auto i = img;
 
-			helper::toBuffer(core_instance, buffer, i);
+			auto w = i.getWidth();
+			auto h = i.getHeight();
 
-			const auto w = i.getWidth();
-			const auto h = i.getHeight();
+			const auto wNew = static_cast<int>(getValidTextureSize(w));
+			const auto hNew = static_cast<int>(getValidTextureSize(h));
+
+			if (wNew != w || hNew != h)
+			{
+				i = i.rescaled(wNew, hNew, juce::Graphics::mediumResamplingQuality);
+
+				w = wNew;
+				h = hNew;
+			}
+
+			helper::toBuffer(core_instance, buffer, i);
 
 			const auto handle = m_renderer->GenerateTexture(buffer, Rml::Vector2i(w, h));
 			addHandle<HandleTexture>(dummyHandle, handle);
@@ -432,6 +443,21 @@ namespace juceRmlUi
 			for (const auto& restoreContextFunc : m_restoreContextFuncs)
 				restoreContextFunc.second();
 		}
+	}
+
+	void RendererProxy::setTextureParameters(const uint32_t _maxTextureSize, const bool _npotTextureSupported)
+	{
+		m_maxTextureSize = _maxTextureSize;
+		m_npotTextureSupported = _npotTextureSupported;
+	}
+
+	uint32_t RendererProxy::getValidTextureSize(const uint32_t _size) const
+	{
+		if (supportsNpotTextures())
+			return std::min(_size, m_maxTextureSize);
+
+		auto s = juce::nextPowerOfTwo(static_cast<int>(_size));
+		return std::min(s, static_cast<int>(m_maxTextureSize));
 	}
 
 	bool RendererProxy::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const

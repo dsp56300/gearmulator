@@ -5,7 +5,7 @@
 
 #include "n2xhardware.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 namespace n2x
 {

@@ -4,7 +4,7 @@
 
 #include "parameterdescriptions.h"
 
-#include "dsp56kEmu/logging.h"
+#include "dsp56kBase/logging.h"
 
 namespace pluginLib
 {
