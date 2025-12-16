@@ -43,7 +43,7 @@ namespace jucePluginEditorLib
 		}
 	}
 
-	void SettingsMidiMatrix::refresh()
+	void SettingsMidiMatrix::refresh() const
 	{
 		auto& matrix = m_midi.getProcessor().getMidiRoutingMatrix();
 		for (size_t i=0; i<CellCount; ++i)

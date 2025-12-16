@@ -10,10 +10,6 @@ namespace juceRmlUi
 namespace Rml
 {
 	class Event;
-}
-
-namespace Rml
-{
 	class Element;
 }
 
@@ -26,7 +22,7 @@ namespace jucePluginEditorLib
 	public:
 		SettingsMidiMatrix(SettingsMidi& _midi, Rml::Element* _root, synthLib::MidiRoutingMatrix::EventType _type, std::string _name);
 
-		void refresh();
+		void refresh() const;
 
 	private:
 		void onClicked(Rml::Event& _event, juceRmlUi::ElemButton* _button, synthLib::MidiEventSource _source, synthLib::MidiEventSource _dest) const;

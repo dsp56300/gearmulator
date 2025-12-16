@@ -16,9 +16,6 @@ namespace jucePluginEditorLib
 {
 	Settings::Settings(Editor& _editor, Rml::Element* _root) : m_editor(_editor), m_root(_root), m_categories(*this), m_page(*this)
 	{
-//		addAndMakeVisible(m_categories);
-//		addAndMakeVisible(m_page);
-
 		juce::MessageManager::callAsync([this]
 		{
 			m_categories.selectLastCategory();
@@ -30,7 +27,7 @@ namespace jucePluginEditorLib
 		juceRmlUi::helper::removeFromParent(m_root);
 	}
 
-	void Settings::setSelectedCategory(const SettingsCategory* _settingsCategory)
+	void Settings::setSelectedCategory(const SettingsCategory* _settingsCategory) const
 	{
 		m_categories.setSelectedCategory(_settingsCategory);
 	}

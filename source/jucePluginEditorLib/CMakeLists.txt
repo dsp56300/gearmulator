@@ -18,13 +18,10 @@ set(SOURCES
 	settings.cpp settings.h
 	settingsCategories.cpp settingsCategories.h
 	settingsCategory.cpp settingsCategory.h
-	settingsControls.cpp settingsControls.h
 	settingsMidi.cpp settingsMidi.h
 	settingsMidiMatrix.cpp settingsMidiMatrix.h
 	settingsPage.cpp settingsPage.h
 	settingsPlugin.cpp settingsPlugin.h
-	settingsStyles.cpp settingsStyles.h
-	settingsTypes.h
 	skin.h
 )
 

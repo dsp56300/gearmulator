@@ -20,7 +20,7 @@ namespace jucePluginEditorLib
 
 		Editor& getEditor() const { return m_editor; }
 
-		void setSelectedCategory(const SettingsCategory* _settingsCategory);
+		void setSelectedCategory(const SettingsCategory* _settingsCategory) const;
 
 		static std::unique_ptr<Settings> createFromTemplate(Editor& _editor, const std::string& _templateName, Rml::Element* _parent);
 
