@@ -110,6 +110,9 @@ namespace jucePluginEditorLib
 		const auto name = m_presets[static_cast<size_t>(idx)].first;
 		auto filename = getPresetFilename(name);
 
+		if (name == g_defaultPresetName)
+			return;
+
 		genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Question, m_processor.getProductName(), "Delete preset '" + name + "'?", 
 			[this, filename](const genericUI::MessageBox::Result _r) 
 		{
