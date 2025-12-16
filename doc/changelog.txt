@@ -12,7 +12,7 @@ Framework:
 - [Fix] List view in patch manager might not always refresh correctly when
         selecting a different bank
 
-Osirus/OsTIrus
+Osirus/OsTIrus:
 
 - [Fix] Single not properly restored if save state was saved while 
         Multi mode active
