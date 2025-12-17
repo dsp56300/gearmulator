@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gearmulator Downloads</title>
+<style>
+  body { font-family: sans-serif; }
+  select { margin-right: 1em; }
+  ul { list-style-type: none; padding: 0; }
+</style>
+</head>
+<body>
+
+<h1>Gearmulator Downloads</h1>
+
+<label>Product: <select id="productFilter"><option value="">All</option></select></label>
+<label>Format: <select id="formatFilter"><option value="">All</option></select></label>
+<label>OS: <select id="osFilter"><option value="">All</option></select></label>
+
+<ul id="assetList"></ul>
+
+<script>
+async function main() {
+  const params = new URLSearchParams(window.location.search);
+  const version = params.get('version');
+  if (!version) {
+    document.body.innerHTML = '<p>No version specified in URL</p>';
+    return;
+  }
+
+  const repo = 'dsp56300/gearmulator';
+  const url = `https://api.github.com/repos/${repo}/releases/tags/${version}`;
+  const resp = await fetch(url);
+  const data = await resp.json();
+
+  const assetList = document.getElementById('assetList');
+  const productFilter = document.getElementById('productFilter');
+  const formatFilter = document.getElementById('formatFilter');
+  const osFilter = document.getElementById('osFilter');
+
+  const products = new Set();
+  const formats = new Set();
+  const oses = new Set();
+
+  const assets = data.assets.map(a => {
+    // filename example:
+    // TheUsualSuspects-XeniaFX-VST3-2.0.14-Linux_aarch64.rpm
+    const name = a.name;
+    const parts = name.split('-');
+    const product = parts[1] || '';
+    const format = parts[2] || '';
+    const os = parts[4] || '';
+    products.add(product);
+    formats.add(format);
+    oses.add(os);
+    return { name, url: a.browser_download_url, product, format, os };
+  });
+
+  function populateFilter(select, items) {
+    [...items].sort().forEach(i => {
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = i;
+      select.appendChild(opt);
+    });
+  }
+
+  populateFilter(productFilter, products);
+  populateFilter(formatFilter, formats);
+  populateFilter(osFilter, oses);
+
+  function render() {
+    assetList.innerHTML = '';
+    const p = productFilter.value;
+    const f = formatFilter.value;
+    const o = osFilter.value;
+    assets.forEach(a => {
+      if ((p === '' || a.product === p) &&
+          (f === '' || a.format === f) &&
+          (o === '' || a.os === o)) {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = a.url;
+        link.textContent = a.name;
+        li.appendChild(link);
+        assetList.appendChild(li);
+      }
+    });
+  }
+
+  productFilter.addEventListener('change', render);
+  formatFilter.addEventListener('change', render);
+  osFilter.addEventListener('change', render);
+
+  render();
+}
+
+main();
+</script>
+
+</body>
+</html>
