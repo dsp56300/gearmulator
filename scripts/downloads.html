@@ -58,8 +58,9 @@ async function main() {
         const maybeFormat = parts[2] || '';
         const format = validFormats.has(maybeFormat) ? maybeFormat : '';
 
-        // Extract OS (fifth part, remove extension if any)
-        let os = parts[4] || '';
+		const osIndex = format === '' ? 3 : 4;
+        // Extract OS (fifth part, or fourth part if no format, remove extension if any)
+        let os = parts[osIndex] || '';
         os = os.replace(/\.[^/.]+$/, ''); // remove file extension
 
         if (product) products.add(product);
