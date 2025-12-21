@@ -1,11 +1,14 @@
 Release Notes 
 
-2.1.0:
+2.0.15:
+
+Osirus/OsTIrus:
+
+- [Fix] State not correctly saved in Single Mode
 
 OsTIrus:
 
 - [Fix] Chorus Type displayed the same value regardless of selected part
-- [Fix] State not correctly saved in Single Mode
 
 2.0.14:
 
