@@ -1,5 +1,11 @@
 Release Notes 
 
+2.1.0:
+
+OsTIrus:
+
+- [Fix] Chorus Type displayed the same value regardless of selected part
+
 2.0.14:
 
 Framework:

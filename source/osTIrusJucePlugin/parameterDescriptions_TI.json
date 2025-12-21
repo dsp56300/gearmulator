@@ -144,7 +144,7 @@
  		{"page":112, "index":100, "name":"A_Undefined100", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":112, "index":101, "name":"A_Undefined101", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":112, "index":102, "name":"A_Undefined102", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
-		{"page":112, "index":103, "class":"MultiOrSingle|NonPartSensitive", "name":"Chorus/Type", "displayName":"Chorus/Type", "min":0, "max":6, "default":0, "toText":"chorusType", "isPublic":true, "isDiscrete":true, "isBool":false},
+		{"page":112, "index":103, "name":"Chorus/Type", "displayName":"Chorus/Type", "min":0, "max":6, "default":0, "toText":"chorusType", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":112, "index":104, "name":"Chorus/Mix2", "displayName":"Chorus/Mix 2", "min":0, "max":127, "default":0, "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":112, "index":105, "name":"Chorus Mix", "displayName":"Chorus/Mix", "min":0, "max":127, "default":0, "toText":"unsignedOff", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":106, "name":"Chorus Rate", "displayName":"Chorus/LFO Rate", "min":0, "max":127, "default":64, "isPublic":true, "isDiscrete":false, "isBool":false},
