@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -73,7 +74,25 @@ namespace
 				return {};
 		}
 
+		if (_line.back() == ':')
+			return _line.substr(0, _line.size() - 1);
+
 		return _line;
+	}
+
+	uint64_t versionToInt(const std::string& _v)
+	{
+		auto posA = _v.find('.');
+		auto posB = _v.find('.', posA + 1);
+		const auto major = std::stoull(_v.substr(0, posA));
+		const auto minor = std::stoull(_v.substr(posA + 1, posB - posA - 1));
+		const auto patch = std::stoull(_v.substr(posB + 1));
+		return (major << 32) | (minor << 16) | patch;
+	}
+
+	bool compareVersions(const std::string& _a, const std::string& _b)
+	{
+		return versionToInt(_a) < versionToInt(_b);
 	}
 
 	std::string parseProduct(const std::string& _line)
@@ -300,7 +319,22 @@ int main(const int _argc, char* _argv[])
 
 	// create individual files per version and product
 	std::set<std::string> globalProducts = { "DSP", "Framework", "Patch Manager" };
-	std::set<std::string> localProducts = { "Osirus", "OsTIrus", "Xenia", "Vavra", "NodalRed2x" };
+	std::set<std::string> localProducts;
+
+	// find all local products
+	for (const auto& it : productPerVersion)
+	{
+		const auto& products = it.second;
+
+		for (const auto& [productName, productData] : products)
+		{
+			if (productName.empty())
+				continue;
+
+			if (globalProducts.find(productName) == globalProducts.end())
+				localProducts.insert(productName);
+		}
+	}
 
 	auto formatHeader = [format](const std::string & _header)
 	{
@@ -311,13 +345,19 @@ int main(const int _argc, char* _argv[])
 		return _header;
 	};
 
+	using Globals = std::map<std::string, Lines>;
+	using Locals = std::map<std::string, Lines>;
+
+	// to create a file per product with all versions included
+	std::map<std::string, std::vector<std::pair<std::string, std::pair<Globals, Lines>>>> outputs;
+
 	for (auto& itVersion : productPerVersion)
 	{
 		const auto& version = itVersion.first;
 		const auto& products = itVersion.second;
 
-		std::map<std::string, Lines> globals;
-		std::map<std::string, Lines> locals;
+		Globals globals;
+		Locals locals;
 
 		for (const auto& itProduct : products)
 		{
@@ -338,12 +378,23 @@ int main(const int _argc, char* _argv[])
 			}
 		}
 
-		// write one file per product
-		if (locals.size() > 1)
+		for (const auto& localName : localProducts)
+		{
+			auto it = locals.find(localName);
+
+			if ( globals.empty() && it == locals.end())
+				continue;
+
+			outputs[localName].emplace_back(version, std::pair(globals, it == locals.end() ? Lines() : it->second));
+		}
+
+		// write one file per product/version separated
+		if (!locals.empty())
 		{
 			for (const auto& itProduct : locals)
 			{
 				const auto& product = itProduct.first;
+				const auto& lines = itProduct.second;
 
 				const auto outName = outPath + fixFilename(version + "_" + product + ".txt");
 				std::ofstream outFile(outName);
@@ -368,7 +419,7 @@ int main(const int _argc, char* _argv[])
 				for (const auto& global : globals)
 					needsSpace |= writeProduct(outFile, global.first, global.second, needsSpace);
 
-				writeProduct(outFile, product, itProduct.second, needsSpace);
+				writeProduct(outFile, product, lines, needsSpace);
 
 				if (format == Format::Discord)
 					outFile << "```\n";
@@ -401,5 +452,53 @@ int main(const int _argc, char* _argv[])
 		if (format == Format::Discord)
 			outFile << "```\n";
 	}
+
+	// write a file per product with all versions
+	for (auto& itOutput : outputs)
+	{
+		const auto& product = itOutput.first;
+
+		auto versions = itOutput.second;
+
+		std::sort(versions.begin(), versions.end(), [&](const auto& a, const auto& b)
+		{
+			return !compareVersions(a.first,b.first);
+		});
+
+		const auto outName = outPath + fixFilename("changelog_" + product + ".txt");
+		std::ofstream outFile(outName);
+		if (!outFile.is_open())
+		{
+			std::cout << "Failed to create output file '" << outName << '\n';
+			return -1;
+		}
+
+		bool needsSpace = false;
+
+		for (auto& it : versions)
+		{
+			const auto& version = it.first;
+			const auto& globals = it.second.first;
+			const auto& localLines = it.second.second;
+
+			if (needsSpace)
+				outFile << '\n';
+
+			outFile << formatHeader("Version " + version) << "\n\n";
+
+			if (format == Format::Discord)
+				outFile << "```\n";
+
+			for (const auto& global : globals)
+				needsSpace |= writeProduct(outFile, global.first, global.second, needsSpace);
+
+			if (!localLines.empty())
+				needsSpace |= writeProduct(outFile, product, localLines, needsSpace);
+
+			if (format == Format::Discord)
+				outFile << "```\n";
+		}
+	}
+
 	return 0;
 }
