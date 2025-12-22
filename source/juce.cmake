@@ -316,7 +316,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	tus_registerChangelog(${targetName})
 
 	foreach(format IN LISTS plugin_formats)
-		string(REPLACE "_FX" "" productNameClean ${productName})
+		string(REPLACE "FX" "" productNameClean ${productName})
 		install(FILES "${CMAKE_SOURCE_DIR}/doc/changelog_split/changelog_${productNameClean}.txt"
 			DESTINATION .
 			COMPONENT ${productName}-${format})
