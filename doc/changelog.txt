@@ -5,6 +5,8 @@ Release Notes
 Framework:
 
 - [Fix] BUG-10085 Do not expand factory ROM presets tree node by default
+- [Fix] BUG-10084 Linux: Plugin editor cannot be operated after releasing 
+        the mouse
 
 2.0.15:
 
