@@ -473,7 +473,7 @@ int main(const int _argc, char* _argv[])
 
 		std::sort(versions.begin(), versions.end(), [&](const auto& a, const auto& b)
 		{
-			return !compareVersions(a.first,b.first);
+			return compareVersions(b.first, a.first);
 		});
 
 		const auto outName = outPath + fixFilename("changelog_" + product + ".txt");
