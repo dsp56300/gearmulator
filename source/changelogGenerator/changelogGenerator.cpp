@@ -82,12 +82,23 @@ namespace
 
 	uint64_t versionToInt(const std::string& _v)
 	{
-		auto posA = _v.find('.');
-		auto posB = _v.find('.', posA + 1);
-		const auto major = std::stoull(_v.substr(0, posA));
-		const auto minor = std::stoull(_v.substr(posA + 1, posB - posA - 1));
-		const auto patch = std::stoull(_v.substr(posB + 1));
-		return (major << 32) | (minor << 16) | patch;
+		try
+		{
+			auto posA = _v.find('.');
+			auto posB = _v.find('.', posA + 1);
+			auto end = _v.find_first_not_of("0123456789", posB + 1);
+			if (posA == std::string::npos || posB == std::string::npos)
+				return 0;
+			const auto major = std::stoull(_v.substr(0, posA));
+			const auto minor = std::stoull(_v.substr(posA + 1, posB - posA - 1));
+			const auto patch = std::stoull(_v.substr(posB + 1, end == std::string::npos ? std::string::npos : end - posB - 1));
+			return (major << 32) | (minor << 16) | patch;
+		}
+		catch (const std::invalid_argument& e)
+		{
+			std::cerr << "Invalid version string '" << _v << "': " << e.what() << '\n';
+			return 0;
+		}
 	}
 
 	bool compareVersions(const std::string& _a, const std::string& _b)
