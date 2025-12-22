@@ -18,38 +18,45 @@ set(USE_Standalone ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_Standalone})
 set(JUCE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 set(juce_formats "")
+set(plugin_formats "")
 
 if(USE_AU AND APPLE)
 	set(juce_formats AU)
+	set(plugin_formats AU)
 	add_custom_target(PluginFormat_AU)
 	set_property(TARGET PluginFormat_AU PROPERTY FOLDER CustomTargets)
 endif()
 
 if(USE_VST2 AND JUCE_GLOBAL_VST2_SDK_PATH)
     list(APPEND juce_formats VST)
+	list(APPEND plugin_formats VST2)
 	add_custom_target(PluginFormat_VST2)
 	set_property(TARGET PluginFormat_VST2 PROPERTY FOLDER CustomTargets)
 endif()
 
 if(USE_VST3)
     list(APPEND juce_formats VST3)
+	list(APPEND plugin_formats VST3)
 	add_custom_target(PluginFormat_VST3)
 	set_property(TARGET PluginFormat_VST3 PROPERTY FOLDER CustomTargets)
 endif()
 
 if(USE_LV2)
     list(APPEND juce_formats LV2)
+    list(APPEND plugin_formats LV2)
 	add_custom_target(PluginFormat_LV2)
 	set_property(TARGET PluginFormat_LV2 PROPERTY FOLDER CustomTargets)
 endif()
 
 if(USE_CLAP)
+    list(APPEND plugin_formats CLAP)
 	add_custom_target(PluginFormat_CLAP)
 	set_property(TARGET PluginFormat_CLAP PROPERTY FOLDER CustomTargets)
 endif()
 
 if(USE_Standalone)
     list(APPEND juce_formats Standalone)
+    list(APPEND plugin_formats Standalone)
 	add_custom_target(PluginFormat_Standalone)
 	set_property(TARGET PluginFormat_Standalone PROPERTY FOLDER CustomTargets)
 endif()
@@ -304,6 +311,16 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	if(${isSynth})
 		tus_exportTarget(${targetName})
 	endif()
+
+	# ---------- add changelog to each plugin ----------
+	tus_registerChangelog(${targetName})
+
+	foreach(format IN LISTS plugin_formats)
+		string(REPLACE "_FX" "" productNameClean ${productName})
+		install(FILES "${CMAKE_SOURCE_DIR}/doc/changelog_split/changelog_${productNameClean}.txt"
+			DESTINATION .
+			COMPONENT ${productName}-${format})
+	endforeach()
 
 	# --------- Server Plugin ---------
 
