@@ -1,5 +1,11 @@
 Release Notes 
 
+2.1.0:
+
+Framework:
+
+- [Fix] BUG-10085 Do not expand factory ROM presets tree node by default
+
 2.0.15:
 
 Osirus/OsTIrus:

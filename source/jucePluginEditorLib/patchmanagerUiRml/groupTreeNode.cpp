@@ -41,7 +41,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 			createItemForDataSource(d);
 
-			if (size() == 1 && oldCount == 0)
+			if (size() == 1 && oldCount == 0 && getGroupType() != patchManager::GroupType::Factory)
 				setOpened(true);
 		}
 	}
