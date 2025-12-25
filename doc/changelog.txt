@@ -16,6 +16,8 @@ OsTIrus:
 - [Fix] Fix Serial 6 routing displaying two times "4 Pole" instead of 
 		"4 Pole" and "2 Pole"
 - [Fix] Typo "DESTENATION" on LFO page
+- [Fix] Analogue filter modes button not being lit if analogue modes page
+        selected
 
 2.0.15:
 
