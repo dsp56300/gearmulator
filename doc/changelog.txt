@@ -8,6 +8,12 @@ Framework:
 - [Fix] BUG-10084 Linux: Plugin editor cannot be operated after releasing 
         the mouse
 
+OsTIrus:
+
+- [Fix] Automation became incompatible with 2.0.15 due to Chorus Type parameter
+        fix. Parameter versioning has been introduced to prevent this in the 
+		future. Parameters are now compatible with 2.0.14 and below again.
+
 2.0.15:
 
 Osirus/OsTIrus:
