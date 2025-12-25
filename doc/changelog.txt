@@ -13,6 +13,8 @@ OsTIrus:
 - [Fix] Automation became incompatible with 2.0.15 due to Chorus Type parameter
         fix. Parameter versioning has been introduced to prevent this in the 
 		future. Parameters are now compatible with 2.0.14 and below again.
+- [Fix] Fix Serial 6 routing displaying two times "4 Pole" instead of 
+		"4 Pole" and "2 Pole"
 
 2.0.15:
 
