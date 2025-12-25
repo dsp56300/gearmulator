@@ -252,11 +252,18 @@ namespace pluginLib
 		m_notifyingHost = false;
     }
 
-    juce::String Parameter::genId(const Description& d, const int part, const int uniqueId)
+    juce::ParameterID Parameter::genId(const Description& d, const int part, const int uniqueId)
 	{
+		juce::String s;
+
 		if(uniqueId > 0)
-			return juce::String::formatted("%d_%d_%d_%d", static_cast<int>(d.page), part, d.index, uniqueId);
-		return juce::String::formatted("%d_%d_%d", static_cast<int>(d.page), part, d.index);
+			s = juce::String::formatted("%d_%d_%d_%d", static_cast<int>(d.page), part, d.index, uniqueId);
+		else
+			s = juce::String::formatted("%d_%d_%d", static_cast<int>(d.page), part, d.index);
+
+		if (d.version > 0)
+			return { s, d.version };
+		return { s };
 	}
 
 	float Parameter::getValueForText(const juce::String& _text) const

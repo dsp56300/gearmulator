@@ -1,5 +1,34 @@
 Release Notes 
 
+2.1.0:
+
+Framework:
+
+- [Fix] BUG-10085 Do not expand factory ROM presets tree node by default
+- [Fix] BUG-10084 Linux: Plugin editor cannot be operated after releasing 
+        the mouse
+
+OsTIrus:
+
+- [Fix] Automation became incompatible with 2.0.15 due to Chorus Type parameter
+        fix. Parameter versioning has been introduced to prevent this in the 
+		future. Parameters are now compatible with 2.0.14 and below again.
+- [Fix] Fix Serial 6 routing displaying two times "4 Pole" instead of 
+		"4 Pole" and "2 Pole"
+- [Fix] Typo "DESTENATION" on LFO page
+- [Fix] Typo "CUTTOFF" on Filter page
+- [Fix] Analogue filter modes button not lit if analogue modes page selected
+
+2.0.15:
+
+Osirus/OsTIrus:
+
+- [Fix] State not correctly saved in Single Mode
+
+OsTIrus:
+
+- [Fix] Chorus Type displayed the same value regardless of selected part
+
 2.0.14:
 
 Framework:
@@ -12,7 +41,7 @@ Framework:
 - [Fix] List view in patch manager might not always refresh correctly when
         selecting a different bank
 
-Osirus/OsTIrus
+Osirus/OsTIrus:
 
 - [Fix] Single not properly restored if save state was saved while 
         Multi mode active

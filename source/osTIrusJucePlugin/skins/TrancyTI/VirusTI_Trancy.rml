@@ -352,7 +352,7 @@
 				<button id="Filter1Mode_BS" class="jucePos juceButton button_filter_bs" data-model="partCurrent" isToggle="1" param="Filter1 Mode" valueOn="3" style="left: 291dp; top: 20dp; width: 55dp; height: 54dp;"/>
 			</div>
 			<div id="Filter1Mode_AM" class="jucePos" tabgroup="tgFilter1Mode" tabpage="1" style="left: 300dp; top: 286dp; width: 400dp; height: 120dp;">
-				<button id="buttonFilter1Mode_CM" class="jucePos juceButton button_1" isToggle="0" tabbutton="0" tabgroup="tgFilter1Mode" style="left: 0dp; top: 7dp; width: 79dp; height: 78dp;">
+				<button id="buttonFilter1Mode_CM" class="jucePos juceButton button_AM" isToggle="0" tabbutton="0" tabgroup="tgFilter1Mode" style="left: 0dp; top: 7dp; width: 79dp; height: 78dp;">
 					<buttonhittest class="jucePos" style="left: 0dp; top: 0dp; width: 199dp; height: 58dp;"/>
 				</button>
 				<button id="Filter1Mode_AP1" class="jucePos juceButton button_filter_ap1" data-model="partCurrent" isToggle="1" param="Filter1 Mode" valueOn="4" style="left: 126dp; top: 20dp; width: 55dp; height: 54dp;"/>

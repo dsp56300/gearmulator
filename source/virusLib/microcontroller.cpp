@@ -260,6 +260,10 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 
 	if(isMulti)
 	{
+		// if we want to send a new preset while still waiting for the upgraded one, ignore as its obsolete
+		if (m_sentPresetProgram == 0 && m_sentPresetIsMulti)
+			m_sentPresetProgram = 0xff;
+
 		m_multiEditBuffer = preset;
 
 		m_globalSettings[PLAY_MODE] = PlayModeMulti;
@@ -270,11 +274,19 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 		{
 			m_globalSettings[PLAY_MODE] = PlayModeSingle;
 			m_singleEditBuffer = preset;
+
+			// if we want to send a new preset while still waiting for the upgraded one, ignore as its obsolete
+			 if (!m_sentPresetIsMulti && m_sentPresetProgram == SINGLE)
+				m_sentPresetProgram = 0xff;
 		}
 		else if(program < m_singleEditBuffers.size())
 		{
 			if(program >= getPartCount())
 				return false;
+
+			// if we want to send a new preset while still waiting for the upgraded one, ignore as its obsolete
+			if (!m_sentPresetIsMulti && m_sentPresetProgram == program)
+				m_sentPresetProgram = 0xff;
 
 			m_singleEditBuffers[program] = preset;
 		}
@@ -1378,6 +1390,12 @@ void Microcontroller::receiveUpgradedPreset()
 
 	if(upgradedPreset.empty())
 		return;
+
+	if (m_sentPresetProgram == 0xff)
+	{
+		LOG("Ignoring upgraded preset as it became obsolete");
+		return;
+	}
 
 	LOG("Replacing edit buffer for " << (m_sentPresetIsMulti ? "multi" : "single") << " program " << static_cast<int>(m_sentPresetProgram) << " with upgraded preset");
 

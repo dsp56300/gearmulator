@@ -33,6 +33,7 @@ namespace pluginLib
 		uint8_t page;
 		uint8_t index;
 		int classFlags;
+		int version = 0;
 		std::string name;
 		std::string displayName;
 		juce::Range<int> range;

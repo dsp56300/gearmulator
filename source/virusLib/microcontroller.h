@@ -117,7 +117,7 @@ private:
 	uint8_t m_currentBank = 0;
 	uint8_t m_currentSingle = 0;
 
-	uint8_t m_sentPresetProgram = 0;
+	uint8_t m_sentPresetProgram = 0xff;
 	bool m_sentPresetIsMulti = false;
 
 	// Device does not like if we send everything at once, therefore we delay the send of Singles after sending a Multi

@@ -537,9 +537,13 @@ namespace juceRmlUi
 	{
 		Component::focusLost(_cause);
 
+		// We skip this on Linux because apparently focusLost is called when the mouse button is released?!
+		// https://tus.youtrack.cloud/tickets/BUG-10084/
+#if JUCE_WINDOWS || JUCE_MAC
 		RmlInterfaces::ScopedAccess access(*this);
 		if (m_rmlContext)
 			m_rmlContext->ProcessMouseLeave();
+#endif
 
 		enqueueUpdate();
 	}

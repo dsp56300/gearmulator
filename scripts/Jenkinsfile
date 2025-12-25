@@ -9,33 +9,20 @@ pipeline {
 	{
 		string(name: 'Branch', defaultValue: "master", description: '')
 		string(name: 'AgentLabel', defaultValue: "git && cmake", description: '')
+		string(name: 'Synths', defaultValue: "-Dgearmulator_SYNTH_OSIRUS=on", description: '')
+		string(name: 'DisplayName', defaultValue: "?", description: '')
+		string(name: 'UploadFolder', defaultValue: "", description: '')
 		booleanParam(name: 'FXPlugins', defaultValue: false, description: '') 
 		booleanParam(name: 'Deploy', defaultValue: true, description: '') 
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '') 
-		string(name: 'UploadFolder', defaultValue: "", description: '')
-		booleanParam(name: 'SynthOsirus', defaultValue: true, description: '')
-		booleanParam(name: 'SynthOsTIrus', defaultValue: true, description: '')
-		booleanParam(name: 'SynthVavra', defaultValue: true, description: '')
-		booleanParam(name: 'SynthXenia', defaultValue: false, description: '')
-		booleanParam(name: 'SynthNodalRed2x', defaultValue: false, description: '')
 	}
 	stages {
 		stage("Checkout") {
 			steps {
 				script {
-					currentBuild.displayName += " - ${params.AgentLabel} - ${params.Branch}"
+					currentBuild.displayName += " - ${params.AgentLabel} - ${params.Branch} - ${params.DisplayName}"
 					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}\nUpload: ${params.Upload}"
-
-					if(params.FXPlugins)				currentBuild.displayName += " FX"
-					if(params.Deploy)					currentBuild.displayName += " d"
-					if(params.IntegrationTests)			currentBuild.displayName += " i"
-					if(params.Upload)					currentBuild.displayName += " u"
-					if(params.SynthOsirus)			    currentBuild.displayName += " Sabc"
-					if(params.SynthOsTIrus)			    currentBuild.displayName += " Sti"
-					if(params.SynthVavra)			    currentBuild.displayName += " SmQ"
-					if(params.SynthXenia)			    currentBuild.displayName += " Sxt"
-					if(params.SynthNodalRed2x)			currentBuild.displayName += " Sn2x"
 				}
 				doCheckout()
 			}
@@ -95,21 +82,6 @@ def genericSh(cmd)
 	}
 }
 
-def hasLabel(String label)
-{
-    def res = false
-    
-    env.NODE_LABELS.split(' ').each
-    { l ->
-        if (l.equals(label))
-        {
-            res = true
-        }
-    }
-
-    return res
-}
-
 def formatArg(_arg)
 {
 	if(isUnix())
@@ -126,14 +98,11 @@ def deleteFile(name)
 		bat "del ${name}"
 }
 
-def needsJuce()
-{
-	return "on"
-}
 def buildFxPlugins()
 {
 	return params.FXPlugins ? 'on' : 'off'
 }
+
 def cmakeBuildDir()
 {
 	return "${CMAKE_BUILD_DIR}_${params.Branch}"
@@ -158,38 +127,20 @@ def doCheckout()
 
 def getSynths()
 {
-    def synths =
-         "-Dgearmulator_SYNTH_OSIRUS=" + (params.SynthOsirus ? "on" : "off") +
-        " -Dgearmulator_SYNTH_OSTIRUS=" + (params.SynthOsTIrus ? "on" : "off") +
-        " -Dgearmulator_SYNTH_VAVRA=" + (params.SynthVavra ? "on" : "off") +
-        " -Dgearmulator_SYNTH_XENIA=" + (params.SynthXenia ? "on" : "off") +
-        " -Dgearmulator_SYNTH_NODALRED2X=" + (params.SynthNodalRed2x ? "on" : "off")
-    
-    return synths
+    return "${env.synths}";
 }
 
 def cmakeBuild()
 {
     def buildDir = cmakeBuildDir()
     def synths = getSynths()
-    def juce = needsJuce()
     def fx = buildFxPlugins()
 
 	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
-    	genericSh "cmake -Dgearmulator_SOURCE_DIR=../ -Dgearmulator_BINARY_DIR=../${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${juce} -Dgearmulator_BUILD_FX_PLUGIN=${fx} -DCMAKE_BUILD_TYPE=Release ${synths} -P scripts/generate.cmake"
+    	genericSh "cmake -Dgearmulator_SOURCE_DIR=../ -Dgearmulator_BINARY_DIR=../${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=on -Dgearmulator_BUILD_FX_PLUGIN=${fx} -DCMAKE_BUILD_TYPE=Release ${synths} -P scripts/generate.cmake"
 	}
 
-    def parallel = 2;
-    
-    if(hasLabel("win")) {
-        parallel = 12;
-    } else if(hasLabel("m2")) {
-        parallel = 6;
-    } else if(hasLabel("pi5")) {
-		paraellel = 2;
-	}
-	
-	genericSh "cmake --build ${buildDir} --config Release --parallel ${parallel}"
+	genericSh "cmake --build ${buildDir} --config Release"
 }
 
 def doIntegrationTests()
@@ -203,8 +154,13 @@ def doIntegrationTests()
 
 def doPack()
 {
+    def buildDir = cmakeBuildDir()
+    
 	dir(cmakeBuildDir()) {
 		genericSh 'cmake -P ../../scripts/pack.cmake'
+	}
+	if("${params.UploadFolder}" == "donators") {
+		genericSh "cmake -Dgearmulator_BINARY_DIR=${WORKSPACE}/${buildDir} -P scripts/packagesource.cmake"
 	}
 }
 

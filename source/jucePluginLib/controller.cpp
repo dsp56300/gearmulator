@@ -52,6 +52,10 @@ namespace pluginLib
 		}
 		std::map<ParamIndex, int> knownParameterIndices;
 
+		// all parameters that are added later are added to separate groups to prevent that
+		// automation of previous projects break in VST2/AU
+		std::map<int, std::unique_ptr<juce::AudioProcessorParameterGroup>> versionGroups;
+
     	for (uint8_t part = 0; part < getPartCount(); part++)
 		{
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
@@ -113,13 +117,34 @@ namespace pluginLib
 						m_synthParams.insert(std::make_pair(idx, std::move(params)));
 					}
 
-					if (isNonPartExclusive)
+					if (desc.version > 0)
+					{
+						auto itVersionGroup = versionGroups.find(desc.version);
+
+						if (itVersionGroup == versionGroups.end())
+						{
+							auto vg = std::make_unique<juce::AudioProcessorParameterGroup>(
+								"version" + juce::String(desc.version),
+								"Version " + juce::String(desc.version),
+								"|");
+
+							vg->addChild(std::move(p));
+							itVersionGroup = versionGroups.insert(std::make_pair(desc.version, std::move(vg))).first;
+						}
+						else
+						{
+							itVersionGroup->second->addChild(std::move(p));
+						}
+					}
+					else if (isNonPartExclusive)
 					{
 						jassert(part == 0);
 						globalParams->addChild(std::move(p));
 					}
 					else
+					{
 						group->addChild(std::move(p));
+					}
 				}
 				else
 				{
@@ -139,10 +164,16 @@ namespace pluginLib
 					m_synthInternalParamList.emplace_back(std::move(p));
 				}
 			}
+
 			_processor.addParameterGroup(std::move(group));
 		}
 
 		_processor.addParameterGroup(std::move(globalParams));
+
+		for (auto& [v,g] : versionGroups)
+			_processor.addParameterGroup(std::move(g));
+
+		versionGroups.clear();
 
 		// initialize all soft knobs for all parts
 		std::vector<size_t> softKnobs;

@@ -1328,6 +1328,10 @@
 {
 	decorator: image(button_1_hover scale-none left top);
 }
+.button_AM
+{
+	decorator: image(button_1_checked scale-none left top);
+}
 .button_arp_1
 {
 	decorator: image(button_arp_1_default scale-none left top);
