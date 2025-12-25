@@ -15,6 +15,7 @@ OsTIrus:
 		future. Parameters are now compatible with 2.0.14 and below again.
 - [Fix] Fix Serial 6 routing displaying two times "4 Pole" instead of 
 		"4 Pole" and "2 Pole"
+- [Fix] Typo "DESTENATION" on LFO page
 
 2.0.15:
 
