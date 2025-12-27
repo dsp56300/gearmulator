@@ -8,6 +8,12 @@ Framework:
 - [Fix] BUG-10084 Linux: Plugin editor cannot be operated after releasing 
         the mouse
 
+JE8086:
+
+- [Sad] Removed the volume knob animation that "emulated" the loose knob
+        from the hardware. Apparently most people never owned the hardware 
+		and thought it was a bug
+
 OsTIrus:
 
 - [Fix] Automation became incompatible with 2.0.15 due to Chorus Type parameter
@@ -50,11 +56,29 @@ Osirus/OsTIrus:
 - [Fix] Single not properly restored if save state was saved while 
         Multi mode active
 
+JE8086:
+
+- [Imp] JE-8086 is now compatible with DSP Bridge
+- [Imp] Added JE test console, a command line tool to test performance by
+        rendering the factory demos to a .wav file
+
 2.0.13:
 
 Framework:
 
 - [Imp] Improved compatiblity with Win 7 and older OpenGL versions
+
+JE8086:
+
+- [Fix] At latency setting 0, processing is now done in the audio thread to 
+        prevent spikes when app is not in focus
+- [Fix] BUG-10060 Remote Control Channel resetting to 1 if set to Off
+- [Fix] BUG-10064 Patch/Performance toggle button state not reporting the
+        correct state after switching skin
+- [Fix] BUG-10060 Performances were saved incorrectly and caused issues when 
+		loading them again
+- [Fix] BUG-10058 Fix Osc 2 Fine/Wide center values and 
+        incorrect parameter value labels
 
 Osirus/OsTIrus:
 
@@ -85,6 +109,20 @@ Framework:
 - [Fix] BUG-10051 Do not send gesture begin/end to host if parameter is 
         changed via midi CCs
 
+JE8086:
+
+- [Imp] UI polishing and improvements
+- [Fix] Add Remote Midi Channel selection to UI. The Remote Midi Channel is 
+        used for the arpeggiator and split key mode. 
+		The default value has now changed from 3 to 1 for new instances.
+- [Fix] Voice Assign numbers were reversed, now correctly display Upper-Lower
+- [Fix] Selecting a Performance in Patch Manager didn't update the selection
+        for both parts, causing Patch Manager to select obsolete patches when
+		switching between Upper / Lower
+- [Fix] BUG-10053 Upper/Lower button state ignored after loading Performance 
+        from browser
+- [Fix] BUG-10050 No visual feedback when controlling Osc 2 Fine via Midi CC
+
 Osirus:
 
 - [Fix] Incorrect default value for Osc 2 Detune
@@ -111,6 +149,13 @@ Framework:
 - [Fix] Patch Manager: Exported patches may not have consecutive 
         bank/program numbers
 
+JE8086:
+
+- [Imp] Added Performmance/Patch LCD toggle button
+- [Imp] UI has been further polished
+
+- [Fix] BUG-10037 Osc Range -12/+12 placement on UI didn't match parameter value
+
 2.0.8:
 
 Framework:
@@ -123,6 +168,31 @@ Framework:
         sending automation events back to host
 - [Fix] EMU-25 focused parameter keeps dragged element in focus
 
+JE8086:
+
+- [Imp] Default Master Volume and maximum Master Volume increased by 12 dB
+- [Imp] Expose Master Volume and Master Tune as automatable parameters
+- [Imp] Velocity/Control Assign has been redesigned, now uses new
+        graphics for knobs/sliders
+- [Imp] Patch Manager design improved to match the overall synth design
+- [Imp] Overall UI polishing and improvements
+
+- [Fix] Oscillator Shift dropdown was reversed, causing mouse wheel to work
+		in the wrong direction
+- [Fix] Automating a parameter while both parts were selected cuased the other
+		part to be modified too and caused some hosts to disable the automation
+		lane
+- [Fix] Some Midi CCs updated the UI but didn't modify the patch because CC mode
+        was set to Mode 1 instead of Mode 2
+
+2.0.7:
+
+JE8086:
+
+- [Fix] Incorrect parameter range for Velocity & Control Assign for Oscillator 2
+        Range and Fine/Wide
+- [Fix] Possibly lost midi events when automating many parameters at once
+
 2.0.6:
 
 Framework:
@@ -133,6 +203,25 @@ Framework:
 - [Fix] [UI] Missing repaint if parameter changed via Midi CC causing sliders to jump
 - [Fix] Possible crash when resizing the editor window
 
+JE8086:
+
+- [Fix] MIDI timing issues due to synchronization problems, more prominent when rendering
+- [Fix] Some controls only affected Upper Part even if Lower Part was selected:
+        Amp Pan / Amp LFO1 Depth / Bend Range Up & Down / Transpose
+- [Fix] Damaged MIDI files when exporting patches via drag & drop
+
+2.0.5:
+
+JE8086:
+
+- [Imp] UI polishing and improvements
+- [Imp] Support MIDI Control Changes for all parameters according
+        to specification of original hardware
+
+- [Fix] Performances were saved in a broken state
+- [Fix] Much better MIDI timing & correction of reported latency to host
+- [Fix] Save menu for Performances didn't show "Performance" but "Patch Upper"
+
 2.0.4:
 
 Framework:
@@ -141,6 +230,15 @@ Framework:
         via mouse wheel
 
 - [Fix] Fix inverted mouse wheel on Mac if natural scrolling is enabled
+
+JE8086:
+
+- [Fix] Slow boot when opening the plugin for the first time
+- [Fix] Validate ROM content before attempting to boot the device to prevent crashes due to
+        other ROMs in the same folder that might not belong to the synth
+- [Fix] Default Master Volume is now higher and the highest possible value has been increased
+        too. Furhtermore, the displayed percentage values have been adjusted to show
+		lower values overall
 
 2.0.3:
 

@@ -13,3 +13,4 @@
 *debug.sh
 CMakeUserPresets.json
 bin/
+.DS_Store

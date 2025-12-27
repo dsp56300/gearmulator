@@ -1,0 +1,64 @@
+#pragma once
+
+#include "jucePluginEditorLib/pluginEditor.h"
+
+#include "jucePluginLib/patchdb/patch.h"
+
+namespace jucePluginEditorLib
+{
+	class FocusedParameter;
+	class MidiPorts;
+	class Processor;
+}
+
+namespace jeJucePlugin
+{
+	class AudioPluginAudioProcessor;
+	class JePartButton;
+	class JeAssign;
+	class PartSelect;
+	class JeLcd;
+	class Controller;
+
+	class Editor final : public jucePluginEditorLib::Editor
+	{
+	public:
+		Editor(jucePluginEditorLib::Processor& _processor, const jucePluginEditorLib::Skin& _skin);
+		~Editor() override;
+
+		Editor(Editor&&) = delete;
+		Editor(const Editor&) = delete;
+		Editor& operator = (Editor&&) = delete;
+		Editor& operator = (const Editor&) = delete;
+
+		void create() override;
+
+		void initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model) override;
+
+		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
+
+		std::pair<std::string, std::string> getDemoRestrictionText() const override;
+
+		Controller& getJeController() const { return m_controller; }
+		AudioPluginAudioProcessor& getJeProcessor() const;
+
+	private:
+		void onBtWrite(Rml::Event& _event) const;
+		bool createWritePatchesMenu(juceRmlUi::Menu& _menu) const;
+
+		Controller& m_controller;
+
+		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
+
+		baseLib::EventListener<uint8_t> onPartChanged;
+
+		std::array<std::string, 4> m_activePatchNames;
+
+		std::unique_ptr<JeLcd> m_lcd;
+		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
+		std::unique_ptr<PartSelect> m_partSelect;
+		std::unique_ptr<JeAssign> m_assign;
+
+		std::vector<std::unique_ptr<JePartButton>> m_writeButtons;
+	};
+}

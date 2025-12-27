@@ -1,0 +1,815 @@
+{
+	"parameterdescriptiondefaults":
+	{
+		"isPublic":true,
+		"isBipolar":false,
+		"toText":"unsignedZero",
+		"name":"",
+		"class":"",
+		"min":0,
+		"max":127,
+		"isBool":false,
+		"isDiscrete":false,
+		"page":0,
+		"step":0
+	},
+ 	"parameterdescriptions":
+ 	[
+		{"index":0 , "name":"PatchName1", "min":32, "max":125, "default":125},
+		{"index":1 , "name":"PatchName2", "min":32, "max":125, "default":125},
+		{"index":2 , "name":"PatchName3", "min":32, "max":125, "default":125},
+		{"index":3 , "name":"PatchName4", "min":32, "max":125, "default":125},
+		{"index":4 , "name":"PatchName5", "min":32, "max":125, "default":125},
+		{"index":5 , "name":"PatchName6", "min":32, "max":125, "default":125},
+		{"index":6 , "name":"PatchName7", "min":32, "max":125, "default":125},
+		{"index":7 , "name":"PatchName8", "min":32, "max":125, "default":125},
+		{"index":8 , "name":"PatchName9", "min":32, "max":125, "default":125},
+		{"index":9 , "name":"PatchName10", "min":32, "max":125, "default":125},
+		{"index":10 , "name":"PatchName11", "min":32, "max":125, "default":125},
+		{"index":11 , "name":"PatchName12", "min":32, "max":125, "default":125},
+		{"index":12 , "name":"PatchName13", "min":32, "max":125, "default":125},
+		{"index":13 , "name":"PatchName14", "min":32, "max":125, "default":125},
+		{"index":14 , "name":"PatchName15", "min":32, "max":125, "default":125},
+		{"index":15 , "name":"PatchName16", "min":32, "max":125, "default":125},
+		{"index":16 , "name":"Lfo1Waveform", "displayName": "LFO1 Waveform", "min":0, "max":3, "toText":"waveForm", "default":0},
+		{"index":17 , "name":"Lfo1Rate", "displayName": "LFO1 RATE", "min":0, "max":127, "default":127},
+		{"index":18 , "name":"Lfo1Fade", "displayName": "LFO1 FADE", "min":0, "max":127, "default":127},
+		{"index":19 , "name":"Lfo2Rate", "displayName": "LFO2 RATE", "min":0, "max":127, "default":127},
+		{"index":20 , "name":"Lfo2DepthSelect", "min":0, "max":2, "toText": "depthSelect", "default":0},
+		{"index":21 , "name":"RingModulatorSwitch", "displayName": "RING MODULATOR",  "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":22 , "name":"CrossModulationDepth", "displayName": "CROSS MOD DEPTH", "min":0, "max":127, "default":127},
+		{"index":23 , "name":"OscillatorBalance", "displayName": "OSC BALANCE", "min":0, "max":127, "toText":"oscBalance", "default":64},
+		{"index":24 , "name":"Lfo1AndEnvelopeDestination", "displayName": "LFO1 & ENV DEST", "min":0, "max":2, "toText":"lfo1EnvDest", "default":0},
+		{"index":25 , "name":"OscLfo1Depth", "displayName": "OSC LFO1 DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":26 , "name":"PitchLfo2Depth", "displayName": "PITCH LFO2 DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":27 , "name":"PitchEnvelopeDepth", "displayName": "PITCH ENV DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":28 , "name":"PitchEnvelopeAttackTime", "displayName": "PITCH ENV ATTACK", "min":0, "max":127, "default":127},
+		{"index":29 , "name":"PitchEnvelopeDecayTime", "displayName": "PITCH ENV DECAY", "min":0, "max":127, "default":127},
+		{"index":30 , "name":"Osc1Waveform", "displayName": "OSC WAVEFORM", "min":0, "max":6, "toText":"osc1WaveForm", "default":0},
+		
+		{"index":31 , "name":"Osc1Control1", "displayName": "OSC1 CTRL 1", "min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2", "displayName": "OSC1 CTRL 2", "min":0, "max":127, "default":127},
+		
+		{"index":31 , "name":"Osc1Control1Detune", "displayName": "OSC1 DETUNE", "min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2Mix", "displayName": "OSC1 MIX", "min":0, "max":127, "default":127},
+		
+		{"index":31 , "name":"Osc1Control1Offset", "displayName": "OSC1 OFFSET", "min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2LFO1Depth", "displayName": "OSC1 LFO1 DEPTH","min":0, "max":127, "default":127},
+		
+		{"index":31 , "name":"Osc1Control1CutoffFrq", "displayName": "OSC1 FLT FREQ","min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2Resonance", "displayName": "OSC1 FLT RESO","min":0, "max":127, "default":127},
+		
+		{"index":31 , "name":"Osc1Control1Harmonics", "displayName": "OSC1 HARMONICS","min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2FeedbackAmount", "displayName": "OSC1 FEEDBK AMT","min":0, "max":127, "default":127},
+		
+		{"index":31 , "name":"Osc1Control1PulseWidth", "displayName": "OSC1 PULSE WIDTH","min":0, "max":127, "default":127},
+		{"index":32 , "name":"Osc1Control2PWMDepth", "displayName": "OSC1 PWM DEPTH","min":0, "max":127, "default":127},
+		
+		{"index":31 , "name":"Osc1Control1Shape", "displayName": "OSC1 SHAPE", "min":0, "max":127, "default":127},
+						
+		{"index":33 , "name":"Osc2Waveform", "displayName": "OSC2 WAVEFORM", "min":0, "max":3, "toText":"osc2WaveForm", "default":0},
+		{"index":34 , "name":"Osc2SyncSwitch", "displayName": "OSC2 SYNC", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":35 , "name":"Osc2Range", "displayName": "OSC2 RANGE", "min":0, "max":50, "toText":"osc2Range", "default":25},
+		{"index":36 , "name":"Osc2FineWide", "displayName": "OSC2 FINE WIDE", "min":0, "max":100, "toText":"osc2RangeFine", "default":50},
+		{"index":36 , "name":"Osc2Fine", "displayName": "OSC2 FINE", "min":0, "max":100, "default":50, "toText":"osc2RangeFine"," isPublic":false},
+		{"index":36 , "name":"Osc2WidePos", "displayName": "OSC2 WIDE POSITIVE", "min":0, "max":100, "default":50, "toText":"osc2RangeWidePos", "isPublic":false},
+		{"index":36 , "name":"Osc2WideNeg", "displayName": "OSC2 WIDE NEGATIVE", "min":0, "max":100, "default":50, "toText":"osc2RangeWideNeg", "isPublic":false},
+			
+		{"index":37 , "name":"Osc2Control1", "displayName": "OSC2 CTRL1", "min":0, "max":127, "default":127},
+		{"index":38 , "name":"Osc2Control2", "displayName": "OSC2 CTRL2", "min":0, "max":127, "default":127},
+		
+		{"index":37 , "name":"Osc2Control1PulseWidth", "displayName": "OSC2 PULSE WIDTH","min":0, "max":127, "default":127},
+		{"index":38 , "name":"Osc2Control2PWMDepth", "displayName": "OSC2 PWM DEPTH","min":0, "max":127, "default":127},		
+		
+		{"index":37 , "name":"Osc2Control1Shape", "displayName": "OSC2 SHAPE", "min":0, "max":127, "default":127},
+		{"index":38 , "name":"Osc2Control2LFO1Depth", "displayName": "OSC2 LFO1 DEPTH","min":0, "max":127, "default":127},
+		
+		{"index":37 , "name":"Osc2Control1CutoffFrq", "displayName": "OSC2 FLT FREQ", "min":0, "max":127, "default":127},
+		{"index":38 , "name":"Osc2Control2Resonance", "displayName": "OSC2 FLT RESO", "min":0, "max":127, "default":127},		
+		
+		{"index":39 , "name":"FilterType", "displayName": "FLT TYPE", "min":0, "max":2, "toText":"filterType", "default":0},
+		{"index":40 , "name":"CutoffSlope", "displayName": "CUTOFF SLOPE", "min":0, "max":1, "toText":"cutoffSlope", "default":0},
+		{"index":41 , "name":"CutoffFrequency", "displayName": "FLT CUTOFF FREQ", "min":0, "max":127, "default":127},
+		{"index":42 , "name":"Resonance", "displayName": "FLT RESONANCE", "min":0, "max":127, "default":127},
+		{"index":43 , "name":"CutoffFrequencyKeyFollow", "displayName": "FLT KEY FOLLOW", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":44 , "name":"FilterLfo1Depth", "displayName": "FLT LFO1 DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":45 , "name":"FilterLfo2Depth", "displayName": "FLT LFO2 DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":46 , "name":"FilterEnvelopeDepth", "displayName": "FLT ENV DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":47 , "name":"FilterEnvelopeAttackTime", "displayName": "FLT ENV ATTACK", "min":0, "max":127, "default":127},
+		{"index":48 , "name":"FilterEnvelopeDecayTime", "displayName": "FLT ENV DECAY", "min":0, "max":127, "default":127},
+		{"index":49 , "name":"FilterEnvelopeSustainLevel", "displayName": "FLT ENV SUSTAIN", "min":0, "max":127, "default":127},
+		{"index":50 , "name":"FilterEnvelopeReleaseTime", "displayName": "FLT ENV RELEASE", "min":0, "max":127, "default":127},
+		{"index":51 , "name":"AmpLevel", "displayName": "AMP LEVEL", "min":0, "max":127, "default":127},
+		{"index":52 , "name":"AmpLfo1Depth", "displayName": "AMP LFO1 DEPTH", "min":0, "max":127, "toText":"LFO1DepthPan", "default":64},
+		{"index":52 , "name":"AmpPan", "displayName": "AMP PAN", "min":0, "max":127, "toText":"LFO1DepthPan", "default":64},
+		{"index":53 , "name":"AmpLfo2Depth", "displayName": "AMP LFO2 DEPTH", "min":0, "max":127, "toText":"signed", "default":64},
+		{"index":54 , "name":"AmpEnvelopeAttackTime", "displayName": "AMP ENV ATTACK", "min":0, "max":127, "default":127},
+		{"index":55 , "name":"AmpEnvelopeDecayTime", "displayName": "AMP ENV DECAY", "min":0, "max":127, "default":127},
+		{"index":56 , "name":"AmpEnvelopeSustainLevel", "displayName": "AMP ENV SUSTAIN", "min":0, "max":127, "default":127},
+		{"index":57 , "name":"AmpEnvelopeReleaseTime", "displayName": "AMP ENV RELEASE", "min":0, "max":127, "default":127},
+		{"index":58 , "name":"AutoPanManualPanSwitch", "displayName": "LFO1 MOD", "min":0, "max":2, "toText":"autoPanManualPanSwitch", "default":0},
+		{"index":59 , "name":"ToneControlBass", "displayName": "TONE CTRL BASS", "min":0, "max":127, "toText": "signed", "default":64},
+		{"index":60 , "name":"ToneControlTreble", "displayName": "TONE CTRL TREBLE","min":0, "max":127, "toText": "signed", "default":64},
+		{"index":61,  "name":"ChorusType", "displayName": "CHORUS TYPE", "min":0, "max":11, "toText":"chorusType", "default":0},
+		{"index":61,  "name":"ChorusTypeRack", "displayName": "CHORUS TYPE", "min":0, "max":12, "toText":"chorusType", "default":0},
+		{"index":62 , "name":"ChorusLevel", "displayName": "CHORUS LEVEL", "min":0, "max":127, "default":127},
+		{"index":62 , "name":"MultiEffectsLevel", "displayName": "MULTI-FX LEVEL", "min":0, "max":127, "default":127},		
+		{"index":63 , "name":"DelayType", "displayName": "DELAY TYPE", "min":0, "max":4, "toText":"delayType", "default":0},
+		{"index":64 , "name":"DelayTime", "displayName": "DELAY TIME", "min":0, "max":127, "default":127},
+		{"index":65 , "name":"DelayFeedback", "displayName": "DELAY FEEDBACK", "min":0, "max":127, "default":127},
+		{"index":66 , "name":"DelayLevel", "displayName": "DELAY LEVEL", "min":0, "max":127, "default":127},
+		{"index":67 , "name":"BendRangeUp", "displayName": "BEND RANGE UP", "min":0, "max":24, "toText":"bendRangeUp", "default":0},
+		{"index":68 , "name":"BendRangeDown", "displayName": "BEND RANGE DOWN", "min":0, "max":24, "toText":"bendRangeDown", "default":0},
+		{"index":69 , "name":"PortamentoSwitch", "displayName": "PORTAMENTO", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":70 , "name":"PortamentoTime", "displayName": "PORTAMENTO TIME", "min":0, "max":127, "default":127},
+		{"index":71 , "name":"MonoSwitch", "displayName": "MONO", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":72 , "name":"LegatoSwitch", "displayName": "LEGATO",  "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":73 , "name":"OscillatorShift", "displayName": "OSCILLATOR SHIFT", "min":0, "max":4, "toText":"oscShift", "default":2},
+		{"index":74 , "name":"ControlLfo1Rate", "displayName": "CTRL LFO1 RATE", "min":0, "max":254, "toText":"signed255", "default":127},
+		{"index":76 , "name":"ControlLfo1Fade", "displayName": "CTRL LFO1 FADE", "min":0, "max":254, "toText":"signed255", "default":127},
+		{"index":78 , "name":"ControlLfo2Rate", "displayName": "CTRL LFO2 RATE", "min":0, "max":254, "toText":"signed255", "default":127},
+		{"index":80,"name":"ControlCrossModulationDepth","displayName":"C.CROSS MOD DEPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":82,"name":"ControlOscillatorBalance","displayName":"C.OSC BALANCE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":84,"name":"ControlPitchLfo1Depth","displayName":"C.PITCH LFO1 DPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":86,"name":"ControlPitchLfo2Depth","displayName":"C.PITCH LFO2 DPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":88,"name":"ControlPitchEnvelopeDepth","displayName":"C.PITCH ENV DEPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":90,"name":"ControlPitchEnvelopeAttackTime","displayName":"C.PITCH ENV ATK","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":92,"name":"ControlPitchEnvelopeDecayTime","displayName":"C.PITCH ENV DCY","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":94,"name":"ControlOsc1Control1","displayName":"C.OSC1 CONTROL 1","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":96,"name":"ControlOsc1Control2","displayName":"C.OSC1 CONTROL 2","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":98,"name":"ControlOsc2Range","displayName":"C.OSC2 RANGE","min":77,"max":177,"toText":"assignOsc2RangeFineWide", "default":127},
+		{"index":100,"name":"ControlOsc2FineWide","displayName":"C.OSC2 FINE WIDE","min":27,"max":227,"toText":"assignOsc2RangeFineWide", "default":127},
+		{"index":102,"name":"ControlOsc2Control1","displayName":"C.OSC2 CONTROL 1","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":104,"name":"ControlOsc2Control2","displayName":"C.OSC2 CONTROL 2","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":106,"name":"ControlCutoffFrequency","displayName":"C.CUTOFF FREQ","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":108,"name":"ControlResonance","displayName":"C.RESONANCE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":110,"name":"ControlCutoffFreqKeyFollow","displayName":"C.KEY FOLLOW","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":112,"name":"ControlFilterLfo1Depth","displayName":"C.FIT LFO1","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":114,"name":"ControlFilterLfo2Depth","displayName":"C.FIT LFO2","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":116,"name":"ControlFilterEnvDepth","displayName":"C.FIT ENV DPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":118,"name":"ControlFilterEnvAttackTime","displayName":"C.FIT ENV ATTACK","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":120,"name":"ControlFilterEnvDecayTime","displayName":"C.FIT ENV DECAY","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":122,"name":"ControlFilterEnvSustainLevel","displayName":"C.FIT ENV SUSTAIN","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":124,"name":"ControlFilterEnvReleaseTime","displayName":"C.FIT ENV REL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":126,"name":"ControlAmpLevel","displayName":"C.AMP LEVEL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":128,"name":"ControlAmpLfo1Depth","displayName":"C.AMP LFO1 DPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":130,"name":"ControlAmpLfo2Depth","displayName":"C.AMP LFO2 DPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":132,"name":"ControlAmpEnvAttackTime","displayName":"C.AMP ENV ATTACK","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":134,"name":"ControlAmpEnvDecayTime","displayName":"C.AMP ENV DECAY","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":136,"name":"ControlAmpEnvSustainLevel","displayName":"C.AMP ENV SUSTAIN","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":138,"name":"ControlAmpEnvReleaseTime","displayName":"C.AMP ENV REL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":140,"name":"ControlToneControlBass","displayName":"C.TONE CTRL BASS","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":142,"name":"ControlToneControlTreble","displayName":"C.TONE CTRL TREBLE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":144,"name":"ControlMultiEffectsLevel","displayName":"C.MULTIFX LEVEL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":146,"name":"ControlDelayTime","displayName":"C.DELAY TIME","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":148,"name":"ControlDelayFeedback","displayName":"C.DELAY FEEDBK","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":150,"name":"ControlDelayLevel","displayName":"C.DELAY LEVEL","min":0,"max":254,"toText":"signed255","default":127},
+
+
+
+		{"index":152 , "name":"MorphBendAssign", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":153 , "name":"ControlPortamentoTime", "min":0, "max":254, "toText":"signed255", "default":127},
+		{"index":155 , "name":"VelocitySwitch", "displayName": "VELOCITY", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":156 , "name":"VelocityLfo1Rate","displayName":"V.LFO1 RATE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":158 , "name":"VelocityLfo1Fade","displayName":"V.LFO1 FADE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":160 , "name":"VelocityLfo2Rate","displayName":"V.LFO2 RATE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":162 , "name":"VelocityCrossModulationDepth","displayName":"V.CROSS MOD DEPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":164 , "name":"VelocityOscillatorBalance","displayName":"V.OSC BALANCE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":166 , "name":"VelocityPitchLfo1Depth","displayName":"V.PITCH LFO1 DEPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":168 , "name":"VelocityPitchLfo2Depth","displayName":"V.PITCH LFO2 DEPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":170 , "name":"VelocityPitchEnvelopeDepth","displayName":"V.PITCHENV DEPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":172 , "name":"VelocityPitchEnvelopeAttackTime","displayName":"V.PITCH ENV ATK","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":174 , "name":"VelocityPitchEnvelopeDecayTime","displayName":"V.PITCH ENV DCY","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":176 , "name":"VelocityOsc1Control1","displayName":"V.OSC1 CONTROL 1","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":178 , "name":"VelocityOsc1Control2","displayName":"V.OSC1 CONTROL 2","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":180 , "name":"VelocityOsc2Range","displayName":"V.OSC2 RANGE","min":77,"max":177,"toText":"assignOsc2RangeFineWide", "default":127},
+		{"index":182 , "name":"VelocityOsc2FineWide","displayName":"V.OSC2 FINE WIDE","min":27,"max":227,"toText":"assignOsc2RangeFineWide", "default":127},
+		{"index":184 , "name":"VelocityOsc2Control1","displayName":"V.OSC2 CONTROL 1","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":186 , "name":"VelocityOsc2Control2","displayName":"V.OSC2 CONTROL 2","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":188 , "name":"VelocityCutoffFrequency","displayName":"V.CUTOFF FREQ","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":190 , "name":"VelocityResonance","displayName":"V.FLT RESONANCE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":192 , "name":"VelocityCutoffFreqKeyFollow","displayName":"V.KEY FOLLOW","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":194 , "name":"VelocityFilterLfo1Depth","displayName":"V.FLT LFO1","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":196 , "name":"VelocityFilterLfo2Depth","displayName":"V.FLT LFO2","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":198 , "name":"VelocityFilterEnvDepth","displayName":"V.FLT ENV DPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":200 , "name":"VelocityFilterEnvAttackTime","displayName":"V.FLT ENV ATTACK","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":202 , "name":"VelocityFilterEnvDecayTime","displayName":"V.FLT ENV DECAY","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":204 , "name":"VelocityFilterEnvSusLevel","displayName":"V.FLT ENV SUSTAIN","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":206 , "name":"VelocityFilterEnvReleaseTime","displayName":"V.FLT ENV REL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":208 , "name":"VelocityAmpLevel","displayName":"V.AMP LEVEL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":210 , "name":"VelocityAmpLfo1Depth","displayName":"V.AMP LFO1 DPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":212 , "name":"VelocityAmpLfo2Depth","displayName":"V.AMP LFO2 DPTH","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":214 , "name":"VelocityAmpEnvAttackTime","displayName":"V.AMP ENV ATTACK","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":216 , "name":"VelocityAmpEnvDecayTime","displayName":"V.AMP ENV DECAY","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":218 , "name":"VelocityAmpEnvSustainLevel","displayName":"V.AMP ENV SUSTAIN","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":220 , "name":"VelocityAmpEnvReleaseTime","displayName":"V.AMP ENV REL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":222 , "name":"VelocityToneControlBass","displayName":"V.TONE CTRL BASS","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":224 , "name":"VelocityToneControlTreble","displayName":"V.TONE CTRL TREBLE","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":226 , "name":"VelocityMultiEffectsLevel","displayName":"V.MULTIFX LEVEL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":228 , "name":"VelocityDelayTime","displayName":"V.DELAY TIME","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":230 , "name":"VelocityDelayFeedback","displayName":"V.DELAY FEEDBK","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":232 , "name":"VelocityDelayLevel","displayName":"V.DELAY LEVEL","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":234 , "name":"VelocityPortamentoTime","displayName":"V.PORTAMENTO","min":0,"max":254,"toText":"signed255","default":127},
+		{"index":236 , "name":"ActiveIndicatorOfBender","displayName":"V.ACTIVE BENDER","min":0,"max":1,"default":0},
+		{"index":237 , "name":"ActiveIndicatorOfVelocityAssign","displayName":"ACTIVE VEL ASGN","min":0,"max":1,"toText":"offOn","default":0},
+		{"index":238 , "name":"ActiveIndicatorOfControlAssign","displayName":"ACTIVE CTRL ASGN","min":0,"max":1,"toText":"offOn","default":0},
+		{"index":239 , "name":"EnvelopeTypeInSolo", "displayName": "ENV TYPE IN SOLO", "min":0, "max":1, "default":0},
+		{"index":241 , "name":"Osc2ExternalInputSwitch", "displayName": "OSC2 EXT INPUT", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":242 , "name":"VoiceModulatorSendSwitch", "displayName": "VOICE MOD SEND", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":243 , "name":"UnisonSwitch", "displayName": "UNISON", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":244 , "name":"UnisonDetune", "displayName": "UNISON DETUNE", "min":0, "max":50, "default":50},
+		{"index":245 , "name":"PatchGain", "displayName": "PATCH GAIN", "min":0, "max":2,  "toText":"ampGain", "default":0},
+		{"index":246 , "name":"ExternalTriggerSwitch", "displayName": "EXT TRIGGER", "min":0, "max":1, "toText":"offOn", "default":0},
+		{"index":247 , "name":"ExternalTriggerDestination","displayName": "EXT TRIGGER DEST",  "min":0, "max":2, "toText":"triggerDestination", "default":0},
+		
+		{"page":2,"index":0,"name":"PatchBank","displayName":"PATCH BANK","min":0,"max":3,"default":0,"isPublic":false},
+		{"page":2,"index":1,"name":"PatchNo","displayName":"PATCH NO","min":0,"max":127,"default":0,"isPublic":false},
+		{"page":2,"index":2,"name":"MidiChannel","displayName":"MIDI CHANNEL","min":0,"max":16,"default":0,"toText":"midiChannel","isPublic":false},
+		{"page":2,"index":3,"name":"PartTranspose","displayName":"PART TRANSPOSE","min":0,"max":48,"toText":"transpose","default":24},
+		{"page":2,"index":4,"name":"DelaySync","displayName":"DELAY SYNC","min":0,"max":10,"toText":"delaySync","default":0},
+		{"page":2,"index":5,"name":"LFO1Sync","displayName":"LFO1 SYNC","min":0,"max":22,"toText":"lFO1Sync","default":0},
+		{"page":2,"index":6,"name":"ChorusSyncRate","displayName":"CHORUS SYNC RATE","min":0,"max":23,"toText":"chorusSyncRate","default":0},
+		{"page":2,"index":7,"name":"PatchGroupNo","displayName":"PATCH GROUP NO","min":0,"max":63,"default":0,"isPublic":false},
+
+		{"page":3,"index":0,"name":"PerformanceName1", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":1,"name":"PerformanceName2", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":2,"name":"PerformanceName3", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":3,"name":"PerformanceName4", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":4,"name":"PerformanceName5", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":5,"name":"PerformanceName6", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":6,"name":"PerformanceName7", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":7,"name":"PerformanceName8", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":8,"name":"PerformanceName9", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":9,"name":"PerformanceName10", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":10,"name":"PerformanceName11", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":11,"name":"PerformanceName12", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":12,"name":"PerformanceName13", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":13,"name":"PerformanceName14", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":14,"name":"PerformanceName15", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":15,"name":"PerformanceName16", "class":"NonPartSensitive", "min":32,"max":125,"default":125},
+		{"page":3,"index":16,"name":"KeyMode","displayName":"KEY MODE", "class":"NonPartSensitive", "min":0,"max":2,"toText":"keyMode","default":0},
+		{"page":3,"index":17,"name":"SplitPoint","displayName":"SPLIT POINT", "class":"NonPartSensitive", "min":0,"max":127,"toText":"splitPoint","default":0},
+		{"page":3,"index":18,"name":"PanelSelect","displayName":"PANEL SELECT", "class":"NonPartSensitive", "min":0,"max":2,"default":0},
+		{"page":3,"index":19,"name":"PartDetune","displayName":"PART DETUNE", "class":"NonPartSensitive", "min":0,"max":100,"toText":"signed101","default":50},
+		{"page":3,"index":20,"name":"OutputAssign","displayName":"OUTPUT ASSIGN", "class":"NonPartSensitive", "min":0,"max":1,"toText":"outputAssign","default":0},
+		{"page":3,"index":21,"name":"ArpDestination","displayName":"ARP DESTINATION", "class":"NonPartSensitive", "min":0,"max":2,"toText":"destination","default":0},
+		{"page":3,"index":22,"name":"voiceAssignKeyboard","displayName":"VOICE ASSIGN", "class":"NonPartSensitive", "min":0,"max":4,"toText":"voiceAssignKeyboard","default":0},
+		{"page":3,"index":22,"name":"voiceAssignRack","displayName":"VOICE ASSIGN", "class":"NonPartSensitive", "min":0,"max":6,"toText":"voiceAssignRack","default":0,"isPublic":false},
+		{"page":3,"index":23,"name":"ArpSwitch","displayName":"ARP", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0},
+		{"page":3,"index":24,"name":"ArpMode","displayName":"ARP MODE", "class":"NonPartSensitive", "min":0,"max":4,"toText":"arpMode","default":0},
+		{"page":3,"index":25,"name":"ArpBeatPattern","displayName":"ARP BEAT PATTERN", "class":"NonPartSensitive", "min":0,"max":96,"toText":"beatPattern","default":0},
+		{"page":3,"index":26,"name":"ArpRange","displayName":"ARP RANGE", "class":"NonPartSensitive", "min":0,"max":3,"toText":"arpRange","default":0},
+		{"page":3,"index":27,"name":"ArpHold","displayName":"ARP HOLD", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0},
+		{"page":3,"index":28,"name":"_PerformanceUnused28", "class":"NonPartSensitive", "min":0,"max":1,"default":0,"isPublic":false},
+		{"page":3,"index":29,"name":"IndividualTriggerSwitch", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0},
+		{"page":3,"index":30,"name":"IndividualTriggerDestination", "class":"NonPartSensitive", "min":0,"max":2,"toText":"triggerDestination","default":0},
+		{"page":3,"index":31,"name":"IndividualTriggerSourceChannel", "class":"NonPartSensitive", "min":0,"max":15, "default":0},
+		{"page":3,"index":32,"name":"IndividualTriggerSourceNote", "class":"NonPartSensitive", "min":0,"max":128,"toText":"splitPoint","default":0},
+		{"page":3,"index":34,"name":"Tempo", "class":"NonPartSensitive", "min":20,"max":250,"toText":"unsigned201","default":120},
+		{"page":3,"index":36,"name":"VocalUpperInputJackFrontRear", "class":"NonPartSensitive", "min":0,"max":1,"toText":"vocalUpperInputJackFrontRear","default":0},
+		
+		{"page":4,"index":0,"name":"VoiceModulatorSwitch","displayName":"VOICE MODULATOR", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0,"isPublic":true},
+		{"page":4,"index":1,"name":"VoiceModulatorPanelMode","displayName":"PANEL MODE", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0,"isPublic":true},
+		{"page":4,"index":2,"name":"Algorithm","displayName":"ALGORITHM", "class":"NonPartSensitive", "min":0,"max":4,"toText":"algorithmType","default":0,"isPublic":true},
+		{"page":4,"index":3,"name":"VoiceModulatorDelayType","displayName":"DELAY TYPE", "class":"NonPartSensitive", "min":0,"max":4,"toText":"delayType","default":0,"isPublic":true},
+		{"page":4,"index":4,"name":"EnsembleType","displayName":"ENSEMBLE TYPE", "class":"NonPartSensitive", "min":0,"max":14,"toText":"ensembleType","default":0,"isPublic":true},
+		{"page":4,"index":5,"name":"ExternaltoInstSendSwitch","displayName":"EXT TO INST SEND", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0,"isPublic":true},
+		{"page":4,"index":6,"name":"ExternaltoVocalSendSwitch","displayName":"EXT TO VOCAL SEND", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0,"isPublic":true},
+		{"page":4,"index":7,"name":"VocalMorphControlSwitch","displayName":"VOCAL MORPH CTRL", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0,"isPublic":true},
+		{"page":4,"index":8,"name":"VocalMorphSensitivity","displayName":"VM SENSITIVITY", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":9,"name":"VocalMorphThreshold","displayName":"VM THRESHOLD", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":10,"name":"Control1Assign","displayName":"CTRL 1 ASSIGN", "class":"NonPartSensitive", "min":0,"max":26,"toText":"controlAssignType","default":0,"isPublic":true},
+		{"page":4,"index":11,"name":"Control2Assign","displayName":"CTRL 2 ASSIGN", "class":"NonPartSensitive", "min":0,"max":26,"toText":"controlAssignType","default":0,"isPublic":true},
+		{"page":4,"index":12,"name":"Character1","displayName":"CHARACTER 1", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":13,"name":"Character2","displayName":"CHARACTER 2", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":14,"name":"Character3","displayName":"CHARACTER 3", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":15,"name":"Character4","displayName":"CHARACTER 4", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":16,"name":"Character5","displayName":"CHARACTER 5", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":17,"name":"Character6","displayName":"CHARACTER 6", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":18,"name":"Character7","displayName":"CHARACTER 7", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":19,"name":"Character8","displayName":"CHARACTER 8", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":20,"name":"Character9","displayName":"CHARACTER 9", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":21,"name":"Character10","displayName":"CHARACTER 10", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":22,"name":"Character11","displayName":"CHARACTER 11", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":23,"name":"Character12","displayName":"CHARACTER 12", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":24,"name":"VocalMix","displayName":"VOCAL MIX", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":25,"name":"VoiceModulatorRelease","displayName":"RELEASE", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":26,"name":"VoiceModulatorResonance","displayName":"RESONANCE", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":27,"name":"VoiceModulatorPan","displayName":"PAN", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":28,"name":"VoiceModulatorLevel","displayName":"LEVEL", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":29,"name":"VoiceModulatorNoiseCutoff","displayName":"NOISE CUTOFF", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":30,"name":"VoiceModulatorNoiseLevel","displayName":"NOISE LEVEL", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":31,"name":"GateThreshold","displayName":"GATE THRESHOLD", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":32,"name":"RobotPitch","displayName":"ROBOT PITCH", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":33,"name":"RobotControl","displayName":"ROBOT CONTROL", "class":"NonPartSensitive", "min":0,"max":1,"toText":"offOn","default":0,"isPublic":true},
+		{"page":4,"index":34,"name":"RobotLevel","displayName":"ROBOT LEVEL", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":35,"name":"EnsembleLevel","displayName":"ENSEMBLE LEVEL", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":36,"name":"VoiceModulatorDelayTime","displayName":"DELAY TIME", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":37,"name":"VoiceModulatorDelayFeedback","displayName":"DELAY FEEDBACK", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":38,"name":"VoiceModulatorDelayLevel","displayName":"DELAY LEVEL", "class":"NonPartSensitive", "min":0,"max":127,"default":0,"isPublic":true},
+		{"page":4,"index":39,"name":"EnsembleSync","displayName":"ENSEMBLE SYNC", "class":"NonPartSensitive", "min":0,"max":22,"toText":"syncType","default":0,"isPublic":true},
+		{"page":4,"index":40,"name":"VoiceModulatorDelaySync","displayName":"DELAY SYNC", "class":"NonPartSensitive", "min":0,"max":10,"toText":"syncType","default":0,"isPublic":true},
+
+		{"page":5, "index":4, "name":"MidiSync", "displayName": "MIDI SYNC", "class":"NonPartSensitive", "min":0, "max":1, "toText":"offOn", "default":0, "isPublic":false},
+		{"page":5, "index":4, "name":"MidiSyncRack", "displayName": "MIDI SYNC", "class":"NonPartSensitive", "min":0, "max":2, "toText":"midiSyncRack", "default":0, "isPublic":false},
+		
+		{"page":5, "index":9, "name":"RemoteControlChannel", "displayName": "REMOTE CTRL CH", "class":"NonPartSensitive", "min":0, "max":17, "toText":"remoteMidiChannel", "default":2, "isPublic":false},
+		{"page":5, "index":10, "name":"MasterTune", "displayName": "MASTER TUNE", "class":"NonPartSensitive", "min":0, "max":100, "toText":"masterTune", "default":50, "isPublic":true},
+		{"page":5, "index":24, "name":"RemoteKeyboardChannel", "displayName": "REMOTE KEYB CH", "class":"NonPartSensitive", "min":0, "max":16, "toText":"remoteMidiChannel", "default":2, "isPublic":false},
+
+		{"page":6, "index":0, "name":"MasterVolume", "displayName": "MASTER VOLUME", "class":"NonPartSensitive", "min":0, "max":600, "toText":"masterVolume", "default":100, "isPublic":true},
+
+		{"page":99, "index":0, "name":"Halloween", "displayName": "Happy Halloween!", "min":666, "max":666,  "default":666, "isPublic":false},	
+		{"page":99, "index":0, "name":"NewYear", "displayName": "Happy New Year!", "min":666, "max":666,  "default":666, "isPublic":false},	
+		{"page":99, "index":0, "name":"MerryChristmas", "displayName": "Merry Christmas!", "min":666, "max":666,  "default":666, "isPublic":false},	
+		{"page":99, "index":0, "name":"HappyEaster", "displayName": "Happy Easter!", "min":666, "max":666,  "default":666, "isPublic":false}	
+		
+ 	],
+	"regions":
+	[
+	],
+ 	"valuelists":
+ 	{
+ 		"unsignedZero":
+ 		[
+ 			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
+			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
+			"60",	"61",	"62",	"63",	"64",	"65",	"66",	"67",	"68",	"69",	"70",	"71",	"72",	"73",	"74",	"75",	"76",	"77",	"78",	"79",
+			"80",	"81",	"82",	"83",	"84",	"85",	"86",	"87",	"88",	"89",	"90",	"91",	"92",	"93",	"94",	"95",	"96",	"97",	"98",	"99",
+			"100",	"101",	"102",	"103",	"104",	"105",	"106",	"107",	"108",	"109",	"110",	"111",	"112",	"113",	"114",	"115",	"116",	"117",	"118",	"119",
+ 			"120",	"121",	"122",	"123",	"124",	"125",	"126",	"127"
+ 		],
+ 		"signed":
+ 		[
+			"-64", "-63", "-62", "-61", "-60", "-59", "-58", "-57", "-56", "-55", "-54", "-53", "-52", "-51", "-50", "-49", "-48",
+			"-47", "-46", "-45", "-44", "-43", "-42", "-41", "-40", "-39", "-38", "-37", "-36", "-35", "-34", "-33", "-32", "-31", "-30", "-29", "-28",
+			"-27", "-26", "-25", "-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
+			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
+			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
+			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
+			"60",	"61",	"62",	"63"
+ 		],
+ 		"oscPitch":
+ 		[
+			"-60", "-59", "-58", "-57", "-56", "-55", "-54", "-53", "-52", "-51", "-50", "-49", "-48",
+			"-47", "-46", "-45", "-44", "-43", "-42", "-41", "-40", "-39", "-38", "-37", "-36", "-35", "-34", "-33", "-32", "-31", "-30", "-29", "-28",
+			"-27", "-26", "-25", "-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
+			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
+			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
+			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
+			"60"
+ 		],
+ 		"signed255":
+ 		[
+			"-127", "-126", "-125", "-124", "-123", "-122", "-121", "-120", "-119", "-118", "-117", "-116", "-115", "-114", "-113", "-112", "-111", "-110", "-109", "-108",
+			"-107", "-106", "-105", "-104", "-103", "-102", "-101", "-100", "-99", "-98", "-97", "-96", "-95", "-94", "-93", "-92", "-91", "-90", "-89", "-88",
+			"-87", "-86", "-85", "-84", "-83", "-82", "-81", "-80", "-79", "-78", "-77", "-76", "-75", "-74", "-73", "-72", "-71", "-70", "-69", "-68",
+			"-67", "-66", "-65", "-64", "-63", "-62", "-61", "-60", "-59", "-58", "-57", "-56", "-55", "-54", "-53", "-52", "-51", "-50", "-49", "-48",
+			"-47", "-46", "-45", "-44", "-43", "-42", "-41", "-40", "-39", "-38", "-37", "-36", "-35", "-34", "-33", "-32", "-31", "-30", "-29", "-28",
+			"-27", "-26", "-25", "-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
+			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
+			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
+			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
+			"60",	"61",	"62",	"63",	"64",	"65",	"66",	"67",	"68",	"69",	"70",	"71",	"72",	"73",	"74",	"75",	"76",	"77",	"78",	"79",
+			"80",	"81",	"82",	"83",	"84",	"85",	"86",	"87",	"88",	"89",	"90",	"91",	"92",	"93",	"94",	"95",	"96",	"97",	"98",	"99",
+			"100",	"101",	"102",	"103",	"104",	"105",	"106",	"107",	"108",	"109",	"110",	"111",	"112",	"113",	"114",	"115",	"116",	"117",	"118",	"119",
+ 			"120",	"121",	"122",	"123",	"124",	"125",	"126",	"127"
+ 		],
+ 		"signed201":
+ 		[
+			"-100", "-99", "-98", "-97", "-96", "-95", "-94", "-93", "-92", "-91", "-90", "-89", "-88",
+			"-87", "-86", "-85", "-84", "-83", "-82", "-81", "-80", "-79", "-78", "-77", "-76", "-75", "-74", "-73", "-72", "-71", "-70", "-69", "-68",
+			"-67", "-66", "-65", "-64", "-63", "-62", "-61", "-60", "-59", "-58", "-57", "-56", "-55", "-54", "-53", "-52", "-51", "-50", "-49", "-48",
+			"-47", "-46", "-45", "-44", "-43", "-42", "-41", "-40", "-39", "-38", "-37", "-36", "-35", "-34", "-33", "-32", "-31", "-30", "-29", "-28",
+			"-27", "-26", "-25", "-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
+			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
+			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
+			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
+			"60",	"61",	"62",	"63",	"64",	"65",	"66",	"67",	"68",	"69",	"70",	"71",	"72",	"73",	"74",	"75",	"76",	"77",	"78",	"79",
+			"80",	"81",	"82",	"83",	"84",	"85",	"86",	"87",	"88",	"89",	"90",	"91",	"92",	"93",	"94",	"95",	"96",	"97",	"98",	"99",
+			"100"
+ 		],
+		"unsigned201": [
+			"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+			"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+			"20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+			"30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+			"40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+			"50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
+			"60", "61", "62", "63", "64", "65", "66", "67", "68", "69",
+			"70", "71", "72", "73", "74", "75", "76", "77", "78", "79",
+			"80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
+			"90", "91", "92", "93", "94", "95", "96", "97", "98", "99",
+			"100", "101", "102", "103", "104", "105", "106", "107", "108", "109",
+			"110", "111", "112", "113", "114", "115", "116", "117", "118", "119",
+			"120", "121", "122", "123", "124", "125", "126", "127", "128", "129",
+			"130", "131", "132", "133", "134", "135", "136", "137", "138", "139",
+			"140", "141", "142", "143", "144", "145", "146", "147", "148", "149",
+			"150", "151", "152", "153", "154", "155", "156", "157", "158", "159",
+			"160", "161", "162", "163", "164", "165", "166", "167", "168", "169",
+			"170", "171", "172", "173", "174", "175", "176", "177", "178", "179",
+			"180", "181", "182", "183", "184", "185", "186", "187", "188", "189",
+			"190", "191", "192", "193", "194", "195", "196", "197", "198", "199",
+			"200", "201", "202", "203", "204", "205", "206", "207", "208", "209",
+			"210", "211", "212", "213", "214", "215", "216", "217", "218", "219",
+			"220", "221", "222", "223", "224", "225", "226", "227", "228", "229",
+			"230", "231", "232", "233", "234", "235", "236", "237", "238", "239",
+			"240", "241", "242", "243", "244", "245", "246", "247", "248", "249",
+			"250", "251", "252", "253", "254", "255"
+		],		
+		"signed101":
+ 		[
+			"-50", "-49", "-48",
+			"-47", "-46", "-45", "-44", "-43", "-42", "-41", "-40", "-39", "-38", "-37", "-36", "-35", "-34", "-33", "-32", "-31", "-30", "-29", "-28",
+			"-27", "-26", "-25", "-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
+			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
+			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
+			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50"
+ 		],
+		"assignOsc2RangeFineWide":
+ 		[
+			"-127",	"-126",	"-125",	"-124",	"-123",	"-122",	"-121",
+			"-120",	"-119",	"-118",	"-117",	"-116",	"-115",	"-114",	"-113",	"-112",	"-111",	"-110",	"-109",	"-108",	"-107",	"-106",	"-105",	"-104",	"-103",	"-102",	"-101",
+			"-100",	"-99",	"-98",	"-97",	"-96",	"-95",	"-94",	"-93",	"-92",	"-91",	"-90",	"-89",	"-88",	"-87",	"-86",	"-85",	"-84",	"-83",	"-82",	"-81",
+			"-80",	"-79",	"-78",	"-77",	"-76",	"-75",	"-74",	"-73",	"-72",	"-71",	"-70",	"-69",	"-68",	"-67",	"-66",	"-65",	"-64",	"-63",	"-62",	"-61",
+			"-60",	"-59",	"-58",	"-57",	"-56",	"-55",	"-54",	"-53",	"-52",	"-51",	"-50",	"-49",	"-48",	"-47",	"-46",	"-45",	"-44",	"-43",	"-42",	"-41",
+			"-40",	"-39",	"-38",	"-37",	"-36",	"-35",	"-34",	"-33",	"-32",	"-31",	"-30",	"-29",	"-28",	"-27",	"-26",	"-25",	"-24",	"-23",	"-22",	"-21",
+			"-20",	"-19",	"-18",	"-17",	"-16",	"-15",	"-14",	"-13",	"-12",	"-11",	"-10",	"-9",	"-8",	"-7",	"-6",	"-5",	"-4",	"-3",	"-2",	"-1",
+			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
+			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
+			"60",	"61",	"62",	"63",	"64",	"65",	"66",	"67",	"68",	"69",	"70",	"71",	"72",	"73",	"74",	"75",	"76",	"77",	"78",	"79",
+			"80",	"81",	"82",	"83",	"84",	"85",	"86",	"87",	"88",	"89",	"90",	"91",	"92",	"93",	"94",	"95",	"96",	"97",	"98",	"99",
+			"100"
+ 		],
+		"masterTune": 
+		[
+			"427.5 Hz", "427.7 Hz", "428.0 Hz", "428.2 Hz", "428.5 Hz", "428.7 Hz", "429.0 Hz", "429.2 Hz", "429.5 Hz", "429.7 Hz",
+			"430.0 Hz", "430.2 Hz", "430.4 Hz", "430.7 Hz", "430.9 Hz", "431.2 Hz", "431.4 Hz", "431.7 Hz", "431.9 Hz", "432.2 Hz",
+			"432.4 Hz", "432.7 Hz", "432.9 Hz", "433.2 Hz", "433.4 Hz", "433.7 Hz", "433.9 Hz", "434.2 Hz", "434.4 Hz", "434.7 Hz",
+			"434.9 Hz", "435.2 Hz", "435.4 Hz", "435.7 Hz", "436.0 Hz", "436.2 Hz", "436.5 Hz", "436.7 Hz", "437.0 Hz", "437.2 Hz",
+			"437.5 Hz", "437.7 Hz", "438.0 Hz", "438.2 Hz", "438.5 Hz", "438.7 Hz", "439.0 Hz", "439.2 Hz", "439.5 Hz", "439.7 Hz",
+			"440.0 Hz", "440.3 Hz", "440.5 Hz", "440.8 Hz", "441.0 Hz", "441.3 Hz", "441.5 Hz", "441.8 Hz", "442.0 Hz", "442.3 Hz",
+			"442.5 Hz", "442.8 Hz", "443.1 Hz", "443.3 Hz", "443.6 Hz", "443.8 Hz", "444.1 Hz", "444.3 Hz", "444.6 Hz", "444.9 Hz",
+			"445.1 Hz", "445.4 Hz", "445.6 Hz", "445.9 Hz", "446.1 Hz", "446.4 Hz", "446.7 Hz", "446.9 Hz", "447.2 Hz", "447.4 Hz",
+			"447.7 Hz", "447.9 Hz", "448.2 Hz", "448.5 Hz", "448.7 Hz", "449.0 Hz", "449.2 Hz", "449.5 Hz", "449.8 Hz", "450.0 Hz",
+			"450.3 Hz", "450.5 Hz", "450.8 Hz", "451.1 Hz", "451.3 Hz", "451.6 Hz", "451.8 Hz", "452.1 Hz", "452.4 Hz", "452.6 Hz",
+			"452.9 Hz"
+		],
+		"masterVolume":
+		[
+			"0%",	"0%",	"1%",	"1%",	"1%",	"2%",	"2%",	"2%",	"3%",	"3%",	"3%",	"4%",	"4%",	"4%",	"5%",	"5%",	"5%",	"6%",	"6%",	"6%",
+			"7%",	"7%",	"7%",	"8%",	"8%",	"8%",	"9%",	"9%",	"9%",	"10%",	"10%",	"10%",	"11%",	"11%",	"11%",	"12%",	"12%",	"12%",	"13%",	"13%",
+			"13%",	"14%",	"14%",	"14%",	"15%",	"15%",	"15%",	"16%",	"16%",	"16%",	"17%",	"17%",	"17%",	"18%",	"18%",	"18%",	"19%",	"19%",	"19%",	"20%",
+			"20%",	"20%",	"21%",	"21%",	"21%",	"22%",	"22%",	"22%",	"23%",	"23%",	"23%",	"24%",	"24%",	"24%",	"25%",	"25%",	"25%",	"26%",	"26%",	"26%",
+			"27%",	"27%",	"27%",	"28%",	"28%",	"28%",	"29%",	"29%",	"29%",	"30%",	"30%",	"30%",	"31%",	"31%",	"31%",	"32%",	"32%",	"32%",	"33%",	"33%",
+			"33%",	"34%",	"34%",	"34%",	"35%",	"35%",	"35%",	"36%",	"36%",	"36%",	"37%",	"37%",	"37%",	"38%",	"38%",	"38%",	"39%",	"39%",	"39%",	"40%",
+			"40%",	"40%",	"41%",	"41%",	"41%",	"42%",	"42%",	"42%",	"43%",	"43%",	"43%",	"44%",	"44%",	"44%",	"45%",	"45%",	"45%",	"46%",	"46%",	"46%",
+			"47%",	"47%",	"47%",	"48%",	"48%",	"48%",	"49%",	"49%",	"49%",	"50%",	"50%",	"50%",	"51%",	"51%",	"51%",	"52%",	"52%",	"52%",	"53%",	"53%",
+			"53%",	"54%",	"54%",	"54%",	"55%",	"55%",	"55%",	"56%",	"56%",	"56%",	"57%",	"57%",	"57%",	"58%",	"58%",	"58%",	"59%",	"59%",	"59%",	"60%",
+			"60%",	"60%",	"61%",	"61%",	"61%",	"62%",	"62%",	"62%",	"63%",	"63%",	"63%",	"64%",	"64%",	"64%",	"65%",	"65%",	"65%",	"66%",	"66%",	"66%",
+			"67%",	"67%",	"67%",	"68%",	"68%",	"68%",	"69%",	"69%",	"69%",	"70%",	"70%",	"70%",	"71%",	"71%",	"71%",	"72%",	"72%",	"72%",	"73%",	"73%",
+			"73%",	"74%",	"74%",	"74%",	"75%",	"75%",	"75%",	"76%",	"76%",	"76%",	"77%",	"77%",	"77%",	"78%",	"78%",	"78%",	"79%",	"79%",	"79%",	"80%",
+			"80%",	"80%",	"81%",	"81%",	"81%",	"82%",	"82%",	"82%",	"83%",	"83%",	"83%",	"84%",	"84%",	"84%",	"85%",	"85%",	"85%",	"86%",	"86%",	"86%",
+			"87%",	"87%",	"87%",	"88%",	"88%",	"88%",	"89%",	"89%",	"89%",	"90%",	"90%",	"90%",	"91%",	"91%",	"91%",	"92%",	"92%",	"92%",	"93%",	"93%",
+			"93%",	"94%",	"94%",	"94%",	"95%",	"95%",	"95%",	"96%",	"96%",	"96%",	"97%",	"97%",	"97%",	"98%",	"98%",	"98%",	"99%",	"99%",	"99%",	"100%",
+			"100%",	"100%",	"101%",	"101%",	"101%",	"102%",	"102%",	"102%",	"103%",	"103%",	"103%",	"104%",	"104%",	"104%",	"105%",	"105%",	"105%",	"106%",	"106%",	"106%",
+			"107%",	"107%",	"107%",	"108%",	"108%",	"108%",	"109%",	"109%",	"109%",	"110%",	"110%",	"110%",	"111%",	"111%",	"111%",	"112%",	"112%",	"112%",	"113%",	"113%",
+			"113%",	"114%",	"114%",	"114%",	"115%",	"115%",	"115%",	"116%",	"116%",	"116%",	"117%",	"117%",	"117%",	"118%",	"118%",	"118%",	"119%",	"119%",	"119%",	"120%",
+			"120%",	"120%",	"121%",	"121%",	"121%",	"122%",	"122%",	"122%",	"123%",	"123%",	"123%",	"124%",	"124%",	"124%",	"125%",	"125%",	"125%",	"126%",	"126%",	"126%",
+			"127%",	"127%",	"127%",	"128%",	"128%",	"128%",	"129%",	"129%",	"129%",	"130%",	"130%",	"130%",	"131%",	"131%",	"131%",	"132%",	"132%",	"132%",	"133%",	"133%",
+			"133%",	"134%",	"134%",	"134%",	"135%",	"135%",	"135%",	"136%",	"136%",	"136%",	"137%",	"137%",	"137%",	"138%",	"138%",	"138%",	"139%",	"139%",	"139%",	"140%",
+			"140%",	"140%",	"141%",	"141%",	"141%",	"142%",	"142%",	"142%",	"143%",	"143%",	"143%",	"144%",	"144%",	"144%",	"145%",	"145%",	"145%",	"146%",	"146%",	"146%",
+			"147%",	"147%",	"147%",	"148%",	"148%",	"148%",	"149%",	"149%",	"149%",	"150%",	"150%",	"150%",	"151%",	"151%",	"151%",	"152%",	"152%",	"152%",	"153%",	"153%",
+			"153%",	"154%",	"154%",	"154%",	"155%",	"155%",	"155%",	"156%",	"156%",	"156%",	"157%",	"157%",	"157%",	"158%",	"158%",	"158%",	"159%",	"159%",	"159%",	"160%",
+			"160%",	"160%",	"161%",	"161%",	"161%",	"162%",	"162%",	"162%",	"163%",	"163%",	"163%",	"164%",	"164%",	"164%",	"165%",	"165%",	"165%",	"166%",	"166%",	"166%",
+			"167%",	"167%",	"167%",	"168%",	"168%",	"168%",	"169%",	"169%",	"169%",	"170%",	"170%",	"170%",	"171%",	"171%",	"171%",	"172%",	"172%",	"172%",	"173%",	"173%",
+			"173%",	"174%",	"174%",	"174%",	"175%",	"175%",	"175%",	"176%",	"176%",	"176%",	"177%",	"177%",	"177%",	"178%",	"178%",	"178%",	"179%",	"179%",	"179%",	"180%",
+			"180%",	"180%",	"181%",	"181%",	"181%",	"182%",	"182%",	"182%",	"183%",	"183%",	"183%",	"184%",	"184%",	"184%",	"185%",	"185%",	"185%",	"186%",	"186%",	"186%",
+			"187%",	"187%",	"187%",	"188%",	"188%",	"188%",	"189%",	"189%",	"189%",	"190%",	"190%",	"190%",	"191%",	"191%",	"191%",	"192%",	"192%",	"192%",	"193%",	"193%",
+			"193%",	"194%",	"194%",	"194%",	"195%",	"195%",	"195%",	"196%",	"196%",	"196%",	"197%",	"197%",	"197%",	"198%",	"198%",	"198%",	"199%",	"199%",	"199%",	"200%",
+			"200%"
+		],
+ 		"lfoSync":
+ 		[
+			"Off", "2/1", "1/1", "1/2", "1/4", "1/8", "1/8.", "1/16"
+ 		],
+ 		"midiChannel":
+ 		[
+			"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"Off"
+ 		],
+ 		"channelPressureDest":
+ 		[
+			"LFO 1 Amount",	"LFO 2 Amount", "Filter Cutoff", "FM Amount", "Osc 2 Pitch"
+ 		],
+ 		"expressionPedalDest":
+ 		[
+			"LFO 1 Amount",	"LFO 2 Amount", "Filter Cutoff", "FM Amount", "Osc 2 Pitch"
+ 		],
+ 		"channelPressureAmount":
+ 		[
+			"Off", "1", "2", "3", "4", "5", "6", "7"
+ 		],
+ 		"expressionPedalAmount":
+ 		[
+			"Off", "1", "2", "3", "4", "5", "6", "7"
+ 		],
+		"noteNumber":
+		[
+			"C-1","C#-1","D-1","D#-1","E-1","F-1","F#-1","G-1","G#-1","A-1","A#-1","B-1",
+			"C0", "C#0", "D0", "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0",
+			"C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1", "G#1", "A1", "A#1", "B1",
+			"C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
+			"C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
+			"C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+			"C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
+			"C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
+			"C7", "C#7", "D7", "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7",
+			"C8", "C#8", "D8", "D#8", "E8", "F8", "F#8", "G8", "G#8", "A8", "A#8", "B8",
+			"C9", "C#9", "D9", "D#9", "E9", "F9", "F#9", "G9"
+		],
+		"delayType": [
+			"PANNING L->R", "PANNING R->L", "PANNING SHORT", "MONO SHORT", "MONO LONG"
+		],
+		"delaySync": [
+			"OFF", "1/16", "1/8 TRIPLET", "1/16 DOTTED", "1/8", "1/4 TRIPLET", "1/8 DOTTED", "1/4", "1/2 TRIPLET", "1/4 DOTTED", "1/2"
+		],
+		"chorusType": [
+			"SUPER CHORUS SLW", "SUPER CHORUS MID", "SUPER CHORUS FST", "SUPER CHORUS CLR", 
+			"FLANGER SLOW", "FLANGER DEEP", "FLANGER FAST", 
+			"DEEP PHASING SLW", "JET PHASING", "TWISTING", "FREEZE PHASE 1", "FREEZE PHASE 2", "DISTORTION"
+		],
+		"chorusSyncRate": [
+			"OFF", "1/16", "1/8 TRIPLET", "1/16 DOTTED", "1/8", "1/4 TRIPLET", "1/8 DOTTED", "1/4", 
+			"1/2 TRIPLET", "1/4 DOTTED", "1/2", "1/1 TRIPLET", "1/2 DOTTED", "1/1", 
+			"2/1 TRIPLET", "1/1 DOTTED", "2/1", "3 MEASURES", "4 MEASURES", "5 MEASURES", 
+			"6 MEASURES", "7 MEASURES", "8 MEASURES", "LFO1"
+		],
+		"lFO1Sync": [
+			"OFF", "1/16", "1/8 TRIPLET", "1/16 DOTTED", "1/8", "1/4 TRIPLET", "1/8 DOTTED", "1/4", 
+			"1/2 TRIPLET", "1/4 DOTTED", "1/2", "1/1 TRIPLET", "1/2 DOTTED", "1/1", 
+			"2/1 TRIPLET", "1/1 DOTTED", "2/1", "3 MEASURES", "4 MEASURES", "5 MEASURES", 
+			"6 MEASURES", "7 MEASURES", "8 MEASURES"
+		],		
+		"ampGain": [
+			"+-0 DB", "+6 DB", "+12 DB"
+		],
+		"oscShift": {
+			"4": "+2", "3" : "+1", "2": "0", "1" :"-1", "0" :"-2" 
+		},
+		"splitPoint": [
+			"C-1", "C#-1", "D-1", "D#-1", "E-1", "F-1", "F#-1", "G-1", "G#-1", "A-1", "A#-1", "B-1",
+			"C0", "C#0", "D0", "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0",
+			"C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1", "G#1", "A1", "A#1", "B1",
+			"C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
+			"C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
+			"C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+			"C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
+			"C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
+			"C7", "C#7", "D7", "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7",
+			"C8", "C#8", "D8", "D#8", "E8", "F8", "F#8", "G8", "G#8", "A8", "A#8", "B8",
+			"C9", "C#9", "D9", "D#9", "E9", "F9", "F#9", "G9", "ALL"
+		],
+		"voiceAssignKeyboard":[
+			"2-6", "3-5", "4-4", "5-3", "6-2"
+		],
+		"voiceAssignRack":[
+			"2-8", "3-7", "4-6", "5-5", "6-4", "7-3", "8-2"
+		],		
+		"beatPattern": [
+			"NORMAL 1/4", "NORMAL 1/6", "NORMAL 1/8", "NORMAL 1/12", "NORMAL 1/16", "NORMAL 1/32",
+			"PORTAMENTO A1", "PORTAMENTO A2", "PORTAMENTO A3", "PORTAMENTO A4", "PORTAMENTO A5", "PORTAMENTO A6", "PORTAMENTO A7", "PORTAMENTO A8", "PORTAMENTO A9", "PORTAMENTO A10", "PORTAMENTO A11",
+			"PORTAMENTO B1", "PORTAMENTO B2", "PORTAMENTO B3", "PORTAMENTO B4", "PORTAMENTO B5", "PORTAMENTO B6", "PORTAMENTO B7", "PORTAMENTO B8", "PORTAMENTO B9", "PORTAMENTO B10", "PORTAMENTO B11", "PORTAMENTO B12", "PORTAMENTO B13", "PORTAMENTO B14", "PORTAMENTO B15",
+			"SEQUENCE A1", "SEQUENCE A2", "SEQUENCE A3", "SEQUENCE A4", "SEQUENCE A5", "SEQUENCE A6", "SEQUENCE A7", "SEQUENCE A8", "SEQUENCE A9", "SEQUENCE A10", "SEQUENCE A11", "SEQUENCE A12", "SEQUENCE A13", "SEQUENCE A14", "SEQUENCE A15", "SEQUENCE A16", "SEQUENCE A17",
+			"SEQUENCE B1", "SEQUENCE B2", "SEQUENCE B3", "SEQUENCE B4", "SEQUENCE B5",
+			"SEQUENCE C1", "SEQUENCE C2",
+			"SEQUENCE D1", "SEQUENCE D2", "SEQUENCE D3", "SEQUENCE D4", "SEQUENCE D5", "SEQUENCE D6", "SEQUENCE D7", "SEQUENCE D8",
+			"ECHO 1", "ECHO 2", "ECHO 3",
+			"MUTE 1", "MUTE 2", "MUTE 3", "MUTE 4", "MUTE 5", "MUTE 6", "MUTE 7", "MUTE 8", "MUTE 9", "MUTE 10", "MUTE 11", "MUTE 12", "MUTE 13", "MUTE 14", "MUTE 15", "MUTE 16",
+			"STRUMMING 1", "STRUMMING 2", "STRUMMING 3", "STRUMMING 4", "STRUMMING 5", "STRUMMING 6", "STRUMMING 7", "STRUMMING 8",
+			"REFRAIN 1", "REFRAIN 2",
+			"PERCUSSION 1", "PERCUSSION 2", "PERCUSSION 3", "PERCUSSION 4",
+			"WALKING BASS", "HARP", "RANDOM"
+		],
+		"destination": [
+			"LOWER & UPPER", "LOWER", "UPPER"
+		],
+		"waveForm": [
+			"TRIANGLE", "SAWTOOTH", "SQUARE", "RANDOM"
+		]
+		,
+		"osc1WaveForm": [
+			"SUPER SAW", "TRIANGLE MOD","NOISE", "FEEDBACK OSC", "SQR (PWM)","SAW", "TRIANGLE"
+		]
+		,
+		"osc2WaveForm": [
+			 "SQR (PWM)","SAW", "TRIANGLE","NOISE"
+		]
+		,		
+		"arpRange": [
+			"1 OCTAVE", "2 OCTAVES", "3 OCTAVES", "4 OCTAVES"
+		]
+		,
+		"arpMode": [
+			"UP", "DOWN", "UP & DOWN", "RANDOM", "RPS"
+		],
+ 		"offOn":
+ 		[
+			"OFF", "ON"
+ 		],
+ 		"depthSelect":
+ 		[
+			"PITCH", "FILTER", "AMP"
+ 		],
+ 		"osc2Range":
+ 		[
+			"-WIDE", "-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
+			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
+			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24",	"+WIDE"
+ 		],
+		"oscBalance":
+ 		[
+			"OSC1", "-63", "-62", "-61", "-60", "-59", "-58", "-57", "-56", "-55", "-54", "-53", "-52", "-51", "-50", "-49", "-48",
+			"-47", "-46", "-45", "-44", "-43", "-42", "-41", "-40", "-39", "-38", "-37", "-36", "-35", "-34", "-33", "-32", "-31", "-30", "-29", "-28",
+			"-27", "-26", "-25", "-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
+			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
+			"CENTER",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24",	"25",	"26",	"27",	"28",	"29",	"30",	"31",	"32",	"33",	"34",	"35",	"36",	"37",	"38",	"39",
+			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
+			"60",	"61",	"62",	"OSC2"
+ 		],
+		"lfo1EnvDest":
+ 		[
+			"OSC1+2", "OSC2", "X-MOD"
+ 		],
+		"filterType":
+ 		[
+			"HPF", "BPF", "LPF"
+ 		],		
+		"cutoffSlope":
+ 		[
+			"-12dB/oct", "-24dB/oct"
+ 		],		
+		"autoPanManualPanSwitch":
+ 		[
+			"OFF", "AUTO", "MANUAL"
+ 		],
+		"triggerDestination":
+ 		[
+			"FILTER", "AMP", "FILTER & AMP"
+ 		],
+		"keyMode":
+		[
+			"SINGLE", "DUAL", "SPLIT"
+ 		],
+		"vocalUpperInputJackFrontRear":
+		[
+			"REAR", "FRONT"
+ 		],
+ 		"transpose":
+ 		[
+			"-24", "-23", "-22", "-21", "-20", "-19", "-18", "-17", "-16", "-15", "-14", "-13", "-12", "-11", "-10", "-9", "-8",
+			"-7", "-6", "-5", "-4", "-3", "-2", "-1",
+			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",
+ 			"20",	"21",	"22",	"23",	"24"
+ 		],	
+		"bendRangeDown":
+ 		[
+			"0",	"-1",	"-2",	"-3",	"-4",	"-5",	"-6",	"-7",	"-8",	"-9",	"-10",	"-11",	"-12",	"-13",	"-14",	"-15",	"-16",	"-17",	"-18",	"-19",
+ 			"-20",	"-21",	"-22",	"-23",	"-24"
+ 		],
+		"bendRangeUp":
+ 		[
+			"0",	 "+1",	 "+2",	 "+3",	 "+4",	 "+5",	 "+6",	 "+7",	 "+8",	 "+9",	 "+10",	 "+11",	 "+12",	 "+13",	 "+14",	 "+15",	 "+16",	 "+17",	 "+18",	 "+19",
+ 			 "+20",	 "+21",	 "+22",	 "+23",	 "+24"
+ 		],
+		"algorithmType": 
+		[
+			"SOLID", "SMOOTH", "WIDE", "FLTR BNK WIDE", "FLTR BNK NARROW"
+		],
+		"ensembleType": 
+		[
+			"ENSEMBLE MILD",  "ENSEMBLE CLEAN",  "ENSEMBLE FAST",  "SUPER CHORUS SLW",  "SUPER CHORUS MID",  "SUPER CHORUS FST",  "SUPER CHORUS CLR",  "FLANGER SLOW",  "FLANGER DEEP",  "FLANGER FAST",  "DEEP PHASING SLW",  "JET PHASING",  "TWISTING",  "FREEZE PHASE 1",  "FREEZE PHASE 2"
+		],
+		"controlAssignType": 
+		[
+			"ENSEMBLE LEVEL","V DELAY TIME","V DELAY FEEDBACK","V DELAY LEVEL","VOCAL MIX","V RESONANCE","V RELEASE","V PAN","V LEVEL","V NOISE CUTOFF","V NOISE LEVEL","GATE THRESHOLD","ROBOT PITCH","ROBOT CONTROL","ROBOT LEVEL","CHARACTER 1","CHARACTER 2","CHARACTER 3","CHARACTER 4","CHARACTER 5","CHARACTER 6","CHARACTER 7","CHARACTER 8","CHARACTER 9","CHARACTER 10","CHARACTER 11","CHARACTER 12"
+		],
+		"syncType": 
+		[	
+			"OFF","1/16","1/8 TRIPLET","1/16 DOTTED","1/8","1/4 TRIPLET","1/8 DOTTED","1/4","1/2 TRIPLET","1/4 DOTTED","1/2","1/1 TRIPLET","1/2 DOTTED","1/1","2/1 TRIPLET","1/1 DOTTED","2/1","3 MEASURES","4 MEASURES","5 MEASURES","6 MEASURES","7 MEASURES","8 MEASURES"
+		],
+		"outputAssign": 
+		[
+			"MIX OUT", "PARALLEL OUT"
+		], 
+ 		"LFO1DepthPan":
+ 		[
+			"LEFT", "L -63", "L -62", "L -61", "L -60", "L -59", "L -58", "L -57", "L -56", "L -55", "L -54", "L -53", "L -52", "L -51", "L -50", "L -49", "L -48",
+			"L -47", "L -46", "L -45", "L -44", "L -43", "L -42", "L -41", "L -40", "L -39", "L -38", "L -37", "L -36", "L -35", "L -34", "L -33", "L -32", "L -31", "L -30", "L -29", "L -28",
+			"L -27", "L -26", "L -25", "L -24", "L -23", "L -22", "L -21", "L -20", "L -19", "L -18", "L -17", "L -16", "L -15", "L -14", "L -13", "L -12", "L -11", "L -10", "L -9", "L -8",
+			"L -7", "L -6", "L -5", "L -4", "L -3", "L -2", "L -1",
+			"0",	"R 1",	"R 2",	"R 3",	"R 4",	"R 5",	"R 6",	"R 7",	"R 8",	"R 9",	"R 10",	"R 11",	"R 12",	"R 13",	"R 14",	"R 15",	"R 16",	"R 17",	"R 18",	"R 19",
+ 			"20",	"R 21",	"R 22",	"R 23",	"R 24",	"R 25",	"R 26",	"R 27",	"R 28",	"R 29",	"R 30",	"R 31",	"R 32",	"R 33",	"R 34",	"R 35",	"R 36",	"R 37",	"R 38",	"R 39",
+			"40",	"R 41",	"R 42",	"R 43",	"R 44",	"R 45",	"R 46",	"R 47",	"R 48",	"R 49",	"R 50",	"R 51",	"R 52",	"R 53",	"R 54",	"R 55",	"R 56",	"R 57",	"R 58",	"R 59",
+			"60",	"R 61",	"R 62",	"RIGHT"
+		],
+		"osc2RangeFine":
+ 		[
+			"-50 cent", "-49 cent", "-48 cent",
+			"-47 cent", "-46 cent", "-45 cent", "-44 cent", "-43 cent", "-42 cent", "-41 cent", "-40 cent", "-39 cent", "-38 cent", "-37 cent", "-36 cent", "-35 cent", "-34 cent", "-33 cent", "-32 cent", "-31 cent", "-30 cent", "-29 cent", "-28 cent",
+			"-27 cent", "-26 cent", "-25 cent", "-24 cent", "-23 cent", "-22 cent", "-21 cent", "-20 cent", "-19 cent", "-18 cent", "-17 cent", "-16 cent", "-15 cent", "-14 cent", "-13 cent", "-12 cent", "-11 cent", "-10 cent", "-9 cent", "-8 cent",
+			"-7 cent", "-6 cent", "-5 cent", "-4 cent", "-3 cent", "-2 cent", "-1 cent",
+			"0 cent",	"1 cent",	"2 cent",	"3 cent",	"4 cent",	"5 cent",	"6 cent",	"7 cent",	"8 cent",	"9 cent",	"10 cent",	"11 cent",	"12 cent",	"13 cent",	"14 cent",	"15 cent",	"16 cent",	"17 cent",	"18 cent",	"19 cent",
+ 			"20 cent",	"21 cent",	"22 cent",	"23 cent",	"24 cent",	"25 cent",	"26 cent",	"27 cent",	"28 cent",	"29 cent",	"30 cent",	"31 cent",	"32 cent",	"33 cent",	"34 cent",	"35 cent",	"36 cent",	"37 cent",	"38 cent",	"39 cent",
+			"40 cent",	"41 cent",	"42 cent",	"43 cent",	"44 cent",	"45 cent",	"46 cent",	"47 cent",	"48 cent",	"49 cent",	"50 cent"
+ 		],
+		"osc2RangeWidePos": [ 
+		  "0 oct", 
+		  "0 oct", "0 oct 1.0 s", "0 oct 1.5 s", "0 oct 2.0 s", "0 oct 2.5 s", "0 oct 3.0 s", "0 oct 3.5 s", "0 oct 4.0 s", "0 oct 4.5 s", "0 oct 5.0 s", "0 oct 5.5 s", "0 oct 6.0 s", "0 oct 6.5 s", "0 oct 7.0 s", "0 oct 7.5 s", "0 oct 8.0 s", "0 oct 8.5 s", "0 oct 9.0 s", "0 oct 9.5 s", "0 oct 10.0 s", "0 oct 10.5 s", "0 oct 11.0 s", "0 oct 11.25 s", "0 oct 11.5 s",  "0 oct 11.75 s",
+		  "1 oct", "1 oct 0.5 s", "1 oct 1.0 s", "1 oct 1.5 s", "1 oct 2.0 s", "1 oct 2.5 s", "1 oct 3.0 s", "1 oct 3.5 s", "1 oct 4.0 s", "1 oct 4.5 s", "1 oct 5.0 s", "1 oct 5.5 s", "1 oct 6.0 s", "1 oct 6.5 s", "1 oct 7.0 s", "1 oct 7.5 s", "1 oct 8.0 s", "1 oct 8.5 s", "1 oct 9.0 s", "1 oct 9.5 s", "1 oct 10.0 s", "1 oct 10.5 s", "1 oct 11.0 s", "1 oct 11.5 s",
+		  "2 oct", "2 oct 0.5 s", "2 oct 1.0 s", "2 oct 1.5 s", "2 oct 2.0 s", "2 oct 2.5 s", "2 oct 3.0 s", "2 oct 3.5 s", "2 oct 4.0 s", "2 oct 4.5 s", "2 oct 5.0 s", "2 oct 5.5 s", "2 oct 6.0 s", "2 oct 6.5 s", "2 oct 7.0 s", "2 oct 7.5 s", "2 oct 8.0 s", "2 oct 8.5 s", "2 oct 9.0 s", "2 oct 9.5 s", "2 oct 10.0 s", "2 oct 10.5 s", "2 oct 11.0 s", "2 oct 11.5 s",
+		  "3 oct", "3 oct 0.5 s", "3 oct 1.0 s", "3 oct 1.5 s", "3 oct 2.0 s", "3 oct 2.5 s", "3 oct 3.0 s", "3 oct 3.5 s", "3 oct 4.0 s", "3 oct 4.5 s", "3 oct 5.0 s", "3 oct 5.5 s", "3 oct 6.0 s", "3 oct 6.5 s", "3 oct 7.0 s", "3 oct 7.5 s", "3 oct 8.0 s", "3 oct 8.5 s", "3 oct 9.0 s", "3 oct 9.5 s", "3 oct 10.0 s", "3 oct 10.5 s", "3 oct 11.0 s", "3 oct 11.5 s",
+		  "4 oct", "4 oct", "4 oct",
+		],
+
+		"osc2RangeWideNeg": [ 
+		  "-4 oct", "-4 oct", "-4 oct",
+		  "-3 oct 11.5 s", "-3 oct 11.0 s", "-3 oct 10.5 s", "-3 oct 10.0 s", "-3 oct 9.5 s", "-3 oct 9.0 s", "-3 oct 8.5 s", "-3 oct 8.0 s", "-3 oct 7.5 s", "-3 oct 7.0 s", "-3 oct 6.5 s", "-3 oct 6.0 s", "-3 oct 5.5 s", "-3 oct 5.0 s", "-3 oct 4.5 s", "-3 oct 4.0 s", "-3 oct 3.5 s", "-3 oct 3.0 s", "-3 oct 2.5 s", "-3 oct 2.0 s", "-3 oct 1.5 s", "-3 oct 1.0 s", "-3 oct 0.5 s", "-3 oct",
+		  "-2 oct 11.5 s", "-2 oct 11.0 s", "-2 oct 10.5 s", "-2 oct 10.0 s", "-2 oct 9.5 s", "-2 oct 9.0 s", "-2 oct 8.5 s", "-2 oct 8.0 s", "-2 oct 7.5 s", "-2 oct 7.0 s", "-2 oct 6.5 s", "-2 oct 6.0 s", "-2 oct 5.5 s", "-2 oct 5.0 s", "-2 oct 4.5 s", "-2 oct 4.0 s", "-2 oct 3.5 s", "-2 oct 3.0 s", "-2 oct 2.5 s", "-2 oct 2.0 s", "-2 oct 1.5 s", "-2 oct 1.0 s", "-2 oct 0.5 s", "-2 oct",
+		  "-1 oct 11.5 s", "-1 oct 11.0 s", "-1 oct 10.5 s", "-1 oct 10.0 s", "-1 oct 9.5 s", "-1 oct 9.0 s", "-1 oct 8.5 s", "-1 oct 8.0 s", "-1 oct 7.5 s", "-1 oct 7.0 s", "-1 oct 6.5 s", "-1 oct 6.0 s", "-1 oct 5.5 s", "-1 oct 5.0 s", "-1 oct 4.5 s", "-1 oct 4.0 s", "-1 oct 3.5 s", "-1 oct 3.0 s", "-1 oct 2.5 s", "-1 oct 2.0 s", "-1 oct 1.5 s", "-1 oct 1.0 s", "-1 oct 0.5 s", "-1 oct",
+		  "-0 oct 11.5 s", "-0 oct 11.0 s", "-0 oct 10.5 s", "-0 oct 10.0 s", "-0 oct 9.5 s", "-0 oct 9.0 s", "-0 oct 8.5 s", "-0 oct 8.0 s", "-0 oct 7.5 s", "-0 oct 7.0 s", "-0 oct 6.5 s", "-0 oct 6.0 s", "-0 oct 5.5 s", "-0 oct 5.0 s", "-0 oct 4.5 s", "-0 oct 4.0 s", "-0 oct 3.5 s", "-0 oct 3.0 s", "-0 oct 2.5 s", "-0 oct 2.0 s", "-0 oct 1.5 s", "-0 oct 1.0 s", "-0 oct 0.5 s", "-0 oct",
+		  "-0 oct", "-0 oct"
+		],
+ 		"remoteMidiChannel":
+ 		[
+			"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"ALL", "OFF"
+ 		],		
+ 		"midiSyncRack":
+ 		[
+			"OFF", "MIDI IN", "R-KBD IN"	
+ 		]
+	
+	},
+ 	"midipackets":
+ 	{
+	},
+	"controllerMap": [
+		{"cc": 16, "param": "Lfo1Rate"},
+		{"cc": 20, "param": "Lfo1Fade"},
+
+		{"cc": 8 , "param": "OscillatorBalance"},
+		{"cc": 70, "param": "CrossModulationDepth"},
+		{"cc": 18, "param": "OscLfo1Depth"},
+		{"cc": 25, "param": "PitchEnvelopeDepth"},
+		{"cc": 26, "param": "PitchEnvelopeAttackTime"},
+		{"cc": 27, "param": "PitchEnvelopeDecayTime"},
+
+		{"cc": 4 , "param": "Osc1Control1"},
+		{"cc": 76, "param": "Osc1Control2"},
+
+		{"cc": 21, "param": "Osc2Range"},
+		{"cc": 77, "param": "Osc2Fine"},
+		{"cc": 78, "param": "Osc2Control1"},
+		{"cc": 79, "param": "Osc2Control2"},
+
+		{"cc": 74, "param": "CutoffFrequency"},
+		{"cc": 71, "param": "Resonance"},
+		{"cc": 30, "param": "CutoffFrequencyKeyFollow"},
+		{"cc": 19, "param": "FilterLfo1Depth"},
+		{"cc": 81, "param": "FilterEnvelopeDepth"},
+		{"cc": 82, "param": "FilterEnvelopeAttackTime"},
+		{"cc": 83, "param": "FilterEnvelopeDecayTime"},
+		{"cc": 28, "param": "FilterEnvelopeSustainLevel"},
+		{"cc": 29, "param": "FilterEnvelopeReleaseTime"},
+
+		{"cc": 7 , "param": "AmpLevel"},
+		{"cc": 80, "param": "AmpLfo1Depth"},
+		{"cc": 73, "param": "AmpEnvelopeAttackTime"},
+		{"cc": 75, "param": "AmpEnvelopeDecayTime"},
+		{"cc": 31, "param": "AmpEnvelopeSustainLevel"},
+		{"cc": 72, "param": "AmpEnvelopeReleaseTime"},
+
+		{"cc": 92, "param": "ToneControlBass"},
+		{"cc": 95, "param": "ToneControlTreble"},
+
+		{"cc": 93, "param": "MultiEffectsLevel"},
+		{"cc": 12, "param": "DelayTime"},
+		{"cc": 13, "param": "DelayFeedback"},
+		{"cc": 94, "param": "DelayLevel"},
+
+		{"cc": 5 , "param": "PortamentoTime"},
+		
+		{"cc": 17, "param": "Lfo2Rate"},
+		{"cc": 22, "param": "PitchLfo2Depth"},
+		{"cc": 23, "param": "FilterLfo2Depth"},
+		{"cc": 24, "param": "AmpLfo2Depth"}
+	]
+}

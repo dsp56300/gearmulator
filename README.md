@@ -13,9 +13,9 @@
 [s3]: https://img.shields.io/discord/829099347975208970?label=Discord
 [l3]: https://discord.gg/WJ9cxySnsM
 
-## Emulation of classic VA synths of the late 90s/2000s that used the Motorola 56300 family DSP
+## Low Level Emulation of classic VA synths & effects of the late 90s/2000s
 
-This project emulates various musical devices that used the Motorola 56300 family DSPs.
+This project emulates the used ICs of various musical devices to run the original firmware - aka ROM - as audio plugins.
 
 The supported plugin formats are [FST](https://github.com/pierreguillot/FTS), VST3, AU, [CLAP](https://cleveraudio.org/) and [LV2](https://lv2plug.in/).
 
@@ -31,6 +31,7 @@ At the moment, the following synthesizers are supported:
 * Vavra: Waldorf microQ
 * Xenia: Waldorf Microwave II/XT
 * Nodal Red 2x: Clavia Nord Lead/Rack 2x
+* JE-8086: Roland JP-8000
 
 ### Compiling
 
@@ -56,6 +57,7 @@ Additional options to select which devices to build:
 | gearmulator_SYNTH_VAVRA | Build Vavra | on |
 | gearmulator_SYNTH_XENIA | Build Xenia | on |
 | gearmulator_SYNTH_NODALRED2X | Build Nodal Red 2x | on |
+| gearmulator_SYNTH_JE8086 | Build JE-8086 | on |
 
 ### Join us on Discord
 
@@ -64,4 +66,4 @@ If you want to help or just want to follow the state of the project, feel free t
 ### Visit our Homepage
 
 🎵 Visit our homepage for Audio and Video examples 🎧:
-[DSP 56300 Emulation Blog](https://dsp56300.wordpress.com/)
+[The Usual Suspects Website](https://dsp56300.com/)

@@ -5,6 +5,7 @@ option(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS "Build OsTIrus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_XENIA "Build Xenia" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_NODALRED2X "Build NodalRed2x" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_JE8086 "Build JE-8086" on)
 
 # ----------------- Add our cmake scripts to IDE
 
@@ -139,3 +140,7 @@ endif()
 # ----------------- all nords
 
 add_subdirectory(nord)
+
+# ----------------- all ronaldos
+
+add_subdirectory(ronaldo)
