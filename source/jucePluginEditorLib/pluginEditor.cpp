@@ -1,8 +1,12 @@
 #include "pluginEditor.h"
 
 #include "pluginProcessor.h"
+
 #include "settings.h"
 #include "settingsMidi.h"
+#include "settingsGui.h"
+#include "settingsSkin.h"
+
 #include "skin.h"
 
 #include "baseLib/filesystem.h"
@@ -672,6 +676,8 @@ namespace jucePluginEditorLib
 
 	void Editor::registerSettings(std::vector<std::unique_ptr<SettingsPlugin>>& _plugins)
 	{
+		_plugins.push_back(std::make_unique<SettingsSkin>(getProcessor()));
+		_plugins.push_back(std::make_unique<SettingsGui>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsMidi>(getProcessor()));
 	}
 

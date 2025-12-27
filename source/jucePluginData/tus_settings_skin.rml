@@ -1,4 +1,4 @@
-<template name="tus_settings_midi">
+<template name="tus_settings_skin">
 <head>
 	<link type="text/rcss" href="tus_settings_midi.rcss"/>
 </head>
