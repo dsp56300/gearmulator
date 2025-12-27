@@ -62,6 +62,16 @@ namespace pluginLib
 		return &it->second;
 	}
 
+	uint32_t ParameterDescriptions::getAbsoluteIndex(uint32_t _page, uint8_t _index) const
+	{
+		const auto it = m_pageAndIndexRemap.find({ _page, _index });
+		if(it == m_pageAndIndexRemap.end())
+			return std::numeric_limits<uint32_t>::max();
+		if (it->second >= m_descriptions.size())
+			return std::numeric_limits<uint32_t>::max();
+		return it->second;
+	}
+
 	std::string ParameterDescriptions::loadJson(const std::string& _jsonString)
 	{
 		// juce' JSON parser doesn't like JSON5-style comments
@@ -301,6 +311,8 @@ namespace pluginLib
 					}
 				}
 			}
+
+			m_pageAndIndexRemap[std::make_pair(d.page, d.index)] = static_cast<uint32_t>(m_descriptions.size());
 
 			m_descriptions.emplace_back(std::move(d));
 		}

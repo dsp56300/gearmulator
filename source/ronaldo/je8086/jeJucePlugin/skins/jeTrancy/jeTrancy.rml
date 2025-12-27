@@ -1,0 +1,755 @@
+<rml>
+	<head>
+		<link type="text/template" href="tus_colorpicker.rml"/>
+		<link type="text/template" href="tus_patchmanager.rml"/>
+		<link type="text/rcss" href="tus_default.rcss"/>
+		<link type="text/rcss" href="tus_juceskin.rcss"/>
+		<link type="text/rcss" href="knob.rcss"/>
+		<link type="text/rcss" href="jeTrancy.rcss"/>
+	</head>
+	<body debugger=1" id="Root" rootScale="0.5">
+		<img class="background" src="background.png"/>
+
+		
+		<!-- Top&Bottom background -->
+		<img id="bottom" class="jucePos" src="bottom.png" style="left: 173dp; top: 1155dp;"/>	
+		<img id="top" class="jucePos" src="top.png" style="left: 720dp; top: 56dp;"/>
+		<img id="unison" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="unison.png" style="left: 2327dp; top: 63dp;"/>
+		<img id="8K" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="8k.png" style="left: 2360dp; top: 125dp;"/>
+				
+		<img id="split" class="jucePos" data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" src="cmb_split.png" style="left: 747dp; top: 1316dp; "/>
+			
+		<!-- MAIN PAGE -->
+		<div data-model="partCurrent" class="abs" tabgroup="main" tabpage="0">
+			
+			<!-- Background Images -->
+			<img id="main" class="jucePos" src="main.png" style="left: 173dp; top: 274dp;"/>
+			<img id="arp" class="jucePos" src="arp.png" style="left: 1196dp; top: 1155dp;"/>
+
+			<img id="osc2_noise" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 1304dp; top:426dp"/>					
+			<img id="amp_gain" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="amp_gain.png" style="left: 2445dp; top: 331dp;"/>	
+			
+			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
+			
+			<!-- second row -->
+			<div class="row" style="top: 270dp; height: 316dp;">
+			
+				<!-- LFO 1 -->
+				<div class="abs" style="left: 11dp; top: 32dp; height: 287dp; width: 290dp;">
+					
+					<!-- LFO 1 Waveform -->
+					<combo param="Lfo1Waveform" id="Lfo1Waveform" class="jucePos comboxtext2" style="left: 0dp; top: 23dp; width: 310dp; height: 45dp; line-height: 45dp;">
+						<combotext></combotext>
+					</combo>
+					
+					<!-- Sync -->
+					<combo param="LFO1Sync" id="LFO1Sync" class="jucePos comboxtext2" style="left: 0dp; top: 86dp; width: 310dp; height: 45dp; line-height: 45dp;">
+						<combotext></combotext>
+					</combo>
+					
+					<div class="knobs_row2">
+						<knob class="knob" param="Lfo1Rate" id="Lfo1Rate"/>
+						<knob class="knob" param="Lfo1Fade" id="Lfo1Fade"/>
+					</div>
+				</div>
+				
+				<!-- OSC 1 -->
+				<div class="abs" style="left: 335dp; top: 52dp; height: 250dp; width: 220dp;">
+					<!-- Supersaw -->
+					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 0)" data-model="partCurrent" >
+						<input data-model="partCurrent" class="abs sliderV slider_row2" param="Osc1Control1Detune" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input data-model="partCurrent" class="abs sliderV slider_row2" param="Osc1Control2Mix" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
+						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">DETUNE</div>
+						<div class="label" style="left: 337dp; width:100dp; margin-top:-9dp">MIX</div>						
+					</div>		
+					
+					<!-- Triangle Modulation -->
+					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 1)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc1Control1Offset" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
+						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">OFFSET</div>
+						<div class="label" style="left: 337dp; width:100dp; margin-top:-18dp">LFO 1 DEPTH</div>						
+					</div>	
+
+					<!-- Noise -->
+					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 2)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc1Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2Resonance" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
+						<div class="label" style="left: 246dp; width:100dp; margin-top:-20dp">CUTOFF FREQ</div>
+						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">RESO- NANCE</div>							
+					</div>	
+
+					<!-- Feedback Oscillator -->
+					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 3)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc1Control1Harmonics" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2FeedbackAmount" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
+						<div class="label" style="left: 246dp; width:100dp; margin-top:-20dp">HARMO- NICS</div>
+						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">FDBCK AMT</div>						
+					</div>	
+					
+					<!-- Square wave -->
+					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 4)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc1Control1PulseWidth" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2PWMDepth" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
+						<div class="label" style="left: 246dp; width:100dp; margin-top:-20dp">PULSE WIDTH</div>
+						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">PWM DEPTH</div>							
+					</div>	
+					
+					<!-- Sawtooth wave -->
+					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 5)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc1Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
+						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">SHAPE</div>
+						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">LFO 1 DEPTH</div>							
+					</div>	
+					
+					<!-- Triangle wave -->
+					<div id="ContainerOsc1Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc1Waveform_value == 6)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc1Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 9dp; left: 264dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc1Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 9dp; left: 357dp;"/>
+						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">SHAPE</div>
+						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">LFO 1 DEPTH</div>							
+					</div>				
+					
+					
+					<div class="vlayoutLeds" style="height: 243dp; width: 210dp; margin-top:-1dp">
+						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="0" isToggle="1"/>
+						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="1" isToggle="1"/>
+						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="2" isToggle="1"/>
+						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="3" isToggle="1"/>
+						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="4" isToggle="1"/>
+						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="5" isToggle="1"/>
+						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="6" isToggle="1"/>
+					</div>
+				</div>
+	
+					
+				<!-- OSC 2 -->
+				<div class="abs" style="left: 811dp; top: 32dp; width: 460dp; height: 287dp;">
+					
+				
+					<!-- Square wave -->
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 0)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc2Control1PulseWidth" id="Osc1Control1" type="range" orientation="vertical" style="top: 28dp; left: 471dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control2PWMDepth" id="Osc1Control2" type="range" orientation="vertical" style="top: 28dp; left: 566dp;"/>
+						<div class="label" style="left: 448dp; width:100dp; margin-top:-5dp">PULSE WIDTH</div>
+						<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">PWM DEPTH</div>						
+					</div>	
+					
+					<!-- Sawtooth wave -->
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 1)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc2Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 28dp; left: 471dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 28dp; left: 566dp;"/>
+						<div class="label" style="left: 448dp; width:100dp; margin-top:7dp">SHAPE</div>
+						<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">LFO 1 DEPTH</div>	
+					</div>	
+					
+					<!-- Triangle wave -->
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 2)" data-model="partCurrent" >
+						<input class="abs sliderV slider_row2" param="Osc2Control1Shape" id="Osc1Control1" type="range" orientation="vertical" style="top: 28dp; left: 471dp;"/>
+						<input class="abs sliderV slider_row2" param="Osc2Control2LFO1Depth" id="Osc1Control2" type="range" orientation="vertical" style="top: 28dp; left: 566dp;"/>
+						<div class="label" style="left: 448dp; width:100dp; margin-top: 7dp">SHAPE</div>
+						<div class="label" style="left: 545dp; width:100dp; margin-top:-5dp">LFO 1 DEPTH</div>							
+					</div>	
+					
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
+						<!-- Noise -->
+						<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Waveform_value == 3)" data-model="partCurrent" >
+							<input class="abs sliderV slider_row2" param="Osc2Control1CutoffFrq" id="Osc1Control1" type="range" orientation="vertical" style="top: 28dp; left: 471dp;"/>
+							<input class="abs sliderV slider_row2" param="Osc2Control2Resonance" id="Osc1Control2" type="range" orientation="vertical" style="top: 28dp; left: 566dp;"/>
+							<div class="label" style="left: 448dp; width:100dp; margin-top:-5dp">CUTOFF FREQ</div>
+							<div class="label" style="left: 545dp; width:100dp; margin-top:7dp">RESO</div>							
+						</div>	
+					</div>						
+					
+					<button class="abs btBlackLed" param="Osc2SyncSwitch" id="Osc2SyncSwitch" style="left: 60dp; top: 44dp;" isToggle="1"/>
+						
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
+						<img id="rack" class="jucePos" src="osc2_ext.png" style="left: 156dp; top: 23dp"/>	
+						<button class="abs btBlackLed" param="Osc2ExternalInputSwitch" id="Osc2ExternalInputSwitch" style="left: 167dp; top: 44dp;" isToggle="1"/>						
+					</div>					
+
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
+						<div class="abs vlayoutLeds" style="left: 305dp; top: 18dp; height: 135dp; width: 120dp">
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="3" isToggle="1"/>
+						</div>
+					</div>
+					<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-class-hlayout="deviceModel=='keyboard'" data-model="plugin" class="abs" >
+						<div class="abs vlayoutLeds" style="left: 304dp; top: 18dp; height: 135dp; width: 120dp">
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="0" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="1" isToggle="1"/>
+							<button class="ledRed" param="Osc2Waveform" id="Osc2Waveform" valueOn="2" isToggle="1"/>
+						</div>
+					</div>					
+
+					<knob class="abs knob" param="Osc2Range" id="Osc2Range" style="top:172dp; left: 43dp;"/>
+						
+					
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!((Osc2Range_value > 0 && Osc2Range_value < 50))" data-model="partCurrent" >
+						<knob class="abs knob" param="Osc2Fine" id="Osc2Fine" style="top:172dp; left: 200dp;"/>
+						<div class="label2" style="left:172dp; top:142dp;; width:150dp; color: #ffffffDD;">FINE</div>
+					</div>	
+
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Range_value == 50)" data-model="partCurrent" >
+						<knob class="abs knob" param="Osc2WidePos" id="Osc2WidePos" style="top:172dp; left: 200dp;"/>
+						<div class="label2" style="left:172dp; top:142dp;; width:150dp; color: #ff6600ff;">WIDE+</div>
+					</div>					
+
+					<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2Range_value == 0)" data-model="partCurrent" >
+						<knob class="abs knob" param="Osc2WideNeg" id="Osc2WideNeg" style="top:172dp; left: 200dp;"/>
+						<div class="label2" style="left:172dp; top:142dp;; width:150dp; color: #ff6600ff;">WIDE-</div>
+					</div>										
+					
+				</div>
+						
+				<button class="abs btBlackLed" param="RingModulatorSwitch" id="RingModulatorSwitch" style="left: 772dp; top: 76dp;" isToggle="1"/>
+				
+				<!-- Filter -->
+				<div class="abs" style="left: 1490dp; top: 32dp; width: 630dp; height: 287dp;">
+					<div class="abs vlayoutLeds" style="left: 430dp; top: 14dp; height: 140dp; width: 140dp">
+						<button class="ledRed" param="FilterType" id="FilterType" valueOn="0" isToggle="1"/>
+						<button class="ledRed" param="FilterType" id="FilterType" valueOn="1" isToggle="1"/>
+						<button class="ledRed" param="FilterType" id="FilterType" valueOn="2" isToggle="1"/>
+					</div>
+					<button class="ledRed2" param="CutoffSlope" id="CutoffSlope" valueOn="0" style="left: 282dp; top: 32dp; width: 140dp;" isToggle="1"/>
+					<button class="ledRed2" param="CutoffSlope" id="CutoffSlope" valueOn="1" style="left: 282dp; top: 66dp; width: 140dp;" isToggle="1"/>
+
+					<input class="abs sliderV slider_row2" param="CutoffFrequency" id="CutoffFrequency" type="range" orientation="vertical" style="left: 52dp; margin-top:7dp"/>
+					<input class="abs sliderV slider_row2" param="Resonance" id="Resonance" type="range" orientation="vertical" style="left: 169dp; margin-top:7dp"/>
+					
+					<div class="knobs_row2" style="left: 301dp; gap: 64dp;">
+						<knob class="knob" param="CutoffFrequencyKeyFollow" id="CutoffFrequencyKeyFollow"/>
+						<knob class="knob" param="FilterLfo1Depth" id="FilterLfo1Depth" />
+					</div>
+				</div>
+
+				<!-- Amp -->
+				<div class="abs" style="left: 2097dp; top: 46dp; height: 257dp; width: 290dp;">
+					<div class="vlayoutLeds" style="height: 140dp; width: 150dp">
+						<button class="ledRed" param="AutoPanManualPanSwitch" id="AutoPanManualPanSwitch" valueOn="0" isToggle="1"/>
+						<button class="ledRed" param="AutoPanManualPanSwitch" id="AutoPanManualPanSwitch" valueOn="1" isToggle="1"/>
+						<button class="ledRed" param="AutoPanManualPanSwitch" id="AutoPanManualPanSwitch" valueOn="2" isToggle="1"/>						
+					</div>
+					
+					<!-- Gain -->
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">						
+						<combo param="DelayType" id="DelayType" class="jucePos comboxtext2" param="PatchGain" id="PatchGain" style="left: 171dp; top: -113dp; width: 125dp; height: 45dp; line-height: 45dp;">
+							<combotext></combotext>
+						</combo>						
+					</div>		
+					
+					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 0 || AutoPanManualPanSwitch_value == 1)" class="abs">
+						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpLfo1Depth" id="AmpLfo1Depth" />	
+						<div class="label2" style="left: 3dp; margin-top:-11dp; width:150dp; color: #ffffffDD;">LFO1 DEPTH</div>				
+					</div>	
+					<div data-class-juceConditionDisabled="!(AutoPanManualPanSwitch_value == 2)" class="abs">
+						<knob class="knob abs" style="left: 35dp; top: 18dp;" param="AmpPan" id="AmpPan" />							
+						<div class="label2" style="left:3dp; margin-top:-11dp; width:150dp; color: #ff6600ff;">PAN</div>				
+					</div>						
+					<knob class="knob abs" style="left: 188dp; top: 158dp;" param="AmpLevel" id="AmpLevel" />
+
+				</div>			
+			</div>
+
+			<!-- third row -->
+			<div class="row" style="top: 595dp; height: 326dp;  width: 0dp;">
+			
+				<!-- Modulation (LFO 2) -->
+				<div class="abs" style="left: -1dp; top: 0dp; height: 100%; width: 314dp;">
+					<div class="knobs_row3" style="top: 67dp; left: 38dp;">
+						<knob class="knob" param="AmpLfo2Depth" id="AmpLfo2Depth" />
+						<knob class="knob" param="FilterLfo2Depth" id="FilterLfo2Depth" />
+					</div>					
+					<div class="knobs_row3" style="left: 38dp;">
+						<knob class="knob" param="Lfo2Rate" id="Lfo2Rate" />
+						<knob class="knob" param="PitchLfo2Depth" id="PitchLfo2Depth" />
+					</div>
+				</div>
+			
+				<!-- Portamento -->
+				<div class="abs vlayout" style="left: 335dp; top: 0dp; width: 188dp; padding-top: 80dp; gap: 64dp; height: 77%">
+					<button class="btBlackLed" param="PortamentoSwitch" id="PortamentoSwitch" style="" isToggle="1"/>
+					<knob class="knob" param="PortamentoTime" id="PortamentoTime" style="margin-left: -58dp" />
+				</div>
+			
+				<!-- OSC Common -->
+				<div class="abs" style="left: 524dp; top: 0dp; width: 490dp; height: 100%;">
+					
+					<!-- OSC Shift -->
+					<combo class="jucePos comboxtext2" param="OscillatorShift" id="OscillatorShift" style="left: 40dp; top: 59dp; width: 180dp; height: 45dp; line-height: 45dp;">
+						<combotext></combotext>
+					</combo>					
+					
+					<div class="abs vlayoutLeds" style="left: 245dp; top: 67dp; height: 140dp; width: 245dp; gap:9dp">
+						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="0" isToggle="1"/>
+						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="1" isToggle="1"/>
+						<button class="ledRed" param="Lfo1AndEnvelopeDestination" id="Lfo1AndEnvelopeDestination" valueOn="2" isToggle="1"/>
+					</div>
+
+					<div class="knobs_row3" style="left: 51dp; gap: 65dp;">
+						<knob class="knob" param="OscillatorBalance" id="OscillatorBalance" />
+						<knob class="knob" param="CrossModulationDepth" id="CrossModulationDepth" />
+						<knob class="knob" param="OscLfo1Depth" id="OscLfo1Depth" />
+					</div>
+				</div>
+				
+				<!-- Pitch Envelope -->
+				<div class="abs" style="left: 1027dp; width: 372dp; height: 100%;">
+					<input class="abs sliderV slider_row3" param="PitchEnvelopeDepth" id="PitchEnvelopeDepth" type="range" orientation="vertical" style="left: 60dp;"/>
+					<input class="abs sliderV slider_row3" param="PitchEnvelopeAttackTime" id="PitchEnvelopeAttackTime" type="range" orientation="vertical" style="left: 182dp;"/>
+					<input class="abs sliderV slider_row3" param="PitchEnvelopeDecayTime" id="PitchEnvelopeDecayTime" type="range" orientation="vertical" style="left: 274dp;"/>
+				</div>
+				
+				<!-- Filter Envelope -->
+				<div class="abs" style="left: 1412dp; width: 550dp; height: 100%;">
+					<input class="abs sliderV slider_row3"  param="FilterEnvelopeDepth" id="FilterEnvelopeDepth" type="range" orientation="vertical" style="left: 50dp;"/>
+					<div class="abs hlayout slider_row3" style="left: 174dp; gap: 24dp;">
+						<input class="sliderV" type="range" orientation="vertical" param="FilterEnvelopeAttackTime" id="FilterEnvelopeAttackTime" />
+						<input class="sliderV" type="range" orientation="vertical" param="FilterEnvelopeDecayTime" id="FilterEnvelopeDecayTime" />
+						<input class="sliderV" type="range" orientation="vertical" param="FilterEnvelopeSustainLevel" id="FilterEnvelopeSustainLevel" />
+						<input class="sliderV" type="range" orientation="vertical" param="FilterEnvelopeReleaseTime" id="FilterEnvelopeReleaseTime" />
+					</div>
+				</div>
+				
+				<!-- Amp Envelope -->
+				<div class="abs" style="left: 1981dp; width: 452dp; height: 100%;">
+					<div class="abs hlayout slider_row3" style="left: 56dp; gap: 24dp;">
+						<input class="sliderV" type="range" orientation="vertical" param="AmpEnvelopeAttackTime" id="AmpEnvelopeAttackTime" />
+						<input class="sliderV" type="range" orientation="vertical" param="AmpEnvelopeDecayTime" id="AmpEnvelopeDecayTime" />
+						<input class="sliderV" type="range" orientation="vertical" param="AmpEnvelopeSustainLevel" id="AmpEnvelopeSustainLevel" />
+						<input class="sliderV" type="range" orientation="vertical" param="AmpEnvelopeReleaseTime" id="AmpEnvelopeReleaseTime" />
+					</div>
+				</div>
+			</div>
+
+			<!-- fourth row -->
+			<div class="row" style="top:934dp; height: 200dp;">
+				<!-- Control -->
+				<div class="abs hlayout" style="left: 47dp; top:128dp; gap: 34dp; width:700dp">
+					<button class="btBlackLed" param="MonoSwitch" id="MonoSwitch" isToggle="1"/>
+					<button class="btBlackLed" param="LegatoSwitch" id="LegatoSwitch" isToggle="1"/>				
+					<button class="btBlackLed" param="VelocitySwitch" id="VelocitySwitch" isToggle="1"/>					
+					<button class="btBlackLed" id="ActiveIndicatorOfVelocityAssign" isToggle="1"/>
+					<button class="btBlackLed" id="ActiveIndicatorOfControlAssign" isToggle="1"/>
+				</div>					
+
+				<!-- FX section -->
+				<div class="layoutFxKnobs">
+					<knob class="knob" param="ToneControlBass" id="ToneControlBass"/>
+					<knob class="knob" param="ToneControlTreble" id="ToneControlTreble"/>
+					<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-class-hlayout="deviceModel=='keyboard'" data-model="plugin" class="" >
+						<knob class="knob" param="ChorusLevel" id="ChorusLevel" style="margin-top: 7dp;"/>
+					</div>
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="" >
+						<knob class="knob" param="MultiEffectsLevel" id="MultiEffectsLevel" style="margin-top: 7dp;"/>
+					</div>				
+					
+					<knob class="knob" param="DelayTime" id="DelayTime"/>
+					<knob class="knob" param="DelayFeedback" id="DelayFeedback"/>
+					<knob class="knob" param="DelayLevel" id="DelayLevel"/>
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
+						<button class="abs btBlackLed" style="left: 1583dp; top: 23dp;" param="VoiceModulatorSendSwitch" isToggle="1"/>
+						<div class="label" style="left: 1545dp; width:150dp; margin-top:-18dp">VOICE MOD SEND</div>
+					</div>
+					<!-- FX delay section -->
+					<combo param="DelayType" id="DelayType" class="jucePos comboxtext2" style="left: 890dp; top: -12dp; width: 340dp; height: 45dp; line-height: 45dp;">
+						<combotext></combotext>
+					</combo>
+					
+					<combo param="DelaySync" id="DelaySync" class="jucePos comboxtext2" style="left: 890dp; top: 57dp; width: 340dp; height: 45dp; line-height: 45dp;">
+						<combotext></combotext>
+					</combo>
+
+					<!-- FX chorus section -->
+					<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-class-hlayout="deviceModel=='keyboard'" data-model="plugin" class="abs" >
+						<div class="label2" style="left: 258dp; width:150dp; margin-top:-48dp; font-size: 20dp;">CHORUS LEVEL</div>
+						<combo param="ChorusType" id="ChorusType" class="jucePos comboxtext2" style="left: 1215dp; top: -12dp; width: 340dp; height: 45dp; line-height: 45dp;">
+							<combotext></combotext>
+						</combo>					
+					</div>
+					<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" >
+						<div class="label" style="left: 258dp; width:150dp; margin-top:-48dp; font-size: 20dp;">MULTI-FX LEVEL</div>
+						<combo param="ChorusTypeRack" id="ChorusTypeRack" class="jucePos comboxtext2" style="left: 1215dp; top: -12dp; width: 340dp; height: 45dp; line-height: 45dp;">
+							<combotext></combotext>
+						</combo>					
+					</div>
+				
+					<combo param="ChorusSyncRate" id="ChorusSyncRate" class="jucePos comboxtext2" style="left: 1215dp; top: 57dp; width: 340dp; height: 45dp; line-height: 45dp;">
+						<combotext></combotext>
+					</combo>	
+
+				</div>
+					
+			</div>
+			<!-- fourth row -->	
+		</div>
+		
+		<!-- PATCH BROWSER -->
+		<div data-model="partCurrent" class="abs" tabgroup="main" tabpage="1">
+			
+			<!-- Background Images -->
+			<img id="browser" class="jucePos" src="browser.png" style="left: 173dp; top: 274dp;"/>
+			<img id="easy" class="jucePos" src="easy.png" style="left: 1196dp; top: 1155dp;"/>
+			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
+			
+			<!-- OSC Shift -->
+			<div class="abs vlayoutLeds" style="left: 1236dp; top: 1198dp; height: 140dp; width: 186dp">
+				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="4" isToggle="1"/>
+				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="3" isToggle="1"/>
+				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="2" isToggle="1"/>
+				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="1" isToggle="1"/>
+				<button class="ledRed" param="OscillatorShift" id="OscillatorShift" valueOn="0" isToggle="1"/>
+			</div>			
+			
+			<!-- TODO -->
+			<div class="abs hlayout label" style="left:1460dp; top:1232dp; gap: 40dp; width: 1700dp">
+				<div style="width:100dp; margin-top:-55dp;">CUTOFF FREQ</div>				
+				<div style="width:100dp; margin-top:-55dp;">RESO</div>	
+				<div style="width:100dp; margin-top:-55dp;">OSC 1 CTRL 1</div>	
+				<div style="width:100dp; margin-top:-55dp;">OSC 1 CTRL 2</div>	
+				<div style="width:100dp; margin-top:-55dp;">OSC 2 CTRL 1</div>	
+				<div style="width:100dp; margin-top:-55dp;">OSC 2 CTRL 2</div>							
+				<div style="width:100dp; margin-top:-55dp;">BASS</div>
+				<div style="width:100dp; margin-top:-55dp;">TREBLE</div>			
+			</div>			
+			
+			<div class="abs hlayout" style="left:1465dp; top:1238dp; gap: 51.8dp; width: 1700dp">
+				<knob class="knob" param="CutoffFrequency" id="CutoffFrequency" />	
+				<knob class="knob" param="Resonance" id="Resonance" />
+				<knob class="knob" param="Osc1Control1" id="Osc1Control1" />
+				<knob class="knob" param="Osc1Control2" id="Osc1Control2" />
+				<knob class="knob" param="Osc2Control1" id="Osc1Control1" />
+				<knob class="knob" param="Osc2Control2" id="Osc1Control2" />						
+				<knob class="knob" param="ToneControlBass" id="ToneControlBass"/>
+				<knob class="knob" param="ToneControlTreble" id="ToneControlTreble"/>		
+			</div>
+			
+			
+			<div class="abs" style="left: 176dp; top: 269dp; width: 2420dp; height: 870dp; padding: 10dp; padding-top: 40dp; box-sizing: border-box">
+				<template src="patchmanager"/>
+			</div>	
+		</div>
+		
+	
+		<!-- VOICE MOD PAGE -->
+		<div data-model="partCurrent" class="abs" tabgroup="main" tabpage="2">
+		
+			<img id="voicemod" class="jucePos" src="voice_mod.png" style="left: 173dp; top: 274dp;"/>
+			<img id="arp" class="jucePos" src="arp.png" style="left: 1196dp; top: 1155dp;"/>
+			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
+			
+		
+			<!-- second row -->
+			<!-- Global -->
+			<div class="abs hlayout" style="left: 387dp; top:364dp; gap: 78dp; width:500dp">
+				<knob class="knob" param="VoiceModulatorLevel"/>
+				<knob class="knob" param="VoiceModulatorPan"/>	
+				<knob class="knob" param="VocalMix"/>
+			</div>	
+			<div class="abs hlayout" style="left: 233dp; top:384dp;">
+				<button class="btBlackLed" param="VoiceModulatorSwitch" id="VoiceModulatorSwitch" isToggle="1"/>
+			</div>	
+			<div class="abs hlayout" style="left: 895dp; top:384dp; gap: 61dp;">
+				<button class="btBlackLed" param="VoiceModulatorPanelMode" id="VoiceModulatorPanelMode" isToggle="1"/>
+				<button class="btBlackLed" param="ExternaltoInstSendSwitch" id="ExternaltoInstSendSwitch" isToggle="1"/>
+				<button class="btBlackLed" param="ExternaltoVocalSendSwitch" id="ExternaltoVocalSendSwitch" isToggle="1"/>
+			</div>					
+			<combo param="Algorithm" id="Algorithm" class="jucePos comboxtext3" style="left: 1350dp; top: 387dp; width: 350dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>
+				
+			<!-- third row -->
+			<!-- Vocal Morph -->
+			<button class="btBlackLed abs" style="left: 395dp; top: 615dp;" param="VocalMorphControlSwitch" id="VocalMorphControlSwitch" isToggle="1"/>
+			
+			<div class="abs hlayout" style="left: 309dp; top:782dp; width:1500dp; gap: 73dp;">
+				<knob class="knob" param="VocalMorphThreshold"/>
+				<knob class="knob" param="VocalMorphSensitivity"/>				
+			</div>	
+			<div class="abs hlayout" style="left: 700dp; top:595dp; width:1500dp; gap: 72.7dp;">
+				<knob class="knob" param="Character1"/>
+				<knob class="knob" param="Character2"/>
+				<knob class="knob" param="Character3"/>
+				<knob class="knob" param="Character4"/>
+				<knob class="knob" param="Character5"/>
+				<knob class="knob" param="Character6"/>					
+			</div>					
+			<div class="abs hlayout" style="left: 700dp; top:779dp; width:1500dp; gap: 72.7dp;">
+				<knob class="knob" param="Character7"/>
+				<knob class="knob" param="Character8"/>
+				<knob class="knob" param="Character9"/>
+				<knob class="knob" param="Character10"/>
+				<knob class="knob" param="Character11"/>
+				<knob class="knob" param="Character12"/>					
+			</div>	
+			
+			<!-- ext input -->
+			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" style="left: 1740dp; top:304dp;">
+				<knob class="abs knob" style="left: 133dp; top: 59dp;"></knob>
+				<button class="ledBlue" style="left: 153dp; top: -7dp;"/>
+				<knob class="abs knob" style="left: 456dp; top: 59dp;"></knob>
+				<button class="ledBlue" style="left: 478dp; top: -7dp;"/>
+				<button class="ledRed2" style="top: 54dp; width: 115dp; left: 604dp"/>
+				<button class="ledRed2" style="top: 94dp; width: 115dp; left: 604dp"/>
+			</div>	
+			
+			<!-- Dynamic -->
+			<div class="abs hlayout" style="left: 1792dp; top:578dp; width:800dp; gap: 72.5dp;">
+				<knob class="knob" param="VoiceModulatorNoiseLevel"/>
+				<knob class="knob" param="VoiceModulatorNoiseCutoff"/>	
+				<knob class="knob" param="VoiceModulatorResonance"/>
+				<knob class="knob" param="GateThreshold"/>
+				<knob class="knob" param="VoiceModulatorRelease"/>
+				
+			</div>				
+			
+			<!-- Ensemble -->
+			<div class="abs" style="left: 1732dp; top:698dp; height: 220dp;  width: 860dp;">						
+				<knob class="abs knob" style="left: 61dp; top: 100dp;" param="EnsembleLevel"/>
+				<combo param="EnsembleType" id="EnsembleType" class="jucePos comboxtext3" style="left: 213dp; top: 116dp; width: 290dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>
+				<combo param="EnsembleSync" id="EnsembleSync" class="jucePos comboxtext3" style="left: 535dp; top: 116dp; width: 290dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>	
+			</div>	
+
+			<!-- fourth row -->
+			<div class="row" style="top:937dp; height: 200dp;">
+				<!-- Delay -->
+				<knob class="abs knob" style="left: 51dp; top: 85dp;" param="VoiceModulatorDelayLevel"/>
+				
+				<combo param="VoiceModulatorDelayType" id="VoiceModulatorDelayType" class="jucePos comboxtext3" style="left: 240dp; top: 109dp; width: 350dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>
+				<combo param="VoiceModulatorDelaySync" id="VoiceModulatorDelaySync" class="jucePos comboxtext3" style="left: 630dp; top: 109dp; width: 350dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>			
+				
+				<knob class="abs knob" style="left: 1091dp; top: 85dp;" param="VoiceModulatorDelayTime"/>
+				<knob class="abs knob" style="left: 1335dp; top: 85dp;" param="VoiceModulatorDelayFeedback"/>					
+				
+				<!-- Rpbot Voice -->				
+				<div class="abs hlayout" style="left: 1617dp; top:85dp; gap: 73dp;">
+					<knob class="knob" param="RobotLevel"/>
+					<knob class="knob" param="RobotPitch"/>	
+					<knob class="knob" param="RobotControl"/>				
+				</div>	
+			</div>			
+		</div>	
+	
+		<!-- TAB BUTTONS -->
+		<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs" >	
+			
+			<img id="shadow" class="jucePos" src="tab_shadow.png" style="left: 176dp; top: 197dp; width: 254dp; height: 62dp"/>
+			<img id="shadow" class="jucePos" src="tab_shadow.png" style="left: 442dp;  top: 197dp; width: 254dp; height: 62dp"/>		
+			<button tabbutton="0" tabgroup="main" class="abs btTab btTabMain" style="left: 155dp; top: 182dp;"/>
+			<button tabbutton="1" tabgroup="main" class="abs btTab btTabPatchManager" style="left: 421dp; top: 182dp;"/>		
+		</div>
+	
+		
+		<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" >
+			
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 171dp; top: 198dp;"/>	
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 346dp; top: 198dp;"/>
+			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 521dp; top: 198dp;"/>
+		
+			<div data-class-juceConditionDisabled="!(VoiceModulatorSwitch_value == 0)" data-model="part0" class="abs">
+				<button tabbutton="0" tabgroup="main" class="abs btTabRack btTabMainRack" style="left: 157dp; top: 183dp;"/>			
+			</div>			
+			<div id="NoMainWithModVoice" data-class-juceConditionDisabled="!(VoiceModulatorSwitch_value == 1)" data-model="part0" class="jucePos" style="left: 157dp; top: 183dp; width: 198dp; height: 91dp; opacity: 0.5; decorator: image(tab_main_rack_off scale-none left top);">			
+			</div>			
+			
+			<button tabbutton="1" tabgroup="main" class="abs btTabRack btTabPatchManagerRack" style="left: 332dp; top: 183dp;"/>	
+			<button tabbutton="2" tabgroup="main" class="abs btTabRack btTabVoiceModRack" style="left: 507dp; top: 183dp;"/>				
+		</div>	
+		
+		<!-- Global Top Row -->
+		<div class="row" style="left:725dp; top:55dp; height: 200dp;">
+			<!-- Panel Select / Patchnames / Midi Chnnels -->
+			<button class="abs btWhiteLed" style="left: 32dp; top: 58dp;" id="partUpper" isToggle="1"/>
+			<button class="abs btWhiteLed" style="left: 32dp; top: 136dp;" id="partLower" isToggle="1"/>
+			
+			<div class="patchNameText" id="patchNameTextUpper" style="left: 120dp; top: 70dp;"/>
+			<div class="patchNameText" id="patchNameTextLower" style="left: 120dp; top: 149dp;"/>
+			
+			<!-- Panel 1 MIDI CH --> 
+			<combo data-model="part0" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 367dp; top: 62dp; width: 110dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>			
+
+			<!-- Panel 2 MIDI CH --> 
+			<combo data-model="part1" param="MidiChannel" id="MidiChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 367dp; top: 141dp; width: 110dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>					
+			
+			
+			<!-- LCD -->
+			<div id="lcd" class="abs" style="left: 538dp; top: 52dp; width: 525dp; height: 106dp;" lcdBackgroundColor="2a2b2d" lcdTextColor="00fe00"/>
+			
+			<!-- pairs of two buttons on the right -->
+			<!-- Dec/Inc -->
+			<div class="abs hlayout" style="left: 1146dp; top: 33dp; gap: 52dp;">					
+				<button id="btDec" class="btBlack"/>	
+				<button id="btInc" class="btBlack"/>
+		
+			</div>
+			<!-- Edit/Write -->
+			<div class="abs hlayout" style="left: 1132dp; top: 137dp; gap: 54dp;">
+				<button id="btPerfPatch" class="btBlackLed"/>
+				<button id="btMenu" class="btRed"/>
+			</div>
+				
+
+			<knob class="abs knob" data-model="partCurrent" param="PartTranspose" style="left: 1420dp; top: 83dp"/>	
+
+
+			<!-- bottom unision, unision knobs -->
+			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" style="left: 1600dp; top: 84dp; gap: 22dp;">
+				<button class="btBlackLed" param="UnisonSwitch" id="UnisonSwitch" isToggle="1"  style="margin-top: -20dp"/>
+				<knob class="knob" param="UnisonDetune" id="UnisonDetune" />					
+			</div>					
+		</div>	
+		
+		<!-- Arp -->
+		<div data-model="tabgroup_main" data-class-juceConditionDisabled="(page == 1)" class="abs" style="left: 1195dp; top: 1153dp; width: 1200dp; height: 230dp;">
+			<!--!!!!!! Skinner's doesn't talk about these Easter eggs. !!!!!! -->	
+			
+			<!-- Grid -->
+
+			<!---->
+			<div data-class-juceConditionDisabled="(today == '2025-10-31') || (today == '2025-12-24') || (today == '2025-12-25') || (today == '2025-12-26') || (today == '2025-12-31') || (today == '2025-01-01') || (today == '2026-04-05') || (today == '2027-03-28') || (today == '2028-04-16')" data-model="plugin" class="abs">
+				<img id="grid" class="jucePos" src="grid.png" style="left: 1218dp; top: 56dp;"/>
+			</div>	
+			
+			<div data-class-juceConditionDisabled="!(today == '2025-10-31')" data-model="plugin" class="abs">
+				<img id="pumpkin" class="jucePos" src="hidden_pumpkin.png" param="Halloween" style="left: 1063dp; top: 52dp;"/>			
+			</div>	
+			
+			<div data-class-juceConditionDisabled="!((today == '2025-12-24') || (today == '2025-12-25') || (today == '2025-12-26'))" data-model="plugin" class="abs">
+				<img id="xmas" class="jucePos" src="hidden_xmas.png" param="MerryChristmas" style="left: 1210dp; top: 47dp;"/>
+			</div>	
+
+			<div data-class-juceConditionDisabled="!(today == '2025-12-31')" data-model="plugin" class="abs">
+				<img id="newyear" class="jucePos" src="hidden_newyear.png" param="NewYear" style="left: 1210dp; top: 47dp;"/>			
+			</div>	
+			
+			<div data-class-juceConditionDisabled="!((today == '2026-04-05') || (today == '2027-03-28') || (today == '2028-04-16'))" data-model="plugin" class="abs">
+				<img id="easter" class="jucePos" src="hidden_easter.png" param="HappyEaster" style="left: 1063dp; top: 32dp;"/>
+			</div>			
+			
+			<!-- left column -->
+			<button class="abs btBlackLed" style="left: 58dp; top: 104dp;" param="ArpSwitch" isToggle="1"/>
+			<button class="abs btBlackLed" style="left: 178dp; top: 104dp;" param="ArpHold" isToggle="1"/>
+							
+			<!-- center column -->
+			<knob class="abs knob" style="left: 339dp; top: 87dp;" param="Tempo"/>
+
+			<!-- Beat Pattern -->
+			<combo param="ArpBeatPattern" id="ArpBeatPattern" class="jucePos comboxtext2" style="left: 535dp; top: 66dp; width: 300dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>				
+			<!-- Destination -->
+			<combo param="ArpDestination" id="ArpDestination" class="jucePos comboxtext2" style="left: 535dp; top: 145dp; width: 300dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>	
+			<!-- Range -->
+			<combo param="ArpRange" id="ArpRange" class="jucePos comboxtext2" style="left: 880dp; top: 66dp; width: 300dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>
+			<!-- Mode -->
+			<combo param="ArpMode" id="ArpMode" class="jucePos comboxtext2" style="left: 880dp; top: 145dp; width: 300dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>
+			
+		</div>		
+		
+		<!-- Global Bottom Row -->
+		<div class="abs" style="left:175dp; top:1148dp; height: 225dp; width: 850dp" data-model="part0">
+		<!-- bottom left, Volume and Semitones knobs -->
+			<div class="abs hlayout" style="left: 34dp; top: 112dp; gap: 60dp;">
+				<knob class="knob mainVolume" param="MasterVolume"/>
+				<knob class="knob" param="MasterTune"/>
+			</div>	
+
+			<!-- Remote MIDI CH --> 
+			<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs">
+				<combo data-model="part0" param="RemoteControlChannel" id="RemoteControlChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 345dp; top: 90dp; width: 170dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>
+				<combo data-model="part0" param="MidiSync" id="MidiSync" class="jucePos comboxtext2" items-per-column="17" style="left: 345dp; top: 172dp; width: 170dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>				
+			</div>
+			
+			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
+				<combo data-model="part0" param="RemoteKeyboardChannel" id="RemoteKeyboardChannel" class="jucePos comboxtext2" items-per-column="17" style="left: 345dp; top: 90dp; width: 170dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>	
+				<combo data-model="part0" param="MidiSyncRack" id="MidiSyncRack" class="jucePos comboxtext2" items-per-column="17" style="left: 345dp; top: 172dp; width: 170dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>				
+			</div>		
+
+			<!-- Key Mode / Voice Assign -->
+			<div class="abs" style="left: 549dp; top:7dp; width: 280dp; height: 100%;">
+				<div data-model="part0" class="abs vlayoutLeds" style="left: 16dp; top: 56dp; height: 100dp; width: 200dp">
+					<button class="ledRed" isToggle="1" valueOn="0" param="KeyMode"/>
+					<button class="ledRed" isToggle="1" valueOn="1" param="KeyMode"/>
+					<button class="ledRed" isToggle="1" valueOn="2" param="KeyMode"/>
+				</div>
+			</div>	
+
+
+			<!-- Voice Assign -->
+			<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs">
+				<combo data-model="part0" param="voiceAssignKeyboard" id="voiceAssignKeyboard" class="jucePos comboxtext2" style="left: 815dp; top: 54dp; width: 165dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>
+			</div>
+			
+			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
+				<combo data-model="part0" param="voiceAssignRack" id="voiceAssignRack" class="jucePos comboxtext2" style="left: 815dp; top: 54dp; width: 165dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>
+			</div>	
+
+			<!-- Split -->
+			<div data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" class="abs">
+				<combo data-model="part0" param="SplitPoint" id="SplitPoint" class="jucePos comboxtext2" style="left: 580dp; top: 159dp; width: 169dp; height: 46dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>				
+			</div>	
+
+			<!-- Bend Up/Down -->
+			<combo data-model="partCurrent" param="BendRangeDown" id="BendRangeDown" class="jucePos comboxtext2" style="left: 792dp; top: 161dp; width: 100dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>
+			<combo data-model="partCurrent" param="BendRangeUp" id="BendRangeUp" class="jucePos comboxtext2" style="left: 894dp; top: 161dp; width: 100dp; height: 45dp; line-height: 45dp;">
+				<combotext></combotext>
+			</combo>
+			
+		</div>
+		
+		<!-- bottom texts -->
+
+		<div data-model="plugin" class="abs" style="left: 0dp; width: 500dp; top: 1418dp; height: 26dp;">
+			<div class="bottomText" style="left: 305dp; margin-top: 2dp ">{{versionString}}</div>
+			<combo id="romselector" class="bottomText" style="left: 935dp; width: 400dp; height: 30dp;"><combotext/></combo>
+
+			<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" class="abs">
+				<div class="bottomText" style="left: 595dp; width:100dp; margin-top:2dp">Keyboard</div>		
+			</div>
+			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs">
+				<div class="bottomText" style="left: 595dp; width:100dp; margin-top:2dp">Rack</div>		
+			</div>			
+		</div>
+		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton textDonate" url="https://paypal.me/dsp56300" style="left: 1290dp; top: 1417dp; width: 475dp; height: 32dp; line-height: 32dp;">Donate: https://paypal.me/dsp56300</div>		
+	
+		
+		
+	</body>
+</rml>

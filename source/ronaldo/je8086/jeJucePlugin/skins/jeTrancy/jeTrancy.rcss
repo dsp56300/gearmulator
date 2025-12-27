@@ -1,0 +1,669 @@
+@spritesheet led_blue
+{
+	led_blue_off: 0px 0px  45px 45px;
+	led_blue_on:  0px 45px 45px 45px;
+	src: led_blue.png;
+}
+
+@spritesheet led_red
+{
+	led_red_off: 0px 0px  45px 45px;
+	led_red_on:  0px 45px 45px 45px;
+	src: led_red.png;
+}
+
+@spritesheet led2_red
+{
+	led2_red_off: 0px 0px  27px 17px;
+	led2_red_on:  0px 17px  27px 17px;
+	src: led2_red.png;
+}
+
+@spritesheet button_black
+{
+	button_black_off: 0px 0px 101px 74px;
+	button_black_on:  0px 0px 101px 74px;
+	src: button_black.png;
+}
+
+@spritesheet button_black_led
+{
+	button_black_led_off: 0px 0px  109px 85px;
+	button_black_led_on:  0px 85px 109px 85px;
+	src: button_black_led.png;
+}
+
+@spritesheet button_red
+{
+	button_red_off: 0px 0px 101px 74px;
+	button_red_on:  0px 0px 101px 74px;
+	src: button_red.png;
+}
+
+@spritesheet button_red_led
+{
+	button_red_led_off: 0px 0px  74px 48px;
+	button_red_led_on:  0px 48px 74px 48px;
+	src: button_red_led.png;
+}
+
+@spritesheet button_white_led
+{
+	button_white_led_off: 0px 0px  78px 60px;
+	button_white_led_on:  0px 60px 78px 60px;
+	src: button_white_led.png;
+}
+
+@spritesheet button_white2_led
+{
+	button_white2_led_off: 0px 0px  109px 45px;
+	button_white2_led_on:  0px 45px 109px 45px;
+	src: button_white2_led.png;
+}
+
+@spritesheet tab_main
+{
+	tab_main_off: 0px 0px 296px 91px;
+	tab_main_on:  0px 91px 296px 91px;
+	src: tab_1_main.png;
+}
+
+@spritesheet tab_browser
+{
+	tab_browser_off: 0px 0px 296px 91px;
+	tab_browser_on:  0px 91px 296px 91px;
+	src: tab_2_browser.png;
+}
+
+
+@spritesheet tab_main_rack
+{
+	tab_main_rack_off: 0px 0px 198px 91px;
+	tab_main_rack_on:  0px 91px 198px 91px;
+	src: tab_1_rack_main.png;
+}
+
+@spritesheet tab_browser_rack
+{
+	tab_browser_rack_off: 0px 0px 198px 91px;
+	tab_browser_rack_on:  0px 91px 198px 91px;
+	src: tab_2_rack_browser.png;
+}
+
+@spritesheet tab_voicemod_rack
+{
+	tab_voicemod_rack_off: 0px 0px 198px 91px;
+	tab_voicemod_rack_on:  0px 91px 198px 91px;
+	src: tab_3_rack_voice_mod.png;
+}
+
+body
+{
+	font-size: 32dp;
+	left: 0dp; 
+	top: 0dp; 
+	width: 2772dp; 
+	height: 1460dp;
+}
+
+.background
+{
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 100%;
+	height: 100%;
+}
+
+.abs
+{
+	position: absolute;
+}
+
+button
+{
+	flex: 0 0 auto;
+}
+
+.btTab
+{
+	width: 296dp;
+	height: 91dp;
+}
+
+.btTabRack
+{
+	width: 198dp;
+	height: 91dp;
+}
+
+.btTabRack:active, .btTab:active  
+{
+	transform: scale(0.97);
+	image-color: #ccc;
+}
+
+.btTabMain
+{
+	decorator: image(tab_main_off fill);
+}
+
+.btTabMain:hover, .btTabMain:checked
+{
+	decorator: image(tab_main_on fill);
+}
+
+.btTabPatchManager
+{
+	decorator: image(tab_browser_off fill);
+}
+
+.btTabPatchManager:hover, .btTabPatchManager:checked
+{
+	decorator: image(tab_browser_on fill);
+}
+
+.btTabMainRack
+{
+	decorator: image(tab_main_rack_off fill);
+}
+.btTabMainRack:hover, .btTabMainRack:checked
+{
+	decorator: image(tab_main_rack_on fill);
+}
+
+.btTabPatchManagerRack
+{
+	decorator: image(tab_browser_rack_off fill);
+}
+
+.btTabPatchManagerRack:hover, .btTabPatchManagerRack:checked
+{
+	decorator: image(tab_browser_rack_on fill);
+}
+
+.btTabVoiceModRack
+{
+	decorator: image(tab_voicemod_rack_off fill);
+}
+
+.btTabVoiceModRack:hover, .btTabVoiceModRack:checked
+{
+	decorator: image(tab_voicemod_rack_on fill);
+}
+
+
+.btBlackLed
+{
+	width: 107dp;
+	height: 80dp;
+	margin: -14dp -0dp 0dp -17dp;	  	
+	decorator: image(button_black_led_off fill);	
+}
+
+.btBlackLed:active  
+{
+	transform: scale(0.92);
+	image-color: #ccc;
+}
+
+.btBlackLed:checked
+{
+	decorator: image(button_black_led_on fill);	
+}
+
+.btRedLed
+{
+	width: 74dp;
+	height: 48dp;
+	decorator: image(button_red_led_off fill);	
+}
+
+.btRedLed:hover, .btRedLed:chcked
+{
+	decorator: image(button_red_led_on fill);	
+}
+
+.btRed
+{
+	width: 101dp;
+	height: 74dp;
+	margin: 0dp 0dp 0dp -22dp;		
+	decorator: image(button_red_off fill);	
+}
+
+.btRed:active  
+{
+	transform: scale(0.92);
+	image-color: #ccc;
+}
+
+.btBlack
+{
+	width: 101dp;
+	height: 74dp;
+	margin: 0dp 0dp 0dp -22dp;		
+	decorator: image(button_black_off fill);	
+}
+
+.btBlack:active  
+{
+	transform: scale(0.92);
+	image-color: #ccc;
+}
+
+.btWhiteLed
+{
+	width: 75dp;
+	height: 60dp;
+	decorator: image(button_white_led_off fill);	
+}
+
+.btWhiteLed:hover, .btWhiteLed:checked
+{
+	decorator: image(button_white_led_on fill);	
+}
+
+.btWhiteLed:active  
+{
+	transform: scale(0.95);
+	image-color: #ccc;
+}
+
+.btWhite2Led
+{
+	width: 109dp;
+	height: 45dp;
+	decorator: image(button_white2_led_off fill);	
+}
+
+.btWhite2Led:hover, .btWhite2Led:checked
+{
+	decorator: image(button_white2_led_on fill);	
+}
+
+
+.knob {
+    frames: 128;
+    spriteprefix: knob_;
+    width: 160dp;
+    height: 160dp;
+    decorator: image(knob_000);
+    margin: -33dp -35.5dp 0dp -35.5dp;	    
+}
+
+
+.layoutFxKnobs
+{
+	position: absolute;
+	display: flex;
+	width: 823dp;
+	height: 89dp;
+	left: 721dp;
+	top: 94dp;
+	gap: 57.2dp;
+}
+
+.ledBlue
+{
+	position: absolute;
+	left: 25dp;
+	top: -72dp;
+	width: 45dp;
+	height: 45dp;
+	decorator: image(led_blue_off fill);	
+}
+
+.ledBlue:checked
+{
+	decorator: image(led_blue_off fill);	
+}
+
+.ledRed2
+{
+	position: absolute;
+	left: 430dp;
+	width: 200dp;
+	height: 26dp;
+	decorator: image(led2_red_off scale-none left center);
+	transform: scale(1.2, 1.2);
+	margin: 0dp 0dp -2.1dp 10.3dp;		
+}
+
+.ledRed2:checked
+{
+	decorator: image(led2_red_on scale-none left center);
+}
+
+.ledRed
+{
+	width: 100%;
+	height: 30dp;
+	flex: 0 0 auto;
+	decorator: image(led_red_off scale-none left center);
+	transform: scale(1.1, 1.1);
+	margin: 0dp 0dp -2.1dp 10.3dp;	
+}
+
+
+
+.ledRed:checked
+{
+	decorator: image(led_red_on scale-none left center);
+}
+
+.row
+{
+	position: absolute;
+	left: 175dp;
+	width: 2420dp;
+}
+
+.debug
+{
+	background-color: #f0f4;
+}
+
+.vlayoutLeds
+{
+	display: flex; 
+	flex-direction: column; 
+	row-gap: 6.7dp;
+}
+
+.knobs_row2
+{
+	position: absolute;
+	top: 173dp;
+	left: 26dp;
+
+	display: flex;
+	gap: 58dp;
+}
+
+.knobs_row3
+{
+	position: absolute;
+	top: 208dp;
+	left: 28dp;
+
+	display: flex;
+	gap: 58dp;
+}
+
+.sliderV sliderbar
+{
+	decorator: image(slider.png contain);
+	width: 130dp;
+	height: 165dp;
+	margin: -38dp 0dp -20dp -28dp;	
+}
+
+.sliderV
+{
+	height: 284dp;
+	width: 69dp;
+}
+
+.slider_row2
+{
+	top: 20dp;
+}
+
+.slider_row3
+{
+	top: 71dp;
+}
+
+.vlayout
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.hlayout
+{
+	display: flex;
+	align-items: center;
+}
+
+.bottomText
+{
+	color: #ff6600ff;
+	position: absolute;
+	font-size: 28dp;
+	font-weight: bold;
+	vertical-align: bottom;
+	height: 100%;
+	line-height: 100%;
+	font-family: Metropolis;	
+}
+.comboxtext1
+{
+	color: #ff6600ff;
+	font-size: 24dp;
+	text-align: right;
+	font-family: Metropolis;	
+}
+.comboxtext2
+{
+	color: #ff6600ff;
+	font-size: 24dp;
+	text-align: center;
+	font-family: Metropolis;	
+}
+.comboxtext3
+{
+	color: #ffffffff;
+	font-size: 24dp;
+	text-align: center;
+	font-family: Metropolis;	
+}
+.textDonate
+{
+	color: #ffffff;
+	font-size: 26dp;
+	text-align: center;
+	text-decoration: underline;
+}
+.patchNameText
+{
+	position: absolute;
+	font-size: 26dp;
+	vertical-align: bottom;
+	width: 260dp;
+	height: 28dp;
+	line-height: 28dp;
+	color: #ff6600ff;
+	font-family: Metropolis;
+}
+.label
+{
+	position: absolute;
+	color: #ffffffff;
+	font-size: 18dp;
+	line-height: 17dp;
+	
+	text-align: center;
+	font-family: Vipnagorgialla;
+
+}
+.label2
+{
+	position: absolute;
+	color: #ffffffff;
+	font-size: 21dp;
+	line-height: 17dp;
+	
+	text-align: center;
+	font-family: Vipnagorgialla;
+
+}
+.labelBlue
+{
+	position: absolute;
+	color: #6cbfffff;
+	font-size: 21dp;
+	line-height: 17dp;
+	
+	text-align: center;
+	font-family: Vipnagorgialla;
+}
+/* Keyframes for a little left-right wiggle */
+@keyframes wiggle {
+    0%   { transform: translateX(0px); }
+    20%  { transform: translateX(5px); }
+    40%  { transform: translateX(-10px) translateY(5px); }
+    60%  { transform: translateX(10px); }
+    80%  { transform: translateX(-5px) translateY(-5px); }
+    100% { transform: translateX(0px) translateY(0px); }
+}
+
+.mainVolume {
+}
+/*
+.mainVolume:hover {
+    animation: 0.30s ease-in-out wiggle;
+}
+*/
+.pm-gridentry {
+	width: 11em;
+	height: 1.3em;
+	
+
+}
+
+
+.knob:assignvelocity, .knob:assigncontrol 
+{
+	frames: 128;
+	spriteprefix: knob2_;
+	width: 160dp;
+	height: 160dp;
+	decorator: image(knob2_000);
+	margin: -33dp -35.5dp 0dp -35.5dp;	    
+}
+
+
+.sliderV:assignvelocity sliderbar, .sliderV:assigncontrol sliderbar
+{
+	decorator: image(slider2.png contain);
+	width: 130dp;
+	height: 165dp;
+	margin: -38dp 0dp -20dp -28dp;	
+}
+
+/*
+button:active {
+	transform: scale(0.92);
+	image-color: #ccc;
+}
+*/
+
+.opacityZero {
+	opacity: 0;
+}
+.pm-count
+{
+	color: #fd6807;
+	font-size: 18dp;
+	line-height: 17dp;
+	font-style: normal;
+	font-family: Vipnagorgialla;
+}
+
+.pm-name
+{
+	font-size: 22dp;
+	line-height: 17dp;
+	font-style: normal;
+	font-family: metropolis;	
+}
+
+.pm-info-name, .pm-infotext
+{
+	font-style: normal;
+	font-family: metropolis;	
+}
+
+.pm-gridentry, .pm-listentry
+{
+	background-color: #202020;	
+}
+
+.grid
+{
+	padding-bottom: 10dp;
+}
+
+.input-placeholder
+{
+	color: #fd6807;
+	font-size: 25dp;
+	line-height: 25dp;
+	font-style: normal;
+	font-family: Vipnagorgialla;
+	
+}
+
+.pm-search-grid
+{
+	border-color: #272727;	
+		
+}
+
+.pm-search
+{
+	color: #fd6807;
+	font-size: 25dp;
+	line-height: 25dp;
+	font-style: normal;
+	font-family: Vipnagorgialla;
+
+
+}
+
+splitter
+{
+	width:15dp;
+	background-color: #373737;
+	border-radius: 10dp;
+}
+
+
+scrollbarvertical sliderbar 
+{
+	width:20dp;
+	margin-left: -10dp;
+	min-height: 100dp;
+	border-radius: 10dp;
+	background-color: #bc4d05;
+}
+
+scrollbarhorizontal sliderbar
+{
+	height:20dp;
+	margin-top: -10dp;
+	min-width: 100dp;
+	border-radius: 10dp;	
+	background-color: #bc4d05;	
+}
+
+input.text
+{
+	border-color: #303030;	
+	border-width: 2dp;
+}
+
+.pm-status
+{
+	color: #fd6807;
+	font-size: 25dp;
+	line-height: 25dp;
+	font-style: normal;
+	font-family: Vipnagorgialla;
+	border-color: #303030;	
+	border-width: 2dp;		
+}
+
