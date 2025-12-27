@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 #include <functional>
+#include <cstdint>
 
 #include "baseLib/commandline.h"
 
