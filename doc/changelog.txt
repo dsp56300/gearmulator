@@ -19,6 +19,10 @@ OsTIrus:
 - [Fix] Typo "CUTTOFF" on Filter page
 - [Fix] Analogue filter modes button not lit if analogue modes page selected
 
+NodalRed2x:
+
+- [Imp] Added "secret" Notch filter type
+
 2.0.15:
 
 Osirus/OsTIrus:
