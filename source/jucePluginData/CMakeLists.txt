@@ -33,6 +33,10 @@ set(RMLSOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings.rcss
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_midi.rml
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_midi.rcss
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_gui.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_gui.rcss
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_skin.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_skin.rcss
 )
 
 list(APPEND DATASOURCES ${RMLSOURCES})

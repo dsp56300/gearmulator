@@ -75,7 +75,7 @@
 	display: block;
 	width: 100%;
 	text-align: center;
-	background-color: #0002;
+	background-color: #0003;
 }
 .settings-page h2 {
 	padding-bottom: 0.2em;
