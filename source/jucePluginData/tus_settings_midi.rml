@@ -23,8 +23,15 @@
 				</td>
 			</tr>
 		</table>
+		<h1>Panic</h1>
+		<div class="settings-hlayout">
+			<button id="btPanicAllNotesOff" class="button">Send "All Notes Off"</button>
+			<button id="btPanicNoteOffEveryNote" class="button">Send "Note Off" for every Note</button>
+			<button id="btPanicReboot" class="button">Reboot Device</button>
+		</div>
+		
 		<h1>MIDI Routing Matrix</h1>
-		<div class="midimatrix-presetcontainer">
+		<div class="settings-hlayout">
 			<label>Preset:</label>
 			<combo id="presetList" class="settings-combo">
 				<combotext>Default</combotext>

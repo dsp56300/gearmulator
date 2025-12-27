@@ -1,9 +1,11 @@
 #pragma once
 
+#include <functional>
 #include <string>
 
 namespace Rml
 {
+	class Event;
 	class Element;
 }
 
@@ -25,5 +27,7 @@ namespace jucePluginEditorLib
 		virtual std::string getTemplateName() const = 0;
 
 		virtual void createUi(Rml::Element* _root) = 0;
+
+		static bool addClickHandler(Rml::Element* _root, const std::string& _child, std::function<void(Rml::Event&)> _handler);
 	};
 }

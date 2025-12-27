@@ -37,6 +37,22 @@ namespace jucePluginEditorLib
 		if (comboOutput)
 			MidiPorts::initOutputComboBox(m_processor, comboOutput);
 
+		// Panic
+		addClickHandler(_root, "btPanicAllNotesOff", [this](Rml::Event&)
+		{
+			panicSendAllNotesOff();
+		});
+
+		addClickHandler(_root, "btPanicNoteOffEveryNote", [this](Rml::Event&)
+		{
+			panicSendNoteOffForEveryNote();
+		});
+
+		addClickHandler(_root, "btPanicReboot", [this](Rml::Event&)
+		{
+			panicRebootDevice();
+		});
+
 		// Matrix Presets
 		m_presetList = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(_root, "presetList");
 		m_presetList->onValueChanged.addListener([this](float _value) { onPresetSelected(static_cast<int>(_value)); });
@@ -67,6 +83,32 @@ namespace jucePluginEditorLib
 		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::PitchBend, "Pitch Bend");
 		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::ProgramChange, "Program Change");
 		createMatrix(newMatrixElem(), synthLib::MidiRoutingMatrix::EventType::Other, "Other");
+	}
+
+	void SettingsMidi::panicSendAllNotesOff() const
+	{
+		for(uint8_t c=0; c<16; ++c)
+		{
+			synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor, synthLib::M_CONTROLCHANGE + c, synthLib::MC_ALLNOTESOFF);
+			m_processor.addMidiEvent(ev);
+		}
+	}
+
+	void SettingsMidi::panicSendNoteOffForEveryNote() const
+	{
+		for(uint8_t c=0; c<16; ++c)
+		{
+			for(uint8_t n=0; n<128; ++n)
+			{
+				synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor, synthLib::M_NOTEOFF + c, n, 64, n * 256);
+				m_processor.addMidiEvent(ev);
+			}
+		}
+	}
+
+	void SettingsMidi::panicRebootDevice() const
+	{
+		m_processor.rebootDevice();
 	}
 
 	void SettingsMidi::createMatrix(Rml::Element* _root, synthLib::MidiRoutingMatrix::EventType _type, const char* _name)

@@ -578,40 +578,6 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 	initContextMenu(menu);
 
-	{
-		menu.addSeparator();
-
-		juceRmlUi::Menu panicMenu;
-
-		panicMenu.addEntry("Send 'All Notes Off'", [this]
-		{
-			for(uint8_t c=0; c<16; ++c)
-			{
-				synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor, synthLib::M_CONTROLCHANGE + c, synthLib::MC_ALLNOTESOFF);
-				m_processor.addMidiEvent(ev);
-			}
-		});
-
-		panicMenu.addEntry("Send 'Note Off' for every Note", [this]
-		{
-			for(uint8_t c=0; c<16; ++c)
-			{
-				for(uint8_t n=0; n<128; ++n)
-				{
-					synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor, synthLib::M_NOTEOFF + c, n, 64, n * 256);
-					m_processor.addMidiEvent(ev);
-				}
-			}
-		});
-
-		panicMenu.addEntry("Reboot Device", [this]
-		{
-			m_processor.rebootDevice();
-		});
-
-		menu.addSubMenu("Panic", std::move(panicMenu));
-	}
-
 	if(auto* editor = dynamic_cast<Editor*>(getEditor()))
 	{
 		if(auto* pm = editor->getPatchManager())

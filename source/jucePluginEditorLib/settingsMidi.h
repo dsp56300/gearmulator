@@ -29,6 +29,10 @@ namespace jucePluginEditorLib
 		void createUi(Rml::Element* _root) override;
 
 	private:
+		void panicSendAllNotesOff() const;
+		void panicSendNoteOffForEveryNote() const;
+		void panicRebootDevice() const;
+
 		void createMatrix(Rml::Element* _root, synthLib::MidiRoutingMatrix::EventType _type, const char* _name);
 
 		void onBtPresetSave();

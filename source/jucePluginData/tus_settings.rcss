@@ -128,3 +128,10 @@
 .settings-checkbox:disabled {
 	opacity: 0.2;
 }
+
+.settings-hlayout {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+	padding: 0.5em;
+}
