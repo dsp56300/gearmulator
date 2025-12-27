@@ -181,6 +181,9 @@
 			<button id="FilterType_5" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterType" valueOn="4" style="left: 1954dp; top: 517dp; width: 70dp; height: 70dp;">
 				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
 			</button>
+			<button id="FilterType_6" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="FilterType" valueOn="5" style="left: 1954dp; top: 554dp; width: 70dp; height: 70dp;">
+				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
+			</button>
 			<button id="Distortion" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Distortion" style="left: 1954dp; top: 705dp; width: 70dp; height: 70dp;">
 				<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
 			</button>

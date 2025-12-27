@@ -211,7 +211,7 @@ namespace n2xJucePlugin
 			assert(false && "parameter not found");
 
 		const auto& ccs = controllerMap.getControlTypes(synthLib::M_CONTROLCHANGE, descIndex);
-		if(ccs.empty())
+		if (ccs.empty() || singleParam == n2x::FilterType)	// "secret" filter type can only be changed by sysex
 		{
 			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
 			setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));

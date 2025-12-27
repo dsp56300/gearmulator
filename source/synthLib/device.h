@@ -25,6 +25,7 @@ namespace synthLib
 		std::vector<uint8_t> romData;
 		baseLib::MD5 romHash;
 		uint32_t customData = 0;
+		std::string homePath;
 	};
 
 	class Device
