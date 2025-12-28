@@ -239,7 +239,11 @@ namespace jeJucePlugin
 		{
 			// performance applies to both parts, update selection for both of them
 			for (uint8_t part = 0; part < m_controller.getPartCount(); ++part)
+			{
+				if (_part == part)
+					continue;
 				setSelectedPatch(part, _patch);
+			}
 		}
 
 		return true;

@@ -1,5 +1,11 @@
 Release Notes 
 
+2.1.1:
+
+JE8086:
+
+- [Fix] Patch Manager list might erratically jump when selecting a Performance
+
 2.1.0:
 
 Framework:
