@@ -878,6 +878,9 @@ namespace juceRmlUi
 			auto& sys = m_rmlInterfaces.getSystemInterface();
 			sys.beginLogRecording();
 
+			// On Linux, some hosts (for example Carla) like to set the locale to the current user language, this breaks float number parsing, so we force the "C" locale here
+			(void)setlocale(LC_NUMERIC, "C");
+
 			m_document = m_rmlContext->LoadDocument(m_rootRmlFilename);
 
 			if (m_document)
