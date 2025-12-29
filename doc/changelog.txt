@@ -8,6 +8,8 @@ Framework:
 
 JE8086:
 
+- [Imp] Patch Manager: Add support for .pat/.pfm preset files
+
 - [Fix] Support Patch/Performance Dumps from edit buffers
 - [Fix] Patch Manager list might erratically jump when selecting a Performance
 - [Fix] Test Console: Fix name of binary and add missing macOS setup script

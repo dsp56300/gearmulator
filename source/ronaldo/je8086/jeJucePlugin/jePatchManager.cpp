@@ -254,7 +254,135 @@ namespace jeJucePlugin
 		pluginLib::patchDB::DataList data;
 
 		if (!jucePluginEditorLib::patchManager::PatchManager::parseFileData(data, _data))
+		{
+			// pfm/pat file?
+			if (_data.size() > 7 + 12)
+			{
+				const auto isRack = _data[5] == '8';
+				const auto isKeyboard = _data[5] == '0';
+
+				if (!isRack && !isKeyboard)
+					return false;
+
+				auto createSysexFromRawData = [](uint32_t _addr, const std::vector<uint8_t>::const_iterator& _begin, const std::vector<uint8_t>::const_iterator& _end)
+				{
+					jeLib::State::Dump dump;
+					dump.reserve(512);
+
+					for (auto h : jeLib::g_sysexHeader)
+						dump.push_back(static_cast<uint8_t>(h));
+
+					dump.push_back(static_cast<uint8_t>(jeLib::SysexByte::CommandIdDataSet1));
+
+					dump.push_back(0x00); // placeholder for address
+					dump.push_back(0x00); // placeholder for address
+					dump.push_back(0x00); // placeholder for address
+					dump.push_back(0x00); // placeholder for address
+
+					dump.insert(dump.end(), _begin, _end);
+
+					for (auto h : jeLib::g_sysexFooter)
+						dump.push_back(static_cast<uint8_t>(h));
+
+					jeLib::State::setAddress(dump, _addr);
+					jeLib::State::updateChecksum(dump);
+
+					return dump;
+				};
+
+				constexpr auto programNoDiff = static_cast<uint32_t>(jeLib::UserPatchArea::UserPatch002) - static_cast<uint32_t>(jeLib::UserPatchArea::UserPatch001);
+				constexpr auto performanceNoDiff = static_cast<uint32_t>(jeLib::UserPerformanceArea::UserPerformance02) - static_cast<uint32_t>(jeLib::UserPerformanceArea::UserPerformance01);
+
+				constexpr size_t start = 0x80;
+
+				uint32_t program = 0;
+
+				if (std::string(reinterpret_cast<const char*>(&_data[7]), 12) == " USER PATCH ")
+				{
+					// this is a list of patches without sysex headers/footers, we generate sysex patches here
+
+					const auto size = static_cast<ptrdiff_t>(isKeyboard ? jeLib::Patch::DataLengthKeyboard : jeLib::Patch::DataLengthRack);
+
+					auto i = start;
+
+					while (i + size <= _data.size())
+					{
+						// we do not expect more than 128 patches in a pfm/pat file but just to be on the safe
+						// side we limit it here because the address area can only express A11 to B88
+						program &= 0x7f;
+
+						auto addr = static_cast<uint32_t>(jeLib::AddressArea::UserPatch);
+
+						if (program < 64)
+							addr += static_cast<uint32_t>(jeLib::UserPatchArea::UserPatch001) + programNoDiff * program;
+						else
+							addr += static_cast<uint32_t>(jeLib::UserPatchArea::UserPatch065) + programNoDiff * (program - 64);
+
+						const auto is = static_cast<std::ptrdiff_t>(i);
+						jeLib::State::Dump dump = createSysexFromRawData(addr, _data.begin() + is, _data.begin() + is + size);
+
+						_results.emplace_back(std::move(dump));
+
+						i += size;
+						++program;
+					}
+
+					if (program > 0)
+						return true;
+				}
+				else if (std::string(reinterpret_cast<const char*>(&_data[7]), 17) == " USER PERFORMANCE")
+				{
+					if (!isKeyboard)
+						return false;	// no file for testing available so skip for now
+
+					size_t i = start;
+
+					constexpr auto sizePerformanceCommon = static_cast<ptrdiff_t>(jeLib::PerformanceCommon::DataLengthKeyboard);
+					constexpr auto sizePart = static_cast<ptrdiff_t>(jeLib::Part::DataLengthKeyboard);
+					constexpr auto sizePatch = static_cast<ptrdiff_t>(jeLib::Patch::DataLengthKeyboard);
+
+					constexpr ptrdiff_t size =
+						sizePerformanceCommon +
+						sizePart +  // part upper
+						sizePart +  // part lower
+						sizePatch + // patch upper
+						sizePatch;  // patch lower
+
+					while (i + size <= _data.size())
+					{
+						program &= 0x3f;	// valid performance numbers are 0-63
+
+						uint32_t addr = static_cast<uint32_t>(jeLib::AddressArea::UserPerformance) +
+							static_cast<uint32_t>(jeLib::UserPerformanceArea::UserPerformance01) +
+							performanceNoDiff * program;
+
+						auto patch = createSysexFromRawData(addr, _data.begin() + static_cast<std::ptrdiff_t>(i), _data.begin() + static_cast<std::ptrdiff_t>(i + sizePerformanceCommon));
+						i += sizePerformanceCommon;
+						auto partUpper = createSysexFromRawData(addr | static_cast<uint32_t>(jeLib::PerformanceData::PartUpper), _data.begin() + static_cast<std::ptrdiff_t>(i), _data.begin() + static_cast<std::ptrdiff_t>(i + sizePart));
+						i += sizePart;
+						auto partLower = createSysexFromRawData(addr | static_cast<uint32_t>(jeLib::PerformanceData::PartLower), _data.begin() + static_cast<std::ptrdiff_t>(i), _data.begin() + static_cast<std::ptrdiff_t>(i + sizePart));
+						i += sizePart;
+						auto patchUpper = createSysexFromRawData(addr | static_cast<uint32_t>(jeLib::PerformanceData::PatchUpper), _data.begin() + static_cast<std::ptrdiff_t>(i), _data.begin() + static_cast<std::ptrdiff_t>(i + sizePatch));
+						i += sizePatch;
+						auto patchLower = createSysexFromRawData(addr | static_cast<uint32_t>(jeLib::PerformanceData::PatchLower), _data.begin() + static_cast<std::ptrdiff_t>(i), _data.begin() + static_cast<std::ptrdiff_t>(i + sizePatch));
+						i += sizePatch;
+
+						patch.insert(patch.end(), partUpper.begin(), partUpper.end());
+						patch.insert(patch.end(), partLower.begin(), partLower.end());
+						patch.insert(patch.end(), patchUpper.begin(), patchUpper.end());
+						patch.insert(patch.end(), patchLower.begin(), patchLower.end());
+
+						_results.push_back(std::move(patch));
+
+						++program;
+					}
+
+					if (program > 0)
+						return true;
+				}
+			}
 			return false;
+		}
 
 		// patches might be split into multiple sysex messages, try to merge them
 		std::vector<std::map<uint32_t, std::vector<pluginLib::patchDB::Data>>> sameAddressPatches;
