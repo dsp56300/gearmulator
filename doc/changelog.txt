@@ -2,6 +2,10 @@ Release Notes
 
 2.1.1:
 
+Framework:
+
+- [Fix] Crash when unloading plugin while automating a parameter
+
 JE8086:
 
 - [Fix] Support Patch/Performance Dumps from edit buffers

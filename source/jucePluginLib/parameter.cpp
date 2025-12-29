@@ -4,6 +4,8 @@
 
 namespace pluginLib
 {
+	static std::set<Parameter*> g_pendingParameterChanges;
+
 	Parameter::Parameter(Controller& _controller, const Description& _desc, const uint8_t _partNum, const int _uniqueId, const PartFormatter& _partFormatter)
 		: juce::RangedAudioParameter(genId(_desc, _partNum, _uniqueId), _partFormatter(_partNum, _desc.isNonPartSensitive()) + " " + _desc.displayName)
 		, m_controller(_controller)
@@ -19,7 +21,12 @@ namespace pluginLib
 		m_value.addListener(this);
     }
 
-    void Parameter::valueChanged(juce::Value&)
+	Parameter::~Parameter()
+	{
+		g_pendingParameterChanges.erase(this);
+	}
+
+	void Parameter::valueChanged(juce::Value&)
     {
 		sendToSynth(m_lastValueOrigin);
 		onValueChanged(this);
@@ -86,9 +93,13 @@ namespace pluginLib
 		}
 		else
 		{
+			// BUG-10089 this guards against a parameter being deleted before the delayed call happens
+			g_pendingParameterChanges.insert(this);
+
 			juce::Timer::callAfterDelay(static_cast<int>(elapsed), [this, _value, _uniqueId, _origin]
 			{
-				sendParameterChangeDelayed(_value, _uniqueId, _origin);
+				if (g_pendingParameterChanges.erase(this))
+					sendParameterChangeDelayed(_value, _uniqueId, _origin);
 			});
 		}
     }

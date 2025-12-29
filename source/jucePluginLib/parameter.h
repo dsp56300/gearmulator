@@ -34,6 +34,7 @@ namespace pluginLib
 		baseLib::Event<Parameter*> onValueChanged;
 
 		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int _uniqueId, const PartFormatter& _partFormatter);
+		~Parameter() override;
 
         juce::Value& getValueObject() { return m_value; }
 
