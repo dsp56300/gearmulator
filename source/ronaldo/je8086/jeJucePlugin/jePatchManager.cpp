@@ -141,7 +141,7 @@ namespace jeJucePlugin
 		{
 			if (_sysex[i] == 0xf0)
 			{
-				i += std::size(jeLib::g_sysexHeader) + 4; // skip header + address
+				i += std::size(jeLib::g_sysexHeader) + 1 + 4; // skip header + command + address
 				continue;
 			}
 
