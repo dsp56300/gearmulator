@@ -4,6 +4,7 @@ Release Notes
 
 JE8086:
 
+- [Fix] Support Patch/Performance Dumps from edit buffers
 - [Fix] Patch Manager list might erratically jump when selecting a Performance
 
 2.1.0:

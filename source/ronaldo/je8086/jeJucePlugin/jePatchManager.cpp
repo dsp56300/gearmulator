@@ -259,11 +259,40 @@ namespace jeJucePlugin
 		// patches might be split into multiple sysex messages, try to merge them
 		std::vector<std::map<uint32_t, std::vector<pluginLib::patchDB::Data>>> sameAddressPatches;
 
+		bool foundTempPerformanceCommon = false;
+
 		for (auto& d : data)
 		{
-			const auto addr = jeLib::State::getAddress(d);
+			auto addr = jeLib::State::getAddress(d);
+			auto area = jeLib::State::getAddressArea(addr);
 
-			const auto area = jeLib::State::getAddressArea(addr);
+			// surprisingly there are indeeed files around that contain edit buffer dumps.
+			// The problem is that we do not know if PatchUpper or PatchLower is part of a performance or individual.
+			// We treat all of them individual if there is no PerformanceCommon dump
+			if (area == jeLib::AddressArea::PerformanceTemp)
+			{
+				const auto type = static_cast<jeLib::PerformanceData>(addr & static_cast<uint32_t>(jeLib::PerformanceData::BlockMask));
+
+				if (type == jeLib::PerformanceData::PerformanceCommon)
+					foundTempPerformanceCommon = true;
+
+				// if there is any performance common dump in there, treat all subsequent dumps as user performance dumps
+				if (foundTempPerformanceCommon)
+				{
+					addr &= ~static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp);
+					addr |= static_cast<uint32_t>(jeLib::AddressArea::UserPerformance);
+
+					area = jeLib::State::getAddressArea(addr);
+					jeLib::State::setAddress(d, addr);
+				}
+				else if (type == jeLib::PerformanceData::PatchUpper || type == jeLib::PerformanceData::PatchLower)
+				{
+					// otherwise, treat them as user patches at bank 0 program 0
+					addr = static_cast<uint32_t>(jeLib::AddressArea::UserPatch);
+					jeLib::State::setAddress(d, addr);
+					area = jeLib::State::getAddressArea(addr);
+				}
+			}
 
 			// group sysex messages that belong to the same patch
 
