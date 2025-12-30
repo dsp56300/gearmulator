@@ -16,6 +16,10 @@ JE8086:
 - [Fix] Patch Manager list might erratically jump when selecting a Performance
 - [Fix] Test Console: Fix name of binary and add missing macOS setup script
 
+OsTIrus:
+
+- [Fix] BUG-10083 Mode and Type labels were reversed for Delay on FX 2 page
+
 Xenia:
 
 - [Fix] BUG-10057 BP Filter Offset din't display bipolar but unipolar values
