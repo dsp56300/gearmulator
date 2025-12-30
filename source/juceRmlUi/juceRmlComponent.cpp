@@ -87,7 +87,6 @@ namespace juceRmlUi
 			m_openGLContext->setMultisamplingEnabled(true);
 			m_openGLContext->setRenderer(this);
 			m_openGLContext->setComponentPaintingEnabled(false);
-			m_openGLContext->attachTo(*this);
 			m_openGLContext->setContinuousRepainting(false);
 
 #if JUCE_MAC
@@ -358,6 +357,14 @@ namespace juceRmlUi
 
 		m_renderProxy->setRenderer(nullptr);
 		m_renderInterface.reset();
+	}
+
+	void RmlComponent::visibilityChanged()
+	{
+		Component::visibilityChanged();
+
+		if (isVisible() && m_openGLContext && !m_openGLContext->isAttached())
+			m_openGLContext->attachTo(*this);
 	}
 
 	void RmlComponent::mouseDown(const juce::MouseEvent& _event)
