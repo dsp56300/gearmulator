@@ -16,6 +16,10 @@ JE8086:
 - [Fix] Patch Manager list might erratically jump when selecting a Performance
 - [Fix] Test Console: Fix name of binary and add missing macOS setup script
 
+Xenia:
+
+- [Fix] BUG-10057 BP Filter Offset din't display bipolar but unipolar values
+
 2.1.0:
 
 Framework:
