@@ -97,12 +97,12 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 
 	m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(m_state.getWidth()) / static_cast<double>(m_state.getHeight()));
 	
+    const auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
+	setGuiScale(scale);
+
 	_component->setSize(getWidth(), getHeight());
 
 	addAndMakeVisible(_component);
-
-    const auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
-	setGuiScale(scale);
 
 	setResizable(true, true);
 	setConstrainer(&m_sizeConstrainer);
