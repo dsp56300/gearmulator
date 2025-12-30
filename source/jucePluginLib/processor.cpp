@@ -683,7 +683,7 @@ namespace pluginLib
 				ev.c = message.getRawDataSize() > 1 ? message.getRawData()[2] : 0;
 			}
 
-			ev.offset = metadata.samplePosition;
+			ev.offset = std::max(0, metadata.samplePosition);
 
 			addMidiEvent(ev);
 		}
