@@ -767,7 +767,7 @@ namespace pluginLib::patchDB
 		if (!baseLib::filesystem::readFile(data, _file) || data.empty())
 			return false;
 
-		return parseFileData(_results, data);
+		return parseFileData(_results, data, baseLib::filesystem::getFilenameWithoutPath(_file));
 	}
 
 	bool DB::loadLocalStorage(DataList& _results, const DataSource& _ds)
@@ -807,7 +807,7 @@ namespace pluginLib::patchDB
 		return !files.empty();
 	}
 
-	bool DB::parseFileData(DataList& _results, const Data& _data)
+	bool DB::parseFileData(DataList& _results, const Data& _data, const std::string& _filename)
 	{
 		return synthLib::MidiToSysex::extractSysexFromData(_results, _data);
 	}

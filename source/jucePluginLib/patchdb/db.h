@@ -102,7 +102,7 @@ namespace pluginLib::patchDB
 		virtual bool loadFolder(const DataSourceNodePtr& _folder);
 		virtual PatchPtr initializePatch(Data&& _sysex, const std::string& _defaultPatchName) = 0;
 		virtual Data applyModifications(const PatchPtr& _patch, const FileType& _fileType, ExportType _exportType) const = 0;
-		virtual bool parseFileData(DataList& _results, const Data& _data);
+		virtual bool parseFileData(DataList& _results, const Data& _data, const std::string& _filename);
 		virtual bool equals(const PatchPtr& _a, const PatchPtr& _b) const
 		{
 			return _a == _b || _a->hash == _b->hash;

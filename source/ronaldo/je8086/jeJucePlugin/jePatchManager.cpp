@@ -249,11 +249,11 @@ namespace jeJucePlugin
 		return true;
 	}
 
-	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
+	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
 	{
 		pluginLib::patchDB::DataList data;
 
-		if (!jucePluginEditorLib::patchManager::PatchManager::parseFileData(data, _data))
+		if (!jucePluginEditorLib::patchManager::PatchManager::parseFileData(data, _data, _filename))
 		{
 			// pfm/pat file?
 			if (_data.size() > 7 + 12)

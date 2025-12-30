@@ -265,7 +265,7 @@ namespace genericVirusUI
 		return result;
 	}
 
-	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
+	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
 	{
 		if (synthLib::SounddiverLibLoader::isValidData(_data))
 		{

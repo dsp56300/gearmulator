@@ -133,9 +133,9 @@ namespace n2xJucePlugin
 		return true;
 	}
 
-	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
+	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
 	{
-		return jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data);
+		return jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data, _filename);
 	}
 
 	std::string PatchManager::getPatchName(const pluginLib::patchDB::Data& _sysex, const std::string& _defaultPatchName/* = {}*/)

@@ -662,7 +662,7 @@ namespace jucePluginEditorLib::patchManager
 
 		pluginLib::patchDB::DataList results;
 
-		if (!parseFileData(results, data.sysex))
+		if (!parseFileData(results, data.sysex, {}))
 			return {};
 
 		std::vector<pluginLib::patchDB::PatchPtr> patches;
