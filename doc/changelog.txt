@@ -1,4 +1,4 @@
-Release Notes 
+Release Notes
 
 2.1.1:
 
@@ -17,6 +17,10 @@ JE8086:
 - [Fix] Support Patch/Performance Dumps from edit buffers
 - [Fix] Patch Manager list might erratically jump when selecting a Performance
 - [Fix] Test Console: Fix name of binary and add missing macOS setup script
+
+Osirus/OsTIrus:
+
+- [Imp] BUG-10100 Patch Manager: Add support for .tfx presets from TDM plugin
 
 OsTIrus:
 
