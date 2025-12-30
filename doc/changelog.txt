@@ -22,6 +22,10 @@ Osirus/OsTIrus:
 
 - [Imp] BUG-10100 Patch Manager: Add support for .tfx presets from TDM plugin
 
+Osirus:
+
+- [Fix] BUG-10075 swap labels Slot 1 and Slot 3 [Hoverland/Galaxpel skins]
+
 OsTIrus:
 
 - [Fix] BUG-10083 Mode and Type labels were reversed for Delay on FX 2 page
