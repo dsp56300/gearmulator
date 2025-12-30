@@ -12,6 +12,8 @@ JE8086:
 
 - [Imp] Patch Manager: Add support for .pat/.pfm preset files
 
+- [Fix] BUG-10098 Automation parameters not updating when selecting a 
+        different patch/performance
 - [Fix] Support Patch/Performance Dumps from edit buffers
 - [Fix] Patch Manager list might erratically jump when selecting a Performance
 - [Fix] Test Console: Fix name of binary and add missing macOS setup script
