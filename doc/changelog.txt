@@ -4,7 +4,7 @@ Release Notes
 
 Framework:
 
-- [Fix] Crash when unloading plugin while automating a parameter
+- [Fix] BUG-10089 Crash when unloading plugin while automating a parameter
 - [Fix] Warning dialog and broken UI in certain hosts if host alters     
         the locale to something that uses , as decimal point instead of .
 
