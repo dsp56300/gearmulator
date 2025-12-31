@@ -43,7 +43,7 @@
 		<div id="matrix">
 			<h3 id="matrixHeadline">Note On/Off</h3>
 			<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 1em;">
-				<tr class="settings-tr midimatrix-tr-headline">
+				<tr class="settings-tr settings-tr-headline">
 					<td>From | To</td>
 					<td>Device</td>
 					<td>Editor</td>

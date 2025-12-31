@@ -26,11 +26,13 @@
 
 .settings-table {
 	column-gap: 1em;
-	padding-top: 1em;
+	padding-top: 0.1em;
+	padding-bottom: 0.1em;
 }
 
 .settings-tr {
 	padding-top: 0.1em;
+	padding-bottom: 0.1em;
 }
 
 .settings-td {

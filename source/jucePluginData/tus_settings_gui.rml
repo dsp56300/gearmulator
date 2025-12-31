@@ -1,6 +1,6 @@
 <template name="tus_settings_gui">
 <head>
-	<link type="text/rcss" href="tus_settings_midi.rcss"/>
+	<link type="text/rcss" href="tus_settings_gui.rcss"/>
 </head>
 <body>
 	<div class="settings-page">

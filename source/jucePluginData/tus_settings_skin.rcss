@@ -1,0 +1,4 @@
+.settings-skin-tr-headline {
+	font-style: italic;
+	background-color: #0003;
+}

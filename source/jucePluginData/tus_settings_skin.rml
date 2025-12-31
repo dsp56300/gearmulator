@@ -1,10 +1,25 @@
 <template name="tus_settings_skin">
 <head>
-	<link type="text/rcss" href="tus_settings_midi.rcss"/>
+	<link type="text/rcss" href="tus_settings_skin.rcss"/>
 </head>
 <body>
 	<div class="settings-page">
 		<h1>Skins</h1>
+		<h3 id="matrixHeadline">Available Skins</h3>
+		<table class="settings-table">
+			<tr class="settings-tr settings-tr-headline settings-skin-tr-headline">
+				<td>Name</td>
+				<td>Type</td>
+			</tr>
+			<tr class="settings-tr">
+				<td>SomeName</td>
+				<td>Builtin</td>
+			</tr>
+			<tr class="settings-tr">
+				<td>Some Other Skin</td>
+				<td>From File</td>
+			</tr>
+		</table>
 	</div>
 </body>
 </template>
