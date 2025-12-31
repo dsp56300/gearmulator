@@ -9,12 +9,12 @@ namespace jucePluginEditorLib
 	class SettingsSkin : public SettingsPlugin
 	{
 	public:
-		SettingsSkin(Processor& processor) : SettingsPlugin() {}
+		SettingsSkin(Processor& _processor);
 
 		std::string getCategoryName() const override {return "Skin";}
 		std::string getTemplateName() const override { return "tus_settings_skin"; }
 
-		void createUi(Rml::Element* _root) override {}
+		void createUi(Rml::Element* _root) override;
 	private:
 	};
 }

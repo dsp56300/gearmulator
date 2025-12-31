@@ -2,3 +2,11 @@
 	font-style: italic;
 	background-color: #0003;
 }
+ .settings-skin-tr {
+ 	height: 3em;
+	vertical-align: middle;
+}
+.settings-skin-tr td {
+	padding-left: 1em;
+	vertical-align: middle;
+}

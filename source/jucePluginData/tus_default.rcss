@@ -297,10 +297,13 @@ knob {
 
 .button {
 	background-color: rgb(50,62,68);
-	border: 2dp rgb(172,176,179);
+	border: 2dp rgba(172,176,179,64);
 	border-radius: 15dp;
 	padding: 0.5em 1em 0.5em 1em;
 	text-align: center;
+	box-shadow: 
+		#fff5 2dp 2dp 0 inset,
+		#000c -4dp -4dp 0 inset;
 }
 
 .button:hover {
@@ -309,6 +312,9 @@ knob {
 
 .button:active {
 	background-color: rgb(70,82,88);
+	box-shadow: 
+		#000c 4dp 4dp 0 inset,
+		#fff5 -2dp -2dp 0 inset;
 }
 
 /* everything that is a drag target */
