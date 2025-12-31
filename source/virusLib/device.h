@@ -39,6 +39,7 @@ namespace virusLib
 		static bool find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string_view& _4cc);
 		static bool parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const std::vector<uint8_t>& _state);
 		static bool parsePowercorePreset(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data);
+		static bool parseTDMPreset(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data, const std::string& _filename);
 		static bool parseVTIBackup(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data);
 
 		uint32_t getInternalLatencyMidiToOutput() const override;

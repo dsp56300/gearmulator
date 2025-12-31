@@ -197,9 +197,9 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
+	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
 	{
-		if(!jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data))
+		if(!jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data, _filename))
 			return false;
 
 		// check if there are MW1 bank dumps. A bank dump is one sysex with multiple patches. Split them into individual preset dumps

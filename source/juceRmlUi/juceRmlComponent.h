@@ -58,6 +58,7 @@ namespace juceRmlUi
 		void newOpenGLContextCreated() override;
 		void renderOpenGL() override;
 		void openGLContextClosing() override;
+		void visibilityChanged() override;
 
 		void mouseDown(const juce::MouseEvent& _event) override;
 		void mouseUp(const juce::MouseEvent& _event) override;

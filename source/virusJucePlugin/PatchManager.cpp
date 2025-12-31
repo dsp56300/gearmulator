@@ -265,7 +265,7 @@ namespace genericVirusUI
 		return result;
 	}
 
-	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
+	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
 	{
 		if (synthLib::SounddiverLibLoader::isValidData(_data))
 		{
@@ -327,7 +327,12 @@ namespace genericVirusUI
 		res |= synthLib::MidiToSysex::extractSysexFromData(_results, _data);
 
 		if(!res)
-			return false;
+		{
+			// Attempt to extract TDM plugin presets
+
+			if (!virusLib::Device::parseTDMPreset(_results, _data, _filename))
+				return false;
+		}
 
 		if(!_results.empty())
 		{

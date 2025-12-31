@@ -119,7 +119,8 @@
 			<img id="f1Type8" class="jucePos" data-class-juceConditionDisabled="!(F1Type_value == 8)" data-model="partCurrent" src="f1Type8.png" style="left: 2638.84dp; top: 495.954dp; width: 242dp; height: 38dp;"/>
 			<img id="f1Type9" class="jucePos" data-class-juceConditionDisabled="!(F1Type_value == 9)" data-model="partCurrent" src="f1Type9.png" style="left: 2638.84dp; top: 495.954dp; width: 242dp; height: 38dp;"/>
 			<img id="f1Type12" class="jucePos" data-class-juceConditionDisabled="!(F1Type_value == 12)" data-model="partCurrent" src="f1Type12.png" style="left: 2638.84dp; top: 495.954dp; width: 242dp; height: 38dp;"/>
-			<knob id="xtKnob" class="jucePos juceRotary knob" data-class-juceConditionDisabled="!((F1Type_value >= 6 && F1Type_value <= 9) || F1Type_value == 12)" data-model="partCurrent" param="F1Extra" style="left: 2695.84dp; top: 370.17dp; width: 128dp; height: 128dp;"/>
+			<knob id="xtKnob" class="jucePos juceRotary knob" data-class-juceConditionDisabled="!((F1Type_value >= 6 && F1Type_value <= 9 && F1Type_value != 7) || F1Type_value == 12)" data-model="partCurrent" param="F1Extra" style="left: 2695.84dp; top: 370.17dp; width: 128dp; height: 128dp;"/>
+			<knob id="xtKnob" class="jucePos juceRotary knob" data-class-juceConditionDisabled="!(F1Type_value == 7)" data-model="partCurrent" param="F1BPOffset" style="left: 2695.84dp; top: 370.17dp; width: 128dp; height: 128dp;"/>
 			<knob id="xtKnob" class="jucePos juceRotary knob" data-model="partCurrent" param="F2Cutoff" style="left: 3060.85dp; top: 172.23dp; width: 128dp; height: 128dp;"/>
 			<knob id="xtKnob" class="jucePos juceRotary knob" data-model="partCurrent" param="F2KeyTrack" style="left: 3060.85dp; top: 370.17dp; width: 128dp; height: 128dp;"/>
 			<combo id="dropdown" class="jucePos txt" data-model="partCurrent" param="F1EnvTrigger" style="left: 2760.84dp; top: 666.4dp; width: 225dp; height: 50dp; line-height: 50dp;">

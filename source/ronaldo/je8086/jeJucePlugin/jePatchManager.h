@@ -33,7 +33,7 @@ namespace jeJucePlugin
 			const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const override;
 		uint32_t getCurrentPart() const override;
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
-		bool parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data) override;
+		bool parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename) override;
 
 	private:
 		Editor& m_editor;

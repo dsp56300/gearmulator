@@ -13,6 +13,8 @@
 
 #include "dspMemoryPatches.h"
 
+#include "baseLib/filesystem.h"
+
 namespace virusLib
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params, const bool _createDebugger/* = false*/)
@@ -379,6 +381,54 @@ namespace virusLib
 		}
 
 		return numFound > 0;
+	}
+
+	bool Device::parseTDMPreset(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data, const std::string& _filename)
+	{
+		// search for this string, every ? is a wildcard
+		constexpr auto key = "DigiVrus????vals";
+
+		for (size_t i=0; i<_data.size() - strlen(key); ++i)
+		{
+			bool found = true;
+
+			for (size_t k=0; k<strlen(key); ++k)
+			{
+				if (key[k] != '?' && static_cast<uint8_t>(key[k]) != _data[i+k])
+				{
+					found = false;
+					break;
+				}
+			}
+
+			if (!found)
+				continue;
+
+			const ptrdiff_t pos = i + strlen(key) + 0x20;	// skip 32 unknown bytes
+
+			constexpr uint8_t programIndex = 0;
+			const auto presetSize = ROMFile::getSinglePresetSize(DeviceModel::B);
+
+			// replace preset name, that is usually just 'Untitled' with the filename
+			auto newPresetName = baseLib::filesystem::stripExtension(_filename);
+			auto firstSpacePos = newPresetName.find_first_of(' ');
+			if (firstSpacePos != std::string::npos && firstSpacePos < newPresetName.size() - 1)
+				newPresetName = newPresetName.substr(firstSpacePos + 1);
+
+			std::vector<uint8_t> data{_data.begin() + pos, _data.begin() + pos + presetSize};
+
+			for (size_t n = 0; n<10; ++n)
+				data[n + 240] = n < newPresetName.size() ? static_cast<uint8_t>(newPresetName[n]) : ' ';
+
+			// pack into sysex
+			std::vector<uint8_t>& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x10, 0x01, programIndex});
+			sysex.insert(sysex.end(), data.begin(), data.end());
+			sysex.push_back(Microcontroller::calcChecksum(sysex));
+			sysex.push_back(0xf7);
+
+			return true;
+		}
+		return false;
 	}
 
 	bool Device::parseVTIBackup(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data)

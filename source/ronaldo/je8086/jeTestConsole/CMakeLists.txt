@@ -1,28 +1,28 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(jeTestConsole)
+project(JE8086TestConsole)
 
-add_executable(jeTestConsole)
+add_executable(JE8086TestConsole)
 
 set(SOURCES
 	jeTestConsole.cpp
 )
 
-target_sources(jeTestConsole PRIVATE ${SOURCES})
+target_sources(JE8086TestConsole PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-createMacSetupScript("jeTestConsole")
+createMacSetupScript("JE8086TestConsole")
 
-target_link_libraries(jeTestConsole PUBLIC jeLib)
+target_link_libraries(JE8086TestConsole PUBLIC jeLib)
 
 if(UNIX AND NOT APPLE)
-	target_link_libraries(jeTestConsole PUBLIC -static-libgcc -static-libstdc++)
+	target_link_libraries(JE8086TestConsole PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
-install(TARGETS jeTestConsole DESTINATION . COMPONENT JE8086TestConsole)
+install(TARGETS JE8086TestConsole DESTINATION . COMPONENT JE8086TestConsole)
 
 if(APPLE)
-	installMacSetupScript(. JETestConsole)
+	installMacSetupScript(. JE8086TestConsole)
 endif()
 
-set_property(TARGET jeTestConsole PROPERTY FOLDER "JE8086")
+set_property(TARGET JE8086TestConsole PROPERTY FOLDER "JE8086")

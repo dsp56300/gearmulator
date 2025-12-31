@@ -361,12 +361,11 @@ namespace jeJucePlugin
 		{
 			const auto parameterType = static_cast<jeLib::PerformanceCommon>(addr);
 
-			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePerformance, static_cast<uint8_t>(addr));
+			const auto params = findSynthParam(0, g_paramPagePerformance, static_cast<uint8_t>(addr));
 
-			auto* param = getParameter(parameterIndex, 0);
-			assert(param && "parameter not found");
+			assert(!params.empty() && "parameter not found");
 
-			if(!param)
+			if(params.empty())
 				break;
 
 			pluginLib::ParamValue value;
@@ -384,11 +383,14 @@ namespace jeJucePlugin
 				value = _sysex[i];
 			}
 
-			param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
+			for (const auto& param : params)
+				param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 		}
 
 		if (auto name = jeLib::State::getName(_sysex))
 			setPatchName(PatchType::Performance, *name);
+
+		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 	}
 
 	void Controller::parsePatch(const pluginLib::SysEx& _sysex, const uint8_t _part)
@@ -413,12 +415,11 @@ namespace jeJucePlugin
 
 			const auto parameterType = static_cast<jeLib::Patch>((addr4[2] << 8) + addr4[3]);
 
-			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(addr4[2] + g_paramPagePatch, addr4[3]);
+			auto params = findSynthParam(_part, addr4[2] + g_paramPagePatch, addr4[3]);
 
-			auto* param = getParameter(parameterIndex, _part);
-			assert(param && "parameter not found");
+			assert(!params.empty() && "parameter not found");
 
-			if(!param)
+			if(params.empty())
 				break;
 
 			pluginLib::ParamValue value;
@@ -436,8 +437,11 @@ namespace jeJucePlugin
 				value = _sysex[i];
 			}
 
-			param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
+			for (const auto& param : params)
+				param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 		}
+
+		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 	}
 
 	void Controller::parsePart(const pluginLib::SysEx& _sysex, const uint8_t _part) const
@@ -448,18 +452,20 @@ namespace jeJucePlugin
 
 		for (size_t i=g_dataStartIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
 		{
-			const auto parameterIndex = getParameterDescriptions().getAbsoluteIndex(g_paramPagePart, static_cast<uint8_t>(addr));
+			const auto params = findSynthParam(_part, g_paramPagePart, static_cast<uint8_t>(addr));
 
-			auto* param = getParameter(parameterIndex, _part);
-			assert(param && "parameter not found");
+			assert(!params.empty() && "parameter not found");
 
-			if(!param)
+			if(params.empty())
 				break;
 
 			pluginLib::ParamValue value = _sysex[i];
 
-			param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
+			for (const auto& param : params)
+				param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 		}
+
+		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 	}
 
 	void Controller::parseSystemParameters(const pluginLib::SysEx& _sysex) const
