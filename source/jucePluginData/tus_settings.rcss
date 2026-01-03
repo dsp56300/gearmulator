@@ -66,6 +66,12 @@
 	font-size: 1.3em;
 }
 
+.settings-category-button:checked
+{
+	border-color: #fffa;
+	border-width: 2dp;
+}
+
 .settings-headline {
 	font-size: 2em;
 }
@@ -141,4 +147,10 @@
 settingsspacer1 {
 	display: block; 
 	height: 1em
+}
+
+.settings-checkboxwithlabel {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
 }
