@@ -46,7 +46,6 @@ namespace jucePluginEditorLib
 		PluginEditorState& operator = (PluginEditorState&&) = delete;
 		PluginEditorState& operator = (const PluginEditorState&) = delete;
 
-		void exportCurrentSkin() const;
 		Skin readSkinFromConfig() const;
 		void writeSkinToConfig(const Skin& _skin) const;
 
@@ -87,17 +86,18 @@ namespace jucePluginEditorLib
 			return m_currentSkin.isValid();
 		}
 
+		bool loadSkin(const Skin& _skin, uint32_t _fallbackIndex = 0);
+		std::string exportSkinToFolder(const Skin& _skin, const std::string& _folder) const;
+
+		Editor* getEditor() const;
+
 	protected:
 		virtual Editor* createEditor(const Skin& _skin) = 0;
 
 		Processor& m_processor;
 
-		Editor* getEditor() const;
-
 	private:
-		bool loadSkin(const Skin& _skin, uint32_t _fallbackIndex = 0);
 		void setGuiScale(int _scale) const;
-		std::string exportSkinToFolder(const Skin& _skin, const std::string& _folder) const;
 
 		std::unique_ptr<Editor> m_editor;
 		Skin m_currentSkin;

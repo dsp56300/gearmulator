@@ -203,6 +203,11 @@ namespace jucePluginEditorLib
 		bool setSize(int _width, int _height) const;
 
 		static std::string getAbsoluteSkinFolder(const Processor& _processor, const std::string& _skinFolder);
+
+		void toggleSettings();
+		void showSettings(bool _show);
+		bool settingsOpened() const { return m_settings != nullptr; }
+
 	private:
 		void onDisclaimerFinished() const;
 

@@ -47,8 +47,6 @@ namespace jucePluginEditorLib
 
 		void savePreset(const std::string& _name, bool _needsOverwriteConfirmation = true);
 
-		Processor& m_processor;
-
 		std::vector<std::unique_ptr<SettingsMidiMatrix>> m_matrices;
 		juceRmlUi::ElemComboBox* m_presetList = nullptr;
 		std::vector<std::pair<std::string, synthLib::MidiRoutingMatrix>> m_presets;

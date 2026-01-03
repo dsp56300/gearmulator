@@ -16,10 +16,13 @@ namespace juce
 
 namespace jucePluginEditorLib
 {
+	class Processor;
+
 	class SettingsPlugin
 	{
 	protected:
-		SettingsPlugin() = default;
+		SettingsPlugin(Processor& _processor) : m_processor(_processor) {}
+
 	public:
 		virtual ~SettingsPlugin() = default;
 
@@ -29,5 +32,8 @@ namespace jucePluginEditorLib
 		virtual void createUi(Rml::Element* _root) = 0;
 
 		static bool addClickHandler(Rml::Element* _root, const std::string& _child, std::function<void(Rml::Event&)> _handler);
+
+	protected:
+		Processor& m_processor;
 	};
 }

@@ -23,6 +23,24 @@
 				</td>
 			</tr>
 		</table>
+		
+		<settingsspacer1/>
+		<button id="btOpenFolder" class="button" style="display: inline-block;">Open skins folder in File Browser</button>
+		<settingsspacer1/>
+		
+		<h1>Developer Options</h1>
+		<settingsspacer1/>
+
+		<div id="btReloadViaF5" class="settings-hlayout" style="gap: 0.5em;">
+			<button id="button" class="settings-checkbox"/>
+			<label>Reload skin via F5 key</label>
+		</div>
+		<settingsspacer1/>
+		<div id="btEnableRmlUiDebugger" class="settings-hlayout" style="gap: 0.5em;">
+			<button id="button" class="settings-checkbox"/>
+			<label>Enable RmlUi Debugger</label>
+		</div>
+		<settingsspacer1/>
 	</div>
 </body>
 </template>

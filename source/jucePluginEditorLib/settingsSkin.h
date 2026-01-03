@@ -4,6 +4,11 @@
 
 namespace jucePluginEditorLib
 {
+	struct Skin;
+}
+
+namespace jucePluginEditorLib
+{
 	class Processor;
 
 	class SettingsSkin : public SettingsPlugin
@@ -16,5 +21,6 @@ namespace jucePluginEditorLib
 
 		void createUi(Rml::Element* _root) override;
 	private:
+		void exportSkin(const Skin& _skin) const;
 	};
 }

@@ -20,7 +20,7 @@ namespace jucePluginEditorLib
 
 	constexpr std::string_view g_defaultPresetName = "Default";
 
-	SettingsMidi::SettingsMidi(Processor& _processor) : m_processor(_processor)
+	SettingsMidi::SettingsMidi(Processor& _processor) : SettingsPlugin(_processor)
 	{
 	}
 

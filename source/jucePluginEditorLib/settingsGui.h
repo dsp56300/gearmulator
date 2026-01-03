@@ -9,7 +9,7 @@ namespace jucePluginEditorLib
 	class SettingsGui : public SettingsPlugin
 	{
 	public:
-		SettingsGui(Processor& processor) : SettingsPlugin() {}
+		SettingsGui(Processor& _processor) : SettingsPlugin(_processor) {}
 
 		std::string getCategoryName() const override {return "GUI";}
 		std::string getTemplateName() const override { return "tus_settings_gui"; }

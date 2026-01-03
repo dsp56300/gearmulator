@@ -728,20 +728,14 @@ namespace jucePluginEditorLib
 				switch (juceRmlUi::helper::getKeyIdentifier(_event))
 				{
 				case Rml::Input::KI_ESCAPE:
-					if (m_settings)
-					{
-						m_settings.reset();
-					}
-					else
-					{
-						m_settings = Settings::createFromTemplate(*this, "settings", getRmlRootElement());
-					}
+					toggleSettings();
 					_event.StopPropagation();
 					break;
 				default:;
 				}
 			}
 		});
+
 		return comp;
 	}
 
@@ -985,5 +979,22 @@ namespace jucePluginEditorLib
 	std::string Editor::getAbsoluteSkinFolder(const std::string& _skinFolder) const
 	{
 		return getAbsoluteSkinFolder(m_processor, _skinFolder);
+	}
+
+	void Editor::toggleSettings()
+	{
+		showSettings(!settingsOpened());
+	}
+
+	void Editor::showSettings(bool _show)
+	{
+		if (!_show && m_settings)
+		{
+			m_settings.reset();
+		}
+		else if (_show && !m_settings)
+		{
+			m_settings = Settings::createFromTemplate(*this, "settings", getRmlRootElement());
+		}
 	}
 }

@@ -137,3 +137,8 @@
 	align-items: center;
 	gap: 1em;
 }
+
+settingsspacer1 {
+	display: block; 
+	height: 1em
+}
