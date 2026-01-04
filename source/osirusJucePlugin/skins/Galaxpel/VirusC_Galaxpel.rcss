@@ -133,10 +133,10 @@
 }
 @spritesheet btn2-52x36
 {
-	btn2-52x36_active: 0px 36px 52px 36px;
-	btn2-52x36_checked: 0px 36px 52px 36px;
-	btn2-52x36_checked-active: 0px 0px 52px 36px;
-	btn2-52x36_default: 0px 0px 52px 36px;
+	btn2-52x36_active: 0px 0px 52px 36px;
+	btn2-52x36_checked: 0px 0px 52px 36px;
+	btn2-52x36_checked-active: 0px 36px 52px 36px;
+	btn2-52x36_default: 0px 36px 52px 36px;
 	src: btn2-52x36.png;
 }
 @spritesheet chain-btn-36x62
@@ -453,10 +453,10 @@
 @spritesheet toggle-btn-39x102
 {
 	src: toggle-btn-39x102.png;
-	toggle-btn-39x102_active: 0px 0px 39px 102px;
-	toggle-btn-39x102_checked: 0px 0px 39px 102px;
-	toggle-btn-39x102_checked-active: 0px 102px 39px 102px;
-	toggle-btn-39x102_default: 0px 102px 39px 102px;
+	toggle-btn-39x102_active: 0px 102px 39px 102px;
+	toggle-btn-39x102_checked: 0px 102px 39px 102px;
+	toggle-btn-39x102_checked-active: 0px 0px 39px 102px;
+	toggle-btn-39x102_default: 0px 0px 39px 102px;
 }
 .arp-btn-306x83
 {

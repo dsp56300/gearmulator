@@ -645,6 +645,22 @@ namespace juceRmlUi
 		if (!doc)
 			return nullptr;
 		auto* p = doc->GetAttribute<void*>("rmlComponent", nullptr);
+		if (!p)
+		{
+			// this can fail if the document is the temporary drag & drop document, so we search all documents in the context
+			auto* context = _element->GetContext();
+
+			if (!context)
+				return nullptr;
+
+			for (int i=0; i<context->GetNumDocuments(); ++i)
+			{
+				doc = _element->GetContext()->GetDocument(i);
+				p = doc->GetAttribute<void*>("rmlComponent", nullptr);
+				if(p)
+					break;
+			}
+		}
 		return static_cast<RmlComponent*>(p);
 	}
 
