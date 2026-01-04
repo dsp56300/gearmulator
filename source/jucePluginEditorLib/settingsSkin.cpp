@@ -10,7 +10,6 @@
 #include "baseLib/filesystem.h"
 
 #include "juceRmlUi/juceRmlComponent.h"
-#include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 
@@ -27,30 +26,9 @@ namespace jucePluginEditorLib
 	}
 	void SettingsSkin::createUi(Rml::Element* _root)
 	{
-		auto createToggleButton = [this, _root](const std::string& _buttonName, const std::string& _configName, const std::function<void(bool)>& _applyChange)
-		{
-			if (auto* btRoot = juceRmlUi::helper::findChild(_root, _buttonName, false))
-			{
-				auto* bt = juceRmlUi::helper::findChild(btRoot, "button");
+		createToggleButton(_root, "btReloadViaF5", "reloadSkinViaF5", [this](bool){});
 
-				const auto enabled = m_processor.getConfig().getBoolValue(_configName, false);
-				juceRmlUi::ElemButton::setChecked(bt, enabled);
-
-				juceRmlUi::EventListener::AddClick(btRoot, [this, bt, _applyChange, _configName]
-				{
-					auto& c = m_processor.getConfig();
-					const auto enabled = c.getBoolValue(_configName, false);
-					juceRmlUi::ElemButton::setChecked(bt, !enabled);
-					c.setValue(_configName, !enabled);
-					c.saveIfNeeded();
-					_applyChange(!enabled);
-				});
-			}
-		};
-
-		createToggleButton("btReloadViaF5", "reloadSkinViaF5", [this](bool _enable){});
-
-		createToggleButton("btEnableRmlUiDebugger", "enableRmlUiDebugger", [this](bool _enable)
+		createToggleButton(_root, "btEnableRmlUiDebugger", "enableRmlUiDebugger", [this](bool _enable)
 		{
 			m_processor.getEditorState()->getEditor()->getRmlComponent()->enableDebugger(_enable);
 		});

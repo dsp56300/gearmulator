@@ -3,8 +3,9 @@
 #include "pluginProcessor.h"
 
 #include "settings.h"
-#include "settingsMidi.h"
+#include "settingsDspAudio.h"
 #include "settingsGui.h"
+#include "settingsMidi.h"
 #include "settingsSkin.h"
 
 #include "skin.h"
@@ -678,6 +679,7 @@ namespace jucePluginEditorLib
 	{
 		_plugins.push_back(std::make_unique<SettingsSkin>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsGui>(getProcessor()));
+		_plugins.push_back(std::make_unique<SettingsDspAudio>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsMidi>(getProcessor()));
 	}
 

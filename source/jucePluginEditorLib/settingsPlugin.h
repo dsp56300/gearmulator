@@ -34,6 +34,10 @@ namespace jucePluginEditorLib
 		static bool addClickHandler(Rml::Element* _root, const std::string& _child, std::function<void(Rml::Event&)> _handler);
 
 	protected:
+		bool createToggleButton(Rml::Element* _root,
+			const std::string& _buttonName,
+			const std::string& _configName,
+			const std::function<void(bool)>& _changeCallback) const;
 		Processor& m_processor;
 	};
 }

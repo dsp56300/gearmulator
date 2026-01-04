@@ -14,7 +14,7 @@ namespace jucePluginEditorLib
 		std::string getCategoryName() const override {return "GUI";}
 		std::string getTemplateName() const override { return "tus_settings_gui"; }
 
-		void createUi(Rml::Element* _root) override {}
+		void createUi(Rml::Element* _root) override;
 	private:
 	};
 }

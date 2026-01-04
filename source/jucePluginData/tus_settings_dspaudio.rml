@@ -1,0 +1,10 @@
+<template name="tus_settings_dspaudio">
+<head>
+	<link type="text/rcss" href="tus_settings_dspaudio.rcss"/>
+</head>
+<body>
+	<div class="settings-page">
+		<h1>DSP & Audio</h1>
+	</div>
+</body>
+</template>
