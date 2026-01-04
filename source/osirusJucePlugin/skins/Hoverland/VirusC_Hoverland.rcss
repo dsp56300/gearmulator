@@ -475,10 +475,10 @@
 }
 @spritesheet env_pol_100x68_x2
 {
-	env_pol_100x68_x2_active: 50px 0px 50px 68px;
-	env_pol_100x68_x2_checked: 50px 0px 50px 68px;
-	env_pol_100x68_x2_checked-active: 0px 0px 50px 68px;
-	env_pol_100x68_x2_default: 0px 0px 50px 68px;
+	env_pol_100x68_x2_active: 0px 0px 50px 68px;
+	env_pol_100x68_x2_checked: 0px 0px 50px 68px;
+	env_pol_100x68_x2_checked-active: 50px 0px 50px 68px;
+	env_pol_100x68_x2_default: 50px 0px 50px 68px;
 	src: env_pol_100x68_x2.png;
 }
 @spritesheet handle_72x94_x2

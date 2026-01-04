@@ -259,8 +259,8 @@
 			</combo>
 			<button id="LfoMode" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Lfo3 Mode" style="left: 18dp; top: 1008.23dp; width: 39dp; height: 102dp;"/>
 			<knob id="LfoRate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Rate" style="left: 241.3dp; top: 800.5dp; width: 104dp; height: 104dp;"/>
-			<knob id="Lfo3FadeIn" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Fade-In Time" style="left: 370.3dp; top: 800.5dp; width: 104dp; height: 104dp;"/>
-			<knob id="Lfo3Keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Keyfollow" style="left: 241.3dp; top: 966.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Lfo3Keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Keyfollow" style="left: 370.3dp; top: 800.5dp; width: 104dp; height: 104dp;"/>
+			<knob id="Lfo3FadeIn" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Fade-In Time" style="left: 241.3dp; top: 966.5dp; width: 104dp; height: 104dp;"/>
 			<knob id="Lfo3Amount" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc Lfo3 Amount" style="left: 650dp; top: 800.5dp; width: 104dp; height: 104dp;"/>
 			<combo id="Lfo3AssignDestination" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Destination" style="left: 782dp; top: 824.5dp; width: 180dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
@@ -364,6 +364,9 @@
 				<knob id="ReverbColor" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Color" style="left: 506dp; top: 56dp; width: 104dp; height: 104dp;"/>
 				<knob id="ReverbPreDelay" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Time" style="left: 631dp; top: 56dp; width: 104dp; height: 104dp;"/>
 				<knob id="ReverbFeedback" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Feedback" style="left: 756dp; top: 56dp; width: 104dp; height: 104dp;"/>
+				<combo id="ReverbSize" class="jucePos txt2" data-model="partCurrent" param="Rev Size" style="left: 272dp; top: 287dp; width: 160dp; height: 45dp; line-height: 45dp;">
+					<combotext>Wave 42</combotext>
+				</combo>
 			</img>
 			<div id="ContainerDelay" class="jucePos" data-class-juceConditionDisabled="!((Delay_Reverb_Mode_value >= 0 && Delay_Reverb_Mode_value <= 1) || (Delay_Reverb_Mode_value >= 5 && Delay_Reverb_Mode_value <= 26))" data-model="partCurrent" style="left: 1022dp; top: 0dp; width: 948dp; height: 444dp;">
 				<knob id="DelayTime" class="jucePos juceRotary knob1" data-model="partCurrent" param="Delay Time" style="left: 256dp; top: 56dp; width: 104dp; height: 104dp;"/>
