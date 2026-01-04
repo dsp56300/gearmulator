@@ -162,7 +162,7 @@
 			<knob id="NoiseColor" class="jucePos juceRotary knob1" data-model="partCurrent" param="Noise Color" style="left: 800.3dp; top: 480.61dp; width: 104dp; height: 104dp;"/>
 			<knob id="SubLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Suboscillator Volume" style="left: 939.5dp; top: 726dp; width: 104dp; height: 104dp;"/>
 			<knob id="Portamento" class="jucePos juceRotary knob1" data-model="partCurrent" param="Portamento Time" style="left: 800.3dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
-			<button id="SubOscTypeSwitch" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" isToggle="1" param="Suboscillator Shape" style="left: 813.8dp; top: 735.2dp; width: 39dp; height: 102dp;"/>
+			<button id="SubOscTypeSwitch" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" valueOff="1" valueOn="0" isToggle="1" param="Suboscillator Shape" style="left: 813.8dp; top: 735.2dp; width: 39dp; height: 102dp;"/>
 			<knob id="Cutoff" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff" style="left: 1167.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
 			<knob id="Reso" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Resonance" style="left: 1291.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
 			<knob id="EnvAmt" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Env Amt" style="left: 1415.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
