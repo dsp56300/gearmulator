@@ -36,6 +36,7 @@ OsTIrus:
 Xenia:
 
 - [Fix] BUG-10057 BP Filter Offset din't display bipolar but unipolar values
+- [Fix] BUG-10108 Crash when dragging a wave in the wave editor
 
 2.1.0:
 
