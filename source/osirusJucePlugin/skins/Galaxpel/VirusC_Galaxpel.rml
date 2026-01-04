@@ -219,8 +219,8 @@
 			<knob id="LfoKeytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1 Keyfollow" style="left: 370.2dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoContour" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1 Symmetry" style="left: 242.2dp; top: 211.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoPhase" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo1 Keytrigger" style="left: 370.2dp; top: 212.8dp; width: 104dp; height: 104dp;"/>
-			<knob id="LfoOsc1Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc1 Lfo1 Amount" style="left: 520.7dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
-			<knob id="LfoOsc2Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="Osc2 Lfo1 Amount" style="left: 649.5dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoOsc1Pitch" class="jucePos juceRotary knob1" controllerLinkCondition="Lfo1Link" controllerLinkTarget="LfoOsc2Pitch" data-model="partCurrent" param="Osc1 Lfo1 Amount" style="left: 520.7dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="LfoOsc2Pitch" class="jucePos juceRotary knob1" controllerLinkCondition="Lfo1Link" controllerLinkTarget="LfoOsc1Pitch" data-model="partCurrent" param="Osc2 Lfo1 Amount" style="left: 649.5dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoFilterGain" class="jucePos juceRotary knob1" data-model="partCurrent" param="FiltGain Lfo1 Amount" style="left: 520.7dp; top: 212.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="LFO1 Assign Amount" style="left: 649.5dp; top: 211.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoPW12" class="jucePos juceRotary knob1" data-model="partCurrent" param="PW Lfo1 Amount" style="left: 778.4dp; top: 45.8dp; width: 104dp; height: 104dp;"/>
@@ -241,8 +241,8 @@
 			<knob id="LfoKeytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2 Keyfollow" style="left: 370.9dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoContour" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2 Symmetry" style="left: 242.2dp; top: 587.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoPhase" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2 Keytrigger" style="left: 370.9dp; top: 588.8dp; width: 104dp; height: 104dp;"/>
-			<knob id="LfoOsc1Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff1 Lfo2 Amount" style="left: 520dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
-			<knob id="LfoOsc2Pitch" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff2 Lfo2 Amount" style="left: 649.2dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="Cutoff1Lfo2Amount" class="jucePos juceRotary knob1" controllerLinkCondition="Lfo2Link" controllerLinkTarget="Cutoff2Lfo2Amount" data-model="partCurrent" param="Cutoff1 Lfo2 Amount" style="left: 520dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
+			<knob id="Cutoff2Lfo2Amount" class="jucePos juceRotary knob1" controllerLinkCondition="Lfo2Link" controllerLinkTarget="Cutoff1Lfo2Amount" data-model="partCurrent" param="Cutoff2 Lfo2 Amount" style="left: 649.2dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoFilterGain" class="jucePos juceRotary knob1" data-model="partCurrent" param="Pan Lfo2 Amount" style="left: 520dp; top: 588.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoAmount" class="jucePos juceRotary knob1" data-model="partCurrent" param="LFO2 Assign Amount" style="left: 649.2dp; top: 587.8dp; width: 104dp; height: 104dp;"/>
 			<knob id="LfoPW12" class="jucePos juceRotary knob1" data-model="partCurrent" param="Shape Lfo2 Amount" style="left: 778.4dp; top: 421.8dp; width: 104dp; height: 104dp;"/>
@@ -250,7 +250,7 @@
 			<combo id="LfoAssignDestination" class="jucePos txt2" data-model="partCurrent" param="LFO2 Assign Dest" style="left: 782dp; top: 612dp; width: 180dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<button id="Lfo1Link" class="jucePos juceButton chain-btn2-62x36" isToggle="1" style="left: 606.7dp; top: 403.9dp; width: 62dp; height: 36dp;"/>
+			<button id="Lfo2Link" class="jucePos juceButton chain-btn2-62x36" isToggle="1" style="left: 606.7dp; top: 403.9dp; width: 62dp; height: 36dp;"/>
 			<combo id="LfoShape" class="jucePos txt2" data-model="partCurrent" param="Lfo3 Shape" style="left: 22dp; top: 818.75dp; width: 158dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
@@ -417,6 +417,7 @@
 			<combo id="InputSelect" class="jucePos txt5" data-model="partCurrent" param="Input Select" style="left: 233dp; top: 574dp; width: 160dp; height: 36dp; line-height: 36dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
+			<knob id="PureTuning" class="jucePos juceRotary knob1" data-model="partCurrent" param="Pure Tuning" style="left: 725dp; top: 707dp; width: 104dp; height: 104dp;"/>
 			<knob id="ArpGlobalTempo" class="jucePos juceRotary knob1" data-model="partCurrent" param="Clock Tempo" style="left: 916.5dp; top: 78.6001dp; width: 104dp; height: 104dp;"/>
 			<knob id="ArpNoteLength" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp Note Length" style="left: 1045.2dp; top: 78.6001dp; width: 104dp; height: 104dp;"/>
 			<knob id="ArpNoteSwing" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp Swing" style="left: 1175.5dp; top: 78.6001dp; width: 104dp; height: 104dp;"/>

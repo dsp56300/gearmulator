@@ -25,6 +25,8 @@ Osirus/OsTIrus:
 Osirus:
 
 - [Fix] BUG-10075 swap labels Slot 1 and Slot 3 [Hoverland/Galaxpel skins]
+- [Fix] BUG-10106 Galaxpel skin: LFO link buttons had no effect
+- [Fix] BUG-10106 Galaxpel skin: Add Pure Tuning parameter to global page
 
 OsTIrus:
 
