@@ -173,7 +173,8 @@
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="EnvPolarity" class="jucePos juceButton env-pol-radio-btns-38x66" data-model="partCurrent" isToggle="1" param="Filter1 Env Polarity" style="left: 1729.1dp; top: 365.26dp; width: 38dp; height: 66dp;"/>
-			<knob id="Cutoff" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff2" style="left: 1167.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="Cutoff2" class="jucePos juceRotary knob1" data-model="partCurrent" data-class-juceConditionDisabled="Filter2_Cutoff_Link_value == 1" param="Cutoff2" style="left: 1167.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="Cutoff2" class="jucePos juceRotary knob1" data-model="partCurrent" data-class-juceConditionDisabled="Filter2_Cutoff_Link_value == 0" param="Cutoff2Offset" style="left: 1167.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
 			<knob id="Reso" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Resonance" style="left: 1291.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
 			<knob id="EnvAmt" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Env Amt" style="left: 1415.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
 			<knob id="Keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Keyfollow" style="left: 1539.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>

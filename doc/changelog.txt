@@ -9,6 +9,8 @@ Osirus:
 - [Fix] BUG-10106 Galaxpel skin: Fix swapped 
         parameters LFO 3 Keytrack and LFO 3 Fade In
 - [Fix] BUG-10106 Hoverland skin: Fix Envelope Polarity button inverted
+- [Fix] BUG-10106 If Cutoff Link is active, Cutoff 2 values are displayed 
+        as offset to Cutoff 1 in range -64 to +63
 
 2.1.1:
 

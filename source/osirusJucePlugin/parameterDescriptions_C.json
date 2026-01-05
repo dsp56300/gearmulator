@@ -53,6 +53,7 @@
  		{"page":112, "index":39, "name":"Noise Color", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":112, "index":40, "name":"Cutoff", "min":0, "max":127, "default":127, "isPublic":true, "isDiscrete":false, "isBool":false},
  		{"page":112, "index":41, "name":"Cutoff2", "min":0, "max":127, "default":64, "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
+ 		{"page":112, "index":41, "name":"Cutoff2Offset", "displayName":"Cutoff 2 Offset", "min":0, "max":127, "default":64, "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true, "toText":"signed", "version":1},
  		{"page":112, "index":42, "name":"Filter1 Resonance", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false},
  		{"page":112, "index":43, "name":"Filter2 Resonance", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false},
  		{"page":112, "index":44, "name":"Filter1 Env Amt", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false},
