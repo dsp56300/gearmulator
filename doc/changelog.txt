@@ -2,6 +2,10 @@ Release Notes
 
 2.1.2:
 
+Framework:
+
+- [Fix] Crash when loading plugin on some Linux distributions
+
 Osirus:
 
 - [Fix] BUG-10106 Hoverland/Galaxpel skins: Rename LFO SHAPE to reverb TYPE
