@@ -16,7 +16,6 @@ set(SOURCES
 	os.cpp os.h
 	propertyMap.cpp propertyMap.h
 	semaphore.h
-	threadtools.cpp threadtools.h
 )
 
 target_sources(baseLib PRIVATE ${SOURCES})

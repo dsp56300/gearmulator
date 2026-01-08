@@ -59,8 +59,10 @@ namespace jeJucePlugin
 	{
 		const auto& rom = getSelectedRom();
 
+		auto* errorMsg = "A firmware rom (a single 512k .bin file or multiple .mid files) is required, but was not found.";
+
 		if (!rom.isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (512k .bin) is required, but was not found.");
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, errorMsg);
 
 		synthLib::DeviceCreateParams params;
 
@@ -70,7 +72,7 @@ namespace jeJucePlugin
 
 		auto* d = new jeLib::Device(params);
 		if(!d->isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (512k .bin) is required, but was not found.");
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, errorMsg);
 		return d;
 	}
 
