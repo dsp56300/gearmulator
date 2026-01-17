@@ -364,6 +364,33 @@ namespace juceRmlUi
 			return result;
 		}
 
+		Rml::Element* findChildByTag(Rml::Element* _elem, const std::string& _tag, const bool _mustExist, bool _includeNonDomElements)
+		{
+			// We cannot use Rml::ElementUtilities::GetElementsByTagName(results, _elem, _tag) because it always excludes non-dom elements
+
+			typedef Rml::Queue<Rml::Element*> SearchQueue;
+			SearchQueue searchQueue;
+			for (int i = 0; i < _elem->GetNumChildren(_includeNonDomElements); ++i)
+				searchQueue.push(_elem->GetChild(i));
+
+			while (!searchQueue.empty())
+			{
+				Rml::Element* element = searchQueue.front();
+				searchQueue.pop();
+
+				if (element->GetTagName() == _tag)
+					return element;
+
+				// Add all children to search.
+				for (int i = 0; i < element->GetNumChildren(); i++)
+					searchQueue.push(element->GetChild(i));
+			}
+
+			if (_mustExist)
+				throw std::runtime_error("Element with tag '" + _tag + "' not found in '" + _elem->GetId() + "' (" + _elem->GetTagName() + ") element");
+			return nullptr;
+		}
+
 		Rml::ElementPtr removeFromParent(Rml::Element* _elem)
 		{
 			if (!_elem)
