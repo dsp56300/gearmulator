@@ -4,6 +4,8 @@ Release Notes
 
 Framework:
 
+- [Imp] BUG-10120 allow to drag sliders slower by using shift key
+
 - [Fix] Crash when loading plugin on some Linux distributions
 
 Osirus:

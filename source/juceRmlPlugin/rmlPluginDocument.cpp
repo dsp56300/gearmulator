@@ -15,6 +15,17 @@
 
 namespace rmlPlugin
 {
+	// list of events we want to listen to on the whole document
+	constexpr Rml::EventId g_documentEvents[] =
+	{
+		Rml::EventId::Mousedown,
+		Rml::EventId::Mouseup,
+		Rml::EventId::Mouseout,
+		Rml::EventId::Mousemove,
+		Rml::EventId::Keydown,
+		Rml::EventId::Keyup
+	};
+
 	class DocumentListener : public Rml::EventListener
 	{
 	public:
@@ -24,6 +35,7 @@ namespace rmlPlugin
 			m_document.processEvent(_event);
 		}
 
+	private:
 		RmlPluginDocument& m_document;
 	};
 
@@ -35,9 +47,8 @@ namespace rmlPlugin
 	{
 		if (m_documentListener)
 		{
-			m_document->RemoveEventListener(Rml::EventId::Mousedown, m_documentListener.get());
-			m_document->RemoveEventListener(Rml::EventId::Mouseup, m_documentListener.get());
-			m_document->RemoveEventListener(Rml::EventId::Mouseout, m_documentListener.get());
+			for (const auto eventId : g_documentEvents)
+				m_document->RemoveEventListener(eventId, m_documentListener.get());
 
 			m_documentListener.reset();
 		}
@@ -54,9 +65,9 @@ namespace rmlPlugin
 
 	bool RmlPluginDocument::selectTabWithElement(const Rml::Element* _element) const
 	{
-		for (auto& it : m_tabGroups)
+		for (const auto& [_, tabGroup] : m_tabGroups)
 		{
-			if (it.second->selectTabWithElement(_element))
+			if (tabGroup->selectTabWithElement(_element))
 				return true;
 		}
 		return false;
@@ -73,10 +84,49 @@ namespace rmlPlugin
 		case Rml::EventId::Mouseup:
 			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Left)
 				setMouseIsDown(false);
+			m_shiftTargetSlider.reset();
 			break;
 		case Rml::EventId::Mouseout:
 			if (_event.GetTargetElement() == m_document)
 				setMouseIsDown(false);
+			break;
+		case Rml::EventId::Keydown:
+		case Rml::EventId::Keyup:
+			m_shiftDown = juceRmlUi::helper::getKeyModShift(_event);
+			break;
+		case Rml::EventId::Mousemove:
+			{
+				const auto mousePos = juceRmlUi::helper::getMousePos(_event);
+				const auto mouseDelta = mousePos - m_mouseDownPos;
+
+				if (m_shiftTargetSlider)
+				{
+					auto& binding = m_context.getParameterBinding();
+
+					if (auto* parameter = binding.getParameterForElement(m_shiftTargetSlider.get()))
+					{
+						bool isVertical = false;
+
+						if (const auto* attrib = m_shiftTargetSlider->GetAttribute("orientation"))
+							isVertical = attrib->Get(m_shiftTargetSlider->GetCoreInstance(), std::string()) == "vertical";
+
+						const auto delta = isVertical ? -mouseDelta.y : mouseDelta.x;
+
+						auto scale = 0.1f;
+
+						if (auto* prop = m_shiftTargetSlider->GetProperty("speedScaleShift"))
+							scale = prop->Get<float>(m_shiftTargetSlider->GetCoreInstance());
+
+						auto current = m_shiftDownParameterStartValue;
+						current += static_cast<int>(delta * scale);
+
+						current = std::clamp(current, parameter->getDescription().range.getStart(), parameter->getDescription().range.getEnd());
+
+						if (current != parameter->getUnnormalizedValue())
+							parameter->setUnnormalizedValueNotifyingHost(current, pluginLib::Parameter::Origin::Ui);
+					}
+				}
+			}
 			break;
 		default:
 			break;
@@ -96,6 +146,25 @@ namespace rmlPlugin
 		return true;
 	}
 
+	void RmlPluginDocument::enableSliderDefaultMouseInputs(Rml::ElementFormControlInput* _input, const bool _enabled)
+	{
+		const auto drag = _enabled ? Rml::Style::Drag::Drag : Rml::Style::Drag::None;
+		const auto pointerEvents = _enabled ? Rml::Style::PointerEvents::Auto : Rml::Style::PointerEvents::None;
+
+		auto enableChild = [_input, drag, pointerEvents](const std::string& _childName)
+		{
+			if (auto* child = juceRmlUi::helper::findChildByTag(_input, _childName, false, true))
+			{
+				child->SetProperty(Rml::PropertyId::PointerEvents, pointerEvents);
+				child->SetProperty(Rml::PropertyId::Drag, drag);
+			}
+		};
+
+		enableChild("sliderbar");
+		enableChild("slidertrack");
+		enableChild("sliderprogress");
+	}
+
 	void RmlPluginDocument::setMouseIsDown(const bool _isDown)
 	{
 		if (m_mouseIsDown == _isDown)
@@ -112,9 +181,8 @@ namespace rmlPlugin
 
 		m_documentListener.reset(new DocumentListener(*this));
 
-		_doc->AddEventListener(Rml::EventId::Mousedown, m_documentListener.get());
-		_doc->AddEventListener(Rml::EventId::Mouseup, m_documentListener.get());
-		_doc->AddEventListener(Rml::EventId::Mouseout, m_documentListener.get());
+		for (const auto eventId : g_documentEvents)
+			_doc->AddEventListener(eventId, m_documentListener.get());
 
 		for (const auto & desc : m_controllerLinkDescs)
 		{
@@ -186,6 +254,44 @@ namespace rmlPlugin
 				{
 					juceRmlUi::ElemKnob::processMouseWheel(*input, _event);
 				});
+
+				// prevent default slider mouse handling when shift is held down
+				juceRmlUi::EventListener::Add(input, Rml::EventId::Mousedown, [this, input](Rml::Event& _event)
+				{
+					if (m_shiftDown)
+					{
+						auto& binding = m_context.getParameterBinding();
+						auto* parameter = binding.getParameterForElement(input);
+						if (parameter)
+						{
+							m_shiftDownParameterStartValue = parameter->getUnnormalizedValue();
+							m_shiftTargetSlider = input->GetObserverPtr(input->GetCoreInstance());
+							m_disabledSliders.insert(input);
+							m_mouseDownPos = juceRmlUi::helper::getMousePos(_event);
+						}
+					}
+					else
+					{
+						m_disabledSliders.erase(input);
+					}
+
+					enableSliderDefaultMouseInputs(input, !m_shiftDown);
+
+					if (m_shiftDown)
+						_event.StopPropagation();
+				}, true);
+
+				juceRmlUi::EventListener::Add(input, Rml::EventId::Mouseout, [this, input](Rml::Event&)
+				{
+					if (m_disabledSliders.erase(input))
+						enableSliderDefaultMouseInputs(input, true);
+				}, true);
+
+				juceRmlUi::EventListener::Add(input, Rml::EventId::Mouseup, [this, input](Rml::Event&)
+				{
+					if (m_disabledSliders.erase(input))
+						enableSliderDefaultMouseInputs(input, true);
+				}, true);
 			}
 		}
 
