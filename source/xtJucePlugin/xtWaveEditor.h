@@ -43,8 +43,8 @@ namespace xtJucePlugin
 		void initialize();
 		void destroy();
 
-		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
-		void onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
+		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const synthLib::SysexBuffer& _msg);
+		void onReceiveTable(const pluginLib::MidiPacket::Data& _data, const synthLib::SysexBuffer& _msg);
 
 		const WaveEditorData& getData() const { return m_data; }
 		WaveEditorData& getData() { return m_data; }
@@ -78,10 +78,10 @@ namespace xtJucePlugin
 
 		void exportAsWav(const std::string& _filename, const std::vector<int8_t>& _data) const;
 
-		void exportToFile(const std::string& _filename, const std::vector<std::vector<uint8_t>>& _sysex, bool _midi) const;
-		void exportToFile(const std::string& _filename, const std::vector<uint8_t>& _sysex, bool _midi) const
+		void exportToFile(const std::string& _filename, const synthLib::SysexBufferList& _sysex, bool _midi) const;
+		void exportToFile(const std::string& _filename, const synthLib::SysexBuffer& _sysex, bool _midi) const
 		{
-			return exportToFile(_filename, std::vector<std::vector<uint8_t>>{ _sysex }, _midi);
+			return exportToFile(_filename, synthLib::SysexBufferList{ _sysex }, _midi);
 		}
 
 		void selectImportFile(const std::function<void(const juce::String&)>& _callback);

@@ -165,7 +165,8 @@ namespace baseLib
 		// tools
 		//
 
-		void toVector(std::vector<uint8_t>& _buffer, const bool _append = false)
+		template<typename Alloc>
+		void toVector(std::vector<uint8_t, Alloc>& _buffer, const bool _append = false)
 		{
 			const auto size = tellp();
 			if(size <= 0)
@@ -233,7 +234,7 @@ namespace baseLib
 			Base::write(reinterpret_cast<const uint8_t*>(_data), sizeof(T) * _size);
 		}
 
-		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void write(const std::vector<T>& _vector)
+		template<typename T, typename Alloc, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void write(const std::vector<T, Alloc>& _vector)
 		{
 			const auto size = static_cast<SizeType>(_vector.size());
 			write(size);
@@ -288,7 +289,7 @@ namespace baseLib
 				Base::read(reinterpret_cast<uint8_t*>(_out), sizeof(T) * _size);
 		}
 
-		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void read(std::vector<T>& _vector)
+		template<typename T, typename Alloc, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void read(std::vector<T, Alloc>& _vector)
 		{
 			const auto size = read<SizeType>();
 			checkFail();

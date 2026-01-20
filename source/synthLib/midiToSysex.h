@@ -4,15 +4,17 @@
 #include <iostream>
 #include <cstdint>
 
+#include "midiTypes.h"
+
 namespace synthLib
 {
 	class MidiToSysex
 	{
 	public:
-		static bool readFile(std::vector<uint8_t>& _sysexMessages, const char* _filename);
-		static void splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src, bool _isMidiFileData = false);
-		static bool extractSysexFromFile(std::vector<std::vector<uint8_t>>& _messages, const std::string& _filename);
-		static bool extractSysexFromData(std::vector<std::vector<uint8_t>>& _messages, const std::vector<uint8_t>& _data);
+		static bool readFile(SysexBuffer& _sysexMessages, const char* _filename);
+		static void splitMultipleSysex(SysexBufferList& _dst, const SysexBuffer& _src, bool _isMidiFileData = false);
+		static bool extractSysexFromFile(SysexBufferList& _messages, const std::string& _filename);
+		static bool extractSysexFromData(SysexBufferList& _messages, const SysexBuffer& _data);
 	private:
 		static bool checkChunk(FILE* hFile, const char* _pCompareChunk);
 		static uint32_t getChunkLength(FILE* hFile);

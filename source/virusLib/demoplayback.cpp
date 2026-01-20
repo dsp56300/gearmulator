@@ -305,7 +305,8 @@ namespace virusLib
 		case EventType::MidiSysex:
 			{
 				std::vector<synthLib::SMidiEvent> responses;
-				m_mc.sendSysex(_event.data, responses, synthLib::MidiEventSource::Internal);
+				synthLib::SysexBuffer sysexData(_event.data.begin(), _event.data.end());
+				m_mc.sendSysex(sysexData, responses, synthLib::MidiEventSource::Internal);
 			}
 			break;
 		case EventType::Midi:

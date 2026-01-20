@@ -198,23 +198,25 @@ namespace virusLib
 	{
 		std::vector<synthLib::SMidiEvent> messages;
 
-		if(parseTIcontrolPreset(messages, _state))
+		const synthLib::SysexBuffer stateBuffer(_state.begin(), _state.end());
+
+		if(parseTIcontrolPreset(messages, stateBuffer))
 			return m_mc->setState(messages);
 
-		std::vector<std::vector<uint8_t>> sysexMessages;
-		synthLib::MidiToSysex::splitMultipleSysex(sysexMessages, _state, false);
+		synthLib::SysexBufferList sysexMessages;
+		synthLib::MidiToSysex::splitMultipleSysex(sysexMessages, stateBuffer, false);
 
 		if(sysexMessages.empty())
 			return false;
 
-		for (const auto& sysexMessage : sysexMessages)
-			messages.emplace_back().sysex = sysexMessage;
+		for (auto& sysexMessage : sysexMessages)
+			messages.emplace_back().sysex = std::move(sysexMessage);
 
 		return m_mc->setState(messages);
 	}
 #endif
 
-	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string_view& _4cc)
+	bool Device::find4CC(uint32_t& _offset, const synthLib::SysexBuffer& _data, const std::string_view& _4cc)
 	{
 		if(_data.size() < (_offset + _4cc.size()))
 			return false;
@@ -238,7 +240,7 @@ namespace virusLib
 		return false;
 	}
 
-	bool Device::parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const std::vector<uint8_t>& _state)
+	bool Device::parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const synthLib::SysexBuffer& _state)
 	{
 		if(_state.size() < 8)
 			return false;
@@ -319,7 +321,7 @@ namespace virusLib
 		return numFound > 0;
 	}
 
-	bool Device::parsePowercorePreset(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data)
+	bool Device::parsePowercorePreset(synthLib::SysexBufferList& _sysexPresets, const synthLib::SysexBuffer& _data)
 	{
 		uint32_t off = 0;
 
@@ -366,7 +368,7 @@ namespace virusLib
 					break;
 
 				// pack into sysex
-				std::vector<uint8_t>& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x10, 0x01, programIndex});
+				synthLib::SysexBuffer& sysex = _sysexPresets.emplace_back(synthLib::SysexBuffer{0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x10, 0x01, programIndex});
 				sysex.insert(sysex.end(), _data.begin() + pos, _data.begin() + pos + presetSize);
 				sysex.push_back(Microcontroller::calcChecksum(sysex));
 				sysex.push_back(0xf7);
@@ -383,7 +385,7 @@ namespace virusLib
 		return numFound > 0;
 	}
 
-	bool Device::parseTDMPreset(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data, const std::string& _filename)
+	bool Device::parseTDMPreset(synthLib::SysexBufferList& _sysexPresets, const synthLib::SysexBuffer& _data, const std::string& _filename)
 	{
 		// search for this string, every ? is a wildcard
 		constexpr auto key = "DigiVrus????vals";
@@ -415,13 +417,13 @@ namespace virusLib
 			if (firstSpacePos != std::string::npos && firstSpacePos < newPresetName.size() - 1)
 				newPresetName = newPresetName.substr(firstSpacePos + 1);
 
-			std::vector<uint8_t> data{_data.begin() + pos, _data.begin() + pos + presetSize};
+			synthLib::SysexBuffer data{_data.begin() + pos, _data.begin() + pos + presetSize};
 
 			for (size_t n = 0; n<10; ++n)
 				data[n + 240] = n < newPresetName.size() ? static_cast<uint8_t>(newPresetName[n]) : ' ';
 
 			// pack into sysex
-			std::vector<uint8_t>& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x10, 0x01, programIndex});
+			synthLib::SysexBuffer& sysex = _sysexPresets.emplace_back(synthLib::SysexBuffer{0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x10, 0x01, programIndex});
 			sysex.insert(sysex.end(), data.begin(), data.end());
 			sysex.push_back(Microcontroller::calcChecksum(sysex));
 			sysex.push_back(0xf7);
@@ -431,7 +433,7 @@ namespace virusLib
 		return false;
 	}
 
-	bool Device::parseVTIBackup(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data)
+	bool Device::parseVTIBackup(synthLib::SysexBufferList& _sysexPresets, const synthLib::SysexBuffer& _data)
 	{
 		if(_data.size() < 512)
 			return false;
@@ -462,7 +464,7 @@ namespace virusLib
 			if(name.empty())
 				break;
 
-			auto& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{
+			auto& sysex = _sysexPresets.emplace_back(synthLib::SysexBuffer{
 				0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, DUMP_SINGLE,
 				static_cast<uint8_t>((presetIdx >> 7) & 0x7f),
 				static_cast<uint8_t>(presetIdx & 0x7f)});

@@ -13,7 +13,7 @@
 
 namespace synthLib
 {
-	bool MidiToSysex::readFile(std::vector<uint8_t>& _sysexMessages, const char* _filename)
+	bool MidiToSysex::readFile(SysexBuffer& _sysexMessages, const char* _filename)
 	{
 		FILE* hFile = baseLib::filesystem::openFile(_filename, "rb");
 
@@ -125,7 +125,7 @@ namespace synthLib
 		return true;
 	}
 
-	void MidiToSysex::splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src, const bool _isMidiFileData/* = false*/)
+	void MidiToSysex::splitMultipleSysex(SysexBufferList& _dst, const SysexBuffer& _src, const bool _isMidiFileData/* = false*/)
 	{
 		if(!_isMidiFileData)
 		{
@@ -176,7 +176,7 @@ namespace synthLib
 				if(_src[j] <= 0xf0)
 					continue;
 
-				std::vector<uint8_t> entry;
+				SysexBuffer entry;
 				entry.reserve(j - jStart + 2);
 				entry.push_back(0xf0);
 				entry.insert(entry.end(), _src.begin() + jStart, _src.begin() + j);
@@ -188,9 +188,9 @@ namespace synthLib
 		}
 	}
 
-	bool MidiToSysex::extractSysexFromFile(std::vector<std::vector<uint8_t>>& _messages, const std::string& _filename)
+	bool MidiToSysex::extractSysexFromFile(SysexBufferList& _messages, const std::string& _filename)
 	{
-		std::vector<uint8_t> data;
+		SysexBuffer data;
 
 		if(!baseLib::filesystem::readFile(data, _filename))
 			return false;
@@ -198,7 +198,7 @@ namespace synthLib
 		return extractSysexFromData(_messages, data);
 	}
 
-	bool MidiToSysex::extractSysexFromData(std::vector<std::vector<uint8_t>>& _messages, const std::vector<uint8_t>& _data)
+	bool MidiToSysex::extractSysexFromData(SysexBufferList& _messages, const SysexBuffer& _data)
 	{
 		constexpr uint8_t midiHeader[] = "MThd";
 		const auto isMidiFile = _data.size() >= 4 && memcmp(_data.data(), midiHeader, 4) == 0;

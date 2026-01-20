@@ -37,6 +37,13 @@ namespace hwLib
 		}
 		virtual void write(const synthLib::SMidiEvent& _e);
 
+		template<typename Alloc>
+		void write(const std::vector<uint8_t, Alloc>& _bytes)
+		{
+			for (const uint8_t byte : _bytes)
+				write(byte);
+		}
+
 		virtual void read(std::vector<uint8_t>& _result);
 
 		void setSysexDelay(const float _seconds, const uint32_t _size);

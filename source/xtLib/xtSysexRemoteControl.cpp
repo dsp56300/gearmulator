@@ -12,7 +12,7 @@ namespace xt
 {
 	enum class ButtonType;
 
-	void SysexRemoteControl::createSysexHeader(std::vector<uint8_t>& _dst, xt::SysexCommand _cmd)
+	void SysexRemoteControl::createSysexHeader(synthLib::SysexBuffer& _dst, xt::SysexCommand _cmd)
 	{
 		constexpr uint8_t devId = 0;
 		_dst.assign({0xf0, wLib::IdWaldorf, IdMw2, devId, static_cast<uint8_t>(_cmd)});
@@ -84,7 +84,7 @@ namespace xt
 		}
 */	}
 
-	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const std::vector<unsigned char>& _input) const
+	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const synthLib::SysexBuffer& _input) const
 	{
 		if(_input.size() < 5)
 			return false;

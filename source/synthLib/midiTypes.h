@@ -3,9 +3,14 @@
 #include <cassert>
 #include <vector>
 #include <cstdint>
+#include <memory_resource>
 
 namespace synthLib
 {
+	// Type alias for sysex buffer - can be changed to use different allocators
+	using SysexBuffer = std::pmr::vector<uint8_t>;
+	using SysexBufferList = std::vector<SysexBuffer>;
+
 	// MIDI status bytes
 	enum MidiStatusByte
 	{
@@ -208,7 +213,7 @@ namespace synthLib
 	struct SMidiEvent
 	{
 		uint8_t a, b, c;
-		std::vector<uint8_t> sysex;
+		SysexBuffer sysex;
 		uint32_t offset;
 		MidiEventSource source;
 

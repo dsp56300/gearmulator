@@ -92,7 +92,7 @@ namespace xt
 
 		void process(uint32_t _numSamples);
 
-		static bool setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name);
+		static bool setSingleName(SysEx& _sysex, const std::string& _name);
 
 		static TableId getWavetableFromSingleDump(const SysEx& _single);
 

@@ -90,8 +90,8 @@ namespace mqLib
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
 
-		static bool setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name);
-		static bool setCategory(std::vector<uint8_t>& _sysex, const std::string& _name);
+		static bool setSingleName(SysEx& _sysex, const std::string& _name);
+		static bool setCategory(SysEx& _sysex, const std::string& _name);
 
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 

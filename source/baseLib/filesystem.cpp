@@ -266,11 +266,6 @@ namespace baseLib::filesystem
         return lowercase(getExtension(_filename)) == lowercase(_extension);
     }
 
-    bool writeFile(const std::string& _filename, const std::vector<uint8_t>& _data)
-    {
-        return writeFile(_filename, _data.data(), _data.size());
-    }
-
     bool writeFile(const std::string& _filename, const uint8_t* _data, size_t _size)
     {
         auto* hFile = openFile(_filename, "wb");

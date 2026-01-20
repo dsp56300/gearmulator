@@ -4,11 +4,9 @@
 #include "mqmiditypes.h"
 #include "microq.h"
 
-#include "synthLib/midiTypes.h"
-
 namespace mqLib
 {
-	void SysexRemoteControl::createSysexHeader(std::vector<uint8_t>& _dst, SysexCommand _cmd)
+	void SysexRemoteControl::createSysexHeader(synthLib::SysexBuffer& _dst, SysexCommand _cmd)
 	{
 		constexpr uint8_t devId = 0;
 		_dst.assign({0xf0, wLib::IdWaldorf, IdMicroQ, devId, static_cast<uint8_t>(_cmd)});
@@ -102,7 +100,7 @@ namespace mqLib
 		response.push_back(0xf7);
 	}
 
-	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const std::vector<unsigned char>& _input) const
+	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const synthLib::SysexBuffer& _input) const
 	{
 		if(_input.size() < 5)
 			return false;

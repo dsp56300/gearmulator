@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "synthLib/midiTypes.h"
+
 namespace wLib
 {
 	class ROM
@@ -28,7 +30,7 @@ namespace wLib
 		static bool loadFromMidi(std::vector<uint8_t>& _buffer, const std::string& _filename);
 		static bool loadFromMidiData(std::vector<uint8_t>& _buffer, const std::vector<uint8_t>& _midiData);
 		static bool loadFromSysExFile(std::vector<uint8_t>& _buffer, const std::string& _filename);
-		static bool loadFromSysExBuffer(std::vector<uint8_t> &_buffer, const std::vector<uint8_t> &_sysex, bool _isMidiFileData = false);
+		static bool loadFromSysExBuffer(std::vector<uint8_t> &_buffer, const synthLib::SysexBuffer &_sysex, bool _isMidiFileData = false);
 
 	private:
 		bool loadFromFile(const std::string& _filename, uint32_t _expectedSize);

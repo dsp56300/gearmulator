@@ -8,7 +8,7 @@ namespace virusLib
 {
 	bool MidiFileToRomData::load(const std::string& _filename)
 	{
-		std::vector<uint8_t> sysex;
+		synthLib::SysexBuffer sysex;
 
 		if(!synthLib::MidiToSysex::readFile(sysex, _filename.c_str()))
 			return false;
@@ -16,11 +16,17 @@ namespace virusLib
 		return load(sysex);
 	}
 
-	bool MidiFileToRomData::load(const std::vector<uint8_t>& _fileData, bool _isMidiFileData/* = false*/)
+	bool MidiFileToRomData::load(const std::vector<uint8_t>& _fileData, const bool _isMidiFileData/* = false*/)
 	{
-		std::vector<std::vector<uint8_t>> packets;
+		const synthLib::SysexBuffer sysexData(_fileData.begin(), _fileData.end());
+		return load(sysexData, _isMidiFileData);
+	}
 
-		synthLib::MidiToSysex::splitMultipleSysex(packets, _fileData, _isMidiFileData);
+	bool MidiFileToRomData::load(const synthLib::SysexBuffer& _sysexData, bool _isMidiFileData)
+	{
+		synthLib::SysexBufferList packets;
+
+		synthLib::MidiToSysex::splitMultipleSysex(packets, _sysexData, _isMidiFileData);
 
 		return add(packets);
 	}

@@ -258,7 +258,7 @@ namespace jeJucePlugin
 		return getParameter("PanelSelect", 0)->getUnnormalizedValue() == 2;
 	}
 
-	bool Controller::requestPatchForPart(std::vector<uint8_t>& _data, const uint32_t _part, const uint64_t _userData) const
+	bool Controller::requestPatchForPart(synthLib::SysexBuffer& _data, const uint32_t _part, const uint64_t _userData) const
 	{
 		std::vector<synthLib::SMidiEvent> results;
 
@@ -333,7 +333,7 @@ namespace jeJucePlugin
 
 		const auto part = _type == PatchType::PartUpper ? 0 : 1;
 
-		std::vector<uint8_t> data;
+		synthLib::SysexBuffer data;
 		if (!requestPatchForPart(data, part, part))
 			return false;
 
@@ -546,7 +546,7 @@ namespace jeJucePlugin
 	bool Controller::sendSingle(const pluginLib::SysEx& _sysex, uint32_t _part) const
 	{
 		// patches consist of multiple sysex messages, split them up again
-		std::vector<std::vector<uint8_t>> sysex;
+		synthLib::SysexBufferList sysex;
 		synthLib::MidiToSysex::splitMultipleSysex(sysex, _sysex);
 
 		if (sysex.empty())

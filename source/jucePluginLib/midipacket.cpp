@@ -61,7 +61,7 @@ namespace pluginLib
 		m_numDifferentPartsUsedInParameters = static_cast<uint32_t>(usedParts.size());
 	}
 
-	bool MidiPacket::create(std::vector<uint8_t>& _dst, const Data& _data, const NamedParamValues& _paramValues) const
+	bool MidiPacket::create(synthLib::SysexBuffer& _dst, const Data& _data, const NamedParamValues& _paramValues) const
 	{
 		_dst.assign(size(), 0);
 
@@ -127,7 +127,7 @@ namespace pluginLib
 		return true;
 	}
 
-	bool MidiPacket::create(std::vector<uint8_t>& _dst, const Data& _data) const
+	bool MidiPacket::create(synthLib::SysexBuffer& _dst, const Data& _data) const
 	{
 		return create(_dst, _data, {});
 	}

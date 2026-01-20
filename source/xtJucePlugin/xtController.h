@@ -53,7 +53,7 @@ namespace xtJucePlugin
 		struct Patch
 		{
 			std::string name;
-			std::vector<uint8_t> data;
+			synthLib::SysexBuffer data;
 		};
 
 		baseLib::Event<bool> onPlayModeChanged;
@@ -62,8 +62,8 @@ namespace xtJucePlugin
 		Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 		~Controller() override;
 
-		bool sendSingle(const std::vector<uint8_t>& _sysex);
-		bool sendSingle(const std::vector<uint8_t>& _sysex, uint8_t _part);
+		bool sendSingle(const synthLib::SysexBuffer& _sysex);
+		bool sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
 
 		bool sendSysEx(MidiPacketType _type) const;
 		bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
@@ -75,9 +75,9 @@ namespace xtJucePlugin
 		void selectNextPreset();
 		void selectPrevPreset();
 
-		std::vector<uint8_t> createSingleDump(xt::LocationH _buffer, uint8_t _location, uint8_t _part) const;
-		std::vector<uint8_t> createSingleDump(xt::LocationH _buffer, uint8_t _location, const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
-		bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const std::vector<uint8_t>& _sysex) const;
+		synthLib::SysexBuffer createSingleDump(xt::LocationH _buffer, uint8_t _location, uint8_t _part) const;
+		synthLib::SysexBuffer createSingleDump(xt::LocationH _buffer, uint8_t _location, const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
+		bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const synthLib::SysexBuffer& _sysex) const;
 
 		std::string getSingleName(uint8_t _part) const;
 		std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;

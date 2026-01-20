@@ -45,7 +45,7 @@ namespace synthLib
 		void flushEvent();
 
 		std::vector<synthLib::SMidiEvent> m_midiEvents;
-		std::vector<uint8_t> m_sysexBuffer;
+		SysexBuffer m_sysexBuffer;
 		synthLib::SMidiEvent m_pendingEvent;
 		uint32_t m_pendingEventLen = 0;
 		bool m_sysex = false;

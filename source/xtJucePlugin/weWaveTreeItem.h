@@ -5,6 +5,8 @@
 
 #include "baseLib/event.h"
 
+#include "synthLib/midiTypes.h"
+
 namespace juce
 {
 	class StringArray;
@@ -55,7 +57,7 @@ namespace xtJucePlugin
 		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
 		void dropFiles(const std::vector<std::string>& _files) const;
 
-		static std::vector<std::vector<uint8_t>> getSysexFromFiles(const std::vector<std::string>& _files);
+		static synthLib::SysexBufferList getSysexFromFiles(const std::vector<std::string>& _files);
 
 		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 
