@@ -145,6 +145,8 @@ namespace juceRmlUi
 		bool setVisible(Rml::Element* _element, bool _visible);
 		void setEnabled(Rml::Element* _element, bool _enabled);
 
+		bool isVisible(Rml::Element* _element);
+
 		Rml::Element* createTemplate(const std::string& _templateName, Rml::Element* _parent);
 	}
 }

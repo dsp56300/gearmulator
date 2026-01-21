@@ -19,6 +19,7 @@ set(SOURCES
 	settingsCategories.cpp settingsCategories.h
 	settingsCategory.cpp settingsCategory.h
 	settingsDspAudio.cpp settingsDspAudio.h
+	settingsDspBridge.cpp settingsDspBridge.h
 	settingsGui.cpp settingsGui.h
 	settingsMidi.cpp settingsMidi.h
 	settingsMidiMatrix.cpp settingsMidiMatrix.h

@@ -21,20 +21,22 @@ namespace juceRmlUi
 
 		void OnDetach(Rml::Element*) override;
 
-		static void Add(Rml::Element* _element, const Rml::EventId _event, const std::function<void(Rml::Event&)>& _callback, const bool _inCapturePhase = false)
+		static EventListener* Add(Rml::Element* _element, const Rml::EventId _event, const std::function<void(Rml::Event&)>& _callback, const bool _inCapturePhase = false)
 		{
-			new EventListener(_element, _event, _callback, _inCapturePhase);
+			return new EventListener(_element, _event, _callback, _inCapturePhase);
 		}
 
-		static void Add(const Rml::ElementPtr& _element, const Rml::EventId _event, const std::function<void(Rml::Event&)>& _callback, const bool _inCapturePhase = false)
+		static EventListener* Add(const Rml::ElementPtr& _element, const Rml::EventId _event, const std::function<void(Rml::Event&)>& _callback, const bool _inCapturePhase = false)
 		{
-			Add(_element.get(), _event, _callback, _inCapturePhase);
+			return Add(_element.get(), _event, _callback, _inCapturePhase);
 		}
 
-		static void AddClick(Rml::Element* _element, const std::function<void()>& _callback)
+		static EventListener* AddClick(Rml::Element* _element, const std::function<void()>& _callback)
 		{
-			Add(_element, Rml::EventId::Click, [_callback](Rml::Event& _event) { _callback(); });
+			return Add(_element, Rml::EventId::Click, [_callback](Rml::Event& _event) { _callback(); });
 		}
+
+		void Remove();
 
 	private:
 		Rml::Element* m_element;

@@ -5,6 +5,7 @@
 	<link type="text/template" href="tus_settings_skin.rml"/>
 	<link type="text/template" href="tus_settings_gui.rml"/>
 	<link type="text/template" href="tus_settings_dspaudio.rml"/>
+	<link type="text/template" href="tus_settings_dspbridge.rml"/>
 </head>
 <body>
 	<div class="settings-parent">

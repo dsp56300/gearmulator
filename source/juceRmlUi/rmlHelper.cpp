@@ -520,6 +520,14 @@ namespace juceRmlUi
 			}
 		}
 
+		bool isVisible(Rml::Element* _element)
+		{
+			auto* prop = _element->GetProperty(Rml::PropertyId::Display);
+			if (prop && prop->Get<Rml::Style::Display>(_element->GetCoreInstance()) == Rml::Style::Display::None)
+				return false;
+			return true;
+		}
+
 		Rml::Element* createTemplate(const std::string& _templateName, Rml::Element* _parent)
 		{
 			auto* t = _parent->GetCoreInstance().template_cache->GetTemplate(_templateName);

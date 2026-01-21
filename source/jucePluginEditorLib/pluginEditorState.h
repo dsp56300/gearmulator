@@ -91,6 +91,8 @@ namespace jucePluginEditorLib
 
 		Editor* getEditor() const;
 
+		bridgeClient::ServerList* getRemoteServerList() const { return m_remoteServerList.get(); }
+
 	protected:
 		virtual Editor* createEditor(const Skin& _skin) = 0;
 

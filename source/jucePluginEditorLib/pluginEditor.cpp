@@ -4,6 +4,7 @@
 
 #include "settings.h"
 #include "settingsDspAudio.h"
+#include "settingsDspBridge.h"
 #include "settingsGui.h"
 #include "settingsMidi.h"
 #include "settingsSkin.h"
@@ -679,8 +680,9 @@ namespace jucePluginEditorLib
 	{
 		_plugins.push_back(std::make_unique<SettingsSkin>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsGui>(getProcessor()));
-		_plugins.push_back(std::make_unique<SettingsDspAudio>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsMidi>(getProcessor()));
+		_plugins.push_back(std::make_unique<SettingsDspAudio>(getProcessor()));
+		_plugins.push_back(std::make_unique<SettingsDspBridge>(getProcessor()));
 	}
 
 	juce::Component* Editor::createRmlUiComponent(const std::string& _rmlFile)
