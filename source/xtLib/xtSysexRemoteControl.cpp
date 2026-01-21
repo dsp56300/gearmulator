@@ -12,16 +12,16 @@ namespace xt
 {
 	enum class ButtonType;
 
-	void SysexRemoteControl::createSysexHeader(synthLib::SysexBuffer& _dst, xt::SysexCommand _cmd)
+	SysexRemoteControl::SysexRemoteControl(Xt& _xt)
+	: wLib::SysexRemoteControl(IdMw2)
+	, m_xt(_xt)
 	{
-		constexpr uint8_t devId = 0;
-		_dst.assign({0xf0, wLib::IdWaldorf, IdMw2, devId, static_cast<uint8_t>(_cmd)});
 	}
 
 	void SysexRemoteControl::sendSysexLCD(std::vector<synthLib::SMidiEvent>& _dst) const
 	{
 		std::array<char, 80> lcdData{};
-		m_mq.readLCD(lcdData);
+		m_xt.readLCD(lcdData);
 
 		synthLib::SMidiEvent ev(synthLib::MidiEventSource::Internal);
 		createSysexHeader(ev.sysex, SysexCommand::EmuLCD);
@@ -37,7 +37,7 @@ namespace xt
 		uint32_t buttons = 0;
 		for(uint32_t i=0; i<static_cast<uint32_t>(ButtonType::Count); ++i)
 		{
-			if(m_mq.getButton(static_cast<ButtonType>(i)))
+			if(m_xt.getButton(static_cast<ButtonType>(i)))
 				buttons |= (1<<i);
 		}
 
@@ -57,7 +57,7 @@ namespace xt
 		uint32_t leds = 0;
 		for(uint32_t i=0; i<static_cast<uint32_t>(LedType::Count); ++i)
 		{
-			if(m_mq.getLedState(static_cast<LedType>(i)))
+			if(m_xt.getLedState(static_cast<LedType>(i)))
 				leds |= (1<<i);
 		}
 		auto& ev = _dst.emplace_back(synthLib::MidiEventSource::Internal);
@@ -84,12 +84,9 @@ namespace xt
 		}
 */	}
 
-	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const synthLib::SysexBuffer& _input) const
+	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const synthLib::SysexBuffer& _input)
 	{
-		if(_input.size() < 5)
-			return false;
-
-		if(_input[1] != wLib::IdWaldorf || _input[2] != IdMw2)
+		if(!validateWaldorfSysex(_input))
 			return false;
 
 		const auto cmd = _input[4];
@@ -105,7 +102,7 @@ namespace xt
 				{
 					const auto button = static_cast<ButtonType>(_input[5]);
 					const auto state = _input[6];
-					m_mq.getHardware()->getUC().setButton(button, state != 0);
+					m_xt.getHardware()->getUC().setButton(button, state != 0);
 				}
 				else
 				{
