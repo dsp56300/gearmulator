@@ -16,8 +16,6 @@
 
 #include "RmlUi/Core/ElementDocument.h"
 
-#include "synthLib/os.h"
-
 namespace
 {
 	bridgeLib::PluginDesc getPluginDesc(const pluginLib::Processor& _p)
@@ -341,63 +339,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 	scaleMenu.addEntry("250%", scale == 250, [this] { setGuiScale(250); });
 	scaleMenu.addEntry("300%", scale == 300, [this] { setGuiScale(300); });
 
-	auto adjustLatency = [this](const int _blocks)
-	{
-		m_processor.setLatencyBlocks(_blocks);
-
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Warning",
-			"Most hosts cannot handle if a plugin changes its latency while being in use.\n"
-			"It is advised to save, close & reopen the project to prevent synchronization issues.");
-	};
-
-	const auto latency = m_processor.getPlugin().getLatencyBlocks();
-	juceRmlUi::Menu latencyMenu;
-	latencyMenu.addEntry("0 (DAW will report proper CPU usage)", latency == 0, [this, adjustLatency] { adjustLatency(0); });
-	latencyMenu.addEntry("1 (default)", latency == 1, [this, adjustLatency] { adjustLatency(1); });
-	latencyMenu.addEntry("2", latency == 2, [this, adjustLatency] { adjustLatency(2); });
-	latencyMenu.addEntry("4", latency == 4, [this, adjustLatency] { adjustLatency(4); });
-	latencyMenu.addEntry("8", latency == 8, [this, adjustLatency] { adjustLatency(8); });
-
 	menu.addSubMenu("GUI Scale", std::move(scaleMenu));
-	menu.addSubMenu("Latency (blocks)", std::move(latencyMenu));
-
-	if (m_remoteServerList)
-	{
-		auto servers = m_remoteServerList->getEntries();
-
-		juceRmlUi::Menu deviceTypeMenu;
-		deviceTypeMenu.addEntry("Local (default)", m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
-
-		if(servers.empty())
-		{
-			deviceTypeMenu.addEntry("- no servers found -", false, false, [this] {});
-		}
-		else
-		{
-			for (const auto & server : servers)
-			{
-				if(server.err.code == bridgeLib::ErrorCode::Ok)
-				{
-					std::string name = server.host + ':' + std::to_string(server.serverInfo.portTcp);
-
-					const auto isSelected = m_processor.getDeviceType() == pluginLib::DeviceType::Remote && 
-						m_processor.getRemoteDeviceHost() == server.host && 
-						m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
-
-					deviceTypeMenu.addEntry(name, isSelected, [this, server]
-					{
-						m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
-					});
-				}
-				else
-				{
-					std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
-					deviceTypeMenu.addEntry(name, false, false, [this] {});
-				}
-			}
-		}
-		menu.addSubMenu("Device Type", std::move(deviceTypeMenu));
-	}
 
 	menu.addSeparator();
 
