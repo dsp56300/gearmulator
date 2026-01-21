@@ -19,22 +19,7 @@ namespace virus
 
 	void VirusEditorState::initContextMenu(juceRmlUi::Menu& _menu)
 	{
-		jucePluginEditorLib::PluginEditorState::initContextMenu(_menu);
-		auto& p = m_processor;
-
-		{
-			juceRmlUi::Menu gainMenu;
-
-			const auto gain = m_processor.getOutputGain();
-
-			gainMenu.addEntry("-12 dB", true, gain == 0.25f, [&p] { p.setOutputGain(0.25f); });
-			gainMenu.addEntry("-6 dB", true, gain == 0.5f, [&p] { p.setOutputGain(0.5f); });
-			gainMenu.addEntry("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
-			gainMenu.addEntry("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
-			gainMenu.addEntry("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
-
-			_menu.addSubMenu("Output Gain", std::move(gainMenu));
-		}
+		PluginEditorState::initContextMenu(_menu);
 
 		if(const auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(getEditor()))
 		{

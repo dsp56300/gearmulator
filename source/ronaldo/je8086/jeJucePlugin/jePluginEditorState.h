@@ -15,7 +15,6 @@ namespace jeJucePlugin
 	{
 	public:
 		explicit PluginEditorState(AudioPluginAudioProcessor& _processor);
-		void initContextMenu(juceRmlUi::Menu& _menu) override;
 
 	private:
 		jucePluginEditorLib::Editor* createEditor(const jucePluginEditorLib::Skin& _skin) override;
