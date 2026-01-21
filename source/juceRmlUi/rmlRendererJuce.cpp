@@ -1018,6 +1018,8 @@ namespace juceRmlUi
 
 	void RendererJuce::ReleaseTexture(const Rml::TextureHandle _texture)
 	{
+		if (!_texture)
+			return;
 		auto* img = reinterpret_cast<Image*>(_texture);
 		img->clearMip();
 		m_imagePool[img->getSizeKey()].emplace_back(img);
