@@ -6,7 +6,7 @@
 	<div class="settings-page">
 		<h1>DSP Bridge</h1>
 		<settingsspacer1/>
-		<h1>Device Type</h1>
+		<h3>Device Type</h3>
 		<settingsspacer1/>
 		<table id="deviceTypeTable" class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
 			<tr class="settings-tr" id="deviceTypeEntry">

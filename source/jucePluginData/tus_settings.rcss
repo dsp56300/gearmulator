@@ -154,3 +154,17 @@ settingsspacer1 {
 	align-items: center;
 	gap: 0.5em;
 }
+
+.settings-slider-h {
+	width: 20em; 
+	height: 2em;
+	background-color: #7775;
+	border-radius: 1em;
+}
+
+.settings-slider-h sliderbar {
+	width: 2em; 
+	height: 2em;
+	background-color: #000a;
+	border-radius: 1em;
+}

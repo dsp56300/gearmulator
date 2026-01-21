@@ -4,7 +4,7 @@
 </head>
 <body>
 	<div class="settings-page">
-		<h1>GUI</h1>
+		<h1>Renderer</h1>
 		<settingsspacer1/>
 		By default, OpenGL is used for rendering. If you encounter issues, enable this option to force software rendering instead.
 		<settingsspacer1/>
@@ -12,7 +12,7 @@
 			<button id="button" class="settings-checkbox"/>
 			<label>Force Software Rendering</label>
 		</div>
-		<settingsspacer2/>
+		<settingsspacer1/>
 		<h1>GUI Scale</h1>
 		<settingsspacer1/>
 		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
