@@ -79,8 +79,8 @@ namespace jucePluginEditorLib
 		{
 			// Initialize slider with current gain value (convert to dB)
 			const float currentGain = m_processor.getOutputGain();
-			const float currentDb = gainToDb(currentGain);
-			sliderGain->SetAttribute("value", std::to_string(std::round(currentDb)));
+			const float currentDb = std::round(gainToDb(currentGain));
+			sliderGain->SetAttribute("value", std::to_string(currentDb));
 			labelGain->SetInnerRML(Rml::StringUtilities::EncodeRml(formatDbLabel(currentDb)));
 
 			// Add change event listener
