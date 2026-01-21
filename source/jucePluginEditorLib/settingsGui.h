@@ -2,6 +2,11 @@
 
 #include "settingsPlugin.h"
 
+namespace juceRmlUi
+{
+	class ElemButton;
+}
+
 namespace jucePluginEditorLib
 {
 	class Processor;
@@ -15,6 +20,11 @@ namespace jucePluginEditorLib
 		std::string getTemplateName() const override { return "tus_settings_gui"; }
 
 		void createUi(Rml::Element* _root) override;
+
 	private:
+		int getCurrentScale() const;
+		void updateButtons() const;
+
+		std::vector<std::pair<int,juceRmlUi::ElemButton*>> m_scaleButtons;
 	};
 }

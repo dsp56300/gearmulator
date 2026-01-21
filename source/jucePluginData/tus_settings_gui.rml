@@ -12,6 +12,89 @@
 			<button id="button" class="settings-checkbox"/>
 			<label>Force Software Rendering</label>
 		</div>
+		<settingsspacer2/>
+		<h1>GUI Scale</h1>
+		<settingsspacer1/>
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btScale50" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>50%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale65" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>65%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale75" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>75%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale85" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>85%</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btScale100" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>100%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale125" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>125%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale150" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>150%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale175" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>175%</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btScale200" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>200%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale250" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>250%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale300" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>300%</label>
+					</div>
+				</td>
+				<td class="settings-td">
+					<div id="btScale400" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>400%</label>
+					</div>
+				</td>
+			</tr>
+		</table>
 	</div>
 </body>
 </template>
