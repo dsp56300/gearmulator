@@ -7,15 +7,15 @@
 #include "xtTypes.h"
 #include "xtUc.h"
 
+#include "wLib/wState.h"
+
 namespace xt
 {
-	using SysEx = std::vector<uint8_t>;
-
 	class RomWaves
 	{
 	public:
 		RomWaves(XtUc& _uc) : m_uc(_uc) {}
-		bool receiveSysEx(std::vector<SysEx>& _results, const SysEx& _data) const;
+		bool receiveSysEx(wLib::Responses& _results, const wLib::SysEx& _data) const;
 
 	private:
 		bool writeToRom(WaveId _id, const WaveData& _waveData) const;

@@ -209,8 +209,9 @@ namespace n2x
 
 	bool State::setState(const std::vector<uint8_t>& _state)
 	{
-		std::vector<std::vector<uint8_t>> msgs;
-		synthLib::MidiToSysex::splitMultipleSysex(msgs, _state);
+		synthLib::SysexBuffer stateBuf(_state.begin(), _state.end());
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, stateBuf);
 
 		for (auto& msg : msgs)
 			receive(msg, synthLib::MidiEventSource::Host);
@@ -328,7 +329,7 @@ namespace n2x
 		return false;
 	}
 
-	bool State::receive(const std::vector<uint8_t>& _data, synthLib::MidiEventSource _source)
+	bool State::receive(const synthLib::SysexBuffer& _data, synthLib::MidiEventSource _source)
 	{
 		synthLib::SMidiEvent e;
 		e.sysex = _data;
@@ -502,7 +503,7 @@ namespace n2x
 		return res;
 	}
 
-	std::vector<uint8_t> State::createKnobSysex(KnobType _type, uint8_t _value)
+	synthLib::SysexBuffer State::createKnobSysex(KnobType _type, uint8_t _value)
 	{
 		return {0xf0, IdClavia, DefaultDeviceId, IdN2X,
 			EmuSetPotPosition,
@@ -513,7 +514,7 @@ namespace n2x
 		};
 	}
 
-	bool State::parseKnobSysex(KnobType& _type, uint8_t& _value, const std::vector<uint8_t>& _sysex)
+	bool State::parseKnobSysex(KnobType& _type, uint8_t& _value, const synthLib::SysexBuffer& _sysex)
 	{
 		if(_sysex.size() <= SysexIndex::IdxKnobPosL)
 			return false;
@@ -535,35 +536,35 @@ namespace n2x
 		return true;
 	}
 
-	bool State::isSingleDump(const std::vector<uint8_t>& _dump)
+	bool State::isSingleDump(const synthLib::SysexBuffer& _dump)
 	{
 		return _dump.size() == g_singleDumpSize || _dump.size() == g_singleDumpWithNameSize;
 	}
 
-	bool State::isMultiDump(const std::vector<uint8_t>& _dump)
+	bool State::isMultiDump(const synthLib::SysexBuffer& _dump)
 	{
 		return _dump.size() == g_multiDumpSize || _dump.size() == g_multiDumpWithNameSize;
 	}
 
-	std::string State::extractPatchName(const std::vector<uint8_t>& _dump)
+	std::string State::extractPatchName(const synthLib::SysexBuffer& _dump)
 	{
-		if(!isDumpWithPatchName(_dump))
+		if (!isDumpWithPatchName(_dump))
 			return {};
 		auto* begin = &_dump[_dump.size() - g_nameLength - 1];
-		if(*begin == 0xf7)
+		if (*begin == 0xf7)
 			return {};
 		std::string name(reinterpret_cast<const char*>(begin), g_nameLength);
 		return name;
 	}
 
-	bool State::isDumpWithPatchName(const std::vector<uint8_t>& _dump)
+	bool State::isDumpWithPatchName(const synthLib::SysexBuffer& _dump)
 	{
 		return _dump.size() == g_singleDumpWithNameSize || _dump.size() == g_multiDumpWithNameSize;
 	}
 
-	std::vector<uint8_t> State::stripPatchName(const std::vector<uint8_t>& _dump)
+	synthLib::SysexBuffer State::stripPatchName(const synthLib::SysexBuffer& _dump)
 	{
-		if(!isDumpWithPatchName(_dump))
+		if (!isDumpWithPatchName(_dump))
 			return _dump;
 		auto d = _dump;
 		d.erase(d.end() - g_nameLength - 1, d.end() - 1);
@@ -572,27 +573,27 @@ namespace n2x
 		return d;
 	}
 
-	bool State::isValidPatchName(const std::vector<uint8_t>& _dump)
+	bool State::isValidPatchName(const synthLib::SysexBuffer& _dump)
 	{
-		if(!isDumpWithPatchName(_dump))
+		if (!isDumpWithPatchName(_dump))
 			return false;
 
-		if(_dump.back() != 0xf7)
+		if (_dump.back() != 0xf7)
 			return false;
 
 		const auto nameStart = _dump.size() - g_nameLength - 1;
 
-		for(size_t i=nameStart; i<nameStart+g_nameLength; ++i)
+		for (size_t i = nameStart; i < nameStart + g_nameLength; ++i)
 		{
-			if(_dump[i] < 32 || _dump[i] >= 128)
+			if (_dump[i] < 32 || _dump[i] >= 128)
 				return false;
 		}
 		return true;
 	}
 
-	std::vector<uint8_t> State::validateDump(const std::vector<uint8_t>& _dump)
+	synthLib::SysexBuffer State::validateDump(const synthLib::SysexBuffer& _dump)
 	{
-		if(!isValidPatchName(_dump))
+		if (!isValidPatchName(_dump))
 			return stripPatchName(_dump);
 		return _dump;
 	}

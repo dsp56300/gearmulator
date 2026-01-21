@@ -47,7 +47,7 @@ namespace jeJucePlugin
 		bool isLowerSelected() const;
 		bool isBothSelected() const;
 
-		bool requestPatchForPart(std::vector<uint8_t>& _data, uint32_t _part, uint64_t _userData) const;
+		bool requestPatchForPart(synthLib::SysexBuffer& _data, uint32_t _part, uint64_t _userData) const;
 
 		const std::string& getPatchName(PatchType _type) const { return m_patchNames[static_cast<size_t>(_type)]; }
 

@@ -37,7 +37,7 @@ namespace n2x
 			return receive(responses, _ev);
 		}
 		bool receive(std::vector<synthLib::SMidiEvent>& _responses, const synthLib::SMidiEvent& _ev);
-		bool receive(const std::vector<uint8_t>& _data, synthLib::MidiEventSource _source);
+		bool receive(const synthLib::SysexBuffer& _data, synthLib::MidiEventSource _source);
 
 		bool receiveNonSysex(const synthLib::SMidiEvent& _ev);
 
@@ -135,19 +135,19 @@ namespace n2x
 			_dump[_off+1] = _value >> 4;
 		}
 
-		static std::vector<uint8_t> createKnobSysex(KnobType _type, uint8_t _value);
-		static bool parseKnobSysex(KnobType& _type, uint8_t& _value, const std::vector<uint8_t>& _sysex);
+		static synthLib::SysexBuffer createKnobSysex(KnobType _type, uint8_t _value);
+		static bool parseKnobSysex(KnobType& _type, uint8_t& _value, const synthLib::SysexBuffer& _sysex);
 
 		bool getKnobState(uint8_t& _result, KnobType _type) const;
 
-		static bool isSingleDump(const std::vector<uint8_t>& _dump);
-		static bool isMultiDump(const std::vector<uint8_t>& _dump);
+		static bool isSingleDump(const synthLib::SysexBuffer& _dump);
+		static bool isMultiDump(const synthLib::SysexBuffer& _dump);
 
-		static std::string extractPatchName(const std::vector<uint8_t>& _dump);
-		static bool isDumpWithPatchName(const std::vector<uint8_t>& _dump);
-		static std::vector<uint8_t> stripPatchName(const std::vector<uint8_t>& _dump);
-		static bool isValidPatchName(const std::vector<uint8_t>& _dump);
-		static std::vector<uint8_t> validateDump(const std::vector<uint8_t>& _dump);
+		static std::string extractPatchName(const synthLib::SysexBuffer& _dump);
+		static bool isDumpWithPatchName(const synthLib::SysexBuffer& _dump);
+		static synthLib::SysexBuffer stripPatchName(const synthLib::SysexBuffer& _dump);
+		static bool isValidPatchName(const synthLib::SysexBuffer& _dump);
+		static synthLib::SysexBuffer validateDump(const synthLib::SysexBuffer& _dump);
 
 		static synthLib::SMidiEvent& createPartCC(uint8_t _part, synthLib::SMidiEvent& _ccEvent);
 

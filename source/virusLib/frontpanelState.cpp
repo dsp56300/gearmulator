@@ -48,7 +48,7 @@ namespace virusLib
 		_target = (normalized - _minimumValue) * floatRangeInv;
 	}
 
-	void writeFloat(std::vector<uint8_t>& _sysex, const float _v)
+	void writeFloat(synthLib::SysexBuffer& _sysex, const float _v)
 	{
 		const auto* ptr = reinterpret_cast<const uint8_t*>(&_v);
 		for(size_t i=0; i<sizeof(_v); ++i)
@@ -93,7 +93,7 @@ namespace virusLib
 		return fromMidiEvent(_e.sysex);
 	}
 
-	bool FrontpanelState::fromMidiEvent(const std::vector<uint8_t>& _sysex)
+	bool FrontpanelState::fromMidiEvent(const synthLib::SysexBuffer& _sysex)
 	{
 		if(_sysex.size() < g_midiDumpHeader.size())
 			return false;

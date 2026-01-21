@@ -4,6 +4,8 @@
 
 #include "xtLib/xtLeds.h"
 
+#include "synthLib/midiTypes.h"
+
 namespace juceRmlUi
 {
 	class ElemButton;
@@ -21,7 +23,7 @@ namespace xtJucePlugin
 		explicit FrontPanel(const Editor& _editor, Controller& _controller);
 		~FrontPanel();
 
-		void processSysex(const std::vector<uint8_t>& _msg) const;
+		void processSysex(const synthLib::SysexBuffer& _msg) const;
 
 		XtLcd* getLcd() const
 		{
@@ -29,8 +31,8 @@ namespace xtJucePlugin
 		}
 
 	private:
-		void processLCDUpdate(const std::vector<uint8_t>& _msg) const;
-		void processLedUpdate(const std::vector<uint8_t>& _msg) const;
+		void processLCDUpdate(const synthLib::SysexBuffer& _msg) const;
+		void processLedUpdate(const synthLib::SysexBuffer& _msg) const;
 
 		std::array<juceRmlUi::ElemButton*, static_cast<uint32_t>(xt::LedType::Count)> m_leds{};
 

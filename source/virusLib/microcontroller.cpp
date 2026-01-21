@@ -499,7 +499,7 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/
 	return true;
 }
 
-bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<SMidiEvent>& _responses, const MidiEventSource _source)
+bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<SMidiEvent>& _responses, const MidiEventSource _source)
 {
 	if (_data.size() < 7)
 		return true;	// invalid sysex or not directed to us
@@ -1256,7 +1256,7 @@ PresetVersion Microcontroller::getPresetVersion(const uint8_t v)
 	return A;
 }
 
-uint8_t Microcontroller::calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset, const size_t _count/* = std::numeric_limits<size_t>::max()*/)
+uint8_t Microcontroller::calcChecksum(const synthLib::SysexBuffer& _data, const size_t _offset, const size_t _count/* = std::numeric_limits<size_t>::max()*/)
 {
 	uint8_t cs = 0;
 

@@ -44,7 +44,7 @@ namespace xtJucePlugin
 		m_lcd.reset();
 	}
 
-	void FrontPanel::processSysex(const std::vector<uint8_t>& _msg) const
+	void FrontPanel::processSysex(const synthLib::SysexBuffer& _msg) const
 	{
 		if(_msg.size() < 5)
 			return;
@@ -66,7 +66,7 @@ namespace xtJucePlugin
 		}
 	}
 
-	void FrontPanel::processLCDUpdate(const std::vector<uint8_t>& _msg) const
+	void FrontPanel::processLCDUpdate(const synthLib::SysexBuffer& _msg) const
 	{
 		const auto* data = &_msg[5];
 
@@ -78,7 +78,7 @@ namespace xtJucePlugin
 		m_lcd->setText(d);
 	}
 
-	void FrontPanel::processLedUpdate(const std::vector<uint8_t>& _msg) const
+	void FrontPanel::processLedUpdate(const synthLib::SysexBuffer& _msg) const
 	{
 		const uint32_t leds = 
 			(static_cast<uint32_t>(_msg[5]) << 24) |

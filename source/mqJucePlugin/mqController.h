@@ -43,7 +43,7 @@ namespace mqJucePlugin
 	    struct Patch
 	    {
 	        std::string name;
-			std::vector<uint8_t> data;
+			synthLib::SysexBuffer data;
 	    };
 
 		baseLib::Event<bool> onPlayModeChanged;
@@ -53,8 +53,8 @@ namespace mqJucePlugin
 		~Controller() override;
 
 	    void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
-	    void sendSingle(const std::vector<uint8_t>& _sysex);
-	    void sendSingle(const std::vector<uint8_t>& _sysex, uint8_t _part);
+	    void sendSingle(const synthLib::SysexBuffer& _sysex);
+	    void sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
 
 		bool sendSysEx(MidiPacketType _type) const;
 	    bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
@@ -65,10 +65,10 @@ namespace mqJucePlugin
 	    void selectNextPreset();
 	    void selectPrevPreset();
 
-		std::vector<uint8_t> createSingleDump(mqLib::MidiBufferNum _buffer, mqLib::MidiSoundLocation _location, uint8_t _locationOffset, uint8_t _part) const;
-		std::vector<uint8_t> createSingleDump(mqLib::MidiBufferNum _buffer, mqLib::MidiSoundLocation _location, uint8_t _locationOffset, const pluginLib::MidiPacket
+		synthLib::SysexBuffer createSingleDump(mqLib::MidiBufferNum _buffer, mqLib::MidiSoundLocation _location, uint8_t _locationOffset, uint8_t _part) const;
+		synthLib::SysexBuffer createSingleDump(mqLib::MidiBufferNum _buffer, mqLib::MidiSoundLocation _location, uint8_t _locationOffset, const pluginLib::MidiPacket
 		                                      ::AnyPartParamValues& _values) const;
-	    bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const std::vector<uint8_t>& _sysex) const;
+	    bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const synthLib::SysexBuffer& _sysex) const;
 
 		std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
 	    std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;

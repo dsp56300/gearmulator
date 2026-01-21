@@ -30,7 +30,7 @@ public:
 	explicit Microcontroller(DspSingle& _dsp, const ROMFile& romFile, bool _useEsaiBasedMidiTiming);
 
 	bool sendMIDI(const synthLib::SMidiEvent& _ev, FrontpanelState* _fpState = nullptr);
-	bool sendSysex(const std::vector<uint8_t>& _data, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
+	bool sendSysex(const synthLib::SysexBuffer& _data, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
 
 	bool writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data);
 	bool writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data);
@@ -57,7 +57,7 @@ public:
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
 
-	static uint8_t calcChecksum(const std::vector<uint8_t>& _data, size_t _offset = 5, size_t _count = std::numeric_limits<size_t>::max());
+	static uint8_t calcChecksum(const synthLib::SysexBuffer& _data, size_t _offset = 5, size_t _count = std::numeric_limits<size_t>::max());
 
 	bool dspHasBooted() const;
 
@@ -130,7 +130,7 @@ private:
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
 
-	std::vector<std::pair<synthLib::MidiEventSource, std::vector<uint8_t>>> m_pendingSysexInput;
+	std::vector<std::pair<synthLib::MidiEventSource, synthLib::SysexBuffer>> m_pendingSysexInput;
 	std::vector<synthLib::SMidiEvent> m_midiOutput;
 
 	mutable std::recursive_mutex m_mutex;

@@ -6,6 +6,9 @@
 
 #include "baseLib/event.h"
 
+#include "synthLib/midiTypes.h"
+#include "synthLib/sysexRemoteControl.h"
+
 namespace hwLib
 {
 	class LCD;
@@ -19,7 +22,7 @@ namespace synthLib
 namespace jeLib
 {
 	// TODO: refactor this and create a common class for JE/SXX
-	class SysexRemoteControl
+	class SysexRemoteControl : public synthLib::SysexRemoteControl
 	{
 	public:
 		using Leds = std::array<bool, 66>;
@@ -40,8 +43,8 @@ namespace jeLib
 			SetParam
 		};
 
-		static void createSysexHeader(std::vector<uint8_t>& _dst, uint8_t _cmd);
-		static void createSysexHeader(std::vector<uint8_t>& _dst, CommandType _cmd);
+		static void createSysexHeader(synthLib::SysexBuffer& _dst, uint8_t _cmd);
+		static void createSysexHeader(synthLib::SysexBuffer& _dst, CommandType _cmd);
 
 		static void sendSysexLcdCgRam(std::vector<synthLib::SMidiEvent>& _dst, const hwLib::LCD& _lcd);
 		static void sendSysexLcdDdRam(std::vector<synthLib::SMidiEvent>& _dst, const hwLib::LCD& _lcd);
@@ -50,8 +53,8 @@ namespace jeLib
 		static void sendSysexLeds(std::vector<synthLib::SMidiEvent>& _dst, const Leds& _ledStates);
 		static void sendSysexParameter(std::vector<synthLib::SMidiEvent>& _dst, uint8_t _page, uint8_t _index, const int32_t& _value);
 
-		bool receive(const synthLib::SMidiEvent& _input);
-		bool receive(const std::vector<uint8_t>& _input);
-	private:
+		bool receive(std::vector<synthLib::SMidiEvent>& _output, const synthLib::SysexBuffer& _input) override { return false; }
+		bool receive(const synthLib::SMidiEvent& _input) override;
+		bool receive(const synthLib::SysexBuffer& _input) override;
 	};
 }

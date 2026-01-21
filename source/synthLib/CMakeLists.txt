@@ -30,6 +30,7 @@ set(SOURCES
 	resamplerInOut.cpp resamplerInOut.h
 	romLoader.cpp romLoader.h
 	sounddiverLibLoader.cpp sounddiverLibLoader.h
+	sysexRemoteControl.cpp sysexRemoteControl.h
 	sysexToMidi.cpp sysexToMidi.h
 	vstpreset.cpp vstpreset.h
 	wavReader.cpp wavReader.h

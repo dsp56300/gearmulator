@@ -484,7 +484,7 @@ namespace genericVirusUI
 #if SYNTHLIB_DEMO_MODE
 		return false;
 #else
-		std::vector< std::vector<uint8_t> > messages;
+		synthLib::SysexBufferList messages;
 		
 		switch (_saveType)
 		{
@@ -509,7 +509,7 @@ namespace genericVirusUI
 			{
 				getController().onMultiReceived = [this, _fileType, _pathName]
 				{
-					std::vector< std::vector<uint8_t> > messages;
+					synthLib::SysexBufferList messages;
 					messages.push_back(getController().getMultiEditBuffer().data);
 
 					for(uint8_t i=0; i<16; ++i)

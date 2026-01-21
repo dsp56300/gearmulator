@@ -301,16 +301,16 @@ namespace pluginLib
         return sendSysEx(_packetName, {});
     }
 
-    bool Controller::sendSysEx(const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const
-    {
-	    std::vector<uint8_t> sysex;
+	bool Controller::sendSysEx(const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const
+	{
+		SysEx sysex;
 
-    	if(!createMidiDataFromPacket(sysex, _packetName, _params, 0))
-            return false;
+		if(!createMidiDataFromPacket(sysex, _packetName, _params, 0))
+			return false;
 
-        sendSysEx(sysex);
-        return true;
-    }
+		sendSysEx(sysex);
+		return true;
+	}
 
 	const Controller::ParameterList& Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex) const
 	{
@@ -464,7 +464,7 @@ namespace pluginLib
 		return true;
 	}
 
-	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, uint8_t _part) const
+	bool Controller::createMidiDataFromPacket(SysEx& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, uint8_t _part) const
 	{
 		MidiPacket::NamedParamValues paramValues;
 
@@ -474,7 +474,7 @@ namespace pluginLib
 		return createMidiDataFromPacket(_sysex, _packetName, _data, paramValues);
 	}
 
-	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::NamedParamValues& _values) const
+	bool Controller::createMidiDataFromPacket(SysEx& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::NamedParamValues& _values) const
 	{
         const auto* m = getMidiPacket(_packetName);
 
@@ -487,7 +487,7 @@ namespace pluginLib
         return true;
 	}
 
-	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::AnyPartParamValues& _values) const
+	bool Controller::createMidiDataFromPacket(SysEx& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::AnyPartParamValues& _values) const
 	{
 		MidiPacket::NamedParamValues namedParams;
 		if(!createNamedParamValues(namedParams, _values))
@@ -495,27 +495,27 @@ namespace pluginLib
 		return createMidiDataFromPacket(_sysex, _packetName, _data, namedParams);
 	}
 
-	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
+	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const SysEx& _src) const
 	{
 		_data.clear();
 		_parameterValues.clear();
 		return _packet.parse(_data, _parameterValues, m_descriptions, _src);
 	}
 
-	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::AnyPartParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
+	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::AnyPartParamValues& _parameterValues, const SysEx& _src) const
 	{
 		_data.clear();
 		_parameterValues.clear();
 		return _packet.parse(_data, _parameterValues, m_descriptions, _src);
 	}
 
-	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, ParamValue)>& _parameterValues, const std::vector<uint8_t>& _src) const
+	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, ParamValue)>& _parameterValues, const SysEx& _src) const
 	{
 		_data.clear();
 		return _packet.parse(_data, _parameterValues, m_descriptions, _src);
 	}
 
-	bool Controller::parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
+	bool Controller::parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const SysEx& _src) const
 	{
 		auto* m = getMidiPacket(_name);
 		assert(m);
@@ -524,7 +524,7 @@ namespace pluginLib
 		return parseMidiPacket(*m, _data, _parameterValues, _src);
 	}
 
-	bool Controller::parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
+	bool Controller::parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const SysEx& _src) const
 	{
 		const auto& packets = m_descriptions.getMidiPackets();
 

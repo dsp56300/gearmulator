@@ -98,7 +98,7 @@ namespace genericVirusUI
 		return true;
 	}
 
-	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(std::vector<uint8_t>&& _sysex, const std::string& _defaultPatchName)
+	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
 	{
 		if (_sysex.size() < 267)
 			return nullptr;
@@ -267,9 +267,12 @@ namespace genericVirusUI
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
 	{
-		if (synthLib::SounddiverLibLoader::isValidData(_data))
+		// Convert SysexBuffer to std::vector<uint8_t> for SounddiverLibLoader
+		std::vector<uint8_t> dataVec(_data.begin(), _data.end());
+		
+		if (synthLib::SounddiverLibLoader::isValidData(dataVec))
 		{
-			synthLib::SounddiverLibLoader sd2s(_data);
+			synthLib::SounddiverLibLoader sd2s(dataVec);
 
 			const auto& results = sd2s.getResults();
 
@@ -284,8 +287,8 @@ namespace genericVirusUI
 
 					// preset, pack into sysex
 
-					std::vector<uint8_t>& sysex = _results.emplace_back(
-						std::vector<uint8_t>{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10,
+					synthLib::SysexBuffer& sysex = _results.emplace_back(
+						synthLib::SysexBuffer{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10,
 							static_cast<uint8_t>(prog >> 7), static_cast<uint8_t>(prog & 0x7f)}
 					);
 
@@ -391,7 +394,7 @@ namespace genericVirusUI
 							for(uint32_t i=0; i<index; ++i)
 							{
 								// pack into sysex
-								std::vector<uint8_t>& sysex = _results.emplace_back(std::vector<uint8_t>
+								synthLib::SysexBuffer& sysex = _results.emplace_back(synthLib::SysexBuffer
 									{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10, static_cast<uint8_t>(0x01 + (i >> 7)), static_cast<uint8_t>(i & 0x7f)}
 								);
 								sysex.insert(sysex.end(), data.begin() + i * 0x100 + startAddr, data.begin() + i * 0x100 + 0x100 + startAddr);

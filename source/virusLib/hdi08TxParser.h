@@ -54,7 +54,7 @@ namespace virusLib
 		Microcontroller& m_mc;
 
 		std::vector<synthLib::SMidiEvent> m_midiData;
-		std::vector<uint8_t> m_sysexData;
+		synthLib::SysexBuffer m_sysexData;
 		std::vector<uint8_t> m_presetData;
 		std::vector<dsp56k::TWord> m_dspStatus;
 

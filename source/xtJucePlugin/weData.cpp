@@ -53,7 +53,7 @@ namespace xtJucePlugin
 		onAllDataReceived();
 	}
 
-	void WaveEditorData::onReceiveWave(const std::vector<uint8_t>& _msg, const bool _sendToDevice)
+	void WaveEditorData::onReceiveWave(const synthLib::SysexBuffer& _msg, const bool _sendToDevice)
 	{
 		if(!parseMidi(_msg))
 			return;
@@ -71,7 +71,7 @@ namespace xtJucePlugin
 			sendWaveToDevice(id);
 	}
 
-	void WaveEditorData::onReceiveTable(const std::vector<uint8_t>& _msg, const bool _sendToDevice)
+	void WaveEditorData::onReceiveTable(const synthLib::SysexBuffer& _msg, const bool _sendToDevice)
 	{
 		if(!parseMidi(_msg))
 			return;
@@ -313,12 +313,12 @@ namespace xtJucePlugin
 		saveRomCache();
 	}
 
-	xt::SysexCommand WaveEditorData::toCommand(const std::vector<uint8_t>& _sysex)
+	xt::SysexCommand WaveEditorData::toCommand(const synthLib::SysexBuffer& _sysex)
 	{
 		return static_cast<xt::SysexCommand>(_sysex[4]);
 	}
 
-	uint16_t WaveEditorData::toIndex(const std::vector<uint8_t>& _sysex)
+	uint16_t WaveEditorData::toIndex(const synthLib::SysexBuffer& _sysex)
 	{
 		const uint32_t hh = _sysex[5];
 		const uint32_t ll = _sysex[6];
@@ -328,7 +328,7 @@ namespace xtJucePlugin
 		return index;
 	}
 
-	bool WaveEditorData::parseMidi(const std::vector<uint8_t>& _sysex)
+	bool WaveEditorData::parseMidi(const synthLib::SysexBuffer& _sysex)
 	{
 		if(_sysex.size() < 10 || _sysex.front() != 0xf0 || _sysex.back() != 0xf7)
 			return false;
@@ -413,11 +413,11 @@ namespace xtJucePlugin
 
 	void WaveEditorData::loadRomCache()
 	{
-		std::vector<uint8_t> data;
+		synthLib::SysexBuffer data;
 		if(!baseLib::filesystem::readFile(data, getRomCacheFilename()))
 			return;
 
-		std::vector<std::vector<uint8_t>> sysexMessages;
+		synthLib::SysexBufferList sysexMessages;
 		synthLib::MidiToSysex::splitMultipleSysex(sysexMessages, data);
 		for (const auto& sysex : sysexMessages)
 			parseMidi(sysex);
@@ -457,7 +457,7 @@ namespace xtJucePlugin
 		{
 			const auto id = xt::WaveId(i + xt::wave::g_firstRamWaveIndex);
 			const auto filename = toFilename(id);
-			std::vector<uint8_t> data;
+			synthLib::SysexBuffer data;
 			if (!baseLib::filesystem::readFile(data, m_cacheDir + filename))
 				continue;
 			xt::WaveData wave;
@@ -469,7 +469,7 @@ namespace xtJucePlugin
 		{
 			const auto id = xt::TableId(i);
 			const auto filename = toFilename(id);
-			std::vector<uint8_t> data;
+			synthLib::SysexBuffer data;
 			if (!baseLib::filesystem::readFile(data, m_cacheDir + filename))
 				continue;
 			xt::TableData table;

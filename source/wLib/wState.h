@@ -5,10 +5,12 @@
 #include <vector>
 #include <array>
 
+#include "synthLib/midiTypes.h"
+
 namespace wLib
 {
-	using SysEx = std::vector<uint8_t>;
-	using Responses = std::vector<SysEx>;
+	using SysEx = synthLib::SysexBuffer;
+	using Responses = synthLib::SysexBufferList;
 
 	class State
 	{

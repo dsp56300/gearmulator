@@ -4,12 +4,14 @@
 #include <string>
 #include <vector>
 
+#include "synthLib/midiTypes.h"
+
 namespace virusLib
 {
 	class MidiFileToRomData
 	{
 	public:
-		using Packet = std::vector<uint8_t>;
+		using Packet = synthLib::SysexBuffer;
 
 		MidiFileToRomData(const uint8_t _expectedFirstSector = 0xff) : m_expectedSector(_expectedFirstSector)
 		{
@@ -17,6 +19,7 @@ namespace virusLib
 
 		bool load(const std::string& _filename);
 		bool load(const std::vector<uint8_t>& _fileData, bool _isMidiFileData = false);
+		bool load(const synthLib::SysexBuffer& _sysexData, bool _isMidiFileData = false);
 
 		bool add(const std::vector<Packet>& _packets);
 		bool add(const Packet& _packet);

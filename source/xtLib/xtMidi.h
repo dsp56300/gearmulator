@@ -3,6 +3,8 @@
 #include "xtRomWaves.h"
 #include "hardwareLib/sciMidi.h"
 
+#include "wLib/wState.h"
+
 namespace xt
 {
 	class SciMidi : public hwLib::SciMidi
@@ -15,6 +17,6 @@ namespace xt
 
 	private:
 		RomWaves m_romWaves;
-		std::vector<SysEx> m_results;
+		wLib::Responses m_results;
 	};
 }

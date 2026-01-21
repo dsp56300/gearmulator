@@ -4,12 +4,14 @@
 #include <string>
 #include <vector>
 
+#include "midiTypes.h"
+
 namespace synthLib
 {
 	class Lv2PresetExport
 	{
 	public:
-		using PresetData = std::vector<uint8_t>;
+		using PresetData = SysexBuffer;
 
 		struct Preset
 		{

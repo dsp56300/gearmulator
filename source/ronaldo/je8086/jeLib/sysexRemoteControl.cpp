@@ -13,12 +13,12 @@ namespace jeLib
 	static constexpr uint8_t g_headerSize = 3;	// 0xf0, manufacturerId, command
 	static constexpr uint8_t g_footerSize = 1;	// 0xf7
 
-	void SysexRemoteControl::createSysexHeader(std::vector<uint8_t>& _dst, uint8_t _cmd)
+	void SysexRemoteControl::createSysexHeader(synthLib::SysexBuffer& _dst, uint8_t _cmd)
 	{
 		_dst.assign({0xf0, g_manufacturerId, _cmd});
 	}
 
-	void SysexRemoteControl::createSysexHeader(std::vector<uint8_t>& _dst, CommandType _cmd)
+	void SysexRemoteControl::createSysexHeader(synthLib::SysexBuffer& _dst, CommandType _cmd)
 	{
 		createSysexHeader(_dst, static_cast<uint8_t>(_cmd));
 	}
@@ -118,7 +118,7 @@ namespace jeLib
 		return receive(_input.sysex);
 	}
 
-	bool SysexRemoteControl::receive(const std::vector<uint8_t>& _input)
+	bool SysexRemoteControl::receive(const synthLib::SysexBuffer& _input)
 	{
 		if(_input.size() < g_headerSize + g_footerSize)
 			return false;

@@ -153,7 +153,7 @@ namespace mqJucePlugin
 			const auto p = m_controller.createSingleDump(mqLib::MidiBufferNum::SingleBankA, static_cast<mqLib::MidiSoundLocation>(0), part, part);
 			if(!p.empty())
 			{
-				const std::vector<std::vector<uint8_t>> presets{p};
+				const synthLib::SysexBufferList presets{p};
 				jucePluginEditorLib::Editor::savePresets(_type, file, presets);
 			}
 		});

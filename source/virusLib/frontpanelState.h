@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "synthLib/midiTypes.h"
+
 namespace synthLib
 {
 	struct SMidiEvent;
@@ -38,7 +40,7 @@ namespace virusLib
 
 		void toMidiEvent(synthLib::SMidiEvent& _e) const;
 		bool fromMidiEvent(const synthLib::SMidiEvent& _e);
-		bool fromMidiEvent(const std::vector<uint8_t>& _sysex);
+		bool fromMidiEvent(const synthLib::SysexBuffer& _sysex);
 
 		std::array<bool, 16> m_midiEventReceived;
 		std::array<float, 3> m_lfoPhases;

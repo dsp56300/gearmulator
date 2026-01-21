@@ -90,6 +90,8 @@ namespace juceRmlUi
 
 		Rml::Element* findChild(Rml::Element* _elem, const std::string& _name, bool _mustExist = true);
 
+		Rml::Element* findChildByTag(Rml::Element* _elem, const std::string& _tag, bool _mustExist = true, bool _includeNonDomElements = false);
+
 		// these are used in the template below, the only purpose is to avoid including RmlUi/Core/Element.h in the header file
 		int getNumChildren(const Rml::Element* _parent);
 		Rml::Element* getChild(const Rml::Element* _parent, int _index);

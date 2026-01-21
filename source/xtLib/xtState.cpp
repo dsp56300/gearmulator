@@ -24,7 +24,7 @@ namespace xt
 
 	bool State::loadState(const SysEx& _sysex)
 	{
-		std::vector<std::vector<uint8_t>> messages;
+		synthLib::SysexBufferList messages;
 		synthLib::MidiToSysex::splitMultipleSysex(messages, _sysex);
 
 		if(messages.empty())
@@ -40,33 +40,35 @@ namespace xt
 
 	bool State::getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const
 	{
-		append(_state, m_mode, ~0u);
-		append(_state, m_global, wLib::IdxCommand);
+		SysEx state;
+
+		append(state, m_mode, ~0u);
+		append(state, m_global, wLib::IdxCommand);
 
 		// add all waves and tables that are used by the singles
 		std::set<TableId> tableIds;
 
 		auto addTableId = [&](TableId id)
 		{
-			if(wave::isReadOnly(id))
+			if (wave::isReadOnly(id))
 				return false;
 
 			const auto idx = id.rawId();
-			if(idx >= m_tables.size())
+			if (idx >= m_tables.size())
 				return false;
 
-			if(!isValid(m_tables[idx]))
+			if (!isValid(m_tables[idx]))
 				return false;
 			tableIds.insert(id);
 			return true;
 		};
 
-		for (const auto& s  : m_currentInstrumentSingles)
+		for (const auto& s : m_currentInstrumentSingles)
 		{
 			const auto table = getWavetableFromSingleDump({s.begin(), s.end()});
 			addTableId(table);
 		}
-		for (const auto& s  : m_currentMultiSingles)
+		for (const auto& s : m_currentMultiSingles)
 		{
 			const auto table = getWavetableFromSingleDump({s.begin(), s.end()});
 			addTableId(table);
@@ -75,15 +77,15 @@ namespace xt
 		std::set<WaveId> waveIds;
 		for (const TableId id : tableIds)
 		{
-			if(wave::isReadOnly(id))
+			if (wave::isReadOnly(id))
 				continue;
 
 			const auto idx = id.rawId();
-			if(idx >= m_tables.size())
+			if (idx >= m_tables.size())
 				continue;
 
 			const auto& t = m_tables[idx];
-			if(!isValid(t))
+			if (!isValid(t))
 				continue;
 
 			TableData table;
@@ -93,45 +95,46 @@ namespace xt
 
 			for (const auto& waveId : tableWaves)
 			{
-				if(wave::isReadOnly(waveId))
+				if (wave::isReadOnly(waveId))
 					continue;
 				const auto waveIdx = waveId.rawId();
-				if(waveIdx >= m_waves.size())
+				if (waveIdx >= m_waves.size())
 					continue;
 				const auto& wave = m_waves[waveIdx];
-				if(!isValid(wave))
+				if (!isValid(wave))
 					continue;
 				waveIds.insert(waveId);
 			}
-		}
+	}
 
 		for (const auto& waveId : waveIds)
-			append(_state, m_waves[waveId.rawId()], 7);
+			append(state, m_waves[waveId.rawId()], 7);
 
 		for (const auto& tableId : tableIds)
-			append(_state, m_tables[tableId.rawId()], 7);
+			append(state, m_tables[tableId.rawId()], 7);
 
 		const auto multiMode = isMultiMode();
 
 		// if we are in multimode, write multis last, otherwise, write singles last
 		// This causes the relevant things to be activated last when loading
-		if(multiMode)
+		if (multiMode)
 		{
-			for (const auto& s: m_currentInstrumentSingles)
-				append(_state, s, IdxSingleChecksumStart);
-			append(_state, m_currentMulti, IdxMultiChecksumStart);
-			for (const auto& s: m_currentMultiSingles)
-				append(_state, s, IdxSingleChecksumStart);
+			for (const auto& s : m_currentInstrumentSingles)
+				append(state, s, IdxSingleChecksumStart);
+			append(state, m_currentMulti, IdxMultiChecksumStart);
+			for (const auto& s : m_currentMultiSingles)
+				append(state, s, IdxSingleChecksumStart);
 		}
 		else
 		{
-			append(_state, m_currentMulti, IdxMultiChecksumStart);
-			for (const auto& s: m_currentMultiSingles)
-				append(_state, s, IdxSingleChecksumStart);
-			for (const auto& s: m_currentInstrumentSingles)
-				append(_state, s, IdxSingleChecksumStart);
+			append(state, m_currentMulti, IdxMultiChecksumStart);
+			for (const auto& s : m_currentMultiSingles)
+				append(state, s, IdxSingleChecksumStart);
+			for (const auto& s : m_currentInstrumentSingles)
+				append(state, s, IdxSingleChecksumStart);
 		}
 
+		_state.assign(state.begin(), state.end());
 		return !_state.empty();
 	}
 
@@ -305,7 +308,8 @@ namespace xt
 
 	bool State::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		return loadState(_state);
+		SysEx sysexBuf(_state.begin(), _state.end());
+		return loadState(sysexBuf);
 	}
 
 	void State::process(const uint32_t _numSamples)
@@ -329,7 +333,7 @@ namespace xt
 		}
 	}
 
-	bool State::setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name)
+	bool State::setSingleName(SysEx& _sysex, const std::string& _name)
 	{
 		if (_sysex.size() != std::tuple_size_v<Single>)
 			return false;
@@ -924,7 +928,7 @@ namespace xt
 
 	void State::sendMulti(const std::vector<uint8_t>& _multiData) const
 	{
-		std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiDump), static_cast<uint8_t>(LocationH::MultiBankA), 0};
+		synthLib::SysexBuffer data = { 0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiDump), static_cast<uint8_t>(LocationH::MultiBankA), 0};
 		data.insert(data.end(), _multiData.begin(), _multiData.end());
 		data.push_back(0x00);
 		data.push_back(0xf7);

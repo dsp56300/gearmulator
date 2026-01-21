@@ -264,7 +264,7 @@ namespace jeJucePlugin
 				if (!isRack && !isKeyboard)
 					return false;
 
-				auto createSysexFromRawData = [](uint32_t _addr, const std::vector<uint8_t>::const_iterator& _begin, const std::vector<uint8_t>::const_iterator& _end)
+				auto createSysexFromRawData = [](uint32_t _addr, const synthLib::SysexBuffer::const_iterator& _begin, const synthLib::SysexBuffer::const_iterator& _end)
 				{
 					jeLib::State::Dump dump;
 					dump.reserve(512);

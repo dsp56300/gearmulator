@@ -18,19 +18,19 @@ namespace virus
     public:
 		baseLib::Event<virusLib::FrontpanelState> onFrontPanelStateChanged;
 
-        struct Patch
-        {
-            std::string name;
-			std::vector<uint8_t> data;
-            uint8_t progNumber = 0;
-        };
+	    struct Patch
+	    {
+	        std::string name;
+			synthLib::SysexBuffer data;
+	        uint8_t progNumber = 0;
+	    };
 
-        struct SinglePatch : Patch
-        {
+	    struct SinglePatch : Patch
+	    {
 	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
-        };
+	    };
 
-        struct MultiPatch : Patch {};
+	    struct MultiPatch : Patch {};
 
     	using Singles = std::vector<std::array<SinglePatch, 128>>;
 
@@ -71,16 +71,16 @@ namespace virus
     	Controller(VirusProcessor&, virusLib::DeviceModel _defaultModel, unsigned char deviceId = 0x00);
 		~Controller() override;
 
-        std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
-        std::vector<uint8_t> createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues);
-        std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram) const;
+        synthLib::SysexBuffer createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
+        synthLib::SysexBuffer createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues);
+        synthLib::SysexBuffer modifySingleDump(const synthLib::SysexBuffer& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram) const;
 
     	void selectPrevPreset(uint8_t _part);
     	void selectNextPreset(uint8_t _part);
         std::string getBankName(uint32_t _index) const;
 
-    	bool activatePatch(const std::vector<unsigned char>& _sysex);
-    	bool activatePatch(const std::vector<unsigned char>& _sysex, uint32_t _part);
+    	bool activatePatch(const synthLib::SysexBuffer& _sysex);
+    	bool activatePatch(const synthLib::SysexBuffer& _sysex, uint32_t _part);
 
         static void printMessage(const pluginLib::SysEx &);
 

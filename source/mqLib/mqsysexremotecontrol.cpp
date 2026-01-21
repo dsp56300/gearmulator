@@ -4,14 +4,12 @@
 #include "mqmiditypes.h"
 #include "microq.h"
 
-#include "synthLib/midiTypes.h"
-
 namespace mqLib
 {
-	void SysexRemoteControl::createSysexHeader(std::vector<uint8_t>& _dst, SysexCommand _cmd)
+	SysexRemoteControl::SysexRemoteControl(MicroQ& _mq)
+	: wLib::SysexRemoteControl(IdMicroQ)
+	, m_mq(_mq)
 	{
-		constexpr uint8_t devId = 0;
-		_dst.assign({0xf0, wLib::IdWaldorf, IdMicroQ, devId, static_cast<uint8_t>(_cmd)});
 	}
 
 	void SysexRemoteControl::sendSysexLCD(std::vector<synthLib::SMidiEvent>& _dst) const
@@ -102,13 +100,10 @@ namespace mqLib
 		response.push_back(0xf7);
 	}
 
-	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const std::vector<unsigned char>& _input) const
+	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const synthLib::SysexBuffer& _input)
 	{
-		if(_input.size() < 5)
-			return false;
-
-		if(_input[1] != wLib::IdWaldorf || _input[2] != IdMicroQ)
-			return false;
+		if(!validateWaldorfSysex(_input))
+		return false;
 
 		const auto cmd = _input[4];
 

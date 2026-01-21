@@ -79,9 +79,10 @@ namespace jeLib
 
 		for (const auto& file : _files)
 		{
-			std::vector<std::vector<uint8_t>> sysexMessages;
+			synthLib::SysexBuffer fileBuf(file.second.begin(), file.second.end());
+			synthLib::SysexBufferList sysexMessages;
 
-			if (!synthLib::MidiToSysex::extractSysexFromData(sysexMessages, file.second))
+			if (!synthLib::MidiToSysex::extractSysexFromData(sysexMessages, fileBuf))
 				return {};
 
 			for (const auto& message : sysexMessages)
@@ -172,7 +173,7 @@ namespace jeLib
 		}
 	}
 
-	RomLoader::Range RomLoader::parseSysexDump(std::vector<uint8_t>& _fullRom, const std::vector<uint8_t>& _sysex)
+	RomLoader::Range RomLoader::parseSysexDump(std::vector<uint8_t>& _fullRom, const synthLib::SysexBuffer& _sysex)
 	{
 		Range result = { std::numeric_limits<uint32_t>::max(), 0 };
 

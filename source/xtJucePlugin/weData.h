@@ -31,8 +31,8 @@ namespace xtJucePlugin
 		bool isWaitingForTable() const { return m_currentTableRequestIndex != g_invalidTableIndex; }
 		bool isWaitingForData() const { return isWaitingForWave() || isWaitingForTable(); }
 
-		void onReceiveWave(const std::vector<uint8_t>& _msg, bool _sendToDevice = false);
-		void onReceiveTable(const std::vector<uint8_t>& _msg, bool _sendToDevice = false);
+		void onReceiveWave(const synthLib::SysexBuffer& _msg, bool _sendToDevice = false);
+		void onReceiveTable(const synthLib::SysexBuffer& _msg, bool _sendToDevice = false);
 
 		std::optional<xt::WaveData> getWave(xt::WaveId _waveId) const;
 		std::optional<xt::WaveData> getWave(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;
@@ -60,9 +60,9 @@ namespace xtJucePlugin
 
 		void onAllDataReceived() const;
 
-		static xt::SysexCommand toCommand(const std::vector<uint8_t>& _sysex);
-		static uint16_t toIndex(const std::vector<uint8_t>& _sysex);
-		bool parseMidi(const std::vector<uint8_t>& _sysex);
+		static xt::SysexCommand toCommand(const synthLib::SysexBuffer& _sysex);
+		static uint16_t toIndex(const synthLib::SysexBuffer& _sysex);
+		bool parseMidi(const synthLib::SysexBuffer& _sysex);
 
 		std::string getRomCacheFilename() const;
 

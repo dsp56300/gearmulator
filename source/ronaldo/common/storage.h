@@ -28,6 +28,15 @@ namespace rLib
 
 		uint8_t read(const Address4& _addr) const;
 		uint32_t read(std::vector<uint8_t>& _data, const Address4& _addr, uint32_t _count) const;
+		
+		template<typename T>
+		uint32_t read(T& _data, const Address4& _addr, const uint32_t _count) const
+		{
+			std::vector<uint8_t> temp;
+			auto result = read(temp, _addr, _count);
+			_data.assign(temp.begin(), temp.end());
+			return result;
+		}
 
 		static uint32_t toLinearAddress(Address4 _addr);
 		static Address4 fromLinearAddress(uint32_t _addr);

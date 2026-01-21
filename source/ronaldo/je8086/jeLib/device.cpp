@@ -75,15 +75,16 @@ namespace jeLib
 		if (_state.empty())
 			return false;
 
-		std::vector<std::vector<uint8_t>> messages;
-		synthLib::MidiToSysex::splitMultipleSysex(messages, _state);
+		synthLib::SysexBuffer stateBuf(_state.begin(), _state.end());
+		synthLib::SysexBufferList messages;
+		synthLib::MidiToSysex::splitMultipleSysex(messages, stateBuf);
 
 		if (messages.empty())
 			return false;
 
 		m_masterVolume = -1.0f;
 
-		for (auto message : messages)
+		for (auto& message : messages)
 		{
 			synthLib::SMidiEvent e(synthLib::MidiEventSource::Host);
 			e.sysex = std::move(message);

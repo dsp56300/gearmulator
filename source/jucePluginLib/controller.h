@@ -20,7 +20,7 @@ namespace juce
 namespace pluginLib
 {
 	class Processor;
-	using SysEx = std::vector<uint8_t>;
+	using SysEx = synthLib::SysexBuffer;
 
 	class Controller : juce::Timer
 	{

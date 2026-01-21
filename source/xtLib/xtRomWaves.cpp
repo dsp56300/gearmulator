@@ -20,7 +20,7 @@ namespace xt
 		}
 	}
 
-	bool RomWaves::receiveSysEx(std::vector<SysEx>& _results, const SysEx& _data) const
+	bool RomWaves::receiveSysEx(wLib::Responses& _results, const wLib::SysEx& _data) const
 	{
 		switch (State::getCommand(_data))
 		{

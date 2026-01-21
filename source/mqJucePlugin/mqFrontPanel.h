@@ -8,6 +8,8 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
+#include "synthLib/midiTypes.h"
+
 namespace juceRmlUi
 {
 	class ElemButton;
@@ -24,12 +26,12 @@ namespace mqJucePlugin
 		explicit FrontPanel(const Editor& _editor, Controller& _controller);
 		~FrontPanel();
 
-		void processSysex(const std::vector<uint8_t>& _msg) const;
+		void processSysex(const synthLib::SysexBuffer& _msg) const;
 
 	private:
-		void processLCDUpdate(const std::vector<uint8_t>& _msg) const;
-		void processLCDCGRamUpdate(const std::vector<uint8_t>& _msg) const;
-		void processLedUpdate(const std::vector<uint8_t>& _msg) const;
+		void processLCDUpdate(const synthLib::SysexBuffer& _msg) const;
+		void processLCDCGRamUpdate(const synthLib::SysexBuffer& _msg) const;
+		void processLedUpdate(const synthLib::SysexBuffer& _msg) const;
 
 		void onButtonStateChanged(uint32_t _index) const;
 		void onEncoderValueChanged(uint32_t _index);

@@ -24,7 +24,7 @@ private:
 	void process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _message);
 
 	void* m_stream = nullptr;
-	std::vector<uint8_t> m_sysexBuffer;
+	synthLib::SysexBuffer m_sysexBuffer;
 	bool m_readSysex = false;
 };
 }

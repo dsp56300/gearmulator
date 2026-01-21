@@ -284,6 +284,11 @@ input.text {
 	height: 100%;
 }
 
+/* sliders */
+input.range {
+	speedScaleShift: 0.1;	/* 0.1 = 10 pixels needed to change parameter by 1 */
+}
+
 /* all knobs need the dragging attribute */
 knob {
 	drag: drag;
