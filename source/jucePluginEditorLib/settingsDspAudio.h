@@ -2,6 +2,11 @@
 
 #include "settingsPlugin.h"
 
+namespace juceRmlUi
+{
+	class ElemButton;
+}
+
 namespace jucePluginEditorLib
 {
 	class Processor;
@@ -15,5 +20,11 @@ namespace jucePluginEditorLib
 		std::string getTemplateName() const override { return "tus_settings_dspaudio"; }
 
 		void createUi(Rml::Element* _root) override;
+
+	private:
+		uint32_t getCurrentLatency() const;
+		void updateButtons() const;
+
+		std::vector<std::pair<uint32_t, juceRmlUi::ElemButton*>> m_latencyButtons;
 	};
 }

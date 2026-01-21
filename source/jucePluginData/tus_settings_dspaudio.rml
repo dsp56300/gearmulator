@@ -5,6 +5,51 @@
 <body>
 	<div class="settings-page">
 		<h1>DSP & Audio</h1>
+		<settingsspacer1/>
+		<h1>Latency (blocks)</h1>
+		<settingsspacer1/>
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency0" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>0 (DAW will report proper CPU usage)</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency1" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>1 (default)</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency2" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>2</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency4" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>4</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency8" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>8</label>
+					</div>
+				</td>
+			</tr>
+		</table>
 	</div>
 </body>
 </template>
