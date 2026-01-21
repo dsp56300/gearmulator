@@ -6,6 +6,8 @@
 #include <vector>
 #include <chrono>
 
+#include "synthLib/midiTypes.h"
+
 namespace pluginLib::patchDB
 {
 	enum class SourceType
@@ -46,8 +48,8 @@ namespace pluginLib::patchDB
 	struct PatchModifications;
 	using PatchModificationsPtr = std::shared_ptr<PatchModifications>;
 
-	using Data = std::vector<uint8_t>;
-	using DataList = std::vector<Data>;
+	using Data = synthLib::SysexBuffer;
+	using DataList = synthLib::SysexBufferList;
 
 	using SearchHandle = uint32_t;
 

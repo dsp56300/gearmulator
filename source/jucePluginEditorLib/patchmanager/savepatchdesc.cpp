@@ -53,7 +53,7 @@ namespace jucePluginEditorLib::patchManager
 		if(patches.empty())
 			return false;
 
-		std::vector<std::vector<uint8_t>> patchesData;
+		synthLib::SysexBufferList patchesData;
 
 		for (auto& patch : patches)
 		{

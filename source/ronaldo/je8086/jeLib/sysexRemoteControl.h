@@ -6,6 +6,8 @@
 
 #include "baseLib/event.h"
 
+#include "synthLib/midiTypes.h"
+
 namespace hwLib
 {
 	class LCD;
@@ -40,8 +42,8 @@ namespace jeLib
 			SetParam
 		};
 
-		static void createSysexHeader(std::vector<uint8_t>& _dst, uint8_t _cmd);
-		static void createSysexHeader(std::vector<uint8_t>& _dst, CommandType _cmd);
+		static void createSysexHeader(synthLib::SysexBuffer& _dst, uint8_t _cmd);
+		static void createSysexHeader(synthLib::SysexBuffer& _dst, CommandType _cmd);
 
 		static void sendSysexLcdCgRam(std::vector<synthLib::SMidiEvent>& _dst, const hwLib::LCD& _lcd);
 		static void sendSysexLcdDdRam(std::vector<synthLib::SMidiEvent>& _dst, const hwLib::LCD& _lcd);
@@ -51,7 +53,6 @@ namespace jeLib
 		static void sendSysexParameter(std::vector<synthLib::SMidiEvent>& _dst, uint8_t _page, uint8_t _index, const int32_t& _value);
 
 		bool receive(const synthLib::SMidiEvent& _input);
-		bool receive(const std::vector<uint8_t>& _input);
-	private:
+		bool receive(const synthLib::SysexBuffer& _input);
 	};
 }

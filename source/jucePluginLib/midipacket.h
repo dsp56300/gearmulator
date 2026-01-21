@@ -11,6 +11,8 @@
 
 #include "types.h"
 
+#include "synthLib/midiTypes.h"
+
 namespace pluginLib
 {
 	class ParameterDescriptions;
@@ -84,7 +86,7 @@ namespace pluginLib
 		using ParamValues = std::unordered_map<ParamIndex, ParamValue, ParamIndexHash>;	// part, index => value
 		using AnyPartParamValues = std::vector<std::optional<ParamValue>>;				// index => value
 		using NamedParamValues = std::map<std::pair<uint8_t,std::string>, ParamValue>;	// part, name => value
-		using Sysex = std::vector<uint8_t>;
+		using Sysex = synthLib::SysexBuffer;
 
 		MidiPacket() = default;
 		explicit MidiPacket(std::string _name, std::vector<MidiDataDefinition>&& _bytes);
@@ -92,8 +94,8 @@ namespace pluginLib
 		const std::vector<MidiDataDefinition>& definitions() { return m_definitions; }
 		uint32_t size() const { return m_byteSize; }
 
-		bool create(std::vector<uint8_t>& _dst, const Data& _data, const NamedParamValues& _paramValues) const;
-		bool create(std::vector<uint8_t>& _dst, const Data& _data) const;
+		bool create(Sysex& _dst, const Data& _data, const NamedParamValues& _paramValues) const;
+		bool create(Sysex& _dst, const Data& _data) const;
 		bool parse(Data& _data, AnyPartParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool parse(Data& _data, const std::function<void(ParamIndex, ParamValue)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;

@@ -6,6 +6,7 @@
 #include "juceUiLib/editor.h"
 
 #include "synthLib/buildconfig.h"
+#include "synthLib/midiTypes.h"
 
 #include "baseLib/event.h"
 
@@ -104,7 +105,7 @@ namespace jucePluginEditorLib
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
 		void savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback);
 #if !SYNTHLIB_DEMO_MODE
-		static bool savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets);
+		static bool savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const synthLib::SysexBufferList& _presets);
 #endif
 		static std::string createValidFilename(pluginLib::FileType& _type, const juce::File& _file);
 

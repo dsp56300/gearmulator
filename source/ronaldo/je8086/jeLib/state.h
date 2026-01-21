@@ -11,6 +11,7 @@
 #include "common/storage.h"
 
 #include "jucePluginLib/patchdb/patchdbtypes.h"
+
 #include "synthLib/midiTypes.h"
 
 namespace jeLib
@@ -18,7 +19,7 @@ namespace jeLib
 	class State
 	{
 	public:
-		using Dump = std::vector<uint8_t>;
+		using Dump = synthLib::SysexBuffer;
 
 		using Address = uint32_t;
 
@@ -73,7 +74,7 @@ namespace jeLib
 
 		bool receive(const std::vector<synthLib::SMidiEvent>& _events);
 		bool receive(const synthLib::SMidiEvent& _event);
-		bool receive(const Dump& _sysex);
+		bool receive(const synthLib::SysexBuffer& _sysex);
 
 		bool createSystemDump(synthLib::SMidiEvent& _result) const;
 		bool createTempPerformanceDumps(std::vector<synthLib::SMidiEvent>& _results, PerformanceData _data, uint32_t _sizeRack, uint32_t _sizeKeyboard) const;

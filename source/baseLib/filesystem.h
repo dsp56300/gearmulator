@@ -31,8 +31,13 @@ namespace baseLib
 
 		bool isDirectory(const std::string& _path);
 
-		bool writeFile(const std::string& _filename, const std::vector<uint8_t>& _data);
 		bool writeFile(const std::string& _filename, const uint8_t* _data, size_t _size);
+
+		template<typename Alloc>
+	    bool writeFile(const std::string& _filename, const std::vector<uint8_t, Alloc>& _data)
+	    {
+	        return writeFile(_filename, _data.data(), _data.size());
+	    }
 
 		template<size_t Size> bool writeFile(const std::string& _filename, const std::array<uint8_t, Size>& _data)
 		{
@@ -40,6 +45,15 @@ namespace baseLib
 		}
 
 		bool readFile(std::vector<uint8_t>& _data, const std::string& _filename);
+
+		template<typename T> bool readFile(T& _data, const std::string& _filename)
+		{
+			std::vector<uint8_t> temp;
+			if (!readFile(temp, _filename))
+				return false;
+			_data.assign(temp.begin(), temp.end());
+			return true;
+		}
 
 		FILE* openFile(const std::string& _name, const char* _mode);
 

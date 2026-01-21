@@ -289,7 +289,7 @@ namespace n2xJucePlugin
 		sendSysEx(MidiPacketType::RequestDump, params);
 	}
 
-	std::vector<uint8_t> Controller::createSingleDump(uint8_t _bank, uint8_t _program, uint8_t _part) const
+	synthLib::SysexBuffer Controller::createSingleDump(uint8_t _bank, uint8_t _program, uint8_t _part) const
 	{
 		pluginLib::MidiPacket::Data data;
 
@@ -297,7 +297,7 @@ namespace n2xJucePlugin
 		data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
 		data.insert(std::make_pair(pluginLib::MidiDataType::Program, _program));
 
-		std::vector<uint8_t> dst;
+		synthLib::SysexBuffer dst;
 
 		if (!createMidiDataFromPacket(dst, midiPacketName(MidiPacketType::SingleDump), data, _part))
 			return {};
@@ -305,11 +305,11 @@ namespace n2xJucePlugin
 		return dst;
 	}
 
-	std::vector<uint8_t> Controller::createMultiDump(const n2x::SysexByte _bank, const uint8_t _program)
+	synthLib::SysexBuffer Controller::createMultiDump(const n2x::SysexByte _bank, const uint8_t _program)
 	{
 		const auto multi = m_state.updateAndGetMulti();
 
-		std::vector<uint8_t> result(multi.begin(), multi.end());
+		synthLib::SysexBuffer result(multi.begin(), multi.end());
 		result = n2x::State::validateDump(result);
 
 		result[n2x::SysexIndex::IdxMsgType] = _bank;
@@ -318,7 +318,7 @@ namespace n2xJucePlugin
 		return result;
 	}
 
-	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part)
+	bool Controller::activatePatch(const synthLib::SysexBuffer& _sysex, const uint32_t _part)
 	{
 		if(_part >= getPartCount())
 			return false;

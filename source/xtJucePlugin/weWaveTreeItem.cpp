@@ -186,13 +186,13 @@ namespace xtJucePlugin
 		m_editor.getData().sendWaveToDevice(getWaveId());
 	}
 
-	std::vector<std::vector<uint8_t>> WaveTreeItem::getSysexFromFiles(const std::vector<std::string>& _files)
+	synthLib::SysexBufferList WaveTreeItem::getSysexFromFiles(const std::vector<std::string>& _files)
 	{
-		std::vector<std::vector<uint8_t>> sysex;
+		synthLib::SysexBufferList sysex;
 
 		for(const auto& file : _files)
 		{
-			std::vector<std::vector<uint8_t>> s;
+			synthLib::SysexBufferList s;
 			synthLib::MidiToSysex::extractSysexFromFile(s, file);
 			sysex.insert(sysex.end(), s.begin(), s.end());
 		}

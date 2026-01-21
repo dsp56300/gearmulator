@@ -774,7 +774,7 @@ namespace pluginLib::patchDB
 	{
 		const auto file = getLocalStorageFile(_ds);
 
-		std::vector<uint8_t> data;
+		synthLib::SysexBuffer data;
 		if (!baseLib::filesystem::readFile(data, file.getFullPathName().toStdString()))
 			return false;
 
@@ -953,7 +953,7 @@ namespace pluginLib::patchDB
 		if (ds->origin == DataSourceOrigin::Manual)
 			addDsToList();
 
-		std::vector<std::vector<uint8_t>> data;
+		DataList data;
 
 		if(loadData(data, ds) && !data.empty())
 		{

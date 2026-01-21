@@ -77,7 +77,7 @@ namespace xtJucePlugin
 
 		if(_sysex.size() > std::tuple_size_v<xt::State::Single>)
 		{
-			std::vector<xt::SysEx> dumps;
+			synthLib::SysexBufferList dumps;
 			xt::State::splitCombinedPatch(dumps, _sysex);
 
 			if(dumps.empty())
@@ -215,7 +215,7 @@ namespace xtJucePlugin
 			if(res[0] != 0xf0 || res[1] != wLib::IdWaldorf || res[2] != xt::IdMw1)
 				continue;
 
-			auto createPreset = [](pluginLib::patchDB::DataList& _res, const std::vector<uint8_t>& _source, size_t _readPos)
+			auto createPreset = [](pluginLib::patchDB::DataList& _res, const synthLib::SysexBuffer& _source, size_t _readPos)
 			{
 				pluginLib::patchDB::Data data;
 

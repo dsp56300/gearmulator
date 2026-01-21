@@ -486,7 +486,7 @@ namespace jeLib
 		return receive(_event.sysex);
 	}
 
-	bool State::receive(const Dump& _sysex)
+	bool State::receive(const synthLib::SysexBuffer& _sysex)
 	{
 		if (_sysex.empty())
 			return false;

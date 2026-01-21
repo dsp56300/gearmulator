@@ -9,7 +9,7 @@ namespace synthLib
 	constexpr uint16_t g_ppq = 96;
 	constexpr uint16_t g_beatsBetweenMessages = 1;
 
-	bool SysexToMidi::write(const char* _filename, const std::vector<std::vector<uint8_t>>& _messages)
+	bool SysexToMidi::write(const char* _filename, const SysexBufferList& _messages)
 	{
 		std::ofstream f(_filename, std::ios::binary);
 		if(!f.is_open())
@@ -25,7 +25,7 @@ namespace synthLib
 		return true;
 	}
 
-	void SysexToMidi::write(std::ostream& _dst, const std::vector<std::vector<uint8_t>>& _messages)
+	void SysexToMidi::write(std::ostream& _dst, const SysexBufferList& _messages)
 	{
 		write(_dst, "MThd");	// header
 		writeUInt32(_dst, 6);	// chunk length = 6
@@ -41,7 +41,7 @@ namespace synthLib
 		for (const auto& message : _messages)
 		{
 			// split them again to support that someone writes multiple sysex messages into one buffer
-			std::vector<std::vector<uint8_t>> messages;
+			SysexBufferList messages;
 			MidiToSysex::splitMultipleSysex(messages, message);
 
 			for (const auto& m : messages)
@@ -63,7 +63,7 @@ namespace synthLib
 		_dst.seekp(end);
 	}
 
-	void SysexToMidi::writeBuf(std::ostream& _dst, const std::vector<uint8_t>& _data)
+	void SysexToMidi::writeBuf(std::ostream& _dst, const SysexBuffer& _data)
 	{
 		_dst.write(reinterpret_cast<const char*>(_data.data()), static_cast<std::streamsize>(_data.size()));
 	}

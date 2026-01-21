@@ -158,12 +158,12 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
+	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const synthLib::SysexBuffer& _msg)
 	{
 		m_data.onReceiveWave(_msg);
 	}
 
-	void WaveEditor::onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
+	void WaveEditor::onReceiveTable(const pluginLib::MidiPacket::Data& _data, const synthLib::SysexBuffer& _msg)
 	{
 		m_data.onReceiveTable(_msg);
 	}
@@ -281,7 +281,7 @@ namespace xtJucePlugin
 				int32_t off = 5;
 				for (size_t t=0; t<12; ++t, off += tableSize)
 				{
-					std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, xt::IdMw1, wLib::IdDeviceOmni, xt::Mw1::g_idmTable, static_cast<uint8_t>(xt::Mw1::g_firstRamTableIndex + t) };
+					synthLib::SysexBuffer data = { 0xf0, wLib::IdWaldorf, xt::IdMw1, wLib::IdDeviceOmni, xt::Mw1::g_idmTable, static_cast<uint8_t>(xt::Mw1::g_firstRamTableIndex + t) };
 					data.insert(data.end(), s.begin() + off, s.begin() + off + tableSize);
 					data.push_back(0x00);
 					data.push_back(0xf7);
@@ -291,7 +291,7 @@ namespace xtJucePlugin
 				{
 					auto waveIndex = static_cast<uint16_t>(xt::Mw1::g_firstRamWaveIndex + w);
 
-					std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, xt::IdMw1, wLib::IdDeviceOmni, xt::Mw1::g_idmWave,
+					synthLib::SysexBuffer data = { 0xf0, wLib::IdWaldorf, xt::IdMw1, wLib::IdDeviceOmni, xt::Mw1::g_idmWave,
 						static_cast<uint8_t>(waveIndex >> 12),
 						static_cast<uint8_t>((waveIndex >> 8) & 0xf),
 						static_cast<uint8_t>((waveIndex >> 4) & 0xf),
@@ -522,7 +522,7 @@ namespace xtJucePlugin
 	{
 		selectExportFileName(_midi ? "Save Waves as .mid" : "Save Waves as .syx", _midi ? ".mid" : ".syx", [this, _ids, _midi](const std::string& _filename)
 		{
-			std::vector<std::vector<uint8_t>> sysex;
+			synthLib::SysexBufferList sysex;
 
 			sysex.reserve(_ids.size());
 
@@ -640,7 +640,7 @@ namespace xtJucePlugin
 		}
 	}
 
-	void WaveEditor::exportToFile(const std::string& _filename, const std::vector<std::vector<uint8_t>>& _sysex, const bool _midi) const
+	void WaveEditor::exportToFile(const std::string& _filename, const synthLib::SysexBufferList& _sysex, const bool _midi) const
 	{
 		bool success;
 
@@ -652,7 +652,7 @@ namespace xtJucePlugin
 		{
 			if (_sysex.size() > 1)
 			{
-				std::vector<uint8_t> sysex;
+				synthLib::SysexBuffer sysex;
 				for (const auto& s : _sysex)
 					sysex.insert(sysex.end(), s.begin(), s.end());
 				success = baseLib::filesystem::writeFile(_filename, sysex);

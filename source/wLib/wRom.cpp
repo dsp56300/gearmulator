@@ -38,8 +38,8 @@ namespace wLib
 	{
 		_buffer.clear();
 
-		std::vector<uint8_t> data;
-		if(!synthLib::MidiToSysex::readFile(data, _filename.c_str()) || data.empty())
+		synthLib::SysexBuffer data;
+		if (!synthLib::MidiToSysex::readFile(data, _filename.c_str()) || data.empty())
 			return false;
 
 		return loadFromSysExBuffer(_buffer, data);
@@ -47,24 +47,25 @@ namespace wLib
 
 	bool ROM::loadFromMidiData(std::vector<uint8_t>& _buffer, const std::vector<uint8_t>& _midiData)
 	{
-		return loadFromSysExBuffer(_buffer, _midiData, true);
+		synthLib::SysexBuffer sysexBuf(_midiData.begin(), _midiData.end());
+		return loadFromSysExBuffer(_buffer, sysexBuf, true);
 	}
 
 	bool ROM::loadFromSysExFile(std::vector<uint8_t>& _buffer, const std::string& _filename)
 	{
 		_buffer.clear();
 
-		std::vector<uint8_t> buf;
+		synthLib::SysexBuffer buf;
 		if (!baseLib::filesystem::readFile(buf, _filename))
 			return false;
 		return loadFromSysExBuffer(_buffer, buf);
 	}
 
-	bool ROM::loadFromSysExBuffer(std::vector<unsigned char>& _buffer, const std::vector<uint8_t>& _sysex, bool _isMidiFileData/* = false*/)
+	bool ROM::loadFromSysExBuffer(std::vector<unsigned char>& _buffer, const synthLib::SysexBuffer& _sysex, bool _isMidiFileData/* = false*/)
 	{
 		_buffer.reserve(_sysex.size());
 
-		std::vector<std::vector<uint8_t>> messages;
+		synthLib::SysexBufferList messages;
 		synthLib::MidiToSysex::splitMultipleSysex(messages, _sysex, _isMidiFileData);
 
 		uint16_t expectedCounter = 1;

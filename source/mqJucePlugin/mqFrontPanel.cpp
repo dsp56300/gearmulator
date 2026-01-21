@@ -145,7 +145,7 @@ namespace mqJucePlugin
 		m_lcd.reset();
 	}
 
-	void FrontPanel::processSysex(const std::vector<uint8_t>& _msg) const
+	void FrontPanel::processSysex(const synthLib::SysexBuffer& _msg) const
 	{
 		if(_msg.size() < 5)
 			return;
@@ -170,7 +170,7 @@ namespace mqJucePlugin
 		}
 	}
 
-	void FrontPanel::processLCDUpdate(const std::vector<uint8_t>& _msg) const
+	void FrontPanel::processLCDUpdate(const synthLib::SysexBuffer& _msg) const
 	{
 		const auto* data = &_msg[5];
 
@@ -182,7 +182,7 @@ namespace mqJucePlugin
 		m_lcd->setText(d);
 	}
 
-	void FrontPanel::processLCDCGRamUpdate(const std::vector<uint8_t>& _msg) const
+	void FrontPanel::processLCDCGRamUpdate(const synthLib::SysexBuffer& _msg) const
 	{
 		const auto *data = &_msg[5];
 
@@ -193,7 +193,7 @@ namespace mqJucePlugin
 		m_lcd->setCgRam(d);
 	}
 
-	void FrontPanel::processLedUpdate(const std::vector<uint8_t>& _msg) const
+	void FrontPanel::processLedUpdate(const synthLib::SysexBuffer& _msg) const
 	{
 		const uint32_t leds = 
 			(static_cast<uint32_t>(_msg[5]) << 24) |

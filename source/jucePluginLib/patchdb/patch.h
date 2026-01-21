@@ -9,6 +9,8 @@
 #include "tags.h"
 #include "patchdbtypes.h"
 
+#include "synthLib/midiTypes.h"
+
 namespace baseLib
 {
 	class BinaryStream;
@@ -57,7 +59,7 @@ namespace pluginLib::patchDB
 		TypedTags tags;
 
 		PatchHash hash;
-		std::vector<uint8_t> sysex;
+		synthLib::SysexBuffer sysex;
 
 		std::shared_ptr<PatchModifications> modifications;
 

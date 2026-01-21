@@ -6,12 +6,14 @@
 
 #include "jetypes.h"
 
+#include "synthLib/midiTypes.h"
+
 namespace jeLib
 {
 	class Rom
 	{
 	public:
-		using Sysex = std::vector<uint8_t>;
+		using Sysex = synthLib::SysexBuffer;
 		using Preset = std::vector<Sysex>;
 
 		static constexpr size_t RomSizeKeyboard = 512 * 1024;

@@ -80,11 +80,11 @@ namespace synthLib
 		if(m_sysexBuffer.empty())
 			return;
 
-		synthLib::SMidiEvent ev(m_pendingEvent.source);
+		SMidiEvent ev(m_pendingEvent.source);
 		ev.sysex.swap(m_sysexBuffer);
 
-		if(ev.sysex.back() != synthLib::M_ENDOFSYSEX)
-			ev.sysex.push_back(synthLib::M_ENDOFSYSEX);
+		if(ev.sysex.back() != M_ENDOFSYSEX)
+			ev.sysex.push_back(M_ENDOFSYSEX);
 
 		m_midiEvents.push_back(ev);
 		m_sysexBuffer.clear();
