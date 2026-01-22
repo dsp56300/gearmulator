@@ -14,7 +14,7 @@ namespace Rml
 
 namespace jucePluginEditorLib
 {
-	Settings::Settings(Editor& _editor, Rml::Element* _root) : m_editor(_editor), m_root(_root), m_categories(*this), m_page(*this)
+	Settings::Settings(Editor& _editor, Rml::Element* _root) : m_editor(_editor), m_root(_root), m_categories(*this)
 	{
 		juce::MessageManager::callAsync([this]
 		{

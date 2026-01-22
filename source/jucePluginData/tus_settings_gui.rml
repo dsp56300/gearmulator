@@ -95,6 +95,7 @@
 				</td>
 			</tr>
 		</table>
+		<div id="containerDeviceSpecific"/>
 	</div>
 </body>
 </template>

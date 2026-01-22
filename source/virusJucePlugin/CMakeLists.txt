@@ -15,6 +15,8 @@ set(SOURCES
 	Parts.h
 	PatchManager.cpp
 	PatchManager.h
+	SettingsGuiOsTIrus.cpp
+	SettingsGuiOsTIrus.h
 	VirusController.cpp
 	VirusController.h
 	VirusEditor.cpp

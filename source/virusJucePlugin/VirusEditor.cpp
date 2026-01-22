@@ -4,6 +4,7 @@
 #include "ControllerLinks.h"
 
 #include "ParameterNames.h"
+#include "SettingsGuiOsTIrus.h"
 #include "VirusProcessor.h"
 #include "VirusController.h"
 
@@ -12,6 +13,7 @@
 
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 #include "jucePluginEditorLib/pluginDataModel.h"
+#include "jucePluginEditorLib/settingsDeviceSpecific.h"
 
 #include "juceRmlPlugin/skinConverter/skinConverterOptions.h"
 
@@ -234,6 +236,14 @@ namespace genericVirusUI
 	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(Rml::Element* _parent)
 	{
 		return new PatchManager(*this, _parent);
+	}
+
+	std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> VirusEditor::createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root)
+	{
+		if (_templateName == "tus_settings_gui_OsTIrus")
+			return std::make_unique<SettingsGuiOsTIrus>(_root);
+
+		return Editor::createDeviceSpecificSettings(_templateName, _root);
 	}
 
 	void VirusEditor::onProgramChange(int _part)

@@ -528,6 +528,11 @@ namespace juceRmlUi
 			return true;
 		}
 
+		bool hasTemplate(const std::string& _templateName, const Rml::Element* _parent)
+		{
+			return _parent->GetCoreInstance().template_cache->GetTemplate(_templateName) != nullptr;
+		}
+
 		Rml::Element* createTemplate(const std::string& _templateName, Rml::Element* _parent)
 		{
 			auto* t = _parent->GetCoreInstance().template_cache->GetTemplate(_templateName);

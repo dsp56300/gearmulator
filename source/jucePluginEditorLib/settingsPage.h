@@ -15,8 +15,6 @@ namespace jucePluginEditorLib
 		explicit SettingsPage(Settings& _settings);
 		~SettingsPage();
 
-		void setPage(Rml::Element* _page);
-
 	private:
 		Settings& m_settings;
 	};

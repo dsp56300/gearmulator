@@ -6,8 +6,4 @@ namespace jucePluginEditorLib
 	{
 	}
 	SettingsPage::~SettingsPage() = default;
-
-	void SettingsPage::setPage(Rml::Element* _page)
-	{
-	}
 }

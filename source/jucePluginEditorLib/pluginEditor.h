@@ -1,6 +1,7 @@
 #pragma once
 
 #include "parameterOverlays.h"
+#include "settingsDeviceSpecific.h"
 #include "skin.h"
 
 #include "juceUiLib/editor.h"
@@ -62,7 +63,6 @@ namespace pluginLib
 
 namespace jucePluginEditorLib
 {
-
 	class SettingsPlugin;
 	class Settings;
 
@@ -150,6 +150,8 @@ namespace jucePluginEditorLib
 		virtual void createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
 		void registerSettings(std::vector<std::unique_ptr<SettingsPlugin>>& _plugins);
+
+		virtual std::unique_ptr<SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) { return nullptr; }
 
 		juce::Component* createRmlUiComponent(const std::string& _rmlFile);
 

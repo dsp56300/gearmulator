@@ -10,9 +10,16 @@ set(SOURCES
 	OsTIrusEditorState.h
 	OsTIrusProcessor.cpp
 	OsTIrusProcessor.h
+
+	tus_settings_gui_OsTIrus.rcss
+	tus_settings_gui_OsTIrus.rml
 )
 
-SET(ASSETS "parameterDescriptions_TI.json")
+SET(ASSETS 
+	"parameterDescriptions_TI.json"
+	"tus_settings_gui_OsTIrus.rml"
+	"tus_settings_gui_OsTIrus.rcss"
+)
 
 addSkin("OsTIrus" "TrancyTI" "skins/TrancyTI" "VirusTI_Trancy.rml")
 

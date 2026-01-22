@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 namespace juceRmlUi
 {
@@ -15,5 +16,6 @@ namespace juceRmlUi
 	{
 		int refreshRateLimitHz = -1;
 		SoftwareRendererMode forceSoftwareRenderer = SoftwareRendererMode::Auto;
+		std::vector<std::string> additionalTemplateFiles;
 	};
 }

@@ -692,6 +692,27 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::RmlComponentConfig config;
 
+		// add product specific settings template files
+		const auto productName = getProcessor().getProductName();
+
+		auto files = getAllFilenames();
+
+		for (auto& file : files)
+		{
+			if (!baseLib::filesystem::hasExtension(file, ".rml"))
+				continue;
+
+			if (file.find(productName) == std::string::npos)
+				continue;
+
+			const std::string key = "tus_settings_";
+
+			if (file.size() <= key.size() || file.substr(0, key.size()) != key)
+				continue;
+
+			config.additionalTemplateFiles.push_back(std::move(file));
+		}
+
 		config.refreshRateLimitHz = m_processor.getConfig().getIntValue("refreshRateLimitHz", -1);
 
 		auto software = m_processor.getConfig().getIntValue("forceSoftwareRenderer", -1);
@@ -990,7 +1011,7 @@ namespace jucePluginEditorLib
 		showSettings(!settingsOpened());
 	}
 
-	void Editor::showSettings(bool _show)
+	void Editor::showSettings(const bool _show)
 	{
 		if (!_show && m_settings)
 		{

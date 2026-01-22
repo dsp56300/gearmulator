@@ -921,6 +921,9 @@ namespace juceRmlUi
 				addTemplate("tus_patchmanager.rml");
 				addTemplate("tus_colorpicker.rml");
 				addTemplate("tus_settings.rml");
+
+				for (const auto& templateName : m_config.additionalTemplateFiles)
+					addTemplate(templateName);
 			}
 
 			m_document = m_rmlContext->LoadDocumentFromMemory(rmlString, m_rootRmlFilename);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "settingsCategories.h"
-#include "settingsPage.h"
 
 namespace Rml
 {
@@ -32,6 +31,5 @@ namespace jucePluginEditorLib
 		Rml::Element* m_root;
 
 		SettingsCategories m_categories;
-		SettingsPage m_page;
 	};
 }

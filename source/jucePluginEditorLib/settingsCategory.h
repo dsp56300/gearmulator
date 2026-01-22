@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+
+#include "settingsDeviceSpecific.h"
+
 namespace Rml
 {
 	class Element;
@@ -27,5 +31,7 @@ namespace jucePluginEditorLib
 
 		Rml::Element* m_button;
 		Rml::Element* m_page;
+
+		std::unique_ptr<SettingsDeviceSpecific> m_settingsDeviceSpecific;
 	};
 }
