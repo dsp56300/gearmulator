@@ -40,7 +40,7 @@ namespace jucePluginEditorLib
 
 			button->setChecked(currentScale == scale);
 
-			juceRmlUi::EventListener::Add(button, Rml::EventId::Click, [this, scale](Rml::Event& _event)
+			juceRmlUi::EventListener::Add(buttonContainer, Rml::EventId::Click, [this, scale](Rml::Event& _event)
 			{
 				_event.StopPropagation();
 

@@ -57,7 +57,7 @@ namespace jucePluginEditorLib
 
 			button->setChecked(currentLatency == latency);
 
-			juceRmlUi::EventListener::Add(button, Rml::EventId::Click, [this, latency](Rml::Event& _event)
+			juceRmlUi::EventListener::Add(buttonContainer, Rml::EventId::Click, [this, latency](Rml::Event& _event)
 			{
 				_event.StopPropagation();
 
