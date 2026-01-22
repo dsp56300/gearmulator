@@ -5,6 +5,7 @@
 <body>
 	<settingsspacer1/>
 	<h1>Animation</h1>
+	<settingsspacer1/>
 	<div id="btEnableLogoAnimations" class="settings-checkboxwithlabel">
 		<button id="button" class="settings-checkbox"/>
 		<label>Enable Logo Animation</label>

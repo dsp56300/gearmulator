@@ -9,9 +9,11 @@ namespace Rml
 
 namespace genericVirusUI
 {
+	class VirusEditor;
+
 	class SettingsGuiOsTIrus : public jucePluginEditorLib::SettingsDeviceSpecific
 	{
 	public:
-		SettingsGuiOsTIrus(Rml::Element* _root);
+		SettingsGuiOsTIrus(const VirusEditor* _editor, Rml::Element* _root);
 	};
 }

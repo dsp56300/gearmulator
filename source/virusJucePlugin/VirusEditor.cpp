@@ -241,7 +241,7 @@ namespace genericVirusUI
 	std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> VirusEditor::createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root)
 	{
 		if (_templateName == "tus_settings_gui_OsTIrus")
-			return std::make_unique<SettingsGuiOsTIrus>(_root);
+			return std::make_unique<SettingsGuiOsTIrus>(this, _root);
 
 		return Editor::createDeviceSpecificSettings(_templateName, _root);
 	}
