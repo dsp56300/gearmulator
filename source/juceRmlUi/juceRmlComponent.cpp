@@ -876,6 +876,16 @@ namespace juceRmlUi
 		m_renderDone = true;
 	}
 
+	juce::Component* RmlComponent::getComponentAt(const juce::Point<float> _position)
+	{
+		if (auto* elem = m_rmlContext->GetElementAtPoint(Rml::Vector2f(_position.x, _position.y)))
+			m_lastGetComponentAt = elem->GetObserverPtr(elem->GetCoreInstance());
+		else
+			m_lastGetComponentAt.reset();
+
+		return Component::getComponentAt(_position);
+	}
+
 	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
 	{
 		const auto size = getScreenBounds();

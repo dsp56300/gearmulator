@@ -5,6 +5,8 @@ Release Notes
 Framework:
 
 - [Imp] BUG-10120 allow to drag sliders slower by using shift key
+- [Imp] BUG-10130 Add IParameterFinder support for VST3 plug-ins
+        to support "AI knob" control surfaces
 
 - [Fix] Crash when loading plugin on some Linux distributions
 

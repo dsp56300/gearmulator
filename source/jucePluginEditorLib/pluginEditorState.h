@@ -87,12 +87,12 @@ namespace jucePluginEditorLib
 			return m_currentSkin.isValid();
 		}
 
+		Editor* getEditor() const;
+
 	protected:
 		virtual Editor* createEditor(const Skin& _skin) = 0;
 
 		Processor& m_processor;
-
-		Editor* getEditor() const;
 
 	private:
 		bool loadSkin(const Skin& _skin, uint32_t _fallbackIndex = 0);

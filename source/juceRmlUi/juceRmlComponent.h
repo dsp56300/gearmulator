@@ -127,6 +127,9 @@ namespace juceRmlUi
 
 		void paint(juce::Graphics& _g) override;
 
+		Component* getComponentAt(juce::Point<float> _position) override;
+		Rml::Element* getLastElementByGetComponentAt() const { return m_lastGetComponentAt.get(); }
+
 	private:
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
@@ -197,5 +200,7 @@ namespace juceRmlUi
 		juce::Component* m_lookAndFeelParent = nullptr;
 
 		RmlComponentConfig m_config;
+
+		Rml::ObserverPtr<Rml::Element> m_lastGetComponentAt;
 	};
 }
