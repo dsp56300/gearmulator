@@ -17,29 +17,6 @@ namespace virus
 		return new genericVirusUI::VirusEditor(static_cast<VirusProcessor&>(m_processor), _skin);
 	}
 
-	void VirusEditorState::initContextMenu(juceRmlUi::Menu& _menu)
-	{
-		PluginEditorState::initContextMenu(_menu);
-
-		if(const auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(getEditor()))
-		{
-			const auto& leds = editor->getLeds();
-
-			if(leds && leds->supportsLogoAnimation())
-			{
-				_menu.addEntry("Enable Logo Animation", true, leds->isLogoAnimationEnabled(), [this]
-				{
-					const auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(getEditor());
-					if(editor)
-					{
-						const auto& leds = editor->getLeds();
-						leds->toggleLogoAnimation();
-					}
-				});
-			}
-		}
-	}
-
 	bool VirusEditorState::initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled)
 	{
 		jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
