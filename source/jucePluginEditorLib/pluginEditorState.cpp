@@ -316,6 +316,18 @@ Editor* PluginEditorState::getEditor() const
 	return m_editor.get();
 }
 
+void PluginEditorState::enableDspBridge(const bool _enable)
+{
+	if (_enable && !m_remoteServerList)
+	{
+		m_remoteServerList.reset(new bridgeClient::ServerList(getPluginDesc(m_processor)));
+	}
+	else if (!_enable && m_remoteServerList)
+	{
+		m_remoteServerList.reset();
+	}
+}
+
 void PluginEditorState::openMenu(const Rml::Event& _event)
 {
 	if(getEditor()->openContextMenuForParameter(_event))

@@ -39,11 +39,6 @@ namespace jucePluginEditorLib
 
 	void SettingsDspBridge::createUi(Rml::Element* _root)
 	{
-		auto* editorState = m_processor.getEditorState();
-
-		if (!editorState->getRemoteServerList())
-			return;
-
 		m_table = juceRmlUi::helper::findChild(_root, g_deviceTypeTableId);
 		if (!m_table)
 			return;
@@ -51,6 +46,11 @@ namespace jucePluginEditorLib
 		m_templateRow = juceRmlUi::helper::findChild(_root, g_deviceTypeEntryId);
 		if (!m_templateRow)
 			return;
+
+		createToggleButton(_root, "btEnableDspBridge", "supportDspBridge", [this](bool _enable)
+		{
+			m_processor.getEditorState()->enableDspBridge(_enable);
+		});
 
 		juceRmlUi::helper::setVisible(m_templateRow, false);
 
@@ -138,11 +138,15 @@ namespace jucePluginEditorLib
 
 	void SettingsDspBridge::refreshServerList()
 	{
-		auto* editorState = m_processor.getEditorState();
-		if (!editorState->getRemoteServerList() || !m_table || !m_templateRow)
+		if (!m_table || !m_templateRow)
 			return;
 
-		auto servers = editorState->getRemoteServerList()->getEntries();
+		std::set<bridgeClient::ServerList::Entry> servers;
+
+		auto* editorState = m_processor.getEditorState();
+
+		if (editorState->getRemoteServerList())
+			servers = editorState->getRemoteServerList()->getEntries();
 
 		// Calculate total entries needed: 1 (Local) + servers.size() or 1 (Local) + 1 ("no servers found")
 		size_t entriesNeeded = 1; // Always have Local

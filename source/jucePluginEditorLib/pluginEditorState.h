@@ -91,6 +91,7 @@ namespace jucePluginEditorLib
 
 		Editor* getEditor() const;
 
+		void enableDspBridge(bool _enable);
 		bridgeClient::ServerList* getRemoteServerList() const { return m_remoteServerList.get(); }
 
 	protected:

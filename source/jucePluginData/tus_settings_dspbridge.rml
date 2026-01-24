@@ -4,6 +4,13 @@
 </head>
 <body>
 	<div class="settings-page">
+		<h1>Activation</h1>
+		<settingsspacer1/>
+		<div id="btEnableDspBridge" class="settings-checkboxwithlabel">
+			<button id="button" class="settings-checkbox"/>
+			<label id="label">Enable DSP Bridge</label>
+		</div>
+		<settingsspacer1/>
 		<h1>Device Type</h1>
 		<settingsspacer1/>
 		<table id="deviceTypeTable" class="settings-table">
