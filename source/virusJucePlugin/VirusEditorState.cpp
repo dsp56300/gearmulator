@@ -45,43 +45,6 @@ namespace virus
 
 		_menu.addSubMenu("DSP Clock", std::move(clockMenu));
 
-		const auto samplerates = m_processor.getDeviceSupportedSamplerates();
-
-		if(samplerates.size() > 1)
-		{
-			juceRmlUi::Menu srMenu;
-
-			const auto current = m_processor.getPreferredDeviceSamplerate();
-
-			const auto preferred = m_processor.getDevicePreferredSamplerates();
-
-			srMenu.addEntry("Automatic (Match with host)", true, current == 0.0f, [this] { m_processor.setPreferredDeviceSamplerate(0.0f); });
-			srMenu.addSeparator();
-			srMenu.addEntry("Official, used automatically", false, false, [] {});
-
-			auto addSRs = [&](bool _usePreferred)
-			{
-				for (const float samplerate : samplerates)
-				{
-					const auto isPreferred = std::find(preferred.begin(), preferred.end(), samplerate) != preferred.end();
-
-					if(isPreferred != _usePreferred)
-						continue;
-
-					const auto title = std::to_string(static_cast<int>(std::floor(samplerate + 0.5f))) + " Hz";
-
-					srMenu.addEntry(title, _enabled, std::fabs(samplerate - current) < 1.0f, [this, samplerate] { m_processor.setPreferredDeviceSamplerate(samplerate); });
-				}
-			};
-
-			addSRs(true);
-			srMenu.addSeparator();
-			srMenu.addEntry("Undocumented, use with care", false, false, [] {});
-			addSRs(false);
-
-			_menu.addSubMenu("Device Samplerate", std::move(srMenu));
-		}
-
 		return true;
 	}
 }
