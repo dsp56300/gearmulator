@@ -4,6 +4,7 @@
 #include "ControllerLinks.h"
 
 #include "ParameterNames.h"
+#include "SettingsDspAudioOsTIrus.h"
 #include "SettingsGuiOsTIrus.h"
 #include "VirusProcessor.h"
 #include "VirusController.h"
@@ -242,6 +243,9 @@ namespace genericVirusUI
 	{
 		if (_templateName == "tus_settings_gui_OsTIrus")
 			return std::make_unique<SettingsGuiOsTIrus>(this, _root);
+
+		if (_templateName == "tus_settings_dspaudio_OsTIrus")
+			return std::make_unique<SettingsDspAudioOsTIrus>(this, _root);
 
 		return Editor::createDeviceSpecificSettings(_templateName, _root);
 	}

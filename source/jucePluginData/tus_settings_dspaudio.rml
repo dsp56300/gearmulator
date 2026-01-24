@@ -54,6 +54,7 @@
 			<input id="sliderGain" class="settings-slider-h" type="range" min="-24" max="24" step="1" value="0" style="width: 90%;"/>
 			<label id="labelGain">+6 dB</label>
 		</div>
+		<div id="containerDeviceSpecific"/>
 	</div>
 </body>
 </template>

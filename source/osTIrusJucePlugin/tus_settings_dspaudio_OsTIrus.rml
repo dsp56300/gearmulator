@@ -1,0 +1,27 @@
+<template name="tus_settings_dspaudio_OsTIrus">
+<head>
+	<link type="text/rcss" href="tus_settings_dspaudio_OsTIrus.rcss"/>
+</head>
+<body>
+	<h1>Device Samplerate</h1>
+	<settingsspacer1/>
+	<h3>Automatic</h3>
+	<div id="btSamplerateAutomatic" class="settings-checkboxwithlabel">
+		<button id="button" class="settings-checkbox"/>
+		<label>Automatic (Match with host)</label>
+	</div>
+	<settingsspacer1/>
+	<h3>Official, used automatically</h3>
+	<div id="btSamplerateOfficial" style="display: none;" class="settings-checkboxwithlabel">
+		<button id="button" class="settings-checkbox"/>
+		<label id="label">48000 Hz</label>
+	</div>
+	<settingsspacer1/>
+	<h3>Undocumented, use with care</h3>
+	<div id="btSamplerateUndocumented" style="display: none;" class="settings-checkboxwithlabel">
+		<button id="button" class="settings-checkbox"/>
+		<label id="label">48000 Hz</label>
+	</div>
+</body>
+</template>
+
