@@ -16,7 +16,6 @@ namespace xtJucePlugin
 	public:
 		explicit PluginEditorState(AudioPluginAudioProcessor& _processor);
 		void initContextMenu(juceRmlUi::Menu& _menu) override;
-		bool initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled) override;
 		void openMenu(const Rml::Event& _event) override;
 
 	private:

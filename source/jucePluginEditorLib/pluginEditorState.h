@@ -71,7 +71,6 @@ namespace jucePluginEditorLib
 		void loadDefaultSkin();
 
 		virtual void initContextMenu(juceRmlUi::Menu& _menu) {}
-		virtual bool initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled) { return false; }
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data);
 		void getPerInstanceConfig(std::vector<uint8_t>& _data);

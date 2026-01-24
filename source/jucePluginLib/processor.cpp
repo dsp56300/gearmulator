@@ -382,6 +382,13 @@ namespace pluginLib
 		return m_device->getDspClockHz();
 	}
 
+	bool Processor::canModifyDspClock() const
+	{
+		if(!m_device)
+			return false;
+		return m_device->canModifyDspClock();
+	}
+
 	bool Processor::setPreferredDeviceSamplerate(const float _samplerate)
 	{
 		m_preferredDeviceSamplerate = _samplerate;

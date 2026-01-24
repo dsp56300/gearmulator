@@ -168,3 +168,11 @@ settingsspacer1 {
 	background-color: #000a;
 	border-radius: 1em;
 }
+
+.settings-advanced {
+}
+
+.settings-advanced:disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}

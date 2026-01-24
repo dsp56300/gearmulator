@@ -24,7 +24,9 @@ namespace jucePluginEditorLib
 	private:
 		uint32_t getCurrentLatency() const;
 		void updateButtons() const;
+		void updateClockButtons() const;
 
 		std::vector<std::pair<uint32_t, juceRmlUi::ElemButton*>> m_latencyButtons;
+		std::vector<std::pair<int, juceRmlUi::ElemButton*>> m_clockButtons;
 	};
 }

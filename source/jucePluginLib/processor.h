@@ -122,6 +122,7 @@ namespace pluginLib
 		bool setDspClockPercent(uint32_t _percent = 100);
 		uint32_t getDspClockPercent() const;
 		uint64_t getDspClockHz() const;
+		bool canModifyDspClock() const;
 
 		bool setPreferredDeviceSamplerate(float _samplerate);
 		float getPreferredDeviceSamplerate() const;

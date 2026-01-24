@@ -8,11 +8,15 @@
 
 #include "juceUiLib/messageBox.h"
 
+#include "RmlUi/Core/Element.h"
+
 #include <cmath>
+#include <sstream>
 
 namespace jucePluginEditorLib
 {
 	static constexpr std::initializer_list<uint32_t> g_latencies = {0, 1, 2, 4, 8};
+	static constexpr std::initializer_list<int> g_clockPercents = {50, 75, 100, 125, 150, 200};
 
 	namespace
 	{
@@ -71,6 +75,58 @@ namespace jucePluginEditorLib
 			});
 		}
 
+		// DSP Clock buttons
+		if (m_processor.canModifyDspClock())
+		{
+			if (auto* dspClockTemplate = juceRmlUi::helper::findChild(_root, "dspClockEntry", false))
+			{
+				const auto currentPercent = m_processor.getDspClockPercent();
+				const auto hz = m_processor.getDspClockHz();
+				auto* parent = dspClockTemplate->GetParentNode();
+
+				for (const auto percent : g_clockPercents)
+				{
+					auto clone = dspClockTemplate->Clone();
+					auto* clonePtr = clone.get();
+					clonePtr->SetId("");
+					clonePtr->RemoveProperty("display");
+
+					auto* buttonContainer = juceRmlUi::helper::findChild(clonePtr, "dspClockButton");
+					auto* button = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(buttonContainer, "button");
+					auto* label = juceRmlUi::helper::findChild(buttonContainer, "label");
+
+					const auto mhz = hz * percent / 100 / 1000000;
+					std::stringstream ss;
+					ss << percent << "% (" << mhz << " MHz)";
+					if(percent == 100)
+						ss << " (Default)";
+					
+					label->SetInnerRML(ss.str());
+
+					button->setChecked(currentPercent == percent);
+					m_clockButtons.emplace_back(percent, button);
+
+					juceRmlUi::EventListener::Add(buttonContainer, Rml::EventId::Click, [this, percent](Rml::Event& _event)
+					{
+						_event.StopPropagation();
+						m_processor.setDspClockPercent(percent);
+						updateClockButtons();
+					});
+
+					parent->InsertBefore(std::move(clone), dspClockTemplate);
+				}
+
+				dspClockTemplate->GetParentNode()->RemoveChild(dspClockTemplate);
+			}
+		}
+		else
+		{
+			if (auto* containerDspClock = juceRmlUi::helper::findChild(_root, "containerDspClock", false))
+			{
+				juceRmlUi::helper::setVisible(containerDspClock, false);
+			}
+		}
+
 		// Output Gain slider
 		auto* sliderGain = juceRmlUi::helper::findChild(_root, "sliderGain", false);
 		auto* labelGain = juceRmlUi::helper::findChild(_root, "labelGain", false);
@@ -117,6 +173,16 @@ namespace jucePluginEditorLib
 		for (const auto [latency, button] : m_latencyButtons)
 		{
 			button->setChecked(currentLatency == latency);
+		}
+	}
+
+	void SettingsDspAudio::updateClockButtons() const
+	{
+		const auto currentPercent = m_processor.getDspClockPercent();
+
+		for (const auto [percent, button] : m_clockButtons)
+		{
+			button->setChecked(currentPercent == percent);
 		}
 	}
 }

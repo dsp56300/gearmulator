@@ -1,10 +1,14 @@
 #include "settings.h"
 
+#include "pluginEditor.h"
+#include "pluginProcessor.h"
+
 #include "juceRmlUi/rmlHelper.h"
 
 #include "juce_events/juce_events.h"
 
 #include "RmlUi/Core/Element.h"
+#include "RmlUi/Core/ElementUtilities.h"
 #include "RmlUi/Core/ID.h"
 
 namespace Rml
@@ -16,6 +20,10 @@ namespace jucePluginEditorLib
 {
 	Settings::Settings(Editor& _editor, Rml::Element* _root) : m_editor(_editor), m_root(_root), m_categories(*this)
 	{
+		const bool allowAdvanced = _editor.getProcessor().getConfig().getBoolValue("allow_advanced_options", false);
+
+		enableAdvancedOptions(allowAdvanced);
+
 		juce::MessageManager::callAsync([this]
 		{
 			m_categories.selectLastCategory();
@@ -54,5 +62,14 @@ namespace jucePluginEditorLib
 	Rml::Element* Settings::getPageParent() const
 	{
 		return juceRmlUi::helper::findChild(m_root, "pageContainer");
+	}
+
+	void Settings::enableAdvancedOptions(const bool _enable) const
+	{
+		Rml::ElementList elements;
+		Rml::ElementUtilities::GetElementsByClassName(elements, m_root, "settings-advanced");
+
+		for (auto* element : elements)
+			element->SetPseudoClass("disabled", !_enable);
 	}
 }

@@ -16,8 +16,6 @@ namespace mqJucePlugin
 	public:
 		explicit PluginEditorState(AudioPluginAudioProcessor& _processor);
 
-		bool initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled) override;
-
 	private:
 		jucePluginEditorLib::Editor* createEditor(const jucePluginEditorLib::Skin& _skin) override;
 	};
