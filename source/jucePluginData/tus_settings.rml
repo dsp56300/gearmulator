@@ -13,6 +13,11 @@
 			<div class="settings-categories">
 				<div class="settings-headline">Settings</div>
 				<button id="btPage" class="button settings-category-button">...</button>
+				<flexspacer style="flex-grow: 1;"/>
+				<div id="btEnableAdvancedOptions" class="settings-checkboxwithlabel">
+					<button id="button" class="settings-checkbox"/>
+					<label>Enable Advanced Options</label>
+				</div>
 			</div>
 			<div id="pageContainer" class="settings-pagecontainer">
 			</div>

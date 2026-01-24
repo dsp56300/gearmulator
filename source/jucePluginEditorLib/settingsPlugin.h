@@ -12,6 +12,7 @@ namespace Rml
 namespace juce
 {
 	class Component;
+	class PropertiesFile;
 }
 
 namespace jucePluginEditorLib
@@ -33,11 +34,18 @@ namespace jucePluginEditorLib
 
 		static bool addClickHandler(Rml::Element* _root, const std::string& _child, std::function<void(Rml::Event&)> _handler);
 
+		static bool createToggleButton(Rml::Element* _root,
+			const std::string& _buttonName,
+			juce::PropertiesFile& _config,
+			const std::string& _configName,
+			const std::function<void(bool)>& _changeCallback);
+
 	protected:
 		bool createToggleButton(Rml::Element* _root,
 			const std::string& _buttonName,
 			const std::string& _configName,
 			const std::function<void(bool)>& _changeCallback) const;
+
 		Processor& m_processor;
 	};
 }

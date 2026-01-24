@@ -432,39 +432,6 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 		}
 	}
 
-	{
-		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
-
-		juceRmlUi::Menu advancedMenu;
-		advancedMenu.addEntry("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
-		{
-			if(!allowAdvanced)
-			{
-				genericUI::MessageBox::showOkCancel(
-					genericUI::MessageBox::Icon::Warning, 
-					"Warning", 
-					"Changing these settings may cause instability of the plugin.\n\nPlease confirm to continue.", 
-					[this](const genericUI::MessageBox::Result _result)
-				{
-					if (_result == genericUI::MessageBox::Result::Ok)
-						m_processor.getConfig().setValue("allow_advanced_options", true);
-				});
-			}
-			else
-			{
-				m_processor.getConfig().setValue("allow_advanced_options", juce::var(false));
-			}
-		});
-
-		advancedMenu.addSeparator();
-
-		if(initAdvancedContextMenu(advancedMenu, allowAdvanced))
-		{
-			menu.addSeparator();
-			menu.addSubMenu("Advanced...", std::move(advancedMenu));
-		}
-	}
-
 	menu.runModal(_event, 16);
 }
 

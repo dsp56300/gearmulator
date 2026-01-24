@@ -21,7 +21,7 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
-	bool SettingsPlugin::createToggleButton(Rml::Element* _root, const std::string& _buttonName, const std::string& _configName, const std::function<void(bool)>& _changeCallback) const
+	bool SettingsPlugin::createToggleButton(Rml::Element* _root, const std::string& _buttonName, juce::PropertiesFile& _config, const std::string& _configName, const std::function<void(bool)>& _changeCallback)
 	{
 		auto* btRoot = juceRmlUi::helper::findChild(_root, _buttonName, false);
 
@@ -30,12 +30,12 @@ namespace jucePluginEditorLib
 
 		auto* bt = juceRmlUi::helper::findChild(btRoot, "button");
 
-		const auto enabled = m_processor.getConfig().getBoolValue(_configName, false);
+		const auto enabled = _config.getBoolValue(_configName, false);
 		juceRmlUi::ElemButton::setChecked(bt, enabled);
 
-		juceRmlUi::EventListener::AddClick(btRoot, [this, bt, _changeCallback, _configName]
+		juceRmlUi::EventListener::AddClick(btRoot, [bt, &_config, _changeCallback, _configName]
 		{
-			auto& c = m_processor.getConfig();
+			auto& c = _config;
 			const auto enabled = c.getBoolValue(_configName, false);
 			juceRmlUi::ElemButton::setChecked(bt, !enabled);
 			c.setValue(_configName, !enabled);
@@ -44,5 +44,10 @@ namespace jucePluginEditorLib
 		});
 
 		return true;
+	}
+
+	bool SettingsPlugin::createToggleButton(Rml::Element* _root, const std::string& _buttonName, const std::string& _configName, const std::function<void(bool)>& _changeCallback) const
+	{
+		return createToggleButton(_root, _buttonName, m_processor.getConfig(), _configName, _changeCallback);
 	}
 }

@@ -48,7 +48,7 @@
 	gap: 1em;
 	align-items: center;
 	padding-top: 1em;
-
+	padding-bottom: 1em;
 }
 
 .settings-pagecontainer {
