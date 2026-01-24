@@ -1,9 +1,15 @@
 #include "pluginEditorWindow.h"
+
+#include "pluginEditor.h"
 #include "pluginEditorState.h"
+
 #include "dsp56kBase/logging.h"
+
+#include "juceRmlPlugin/rmlParameterBinding.h"
+
 #include "juceRmlUi/juceRmlComponent.h"
 
-#include "patchmanager/patchmanager.h"
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace jucePluginEditorLib
 {
@@ -63,6 +69,41 @@ void EditorWindow::resized()
 	// root component is not! This is no drama as long as you do not have a juce OpenGL context, because
 	// that one uses the "top level component" to set the clipping rectangle! W T F
 	startTimer(1);
+}
+
+int EditorWindow::getControlParameterIndex(Component& _component)
+{
+	// This code relies on the fact that getComponentAt() is called with a XY position
+	// first and then the parameter is queried for that returned component afterwards.
+	// As we do not have Juce components, we remember the last Rml element that was
+	// under the mouse and query the parameter binding for that element here.
+	// It would be better if there was a function like "getParameterForPosition" but unfortunately
+	// Juce does not provide that.
+	if (const auto* editor = m_state.getEditor())
+	{
+		if (const auto* comp = editor->getRmlComponent())
+		{
+			if (const auto* binding = editor->getRmlParameterBinding())
+			{
+				if (const auto* elem = comp->getLastElementByGetComponentAt())
+				{
+					if (const auto* param = binding->getParameterForElement(elem))
+						return param->getParameterIndex();
+
+					if (const auto* parent = elem->GetParentNode())
+					{
+						if (dynamic_cast<const Rml::ElementFormControlInput*>(parent))
+						{
+							if (const auto* param = binding->getParameterForElement(parent))
+								return param->getParameterIndex();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return AudioProcessorEditor::getControlParameterIndex(_component);
 }
 
 void EditorWindow::setGuiScale(const float _percent)
