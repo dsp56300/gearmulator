@@ -195,6 +195,9 @@ namespace juceRmlUi
 
 	Rml::LayerHandle RendererProxy::PushLayer()
 	{
+		if (!m_config.canLayer)
+			return {};
+
 		auto dummyHandle = createDummyHandle();
 
 		addRenderFunction(dummyHandle, [this, dummyHandle]
@@ -210,6 +213,9 @@ namespace juceRmlUi
 
 	void RendererProxy::CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, const Rml::Span<const Rml::CompiledFilterHandle> _filters)
 	{
+		if (!m_config.canLayer)
+			return;
+
 		auto f = copySpan(_filters);
 		addRenderFunction([this, _source, _destination, _blendMode, filters = std::move(f)]
 		{
@@ -241,6 +247,9 @@ namespace juceRmlUi
 
 	void RendererProxy::PopLayer()
 	{
+		if (!m_config.canLayer)
+			return;
+
 		addRenderFunction([this]
 		{
 			m_renderer->PopLayer();
@@ -252,6 +261,9 @@ namespace juceRmlUi
 
 	Rml::TextureHandle RendererProxy::SaveLayerAsTexture()
 	{
+		if (!m_config.canLayer)
+			return {};
+
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction([this, dummyHandle]
 		{
@@ -265,6 +277,9 @@ namespace juceRmlUi
 
 	Rml::CompiledFilterHandle RendererProxy::SaveLayerAsMaskImage()
 	{
+		if (!m_config.canLayer)
+			return {};
+
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction(dummyHandle, [this, dummyHandle]
 		{
@@ -278,6 +293,9 @@ namespace juceRmlUi
 
 	Rml::CompiledFilterHandle RendererProxy::CompileFilter(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
+		if (!m_config.canFilter)
+			return {};
+
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction(dummyHandle, [this, dummyHandle, name = _name, parameters = _parameters]
 		{
@@ -291,6 +309,9 @@ namespace juceRmlUi
 
 	void RendererProxy::ReleaseFilter(Rml::CompiledFilterHandle _filter)
 	{
+		if (!m_config.canFilter)
+			return;
+
 		addRenderFunction([this, _filter]
 		{
 			if (const auto realFilter = getRealHandle<HandleCompiledFilter>(_filter))
@@ -303,6 +324,9 @@ namespace juceRmlUi
 
 	Rml::CompiledShaderHandle RendererProxy::CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
+		if (!m_config.canShader)
+			return {};
+
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction(dummyHandle, [this, dummyHandle, name = _name, parameters = _parameters]
 		{
@@ -316,6 +340,9 @@ namespace juceRmlUi
 
 	void RendererProxy::RenderShader(Rml::CompiledShaderHandle _shader, const Rml::CompiledGeometryHandle _geometry, const Rml::Vector2f _translation, const Rml::TextureHandle _texture)
 	{
+		if (!m_config.canShader)
+			return;
+
 		addRenderFunction([this, _shader, _geometry, _translation, _texture]
 		{
 			if (const auto realShader = getRealHandle<HandleCompiledShader>(_shader))
@@ -330,6 +357,9 @@ namespace juceRmlUi
 
 	void RendererProxy::ReleaseShader(Rml::CompiledShaderHandle _shader)
 	{
+		if (!m_config.canShader)
+			return;
+
 		addRenderFunction([this, _shader]
 		{
 			if (const auto realShader = getRealHandle<HandleCompiledShader>(_shader))
@@ -398,7 +428,7 @@ namespace juceRmlUi
 		void release(Rml::RenderInterface* _r, const RendererProxy::HandleLayer&              ) { _r->PopLayer(); }
 	}
 
-	void RendererProxy::setRenderer(Rml::RenderInterface* _renderer)
+	void RendererProxy::setRenderer(Rml::RenderInterface* _renderer, const RendererConfig& _config)
 	{
 		std::lock_guard lockR(m_mutexRender);
 
@@ -436,6 +466,7 @@ namespace juceRmlUi
 		}
 
 		m_renderer = _renderer;
+		m_config = _config;
 
 		if (m_renderer)
 		{

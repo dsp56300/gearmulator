@@ -57,6 +57,10 @@ namespace juceRmlUi
 		    }
 			return false;
 		}
+
+		static constexpr RendererProxy::RendererConfig g_renderConfigSoftware {true, false, false};
+		static constexpr RendererProxy::RendererConfig g_renderConfigGL2 {false, false, false};
+		static constexpr RendererProxy::RendererConfig g_renderConfigGL3 {true, true, true};
 	}
 
 	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, const RmlComponentConfig& _config)
@@ -78,7 +82,7 @@ namespace juceRmlUi
 		{
 			m_renderInterface.reset(new RendererJuce(m_coreInstance));
 			m_renderType = Renderer::Software;
-			m_renderProxy->setRenderer(m_renderInterface.get());
+			m_renderProxy->setRenderer(m_renderInterface.get(), g_renderConfigSoftware);
 		}
 		else
 		{
@@ -139,7 +143,7 @@ namespace juceRmlUi
 
 	RmlComponent::~RmlComponent()
 	{
-		m_renderProxy->setRenderer(nullptr);
+		m_renderProxy->setRenderer(nullptr, g_renderConfigSoftware);
 
 		if (m_lookAndFeelParent)
 			m_lookAndFeelParent->setLookAndFeel(nullptr);
@@ -256,7 +260,7 @@ namespace juceRmlUi
 
 		m_openGLversion = version;
 
-		m_renderProxy->setRenderer(m_renderInterface.get());
+		m_renderProxy->setRenderer(m_renderInterface.get(), m_renderType == Renderer::Gl3 ? g_renderConfigGL3 : g_renderConfigGL2);
 
 		{
 			std::scoped_lock lock(m_timerMutex);
@@ -355,7 +359,7 @@ namespace juceRmlUi
 		if (m_renderType == Renderer::Software)
 			return;
 
-		m_renderProxy->setRenderer(nullptr);
+		m_renderProxy->setRenderer(nullptr, g_renderConfigSoftware);
 		m_renderInterface.reset();
 	}
 
@@ -681,7 +685,7 @@ namespace juceRmlUi
 		if (m_renderType == Renderer::Software && !m_renderInterface)
 		{
 			m_renderInterface.reset(new RendererJuce(m_coreInstance));
-			m_renderProxy->setRenderer(m_renderInterface.get());
+			m_renderProxy->setRenderer(m_renderInterface.get(), g_renderConfigSoftware);
 		}
 		else if (!m_renderInterface)
 			return;
