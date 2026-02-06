@@ -30,6 +30,13 @@ namespace juceRmlUi
 			HandleTypeLayer
 		};
 
+		struct RendererConfig
+		{
+			bool canLayer = true;
+			bool canFilter = true;
+			bool canShader = true;
+		};
+
 		// we need strongly typed handles to avoid confusion between different types of handles, they all have the same underlying type
 		template<typename T, HandleType HT>
 		struct StrongHandle
@@ -84,7 +91,7 @@ namespace juceRmlUi
 
 		void finishFrame();
 
-		void setRenderer(Rml::RenderInterface* _renderer);
+		void setRenderer(RenderInterface* _renderer, const RendererConfig& _config);
 
 		void setTextureParameters(const uint32_t _maxTextureSize, const bool _npotTextureSupported);
 
@@ -159,6 +166,7 @@ namespace juceRmlUi
 
 		Handle m_nextHandle = 1;
 		Rml::RenderInterface* m_renderer = nullptr;
+		RendererConfig m_config;
 		std::mutex m_mutex;
 		std::mutex m_mutexRender;
 		std::vector<Func> m_enqueuedFunctions;
