@@ -54,6 +54,11 @@ namespace juceRmlUi
 		Rml::TextureHandle GenerateTexture(Rml::Span<const uint8_t> _source, Rml::Vector2i _sourceDimensions) override;
 		void ReleaseTexture(Rml::TextureHandle _texture) override;
 
+		Rml::LayerHandle PushLayer() override;
+		void PopLayer() override;
+		Rml::TextureHandle SaveLayerAsTexture() override;
+		void CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, Rml::Span<const unsigned long long> _filters) override;
+
 		void EnableScissorRegion(bool _enable) override;
 		void SetScissorRegion(Rml::Rectanglei _region) override;
 
@@ -62,12 +67,17 @@ namespace juceRmlUi
 	private:
 		void pushClip();
 
+		rendererJuce::Image* allocateRenderTarget(int _width, int _height);
+		void releaseRenderTarget(rendererJuce::Image* _img);
+
 		bool m_scissorEnabled = false;
 		Rml::Rectanglei m_scissorRegion;
 
 		juce::Graphics* m_graphics = nullptr;
 
-		std::unique_ptr<rendererJuce::Image> m_renderTarget;
+		rendererJuce::Image* m_renderTarget = nullptr;
+		std::vector<rendererJuce::Image*> m_renderTargetStack;
+		std::vector<std::unique_ptr<rendererJuce::Image>> m_renderTargetPool;
 		std::unique_ptr<juce::Image> m_renderImage;
 
 		std::unordered_map<uint64_t, std::vector<std::unique_ptr<rendererJuce::Image>>> m_imagePool;

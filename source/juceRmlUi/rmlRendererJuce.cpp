@@ -1018,9 +1018,168 @@ namespace juceRmlUi
 
 	void RendererJuce::ReleaseTexture(const Rml::TextureHandle _texture)
 	{
+		if (!_texture)
+			return;
+
 		auto* img = reinterpret_cast<Image*>(_texture);
 		img->clearMip();
 		m_imagePool[img->getSizeKey()].emplace_back(img);
+	}
+
+	Rml::LayerHandle RendererJuce::PushLayer()
+	{
+		if (!m_renderTarget)
+			return {};
+
+		const auto width = m_renderTarget->width;
+		const auto height = m_renderTarget->height;
+
+		auto* newLayer = allocateRenderTarget(width, height);
+
+		// copy current render target content to new layer
+		const auto copySize = m_renderTarget->paddedWidth * m_renderTarget->height * 4;
+		memcpy(newLayer->data.data(), m_renderTarget->data.data(), copySize);
+
+		m_renderTargetStack.push_back(newLayer);
+		m_renderTarget = newLayer;
+
+		return reinterpret_cast<Rml::LayerHandle>(newLayer);
+	}
+
+	void RendererJuce::PopLayer()
+	{
+		if (m_renderTargetStack.empty())
+			return;
+
+		auto* layer = m_renderTargetStack.back();
+		m_renderTargetStack.pop_back();
+
+		releaseRenderTarget(layer);
+
+		// update m_renderTarget to point to the new top of stack, or the base render target if stack is empty
+		if (!m_renderTargetStack.empty())
+			m_renderTarget = m_renderTargetStack.back();
+	}
+
+	Rml::TextureHandle RendererJuce::SaveLayerAsTexture()
+	{
+		if (!m_renderTarget)
+			return {};
+
+		int texWidth, texHeight, srcX, srcY;
+
+		if (m_scissorEnabled)
+		{
+			RMLUI_ASSERT(m_scissorRegion.Valid());
+			// Texture size is based on the scissor region
+			texWidth = m_scissorRegion.Width();
+			texHeight = m_scissorRegion.Height();
+			srcX = m_scissorRegion.Left();
+			srcY = m_scissorRegion.Top();
+		}
+		else
+		{
+			// Use full render target size
+			texWidth = m_renderTarget->width;
+			texHeight = m_renderTarget->height;
+			srcX = 0;
+			srcY = 0;
+		}
+
+		// Create a new image to hold the texture copy
+		auto* texture = new Image();
+		texture->width = texWidth;
+		texture->paddedWidth = Image::padWidth(texWidth);
+		texture->height = texHeight;
+		texture->hasAlpha = true;
+
+		// Allocate texture data
+		const auto dataSize = texture->paddedWidth * Image::padHeight(texture->height) * 4;
+		texture->data.resize(dataSize);
+
+		// Copy region from render target to texture at position (0,0)
+		constexpr Colorb color{255, 255, 255, 255};
+		blit<false, false>(*texture, 0, 0, *m_renderTarget, 
+			srcX, srcY, texWidth, texHeight, color);
+
+		// The layer remains on the stack and rendering continues to it
+		return reinterpret_cast<Rml::TextureHandle>(texture);
+	}
+
+	void RendererJuce::CompositeLayers(const Rml::LayerHandle _source, const Rml::LayerHandle _destination, const Rml::BlendMode _blendMode, const Rml::Span<const unsigned long long> _filters)
+	{
+		const auto* source = reinterpret_cast<const Image*>(_source);
+		auto* destination = reinterpret_cast<Image*>(_destination);
+
+		if (!_source)
+			source = m_renderTarget;
+
+		if (!_destination)
+			destination = m_renderTarget;
+
+		RMLUI_ASSERT(source && destination);
+		RMLUI_ASSERT(source->width == destination->width && "Source and destination width must match");
+		RMLUI_ASSERT(source->height == destination->height && "Source and destination height must match");
+		RMLUI_ASSERT(source->paddedWidth == destination->paddedWidth && "Source and destination padded width must match");
+
+		constexpr Colorb color{255, 255, 255, 255}; // No color tint
+
+		auto x = 0;
+		auto y = 0;
+		auto w = source->width;
+		auto h = source->height;
+
+		if (m_scissorEnabled)
+		{
+			x = m_scissorRegion.Left();
+			y = m_scissorRegion.Top();
+			w = m_scissorRegion.Width();
+			h = m_scissorRegion.Height();
+		}
+
+		if (_blendMode == Rml::BlendMode::Replace)
+		{
+			// Direct copy without alpha blending
+			blit<false, false>(*destination, x, y, *source, x,y,w,h, color);
+		}
+		else
+		{
+			// Alpha blend (assumes BlendMode::AlphaBlend or similar)
+			blit<true, false>(*destination, x, y, *source, x,y,w,h, color);
+		}
+	}
+
+	Image* RendererJuce::allocateRenderTarget(const int _width, const int _height)
+	{
+		// try to reuse from pool
+		for (auto it = m_renderTargetPool.begin(); it != m_renderTargetPool.end(); ++it)
+		{
+			if ((*it)->width == _width && (*it)->height == _height)
+			{
+				auto* img = it->release();
+				m_renderTargetPool.erase(it);
+				return img;
+			}
+		}
+
+		// allocate new render target
+		auto* img = new Image();
+		img->width = _width;
+		img->paddedWidth = Image::padWidth(_width);
+		img->height = _height;
+		img->hasAlpha = true;
+		img->data.resize(img->paddedWidth * Image::padHeight(_height) * 4);
+
+		return img;
+	}
+
+	void RendererJuce::releaseRenderTarget(Image* _img)
+	{
+		if (!_img)
+			return;
+
+		_img->clearMip();
+		m_renderTargetPool.emplace_back(_img);
 	}
 
 	void RendererJuce::EnableScissorRegion(bool _enable)
@@ -1059,18 +1218,25 @@ namespace juceRmlUi
 
 		m_scissorRegion = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0,0), Rml::Vector2i(width, height));
 
+		// ensure stack is empty at frame start
+		while (!m_renderTargetStack.empty())
+		{
+			auto* layer = m_renderTargetStack.back();
+			m_renderTargetStack.pop_back();
+			releaseRenderTarget(layer);
+		}
+
 		if (!m_renderTarget || m_renderTarget->width != width || m_renderTarget->height != height)
 		{
 			// for generated images (LCDs) they are created at specific sizes based on the render target size, clear the pool then as the ones
 			// in the pool will most probably not used anyway
 			if (m_renderTarget)
+			{
 				m_imagePool.clear();
+				releaseRenderTarget(m_renderTarget);
+			}
 
-			m_renderTarget.reset(new Image());
-			m_renderTarget->width = width;
-			m_renderTarget->paddedWidth = Image::padWidth(width);
-			m_renderTarget->height = height;
-			m_renderTarget->data.resize((Image::padWidth(width) * Image::padHeight(height)) << 2);
+			m_renderTarget = allocateRenderTarget(width, height);
 
 			m_renderImage.reset(new juce::Image(juce::Image::RGB, width, height, false));
 		}
