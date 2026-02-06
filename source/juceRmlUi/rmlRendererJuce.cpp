@@ -745,7 +745,7 @@ namespace juceRmlUi
 					std::max({ v0.position.y, v1.position.y, v2.position.y, v3.position.y })
 				);
 
-				if (quadPosMax.x <= quadPosMin.y || quadPosMax.y <= quadPosMin.y)
+				if (quadPosMax.x <= quadPosMin.x || quadPosMax.y <= quadPosMin.y)
 					continue;
 
 				const Rml::Vector2f quadUvMin(
@@ -1191,7 +1191,7 @@ namespace juceRmlUi
 			if (_dst.pixelStride == 4)
 			{
 				if (_dst.pixelFormat == juce::Image::ARGB)
-					copyToBitmap<juce::PixelARGB>(_dst, _src, 0, 0, w, h);
+					copyToBitmap4<juce::PixelARGB>(_dst, _src, 0, 0, w, h);
 				else if (_dst.pixelFormat == juce::Image::RGB)
 					copyToBitmap4<juce::PixelRGB>(_dst, _src, 0, 0, w, h);
 			}
