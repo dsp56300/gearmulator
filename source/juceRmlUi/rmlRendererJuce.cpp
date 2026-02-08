@@ -1200,8 +1200,8 @@ namespace juceRmlUi
 		if (m_scissorEnabled)
 		{
 			memcpy(newLayer->data.data(), m_renderTarget->data.data(), m_renderTarget->data.size());
-			const auto w = std::min(m_scissorRegion.Width(), newLayer->width);
-			const auto h = std::min(m_scissorRegion.Height(), newLayer->height);
+			const auto w = std::min(m_scissorRegion.Width(), newLayer->width - m_scissorRegion.Left());
+			const auto h = std::min(m_scissorRegion.Height(), newLayer->height - m_scissorRegion.Top());
 			fill<false>(*newLayer, m_scissorRegion.Left(), m_scissorRegion.Top(), w, h, Colorb{ 0,0,0,0 });
 		}
 		else
