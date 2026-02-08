@@ -627,7 +627,10 @@ namespace juceRmlUi
 	}
 
 	RendererJuce::~RendererJuce()
-	= default;
+	{
+		m_renderImage.reset();
+		m_renderTargetPool.clear();
+	}
 
 	Image* Image::getMip()
 	{
@@ -1254,31 +1257,42 @@ namespace juceRmlUi
 
 		m_scissorRegion = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0,0), Rml::Vector2i(width, height));
 
-		// ensure stack is empty at frame start
-		while (!m_renderTargetStack.empty())
+		// Release all additional layers (keep base layer at index 0)
+		while (m_renderTargetStack.size() > 1)
 		{
 			auto* layer = m_renderTargetStack.back();
 			m_renderTargetStack.pop_back();
 			releaseRenderTarget(layer);
 		}
 
+		// Check if we need to resize the base render target
 		if (!m_renderTarget || m_renderTarget->width != width || m_renderTarget->height != height)
 		{
-			// for generated images (LCDs) they are created at specific sizes based on the render target size, clear the pool then as the ones
-			// in the pool will most probably not used anyway
+			// Remove old base render target from stack if it exists
+			if (!m_renderTargetStack.empty())
+			{
+				m_renderTargetStack.pop_back();
+			}
+
+			// Release old base render target
 			if (m_renderTarget)
 			{
+				// for generated images (LCDs) they are created at specific sizes based on the render target size, 
+				// clear the pool as the ones in the pool will most probably not be used anyway
 				m_imagePool.clear();
 				releaseRenderTarget(m_renderTarget);
 			}
 
+			// Allocate new base render target
 			m_renderTarget = allocateRenderTarget(width, height);
-
 			m_renderImage.reset(new juce::Image(juce::Image::RGB, width, height, false));
+
+			// Push new base render target onto stack
+			m_renderTargetStack.push_back(m_renderTarget);
 		}
 
-		// Push the base render target onto the stack - there should always be at least one layer
-		m_renderTargetStack.push_back(m_renderTarget);
+		// At this point, stack should have exactly one item (the base render target)
+		assert(m_renderTargetStack.size() == 1 && m_renderTargetStack[0] == m_renderTarget);
 	}
 
 	namespace
