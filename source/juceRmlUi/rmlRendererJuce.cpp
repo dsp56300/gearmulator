@@ -788,13 +788,126 @@ namespace juceRmlUi
 			}
 		}
 
-		// add remaining triangles to path
-		for (; i <= _indices.size() - 3; i += 3)
+		// Try to extract quads from triangle pairs
+		std::vector<bool> indexUsed(_indices.size(), false);
+
+		for (size_t i = 0; i + 6 <= _indices.size(); i += 3)
 		{
-			const auto& v0 = _vertices[_indices[i]];
-			const auto& v1 = _vertices[_indices[i+1]];
-			const auto& v2 = _vertices[_indices[i+2]];
-			assert(false);
+			if (indexUsed[i])
+				continue;
+
+			const int t1i0 = _indices[i + 0];
+			const int t1i1 = _indices[i + 1];
+			const int t1i2 = _indices[i + 2];
+
+			for (size_t j = i + 3; j + 3 <= _indices.size() && j < i + 12; j += 3)
+			{
+				if (indexUsed[j])
+					continue;
+
+				const int t2i0 = _indices[j + 0];
+				const int t2i1 = _indices[j + 1];
+				const int t2i2 = _indices[j + 2];
+
+				std::array<int, 6> allIndices = {t1i0, t1i1, t1i2, t2i0, t2i1, t2i2};
+				int quadIndices[6];
+				int uniqueCount = 0;
+
+				for (int idx : allIndices)
+				{
+					bool found = false;
+					for (int k = 0; k < uniqueCount; ++k)
+					{
+						if (quadIndices[k] == idx)
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+						quadIndices[uniqueCount++] = idx;
+				}
+
+				if (uniqueCount == 4)
+				{
+					const auto& v0 = _vertices[quadIndices[0]];
+					const auto& v1 = _vertices[quadIndices[1]];
+					const auto& v2 = _vertices[quadIndices[2]];
+					const auto& v3 = _vertices[quadIndices[3]];
+
+					// Validate that the 4 vertices form an axis-aligned quad
+					// There should be exactly 2 unique X values and 2 unique Y values
+					std::array<float, 4> xVals = {v0.position.x, v1.position.x, v2.position.x, v3.position.x};
+					std::array<float, 4> yVals = {v0.position.y, v1.position.y, v2.position.y, v3.position.y};
+					
+					std::sort(xVals.begin(), xVals.end());
+					std::sort(yVals.begin(), yVals.end());
+					
+					constexpr float epsilon = 0.01f;
+					const bool validQuadX = (std::abs(xVals[0] - xVals[1]) < epsilon) && (std::abs(xVals[2] - xVals[3]) < epsilon);
+					const bool validQuadY = (std::abs(yVals[0] - yVals[1]) < epsilon) && (std::abs(yVals[2] - yVals[3]) < epsilon);
+					
+					if (!validQuadX || !validQuadY)
+						continue;
+
+					const Rml::Vector2f quadPosMin(xVals[0], yVals[0]);
+					const Rml::Vector2f quadPosMax(xVals[3], yVals[3]);
+
+					if (quadPosMax.x <= quadPosMin.x || quadPosMax.y <= quadPosMin.y)
+						continue;
+
+					const Rml::Vector2f quadUvMin(
+						std::min({ v0.tex_coord.x, v1.tex_coord.x, v2.tex_coord.x, v3.tex_coord.x }),
+						std::min({ v0.tex_coord.y, v1.tex_coord.y, v2.tex_coord.y, v3.tex_coord.y })
+					);
+
+					const Rml::Vector2f quadUvMax(
+						std::max({ v0.tex_coord.x, v1.tex_coord.x, v2.tex_coord.x, v3.tex_coord.x }),
+						std::max({ v0.tex_coord.y, v1.tex_coord.y, v2.tex_coord.y, v3.tex_coord.y })
+					);
+
+					uint32_t rSum = v0.colour.red + v1.colour.red + v2.colour.red + v3.colour.red;
+					uint32_t gSum = v0.colour.green + v1.colour.green + v2.colour.green + v3.colour.green;
+					uint32_t bSum = v0.colour.blue + v1.colour.blue + v2.colour.blue + v3.colour.blue;
+					uint32_t aSum = v0.colour.alpha + v1.colour.alpha + v2.colour.alpha + v3.colour.alpha;
+
+					// If the colors are not the same, we skip the quad and render the triangles separately
+					if (v0.colour != v1.colour || v0.colour != v2.colour || v0.colour != v3.colour)
+						break;
+
+					auto quadColor = Rml::ColourbPremultiplied(
+						static_cast<uint8_t>(rSum >> 2),
+						static_cast<uint8_t>(gSum >> 2),
+						static_cast<uint8_t>(bSum >> 2),
+						static_cast<uint8_t>(aSum >> 2)
+					);
+
+					const auto hasColor = quadColor.red != 255 || quadColor.green != 255 || quadColor.blue != 255;
+
+					g->quads.emplace_back(Quad{
+						Rml::Rectanglef::FromCorners(quadPosMin, quadPosMax),
+						Rml::Rectanglef::FromCorners(quadUvMin, quadUvMax),
+						Rml::Vector2f(
+							(quadUvMax.x - quadUvMin.x) / (quadPosMax.x - quadPosMin.x),
+							(quadUvMax.y - quadUvMin.y) / (quadPosMax.y - quadPosMin.y)
+						),
+						quadColor,
+						hasColor });
+
+					indexUsed[i] = indexUsed[i+1] = indexUsed[i+2] = true;
+					indexUsed[j] = indexUsed[j+1] = indexUsed[j+2] = true;
+					break;
+				}
+			}
+		}
+
+		// Process remaining triangles
+		for (size_t i = 0; i + 3 <= _indices.size(); i += 3)
+		{
+			if (!indexUsed[i])
+			{
+				// TODO: Store triangle for rendering
+			}
 		}
 
 		return reinterpret_cast<Rml::CompiledGeometryHandle>(g);
