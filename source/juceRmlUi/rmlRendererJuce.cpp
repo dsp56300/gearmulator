@@ -24,13 +24,6 @@ namespace juceRmlUi
 {
 	namespace rendererJuce
 	{
-		struct Triangle
-		{
-			Rml::Vector2f p0;
-			Rml::Vector2f p1;
-			Rml::Vector2f p2;
-		};
-
 		struct Quad
 		{
 			Rml::Rectanglef position;
@@ -40,11 +33,20 @@ namespace juceRmlUi
 			bool hasColor;
 		};
 
+		struct Triangle
+		{
+			Rml::Vector2f p[3];
+			Rml::Vector2f uv[3];
+			Rml::ColourbPremultiplied color[3];
+			bool hasColor;
+		};
+
 		struct Geometry
 		{
 			Rml::Rectanglef bounds;
 			Rml::Rectanglef uvBounds;
 			std::vector<Quad> quads;
+			std::vector<Triangle> triangles;
 		};
 
 		template<typename T>
@@ -806,10 +808,30 @@ namespace juceRmlUi
 		// Process remaining triangles
 		for (size_t i = 0; i + 3 <= _indices.size(); i += 3)
 		{
-			if (!indexUsed[i])
-			{
-				// TODO: Store triangle for rendering
-			}
+			if (indexUsed[i])
+				continue;
+
+			const auto t1i0 = _indices[i + 0];
+			const auto t1i1 = _indices[i + 1];
+			const auto t1i2 = _indices[i + 2];
+
+			const auto& v0 = _vertices[t1i0];
+			const auto& v1 = _vertices[t1i1];
+			const auto& v2 = _vertices[t1i2];
+
+			const auto hasColor = v0.colour != v1.colour || v0.colour != v2.colour;
+
+			g->triangles.emplace_back(Triangle{
+					{Rml::Vector2f(v0.position.x, v0.position.y),
+						Rml::Vector2f(v1.position.x, v1.position.y),
+						Rml::Vector2f(v2.position.x, v2.position.y)},
+					{Rml::Vector2f(v0.tex_coord.x, v0.tex_coord.y),
+						Rml::Vector2f(v1.tex_coord.x, v1.tex_coord.y),
+						Rml::Vector2f(v2.tex_coord.x, v2.tex_coord.y)},
+					{v0.colour,
+						v1.colour,
+						v2.colour}, hasColor }
+			);
 		}
 
 		return reinterpret_cast<Rml::CompiledGeometryHandle>(g);
