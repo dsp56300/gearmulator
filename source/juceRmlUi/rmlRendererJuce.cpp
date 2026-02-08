@@ -1036,9 +1036,19 @@ namespace juceRmlUi
 
 		auto* newLayer = allocateRenderTarget(width, height);
 
-		// copy current render target content to new layer
-		const auto copySize = m_renderTarget->paddedWidth * m_renderTarget->height * 4;
-		memcpy(newLayer->data.data(), m_renderTarget->data.data(), copySize);
+		// Copy current render target to new layer, then clear the scissor region to transparent black
+		if (m_scissorEnabled)
+		{
+			memcpy(newLayer->data.data(), m_renderTarget->data.data(), m_renderTarget->data.size());
+			const auto w = std::min(m_scissorRegion.Width(), newLayer->width);
+			const auto h = std::min(m_scissorRegion.Height(), newLayer->height);
+			fill<false>(*newLayer, m_scissorRegion.Left(), m_scissorRegion.Top(), w, h, Colorb{ 0,0,0,0 });
+		}
+		else
+		{
+			// New layer should be transparent black
+			memset(newLayer->data.data(), 0, newLayer->data.size());
+		}
 
 		m_renderTargetStack.push_back(newLayer);
 		m_renderTarget = newLayer;
@@ -1048,7 +1058,10 @@ namespace juceRmlUi
 
 	void RendererJuce::PopLayer()
 	{
-		if (m_renderTargetStack.empty())
+		// Never pop the base render target (first item in stack)
+		RMLUI_ASSERT(m_renderTargetStack.size() > 1 && "Cannot pop the base render target layer");
+
+		if (m_renderTargetStack.size() <= 1)
 			return;
 
 		auto* layer = m_renderTargetStack.back();
@@ -1056,9 +1069,8 @@ namespace juceRmlUi
 
 		releaseRenderTarget(layer);
 
-		// update m_renderTarget to point to the new top of stack, or the base render target if stack is empty
-		if (!m_renderTargetStack.empty())
-			m_renderTarget = m_renderTargetStack.back();
+		// Update m_renderTarget to point to the new top of stack
+		m_renderTarget = m_renderTargetStack.back();
 	}
 
 	Rml::TextureHandle RendererJuce::SaveLayerAsTexture()
@@ -1240,6 +1252,9 @@ namespace juceRmlUi
 
 			m_renderImage.reset(new juce::Image(juce::Image::RGB, width, height, false));
 		}
+
+		// Push the base render target onto the stack - there should always be at least one layer
+		m_renderTargetStack.push_back(m_renderTarget);
 	}
 
 	namespace
