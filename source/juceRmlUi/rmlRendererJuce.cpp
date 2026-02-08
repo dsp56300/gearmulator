@@ -1201,6 +1201,9 @@ namespace juceRmlUi
 			texHeight = m_scissorRegion.Height();
 			srcX = m_scissorRegion.Left();
 			srcY = m_scissorRegion.Top();
+
+			texWidth = std::min(texWidth, m_renderTarget->width - srcX);
+			texHeight = std::min(texHeight, m_renderTarget->height - srcY);
 		}
 		else
 		{
@@ -1261,6 +1264,9 @@ namespace juceRmlUi
 			w = m_scissorRegion.Width();
 			h = m_scissorRegion.Height();
 		}
+
+		w = std::min(w, source->width - x);
+		h = std::min(h, source->height - y);
 
 		if (_blendMode == Rml::BlendMode::Replace)
 		{
