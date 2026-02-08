@@ -611,6 +611,105 @@ namespace juceRmlUi
 				}
 			}
 		}
+
+		template<bool AlphaBlend>
+		void fillScanline(Image& _dst, const int _yi, float _x0, float _x1, const Colorb& _color, const int _invAlpha) noexcept
+		{
+			if (_x0 > _x1)
+				std::swap(_x0, _x1);
+
+			const auto xi0 = static_cast<int>(_x0);
+			const auto xi1 = static_cast<int>(_x1);
+
+			// Clamp to image bounds
+			const auto xStart = std::max(xi0, 0);
+			const auto xEnd = std::min(xi1, _dst.width);
+
+			auto* dst = _dst.getColorPointer(xStart, _yi);
+
+			for (int x = xStart; x < xEnd; ++x)
+			{
+				if constexpr (AlphaBlend)
+				{
+					auto existing = toInt(*dst);
+					auto blended = toInt(_color) + ((existing * _invAlpha) >> 8);
+					*dst = toByte(blended);
+				}
+				else
+				{
+					*dst = _color;
+				}
+				
+				++dst;
+			}
+		}
+
+		template<bool AlphaBlend>
+		void fillTriangle(Image& _dst, Rml::Vector2i _p0, Rml::Vector2i _p1, Rml::Vector2i _p2, const Colorb& _color) noexcept
+		{
+			// Sort vertices by Y coordinate (top to bottom), then by X (left to right)
+			if (_p0.y > _p1.y) std::swap(_p0, _p1);
+			if (_p0.y > _p2.y) std::swap(_p0, _p2);
+			if (_p1.y > _p2.y) std::swap(_p1, _p2);
+
+			// Rasterize triangle using scanline approach
+			const auto totalHeight = _p2.y - _p0.y;
+
+			// Handle degenerate triangles (all points on a line)
+			if (totalHeight < 2)
+			{
+				const auto x = std::min({ _p0.x, _p1.x, _p2.x });
+				const auto y = _p0.y;
+				const auto w = std::max({ _p0.x, _p1.x, _p2.x }) - x;
+				const auto h = _p2.y - y;
+
+				fill<AlphaBlend>(_dst, x, y, w, h, _color);
+				return;
+			}
+
+			const auto invAlpha = 255 - _color.a;
+
+			// Clamp Y coordinates to image bounds before loops to avoid per-scanline checks
+			const auto yStart = std::max(0, static_cast<int>(_p0.y));
+			const auto yMid = std::clamp(static_cast<int>(_p1.y), 0, _dst.height - 1);
+			const auto yEnd = std::min(static_cast<int>(_p2.y), _dst.height - 1);
+
+			// Early exit if triangle is completely outside
+			if (yStart >= _dst.height || yEnd < 0)
+				return;
+
+			// Render upper part (from p0 to p1)
+			for (int yi = yStart; yi <= yMid && yi <= yEnd; ++yi)
+			{
+				const auto y = static_cast<float>(yi);
+				const auto segmentHeight = _p1.y - _p0.y;
+				
+				// Clamp interpolation factors to [0, 1] to prevent overshooting on small triangles
+				const auto alpha = std::clamp((y - _p0.y) / totalHeight, 0.0f, 1.0f);
+				const auto beta = segmentHeight > 0.0f ? std::clamp((y - _p0.y) / segmentHeight, 0.0f, 1.0f) : 0.0f;
+
+				const auto x0 = _p0.x + (_p2.x - _p0.x) * alpha;
+				const auto x1 = _p0.x + (_p1.x - _p0.x) * beta;
+
+				fillScanline<AlphaBlend>(_dst, yi, x0, x1, _color, invAlpha);
+			}
+
+			// Render lower part (from p1 to p2)
+			for (int yi = yMid + 1; yi <= yEnd; ++yi)
+			{
+				const auto y = static_cast<float>(yi);
+				const auto segmentHeight = _p2.y - _p1.y;
+				
+				// Clamp interpolation factors to [0, 1] to prevent overshooting on small triangles
+				const auto alpha = std::clamp((y - _p0.y) / totalHeight, 0.0f, 1.0f);
+				const auto beta = segmentHeight > 0.0f ? std::clamp((y - _p1.y) / segmentHeight, 0.0f, 1.0f) : 0.0f;
+
+				const auto x0 = _p0.x + (_p2.x - _p0.x) * alpha;
+				const auto x1 = _p1.x + (_p2.x - _p1.x) * beta;
+
+				fillScanline<AlphaBlend>(_dst, yi, x0, x1, _color, invAlpha);
+			}
+		}
 	}
 
 	namespace
@@ -949,6 +1048,28 @@ namespace juceRmlUi
 				else
 					fill<false>(*m_renderTarget, dstX, dstY, dstW, dstH, col);
 			}
+		}
+
+		// Render triangles (only solid color for now, no texture support)
+		for (const auto& tri : p->triangles)
+		{
+			if (img)
+				continue; // Skip textured triangles for now
+
+			// Apply translation to triangle vertices
+			const auto p0 = Rml::Vector2i(roundToInt(tri.p[0].x + _translation.x), roundToInt(tri.p[0].y + _translation.y));
+			const auto p1 = Rml::Vector2i(roundToInt(tri.p[1].x + _translation.x), roundToInt(tri.p[1].y + _translation.y));
+			const auto p2 = Rml::Vector2i(roundToInt(tri.p[2].x + _translation.x), roundToInt(tri.p[2].y + _translation.y));
+
+			// Use first vertex color
+			const auto& color = tri.color[0];
+			const Colorb col { color.red, color.green, color.blue, color.alpha };
+
+			// Render the triangle
+			if (col.a < 255)
+				fillTriangle<true>(*m_renderTarget, p0, p1, p2, col);
+			else
+				fillTriangle<false>(*m_renderTarget, p0, p1, p2, col);
 		}
 	}
 
