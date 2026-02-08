@@ -62,6 +62,8 @@ namespace juceRmlUi
 		void EnableScissorRegion(bool _enable) override;
 		void SetScissorRegion(Rml::Rectanglei _region) override;
 
+		void SetTransform(const Rml::Matrix4f* transform) override;
+
 		static constexpr bool isX64() { return IS_X64; }
 
 	private:
@@ -83,5 +85,6 @@ namespace juceRmlUi
 		std::unordered_map<uint64_t, std::vector<std::unique_ptr<rendererJuce::Image>>> m_imagePool;
 
 		bool m_pushed = false;
+		Rml::Matrix4f m_transform;
 	};
 }

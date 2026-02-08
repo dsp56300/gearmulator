@@ -1323,6 +1323,12 @@ namespace juceRmlUi
 		m_scissorRegion = _region;
 	}
 
+	void RendererJuce::SetTransform(const Rml::Matrix4f* transform)
+	{
+		m_transform = transform ? *transform : Rml::Matrix4f::Identity();
+		RenderInterface::SetTransform(transform);
+	}
+
 	void RendererJuce::pushClip()
 	{
 		if (m_pushed)
