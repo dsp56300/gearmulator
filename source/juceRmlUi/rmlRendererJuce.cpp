@@ -846,7 +846,7 @@ namespace juceRmlUi
 					std::sort(xVals.begin(), xVals.end());
 					std::sort(yVals.begin(), yVals.end());
 					
-					constexpr float epsilon = 0.01f;
+					constexpr float epsilon = 1.0f;
 					const bool validQuadX = (std::abs(xVals[0] - xVals[1]) < epsilon) && (std::abs(xVals[2] - xVals[3]) < epsilon);
 					const bool validQuadY = (std::abs(yVals[0] - yVals[1]) < epsilon) && (std::abs(yVals[2] - yVals[3]) < epsilon);
 					
@@ -874,9 +874,11 @@ namespace juceRmlUi
 					uint32_t bSum = v0.colour.blue + v1.colour.blue + v2.colour.blue + v3.colour.blue;
 					uint32_t aSum = v0.colour.alpha + v1.colour.alpha + v2.colour.alpha + v3.colour.alpha;
 
+					/*
 					// If the colors are not the same, we skip the quad and render the triangles separately
 					if (v0.colour != v1.colour || v0.colour != v2.colour || v0.colour != v3.colour)
 						break;
+					*/
 
 					auto quadColor = Rml::ColourbPremultiplied(
 						static_cast<uint8_t>(rSum >> 2),
