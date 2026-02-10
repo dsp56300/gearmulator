@@ -547,10 +547,10 @@ namespace juceRmlUi
 			Image& _dst, const Image& _src,
 			const int _srcX, const int _srcY, const int _srcW, const int _srcH,
 			const int _dstX, const int _dstY, const int _dstW, const int _dstH, 
-			const Colorb& _color, bool hasScale, bool hasAlphablend, bool hasColor) noexcept
+			const Colorb& _color, const bool _hasScale, bool _hasAlphablend, bool _hasColor) noexcept
 		{
-			if (hasScale) blit<true >(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasAlphablend, hasColor);
-			else          blit<false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, hasAlphablend, hasColor);
+			if (_hasScale) blit<true>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, _hasAlphablend, _hasColor);
+			else          blit<false>(_dst, _src, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, _color, _hasAlphablend, _hasColor);
 		}
 
 		template<bool AlphaBlend>
