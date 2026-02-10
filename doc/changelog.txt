@@ -8,6 +8,7 @@ Framework:
 - [Imp] BUG-10130 Add IParameterFinder support for VST3 plug-ins
         to support "AI knob" control surfaces
 
+- [Fix] BUG-10135 Patch Manager now works with WSL2 EXT4 mounted drives
 - [Fix] BUG-10136 Conditional parameter links now work with mouse wheel
 - [Fix] Crash when loading plugin on some Linux distributions
 
