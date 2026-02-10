@@ -21,6 +21,7 @@ namespace rmlPlugin
 
 		m_source->AddEventListener(Rml::EventId::Mousedown, this);
 		m_source->AddEventListener(Rml::EventId::Mouseup, this);
+		m_source->AddEventListener(Rml::EventId::Mousescroll, this);
 		m_source->AddEventListener(Rml::EventId::Change, this);
 
 		m_lastSourceValue = getValue(m_source);
@@ -30,6 +31,7 @@ namespace rmlPlugin
 	{
 		m_source->RemoveEventListener(Rml::EventId::Mousedown, this);
 		m_source->RemoveEventListener(Rml::EventId::Mouseup, this);
+		m_source->RemoveEventListener(Rml::EventId::Mousescroll, this);
 		m_source->RemoveEventListener(Rml::EventId::Change, this);
 	}
 
@@ -45,6 +47,11 @@ namespace rmlPlugin
 		case Rml::EventId::Mouseup:
 			m_sourceIsBeingDragged = false;
 			break;
+		case Rml::EventId::Mousescroll:
+			m_lastSourceValue = getValue(m_source);
+			m_lastTargetValue = getValue(m_target);
+			m_sourceIsBeingScrolled = true;
+			break;
 		case Rml::EventId::Change:
 			{
 				if (m_processingChangeEvent)
@@ -53,8 +60,11 @@ namespace rmlPlugin
 				const auto current = getValue(m_source);
 				const auto delta = current - m_lastSourceValue;
 
-				if(!m_sourceIsBeingDragged)
+				if(!m_sourceIsBeingDragged && !m_sourceIsBeingScrolled)
 					return;
+
+				const auto wasScrolling = m_sourceIsBeingScrolled;
+				m_sourceIsBeingScrolled = false;
 
 				if(std::abs(delta) < 0.0001f)
 					return;
@@ -71,6 +81,12 @@ namespace rmlPlugin
 				m_processingChangeEvent = true;
 				setValue(m_target, newDestValue);
 				m_processingChangeEvent = false;
+
+				if (!wasScrolling)
+				{
+					m_lastSourceValue = current;
+					m_lastTargetValue = newDestValue;
+				}
 				break;
 			}
 		default:;
