@@ -10,6 +10,7 @@ Framework:
 
 - [Fix] BUG-10135 Patch Manager now works with WSL2 EXT4 mounted drives
 - [Fix] BUG-10136 Conditional parameter links now work with mouse wheel
+- [Fix] BUG-10133 Parameter values now correctly update when dragging controls quickly
 - [Fix] Crash when loading plugin on some Linux distributions
 
 Osirus:

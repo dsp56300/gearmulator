@@ -4,7 +4,10 @@
 
 namespace pluginLib
 {
-	static std::set<Parameter*> g_pendingParameterChanges;
+	namespace
+	{
+		std::set<Parameter*> g_pendingParameterChanges;
+	}
 
 	Parameter::Parameter(Controller& _controller, const Description& _desc, const uint8_t _partNum, const int _uniqueId, const PartFormatter& _partFormatter)
 		: juce::RangedAudioParameter(genId(_desc, _partNum, _uniqueId), _partFormatter(_partNum, _desc.isNonPartSensitive()) + " " + _desc.displayName)
@@ -12,6 +15,7 @@ namespace pluginLib
 		, m_desc(_desc)
 		, m_part(_partNum)
 		, m_uniqueId(_uniqueId)
+		, m_pendingParameterChange([] {})
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
 		m_range.end = static_cast<float>(m_desc.range.getEnd());
@@ -60,7 +64,7 @@ namespace pluginLib
 		{
 			if(m_rateLimit)
 			{
-				sendParameterChangeDelayed(value, ++m_uniqueDelayCallbackId, _origin);
+				sendParameterChangeDelayed(value, _origin);
 			}
 			else
 			{
@@ -78,31 +82,45 @@ namespace pluginLib
 		return t.count();
     }
 
-    void Parameter::sendParameterChangeDelayed(const ParamValue _value, uint32_t _uniqueId, Origin _origin)
-    {
-		if(_uniqueId != m_uniqueDelayCallbackId)
-			return;
-
+	void Parameter::sendParameterChangeDelayed(const ParamValue _value, Origin _origin)
+	{
 		const auto ms = milliseconds();
-
 		const auto elapsed = ms - m_lastSendTime;
+		
 		if(elapsed >= m_rateLimit)
 		{
-			m_lastSendTime = ms;
+			// Send immediately if enough time has passed
+			m_pendingParameterChange = [] {};
+			m_lastSendTime = milliseconds();
 			m_controller.sendParameterChange(*this, _value, _origin);
 		}
 		else
 		{
-			// BUG-10089 this guards against a parameter being deleted before the delayed call happens
+			// Schedule to send after remaining delay
+			const auto remainingDelay = m_rateLimit - elapsed;
+
+			m_pendingParameterChange = [this, _value, _origin]
+			{
+				m_lastSendTime = milliseconds();
+				m_controller.sendParameterChange(*this, _value, _origin);
+			};
+
 			g_pendingParameterChanges.insert(this);
 
-			juce::Timer::callAfterDelay(static_cast<int>(elapsed), [this, _value, _uniqueId, _origin]
+			juce::Timer::callAfterDelay(static_cast<int>(remainingDelay), [this]
 			{
-				if (g_pendingParameterChanges.erase(this))
-					sendParameterChangeDelayed(_value, _uniqueId, _origin);
+				if (g_pendingParameterChanges.count(this))
+					sendPendingParameterChange();
 			});
 		}
     }
+
+	void Parameter::sendPendingParameterChange()
+	{
+		// Send only the last pending change
+		m_pendingParameterChange();
+		m_pendingParameterChange = [] {};
+	}
 
     int Parameter::clampValue(const int _value) const
     {
@@ -164,11 +182,17 @@ namespace pluginLib
     {
 		if (!getDescription().isPublic)
 			return;
+		
 		assert(m_changeGestureCount > 0);
 		--m_changeGestureCount;
+
 		if(!m_changeGestureCount)
+		{
+			// Flush any pending rate-limited parameter value when gesture ends
+			sendPendingParameterChange();
 			endChangeGesture();
-    }
+		}
+	}
 
     bool Parameter::requiresGesture(Origin _origin)
     {
@@ -334,5 +358,4 @@ namespace pluginLib
 		if(m_parameter.getDescription().isPublic && requiresGesture(m_origin))
 		    m_parameter.popChangeGesture();
     }
-
 }
