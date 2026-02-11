@@ -14,6 +14,9 @@ set(SOURCES
 	controllermap.cpp controllermap.h
 	dummydevice.cpp dummydevice.h
 	filetype.cpp filetype.h
+	midiLearnManager.cpp midiLearnManager.h
+	midiLearnMapping.cpp midiLearnMapping.h
+	midiLearnPreset.cpp midiLearnPreset.h
 	midipacket.cpp midipacket.h
 	midiports.cpp midiports.h
 	parameter.cpp parameter.h
