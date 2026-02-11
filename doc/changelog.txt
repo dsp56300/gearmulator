@@ -13,6 +13,10 @@ Framework:
 - [Fix] BUG-10133 Parameter values now correctly update when dragging controls quickly
 - [Fix] Crash when loading plugin on some Linux distributions
 
+Osirus/OsTIrus:
+
+- [Fix] BUG-10118 Double-clicking in preset name field no longer shows CSS properties
+
 Osirus:
 
 - [Fix] BUG-10106 Hoverland/Galaxpel skins: Rename LFO SHAPE to reverb TYPE

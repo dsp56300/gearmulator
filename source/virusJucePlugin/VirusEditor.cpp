@@ -118,8 +118,11 @@ namespace genericVirusUI
 		if(presetLoad)
 			juceRmlUi::EventListener::AddClick(presetLoad, [this] { loadPreset(); });
 
-		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Dblclick, [this](Rml::Event& _event)
+		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Dblclick, [this](const Rml::Event& _event)
 		{
+			if (_event.GetTargetElement() != _event.GetCurrentElement())
+				return;
+
 			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(m_presetName->GetInnerRML()), [this](const std::string& _text)
 			{
 				auto text = Rml::StringUtilities::StripWhitespace(_text);
