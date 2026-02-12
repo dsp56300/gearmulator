@@ -877,11 +877,15 @@ namespace jucePluginEditorLib
 				// Use the mapping from translator (already has correct mode detected!)
 				auto preset = translator->getPreset();
 
-				// Remove existing mappings for this parameter if any (replace)
+				// Remove existing mapping for this MIDI controller (channel+CC) if any
 				auto& mappings = preset.getMappings();
 				mappings.erase(
 					std::remove_if(mappings.begin(), mappings.end(),
-						[&paramName](const pluginLib::MidiLearnMapping& _m) { return _m.paramName == paramName; }),
+						[&_mapping](const pluginLib::MidiLearnMapping& _m) {
+							return _m.type == _mapping.type && 
+							       _m.channel == _mapping.channel && 
+							       _m.controller == _mapping.controller;
+						}),
 					mappings.end());
 
 				// Add new mapping as-is from translator
@@ -908,10 +912,25 @@ namespace jucePluginEditorLib
 				m_midiLearnDialog->onMidiReceived(_mapping);
 		};
 
-		translator->onMappingConflict = [this](const pluginLib::MidiLearnMapping& _existingMapping)
+		translator->onMappingConflict = [this](const pluginLib::MidiLearnMapping& _newMapping)
 		{
 			if (m_midiLearnDialog)
-				m_midiLearnDialog->onConflict(_existingMapping.paramName, _existingMapping);
+			{
+				// Find what parameter this MIDI controller is currently mapped to
+				auto* translator = m_processor.getMidiLearnTranslator();
+				if (translator)
+				{
+					const auto& preset = translator->getPreset();
+					const auto* existingMapping = preset.findMapping(_newMapping.type, _newMapping.channel, _newMapping.controller);
+					if (existingMapping)
+					{
+						m_midiLearnDialog->onConflict(existingMapping->paramName, _newMapping);
+						return;
+					}
+				}
+				// Fallback if we can't find existing mapping
+				m_midiLearnDialog->onConflict("unknown parameter", _newMapping);
+			}
 		};
 	}
 

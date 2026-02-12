@@ -187,11 +187,11 @@ namespace pluginLib
 		newMapping.paramName = m_learningParamName;
 		newMapping.mode = detectMode(m_learningValues);
 
-		// Check if this parameter already has a mapping
-		const auto existingMappings = m_preset.findMappingsByParam(m_learningParamName);
-		if (!existingMappings.empty())
+		// Check if this MIDI controller (channel+CC) is already mapped to a different parameter
+		const auto* existingMapping = m_preset.findMapping(newMapping.type, newMapping.channel, newMapping.controller);
+		if (existingMapping && existingMapping->paramName != m_learningParamName)
 		{
-			// Notify about conflict
+			// MIDI controller is mapped to a different parameter - show conflict
 			if (onMappingConflict)
 				onMappingConflict(newMapping);
 		}
