@@ -11,7 +11,7 @@
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/Factory.h"
 
-#include "synthLib/midiTypes.h"
+#include "jucePluginLib/midiLearnMapping.h"
 
 #include "juce_events/juce_events.h"
 
@@ -21,7 +21,6 @@ namespace juceRmlUi
 		: m_root(_root)
 		, m_completionCallback(std::move(_completionCallback))
 		, m_parameterName(std::move(_parameterName))
-		, m_receivedEvent(synthLib::MidiEventSource::Physical)
 	{
 		m_statusText = helper::findChild(m_root, "statusText");
 		m_parameterText = helper::findChild(m_root, "parameterText");
@@ -86,9 +85,9 @@ namespace juceRmlUi
 		return std::make_unique<MidiLearnDialog>(attachedElem, std::move(_completionCallback), _parameterName);
 	}
 
-	void MidiLearnDialog::onMidiReceived(const synthLib::SMidiEvent& _event)
+	void MidiLearnDialog::onMidiReceived(const pluginLib::MidiLearnMapping& _mapping)
 	{
-		m_receivedEvent = _event;
+		m_receivedMapping = _mapping;
 		callCompletionCallback(true);
 	}
 
@@ -101,10 +100,10 @@ namespace juceRmlUi
 		}
 	}
 
-	void MidiLearnDialog::onConflict(const std::string& _existingParamName, const synthLib::SMidiEvent& _event)
+	void MidiLearnDialog::onConflict(const std::string& _existingParamName, const pluginLib::MidiLearnMapping& _mapping)
 	{
 		m_isConflict = true;
-		m_receivedEvent = _event;
+		m_receivedMapping = _mapping;
 
 		// Update UI to show conflict
 		if (m_statusText)
@@ -145,6 +144,6 @@ namespace juceRmlUi
 	void MidiLearnDialog::callCompletionCallback(const bool _confirmed) const
 	{
 		if (m_completionCallback)
-			m_completionCallback(_confirmed, m_receivedEvent);
+			m_completionCallback(_confirmed, m_receivedMapping);
 	}
 }

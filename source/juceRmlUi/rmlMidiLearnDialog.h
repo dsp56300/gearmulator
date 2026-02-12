@@ -1,10 +1,10 @@
 #pragma once
 
+#include "jucePluginLib/midiLearnMapping.h"
+
 #include <functional>
 #include <memory>
 #include <string>
-
-#include "synthLib/midiTypes.h"
 
 namespace Rml
 {
@@ -16,7 +16,7 @@ namespace juceRmlUi
 	class MidiLearnDialog
 	{
 	public:
-		using CompletionCallback = std::function<void(bool, const synthLib::SMidiEvent&)>;
+		using CompletionCallback = std::function<void(bool, const pluginLib::MidiLearnMapping&)>;
 		
 		MidiLearnDialog(Rml::Element* _root, CompletionCallback&& _completionCallback, std::string _parameterName);
 		~MidiLearnDialog();
@@ -27,8 +27,8 @@ namespace juceRmlUi
 			CompletionCallback&& _completionCallback,
 			const std::string& _parameterName);
 
-		void onMidiReceived(const synthLib::SMidiEvent& _event);
-		void onConflict(const std::string& _existingParamName, const synthLib::SMidiEvent& _event);
+		void onMidiReceived(const pluginLib::MidiLearnMapping& _mapping);
+		void onConflict(const std::string& _existingParamName, const pluginLib::MidiLearnMapping& _mapping);
 		void updateProgress(size_t _eventCount, size_t _requiredCount);
 
 	private:
@@ -39,7 +39,7 @@ namespace juceRmlUi
 		Rml::Element* m_parameterText;
 		CompletionCallback m_completionCallback;
 		std::string m_parameterName;
-		synthLib::SMidiEvent m_receivedEvent;
+		pluginLib::MidiLearnMapping m_receivedMapping;
 		bool m_isConflict = false;
 	};
 }

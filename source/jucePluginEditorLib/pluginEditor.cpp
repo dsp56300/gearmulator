@@ -864,7 +864,7 @@ namespace jucePluginEditorLib
 		m_midiLearnDialog = juceRmlUi::MidiLearnDialog::createFromTemplate(
 			"tus_midilearn_dialog",
 			getRmlRootElement(),
-			[this, translator, paramName](bool _confirmed, const synthLib::SMidiEvent& _event)
+			[this, translator, paramName](bool _confirmed, const pluginLib::MidiLearnMapping& _mapping)
 			{
 				translator->cancelLearning();
 
@@ -874,16 +874,7 @@ namespace jucePluginEditorLib
 					return;
 				}
 
-				// Create mapping from received MIDI event
-				pluginLib::MidiLearnMapping newMapping;
-				newMapping.type = pluginLib::MidiLearnMapping::midiStatusToType(
-					static_cast<synthLib::MidiStatusByte>(_event.a & 0xf0));
-				newMapping.channel = pluginLib::MidiLearnMapping::getChannel(_event);
-				newMapping.controller = pluginLib::MidiLearnMapping::getController(_event);
-				newMapping.paramName = paramName;
-				newMapping.mode = pluginLib::MidiLearnMapping::Mode::Absolute; // Will be auto-detected by translator
-
-				// Get modifiable preset
+				// Use the mapping from translator (already has correct mode detected!)
 				auto preset = translator->getPreset();
 
 				// Remove existing mappings for this parameter if any (replace)
@@ -893,8 +884,8 @@ namespace jucePluginEditorLib
 						[&paramName](const pluginLib::MidiLearnMapping& _m) { return _m.paramName == paramName; }),
 					mappings.end());
 
-				// Add new mapping
-				preset.addMapping(newMapping);
+				// Add new mapping as-is from translator
+				preset.addMapping(_mapping);
 
 				// Update translator with modified preset (rebuilds cache and subscriptions)
 				translator->setPreset(preset);
@@ -914,16 +905,13 @@ namespace jucePluginEditorLib
 		translator->onMappingLearned = [this](const pluginLib::MidiLearnMapping& _mapping)
 		{
 			if (m_midiLearnDialog)
-				m_midiLearnDialog->onMidiReceived(pluginLib::MidiLearnMapping::toMidiEvent(_mapping));
+				m_midiLearnDialog->onMidiReceived(_mapping);
 		};
 
 		translator->onMappingConflict = [this](const pluginLib::MidiLearnMapping& _existingMapping)
 		{
 			if (m_midiLearnDialog)
-			{
-				const auto event = pluginLib::MidiLearnMapping::toMidiEvent(_existingMapping);
-				m_midiLearnDialog->onConflict(_existingMapping.paramName, event);
-			}
+				m_midiLearnDialog->onConflict(_existingMapping.paramName, _existingMapping);
 		};
 	}
 
