@@ -27,7 +27,7 @@ namespace pluginLib
 		};
 		
 		static constexpr const char* ModeStrings[] = { "Absolute", "Relative" };
-		static_assert(static_cast<size_t>(Mode::Count) == sizeof(ModeStrings) / sizeof(ModeStrings[0]), 
+		static_assert(static_cast<size_t>(Mode::Count) == std::size(ModeStrings), 
 		              "ModeStrings array size must match Mode enum count");
 
 		// Feedback target flags (bitmask)
