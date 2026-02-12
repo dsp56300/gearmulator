@@ -21,7 +21,7 @@
 		<h2>Mappings</h2>
 		<settingsspacer1/>
 		
-		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 1em;">
+		<table class="settings-table" id="mappingTable" style="padding-top: 0.5em; padding-bottom: 1em;">
 			<tr class="settings-tr settings-tr-headline">
 				<td>Type</td>
 				<td>Channel</td>
@@ -39,6 +39,23 @@
 				<td><button id="btRemove" class="button">Remove</button></td>
 			</tr>
 		</table>
+		
+		<settingsspacer1/>
+		
+		<h2>MIDI Feedback</h2>
+		<settingsspacer1/>
+		
+		<div class="settings-hlayout">
+			<label>Send feedback to:</label>
+			<button id="cbFeedbackDevice" class="settings-checkbox" style="pointer-events: none;"/>
+			<label for="cbFeedbackDevice">Device</label>
+			<button id="cbFeedbackEditor" class="settings-checkbox"/>
+			<label for="cbFeedbackEditor">Editor</label>
+			<button id="cbFeedbackHost" class="settings-checkbox"/>
+			<label for="cbFeedbackHost">Host</label>
+			<button id="cbFeedbackPhysical" class="settings-checkbox"/>
+			<label for="cbFeedbackPhysical">Physical</label>
+		</div>
 	</div>
 </body>
 </template>

@@ -63,6 +63,7 @@ namespace pluginLib
 		obj->setProperty("controller", static_cast<int>(controller));
 		obj->setProperty("nrpn", static_cast<int>(nrpn));
 		obj->setProperty("paramName", juce::String(paramName));
+		obj->setProperty("feedbackTargets", static_cast<int>(feedbackTargets));
 
 		return juce::var(obj);
 	}
@@ -79,6 +80,7 @@ namespace pluginLib
 			mapping.controller = static_cast<uint8_t>(static_cast<int>(obj->getProperty("controller")));
 			mapping.nrpn = static_cast<uint16_t>(static_cast<int>(obj->getProperty("nrpn")));
 			mapping.paramName = obj->getProperty("paramName").toString().toStdString();
+			mapping.feedbackTargets = static_cast<uint8_t>(static_cast<int>(obj->getProperty("feedbackTargets")));
 		}
 
 		return mapping;
@@ -146,6 +148,33 @@ namespace pluginLib
 		case Type::PitchBend: return synthLib::M_PITCHBEND;
 		case Type::NRPN: return synthLib::M_CONTROLCHANGE; // NRPN uses CC messages
 		default: return synthLib::M_CONTROLCHANGE;
+		}
+	}
+
+	void MidiLearnMapping::setFeedbackEnabled(synthLib::MidiEventSource _target, bool _enabled)
+	{
+		const auto flag = midiEventSourceToFeedbackTarget(_target);
+		if (_enabled)
+			feedbackTargets |= flag;
+		else
+			feedbackTargets &= ~flag;
+	}
+
+	bool MidiLearnMapping::isFeedbackEnabled(synthLib::MidiEventSource _target) const
+	{
+		const auto flag = midiEventSourceToFeedbackTarget(_target);
+		return (feedbackTargets & flag) != 0;
+	}
+
+	MidiLearnMapping::FeedbackTarget MidiLearnMapping::midiEventSourceToFeedbackTarget(synthLib::MidiEventSource _source)
+	{
+		switch (_source)
+		{
+		case synthLib::MidiEventSource::Device: return FeedbackTarget::Device;
+		case synthLib::MidiEventSource::Editor: return FeedbackTarget::Editor;
+		case synthLib::MidiEventSource::Host: return FeedbackTarget::Host;
+		case synthLib::MidiEventSource::Physical: return FeedbackTarget::Physical;
+		default: return FeedbackTarget::None;
 		}
 	}
 }

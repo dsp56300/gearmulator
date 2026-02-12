@@ -4,7 +4,7 @@
 #include <string>
 #include <cstdint>
 
-namespace synthLib { struct SMidiEvent; enum MidiStatusByte; }
+namespace synthLib { struct SMidiEvent; enum MidiStatusByte; enum class MidiEventSource : uint8_t; }
 
 namespace pluginLib
 {
@@ -25,12 +25,24 @@ namespace pluginLib
 			Relative
 		};
 
+		// Feedback target flags (bitmask)
+		enum FeedbackTarget : uint8_t
+		{
+			None = 0x00,
+			Device = 0x01,
+			Editor = 0x02,
+			Host = 0x04,
+			Physical = 0x08,
+			All = 0x0F
+		};
+
 		Type type = Type::ControlChange;
 		Mode mode = Mode::Absolute;
 		uint8_t channel = 0;         // MIDI channel (0-15, displayed as 1-16)
 		uint8_t controller = 0;      // CC number (0-127) or PP note number
 		uint16_t nrpn = 0;           // For NRPN type
 		std::string paramName;       // Target parameter name
+		uint8_t feedbackTargets = 0; // Bitmask of FeedbackTarget flags
 
 		// Comparison for finding mappings
 		bool matchesMidiEvent(Type _eventType, uint8_t _eventChannel, uint8_t _eventController) const;
@@ -54,5 +66,10 @@ namespace pluginLib
 		// Convert between MidiStatusByte and Type
 		static Type midiStatusToType(synthLib::MidiStatusByte _statusByte);
 		static synthLib::MidiStatusByte typeToMidiStatus(Type _type);
+
+		// Feedback target management
+		void setFeedbackEnabled(synthLib::MidiEventSource _target, bool _enabled);
+		bool isFeedbackEnabled(synthLib::MidiEventSource _target) const;
+		static FeedbackTarget midiEventSourceToFeedbackTarget(synthLib::MidiEventSource _source);
 	};
 }

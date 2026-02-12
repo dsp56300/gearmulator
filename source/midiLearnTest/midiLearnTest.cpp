@@ -265,6 +265,57 @@ void testMidiLearnTranslatorBasics()
 	std::cout << "    - Return false = not consumed (forward to device)" << std::endl;
 }
 
+void testMidiLearnFeedback()
+{
+	std::cout << "Testing MIDI Learn Feedback targets..." << std::endl;
+
+	// Test feedback target flags
+	MidiLearnMapping mapping;
+	mapping.type = MidiLearnMapping::Type::ControlChange;
+	mapping.channel = 0;
+	mapping.controller = 74;
+	mapping.paramName = "TestParam";
+
+	// Initially no feedback targets
+	TEST_ASSERT(!mapping.isFeedbackEnabled(synthLib::MidiEventSource::Device));
+	TEST_ASSERT(!mapping.isFeedbackEnabled(synthLib::MidiEventSource::Editor));
+	TEST_ASSERT(!mapping.isFeedbackEnabled(synthLib::MidiEventSource::Host));
+	TEST_ASSERT(!mapping.isFeedbackEnabled(synthLib::MidiEventSource::Physical));
+
+	// Enable Editor feedback
+	mapping.setFeedbackEnabled(synthLib::MidiEventSource::Editor, true);
+	TEST_ASSERT(mapping.isFeedbackEnabled(synthLib::MidiEventSource::Editor));
+	TEST_ASSERT(!mapping.isFeedbackEnabled(synthLib::MidiEventSource::Host));
+
+	// Enable Host feedback
+	mapping.setFeedbackEnabled(synthLib::MidiEventSource::Host, true);
+	TEST_ASSERT(mapping.isFeedbackEnabled(synthLib::MidiEventSource::Editor));
+	TEST_ASSERT(mapping.isFeedbackEnabled(synthLib::MidiEventSource::Host));
+	TEST_ASSERT(!mapping.isFeedbackEnabled(synthLib::MidiEventSource::Physical));
+
+	// Disable Editor feedback
+	mapping.setFeedbackEnabled(synthLib::MidiEventSource::Editor, false);
+	TEST_ASSERT(!mapping.isFeedbackEnabled(synthLib::MidiEventSource::Editor));
+	TEST_ASSERT(mapping.isFeedbackEnabled(synthLib::MidiEventSource::Host));
+
+	// Test JSON round-trip with feedback targets
+	mapping.setFeedbackEnabled(synthLib::MidiEventSource::Physical, true);
+	auto json = mapping.toJson();
+	auto restored = MidiLearnMapping::fromJson(json);
+
+	TEST_ASSERT(!restored.isFeedbackEnabled(synthLib::MidiEventSource::Editor));
+	TEST_ASSERT(restored.isFeedbackEnabled(synthLib::MidiEventSource::Host));
+	TEST_ASSERT(restored.isFeedbackEnabled(synthLib::MidiEventSource::Physical));
+
+	std::cout << "  MIDI Learn Feedback tests passed!" << std::endl;
+	std::cout << std::endl;
+	std::cout << "  Note: Feedback implementation:" << std::endl;
+	std::cout << "    - Feedback targets stored per mapping" << std::endl;
+	std::cout << "    - Device target disabled (UI grayed out)" << std::endl;
+	std::cout << "    - Feedback only sent for UI/automation changes (not MIDI input)" << std::endl;
+	std::cout << "    - Relative mode mappings send absolute feedback" << std::endl;
+}
+
 int main()
 {
 	try
@@ -277,6 +328,7 @@ int main()
 		testMidiLearnPreset();
 		testMidiLearnManager();
 		testMidiLearnTranslatorBasics();
+		testMidiLearnFeedback();
 
 		std::cout << std::endl;
 		std::cout << "All tests passed successfully!" << std::endl;

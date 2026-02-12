@@ -40,6 +40,20 @@ namespace jucePluginEditorLib
 			m_mappingTableBody->RemoveChild(m_mappingRowTemplate);
 		}
 
+		// Feedback checkboxes
+		m_cbFeedbackDevice = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbFeedbackDevice");
+		m_cbFeedbackEditor = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbFeedbackEditor");
+		m_cbFeedbackHost = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbFeedbackHost");
+		m_cbFeedbackPhysical = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbFeedbackPhysical");
+
+		// Device checkbox is always disabled
+		if (m_cbFeedbackDevice)
+			m_cbFeedbackDevice->setChecked(false);
+
+		juceRmlUi::EventListener::Add(m_cbFeedbackEditor, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onFeedbackTargetToggle(synthLib::MidiEventSource::Editor); });
+		juceRmlUi::EventListener::Add(m_cbFeedbackHost, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onFeedbackTargetToggle(synthLib::MidiEventSource::Host); });
+		juceRmlUi::EventListener::Add(m_cbFeedbackPhysical, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onFeedbackTargetToggle(synthLib::MidiEventSource::Physical); });
+
 		initPresetList();
 	}
 
@@ -272,5 +286,55 @@ namespace jucePluginEditorLib
 				});
 			}
 		}
+
+		// Update feedback checkboxes (for first mapping if exists)
+		refreshFeedbackCheckboxes();
+	}
+
+	void SettingsMidiLearn::refreshFeedbackCheckboxes()
+	{
+		// For now, we show feedback settings globally for all mappings
+		// (In future, could show per-mapping if we add a selection mechanism)
+		const auto& mappings = m_currentPreset.getMappings();
+		
+		// If no mappings, disable all checkboxes
+		if (mappings.empty())
+		{
+			if (m_cbFeedbackEditor) m_cbFeedbackEditor->setChecked(false);
+			if (m_cbFeedbackHost) m_cbFeedbackHost->setChecked(false);
+			if (m_cbFeedbackPhysical) m_cbFeedbackPhysical->setChecked(false);
+			return;
+		}
+
+		// Show feedback settings from first mapping
+		// (All mappings share feedback settings in this simple version)
+		const auto& firstMapping = mappings[0];
+		
+		if (m_cbFeedbackEditor)
+			m_cbFeedbackEditor->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Editor));
+		
+		if (m_cbFeedbackHost)
+			m_cbFeedbackHost->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Host));
+		
+		if (m_cbFeedbackPhysical)
+			m_cbFeedbackPhysical->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Physical));
+	}
+
+	void SettingsMidiLearn::onFeedbackTargetToggle(synthLib::MidiEventSource _target)
+	{
+		auto& mappings = m_currentPreset.getMappings();
+		
+		if (mappings.empty())
+			return;
+
+		// Toggle feedback target for ALL mappings
+		const bool newState = !mappings[0].isFeedbackEnabled(_target);
+		
+		for (auto& mapping : mappings)
+		{
+			mapping.setFeedbackEnabled(_target, newState);
+		}
+
+		refreshFeedbackCheckboxes();
 	}
 }

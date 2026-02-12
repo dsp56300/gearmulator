@@ -12,10 +12,16 @@ namespace pluginLib
 	{
 	}
 
-	MidiLearnTranslator::~MidiLearnTranslator() = default;
+	MidiLearnTranslator::~MidiLearnTranslator()
+	{
+		unsubscribeFromParameters();
+	}
 
 	void MidiLearnTranslator::setPreset(const MidiLearnPreset& _preset)
 	{
+		// Unsubscribe from old parameters
+		unsubscribeFromParameters();
+
 		m_preset = _preset;
 
 		// Rebuild cache for fast lookup
@@ -34,6 +40,9 @@ namespace pluginLib
 				m_midiToMappingIndex[key] = i;
 			}
 		}
+
+		// Subscribe to new parameters for feedback
+		subscribeToParameters();
 	}
 
 	bool MidiLearnTranslator::processMidiInput(const synthLib::SMidiEvent& _event)
@@ -165,5 +174,124 @@ namespace pluginLib
 			return MidiLearnMapping::Mode::Relative;
 		
 		return MidiLearnMapping::Mode::Absolute;
+	}
+
+	void MidiLearnTranslator::subscribeToParameters()
+	{
+		const auto& mappings = m_preset.getMappings();
+		m_paramListenerIds.reserve(mappings.size());
+
+		for (const auto& mapping : mappings)
+		{
+			// Only subscribe if feedback is enabled for at least one target
+			if (mapping.feedbackTargets == 0)
+				continue;
+
+			auto* param = m_controller.getParameter(mapping.paramName, 0);
+			if (!param)
+				continue;
+
+			// Subscribe to parameter changes
+			const auto listenerId = param->onValueChanged.addListener(
+				[this, paramName = mapping.paramName](Parameter* _param)
+				{
+					// Don't send feedback for MIDI-originated changes (avoid feedback loops)
+					if (_param->getChangeOrigin() == Parameter::Origin::Midi)
+						return;
+
+					onParameterChanged(paramName, _param->getValue());
+				});
+
+			m_paramListenerIds.push_back(listenerId);
+		}
+	}
+
+	void MidiLearnTranslator::unsubscribeFromParameters()
+	{
+		const auto& mappings = m_preset.getMappings();
+		
+		// Remove listeners
+		for (size_t i = 0; i < m_paramListenerIds.size() && i < mappings.size(); ++i)
+		{
+			auto* param = m_controller.getParameter(mappings[i].paramName, 0);
+			if (param)
+				param->onValueChanged.removeListener(m_paramListenerIds[i]);
+		}
+
+		m_paramListenerIds.clear();
+	}
+
+	void MidiLearnTranslator::onParameterChanged(const std::string& _paramName, float _normalizedValue)
+	{
+		// Find all mappings for this parameter
+		const auto mappings = m_preset.findMappingsByParam(_paramName);
+		
+		for (const auto* mapping : mappings)
+		{
+			if (!mapping || mapping->feedbackTargets == 0)
+				continue;
+
+			// Create the feedback MIDI event
+			const auto feedbackEvent = createFeedbackEvent(*mapping, _normalizedValue);
+
+			// Send to each enabled feedback target
+			if (!onSendMidiOutput)
+				continue;
+
+			if (mapping->isFeedbackEnabled(synthLib::MidiEventSource::Device))
+				onSendMidiOutput(synthLib::MidiEventSource::Device, feedbackEvent);
+
+			if (mapping->isFeedbackEnabled(synthLib::MidiEventSource::Editor))
+				onSendMidiOutput(synthLib::MidiEventSource::Editor, feedbackEvent);
+
+			if (mapping->isFeedbackEnabled(synthLib::MidiEventSource::Host))
+				onSendMidiOutput(synthLib::MidiEventSource::Host, feedbackEvent);
+
+			if (mapping->isFeedbackEnabled(synthLib::MidiEventSource::Physical))
+				onSendMidiOutput(synthLib::MidiEventSource::Physical, feedbackEvent);
+		}
+	}
+
+	synthLib::SMidiEvent MidiLearnTranslator::createFeedbackEvent(const MidiLearnMapping& _mapping, float _normalizedValue) const
+	{
+		// Always send absolute values for feedback (even for relative-mode mappings)
+		const uint8_t midiValue = static_cast<uint8_t>(std::clamp(_normalizedValue * 127.0f, 0.0f, 127.0f));
+
+		// Build status byte: message type + channel
+		const auto statusByte = MidiLearnMapping::typeToMidiStatus(_mapping.type);
+		const uint8_t statusWithChannel = statusByte | (_mapping.channel & 0x0f);
+
+		// Create the event based on message type
+		synthLib::SMidiEvent event(synthLib::MidiEventSource::Internal);
+		event.a = statusWithChannel;
+
+		switch (_mapping.type)
+		{
+		case MidiLearnMapping::Type::ControlChange:
+		case MidiLearnMapping::Type::PolyPressure:
+			event.b = _mapping.controller;
+			event.c = midiValue;
+			break;
+
+		case MidiLearnMapping::Type::ChannelPressure:
+			event.b = midiValue;
+			event.c = 0;
+			break;
+
+		case MidiLearnMapping::Type::PitchBend:
+			// Pitch bend uses 14-bit value (LSB, MSB)
+			{
+				const uint16_t pitchValue = static_cast<uint16_t>(_normalizedValue * 16383.0f);
+				event.b = pitchValue & 0x7f; // LSB
+				event.c = (pitchValue >> 7) & 0x7f; // MSB
+			}
+			break;
+
+		case MidiLearnMapping::Type::NRPN:
+			// NRPN feedback not yet implemented (needs multiple CC messages)
+			break;
+		}
+
+		return event;
 	}
 }

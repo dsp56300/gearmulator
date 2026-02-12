@@ -25,6 +25,7 @@ namespace pluginLib
 		void removeMapping(size_t _index);
 		void clearMappings();
 		const std::vector<MidiLearnMapping>& getMappings() const { return m_mappings; }
+		std::vector<MidiLearnMapping>& getMappings() { return m_mappings; }
 
 		// Find mapping by MIDI message
 		const MidiLearnMapping* findMapping(MidiLearnMapping::Type _type, uint8_t _channel, uint8_t _controller) const;
