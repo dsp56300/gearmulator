@@ -63,6 +63,16 @@ namespace pluginLib
 
 	void Processor::addMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
+		// Process through MIDI Learn translator first
+		if (_ev.source != synthLib::MidiEventSource::Device)
+		{
+			if (m_midiLearnTranslator && m_midiLearnTranslator->processMidiInput(_ev))
+			{
+				// MIDI event was consumed by MIDI Learn (learned mapping or learning mode)
+				return;
+			}
+		}
+
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Editor))
 			getController().enqueueMidiMessages({_ev});
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
@@ -105,13 +115,6 @@ namespace pluginLib
 					syx.push_back(rawData[i]);
 				sm.sysex = syx;
 			}
-		}
-
-		// Process through MIDI Learn translator first
-		if (m_midiLearnTranslator && m_midiLearnTranslator->processMidiInput(sm))
-		{
-			// MIDI event was consumed by MIDI Learn (learned mapping or learning mode)
-			return;
 		}
 
 		addMidiEvent(sm);
