@@ -3,6 +3,9 @@
 #include "rmlEventListener.h"
 #include "rmlHelper.h"
 
+#include "Core/Template.h"
+#include "Core/TemplateCache.h"
+#include "RmlUi/Core/CoreInstance.h"
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/ElementUtilities.h"
@@ -49,15 +52,31 @@ namespace juceRmlUi
 		const std::string& _parameterName)
 	{
 		if (!_parent)
-			return {};
+			return nullptr;
 
-		Rml::ElementPtr element = _parent->GetOwnerDocument()->CreateElement(_templateName.c_str());
-		if (!element)
-			return {};
+		auto* t = _parent->GetCoreInstance().template_cache->GetTemplate(_templateName);
 
-		_parent->AppendChild(std::move(element));
+		if (!t)
+		{
+			Rml::Log::Message(_parent->GetCoreInstance(), Rml::Log::LT_ERROR, "MidiLearnDialog template '%s' not found", _templateName.c_str());
+			return nullptr;
+		}
 
-		return std::make_unique<MidiLearnDialog>(_parent->GetLastChild(), std::move(_completionCallback), _parameterName);
+		auto elem = _parent->GetOwnerDocument()->CreateElement("div");
+
+		auto* parsedElem = t->ParseTemplate(elem.get());
+
+		if (!parsedElem)
+		{
+			Rml::Log::Message(_parent->GetCoreInstance(), Rml::Log::LT_ERROR, "MidiLearnDialog template '%s' could not be parsed", _templateName.c_str());
+			return nullptr;
+		}
+
+		auto* attachedElem = _parent->AppendChild(std::move(elem));
+
+		attachedElem->SetProperty(Rml::PropertyId::ZIndex, Rml::Property(100, Rml::Unit::NUMBER));
+
+		return std::make_unique<MidiLearnDialog>(attachedElem, std::move(_completionCallback), _parameterName);
 	}
 
 	void MidiLearnDialog::onMidiReceived(const synthLib::SMidiEvent& _event)
