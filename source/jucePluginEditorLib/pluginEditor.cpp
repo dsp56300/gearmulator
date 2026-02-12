@@ -868,6 +868,34 @@ namespace jucePluginEditorLib
 			{
 				translator->cancelLearning();
 				m_midiLearnDialog.reset();
+
+				if (!_confirmed)
+					return;
+
+				// Create mapping from received MIDI event
+				pluginLib::MidiLearnMapping newMapping;
+				newMapping.type = pluginLib::MidiLearnMapping::midiStatusToType(
+					static_cast<synthLib::MidiStatusByte>(_event.a & 0xf0));
+				newMapping.channel = pluginLib::MidiLearnMapping::getChannel(_event);
+				newMapping.controller = pluginLib::MidiLearnMapping::getController(_event);
+				newMapping.paramName = paramName;
+				newMapping.mode = pluginLib::MidiLearnMapping::Mode::Absolute; // Will be auto-detected by translator
+
+				// Get modifiable preset
+				auto preset = translator->getPreset();
+
+				// Remove existing mappings for this parameter if any (replace)
+				auto& mappings = preset.getMappings();
+				mappings.erase(
+					std::remove_if(mappings.begin(), mappings.end(),
+						[&paramName](const pluginLib::MidiLearnMapping& _m) { return _m.paramName == paramName; }),
+					mappings.end());
+
+				// Add new mapping
+				preset.addMapping(newMapping);
+
+				// Update translator with modified preset (rebuilds cache and subscriptions)
+				translator->setPreset(preset);
 			},
 			_param->getDescription().displayName
 		);
