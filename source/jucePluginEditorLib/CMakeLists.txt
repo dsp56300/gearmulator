@@ -23,6 +23,7 @@ set(SOURCES
 	settingsDspBridge.cpp settingsDspBridge.h
 	settingsGui.cpp settingsGui.h
 	settingsMidi.cpp settingsMidi.h
+	settingsMidiLearn.cpp settingsMidiLearn.h
 	settingsMidiMatrix.cpp settingsMidiMatrix.h
 	settingsSkin.cpp settingsSkin.h
 	settingsPlugin.cpp settingsPlugin.h

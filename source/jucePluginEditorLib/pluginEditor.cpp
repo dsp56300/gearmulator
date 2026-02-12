@@ -7,6 +7,7 @@
 #include "settingsDspBridge.h"
 #include "settingsGui.h"
 #include "settingsMidi.h"
+#include "settingsMidiLearn.h"
 #include "settingsSkin.h"
 
 #include "skin.h"
@@ -681,6 +682,7 @@ namespace jucePluginEditorLib
 		_plugins.push_back(std::make_unique<SettingsSkin>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsGui>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsMidi>(getProcessor()));
+		_plugins.push_back(std::make_unique<SettingsMidiLearn>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsDspAudio>(getProcessor()));
 		_plugins.push_back(std::make_unique<SettingsDspBridge>(getProcessor()));
 	}

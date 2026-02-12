@@ -1,0 +1,44 @@
+<template name="tus_settings_midilearn">
+<head>
+	<link type="text/rcss" href="tus_settings_midilearn.rcss"/>
+</head>
+<body>
+	<div class="settings-page">
+		<h1>MIDI Learn</h1>
+		<settingsspacer1/>
+		
+		<div class="settings-hlayout">
+			<label>Preset:</label>
+			<combo id="presetList" class="settings-combo">
+				<combotext>Default</combotext>
+			</combo>
+			<button id="btPresetCreate" class="button">Create</button>
+			<button id="btPresetDelete" class="button">Delete</button>
+		</div>
+		
+		<settingsspacer1/>
+		
+		<h2>Mappings</h2>
+		<settingsspacer1/>
+		
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 1em;">
+			<tr class="settings-tr settings-tr-headline">
+				<td>Type</td>
+				<td>Channel</td>
+				<td>Controller</td>
+				<td>Mode</td>
+				<td>Parameter</td>
+				<td></td>
+			</tr>
+			<tr id="mappingRow" class="settings-tr">
+				<td id="type">CC</td>
+				<td id="channel">1</td>
+				<td id="controller">74</td>
+				<td id="mode">Absolute</td>
+				<td id="parameter">Filter Cutoff</td>
+				<td><button id="btRemove" class="button">Remove</button></td>
+			</tr>
+		</table>
+	</div>
+</body>
+</template>
