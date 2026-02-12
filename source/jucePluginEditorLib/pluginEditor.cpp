@@ -21,6 +21,7 @@
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlMidiLearnDialog.h"
 
 #include "jucePluginData.h"
 #include "pluginDataModel.h"
@@ -847,14 +848,45 @@ namespace jucePluginEditorLib
 
 	void Editor::onMidiLearnRequested(const pluginLib::Parameter* _param)
 	{
-		// TODO: Phase 5 - Implement MIDI Learn workflow
-		// 1. Get or create MidiLearnTranslator from processor
-		// 2. Call translator->startLearning(_param->getDescription().name)
-		// 3. Show learning feedback UI (dialog/overlay)
-		// 4. Handle callbacks (onMappingLearned, onMappingConflict)
-		
-		// For now, just log that MIDI Learn was requested
-		(void)_param;  // Suppress unused parameter warning
+		if (!_param)
+			return;
+
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		const auto paramName = _param->getDescription().name;
+
+		// Start learning mode
+		translator->startLearning(paramName);
+
+		// Show MIDI Learn dialog
+		m_midiLearnDialog = juceRmlUi::MidiLearnDialog::createFromTemplate(
+			"tus_midilearn_dialog",
+			getRmlRootElement(),
+			[this, translator, paramName](bool _confirmed, const synthLib::SMidiEvent& _event)
+			{
+				translator->cancelLearning();
+				m_midiLearnDialog.reset();
+			},
+			_param->getDescription().displayName
+		);
+
+		// Setup callbacks for MIDI learning
+		translator->onMappingLearned = [this](const pluginLib::MidiLearnMapping& _mapping)
+		{
+			if (m_midiLearnDialog)
+				m_midiLearnDialog->onMidiReceived(pluginLib::MidiLearnMapping::toMidiEvent(_mapping));
+		};
+
+		translator->onMappingConflict = [this](const pluginLib::MidiLearnMapping& _existingMapping)
+		{
+			if (m_midiLearnDialog)
+			{
+				const auto event = pluginLib::MidiLearnMapping::toMidiEvent(_existingMapping);
+				m_midiLearnDialog->onConflict(_existingMapping.paramName, event);
+			}
+		};
 	}
 
 	std::vector<Rml::Element*> Editor::findChildreByParam(const std::string& _param, uint8_t _part,	const size_t _expectedCount, bool _visibleOnly) const

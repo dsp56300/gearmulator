@@ -1,0 +1,24 @@
+<template name="tus_midilearn_dialog">
+<head>
+	<link type="text/rcss" href="tus_midilearn_dialog.rcss"/>
+</head>
+<body>
+	<div class="ml-parent">
+		<div id="tus-midilearn-dialog" class="ml-box">
+			<div class="ml-headline"><p>MIDI Learn</p></div>
+			
+			<div class="ml-content">
+				<div id="parameterText" class="ml-parameter">Filter Cutoff</div>
+				<div id="statusText" class="ml-status">
+					Waiting for MIDI input...<br/>
+					Move a knob or fader on your controller.
+				</div>
+			</div>
+			
+			<div id="buttonContainer" class="ml-button-container">
+				<div id="buttonCancel" class="button ml-button">Cancel</div>
+			</div>
+		</div>
+	</div>
+</body>
+</template>

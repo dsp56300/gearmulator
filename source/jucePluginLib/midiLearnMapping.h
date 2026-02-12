@@ -66,6 +66,9 @@ namespace pluginLib
 		// Convert between MidiStatusByte and Type
 		static Type midiStatusToType(synthLib::MidiStatusByte _statusByte);
 		static synthLib::MidiStatusByte typeToMidiStatus(Type _type);
+		
+		// Convert to SMidiEvent for feedback/display
+		static synthLib::SMidiEvent toMidiEvent(const MidiLearnMapping& _mapping);
 
 		// Feedback target management
 		void setFeedbackEnabled(synthLib::MidiEventSource _target, bool _enabled);

@@ -151,6 +151,18 @@ namespace pluginLib
 		}
 	}
 
+	synthLib::SMidiEvent MidiLearnMapping::toMidiEvent(const MidiLearnMapping& _mapping)
+	{
+		synthLib::SMidiEvent event(synthLib::MidiEventSource::Editor);
+		
+		const auto statusByte = typeToMidiStatus(_mapping.type);
+		event.a = statusByte | (_mapping.channel & 0x0f);
+		event.b = _mapping.controller;
+		event.c = 0;  // Value doesn't matter for display purposes
+		
+		return event;
+	}
+
 	void MidiLearnMapping::setFeedbackEnabled(synthLib::MidiEventSource _target, bool _enabled)
 	{
 		const auto flag = midiEventSourceToFeedbackTarget(_target);

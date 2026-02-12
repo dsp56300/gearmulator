@@ -47,6 +47,7 @@ namespace Rml
 namespace juceRmlUi
 {
 	class RmlComponent;
+	class MidiLearnDialog;
 }
 
 namespace baseLib
@@ -240,6 +241,7 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::RmlInterfaces m_rmlInterfaces;
 		std::unique_ptr<juceRmlUi::RmlComponent> m_rmlComponent;
+		std::unique_ptr<juceRmlUi::MidiLearnDialog> m_midiLearnDialog;
 
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
 
