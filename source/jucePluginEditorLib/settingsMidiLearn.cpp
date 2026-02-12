@@ -332,40 +332,40 @@ namespace jucePluginEditorLib
 				case pluginLib::MidiLearnMapping::Type::PitchBend: typeStr = "Pitch Bend"; break;
 				case pluginLib::MidiLearnMapping::Type::NRPN: typeStr = "NRPN"; break;
 				}
-				typeCell->SetInnerRML(typeStr.c_str());
+				typeCell->SetInnerRML(typeStr);
 			}
 
 			if (channelCell)
-				channelCell->SetInnerRML(std::to_string(mapping.channel + 1).c_str());
+				channelCell->SetInnerRML(std::to_string(mapping.channel + 1));
 
 			if (controllerCell)
-				controllerCell->SetInnerRML(std::to_string(mapping.controller).c_str());
+				controllerCell->SetInnerRML(std::to_string(mapping.controller));
 
 			// Create and populate mode combo box
 			auto* modeCombo = juceRmlUi::helper::findChild(row, "modeCombo");
 			if (modeCombo)
 			{
 				// Populate with both options
-				auto* combobox = juceRmlUi::ElemComboBox::fromElement(modeCombo);
+				auto* combobox = dynamic_cast<juceRmlUi::ElemComboBox*>(modeCombo);
 				if (combobox)
 				{
-					combobox->addItem("Absolute");
-					combobox->addItem("Relative");
+					combobox->addOption("Absolute");
+					combobox->addOption("Relative");
 					
 					// Set current mode
 					const int currentMode = (mapping.mode == pluginLib::MidiLearnMapping::Mode::Absolute) ? 0 : 1;
-					combobox->setSelectedIndex(currentMode);
+					combobox->setSelectedIndex(currentMode, false); // Don't trigger callback when setting initial value
 					
 					// Handle mode change
-					combobox->onValueChanged = [this, i](int _newIndex)
+					combobox->onValueChanged.addListener([this, i](float _value)
 					{
-						onModeChanged(i, _newIndex);
-					};
+						onModeChanged(i, static_cast<int>(_value));
+					});
 				}
 			}
 
 			if (parameterCell)
-				parameterCell->SetInnerRML(mapping.paramName.c_str());
+				parameterCell->SetInnerRML(mapping.paramName);
 
 			if (removeButton)
 			{
