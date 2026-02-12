@@ -29,7 +29,7 @@ namespace juceRmlUi
 
 		void onMidiReceived(const pluginLib::MidiLearnMapping& _mapping);
 		void onConflict(const std::string& _existingParamName, const pluginLib::MidiLearnMapping& _mapping);
-		void updateProgress(size_t _eventCount, size_t _requiredCount);
+		void updateProgress(size_t _eventCount, size_t _requiredCount) const;
 
 	private:
 		void callCompletionCallback(bool _confirmed) const;

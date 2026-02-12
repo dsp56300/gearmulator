@@ -9,7 +9,6 @@
 #include "RmlUi/Core/CoreInstance.h"
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementDocument.h"
-#include "RmlUi/Core/Factory.h"
 
 #include "jucePluginLib/midiLearnMapping.h"
 
@@ -87,24 +86,30 @@ namespace juceRmlUi
 
 	void MidiLearnDialog::onMidiReceived(const pluginLib::MidiLearnMapping& _mapping)
 	{
-		m_receivedMapping = _mapping;
-		callCompletionCallback(true);
+		juce::MessageManager::callAsync([this, _mapping]
+		{
+			m_receivedMapping = _mapping;
+			callCompletionCallback(true);
+		});
 	}
 
-	void MidiLearnDialog::updateProgress(size_t _eventCount, size_t _requiredCount)
+	void MidiLearnDialog::updateProgress(size_t _eventCount, size_t _requiredCount) const
 	{
-		if (m_statusText)
+		juce::MessageManager::callAsync([this, _eventCount, _requiredCount]
 		{
-			if (_eventCount == 0)
+			if (m_statusText)
 			{
-				m_statusText->SetInnerRML("Move controller in both directions...");
+				if (_eventCount == 0)
+				{
+					m_statusText->SetInnerRML("Move controller in both directions...");
+				}
+				else
+				{
+					std::string statusMsg = "Move in both directions... (" + std::to_string(_eventCount) + "/" + std::to_string(_requiredCount) + ")";
+					m_statusText->SetInnerRML(statusMsg);
+				}
 			}
-			else
-			{
-				std::string statusMsg = "Move in both directions... (" + std::to_string(_eventCount) + "/" + std::to_string(_requiredCount) + ")";
-				m_statusText->SetInnerRML(statusMsg.c_str());
-			}
-		}
+		});
 	}
 
 	void MidiLearnDialog::onConflict(const std::string& _existingParamName, const pluginLib::MidiLearnMapping& _mapping)
