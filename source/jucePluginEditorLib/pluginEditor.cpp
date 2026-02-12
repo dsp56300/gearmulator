@@ -867,10 +867,12 @@ namespace jucePluginEditorLib
 			[this, translator, paramName](bool _confirmed, const synthLib::SMidiEvent& _event)
 			{
 				translator->cancelLearning();
-				m_midiLearnDialog.reset();
 
 				if (!_confirmed)
+				{
+					m_midiLearnDialog.reset();
 					return;
+				}
 
 				// Create mapping from received MIDI event
 				pluginLib::MidiLearnMapping newMapping;
@@ -896,6 +898,8 @@ namespace jucePluginEditorLib
 
 				// Update translator with modified preset (rebuilds cache and subscriptions)
 				translator->setPreset(preset);
+
+				m_midiLearnDialog.reset();
 			},
 			_param->getDescription().displayName
 		);
