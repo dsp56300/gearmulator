@@ -215,9 +215,12 @@ namespace jucePluginEditorLib
 		if (_mappingIndex >= mappings.size())
 			return;
 
-		// Update the mode (0 = Absolute, 1 = Relative)
+		// Validate mode index and update the mode
+		if (_newModeIndex < 0 || _newModeIndex >= static_cast<int>(pluginLib::MidiLearnMapping::Mode::Count))
+			return;
+
 		auto& mapping = mappings[_mappingIndex];
-		mapping.mode = (_newModeIndex == 0) ? pluginLib::MidiLearnMapping::Mode::Absolute : pluginLib::MidiLearnMapping::Mode::Relative;
+		mapping.mode = static_cast<pluginLib::MidiLearnMapping::Mode>(_newModeIndex);
 
 		// Save the preset
 		const juce::String presetName(preset.getName());
@@ -342,26 +345,24 @@ namespace jucePluginEditorLib
 				controllerCell->SetInnerRML(std::to_string(mapping.controller));
 
 			// Create and populate mode combo box
-			auto* modeCombo = juceRmlUi::helper::findChild(row, "modeCombo");
+			auto* modeCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "modeCombo");
 			if (modeCombo)
 			{
-				// Populate with both options
-				auto* combobox = dynamic_cast<juceRmlUi::ElemComboBox*>(modeCombo);
-				if (combobox)
+				// Populate with all mode options
+				for (const auto* modeStr : pluginLib::MidiLearnMapping::ModeStrings)
 				{
-					combobox->addOption("Absolute");
-					combobox->addOption("Relative");
-					
-					// Set current mode
-					const int currentMode = (mapping.mode == pluginLib::MidiLearnMapping::Mode::Absolute) ? 0 : 1;
-					combobox->setSelectedIndex(currentMode, false); // Don't trigger callback when setting initial value
-					
-					// Handle mode change
-					combobox->onValueChanged.addListener([this, i](float _value)
-					{
-						onModeChanged(i, static_cast<int>(_value));
-					});
+					modeCombo->addOption(modeStr);
 				}
+				
+				// Set current mode
+				const int currentMode = static_cast<int>(mapping.mode);
+				modeCombo->setSelectedIndex(currentMode, false); // Don't trigger callback when setting initial value
+				
+				// Handle mode change
+				modeCombo->onValueChanged.addListener([this, i](float _value)
+				{
+					onModeChanged(i, static_cast<int>(_value));
+				});
 			}
 
 			if (parameterCell)

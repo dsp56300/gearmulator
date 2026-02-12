@@ -22,8 +22,13 @@ namespace pluginLib
 		enum class Mode
 		{
 			Absolute,
-			Relative
+			Relative,
+			Count
 		};
+		
+		static constexpr const char* ModeStrings[] = { "Absolute", "Relative" };
+		static_assert(static_cast<size_t>(Mode::Count) == sizeof(ModeStrings) / sizeof(ModeStrings[0]), 
+		              "ModeStrings array size must match Mode enum count");
 
 		// Feedback target flags (bitmask)
 		enum FeedbackTarget : uint8_t
