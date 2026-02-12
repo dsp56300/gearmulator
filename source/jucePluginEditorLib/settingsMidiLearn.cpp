@@ -203,6 +203,37 @@ namespace jucePluginEditorLib
 		}
 	}
 
+	void SettingsMidiLearn::onModeChanged(size_t _mappingIndex, int _newModeIndex)
+	{
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		auto& preset = const_cast<pluginLib::MidiLearnPreset&>(translator->getPreset());
+		auto& mappings = preset.getMappings();
+		
+		if (_mappingIndex >= mappings.size())
+			return;
+
+		// Update the mode (0 = Absolute, 1 = Relative)
+		auto& mapping = mappings[_mappingIndex];
+		mapping.mode = (_newModeIndex == 0) ? pluginLib::MidiLearnMapping::Mode::Absolute : pluginLib::MidiLearnMapping::Mode::Relative;
+
+		// Save the preset
+		const juce::String presetName(preset.getName());
+		if (m_learnManager.savePreset(presetName, preset))
+		{
+			translator->setPreset(preset); // Refresh to apply changes
+		}
+		else
+		{
+			genericUI::MessageBox::showOk(
+				genericUI::MessageBox::Icon::Warning,
+				m_processor.getProductName(),
+				"Failed to save mode change.");
+		}
+	}
+
 	void SettingsMidiLearn::initPresetList()
 	{
 		m_presetNames.clear();
@@ -310,10 +341,27 @@ namespace jucePluginEditorLib
 			if (controllerCell)
 				controllerCell->SetInnerRML(std::to_string(mapping.controller).c_str());
 
-			if (modeCell)
+			// Create and populate mode combo box
+			auto* modeCombo = juceRmlUi::helper::findChild(row, "modeCombo");
+			if (modeCombo)
 			{
-				const char* modeStr = (mapping.mode == pluginLib::MidiLearnMapping::Mode::Absolute) ? "Absolute" : "Relative";
-				modeCell->SetInnerRML(modeStr);
+				// Populate with both options
+				auto* combobox = juceRmlUi::ElemComboBox::fromElement(modeCombo);
+				if (combobox)
+				{
+					combobox->addItem("Absolute");
+					combobox->addItem("Relative");
+					
+					// Set current mode
+					const int currentMode = (mapping.mode == pluginLib::MidiLearnMapping::Mode::Absolute) ? 0 : 1;
+					combobox->setSelectedIndex(currentMode);
+					
+					// Handle mode change
+					combobox->onValueChanged = [this, i](int _newIndex)
+					{
+						onModeChanged(i, _newIndex);
+					};
+				}
 			}
 
 			if (parameterCell)

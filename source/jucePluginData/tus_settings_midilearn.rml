@@ -34,7 +34,11 @@
 				<td id="type">CC</td>
 				<td id="channel">1</td>
 				<td id="controller">74</td>
-				<td id="mode">Absolute</td>
+				<td>
+					<combo id="modeCombo" class="settings-combo-small">
+						<combotext>Absolute</combotext>
+					</combo>
+				</td>
 				<td id="parameter">Filter Cutoff</td>
 				<td><button id="btRemove" class="button">Remove</button></td>
 			</tr>

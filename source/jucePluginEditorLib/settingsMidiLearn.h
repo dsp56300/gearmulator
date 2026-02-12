@@ -29,6 +29,7 @@ namespace jucePluginEditorLib
 		void onBtPresetDelete();
 		void onPresetSelected(int _index);
 		void onBtRemoveMapping(size_t _mappingIndex);
+		void onModeChanged(size_t _mappingIndex, int _newModeIndex);
 		void onFeedbackTargetToggle(synthLib::MidiEventSource _target);
 
 		void initPresetList();
