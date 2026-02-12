@@ -38,7 +38,7 @@ namespace jucePluginEditorLib
 		pluginLib::MidiLearnManager m_learnManager;
 		juceRmlUi::ElemComboBox* m_presetList = nullptr;
 		Rml::Element* m_mappingTableBody = nullptr;
-		Rml::Element* m_mappingRowTemplate = nullptr;
+		Rml::ElementPtr m_mappingRowTemplate = nullptr;
 		
 		// Feedback checkboxes
 		juceRmlUi::ElemButton* m_cbFeedbackDevice = nullptr;

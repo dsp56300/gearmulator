@@ -34,10 +34,10 @@ namespace jucePluginEditorLib
 		if (templateRow)
 		{
 			m_mappingTableBody = templateRow->GetParentNode();
-			m_mappingRowTemplate = templateRow;
+			auto mappingRowTemplate = templateRow;
 			
 			// Remove the template row from view (header row at index 0 will remain)
-			m_mappingTableBody->RemoveChild(m_mappingRowTemplate);
+			m_mappingRowTemplate = m_mappingTableBody->RemoveChild(mappingRowTemplate);
 		}
 
 		// Feedback checkboxes
