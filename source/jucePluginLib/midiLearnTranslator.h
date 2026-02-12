@@ -43,6 +43,7 @@ namespace pluginLib
 		// Events/Callbacks
 		std::function<void(const MidiLearnMapping&)> onMappingLearned;
 		std::function<void(const MidiLearnMapping&)> onMappingConflict;
+		std::function<void(size_t _eventCount, size_t _requiredCount)> onLearningProgress;
 		std::function<void(synthLib::MidiEventSource, const synthLib::SMidiEvent&)> onSendMidiOutput;
 
 		// State persistence
@@ -54,7 +55,7 @@ namespace pluginLib
 		void applyMapping(const MidiLearnMapping& _mapping, const synthLib::SMidiEvent& _event);
 		void handleLearning(const synthLib::SMidiEvent& _event);
 		
-		MidiLearnMapping::Mode detectMode(uint8_t _value) const;
+		MidiLearnMapping::Mode detectMode(const std::vector<uint8_t>& _values) const;
 
 		// Parameter feedback
 		void subscribeToParameters();
@@ -69,6 +70,10 @@ namespace pluginLib
 		// Learning state
 		bool m_isLearning = false;
 		std::string m_learningParamName;
+		std::vector<uint8_t> m_learningValues; // Collect multiple values to detect mode
+		uint8_t m_learningChannel = 0;
+		uint8_t m_learningController = 0;
+		static constexpr size_t kLearningEventCount = 3;
 
 		// Parameter subscriptions for feedback
 		std::vector<baseLib::Event<Parameter*>::ListenerId> m_paramListenerIds;

@@ -92,6 +92,15 @@ namespace juceRmlUi
 		callCompletionCallback(true);
 	}
 
+	void MidiLearnDialog::updateProgress(size_t _eventCount, size_t _requiredCount)
+	{
+		if (m_statusText)
+		{
+			std::string statusMsg = "Move controller... (" + std::to_string(_eventCount) + "/" + std::to_string(_requiredCount) + ")";
+			m_statusText->SetInnerRML(statusMsg.c_str());
+		}
+	}
+
 	void MidiLearnDialog::onConflict(const std::string& _existingParamName, const synthLib::SMidiEvent& _event)
 	{
 		m_isConflict = true;

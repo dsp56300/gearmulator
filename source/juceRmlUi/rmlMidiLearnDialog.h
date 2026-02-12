@@ -29,6 +29,7 @@ namespace juceRmlUi
 
 		void onMidiReceived(const synthLib::SMidiEvent& _event);
 		void onConflict(const std::string& _existingParamName, const synthLib::SMidiEvent& _event);
+		void updateProgress(size_t _eventCount, size_t _requiredCount);
 
 	private:
 		void callCompletionCallback(bool _confirmed) const;

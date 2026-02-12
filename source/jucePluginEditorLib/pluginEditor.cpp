@@ -905,6 +905,12 @@ namespace jucePluginEditorLib
 		);
 
 		// Setup callbacks for MIDI learning
+		translator->onLearningProgress = [this](size_t _eventCount, size_t _requiredCount)
+		{
+			if (m_midiLearnDialog)
+				m_midiLearnDialog->updateProgress(_eventCount, _requiredCount);
+		};
+
 		translator->onMappingLearned = [this](const pluginLib::MidiLearnMapping& _mapping)
 		{
 			if (m_midiLearnDialog)

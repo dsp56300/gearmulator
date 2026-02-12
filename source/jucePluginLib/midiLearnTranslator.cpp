@@ -81,12 +81,16 @@ namespace pluginLib
 	{
 		m_isLearning = true;
 		m_learningParamName = _paramName;
+		m_learningValues.clear();
+		m_learningChannel = 0;
+		m_learningController = 0;
 	}
 
 	void MidiLearnTranslator::cancelLearning()
 	{
 		m_isLearning = false;
 		m_learningParamName.clear();
+		m_learningValues.clear();
 	}
 
 	bool MidiLearnTranslator::isDefaultControllerMapping(const synthLib::SMidiEvent& _event) const
@@ -143,13 +147,45 @@ namespace pluginLib
 		if (statusByte != synthLib::M_CONTROLCHANGE)
 			return;
 
-		// Create a new mapping
+		const auto channel = MidiLearnMapping::getChannel(_event);
+		const auto controller = MidiLearnMapping::getController(_event);
+		const auto value = MidiLearnMapping::getValue(_event);
+
+		// First event: establish channel and controller
+		if (m_learningValues.empty())
+		{
+			m_learningChannel = channel;
+			m_learningController = controller;
+			m_learningValues.push_back(value);
+
+			// Notify progress
+			if (onLearningProgress)
+				onLearningProgress(m_learningValues.size(), kLearningEventCount);
+			return;
+		}
+
+		// Subsequent events: must be same channel and controller
+		if (channel != m_learningChannel || controller != m_learningController)
+			return; // Ignore events from different CC
+
+		// Collect the value
+		m_learningValues.push_back(value);
+
+		// Notify progress
+		if (onLearningProgress)
+			onLearningProgress(m_learningValues.size(), kLearningEventCount);
+
+		// Wait for enough events
+		if (m_learningValues.size() < kLearningEventCount)
+			return;
+
+		// We have enough events, create the mapping
 		MidiLearnMapping newMapping;
 		newMapping.type = MidiLearnMapping::midiStatusToType(statusByte);
-		newMapping.channel = MidiLearnMapping::getChannel(_event);
-		newMapping.controller = MidiLearnMapping::getController(_event);
+		newMapping.channel = m_learningChannel;
+		newMapping.controller = m_learningController;
 		newMapping.paramName = m_learningParamName;
-		newMapping.mode = detectMode(MidiLearnMapping::getValue(_event));
+		newMapping.mode = detectMode(m_learningValues);
 
 		// Check if this parameter already has a mapping
 		const auto existingMappings = m_preset.findMappingsByParam(m_learningParamName);
@@ -170,12 +206,57 @@ namespace pluginLib
 		cancelLearning();
 	}
 
-	MidiLearnMapping::Mode MidiLearnTranslator::detectMode(uint8_t _value) const
+	MidiLearnMapping::Mode MidiLearnTranslator::detectMode(const std::vector<uint8_t>& _values) const
 	{
-		// Auto-detect relative mode: if value is 0x7F (127) or 0x01 (1), assume relative
-		if (_value == 0x7F || _value == 0x01)
+		if (_values.empty())
+			return MidiLearnMapping::Mode::Absolute;
+
+		// Check for relative encoder patterns:
+		// - Two's complement: 0x3F-0x01 for negative, 0x41-0x7F for positive (center at 0x40)
+		// - Sign bit: 0x01-0x7F for positive, 0x7F-0x01 for negative
+		// Relative encoders typically send values like 0x3F, 0x41, or 0x01, 0x7F
+
+		bool hasLowValues = false;  // Values near 0x01
+		bool hasHighValues = false; // Values near 0x7F
+		bool hasMidValues = false;  // Values around 0x3F-0x41
+
+		for (const auto value : _values)
+		{
+			if (value <= 0x02) // 0x00, 0x01, 0x02
+				hasLowValues = true;
+			else if (value >= 0x7D) // 0x7D, 0x7E, 0x7F
+				hasHighValues = true;
+			else if (value >= 0x3E && value <= 0x42) // Around 0x40 (center)
+				hasMidValues = true;
+		}
+
+		// If we see both very low and very high values, or values clustered around center,
+		// it's likely a relative encoder
+		if ((hasLowValues && hasHighValues) || hasMidValues)
 			return MidiLearnMapping::Mode::Relative;
-		
+
+		// Check if values are changing sequentially (absolute fader/knob)
+		// Calculate variance - absolute controls show gradual changes
+		if (_values.size() >= 2)
+		{
+			bool isSequential = true;
+			for (size_t i = 1; i < _values.size(); ++i)
+			{
+				const int diff = std::abs(static_cast<int>(_values[i]) - static_cast<int>(_values[i - 1]));
+				// Absolute controls typically change by small amounts (1-10)
+				// Relative encoders can jump wildly
+				if (diff > 20)
+				{
+					isSequential = false;
+					break;
+				}
+			}
+
+			if (isSequential)
+				return MidiLearnMapping::Mode::Absolute;
+		}
+
+		// Default to absolute if unsure
 		return MidiLearnMapping::Mode::Absolute;
 	}
 
