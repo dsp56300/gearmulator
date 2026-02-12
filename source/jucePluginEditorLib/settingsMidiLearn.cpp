@@ -147,11 +147,9 @@ namespace jucePluginEditorLib
 		if (!translator)
 			return;
 
-		// Handle "Default" (empty) preset
-		if (_index == 0 || presetName == "Default")
+		// Handle "Current" preset - don't load anything, just refresh display
+		if (_index == 0 || presetName == "Current")
 		{
-			pluginLib::MidiLearnPreset emptyPreset("");
-			translator->setPreset(emptyPreset);
 			refreshMappingList();
 			refreshFeedbackCheckboxes();
 			return;
@@ -210,9 +208,9 @@ namespace jucePluginEditorLib
 		m_presetNames.clear();
 		m_presetList->clearOptions();
 
-		// Always add a default empty preset as first option
-		m_presetNames.push_back("Default");
-		m_presetList->addOption("Default");
+		// Always add "Current" as first option - represents current engine state
+		m_presetNames.push_back("Current");
+		m_presetList->addOption("Current");
 
 		// Get all preset names
 		auto jucePresets = m_learnManager.getPresetNames();
@@ -227,33 +225,34 @@ namespace jucePluginEditorLib
 			m_presetList->addOption(m_presetNames[i]);
 		}
 
-		// Select the preset that's currently active in the translator
+		// Find if current translator preset matches any saved preset
 		auto* translator = m_processor.getMidiLearnTranslator();
+		int selectedIndex = 0; // Default to "Current"
+		
 		if (translator)
 		{
 			const auto& currentPreset = translator->getPreset();
-			const auto& currentName = currentPreset.getName();
 			
-			// Find matching preset name
-			int selectedIndex = 0; // Default to "Default" preset
-			if (!currentName.empty())
+			// Compare current preset to all saved presets
+			for (size_t i = 1; i < m_presetNames.size(); ++i)
 			{
-				for (size_t i = 0; i < m_presetNames.size(); ++i)
+				const auto& presetName = m_presetNames[i];
+				pluginLib::MidiLearnPreset savedPreset(presetName);
+				
+				if (m_learnManager.loadPreset(juce::String(presetName), savedPreset))
 				{
-					if (m_presetNames[i] == currentName)
+					if (currentPreset == savedPreset)
 					{
 						selectedIndex = static_cast<int>(i);
 						break;
 					}
 				}
 			}
-			
-			m_presetList->setSelectedIndex(selectedIndex);
 		}
-		else
-		{
-			m_presetList->setSelectedIndex(0);
-		}
+		
+		// Set selected index without triggering callback that would overwrite preset
+		// The callback will be triggered but onPresetSelected handles "Current" correctly
+		m_presetList->setSelectedIndex(selectedIndex);
 		
 		refreshMappingList();
 		refreshFeedbackCheckboxes();

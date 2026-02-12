@@ -42,6 +42,9 @@ namespace pluginLib
 		bool saveToFile(const juce::File& _file) const;
 		bool loadFromFile(const juce::File& _file);
 
+		// Comparison
+		bool operator==(const MidiLearnPreset& _other) const;
+
 	private:
 		std::string m_name;
 		std::vector<MidiLearnMapping> m_mappings;

@@ -119,4 +119,29 @@ namespace pluginLib
 
 		return fromJson(json);
 	}
+
+	bool MidiLearnPreset::operator==(const MidiLearnPreset& _other) const
+	{
+		// Compare mappings only, not names
+		if (m_mappings.size() != _other.m_mappings.size())
+			return false;
+
+		for (size_t i = 0; i < m_mappings.size(); ++i)
+		{
+			const auto& a = m_mappings[i];
+			const auto& b = _other.m_mappings[i];
+
+			if (a.type != b.type ||
+			    a.channel != b.channel ||
+			    a.controller != b.controller ||
+			    a.paramName != b.paramName ||
+			    a.mode != b.mode ||
+			    a.feedbackTargets != b.feedbackTargets)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
 }
