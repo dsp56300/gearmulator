@@ -227,14 +227,34 @@ namespace jucePluginEditorLib
 			m_presetList->addOption(m_presetNames[i]);
 		}
 
-		// Select first preset (Default) by default and set in translator
-		m_presetList->setSelectedIndex(0);
+		// Select the preset that's currently active in the translator
 		auto* translator = m_processor.getMidiLearnTranslator();
 		if (translator)
 		{
-			pluginLib::MidiLearnPreset emptyPreset("");
-			translator->setPreset(emptyPreset);
+			const auto& currentPreset = translator->getPreset();
+			const auto& currentName = currentPreset.getName();
+			
+			// Find matching preset name
+			int selectedIndex = 0; // Default to "Default" preset
+			if (!currentName.empty())
+			{
+				for (size_t i = 0; i < m_presetNames.size(); ++i)
+				{
+					if (m_presetNames[i] == currentName)
+					{
+						selectedIndex = static_cast<int>(i);
+						break;
+					}
+				}
+			}
+			
+			m_presetList->setSelectedIndex(selectedIndex);
 		}
+		else
+		{
+			m_presetList->setSelectedIndex(0);
+		}
+		
 		refreshMappingList();
 		refreshFeedbackCheckboxes();
 	}
