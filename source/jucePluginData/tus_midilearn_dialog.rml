@@ -10,8 +10,8 @@
 			<div class="ml-content">
 				<div id="parameterText" class="ml-parameter">Filter Cutoff</div>
 				<div id="statusText" class="ml-status">
-					Waiting for MIDI input...<br/>
-					Move a knob or fader on your controller.
+					Move controller in both directions...<br/>
+					Turn a knob or move a fader on your controller.
 				</div>
 			</div>
 			

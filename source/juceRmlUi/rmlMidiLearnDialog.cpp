@@ -95,8 +95,15 @@ namespace juceRmlUi
 	{
 		if (m_statusText)
 		{
-			std::string statusMsg = "Move controller... (" + std::to_string(_eventCount) + "/" + std::to_string(_requiredCount) + ")";
-			m_statusText->SetInnerRML(statusMsg.c_str());
+			if (_eventCount == 0)
+			{
+				m_statusText->SetInnerRML("Move controller in both directions...");
+			}
+			else
+			{
+				std::string statusMsg = "Move in both directions... (" + std::to_string(_eventCount) + "/" + std::to_string(_requiredCount) + ")";
+				m_statusText->SetInnerRML(statusMsg.c_str());
+			}
 		}
 	}
 

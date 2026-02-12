@@ -160,7 +160,7 @@ namespace pluginLib
 
 			// Notify progress
 			if (onLearningProgress)
-				onLearningProgress(m_learningValues.size(), kLearningEventCount);
+				onLearningProgress(1, kRequiredUniqueValues);
 			return;
 		}
 
@@ -168,18 +168,24 @@ namespace pluginLib
 		if (channel != m_learningChannel || controller != m_learningController)
 			return; // Ignore events from different CC
 
-		// Collect the value
-		m_learningValues.push_back(value);
+		// Only add if it's a unique value
+		if (std::find(m_learningValues.begin(), m_learningValues.end(), value) == m_learningValues.end())
+		{
+			m_learningValues.push_back(value);
+		}
+
+		// Count unique values
+		const size_t uniqueCount = m_learningValues.size();
 
 		// Notify progress
 		if (onLearningProgress)
-			onLearningProgress(m_learningValues.size(), kLearningEventCount);
+			onLearningProgress(uniqueCount, kRequiredUniqueValues);
 
-		// Wait for enough events
-		if (m_learningValues.size() < kLearningEventCount)
+		// Wait for enough unique values (forces user to rotate in both directions)
+		if (uniqueCount < kRequiredUniqueValues)
 			return;
 
-		// We have enough events, create the mapping
+		// We have enough unique values, create the mapping
 		MidiLearnMapping newMapping;
 		newMapping.type = MidiLearnMapping::midiStatusToType(statusByte);
 		newMapping.channel = m_learningChannel;

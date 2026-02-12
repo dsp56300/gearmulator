@@ -70,10 +70,10 @@ namespace pluginLib
 		// Learning state
 		bool m_isLearning = false;
 		std::string m_learningParamName;
-		std::vector<uint8_t> m_learningValues; // Collect multiple values to detect mode
+		std::vector<uint8_t> m_learningValues; // Collect values to detect mode
 		uint8_t m_learningChannel = 0;
 		uint8_t m_learningController = 0;
-		static constexpr size_t kLearningEventCount = 3;
+		static constexpr size_t kRequiredUniqueValues = 2; // Need 2 unique values (both directions)
 
 		// Parameter subscriptions for feedback
 		std::vector<baseLib::Event<Parameter*>::ListenerId> m_paramListenerIds;
