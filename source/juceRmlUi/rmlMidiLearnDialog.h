@@ -18,7 +18,7 @@ namespace juceRmlUi
 	public:
 		using CompletionCallback = std::function<void(bool, const synthLib::SMidiEvent&)>;
 		
-		MidiLearnDialog(Rml::Element* _root, CompletionCallback&& _completionCallback, const std::string& _parameterName);
+		MidiLearnDialog(Rml::Element* _root, CompletionCallback&& _completionCallback, std::string _parameterName);
 		~MidiLearnDialog();
 
 		static std::unique_ptr<MidiLearnDialog> createFromTemplate(
@@ -31,7 +31,7 @@ namespace juceRmlUi
 		void onConflict(const std::string& _existingParamName, const synthLib::SMidiEvent& _event);
 
 	private:
-		void close(bool _confirmed);
+		void callCompletionCallback(bool _confirmed) const;
 
 		Rml::Element* m_root;
 		Rml::Element* m_statusText;

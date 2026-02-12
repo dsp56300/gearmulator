@@ -5,27 +5,29 @@
 
 #include "Core/Template.h"
 #include "Core/TemplateCache.h"
+
 #include "RmlUi/Core/CoreInstance.h"
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementDocument.h"
-#include "RmlUi/Core/ElementUtilities.h"
 #include "RmlUi/Core/Factory.h"
 
 #include "synthLib/midiTypes.h"
 
+#include "juce_events/juce_events.h"
+
 namespace juceRmlUi
 {
-	MidiLearnDialog::MidiLearnDialog(Rml::Element* _root, CompletionCallback&& _completionCallback, const std::string& _parameterName)
+	MidiLearnDialog::MidiLearnDialog(Rml::Element* _root, CompletionCallback&& _completionCallback, std::string _parameterName)
 		: m_root(_root)
 		, m_completionCallback(std::move(_completionCallback))
-		, m_parameterName(_parameterName)
+		, m_parameterName(std::move(_parameterName))
 		, m_receivedEvent(synthLib::MidiEventSource::Physical)
 	{
 		m_statusText = helper::findChild(m_root, "statusText");
 		m_parameterText = helper::findChild(m_root, "parameterText");
 
 		if (m_parameterText)
-			m_parameterText->SetInnerRML(m_parameterName.c_str());
+			m_parameterText->SetInnerRML(m_parameterName);
 
 		// Cancel button
 		auto* buttonCancel = helper::findChild(m_root, "buttonCancel");
@@ -34,7 +36,11 @@ namespace juceRmlUi
 			EventListener::Add(buttonCancel, Rml::EventId::Click, [this](Rml::Event& _event)
 			{
 				_event.StopPropagation();
-				close(false);
+
+				juce::MessageManager::callAsync([this]
+				{
+					callCompletionCallback(false);
+				});
 			});
 		}
 	}
@@ -43,6 +49,7 @@ namespace juceRmlUi
 	{
 		if (m_root && m_root->GetParentNode())
 			m_root->GetParentNode()->RemoveChild(m_root);
+		m_root = nullptr;
 	}
 
 	std::unique_ptr<MidiLearnDialog> MidiLearnDialog::createFromTemplate(
@@ -82,7 +89,7 @@ namespace juceRmlUi
 	void MidiLearnDialog::onMidiReceived(const synthLib::SMidiEvent& _event)
 	{
 		m_receivedEvent = _event;
-		close(true);
+		callCompletionCallback(true);
 	}
 
 	void MidiLearnDialog::onConflict(const std::string& _existingParamName, const synthLib::SMidiEvent& _event)
@@ -95,7 +102,7 @@ namespace juceRmlUi
 		{
 			std::string conflictMsg = "This MIDI message is already mapped to:<br/><strong>" 
 				+ _existingParamName + "</strong><br/><br/>Replace existing mapping?";
-			m_statusText->SetInnerRML(conflictMsg.c_str());
+			m_statusText->SetInnerRML(conflictMsg);
 		}
 
 		// Add confirm button for conflict resolution
@@ -115,7 +122,7 @@ namespace juceRmlUi
 				EventListener::Add(confirmPtr, Rml::EventId::Click, [this](Rml::Event& _event)
 				{
 					_event.StopPropagation();
-					close(true);
+					callCompletionCallback(true);
 				});
 			}
 
@@ -126,15 +133,9 @@ namespace juceRmlUi
 		}
 	}
 
-	void MidiLearnDialog::close(const bool _confirmed)
+	void MidiLearnDialog::callCompletionCallback(const bool _confirmed) const
 	{
 		if (m_completionCallback)
 			m_completionCallback(_confirmed, m_receivedEvent);
-
-		// Destroy dialog
-		if (m_root && m_root->GetParentNode())
-			m_root->GetParentNode()->RemoveChild(m_root);
-
-		m_root = nullptr;
 	}
 }
