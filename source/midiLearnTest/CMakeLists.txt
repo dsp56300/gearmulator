@@ -15,7 +15,7 @@ juce_generate_juce_header(midiLearnTest)
 target_sources(midiLearnTest PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(midiLearnTest PUBLIC jucePluginLib juce::juce_core)
+target_link_libraries(midiLearnTest PUBLIC jucePluginLib juce::juce_core juce::juce_graphics)
 
 add_test(NAME midiLearnTests COMMAND midiLearnTest)
 set_tests_properties(midiLearnTests PROPERTIES LABELS "UnitTest")
