@@ -575,6 +575,13 @@ namespace jucePluginEditorLib
 
 		menu.addSubMenu("Parameter Links", std::move(linkMenu));
 
+		// MIDI Learn
+		menu.addSeparator();
+		menu.addEntry("MIDI Learn...", [this, param]()
+		{
+			onMidiLearnRequested(param);
+		});
+
 		auto& midiPackets = m_processor.getController().getParameterDescriptions().getMidiPackets();
 		for (const auto& mp : midiPackets)
 		{
@@ -836,6 +843,18 @@ namespace jucePluginEditorLib
 		if (!m_rmlComponent)
 			return {};
 		return m_rmlComponent->getDocument();
+	}
+
+	void Editor::onMidiLearnRequested(const pluginLib::Parameter* _param)
+	{
+		// TODO: Phase 5 - Implement MIDI Learn workflow
+		// 1. Get or create MidiLearnTranslator from processor
+		// 2. Call translator->startLearning(_param->getDescription().name)
+		// 3. Show learning feedback UI (dialog/overlay)
+		// 4. Handle callbacks (onMappingLearned, onMappingConflict)
+		
+		// For now, just log that MIDI Learn was requested
+		(void)_param;  // Suppress unused parameter warning
 	}
 
 	std::vector<Rml::Element*> Editor::findChildreByParam(const std::string& _param, uint8_t _part,	const size_t _expectedCount, bool _visibleOnly) const

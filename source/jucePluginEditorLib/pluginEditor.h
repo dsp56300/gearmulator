@@ -146,6 +146,8 @@ namespace jucePluginEditorLib
 		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;
 		bool setParameters(const std::map<std::string, pluginLib::ParamValue>& _paramValues) const;
 
+		virtual void onMidiLearnRequested(const pluginLib::Parameter* _param);
+
 		juceRmlUi::Menu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
 		virtual void createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
