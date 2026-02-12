@@ -107,13 +107,40 @@ namespace pluginLib
 			}
 		}
 
+		// Process through MIDI Learn translator first
+		if (m_midiLearnTranslator && m_midiLearnTranslator->processMidiInput(sm))
+		{
+			// MIDI event was consumed by MIDI Learn (learned mapping or learning mode)
+			return;
+		}
+
 		addMidiEvent(sm);
 	}
 
 	Controller& Processor::getController()
 	{
 	    if (m_controller == nullptr)
+		{
 	        m_controller.reset(createController());
+			
+			// Initialize MIDI Learn translator with controller
+			if (m_controller && !m_midiLearnTranslator)
+			{
+				m_midiLearnTranslator = std::make_unique<MidiLearnTranslator>(*m_controller, m_controller->getParameterDescriptions().getControllerMap());
+				
+				// Setup MIDI feedback callback
+				m_midiLearnTranslator->onSendMidiOutput = [this](synthLib::MidiEventSource _source, const synthLib::SMidiEvent& _event)
+				{
+					if (m_midiRoutingMatrix.enabled(_event, _source))
+					{
+						if (_source == synthLib::MidiEventSource::Editor)
+							getController().enqueueMidiMessages({_event});
+						else if (_source == synthLib::MidiEventSource::Physical)
+							m_midiPorts.send(_event);
+					}
+				};
+			}
+		}
 
 	    return *m_controller;
 	}
@@ -297,6 +324,9 @@ namespace pluginLib
 		m_midiPorts.saveChunkData(s);
 		m_midiRoutingMatrix.saveChunkData(s);
 
+		if (m_midiLearnTranslator)
+			m_midiLearnTranslator->saveChunkData(s);
+
 		if (m_programName != g_defaultProgramName)
 		{
 			baseLib::ChunkWriter cw(s, "PROG", 1);
@@ -347,6 +377,9 @@ namespace pluginLib
 
 		m_midiPorts.loadChunkData(_cr);
 		m_midiRoutingMatrix.loadChunkData(_cr);
+		
+		if (m_midiLearnTranslator)
+			m_midiLearnTranslator->loadChunkData(_cr);
 	}
 
 	void Processor::readGain(baseLib::BinaryStream& _s)

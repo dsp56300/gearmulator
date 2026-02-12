@@ -8,6 +8,12 @@
 
 namespace synthLib { struct SMidiEvent; }
 
+namespace baseLib
+{
+	class BinaryStream;
+	class ChunkReader;
+}
+
 namespace pluginLib
 {
 	class Controller;
@@ -38,6 +44,10 @@ namespace pluginLib
 		std::function<void(const MidiLearnMapping&)> onMappingLearned;
 		std::function<void(const MidiLearnMapping&)> onMappingConflict;
 		std::function<void(synthLib::MidiEventSource, const synthLib::SMidiEvent&)> onSendMidiOutput;
+
+		// State persistence
+		void saveChunkData(baseLib::BinaryStream& _stream) const;
+		void loadChunkData(baseLib::ChunkReader& _cr);
 
 	private:
 		bool isDefaultControllerMapping(const synthLib::SMidiEvent& _event) const;

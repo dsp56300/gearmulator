@@ -4,6 +4,7 @@
 
 #include "bypassBuffer.h"
 #include "controller.h"
+#include "midiLearnTranslator.h"
 #include "midiports.h"
 
 #include "bridgeLib/types.h"
@@ -161,6 +162,8 @@ namespace pluginLib
 		const synthLib::MidiRoutingMatrix& getMidiRoutingMatrix() const { return m_midiRoutingMatrix; }
 		synthLib::MidiRoutingMatrix& getMidiRoutingMatrix() { return m_midiRoutingMatrix; }
 
+		MidiLearnTranslator* getMidiLearnTranslator() { return m_midiLearnTranslator.get(); }
+
 	protected:
 		void destroyController();
 
@@ -224,5 +227,6 @@ namespace pluginLib
 		bridgeLib::SessionId m_remoteSessionId;
 		synthLib::MidiRoutingMatrix m_midiRoutingMatrix;
 		std::string m_programName;
+		std::unique_ptr<MidiLearnTranslator> m_midiLearnTranslator;
 	};
 }

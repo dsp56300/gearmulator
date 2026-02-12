@@ -47,7 +47,6 @@ namespace jucePluginEditorLib
 		juceRmlUi::ElemButton* m_cbFeedbackPhysical = nullptr;
 		
 		std::vector<std::string> m_presetNames;
-		pluginLib::MidiLearnPreset m_currentPreset;
 		size_t m_selectedMappingIndex = static_cast<size_t>(-1);
 	};
 }

@@ -3,6 +3,9 @@
 #include "controller.h"
 #include "controllermap.h"
 #include "synthLib/midiTypes.h"
+#include "baseLib/binarystream.h"
+
+#include <juce_data_structures/juce_data_structures.h>
 
 namespace pluginLib
 {
@@ -293,5 +296,36 @@ namespace pluginLib
 		}
 
 		return event;
+	}
+
+	void MidiLearnTranslator::saveChunkData(baseLib::BinaryStream& _stream) const
+	{
+		baseLib::ChunkWriter cw(_stream, "MDLN", 1);
+
+		// Serialize preset to JSON
+		const auto json = m_preset.toJson();
+		const auto jsonString = juce::JSON::toString(json);
+		_stream.write(jsonString.toStdString());
+	}
+
+	void MidiLearnTranslator::loadChunkData(baseLib::ChunkReader& _cr)
+	{
+		_cr.add("MDLN", 1, [this](baseLib::BinaryStream& _stream, uint32_t _version)
+		{
+			const auto jsonString = _stream.readString();
+			
+			// Parse JSON and load preset
+			juce::var json;
+			const auto result = juce::JSON::parse(juce::String(jsonString), json);
+			
+			if (result.wasOk())
+			{
+				MidiLearnPreset preset;
+				if (preset.fromJson(json))
+				{
+					setPreset(preset);
+				}
+			}
+		});
 	}
 }

@@ -143,12 +143,17 @@ namespace jucePluginEditorLib
 			return;
 
 		const auto& presetName = m_presetNames[static_cast<size_t>(_index)];
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
 
 		// Handle "Default" (empty) preset
 		if (_index == 0 || presetName == "Default")
 		{
-			m_currentPreset = pluginLib::MidiLearnPreset("");
+			pluginLib::MidiLearnPreset emptyPreset("");
+			translator->setPreset(emptyPreset);
 			refreshMappingList();
+			refreshFeedbackCheckboxes();
 			return;
 		}
 
@@ -158,8 +163,9 @@ namespace jucePluginEditorLib
 		pluginLib::MidiLearnPreset preset(presetName);
 		if (m_learnManager.loadPreset(juceStr, preset))
 		{
-			m_currentPreset = preset;
+			translator->setPreset(preset);
 			refreshMappingList();
+			refreshFeedbackCheckboxes();
 		}
 		else
 		{
@@ -172,16 +178,23 @@ namespace jucePluginEditorLib
 
 	void SettingsMidiLearn::onBtRemoveMapping(size_t _mappingIndex)
 	{
-		if (_mappingIndex >= m_currentPreset.getMappings().size())
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
 			return;
 
-		m_currentPreset.removeMapping(_mappingIndex);
+		auto& preset = const_cast<pluginLib::MidiLearnPreset&>(translator->getPreset());
+		if (_mappingIndex >= preset.getMappings().size())
+			return;
+
+		preset.removeMapping(_mappingIndex);
 		
 		// Save the preset
-		const juce::String presetName(m_currentPreset.getName());
-		if (m_learnManager.savePreset(presetName, m_currentPreset))
+		const juce::String presetName(preset.getName());
+		if (m_learnManager.savePreset(presetName, preset))
 		{
+			translator->setPreset(preset); // Refresh subscriptions
 			refreshMappingList();
+			refreshFeedbackCheckboxes();
 		}
 		else
 		{
@@ -214,15 +227,25 @@ namespace jucePluginEditorLib
 			m_presetList->addOption(m_presetNames[i]);
 		}
 
-		// Select first preset (Default) by default
+		// Select first preset (Default) by default and set in translator
 		m_presetList->setSelectedIndex(0);
-		m_currentPreset = pluginLib::MidiLearnPreset("");
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (translator)
+		{
+			pluginLib::MidiLearnPreset emptyPreset("");
+			translator->setPreset(emptyPreset);
+		}
 		refreshMappingList();
+		refreshFeedbackCheckboxes();
 	}
 
 	void SettingsMidiLearn::refreshMappingList()
 	{
 		if (!m_mappingTableBody || !m_mappingRowTemplate)
+			return;
+
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
 			return;
 
 		// Clear existing rows but keep the header
@@ -232,7 +255,7 @@ namespace jucePluginEditorLib
 		}
 
 		// Add a row for each mapping
-		const auto& mappings = m_currentPreset.getMappings();
+		const auto& mappings = translator->getPreset().getMappings();
 		for (size_t i = 0; i < mappings.size(); ++i)
 		{
 			const auto& mapping = mappings[i];
@@ -293,9 +316,13 @@ namespace jucePluginEditorLib
 
 	void SettingsMidiLearn::refreshFeedbackCheckboxes()
 	{
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
 		// For now, we show feedback settings globally for all mappings
 		// (In future, could show per-mapping if we add a selection mechanism)
-		const auto& mappings = m_currentPreset.getMappings();
+		const auto& mappings = translator->getPreset().getMappings();
 		
 		// If no mappings, disable all checkboxes
 		if (mappings.empty())
@@ -322,7 +349,12 @@ namespace jucePluginEditorLib
 
 	void SettingsMidiLearn::onFeedbackTargetToggle(synthLib::MidiEventSource _target)
 	{
-		auto& mappings = m_currentPreset.getMappings();
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		auto& preset = const_cast<pluginLib::MidiLearnPreset&>(translator->getPreset());
+		auto& mappings = preset.getMappings();
 		
 		if (mappings.empty())
 			return;
@@ -334,6 +366,16 @@ namespace jucePluginEditorLib
 		{
 			mapping.setFeedbackEnabled(_target, newState);
 		}
+
+		// Save the updated preset
+		const juce::String presetName(preset.getName());
+		if (!presetName.isEmpty())
+		{
+			m_learnManager.savePreset(presetName, preset);
+		}
+
+		// Refresh subscriptions with updated preset
+		translator->setPreset(preset);
 
 		refreshFeedbackCheckboxes();
 	}
