@@ -11,7 +11,9 @@ body {
     bottom: 0px;
     left: 0px;
 }
-
+br {
+	display: block;
+}
 /* default table setup as explained in the manual: https://mikke89.github.io/RmlUiDoc/pages/rcss/tables.html */
 table {
 	box-sizing: border-box;
@@ -36,24 +38,17 @@ thead, tbody, tfoot {
 	display: table-row-group;
 }
 
-/* all menus */
+/* default background for all dialog boxes & menus */
 
-.menubox {
+.dialogbox {
 	background-color: rgba(50,62,68,180);
 	border: 1dp rgb(172,176,179);
 	border-radius: 0dp;
-	display: flex;
-	flex-direction: row;
-	padding: 5dp;
-	position: absolute;
-	z-index: 100;
-	gap: 4dp;
-	font-weight: 500;
 }
 
 @media (theme: advancedrenderer)
 {
-	.menubox {
+	.dialogbox {
 		box-shadow: #000a 0dp 0dp 8dp 3dp;
 		backdrop-filter: blur(12dp);
 		background-color: rgba(50,62,68,180);
@@ -62,9 +57,21 @@ thead, tbody, tfoot {
 
 @media not (theme: advancedrenderer)
 {
-	.menubox {
+	.dialogbox {
 		background-color: rgba(50,62,68,230);
 	}
+}
+
+/* all menus */
+
+.menubox {
+	display: flex;
+	flex-direction: row;
+	padding: 5dp;
+	position: absolute;
+	z-index: 100;
+	gap: 4dp;
+	font-weight: 500;
 }
 
 .menucolumn {

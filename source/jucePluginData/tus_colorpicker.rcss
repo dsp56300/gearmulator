@@ -11,11 +11,6 @@
 }
 
 .cp-box {
-	box-shadow: #000a 0dp 0dp 8dp 3dp;
-	background-color: rgba(50,62,68,180);
-	backdrop-filter: blur(12dp);
-	border: 1dp rgb(172,176,179);
-	border-radius: 0dp;
 	width: 30em;
 	font-size: 28dp;
 	padding: 1em;

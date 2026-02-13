@@ -4,7 +4,7 @@
 </head>
 <body>
 	<div class="cp-parent">
-		<div id="tus-colorpicker" class="cp-box">
+		<div id="tus-colorpicker" class="cp-box dialogbox">
 			<div class="cp-headline"><p>Select Color</p></div>
 			<table class="cp-table">
 				<tr class="cp-tr">

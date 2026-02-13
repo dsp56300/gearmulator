@@ -59,6 +59,7 @@ namespace juceRmlUi
 		auto menu = doc->CreateElement("div");
 
 		menu->SetClass("menubox", true);
+		menu->SetClass("dialogbox", true);
 
 		uint32_t counter = 0;
 
