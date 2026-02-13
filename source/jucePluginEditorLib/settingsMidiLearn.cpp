@@ -344,8 +344,7 @@ namespace jucePluginEditorLib
 				controllerCell->SetInnerRML(std::to_string(mapping.controller));
 
 			// Create and populate mode combo box
-			auto* modeCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "modeCombo");
-			if (modeCombo)
+			if (auto* modeCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "modeCombo"))
 			{
 				// Populate with all mode options
 				for (const auto* modeStr : pluginLib::MidiLearnMapping::ModeStrings)
