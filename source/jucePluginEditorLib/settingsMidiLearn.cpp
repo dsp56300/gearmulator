@@ -40,17 +40,17 @@ namespace jucePluginEditorLib
 			m_mappingRowTemplate = m_mappingTableBody->RemoveChild(mappingRowTemplate);
 		}
 
+		// Input source checkboxes
+		m_cbInputHost = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbInputHost");
+		m_cbInputPhysical = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbInputPhysical");
+
+		juceRmlUi::EventListener::Add(m_cbInputHost, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onInputSourceToggle(synthLib::MidiEventSource::Host); });
+		juceRmlUi::EventListener::Add(m_cbInputPhysical, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onInputSourceToggle(synthLib::MidiEventSource::Physical); });
+
 		// Feedback checkboxes
-		m_cbFeedbackDevice = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbFeedbackDevice");
-		m_cbFeedbackEditor = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbFeedbackEditor");
 		m_cbFeedbackHost = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbFeedbackHost");
 		m_cbFeedbackPhysical = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(_root, "cbFeedbackPhysical");
 
-		// Device checkbox is always disabled
-		if (m_cbFeedbackDevice)
-			m_cbFeedbackDevice->setChecked(false);
-
-		juceRmlUi::EventListener::Add(m_cbFeedbackEditor, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onFeedbackTargetToggle(synthLib::MidiEventSource::Editor); });
 		juceRmlUi::EventListener::Add(m_cbFeedbackHost, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onFeedbackTargetToggle(synthLib::MidiEventSource::Host); });
 		juceRmlUi::EventListener::Add(m_cbFeedbackPhysical, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onFeedbackTargetToggle(synthLib::MidiEventSource::Physical); });
 
@@ -289,6 +289,7 @@ namespace jucePluginEditorLib
 		m_presetList->setSelectedIndex(selectedIndex);
 		
 		refreshMappingList();
+		refreshInputSourceCheckboxes();
 		refreshFeedbackCheckboxes();
 	}
 
@@ -393,7 +394,6 @@ namespace jucePluginEditorLib
 		// If no mappings, disable all checkboxes
 		if (mappings.empty())
 		{
-			if (m_cbFeedbackEditor) m_cbFeedbackEditor->setChecked(false);
 			if (m_cbFeedbackHost) m_cbFeedbackHost->setChecked(false);
 			if (m_cbFeedbackPhysical) m_cbFeedbackPhysical->setChecked(false);
 			return;
@@ -403,14 +403,43 @@ namespace jucePluginEditorLib
 		// (All mappings share feedback settings in this simple version)
 		const auto& firstMapping = mappings[0];
 		
-		if (m_cbFeedbackEditor)
-			m_cbFeedbackEditor->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Editor));
-		
 		if (m_cbFeedbackHost)
 			m_cbFeedbackHost->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Host));
 		
 		if (m_cbFeedbackPhysical)
 			m_cbFeedbackPhysical->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Physical));
+	}
+
+	void SettingsMidiLearn::refreshInputSourceCheckboxes()
+	{
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		// Get current input sources from translator
+		const uint8_t sources = translator->getLearnInputSources();
+		
+		if (m_cbInputHost)
+			m_cbInputHost->setChecked(sources & static_cast<uint8_t>(synthLib::MidiEventSource::Host));
+		
+		if (m_cbInputPhysical)
+			m_cbInputPhysical->setChecked(sources & static_cast<uint8_t>(synthLib::MidiEventSource::Physical));
+	}
+
+	void SettingsMidiLearn::onInputSourceToggle(synthLib::MidiEventSource _source)
+	{
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		// Toggle the input source
+		const uint8_t currentSources = translator->getLearnInputSources();
+		const uint8_t sourceBit = static_cast<uint8_t>(_source);
+		const uint8_t newSources = currentSources ^ sourceBit; // XOR to toggle
+		
+		translator->setLearnInputSources(newSources);
+		
+		refreshInputSourceCheckboxes();
 	}
 
 	void SettingsMidiLearn::onFeedbackTargetToggle(synthLib::MidiEventSource _target)

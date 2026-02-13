@@ -46,15 +46,24 @@
 		
 		<settingsspacer1/>
 		
+		<h2>MIDI Input</h2>
+		<settingsspacer1/>
+		
+		<div class="settings-hlayout">
+			<label>Learn from:</label>
+			<button id="cbInputHost" class="settings-checkbox"/>
+			<label for="cbInputHost">Host</label>
+			<button id="cbInputPhysical" class="settings-checkbox"/>
+			<label for="cbInputPhysical">Physical</label>
+		</div>
+		
+		<settingsspacer1/>
+		
 		<h2>MIDI Feedback</h2>
 		<settingsspacer1/>
 		
 		<div class="settings-hlayout">
 			<label>Send feedback to:</label>
-			<button id="cbFeedbackDevice" class="settings-checkbox" style="pointer-events: none;"/>
-			<label for="cbFeedbackDevice">Device</label>
-			<button id="cbFeedbackEditor" class="settings-checkbox"/>
-			<label for="cbFeedbackEditor">Editor</label>
 			<button id="cbFeedbackHost" class="settings-checkbox"/>
 			<label for="cbFeedbackHost">Host</label>
 			<button id="cbFeedbackPhysical" class="settings-checkbox"/>

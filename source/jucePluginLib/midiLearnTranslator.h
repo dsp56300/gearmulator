@@ -40,6 +40,10 @@ namespace pluginLib
 		bool isLearning() const { return m_isLearning; }
 		const std::string& getLearningParamName() const { return m_learningParamName; }
 
+		// Learn input source filtering (bitmask of MidiEventSource)
+		uint8_t getLearnInputSources() const { return m_learnInputSources; }
+		void setLearnInputSources(uint8_t _sources) { m_learnInputSources = _sources; }
+
 		// Events/Callbacks
 		std::function<void(const MidiLearnMapping&)> onMappingLearned;
 		std::function<void(const MidiLearnMapping&)> onMappingConflict;
@@ -73,6 +77,7 @@ namespace pluginLib
 		std::vector<uint8_t> m_learningValues; // Collect values to detect mode
 		uint8_t m_learningChannel = 0;
 		uint8_t m_learningController = 0;
+		uint8_t m_learnInputSources = 0x08 | 0x04; // Host(0x04) | Physical(0x08) - both enabled by default
 		static constexpr size_t kRequiredUniqueValues = 2; // Need 2 unique values (both directions)
 
 		// Parameter subscriptions for feedback

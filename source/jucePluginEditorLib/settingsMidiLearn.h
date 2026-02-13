@@ -30,10 +30,12 @@ namespace jucePluginEditorLib
 		void onPresetSelected(int _index);
 		void onBtRemoveMapping(size_t _mappingIndex);
 		void onModeChanged(size_t _mappingIndex, int _newModeIndex);
+		void onInputSourceToggle(synthLib::MidiEventSource _source);
 		void onFeedbackTargetToggle(synthLib::MidiEventSource _target);
 
 		void initPresetList();
 		void refreshMappingList();
+		void refreshInputSourceCheckboxes();
 		void refreshFeedbackCheckboxes();
 
 		pluginLib::MidiLearnManager m_learnManager;
@@ -41,9 +43,11 @@ namespace jucePluginEditorLib
 		Rml::Element* m_mappingTableBody = nullptr;
 		Rml::ElementPtr m_mappingRowTemplate = nullptr;
 		
+		// Input source checkboxes
+		juceRmlUi::ElemButton* m_cbInputHost = nullptr;
+		juceRmlUi::ElemButton* m_cbInputPhysical = nullptr;
+		
 		// Feedback checkboxes
-		juceRmlUi::ElemButton* m_cbFeedbackDevice = nullptr;
-		juceRmlUi::ElemButton* m_cbFeedbackEditor = nullptr;
 		juceRmlUi::ElemButton* m_cbFeedbackHost = nullptr;
 		juceRmlUi::ElemButton* m_cbFeedbackPhysical = nullptr;
 		
