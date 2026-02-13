@@ -320,7 +320,6 @@ namespace jucePluginEditorLib
 			auto* typeCell = juceRmlUi::helper::findChild(row, "type");
 			auto* channelCell = juceRmlUi::helper::findChild(row, "channel");
 			auto* controllerCell = juceRmlUi::helper::findChild(row, "controller");
-			auto* modeCell = juceRmlUi::helper::findChild(row, "mode");
 			auto* parameterCell = juceRmlUi::helper::findChild(row, "parameter");
 			auto* removeButton = juceRmlUi::helper::findChild(row, "btRemove");
 
