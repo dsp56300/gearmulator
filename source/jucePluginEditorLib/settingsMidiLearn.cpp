@@ -420,10 +420,10 @@ namespace jucePluginEditorLib
 		const uint8_t sources = translator->getLearnInputSources();
 		
 		if (m_cbInputHost)
-			m_cbInputHost->setChecked(sources & static_cast<uint8_t>(synthLib::MidiEventSource::Host));
+			m_cbInputHost->setChecked(sources & (1<<static_cast<uint8_t>(synthLib::MidiEventSource::Host)));
 		
 		if (m_cbInputPhysical)
-			m_cbInputPhysical->setChecked(sources & static_cast<uint8_t>(synthLib::MidiEventSource::Physical));
+			m_cbInputPhysical->setChecked(sources & (1<<static_cast<uint8_t>(synthLib::MidiEventSource::Physical)));
 	}
 
 	void SettingsMidiLearn::onInputSourceToggle(synthLib::MidiEventSource _source)
@@ -434,7 +434,7 @@ namespace jucePluginEditorLib
 
 		// Toggle the input source
 		const uint8_t currentSources = translator->getLearnInputSources();
-		const uint8_t sourceBit = static_cast<uint8_t>(_source);
+		const uint8_t sourceBit = static_cast<uint8_t>(1 << static_cast<uint8_t>(_source));
 		const uint8_t newSources = currentSources ^ sourceBit; // XOR to toggle
 		
 		translator->setLearnInputSources(newSources);

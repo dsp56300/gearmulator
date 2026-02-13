@@ -50,6 +50,11 @@ namespace pluginLib
 
 	bool MidiLearnTranslator::processMidiInput(const synthLib::SMidiEvent& _event)
 	{
+		// Filter by input source - ignore events from disabled sources
+		const uint8_t sourceBit = 1 << static_cast<uint8_t>(_event.source);
+		if (!(m_learnInputSources & sourceBit))
+			return false; // Not consumed - source is disabled for MIDI Learn
+
 		// If we're in learning mode, handle learning instead of normal processing
 		if (m_isLearning)
 		{
@@ -142,11 +147,6 @@ namespace pluginLib
 
 	void MidiLearnTranslator::handleLearning(const synthLib::SMidiEvent& _event)
 	{
-		// Check if this input source is enabled for learning
-		const uint8_t sourceBit = static_cast<uint8_t>(_event.source);
-		if (!(m_learnInputSources & sourceBit))
-			return; // Ignore events from disabled sources
-
 		// Only support CC learning for now (Phase 1)
 		const auto statusByte = static_cast<synthLib::MidiStatusByte>(_event.a & 0xf0);
 		if (statusByte != synthLib::M_CONTROLCHANGE)
@@ -405,25 +405,7 @@ namespace pluginLib
 
 	void MidiLearnTranslator::loadChunkData(baseLib::ChunkReader& _cr)
 	{
-		// Version 1: Only preset JSON
-		_cr.add("MDLN", 1, [this](baseLib::BinaryStream& _stream, uint32_t _version)
-		{
-			const auto jsonString = _stream.readString();
-			
-			// Parse JSON and load preset
-			juce::var json;
-			const auto result = juce::JSON::parse(juce::String(jsonString), json);
-			
-			if (result.wasOk())
-			{
-				MidiLearnPreset preset;
-				if (preset.fromJson(json))
-				{
-					setPreset(preset);
-				}
-			}
-		});
-		
+		// Version 1: Only Preset JSON
 		// Version 2: Preset JSON + input sources
 		_cr.add("MDLN", 2, [this](baseLib::BinaryStream& _stream, uint32_t _version)
 		{
@@ -442,8 +424,11 @@ namespace pluginLib
 				}
 			}
 			
-			// Load learn input sources
-			_stream.read(m_learnInputSources);
+			if (_version >= 2)
+			{
+				// Load learn input sources
+				_stream.read(m_learnInputSources);
+			}
 		});
 	}
 }
