@@ -11,7 +11,7 @@ namespace jucePluginEditorLib
 {
 	SettingsMidiLearn::SettingsMidiLearn(Processor& _processor)
 		: SettingsPlugin(_processor)
-		, m_learnManager(juce::File(_processor.getConfigFolder() + "MidiLearn"))
+		, m_learnManager(juce::File(_processor.getConfigFolder() + "midilearn"))
 	{
 	}
 
