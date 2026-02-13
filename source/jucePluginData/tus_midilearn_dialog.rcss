@@ -12,17 +12,13 @@
 }
 
 .ml-box {
-	box-shadow: #000a 0dp 0dp 8dp 3dp;
-	background-color: rgba(50,62,68,220);
-	backdrop-filter: blur(12dp);
-	border-radius: 4dp;
 	padding: 20dp;
 	min-width: 400dp;
 	max-width: 500dp;
 }
 
 .ml-headline {
-	font-size: 18dp;
+	font-size: 1.5em;
 	font-weight: bold;
 	text-align: center;
 	margin-bottom: 20dp;
@@ -34,7 +30,7 @@
 }
 
 .ml-parameter {
-	font-size: 16dp;
+	font-size: 1.2em;
 	font-weight: bold;
 	text-align: center;
 	color: #4a9eff;
@@ -42,7 +38,7 @@
 }
 
 .ml-status {
-	font-size: 14dp;
+	font-size: 1em;
 	text-align: center;
 	color: #ccc;
 	line-height: 1.5;

@@ -4,17 +4,18 @@
 </head>
 <body>
 	<div class="ml-parent">
-		<div id="tus-midilearn-dialog" class="ml-box">
+		<div id="tus-midilearn-dialog" class="ml-box dialogbox">
 			<div class="ml-headline"><p>MIDI Learn</p></div>
-			
+			<br/>
 			<div class="ml-content">
 				<div id="parameterText" class="ml-parameter">Filter Cutoff</div>
+				<br/>
 				<div id="statusText" class="ml-status">
 					Move controller in both directions...<br/>
 					Turn a knob or move a fader on your controller.
 				</div>
 			</div>
-			
+			<br/>
 			<div id="buttonContainer" class="ml-button-container">
 				<div id="buttonCancel" class="button ml-button">Cancel</div>
 			</div>
