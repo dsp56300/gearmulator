@@ -104,7 +104,7 @@ namespace pluginLib
 	bool MidiLearnPreset::saveToFile(const juce::File& _file) const
 	{
 		const auto json = toJson();
-		const auto jsonString = juce::JSON::toString(json, true); // true = pretty print
+		const auto jsonString = juce::JSON::toString(json, false); // true = all on one line, but we want it pretty-printed
 
 		return _file.replaceWithText(jsonString);
 	}
