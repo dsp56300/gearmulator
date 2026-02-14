@@ -566,7 +566,7 @@ namespace virus
 			{
 				for(uint8_t p=0; p<getPartCount(); ++p)
 				{
-					const auto idx = getParameterIndexByName("Part Midi Channel");
+					const auto idx = getParameterIndexByName(g_paramPartMidiChannel);
 					if(idx == pluginLib::Controller::InvalidParameterIndex)
 						continue;
 

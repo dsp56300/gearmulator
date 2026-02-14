@@ -128,7 +128,7 @@ namespace genericVirusUI
 
 		juce::PopupMenu menu;
 
-		const auto idx = m_editor.getController().getParameterIndexByName(multiMode ? "Part Midi Channel" : "Midi Channel");
+		const auto idx = m_editor.getController().getParameterIndexByName(multiMode ? virus::g_paramPartMidiChannel : virus::g_paramMidiChannel);
 		if(idx == pluginLib::Controller::InvalidParameterIndex)
 			return;
 
