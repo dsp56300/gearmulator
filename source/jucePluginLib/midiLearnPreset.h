@@ -45,6 +45,9 @@ namespace pluginLib
 		// Comparison
 		bool operator==(const MidiLearnPreset& _other) const;
 
+		// Returns true if preset is empty (no mappings and no name)
+		bool empty() const { return m_name.empty() && m_mappings.empty(); }
+
 	private:
 		std::string m_name;
 		std::vector<MidiLearnMapping> m_mappings;

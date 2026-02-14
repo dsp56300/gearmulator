@@ -18,7 +18,7 @@ namespace jucePluginEditorLib
 	SettingsMidiLearn::~SettingsMidiLearn()
 	{
 		// If preset was not applied and we have original state, restore it
-		if (m_hasOriginalPreset && !m_presetApplied)
+		if (!m_originalPreset.empty() && !m_presetApplied)
 		{
 			auto* translator = m_processor.getMidiLearnTranslator();
 			if (translator)
@@ -35,7 +35,6 @@ namespace jucePluginEditorLib
 		if (translator)
 		{
 			m_originalPreset = translator->getPreset();
-			m_hasOriginalPreset = true;
 			m_presetApplied = false;
 		}
 
@@ -180,7 +179,7 @@ namespace jucePluginEditorLib
 		if (_index == 0 || presetName == "Current")
 		{
 			// Restore the original preset if we had saved it
-			if (m_hasOriginalPreset)
+			if (!m_originalPreset.empty())
 			{
 				translator->setPreset(m_originalPreset);
 			}
@@ -230,14 +229,13 @@ namespace jucePluginEditorLib
 				{
 					// Mark as applied so destructor won't restore
 					m_presetApplied = true;
-					m_hasOriginalPreset = false;
+					m_originalPreset = pluginLib::MidiLearnPreset(); // clear
 					
 					// Update the original preset to current state (so it's now the baseline)
 					auto* translator = m_processor.getMidiLearnTranslator();
 					if (translator)
 					{
 						m_originalPreset = translator->getPreset();
-						m_hasOriginalPreset = true;
 						m_presetApplied = false;
 					}
 					
