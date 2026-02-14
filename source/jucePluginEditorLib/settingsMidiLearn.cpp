@@ -76,8 +76,15 @@ namespace jucePluginEditorLib
 				return;
 			}
 
-			// Create new preset
-			pluginLib::MidiLearnPreset newPreset(_name);
+			// Get current preset from translator (copy it to new preset)
+			auto* translator = m_processor.getMidiLearnTranslator();
+			if (!translator)
+				return;
+
+			// Copy current preset and give it the new name
+			pluginLib::MidiLearnPreset newPreset = translator->getPreset();
+			newPreset.setName(_name);
+			
 			if (m_learnManager.savePreset(juceStr, newPreset))
 			{
 				initPresetList();
