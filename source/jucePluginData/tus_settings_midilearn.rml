@@ -30,7 +30,7 @@
 				<td>Parameter</td>
 				<td></td>
 			</tr>
-			<tr id="mappingRow" class="settings-tr">
+			<tr id="mappingRow" class="settings-tr ml-tr">
 				<td id="type">CC</td>
 				<td id="channel">1</td>
 				<td id="controller">74</td>
