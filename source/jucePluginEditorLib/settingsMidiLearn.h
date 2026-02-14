@@ -27,6 +27,7 @@ namespace jucePluginEditorLib
 	private:
 		void onBtPresetCreate();
 		void onBtPresetDelete();
+		void onBtPresetApply();
 		void onPresetSelected(int _index);
 		void onBtRemoveMapping(size_t _mappingIndex);
 		void onModeChanged(size_t _mappingIndex, int _newModeIndex);
@@ -37,11 +38,13 @@ namespace jucePluginEditorLib
 		void refreshMappingList();
 		void refreshInputSourceCheckboxes();
 		void refreshFeedbackCheckboxes();
+		void updateApplyButtonVisibility();
 
 		pluginLib::MidiLearnManager m_learnManager;
 		juceRmlUi::ElemComboBox* m_presetList = nullptr;
 		Rml::Element* m_mappingTableBody = nullptr;
 		Rml::ElementPtr m_mappingRowTemplate = nullptr;
+		Rml::Element* m_btApply = nullptr;
 		
 		// Input source checkboxes
 		juceRmlUi::ElemButton* m_cbInputHost = nullptr;
@@ -53,5 +56,10 @@ namespace jucePluginEditorLib
 		
 		std::vector<std::string> m_presetNames;
 		size_t m_selectedMappingIndex = static_cast<size_t>(-1);
+		
+		// Saved state for restore on cancel
+		pluginLib::MidiLearnPreset m_originalPreset;
+		bool m_hasOriginalPreset = false;
+		bool m_presetApplied = false;
 	};
 }

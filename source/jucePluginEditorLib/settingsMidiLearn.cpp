@@ -15,19 +15,41 @@ namespace jucePluginEditorLib
 	{
 	}
 
-	SettingsMidiLearn::~SettingsMidiLearn() = default;
+	SettingsMidiLearn::~SettingsMidiLearn()
+	{
+		// If preset was not applied and we have original state, restore it
+		if (m_hasOriginalPreset && !m_presetApplied)
+		{
+			auto* translator = m_processor.getMidiLearnTranslator();
+			if (translator)
+			{
+				translator->setPreset(m_originalPreset);
+			}
+		}
+	}
 
 	void SettingsMidiLearn::createUi(Rml::Element* _root)
 	{
+		// Save the current preset state before any changes
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (translator)
+		{
+			m_originalPreset = translator->getPreset();
+			m_hasOriginalPreset = true;
+			m_presetApplied = false;
+		}
+
 		// Preset management
 		m_presetList = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(_root, "presetList");
 		m_presetList->onValueChanged.addListener([this](float _value) { onPresetSelected(static_cast<int>(_value)); });
 
 		auto* btPresetCreate = juceRmlUi::helper::findChild(_root, "btPresetCreate");
 		auto* btPresetDelete = juceRmlUi::helper::findChild(_root, "btPresetDelete");
+		m_btApply = juceRmlUi::helper::findChild(_root, "btPresetApply");
 
 		juceRmlUi::EventListener::Add(btPresetCreate, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onBtPresetCreate(); });
 		juceRmlUi::EventListener::Add(btPresetDelete, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onBtPresetDelete(); });
+		juceRmlUi::EventListener::Add(m_btApply, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onBtPresetApply(); });
 
 		// Find the mapping table and template row
 		auto* templateRow = juceRmlUi::helper::findChild(_root, "mappingRow");
@@ -154,23 +176,32 @@ namespace jucePluginEditorLib
 		if (!translator)
 			return;
 
-		// Handle "Current" preset - don't load anything, just refresh display
+		// Handle "Current" preset - restore original and just refresh display
 		if (_index == 0 || presetName == "Current")
 		{
+			// Restore the original preset if we had saved it
+			if (m_hasOriginalPreset)
+			{
+				translator->setPreset(m_originalPreset);
+			}
 			refreshMappingList();
+			refreshInputSourceCheckboxes();
 			refreshFeedbackCheckboxes();
+			updateApplyButtonVisibility();
 			return;
 		}
 
 		const juce::String juceStr(presetName);
 
-		// Load the preset
+		// Load the preset (for testing/preview)
 		pluginLib::MidiLearnPreset preset(presetName);
 		if (m_learnManager.loadPreset(juceStr, preset))
 		{
 			translator->setPreset(preset);
 			refreshMappingList();
+			refreshInputSourceCheckboxes();
 			refreshFeedbackCheckboxes();
+			updateApplyButtonVisibility();
 		}
 		else
 		{
@@ -179,6 +210,40 @@ namespace jucePluginEditorLib
 				m_processor.getProductName(),
 				"Failed to load preset '" + presetName + "'.");
 		}
+	}
+
+	void SettingsMidiLearn::onBtPresetApply()
+	{
+		const int idx = m_presetList->getSelectedIndex();
+		if (idx <= 0 || idx >= static_cast<int>(m_presetNames.size()))
+			return;
+
+		const auto& presetName = m_presetNames[static_cast<size_t>(idx)];
+
+		genericUI::MessageBox::showYesNo(
+			genericUI::MessageBox::Icon::Question,
+			m_processor.getProductName(),
+			"Apply preset '" + presetName + "'?\n\nThis will overwrite the current mappings.",
+			[this](const genericUI::MessageBox::Result _r)
+			{
+				if (_r == genericUI::MessageBox::Result::Yes)
+				{
+					// Mark as applied so destructor won't restore
+					m_presetApplied = true;
+					m_hasOriginalPreset = false;
+					
+					// Update the original preset to current state (so it's now the baseline)
+					auto* translator = m_processor.getMidiLearnTranslator();
+					if (translator)
+					{
+						m_originalPreset = translator->getPreset();
+						m_hasOriginalPreset = true;
+						m_presetApplied = false;
+					}
+					
+					updateApplyButtonVisibility();
+				}
+			});
 	}
 
 	void SettingsMidiLearn::onBtRemoveMapping(size_t _mappingIndex)
@@ -480,5 +545,24 @@ namespace jucePluginEditorLib
 		translator->setPreset(preset);
 
 		refreshFeedbackCheckboxes();
+	}
+
+	void SettingsMidiLearn::updateApplyButtonVisibility()
+	{
+		if (!m_btApply)
+			return;
+
+		const int idx = m_presetList->getSelectedIndex();
+		const bool isCurrent = (idx == 0);
+
+		// Show Apply button only when a non-Current preset is selected
+		if (isCurrent)
+		{
+			m_btApply->SetProperty("display", "none");
+		}
+		else
+		{
+			m_btApply->SetProperty("display", "inline-block");
+		}
 	}
 }
