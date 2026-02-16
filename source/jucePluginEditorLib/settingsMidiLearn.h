@@ -39,6 +39,7 @@ namespace jucePluginEditorLib
 		void refreshInputSourceCheckboxes();
 		void refreshFeedbackCheckboxes();
 		void updateApplyButtonVisibility();
+		bool isCurrentPresetSelected() const;
 
 		pluginLib::MidiLearnManager m_learnManager;
 		juceRmlUi::ElemComboBox* m_presetList = nullptr;

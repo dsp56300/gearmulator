@@ -9,6 +9,8 @@
 
 namespace jucePluginEditorLib
 {
+	static constexpr const char* kCurrentPresetName = "Current";
+
 	SettingsMidiLearn::SettingsMidiLearn(Processor& _processor)
 		: SettingsPlugin(_processor)
 		, m_learnManager(juce::File(_processor.getConfigFolder() + "midilearn"))
@@ -136,8 +138,8 @@ namespace jucePluginEditorLib
 		if (idx < 0 || idx >= static_cast<int>(m_presetNames.size()))
 			return;
 
-		// Cannot delete the "Default" preset
-		if (idx == 0)
+		// Cannot delete the "Current" preset
+		if (isCurrentPresetSelected())
 			return;
 
 		const auto& name = m_presetNames[static_cast<size_t>(idx)];
@@ -176,7 +178,7 @@ namespace jucePluginEditorLib
 			return;
 
 		// Handle "Current" preset - restore original and just refresh display
-		if (_index == 0 || presetName == "Current")
+		if (_index == 0 || presetName == kCurrentPresetName)
 		{
 			// Restore the original preset if we had saved it
 			if (!m_originalPreset.empty())
@@ -213,8 +215,11 @@ namespace jucePluginEditorLib
 
 	void SettingsMidiLearn::onBtPresetApply()
 	{
+		if (isCurrentPresetSelected())
+			return;
+
 		const int idx = m_presetList->getSelectedIndex();
-		if (idx <= 0 || idx >= static_cast<int>(m_presetNames.size()))
+		if (idx < 0 || idx >= static_cast<int>(m_presetNames.size()))
 			return;
 
 		const auto& presetName = m_presetNames[static_cast<size_t>(idx)];
@@ -261,6 +266,8 @@ namespace jucePluginEditorLib
 		if (m_learnManager.savePreset(presetName, preset))
 		{
 			translator->setPreset(preset); // Refresh subscriptions
+			if (isCurrentPresetSelected())
+				m_originalPreset = preset;
 			refreshMappingList();
 			refreshFeedbackCheckboxes();
 		}
@@ -297,6 +304,8 @@ namespace jucePluginEditorLib
 		if (m_learnManager.savePreset(presetName, preset))
 		{
 			translator->setPreset(preset); // Refresh to apply changes
+			if (isCurrentPresetSelected())
+				m_originalPreset = preset;
 		}
 		else
 		{
@@ -313,8 +322,8 @@ namespace jucePluginEditorLib
 		m_presetList->clearOptions();
 
 		// Always add "Current" as first option - represents current engine state
-		m_presetNames.push_back("Current");
-		m_presetList->addOption("Current");
+		m_presetNames.push_back(kCurrentPresetName);
+		m_presetList->addOption(kCurrentPresetName);
 
 		// Get all preset names
 		auto jucePresets = m_learnManager.getPresetNames();
@@ -547,6 +556,8 @@ namespace jucePluginEditorLib
 
 		// Refresh subscriptions with updated preset
 		translator->setPreset(preset);
+		if (isCurrentPresetSelected())
+			m_originalPreset = preset;
 
 		refreshFeedbackCheckboxes();
 	}
@@ -556,8 +567,7 @@ namespace jucePluginEditorLib
 		if (!m_btApply)
 			return;
 
-		const int idx = m_presetList->getSelectedIndex();
-		const bool isCurrent = (idx == 0);
+		const bool isCurrent = isCurrentPresetSelected();
 
 		// Show Apply button only when a non-Current preset is selected
 		if (isCurrent)
@@ -568,5 +578,10 @@ namespace jucePluginEditorLib
 		{
 			m_btApply->SetProperty("display", "inline-block");
 		}
+	}
+
+	bool SettingsMidiLearn::isCurrentPresetSelected() const
+	{
+		return m_presetList && m_presetList->getSelectedIndex() == 0;
 	}
 }
