@@ -49,8 +49,22 @@ namespace pluginLib
 
 	uint8_t MidiLearnMapping::getValue(const synthLib::SMidiEvent& _event)
 	{
-		// For most MIDI messages, c contains the value
-		return _event.c;
+		const auto statusByte = static_cast<synthLib::MidiStatusByte>(_event.a & 0xf0);
+
+		switch (statusByte)
+		{
+		case synthLib::M_AFTERTOUCH:
+			// Channel Pressure: value is in byte b
+			return _event.b;
+
+		case synthLib::M_PITCHBEND:
+			// Pitch Bend: 14-bit value (LSB in b, MSB in c), return MSB for 7-bit representation
+			return _event.c;
+
+		default:
+			// CC, PolyPressure: value is in byte c
+			return _event.c;
+		}
 	}
 
 	juce::var MidiLearnMapping::toJson() const

@@ -442,6 +442,301 @@ void testMidiLearnModeDetection()
 	std::cout << "    - Sequential gradual changes → Absolute" << std::endl;
 }
 
+void testMidiLearnPitchBend()
+{
+	std::cout << "Testing MIDI Learn Pitch Bend..." << std::endl;
+
+	// Test PitchBend mapping creation and serialization
+	MidiLearnMapping mapping;
+	mapping.type = MidiLearnMapping::Type::PitchBend;
+	mapping.mode = MidiLearnMapping::Mode::Absolute;
+	mapping.channel = 3;
+	mapping.controller = 0; // not relevant for PitchBend
+	mapping.paramName = "FilterCutoff";
+
+	// Test type string conversion
+	TEST_ASSERT(MidiLearnMapping::typeToString(MidiLearnMapping::Type::PitchBend) == "PitchBend");
+	TEST_ASSERT(MidiLearnMapping::stringToType("PitchBend") == MidiLearnMapping::Type::PitchBend);
+
+	// Test status byte conversion
+	TEST_ASSERT(MidiLearnMapping::midiStatusToType(synthLib::M_PITCHBEND) == MidiLearnMapping::Type::PitchBend);
+	TEST_ASSERT(MidiLearnMapping::typeToMidiStatus(MidiLearnMapping::Type::PitchBend) == synthLib::M_PITCHBEND);
+
+	// Test matching: PitchBend ignores controller number
+	TEST_ASSERT(mapping.matchesMidiEvent(MidiLearnMapping::Type::PitchBend, 3, 0));
+	TEST_ASSERT(mapping.matchesMidiEvent(MidiLearnMapping::Type::PitchBend, 3, 99)); // controller doesn't matter
+	TEST_ASSERT(!mapping.matchesMidiEvent(MidiLearnMapping::Type::PitchBend, 4, 0)); // wrong channel
+
+	// Test SMidiEvent matching
+	// PitchBend: a = 0xE0 | channel, b = LSB, c = MSB
+	synthLib::SMidiEvent pbEvent(synthLib::MidiEventSource::Host, synthLib::M_PITCHBEND | 3, 0x00, 0x40);
+	TEST_ASSERT(mapping.matchesMidiEvent(pbEvent));
+	TEST_ASSERT(MidiLearnMapping::getChannel(pbEvent) == 3);
+
+	// Test getValue for PitchBend returns MSB (c)
+	TEST_ASSERT(MidiLearnMapping::getValue(pbEvent) == 0x40);
+
+	// PitchBend center (8192 = 0x2000): LSB=0x00, MSB=0x40
+	synthLib::SMidiEvent pbCenter(synthLib::MidiEventSource::Host, synthLib::M_PITCHBEND | 0, 0x00, 0x40);
+	TEST_ASSERT(MidiLearnMapping::getValue(pbCenter) == 0x40);
+
+	// PitchBend max (16383 = 0x3FFF): LSB=0x7F, MSB=0x7F
+	synthLib::SMidiEvent pbMax(synthLib::MidiEventSource::Host, synthLib::M_PITCHBEND | 0, 0x7F, 0x7F);
+	TEST_ASSERT(MidiLearnMapping::getValue(pbMax) == 0x7F);
+
+	// PitchBend min (0): LSB=0x00, MSB=0x00
+	synthLib::SMidiEvent pbMin(synthLib::MidiEventSource::Host, synthLib::M_PITCHBEND | 0, 0x00, 0x00);
+	TEST_ASSERT(MidiLearnMapping::getValue(pbMin) == 0x00);
+
+	// Test JSON round-trip
+	auto json = mapping.toJson();
+	auto restored = MidiLearnMapping::fromJson(json);
+	TEST_ASSERT(restored.type == MidiLearnMapping::Type::PitchBend);
+	TEST_ASSERT(restored.mode == MidiLearnMapping::Mode::Absolute);
+	TEST_ASSERT(restored.channel == 3);
+	TEST_ASSERT(restored.paramName == "FilterCutoff");
+
+	// Test preset round-trip with PitchBend mapping
+	MidiLearnPreset preset("PB Test");
+	preset.addMapping(mapping);
+	auto presetJson = preset.toJson();
+	MidiLearnPreset restoredPreset;
+	TEST_ASSERT(restoredPreset.fromJson(presetJson));
+	TEST_ASSERT(restoredPreset.getMappings().size() == 1);
+	TEST_ASSERT(restoredPreset.getMappings()[0].type == MidiLearnMapping::Type::PitchBend);
+
+	// Test finding PitchBend mapping by event
+	const auto* found = preset.findMapping(pbEvent);
+	TEST_ASSERT(found != nullptr);
+	TEST_ASSERT(found->paramName == "FilterCutoff");
+
+	std::cout << "  Pitch Bend tests passed!" << std::endl;
+}
+
+void testMidiLearnChannelPressure()
+{
+	std::cout << "Testing MIDI Learn Channel Pressure (Aftertouch)..." << std::endl;
+
+	// Test ChannelPressure mapping creation and serialization
+	MidiLearnMapping mapping;
+	mapping.type = MidiLearnMapping::Type::ChannelPressure;
+	mapping.mode = MidiLearnMapping::Mode::Absolute;
+	mapping.channel = 2;
+	mapping.controller = 0; // not relevant for ChannelPressure
+	mapping.paramName = "FilterResonance";
+
+	// Test type string conversion
+	TEST_ASSERT(MidiLearnMapping::typeToString(MidiLearnMapping::Type::ChannelPressure) == "ChannelPressure");
+	TEST_ASSERT(MidiLearnMapping::stringToType("ChannelPressure") == MidiLearnMapping::Type::ChannelPressure);
+
+	// Test status byte conversion
+	TEST_ASSERT(MidiLearnMapping::midiStatusToType(synthLib::M_AFTERTOUCH) == MidiLearnMapping::Type::ChannelPressure);
+	TEST_ASSERT(MidiLearnMapping::typeToMidiStatus(MidiLearnMapping::Type::ChannelPressure) == synthLib::M_AFTERTOUCH);
+
+	// Test matching: ChannelPressure ignores controller number
+	TEST_ASSERT(mapping.matchesMidiEvent(MidiLearnMapping::Type::ChannelPressure, 2, 0));
+	TEST_ASSERT(mapping.matchesMidiEvent(MidiLearnMapping::Type::ChannelPressure, 2, 99)); // controller doesn't matter
+	TEST_ASSERT(!mapping.matchesMidiEvent(MidiLearnMapping::Type::ChannelPressure, 3, 0)); // wrong channel
+
+	// Test SMidiEvent matching
+	// ChannelPressure: a = 0xD0 | channel, b = pressure value, c = 0
+	synthLib::SMidiEvent atEvent(synthLib::MidiEventSource::Host, synthLib::M_AFTERTOUCH | 2, 100, 0);
+	TEST_ASSERT(mapping.matchesMidiEvent(atEvent));
+	TEST_ASSERT(MidiLearnMapping::getChannel(atEvent) == 2);
+
+	// Test getValue for ChannelPressure returns b (pressure value)
+	TEST_ASSERT(MidiLearnMapping::getValue(atEvent) == 100);
+
+	// ChannelPressure min value
+	synthLib::SMidiEvent atMin(synthLib::MidiEventSource::Host, synthLib::M_AFTERTOUCH | 0, 0, 0);
+	TEST_ASSERT(MidiLearnMapping::getValue(atMin) == 0);
+
+	// ChannelPressure max value
+	synthLib::SMidiEvent atMax(synthLib::MidiEventSource::Host, synthLib::M_AFTERTOUCH | 0, 127, 0);
+	TEST_ASSERT(MidiLearnMapping::getValue(atMax) == 127);
+
+	// Test JSON round-trip
+	auto json = mapping.toJson();
+	auto restored = MidiLearnMapping::fromJson(json);
+	TEST_ASSERT(restored.type == MidiLearnMapping::Type::ChannelPressure);
+	TEST_ASSERT(restored.mode == MidiLearnMapping::Mode::Absolute);
+	TEST_ASSERT(restored.channel == 2);
+	TEST_ASSERT(restored.paramName == "FilterResonance");
+
+	// Test preset round-trip
+	MidiLearnPreset preset("AT Test");
+	preset.addMapping(mapping);
+	auto presetJson = preset.toJson();
+	MidiLearnPreset restoredPreset;
+	TEST_ASSERT(restoredPreset.fromJson(presetJson));
+	TEST_ASSERT(restoredPreset.getMappings().size() == 1);
+	TEST_ASSERT(restoredPreset.getMappings()[0].type == MidiLearnMapping::Type::ChannelPressure);
+
+	// Test finding by event
+	const auto* found = preset.findMapping(atEvent);
+	TEST_ASSERT(found != nullptr);
+	TEST_ASSERT(found->paramName == "FilterResonance");
+
+	std::cout << "  Channel Pressure tests passed!" << std::endl;
+}
+
+void testMidiLearnPolyPressure()
+{
+	std::cout << "Testing MIDI Learn Poly Pressure..." << std::endl;
+
+	// Test PolyPressure mapping creation and serialization
+	MidiLearnMapping mapping;
+	mapping.type = MidiLearnMapping::Type::PolyPressure;
+	mapping.mode = MidiLearnMapping::Mode::Absolute;
+	mapping.channel = 1;
+	mapping.controller = 60; // note number for PolyPressure
+	mapping.paramName = "OscPitch";
+
+	// Test type string conversion
+	TEST_ASSERT(MidiLearnMapping::typeToString(MidiLearnMapping::Type::PolyPressure) == "PolyPressure");
+	TEST_ASSERT(MidiLearnMapping::stringToType("PolyPressure") == MidiLearnMapping::Type::PolyPressure);
+
+	// Test status byte conversion
+	TEST_ASSERT(MidiLearnMapping::midiStatusToType(synthLib::M_POLYPRESSURE) == MidiLearnMapping::Type::PolyPressure);
+	TEST_ASSERT(MidiLearnMapping::typeToMidiStatus(MidiLearnMapping::Type::PolyPressure) == synthLib::M_POLYPRESSURE);
+
+	// Test matching: PolyPressure needs matching note number (controller)
+	TEST_ASSERT(mapping.matchesMidiEvent(MidiLearnMapping::Type::PolyPressure, 1, 60));
+	TEST_ASSERT(!mapping.matchesMidiEvent(MidiLearnMapping::Type::PolyPressure, 1, 61)); // wrong note
+	TEST_ASSERT(!mapping.matchesMidiEvent(MidiLearnMapping::Type::PolyPressure, 2, 60)); // wrong channel
+
+	// Test SMidiEvent matching
+	// PolyPressure: a = 0xA0 | channel, b = note number, c = pressure value
+	synthLib::SMidiEvent ppEvent(synthLib::MidiEventSource::Host, synthLib::M_POLYPRESSURE | 1, 60, 80);
+	TEST_ASSERT(mapping.matchesMidiEvent(ppEvent));
+	TEST_ASSERT(MidiLearnMapping::getChannel(ppEvent) == 1);
+	TEST_ASSERT(MidiLearnMapping::getController(ppEvent) == 60);
+
+	// Test getValue for PolyPressure returns c (pressure value)
+	TEST_ASSERT(MidiLearnMapping::getValue(ppEvent) == 80);
+
+	// Non-matching events
+	synthLib::SMidiEvent ppWrongNote(synthLib::MidiEventSource::Host, synthLib::M_POLYPRESSURE | 1, 61, 80);
+	TEST_ASSERT(!mapping.matchesMidiEvent(ppWrongNote));
+
+	synthLib::SMidiEvent ppWrongChan(synthLib::MidiEventSource::Host, synthLib::M_POLYPRESSURE | 2, 60, 80);
+	TEST_ASSERT(!mapping.matchesMidiEvent(ppWrongChan));
+
+	// Test JSON round-trip
+	auto json = mapping.toJson();
+	auto restored = MidiLearnMapping::fromJson(json);
+	TEST_ASSERT(restored.type == MidiLearnMapping::Type::PolyPressure);
+	TEST_ASSERT(restored.mode == MidiLearnMapping::Mode::Absolute);
+	TEST_ASSERT(restored.channel == 1);
+	TEST_ASSERT(restored.controller == 60);
+	TEST_ASSERT(restored.paramName == "OscPitch");
+
+	// Test preset round-trip
+	MidiLearnPreset preset("PP Test");
+	preset.addMapping(mapping);
+	auto presetJson = preset.toJson();
+	MidiLearnPreset restoredPreset;
+	TEST_ASSERT(restoredPreset.fromJson(presetJson));
+	TEST_ASSERT(restoredPreset.getMappings().size() == 1);
+	TEST_ASSERT(restoredPreset.getMappings()[0].type == MidiLearnMapping::Type::PolyPressure);
+	TEST_ASSERT(restoredPreset.getMappings()[0].controller == 60);
+
+	// Test finding by event
+	const auto* found = preset.findMapping(ppEvent);
+	TEST_ASSERT(found != nullptr);
+	TEST_ASSERT(found->paramName == "OscPitch");
+
+	std::cout << "  Poly Pressure tests passed!" << std::endl;
+}
+
+void testMidiLearnMixedTypes()
+{
+	std::cout << "Testing MIDI Learn Mixed Types preset..." << std::endl;
+
+	// Test a preset with all four mapping types
+	MidiLearnPreset preset("Mixed Types");
+
+	MidiLearnMapping ccMapping;
+	ccMapping.type = MidiLearnMapping::Type::ControlChange;
+	ccMapping.mode = MidiLearnMapping::Mode::Absolute;
+	ccMapping.channel = 0;
+	ccMapping.controller = 74;
+	ccMapping.paramName = "FilterCutoff";
+
+	MidiLearnMapping pbMapping;
+	pbMapping.type = MidiLearnMapping::Type::PitchBend;
+	pbMapping.mode = MidiLearnMapping::Mode::Absolute;
+	pbMapping.channel = 0;
+	pbMapping.paramName = "OscPitch";
+
+	MidiLearnMapping atMapping;
+	atMapping.type = MidiLearnMapping::Type::ChannelPressure;
+	atMapping.mode = MidiLearnMapping::Mode::Absolute;
+	atMapping.channel = 0;
+	atMapping.paramName = "FilterResonance";
+
+	MidiLearnMapping ppMapping;
+	ppMapping.type = MidiLearnMapping::Type::PolyPressure;
+	ppMapping.mode = MidiLearnMapping::Mode::Absolute;
+	ppMapping.channel = 0;
+	ppMapping.controller = 48;
+	ppMapping.paramName = "AmpLevel";
+
+	preset.addMapping(ccMapping);
+	preset.addMapping(pbMapping);
+	preset.addMapping(atMapping);
+	preset.addMapping(ppMapping);
+
+	// Each type should be found correctly by its respective event
+	synthLib::SMidiEvent ccEvent(synthLib::MidiEventSource::Host, synthLib::M_CONTROLCHANGE | 0, 74, 64);
+	synthLib::SMidiEvent pbEvent(synthLib::MidiEventSource::Host, synthLib::M_PITCHBEND | 0, 0x00, 0x40);
+	synthLib::SMidiEvent atEvent(synthLib::MidiEventSource::Host, synthLib::M_AFTERTOUCH | 0, 100, 0);
+	synthLib::SMidiEvent ppEvent(synthLib::MidiEventSource::Host, synthLib::M_POLYPRESSURE | 0, 48, 90);
+
+	const auto* foundCC = preset.findMapping(ccEvent);
+	const auto* foundPB = preset.findMapping(pbEvent);
+	const auto* foundAT = preset.findMapping(atEvent);
+	const auto* foundPP = preset.findMapping(ppEvent);
+
+	TEST_ASSERT(foundCC != nullptr && foundCC->paramName == "FilterCutoff");
+	TEST_ASSERT(foundPB != nullptr && foundPB->paramName == "OscPitch");
+	TEST_ASSERT(foundAT != nullptr && foundAT->paramName == "FilterResonance");
+	TEST_ASSERT(foundPP != nullptr && foundPP->paramName == "AmpLevel");
+
+	// Cross-type events should not match
+	synthLib::SMidiEvent wrongType(synthLib::MidiEventSource::Host, synthLib::M_CONTROLCHANGE | 0, 48, 90);
+	const auto* shouldNotMatchPP = preset.findMapping(wrongType);
+	// This should find CC mapping for controller 48 if it exists, but we only have CC for 74
+	TEST_ASSERT(shouldNotMatchPP == nullptr);
+
+	// JSON round-trip preserves all types
+	auto json = preset.toJson();
+	MidiLearnPreset restored;
+	TEST_ASSERT(restored.fromJson(json));
+	TEST_ASSERT(restored.getMappings().size() == 4);
+	TEST_ASSERT(restored.getMappings()[0].type == MidiLearnMapping::Type::ControlChange);
+	TEST_ASSERT(restored.getMappings()[1].type == MidiLearnMapping::Type::PitchBend);
+	TEST_ASSERT(restored.getMappings()[2].type == MidiLearnMapping::Type::ChannelPressure);
+	TEST_ASSERT(restored.getMappings()[3].type == MidiLearnMapping::Type::PolyPressure);
+
+	// File round-trip
+	auto tempFile = juce::File::getSpecialLocation(juce::File::tempDirectory)
+		.getChildFile("test_midi_learn_mixed_types.json");
+
+	TEST_ASSERT(preset.saveToFile(tempFile));
+	MidiLearnPreset fromFile;
+	TEST_ASSERT(fromFile.loadFromFile(tempFile));
+	TEST_ASSERT(fromFile.getMappings().size() == 4);
+	TEST_ASSERT(fromFile.getMappings()[0].type == MidiLearnMapping::Type::ControlChange);
+	TEST_ASSERT(fromFile.getMappings()[1].type == MidiLearnMapping::Type::PitchBend);
+	TEST_ASSERT(fromFile.getMappings()[2].type == MidiLearnMapping::Type::ChannelPressure);
+	TEST_ASSERT(fromFile.getMappings()[3].type == MidiLearnMapping::Type::PolyPressure);
+
+	tempFile.deleteFile();
+
+	std::cout << "  Mixed Types tests passed!" << std::endl;
+}
+
 int main()
 {
 	try
@@ -457,6 +752,10 @@ int main()
 		testMidiLearnFeedback();
 		testMidiLearnRelativeModes();
 		testMidiLearnModeDetection();
+		testMidiLearnPitchBend();
+		testMidiLearnChannelPressure();
+		testMidiLearnPolyPressure();
+		testMidiLearnMixedTypes();
 
 		std::cout << std::endl;
 		std::cout << "All tests passed successfully!" << std::endl;

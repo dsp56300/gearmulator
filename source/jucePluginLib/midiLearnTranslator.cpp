@@ -89,6 +89,7 @@ namespace pluginLib
 		m_learningValues.clear();
 		m_learningChannel = 0;
 		m_learningController = 0;
+		m_learningType = synthLib::M_CONTROLCHANGE;
 	}
 
 	void MidiLearnTranslator::cancelLearning()
@@ -112,11 +113,10 @@ namespace pluginLib
 		if (!param)
 			return;
 
-		const auto value = MidiLearnMapping::getValue(_event);
-
 		if (_mapping.mode == MidiLearnMapping::Mode::RelativeSigned)
 		{
 			// Relative Signed: 0x01 = +1 (increment), 0x7F = -1 (decrement)
+			const auto value = MidiLearnMapping::getValue(_event);
 			const auto currentValue = param->getUnnormalizedValue();
 			const auto& desc = param->getDescription();
 			
@@ -135,6 +135,7 @@ namespace pluginLib
 		else if (_mapping.mode == MidiLearnMapping::Mode::RelativeOffset)
 		{
 			// Relative Offset: 65 (0x41) = +1 (increment), 63 (0x3F) = -1 (decrement)
+			const auto value = MidiLearnMapping::getValue(_event);
 			const auto currentValue = param->getUnnormalizedValue();
 			const auto& desc = param->getDescription();
 			
@@ -152,32 +153,55 @@ namespace pluginLib
 		}
 		else
 		{
-			// Absolute mode: map MIDI value (0-127) to parameter range
+			// Absolute mode: map MIDI value to parameter range
 			const auto& desc = param->getDescription();
 			const auto rangeSize = desc.range.getEnd() - desc.range.getStart();
-			const auto normalized = value / 127.0f;
+
+			float normalized;
+
+			if (_mapping.type == MidiLearnMapping::Type::PitchBend)
+			{
+				// Pitch Bend: 14-bit value from LSB (b) and MSB (c)
+				const uint16_t pitchValue = (static_cast<uint16_t>(_event.c) << 7) | (_event.b & 0x7f);
+				normalized = pitchValue / 16383.0f;
+			}
+			else if (_mapping.type == MidiLearnMapping::Type::ChannelPressure)
+			{
+				// Channel Pressure: value in byte b
+				normalized = _event.b / 127.0f;
+			}
+			else
+			{
+				// CC, PolyPressure: value in byte c
+				normalized = _event.c / 127.0f;
+			}
+
 			const auto paramValue = static_cast<int>(desc.range.getStart() + normalized * rangeSize);
-			
 			param->setUnnormalizedValueNotifyingHost(paramValue, Parameter::Origin::Midi);
 		}
 	}
 
 	void MidiLearnTranslator::handleLearning(const synthLib::SMidiEvent& _event)
 	{
-		// Only support CC learning for now (Phase 1)
 		const auto statusByte = static_cast<synthLib::MidiStatusByte>(_event.a & 0xf0);
-		if (statusByte != synthLib::M_CONTROLCHANGE)
+
+		// Only support learnable MIDI message types
+		if (statusByte != synthLib::M_CONTROLCHANGE &&
+		    statusByte != synthLib::M_POLYPRESSURE &&
+		    statusByte != synthLib::M_AFTERTOUCH &&
+		    statusByte != synthLib::M_PITCHBEND)
 			return;
 
 		const auto channel = MidiLearnMapping::getChannel(_event);
 		const auto controller = MidiLearnMapping::getController(_event);
 		const auto value = MidiLearnMapping::getValue(_event);
 
-		// First event: establish channel and controller
+		// First event: establish channel, type, and controller
 		if (m_learningValues.empty())
 		{
 			m_learningChannel = channel;
 			m_learningController = controller;
+			m_learningType = statusByte;
 			m_learningValues.push_back(value);
 
 			// Notify progress
@@ -186,9 +210,14 @@ namespace pluginLib
 			return;
 		}
 
-		// Subsequent events: must be same channel and controller
-		if (channel != m_learningChannel || controller != m_learningController)
-			return; // Ignore events from different CC
+		// Subsequent events: must be same type and channel
+		if (statusByte != m_learningType || channel != m_learningChannel)
+			return;
+
+		// For CC and PolyPressure, must also be same controller number
+		if ((statusByte == synthLib::M_CONTROLCHANGE || statusByte == synthLib::M_POLYPRESSURE) &&
+		    controller != m_learningController)
+			return;
 
 		// Only add if it's a unique value
 		if (std::find(m_learningValues.begin(), m_learningValues.end(), value) == m_learningValues.end())
@@ -213,9 +242,14 @@ namespace pluginLib
 		newMapping.channel = m_learningChannel;
 		newMapping.controller = m_learningController;
 		newMapping.paramName = m_learningParamName;
-		newMapping.mode = detectMode(m_learningValues);
 
-		// Check if this MIDI controller (channel+CC) is already mapped to a different parameter
+		// Only detect relative mode for CC (encoders), other types are always absolute
+		if (statusByte == synthLib::M_CONTROLCHANGE)
+			newMapping.mode = detectMode(m_learningValues);
+		else
+			newMapping.mode = MidiLearnMapping::Mode::Absolute;
+
+		// Check if this MIDI source is already mapped to a different parameter
 		const auto* existingMapping = m_preset.findMapping(newMapping.type, newMapping.channel, newMapping.controller);
 		if (existingMapping && existingMapping->paramName != m_learningParamName)
 		{

@@ -77,6 +77,7 @@ namespace pluginLib
 		std::vector<uint8_t> m_learningValues; // Collect values to detect mode
 		uint8_t m_learningChannel = 0;
 		uint8_t m_learningController = 0;
+		synthLib::MidiStatusByte m_learningType = synthLib::M_CONTROLCHANGE;
 		uint8_t m_learnInputSources = (1<<static_cast<uint8_t>(synthLib::MidiEventSource::Host)) | (1<<static_cast<uint8_t>(synthLib::MidiEventSource::Physical)); // Host | Physical - both enabled by default
 		static constexpr size_t kRequiredUniqueValues = 2; // Need 2 unique values (both directions)
 

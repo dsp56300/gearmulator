@@ -412,7 +412,13 @@ namespace jucePluginEditorLib
 				channelCell->SetInnerRML(std::to_string(mapping.channel + 1));
 
 			if (controllerCell)
-				controllerCell->SetInnerRML(std::to_string(mapping.controller));
+			{
+				if (mapping.type == pluginLib::MidiLearnMapping::Type::ChannelPressure ||
+				    mapping.type == pluginLib::MidiLearnMapping::Type::PitchBend)
+					controllerCell->SetInnerRML("-");
+				else
+					controllerCell->SetInnerRML(std::to_string(mapping.controller));
+			}
 
 			// Create and populate mode combo box
 			if (auto* modeCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "modeCombo"))
