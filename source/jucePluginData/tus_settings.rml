@@ -11,7 +11,9 @@
 	<div class="settings-parent">
 		<div id="settings-root" class="settings-root">
 			<div class="settings-categories">
+				<button id="btSettingsClose" class="button settings-close-button">X</button>
 				<div class="settings-headline">Settings</div>
+				<br/>
 				<button id="btPage" class="button settings-category-button">...</button>
 				<flexspacer style="flex-grow: 1;"/>
 				<div id="btEnableAdvancedOptions" class="settings-checkboxwithlabel">
