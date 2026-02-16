@@ -114,43 +114,46 @@ namespace juceRmlUi
 
 	void MidiLearnDialog::onConflict(const std::string& _existingParamName, const pluginLib::MidiLearnMapping& _mapping)
 	{
-		m_isConflict = true;
-		m_receivedMapping = _mapping;
-
-		// Update UI to show conflict
-		if (m_statusText)
+		juce::MessageManager::callAsync([this, _existingParamName, _mapping]
 		{
-			std::string conflictMsg = "This MIDI message is already mapped to:<br/><strong>" 
-				+ _existingParamName + "</strong><br/><br/>Replace existing mapping?";
-			m_statusText->SetInnerRML(conflictMsg);
-		}
+			m_isConflict = true;
+			m_receivedMapping = _mapping;
 
-		// Add confirm button for conflict resolution
-		auto* buttonContainer = helper::findChild(m_root, "buttonContainer");
-		if (buttonContainer)
-		{
-			Rml::ElementPtr buttonConfirm = buttonContainer->GetOwnerDocument()->CreateElement("div");
-			if (buttonConfirm)
+			// Update UI to show conflict
+			if (m_statusText)
 			{
-				buttonConfirm->SetAttribute("id", "buttonConfirm");
-				buttonConfirm->SetAttribute("class", "button ml-button");
-				buttonConfirm->SetInnerRML("Replace");
-				
-				auto* confirmPtr = buttonConfirm.get();
-				buttonContainer->InsertBefore(std::move(buttonConfirm), buttonContainer->GetFirstChild());
-
-				EventListener::Add(confirmPtr, Rml::EventId::Click, [this](Rml::Event& _event)
-				{
-					_event.StopPropagation();
-					callCompletionCallback(true);
-				});
+				std::string conflictMsg = "This MIDI message is already mapped to:<br/><strong>" 
+					+ _existingParamName + "</strong><br/><br/>Replace existing mapping?";
+				m_statusText->SetInnerRML(conflictMsg);
 			}
 
-			// Update cancel button text
-			auto* buttonCancel = helper::findChild(m_root, "buttonCancel");
-			if (buttonCancel)
-				buttonCancel->SetInnerRML("Keep Existing");
-		}
+			// Add confirm button for conflict resolution
+			auto* buttonContainer = helper::findChild(m_root, "buttonContainer");
+			if (buttonContainer)
+			{
+				Rml::ElementPtr buttonConfirm = buttonContainer->GetOwnerDocument()->CreateElement("div");
+				if (buttonConfirm)
+				{
+					buttonConfirm->SetAttribute("id", "buttonConfirm");
+					buttonConfirm->SetAttribute("class", "button ml-button");
+					buttonConfirm->SetInnerRML("Replace");
+					
+					auto* confirmPtr = buttonConfirm.get();
+					buttonContainer->InsertBefore(std::move(buttonConfirm), buttonContainer->GetFirstChild());
+
+					EventListener::Add(confirmPtr, Rml::EventId::Click, [this](Rml::Event& _event)
+					{
+						_event.StopPropagation();
+						callCompletionCallback(true);
+					});
+				}
+
+				// Update cancel button text
+				auto* buttonCancel = helper::findChild(m_root, "buttonCancel");
+				if (buttonCancel)
+					buttonCancel->SetInnerRML("Keep Existing");
+			}
+		});
 	}
 
 	void MidiLearnDialog::callCompletionCallback(const bool _confirmed) const
