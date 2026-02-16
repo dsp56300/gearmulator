@@ -432,6 +432,16 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 		}
 	}
 
+	menu.addSeparator();
+
+	menu.addEntry("Settings...", [this]
+	{
+		juce::MessageManager::callAsync([this]
+		{
+			getEditor()->showSettings(true);
+		});
+	});
+
 	menu.runModal(_event, 16);
 }
 

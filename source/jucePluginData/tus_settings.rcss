@@ -72,6 +72,16 @@
 	border-width: 2dp;
 }
 
+.settings-close-button {
+	width: 0.7em;
+	height: 1.2em;
+	font-size: 1.2em;
+	line-height: 1.2em;
+	text-align: center;
+	align-self: flex-start;
+	margin-left: 1.0em;
+}
+
 .settings-headline {
 	font-size: 2em;
 }

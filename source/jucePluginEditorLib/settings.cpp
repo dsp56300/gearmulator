@@ -42,6 +42,18 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::ElemButton::setChecked(bt, allowAdvanced);
 
+		auto* btClose = juceRmlUi::helper::findChild(_root, "btSettingsClose");
+		if (btClose)
+		{
+			juceRmlUi::EventListener::AddClick(btClose, [this]
+			{
+				juce::MessageManager::callAsync([this]
+				{
+					m_editor.showSettings(false);
+				});
+			});
+		}
+
 		juceRmlUi::EventListener::AddClick(btAllowAdvanced, [this, bt]
 		{
 			auto& c = m_editor.getProcessor().getConfig();
