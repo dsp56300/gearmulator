@@ -87,7 +87,7 @@ You have two options:
 
 Open the Settings dialog by pressing **Escape** or by right-clicking anywhere on the plugin UI and selecting **"Settings..."** from the context menu. Then navigate to the **MIDI Learn** page.
 
-![](midilearn_parameter_settings.png)
+![](midilearn_settings.png)
 
 ### Preset Management
 
