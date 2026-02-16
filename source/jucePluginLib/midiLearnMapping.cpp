@@ -114,7 +114,8 @@ namespace pluginLib
 		switch (_mode)
 		{
 		case Mode::Absolute: return "Absolute";
-		case Mode::Relative: return "Relative";
+		case Mode::RelativeSigned: return "RelativeSigned";
+		case Mode::RelativeOffset: return "RelativeOffset";
 		default: return "Absolute";
 		}
 	}
@@ -122,7 +123,9 @@ namespace pluginLib
 	MidiLearnMapping::Mode MidiLearnMapping::stringToMode(const std::string& _str)
 	{
 		if (_str == "Absolute") return Mode::Absolute;
-		if (_str == "Relative") return Mode::Relative;
+		if (_str == "RelativeSigned") return Mode::RelativeSigned;
+		if (_str == "RelativeOffset") return Mode::RelativeOffset;
+		if (_str == "Relative") return Mode::RelativeSigned; // backward compatibility
 		return Mode::Absolute;
 	}
 

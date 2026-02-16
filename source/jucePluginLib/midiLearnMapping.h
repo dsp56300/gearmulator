@@ -22,11 +22,12 @@ namespace pluginLib
 		enum class Mode
 		{
 			Absolute,
-			Relative,
+			RelativeSigned,
+			RelativeOffset,
 			Count
 		};
 		
-		static constexpr const char* ModeStrings[] = { "Absolute", "Relative" };
+		static constexpr const char* ModeStrings[] = { "Absolute", "Relative Signed", "Relative Offset" };
 		static_assert(static_cast<size_t>(Mode::Count) == std::size(ModeStrings), 
 		              "ModeStrings array size must match Mode enum count");
 

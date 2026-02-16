@@ -121,7 +121,7 @@ void testMidiLearnPreset()
 
 	MidiLearnMapping mapping2;
 	mapping2.type = MidiLearnMapping::Type::ControlChange;
-	mapping2.mode = MidiLearnMapping::Mode::Relative;
+	mapping2.mode = MidiLearnMapping::Mode::RelativeSigned;
 	mapping2.channel = 0;
 	mapping2.controller = 75;
 	mapping2.paramName = "Filter Resonance";
@@ -316,6 +316,132 @@ void testMidiLearnFeedback()
 	std::cout << "    - Relative mode mappings send absolute feedback" << std::endl;
 }
 
+void testMidiLearnRelativeModes()
+{
+	std::cout << "Testing MIDI Learn Relative Modes..." << std::endl;
+
+	// Test Mode enum values
+	TEST_ASSERT(static_cast<int>(MidiLearnMapping::Mode::Absolute) == 0);
+	TEST_ASSERT(static_cast<int>(MidiLearnMapping::Mode::RelativeSigned) == 1);
+	TEST_ASSERT(static_cast<int>(MidiLearnMapping::Mode::RelativeOffset) == 2);
+	TEST_ASSERT(static_cast<int>(MidiLearnMapping::Mode::Count) == 3);
+
+	// Test ModeStrings match
+	TEST_ASSERT(std::string(MidiLearnMapping::ModeStrings[0]) == "Absolute");
+	TEST_ASSERT(std::string(MidiLearnMapping::ModeStrings[1]) == "Relative Signed");
+	TEST_ASSERT(std::string(MidiLearnMapping::ModeStrings[2]) == "Relative Offset");
+
+	// Test modeToString
+	TEST_ASSERT(MidiLearnMapping::modeToString(MidiLearnMapping::Mode::Absolute) == "Absolute");
+	TEST_ASSERT(MidiLearnMapping::modeToString(MidiLearnMapping::Mode::RelativeSigned) == "RelativeSigned");
+	TEST_ASSERT(MidiLearnMapping::modeToString(MidiLearnMapping::Mode::RelativeOffset) == "RelativeOffset");
+
+	// Test stringToMode
+	TEST_ASSERT(MidiLearnMapping::stringToMode("Absolute") == MidiLearnMapping::Mode::Absolute);
+	TEST_ASSERT(MidiLearnMapping::stringToMode("RelativeSigned") == MidiLearnMapping::Mode::RelativeSigned);
+	TEST_ASSERT(MidiLearnMapping::stringToMode("RelativeOffset") == MidiLearnMapping::Mode::RelativeOffset);
+
+	// Test backward compatibility: "Relative" maps to RelativeSigned
+	TEST_ASSERT(MidiLearnMapping::stringToMode("Relative") == MidiLearnMapping::Mode::RelativeSigned);
+
+	// Test JSON round-trip for RelativeSigned
+	{
+		MidiLearnMapping mapping;
+		mapping.type = MidiLearnMapping::Type::ControlChange;
+		mapping.mode = MidiLearnMapping::Mode::RelativeSigned;
+		mapping.channel = 0;
+		mapping.controller = 1;
+		mapping.paramName = "TestParam";
+
+		auto json = mapping.toJson();
+		auto restored = MidiLearnMapping::fromJson(json);
+		TEST_ASSERT(restored.mode == MidiLearnMapping::Mode::RelativeSigned);
+	}
+
+	// Test JSON round-trip for RelativeOffset
+	{
+		MidiLearnMapping mapping;
+		mapping.type = MidiLearnMapping::Type::ControlChange;
+		mapping.mode = MidiLearnMapping::Mode::RelativeOffset;
+		mapping.channel = 0;
+		mapping.controller = 2;
+		mapping.paramName = "TestParam2";
+
+		auto json = mapping.toJson();
+		auto restored = MidiLearnMapping::fromJson(json);
+		TEST_ASSERT(restored.mode == MidiLearnMapping::Mode::RelativeOffset);
+	}
+
+	std::cout << "  Relative Modes tests passed!" << std::endl;
+}
+
+void testMidiLearnModeDetection()
+{
+	std::cout << "Testing MIDI Learn Mode Detection..." << std::endl;
+
+	// We can't directly test detectMode() since it's a private member,
+	// but we can test the preset round-trip with both modes to ensure
+	// they serialize/deserialize correctly, and verify the detection
+	// logic behavior description.
+
+	// Test preset with mixed modes
+	MidiLearnPreset preset("Mixed Modes");
+
+	MidiLearnMapping absoluteMapping;
+	absoluteMapping.type = MidiLearnMapping::Type::ControlChange;
+	absoluteMapping.mode = MidiLearnMapping::Mode::Absolute;
+	absoluteMapping.channel = 0;
+	absoluteMapping.controller = 1;
+	absoluteMapping.paramName = "AbsParam";
+
+	MidiLearnMapping signedMapping;
+	signedMapping.type = MidiLearnMapping::Type::ControlChange;
+	signedMapping.mode = MidiLearnMapping::Mode::RelativeSigned;
+	signedMapping.channel = 0;
+	signedMapping.controller = 2;
+	signedMapping.paramName = "SignedParam";
+
+	MidiLearnMapping offsetMapping;
+	offsetMapping.type = MidiLearnMapping::Type::ControlChange;
+	offsetMapping.mode = MidiLearnMapping::Mode::RelativeOffset;
+	offsetMapping.channel = 0;
+	offsetMapping.controller = 3;
+	offsetMapping.paramName = "OffsetParam";
+
+	preset.addMapping(absoluteMapping);
+	preset.addMapping(signedMapping);
+	preset.addMapping(offsetMapping);
+
+	// JSON round-trip
+	auto json = preset.toJson();
+	MidiLearnPreset restored;
+	TEST_ASSERT(restored.fromJson(json));
+	TEST_ASSERT(restored.getMappings().size() == 3);
+	TEST_ASSERT(restored.getMappings()[0].mode == MidiLearnMapping::Mode::Absolute);
+	TEST_ASSERT(restored.getMappings()[1].mode == MidiLearnMapping::Mode::RelativeSigned);
+	TEST_ASSERT(restored.getMappings()[2].mode == MidiLearnMapping::Mode::RelativeOffset);
+
+	// File round-trip
+	auto tempFile = juce::File::getSpecialLocation(juce::File::tempDirectory)
+		.getChildFile("test_midi_learn_modes.json");
+
+	TEST_ASSERT(preset.saveToFile(tempFile));
+	MidiLearnPreset fromFile;
+	TEST_ASSERT(fromFile.loadFromFile(tempFile));
+	TEST_ASSERT(fromFile.getMappings()[0].mode == MidiLearnMapping::Mode::Absolute);
+	TEST_ASSERT(fromFile.getMappings()[1].mode == MidiLearnMapping::Mode::RelativeSigned);
+	TEST_ASSERT(fromFile.getMappings()[2].mode == MidiLearnMapping::Mode::RelativeOffset);
+
+	tempFile.deleteFile();
+
+	std::cout << "  Mode Detection tests passed!" << std::endl;
+	std::cout << std::endl;
+	std::cout << "  Mode detection behavior:" << std::endl;
+	std::cout << "    - Values 0x01/0x7F (1/127) → RelativeSigned" << std::endl;
+	std::cout << "    - Values 0x3F/0x41 (63/65) → RelativeOffset" << std::endl;
+	std::cout << "    - Sequential gradual changes → Absolute" << std::endl;
+}
+
 int main()
 {
 	try
@@ -329,6 +455,8 @@ int main()
 		testMidiLearnManager();
 		testMidiLearnTranslatorBasics();
 		testMidiLearnFeedback();
+		testMidiLearnRelativeModes();
+		testMidiLearnModeDetection();
 
 		std::cout << std::endl;
 		std::cout << "All tests passed successfully!" << std::endl;

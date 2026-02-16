@@ -114,10 +114,9 @@ namespace pluginLib
 
 		const auto value = MidiLearnMapping::getValue(_event);
 
-		if (_mapping.mode == MidiLearnMapping::Mode::Relative)
+		if (_mapping.mode == MidiLearnMapping::Mode::RelativeSigned)
 		{
-			// Relative mode: increment or decrement
-			// 0x7F (127) = -1 (decrement), 0x01 (1) = +1 (increment)
+			// Relative Signed: 0x01 = +1 (increment), 0x7F = -1 (decrement)
 			const auto currentValue = param->getUnnormalizedValue();
 			const auto& desc = param->getDescription();
 			
@@ -127,6 +126,24 @@ namespace pluginLib
 				newValue = std::max(static_cast<int>(desc.range.getStart()), currentValue - 1);
 			}
 			else if (value == 0x01) // Increment
+			{
+				newValue = std::min(static_cast<int>(desc.range.getEnd()), currentValue + 1);
+			}
+			
+			param->setUnnormalizedValueNotifyingHost(newValue, Parameter::Origin::Midi);
+		}
+		else if (_mapping.mode == MidiLearnMapping::Mode::RelativeOffset)
+		{
+			// Relative Offset: 65 (0x41) = +1 (increment), 63 (0x3F) = -1 (decrement)
+			const auto currentValue = param->getUnnormalizedValue();
+			const auto& desc = param->getDescription();
+			
+			int newValue = currentValue;
+			if (value == 0x3F) // Decrement (63)
+			{
+				newValue = std::max(static_cast<int>(desc.range.getStart()), currentValue - 1);
+			}
+			else if (value == 0x41) // Increment (65)
 			{
 				newValue = std::min(static_cast<int>(desc.range.getEnd()), currentValue + 1);
 			}
@@ -241,10 +258,13 @@ namespace pluginLib
 				hasMidValues = true;
 		}
 
-		// If we see both very low and very high values, or values clustered around center,
-		// it's likely a relative encoder
-		if ((hasLowValues && hasHighValues) || hasMidValues)
-			return MidiLearnMapping::Mode::Relative;
+		// If we see both very low and very high values, it's relative signed (0x01/0x7F)
+		if (hasLowValues && hasHighValues)
+			return MidiLearnMapping::Mode::RelativeSigned;
+
+		// Values clustered around center (0x3F/0x41) = relative offset (63/65)
+		if (hasMidValues)
+			return MidiLearnMapping::Mode::RelativeOffset;
 
 		// Check if values are changing sequentially (absolute fader/knob)
 		// Calculate variance - absolute controls show gradual changes
