@@ -9,7 +9,7 @@
 	line-height: 1.2em;
 	min-height: 1.2em;
 	padding-left: 0.3em;
-	width: 6em;
+	width: 9em;
 }
 
 .settings-combo-small combotext {
@@ -22,3 +22,10 @@
 	padding-top: 0.3em;
 	padding-bottom: 0.3em;
 }
+
+.ml-col-type { width: 10%; }
+.ml-col-channel { width: 10%; }
+.ml-col-controller { width: 10%; }
+.ml-col-mode { width: 25%; }
+.ml-col-parameter { width: 22%; }
+.ml-col-remove { width: 15%; }
