@@ -113,7 +113,8 @@ namespace pluginLib
 		void setDerivedValue(const int _value);
 		void sendToSynth(Origin _origin);
 		static uint64_t milliseconds();
-		void sendParameterChangeDelayed(ParamValue _value, uint32_t _uniqueId, Origin _origin);
+		void sendParameterChangeDelayed(ParamValue _value, Origin _origin);
+		void sendPendingParameterChange();
 		void forwardToDerived(const int _newValue);
 		void notifyHost(float _value);
 
@@ -133,7 +134,7 @@ namespace pluginLib
 
 		uint32_t m_rateLimit = 0;		// milliseconds
 		uint64_t m_lastSendTime = 0;
-		uint32_t m_uniqueDelayCallbackId = 0;
+		std::function<void()> m_pendingParameterChange;
 
 		bool m_isLocked = false;
 		ParameterLinkType m_linkType = None;
