@@ -1541,12 +1541,6 @@ namespace pluginLib::patchDB
 
 		deleteFile(cacheFile);
 
-		if (!jsonFile.hasWriteAccess())
-		{
-			pushError("No write access to file:\n" + jsonFile.getFullPathName().toStdString());
-			return false;
-		}
-
 		auto* json = new juce::DynamicObject();
 
 		{
@@ -1713,17 +1707,7 @@ namespace pluginLib::patchDB
 
 	bool DB::saveJson(const juce::File& _target, juce::DynamicObject* _src)
 	{
-		if (!_target.hasWriteAccess())
-		{
-			pushError("No write access to file:\n" + _target.getFullPathName().toStdString());
-			return false;
-		}
 		const auto tempFile = juce::File(_target.getFullPathName() + "_tmp.json");
-		if (!tempFile.hasWriteAccess())
-		{
-			pushError("No write access to file:\n" + tempFile.getFullPathName().toStdString());
-			return false;
-		}
 		const auto jsonText = juce::JSON::toString(juce::var(_src), false);
 		if (!tempFile.replaceWithText(jsonText))
 		{
@@ -2007,9 +1991,6 @@ namespace pluginLib::patchDB
 	void DB::saveCache()
 	{
 		const auto cacheFile = getCacheFile();
-
-		if(!cacheFile.hasWriteAccess())
-			return;
 
 		baseLib::BinaryStream outStream;
 		{
