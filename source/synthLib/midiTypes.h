@@ -3,12 +3,22 @@
 #include <cassert>
 #include <vector>
 #include <cstdint>
+
+#if __has_include(<memory_resource>)
 #include <memory_resource>
+#define SYNTHLIB_HAS_PMR 1
+#else
+#define SYNTHLIB_HAS_PMR 0
+#endif
 
 namespace synthLib
 {
-	// Type alias for sysex buffer - can be changed to use different allocators
+	// Type alias for sysex buffer - uses pmr allocator when available
+#if SYNTHLIB_HAS_PMR
 	using SysexBuffer = std::pmr::vector<uint8_t>;
+#else
+	using SysexBuffer = std::vector<uint8_t>;
+#endif
 	using SysexBufferList = std::vector<SysexBuffer>;
 
 	// MIDI status bytes
