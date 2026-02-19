@@ -57,7 +57,7 @@ namespace juceRmlUi
 		Rml::LayerHandle PushLayer() override;
 		void PopLayer() override;
 		Rml::TextureHandle SaveLayerAsTexture() override;
-		void CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, Rml::Span<const unsigned long long> _filters) override;
+		void CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, Rml::Span<const Rml::CompiledFilterHandle> _filters) override;
 
 		void EnableScissorRegion(bool _enable) override;
 		void SetScissorRegion(Rml::Rectanglei _region) override;

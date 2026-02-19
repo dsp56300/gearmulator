@@ -1106,7 +1106,7 @@ namespace juceRmlUi
 		return reinterpret_cast<Rml::TextureHandle>(texture);
 	}
 
-	void RendererJuce::CompositeLayers(const Rml::LayerHandle _source, const Rml::LayerHandle _destination, const Rml::BlendMode _blendMode, const Rml::Span<const unsigned long long> _filters)
+	void RendererJuce::CompositeLayers(const Rml::LayerHandle _source, const Rml::LayerHandle _destination, const Rml::BlendMode _blendMode, const Rml::Span<const Rml::CompiledFilterHandle> _filters)
 	{
 		const auto* source = reinterpret_cast<const Image*>(_source);
 		auto* destination = reinterpret_cast<Image*>(_destination);
