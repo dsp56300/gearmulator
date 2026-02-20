@@ -18,6 +18,21 @@ namespace jucePluginEditorLib
 	static constexpr std::initializer_list<uint32_t> g_latencies = {0, 1, 2, 4, 8};
 	static constexpr std::initializer_list<int> g_clockPercents = {50, 75, 100, 125, 150, 200};
 
+	struct ResamplerModeEntry
+	{
+		synthLib::Resampler::Mode mode;
+		const char* buttonId;
+	};
+
+	static constexpr std::initializer_list<ResamplerModeEntry> g_resamplerModes =
+	{
+		{synthLib::Resampler::Mode::Legacy, "btResamplerLegacy"},
+		{synthLib::Resampler::Mode::MameHq, "btResamplerHq"},
+		{synthLib::Resampler::Mode::MameLofi, "btResamplerLofi"}
+	};
+
+	static_assert(g_resamplerModes.size() == static_cast<size_t>(synthLib::Resampler::Mode::Count));
+
 	namespace
 	{
 		float dbToGain(const float _db)
@@ -159,6 +174,31 @@ namespace jucePluginEditorLib
 				labelGain->SetInnerRML(Rml::StringUtilities::EncodeRml(formatDbLabel(db)));
 			});
 		}
+
+		// Resampler mode buttons
+		const auto currentResamplerMode = m_processor.getResamplerMode();
+
+		for (const auto& [mode, buttonId] : g_resamplerModes)
+		{
+			auto* buttonContainer = juceRmlUi::helper::findChild(_root, buttonId, false);
+			if (!buttonContainer)
+				continue;
+
+			auto* button = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(buttonContainer, "button");
+			if (!button)
+				continue;
+
+			m_resamplerButtons.emplace_back(mode, button);
+
+			button->setChecked(currentResamplerMode == mode);
+
+			juceRmlUi::EventListener::Add(buttonContainer, Rml::EventId::Click, [this, mode](Rml::Event& _event)
+			{
+				_event.StopPropagation();
+				m_processor.setResamplerMode(mode);
+				updateResamplerButtons();
+			});
+		}
 	}
 
 	uint32_t SettingsDspAudio::getCurrentLatency() const
@@ -183,6 +223,16 @@ namespace jucePluginEditorLib
 		for (const auto [percent, button] : m_clockButtons)
 		{
 			button->setChecked(currentPercent == percent);
+		}
+	}
+
+	void SettingsDspAudio::updateResamplerButtons() const
+	{
+		const auto currentMode = m_processor.getResamplerMode();
+
+		for (const auto [mode, button] : m_resamplerButtons)
+		{
+			button->setChecked(currentMode == mode);
 		}
 	}
 }

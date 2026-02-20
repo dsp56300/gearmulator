@@ -21,7 +21,8 @@ namespace synthLib
 		{
 			Legacy,
 			MameHq,
-			MameLofi
+			MameLofi,
+			Count
 		};
 
 		using TProcessFunc = std::function<void(TAudioOutputs&, uint32_t)>;

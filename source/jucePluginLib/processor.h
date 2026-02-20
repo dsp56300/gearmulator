@@ -129,6 +129,9 @@ namespace pluginLib
 		std::vector<float> getDeviceSupportedSamplerates() const;
 		std::vector<float> getDevicePreferredSamplerates() const;
 
+		void setResamplerMode(synthLib::Resampler::Mode _mode);
+		synthLib::Resampler::Mode getResamplerMode() const { return m_resamplerMode; }
+
 		float getHostSamplerate() const { return m_hostSamplerate; }
 
 		const Properties& getProperties() const { return m_properties; }
@@ -215,6 +218,7 @@ namespace pluginLib
 		float m_inputGain = 1.0f;
 		uint32_t m_dspClockPercent = 100;
 		float m_preferredDeviceSamplerate = 0.0f;
+		synthLib::Resampler::Mode m_resamplerMode = synthLib::Resampler::Mode::Legacy;
 		float m_hostSamplerate = 0.0f;
 		MidiPorts m_midiPorts;
 		BypassBuffer m_bypassBuffer;
