@@ -137,11 +137,11 @@ void synthLib::Resampler::ensureMameInput(const uint32_t _numChannels, const uin
 
 	TAudioOutputs tempBuffers;
 	tempBuffers.fill(nullptr);
-	std::vector<std::vector<float>> temp(_numChannels);
+	m_mameInputTemp.resize(_numChannels);
 	for (uint32_t i = 0; i < _numChannels; ++i)
 	{
-		temp[i].resize(_requiredInputSamples, 0.0f);
-		tempBuffers[i] = temp[i].data();
+		m_mameInputTemp[i].assign(_requiredInputSamples, 0.0f);
+		tempBuffers[i] = m_mameInputTemp[i].data();
 	}
 
 	_processFunc(tempBuffers, _requiredInputSamples);
@@ -149,7 +149,7 @@ void synthLib::Resampler::ensureMameInput(const uint32_t _numChannels, const uin
 	for (uint32_t i = 0; i < _numChannels; ++i)
 	{
 		auto& dst = m_mameTempOutput[i];
-		dst.insert(dst.end(), temp[i].begin(), temp[i].end());
+		dst.insert(dst.end(), m_mameInputTemp[i].begin(), m_mameInputTemp[i].end());
 	}
 }
 
@@ -191,6 +191,7 @@ void synthLib::Resampler::destroyResamplers()
 	m_resamplerOut.clear();
 	m_mameResamplerOut.clear();
 	m_mameTempOutput.clear();
+	m_mameInputTemp.clear();
 	m_mameSourceBaseSample = 0;
 	m_mameDestSample = 0;
 }

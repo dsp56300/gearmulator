@@ -63,6 +63,7 @@ namespace synthLib
 		std::vector<void*> m_resamplerOut;
 		std::vector<std::unique_ptr<MameResampler>> m_mameResamplerOut;
 		std::vector<std::deque<float>> m_mameTempOutput;
+		std::vector<std::vector<float>> m_mameInputTemp;
 		int64_t m_mameSourceBaseSample = 0;
 		uint64_t m_mameDestSample = 0;
 
