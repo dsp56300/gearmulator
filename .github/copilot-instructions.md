@@ -277,6 +277,45 @@ The plugin UI uses RmlUi, an HTML/CSS-like framework. Key details:
 - Test binary: `source/midiLearnTest/midiLearnTest.cpp`
 - Built to: `temp/cmake_vs26/source/midiLearnTest/midiLearnTest_artefacts/Debug/midiLearnTest.exe`
 
+## YouTrack Issue Tracker
+
+Two YouTrack projects are used:
+
+### BUG Project — "TUS Bug and Feature Reporting" (public-facing)
+- **Type**: Question, Incident, Problem, Task, Feature Request
+- **State**: New → In Progress → Review → Solved (also: Pending, On hold, Duplicate, No change needed, Rejected)
+- **Priority**: Urgent, High, Normal, Low
+- **Emulator** (required, multi-select): Osirus, OsTirus, Vavra, Xenia, NodalRed2x, JE8086, DSPBridge, All Emulators
+- **Operating System** (required, multi-select): Windows, MacOS, Linux, All
+- **DAW** (required, multi-select): Cubase, Ableton Live, Logic Pro, Bitwig Studio, FL Studio, Reaper, Studio One, Other, All
+- **Plugin Format** (required, multi-select): AU, CLAP, LV2, VST2, VST3, All
+- **Fixed in Version**: Set to the current project version from `CMakeLists.txt` (`project(gearmulator VERSION x.y.z)`) — currently **2.1.2**
+
+### EMU Project — "TheUsualSuspects" (internal development)
+- **Type**: Bug, Cosmetics, Exception, Feature, Task, Usability Problem, Performance Problem, Epic
+- **Stage**: Backlog → TODO → In Progress → Review → Staging → Done
+- **Priority**: Show-stopper, Critical, Major, Normal, Minor
+- **Product** (multi-select): Osirus, OsTIrus, Vavra, Xenia, Nodal Red 2X, JE8086, All
+- **Subsystem**: RmlUI C++, Skin, Framework, dsp56000, MC68331
+- **Affected versions** / **Fixed in build**: Version strings
+
+### Emulator ↔ Source Directory Mapping
+
+| Emulator Name | Hardware | Device Library | Plugin Directory |
+|---|---|---|---|
+| Osirus | Access Virus A/B/C | `virusLib/` | `osirusJucePlugin/` |
+| OsTIrus | Access Virus TI/TI2/Snow | `virusLib/` | `osTIrusJucePlugin/` |
+| Vavra | Waldorf microQ | `mqLib/` | `mqJucePlugin/` |
+| Xenia | Waldorf Microwave II/XT | `xtLib/` | `xtJucePlugin/` |
+| NodalRed2x | Clavia Nord Lead/Rack 2x | `nord/n2x/` | `nord/n2x/n2xJucePlugin/` |
+| JE8086 | Roland JP-8000 | `ronaldo/je8086/` | `ronaldo/je8086/jeJucePlugin/` |
+| DSPBridge | Network bridge | `bridge/` | — |
+
+### Workflow Notes
+- **When a ticket is marked done**: Set State to **Review**, assign to **bax**, and set **Fixed in Version** to the current `CMakeLists.txt` project version
+- The **Emulator** / **Product** field determines which source directories are relevant
+- BUG project requires Emulator, Operating System, DAW, and Plugin Format fields at creation
+
 ## Git Conventions
 
 - Do NOT include `Co-authored-by` trailers in commit messages
