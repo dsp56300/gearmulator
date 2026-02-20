@@ -65,6 +65,13 @@ namespace synthLib
 		updateDeviceLatency();
 	}
 
+	void Plugin::setResamplerMode(const Resampler::Mode _mode)
+	{
+		std::lock_guard lock(m_lock);
+		m_resampler.setResamplerMode(_mode);
+		updateDeviceLatency();
+	}
+
 	void Plugin::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
 	{
 		baseLib::setFlushDenormalsToZero();
