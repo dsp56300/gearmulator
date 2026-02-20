@@ -22,6 +22,7 @@ namespace virusLib
 		return load(sysexData, _isMidiFileData);
 	}
 
+#if SYNTHLIB_HAS_PMR
 	bool MidiFileToRomData::load(const synthLib::SysexBuffer& _sysexData, bool _isMidiFileData)
 	{
 		synthLib::SysexBufferList packets;
@@ -30,6 +31,7 @@ namespace virusLib
 
 		return add(packets);
 	}
+#endif
 
 	bool MidiFileToRomData::add(const std::vector<Packet>& _packets)
 	{
