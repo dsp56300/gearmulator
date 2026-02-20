@@ -40,7 +40,7 @@ namespace synthLib
 
 		float m_samplerateDevice = 0;
 		float m_samplerateHost = 0;
-		Resampler::Mode m_mode = Resampler::Mode::MameHq;
+		Resampler::Mode m_mode = Resampler::Mode::Legacy;
 
 		AudioBuffer m_scaledInput;
 		AudioBuffer m_input;
