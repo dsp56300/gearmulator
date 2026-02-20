@@ -187,7 +187,10 @@ void synthLib::Resampler::trimMameHistory(const uint32_t _numChannels)
 void synthLib::Resampler::destroyResamplers()
 {
 	for (const auto& resampler : m_resamplerOut)
-		resample_close(resampler);
+	{
+		if (resampler)
+			resample_close(resampler);
+	}
 	m_resamplerOut.clear();
 	m_mameResamplerOut.clear();
 	m_mameTempOutput.clear();
