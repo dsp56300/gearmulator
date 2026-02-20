@@ -21,7 +21,7 @@ namespace synthLib
 
 	void ResamplerInOut::setResamplerMode(const Resampler::Mode _mode)
 	{
-//		if (m_mode == _mode)
+		if (m_mode == _mode)
 			return;
 
 		m_mode = _mode;
