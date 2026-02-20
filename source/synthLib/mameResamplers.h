@@ -51,6 +51,7 @@ namespace synthLib
         uint32_t m_phaseShift = 0;
 
         std::vector<std::vector<float>> m_coefficients;
+        mutable std::vector<float> m_scratchBuffer;
     };
 
     class MameResamplerLofi final : public MameResampler
@@ -67,9 +68,11 @@ namespace synthLib
         static const std::array<std::array<float, 0x1001>, 2> s_interpolationTable;
 
         uint32_t m_sourceDivide = 1;
+        float m_invSourceDivide = 1.0f;
         uint32_t m_fs = 0;
         uint32_t m_ft = 0;
         uint32_t m_step = 0;
+        mutable std::vector<float> m_scratchBuffer;
     };
 }
 

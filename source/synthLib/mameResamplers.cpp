@@ -290,18 +290,31 @@ namespace synthLib
 
     void MameResamplerHq::apply(const std::deque<float>& src, const int64_t srcBase, float* dest, const uint64_t destSample, const uint32_t samples, const float gain) const
     {
+        if (samples == 0)
+            return;
+
         const uint64_t seconds = destSample / m_ft;
         const uint32_t dsamp = static_cast<uint32_t>(destSample % m_ft);
         const uint32_t ssamp = static_cast<uint32_t>((uint64_t(dsamp) * m_fs) / m_ft);
         int64_t s = static_cast<int64_t>(ssamp + uint64_t(m_fs) * seconds);
         uint32_t phase = (dsamp * m_ftm) % m_fsm;
 
+        // Copy needed source range to contiguous buffer for cache-friendly inner loop
+        const int64_t rangeStart = s - static_cast<int64_t>(m_orderPerLane) + 1;
+        const int64_t rangeEnd = maxSourceIndexNeeded(destSample, samples);
+        const size_t rangeSize = static_cast<size_t>(rangeEnd - rangeStart + 1);
+
+        m_scratchBuffer.resize(rangeSize);
+        for (size_t i = 0; i < rangeSize; ++i)
+            m_scratchBuffer[i] = sample_at(src, srcBase, rangeStart + static_cast<int64_t>(i));
+
         for (uint32_t sample = 0; sample != samples; ++sample)
         {
             float acc = 0.0f;
             const float* filter = m_coefficients[phase >> m_phaseShift].data();
+            const size_t srcOff = static_cast<size_t>(s - rangeStart);
             for (uint32_t k = 0; k != m_orderPerLane; ++k)
-                acc += *filter++ * sample_at(src, srcBase, s - static_cast<int64_t>(k));
+                acc += filter[k] * m_scratchBuffer[srcOff - k];
             dest[sample] += acc * gain;
 
             phase += m_delta;
@@ -361,6 +374,7 @@ namespace synthLib
 
     MameResamplerLofi::MameResamplerLofi(const uint32_t fs, const uint32_t ft)
         : m_sourceDivide(fs <= ft ? 1u : 1u + fs / ft)
+        , m_invSourceDivide(1.0f / static_cast<float>(m_sourceDivide))
         , m_fs(fs)
         , m_ft(ft)
         , m_step(static_cast<uint32_t>(uint64_t(fs) * 0x1000000ull / ft / m_sourceDivide))
@@ -429,6 +443,9 @@ namespace synthLib
 
     void MameResamplerLofi::apply(const std::deque<float>& src, const int64_t srcBase, float* dest, const uint64_t destSample, const uint32_t samples, const float gain) const
     {
+        if (samples == 0)
+            return;
+
         const uint64_t seconds = destSample / m_ft;
         const uint64_t dsamp = destSample % m_ft;
         const uint64_t ssamp = (dsamp * m_fs * 0x1000ull) / m_ft;
@@ -443,15 +460,26 @@ namespace synthLib
         }
 
         ssample -= static_cast<int64_t>(4 * m_sourceDivide);
+
+        // Copy needed source range to contiguous buffer
+        const int64_t rangeStart = ssample;
+        const int64_t rangeEnd = maxSourceIndexNeeded(destSample, samples);
+        const size_t rangeSize = static_cast<size_t>(rangeEnd - rangeStart + 1);
+
+        m_scratchBuffer.resize(rangeSize);
+        for (size_t i = 0; i < rangeSize; ++i)
+            m_scratchBuffer[i] = sample_at(src, srcBase, rangeStart + static_cast<int64_t>(i));
+
         int64_t readPos = ssample;
 
         auto reader = [&]() -> float
         {
             float sm = 0.0f;
+            const size_t off = static_cast<size_t>(readPos - rangeStart);
             for (uint32_t i = 0; i != m_sourceDivide; ++i)
-                sm += sample_at(src, srcBase, readPos + static_cast<int64_t>(i));
+                sm += m_scratchBuffer[off + i];
             readPos += m_sourceDivide;
-            return sm / static_cast<float>(m_sourceDivide);
+            return sm * m_invSourceDivide;
         };
 
         phase <<= 12;
