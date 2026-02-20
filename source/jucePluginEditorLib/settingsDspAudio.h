@@ -2,6 +2,8 @@
 
 #include "settingsPlugin.h"
 
+#include "synthLib/resampler.h"
+
 namespace juceRmlUi
 {
 	class ElemButton;
@@ -25,8 +27,10 @@ namespace jucePluginEditorLib
 		uint32_t getCurrentLatency() const;
 		void updateButtons() const;
 		void updateClockButtons() const;
+		void updateResamplerButtons() const;
 
 		std::vector<std::pair<uint32_t, juceRmlUi::ElemButton*>> m_latencyButtons;
 		std::vector<std::pair<int, juceRmlUi::ElemButton*>> m_clockButtons;
+		std::vector<std::pair<synthLib::Resampler::Mode, juceRmlUi::ElemButton*>> m_resamplerButtons;
 	};
 }

@@ -19,6 +19,15 @@ namespace synthLib
 	{
 	}
 
+	void ResamplerInOut::setResamplerMode(const Resampler::Mode _mode)
+	{
+		if (m_mode == _mode)
+			return;
+
+		m_mode = _mode;
+		recreate();
+	}
+
 	void ResamplerInOut::setDeviceSamplerate(float _samplerate)
 	{
 		if(m_samplerateDevice == _samplerate)
@@ -53,8 +62,8 @@ namespace synthLib
 		if(m_samplerateDevice < 1 || m_samplerateHost < 1)
 			return;
 
-		m_out.reset(new Resampler(m_samplerateDevice, m_samplerateHost));
-		m_in.reset(new Resampler(m_samplerateHost, m_samplerateDevice));
+		m_out.reset(new Resampler(m_samplerateDevice, m_samplerateHost, m_mode));
+		m_in.reset(new Resampler(m_samplerateHost, m_samplerateDevice, m_mode));
 
 		m_scaledInputSize = 0;
 		m_inputLatency = 0;

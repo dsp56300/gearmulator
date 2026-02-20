@@ -33,6 +33,7 @@ cd temp/cmake_win64 && cpack -G ZIP
 - Build directory: `.\temp\cmake_vs26`
 - Contains the Visual Studio 2026 solution currently in use
 - When building or testing, use this directory
+- **For quick compile checks, use Debug config** (`--config Debug`) — it is much faster than Release
 
 **Linux:**
 ```bash

@@ -55,6 +55,34 @@
 			<label id="labelGain">+6 dB</label>
 		</div>
 		<settingsspacer1/>
+		<h1>Resampler</h1>
+		<settingsspacer1/>
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btResamplerLegacy" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>Legacy</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btResamplerHq" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>Mame High Quality</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btResamplerLofi" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>Mame Lo-Fi</label>
+					</div>
+				</td>
+			</tr>
+		</table>
 		<div id="containerDspClock" class="settings-advanced">
 			<h1>DSP Clock</h1>
 			<settingsspacer1/>
