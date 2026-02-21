@@ -285,7 +285,7 @@ namespace pluginLib::patchDB
 
 	bool DB::setTagColor(const TagType _type, const Tag& _tag, const Color _color)
 	{
-		std::shared_lock lock(m_patchesMutex);
+		std::unique_lock lock(m_patchesMutex);
 		if(_color == g_invalidColor)
 		{
 			const auto itType = m_tagColors.find(_type);
@@ -878,6 +878,7 @@ namespace pluginLib::patchDB
 
 	void DB::runOnUiThread(const std::function<void()>& _func)
 	{
+		std::unique_lock lock(m_uiMutex);
 		m_uiFuncs.push_back(_func);
 	}
 
