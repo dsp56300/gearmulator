@@ -16,11 +16,13 @@ namespace virusLib
 		return load(sysex);
 	}
 
+#if SYNTHLIB_HAS_PMR
 	bool MidiFileToRomData::load(const std::vector<uint8_t>& _fileData, const bool _isMidiFileData/* = false*/)
 	{
 		const synthLib::SysexBuffer sysexData(_fileData.begin(), _fileData.end());
 		return load(sysexData, _isMidiFileData);
 	}
+#endif
 
 	bool MidiFileToRomData::load(const synthLib::SysexBuffer& _sysexData, bool _isMidiFileData)
 	{
