@@ -18,7 +18,9 @@ namespace virusLib
 		}
 
 		bool load(const std::string& _filename);
+#if SYNTHLIB_HAS_PMR
 		bool load(const std::vector<uint8_t>& _fileData, bool _isMidiFileData = false);
+#endif
 		bool load(const synthLib::SysexBuffer& _sysexData, bool _isMidiFileData = false);
 
 		bool add(const std::vector<Packet>& _packets);
