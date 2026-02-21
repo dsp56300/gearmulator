@@ -1,5 +1,12 @@
 Release Notes
 
+2.1.4:
+
+Framework:
+
+- [Fix] EMU-42 Patch Manager: Fix threading bugs and file I/O race 
+        conditions with multiple plugin instances
+
 2.1.3:
 
 JE8086:
