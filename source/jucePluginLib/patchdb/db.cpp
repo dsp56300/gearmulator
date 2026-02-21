@@ -347,7 +347,10 @@ namespace pluginLib::patchDB
 			if (!internalAddTag(_type, _tag))
 				return false;
 		}
-		saveJson();
+		runOnLoaderThread([this]
+		{
+			saveJson();
+		});
 		return true;
 	}
 
@@ -358,7 +361,10 @@ namespace pluginLib::patchDB
 			if (!internalRemoveTag(_type, _tag))
 				return false;
 		}
-		saveJson();
+		runOnLoaderThread([this]
+		{
+			saveJson();
+		});
 		return true;
 	}
 
