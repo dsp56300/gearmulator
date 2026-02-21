@@ -19,6 +19,9 @@ Framework:
 - [Imp] Optimize MAME resampler: use contiguous scratch buffers in FIR 
         loops, eliminate per-callback heap allocation
 
+- [Fix] EMU-42 Patch Manager: Fix threading bugs and file I/O race 
+        conditions with multiple plugin instances
+
 OsTIrus:
 
 - [Imp] Add sample rate selection to DSP & Audio settings
