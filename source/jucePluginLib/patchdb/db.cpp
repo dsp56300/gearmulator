@@ -59,9 +59,17 @@ namespace pluginLib::patchDB
 				sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
 		}
 
-		if(!_file.replaceWithData(sysexBuffer.data(), sysexBuffer.size()))
+		const auto tempFile = getTempFile(_file);
+
+		if(!tempFile.replaceWithData(sysexBuffer.data(), sysexBuffer.size()))
 		{
-			pushError("Failed to write to file " + _file.getFullPathName().toStdString() + ", make sure that it is not write protected");
+			pushError("Failed to write to file " + tempFile.getFullPathName().toStdString() + ", make sure that it is not write protected");
+			return false;
+		}
+		if(!tempFile.moveFileTo(_file))
+		{
+			pushError("Failed to move " + tempFile.getFullPathName().toStdString() + " to " + _file.getFullPathName().toStdString());
+			deleteFile(tempFile);
 			return false;
 		}
 		return true;
@@ -1708,19 +1716,19 @@ namespace pluginLib::patchDB
 
 	bool DB::saveJson(const juce::File& _target, juce::DynamicObject* _src)
 	{
-		const auto tempFile = juce::File(_target.getFullPathName() + "_tmp.json");
+		const auto tempFile = getTempFile(_target);
 		const auto jsonText = juce::JSON::toString(juce::var(_src), false);
 		if (!tempFile.replaceWithText(jsonText))
 		{
 			pushError("Failed to write data to file:\n" + tempFile.getFullPathName().toStdString());
 			return false;
 		}
-		if (!tempFile.copyFileTo(_target))
+		if (!tempFile.moveFileTo(_target))
 		{
-			pushError("Failed to copy\n" + tempFile.getFullPathName().toStdString() + "\nto\n" + _target.getFullPathName().toStdString());
+			pushError("Failed to move\n" + tempFile.getFullPathName().toStdString() + "\nto\n" + _target.getFullPathName().toStdString());
+			deleteFile(tempFile);
 			return false;
 		}
-		deleteFile(tempFile);
 		return true;
 	}
 
@@ -1777,6 +1785,12 @@ namespace pluginLib::patchDB
 	{
 		std::unique_lock lockUi(m_uiMutex);
 		m_dirty.errors.emplace_back(std::move(_string));
+	}
+
+	juce::File DB::getTempFile(const juce::File& _target) const
+	{
+		const auto suffix = juce::String::toHexString(reinterpret_cast<uintptr_t>(this));
+		return juce::File(_target.getFullPathName() + "_tmp_" + suffix);
 	}
 
 	bool DB::loadCache()

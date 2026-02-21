@@ -157,6 +157,8 @@ namespace pluginLib::patchDB
 
 		void pushError(std::string _string);
 
+		juce::File getTempFile(const juce::File& _target) const;
+
 		bool loadCache();
 		void saveCache();
 		juce::File getCacheFile() const;
