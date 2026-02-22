@@ -178,8 +178,11 @@ namespace jucePluginEditorLib
 		// Resampler mode buttons
 		const auto currentResamplerMode = m_processor.getResamplerMode();
 
-		for (const auto& [mode, buttonId] : g_resamplerModes)
+		for (const auto& kvp : g_resamplerModes)
 		{
+			const auto& mode = kvp.mode;
+			const auto* buttonId = kvp.buttonId;
+
 			auto* buttonContainer = juceRmlUi::helper::findChild(_root, buttonId, false);
 			if (!buttonContainer)
 				continue;
