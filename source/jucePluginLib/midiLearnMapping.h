@@ -4,7 +4,7 @@
 #include <string>
 #include <cstdint>
 
-namespace synthLib { struct SMidiEvent; enum MidiStatusByte; enum class MidiEventSource : uint8_t; }
+#include "synthLib/midiTypes.h"
 
 namespace pluginLib
 {
