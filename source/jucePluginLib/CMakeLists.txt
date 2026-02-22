@@ -32,6 +32,7 @@ set(SOURCES
 	pluginVersion.cpp pluginVersion.h
 	processor.cpp processor.h
 	processorPropertiesInit.h
+	programChangeRouter.cpp programChangeRouter.h
 	softknob.cpp softknob.h
 	tools.cpp tools.h
 	types.h

@@ -6,6 +6,7 @@
 #include "controller.h"
 #include "midiLearnTranslator.h"
 #include "midiports.h"
+#include "programChangeRouter.h"
 
 #include "bridgeLib/types.h"
 
@@ -72,6 +73,8 @@ namespace pluginLib
 		bool isPluginValid() { return getPlugin().isValid(); }
 
 		synthLib::Plugin& getPlugin();
+
+		ProgramChangeRouter& getProgramChangeRouter() { return m_programChangeRouter; }
 
 		virtual synthLib::Device* createDevice() = 0;
 		virtual bridgeClient::RemoteDevice* createRemoteDevice(const synthLib::DeviceCreateParams& _params);
@@ -232,5 +235,6 @@ namespace pluginLib
 		synthLib::MidiRoutingMatrix m_midiRoutingMatrix;
 		std::string m_programName;
 		std::unique_ptr<MidiLearnTranslator> m_midiLearnTranslator;
+		ProgramChangeRouter m_programChangeRouter;
 	};
 }

@@ -291,6 +291,49 @@ namespace pluginLib::patchDB
 		return results;
 	}
 
+	bool DB::setDataSourceMidiBankNumber(const DataSourceNodePtr& _ds, const uint32_t _midiBankNumber)
+	{
+		{
+			std::unique_lock lock(m_dataSourcesMutex);
+
+			// check for duplicates
+			for (const auto& it : m_dataSources)
+			{
+				if (it.second != _ds && it.second->midiBankNumber == _midiBankNumber)
+					return false;
+			}
+
+			_ds->midiBankNumber = _midiBankNumber;
+		}
+
+		m_dirty.dataSources = true;
+		runOnLoaderThread([this]{ saveJson(); });
+		return true;
+	}
+
+	bool DB::clearDataSourceMidiBankNumber(const DataSourceNodePtr& _ds)
+	{
+		{
+			std::unique_lock lock(m_dataSourcesMutex);
+			_ds->midiBankNumber = g_invalidMidiBankNumber;
+		}
+
+		m_dirty.dataSources = true;
+		runOnLoaderThread([this]{ saveJson(); });
+		return true;
+	}
+
+	DataSourceNodePtr DB::getDataSourceByMidiBankNumber(const uint32_t _midiBankNumber)
+	{
+		std::shared_lock lock(m_dataSourcesMutex);
+		for (const auto& it : m_dataSources)
+		{
+			if (it.second->midiBankNumber == _midiBankNumber)
+				return it.second;
+		}
+		return {};
+	}
+
 	bool DB::setTagColor(const TagType _type, const Tag& _tag, const Color _color)
 	{
 		std::unique_lock lock(m_patchesMutex);
@@ -951,6 +994,15 @@ namespace pluginLib::patchDB
 			std::unique_lock lockDs(m_dataSourcesMutex);
 
 			m_dataSources.insert({ *ds, ds });
+
+			// apply pending MIDI bank assignment if one exists
+			const auto itPending = m_pendingMidiBankAssignments.find(*ds);
+			if(itPending != m_pendingMidiBankAssignments.end())
+			{
+				ds->midiBankNumber = itPending->second;
+				m_pendingMidiBankAssignments.erase(itPending);
+			}
+
 			std::unique_lock lockUi(m_uiMutex);
 			m_dirty.dataSources = true;
 
@@ -1450,6 +1502,30 @@ namespace pluginLib::patchDB
 				success = false;
 		}
 
+		// load MIDI bank assignments (applied to datasources as they become available)
+		if(const auto* bankAssignments = json["midiBankAssignments"].getArray())
+		{
+			std::unique_lock lockDs(m_dataSourcesMutex);
+			for(int i=0; i<bankAssignments->size(); ++i)
+			{
+				const auto var = bankAssignments->getUnchecked(i);
+
+				DataSource key;
+				key.type = toSourceType(var["type"].toString().toStdString());
+				key.name = var["name"].toString().toStdString();
+				key.bank = static_cast<uint32_t>(static_cast<int>(var["bank"]));
+
+				const auto midiBankNumber = static_cast<uint32_t>(static_cast<int>(var["midiBankNumber"]));
+
+				// try to apply immediately if datasource already exists
+				const auto it = m_dataSources.find(key);
+				if(it != m_dataSources.end())
+					it->second->midiBankNumber = midiBankNumber;
+				else
+					m_pendingMidiBankAssignments.insert({key, midiBankNumber});
+			}
+		}
+
 		return success;
 	}
 
@@ -1598,6 +1674,23 @@ namespace pluginLib::patchDB
 				dss.add(o);
 			}
 			json->setProperty("datasources", dss);
+
+			// save MIDI bank assignments for all datasources (including ROM)
+			juce::Array<juce::var> bankAssignments;
+			for (const auto& it : m_dataSources)
+			{
+				const auto& dataSource = it.second;
+				if (dataSource->midiBankNumber == g_invalidMidiBankNumber)
+					continue;
+
+				auto* o = new juce::DynamicObject();
+				o->setProperty("type", juce::String(toString(dataSource->type)));
+				o->setProperty("name", juce::String(dataSource->name));
+				o->setProperty("bank", static_cast<int>(dataSource->bank));
+				o->setProperty("midiBankNumber", static_cast<int>(dataSource->midiBankNumber));
+				bankAssignments.add(o);
+			}
+			json->setProperty("midiBankAssignments", bankAssignments);
 
 			saveLocalStorage();
 

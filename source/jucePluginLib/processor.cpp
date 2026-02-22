@@ -71,6 +71,15 @@ namespace pluginLib
 				// MIDI event was consumed by MIDI Learn (learned mapping or learning mode)
 				return;
 			}
+
+			if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+			{
+				if (m_programChangeRouter.processMidiEvent(_ev))
+				{
+					// Program change was handled by patch manager
+					return;
+				}
+			}
 		}
 
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Editor))

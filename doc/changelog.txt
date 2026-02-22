@@ -21,6 +21,10 @@ Framework:
 
 - [Fix] EMU-42 Patch Manager: Fix threading bugs and file I/O race 
         conditions with multiple plugin instances
+- [Imp] EMU-18 Patch Manager: Program change banks — assign MIDI bank 
+        numbers to data sources, enabling Bank Select + Program Change to 
+        select patches from the patch manager. Factory ROM banks get 
+        default assignments. Respects MIDI routing matrix settings.
 
 OsTIrus:
 

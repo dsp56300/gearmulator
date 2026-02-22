@@ -9,6 +9,7 @@
 
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/filetype.h"
+#include "jucePluginLib/programChangeRouter.h"
 #include "jucePluginLib/types.h"
 
 #include "jucePluginEditorLib/patchmanagerUiRml/patchmanagerUiRml.h"
@@ -19,22 +20,68 @@
 
 namespace jucePluginEditorLib::patchManager
 {
+	std::mutex& PatchManager::getInstancesMutex()
+	{
+		static std::mutex mutex;
+		return mutex;
+	}
+
+	std::set<PatchManager*>& PatchManager::getInstances()
+	{
+		static std::set<PatchManager*> instances;
+		return instances;
+	}
+
 	PatchManager::PatchManager(Editor& _editor, Rml::Element* _rootElement, const std::initializer_list<GroupType>& _groupTypes/* = DefaultGroupTypes*/)
 	: DB(juce::File(_editor.getProcessor().getPatchManagerDataFolder(false)))
 	, m_state(*this)
 	, m_editor(_editor)
 	{
+		{
+			std::lock_guard lock(getInstancesMutex());
+			getInstances().insert(this);
+		}
+
 		setTagTypeName(pluginLib::patchDB::TagType::Category, "Category");
 		setTagTypeName(pluginLib::patchDB::TagType::Tag, "Tag");
 		setTagTypeName(pluginLib::patchDB::TagType::Favourites, "Favourite");
 
 		startTimer(200);
 
+		// register program change router — queues requests, dispatches via callAsync
+		auto& router = _editor.getProcessor().getProgramChangeRouter();
+
+		router.setHasBankCallback(
+			[this](const uint32_t _midiBankNumber) -> bool
+			{
+				return getDataSourceByMidiBankNumber(_midiBankNumber) != nullptr;
+			});
+
+		router.setOnProgramChangeQueued(
+			[this]
+			{
+				auto* self = this;
+				juce::MessageManager::callAsync([self]
+				{
+					std::lock_guard lock(getInstancesMutex());
+					if (getInstances().find(self) == getInstances().end())
+						return;
+					self->processPendingProgramChanges();
+				});
+			});
+
 		setUi(std::make_unique<patchManagerRml::PatchManagerUiRml>(m_editor, *this, *m_editor.getRmlComponent(), _rootElement, *m_editor.getPatchManagerDataModel(), _groupTypes));
 	}
 
 	PatchManager::~PatchManager()
 	{
+		{
+			std::lock_guard lock(getInstancesMutex());
+			getInstances().erase(this);
+		}
+
+		m_editor.getProcessor().getProgramChangeRouter().setHasBankCallback(nullptr);
+		m_editor.getProcessor().getProgramChangeRouter().setOnProgramChangeQueued(nullptr);
 		stopTimer();
 	}
 
@@ -42,6 +89,17 @@ namespace jucePluginEditorLib::patchManager
 	{
 		const juceRmlUi::RmlInterfaces::ScopedAccess access(*m_editor.getRmlComponent());
 		uiProcess();
+	}
+
+	void PatchManager::processPendingProgramChanges()
+	{
+		auto requests = m_editor.getProcessor().getProgramChangeRouter().getPendingRequests();
+		for (const auto& req : requests)
+		{
+			const auto ds = getDataSourceByMidiBankNumber(req.midiBankNumber);
+			if (ds)
+				selectPatch(req.part, *ds, req.program);
+		}
 	}
 
 	void PatchManager::processDirty(const pluginLib::patchDB::Dirty& _dirty) const

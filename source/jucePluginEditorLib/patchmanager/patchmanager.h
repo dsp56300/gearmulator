@@ -9,6 +9,9 @@
 
 #include "juce_events/juce_events.h"	// juce::Timer
 
+#include <mutex>
+#include <set>
+
 namespace Rml
 {
 	class Element;
@@ -45,6 +48,7 @@ namespace jucePluginEditorLib::patchManager
 
 		void timerCallback() override;
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty) const override;
+		void processPendingProgramChanges();
 
 		bool setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
 
@@ -118,6 +122,9 @@ namespace jucePluginEditorLib::patchManager
 		void startLoaderThread(const juce::File& _migrateFromDir = {}) override;
 
 	private:
+		static std::mutex& getInstancesMutex();
+		static std::set<PatchManager*>& getInstances();
+
 		pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem);
 
 		State m_state;

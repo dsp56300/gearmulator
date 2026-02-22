@@ -56,6 +56,7 @@ namespace pluginLib::patchDB
 	static constexpr SearchHandle g_invalidSearchHandle = ~0;
 	static constexpr uint32_t g_invalidBank = ~0;
 	static constexpr uint32_t g_invalidProgram = ~0;
+	static constexpr uint32_t g_invalidMidiBankNumber = ~0;
 
 	struct Dirty
 	{

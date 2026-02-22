@@ -53,8 +53,10 @@ namespace jeJucePlugin
 			{
 				pluginLib::patchDB::DataSource ds;
 				ds.type = pluginLib::patchDB::SourceType::Rom;
-				ds.bank = bankIndex++;
+				ds.bank = bankIndex;
 				ds.name = _name;
+				ds.midiBankNumber = bankIndex;
+				++bankIndex;
 				addDataSource(ds);
 			};
 
