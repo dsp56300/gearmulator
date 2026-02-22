@@ -34,7 +34,7 @@ namespace rLib
 		{
 			std::vector<uint8_t> temp;
 			auto result = read(temp, _addr, _count);
-			_data.assign(temp.begin(), temp.end());
+			_data.insert(_data.end(), temp.begin(), temp.end());
 			return result;
 		}
 

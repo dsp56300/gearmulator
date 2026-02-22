@@ -1,6 +1,6 @@
 Release Notes
 
-2.1.3:
+2.1.4:
 
 Framework:
 
@@ -29,6 +29,12 @@ Framework:
 OsTIrus:
 
 - [Imp] Add sample rate selection to DSP & Audio settings
+
+2.1.3:
+
+JE8086:
+
+- [Fix] Preset no longer preserved when reloading a DAW session
 
 2.1.2:
 
