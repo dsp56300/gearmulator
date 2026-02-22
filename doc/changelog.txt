@@ -26,6 +26,10 @@ Framework:
         select patches from the patch manager. Factory ROM banks get 
         default assignments. Respects MIDI routing matrix settings.
 
+JE8086:
+
+- [Fix] Preset no longer preserved when reloading a DAW session
+
 OsTIrus:
 
 - [Imp] Add sample rate selection to DSP & Audio settings
@@ -35,6 +39,11 @@ OsTIrus:
 JE8086:
 
 - [Fix] Preset no longer preserved when reloading a DAW session
+
+Framework:
+
+- [Fix] EMU-42 Patch Manager: Fix threading bugs and file I/O race 
+        conditions with multiple plugin instances
 
 2.1.2:
 
