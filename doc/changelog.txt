@@ -4,46 +4,41 @@ Release Notes
 
 Framework:
 
+- [Imp] New Settings screen replacing context menu options, with pages for:
+        MIDI routing matrix with presets, DSP & Audio (latency, gain,
+        DSP clock, resampler mode), and Skin/GUI (skin selection, scale, 
+        software renderer toggle)
 - [Imp] EMU-6 MIDI Learn: Map any physical MIDI controller to synth 
         parameters with auto-detection of absolute and relative modes.
         Supports CC, Pitch Bend, Aftertouch, and Poly Pressure.
         Includes preset management, conflict detection, and MIDI feedback.
 - [Imp] EMU-23 Part buttons: Right-click copy/paste via system clipboard,
         enabling patch transfer between multi and single mode
-- [Imp] New Settings screen replacing context menu options, with pages for:
-        MIDI routing matrix with presets, DSP & Audio (latency, gain,
-        DSP clock, resampler mode), and Skin/GUI (skin selection, scale, 
-        software renderer toggle)
 - [Imp] Add MAME high-quality and lo-fi resampler modes as alternatives 
         to the legacy resampler, selectable per instance in DSP & Audio settings
 - [Imp] Optimize MAME resampler: use contiguous scratch buffers in FIR 
         loops, eliminate per-callback heap allocation
-
-- [Fix] EMU-42 Patch Manager: Fix threading bugs and file I/O race 
-        conditions with multiple plugin instances
 - [Imp] EMU-18 Patch Manager: Program change banks — assign MIDI bank 
         numbers to data sources, enabling Bank Select + Program Change to 
         select patches from the patch manager. Factory ROM banks get 
         default assignments. Respects MIDI routing matrix settings.
 
-JE8086:
-
-- [Fix] Preset no longer preserved when reloading a DAW session
-
 OsTIrus:
 
 - [Imp] Add sample rate selection to DSP & Audio settings
+
+2.1.4:
+
+Framework:
+
+- [Fix] EMU-42 Patch Manager: Fix threading bugs and file I/O race 
+        conditions with multiple plugin instances
 
 2.1.3:
 
 JE8086:
 
 - [Fix] Preset no longer preserved when reloading a DAW session
-
-Framework:
-
-- [Fix] EMU-42 Patch Manager: Fix threading bugs and file I/O race 
-        conditions with multiple plugin instances
 
 2.1.2:
 
