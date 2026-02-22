@@ -390,10 +390,10 @@ static std::set<MyClass*>& getInstances() { static std::set<MyClass*> s; return 
 ## Release Workflow
 
 ### Hotfix Process
-1. Create branch from `gearmulator/main`: `git checkout -b hotfix/<name> gearmulator/main`
+1. Switch to the `oss/main` branch (tracks `gearmulator/main`): `git checkout oss/main`
 2. Apply minimal fix, commit
 3. Update `doc/changelog.txt` with new version section
-4. Push to main: `git push gearmulator hotfix/<name>:main`
+4. Push: `git push gearmulator oss/main:main`
 5. Tag: `git tag <version>` and push with `--tags`
 6. Move feature tickets from the hotfix version to next version (e.g., 2.1.3 → 2.1.4)
 7. Bug fix tickets stay in the hotfix version
@@ -406,7 +406,7 @@ static std::set<MyClass*>& getInstances() { static std::set<MyClass*> s; return 
 
 ### Git Remotes
 - `gearmulator` — public OSS repo (dsp56300/gearmulator on GitHub)
-- `private` — private repo (Lyve1981/VirusEmulator)
+- `private` — private development repo
 - Also: `nas`, `codeberg`, `EvilDragon`
 
 ## Git Conventions
