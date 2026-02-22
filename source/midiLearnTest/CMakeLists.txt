@@ -8,9 +8,15 @@ juce_add_console_app(midiLearnTest
 	COMPANY_NAME "The Usual Suspects"
 	COMPANY_WEBSITE "https://dsp56300.com"
 	PRODUCT_NAME "midiLearnTest"
+	BUNDLE_ID "com.theusualsuspects.midilearntest"
 )
 
 juce_generate_juce_header(midiLearnTest)
+
+target_compile_definitions(midiLearnTest PRIVATE 
+    JUCE_USE_CURL=0
+    JUCE_WEB_BROWSER=0
+)
 
 target_sources(midiLearnTest PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
