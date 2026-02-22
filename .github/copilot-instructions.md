@@ -226,6 +226,12 @@ When adding a new parameter:
 
 The project emphasizes **accuracy of emulation** over shortcuts - the goal is to run original firmware bit-identically to hardware.
 
+### ROM/Factory Data Sources
+- Only **Virus** (Osirus/OsTIrus) and **JE8086** register ROM data sources with the patch manager
+- Vavra, Xenia, NodalRed2x do NOT add ROM datasources (uninitialized flash or no ROM presets)
+- ROM data sources get default `midiBankNumber` assignments (sequential, starting from 0)
+- User-assigned bank numbers from JSON override defaults on reload
+
 ## RmlUi (UI Framework)
 
 The plugin UI uses RmlUi, an HTML/CSS-like framework. Key details:
@@ -246,6 +252,9 @@ The plugin UI uses RmlUi, an HTML/CSS-like framework. Key details:
 - RmlUi DOM modifications MUST happen on the JUCE message thread
 - MIDI callbacks run on the audio/MIDI thread — always use `juce::MessageManager::callAsync` when updating UI from MIDI callbacks
 - All dialog callbacks (`onConflict`, `updateProgress`, `onMidiReceived`) must dispatch to message thread
+- `PatchDB` uses `shared_mutex` (`m_dataSourcesMutex`) — read operations (like `getDataSourceByMidiBankNumber`) are safe from any thread via `shared_lock`; write operations need `unique_lock`
+- When queueing work from audio thread to UI thread, prefer `juce::MessageManager::callAsync` over timer-based polling for lower latency
+- Use the static instance-set pattern (see Patch Manager section) to guard `callAsync` lambdas against use-after-free
 
 ## MIDI Learn System
 
@@ -289,7 +298,7 @@ Two YouTrack projects are used:
 - **Operating System** (required, multi-select): Windows, MacOS, Linux, All
 - **DAW** (required, multi-select): Cubase, Ableton Live, Logic Pro, Bitwig Studio, FL Studio, Reaper, Studio One, Other, All
 - **Plugin Format** (required, multi-select): AU, CLAP, LV2, VST2, VST3, All
-- **Fixed in Version**: Set to the current project version from `CMakeLists.txt` (`project(gearmulator VERSION x.y.z)`) — currently **2.1.2**
+- **Fixed in Version**: Set to the current project version from `CMakeLists.txt` (`project(gearmulator VERSION x.y.z)`) — currently **2.1.3**
 
 ### EMU Project — "TheUsualSuspects" (internal development)
 - **Type**: Bug, Cosmetics, Exception, Feature, Task, Usability Problem, Performance Problem, Epic
@@ -315,6 +324,90 @@ Two YouTrack projects are used:
 - **When a ticket is marked done**: Set State to **Review**, assign to **bax**, and set **Fixed in Version** to the current `CMakeLists.txt` project version
 - The **Emulator** / **Product** field determines which source directories are relevant
 - BUG project requires Emulator, Operating System, DAW, and Plugin Format fields at creation
+
+## Patch Manager & Program Change Routing
+
+### PatchDB Architecture
+- `jucePluginLib/patchdb/` — Core patch database (thread-safe, uses `shared_mutex` for data source access)
+- `DataSource` represents a folder, file, local storage, or ROM bank of patches
+- Each `DataSource` can have a `midiBankNumber` assignment for MIDI program change routing
+- Bank assignments persist in `patchmanagerdb.json` under `midiBankAssignments` (separate from `datasources` array because ROM sources aren't in that array)
+- Pending assignments: if a bank assignment references a ROM DataSource not yet loaded, it's stored in `m_pendingMidiBankAssignments` and applied when `addDataSource()` is called
+
+### Program Change Router (`jucePluginLib/programChangeRouter.h/.cpp`)
+- Tracks per-channel bank select state (CC#0 MSB + CC#32 LSB)
+- Bank Select CCs pass through to device (not consumed); only Program Change is consumed when a bank is assigned
+- Two-stage design for thread safety:
+  - **Audio thread**: `HasBankFunc` callback does read-only check via `shared_lock` — safe
+  - **Audio thread**: queues `ProgramChangeRequest` into mutex-protected vector
+  - **UI thread**: `PatchManager` drains queue via `juce::MessageManager::callAsync`
+- Gated by `m_midiRoutingMatrix.enabled(_ev, MidiEventSource::Device)` — respects user's MIDI matrix settings
+- Wired in `Processor::addMidiEvent()` after MIDI Learn, before routing to device
+
+### callAsync Safety Pattern
+When using `juce::MessageManager::callAsync` with class instances, use a **static instance set** to guard against use-after-free:
+```cpp
+static std::mutex& getMutex() { static std::mutex m; return m; }
+static std::set<MyClass*>& getInstances() { static std::set<MyClass*> s; return s; }
+// Register in ctor, unregister in dtor
+// In callAsync lambda: lock mutex, check if pointer still in set before using
+```
+
+## State Save/Restore (DAW Persistence)
+
+### Save Path
+`Processor::getStateInformation()` → `saveChunkData()` → `Plugin::getState()` → `Device::getState()`
+- Device produces `std::vector<SMidiEvent>` containing sysex dumps
+- Events are serialized into a flat `std::vector<uint8_t>` by concatenating all sysex bytes
+- Wrapped with version header by `Plugin::getState()`
+
+### Restore Path
+`Processor::setStateInformation()` → `Plugin::setState()` → `Device::setState()`
+- `splitMultipleSysex()` splits flat byte stream back into individual messages by finding `0xF0`...`0xF7` pairs
+- Messages are fed back into the device's state/MIDI input
+
+### Per-Synth State Patterns
+- **Virus (Osirus/OsTIrus)**: Single/Multi dumps via `virusLib` sysex protocol
+- **JE8086**: Uses `ronaldo/common/Storage` class for system + temp performance dumps; `createHeader()` → `Storage::read()` (appends body) → `createFooter()`
+- **Vavra/Xenia/NodalRed2x**: Different state mechanisms, don't use `Storage::read()`
+
+### Critical: Storage::read() Append Semantics
+`Storage::read(vector, addr, count)` **appends** data to the destination vector (uses `push_back`). The template overload for non-`std::vector<uint8_t>` types (e.g., PMR vectors) must also append via `insert()`, NOT replace via `assign()`. This was the root cause of the 2.1.2 JE8086 state save regression.
+
+## SysexBuffer / PMR Types
+
+### Type Aliases (in `synthLib/midiTypes.h`)
+- `synthLib::SysexBuffer` = `std::pmr::vector<uint8_t>` (or `std::vector<uint8_t>` on platforms without PMR, e.g., macOS 10.12/10.13)
+- `synthLib::SysexBufferList` = `std::vector<SysexBuffer>`
+- `SMidiEvent::sysex` is `SysexBuffer`
+- Compile-time check: `__has_include(<memory_resource>)` determines availability
+
+### PMR Pitfalls
+- When adding template overloads that accept both `std::vector<uint8_t>` and `SysexBuffer`, ensure the template preserves the same semantics (append vs replace, size handling, etc.)
+- Implicit conversions between `std::vector<uint8_t>` and PMR vector work via iterator constructors but create copies — be mindful in hot paths
+- The save/restore path converts between PMR sysex and `std::vector<uint8_t>` at the `Plugin`/`Device` boundary
+
+## Release Workflow
+
+### Hotfix Process
+1. Create branch from `gearmulator/main`: `git checkout -b hotfix/<name> gearmulator/main`
+2. Apply minimal fix, commit
+3. Update `doc/changelog.txt` with new version section
+4. Push to main: `git push gearmulator hotfix/<name>:main`
+5. Tag: `git tag <version>` and push with `--tags`
+6. Move feature tickets from the hotfix version to next version (e.g., 2.1.3 → 2.1.4)
+7. Bug fix tickets stay in the hotfix version
+
+### Version Management
+- Feature tickets use **"Fixed in build"** (EMU) or **"Fixed in Version"** (BUG) fields
+- When releasing a hotfix, bump feature tickets to next minor version
+- Bug fixes that are already on main stay in the hotfix version
+- `doc/changelog.txt` is the source of truth for release notes
+
+### Git Remotes
+- `gearmulator` — public OSS repo (dsp56300/gearmulator on GitHub)
+- `private` — private repo (Lyve1981/VirusEmulator)
+- Also: `nas`, `codeberg`, `EvilDragon`
 
 ## Git Conventions
 
