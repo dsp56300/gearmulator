@@ -418,6 +418,7 @@ namespace baseLib::filesystem
 		name.resize(newSize);
 		return name;
 	}
+#endif
 
 	bool exists(const std::string& _filename)
 	{
@@ -434,5 +435,4 @@ namespace baseLib::filesystem
 	{
 		return 0 == ::remove(_filename.c_str());
 	}
-#endif
 }
