@@ -139,10 +139,6 @@ namespace jucePluginEditorLib::patchManagerRml
 		{
 			parentNeeded = createItemForDataSource(_ds->getParent());
 		}
-		else if (_ds->type == pluginLib::patchDB::SourceType::Folder && !m_filter.empty())
-		{
-			parentNeeded = getTree().getRoot();
-		}
 		else
 		{
 			auto* nodeElem = _node->getElement();

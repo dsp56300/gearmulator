@@ -8,6 +8,8 @@ Framework:
         conditions with multiple plugin instances
 - [Fix] Patch Manager: Fix ghost nodes remaining in tree after
         clearing a search filter
+- [Fix] Patch Manager: Fix non-matching folder nodes remaining
+        visible during tree search filtering
 
 2.1.3:
 
