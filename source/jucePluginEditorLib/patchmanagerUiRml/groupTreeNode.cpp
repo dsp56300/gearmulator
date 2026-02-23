@@ -160,13 +160,18 @@ namespace jucePluginEditorLib::patchManagerRml
 			}
 		}
 
-		_node->setParent(parentNeeded, [](const juceRmlUi::TreeNodePtr& _a, const juceRmlUi::TreeNodePtr& _b)
+		const auto sortByBankNumber = m_type == patchManager::GroupType::MidiBanks;
+
+		_node->setParent(parentNeeded, [sortByBankNumber](const juceRmlUi::TreeNodePtr& _a, const juceRmlUi::TreeNodePtr& _b)
 		{
 			auto* a = dynamic_cast<DatasourceNode*>(_a.get());
 			auto* b = dynamic_cast<DatasourceNode*>(_b.get());
 
 			if (!a || !b)
 				return false;
+
+			if (sortByBankNumber)
+				return a->getMidiBankNumber() < b->getMidiBankNumber();
 
 			return a->getText() < b->getText();
 		});
@@ -200,6 +205,8 @@ namespace jucePluginEditorLib::patchManagerRml
 	bool GroupNode::needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds) const
 	{
 		if (!m_filter.empty())
+			return false;
+		if (m_type == patchManager::GroupType::MidiBanks)
 			return false;
 		return _ds->hasParent() && _ds->origin != pluginLib::patchDB::DataSourceOrigin::Manual;
 	}

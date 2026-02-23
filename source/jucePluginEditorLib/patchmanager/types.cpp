@@ -10,6 +10,7 @@ namespace jucePluginEditorLib::patchManager
 		"Data Sources",
 		"User",
 		"Factory",
+		"MIDI Banks",
 		"Categories",
 		"Tags",
 		"Favourites",
@@ -26,7 +27,8 @@ namespace jucePluginEditorLib::patchManager
 		{
 		case GroupType::DataSources:
 		case GroupType::LocalStorage:
-		case GroupType::Factory:		return pluginLib::patchDB::TagType::Invalid;
+		case GroupType::Factory:
+		case GroupType::MidiBanks:		return pluginLib::patchDB::TagType::Invalid;
 		case GroupType::Categories:		return pluginLib::patchDB::TagType::Category;
 		case GroupType::Tags:			return pluginLib::patchDB::TagType::Tag;
 		case GroupType::Favourites:		return pluginLib::patchDB::TagType::Favourites;

@@ -41,7 +41,7 @@ namespace jucePluginEditorLib::patchManager
 	public:
 		baseLib::Event<uint32_t, pluginLib::patchDB::PatchKey> onSelectedPatchChanged;
 
-		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
+		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::MidiBanks, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
 
 		explicit PatchManager(Editor& _editor, Rml::Element* _rootElement, const std::initializer_list<patchManager::GroupType>& _groupTypes = DefaultGroupTypes);
 		~PatchManager() override;

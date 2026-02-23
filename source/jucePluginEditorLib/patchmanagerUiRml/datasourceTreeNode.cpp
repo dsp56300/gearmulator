@@ -73,6 +73,11 @@ namespace jucePluginEditorLib::patchManagerRml
 		return m_ds ? getDataSourceDisplayName(m_ds) : std::string();
 	}
 
+	uint32_t DatasourceNode::getMidiBankNumber() const
+	{
+		return m_ds ? m_ds->midiBankNumber : pluginLib::patchDB::g_invalidMidiBankNumber;
+	}
+
 	void DatasourceNode::refresh()
 	{
 		auto* elem = dynamic_cast<DatasourceTreeElem*>(getElement());

@@ -143,6 +143,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		auto itemDs = getItemT<GroupNode>(patchManager::GroupType::DataSources);
 		auto itemLocalStorage = getItemT<GroupNode>(patchManager::GroupType::LocalStorage);
 		auto itemFactory = getItemT<GroupNode>(patchManager::GroupType::Factory);
+		auto itemMidiBanks = getItemT<GroupNode>(patchManager::GroupType::MidiBanks);
 
 		if (!itemDs || !itemLocalStorage)
 			return;
@@ -152,6 +153,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> readOnlyDataSources;
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> storageDataSources;
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> factoryDataSources;
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> midiBankDataSources;
 
 		getDB().getDataSources(allDataSources);
 
@@ -167,13 +169,26 @@ namespace jucePluginEditorLib::patchManagerRml
 				factoryDataSources.push_back(ds);
 			else
 				readOnlyDataSources.push_back(ds);
+
+			if (ds->midiBankNumber != pluginLib::patchDB::g_invalidMidiBankNumber)
+				midiBankDataSources.push_back(ds);
 		}
+
+		// sort MIDI bank sources by bank number
+		std::sort(midiBankDataSources.begin(), midiBankDataSources.end(),
+			[](const pluginLib::patchDB::DataSourceNodePtr& _a, const pluginLib::patchDB::DataSourceNodePtr& _b)
+			{
+				return _a->midiBankNumber < _b->midiBankNumber;
+			});
 
 		itemDs->updateFromDataSources(readOnlyDataSources);
 		itemLocalStorage->updateFromDataSources(storageDataSources);
 
 		if (itemFactory)
 			itemFactory->updateFromDataSources(factoryDataSources);
+
+		if (itemMidiBanks)
+			itemMidiBanks->updateFromDataSources(midiBankDataSources);
 	}
 
 	void Tree::updateTags(const patchManager::GroupType& _type)
