@@ -60,11 +60,14 @@ namespace juceRmlUi
 
 	void ElemTree::childAdded(const TreeNodePtr& _parent, const TreeNodePtr& _child)
 	{
-		createNodeElement(_child);
+		updateNodeElements(_child);
 	}
 
 	void ElemTree::childRemoved(const TreeNodePtr& _parent, const TreeNodePtr& _child)
 	{
+		for (const auto& grandchild : _child->getChildren())
+			childRemoved(_child, grandchild);
+
 		auto itA = m_activeNodeElements.find(_child);
 
 		if (itA != m_activeNodeElements.end())
