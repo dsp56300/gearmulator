@@ -6,6 +6,8 @@ Framework:
 
 - [Fix] EMU-42 Patch Manager: Fix threading bugs and file I/O race 
         conditions with multiple plugin instances
+- [Fix] Patch Manager: Fix ghost nodes remaining in tree after
+        clearing a search filter
 
 2.1.3:
 
