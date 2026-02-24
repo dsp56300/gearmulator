@@ -228,7 +228,7 @@ namespace mqLib
 //		for (const auto& s : m_currentDrumMapSingles)
 //			append(sysexState, s);
 
-		_state.assign(sysexState.begin(), sysexState.end());
+		_state.insert(_state.end(), sysexState.begin(), sysexState.end());
 		return !_state.empty();
 	}
 

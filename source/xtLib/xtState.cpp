@@ -134,7 +134,7 @@ namespace xt
 				append(state, s, IdxSingleChecksumStart);
 		}
 
-		_state.assign(state.begin(), state.end());
+		_state.insert(_state.end(), state.begin(), state.end());
 		return !_state.empty();
 	}
 

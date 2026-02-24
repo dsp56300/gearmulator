@@ -10,6 +10,8 @@ Framework:
         clearing a search filter
 - [Fix] Patch Manager: Fix non-matching folder nodes remaining
         visible during tree search filtering
+- [Fix] Xenia/Vavra: Fix state not being preserved when reloading
+        a DAW session
 
 2.1.3:
 
