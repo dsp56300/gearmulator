@@ -33,6 +33,7 @@ cd temp/cmake_win64 && cpack -G ZIP
 - Build directory: `.\temp\cmake_vs26`
 - Contains the Visual Studio 2026 solution currently in use
 - When building or testing, use this directory
+- **For quick compile checks, use Debug config** (`--config Debug`) — it is much faster than Release
 
 **Linux:**
 ```bash
@@ -265,6 +266,15 @@ The plugin UI uses RmlUi, an HTML/CSS-like framework. Key details:
 - `juceRmlUi/rmlMidiLearnDialog.h/.cpp` — Learning/conflict dialog
 - `jucePluginEditorLib/pluginEditorState.cpp` — Context menu integration
 
+### Parameter Overlay System
+- `jucePluginEditorLib/parameterOverlay.h/.cpp` — Wraps a single UI component with overlay indicators (Lock, Link, MidiLearn)
+- `jucePluginEditorLib/parameterOverlays.h/.cpp` — Manages all overlays, listens to bind/unbind events from `RmlParameterBinding`
+- Overlay divs get class `tus-parameteroverlay tus-parameteroverlaytype-{type}` and CSS pseudo-classes for state
+- MidiLearn overlays use pseudo-classes: `midi-bound` (green), `midi-unbound` (red), `midi-listening` (amber)
+- Styles in `source/jucePluginData/tus_default.rcss` — use pseudo-class selectors so synth-specific skins can override
+- `pointer-events: auto` on overlay div intercepts clicks before the parameter control
+- RmlUi has no `contextmenu` event — use `Mousedown` + `juceRmlUi::helper::isContextMenu()` for right-click detection
+
 ### MIDI Message Value Extraction
 - **CC**: value in `event.c`
 - **PolyPressure**: value in `event.c`, note in `event.b`
@@ -298,7 +308,7 @@ Two YouTrack projects are used:
 - **Operating System** (required, multi-select): Windows, MacOS, Linux, All
 - **DAW** (required, multi-select): Cubase, Ableton Live, Logic Pro, Bitwig Studio, FL Studio, Reaper, Studio One, Other, All
 - **Plugin Format** (required, multi-select): AU, CLAP, LV2, VST2, VST3, All
-- **Fixed in Version**: Set to the current project version from `CMakeLists.txt` (`project(gearmulator VERSION x.y.z)`) — currently **2.1.3**
+- **Fixed in Version**: Set to the current project version from `CMakeLists.txt` (`project(gearmulator VERSION x.y.z)`) — currently **2.1.4**
 
 ### EMU Project — "TheUsualSuspects" (internal development)
 - **Type**: Bug, Cosmetics, Exception, Feature, Task, Usability Problem, Performance Problem, Epic
@@ -371,8 +381,10 @@ static std::set<MyClass*>& getInstances() { static std::set<MyClass*> s; return 
 - **JE8086**: Uses `ronaldo/common/Storage` class for system + temp performance dumps; `createHeader()` → `Storage::read()` (appends body) → `createFooter()`
 - **Vavra/Xenia/NodalRed2x**: Different state mechanisms, don't use `Storage::read()`
 
-### Critical: Storage::read() Append Semantics
-`Storage::read(vector, addr, count)` **appends** data to the destination vector (uses `push_back`). The template overload for non-`std::vector<uint8_t>` types (e.g., PMR vectors) must also append via `insert()`, NOT replace via `assign()`. This was the root cause of the 2.1.2 JE8086 state save regression.
+### Critical: Append Semantics in State Save
+When `Device::getState()` is called, `Plugin::getState()` has already pushed header bytes (version, type) into the `_state` vector. Device implementations that build sysex into a local buffer MUST use `_state.insert(_state.end(), ...)` to append — NOT `_state.assign(...)` which overwrites the header bytes. This pattern caused state save regressions in:
+- **JE8086 (2.1.2)**: `Storage::read()` template overload used `assign()` instead of `push_back`/`insert()`
+- **Vavra/Xenia (2.1.2)**: `mqstate.cpp`/`xtState.cpp` `getState()` used `_state.assign()` instead of `_state.insert()`
 
 ## SysexBuffer / PMR Types
 
@@ -414,3 +426,11 @@ static std::set<MyClass*>& getInstances() { static std::set<MyClass*> s; return 
 - Do NOT include `Co-authored-by` trailers in commit messages
 - Do NOT commit without explicit user approval
 - User stages changes themselves — only commit when asked
+
+## Changelog Conventions
+
+- Located at `doc/changelog.txt`
+- Format: `- [Fix] description` for bug fixes, `- [Imp] description` for improvements
+- Multi-line entries indent continuation with 8 spaces
+- Group by version, then by section: `Framework:` (shared), synth-specific (e.g., `Osirus:`, `JE8086:`, `Vavra/Xenia:`)
+- Framework entries apply to all synths; synth-specific entries only to those synths
