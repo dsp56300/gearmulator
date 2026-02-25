@@ -57,6 +57,7 @@ namespace pluginLib
 	private:
 		bool isDefaultControllerMapping(const synthLib::SMidiEvent& _event) const;
 		void applyMapping(const MidiLearnMapping& _mapping, const synthLib::SMidiEvent& _event);
+		void applyMappingToParam(const MidiLearnMapping& _mapping, const synthLib::SMidiEvent& _event, Parameter& _param);
 		void handleLearning(const synthLib::SMidiEvent& _event);
 		
 		MidiLearnMapping::Mode detectMode(const std::vector<uint8_t>& _values) const;
