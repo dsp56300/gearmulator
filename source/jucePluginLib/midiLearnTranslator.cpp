@@ -108,53 +108,58 @@ namespace pluginLib
 
 	void MidiLearnTranslator::applyMapping(const MidiLearnMapping& _mapping, const synthLib::SMidiEvent& _event)
 	{
-		// Get the parameter to update
-		auto* param = m_controller.getParameter(_mapping.paramName, 0);
-		if (!param)
+		const auto channel = static_cast<uint8_t>(_event.a & 0x0f);
+		auto parts = m_controller.getPartsForMidiChannel(channel);
+
+		if (parts.empty())
 			return;
 
+		for (const auto part : parts)
+		{
+			auto* param = m_controller.getParameter(_mapping.paramName, part);
+			if (!param)
+				continue;
+
+			applyMappingToParam(_mapping, _event, *param);
+		}
+	}
+
+	void MidiLearnTranslator::applyMappingToParam(const MidiLearnMapping& _mapping, const synthLib::SMidiEvent& _event, Parameter& _param)
+	{
 		if (_mapping.mode == MidiLearnMapping::Mode::RelativeSigned)
 		{
 			// Relative Signed: 0x01 = +1 (increment), 0x7F = -1 (decrement)
 			const auto value = MidiLearnMapping::getValue(_event);
-			const auto currentValue = param->getUnnormalizedValue();
-			const auto& desc = param->getDescription();
+			const auto currentValue = _param.getUnnormalizedValue();
+			const auto& desc = _param.getDescription();
 			
 			int newValue = currentValue;
 			if (value == 0x7F) // Decrement
-			{
 				newValue = std::max(static_cast<int>(desc.range.getStart()), currentValue - 1);
-			}
 			else if (value == 0x01) // Increment
-			{
 				newValue = std::min(static_cast<int>(desc.range.getEnd()), currentValue + 1);
-			}
 			
-			param->setUnnormalizedValueNotifyingHost(newValue, Parameter::Origin::Midi);
+			_param.setUnnormalizedValueNotifyingHost(newValue, Parameter::Origin::Midi);
 		}
 		else if (_mapping.mode == MidiLearnMapping::Mode::RelativeOffset)
 		{
 			// Relative Offset: 65 (0x41) = +1 (increment), 63 (0x3F) = -1 (decrement)
 			const auto value = MidiLearnMapping::getValue(_event);
-			const auto currentValue = param->getUnnormalizedValue();
-			const auto& desc = param->getDescription();
+			const auto currentValue = _param.getUnnormalizedValue();
+			const auto& desc = _param.getDescription();
 			
 			int newValue = currentValue;
 			if (value == 0x3F) // Decrement (63)
-			{
 				newValue = std::max(static_cast<int>(desc.range.getStart()), currentValue - 1);
-			}
 			else if (value == 0x41) // Increment (65)
-			{
 				newValue = std::min(static_cast<int>(desc.range.getEnd()), currentValue + 1);
-			}
 			
-			param->setUnnormalizedValueNotifyingHost(newValue, Parameter::Origin::Midi);
+			_param.setUnnormalizedValueNotifyingHost(newValue, Parameter::Origin::Midi);
 		}
 		else
 		{
 			// Absolute mode: map MIDI value to parameter range
-			const auto& desc = param->getDescription();
+			const auto& desc = _param.getDescription();
 			const auto rangeSize = desc.range.getEnd() - desc.range.getStart();
 
 			float normalized;
@@ -177,7 +182,7 @@ namespace pluginLib
 			}
 
 			const auto paramValue = static_cast<int>(desc.range.getStart() + normalized * rangeSize);
-			param->setUnnormalizedValueNotifyingHost(paramValue, Parameter::Origin::Midi);
+			_param.setUnnormalizedValueNotifyingHost(paramValue, Parameter::Origin::Midi);
 		}
 	}
 
