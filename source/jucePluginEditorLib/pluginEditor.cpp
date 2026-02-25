@@ -21,7 +21,6 @@
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlEventListener.h"
-#include "juceRmlUi/rmlMidiLearnDialog.h"
 
 #include "jucePluginData.h"
 #include "pluginDataModel.h"
@@ -64,6 +63,8 @@ namespace jucePluginEditorLib
 
 	Editor::~Editor()
 	{
+		setMidiLearnMode(false);
+
 		m_overlays.reset();
 
 		for (const auto& file : m_dragAndDropFiles)
@@ -144,6 +145,15 @@ namespace jucePluginEditorLib
 			}
 		});
 #endif
+
+		juceRmlUi::EventListener::Add(getRmlRootElement(), Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (m_midiLearnModeActive && juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_ESCAPE)
+			{
+				setMidiLearnMode(false);
+				_event.StopPropagation();
+			}
+		});
 	}
 
 	void Editor::initPluginDataModel(PluginDataModel& _model)
@@ -578,10 +588,49 @@ namespace jucePluginEditorLib
 
 		// MIDI Learn
 		menu.addSeparator();
-		menu.addEntry("MIDI Learn...", [this, param]()
+
+		if (m_midiLearnModeActive)
 		{
-			onMidiLearnRequested(param);
-		});
+			menu.addEntry("Exit MIDI Learn Mode", [this]()
+			{
+				setMidiLearnMode(false);
+			});
+		}
+		else
+		{
+			menu.addEntry("MIDI Learn Mode", [this]()
+			{
+				setMidiLearnMode(true);
+			});
+		}
+
+		{
+			auto* translator = m_processor.getMidiLearnTranslator();
+			if (translator)
+			{
+				const auto& preset = translator->getPreset();
+				const auto mappings = preset.findMappingsByParam(param->getDescription().name);
+				if (!mappings.empty())
+				{
+					menu.addEntry("Clear MIDI Mapping", [this, param]()
+					{
+						auto* t = m_processor.getMidiLearnTranslator();
+						if (!t) return;
+						auto preset = t->getPreset();
+						auto& m = preset.getMappings();
+						const auto paramName = param->getDescription().name;
+						m.erase(std::remove_if(m.begin(), m.end(),
+							[&paramName](const pluginLib::MidiLearnMapping& _m)
+							{
+								return _m.paramName == paramName;
+							}), m.end());
+						t->setPreset(preset);
+						if (m_overlays)
+							m_overlays->setMidiLearnMode(m_midiLearnModeActive);
+					});
+				}
+			}
+		}
 
 		auto& midiPackets = m_processor.getController().getParameterDescriptions().getMidiPackets();
 		for (const auto& mp : midiPackets)
@@ -848,90 +897,74 @@ namespace jucePluginEditorLib
 
 	void Editor::onMidiLearnRequested(const pluginLib::Parameter* _param)
 	{
-		if (!_param)
+	}
+
+	void Editor::setMidiLearnMode(const bool _enable)
+	{
+		if (m_midiLearnModeActive == _enable)
 			return;
+
+		m_midiLearnModeActive = _enable;
+		m_midiLearnSelectedParam = nullptr;
 
 		auto* translator = m_processor.getMidiLearnTranslator();
-		if (!translator)
-			return;
 
-		const auto paramName = _param->getDescription().name;
-
-		// Start learning mode
-		translator->startLearning(paramName);
-
-		// Show MIDI Learn dialog
-		m_midiLearnDialog = juceRmlUi::MidiLearnDialog::createFromTemplate(
-			"tus_midilearn_dialog",
-			getRmlRootElement(),
-			[this, translator, paramName](bool _confirmed, const pluginLib::MidiLearnMapping& _mapping)
-			{
+		if (!_enable)
+		{
+			if (translator)
 				translator->cancelLearning();
 
-				if (!_confirmed)
-				{
-					m_midiLearnDialog.reset();
-					return;
-				}
-
-				// Use the mapping from translator (already has correct mode detected!)
-				auto preset = translator->getPreset();
-
-				// Remove existing mapping for this MIDI controller (channel+CC) if any
-				auto& mappings = preset.getMappings();
-				mappings.erase(
-					std::remove_if(mappings.begin(), mappings.end(),
-						[&_mapping](const pluginLib::MidiLearnMapping& _m) {
-							return _m.type == _mapping.type && 
-							       _m.channel == _mapping.channel && 
-							       _m.controller == _mapping.controller;
-						}),
-					mappings.end());
-
-				// Add new mapping as-is from translator
-				preset.addMapping(_mapping);
-
-				// Update translator with modified preset (rebuilds cache and subscriptions)
-				translator->setPreset(preset);
-
-				m_midiLearnDialog.reset();
-			},
-			_param->getDescription().displayName
-		);
-
-		// Setup callbacks for MIDI learning
-		translator->onLearningProgress = [this](size_t _eventCount, size_t _requiredCount)
-		{
-			if (m_midiLearnDialog)
-				m_midiLearnDialog->updateProgress(_eventCount, _requiredCount);
-		};
-
-		translator->onMappingLearned = [this](const pluginLib::MidiLearnMapping& _mapping)
-		{
-			if (m_midiLearnDialog)
-				m_midiLearnDialog->onMidiReceived(_mapping);
-		};
-
-		translator->onMappingConflict = [this](const pluginLib::MidiLearnMapping& _newMapping)
-		{
-			if (m_midiLearnDialog)
+			// clear all callbacks
+			if (translator)
 			{
-				// Find what parameter this MIDI controller is currently mapped to
-				auto* translator = m_processor.getMidiLearnTranslator();
-				if (translator)
-				{
-					const auto& preset = translator->getPreset();
-					const auto* existingMapping = preset.findMapping(_newMapping.type, _newMapping.channel, _newMapping.controller);
-					if (existingMapping)
-					{
-						m_midiLearnDialog->onConflict(existingMapping->paramName, _newMapping);
-						return;
-					}
-				}
-				// Fallback if we can't find existing mapping
-				m_midiLearnDialog->onConflict("unknown parameter", _newMapping);
+				translator->onLearningProgress = nullptr;
+				translator->onMappingLearned = nullptr;
+				translator->onMappingConflict = nullptr;
 			}
-		};
+		}
+		else
+		{
+			if (translator)
+			{
+				translator->onMappingLearned = [this](const pluginLib::MidiLearnMapping& _mapping)
+				{
+					auto* t = m_processor.getMidiLearnTranslator();
+					if (!t)
+						return;
+
+					auto preset = t->getPreset();
+
+					auto& m = preset.getMappings();
+					m.erase(std::remove_if(m.begin(), m.end(),
+						[&_mapping](const pluginLib::MidiLearnMapping& _m)
+						{
+							// remove existing mapping for same controller or same parameter
+							return (_m.type == _mapping.type &&
+								_m.channel == _mapping.channel &&
+								_m.controller == _mapping.controller) ||
+								_m.paramName == _mapping.paramName;
+						}), m.end());
+
+					preset.addMapping(_mapping);
+					t->setPreset(preset);
+
+					// exit listening on the learned parameter's overlay and refresh it
+					if (m_overlays)
+					{
+						if (auto* overlay = m_overlays->findOverlayForParameter(m_midiLearnSelectedParam))
+							overlay->setMidiLearnListening(false);
+					}
+
+					m_midiLearnSelectedParam = nullptr;
+				};
+
+				translator->onMappingConflict = nullptr;
+				translator->onLearningProgress = nullptr;
+			}
+		}
+
+		if (m_overlays)
+			m_overlays->setMidiLearnMode(_enable);
 	}
 
 	std::vector<Rml::Element*> Editor::findChildreByParam(const std::string& _param, uint8_t _part,	const size_t _expectedCount, bool _visibleOnly) const

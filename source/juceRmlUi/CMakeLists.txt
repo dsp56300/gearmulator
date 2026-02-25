@@ -35,7 +35,6 @@ set(SOURCES
 	rmlList.cpp rmlList.h
 	rmlListEntry.cpp rmlListEntry.h
 	rmlMenu.cpp rmlMenu.h
-	rmlMidiLearnDialog.cpp rmlMidiLearnDialog.h
 	rmlRendererProxy.cpp rmlRendererProxy.h
 	rmlRendererGL2.cpp rmlRendererGL2.h
 	rmlRendererGL2Types.h

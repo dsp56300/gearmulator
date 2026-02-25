@@ -30,6 +30,10 @@ namespace jucePluginEditorLib
 		Editor& getEditor() const { return m_editor; }
 
 		void refreshAll() const;
+		void setMidiLearnMode(bool _active);
+
+		ParameterOverlay* findOverlayForParameter(const pluginLib::Parameter* _param);
+		void updateMidiLearnOverlays() const;
 
 	private:
 		void onBind(pluginLib::Parameter* _param, Rml::Element* _elem);

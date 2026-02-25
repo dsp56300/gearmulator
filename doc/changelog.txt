@@ -1,5 +1,17 @@
 Release Notes
 
+2.2.1:
+
+Framework:
+
+- [Imp] EMU-6 MIDI Learn Mode: Replaced single-parameter dialog with a 
+        full visual overlay mode. Enter via right-click context menu, 
+        overlays appear on all parameters showing bound/unbound state.
+        Left-click to select a parameter for learning, right-click to 
+        clear a mapping. Press Escape to exit MIDI Learn mode.
+- [Fix] Removed old MIDI Learn dialog (replaced by overlay mode)
+- [Fix] Fix crash when closing plugin while MIDI Learn mode is active
+
 2.2.0:
 
 Framework:

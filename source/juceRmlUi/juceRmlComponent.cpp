@@ -935,7 +935,6 @@ namespace juceRmlUi
 				addTemplate("tus_patchmanager.rml");
 				addTemplate("tus_colorpicker.rml");
 				addTemplate("tus_settings.rml");
-				addTemplate("tus_midilearn_dialog.rml");
 
 				for (const auto& templateName : m_config.additionalTemplateFiles)
 					addTemplate(templateName);

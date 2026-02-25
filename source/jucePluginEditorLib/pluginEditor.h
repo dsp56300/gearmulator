@@ -47,7 +47,6 @@ namespace Rml
 namespace juceRmlUi
 {
 	class RmlComponent;
-	class MidiLearnDialog;
 }
 
 namespace baseLib
@@ -149,6 +148,11 @@ namespace jucePluginEditorLib
 
 		virtual void onMidiLearnRequested(const pluginLib::Parameter* _param);
 
+		void setMidiLearnMode(bool _enable);
+		bool isMidiLearnMode() const { return m_midiLearnModeActive; }
+		pluginLib::Parameter* getMidiLearnSelectedParam() const { return m_midiLearnSelectedParam; }
+		void setMidiLearnSelectedParam(pluginLib::Parameter* _param) { m_midiLearnSelectedParam = _param; }
+
 		juceRmlUi::Menu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
 		virtual void createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
@@ -241,7 +245,9 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::RmlInterfaces m_rmlInterfaces;
 		std::unique_ptr<juceRmlUi::RmlComponent> m_rmlComponent;
-		std::unique_ptr<juceRmlUi::MidiLearnDialog> m_midiLearnDialog;
+
+		bool m_midiLearnModeActive = false;
+		pluginLib::Parameter* m_midiLearnSelectedParam = nullptr;
 
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
 

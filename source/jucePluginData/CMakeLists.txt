@@ -27,8 +27,6 @@ set(RMLSOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_colorpicker.rml
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_default.rcss
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_juceskin.rcss
-	${CMAKE_CURRENT_SOURCE_DIR}/tus_midilearn_dialog.rcss
-	${CMAKE_CURRENT_SOURCE_DIR}/tus_midilearn_dialog.rml
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_patchmanager.rcss
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_patchmanager.rml
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings.rml
