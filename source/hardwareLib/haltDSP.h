@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <atomic>
 
-#include "dsp56kEmu/semaphore.h"
+#include "dsp56kBase/semaphore.h"
 
 namespace dsp56k
 {

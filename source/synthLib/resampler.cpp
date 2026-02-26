@@ -6,7 +6,7 @@
 
 #include "libresample/include/libresample.h"
 
-#include "dsp56kEmu/fastmath.h"
+#include "dsp56kBase/fastmath.h"
 
 synthLib::Resampler::Resampler(const float _samplerateIn, const float _samplerateOut)
 	: m_samplerateIn(_samplerateIn)

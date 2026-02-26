@@ -1,7 +1,7 @@
 #pragma once
 
 #include "baseLib/binarystream.h"
-#include "dsp56kEmu/ringbuffer.h"
+#include "dsp56kBase/ringbuffer.h"
 
 #include "synthLib/audioTypes.h"
 

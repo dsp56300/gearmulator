@@ -19,7 +19,7 @@
 #include "synthLib/midiBufferParser.h"
 #include "synthLib/romLoader.h"
 
-#include "dsp56kEmu/fastmath.h"
+#include "dsp56kBase/fastmath.h"
 #include "dsp56kBase/logging.h"
 
 #include "juceUiLib/messageBox.h"

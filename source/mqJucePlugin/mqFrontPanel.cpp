@@ -8,7 +8,7 @@
 #include "mqLib/device.h"
 #include "mqLib/mqmiditypes.h"
 
-#include "dsp56kEmu/fastmath.h"
+#include "dsp56kBase/fastmath.h"
 #include "juceRmlUi/rmlElemButton.h"
 
 namespace mqLib
