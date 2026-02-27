@@ -10,7 +10,7 @@
 #include <string>
 #include <thread>
 
-#include "dsp56kEmu/types.h"
+#include <cstdint>
 
 namespace synthLib
 {
@@ -25,7 +25,7 @@ namespace synthLib
 			return write(_filename, _bitsPerSample, isFloat, _channelCount, _samplerate, &_data[0], sizeof(T) * _data.size());
 		}
 
-		static void writeWord(std::vector<uint8_t>& _dst, dsp56k::TWord _word);
+		static void writeWord(std::vector<uint8_t>& _dst, uint32_t _word);
 
 	private:
 		size_t m_existingDataSize = 0;
@@ -37,7 +37,7 @@ namespace synthLib
 		AsyncWriter(std::string _filename, uint32_t _samplerate, bool _measureSilence = false);
 		~AsyncWriter();
 
-		void append(const std::function<void(std::vector<dsp56k::TWord>&)>& _func);
+		void append(const std::function<void(std::vector<uint32_t>&)>& _func);
 
 		void setFinished()
 		{
@@ -65,6 +65,6 @@ namespace synthLib
 		std::unique_ptr<std::thread> m_thread;
 		uint32_t m_silenceDuration = 0;
 		std::mutex m_writeMutex;
-		std::vector<dsp56k::TWord> m_stereoOutput;
+		std::vector<uint32_t> m_stereoOutput;
 	};
 };

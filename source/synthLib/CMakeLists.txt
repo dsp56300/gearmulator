@@ -15,7 +15,6 @@ set(SOURCES
 	device.cpp device.h
 	deviceException.cpp deviceException.h
 	deviceTypes.h
-	dspMemoryPatch.cpp dspMemoryPatch.h
 	lv2PresetExport.cpp lv2PresetExport.h
 	midiBufferParser.cpp midiBufferParser.h
 	midiClock.cpp midiClock.h
@@ -41,7 +40,7 @@ set(SOURCES
 target_sources(synthLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(synthLib PUBLIC resample dsp56kEmu baseLib)
+target_link_libraries(synthLib PUBLIC resample dsp56kBase baseLib)
 
 if(NOT MSVC)
 	target_link_libraries(synthLib PUBLIC dl)

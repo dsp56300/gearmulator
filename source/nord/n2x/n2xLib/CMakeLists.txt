@@ -23,7 +23,7 @@ set(SOURCES
 target_sources(n2xLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(n2xLib PUBLIC hardwareLib)
+target_link_libraries(n2xLib PUBLIC hardwareLib dsp56kEmu)
 
 if(DSP56300_DEBUGGER)
 	target_link_libraries(n2xLib PUBLIC dsp56kDebugger)

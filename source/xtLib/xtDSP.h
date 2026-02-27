@@ -4,7 +4,7 @@
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/peripherals.h"
 
-#include "hardwareLib/dspBootCode.h"
+#include "dsp56kEmu/dspBootCode.h"
 
 #include "wLib/wDsp.h"
 
@@ -74,6 +74,6 @@ namespace xt
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
 
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
-		hwLib::DspBoot m_boot;
+		dsp56k::DspBoot m_boot;
 	};
 }

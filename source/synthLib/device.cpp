@@ -1,12 +1,10 @@
 #include "device.h"
 
 #include "audioTypes.h"
-#include "dsp56kEmu/dsp.h"
-#include "dsp56kEmu/memory.h"
+
+#include "dsp56kBase/logging.h"
 
 #include <cmath>
-
-using namespace dsp56k;
 
 namespace synthLib
 {
@@ -15,7 +13,7 @@ namespace synthLib
 	}
 	Device::~Device() = default;
 
-	ASMJIT_NOINLINE void Device::release(std::vector<SMidiEvent>& _events)
+	BASELIB_NOINLINE void Device::release(std::vector<SMidiEvent>& _events)
 	{
 		_events.clear();
 	}
@@ -55,7 +53,7 @@ namespace synthLib
 
 	void Device::setExtraLatencySamples(const uint32_t _size)
 	{
-		constexpr auto maxLatency = Audio::RingBufferSize >> 1;
+		constexpr uint32_t maxLatency = 16384;  // must match Audio::RingBufferSize / 2 in dsp56kEmu
 
 		m_extraLatency = std::min(_size, maxLatency);
 

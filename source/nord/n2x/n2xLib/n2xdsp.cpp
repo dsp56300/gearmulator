@@ -150,8 +150,8 @@ namespace n2x
 	{
 		if(_needMoreData)
 		{
-			hwLib::ScopedResumeDSP rA(m_hardware.getDSPA().getHaltDSP());
-			hwLib::ScopedResumeDSP rB(m_hardware.getDSPB().getHaltDSP());
+			dsp56k::ScopedResumeDSP rA(m_hardware.getDSPA().getHaltDSP());
+			dsp56k::ScopedResumeDSP rB(m_hardware.getDSPB().getHaltDSP());
 
 			while(dsp().hasPendingInterrupts())
 				std::this_thread::yield();
@@ -188,8 +188,8 @@ namespace n2x
 			dsp().injectExternalInterrupt(_irq);
 			dsp().injectExternalInterrupt(m_irqInterruptDone);
 
-			hwLib::ScopedResumeDSP rA(m_hardware.getDSPA().getHaltDSP());
-			hwLib::ScopedResumeDSP rB(m_hardware.getDSPB().getHaltDSP());
+			dsp56k::ScopedResumeDSP rA(m_hardware.getDSPA().getHaltDSP());
+			dsp56k::ScopedResumeDSP rB(m_hardware.getDSPB().getHaltDSP());
 			m_triggerInterruptDone.wait();
 		}
 

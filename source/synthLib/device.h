@@ -11,8 +11,7 @@
 #include "buildconfig.h"
 #include "midiTranslator.h"
 
-#include "asmjit/core/api-config.h"
-
+#include "baseLib/compilerdefs.h"
 #include "baseLib/md5.h"
 
 namespace synthLib
@@ -84,7 +83,7 @@ namespace synthLib
 		virtual uint64_t getDspClockHz() const = 0;
 
 
-		ASMJIT_NOINLINE virtual void release(std::vector<SMidiEvent>& _events);
+		BASELIB_NOINLINE virtual void release(std::vector<SMidiEvent>& _events);
 
 		auto& getMidiTranslator() { return m_midiTranslator; }
 

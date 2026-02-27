@@ -18,6 +18,6 @@ set(SOURCES
 target_sources(wLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(wLib PUBLIC hardwareLib synthLib)
+target_link_libraries(wLib PUBLIC hardwareLib synthLib dsp56kEmu)
 
 target_include_directories(wLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

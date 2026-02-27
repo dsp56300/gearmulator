@@ -8,6 +8,7 @@ set(SOURCES
 	demoplaybackTI.cpp demoplaybackTI.h
 	device.cpp device.h
 	deviceModel.cpp deviceModel.h
+	dspMemoryPatch.cpp dspMemoryPatch.h
 	dspMemoryPatches.cpp dspMemoryPatches.h
 	dspSingle.cpp dspSingle.h
 	dspSingleSnow.cpp dspSingleSnow.h
@@ -29,7 +30,7 @@ set(SOURCES
 target_sources(virusLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(virusLib PUBLIC synthLib)
+target_link_libraries(virusLib PUBLIC synthLib dsp56kEmu)
 
 if(DSP56300_DEBUGGER)
 	target_link_libraries(virusLib PUBLIC dsp56kDebugger)

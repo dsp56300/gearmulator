@@ -4,7 +4,7 @@
 
 namespace virusLib
 {
-	static const std::initializer_list<synthLib::DspMemoryPatches> g_patches =
+	static const std::initializer_list<virusLib::DspMemoryPatchSet> g_patches =
 	{
 	};
 

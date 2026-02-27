@@ -9,7 +9,7 @@ namespace dsp56k
 	class DSP;
 }
 
-namespace synthLib
+namespace virusLib
 {
 	namespace dspOpcodes
 	{
@@ -49,7 +49,7 @@ namespace synthLib
 		std::string toString() const;
 	};
 
-	struct DspMemoryPatches
+	struct DspMemoryPatchSet
 	{
 		std::initializer_list<baseLib::MD5> allowedTargets;
 		std::initializer_list<DspMemoryPatch> patches;
