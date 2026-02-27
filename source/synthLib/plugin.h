@@ -7,7 +7,7 @@
 #include "resamplerInOut.h"
 #include "buildconfig.h"
 
-#include "dsp56kEmu/ringbuffer.h"
+#include "dsp56kBase/ringbuffer.h"
 
 #include "deviceTypes.h"
 #include "midiClock.h"

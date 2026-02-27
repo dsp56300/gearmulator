@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "dsp56kEmu/ringbuffer.h"
+#include "dsp56kBase/ringbuffer.h"
 
 namespace pluginLib
 {

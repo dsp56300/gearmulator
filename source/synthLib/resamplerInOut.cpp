@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "dsp56kEmu/fastmath.h"
+#include "dsp56kBase/fastmath.h"
 #include "dsp56kBase/logging.h"
 
 #include <cstring>	// memset/memcpy

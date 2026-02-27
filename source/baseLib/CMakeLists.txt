@@ -6,6 +6,7 @@ add_library(baseLib STATIC)
 set(SOURCES
 	binarystream.cpp binarystream.h
 	commandline.cpp commandline.h
+	compilerdefs.h
 	configFile.cpp configFile.h
 	endian.h
 	event.cpp event.h

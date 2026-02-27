@@ -1,8 +1,7 @@
 #pragma once
 
 #include <array>
-
-#include "dsp56kEmu/types.h"
+#include <cstdint>
 
 namespace synthLib
 {
@@ -11,6 +10,6 @@ namespace synthLib
 
 	using TAudioInputs		= TAudioInputsT<float>;
 	using TAudioOutputs		= TAudioOutputsT<float>;
-	using TAudioInputsInt	= TAudioInputsT<dsp56k::TWord>;
-	using TAudioOutputsInt	= TAudioOutputsT<dsp56k::TWord>;
+	using TAudioInputsInt	= TAudioInputsT<uint32_t>;
+	using TAudioOutputsInt	= TAudioOutputsT<uint32_t>;
 }

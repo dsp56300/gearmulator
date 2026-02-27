@@ -4,7 +4,7 @@
 #include "xtWaveEditorStyle.h"
 #include "baseLib/filesystem.h"
 
-#include "dsp56kEmu/fastmath.h"
+#include "dsp56kBase/fastmath.h"
 
 #include "juceRmlUi/rmlElemCanvas.h"
 #include "juceRmlUi/rmlHelper.h"

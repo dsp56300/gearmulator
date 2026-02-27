@@ -1,10 +1,8 @@
 #pragma once
 
+#include <climits>
 #include <cmath>
 #include <cstdint>
-
-#include "dsp56kEmu/types.h"
-#include "dsp56kEmu/utils.h"
 
 namespace juce
 {
@@ -31,6 +29,12 @@ namespace synthLib
 
 			return _state;
 		}
+
+		template<typename T, size_t numBitsSrc> T signextend(const T _src)
+		{
+			const T shiftAmount = (sizeof(T) * CHAR_BIT) - numBitsSrc;
+			return (T(_src) << shiftAmount) >> shiftAmount;
+		}
 	}
 
 	template<uint32_t OutputBits, uint32_t NoiseBits> class DacProcessor
@@ -47,9 +51,9 @@ namespace synthLib
 		static constexpr float FloatToIntScale = static_cast<float>(1 << (OutputBits-1));	// 1 bit sign
 		static constexpr float IntToFloatScale = 1.0f / FloatToIntScale;
 
-		static float processSample(DacState& _dacState, const dsp56k::TWord _in)
+		static float processSample(DacState& _dacState, const uint32_t _in)
 		{
-			int32_t v = dsp56k::signextend<int32_t,24>(static_cast<int32_t>(_in));
+			int32_t v = dacHelper::signextend<int32_t,24>(static_cast<int32_t>(_in));
 
 			if constexpr (OutBits > InBits)
 			{
@@ -85,11 +89,11 @@ namespace synthLib
 	public:
 		Dac();
 
-		using ProcessFunc = float(*)(DacState&, dsp56k::TWord);
+		using ProcessFunc = float(*)(DacState&, uint32_t);
 
 		bool configure(uint32_t _outputBits, uint32_t _noiseBits);
 
-		float processSample(const dsp56k::TWord _in)
+		float processSample(const uint32_t _in)
 		{
 			return m_processFunc(m_state, _in);
 		}
