@@ -1,5 +1,6 @@
 #pragma once
 
+#include "xtBuildconfig.h"
 #include "xtButtons.h"
 #include "xtFlash.h"
 #include "xtLcd.h"
@@ -15,6 +16,10 @@ namespace xt
 	class Rom;
 
 	using xtHdi08A = mc68k::Hdi08Periph<0xfe000>;
+#if XT_VOICE_EXPANSION
+	using xtHdi08B = mc68k::Hdi08Periph<0xfc000>;
+	using xtHdi08C = mc68k::Hdi08Periph<0xfd000>;
+#endif
 
 	class XtUc final : public mc68k::Mc68k
 	{
@@ -30,6 +35,10 @@ namespace xt
 		void write8(uint32_t _addr, uint8_t _val) override;
 
 		xtHdi08A& getHdi08A() { return m_hdiA; }
+#if XT_VOICE_EXPANSION
+		xtHdi08B& getHdi08B() { return m_hdiB; }
+		xtHdi08C& getHdi08C() { return m_hdiC; }
+#endif
 
 		bool requestDSPReset() const { return m_dspResetRequest; }
 		void notifyDSPBooted() { m_dspResetCompleted = true; }
@@ -52,6 +61,10 @@ namespace xt
 		std::array<uint8_t, g_romSize> m_romRuntimeData;
 
 		xtHdi08A m_hdiA;
+#if XT_VOICE_EXPANSION
+		xtHdi08B m_hdiB;
+		xtHdi08C m_hdiC;
+#endif
 		Flash m_flash;
 		Pic m_pic;
 		Lcd m_lcd;

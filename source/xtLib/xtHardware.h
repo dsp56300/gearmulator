@@ -1,5 +1,6 @@
 #pragma once
 
+#include "xtBuildconfig.h"
 #include "xtDSP.h"
 #include "xtRom.h"
 #include "xtUc.h"
@@ -17,7 +18,7 @@ namespace xt
 
 	class Hardware : public wLib::Hardware
 	{
-		static constexpr uint32_t g_dspCount = 1;
+		static constexpr uint32_t g_dspCount = g_useVoiceExpansion ? 3 : 1;
 
 	public:
 		explicit Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName);

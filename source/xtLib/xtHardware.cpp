@@ -20,7 +20,11 @@ namespace xt
 		: wLib::Hardware(40000)
 		, m_rom(initializeRom(_romData, _romName))
 		, m_uc(m_rom)
+#if XT_VOICE_EXPANSION
+		, m_dsps{DSP(*this, m_uc.getHdi08B().getHdi08(), 0), DSP(*this, m_uc.getHdi08C().getHdi08(), 1), DSP(*this, m_uc.getHdi08A().getHdi08(), 2)}
+#else
 		, m_dsps{DSP(*this, m_uc.getHdi08A().getHdi08(), 0)}
+#endif
 		, m_midi(m_uc)
 	{
 		if(!m_rom.isValid())
