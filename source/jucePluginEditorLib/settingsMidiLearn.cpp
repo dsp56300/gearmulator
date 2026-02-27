@@ -322,7 +322,7 @@ namespace jucePluginEditorLib
 		m_presetList->clearOptions();
 
 		// Always add "Current" as first option - represents current engine state
-		m_presetNames.push_back(kCurrentPresetName);
+		m_presetNames.emplace_back(kCurrentPresetName);
 		m_presetList->addOption(kCurrentPresetName);
 
 		// Get all preset names
@@ -466,7 +466,7 @@ namespace jucePluginEditorLib
 		refreshFeedbackCheckboxes();
 	}
 
-	void SettingsMidiLearn::refreshFeedbackCheckboxes()
+	void SettingsMidiLearn::refreshFeedbackCheckboxes() const
 	{
 		auto* translator = m_processor.getMidiLearnTranslator();
 		if (!translator)
@@ -495,7 +495,7 @@ namespace jucePluginEditorLib
 			m_cbFeedbackPhysical->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Physical));
 	}
 
-	void SettingsMidiLearn::refreshInputSourceCheckboxes()
+	void SettingsMidiLearn::refreshInputSourceCheckboxes() const
 	{
 		auto* translator = m_processor.getMidiLearnTranslator();
 		if (!translator)
@@ -511,7 +511,7 @@ namespace jucePluginEditorLib
 			m_cbInputPhysical->setChecked(sources & (1<<static_cast<uint8_t>(synthLib::MidiEventSource::Physical)));
 	}
 
-	void SettingsMidiLearn::onInputSourceToggle(synthLib::MidiEventSource _source)
+	void SettingsMidiLearn::onInputSourceToggle(synthLib::MidiEventSource _source) const
 	{
 		auto* translator = m_processor.getMidiLearnTranslator();
 		if (!translator)
@@ -562,7 +562,7 @@ namespace jucePluginEditorLib
 		refreshFeedbackCheckboxes();
 	}
 
-	void SettingsMidiLearn::updateApplyButtonVisibility()
+	void SettingsMidiLearn::updateApplyButtonVisibility() const
 	{
 		if (!m_btApply)
 			return;
