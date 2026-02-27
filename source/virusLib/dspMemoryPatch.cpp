@@ -2,7 +2,7 @@
 
 #include "dsp56kEmu/dsp.h"
 
-namespace synthLib
+namespace virusLib
 {
 	std::string DspMemoryPatch::toString() const
 	{
@@ -19,7 +19,7 @@ namespace synthLib
 		return ss.str();
 	}
 
-	bool DspMemoryPatches::apply(dsp56k::DSP& _dsp, const std::initializer_list<DspMemoryPatch>& _patches)
+	bool DspMemoryPatchSet::apply(dsp56k::DSP& _dsp, const std::initializer_list<DspMemoryPatch>& _patches)
 	{
 		bool res = true;
 
@@ -29,7 +29,7 @@ namespace synthLib
 		return res;
 	}
 
-	bool DspMemoryPatches::apply(dsp56k::DSP& _dsp, const DspMemoryPatch& _patch)
+	bool DspMemoryPatchSet::apply(dsp56k::DSP& _dsp, const DspMemoryPatch& _patch)
 	{
 		auto& mem = _dsp.memory();
 
@@ -65,7 +65,7 @@ namespace synthLib
 		return true;
 	}
 
-	bool DspMemoryPatches::apply(dsp56k::DSP& _dsp, const baseLib::MD5& _md5) const
+	bool DspMemoryPatchSet::apply(dsp56k::DSP& _dsp, const baseLib::MD5& _md5) const
 	{
 		for (const auto& e : allowedTargets)
 		{

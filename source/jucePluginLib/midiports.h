@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "dsp56kEmu/ringbuffer.h"
+#include "dsp56kBase/ringbuffer.h"
 
 #include "juce_audio_devices/juce_audio_devices.h"
 

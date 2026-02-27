@@ -13,7 +13,7 @@
 
 #include "baseLib/filesystem.h"
 
-#include "dsp56kEmu/fastmath.h"
+#include "dsp56kBase/fastmath.h"
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 

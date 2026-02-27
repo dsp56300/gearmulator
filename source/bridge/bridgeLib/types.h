@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "dsp56kEmu/buildconfig.h"
+#include "dsp56kBase/buildconfig.h"
 
 namespace bridgeLib
 {

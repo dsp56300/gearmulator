@@ -2,8 +2,17 @@
 
 #include "je8086.h"
 #include "jeThread.h"
-#include "dsp56kEmu/audio.h"
 #include "synthLib/midiToSysex.h"
+
+namespace
+{
+	inline float dspWordToFloat(const uint32_t _d)
+	{
+		constexpr float scale = 1.0f / 8388608.0f;
+		const auto signExtended = static_cast<int32_t>(_d << 8) >> 8;
+		return static_cast<float>(signExtended) * scale;
+	}
+}
 
 namespace jeLib
 {
@@ -158,8 +167,8 @@ namespace jeLib
 		{
 			const auto s = sampleBuffer.pop_front();
 
-			_outputs[0][i] = dsp56k::dsp2sample<float>(s.first) * m_masterVolume;
-			_outputs[1][i] = dsp56k::dsp2sample<float>(s.second) * m_masterVolume;
+			_outputs[0][i] = dspWordToFloat(s.first) * m_masterVolume;
+			_outputs[1][i] = dspWordToFloat(s.second) * m_masterVolume;
 		}
 	}
 

@@ -11,7 +11,6 @@
 #include "baseLib/filesystem.h"
 
 #include "dsp56kBase/threadtools.h"
-#include "dsp56kEmu/types.h"
 
 namespace synthLib
 {
@@ -105,7 +104,7 @@ namespace synthLib
 		return true;
 	}
 
-	void WavWriter::writeWord(std::vector<uint8_t>& _dst, dsp56k::TWord _word)
+	void WavWriter::writeWord(std::vector<uint8_t>& _dst, uint32_t _word)
 	{
 		const auto d = reinterpret_cast<const uint8_t*>(&_word);
 		_dst.push_back(d[0]);
@@ -135,7 +134,7 @@ namespace synthLib
 		}
 	}
 
-	void AsyncWriter::append(const std::function<void(std::vector<dsp56k::TWord>&)>& _func)
+	void AsyncWriter::append(const std::function<void(std::vector<uint32_t>&)>& _func)
 	{
 		std::lock_guard lock(m_writeMutex);
 		_func(m_stereoOutput);
@@ -147,7 +146,7 @@ namespace synthLib
 
 		synthLib::WavWriter writer;
 
-		std::vector<dsp56k::TWord> m_wordBuffer;
+		std::vector<uint32_t> m_wordBuffer;
 		std::vector<uint8_t> m_byteBuffer;
 		m_byteBuffer.reserve(m_wordBuffer.capacity() * 3);
 
@@ -165,16 +164,16 @@ namespace synthLib
 
 			if(!m_wordBuffer.empty())
 			{
-				for (const dsp56k::TWord w : m_wordBuffer)
+				for (const uint32_t w : m_wordBuffer)
 					WavWriter::writeWord(m_byteBuffer, w);
 
 				if(m_measureSilence)
 				{
 					bool isSilence = true;
 
-					for (const dsp56k::TWord w : m_wordBuffer)
+					for (const uint32_t w : m_wordBuffer)
 					{
-						constexpr dsp56k::TWord silenceThreshold = 0x1ff;
+						constexpr uint32_t silenceThreshold = 0x1ff;
 						const bool silence = w < silenceThreshold || w >= (0xffffff - silenceThreshold);
 						if(!silence)
 						{

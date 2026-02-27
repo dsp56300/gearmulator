@@ -4,7 +4,7 @@
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/peripherals.h"
 
-#include "hardwareLib/dspBootCode.h"
+#include "dsp56kEmu/dspBootCode.h"
 
 #include "wLib/wDsp.h"
 
@@ -79,6 +79,6 @@ namespace mqLib
 
 		bool m_receivedMagicEsaiPacket = false;
 
-		hwLib::DspBoot m_boot;
+		dsp56k::DspBoot m_boot;
 	};
 }

@@ -4,7 +4,7 @@
 
 #include "baseLib/semaphore.h"
 
-#include "dsp56kEmu/ringbuffer.h"
+#include "dsp56kBase/ringbuffer.h"
 
 #include "synthLib/midiTypes.h"
 
