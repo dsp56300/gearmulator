@@ -10,7 +10,7 @@
 </head>
 <body>
 	<div class="settings-parent">
-		<div id="settings-root" class="settings-root">
+		<div id="settings-root" class="settings-root dialogbox">
 			<div class="settings-categories">
 				<button id="btSettingsClose" class="button settings-close-button">X</button>
 				<div class="settings-headline">Settings</div>
