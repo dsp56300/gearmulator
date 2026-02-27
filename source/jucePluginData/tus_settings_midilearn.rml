@@ -15,6 +15,7 @@
 			<button id="btPresetCreate" class="button">Create</button>
 			<button id="btPresetDelete" class="button">Delete</button>
 			<button id="btPresetApply" class="button" style="display: none;">Apply</button>
+			<button id="btBrowsePresets" class="button">Browse...</button>
 		</div>
 		
 		<settingsspacer1/>

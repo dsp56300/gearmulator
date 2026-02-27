@@ -52,6 +52,17 @@ namespace jucePluginEditorLib
 		juceRmlUi::EventListener::Add(btPresetDelete, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onBtPresetDelete(); });
 		juceRmlUi::EventListener::Add(m_btApply, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onBtPresetApply(); });
 
+		if (auto* btBrowsePresets = juceRmlUi::helper::findChild(_root, "btBrowsePresets"))
+		{
+			juceRmlUi::EventListener::Add(btBrowsePresets, Rml::EventId::Click, [this](Rml::Event& _event)
+			{
+				_event.StopPropagation();
+				const juce::File dir = m_learnManager.getPresetsDirectory();
+				baseLib::filesystem::createDirectory(dir.getFullPathName().toStdString());
+				dir.revealToUser();
+			});
+		}
+
 		// Find the mapping table and template row
 		auto* templateRow = juceRmlUi::helper::findChild(_root, "mappingRow");
 		if (templateRow)
