@@ -34,7 +34,7 @@ namespace xt
 		{
 			// ESSI1 inter-DSP bus runs 8x faster than ESSI0 audio rate
 			// (8 channels x 2 words per voice cycle, 2 words per ESSI1 frame)
-			constexpr uint32_t essi1Multiplier = 3;
+			constexpr uint32_t essi1Multiplier = 8;
 			m_periphX.getEssiClock().setSamplerate(40000 * essi1Multiplier);
 			m_periphX.getEssiClock().setEsaiDivider(&m_periphX.getEssi0(), essi1Multiplier - 1);
 			m_periphX.getEssiClock().setEsaiDivider(&m_periphX.getEssi1(), 0);

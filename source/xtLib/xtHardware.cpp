@@ -148,6 +148,31 @@ namespace xt
 			m_bootCompleted = true;
 			onEsaiCallback(mainEssi0);
 		}, 0);
+
+		// Real-time ESSI1 ring routing via TX callbacks.
+		// Each DSP's ESSI1 TX callback immediately forwards data to the next DSP's ESSI1 RX,
+		// providing natural backpressure via semaphore-based ring buffers instead of
+		// batch routing in processAudio which caused rate mismatch (expansion DSPs
+		// outrun main DSP that is throttled by ESSI0 audio output).
+		// Ring: DSP2 TX→DSP0 RX, DSP0 TX→DSP1 RX, DSP1 TX→DSP2 RX
+		constexpr uint32_t essi1RxDst[] = {1, 2, 0};  // DSP[i] TX routes to DSP[essi1RxDst[i]] RX
+		for (uint32_t i = 0; i < g_dspCount; ++i)
+		{
+			auto& srcEssi1 = m_dsps[i].getPeriph().getEssi1();
+			auto& dstEssi1 = m_dsps[essi1RxDst[i]].getPeriph().getEssi1();
+
+			srcEssi1.setCallback([&srcEssi1, &dstEssi1](dsp56k::Audio*)
+			{
+				auto& txOut = srcEssi1.getAudioOutputs();
+				auto& rxIn = dstEssi1.getAudioInputs();
+				while (!txOut.empty() && !rxIn.full())
+				{
+					dsp56k::Audio::RxFrame rx;
+					txToRx(txOut.pop_front(), rx);
+					rxIn.push_back(std::move(rx));
+				}
+			}, 0);
+		}
 	}
 
 	void Hardware::setupEsaiListener()
@@ -236,22 +261,7 @@ namespace xt
 
 			if constexpr (g_useVoiceExpansion)
 			{
-				// ESSI1 ring routing: DSP2(idx 2) TX→DSP0(idx 0) RX→DSP0 TX→DSP1(idx 1) RX→DSP1 TX→DSP2 RX
-				constexpr uint32_t essi1From[] = {2, 0, 1};
-				constexpr uint32_t essi1To[]   = {0, 1, 2};
-
-				for (int leg = 0; leg < 3; ++leg)
-				{
-					auto& txOut = m_dsps[essi1From[leg]].getPeriph().getEssi1().getAudioOutputs();
-					auto& rxIn  = m_dsps[essi1To[leg]].getPeriph().getEssi1().getAudioInputs();
-
-					while (!txOut.empty() && !rxIn.full())
-					{
-						dsp56k::Audio::RxFrame rx;
-						txToRx(txOut.pop_front(), rx);
-						rxIn.push_back({std::move(rx)});
-					}
-				}
+				// ESSI1 ring routing is handled in real-time via TX callbacks (set in initVoiceExpansion)
 
 				// Feed external audio input to DSP0 (exp1) via ESSI0 RX
 				m_dsps[0].getPeriph().getEssi0().processAudioInputInterleaved(inputs, processCount);
