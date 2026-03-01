@@ -261,6 +261,43 @@ namespace xt
 
 			if constexpr (g_useVoiceExpansion)
 			{
+				// One-shot DMA diagnostic after ~2 seconds of runtime
+				static bool dmaDiagDone = false;
+				if (!dmaDiagDone && m_esaiFrameIndex > 800000)
+				{
+					dmaDiagDone = true;
+					for (uint32_t dspIdx = 0; dspIdx < g_dspCount; ++dspIdx)
+					{
+						auto& dma = m_dsps[dspIdx].getPeriph().getDMA();
+						for (uint32_t ch = 0; ch < 6; ++ch)
+						{
+							const auto dcr = dma.getDCR(ch);
+							if (dcr == 0) continue;
+							const auto de = (dcr >> 23) & 1;
+							const auto tm = (dcr >> 19) & 7;
+							const auto rs = (dcr >> 11) & 0x1f;
+							LOG("DMA DIAG: DSP" << dspIdx << " DMA" << ch
+								<< " DCR=" << HEX(dcr) << " DE=" << de << " TM=" << tm << " RS=" << rs
+								<< " DSR=" << HEX(dma.getDSR(ch)) << " DDR=" << HEX(dma.getDDR(ch))
+								<< " DCO=" << HEX(dma.getDCO(ch))
+								<< " hasTrigger(Essi1TX)=" << dma.hasTrigger(dsp56k::DmaChannel::RequestSource::Essi1TransmitData));
+						}
+						auto& essi1 = m_dsps[dspIdx].getPeriph().getEssi1();
+						auto& essi0 = m_dsps[dspIdx].getPeriph().getEssi0();
+						LOG("DMA DIAG: DSP" << dspIdx
+							<< " ESSI1 txOut=" << essi1.getAudioOutputs().size()
+							<< " rxIn=" << essi1.getAudioInputs().size()
+							<< " TE=" << essi1.hasEnabledTransmitters()
+							<< " RE=" << essi1.hasEnabledReceivers()
+							<< " CRA=" << HEX(static_cast<uint32_t>(essi1.getCRA()))
+							<< " CRB=" << HEX(static_cast<uint32_t>(essi1.getCRB()))
+							<< " SR=" << HEX(static_cast<uint32_t>(essi1.getSR()))
+							<< " txWC=" << essi1.getTxWordCount()
+							<< " | ESSI0 TE=" << essi0.hasEnabledTransmitters()
+							<< " RE=" << essi0.hasEnabledReceivers());
+					}
+				}
+
 				// ESSI1 ring routing is handled in real-time via TX callbacks (set in initVoiceExpansion)
 
 				// Feed external audio input to DSP0 (exp1) via ESSI0 RX
