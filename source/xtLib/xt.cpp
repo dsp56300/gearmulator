@@ -1,5 +1,6 @@
 #include "xt.h"
 
+#include "xtBuildconfig.h"
 #include "synthLib/midiTypes.h"
 
 #include "dsp56kBase/threadtools.h"
@@ -51,7 +52,7 @@ namespace xt
 		m_destroy = true;
 
 		// DSP needs to run to let the uc thread wake up
-		const auto& esai = m_hw->getDSP().getPeriph().getEssi0();
+		const auto& esai = m_hw->getDSP(g_mainDspIdx).getPeriph().getEssi0();
 		while(m_destroy)
 		{
 			if(!esai.getAudioOutputs().empty())

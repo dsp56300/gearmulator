@@ -29,6 +29,11 @@ namespace xt
 		reset();
 		setPC(0x100100);
 
+#if XT_VOICE_EXPANSION
+		// Signal expansion board presence to the firmware via PORTGP hardware config pins
+		getPortGP().writeRX(0x00);
+#endif
+
 		getPortGP().setWriteTXCallback([this](const mc68k::Port&)
 		{
 //			onPortGPWritten();

@@ -1,5 +1,6 @@
 #include "xtDSP.h"
 
+#include "xtBuildconfig.h"
 #include "xtHardware.h"
 
 #if DSP56300_DEBUGGER
@@ -28,7 +29,21 @@ namespace xt
 			return;
 
 		m_periphX.getEssiClock().setExternalClockFrequency(10'240'000);	// 10,24 MHz
-		m_periphX.getEssiClock().setSamplerate(40000);
+
+		if constexpr (g_useVoiceExpansion)
+		{
+			// ESSI1 inter-DSP bus runs 8x faster than ESSI0 audio rate
+			// (8 channels x 2 words per voice cycle, 2 words per ESSI1 frame)
+			constexpr uint32_t essi1Multiplier = 3;
+			m_periphX.getEssiClock().setSamplerate(40000 * essi1Multiplier);
+			m_periphX.getEssiClock().setEsaiDivider(&m_periphX.getEssi0(), essi1Multiplier - 1);
+			m_periphX.getEssiClock().setEsaiDivider(&m_periphX.getEssi1(), 0);
+		}
+		else
+		{
+			m_periphX.getEssiClock().setSamplerate(40000);
+		}
+
 		m_periphX.getEssiClock().setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 
 		auto config = m_dsp.getJit().getConfig();
@@ -54,7 +69,8 @@ namespace xt
 
 //		getPeriph().disableTimers(true);
 
-		m_periphX.getEssi0().writeEmptyAudioIn(8);
+		m_periphX.getEssi0().writeEmptyAudioIn(64);
+		m_periphX.getEssi1().writeEmptyAudioIn(64);
 
 		hdi08().setRXRateLimit(0);
 		hdi08().setTransmitDataAlwaysEmpty(false);

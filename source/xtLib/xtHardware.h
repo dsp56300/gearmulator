@@ -18,8 +18,6 @@ namespace xt
 
 	class Hardware : public wLib::Hardware
 	{
-		static constexpr uint32_t g_dspCount = g_useVoiceExpansion ? 3 : 1;
-
 	public:
 		explicit Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName);
 		~Hardware() override;
