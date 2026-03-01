@@ -258,19 +258,21 @@ namespace pluginLib
 		const auto* existingMapping = m_preset.findMapping(newMapping.type, newMapping.channel, newMapping.controller);
 		if (existingMapping && existingMapping->paramName != m_learningParamName)
 		{
-			// MIDI controller is mapped to a different parameter - show conflict
+			// MIDI controller is mapped to a different parameter
+			// Reset learning values so the user can try a different controller
+			m_learningValues.clear();
+
 			if (onMappingConflict)
 				onMappingConflict(newMapping);
 		}
 		else
 		{
-			// No conflict, notify success
+			// No conflict, notify success and exit learning mode
+			cancelLearning();
+
 			if (onMappingLearned)
 				onMappingLearned(newMapping);
 		}
-
-		// Exit learning mode
-		cancelLearning();
 	}
 
 	MidiLearnMapping::Mode MidiLearnTranslator::detectMode(const std::vector<uint8_t>& _values) const

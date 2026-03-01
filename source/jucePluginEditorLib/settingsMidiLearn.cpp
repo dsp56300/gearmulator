@@ -52,6 +52,17 @@ namespace jucePluginEditorLib
 		juceRmlUi::EventListener::Add(btPresetDelete, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onBtPresetDelete(); });
 		juceRmlUi::EventListener::Add(m_btApply, Rml::EventId::Click, [this](Rml::Event& _event) { _event.StopPropagation(); onBtPresetApply(); });
 
+		if (auto* btBrowsePresets = juceRmlUi::helper::findChild(_root, "btBrowsePresets"))
+		{
+			juceRmlUi::EventListener::Add(btBrowsePresets, Rml::EventId::Click, [this](Rml::Event& _event)
+			{
+				_event.StopPropagation();
+				const juce::File dir = m_learnManager.getPresetsDirectory();
+				baseLib::filesystem::createDirectory(dir.getFullPathName().toStdString());
+				dir.revealToUser();
+			});
+		}
+
 		// Find the mapping table and template row
 		auto* templateRow = juceRmlUi::helper::findChild(_root, "mappingRow");
 		if (templateRow)
@@ -322,7 +333,7 @@ namespace jucePluginEditorLib
 		m_presetList->clearOptions();
 
 		// Always add "Current" as first option - represents current engine state
-		m_presetNames.push_back(kCurrentPresetName);
+		m_presetNames.emplace_back(kCurrentPresetName);
 		m_presetList->addOption(kCurrentPresetName);
 
 		// Get all preset names
@@ -466,7 +477,7 @@ namespace jucePluginEditorLib
 		refreshFeedbackCheckboxes();
 	}
 
-	void SettingsMidiLearn::refreshFeedbackCheckboxes()
+	void SettingsMidiLearn::refreshFeedbackCheckboxes() const
 	{
 		auto* translator = m_processor.getMidiLearnTranslator();
 		if (!translator)
@@ -495,7 +506,7 @@ namespace jucePluginEditorLib
 			m_cbFeedbackPhysical->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Physical));
 	}
 
-	void SettingsMidiLearn::refreshInputSourceCheckboxes()
+	void SettingsMidiLearn::refreshInputSourceCheckboxes() const
 	{
 		auto* translator = m_processor.getMidiLearnTranslator();
 		if (!translator)
@@ -511,7 +522,7 @@ namespace jucePluginEditorLib
 			m_cbInputPhysical->setChecked(sources & (1<<static_cast<uint8_t>(synthLib::MidiEventSource::Physical)));
 	}
 
-	void SettingsMidiLearn::onInputSourceToggle(synthLib::MidiEventSource _source)
+	void SettingsMidiLearn::onInputSourceToggle(synthLib::MidiEventSource _source) const
 	{
 		auto* translator = m_processor.getMidiLearnTranslator();
 		if (!translator)
@@ -562,7 +573,7 @@ namespace jucePluginEditorLib
 		refreshFeedbackCheckboxes();
 	}
 
-	void SettingsMidiLearn::updateApplyButtonVisibility()
+	void SettingsMidiLearn::updateApplyButtonVisibility() const
 	{
 		if (!m_btApply)
 			return;

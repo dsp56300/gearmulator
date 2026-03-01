@@ -1200,8 +1200,8 @@ namespace juceRmlUi
 		if (m_scissorEnabled)
 		{
 			memcpy(newLayer->data.data(), m_renderTarget->data.data(), m_renderTarget->data.size());
-			const auto w = std::min(m_scissorRegion.Width(), newLayer->width - m_scissorRegion.Left());
-			const auto h = std::min(m_scissorRegion.Height(), newLayer->height - m_scissorRegion.Top());
+			const auto w = m_scissorRegion.Width();
+			const auto h = m_scissorRegion.Height();
 			fill<false>(*newLayer, m_scissorRegion.Left(), m_scissorRegion.Top(), w, h, Colorb{ 0,0,0,0 });
 		}
 		else
@@ -1248,9 +1248,6 @@ namespace juceRmlUi
 			texHeight = m_scissorRegion.Height();
 			srcX = m_scissorRegion.Left();
 			srcY = m_scissorRegion.Top();
-
-			texWidth = std::min(texWidth, m_renderTarget->width - srcX);
-			texHeight = std::min(texHeight, m_renderTarget->height - srcY);
 		}
 		else
 		{
@@ -1312,9 +1309,6 @@ namespace juceRmlUi
 			h = m_scissorRegion.Height();
 		}
 
-		w = std::min(w, source->width - x);
-		h = std::min(h, source->height - y);
-
 		if (_blendMode == Rml::BlendMode::Replace)
 		{
 			// Direct copy without alpha blending
@@ -1368,6 +1362,13 @@ namespace juceRmlUi
 	void RendererJuce::SetScissorRegion(Rml::Rectanglei _region)
 	{
 		m_scissorRegion = _region;
+
+		// Clamp scissor region to the render target bounds
+		if (m_renderTarget)
+		{
+			const Rml::Rectanglei rtBounds = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0, 0), Rml::Vector2i(m_renderTarget->width, m_renderTarget->height));
+			m_scissorRegion = m_scissorRegion.Intersect(rtBounds);
+		}
 	}
 
 	void RendererJuce::SetTransform(const Rml::Matrix4f* transform)
