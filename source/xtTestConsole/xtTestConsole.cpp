@@ -59,12 +59,14 @@ int main()
 
 	auto sendButton = [&](const xt::ButtonType _button, const bool _pressed)
 	{
+		LOG("Setting button " << static_cast<int>(_button) << " to " << _pressed);
 		auto& u = uc->getHardware()->getUC();
 		u.setButton(_button, _pressed);
 	};
 
 	auto sendEncoder = [&](const uint8_t _encoder, const int8_t _delta)
 	{
+		LOG("Setting encoder " << static_cast<int>(_encoder) << " to " << static_cast<int>(_delta));
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Host);
 		constexpr uint8_t idm = 0x26;	// RMTP
 		const uint8_t uu = _encoder;	// encoder
