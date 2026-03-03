@@ -137,12 +137,18 @@ namespace xt
 
 		LOG("Voice Expansion boot completed, main DSP index " << g_mainDspIdx);
 
-		// Set real audio callback on main DSP's ESSI0
+		// Prime each DSP with minimal input to prevent blocking, then drain outputs
 		for (auto& dsp : m_dsps)
 		{
-			dsp.getPeriph().getEssi0().writeEmptyAudioIn(8192);
-			dsp.getPeriph().getEssi1().writeEmptyAudioIn(8192);
+			dsp.getPeriph().getEssi0().writeEmptyAudioIn(8);
+			dsp.getPeriph().getEssi1().writeEmptyAudioIn(8 * 8);
+
+			while (!dsp.getPeriph().getEssi0().getAudioOutputs().empty())
+				dsp.getPeriph().getEssi0().getAudioOutputs().pop_front();
+			while (!dsp.getPeriph().getEssi1().getAudioOutputs().empty())
+				dsp.getPeriph().getEssi1().getAudioOutputs().pop_front();
 		}
+
 		mainEssi0.setCallback([this, &mainEssi0](dsp56k::Audio*)
 		{
 			m_bootCompleted = true;
