@@ -196,6 +196,7 @@ Managed as git submodules or in-tree:
 
 ## CI/CD
 
+### GitHub Actions
 GitHub Actions workflows (`.github/workflows/`):
 - `cmake.yml` - Build matrix: Ubuntu, macOS 14, Windows 2022 with default/Ninja generators
 - `nightly.yml` - Nightly builds
@@ -205,6 +206,26 @@ Linux dependencies for CI:
 ```bash
 sudo apt install -y libgl1-mesa-dev xorg-dev libasound2-dev
 ```
+
+### Jenkins (Private CI)
+
+Private Jenkins instance. Three jobs belong to this project:
+
+- **`dsp56300_main`** — Single-platform build job (Jenkinsfile from SCM: `scripts/Jenkinsfile`)
+  - Stages: Checkout → Compile → Pack → Integration Tests → Deploy → Upload → GitHub
+  - Parameters: `Branch`, `AgentLabel` (platform label), `Synths` (cmake -D flags string), `DisplayName`, `FXPlugins`, `Deploy`, `Upload`, `GitHub`, `IntegrationTests`, `UploadFolder`
+  - Uses `scripts/generate.cmake` for cmake configure, `scripts/pack.cmake` for CPack, `scripts/deployAll.cmake` for rclone deploy/upload, `scripts/deployGitHub.cmake` for GitHub releases
+
+- **`dsp56300_main_multi`** — Multi-platform orchestrator (inline pipeline: `scripts/JenkinsfileMulti`)
+  - Triggers `dsp56300_main` in parallel for each enabled platform (Win, Mac, Linux ARM, Linux x86)
+  - Per-synth boolean params (`SynthOsirus`, `SynthOsTIrus`, `SynthVavra`, `SynthXenia`, `SynthNodalRed2x`, `SynthJe8086`, `DSPBridge`) are assembled into a `Synths` string passed to child jobs
+  - `UploadFolder` choices: `internal`, `alpha`, `beta`, `donators`
+  - Posts MQTT notification on completion
+  - Branch choices on Jenkins: `main`, `nova`, `dev`
+
+- **`dsp56300_copy`** — Utility job for rclone archival of build artifacts
+
+Build agents are labeled: `win`, `mac`, `linux && arm`, `linux && x86`
 
 ## Network Bridge
 
@@ -226,6 +247,26 @@ When adding a new parameter:
 3. Update UI skin RML if exposing in UI
 
 The project emphasizes **accuracy of emulation** over shortcuts - the goal is to run original firmware bit-identically to hardware.
+
+## Voice Expansion (Xenia/Vavra)
+
+The Waldorf Microwave II/XT and microQ support voice expansion via additional DSP boards. In emulation this means running multiple DSP56300 instances.
+
+### Architecture
+- **XT_VOICE_EXPANSION** build config in `xtBuildconfig.h` enables multi-DSP mode
+- `g_dspCount` = 3, `g_mainDspIdx` = 2 (main DSP is the last one, matching hardware)
+- DSPs communicate via **ESSI1 ring bus**: DSP2(main) TX → DSP0 RX → DSP0 TX → DSP1 RX → DSP1 TX → DSP2 RX
+- **ESSI0** is the audio I/O interface (to DAC/ADC), only active on main DSP
+- **ESSI1** is the inter-DSP bus, runs at 8× the ESSI0 audio rate (320kHz vs 40kHz)
+
+### Key Implementation Details
+- `xtHardware::initVoiceExpansion()` — Sets up boot pump, ESSI1 ring routing callbacks, and ESSI0 callback
+- ESSI1 routing uses real-time TX callbacks (not batch routing) — each DSP's `writeTXimpl` callback immediately forwards to next DSP's RX, providing natural semaphore backpressure
+- Boot sequence: expansion DSPs boot first, firmware handshake via magic value `$535400` over ESSI1
+- `EsxiClock::exec()` processes ALL TX then ALL RX — ordering matters for understanding data flow
+- `RingBuffer` in audio mode uses semaphore blocking (`push_back`/`pop_front`) even though `waitNotEmpty`/`waitNotFull` are no-ops
+- Expansion DSPs have ESSI0 TE=0/RE=0 (no audio I/O throttling), so they run at full CPU speed — ESSI1 backpressure is the only throttle
+- Main DSP (DSP2) has SCKD=1 on ESSI1 (clock master), expansion DSPs have SCKD=0 (clock slave)
 
 ### ROM/Factory Data Sources
 - Only **Virus** (Osirus/OsTIrus) and **JE8086** register ROM data sources with the patch manager
@@ -418,8 +459,10 @@ When `Device::getState()` is called, `Plugin::getState()` has already pushed hea
 
 ### Git Remotes
 - `gearmulator` — public OSS repo (dsp56300/gearmulator on GitHub)
-- `private` — private development repo
+- `private` — private development repo on GitHub
 - Also: `nas`, `codeberg`, `EvilDragon`
+- **DSP submodule** (`source/dsp56300/`) — also owned by the user, changes can be made there freely
+- Jenkins SCM points to `private` remote
 
 ## Git Conventions
 

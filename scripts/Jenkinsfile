@@ -16,6 +16,7 @@ pipeline {
 		booleanParam(name: 'Deploy', defaultValue: true, description: '') 
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '') 
+		booleanParam(name: 'GitHub', defaultValue: false, description: '') 
 	}
 	stages {
 		stage("Checkout") {
@@ -65,6 +66,16 @@ pipeline {
 			}
 			steps {
 				doUpload();
+			}
+		}
+		stage('GitHub') {
+			when {
+				expression {
+					return params.GitHub
+				}
+			}
+			steps {
+				doGitHub();
 			}
 		}
 	}
@@ -182,4 +193,13 @@ def doDeploy()
 def doUpload()
 {
 	copyArtefacts(0,1)
+}
+
+def doGitHub()
+{
+    def buildDir = cmakeBuildDir()
+
+	withCredentials([string(credentialsId: 'github_token', variable: 'GH_TOKEN')]) {
+		genericSh "cmake -Dgearmulator_SOURCE_DIR=${WORKSPACE} -Dgearmulator_BINARY_DIR=${buildDir} -DGH_TOKEN=${GH_TOKEN} -P scripts/deployGitHub.cmake"
+	}
 }
