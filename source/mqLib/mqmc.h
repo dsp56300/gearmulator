@@ -80,6 +80,10 @@ namespace mqLib
 		std::list<uint32_t> m_lastPCs;
 		bool m_dspResetRequest = false;
 		bool m_dspResetCompleted = false;
+		uint32_t m_hdiWriteCountA = 0;
+		uint32_t m_hdiWriteCountB = 0;
+		uint32_t m_hdiWriteCountC = 0;
+		uint32_t m_hdiLogTimer = 0;
 
 #if SUPPORT_NMI_INTERRUPT
 		uint8_t m_dspInjectNmiRequest = 0;

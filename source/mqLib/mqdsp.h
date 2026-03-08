@@ -51,9 +51,11 @@ namespace mqLib
 
 		dsp56k::DSPThread& thread() { return *m_thread; }
 		bool haveSentTXToDSP() const { return m_haveSentTXtoDSP; }
+		bool hasThread() const { return m_thread != nullptr; }
 
 		bool receivedMagicEsaiPacket() const { return m_receivedMagicEsaiPacket; }
 		void onDspBootFinished();
+		void reset();
 
 	private:
 		void onUCRxEmpty(bool _needMoreData);
@@ -74,6 +76,10 @@ namespace mqLib
 
 		bool m_haveSentTXtoDSP = false;
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
+		uint32_t m_hdiUcToDspCount = 0;
+		uint32_t m_hdiDspToUcCount = 0;
+		uint32_t m_hdiDspToUcFailCount = 0;
+		uint32_t m_onUcRxEmptyCount = 0;
 
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
 

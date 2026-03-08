@@ -72,6 +72,8 @@ namespace mqLib
 		const ROM m_rom;
 
 		bool m_requestNMI = false;
+		bool m_dspResetPending = false;
+		bool m_voiceExpansionReady = false;
 
 		MqMc m_uc;
 		TAudioInputs m_audioInputs;

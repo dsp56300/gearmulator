@@ -29,7 +29,7 @@ namespace mqLib
 
 	template<size_t Count> using TAudioBuffer = std::array<std::vector<dsp56k::TWord>, Count>;
 
-	using TAudioOutputs = TAudioBuffer<6>;
+	using TAudioOutputs = TAudioBuffer<16>;
 	using TAudioInputs = TAudioBuffer<2>;
 
 	enum class BootMode

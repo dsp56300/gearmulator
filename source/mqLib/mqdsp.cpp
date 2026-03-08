@@ -2,6 +2,8 @@
 
 #include "mqhardware.h"
 
+#include <cstdio>
+
 #if DSP56300_DEBUGGER
 #include "dsp56kDebugger/debugger.h"
 #endif
@@ -60,12 +62,16 @@ namespace mqLib
 		hdi08().setRXRateLimit(0);
 		hdi08().setTransmitDataAlwaysEmpty(false);
 
+		// Set MC68K-side callbacks for all DSPs.
+		// On real hardware, all HDI08 interfaces are active from power-on.
 		m_hdiUC.setRxEmptyCallback([&](const bool needMoreData)
 		{
 			onUCRxEmpty(needMoreData);
 		});
 		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
 		{
+			if (!m_haveSentTXtoDSP)
+				fprintf(stderr, "[DSP %d] First boot word received: 0x%06x\n", m_index, _word);
 			if(m_boot.hdiWriteTX(_word))
 				onDspBootFinished();
 		});
@@ -105,7 +111,6 @@ namespace mqLib
 
 		if (hf01 != m_hdiHF01)
 		{
-//			LOG('[' << m_name << "] HDI HF01=" << HEXN((hf01>>3),1));
 			waitDspRxEmpty();
 			m_hdiHF01 = hf01;
 			hdi08().setPendingHostFlags01(hf01);
@@ -114,6 +119,11 @@ namespace mqLib
 
 	void MqDsp::onDspBootFinished()
 	{
+		printf("[DSP %d] Boot finished, creating thread\n", m_index);
+		fflush(stdout);
+
+		m_haveSentTXtoDSP = true;
+
 		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
 		{
 			hdiTransferUCtoDSP(_word);
@@ -128,11 +138,56 @@ namespace mqLib
 		m_thread->setLogToStdout(false);
 	}
 
+	void MqDsp::reset()
+	{
+		printf("[DSP %d] Reset requested\n", m_index);
+		fflush(stdout);
+
+		if (m_thread)
+		{
+			m_thread->terminate();
+			m_thread->join();
+			m_thread.reset();
+		}
+
+		// Reset DSP core and peripherals
+		m_dsp.resetHW();
+
+		// Clear program memory so DspBoot can reload firmware
+		for(dsp56k::TWord i=0; i<m_memory.sizeP(); ++i)
+		{
+			m_memory.set(dsp56k::MemArea_P, i, 0x000200);
+			m_dsp.getJit().notifyProgramMemWrite(i);
+		}
+
+		// Reset ESAI state
+		m_periphX.getEsai().writeEmptyAudioIn(8);
+		while (!m_periphX.getEsai().getAudioOutputs().empty())
+			m_periphX.getEsai().getAudioOutputs().pop_front();
+
+		// Reset boot state by reconstructing DspBoot in-place
+		m_boot.~DspBoot();
+		new (&m_boot) dsp56k::DspBoot(m_dsp);
+		m_haveSentTXtoDSP = false;
+		m_receivedMagicEsaiPacket = false;
+		m_hdiHF01 = 0;
+
+		// Restore initial HDI08 write callback for boot mode
+		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
+		{
+			if(m_boot.hdiWriteTX(_word))
+				onDspBootFinished();
+		});
+	}
+
 	void MqDsp::onUCRxEmpty(bool _needMoreData)
 	{
+		if (!m_thread)
+			return;
+
 		hdi08().injectTXInterrupt();
 
-		if (_needMoreData)
+		if (_needMoreData && m_hardware.getEsaiFrameIndex() > 0)
 		{
 			m_hardware.ucYieldLoop([&]()
 			{
@@ -147,10 +202,27 @@ namespace mqLib
 	{
 		if (m_hdiUC.canReceiveData() && hdi08().hasTX())
 		{
-			const auto v = hdi08().readTX();
-//			LOG('[' << m_name << "] HDI dsp2uc=" << HEX(v));
+			auto v = hdi08().readTX();
+			++m_hdiDspToUcCount;
+
+#if MQ_VOICE_EXPANSION
+			// The DSP firmware reads Port C bit 4 AFTER sending its first HDI08
+			// response. On real VE hardware, the first response from expansion
+			// DSPs would be 0x000010 (VE identity) because Port C is physically
+			// tied high. In our emulation the timing differs, so we patch the
+			// first response for expansion DSPs to match real hardware behavior.
+			if (m_index > 0 && m_hdiDspToUcCount == 1 && v == 0x000001)
+				v = 0x000010;
+#endif
+
+			if(m_hdiDspToUcCount <= 5)
+				fprintf(stderr, "[DSP %d] HDI DSP->UC #%u val=0x%06x\n", m_index, m_hdiDspToUcCount, v);
 			if (v == g_magicEsaiPacket)
+			{
+				printf("[DSP %d] Received magic ESAI packet via HDI08\n", m_index);
+				fflush(stdout);
 				m_receivedMagicEsaiPacket = true;
+			}
 			m_hdiUC.writeRx(v);
 			return true;
 		}
@@ -160,33 +232,36 @@ namespace mqLib
 	void MqDsp::hdiTransferUCtoDSP(dsp56k::TWord _word)
 	{
 		m_haveSentTXtoDSP = true;
-//		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word));
+		++m_hdiUcToDspCount;
+		if(m_hdiUcToDspCount <= 3)
+			fprintf(stderr, "[DSP %d] HDI UC->DSP #%u val=0x%06x\n", m_index, m_hdiUcToDspCount, _word);
 		hdi08().writeRX(&_word, 1);
 	}
 
 	void MqDsp::hdiSendIrqToDSP(uint8_t _irq)
 	{
+		if (!m_thread)
+			return;
+
 		waitDspRxEmpty();
 
-		if(_irq == 0x92)
+		if(_irq == 0x92 && m_hardware.getEsaiFrameIndex() > 0)
 		{
-//			LOG('[' << m_name << "] DSP timeout, waiting...");
-			// this one is sent by the uc if the DSP taking too long to reset HF2 back to one. Instead of aborting here, we wait a bit longer for the DSP to finish on its own
 			m_hardware.ucYieldLoop([&]
 			{
 				return !bittest(hdi08().readControlRegister(), dsp56k::HDI08::HCR_HF2);
 			});
-//			LOG('[' << m_name << "] DSP timeout wait done");
 		}
-//		else
-//			LOG('[' << m_name << "] Inject interrupt" << HEXN(_irq,2));
 
 		dsp().injectExternalInterrupt(_irq);
 
-		m_hardware.ucYieldLoop([&]()
+		if (m_hardware.getEsaiFrameIndex() > 0)
 		{
-			return dsp().hasPendingInterrupts();
-		});
+			m_hardware.ucYieldLoop([&]()
+			{
+				return dsp().hasPendingInterrupts();
+			});
+		}
 
 		hdiTransferDSPtoUC();
 	}
@@ -206,7 +281,6 @@ namespace mqLib
 		{
 			return (hdi08().hasRXData() && hdi08().rxInterruptEnabled()) || dsp().hasPendingInterrupts();
 		});
-//		LOG("writeRX wait over");
 	}
 
 }

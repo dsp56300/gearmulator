@@ -49,7 +49,7 @@ namespace wLib
 
 		while(_continue())
 		{
-			if(m_processAudio)
+			if(m_processAudio || m_esaiFrameIndex <= 0)
 			{
 				std::this_thread::yield();
 			}
