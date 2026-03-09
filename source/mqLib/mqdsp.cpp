@@ -2,8 +2,6 @@
 
 #include "mqhardware.h"
 
-#include <cstdio>
-
 #if DSP56300_DEBUGGER
 #include "dsp56kDebugger/debugger.h"
 #endif
@@ -70,8 +68,6 @@ namespace mqLib
 		});
 		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
 		{
-			if (!m_haveSentTXtoDSP)
-				fprintf(stderr, "[DSP %d] First boot word received: 0x%06x\n", m_index, _word);
 			if(m_boot.hdiWriteTX(_word))
 				onDspBootFinished();
 		});
@@ -119,9 +115,6 @@ namespace mqLib
 
 	void MqDsp::onDspBootFinished()
 	{
-		printf("[DSP %d] Boot finished, creating thread\n", m_index);
-		fflush(stdout);
-
 		m_haveSentTXtoDSP = true;
 
 		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
@@ -140,9 +133,6 @@ namespace mqLib
 
 	void MqDsp::reset()
 	{
-		printf("[DSP %d] Reset requested\n", m_index);
-		fflush(stdout);
-
 		if (m_thread)
 		{
 			m_thread->terminate();
@@ -215,14 +205,8 @@ namespace mqLib
 				v = 0x000010;
 #endif
 
-			if(m_hdiDspToUcCount <= 5)
-				fprintf(stderr, "[DSP %d] HDI DSP->UC #%u val=0x%06x\n", m_index, m_hdiDspToUcCount, v);
 			if (v == g_magicEsaiPacket)
-			{
-				printf("[DSP %d] Received magic ESAI packet via HDI08\n", m_index);
-				fflush(stdout);
 				m_receivedMagicEsaiPacket = true;
-			}
 			m_hdiUC.writeRx(v);
 			return true;
 		}
@@ -232,9 +216,6 @@ namespace mqLib
 	void MqDsp::hdiTransferUCtoDSP(dsp56k::TWord _word)
 	{
 		m_haveSentTXtoDSP = true;
-		++m_hdiUcToDspCount;
-		if(m_hdiUcToDspCount <= 3)
-			fprintf(stderr, "[DSP %d] HDI UC->DSP #%u val=0x%06x\n", m_index, m_hdiUcToDspCount, _word);
 		hdi08().writeRX(&_word, 1);
 	}
 

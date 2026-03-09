@@ -98,14 +98,6 @@ namespace mqLib
 		{
 			m_hdi08b.exec(deltaCycles);
 			m_hdi08c.exec(deltaCycles);
-
-			m_hdiLogTimer += deltaCycles;
-			if (m_hdiLogTimer > 50000000)
-			{
-				fprintf(stderr, "[UC-HDI] writes A=%u B=%u C=%u\n", m_hdiWriteCountA, m_hdiWriteCountB, m_hdiWriteCountC);
-				fflush(stderr);
-				m_hdiLogTimer = 0;
-			}
 		}
 
 		m_buttons.processButtons(getPortGP(), getPortE());
@@ -217,7 +209,6 @@ namespace mqLib
 		if (m_hdi08a.isInRange(pa))
 		{
 			m_hdi08a.write16(pa, val);
-			++m_hdiWriteCountA;
 			return;
 		}
 
@@ -226,13 +217,11 @@ namespace mqLib
 			if (m_hdi08b.isInRange(pa))
 			{
 				m_hdi08b.write16(pa, val);
-				++m_hdiWriteCountB;
 				return;
 			}
 			if (m_hdi08c.isInRange(pa))
 			{
 				m_hdi08c.write16(pa, val);
-				++m_hdiWriteCountC;
 				return;
 			}
 		}

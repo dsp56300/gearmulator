@@ -76,10 +76,7 @@ namespace mqLib
 
 		bool m_haveSentTXtoDSP = false;
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
-		uint32_t m_hdiUcToDspCount = 0;
 		uint32_t m_hdiDspToUcCount = 0;
-		uint32_t m_hdiDspToUcFailCount = 0;
-		uint32_t m_onUcRxEmptyCount = 0;
 
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
 

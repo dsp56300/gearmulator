@@ -58,26 +58,11 @@ int main(int _argc, char* _argv[])
 
 	dsp56k::ThreadTools::setCurrentThreadName("main");
 
-	// WAV writers for all output channels
-	// A's 6 TX register stereo pairs
-	synthLib::AsyncWriter writer0("mqOutput.wav", 44100, false);      // A pair 0 (main out)
-	synthLib::AsyncWriter writer1("mqOutput_A1.wav", 44100, false);   // A pair 1
-	synthLib::AsyncWriter writer2("mqOutput_A2.wav", 44100, false);   // A pair 2
-	synthLib::AsyncWriter writer3("mqOutput_A3.wav", 44100, false);   // A pair 3
-	synthLib::AsyncWriter writer4("mqOutput_A4.wav", 44100, false);   // A pair 4
-	synthLib::AsyncWriter writer5("mqOutput_A5.wav", 44100, false);   // A pair 5
-	// B/C expansion ring buffer captures
-	synthLib::AsyncWriter writerB("mqOutput_B.wav", 44100, false);
-	synthLib::AsyncWriter writerC("mqOutput_C.wav", 44100, false);
+	// WAV writer for main stereo output
+	synthLib::AsyncWriter writer("mqOutput.wav", 44100, false);
 
 	constexpr uint32_t blockSize = 64;
-	// Stereo buffers for each output pair
-	std::vector<dsp56k::TWord> stereoBuf[8];
-	for (auto& buf : stereoBuf)
-		buf.resize(blockSize * 2);
-
-	uint32_t nonZeroSamples = 0;
-	uint32_t totalSamples = 0;
+	std::vector<dsp56k::TWord> stereoBuf(blockSize * 2);
 
 	bool waitingForBoot = true;
 	bool waitingForInitSound = false;
@@ -106,20 +91,11 @@ int main(int _argc, char* _argv[])
 		return std::string(&printData[line * 20], 20);
 	};
 
-	uint32_t loopCount = 0;
 	bool demoStarted = false;
 	int playRetryCounter = 0;
 
 	while(true)
 	{
-		++loopCount;
-
-		// Safety: abort if stuck (>10 million iterations without audio)
-		if(loopCount > 10000000 && totalSamples == 0)
-		{
-			std::cout << "ABORT: No audio after " << loopCount << " iterations" << std::endl;
-			break;
-		}
 
 		if(waitingForBoot && mq.isBootCompleted())
 		{
@@ -225,68 +201,25 @@ int main(int _argc, char* _argv[])
 
 		mq.process(blockSize, 0);
 
-		// Periodic state logging
-		if(loopCount % 100000 == 0)
-		{
-			std::cout << "[Loop " << loopCount << "] counter=" << counter
-				<< " waitBoot=" << waitingForBoot << " waitInit=" << waitingForInitSound
-				<< " totalSamples=" << totalSamples << std::endl;
-		}
-
 		if(counter == 0)
 		{
 			auto& outs = mq.getAudioOutputs();
 
-			uint32_t blockNonZero = 0;
 			for(size_t i=0; i<blockSize; ++i)
 			{
-				// A's 6 TX register stereo pairs (audioOutputs 0-11)
-				// Note: audioOutputs use swapped L/R mapping, so pair N = outs[2N] (R), outs[2N+1] (L)
-				for (int p = 0; p < 6; ++p)
-				{
-					stereoBuf[p][(i<<1)  ] = outs[p*2  ][i];
-					stereoBuf[p][(i<<1)+1] = outs[p*2+1][i];
-				}
-				// B expansion = audioOutputs 12/13, C expansion = audioOutputs 14/15
-				stereoBuf[6][(i<<1)  ] = outs[12][i];
-				stereoBuf[6][(i<<1)+1] = outs[13][i];
-				stereoBuf[7][(i<<1)  ] = outs[14][i];
-				stereoBuf[7][(i<<1)+1] = outs[15][i];
-
-				if(outs[0][i] != 0 || outs[1][i] != 0)
-					++blockNonZero;
+				stereoBuf[(i<<1)  ] = outs[0][i];
+				stereoBuf[(i<<1)+1] = outs[1][i];
 			}
-			totalSamples += blockSize;
-			nonZeroSamples += blockNonZero;
 
-			synthLib::AsyncWriter* writers[] = {&writer0, &writer1, &writer2, &writer3, &writer4, &writer5, &writerB, &writerC};
-			for (int w = 0; w < 8; ++w)
+			writer.append([&stereoBuf](std::vector<dsp56k::TWord>& _wavOut)
 			{
-				const int idx = w;
-				writers[w]->append([&stereoBuf, idx](std::vector<dsp56k::TWord>& _wavOut)
-				{
-					_wavOut.insert(_wavOut.end(), stereoBuf[idx].begin(), stereoBuf[idx].end());
-				});
-			}
-
-			// Log audio stats every ~2 seconds
-			if(totalSamples > 0 && (totalSamples % (44100 * 2)) < blockSize)
-			{
-				std::cout << "Audio: nonZero=" << nonZeroSamples << "/" << totalSamples
-					<< " (" << (nonZeroSamples * 100 / totalSamples) << "%)" << std::endl;
-			}
-
-			// Safety exit after ~60 seconds of audio
-			if(totalSamples > 44100 * 60 * 10)
-			{
-				std::cout << "Timeout after 60s of audio capture" << std::endl;
-				break;
-			}
+				_wavOut.insert(_wavOut.end(), stereoBuf.begin(), stereoBuf.end());
+			});
 		}
 	}
 
-	std::cout << "Final audio stats: nonZero=" << nonZeroSamples << "/" << totalSamples
-		<< " (" << (totalSamples > 0 ? (nonZeroSamples * 100 / totalSamples) : 0) << "%)" << std::endl;
+	std::cout << '\a';
+	std::cin.ignore();
 
 	return 0;
 }
