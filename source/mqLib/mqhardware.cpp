@@ -85,6 +85,18 @@ namespace mqLib
 				portC.setControl(0x10);   // Enable bit 4 as GPIO (not ESAI)
 				portC.hostWrite(0x10);    // Set external pin value: bit 4 = VE expansion
 			}
+
+			// Set ESAI clock dividers immediately so frame rates are aligned from
+			// the very first frame, including during boot.  In real hardware all 3
+			// DSPs share a single ESAI bit-clock so every frame period contains the
+			// maximum slot count (32).  In the emulator each DSP has its own
+			// EsxiClock, so we compensate with per-direction dividers:
+			//   A: 2 TX slots → txDiv=15 (fire every 16th tick → 32 ticks/frame)
+			//   B: 2 RX slots → rxDiv=15 (fire every 16th tick → 32 ticks/frame)
+			//   C: 32 TX+RX  → no divider needed
+			m_dsps[0].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[0].getPeriph().getEsai(), 15, 0);
+			m_dsps[1].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[1].getPeriph().getEsai(), 0, 15);
+			m_dsps[2].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[2].getPeriph().getEsai(), 0, 0);
 		}
 #endif
 
@@ -255,29 +267,9 @@ namespace mqLib
 		// Block further DSP resets now that VE init is complete
 		m_voiceExpansionReady = true;
 
-		// In real hardware, all 3 DSPs share the same ESAI bit-clock so
-		// every frame period contains the MAXIMUM slot count (32).  DSPs
-		// with fewer active slots simply idle for the remaining slots.
-		// In the emulator each DSP has its own EsxiClock, so we must add
-		// per-direction dividers to keep the frame rates aligned:
-		//   baseCPS = normalCPS * masterTxSlots / maxSlots
-		//   A: txDiv=15 (2-slot TX, slow down 16×), rxDiv=0 (32-slot RX, full speed)
-		//   B: txDiv=0  (32-slot TX, full speed),  rxDiv=15 (2-slot RX, slow down 16×)
-		//   C: txDiv=0  (32-slot TX, full speed),  rxDiv=0  (32-slot RX, full speed)
-		{
-			auto& clockA = m_dsps[0].getPeriph().getEsaiClock();
-			auto& clockB = m_dsps[1].getPeriph().getEsaiClock();
-			auto& clockC = m_dsps[2].getPeriph().getEsaiClock();
-			auto& esaiA  = m_dsps[0].getPeriph().getEsai();
-			auto& esaiB  = m_dsps[1].getPeriph().getEsai();
-			auto& esaiC  = m_dsps[2].getPeriph().getEsai();
-
-			clockA.setEsaiDivider(&esaiA, 15, 0);   // A: TX÷16, RX÷1
-			clockB.setEsaiDivider(&esaiB, 0, 15);    // B: TX÷1, RX÷16
-			clockC.setEsaiDivider(&esaiC, 0, 0);     // C: TX÷1, RX÷1
-
-			LOG("Voice Expansion: ESAI clock dividers set — A:tx15/rx0  B:tx0/rx15  C:tx0/rx0");
-		}
+		// ESAI clock dividers were already set in the Hardware constructor
+		// (before any DSP threads started) to ensure frame rates are aligned
+		// from the very first frame.
 
 		// Set up A's ESAI callback for frame counting + CV notification
 		setupEsaiListener();
