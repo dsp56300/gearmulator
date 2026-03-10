@@ -39,6 +39,12 @@ OsTIrus:
 
 - [Imp] Add sample rate selection to DSP & Audio settings
 
+2.1.5:
+
+JE8086:
+
+- [Imp] EMU-50 Create better default values when doubleclicking on a parameter
+
 2.1.4:
 
 Framework:
