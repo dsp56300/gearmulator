@@ -351,12 +351,17 @@ namespace baseLib
 		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
 		BinaryStream tryReadChunk(char const(&_4Cc)[N], const uint32_t _version = 1)
 		{
-			return tryReadChunkInternal(_4Cc, _version);
+			return tryReadChunkInternal(_4Cc, _version, _version).first;
+		}
+
+		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
+		std::pair<BinaryStream,uint32_t> tryReadChunk(char const(&_4Cc)[N], const uint32_t _minVersion, const uint32_t _maxVersion)
+		{
+			return tryReadChunkInternal(_4Cc, _minVersion, _maxVersion);
 		}
 
 	private:
-		BinaryStream tryReadChunkInternal(const char* _4Cc, uint32_t _version = 1);
-
+		std::pair<BinaryStream, uint32_t> tryReadChunkInternal(const char* _4Cc, const uint32_t _minVersion, const uint32_t _maxVersion);
 
 		// ___________________________________
 		// helpers

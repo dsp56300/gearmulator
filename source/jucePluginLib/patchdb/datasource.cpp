@@ -159,7 +159,7 @@ namespace pluginLib::patchDB
 
 	void DataSource::write(baseLib::BinaryStream& _outStream) const
 	{
-		baseLib::ChunkWriter cw(_outStream, chunks::g_datasource, 1);
+		baseLib::ChunkWriter cw(_outStream, chunks::g_datasource, 2);
 
 		_outStream.write(static_cast<uint8_t>(type));
 		_outStream.write(static_cast<uint8_t>(origin));
@@ -170,11 +170,13 @@ namespace pluginLib::patchDB
 
 		for (const auto& patch : patches)
 			patch->write(_outStream);
+
+		_outStream.write(midiBankNumber);
 	}
 
 	bool DataSource::read(baseLib::BinaryStream& _inStream)
 	{
-		auto in = _inStream.tryReadChunk(chunks::g_datasource);
+		auto [in, version] = _inStream.tryReadChunk(chunks::g_datasource, 1, 2);
 		if(!in)
 			return false;
 
@@ -195,6 +197,9 @@ namespace pluginLib::patchDB
 
 			patches.insert(patch);
 		}
+
+		if(version >= 2)
+			midiBankNumber = in.read<uint32_t>();
 
 		return true;
 	}
