@@ -76,7 +76,8 @@ namespace mqLib
 
 	Hardware::~Hardware()
 	{
-		m_dsps.front().getPeriph().getEsai().setCallback({}, 0);
+		for (auto & dsp : m_dsps)
+			dsp.getPeriph().getEsai().setCallback({}, 0);
 	}
 
 	void Hardware::process()
