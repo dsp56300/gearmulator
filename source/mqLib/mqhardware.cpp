@@ -395,12 +395,12 @@ namespace mqLib
 		outputs[2] = &m_audioOutputs[3].front();
 		outputs[5] = &m_audioOutputs[4].front();
 		outputs[4] = &m_audioOutputs[5].front();
-		outputs[7] = &m_audioOutputs[6].front();
-		outputs[6] = &m_audioOutputs[7].front();
-		outputs[9] = &m_audioOutputs[8].front();
-		outputs[8] = &m_audioOutputs[9].front();
-		outputs[11] = &m_audioOutputs[10].front();
-		outputs[10] = &m_audioOutputs[11].front();
+		outputs[7] = m_dummyOutput.data();
+		outputs[6] = m_dummyOutput.data();
+		outputs[9] = m_dummyOutput.data();
+		outputs[8] = m_dummyOutput.data();
+		outputs[11] = m_dummyOutput.data();
+		outputs[10] = m_dummyOutput.data();
 
 		while (_frames)
 		{
