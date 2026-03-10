@@ -28,7 +28,12 @@ namespace mqLib
 			return;
 
 		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768); // measured as being roughly 33,9MHz, this should be exact
+
+#if MQ_VOICE_EXPANSION
+		m_periphX.getEsaiClock().setSamplerate(16 * 44100); // verified
+#else
 		m_periphX.getEsaiClock().setSamplerate(44100); // verified
+#endif
 		m_periphX.getEsaiClock().setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 
 		auto config = m_dsp.getJit().getConfig();
