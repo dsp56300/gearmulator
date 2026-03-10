@@ -1,5 +1,15 @@
 Release Notes
 
+2.2.2:
+
+Framework:
+
+- [Fix] EMU-18 Patch Manager: MIDI Banks category now appears for all synths
+        (was missing in Xenia, Vavra, and NodalRed2x)
+- [Fix] EMU-18 Patch Manager: MIDI bank assignments now persist across
+        plugin reloads (added serialization to binary cache)
+- [Fix] EMU-18 Patch Manager: MIDI Banks category is now collapsed by default
+
 2.2.1:
 
 Framework:
