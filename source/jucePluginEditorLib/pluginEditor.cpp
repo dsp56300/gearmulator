@@ -119,7 +119,8 @@ namespace jucePluginEditorLib
 			if (juceRmlUi::helper::isContextMenu(_event))
 			{
 				_event.StopPropagation();
-				openMenu(_event);
+				if (!settingsOpened())
+					openMenu(_event);
 			}
 		});
 
@@ -804,9 +805,25 @@ namespace jucePluginEditorLib
 				{
 				case Rml::Input::KI_ESCAPE:
 					if (m_midiLearnModeActive)
+					{
 						setMidiLearnMode(false);
+					}
 					else
+					{
+						// Close any open context menus before toggling settings
+						if (auto* doc = getDocument())
+						{
+							Rml::ElementList menus;
+							doc->QuerySelectorAll(menus, ".menubox");
+							if (!menus.empty())
+							{
+								for (auto* menu : menus)
+									menu->GetParentNode()->RemoveChild(menu);
+								break;
+							}
+						}
 						toggleSettings();
+					}
 					_event.StopPropagation();
 					break;
 				default:;
