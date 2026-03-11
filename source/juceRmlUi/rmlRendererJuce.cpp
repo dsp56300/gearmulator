@@ -1393,13 +1393,13 @@ namespace juceRmlUi
 		));
 	}
 
-	void RendererJuce::beginFrame(juce::Graphics& _g)
+	void RendererJuce::beginFrame(juce::Graphics& _g, const Rml::Vector2i _size)
 	{
 		m_graphics = &_g;
 		m_graphics->setImageResamplingQuality(juce::Graphics::mediumResamplingQuality);
 
-		const auto width = _g.getClipBounds().getWidth();
-		const auto height = _g.getClipBounds().getHeight();
+		const auto width = _size.x;
+		const auto height = _size.y;
 
 		m_scissorRegion = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0,0), Rml::Vector2i(width, height));
 
