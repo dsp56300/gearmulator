@@ -9,6 +9,8 @@ Framework:
 - [Fix] EMU-18 Patch Manager: MIDI bank assignments now persist across
         plugin reloads (added serialization to binary cache)
 - [Fix] EMU-18 Patch Manager: MIDI Banks category is now collapsed by default
+- [Fix] Patch Manager: Fix potential crash when scrolling group tree node
+        into view after element was destroyed
 
 2.2.1:
 

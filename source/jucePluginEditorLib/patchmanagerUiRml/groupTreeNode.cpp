@@ -289,14 +289,17 @@ namespace jucePluginEditorLib::patchManagerRml
 
 		m_patchManager.getEditor().getRmlComponent()->addPostFrameCallback([node]
 		{
-			Rml::ScrollIntoViewOptions options;
+			if (auto* elem = node->getElement())
+			{
+				Rml::ScrollIntoViewOptions options;
 
-			options.vertical = Rml::ScrollAlignment::Nearest;
-			options.horizontal = Rml::ScrollAlignment::Nearest;
-			options.behavior = Rml::ScrollBehavior::Smooth;
-			options.parentage = Rml::ScrollParentage::All;
+				options.vertical = Rml::ScrollAlignment::Nearest;
+				options.horizontal = Rml::ScrollAlignment::Nearest;
+				options.behavior = Rml::ScrollBehavior::Smooth;
+				options.parentage = Rml::ScrollParentage::All;
 
-			node->getElement()->ScrollIntoView(options);
+				elem->ScrollIntoView(options);
+			}
 		});
 
 		return true;
