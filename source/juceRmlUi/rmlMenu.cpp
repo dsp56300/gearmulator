@@ -167,6 +167,7 @@ namespace juceRmlUi
 
 		m_document = _parent->GetOwnerDocument();
 		m_document->AddEventListener(Rml::EventId::Mousedown, this, true);
+		m_document->AddEventListener(Rml::EventId::Keydown, this, true);
 
 		m_root->AddEventListener(Rml::EventId::Mouseover, this);
 	}
@@ -187,6 +188,7 @@ namespace juceRmlUi
 		if (m_document)
 		{
 			m_document->RemoveEventListener(Rml::EventId::Mousedown, this, true);
+			m_document->RemoveEventListener(Rml::EventId::Keydown, this, true);
 			m_document = nullptr;
 		}
 
@@ -212,6 +214,13 @@ namespace juceRmlUi
 				if (isChildOfThis(target))
 					return;
 				close();
+			}
+			break;
+		case Rml::EventId::Keydown:
+			if (helper::getKeyIdentifier(_event) == Rml::Input::KI_ESCAPE)
+			{
+				closeAll();
+				_event.StopPropagation();
 			}
 			break;
 		default:
