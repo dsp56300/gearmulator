@@ -1158,6 +1158,7 @@ namespace jucePluginEditorLib
 		if (!_show && m_settings)
 		{
 			m_settings.reset();
+			onSettingsClosed();
 		}
 		else if (_show && !m_settings)
 		{

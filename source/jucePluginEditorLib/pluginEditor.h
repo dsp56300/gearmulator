@@ -84,6 +84,7 @@ namespace jucePluginEditorLib
 	{
 	public:
 		baseLib::Event<Editor*, Rml::Event&> onOpenMenu;
+		baseLib::Event<> onSettingsClosed;
 
 		Editor(Processor& _processor, Skin _skin);
 		~Editor() override;
