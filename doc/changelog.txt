@@ -2,6 +2,11 @@ Release Notes
 
 2.1.5:
 
+Framework:
+
+- [Imp] BUG-10125 Browser grid view now supports mouse wheel scrolling for
+        horizontal navigation
+
 JE8086:
 
 - [Imp] EMU-50 Create better default values when doubleclicking on a parameter
