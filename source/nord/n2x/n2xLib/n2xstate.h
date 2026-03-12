@@ -161,6 +161,7 @@ namespace n2x
 		}
 
 		void send(const synthLib::SMidiEvent& _e) const;
+		void applyMasterTuneToMCU(uint8_t _masterTune);
 
 		Hardware* m_hardware;
 		synthLib::MidiTranslator* m_midiTranslator;

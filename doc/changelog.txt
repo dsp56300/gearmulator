@@ -6,6 +6,12 @@ JE8086:
 
 - [Imp] EMU-50 Create better default values when doubleclicking on a parameter
 
+NodalRed2x:
+
+- [Fix] BUG-10010 Master Tune knob now correctly affects tuning (firmware
+        protects the value during multi dump processing, fix applies it
+        directly to MCU memory)
+
 2.1.4:
 
 Framework:
