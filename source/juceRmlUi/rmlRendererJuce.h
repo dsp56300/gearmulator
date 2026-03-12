@@ -43,7 +43,7 @@ namespace juceRmlUi
 		RendererJuce& operator=(const RendererJuce&) = delete;
 		RendererJuce& operator=(RendererJuce&&) = delete;
 
-		void beginFrame(juce::Graphics& _g);
+		void beginFrame(juce::Graphics& _g, Rml::Vector2i _size);
 		void endFrame(const juce::Image& _renderTarget);
 
 		Rml::CompiledGeometryHandle	CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;

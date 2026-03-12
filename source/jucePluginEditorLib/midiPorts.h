@@ -1,5 +1,7 @@
 #pragma once
 
+#include "baseLib/event.h"
+
 namespace juceRmlUi
 {
 	class ElemComboBox;
@@ -31,7 +33,7 @@ namespace jucePluginEditorLib
 	class MidiPorts
 	{
 	public:
-		explicit MidiPorts(const Editor& _editor, Processor& _processor);
+		explicit MidiPorts(Editor& _editor, Processor& _processor);
 
 		static void createMidiInputMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts&);
 		static void createMidiOutputMenu(juceRmlUi::Menu& _menu, pluginLib::MidiPorts&);
@@ -39,6 +41,8 @@ namespace jucePluginEditorLib
 
 		static void initInputComboBox(Processor& _processor, juceRmlUi::ElemComboBox* _combo);
 		static void initOutputComboBox(Processor& _processor, juceRmlUi::ElemComboBox* _combo);
+
+		void refreshSelection();
 
 	private:
 		pluginLib::MidiPorts& getMidiPorts() const;
@@ -57,5 +61,7 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::ElemComboBox* m_midiIn = nullptr;
 		juceRmlUi::ElemComboBox* m_midiOut = nullptr;
+
+		baseLib::EventListener<> m_onSettingsClosed;
 	};
 }

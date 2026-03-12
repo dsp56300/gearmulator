@@ -173,6 +173,17 @@ namespace jucePluginEditorLib
 				// Update label
 				labelGain->SetInnerRML(Rml::StringUtilities::EncodeRml(formatDbLabel(db)));
 			});
+
+			// Double-click resets to 0 dB
+			juceRmlUi::EventListener::Add(sliderGain, Rml::EventId::Dblclick, [this, sliderGain, labelGain](Rml::Event& _event)
+			{
+				_event.StopPropagation();
+
+				constexpr float defaultDb = 0.0f;
+				sliderGain->SetAttribute("value", std::to_string(defaultDb));
+				m_processor.setOutputGain(dbToGain(defaultDb));
+				labelGain->SetInnerRML(Rml::StringUtilities::EncodeRml(formatDbLabel(defaultDb)));
+			});
 		}
 
 		// Resampler mode buttons

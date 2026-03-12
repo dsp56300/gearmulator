@@ -1,5 +1,19 @@
 Release Notes
 
+2.2.2:
+
+Framework:
+
+- [Fix] EMU-18 Patch Manager: MIDI Banks category now appears for all synths
+        (was missing in Xenia, Vavra, and NodalRed2x)
+- [Fix] EMU-18 Patch Manager: MIDI bank assignments now persist across
+        plugin reloads (added serialization to binary cache)
+- [Fix] EMU-18 Patch Manager: MIDI Banks category is now collapsed by default
+- [Fix] Patch Manager: Fix potential crash when scrolling group tree node
+        into view after element was destroyed
+- [Fix] Software Renderer: Fix UI scaling issue in Bitwig when monitor
+        DPI is set above 100%
+
 2.2.1:
 
 Framework:
@@ -38,6 +52,12 @@ Framework:
 OsTIrus:
 
 - [Imp] Add sample rate selection to DSP & Audio settings
+
+2.1.5:
+
+JE8086:
+
+- [Imp] EMU-50 Create better default values when doubleclicking on a parameter
 
 2.1.4:
 

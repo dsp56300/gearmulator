@@ -619,7 +619,15 @@ namespace juceRmlUi
 	{
 		if (m_openGLContext)
 			return static_cast<float>(m_openGLContext->getRenderingScale());
-		return 1.0f;
+
+		float scale = 1.0f;
+		const Component* t = this;
+		while (t)
+		{
+			scale *= std::sqrt (std::abs (t->getTransform().getDeterminant()));
+			t = t->getParentComponent();
+		}
+		return scale;
 	}
 
 	void RmlComponent::resize(const int _width, const int _height)
@@ -860,22 +868,19 @@ namespace juceRmlUi
 		if (!r)
 			return;
 
-		r->beginFrame(_g);
-
-		m_renderProxy->executeRenderFunctions();
-
 		auto* rootComp = getTopLevelComponent();
 		auto* laf = dynamic_cast<LookAndFeel*>(&rootComp->getLookAndFeel());
 
-		if (laf)
-		{
-			r->endFrame(laf->getCurrentImage());
-		}
-		else
-		{
-			static juce::Image nullImage;
-			r->endFrame(nullImage);
-		}
+		const auto& img = laf ? laf->getCurrentImage() : juce::Image();
+		const auto size = img.isValid()
+			? Rml::Vector2i(img.getWidth(), img.getHeight())
+			: getRenderSize();
+
+		r->beginFrame(_g, size);
+
+		m_renderProxy->executeRenderFunctions();
+
+		r->endFrame(img);
 
 		m_renderDone = true;
 	}

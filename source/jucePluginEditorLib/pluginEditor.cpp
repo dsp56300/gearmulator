@@ -119,7 +119,8 @@ namespace jucePluginEditorLib
 			if (juceRmlUi::helper::isContextMenu(_event))
 			{
 				_event.StopPropagation();
-				openMenu(_event);
+				if (!settingsOpened())
+					openMenu(_event);
 			}
 		});
 
@@ -145,15 +146,6 @@ namespace jucePluginEditorLib
 			}
 		});
 #endif
-
-		juceRmlUi::EventListener::Add(getRmlRootElement(), Rml::EventId::Keydown, [this](Rml::Event& _event)
-		{
-			if (m_midiLearnModeActive && juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_ESCAPE)
-			{
-				setMidiLearnMode(false);
-				_event.StopPropagation();
-			}
-		});
 	}
 
 	void Editor::initPluginDataModel(PluginDataModel& _model)
@@ -812,7 +804,14 @@ namespace jucePluginEditorLib
 				switch (juceRmlUi::helper::getKeyIdentifier(_event))
 				{
 				case Rml::Input::KI_ESCAPE:
-					toggleSettings();
+					if (m_midiLearnModeActive)
+					{
+						setMidiLearnMode(false);
+					}
+					else
+					{
+						toggleSettings();
+					}
 					_event.StopPropagation();
 					break;
 				default:;
@@ -1147,6 +1146,7 @@ namespace jucePluginEditorLib
 		if (!_show && m_settings)
 		{
 			m_settings.reset();
+			onSettingsClosed();
 		}
 		else if (_show && !m_settings)
 		{
