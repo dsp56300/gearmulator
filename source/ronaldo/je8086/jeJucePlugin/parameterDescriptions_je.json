@@ -327,6 +327,45 @@
  	],
 	"regions":
 	[
+		{	"id":"lfo", "name": "LFO",
+			"parameters":["Lfo1Waveform", "Lfo1Rate", "Lfo1Fade", "Lfo2Rate", "Lfo2DepthSelect", "Lfo1AndEnvelopeDestination", "OscLfo1Depth", "PitchLfo2Depth", "AutoPanManualPanSwitch"]
+		},
+		{	"id":"osc1", "name": "Oscillator 1",
+			"parameters":["Osc1Waveform", "Osc1Control1", "Osc1Control2", "Osc1Control1Detune", "Osc1Control2Mix", "Osc1Control1Offset", "Osc1Control2LFO1Depth", "Osc1Control1CutoffFrq", "Osc1Control2Resonance", "Osc1Control1Harmonics", "Osc1Control2FeedbackAmount", "Osc1Control1PulseWidth", "Osc1Control2PWMDepth", "Osc1Control1Shape"]
+		},
+		{	"id":"osc2", "name": "Oscillator 2",
+			"parameters":["Osc2Waveform", "Osc2SyncSwitch", "Osc2Range", "Osc2FineWide", "Osc2Fine", "Osc2WidePos", "Osc2WideNeg", "Osc2Control1", "Osc2Control2", "Osc2Control1PulseWidth", "Osc2Control2PWMDepth", "Osc2Control1Shape", "Osc2Control2LFO1Depth", "Osc2Control1CutoffFrq", "Osc2Control2Resonance", "Osc2ExternalInputSwitch"]
+		},
+		{	"id":"oscCommon", "name": "Osc Common",
+			"parameters":["RingModulatorSwitch", "CrossModulationDepth", "OscillatorBalance", "OscillatorShift"]
+		},
+		{	"id":"pitch", "name": "Pitch Envelope",
+			"parameters":["PitchEnvelopeDepth", "PitchEnvelopeAttackTime", "PitchEnvelopeDecayTime"]
+		},
+		{	"id":"filter", "name": "Filter",
+			"parameters":["FilterType", "CutoffSlope", "CutoffFrequency", "Resonance", "CutoffFrequencyKeyFollow", "FilterLfo1Depth", "FilterLfo2Depth", "FilterEnvelopeDepth"]
+		},
+		{	"id":"filterEnv", "name": "Filter Envelope",
+			"parameters":["FilterEnvelopeAttackTime", "FilterEnvelopeDecayTime", "FilterEnvelopeSustainLevel", "FilterEnvelopeReleaseTime"]
+		},
+		{	"id":"amp", "name": "Amplifier",
+			"parameters":["AmpLevel", "AmpLfo1Depth", "AmpPan", "AmpLfo2Depth"]
+		},
+		{	"id":"ampEnv", "name": "Amp Envelope",
+			"parameters":["AmpEnvelopeAttackTime", "AmpEnvelopeDecayTime", "AmpEnvelopeSustainLevel", "AmpEnvelopeReleaseTime"]
+		},
+		{	"id":"tone", "name": "Tone Control",
+			"parameters":["ToneControlBass", "ToneControlTreble"]
+		},
+		{	"id":"chorus", "name": "Chorus",
+			"parameters":["ChorusType", "ChorusTypeRack", "ChorusLevel", "MultiEffectsLevel"]
+		},
+		{	"id":"delay", "name": "Delay",
+			"parameters":["DelayType", "DelayTime", "DelayFeedback", "DelayLevel"]
+		},
+		{	"id":"playMode", "name": "Play Mode",
+			"parameters":["BendRangeUp", "BendRangeDown", "PortamentoSwitch", "PortamentoTime", "MonoSwitch", "LegatoSwitch", "UnisonSwitch", "UnisonDetune", "PatchGain", "VelocitySwitch", "ExternalTriggerSwitch", "ExternalTriggerDestination", "VoiceModulatorSendSwitch"]
+		}
 	],
  	"valuelists":
  	{
