@@ -47,13 +47,21 @@ namespace jucePluginEditorLib
 			if (m_overlayElements.find(_type) != m_overlayElements.end())
 				return;
 
+			auto* offsetParent = m_component->GetOffsetParent();
+
+			if(!offsetParent)
+				offsetParent = m_component->GetOwnerDocument();
+
 			auto overlay = m_component->GetOwnerDocument()->CreateElement("div");
 
 			overlay->SetAttribute("class", "tus-parameteroverlay tus-parameteroverlaytype-" + toString(_type));
 
 			overlay->SetProperty(Rml::PropertyId::Opacity, Rml::Property(_opacity, Rml::Unit::NUMBER));
+			overlay->SetProperty(Rml::PropertyId::Left, Rml::Property(m_component->GetOffsetLeft(), Rml::Unit::PX));
+			overlay->SetProperty(Rml::PropertyId::Top, Rml::Property(m_component->GetOffsetTop(), Rml::Unit::PX));
+			overlay->SetProperty(Rml::PropertyId::Width, Rml::Property(m_component->GetOffsetWidth(), Rml::Unit::PX));
 
-			m_overlayElements.insert({ _type, m_component->AppendChild(std::move(overlay)) });
+			m_overlayElements.insert({ _type, offsetParent->AppendChild(std::move(overlay)) });
 		}
 		else
 		{
