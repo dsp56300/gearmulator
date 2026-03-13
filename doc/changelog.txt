@@ -4,6 +4,8 @@ Release Notes
 
 Framework:
 
+- [Fix] BUG-10117 Combo box mouse wheel scrolling now follows display order
+        for custom-ordered dropdowns (e.g. Page Matrix Assign Destination)
 - [Imp] BUG-10125 Browser grid view now supports mouse wheel scrolling for
         horizontal navigation
 
