@@ -10,10 +10,12 @@ Framework:
         elements instead of falling through to the global menu
 - [Imp] BUG-10125 Browser grid view now supports mouse wheel scrolling for
         horizontal navigation
+- [Imp] Added parameter linking for individual parameters
 
 JE8086:
 
 - [Imp] EMU-50 Create better default values when doubleclicking on a parameter
+- [Imp] BUG-10102 Added parameter locking/linking for JE8086
 
 NodalRed2x:
 
