@@ -55,9 +55,28 @@ OsTIrus:
 
 2.1.5:
 
+Framework:
+
+- [Fix] BUG-10117 Combo box mouse wheel scrolling now follows display order
+        for custom-ordered dropdowns (e.g. Page Matrix Assign Destination)
+- [Fix] Right-click context menu now opens correctly on scrollbar/slider
+        elements instead of falling through to the global menu
+- [Imp] BUG-10125 Browser grid view now supports mouse wheel scrolling for
+        horizontal navigation
+- [Imp] Added parameter linking for individual parameters
+
 JE8086:
 
 - [Imp] EMU-50 Create better default values when doubleclicking on a parameter
+- [Imp] BUG-10102 Added parameter locking/linking for JE8086
+
+NodalRed2x:
+
+- [Fix] BUG-10010 Master Tune knob now correctly affects tuning (firmware
+        protects the value during multi dump processing, fix applies it
+        directly to MCU memory)
+- [Fix] BUG-10110 Arpeggiator/LFO timing no longer slows down under heavy
+        MIDI traffic (CC rate limiting prevents firmware event queue saturation)
 
 2.1.4:
 

@@ -235,6 +235,8 @@ namespace jeJucePlugin
 		if (!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), _part))
 			return false;
 
+		m_controller.sendLockedParameters(static_cast<uint8_t>(_part));
+
 		const auto area = jeLib::State::getAddressArea(_patch->sysex);
 
 		if (area == jeLib::AddressArea::UserPerformance)

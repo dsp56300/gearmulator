@@ -23,29 +23,53 @@ namespace hwLib
 		if(m_readingSysex)
 			return;
 
-		auto remainingSamples = _numSamples;
-
-		while(!m_pendingSysexBuffers.empty())
+		// Move ready sysex messages into the byte buffer
 		{
-			if(m_remainingSysexDelay > 0)
+			auto remainingSamples = _numSamples;
+
+			while(!m_pendingSysexBuffers.empty())
 			{
-				const auto sub = std::min(m_remainingSysexDelay, remainingSamples);
-				remainingSamples -= sub;
+				if(m_remainingSysexDelay > 0)
+				{
+					const auto sub = std::min(m_remainingSysexDelay, remainingSamples);
+					remainingSamples -= sub;
+					m_remainingSysexDelay -= sub;
+				}
 
-				m_remainingSysexDelay -= sub;
+				if(m_remainingSysexDelay)
+					break;
+
+				const auto& msg = m_pendingSysexBuffers.front();
+
+				for (const auto b : msg)
+					m_pendingBytes.push_back(b);
+
+				m_remainingSysexDelay = static_cast<uint32_t>(static_cast<float>(msg.size()) * m_samplerate * m_sysexDelaySeconds / static_cast<float>(m_sysexDelaySize));
+
+				m_pendingSysexBuffers.pop_front();
 			}
+		}
 
-			if(m_remainingSysexDelay)
-				break;
+		// Drain all pending bytes to QSM with baud rate pacing
+		{
+			auto remainingSamples = _numSamples;
 
-			const auto& msg = m_pendingSysexBuffers.front();
+			while(!m_pendingBytes.empty())
+			{
+				if(m_remainingByteDelay > 0)
+				{
+					const auto sub = std::min(m_remainingByteDelay, remainingSamples);
+					remainingSamples -= sub;
+					m_remainingByteDelay -= sub;
+				}
 
-			for (const auto b : msg)
-				m_qsm.writeSciRX(b);
+				if(m_remainingByteDelay)
+					break;
 
-			m_remainingSysexDelay = static_cast<uint32_t>(static_cast<float>(msg.size()) * m_samplerate * m_sysexDelaySeconds / static_cast<float>(m_sysexDelaySize));
-
-			m_pendingSysexBuffers.pop_front();
+				m_qsm.writeSciRX(m_pendingBytes.front());
+				m_pendingBytes.pop_front();
+				m_remainingByteDelay = static_cast<uint32_t>(m_samplerate * m_byteDelaySeconds);
+			}
 		}
 	}
 
@@ -61,6 +85,10 @@ namespace hwLib
 		if(m_writingSysex)
 		{
 			m_pendingSysexMessage.push_back(_byte);
+		}
+		else if(m_byteDelaySeconds > 0.0f)
+		{
+			m_pendingBytes.push_back(_byte);
 		}
 		else
 		{
@@ -122,5 +150,10 @@ namespace hwLib
 	{
 		m_sysexDelaySeconds = _seconds;
 		m_sysexDelaySize = _size;
+	}
+
+	void SciMidi::setByteDelay(const float _seconds)
+	{
+		m_byteDelaySeconds = _seconds;
 	}
 }

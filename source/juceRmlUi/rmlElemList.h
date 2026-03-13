@@ -58,6 +58,7 @@ namespace juceRmlUi
 		Rml::Element* createSpacer();
 
 		void onScroll(const Rml::Event& _event);
+		void onMouseScroll(Rml::Event& _event);
 		bool onKeypress(Rml::Event& _event);
 
 		uint32_t getItemsPerColumn();
@@ -89,6 +90,8 @@ namespace juceRmlUi
 		Rml::Element* m_scrollDummy = nullptr;
 
 		uint32_t m_scrollTargetDirty = 0;
+
+		bool m_redirectingMouseScroll = false;
 
 		List m_list;
 

@@ -233,7 +233,7 @@ namespace n2xJucePlugin
 
 		auto ev = synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, static_cast<uint8_t>(synthLib::M_CONTROLCHANGE + part), cc, static_cast<uint8_t>(_value)};
 
-		nonConstParam.setRateLimitMilliseconds(0);
+		nonConstParam.setRateLimitMilliseconds(20);
 		m_state.changeSingleParameter(part, ev);
 		sendMidiEvent(n2x::State::createPartCC(part, ev));
 	}
