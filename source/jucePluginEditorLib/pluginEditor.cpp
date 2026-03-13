@@ -444,43 +444,44 @@ namespace jucePluginEditorLib
 		const auto& regions = controller.getParameterDescriptions().getRegions();
 		const auto paramRegionIds = controller.getRegionIdsForParameter(param);
 
-		if(paramRegionIds.empty())
-			return false;
-
 		const auto part = param->getPart();
+		const auto hasRegions = !paramRegionIds.empty();
 
 		juceRmlUi::Menu menu;
 
 		// Lock / Unlock
 
-		for (const auto& regionId : paramRegionIds)
+		if(hasRegions)
 		{
-			const auto& regionName = regions.find(regionId)->second.getName();
-
-			const auto isLocked = controller.getParameterLocking().isRegionLocked(part, regionId);
-
-			menu.addEntry(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked, part]
+			for (const auto& regionId : paramRegionIds)
 			{
-				auto& locking = m_processor.getController().getParameterLocking();
-				if(isLocked)
-					locking.unlockRegion(part, regionId);
-				else
-					locking.lockRegion(part, regionId);
-			});
-		}
+				const auto& regionName = regions.find(regionId)->second.getName();
 
-		// Copy to clipboard
+				const auto isLocked = controller.getParameterLocking().isRegionLocked(part, regionId);
 
-		menu.addSeparator();
+				menu.addEntry(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked, part]
+				{
+					auto& locking = m_processor.getController().getParameterLocking();
+					if(isLocked)
+						locking.unlockRegion(part, regionId);
+					else
+						locking.lockRegion(part, regionId);
+				});
+			}
 
-		for (const auto& regionId : paramRegionIds)
-		{
-			const auto& regionName = regions.find(regionId)->second.getName();
+			// Copy to clipboard
 
-			menu.addEntry(std::string("Copy region '") + regionName + "'", [this, regionId]
+			menu.addSeparator();
+
+			for (const auto& regionId : paramRegionIds)
 			{
-				copyRegionToClipboard(regionId);
-			});
+				const auto& regionName = regions.find(regionId)->second.getName();
+
+				menu.addEntry(std::string("Copy region '") + regionName + "'", [this, regionId]
+				{
+					copyRegionToClipboard(regionId);
+				});
+			}
 		}
 
 		// Paste from clipboard
@@ -489,34 +490,37 @@ namespace jucePluginEditorLib
 
 		if(!data.parameterValuesByRegion.empty())
 		{
-			bool haveSeparator = false;
-
-			for (const auto& paramRegionId : paramRegionIds)
+			if(hasRegions)
 			{
-				const auto it = data.parameterValuesByRegion.find(paramRegionId);
+				bool haveSeparator = false;
 
-				if(it == data.parameterValuesByRegion.end())
-					continue;
-
-				// if region is not fully covered, skip it
-				const auto& region = regions.find(it->first)->second;
-				if(it->second.size() < region.getParams().size())
-					continue;
-
-				const auto& parameterValues = it->second;
-
-				if(!haveSeparator)
+				for (const auto& paramRegionId : paramRegionIds)
 				{
-					menu.addSeparator();
-					haveSeparator = true;
+					const auto it = data.parameterValuesByRegion.find(paramRegionId);
+
+					if(it == data.parameterValuesByRegion.end())
+						continue;
+
+					// if region is not fully covered, skip it
+					const auto& region = regions.find(it->first)->second;
+					if(it->second.size() < region.getParams().size())
+						continue;
+
+					const auto& parameterValues = it->second;
+
+					if(!haveSeparator)
+					{
+						menu.addSeparator();
+						haveSeparator = true;
+					}
+
+					const auto& regionName = regions.find(paramRegionId)->second.getName();
+
+					menu.addEntry("Paste region '" + regionName + "'", [this, parameterValues]
+					{
+						setParameters(parameterValues);
+					});
 				}
-
-				const auto& regionName = regions.find(paramRegionId)->second.getName();
-
-				menu.addEntry("Paste region '" + regionName + "'", [this, parameterValues]
-				{
-					setParameters(parameterValues);
-				});
 			}
 
 			menu.addSeparator();
@@ -543,39 +547,78 @@ namespace jucePluginEditorLib
 
 		// Parameter links
 
-		juceRmlUi::Menu linkMenu;
-
-		menu.addSeparator();
-
-		for (const auto& regionId : paramRegionIds)
+		if(controller.getPartCount() > 1)
 		{
-			juceRmlUi::Menu regionMenu;
+			juceRmlUi::Menu linkMenu;
 
-			const auto currentPart = controller.getCurrentPart();
+			menu.addSeparator();
 
-			for(uint8_t p=0; p<controller.getPartCount(); ++p)
+			if(hasRegions)
 			{
-				if(p == currentPart)
-					continue;
-
-				const auto isLinked = controller.getParameterLinks().isRegionLinked(regionId, currentPart, p);
-
-				regionMenu.addEntry(std::string("Link Part ") + std::to_string(p+1), isLinked, [this, regionId, isLinked, currentPart, p]
+				for (const auto& regionId : paramRegionIds)
 				{
-					auto& links = m_processor.getController().getParameterLinks();
+					juceRmlUi::Menu regionMenu;
 
-					if(isLinked)
-						links.unlinkRegion(regionId, currentPart, p);
-					else
-						links.linkRegion(regionId, currentPart, p, true);
-				});
+					const auto currentPart = controller.getCurrentPart();
+
+					for(uint8_t p=0; p<controller.getPartCount(); ++p)
+					{
+						if(p == currentPart)
+							continue;
+
+						const auto isLinked = controller.getParameterLinks().isRegionLinked(regionId, currentPart, p);
+
+						regionMenu.addEntry(std::string("Link Part ") + std::to_string(p+1), isLinked, [this, regionId, isLinked, currentPart, p]
+						{
+							auto& links = m_processor.getController().getParameterLinks();
+
+							if(isLinked)
+								links.unlinkRegion(regionId, currentPart, p);
+							else
+								links.linkRegion(regionId, currentPart, p, true);
+						});
+					}
+
+					const auto& regionName = regions.find(regionId)->second.getName();
+					linkMenu.addSubMenu("Region '" + regionName + "'", std::move(regionMenu));
+				}
 			}
 
-			const auto& regionName = regions.find(regionId)->second.getName();
-			linkMenu.addSubMenu("Region '" + regionName + "'", std::move(regionMenu));
-		}
+			{
+				juceRmlUi::Menu paramMenu;
 
-		menu.addSubMenu("Parameter Links", std::move(linkMenu));
+				const auto currentPart = controller.getCurrentPart();
+				const auto& paramName = param->getDescription().name;
+
+				for(uint8_t p=0; p<controller.getPartCount(); ++p)
+				{
+					if(p == currentPart)
+						continue;
+
+					auto* sourceParam = controller.getParameter(paramName, currentPart);
+					auto* destParam = controller.getParameter(paramName, p);
+
+					if(!sourceParam || !destParam)
+						continue;
+
+					const auto isLinked = sourceParam->getLinkState() != pluginLib::ParameterLinkType::None;
+
+					paramMenu.addEntry(std::string("Link Part ") + std::to_string(p+1), isLinked, [this, sourceParam, destParam, isLinked]
+					{
+						auto& links = m_processor.getController().getParameterLinks();
+
+						if(isLinked)
+							links.remove(sourceParam, destParam);
+						else
+							links.add(sourceParam, destParam, true);
+					});
+				}
+
+				linkMenu.addSubMenu("Parameter '" + param->getDescription().displayName + "'", std::move(paramMenu));
+			}
+
+			menu.addSubMenu("Parameter Links", std::move(linkMenu));
+		}
 
 		auto& midiPackets = m_processor.getController().getParameterDescriptions().getMidiPackets();
 		for (const auto& mp : midiPackets)
