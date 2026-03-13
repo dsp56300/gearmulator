@@ -22,6 +22,8 @@ NodalRed2x:
 - [Fix] BUG-10010 Master Tune knob now correctly affects tuning (firmware
         protects the value during multi dump processing, fix applies it
         directly to MCU memory)
+- [Fix] BUG-10110 Arpeggiator/LFO timing no longer slows down under heavy
+        MIDI traffic (CC rate limiting prevents firmware event queue saturation)
 
 2.1.4:
 
