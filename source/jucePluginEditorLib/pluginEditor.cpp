@@ -31,6 +31,7 @@
 #include "patchmanagerUiRml/patchmanagerDataModel.h"
 
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace jucePluginEditorLib
 {
@@ -425,6 +426,16 @@ namespace jucePluginEditorLib
 	bool Editor::openContextMenuForParameter(const Rml::Event& _event)
 	{
 		const auto* param = getRmlParameterBinding()->getParameterForElement(_event.GetTargetElement());
+
+		if(!param)
+		{
+			for(auto* node = _event.GetTargetElement()->GetParentNode(); node && !param; node = node->GetParentNode())
+			{
+				if(dynamic_cast<const Rml::ElementFormControlInput*>(node))
+					param = getRmlParameterBinding()->getParameterForElement(node);
+			}
+		}
+
 		if(!param)
 			return false;
 
