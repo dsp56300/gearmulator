@@ -160,7 +160,11 @@ namespace jucePluginEditorLib
 
 				translator->setPreset(preset);
 
-				updateMidiLearnOverlay();
+				// update all overlays for this parameter (multiple elements may share it)
+				m_overlays.forEachOverlayForParameter(m_parameter, [](ParameterOverlay& _overlay)
+				{
+					_overlay.updateMidiLearnOverlay();
+				});
 			}
 
 			// block all mouse-down during MIDI learn mode to prevent parameter changes
@@ -173,13 +177,20 @@ namespace jucePluginEditorLib
 			if (!translator)
 				return;
 
-			// reset previous listening overlay
-			if (auto* prevOverlay = m_overlays.findOverlayForParameter(editor.getMidiLearnSelectedParam()))
-				prevOverlay->setMidiLearnListening(false);
+			// reset previous listening overlays (multiple elements may share the same parameter)
+			m_overlays.forEachOverlayForParameter(editor.getMidiLearnSelectedParam(), [](ParameterOverlay& _overlay)
+			{
+				_overlay.setMidiLearnListening(false);
+			});
 
 			editor.setMidiLearnSelectedParam(m_parameter);
 			translator->startLearning(m_parameter->getDescription().name);
-			setMidiLearnListening(true);
+
+			// set all overlays for this parameter to listening (multiple elements may share it)
+			m_overlays.forEachOverlayForParameter(m_parameter, [](ParameterOverlay& _overlay)
+			{
+				_overlay.setMidiLearnListening(true);
+			});
 
 			_event.StopImmediatePropagation();
 		}

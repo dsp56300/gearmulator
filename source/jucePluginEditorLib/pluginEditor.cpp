@@ -1010,8 +1010,10 @@ namespace jucePluginEditorLib
 					{
 						if (m_overlays)
 						{
-							if (auto* overlay = m_overlays->findOverlayForParameter(selectedParam))
-								overlay->setMidiLearnListening(false);
+							m_overlays->forEachOverlayForParameter(selectedParam, [](ParameterOverlay& _overlay)
+							{
+								_overlay.setMidiLearnListening(false);
+							});
 						}
 					});
 				};

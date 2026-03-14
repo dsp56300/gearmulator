@@ -60,6 +60,8 @@ namespace jucePluginEditorLib
 
 		void ProcessEvent(Rml::Event& _event) override;
 
+		void updateMidiLearnOverlay();
+
 	private:
 		struct OverlayProperties
 		{
@@ -71,7 +73,6 @@ namespace jucePluginEditorLib
 		void toggleOverlay(Type _type, bool _enable, float _opacity = 1.0f);
 
 		void updateOverlays();
-		void updateMidiLearnOverlay();
 		void setParameter(pluginLib::Parameter* _parameter);
 
 		std::string getMidiLearnLabel() const;

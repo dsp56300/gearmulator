@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <map>
 #include <memory>
 
@@ -33,6 +34,7 @@ namespace jucePluginEditorLib
 		void setMidiLearnMode(bool _active);
 
 		ParameterOverlay* findOverlayForParameter(const pluginLib::Parameter* _param);
+		void forEachOverlayForParameter(const pluginLib::Parameter* _param, const std::function<void(ParameterOverlay&)>& _func);
 		void updateMidiLearnOverlays() const;
 
 	private:

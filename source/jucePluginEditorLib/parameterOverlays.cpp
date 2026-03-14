@@ -55,6 +55,15 @@ namespace jucePluginEditorLib
 		return nullptr;
 	}
 
+	void ParameterOverlays::forEachOverlayForParameter(const pluginLib::Parameter* _param, const std::function<void(ParameterOverlay&)>& _func)
+	{
+		for (const auto& [elem, overlay] : m_overlays)
+		{
+			if (overlay->getParameter() == _param)
+				_func(*overlay);
+		}
+	}
+
 	void ParameterOverlays::updateMidiLearnOverlays() const
 	{
 		for (const auto& overlay : m_overlays)
