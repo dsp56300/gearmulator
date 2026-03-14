@@ -90,6 +90,11 @@ namespace jeJucePlugin
 		return hwLib::getCharacterData(_character);
 	}
 
+	bool JeLcd::isPatchMode() const
+	{
+		return m_btPerfPatch && m_btPerfPatch->isChecked();
+	}
+
 	bool JeLcd::getOverrideText(std::vector<std::string>& _lines)
 	{
 		_lines.emplace_back(std::string("JE-8086 v") + g_pluginVersionString);
