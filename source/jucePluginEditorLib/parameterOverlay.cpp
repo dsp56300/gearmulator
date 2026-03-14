@@ -89,8 +89,7 @@ namespace jucePluginEditorLib
 			overlay->SetProperty(Rml::PropertyId::Top, Rml::Property(m_component->GetOffsetTop(), Rml::Unit::PX));
 			overlay->SetProperty(Rml::PropertyId::Width, Rml::Property(m_component->GetOffsetWidth(), Rml::Unit::PX));
 
-
-			auto* elem = m_component->AppendChild(std::move(overlay));
+			auto* elem = offsetParent->AppendChild(std::move(overlay));
 
 			if (_type == Type::MidiLearn)
 			{
