@@ -18,6 +18,8 @@ JE8086:
 
 - [Imp] EMU-50 Create better default values when doubleclicking on a parameter
 - [Imp] BUG-10102 Added parameter locking/linking for JE8086
+- [Fix] BUG-10113 Loading a single patch in patch display mode now switches
+        key mode to Single to prevent the other layer from staying active
 
 Xenia:
 

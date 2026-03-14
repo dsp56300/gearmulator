@@ -41,6 +41,7 @@ namespace jeJucePlugin
 
 		Controller& getJeController() const { return m_controller; }
 		AudioPluginAudioProcessor& getJeProcessor() const;
+		const JeLcd* getLcd() const { return m_lcd.get(); }
 
 	private:
 		void onBtWrite(Rml::Event& _event) const;

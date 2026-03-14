@@ -24,6 +24,8 @@ namespace jeJucePlugin
 		void setText(const std::array<char, 40>& _data);
 		void setParameterDisplay(const std::string& _name, const std::string& _value);
 
+		bool isPatchMode() const;
+
 		void renamePerformance() const;
 
 	private:
