@@ -4,6 +4,8 @@ Release Notes
 
 Framework:
 
+- [Fix] BUG-10134 Fixed parameter rate limiting firing too fast due to
+        unreliable JUCE timer, causing sluggish wavetable bank cycling
 - [Fix] BUG-10117 Combo box mouse wheel scrolling now follows display order
         for custom-ordered dropdowns (e.g. Page Matrix Assign Destination)
 - [Fix] Right-click context menu now opens correctly on scrollbar/slider
@@ -16,6 +18,11 @@ JE8086:
 
 - [Imp] EMU-50 Create better default values when doubleclicking on a parameter
 - [Imp] BUG-10102 Added parameter locking/linking for JE8086
+
+Xenia:
+
+- [Imp] BUG-10134 Reduced wavetable bank cycling rate limit from 250ms to
+        100ms for smoother Wave knob interaction
 
 NodalRed2x:
 
