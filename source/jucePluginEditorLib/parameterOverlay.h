@@ -51,6 +51,7 @@ namespace jucePluginEditorLib
 		void refresh()
 		{
 			updateOverlays();
+			updateMidiLearnOverlay();
 		}
 
 		void setMidiLearnMode(bool _active);

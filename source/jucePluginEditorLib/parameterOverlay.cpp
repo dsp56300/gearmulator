@@ -71,7 +71,9 @@ namespace jucePluginEditorLib
 
 	void ParameterOverlay::toggleOverlay(Type _type, const bool _enable, float _opacity/* = 1.0f*/)
 	{
-		if(_enable)
+		const auto visible = _enable && m_component->IsVisible(true);
+
+		if(visible)
 		{
 			if (m_overlayElements.find(_type) != m_overlayElements.end())
 				return;
