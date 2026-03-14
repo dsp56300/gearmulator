@@ -45,38 +45,43 @@ using namespace baseLib::filesystem;
 
 namespace synthLib
 {
+	std::string getModuleFilePath()
+	{
+		std::string path;
+#ifdef _WIN32
+		char buffer[MAX_PATH];
+		HMODULE hm = nullptr;
+
+		if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+		                      reinterpret_cast<LPCSTR>(&getModuleFilePath), &hm) == 0)
+		{
+			LOG("GetModuleHandle failed, error = " << GetLastError());
+			return {};
+		}
+		if (GetModuleFileName(hm, buffer, sizeof(buffer)) == 0)
+		{
+			LOG("GetModuleFileName failed, error = " << GetLastError());
+			return {};
+		}
+
+		path = buffer;
+#else
+		Dl_info info;
+		if (!dladdr(reinterpret_cast<const void *>(&getModuleFilePath), &info))
+		{
+			LOG("Failed to get module path");
+			return {};
+		}
+		path = info.dli_fname;
+#endif
+		return path;
+	}
+
 	std::string getModulePath(bool _stripPluginComponentFolders/* = true*/)
     {
-        std::string path;
-#ifdef _WIN32
-        char buffer[MAX_PATH];
-        HMODULE hm = nullptr;
-
-        if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                              reinterpret_cast<LPCSTR>(&getModulePath), &hm) == 0)
-        {
-            LOG("GetModuleHandle failed, error = " << GetLastError());
+        auto path = getModuleFilePath();
+        if (path.empty())
             return {};
-        }
-        if (GetModuleFileName(hm, buffer, sizeof(buffer)) == 0)
-        {
-            LOG("GetModuleFileName failed, error = " << GetLastError());
-            return {};
-        }
-
-        path = buffer;
-#else
-        Dl_info info;
-        if (!dladdr(reinterpret_cast<const void *>(&getModulePath), &info))
-        {
-            LOG("Failed to get module path");
-            return std::string();
-        }
-        else
-        {
-            path = info.dli_fname;
-        }
-#endif
 
     	auto fixPathWithDelim = [&](const std::string& _key, const char _delim)
     	{

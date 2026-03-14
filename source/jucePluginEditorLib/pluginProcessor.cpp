@@ -5,6 +5,8 @@
 
 #include "baseLib/binarystream.h"
 
+#include "synthLib/os.h"
+
 #ifdef ZYNTHIAN
 #include "dsp56kBase/logging.h"
 #endif
@@ -19,6 +21,26 @@ namespace jucePluginEditorLib
 			// https://discourse.zynthian.org/t/deadlock-when-attempting-to-log-to-stdout/10169
 		}
 #endif
+
+		std::string getPluginFormatName(const juce::AudioProcessor::WrapperType _wrapperType, const std::string& _moduleFilePath)
+		{
+			switch (_wrapperType)
+			{
+			case juce::AudioProcessor::wrapperType_VST:         return "vst2";
+			case juce::AudioProcessor::wrapperType_VST3:        return "vst3";
+			case juce::AudioProcessor::wrapperType_AudioUnit:   return "au";
+			case juce::AudioProcessor::wrapperType_AudioUnitv3: return "auv3";
+			case juce::AudioProcessor::wrapperType_LV2:         return "lv2";
+			case juce::AudioProcessor::wrapperType_Standalone:  return "standalone";
+			case juce::AudioProcessor::wrapperType_AAX:         return "aax";
+			case juce::AudioProcessor::wrapperType_Undefined:
+			default:
+				// CLAP reports as wrapperType_Undefined, detect from module file path
+				if (_moduleFilePath.find(".clap") != std::string::npos)
+					return "clap";
+				return {};
+			}
+		}
 	}
 
 	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties)
@@ -29,6 +51,7 @@ namespace jucePluginEditorLib
 #ifdef ZYNTHIAN
 		Logging::setLogFunc(&noLoggingFunc);
 #endif
+		savePluginLoadPath();
 	}
 
 	Processor::~Processor()
@@ -139,6 +162,21 @@ namespace jucePluginEditorLib
 		});
 
 		getController().loadChunkData(_cr);
+	}
+
+	void Processor::savePluginLoadPath()
+	{
+		const auto moduleFilePath = synthLib::getModuleFilePath();
+		if (moduleFilePath.empty())
+			return;
+
+		const auto format = getPluginFormatName(wrapperType, moduleFilePath);
+		if (format.empty())
+			return;
+
+		const auto key = "pluginPath_" + format;
+		getConfig().setValue(juce::String(key), juce::String(moduleFilePath));
+		getConfig().saveIfNeeded();
 	}
 
 	juce::File Processor::initConfigFile(const juce::PropertiesFile::Options& _o) const

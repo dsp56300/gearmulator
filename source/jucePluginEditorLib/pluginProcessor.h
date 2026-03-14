@@ -30,6 +30,7 @@ namespace jucePluginEditorLib
 
 	private:
 		juce::File initConfigFile(const juce::PropertiesFile::Options& _o) const;
+		void savePluginLoadPath();
 
 		std::unique_ptr<PluginEditorState> m_editorState;
 
