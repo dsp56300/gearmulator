@@ -143,28 +143,42 @@ namespace jucePluginEditorLib
 		{
 			if (juceRmlUi::helper::isContextMenu(_event))
 			{
-				// right click: clear mapping for this parameter
 				auto* translator = editor.getProcessor().getMidiLearnTranslator();
 				if (!translator)
 					return;
 
-				auto preset = translator->getPreset();
-				auto& mappings = preset.getMappings();
-				const auto paramName = m_parameter->getDescription().name;
-
-				mappings.erase(std::remove_if(mappings.begin(), mappings.end(),
-					[&paramName](const pluginLib::MidiLearnMapping& _m)
-					{
-						return _m.paramName == paramName;
-					}), mappings.end());
-
-				translator->setPreset(preset);
-
-				// update all overlays for this parameter (multiple elements may share it)
-				m_overlays.forEachOverlayForParameter(m_parameter, [](ParameterOverlay& _overlay)
+				if (m_midiLearnListening)
 				{
-					_overlay.updateMidiLearnOverlay();
-				});
+					// right click while listening: cancel learning and reset overlay
+					translator->cancelLearning();
+					editor.setMidiLearnSelectedParam(nullptr);
+
+					m_overlays.forEachOverlayForParameter(m_parameter, [](ParameterOverlay& _overlay)
+					{
+						_overlay.setMidiLearnListening(false);
+					});
+				}
+				else
+				{
+					// right click: clear mapping for this parameter
+					auto preset = translator->getPreset();
+					auto& mappings = preset.getMappings();
+					const auto paramName = m_parameter->getDescription().name;
+
+					mappings.erase(std::remove_if(mappings.begin(), mappings.end(),
+						[&paramName](const pluginLib::MidiLearnMapping& _m)
+						{
+							return _m.paramName == paramName;
+						}), mappings.end());
+
+					translator->setPreset(preset);
+
+					// update all overlays for this parameter (multiple elements may share it)
+					m_overlays.forEachOverlayForParameter(m_parameter, [](ParameterOverlay& _overlay)
+					{
+						_overlay.updateMidiLearnOverlay();
+					});
+				}
 			}
 
 			// block all mouse-down during MIDI learn mode to prevent parameter changes
