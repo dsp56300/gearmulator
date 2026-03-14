@@ -972,7 +972,6 @@ namespace jucePluginEditorLib
 			{
 				translator->onLearningProgress = nullptr;
 				translator->onMappingLearned = nullptr;
-				translator->onMappingConflict = nullptr;
 			}
 		}
 		else
@@ -1014,11 +1013,13 @@ namespace jucePluginEditorLib
 							{
 								_overlay.setMidiLearnListening(false);
 							});
+
+							// Refresh all overlays in case a CC was reassigned from another parameter
+							m_overlays->refreshMidiLearnOverlays();
 						}
 					});
 				};
 
-				translator->onMappingConflict = nullptr;
 				translator->onLearningProgress = nullptr;
 			}
 		}

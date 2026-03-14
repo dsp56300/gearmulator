@@ -70,6 +70,12 @@ namespace jucePluginEditorLib
 			overlay.second->setMidiLearnMode(overlay.second->getParameter() != nullptr);
 	}
 
+	void ParameterOverlays::refreshMidiLearnOverlays() const
+	{
+		for (const auto& overlay : m_overlays)
+			overlay.second->updateMidiLearnOverlay();
+	}
+
 	void ParameterOverlays::onBind(pluginLib::Parameter* _param, Rml::Element* _elem)
 	{
 		registerComponent(_elem);

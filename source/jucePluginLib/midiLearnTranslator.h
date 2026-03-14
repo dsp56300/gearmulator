@@ -46,7 +46,6 @@ namespace pluginLib
 
 		// Events/Callbacks
 		std::function<void(const MidiLearnMapping&)> onMappingLearned;
-		std::function<void(const MidiLearnMapping&)> onMappingConflict;
 		std::function<void(size_t, size_t)> onLearningProgress;
 		std::function<void(synthLib::MidiEventSource, const synthLib::SMidiEvent&)> onSendMidiOutput;
 

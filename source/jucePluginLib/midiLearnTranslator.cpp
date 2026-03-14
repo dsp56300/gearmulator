@@ -254,25 +254,11 @@ namespace pluginLib
 		else
 			newMapping.mode = MidiLearnMapping::Mode::Absolute;
 
-		// Check if this MIDI source is already mapped to a different parameter
-		const auto* existingMapping = m_preset.findMapping(newMapping.type, newMapping.channel, newMapping.controller);
-		if (existingMapping && existingMapping->paramName != m_learningParamName)
-		{
-			// MIDI controller is mapped to a different parameter
-			// Reset learning values so the user can try a different controller
-			m_learningValues.clear();
+		// No conflict or reassigning controller from another parameter - notify success and exit learning mode
+		cancelLearning();
 
-			if (onMappingConflict)
-				onMappingConflict(newMapping);
-		}
-		else
-		{
-			// No conflict, notify success and exit learning mode
-			cancelLearning();
-
-			if (onMappingLearned)
-				onMappingLearned(newMapping);
-		}
+		if (onMappingLearned)
+			onMappingLearned(newMapping);
 	}
 
 	MidiLearnMapping::Mode MidiLearnTranslator::detectMode(const std::vector<uint8_t>& _values) const
