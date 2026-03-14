@@ -672,7 +672,7 @@ namespace jucePluginEditorLib
 							}), m.end());
 						t->setPreset(preset);
 						if (m_overlays)
-							m_overlays->setMidiLearnMode(m_midiLearnModeActive);
+							m_overlays->refreshMidiLearnOverlays();
 					});
 				}
 			}
