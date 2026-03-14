@@ -309,13 +309,13 @@ knob {
 
 .button {
 	background-color: rgb(50,62,68);
-	border: 2dp rgba(172,176,179,64);
-	border-radius: 15dp;
+	border: 0.1em rgba(172,176,179,64);
+	border-radius: 0.5em;
 	padding: 0.5em 1em 0.5em 1em;
 	text-align: center;
 	box-shadow: 
-		#fff5 2dp 2dp 0 inset,
-		#000c -4dp -4dp 0 inset;
+		#fff5 0.05em 0.05em 0 inset,
+		#000c -0.1em -0.1em 0 inset;
 }
 
 .button:hover {

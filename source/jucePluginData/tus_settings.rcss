@@ -64,7 +64,7 @@
 .settings-category-button:checked
 {
 	border-color: #fffa;
-	border-width: 2dp;
+	border-width: 0.1em;
 }
 
 .settings-close-button {
@@ -109,7 +109,7 @@
 }
 
 .settings-combo {
-	border: 1dp #aaa;
+	border: 0.1em #aaa;
 	background-color: #0008;
 	border-radius: 0.4em;
 	width: 16em;
@@ -129,7 +129,7 @@
 	width: 1.2em;
 	min-width: 1.2em;
 	height: 1.2em;
-	border: 1dp #aaa;
+	border: 0.1em #aaa;
 	background-color: #0008;
 	border-radius: 0.3em;
 }
