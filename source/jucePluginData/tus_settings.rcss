@@ -13,7 +13,7 @@
 .settings-root {
 	width: 70%;
 	height: 80%;
-	font-size: 28dp;
+	font-size: 1em;
 	/*padding: 1em;*/
 	display: flex;
 	flex-direction: row;
