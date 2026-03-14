@@ -1001,14 +1001,19 @@ namespace jucePluginEditorLib
 					preset.addMapping(_mapping);
 					t->setPreset(preset);
 
-					// exit listening on the learned parameter's overlay and refresh it
-					if (m_overlays)
-					{
-						if (auto* overlay = m_overlays->findOverlayForParameter(m_midiLearnSelectedParam))
-							overlay->setMidiLearnListening(false);
-					}
-
+					// Dispatch overlay update to message thread - this callback fires from audio/MIDI thread
+					// and RmlUi DOM manipulation is not thread-safe
+					auto* selectedParam = m_midiLearnSelectedParam;
 					m_midiLearnSelectedParam = nullptr;
+
+					juce::MessageManager::callAsync([this, selectedParam]
+					{
+						if (m_overlays)
+						{
+							if (auto* overlay = m_overlays->findOverlayForParameter(selectedParam))
+								overlay->setMidiLearnListening(false);
+						}
+					});
 				};
 
 				translator->onMappingConflict = nullptr;
