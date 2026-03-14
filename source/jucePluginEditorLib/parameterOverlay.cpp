@@ -11,6 +11,7 @@
 #include "juceRmlUi/rmlHelper.h"
 
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/ElementUtilities.h"
 
 #include <algorithm>
 
@@ -84,10 +85,12 @@ namespace jucePluginEditorLib
 
 			overlay->SetAttribute("class", "tus-parameteroverlay tus-parameteroverlaytype-" + toString(_type));
 
+			const auto dpRatio = Rml::ElementUtilities::GetDensityIndependentPixelRatio(m_component);
+
 			overlay->SetProperty(Rml::PropertyId::Opacity, Rml::Property(_opacity, Rml::Unit::NUMBER));
-			overlay->SetProperty(Rml::PropertyId::Left, Rml::Property(m_component->GetOffsetLeft(), Rml::Unit::PX));
-			overlay->SetProperty(Rml::PropertyId::Top, Rml::Property(m_component->GetOffsetTop(), Rml::Unit::PX));
-			overlay->SetProperty(Rml::PropertyId::Width, Rml::Property(m_component->GetOffsetWidth(), Rml::Unit::PX));
+			overlay->SetProperty(Rml::PropertyId::Left, Rml::Property(m_component->GetOffsetLeft() / dpRatio, Rml::Unit::DP));
+			overlay->SetProperty(Rml::PropertyId::Top, Rml::Property(m_component->GetOffsetTop() / dpRatio, Rml::Unit::DP));
+			overlay->SetProperty(Rml::PropertyId::Width, Rml::Property(m_component->GetOffsetWidth() / dpRatio, Rml::Unit::DP));
 
 			auto* elem = offsetParent->AppendChild(std::move(overlay));
 
