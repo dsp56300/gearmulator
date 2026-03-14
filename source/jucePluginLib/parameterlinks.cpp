@@ -16,6 +16,11 @@ namespace pluginLib
 		if(_source == _dest)
 			return false;
 
+		// prevent circular links: if dest is already a source that targets source, reject
+		const auto itReverse = m_parameterLinks.find(_dest);
+		if(itReverse != m_parameterLinks.end() && itReverse->second->hasTarget(_source))
+			return false;
+
 		const auto it = m_parameterLinks.find(_source);
 
 		if(it != m_parameterLinks.end())

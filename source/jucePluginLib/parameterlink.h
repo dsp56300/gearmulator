@@ -18,6 +18,7 @@ namespace pluginLib
 		bool remove(Parameter* _target);
 
 		bool empty() const { return m_targets.empty(); }
+		bool hasTarget(const Parameter* _target) const { return m_targets.count(const_cast<Parameter*>(_target)) > 0; }
 
 	private:
 		void onSourceValueChanged();
@@ -26,5 +27,6 @@ namespace pluginLib
 		ParameterListener m_sourceListener;
 		std::set<Parameter*> m_targets;
 		int m_sourceValue;
+		bool m_propagating = false;
 	};
 }

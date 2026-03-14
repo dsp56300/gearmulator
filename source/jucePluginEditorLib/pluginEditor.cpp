@@ -586,6 +586,8 @@ namespace jucePluginEditorLib
 
 							if(isLinked)
 								links.unlinkRegion(regionId, currentPart, p);
+							else if(links.isRegionLinked(regionId, p, currentPart))
+								juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
 							else
 								links.linkRegion(regionId, currentPart, p, true);
 						});
@@ -621,8 +623,8 @@ namespace jucePluginEditorLib
 
 						if(isLinked)
 							links.remove(sourceParam, destParam);
-						else
-							links.add(sourceParam, destParam, true);
+						else if(!links.add(sourceParam, destParam, true))
+							juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
 					});
 				}
 
