@@ -393,6 +393,8 @@ knob {
 	text-align: center;
 	border: 1dp #000f;
 	border-radius: 15dp;
+	min-width: 3em;
+	white-space: nowrap;
 }
 
 .tus-parameteroverlaytype-midilearn:midi-unbound {
