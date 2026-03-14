@@ -13,10 +13,7 @@
 		
 		<!-- Top&Bottom background -->
 		<img id="bottom" class="jucePos" src="bottom.png" style="left: 173dp; top: 1155dp;"/>	
-		<img id="top" class="jucePos" src="top.png" style="left: 720dp; top: 56dp;"/>
-		<img id="unison" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="unison.png" style="left: 2327dp; top: 63dp;"/>
-		<img id="8K" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="8k.png" style="left: 2360dp; top: 125dp;"/>
-				
+		<img id="top" class="jucePos" src="top.png" style="left: 720dp; top: 56dp;"/>	
 		<img id="split" class="jucePos" data-class-juceConditionDisabled="!(KeyMode_value == 2)" data-model="part0" src="cmb_split.png" style="left: 747dp; top: 1316dp; "/>
 			
 		<!-- MAIN PAGE -->
@@ -24,7 +21,9 @@
 			
 			<!-- Background Images -->
 			<img id="main" class="jucePos" src="main.png" style="left: 173dp; top: 274dp;"/>
-			<img id="arp" class="jucePos" src="arp.png" style="left: 1196dp; top: 1155dp;"/>
+
+			<img id="arp" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="arp.png" style="left: 1196dp; top: 1155dp"/>
+			<img id="arp_unison" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="arp_unison.png" style="left: 1196dp; top: 1155dp;"/>
 
 			<img id="osc2_noise" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="osc2_noise.png" style="left: 1304dp; top:426dp"/>					
 			<img id="amp_gain" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="amp_gain.png" style="left: 2445dp; top: 331dp;"/>	
@@ -110,8 +109,7 @@
 						<div class="label" style="left: 246dp; width:100dp; margin-top:-9dp">SHAPE</div>
 						<div class="label" style="left: 337dp; width:100dp; margin-top:-20dp">LFO 1 DEPTH</div>							
 					</div>				
-					
-					
+									
 					<div class="vlayoutLeds" style="height: 243dp; width: 210dp; margin-top:-1dp">
 						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="0" isToggle="1"/>
 						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="1" isToggle="1"/>
@@ -122,7 +120,6 @@
 						<button class="ledRed" param="Osc1Waveform" id="Osc1Waveform" valueOn="6" isToggle="1"/>
 					</div>
 				</div>
-	
 					
 				<!-- OSC 2 -->
 				<div class="abs" style="left: 811dp; top: 32dp; width: 460dp; height: 287dp;">
@@ -438,10 +435,10 @@
 		<div data-model="partCurrent" class="abs" tabgroup="main" tabpage="2">
 		
 			<img id="voicemod" class="jucePos" src="voice_mod.png" style="left: 173dp; top: 274dp;"/>
-			<img id="arp" class="jucePos" src="arp.png" style="left: 1196dp; top: 1155dp;"/>
+			<img id="arp" class="jucePos" data-class-juceConditionDisabled="deviceModel!='keyboard'" data-model="plugin" src="arp.png" style="left: 1196dp; top: 1155dp"/>
+			<img id="arp_unison" class="jucePos" data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" src="arp_unison.png" style="left: 1196dp; top: 1155dp;"/>
 			<img id="light_layer" class="jucePos" src="light_layer.png" style="left: 0dp; top: 0dp;"/>
-			
-		
+
 			<!-- second row -->
 			<!-- Global -->
 			<div class="abs hlayout" style="left: 387dp; top:364dp; gap: 78dp; width:500dp">
@@ -592,26 +589,20 @@
 			
 			<!-- pairs of two buttons on the right -->
 			<!-- Dec/Inc -->
-			<div class="abs hlayout" style="left: 1146dp; top: 33dp; gap: 52dp;">					
+			<div class="abs hlayout" style="left: 1172dp; top: 33dp; gap: 58dp;">					
 				<button id="btDec" class="btBlack"/>	
 				<button id="btInc" class="btBlack"/>
 		
 			</div>
 			<!-- Edit/Write -->
-			<div class="abs hlayout" style="left: 1132dp; top: 137dp; gap: 54dp;">
+			<div class="abs hlayout" style="left: 1162dp; top: 137dp; gap: 58dp;">
 				<button id="btPerfPatch" class="btBlackLed"/>
 				<button id="btMenu" class="btRed"/>
 			</div>
 				
-
-			<knob class="abs knob" data-model="partCurrent" param="PartTranspose" style="left: 1420dp; top: 83dp"/>	
-
-
-			<!-- bottom unision, unision knobs -->
-			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" style="left: 1600dp; top: 84dp; gap: 22dp;">
-				<button class="btBlackLed" param="UnisonSwitch" id="UnisonSwitch" isToggle="1"  style="margin-top: -20dp"/>
-				<knob class="knob" param="UnisonDetune" id="UnisonDetune" />					
-			</div>					
+			<knob class="abs knob" data-model="partCurrent" param="PartTranspose" style="left: 1508dp; top: 83dp"/>	
+			<knob class="abs knob" data-model="partCurrent" param="PartDetune" style="left: 1702dp; top: 83dp"/>	
+							
 		</div>	
 		
 		<!-- Arp -->
@@ -641,32 +632,70 @@
 				<img id="easter" class="jucePos" src="hidden_easter.png" param="HappyEaster" style="left: 1063dp; top: 32dp;"/>
 			</div>			
 			
-			<!-- left column -->
-			<button class="abs btBlackLed" style="left: 58dp; top: 104dp;" param="ArpSwitch" isToggle="1"/>
-			<button class="abs btBlackLed" style="left: 178dp; top: 104dp;" param="ArpHold" isToggle="1"/>
-							
-			<!-- center column -->
-			<knob class="abs knob" style="left: 339dp; top: 87dp;" param="Tempo"/>
-
-			<!-- Beat Pattern -->
-			<combo param="ArpBeatPattern" id="ArpBeatPattern" class="jucePos comboxtext2" style="left: 535dp; top: 66dp; width: 300dp; height: 45dp; line-height: 45dp;">
-				<combotext></combotext>
-			</combo>				
-			<!-- Destination -->
-			<combo param="ArpDestination" id="ArpDestination" class="jucePos comboxtext2" style="left: 535dp; top: 145dp; width: 300dp; height: 45dp; line-height: 45dp;">
-				<combotext></combotext>
-			</combo>	
-			<!-- Range -->
-			<combo param="ArpRange" id="ArpRange" class="jucePos comboxtext2" style="left: 880dp; top: 66dp; width: 300dp; height: 45dp; line-height: 45dp;">
-				<combotext></combotext>
-			</combo>
-			<!-- Mode -->
-			<combo param="ArpMode" id="ArpMode" class="jucePos comboxtext2" style="left: 880dp; top: 145dp; width: 300dp; height: 45dp; line-height: 45dp;">
-				<combotext></combotext>
-			</combo>
 			
-		</div>		
-		
+			<!-- bottom unison, unison knobs -->
+			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-class-hlayout="deviceModel=='rack'" data-model="plugin" class="abs" ">
+				<button class="abs btBlackLed" param="UnisonSwitch" id="UnisonSwitch" isToggle="1" style="left: 30dp; top:112dp;" />
+				<knob class="abs knob" param="UnisonDetune" id="UnisonDetune" style="left: 149dp; top: 92dp;" />		
+
+				<!-- left column -->
+				<button class="abs btBlackLed" style="left: 332dp; top: 68dp;" param="ArpSwitch" isToggle="1"/>
+				<button class="abs btBlackLed" style="left: 332dp; top: 154dp;" param="ArpHold" isToggle="1"/>
+				
+				<!-- center column -->
+				<knob class="abs knob" style="left: 472dp; top: 87dp;" param="Tempo"/>
+
+				<!-- Beat Pattern -->
+				<combo param="ArpBeatPattern" id="ArpBeatPattern" class="jucePos comboxtext2" style="left: 620dp; top: 66dp; width: 300dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>				
+				<!-- Destination -->
+				<combo param="ArpDestination" id="ArpDestination" class="jucePos comboxtext2" style="left: 620dp; top: 145dp; width: 300dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>	
+				<!-- Range -->
+				<combo param="ArpRange" id="ArpRange" class="jucePos comboxtext2" style="left: 900dp; top: 66dp; width: 300dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>
+				<!-- Mode -->
+				<combo param="ArpMode" id="ArpMode" class="jucePos comboxtext2" style="left: 900dp; top: 145dp; width: 300dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>				
+				
+			</div>				
+
+			<!-- bottom unison, unison knobs -->
+			<div data-class-juceConditionDisabled="deviceModel!='keyboard'" data-class-hlayout="deviceModel=='keyboard'" data-model="plugin" class="abs" ">
+				<!-- left column -->
+				<button class="abs btBlackLed" style="left: 58dp; top: 104dp;" param="ArpSwitch" isToggle="1"/>
+				<button class="abs btBlackLed" style="left: 178dp; top: 104dp;" param="ArpHold" isToggle="1"/>
+								
+				<!-- center column -->
+				<knob class="abs knob" style="left: 339dp; top: 87dp;" param="Tempo"/>
+
+				<!-- Beat Pattern -->
+				<combo param="ArpBeatPattern" id="ArpBeatPattern" class="jucePos comboxtext2" style="left: 535dp; top: 66dp; width: 300dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>				
+				<!-- Destination -->
+				<combo param="ArpDestination" id="ArpDestination" class="jucePos comboxtext2" style="left: 535dp; top: 145dp; width: 300dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>	
+				<!-- Range -->
+				<combo param="ArpRange" id="ArpRange" class="jucePos comboxtext2" style="left: 880dp; top: 66dp; width: 300dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>
+				<!-- Mode -->
+				<combo param="ArpMode" id="ArpMode" class="jucePos comboxtext2" style="left: 880dp; top: 145dp; width: 300dp; height: 45dp; line-height: 45dp;">
+					<combotext></combotext>
+				</combo>				
+			</div>			
+			
+
+			
+		</div>	
+
+	
 		<!-- Global Bottom Row -->
 		<div class="abs" style="left:175dp; top:1148dp; height: 225dp; width: 850dp" data-model="part0">
 		<!-- bottom left, Volume and Semitones knobs -->
