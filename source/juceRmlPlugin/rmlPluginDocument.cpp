@@ -21,9 +21,8 @@ namespace rmlPlugin
 		Rml::EventId::Mousedown,
 		Rml::EventId::Mouseup,
 		Rml::EventId::Mouseout,
-		Rml::EventId::Mousemove,
-		Rml::EventId::Keydown,
-		Rml::EventId::Keyup
+		Rml::EventId::Drag,
+		Rml::EventId::Dragend,
 	};
 
 	class DocumentListener : public Rml::EventListener
@@ -84,53 +83,78 @@ namespace rmlPlugin
 		case Rml::EventId::Mouseup:
 			if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Left)
 				setMouseIsDown(false);
-			m_shiftTargetSlider.reset();
 			break;
 		case Rml::EventId::Mouseout:
 			if (_event.GetTargetElement() == m_document)
 				setMouseIsDown(false);
 			break;
-		case Rml::EventId::Keydown:
-		case Rml::EventId::Keyup:
-			m_shiftDown = juceRmlUi::helper::getKeyModShift(_event);
+		case Rml::EventId::Dragend:
+			endSliderDrag();
 			break;
-		case Rml::EventId::Mousemove:
+		case Rml::EventId::Drag:
 			{
+				if (!m_dragTargetSlider)
+					break;
+
+				auto& binding = m_context.getParameterBinding();
+				auto* parameter = binding.getParameterForElement(m_dragTargetSlider.get());
+				if (!parameter)
+					break;
+
 				const auto mousePos = juceRmlUi::helper::getMousePos(_event);
-				const auto mouseDelta = mousePos - m_mouseDownPos;
+				const auto mod = getModifierScale(_event, m_dragTargetSlider.get());
 
-				if (m_shiftTargetSlider)
+				// when modifier state changes, reset the anchor (like the knob does)
+				if (mod != m_lastMod)
 				{
-					auto& binding = m_context.getParameterBinding();
-
-					if (auto* parameter = binding.getParameterForElement(m_shiftTargetSlider.get()))
-					{
-						bool isVertical = false;
-
-						if (const auto* attrib = m_shiftTargetSlider->GetAttribute("orientation"))
-							isVertical = attrib->Get(m_shiftTargetSlider->GetCoreInstance(), std::string()) == "vertical";
-
-						const auto delta = isVertical ? -mouseDelta.y : mouseDelta.x;
-
-						auto scale = 0.1f;
-
-						if (auto* prop = m_shiftTargetSlider->GetProperty("speedScaleShift"))
-							scale = prop->Get<float>(m_shiftTargetSlider->GetCoreInstance());
-
-						auto current = m_shiftDownParameterStartValue;
-						current += static_cast<int>(delta * scale);
-
-						current = std::clamp(current, parameter->getDescription().range.getStart(), parameter->getDescription().range.getEnd());
-
-						if (current != parameter->getUnnormalizedValue())
-							parameter->setUnnormalizedValueNotifyingHost(current, pluginLib::Parameter::Origin::Ui);
-					}
+					m_modAnchorValue = parameter->getUnnormalizedValue();
+					m_lastMod = mod;
+					m_lastMousePos = mousePos;
 				}
+
+				bool isVertical = false;
+				if (const auto* attrib = m_dragTargetSlider->GetAttribute("orientation"))
+					isVertical = attrib->Get(m_dragTargetSlider->GetCoreInstance(), std::string()) == "vertical";
+
+				const auto mouseDelta = mousePos - m_lastMousePos;
+				const auto delta = isVertical ? -mouseDelta.y : mouseDelta.x;
+
+				const auto sliderSize = juceRmlUi::helper::getSliderTraversableLength(m_dragTargetSlider.get(), isVertical);
+
+				if (sliderSize <= 0.0f)
+					break;
+
+				const auto range = static_cast<float>(parameter->getDescription().range.getEnd() - parameter->getDescription().range.getStart());
+				const auto d = delta * range * mod / sliderSize;
+
+				auto newValue = m_modAnchorValue + static_cast<int>(std::round(d));
+				newValue = std::clamp(newValue, parameter->getDescription().range.getStart(), parameter->getDescription().range.getEnd());
+
+				if (newValue != parameter->getUnnormalizedValue())
+					parameter->setUnnormalizedValueNotifyingHost(newValue, pluginLib::Parameter::Origin::Ui);
 			}
 			break;
 		default:
 			break;
 		}
+	}
+
+	float RmlPluginDocument::getModifierScale(const Rml::Event& _event, Rml::Element* _slider)
+	{
+		auto getScale = [_slider](const char* _propName, const float _default)
+		{
+			if (const auto* prop = _slider->GetProperty(_propName))
+				return prop->Get<float>(_slider->GetCoreInstance());
+			return _default;
+		};
+
+		if (juceRmlUi::helper::getKeyModShift(_event))
+			return getScale("speedScaleShift", 0.1f);
+		if (juceRmlUi::helper::getKeyModCommand(_event))
+			return getScale("speedScaleCtrl", 0.2f);
+		if (juceRmlUi::helper::getKeyModAlt(_event))
+			return getScale("speedScaleAlt", 0.5f);
+		return 1.0f;
 	}
 
 	bool RmlPluginDocument::addControllerLink(Rml::Element* _source, Rml::Element* _target, Rml::Element* _conditionButton)
@@ -173,6 +197,12 @@ namespace rmlPlugin
 		m_mouseIsDown = _isDown;
 
 		m_context.getParameterBinding().setMouseIsDown(m_document, _isDown);
+	}
+
+	void RmlPluginDocument::endSliderDrag()
+	{
+		m_dragTargetSlider.reset();
+		m_lastMod = -1.0f;
 	}
 
 	void RmlPluginDocument::loadCompleted(Rml::ElementDocument* _doc)
@@ -255,42 +285,25 @@ namespace rmlPlugin
 					juceRmlUi::ElemKnob::processMouseWheel(*input, _event);
 				});
 
-				// prevent default slider mouse handling when shift is held down
+				// permanently disable native slider drag on children and enable drag on
+				// the input element itself — this lets RmlUi capture the mouse so our
+				// delta-based drag works even outside the plugin window (like knobs)
+				enableSliderDefaultMouseInputs(input, false);
+				input->SetProperty(Rml::PropertyId::Drag, Rml::Style::Drag::Drag);
+
+				// override default slider drag with delta-based handling (like knobs)
 				juceRmlUi::EventListener::Add(input, Rml::EventId::Mousedown, [this, input](Rml::Event& _event)
 				{
-					if (m_shiftDown)
+					auto& binding = m_context.getParameterBinding();
+					auto* parameter = binding.getParameterForElement(input);
+					if (parameter)
 					{
-						auto& binding = m_context.getParameterBinding();
-						auto* parameter = binding.getParameterForElement(input);
-						if (parameter)
-						{
-							m_shiftDownParameterStartValue = parameter->getUnnormalizedValue();
-							m_shiftTargetSlider = input->GetObserverPtr(input->GetCoreInstance());
-							m_disabledSliders.insert(input);
-							m_mouseDownPos = juceRmlUi::helper::getMousePos(_event);
-						}
+						m_dragStartValue = parameter->getUnnormalizedValue();
+						m_modAnchorValue = m_dragStartValue;
+						m_dragTargetSlider = input->GetObserverPtr(input->GetCoreInstance());
+						m_lastMousePos = juceRmlUi::helper::getMousePos(_event);
+						m_lastMod = getModifierScale(_event, input);
 					}
-					else
-					{
-						m_disabledSliders.erase(input);
-					}
-
-					enableSliderDefaultMouseInputs(input, !m_shiftDown);
-
-					if (m_shiftDown)
-						_event.StopPropagation();
-				}, true);
-
-				juceRmlUi::EventListener::Add(input, Rml::EventId::Mouseout, [this, input](Rml::Event&)
-				{
-					if (m_disabledSliders.erase(input))
-						enableSliderDefaultMouseInputs(input, true);
-				}, true);
-
-				juceRmlUi::EventListener::Add(input, Rml::EventId::Mouseup, [this, input](Rml::Event&)
-				{
-					if (m_disabledSliders.erase(input))
-						enableSliderDefaultMouseInputs(input, true);
 				}, true);
 			}
 		}

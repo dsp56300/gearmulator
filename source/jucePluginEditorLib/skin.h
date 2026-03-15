@@ -16,6 +16,11 @@ namespace jucePluginEditorLib
 			return displayName == _other.displayName && filename == _other.filename && folder == _other.folder;
 		}
 
+		bool operator != (const Skin& _other) const
+		{
+			return !(*this == _other);
+		}
+
 		bool isValid() const
 		{
 			return !filename.empty();

@@ -46,7 +46,6 @@ namespace jucePluginEditorLib
 		PluginEditorState& operator = (PluginEditorState&&) = delete;
 		PluginEditorState& operator = (const PluginEditorState&) = delete;
 
-		void exportCurrentSkin() const;
 		Skin readSkinFromConfig() const;
 		void writeSkinToConfig(const Skin& _skin) const;
 
@@ -57,7 +56,7 @@ namespace jucePluginEditorLib
 
 		bool resizeEditor(int _width, int _height) const;
 
-		const Skin& getCurrentSkin() { return m_currentSkin; }
+		const Skin& getCurrentSkin() const { return m_currentSkin; }
 		const std::vector<Skin>& getIncludedSkins();
 
 		static std::string createSkinDisplayName(std::string _filename);
@@ -72,7 +71,6 @@ namespace jucePluginEditorLib
 		void loadDefaultSkin();
 
 		virtual void initContextMenu(juceRmlUi::Menu& _menu) {}
-		virtual bool initAdvancedContextMenu(juceRmlUi::Menu& _menu, bool _enabled) { return false; }
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data);
 		void getPerInstanceConfig(std::vector<uint8_t>& _data);
@@ -87,7 +85,13 @@ namespace jucePluginEditorLib
 			return m_currentSkin.isValid();
 		}
 
+		bool loadSkin(const Skin& _skin, uint32_t _fallbackIndex = 0);
+		std::string exportSkinToFolder(const Skin& _skin, const std::string& _folder) const;
+
 		Editor* getEditor() const;
+
+		void enableDspBridge(bool _enable);
+		bridgeClient::ServerList* getRemoteServerList() const { return m_remoteServerList.get(); }
 
 	protected:
 		virtual Editor* createEditor(const Skin& _skin) = 0;
@@ -95,9 +99,7 @@ namespace jucePluginEditorLib
 		Processor& m_processor;
 
 	private:
-		bool loadSkin(const Skin& _skin, uint32_t _fallbackIndex = 0);
 		void setGuiScale(int _scale) const;
-		std::string exportSkinToFolder(const Skin& _skin, const std::string& _folder) const;
 
 		std::unique_ptr<Editor> m_editor;
 		Skin m_currentSkin;

@@ -1,0 +1,103 @@
+<template name="tus_settings_dspaudio">
+<head>
+	<link type="text/rcss" href="tus_settings_dspaudio.rcss"/>
+</head>
+<body>
+	<div class="settings-page">
+		<h1>Latency (blocks)</h1>
+		<settingsspacer1/>
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency0" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>0 (DAW will report proper CPU usage)</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency1" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>1 (default)</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency2" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>2</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency4" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>4</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btLatency8" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>8</label>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<h1>Output Gain</h1>
+		<settingsspacer1/>
+		<div class="settings-hlayout">
+			<input id="sliderGain" class="settings-slider-h" type="range" min="-24" max="24" step="1" value="0" style="width: 90%;"/>
+			<label id="labelGain">+6 dB</label>
+		</div>
+		<settingsspacer1/>
+		<h1>Resampler</h1>
+		<settingsspacer1/>
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btResamplerLegacy" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>Legacy</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btResamplerHq" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>Mame High Quality</label>
+					</div>
+				</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<div id="btResamplerLofi" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label>Mame Lo-Fi</label>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div id="containerDspClock" class="settings-advanced">
+			<h1>DSP Clock</h1>
+			<settingsspacer1/>
+			<table id="dspClockTable" class="settings-table">
+				<tr class="settings-tr" id="dspClockEntry" style="display: none;">
+					<td class="settings-td">
+						<div id="dspClockButton" class="settings-checkboxwithlabel">
+							<button id="button" class="settings-checkbox"/>
+							<label id="label">100% (100 MHz)</label>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="containerDeviceSpecific"/>
+	</div>
+</body>
+</template>

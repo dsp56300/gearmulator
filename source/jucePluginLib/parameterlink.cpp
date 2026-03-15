@@ -49,6 +49,10 @@ namespace pluginLib
 
 	void ParameterLink::onSourceValueChanged()
 	{
+		// prevent re-entrant propagation from circular links
+		if(m_propagating)
+			return;
+
 		const auto newSourceValue = m_source->getUnnormalizedValue();
 
 		if(newSourceValue == m_sourceValue)
@@ -64,11 +68,15 @@ namespace pluginLib
 
 		const auto origin = m_source->getChangeOrigin();
 
+		m_propagating = true;
+
 		for (auto* p : m_targets)
 		{
 			const auto newTargetValue = p->getUnnormalizedValue() + sourceDiff;
 			const auto clampedTargetValue = p->getDescription().range.clipValue(newTargetValue);
 			p->setUnnormalizedValue(clampedTargetValue, origin);
 		}
+
+		m_propagating = false;
 	}
 }

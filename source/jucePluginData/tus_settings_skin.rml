@@ -1,0 +1,46 @@
+<template name="tus_settings_skin">
+<head>
+	<link type="text/rcss" href="tus_settings_skin.rcss"/>
+</head>
+<body>
+	<div class="settings-page">
+		<h1>Skins</h1>
+		<h3 id="matrixHeadline" style="padding-top: 1em">Available Skins</h3>
+		<table class="settings-table">
+			<tr class="settings-tr settings-tr-headline settings-skin-tr-headline settings-skin-tr">
+				<td>Name</td>
+				<td>Type</td>
+				<td>Action</td>
+			</tr>
+			<tr id="entry" class="settings-tr settings-skin-tr">
+				<td id="lbName">SomeName</td>
+				<td id="lbType">Builtin</td>
+				<td>
+					<div class="settings-hlayout">
+						<button id="btActivate" class="button">Activate</button>
+						<button id="btExport" class="button">Export</button>
+					</div>
+				</td>
+			</tr>
+		</table>
+		
+		<settingsspacer1/>
+		<button id="btOpenFolder" class="button" style="display: inline-block;">Open skins folder in File Browser</button>
+		<settingsspacer1/>
+		
+		<h1>Developer Options</h1>
+		<settingsspacer1/>
+
+		<div id="btReloadViaF5" class="settings-checkboxwithlabel">
+			<button id="button" class="settings-checkbox"/>
+			<label>Reload skin via F5 key</label>
+		</div>
+		<settingsspacer1/>
+		<div id="btEnableRmlUiDebugger" class="settings-checkboxwithlabel">
+			<button id="button" class="settings-checkbox"/>
+			<label>Enable RmlUi Debugger</label>
+		</div>
+		<settingsspacer1/>
+	</div>
+</body>
+</template>

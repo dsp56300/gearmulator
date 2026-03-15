@@ -15,6 +15,18 @@ set(SOURCES
 	pluginEditorWindow.cpp pluginEditorWindow.h
 	pluginEditorState.cpp pluginEditorState.h
 	pluginProcessor.cpp pluginProcessor.h
+	settings.cpp settings.h
+	settingsCategories.cpp settingsCategories.h
+	settingsCategory.cpp settingsCategory.h
+	settingsDeviceSpecific.cpp settingsDeviceSpecific.h
+	settingsDspAudio.cpp settingsDspAudio.h
+	settingsDspBridge.cpp settingsDspBridge.h
+	settingsGui.cpp settingsGui.h
+	settingsMidi.cpp settingsMidi.h
+	settingsMidiLearn.cpp settingsMidiLearn.h
+	settingsMidiMatrix.cpp settingsMidiMatrix.h
+	settingsSkin.cpp settingsSkin.h
+	settingsPlugin.cpp settingsPlugin.h
 	skin.h
 )
 

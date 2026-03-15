@@ -1,0 +1,183 @@
+.settings-parent {
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	background-color: #0008;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+}
+
+.settings-root {
+	width: 70%;
+	height: 80%;
+	font-size: 1em;
+	/*padding: 1em;*/
+	display: flex;
+	flex-direction: row;
+}
+
+.settings-table {
+	column-gap: 1em;
+	padding-top: 0.1em;
+	padding-bottom: 0.1em;
+}
+
+.settings-tr {
+	padding-top: 0.1em;
+	padding-bottom: 0.1em;
+}
+
+.settings-td {
+}
+
+.settings-categories {
+	background-color: #0005;
+	flex: 0 0 auto;
+	width: 15em;
+
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+	align-items: center;
+	padding-top: 1em;
+	padding-bottom: 1em;
+}
+
+.settings-pagecontainer {
+	flex: 1 1 auto;
+	padding: 1em;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.settings-category-button
+{
+	width: 60%;
+	height: 1em;
+	line-height: 1em;
+	font-size: 1.3em;
+}
+
+.settings-category-button:checked
+{
+	border-color: #fffa;
+	border-width: 0.1em;
+}
+
+.settings-close-button {
+	width: 0.7em;
+	height: 1.2em;
+	font-size: 1.2em;
+	line-height: 1.2em;
+	text-align: center;
+	align-self: flex-start;
+	margin-left: 1.0em;
+}
+
+.settings-headline {
+	font-size: 2em;
+}
+
+.settings-page h1 {
+	padding-bottom: 0.2em;
+	padding-top: 0.2em;
+	font-size: 2em;
+	display: block;
+	width: 100%;
+	text-align: center;
+	background-color: #0003;
+	border-radius: 0.3em;
+}
+.settings-page h2 {
+	padding-bottom: 0.2em;
+	padding-top: 0.2em;
+	font-size: 1.5em;
+	display: block;
+	width: 100%;
+	text-align: center;
+}
+.settings-page h3 {
+	padding-bottom: 0.2em;
+	padding-top: 0.2em;
+	font-size: 1.2em;
+	display: block;
+	width: 100%;
+	text-align: center;
+}
+
+.settings-combo {
+	border: 0.1em #aaa;
+	background-color: #0008;
+	border-radius: 0.4em;
+	width: 16em;
+	height: 1.2em;
+	padding-left: 0.3em;
+}
+
+.settings-combo combotext
+{
+	line-height: 1.2em;
+	height: 100%;
+}
+
+.settings-checkbox {
+	display: block;
+	position: relative;
+	width: 1.2em;
+	min-width: 1.2em;
+	height: 1.2em;
+	border: 0.1em #aaa;
+	background-color: #0008;
+	border-radius: 0.3em;
+}
+
+.settings-checkbox:checked {
+	decorator: image(check.png fill);
+	image-color: #0f8;
+}
+
+.settings-checkbox:disabled {
+	opacity: 0.2;
+}
+
+.settings-hlayout {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+}
+
+settingsspacer1 {
+	display: block; 
+	height: 1em
+}
+
+.settings-checkboxwithlabel {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
+.settings-slider-h {
+	width: 20em; 
+	height: 2em;
+	background-color: #7775;
+	border-radius: 1em;
+}
+
+.settings-slider-h sliderbar {
+	width: 2em; 
+	height: 2em;
+	background-color: #000a;
+	border-radius: 1em;
+}
+
+.settings-advanced {
+}
+
+.settings-advanced:disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}

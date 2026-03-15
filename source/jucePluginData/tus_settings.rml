@@ -1,0 +1,30 @@
+<template name="settings">
+<head>
+	<link type="text/rcss" href="tus_settings.rcss"/>
+	<link type="text/template" href="tus_settings_midi.rml"/>
+	<link type="text/template" href="tus_settings_midilearn.rml"/>
+	<link type="text/template" href="tus_settings_skin.rml"/>
+	<link type="text/template" href="tus_settings_gui.rml"/>
+	<link type="text/template" href="tus_settings_dspaudio.rml"/>
+	<link type="text/template" href="tus_settings_dspbridge.rml"/>
+</head>
+<body>
+	<div class="settings-parent">
+		<div id="settings-root" class="settings-root dialogbox">
+			<div class="settings-categories">
+				<button id="btSettingsClose" class="button settings-close-button">X</button>
+				<div class="settings-headline">Settings</div>
+				<br/>
+				<button id="btPage" class="button settings-category-button">...</button>
+				<flexspacer style="flex-grow: 1;"/>
+				<div id="btEnableAdvancedOptions" class="settings-checkboxwithlabel">
+					<button id="button" class="settings-checkbox"/>
+					<label>Enable Advanced Options</label>
+				</div>
+			</div>
+			<div id="pageContainer" class="settings-pagecontainer">
+			</div>
+		</div>
+	</div>
+</body>
+</template>

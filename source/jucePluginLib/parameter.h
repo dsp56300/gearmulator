@@ -113,8 +113,10 @@ namespace pluginLib
 		void setDerivedValue(const int _value);
 		void sendToSynth(Origin _origin);
 		static uint64_t milliseconds();
+		void sendParameterChangeNow(ParamValue _value, Origin _origin);
 		void sendParameterChangeDelayed(ParamValue _value, Origin _origin);
 		void sendPendingParameterChange();
+		void scheduleTimer(uint64_t _delayMs);
 		void forwardToDerived(const int _newValue);
 		void notifyHost(float _value);
 

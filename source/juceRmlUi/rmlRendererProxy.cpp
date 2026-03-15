@@ -277,7 +277,7 @@ namespace juceRmlUi
 
 	Rml::CompiledFilterHandle RendererProxy::SaveLayerAsMaskImage()
 	{
-		if (!m_config.canLayer)
+		if (!m_config.canLayer || !m_config.canFilter)
 			return {};
 
 		auto dummyHandle = createDummyHandle();

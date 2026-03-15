@@ -25,6 +25,8 @@ namespace xt
 		uint32_t getChannelCountIn() override;
 		uint32_t getChannelCountOut() override;
 
+		bool canModifyDspClock() const override { return true; }
+
 	protected:
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;

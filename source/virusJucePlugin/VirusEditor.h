@@ -67,6 +67,8 @@ namespace genericVirusUI
 
 		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 
+		std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) override;
+
 	private:
 		void onProgramChange(int _part);
 		void onPlayModeChanged();

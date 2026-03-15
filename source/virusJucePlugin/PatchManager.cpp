@@ -499,6 +499,7 @@ namespace genericVirusUI
 		ds.type = pluginLib::patchDB::SourceType::Rom;
 		ds.bank = _bank;
 		ds.name = m_controller.getBankName(_bank);
+		ds.midiBankNumber = _bank;
 		return ds;
 	}
 

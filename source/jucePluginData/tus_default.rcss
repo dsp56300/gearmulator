@@ -11,7 +11,9 @@ body {
     bottom: 0px;
     left: 0px;
 }
-
+br {
+	display: block;
+}
 /* default table setup as explained in the manual: https://mikke89.github.io/RmlUiDoc/pages/rcss/tables.html */
 table {
 	box-sizing: border-box;
@@ -36,24 +38,17 @@ thead, tbody, tfoot {
 	display: table-row-group;
 }
 
-/* all menus */
+/* default background for all dialog boxes & menus */
 
-.menubox {
+.dialogbox {
 	background-color: rgba(50,62,68,180);
 	border: 1dp rgb(172,176,179);
 	border-radius: 0dp;
-	display: flex;
-	flex-direction: row;
-	padding: 5dp;
-	position: absolute;
-	z-index: 100;
-	gap: 4dp;
-	font-weight: 500;
 }
 
 @media (theme: advancedrenderer)
 {
-	.menubox {
+	.dialogbox {
 		box-shadow: #000a 0dp 0dp 8dp 3dp;
 		backdrop-filter: blur(12dp);
 		background-color: rgba(50,62,68,180);
@@ -62,9 +57,21 @@ thead, tbody, tfoot {
 
 @media not (theme: advancedrenderer)
 {
-	.menubox {
+	.dialogbox {
 		background-color: rgba(50,62,68,230);
 	}
+}
+
+/* all menus */
+
+.menubox {
+	display: flex;
+	flex-direction: row;
+	padding: 5dp;
+	position: absolute;
+	z-index: 100;
+	gap: 4dp;
+	font-weight: 500;
 }
 
 .menucolumn {
@@ -302,9 +309,13 @@ knob {
 
 .button {
 	background-color: rgb(50,62,68);
-	border: 2dp rgb(172,176,179);
-	border-radius: 15dp;
+	border: 0.1em rgba(172,176,179,64);
+	border-radius: 0.5em;
 	padding: 0.5em 1em 0.5em 1em;
+	text-align: center;
+	box-shadow: 
+		#fff5 0.05em 0.05em 0 inset,
+		#000c -0.1em -0.1em 0 inset;
 }
 
 .button:hover {
@@ -313,6 +324,9 @@ knob {
 
 .button:active {
 	background-color: rgb(70,82,88);
+	box-shadow: 
+		#000c 4dp 4dp 0 inset,
+		#fff5 -2dp -2dp 0 inset;
 }
 
 /* everything that is a drag target */
@@ -364,4 +378,40 @@ knob {
 .tus-parameteroverlaytype-lock {
 	decorator: image(lock.png contain left);
 	image-color: #e1512a;
+}
+
+/* MIDI Learn mode overlays */
+
+.tus-parameteroverlaytype-midilearn {
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	pointer-events: auto;
+	z-index: 100;
+	text-align: center;
+	border: 1dp #000f;
+	border-radius: 15dp;
+	min-width: 3em;
+	white-space: nowrap;
+}
+
+.tus-parameteroverlaytype-midilearn:midi-unbound {
+	background-color: rgba(225, 81, 42, 90);
+}
+
+.tus-parameteroverlaytype-midilearn:midi-bound {
+	background-color: rgba(99, 234, 201, 90);
+}
+
+.tus-parameteroverlaytype-midilearn:midi-listening {
+	background-color: rgba(255, 200, 50, 115);
+}
+
+.tus-midilearn-label {
+	font-size: 0.95em;
+	color: white;
+	text-align: center;
+	font-effect: outline( 1dp #000 );
 }

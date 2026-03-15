@@ -37,6 +37,7 @@ namespace n2x
 		std::copy(std::begin(_rom.data()), std::end(_rom.data()), std::begin(m_romRam));
 
 		m_midi.setSysexDelay(0.05f, 1024);
+//		m_midi.setByteDelay(0.00032f);	// 320µs per byte = 31.25 kbaud MIDI baud rate
 
 //		dumpAssembly("n2x_68k.asm", g_romAddress, g_romSize);
 

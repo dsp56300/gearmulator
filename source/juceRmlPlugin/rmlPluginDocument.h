@@ -2,7 +2,6 @@
 
 #include <map>
 #include <memory>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -52,13 +51,18 @@ namespace rmlPlugin
 
 	private:
 		void setMouseIsDown(bool _isDown);
+		void endSliderDrag();
+
+		static float getModifierScale(const Rml::Event& _event, Rml::Element* _slider);
 
 		RmlPluginContext& m_context;
 		Rml::ElementDocument* m_document = nullptr;
 		Rml::Vector2f m_mouseDownPos;
-		bool m_shiftDown = false;
-		Rml::ObserverPtr<Rml::Element> m_shiftTargetSlider;
-		int m_shiftDownParameterStartValue = 0;
+		Rml::ObserverPtr<Rml::Element> m_dragTargetSlider;
+		int m_dragStartValue = 0;
+		float m_lastMod = -1.0f;
+		Rml::Vector2f m_lastMousePos;
+		int m_modAnchorValue = 0;
 
 		struct ControllerLinkDesc
 		{
@@ -71,8 +75,6 @@ namespace rmlPlugin
 		std::vector<std::unique_ptr<ControllerLink>> m_controllerLinks;
 
 		std::map<std::string, std::unique_ptr<TabGroup>> m_tabGroups;
-
-		std::set<Rml::Element*> m_disabledSliders;
 
 		std::unique_ptr<DocumentListener> m_documentListener;
 

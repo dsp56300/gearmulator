@@ -1,0 +1,92 @@
+<template name="tus_settings_midi">
+<head>
+	<link type="text/rcss" href="tus_settings_midi.rcss"/>
+</head>
+<body>
+	<div class="settings-page">
+		<h1>Physical MIDI Ports</h1>
+		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
+			<tr class="settings-tr">
+				<td>Input</td>
+				<td>Output</td>
+			</tr>
+			<tr class="settings-tr">
+				<td class="settings-td">
+					<combo class="settings-combo" id="midiInput">
+						<combotext>Input</combotext>
+					</combo>
+				</td>
+				<td class="settings-td">
+					<combo class="settings-combo" id="midiOutput">
+						<combotext>Output</combotext>
+					</combo>
+				</td>
+			</tr>
+		</table>
+
+		<h1>Panic</h1>
+
+		<settingsspacer1/>
+		
+		<div class="settings-hlayout">
+			<button id="btPanicAllNotesOff" class="button">Send "All Notes Off"</button>
+			<button id="btPanicNoteOffEveryNote" class="button">Send "Note Off" for every Note</button>
+			<button id="btPanicReboot" class="button">Reboot Device</button>
+		</div>
+		
+		<settingsspacer1/>
+	
+		<h1>MIDI Routing Matrix</h1>
+		<settingsspacer1/>
+		<div class="settings-hlayout">
+			<label>Preset:</label>
+			<combo id="presetList" class="settings-combo">
+				<combotext>Default</combotext>
+			</combo>
+			<button id="btPresetSave" class="button">Save</button>
+			<button id="btPresetSaveAs" class="button">Save as...</button>
+			<button id="btPresetDelete" class="button">Delete</button>
+		</div>
+		<div id="matrix">
+			<h3 id="matrixHeadline">Note On/Off</h3>
+			<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 1em;">
+				<tr class="settings-tr settings-tr-headline">
+					<td>From | To</td>
+					<td>Device</td>
+					<td>Editor</td>
+					<td>Host</td>
+					<td>Physical</td>
+				</tr>
+				<tr class="settings-tr midimatrix-tr">
+					<td>Device</td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+				</tr>
+				<tr class="settings-tr midimatrix-tr">
+					<td>Editor</td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+				</tr>
+				<tr class="settings-tr midimatrix-tr">
+					<td>Host</td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+				</tr>
+				<tr class="settings-tr midimatrix-tr">
+					<td>Physical</td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+					<td><button id="cell" class="settings-checkbox"/></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>
+</template>

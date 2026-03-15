@@ -400,6 +400,31 @@ namespace virus
     	return parseMidiPacket(*m, _data, _parameterValues, _msg);
     }
 
+	std::vector<uint8_t> Controller::getPartsForMidiChannel(const uint8_t _channel)
+	{
+		std::vector<uint8_t> parts;
+		if(isMultiMode())
+		{
+			for(uint8_t p=0; p<getPartCount(); ++p)
+			{
+				const auto idx = getParameterIndexByName(g_paramPartMidiChannel);
+
+				if(idx == pluginLib::Controller::InvalidParameterIndex)
+					continue;
+
+				const auto v = getParameter(idx, p);
+				if(v->getUnnormalizedValue() == _channel)
+					parts.push_back(p);
+			}
+		}
+		else
+		{
+			if (_channel == 0)
+				parts.push_back(0);
+		}
+		return parts;
+	}
+
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
 	{
         SinglePatch patch;
@@ -542,10 +567,10 @@ namespace virus
 		}
     }
 
-	bool Controller::parseControllerDump(const synthLib::SMidiEvent& _e) const
+	bool Controller::parseControllerDump(const synthLib::SMidiEvent& _e)
 	{
 		const uint8_t status = _e.a & 0xf0;
-    	const uint8_t part = _e.a & 0x0f;
+    	const uint8_t channel = _e.a & 0x0f;
 
 		uint8_t page;
 
@@ -564,14 +589,14 @@ namespace virus
 		{
 			if(isMultiMode())
 			{
-				for(uint8_t p=0; p<getPartCount(); ++p)
-				{
-					const auto idx = getParameterIndexByName("Part Midi Channel");
-					if(idx == pluginLib::Controller::InvalidParameterIndex)
-						continue;
+				const auto idx = getParameterIndexByName(g_paramPartMidiChannel);
+				assert(idx != pluginLib::Controller::InvalidParameterIndex);
 
+				auto parts = getPartsForMidiChannel(channel);
+				for(const auto& p : parts)
+				{
 					const auto v = getParameter(idx, p);
-					if(v->getUnnormalizedValue() == part)
+					if(v->getUnnormalizedValue() == channel)
 						requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), p);
 				}
 			}
@@ -586,7 +611,7 @@ namespace virus
 			return false;
 		}
 
-		const auto& params = findSynthParam(part, page, _e.b);
+		const auto& params = findSynthParam(channel, page, _e.b);
 		for (const auto & p : params)
 			p->setValueFromSynth(_e.c, midiEventSourceToParameterOrigin(_e.source));
 

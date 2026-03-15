@@ -6,10 +6,13 @@
 
 #include "rmlDragSource.h"
 #include "rmlInterfaces.h"
+#include "Core/Template.h"
+#include "Core/TemplateCache.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "RmlUi/Core/Element.h"
+#include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/ElementInstancer.h"
 #include "RmlUi/Core/ElementUtilities.h"
 #include "RmlUi/Core/Event.h"
@@ -515,6 +518,64 @@ namespace juceRmlUi
 				_element->RemoveProperty(Rml::PropertyId::PointerEvents);
 				_element->SetPseudoClass("disabled", false);
 			}
+		}
+
+		bool isVisible(Rml::Element* _element)
+		{
+			auto* prop = _element->GetProperty(Rml::PropertyId::Display);
+			if (prop && prop->Get<Rml::Style::Display>(_element->GetCoreInstance()) == Rml::Style::Display::None)
+				return false;
+			return true;
+		}
+
+		bool hasTemplate(const std::string& _templateName, const Rml::Element* _parent)
+		{
+			return _parent->GetCoreInstance().template_cache->GetTemplate(_templateName) != nullptr;
+		}
+
+		Rml::Element* createTemplate(const std::string& _templateName, Rml::Element* _parent)
+		{
+			auto* t = _parent->GetCoreInstance().template_cache->GetTemplate(_templateName);
+
+			if (!t)
+			{
+				Rml::Log::Message(_parent->GetCoreInstance(), Rml::Log::LT_ERROR, "Template '%s' not found", _templateName.c_str());
+				return nullptr;
+			}
+
+			auto elem = _parent->GetOwnerDocument()->CreateElement("div");
+
+			auto* parsedElem = t->ParseTemplate(elem.get());
+
+			if (!parsedElem)
+			{
+				Rml::Log::Message(_parent->GetCoreInstance(), Rml::Log::LT_ERROR, "Template '%s' could not be parsed", _templateName.c_str());
+				return {};
+			}
+
+			auto* attachedElem = _parent->AppendChild(std::move(elem));
+
+			return attachedElem;
+		}
+
+		float getSliderTraversableLength(Rml::Element* _slider, const bool _vertical)
+		{
+			auto* track = findChildByTag(_slider, "slidertrack", false, true);
+			auto* bar = findChildByTag(_slider, "sliderbar", false, true);
+
+			if (!track || !bar)
+				return 0.0f;
+
+			if (_vertical)
+			{
+				const float edgeTop = bar->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Top);
+				const float edgeBottom = bar->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Bottom);
+				return track->GetBox().GetSize(Rml::BoxArea::Content).y - bar->GetBox().GetSize(Rml::BoxArea::Border).y - edgeTop - edgeBottom;
+			}
+
+			const float edgeLeft = bar->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Left);
+			const float edgeRight = bar->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Right);
+			return track->GetBox().GetSize(Rml::BoxArea::Content).x - bar->GetBox().GetSize(Rml::BoxArea::Border).x - edgeLeft - edgeRight;
 		}
 	}
 }

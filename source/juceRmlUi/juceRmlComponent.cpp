@@ -619,7 +619,15 @@ namespace juceRmlUi
 	{
 		if (m_openGLContext)
 			return static_cast<float>(m_openGLContext->getRenderingScale());
-		return 1.0f;
+
+		float scale = 1.0f;
+		const Component* t = this;
+		while (t)
+		{
+			scale *= std::sqrt (std::abs (t->getTransform().getDeterminant()));
+			t = t->getParentComponent();
+		}
+		return scale;
 	}
 
 	void RmlComponent::resize(const int _width, const int _height)
@@ -860,22 +868,19 @@ namespace juceRmlUi
 		if (!r)
 			return;
 
-		r->beginFrame(_g);
-
-		m_renderProxy->executeRenderFunctions();
-
 		auto* rootComp = getTopLevelComponent();
 		auto* laf = dynamic_cast<LookAndFeel*>(&rootComp->getLookAndFeel());
 
-		if (laf)
-		{
-			r->endFrame(laf->getCurrentImage());
-		}
-		else
-		{
-			static juce::Image nullImage;
-			r->endFrame(nullImage);
-		}
+		const auto& img = laf ? laf->getCurrentImage() : juce::Image();
+		const auto size = img.isValid()
+			? Rml::Vector2i(img.getWidth(), img.getHeight())
+			: getRenderSize();
+
+		r->beginFrame(_g, size);
+
+		m_renderProxy->executeRenderFunctions();
+
+		r->endFrame(img);
 
 		m_renderDone = true;
 	}
@@ -918,7 +923,29 @@ namespace juceRmlUi
 			// On Linux, some hosts (for example Carla) like to set the locale to the current user language, this breaks float number parsing, so we force the "C" locale here
 			(void)setlocale(LC_NUMERIC, "C");
 
-			m_document = m_rmlContext->LoadDocument(m_rootRmlFilename);
+			Rml::String rmlString;
+			m_coreInstance.file_interface->LoadFile(m_rootRmlFilename, rmlString);
+
+			// inject more templates to prevent that each GUI has to add them
+			const std::string key = "<head>";
+			auto pos = rmlString.find(key);
+			if (pos != Rml::String::npos)
+			{
+				auto addTemplate = [&](const std::string& _name)
+				{
+					const Rml::String templates = R"(<link type="text/template" href=")" + _name + "\"/>";
+					rmlString.insert(pos + key.length(), templates);
+				};
+
+				addTemplate("tus_patchmanager.rml");
+				addTemplate("tus_colorpicker.rml");
+				addTemplate("tus_settings.rml");
+
+				for (const auto& templateName : m_config.additionalTemplateFiles)
+					addTemplate(templateName);
+			}
+
+			m_document = m_rmlContext->LoadDocumentFromMemory(rmlString, m_rootRmlFilename);
 
 			if (m_document)
 			{

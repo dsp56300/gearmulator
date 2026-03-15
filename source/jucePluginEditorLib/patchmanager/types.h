@@ -16,6 +16,7 @@ namespace jucePluginEditorLib::patchManager
 		DataSources,
 		LocalStorage,
 		Factory,
+		MidiBanks,
 		Categories,
 		Tags,
 		Favourites,

@@ -63,4 +63,17 @@ namespace baseLib
 	ConfigFile::ConfigFile(const std::string& _filename) : ConfigFile(_filename.c_str())
 	{
 	}
+
+	bool ConfigFile::writeToFile(const std::string& _filename) const
+	{
+		std::ofstream file(_filename, std::ios::out | std::ios::trunc);
+
+		if (!file.is_open())
+			return false;
+
+		for (const auto& [key, value] : getArgsWithValues())
+			file << key << " = " << value << "\n";
+
+		return true;
+	}
 }

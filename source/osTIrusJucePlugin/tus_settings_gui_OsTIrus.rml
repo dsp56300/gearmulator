@@ -1,0 +1,14 @@
+<template name="tus_settings_gui_OsTIrus">
+<head>
+	<link type="text/rcss" href="tus_settings_gui_OsTIrus.rcss"/>
+</head>
+<body>
+	<settingsspacer1/>
+	<h1>Animation</h1>
+	<settingsspacer1/>
+	<div id="btEnableLogoAnimations" class="settings-checkboxwithlabel">
+		<button id="button" class="settings-checkbox"/>
+		<label>Enable Logo Animation</label>
+	</div>
+</body>
+</template>

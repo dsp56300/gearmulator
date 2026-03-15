@@ -9,6 +9,9 @@
 
 #include "juce_events/juce_events.h"	// juce::Timer
 
+#include <mutex>
+#include <set>
+
 namespace Rml
 {
 	class Element;
@@ -38,13 +41,14 @@ namespace jucePluginEditorLib::patchManager
 	public:
 		baseLib::Event<uint32_t, pluginLib::patchDB::PatchKey> onSelectedPatchChanged;
 
-		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
+		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::MidiBanks, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
 
 		explicit PatchManager(Editor& _editor, Rml::Element* _rootElement, const std::initializer_list<patchManager::GroupType>& _groupTypes = DefaultGroupTypes);
 		~PatchManager() override;
 
 		void timerCallback() override;
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty) const override;
+		void processPendingProgramChanges();
 
 		bool setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
 
@@ -118,6 +122,9 @@ namespace jucePluginEditorLib::patchManager
 		void startLoaderThread(const juce::File& _migrateFromDir = {}) override;
 
 	private:
+		static std::mutex& getInstancesMutex();
+		static std::set<PatchManager*>& getInstances();
+
 		pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem);
 
 		State m_state;

@@ -1,0 +1,76 @@
+<template name="tus_settings_midilearn">
+<head>
+	<link type="text/rcss" href="tus_settings_midilearn.rcss"/>
+</head>
+<body>
+	<div class="settings-page">
+		<h1>MIDI Learn</h1>
+		<settingsspacer1/>
+		
+		<div class="settings-hlayout">
+			<label>Preset:</label>
+			<combo id="presetList" class="settings-combo">
+				<combotext>Default</combotext>
+			</combo>
+			<button id="btPresetCreate" class="button">Create</button>
+			<button id="btPresetDelete" class="button">Delete</button>
+			<button id="btPresetApply" class="button" style="display: none;">Apply</button>
+			<button id="btBrowsePresets" class="button">Browse...</button>
+		</div>
+		
+		<settingsspacer1/>
+		
+		<h2>Mappings</h2>
+		<settingsspacer1/>
+		
+		<table class="settings-table" id="mappingTable" style="padding-top: 0.5em; padding-bottom: 1em;">
+			<tr class="settings-tr settings-tr-headline">
+				<td class="ml-col-type">Type</td>
+				<td class="ml-col-channel">Channel</td>
+				<td class="ml-col-controller">Controller</td>
+				<td class="ml-col-mode">Mode</td>
+				<td class="ml-col-parameter">Parameter</td>
+				<td class="ml-col-remove"></td>
+			</tr>
+			<tr id="mappingRow" class="settings-tr ml-tr">
+				<td id="type" class="ml-col-type">CC</td>
+				<td id="channel" class="ml-col-channel">1</td>
+				<td id="controller" class="ml-col-controller">74</td>
+				<td class="ml-col-mode">
+					<combo id="modeCombo" class="settings-combo-small">
+						<combotext>Absolute</combotext>
+					</combo>
+				</td>
+				<td id="parameter" class="ml-col-parameter">Filter Cutoff</td>
+				<td class="ml-col-remove"><button id="btRemove" class="button">Remove</button></td>
+			</tr>
+		</table>
+		
+		<settingsspacer1/>
+		
+		<h2>MIDI Input</h2>
+		<settingsspacer1/>
+		
+		<div class="settings-hlayout">
+			<label>Learn from:</label>
+			<button id="cbInputHost" class="settings-checkbox"/>
+			<label for="cbInputHost">Host</label>
+			<button id="cbInputPhysical" class="settings-checkbox"/>
+			<label for="cbInputPhysical">Physical</label>
+		</div>
+		
+		<settingsspacer1/>
+		
+		<h2>MIDI Feedback</h2>
+		<settingsspacer1/>
+		
+		<div class="settings-hlayout">
+			<label>Send feedback to:</label>
+			<button id="cbFeedbackHost" class="settings-checkbox"/>
+			<label for="cbFeedbackHost">Host</label>
+			<button id="cbFeedbackPhysical" class="settings-checkbox"/>
+			<label for="cbFeedbackPhysical">Physical</label>
+		</div>
+	</div>
+</body>
+</template>

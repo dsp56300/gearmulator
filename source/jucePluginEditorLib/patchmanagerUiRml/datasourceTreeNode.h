@@ -25,6 +25,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 
 		std::string getText() const;
+		uint32_t getMidiBankNumber() const;
 
 		const auto& getDatasource() const { return m_ds; }
 		void refresh();

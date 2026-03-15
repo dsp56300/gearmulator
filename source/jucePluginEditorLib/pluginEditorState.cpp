@@ -16,8 +16,6 @@
 
 #include "RmlUi/Core/ElementDocument.h"
 
-#include "synthLib/os.h"
-
 namespace
 {
 	bridgeLib::PluginDesc getPluginDesc(const pluginLib::Processor& _p)
@@ -150,11 +148,14 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 {
 	auto skin = _skin;
 
+	bool hasSettingsOpened = false;
+
 	if (m_editor)
 	{
 		m_instanceConfig.clear();
 		getEditor()->getPerInstanceConfig(m_instanceConfig);
 
+		hasSettingsOpened = m_editor->settingsOpened();
 		m_editor.reset();
 	}
 
@@ -219,6 +220,7 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		if(!m_instanceConfig.empty())
 			getEditor()->setPerInstanceConfig(m_instanceConfig);
 
+		getEditor()->showSettings(hasSettingsOpened);
 
 		auto* doc = m_editor->getDocument();
 
@@ -314,6 +316,18 @@ Editor* PluginEditorState::getEditor() const
 	return m_editor.get();
 }
 
+void PluginEditorState::enableDspBridge(const bool _enable)
+{
+	if (_enable && !m_remoteServerList)
+	{
+		m_remoteServerList.reset(new bridgeClient::ServerList(getPluginDesc(m_processor)));
+	}
+	else if (!_enable && m_remoteServerList)
+	{
+		m_remoteServerList.reset();
+	}
+}
+
 void PluginEditorState::openMenu(const Rml::Event& _event)
 {
 	if(getEditor()->openContextMenuForParameter(_event))
@@ -323,140 +337,6 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
     const auto scale = juce::roundToInt(config.getDoubleValue("scale", 100));
 
 	juceRmlUi::Menu menu;
-
-	juceRmlUi::Menu skinMenu;
-
-	skinMenu.setItemsPerColumn(32);
-
-	bool loadedSkinIsPartOfList = false;
-
-	std::set<std::pair<std::string, std::string>> knownSkins;	// folder, filename
-
-	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList, &knownSkins](const Skin& _skin)
-	{
-		// remove dupes by folder
-		if(!_skin.folder.empty() && !knownSkins.insert({_skin.folder, _skin.filename}).second)
-			return;
-
-		const auto isCurrent = _skin == getCurrentSkin();
-
-		if(isCurrent)
-			loadedSkinIsPartOfList = true;
-
-		skinMenu.addEntry(_skin.displayName, isCurrent,[this, _skin]
-		{
-			juce::MessageManager::callAsync([this, _skin]
-			{
-				loadSkin(_skin);
-			});
-		});
-	};
-
-	for (const auto & skin : getIncludedSkins())
-		addSkinEntry(skin);
-
-	bool haveSkinsOnDisk = false;
-
-	// find more skins on disk
-	const auto modulePath = synthLib::getModulePath();
-
-	// new: user documents folder
-	std::vector<std::string> entries;
-	baseLib::filesystem::getDirectoryEntries(entries, getSkinFolder());
-
-	// old: next to plugin, kept for backwards compatibility
-	std::vector<std::string> entriesModulePath;
-	baseLib::filesystem::getDirectoryEntries(entriesModulePath, modulePath + "skins_" + m_processor.getProperties().name);
-	entries.insert(entries.end(), entriesModulePath.begin(), entriesModulePath.end());
-
-	for (const auto& entry : entries)
-	{
-		std::vector<std::string> files;
-		baseLib::filesystem::getDirectoryEntries(files, entry);
-
-		for (const auto& file : files)
-		{
-			const auto isJson = baseLib::filesystem::hasExtension(file, ".json");
-			const auto isRml = baseLib::filesystem::hasExtension(file, ".rml");
-			if(isJson || isRml)
-			{
-				if (isRml)
-				{
-					// ensure its not a template
-					std::vector<uint8_t> rmlData;
-					baseLib::filesystem::readFile(rmlData, file);
-					constexpr char key[] = "<rml>";
-					if (rmlData.size() < std::size(key))
-						continue;
-					if (std::memcmp(rmlData.data(), key, std::size(key) - 1) != 0)
-						continue;
-				}
-				if(!haveSkinsOnDisk)
-				{
-					haveSkinsOnDisk = true;
-					skinMenu.addSeparator();
-				}
-
-				std::string skinPath = entry;
-				if(entry.find(modulePath) == 0)
-					skinPath = entry.substr(modulePath.size());
-				skinPath = baseLib::filesystem::validatePath(skinPath);
-
-				auto filename = baseLib::filesystem::getFilenameWithoutPath(file);
-
-				auto displayName = createSkinDisplayName(file);
-				const Skin skin{displayName, filename, skinPath, {}};
-
-				addSkinEntry(skin);
-			}
-		}
-	}
-
-	if(!loadedSkinIsPartOfList)
-		addSkinEntry(getCurrentSkin());
-
-	skinMenu.addSeparator();
-
-	if(getEditor() && m_currentSkin.folder.empty() || m_currentSkin.folder.find(getSkinFolder()) != 0)
-	{
-		skinMenu.addEntry("Export current skin to disk", [this]
-		{
-			exportCurrentSkin();
-		});
-	}
-
-	skinMenu.addEntry("Open skins folder in File Browser", [this]
-	{
-		const auto dir = getSkinFolder();
-		baseLib::filesystem::createDirectory(dir);
-		juce::File(dir).revealToUser();
-	});
-
-	{
-		juceRmlUi::Menu skinDevMenu;
-
-		skinDevMenu.addEntry("Reload skin via F5 key", config.getBoolValue("reloadSkinViaF5", false), [this]
-		{
-			auto& c = m_processor.getConfig();
-			const auto enabled = c.getBoolValue("reloadSkinViaF5", false);
-			c.setValue("reloadSkinViaF5", !enabled);
-			c.saveIfNeeded();
-		});
-
-		skinDevMenu.addEntry("Enable RmlUi Debugger", config.getBoolValue("enableRmlUiDebugger", false), [this]
-		{
-			auto& c = m_processor.getConfig();
-			const auto enabled = !c.getBoolValue("enableRmlUiDebugger", false);
-			c.setValue("enableRmlUiDebugger", enabled);
-			c.saveIfNeeded();
-
-			if (m_editor)
-				m_editor->getRmlComponent()->enableDebugger(enabled);
-		});
-
-		skinMenu.addSeparator();
-		skinMenu.addSubMenu("Developer Options", std::move(skinDevMenu));
-	}
 
 	juceRmlUi::Menu scaleMenu;
 	scaleMenu.addEntry("50%", scale == 50, [this] { setGuiScale(50); });
@@ -471,64 +351,7 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 	scaleMenu.addEntry("250%", scale == 250, [this] { setGuiScale(250); });
 	scaleMenu.addEntry("300%", scale == 300, [this] { setGuiScale(300); });
 
-	auto adjustLatency = [this](const int _blocks)
-	{
-		m_processor.setLatencyBlocks(_blocks);
-
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Warning",
-			"Most hosts cannot handle if a plugin changes its latency while being in use.\n"
-			"It is advised to save, close & reopen the project to prevent synchronization issues.");
-	};
-
-	const auto latency = m_processor.getPlugin().getLatencyBlocks();
-	juceRmlUi::Menu latencyMenu;
-	latencyMenu.addEntry("0 (DAW will report proper CPU usage)", latency == 0, [this, adjustLatency] { adjustLatency(0); });
-	latencyMenu.addEntry("1 (default)", latency == 1, [this, adjustLatency] { adjustLatency(1); });
-	latencyMenu.addEntry("2", latency == 2, [this, adjustLatency] { adjustLatency(2); });
-	latencyMenu.addEntry("4", latency == 4, [this, adjustLatency] { adjustLatency(4); });
-	latencyMenu.addEntry("8", latency == 8, [this, adjustLatency] { adjustLatency(8); });
-
-	menu.addSubMenu("GUI Skin", std::move(skinMenu));
 	menu.addSubMenu("GUI Scale", std::move(scaleMenu));
-	menu.addSubMenu("Latency (blocks)", std::move(latencyMenu));
-
-	if (m_remoteServerList)
-	{
-		auto servers = m_remoteServerList->getEntries();
-
-		juceRmlUi::Menu deviceTypeMenu;
-		deviceTypeMenu.addEntry("Local (default)", m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
-
-		if(servers.empty())
-		{
-			deviceTypeMenu.addEntry("- no servers found -", false, false, [this] {});
-		}
-		else
-		{
-			for (const auto & server : servers)
-			{
-				if(server.err.code == bridgeLib::ErrorCode::Ok)
-				{
-					std::string name = server.host + ':' + std::to_string(server.serverInfo.portTcp);
-
-					const auto isSelected = m_processor.getDeviceType() == pluginLib::DeviceType::Remote && 
-						m_processor.getRemoteDeviceHost() == server.host && 
-						m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
-
-					deviceTypeMenu.addEntry(name, isSelected, [this, server]
-					{
-						m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
-					});
-				}
-				else
-				{
-					std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
-					deviceTypeMenu.addEntry(name, false, false, [this] {});
-				}
-			}
-		}
-		menu.addSubMenu("Device Type", std::move(deviceTypeMenu));
-	}
 
 	menu.addSeparator();
 
@@ -578,40 +401,6 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 
 	initContextMenu(menu);
 
-	{
-		menu.addSeparator();
-
-		juceRmlUi::Menu panicMenu;
-
-		panicMenu.addEntry("Send 'All Notes Off'", [this]
-		{
-			for(uint8_t c=0; c<16; ++c)
-			{
-				synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor, synthLib::M_CONTROLCHANGE + c, synthLib::MC_ALLNOTESOFF);
-				m_processor.addMidiEvent(ev);
-			}
-		});
-
-		panicMenu.addEntry("Send 'Note Off' for every Note", [this]
-		{
-			for(uint8_t c=0; c<16; ++c)
-			{
-				for(uint8_t n=0; n<128; ++n)
-				{
-					synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor, synthLib::M_NOTEOFF + c, n, 64, n * 256);
-					m_processor.addMidiEvent(ev);
-				}
-			}
-		});
-
-		panicMenu.addEntry("Reboot Device", [this]
-		{
-			m_processor.rebootDevice();
-		});
-
-		menu.addSubMenu("Panic", std::move(panicMenu));
-	}
-
 	if(auto* editor = dynamic_cast<Editor*>(getEditor()))
 	{
 		if(auto* pm = editor->getPatchManager())
@@ -643,61 +432,17 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 		}
 	}
 
+	menu.addSeparator();
+
+	menu.addEntry("Settings...", [this]
 	{
-		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
-
-		juceRmlUi::Menu advancedMenu;
-		advancedMenu.addEntry("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
+		juce::MessageManager::callAsync([this]
 		{
-			if(!allowAdvanced)
-			{
-				genericUI::MessageBox::showOkCancel(
-					genericUI::MessageBox::Icon::Warning, 
-					"Warning", 
-					"Changing these settings may cause instability of the plugin.\n\nPlease confirm to continue.", 
-					[this](const genericUI::MessageBox::Result _result)
-				{
-					if (_result == genericUI::MessageBox::Result::Ok)
-						m_processor.getConfig().setValue("allow_advanced_options", true);
-				});
-			}
-			else
-			{
-				m_processor.getConfig().setValue("allow_advanced_options", juce::var(false));
-			}
+			getEditor()->showSettings(true);
 		});
-
-		advancedMenu.addSeparator();
-
-		if(initAdvancedContextMenu(advancedMenu, allowAdvanced))
-		{
-			menu.addSeparator();
-			menu.addSubMenu("Advanced...", std::move(advancedMenu));
-		}
-	}
+	});
 
 	menu.runModal(_event, 16);
-}
-
-void PluginEditorState::exportCurrentSkin() const
-{
-	auto* editor = getEditor();
-
-	if(!editor)
-		return;
-
-	const auto& skin = editor->getSkin();
-
-	const auto res = exportSkinToFolder(skin, getSkinFolder());
-
-	if(!res.empty())
-	{
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Export failed", "Failed to export skin:\n\n" + res, getUiRoot());
-	}
-	else
-	{
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Export finished", "Skin successfully exported", getUiRoot());
-	}
 }
 
 Skin PluginEditorState::readSkinFromConfig() const

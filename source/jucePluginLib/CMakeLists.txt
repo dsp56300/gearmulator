@@ -14,6 +14,10 @@ set(SOURCES
 	controllermap.cpp controllermap.h
 	dummydevice.cpp dummydevice.h
 	filetype.cpp filetype.h
+	midiLearnManager.cpp midiLearnManager.h
+	midiLearnMapping.cpp midiLearnMapping.h
+	midiLearnPreset.cpp midiLearnPreset.h
+	midiLearnTranslator.cpp midiLearnTranslator.h
 	midipacket.cpp midipacket.h
 	midiports.cpp midiports.h
 	parameter.cpp parameter.h
@@ -28,6 +32,7 @@ set(SOURCES
 	pluginVersion.cpp pluginVersion.h
 	processor.cpp processor.h
 	processorPropertiesInit.h
+	programChangeRouter.cpp programChangeRouter.h
 	softknob.cpp softknob.h
 	tools.cpp tools.h
 	types.h

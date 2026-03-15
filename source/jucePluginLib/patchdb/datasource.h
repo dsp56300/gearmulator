@@ -20,6 +20,7 @@ namespace pluginLib::patchDB
 		std::string name;
 		uint32_t bank = g_invalidBank;
 //		uint32_t program = g_invalidProgram;
+		uint32_t midiBankNumber = g_invalidMidiBankNumber;	// user-assigned MIDI bank for program change routing
 		Timestamp timestamp;
 		std::set<PatchPtr> patches;
 

@@ -1,10 +1,19 @@
 #include "parameterOverlay.h"
 
+#include "parameterOverlays.h"
 #include "pluginEditor.h"
+#include "pluginProcessor.h"
 
 #include "jucePluginLib/parameter.h"
+#include "jucePluginLib/midiLearnPreset.h"
+#include "jucePluginLib/midiLearnTranslator.h"
+
+#include "juceRmlUi/rmlHelper.h"
 
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/ElementUtilities.h"
+
+#include <algorithm>
 
 namespace jucePluginEditorLib
 {
@@ -16,7 +25,27 @@ namespace jucePluginEditorLib
 			{
 				case ParameterOverlay::Type::Lock: return "lock";
 				case ParameterOverlay::Type::Link: return "link";
+				case ParameterOverlay::Type::MidiLearn: return "midilearn";
 				default: return {};
+			}
+		}
+
+		std::string getMappingShortLabel(const pluginLib::MidiLearnMapping& _mapping)
+		{
+			switch (_mapping.type)
+			{
+			case pluginLib::MidiLearnMapping::Type::ControlChange:
+				return "CC " + std::to_string(_mapping.controller);
+			case pluginLib::MidiLearnMapping::Type::PitchBend:
+				return "PB";
+			case pluginLib::MidiLearnMapping::Type::ChannelPressure:
+				return "AT";
+			case pluginLib::MidiLearnMapping::Type::PolyPressure:
+				return "PP " + std::to_string(_mapping.controller);
+			case pluginLib::MidiLearnMapping::Type::NRPN:
+				return "NRPN " + std::to_string(_mapping.nrpn);
+			default:
+				return {};
 			}
 		}
 	}
@@ -42,18 +71,38 @@ namespace jucePluginEditorLib
 
 	void ParameterOverlay::toggleOverlay(Type _type, const bool _enable, float _opacity/* = 1.0f*/)
 	{
-		if(_enable)
+		const auto visible = _enable && m_component->IsVisible(true);
+
+		if(visible)
 		{
 			if (m_overlayElements.find(_type) != m_overlayElements.end())
 				return;
+
+			auto* offsetParent = m_component->GetOffsetParent();
+
+			if(!offsetParent)
+				offsetParent = m_component->GetOwnerDocument();
 
 			auto overlay = m_component->GetOwnerDocument()->CreateElement("div");
 
 			overlay->SetAttribute("class", "tus-parameteroverlay tus-parameteroverlaytype-" + toString(_type));
 
-			overlay->SetProperty(Rml::PropertyId::Opacity, Rml::Property(_opacity, Rml::Unit::NUMBER));
+			const auto dpRatio = Rml::ElementUtilities::GetDensityIndependentPixelRatio(m_component);
 
-			m_overlayElements.insert({ _type, m_component->AppendChild(std::move(overlay)) });
+			overlay->SetProperty(Rml::PropertyId::Opacity, Rml::Property(_opacity, Rml::Unit::NUMBER));
+			overlay->SetProperty(Rml::PropertyId::Left, Rml::Property(m_component->GetOffsetLeft() / dpRatio, Rml::Unit::DP));
+			overlay->SetProperty(Rml::PropertyId::Top, Rml::Property(m_component->GetOffsetTop() / dpRatio, Rml::Unit::DP));
+			overlay->SetProperty(Rml::PropertyId::Width, Rml::Property(m_component->GetOffsetWidth() / dpRatio, Rml::Unit::DP));
+
+			auto* elem = offsetParent->AppendChild(std::move(overlay));
+
+			if (_type == Type::MidiLearn)
+			{
+				elem->AddEventListener(Rml::EventId::Click, this);
+				elem->AddEventListener(Rml::EventId::Mousedown, this);
+			}
+
+			m_overlayElements.insert({ _type, elem });
 		}
 		else
 		{
@@ -61,6 +110,13 @@ namespace jucePluginEditorLib
 			if(it == m_overlayElements.end())
 				return;
 			auto* overlay = it->second;
+
+			if (_type == Type::MidiLearn)
+			{
+				overlay->RemoveEventListener(Rml::EventId::Click, this);
+				overlay->RemoveEventListener(Rml::EventId::Mousedown, this);
+			}
+
 			m_overlayElements.erase(it);
 			overlay->GetParentNode()->RemoveChild(overlay);
 		}
@@ -79,6 +135,84 @@ namespace jucePluginEditorLib
 
 		toggleOverlay(Type::Lock, isLocked);
 		toggleOverlay(Type::Link, isLinkSource || isLinkTarget, linkAlpha);
+	}
+
+	void ParameterOverlay::ProcessEvent(Rml::Event& _event)
+	{
+		if (!m_midiLearnModeActive || !m_parameter)
+			return;
+
+		auto& editor = m_overlays.getEditor();
+
+		if (_event.GetId() == Rml::EventId::Mousedown)
+		{
+			if (juceRmlUi::helper::isContextMenu(_event))
+			{
+				auto* translator = editor.getProcessor().getMidiLearnTranslator();
+				if (!translator)
+					return;
+
+				if (m_midiLearnListening)
+				{
+					// right click while listening: cancel learning and reset overlay
+					translator->cancelLearning();
+					editor.setMidiLearnSelectedParam(nullptr);
+
+					m_overlays.forEachOverlayForParameter(m_parameter, [](ParameterOverlay& _overlay)
+					{
+						_overlay.setMidiLearnListening(false);
+					});
+				}
+				else
+				{
+					// right click: clear mapping for this parameter
+					auto preset = translator->getPreset();
+					auto& mappings = preset.getMappings();
+					const auto paramName = m_parameter->getDescription().name;
+
+					mappings.erase(std::remove_if(mappings.begin(), mappings.end(),
+						[&paramName](const pluginLib::MidiLearnMapping& _m)
+						{
+							return _m.paramName == paramName;
+						}), mappings.end());
+
+					translator->setPreset(preset);
+
+					// update all overlays for this parameter (multiple elements may share it)
+					m_overlays.forEachOverlayForParameter(m_parameter, [](ParameterOverlay& _overlay)
+					{
+						_overlay.updateMidiLearnOverlay();
+					});
+				}
+			}
+
+			// block all mouse-down during MIDI learn mode to prevent parameter changes
+			_event.StopImmediatePropagation();
+		}
+		else if (_event.GetId() == Rml::EventId::Click)
+		{
+			// left click: start learning for this parameter
+			auto* translator = editor.getProcessor().getMidiLearnTranslator();
+			if (!translator)
+				return;
+
+			// reset previous listening overlays (multiple elements may share the same parameter)
+			m_overlays.forEachOverlayForParameter(editor.getMidiLearnSelectedParam(), [](ParameterOverlay& _overlay)
+			{
+				_overlay.setMidiLearnListening(false);
+			});
+
+			editor.setMidiLearnSelectedParam(m_parameter);
+			translator->startLearning(m_parameter->getDescription().name);
+
+			// set all overlays for this parameter to listening (multiple elements may share it)
+			m_overlays.forEachOverlayForParameter(m_parameter, [](ParameterOverlay& _overlay)
+			{
+				_overlay.setMidiLearnListening(true);
+			});
+
+			_event.StopImmediatePropagation();
+		}
 	}
 
 	void ParameterOverlay::setParameter(pluginLib::Parameter* _parameter)
@@ -109,5 +243,75 @@ namespace jucePluginEditorLib
 		}
 
 		updateOverlays();
+	}
+
+	void ParameterOverlay::setMidiLearnMode(const bool _active)
+	{
+		if (m_midiLearnModeActive == _active)
+			return;
+		m_midiLearnModeActive = _active;
+		m_midiLearnListening = false;
+		updateMidiLearnOverlay();
+	}
+
+	void ParameterOverlay::setMidiLearnListening(const bool _listening)
+	{
+		if (m_midiLearnListening == _listening)
+			return;
+		m_midiLearnListening = _listening;
+		updateMidiLearnOverlay();
+	}
+
+	void ParameterOverlay::updateMidiLearnOverlay()
+	{
+		if (!m_midiLearnModeActive || !m_parameter)
+		{
+			toggleOverlay(Type::MidiLearn, false);
+			return;
+		}
+
+		toggleOverlay(Type::MidiLearn, true);
+
+		auto it = m_overlayElements.find(Type::MidiLearn);
+		if (it == m_overlayElements.end())
+			return;
+
+		auto* elem = it->second;
+
+		const auto label = getMidiLearnLabel();
+		const bool isBound = !label.empty();
+
+		elem->SetPseudoClass("midi-bound", isBound && !m_midiLearnListening);
+		elem->SetPseudoClass("midi-unbound", !isBound && !m_midiLearnListening);
+		elem->SetPseudoClass("midi-listening", m_midiLearnListening);
+
+		// update or create label child
+		if (elem->GetNumChildren() == 0)
+		{
+			auto span = m_component->GetOwnerDocument()->CreateElement("span");
+			span->SetAttribute("class", "tus-midilearn-label");
+			elem->AppendChild(std::move(span));
+		}
+
+		if (auto* labelElem = elem->GetChild(0))
+			labelElem->SetInnerRML(m_midiLearnListening ? "..." : label);
+	}
+
+	std::string ParameterOverlay::getMidiLearnLabel() const
+	{
+		if (!m_parameter)
+			return {};
+
+		auto* translator = m_overlays.getEditor().getProcessor().getMidiLearnTranslator();
+		if (!translator)
+			return {};
+
+		const auto& preset = translator->getPreset();
+		const auto mappings = preset.findMappingsByParam(m_parameter->getDescription().name);
+
+		if (mappings.empty())
+			return {};
+
+		return getMappingShortLabel(*mappings.front());
 	}
 }

@@ -28,6 +28,7 @@ namespace synthLib
 		bool setPreferredDeviceSamplerate(float _samplerate);
 
 		void setHostSamplerate(float _hostSamplerate, float _preferredDeviceSamplerate);
+		void setResamplerMode(Resampler::Mode _mode);
 		float getHostSamplerate() const { return m_hostSamplerate; }
 		float getHostSamplerateInv() const { return m_hostSamplerateInv; }
 

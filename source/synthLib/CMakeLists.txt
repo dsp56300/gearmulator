@@ -25,6 +25,7 @@ set(SOURCES
 	midiTypes.h
 	os.cpp os.h
 	plugin.cpp plugin.h
+	mameResamplers.cpp mameResamplers.h
 	resampler.cpp resampler.h
 	resamplerInOut.cpp resamplerInOut.h
 	romLoader.cpp romLoader.h

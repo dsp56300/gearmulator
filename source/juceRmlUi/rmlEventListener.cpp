@@ -18,8 +18,7 @@ namespace juceRmlUi
 
 	EventListener::~EventListener()
 	{
-		if (m_element)
-			m_element->RemoveEventListener(m_event, this, m_inCapturePhase);
+		Remove();
 	}
 
 	void EventListener::ProcessEvent(Rml::Event& _event)
@@ -34,6 +33,12 @@ namespace juceRmlUi
 			m_element = nullptr;
 			delete this;
 		}
+	}
+
+	void EventListener::Remove()
+	{
+		if (m_element)
+			m_element->RemoveEventListener(m_event, this, m_inCapturePhase);
 	}
 
 	void OnDetachListener::add(Rml::Element* _element, const Callback& _callback)

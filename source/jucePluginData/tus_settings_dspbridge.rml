@@ -1,0 +1,28 @@
+<template name="tus_settings_dspbridge">
+<head>
+	<link type="text/rcss" href="tus_settings_dspbridge.rcss"/>
+</head>
+<body>
+	<div class="settings-page">
+		<h1>Activation</h1>
+		<settingsspacer1/>
+		<div id="btEnableDspBridge" class="settings-checkboxwithlabel">
+			<button id="button" class="settings-checkbox"/>
+			<label id="label">Enable DSP Bridge</label>
+		</div>
+		<settingsspacer1/>
+		<h1>Device Type</h1>
+		<settingsspacer1/>
+		<table id="deviceTypeTable" class="settings-table">
+			<tr class="settings-tr" id="deviceTypeEntry">
+				<td class="settings-td">
+					<div id="deviceTypeButton" class="settings-checkboxwithlabel">
+						<button id="button" class="settings-checkbox"/>
+						<label id="label">Device</label>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</template>

@@ -9,6 +9,11 @@
 
 namespace n2x
 {
+	// MCU memory offsets relative to A4 base register (from firmware reverse engineering)
+	// Used to directly apply Master Tune since firmware protects it during multi dump processing
+	static constexpr uint32_t g_mcuMasterTuneOffset = 0x19F0;
+	static constexpr uint32_t g_mcuDspTuneValueOffset = 0x1A58;
+
 	static constexpr uint8_t g_singleDefault[] =
 	{
 		72,		// O2Pitch
@@ -281,6 +286,14 @@ namespace n2x
 				send(_ev);
 			}
 
+			// BUG-10010: Firmware's multi dump processing deliberately protects Master Tune,
+			// discarding the incoming value. Apply it directly to MCU memory after queuing the dump.
+			if(_ev.source != synthLib::MidiEventSource::Device)
+			{
+				const auto masterTune = unpackNibbles(m_multi, getOffsetInMultiDump(MultiParam::MasterTune));
+				applyMasterTuneToMCU(masterTune);
+			}
+
 			return true;
 		}
 
@@ -324,6 +337,16 @@ namespace n2x
 			e.source = _ev.source;
 			e.offset = _ev.offset;
 			changeSingleParameter(part, e);
+		}
+		else if (bank == SysexByte::EmuSetMasterTune)
+		{
+			if(sysex.size() >= g_sysexHeaderSize + 1 + g_sysexFooterSize)
+			{
+				const auto masterTune = static_cast<uint8_t>((sysex[IdxMsgSpec] << 4) | sysex[IdxMsgSpec + 1]);
+				changeMultiParameter(MultiParam::MasterTune, masterTune);
+				applyMasterTuneToMCU(masterTune);
+				return true;
+			}
 		}
 
 		return false;
@@ -647,5 +670,28 @@ namespace n2x
 		_buffer[SysexIndex::IdxMsgSpec] = _msgSpec;
 
 		_buffer.back() = 0xf7;
+	}
+
+	void State::applyMasterTuneToMCU(const uint8_t _masterTune)
+	{
+		if(!m_hardware)
+			return;
+
+		auto& uc = m_hardware->getUC();
+		const auto a4 = uc.getAReg(4);
+
+		if(a4 == 0)
+			return;
+
+		// Write Master Tune byte to firmware's global params area
+		uc.write8(a4 + g_mcuMasterTuneOffset, _masterTune);
+
+		// Calculate and write DSP tuning value using firmware's formula:
+		// DSP_value = ((signed_tune * 128) / 100) + 6318
+		const auto signedTune = static_cast<int8_t>(_masterTune);
+		const auto dspValue = static_cast<uint32_t>(((static_cast<int32_t>(signedTune) * 128) / 100) + 6318);
+
+		uc.write16(a4 + g_mcuDspTuneValueOffset, static_cast<uint16_t>(dspValue >> 16));
+		uc.write16(a4 + g_mcuDspTuneValueOffset + 2, static_cast<uint16_t>(dspValue & 0xFFFF));
 	}
 }

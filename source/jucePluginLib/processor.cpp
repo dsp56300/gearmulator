@@ -63,6 +63,25 @@ namespace pluginLib
 
 	void Processor::addMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
+		// Process through MIDI Learn translator first
+		if (_ev.source != synthLib::MidiEventSource::Device)
+		{
+			if (m_midiLearnTranslator && m_midiLearnTranslator->processMidiInput(_ev))
+			{
+				// MIDI event was consumed by MIDI Learn (learned mapping or learning mode)
+				return;
+			}
+
+			if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+			{
+				if (m_programChangeRouter.processMidiEvent(_ev))
+				{
+					// Program change was handled by patch manager
+					return;
+				}
+			}
+		}
+
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Editor))
 			getController().enqueueMidiMessages({_ev});
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
@@ -113,7 +132,27 @@ namespace pluginLib
 	Controller& Processor::getController()
 	{
 	    if (m_controller == nullptr)
+		{
 	        m_controller.reset(createController());
+			
+			// Initialize MIDI Learn translator with controller
+			if (m_controller && !m_midiLearnTranslator)
+			{
+				m_midiLearnTranslator = std::make_unique<MidiLearnTranslator>(*m_controller, m_controller->getParameterDescriptions().getControllerMap());
+				
+				// Setup MIDI feedback callback
+				m_midiLearnTranslator->onSendMidiOutput = [this](synthLib::MidiEventSource _source, const synthLib::SMidiEvent& _event)
+				{
+					if (m_midiRoutingMatrix.enabled(_event, _source))
+					{
+						if (_source == synthLib::MidiEventSource::Editor)
+							getController().enqueueMidiMessages({_event});
+						else if (_source == synthLib::MidiEventSource::Physical)
+							m_midiPorts.send(_event);
+					}
+				};
+			}
+		}
 
 	    return *m_controller;
 	}
@@ -294,8 +333,17 @@ namespace pluginLib
 			s.write(m_preferredDeviceSamplerate);
 		}
 
+		if(m_resamplerMode != synthLib::Resampler::Mode::Legacy)
+		{
+			baseLib::ChunkWriter cw(s, "RSMP", 1);
+			s.write(static_cast<uint8_t>(m_resamplerMode));
+		}
+
 		m_midiPorts.saveChunkData(s);
 		m_midiRoutingMatrix.saveChunkData(s);
+
+		if (m_midiLearnTranslator)
+			m_midiLearnTranslator->saveChunkData(s);
 
 		if (m_programName != g_defaultProgramName)
 		{
@@ -331,6 +379,13 @@ namespace pluginLib
 			setPreferredDeviceSamplerate(sr);
 		});
 
+		_cr.add("RSMP", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			const auto mode = _binaryStream.read<uint8_t>();
+			if(mode < static_cast<uint8_t>(synthLib::Resampler::Mode::Count))
+				setResamplerMode(static_cast<synthLib::Resampler::Mode>(mode));
+		});
+
 		_cr.add("PROG", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
 			m_programName = _binaryStream.readString();
@@ -347,6 +402,9 @@ namespace pluginLib
 
 		m_midiPorts.loadChunkData(_cr);
 		m_midiRoutingMatrix.loadChunkData(_cr);
+		
+		if (m_midiLearnTranslator)
+			m_midiLearnTranslator->loadChunkData(_cr);
 	}
 
 	void Processor::readGain(baseLib::BinaryStream& _s)
@@ -382,6 +440,13 @@ namespace pluginLib
 		return m_device->getDspClockHz();
 	}
 
+	bool Processor::canModifyDspClock() const
+	{
+		if(!m_device)
+			return false;
+		return m_device->canModifyDspClock();
+	}
+
 	bool Processor::setPreferredDeviceSamplerate(const float _samplerate)
 	{
 		m_preferredDeviceSamplerate = _samplerate;
@@ -413,6 +478,12 @@ namespace pluginLib
 		std::vector<float> result;
 		m_device->getPreferredSamplerates(result);
 		return result;
+	}
+
+	void Processor::setResamplerMode(const synthLib::Resampler::Mode _mode)
+	{
+		m_resamplerMode = _mode;
+		getPlugin().setResamplerMode(_mode);
 	}
 
 	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const BinaryDataRef& _binaryData,	const std::string& _filename)

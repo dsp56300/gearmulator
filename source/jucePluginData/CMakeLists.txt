@@ -29,6 +29,20 @@ set(RMLSOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_juceskin.rcss
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_patchmanager.rcss
 	${CMAKE_CURRENT_SOURCE_DIR}/tus_patchmanager.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings.rcss
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_dspaudio.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_dspaudio.rcss
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_dspbridge.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_dspbridge.rcss
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_gui.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_gui.rcss
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_midi.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_midi.rcss
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_midilearn.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_midilearn.rcss
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_skin.rml
+	${CMAKE_CURRENT_SOURCE_DIR}/tus_settings_skin.rcss
 )
 
 list(APPEND DATASOURCES ${RMLSOURCES})

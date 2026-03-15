@@ -50,6 +50,10 @@ namespace pluginLib::patchDB
 				_dataSources.push_back(it.second);
 		}
 
+		bool setDataSourceMidiBankNumber(const DataSourceNodePtr& _ds, uint32_t _midiBankNumber);
+		bool clearDataSourceMidiBankNumber(const DataSourceNodePtr& _ds);
+		DataSourceNodePtr getDataSourceByMidiBankNumber(uint32_t _midiBankNumber);
+
 		bool setTagColor(TagType _type, const Tag& _tag, Color _color);
 		Color getTagColor(TagType _type, const Tag& _tag) const;
 		Color getPatchColor(const PatchPtr& _patch, const TypedTags& _tagsToIgnore) const;
@@ -193,5 +197,8 @@ namespace pluginLib::patchDB
 		// state
 		bool m_loading = true;
 		bool m_cacheDirty = false;
+
+		// pending MIDI bank assignments from JSON, applied when datasources become available
+		std::map<DataSource, uint32_t> m_pendingMidiBankAssignments;
 	};
 }

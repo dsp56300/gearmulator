@@ -1,6 +1,7 @@
 #include "jePatchManager.h"
 
 #include "jeEditor.h"
+#include "jeLcd.h"
 
 #include "jeController.h"
 #include "jePluginProcessor.h"
@@ -53,8 +54,10 @@ namespace jeJucePlugin
 			{
 				pluginLib::patchDB::DataSource ds;
 				ds.type = pluginLib::patchDB::SourceType::Rom;
-				ds.bank = bankIndex++;
+				ds.bank = bankIndex;
 				ds.name = _name;
+				ds.midiBankNumber = bankIndex;
+				++bankIndex;
 				addDataSource(ds);
 			};
 
@@ -233,6 +236,8 @@ namespace jeJucePlugin
 		if (!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), _part))
 			return false;
 
+		m_controller.sendLockedParameters(static_cast<uint8_t>(_part));
+
 		const auto area = jeLib::State::getAddressArea(_patch->sysex);
 
 		if (area == jeLib::AddressArea::UserPerformance)
@@ -243,6 +248,20 @@ namespace jeJucePlugin
 				if (_part == part)
 					continue;
 				setSelectedPatch(part, _patch);
+			}
+		}
+		else if (area == jeLib::AddressArea::UserPatch)
+		{
+			// loading a single patch while in patch display mode: switch to single key mode
+			// to prevent the other layer from remaining active ("hanging" presets)
+			if (auto* lcd = m_editor.getLcd())
+			{
+				if (lcd->isPatchMode())
+				{
+					auto* keyMode = m_controller.getParameter("KeyMode", 0);
+					if (keyMode && keyMode->getUnnormalizedValue() != 0)
+						keyMode->setUnnormalizedValueNotifyingHost(0, pluginLib::Parameter::Origin::Ui);
+				}
 			}
 		}
 

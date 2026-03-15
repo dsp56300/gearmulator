@@ -3,6 +3,7 @@
 #include "baseLib/event.h"
 
 #include "RmlUi/Core/Vector2.h"
+#include "RmlUi/Core/EventListener.h"
 
 #include <cstdint>
 
@@ -26,13 +27,14 @@ namespace jucePluginEditorLib
 {
 	class ParameterOverlays;
 
-	class ParameterOverlay
+	class ParameterOverlay : public Rml::EventListener
 	{
 	public:
 		enum class Type
 		{
 			Lock,
 			Link,
+			MidiLearn,
 
 			Count
 		};
@@ -49,7 +51,17 @@ namespace jucePluginEditorLib
 		void refresh()
 		{
 			updateOverlays();
+			updateMidiLearnOverlay();
 		}
+
+		void setMidiLearnMode(bool _active);
+		void setMidiLearnListening(bool _listening);
+
+		pluginLib::Parameter* getParameter() const { return m_parameter; }
+
+		void ProcessEvent(Rml::Event& _event) override;
+
+		void updateMidiLearnOverlay();
 
 	private:
 		struct OverlayProperties
@@ -64,6 +76,8 @@ namespace jucePluginEditorLib
 		void updateOverlays();
 		void setParameter(pluginLib::Parameter* _parameter);
 
+		std::string getMidiLearnLabel() const;
+
 		ParameterOverlays& m_overlays;
 		Rml::Element* const m_component;
 
@@ -72,6 +86,9 @@ namespace jucePluginEditorLib
 
 		size_t m_parameterLockChangedListener = InvalidListenerId;
 		size_t m_parameterLinkChangedListener = InvalidListenerId;
+
+		bool m_midiLearnModeActive = false;
+		bool m_midiLearnListening = false;
 
 //		std::array<juce::DrawableImage*, OverlayCount> m_images{nullptr,nullptr};
 	};

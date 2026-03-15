@@ -58,17 +58,30 @@ namespace jucePluginEditorLib::patchManagerRml
 				return t.substr(pos + 1);
 			return t;
 		}
+
+		std::string getDataSourceDisplayName(const pluginLib::patchDB::DataSourceNodePtr& _ds)
+		{
+			auto name = getDataSourceNodeTitle(_ds);
+			if (_ds->midiBankNumber != pluginLib::patchDB::g_invalidMidiBankNumber)
+				name += " [Bank " + std::to_string(_ds->midiBankNumber) + "]";
+			return name;
+		}
 	}
 
 	std::string DatasourceNode::getText() const
 	{
-		return m_ds ? getDataSourceNodeTitle(m_ds) : std::string();
+		return m_ds ? getDataSourceDisplayName(m_ds) : std::string();
+	}
+
+	uint32_t DatasourceNode::getMidiBankNumber() const
+	{
+		return m_ds ? m_ds->midiBankNumber : pluginLib::patchDB::g_invalidMidiBankNumber;
 	}
 
 	void DatasourceNode::refresh()
 	{
 		auto* elem = dynamic_cast<DatasourceTreeElem*>(getElement());
-		elem->setName(getDataSourceNodeTitle(m_ds));
+		elem->setName(getDataSourceDisplayName(m_ds));
 	}
 
 	DatasourceTreeElem::DatasourceTreeElem(Tree& _tree, Rml::CoreInstance& _coreInstance, const Rml::String& _tag) : TreeElem(_tree, _coreInstance, _tag)
@@ -87,9 +100,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		if (!m_dataSource)
 			return;
 
-		const auto name = getDataSourceNodeTitle(m_dataSource);
-
-		setName(name);
+		setName(getDataSourceDisplayName(m_dataSource));
 
 		pluginLib::patchDB::SearchRequest sr;
 		sr.sourceNode = m_dataSource;
@@ -181,6 +192,39 @@ namespace jucePluginEditorLib::patchManagerRml
 					getDB().copyPatchesToLocalStorage(m_dataSource, clipboardPatches, -1);
 				});
 			}
+		}
+
+		// MIDI Bank assignment
+		{
+			menu.addSeparator();
+
+			const auto currentBank = m_dataSource->midiBankNumber;
+			const bool hasBank = currentBank != pluginLib::patchDB::g_invalidMidiBankNumber;
+
+			if (hasBank)
+			{
+				menu.addEntry("Clear MIDI Bank (Bank " + std::to_string(currentBank) + ")", [this]
+				{
+					getDB().clearDataSourceMidiBankNumber(m_dataSource);
+				});
+			}
+
+			menu.addEntry(hasBank ? "Change MIDI Bank..." : "Assign MIDI Bank...", [this]
+			{
+				const auto current = m_dataSource->midiBankNumber;
+				const auto initialValue = current != pluginLib::patchDB::g_invalidMidiBankNumber ? std::to_string(current) : std::string();
+
+				new juceRmlUi::InplaceEditor(this, initialValue,
+					[this](const std::string& _value)
+					{
+						try
+						{
+							const auto bank = static_cast<uint32_t>(std::stoul(_value));
+							getDB().setDataSourceMidiBankNumber(m_dataSource, bank);
+						}
+						catch (...) {}
+					});
+			});
 		}
 
 		menu.runModal(this, juceRmlUi::helper::getMousePos(_event));

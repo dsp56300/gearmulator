@@ -1,6 +1,7 @@
 #pragma once
 
 #include "parameterOverlays.h"
+#include "settingsDeviceSpecific.h"
 #include "skin.h"
 
 #include "juceUiLib/editor.h"
@@ -62,6 +63,9 @@ namespace pluginLib
 
 namespace jucePluginEditorLib
 {
+	class SettingsPlugin;
+	class Settings;
+
 	class PluginDataModel;
 
 	namespace patchManagerRml
@@ -80,6 +84,7 @@ namespace jucePluginEditorLib
 	{
 	public:
 		baseLib::Event<Editor*, Rml::Event&> onOpenMenu;
+		baseLib::Event<> onSettingsClosed;
 
 		Editor(Processor& _processor, Skin _skin);
 		~Editor() override;
@@ -142,8 +147,19 @@ namespace jucePluginEditorLib
 		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;
 		bool setParameters(const std::map<std::string, pluginLib::ParamValue>& _paramValues) const;
 
+		virtual void onMidiLearnRequested(const pluginLib::Parameter* _param);
+
+		void setMidiLearnMode(bool _enable);
+		bool isMidiLearnMode() const { return m_midiLearnModeActive; }
+		pluginLib::Parameter* getMidiLearnSelectedParam() const { return m_midiLearnSelectedParam; }
+		void setMidiLearnSelectedParam(pluginLib::Parameter* _param) { m_midiLearnSelectedParam = _param; }
+
 		juceRmlUi::Menu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
 		virtual void createExportFileTypeMenu(juceRmlUi::Menu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
+
+		void registerSettings(std::vector<std::unique_ptr<SettingsPlugin>>& _plugins);
+
+		virtual std::unique_ptr<SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) { return nullptr; }
 
 		juce::Component* createRmlUiComponent(const std::string& _rmlFile);
 
@@ -198,6 +214,11 @@ namespace jucePluginEditorLib
 		bool setSize(int _width, int _height) const;
 
 		static std::string getAbsoluteSkinFolder(const Processor& _processor, const std::string& _skinFolder);
+
+		void toggleSettings();
+		void showSettings(bool _show);
+		bool settingsOpened() const { return m_settings != nullptr; }
+
 	private:
 		void onDisclaimerFinished() const;
 
@@ -220,11 +241,17 @@ namespace jucePluginEditorLib
 		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
+
 		std::unique_ptr<ParameterOverlays> m_overlays;
 
 		juceRmlUi::RmlInterfaces m_rmlInterfaces;
 		std::unique_ptr<juceRmlUi::RmlComponent> m_rmlComponent;
 
+		bool m_midiLearnModeActive = false;
+		pluginLib::Parameter* m_midiLearnSelectedParam = nullptr;
+
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
+
+		std::unique_ptr<Settings> m_settings;
 	};
 }

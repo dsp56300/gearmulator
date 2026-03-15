@@ -2,6 +2,7 @@
 
 #include <array>
 #include <iostream>
+#include <cstdio>
 
 #ifndef _WIN32
 // filesystem is only available on macOS Catalina 10.15+
@@ -418,4 +419,20 @@ namespace baseLib::filesystem
 		return name;
 	}
 #endif
+
+	bool exists(const std::string& _filename)
+	{
+		auto* hFile = openFile(_filename, "r");
+		if (hFile)
+		{
+			fclose(hFile);
+			return true;
+		}
+		return false;
+	}
+
+	bool remove(const std::string& _filename)
+	{
+		return 0 == ::remove(_filename.c_str());
+	}
 }

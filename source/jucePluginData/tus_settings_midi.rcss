@@ -1,0 +1,11 @@
+.settings-midi {
+}
+
+.midimatrix-tr {
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+}
+
+.midimatrix-tr:nth-child(even) {
+	background-color: #0003;
+}

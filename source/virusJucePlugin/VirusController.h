@@ -162,6 +162,8 @@ namespace virus
 
 		const auto& getFrontpanelState() const { return m_frontpanelState; }
 
+		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) override;
+
     private:
         Singles m_singles;
         SinglePatch m_singleEditBuffer;                     // single mode
@@ -174,7 +176,7 @@ namespace virus
     	void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
         void parseParamChange(const pluginLib::MidiPacket::Data& _data, synthLib::MidiEventSource _source);
-        bool parseControllerDump(const synthLib::SMidiEvent&) const;
+        bool parseControllerDump(const synthLib::SMidiEvent&);
 
         VirusProcessor& m_processor;
         virusLib::DeviceModel m_defaultModel;

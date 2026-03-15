@@ -81,7 +81,7 @@ namespace synthLib
 		virtual bool setDspClockPercent(uint32_t _percent = 100) = 0;
 		virtual uint32_t getDspClockPercent() const = 0;
 		virtual uint64_t getDspClockHz() const = 0;
-
+		virtual bool canModifyDspClock() const { return false; }
 
 		BASELIB_NOINLINE virtual void release(std::vector<SMidiEvent>& _events);
 

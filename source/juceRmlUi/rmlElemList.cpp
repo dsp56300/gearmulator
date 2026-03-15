@@ -4,6 +4,7 @@
 #include "rmlHelper.h"
 #include "rmlListEntry.h"
 
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/ElementDocument.h"
 
 #include <algorithm>
@@ -84,6 +85,9 @@ namespace juceRmlUi
 		case EventId::Keydown:
 			onKeypress(_event);
 			break;
+		case EventId::Mousescroll:
+			onMouseScroll(_event);
+			break;
 		default:;
 		}
 	}
@@ -149,6 +153,7 @@ namespace juceRmlUi
 
 		AddEventListener(EventId::Scroll, this);
 		AddEventListener(EventId::Keydown, this);
+		AddEventListener(EventId::Mousescroll, this);
 
 		m_list.evEntryAdded.addListener([this](List*, const List::EntryPtr&) { onEntryAdded(); });
 		m_list.evEntryRemoved.addListener([this](List*, const List::EntryPtr&) { onEntryRemoved(); });
@@ -593,6 +598,25 @@ namespace juceRmlUi
 	{
 		updateLayout();
 //		m_layoutDirty = 1;
+	}
+
+	void ElemList::onMouseScroll(Event& _event)
+	{
+		if (m_redirectingMouseScroll || getLayoutType() != LayoutType::Grid)
+			return;
+
+		const auto deltaY = _event.GetParameter("wheel_delta_y", 0.0f);
+		if (deltaY == 0.0f)
+			return;
+
+		// In grid mode, the list scrolls horizontally. Redirect the vertical
+		// mouse wheel delta to become a horizontal delta by re-dispatching the
+		// event through the context with swapped axes.
+		_event.StopPropagation();
+
+		m_redirectingMouseScroll = true;
+		GetContext()->ProcessMouseWheel(Vector2f(deltaY, 0.0f), helper::getKeyModifiers(_event));
+		m_redirectingMouseScroll = false;
 	}
 
 	bool ElemList::onKeypress(Event& _event)

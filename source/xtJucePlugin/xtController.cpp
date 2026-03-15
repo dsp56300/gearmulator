@@ -80,7 +80,7 @@ namespace xtJucePlugin
 		for(uint8_t i=0; i<m_singleEditBuffers.size(); ++i)
 		{
 			auto* p = getParameter(idx, i);
-			p->setRateLimitMilliseconds(250);
+			p->setRateLimitMilliseconds(100);
 		}
 	}
 

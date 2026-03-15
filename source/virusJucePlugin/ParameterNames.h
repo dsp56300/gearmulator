@@ -8,4 +8,6 @@ namespace virus
 	static constexpr char g_paramPartPanorama[] = "Panorama";
 	static constexpr char g_paramPlayMode[] = "Play Mode";
 	static constexpr char g_paramClockTempo[] = "Clock Tempo";
+	static constexpr char g_paramPartMidiChannel[] = "Part Midi Channel";
+	static constexpr char g_paramMidiChannel[] = "Midi Channel";
 }
