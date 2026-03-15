@@ -16,7 +16,7 @@ namespace xt
 {
 	static dsp56k::DefaultMemoryValidator g_memoryValidator;
 
-	DSP::DSP(Hardware& _hardware, mc68k::Hdi08& _hdiUC, const uint32_t _index)
+	DSP::DSP(Hardware& _hardware, mc68k::Hdi08& _hdiUC, const uint32_t _index, const bool _voiceExpansion/* = false*/)
 	: m_hardware(_hardware), m_hdiUC(_hdiUC)
 	, m_index(_index)
 	, m_name({static_cast<char>('A' + _index)})
@@ -30,7 +30,7 @@ namespace xt
 
 		m_periphX.getEssiClock().setExternalClockFrequency(10'240'000);	// 10,24 MHz
 
-		if constexpr (g_useVoiceExpansion)
+		if (_voiceExpansion)
 		{
 			// ESSI1 inter-DSP bus runs 8x faster than ESSI0 audio rate
 			// (8 channels x 2 words per voice cycle, 2 words per ESSI1 frame)

@@ -16,19 +16,30 @@ namespace xt
 		return Rom{_romName, _romData};
 	}
 
-	Hardware::Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName)
+	Hardware::Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName, const bool _voiceExpansion/* = false*/)
 		: wLib::Hardware(40000)
 		, m_rom(initializeRom(_romData, _romName))
-		, m_uc(m_rom)
-#if XT_VOICE_EXPANSION
-		, m_dsps{DSP(*this, m_uc.getHdi08B().getHdi08(), 0), DSP(*this, m_uc.getHdi08C().getHdi08(), 1), DSP(*this, m_uc.getHdi08A().getHdi08(), 2)}
-#else
-		, m_dsps{DSP(*this, m_uc.getHdi08A().getHdi08(), 0)}
-#endif
+		, m_useVoiceExpansion(_voiceExpansion)
+		, m_uc(m_rom, _voiceExpansion)
 		, m_midi(m_uc)
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing);
+
+		if (m_useVoiceExpansion)
+		{
+			// Expansion DSP index mapping (verified from actual XT ROM dumps):
+			// idx 0 = HDI08B (0xFC000) = exp1: voices, ESSI0 RX (ext audio) + ESSI1 TX/RX
+			// idx 1 = HDI08C (0xFD000) = exp2: voices + mixing, ESSI1 only (no ESSI0)
+			// idx 2 = HDI08A (0xFE000) = exp3: effects + final output, ESSI0 TX + ESSI1 TX/RX
+			m_dsps.push_back(std::make_unique<DSP>(*this, m_uc.getHdi08B().getHdi08(), 0, true));
+			m_dsps.push_back(std::make_unique<DSP>(*this, m_uc.getHdi08C().getHdi08(), 1, true));
+			m_dsps.push_back(std::make_unique<DSP>(*this, m_uc.getHdi08A().getHdi08(), 2, true));
+		}
+		else
+		{
+			m_dsps.push_back(std::make_unique<DSP>(*this, m_uc.getHdi08A().getHdi08(), 0));
+		}
 	}
 
 	Hardware::~Hardware()
@@ -48,7 +59,7 @@ namespace xt
 	void Hardware::resetMidiCounter()
 	{
 		// wait for DSP to enter blocking state
-		const auto& esai = m_dsps[g_mainDspIdx].getPeriph().getEssi0();
+		const auto& esai = m_dsps[getMainDspIdx()]->getPeriph().getEssi0();
 
 		auto& inputs = esai.getAudioInputs();
 		auto& outputs = esai.getAudioOutputs();
@@ -85,17 +96,19 @@ namespace xt
 			return;
 		}
 
+		const auto mainDspIdx = getMainDspIdx();
+
 		// During boot, set empty callbacks on all ESSI interfaces to prevent DSP threads from blocking
 		for (uint32_t i = 0; i < 3; ++i)
 		{
-			m_dsps[i].getPeriph().getEssi0().setCallback([](dsp56k::Audio*) {}, 0);
-			m_dsps[i].getPeriph().getEssi1().setCallback([](dsp56k::Audio*) {}, 0);
+			m_dsps[i]->getPeriph().getEssi0().setCallback([](dsp56k::Audio*) {}, 0);
+			m_dsps[i]->getPeriph().getEssi1().setCallback([](dsp56k::Audio*) {}, 0);
 		}
 
 		// Boot pump loop: DSPs sync via ESSI1 ring (DSP2 TX→DSP0 RX→DSP0 TX→DSP1 RX→DSP1 TX→DSP2 RX).
 		// DSP2 (exp3, idx 2) sends magic $535400 on ESSI1 TX, DSP0/DSP1 echo it forward.
 		// We must route ESSI1 data between DSPs for the sync handshake to complete.
-		auto& mainEssi0 = m_dsps[g_mainDspIdx].getPeriph().getEssi0();
+		auto& mainEssi0 = m_dsps[mainDspIdx]->getPeriph().getEssi0();
 
 		// ESSI1 ring connections: [from].TX → [to].RX
 		constexpr uint32_t essi1From[] = {2, 0, 1};  // TX source DSP index
@@ -106,8 +119,8 @@ namespace xt
 			// Route ESSI1 data around the ring
 			for (int leg = 0; leg < 3; ++leg)
 			{
-				auto& txOut = m_dsps[essi1From[leg]].getPeriph().getEssi1().getAudioOutputs();
-				auto& rxIn  = m_dsps[essi1To[leg]].getPeriph().getEssi1().getAudioInputs();
+				auto& txOut = m_dsps[essi1From[leg]]->getPeriph().getEssi1().getAudioOutputs();
+				auto& rxIn  = m_dsps[essi1To[leg]]->getPeriph().getEssi1().getAudioInputs();
 
 				while (!txOut.empty() && !rxIn.full())
 				{
@@ -120,7 +133,7 @@ namespace xt
 			// Feed ESSI0 inputs (DSP0 uses ESSI0 RX for external audio, feed silence)
 			for (uint32_t i = 0; i < 3; ++i)
 			{
-				auto& in0 = m_dsps[i].getPeriph().getEssi0().getAudioInputs();
+				auto& in0 = m_dsps[i]->getPeriph().getEssi0().getAudioInputs();
 				if (in0.empty())
 					in0.push_back({});
 			}
@@ -128,9 +141,9 @@ namespace xt
 			// Drain ESSI0 outputs from non-main DSPs to prevent overflow
 			for (uint32_t i = 0; i < 3; ++i)
 			{
-				if (i != g_mainDspIdx)
+				if (i != mainDspIdx)
 				{
-					auto& out0 = m_dsps[i].getPeriph().getEssi0().getAudioOutputs();
+					auto& out0 = m_dsps[i]->getPeriph().getEssi0().getAudioOutputs();
 					while (out0.size() > 32)
 						out0.pop_front();
 				}
@@ -139,18 +152,18 @@ namespace xt
 			std::this_thread::yield();
 		}
 
-		LOG("Voice Expansion boot completed, main DSP index " << g_mainDspIdx);
+		LOG("Voice Expansion boot completed, main DSP index " << mainDspIdx);
 
 		// Prime each DSP with minimal input to prevent blocking, then drain outputs
 		for (auto& dsp : m_dsps)
 		{
-			dsp.getPeriph().getEssi0().writeEmptyAudioIn(8);
-			dsp.getPeriph().getEssi1().writeEmptyAudioIn(8 * 8);
+			dsp->getPeriph().getEssi0().writeEmptyAudioIn(8);
+			dsp->getPeriph().getEssi1().writeEmptyAudioIn(8 * 8);
 
-			while (!dsp.getPeriph().getEssi0().getAudioOutputs().empty())
-				dsp.getPeriph().getEssi0().getAudioOutputs().pop_front();
-			while (!dsp.getPeriph().getEssi1().getAudioOutputs().empty())
-				dsp.getPeriph().getEssi1().getAudioOutputs().pop_front();
+			while (!dsp->getPeriph().getEssi0().getAudioOutputs().empty())
+				dsp->getPeriph().getEssi0().getAudioOutputs().pop_front();
+			while (!dsp->getPeriph().getEssi1().getAudioOutputs().empty())
+				dsp->getPeriph().getEssi1().getAudioOutputs().pop_front();
 		}
 
 		mainEssi0.setCallback([this, &mainEssi0](dsp56k::Audio*)
@@ -160,16 +173,11 @@ namespace xt
 		}, 0);
 
 		// Real-time ESSI1 ring routing via TX callbacks.
-		// Each DSP's ESSI1 TX callback immediately forwards data to the next DSP's ESSI1 RX,
-		// providing natural backpressure via semaphore-based ring buffers instead of
-		// batch routing in processAudio which caused rate mismatch (expansion DSPs
-		// outrun main DSP that is throttled by ESSI0 audio output).
-		// Ring: DSP2 TX→DSP0 RX, DSP0 TX→DSP1 RX, DSP1 TX→DSP2 RX
 		constexpr uint32_t essi1RxDst[] = {1, 2, 0};  // DSP[i] TX routes to DSP[essi1RxDst[i]] RX
-		for (uint32_t i = 0; i < g_dspCount; ++i)
+		for (uint32_t i = 0; i < getDspCount(); ++i)
 		{
-			auto& srcEssi1 = m_dsps[i].getPeriph().getEssi1();
-			auto& dstEssi1 = m_dsps[essi1RxDst[i]].getPeriph().getEssi1();
+			auto& srcEssi1 = m_dsps[i]->getPeriph().getEssi1();
+			auto& dstEssi1 = m_dsps[essi1RxDst[i]]->getPeriph().getEssi1();
 
 			srcEssi1.setCallback([&srcEssi1, &dstEssi1](dsp56k::Audio*)
 			{
@@ -187,7 +195,7 @@ namespace xt
 
 	void Hardware::setupEsaiListener()
 	{
-		auto& esaiA = m_dsps.front().getPeriph().getEssi0();
+		auto& esaiA = m_dsps.front()->getPeriph().getEssi0();
 
 		esaiA.setCallback([&](dsp56k::Audio*)
 		{
@@ -206,16 +214,16 @@ namespace xt
 			m_remainingUcCycles -= static_cast<int64_t>(deltaCycles);
 
 		for (auto& dsp : m_dsps)
-			dsp.transferHostFlagsUc2Dsdp();
+			dsp->transferHostFlagsUc2Dsdp();
 
 		for (auto& dsp : m_dsps)
-			dsp.hdiTransferDSPtoUC();
+			dsp->hdiTransferDSPtoUC();
 
 		if(m_uc.requestDSPReset())
 		{
 			for (auto& dsp : m_dsps)
 			{
-				if(dsp.haveSentTXToDSP())
+				if(dsp->haveSentTXToDSP())
 				{
 //					m_uc.dumpMemory("DSPreset");
 					assert(false && "DSP needs reset even though it got data already. Needs impl");
@@ -237,7 +245,7 @@ namespace xt
 		m_processAudio = true;
 
 		// DSP3 (index 1) outputs final audio on ESSI0, single DSP uses index 0
-		auto& essiMain = m_dsps[g_mainDspIdx].getPeriph().getEssi0();
+		auto& essiMain = m_dsps[getMainDspIdx()]->getPeriph().getEssi0();
 
 		const dsp56k::TWord* inputs[16]{nullptr};
 		dsp56k::TWord* outputs[16]{nullptr};
@@ -269,16 +277,16 @@ namespace xt
 			const auto processCount = std::min(_frames, static_cast<uint32_t>(1024));
 			_frames -= processCount;
 
-			if constexpr (g_useVoiceExpansion)
+			if (m_useVoiceExpansion)
 			{
 				// One-shot DMA diagnostic after ~2 seconds of runtime
 				static bool dmaDiagDone = false;
 				if (!dmaDiagDone && m_esaiFrameIndex > 800000)
 				{
 					dmaDiagDone = true;
-					for (uint32_t dspIdx = 0; dspIdx < g_dspCount; ++dspIdx)
+					for (uint32_t dspIdx = 0; dspIdx < getDspCount(); ++dspIdx)
 					{
-						auto& dma = m_dsps[dspIdx].getPeriph().getDMA();
+						auto& dma = m_dsps[dspIdx]->getPeriph().getDMA();
 						for (uint32_t ch = 0; ch < 6; ++ch)
 						{
 							const auto dcr = dma.getDCR(ch);
@@ -292,8 +300,8 @@ namespace xt
 								<< " DCO=" << HEX(dma.getDCO(ch))
 								<< " hasTrigger(Essi1TX)=" << dma.hasTrigger(dsp56k::DmaChannel::RequestSource::Essi1TransmitData));
 						}
-						auto& essi1 = m_dsps[dspIdx].getPeriph().getEssi1();
-						auto& essi0 = m_dsps[dspIdx].getPeriph().getEssi0();
+						auto& essi1 = m_dsps[dspIdx]->getPeriph().getEssi1();
+						auto& essi0 = m_dsps[dspIdx]->getPeriph().getEssi0();
 						LOG("DMA DIAG: DSP" << dspIdx
 							<< " ESSI1 txOut=" << essi1.getAudioOutputs().size()
 							<< " rxIn=" << essi1.getAudioInputs().size()
@@ -311,7 +319,7 @@ namespace xt
 				// ESSI1 ring routing is handled in real-time via TX callbacks (set in initVoiceExpansion)
 
 				// Feed external audio input to DSP0 (exp1) via ESSI0 RX
-				m_dsps[0].getPeriph().getEssi0().processAudioInputInterleaved(inputs, processCount);
+				m_dsps[0]->getPeriph().getEssi0().processAudioInputInterleaved(inputs, processCount);
 
 				// Feed silence to main DSP's ESSI0 RX (exp3 doesn't use external audio input)
 				essiMain.processAudioInputInterleaved(inputs, processCount, _latency);
@@ -338,14 +346,14 @@ namespace xt
 
 			essiMain.processAudioOutputInterleaved(outputs, processCount);
 
-			if constexpr (g_useVoiceExpansion)
+			if (m_useVoiceExpansion)
 			{
 				// Drain ESSI0 outputs from non-main DSPs to prevent buffer overflow
 				for (uint32_t idx = 0; idx < 3; ++idx)
 				{
-					if (idx == g_mainDspIdx)
+					if (idx == getMainDspIdx())
 						continue;
-					auto& essi0 = m_dsps[idx].getPeriph().getEssi0();
+					auto& essi0 = m_dsps[idx]->getPeriph().getEssi0();
 					dsp56k::TWord* dummyOuts[16]{nullptr};
 					const auto available = essi0.getAudioOutputs().size();
 					if (available >= 512)

@@ -30,7 +30,7 @@ namespace xt
 			Lcd			= 0x02,
 		};
 
-		Xt(const std::vector<uint8_t>& _romData, const std::string& _romName);
+		Xt(const std::vector<uint8_t>& _romData, const std::string& _romName, bool _voiceExpansion = false);
 		~Xt();
 
 		bool isValid() const;

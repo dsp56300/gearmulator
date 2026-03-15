@@ -43,6 +43,8 @@ namespace xtJucePlugin
 		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 
+		std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) override;
+
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 		Controller& getXtController() const { return m_controller; }
