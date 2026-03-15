@@ -1,6 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "mqbuildconfig.h"
 #include "mqdsp.h"
@@ -18,22 +20,23 @@ namespace mqLib
 {
 	class Hardware : public wLib::Hardware
 	{
-		static constexpr uint32_t g_dspCount = g_useVoiceExpansion ? 3 : 1;
-
 	public:
-		explicit Hardware(const ROM& _rom);
+		explicit Hardware(const ROM& _rom, bool _voiceExpansion = false);
 		~Hardware();
 
 		void process();
 
 		MqMc& getUC() { return m_uc; }
-		MqDsp& getDSP(uint32_t _index = 0) { return m_dsps[_index]; }
+		MqDsp& getDSP(uint32_t _index = 0) { return *m_dsps[_index]; }
 		uint64_t getUcCycles() const { return m_uc.getCycles(); }
 
 		auto& getAudioInputs() { return m_audioInputs; }
 		auto& getAudioOutputs() { return m_audioOutputs; }
 
-		dsp56k::DSPThread& getDspThread(uint32_t _index = 0) { return m_dsps[_index].thread(); }
+		dsp56k::DSPThread& getDspThread(uint32_t _index = 0) { return m_dsps[_index]->thread(); }
+
+		uint32_t getDspCount() const { return static_cast<uint32_t>(m_dsps.size()); }
+		bool useVoiceExpansion() const { return m_useVoiceExpansion; }
 
 		void processAudio(uint32_t _frames, uint32_t _latency = 0);
 
@@ -70,6 +73,7 @@ namespace mqLib
 		void setGlobalDefaultParameters();
 
 		const ROM m_rom;
+		const bool m_useVoiceExpansion;
 
 		bool m_requestNMI = false;
 		bool m_dspResetPending = false;
@@ -78,7 +82,7 @@ namespace mqLib
 		MqMc m_uc;
 		TAudioInputs m_audioInputs;
 		TAudioOutputs m_audioOutputs;
-		std::array<MqDsp,g_dspCount> m_dsps;
+		std::vector<std::unique_ptr<MqDsp>> m_dsps;
 
 		hwLib::SciMidi m_midi;
 	};

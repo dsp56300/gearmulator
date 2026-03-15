@@ -29,7 +29,7 @@ namespace mqLib
 		return ss.str();
 	}
 
-	MqMc::MqMc(const ROM& _rom) : m_rom(_rom)
+	MqMc::MqMc(const ROM& _rom, const bool _voiceExpansion/* = false*/) : m_rom(_rom), m_useVoiceExpansion(_voiceExpansion)
 	{
 		if(!_rom.isValid())
 			return;
@@ -94,7 +94,7 @@ namespace mqLib
 
 		m_hdi08a.exec(deltaCycles);
 
-		if constexpr (g_useVoiceExpansion)
+		if (m_useVoiceExpansion)
 		{
 			m_hdi08b.exec(deltaCycles);
 			m_hdi08c.exec(deltaCycles);
@@ -147,7 +147,7 @@ namespace mqLib
 		if (m_hdi08a.isInRange(pa))
 			return m_hdi08a.read16(pa);
 
-		if constexpr (g_useVoiceExpansion)
+		if (m_useVoiceExpansion)
 		{
 			if (m_hdi08b.isInRange(pa))
 				return m_hdi08b.read16(pa);
@@ -171,7 +171,7 @@ namespace mqLib
 		if (m_hdi08a.isInRange(pa))
 			return m_hdi08a.read8(pa);
 
-		if constexpr (g_useVoiceExpansion)
+		if (m_useVoiceExpansion)
 		{
 			if (m_hdi08b.isInRange(pa))
 				return m_hdi08b.read8(pa);
@@ -212,7 +212,7 @@ namespace mqLib
 			return;
 		}
 
-		if constexpr (g_useVoiceExpansion)
+		if (m_useVoiceExpansion)
 		{
 			if (m_hdi08b.isInRange(pa))
 			{
@@ -258,7 +258,7 @@ namespace mqLib
 			return;
 		}
 
-		if constexpr (g_useVoiceExpansion)
+		if (m_useVoiceExpansion)
 		{
 			if (m_hdi08b.isInRange(pa))
 			{

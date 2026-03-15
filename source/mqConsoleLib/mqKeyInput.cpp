@@ -82,7 +82,7 @@ namespace mqConsoleLib
 				break;
 			case '!':
 				hw->getDSP(0).dumpPMem("dspA_dump_P_" + std::to_string(hw->getUcCycles()));
-				if constexpr (mqLib::g_useVoiceExpansion)
+				if (hw->getDspCount() > 1)
 				{
 					hw->getDSP(1).dumpPMem("dspB_dump_P_" + std::to_string(hw->getUcCycles()));
 					hw->getDSP(2).dumpPMem("dspC_dump_P_" + std::to_string(hw->getUcCycles()));

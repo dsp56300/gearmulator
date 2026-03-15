@@ -146,10 +146,11 @@ int main(int _argc, char* _argv[])
 				mq.setButton(ButtonType::Play, false);
 
 				mq.getHardware()->getDspThread(0).setLogToStdout(true);
-#if MQ_VOICE_EXPANSION
-				mq.getHardware()->getDspThread(1).setLogToStdout(true);
-				mq.getHardware()->getDspThread(2).setLogToStdout(true);
-#endif
+				if (mq.getHardware()->getDspCount() > 1)
+				{
+					mq.getHardware()->getDspThread(1).setLogToStdout(true);
+					mq.getHardware()->getDspThread(2).setLogToStdout(true);
+				}
 			}
 		}
 		else

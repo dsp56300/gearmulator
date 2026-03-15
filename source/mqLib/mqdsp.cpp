@@ -29,11 +29,7 @@ namespace mqLib
 
 		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768); // measured as being roughly 33,9MHz, this should be exact
 
-#if MQ_VOICE_EXPANSION
-		m_periphX.getEsaiClock().setSamplerate(16 * 44100); // verified
-#else
-		m_periphX.getEsaiClock().setSamplerate(44100); // verified
-#endif
+		m_periphX.getEsaiClock().setSamplerate(_hardware.useVoiceExpansion() ? 16 * 44100 : 44100);
 		m_periphX.getEsaiClock().setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 
 		auto config = m_dsp.getJit().getConfig();
@@ -200,7 +196,6 @@ namespace mqLib
 			auto v = hdi08().readTX();
 			++m_hdiDspToUcCount;
 
-#if MQ_VOICE_EXPANSION
 			// The DSP firmware reads Port C bit 4 AFTER sending its first HDI08
 			// response. On real VE hardware, the first response from expansion
 			// DSPs would be 0x000010 (VE identity) because Port C is physically
@@ -208,7 +203,6 @@ namespace mqLib
 			// first response for expansion DSPs to match real hardware behavior.
 			if (m_index > 0 && m_hdiDspToUcCount == 1 && v == 0x000001)
 				v = 0x000010;
-#endif
 
 			if (v == g_magicEsaiPacket)
 				m_receivedMagicEsaiPacket = true;

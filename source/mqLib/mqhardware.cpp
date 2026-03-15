@@ -22,50 +22,46 @@ namespace
 
 namespace mqLib
 {
-	Hardware::Hardware(const ROM& _rom)
-		: wLib::Hardware(44100)
+	Hardware::Hardware(const ROM& _rom, const bool _voiceExpansion/* = false*/)
+		: wLib::Hardware(_voiceExpansion ? 16 * 44100 : 44100)
 		, m_rom(_rom)
-		, m_uc(m_rom)
-#if MQ_VOICE_EXPANSION
-		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0), MqDsp(*this, m_uc.getHdi08B().getHdi08(), 1), MqDsp(*this, m_uc.getHdi08C().getHdi08(), 2)}
-#else
-		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0)}
-#endif
+		, m_useVoiceExpansion(_voiceExpansion)
+		, m_uc(m_rom, _voiceExpansion)
 		, m_midi(m_uc.getQSM(), 44100)
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing);
 
-#if MQ_VOICE_EXPANSION
-		// On real VE hardware, Port C bit 4 (FST pin) is physically tied high on
-		// the expansion board, telling DSP firmware this is a VE expansion DSP.
-		// We must set both the external pin value (hostWrite) AND enable the pin
-		// as GPIO input (setControl) before firmware boot. After reset, PCRC=0
-		// means all pins are disconnected and dspRead returns 0 regardless of
-		// hostWrite. Pre-enabling PCRC bit 4 ensures the firmware can read it
-		// immediately during its early identification sequence.
-		if (m_dsps.size() >= 3)
+		if (m_useVoiceExpansion)
 		{
+			m_dsps.push_back(std::make_unique<MqDsp>(*this, m_uc.getHdi08A().getHdi08(), 0));
+			m_dsps.push_back(std::make_unique<MqDsp>(*this, m_uc.getHdi08B().getHdi08(), 1));
+			m_dsps.push_back(std::make_unique<MqDsp>(*this, m_uc.getHdi08C().getHdi08(), 2));
+
+			// On real VE hardware, Port C bit 4 (FST pin) is physically tied high on
+			// the expansion board, telling DSP firmware this is a VE expansion DSP.
+			// We must set both the external pin value (hostWrite) AND enable the pin
+			// as GPIO input (setControl) before firmware boot. After reset, PCRC=0
+			// means all pins are disconnected and dspRead returns 0 regardless of
+			// hostWrite. Pre-enabling PCRC bit 4 ensures the firmware can read it
+			// immediately during its early identification sequence.
 			for (size_t i = 1; i < m_dsps.size(); ++i)
 			{
-				auto& portC = m_dsps[i].getPeriph().getPortC();
+				auto& portC = m_dsps[i]->getPeriph().getPortC();
 				portC.setControl(0x10);   // Enable bit 4 as GPIO (not ESAI)
 				portC.hostWrite(0x10);    // Set external pin value: bit 4 = VE expansion
 			}
 
 			// Set ESAI clock dividers immediately so frame rates are aligned from
-			// the very first frame, including during boot.  In real hardware all 3
-			// DSPs share a single ESAI bit-clock so every frame period contains the
-			// maximum slot count (32).  In the emulator each DSP has its own
-			// EsxiClock, so we compensate with per-direction dividers:
-			//   A: 2 TX slots → txDiv=15 (fire every 16th tick → 32 ticks/frame)
-			//   B: 2 RX slots → rxDiv=15 (fire every 16th tick → 32 ticks/frame)
-			//   C: 32 TX+RX  → no divider needed
-			m_dsps[0].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[0].getPeriph().getEsai(), 15, 0);
-			m_dsps[1].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[1].getPeriph().getEsai(), 0, 15);
-			m_dsps[2].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[2].getPeriph().getEsai(), 0, 0);
+			// the very first frame, including during boot.
+			m_dsps[0]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[0]->getPeriph().getEsai(), 15, 0);
+			m_dsps[1]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[1]->getPeriph().getEsai(), 0, 15);
+			m_dsps[2]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[2]->getPeriph().getEsai(), 0, 0);
 		}
-#endif
+		else
+		{
+			m_dsps.push_back(std::make_unique<MqDsp>(*this, m_uc.getHdi08A().getHdi08(), 0));
+		}
 
 		m_uc.getPortF().setDirectionChangeCallback([&](const mc68k::Port& _port)
 		{
@@ -77,7 +73,7 @@ namespace mqLib
 	Hardware::~Hardware()
 	{
 		for (auto & dsp : m_dsps)
-			dsp.getPeriph().getEsai().setCallback({}, 0);
+			dsp->getPeriph().getEsai().setCallback({}, 0);
 	}
 
 	void Hardware::process()
@@ -131,7 +127,7 @@ namespace mqLib
 	{
 		// wait for DSP to enter blocking state
 
-		const auto& esai = m_dsps.front().getPeriph().getEsai();
+		const auto& esai = m_dsps.front()->getPeriph().getEsai();
 
 		auto& inputs = esai.getAudioInputs();
 		auto& outputs = esai.getAudioOutputs();
@@ -151,7 +147,7 @@ namespace mqLib
 		if(m_requestNMI && !requestNMI)
 		{
 //			LOG("uc request DSP NMI");
-			m_dsps.front().hdiSendIrqToDSP(dsp56k::Vba_NMI);
+			m_dsps.front()->hdiSendIrqToDSP(dsp56k::Vba_NMI);
 
 			m_requestNMI = requestNMI;
 		}
@@ -166,12 +162,12 @@ namespace mqLib
 			return;
 		}
 
-		m_dsps[1].getPeriph().getPortC().hostWrite(0x10);	// set bit 4 of GPIO Port C, vexp DSPs are waiting for this
-		m_dsps[2].getPeriph().getPortC().hostWrite(0x10);	// set bit 4 of GPIO Port C, vexp DSPs are waiting for this
+		m_dsps[1]->getPeriph().getPortC().hostWrite(0x10);	// set bit 4 of GPIO Port C, vexp DSPs are waiting for this
+		m_dsps[2]->getPeriph().getPortC().hostWrite(0x10);	// set bit 4 of GPIO Port C, vexp DSPs are waiting for this
 
-		auto& esaiA = m_dsps[0].getPeriph().getEsai();
-		auto& esaiB = m_dsps[1].getPeriph().getEsai();
-		auto& esaiC = m_dsps[2].getPeriph().getEsai();
+		auto& esaiA = m_dsps[0]->getPeriph().getEsai();
+		auto& esaiB = m_dsps[1]->getPeriph().getEsai();
+		auto& esaiC = m_dsps[2]->getPeriph().getEsai();
 
 		// During boot, set empty callbacks on all ESAI interfaces to prevent DSP threads from blocking
 		esaiA.setCallback([](dsp56k::Audio*) {}, 0);
@@ -245,19 +241,19 @@ namespace mqLib
 		// Drain any stale boot-time output and prime each DSP with fresh input
 		for (auto& dsp : m_dsps)
 		{
-			auto& out = dsp.getPeriph().getEsai().getAudioOutputs();
+			auto& out = dsp->getPeriph().getEsai().getAudioOutputs();
 			while (!out.empty())
 				out.pop_front();
-			dsp.getPeriph().getEsai().writeEmptyAudioIn(8);
+			dsp->getPeriph().getEsai().writeEmptyAudioIn(8);
 		}
 
 		// Normal ring routing: B→C, C→A via TX callbacks.
 		// A→B handled in processAudio alongside host audio extraction.
 
-		m_dsps[1].getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
+		m_dsps[1]->getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
 		{
 			auto& txOut = _audio->getAudioOutputs();
-			auto& rxIn  = m_dsps[2].getPeriph().getEsai().getAudioInputs();
+			auto& rxIn  = m_dsps[2]->getPeriph().getEsai().getAudioInputs();
 			while (!txOut.empty())
 			{
 /*				if (rxIn.full())
@@ -272,10 +268,10 @@ namespace mqLib
 			}
 		}, 0);
 
-		m_dsps[2].getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
+		m_dsps[2]->getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
 		{
 			auto& txOut = _audio->getAudioOutputs();
-			auto& rxIn  = m_dsps[0].getPeriph().getEsai().getAudioInputs();
+			auto& rxIn  = m_dsps[0]->getPeriph().getEsai().getAudioInputs();
 			while (!txOut.empty())
 			{
 /*				if (rxIn.full())
@@ -304,7 +300,7 @@ namespace mqLib
 
 	void Hardware::setupEsaiListener()
 	{
-		auto& esaiA = m_dsps.front().getPeriph().getEsai();
+		auto& esaiA = m_dsps.front()->getPeriph().getEsai();
 
 		esaiA.setCallback([&](dsp56k::Audio*)
 		{
@@ -321,12 +317,12 @@ namespace mqLib
 			m_remainingUcCycles -= static_cast<int64_t>(deltaCycles);
 
 		for (size_t i = 0; i < m_dsps.size(); ++i)
-			m_dsps[i].transferHostFlagsUc2Dsdp();
+			m_dsps[i]->transferHostFlagsUc2Dsdp();
 
 		hdiProcessUCtoDSPNMIIrq();
 
 		for (auto& dsp : m_dsps)
-			dsp.hdiTransferDSPtoUC();
+			dsp->hdiTransferDSPtoUC();
 
 		if(m_uc.requestDSPReset() && !m_voiceExpansionReady)
 		{
@@ -334,7 +330,7 @@ namespace mqLib
 			bool allBooted = true;
 			for (auto& dsp : m_dsps)
 			{
-				if(!dsp.haveSentTXToDSP())
+				if(!dsp->haveSentTXToDSP())
 				{
 					allBooted = false;
 					break;
@@ -344,7 +340,7 @@ namespace mqLib
 			if(!allBooted && !m_dspResetPending)
 			{
 				for (auto& dsp : m_dsps)
-					dsp.reset();
+					dsp->reset();
 				m_dspResetPending = true;
 			}
 			m_uc.notifyDSPBooted();
@@ -373,7 +369,7 @@ namespace mqLib
 
 		m_processAudio = true;
 
-		auto& esai = m_dsps.front().getPeriph().getEsai();
+		auto& esai = m_dsps.front()->getPeriph().getEsai();
 
 		const dsp56k::TWord* inputs[16]{nullptr};
 		dsp56k::TWord* outputs[16]{nullptr};
@@ -407,13 +403,13 @@ namespace mqLib
 			const auto processCount = std::min(_frames, static_cast<uint32_t>(1024));
 			_frames -= processCount;
 
-			if constexpr (g_useVoiceExpansion)
+			if (m_useVoiceExpansion)
 			{
 				// VE mode: B→C and C→A routing is handled by continuous TX callbacks
 				// (set up in initVoiceExpansion). processAudioOutput pops each frame
 				// from A's output, extracts host audio, and routes A→B to complete
 				// the ring.
-				auto& rxInB = m_dsps[1].getPeriph().getEsai().getAudioInputs();
+				auto& rxInB = m_dsps[1]->getPeriph().getEsai().getAudioInputs();
 
 				esai.processAudioOutput<dsp56k::TWord>(processCount, [&](size_t _frame, dsp56k::Audio::TxFrame& _tx)
 				{
