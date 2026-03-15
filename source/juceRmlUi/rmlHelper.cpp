@@ -557,5 +557,25 @@ namespace juceRmlUi
 
 			return attachedElem;
 		}
+
+		float getSliderTraversableLength(Rml::Element* _slider, const bool _vertical)
+		{
+			auto* track = findChildByTag(_slider, "slidertrack", false, true);
+			auto* bar = findChildByTag(_slider, "sliderbar", false, true);
+
+			if (!track || !bar)
+				return 0.0f;
+
+			if (_vertical)
+			{
+				const float edgeTop = bar->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Top);
+				const float edgeBottom = bar->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Bottom);
+				return track->GetBox().GetSize(Rml::BoxArea::Content).y - bar->GetBox().GetSize(Rml::BoxArea::Border).y - edgeTop - edgeBottom;
+			}
+
+			const float edgeLeft = bar->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Left);
+			const float edgeRight = bar->GetBox().GetEdge(Rml::BoxArea::Margin, Rml::BoxEdge::Right);
+			return track->GetBox().GetSize(Rml::BoxArea::Content).x - bar->GetBox().GetSize(Rml::BoxArea::Border).x - edgeLeft - edgeRight;
+		}
 	}
 }

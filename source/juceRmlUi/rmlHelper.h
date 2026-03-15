@@ -149,5 +149,9 @@ namespace juceRmlUi
 
 		bool hasTemplate(const std::string& _templateName, const Rml::Element* _parent);
 		Rml::Element* createTemplate(const std::string& _templateName, Rml::Element* _parent);
+
+		// Returns the traversable track length of a slider element (input type="range"),
+		// i.e. the distance the bar/thumb can actually travel. Matches RmlUi's WidgetSlider logic.
+		float getSliderTraversableLength(Rml::Element* _slider, bool _vertical);
 	}
 }
