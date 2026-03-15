@@ -136,11 +136,10 @@ namespace mqLib
 			return mc68k::memoryOps::readU16(m_memory, addr);
 		}
 
+		// ROM must be checked first — HDI08 chip-select addresses (0xFFB000+) are above ROM range (0x80000-0x100000)
 		if(addr >= g_romAddress && addr < g_romAddress + ROM::size())
 		{
-			const auto r = mc68k::memoryOps::readU16(m_romRuntimeData, addr - g_romAddress);
-//			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
-			return r;
+			return mc68k::memoryOps::readU16(m_romRuntimeData, addr - g_romAddress);
 		}
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(addr & mc68k::g_peripheralMask);
@@ -155,8 +154,6 @@ namespace mqLib
 			if (m_hdi08c.isInRange(pa))
 				return m_hdi08c.read16(pa);
 		}
-
-//		LOG("read16 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
 
 		return Mc68k::read16(addr);
 	}
@@ -173,6 +170,7 @@ namespace mqLib
 
 		if (m_hdi08a.isInRange(pa))
 			return m_hdi08a.read8(pa);
+
 		if constexpr (g_useVoiceExpansion)
 		{
 			if (m_hdi08b.isInRange(pa))
@@ -180,8 +178,6 @@ namespace mqLib
 			if (m_hdi08c.isInRange(pa))
 				return m_hdi08c.read8(pa);
 		}
-
-//		LOG("read8 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
 
 		return Mc68k::read8(addr);
 	}
@@ -254,8 +250,6 @@ namespace mqLib
 			m_flash->write(addr - g_romAddress, val);
 			return;
 		}
-
-//		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(addr & mc68k::g_peripheralMask);
 		if (m_hdi08a.isInRange(pa))

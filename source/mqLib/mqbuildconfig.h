@@ -1,6 +1,6 @@
 #pragma once
 
-#define MQ_VOICE_EXPANSION 0
+#define MQ_VOICE_EXPANSION 1
 
 namespace mqLib
 {

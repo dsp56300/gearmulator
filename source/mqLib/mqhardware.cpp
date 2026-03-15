@@ -5,6 +5,21 @@
 
 #include <cstring>	// memcpy
 
+namespace
+{
+	// Convert a TX frame to an RX frame for ESAI routing between DSPs.
+	// TX slots have 6 words, RX slots have 4 — copy the first 4 words of each slot.
+	void txToRx(const dsp56k::Audio::TxFrame& _tx, dsp56k::Audio::RxFrame& _rx)
+	{
+		_rx.resize(_tx.size());
+		for (uint32_t s = 0; s < _tx.size(); ++s)
+		{
+			for (uint32_t w = 0; w < dsp56k::Audio::RxRegisterCount; ++w)
+				_rx[s][w] = _tx[s][w];
+		}
+	}
+}
+
 namespace mqLib
 {
 	Hardware::Hardware(const ROM& _rom)
@@ -12,7 +27,7 @@ namespace mqLib
 		, m_rom(_rom)
 		, m_uc(m_rom)
 #if MQ_VOICE_EXPANSION
-		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0), MqDsp(*this, m_uc.getHdi08B().getHdi08(), 1) , MqDsp(*this, m_uc.getHdi08C().getHdi08(), 2)}
+		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0), MqDsp(*this, m_uc.getHdi08B().getHdi08(), 1), MqDsp(*this, m_uc.getHdi08C().getHdi08(), 2)}
 #else
 		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0)}
 #endif
@@ -20,6 +35,37 @@ namespace mqLib
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing);
+
+#if MQ_VOICE_EXPANSION
+		// On real VE hardware, Port C bit 4 (FST pin) is physically tied high on
+		// the expansion board, telling DSP firmware this is a VE expansion DSP.
+		// We must set both the external pin value (hostWrite) AND enable the pin
+		// as GPIO input (setControl) before firmware boot. After reset, PCRC=0
+		// means all pins are disconnected and dspRead returns 0 regardless of
+		// hostWrite. Pre-enabling PCRC bit 4 ensures the firmware can read it
+		// immediately during its early identification sequence.
+		if (m_dsps.size() >= 3)
+		{
+			for (size_t i = 1; i < m_dsps.size(); ++i)
+			{
+				auto& portC = m_dsps[i].getPeriph().getPortC();
+				portC.setControl(0x10);   // Enable bit 4 as GPIO (not ESAI)
+				portC.hostWrite(0x10);    // Set external pin value: bit 4 = VE expansion
+			}
+
+			// Set ESAI clock dividers immediately so frame rates are aligned from
+			// the very first frame, including during boot.  In real hardware all 3
+			// DSPs share a single ESAI bit-clock so every frame period contains the
+			// maximum slot count (32).  In the emulator each DSP has its own
+			// EsxiClock, so we compensate with per-direction dividers:
+			//   A: 2 TX slots → txDiv=15 (fire every 16th tick → 32 ticks/frame)
+			//   B: 2 RX slots → rxDiv=15 (fire every 16th tick → 32 ticks/frame)
+			//   C: 32 TX+RX  → no divider needed
+			m_dsps[0].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[0].getPeriph().getEsai(), 15, 0);
+			m_dsps[1].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[1].getPeriph().getEsai(), 0, 15);
+			m_dsps[2].getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[2].getPeriph().getEsai(), 0, 0);
+		}
+#endif
 
 		m_uc.getPortF().setDirectionChangeCallback([&](const mc68k::Port& _port)
 		{
@@ -30,7 +76,8 @@ namespace mqLib
 
 	Hardware::~Hardware()
 	{
-		m_dsps.front().getPeriph().getEsai().setCallback({}, 0);
+		for (auto & dsp : m_dsps)
+			dsp.getPeriph().getEsai().setCallback({}, 0);
 	}
 
 	void Hardware::process()
@@ -118,50 +165,140 @@ namespace mqLib
 			setupEsaiListener();
 			return;
 		}
-		/*
+
 		m_dsps[1].getPeriph().getPortC().hostWrite(0x10);	// set bit 4 of GPIO Port C, vexp DSPs are waiting for this
 		m_dsps[2].getPeriph().getPortC().hostWrite(0x10);	// set bit 4 of GPIO Port C, vexp DSPs are waiting for this
-
-		bool done = false;
 
 		auto& esaiA = m_dsps[0].getPeriph().getEsai();
 		auto& esaiB = m_dsps[1].getPeriph().getEsai();
 		auto& esaiC = m_dsps[2].getPeriph().getEsai();
 
-		esaiA.setCallback([&](dsp56k::Audio*)
+		// During boot, set empty callbacks on all ESAI interfaces to prevent DSP threads from blocking
+		esaiA.setCallback([](dsp56k::Audio*) {}, 0);
+		esaiB.setCallback([](dsp56k::Audio*) {}, 0);
+		esaiC.setCallback([](dsp56k::Audio*) {}, 0);
+
+		// Boot pump loop: route ESAI data in a ring between all 3 DSPs
+		// Ring: A TX → B RX → B TX → C RX → C TX → A RX (matches XT topology)
+		// DSP A sends 0x654300 via HDI08 TX when VE boot is ready
+		uint32_t loopCount = 0;
+		uint32_t routedAB = 0, routedBC = 0, routedCA = 0;
+
+		while (true)
 		{
-		}, 0);
+			auto& txOutA = esaiA.getAudioOutputs();
+			auto& txOutB = esaiB.getAudioOutputs();
+			auto& txOutC = esaiC.getAudioOutputs();
+			auto& rxInA  = esaiA.getAudioInputs();
+			auto& rxInB  = esaiB.getAudioInputs();
+			auto& rxInC  = esaiC.getAudioInputs();
 
-		esaiB.setCallback([&](dsp56k::Audio*)
-		{
-		}, 0);
+			// A TX → B RX
+			while (!txOutA.empty() && !rxInB.full())
+			{
+				dsp56k::Audio::RxFrame rx;
+				txToRx(txOutA.pop_front(), rx);
+				rxInB.push_back(std::move(rx));
+				++routedAB;
+			}
 
-		esaiC.setCallback([&](dsp56k::Audio*)
-		{
-		}, 0);
+			// B TX → C RX
+			while (!txOutB.empty() && !rxInC.full())
+			{
+				dsp56k::Audio::RxFrame rx;
+				txToRx(txOutB.pop_front(), rx);
+				rxInC.push_back(std::move(rx));
+				++routedBC;
+			}
 
-		while (!m_dsps.front().receivedMagicEsaiPacket())
-		{
-			// vexp1 only needs the audio input
-			esaiB.getAudioInputs().push_back({0});
+			// C TX → A RX
+			while (!txOutC.empty() && !rxInA.full())
+			{
+				dsp56k::Audio::RxFrame rx;
+				txToRx(txOutC.pop_front(), rx);
+				rxInA.push_back(std::move(rx));
+				++routedCA;
+			}
 
-			// transfer output from vexp1 to vexp2
-			auto out = esaiB.getAudioOutputs().pop_front();
-			std::array<dsp56k::TWord, 4> in{ out[0], out[1], out[2], 0};
-			esaiC.getAudioInputs().push_back(in);
+			++loopCount;
 
-			// read output of vexp2 and send to main
-			out = esaiC.getAudioOutputs().pop_front();
+			// Exit when UC firmware signals boot complete AND all 3 DSPs have exchanged
+			// ESAI data in the ring (C→A confirms full ring routing is working)
+			if (m_bootCompleted && routedCA > 0)
+				break;
 
-			// this should consist of RX0 = audio input, RX1/2 = vexp2 output TX1/TX2
-			in = {0, out[1], out[2]};
-			esaiA.getAudioInputs().push_back(in);
-
-			// final output 0,1,2 = audio outs
-			out = esaiA.getAudioOutputs().pop_front();
+			std::this_thread::yield();
 		}
+
 		LOG("Voice Expansion initialization completed");
+
+		// Block further DSP resets now that VE init is complete
+		m_voiceExpansionReady = true;
+
+		// ESAI clock dividers were already set in the Hardware constructor
+		// (before any DSP threads started) to ensure frame rates are aligned
+		// from the very first frame.
+
+		// Set up A's ESAI callback for frame counting + CV notification
 		setupEsaiListener();
+
+		// Drain any stale boot-time output and prime each DSP with fresh input
+		for (auto& dsp : m_dsps)
+		{
+			auto& out = dsp.getPeriph().getEsai().getAudioOutputs();
+			while (!out.empty())
+				out.pop_front();
+			dsp.getPeriph().getEsai().writeEmptyAudioIn(8);
+		}
+
+		// Normal ring routing: B→C, C→A via TX callbacks.
+		// A→B handled in processAudio alongside host audio extraction.
+
+		m_dsps[1].getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
+		{
+			auto& txOut = _audio->getAudioOutputs();
+			auto& rxIn  = m_dsps[2].getPeriph().getEsai().getAudioInputs();
+			while (!txOut.empty())
+			{
+/*				if (rxIn.full())
+				{
+					txOut.pop_front();
+					continue;
+				}
+*/				dsp56k::Audio::RxFrame rx;
+				txToRx(txOut.front(), rx);
+				txOut.pop_front();
+				rxIn.push_back(std::move(rx));
+			}
+		}, 0);
+
+		m_dsps[2].getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
+		{
+			auto& txOut = _audio->getAudioOutputs();
+			auto& rxIn  = m_dsps[0].getPeriph().getEsai().getAudioInputs();
+			while (!txOut.empty())
+			{
+/*				if (rxIn.full())
+				{
+					txOut.pop_front();
+					continue;
+				}
+*/				dsp56k::Audio::RxFrame rx;
+				txToRx(txOut.front(), rx);
+				txOut.pop_front();
+				rxIn.push_back(std::move(rx));
+			}
+		}, 0);
+		/*
+		// Dump all DSP P memories as disassembly
+		const char* dspNames[] = {"A", "B", "C"};
+		for (uint32_t i = 0; i < m_dsps.size(); ++i)
+		{
+			const auto filename = std::string("mqDsp") + dspNames[i] + "_P.asm";
+			const auto& mem = m_dsps[i].dsp().memory();
+			mem.saveAssembly(filename.c_str(), 0, MqDsp::g_pMemSize, false, false);
+			LOG("Saved DSP " << dspNames[i] << " P memory to " << filename);
+		}
 		*/
 	}
 
@@ -183,26 +320,39 @@ namespace mqLib
 		if(m_esaiFrameIndex > 0)
 			m_remainingUcCycles -= static_cast<int64_t>(deltaCycles);
 
-		for (auto& dsp : m_dsps)
-			dsp.transferHostFlagsUc2Dsdp();
+		for (size_t i = 0; i < m_dsps.size(); ++i)
+			m_dsps[i].transferHostFlagsUc2Dsdp();
 
 		hdiProcessUCtoDSPNMIIrq();
 
 		for (auto& dsp : m_dsps)
 			dsp.hdiTransferDSPtoUC();
 
-		if(m_uc.requestDSPReset())
+		if(m_uc.requestDSPReset() && !m_voiceExpansionReady)
 		{
+			// Only actually reset if DSPs haven't booted yet
+			bool allBooted = true;
 			for (auto& dsp : m_dsps)
 			{
-				if(dsp.haveSentTXToDSP())
+				if(!dsp.haveSentTXToDSP())
 				{
-					m_uc.dumpMemory("DSPreset");
-					assert(false && "DSP needs reset even though it got data already. Needs impl");
+					allBooted = false;
+					break;
 				}
+			}
+
+			if(!allBooted && !m_dspResetPending)
+			{
+				for (auto& dsp : m_dsps)
+					dsp.reset();
+				m_dspResetPending = true;
 			}
 			m_uc.notifyDSPBooted();
 		}
+
+		// Clear pending when UC de-asserts reset (allows next reset cycle)
+		if(m_dspResetPending && !m_uc.requestDSPReset())
+			m_dspResetPending = false;
 	}
 
 	void Hardware::setGlobalDefaultParameters()
@@ -245,14 +395,12 @@ namespace mqLib
 		outputs[2] = &m_audioOutputs[3].front();
 		outputs[5] = &m_audioOutputs[4].front();
 		outputs[4] = &m_audioOutputs[5].front();
-		outputs[6] = m_dummyOutput.data();
 		outputs[7] = m_dummyOutput.data();
-		outputs[8] = m_dummyOutput.data();
+		outputs[6] = m_dummyOutput.data();
 		outputs[9] = m_dummyOutput.data();
-		outputs[10] = m_dummyOutput.data();
+		outputs[8] = m_dummyOutput.data();
 		outputs[11] = m_dummyOutput.data();
-
-		const auto totalFrames = _frames;
+		outputs[10] = m_dummyOutput.data();
 
 		while (_frames)
 		{
@@ -261,86 +409,76 @@ namespace mqLib
 
 			if constexpr (g_useVoiceExpansion)
 			{
-				auto& esaiA = m_dsps[0].getPeriph().getEsai();
-				auto& esaiB = m_dsps[1].getPeriph().getEsai();
-				auto& esaiC = m_dsps[2].getPeriph().getEsai();
-				/*
-				const auto tccrA = esaiA.getTccrAsString();	const auto rccrA = esaiA.getRccrAsString();
-				const auto tcrA = esaiA.getTcrAsString();	const auto rcrA = esaiA.getRcrAsString();
+				// VE mode: B→C and C→A routing is handled by continuous TX callbacks
+				// (set up in initVoiceExpansion). processAudioOutput pops each frame
+				// from A's output, extracts host audio, and routes A→B to complete
+				// the ring.
+				auto& rxInB = m_dsps[1].getPeriph().getEsai().getAudioInputs();
 
-				const auto tccrB = esaiB.getTccrAsString();	const auto rccrB = esaiB.getRccrAsString();
-				const auto tcrB = esaiB.getTcrAsString();	const auto rcrB = esaiB.getRcrAsString();
+				esai.processAudioOutput<dsp56k::TWord>(processCount, [&](size_t _frame, dsp56k::Audio::TxFrame& _tx)
+				{
+					if(!_tx.empty())
+					{
+						outputs[0 ][_frame] = _tx[0][0];
+						outputs[2 ][_frame] = _tx[0][1];
+						outputs[4 ][_frame] = _tx[0][2];
+						outputs[6 ][_frame] = _tx[0][3];
+						outputs[8 ][_frame] = _tx[0][4];
+						outputs[10][_frame] = _tx[0][5];
 
-				const auto tccrC = esaiC.getTccrAsString();	const auto rccrC = esaiC.getRccrAsString();
-				const auto tcrC = esaiC.getTcrAsString();	const auto rcrC = esaiC.getRcrAsString();
+						if(_tx.size() >= 2)
+						{
+							outputs[ 1][_frame] = _tx[1][0];
+							outputs[ 3][_frame] = _tx[1][1];
+							outputs[ 5][_frame] = _tx[1][2];
+							outputs[ 7][_frame] = _tx[1][3];
+							outputs[ 9][_frame] = _tx[1][4];
+							outputs[11][_frame] = _tx[1][5];
+						}
+					}
 
-				LOG("ESAI DSPmain:\n" << tccrA << '\n' << tcrA << '\n' << rccrA << '\n' << rcrA << '\n');
-				LOG("ESAI VexpA:\n"   << tccrB << '\n' << tcrB << '\n' << rccrB << '\n' << rcrB << '\n');
-				LOG("ESAI VexpB:\n"   << tccrC << '\n' << tcrC << '\n' << rccrC << '\n' << rcrC << '\n');
-				*/
-				// vexp1 only needs the audio input
-				esaiB.processAudioInputInterleaved(inputs, processCount);
-
-				// transfer output from vexp1 to vexp2
-				esaiB.processAudioOutputInterleaved(outputs, processCount);
-
-				const dsp56k::TWord* in[] = { outputs[0], outputs[1], outputs[2], outputs[3], outputs[4], outputs[5], nullptr, nullptr };
-				esaiC.processAudioInputInterleaved(in, processCount);
-
-				// read output of vexp2 and send to main
-				esaiC.processAudioOutputInterleaved(outputs, processCount);
-
-				// RX1/2 = vexp2 output TX1/TX2
-				const dsp56k::TWord* inA[] = { inputs[1], inputs[0], outputs[2], outputs[3], outputs[4], outputs[5], nullptr, nullptr };
-				esaiA.processAudioInputInterleaved(inA, processCount);
-
-				// final output 0,1,2 = audio outs below
+					// Route A→B to complete the ring
+//					if (!rxInB.full())
+					{
+						dsp56k::Audio::RxFrame rx;
+//						rx.resize(_tx.size());
+						txToRx(_tx, rx);
+						rxInB.push_back(std::move(rx));
+					}
+				});
 			}
 			else
 			{
 				esai.processAudioInputInterleaved(inputs, processCount, _latency);
-			}
 
-			const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
+				const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
 
-			if(esai.getAudioOutputs().size() < requiredSize)
-			{
-				// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
-
-				std::unique_lock uLock(m_requestedFramesAvailableMutex);
-				m_requestedFrames = requiredSize;
-				m_requestedFramesAvailableCv.wait(uLock, [&]()
+				if(esai.getAudioOutputs().size() < requiredSize)
 				{
-					if(esai.getAudioOutputs().size() < requiredSize)
-						return false;
-					m_requestedFrames = 0;
-					return true;
-				});
-			}
+					// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
 
-			esai.processAudioOutputInterleaved(outputs, processCount);
-
-			if constexpr (g_useVoiceExpansion)
-			{
-				for (uint32_t i = 1; i < 3; ++i)
-				{
-					auto& e = m_dsps[i].getPeriph().getEsai();
-
-					dsp56k::TWord* outs[16]{ nullptr };
-					if (e.getAudioOutputs().size() >= 512)
-						e.processAudioOutputInterleaved(outs, static_cast<uint32_t>(e.getAudioOutputs().size() >> 1));
+					std::unique_lock uLock(m_requestedFramesAvailableMutex);
+					m_requestedFrames = requiredSize;
+					m_requestedFramesAvailableCv.wait(uLock, [&]()
+					{
+						if(esai.getAudioOutputs().size() < requiredSize)
+							return false;
+						m_requestedFrames = 0;
+						return true;
+					});
 				}
+
+				esai.processAudioOutputInterleaved(outputs, processCount);
 			}
 
 			inputs[0] += processCount;
 			inputs[1] += processCount;
 
-			outputs[0] += processCount;
-			outputs[1] += processCount;
-			outputs[2] += processCount;
-			outputs[3] += processCount;
-			outputs[4] += processCount;
-			outputs[5] += processCount;
+			for (auto& output : outputs)
+			{
+				if (output)
+					output += processCount;
+			}
 		}
 
 		m_processAudio = false;

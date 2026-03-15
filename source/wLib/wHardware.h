@@ -42,6 +42,8 @@ namespace wLib
 		void sendMidi(const synthLib::SMidiEvent& _ev);
 		void receiveMidi(std::vector<uint8_t>& _data);
 
+		uint32_t getEsaiFrameIndex() const { return m_esaiFrameIndex; }
+
 	protected:
 		void onEsaiCallback(dsp56k::Audio& _audio);
 		void syncUcToDSP();
