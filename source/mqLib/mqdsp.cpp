@@ -144,6 +144,13 @@ namespace mqLib
 		// Reset DSP core and peripherals
 		m_dsp.resetHW();
 
+		// Reset HDI08 transfer counter so VE identity patch fires correctly on next boot
+		m_hdiDspToUcCount = 0;
+
+		// Drain stale HDI08 TX data from previous boot cycle
+		while (hdi08().hasTX())
+			hdi08().readTX();
+
 		// Clear program memory so DspBoot can reload firmware
 		for(dsp56k::TWord i=0; i<m_memory.sizeP(); ++i)
 		{
