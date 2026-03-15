@@ -33,7 +33,11 @@ namespace xt
 
 	Hardware::~Hardware()
 	{
-		m_dsps[g_mainDspIdx].getPeriph().getEssi0().setCallback({}, 0);
+		for(const auto& dsp : m_dsps)
+		{
+			dsp->getPeriph().getEssi0().setCallback({},0);
+			dsp->getPeriph().getEssi1().setCallback({},0);
+		}
 	}
 
 	void Hardware::process()
