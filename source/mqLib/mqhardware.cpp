@@ -23,7 +23,7 @@ namespace
 namespace mqLib
 {
 	Hardware::Hardware(const ROM& _rom, const bool _voiceExpansion/* = false*/)
-		: wLib::Hardware(_voiceExpansion ? 16 * 44100 : 44100)
+		: wLib::Hardware(44100)
 		, m_rom(_rom)
 		, m_useVoiceExpansion(_voiceExpansion)
 		, m_uc(m_rom, _voiceExpansion)
