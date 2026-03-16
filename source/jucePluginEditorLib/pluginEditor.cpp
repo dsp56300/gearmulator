@@ -1019,6 +1019,8 @@ namespace jucePluginEditorLib
 							// Refresh all overlays in case a CC was reassigned from another parameter
 							m_overlays->refreshMidiLearnOverlays();
 						}
+
+						m_processor.saveDefaultMidiLearnPreset();
 					});
 				};
 

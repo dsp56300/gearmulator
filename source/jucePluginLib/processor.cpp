@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "dummydevice.h"
+#include "midiLearnManager.h"
 #include "pluginVersion.h"
 #include "tools.h"
 #include "types.h"
@@ -151,6 +152,10 @@ namespace pluginLib
 							m_midiPorts.send(_event);
 					}
 				};
+
+				// Load default MIDI learn preset from disk. DAW state restore
+				// (setStateInformation) will override this if present.
+				loadDefaultMidiLearnPreset();
 			}
 		}
 
@@ -537,6 +542,32 @@ namespace pluginLib
 		if(!_useFxName && !p.isSynth && name.substr(name.size()-2, 2) == "FX")
 			return name.substr(0, name.size() - 2);
 		return name;
+	}
+
+	void Processor::saveDefaultMidiLearnPreset()
+	{
+		if (!m_midiLearnTranslator)
+			return;
+
+		MidiLearnManager manager{juce::File(getMidiLearnFolder())};
+		manager.savePreset("__default", m_midiLearnTranslator->getPreset());
+	}
+
+	void Processor::loadDefaultMidiLearnPreset()
+	{
+		if (!m_midiLearnTranslator)
+			return;
+
+		MidiLearnManager manager{juce::File(getMidiLearnFolder())};
+		MidiLearnPreset preset;
+
+		if (manager.loadPreset("__default", preset))
+			m_midiLearnTranslator->setPreset(preset);
+	}
+
+	std::string Processor::getMidiLearnFolder() const
+	{
+		return getConfigFolder() + "midilearn";
 	}
 
 	void Processor::getPluginDesc(bridgeLib::PluginDesc& _desc) const
