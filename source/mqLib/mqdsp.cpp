@@ -2,6 +2,8 @@
 
 #include "mqhardware.h"
 
+#include "baseLib/logging.h"
+
 #if DSP56300_DEBUGGER
 #include "dsp56kDebugger/debugger.h"
 #endif
@@ -36,7 +38,7 @@ namespace mqLib
 
 		config.aguSupportBitreverse = true;
 		config.linkJitBlocks = true;
-		config.dynamicPeripheralAddressing = false;
+		config.dynamicPeripheralAddressing = true;
 #ifdef _DEBUG
 		config.debugDynamicPeripheralAddressing = true;
 #endif
@@ -44,6 +46,11 @@ namespace mqLib
 
 		// allow dynamic peripheral addressing for code following clr b M_AAR3,r2
 		enableDynamicPeripheralAddressing(config, m_dsp, 0x62f41b, dsp56k::M_AAR3, 16);
+		// allow dynamic peripheral addressing for voice parameter handler at func_000290 (move #>$81d86,r2)
+		enableDynamicPeripheralAddressing(config, m_dsp, 0x62f400, 0x081d86, 112);
+		// allow dynamic peripheral addressing for interrupt handler at func_000d40 (move #>$11a8,r6)
+		// reads X memory via runtime pointer from x:$11a3 which can alias peripheral space
+		enableDynamicPeripheralAddressing(config, m_dsp, 0x66f400, 0x0011a8, 52);
 
 		m_dsp.getJit().setConfig(config);
 
@@ -63,14 +70,25 @@ namespace mqLib
 
 		// Set MC68K-side callbacks for all DSPs.
 		// On real hardware, all HDI08 interfaces are active from power-on.
+		// The writeTx callback is set once and never changed. A mutex protects
+		// the boot/runtime mode switch and m_boot access against the boot pump
+		// thread calling reset() concurrently.
 		m_hdiUC.setRxEmptyCallback([&](const bool needMoreData)
 		{
 			onUCRxEmpty(needMoreData);
 		});
-		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
+		m_hdiUC.setWriteTxCallback([this](const uint32_t _word)
 		{
-			if(m_boot.hdiWriteTX(_word))
-				onDspBootFinished();
+			std::lock_guard lock(m_hdiCallbackMutex);
+			if (m_inBootMode)
+			{
+				if(m_boot.hdiWriteTX(_word))
+					onDspBootFinished();
+			}
+			else
+			{
+				hdiTransferUCtoDSP(_word);
+			}
 		});
 		m_hdiUC.setWriteIrqCallback([&](const uint8_t _irq)
 		{
@@ -116,12 +134,25 @@ namespace mqLib
 
 	void MqDsp::onDspBootFinished()
 	{
-		m_haveSentTXtoDSP = true;
-
-		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
+		// Safety: if a thread already exists, terminate it before creating a new one.
+		// unique_ptr::reset(new ...) constructs the new object (starting its thread)
+		// BEFORE destroying the old one, which would cause two threads on the same DSP.
+		if (m_thread)
 		{
-			hdiTransferUCtoDSP(_word);
-		});
+			LOG("CRITICAL: DSP " << m_index << " onDspBootFinished called with existing thread! Terminating old thread first.");
+			m_thread->terminate();
+			m_thread->join();
+			m_thread.reset();
+		}
+
+		m_haveSentTXtoDSP = true;
+		m_hdiUcToDspCount = 0;
+
+		LOG("DSP " << m_index << " boot finished, switching to runtime HDI08 callback");
+
+		// Switch from boot to runtime mode. This is called from inside the
+		// HDI08 callback which already holds m_hdiCallbackMutex.
+		m_inBootMode = false;
 
 #if DSP56300_DEBUGGER
 		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
@@ -132,7 +163,7 @@ namespace mqLib
 		m_thread->setLogToStdout(false);
 	}
 
-	void MqDsp::reset()
+	void MqDsp::terminateThread()
 	{
 		if (m_thread)
 		{
@@ -140,9 +171,17 @@ namespace mqLib
 			m_thread->join();
 			m_thread.reset();
 		}
+	}
 
+	void MqDsp::resetState()
+	{
 		// Reset DSP core and peripherals
 		m_dsp.resetHW();
+
+		// Resync ESAI clock after resetHW zeroed the instruction counter.
+		// Without this, the EsaiClock's m_lastClock is far ahead of the
+		// reset counter, causing broken timing until uint64 wraps around.
+		m_periphX.getEsaiClock().restartClock();
 
 		// Reset HDI08 transfer counter so VE identity patch fires correctly on next boot
 		m_hdiDspToUcCount = 0;
@@ -151,6 +190,9 @@ namespace mqLib
 		while (hdi08().hasTX())
 			hdi08().readTX();
 
+		// Clear UC-side HDI08 RX buffer so firmware doesn't read stale data
+		m_hdiUC.clearRx();
+
 		// Clear program memory so DspBoot can reload firmware
 		for(dsp56k::TWord i=0; i<m_memory.sizeP(); ++i)
 		{
@@ -158,24 +200,33 @@ namespace mqLib
 			m_dsp.getJit().notifyProgramMemWrite(i);
 		}
 
-		// Reset ESAI state
-		m_periphX.getEsai().writeEmptyAudioIn(8);
-		while (!m_periphX.getEsai().getAudioOutputs().empty())
-			m_periphX.getEsai().getAudioOutputs().pop_front();
+		// Prime ESAI input with empty frames for boot pump routing.
+		// resetHW() now properly resets ESAI (clearing buffers and registers),
+		// so we just need to seed the input for the ESAI ring to start flowing.
+		for (size_t i=0; i<8; ++i)
+			m_periphX.getEsai().writeEmptyAudioIn(1);
 
-		// Reset boot state by reconstructing DspBoot in-place
-		m_boot.~DspBoot();
-		new (&m_boot) dsp56k::DspBoot(m_dsp);
+		// Reset boot state by reconstructing DspBoot in-place.
+		// Must hold the mutex to prevent the UC thread from calling
+		// m_boot.hdiWriteTX() while we destroy and reconstruct it.
+		{
+			std::lock_guard lock(m_hdiCallbackMutex);
+			m_boot.~DspBoot();
+			new (&m_boot) dsp56k::DspBoot(m_dsp);
+			m_inBootMode = true;
+		}
 		m_haveSentTXtoDSP = false;
 		m_receivedMagicEsaiPacket = false;
 		m_hdiHF01 = 0;
+		m_hdiTransferFailCount = 0;
+		m_hdiUcToDspCount = 0;
+		m_hdiUcToDspLogIndex = 0;
+	}
 
-		// Restore initial HDI08 write callback for boot mode
-		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
-		{
-			if(m_boot.hdiWriteTX(_word))
-				onDspBootFinished();
-		});
+	void MqDsp::reset()
+	{
+		terminateThread();
+		resetState();
 	}
 
 	void MqDsp::onUCRxEmpty(bool _needMoreData)
@@ -216,13 +267,45 @@ namespace mqLib
 			m_hdiUC.writeRx(v);
 			return true;
 		}
+
+		// Rate-limited diagnostic: log only sustained transfer failures
+		if (hdi08().hasTX() && !m_hdiUC.canReceiveData())
+		{
+			if (++m_hdiTransferFailCount == 100000)
+				LOG("DSP " << m_index << " HDI08 TX blocked: UC RX full for " << m_hdiTransferFailCount << " cycles");
+		}
+		else
+		{
+			m_hdiTransferFailCount = 0;
+		}
+
 		return false;
 	}
 
 	void MqDsp::hdiTransferUCtoDSP(dsp56k::TWord _word)
 	{
 		m_haveSentTXtoDSP = true;
+
+		// Record in ring buffer for post-mortem analysis
+		m_hdiUcToDspLog[m_hdiUcToDspLogIndex % g_hdiLogSize] = _word;
+		++m_hdiUcToDspLogIndex;
+
+		if (m_hdiUcToDspCount < 20)
+			LOG("DSP " << m_index << " UC->DSP HDI08 word #" << m_hdiUcToDspCount << ": " << HEX(_word));
+		++m_hdiUcToDspCount;
+
 		hdi08().writeRX(&_word, 1);
+	}
+
+	void MqDsp::dumpHdiLog() const
+	{
+		const auto count = std::min(m_hdiUcToDspLogIndex, g_hdiLogSize);
+		LOG("DSP " << m_index << " last " << count << " UC->DSP HDI08 words (total=" << m_hdiUcToDspCount << "):");
+		for (uint32_t i = 0; i < count; ++i)
+		{
+			const auto idx = (m_hdiUcToDspLogIndex - count + i) % g_hdiLogSize;
+			LOG("  [" << i << "] " << HEX(m_hdiUcToDspLog[idx]));
+		}
 	}
 
 	void MqDsp::hdiSendIrqToDSP(uint8_t _irq)

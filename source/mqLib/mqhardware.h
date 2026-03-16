@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -78,6 +79,9 @@ namespace mqLib
 		bool m_requestNMI = false;
 		bool m_dspResetPending = false;
 		bool m_voiceExpansionReady = false;
+		bool m_inBootPump = false;
+		uint32_t m_veResetCount = 0;
+		std::mutex m_esaiBootMutex;
 
 		MqMc m_uc;
 		TAudioInputs m_audioInputs;

@@ -8,6 +8,8 @@
 
 #include "wLib/wDsp.h"
 
+#include <mutex>
+
 namespace mc68k
 {
 	class Hdi08;
@@ -54,8 +56,14 @@ namespace mqLib
 		bool hasThread() const { return m_thread != nullptr; }
 
 		bool receivedMagicEsaiPacket() const { return m_receivedMagicEsaiPacket; }
+		bool isInBootMode() const { return m_inBootMode; }
 		void onDspBootFinished();
 		void reset();
+		void terminateThread();
+		void resetState();
+
+		void dumpHdiLog() const;
+		uint32_t getIndex() const { return m_index; }
 
 	private:
 		void onUCRxEmpty(bool _needMoreData);
@@ -81,6 +89,21 @@ namespace mqLib
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
 
 		bool m_receivedMagicEsaiPacket = false;
+		uint32_t m_hdiTransferFailCount = 0;
+		uint32_t m_hdiUcToDspCount = 0;
+
+		// Ring buffer of last 32 UC→DSP HDI08 words for crash diagnostics
+		static constexpr uint32_t g_hdiLogSize = 32;
+		dsp56k::TWord m_hdiUcToDspLog[g_hdiLogSize]{};
+		uint32_t m_hdiUcToDspLogIndex = 0;
+
+		// Protects m_boot and m_inBootMode from concurrent access between
+		// the UC thread (invoking HDI08 callbacks) and the boot pump thread
+		// (calling reset()). The callback is set once in the constructor and
+		// never changed; the mutex ensures m_boot is not destroyed/reconstructed
+		// while the UC thread is inside m_boot.hdiWriteTX().
+		std::mutex m_hdiCallbackMutex;
+		bool m_inBootMode = true;
 
 		dsp56k::DspBoot m_boot;
 	};

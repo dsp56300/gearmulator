@@ -80,6 +80,9 @@ namespace mqLib
 
 		m_destroy = true;
 
+		// Break any active ucYieldLoop so the UC thread can check m_destroy
+		m_hw->requestUcTermination();
+
 		// DSP needs to run to let the uc thread wake up
 		const auto& esai = m_hw->getDSP().getPeriph().getEsai();
 		while(m_destroy)

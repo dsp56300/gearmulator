@@ -179,44 +179,64 @@ namespace mqLib
 		// DSP A sends 0x654300 via HDI08 TX when VE boot is ready
 		uint32_t loopCount = 0;
 		uint32_t routedAB = 0, routedBC = 0, routedCA = 0;
+		uint32_t lastStatusLog = 0;
+
+		m_inBootPump = true;
+		m_veResetCount = 0;
 
 		while (true)
 		{
-			auto& txOutA = esaiA.getAudioOutputs();
-			auto& txOutB = esaiB.getAudioOutputs();
-			auto& txOutC = esaiC.getAudioOutputs();
-			auto& rxInA  = esaiA.getAudioInputs();
-			auto& rxInB  = esaiB.getAudioInputs();
-			auto& rxInC  = esaiC.getAudioInputs();
-
-			// A TX → B RX
-			while (!txOutA.empty() && !rxInB.full())
 			{
-				dsp56k::Audio::RxFrame rx;
-				txToRx(txOutA.pop_front(), rx);
-				rxInB.push_back(std::move(rx));
-				++routedAB;
-			}
+				// Mutex protects ESAI buffers from concurrent access during
+				// DSP state reset (resetState drains/primes ESAI buffers)
+				std::lock_guard lock(m_esaiBootMutex);
 
-			// B TX → C RX
-			while (!txOutB.empty() && !rxInC.full())
-			{
-				dsp56k::Audio::RxFrame rx;
-				txToRx(txOutB.pop_front(), rx);
-				rxInC.push_back(std::move(rx));
-				++routedBC;
-			}
+				auto& txOutA = esaiA.getAudioOutputs();
+				auto& txOutB = esaiB.getAudioOutputs();
+				auto& txOutC = esaiC.getAudioOutputs();
+				auto& rxInA  = esaiA.getAudioInputs();
+				auto& rxInB  = esaiB.getAudioInputs();
+				auto& rxInC  = esaiC.getAudioInputs();
 
-			// C TX → A RX
-			while (!txOutC.empty() && !rxInA.full())
-			{
-				dsp56k::Audio::RxFrame rx;
-				txToRx(txOutC.pop_front(), rx);
-				rxInA.push_back(std::move(rx));
-				++routedCA;
+				// A TX → B RX
+				while (!txOutA.empty() && !rxInB.full())
+				{
+					dsp56k::Audio::RxFrame rx;
+					txToRx(txOutA.pop_front(), rx);
+					rxInB.push_back(std::move(rx));
+					++routedAB;
+				}
+
+				// B TX → C RX
+				while (!txOutB.empty() && !rxInC.full())
+				{
+					dsp56k::Audio::RxFrame rx;
+					txToRx(txOutB.pop_front(), rx);
+					rxInC.push_back(std::move(rx));
+					++routedBC;
+				}
+
+				// C TX → A RX
+				while (!txOutC.empty() && !rxInA.full())
+				{
+					dsp56k::Audio::RxFrame rx;
+					txToRx(txOutC.pop_front(), rx);
+					rxInA.push_back(std::move(rx));
+					++routedCA;
+				}
 			}
 
 			++loopCount;
+
+			// Periodic status logging
+			if (loopCount - lastStatusLog >= 5000000)
+			{
+				lastStatusLog = loopCount;
+				LOG("Boot pump status: loop=" << loopCount
+					<< " AB=" << routedAB << " BC=" << routedBC << " CA=" << routedCA
+					<< " bootCompleted=" << m_bootCompleted
+					<< " threads=" << m_dsps[0]->hasThread() << m_dsps[1]->hasThread() << m_dsps[2]->hasThread());
+			}
 
 			// Exit when UC firmware signals boot complete AND all 3 DSPs have exchanged
 			// ESAI data in the ring (C→A confirms full ring routing is working)
@@ -228,8 +248,11 @@ namespace mqLib
 
 		LOG("Voice Expansion initialization completed");
 
-		// Block further DSP resets now that VE init is complete
+		// Block further DSP resets BEFORE clearing boot pump flag.
+		// Otherwise the UC thread can see m_inBootPump=false while
+		// m_voiceExpansionReady is still false and do a direct reset.
 		m_voiceExpansionReady = true;
+		m_inBootPump = false;
 
 		// ESAI clock dividers were already set in the Hardware constructor
 		// (before any DSP threads started) to ensure frame rates are aligned
@@ -324,23 +347,48 @@ namespace mqLib
 		for (auto& dsp : m_dsps)
 			dsp->hdiTransferDSPtoUC();
 
-		if(m_uc.requestDSPReset() && !m_voiceExpansionReady)
+		// Periodic DSP PC bounds check — catch corruption before JIT crash.
+		// Checks during both boot and runtime (whenever a DSP thread exists).
+		for (auto& dsp : m_dsps)
 		{
-			// Only actually reset if DSPs haven't booted yet
-			bool allBooted = true;
-			for (auto& dsp : m_dsps)
+			if (dsp->hasThread())
 			{
-				if(!dsp->haveSentTXToDSP())
+				const auto pc = dsp->dsp().getPC().toWord();
+				if (pc >= MqDsp::g_pMemSize)
 				{
-					allBooted = false;
-					break;
+					static bool logged = false;
+					if (!logged)
+					{
+						logged = true;
+						LOG("CRITICAL: DSP " << dsp->getIndex() << " PC out of bounds: " << HEX(pc));
+						for (auto& d : m_dsps)
+							d->dumpHdiLog();
+					}
 				}
 			}
+		}
 
-			if(!allBooted && !m_dspResetPending)
+		if(m_uc.requestDSPReset() && !m_voiceExpansionReady)
+		{
+			if(!m_dspResetPending)
 			{
+				LOG("DSP reset requested (count " << (m_veResetCount + 1) << ")");
+
+				// Phase 1: Terminate DSP threads WITHOUT holding the mutex.
+				// The boot pump continues draining ESAI outputs, which unblocks
+				// any DSP thread stuck in Audio::writeTXimpl::waitNotFull().
 				for (auto& dsp : m_dsps)
-					dsp->reset();
+					dsp->terminateThread();
+
+				// Phase 2: Lock mutex and reset DSP state (ESAI, P-memory, etc.)
+				// The boot pump waits on the mutex during this brief phase.
+				{
+					std::lock_guard lock(m_esaiBootMutex);
+					for (auto& dsp : m_dsps)
+						dsp->resetState();
+				}
+
+				++m_veResetCount;
 				m_dspResetPending = true;
 			}
 			m_uc.notifyDSPBooted();

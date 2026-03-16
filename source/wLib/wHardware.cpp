@@ -47,7 +47,7 @@ namespace wLib
 
 		resumeDSP();
 
-		while(_continue())
+		while(_continue() && !m_terminateUcThread)
 		{
 			if(m_processAudio || m_esaiFrameIndex <= 0)
 			{
@@ -62,6 +62,12 @@ namespace wLib
 
 		if(dspHalted)
 			haltDSP();
+	}
+
+	void Hardware::requestUcTermination()
+	{
+		m_terminateUcThread = true;
+		m_esaiFrameAddedCv.notify_one();
 	}
 
 	void Hardware::sendMidi(const synthLib::SMidiEvent& _ev)

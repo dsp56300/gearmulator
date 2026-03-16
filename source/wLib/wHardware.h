@@ -39,6 +39,10 @@ namespace wLib
 
 		void ucYieldLoop(const std::function<bool()>& _continue);
 
+		// Request that any active ucYieldLoop exits immediately.
+		// Used during shutdown so the UC thread can check m_destroy.
+		void requestUcTermination();
+
 		void sendMidi(const synthLib::SMidiEvent& _ev);
 		void receiveMidi(std::vector<uint8_t>& _data);
 
@@ -74,5 +78,6 @@ namespace wLib
 		std::mutex m_haltDSPmutex;
 		bool m_processAudio = false;
 		bool m_bootCompleted = false;
+		bool m_terminateUcThread = false;
 	};
 }
