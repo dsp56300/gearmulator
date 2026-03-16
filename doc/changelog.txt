@@ -9,6 +9,8 @@ Framework:
 - [Fix] EMU-18 Patch Manager: MIDI bank assignments now persist across
         plugin reloads (added serialization to binary cache)
 - [Fix] EMU-18 Patch Manager: MIDI Banks category is now collapsed by default
+- [Fix] BUG-10148 Patch Manager: Dragging a folder onto the data sources
+        tree now correctly adds it as a folder source instead of a file
 - [Fix] Patch Manager: Fix potential crash when scrolling group tree node
         into view after element was destroyed
 - [Fix] Software Renderer: Fix UI scaling issue in Bitwig when monitor

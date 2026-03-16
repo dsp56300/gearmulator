@@ -545,7 +545,9 @@ namespace jucePluginEditorLib::patchManagerRml
 			{
 				pluginLib::patchDB::DataSource ds;
 				ds.name = file;
-				ds.type = pluginLib::patchDB::SourceType::File;
+				ds.type = juce::File(file).isDirectory()
+					? pluginLib::patchDB::SourceType::Folder
+					: pluginLib::patchDB::SourceType::File;
 				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 
 				getDB().addDataSource(ds);
