@@ -30,6 +30,17 @@ int main(int _argc, char* _argv[])
 	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
 	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #endif
+
+	bool voiceExpansion = false;
+
+	for(int i = 1; i < _argc; ++i)
+	{
+		const std::string arg(_argv[i]);
+		if(arg == "--multi-dsp")
+			voiceExpansion = true;
+	}
+
+	std::cout << "DSP mode: " << (voiceExpansion ? "multi (VE)" : "single") << std::endl;
 	std::cout << "Running unit tests..." << std::endl;
 
 	try
@@ -47,7 +58,7 @@ int main(int _argc, char* _argv[])
 	std::cout << "Unit tests passed" << std::endl;
 
 	// create hardware
-	mqLib::MicroQ mq(mqLib::BootMode::Default);
+	mqLib::MicroQ mq(mqLib::BootMode::Default, {}, {}, voiceExpansion);
 
 	if(!mq.isValid())
 	{
