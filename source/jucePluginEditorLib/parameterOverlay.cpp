@@ -183,6 +183,8 @@ namespace jucePluginEditorLib
 					{
 						_overlay.updateMidiLearnOverlay();
 					});
+
+					editor.getProcessor().saveDefaultMidiLearnPreset();
 				}
 			}
 

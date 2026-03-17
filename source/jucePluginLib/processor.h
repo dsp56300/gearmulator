@@ -170,6 +170,10 @@ namespace pluginLib
 
 		MidiLearnTranslator* getMidiLearnTranslator() { return m_midiLearnTranslator.get(); }
 
+		std::string getMidiLearnFolder() const;
+		void saveDefaultMidiLearnPreset();
+		void loadDefaultMidiLearnPreset();
+
 	protected:
 		void destroyController();
 
