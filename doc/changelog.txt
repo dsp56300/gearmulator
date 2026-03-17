@@ -4,6 +4,10 @@ Release Notes
 
 Framework:
 
+- [Imp] BUG-10125 Browser grid view now supports mouse wheel scrolling for
+        horizontal navigation
+- [Imp] Added parameter linking for individual parameters
+
 - [Fix] EMU-18 Patch Manager: MIDI Banks category now appears for all synths
         (was missing in Xenia, Vavra, and NodalRed2x)
 - [Fix] EMU-18 Patch Manager: MIDI bank assignments now persist across
@@ -21,6 +25,33 @@ Framework:
 - [Fix] BUG-10111 Linux: Fix crash when loading multiple TUS plugin types
         in the same DAW process, caused by ELF symbol interposition between
         plugin shared objects
+- [Fix] BUG-10134 Fixed parameter rate limiting firing too fast due to
+        unreliable JUCE timer, causing sluggish wavetable bank cycling
+- [Fix] BUG-10117 Combo box mouse wheel scrolling now follows display order
+        for custom-ordered dropdowns (e.g. Page Matrix Assign Destination)
+- [Fix] Right-click context menu now opens correctly on scrollbar/slider
+        elements instead of falling through to the global menu
+
+JE8086:
+
+- [Imp] EMU-50 Create better default values when doubleclicking on a parameter
+- [Imp] BUG-10102 Added parameter locking/linking for JE8086
+
+- [Fix] BUG-10113 Loading a single patch in patch display mode now switches
+        key mode to Single to prevent the other layer from staying active
+
+Xenia:
+
+- [Imp] BUG-10134 Reduced wavetable bank cycling rate limit from 250ms to
+        100ms for smoother Wave knob interaction
+
+NodalRed2x:
+
+- [Fix] BUG-10010 Master Tune knob now correctly affects tuning (firmware
+        protects the value during multi dump processing, fix applies it
+        directly to MCU memory)
+- [Fix] BUG-10110 Arpeggiator/LFO timing no longer slows down under heavy
+        MIDI traffic (CC rate limiting prevents firmware event queue saturation)
 
 2.2.1:
 
@@ -60,40 +91,6 @@ Framework:
 OsTIrus:
 
 - [Imp] Add sample rate selection to DSP & Audio settings
-
-2.1.5:
-
-Framework:
-
-- [Fix] BUG-10134 Fixed parameter rate limiting firing too fast due to
-        unreliable JUCE timer, causing sluggish wavetable bank cycling
-- [Fix] BUG-10117 Combo box mouse wheel scrolling now follows display order
-        for custom-ordered dropdowns (e.g. Page Matrix Assign Destination)
-- [Fix] Right-click context menu now opens correctly on scrollbar/slider
-        elements instead of falling through to the global menu
-- [Imp] BUG-10125 Browser grid view now supports mouse wheel scrolling for
-        horizontal navigation
-- [Imp] Added parameter linking for individual parameters
-
-JE8086:
-
-- [Imp] EMU-50 Create better default values when doubleclicking on a parameter
-- [Imp] BUG-10102 Added parameter locking/linking for JE8086
-- [Fix] BUG-10113 Loading a single patch in patch display mode now switches
-        key mode to Single to prevent the other layer from staying active
-
-Xenia:
-
-- [Imp] BUG-10134 Reduced wavetable bank cycling rate limit from 250ms to
-        100ms for smoother Wave knob interaction
-
-NodalRed2x:
-
-- [Fix] BUG-10010 Master Tune knob now correctly affects tuning (firmware
-        protects the value during multi dump processing, fix applies it
-        directly to MCU memory)
-- [Fix] BUG-10110 Arpeggiator/LFO timing no longer slows down under heavy
-        MIDI traffic (CC rate limiting prevents firmware event queue saturation)
 
 2.1.4:
 
