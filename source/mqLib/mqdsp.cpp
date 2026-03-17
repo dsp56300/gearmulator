@@ -38,7 +38,7 @@ namespace mqLib
 
 		config.aguSupportBitreverse = true;
 		config.linkJitBlocks = true;
-		config.dynamicPeripheralAddressing = true;
+		config.dynamicPeripheralAddressing = false;
 #ifdef _DEBUG
 		config.debugDynamicPeripheralAddressing = true;
 #endif
@@ -46,11 +46,6 @@ namespace mqLib
 
 		// allow dynamic peripheral addressing for code following clr b M_AAR3,r2
 		enableDynamicPeripheralAddressing(config, m_dsp, 0x62f41b, dsp56k::M_AAR3, 16);
-		// allow dynamic peripheral addressing for voice parameter handler at func_000290 (move #>$81d86,r2)
-		enableDynamicPeripheralAddressing(config, m_dsp, 0x62f400, 0x081d86, 112);
-		// allow dynamic peripheral addressing for interrupt handler at func_000d40 (move #>$11a8,r6)
-		// reads X memory via runtime pointer from x:$11a3 which can alias peripheral space
-		enableDynamicPeripheralAddressing(config, m_dsp, 0x66f400, 0x0011a8, 52);
 
 		m_dsp.getJit().setConfig(config);
 
