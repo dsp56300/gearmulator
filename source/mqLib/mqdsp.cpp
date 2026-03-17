@@ -65,7 +65,10 @@ namespace mqLib
 
 		m_periphX.getEsai().writeEmptyAudioIn(8);
 
-		hdi08().setRXRateLimit(0);
+		// Enforce minimum DSP instruction gap between HRDF interrupts.
+		// Real hardware: MC68K@16MHz writes TXH/TXM/TXL + polls TXDE ≈ 20-40
+		// MC68K cycles per word ≈ 125-250 DSP@100MHz instruction cycles.
+		hdi08().setRXRateLimit(100);
 		hdi08().setTransmitDataAlwaysEmpty(false);
 
 		// Set MC68K-side callbacks for all DSPs.
@@ -284,6 +287,16 @@ namespace mqLib
 
 	void MqDsp::hdiTransferUCtoDSP(dsp56k::TWord _word)
 	{
+		// TXDE back-pressure: wait for DSP to consume previous RX data.
+		// On real hardware, the MC68K polls TXDE between words.
+		if (hdi08().hasRXData() && hdi08().rxInterruptEnabled())
+		{
+			m_hardware.ucYieldLoop([&]()
+			{
+				return hdi08().hasRXData() && hdi08().rxInterruptEnabled();
+			});
+		}
+
 		m_haveSentTXtoDSP = true;
 
 		// Record in ring buffer for post-mortem analysis
@@ -313,9 +326,31 @@ namespace mqLib
 		if (!m_thread)
 			return;
 
+		const auto cmd = static_cast<HostCommand>(_irq);
+
 		waitDspRxEmpty();
 
-		if(_irq == 0x92 && m_hardware.getEsaiFrameIndex() > 0)
+		// Before BatchStart, ensure the previous batch's command processing
+		// is done.  Firmware protocol for Y:$6:
+		//   BatchComplete: move n6,y:$6  => Y:$6 = N6 (bit 0 = 0 = pending)
+		//   Main loop processes commands, then: bset #0,y:$6 => bit 0 = 1 = done
+		// BatchStart clobbers R6 (fast interrupt, no save/restore).
+		// If the command processor still has R6 at a non-standard offset,
+		// subsequent HRDF writes go to wrong addresses.
+		// On real hardware the MC68K is slow enough that processing always
+		// finishes between batches.  Here we wait only before BatchStart
+		// (not after BatchComplete) so the UC can do other work (LCD, MIDI,
+		// other IRQs) in parallel with DSP command processing.
+		if (cmd == HostCommand::BatchStart && m_commandProcessingActive)
+		{
+			m_hardware.ucYieldLoop([&]()
+			{
+				return (m_memory.get(dsp56k::MemArea_Y, 6) & 1) == 0;
+			});
+			m_commandProcessingActive = false;
+		}
+
+		if(cmd == HostCommand::SetHF2)
 		{
 			m_hardware.ucYieldLoop([&]
 			{
@@ -325,13 +360,18 @@ namespace mqLib
 
 		dsp().injectExternalInterrupt(_irq);
 
-		if (m_hardware.getEsaiFrameIndex() > 0)
+		// Wait for the external interrupt to be moved to the internal
+		// pending queue by processExternalInterrupts().  Once there, it
+		// sits ahead of any future HRDF in the FIFO, preserving ordering.
+		// This is much cheaper than hasPendingInterrupts() which also
+		// waits for long interrupt handlers to complete.
+		m_hardware.ucYieldLoop([&]()
 		{
-			m_hardware.ucYieldLoop([&]()
-			{
-				return dsp().hasPendingInterrupts();
-			});
-		}
+			return dsp().hasPendingExternalInterrupts();
+		});
+
+		if (cmd == HostCommand::BatchComplete)
+			m_commandProcessingActive = true;
 
 		hdiTransferDSPtoUC();
 	}
@@ -349,7 +389,7 @@ namespace mqLib
 	{
 		m_hardware.ucYieldLoop([&]()
 		{
-			return (hdi08().hasRXData() && hdi08().rxInterruptEnabled()) || dsp().hasPendingInterrupts();
+			return (hdi08().hasRXData() && hdi08().rxInterruptEnabled()) || dsp().hasPendingExternalInterrupts();
 		});
 	}
 

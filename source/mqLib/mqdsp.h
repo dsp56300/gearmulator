@@ -17,6 +17,16 @@ namespace mc68k
 
 namespace mqLib
 {
+	// microQ firmware host command vectors (written to DSP via CVR by MC68K).
+	// These dispatch as fast interrupts in the DSP's vector table.
+	// All three reset R6 to N6 (buffer base address).
+	enum class HostCommand : uint8_t
+	{
+		BatchStart   = 0x80,  // bclr #3,HCR  — clear HF2, begin new data batch
+		BatchComplete= 0x82,  // move n6,y:$6  — signal commands pending for main loop
+		SetHF2       = 0x92,  // bset #3,HCR  — set HF2 flag
+	};
+
 	class Hardware;
 
 	class MqDsp : public wLib::Dsp
@@ -91,6 +101,7 @@ namespace mqLib
 		bool m_receivedMagicEsaiPacket = false;
 		uint32_t m_hdiTransferFailCount = 0;
 		uint32_t m_hdiUcToDspCount = 0;
+		bool m_commandProcessingActive = false;
 
 		// Ring buffer of last 32 UC→DSP HDI08 words for crash diagnostics
 		static constexpr uint32_t g_hdiLogSize = 32;
