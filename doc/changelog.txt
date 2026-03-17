@@ -18,6 +18,9 @@ Framework:
 - [Fix] BUG-10102 Parameter Links: Prevent circular link dependencies that
         caused erratic controller jumps. Bidirectional links are now rejected
         with a user-facing warning dialog
+- [Fix] BUG-10111 Linux: Fix crash when loading multiple TUS plugin types
+        in the same DAW process, caused by ELF symbol interposition between
+        plugin shared objects
 
 2.2.1:
 
