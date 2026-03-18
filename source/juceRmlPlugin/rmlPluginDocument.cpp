@@ -285,26 +285,32 @@ namespace rmlPlugin
 					juceRmlUi::ElemKnob::processMouseWheel(*input, _event);
 				});
 
-				// permanently disable native slider drag on children and enable drag on
-				// the input element itself — this lets RmlUi capture the mouse so our
-				// delta-based drag works even outside the plugin window (like knobs)
-				enableSliderDefaultMouseInputs(input, false);
-				input->SetProperty(Rml::PropertyId::Drag, Rml::Style::Drag::Drag);
-
-				// override default slider drag with delta-based handling (like knobs)
-				juceRmlUi::EventListener::Add(input, Rml::EventId::Mousedown, [this, input](Rml::Event& _event)
+				// Only override native slider drag for parameter-bound sliders.
+				// Unbound sliders (e.g. hardware analog controls) keep native RmlUi
+				// interaction so they remain functional without a parameter binding.
+				if (input->GetAttribute("param"))
 				{
-					auto& binding = m_context.getParameterBinding();
-					auto* parameter = binding.getParameterForElement(input);
-					if (parameter)
+					// permanently disable native slider drag on children and enable drag on
+					// the input element itself — this lets RmlUi capture the mouse so our
+					// delta-based drag works even outside the plugin window (like knobs)
+					enableSliderDefaultMouseInputs(input, false);
+					input->SetProperty(Rml::PropertyId::Drag, Rml::Style::Drag::Drag);
+
+					// override default slider drag with delta-based handling (like knobs)
+					juceRmlUi::EventListener::Add(input, Rml::EventId::Mousedown, [this, input](Rml::Event& _event)
 					{
-						m_dragStartValue = parameter->getUnnormalizedValue();
-						m_modAnchorValue = m_dragStartValue;
-						m_dragTargetSlider = input->GetObserverPtr(input->GetCoreInstance());
-						m_lastMousePos = juceRmlUi::helper::getMousePos(_event);
-						m_lastMod = getModifierScale(_event, input);
-					}
-				}, true);
+						auto& binding = m_context.getParameterBinding();
+						auto* parameter = binding.getParameterForElement(input);
+						if (parameter)
+						{
+							m_dragStartValue = parameter->getUnnormalizedValue();
+							m_modAnchorValue = m_dragStartValue;
+							m_dragTargetSlider = input->GetObserverPtr(input->GetCoreInstance());
+							m_lastMousePos = juceRmlUi::helper::getMousePos(_event);
+							m_lastMod = getModifierScale(_event, input);
+						}
+					}, true);
+				}
 			}
 		}
 
