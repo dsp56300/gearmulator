@@ -44,6 +44,8 @@ namespace jucePluginEditorLib
 	private:
 		void ProcessEvent(Rml::Event& _event) override;
 
+		void acquireDocument(const Rml::Element* _elem);
+
 		void onBind(pluginLib::Parameter* _param, Rml::Element* _elem);
 		void onUnbind(pluginLib::Parameter* _param, Rml::Element* _elem);
 

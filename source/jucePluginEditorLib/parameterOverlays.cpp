@@ -33,12 +33,7 @@ namespace jucePluginEditorLib
 		if(m_overlays.find(_component) != m_overlays.end())
 			return false;
 
-		if (!m_document)
-		{
-			m_document = _component->GetOwnerDocument();
-			if (m_document)
-				m_document->AddEventListener(Rml::EventId::Tabchange, this, true);
-		}
+		acquireDocument(_component);
 
 		m_overlays.insert({_component, std::make_unique<ParameterOverlay>(*this, _component)});
 
@@ -53,6 +48,10 @@ namespace jucePluginEditorLib
 
 	void ParameterOverlays::setMidiLearnMode(const bool _active)
 	{
+		// retry document acquisition in case it was unavailable during initial binding
+		if (!m_document && !m_overlays.empty())
+			acquireDocument(m_overlays.begin()->first);
+
 		for (const auto& overlay : m_overlays)
 			overlay.second->setMidiLearnMode(_active);
 	}
@@ -86,6 +85,15 @@ namespace jucePluginEditorLib
 	{
 		for (const auto& overlay : m_overlays)
 			overlay.second->updateMidiLearnOverlay();
+	}
+
+	void ParameterOverlays::acquireDocument(const Rml::Element* _elem)
+	{
+		if (m_document)
+			return;
+		m_document = _elem->GetOwnerDocument();
+		if (m_document)
+			m_document->AddEventListener(Rml::EventId::Tabchange, this, true);
 	}
 
 	void ParameterOverlays::ProcessEvent(Rml::Event& /*_event*/)
