@@ -52,10 +52,14 @@ namespace jucePluginEditorLib
 
 	ParameterOverlay::ParameterOverlay(ParameterOverlays& _overlays, Rml::Element* _component) : m_overlays(_overlays), m_component(_component)
 	{
+		m_component->AddEventListener(Rml::EventId::Show, this);
+		m_component->AddEventListener(Rml::EventId::Hide, this);
 	}
 
 	ParameterOverlay::~ParameterOverlay()
 	{
+		m_component->RemoveEventListener(Rml::EventId::Show, this);
+		m_component->RemoveEventListener(Rml::EventId::Hide, this);
 		setParameter(nullptr);
 	}
 
@@ -139,6 +143,14 @@ namespace jucePluginEditorLib
 
 	void ParameterOverlay::ProcessEvent(Rml::Event& _event)
 	{
+		if (_event.GetId() == Rml::EventId::Show || _event.GetId() == Rml::EventId::Hide)
+		{
+			if (auto* doc = m_component->GetOwnerDocument())
+				doc->UpdateDocument();
+			refresh();
+			return;
+		}
+
 		if (!m_midiLearnModeActive || !m_parameter)
 			return;
 
