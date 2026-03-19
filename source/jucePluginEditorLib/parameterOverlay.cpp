@@ -256,7 +256,7 @@ namespace jucePluginEditorLib
 			});
 		}
 
-		updateOverlays();
+		refresh();
 	}
 
 	void ParameterOverlay::setMidiLearnMode(const bool _active)
