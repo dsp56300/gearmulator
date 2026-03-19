@@ -53,6 +53,11 @@ NodalRed2x:
 - [Fix] BUG-10110 Arpeggiator/LFO timing no longer slows down under heavy
         MIDI traffic (CC rate limiting prevents firmware event queue saturation)
 
+OsTIrus:
+
+- [Fix] BUG-10149 Master Volume knob now displays and updates correctly.
+        Global parameters were being dropped when received from the device
+
 2.2.1:
 
 Framework:

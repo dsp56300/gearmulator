@@ -1068,7 +1068,7 @@
 				<combotext>Wave 42</combotext>
 			</combo>
 			<input id="OutputBalance" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Balance" type="range" style="left: 1053dp; top: 92dp; width: 353dp; height: 63dp;"/>
-			<knob id="Master Volume" class="jucePos juceRotary knob3" data-model="partCurrent" param="Master Volume" style="left: 1075dp; top: 595dp; width: 98dp; height: 98dp;"/>
+			<knob id="Master Volume" class="jucePos juceRotary knob3" data-model="part0" param="Master Volume" style="left: 1075dp; top: 595dp; width: 98dp; height: 98dp;"/>
 			<combo id="SecondaryOutput" class="jucePos text3" data-model="partCurrent" param="Part Output Select" style="left: 1463dp; top: 101dp; width: 275dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>

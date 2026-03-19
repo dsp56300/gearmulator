@@ -144,6 +144,11 @@ namespace virus
 			// always allow play mode change as the UI will update based on the play mode parameter, we must not
 			// drop it even if sent from the synth as it would desync the UI
 		}
+		else if (!partParams.empty() && partParams.front()->getDescription().isNonPartSensitive())
+		{
+			// always allow global parameters (e.g. Master Volume) as they are only delivered
+			// via parameter change messages, never via single/multi dumps
+		}
 		else if(_source == synthLib::MidiEventSource::Device)
 		{
 			// TI DSP sends parameter changes back as sysex, unsure why. Ignore them as it stops
