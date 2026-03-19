@@ -31,6 +31,8 @@ Framework:
         for custom-ordered dropdowns (e.g. Page Matrix Assign Destination)
 - [Fix] Right-click context menu now opens correctly on scrollbar/slider
         elements instead of falling through to the global menu
+- [Fix] BUG-10153 Patch Manager: Fix crash when typing in browser search
+        columns caused by invalid tree node cast during filtering
 
 JE8086:
 
