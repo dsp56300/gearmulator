@@ -234,6 +234,15 @@ namespace jucePluginEditorLib
 		if(m_parameter == _parameter)
 			return;
 
+		if(m_midiLearnListening)
+		{
+			auto& editor = m_overlays.getEditor();
+			if (auto* translator = editor.getProcessor().getMidiLearnTranslator())
+				translator->cancelLearning();
+			editor.setMidiLearnSelectedParam(nullptr);
+			m_midiLearnListening = false;
+		}
+
 		if(m_parameter)
 		{
 			m_parameter->onLockedChanged.removeListener(m_parameterLockChangedListener);
