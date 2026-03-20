@@ -15,6 +15,7 @@ set(SOURCES
 	pluginEditorWindow.cpp pluginEditorWindow.h
 	pluginEditorState.cpp pluginEditorState.h
 	pluginProcessor.cpp pluginProcessor.h
+	mcpDomTools.cpp mcpDomTools.h
 	settings.cpp settings.h
 	settingsCategories.cpp settingsCategories.h
 	settingsCategory.cpp settingsCategory.h
