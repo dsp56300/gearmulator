@@ -2,6 +2,11 @@
 
 #include "jucePluginLib/processor.h"
 
+#ifdef GEARMULATOR_BUILD_MCP_SERVER
+#include <memory>
+namespace mcpServer { class McpPluginServer; }
+#endif
+
 namespace jucePluginEditorLib
 {
 	class PluginEditorState;
@@ -28,6 +33,10 @@ namespace jucePluginEditorLib
 		bool loadCustomData(const std::vector<uint8_t>& _sourceBuffer) override;
 		void loadChunkData(baseLib::ChunkReader& _cr) override;
 
+#ifdef GEARMULATOR_BUILD_MCP_SERVER
+		mcpServer::McpPluginServer* getMcpServer() const { return m_mcpServer.get(); }
+#endif
+
 	private:
 		juce::File initConfigFile(const juce::PropertiesFile::Options& _o) const;
 		void savePluginLoadPath();
@@ -38,5 +47,9 @@ namespace jucePluginEditorLib
 		juce::PropertiesFile m_config;
 
 		std::vector<uint8_t> m_editorStateData;
+
+#ifdef GEARMULATOR_BUILD_MCP_SERVER
+		std::unique_ptr<mcpServer::McpPluginServer> m_mcpServer;
+#endif
 	};
 }

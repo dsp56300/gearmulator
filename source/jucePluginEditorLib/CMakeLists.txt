@@ -69,6 +69,11 @@ source_group("source\\patchmanagerUiRml" FILES ${SOURCES_PM_RML})
 
 target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib jucePluginData juceRmlPlugin)
 
+if(${CMAKE_PROJECT_NAME}_BUILD_MCP_SERVER AND ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
+	target_link_libraries(jucePluginEditorLib PUBLIC mcpServerLib)
+	target_compile_definitions(jucePluginEditorLib PUBLIC GEARMULATOR_BUILD_MCP_SERVER=1)
+endif()
+
 target_include_directories(jucePluginEditorLib PUBLIC ../JUCE/modules)
 target_compile_definitions(jucePluginEditorLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET jucePluginEditorLib PROPERTY FOLDER "Gearmulator")

@@ -52,6 +52,10 @@ add_subdirectory(ptypes EXCLUDE_FROM_ALL)
 add_subdirectory(networkLib EXCLUDE_FROM_ALL)
 add_subdirectory(bridge)
 
+# ----------------- MCP server
+
+option(${CMAKE_PROJECT_NAME}_BUILD_MCP_SERVER "Build MCP server for remote control" on)
+
 # ----------------- Try to install VST2 SDK
 
 include(findvst2.cmake)
@@ -66,6 +70,9 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 		add_subdirectory(clap-juce-extensions)
 	endif()
 	add_subdirectory(jucePluginLib EXCLUDE_FROM_ALL)
+	if(${CMAKE_PROJECT_NAME}_BUILD_MCP_SERVER)
+		add_subdirectory(mcpServerLib EXCLUDE_FROM_ALL)
+	endif()
 	add_subdirectory(juceRmlUi)
 	add_subdirectory(juceRmlPlugin)
 	add_subdirectory(juceUiLib EXCLUDE_FROM_ALL)

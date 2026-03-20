@@ -7,6 +7,11 @@
 
 #include "synthLib/os.h"
 
+#ifdef GEARMULATOR_BUILD_MCP_SERVER
+#include "mcpServerLib/mcpPluginServer.h"
+#include "networkLib/logging.h"
+#endif
+
 #ifdef ZYNTHIAN
 #include "dsp56kBase/logging.h"
 #endif
@@ -52,10 +57,34 @@ namespace jucePluginEditorLib
 		Logging::setLogFunc(&noLoggingFunc);
 #endif
 		savePluginLoadPath();
+
+#ifdef GEARMULATOR_BUILD_MCP_SERVER
+		try
+		{
+			m_mcpServer = std::make_unique<mcpServer::McpPluginServer>(*this);
+			if (m_mcpServer->start())
+			{
+				LOGNET(networkLib::LogLevel::Info, "MCP server started on port " << m_mcpServer->getPort() << " for plugin " << _properties.name);
+			}
+			else
+			{
+				LOGNET(networkLib::LogLevel::Warning, "Failed to start MCP server for plugin " << _properties.name);
+				m_mcpServer.reset();
+			}
+		}
+		catch (const std::exception& e)
+		{
+			LOGNET(networkLib::LogLevel::Warning, "MCP server creation failed: " << e.what());
+			m_mcpServer.reset();
+		}
+#endif
 	}
 
 	Processor::~Processor()
 	{
+#ifdef GEARMULATOR_BUILD_MCP_SERVER
+		m_mcpServer.reset();
+#endif
 		assert(!m_editorState && "call destroyEditorState in destructor of derived class");
 	}
 
