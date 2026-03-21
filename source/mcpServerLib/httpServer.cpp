@@ -42,6 +42,8 @@ namespace mcpServer
 
 	void HttpServer::onClientConnected(std::unique_ptr<networkLib::TcpStream> _stream)
 	{
+		LOGNET(networkLib::LogLevel::Info, "New TCP connection accepted");
+
 		auto shared = std::shared_ptr<networkLib::TcpStream>(std::move(_stream));
 
 		std::lock_guard lock(m_clientsMutex);
@@ -70,7 +72,14 @@ namespace mcpServer
 			{
 				HttpRequest request;
 				if (!parseRequest(request, stream))
+				{
+					LOGNET(networkLib::LogLevel::Debug, "Client disconnected (no more data)");
 					break;
+				}
+
+				LOGNET(networkLib::LogLevel::Info, "HTTP " << request.method << " " << request.path
+					<< " (Content-Length: " << request.getContentLength()
+					<< ", Accept: " << request.getHeader("accept") << ")");
 
 				auto response = m_handler(request, stream);
 
@@ -78,19 +87,28 @@ namespace mcpServer
 				if (request.getHeader("accept") == "text/event-stream")
 					continue;
 
+				LOGNET(networkLib::LogLevel::Info, "HTTP Response: " << response.statusCode << " " << response.statusText
+					<< " (body: " << response.body.size() << " bytes)");
+
 				if (!sendResponse(response, stream))
+				{
+					LOGNET(networkLib::LogLevel::Warning, "Failed to send response");
 					break;
+				}
 			}
-			catch (const networkLib::NetException&)
+			catch (const networkLib::NetException& e)
 			{
+				LOGNET(networkLib::LogLevel::Debug, "Client connection closed: " << e.what() << " (type: " << static_cast<int>(e.type()) << ")");
 				break;
 			}
 			catch (const std::exception& e)
 			{
-				LOGNET(networkLib::LogLevel::Error, "MCP client handler error: " << e.what());
+				LOGNET(networkLib::LogLevel::Error, "Client handler error: " << e.what());
 				break;
 			}
 		}
+
+		LOGNET(networkLib::LogLevel::Debug, "Client handler thread exiting");
 	}
 
 	bool HttpServer::parseRequest(HttpRequest& _request, networkLib::Stream& _stream)

@@ -1,5 +1,6 @@
 #include "mcpServer.h"
 
+#include "networkLib/exception.h"
 #include "networkLib/logging.h"
 
 namespace mcpServer
@@ -77,6 +78,7 @@ namespace mcpServer
 		// CORS preflight
 		if (_request.isOptions())
 		{
+			LOGNET(networkLib::LogLevel::Debug, "CORS preflight for " << _request.path);
 			response.statusCode = 204;
 			response.statusText = "No Content";
 			return response;
@@ -85,14 +87,16 @@ namespace mcpServer
 		// SSE endpoint
 		if (_request.isGet() && _request.path == "/sse")
 		{
+			LOGNET(networkLib::LogLevel::Info, "SSE connection requested");
 			handleSseConnection(_stream);
 			// SSE keeps connection open; return empty (won't be sent by HttpServer)
 			return response;
 		}
 
-		// MCP message endpoint
-		if (_request.isPost() && (_request.path == "/message" || _request.path == "/mcp"))
+		// MCP message endpoint - accept POST to /message, /mcp, and /sse (Streamable HTTP)
+		if (_request.isPost() && (_request.path == "/message" || _request.path == "/mcp" || _request.path == "/sse"))
 		{
+			LOGNET(networkLib::LogLevel::Info, "MCP POST to " << _request.path << ", body: " << _request.body.substr(0, 200));
 			return handleMcpPost(_request);
 		}
 
@@ -108,6 +112,7 @@ namespace mcpServer
 			return response;
 		}
 
+		LOGNET(networkLib::LogLevel::Warning, "Unhandled request: " << _request.method << " " << _request.path);
 		response.statusCode = 404;
 		response.statusText = "Not Found";
 		auto err = JsonValue::object();
@@ -124,12 +129,13 @@ namespace mcpServer
 		auto rpcRequest = parseJsonRpcRequest(_request.body);
 		if (!rpcRequest)
 		{
+			LOGNET(networkLib::LogLevel::Warning, "Failed to parse JSON-RPC request: " << _request.body.substr(0, 200));
 			auto rpcResp = JsonRpcResponse::error(JsonValue::null(), ErrorCode::ParseError, "Invalid JSON-RPC request");
 			response.setJsonBody(serializeJsonRpcResponse(rpcResp));
 			return response;
 		}
 
-		LOGNET(networkLib::LogLevel::Debug, "MCP method: " << rpcRequest->method);
+		LOGNET(networkLib::LogLevel::Info, "MCP method: " << rpcRequest->method << " (id: " << rpcRequest->id.toJsonString() << ")");
 
 		JsonRpcResponse rpcResponse;
 
@@ -143,22 +149,28 @@ namespace mcpServer
 			rpcResponse = handleToolsCall(*rpcRequest);
 		else if (rpcRequest->method == "notifications/initialized")
 		{
+			LOGNET(networkLib::LogLevel::Info, "Client sent notifications/initialized");
 			// Client notification, no response needed for notifications
 			// But we send an empty success since HTTP needs a response
 			rpcResponse = JsonRpcResponse::success(rpcRequest->id, JsonValue::object());
 		}
 		else
 		{
+			LOGNET(networkLib::LogLevel::Warning, "Unknown MCP method: " << rpcRequest->method);
 			rpcResponse = JsonRpcResponse::error(rpcRequest->id, ErrorCode::MethodNotFound,
 				"Unknown method: " + rpcRequest->method);
 		}
 
-		response.setJsonBody(serializeJsonRpcResponse(rpcResponse));
+		const auto responseBody = serializeJsonRpcResponse(rpcResponse);
+		LOGNET(networkLib::LogLevel::Debug, "MCP response: " << responseBody.substr(0, 300));
+		response.setJsonBody(responseBody);
 		return response;
 	}
 
 	void McpServer::handleSseConnection(networkLib::Stream& _stream)
 	{
+		LOGNET(networkLib::LogLevel::Info, "Setting up SSE stream");
+
 		// Send SSE headers
 		HttpResponse headers;
 		headers.setSseHeaders();
@@ -168,6 +180,7 @@ namespace mcpServer
 		_stream.flush();
 
 		// Send endpoint event so the client knows where to POST
+		LOGNET(networkLib::LogLevel::Info, "Sending SSE endpoint event: /message");
 		sendSseEvent(_stream, "endpoint", "/message");
 
 		addSseClient(&_stream);
@@ -182,10 +195,20 @@ namespace mcpServer
 				const std::string keepAlive = ": keepalive\n\n";
 				_stream.write(keepAlive.data(), static_cast<uint32_t>(keepAlive.size()));
 				_stream.flush();
+				LOGNET(networkLib::LogLevel::Debug, "SSE keepalive sent");
 			}
+		}
+		catch (const networkLib::NetException& e)
+		{
+			LOGNET(networkLib::LogLevel::Info, "SSE connection closed: " << e.what());
+		}
+		catch (const std::exception& e)
+		{
+			LOGNET(networkLib::LogLevel::Warning, "SSE connection error: " << e.what());
 		}
 		catch (...)
 		{
+			LOGNET(networkLib::LogLevel::Warning, "SSE connection closed with unknown exception");
 		}
 
 		removeSseClient(&_stream);
@@ -194,6 +217,7 @@ namespace mcpServer
 	JsonRpcResponse McpServer::handleInitialize(const JsonRpcRequest& _request)
 	{
 		m_initialized = true;
+		LOGNET(networkLib::LogLevel::Info, "MCP session initialized");
 
 		auto result = JsonValue::object();
 		result.set("protocolVersion", JsonValue::fromString(g_mcpProtocolVersion));
@@ -216,6 +240,7 @@ namespace mcpServer
 	JsonRpcResponse McpServer::handleToolsList(const JsonRpcRequest& _request)
 	{
 		std::lock_guard lock(m_toolsMutex);
+		LOGNET(networkLib::LogLevel::Info, "tools/list: returning " << m_tools.size() << " tools");
 
 		auto toolsArray = JsonValue::array();
 		for (const auto& tool : m_tools)
@@ -231,6 +256,8 @@ namespace mcpServer
 		const auto toolName = _request.params.get("name").getString().toStdString();
 		const auto arguments = _request.params.get("arguments");
 
+		LOGNET(networkLib::LogLevel::Info, "Tool call: " << toolName);
+
 		std::lock_guard lock(m_toolsMutex);
 
 		for (const auto& tool : m_tools)
@@ -240,6 +267,7 @@ namespace mcpServer
 				try
 				{
 					auto toolResult = tool.handler(arguments);
+					LOGNET(networkLib::LogLevel::Info, "Tool " << toolName << " completed successfully");
 
 					auto content = JsonValue::array();
 					auto textContent = JsonValue::object();
@@ -253,6 +281,7 @@ namespace mcpServer
 				}
 				catch (const std::exception& e)
 				{
+					LOGNET(networkLib::LogLevel::Error, "Tool " << toolName << " failed: " << e.what());
 					auto content = JsonValue::array();
 					auto textContent = JsonValue::object();
 					textContent.set("type", JsonValue::fromString("text"));
@@ -283,13 +312,20 @@ namespace mcpServer
 			msg += "event: " + _event + "\n";
 		msg += "data: " + _data + "\n\n";
 
+		LOGNET(networkLib::LogLevel::Debug, "SSE send: event=" << _event << " data=" << _data.substr(0, 100));
+
 		try
 		{
 			_stream.write(msg.data(), static_cast<uint32_t>(msg.size()));
 			_stream.flush();
 		}
+		catch (const std::exception& e)
+		{
+			LOGNET(networkLib::LogLevel::Warning, "SSE send failed: " << e.what());
+		}
 		catch (...)
 		{
+			LOGNET(networkLib::LogLevel::Warning, "SSE send failed with unknown exception");
 		}
 	}
 
