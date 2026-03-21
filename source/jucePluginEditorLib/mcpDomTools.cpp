@@ -25,6 +25,45 @@ namespace jucePluginEditorLib
 {
 	namespace
 	{
+		// Helper to get plain text content from an element (strips HTML tags)
+		std::string getTextContent(Rml::Element* _elem)
+		{
+			std::string result;
+			for (int i = 0; i < _elem->GetNumChildren(true); ++i)
+			{
+				auto* child = _elem->GetChild(i);
+				if (!child) continue;
+				if (child->GetTagName() == "#text")
+				{
+					// Text node — get its content via the parent's inner RML at this position
+					// Use the simpler approach: just get InnerRML and strip tags
+				}
+				else
+				{
+					result += getTextContent(child);
+				}
+			}
+			if (result.empty())
+			{
+				// Fallback: use GetInnerRML and strip any HTML tags
+				auto rml = _elem->GetInnerRML();
+				std::string text;
+				bool inTag = false;
+				for (const char c : rml)
+				{
+					if (c == '<') inTag = true;
+					else if (c == '>') inTag = false;
+					else if (!inTag) text += c;
+				}
+				// Trim whitespace
+				const auto start = text.find_first_not_of(" \t\n\r");
+				if (start == std::string::npos) return {};
+				const auto end = text.find_last_not_of(" \t\n\r");
+				return text.substr(start, end - start + 1);
+			}
+			return result;
+		}
+
 		// Helper to serialize an element to JSON
 		mcpServer::JsonValue serializeElement(Rml::Element* _elem, const int _maxDepth, const int _currentDepth = 0)
 		{
@@ -56,6 +95,27 @@ namespace jucePluginEditorLib
 			const auto classNames = _elem->GetClassNames();
 			if (!classNames.empty())
 				obj.set("class", mcpServer::JsonValue::fromString(classNames));
+
+			// Text content (leaf-level or inner text)
+			const auto text = getTextContent(_elem);
+			if (!text.empty())
+				obj.set("text", mcpServer::JsonValue::fromString(text));
+
+			// Box position and size
+			if (_elem->IsVisible())
+			{
+				const auto offset = _elem->GetAbsoluteOffset(Rml::BoxArea::Border);
+				const auto size = _elem->GetBox().GetSize(Rml::BoxArea::Border);
+				if (size.x > 0 || size.y > 0)
+				{
+					auto box = mcpServer::JsonValue::object();
+					box.set("x", mcpServer::JsonValue::fromInt(static_cast<int>(offset.x)));
+					box.set("y", mcpServer::JsonValue::fromInt(static_cast<int>(offset.y)));
+					box.set("w", mcpServer::JsonValue::fromInt(static_cast<int>(size.x)));
+					box.set("h", mcpServer::JsonValue::fromInt(static_cast<int>(size.y)));
+					obj.set("box", box);
+				}
+			}
 
 			// Children (if within depth limit)
 			const int numChildren = _elem->GetNumChildren();
@@ -365,13 +425,18 @@ namespace jucePluginEditorLib
 		{
 			mcpServer::ToolDef tool;
 			tool.name = "find_elements";
-			tool.description = "Find elements by tag name, returning their IDs and basic info";
-			tool.inputSchema.addProperty("tag", "string", "Tag name to search for (e.g. 'button', 'input', 'select')", true);
+			tool.description = "Find elements by tag name or CSS selector. Returns text content and box position for each match.";
+			tool.inputSchema.addProperty("tag", "string", "Tag name to search for (e.g. 'div', 'button', 'select')", false);
+			tool.inputSchema.addProperty("selector", "string", "CSS selector (e.g. '.menuitem', 'div.active', '#panel > div')", false);
 			tool.inputSchema.addIntProperty("limit", "Maximum number of results (default: 50)", false, 1, 500);
 			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
-				const auto tag = _params.get("tag").getString().toStdString();
+				const auto tag = _params.hasProperty("tag") ? _params.get("tag").getString().toStdString() : std::string();
+				const auto selector = _params.hasProperty("selector") ? _params.get("selector").getString().toStdString() : std::string();
 				const int limit = _params.hasProperty("limit") ? _params.get("limit").getInt() : 50;
+
+				if (tag.empty() && selector.empty())
+					throw std::runtime_error("Either 'tag' or 'selector' must be provided");
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
@@ -389,41 +454,83 @@ namespace jucePluginEditorLib
 					if (!doc)
 						throw std::runtime_error("No RmlUI document loaded");
 
-					// BFS to find matching elements
-					auto results = mcpServer::JsonValue::array();
-					int count = 0;
+					std::vector<Rml::Element*> matches;
 
-					std::vector<Rml::Element*> queue;
-					queue.push_back(doc);
-
-					while (!queue.empty() && count < limit)
+					if (!selector.empty())
 					{
-						auto* current = queue.front();
-						queue.erase(queue.begin());
-
-						if (current->GetTagName() == tag)
+						Rml::ElementList elements;
+						doc->QuerySelectorAll(elements, selector);
+						for (auto* el : elements)
 						{
-							auto obj = mcpServer::JsonValue::object();
-							obj.set("tag", mcpServer::JsonValue::fromString(current->GetTagName()));
-							const auto& id = current->GetId();
-							if (!id.empty())
-								obj.set("id", mcpServer::JsonValue::fromString(id));
-							obj.set("class", mcpServer::JsonValue::fromString(current->GetClassNames()));
-							obj.set("visible", mcpServer::JsonValue::fromBool(current->IsVisible()));
-							results.append(obj);
-							++count;
+							if (static_cast<int>(matches.size()) >= limit) break;
+							matches.push_back(el);
 						}
+					}
+					else
+					{
+						// BFS to find matching elements by tag
+						std::vector<Rml::Element*> queue;
+						queue.push_back(doc);
 
-						for (int i = 0; i < current->GetNumChildren(); ++i)
+						while (!queue.empty() && static_cast<int>(matches.size()) < limit)
 						{
-							auto* child = current->GetChild(i);
-							if (child)
-								queue.push_back(child);
+							auto* current = queue.front();
+							queue.erase(queue.begin());
+
+							if (current->GetTagName() == tag)
+								matches.push_back(current);
+
+							for (int i = 0; i < current->GetNumChildren(); ++i)
+							{
+								auto* child = current->GetChild(i);
+								if (child)
+									queue.push_back(child);
+							}
 						}
 					}
 
+					auto results = mcpServer::JsonValue::array();
+					int idx = 0;
+					for (auto* elem : matches)
+					{
+						auto obj = mcpServer::JsonValue::object();
+						obj.set("index", mcpServer::JsonValue::fromInt(idx++));
+						obj.set("tag", mcpServer::JsonValue::fromString(elem->GetTagName()));
+
+						const auto& id = elem->GetId();
+						if (!id.empty())
+							obj.set("id", mcpServer::JsonValue::fromString(id));
+
+						const auto classNames = elem->GetClassNames();
+						if (!classNames.empty())
+							obj.set("class", mcpServer::JsonValue::fromString(classNames));
+
+						const auto text = getTextContent(elem);
+						if (!text.empty())
+							obj.set("text", mcpServer::JsonValue::fromString(text));
+
+						obj.set("visible", mcpServer::JsonValue::fromBool(elem->IsVisible()));
+
+						if (elem->IsVisible())
+						{
+							const auto offset = elem->GetAbsoluteOffset(Rml::BoxArea::Border);
+							const auto size = elem->GetBox().GetSize(Rml::BoxArea::Border);
+							if (size.x > 0 || size.y > 0)
+							{
+								auto box = mcpServer::JsonValue::object();
+								box.set("x", mcpServer::JsonValue::fromInt(static_cast<int>(offset.x)));
+								box.set("y", mcpServer::JsonValue::fromInt(static_cast<int>(offset.y)));
+								box.set("w", mcpServer::JsonValue::fromInt(static_cast<int>(size.x)));
+								box.set("h", mcpServer::JsonValue::fromInt(static_cast<int>(size.y)));
+								obj.set("box", box);
+							}
+						}
+
+						results.append(obj);
+					}
+
 					auto result = mcpServer::JsonValue::object();
-					result.set("count", mcpServer::JsonValue::fromInt(count));
+					result.set("count", mcpServer::JsonValue::fromInt(static_cast<int>(matches.size())));
 					result.set("elements", results);
 					return result;
 				});
@@ -435,24 +542,42 @@ namespace jucePluginEditorLib
 		{
 			mcpServer::ToolDef tool;
 			tool.name = "click_element";
-			tool.description = "Simulate a mouse click on an element by ID. Injects mouse move, button down, and button up through the RmlUI context for realistic event processing.";
-			tool.inputSchema.addProperty("id", "string", "Element ID to click", true);
+			tool.description = "Simulate a mouse click on an element by ID or CSS selector. Injects mouse move, button down, and button up through the RmlUI context.";
+			tool.inputSchema.addProperty("id", "string", "Element ID to click", false);
+			tool.inputSchema.addProperty("selector", "string", "CSS selector to find the element (e.g. '.menuitem', 'div.active'). Uses first match.", false);
 			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
 			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
-				const auto id = _params.get("id").getString().toStdString();
+				const auto id = _params.hasProperty("id") ? _params.get("id").getString().toStdString() : std::string();
+				const auto selector = _params.hasProperty("selector") ? _params.get("selector").getString().toStdString() : std::string();
 				const int button = parseMouseButton(_params);
 				const int mods = parseModifiers(_params);
+
+				if (id.empty() && selector.empty())
+					throw std::runtime_error("Either 'id' or 'selector' must be provided");
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
 					auto ui = RmlUiAccess::acquire(_processor);
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
-					auto* elem = ui.document->GetElementById(id);
+					Rml::Element* elem = nullptr;
+					std::string elemDesc;
+
+					if (!id.empty())
+					{
+						elem = ui.document->GetElementById(id);
+						elemDesc = id;
+					}
+					else
+					{
+						elem = ui.document->QuerySelector(selector);
+						elemDesc = selector;
+					}
+
 					if (!elem)
-						throw std::runtime_error("Element not found: " + id);
+						throw std::runtime_error("Element not found: " + elemDesc);
 
 					const auto [cx, cy] = getElementCenter(elem);
 
@@ -463,7 +588,13 @@ namespace jucePluginEditorLib
 
 					auto result = mcpServer::JsonValue::object();
 					result.set("success", mcpServer::JsonValue::fromBool(true));
-					result.set("element", mcpServer::JsonValue::fromString(id));
+					result.set("element", mcpServer::JsonValue::fromString(elemDesc));
+					const auto& elemId = elem->GetId();
+					if (!elemId.empty() && elemId != elemDesc)
+						result.set("id", mcpServer::JsonValue::fromString(elemId));
+					const auto text = getTextContent(elem);
+					if (!text.empty())
+						result.set("text", mcpServer::JsonValue::fromString(text));
 					result.set("x", mcpServer::JsonValue::fromInt(cx));
 					result.set("y", mcpServer::JsonValue::fromInt(cy));
 					return result;
