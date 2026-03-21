@@ -17,11 +17,15 @@ When a Gearmulator plugin is loaded in a DAW, it starts an MCP server on a local
 
 ### Enabling the MCP Server
 
-The MCP server is enabled by default. To disable it at build time, set the CMake option:
+The MCP server is **disabled by default**. To enable it:
 
-```
--Dgearmulator_BUILD_MCP_SERVER=OFF
-```
+1. Open the plugin editor window
+2. Go to **Settings** → **Skins** tab
+3. Under **Developer Options**, check **Enable MCP Server (AI remote control)**
+
+The server starts immediately when enabled and stops when disabled. The setting is persisted across sessions — you only need to toggle it once.
+
+> **Note:** All plugin instances share the same config file, so enabling it once enables it for all future instances of the same plugin.
 
 ### Connecting
 

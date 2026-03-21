@@ -1,5 +1,3 @@
-#ifdef GEARMULATOR_BUILD_MCP_SERVER
-
 #include "mcpDomTools.h"
 
 #include "pluginEditor.h"
@@ -943,5 +941,3 @@ namespace jucePluginEditorLib
 		}
 	}
 }
-
-#endif // GEARMULATOR_BUILD_MCP_SERVER

@@ -7,12 +7,10 @@
 
 #include "synthLib/os.h"
 
-#ifdef GEARMULATOR_BUILD_MCP_SERVER
 #include "mcpServerLib/mcpPluginServer.h"
 #include "mcpDomTools.h"
 #include "mcpPatchManagerTools.h"
 #include "networkLib/logging.h"
-#endif
 
 #ifdef ZYNTHIAN
 #include "dsp56kBase/logging.h"
@@ -60,35 +58,13 @@ namespace jucePluginEditorLib
 #endif
 		savePluginLoadPath();
 
-#ifdef GEARMULATOR_BUILD_MCP_SERVER
-		try
-		{
-			m_mcpServer = std::make_unique<mcpServer::McpPluginServer>(*this);
-			registerDomTools(m_mcpServer->getServer(), *this);
-			registerPatchManagerTools(m_mcpServer->getServer(), *this);
-			if (m_mcpServer->start())
-			{
-				LOGNET(networkLib::LogLevel::Info, "MCP server started on port " << m_mcpServer->getPort() << " for plugin " << _properties.name);
-			}
-			else
-			{
-				LOGNET(networkLib::LogLevel::Warning, "Failed to start MCP server for plugin " << _properties.name);
-				m_mcpServer.reset();
-			}
-		}
-		catch (const std::exception& e)
-		{
-			LOGNET(networkLib::LogLevel::Warning, "MCP server creation failed: " << e.what());
-			m_mcpServer.reset();
-		}
-#endif
+		if (m_config.getBoolValue("enableMcpServer", false))
+			startMcpServer();
 	}
 
 	Processor::~Processor()
 	{
-#ifdef GEARMULATOR_BUILD_MCP_SERVER
-		m_mcpServer.reset();
-#endif
+		stopMcpServer();
 		assert(!m_editorState && "call destroyEditorState in destructor of derived class");
 	}
 
@@ -228,5 +204,49 @@ namespace jucePluginEditorLib
 			return newFile;
 		}
 		return newFile;
+	}
+
+	void Processor::startMcpServer()
+	{
+		if (m_mcpServer)
+			return;
+
+		try
+		{
+			m_mcpServer = std::make_unique<mcpServer::McpPluginServer>(*this);
+			registerDomTools(m_mcpServer->getServer(), *this);
+			registerPatchManagerTools(m_mcpServer->getServer(), *this);
+			if (m_mcpServer->start())
+			{
+				LOGNET(networkLib::LogLevel::Info, "MCP server started on port " << m_mcpServer->getPort() << " for plugin " << getProperties().name);
+			}
+			else
+			{
+				LOGNET(networkLib::LogLevel::Warning, "Failed to start MCP server for plugin " << getProperties().name);
+				m_mcpServer.reset();
+			}
+		}
+		catch (const std::exception& e)
+		{
+			LOGNET(networkLib::LogLevel::Warning, "MCP server creation failed: " << e.what());
+			m_mcpServer.reset();
+		}
+	}
+
+	void Processor::stopMcpServer()
+	{
+		if (m_mcpServer)
+		{
+			LOGNET(networkLib::LogLevel::Info, "MCP server stopped for plugin " << getProperties().name);
+			m_mcpServer.reset();
+		}
+	}
+
+	void Processor::setMcpServerEnabled(const bool _enabled)
+	{
+		if (_enabled)
+			startMcpServer();
+		else
+			stopMcpServer();
 	}
 }
