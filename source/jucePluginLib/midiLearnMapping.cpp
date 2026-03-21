@@ -30,6 +30,10 @@ namespace pluginLib
 	{
 		const auto statusByte = static_cast<synthLib::MidiStatusByte>(_event.a & 0xf0);
 		const auto eventType = midiStatusToType(statusByte);
+
+		if (eventType == Type::Invalid)
+			return false;
+
 		const auto eventChannel = getChannel(_event);
 		const auto eventController = getController(_event);
 
@@ -155,7 +159,7 @@ namespace pluginLib
 		case synthLib::M_POLYPRESSURE: return Type::PolyPressure;
 		case synthLib::M_AFTERTOUCH: return Type::ChannelPressure;
 		case synthLib::M_PITCHBEND: return Type::PitchBend;
-		default: return Type::ControlChange;
+		default: return Type::Invalid;
 		}
 	}
 
