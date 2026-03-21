@@ -6,6 +6,8 @@
 #include <memory>
 #include <string>
 
+#include "synthLib/midiTypes.h"
+
 namespace pluginLib
 {
 	class Controller;
@@ -36,6 +38,8 @@ namespace mcpServer
 		void registerMidiTools();
 		void registerStateTools();
 		void registerDeviceInfoTools();
+
+		static synthLib::MidiEventSource parseMidiSource(const JsonValue& _params);
 
 		pluginLib::Processor& m_processor;
 		McpServer m_server;

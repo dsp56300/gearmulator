@@ -289,6 +289,19 @@ namespace mcpServer
 		}
 	}
 
+	synthLib::MidiEventSource McpPluginServer::parseMidiSource(const JsonValue& _params)
+	{
+		if (_params.hasProperty("source"))
+		{
+			const auto src = _params.get("source").getString();
+			if (src == "host")
+				return synthLib::MidiEventSource::Host;
+			if (src == "physical")
+				return synthLib::MidiEventSource::Physical;
+		}
+		return synthLib::MidiEventSource::Editor;
+	}
+
 	void McpPluginServer::registerMidiTools()
 	{
 		// send_midi
@@ -299,9 +312,10 @@ namespace mcpServer
 			tool.inputSchema.addIntProperty("status", "MIDI status byte (e.g. 0x90 for note on)", true, 0, 255);
 			tool.inputSchema.addIntProperty("data1", "First data byte", true, 0, 127);
 			tool.inputSchema.addIntProperty("data2", "Second data byte", false, 0, 127);
+			tool.inputSchema.addProperty("source", "string", "MIDI source: 'editor' (default), 'host', 'physical'", false);
 			tool.handler = [this](const JsonValue& _params) -> JsonValue
 			{
-				synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
+				synthLib::SMidiEvent ev(parseMidiSource(_params));
 				ev.a = static_cast<uint8_t>(_params.get("status").getInt());
 				ev.b = static_cast<uint8_t>(_params.get("data1").getInt());
 				ev.c = _params.hasProperty("data2") ? static_cast<uint8_t>(_params.get("data2").getInt()) : static_cast<uint8_t>(0);
@@ -324,6 +338,7 @@ namespace mcpServer
 			tool.inputSchema.addIntProperty("velocity", "Note velocity (1-127)", false, 1, 127);
 			tool.inputSchema.addIntProperty("channel", "MIDI channel (0-15)", false, 0, 15);
 			tool.inputSchema.addIntProperty("duration_ms", "Note duration in milliseconds", false, 1, 10000);
+			tool.inputSchema.addProperty("source", "string", "MIDI source: 'editor' (default), 'host', 'physical'", false);
 			tool.handler = [this](const JsonValue& _params) -> JsonValue
 			{
 				const uint8_t note = static_cast<uint8_t>(_params.get("note").getInt());
@@ -333,9 +348,10 @@ namespace mcpServer
 					? static_cast<uint8_t>(_params.get("channel").getInt()) : static_cast<uint8_t>(0);
 				const int durationMs = _params.hasProperty("duration_ms")
 					? _params.get("duration_ms").getInt() : 500;
+				const auto source = parseMidiSource(_params);
 
 				// Note on
-				synthLib::SMidiEvent noteOn(synthLib::MidiEventSource::Editor);
+				synthLib::SMidiEvent noteOn(source);
 				noteOn.a = static_cast<uint8_t>(0x90 | (channel & 0x0f));
 				noteOn.b = note;
 				noteOn.c = velocity;
@@ -345,7 +361,7 @@ namespace mcpServer
 				std::this_thread::sleep_for(std::chrono::milliseconds(durationMs));
 
 				// Note off
-				synthLib::SMidiEvent noteOff(synthLib::MidiEventSource::Editor);
+				synthLib::SMidiEvent noteOff(source);
 				noteOff.a = static_cast<uint8_t>(0x80 | (channel & 0x0f));
 				noteOff.b = note;
 				noteOff.c = 0;
