@@ -170,6 +170,7 @@ Send a raw MIDI message.
 | `status` | integer | yes | MIDI status byte (0-255) |
 | `data1` | integer | yes | First data byte (0-127) |
 | `data2` | integer | no | Second data byte (0-127, default: 0) |
+| `source` | string | no | MIDI source: `"editor"` (default), `"host"`, or `"physical"` |
 
 #### `send_note`
 
@@ -181,6 +182,9 @@ Send a note on, wait for a duration, then send note off.
 | `velocity` | integer | no | Note velocity (0-127, default: 100) |
 | `channel` | integer | no | MIDI channel (0-15, default: 0) |
 | `duration_ms` | integer | no | Note duration in milliseconds (default: 500) |
+| `source` | string | no | MIDI source: `"editor"` (default), `"host"`, or `"physical"` |
+
+> **Tip:** Use `"host"` or `"physical"` source when testing MIDI Learn, which only processes Host and Physical sources by default.
 
 #### `send_sysex`
 
