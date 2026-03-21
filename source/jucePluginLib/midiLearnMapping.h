@@ -12,6 +12,7 @@ namespace pluginLib
 	{
 		enum class Type
 		{
+			Invalid,
 			ControlChange,
 			PolyPressure,
 			ChannelPressure,
