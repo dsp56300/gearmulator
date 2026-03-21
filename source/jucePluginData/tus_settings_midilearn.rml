@@ -27,6 +27,7 @@
 			<tr class="settings-tr settings-tr-headline">
 				<td class="ml-col-type">Type</td>
 				<td class="ml-col-channel">Channel</td>
+				<td class="ml-col-part">Part</td>
 				<td class="ml-col-controller">Controller</td>
 				<td class="ml-col-mode">Mode</td>
 				<td class="ml-col-parameter">Parameter</td>
@@ -34,7 +35,16 @@
 			</tr>
 			<tr id="mappingRow" class="settings-tr ml-tr">
 				<td id="type" class="ml-col-type">CC</td>
-				<td id="channel" class="ml-col-channel">1</td>
+				<td class="ml-col-channel">
+					<combo id="channelCombo" class="settings-combo-small settings-combo-channel">
+						<combotext>All</combotext>
+					</combo>
+				</td>
+				<td class="ml-col-part">
+					<combo id="partCombo" class="settings-combo-small settings-combo-channel">
+						<combotext>Auto</combotext>
+					</combo>
+				</td>
 				<td id="controller" class="ml-col-controller">74</td>
 				<td class="ml-col-mode">
 					<combo id="modeCombo" class="settings-combo-small">

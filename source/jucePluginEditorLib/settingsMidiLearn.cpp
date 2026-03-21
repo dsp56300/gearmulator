@@ -2,6 +2,7 @@
 
 #include "pluginProcessor.h"
 #include "baseLib/filesystem.h"
+#include "jucePluginLib/controller.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
@@ -10,6 +11,7 @@
 namespace jucePluginEditorLib
 {
 	static constexpr const char* kCurrentPresetName = "Current";
+	static constexpr const char* kDefaultPresetFileName = "__default";
 
 	SettingsMidiLearn::SettingsMidiLearn(Processor& _processor)
 		: SettingsPlugin(_processor)
@@ -327,6 +329,84 @@ namespace jucePluginEditorLib
 		}
 	}
 
+	void SettingsMidiLearn::onChannelChanged(size_t _mappingIndex, int _newChannelIndex)
+	{
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		auto& preset = const_cast<pluginLib::MidiLearnPreset&>(translator->getPreset());
+		auto& mappings = preset.getMappings();
+		
+		if (_mappingIndex >= mappings.size())
+			return;
+
+		// Index 0 = All, 1-16 = specific channel (stored as 0-15)
+		if (_newChannelIndex < 0 || _newChannelIndex > 16)
+			return;
+
+		auto& mapping = mappings[_mappingIndex];
+		mapping.channel = _newChannelIndex == 0
+			? pluginLib::MidiLearnMapping::AllChannels
+			: static_cast<uint8_t>(_newChannelIndex - 1);
+
+		// Save the preset
+		const juce::String presetName(preset.getName());
+		if (m_learnManager.savePreset(presetName, preset))
+		{
+			translator->setPreset(preset);
+			if (isCurrentPresetSelected())
+				m_originalPreset = preset;
+		}
+		else
+		{
+			genericUI::MessageBox::showOk(
+				genericUI::MessageBox::Icon::Warning,
+				m_processor.getProductName(),
+				"Failed to save channel change.");
+		}
+	}
+
+	void SettingsMidiLearn::onPartChanged(size_t _mappingIndex, int _newPartIndex)
+	{
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		auto& preset = const_cast<pluginLib::MidiLearnPreset&>(translator->getPreset());
+		auto& mappings = preset.getMappings();
+
+		if (_mappingIndex >= mappings.size())
+			return;
+
+		const auto partCount = m_processor.getController().getPartCount();
+
+		// Index 0 = Auto, 1-N = specific part (stored as 0-based)
+		if (_newPartIndex < 0 || _newPartIndex > partCount)
+			return;
+
+		auto& mapping = mappings[_mappingIndex];
+		mapping.part = _newPartIndex == 0
+			? pluginLib::MidiLearnMapping::AutoPart
+			: static_cast<uint8_t>(_newPartIndex - 1);
+
+		// Save the preset
+		const juce::String presetName(preset.getName());
+		if (m_learnManager.savePreset(presetName, preset))
+		{
+			translator->setPreset(preset);
+			if (isCurrentPresetSelected())
+				m_originalPreset = preset;
+		}
+		else
+		{
+			genericUI::MessageBox::showOk(
+				genericUI::MessageBox::Icon::Warning,
+				m_processor.getProductName(),
+				"Failed to save part change.");
+		}
+	}
+
 	void SettingsMidiLearn::initPresetList()
 	{
 		m_presetNames.clear();
@@ -336,10 +416,12 @@ namespace jucePluginEditorLib
 		m_presetNames.emplace_back(kCurrentPresetName);
 		m_presetList->addOption(kCurrentPresetName);
 
-		// Get all preset names
+		// Get all preset names (excluding internal __default)
 		auto jucePresets = m_learnManager.getPresetNames();
 		for (const auto& juceName : jucePresets)
 		{
+			if (juceName == kDefaultPresetFileName)
+				continue;
 			m_presetNames.push_back(juceName.toStdString());
 		}
 
@@ -409,7 +491,6 @@ namespace jucePluginEditorLib
 
 			// Fill in the mapping data
 			auto* typeCell = juceRmlUi::helper::findChild(row, "type");
-			auto* channelCell = juceRmlUi::helper::findChild(row, "channel");
 			auto* controllerCell = juceRmlUi::helper::findChild(row, "controller");
 			auto* parameterCell = juceRmlUi::helper::findChild(row, "parameter");
 			auto* removeButton = juceRmlUi::helper::findChild(row, "btRemove");
@@ -428,8 +509,24 @@ namespace jucePluginEditorLib
 				typeCell->SetInnerRML(typeStr);
 			}
 
-			if (channelCell)
-				channelCell->SetInnerRML(std::to_string(mapping.channel + 1));
+			// Create and populate channel combo box
+			if (auto* channelCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "channelCombo"))
+			{
+				channelCombo->addOption("All");
+				for (int ch = 1; ch <= 16; ++ch)
+					channelCombo->addOption(std::to_string(ch));
+
+				// Set current channel: AllChannels → index 0 ("All"), specific channel → index channel+1
+				const int channelIndex = mapping.channel == pluginLib::MidiLearnMapping::AllChannels
+					? 0
+					: mapping.channel + 1;
+				channelCombo->setSelectedIndex(channelIndex, false);
+
+				channelCombo->onValueChanged.addListener([this, i](float _value)
+				{
+					onChannelChanged(i, static_cast<int>(_value));
+				});
+			}
 
 			if (controllerCell)
 			{
@@ -457,6 +554,26 @@ namespace jucePluginEditorLib
 				modeCombo->onValueChanged.addListener([this, i](float _value)
 				{
 					onModeChanged(i, static_cast<int>(_value));
+				});
+			}
+
+			// Create and populate part combo box
+			if (auto* partCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "partCombo"))
+			{
+				partCombo->addOption("Auto");
+				const auto partCount = m_processor.getController().getPartCount();
+				for (uint8_t p = 0; p < partCount; ++p)
+					partCombo->addOption(std::to_string(p + 1));
+
+				// Set current part: AutoPart → index 0 ("Auto"), specific part → index part+1
+				const int partIndex = mapping.part == pluginLib::MidiLearnMapping::AutoPart
+					? 0
+					: mapping.part + 1;
+				partCombo->setSelectedIndex(partIndex, false);
+
+				partCombo->onValueChanged.addListener([this, i](float _value)
+				{
+					onPartChanged(i, static_cast<int>(_value));
 				});
 			}
 

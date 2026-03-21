@@ -133,6 +133,7 @@ namespace pluginLib
 
 			if (a.type != b.type ||
 			    a.channel != b.channel ||
+			    a.part != b.part ||
 			    a.controller != b.controller ||
 			    a.paramName != b.paramName ||
 			    a.mode != b.mode ||

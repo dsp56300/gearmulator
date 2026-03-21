@@ -48,6 +48,7 @@ namespace pluginLib
 		std::function<void(const MidiLearnMapping&)> onMappingLearned;
 		std::function<void(size_t, size_t)> onLearningProgress;
 		std::function<void(synthLib::MidiEventSource, const synthLib::SMidiEvent&)> onSendMidiOutput;
+		std::function<void()> onPresetChanged;
 
 		// State persistence
 		void saveChunkData(baseLib::BinaryStream& _stream) const;
