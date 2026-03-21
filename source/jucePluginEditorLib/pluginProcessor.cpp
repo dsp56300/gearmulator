@@ -10,6 +10,7 @@
 #ifdef GEARMULATOR_BUILD_MCP_SERVER
 #include "mcpServerLib/mcpPluginServer.h"
 #include "mcpDomTools.h"
+#include "mcpPatchManagerTools.h"
 #include "networkLib/logging.h"
 #endif
 
@@ -64,6 +65,7 @@ namespace jucePluginEditorLib
 		{
 			m_mcpServer = std::make_unique<mcpServer::McpPluginServer>(*this);
 			registerDomTools(m_mcpServer->getServer(), *this);
+			registerPatchManagerTools(m_mcpServer->getServer(), *this);
 			if (m_mcpServer->start())
 			{
 				LOGNET(networkLib::LogLevel::Info, "MCP server started on port " << m_mcpServer->getPort() << " for plugin " << _properties.name);

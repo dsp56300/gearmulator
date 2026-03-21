@@ -9,6 +9,7 @@ When a Gearmulator plugin is loaded in a DAW, it starts an MCP server on a local
 - Read and write synthesizer parameters
 - Send MIDI messages (notes, program changes, SysEx)
 - Save and load device state
+- Browse, search, load, save, and rename presets via the patch manager
 - Inspect and interact with the plugin UI (DOM tree, clicks, key presses)
 - Run automated tests
 
@@ -395,6 +396,103 @@ Inject text input into the currently focused element, character by character.
 
 ---
 
+### Patch Manager
+
+These tools interact with the patch manager database for browsing, loading, saving, and renaming presets. They require the plugin editor window to be open.
+
+#### `get_current_preset`
+
+Get the currently loaded preset for a part.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `part` | integer | no | Part number (default: 0) |
+
+Returns name, program, bank, data source, source type, tags, and selection status.
+
+#### `list_data_sources`
+
+List available data sources (ROM banks, folders, local storage).
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `type` | string | no | Filter by type: `rom`, `folder`, `file`, `localstorage` |
+
+Returns an array of data source objects with `name`, `type`, and `patchCount`.
+
+#### `search_presets`
+
+Search for presets by name, data source, source type, or category.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | no | Substring to search for (case-insensitive) |
+| `dataSource` | string | no | Data source name to search within |
+| `sourceType` | string | no | Filter by type: `rom`, `folder`, `file`, `localstorage` |
+| `category` | string | no | Filter by category tag |
+
+Returns a `searchHandle` (used with `get_search_results` and `load_preset`), `resultCount`, and `state`.
+
+#### `get_search_results`
+
+Get the results from a previous search.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `searchHandle` | integer | yes | Search handle from `search_presets` |
+| `offset` | integer | no | Starting index (default: 0) |
+| `limit` | integer | no | Maximum results to return (default: 50) |
+
+Returns an array of preset objects with `name`, `program`, `bank`, `dataSource`, `sourceType`, `tags`, and `index`.
+
+#### `load_preset`
+
+Load a preset from search results by index.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `searchHandle` | integer | yes | Search handle from `search_presets` |
+| `presetIndex` | integer | yes | Index in the search results |
+| `part` | integer | no | Part number to load into (default: 0) |
+
+#### `load_preset_by_name`
+
+Search for a preset by name and load the first match.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | yes | Preset name to search for (case-insensitive substring) |
+| `part` | integer | no | Part number to load into (default: 0) |
+
+#### `select_next_preset` / `select_prev_preset`
+
+Navigate to the next or previous preset in the current search results.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `part` | integer | no | Part number (default: 0) |
+
+#### `save_preset`
+
+Save the current preset to a local storage data source.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | no | Name for the saved preset |
+| `dataSource` | string | yes | Local storage data source name |
+| `part` | integer | no | Part number (default: 0) |
+
+#### `rename_preset`
+
+Rename the currently loaded preset (must be in local storage).
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | yes | New name for the preset |
+| `part` | integer | no | Part number (default: 0) |
+
+---
+
 ## Examples
 
 ### Read a parameter value
@@ -503,6 +601,32 @@ Inject text input into the currently focused element, character by character.
 }
 ```
 
+### Search and load a preset
+
+```json
+{
+  "jsonrpc": "2.0", "id": 9,
+  "method": "tools/call",
+  "params": {
+    "name": "load_preset_by_name",
+    "arguments": { "name": "Carpets JS", "part": 0 }
+  }
+}
+```
+
+### Save a preset to local storage
+
+```json
+{
+  "jsonrpc": "2.0", "id": 10,
+  "method": "tools/call",
+  "params": {
+    "name": "save_preset",
+    "arguments": { "dataSource": "My Patches", "part": 0 }
+  }
+}
+```
+
 ## Architecture
 
 ```
@@ -544,5 +668,6 @@ Inject text input into the currently focused element, character by character.
 ## Limitations
 
 - DOM and UI input tools require the plugin editor window to be open. They return a clear error if the window is closed.
+- Patch manager tools require the plugin editor window to be open (the patch manager is initialized with the editor).
 - The discovery file may contain stale entries if a plugin crashes without cleanup. Entries include the process ID (`pid`) so clients can verify liveness.
 - Maximum of 100 simultaneous plugin instances (ports 13710–13809).
