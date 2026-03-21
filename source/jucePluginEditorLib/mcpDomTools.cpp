@@ -14,9 +14,12 @@
 
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/Context.h"
+#include "RmlUi/Core/Input.h"
 
 #include <juce_events/juce_events.h>
 #include <future>
+#include <thread>
 
 namespace jucePluginEditorLib
 {
@@ -117,6 +120,114 @@ namespace jucePluginEditorLib
 				return nullptr;
 			return editorState->getEditor();
 		}
+
+		int parseMouseButton(const mcpServer::JsonValue& _params)
+		{
+			if (!_params.isObject() || !_params.hasProperty("button"))
+				return 0; // left
+
+			const auto btn = _params.get("button").getString().toStdString();
+			if (btn == "right")  return 1;
+			if (btn == "middle") return 2;
+			return 0; // left
+		}
+
+		int parseModifiers(const mcpServer::JsonValue& _params)
+		{
+			int mods = 0;
+			if (!_params.isObject() || !_params.hasProperty("modifiers"))
+				return mods;
+
+			const auto m = _params.get("modifiers");
+			if (m.isObject())
+			{
+				if (m.hasProperty("ctrl") && m.get("ctrl").getBool())   mods |= Rml::Input::KM_CTRL;
+				if (m.hasProperty("shift") && m.get("shift").getBool()) mods |= Rml::Input::KM_SHIFT;
+				if (m.hasProperty("alt") && m.get("alt").getBool())     mods |= Rml::Input::KM_ALT;
+				if (m.hasProperty("meta") && m.get("meta").getBool())   mods |= Rml::Input::KM_META;
+			}
+			return mods;
+		}
+
+		std::pair<int, int> getElementCenter(Rml::Element* _elem)
+		{
+			const auto offset = _elem->GetAbsoluteOffset(Rml::BoxArea::Border);
+			const auto size = _elem->GetBox().GetSize(Rml::BoxArea::Border);
+			return {
+				static_cast<int>(offset.x + size.x * 0.5f),
+				static_cast<int>(offset.y + size.y * 0.5f)
+			};
+		}
+
+		Rml::Input::KeyIdentifier parseKeyName(const std::string& _name)
+		{
+			if (_name == "space")    return Rml::Input::KI_SPACE;
+			if (_name == "return" || _name == "enter") return Rml::Input::KI_RETURN;
+			if (_name == "escape" || _name == "esc")   return Rml::Input::KI_ESCAPE;
+			if (_name == "backspace") return Rml::Input::KI_BACK;
+			if (_name == "delete")   return Rml::Input::KI_DELETE;
+			if (_name == "insert")   return Rml::Input::KI_INSERT;
+			if (_name == "tab")      return Rml::Input::KI_TAB;
+			if (_name == "left")     return Rml::Input::KI_LEFT;
+			if (_name == "right")    return Rml::Input::KI_RIGHT;
+			if (_name == "up")       return Rml::Input::KI_UP;
+			if (_name == "down")     return Rml::Input::KI_DOWN;
+			if (_name == "home")     return Rml::Input::KI_HOME;
+			if (_name == "end")      return Rml::Input::KI_END;
+			if (_name == "pageup")   return Rml::Input::KI_PRIOR;
+			if (_name == "pagedown") return Rml::Input::KI_NEXT;
+
+			// F-keys
+			if (_name == "f1")  return Rml::Input::KI_F1;
+			if (_name == "f2")  return Rml::Input::KI_F2;
+			if (_name == "f3")  return Rml::Input::KI_F3;
+			if (_name == "f4")  return Rml::Input::KI_F4;
+			if (_name == "f5")  return Rml::Input::KI_F5;
+			if (_name == "f6")  return Rml::Input::KI_F6;
+			if (_name == "f7")  return Rml::Input::KI_F7;
+			if (_name == "f8")  return Rml::Input::KI_F8;
+			if (_name == "f9")  return Rml::Input::KI_F9;
+			if (_name == "f10") return Rml::Input::KI_F10;
+			if (_name == "f11") return Rml::Input::KI_F11;
+			if (_name == "f12") return Rml::Input::KI_F12;
+
+			// Single letters a-z
+			if (_name.size() == 1)
+			{
+				const char c = _name[0];
+				if (c >= 'a' && c <= 'z') return static_cast<Rml::Input::KeyIdentifier>(Rml::Input::KI_A + (c - 'a'));
+				if (c >= 'A' && c <= 'Z') return static_cast<Rml::Input::KeyIdentifier>(Rml::Input::KI_A + (c - 'A'));
+				if (c >= '0' && c <= '9') return static_cast<Rml::Input::KeyIdentifier>(Rml::Input::KI_0 + (c - '0'));
+			}
+
+			return Rml::Input::KI_UNKNOWN;
+		}
+
+		struct RmlUiAccess
+		{
+			Editor* editor = nullptr;
+			juceRmlUi::RmlComponent* rmlComp = nullptr;
+			Rml::Context* context = nullptr;
+			Rml::ElementDocument* document = nullptr;
+
+			static RmlUiAccess acquire(Processor& _processor)
+			{
+				RmlUiAccess a;
+				a.editor = getEditor(_processor);
+				if (!a.editor)
+					throw std::runtime_error("Plugin editor is not open. Open the plugin window first.");
+				a.rmlComp = a.editor->getRmlComponent();
+				if (!a.rmlComp)
+					throw std::runtime_error("RmlUI component not available");
+				a.context = a.rmlComp->getContext();
+				if (!a.context)
+					throw std::runtime_error("RmlUI context not available");
+				a.document = a.editor->getDocument();
+				if (!a.document)
+					throw std::runtime_error("No RmlUI document loaded");
+				return a;
+			}
+		};
 	}
 
 	void registerDomTools(mcpServer::McpServer& _server, Processor& _processor)
@@ -324,37 +435,37 @@ namespace jucePluginEditorLib
 		{
 			mcpServer::ToolDef tool;
 			tool.name = "click_element";
-			tool.description = "Simulate a click on an element by ID";
+			tool.description = "Simulate a mouse click on an element by ID. Injects mouse move, button down, and button up through the RmlUI context for realistic event processing.";
 			tool.inputSchema.addProperty("id", "string", "Element ID to click", true);
+			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
+			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
 			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const auto id = _params.get("id").getString().toStdString();
+				const int button = parseMouseButton(_params);
+				const int mods = parseModifiers(_params);
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto* editor = getEditor(_processor);
-					if (!editor)
-						throw std::runtime_error("Plugin editor is not open");
+					auto ui = RmlUiAccess::acquire(_processor);
+					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
-					auto* rmlComp = editor->getRmlComponent();
-					if (!rmlComp)
-						throw std::runtime_error("RmlUI component not available");
-
-					juceRmlUi::RmlInterfaces::ScopedAccess access(*rmlComp);
-
-					auto* doc = editor->getDocument();
-					if (!doc)
-						throw std::runtime_error("No RmlUI document loaded");
-
-					auto* elem = doc->GetElementById(id);
+					auto* elem = ui.document->GetElementById(id);
 					if (!elem)
 						throw std::runtime_error("Element not found: " + id);
 
-					elem->Click();
+					const auto [cx, cy] = getElementCenter(elem);
+
+					ui.context->ProcessMouseMove(cx, cy, mods);
+					ui.context->ProcessMouseButtonDown(button, mods);
+					ui.context->ProcessMouseButtonUp(button, mods);
+					ui.rmlComp->enqueueUpdate();
 
 					auto result = mcpServer::JsonValue::object();
 					result.set("success", mcpServer::JsonValue::fromBool(true));
 					result.set("element", mcpServer::JsonValue::fromString(id));
+					result.set("x", mcpServer::JsonValue::fromInt(cx));
+					result.set("y", mcpServer::JsonValue::fromInt(cy));
 					return result;
 				});
 			};
@@ -399,6 +510,301 @@ namespace jucePluginEditorLib
 
 					auto result = mcpServer::JsonValue::object();
 					result.set("success", mcpServer::JsonValue::fromBool(true));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// mouse_move - move the mouse cursor to coordinates or an element's center
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "mouse_move";
+			tool.description = "Move the mouse cursor to specific coordinates or to the center of an element. Coordinates are in RmlUI document space.";
+			tool.inputSchema.addProperty("id", "string", "Element ID to move to (uses element center). Either 'id' or 'x'+'y' must be provided.", false);
+			tool.inputSchema.addIntProperty("x", "X coordinate in document space", false);
+			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", false);
+			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const int mods = parseModifiers(_params);
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+					int x, y;
+					if (_params.hasProperty("id"))
+					{
+						const auto id = _params.get("id").getString().toStdString();
+						auto* elem = ui.document->GetElementById(id);
+						if (!elem)
+							throw std::runtime_error("Element not found: " + id);
+						std::tie(x, y) = getElementCenter(elem);
+					}
+					else if (_params.hasProperty("x") && _params.hasProperty("y"))
+					{
+						x = _params.get("x").getInt();
+						y = _params.get("y").getInt();
+					}
+					else
+					{
+						throw std::runtime_error("Either 'id' or both 'x' and 'y' must be provided");
+					}
+
+					ui.context->ProcessMouseMove(x, y, mods);
+					ui.rmlComp->enqueueUpdate();
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("success", mcpServer::JsonValue::fromBool(true));
+					result.set("x", mcpServer::JsonValue::fromInt(x));
+					result.set("y", mcpServer::JsonValue::fromInt(y));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// mouse_click_at - click at specific coordinates
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "mouse_click_at";
+			tool.description = "Simulate a mouse click at specific coordinates. Injects mouse move, button down, and button up.";
+			tool.inputSchema.addIntProperty("x", "X coordinate in document space", true);
+			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", true);
+			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
+			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const int x = _params.get("x").getInt();
+				const int y = _params.get("y").getInt();
+				const int button = parseMouseButton(_params);
+				const int mods = parseModifiers(_params);
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+					ui.context->ProcessMouseMove(x, y, mods);
+					ui.context->ProcessMouseButtonDown(button, mods);
+					ui.context->ProcessMouseButtonUp(button, mods);
+					ui.rmlComp->enqueueUpdate();
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("success", mcpServer::JsonValue::fromBool(true));
+					result.set("x", mcpServer::JsonValue::fromInt(x));
+					result.set("y", mcpServer::JsonValue::fromInt(y));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// mouse_drag - drag from one position to another
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "mouse_drag";
+			tool.description = "Simulate a mouse drag from one position to another. Supports element IDs or coordinates for start/end. Generates intermediate mouse move events for smooth dragging.";
+			tool.inputSchema.addProperty("fromId", "string", "Element ID to start drag from (uses center)", false);
+			tool.inputSchema.addIntProperty("fromX", "Start X coordinate", false);
+			tool.inputSchema.addIntProperty("fromY", "Start Y coordinate", false);
+			tool.inputSchema.addProperty("toId", "string", "Element ID to drag to (uses center)", false);
+			tool.inputSchema.addIntProperty("toX", "End X coordinate", false);
+			tool.inputSchema.addIntProperty("toY", "End Y coordinate", false);
+			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
+			tool.inputSchema.addIntProperty("steps", "Number of intermediate move steps (default: 10)", false, 1, 100);
+			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const int button = parseMouseButton(_params);
+				const int mods = parseModifiers(_params);
+				const int steps = _params.hasProperty("steps") ? _params.get("steps").getInt() : 10;
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+					int fromX, fromY, toX, toY;
+
+					if (_params.hasProperty("fromId"))
+					{
+						auto* elem = ui.document->GetElementById(_params.get("fromId").getString().toStdString());
+						if (!elem) throw std::runtime_error("Start element not found: " + _params.get("fromId").getString().toStdString());
+						std::tie(fromX, fromY) = getElementCenter(elem);
+					}
+					else if (_params.hasProperty("fromX") && _params.hasProperty("fromY"))
+					{
+						fromX = _params.get("fromX").getInt();
+						fromY = _params.get("fromY").getInt();
+					}
+					else
+					{
+						throw std::runtime_error("Either 'fromId' or both 'fromX' and 'fromY' must be provided");
+					}
+
+					if (_params.hasProperty("toId"))
+					{
+						auto* elem = ui.document->GetElementById(_params.get("toId").getString().toStdString());
+						if (!elem) throw std::runtime_error("End element not found: " + _params.get("toId").getString().toStdString());
+						std::tie(toX, toY) = getElementCenter(elem);
+					}
+					else if (_params.hasProperty("toX") && _params.hasProperty("toY"))
+					{
+						toX = _params.get("toX").getInt();
+						toY = _params.get("toY").getInt();
+					}
+					else
+					{
+						throw std::runtime_error("Either 'toId' or both 'toX' and 'toY' must be provided");
+					}
+
+					// Move to start, press button
+					ui.context->ProcessMouseMove(fromX, fromY, mods);
+					ui.context->ProcessMouseButtonDown(button, mods);
+
+					// Generate intermediate drag moves
+					for (int i = 1; i <= steps; ++i)
+					{
+						const float t = static_cast<float>(i) / static_cast<float>(steps);
+						const int mx = fromX + static_cast<int>(static_cast<float>(toX - fromX) * t);
+						const int my = fromY + static_cast<int>(static_cast<float>(toY - fromY) * t);
+						ui.context->ProcessMouseMove(mx, my, mods);
+					}
+
+					// Release button
+					ui.context->ProcessMouseButtonUp(button, mods);
+					ui.rmlComp->enqueueUpdate();
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("success", mcpServer::JsonValue::fromBool(true));
+					result.set("fromX", mcpServer::JsonValue::fromInt(fromX));
+					result.set("fromY", mcpServer::JsonValue::fromInt(fromY));
+					result.set("toX", mcpServer::JsonValue::fromInt(toX));
+					result.set("toY", mcpServer::JsonValue::fromInt(toY));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// mouse_wheel - inject scroll wheel events
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "mouse_wheel";
+			tool.description = "Simulate mouse wheel scrolling at coordinates or on an element. Positive deltaY scrolls down, negative scrolls up.";
+			tool.inputSchema.addProperty("id", "string", "Element ID to scroll on (moves mouse to center first). Either 'id' or 'x'+'y' must be provided.", false);
+			tool.inputSchema.addIntProperty("x", "X coordinate to scroll at", false);
+			tool.inputSchema.addIntProperty("y", "Y coordinate to scroll at", false);
+			tool.inputSchema.addProperty("deltaX", "number", "Horizontal scroll delta (default: 0)", false);
+			tool.inputSchema.addProperty("deltaY", "number", "Vertical scroll delta (default: 0)", false);
+			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const int mods = parseModifiers(_params);
+				const auto deltaX = _params.hasProperty("deltaX") ? static_cast<float>(_params.get("deltaX").getDouble()) : 0.0f;
+				const auto deltaY = _params.hasProperty("deltaY") ? static_cast<float>(_params.get("deltaY").getDouble()) : 0.0f;
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+					int x, y;
+					if (_params.hasProperty("id"))
+					{
+						const auto id = _params.get("id").getString().toStdString();
+						auto* elem = ui.document->GetElementById(id);
+						if (!elem)
+							throw std::runtime_error("Element not found: " + id);
+						std::tie(x, y) = getElementCenter(elem);
+					}
+					else if (_params.hasProperty("x") && _params.hasProperty("y"))
+					{
+						x = _params.get("x").getInt();
+						y = _params.get("y").getInt();
+					}
+					else
+					{
+						throw std::runtime_error("Either 'id' or both 'x' and 'y' must be provided");
+					}
+
+					ui.context->ProcessMouseMove(x, y, mods);
+					ui.context->ProcessMouseWheel(Rml::Vector2f(deltaX, deltaY), mods);
+					ui.rmlComp->enqueueUpdate();
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("success", mcpServer::JsonValue::fromBool(true));
+					result.set("x", mcpServer::JsonValue::fromInt(x));
+					result.set("y", mcpServer::JsonValue::fromInt(y));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// send_key - inject keyboard events
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "send_key";
+			tool.description = "Simulate a key press, release, or press+release. Supported key names: a-z, 0-9, space, return/enter, escape/esc, backspace, delete, insert, tab, left, right, up, down, home, end, pageup, pagedown, f1-f12.";
+			tool.inputSchema.addProperty("key", "string", "Key name (e.g. 'space', 'return', 'a', 'f1', 'up')", true);
+			tool.inputSchema.addEnumProperty("action", "Key action (default: 'press' = down+up)", {"press", "down", "up"}, false);
+			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const auto keyName = _params.get("key").getString().toStdString();
+				const auto action = _params.hasProperty("action") ? _params.get("action").getString().toStdString() : std::string("press");
+				const int mods = parseModifiers(_params);
+
+				const auto keyId = parseKeyName(keyName);
+				if (keyId == Rml::Input::KI_UNKNOWN)
+					throw std::runtime_error("Unknown key name: " + keyName);
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+					if (action == "down" || action == "press")
+						ui.context->ProcessKeyDown(keyId, mods);
+					if (action == "up" || action == "press")
+						ui.context->ProcessKeyUp(keyId, mods);
+					ui.rmlComp->enqueueUpdate();
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("success", mcpServer::JsonValue::fromBool(true));
+					result.set("key", mcpServer::JsonValue::fromString(keyName));
+					result.set("action", mcpServer::JsonValue::fromString(action));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// send_text - inject text input
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "send_text";
+			tool.description = "Inject text input into the focused element, character by character. Use this for typing into text fields and inputs.";
+			tool.inputSchema.addProperty("text", "string", "Text to inject", true);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const auto text = _params.get("text").getString().toStdString();
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+					ui.context->ProcessTextInput(text);
+					ui.rmlComp->enqueueUpdate();
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("success", mcpServer::JsonValue::fromBool(true));
+					result.set("length", mcpServer::JsonValue::fromInt(static_cast<int>(text.size())));
 					return result;
 				});
 			};
