@@ -1,5 +1,12 @@
 Release Notes
 
+2.2.3:
+
+OsTIrus:
+
+- [Imp] Trancy skin: Visual polishing (oscillator, filter, LFO, FX panels,
+        filter routing icons, waveform shape buttons)
+
 2.2.2:
 
 Framework:
