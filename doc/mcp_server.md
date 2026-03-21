@@ -262,7 +262,7 @@ Get the RmlUI document DOM tree as JSON.
 | `maxDepth` | integer | no | Maximum tree depth (default: 5, range: 1-50) |
 | `rootId` | string | no | Element ID to use as root (default: document root) |
 
-Returns a nested JSON tree with `tag`, `id`, `class`, `attributes`, and `children` for each element.
+Returns a nested JSON tree with `tag`, `id`, `class`, `text` (inner text content), `box` ({x, y, w, h} position/size), `attributes`, and `children` for each element.
 
 #### `get_element`
 
@@ -276,12 +276,17 @@ Returns tag, id, class, attributes, box model (x, y, width, height), visibility,
 
 #### `find_elements`
 
-Find elements by tag name.
+Find elements by tag name or CSS selector. Returns text content and box position for each match.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `tag` | string | yes | Tag name to search for (e.g. `button`, `input`, `select`) |
+| `tag` | string | no* | Tag name to search for (e.g. `div`, `button`, `select`) |
+| `selector` | string | no* | CSS selector (e.g. `.menuitem`, `div.active`, `#panel > div`) |
 | `limit` | integer | no | Maximum results (default: 50, range: 1-500) |
+
+\* Either `tag` or `selector` must be provided.
+
+Each result includes: `index`, `tag`, `id` (if set), `class`, `text` (inner text content), `visible`, and `box` ({x, y, w, h}).
 
 #### `set_element_attribute`
 
@@ -301,13 +306,16 @@ These tools inject input events through the RmlUI context, identical to real use
 
 #### `click_element`
 
-Simulate a mouse click on an element by ID. Moves the cursor to the element's center, then injects mouse button down and up.
+Simulate a mouse click on an element by ID or CSS selector. Moves the cursor to the element's center, then injects mouse button down and up.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `id` | string | yes | Element ID to click |
+| `id` | string | no* | Element ID to click |
+| `selector` | string | no* | CSS selector (uses first match, e.g. `.menuitem`) |
 | `button` | string | no | `"left"` (default), `"right"`, or `"middle"` |
 | `modifiers` | object | no | `{ctrl, shift, alt, meta}` as booleans |
+
+\* Either `id` or `selector` must be provided.
 
 #### `mouse_move`
 
