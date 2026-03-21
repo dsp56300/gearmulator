@@ -71,6 +71,13 @@
 		<button id="ModWheelDest_5" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="ModWheelDest" valueOn="1" style="left: 1222dp; top: 1087dp; width: 70dp; height: 70dp;">
 			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
 		</button>
+		<button id="Program" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" style="left: 1391dp; top: 938dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		<button id="Performance" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1"  style="left: 1391dp; top: 975dp; width: 70dp; height: 70dp;">
+			<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 220dp; height: 50dp;"/>
+		</button>
+		
 		<button id="button_store" class="jucePos juceButton button_red" isToggle="0" style="left: 560dp; top: 1065dp; width: 99dp; height: 47dp;"/>
 		<button id="PresetNext" class="jucePos juceButton button_black" isToggle="0" style="left: 225dp; top: 910dp; width: 99dp; height: 47dp;"/>
 		<button id="PresetPrev" class="jucePos juceButton button_black" isToggle="0" style="left: 225dp; top: 957dp; width: 99dp; height: 47dp;"/>

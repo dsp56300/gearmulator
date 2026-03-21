@@ -12,6 +12,12 @@ JE8086:
 - [Fix] BUG-10068 Trancy skin: Arp speed parameter now matches front panel
         labels
 
+NodalRed2x:
+
+- [Fix] BUG-10113 Trancy skin: Added Program/Performance mode toggle. In
+        Program mode (default), loading a patch mutes other slots to prevent
+        hanging presets
+
 2.2.2:
 
 Framework:
