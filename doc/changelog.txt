@@ -7,6 +7,11 @@ OsTIrus:
 - [Imp] Trancy skin: Visual polishing (oscillator, filter, LFO, FX panels,
         filter routing icons, waveform shape buttons)
 
+JE8086:
+
+- [Fix] BUG-10068 Trancy skin: Arp speed parameter now matches front panel
+        labels
+
 2.2.2:
 
 Framework:
