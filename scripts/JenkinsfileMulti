@@ -7,6 +7,7 @@ pipeline {
 		booleanParam(name: 'Win', defaultValue: true, description: '') 
 		booleanParam(name: 'Mac', defaultValue: true, description: '')
 		choice(name: 'Branch', choices: ['main', 'dev'], description: '')
+		string(name: 'CustomBranch', defaultValue: '', description: 'Override branch (leave empty to use dropdown)')
 		booleanParam(name: 'FXPlugins', defaultValue: true, description: '')
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 		booleanParam(name: 'Deploy', defaultValue: false, description: '')
@@ -25,7 +26,8 @@ pipeline {
 		stage('Prepare') {
 			steps {
 				script {
-					currentBuild.displayName += " - ${params.Branch} -"
+					env.effectiveBranch = params.CustomBranch?.trim() ? params.CustomBranch.trim() : params.Branch
+					currentBuild.displayName += " - ${env.effectiveBranch} -"
 					   
 					env.childDisplayName = ""
 
@@ -107,7 +109,7 @@ def startBuildJob(label)
 	build job: 'dsp56300_main', parameters:
 	[
 		[$class: 'StringParameterValue', name: 'AgentLabel', value: "${label}"], 
-		[$class: 'StringParameterValue', name: 'Branch', value: params.Branch], 
+		[$class: 'StringParameterValue', name: 'Branch', value: env.effectiveBranch], 
 		[$class: 'StringParameterValue', name: 'Synths', value: "${env.synths}"], 
 		[$class: 'StringParameterValue', name: 'DisplayName', value: "${env.childDisplayName}"], 
 		[$class: 'BooleanParameterValue', name: 'Deploy', value: params.Deploy], 
