@@ -65,7 +65,8 @@ namespace baseLib
 
 		void invoke(const Ts& ..._args) const
 		{
-			for (const auto& it : m_listeners)
+			auto listeners = m_listeners; // needs to be copied to allow listeners to remove themselves while being invoked
+			for (const auto& it : listeners)
 				it.second(_args...);
 		}
 

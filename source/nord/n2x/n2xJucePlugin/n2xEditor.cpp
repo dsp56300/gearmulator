@@ -19,7 +19,9 @@
 
 #include "jucePluginEditorLib/midiPorts.h"
 
+#include "jucePluginLib/parameter.h"
 #include "jucePluginLib/pluginVersion.h"
+#include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemComboBox.h"
 
 #include "n2xLib/n2xdevice.h"
@@ -119,6 +121,24 @@ namespace n2xJucePlugin
 			const auto key = juceRmlUi::helper::getKeyModShift(_event);
 			getVmMap().setEnabled(key);
 		}, false);
+
+		m_btProgram = findChild<juceRmlUi::ElemButton>("Program", false);
+		m_btPerformance = findChild<juceRmlUi::ElemButton>("Performance", false);
+
+		if(m_btProgram && m_btPerformance)
+		{
+			setProgramMode(true);
+
+			juceRmlUi::EventListener::Add(m_btProgram, Rml::EventId::Click, [this](Rml::Event&)
+			{
+				setProgramMode(true);
+			});
+
+			juceRmlUi::EventListener::Add(m_btPerformance, Rml::EventId::Click, [this](Rml::Event&)
+			{
+				setProgramMode(false);
+			});
+		}
 	}
 
 	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
@@ -184,6 +204,24 @@ namespace n2xJucePlugin
 				getPatchManager()->setSelectedPatch(p, _patch);
 			}
 		}
+		else if(m_programMode)
+		{
+			// Defer MIDI channel muting until after the dump response is received,
+			// so the internal state is up-to-date before a multi dump is sent
+			const auto part = static_cast<uint8_t>(_part);
+			m_onProgramChangedForMute.set(m_controller.onProgramChanged, [this, part]()
+			{
+				constexpr const char* midiChParams[] = {"PerfMidiChannelA", "PerfMidiChannelB", "PerfMidiChannelC", "PerfMidiChannelD"};
+				for(uint8_t p = 0; p < 4; ++p)
+				{
+					if(p == part)
+						continue;
+					if(auto* param = m_controller.getParameter(midiChParams[p], 0))
+						param->setUnnormalizedValueNotifyingHost(16, pluginLib::Parameter::Origin::Ui);
+				}
+				m_onProgramChangedForMute.reset();
+			});
+		}
 
 		m_lcd->updatePatchName();
 	}
@@ -238,5 +276,15 @@ namespace n2xJucePlugin
 
 		if(const auto patch = source->getPatch(_patchKey))
 			setCurrentPatchName(_part, patch->getName());
+	}
+
+	void Editor::setProgramMode(const bool _programMode)
+	{
+		m_programMode = _programMode;
+
+		if(m_btProgram)
+			m_btProgram->setChecked(_programMode);
+		if(m_btPerformance)
+			m_btPerformance->setChecked(!_programMode);
 	}
 }
