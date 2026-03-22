@@ -17,6 +17,8 @@ NodalRed2x:
 - [Fix] BUG-10113 Trancy skin: Added Program/Performance mode toggle. In
         Program mode (default), loading a patch mutes other slots to prevent
         hanging presets
+- [Fix] BUG-10156 Trancy skin: Fix settings dialog rendering issues caused
+        by missing font size
 
 2.2.2:
 
