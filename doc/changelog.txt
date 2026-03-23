@@ -2,6 +2,11 @@ Release Notes
 
 2.2.3:
 
+Framework:
+
+- [Fix] Fix file drag and drop onto part buttons (patch name, part
+        slots) not accepting dropped .syx/.mid files
+
 OsTIrus:
 
 - [Imp] Trancy skin: Visual polishing (oscillator, filter, LFO, FX panels,
