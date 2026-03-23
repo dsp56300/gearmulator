@@ -41,6 +41,11 @@
 			<label>Enable RmlUi Debugger</label>
 		</div>
 		<settingsspacer1/>
+		<div id="btEnableMcpServer" class="settings-checkboxwithlabel">
+			<button id="button" class="settings-checkbox"/>
+			<label>Enable MCP Server (AI remote control)</label>
+		</div>
+		<settingsspacer1/>
 	</div>
 </body>
 </template>
