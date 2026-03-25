@@ -8,6 +8,9 @@ Framework:
         slots) not accepting dropped .syx/.mid files
 - [Fix] MIDI Learn: Feedback to host and physical MIDI ports was not
         working
+- [Fix] Fix crash on plugin shutdown when a physical MIDI port was
+        active and a MIDI event arrived during shutdown (common problem
+		for controllers that send MIDI clock)
 
 OsTIrus:
 

@@ -71,6 +71,8 @@ namespace pluginLib
 			return send(toJuceMidiMessage(_message));
 		}
 
+		void close();
+
 		static juce::MidiMessage toJuceMidiMessage(const synthLib::SMidiEvent& _e);
 
 		bool isMidiOutValid()

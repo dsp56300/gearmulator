@@ -57,6 +57,8 @@ namespace pluginLib
 
 	Processor::~Processor()
 	{
+		m_midiPorts.close();
+
 		destroyController();
 		m_plugin.reset();
 		m_device.reset();
