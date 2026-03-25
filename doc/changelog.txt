@@ -6,6 +6,8 @@ Framework:
 
 - [Fix] Fix file drag and drop onto part buttons (patch name, part
         slots) not accepting dropped .syx/.mid files
+- [Fix] MIDI Learn: Feedback to host and physical MIDI ports was not
+        working
 
 OsTIrus:
 

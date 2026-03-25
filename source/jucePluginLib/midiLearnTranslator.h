@@ -65,8 +65,8 @@ namespace pluginLib
 		// Parameter feedback
 		void subscribeToParameters();
 		void unsubscribeFromParameters();
-		void onParameterChanged(const std::string& _paramName, float _normalizedValue);
-		synthLib::SMidiEvent createFeedbackEvent(const MidiLearnMapping& _mapping, float _normalizedValue) const;
+		void onParameterChanged(const std::string& _paramName, float _normalizedValue, Parameter::Origin _origin);
+		synthLib::SMidiEvent createFeedbackEvent(const MidiLearnMapping& _mapping, float _normalizedValue, synthLib::MidiEventSource _source) const;
 
 		Controller& m_controller;
 		const ControllerMap& m_controllerMap;

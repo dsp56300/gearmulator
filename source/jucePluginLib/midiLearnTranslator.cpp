@@ -362,11 +362,13 @@ namespace pluginLib
 			const auto listenerId = param->onValueChanged.addListener(
 				[this, paramName = mapping.paramName](Parameter* _param)
 				{
+					const auto origin = _param->getChangeOrigin();
+
 					// Don't send feedback for MIDI-originated changes (avoid feedback loops)
-					if (_param->getChangeOrigin() == Parameter::Origin::Midi)
+					if (origin == Parameter::Origin::Midi)
 						return;
 
-					onParameterChanged(paramName, _param->getValue());
+					onParameterChanged(paramName, _param->getValue(), origin);
 				});
 
 			m_paramListenerIds.push_back(listenerId);
@@ -388,7 +390,7 @@ namespace pluginLib
 		m_paramListenerIds.clear();
 	}
 
-	void MidiLearnTranslator::onParameterChanged(const std::string& _paramName, float _normalizedValue)
+	void MidiLearnTranslator::onParameterChanged(const std::string& _paramName, float _normalizedValue, Parameter::Origin _origin)
 	{
 		// Find all mappings for this parameter
 		const auto mappings = m_preset.findMappingsByParam(_paramName);
@@ -399,7 +401,8 @@ namespace pluginLib
 				continue;
 
 			// Create the feedback MIDI event
-			const auto feedbackEvent = createFeedbackEvent(*mapping, _normalizedValue);
+			const auto source = Controller::parameterOriginToMidiEventSource(_origin);
+			const auto feedbackEvent = createFeedbackEvent(*mapping, _normalizedValue, source);
 
 			// Send to each enabled feedback target
 			if (!onSendMidiOutput)
@@ -419,7 +422,7 @@ namespace pluginLib
 		}
 	}
 
-	synthLib::SMidiEvent MidiLearnTranslator::createFeedbackEvent(const MidiLearnMapping& _mapping, float _normalizedValue) const
+	synthLib::SMidiEvent MidiLearnTranslator::createFeedbackEvent(const MidiLearnMapping& _mapping, float _normalizedValue, synthLib::MidiEventSource _source) const
 	{
 		// Always send absolute values for feedback (even for relative-mode mappings)
 		const uint8_t midiValue = static_cast<uint8_t>(std::clamp(_normalizedValue * 127.0f, 0.0f, 127.0f));
@@ -429,7 +432,7 @@ namespace pluginLib
 		const uint8_t statusWithChannel = statusByte | (feedbackChannel & 0x0f);
 
 		// Create the event based on message type
-		synthLib::SMidiEvent event(synthLib::MidiEventSource::Internal);
+		synthLib::SMidiEvent event(_source);
 		event.a = statusWithChannel;
 
 		switch (_mapping.type)

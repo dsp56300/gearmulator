@@ -79,6 +79,7 @@ namespace pluginLib
 		void saveChunkData(baseLib::BinaryStream& _s) const;
 
 		static Parameter::Origin midiEventSourceToParameterOrigin(synthLib::MidiEventSource _source);
+		static synthLib::MidiEventSource parameterOriginToMidiEventSource(Parameter::Origin _origin);
 
 		std::vector<uint8_t> getPartsForMidiEvent(const synthLib::SMidiEvent& _e)
 		{

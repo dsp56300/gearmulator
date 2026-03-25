@@ -2,6 +2,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include <mutex>
+
 #include "bypassBuffer.h"
 #include "controller.h"
 #include "midiLearnTranslator.h"
@@ -223,6 +225,8 @@ namespace pluginLib
 		std::vector<synthLib::SMidiEvent> m_midiOut;
 
 	private:
+		void addHostMidiFeedback(const synthLib::SMidiEvent& _event);
+
 		const Properties m_properties;
 		float m_outputGain = 1.0f;
 		float m_inputGain = 1.0f;
@@ -240,5 +244,9 @@ namespace pluginLib
 		std::string m_programName;
 		std::unique_ptr<MidiLearnTranslator> m_midiLearnTranslator;
 		ProgramChangeRouter m_programChangeRouter;
+
+		// Host MIDI feedback queue (filled from parameter listeners, drained in processBlock)
+		std::mutex m_hostFeedbackMutex;
+		std::vector<synthLib::SMidiEvent> m_hostFeedbackQueue;
 	};
 }
