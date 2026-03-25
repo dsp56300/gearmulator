@@ -600,27 +600,16 @@ namespace jucePluginEditorLib
 		if (!translator)
 			return;
 
-		// For now, we show feedback settings globally for all mappings
-		// (In future, could show per-mapping if we add a selection mechanism)
-		const auto& mappings = translator->getPreset().getMappings();
-		
-		// If no mappings, disable all checkboxes
-		if (mappings.empty())
-		{
-			if (m_cbFeedbackHost) m_cbFeedbackHost->setChecked(false);
-			if (m_cbFeedbackPhysical) m_cbFeedbackPhysical->setChecked(false);
-			return;
-		}
+		const auto& preset = translator->getPreset();
+		const auto defaults = preset.getDefaultFeedbackTargets();
+		const uint8_t hostBit = 1 << static_cast<uint8_t>(synthLib::MidiEventSource::Host);
+		const uint8_t physicalBit = 1 << static_cast<uint8_t>(synthLib::MidiEventSource::Physical);
 
-		// Show feedback settings from first mapping
-		// (All mappings share feedback settings in this simple version)
-		const auto& firstMapping = mappings[0];
-		
 		if (m_cbFeedbackHost)
-			m_cbFeedbackHost->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Host));
+			m_cbFeedbackHost->setChecked((defaults & hostBit) != 0);
 		
 		if (m_cbFeedbackPhysical)
-			m_cbFeedbackPhysical->setChecked(firstMapping.isFeedbackEnabled(synthLib::MidiEventSource::Physical));
+			m_cbFeedbackPhysical->setChecked((defaults & physicalBit) != 0);
 	}
 
 	void SettingsMidiLearn::refreshInputSourceCheckboxes() const
@@ -663,13 +652,20 @@ namespace jucePluginEditorLib
 
 		auto& preset = const_cast<pluginLib::MidiLearnPreset&>(translator->getPreset());
 		auto& mappings = preset.getMappings();
-		
-		if (mappings.empty())
-			return;
 
-		// Toggle feedback target for ALL mappings
-		const bool newState = !mappings[0].isFeedbackEnabled(_target);
-		
+		// Determine new state from default targets (works even with no mappings)
+		const uint8_t targetBit = 1 << static_cast<uint8_t>(_target);
+		const bool newState = !(preset.getDefaultFeedbackTargets() & targetBit);
+
+		// Update preset-level default
+		auto defaults = preset.getDefaultFeedbackTargets();
+		if (newState)
+			defaults |= targetBit;
+		else
+			defaults &= ~targetBit;
+		preset.setDefaultFeedbackTargets(defaults);
+
+		// Apply to all existing mappings
 		for (auto& mapping : mappings)
 		{
 			mapping.setFeedbackEnabled(_target, newState);

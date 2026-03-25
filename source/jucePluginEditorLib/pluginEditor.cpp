@@ -1082,6 +1082,9 @@ namespace jucePluginEditorLib
 							return _m.channel == _mapping.channel;
 						}), m.end());
 
+					// Inherit feedback targets from preset default
+					_mapping.feedbackTargets = preset.getDefaultFeedbackTargets();
+
 					preset.addMapping(_mapping);
 					t->setPreset(preset);
 

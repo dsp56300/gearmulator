@@ -71,6 +71,7 @@ namespace pluginLib
 			mappingsArray.add(mapping.toJson());
 		}
 		obj->setProperty("mappings", mappingsArray);
+		obj->setProperty("defaultFeedbackTargets", static_cast<int>(m_defaultFeedbackTargets));
 
 		return juce::var(obj);
 	}
@@ -97,6 +98,9 @@ namespace pluginLib
 				m_mappings.push_back(MidiLearnMapping::fromJson(mappingVar));
 			}
 		}
+
+		if (obj->hasProperty("defaultFeedbackTargets"))
+			m_defaultFeedbackTargets = static_cast<uint8_t>(static_cast<int>(obj->getProperty("defaultFeedbackTargets")));
 
 		return true;
 	}
