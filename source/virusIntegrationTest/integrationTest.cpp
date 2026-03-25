@@ -166,7 +166,7 @@ int main(int _argc, char* _argv[])
 				}
 			}
 		}
-		std::cout << "invalid command line arguments" << '\n';
+		std::cout << "ERROR: No test data specified. Use -folder <path> or -rom <file> -preset <name>" << '\n';
 		return -1;
 	}
 	catch(const std::runtime_error& _err)
