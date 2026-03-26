@@ -321,6 +321,7 @@ Simulate a mouse click on an element by ID or CSS selector. Moves the cursor to 
 | `id` | string | no* | Element ID to click |
 | `selector` | string | no* | CSS selector (uses first match, e.g. `.menuitem`) |
 | `button` | string | no | `"left"` (default), `"right"`, or `"middle"` |
+| `clickCount` | integer | no | Number of clicks (default: 1, use 2 for double-click) |
 | `modifiers` | object | no | `{ctrl, shift, alt, meta}` as booleans |
 
 \* Either `id` or `selector` must be provided.
@@ -347,6 +348,7 @@ Simulate a mouse click at specific coordinates.
 | `x` | integer | yes | X coordinate |
 | `y` | integer | yes | Y coordinate |
 | `button` | string | no | `"left"` (default), `"right"`, or `"middle"` |
+| `clickCount` | integer | no | Number of clicks (default: 1, use 2 for double-click) |
 | `modifiers` | object | no | `{ctrl, shift, alt, meta}` as booleans |
 
 #### `mouse_drag`

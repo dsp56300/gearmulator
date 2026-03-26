@@ -540,10 +540,11 @@ namespace jucePluginEditorLib
 		{
 			mcpServer::ToolDef tool;
 			tool.name = "click_element";
-			tool.description = "Simulate a mouse click on an element by ID or CSS selector. Injects mouse move, button down, and button up through the RmlUI context.";
+			tool.description = "Simulate a mouse click on an element by ID or CSS selector. Injects mouse move, button down, and button up through the RmlUI context. Use clickCount=2 for double-click.";
 			tool.inputSchema.addProperty("id", "string", "Element ID to click", false);
 			tool.inputSchema.addProperty("selector", "string", "CSS selector to find the element (e.g. '.menuitem', 'div.active'). Uses first match.", false);
 			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
+			tool.inputSchema.addIntProperty("clickCount", "Number of clicks (default: 1, use 2 for double-click)", false, 1, 3);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
 			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
@@ -551,6 +552,7 @@ namespace jucePluginEditorLib
 				const auto selector = _params.hasProperty("selector") ? _params.get("selector").getString().toStdString() : std::string();
 				const int button = parseMouseButton(_params);
 				const int mods = parseModifiers(_params);
+				const int clickCount = _params.hasProperty("clickCount") ? _params.get("clickCount").getInt() : 1;
 
 				if (id.empty() && selector.empty())
 					throw std::runtime_error("Either 'id' or 'selector' must be provided");
@@ -580,8 +582,11 @@ namespace jucePluginEditorLib
 					const auto [cx, cy] = getElementCenter(elem);
 
 					ui.context->ProcessMouseMove(cx, cy, mods);
-					ui.context->ProcessMouseButtonDown(button, mods);
-					ui.context->ProcessMouseButtonUp(button, mods);
+					for (int i = 0; i < clickCount; ++i)
+					{
+						ui.context->ProcessMouseButtonDown(button, mods);
+						ui.context->ProcessMouseButtonUp(button, mods);
+					}
 					ui.rmlComp->enqueueUpdate();
 
 					auto result = mcpServer::JsonValue::object();
@@ -699,10 +704,11 @@ namespace jucePluginEditorLib
 		{
 			mcpServer::ToolDef tool;
 			tool.name = "mouse_click_at";
-			tool.description = "Simulate a mouse click at specific coordinates. Injects mouse move, button down, and button up.";
+			tool.description = "Simulate a mouse click at specific coordinates. Injects mouse move, button down, and button up. Use clickCount=2 for double-click.";
 			tool.inputSchema.addIntProperty("x", "X coordinate in document space", true);
 			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", true);
 			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
+			tool.inputSchema.addIntProperty("clickCount", "Number of clicks (default: 1, use 2 for double-click)", false, 1, 3);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
 			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
@@ -710,6 +716,7 @@ namespace jucePluginEditorLib
 				const int y = _params.get("y").getInt();
 				const int button = parseMouseButton(_params);
 				const int mods = parseModifiers(_params);
+				const int clickCount = _params.hasProperty("clickCount") ? _params.get("clickCount").getInt() : 1;
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
@@ -717,8 +724,11 @@ namespace jucePluginEditorLib
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 					ui.context->ProcessMouseMove(x, y, mods);
-					ui.context->ProcessMouseButtonDown(button, mods);
-					ui.context->ProcessMouseButtonUp(button, mods);
+					for (int i = 0; i < clickCount; ++i)
+					{
+						ui.context->ProcessMouseButtonDown(button, mods);
+						ui.context->ProcessMouseButtonUp(button, mods);
+					}
 					ui.rmlComp->enqueueUpdate();
 
 					auto result = mcpServer::JsonValue::object();
