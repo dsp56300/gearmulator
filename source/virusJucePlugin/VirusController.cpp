@@ -688,28 +688,33 @@ namespace virus
 
     void Controller::requestRomBanks()
     {
-		switch(m_processor.getModel())
-		{
-        default:
-        case virusLib::DeviceModel::A:
-        case virusLib::DeviceModel::B:
-        case virusLib::DeviceModel::C:
-			m_singles.resize(8);
-			break;
-        case virusLib::DeviceModel::Snow:
-        case virusLib::DeviceModel::TI:
-        case virusLib::DeviceModel::TI2:
-        	m_singles.resize(
-                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI) +
-                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI2) +
-                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::Snow) +
-                2
-            );
-			break;
-        }
+		const auto* rom = m_processor.getSelectedRom();
 
-    	for(uint8_t i=3; i<=getBankCount(); ++i)
-			requestSingleBank(i);
+		if (!rom)
+			return;
+
+		// 2 RAM banks (A, B) + ROM banks from ROM file
+		m_singles.resize(2 + rom->getNumSingleBanks());
+
+		// Populate ROM banks directly from ROM data instead of requesting via MIDI
+		for (uint32_t b = 2; b < getBankCount(); ++b)
+		{
+			for (uint8_t p = 0; p < 128; ++p)
+			{
+				virusLib::ROMFile::TPreset preset;
+				if (!rom->getSingle(static_cast<int>(b - 2), p, preset))
+					continue;
+
+				const auto name = virusLib::ROMFile::getSingleName(preset);
+				if (name.empty())
+					continue;
+
+				auto& patch = m_singles[b][p];
+				patch.name = name;
+				patch.bankNumber = virusLib::fromArrayIndex(static_cast<uint8_t>(b));
+				patch.progNumber = p;
+			}
+		}
     }
 
     bool Controller::sendSysEx(MidiPacketType _type) const

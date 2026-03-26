@@ -536,6 +536,15 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		if(!isValid(_dump))
 			return;
 
+		if (_type == DUMP_SINGLE)
+		{
+			SMidiEvent ev(MidiEventSource::Device);
+			ev.sysex = createSingleDump(m_rom, _bank, _program, _dump, deviceId);
+			_responses.emplace_back(std::move(ev));
+			return;
+		}
+
+		// Multi dump (not extracted to utility as it's only used here)
 		SMidiEvent ev(MidiEventSource::Device);
 
 		auto& response = ev.sysex;
@@ -546,14 +555,12 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		response.push_back(toMidiByte(_bank));
 		response.push_back(_program);
 
-		const auto size = _type == DUMP_SINGLE ? m_rom.getSinglePresetSize() : m_rom.getMultiPresetSize();
-
+		const auto size = m_rom.getMultiPresetSize();
 		const auto modelABCsize = ROMFile::getSinglePresetSize(DeviceModel::ABC);
 
 		for(size_t i=0; i<modelABCsize; ++i)
 			response.push_back(_dump[i]);
 
-		// checksum for ABC models comes after 256 bytes of preset data
 		response.push_back(calcChecksum(response));
 
 		if (size > modelABCsize)
@@ -561,7 +568,6 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 			for (size_t i = modelABCsize; i < size; ++i)
 				response.push_back(_dump[i]);
 
-			// Second checksum for D model: That checksum is to be calculated over the whole preset data, including the ABC checksum
 			response.push_back(calcChecksum(response));
 		}
 
@@ -1421,5 +1427,45 @@ void Microcontroller::receiveUpgradedPreset()
 bool Microcontroller::isValid(const TPreset& _preset)
 {
 	return _preset[240] >= 32 && _preset[240] <= 127;
+}
+
+SysexBuffer Microcontroller::createSingleDump(const ROMFile& _rom, const BankNumber _bank, const uint8_t _program, const TPreset& _preset, const uint8_t _deviceId)
+{
+	SysexBuffer sysex;
+	sysex.reserve(512 + 16);
+
+	sysex.push_back(M_STARTOFSYSEX);
+	sysex.push_back(0x00);
+	sysex.push_back(0x20);
+	sysex.push_back(0x33);
+	sysex.push_back(0x01);
+	sysex.push_back(_deviceId);
+
+	sysex.push_back(DUMP_SINGLE);
+	sysex.push_back(toMidiByte(_bank));
+	sysex.push_back(_program);
+
+	const auto presetSize = _rom.getSinglePresetSize();
+	const auto modelABCsize = ROMFile::getSinglePresetSize(DeviceModel::ABC);
+
+	for (size_t i = 0; i < modelABCsize; ++i)
+		sysex.push_back(_preset[i]);
+
+	// First checksum covers the ABC portion (256 bytes). All models include this.
+	sysex.push_back(calcChecksum(sysex));
+
+	// TI/TI2/Snow presets are 512 bytes. Append the extended data with a second
+	// checksum that covers the entire message including the first checksum.
+	if (presetSize > modelABCsize)
+	{
+		for (size_t i = modelABCsize; i < presetSize; ++i)
+			sysex.push_back(_preset[i]);
+
+		sysex.push_back(calcChecksum(sysex));
+	}
+
+	sysex.push_back(M_ENDOFSYSEX);
+
+	return sysex;
 }
 }

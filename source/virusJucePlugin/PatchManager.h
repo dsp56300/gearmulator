@@ -18,6 +18,7 @@ namespace Rml
 namespace virus
 {
 	class Controller;
+	class VirusProcessor;
 }
 
 namespace genericVirusUI
@@ -47,5 +48,6 @@ namespace genericVirusUI
 		pluginLib::patchDB::DataSource createRomDataSource(uint32_t _bank) const;
 
 		virus::Controller& m_controller;
+		virus::VirusProcessor& m_processor;
 	};
 }

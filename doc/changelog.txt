@@ -12,8 +12,13 @@ Framework:
         active and a MIDI event arrived during shutdown (common problem
 		for controllers that send MIDI clock)
 
+Osirus:
+
+- [Imp] Faster startup by extracting factory presets directly from ROM
+
 OsTIrus:
 
+- [Imp] Faster startup by extracting factory presets directly from ROM
 - [Imp] Trancy skin: Visual polishing (oscillator, filter, LFO, FX panels,
         filter routing icons, waveform shape buttons)
 

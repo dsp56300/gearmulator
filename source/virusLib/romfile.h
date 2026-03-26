@@ -113,6 +113,13 @@ public:
 
 	static uint32_t getRomBankCount(DeviceModel _model);
 
+	uint32_t getNumSingleBanks() const
+	{
+		if (isTIFamily())
+			return static_cast<uint32_t>(m_singles.size() / getSinglesPerBank());
+		return getRomBankCount(m_model);
+	}
+
 	const std::vector<uint8_t>& getDemoData() const { return m_demoData; }
 
 	std::string getFilename() const { return isValid() ? m_romFileName : std::string(); }

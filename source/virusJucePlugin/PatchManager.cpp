@@ -2,6 +2,7 @@
 
 #include "VirusEditor.h"
 #include "VirusController.h"
+#include "VirusProcessor.h"
 
 #include "jucePluginEditorLib/patchmanagerUiRml/patchmanagerUiRml.h"
 
@@ -28,74 +29,54 @@ namespace genericVirusUI
 	PatchManager::PatchManager(VirusEditor& _editor, Rml::Element* _root)
 		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root)
 		, m_controller(_editor.getController())
+		, m_processor(_editor.getProcessor())
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
-		
+
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB);
 
 		startLoaderThread();
-
-		// rom patches are received via midi, make sure we add all remaining ones, too
-		m_controller.onRomPatchReceived = [this](const virusLib::BankNumber _bank, const uint32_t _program)
-		{
-			if (_bank == virusLib::BankNumber::EditBuffer)
-				return;
-
-			const auto index = virusLib::toArrayIndex(_bank);
-
-			const auto& banks = m_controller.getSinglePresets();
-
-			if(index < banks.size())
-			{
-				const auto& bank = banks[index];
-
-				if(_program == bank.size() - 1)
-				{
-					const auto romDS = createRomDataSource(index);
-					removeDataSource(romDS);
-					addDataSource(romDS);
-				}
-			}
-		};
-
 		addRomPatches();
 	}
 
 	PatchManager::~PatchManager()
 	{
 		stopLoaderThread();
-		m_controller.onRomPatchReceived = {};
 	}
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
-		const auto bankIndex = _bank;
-
-		const auto& singles = m_controller.getSinglePresets();
-
-		if (bankIndex >= singles.size())
+		const auto* rom = m_processor.getSelectedRom();
+		if (!rom)
 			return false;
 
-		const auto& bank = singles[bankIndex];
+		const auto bankNumber = virusLib::fromArrayIndex(_bank);
 
-		if(_program != pluginLib::patchDB::g_invalidProgram)
+		if (_program != pluginLib::patchDB::g_invalidProgram)
 		{
-			if (_program >= bank.size())
+			virusLib::ROMFile::TPreset preset;
+			if (!rom->getSingle(static_cast<int>(_bank), static_cast<int>(_program), preset))
 				return false;
-			const auto& s = bank[_program];
-			if (s.data.empty())
+			if (virusLib::ROMFile::getSingleName(preset).empty())
 				return false;
-			_results.push_back(s.data);
+			_results.push_back(virusLib::Microcontroller::createSingleDump(*rom, bankNumber, static_cast<uint8_t>(_program), preset));
 		}
 		else
 		{
-			_results.reserve(bank.size());
-			for (const auto& patch : bank)
-				_results.push_back(patch.data);
+			_results.reserve(virusLib::ROMFile::getSinglesPerBank());
+			for (uint8_t p = 0; p < virusLib::ROMFile::getSinglesPerBank(); ++p)
+			{
+				virusLib::ROMFile::TPreset preset;
+				if (!rom->getSingle(static_cast<int>(_bank), p, preset))
+					continue;
+				if (virusLib::ROMFile::getSingleName(preset).empty())
+					continue;
+				_results.push_back(virusLib::Microcontroller::createSingleDump(*rom, bankNumber, p, preset));
+			}
 		}
-		return true;
+		return !_results.empty();
 	}
 
 	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
@@ -478,15 +459,18 @@ namespace genericVirusUI
 
 	void PatchManager::addRomPatches()
 	{
-		const auto& singles = m_controller.getSinglePresets();
+		const auto* rom = m_processor.getSelectedRom();
+		if (!rom)
+			return;
 
-		for (uint32_t b = 0; b < singles.size(); ++b)
+		const auto bankCount = rom->getNumSingleBanks();
+
+		for (uint32_t b = 0; b < bankCount; ++b)
 		{
-			const auto& bank = singles[b];
-
-			const auto& single = bank[bank.size()-1];
-
-			if (single.data.empty())
+			virusLib::ROMFile::TPreset preset;
+			if (!rom->getSingle(static_cast<int>(b), 0, preset))
+				continue;
+			if (virusLib::ROMFile::getSingleName(preset).empty())
 				continue;
 
 			addDataSource(createRomDataSource(b));
@@ -498,8 +482,8 @@ namespace genericVirusUI
 		pluginLib::patchDB::DataSource ds;
 		ds.type = pluginLib::patchDB::SourceType::Rom;
 		ds.bank = _bank;
-		ds.name = m_controller.getBankName(_bank);
-		ds.midiBankNumber = _bank;
+		ds.name = m_controller.getBankName(_bank + 2);  // +2 to skip RAM banks A/B in controller indexing
+		ds.midiBankNumber = _bank + 2;
 		return ds;
 	}
 

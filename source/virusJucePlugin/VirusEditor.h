@@ -57,6 +57,7 @@ namespace genericVirusUI
 		void setPart(size_t _part);
 
 		virus::Controller& getController() const;
+		virus::VirusProcessor& getProcessor() const { return m_processor; }
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
