@@ -667,3 +667,7 @@ input.text
 	border-width: 2dp;		
 }
 
+.settings-root
+{
+	font-size: 26dp;
+}
