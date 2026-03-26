@@ -58,8 +58,6 @@ namespace pluginLib
 	Processor::~Processor()
 	{
 		m_midiPorts.close();
-		m_midiLearnTranslator.reset();
-
 		destroyController();
 		m_plugin.reset();
 		m_device.reset();
@@ -619,6 +617,7 @@ namespace pluginLib
 
 	void Processor::destroyController()
 	{
+		m_midiLearnTranslator.reset();
 		m_controller.reset();
 	}
 

@@ -21,6 +21,7 @@ namespace virus
 
 	VirusProcessor::~VirusProcessor()
 	{
+		destroyController();
 		destroyEditorState();
 	}
 
