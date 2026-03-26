@@ -699,15 +699,21 @@ namespace virus
 		// Populate ROM banks directly from ROM data instead of requesting via MIDI
 		for (uint32_t b = 2; b < getBankCount(); ++b)
 		{
+			virusLib::ROMFile::TPreset firstPreset;
+			if (!rom->getSingle(static_cast<int>(b - 2), 0, firstPreset))
+				break;
+			if (virusLib::ROMFile::getSingleName(firstPreset).size() != 10)
+				break;
+
 			for (uint8_t p = 0; p < 128; ++p)
 			{
 				virusLib::ROMFile::TPreset preset;
 				if (!rom->getSingle(static_cast<int>(b - 2), p, preset))
-					continue;
+					break;
 
 				const auto name = virusLib::ROMFile::getSingleName(preset);
-				if (name.empty())
-					continue;
+				if (name.size() != 10)
+					break;
 
 				auto& patch = m_singles[b][p];
 				patch.name = name;

@@ -2,8 +2,12 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "jucePluginLib/patchdb/patch.h"
+#include "jucePluginLib/patchdb/datasource.h"
+
+#include "baseLib/event.h"
 
 #include "virusLib/microcontrollerTypes.h"
+#include "virusLib/romfile.h"
 
 namespace juceRmlUi
 {
@@ -45,9 +49,14 @@ namespace genericVirusUI
 
 	private:
 		void addRomPatches();
-		pluginLib::patchDB::DataSource createRomDataSource(uint32_t _bank) const;
+		void removeRomPatches();
+		bool loadRamBankData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program);
+		bool loadRomBankData(pluginLib::patchDB::DataList& _results, uint32_t _romBank, uint32_t _program);
+		pluginLib::patchDB::DataSource createDataSource(uint32_t _controllerBank) const;
 
 		virus::Controller& m_controller;
 		virus::VirusProcessor& m_processor;
+		std::vector<pluginLib::patchDB::DataSource> m_romDataSources;
+		baseLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
 	};
 }

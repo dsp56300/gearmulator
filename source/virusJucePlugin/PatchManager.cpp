@@ -30,6 +30,7 @@ namespace genericVirusUI
 		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root)
 		, m_controller(_editor.getController())
 		, m_processor(_editor.getProcessor())
+		, m_onRomChanged(_editor.getProcessor().evRomChanged)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
@@ -38,28 +39,113 @@ namespace genericVirusUI
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB);
 
 		startLoaderThread();
-		addRomPatches();
+
+		// RAM banks are populated via MIDI when the controller receives them
+		m_controller.onRomPatchReceived = [this](const virusLib::BankNumber _bank, const uint32_t _program)
+		{
+			if (_bank == virusLib::BankNumber::EditBuffer)
+				return;
+
+			const auto index = virusLib::toArrayIndex(_bank);
+
+			// Only handle RAM banks (A and B = indices 0 and 1)
+			if (index >= 2)
+				return;
+
+			const auto& banks = m_controller.getSinglePresets();
+
+			if (index < banks.size() && _program == banks[index].size() - 1)
+			{
+				const auto ds = createDataSource(index);
+				removeDataSource(ds);
+				addDataSource(ds);
+			}
+		};
+
+		// Add RAM banks that were already populated before the PatchManager was created
+		{
+			const auto& banks = m_controller.getSinglePresets();
+			for (uint32_t i = 0; i < 2 && i < banks.size(); ++i)
+			{
+				if (!banks[i][0].data.empty())
+					addDataSource(createDataSource(i));
+			}
+		}
+
+		if (virusLib::isTIFamily(m_processor.getModel()))
+		{
+			addRomPatches();
+		}
+		else
+		{
+			// Initial ROM patches are added by the retained event, subsequent changes refresh
+			m_onRomChanged = [this](const virusLib::ROMFile*)
+			{
+				addRomPatches();
+			};
+		}
 	}
 
 	PatchManager::~PatchManager()
 	{
 		stopLoaderThread();
+		m_controller.onRomPatchReceived = {};
 	}
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
+	{
+		// RAM banks (0, 1) are loaded from live controller data (populated via MIDI)
+		if (_bank < 2)
+			return loadRamBankData(_results, _bank, _program);
+
+		// ROM banks (2+) are loaded directly from ROM
+		return loadRomBankData(_results, _bank - 2, _program);
+	}
+
+	bool PatchManager::loadRamBankData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
+	{
+		const auto& singles = m_controller.getSinglePresets();
+
+		if (_bank >= singles.size())
+			return false;
+
+		const auto& bank = singles[_bank];
+
+		if (_program != pluginLib::patchDB::g_invalidProgram)
+		{
+			if (_program >= bank.size())
+				return false;
+			const auto& s = bank[_program];
+			if (s.data.empty())
+				return false;
+			_results.push_back(s.data);
+		}
+		else
+		{
+			_results.reserve(bank.size());
+			for (const auto& patch : bank)
+			{
+				if (!patch.data.empty())
+					_results.push_back(patch.data);
+			}
+		}
+		return !_results.empty();
+	}
+
+	bool PatchManager::loadRomBankData(pluginLib::patchDB::DataList& _results, const uint32_t _romBank, const uint32_t _program)
 	{
 		const auto* rom = m_processor.getSelectedRom();
 		if (!rom)
 			return false;
 
-		const auto bankNumber = virusLib::fromArrayIndex(_bank);
+		const auto bankNumber = virusLib::fromArrayIndex(_romBank + 2);
 
 		if (_program != pluginLib::patchDB::g_invalidProgram)
 		{
 			virusLib::ROMFile::TPreset preset;
-			if (!rom->getSingle(static_cast<int>(_bank), static_cast<int>(_program), preset))
+			if (!rom->getSingle(static_cast<int>(_romBank), static_cast<int>(_program), preset))
 				return false;
-			if (virusLib::ROMFile::getSingleName(preset).empty())
+			if (virusLib::ROMFile::getSingleName(preset).size() != 10)
 				return false;
 			_results.push_back(virusLib::Microcontroller::createSingleDump(*rom, bankNumber, static_cast<uint8_t>(_program), preset));
 		}
@@ -69,9 +155,9 @@ namespace genericVirusUI
 			for (uint8_t p = 0; p < virusLib::ROMFile::getSinglesPerBank(); ++p)
 			{
 				virusLib::ROMFile::TPreset preset;
-				if (!rom->getSingle(static_cast<int>(_bank), p, preset))
+				if (!rom->getSingle(static_cast<int>(_romBank), p, preset))
 					continue;
-				if (virusLib::ROMFile::getSingleName(preset).empty())
+				if (virusLib::ROMFile::getSingleName(preset).size() != 10)
 					continue;
 				_results.push_back(virusLib::Microcontroller::createSingleDump(*rom, bankNumber, p, preset));
 			}
@@ -457,8 +543,17 @@ namespace genericVirusUI
 		return m_controller.activatePatch(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), _part);
 	}
 
+	void PatchManager::removeRomPatches()
+	{
+		for (const auto& ds : m_romDataSources)
+			removeDataSource(ds);
+		m_romDataSources.clear();
+	}
+
 	void PatchManager::addRomPatches()
 	{
+		removeRomPatches();
+
 		const auto* rom = m_processor.getSelectedRom();
 		if (!rom)
 			return;
@@ -467,23 +562,33 @@ namespace genericVirusUI
 
 		for (uint32_t b = 0; b < bankCount; ++b)
 		{
-			virusLib::ROMFile::TPreset preset;
-			if (!rom->getSingle(static_cast<int>(b), 0, preset))
-				continue;
-			if (virusLib::ROMFile::getSingleName(preset).empty())
-				continue;
+			// Validate entire bank — stop at first invalid bank (matches Microcontroller behavior)
+			bool valid = true;
+			for (uint8_t p = 0; p < virusLib::ROMFile::getSinglesPerBank(); ++p)
+			{
+				virusLib::ROMFile::TPreset preset;
+				if (!rom->getSingle(static_cast<int>(b), p, preset) || virusLib::ROMFile::getSingleName(preset).size() != 10)
+				{
+					valid = false;
+					break;
+				}
+			}
+			if (!valid)
+				break;
 
-			addDataSource(createRomDataSource(b));
+			auto ds = createDataSource(b + 2);  // +2: controller index (0=RAM A, 1=RAM B, 2+=ROM)
+			addDataSource(ds);
+			m_romDataSources.push_back(std::move(ds));
 		}
 	}
 
-	pluginLib::patchDB::DataSource PatchManager::createRomDataSource(const uint32_t _bank) const
+	pluginLib::patchDB::DataSource PatchManager::createDataSource(const uint32_t _controllerBank) const
 	{
 		pluginLib::patchDB::DataSource ds;
 		ds.type = pluginLib::patchDB::SourceType::Rom;
-		ds.bank = _bank;
-		ds.name = m_controller.getBankName(_bank + 2);  // +2 to skip RAM banks A/B in controller indexing
-		ds.midiBankNumber = _bank + 2;
+		ds.bank = _controllerBank;
+		ds.name = m_controller.getBankName(_controllerBank);
+		ds.midiBankNumber = _controllerBank;
 		return ds;
 	}
 
