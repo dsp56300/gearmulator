@@ -11,6 +11,8 @@ Framework:
 - [Fix] Fix crash on plugin shutdown when a physical MIDI port was
         active and a MIDI event arrived during shutdown (common problem
 		for controllers that send MIDI clock)
+- [Fix] BUG-10159 CLAP: Fix keyboard input in text fields (cursor
+        jumping, digit reordering) on Windows
 
 Osirus:
 
