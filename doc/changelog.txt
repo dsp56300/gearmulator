@@ -28,6 +28,9 @@ JE8086:
 
 - [Fix] BUG-10068 Trancy skin: Arp speed parameter now matches front panel
         labels
+- [Fix] EMU-58 Trancy skin: Fix settings dialog font size
+- [Fix] BUG-10161 Fix saved performances split into separate entries
+        after DAW restart
 
 NodalRed2x:
 
