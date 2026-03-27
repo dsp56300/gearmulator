@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a Bug
+    url: https://tus.youtrack.cloud/form/f41165e1-01a0-416f-b8ac-5589b22e8ef5
+    about: Report bugs, problems, and questions. Please read the bug reporting guidelines in ISSUES.md before submitting.
+  - name: Request a Feature
+    url: https://tus.youtrack.cloud/form/258da36f-3760-4f91-9ac6-2d267dcd4f54
+    about: Submit feature requests and suggestions.
