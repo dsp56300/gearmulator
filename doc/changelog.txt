@@ -14,6 +14,8 @@ Framework:
 - [Fix] BUG-10159 CLAP: Fix keyboard input in text fields (cursor
         jumping, digit reordering) on Windows
 - [Fix] #262 Restore Windows 7 compatibility
+- [Fix] BUG-10144 Fix combo box value mapping for parameters with empty
+        entries (e.g. Phaser Stages in Osirus)
 
 Osirus:
 
