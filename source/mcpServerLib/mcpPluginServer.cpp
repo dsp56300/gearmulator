@@ -491,6 +491,50 @@ namespace mcpServer
 			m_server.registerTool(std::move(tool));
 		}
 
+		// get_plugin_state - full DAW-level state (device + controller + MIDI learn + patch manager)
+		{
+			ToolDef tool;
+			tool.name = "get_plugin_state";
+			tool.description = "Get the full plugin state as saved by the DAW (getStateInformation). Returns base64-encoded binary. Use this to capture a snapshot that can be restored with set_plugin_state.";
+			tool.handler = [this](const JsonValue&) -> JsonValue
+			{
+				juce::MemoryBlock destData;
+				static_cast<juce::AudioProcessor&>(m_processor).getStateInformation(destData);
+
+				const auto base64 = juce::Base64::toBase64(destData.getData(), destData.getSize()).toStdString();
+
+				auto result = JsonValue::object();
+				result.set("size", JsonValue::fromInt(static_cast<int>(destData.getSize())));
+				result.set("data", JsonValue::fromString(base64));
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
+
+		// set_plugin_state - restore full DAW-level state
+		{
+			ToolDef tool;
+			tool.name = "set_plugin_state";
+			tool.description = "Restore the full plugin state as if the DAW called setStateInformation. Takes base64-encoded binary from get_plugin_state.";
+			tool.inputSchema.addProperty("data", "string", "Base64-encoded plugin state data from get_plugin_state", true);
+			tool.handler = [this](const JsonValue& _params) -> JsonValue
+			{
+				const auto base64Str = _params.get("data").getString();
+
+				juce::MemoryOutputStream decoded;
+				if (!juce::Base64::convertFromBase64(decoded, base64Str))
+					throw std::runtime_error("Invalid base64 data");
+
+				static_cast<juce::AudioProcessor&>(m_processor).setStateInformation(decoded.getData(), static_cast<int>(decoded.getDataSize()));
+
+				auto result = JsonValue::object();
+				result.set("success", JsonValue::fromBool(true));
+				result.set("size", JsonValue::fromInt(static_cast<int>(decoded.getDataSize())));
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
+
 		// get_current_part
 		{
 			ToolDef tool;
