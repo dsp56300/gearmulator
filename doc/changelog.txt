@@ -13,6 +13,7 @@ Framework:
 		for controllers that send MIDI clock)
 - [Fix] BUG-10159 CLAP: Fix keyboard input in text fields (cursor
         jumping, digit reordering) on Windows
+- [Fix] #262 Restore Windows 7 compatibility
 
 Osirus:
 
