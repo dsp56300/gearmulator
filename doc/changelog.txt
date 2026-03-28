@@ -1,5 +1,48 @@
 Release Notes
 
+2.2.3:
+
+Framework:
+
+- [Fix] Fix file drag and drop onto part buttons (patch name, part
+        slots) not accepting dropped .syx/.mid files
+- [Fix] MIDI Learn: Feedback to host and physical MIDI ports was not
+        working
+- [Fix] Fix crash on plugin shutdown when a physical MIDI port was
+        active and a MIDI event arrived during shutdown (common problem
+		for controllers that send MIDI clock)
+- [Fix] BUG-10159 CLAP: Fix keyboard input in text fields (cursor
+        jumping, digit reordering) on Windows
+- [Fix] #262 Restore Windows 7 compatibility
+- [Fix] BUG-10144 Fix combo box value mapping for parameters with empty
+        entries (e.g. Phaser Stages in Osirus)
+
+Osirus:
+
+- [Imp] Faster startup by extracting factory presets directly from ROM
+
+OsTIrus:
+
+- [Imp] Faster startup by extracting factory presets directly from ROM
+- [Imp] Trancy skin: Visual polishing (oscillator, filter, LFO, FX panels,
+        filter routing icons, waveform shape buttons)
+
+JE8086:
+
+- [Fix] BUG-10068 Trancy skin: Arp speed parameter now matches front panel
+        labels
+- [Fix] EMU-58 Trancy skin: Fix settings dialog font size
+- [Fix] BUG-10161 Fix saved performances split into separate entries
+        after DAW restart
+
+NodalRed2x:
+
+- [Fix] BUG-10113 Trancy skin: Added Program/Performance mode toggle. In
+        Program mode (default), loading a patch mutes other slots to prevent
+        hanging presets
+- [Fix] BUG-10156 Trancy skin: Fix settings dialog rendering issues caused
+        by missing font size
+
 2.2.2:
 
 Framework:
@@ -31,6 +74,8 @@ Framework:
         for custom-ordered dropdowns (e.g. Page Matrix Assign Destination)
 - [Fix] Right-click context menu now opens correctly on scrollbar/slider
         elements instead of falling through to the global menu
+- [Fix] BUG-10153 Patch Manager: Fix crash when typing in browser search
+        columns caused by invalid tree node cast during filtering
 
 JE8086:
 
@@ -52,6 +97,11 @@ NodalRed2x:
         directly to MCU memory)
 - [Fix] BUG-10110 Arpeggiator/LFO timing no longer slows down under heavy
         MIDI traffic (CC rate limiting prevents firmware event queue saturation)
+
+OsTIrus:
+
+- [Fix] BUG-10149 Master Volume knob now displays and updates correctly.
+        Global parameters were being dropped when received from the device
 
 2.2.1:
 

@@ -12,6 +12,11 @@
 	width: 9em;
 }
 
+.settings-combo-channel {
+	width: 3em;
+	items-per-column: 17;
+}
+
 .settings-combo-small combotext {
 	line-height: 1.2em;
 	height: 100%;
@@ -23,9 +28,10 @@
 	padding-bottom: 0.3em;
 }
 
-.ml-col-type { width: 10%; }
-.ml-col-channel { width: 10%; }
+.ml-col-type { width: 8%; }
+.ml-col-channel { width: 8%; }
+.ml-col-part { width: 8%; }
 .ml-col-controller { width: 10%; }
-.ml-col-mode { width: 25%; }
+.ml-col-mode { width: 20%; }
 .ml-col-parameter { width: 22%; }
 .ml-col-remove { width: 15%; }

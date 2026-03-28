@@ -282,8 +282,12 @@ namespace jucePluginEditorLib::patchManagerRml
 		{
 			for (const auto& item : selectedItem.second)
 			{
-				const auto& s = dynamic_cast<TreeElem*>(item->getElement())->getSearchRequest();
-				ignoreTags.add(s.tags);
+				auto* elem = dynamic_cast<TreeElem*>(item->getElement());
+				if (elem)
+				{
+					const auto& s = elem->getSearchRequest();
+					ignoreTags.add(s.tags);
+				}
 			}
 		}
 		return getDB().getPatchColor(_patch, ignoreTags);

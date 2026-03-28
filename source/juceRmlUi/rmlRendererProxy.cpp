@@ -75,34 +75,47 @@ namespace juceRmlUi
 		auto dummyHandle = createDummyHandle();
 
 		juce::Image image;
-
 		if (!loadImage(image, _textureDimensions, _source))
 			return {};
 
-		addRenderFunction(dummyHandle, [this, dummyHandle, img = std::move(image)]
+		auto cachedImage = std::make_shared<juce::Image>(std::move(image));
+
+		addRenderFunction(dummyHandle, [this, dummyHandle, source = _source, cachedImage]() mutable
 		{
 			if (exists(dummyHandle))
 				return;
 
+			juce::Image image;
+
+			if (cachedImage && cachedImage->isValid())
+			{
+				image = std::move(*cachedImage);
+				cachedImage.reset();
+			}
+			else
+			{
+				Rml::Vector2i dims;
+				if (!loadImage(image, dims, source))
+					return;
+			}
+
 			std::vector<uint8_t> buffer;
 
-			auto i = img;
-
-			auto w = i.getWidth();
-			auto h = i.getHeight();
+			auto w = image.getWidth();
+			auto h = image.getHeight();
 
 			const auto wNew = static_cast<int>(getValidTextureSize(w));
 			const auto hNew = static_cast<int>(getValidTextureSize(h));
 
 			if (wNew != w || hNew != h)
 			{
-				i = i.rescaled(wNew, hNew, juce::Graphics::mediumResamplingQuality);
+				image = image.rescaled(wNew, hNew, juce::Graphics::mediumResamplingQuality);
 
 				w = wNew;
 				h = hNew;
 			}
 
-			helper::toBuffer(core_instance, buffer, i);
+			helper::toBuffer(core_instance, buffer, image);
 
 			const auto handle = m_renderer->GenerateTexture(buffer, Rml::Vector2i(w, h));
 			addHandle<HandleTexture>(dummyHandle, handle);
@@ -121,6 +134,7 @@ namespace juceRmlUi
 		{
 			if (exists(dummyHandle))
 				return;
+
 			auto handle = m_renderer->GenerateTexture(source, _sourceDimensions);
 			addHandle<HandleTexture>(dummyHandle, handle);
 		});

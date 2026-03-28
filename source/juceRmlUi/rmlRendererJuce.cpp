@@ -652,6 +652,9 @@ namespace juceRmlUi
 			if (_p0.y > _p2.y) std::swap(_p0, _p2);
 			if (_p1.y > _p2.y) std::swap(_p1, _p2);
 
+			if (_p0.y < 0 || _p2.y >= _dst.height)
+				return;
+
 			// Rasterize triangle using scanline approach
 			const auto totalHeight = _p2.y - _p0.y;
 

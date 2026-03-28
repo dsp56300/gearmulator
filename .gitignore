@@ -16,3 +16,5 @@ bin/
 .DS_Store
 _copilot.bat
 target/logs/
+claude*.bat
+.mcp.json

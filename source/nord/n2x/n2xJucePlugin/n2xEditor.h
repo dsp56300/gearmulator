@@ -11,6 +11,11 @@ namespace jucePluginEditorLib
 	class Processor;
 }
 
+namespace juceRmlUi
+{
+	class ElemButton;
+}
+
 namespace n2xJucePlugin
 {
 	class Part;
@@ -84,6 +89,7 @@ namespace n2xJucePlugin
 		void onBtNext(Rml::Event&) const;
 		void setCurrentPatchName(uint8_t _part, const std::string& _name);
 		void onSelectedPatchChanged(uint8_t _part, const pluginLib::patchDB::PatchKey& _patchKey);
+		void setProgramMode(bool _programMode);
 
 		Controller& m_controller;
 
@@ -103,5 +109,10 @@ namespace n2xJucePlugin
 		std::array<std::string, 4> m_activePatchNames;
 
 		baseLib::EventListener<uint32_t, pluginLib::patchDB::PatchKey> m_onSelectedPatchChanged;
+
+		bool m_programMode = true;
+		juceRmlUi::ElemButton* m_btProgram = nullptr;
+		juceRmlUi::ElemButton* m_btPerformance = nullptr;
+		baseLib::EventListener<> m_onProgramChangedForMute;
 	};
 }

@@ -831,12 +831,11 @@ namespace pluginLib::patchDB
 	{
 		const auto file = getLocalStorageFile(_ds);
 
-		synthLib::SysexBuffer data;
+		Data data;
 		if (!baseLib::filesystem::readFile(data, file.getFullPathName().toStdString()))
 			return false;
 
-		synthLib::MidiToSysex::splitMultipleSysex(_results, data);
-		return !_results.empty();
+		return parseFileData(_results, data, file.getFileNameWithoutExtension().toStdString());
 	}
 
 	bool DB::loadFolder(const DataSourceNodePtr& _folder)

@@ -639,6 +639,24 @@ namespace pluginLib
 		}
 	}
 
+	synthLib::MidiEventSource Controller::parameterOriginToMidiEventSource(const Parameter::Origin _origin)
+	{
+		switch (_origin)
+		{
+		case Parameter::Origin::Ui:
+			return synthLib::MidiEventSource::Editor;
+		case Parameter::Origin::HostAutomation:
+			return synthLib::MidiEventSource::Host;
+		case Parameter::Origin::Midi:
+			return synthLib::MidiEventSource::Physical;
+		case Parameter::Origin::PresetChange:
+		case Parameter::Origin::Derived:
+		case Parameter::Origin::Unknown:
+		default:
+			return synthLib::MidiEventSource::Internal;
+		}
+	}
+
 	void Controller::getMidiMessages(std::vector<synthLib::SMidiEvent>& _events)
 	{
 		const std::lock_guard l(m_midiMessagesLock);

@@ -57,6 +57,7 @@ namespace pluginLib
 
 	Processor::~Processor()
 	{
+		m_midiPorts.close();
 		destroyController();
 		m_plugin.reset();
 		m_device.reset();
@@ -142,15 +143,14 @@ namespace pluginLib
 				m_midiLearnTranslator = std::make_unique<MidiLearnTranslator>(*m_controller, m_controller->getParameterDescriptions().getControllerMap());
 				
 				// Setup MIDI feedback callback
-				m_midiLearnTranslator->onSendMidiOutput = [this](synthLib::MidiEventSource _source, const synthLib::SMidiEvent& _event)
+				m_midiLearnTranslator->onSendMidiOutput = [this](const synthLib::MidiEventSource _target, const synthLib::SMidiEvent& _event)
 				{
-					if (m_midiRoutingMatrix.enabled(_event, _source))
-					{
-						if (_source == synthLib::MidiEventSource::Editor)
-							getController().enqueueMidiMessages({_event});
-						else if (_source == synthLib::MidiEventSource::Physical)
-							m_midiPorts.send(_event);
-					}
+					if (_target == synthLib::MidiEventSource::Editor && _event.source != synthLib::MidiEventSource::Editor)
+						getController().enqueueMidiMessages({_event});
+					else if (_target == synthLib::MidiEventSource::Physical && _event.source != synthLib::MidiEventSource::Physical)
+						m_midiPorts.send(_event);
+					else if (_target == synthLib::MidiEventSource::Host && _event.source != synthLib::MidiEventSource::Host)
+						addHostMidiFeedback(_event);
 				};
 
 				// Load default MIDI learn preset from disk. DAW state restore
@@ -617,6 +617,7 @@ namespace pluginLib
 
 	void Processor::destroyController()
 	{
+		m_midiLearnTranslator.reset();
 		m_controller.reset();
 	}
 
@@ -831,6 +832,17 @@ namespace pluginLib
 	    	const auto mm = MidiPorts::toJuceMidiMessage(e);
 		    midiMessages.addEvent(mm, 0);
 	    }
+
+		// Drain MIDI Learn feedback events destined for the host
+		{
+			const std::scoped_lock lock(m_hostFeedbackMutex);
+			for (const auto& e : m_hostFeedbackQueue)
+			{
+				const auto mm = MidiPorts::toJuceMidiMessage(e);
+				midiMessages.addEvent(mm, 0);
+			}
+			m_hostFeedbackQueue.clear();
+		}
 	}
 
 	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)
@@ -949,6 +961,12 @@ namespace pluginLib
 	{
 		juce::ignoreUnused(_index);
 		return m_programName;
+	}
+
+	void Processor::addHostMidiFeedback(const synthLib::SMidiEvent& _event)
+	{
+		const std::scoped_lock lock(m_hostFeedbackMutex);
+		m_hostFeedbackQueue.push_back(_event);
 	}
 
 	void Processor::changeProgramName(int _index, const juce::String& _newName)

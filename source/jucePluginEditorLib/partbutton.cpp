@@ -113,7 +113,10 @@ namespace jucePluginEditorLib
 			return !savePatchDesc->isPartValid() || savePatchDesc->getPart() != getPart();
 
 		const auto patch = getPatchFromDragSource(_event, _source);
-		return patch.first != nullptr;
+		if(patch.first != nullptr)
+			return true;
+
+		return DragTarget::canDrop(_event, _source);
 	}
 
 	bool PartButton::canDropFiles(const Rml::Event& _event, const std::vector<std::string>& _files)

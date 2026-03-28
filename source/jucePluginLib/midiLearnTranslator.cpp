@@ -39,13 +39,28 @@ namespace pluginLib
 			if (mapping.type == MidiLearnMapping::Type::ControlChange ||
 			    mapping.type == MidiLearnMapping::Type::PolyPressure)
 			{
-				const uint32_t key = (static_cast<uint32_t>(mapping.channel) << 8) | mapping.controller;
-				m_midiToMappingIndex[key] = i;
+				if (mapping.channel == MidiLearnMapping::AllChannels)
+				{
+					// AllChannels: populate cache for all 16 channels
+					for (uint32_t ch = 0; ch < 16; ++ch)
+					{
+						const uint32_t key = (ch << 8) | mapping.controller;
+						m_midiToMappingIndex[key] = i;
+					}
+				}
+				else
+				{
+					const uint32_t key = (static_cast<uint32_t>(mapping.channel) << 8) | mapping.controller;
+					m_midiToMappingIndex[key] = i;
+				}
 			}
 		}
 
 		// Subscribe to new parameters for feedback
 		subscribeToParameters();
+
+		if (onPresetChanged)
+			onPresetChanged();
 	}
 
 	bool MidiLearnTranslator::processMidiInput(const synthLib::SMidiEvent& _event)
@@ -108,6 +123,16 @@ namespace pluginLib
 
 	void MidiLearnTranslator::applyMapping(const MidiLearnMapping& _mapping, const synthLib::SMidiEvent& _event)
 	{
+		if (_mapping.part != MidiLearnMapping::AutoPart)
+		{
+			// Specific part: apply directly
+			auto* param = m_controller.getParameter(_mapping.paramName, _mapping.part);
+			if (param)
+				applyMappingToParam(_mapping, _event, *param);
+			return;
+		}
+
+		// Auto: resolve parts from incoming MIDI channel
 		const auto channel = static_cast<uint8_t>(_event.a & 0x0f);
 		auto parts = m_controller.getPartsForMidiChannel(channel);
 
@@ -337,11 +362,13 @@ namespace pluginLib
 			const auto listenerId = param->onValueChanged.addListener(
 				[this, paramName = mapping.paramName](Parameter* _param)
 				{
+					const auto origin = _param->getChangeOrigin();
+
 					// Don't send feedback for MIDI-originated changes (avoid feedback loops)
-					if (_param->getChangeOrigin() == Parameter::Origin::Midi)
+					if (origin == Parameter::Origin::Midi)
 						return;
 
-					onParameterChanged(paramName, _param->getValue());
+					onParameterChanged(paramName, _param->getValue(), origin);
 				});
 
 			m_paramListenerIds.push_back(listenerId);
@@ -363,7 +390,7 @@ namespace pluginLib
 		m_paramListenerIds.clear();
 	}
 
-	void MidiLearnTranslator::onParameterChanged(const std::string& _paramName, float _normalizedValue)
+	void MidiLearnTranslator::onParameterChanged(const std::string& _paramName, float _normalizedValue, Parameter::Origin _origin)
 	{
 		// Find all mappings for this parameter
 		const auto mappings = m_preset.findMappingsByParam(_paramName);
@@ -374,7 +401,8 @@ namespace pluginLib
 				continue;
 
 			// Create the feedback MIDI event
-			const auto feedbackEvent = createFeedbackEvent(*mapping, _normalizedValue);
+			const auto source = Controller::parameterOriginToMidiEventSource(_origin);
+			const auto feedbackEvent = createFeedbackEvent(*mapping, _normalizedValue, source);
 
 			// Send to each enabled feedback target
 			if (!onSendMidiOutput)
@@ -394,17 +422,17 @@ namespace pluginLib
 		}
 	}
 
-	synthLib::SMidiEvent MidiLearnTranslator::createFeedbackEvent(const MidiLearnMapping& _mapping, float _normalizedValue) const
+	synthLib::SMidiEvent MidiLearnTranslator::createFeedbackEvent(const MidiLearnMapping& _mapping, float _normalizedValue, synthLib::MidiEventSource _source) const
 	{
 		// Always send absolute values for feedback (even for relative-mode mappings)
 		const uint8_t midiValue = static_cast<uint8_t>(std::clamp(_normalizedValue * 127.0f, 0.0f, 127.0f));
 
-		// Build status byte: message type + channel
 		const auto statusByte = MidiLearnMapping::typeToMidiStatus(_mapping.type);
-		const uint8_t statusWithChannel = statusByte | (_mapping.channel & 0x0f);
+		const uint8_t feedbackChannel = _mapping.channel == MidiLearnMapping::AllChannels ? 0 : _mapping.channel;
+		const uint8_t statusWithChannel = statusByte | (feedbackChannel & 0x0f);
 
 		// Create the event based on message type
-		synthLib::SMidiEvent event(synthLib::MidiEventSource::Internal);
+		synthLib::SMidiEvent event(_source);
 		event.a = statusWithChannel;
 
 		switch (_mapping.type)

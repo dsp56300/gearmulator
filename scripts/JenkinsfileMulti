@@ -6,7 +6,8 @@ pipeline {
 		booleanParam(name: 'LinuxX86', defaultValue: true, description: '') 
 		booleanParam(name: 'Win', defaultValue: true, description: '') 
 		booleanParam(name: 'Mac', defaultValue: true, description: '')
-		choice(name: 'Branch', choices: ['main'], description: '')
+		choice(name: 'Branch', choices: ['main', 'dev'], description: '')
+		string(name: 'CustomBranch', defaultValue: '', description: 'Override branch (leave empty to use dropdown)')
 		booleanParam(name: 'FXPlugins', defaultValue: true, description: '')
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 		booleanParam(name: 'Deploy', defaultValue: false, description: '')
@@ -25,23 +26,40 @@ pipeline {
 		stage('Prepare') {
 			steps {
 				script {
-					currentBuild.displayName += " - ${params.Branch} -"
+					env.effectiveBranch = params.CustomBranch?.trim() ? params.CustomBranch.trim() : params.Branch
+					currentBuild.displayName += " - ${env.effectiveBranch} -"
+					   
+					env.childDisplayName = ""
 
 					if(params.LinuxARM)					currentBuild.displayName += " La"
 					if(params.LinuxX86)					currentBuild.displayName += " Lx"
 					if(params.Mac)						currentBuild.displayName += " M"
 					if(params.Win)						currentBuild.displayName += " W"
-					if(params.FXPlugins)				currentBuild.displayName += " FX"
-					if(params.IntegrationTests)			currentBuild.displayName += " i"
-					if(params.Deploy)					currentBuild.displayName += " d"
-					if(params.Upload)					currentBuild.displayName += " u"
-					if(params.SynthOsirus)			    currentBuild.displayName += " Sabc"
-					if(params.SynthOsTIrus)			    currentBuild.displayName += " Sti"
-					if(params.SynthVavra)			    currentBuild.displayName += " SmQ"
-					if(params.SynthXenia)			    currentBuild.displayName += " Sxt"
-					if(params.SynthNodalRed2x)		    currentBuild.displayName += " Sn2x"
-					if(params.SynthJe8086)		    currentBuild.displayName += " Sje"
-					if(params.DSPBridge)			    currentBuild.displayName += " Net"
+
+					if(params.FXPlugins)				env.childDisplayName += " FX"
+					if(params.IntegrationTests)			env.childDisplayName += " i"
+					if(params.Deploy)					env.childDisplayName += " d"
+					if(params.Upload)					env.childDisplayName += " u"
+					if(params.GitHub)					env.childDisplayName += " g"
+
+					if(params.SynthOsirus)			    env.childDisplayName += " Sabc"
+					if(params.SynthOsTIrus)			    env.childDisplayName += " Sti"
+					if(params.SynthVavra)			    env.childDisplayName += " SmQ"
+					if(params.SynthXenia)			    env.childDisplayName += " Sxt"
+					if(params.SynthNodalRed2x)          env.childDisplayName += " Sn2x"
+					if(params.SynthJe8086)              env.childDisplayName += " Sje"
+					if(params.DSPBridge)	    	    env.childDisplayName += " Net"
+
+					currentBuild.displayName += "${env.childDisplayName}"
+					
+                    env.synths =
+                        "-Dgearmulator_SYNTH_OSIRUS=" + (params.SynthOsirus ? "on" : "off") +
+                        " -Dgearmulator_SYNTH_OSTIRUS=" + (params.SynthOsTIrus ? "on" : "off") +
+                        " -Dgearmulator_SYNTH_VAVRA=" + (params.SynthVavra ? "on" : "off") +
+                        " -Dgearmulator_SYNTH_XENIA=" + (params.SynthXenia ? "on" : "off") +
+                        " -Dgearmulator_SYNTH_NODALRED2X=" + (params.SynthNodalRed2x ? "on" : "off") +
+                        " -Dgearmulator_SYNTH_JE8086=" + (params.SynthJe8086 ? "on" : "off") +
+                        " -Dgearmulator_COMPONENT_DSPBRIDGE=" + (params.DSPBridge ? "on" : "off")
 
 					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
 				}
@@ -88,24 +106,12 @@ pipeline {
 
 def startBuildJob(label)
 {
-	def synths = ""
-	def displayName = ""
-
-	if(params.IntegrationTests)	displayName += " i"
-	if(params.SynthOsirus)		{ synths += " -Dgearmulator_SYNTH_OSIRUS=on"; displayName += " Sabc" }
-	if(params.SynthOsTIrus)		{ synths += " -Dgearmulator_SYNTH_OSTIRUS=on"; displayName += " Sti" }
-	if(params.SynthVavra)		{ synths += " -Dgearmulator_SYNTH_VAVRA=on"; displayName += " SmQ" }
-	if(params.SynthXenia)		{ synths += " -Dgearmulator_SYNTH_XENIA=on"; displayName += " Sxt" }
-	if(params.SynthNodalRed2x)	{ synths += " -Dgearmulator_SYNTH_NODALRED2X=on"; displayName += " Sn2x" }
-	if(params.SynthJe8086)		{ synths += " -Dgearmulator_SYNTH_JE8086=on"; displayName += " Sje" }
-	if(params.DSPBridge)		{ synths += " -Dgearmulator_COMPONENT_DSPBRIDGE=on"; displayName += " Net" }
-
 	build job: 'dsp56300_main', parameters:
 	[
 		[$class: 'StringParameterValue', name: 'AgentLabel', value: "${label}"], 
-		[$class: 'StringParameterValue', name: 'Branch', value: params.Branch], 
-		[$class: 'StringParameterValue', name: 'Synths', value: synths],
-		[$class: 'StringParameterValue', name: 'DisplayName', value: displayName],
+		[$class: 'StringParameterValue', name: 'Branch', value: env.effectiveBranch], 
+		[$class: 'StringParameterValue', name: 'Synths', value: "${env.synths}"], 
+		[$class: 'StringParameterValue', name: 'DisplayName', value: "${env.childDisplayName}"], 
 		[$class: 'BooleanParameterValue', name: 'Deploy', value: params.Deploy], 
 		[$class: 'BooleanParameterValue', name: 'Upload', value: params.Upload], 
 		[$class: 'BooleanParameterValue', name: 'GitHub', value: params.GitHub], 

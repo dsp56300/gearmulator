@@ -666,3 +666,8 @@ tree
 	background-color: rgb(32,32,32);
 }
 
+
+.settings-root
+{
+	font-size: 21dp;
+}

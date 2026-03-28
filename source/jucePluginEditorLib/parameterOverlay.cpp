@@ -4,6 +4,7 @@
 #include "pluginEditor.h"
 #include "pluginProcessor.h"
 
+#include "jucePluginLib/controller.h"
 #include "jucePluginLib/parameter.h"
 #include "jucePluginLib/midiLearnPreset.h"
 #include "jucePluginLib/midiLearnTranslator.h"
@@ -52,10 +53,14 @@ namespace jucePluginEditorLib
 
 	ParameterOverlay::ParameterOverlay(ParameterOverlays& _overlays, Rml::Element* _component) : m_overlays(_overlays), m_component(_component)
 	{
+		m_component->AddEventListener(Rml::EventId::Show, this);
+		m_component->AddEventListener(Rml::EventId::Hide, this);
 	}
 
 	ParameterOverlay::~ParameterOverlay()
 	{
+		m_component->RemoveEventListener(Rml::EventId::Show, this);
+		m_component->RemoveEventListener(Rml::EventId::Hide, this);
 		setParameter(nullptr);
 	}
 
@@ -139,6 +144,14 @@ namespace jucePluginEditorLib
 
 	void ParameterOverlay::ProcessEvent(Rml::Event& _event)
 	{
+		if (_event.GetId() == Rml::EventId::Show || _event.GetId() == Rml::EventId::Hide)
+		{
+			if (auto* doc = m_component->GetOwnerDocument())
+				doc->UpdateDocument();
+			refresh();
+			return;
+		}
+
 		if (!m_midiLearnModeActive || !m_parameter)
 			return;
 
@@ -165,15 +178,21 @@ namespace jucePluginEditorLib
 				}
 				else
 				{
-					// right click: clear mapping for this parameter
+					// right click: clear mapping for this parameter on this part
 					auto preset = translator->getPreset();
 					auto& mappings = preset.getMappings();
 					const auto paramName = m_parameter->getDescription().name;
+					const auto paramPart = m_parameter->getPart();
 
 					mappings.erase(std::remove_if(mappings.begin(), mappings.end(),
-						[&paramName](const pluginLib::MidiLearnMapping& _m)
+						[&paramName, paramPart](const pluginLib::MidiLearnMapping& _m)
 						{
-							return _m.paramName == paramName;
+							if (_m.paramName != paramName)
+								return false;
+							// AutoPart or matching specific part → remove
+							if (_m.part == pluginLib::MidiLearnMapping::AutoPart)
+								return true;
+							return _m.part == paramPart;
 						}), mappings.end());
 
 					translator->setPreset(preset);
@@ -222,6 +241,15 @@ namespace jucePluginEditorLib
 		if(m_parameter == _parameter)
 			return;
 
+		if(m_midiLearnListening)
+		{
+			auto& editor = m_overlays.getEditor();
+			if (auto* translator = editor.getProcessor().getMidiLearnTranslator())
+				translator->cancelLearning();
+			editor.setMidiLearnSelectedParam(nullptr);
+			m_midiLearnListening = false;
+		}
+
 		if(m_parameter)
 		{
 			m_parameter->onLockedChanged.removeListener(m_parameterLockChangedListener);
@@ -244,7 +272,7 @@ namespace jucePluginEditorLib
 			});
 		}
 
-		updateOverlays();
+		refresh();
 	}
 
 	void ParameterOverlay::setMidiLearnMode(const bool _active)
@@ -304,7 +332,8 @@ namespace jucePluginEditorLib
 		if (!m_parameter)
 			return {};
 
-		auto* translator = m_overlays.getEditor().getProcessor().getMidiLearnTranslator();
+		auto& processor = m_overlays.getEditor().getProcessor();
+		auto* translator = processor.getMidiLearnTranslator();
 		if (!translator)
 			return {};
 
@@ -314,6 +343,31 @@ namespace jucePluginEditorLib
 		if (mappings.empty())
 			return {};
 
-		return getMappingShortLabel(*mappings.front());
+		const auto paramPart = m_parameter->getPart();
+
+		for (const auto* mapping : mappings)
+		{
+			if (mapping->part != pluginLib::MidiLearnMapping::AutoPart)
+			{
+				// Specific part: only match if part equals this parameter's part
+				if (mapping->part != paramPart)
+					continue;
+				return getMappingShortLabel(*mapping);
+			}
+
+			if (mapping->channel == pluginLib::MidiLearnMapping::AllChannels)
+			{
+				// All channels + Auto part: applies to all parts
+				return getMappingShortLabel(*mapping);
+			}
+
+			// Specific channel + Auto part: check if channel resolves to this part
+			auto& controller = processor.getController();
+			const auto parts = controller.getPartsForMidiChannel(mapping->channel);
+			if (std::find(parts.begin(), parts.end(), paramPart) != parts.end())
+				return getMappingShortLabel(*mapping);
+		}
+
+		return {};
 	}
 }

@@ -16,9 +16,7 @@ namespace pluginLib
 
 	MidiPorts::~MidiPorts()
 	{
-		setMidiInput({});
-		setMidiOutput({});
-
+		close();
 		m_deviceManager.reset();
 	}
 
@@ -66,6 +64,12 @@ namespace pluginLib
 			setMidiInput(input);
 			setMidiOutput(output);
 		});
+	}
+
+	void MidiPorts::close()
+	{
+		setMidiInput({});
+		setMidiOutput({});
 	}
 
 	juce::MidiMessage MidiPorts::toJuceMidiMessage(const synthLib::SMidiEvent& _e)

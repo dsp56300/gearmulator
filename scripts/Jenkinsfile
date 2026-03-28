@@ -2,8 +2,9 @@ pipeline {
 	agent { label "${params.AgentLabel}" }
 	
 	environment {
-		GIT_URL = credentials('dsp56300_gitUrl')
 		CMAKE_BUILD_DIR = 'temp/cmake_jenkins'
+		GH_TOKEN = credentials('tus_git_upload_token')
+		GIT_URL = credentials('dsp56300_gitUrl')
 	}
 	parameters
 	{
@@ -23,7 +24,7 @@ pipeline {
 			steps {
 				script {
 					currentBuild.displayName += " - ${params.AgentLabel} - ${params.Branch} - ${params.DisplayName}"
-					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}\nUpload: ${params.Upload}"
+					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}\nUpload: ${params.Upload}\nGitHub: ${params.GitHub}"
 				}
 				doCheckout()
 			}
@@ -199,7 +200,7 @@ def doGitHub()
 {
     def buildDir = cmakeBuildDir()
 
-	withCredentials([string(credentialsId: 'github_token', variable: 'GH_TOKEN')]) {
-		genericSh "cmake -Dgearmulator_SOURCE_DIR=${WORKSPACE} -Dgearmulator_BINARY_DIR=${buildDir} -DGH_TOKEN=${GH_TOKEN} -P scripts/deployGitHub.cmake"
+	if("${params.UploadFolder}" == "beta" || "${params.UploadFolder}" == "") {
+		genericSh "cmake -Dgearmulator_SOURCE_DIR=${WORKSPACE} -Dgearmulator_BINARY_DIR=${WORKSPACE}/${buildDir} -P scripts/deployGitHub.cmake"
 	}
 }

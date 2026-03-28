@@ -12,6 +12,7 @@ namespace pluginLib
 	{
 		enum class Type
 		{
+			Invalid,
 			ControlChange,
 			PolyPressure,
 			ChannelPressure,
@@ -42,9 +43,16 @@ namespace pluginLib
 			All = 0x0F
 		};
 
+		// Sentinel value meaning "respond to any MIDI channel"
+		static constexpr uint8_t AllChannels = 0xFF;
+
+		// Sentinel value meaning "auto-resolve part from MIDI channel"
+		static constexpr uint8_t AutoPart = 0xFF;
+
 		Type type = Type::ControlChange;
 		Mode mode = Mode::Absolute;
-		uint8_t channel = 0;         // MIDI channel (0-15, displayed as 1-16)
+		uint8_t channel = AllChannels;  // MIDI channel: 0-15 = specific, AllChannels = any
+		uint8_t part = AutoPart;        // Target part: 0-based = specific, AutoPart = resolve from channel
 		uint8_t controller = 0;      // CC number (0-127) or PP note number
 		uint16_t nrpn = 0;           // For NRPN type
 		std::string paramName;       // Target parameter name

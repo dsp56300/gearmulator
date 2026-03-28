@@ -6,12 +6,9 @@
 
 #include "parameterOverlay.h"
 
-#include "RmlUi/Core/EventListener.h"
-
 namespace Rml
 {
 	class Element;
-	class ElementDocument;
 }
 
 namespace rmlPlugin
@@ -23,11 +20,11 @@ namespace jucePluginEditorLib
 {
 	class Editor;
 
-	class ParameterOverlays : public Rml::EventListener
+	class ParameterOverlays
 	{
 	public:
 		explicit ParameterOverlays(Editor& _editor, rmlPlugin::RmlParameterBinding& _binding);
-		~ParameterOverlays() override;
+		~ParameterOverlays();
 
 		bool registerComponent(Rml::Element* _component);
 
@@ -42,8 +39,6 @@ namespace jucePluginEditorLib
 		void refreshMidiLearnOverlays() const;
 
 	private:
-		void ProcessEvent(Rml::Event& _event) override;
-
 		void onBind(pluginLib::Parameter* _param, Rml::Element* _elem);
 		void onUnbind(pluginLib::Parameter* _param, Rml::Element* _elem);
 
@@ -56,7 +51,5 @@ namespace jucePluginEditorLib
 
 		size_t m_onBindListenerId;
 		size_t m_onUnbindListenerId;
-
-		Rml::ElementDocument* m_document = nullptr;
 	};
 }

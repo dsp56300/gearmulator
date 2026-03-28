@@ -11,7 +11,7 @@ namespace pluginLib
 		if (type != _eventType)
 			return false;
 
-		if (channel != _eventChannel)
+		if (channel != AllChannels && channel != _eventChannel)
 			return false;
 
 		// For NRPN, we would need to match the NRPN number, but that's for future implementation
@@ -30,6 +30,10 @@ namespace pluginLib
 	{
 		const auto statusByte = static_cast<synthLib::MidiStatusByte>(_event.a & 0xf0);
 		const auto eventType = midiStatusToType(statusByte);
+
+		if (eventType == Type::Invalid)
+			return false;
+
 		const auto eventChannel = getChannel(_event);
 		const auto eventController = getController(_event);
 
@@ -74,6 +78,7 @@ namespace pluginLib
 		obj->setProperty("type", juce::String(typeToString(type)));
 		obj->setProperty("mode", juce::String(modeToString(mode)));
 		obj->setProperty("channel", static_cast<int>(channel));
+		obj->setProperty("part", static_cast<int>(part));
 		obj->setProperty("controller", static_cast<int>(controller));
 		obj->setProperty("nrpn", static_cast<int>(nrpn));
 		obj->setProperty("paramName", juce::String(paramName));
@@ -91,6 +96,9 @@ namespace pluginLib
 			mapping.type = stringToType(obj->getProperty("type").toString().toStdString());
 			mapping.mode = stringToMode(obj->getProperty("mode").toString().toStdString());
 			mapping.channel = static_cast<uint8_t>(static_cast<int>(obj->getProperty("channel")));
+			mapping.part = obj->hasProperty("part")
+				? static_cast<uint8_t>(static_cast<int>(obj->getProperty("part")))
+				: AutoPart;
 			mapping.controller = static_cast<uint8_t>(static_cast<int>(obj->getProperty("controller")));
 			mapping.nrpn = static_cast<uint16_t>(static_cast<int>(obj->getProperty("nrpn")));
 			mapping.paramName = obj->getProperty("paramName").toString().toStdString();
@@ -151,7 +159,7 @@ namespace pluginLib
 		case synthLib::M_POLYPRESSURE: return Type::PolyPressure;
 		case synthLib::M_AFTERTOUCH: return Type::ChannelPressure;
 		case synthLib::M_PITCHBEND: return Type::PitchBend;
-		default: return Type::ControlChange;
+		default: return Type::Invalid;
 		}
 	}
 
@@ -173,7 +181,7 @@ namespace pluginLib
 		synthLib::SMidiEvent event(synthLib::MidiEventSource::Editor);
 		
 		const auto statusByte = typeToMidiStatus(_mapping.type);
-		event.a = statusByte | (_mapping.channel & 0x0f);
+		event.a = statusByte | ((_mapping.channel == AllChannels ? 0 : _mapping.channel) & 0x0f);
 		event.b = _mapping.controller;
 		event.c = 0;  // Value doesn't matter for display purposes
 		

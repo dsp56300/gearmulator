@@ -59,7 +59,10 @@ namespace juceRmlUi
 			m_options.push_back({_options[i], static_cast<int>(i)});
 		}
 
-		setMaxValue(static_cast<float>(m_options.size() - 1));
+		int max = 0;
+		for (const auto& option : m_options)
+			max = std::max(option.value, max);
+		setMaxValue(static_cast<float>(max));
 	}
 
 	void ElemComboBox::addOption(const Rml::String& _option)

@@ -536,6 +536,77 @@
 	button_filter_lp_hover: 0px 54px 55px 54px;
 	src: button_filter_lp.png;
 }
+
+@spritesheet button_shape_sine
+{
+	button_shape_sine_active: 0px 0px 55px 45px;
+	button_shape_sine_checked: 0px 45px 55px 45px;
+	button_shape_sine_checked-active: 0px 45px 55px 45px;
+	button_shape_sine_checked-hover: 0px 45px 55px 45px;
+	button_shape_sine_default: 0px 0px 55px 45px;
+	button_shape_sine_hover: 0px 45px 55px 45px;
+	src: button_shape_sine.png;
+}
+
+@spritesheet button_shape_tri
+{
+	button_shape_tri_active: 0px 0px 55px 45px;
+	button_shape_tri_checked: 0px 45px 55px 45px;
+	button_shape_tri_checked-active: 0px 45px 55px 45px;
+	button_shape_tri_checked-hover: 0px 45px 55px 45px;
+	button_shape_tri_default: 0px 0px 55px 45px;
+	button_shape_tri_hover: 0px 45px 55px 45px;
+	src: button_shape_tri.png;
+}
+
+@spritesheet button_shape_sh
+{
+	button_shape_sh_active: 0px 0px 55px 45px;
+	button_shape_sh_checked: 0px 45px 55px 45px;
+	button_shape_sh_checked-active: 0px 45px 55px 45px;
+	button_shape_sh_checked-hover: 0px 45px 55px 45px;
+	button_shape_sh_default: 0px 0px 55px 45px;
+	button_shape_sh_hover: 0px 45px 55px 45px;
+	src: button_shape_sh.png;
+}
+
+@spritesheet button_shape_sg
+{
+	button_shape_sg_active: 0px 0px 55px 45px;
+	button_shape_sg_checked: 0px 45px 55px 45px;
+	button_shape_sg_checked-active: 0px 45px 55px 45px;
+	button_shape_sg_checked-hover: 0px 45px 55px 45px;
+	button_shape_sg_default: 0px 0px 55px 45px;
+	button_shape_sg_hover: 0px 45px 55px 45px;
+	src: button_shape_sg.png;
+}
+
+
+@spritesheet button_shape_square
+{
+	button_shape_square_active: 0px 0px 55px 45px;
+	button_shape_square_checked: 0px 45px 55px 45px;
+	button_shape_square_checked-active: 0px 45px 55px 45px;
+	button_shape_square_checked-hover: 0px 45px 55px 45px;
+	button_shape_square_default: 0px 0px 55px 45px;
+	button_shape_square_hover: 0px 45px 55px 45px;
+	src: button_shape_square.png;
+}
+
+
+@spritesheet button_shape_saw
+{
+	button_shape_saw_active: 0px 0px 55px 45px;
+	button_shape_saw_checked: 0px 45px 55px 45px;
+	button_shape_saw_checked-active: 0px 45px 55px 45px;
+	button_shape_saw_checked-hover: 0px 45px 55px 45px;
+	button_shape_saw_default: 0px 0px 55px 45px;
+	button_shape_saw_hover: 0px 45px 55px 45px;
+	src: button_shape_saw.png;
+}
+
+
+
 @spritesheet button_load
 {
 	button_load_active: 0px 69px 213px 69px;
@@ -2324,6 +2395,134 @@
 {
 	decorator: image(button_filter_lp_hover scale-none left top);
 }
+
+
+.button_shape_sine
+{
+	decorator: image(button_shape_sine_default scale-none left top);
+}
+.button_shape_sine:checked
+{
+	decorator: image(button_shape_sine_checked scale-none left top);
+}
+.button_shape_sine:checked:active
+{
+	decorator: image(button_shape_sine_checked-active scale-none left top);
+}
+.button_shape_sine:checked:hover
+{
+	decorator: image(button_shape_sine_checked-hover scale-none left top);
+}
+.button_shape_sine:hover
+{
+	decorator: image(button_shape_sine_hover scale-none left top);
+}
+
+.button_shape_tri
+{
+	decorator: image(button_shape_tri_default scale-none left top);
+}
+.button_shape_tri:checked
+{
+	decorator: image(button_shape_tri_checked scale-none left top);
+}
+.button_shape_tri:checked:active
+{
+	decorator: image(button_shape_tri_checked-active scale-none left top);
+}
+.button_shape_tri:checked:hover
+{
+	decorator: image(button_shape_tri_checked-hover scale-none left top);
+}
+.button_shape_tri:hover
+{
+	decorator: image(button_shape_tri_hover scale-none left top);
+}
+
+.button_shape_saw
+{
+	decorator: image(button_shape_saw_default scale-none left top);
+}
+.button_shape_saw:checked
+{
+	decorator: image(button_shape_saw_checked scale-none left top);
+}
+.button_shape_saw:checked:active
+{
+	decorator: image(button_shape_saw_checked-active scale-none left top);
+}
+.button_shape_saw:checked:hover
+{
+	decorator: image(button_shape_saw_checked-hover scale-none left top);
+}
+.button_shape_saw:hover
+{
+	decorator: image(button_shape_saw_hover scale-none left top);
+}
+
+.button_shape_square
+{
+	decorator: image(button_shape_square_default scale-none left top);
+}
+.button_shape_square:checked
+{
+	decorator: image(button_shape_square_checked scale-none left top);
+}
+.button_shape_square:checked:active
+{
+	decorator: image(button_shape_square_checked-active scale-none left top);
+}
+.button_shape_square:checked:hover
+{
+	decorator: image(button_shape_square_checked-hover scale-none left top);
+}
+.button_shape_square:hover
+{
+	decorator: image(button_shape_square_hover scale-none left top);
+}
+
+.button_shape_sh
+{
+	decorator: image(button_shape_sh_default scale-none left top);
+}
+.button_shape_sh:checked
+{
+	decorator: image(button_shape_sh_checked scale-none left top);
+}
+.button_shape_sh:checked:active
+{
+	decorator: image(button_shape_sh_checked-active scale-none left top);
+}
+.button_shape_sh:checked:hover
+{
+	decorator: image(button_shape_sh_checked-hover scale-none left top);
+}
+.button_shape_sh:hover
+{
+	decorator: image(button_shape_sh_hover scale-none left top);
+}
+
+.button_shape_sg
+{
+	decorator: image(button_shape_sg_default scale-none left top);
+}
+.button_shape_sg:checked
+{
+	decorator: image(button_shape_sg_checked scale-none left top);
+}
+.button_shape_sg:checked:active
+{
+	decorator: image(button_shape_sg_checked-active scale-none left top);
+}
+.button_shape_sg:checked:hover
+{
+	decorator: image(button_shape_sg_checked-hover scale-none left top);
+}
+.button_shape_sg:hover
+{
+	decorator: image(button_shape_sg_hover scale-none left top);
+}
+
 .button_load
 {
 	decorator: image(button_load_default scale-none left top);
@@ -2926,9 +3125,5 @@ input.text
 tree
 {
 	background-color: rgb(32,32,32);
-}
-
-combo {
-	padding: 1dp 54dp 2dp 1dp;
 }
 

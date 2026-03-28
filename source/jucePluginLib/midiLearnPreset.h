@@ -48,8 +48,13 @@ namespace pluginLib
 		// Returns true if preset is empty (no mappings and no name)
 		bool empty() const { return m_name.empty() && m_mappings.empty(); }
 
+		// Default feedback targets applied to newly learned mappings
+		uint8_t getDefaultFeedbackTargets() const { return m_defaultFeedbackTargets; }
+		void setDefaultFeedbackTargets(uint8_t _targets) { m_defaultFeedbackTargets = _targets; }
+
 	private:
 		std::string m_name;
 		std::vector<MidiLearnMapping> m_mappings;
+		uint8_t m_defaultFeedbackTargets = 0;
 	};
 }

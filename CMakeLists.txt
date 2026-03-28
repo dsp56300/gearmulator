@@ -19,7 +19,15 @@ if(APPLE)
 	message("CMAKE_OSX_DEPLOYMENT_TARGET: " ${CMAKE_OSX_DEPLOYMENT_TARGET})
 endif()
 
-project(gearmulator VERSION 2.2.2)
+# Use VS 2022 toolset (v143) for Windows 7 compatibility. The VS 2026
+# default toolset (v150) statically links CRT functions that import Win8+
+# APIs (CopyFile2, CreateFile2), preventing DLL load on Win7.
+# Override on command line with -T <toolset> if needed.
+if(NOT CMAKE_GENERATOR_TOOLSET AND CMAKE_GENERATOR MATCHES "Visual Studio 18")
+	set(CMAKE_GENERATOR_TOOLSET "v143")
+endif()
+
+project(gearmulator VERSION 2.2.3)
 
 include(base.cmake)
 include(CTest)

@@ -33,6 +33,11 @@ namespace jucePluginEditorLib
 			m_processor.getEditorState()->getEditor()->getRmlComponent()->enableDebugger(_enable);
 		});
 
+		createToggleButton(_root, "btEnableMcpServer", "enableMcpServer", [this](bool _enable)
+		{
+			m_processor.setMcpServerEnabled(_enable);
+		});
+
 		auto* editorState = m_processor.getEditorState();
 
 		if (auto* btOpenFolder = juceRmlUi::helper::findChild(_root, "btOpenFolder", false))

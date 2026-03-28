@@ -31,6 +31,8 @@ namespace jucePluginEditorLib
 		void onPresetSelected(int _index);
 		void onBtRemoveMapping(size_t _mappingIndex);
 		void onModeChanged(size_t _mappingIndex, int _newModeIndex);
+		void onChannelChanged(size_t _mappingIndex, int _newChannelIndex);
+		void onPartChanged(size_t _mappingIndex, int _newPartIndex);
 		void onInputSourceToggle(synthLib::MidiEventSource _source) const;
 		void onFeedbackTargetToggle(synthLib::MidiEventSource _target);
 
