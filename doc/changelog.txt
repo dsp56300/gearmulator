@@ -16,6 +16,8 @@ Framework:
 - [Fix] #262 Restore Windows 7 compatibility
 - [Fix] BUG-10144 Fix combo box value mapping for parameters with empty
         entries (e.g. Phaser Stages in Osirus)
+- [Fix] BUG-10163 Software renderer: Fix GUI content shifting when
+        window is partially off-screen
 
 Osirus:
 
