@@ -92,8 +92,20 @@ namespace jucePluginEditorLib
 			// Unfortunately RmlUi does not provide any mouse button state in the event itself
 			if (juceRmlUi::helper::isAnyMouseButtonDown())
 				return;
-			if (auto* element = _event.GetTargetElement())
-				updateControlLabel(element, Priority::High);
+
+			// Walk up from the target to find a bound parameter.
+			// Only update if a parameter was found — a second mouseover event
+			// for a parent container in the same move must not clear the display.
+			auto* elem = _event.GetTargetElement();
+			while(elem)
+			{
+				if(getParameterFromElement(elem))
+				{
+					updateControlLabel(elem, Priority::High);
+					return;
+				}
+				elem = elem->GetParentNode();
+			}
 		});
 	}
 
@@ -146,18 +158,20 @@ namespace jucePluginEditorLib
 
 	void FocusedParameter::updateControlLabel(const Rml::Element* _elem, const Priority _prio)
 	{
-		if (_elem)
+		const auto* original = _elem;
+
+		// Walk up the DOM to find the nearest ancestor with a bound parameter
+		while(_elem)
 		{
-			if (auto* parent = _elem->GetParentNode())
+			if(const auto* param = getParameterFromElement(_elem))
 			{
-				if (dynamic_cast<Rml::ElementFormControlInput*>(parent))
-					_elem = parent;
+				updateControlLabel(_elem, param, _prio);
+				return;
 			}
+			_elem = _elem->GetParentNode();
 		}
 
-		const auto* param = getParameterFromElement(_elem);
-
-		updateControlLabel(_elem, param, _prio);
+		updateControlLabel(original, nullptr, _prio);
 	}
 
 	void FocusedParameter::updateControlLabel(const Rml::Element* _elem, const pluginLib::Parameter* _param, Priority _priority)
