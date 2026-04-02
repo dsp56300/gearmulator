@@ -764,6 +764,53 @@ namespace jucePluginEditorLib
 			_server.registerTool(std::move(tool));
 		}
 
+		// screenshot - capture the plugin UI as a PNG image
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "screenshot";
+			tool.description = "Capture a screenshot of the plugin editor UI. Saves as PNG to a temp file and returns the path. Use the Read tool to view the image.";
+			tool.handler = [&_processor](const mcpServer::JsonValue&) -> mcpServer::JsonValue
+			{
+				const auto tempDir = juce::File::getSpecialLocation(juce::File::SpecialLocationType::tempDirectory);
+				const auto file = tempDir.getChildFile("gearmulator_screenshot.png");
+				auto path = std::make_shared<std::string>(file.getFullPathName().toStdString());
+				auto done = std::make_shared<std::atomic<bool>>(false);
+				auto success = std::make_shared<std::atomic<bool>>(false);
+
+				juce::MessageManager::callAsync([&_processor, path, done, success]()
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					if(!ui.rmlComp)
+					{
+						*done = true;
+						return;
+					}
+					ui.rmlComp->takeScreenshot([path, done, success](const juce::Image& _image)
+					{
+						juce::File f(*path);
+						juce::PNGImageFormat png;
+						if(auto stream = f.createOutputStream())
+						{
+							*success = png.writeImageToStream(_image, *stream);
+							stream->flush();
+						}
+						*done = true;
+					});
+				});
+
+				for(int i = 0; i < 500 && !*done; ++i)
+					std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+				if(!*success)
+					throw std::runtime_error("Failed to capture screenshot");
+
+				auto result = mcpServer::JsonValue::object();
+				result.set("path", mcpServer::JsonValue::fromString(*path));
+				return result;
+			};
+			_server.registerTool(std::move(tool));
+		}
+
 		// mouse_click_at - click at specific coordinates
 		{
 			mcpServer::ToolDef tool;
