@@ -18,6 +18,8 @@ Framework:
         entries (e.g. Phaser Stages in Osirus)
 - [Fix] BUG-10163 Software renderer: Fix GUI content shifting when
         window is partially off-screen
+- [Fix] EMU-42 Patch Manager: Fix file move failures with multiple
+        plugin instances in the same DAW
 
 Osirus:
 
