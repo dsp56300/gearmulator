@@ -31,7 +31,7 @@ namespace virusLib
 		m_dsp->getAudio().setCallback([this](dsp56k::Audio*)
 		{
 			onAudioWritten();
-		}, 0);
+		});
 
 		m_mc.reset(new Microcontroller(*m_dsp, m_rom, false));
 
@@ -74,7 +74,7 @@ namespace virusLib
 
 	Device::~Device()
 	{
-		m_dsp->getAudio().setCallback(nullptr,0);
+		m_dsp->getAudio().setCallback(nullptr);
 		m_mc.reset();
 		m_dsp.reset();
 	}

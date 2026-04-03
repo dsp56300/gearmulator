@@ -46,8 +46,8 @@ namespace xt
 	{
 		for(const auto& dsp : m_dsps)
 		{
-			dsp->getPeriph().getEssi0().setCallback({},0);
-			dsp->getPeriph().getEssi1().setCallback({},0);
+			dsp->getPeriph().getEssi0().setCallback({});
+			dsp->getPeriph().getEssi1().setCallback({});
 		}
 	}
 
@@ -202,7 +202,7 @@ namespace xt
 			m_bootCompleted = true;
 
 			onEsaiCallback(esaiA);
-		}, 0);
+		});
 	}
 
 	void Hardware::processUcCycle()

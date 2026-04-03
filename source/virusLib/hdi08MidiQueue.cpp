@@ -16,14 +16,14 @@ namespace virusLib
 			m_esai.setCallback([this](dsp56k::Audio*)
 			{
 				onAudioWritten();
-			}, 0);
+			});
 		}
 	}
 
 	Hdi08MidiQueue::~Hdi08MidiQueue()
 	{
 		if(m_useEsaiBasedTiming)
-			m_esai.setCallback(nullptr, 0);
+			m_esai.setCallback(nullptr);
 	}
 
 	void Hdi08MidiQueue::sendPendingMidiEvents(uint32_t _maxOffset)

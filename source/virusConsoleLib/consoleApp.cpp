@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "audioProcessor.h"
-#include "esaiListenerToFile.h"
 
 #include "virusLib/device.h"
 #include "virusLib/romloader.h"
@@ -19,7 +18,6 @@ namespace virusLib
 using namespace virusLib;
 using namespace synthLib;
 
-class EsaiListener;
 
 namespace
 {
@@ -262,7 +260,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 			m_uc->readMidiOut(midiEvents);
 			audioCallback(callbackCount>>2);
 		}
-	}, 0);
+	});
 
 	bootDSP(_createDebugger);
 
