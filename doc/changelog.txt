@@ -20,6 +20,7 @@ Framework:
         window is partially off-screen
 - [Fix] EMU-42 Patch Manager: Fix file move failures with multiple
         plugin instances in the same DAW
+- [Fix] BUG-10166 Fix slider following knob after double-click
 
 Osirus:
 
