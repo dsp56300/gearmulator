@@ -976,7 +976,8 @@ namespace juceRmlUi
 
 			sys.endLogRecording();
 
-			const auto logs = sys.getRecordedLogEntries();
+			auto logs = sys.getRecordedLogEntries();
+			SystemInterface::filterLogEntries(logs, {Rml::Log::LT_ERROR, Rml::Log::LT_ASSERT, Rml::Log::LT_WARNING});
 
 			if (!logs.empty())
 			{

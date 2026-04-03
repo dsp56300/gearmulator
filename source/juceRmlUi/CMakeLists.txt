@@ -62,6 +62,7 @@ else()
 	target_compile_definitions(juceRmlUi PRIVATE JUCE_MAC=0)
 endif()
 
+include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag(-mssse3 HAS_SSSE3)
 check_cxx_compiler_flag(-msse4.1 HAS_SSE41)
 
