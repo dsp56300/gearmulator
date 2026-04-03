@@ -170,9 +170,9 @@ namespace mqLib
 		auto& esaiC = m_dsps[2]->getPeriph().getEsai();
 
 		// During boot, set empty callbacks on all ESAI interfaces to prevent DSP threads from blocking
-		esaiA.setCallback([](dsp56k::Audio*) {}, 0);
-		esaiB.setCallback([](dsp56k::Audio*) {}, 0);
-		esaiC.setCallback([](dsp56k::Audio*) {}, 0);
+		esaiA.setCallback([](dsp56k::Audio*) {});
+		esaiB.setCallback([](dsp56k::Audio*) {});
+		esaiC.setCallback([](dsp56k::Audio*) {});
 
 		// Boot pump loop: route ESAI data in a ring between all 3 DSPs
 		// Ring: A TX → B RX → B TX → C RX → C TX → A RX (matches XT topology)
@@ -289,7 +289,7 @@ namespace mqLib
 				txOut.pop_front();
 				rxIn.push_back(std::move(rx));
 			}
-		}, 0);
+		});
 
 		m_dsps[2]->getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
 		{
@@ -307,7 +307,7 @@ namespace mqLib
 				txOut.pop_front();
 				rxIn.push_back(std::move(rx));
 			}
-		}, 0);
+		});
 		/*
 		// Dump all DSP P memories as disassembly
 		const char* dspNames[] = {"A", "B", "C"};
@@ -347,7 +347,7 @@ namespace mqLib
 		for (auto& dsp : m_dsps)
 			dsp->hdiTransferDSPtoUC();
 
-		// Periodic DSP PC bounds check — catch corruption before JIT crash.
+		// Periodic DSP PC bounds check - catch corruption before JIT crash.
 		// Checks during both boot and runtime (whenever a DSP thread exists).
 		for (auto& dsp : m_dsps)
 		{

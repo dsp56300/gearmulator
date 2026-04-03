@@ -73,7 +73,7 @@ namespace xt
 	namespace
 	{
 		// Convert a TX frame to an RX frame for ESSI routing between DSPs.
-		// TX slots have 6 words, RX slots have 4 — copy the first 4 words of each slot.
+		// TX slots have 6 words, RX slots have 4 - copy the first 4 words of each slot.
 		void txToRx(const dsp56k::Audio::TxFrame& _tx, dsp56k::Audio::RxFrame& _rx)
 		{
 			_rx.resize(_tx.size());
@@ -101,8 +101,8 @@ namespace xt
 		// During boot, set empty callbacks on all ESSI interfaces to prevent DSP threads from blocking
 		for (uint32_t i = 0; i < 3; ++i)
 		{
-			m_dsps[i]->getPeriph().getEssi0().setCallback([](dsp56k::Audio*) {}, 0);
-			m_dsps[i]->getPeriph().getEssi1().setCallback([](dsp56k::Audio*) {}, 0);
+			m_dsps[i]->getPeriph().getEssi0().setCallback([](dsp56k::Audio*) {});
+			m_dsps[i]->getPeriph().getEssi1().setCallback([](dsp56k::Audio*) {});
 		}
 
 		// Boot pump loop: DSPs sync via ESSI1 ring (DSP2 TX→DSP0 RX→DSP0 TX→DSP1 RX→DSP1 TX→DSP2 RX).
@@ -170,7 +170,7 @@ namespace xt
 		{
 			m_bootCompleted = true;
 			onEsaiCallback(mainEssi0);
-		}, 0);
+		});
 
 		// Real-time ESSI1 ring routing via TX callbacks.
 		constexpr uint32_t essi1RxDst[] = {1, 2, 0};  // DSP[i] TX routes to DSP[essi1RxDst[i]] RX
@@ -189,7 +189,7 @@ namespace xt
 					txToRx(txOut.pop_front(), rx);
 					rxIn.push_back(std::move(rx));
 				}
-			}, 0);
+			});
 		}
 	}
 
