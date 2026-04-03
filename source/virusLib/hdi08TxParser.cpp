@@ -31,24 +31,29 @@ namespace virusLib
 			{
 				m_remainingPresetBytes = 0;
 				m_state = State::Default;
-				LOGTX("Finished receiving preset, no upgrade needed");
+				LOG("DSP TX [Preset] No upgrade needed (F4F4F4)");
 			}
 			else if(_data == 0xf50000)
 			{
 				m_state = State::StatusReport;
 				m_remainingStatusBytes = isABCFamily(m_mc.getROM().getModel()) ? 1 : 2;
+				LOGTX("DSP TX [StatusReport] Begin (" << m_remainingStatusBytes << " words expected)");
 			}
 			else if(_data == 0xf400f4)
 			{
 				m_state = State::Preset;
-				LOGTX("Begin receiving upgraded preset");
+				LOG("DSP TX [Preset] Begin receiving upgraded preset (F400F4)");
 
 				m_presetData.clear();
 
 				if(m_remainingPresetBytes == 0)
 				{
 					m_remainingPresetBytes = std::numeric_limits<uint32_t>::max();
-					LOGTX("No one requested a preset upgrade, assuming preset size based on first word (version number)");
+					LOG("DSP TX [Preset] WARNING: No one requested a preset upgrade, guessing size from version byte");
+				}
+				else
+				{
+					LOG("DSP TX [Preset] Expecting " << m_remainingPresetBytes << " bytes");
 				}
 			}
 			else if((_data & 0xff0000) == 0xf00000)
@@ -76,17 +81,17 @@ namespace virusLib
 						++pos;
 						if(pos == std::size(pattern))
 						{
-//							LOGTX("Matched pattern " << i);
 							const auto p = static_cast<PatternType>(i);
 
 							switch (p)
 							{
 							case PatternType::DspBoot:
 								m_dspHasBooted = true;
-								LOGTX("DSP boot completed");
+								LOG("DSP TX [Boot] DSP boot completed (F40000 7F0000)");
 								break;
 							default:
 								m_matchedPatterns.push_back(p);
+								LOG("DSP TX [Pattern] Matched pattern " << i);
 								break;
 							}
 
@@ -104,11 +109,18 @@ namespace virusLib
 
 				if(!matched)
 				{
-/*					std::stringstream s;
-					for (const auto& w : m_nonPatternWords)
-						s << HEX(w) << ' ';
-					LOGTX("Unknown DSP words: " << s.str());
-*/
+					if(m_nonPatternWords.size() == 1 && (_data & 0xffff) == 0)
+					{
+						LOGTX("DSP TX [MidiEcho] byte=" << HEXN(byte, 2) << std::dec);
+					}
+					else
+					{
+						std::stringstream s;
+						for (const auto& w : m_nonPatternWords)
+							s << HEX(w) << ' ';
+						LOG("DSP TX [Unknown] Unhandled words: " << s.str());
+					}
+
 					m_nonPatternWords.clear();
 				}
 			}
@@ -117,7 +129,7 @@ namespace virusLib
 			{
 				if(_data & 0xffff)
 				{
-					LOGTX("Abort reading sysex, received invalid midi byte " << HEX(_data));
+					LOG("DSP TX [SysEx] Abort: invalid midi byte " << HEX(_data) << " after " << m_sysexData.size() << " bytes, re-processing as Default");
 					m_state = State::Default;
 					m_midiData.clear();
 					return append(_data);
@@ -132,15 +144,23 @@ namespace virusLib
 
 				if(byte == 0xf7)
 				{
-					LOGTX("End reading sysex");
-
 					m_state = State::Default;
 
-					std::stringstream s;
-					for (const auto b : m_sysexData)
-						s << HEXN(b, 2);
-
-					LOGTX("Received sysex: " << s.str());
+					// Detect Access Music complexity SysEx: F0 00 20 33 01 <data> <state> <complexity> <counter> <table_value> F7
+					if(m_sysexData.size() == 11 && m_sysexData[1] == 0x00 && m_sysexData[2] == 0x20 && m_sysexData[3] == 0x33 && m_sysexData[4] == 0x01)
+					{
+						const auto complexity = m_sysexData[7];
+						const auto state = m_sysexData[6];
+						const auto counter = m_sysexData[8];
+						LOG("DSP TX [Complexity] " << (static_cast<float>(complexity) / 64.0f) << " (index=" << static_cast<int>(complexity) << " state=" << HEXN(state,2) << std::dec << " counter=" << static_cast<int>(counter) << ")");
+					}
+					else
+					{
+						std::stringstream s;
+						for (const auto b : m_sysexData)
+							s << HEXN(b, 2) << ' ';
+						LOG("DSP TX [SysEx] " << m_sysexData.size() << " bytes: " << s.str());
+					}
 
 					synthLib::SMidiEvent ev(synthLib::MidiEventSource::Device);
 					std::swap(ev.sysex, m_sysexData);
@@ -166,7 +186,7 @@ namespace virusLib
 						m_remainingPresetBytes = m_mc.getROM().getSinglePresetSize();
 						break;
 					}
-					LOGTX("Preset size for version code " << static_cast<int>(version) << " is " << m_remainingPresetBytes);
+					LOG("DSP TX [Preset] Version=" << static_cast<int>(version) << ", size=" << m_remainingPresetBytes << " bytes");
 				}
 
 				uint32_t shift = 16;
@@ -181,7 +201,7 @@ namespace virusLib
 
 				if(m_remainingPresetBytes == 0)
 				{
-					LOGTX("Succesfully received preset");
+					LOG("DSP TX [Preset] Upgrade complete, received " << m_presetData.size() << " bytes");
 					m_state = State::Default;
 				}
 			}
@@ -189,7 +209,18 @@ namespace virusLib
 		case State::StatusReport:
 			m_dspStatus.push_back(_data);
 			if(--m_remainingStatusBytes == 0)
+			{
+				if(m_dspStatus.size() >= 2)
+				{
+					LOGTX("DSP TX [StatusReport] overload=" << (m_dspStatus[m_dspStatus.size()-2] >> 16) << " data=" << HEX(m_dspStatus.back()));
+				}
+				else if(m_dspStatus.size() == 1)
+				{
+					LOGTX("DSP TX [StatusReport] data=" << HEX(m_dspStatus.back()));
+				}
+				m_dspStatus.clear();
 				m_state = State::Default;
+			}
 			break;
 		}
 

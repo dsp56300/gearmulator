@@ -294,6 +294,8 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 
 	if(m_loadingState || waitingForPresetReceiveConfirmation())
 	{
+		LOG("Preset queued: " << (isMulti ? "Multi" : "Single") << " program " << static_cast<int>(program) << " (loading=" << m_loadingState << " waitingConfirm=" << waitingForPresetReceiveConfirmation() << " queueSize=" << m_pendingPresetWrites.size() << ")");
+
 		// if we write a multi or a multi mode single, remove a pending single for single mode
 		// If we write a single-mode single, remove all multi-related pending writes
 		const auto multiRelated = isMulti || program != SINGLE;
@@ -1100,6 +1102,8 @@ void Microcontroller::process()
 
 	const auto preset = m_pendingPresetWrites.front();
 	m_pendingPresetWrites.pop_front();
+
+	LOG("Dequeuing pending preset: " << (preset.isMulti ? "Multi" : "Single") << " program " << static_cast<int>(preset.program) << " (remaining=" << m_pendingPresetWrites.size() << ")");
 
 	sendPreset(preset.program, preset.data, preset.isMulti);
 }
