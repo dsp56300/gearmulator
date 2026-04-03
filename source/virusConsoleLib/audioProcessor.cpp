@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "esaiListenerToFile.h"
 #include "dsp56kEmu/types.h"
 
 #include "synthLib/wavWriter.h"
