@@ -30,7 +30,7 @@ namespace mqLib
 
 	Hardware::~Hardware()
 	{
-		m_dsps.front().getPeriph().getEsai().setCallback({}, 0);
+		m_dsps.front().getPeriph().getEsai().setCallback({});
 	}
 
 	void Hardware::process()
@@ -172,7 +172,7 @@ namespace mqLib
 		esaiA.setCallback([&](dsp56k::Audio*)
 		{
 			onEsaiCallback(esaiA);
-		}, 0);
+		});
 	}
 
 	void Hardware::processUcCycle()

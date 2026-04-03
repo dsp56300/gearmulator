@@ -29,7 +29,7 @@ namespace xt
 
 	Hardware::~Hardware()
 	{
-		m_dsps.front().getPeriph().getEssi0().setCallback({}, 0);
+		m_dsps.front().getPeriph().getEssi0().setCallback({});
 	}
 
 	void Hardware::process()
@@ -70,7 +70,7 @@ namespace xt
 			m_bootCompleted = true;
 
 			onEsaiCallback(esaiA);
-		}, 0);
+		});
 	}
 
 	void Hardware::processUcCycle()
