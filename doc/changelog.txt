@@ -4,6 +4,8 @@ Release Notes
 
 Framework:
 
+- [New] Built-in MCP (Model Context Protocol) server for AI-assisted
+        development and automated testing. Enable in Settings > Skins.
 - [Fix] Fix file drag and drop onto part buttons (patch name, part
         slots) not accepting dropped .syx/.mid files
 - [Fix] MIDI Learn: Feedback to host and physical MIDI ports was not
