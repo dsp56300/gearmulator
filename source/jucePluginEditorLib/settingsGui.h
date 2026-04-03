@@ -2,6 +2,9 @@
 
 #include "settingsPlugin.h"
 
+#include <utility>
+#include <vector>
+
 namespace juceRmlUi
 {
 	class ElemButton;

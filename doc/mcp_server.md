@@ -213,9 +213,11 @@ Send a MIDI program change message.
 
 #### `get_state`
 
-Get the current device state as a base64-encoded binary.
+Get the current device state (synth engine level) as a base64-encoded binary.
 
-No parameters required.
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `type` | string | yes | `"global"` (full state) or `"currentProgram"` (current program only) |
 
 #### `set_state`
 
@@ -224,6 +226,20 @@ Load a device state from base64-encoded binary data.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `data` | string | yes | Base64-encoded state data |
+
+#### `get_plugin_state`
+
+Get the full plugin state as saved by the DAW (getStateInformation). Returns base64-encoded binary that can be restored with `set_plugin_state`. This captures everything: device state, controller settings, MIDI learn mappings, and patch manager state.
+
+No parameters required.
+
+#### `set_plugin_state`
+
+Restore the full plugin state as if the DAW called setStateInformation. Useful for testing state save/restore and simulating DAW preset switching.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `data` | string | yes | Base64-encoded plugin state data from `get_plugin_state` |
 
 #### `get_current_part`
 
@@ -314,7 +330,7 @@ These tools inject input events through the RmlUI context, identical to real use
 
 #### `click_element`
 
-Simulate a mouse click on an element by ID or CSS selector. Moves the cursor to the element's center, then injects mouse button down and up.
+Simulate a mouse click on an element by ID or CSS selector. Moves the cursor to the element's center, then injects mouse button down and up. Use `clickCount=2` for double-click.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -341,7 +357,7 @@ Move the mouse cursor to specific coordinates or to the center of an element.
 
 #### `mouse_click_at`
 
-Simulate a mouse click at specific coordinates.
+Simulate a mouse click at specific coordinates. Use `clickCount=2` for double-click.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -411,6 +427,21 @@ Inject text input into the currently focused element, character by character.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `text` | string | yes | Text to inject |
+
+#### `element_at_point`
+
+Hit-test: find the topmost element at a given point in document space. Returns the element's tag, id, classes, attributes, and its ancestor chain up to the document root.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `x` | integer | yes | X coordinate in document space |
+| `y` | integer | yes | Y coordinate in document space |
+
+#### `screenshot`
+
+Capture a screenshot of the plugin editor UI. Saves as PNG to a temp file and returns the file path. Use the Read tool to view the image.
+
+No parameters required.
 
 ---
 

@@ -700,6 +700,117 @@ namespace jucePluginEditorLib
 			_server.registerTool(std::move(tool));
 		}
 
+		// element_at_point - hit-test: find the element at a given coordinate
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "element_at_point";
+			tool.description = "Hit-test: find the topmost element at a given point in document space. Returns the element's tag, id, classes, attributes, and its ancestor chain up to the document root.";
+			tool.inputSchema.addIntProperty("x", "X coordinate in document space", true);
+			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", true);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const int x = _params.get("x").getInt();
+				const int y = _params.get("y").getInt();
+
+				return runOnMessageThread([&, x, y]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+					auto* elem = ui.context->GetElementAtPoint(Rml::Vector2f(static_cast<float>(x), static_cast<float>(y)));
+					if(!elem)
+						throw std::runtime_error("No element at point");
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("x", mcpServer::JsonValue::fromInt(x));
+					result.set("y", mcpServer::JsonValue::fromInt(y));
+					result.set("tag", mcpServer::JsonValue::fromString(elem->GetTagName()));
+					result.set("id", mcpServer::JsonValue::fromString(elem->GetId()));
+					result.set("class", mcpServer::JsonValue::fromString(elem->GetAttribute("class", std::string())));
+
+					// Collect attributes
+					auto attrs = mcpServer::JsonValue::object();
+					for(const auto& [name, variant] : elem->GetAttributes())
+						attrs.set(name, mcpServer::JsonValue::fromString(variant.Get<Rml::String>(elem->GetCoreInstance())));
+					result.set("attributes", std::move(attrs));
+
+					// Box
+					const auto box = elem->GetAbsoluteOffset(Rml::BoxArea::Border);
+					const auto size = elem->GetBox().GetSize(Rml::BoxArea::Border);
+					auto boxObj = mcpServer::JsonValue::object();
+					boxObj.set("x", mcpServer::JsonValue::fromInt(static_cast<int>(box.x)));
+					boxObj.set("y", mcpServer::JsonValue::fromInt(static_cast<int>(box.y)));
+					boxObj.set("w", mcpServer::JsonValue::fromInt(static_cast<int>(size.x)));
+					boxObj.set("h", mcpServer::JsonValue::fromInt(static_cast<int>(size.y)));
+					result.set("box", std::move(boxObj));
+
+					// Ancestor chain
+					auto ancestors = mcpServer::JsonValue::array();
+					auto* parent = elem->GetParentNode();
+					while(parent)
+					{
+						auto anc = mcpServer::JsonValue::object();
+						anc.set("tag", mcpServer::JsonValue::fromString(parent->GetTagName()));
+						anc.set("id", mcpServer::JsonValue::fromString(parent->GetId()));
+						anc.set("class", mcpServer::JsonValue::fromString(parent->GetAttribute("class", std::string())));
+						ancestors.append(std::move(anc));
+						parent = parent->GetParentNode();
+					}
+					result.set("ancestors", std::move(ancestors));
+
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// screenshot - capture the plugin UI as a PNG image
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "screenshot";
+			tool.description = "Capture a screenshot of the plugin editor UI. Saves as PNG to a temp file and returns the path. Use the Read tool to view the image.";
+			tool.handler = [&_processor](const mcpServer::JsonValue&) -> mcpServer::JsonValue
+			{
+				const auto tempDir = juce::File::getSpecialLocation(juce::File::SpecialLocationType::tempDirectory);
+				const auto file = tempDir.getChildFile("gearmulator_screenshot.png");
+				auto path = std::make_shared<std::string>(file.getFullPathName().toStdString());
+				auto done = std::make_shared<std::atomic<bool>>(false);
+				auto success = std::make_shared<std::atomic<bool>>(false);
+
+				juce::MessageManager::callAsync([&_processor, path, done, success]()
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+					if(!ui.rmlComp)
+					{
+						*done = true;
+						return;
+					}
+					ui.rmlComp->takeScreenshot([path, done, success](const juce::Image& _image)
+					{
+						juce::File f(*path);
+						juce::PNGImageFormat png;
+						if(auto stream = f.createOutputStream())
+						{
+							*success = png.writeImageToStream(_image, *stream);
+							stream->flush();
+						}
+						*done = true;
+					});
+				});
+
+				for(int i = 0; i < 500 && !*done; ++i)
+					std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+				if(!*success)
+					throw std::runtime_error("Failed to capture screenshot");
+
+				auto result = mcpServer::JsonValue::object();
+				result.set("path", mcpServer::JsonValue::fromString(*path));
+				return result;
+			};
+			_server.registerTool(std::move(tool));
+		}
+
 		// mouse_click_at - click at specific coordinates
 		{
 			mcpServer::ToolDef tool;

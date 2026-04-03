@@ -872,7 +872,14 @@ namespace juceRmlUi
 		auto* laf = dynamic_cast<LookAndFeel*>(&rootComp->getLookAndFeel());
 
 		const auto& img = laf ? laf->getCurrentImage() : juce::Image();
-		const auto size = img.isValid()
+
+		// If the clip origin is offset (window partially off-screen), we cannot render
+		// directly to the LookAndFeel image as it ignores the clip offset. Fall back to
+		// the slower Graphics path which respects the JUCE transform/clip pipeline.
+		const auto clipOrigin = _g.getClipBounds().getPosition();
+		const bool useDirectPath = img.isValid() && clipOrigin.isOrigin();
+
+		const auto size = useDirectPath
 			? Rml::Vector2i(img.getWidth(), img.getHeight())
 			: getRenderSize();
 
@@ -880,7 +887,7 @@ namespace juceRmlUi
 
 		m_renderProxy->executeRenderFunctions();
 
-		r->endFrame(img);
+		r->endFrame(useDirectPath ? img : juce::Image());
 
 		m_renderDone = true;
 	}

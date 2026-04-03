@@ -23,6 +23,7 @@ namespace rmlPlugin
 		Rml::EventId::Mouseout,
 		Rml::EventId::Drag,
 		Rml::EventId::Dragend,
+		Rml::EventId::Dblclick,
 	};
 
 	class DocumentListener : public Rml::EventListener
@@ -89,6 +90,7 @@ namespace rmlPlugin
 				setMouseIsDown(false);
 			break;
 		case Rml::EventId::Dragend:
+		case Rml::EventId::Dblclick:
 			endSliderDrag();
 			break;
 		case Rml::EventId::Drag:

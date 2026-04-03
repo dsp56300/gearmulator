@@ -14,6 +14,8 @@
 
 #include "dsp56kBase/logging.h"
 
+#include <thread>
+
 namespace pluginLib::patchDB
 {
 	constexpr const char* g_fileNameCache = "patchmanagerdb.cache";
@@ -66,7 +68,7 @@ namespace pluginLib::patchDB
 			pushError("Failed to write to file " + tempFile.getFullPathName().toStdString() + ", make sure that it is not write protected");
 			return false;
 		}
-		if(!tempFile.moveFileTo(_file))
+		if(!moveFileWithRetry(tempFile, _file))
 		{
 			pushError("Failed to move " + tempFile.getFullPathName().toStdString() + " to " + _file.getFullPathName().toStdString());
 			deleteFile(tempFile);
@@ -1821,7 +1823,7 @@ namespace pluginLib::patchDB
 			pushError("Failed to write data to file:\n" + tempFile.getFullPathName().toStdString());
 			return false;
 		}
-		if (!tempFile.moveFileTo(_target))
+		if (!moveFileWithRetry(tempFile, _target))
 		{
 			pushError("Failed to move\n" + tempFile.getFullPathName().toStdString() + "\nto\n" + _target.getFullPathName().toStdString());
 			deleteFile(tempFile);
@@ -1889,6 +1891,24 @@ namespace pluginLib::patchDB
 	{
 		const auto suffix = juce::String::toHexString(reinterpret_cast<uintptr_t>(this));
 		return juce::File(_target.getFullPathName() + "_tmp_" + suffix);
+	}
+
+	bool DB::moveFileWithRetry(const juce::File& _src, const juce::File& _dst)
+	{
+		// Another plugin instance in the same process may have the target file
+		// open for reading. Retry a few times with a short delay.
+		constexpr int maxRetries = 10;
+		constexpr int retryDelayMs = 50;
+
+		for (int i = 0; i < maxRetries; ++i)
+		{
+			if (_src.moveFileTo(_dst))
+				return true;
+
+			if (i < maxRetries - 1)
+				std::this_thread::sleep_for(std::chrono::milliseconds(retryDelayMs));
+		}
+		return false;
 	}
 
 	bool DB::loadCache()

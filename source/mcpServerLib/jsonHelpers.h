@@ -21,7 +21,7 @@ namespace mcpServer
 		static JsonValue null() { return JsonValue(juce::var()); }
 		static JsonValue fromString(const juce::String& _s) { return JsonValue(juce::var(_s)); }
 		static JsonValue fromInt(int _i) { return JsonValue(juce::var(_i)); }
-		static JsonValue fromInt64(int64_t _i) { return JsonValue(juce::var(_i)); }
+		static JsonValue fromInt64(int64_t _i) { return JsonValue(juce::var(static_cast<juce::int64>(_i))); }
 		static JsonValue fromDouble(double _d) { return JsonValue(juce::var(_d)); }
 		static JsonValue fromBool(bool _b) { return JsonValue(juce::var(_b)); }
 
@@ -61,7 +61,7 @@ namespace mcpServer
 
 		juce::String getString() const { return m_var.toString(); }
 		int getInt() const { return static_cast<int>(m_var); }
-		int64_t getInt64() const { return static_cast<int64_t>(m_var); }
+		int64_t getInt64() const { return static_cast<int64_t>(static_cast<juce::int64>(m_var)); }
 		double getDouble() const { return static_cast<double>(m_var); }
 		bool getBool() const { return static_cast<bool>(m_var); }
 

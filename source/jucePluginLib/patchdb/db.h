@@ -162,6 +162,7 @@ namespace pluginLib::patchDB
 		void pushError(std::string _string);
 
 		juce::File getTempFile(const juce::File& _target) const;
+		static bool moveFileWithRetry(const juce::File& _src, const juce::File& _dst);
 
 		bool loadCache();
 		void saveCache();

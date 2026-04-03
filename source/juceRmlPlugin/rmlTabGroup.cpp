@@ -100,6 +100,14 @@ namespace rmlPlugin
 			{
 				if (button && isToggle(button) && !isChecked(button))
 				{
+					// Button is being unchecked — check for taboffpage attribute
+					if (auto* attrib = button->GetAttribute("taboffpage"))
+					{
+						const auto offPage = std::stoi(attrib->Get<Rml::String>(button->GetCoreInstance()));
+						setActivePage(static_cast<size_t>(offPage));
+						return;
+					}
+
 					setChecked(button, true);
 					return;
 				}
