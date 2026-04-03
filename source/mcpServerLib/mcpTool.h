@@ -3,6 +3,7 @@
 #include "jsonHelpers.h"
 
 #include <functional>
+#include <limits>
 #include <string>
 
 namespace mcpServer
@@ -38,14 +39,14 @@ namespace mcpServer
 				required.append(JsonValue::fromString(_name));
 		}
 
-		void addIntProperty(const std::string& _name, const std::string& _description, bool _required = false, int _min = INT_MIN, int _max = INT_MAX)
+		void addIntProperty(const std::string& _name, const std::string& _description, bool _required = false, int _min = std::numeric_limits<int>::min(), int _max = std::numeric_limits<int>::max())
 		{
 			auto prop = JsonValue::object();
 			prop.set("type", JsonValue::fromString("integer"));
 			prop.set("description", JsonValue::fromString(_description));
-			if (_min != INT_MIN)
+			if (_min != std::numeric_limits<int>::min())
 				prop.set("minimum", JsonValue::fromInt(_min));
-			if (_max != INT_MAX)
+			if (_max != std::numeric_limits<int>::max())
 				prop.set("maximum", JsonValue::fromInt(_max));
 			properties.set(_name, prop);
 			if (_required)
