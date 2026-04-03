@@ -540,22 +540,23 @@ namespace jucePluginEditorLib
 		// ---- select_next_preset / select_prev_preset ----
 		for (const auto& [toolName, offset] : std::initializer_list<std::pair<const char*, int>>{{"select_next_preset", 1}, {"select_prev_preset", -1}})
 		{
+			const auto dir = offset;
 			mcpServer::ToolDef tool;
 			tool.name = toolName;
-			tool.description = std::string(offset > 0 ? "Select the next" : "Select the previous") + " preset in the current search results for a part";
+			tool.description = std::string(dir > 0 ? "Select the next" : "Select the previous") + " preset in the current search results for a part";
 			tool.inputSchema.addIntProperty("part", "Part number (0-15, default: 0)", false, 0, 15);
 
-			tool.handler = [&_processor, offset](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [&_processor, dir](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int part = _params.hasProperty("part") ? _params.get("part").getInt() : 0;
 
-				return runOnMessageThread([&_processor, part, offset]() -> mcpServer::JsonValue
+				return runOnMessageThread([&_processor, part, dir]() -> mcpServer::JsonValue
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
 						throw std::runtime_error("Patch manager not available (editor may not be open)");
 
-					const bool success = offset > 0
+					const bool success = dir > 0
 						? pm->selectNextPreset(static_cast<uint32_t>(part))
 						: pm->selectPrevPreset(static_cast<uint32_t>(part));
 

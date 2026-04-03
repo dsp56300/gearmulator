@@ -36,12 +36,7 @@ set(SOURCES
 	rmlListEntry.cpp rmlListEntry.h
 	rmlMenu.cpp rmlMenu.h
 	rmlRendererProxy.cpp rmlRendererProxy.h
-	rmlRendererGL2.cpp rmlRendererGL2.h
-	rmlRendererGL2Types.h
 	rmlRendererJuce.cpp rmlRendererJuce.h
-	rmlRenderInterfaceFilters.cpp rmlRenderInterfaceFilters.h
-	rmlRenderInterfaceShaders.cpp rmlRenderInterfaceShaders.h
-	rmlShader.cpp rmlShader.h
 	rmlShaders.h
 	rmlSystemInterface.cpp rmlSystemInterface.h
 	rmlTree.cpp rmlTree.h
