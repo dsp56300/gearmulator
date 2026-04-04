@@ -1,5 +1,6 @@
 #include "rmlPlugin.h"
 
+#include "rmlLuaParameters.h"
 #include "rmlParameterBinding.h"
 #include "rmlPluginContext.h"
 #include "rmlPluginDocument.h"
@@ -8,6 +9,7 @@
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "RmlUi/Core/Context.h"
+#include "RmlUi/Core/CoreInstance.h"
 
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/Element.h"
@@ -23,16 +25,25 @@ namespace rmlPlugin
 
 	RmlPlugin::~RmlPlugin()
 	{
+		if (auto* L = m_coreInstance.lua_state)
+			unregisterLuaParameters(L);
+
 		Rml::UnregisterPlugin(m_coreInstance, this);
 	}
 
 	void RmlPlugin::onContextCreate(Rml::Context* _context, juceRmlUi::RmlComponent& _component)
 	{
 		m_contexts.emplace(_context, std::make_unique<RmlPluginContext>(_context, m_controller, _component));
+
+		if (auto* L = _context->GetCoreInstance().lua_state)
+			registerLuaParameters(L, m_controller);
 	}
 
 	void RmlPlugin::OnContextDestroy(Rml::Context* _context)
 	{
+		if (auto* L = _context->GetCoreInstance().lua_state)
+			unregisterLuaParameters(L);
+
 		m_documentBeingLoaded.reset();
 
 		const auto it = m_contexts.find(_context);

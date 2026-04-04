@@ -21,9 +21,13 @@ add_subdirectory(lua)
 # Enable RmlUi Lua bindings and point to our bundled Lua
 set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
 set(RMLUI_LUA_BINDINGS_LIBRARY "lua_as_cxx" CACHE STRING "" FORCE)
-set(LUA_LIBRARIES lua)
-set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua)
-set(LUA_FOUND TRUE)
+
+# Create the Lua::Lua target so RmlUi's Dependencies.cmake finds it and skips find_package(Lua)
+add_library(Lua::Lua INTERFACE IMPORTED)
+set_target_properties(Lua::Lua PROPERTIES
+	INTERFACE_LINK_LIBRARIES lua
+	INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lua"
+)
 
 # finally...
 add_subdirectory(RmlUi)
