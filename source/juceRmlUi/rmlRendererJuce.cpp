@@ -1591,7 +1591,13 @@ namespace juceRmlUi
 
 				auto& context = m_graphics->getInternalContext();
 
-				context.drawImage(*m_renderImage, juce::AffineTransform());
+				// The render image is at physical pixel dimensions. The Graphics context's
+				// coordinate space is in logical pixels with DPI scaling applied, so we need
+				// to scale down by the physical pixel factor to avoid double-scaling.
+				const auto scale = context.getPhysicalPixelScaleFactor();
+				const auto transform = scale > 1.0f ? juce::AffineTransform::scale(1.0f / scale) : juce::AffineTransform();
+
+				context.drawImage(*m_renderImage, transform);
 			}
 			else
 			{

@@ -999,9 +999,7 @@ namespace juceRmlUi
 		const auto clipOrigin = _g.getClipBounds().getPosition();
 		const bool useDirectPath = img.isValid() && clipOrigin.isOrigin();
 
-		const auto size = useDirectPath
-			? Rml::Vector2i(img.getWidth(), img.getHeight())
-			: getRenderSize();
+		const auto size = getRenderSize();
 
 		r->beginFrame(_g, size);
 
