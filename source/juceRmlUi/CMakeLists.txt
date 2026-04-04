@@ -44,7 +44,16 @@ set(SOURCES
 
 	RmlUi_Renderer_GL2.cpp RmlUi_Renderer_GL2.h
 	RmlUi_Renderer_GL3.cpp RmlUi_Renderer_GL3.h
+	RmlUi_Renderer_Metal.h
+	MetalContext.h
 )
+
+if(APPLE)
+	list(APPEND SOURCES
+		RmlUi_Renderer_Metal.mm
+		MetalContext.mm
+	)
+endif()
 
 add_library(juceRmlUi STATIC)
 
@@ -77,5 +86,14 @@ endif()
 set_property(TARGET juceRmlUi PROPERTY FOLDER "Gearmulator")
 
 target_compile_definitions(juceRmlUi PUBLIC RMLUI_GL3_CUSTOM_LOADER="juce_opengl/juce_opengl.h")
+
+if(APPLE)
+	find_library(METAL_FRAMEWORK Metal)
+	find_library(QUARTZCORE_FRAMEWORK QuartzCore)
+	if(METAL_FRAMEWORK AND QUARTZCORE_FRAMEWORK)
+		target_link_libraries(juceRmlUi PRIVATE ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK})
+		target_compile_definitions(juceRmlUi PUBLIC RMLUI_METAL_RENDERER=1)
+	endif()
+endif()
 
 target_include_directories(juceRmlUi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
