@@ -4,6 +4,10 @@ Release Notes
 
 Framework:
 
+- [New] EMU-73 Native Metal renderer for macOS, replacing the
+        deprecated OpenGL path. Supports all rendering features
+        including backdrop blur, filters, drop shadows, gradients,
+        clip masking and MSAA.
 - [New] Built-in MCP (Model Context Protocol) server for AI-assisted
         development and automated testing. Enable in Settings > Skins.
 - [New] EMU-70 Lua scripting support for skins. Skin authors can use
