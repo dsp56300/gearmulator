@@ -11,6 +11,10 @@
 
 #include "juce_opengl/juce_opengl.h"
 
+#ifdef RMLUI_METAL_RENDERER
+#include "MetalContext.h"
+#endif
+
 namespace Rml
 {
 	class Context;
@@ -26,6 +30,9 @@ namespace juceRmlUi
 	class DataProvider;
 
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer, public juce::FileDragAndDropTarget, public juce::DragAndDropTarget, public juce::DragAndDropContainer
+#ifdef RMLUI_METAL_RENDERER
+		, public MetalContext::Listener
+#endif
 	{
 	public:
 		enum class Renderer : uint8_t
@@ -33,7 +40,10 @@ namespace juceRmlUi
 			None,
 			Gl2,
 			Gl3,
-			Software
+			Software,
+#ifdef RMLUI_METAL_RENDERER
+			Metal,
+#endif
 		};
 
 		enum class ScreenshotState : uint8_t
@@ -59,6 +69,12 @@ namespace juceRmlUi
 		void renderOpenGL() override;
 		void openGLContextClosing() override;
 		void visibilityChanged() override;
+
+#ifdef RMLUI_METAL_RENDERER
+		void metalContextCreated(MetalContext& _context) override;
+		void renderMetal(MetalContext& _context) override;
+		void metalContextClosing(MetalContext& _context) override;
+#endif
 
 		void mouseDown(const juce::MouseEvent& _event) override;
 		void mouseUp(const juce::MouseEvent& _event) override;
@@ -149,6 +165,10 @@ namespace juceRmlUi
 		const std::string m_rootRmlFilename;
 
 		std::unique_ptr<juce::OpenGLContext> m_openGLContext;
+
+#ifdef RMLUI_METAL_RENDERER
+		std::unique_ptr<MetalContext> m_metalContext;
+#endif
 
 		std::unique_ptr<Rml::RenderInterface> m_renderInterface;
 		Renderer m_renderType = Renderer::None;

@@ -212,12 +212,33 @@ namespace n2xJucePlugin
 			m_onProgramChangedForMute.set(m_controller.onProgramChanged, [this, part]()
 			{
 				constexpr const char* midiChParams[] = {"PerfMidiChannelA", "PerfMidiChannelB", "PerfMidiChannelC", "PerfMidiChannelD"};
+
+				auto* currentChParam = m_controller.getParameter(midiChParams[part], 0);
+				if(!currentChParam)
+				{
+					m_onProgramChangedForMute.reset();
+					return;
+				}
+
+				auto currentChannel = currentChParam->getUnnormalizedValue();
+
+				// If the current part's channel is Off, set it to channel 1
+				if(currentChannel == 16)
+				{
+					currentChParam->setUnnormalizedValueNotifyingHost(0, pluginLib::Parameter::Origin::Ui);
+					currentChannel = 0;
+				}
+
+				// Only mute other parts that share the same MIDI channel
 				for(uint8_t p = 0; p < 4; ++p)
 				{
 					if(p == part)
 						continue;
 					if(auto* param = m_controller.getParameter(midiChParams[p], 0))
-						param->setUnnormalizedValueNotifyingHost(16, pluginLib::Parameter::Origin::Ui);
+					{
+						if(param->getUnnormalizedValue() == currentChannel)
+							param->setUnnormalizedValueNotifyingHost(16, pluginLib::Parameter::Origin::Ui);
+					}
 				}
 				m_onProgramChangedForMute.reset();
 			});

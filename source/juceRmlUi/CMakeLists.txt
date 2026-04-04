@@ -44,14 +44,23 @@ set(SOURCES
 
 	RmlUi_Renderer_GL2.cpp RmlUi_Renderer_GL2.h
 	RmlUi_Renderer_GL3.cpp RmlUi_Renderer_GL3.h
+	RmlUi_Renderer_Metal.h
+	MetalContext.h
 )
+
+if(APPLE)
+	list(APPEND SOURCES
+		RmlUi_Renderer_Metal.mm
+		MetalContext.mm
+	)
+endif()
 
 add_library(juceRmlUi STATIC)
 
 target_sources(juceRmlUi PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(juceRmlUi PUBLIC baseLib dsp56kBase rmlui_core rmlui_debugger)
+target_link_libraries(juceRmlUi PUBLIC baseLib dsp56kBase rmlui_core rmlui_debugger rmlui_lua)
 
 target_include_directories(juceRmlUi PUBLIC ../JUCE/modules)
 target_compile_definitions(juceRmlUi PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
@@ -62,6 +71,7 @@ else()
 	target_compile_definitions(juceRmlUi PRIVATE JUCE_MAC=0)
 endif()
 
+include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag(-mssse3 HAS_SSSE3)
 check_cxx_compiler_flag(-msse4.1 HAS_SSE41)
 
@@ -76,5 +86,14 @@ endif()
 set_property(TARGET juceRmlUi PROPERTY FOLDER "Gearmulator")
 
 target_compile_definitions(juceRmlUi PUBLIC RMLUI_GL3_CUSTOM_LOADER="juce_opengl/juce_opengl.h")
+
+if(APPLE)
+	find_library(METAL_FRAMEWORK Metal)
+	find_library(QUARTZCORE_FRAMEWORK QuartzCore)
+	if(METAL_FRAMEWORK AND QUARTZCORE_FRAMEWORK)
+		target_link_libraries(juceRmlUi PRIVATE ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK})
+		target_compile_definitions(juceRmlUi PUBLIC RMLUI_METAL_RENDERER=1)
+	endif()
+endif()
 
 target_include_directories(juceRmlUi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

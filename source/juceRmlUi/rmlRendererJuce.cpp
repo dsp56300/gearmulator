@@ -613,7 +613,7 @@ namespace juceRmlUi
 		}
 
 		template<bool AlphaBlend>
-		void fillScanline(Image& _dst, const int _yi, float _x0, float _x1, const Colorb& _color, const int _invAlpha) noexcept
+		void fillScanline(Image& _dst, const int _yi, float _x0, float _x1, const Colorb& _color, const int _invAlpha, const Rml::Rectanglei& _clip) noexcept
 		{
 			if (_x0 > _x1)
 				std::swap(_x0, _x1);
@@ -621,9 +621,9 @@ namespace juceRmlUi
 			const auto xi0 = static_cast<int>(_x0);
 			const auto xi1 = static_cast<int>(_x1);
 
-			// Clamp to image bounds
-			const auto xStart = std::max(xi0, 0);
-			const auto xEnd = std::min(xi1, _dst.width);
+			// Clamp to clip region
+			const auto xStart = std::max(xi0, _clip.Left());
+			const auto xEnd = std::min(xi1, _clip.Right());
 
 			auto* dst = _dst.getColorPointer(xStart, _yi);
 
@@ -645,14 +645,22 @@ namespace juceRmlUi
 		}
 
 		template<bool AlphaBlend>
-		void fillTriangle(Image& _dst, Rml::Vector2i _p0, Rml::Vector2i _p1, Rml::Vector2i _p2, const Colorb& _color) noexcept
+		void fillTriangle(Image& _dst, Rml::Vector2i _p0, Rml::Vector2i _p1, Rml::Vector2i _p2, const Colorb& _color, const Rml::Rectanglei& _clip) noexcept
 		{
 			// Sort vertices by Y coordinate (top to bottom), then by X (left to right)
 			if (_p0.y > _p1.y) std::swap(_p0, _p1);
 			if (_p0.y > _p2.y) std::swap(_p0, _p2);
 			if (_p1.y > _p2.y) std::swap(_p1, _p2);
 
-			if (_p0.y < 0 || _p2.y >= _dst.height)
+			if (_p0.y < 0 || _p2.y >= _dst.height || !_clip.Valid())
+				return;
+
+			// Early exit if triangle bounding box is completely outside clip region
+			const auto triMinX = std::min({ _p0.x, _p1.x, _p2.x });
+			const auto triMaxX = std::max({ _p0.x, _p1.x, _p2.x });
+
+			if (_p2.y < _clip.Top() || _p0.y >= _clip.Bottom() ||
+				triMaxX < _clip.Left() || triMinX >= _clip.Right())
 				return;
 
 			// Rasterize triangle using scanline approach
@@ -661,24 +669,25 @@ namespace juceRmlUi
 			// Handle degenerate triangles (all points on a line)
 			if (totalHeight < 2)
 			{
-				const auto x = std::min({ _p0.x, _p1.x, _p2.x });
-				const auto y = _p0.y;
-				const auto w = std::max({ _p0.x, _p1.x, _p2.x }) - x;
-				const auto h = _p2.y - y;
+				const auto x = std::max(triMinX, _clip.Left());
+				const auto y = std::max(static_cast<int>(_p0.y), _clip.Top());
+				const auto w = std::min(triMaxX, _clip.Right()) - x;
+				const auto h = std::min(static_cast<int>(_p2.y), _clip.Bottom() - 1) - y;
 
-				fill<AlphaBlend>(_dst, x, y, w, h, _color);
+				if (w > 0 && h >= 0)
+					fill<AlphaBlend>(_dst, x, y, w, h, _color);
 				return;
 			}
 
 			const auto invAlpha = 255 - _color.a;
 
-			// Clamp Y coordinates to image bounds before loops to avoid per-scanline checks
-			const auto yStart = std::max(0, static_cast<int>(_p0.y));
-			const auto yMid = std::clamp(static_cast<int>(_p1.y), 0, _dst.height - 1);
-			const auto yEnd = std::min(static_cast<int>(_p2.y), _dst.height - 1);
+			// Clamp Y coordinates to clip region before loops to avoid per-scanline checks
+			const auto yStart = std::max(_clip.Top(), static_cast<int>(_p0.y));
+			const auto yMid = std::clamp(static_cast<int>(_p1.y), _clip.Top(), _clip.Bottom() - 1);
+			const auto yEnd = std::min(static_cast<int>(_p2.y), _clip.Bottom() - 1);
 
-			// Early exit if triangle is completely outside
-			if (yStart >= _dst.height || yEnd < 0)
+			// Early exit if triangle is completely outside clip region
+			if (yStart >= _clip.Bottom() || yEnd < _clip.Top())
 				return;
 
 			// Render upper part (from p0 to p1)
@@ -694,7 +703,7 @@ namespace juceRmlUi
 				const auto x0 = _p0.x + (_p2.x - _p0.x) * alpha;
 				const auto x1 = _p0.x + (_p1.x - _p0.x) * beta;
 
-				fillScanline<AlphaBlend>(_dst, yi, x0, x1, _color, invAlpha);
+				fillScanline<AlphaBlend>(_dst, yi, x0, x1, _color, invAlpha, _clip);
 			}
 
 			// Render lower part (from p1 to p2)
@@ -710,7 +719,7 @@ namespace juceRmlUi
 				const auto x0 = _p0.x + (_p2.x - _p0.x) * alpha;
 				const auto x1 = _p1.x + (_p2.x - _p1.x) * beta;
 
-				fillScanline<AlphaBlend>(_dst, yi, x0, x1, _color, invAlpha);
+				fillScanline<AlphaBlend>(_dst, yi, x0, x1, _color, invAlpha, _clip);
 			}
 		}
 	}
@@ -1072,9 +1081,9 @@ namespace juceRmlUi
 
 			// Render the triangle
 			if (col.a < 255)
-				fillTriangle<true>(*m_renderTarget, p0, p1, p2, col);
+				fillTriangle<true>(*m_renderTarget, p0, p1, p2, col, clip);
 			else
-				fillTriangle<false>(*m_renderTarget, p0, p1, p2, col);
+				fillTriangle<false>(*m_renderTarget, p0, p1, p2, col, clip);
 		}
 	}
 
@@ -1582,7 +1591,13 @@ namespace juceRmlUi
 
 				auto& context = m_graphics->getInternalContext();
 
-				context.drawImage(*m_renderImage, juce::AffineTransform());
+				// The render image is at physical pixel dimensions. The Graphics context's
+				// coordinate space is in logical pixels with DPI scaling applied, so we need
+				// to scale down by the physical pixel factor to avoid double-scaling.
+				const auto scale = context.getPhysicalPixelScaleFactor();
+				const auto transform = scale > 1.0f ? juce::AffineTransform::scale(1.0f / scale) : juce::AffineTransform();
+
+				context.drawImage(*m_renderImage, transform);
 			}
 			else
 			{

@@ -19,6 +19,7 @@
 #include "RmlUi/Core/Factory.h"
 #include "RmlUi/Core/PropertyDefinition.h"
 #include "RmlUi/Core/StyleSheetSpecification.h"
+#include "RmlUi/Lua/Lua.h"
 
 namespace juceRmlUi
 {
@@ -60,6 +61,7 @@ namespace juceRmlUi
 		ScopedAccess access(*this);
 
 		Rml::Initialise(m_coreInstance);
+		Rml::Lua::Initialise(m_coreInstance);
 
 		Rml::SetSystemInterface(m_coreInstance, &m_systemInterface);
 		Rml::SetFontEngineInterface(m_coreInstance, &m_fontEngineInterface);

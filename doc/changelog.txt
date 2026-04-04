@@ -4,8 +4,16 @@ Release Notes
 
 Framework:
 
+- [New] EMU-73 Native Metal renderer for macOS, replacing the
+        deprecated OpenGL path. Supports all rendering features
+        including backdrop blur, filters, drop shadows, gradients,
+        clip masking and MSAA.
 - [New] Built-in MCP (Model Context Protocol) server for AI-assisted
         development and automated testing. Enable in Settings > Skins.
+- [New] EMU-70 Lua scripting support for skins. Skin authors can use
+        Lua scripts in RML files to create dynamic UI behavior, read
+        and write synth parameters, and react to parameter changes.
+        See doc/lua_scripting.md for documentation.
 - [Fix] Fix file drag and drop onto part buttons (patch name, part
         slots) not accepting dropped .syx/.mid files
 - [Fix] MIDI Learn: Feedback to host and physical MIDI ports was not
@@ -20,6 +28,8 @@ Framework:
         entries (e.g. Phaser Stages in Osirus)
 - [Fix] BUG-10163 Software renderer: Fix GUI content shifting when
         window is partially off-screen
+- [Fix] BUG-10168 Software renderer: Fix triangle rendering ignoring
+        scissor clip region (settings dialog overflow)
 - [Fix] EMU-42 Patch Manager: Fix file move failures with multiple
         plugin instances in the same DAW
 - [Fix] BUG-10166 Fix slider following knob after double-click
