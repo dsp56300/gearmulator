@@ -5,6 +5,7 @@
 
 #include "RmlUi/Core/Log.h"
 #include "RmlUi/Lua/IncludeLua.h"
+#include "RmlUi/Lua/Interpreter.h"
 
 #include "juce_events/juce_events.h"
 
@@ -209,13 +210,7 @@ namespace rmlPlugin
 		lua_rawgeti(_L, LUA_REGISTRYINDEX, _funcRef);
 		lua_pushinteger(_L, _value);
 		lua_pushstring(_L, _text.c_str());
-		if (lua_pcall(_L, 2, 0, 0) != LUA_OK)
-		{
-			const char* err = lua_tostring(_L, -1);
-			if (err)
-				Rml::Log::Message(Rml::Log::LT_WARNING, "Lua parameter callback error: %s", err);
-			lua_pop(_L, 1);
-		}
+		Rml::Lua::Interpreter::ExecuteCall(_L, 2, 0);
 	}
 
 	LuaParameterListeners::LuaParameterListeners(lua_State* _L, pluginLib::Controller& _controller)
