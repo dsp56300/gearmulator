@@ -261,14 +261,20 @@ namespace mqLib
 		// Set up A's ESAI callback for frame counting + CV notification
 		setupEsaiListener();
 
-		// Drain any stale boot-time output and prime each DSP with fresh input
+		// Drain any stale boot-time output
 		for (auto& dsp : m_dsps)
 		{
 			auto& out = dsp->getPeriph().getEsai().getAudioOutputs();
 			while (!out.empty())
 				out.pop_front();
-			dsp->getPeriph().getEsai().writeEmptyAudioIn(8);
 		}
+
+		// Prefill ESAI inputs scaled by RX divider ratio to prevent fast-RX DSPs
+		// from stalling while the slow A→B link (div 15) catches up.
+		// DSP A: RX div=0 (fast), DSP B: RX div=15 (slow), DSP C: RX div=0 (fast)
+		constexpr size_t prefill[] = {8 * 16, 8, 8 * 16};
+		for (size_t i = 0; i < m_dsps.size(); ++i)
+			m_dsps[i]->getPeriph().getEsai().writeEmptyAudioIn(prefill[i]);
 
 		// Normal ring routing: B→C, C→A via TX callbacks.
 		// A→B handled in processAudio alongside host audio extraction.
