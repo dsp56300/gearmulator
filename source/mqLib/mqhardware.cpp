@@ -73,7 +73,10 @@ namespace mqLib
 	Hardware::~Hardware()
 	{
 		for (auto & dsp : m_dsps)
+		{
 			dsp->getPeriph().getEsai().setCallback({});
+			dsp->getPeriph().getEsai().setWriteTxCallback([](uint64_t&, const dsp56k::Audio::Frame<std::array<unsigned, 6>>&) {});
+		}
 	}
 
 	void Hardware::process()
@@ -174,11 +177,13 @@ namespace mqLib
 		esaiB.setCallback([](dsp56k::Audio*) {});
 		esaiC.setCallback([](dsp56k::Audio*) {});
 
-		// Boot pump loop: route ESAI data in a ring between all 3 DSPs
-		// Ring: A TX → B RX → B TX → C RX → C TX → A RX (matches XT topology)
-		// DSP A sends 0x654300 via HDI08 TX when VE boot is ready
+		// Boot pump loop: route ESAI data along the chain (ADC→B→C→A→DAC).
+		// Physical wiring: B's SDI0/RX0 is connected to the ADC (silence during
+		// boot), B TX1→C RX1, C TX1→A RX1. There is no A→B ESAI link.
+		// We feed empty frames to B (simulating ADC silence), route B→C and C→A,
+		// and drain A's TX output. DSP A sends 0x654300 via HDI08 TX when ready.
 		uint32_t loopCount = 0;
-		uint32_t routedAB = 0, routedBC = 0, routedCA = 0;
+		uint32_t routedBC = 0, routedCA = 0;
 		uint32_t lastStatusLog = 0;
 
 		m_inBootPump = true;
@@ -194,18 +199,13 @@ namespace mqLib
 				auto& txOutA = esaiA.getAudioOutputs();
 				auto& txOutB = esaiB.getAudioOutputs();
 				auto& txOutC = esaiC.getAudioOutputs();
-				auto& rxInA  = esaiA.getAudioInputs();
 				auto& rxInB  = esaiB.getAudioInputs();
 				auto& rxInC  = esaiC.getAudioInputs();
+				auto& rxInA  = esaiA.getAudioInputs();
 
-				// A TX → B RX
-				while (!txOutA.empty() && !rxInB.full())
-				{
-					dsp56k::Audio::RxFrame rx;
-					txToRx(txOutA.pop_front(), rx);
-					rxInB.push_back(std::move(rx));
-					++routedAB;
-				}
+				// ADC → B: feed silence (empty frames) to B's RX, simulating the ADC
+				if (rxInB.empty())
+					rxInB.push_back({});
 
 				// B TX → C RX
 				while (!txOutB.empty() && !rxInC.full())
@@ -224,6 +224,10 @@ namespace mqLib
 					rxInA.push_back(std::move(rx));
 					++routedCA;
 				}
+
+				// Drain A's TX output (goes to DAC on real hardware, nowhere useful during boot)
+				while (!txOutA.empty())
+					txOutA.pop_front();
 			}
 
 			++loopCount;
@@ -233,13 +237,13 @@ namespace mqLib
 			{
 				lastStatusLog = loopCount;
 				LOG("Boot pump status: loop=" << loopCount
-					<< " AB=" << routedAB << " BC=" << routedBC << " CA=" << routedCA
+					<< " BC=" << routedBC << " CA=" << routedCA
 					<< " bootCompleted=" << m_bootCompleted
 					<< " threads=" << m_dsps[0]->hasThread() << m_dsps[1]->hasThread() << m_dsps[2]->hasThread());
 			}
 
-			// Exit when UC firmware signals boot complete AND all 3 DSPs have exchanged
-			// ESAI data in the ring (C→A confirms full ring routing is working)
+			// Exit when UC firmware signals boot complete AND the chain has
+			// routed data (C→A confirms B→C→A path is working)
 			if (m_bootCompleted && routedCA > 0)
 				break;
 
@@ -270,50 +274,38 @@ namespace mqLib
 		// Set up A's ESAI callback for frame counting + CV notification
 		setupEsaiListener();
 
-		// Normal ring routing: B→C, C→A via TX callbacks.
-		// A→B handled in processAudio alongside host audio extraction.
+		// Post-boot ESAI chain routing: B→C and C→A via direct TX callbacks.
+		// These fire from the DSP thread when a TX frame completes, bypassing
+		// the TX output ring buffer entirely. Audio input is fed to DSP B in
+		// processAudio (ADC→B→C→A→DAC).
 
-		m_dsps[1]->getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
+		auto& rxInC = m_dsps[2]->getPeriph().getEsai().getAudioInputs();
+		auto& rxInA = m_dsps[0]->getPeriph().getEsai().getAudioInputs();
+
+		m_dsps[1]->getPeriph().getEsai().setWriteTxCallback([&rxInC](uint64_t& _frameIndex, const dsp56k::Audio::TxFrame& _tx)
 		{
-			auto& txOut = _audio->getAudioOutputs();
-			auto& rxIn  = m_dsps[2]->getPeriph().getEsai().getAudioInputs();
-			while (!txOut.empty())
-			{
-				dsp56k::Audio::RxFrame rx;
-				txToRx(txOut.front(), rx);
-				txOut.pop_front();
-				rxIn.push_back(std::move(rx));
-			}
+			dsp56k::Audio::RxFrame rx;
+			txToRx(_tx, rx);
+			rxInC.push_back(std::move(rx));
+			++_frameIndex;
 		});
 
-		m_dsps[2]->getPeriph().getEsai().setCallback([this](dsp56k::Audio* _audio)
+		m_dsps[2]->getPeriph().getEsai().setWriteTxCallback([&rxInA](uint64_t& _frameIndex, const dsp56k::Audio::TxFrame& _tx)
 		{
-			auto& txOut = _audio->getAudioOutputs();
-			auto& rxIn  = m_dsps[0]->getPeriph().getEsai().getAudioInputs();
-			while (!txOut.empty())
-			{
-				dsp56k::Audio::RxFrame rx;
-				txToRx(txOut.front(), rx);
-				txOut.pop_front();
-				rxIn.push_back(std::move(rx));
-			}
+			dsp56k::Audio::RxFrame rx;
+			txToRx(_tx, rx);
+			rxInA.push_back(std::move(rx));
+			++_frameIndex;
 		});
-
-		// Prefill ESAI inputs scaled by RX divider ratio to prevent fast-RX DSPs
-		// from stalling while the slow A→B link (div 15) catches up.
-		// DSP A: RX div=0 (fast), DSP B: RX div=15 (slow), DSP C: RX div=0 (fast)
-		constexpr size_t prefill[] = {8 * 16, 8, 8 * 16};
-		for (size_t i = 0; i < m_dsps.size(); ++i)
-			m_dsps[i]->getPeriph().getEsai().writeEmptyAudioIn(prefill[i]);
 
 		/*
 		// Dump all DSP P memories as disassembly
 		const char* dspNames[] = {"A", "B", "C"};
 		for (uint32_t i = 0; i < m_dsps.size(); ++i)
 		{
-			const auto filename = std::string("mqDsp") + dspNames[i] + "_P.asm";
-			const auto& mem = m_dsps[i].dsp().memory();
-			mem.saveAssembly(filename.c_str(), 0, MqDsp::g_pMemSize, false, false);
+			const auto filename = std::string("e:\\mqDsp") + dspNames[i] + "_P.asm";
+			const auto& mem = m_dsps[i]->dsp().memory();
+			mem.saveAssembly(filename.c_str(), 0, MqDsp::g_pMemSize, false, false, m_dsps[i]->dsp().getPeriph(0), m_dsps[i]->dsp().getPeriph(1));
 			LOG("Saved DSP " << dspNames[i] << " P memory to " << filename);
 		}
 		*/
@@ -381,6 +373,15 @@ namespace mqLib
 		m_midi.write({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x07,0x02,0xf7});	// Control Send = SysEx
 		m_midi.write({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x08,0x01,0xf7});	// Control Receive = on
 		m_bootCompleted = true;
+
+		/*
+		if (m_dsps.size() == 1)
+		{
+			const auto filename = std::string("e:\\mqDspSingle_P.asm");
+			const auto& mem = m_dsps[0]->dsp().memory();
+			mem.saveAssembly(filename.c_str(), 0, MqDsp::g_pMemSize, false, false, m_dsps[0]->dsp().getPeriph(0), m_dsps[0]->dsp().getPeriph(1));
+		}
+		*/
 	}
 
 	void Hardware::processAudio(uint32_t _frames, uint32_t _latency)
@@ -430,12 +431,14 @@ namespace mqLib
 
 			if (m_useVoiceExpansion)
 			{
-				// VE mode: B→C and C→A routing is handled by continuous TX callbacks
-				// (set up in initVoiceExpansion). processAudioOutput pops each frame
-				// from A's output, extracts host audio, and routes A→B to complete
-				// the ring.
-				auto& rxInB = m_dsps[1]->getPeriph().getEsai().getAudioInputs();
+				// VE topology is a chain, not a ring: ADC→B→C→A→DAC
+				// Feed host audio input to DSP B (the expansion DSP whose
+				// SDI0/RX0 is wired to the ADC on real hardware).
+				m_dsps[1]->getPeriph().getEsai().processAudioInputInterleaved(inputs, processCount, _latency);
 
+				// B→C and C→A routing is handled by continuous TX callbacks
+				// (set up in initVoiceExpansion). Extract host audio output
+				// from DSP A's TX.
 				esai.processAudioOutput<dsp56k::TWord>(processCount, [&](size_t _frame, dsp56k::Audio::TxFrame& _tx)
 				{
 					if(!_tx.empty())
@@ -456,15 +459,6 @@ namespace mqLib
 							outputs[ 9][_frame] = _tx[1][4];
 							outputs[11][_frame] = _tx[1][5];
 						}
-					}
-
-					// Route A→B to complete the ring
-//					if (!rxInB.full())
-					{
-						dsp56k::Audio::RxFrame rx;
-//						rx.resize(_tx.size());
-						txToRx(_tx, rx);
-						rxInB.push_back(std::move(rx));
 					}
 				});
 			}
