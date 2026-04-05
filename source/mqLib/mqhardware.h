@@ -69,6 +69,7 @@ namespace mqLib
 
 	private:
 		void setupEsaiListener();
+		void setupEsaiClockDividers();
 		void hdiProcessUCtoDSPNMIIrq();
 		void processUcCycle();
 		void setGlobalDefaultParameters();

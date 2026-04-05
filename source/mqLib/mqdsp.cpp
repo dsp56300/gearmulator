@@ -198,6 +198,14 @@ namespace mqLib
 			m_dsp.getJit().notifyProgramMemWrite(i);
 		}
 
+		// resetHW() clears Port C, but expansion DSPs need bit 4 (FST/GPIO)
+		// set high to detect the VE clock signal. Re-apply after each reset.
+		if (m_index > 0 && m_hardware.useVoiceExpansion())
+		{
+			m_periphX.getPortC().setControl(0x10);
+			m_periphX.getPortC().hostWrite(0x10);
+		}
+
 		// Prime ESAI input with empty frames for boot pump routing.
 		// resetHW() now properly resets ESAI (clearing buffers and registers),
 		// so we just need to seed the input for the ESAI ring to start flowing.

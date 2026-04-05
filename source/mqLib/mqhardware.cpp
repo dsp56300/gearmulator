@@ -54,9 +54,7 @@ namespace mqLib
 
 			// Set ESAI clock dividers immediately so frame rates are aligned from
 			// the very first frame, including during boot.
-			m_dsps[0]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[0]->getPeriph().getEsai(), 15, 0);
-			m_dsps[1]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[1]->getPeriph().getEsai(), 0, 15);
-			m_dsps[2]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[2]->getPeriph().getEsai(), 0, 0);
+			setupEsaiClockDividers();
 		}
 		else
 		{
@@ -238,6 +236,7 @@ namespace mqLib
 				lastStatusLog = loopCount;
 				LOG("Boot pump status: loop=" << loopCount
 					<< " BC=" << routedBC << " CA=" << routedCA
+					<< " resets=" << m_veResetCount
 					<< " bootCompleted=" << m_bootCompleted
 					<< " threads=" << m_dsps[0]->hasThread() << m_dsps[1]->hasThread() << m_dsps[2]->hasThread());
 			}
@@ -250,7 +249,7 @@ namespace mqLib
 			std::this_thread::yield();
 		}
 
-		LOG("Voice Expansion initialization completed");
+		LOG("Voice Expansion initialization completed after " << m_veResetCount << " resets");
 
 		// Block further DSP resets BEFORE clearing boot pump flag.
 		// Otherwise the UC thread can see m_inBootPump=false while
@@ -311,6 +310,19 @@ namespace mqLib
 		*/
 	}
 
+	void Hardware::setupEsaiClockDividers()
+	{
+		if (!m_useVoiceExpansion)
+			return;
+
+		// DSP A: txWC=1 (2-slot TX, slow), rxWC=31 (32-slot RX, fast)
+		// DSP B: txWC=31 (32-slot TX, fast), rxWC=1 (2-slot RX, slow)
+		// DSP C: txWC=31, rxWC=31 (both 32-slot, no adjustment needed)
+		m_dsps[0]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[0]->getPeriph().getEsai(), 15, 0);
+		m_dsps[1]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[1]->getPeriph().getEsai(), 0, 15);
+		m_dsps[2]->getPeriph().getEsaiClock().setEsaiDivider(&m_dsps[2]->getPeriph().getEsai(), 0, 0);
+	}
+
 	void Hardware::setupEsaiListener()
 	{
 		auto& esaiA = m_dsps.front()->getPeriph().getEsai();
@@ -355,6 +367,9 @@ namespace mqLib
 					std::lock_guard lock(m_esaiBootMutex);
 					for (auto& dsp : m_dsps)
 						dsp->resetState();
+
+					// Re-apply ESAI clock dividers cleared by resetHW()
+					setupEsaiClockDividers();
 				}
 
 				++m_veResetCount;
@@ -373,6 +388,7 @@ namespace mqLib
 		m_midi.write({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x07,0x02,0xf7});	// Control Send = SysEx
 		m_midi.write({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x08,0x01,0xf7});	// Control Receive = on
 		m_bootCompleted = true;
+		LOG("Boot completed (m_bootCompleted=true)");
 
 		/*
 		if (m_dsps.size() == 1)
