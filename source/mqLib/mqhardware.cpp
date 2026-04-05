@@ -258,23 +258,17 @@ namespace mqLib
 		// (before any DSP threads started) to ensure frame rates are aligned
 		// from the very first frame.
 
-		// Set up A's ESAI callback for frame counting + CV notification
-		setupEsaiListener();
-
 		// Drain any stale boot-time output
 		for (auto& dsp : m_dsps)
 		{
 			auto& out = dsp->getPeriph().getEsai().getAudioOutputs();
-			while (!out.empty())
+			auto& in  = dsp->getPeriph().getEsai().getAudioInputs();
+			while (!out.empty() || !in.empty())
 				out.pop_front();
 		}
 
-		// Prefill ESAI inputs scaled by RX divider ratio to prevent fast-RX DSPs
-		// from stalling while the slow A→B link (div 15) catches up.
-		// DSP A: RX div=0 (fast), DSP B: RX div=15 (slow), DSP C: RX div=0 (fast)
-		constexpr size_t prefill[] = {8 * 16, 8, 8 * 16};
-		for (size_t i = 0; i < m_dsps.size(); ++i)
-			m_dsps[i]->getPeriph().getEsai().writeEmptyAudioIn(prefill[i]);
+		// Set up A's ESAI callback for frame counting + CV notification
+		setupEsaiListener();
 
 		// Normal ring routing: B→C, C→A via TX callbacks.
 		// A→B handled in processAudio alongside host audio extraction.
@@ -285,12 +279,7 @@ namespace mqLib
 			auto& rxIn  = m_dsps[2]->getPeriph().getEsai().getAudioInputs();
 			while (!txOut.empty())
 			{
-/*				if (rxIn.full())
-				{
-					txOut.pop_front();
-					continue;
-				}
-*/				dsp56k::Audio::RxFrame rx;
+				dsp56k::Audio::RxFrame rx;
 				txToRx(txOut.front(), rx);
 				txOut.pop_front();
 				rxIn.push_back(std::move(rx));
@@ -303,17 +292,20 @@ namespace mqLib
 			auto& rxIn  = m_dsps[0]->getPeriph().getEsai().getAudioInputs();
 			while (!txOut.empty())
 			{
-/*				if (rxIn.full())
-				{
-					txOut.pop_front();
-					continue;
-				}
-*/				dsp56k::Audio::RxFrame rx;
+				dsp56k::Audio::RxFrame rx;
 				txToRx(txOut.front(), rx);
 				txOut.pop_front();
 				rxIn.push_back(std::move(rx));
 			}
 		});
+
+		// Prefill ESAI inputs scaled by RX divider ratio to prevent fast-RX DSPs
+		// from stalling while the slow A→B link (div 15) catches up.
+		// DSP A: RX div=0 (fast), DSP B: RX div=15 (slow), DSP C: RX div=0 (fast)
+		constexpr size_t prefill[] = {8 * 16, 8, 8 * 16};
+		for (size_t i = 0; i < m_dsps.size(); ++i)
+			m_dsps[i]->getPeriph().getEsai().writeEmptyAudioIn(prefill[i]);
+
 		/*
 		// Dump all DSP P memories as disassembly
 		const char* dspNames[] = {"A", "B", "C"};
@@ -352,27 +344,6 @@ namespace mqLib
 
 		for (auto& dsp : m_dsps)
 			dsp->hdiTransferDSPtoUC();
-
-		// Periodic DSP PC bounds check - catch corruption before JIT crash.
-		// Checks during both boot and runtime (whenever a DSP thread exists).
-		for (auto& dsp : m_dsps)
-		{
-			if (dsp->hasThread())
-			{
-				const auto pc = dsp->dsp().getPC().toWord();
-				if (pc >= MqDsp::g_pMemSize)
-				{
-					static bool logged = false;
-					if (!logged)
-					{
-						logged = true;
-						LOG("CRITICAL: DSP " << dsp->getIndex() << " PC out of bounds: " << HEX(pc));
-						for (auto& d : m_dsps)
-							d->dumpHdiLog();
-					}
-				}
-			}
-		}
 
 		if(m_uc.requestDSPReset() && !m_voiceExpansionReady)
 		{
