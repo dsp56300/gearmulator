@@ -4,6 +4,8 @@
 
 #include "baseLib/logging.h"
 
+#include <thread>
+
 #if DSP56300_DEBUGGER
 #include "dsp56kDebugger/debugger.h"
 #endif
@@ -242,7 +244,15 @@ namespace mqLib
 
 		hdi08().injectTXInterrupt();
 
-		if (_needMoreData && m_hardware.getEsaiFrameIndex() > 0)
+		// During VE boot, the UC polls DSP A's HDI08 RX for the magic $654300.
+		// We can't block/sleep the UC (DSPs need ongoing UC interaction at
+		// real-time pace), but a scheduler yield gives DSP threads a chance
+		// to run without meaningfully slowing the UC.
+		if (_needMoreData && m_index == 0 && m_hardware.useVoiceExpansion() && !m_receivedMagicEsaiPacket)
+		{
+			std::this_thread::yield();
+		}
+		else if (_needMoreData && m_hardware.getEsaiFrameIndex() > 0)
 		{
 			m_hardware.ucYieldLoop([&]()
 			{
