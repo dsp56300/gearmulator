@@ -297,6 +297,9 @@ namespace mqLib
 			++_frameIndex;
 		});
 
+		// prefill just a few samples to initiate execution, DSP B is the one needing input as its the one receiving the ADC signal
+		m_dsps[1]->getPeriph().getEsai().writeEmptyAudioIn(4);
+
 		/*
 		// Dump all DSP P memories as disassembly
 		const char* dspNames[] = {"A", "B", "C"};
