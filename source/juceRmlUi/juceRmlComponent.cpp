@@ -418,6 +418,11 @@ namespace juceRmlUi
 
 		if (!m_rmlContext)
 			createRmlContext(nullptr);
+
+		// Allow update() to proceed. Without this, the update/render
+		// cycle deadlocks after a renderer switch because m_renderDone
+		// defaults to false and update() waits for it.
+		m_renderDone = true;
 	}
 
 	void RmlComponent::renderMetal(MetalContext& _context)
