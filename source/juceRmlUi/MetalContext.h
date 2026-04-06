@@ -61,6 +61,8 @@ namespace juceRmlUi
 		void* m_device = nullptr;
 		void* m_commandQueue = nullptr;
 		void* m_metalLayer = nullptr;
+		void* m_metalView = nullptr;
+		void* m_viewAttachment = nullptr; // juce::ReferenceCountedObject* via bridging
 
 		Listener* m_listener = nullptr;
 		juce::Component* m_component = nullptr;
