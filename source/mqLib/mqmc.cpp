@@ -81,15 +81,6 @@ namespace mqLib
 
 	uint32_t MqMc::exec()
 	{
-//		if(g_instructionCounter >= 17300000)
-//			MCLOG("Exec @ " << MCHEX(getPC()));
-/*
-		g_lastPCs.push_back(getPC());
-		if(g_lastPCs.size() > 100)
-			g_lastPCs.pop_front();
-*/
-//		++g_instructionCounter;
-
 		const uint32_t deltaCycles = Mc68k::exec();
 
 		m_hdi08a.exec(deltaCycles);
@@ -347,9 +338,6 @@ namespace mqLib
 			{
 				if(!m_dspResetRequest)
 				{
-#ifdef _DEBUG
-					MCLOG("Request DSP RESET");
-#endif
 					m_dspResetRequest = true;
 					m_dspResetCompleted = false;
 				}

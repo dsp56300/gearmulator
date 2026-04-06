@@ -244,20 +244,23 @@ namespace mqLib
 
 		hdi08().injectTXInterrupt();
 
-		// During VE boot, the UC polls DSP A's HDI08 RX for the magic $654300.
-		// We can't block/sleep the UC (DSPs need ongoing UC interaction at
-		// real-time pace), but a scheduler yield gives DSP threads a chance
-		// to run without meaningfully slowing the UC.
-		if (_needMoreData && m_index == 0 && m_hardware.useVoiceExpansion() && !m_receivedMagicEsaiPacket)
+		if (_needMoreData)
 		{
-			std::this_thread::yield();
-		}
-		else if (_needMoreData && m_hardware.getEsaiFrameIndex() > 0)
-		{
-			m_hardware.ucYieldLoop([&]()
+			if (m_hardware.getEsaiFrameIndex() > 0)
 			{
-				return dsp().hasPendingInterrupts() || (hdi08().txInterruptEnabled() && !hdi08().hasTX());
-			});
+				m_hardware.ucYieldLoop([&]()
+				{
+					return dsp().hasPendingInterrupts() || (hdi08().txInterruptEnabled() && !hdi08().hasTX());
+				});
+			}
+			else if (m_index == 0 && m_hardware.useVoiceExpansion() && !m_receivedMagicEsaiPacket)
+			{
+				// During VE boot, the UC polls DSP A's HDI08 RX for the magic $654300.
+				// We can't block/sleep the UC (DSPs need ongoing UC interaction at
+				// real-time pace), but a scheduler yield gives DSP threads a chance
+				// to run without meaningfully slowing the UC.
+				std::this_thread::yield();
+			}
 		}
 
 		hdiTransferDSPtoUC();
