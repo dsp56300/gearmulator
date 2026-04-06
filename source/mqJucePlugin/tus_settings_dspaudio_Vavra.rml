@@ -8,7 +8,7 @@
 		<settingsspacer1/>
 		<div id="btVoiceExpansion" class="settings-checkboxwithlabel">
 			<button id="button" class="settings-checkbox"/>
-			<label>Enable Voice Expansion (3x DSPs, requires reboot)</label>
+			<label>Enable Voice Expansion (3x DSPs, reboots device)</label>
 		</div>
 	</div>
 	<settingsspacer1/>

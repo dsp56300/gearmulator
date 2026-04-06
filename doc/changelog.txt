@@ -8,12 +8,11 @@ Framework:
         deprecated OpenGL path. Supports all rendering features
         including backdrop blur, filters, drop shadows, gradients,
         clip masking and MSAA.
-- [New] Built-in MCP (Model Context Protocol) server for AI-assisted
-        development and automated testing. Enable in Settings > Skins.
 - [New] EMU-70 Lua scripting support for skins. Skin authors can use
         Lua scripts in RML files to create dynamic UI behavior, read
         and write synth parameters, and react to parameter changes.
         See doc/lua_scripting.md for documentation.
+
 - [Fix] Fix file drag and drop onto part buttons (patch name, part
         slots) not accepting dropped .syx/.mid files
 - [Fix] MIDI Learn: Feedback to host and physical MIDI ports was not
@@ -51,6 +50,18 @@ JE8086:
 - [Fix] EMU-58 Trancy skin: Fix settings dialog font size
 - [Fix] BUG-10161 Fix saved performances split into separate entries
         after DAW restart
+
+Vavra:
+
+- [New] EMU-48 Voice expansion: Emulates 3x DSP configuration for
+        75-voice polyphony. Enable in Settings > DSP/Audio. Setting is
+        preserved per instance, default is off
+
+Xenia:
+
+- [New] EMU-48 Voice expansion: Emulates 3x DSP configuration for
+        30-voice polyphony. Enable in Settings > DSP/Audio. Setting is
+        preserved per instance, default is off
 
 NodalRed2x:
 
