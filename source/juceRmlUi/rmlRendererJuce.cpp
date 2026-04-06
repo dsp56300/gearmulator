@@ -1579,7 +1579,7 @@ namespace juceRmlUi
 		}
 	}
 
-	void RendererJuce::endFrame(const juce::Image& _renderTarget)
+	void RendererJuce::endFrame(const juce::Image& _renderTarget, const float _renderScale/* = 1.0f*/)
 	{
 		// copy render target to juce::Image
 		{
@@ -1591,11 +1591,10 @@ namespace juceRmlUi
 
 				auto& context = m_graphics->getInternalContext();
 
-				// The render image is at physical pixel dimensions. The Graphics context's
-				// coordinate space is in logical pixels with DPI scaling applied, so we need
-				// to scale down by the physical pixel factor to avoid double-scaling.
-				const auto scale = context.getPhysicalPixelScaleFactor();
-				const auto transform = scale > 1.0f ? juce::AffineTransform::scale(1.0f / scale) : juce::AffineTransform();
+				// The render image may be larger than the component's logical bounds (when
+				// rendered at a DPI scale > 1). Scale down by the render scale so the image
+				// maps to logical coordinates correctly.
+				const auto transform = _renderScale != 1.0f ? juce::AffineTransform::scale(1.0f / _renderScale) : juce::AffineTransform();
 
 				context.drawImage(*m_renderImage, transform);
 			}

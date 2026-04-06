@@ -1005,7 +1005,7 @@ namespace juceRmlUi
 
 		m_renderProxy->executeRenderFunctions();
 
-		r->endFrame(useDirectPath ? img : juce::Image());
+		r->endFrame(useDirectPath ? img : juce::Image(), getOpenGLRenderingScale());
 
 		m_renderDone = true;
 	}
