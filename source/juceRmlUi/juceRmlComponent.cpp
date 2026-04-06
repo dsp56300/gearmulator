@@ -437,9 +437,6 @@ namespace juceRmlUi
 
 		const auto size = getRenderSize();
 		if (size.x <= 0 || size.y <= 0) return;
-		static int renderCount = 0;
-		if (renderCount++ < 3) Rml::Log::Message(Rml::Log::LT_INFO, "renderMetal: %dx%d", size.x, size.y);
-
 		auto* drawable = _context.nextDrawable();
 		if (!drawable) return;
 
