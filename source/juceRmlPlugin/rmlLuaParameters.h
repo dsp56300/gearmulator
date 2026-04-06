@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <cstdint>
 
 #include "baseLib/event.h"
 #include "jucePluginLib/parameterlistener.h"
