@@ -22,7 +22,7 @@ namespace mqLib
 		return RomLoader::findROM();
 	}
 
-	MicroQ::MicroQ(BootMode _bootMode/* = BootMode::Default*/, const std::vector<uint8_t>& _romData, const std::string& _romName)
+	MicroQ::MicroQ(BootMode _bootMode/* = BootMode::Default*/, const std::vector<uint8_t>& _romData, const std::string& _romName, const bool _voiceExpansion/* = false*/)
 	{
 		const ROM romFile = initRom(_romData, _romName);
 
@@ -31,7 +31,7 @@ namespace mqLib
 
 		MCLOG("Boot using ROM " << romFile.getFilename());
 
-		m_hw.reset(new Hardware(romFile));
+		m_hw.reset(new Hardware(romFile, _voiceExpansion));
 
 		if(!isValid())
 			return;
@@ -79,6 +79,9 @@ namespace mqLib
 		m_hw->processAudio(1);
 
 		m_destroy = true;
+
+		// Break any active ucYieldLoop so the UC thread can check m_destroy
+		m_hw->requestUcTermination();
 
 		// DSP needs to run to let the uc thread wake up
 		const auto& esai = m_hw->getDSP().getPeriph().getEsai();

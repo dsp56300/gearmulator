@@ -12,11 +12,35 @@
 
 #include "mqConsoleLib/mqSettingsGui.h"
 
+#ifdef _WIN32
+#include <crtdbg.h>
+#include <csignal>
+#endif
+
 using ButtonType = mqLib::Buttons::ButtonType;
 using EncoderType = mqLib::Buttons::Encoders;
 
 int main(int _argc, char* _argv[])
 {
+#ifdef _WIN32
+	// Redirect debug assertions to stderr instead of popup dialog
+	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
+
+	bool voiceExpansion = false;
+
+	for(int i = 1; i < _argc; ++i)
+	{
+		const std::string arg(_argv[i]);
+		if(arg == "--multi-dsp")
+			voiceExpansion = true;
+	}
+
+	std::cout << "DSP mode: " << (voiceExpansion ? "multi (VE)" : "single") << std::endl;
 	std::cout << "Running unit tests..." << std::endl;
 
 	try
@@ -34,7 +58,7 @@ int main(int _argc, char* _argv[])
 	std::cout << "Unit tests passed" << std::endl;
 
 	// create hardware
-	mqLib::MicroQ mq(mqLib::BootMode::Default);
+	mqLib::MicroQ mq(mqLib::BootMode::Default, {}, {}, voiceExpansion);
 
 	if(!mq.isValid())
 	{
@@ -45,13 +69,14 @@ int main(int _argc, char* _argv[])
 
 	dsp56k::ThreadTools::setCurrentThreadName("main");
 
+	// WAV writer for main stereo output
 	synthLib::AsyncWriter writer("mqOutput.wav", 44100, false);
 
 	constexpr uint32_t blockSize = 64;
-	std::vector<dsp56k::TWord> stereoOutput;
-	stereoOutput.resize(blockSize * 2);
+	std::vector<dsp56k::TWord> stereoBuf(blockSize * 2);
 
 	bool waitingForBoot = true;
+	bool waitingForInitSound = false;
 	int counter = -1;
 
 	std::cout << "Device booting..." << std::endl;
@@ -63,15 +88,46 @@ int main(int _argc, char* _argv[])
 	int lcdPrintTimer = -1;
 	bool foundEndText = false;
 
+	// Helper to check LCD content
+	auto getLcdLine = [&](int line) -> std::string
+	{
+		const auto& lcdData = mq.getHardware()->getUC().getLcd().getDdRam();
+		auto printData = lcdData;
+		for (char& c : printData)
+		{
+			const auto u = static_cast<uint8_t>(c);
+			if(u < 32 || u > 127)
+				c = '?';
+		}
+		return std::string(&printData[line * 20], 20);
+	};
+
+	bool demoStarted = false;
+	int playRetryCounter = 0;
+
 	while(true)
 	{
+
 		if(waitingForBoot && mq.isBootCompleted())
 		{
 			std::cout << "Boot completed" << std::endl;
 
 			waitingForBoot = false;
 			mq.setButton(ButtonType::Play, false);
-			counter = 80000 / blockSize;
+
+			// In VE mode boot takes longer; wait for "Init Sound" on LCD
+			waitingForInitSound = true;
+		}
+
+		if(waitingForInitSound)
+		{
+			const auto lineB = getLcdLine(1);
+			if(lineB.find("Init Sound") != std::string::npos)
+			{
+				std::cout << "Init Sound detected, starting demo sequence" << std::endl;
+				waitingForInitSound = false;
+				counter = 80000 / blockSize;
+			}
 		}
 
 		if(counter > 0)
@@ -100,7 +156,12 @@ int main(int _argc, char* _argv[])
 			{
 				mq.setButton(ButtonType::Play, false);
 
-				mq.getHardware()->getDspThread().setLogToStdout(true);
+				mq.getHardware()->getDspThread(0).setLogToStdout(true);
+				if (mq.getHardware()->getDspCount() > 1)
+				{
+					mq.getHardware()->getDspThread(1).setLogToStdout(true);
+					mq.getHardware()->getDspThread(2).setLogToStdout(true);
+				}
 			}
 		}
 		else
@@ -125,12 +186,28 @@ int main(int _argc, char* _argv[])
 				const auto lineB = std::string(&printData[20], 20);
 				std::cout << "LCD: '" << lineA << "'" << std::endl << "LCD: '" << lineB << "'" << std::endl;
 
+				// In VE mode, the demo prompt may appear after Play was already
+				// pressed. Detect the prompt and press Play again.
+				if(!demoStarted && lineA.find("Press <Play>") != std::string::npos)
+				{
+					std::cout << "Demo prompt detected, pressing Play again" << std::endl;
+					mq.setButton(ButtonType::Play, true);
+					playRetryCounter = 5000 / blockSize;
+				}
+
 				const auto hasEndText = lineA.find(" ...DEEPER ") != std::string::npos;
 
 				if(hasEndText)
 					foundEndText = true;
 				else if(foundEndText)
 					break;
+			}
+
+			// Release Play after retry press
+			if(playRetryCounter > 0 && --playRetryCounter == 0)
+			{
+				mq.setButton(ButtonType::Play, false);
+				demoStarted = true;
 			}
 		}
 
@@ -142,21 +219,18 @@ int main(int _argc, char* _argv[])
 
 			for(size_t i=0; i<blockSize; ++i)
 			{
-				stereoOutput[(i<<1)  ] = outs[0][i];
-				stereoOutput[(i<<1)+1] = outs[1][i];
+				stereoBuf[(i<<1)  ] = outs[0][i];
+				stereoBuf[(i<<1)+1] = outs[1][i];
 			}
 
-			writer.append([&](std::vector<dsp56k::TWord>& _wavOut)
+			writer.append([&stereoBuf](std::vector<dsp56k::TWord>& _wavOut)
 			{
-				_wavOut.insert(_wavOut.end(), stereoOutput.begin(), stereoOutput.end());
+				_wavOut.insert(_wavOut.end(), stereoBuf.begin(), stereoBuf.end());
 			});
 		}
 	}
 
 	std::cout << '\a';
-
-	std::cout << "Demo Playback has ended, press key to exit" << std::endl;
-
 	std::cin.ignore();
 
 	return 0;

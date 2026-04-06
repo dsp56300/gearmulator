@@ -1,5 +1,6 @@
 #include "xt.h"
 
+#include "xtBuildconfig.h"
 #include "synthLib/midiTypes.h"
 
 #include "dsp56kBase/threadtools.h"
@@ -9,9 +10,9 @@
 
 namespace xt
 {
-	Xt::Xt(const std::vector<uint8_t>& _romData, const std::string& _romName)
+	Xt::Xt(const std::vector<uint8_t>& _romData, const std::string& _romName, const bool _voiceExpansion/* = false*/)
 	{
-		m_hw.reset(new Hardware(_romData, _romName));
+		m_hw.reset(new Hardware(_romData, _romName, _voiceExpansion));
 
 		if(!isValid())
 			return;
@@ -51,7 +52,7 @@ namespace xt
 		m_destroy = true;
 
 		// DSP needs to run to let the uc thread wake up
-		const auto& esai = m_hw->getDSP().getPeriph().getEssi0();
+		const auto& esai = m_hw->getDSP(m_hw->getMainDspIdx()).getPeriph().getEssi0();
 		while(m_destroy)
 		{
 			if(!esai.getAudioOutputs().empty())

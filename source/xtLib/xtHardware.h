@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
+#include "xtBuildconfig.h"
 #include "xtDSP.h"
 #include "xtRom.h"
 #include "xtUc.h"
@@ -17,22 +21,22 @@ namespace xt
 
 	class Hardware : public wLib::Hardware
 	{
-		static constexpr uint32_t g_dspCount = 1;
-
 	public:
-		explicit Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName);
+		explicit Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName, bool _voiceExpansion = false);
 		~Hardware() override;
 
 		void process();
 
 		XtUc& getUC() { return m_uc; }
-		DSP& getDSP(uint32_t _index = 0) { return m_dsps[_index]; }
+		DSP& getDSP(uint32_t _index = 0) { return *m_dsps[_index]; }
+		uint32_t getDspCount() const { return static_cast<uint32_t>(m_dsps.size()); }
+		uint32_t getMainDspIdx() const { return m_useVoiceExpansion ? 2 : 0; }
 		uint64_t getUcCycles() const { return m_uc.getCycles(); }
 
 		auto& getAudioInputs() { return m_audioInputs; }
 		auto& getAudioOutputs() { return m_audioOutputs; }
 
-		dsp56k::DSPThread& getDspThread(uint32_t _index = 0) { return m_dsps[_index].thread(); }
+		dsp56k::DSPThread& getDspThread(uint32_t _index = 0) { return m_dsps[_index]->thread(); }
 
 		void processAudio(uint32_t _frames, uint32_t _latency = 0);
 
@@ -50,6 +54,8 @@ namespace xt
 
 		void initVoiceExpansion();
 
+		bool useVoiceExpansion() const { return m_useVoiceExpansion; }
+
 		hwLib::SciMidi& getMidi() override
 		{
 			return m_midi;
@@ -65,11 +71,12 @@ namespace xt
 		void processUcCycle();
 
 		const Rom m_rom;
+		const bool m_useVoiceExpansion;
 
 		XtUc m_uc;
 		TAudioInputs m_audioInputs;
 		TAudioOutputs m_audioOutputs;
-		std::array<DSP,g_dspCount> m_dsps;
+		std::vector<std::unique_ptr<DSP>> m_dsps;
 		SciMidi m_midi;
 	};
 }

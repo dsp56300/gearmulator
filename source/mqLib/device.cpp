@@ -9,7 +9,7 @@ namespace mqLib
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params)
 		: wLib::Device(_params)
-		, m_mq(BootMode::Default, _params.romData, _params.romName)
+		, m_mq(BootMode::Default, _params.romData, _params.romName, (_params.customData & 1) != 0)
 		, m_state(m_mq)
 		, m_sysexRemote(m_mq)
 	{

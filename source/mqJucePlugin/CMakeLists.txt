@@ -16,6 +16,7 @@ set(SOURCES
 	mqPartSelect.cpp mqPartSelect.h
 	mqPatchManager.cpp mqPatchManager.h
 	mqPatchBrowser.h
+	mqSettingsDspAudio.cpp mqSettingsDspAudio.h
 
 	skins/mqDefault/mqDefault.rml
 	skins/mqDefault/mqDefault.rcss
@@ -24,7 +25,10 @@ set(SOURCES
 	skins/mqFrontPanel/mqFrontPanel.rcss
 )
 
-SET(ASSETS "parameterDescriptions_mq.json")
+SET(ASSETS
+	"parameterDescriptions_mq.json"
+	"tus_settings_dspaudio_Vavra.rml"
+)
 
 addSkin("Vavra" "mqDefault" "skins/mqDefault" "mqDefault.rml")
 addSkin("Vavra" "mqFrontPanel" "skins/mqFrontPanel" "mqFrontPanel.rml")

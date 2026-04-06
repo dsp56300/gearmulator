@@ -7,6 +7,8 @@
 #include "BinaryData.h"
 #include "jucePluginLib/processorPropertiesInit.h"
 
+#include "baseLib/binarystream.h"
+
 #include "mqLib/device.h"
 #include "mqLib/romloader.h"
 
@@ -51,14 +53,20 @@ namespace mqJucePlugin
 	{
 		return new PluginEditorState(*this);
 	}
+
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()
 	{
-		return new mqLib::Device({});
+		synthLib::DeviceCreateParams p;
+		getRemoteDeviceParams(p);
+		return new mqLib::Device(p);
 	}
 
 	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
 	{
 		Processor::getRemoteDeviceParams(_params);
+
+		if (m_voiceExpansion)
+			_params.customData |= 1;
 
 		const auto rom = mqLib::RomLoader::findROM();
 
@@ -72,6 +80,43 @@ namespace mqJucePlugin
 	pluginLib::Controller* AudioPluginAudioProcessor::createController()
 	{
 		return new Controller(*this);
+	}
+
+	void AudioPluginAudioProcessor::setVoiceExpansion(const bool _enabled)
+	{
+		if (m_voiceExpansion == _enabled)
+			return;
+		m_voiceExpansion = _enabled;
+		rebootDevice();
+	}
+
+	void AudioPluginAudioProcessor::saveChunkData(baseLib::BinaryStream& s)
+	{
+		if (m_voiceExpansion)
+		{
+			baseLib::ChunkWriter cw(s, "VEXP", 1);
+			s.write<uint8_t>(m_voiceExpansion ? 1 : 0);
+		}
+		Processor::saveChunkData(s);
+	}
+
+	void AudioPluginAudioProcessor::loadChunkData(baseLib::ChunkReader& _cr)
+	{
+		_cr.add("VEXP", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t)
+		{
+			m_voiceExpansion = _binaryStream.read<uint8_t>() != 0;
+		});
+
+		Processor::loadChunkData(_cr);
+	}
+
+	bool AudioPluginAudioProcessor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	{
+		const auto prevVE = m_voiceExpansion;
+		const auto result = Processor::loadCustomData(_sourceBuffer);
+		if (m_voiceExpansion != prevVE)
+			rebootDevice();
+		return result;
 	}
 }
 

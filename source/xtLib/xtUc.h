@@ -1,5 +1,6 @@
 #pragma once
 
+#include "xtBuildconfig.h"
 #include "xtButtons.h"
 #include "xtFlash.h"
 #include "xtLcd.h"
@@ -15,11 +16,13 @@ namespace xt
 	class Rom;
 
 	using xtHdi08A = mc68k::Hdi08Periph<0xfe000>;
+	using xtHdi08B = mc68k::Hdi08Periph<0xfc000>;
+	using xtHdi08C = mc68k::Hdi08Periph<0xfd000>;
 
 	class XtUc final : public mc68k::Mc68k
 	{
 	public:
-		XtUc(const Rom& _rom);
+		XtUc(const Rom& _rom, bool _voiceExpansion = false);
 		uint32_t exec() override;
 
 		uint16_t readImm16(uint32_t _addr) override;
@@ -30,6 +33,8 @@ namespace xt
 		void write8(uint32_t _addr, uint8_t _val) override;
 
 		xtHdi08A& getHdi08A() { return m_hdiA; }
+		xtHdi08B& getHdi08B() { return m_hdiB; }
+		xtHdi08C& getHdi08C() { return m_hdiC; }
 
 		bool requestDSPReset() const { return m_dspResetRequest; }
 		void notifyDSPBooted() { m_dspResetCompleted = true; }
@@ -52,11 +57,14 @@ namespace xt
 		std::array<uint8_t, g_romSize> m_romRuntimeData;
 
 		xtHdi08A m_hdiA;
+		xtHdi08B m_hdiB;
+		xtHdi08C m_hdiC;
 		Flash m_flash;
 		Pic m_pic;
 		Lcd m_lcd;
 
 		bool m_dspResetRequest = false;
 		bool m_dspResetCompleted = false;
+		bool m_useVoiceExpansion = false;
 	};
 }

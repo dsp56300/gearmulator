@@ -32,6 +32,7 @@ set(SOURCES
 	xtPartName.cpp xtPartName.h
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
+	xtSettingsDspAudio.cpp xtSettingsDspAudio.h
 	xtWaveEditor.cpp xtWaveEditor.h
 	xtWaveEditorStyle.cpp xtWaveEditorStyle.h
 
@@ -40,9 +41,11 @@ set(SOURCES
 	skins/xtDefault/xtDefault.rml
 	skins/xtDefault/xtDefault.rcss
 	skins/xtDefault/xt-waveeditor-defaults.rcss
+
+	tus_settings_dspaudio_Xenia.rml
 )
 
-SET(ASSETS "parameterDescriptions_xt.json")
+SET(ASSETS "parameterDescriptions_xt.json" "tus_settings_dspaudio_Xenia.rml")
 
 addSkin("Xenia" "xtDefault" "skins/xtDefault" "xtDefault.rml")
 

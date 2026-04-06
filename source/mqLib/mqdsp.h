@@ -8,6 +8,8 @@
 
 #include "wLib/wDsp.h"
 
+#include <mutex>
+
 namespace mc68k
 {
 	class Hdi08;
@@ -15,6 +17,16 @@ namespace mc68k
 
 namespace mqLib
 {
+	// microQ firmware host command vectors (written to DSP via CVR by MC68K).
+	// These dispatch as fast interrupts in the DSP's vector table.
+	// All three reset R6 to N6 (buffer base address).
+	enum class HostCommand : uint8_t
+	{
+		BatchStart   = 0x80,  // bclr #3,HCR  — clear HF2, begin new data batch
+		BatchComplete= 0x82,  // move n6,y:$6  — signal commands pending for main loop
+		SetHF2       = 0x92,  // bset #3,HCR  — set HF2 flag
+	};
+
 	class Hardware;
 
 	class MqDsp : public wLib::Dsp
@@ -51,9 +63,17 @@ namespace mqLib
 
 		dsp56k::DSPThread& thread() { return *m_thread; }
 		bool haveSentTXToDSP() const { return m_haveSentTXtoDSP; }
+		bool hasThread() const { return m_thread != nullptr; }
 
 		bool receivedMagicEsaiPacket() const { return m_receivedMagicEsaiPacket; }
+		bool isInBootMode() const { return m_inBootMode; }
 		void onDspBootFinished();
+		void reset();
+		void terminateThread();
+		void resetState();
+
+		void dumpHdiLog() const;
+		uint32_t getIndex() const { return m_index; }
 
 	private:
 		void onUCRxEmpty(bool _needMoreData);
@@ -74,10 +94,27 @@ namespace mqLib
 
 		bool m_haveSentTXtoDSP = false;
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
+		uint32_t m_hdiDspToUcCount = 0;
 
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
 
 		bool m_receivedMagicEsaiPacket = false;
+		uint32_t m_hdiTransferFailCount = 0;
+		uint32_t m_hdiUcToDspCount = 0;
+		bool m_commandProcessingActive = false;
+
+		// Ring buffer of last 32 UC→DSP HDI08 words for crash diagnostics
+		static constexpr uint32_t g_hdiLogSize = 32;
+		dsp56k::TWord m_hdiUcToDspLog[g_hdiLogSize]{};
+		uint32_t m_hdiUcToDspLogIndex = 0;
+
+		// Protects m_boot and m_inBootMode from concurrent access between
+		// the UC thread (invoking HDI08 callbacks) and the boot pump thread
+		// (calling reset()). The callback is set once in the constructor and
+		// never changed; the mutex ensures m_boot is not destroyed/reconstructed
+		// while the UC thread is inside m_boot.hdiWriteTX().
+		std::mutex m_hdiCallbackMutex;
+		bool m_inBootMode = true;
 
 		dsp56k::DspBoot m_boot;
 	};
