@@ -412,10 +412,10 @@ static void CreateRenderTarget(id<MTLDevice> device, RenderTargetData& out, int 
 
 static void DestroyRenderTarget(RenderTargetData& rt)
 {
-	rt.msaaTexture = nil;
-	rt.resolveTexture = nil;
+	[rt.msaaTexture release];
+	[rt.resolveTexture release];
 	if (rt.ownsStencilTexture)
-		rt.stencilTexture = nil;
+		[rt.stencilTexture release];
 	rt = {};
 }
 
@@ -428,7 +428,7 @@ static void CreatePostprocessTarget(id<MTLDevice> device, PostprocessTargetData&
 
 static void DestroyPostprocessTarget(PostprocessTargetData& pp)
 {
-	pp.colorTexture = nil;
+	[pp.colorTexture release];
 	pp = {};
 }
 
@@ -1432,8 +1432,8 @@ void RenderInterface_Metal::RenderGeometry(Rml::CompiledGeometryHandle _handle, 
 void RenderInterface_Metal::ReleaseGeometry(Rml::CompiledGeometryHandle _handle)
 {
 	auto* geometry = reinterpret_cast<MetalGfx::CompiledGeometryData*>(_handle);
-	geometry->vertexBuffer = nil;
-	geometry->indexBuffer = nil;
+	[geometry->vertexBuffer release];
+	[geometry->indexBuffer release];
 	delete geometry;
 }
 
@@ -1556,19 +1556,16 @@ Rml::TextureHandle RenderInterface_Metal::GenerateTexture(Rml::Span<const Rml::b
 	[blit endEncoding];
 	[cmdBuf commit];
 	[cmdBuf waitUntilCompleted];
+	[staging release];
 
-	// Bridge to handle — caller must release via ReleaseTexture
-	return reinterpret_cast<Rml::TextureHandle>((__bridge_retained void*)texture);
+	// Caller must release via ReleaseTexture
+	return reinterpret_cast<Rml::TextureHandle>((void*)texture); // +1 retained from new*
 }
 
 void RenderInterface_Metal::ReleaseTexture(Rml::TextureHandle _textureHandle)
 {
 	if (_textureHandle)
-	{
-		// Release the bridged reference
-		id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)(void*)_textureHandle;
-		(void)tex; // ARC releases it
-	}
+		[(id<MTLTexture>)(void*)_textureHandle release];
 }
 
 void RenderInterface_Metal::EnableScissorRegion(bool _enable)
@@ -1808,7 +1805,7 @@ Rml::TextureHandle RenderInterface_Metal::SaveLayerAsTexture()
 	// Resume rendering on top layer
 	m_impl->BeginRenderPassOnLayer(topLayer, false);
 
-	return reinterpret_cast<Rml::TextureHandle>((__bridge_retained void*)renderTexture);
+	return reinterpret_cast<Rml::TextureHandle>((void*)renderTexture); // +1 retained from new*
 }
 
 Rml::CompiledFilterHandle RenderInterface_Metal::SaveLayerAsMaskImage()
