@@ -3,7 +3,7 @@
 #include "MetalContext.h"
 
 #import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
+#import <QuartzCore/QuartzCore.h>
 #import <AppKit/AppKit.h>
 
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -213,6 +213,10 @@ namespace juceRmlUi
 			localBounds.getHeight()
 		);
 
+		// Add as sublayer with high zPosition to ensure it's above JUCE's
+		// own painting layers. Without this, the Metal content can be hidden
+		// behind JUCE's component backing layer in some hosts.
+		layer.zPosition = 1000;
 		[nativeView.layer addSublayer:layer];
 		m_metalLayer = (void*)[layer retain];
 
@@ -264,11 +268,13 @@ namespace juceRmlUi
 
 		if (!CGRectEqualToRect(layer.frame, newFrame))
 		{
-			void* layerPtr = m_metalLayer;
-			dispatch_async(dispatch_get_main_queue(), ^{
-				if (layerPtr)
-					((__bridge CAMetalLayer*)layerPtr).frame = newFrame;
-			});
+			// Set frame directly. CAMetalLayer frame updates from background
+			// threads work on macOS. Using dispatch_async can cause the initial
+			// frame to be delayed if the host's main queue is blocked.
+			[CATransaction begin];
+			[CATransaction setDisableActions:YES];
+			layer.frame = newFrame;
+			[CATransaction commit];
 		}
 
 		const auto drawableWidth = static_cast<int>(localBounds.getWidth() * scale);
