@@ -286,7 +286,7 @@ namespace mqLib
 			m_hdiUC.writeRx(v);
 			return true;
 		}
-
+#if defined(_WIN32) && defined(_DEBUG)
 		// Rate-limited diagnostic: log only sustained transfer failures
 		if (hdi08().hasTX() && !m_hdiUC.canReceiveData())
 		{
@@ -297,7 +297,7 @@ namespace mqLib
 		{
 			m_hdiTransferFailCount = 0;
 		}
-
+#endif
 		return false;
 	}
 
