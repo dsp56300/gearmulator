@@ -1265,20 +1265,23 @@ namespace jucePluginEditorLib
 					addFile(file.getFileName().toStdString());
 			}
 		}
-		else
+
+		// Always enumerate the plugin's binary data so that product-specific files
+		// (e.g. tus_settings_dspaudio_<Product>.rml) are available regardless of
+		// whether the skin is embedded or loaded from disk.
 		{
-			auto data = getProcessor().getProperties().binaryData;
-			for (size_t i=0; i<data.listSize; ++i)
-				addFile(data.originalFileNames[i]);
+			auto pluginData = getProcessor().getProperties().binaryData;
+			for (size_t i=0; i<pluginData.listSize; ++i)
+				addFile(pluginData.originalFileNames[i]);
 		}
 
 		for (const auto& file : m_skin.files)
 			addFile(file);
 
-		constexpr auto data = g_binaryDefaultData;
+		constexpr auto defaultData = g_binaryDefaultData;
 
-		for (size_t i=0; i<data.listSize; ++i)
-			addFile(data.originalFileNames[i]);
+		for (size_t i=0; i<defaultData.listSize; ++i)
+			addFile(defaultData.originalFileNames[i]);
 
 		return filenames;
 	}

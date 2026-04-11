@@ -1,5 +1,13 @@
 Release Notes
 
+2.2.4:
+
+Framework:
+
+- [Fix] BUG-10177 Third-party skins: Plugin-specific settings pages
+        (e.g. Voice Expansion) are now loaded from the embedded plugin
+        binary when a skin is loaded from disk
+
 2.2.3:
 
 Framework:
