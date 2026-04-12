@@ -62,10 +62,9 @@ namespace mqLib
 
 		m_periphX.getEsai().writeEmptyAudioIn(8);
 
-		// Enforce minimum DSP instruction gap between HRDF interrupts.
-		// Real hardware: MC68K@16MHz writes TXH/TXM/TXL + polls TXDE ≈ 20-40
-		// MC68K cycles per word ≈ 125-250 DSP@100MHz instruction cycles.
-		hdi08().setRXRateLimit(100);
+		// No RX rate limiting — the emulated UC is fast enough that artificial
+		// throttling causes audio thread stalls and dropouts at low latency.
+		hdi08().setRXRateLimit(0);
 		hdi08().setTransmitDataAlwaysEmpty(false);
 
 		// Set MC68K-side callbacks for all DSPs.
