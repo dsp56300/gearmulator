@@ -146,7 +146,6 @@ namespace mqLib
 		}
 
 		m_haveSentTXtoDSP = true;
-		m_hdiUcToDspCount = 0;
 
 		LOG("DSP " << m_index << " boot finished, switching to runtime HDI08 callback");
 
@@ -227,7 +226,6 @@ namespace mqLib
 		m_receivedMagicEsaiPacket = false;
 		m_hdiHF01 = 0;
 		m_hdiTransferFailCount = 0;
-		m_hdiUcToDspCount = 0;
 		m_hdiUcToDspLogIndex = 0;
 	}
 
@@ -319,17 +317,13 @@ namespace mqLib
 		m_hdiUcToDspLog[m_hdiUcToDspLogIndex % g_hdiLogSize] = _word;
 		++m_hdiUcToDspLogIndex;
 
-		if (m_hdiUcToDspCount < 20)
-			LOG("DSP " << m_index << " UC->DSP HDI08 word #" << m_hdiUcToDspCount << ": " << HEX(_word));
-		++m_hdiUcToDspCount;
-
 		hdi08().writeRX(&_word, 1);
 	}
 
 	void MqDsp::dumpHdiLog() const
 	{
 		const auto count = std::min(m_hdiUcToDspLogIndex, g_hdiLogSize);
-		LOG("DSP " << m_index << " last " << count << " UC->DSP HDI08 words (total=" << m_hdiUcToDspCount << "):");
+		LOG("DSP " << m_index << " last " << count << " UC->DSP HDI08 words:");
 		for (uint32_t i = 0; i < count; ++i)
 		{
 			const auto idx = (m_hdiUcToDspLogIndex - count + i) % g_hdiLogSize;

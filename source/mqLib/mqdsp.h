@@ -100,7 +100,6 @@ namespace mqLib
 
 		bool m_receivedMagicEsaiPacket = false;
 		uint32_t m_hdiTransferFailCount = 0;
-		uint32_t m_hdiUcToDspCount = 0;
 		bool m_commandProcessingActive = false;
 
 		// Ring buffer of last 32 UC→DSP HDI08 words for crash diagnostics
