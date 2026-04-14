@@ -69,26 +69,12 @@ namespace mqLib
 
 		// Set MC68K-side callbacks for all DSPs.
 		// On real hardware, all HDI08 interfaces are active from power-on.
-		// The writeTx callback is set once and never changed. A mutex protects
-		// the boot/runtime mode switch and m_boot access against the boot pump
-		// thread calling reset() concurrently.
+		// All callbacks run on the UC thread — no cross-thread synchronization needed.
 		m_hdiUC.setRxEmptyCallback([&](const bool needMoreData)
 		{
 			onUCRxEmpty(needMoreData);
 		});
-		m_hdiUC.setWriteTxCallback([this](const uint32_t _word)
-		{
-			std::lock_guard lock(m_hdiCallbackMutex);
-			if (m_inBootMode)
-			{
-				if(m_boot.hdiWriteTX(_word))
-					onDspBootFinished();
-			}
-			else
-			{
-				hdiTransferUCtoDSP(_word);
-			}
-		});
+		setBootCallbacks();
 		m_hdiUC.setWriteIrqCallback([&](const uint8_t _irq)
 		{
 			hdiSendIrqToDSP(_irq);
@@ -131,6 +117,23 @@ namespace mqLib
 		}
 	}
 
+	void MqDsp::setBootCallbacks()
+	{
+		m_hdiUC.setWriteTxCallback([this](const uint32_t _word)
+		{
+			if(m_boot.hdiWriteTX(_word))
+				onDspBootFinished();
+		});
+	}
+
+	void MqDsp::setRuntimeCallbacks()
+	{
+		m_hdiUC.setWriteTxCallback([this](const uint32_t _word)
+		{
+			hdiTransferUCtoDSP(_word);
+		});
+	}
+
 	void MqDsp::onDspBootFinished()
 	{
 		// Safety: if a thread already exists, terminate it before creating a new one.
@@ -148,9 +151,10 @@ namespace mqLib
 
 		LOG("DSP " << m_index << " boot finished, switching to runtime HDI08 callback");
 
-		// Switch from boot to runtime mode. This is called from inside the
-		// HDI08 callback which already holds m_hdiCallbackMutex.
-		m_inBootMode = false;
+		// Swap callback from boot to runtime. Called from inside the boot
+		// callback itself (UC thread) — safe because the current invocation
+		// is about to return and future calls will use the new callback.
+		setRuntimeCallbacks();
 
 #if DSP56300_DEBUGGER
 		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
@@ -212,15 +216,11 @@ namespace mqLib
 		for (size_t i=0; i<8; ++i)
 			m_periphX.getEsai().writeEmptyAudioIn(1);
 
-		// Reset boot state by reconstructing DspBoot in-place.
-		// Must hold the mutex to prevent the UC thread from calling
-		// m_boot.hdiWriteTX() while we destroy and reconstruct it.
-		{
-			std::lock_guard lock(m_hdiCallbackMutex);
-			m_boot.~DspBoot();
-			new (&m_boot) dsp56k::DspBoot(m_dsp);
-			m_inBootMode = true;
-		}
+		// Swap to boot callbacks before reconstructing m_boot. Both this
+		// function and the callback run on the UC thread, so no lock needed.
+		setBootCallbacks();
+		m_boot.~DspBoot();
+		new (&m_boot) dsp56k::DspBoot(m_dsp);
 		m_haveSentTXtoDSP = false;
 		m_receivedMagicEsaiPacket = false;
 		m_hdiHF01 = 0;

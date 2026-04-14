@@ -356,8 +356,9 @@ namespace mqLib
 		{
 			if(!m_dspResetPending)
 			{
+#ifdef _DEBUG
 				LOG("DSP reset requested (count " << (m_veResetCount + 1) << ")");
-
+#endif
 				// Phase 1: Terminate DSP threads WITHOUT holding the mutex.
 				// The boot pump continues draining ESAI outputs, which unblocks
 				// any DSP thread stuck in Audio::writeTXimpl::waitNotFull().

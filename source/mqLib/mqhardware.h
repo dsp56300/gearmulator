@@ -12,6 +12,7 @@
 #include "rom.h"
 
 #include "dsp56kEmu/dspthread.h"
+#include "dsp56kBase/mutex.h"
 
 #include "hardwareLib/sciMidi.h"
 
@@ -82,7 +83,7 @@ namespace mqLib
 		bool m_voiceExpansionReady = false;
 		bool m_inBootPump = false;
 		uint32_t m_veResetCount = 0;
-		std::mutex m_esaiBootMutex;
+		dsp56k::Mutex m_esaiBootMutex;
 
 		MqMc m_uc;
 		TAudioInputs m_audioInputs;
