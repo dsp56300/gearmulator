@@ -201,7 +201,9 @@ namespace synthLib
 	bool MidiToSysex::extractSysexFromData(SysexBufferList& _messages, const SysexBuffer& _data)
 	{
 		constexpr uint8_t midiHeader[] = "MThd";
-		const auto isMidiFile = _data.size() >= 4 && memcmp(_data.data(), midiHeader, 4) == 0;
+		const auto isMidiFile = _data.size() >= 4 && memcmp(_data.data(), midiHeader, 4) == 0 
+			&& _data.back() != 0xf7; /* skip strange ".mid" files that are actually just a concatenation of sysex messages with a very small MTHd header. Source unknown. Aura editor export? */
+
 		splitMultipleSysex(_messages, _data, isMidiFile);
 		return !_messages.empty();
 	}

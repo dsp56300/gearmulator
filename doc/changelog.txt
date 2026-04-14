@@ -4,6 +4,9 @@ Release Notes
 
 Framework:
 
+- [Imp] Support parsing of ".mid" files that are not really midi but
+        raw sysex
+
 - [Fix] BUG-10177 Third-party skins: Plugin-specific settings pages
         (e.g. Voice Expansion) are now loaded from the embedded plugin
         binary when a skin is loaded from disk
