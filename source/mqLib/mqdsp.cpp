@@ -300,16 +300,6 @@ namespace mqLib
 
 	void MqDsp::hdiTransferUCtoDSP(dsp56k::TWord _word)
 	{
-		// TXDE back-pressure: wait for DSP to consume previous RX data.
-		// On real hardware, the MC68K polls TXDE between words.
-		if (hdi08().hasRXData() && hdi08().rxInterruptEnabled())
-		{
-			m_hardware.ucYieldLoop([&]()
-			{
-				return hdi08().hasRXData() && hdi08().rxInterruptEnabled();
-			});
-		}
-
 		m_haveSentTXtoDSP = true;
 
 		// Record in ring buffer for post-mortem analysis
