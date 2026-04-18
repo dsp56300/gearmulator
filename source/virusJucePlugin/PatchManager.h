@@ -63,7 +63,12 @@ namespace genericVirusUI
 		bool loadRamBankData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program);
 		bool loadRomBankData(pluginLib::patchDB::DataList& _results, uint32_t _romBank, uint32_t _program);
 		pluginLib::patchDB::DataSource createDataSource(uint32_t _controllerBank) const;
+		bool activateSingle(const pluginLib::patchDB::Data& _sysex, uint32_t _part);
+		bool activateMulti(const pluginLib::patchDB::Data& _multi);
+		bool activateArrangement(const pluginLib::patchDB::Data& _compound);
+		static pluginLib::patchDB::Data retargetMultiToEditBuffer(const pluginLib::patchDB::Data& _multi);
 
+		VirusEditor& m_virusEditor;
 		virus::Controller& m_controller;
 		virus::VirusProcessor& m_processor;
 		std::vector<pluginLib::patchDB::DataSource> m_romDataSources;

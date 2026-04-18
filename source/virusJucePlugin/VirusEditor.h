@@ -70,6 +70,8 @@ namespace genericVirusUI
 
 		std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) override;
 
+		void setPlayMode(uint8_t _playMode);
+
 	private:
 		void onProgramChange(int _part);
 		void onPlayModeChanged();
@@ -82,8 +84,6 @@ namespace genericVirusUI
 
 		void savePreset(Rml::Event& _event);
 		void loadPreset();
-
-		void setPlayMode(uint8_t _playMode);
 
 		void savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber = 0);
 		bool savePresets(const std::string& _pathName, SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber = 0) const;

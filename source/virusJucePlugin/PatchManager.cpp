@@ -28,6 +28,7 @@ namespace genericVirusUI
 {
 	PatchManager::PatchManager(VirusEditor& _editor, Rml::Element* _root)
 		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root)
+		, m_virusEditor(_editor)
 		, m_controller(_editor.getController())
 		, m_processor(_editor.getProcessor())
 		, m_onRomChanged(_editor.getProcessor().evRomChanged)
@@ -665,7 +666,69 @@ namespace genericVirusUI
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		return m_controller.activatePatch(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), _part);
+		const auto sysex = applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware);
+		const auto type = detectPatchType(sysex);
+
+		switch (type)
+		{
+		case PatchType::Multi:
+			return activateMulti(sysex);
+		case PatchType::Arrangement:
+			return activateArrangement(sysex);
+		case PatchType::Single:
+			return activateSingle(sysex, _part);
+		default:
+			return false;
+		}
+	}
+
+	bool PatchManager::activateSingle(const pluginLib::patchDB::Data& _sysex, const uint32_t _part)
+	{
+		return m_controller.activatePatch(_sysex, _part);
+	}
+
+	pluginLib::patchDB::Data PatchManager::retargetMultiToEditBuffer(const pluginLib::patchDB::Data& _multi)
+	{
+		// Multi dump: offset 7 = bank, offset 8 = program. The microcontroller
+		// only applies the multi if bank == EditBuffer; otherwise it's just
+		// stored (or ignored for RAM/ROM writes).
+		auto data = _multi;
+		if (data.size() > 8)
+		{
+			data[7] = virusLib::toMidiByte(virusLib::BankNumber::EditBuffer);
+			data[8] = 0;
+		}
+		return data;
+	}
+
+	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
+	{
+		m_virusEditor.setPlayMode(virusLib::PlayMode::PlayModeMulti);
+		m_controller.sendSysEx(retargetMultiToEditBuffer(_multi));
+		m_controller.requestArrangement();
+		return true;
+	}
+
+	bool PatchManager::activateArrangement(const pluginLib::patchDB::Data& _compound)
+	{
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, _compound);
+
+		if (msgs.size() != 17 || msgs.front()[6] != virusLib::SysexMessageType::DUMP_MULTI)
+			return false;
+
+		m_virusEditor.setPlayMode(virusLib::PlayMode::PlayModeMulti);
+		m_controller.sendSysEx(retargetMultiToEditBuffer(msgs.front()));
+
+		for (uint8_t i = 0; i < 16; ++i)
+		{
+			const auto& single = msgs[i + 1];
+			m_controller.modifySingleDump(single, virusLib::BankNumber::EditBuffer, i);
+			m_controller.activatePatch(single, i);
+		}
+
+		m_controller.requestArrangement();
+		return true;
 	}
 
 	void PatchManager::removeRomPatches()
