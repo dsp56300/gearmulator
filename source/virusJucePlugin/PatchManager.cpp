@@ -190,12 +190,6 @@ namespace genericVirusUI
 		}
 		else
 		{
-			// Deduplicate by multi payload: TI-family ROMs contain only an
-			// "Init Multi" which the loader replicates 128 times. Without
-			// this, the ROM Arrangements node would show 128 identical
-			// entries for TI/TI2/Snow.
-			std::vector<virusLib::ROMFile::TPreset> seen;
-
 			for (uint32_t i = 0; i < 128; ++i)
 			{
 				virusLib::ROMFile::TPreset multi;
@@ -203,20 +197,6 @@ namespace genericVirusUI
 					break;
 				if (virusLib::ROMFile::getMultiName(multi).empty())
 					break;
-
-				bool duplicate = false;
-				for (const auto& prev : seen)
-				{
-					if (memcmp(prev.data(), multi.data(), multi.size()) == 0)
-					{
-						duplicate = true;
-						break;
-					}
-				}
-				if (duplicate)
-					continue;
-
-				seen.push_back(multi);
 				tryAdd(i);
 			}
 		}
@@ -953,13 +933,18 @@ namespace genericVirusUI
 			m_romDataSources.push_back(std::move(ds));
 		}
 
-		// Add a data source for ROM arrangements if the ROM has any multis
-		virusLib::ROMFile::TPreset firstMulti;
-		if (rom->getMulti(0, firstMulti) && !virusLib::ROMFile::getMultiName(firstMulti).empty())
+		// Add a data source for ROM arrangements if the ROM has any multis.
+		// TI family ROMs only contain an "Init Multi" template (replicated 128
+		// times by the loader) — not useful as factory arrangements, so skip.
+		if (!rom->isTIFamily())
 		{
-			auto ds = createArrangementDataSource();
-			addDataSource(ds);
-			m_romDataSources.push_back(std::move(ds));
+			virusLib::ROMFile::TPreset firstMulti;
+			if (rom->getMulti(0, firstMulti) && !virusLib::ROMFile::getMultiName(firstMulti).empty())
+			{
+				auto ds = createArrangementDataSource();
+				addDataSource(ds);
+				m_romDataSources.push_back(std::move(ds));
+			}
 		}
 	}
 
