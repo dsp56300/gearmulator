@@ -750,9 +750,28 @@ namespace genericVirusUI
 		return !_results.empty();
 	}
 
-	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)
 	{
-		_data = m_controller.createSingleDump(static_cast<uint8_t>(_part), toMidiByte(virusLib::BankNumber::A), 0);
+		if (_userData == g_userDataArrangement)
+		{
+			// Build an Arrangement compound from the cached multi edit buffer +
+			// 16 part edit-buffer singles. The multi is pre-requested in
+			// VirusEditor::savePreset so the cache is up to date by the time
+			// the user picks a save target.
+			const auto& multiBuf = m_controller.getMultiEditBuffer().data;
+			if (multiBuf.empty())
+				return false;
+
+			_data.assign(multiBuf.begin(), multiBuf.end());
+			for (uint8_t i = 0; i < 16; ++i)
+			{
+				const auto single = m_controller.createSingleDump(i, virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), i);
+				_data.insert(_data.end(), single.begin(), single.end());
+			}
+			return true;
+		}
+
+		_data = m_controller.createSingleDump(static_cast<uint8_t>(_part), virusLib::toMidiByte(virusLib::BankNumber::A), 0);
 		return !_data.empty();
 	}
 

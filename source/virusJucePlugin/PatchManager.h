@@ -45,6 +45,12 @@ namespace genericVirusUI
 
 		static PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex);
 
+		// _userData = 0 returns the current single for _part; _userData = 1 returns
+		// an arrangement compound (multi + 16 part edit-buffer singles) built from
+		// the cached multi edit buffer — pre-request the multi before the save
+		// menu opens so the buffer is up to date.
+		static constexpr uint64_t g_userDataArrangement = 1;
+
 		// PatchDB impl
 		bool loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program) override;
 		std::shared_ptr<pluginLib::patchDB::Patch> initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName) override;

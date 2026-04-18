@@ -82,7 +82,7 @@ namespace genericVirusUI
 
 		void updateDeviceModel();
 
-		void savePreset(Rml::Event& _event);
+		void savePreset(const Rml::Event& _event);
 		void loadPreset();
 
 		void savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber = 0);

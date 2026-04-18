@@ -4,6 +4,7 @@
 #include "ControllerLinks.h"
 
 #include "ParameterNames.h"
+#include "PatchManager.h"
 #include "SettingsDspAudioOsTIrus.h"
 #include "SettingsGuiOsTIrus.h"
 #include "VirusProcessor.h"
@@ -332,11 +333,21 @@ namespace genericVirusUI
 		m_deviceModel->SetInnerRML(m);
 	}
 
-	void VirusEditor::savePreset(Rml::Event& _event)
+	void VirusEditor::savePreset(const Rml::Event& _event)
 	{
+		// Pre-request the multi edit buffer so it's cached by the time the user
+		// selects "Add arrangement to...". The request goes to the emulated DSP
+		// and the response typically arrives within one audio callback, while
+		// the user takes hundreds of ms to navigate the menu.
+		if (getController().isMultiMode())
+			getController().requestMulti(virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), 0);
+
 		juceRmlUi::Menu menu;
 
-		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
+		uint32_t countAdded = getPatchManager()->createSaveMenuEntries(menu, "Single");
+
+		if (getController().isMultiMode())
+			countAdded += getPatchManager()->createSaveMenuEntries(menu, getController().getCurrentPart(), "Arrangement", PatchManager::g_userDataArrangement);
 
 		if(countAdded)
 			menu.addSeparator();
