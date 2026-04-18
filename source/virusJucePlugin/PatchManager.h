@@ -67,6 +67,8 @@ namespace genericVirusUI
 		bool activateMulti(const pluginLib::patchDB::Data& _multi);
 		bool activateArrangement(const pluginLib::patchDB::Data& _compound);
 		static pluginLib::patchDB::Data retargetMultiToEditBuffer(const pluginLib::patchDB::Data& _multi);
+		pluginLib::patchDB::Data applyModificationsSingle(const pluginLib::patchDB::PatchPtr& _patch) const;
+		static pluginLib::patchDB::Data applyModificationsMulti(const pluginLib::patchDB::Data& _multi, const pluginLib::patchDB::PatchPtr& _patch);
 
 		VirusEditor& m_virusEditor;
 		virus::Controller& m_controller;

@@ -348,12 +348,9 @@ namespace genericVirusUI
 		return patch;
 	}
 
-	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const
+	pluginLib::patchDB::Data PatchManager::applyModificationsSingle(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
 		if (_patch->sysex.size() < 267)
-			return _patch->sysex;
-
-		if (_patch->sysex[6] != virusLib::SysexMessageType::DUMP_SINGLE)
 			return _patch->sysex;
 
 		auto result = _patch->sysex;
@@ -415,6 +412,72 @@ namespace genericVirusUI
 			result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, result.size() - 2);
 
 		return result;
+	}
+
+	pluginLib::patchDB::Data PatchManager::applyModificationsMulti(const pluginLib::patchDB::Data& _multi, const pluginLib::patchDB::PatchPtr& _patch)
+	{
+		// Multi dump name is 10 chars at offset 9 (header) + 4 (MD_NAME_CHAR_0)
+		constexpr size_t nameOffset = 9 + virusLib::MultiDump::MD_NAME_CHAR_0;
+		constexpr size_t nameLength = 10;
+
+		if (_multi.size() < nameOffset + nameLength + 2)
+			return _multi;
+
+		auto result = _multi;
+
+		if (!_patch->getName().empty())
+		{
+			for (size_t i = 0; i < nameLength; ++i)
+				result[nameOffset + i] = i >= _patch->getName().size() ? ' ' : _patch->getName()[i];
+		}
+
+		// apply bank/program at offsets 7/8
+		if (_patch->program != pluginLib::patchDB::g_invalidProgram)
+		{
+			const auto bankOffset = _patch->program / 128;
+			result[8] = static_cast<uint8_t>(_patch->program - bankOffset * 128);
+			result[7] = static_cast<uint8_t>(result[7] + bankOffset);
+		}
+
+		// Recalculate trailing checksum. For TI-family multis there may be an
+		// intermediate checksum too, but we only changed name+bank+program which
+		// live in the ABC portion — the trailing checksum covers the full
+		// payload so recomputing it is sufficient.
+		result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, result.size() - 2);
+
+		return result;
+	}
+
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const
+	{
+		const auto patchType = detectPatchType(_patch->sysex);
+
+		if (patchType == PatchType::Single)
+			return applyModificationsSingle(_patch);
+
+		if (patchType == PatchType::Multi)
+			return applyModificationsMulti(_patch->sysex, _patch);
+
+		if (patchType == PatchType::Arrangement)
+		{
+			// Apply name/bank/program to the Multi dump. The 16 Singles that
+			// follow carry their own names/bank/program — they get sent into
+			// parts on activation so they keep their original identifiers.
+			synthLib::SysexBufferList msgs;
+			synthLib::MidiToSysex::splitMultipleSysex(msgs, _patch->sysex);
+
+			if (msgs.size() != 17 || msgs.front()[6] != virusLib::SysexMessageType::DUMP_MULTI)
+				return _patch->sysex;
+
+			auto multi = applyModificationsMulti(pluginLib::patchDB::Data(msgs.front().begin(), msgs.front().end()), _patch);
+
+			pluginLib::patchDB::Data result(multi.begin(), multi.end());
+			for (size_t i = 1; i < msgs.size(); ++i)
+				result.insert(result.end(), msgs[i].begin(), msgs[i].end());
+			return result;
+		}
+
+		return _patch->sysex;
 	}
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
