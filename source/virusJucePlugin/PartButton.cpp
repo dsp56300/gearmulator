@@ -1,9 +1,13 @@
 #include "PartButton.h"
 
+#include "PatchManager.h"
 #include "VirusEditor.h"
 #include "VirusController.h"
+#include "VirusProcessor.h"
 
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
+
+#include "juceUiLib/messageBox.h"
 
 #include "RmlUi/Core/Element.h"
 
@@ -19,6 +23,44 @@ namespace genericVirusUI
 			return false;
 
 		return jucePluginEditorLib::PartButton::canDrop(_event, _source);
+	}
+
+	void PartButton::dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files)
+	{
+		auto* pm = dynamic_cast<PatchManager*>(m_editor.getPatchManager());
+
+		if (pm && !_files.empty())
+		{
+			// Peek at the first patch to check whether it's a Multi or Arrangement.
+			// Those replace the full device state so dropping them on a part-specific
+			// target doesn't do what the user likely expects — warn before proceeding.
+			const auto patches = pm->loadPatchesFromFiles(std::vector<std::string>{_files.front()});
+			if (!patches.empty())
+			{
+				const auto type = PatchManager::detectPatchType(patches.front()->sysex);
+				if (type == PatchManager::PatchType::Multi || type == PatchManager::PatchType::Arrangement)
+				{
+					const auto& name = m_editor.getProcessor().getProperties().name;
+					const std::string message = type == PatchManager::PatchType::Arrangement
+						? "The dropped file contains an Arrangement patch. Loading it will "
+						  "replace the full device state: the Multi setup and all 16 Single "
+						  "patches in the parts will be overwritten.\n\nDo you want to load it?"
+						: "The dropped file contains a Multi patch. Loading it will replace "
+						  "the Multi setup (part volumes, MIDI channels, FX routing, etc.) "
+						  "but the Single patches currently loaded in the parts will be kept."
+						  "\n\nDo you want to load it?";
+					genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Question, name, message,
+						[pm, patches](const genericUI::MessageBox::Result _result)
+					{
+						if (_result == genericUI::MessageBox::Result::Yes)
+							pm->activatePatch(patches.front(), 0);
+					});
+					return;
+				}
+			}
+		}
+
+		jucePluginEditorLib::PartButton::dropFiles(_event, _data, _files);
 	}
 
 	void PartButton::onClick(Rml::Event& _e)

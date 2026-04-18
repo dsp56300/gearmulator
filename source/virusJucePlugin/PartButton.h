@@ -13,6 +13,8 @@ namespace genericVirusUI
 
 		bool canDrop(const Rml::Event& _event, const juceRmlUi::DragSource* _source) override;
 
+		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
+
 		void onClick(Rml::Event& _e) override;
 		void setButtonText(const std::string& _text);
 
