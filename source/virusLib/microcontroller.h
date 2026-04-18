@@ -59,6 +59,7 @@ public:
 
 	static uint8_t calcChecksum(const synthLib::SysexBuffer& _data, size_t _offset = 5, size_t _count = std::numeric_limits<size_t>::max());
 	static synthLib::SysexBuffer createSingleDump(const ROMFile& _rom, BankNumber _bank, uint8_t _program, const TPreset& _preset, uint8_t _deviceId = OMNI_DEVICE_ID);
+	static synthLib::SysexBuffer createMultiDump(const ROMFile& _rom, BankNumber _bank, uint8_t _program, const TPreset& _preset, uint8_t _deviceId = OMNI_DEVICE_ID);
 
 	bool dspHasBooted() const;
 

@@ -1472,4 +1472,41 @@ SysexBuffer Microcontroller::createSingleDump(const ROMFile& _rom, const BankNum
 
 	return sysex;
 }
+
+SysexBuffer Microcontroller::createMultiDump(const ROMFile& _rom, const BankNumber _bank, const uint8_t _program, const TPreset& _preset, const uint8_t _deviceId)
+{
+	SysexBuffer sysex;
+	sysex.reserve(512 + 16);
+
+	sysex.push_back(M_STARTOFSYSEX);
+	sysex.push_back(0x00);
+	sysex.push_back(0x20);
+	sysex.push_back(0x33);
+	sysex.push_back(0x01);
+	sysex.push_back(_deviceId);
+
+	sysex.push_back(DUMP_MULTI);
+	sysex.push_back(toMidiByte(_bank));
+	sysex.push_back(_program);
+
+	const auto presetSize = _rom.getMultiPresetSize();
+	const auto modelABCsize = ROMFile::getSinglePresetSize(DeviceModel::ABC);
+
+	for (size_t i = 0; i < modelABCsize; ++i)
+		sysex.push_back(_preset[i]);
+
+	sysex.push_back(calcChecksum(sysex));
+
+	if (presetSize > modelABCsize)
+	{
+		for (size_t i = modelABCsize; i < presetSize; ++i)
+			sysex.push_back(_preset[i]);
+
+		sysex.push_back(calcChecksum(sysex));
+	}
+
+	sysex.push_back(M_ENDOFSYSEX);
+
+	return sysex;
+}
 }

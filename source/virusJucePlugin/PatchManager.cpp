@@ -97,6 +97,9 @@ namespace genericVirusUI
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
+		if (_bank == g_arrangementBank)
+			return loadRomArrangements(_results, _program);
+
 		// RAM banks (0, 1) are loaded from live controller data (populated via MIDI)
 		if (_bank < 2)
 			return loadRamBankData(_results, _bank, _program);
@@ -166,6 +169,86 @@ namespace genericVirusUI
 			}
 		}
 		return !_results.empty();
+	}
+
+	bool PatchManager::loadRomArrangements(pluginLib::patchDB::DataList& _results, const uint32_t _program)
+	{
+		const auto* rom = m_processor.getSelectedRom();
+		if (!rom)
+			return false;
+
+		auto tryAdd = [&](uint32_t _multiIndex)
+		{
+			auto compound = buildRomArrangement(*rom, _multiIndex);
+			if (!compound.empty())
+				_results.push_back(std::move(compound));
+		};
+
+		if (_program != pluginLib::patchDB::g_invalidProgram)
+		{
+			tryAdd(_program);
+		}
+		else
+		{
+			// ROM multi count isn't exposed; try up to 128 and stop on first invalid one
+			for (uint32_t i = 0; i < 128; ++i)
+			{
+				virusLib::ROMFile::TPreset multi;
+				if (!rom->getMulti(static_cast<int>(i), multi))
+					break;
+				if (virusLib::ROMFile::getMultiName(multi).empty())
+					break;
+				tryAdd(i);
+			}
+		}
+
+		return !_results.empty();
+	}
+
+	pluginLib::patchDB::Data PatchManager::buildRomArrangement(const virusLib::ROMFile& _rom, const uint32_t _multiIndex)
+	{
+		virusLib::ROMFile::TPreset multi;
+		if (!_rom.getMulti(static_cast<int>(_multiIndex), multi))
+			return {};
+		if (virusLib::ROMFile::getMultiName(multi).empty())
+			return {};
+
+		// Build the Multi dump sysex; use bank A and program = multi index so the
+		// dump's identifiers reflect its ROM location.
+		auto multiSysex = virusLib::Microcontroller::createMultiDump(_rom, virusLib::BankNumber::A, static_cast<uint8_t>(_multiIndex), multi);
+		if (multiSysex.empty())
+			return {};
+
+		pluginLib::patchDB::Data compound(multiSysex.begin(), multiSysex.end());
+
+		// Resolve each of the 16 referenced singles and append their dumps
+		for (uint8_t part = 0; part < 16; ++part)
+		{
+			const auto partBank = multi[virusLib::MultiDump::MD_PART_BANK_NUMBER + part];
+			const auto partProgram = multi[virusLib::MultiDump::MD_PART_PROGRAM_NUMBER + part];
+
+			// bank in the multi uses array-index form; skip empty/disabled parts
+			virusLib::ROMFile::TPreset single;
+			if (!_rom.getSingle(partBank, partProgram, single))
+				continue;
+			if (virusLib::ROMFile::getSingleName(single).empty())
+				continue;
+
+			const auto singleBank = virusLib::fromArrayIndex(partBank);
+			auto singleSysex = virusLib::Microcontroller::createSingleDump(_rom, singleBank, partProgram, single);
+			compound.insert(compound.end(), singleSysex.begin(), singleSysex.end());
+		}
+
+		// Only treat as a valid arrangement if all 16 singles were resolved; the
+		// detection in parseFileData/initializePatch expects the 1-multi+16-singles
+		// pattern. If any are missing, keep it as a plain Multi.
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, compound);
+		if (msgs.size() == 17)
+			return compound;
+
+		// Fall back to just the multi
+		return pluginLib::patchDB::Data(multiSysex.begin(), multiSysex.end());
 	}
 
 	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex)
@@ -831,6 +914,15 @@ namespace genericVirusUI
 			addDataSource(ds);
 			m_romDataSources.push_back(std::move(ds));
 		}
+
+		// Add a data source for ROM arrangements if the ROM has any multis
+		virusLib::ROMFile::TPreset firstMulti;
+		if (rom->getMulti(0, firstMulti) && !virusLib::ROMFile::getMultiName(firstMulti).empty())
+		{
+			auto ds = createArrangementDataSource();
+			addDataSource(ds);
+			m_romDataSources.push_back(std::move(ds));
+		}
 	}
 
 	pluginLib::patchDB::DataSource PatchManager::createDataSource(const uint32_t _controllerBank) const
@@ -840,6 +932,16 @@ namespace genericVirusUI
 		ds.bank = _controllerBank;
 		ds.name = m_controller.getBankName(_controllerBank);
 		ds.midiBankNumber = _controllerBank;
+		return ds;
+	}
+
+	pluginLib::patchDB::DataSource PatchManager::createArrangementDataSource() const
+	{
+		pluginLib::patchDB::DataSource ds;
+		ds.type = pluginLib::patchDB::SourceType::Rom;
+		ds.bank = g_arrangementBank;
+		ds.name = "ROM Arrangements";
+		ds.midiBankNumber = g_arrangementBank;
 		return ds;
 	}
 
