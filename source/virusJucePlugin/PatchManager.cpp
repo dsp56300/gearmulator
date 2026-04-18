@@ -34,9 +34,11 @@ namespace genericVirusUI
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
+		setTagTypeName(pluginLib::patchDB::TagType::CustomC, "Type");
 
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB);
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
 
 		startLoaderThread();
 
@@ -165,8 +167,88 @@ namespace genericVirusUI
 		return !_results.empty();
 	}
 
+	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex)
+	{
+		if (_sysex.size() < 10)
+			return PatchType::Invalid;
+
+		const auto cmd = _sysex[6];
+
+		if (cmd == virusLib::SysexMessageType::DUMP_SINGLE)
+			return PatchType::Single;
+
+		if (cmd != virusLib::SysexMessageType::DUMP_MULTI)
+			return PatchType::Invalid;
+
+		// Multi or Arrangement — split and count components
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, _sysex);
+
+		if (msgs.size() == 1)
+			return PatchType::Multi;
+
+		if (msgs.size() == 17 && msgs.front()[6] == virusLib::SysexMessageType::DUMP_MULTI)
+		{
+			for (size_t i = 1; i < msgs.size(); ++i)
+			{
+				if (msgs[i].size() < 10 || msgs[i][6] != virusLib::SysexMessageType::DUMP_SINGLE)
+					return PatchType::Invalid;
+			}
+			return PatchType::Arrangement;
+		}
+
+		return PatchType::Invalid;
+	}
+
 	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
 	{
+		const auto patchType = detectPatchType(_sysex);
+
+		if (patchType == PatchType::Multi || patchType == PatchType::Arrangement)
+		{
+			// Multi dump: name is 10 chars at offset 9 (sysex header) + 4 (MD_NAME_CHAR_0)
+			constexpr size_t multiNameOffset = 9 + virusLib::MultiDump::MD_NAME_CHAR_0;
+			constexpr size_t multiNameLength = 10;
+
+			if (_sysex.size() < multiNameOffset + multiNameLength)
+				return nullptr;
+
+			auto patch = std::make_shared<pluginLib::patchDB::Patch>();
+
+			std::string name(reinterpret_cast<const char*>(_sysex.data()) + multiNameOffset, multiNameLength);
+			// trim trailing spaces
+			while (!name.empty() && name.back() == ' ')
+				name.pop_back();
+			patch->name = name.empty() ? _defaultPatchName : name;
+
+			patch->bank = _sysex[7];
+			patch->program = _sysex[8];
+
+			// Hash: skip sysex headers/footers so a renamed or relocated dump still matches
+			{
+				synthLib::SysexBufferList msgs;
+				synthLib::MidiToSysex::splitMultipleSysex(msgs, _sysex);
+				std::vector<uint8_t> temp;
+				constexpr size_t frontOffset = 9;	// sysex header + bank + program
+				constexpr size_t backOffset = 2;	// checksum + f7
+				for (const auto& m : msgs)
+				{
+					if (m.size() > frontOffset + backOffset)
+					{
+						for (size_t i = frontOffset; i < m.size() - backOffset; ++i)
+							temp.push_back(m[i]);
+					}
+				}
+				memcpy(patch->hash.data(), juce::MD5(temp.data(), static_cast<int>(temp.size())).getChecksumDataArray(), std::size(patch->hash));
+			}
+
+			patch->tags.add(pluginLib::patchDB::TagType::CustomC,
+				patchType == PatchType::Arrangement ? "Arrangement" : "Multi");
+
+			patch->sysex = std::move(_sysex);
+			return patch;
+		}
+
 		if (_sysex.size() < 267)
 			return nullptr;
 
@@ -260,6 +342,8 @@ namespace genericVirusUI
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Phaser");
 		if(*parameterValues[idxChorusMix] > 0)
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Chorus");
+
+		patch->tags.add(pluginLib::patchDB::TagType::CustomC, "Single");
 		return patch;
 	}
 
@@ -473,6 +557,47 @@ namespace genericVirusUI
 				}
 			}
 
+		}
+
+		// Arrangement detection: if we parsed exactly 1 Multi + 16 Singles, merge
+		// them into a single compound patch (Multi dump followed by 16 Single dumps).
+		if (_results.size() == 17)
+		{
+			uint32_t multiCount = 0;
+			uint32_t singleCount = 0;
+			size_t multiIndex = 0;
+
+			for (size_t i = 0; i < _results.size(); ++i)
+			{
+				if (_results[i].size() < 10)
+				{
+					multiCount = singleCount = 0;
+					break;
+				}
+				const auto cmd = _results[i][6];
+				if (cmd == virusLib::SysexMessageType::DUMP_MULTI)
+				{
+					++multiCount;
+					multiIndex = i;
+				}
+				else if (cmd == virusLib::SysexMessageType::DUMP_SINGLE)
+				{
+					++singleCount;
+				}
+			}
+
+			if (multiCount == 1 && singleCount == 16)
+			{
+				pluginLib::patchDB::Data compound = _results[multiIndex];
+				for (size_t i = 0; i < _results.size(); ++i)
+				{
+					if (i == multiIndex)
+						continue;
+					compound.insert(compound.end(), _results[i].begin(), _results[i].end());
+				}
+				_results.clear();
+				_results.emplace_back(std::move(compound));
+			}
 		}
 
 		return !_results.empty();

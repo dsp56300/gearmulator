@@ -32,8 +32,18 @@ namespace genericVirusUI
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
+		enum class PatchType
+		{
+			Invalid,
+			Single,
+			Multi,
+			Arrangement,	// 1 Multi + 16 Singles concatenated
+		};
+
 		PatchManager(VirusEditor& _editor, Rml::Element* _root);
 		~PatchManager() override;
+
+		static PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex);
 
 		// PatchDB impl
 		bool loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program) override;
