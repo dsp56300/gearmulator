@@ -538,42 +538,12 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		if(!isValid(_dump))
 			return;
 
-		if (_type == DUMP_SINGLE)
-		{
-			SMidiEvent ev(MidiEventSource::Device);
-			ev.sysex = createSingleDump(m_rom, _bank, _program, _dump, deviceId);
-			_responses.emplace_back(std::move(ev));
-			return;
-		}
-
-		// Multi dump (not extracted to utility as it's only used here)
 		SMidiEvent ev(MidiEventSource::Device);
 
-		auto& response = ev.sysex;
-
-		buildResponseHeader(ev);
-
-		response.push_back(_type);
-		response.push_back(toMidiByte(_bank));
-		response.push_back(_program);
-
-		const auto size = m_rom.getMultiPresetSize();
-		const auto modelABCsize = ROMFile::getSinglePresetSize(DeviceModel::ABC);
-
-		for(size_t i=0; i<modelABCsize; ++i)
-			response.push_back(_dump[i]);
-
-		response.push_back(calcChecksum(response));
-
-		if (size > modelABCsize)
-		{
-			for (size_t i = modelABCsize; i < size; ++i)
-				response.push_back(_dump[i]);
-
-			response.push_back(calcChecksum(response));
-		}
-
-		response.push_back(M_ENDOFSYSEX);
+		if (_type == DUMP_SINGLE)
+			ev.sysex = createSingleDump(m_rom, _bank, _program, _dump, deviceId);
+		else
+			ev.sysex = createMultiDump(m_rom, _bank, _program, _dump, deviceId);
 
 		_responses.emplace_back(std::move(ev));
 	};
