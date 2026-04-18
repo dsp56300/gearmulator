@@ -190,7 +190,12 @@ namespace genericVirusUI
 		}
 		else
 		{
-			// ROM multi count isn't exposed; try up to 128 and stop on first invalid one
+			// Deduplicate by multi payload: TI-family ROMs contain only an
+			// "Init Multi" which the loader replicates 128 times. Without
+			// this, the ROM Arrangements node would show 128 identical
+			// entries for TI/TI2/Snow.
+			std::vector<virusLib::ROMFile::TPreset> seen;
+
 			for (uint32_t i = 0; i < 128; ++i)
 			{
 				virusLib::ROMFile::TPreset multi;
@@ -198,6 +203,20 @@ namespace genericVirusUI
 					break;
 				if (virusLib::ROMFile::getMultiName(multi).empty())
 					break;
+
+				bool duplicate = false;
+				for (const auto& prev : seen)
+				{
+					if (memcmp(prev.data(), multi.data(), multi.size()) == 0)
+					{
+						duplicate = true;
+						break;
+					}
+				}
+				if (duplicate)
+					continue;
+
+				seen.push_back(multi);
 				tryAdd(i);
 			}
 		}
