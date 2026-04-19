@@ -705,45 +705,53 @@ namespace genericVirusUI
 
 		}
 
-		// Arrangement detection: if we parsed exactly 1 Multi + 16 Singles, merge
-		// them into a single compound patch (Multi dump followed by 16 Single dumps).
-		if (_results.size() == 17)
+		// Arrangement detection: scan for a DUMP_MULTI immediately followed by
+		// 16 consecutive DUMP_SINGLE messages and merge each such sequence into
+		// one compound patch. Works for single-arrangement files AND user-bank
+		// files that store multiple patches (and possibly multiple arrangements)
+		// as concatenated sysex messages.
 		{
-			uint32_t multiCount = 0;
-			uint32_t singleCount = 0;
-			size_t multiIndex = 0;
-
-			for (size_t i = 0; i < _results.size(); ++i)
+			auto isMulti = [](const pluginLib::patchDB::Data& _d)
 			{
-				if (_results[i].size() < 10)
-				{
-					multiCount = singleCount = 0;
-					break;
-				}
-				const auto cmd = _results[i][6];
-				if (cmd == virusLib::SysexMessageType::DUMP_MULTI)
-				{
-					++multiCount;
-					multiIndex = i;
-				}
-				else if (cmd == virusLib::SysexMessageType::DUMP_SINGLE)
-				{
-					++singleCount;
-				}
-			}
-
-			if (multiCount == 1 && singleCount == 16)
+				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_MULTI;
+			};
+			auto isSingle = [](const pluginLib::patchDB::Data& _d)
 			{
-				pluginLib::patchDB::Data compound = _results[multiIndex];
-				for (size_t i = 0; i < _results.size(); ++i)
+				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_SINGLE;
+			};
+
+			pluginLib::patchDB::DataList merged;
+			merged.reserve(_results.size());
+
+			for (size_t i = 0; i < _results.size();)
+			{
+				if (isMulti(_results[i]) && i + 16 < _results.size())
 				{
-					if (i == multiIndex)
+					bool allSingles = true;
+					for (size_t j = 1; j <= 16; ++j)
+					{
+						if (!isSingle(_results[i + j]))
+						{
+							allSingles = false;
+							break;
+						}
+					}
+
+					if (allSingles)
+					{
+						pluginLib::patchDB::Data compound = _results[i];
+						for (size_t j = 1; j <= 16; ++j)
+							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
+						merged.emplace_back(std::move(compound));
+						i += 17;
 						continue;
-					compound.insert(compound.end(), _results[i].begin(), _results[i].end());
+					}
 				}
-				_results.clear();
-				_results.emplace_back(std::move(compound));
+				merged.emplace_back(std::move(_results[i]));
+				++i;
 			}
+
+			_results = std::move(merged);
 		}
 
 		return !_results.empty();
