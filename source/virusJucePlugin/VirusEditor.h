@@ -97,6 +97,10 @@ namespace genericVirusUI
 		Rml::Element* m_presetName = nullptr;
 //		PartMouseListener* m_presetNameMouseListener  = nullptr;
 
+		// When in Multi mode, click toggles the patch name display between
+		// the current part's Single name (default) and the Multi name.
+		bool m_showMultiName = false;
+
 		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 
 		juceRmlUi::ElemComboBox* m_romSelector = nullptr;

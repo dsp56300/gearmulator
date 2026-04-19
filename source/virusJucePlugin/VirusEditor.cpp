@@ -122,6 +122,17 @@ namespace genericVirusUI
 		if(presetLoad)
 			juceRmlUi::EventListener::AddClick(presetLoad, [this] { loadPreset(); });
 
+		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Click, [this](const Rml::Event& _event)
+		{
+			if (_event.GetTargetElement() != _event.GetCurrentElement())
+				return;
+			// Only toggle in Multi mode; Single mode has only one name to show
+			if (!getController().isMultiMode())
+				return;
+			m_showMultiName = !m_showMultiName;
+			updatePresetName();
+		});
+
 		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Dblclick, [this](const Rml::Event& _event)
 		{
 			if (_event.GetTargetElement() != _event.GetCurrentElement())
@@ -132,8 +143,16 @@ namespace genericVirusUI
 				auto text = Rml::StringUtilities::StripWhitespace(_text);
 				if (text.empty())
 					return;
-				getController().setSinglePresetName(getController().getCurrentPart(), text);
-				onProgramChange(getController().getCurrentPart());
+				if (getController().isMultiMode() && m_showMultiName)
+				{
+					getController().setMultiPresetName(text);
+					updatePresetName();
+				}
+				else
+				{
+					getController().setSinglePresetName(getController().getCurrentPart(), text);
+					onProgramChange(getController().getCurrentPart());
+				}
 			});
 		});
 
@@ -266,6 +285,8 @@ namespace genericVirusUI
 	void VirusEditor::onPlayModeChanged()
 	{
 		m_parts->onPlayModeChanged();
+		if (!getController().isMultiMode())
+			m_showMultiName = false;
 		updatePresetName();
 		updatePlayModeButtons();
 	}
@@ -280,7 +301,11 @@ namespace genericVirusUI
 
 	void VirusEditor::updatePresetName() const
 	{
-		m_presetName->SetInnerRML(getController().getCurrentPartPresetName(getController().getCurrentPart()));
+		const auto& c = getController();
+		const auto name = (c.isMultiMode() && m_showMultiName)
+			? c.getMultiPresetName()
+			: c.getCurrentPartPresetName(c.getCurrentPart());
+		m_presetName->SetInnerRML(name);
 	}
 
 	void VirusEditor::updatePlayModeButtons() const
