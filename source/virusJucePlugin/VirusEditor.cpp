@@ -22,6 +22,7 @@
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
 
 #include "juceUiLib/messageBox.h"
@@ -122,10 +123,14 @@ namespace genericVirusUI
 		if(presetLoad)
 			juceRmlUi::EventListener::AddClick(presetLoad, [this] { loadPreset(); });
 
-		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Click, [this](const Rml::Event& _event)
+		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Mousedown, [this](Rml::Event& _event)
 		{
 			if (_event.GetTargetElement() != _event.GetCurrentElement())
 				return;
+			if (!juceRmlUi::helper::isContextMenu(_event))
+				return;
+			// Swallow the right-click so the global context menu doesn't also open
+			_event.StopPropagation();
 			// Only toggle in Multi mode; Single mode has only one name to show
 			if (!getController().isMultiMode())
 				return;
@@ -138,12 +143,14 @@ namespace genericVirusUI
 			if (_event.GetTargetElement() != _event.GetCurrentElement())
 				return;
 
-			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(m_presetName->GetInnerRML()), [this](const std::string& _text)
+			const bool editMulti = getController().isMultiMode() && m_showMultiName;
+
+			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(m_presetName->GetInnerRML()), [this, editMulti](const std::string& _text)
 			{
 				auto text = Rml::StringUtilities::StripWhitespace(_text);
 				if (text.empty())
 					return;
-				if (getController().isMultiMode() && m_showMultiName)
+				if (editMulti)
 				{
 					getController().setMultiPresetName(text);
 					updatePresetName();

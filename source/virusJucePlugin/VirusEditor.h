@@ -97,7 +97,7 @@ namespace genericVirusUI
 		Rml::Element* m_presetName = nullptr;
 //		PartMouseListener* m_presetNameMouseListener  = nullptr;
 
-		// When in Multi mode, click toggles the patch name display between
+		// When in Multi mode, right-click toggles the patch name display between
 		// the current part's Single name (default) and the Multi name.
 		bool m_showMultiName = false;
 
