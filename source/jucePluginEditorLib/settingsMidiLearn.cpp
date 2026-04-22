@@ -367,6 +367,39 @@ namespace jucePluginEditorLib
 		}
 	}
 
+	void SettingsMidiLearn::onInvertToggled(size_t _mappingIndex, bool _invert)
+	{
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		auto& preset = const_cast<pluginLib::MidiLearnPreset&>(translator->getPreset());
+		auto& mappings = preset.getMappings();
+
+		if (_mappingIndex >= mappings.size())
+			return;
+
+		mappings[_mappingIndex].invert = _invert;
+
+		const juce::String presetName(preset.getName());
+		if (m_learnManager.savePreset(presetName, preset))
+		{
+			translator->setPreset(preset);
+			if (isCurrentPresetSelected())
+				m_originalPreset = preset;
+			// settings-checkbox buttons don't auto-toggle their visual state;
+			// rebuild the row so the checkbox reflects the new invert value.
+			refreshMappingList();
+		}
+		else
+		{
+			genericUI::MessageBox::showOk(
+				genericUI::MessageBox::Icon::Warning,
+				m_processor.getProductName(),
+				"Failed to save invert change.");
+		}
+	}
+
 	void SettingsMidiLearn::onPartChanged(size_t _mappingIndex, int _newPartIndex)
 	{
 		auto* translator = m_processor.getMidiLearnTranslator();
@@ -545,15 +578,31 @@ namespace jucePluginEditorLib
 				{
 					modeCombo->addOption(modeStr);
 				}
-				
+
 				// Set current mode
 				const int currentMode = static_cast<int>(mapping.mode);
 				modeCombo->setSelectedIndex(currentMode, false); // Don't trigger callback when setting initial value
-				
+
 				// Handle mode change
 				modeCombo->onValueChanged.addListener([this, i](float _value)
 				{
 					onModeChanged(i, static_cast<int>(_value));
+				});
+			}
+
+			// Invert checkbox
+			if (auto* cbInvert = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(row, "cbInvert"))
+			{
+				cbInvert->setChecked(mapping.invert);
+				juceRmlUi::EventListener::Add(cbInvert, Rml::EventId::Click, [this, i](Rml::Event& _event)
+				{
+					_event.StopPropagation();
+					if (auto* t = m_processor.getMidiLearnTranslator())
+					{
+						const auto& mappings = t->getPreset().getMappings();
+						if (i < mappings.size())
+							onInvertToggled(i, !mappings[i].invert);
+					}
 				});
 			}
 

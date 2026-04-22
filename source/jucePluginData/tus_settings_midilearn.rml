@@ -30,6 +30,7 @@
 				<td class="ml-col-part">Part</td>
 				<td class="ml-col-controller">Controller</td>
 				<td class="ml-col-mode">Mode</td>
+				<td class="ml-col-invert">Invert</td>
 				<td class="ml-col-parameter">Parameter</td>
 				<td class="ml-col-remove"></td>
 			</tr>
@@ -47,9 +48,12 @@
 				</td>
 				<td id="controller" class="ml-col-controller">74</td>
 				<td class="ml-col-mode">
-					<combo id="modeCombo" class="settings-combo-small">
+					<combo id="modeCombo" class="settings-combo-small" style="width: 100%; box-sizing: border-box;">
 						<combotext>Absolute</combotext>
 					</combo>
+				</td>
+				<td class="ml-col-invert">
+					<button id="cbInvert" class="settings-checkbox"/>
 				</td>
 				<td id="parameter" class="ml-col-parameter">Filter Cutoff</td>
 				<td class="ml-col-remove"><button id="btRemove" class="button">Remove</button></td>

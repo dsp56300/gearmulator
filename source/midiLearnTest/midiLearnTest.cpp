@@ -649,6 +649,157 @@ void testMidiLearnPolyPressure()
 	std::cout << "  Poly Pressure tests passed!" << std::endl;
 }
 
+void testMidiLearnInvert()
+{
+	std::cout << "Testing MIDI Learn Invert flag..." << std::endl;
+
+	// Default: invert is false
+	{
+		MidiLearnMapping m;
+		TEST_ASSERT(m.invert == false);
+	}
+
+	// JSON round-trip with invert=true
+	{
+		MidiLearnMapping original;
+		original.type = MidiLearnMapping::Type::ControlChange;
+		original.mode = MidiLearnMapping::Mode::Absolute;
+		original.channel = 0;
+		original.controller = 74;
+		original.paramName = "Filter Cutoff";
+		original.invert = true;
+
+		auto json = original.toJson();
+		auto restored = MidiLearnMapping::fromJson(json);
+		TEST_ASSERT(restored.invert == true);
+	}
+
+	// JSON round-trip with invert=false is preserved
+	{
+		MidiLearnMapping original;
+		original.invert = false;
+		original.paramName = "NotInverted";
+		auto json = original.toJson();
+		auto restored = MidiLearnMapping::fromJson(json);
+		TEST_ASSERT(restored.invert == false);
+	}
+
+	// Backward compatibility: JSON missing "invert" property → false
+	{
+		auto* obj = new juce::DynamicObject();
+		obj->setProperty("type", juce::String("ControlChange"));
+		obj->setProperty("mode", juce::String("Absolute"));
+		obj->setProperty("channel", 0);
+		obj->setProperty("part", 0xFF);
+		obj->setProperty("controller", 74);
+		obj->setProperty("nrpn", 0);
+		obj->setProperty("paramName", juce::String("LegacyParam"));
+		obj->setProperty("feedbackTargets", 0);
+		// note: no "invert" property
+
+		juce::var legacyJson(obj);
+		auto restored = MidiLearnMapping::fromJson(legacyJson);
+		TEST_ASSERT(restored.paramName == "LegacyParam");
+		TEST_ASSERT(restored.invert == false);
+	}
+
+	// Preset with mixed invert values round-trips correctly
+	{
+		MidiLearnPreset preset("Invert Mix");
+
+		MidiLearnMapping normal;
+		normal.type = MidiLearnMapping::Type::ControlChange;
+		normal.channel = 0;
+		normal.controller = 10;
+		normal.paramName = "Normal";
+		normal.invert = false;
+
+		MidiLearnMapping inverted;
+		inverted.type = MidiLearnMapping::Type::ControlChange;
+		inverted.channel = 0;
+		inverted.controller = 11;
+		inverted.paramName = "Inverted";
+		inverted.invert = true;
+
+		preset.addMapping(normal);
+		preset.addMapping(inverted);
+
+		auto json = preset.toJson();
+		MidiLearnPreset restored;
+		TEST_ASSERT(restored.fromJson(json));
+		TEST_ASSERT(restored.getMappings().size() == 2);
+		TEST_ASSERT(restored.getMappings()[0].invert == false);
+		TEST_ASSERT(restored.getMappings()[1].invert == true);
+
+		// File round-trip
+		auto tempFile = juce::File::getSpecialLocation(juce::File::tempDirectory)
+			.getChildFile("test_midi_learn_invert.json");
+		TEST_ASSERT(preset.saveToFile(tempFile));
+		MidiLearnPreset fromFile;
+		TEST_ASSERT(fromFile.loadFromFile(tempFile));
+		TEST_ASSERT(fromFile.getMappings().size() == 2);
+		TEST_ASSERT(fromFile.getMappings()[0].invert == false);
+		TEST_ASSERT(fromFile.getMappings()[1].invert == true);
+		tempFile.deleteFile();
+	}
+
+	// Invert works for every MIDI type
+	for (auto t : { MidiLearnMapping::Type::ControlChange,
+	                MidiLearnMapping::Type::PolyPressure,
+	                MidiLearnMapping::Type::ChannelPressure,
+	                MidiLearnMapping::Type::PitchBend })
+	{
+		MidiLearnMapping m;
+		m.type = t;
+		m.invert = true;
+		auto restored = MidiLearnMapping::fromJson(m.toJson());
+		TEST_ASSERT(restored.type == t);
+		TEST_ASSERT(restored.invert == true);
+	}
+
+	// Invert works in combination with each mode
+	for (auto mode : { MidiLearnMapping::Mode::Absolute,
+	                   MidiLearnMapping::Mode::RelativeSigned,
+	                   MidiLearnMapping::Mode::RelativeOffset })
+	{
+		MidiLearnMapping m;
+		m.mode = mode;
+		m.invert = true;
+		auto restored = MidiLearnMapping::fromJson(m.toJson());
+		TEST_ASSERT(restored.mode == mode);
+		TEST_ASSERT(restored.invert == true);
+	}
+
+	// operator== for the preset must distinguish mappings by invert flag,
+	// otherwise the "Current preset equals saved preset?" check misidentifies
+	// presets that differ only by invert state.
+	{
+		MidiLearnPreset a("A");
+		MidiLearnPreset b("B"); // name is intentionally different — op== ignores name
+
+		MidiLearnMapping m;
+		m.type = MidiLearnMapping::Type::ControlChange;
+		m.channel = 0;
+		m.controller = 42;
+		m.paramName = "Foo";
+
+		m.invert = false;
+		a.addMapping(m);
+		m.invert = true;
+		b.addMapping(m);
+
+		TEST_ASSERT(!(a == b));
+
+		// flip a to match b
+		a.clearMappings();
+		m.invert = true;
+		a.addMapping(m);
+		TEST_ASSERT(a == b);
+	}
+
+	std::cout << "  Invert flag tests passed!" << std::endl;
+}
+
 void testMidiLearnMixedTypes()
 {
 	std::cout << "Testing MIDI Learn Mixed Types preset..." << std::endl;
@@ -755,6 +906,7 @@ int main()
 		testMidiLearnPitchBend();
 		testMidiLearnChannelPressure();
 		testMidiLearnPolyPressure();
+		testMidiLearnInvert();
 		testMidiLearnMixedTypes();
 
 		std::cout << std::endl;

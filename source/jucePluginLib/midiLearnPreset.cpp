@@ -141,7 +141,8 @@ namespace pluginLib
 			    a.controller != b.controller ||
 			    a.paramName != b.paramName ||
 			    a.mode != b.mode ||
-			    a.feedbackTargets != b.feedbackTargets)
+			    a.feedbackTargets != b.feedbackTargets ||
+			    a.invert != b.invert)
 			{
 				return false;
 			}

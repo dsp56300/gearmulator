@@ -57,6 +57,7 @@ namespace pluginLib
 		uint16_t nrpn = 0;           // For NRPN type
 		std::string paramName;       // Target parameter name
 		uint8_t feedbackTargets = 0; // Bitmask of FeedbackTarget flags
+		bool invert = false;         // Invert incoming values (and outgoing feedback)
 
 		// Comparison for finding mappings
 		bool matchesMidiEvent(Type _eventType, uint8_t _eventChannel, uint8_t _eventController) const;

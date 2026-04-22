@@ -83,6 +83,7 @@ namespace pluginLib
 		obj->setProperty("nrpn", static_cast<int>(nrpn));
 		obj->setProperty("paramName", juce::String(paramName));
 		obj->setProperty("feedbackTargets", static_cast<int>(feedbackTargets));
+		obj->setProperty("invert", invert);
 
 		return juce::var(obj);
 	}
@@ -103,6 +104,7 @@ namespace pluginLib
 			mapping.nrpn = static_cast<uint16_t>(static_cast<int>(obj->getProperty("nrpn")));
 			mapping.paramName = obj->getProperty("paramName").toString().toStdString();
 			mapping.feedbackTargets = static_cast<uint8_t>(static_cast<int>(obj->getProperty("feedbackTargets")));
+			mapping.invert = obj->hasProperty("invert") && static_cast<bool>(obj->getProperty("invert"));
 		}
 
 		return mapping;

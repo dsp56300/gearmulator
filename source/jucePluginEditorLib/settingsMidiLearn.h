@@ -33,6 +33,7 @@ namespace jucePluginEditorLib
 		void onModeChanged(size_t _mappingIndex, int _newModeIndex);
 		void onChannelChanged(size_t _mappingIndex, int _newChannelIndex);
 		void onPartChanged(size_t _mappingIndex, int _newPartIndex);
+		void onInvertToggled(size_t _mappingIndex, bool _invert);
 		void onInputSourceToggle(synthLib::MidiEventSource _source) const;
 		void onFeedbackTargetToggle(synthLib::MidiEventSource _target);
 

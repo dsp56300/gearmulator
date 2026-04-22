@@ -4,6 +4,9 @@ Release Notes
 
 Framework:
 
+- [New] BUG-10179 MIDI Learn: Invert option per mapping. Incoming CC
+        values and outgoing feedback can now be inverted (a new
+        "Invert" checkbox in the MIDI Learn settings page).
 - [Imp] Support parsing of ".mid" files that are not really midi but
         raw sysex
 

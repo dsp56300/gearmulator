@@ -157,13 +157,16 @@ namespace pluginLib
 			const auto value = MidiLearnMapping::getValue(_event);
 			const auto currentValue = _param.getUnnormalizedValue();
 			const auto& desc = _param.getDescription();
-			
+
+			const uint8_t incValue = _mapping.invert ? 0x7F : 0x01;
+			const uint8_t decValue = _mapping.invert ? 0x01 : 0x7F;
+
 			int newValue = currentValue;
-			if (value == 0x7F) // Decrement
+			if (value == decValue)
 				newValue = std::max(static_cast<int>(desc.range.getStart()), currentValue - 1);
-			else if (value == 0x01) // Increment
+			else if (value == incValue)
 				newValue = std::min(static_cast<int>(desc.range.getEnd()), currentValue + 1);
-			
+
 			_param.setUnnormalizedValueNotifyingHost(newValue, Parameter::Origin::Midi);
 		}
 		else if (_mapping.mode == MidiLearnMapping::Mode::RelativeOffset)
@@ -172,13 +175,16 @@ namespace pluginLib
 			const auto value = MidiLearnMapping::getValue(_event);
 			const auto currentValue = _param.getUnnormalizedValue();
 			const auto& desc = _param.getDescription();
-			
+
+			const uint8_t incValue = _mapping.invert ? 0x3F : 0x41;
+			const uint8_t decValue = _mapping.invert ? 0x41 : 0x3F;
+
 			int newValue = currentValue;
-			if (value == 0x3F) // Decrement (63)
+			if (value == decValue)
 				newValue = std::max(static_cast<int>(desc.range.getStart()), currentValue - 1);
-			else if (value == 0x41) // Increment (65)
+			else if (value == incValue)
 				newValue = std::min(static_cast<int>(desc.range.getEnd()), currentValue + 1);
-			
+
 			_param.setUnnormalizedValueNotifyingHost(newValue, Parameter::Origin::Midi);
 		}
 		else
@@ -205,6 +211,9 @@ namespace pluginLib
 				// CC, PolyPressure: value in byte c
 				normalized = _event.c / 127.0f;
 			}
+
+			if (_mapping.invert)
+				normalized = 1.0f - normalized;
 
 			const auto paramValue = static_cast<int>(desc.range.getStart() + normalized * rangeSize);
 			_param.setUnnormalizedValueNotifyingHost(paramValue, Parameter::Origin::Midi);
@@ -424,6 +433,9 @@ namespace pluginLib
 
 	synthLib::SMidiEvent MidiLearnTranslator::createFeedbackEvent(const MidiLearnMapping& _mapping, float _normalizedValue, synthLib::MidiEventSource _source) const
 	{
+		if (_mapping.invert)
+			_normalizedValue = 1.0f - _normalizedValue;
+
 		// Always send absolute values for feedback (even for relative-mode mappings)
 		const uint8_t midiValue = static_cast<uint8_t>(std::clamp(_normalizedValue * 127.0f, 0.0f, 127.0f));
 
