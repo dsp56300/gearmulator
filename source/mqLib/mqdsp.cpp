@@ -327,8 +327,6 @@ namespace mqLib
 
 		const auto cmd = static_cast<HostCommand>(_irq);
 
-		waitDspRxEmpty();
-
 		// Before BatchStart, ensure the previous batch's command processing
 		// is done.  Firmware protocol for Y:$6:
 		//   BatchComplete: move n6,y:$6  => Y:$6 = N6 (bit 0 = 0 = pending)
@@ -349,13 +347,22 @@ namespace mqLib
 			m_commandProcessingActive = false;
 		}
 
+		// $92 is the firmware's timeout/abort path: the UC sends it when it
+		// thinks the DSP is too slow to set HF2=1.  In emulation the DSP is
+		// fast enough that HF2=1 is already set by the time we get here, so
+		// the IRQ would be a no-op.  Wait for HF2=1 as the batch barrier and
+		// skip the injection + pending-interrupt wait entirely.
 		if(cmd == HostCommand::SetHF2)
 		{
 			m_hardware.ucYieldLoop([&]
 			{
 				return !bittest(hdi08().readControlRegister(), dsp56k::HDI08::HCR_HF2);
 			});
+			hdiTransferDSPtoUC();
+			return;
 		}
+
+		waitDspRxEmpty();
 
 		dsp().injectExternalInterrupt(_irq);
 
