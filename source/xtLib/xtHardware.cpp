@@ -242,7 +242,7 @@ namespace xt
 
 		m_midi.process(_frames);
 
-		m_processAudio = true;
+		beginProcessAudio();
 
 		// DSP3 (index 1) outputs final audio on ESSI0, single DSP uses index 0
 		auto& essiMain = m_dsps[getMainDspIdx()]->getPeriph().getEssi0();
@@ -372,7 +372,7 @@ namespace xt
 			outputs[5] += processCount;
 		}
 
-		m_processAudio = false;
+		endProcessAudio();
 	}
 
 	void Hardware::ensureBufferSize(const uint32_t _frames)

@@ -49,14 +49,22 @@ namespace wLib
 
 		while(_continue() && !m_terminateUcThread)
 		{
-			if(m_processAudio || m_esaiFrameIndex <= 0)
+			// Spin while the audio thread is actively processing a buffer -
+			// latency here is critical because the audio callback is blocked
+			// on DSP output and any UC sleep delays DSP progress.
+			// Also spin pre-boot (m_esaiFrameIndex == 0), when nothing will
+			// ever notify m_processAudioCv.
+			if(m_processAudio.load(std::memory_order_acquire) || m_esaiFrameIndex == 0)
 			{
 				std::this_thread::yield();
 			}
 			else
 			{
-				std::unique_lock uLock(m_esaiFrameAddedMutex);
-				m_esaiFrameAddedCv.wait(uLock);
+				// Idle between audio buffers: the DSP is blocked on its
+				// output ring being full, so the UC's wait condition can't
+				// resolve until audio processing resumes. Sleep until then.
+				std::unique_lock uLock(m_processAudioMutex);
+				m_processAudioCv.wait(uLock);
 			}
 		}
 
@@ -67,7 +75,18 @@ namespace wLib
 	void Hardware::requestUcTermination()
 	{
 		m_terminateUcThread = true;
-		m_esaiFrameAddedCv.notify_one();
+		m_processAudioCv.notify_all();
+	}
+
+	void Hardware::beginProcessAudio()
+	{
+		m_processAudio.store(true, std::memory_order_release);
+		m_processAudioCv.notify_all();
+	}
+
+	void Hardware::endProcessAudio()
+	{
+		m_processAudio.store(false, std::memory_order_release);
 	}
 
 	void Hardware::sendMidi(const synthLib::SMidiEvent& _ev)
@@ -88,6 +107,8 @@ namespace wLib
 
 		if((m_esaiFrameIndex & (g_syncEsaiFrameRate-1)) == 0)
 			m_esaiFrameAddedCv.notify_one();
+
+		m_processAudioCv.notify_all();
 
 		m_requestedFramesAvailableMutex.lock();
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 #include <functional>
 
@@ -53,6 +54,13 @@ namespace wLib
 		void syncUcToDSP();
 		void processMidiInput();
 
+		// Derived-class processAudio must bracket its body with these.
+		// Begin sets the flag and wakes any UC thread sleeping in ucYieldLoop.
+		// End clears the flag; no wake needed because waiters only sleep while
+		// the flag is false.
+		void beginProcessAudio();
+		void endProcessAudio();
+
 		// timing
 		const double m_samplerateInv;
 		uint32_t m_esaiFrameIndex = 0;
@@ -76,7 +84,15 @@ namespace wLib
 		bool m_haltDSP = false;
 		dsp56k::ConditionVariable m_haltDSPcv;
 		std::mutex m_haltDSPmutex;
-		bool m_processAudio = false;
+
+		// Paired with m_processAudioCv/Mutex.  The audio callback flips this
+		// to true for the duration of a buffer; ucYieldLoop uses it to decide
+		// between spinning (audio active → low latency) and sleeping on the
+		// CV (audio idle → save CPU).
+		std::atomic<bool> m_processAudio{false};
+		std::mutex m_processAudioMutex;
+		dsp56k::ConditionVariable m_processAudioCv;
+
 		bool m_bootCompleted = false;
 		bool m_terminateUcThread = false;
 	};

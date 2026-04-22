@@ -412,7 +412,7 @@ namespace mqLib
 
 		m_midi.process(_frames);
 
-		m_processAudio = true;
+		beginProcessAudio();
 
 		auto& esai = m_dsps.front()->getPeriph().getEsai();
 
@@ -532,7 +532,7 @@ namespace mqLib
 			}
 		}
 
-		m_processAudio = false;
+		endProcessAudio();
 	}
 
 	void Hardware::ensureBufferSize(uint32_t _frames)
