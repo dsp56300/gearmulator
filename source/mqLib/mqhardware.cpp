@@ -455,6 +455,23 @@ namespace mqLib
 				// SDI0/RX0 is wired to the ADC on real hardware).
 				m_dsps[1]->getPeriph().getEsai().processAudioInputInterleaved(inputs, processCount, _latency);
 
+				// Batch the output drain: wait once for DSP A's TX to have
+				// enough frames rather than blocking per-frame in the pop loop
+				// below. Same pattern as the single-DSP path and Xenia VE.
+				const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
+				if(esai.getAudioOutputs().size() < requiredSize)
+				{
+					std::unique_lock uLock(m_requestedFramesAvailableMutex);
+					m_requestedFrames = requiredSize;
+					m_requestedFramesAvailableCv.wait(uLock, [&]()
+					{
+						if(esai.getAudioOutputs().size() < requiredSize)
+							return false;
+						m_requestedFrames = 0;
+						return true;
+					});
+				}
+
 				// B→C and C→A routing is handled by continuous TX callbacks
 				// (set up in initVoiceExpansion). Extract host audio output
 				// from DSP A's TX.
