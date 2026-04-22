@@ -71,10 +71,8 @@ namespace mqLib
 	Hardware::~Hardware()
 	{
 		for (auto & dsp : m_dsps)
-		{
-			dsp->getPeriph().getEsai().setCallback({});
-			dsp->getPeriph().getEsai().setWriteTxCallback([](uint64_t&, const dsp56k::Audio::Frame<std::array<unsigned, 6>>&) {});
-		}
+			dsp->terminateThread();
+		m_dsps.clear();
 	}
 
 	void Hardware::process()
