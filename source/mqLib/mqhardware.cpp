@@ -295,8 +295,9 @@ namespace mqLib
 			++_frameIndex;
 		});
 
-		// prefill just a few samples to initiate execution, DSP B is the one needing input as its the one receiving the ADC signal
-		m_dsps[1]->getPeriph().getEsai().writeEmptyAudioIn(4);
+		// Prefill DSP B (the ADC-facing expansion DSP in the chain ADC→B→C→A→DAC)
+		// to give the VE pipeline enough slack to absorb per-callback jitter.
+		m_dsps[1]->getPeriph().getEsai().writeEmptyAudioIn(64);
 
 		/*
 		// Dump all DSP P memories as disassembly
