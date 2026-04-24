@@ -380,12 +380,22 @@ namespace pluginLib
 	Parameter::ScopedChangeGesture::ScopedChangeGesture(Parameter& _p, const Origin _origin) : m_parameter(_p), m_origin(_origin)
     {
 		if(_p.getDescription().isPublic && requiresGesture(_origin))
+		{
+			// beginChangeGesture/endChangeGesture must only be called on the
+			// message thread. Every caller that passes Origin::Ui or Origin::Unknown
+			// is expected to run there; an audio-thread call here would race the
+			// host's parameter subscribers and can crash some DAWs.
+			jassert(juce::MessageManager::existsAndIsCurrentThread());
 		    _p.pushChangeGesture();
+		}
     }
 
     Parameter::ScopedChangeGesture::~ScopedChangeGesture()
     {
 		if(m_parameter.getDescription().isPublic && requiresGesture(m_origin))
+		{
+			jassert(juce::MessageManager::existsAndIsCurrentThread());
 		    m_parameter.popChangeGesture();
+		}
     }
 }
