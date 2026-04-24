@@ -6,7 +6,7 @@ namespace pluginLib
 {
 	namespace
 	{
-		std::set<Parameter*> g_pendingParameterChanges;
+		std::set<Parameter*> g_aliveParameters;
 	}
 
 	Parameter::Parameter(Controller& _controller, const Description& _desc, const uint8_t _partNum, const int _uniqueId, const PartFormatter& _partFormatter)
@@ -15,7 +15,6 @@ namespace pluginLib
 		, m_desc(_desc)
 		, m_part(_partNum)
 		, m_uniqueId(_uniqueId)
-		, m_pendingParameterChange(nullptr)
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
 		m_range.end = static_cast<float>(m_desc.range.getEnd());
@@ -23,11 +22,13 @@ namespace pluginLib
 
 		m_value.setValue(m_range.start);
 		m_value.addListener(this);
+
+		g_aliveParameters.insert(this);
     }
 
 	Parameter::~Parameter()
 	{
-		g_pendingParameterChanges.erase(this);
+		g_aliveParameters.erase(this);
 	}
 
 	void Parameter::valueChanged(juce::Value&)
@@ -89,10 +90,9 @@ namespace pluginLib
 
 	void Parameter::scheduleTimer(const uint64_t _delayMs)
 	{
-		g_pendingParameterChanges.insert(this);
 		juce::Timer::callAfterDelay(static_cast<int>(_delayMs), [this]
 		{
-			if (g_pendingParameterChanges.count(this))
+			if (g_aliveParameters.count(this))
 				sendPendingParameterChange();
 		});
 	}
@@ -104,24 +104,26 @@ namespace pluginLib
 
 		if(elapsed >= m_rateLimit)
 		{
-			m_pendingParameterChange = nullptr;
+			m_pendingChange.store(PendingChange{}, std::memory_order_release);
 			sendParameterChangeNow(_value, _origin);
 		}
 		else
 		{
-			if (!m_pendingParameterChange)
-				scheduleTimer(m_rateLimit - elapsed);
+			PendingChange next{};
+			next.value = _value;
+			next.origin = static_cast<uint8_t>(_origin);
+			next.hasPending = true;
 
-			m_pendingParameterChange = [this, _value, _origin]
-			{
-				sendParameterChangeNow(_value, _origin);
-			};
+			const auto prev = m_pendingChange.exchange(next, std::memory_order_acq_rel);
+			if (!prev.hasPending)
+				scheduleTimer(m_rateLimit - elapsed);
 		}
     }
 
 	void Parameter::sendPendingParameterChange()
 	{
-		if (!m_pendingParameterChange)
+		const auto snap = m_pendingChange.load(std::memory_order_acquire);
+		if (!snap.hasPending)
 			return;
 
 		// Guard against juce::Timer firing too early
@@ -135,8 +137,19 @@ namespace pluginLib
 			}
 		}
 
-		m_pendingParameterChange();
-		m_pendingParameterChange = nullptr;
+		// Clear only if nothing newer was written by the audio thread in the
+		// meantime. On a CAS failure the newer state already has hasPending=1,
+		// so we reschedule to pick it up on the next tick.
+		PendingChange expected = snap;
+		if (m_pendingChange.compare_exchange_strong(expected, PendingChange{},
+		                                             std::memory_order_acq_rel))
+		{
+			sendParameterChangeNow(snap.value, static_cast<Origin>(snap.origin));
+		}
+		else
+		{
+			scheduleTimer(m_rateLimit ? m_rateLimit : 1);
+		}
 	}
 
     int Parameter::clampValue(const int _value) const

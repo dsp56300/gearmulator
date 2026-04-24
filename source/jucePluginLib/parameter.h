@@ -1,6 +1,8 @@
 #pragma once
 
+#include <atomic>
 #include <set>
+#include <type_traits>
 
 #include "parameterdescription.h"
 
@@ -136,7 +138,22 @@ namespace pluginLib
 
 		uint32_t m_rateLimit = 0;		// milliseconds
 		uint64_t m_lastSendTime = 0;
-		std::function<void()> m_pendingParameterChange;
+
+		// Pending rate-limited change, updated from the audio thread and
+		// consumed by the message-thread timer callback. Encoded as an 8-byte
+		// trivially-copyable struct so std::atomic gives us true lock-free
+		// group atomicity — no torn reads between value/origin/hasPending.
+		struct PendingChange
+		{
+			int value = 0;
+			uint8_t origin = 0;      // static_cast<uint8_t>(Origin)
+			bool hasPending = false;
+			uint16_t _pad = 0;
+		};
+		static_assert(sizeof(PendingChange) == 8, "PendingChange must be 8 bytes for lock-free atomic");
+		static_assert(std::is_trivially_copyable_v<PendingChange>, "PendingChange must be trivially copyable");
+		static_assert(std::atomic<PendingChange>::is_always_lock_free, "std::atomic<PendingChange> must be lock-free on this platform");
+		std::atomic<PendingChange> m_pendingChange{};
 
 		bool m_isLocked = false;
 		ParameterLinkType m_linkType = None;
