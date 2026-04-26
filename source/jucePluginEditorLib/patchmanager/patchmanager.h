@@ -116,6 +116,13 @@ namespace jucePluginEditorLib::patchManager
 
 		void setCurrentPart(uint32_t _part);
 
+		// Hash the patch the plugin is currently playing on _part and update
+		// the UI selection to match if a corresponding entry exists in any
+		// loaded data source. Used by the evStateLoaded subscription so a
+		// host-driven state load (NKS preset load in Komplete Kontrol etc.)
+		// reflects in the patchmanager browser, not just the audio engine.
+		void selectActivePatch(uint32_t _part);
+
 	protected:
 		void updateStateAsync(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
 
@@ -133,5 +140,10 @@ namespace jucePluginEditorLib::patchManager
 
 		Editor& m_editor;
 		std::unique_ptr<PatchManagerUi> m_ui;
+
+		// Subscribed to Processor::evStateLoaded — fires after a host-driven
+		// setState restores the audio engine, so the UI selection can be
+		// brought in line with what's actually playing.
+		baseLib::EventListener<> m_onStateLoaded;
 	};
 }
