@@ -71,6 +71,22 @@ namespace jucePluginEditorLib::patchManager
 			});
 
 		setUi(std::make_unique<patchManagerRml::PatchManagerUiRml>(m_editor, *this, *m_editor.getRmlComponent(), _rootElement, *m_editor.getPatchManagerDataModel(), _groupTypes));
+
+		// Subscribe to host-driven state loads. Defer the work onto the JUCE
+		// message thread because evStateLoaded may fire from the audio thread
+		// (or any host thread that drove setStateInformation), and the patch
+		// search + UI update must run on the message thread.
+		m_onStateLoaded.set(_editor.getProcessor().evStateLoaded, [this]
+		{
+			auto* self = this;
+			juce::MessageManager::callAsync([self]
+			{
+				std::lock_guard lock(getInstancesMutex());
+				if (getInstances().find(self) == getInstances().end())
+					return;
+				self->selectActivePatch(self->getCurrentPart());
+			});
+		});
 	}
 
 	PatchManager::~PatchManager()
@@ -618,6 +634,40 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		setSelectedPatch(_part, m_state.getPatch(_part));
+	}
+
+	void PatchManager::selectActivePatch(const uint32_t _part)
+	{
+		// Ask the controller for whatever the audio engine is currently
+		// playing on _part. The convenience overload returns a fully-built
+		// PatchPtr with content hash (MD5) computed by the per-plugin
+		// initializePatch() implementation.
+		const auto active = requestPatchForPart(_part);
+		if (!active)
+			return;
+
+		// Linear scan of every loaded data source, matching by content hash.
+		// Patches imported from different sources but identical bytes will
+		// share a hash, so we stop at the first match.
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> sources;
+		getDataSources(sources);
+		for (const auto& ds : sources)
+		{
+			if (!ds)
+				continue;
+			for (const auto& p : ds->patches)
+			{
+				if (p && p->hash == active->hash)
+				{
+					setSelectedPatch(_part, p);
+					return;
+				}
+			}
+		}
+		// No matching patch in any loaded source. Leave selection as-is —
+		// clearing it would surprise users who manually loaded a one-off
+		// patch via SysEx import; better to do nothing than make the UI
+		// look like a search lost the user's place.
 	}
 
 	void PatchManager::updateStateAsync(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
