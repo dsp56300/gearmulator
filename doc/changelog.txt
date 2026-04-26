@@ -14,9 +14,7 @@ Framework:
         (e.g. Voice Expansion) are now loaded from the embedded plugin
         binary when a skin is loaded from disk
 - [Fix] BUG-10189 Fix crash on the audio thread when a rate-limited
-        parameter is automated by the DAW. The pending-change slot was
-        shared unsynchronized with the message-thread timer callback;
-        replaced with a lock-free atomic.
+        parameter is automated by the DAW.
 
 2.2.3:
 
