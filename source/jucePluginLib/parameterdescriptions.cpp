@@ -1,6 +1,7 @@
 #include "parameterdescriptions.h"
 
 #include <cassert>
+#include <cstdio>
 
 #include "dsp56kBase/logging.h"
 
@@ -8,6 +9,78 @@
 
 namespace pluginLib
 {
+	namespace
+	{
+		// Detect whether a printf-style format string expects an integer (%d/%i/%u/%x/%X/%o)
+		// or a floating-point value. Used by the synthesised-value-list path to pick the
+		// right snprintf overload when generating display strings from a format spec.
+		bool formatExpectsInt(const std::string& _format)
+		{
+			bool inSpec = false;
+			for (size_t i = 0; i < _format.size(); ++i)
+			{
+				const char c = _format[i];
+				if (!inSpec)
+				{
+					if (c == '%')
+					{
+						if (i + 1 < _format.size() && _format[i + 1] == '%')
+						{
+							++i;
+							continue;
+						}
+						inSpec = true;
+					}
+					continue;
+				}
+				if (c == 'd' || c == 'i' || c == 'u' || c == 'x' || c == 'X' || c == 'o')
+					return true;
+				if (c == 'f' || c == 'F' || c == 'e' || c == 'E' || c == 'g' || c == 'G' || c == 'a' || c == 'A')
+					return false;
+			}
+			return false;
+		}
+
+		std::string formatValue(const std::string& _format, double _value)
+		{
+			char buffer[64];
+			if (formatExpectsInt(_format))
+				std::snprintf(buffer, sizeof(buffer), _format.c_str(), juce::roundToInt(_value));
+			else
+				std::snprintf(buffer, sizeof(buffer), _format.c_str(), _value);
+			return buffer;
+		}
+
+		// Generate a ValueList for a parameter by formatting each integer value in [_min, _max]
+		// via the printf-style _format after computing display = _scale * value + _offset.
+		// Indexing follows Parameter::getText: list[0] corresponds to value = min(0, _min).
+		ValueList synthesizeValueList(int _min, int _max, const std::string& _format, double _scale, double _offset)
+		{
+			ValueList vl;
+			const int indexBase = std::min(0, _min);
+			const int listSize = _max - indexBase + 1;
+
+			vl.texts.reserve(listSize);
+			vl.order.reserve(listSize);
+
+			for (int i = 0; i < listSize; ++i)
+			{
+				const int value = i + indexBase;
+				const double display = static_cast<double>(value) * _scale + _offset;
+				vl.texts.push_back(formatValue(_format, display));
+				vl.order.push_back(static_cast<ParamValue>(i));
+			}
+
+			for (uint32_t i = 0; i < vl.texts.size(); ++i)
+			{
+				if (vl.textToValueMap.find(vl.texts[i]) == vl.textToValueMap.end())
+					vl.textToValueMap.insert(std::make_pair(vl.texts[i], i));
+			}
+
+			return vl;
+		}
+	}
+
 	ParameterDescriptions::ParameterDescriptions(const std::string& _jsonString)
 	{
 		m_errors = loadJson(_jsonString);
@@ -200,20 +273,54 @@ namespace pluginLib
 				continue;
 			}
 
-			const auto valueList = readPropertyString("toText");
+			// toText accepts two forms:
+			//   "toText": "name"                                          - look up a named value list
+			//   "toText": {"format": "%.2f s", "scale": 0.01, "offset": 0} - synthesise a list at load time
+			const auto toTextVar = readProperty("toText");
 
-			const auto it = m_valueLists.find(valueList);
-			if(it == m_valueLists.end())
+			ValueList synthesizedList;
+			const ValueList* selectedList = nullptr;
+			std::string toTextName;
+
+			if (toTextVar.isObject())
 			{
-				errors << name << ": Value list " << valueList << " not found" << std::endl;
-				continue;
+				auto* obj = toTextVar.getDynamicObject();
+				const auto formatVar = obj->getProperty("format");
+
+				if (!formatVar.isString())
+				{
+					errors << name << ": toText object must contain a string 'format' field" << std::endl;
+					continue;
+				}
+
+				const auto format = std::string(formatVar.toString().toUTF8());
+				const auto scaleVar = obj->getProperty("scale");
+				const auto offsetVar = obj->getProperty("offset");
+				const double scale = scaleVar.isVoid() ? 1.0 : static_cast<double>(scaleVar);
+				const double offset = offsetVar.isVoid() ? 0.0 : static_cast<double>(offsetVar);
+
+				synthesizedList = synthesizeValueList(minValue, maxValue, format, scale, offset);
+				selectedList = &synthesizedList;
+				toTextName = format;
 			}
-
-			const auto& list = *it;
-
-			if((maxValue - minValue + 1) > static_cast<int>(list.second.texts.size()))
+			else
 			{
-				errors << name << ": value list " << valueList << " contains only " << list.second.texts.size() << " entries but parameter range is " << minValue << "-" << maxValue << std::endl;
+				const auto valueList = std::string(toTextVar.toString().toUTF8());
+
+				const auto it = m_valueLists.find(valueList);
+				if (it == m_valueLists.end())
+				{
+					errors << name << ": Value list " << valueList << " not found" << std::endl;
+					continue;
+				}
+
+				if ((maxValue - minValue + 1) > static_cast<int>(it->second.texts.size()))
+				{
+					errors << name << ": value list " << valueList << " contains only " << it->second.texts.size() << " entries but parameter range is " << minValue << "-" << maxValue << std::endl;
+				}
+
+				selectedList = &it->second;
+				toTextName = valueList;
 			}
 
 			Description d;
@@ -229,7 +336,7 @@ namespace pluginLib
 			d.softKnobTargetSelect = readProperty("softknobTargetSelect", false).toString().toStdString();
 			d.softKnobTargetList = readProperty("softknobTargetList", false).toString().toStdString();
 
-			d.toText = valueList;
+			d.toText = toTextName;
 
 			d.page = static_cast<uint8_t>(readPropertyInt("page"));
 			d.version = readPropertyIntWithDefault("version", d.version);
@@ -262,7 +369,7 @@ namespace pluginLib
 					d.defaultValue = minValue;
 			}
 
-			d.valueList = it->second;
+			d.valueList = *selectedList;
 
 			{
 				d.classFlags = 0;
