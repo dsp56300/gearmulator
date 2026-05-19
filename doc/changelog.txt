@@ -16,6 +16,20 @@ Framework:
 - [Fix] BUG-10189 Fix crash on the audio thread when a rate-limited
         parameter is automated by the DAW.
 
+Osirus:
+
+- [New] BUG-10194 Master Tune is now exposed as a public parameter,
+        bipolar (signed, +/-64 cents). Available for host automation
+        and MIDI Learn. Placed in version group 2 so existing project
+        parameter indices stay stable.
+
+OsTIrus:
+
+- [New] BUG-10194 Master Tune is now exposed as a public parameter,
+        bipolar (signed, +/-64 cents). Available for host automation
+        and MIDI Learn. Placed in version group 2 so existing project
+        parameter indices stay stable.
+
 2.2.3:
 
 Framework:

@@ -342,7 +342,7 @@
  		{"page":114, "index":89, "name":"C_Undefined89", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":114, "class":"Global", "index":90, "name":"Input Thru Level", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":114, "class":"Global", "index":91, "name":"Input Boost", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false},
- 		{"page":114, "class":"Global", "index":92, "name":"Master Tune", "min":0, "max":127, "toText":"signed", "isPublic":false, "isDiscrete":false, "isBool":false, "isBipolar":true},
+ 		{"page":114, "class":"Global", "index":92, "name":"Master Tune", "min":0, "max":127, "default":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true, "version":2},
  		{"page":114, "class":"Global", "index":93, "name":"Device ID", "min":0, "max":16, "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":94, "name":"Midi Control Low Page", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":114, "class":"Global", "index":95, "name":"Midi Control High Page", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
