@@ -9,6 +9,11 @@ Framework:
         "Invert" checkbox in the MIDI Learn settings page).
 - [Imp] Support parsing of ".mid" files that are not really midi but
         raw sysex
+- [Imp] ParameterDescriptions: "toText" now accepts an object form
+        {format, scale, offset} that synthesises a value list at load
+        time. Lets devices with non-7-bit native parameter ranges
+        declare native min/max and produce human-readable display text
+        without controller-side scaling.
 
 - [Fix] BUG-10177 Third-party skins: Plugin-specific settings pages
         (e.g. Voice Expansion) are now loaded from the embedded plugin
@@ -16,19 +21,21 @@ Framework:
 - [Fix] BUG-10189 Fix crash on the audio thread when a rate-limited
         parameter is automated by the DAW.
 
-Osirus:
+Osirus/OsTIrus:
 
 - [New] BUG-10194 Master Tune is now exposed as a public parameter,
         bipolar (signed, +/-64 cents). Available for host automation
-        and MIDI Learn. Placed in version group 2 so existing project
-        parameter indices stay stable.
 
-OsTIrus:
+Vavra:
 
-- [New] BUG-10194 Master Tune is now exposed as a public parameter,
-        bipolar (signed, +/-64 cents). Available for host automation
-        and MIDI Learn. Placed in version group 2 so existing project
-        parameter indices stay stable.
+- [Fix] BUG-10172 Voice Expansion: fix audio dropouts and short CPU
+        stalls, especially noticeable at small buffer sizes
+- [Fix] Fix possible crash during shutdown
+
+Xenia:
+
+- [Fix] Voice Expansion: lower UC-thread latency, reducing audio
+        glitches at small buffer sizes (shared fix with Vavra)
 
 2.2.3:
 
