@@ -28,15 +28,18 @@ namespace genericVirusUI
 {
 	PatchManager::PatchManager(VirusEditor& _editor, Rml::Element* _root)
 		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root)
+		, m_virusEditor(_editor)
 		, m_controller(_editor.getController())
 		, m_processor(_editor.getProcessor())
 		, m_onRomChanged(_editor.getProcessor().evRomChanged)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
+		setTagTypeName(pluginLib::patchDB::TagType::CustomC, "Type");
 
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB);
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
 
 		startLoaderThread();
 
@@ -94,6 +97,9 @@ namespace genericVirusUI
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
+		if (_bank == g_arrangementBank)
+			return loadRomArrangements(_results, _program);
+
 		// RAM banks (0, 1) are loaded from live controller data (populated via MIDI)
 		if (_bank < 2)
 			return loadRamBankData(_results, _bank, _program);
@@ -165,8 +171,167 @@ namespace genericVirusUI
 		return !_results.empty();
 	}
 
+	bool PatchManager::loadRomArrangements(pluginLib::patchDB::DataList& _results, const uint32_t _program)
+	{
+		const auto* rom = m_processor.getSelectedRom();
+		if (!rom)
+			return false;
+
+		auto tryAdd = [&](uint32_t _multiIndex)
+		{
+			auto compound = buildRomArrangement(*rom, _multiIndex);
+			if (!compound.empty())
+				_results.push_back(std::move(compound));
+		};
+
+		if (_program != pluginLib::patchDB::g_invalidProgram)
+		{
+			tryAdd(_program);
+		}
+		else
+		{
+			for (uint32_t i = 0; i < 128; ++i)
+			{
+				virusLib::ROMFile::TPreset multi;
+				if (!rom->getMulti(static_cast<int>(i), multi))
+					break;
+				if (virusLib::ROMFile::getMultiName(multi).empty())
+					break;
+				tryAdd(i);
+			}
+		}
+
+		return !_results.empty();
+	}
+
+	pluginLib::patchDB::Data PatchManager::buildRomArrangement(const virusLib::ROMFile& _rom, const uint32_t _multiIndex)
+	{
+		virusLib::ROMFile::TPreset multi;
+		if (!_rom.getMulti(static_cast<int>(_multiIndex), multi))
+			return {};
+		if (virusLib::ROMFile::getMultiName(multi).empty())
+			return {};
+
+		// Build the Multi dump sysex; use bank A and program = multi index so the
+		// dump's identifiers reflect its ROM location.
+		auto multiSysex = virusLib::Microcontroller::createMultiDump(_rom, virusLib::BankNumber::A, static_cast<uint8_t>(_multiIndex), multi);
+		if (multiSysex.empty())
+			return {};
+
+		pluginLib::patchDB::Data compound(multiSysex.begin(), multiSysex.end());
+
+		// Resolve each of the 16 referenced singles and append their dumps
+		for (uint8_t part = 0; part < 16; ++part)
+		{
+			const auto partBank = multi[virusLib::MultiDump::MD_PART_BANK_NUMBER + part];
+			const auto partProgram = multi[virusLib::MultiDump::MD_PART_PROGRAM_NUMBER + part];
+
+			// bank in the multi uses array-index form; skip empty/disabled parts
+			virusLib::ROMFile::TPreset single;
+			if (!_rom.getSingle(partBank, partProgram, single))
+				continue;
+			if (virusLib::ROMFile::getSingleName(single).empty())
+				continue;
+
+			const auto singleBank = virusLib::fromArrayIndex(partBank);
+			auto singleSysex = virusLib::Microcontroller::createSingleDump(_rom, singleBank, partProgram, single);
+			compound.insert(compound.end(), singleSysex.begin(), singleSysex.end());
+		}
+
+		// Only treat as a valid arrangement if all 16 singles were resolved; the
+		// detection in parseFileData/initializePatch expects the 1-multi+16-singles
+		// pattern. If any are missing, keep it as a plain Multi.
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, compound);
+		if (msgs.size() == 17)
+			return compound;
+
+		// Fall back to just the multi
+		return pluginLib::patchDB::Data(multiSysex.begin(), multiSysex.end());
+	}
+
+	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex)
+	{
+		if (_sysex.size() < 10)
+			return PatchType::Invalid;
+
+		const auto cmd = _sysex[6];
+
+		if (cmd == virusLib::SysexMessageType::DUMP_SINGLE)
+			return PatchType::Single;
+
+		if (cmd != virusLib::SysexMessageType::DUMP_MULTI)
+			return PatchType::Invalid;
+
+		// Multi or Arrangement — split and count components
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, _sysex);
+
+		if (msgs.size() == 1)
+			return PatchType::Multi;
+
+		if (msgs.size() == 17 && msgs.front()[6] == virusLib::SysexMessageType::DUMP_MULTI)
+		{
+			for (size_t i = 1; i < msgs.size(); ++i)
+			{
+				if (msgs[i].size() < 10 || msgs[i][6] != virusLib::SysexMessageType::DUMP_SINGLE)
+					return PatchType::Invalid;
+			}
+			return PatchType::Arrangement;
+		}
+
+		return PatchType::Invalid;
+	}
+
 	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
 	{
+		const auto patchType = detectPatchType(_sysex);
+
+		if (patchType == PatchType::Multi || patchType == PatchType::Arrangement)
+		{
+			// Multi dump: name is 10 chars at offset 9 (sysex header) + 4 (MD_NAME_CHAR_0)
+			constexpr size_t multiNameOffset = 9 + virusLib::MultiDump::MD_NAME_CHAR_0;
+			constexpr size_t multiNameLength = 10;
+
+			if (_sysex.size() < multiNameOffset + multiNameLength)
+				return nullptr;
+
+			auto patch = std::make_shared<pluginLib::patchDB::Patch>();
+
+			std::string name(reinterpret_cast<const char*>(_sysex.data()) + multiNameOffset, multiNameLength);
+			// trim trailing spaces
+			while (!name.empty() && name.back() == ' ')
+				name.pop_back();
+			patch->name = name.empty() ? _defaultPatchName : name;
+
+			patch->bank = _sysex[7];
+			patch->program = _sysex[8];
+
+			// Hash: skip sysex headers/footers so a renamed or relocated dump still matches
+			{
+				synthLib::SysexBufferList msgs;
+				synthLib::MidiToSysex::splitMultipleSysex(msgs, _sysex);
+				std::vector<uint8_t> temp;
+				constexpr size_t frontOffset = 9;	// sysex header + bank + program
+				constexpr size_t backOffset = 2;	// checksum + f7
+				for (const auto& m : msgs)
+				{
+					if (m.size() > frontOffset + backOffset)
+					{
+						for (size_t i = frontOffset; i < m.size() - backOffset; ++i)
+							temp.push_back(m[i]);
+					}
+				}
+				memcpy(patch->hash.data(), juce::MD5(temp.data(), static_cast<int>(temp.size())).getChecksumDataArray(), std::size(patch->hash));
+			}
+
+			patch->tags.add(pluginLib::patchDB::TagType::CustomC,
+				patchType == PatchType::Arrangement ? "Arrangement" : "Multi");
+
+			patch->sysex = std::move(_sysex);
+			return patch;
+		}
+
 		if (_sysex.size() < 267)
 			return nullptr;
 
@@ -260,15 +425,14 @@ namespace genericVirusUI
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Phaser");
 		if(*parameterValues[idxChorusMix] > 0)
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Chorus");
+
+		patch->tags.add(pluginLib::patchDB::TagType::CustomC, "Single");
 		return patch;
 	}
 
-	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const
+	pluginLib::patchDB::Data PatchManager::applyModificationsSingle(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
 		if (_patch->sysex.size() < 267)
-			return _patch->sysex;
-
-		if (_patch->sysex[6] != virusLib::SysexMessageType::DUMP_SINGLE)
 			return _patch->sysex;
 
 		auto result = _patch->sysex;
@@ -330,6 +494,72 @@ namespace genericVirusUI
 			result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, result.size() - 2);
 
 		return result;
+	}
+
+	pluginLib::patchDB::Data PatchManager::applyModificationsMulti(const pluginLib::patchDB::Data& _multi, const pluginLib::patchDB::PatchPtr& _patch)
+	{
+		// Multi dump name is 10 chars at offset 9 (header) + 4 (MD_NAME_CHAR_0)
+		constexpr size_t nameOffset = 9 + virusLib::MultiDump::MD_NAME_CHAR_0;
+		constexpr size_t nameLength = 10;
+
+		if (_multi.size() < nameOffset + nameLength + 2)
+			return _multi;
+
+		auto result = _multi;
+
+		if (!_patch->getName().empty())
+		{
+			for (size_t i = 0; i < nameLength; ++i)
+				result[nameOffset + i] = i >= _patch->getName().size() ? ' ' : _patch->getName()[i];
+		}
+
+		// apply bank/program at offsets 7/8
+		if (_patch->program != pluginLib::patchDB::g_invalidProgram)
+		{
+			const auto bankOffset = _patch->program / 128;
+			result[8] = static_cast<uint8_t>(_patch->program - bankOffset * 128);
+			result[7] = static_cast<uint8_t>(result[7] + bankOffset);
+		}
+
+		// Recalculate trailing checksum. For TI-family multis there may be an
+		// intermediate checksum too, but we only changed name+bank+program which
+		// live in the ABC portion — the trailing checksum covers the full
+		// payload so recomputing it is sufficient.
+		result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, result.size() - 2);
+
+		return result;
+	}
+
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const
+	{
+		const auto patchType = detectPatchType(_patch->sysex);
+
+		if (patchType == PatchType::Single)
+			return applyModificationsSingle(_patch);
+
+		if (patchType == PatchType::Multi)
+			return applyModificationsMulti(_patch->sysex, _patch);
+
+		if (patchType == PatchType::Arrangement)
+		{
+			// Apply name/bank/program to the Multi dump. The 16 Singles that
+			// follow carry their own names/bank/program — they get sent into
+			// parts on activation so they keep their original identifiers.
+			synthLib::SysexBufferList msgs;
+			synthLib::MidiToSysex::splitMultipleSysex(msgs, _patch->sysex);
+
+			if (msgs.size() != 17 || msgs.front()[6] != virusLib::SysexMessageType::DUMP_MULTI)
+				return _patch->sysex;
+
+			auto multi = applyModificationsMulti(pluginLib::patchDB::Data(msgs.front().begin(), msgs.front().end()), _patch);
+
+			pluginLib::patchDB::Data result(multi.begin(), multi.end());
+			for (size_t i = 1; i < msgs.size(); ++i)
+				result.insert(result.end(), msgs[i].begin(), msgs[i].end());
+			return result;
+		}
+
+		return _patch->sysex;
 	}
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
@@ -475,12 +705,80 @@ namespace genericVirusUI
 
 		}
 
+		// Arrangement detection: scan for a DUMP_MULTI immediately followed by
+		// 16 consecutive DUMP_SINGLE messages and merge each such sequence into
+		// one compound patch. Works for single-arrangement files AND user-bank
+		// files that store multiple patches (and possibly multiple arrangements)
+		// as concatenated sysex messages.
+		{
+			auto isMulti = [](const pluginLib::patchDB::Data& _d)
+			{
+				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_MULTI;
+			};
+			auto isSingle = [](const pluginLib::patchDB::Data& _d)
+			{
+				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_SINGLE;
+			};
+
+			pluginLib::patchDB::DataList merged;
+			merged.reserve(_results.size());
+
+			for (size_t i = 0; i < _results.size();)
+			{
+				if (isMulti(_results[i]) && i + 16 < _results.size())
+				{
+					bool allSingles = true;
+					for (size_t j = 1; j <= 16; ++j)
+					{
+						if (!isSingle(_results[i + j]))
+						{
+							allSingles = false;
+							break;
+						}
+					}
+
+					if (allSingles)
+					{
+						pluginLib::patchDB::Data compound = _results[i];
+						for (size_t j = 1; j <= 16; ++j)
+							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
+						merged.emplace_back(std::move(compound));
+						i += 17;
+						continue;
+					}
+				}
+				merged.emplace_back(std::move(_results[i]));
+				++i;
+			}
+
+			_results = std::move(merged);
+		}
+
 		return !_results.empty();
 	}
 
-	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)
 	{
-		_data = m_controller.createSingleDump(static_cast<uint8_t>(_part), toMidiByte(virusLib::BankNumber::A), 0);
+		if (_userData == g_userDataArrangement)
+		{
+			// Build an Arrangement compound from the cached multi edit buffer +
+			// 16 part edit-buffer singles. The multi is pre-requested in
+			// VirusEditor::savePreset so the cache is up to date by the time
+			// the user picks a save target.
+			const auto& multiBuf = m_controller.getMultiEditBuffer().data;
+			if (multiBuf.empty())
+				return false;
+
+			_data.assign(multiBuf.begin(), multiBuf.end());
+			for (uint8_t i = 0; i < 16; ++i)
+			{
+				const auto single = m_controller.createSingleDump(i, virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), i);
+				_data.insert(_data.end(), single.begin(), single.end());
+			}
+			return true;
+		}
+
+		_data = m_controller.createSingleDump(static_cast<uint8_t>(_part), virusLib::toMidiByte(virusLib::BankNumber::A), 0);
 		return !_data.empty();
 	}
 
@@ -540,7 +838,69 @@ namespace genericVirusUI
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		return m_controller.activatePatch(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), _part);
+		const auto sysex = applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware);
+		const auto type = detectPatchType(sysex);
+
+		switch (type)
+		{
+		case PatchType::Multi:
+			return activateMulti(sysex);
+		case PatchType::Arrangement:
+			return activateArrangement(sysex);
+		case PatchType::Single:
+			return activateSingle(sysex, _part);
+		default:
+			return false;
+		}
+	}
+
+	bool PatchManager::activateSingle(const pluginLib::patchDB::Data& _sysex, const uint32_t _part)
+	{
+		return m_controller.activatePatch(_sysex, _part);
+	}
+
+	pluginLib::patchDB::Data PatchManager::retargetMultiToEditBuffer(const pluginLib::patchDB::Data& _multi)
+	{
+		// Multi dump: offset 7 = bank, offset 8 = program. The microcontroller
+		// only applies the multi if bank == EditBuffer; otherwise it's just
+		// stored (or ignored for RAM/ROM writes).
+		auto data = _multi;
+		if (data.size() > 8)
+		{
+			data[7] = virusLib::toMidiByte(virusLib::BankNumber::EditBuffer);
+			data[8] = 0;
+		}
+		return data;
+	}
+
+	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
+	{
+		m_virusEditor.setPlayMode(virusLib::PlayMode::PlayModeMulti);
+		m_controller.sendSysEx(retargetMultiToEditBuffer(_multi));
+		m_controller.requestArrangement();
+		return true;
+	}
+
+	bool PatchManager::activateArrangement(const pluginLib::patchDB::Data& _compound)
+	{
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, _compound);
+
+		if (msgs.size() != 17 || msgs.front()[6] != virusLib::SysexMessageType::DUMP_MULTI)
+			return false;
+
+		m_virusEditor.setPlayMode(virusLib::PlayMode::PlayModeMulti);
+		m_controller.sendSysEx(retargetMultiToEditBuffer(msgs.front()));
+
+		for (uint8_t i = 0; i < 16; ++i)
+		{
+			const auto& single = msgs[i + 1];
+			m_controller.modifySingleDump(single, virusLib::BankNumber::EditBuffer, i);
+			m_controller.activatePatch(single, i);
+		}
+
+		m_controller.requestArrangement();
+		return true;
 	}
 
 	void PatchManager::removeRomPatches()
@@ -580,6 +940,20 @@ namespace genericVirusUI
 			addDataSource(ds);
 			m_romDataSources.push_back(std::move(ds));
 		}
+
+		// Add a data source for ROM arrangements if the ROM has any multis.
+		// TI family ROMs only contain an "Init Multi" template (replicated 128
+		// times by the loader) — not useful as factory arrangements, so skip.
+		if (!rom->isTIFamily())
+		{
+			virusLib::ROMFile::TPreset firstMulti;
+			if (rom->getMulti(0, firstMulti) && !virusLib::ROMFile::getMultiName(firstMulti).empty())
+			{
+				auto ds = createArrangementDataSource();
+				addDataSource(ds);
+				m_romDataSources.push_back(std::move(ds));
+			}
+		}
 	}
 
 	pluginLib::patchDB::DataSource PatchManager::createDataSource(const uint32_t _controllerBank) const
@@ -589,6 +963,16 @@ namespace genericVirusUI
 		ds.bank = _controllerBank;
 		ds.name = m_controller.getBankName(_controllerBank);
 		ds.midiBankNumber = _controllerBank;
+		return ds;
+	}
+
+	pluginLib::patchDB::DataSource PatchManager::createArrangementDataSource() const
+	{
+		pluginLib::patchDB::DataSource ds;
+		ds.type = pluginLib::patchDB::SourceType::Rom;
+		ds.bank = g_arrangementBank;
+		ds.name = "ROM Arrangements";
+		ds.midiBankNumber = g_arrangementBank;
 		return ds;
 	}
 

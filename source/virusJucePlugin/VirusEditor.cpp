@@ -4,6 +4,7 @@
 #include "ControllerLinks.h"
 
 #include "ParameterNames.h"
+#include "PatchManager.h"
 #include "SettingsDspAudioOsTIrus.h"
 #include "SettingsGuiOsTIrus.h"
 #include "VirusProcessor.h"
@@ -21,6 +22,7 @@
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
+#include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
 
 #include "juceUiLib/messageBox.h"
@@ -121,18 +123,43 @@ namespace genericVirusUI
 		if(presetLoad)
 			juceRmlUi::EventListener::AddClick(presetLoad, [this] { loadPreset(); });
 
+		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Mousedown, [this](Rml::Event& _event)
+		{
+			if (_event.GetTargetElement() != _event.GetCurrentElement())
+				return;
+			if (!juceRmlUi::helper::isContextMenu(_event))
+				return;
+			// Swallow the right-click so the global context menu doesn't also open
+			_event.StopPropagation();
+			// Only toggle in Multi mode; Single mode has only one name to show
+			if (!getController().isMultiMode())
+				return;
+			m_showMultiName = !m_showMultiName;
+			updatePresetName();
+		});
+
 		juceRmlUi::EventListener::Add(m_presetName, Rml::EventId::Dblclick, [this](const Rml::Event& _event)
 		{
 			if (_event.GetTargetElement() != _event.GetCurrentElement())
 				return;
 
-			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(m_presetName->GetInnerRML()), [this](const std::string& _text)
+			const bool editMulti = getController().isMultiMode() && m_showMultiName;
+
+			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(m_presetName->GetInnerRML()), [this, editMulti](const std::string& _text)
 			{
 				auto text = Rml::StringUtilities::StripWhitespace(_text);
 				if (text.empty())
 					return;
-				getController().setSinglePresetName(getController().getCurrentPart(), text);
-				onProgramChange(getController().getCurrentPart());
+				if (editMulti)
+				{
+					getController().setMultiPresetName(text);
+					updatePresetName();
+				}
+				else
+				{
+					getController().setSinglePresetName(getController().getCurrentPart(), text);
+					onProgramChange(getController().getCurrentPart());
+				}
 			});
 		});
 
@@ -265,6 +292,8 @@ namespace genericVirusUI
 	void VirusEditor::onPlayModeChanged()
 	{
 		m_parts->onPlayModeChanged();
+		if (!getController().isMultiMode())
+			m_showMultiName = false;
 		updatePresetName();
 		updatePlayModeButtons();
 	}
@@ -279,7 +308,11 @@ namespace genericVirusUI
 
 	void VirusEditor::updatePresetName() const
 	{
-		m_presetName->SetInnerRML(getController().getCurrentPartPresetName(getController().getCurrentPart()));
+		const auto& c = getController();
+		const auto name = (c.isMultiMode() && m_showMultiName)
+			? c.getMultiPresetName()
+			: c.getCurrentPartPresetName(c.getCurrentPart());
+		m_presetName->SetInnerRML(name);
 	}
 
 	void VirusEditor::updatePlayModeButtons() const
@@ -332,11 +365,21 @@ namespace genericVirusUI
 		m_deviceModel->SetInnerRML(m);
 	}
 
-	void VirusEditor::savePreset(Rml::Event& _event)
+	void VirusEditor::savePreset(const Rml::Event& _event)
 	{
+		// Pre-request the multi edit buffer so it's cached by the time the user
+		// selects "Add arrangement to...". The request goes to the emulated DSP
+		// and the response typically arrives within one audio callback, while
+		// the user takes hundreds of ms to navigate the menu.
+		if (getController().isMultiMode())
+			getController().requestMulti(virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), 0);
+
 		juceRmlUi::Menu menu;
 
-		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
+		uint32_t countAdded = getPatchManager()->createSaveMenuEntries(menu, "Single");
+
+		if (getController().isMultiMode())
+			countAdded += getPatchManager()->createSaveMenuEntries(menu, getController().getCurrentPart(), "Arrangement", PatchManager::g_userDataArrangement);
 
 		if(countAdded)
 			menu.addSeparator();
@@ -382,89 +425,27 @@ namespace genericVirusUI
 	{
 		Editor::loadPreset([this](const juce::File& _result)
 		{
-			pluginLib::patchDB::DataList results;
+			auto* pm = getPatchManager();
 
-			if(!getPatchManager()->loadFile(results, _result.getFullPathName().toStdString()))
+			const auto patches = pm->loadPatchesFromFiles(std::vector<std::string>{_result.getFullPathName().toStdString()});
+
+			if (patches.empty())
 				return;
 
-			auto& c = getController();
-
-			// we attempt to convert all results as some of them might not be valid preset data
-			for(size_t i=0; i<results.size();)
+			// A single patch may be a Single, Multi or Arrangement — the PatchManager
+			// dispatches by type. Arrangements received from a file used to be 17
+			// separate dumps; parseFileData now merges them into a single compound
+			// patch, so this branch covers them too.
+			if (patches.size() == 1)
 			{
-				// convert to load to edit buffer of current part
-				const auto data = c.modifySingleDump(results[i], virusLib::BankNumber::EditBuffer, c.isMultiMode() ? c.getCurrentPart() : virusLib::SINGLE);
-				if(data.empty())
-					results.erase(results.begin() + i);
-				else
-					results[i++] = data;
+				pm->activatePatch(patches.front(), getController().getCurrentPart());
+				return;
 			}
 
-			if (results.size() == 1)
-			{
-				c.activatePatch(results.front());
-			}
-			else if(results.size() > 1)
-			{
-				// check if this is one multi and 16 singles and load them as arrangement dump. Ask user for confirmation first
-				if(results.size() == 17)
-				{
-					uint32_t multiCount = 0;
-
-					pluginLib::patchDB::DataList singles;
-					pluginLib::patchDB::Data multi;
-
-					for (const auto& result : results)
-					{
-						if(result.size() < 256)
-							continue;
-
-						const auto cmd = result[6];
-
-						if(cmd == virusLib::SysexMessageType::DUMP_MULTI)
-						{
-							multi = result;
-							++multiCount;
-						}
-						else if(cmd == virusLib::SysexMessageType::DUMP_SINGLE)
-						{
-							singles.push_back(result);
-						}
-					}
-
-					if(multiCount == 1 && singles.size() == 16)
-					{
-						const auto title = m_processor.getProductName(true) + " - Load Arrangement Dump?";
-						const auto message = "This file contains an arrangement dump, i.e. one Multi and 16 Singles.\nDo you want to replace the current state by this dump?";
-
-						genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Question, title, message, [this, multi, singles](const genericUI::MessageBox::Result _result)
-						{
-							if (_result != genericUI::MessageBox::Result::Yes)
-								return;
-
-							auto& c = getController();
-
-							setPlayMode(virusLib::PlayMode::PlayModeMulti);
-							c.sendSysEx(multi);
-
-							for(uint8_t i=0; i<static_cast<uint8_t>(singles.size()); ++i)
-							{
-								const auto& single = singles[i];
-								c.modifySingleDump(single, virusLib::BankNumber::EditBuffer, i);
-								c.activatePatch(single, i);
-							}
-
-							c.requestArrangement();
-						});
-
-						return;
-					}
-				}
-				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Information", 
-					"The selected file contains more than one patch. Please add this file as a data source in the Patch Manager instead.\n\n"
-					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
-				);
-			}
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Info, "Information",
+				"The selected file contains more than one patch. Please add this file as a data source in the Patch Manager instead.\n\n"
+				"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
+			);
 		});
 	}
 

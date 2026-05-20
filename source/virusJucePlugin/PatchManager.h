@@ -32,8 +32,24 @@ namespace genericVirusUI
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
+		enum class PatchType
+		{
+			Invalid,
+			Single,
+			Multi,
+			Arrangement,	// 1 Multi + 16 Singles concatenated
+		};
+
 		PatchManager(VirusEditor& _editor, Rml::Element* _root);
 		~PatchManager() override;
+
+		static PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex);
+
+		// _userData = 0 returns the current single for _part; _userData = 1 returns
+		// an arrangement compound (multi + 16 part edit-buffer singles) built from
+		// the cached multi edit buffer — pre-request the multi before the save
+		// menu opens so the buffer is up to date.
+		static constexpr uint64_t g_userDataArrangement = 1;
 
 		// PatchDB impl
 		bool loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program) override;
@@ -52,8 +68,22 @@ namespace genericVirusUI
 		void removeRomPatches();
 		bool loadRamBankData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program);
 		bool loadRomBankData(pluginLib::patchDB::DataList& _results, uint32_t _romBank, uint32_t _program);
+		bool loadRomArrangements(pluginLib::patchDB::DataList& _results, uint32_t _program);
 		pluginLib::patchDB::DataSource createDataSource(uint32_t _controllerBank) const;
+		pluginLib::patchDB::DataSource createArrangementDataSource() const;
+		bool activateSingle(const pluginLib::patchDB::Data& _sysex, uint32_t _part);
+		bool activateMulti(const pluginLib::patchDB::Data& _multi);
+		bool activateArrangement(const pluginLib::patchDB::Data& _compound);
+		static pluginLib::patchDB::Data retargetMultiToEditBuffer(const pluginLib::patchDB::Data& _multi);
+		pluginLib::patchDB::Data applyModificationsSingle(const pluginLib::patchDB::PatchPtr& _patch) const;
+		static pluginLib::patchDB::Data applyModificationsMulti(const pluginLib::patchDB::Data& _multi, const pluginLib::patchDB::PatchPtr& _patch);
+		static pluginLib::patchDB::Data buildRomArrangement(const virusLib::ROMFile& _rom, uint32_t _multiIndex);
 
+		// Sentinel bank index used by the ROM Arrangements data source. Chosen
+		// well above any real single-bank index to avoid collisions.
+		static constexpr uint32_t g_arrangementBank = 0xFFFF0001;
+
+		VirusEditor& m_virusEditor;
 		virus::Controller& m_controller;
 		virus::VirusProcessor& m_processor;
 		std::vector<pluginLib::patchDB::DataSource> m_romDataSources;

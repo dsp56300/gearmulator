@@ -25,6 +25,18 @@ Osirus/OsTIrus:
 
 - [New] BUG-10194 Master Tune is now exposed as a public parameter,
         bipolar (signed, +/-64 cents). Available for host automation
+- [New] BUG-10184 Patch Manager now supports Multi and Arrangement
+        patches alongside Singles. Multi, Arrangement (Multi + 16
+        Singles) and Single dumps are detected automatically on file
+        import and tagged via the new "Type" category. Arrangement
+        loading from Patch Manager switches to Multi mode, applies
+        the multi and distributes the 16 referenced Singles into the
+        parts. A new "ROM Arrangements" data source exposes factory
+        arrangements from Osirus (ABC) ROMs (not available for
+        OsTIrus TI ROMs). Arrangements can also be saved to user
+        banks via the Save menu. Dropping a Multi or Arrangement onto
+        a Part Button prompts for confirmation since the target
+        affects more than just that part.
 
 Vavra:
 

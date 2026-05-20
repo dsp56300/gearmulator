@@ -70,6 +70,8 @@ namespace genericVirusUI
 
 		std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) override;
 
+		void setPlayMode(uint8_t _playMode);
+
 	private:
 		void onProgramChange(int _part);
 		void onPlayModeChanged();
@@ -80,10 +82,8 @@ namespace genericVirusUI
 
 		void updateDeviceModel();
 
-		void savePreset(Rml::Event& _event);
+		void savePreset(const Rml::Event& _event);
 		void loadPreset();
-
-		void setPlayMode(uint8_t _playMode);
 
 		void savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber = 0);
 		bool savePresets(const std::string& _pathName, SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber = 0) const;
@@ -96,6 +96,10 @@ namespace genericVirusUI
 
 		Rml::Element* m_presetName = nullptr;
 //		PartMouseListener* m_presetNameMouseListener  = nullptr;
+
+		// When in Multi mode, right-click toggles the patch name display between
+		// the current part's Single name (default) and the Multi name.
+		bool m_showMultiName = false;
 
 		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 

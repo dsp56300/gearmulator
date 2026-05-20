@@ -538,42 +538,12 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		if(!isValid(_dump))
 			return;
 
-		if (_type == DUMP_SINGLE)
-		{
-			SMidiEvent ev(MidiEventSource::Device);
-			ev.sysex = createSingleDump(m_rom, _bank, _program, _dump, deviceId);
-			_responses.emplace_back(std::move(ev));
-			return;
-		}
-
-		// Multi dump (not extracted to utility as it's only used here)
 		SMidiEvent ev(MidiEventSource::Device);
 
-		auto& response = ev.sysex;
-
-		buildResponseHeader(ev);
-
-		response.push_back(_type);
-		response.push_back(toMidiByte(_bank));
-		response.push_back(_program);
-
-		const auto size = m_rom.getMultiPresetSize();
-		const auto modelABCsize = ROMFile::getSinglePresetSize(DeviceModel::ABC);
-
-		for(size_t i=0; i<modelABCsize; ++i)
-			response.push_back(_dump[i]);
-
-		response.push_back(calcChecksum(response));
-
-		if (size > modelABCsize)
-		{
-			for (size_t i = modelABCsize; i < size; ++i)
-				response.push_back(_dump[i]);
-
-			response.push_back(calcChecksum(response));
-		}
-
-		response.push_back(M_ENDOFSYSEX);
+		if (_type == DUMP_SINGLE)
+			ev.sysex = createSingleDump(m_rom, _bank, _program, _dump, deviceId);
+		else
+			ev.sysex = createMultiDump(m_rom, _bank, _program, _dump, deviceId);
 
 		_responses.emplace_back(std::move(ev));
 	};
@@ -1460,6 +1430,43 @@ SysexBuffer Microcontroller::createSingleDump(const ROMFile& _rom, const BankNum
 
 	// TI/TI2/Snow presets are 512 bytes. Append the extended data with a second
 	// checksum that covers the entire message including the first checksum.
+	if (presetSize > modelABCsize)
+	{
+		for (size_t i = modelABCsize; i < presetSize; ++i)
+			sysex.push_back(_preset[i]);
+
+		sysex.push_back(calcChecksum(sysex));
+	}
+
+	sysex.push_back(M_ENDOFSYSEX);
+
+	return sysex;
+}
+
+SysexBuffer Microcontroller::createMultiDump(const ROMFile& _rom, const BankNumber _bank, const uint8_t _program, const TPreset& _preset, const uint8_t _deviceId)
+{
+	SysexBuffer sysex;
+	sysex.reserve(512 + 16);
+
+	sysex.push_back(M_STARTOFSYSEX);
+	sysex.push_back(0x00);
+	sysex.push_back(0x20);
+	sysex.push_back(0x33);
+	sysex.push_back(0x01);
+	sysex.push_back(_deviceId);
+
+	sysex.push_back(DUMP_MULTI);
+	sysex.push_back(toMidiByte(_bank));
+	sysex.push_back(_program);
+
+	const auto presetSize = _rom.getMultiPresetSize();
+	const auto modelABCsize = ROMFile::getSinglePresetSize(DeviceModel::ABC);
+
+	for (size_t i = 0; i < modelABCsize; ++i)
+		sysex.push_back(_preset[i]);
+
+	sysex.push_back(calcChecksum(sysex));
+
 	if (presetSize > modelABCsize)
 	{
 		for (size_t i = modelABCsize; i < presetSize; ++i)

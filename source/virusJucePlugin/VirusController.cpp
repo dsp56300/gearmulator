@@ -263,38 +263,69 @@ namespace virus
         return name;
     }
 
-    void Controller::setSinglePresetName(const uint8_t _part, const juce::String& _name) const
-    {
-		for (int i=0; i<kNameLength; i++)
+	std::string Controller::getPresetNameFromParameters(const std::string& _paramNamePrefix, const uint8_t _part) const
+	{
+		std::string name;
+		for (int i = 0; i < kNameLength; ++i)
 		{
-	        const std::string paramName = "SingleName" + std::to_string(i);
-            const auto idx = getParameterIndexByName(paramName);
-            if(idx == InvalidParameterIndex)
-                break;
+			const std::string paramName = _paramNamePrefix + std::to_string(i);
+			const auto idx = getParameterIndexByName(paramName);
+			if (idx == InvalidParameterIndex)
+				break;
 
-            auto* param = getParameter(idx, _part);
-            if(!param)
-                break;
-            auto& v = param->getValueObject();
-            if(i >= _name.length())
-				v.setValue(static_cast<uint8_t>(' '));
-            else
-				v.setValue(static_cast<uint8_t>(_name[i]));
+			const auto* param = getParameter(idx, _part);
+			if (!param)
+				break;
+
+			name += static_cast<char>(param->getUnnormalizedValue());
+		}
+		return name;
+	}
+
+	void Controller::setPresetNameOnParameters(const std::string& _paramNamePrefix, const uint8_t _part, const juce::String& _name) const
+	{
+		for (int i = 0; i < kNameLength; ++i)
+		{
+			const std::string paramName = _paramNamePrefix + std::to_string(i);
+			const auto idx = getParameterIndexByName(paramName);
+			if (idx == InvalidParameterIndex)
+				break;
+
+			auto* param = getParameter(idx, _part);
+			if (!param)
+				break;
+
+			param->getValueObject().setValue(static_cast<uint8_t>(i >= _name.length() ? ' ' : _name[i]));
 		}
 	}
 
-    void Controller::setSinglePresetName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _name) const
-    {
-        for(uint32_t i=0; i<kNameLength; ++i)
-        {
-	        const std::string paramName = "SingleName" + std::to_string(i);
-            const auto idx = getParameterIndexByName(paramName);
-            if(idx == InvalidParameterIndex)
-                break;
+	void Controller::setSinglePresetName(const uint8_t _part, const juce::String& _name) const
+	{
+		setPresetNameOnParameters("SingleName", _part, _name);
+	}
 
-            _values[idx] = (i < _name.size()) ? _name[i] : ' ';
-        }
-    }
+	void Controller::setSinglePresetName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _name) const
+	{
+		for (uint32_t i = 0; i < kNameLength; ++i)
+		{
+			const std::string paramName = "SingleName" + std::to_string(i);
+			const auto idx = getParameterIndexByName(paramName);
+			if (idx == InvalidParameterIndex)
+				break;
+
+			_values[idx] = (i < _name.size()) ? _name[i] : ' ';
+		}
+	}
+
+	std::string Controller::getMultiPresetName() const
+	{
+		return getPresetNameFromParameters("MultiName", 0);
+	}
+
+	void Controller::setMultiPresetName(const juce::String& _name) const
+	{
+		setPresetNameOnParameters("MultiName", 0, _name);
+	}
 
     bool Controller::isMultiMode() const
 	{
@@ -303,21 +334,7 @@ namespace virus
 
 	std::string Controller::getCurrentPartPresetName(const uint8_t _part) const
 	{
-        std::string name;
-		for (int i=0; i<kNameLength; i++)
-		{
-	        const std::string paramName = "SingleName" + std::to_string(i);
-            const auto idx = getParameterIndexByName(paramName);
-            if(idx == InvalidParameterIndex)
-                break;
-
-            auto* param = getParameter(idx, _part);
-            if(!param)
-                break;
-            const auto v = param->getUnnormalizedValue();
-			name += static_cast<char>(v);
-		}
-        return name;
+		return getPresetNameFromParameters("SingleName", _part);
 	}
 
 	void Controller::setCurrentPartPreset(uint8_t _part, const virusLib::BankNumber _bank, uint8_t _prg)
@@ -549,9 +566,14 @@ namespace virus
 
 			for (const auto & paramValue : _parameterValues)
 			{
-                const auto part = paramValue.first.first;
+                const auto rawPart = paramValue.first.first;
                 const auto index = paramValue.first.second;
                 const auto value = paramValue.second;
+
+                // Global multi parameters (MultiName, Clock Tempo, Delay Mode, ...)
+                // arrive with part == AnyPart. Map those to part 0 so they land
+                // on a valid Parameter object.
+                const auto part = rawPart == pluginLib::MidiPacket::AnyPart ? 0 : rawPart;
 
                 auto* param = getParameter(index, part);
                 if(!param)
