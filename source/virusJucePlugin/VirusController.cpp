@@ -557,12 +557,17 @@ namespace virus
     {
         const auto bankNumber = _data.find(pluginLib::MidiDataType::Bank)->second;
 
-		/* If it's a multi edit buffer, set the part page C parameters to their multi equivalents */
+		/* If it's a multi edit buffer, set the part global-page parameters
+		 * to their multi equivalents (PAGE_C for Osirus, PAGE_D for OsTIrus) */
 		if (bankNumber == 0)
         {
 	        m_multiEditBuffer.progNumber = _data.find(pluginLib::MidiDataType::Program)->second;
 	        m_multiEditBuffer.name = getMultiPresetName(_parameterValues);
 	        m_multiEditBuffer.data = _msg;
+
+			const auto globalPage = virusLib::isTIFamily(m_processor.getModel())
+				? virusLib::PAGE_D
+				: virusLib::PAGE_C;
 
 			for (const auto & paramValue : _parameterValues)
 			{
@@ -581,7 +586,7 @@ namespace virus
 
                 const auto& desc = param->getDescription();
 
-                if(desc.page != virusLib::PAGE_C)
+                if(desc.page != globalPage)
                     continue;
 
                 param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
