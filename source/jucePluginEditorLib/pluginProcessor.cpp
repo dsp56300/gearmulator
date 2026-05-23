@@ -18,7 +18,7 @@
 
 namespace jucePluginEditorLib
 {
-	namespace 
+	namespace
 	{
 #ifdef ZYNTHIAN
 		void noLoggingFunc(const std::string&)
@@ -26,6 +26,20 @@ namespace jucePluginEditorLib
 			// https://discourse.zynthian.org/t/deadlock-when-attempting-to-log-to-stdout/10169
 		}
 #endif
+
+		// True when the plugin DLL is hosted by a JUCE build-time helper
+		// (juce_vst3_helper / juce_lv2_helper / juce_au_helper). Those exes
+		// load the plugin only to enumerate metadata; they do not run an audio
+		// host and have no use for the MCP server. Starting it there is pure
+		// overhead and was provoking a port-13710 race that crashed n2x builds.
+		bool isJuceHelperProcess()
+		{
+			const auto exeName = juce::File::getSpecialLocation(
+				juce::File::currentExecutableFile).getFileNameWithoutExtension().toLowerCase();
+			return exeName.contains("juce_vst3_helper")
+				|| exeName.contains("juce_lv2_helper")
+				|| exeName.contains("juce_au_helper");
+		}
 
 		std::string getPluginFormatName(const juce::AudioProcessor::WrapperType _wrapperType, const std::string& _moduleFilePath)
 		{
@@ -58,7 +72,7 @@ namespace jucePluginEditorLib
 #endif
 		savePluginLoadPath();
 
-		if (m_config.getBoolValue("enableMcpServer", false))
+		if (m_config.getBoolValue("enableMcpServer", false) && !isJuceHelperProcess())
 			startMcpServer();
 	}
 
@@ -229,6 +243,13 @@ namespace jucePluginEditorLib
 		catch (const std::exception& e)
 		{
 			LOGNET(networkLib::LogLevel::Warning, "MCP server creation failed: " << e.what());
+			m_mcpServer.reset();
+		}
+		catch (...)
+		{
+			// Plugin startup must never crash the host. Swallow any non-
+			// std::exception and continue without MCP.
+			LOGNET(networkLib::LogLevel::Warning, "MCP server creation failed with unknown exception");
 			m_mcpServer.reset();
 		}
 	}
