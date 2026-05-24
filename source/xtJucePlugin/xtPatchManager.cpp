@@ -32,6 +32,7 @@ namespace xtJucePlugin
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "MW Model");
 		jucePluginEditorLib::patchManager::PatchManager::startLoaderThread();
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
+		setTagTypeName(pluginLib::patchDB::TagType::CustomC, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
 	}
 

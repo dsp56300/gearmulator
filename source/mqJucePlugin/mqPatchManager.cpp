@@ -25,6 +25,7 @@ namespace mqJucePlugin
 		, m_editor(_editor)
 		, m_controller(_editor.getMqController())
 	{
+		setTagTypeName(pluginLib::patchDB::TagType::CustomC, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
 		startLoaderThread();
 	}
