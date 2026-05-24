@@ -10,6 +10,7 @@
 #include "xtFrontPanel.h"
 #include "xtPatchManager.h"
 #include "xtSettingsDspAudio.h"
+#include "xtLib/xtMidiTypes.h"
 #include "xtWaveEditor.h"
 
 #include "jucePluginEditorLib/midiPorts.h"
@@ -60,9 +61,19 @@ namespace xtJucePlugin
 
 		addClick("SaveButton", [this](const Rml::Event& _event)
 		{
+			if (m_controller.isMultiMode())
+				m_controller.requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
+
 			juceRmlUi::Menu menu;
 
-			const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
+			uint32_t countAdded = getPatchManager()->createSaveMenuEntries(menu, "Single");
+
+			if (m_controller.isMultiMode())
+			{
+				auto* pm = dynamic_cast<PatchManager*>(getPatchManager());
+				if (pm)
+					countAdded += pm->createSaveMenuEntries(menu, m_controller.getCurrentPart(), "Arrangement", PatchManager::g_userDataArrangement);
+			}
 
 			if(countAdded)
 				menu.runModal(_event);

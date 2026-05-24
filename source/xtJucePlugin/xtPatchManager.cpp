@@ -40,8 +40,24 @@ namespace xtJucePlugin
 		stopLoaderThread();
 	}
 
-	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t _userData)
 	{
+		if (_userData == g_userDataArrangement)
+		{
+			const auto& multiBuf = m_controller.getMultiEditBuffer().data;
+			if (multiBuf.empty())
+				return false;
+
+			_data.assign(multiBuf.begin(), multiBuf.end());
+			const auto partCount = m_controller.getPartCount();
+			for (uint8_t i = 0; i < partCount; ++i)
+			{
+				auto single = m_controller.createSingleDump(xt::LocationH::SingleEditBufferMultiMode, i, i);
+				_data.insert(_data.end(), single.begin(), single.end());
+			}
+			return true;
+		}
+
 		_data = m_controller.createSingleDump(xt::LocationH::SingleBankA, 0, static_cast<uint8_t>(_part));
 		_data = createCombinedDump(_data);
 		return !_data.empty();

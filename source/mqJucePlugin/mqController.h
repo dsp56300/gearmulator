@@ -64,6 +64,8 @@ namespace mqJucePlugin
 	    bool isMultiMode() const;
 	    void setPlayMode(bool _multiMode);
 
+		const Patch& getMultiEditBuffer() const { return m_multiEditBuffer; }
+
 	    void selectNextPreset();
 	    void selectPrevPreset();
 
@@ -97,7 +99,11 @@ namespace mqJucePlugin
 		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 	    bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);
 		void requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;
+
+	public:
 		void requestMulti(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;
+
+	private:
 
 	    uint8_t getGlobalParam(mqLib::GlobalParameter _type) const;
 
@@ -111,6 +117,7 @@ namespace mqJucePlugin
 
 	    Patch m_singleEditBuffer;
 	    std::array<Patch,16> m_singleEditBuffers;
+		Patch m_multiEditBuffer;
 	    std::array<uint8_t, 200> m_globalData{};
 	    mqJucePlugin::FrontPanel* m_frontPanel = nullptr;
 	    std::array<uint32_t, 16> m_currentSingles{0};

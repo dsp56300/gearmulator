@@ -227,6 +227,7 @@ namespace mqJucePlugin
 
 		if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::MultiEditBuffer))
 		{
+			m_multiEditBuffer = patch;
 			applyPatchParameters(_params, 0);
 		}
 	}

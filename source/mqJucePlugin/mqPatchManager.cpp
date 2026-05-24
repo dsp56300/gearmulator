@@ -34,8 +34,25 @@ namespace mqJucePlugin
 		stopLoaderThread();
 	}
 
-	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part, uint64_t)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part, uint64_t _userData)
 	{
+		if (_userData == g_userDataArrangement)
+		{
+			const auto& multiBuf = m_controller.getMultiEditBuffer().data;
+			if (multiBuf.empty())
+				return false;
+
+			_data.assign(multiBuf.begin(), multiBuf.end());
+			for (uint8_t i = 0; i < m_controller.getPartCount(); ++i)
+			{
+				const auto single = m_controller.createSingleDump(
+					mqLib::MidiBufferNum::SingleEditBufferMultiMode,
+					mqLib::MidiSoundLocation::EditBufferFirstMultiSingle, i, i);
+				_data.insert(_data.end(), single.begin(), single.end());
+			}
+			return true;
+		}
+
 		_data = m_controller.createSingleDump(mqLib::MidiBufferNum::SingleBankA, static_cast<mqLib::MidiSoundLocation>(0), _part, _part);
 		return !_data.empty();
 	}

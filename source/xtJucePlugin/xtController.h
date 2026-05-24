@@ -104,7 +104,7 @@ namespace xtJucePlugin
 		void onStateLoaded() override;
 
 		void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
-		void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params) const;
+		void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
 		void parseGlobal(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
 
 		bool parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const;
@@ -115,7 +115,12 @@ namespace xtJucePlugin
 		bool sendGlobalParameterChange(xt::GlobalParameter _param, uint8_t _value);
 		bool sendModeDump() const;
 		void requestSingle(xt::LocationH _buf, uint8_t _location) const;
+
+	public:
 		void requestMulti(xt::LocationH _buf, uint8_t _location) const;
+		const Patch& getMultiEditBuffer() const { return m_multiEditBuffer; }
+
+	private:
 
 		uint8_t getGlobalParam(xt::GlobalParameter _type) const;
 
@@ -127,6 +132,7 @@ namespace xtJucePlugin
 
 		Patch m_singleEditBuffer;
 		std::array<Patch,8> m_singleEditBuffers;
+		Patch m_multiEditBuffer;
 		std::array<uint8_t, 39> m_globalData{};
 		std::array<uint8_t, 1> m_modeData{};
 		std::array<uint32_t, 8> m_currentSingles{0};

@@ -309,7 +309,7 @@ namespace xtJucePlugin
 		onProgramChanged(prog);
 	}
 
-	void Controller::parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data,	const pluginLib::MidiPacket::ParamValues& _params) const
+	void Controller::parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data,	const pluginLib::MidiPacket::ParamValues& _params)
 	{
 		Patch patch;
 		patch.data = _msg;
@@ -320,6 +320,7 @@ namespace xtJucePlugin
 
 		if(bank == static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer))
 		{
+			m_multiEditBuffer = patch;
 			applyPatchParameters(_params, 0);
 
 			if(isMultiMode())

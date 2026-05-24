@@ -34,6 +34,8 @@ namespace xtJucePlugin
 
 		PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex) const;
 
+		static constexpr uint64_t g_userDataArrangement = 1;
+
 	private:
 		static std::string extractMultiName(const pluginLib::patchDB::Data& _sysex);
 		bool activateSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part);
