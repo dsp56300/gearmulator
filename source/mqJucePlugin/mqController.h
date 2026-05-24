@@ -55,8 +55,9 @@ namespace mqJucePlugin
 	    void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
+		void sendMulti(const synthLib::SysexBuffer& _sysex);
+		void sendDrum(const synthLib::SysexBuffer& _sysex);
 
-		using pluginLib::Controller::sendSysEx;
 		bool sendSysEx(MidiPacketType _type) const;
 	    bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 

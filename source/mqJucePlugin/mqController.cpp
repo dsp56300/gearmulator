@@ -90,8 +90,27 @@ namespace mqJucePlugin
 
 		sendLockedParameters(_part);
 
-		requestSingle(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode, 
+		requestSingle(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode,
 			isMultiMode() ? mqLib::MidiSoundLocation::EditBufferFirstMultiSingle : mqLib::MidiSoundLocation::EditBufferCurrentSingle);
+	}
+
+	void Controller::sendMulti(const synthLib::SysexBuffer& _sysex)
+	{
+		auto data = _sysex;
+		data[wLib::IdxBuffer] = static_cast<uint8_t>(mqLib::MidiBufferNum::MultiEditBuffer);
+		data[wLib::IdxDeviceId] = m_deviceId;
+		mqLib::State::updateChecksum(data);
+		pluginLib::Controller::sendSysEx(data);
+		requestMulti(mqLib::MidiBufferNum::MultiEditBuffer, mqLib::MidiSoundLocation::EditBufferFirstMultiSingle);
+	}
+
+	void Controller::sendDrum(const synthLib::SysexBuffer& _sysex)
+	{
+		auto data = _sysex;
+		data[wLib::IdxBuffer] = static_cast<uint8_t>(mqLib::MidiBufferNum::DrumEditBuffer);
+		data[wLib::IdxDeviceId] = m_deviceId;
+		mqLib::State::updateChecksum(data);
+		pluginLib::Controller::sendSysEx(data);
 	}
 
 	void Controller::onStateLoaded()

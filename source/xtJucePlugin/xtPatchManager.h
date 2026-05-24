@@ -32,7 +32,7 @@ namespace xtJucePlugin
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
 		bool parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename) override;
 
-		static PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex);
+		PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex) const;
 
 	private:
 		static std::string extractMultiName(const pluginLib::patchDB::Data& _sysex);

@@ -24,8 +24,6 @@ namespace xtJucePlugin
 		jucePluginEditorLib::patchManager::GroupType::DataSources,
 	};
 
-	static constexpr uint32_t g_multiPartCount = 8;
-
 	PatchManager::PatchManager(Editor& _editor, Rml::Element* _root)
 		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, g_groupTypes)
 		, m_editor(_editor)
@@ -314,10 +312,10 @@ namespace xtJucePlugin
 
 			for (size_t i = 0; i < _results.size();)
 			{
-				if (isMulti(_results[i]) && i + g_multiPartCount < _results.size())
+				if (isMulti(_results[i]) && i + m_controller.getPartCount() < _results.size())
 				{
 					bool allSingles = true;
-					for (size_t j = 1; j <= g_multiPartCount; ++j)
+					for (size_t j = 1; j <= m_controller.getPartCount(); ++j)
 					{
 						if (!isSingle(_results[i + j]))
 						{
@@ -328,10 +326,10 @@ namespace xtJucePlugin
 					if (allSingles)
 					{
 						pluginLib::patchDB::Data compound = _results[i];
-						for (size_t j = 1; j <= g_multiPartCount; ++j)
+						for (size_t j = 1; j <= m_controller.getPartCount(); ++j)
 							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
 						merged.emplace_back(std::move(compound));
-						i += 1 + g_multiPartCount;
+						i += 1 + m_controller.getPartCount();
 						continue;
 					}
 				}
@@ -466,7 +464,7 @@ namespace xtJucePlugin
 		_results.emplace_back(itTable->second);
 	}
 
-	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex)
+	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex) const
 	{
 		if (_sysex.size() < 8)
 			return PatchType::Invalid;
@@ -485,7 +483,7 @@ namespace xtJucePlugin
 		if (msgs.size() == 1)
 			return PatchType::Multi;
 
-		if (msgs.size() == 1 + g_multiPartCount
+		if (msgs.size() == 1 + m_controller.getPartCount()
 			&& xt::State::getCommand(msgs.front()) == xt::SysexCommand::MultiDump)
 		{
 			for (size_t i = 1; i < msgs.size(); ++i)
@@ -530,10 +528,7 @@ namespace xtJucePlugin
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
 	{
-		auto multi = _multi;
-		multi[wLib::IdxBuffer] = static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer);
-		xt::State::updateChecksum(multi, xt::SysexIndex::IdxMultiChecksumStart);
-		m_controller.sendSysEx(multi);
+		m_controller.sendMulti(_multi);
 		return true;
 	}
 
@@ -542,16 +537,14 @@ namespace xtJucePlugin
 		synthLib::SysexBufferList msgs;
 		synthLib::MidiToSysex::splitMultipleSysex(msgs, _compound);
 
-		if (msgs.size() != 1 + g_multiPartCount
+		if (msgs.size() != 1 + m_controller.getPartCount()
 			|| xt::State::getCommand(msgs.front()) != xt::SysexCommand::MultiDump)
 			return false;
 
-		activateMulti(msgs.front());
+		m_controller.sendMulti(msgs.front());
 
-		for (uint8_t i = 0; i < g_multiPartCount; ++i)
-		{
+		for (uint8_t i = 0; i < m_controller.getPartCount(); ++i)
 			m_controller.sendSingle(msgs[i + 1], i);
-		}
 
 		return true;
 	}

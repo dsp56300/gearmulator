@@ -151,6 +151,16 @@ namespace xtJucePlugin
 		return true;
 	}
 
+	void Controller::sendMulti(const synthLib::SysexBuffer& _sysex)
+	{
+		auto data = _sysex;
+		data[wLib::IdxBuffer] = static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer);
+		data[wLib::IdxDeviceId] = m_deviceId;
+		xt::State::updateChecksum(data, xt::SysexIndex::IdxMultiChecksumStart);
+		pluginLib::Controller::sendSysEx(data);
+		requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
+	}
+
 	void Controller::onStateLoaded()
 	{
 		sendSysEx(RequestGlobal);

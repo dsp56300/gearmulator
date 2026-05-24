@@ -64,6 +64,7 @@ namespace xtJucePlugin
 
 		bool sendSingle(const synthLib::SysexBuffer& _sysex);
 		bool sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
+		void sendMulti(const synthLib::SysexBuffer& _sysex);
 
 		bool sendSysEx(MidiPacketType _type) const;
 		bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;

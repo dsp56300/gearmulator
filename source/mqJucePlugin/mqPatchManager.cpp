@@ -20,8 +20,6 @@ namespace mqJucePlugin
 		jucePluginEditorLib::patchManager::GroupType::DataSources,
 	};
 
-	static constexpr uint32_t g_multiPartCount = 16;
-
 	PatchManager::PatchManager(Editor& _editor, Rml::Element* _root)
 		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, g_groupTypes)
 		, m_editor(_editor)
@@ -47,7 +45,7 @@ namespace mqJucePlugin
 		return false;
 	}
 
-	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex)
+	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex) const
 	{
 		if (_sysex.size() < 8)
 			return PatchType::Invalid;
@@ -69,7 +67,7 @@ namespace mqJucePlugin
 		if (msgs.size() == 1)
 			return PatchType::Multi;
 
-		if (msgs.size() == 1 + g_multiPartCount
+		if (msgs.size() == 1 + m_controller.getPartCount()
 			&& static_cast<mqLib::SysexCommand>(msgs.front()[wLib::IdxCommand]) == mqLib::SysexCommand::MultiDump)
 		{
 			for (size_t i = 1; i < msgs.size(); ++i)
@@ -170,10 +168,10 @@ namespace mqJucePlugin
 
 		for (size_t i = 0; i < raw.size();)
 		{
-			if (isMulti(raw[i]) && i + g_multiPartCount < raw.size())
+			if (isMulti(raw[i]) && i + m_controller.getPartCount() < raw.size())
 			{
 				bool allSingles = true;
-				for (size_t j = 1; j <= g_multiPartCount; ++j)
+				for (size_t j = 1; j <= m_controller.getPartCount(); ++j)
 				{
 					if (!isSingle(raw[i + j]))
 					{
@@ -184,10 +182,10 @@ namespace mqJucePlugin
 				if (allSingles)
 				{
 					pluginLib::patchDB::Data compound = raw[i];
-					for (size_t j = 1; j <= g_multiPartCount; ++j)
+					for (size_t j = 1; j <= m_controller.getPartCount(); ++j)
 						compound.insert(compound.end(), raw[i + j].begin(), raw[i + j].end());
 					_results.emplace_back(std::move(compound));
-					i += 1 + g_multiPartCount;
+					i += 1 + m_controller.getPartCount();
 					continue;
 				}
 			}
@@ -214,7 +212,7 @@ namespace mqJucePlugin
 			synthLib::SysexBufferList msgs;
 			synthLib::MidiToSysex::splitMultipleSysex(msgs, _patch->sysex);
 
-			if (msgs.size() != 1 + g_multiPartCount)
+			if (msgs.size() != 1 + m_controller.getPartCount())
 				return _patch->sysex;
 
 			mqLib::State::updateChecksum(msgs[0]);
@@ -236,6 +234,7 @@ namespace mqJucePlugin
 		if (!_patch->getName().empty())
 			mqLib::State::setSingleName(result, _patch->getName());
 
+		// first set tag is category
 		const auto& tags = _patch->getTags(pluginLib::patchDB::TagType::Category).getAdded();
 
 		std::string category;
@@ -246,6 +245,7 @@ namespace mqJucePlugin
 		if (!category.empty())
 			mqLib::State::setCategory(result, category);
 
+		// apply program
 		uint32_t program = 0;
 		uint32_t bank = 0;
 		if(_patch->program != pluginLib::patchDB::g_invalidProgram)
@@ -297,19 +297,13 @@ namespace mqJucePlugin
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
 	{
-		auto multi = _multi;
-		multi[wLib::IdxBuffer] = static_cast<uint8_t>(mqLib::MidiBufferNum::MultiEditBuffer);
-		mqLib::State::updateChecksum(multi);
-		m_controller.sendSysEx(multi);
+		m_controller.sendMulti(_multi);
 		return true;
 	}
 
 	bool PatchManager::activateDrum(const pluginLib::patchDB::Data& _drum)
 	{
-		auto drum = _drum;
-		drum[wLib::IdxBuffer] = static_cast<uint8_t>(mqLib::MidiBufferNum::DrumEditBuffer);
-		mqLib::State::updateChecksum(drum);
-		m_controller.sendSysEx(drum);
+		m_controller.sendDrum(_drum);
 		return true;
 	}
 
@@ -318,17 +312,14 @@ namespace mqJucePlugin
 		synthLib::SysexBufferList msgs;
 		synthLib::MidiToSysex::splitMultipleSysex(msgs, _compound);
 
-		if (msgs.size() != 1 + g_multiPartCount
+		if (msgs.size() != 1 + m_controller.getPartCount()
 			|| static_cast<mqLib::SysexCommand>(msgs.front()[wLib::IdxCommand]) != mqLib::SysexCommand::MultiDump)
 			return false;
 
-		activateMulti(msgs.front());
+		m_controller.sendMulti(msgs.front());
 
-		for (uint8_t i = 0; i < g_multiPartCount; ++i)
-		{
-			const auto& single = msgs[i + 1];
-			m_controller.sendSingle(single, i);
-		}
+		for (uint8_t i = 0; i < m_controller.getPartCount(); ++i)
+			m_controller.sendSingle(msgs[i + 1], i);
 
 		return true;
 	}
