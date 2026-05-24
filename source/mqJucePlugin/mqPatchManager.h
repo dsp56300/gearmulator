@@ -10,6 +10,15 @@ namespace mqJucePlugin
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
+		enum class PatchType
+		{
+			Invalid,
+			Single,
+			Multi,
+			Drum,
+			Arrangement
+		};
+
 		PatchManager(Editor& _editor, Rml::Element* _root);
 		~PatchManager() override;
 
@@ -20,8 +29,17 @@ namespace mqJucePlugin
 		pluginLib::patchDB::Data applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const override;
 		uint32_t getCurrentPart() const override;
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
+		bool parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename) override;
+
+		static PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex);
 
 	private:
+		static std::string extractMultiName(const pluginLib::patchDB::Data& _sysex);
+		bool activateSingle(const pluginLib::patchDB::Data& _sysex, uint32_t _part);
+		bool activateMulti(const pluginLib::patchDB::Data& _multi);
+		bool activateDrum(const pluginLib::patchDB::Data& _drum);
+		bool activateArrangement(const pluginLib::patchDB::Data& _compound);
+
 		Editor& m_editor;
 		Controller& m_controller;
 	};

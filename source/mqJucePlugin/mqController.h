@@ -56,6 +56,7 @@ namespace mqJucePlugin
 	    void sendSingle(const synthLib::SysexBuffer& _sysex);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
 
+		using pluginLib::Controller::sendSysEx;
 		bool sendSysEx(MidiPacketType _type) const;
 	    bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
