@@ -565,6 +565,11 @@ namespace virus
 	        m_multiEditBuffer.name = getMultiPresetName(_parameterValues);
 	        m_multiEditBuffer.data = _msg;
 
+			// Multi dump params live on PAGE_C (per-part instrument params like
+			// Part Volume, Part Pan, etc.) and on the global page (MultiName,
+			// Clock Tempo, etc.). For Osirus/ABC both are PAGE_C. For OsTIrus/TI
+			// globals moved to PAGE_D, but per-part params stayed on PAGE_C.
+			// Accept both pages so neither set is silently dropped.
 			const auto globalPage = virusLib::isTIFamily(m_processor.getModel())
 				? virusLib::PAGE_D
 				: virusLib::PAGE_C;
@@ -586,7 +591,7 @@ namespace virus
 
                 const auto& desc = param->getDescription();
 
-                if(desc.page != globalPage)
+                if(desc.page != virusLib::PAGE_C && desc.page != globalPage)
                     continue;
 
                 param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);

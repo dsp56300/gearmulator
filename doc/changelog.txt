@@ -1,5 +1,14 @@
 Release Notes
 
+2.2.5:
+
+OsTIrus:
+
+- [Fix] BUG-10206 Fix Part Volume knobs showing -64 in Multi mode.
+        The multi dump parser only accepted PAGE_D (TI globals) but
+        dropped PAGE_C (per-part multi params like Part Volume). Now
+        accepts both pages.
+
 2.2.4:
 
 Framework:
