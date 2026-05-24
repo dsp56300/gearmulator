@@ -4,6 +4,8 @@ Release Notes
 
 OsTIrus:
 
+- [Fix] BUG-10192 TrancyTI skin: fix swapped OSC Wavetable/Wave panels
+        and incorrect Filter header showing Envelope 4.
 - [Fix] BUG-10204 Fix LFO 2 destination names in mod matrix showing as
         "LFO >" instead of "LFO 2>" and move them after LFO 2 Assign Amt
         in the destination list.
