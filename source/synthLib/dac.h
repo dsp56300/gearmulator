@@ -2,6 +2,7 @@
 
 #include <climits>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 
 namespace juce
