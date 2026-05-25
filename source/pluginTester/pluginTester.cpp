@@ -33,11 +33,22 @@ int main(const int _argc, char* _argv[])
 	{
 		Logger::writeToLog("Error: " + _msg);
 		Logger::writeToLog("Usage:\n"
-			"pluginTester -plugin <pathToPlugin> [-seconds n -blocks n -blocksize n -samplerate x -forever]");
+			"pluginTester -plugin <pathToPlugin> [-seconds n -blocks n -blocksize n -samplerate x -forever -repeat n]");
 		return 1;
 	};
+
+	const auto repeatCount = cmdLine.getInt("repeat", 1);
 	try
 	{
+	  for (int repeatIdx = 0; repeatIdx < repeatCount; ++repeatIdx)
+	  {
+		if (repeatCount > 1)
+		{
+			char msg[64];
+			(void)snprintf(msg, sizeof(msg), "=== Repeat %d / %d ===", repeatIdx + 1, repeatCount);
+			Logger::writeToLog(msg);
+		}
+
 	    ConsoleApplication app;
 
 		std::string pluginPathName = cmdLine.get("plugin");
@@ -201,6 +212,7 @@ int main(const int _argc, char* _argv[])
 		(void)snprintf(temp, sizeof(temp), "Progress: %d%% (%d/%d blocks)", 100, blocks, blocks);
 		Logger::writeToLog(temp);
 
+	  } // end repeat loop
 	    return 0;
 	}
 	catch (const std::exception& e)
