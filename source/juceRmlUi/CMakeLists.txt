@@ -71,16 +71,27 @@ else()
 	target_compile_definitions(juceRmlUi PRIVATE JUCE_MAC=0)
 endif()
 
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag(-mssse3 HAS_SSSE3)
-check_cxx_compiler_flag(-msse4.1 HAS_SSE41)
+# SSE flags are x86-specific. On ARM64, sse2neon provides the intrinsics
+# and NEON needs no special flags. For macOS universal builds, use
+# -Xarch_x86_64 so the flags apply only to the x86 slice and don't warn
+# (or error with -Werror) on the arm64 slice.
+if(APPLE)
+    # Universal or x86_64-only: scope flags to the x86_64 slice
+    if(CMAKE_OSX_ARCHITECTURES MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86|X86|amd64|AMD64")
+        target_compile_options(juceRmlUi PRIVATE -Xarch_x86_64 -mssse3 -Xarch_x86_64 -msse4.1)
+    endif()
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|X86|amd64|AMD64|i[3-6]86")
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag(-mssse3 HAS_SSSE3)
+    check_cxx_compiler_flag(-msse4.1 HAS_SSE41)
 
-if(HAS_SSSE3)
-    target_compile_options(juceRmlUi PRIVATE -mssse3)
-endif()
+    if(HAS_SSSE3)
+        target_compile_options(juceRmlUi PRIVATE -mssse3)
+    endif()
 
-if(HAS_SSE41)
-    target_compile_options(juceRmlUi PRIVATE -msse4.1)
+    if(HAS_SSE41)
+        target_compile_options(juceRmlUi PRIVATE -msse4.1)
+    endif()
 endif()
 
 set_property(TARGET juceRmlUi PROPERTY FOLDER "Gearmulator")
