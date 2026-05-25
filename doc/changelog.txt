@@ -9,6 +9,8 @@ OsTIrus:
 - [Fix] BUG-10204 Fix LFO 2 destination names in mod matrix showing as
         "LFO >" instead of "LFO 2>" and move them after LFO 2 Assign Amt
         in the destination list.
+- [Fix] BUG-10191 TrancyTI skin: fix oversized Reverb disable overlays
+        blocking the Feedback knob, and tiny scrollbar in Preset Browser.
 - [Fix] BUG-10206 Fix Part Volume knobs showing -64 in Multi mode.
         The multi dump parser only accepted PAGE_D (TI globals) but
         dropped PAGE_C (per-part multi params like Part Volume). Now

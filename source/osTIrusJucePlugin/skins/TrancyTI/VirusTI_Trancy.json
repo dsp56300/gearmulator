@@ -1413,7 +1413,7 @@
 		
                 {
                     "name" : "ContainerReverbFeedback",
-                    "image" : { "x" : "1487", "y" : "442", "width" : "1966", "height" : "328", "texture" : "button_disable" }, 
+                    "image" : { "x" : "1487", "y" : "442", "width" : "138", "height" : "137", "texture" : "button_disable" }, 
                     "condition": { "enableOnParameter": "Reverb Mode", "enableOnValues": "0,1" },
                 }, 
  
@@ -1426,7 +1426,7 @@
 		
                 {
                     "name" : "ContainerReverbPredelayDisable",
-                    "image" : { "x" : "1328", "y" : "442", "width" : "1966", "height" : "328", "texture" : "button_disable" }, 
+                    "image" : { "x" : "1328", "y" : "442", "width" : "138", "height" : "137", "texture" : "button_disable" }, 
                     "condition": { "enableOnParameter": "Reverb Clock", "enableOnValues": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
                 }, 		
 		
