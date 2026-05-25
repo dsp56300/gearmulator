@@ -106,6 +106,8 @@ namespace genericVirusUI
 
 			juce::MessageManager::callAsync([this, patches = std::move(patches), eventMousePos, eventTargetElem]
 			{
+				const auto currentPatch = m_editor.getPatchManager()->getState().getPatch(getPart());
+
 				juceRmlUi::Menu selector;
 
 				for (const auto& it : patches)
@@ -114,7 +116,8 @@ namespace genericVirusUI
 					for (const auto& patch : it.second)
 					{
 		                const auto& presetName = patch->getName();
-		                p.addEntry(presetName, [this, patch] 
+						const bool checked = pluginLib::patchDB::PatchKey(*patch) == currentPatch;
+		                p.addEntry(presetName, true, checked, [this, patch]
 		                {
 							if(m_editor.getPatchManager()->activatePatch(patch, getPart()))
 								m_editor.getPatchManager()->setSelectedPatch(getPart(), patch);

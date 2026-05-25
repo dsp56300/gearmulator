@@ -2,6 +2,11 @@ Release Notes
 
 2.2.5:
 
+Osirus/OsTIrus:
+
+- [Fix] BUG-10201 Part button ROM preset menu now shows a checkmark
+        next to the currently selected preset.
+
 OsTIrus:
 
 - [Fix] BUG-10192 TrancyTI skin: fix swapped OSC Wavetable/Wave panels
