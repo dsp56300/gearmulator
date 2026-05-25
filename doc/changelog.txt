@@ -16,6 +16,12 @@ OsTIrus:
         dropped PAGE_C (per-part multi params like Part Volume). Now
         accepts both pages.
 
+Framework:
+
+- [Fix] BUG-10199 Fix build errors on macOS ARM64: SSE compiler flags
+        were added on non-x86 architectures, and missing cstddef include
+        for size_t in dac.h.
+
 2.2.4:
 
 Framework:
