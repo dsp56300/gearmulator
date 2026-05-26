@@ -1,5 +1,14 @@
 Release Notes
 
+2.2.6:
+
+Framework:
+
+- [Fix] EMU-75 Fix intermittent JIT cache crash during DSP boot caused
+        by a race in the MmuHelper placeholder restore on Windows.
+- [Fix] Fix crash in part button preset menu when comparing patches
+        with null source pointers.
+
 2.2.5:
 
 Osirus/OsTIrus:
