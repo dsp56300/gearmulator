@@ -8,6 +8,8 @@ Framework:
         by a race in the MmuHelper placeholder restore on Windows.
 - [Fix] Fix crash in part button preset menu when comparing patches
         with null source pointers.
+- [Fix] BUG-10209 Fix "Overwrite patch" option disappearing from save
+        menu after saving once.
 
 2.2.5:
 
