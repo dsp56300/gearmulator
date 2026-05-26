@@ -11,6 +11,11 @@ Framework:
 - [Fix] BUG-10209 Fix "Overwrite patch" option disappearing from save
         menu after saving once.
 
+OsTIrus:
+
+- [Fix] BUG-10191 TrancyTI skin: fix oversized Reverb disable overlays
+        blocking the Feedback knob (applied to RML, removed obsolete JSON).
+
 2.2.5:
 
 Osirus/OsTIrus:
