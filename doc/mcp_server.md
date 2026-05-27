@@ -11,7 +11,18 @@ When a Gearmulator plugin is loaded in a DAW, it starts an MCP server on a local
 - Save and load device state
 - Browse, search, load, save, and rename presets via the patch manager
 - Inspect and interact with the plugin UI (DOM tree, clicks, key presses)
+- Take screenshots of the plugin editor
 - Run automated tests
+
+### What can you do with it?
+
+**Sound design with AI** — Connect an AI assistant (like Claude Code) to the MCP server and describe the sound you want. The AI can read the current parameter state, tweak oscillators, filters, and effects, play notes to audition the result, and iterate until you are happy. All without touching the plugin UI.
+
+**Automated testing** — Write scripts that load presets, verify parameter values, send MIDI, capture and restore plugin state, and check UI elements. The MCP server is used by the project's own integration test suite to validate plugin behavior across builds.
+
+**Batch preset management** — Search through preset banks, load and audition presets programmatically, save modified patches to user banks, or rename presets in bulk.
+
+**UI automation** — Simulate mouse clicks, drags, key presses, and text input on the plugin editor. Inspect the DOM tree, find elements by CSS selector, take screenshots. Useful for testing skin layouts or automating repetitive UI workflows.
 
 ## Getting Started
 
@@ -125,7 +136,7 @@ List all parameters with their current values, ranges, and metadata for a given 
 |---|---|---|---|
 | `part` | integer | no | Part number (default: 0) |
 
-Returns an array of parameter objects with `name`, `value`, `min`, `max`, `numSteps`, `isBipolar`, `isStringDefined`, `valueText`.
+Returns an array of parameter objects with `name`, `displayName`, `value`, `min`, `max`, `text`, `part`, `page`, `index`, `isDiscrete`, `isBool`, `isBipolar`.
 
 #### `get_parameter`
 
@@ -135,6 +146,8 @@ Get a specific parameter's value and metadata by name.
 |---|---|---|---|
 | `name` | string | yes | Parameter name |
 | `part` | integer | no | Part number (default: 0) |
+
+Returns `name`, `displayName`, `value`, `min`, `max`, `text`, `part`, `isLocked`. If the parameter has a discrete value list, it is included as `valueList`.
 
 #### `set_parameter`
 
@@ -261,15 +274,19 @@ Switch the active part.
 
 #### `get_device_info`
 
-Get device information: model, sample rate, channel count, DSP clock, validity.
+Get device information: validity, host sample rate, DSP clock speed (Hz and percent), output gain, current part, and part count.
 
 No parameters required.
+
+Returns `valid`, `hostSamplerate`, `dspClockPercent`, `dspClockHz`, `canModifyDspClock`, `outputGain`, `currentPart`, `partCount`.
 
 #### `get_plugin_info`
 
-Get plugin information: name, version, format identifier.
+Get plugin information: name, vendor, 4CC identifier, MIDI capabilities, and MCP server port.
 
 No parameters required.
+
+Returns `name`, `vendor`, `plugin4CC`, `isSynth`, `wantsMidiInput`, `producesMidiOut`, `mcpPort`.
 
 ---
 
@@ -490,7 +507,7 @@ Get the results from a previous search.
 |---|---|---|---|
 | `searchHandle` | integer | yes | Search handle from `search_presets` |
 | `offset` | integer | no | Starting index (default: 0) |
-| `limit` | integer | no | Maximum results to return (default: 50) |
+| `limit` | integer | no | Maximum results to return (default: 50, max: 200) |
 
 Returns an array of preset objects with `name`, `program`, `bank`, `dataSource`, `sourceType`, `tags`, and `index`.
 
@@ -501,7 +518,7 @@ Load a preset from search results by index.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `searchHandle` | integer | yes | Search handle from `search_presets` |
-| `presetIndex` | integer | yes | Index in the search results |
+| `index` | integer | yes | Index in the search results |
 | `part` | integer | no | Part number to load into (default: 0) |
 
 #### `load_preset_by_name`
@@ -523,17 +540,16 @@ Navigate to the next or previous preset in the current search results.
 
 #### `save_preset`
 
-Save the current preset to a local storage data source.
+Save the current patch from a part to a user bank. If no user bank exists, one will be created.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `name` | string | no | Name for the saved preset |
-| `dataSource` | string | yes | Local storage data source name |
+| `bankName` | string | no | User bank name to save to (default: first available, or creates "User Bank") |
 | `part` | integer | no | Part number (default: 0) |
 
 #### `rename_preset`
 
-Rename the currently loaded preset (must be in local storage).
+Rename the currently loaded preset for a part.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -671,7 +687,7 @@ Rename the currently loaded preset (must be in local storage).
   "method": "tools/call",
   "params": {
     "name": "save_preset",
-    "arguments": { "dataSource": "My Patches", "part": 0 }
+    "arguments": { "bankName": "My Patches", "part": 0 }
   }
 }
 ```
