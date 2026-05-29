@@ -258,6 +258,7 @@ namespace jucePluginEditorLib::patchManager
 							if(newPatch)
 							{
 								replacePatch(p, newPatch);
+								m_state.setSelectedPatch(_part, pluginLib::patchDB::PatchKey(*p), m_state.getSearchHandle(_part));
 							}
 						});
 					}

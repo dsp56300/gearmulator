@@ -1,13 +1,6 @@
 Release Notes
 
-2.2.5:
-
-OsTIrus:
-
-- [Fix] BUG-10206 Fix Part Volume knobs showing -64 in Multi mode.
-        The multi dump parser only accepted PAGE_D (TI globals) but
-        dropped PAGE_C (per-part multi params like Part Volume). Now
-        accepts both pages.
+2.2.7:
 
 Vavra:
 
@@ -30,6 +23,49 @@ Xenia:
         Arrangements can be saved to user banks via the Save menu.
         Dropping a Multi or Arrangement onto a Part Button prompts for
         confirmation since it replaces more than one part.
+
+2.2.6:
+
+Framework:
+
+- [Fix] EMU-75 Fix intermittent JIT cache crash during DSP boot caused
+        by a race in the MmuHelper placeholder restore on Windows.
+- [Fix] Fix crash in part button preset menu when comparing patches
+        with null source pointers.
+- [Fix] BUG-10209 Fix "Overwrite patch" option disappearing from save
+        menu after saving once.
+
+OsTIrus:
+
+- [Fix] BUG-10191 TrancyTI skin: fix oversized Reverb disable overlays
+        blocking the Feedback knob (applied to RML, removed obsolete JSON).
+
+2.2.5:
+
+Osirus/OsTIrus:
+
+- [Fix] BUG-10201 Part button ROM preset menu now shows a checkmark
+        next to the currently selected preset.
+
+OsTIrus:
+
+- [Fix] BUG-10192 TrancyTI skin: fix swapped OSC Wavetable/Wave panels
+        and incorrect Filter header showing Envelope 4.
+- [Fix] BUG-10204 Fix LFO 2 destination names in mod matrix showing as
+        "LFO >" instead of "LFO 2>" and move them after LFO 2 Assign Amt
+        in the destination list.
+- [Fix] BUG-10191 TrancyTI skin: fix oversized Reverb disable overlays
+        blocking the Feedback knob, and tiny scrollbar in Preset Browser.
+- [Fix] BUG-10206 Fix Part Volume knobs showing -64 in Multi mode.
+        The multi dump parser only accepted PAGE_D (TI globals) but
+        dropped PAGE_C (per-part multi params like Part Volume). Now
+        accepts both pages.
+
+Framework:
+
+- [Fix] BUG-10199 Fix build errors on macOS ARM64: SSE compiler flags
+        were added on non-x86 architectures, and missing cstddef include
+        for size_t in dac.h.
 
 2.2.4:
 

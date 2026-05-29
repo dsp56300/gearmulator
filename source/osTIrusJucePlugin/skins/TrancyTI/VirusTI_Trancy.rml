@@ -1048,9 +1048,9 @@
 			</combo>
 			<img id="ContainerReverb" class="jucePos" src="panel_9_fx2_reverb.png" style="left: 0dp; top: 348dp; width: 1966dp; height: 328dp;"/>
 			<knob id="ReverbFeedback" class="jucePos juceRotary knob3" data-class-juceConditionDisabled="!((Reverb_Mode_value >= 2 && Reverb_Mode_value <= 3))" data-model="partCurrent" param="Reverb Feedback" style="left: 1487dp; top: 480dp; width: 98dp; height: 98dp;"/>
-			<div id="ContainerReverbFeedback" class="jucePos" data-class-juceConditionDisabled="!((Reverb_Mode_value >= 0 && Reverb_Mode_value <= 1))" data-model="partCurrent" style="left: 1487dp; top: 442dp; width: 1966dp; height: 328dp; decorator: image(button_disable.png scale-none left top);"/>
+			<div id="ContainerReverbFeedback" class="jucePos" data-class-juceConditionDisabled="!((Reverb_Mode_value >= 0 && Reverb_Mode_value <= 1))" data-model="partCurrent" style="left: 1487dp; top: 442dp; width: 138dp; height: 137dp; decorator: image(button_disable.png scale-none left top);"/>
 			<knob id="ReverbPredelay" class="jucePos juceRotary knob3" data-class-juceConditionDisabled="!(Reverb_Clock_value == 0)" data-model="partCurrent" param="Reverb Predelay" style="left: 1329dp; top: 480dp; width: 98dp; height: 98dp;"/>
-			<div id="ContainerReverbPredelayDisable" class="jucePos" data-class-juceConditionDisabled="!((Reverb_Clock_value >= 1 && Reverb_Clock_value <= 16))" data-model="partCurrent" style="left: 1328dp; top: 442dp; width: 1966dp; height: 328dp; decorator: image(button_disable.png scale-none left top);"/>
+			<div id="ContainerReverbPredelayDisable" class="jucePos" data-class-juceConditionDisabled="!((Reverb_Clock_value >= 1 && Reverb_Clock_value <= 16))" data-model="partCurrent" style="left: 1328dp; top: 442dp; width: 138dp; height: 137dp; decorator: image(button_disable.png scale-none left top);"/>
 			<knob id="ReverbDecayTime" class="jucePos juceRotary knob3" data-model="partCurrent" param="Reverb Time" style="left: 846dp; top: 480dp; width: 98dp; height: 98dp;"/>
 			<knob id="ReverbDamping" class="jucePos juceRotary knob3" data-model="partCurrent" param="Reverb Damping" style="left: 1004dp; top: 480dp; width: 98dp; height: 98dp;"/>
 			<knob id="ReverbColor" class="jucePos juceRotary knob3" data-model="partCurrent" param="Reverb Color" style="left: 1171dp; top: 480dp; width: 98dp; height: 98dp;"/>

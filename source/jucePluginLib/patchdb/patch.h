@@ -116,6 +116,8 @@ namespace pluginLib::patchDB
 		{
 			if(!_a)
 				return !_b;
+			if (!_b)
+				return false;
 			return *_a == *_b;
 		}
 
