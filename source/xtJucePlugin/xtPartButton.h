@@ -15,6 +15,8 @@ namespace xtJucePlugin
 
 		bool canDrop(const Rml::Event& _event, const juceRmlUi::DragSource* _source) override;
 
+		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
+
 	private:
 		Editor& m_editor;
 	};

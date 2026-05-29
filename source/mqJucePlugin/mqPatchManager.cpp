@@ -218,9 +218,30 @@ namespace mqJucePlugin
 	{
 		const auto patchType = detectPatchType(_patch->sysex);
 
+		// Writes the patch's display name into a Multi dump's embedded name field
+		// (the same offset extractMultiName() reads back), so a renamed Multi or
+		// Arrangement exports/saves with the updated name.
+		const auto writeMultiName = [&_patch](pluginLib::patchDB::Data& _multi)
+		{
+			if (_patch->getName().empty())
+				return;
+
+			constexpr size_t nameOffset = mqLib::IdxMultiParamFirst + static_cast<size_t>(mqLib::MultiParameter::Name00);
+			constexpr size_t nameLength = 16;
+
+			if (_multi.size() < nameOffset + nameLength)
+				return;
+
+			const auto& name = _patch->getName();
+			for (size_t i = 0; i < nameLength; ++i)
+				_multi[nameOffset + i] = i < name.size() ? static_cast<uint8_t>(name[i]) : ' ';
+		};
+
 		if (patchType == PatchType::Multi || patchType == PatchType::Drum)
 		{
 			auto result = _patch->sysex;
+			if (patchType == PatchType::Multi)
+				writeMultiName(result);
 			mqLib::State::updateChecksum(result);
 			return result;
 		}
@@ -233,6 +254,7 @@ namespace mqJucePlugin
 			if (msgs.size() != 1 + m_controller.getPartCount())
 				return _patch->sysex;
 
+			writeMultiName(msgs[0]);
 			mqLib::State::updateChecksum(msgs[0]);
 			for (size_t i = 1; i < msgs.size(); ++i)
 				mqLib::State::updateChecksum(msgs[i]);
@@ -315,6 +337,8 @@ namespace mqJucePlugin
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
 	{
+		// Ensure the device is in Multi mode so the Multi setup takes effect.
+		m_controller.setPlayMode(true);
 		m_controller.sendMulti(_multi);
 		return true;
 	}
@@ -334,7 +358,11 @@ namespace mqJucePlugin
 			|| static_cast<mqLib::SysexCommand>(msgs.front()[wLib::IdxCommand]) != mqLib::SysexCommand::MultiDump)
 			return false;
 
-		m_controller.sendMulti(msgs.front());
+		// activateMulti() switches to Multi mode and applies the Multi. The mode
+		// switch must happen before the sendSingle() calls below: they only target
+		// the addressed part while in Multi mode (otherwise every Single is sent to
+		// the single edit buffer at location 0 and they overwrite each other).
+		activateMulti(msgs.front());
 
 		for (uint8_t i = 0; i < m_controller.getPartCount(); ++i)
 			m_controller.sendSingle(msgs[i + 1], i);

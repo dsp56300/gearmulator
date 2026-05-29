@@ -183,6 +183,44 @@ namespace xtJucePlugin
 			return true;
 		};
 
+		// Multi / Arrangement: write the (possibly renamed) Multi name back into
+		// the Multi dump and recompute checksums. Singles in an Arrangement keep
+		// their content; only their checksums are refreshed.
+		if (xt::State::getCommand(_patch->sysex) == xt::SysexCommand::MultiDump)
+		{
+			synthLib::SysexBufferList msgs;
+			synthLib::MidiToSysex::splitMultipleSysex(msgs, _patch->sysex);
+
+			if (msgs.empty())
+				return _patch->sysex;
+
+			if (!_patch->getName().empty())
+			{
+				constexpr size_t nameOffset = xt::SysexIndex::IdxMultiParamFirst + static_cast<size_t>(xt::MultiParameter::Name00);
+				constexpr size_t nameLength = 16;
+
+				auto& multi = msgs.front();
+				if (multi.size() >= nameOffset + nameLength)
+				{
+					const auto& name = _patch->getName();
+					for (size_t i = 0; i < nameLength; ++i)
+						multi[nameOffset + i] = i < name.size() ? static_cast<uint8_t>(name[i]) : ' ';
+				}
+			}
+
+			pluginLib::patchDB::Data result;
+			for (auto& msg : msgs)
+			{
+				if (xt::State::getCommand(msg) == xt::SysexCommand::MultiDump)
+					xt::State::updateChecksum(msg, xt::SysexIndex::IdxMultiChecksumStart);
+				else if (xt::State::getCommand(msg) == xt::SysexCommand::SingleDump)
+					xt::State::updateChecksum(msg, xt::SysexIndex::IdxSingleChecksumStart);
+
+				result.insert(result.end(), msg.begin(), msg.end());
+			}
+			return result;
+		}
+
 		if (xt::State::getCommand(_patch->sysex) == xt::SysexCommand::SingleDump)
 		{
 			auto result = _patch->sysex;
@@ -545,6 +583,8 @@ namespace xtJucePlugin
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
 	{
+		// Ensure the device is in Multi mode so the Multi setup takes effect.
+		m_controller.setPlayMode(true);
 		m_controller.sendMulti(_multi);
 		return true;
 	}
@@ -558,7 +598,11 @@ namespace xtJucePlugin
 			|| xt::State::getCommand(msgs.front()) != xt::SysexCommand::MultiDump)
 			return false;
 
-		m_controller.sendMulti(msgs.front());
+		// activateMulti() switches to Multi mode and applies the Multi. The mode
+		// switch must happen before the sendSingle() calls below: they only target
+		// the addressed part while in Multi mode (otherwise every Single is sent to
+		// the single edit buffer at location 0 and they overwrite each other).
+		activateMulti(msgs.front());
 
 		for (uint8_t i = 0; i < m_controller.getPartCount(); ++i)
 			m_controller.sendSingle(msgs[i + 1], i);

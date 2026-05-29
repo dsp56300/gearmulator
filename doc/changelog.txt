@@ -9,6 +9,28 @@ OsTIrus:
         dropped PAGE_C (per-part multi params like Part Volume). Now
         accepts both pages.
 
+Vavra:
+
+- [New] BUG-10184 Patch Manager now supports Multi, Arrangement and
+        Drum dumps alongside Singles. They are detected automatically
+        on file import and tagged via the new "Type" category. Loading
+        an Arrangement (Multi + 16 Singles) switches to Multi mode,
+        applies the Multi and distributes the 16 Singles into the
+        parts. Arrangements can be saved to user banks via the Save
+        menu. Dropping a Multi or Arrangement onto a Part Button
+        prompts for confirmation since it replaces more than one part.
+
+Xenia:
+
+- [New] BUG-10184 Patch Manager now supports Multi and Arrangement
+        dumps alongside Singles. They are detected automatically on
+        file import and tagged via the new "Type" category. Loading an
+        Arrangement (Multi + 8 Singles) switches to Multi mode, applies
+        the Multi and distributes the 8 Singles into the parts.
+        Arrangements can be saved to user banks via the Save menu.
+        Dropping a Multi or Arrangement onto a Part Button prompts for
+        confirmation since it replaces more than one part.
+
 2.2.4:
 
 Framework:
