@@ -1,5 +1,13 @@
 Release Notes
 
+2.2.7:
+
+Osirus:
+
+- [Change] Osirus now ships with the Galaxpel skin only. The Hoverland
+        and Trancy skins have been removed from the build. Existing users
+        of those skins will fall back to Galaxpel.
+
 2.2.6:
 
 Framework:
