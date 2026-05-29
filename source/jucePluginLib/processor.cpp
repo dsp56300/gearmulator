@@ -936,6 +936,14 @@ namespace pluginLib
 
 		if (hasController())
 			getController().onStateLoaded();
+
+		// Notify subscribers (PatchManager, etc.) that the audio state was
+		// restored from the host. Lets the UI refresh selection state to match
+		// what the host just loaded — without this, a host-driven state load
+		// (e.g. NKS preset load in Komplete Kontrol) leaves the patchmanager
+		// UI showing stale or no selection while the audio engine plays the
+		// new patch.
+		evStateLoaded();
 	}
 #endif
 
@@ -1010,6 +1018,9 @@ namespace pluginLib
 		juce::MessageManager::callAsync([this]
 		{
 			getController().onStateLoaded();
+			// Same notification as the synchronous setState path — keeps the
+			// patchmanager UI in sync with what the audio engine is playing.
+			evStateLoaded();
 		});
 
 		return m_device.get();

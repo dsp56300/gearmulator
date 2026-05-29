@@ -12,6 +12,8 @@
 
 #include "bridgeLib/types.h"
 
+#include "baseLib/event.h"
+
 #include "synthLib/midiRoutingMatrix.h"
 #include "synthLib/plugin.h"
 
@@ -77,6 +79,15 @@ namespace pluginLib
 		synthLib::Plugin& getPlugin();
 
 		ProgramChangeRouter& getProgramChangeRouter() { return m_programChangeRouter; }
+
+		// Fires after Processor::setState has restored the plugin's audio state
+		// (called once for both StateTypeGlobal and StateTypeCurrentProgram via
+		// setStateInformation / setCurrentProgramStateInformation paths).
+		// PatchManager subscribes to refresh the UI's currently-selected patch
+		// so a host-driven state load (e.g. NKS preset load in Komplete Kontrol)
+		// is reflected in the patchmanager browser, matching what a manual
+		// click would do.
+		baseLib::Event<> evStateLoaded;
 
 		virtual synthLib::Device* createDevice() = 0;
 		virtual bridgeClient::RemoteDevice* createRemoteDevice(const synthLib::DeviceCreateParams& _params);
