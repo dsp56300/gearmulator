@@ -492,405 +492,373 @@
 			<template src="patchmanager"/>
 		</div>
 		<div id="page_multi" class="jucePos" tabgroup="pages" tabpage="5" style="left: 724dp; top: 325dp; width: 1970dp; height: 1125dp;">
-			<div id="MultiPart0" class="jucePos multiStripe" data-model="part0" style="left: 0dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">1</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart0" class="jucePos multiStripe" data-model="part0" style="left: 0dp; top: 0dp; width: 118dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">1</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 118dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 118dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 118dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 118dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 118dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 118dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 118dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 118dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart1" class="jucePos multiStripe multiStripeAlt" data-model="part1" style="left: 123dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">2</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart1" class="jucePos multiStripe" data-model="part1" style="left: 124dp; top: 0dp; width: 117dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">2</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 117dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 117dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 117dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 117dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 117dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 117dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 117dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 117dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart2" class="jucePos multiStripe" data-model="part2" style="left: 246dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">3</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart2" class="jucePos multiStripe" data-model="part2" style="left: 247dp; top: 0dp; width: 118dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">3</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 118dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 118dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 118dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 118dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 118dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 118dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 118dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 118dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart3" class="jucePos multiStripe multiStripeAlt" data-model="part3" style="left: 369dp; top: 0dp; width: 124dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 124dp; height: 30dp; line-height: 30dp;">4</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 124dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 124dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 124dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 124dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 124dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 112dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 124dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 112dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 124dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 112dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 124dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 112dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 124dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 124dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 124dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart3" class="jucePos multiStripe" data-model="part3" style="left: 371dp; top: 0dp; width: 117dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">4</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 117dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 117dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 117dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 117dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 117dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 117dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 117dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 117dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart4" class="jucePos multiStripe" data-model="part4" style="left: 493dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">5</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart4" class="jucePos multiStripe" data-model="part4" style="left: 494dp; top: 0dp; width: 118dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">5</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 118dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 118dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 118dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 118dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 118dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 118dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 118dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 118dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart5" class="jucePos multiStripe multiStripeAlt" data-model="part5" style="left: 616dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">6</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart5" class="jucePos multiStripe" data-model="part5" style="left: 618dp; top: 0dp; width: 117dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">6</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 117dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 117dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 117dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 117dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 117dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 117dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 117dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 117dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart6" class="jucePos multiStripe" data-model="part6" style="left: 739dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">7</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart6" class="jucePos multiStripe" data-model="part6" style="left: 741dp; top: 0dp; width: 118dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">7</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 118dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 118dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 118dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 118dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 118dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 118dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 118dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 118dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart7" class="jucePos multiStripe multiStripeAlt" data-model="part7" style="left: 862dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">8</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart7" class="jucePos multiStripe" data-model="part7" style="left: 865dp; top: 0dp; width: 117dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">8</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 117dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 117dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 117dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 117dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 117dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 117dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 117dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 117dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart8" class="jucePos multiStripe" data-model="part8" style="left: 985dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">9</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart8" class="jucePos multiStripe" data-model="part8" style="left: 988dp; top: 0dp; width: 118dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">9</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 118dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 118dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 118dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 118dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 118dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 118dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 118dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 118dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart9" class="jucePos multiStripe multiStripeAlt" data-model="part9" style="left: 1108dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">10</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart9" class="jucePos multiStripe" data-model="part9" style="left: 1112dp; top: 0dp; width: 117dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">10</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 117dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 117dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 117dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 117dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 117dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 117dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 117dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 117dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart10" class="jucePos multiStripe" data-model="part10" style="left: 1231dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">11</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart10" class="jucePos multiStripe" data-model="part10" style="left: 1235dp; top: 0dp; width: 118dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">11</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 118dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 118dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 118dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 118dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 118dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 118dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 118dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 118dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart11" class="jucePos multiStripe multiStripeAlt" data-model="part11" style="left: 1354dp; top: 0dp; width: 124dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 124dp; height: 30dp; line-height: 30dp;">12</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 124dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 124dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 124dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 124dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 124dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 112dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 124dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 112dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 124dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 112dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 124dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 112dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 124dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 124dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 124dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart11" class="jucePos multiStripe" data-model="part11" style="left: 1359dp; top: 0dp; width: 117dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">12</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 117dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 117dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 117dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 117dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 117dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 117dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 117dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 117dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart12" class="jucePos multiStripe" data-model="part12" style="left: 1478dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">13</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart12" class="jucePos multiStripe" data-model="part12" style="left: 1482dp; top: 0dp; width: 118dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">13</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 118dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 118dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 118dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 118dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 118dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 118dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 118dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 118dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart13" class="jucePos multiStripe multiStripeAlt" data-model="part13" style="left: 1601dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">14</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart13" class="jucePos multiStripe" data-model="part13" style="left: 1606dp; top: 0dp; width: 117dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">14</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 117dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 117dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 117dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 117dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 117dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 117dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 117dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 117dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart14" class="jucePos multiStripe" data-model="part14" style="left: 1724dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">15</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart14" class="jucePos multiStripe" data-model="part14" style="left: 1729dp; top: 0dp; width: 118dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">15</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 118dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 118dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 118dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 118dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 118dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 118dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 118dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 118dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
-			<div id="MultiPart15" class="jucePos multiStripe multiStripeAlt" data-model="part15" style="left: 1847dp; top: 0dp; width: 123dp; height: 1125dp;">
-				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 4dp; width: 123dp; height: 30dp; line-height: 30dp;">16</div>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 40dp; width: 123dp; height: 16dp; line-height: 16dp;">Volume</div>
-				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 10dp; top: 56dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 180dp; width: 123dp; height: 16dp; line-height: 16dp;">Pan</div>
-				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 10dp; top: 196dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 320dp; width: 123dp; height: 16dp; line-height: 16dp;">Transp</div>
-				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 10dp; top: 336dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 460dp; width: 123dp; height: 16dp; line-height: 16dp;">Detune</div>
-				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 10dp; top: 476dp; width: 104dp; height: 104dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 600dp; width: 123dp; height: 16dp; line-height: 16dp;">LowKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 616dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 670dp; width: 123dp; height: 16dp; line-height: 16dp;">HighKey</div>
-				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 686dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 740dp; width: 123dp; height: 16dp; line-height: 16dp;">MidiCh</div>
-				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 756dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 810dp; width: 123dp; height: 16dp; line-height: 16dp;">Output</div>
-				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 826dp; width: 111dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 880dp; width: 123dp; height: 16dp; line-height: 16dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 36dp; top: 896dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 952dp; width: 123dp; height: 16dp; line-height: 16dp;">Kb2Mid</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Keyb To Midi" style="left: 36dp; top: 968dp; width: 52dp; height: 36dp;"/>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1024dp; width: 123dp; height: 16dp; line-height: 16dp;">Steal</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Note Steal Priority" style="left: 36dp; top: 1040dp; width: 52dp; height: 36dp;"/>
+			<div id="MultiPart15" class="jucePos multiStripe" data-model="part15" style="left: 1853dp; top: 0dp; width: 117dp; height: 1125dp;">
+				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">16</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 62dp; width: 117dp; height: 26dp; line-height: 26dp;">Volume</div>
+				<knob class="jucePos juceRotary knob1" param="Part Volume" style="left: 7dp; top: 88dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 207dp; width: 117dp; height: 26dp; line-height: 26dp;">Pan</div>
+				<knob class="jucePos juceRotary knob1" param="Panorama" style="left: 7dp; top: 233dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 352dp; width: 117dp; height: 26dp; line-height: 26dp;">Transpose</div>
+				<knob class="jucePos juceRotary knob1" param="Part Transpose" style="left: 7dp; top: 378dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 497dp; width: 117dp; height: 26dp; line-height: 26dp;">Detune</div>
+				<knob class="jucePos juceRotary knob1" param="Part Detune" style="left: 7dp; top: 523dp; width: 104dp; height: 104dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 642dp; width: 117dp; height: 26dp; line-height: 26dp;">Low Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part Low Key" style="left: 6dp; top: 668dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 717dp; width: 117dp; height: 26dp; line-height: 26dp;">High Key</div>
+				<combo class="jucePos txtMultiCombo" param="Part High Key" style="left: 6dp; top: 743dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 792dp; width: 117dp; height: 26dp; line-height: 26dp;">Midi Ch</div>
+				<combo class="jucePos txtMultiCombo" param="Part Midi Channel" style="left: 6dp; top: 818dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 867dp; width: 117dp; height: 26dp; line-height: 26dp;">Output</div>
+				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
+				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
+				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 		</div>
 		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton txt9" url="https://paypal.me/dsp56300" style="left: 150dp; top: 1542dp; width: 533dp; height: 45dp; line-height: 45dp;">To donate: https://paypal.me/dsp56300</div>

@@ -468,6 +468,12 @@
 	toggle-btn-39x102_checked-active: 0px 0px 39px 102px;
 	toggle-btn-39x102_default: 0px 0px 39px 102px;
 }
+@spritesheet panel-sheet
+{
+	panel-outer: 0px 0px 268px 175px;
+	panel-inner: 5px 5px 258px 165px;
+	src: panel.png;
+}
 .arp-btn-306x83
 {
 	decorator: image(arp-btn-306x83_default scale-none left top);
@@ -922,26 +928,32 @@
 }
 .txtMultiHdr
 {
-	color: #75a7fe;
-	font-size: 24.000000dp;
-	font-weight: bold;
+	color: #dadfef;
+	font-family: Bebas Neue;
+	font-size: 36.000000dp;
 	text-align: center;
+	text-transform: uppercase;
+	font-effect: shadow( 0dp 2dp black );
 }
 .txtMultiLbl
 {
-	color: #79aaff;
-	font-size: 15.000000dp;
+	color: #dadfef;
+	font-family: Bebas Neue;
+	font-size: 22.500000dp;
 	text-align: center;
+	text-transform: uppercase;
+	font-effect: shadow( 0dp 2dp black );
 }
 .txtMultiCombo
 {
 	color: #79aaff;
 	font-size: 20.000000dp;
 	text-align: center;
+	padding: 1dp 4dp 2dp 4dp;
 }
-.multiStripeAlt
+.multiStripe
 {
-	background-color: #ffffff0c;
+	decorator: ninepatch( panel-outer, panel-inner, 1.0 );
 }
 body
 {
