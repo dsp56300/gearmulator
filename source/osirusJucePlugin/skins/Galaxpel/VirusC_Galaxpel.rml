@@ -23,6 +23,7 @@
 		<button id="TabLfo" class="jucePos juceButton lfo-btn-306x83" isToggle="1" tabbutton="1" tabgroup="pages" style="left: 1026dp; top: 227dp; width: 306dp; height: 83dp;"/>
 		<button id="TabEffects" class="jucePos juceButton efcts-btn-306x83" isToggle="1" tabbutton="2" tabgroup="pages" style="left: 1333dp; top: 227dp; width: 306dp; height: 83dp;"/>
 		<button id="TabArp" class="jucePos juceButton arp-btn-306x83" isToggle="1" tabbutton="3" tabgroup="pages" style="left: 1640dp; top: 227dp; width: 306dp; height: 83dp;"/>
+		<button id="TabMulti" class="jucePos juceButton tab-btn-multi" isToggle="1" tabbutton="5" tabgroup="pages" style="left: 1949dp; top: 227dp; width: 306dp; height: 83dp;"/>
 		<button id="SelectPart" class="jucePos juceButton preset-selected-light-74x68" isToggle="1" style="left: 62dp; top: 324dp; width: 74dp; height: 68dp;"/>
 		<div id="PresetName" class="jucePos juceTextButton txt3" style="left: 157dp; top: 345dp; width: 237dp;">OvertureCK</div>
 		<div id="PresetPrev" class="jucePos juceTextButton txt4" style="left: 454dp; top: 343dp; width: 36dp; height: 30dp; line-height: 30dp;">&lt;</div>
@@ -489,6 +490,9 @@
 		</img>
 		<div id="container-patchmanager" class="jucePos" tabgroup="pages" tabpage="4" style="left: 724dp; top: 325dp; width: 1967dp; height: 1127dp;">
 			<template src="patchmanager"/>
+		</div>
+		<div id="page_multi" class="jucePos" tabgroup="pages" tabpage="5" style="left: 724dp; top: 325dp; width: 1970dp; height: 1125dp;">
+			<!-- Multi editor controls go here -->
 		</div>
 		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton txt9" url="https://paypal.me/dsp56300" style="left: 150dp; top: 1542dp; width: 533dp; height: 45dp; line-height: 45dp;">To donate: https://paypal.me/dsp56300</div>
 		<div id="VersionInfo" class="jucePos juceLabel txt10" style="left: 1290.77dp; top: 1542dp; width: 1400.62dp; height: 45dp; line-height: 45dp;">DSP56300 Emulator Version 0.8.15 - March 12 2042 12:34:56</div>

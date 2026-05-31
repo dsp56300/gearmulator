@@ -450,6 +450,16 @@
 	sync-38x38_checked-active: 0px 38px 38px 38px;
 	sync-38x38_default: 0px 38px 38px 38px;
 }
+@spritesheet tab-btn-multi
+{
+	tab-btn-multi_active: 0px 0px 306px 83px;
+	tab-btn-multi_checked: 0px 0px 306px 83px;
+	tab-btn-multi_checked-active: 0px 0px 306px 83px;
+	tab-btn-multi_checked-hover: 0px 0px 306px 83px;
+	tab-btn-multi_default: 0px 83px 306px 83px;
+	tab-btn-multi_hover: 0px 83px 306px 83px;
+	src: tab-btn-multi.png;
+}
 @spritesheet toggle-btn-39x102
 {
 	src: toggle-btn-39x102.png;
@@ -805,6 +815,26 @@
 .sync-38x38:checked:active
 {
 	decorator: image(sync-38x38_checked-active scale-none left top);
+}
+.tab-btn-multi
+{
+	decorator: image(tab-btn-multi_default scale-none left top);
+}
+.tab-btn-multi:checked
+{
+	decorator: image(tab-btn-multi_checked scale-none left top);
+}
+.tab-btn-multi:checked:active
+{
+	decorator: image(tab-btn-multi_checked-active scale-none left top);
+}
+.tab-btn-multi:checked:hover
+{
+	decorator: image(tab-btn-multi_checked-hover scale-none left top);
+}
+.tab-btn-multi:hover
+{
+	decorator: image(tab-btn-multi_hover scale-none left top);
 }
 .toggle-btn-39x102
 {
