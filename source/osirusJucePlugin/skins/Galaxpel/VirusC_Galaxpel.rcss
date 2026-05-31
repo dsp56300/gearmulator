@@ -920,6 +920,29 @@
 	font-size: 28.000000dp;
 	text-align: center;
 }
+.txtMultiHdr
+{
+	color: #75a7fe;
+	font-size: 24.000000dp;
+	font-weight: bold;
+	text-align: center;
+}
+.txtMultiLbl
+{
+	color: #79aaff;
+	font-size: 15.000000dp;
+	text-align: center;
+}
+.txtMultiCombo
+{
+	color: #79aaff;
+	font-size: 20.000000dp;
+	text-align: center;
+}
+.multiStripeAlt
+{
+	background-color: #ffffff0c;
+}
 body
 {
 	font-size: 28dp;
