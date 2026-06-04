@@ -22,6 +22,28 @@
 #include <sstream>
 #include <thread>
 #include <chrono>
+#include <functional>
+
+namespace
+{
+	// JUCE parameter gestures (begin/endChangeGesture inside setValueNotifyingHost) and other host-facing
+	// mutations must run on the message thread. The MCP HTTP server invokes tool handlers on its own
+	// worker thread, so route those mutations through here, blocking until the message thread has run them.
+	void runOnMessageThread(const std::function<void()>& _fn)
+	{
+		auto* mm = juce::MessageManager::getInstanceWithoutCreating();
+		if (!mm || mm->isThisTheMessageThread())
+		{
+			_fn();
+			return;
+		}
+		mm->callFunctionOnMessageThread([](void* _userData) -> void*
+		{
+			(*static_cast<const std::function<void()>*>(_userData))();
+			return nullptr;
+		}, const_cast<void*>(static_cast<const void*>(&_fn)));
+	}
+}
 
 namespace mcpServer
 {
@@ -224,7 +246,11 @@ namespace mcpServer
 				if (!param)
 					throw std::runtime_error("Parameter not found: " + name);
 
-				param->setUnnormalizedValueNotifyingHost(value, pluginLib::Parameter::Origin::Ui);
+				// Must run on the message thread (parameter gesture); otherwise JUCE asserts and the call hangs.
+				runOnMessageThread([&]
+				{
+					param->setUnnormalizedValueNotifyingHost(value, pluginLib::Parameter::Origin::Ui);
+				});
 
 				auto result = JsonValue::object();
 				result.set("success", JsonValue::fromBool(true));
@@ -258,30 +284,36 @@ namespace mcpServer
 
 				auto results = JsonValue::array();
 				const int count = parameters.getArraySize();
-				for (int i = 0; i < count; ++i)
+
+				// Parameter gestures must run on the message thread (see set_parameter); set the whole batch
+				// in one message-thread round-trip.
+				runOnMessageThread([&]
 				{
-					const auto entry = parameters.getArrayElement(i);
-					const auto name = entry.get("name").getString().toStdString();
-					const int value = entry.get("value").getInt();
-
-					auto* param = controller.getParameter(name, part);
-
-					auto r = JsonValue::object();
-					r.set("name", JsonValue::fromString(name));
-
-					if (param)
+					for (int i = 0; i < count; ++i)
 					{
-						param->setUnnormalizedValueNotifyingHost(value, pluginLib::Parameter::Origin::Ui);
-						r.set("success", JsonValue::fromBool(true));
-						r.set("value", JsonValue::fromInt(param->getUnnormalizedValue()));
+						const auto entry = parameters.getArrayElement(i);
+						const auto name = entry.get("name").getString().toStdString();
+						const int value = entry.get("value").getInt();
+
+						auto* param = controller.getParameter(name, part);
+
+						auto r = JsonValue::object();
+						r.set("name", JsonValue::fromString(name));
+
+						if (param)
+						{
+							param->setUnnormalizedValueNotifyingHost(value, pluginLib::Parameter::Origin::Ui);
+							r.set("success", JsonValue::fromBool(true));
+							r.set("value", JsonValue::fromInt(param->getUnnormalizedValue()));
+						}
+						else
+						{
+							r.set("success", JsonValue::fromBool(false));
+							r.set("error", JsonValue::fromString("Parameter not found"));
+						}
+						results.append(r);
 					}
-					else
-					{
-						r.set("success", JsonValue::fromBool(false));
-						r.set("error", JsonValue::fromString("Parameter not found"));
-					}
-					results.append(r);
-				}
+				});
 
 				return results;
 			};
