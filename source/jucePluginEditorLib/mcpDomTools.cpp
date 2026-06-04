@@ -791,6 +791,11 @@ namespace jucePluginEditorLib
 						juce::PNGImageFormat png;
 						if(auto stream = f.createOutputStream())
 						{
+							// FileOutputStream opens positioned at the END of an existing file, so each capture
+							// would otherwise be appended (the file accumulates PNGs and image viewers decode
+							// only the first/oldest one). Truncate first so we overwrite with just the latest.
+							stream->setPosition(0);
+							stream->truncate();
 							*success = png.writeImageToStream(_image, *stream);
 							stream->flush();
 						}
