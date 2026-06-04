@@ -78,7 +78,11 @@ endif()
 if(APPLE)
     # Universal or x86_64-only: scope flags to the x86_64 slice
     if(CMAKE_OSX_ARCHITECTURES MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86|X86|amd64|AMD64")
-        target_compile_options(juceRmlUi PRIVATE -Xarch_x86_64 -mssse3 -Xarch_x86_64 -msse4.1)
+        # Use SHELL: prefix so CMake doesn't deduplicate the second -Xarch_x86_64
+        # (which would leave -msse4.1 unwrapped, causing arm64 slice to fail).
+        target_compile_options(juceRmlUi PRIVATE
+            "SHELL:-Xarch_x86_64 -mssse3"
+            "SHELL:-Xarch_x86_64 -msse4.1")
     endif()
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|X86|amd64|AMD64|i[3-6]86")
     include(CheckCXXCompilerFlag)
