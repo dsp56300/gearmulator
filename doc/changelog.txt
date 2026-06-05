@@ -1,5 +1,13 @@
 Release Notes
 
+2.2.7:
+
+Framework:
+
+- [Fix] BUG-10214 Linux: VST2 plugins were named "lib<Name>" because the
+        shared object kept the default "lib" prefix. The prefix is now
+        cleared so the VST2 is named like the other formats.
+
 2.2.6:
 
 Framework:

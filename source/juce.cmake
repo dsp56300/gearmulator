@@ -200,7 +200,15 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	if(UNIX AND NOT APPLE)
 		target_link_libraries(${targetName} PUBLIC -static-libgcc -static-libstdc++)
 	endif()
-	
+
+	# On Linux, JUCE clears the default "lib" prefix for VST3/AAX but not for the
+	# VST2 shared object, leaving it named libXxx.so. Hosts derive the friendly
+	# plugin name from the filename, so it shows up as "libXxx". Clear the prefix
+	# so the VST2 is named Xxx.so like the other formats. (BUG-10214)
+	if(UNIX AND NOT APPLE AND TARGET ${targetName}_VST)
+		set_target_properties(${targetName}_VST PROPERTIES PREFIX "")
+	endif()
+
 	if(USE_VST2)
 		add_dependencies(PluginFormat_VST2 ${targetName}_VST)
 	endif()
