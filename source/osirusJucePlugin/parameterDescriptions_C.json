@@ -306,8 +306,8 @@
  		{"page":114, "index":32, "name":"Part Bank Change", "min":0, "max":29, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "index":33, "name":"Part Program Change", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":114, "index":34, "name":"Part Midi Channel", "min":0, "max":15, "isPublic":false, "isDiscrete":true, "isBool":false},
- 		{"page":114, "index":35, "name":"Part Low Key", "min":0, "max":127, "isPublic":false, "isDiscrete":true, "isBool":false},
- 		{"page":114, "index":36, "name":"Part High Key", "min":0, "max":127, "isPublic":false, "isDiscrete":true, "isBool":false},
+ 		{"page":114, "index":35, "name":"Part Low Key", "min":0, "max":127, "toText":"filterKeytrackBase", "isPublic":false, "isDiscrete":true, "isBool":false},
+ 		{"page":114, "index":36, "name":"Part High Key", "min":0, "max":127, "toText":"filterKeytrackBase", "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "index":37, "name":"Part Transpose", "min":0, "max":127, "toText":"signed", "isPublic":false, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":114, "index":38, "name":"Part Detune", "min":0, "max":127, "toText":"signed", "isPublic":false, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":114, "index":39, "name":"Part Volume", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
@@ -327,7 +327,7 @@
  		{"page":114, "index":74, "name":"Part Hold Pedal Enable", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":114, "index":75, "name":"Keyb To Midi", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":114, "index":76, "name":"Pure Tuning", "min":0, "max":127, "toText":"unsignedZero", "isPublic":true, "isDiscrete":false, "isBool":false},
- 		{"page":114, "index":77, "name":"Note Steal Priority", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
+ 		{"page":114, "index":77, "name":"Note Steal Priority", "min":0, "max":1, "toText":"lowHigh", "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "index":78, "name":"Part Prog Change Enable", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":114, "index":79, "name":"C_Undefined79", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":114, "index":80, "name":"C_Undefined80", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
@@ -496,6 +496,7 @@
 	],
  	"valuelists":
  	{
+		"lowHigh": [ "Low", "High" ],
  		"unsignedZero":
  		[
  			"0",	"1",	"2",	"3",	"4",	"5",	"6",	"7",	"8",	"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16",	"17",	"18",	"19",

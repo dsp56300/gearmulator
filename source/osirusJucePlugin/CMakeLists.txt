@@ -8,19 +8,15 @@ set(SOURCES
 	OsirusProcessor.cpp
 	OsirusProcessor.h
 
-	skins/Hoverland/VirusC_Hoverland.rml
-	skins/Hoverland/VirusC_Hoverland.rcss
 	skins/Galaxpel/VirusC_Galaxpel.rml
 	skins/Galaxpel/VirusC_Galaxpel.rcss
-	skins/Trancy/VirusC_Trancy.rml
-	skins/Trancy/VirusC_Trancy.rcss
 )
 
 SET(ASSETS "parameterDescriptions_C.json")
 
-addSkin("Osirus" "Hoverland" "skins/Hoverland" "VirusC_Hoverland.rml")
+# Hoverland and Trancy skins are kept on disk but no longer bundled in the
+# build; Galaxpel is the only shipped skin going forward.
 addSkin("Osirus" "Galaxpel" "skins/Galaxpel" "VirusC_Galaxpel.rml")
-addSkin("Osirus" "Trancy" "skins/Trancy" "VirusC_Trancy.rml")
 
 buildSkinHeader()
 

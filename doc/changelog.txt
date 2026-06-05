@@ -8,6 +8,14 @@ Framework:
         shared object kept the default "lib" prefix. The prefix is now
         cleared so the VST2 is named like the other formats.
 
+Osirus:
+
+- [New] Galaxpel skin: added a Multi editor page with per-part controls
+        for editing multi-mode patches.
+- [Change] Osirus now ships with the Galaxpel skin only. The Hoverland
+        and Trancy skins have been removed from the build. Existing users
+        of those skins will fall back to Galaxpel.
+
 2.2.6:
 
 Framework:

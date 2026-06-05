@@ -450,6 +450,16 @@
 	sync-38x38_checked-active: 0px 38px 38px 38px;
 	sync-38x38_default: 0px 38px 38px 38px;
 }
+@spritesheet tab-btn-multi
+{
+	tab-btn-multi_active: 0px 0px 306px 83px;
+	tab-btn-multi_checked: 0px 0px 306px 83px;
+	tab-btn-multi_checked-active: 0px 0px 306px 83px;
+	tab-btn-multi_checked-hover: 0px 0px 306px 83px;
+	tab-btn-multi_default: 0px 83px 306px 83px;
+	tab-btn-multi_hover: 0px 83px 306px 83px;
+	src: tab-btn-multi.png;
+}
 @spritesheet toggle-btn-39x102
 {
 	src: toggle-btn-39x102.png;
@@ -457,6 +467,12 @@
 	toggle-btn-39x102_checked: 0px 102px 39px 102px;
 	toggle-btn-39x102_checked-active: 0px 0px 39px 102px;
 	toggle-btn-39x102_default: 0px 0px 39px 102px;
+}
+@spritesheet panel-sheet
+{
+	panel-outer: 0px 0px 268px 175px;
+	panel-inner: 5px 5px 258px 165px;
+	src: panel.png;
 }
 .arp-btn-306x83
 {
@@ -806,6 +822,26 @@
 {
 	decorator: image(sync-38x38_checked-active scale-none left top);
 }
+.tab-btn-multi
+{
+	decorator: image(tab-btn-multi_default scale-none left top);
+}
+.tab-btn-multi:checked
+{
+	decorator: image(tab-btn-multi_checked scale-none left top);
+}
+.tab-btn-multi:checked:active
+{
+	decorator: image(tab-btn-multi_checked-active scale-none left top);
+}
+.tab-btn-multi:checked:hover
+{
+	decorator: image(tab-btn-multi_checked-hover scale-none left top);
+}
+.tab-btn-multi:hover
+{
+	decorator: image(tab-btn-multi_hover scale-none left top);
+}
 .toggle-btn-39x102
 {
 	decorator: image(toggle-btn-39x102_default scale-none left top);
@@ -889,6 +925,35 @@
 	font-family: Bebas Neue;
 	font-size: 28.000000dp;
 	text-align: center;
+}
+.txtMultiHdr
+{
+	color: #dadfef;
+	font-family: Bebas Neue;
+	font-size: 36.000000dp;
+	text-align: center;
+	text-transform: uppercase;
+	font-effect: shadow( 0dp 2dp black );
+}
+.txtMultiLbl
+{
+	color: #dadfef;
+	font-family: Bebas Neue;
+	font-size: 22.500000dp;
+	text-align: center;
+	text-transform: uppercase;
+	font-effect: shadow( 0dp 2dp black );
+}
+.txtMultiCombo
+{
+	color: #79aaff;
+	font-size: 20.000000dp;
+	text-align: center;
+	padding: 1dp 4dp 2dp 4dp;
+}
+.multiStripe
+{
+	decorator: ninepatch( panel-outer, panel-inner, 1.0 );
 }
 body
 {
