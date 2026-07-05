@@ -355,7 +355,7 @@ namespace pluginLib
 	void MidiLearnTranslator::subscribeToParameters()
 	{
 		const auto& mappings = m_preset.getMappings();
-		m_paramListenerIds.reserve(mappings.size());
+		m_paramListeners.reserve(mappings.size());
 
 		for (const auto& mapping : mappings)
 		{
@@ -380,23 +380,19 @@ namespace pluginLib
 					onParameterChanged(paramName, _param->getValue(), origin);
 				});
 
-			m_paramListenerIds.push_back(listenerId);
+			m_paramListeners.emplace_back(param, listenerId);
 		}
 	}
 
 	void MidiLearnTranslator::unsubscribeFromParameters()
 	{
-		const auto& mappings = m_preset.getMappings();
-		
-		// Remove listeners
-		for (size_t i = 0; i < m_paramListenerIds.size() && i < mappings.size(); ++i)
-		{
-			auto* param = m_controller.getParameter(mappings[i].paramName, 0);
-			if (param)
-				param->onValueChanged.removeListener(m_paramListenerIds[i]);
-		}
+		// Remove each listener from the exact parameter it was attached to. This is independent
+		// of the current mapping list, so it stays correct even if mappings were skipped during
+		// subscribe or the preset changed in between.
+		for (const auto& [param, listenerId] : m_paramListeners)
+			param->onValueChanged.removeListener(listenerId);
 
-		m_paramListenerIds.clear();
+		m_paramListeners.clear();
 	}
 
 	void MidiLearnTranslator::onParameterChanged(const std::string& _paramName, float _normalizedValue, Parameter::Origin _origin)

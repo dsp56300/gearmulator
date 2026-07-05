@@ -248,5 +248,10 @@ namespace pluginLib
 		// Host MIDI feedback queue (filled from parameter listeners, drained in processBlock)
 		std::mutex m_hostFeedbackMutex;
 		std::vector<synthLib::SMidiEvent> m_hostFeedbackQueue;
+
+		// Keeps the process out of macOS App Nap for the plugin's lifetime. Without this, macOS can demote the
+		// whole plugin-host process into a lower-power scheduling state once it decides the process isn't
+		// interactive, independent of any individual thread's own QoS/priority settings.
+		juce::ScopedLowPowerModeDisabler m_lowPowerModeDisabler;
 	};
 }

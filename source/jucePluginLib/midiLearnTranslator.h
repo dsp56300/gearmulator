@@ -82,8 +82,11 @@ namespace pluginLib
 		uint8_t m_learnInputSources = (1<<static_cast<uint8_t>(synthLib::MidiEventSource::Host)) | (1<<static_cast<uint8_t>(synthLib::MidiEventSource::Physical)); // Host | Physical - both enabled by default
 		static constexpr size_t kRequiredUniqueValues = 2; // Need 2 unique values (both directions)
 
-		// Parameter subscriptions for feedback
-		std::vector<baseLib::Event<Parameter*>::ListenerId> m_paramListenerIds;
+		// Parameter subscriptions for feedback. Store each listener together with the exact
+		// parameter it was attached to, so unsubscribe removes it from the right event
+		// regardless of mapping order or skipped mappings (previously indexed by mapping,
+		// which leaked listeners whenever any mapping was skipped during subscribe).
+		std::vector<std::pair<Parameter*, baseLib::Event<Parameter*>::ListenerId>> m_paramListeners;
 
 		// Cache for quick lookup: key = (channel << 8) | controller
 		std::unordered_map<uint32_t, size_t> m_midiToMappingIndex;
