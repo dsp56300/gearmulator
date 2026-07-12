@@ -167,6 +167,12 @@ namespace pluginLib
 
 	synthLib::Plugin& Processor::getPlugin()
 	{
+		// Serialize lazy device/plugin creation (see m_deviceCreateMutex). In steady state this is
+		// uncontended and the m_plugin check below returns immediately; only the very first call holds it
+		// for the whole boot, during which any concurrent caller correctly waits instead of creating a
+		// second device on top of the one still booting.
+		std::lock_guard<std::mutex> lock(m_deviceCreateMutex);
+
 		if(m_plugin)
 			return *m_plugin;
 

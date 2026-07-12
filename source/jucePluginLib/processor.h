@@ -244,6 +244,11 @@ namespace pluginLib
 
 	protected:
 		synthLib::DeviceError m_deviceError = synthLib::DeviceError::None;
+		// Guards the lazy creation of m_device/m_plugin in getPlugin(). Without it, two concurrent
+		// first-callers (e.g. the audio thread and an MCP request thread) both see m_plugin == null during
+		// the seconds-long device boot and both run m_device.reset(createDevice()), so the second reset
+		// destroys the device the first is still booting - a use-after-free that corrupts the heap.
+		std::mutex m_deviceCreateMutex;
 		std::unique_ptr<synthLib::Device> m_device;
 		std::unique_ptr<synthLib::Plugin> m_plugin;
 		std::vector<synthLib::SMidiEvent> m_midiOut;
