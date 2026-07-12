@@ -38,6 +38,7 @@ namespace mcpServer
 		void registerMidiTools();
 		void registerStateTools();
 		void registerDeviceInfoTools();
+		void registerAudioTools();
 
 		static synthLib::MidiEventSource parseMidiSource(const JsonValue& _params);
 

@@ -19,6 +19,7 @@
 #include "synthLib/os.h"
 #include "synthLib/midiBufferParser.h"
 #include "synthLib/romLoader.h"
+#include "synthLib/wavWriter.h"
 
 #include "dsp56kBase/fastmath.h"
 #include "dsp56kBase/logging.h"
@@ -65,6 +66,8 @@ namespace pluginLib
 
 	void Processor::addMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
+		audioCaptureCheckArm(_ev);
+
 		// Process through MIDI Learn translator first
 		if (_ev.source != synthLib::MidiEventSource::Device)
 		{
@@ -632,6 +635,17 @@ namespace pluginLib
 		getPlugin().setBlockSize(samplesPerBlock);
 
 		updateLatencySamples();
+
+		// (Re)allocate the audio-capture buffer for this sample rate, hard-capped so a capture that is never
+		// stopped cannot grow unbounded. Done here (no audio running) so the audio thread never allocates.
+		{
+			constexpr double captureMaxSeconds = 30.0;
+			m_captureState.store(CaptureState::Idle, std::memory_order_release);
+			m_capturePos.store(0, std::memory_order_relaxed);
+			m_captureMaxFrames.store(0, std::memory_order_relaxed);
+			m_captureBuffer.setSize(g_captureChannels, static_cast<int>(captureMaxSeconds * sampleRate), false, true, true);
+			m_captureBuffer.clear();
+		}
 	}
 
 	void Processor::releaseResources()
@@ -819,6 +833,8 @@ namespace pluginLib
 
 		applyOutputGain(outputs, numSamples);
 
+		captureAudioBlock(buffer, numSamples);
+
 		m_midiOut.clear();
 		getPlugin().getMidiOut(m_midiOut);
 
@@ -843,6 +859,131 @@ namespace pluginLib
 			}
 			m_hostFeedbackQueue.clear();
 		}
+	}
+
+	namespace
+	{
+		// Interleave the float capture to 16-bit PCM (clamped to [-1,1]) and write it with the shared
+		// synthLib::WavWriter rather than hand-rolling a RIFF header.
+		void writeWav16(const std::string& _path, const juce::AudioBuffer<float>& _buffer, const int _frames, const int _channels, const double _sampleRate)
+		{
+			std::vector<int16_t> pcm;
+			pcm.reserve(static_cast<size_t>(_frames) * static_cast<size_t>(_channels));
+			for(int i = 0; i < _frames; ++i)
+			{
+				for(int ch = 0; ch < _channels; ++ch)
+				{
+					const float s = std::max(-1.0f, std::min(1.0f, _buffer.getReadPointer(ch)[i]));
+					pcm.push_back(static_cast<int16_t>(s * 32767.0f));
+				}
+			}
+			synthLib::WavWriter().write(_path, 16, false, _channels, static_cast<int>(_sampleRate), pcm);
+		}
+	}
+
+	void Processor::audioCaptureCheckArm(const synthLib::SMidiEvent& _ev)
+	{
+		// A played note-on (not a device echo) starts a pending (armed) capture.
+		if(m_captureState.load(std::memory_order_acquire) != CaptureState::Armed)
+			return;
+		if(_ev.source == synthLib::MidiEventSource::Device)
+			return;
+		if((_ev.a & 0xf0) != synthLib::M_NOTEON || _ev.c == 0)
+			return;
+		m_captureStarted.store(true, std::memory_order_relaxed);
+		m_captureState.store(CaptureState::Recording, std::memory_order_release);
+	}
+
+	void Processor::captureAudioBlock(const juce::AudioBuffer<float>& _buffer, const int _numSamples)
+	{
+		if(m_captureState.load(std::memory_order_acquire) != CaptureState::Recording)
+			return;
+
+		const int capacity = m_captureBuffer.getNumSamples();
+		const int limit = std::min(m_captureMaxFrames.load(std::memory_order_relaxed), capacity);
+		const int pos = m_capturePos.load(std::memory_order_relaxed);
+		const int room = limit - pos;
+		if(room <= 0)
+		{
+			m_captureState.store(CaptureState::Done, std::memory_order_release);
+			return;
+		}
+
+		const int n = std::min(_numSamples, room);
+		const int srcChannels = _buffer.getNumChannels();
+		for(int ch = 0; ch < m_captureBuffer.getNumChannels(); ++ch)
+		{
+			if(srcChannels <= 0)
+			{
+				m_captureBuffer.clear(ch, pos, n);
+				continue;
+			}
+			const int srcCh = ch < srcChannels ? ch : srcChannels - 1;
+			m_captureBuffer.copyFrom(ch, pos, _buffer, srcCh, 0, n);
+		}
+
+		// Publish pos only after the samples are written, so a concurrent stopAudioCapture reads a count whose
+		// data is fully present.
+		m_capturePos.store(pos + n, std::memory_order_release);
+		if(pos + n >= limit)
+			m_captureState.store(CaptureState::Done, std::memory_order_release);
+	}
+
+	void Processor::startAudioCapture(const uint32_t _maxFrames, const bool _armOnNote)
+	{
+		// Halt any in-flight capture first; the audio thread stops touching the buffer once state != Recording.
+		m_captureState.store(CaptureState::Idle, std::memory_order_release);
+		const int capacity = m_captureBuffer.getNumSamples();
+		const int frames = _maxFrames == 0 ? capacity : std::min(static_cast<int>(_maxFrames), capacity);
+		m_captureMaxFrames.store(frames, std::memory_order_relaxed);
+		m_captureStarted.store(!_armOnNote, std::memory_order_relaxed);
+		m_capturePos.store(0, std::memory_order_release);
+		m_captureState.store(_armOnNote ? CaptureState::Armed : CaptureState::Recording, std::memory_order_release);
+	}
+
+	bool Processor::isAudioCaptureActive() const
+	{
+		const auto s = m_captureState.load(std::memory_order_acquire);
+		return s == CaptureState::Armed || s == CaptureState::Recording;
+	}
+
+	Processor::AudioCaptureResult Processor::stopAudioCapture(const std::string& _wavPath)
+	{
+		// Stop the audio thread from writing further, then read what was captured (the region [0, pos) is stable
+		// once we observe pos, since the audio thread only ever appends).
+		m_captureState.store(CaptureState::Done, std::memory_order_release);
+
+		AudioCaptureResult r;
+		const int channels = m_captureBuffer.getNumChannels();
+		const int frames = std::max(0, std::min(m_capturePos.load(std::memory_order_acquire), m_captureBuffer.getNumSamples()));
+		r.valid = true;
+		r.started = m_captureStarted.load(std::memory_order_relaxed);
+		r.frames = static_cast<uint32_t>(frames);
+		r.channels = static_cast<uint32_t>(channels);
+		r.sampleRate = getSampleRate();
+
+		double sumSquares = 0.0;
+		float peak = 0.0f;
+		for(int ch = 0; ch < channels; ++ch)
+		{
+			const float* data = m_captureBuffer.getReadPointer(ch);
+			for(int i = 0; i < frames; ++i)
+			{
+				const float a = std::fabs(data[i]);
+				if(a > peak)
+					peak = a;
+				sumSquares += static_cast<double>(data[i]) * data[i];
+			}
+		}
+		const double sampleTotal = static_cast<double>(frames) * channels;
+		r.peak = peak;
+		r.rms = sampleTotal > 0.0 ? static_cast<float>(std::sqrt(sumSquares / sampleTotal)) : 0.0f;
+
+		if(frames > 0 && !_wavPath.empty())
+			writeWav16(_wavPath, m_captureBuffer, frames, channels, r.sampleRate);
+
+		m_captureState.store(CaptureState::Idle, std::memory_order_release);
+		return r;
 	}
 
 	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)

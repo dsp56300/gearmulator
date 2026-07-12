@@ -2,6 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include <atomic>
 #include <mutex>
 
 #include "bypassBuffer.h"
@@ -196,6 +197,29 @@ namespace pluginLib
 		void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
 		void processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages) override;
 
+	public:
+		// ---- Audio capture (for automated audio verification, driven by the MCP server) ----
+		struct AudioCaptureResult
+		{
+			bool valid = false;			// a capture buffer existed
+			bool started = false;		// recording actually began (a note arrived, if armed on note)
+			uint32_t frames = 0;		// number of captured frames
+			uint32_t channels = 0;
+			double sampleRate = 0.0;
+			float peak = 0.0f;			// absolute peak across the capture (≈0 means the device was silent)
+			float rms = 0.0f;
+		};
+
+		// Record the main stereo output into a pre-allocated, hard-capped buffer. _maxFrames is clamped to the
+		// capacity (~30s, allocated in prepareToPlay) so a capture that is never stopped cannot run unbounded.
+		// If _armOnNote, recording begins on the next played note-on instead of immediately.
+		void startAudioCapture(uint32_t _maxFrames, bool _armOnNote);
+		// Stop capture, write the captured audio to a 16-bit WAV at _wavPath, and return level stats.
+		AudioCaptureResult stopAudioCapture(const std::string& _wavPath);
+		bool isAudioCaptureActive() const;
+		uint32_t getAudioCaptureCapacityFrames() const { return static_cast<uint32_t>(m_captureBuffer.getNumSamples()); }
+
+	private:
 #if !SYNTHLIB_DEMO_MODE
 		void setState(const void *_data, size_t _sizeInBytes);
 #endif
@@ -248,5 +272,17 @@ namespace pluginLib
 		// Host MIDI feedback queue (filled from parameter listeners, drained in processBlock)
 		std::mutex m_hostFeedbackMutex;
 		std::vector<synthLib::SMidiEvent> m_hostFeedbackQueue;
+
+		// ---- Audio capture state (see startAudioCapture). The buffer is allocated once per sample rate in
+		// prepareToPlay and only written by the audio thread while Recording, so start/stop are lock-free. ----
+		enum class CaptureState { Idle, Armed, Recording, Done };
+		void captureAudioBlock(const juce::AudioBuffer<float>& _buffer, int _numSamples);
+		void audioCaptureCheckArm(const synthLib::SMidiEvent& _ev);
+		static constexpr int g_captureChannels = 2;
+		juce::AudioBuffer<float> m_captureBuffer;
+		std::atomic<CaptureState> m_captureState{CaptureState::Idle};
+		std::atomic<int> m_capturePos{0};
+		std::atomic<int> m_captureMaxFrames{0};
+		std::atomic<bool> m_captureStarted{false};
 	};
 }
