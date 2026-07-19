@@ -85,7 +85,7 @@ namespace virusLib
 		MIDI_ARPEGGIATOR_SEND = 96,
 		MULTI_PROGRAM_CHANGE = 105,
 		MIDI_CLOCK_RX = 106,
-		UNK6d = 109,
+		DSP_CLOCK_ADJUSTMENT = 109,		// DSP PLL clock trim in percent (100=$64 default, 121=$79 max), confirmed live
 		DELAY_REVERB_MODE = 112,
 		EFFECT_SEND = 113,
 		DELAY_TIME = 114,
