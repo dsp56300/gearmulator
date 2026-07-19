@@ -72,7 +72,7 @@ namespace virusLib
 		PART_MIDI_VOLUME_ENABLE = 73,
 		PART_HOLD_PEDAL_ENABLE = 74,
 		PART_KEYB_TO_MIDI = 75,
-		UNK76 = 76,
+		PURE_TUNING = 76,		// Global Tuning page's "Pure Tuning" (Tempered/Natural/Pure), confirmed live
 		PART_NOTE_STEAL_PRIO = 77,
 		PART_PROG_CHANGE_ENABLE = 78,
 
