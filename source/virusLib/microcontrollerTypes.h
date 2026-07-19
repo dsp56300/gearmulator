@@ -72,7 +72,11 @@ namespace virusLib
 		PART_MIDI_VOLUME_ENABLE = 73,
 		PART_HOLD_PEDAL_ENABLE = 74,
 		PART_KEYB_TO_MIDI = 75,
-		UNK76 = 76,
+		PURE_TUNING = 76,		// Global Tuning page's "Pure Tuning" (Tempered/Natural/Pure), confirmed live via a
+								// chromatic-sweep pitch measurement against the real DSP56300 core (single-note
+								// sweeps track flat 12-TET regardless of this value; its own effect on pitch is a
+								// small ~1-2 cent shift, consistent with the manual describing a subtle multi-note
+								// consonance adjustment rather than a scale retuning)
 		PART_NOTE_STEAL_PRIO = 77,
 		PART_PROG_CHANGE_ENABLE = 78,
 
