@@ -11,6 +11,8 @@ Framework:
 - [New] macOS: setting disableMetalRenderer to 1 in the plugin config
         file makes the UI render with OpenGL instead of Metal. This
         helps to find out whether a rendering issue is Metal specific.
+- [Fix] EMU-80 The MCP screenshot tool now works with the Metal renderer
+        on macOS. Previously only the OpenGL path could capture.
 
 2.2.7:
 
