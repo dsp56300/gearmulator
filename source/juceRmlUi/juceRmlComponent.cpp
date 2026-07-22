@@ -452,7 +452,21 @@ namespace juceRmlUi
 
 		m_renderProxy->executeRenderFunctions();
 
-		metal->EndFrame();
+		if (m_screenshotState == ScreenshotState::RequestScreenshot)
+		{
+			m_screenshot = juce::Image(juce::Image::ARGB, size.x, size.y, true);
+
+			const juce::Image::BitmapData data(m_screenshot, juce::Image::BitmapData::writeOnly);
+
+			if (metal->EndFrame(data.data, static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y), static_cast<uint32_t>(data.lineStride)))
+				m_screenshotState = ScreenshotState::ScreenshotReady;
+			else
+				m_screenshotState = ScreenshotState::NoScreenshot;	// capture failed, do not block future requests
+		}
+		else
+		{
+			metal->EndFrame();
+		}
 
 		m_renderDone = true;
 	}

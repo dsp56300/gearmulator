@@ -1322,7 +1322,7 @@ void RenderInterface_Metal::BeginFrame(void* _drawable)
 	m_impl->stencilRef = 1;
 }
 
-void RenderInterface_Metal::EndFrame()
+bool RenderInterface_Metal::EndFrame(uint8_t* _screenshotDest, const uint32_t _destWidth, const uint32_t _destHeight, const uint32_t _destPitch)
 {
 	// Resolve MSAA top layer to postprocess primary
 	const auto& topLayer = m_impl->renderLayers->GetTopLayer();
@@ -1354,11 +1354,59 @@ void RenderInterface_Metal::EndFrame()
 
 	m_impl->renderLayers->EndFrame();
 
+	// Screenshot readback: blit the finished drawable into a CPU-visible buffer
+	// as part of this command buffer, before commit. The layer is created with
+	// framebufferOnly = NO to allow this.
+	id<MTLBuffer> readback = nil;
+	NSUInteger copyW = 0, copyH = 0;
+
+	if (_screenshotDest && _destWidth && _destHeight)
+	{
+		id<MTLTexture> tex = m_impl->currentDrawable.texture;
+		copyW = Rml::Math::Min<NSUInteger>(tex.width, _destWidth);
+		copyH = Rml::Math::Min<NSUInteger>(tex.height, _destHeight);
+
+		readback = [m_impl->device newBufferWithLength:copyW * 4 * copyH options:MTLResourceStorageModeShared];
+
+		if (readback)
+		{
+			id<MTLBlitCommandEncoder> blit = [m_impl->commandBuffer blitCommandEncoder];
+			[blit copyFromTexture:tex
+					  sourceSlice:0
+					  sourceLevel:0
+					 sourceOrigin:MTLOriginMake(0, 0, 0)
+					   sourceSize:MTLSizeMake(copyW, copyH, 1)
+						 toBuffer:readback
+				destinationOffset:0
+		   destinationBytesPerRow:copyW * 4
+		 destinationBytesPerImage:copyW * 4 * copyH];
+			[blit endEncoding];
+		}
+	}
+
 	[m_impl->commandBuffer presentDrawable:m_impl->currentDrawable];
 	[m_impl->commandBuffer commit];
 
+	bool captured = false;
+
+	if (readback)
+	{
+		// Synchronous wait is fine here, screenshots are not latency sensitive
+		[m_impl->commandBuffer waitUntilCompleted];
+
+		// Metal's origin is top-left, same as juce — no vertical flip (unlike GL)
+		const auto* src = static_cast<const uint8_t*>(readback.contents);
+		for (NSUInteger y = 0; y < copyH; ++y)
+			memcpy(_screenshotDest + y * _destPitch, src + y * copyW * 4, copyW * 4);
+
+		[readback release];
+		captured = true;
+	}
+
 	m_impl->commandBuffer = nil;
 	m_impl->currentDrawable = nil;
+
+	return captured;
 }
 
 void RenderInterface_Metal::Clear()

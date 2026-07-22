@@ -22,7 +22,10 @@ public:
 	// _drawable is id<CAMetalDrawable>, passed as void* for C++ compatibility
 	void BeginFrame(void* _drawable);
 	// Draws the result to the drawable and commits.
-	void EndFrame();
+	// If _screenshotDest is non-null, the finished frame is copied into it
+	// synchronously before returning (BGRA8, top-left origin, _destPitch bytes
+	// per row). Returns true if the screenshot was captured.
+	bool EndFrame(uint8_t* _screenshotDest = nullptr, uint32_t _destWidth = 0, uint32_t _destHeight = 0, uint32_t _destPitch = 0);
 
 	// Optional, can be used to clear the active render target.
 	void Clear();
