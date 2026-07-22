@@ -8,6 +8,9 @@ Framework:
         Metal renderer and could break the rendering of the whole UI,
         leaving most of it black and seemingly frozen. The gradient
         parameters were uploaded to the GPU with a wrong memory layout.
+- [New] macOS: setting disableMetalRenderer to 1 in the plugin config
+        file makes the UI render with OpenGL instead of Metal. This
+        helps to find out whether a rendering issue is Metal specific.
 
 2.2.7:
 

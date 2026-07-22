@@ -16,6 +16,9 @@ namespace juceRmlUi
 	{
 		int refreshRateLimitHz = -1;
 		SoftwareRendererMode forceSoftwareRenderer = SoftwareRendererMode::Auto;
+		// macOS only: Metal is used whenever it is supported. Set this to fall back to OpenGL instead,
+		// which is useful to find out whether a rendering problem is specific to the Metal backend.
+		bool disableMetalRenderer = false;
 		std::vector<std::string> additionalTemplateFiles;
 	};
 }

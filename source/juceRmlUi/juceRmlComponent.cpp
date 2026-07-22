@@ -95,7 +95,9 @@ namespace juceRmlUi
 		else
 		{
 #ifdef RMLUI_METAL_RENDERER
-			if (RmlMetal::IsSupported())
+			// disableMetalRenderer falls back to OpenGL below, to tell Metal specific rendering
+			// problems apart from general ones
+			if (RmlMetal::IsSupported() && !_config.disableMetalRenderer)
 			{
 					m_metalContext = std::make_unique<MetalContext>();
 				m_metalContext->setListener(this);

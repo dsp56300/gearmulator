@@ -834,6 +834,8 @@ namespace jucePluginEditorLib
 		if (software >= 0)
 			config.forceSoftwareRenderer = software > 0 ? juceRmlUi::SoftwareRendererMode::ForceOn : juceRmlUi::SoftwareRendererMode::ForceOff;
 
+		config.disableMetalRenderer = m_processor.getConfig().getBoolValue("disableMetalRenderer", false);
+
 		auto* comp = new juceRmlUi::RmlComponent(
 			m_rmlInterfaces, *this, _rmlFile, 1.0f
 			, [this](juceRmlUi::RmlComponent& _rmlComponent, Rml::Context& _context)
