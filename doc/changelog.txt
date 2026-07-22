@@ -1,5 +1,14 @@
 Release Notes
 
+2.2.9:
+
+Framework:
+
+- [Fix] macOS: gradient decorators were rendered incorrectly with the
+        Metal renderer and could break the rendering of the whole UI,
+        leaving most of it black and seemingly frozen. The gradient
+        parameters were uploaded to the GPU with a wrong memory layout.
+
 2.2.7:
 
 Framework:

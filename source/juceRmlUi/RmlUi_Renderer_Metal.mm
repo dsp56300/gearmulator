@@ -2048,17 +2048,30 @@ void RenderInterface_Metal::RenderShader(Rml::CompiledShaderHandle _shaderHandle
 		vertUniforms.transform = m_impl->transform;
 		[m_impl->renderEncoder setVertexBytes:&vertUniforms length:sizeof(vertUniforms) atIndex:1];
 
-		// Fragment uniforms — pack gradient data
-		struct {
-			int func;
-			int padding1[3];
-			float px, py;
-			float vx, vy;
-			int num_stops;
-			int padding2[3];
-			float stop_positions[MAX_NUM_STOPS];
-			float stop_colors[MAX_NUM_STOPS * 4]; // float4 per stop
-		} gradUniforms = {};
+		// Fragment uniforms — pack gradient data.
+		// The layout has to match struct GradientUniforms in the shader source above exactly. MSL aligns
+		// each member to the alignment of its own type, so "float2 p" only needs 8 byte alignment while
+		// "float4 stop_colors[]" needs 16. Padding func out to 16 bytes shifts everything behind it,
+		// which makes the shader read a garbage num_stops and then index stop_colors out of bounds.
+		struct GradientUniforms
+		{
+			int func;								// 0
+			int padding1;							// 4
+			float px, py;							// 8
+			float vx, vy;							// 16
+			int num_stops;							// 24
+			float stop_positions[MAX_NUM_STOPS];	// 28
+			float padding2;							// 92, stop_colors is float4 and must start 16 byte aligned
+			float stop_colors[MAX_NUM_STOPS * 4];	// 96
+		};
+
+		static_assert(offsetof(GradientUniforms, px) == 8, "gradient uniform layout differs from the shader");
+		static_assert(offsetof(GradientUniforms, vx) == 16, "gradient uniform layout differs from the shader");
+		static_assert(offsetof(GradientUniforms, num_stops) == 24, "gradient uniform layout differs from the shader");
+		static_assert(offsetof(GradientUniforms, stop_positions) == 28, "gradient uniform layout differs from the shader");
+		static_assert(offsetof(GradientUniforms, stop_colors) == 96, "gradient uniform layout differs from the shader");
+
+		GradientUniforms gradUniforms = {};
 
 		gradUniforms.func = static_cast<int>(shader.gradient_function);
 		gradUniforms.px = shader.p.x;
