@@ -19,3 +19,6 @@
 [submodule "source/3rdparty/freetype"]
 	path = source/3rdparty/freetype
 	url = https://github.com/freetype/freetype.git
+[submodule "source/3rdparty/lunasvg"]
+	path = source/3rdparty/lunasvg
+	url = https://github.com/sammycage/lunasvg.git

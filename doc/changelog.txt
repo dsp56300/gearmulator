@@ -13,6 +13,8 @@ Framework:
         helps to find out whether a rendering issue is Metal specific.
 - [Fix] EMU-80 The MCP screenshot tool now works with the Metal renderer
         on macOS. Previously only the OpenGL path could capture.
+- [New] Skins can now use SVG images via the RmlUi SVG plugin (svg
+        element and svg() decorator), rendered with LunaSVG.
 
 2.2.7:
 

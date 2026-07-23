@@ -8,6 +8,7 @@ macro(addSkin productName skinName skinFolder skinRootFile)
 		"${skinFolder}/*.rcss"
 		"${skinFolder}/*.ttf"
 		"${skinFolder}/*.lua"
+		"${skinFolder}/*.svg"
 	)
 	
 #	message(STATUS "Skin files for ${skinFolder}: ${SKIN_FILES}")
