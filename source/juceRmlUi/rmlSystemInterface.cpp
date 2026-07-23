@@ -1,6 +1,7 @@
 #include "rmlSystemInterface.h"
 
 #include <cassert>
+#include <cstdio>
 
 #include "baseLib/logging.h"
 
@@ -61,6 +62,14 @@ namespace juceRmlUi
 
 		if (m_recordingLog)
 			m_logEntries.emplace_back(_type, _message);
+
+		// Warnings and errors (e.g. Lua script errors) also go to stdout so they
+		// are visible in headless / captured-output runs, not only the LOG sink.
+		if (_type == Rml::Log::LT_ERROR || _type == Rml::Log::LT_ASSERT || _type == Rml::Log::LT_WARNING)
+		{
+			std::printf("RML %s: %s\n", _type == Rml::Log::LT_WARNING ? "WARNING" : "ERROR", _message.c_str());
+			std::fflush(stdout);
+		}
 
 		if (_type == Rml::Log::LT_ASSERT || _type == Rml::Log::LT_ERROR)
 			return Rml::SystemInterface::LogMessage(_type, _message);
