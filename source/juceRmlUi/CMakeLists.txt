@@ -19,6 +19,7 @@ set(SOURCES
 	rmlElement.cpp rmlElement.h
 	rmlElemButton.cpp rmlElemButton.h
 	rmlElemCanvas.cpp rmlElemCanvas.h
+	rmlLuaCanvas.cpp rmlLuaCanvas.h
 	rmlElemKnob.cpp rmlElemKnob.h
 	rmlElemList.cpp rmlElemList.h
 	rmlElemListEntry.cpp rmlElemListEntry.h

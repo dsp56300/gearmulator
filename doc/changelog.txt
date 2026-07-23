@@ -15,6 +15,10 @@ Framework:
         on macOS. Previously only the OpenGL path could capture.
 - [New] Skins can now use SVG images via the RmlUi SVG plugin (svg
         element and svg() decorator), rendered with LunaSVG.
+- [New] Lua binding for the canvas element with an HTML5-compatible 2D
+        drawing context (fillStyle, strokeStyle, lineWidth, fillRect,
+        strokeRect, beginPath, moveTo, lineTo, rect, arc, ellipse, fill,
+        stroke). Skin scripts can draw custom graphics on a canvas.
 
 2.2.7:
 
