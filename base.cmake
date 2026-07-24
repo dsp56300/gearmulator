@@ -56,8 +56,18 @@ elseif(APPLE)
 	    "-framework OpenGL"
 	    "-framework QuartzCore"  	
 	)
-	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector")
-	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector")
+	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector -g")
+	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector -g")
+
+	# Ship a dSYM for Release so crashes in released macOS builds can be symbolized (a tester's Live crash
+	# report could only be read as raw offsets because no dSYM existed). The -g above is what makes the Xcode
+	# generator turn on GCC_GENERATE_DEBUGGING_SYMBOLS - it stays off for Release otherwise, and setting that
+	# attribute directly is a no-op because CMake overrides it per target. dwarf-with-dsym then makes Xcode run
+	# dsymutil to emit a <product>.dSYM whose UUID matches the binary. The shipped binary keeps the same
+	# optimized code; the debug info lives only in the .dSYM. Release only. Only the Xcode generator (every
+	# macOS release build, see scripts/generate.cmake) honours the attribute; Makefile/Ninja dev builds just
+	# get inline DWARF from -g.
+	set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT[variant=Release] "dwarf-with-dsym")
 else()
 	message("CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
 	message("CMAKE_HOST_SYSTEM_PROCESSOR: " ${CMAKE_HOST_SYSTEM_PROCESSOR})
