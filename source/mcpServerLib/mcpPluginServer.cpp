@@ -19,6 +19,7 @@
 #include <unistd.h>
 #endif
 
+#include <cstdlib>
 #include <sstream>
 #include <thread>
 #include <chrono>
@@ -727,6 +728,45 @@ namespace mcpServer
 				result.set("wantsMidiInput", JsonValue::fromBool(props.wantsMidiInput));
 				result.set("producesMidiOut", JsonValue::fromBool(props.producesMidiOut));
 				result.set("mcpPort", JsonValue::fromInt(m_server.getPort()));
+				result.set("pid", JsonValue::fromInt(static_cast<int>(
+#ifdef _WIN32
+					GetCurrentProcessId()
+#else
+					getpid()
+#endif
+				)));
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
+
+		// exit - terminate this instance's host process (only this one)
+		{
+			ToolDef tool;
+			tool.name = "exit";
+			tool.description = "Cleanly terminate THIS plugin instance's host process (e.g. the vsthost that loaded it). Only this process exits, so it is safe for tearing down one worktree's test host without affecting other parallel instances. WARNING: this terminates the whole host process - in a real DAW it would close the DAW.";
+			tool.handler = [this](const JsonValue&) -> JsonValue
+			{
+				// Remove our entry from the shared discovery file before exiting
+				DiscoveryFile::unregisterInstance(m_server.getPort());
+
+				// Terminate slightly deferred so the HTTP response reaches the client first.
+				std::thread([]
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(250));
+#ifdef _WIN32
+					// std::_Exit/ExitProcess can deadlock on the loader lock while tearing
+					// down the plugin's DSP/audio threads and DLLs, leaving an un-killable
+					// zombie. TerminateProcess is immediate and cannot hang.
+					TerminateProcess(GetCurrentProcess(), 0);
+#else
+					std::_Exit(0);
+#endif
+				}).detach();
+
+				auto result = JsonValue::object();
+				result.set("success", JsonValue::fromBool(true));
+				result.set("message", JsonValue::fromString("Terminating host process"));
 				return result;
 			};
 			m_server.registerTool(std::move(tool));

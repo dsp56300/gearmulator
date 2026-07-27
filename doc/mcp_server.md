@@ -282,11 +282,19 @@ Returns `valid`, `hostSamplerate`, `dspClockPercent`, `dspClockHz`, `canModifyDs
 
 #### `get_plugin_info`
 
-Get plugin information: name, vendor, 4CC identifier, MIDI capabilities, and MCP server port.
+Get plugin information: name, vendor, 4CC identifier, MIDI capabilities, MCP server port, and host process id.
 
 No parameters required.
 
-Returns `name`, `vendor`, `plugin4CC`, `isSynth`, `wantsMidiInput`, `producesMidiOut`, `mcpPort`.
+Returns `name`, `vendor`, `plugin4CC`, `isSynth`, `wantsMidiInput`, `producesMidiOut`, `mcpPort`, `pid`. The `pid` (host process id) and `mcpPort` let a client confirm it is talking to a specific instance — useful when several instances run in parallel and share the discovery file.
+
+#### `exit`
+
+Cleanly terminate **this** plugin instance's host process. Only this process exits, so it is safe for tearing down one instance without affecting other instances running in parallel. The server first removes its own entry from the discovery file, then terminates the host process shortly after (so the response is delivered first).
+
+No parameters required.
+
+> **Warning:** this terminates the entire host process. That is exactly what you want for a dedicated test host (e.g. VSTHost), but in a full DAW it would close the DAW.
 
 ---
 
