@@ -56,13 +56,16 @@ elseif(APPLE)
 	    "-framework OpenGL"
 	    "-framework QuartzCore"  	
 	)
-	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector -g")
-	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector -g")
+	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector -g -gline-tables-only")
+	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector -g -gline-tables-only")
 
 	# Ship a dSYM for Release so crashes in released macOS builds can be symbolized (a tester's Live crash
 	# report could only be read as raw offsets because no dSYM existed). The -g above is what makes the Xcode
 	# generator turn on GCC_GENERATE_DEBUGGING_SYMBOLS - it stays off for Release otherwise, and setting that
-	# attribute directly is a no-op because CMake overrides it per target. dwarf-with-dsym then makes Xcode run
+	# attribute directly is a no-op because CMake overrides it per target. The -gline-tables-only right after
+	# the -g wins as the actual debug level (clang honours the last -g flag), so we emit only line tables -
+	# enough to symbolize a crash backtrace (function + file:line) but far smaller than full -g, which slashes
+	# the dsymutil and LTO-link time on the release build. dwarf-with-dsym then makes Xcode run
 	# dsymutil to emit a <product>.dSYM whose UUID matches the binary. The shipped binary keeps the same
 	# optimized code; the debug info lives only in the .dSYM. Release only. Only the Xcode generator (every
 	# macOS release build, see scripts/generate.cmake) honours the attribute; Makefile/Ninja dev builds just
