@@ -4,6 +4,13 @@ Release Notes
 
 Framework:
 
+- [Fix] macOS: emulation threads could lose their realtime status and end
+        up being scheduled like background work, causing spikes and
+        dropouts. The realtime scheduling parameters were computed with
+        wrong units (microseconds instead of Mach time units) and an
+        invalid period, and thread QOS classes were never applied.
+- [Fix] Linux: thread priorities were never applied due to a bug in the
+        priority mapping.
 - [Fix] macOS: gradient decorators were rendered incorrectly with the
         Metal renderer and could break the rendering of the whole UI,
         leaving most of it black and seemingly frozen. The gradient
