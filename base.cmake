@@ -96,6 +96,15 @@ else()
 	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -Ofast -fno-stack-protector")
 	string(APPEND CMAKE_CXX_FLAGS_DEBUG " -rdynamic")
 
+	# Link the C++ runtime statically so that shipped binaries do not require the
+	# libstdc++ of the machine they happened to be built on. Without this a binary
+	# built with the toolchain PPA demands a GLIBCXX version that even current
+	# distributions do not ship, for example GLIBCXX_3.4.30 needs gcc 12 and so
+	# fails on Ubuntu 22.04.
+	# Set globally on purpose: this used to be repeated per target and had already
+	# been forgotten for xtTestConsole, n2xTestConsole and the DSP bridge.
+	add_link_options(-static-libgcc -static-libstdc++)
+
 	execute_process(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
 
 	# Good atomics are important on aarch64, they exist on ARMv8.1a or higher

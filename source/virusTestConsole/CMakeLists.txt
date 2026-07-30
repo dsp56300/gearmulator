@@ -13,10 +13,6 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(virusTestConsole PUBLIC virusConsoleLib)
 
-if(UNIX AND NOT APPLE)
-	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)
-endif()
-
 createMacSetupScript("virusTestConsole")
 
 if(${gearmulator_SYNTH_OSIRUS})
