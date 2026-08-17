@@ -4,11 +4,32 @@
 #include <vector>
 #include <cstdint>
 
+// SysexBuffer can use a std::pmr::vector (leaving room for custom allocators later); toggle via
+// SYNTHLIB_HAS_PMR. __has_include alone is NOT a safe gate on Apple: <memory_resource> ships in
+// older SDKs, but the std::pmr runtime symbols (std::pmr::get_default_resource, ...) are
+// availability-gated to macOS 14. Referencing them below that deployment target makes the plugin
+// fail to LOAD - dyld: missing symbol std::pmr::get_default_resource (BUG-10281 / BUG-10288, which
+// regressed in 2.2.12 when a different build machine's toolchain started emitting the symbol). The
+// deployment target - not the SDK/build host - is the contract for which OS versions must run the
+// binary, so gate on it: on Apple also require a >= macOS 14 target; elsewhere header presence is
+// enough. Bumping CMAKE_OSX_DEPLOYMENT_TARGET to 14 re-enables pmr on macOS automatically.
 #if __has_include(<memory_resource>)
-#include <memory_resource>
-#define SYNTHLIB_HAS_PMR 1
+	#if defined(__APPLE__)
+		#include <Availability.h>
+		#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 140000
+			#define SYNTHLIB_HAS_PMR 1
+		#else
+			#define SYNTHLIB_HAS_PMR 0
+		#endif
+	#else
+		#define SYNTHLIB_HAS_PMR 1
+	#endif
 #else
-#define SYNTHLIB_HAS_PMR 0
+	#define SYNTHLIB_HAS_PMR 0
+#endif
+
+#if SYNTHLIB_HAS_PMR
+#include <memory_resource>
 #endif
 
 namespace synthLib

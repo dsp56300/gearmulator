@@ -1,5 +1,16 @@
 Release Notes
 
+2.2.10:
+
+Framework:
+
+- [Fix] BUG-10281 BUG-10288 BUG-10278 macOS: the plugin failed to load and
+        did not pass validation on macOS versions below 14, with dyld
+        reporting a missing symbol for std::pmr::get_default_resource. The
+        sysex buffer used a std::pmr::vector whose runtime symbols are only
+        available on macOS 14 and newer; it now falls back to std::vector
+        unless the deployment target is macOS 14 or later.
+
 2.2.9:
 
 Framework:
