@@ -619,23 +619,30 @@ namespace juceRmlUi
 
 			if (m_rmlContext)
 			{
+				// Two phases so we never hold an iterator into m_pressedKeys across ProcessKeyUp:
+				// a key handler can pump the message loop (a modal or native menu), during which a
+				// new keystroke re-enters keyPressed() and push_back()s here, reallocating the
+				// vector - erasing through the now-stale iterator would be a use-after-free.
+				std::vector<juce::KeyPress> released;
 				for (auto it = m_pressedKeys.begin(); it != m_pressedKeys.end();)
 				{
-					if (!it->isCurrentlyDown())
-					{
-						const auto& key = *it;
-						if (consumed(m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key))))
-						{
-							res = true;
-							enqueueUpdate();
-						}
-						it = m_pressedKeys.erase(it);
-					}
-					else
+					if (it->isCurrentlyDown())
 					{
 						++it;
+						continue;
 					}
+					released.push_back(*it);
+					it = m_pressedKeys.erase(it);
 				}
+
+				for (const auto& key : released)
+				{
+					if (consumed(m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key))))
+						res = true;
+				}
+
+				if (res)
+					enqueueUpdate();
 			}
 		}
 		if (res)
