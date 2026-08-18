@@ -67,8 +67,23 @@ namespace virusLib
 
 	bool DspMemoryPatchSet::apply(dsp56k::DSP& _dsp, const baseLib::MD5& _md5) const
 	{
+		// A default-constructed MD5 is all zeroes and means "nobody computed this". It is
+		// not a ROM identity and must never authorise a patch set, in either position:
+		// not as the incoming _md5, and not as an allowedTargets entry. Without this,
+		// ROMFile::getHash() returning the default (which it did for every ROM until the
+		// writer was restored) turned the gate into an unconditional yes for any patch set
+		// whose target list was filled in from a running build.
+		// `static const`, not `static constexpr`: MD5's default constructor is not
+		// constexpr (it assigns m_h in the body), though operator == is.
+		static const baseLib::MD5 g_unknown{};
+
+		if(_md5 == g_unknown)
+			return false;
+
 		for (const auto& e : allowedTargets)
 		{
+			if(e == g_unknown)
+				continue;
 			if(e == _md5)
 				return apply(_dsp, patches);
 		}
