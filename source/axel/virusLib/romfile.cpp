@@ -19,6 +19,27 @@ namespace virusLib
 
 ROMFile::ROMFile(std::vector<uint8_t> _data, std::string _name, const DeviceModel _model/* = DeviceModel::ABC*/) : m_model(_model), m_romFileName(std::move(_name)), m_romFileData(std::move(_data))
 {
+	// getHash() had no writer at all: m_romDataHash was declared, returned, and assigned
+	// nowhere, so every ROM reported the default-constructed MD5 - all zeroes, identical
+	// for every file. The earlier file-loading path computed the digest, but that step
+	// was lost when ROM loading was refactored to pass bytes directly to this constructor;
+	// the getter survived without a writer.
+	//
+	// The only consumer is DspMemoryPatchSet::apply()'s allowedTargets gate, so the gate
+	// could not fail: a patch set authored against a hash READ OUT OF A RUNNING BUILD
+	// would carry the all-zero digest and then match every ROM ever loaded. That is the
+	// dangerous direction, and it is the one an author reaches by measurement rather than
+	// by computing the digest externally.
+	//
+	// Hash the bytes this object was CONSTRUCTED with, and do it before initialize(),
+	// which clears m_romFileData when the ROM turns out to be unparseable. The hash
+	// therefore identifies the content, not the validity - validity is isValid(). An
+	// empty ROM (ROMFile::invalid()) keeps the all-zero digest on purpose: that is the
+	// value DspMemoryPatchSet::apply() now refuses outright, so a ROM that carries no
+	// bytes can never authorise a patch.
+	if(!m_romFileData.empty())
+		m_romDataHash = baseLib::MD5(m_romFileData);
+
 	if(initialize())
 		return;
 	m_romFileData.clear();
