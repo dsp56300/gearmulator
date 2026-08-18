@@ -123,6 +123,9 @@ namespace juceRmlUi
 
 		float getOpenGLRenderingScale() const;
 
+		// true if the editor is actually on screen, i.e. its window exists, is visible and is not minimized
+		bool isOnScreen() const;
+
 		Rml::Vector2i getDocumentSize() const { return m_documentSize; }
 
 		void resize(int _width, int _height);

@@ -11,6 +11,10 @@ Framework:
         available on macOS 14 and newer; it now falls back to std::vector
         unless the deployment target is macOS 14 or later.
 
+- [Fix] BUG-10293 macOS: the user interface was rendered even though the
+        plugin editor was hidden or minimized, causing a high GPU load. The
+        UI is not rendered anymore while it is not visible on screen.
+
 2.2.9:
 
 Framework:
