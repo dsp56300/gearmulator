@@ -77,9 +77,11 @@ The server uses HTTP with Server-Sent Events (SSE):
 
 | Endpoint | Method | Description |
 |---|---|---|
-| `/sse` | GET | SSE stream for receiving server events |
-| `/message` | POST | Send JSON-RPC 2.0 requests |
+| `/sse` | GET | SSE stream. Only carries the initial `endpoint` event and periodic keepalives — **not** tool call results. |
+| `/message` | POST | Send JSON-RPC 2.0 requests. **The JSON-RPC response (including `tools/call` results) is returned directly in this POST's response body.** |
 | `/` | GET | Health check (returns server info) |
+
+> **Note for spec-compliant SSE clients:** unlike some MCP SSE transports, this server does not push `tools/call` results onto the `/sse` stream. Send the request to `/message` and read the result from the HTTP response of that same request.
 
 ### Protocol
 
@@ -210,6 +212,44 @@ Send a SysEx message.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `hex` | string | yes | Hex bytes as a string (e.g. `"F0 00 20 33 ... F7"`) |
+
+`{"success": true, "byteCount": N}` only confirms the bytes were forwarded to the device — it is **not**
+an acknowledgement that the device accepted or applied the message. It also does **not** mean
+`get_parameter` / `list_parameters` / `dump_all_parameters` will now reflect the change — see
+[Async Writes & Parameter Read-Back](#async-writes--parameter-read-back) below, which is required reading
+before building any patch-load automation on top of `send_sysex`.
+
+**Virus/OsTIrus single-dump (`DUMP_SINGLE`) byte layout**, for anyone re-addressing a captured dump to load
+it into the edit buffer:
+
+| Offset | Meaning | Value to use for an edit-buffer load |
+|---|---|---|
+| 0 | `F0` (SysEx start) | `F0` |
+| 1–3 | Manufacturer ID | `00 20 33` (Access) |
+| 4 | Product ID | `01` |
+| 5 | Device ID | `10` (OMNI — bypasses the device-ID filter regardless of the plugin's configured ID) |
+| 6 | Command | `10` (`DUMP_SINGLE`) |
+| 7 | **Bank** | `00` = `BankNumber::EditBuffer`. Any other value writes silently to RAM/ROM storage instead of the audible edit buffer — no audible or observable effect, and *not* an error. |
+| 8 | **Program** | Target part index `0`–`15` (multi mode), or `40` (=64, the dedicated `SINGLE` slot) in single mode. |
+| 9…N-2 | Patch parameter bytes | TI "D" format singles are exactly 524 bytes total; other formats (A/B/C) are shorter. |
+| N-1 | Checksum | `sum(bytes[5..N-2]) & 0x7F`. **Must be recomputed** after changing bank/program bytes 7–8, since they're part of the checksummed range. |
+| N | `F7` (SysEx end) | `F7` |
+
+If you captured a dump from elsewhere (a bank export, a hardware capture, etc.) and just need to re-target
+it at the edit buffer for a specific part, only bytes 7, 8, and the checksum need to change — everything
+else (including the 524-byte length for TI) stays as captured.
+
+**To also request the current buffer back** (used below to make the parameter cache pick up the change),
+send this fixed 10-byte message immediately after the dump — no checksum required:
+
+```
+F0 00 20 33 01 10 30 <bank> <program> F7      (RequestSingle; 30 = request-single command)
+F0 00 20 33 01 10 31 <bank> <program> F7      (RequestMulti;  31 = request-multi command)
+```
+
+using the same bank/program you just wrote (typically `00 <part>` for the edit buffer). The device replies
+with a fresh `DUMP_SINGLE`/`DUMP_MULTI` on its own, asynchronously — you don't parse the reply yourself,
+you just poll the read tools afterward (see next section).
 
 #### `send_program_change`
 
@@ -731,6 +771,63 @@ Rename the currently loaded preset for a part.
 │   test script)  │
 └─────────────────┘
 ```
+
+## Async Writes & Parameter Read-Back
+
+**Read this before writing any patch-load automation.** The server exposes two independent views of "what
+sound is currently loaded," and they update on different triggers with different latency. Confusing them
+produces convincing false negatives — a load can succeed while a naive verification check still sees stale
+data.
+
+### The two state stores
+
+| | Engine/device state | Parameter cache |
+|---|---|---|
+| **Read via** | `get_state`, `get_current_preset` | `get_parameter`, `list_parameters`, `dump_all_parameters` |
+| **Source of truth** | The emulated DSP's actual memory | A mirror on the plugin's `Controller` object, used to drive the GUI and host automation |
+| **Updated by** | Any accepted write to the DSP (SysEx dump, CC, etc.) | Only a MIDI message the *device sends back to the host* (an echo) |
+| **Typical latency after a write** | ~200 ms (one async DSP apply cycle) | ~200 ms **plus** an additional device round trip — see below |
+
+They are not the same subsystem and one does not imply the other. A tool that updates the engine state does
+not necessarily also update the parameter cache in the same call, and vice versa.
+
+### What updates the parameter cache, concretely
+
+| Action | Updates parameter cache? | Why |
+|---|---|---|
+| `set_parameter`, `set_parameters_batch` | **Yes, synchronously** | These write the parameter object directly; no MIDI round trip involved. Safe to `get_parameter` immediately after. |
+| `load_preset`, `load_preset_by_name`, `select_next_preset`, `select_prev_preset` | **Yes, but asynchronously** | Internally these send the patch dump *and* an explicit read-back request to the device, then wait for the device's reply to arrive on the audio thread. That's two DSP round trips stacked (apply, then request+reply), so budget for **more** settle time than the ~200 ms figure used for `get_state` — see the polling recipe below. |
+| `send_sysex` (any raw dump, including a well-formed `DUMP_SINGLE`/`DUMP_MULTI`) | **No, never, by itself** | `send_sysex` only forwards bytes toward the device (Editor→Device routing). It never asks the device to send anything back, so nothing arrives to refresh the cache. This mirrors real MIDI hardware: sending a dump *into* a hardware synth does not make the synth spontaneously echo a dump back out. |
+| `set_state`, `set_plugin_state` | **No, not directly** | These restore engine/DAW-level state; the parameter cache catches up only if/when the device later echoes data back (e.g. from a subsequent request), same as the `send_sysex` case. |
+
+### Recipe: verify a `send_sysex` patch load
+
+1. Send the dump via `send_sysex`, addressed to the edit buffer (see the byte layout table under
+   [`send_sysex`](#send_sysex) above). The `{"success": true}` response only means the bytes were forwarded
+   — it is not a load confirmation.
+2. To confirm the load happened at all, poll `get_state` (`type: "currentProgram"`) or `get_current_preset`
+   every ~50 ms, for up to ~1 s, until the expected patch name/data appears. Do not check on the first try
+   with no delay — the DSP apply is asynchronous (~200 ms typical).
+3. If you *also* need `get_parameter` / `list_parameters` / `dump_all_parameters` to reflect the load (e.g.
+   because your workflow reads individual parameter values rather than raw state), send the matching
+   `RequestSingle`/`RequestMulti` message from the [`send_sysex`](#send_sysex) section immediately after
+   step 1, addressed to the same bank/program you just wrote. Then poll the parameter tool you care about
+   (same 50 ms / ~1 s budget, but allow more headroom — this is an *additional* round trip on top of step 2,
+   not a replacement for it) until the value you expect appears.
+4. If you don't need parameter-level access, skip step 3 entirely — `get_state`/`get_current_preset` is
+   sufficient and simpler.
+
+The same two-step logic (apply, then explicit request) applies if you're debugging why `load_preset*`
+"isn't working": give it the full combined settle time (apply + request/reply), not just the ~200 ms that's
+enough for `get_state` alone.
+
+### Not gated on the editor window
+
+The parameter cache and its MIDI processing run on the plugin `Controller`, which exists and processes MIDI
+independently of whether the editor UI is open or closed — this is *not* why `send_sysex` fails to update
+the cache (see the recipe above for the actual mechanism). The patch manager tools
+(`load_preset`, `search_presets`, etc.) are the ones that genuinely require the editor window, because the
+patch database lives on the editor — see [Limitations](#limitations).
 
 ## Thread Safety
 
