@@ -480,7 +480,14 @@ namespace pluginLib::patchDB
 			return;
 
 		std::unique_lock lock(m_searchesMutex);
-		m_cancelledSearches.insert(_handle);
+
+		// only remember the handle as cancelled if the search may still be picked up by executeSearch
+		// later (i.e. it's still queued/running). A search that has already completed will never be
+		// looked at again, so tracking it here would leak the handle in m_cancelledSearches forever.
+		const auto it = m_searches.find(_handle);
+		if(it != m_searches.end() && it->second->state != SearchState::Completed)
+			m_cancelledSearches.insert(_handle);
+
 		m_searches.erase(_handle);
 	}
 

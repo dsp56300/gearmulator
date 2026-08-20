@@ -644,7 +644,16 @@ namespace jucePluginEditorLib::patchManager
 			results.assign(_search.results.begin(), _search.results.end());
 
 			if(results.empty())
+			{
+				// the search found no match, but it must still be cancelled/removed from the DB's
+				// search list, otherwise it leaks forever and every subsequent bank load / patch
+				// update has to scan it in DB::updateSearches, causing CPU usage to grow unbounded
+				runOnUiThread([this, handle]
+				{
+					cancelSearch(handle);
+				});
 				return;
+			}
 
 			if(results.size() > 1)
 			{
