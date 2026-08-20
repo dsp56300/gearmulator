@@ -49,6 +49,14 @@ namespace jucePluginEditorLib::patchManagerRml
 		});
 	}
 
+	ListModel::~ListModel()
+	{
+		// setContent()/cancelSearch() already cover replacing the current search, but nothing
+		// previously ran on teardown, so a search still in flight when the panel is destroyed
+		// (e.g. closed mid-search) kept running and its handle stayed in DB::m_searches forever.
+		cancelSearch();
+	}
+
 	PatchManagerUiRml& ListModel::getPatchManager() const
 	{
 		return m_patchManager;
