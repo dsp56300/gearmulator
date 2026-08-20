@@ -77,9 +77,13 @@ endif()
 # -Xarch_x86_64 so the flags apply only to the x86 slice and don't warn
 # (or error with -Werror) on the arm64 slice.
 if(APPLE)
-    # Universal or x86_64-only: scope flags to the x86_64 slice
+    # Universal or x86_64-only: scope flags to the x86_64 slice.
+    # SHELL: keeps each -Xarch_x86_64 glued to the flag it applies to. Without it CMake
+    # de-duplicates the repeated -Xarch_x86_64 and the survivors reorder, so -msse4.1 ends
+    # up unscoped and is passed to the arm64 slice too, where it warns (or errors under
+    # -Werror). SHELL: is the documented way to pass options that take a following argument.
     if(CMAKE_OSX_ARCHITECTURES MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86|X86|amd64|AMD64")
-        target_compile_options(juceRmlUi PRIVATE -Xarch_x86_64 -mssse3 -Xarch_x86_64 -msse4.1)
+        target_compile_options(juceRmlUi PRIVATE "SHELL:-Xarch_x86_64 -mssse3" "SHELL:-Xarch_x86_64 -msse4.1")
     endif()
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|X86|amd64|AMD64|i[3-6]86")
     include(CheckCXXCompilerFlag)
