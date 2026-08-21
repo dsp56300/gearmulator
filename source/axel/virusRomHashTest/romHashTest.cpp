@@ -1,30 +1,8 @@
 // Tests for ROMFile::getHash() and the DspMemoryPatchSet allowedTargets gate it feeds.
-//
-// WHY THIS EXISTS
-//
-// m_romDataHash was declared in romfile.h, returned by getHash(), and assigned NOWHERE
-// in the tree. Every ROM therefore reported the default-constructed MD5 - all zeroes -
-// and the only consumer, DspMemoryPatchSet::apply()'s allowedTargets list, could not
-// tell one ROM from another. The check ran, returned an answer, and every caller
-// believed it had chosen. A check that cannot fail is worse than no check.
-//
-// Both directions are covered on purpose. "The right ROM is accepted" alone would still
-// pass if the gate accepted everything, which is exactly the state being fixed, so the
-// rejection arms carry the weight.
-//
-// Each arm names the degenerate stub that reddens it, so the suite's ability to fail is
-// a property of the file rather than a claim in a commit message:
-//   STUB 1 - drop the m_romDataHash assignment in romfile.cpp   (the pre-fix state)
-//   STUB 2 - drop the zero-MD5 guard in dspMemoryPatch.cpp
-// The two stubs must redden DISJOINT sets. If one stub reddens everything, the arms are
-// not independent and the suite is measuring one thing under thirteen names.
-//
-// Ablation results from independently removing the hash assignment and the zero guard:
-//   STUB 1  ->  7/13, 6 failed   arms 1, 2a, 2b, 3, 6a, 6b
-//   STUB 2  -> 11/13, 2 failed   arms 8a, 8b
-//   neither -> 13/13
-// Three checks - 4, 5, 7 - and arm 9 are reddened by NEITHER stub and are labelled as
-// such below rather than quietly counted as coverage.
+// m_romDataHash had no writer, so every ROM reported the default all-zero MD5 and the
+// gate could not tell one ROM from another. Rejection is checked as well as acceptance,
+// since a gate that accepts everything passes an acceptance-only test. Checks that also
+// pass with the bug present are marked as such below.
 
 #include <cstdint>
 #include <iostream>
@@ -87,12 +65,10 @@ namespace
 	constexpr char g_md5A[] = "e2c865db4162bed963bfaa9ef6ac18f0";
 	constexpr char g_md5B[] = "ec6df70f2569891eae50321a9179eb82";
 
-	// These byte vectors are NOT valid Virus ROMs and are not meant to be: initialize()
-	// rejects them and clears m_romFileData. The hash is computed before that happens, on
-	// purpose, so identity survives an unparseable ROM. Testing this with a real firmware
-	// image would make the suite undeliverable - the image is Access's and is not
-	// redistributable - and would test nothing extra, because getHash() never looks at
-	// the parse result.
+	// Not valid Virus ROMs, deliberately: initialize() rejects them and clears
+	// m_romFileData, and the hash is taken before that, so identity survives an
+	// unparseable ROM. A real firmware image is not redistributable and would test
+	// nothing extra, since getHash() never looks at the parse result.
 	virusLib::ROMFile makeRom(std::vector<uint8_t> _data, const std::string& _name)
 	{
 		return virusLib::ROMFile(std::move(_data), _name, virusLib::DeviceModel::ABC);
@@ -112,28 +88,26 @@ int main()
 
 	// ---- identity -------------------------------------------------------------------
 
-	// ARM 1 (STUB 1 reddens). The bug in its plainest form.
+	// The bug in its plainest form. Fails if the hash assignment in romfile.cpp goes.
 	check(romA.getHash() != zero, "a loaded ROM does not report the all-zero MD5",
 		"getHash() = " + romA.getHash().toString());
 
-	// ARM 2 (STUB 1 reddens). Known-answer, against a digest computed outside this tree.
-	// "not zero" alone would pass on any garbage that happened to be non-zero.
+	// Known-answer, against a digest computed outside this tree. "not zero" alone would
+	// pass on any garbage that happened to be non-zero.
 	check(romA.getHash().toString() == g_md5A, "ROM A hashes to its real MD5",
 		"expected " + std::string(g_md5A) + ", got " + romA.getHash().toString());
 	check(romB.getHash().toString() == g_md5B, "ROM B hashes to its real MD5",
 		"expected " + std::string(g_md5B) + ", got " + romB.getHash().toString());
 
-	// ARM 3 (STUB 1 reddens). Two ROMs of identical LENGTH and identical byte multiset,
-	// differing only in order.
+	// Two ROMs of identical length and identical byte multiset, differing only in order.
 	check(romA.getHash() != romB.getHash(), "two different ROMs hash differently");
 
-	// ARM 4. Determinism. Note this arm passes in the BROKEN state too - both hashes were
-	// zero and zero == zero - which is why it is not evidence on its own and is listed
-	// under neither stub.
+	// Determinism. This also passes with the bug present - both hashes were zero, and
+	// zero == zero - so it is not evidence on its own.
 	check(romA.getHash() == romA2.getHash(), "the same bytes hash the same twice");
 
-	// ARM 5. An empty ROM keeps the all-zero digest deliberately: that is the value the
-	// gate refuses, so a ROM carrying no bytes cannot authorise anything.
+	// An empty ROM keeps the all-zero digest deliberately: that is the value the gate
+	// refuses, so a ROM carrying no bytes cannot authorise anything.
 	check(romEmpty.getHash() == zero, "an empty/invalid ROM reports the all-zero MD5",
 		"getHash() = " + romEmpty.getHash().toString());
 
@@ -144,56 +118,53 @@ int main()
 	virusLib::DspSingle dsp(0x040000, true, "romHashTest");
 	auto& d = dsp.getDSP();
 
-	constexpr dsp56k::TWord g_addr = 0x100;
-	constexpr dsp56k::TWord g_old  = 0x000000;
-	constexpr dsp56k::TWord g_new  = 0x0abcde;
+	constexpr dsp56k::TWord addr   = 0x100;
+	constexpr dsp56k::TWord oldVal = 0x000000;
+	constexpr dsp56k::TWord newVal = 0x0abcde;
 
 	const virusLib::DspMemoryPatchSet setForA
 	{
 		{ baseLib::MD5(g_md5A) },
-		{ { dsp56k::MemArea_P, g_addr, g_old, g_new } }
+		{ { dsp56k::MemArea_P, addr, oldVal, newVal } }
 	};
 
-	// ARM 6 (STUB 1 reddens). The right ROM passes, and the write is visible.
-	d.memWriteP(g_addr, g_old);
+	// The right ROM passes, and the write is visible.
+	d.memWriteP(addr, oldVal);
 	const bool acceptedA = setForA.apply(d, romA.getHash());
 	check(acceptedA, "the ROM the patch set names is accepted");
-	check(d.memory().get(dsp56k::MemArea_P, g_addr) == g_new,
+	check(d.memory().get(dsp56k::MemArea_P, addr) == newVal,
 		"...and the patch actually reached DSP memory",
-		"P:$100 = " + std::to_string(d.memory().get(dsp56k::MemArea_P, g_addr)));
+		"P:$100 = " + std::to_string(d.memory().get(dsp56k::MemArea_P, addr)));
 
-	// ARM 7. A different ROM is rejected, and nothing is written. This is the arm the
-	// whole exercise is about: it passed in the broken state only because g_patches was
-	// empty upstream, never because the gate worked.
-	d.memWriteP(g_addr, g_old);
+	// A different ROM is rejected, and nothing is written. This passed with the bug
+	// present only because g_patches is empty upstream, never because the gate worked.
+	d.memWriteP(addr, oldVal);
 	const bool acceptedB = setForA.apply(d, romB.getHash());
 	check(!acceptedB, "a ROM the patch set does not name is rejected");
-	check(d.memory().get(dsp56k::MemArea_P, g_addr) == g_old,
+	check(d.memory().get(dsp56k::MemArea_P, addr) == oldVal,
 		"...and DSP memory is untouched after a rejection",
-		"P:$100 = " + std::to_string(d.memory().get(dsp56k::MemArea_P, g_addr)));
+		"P:$100 = " + std::to_string(d.memory().get(dsp56k::MemArea_P, addr)));
 
-	// ARM 8 (STUB 2 reddens, and ONLY stub 2). Fail-closed: an uncomputed hash authorises
-	// nothing even when the patch set's own target list carries the same uncomputed value,
-	// which is precisely what an author gets by copying getHash() out of a broken build.
+	// Fail-closed: an uncomputed hash authorises nothing even when the patch set's own
+	// target list carries the same uncomputed value, which is what an author gets by
+	// copying getHash() out of a broken build.
 	const virusLib::DspMemoryPatchSet setForZero
 	{
 		{ baseLib::MD5() },
-		{ { dsp56k::MemArea_P, g_addr, g_old, g_new } }
+		{ { dsp56k::MemArea_P, addr, oldVal, newVal } }
 	};
 
-	d.memWriteP(g_addr, g_old);
+	d.memWriteP(addr, oldVal);
 	check(!setForZero.apply(d, zero), "an all-zero MD5 matches nothing, not even an all-zero target");
-	check(d.memory().get(dsp56k::MemArea_P, g_addr) == g_old,
+	check(d.memory().get(dsp56k::MemArea_P, addr) == oldVal,
 		"...and DSP memory is untouched",
-		"P:$100 = " + std::to_string(d.memory().get(dsp56k::MemArea_P, g_addr)));
+		"P:$100 = " + std::to_string(d.memory().get(dsp56k::MemArea_P, addr)));
 
-	// ARM 9. The other position: a real ROM must not be let through by an all-zero entry
-	// sitting in allowedTargets. NEITHER stub reddens this one, and saying so is the
-	// point - with the hash restored, romA's digest simply does not equal the all-zero
-	// entry, so the loop's `continue` is never what rejects it. The arm is load-bearing
-	// only if a future change makes MD5 comparison lax, and it is kept for that reason
-	// and not counted as evidence for either fix.
-	d.memWriteP(g_addr, g_old);
+	// The other position: a real ROM must not be let through by an all-zero entry in
+	// allowedTargets. This also passes with both bugs present - romA's digest simply does
+	// not equal the all-zero entry, so the `continue` is never what rejects it. Kept
+	// against a future change making MD5 comparison lax, not counted as evidence here.
+	d.memWriteP(addr, oldVal);
 	check(!setForZero.apply(d, romA.getHash()), "an all-zero target entry does not admit a real ROM");
 
 	std::cout << "ROM hash tests: " << (g_tests - g_failed) << "/" << g_tests << " passed";
