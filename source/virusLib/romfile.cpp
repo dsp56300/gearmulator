@@ -19,6 +19,10 @@ namespace virusLib
 
 ROMFile::ROMFile(std::vector<uint8_t> _data, std::string _name, const DeviceModel _model/* = DeviceModel::ABC*/) : m_model(_model), m_romFileName(std::move(_name)), m_romFileData(std::move(_data))
 {
+	// hash the raw image before initialize() clears it, so the hash identifies content, not validity
+	if(!m_romFileData.empty())
+		m_romDataHash = baseLib::MD5(m_romFileData);
+
 	if(initialize())
 		return;
 	m_romFileData.clear();
