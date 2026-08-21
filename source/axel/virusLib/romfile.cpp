@@ -19,9 +19,7 @@ namespace virusLib
 
 ROMFile::ROMFile(std::vector<uint8_t> _data, std::string _name, const DeviceModel _model/* = DeviceModel::ABC*/) : m_model(_model), m_romFileName(std::move(_name)), m_romFileData(std::move(_data))
 {
-	// Before initialize(), which clears m_romFileData on an unparseable ROM: the hash
-	// identifies the content, not the validity. An empty ROM keeps the all-zero digest,
-	// which DspMemoryPatchSet::apply() refuses.
+	// hash the raw image before initialize() clears it, so the hash identifies content, not validity
 	if(!m_romFileData.empty())
 		m_romDataHash = baseLib::MD5(m_romFileData);
 
