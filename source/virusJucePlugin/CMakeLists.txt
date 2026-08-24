@@ -36,8 +36,6 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(virusJucePlugin PUBLIC jucePluginEditorLib virusLib)
 
-target_include_directories(virusJucePlugin PUBLIC ../JUCE/modules)
-
 target_compile_definitions(virusJucePlugin PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 
 if(UNIX AND NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

@@ -65,6 +65,11 @@ include(findvst2.cmake)
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
+
+	# juceUiLib and juceRmlUi need the module headers directly, everyone else
+	# inherits them by linking one of those two
+	set(JUCE_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/JUCE/modules)
+
 	add_subdirectory(JUCE EXCLUDE_FROM_ALL)
 	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP)
 		add_subdirectory(clap-juce-extensions)

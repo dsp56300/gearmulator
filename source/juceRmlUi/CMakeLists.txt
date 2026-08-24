@@ -63,7 +63,7 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(juceRmlUi PUBLIC baseLib dsp56kBase rmlui_core rmlui_debugger rmlui_lua)
 
-target_include_directories(juceRmlUi PUBLIC ../JUCE/modules)
+target_include_directories(juceRmlUi PUBLIC ${JUCE_MODULES_DIR})
 target_compile_definitions(juceRmlUi PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 
 if(APPLE)

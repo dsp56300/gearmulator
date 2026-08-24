@@ -71,7 +71,6 @@ source_group("source\\patchmanagerUiRml" FILES ${SOURCES_PM_RML})
 
 target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib jucePluginData juceRmlPlugin mcpServerLib)
 
-target_include_directories(jucePluginEditorLib PUBLIC ../JUCE/modules)
 target_compile_definitions(jucePluginEditorLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET jucePluginEditorLib PROPERTY FOLDER "Gearmulator")
 

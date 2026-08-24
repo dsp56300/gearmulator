@@ -22,6 +22,6 @@ target_sources(mcpServerLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 target_link_libraries(mcpServerLib PUBLIC networkLib jucePluginLib)
-target_include_directories(mcpServerLib PUBLIC ../ ../JUCE/modules)
+target_include_directories(mcpServerLib PUBLIC ../)
 target_compile_definitions(mcpServerLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET mcpServerLib PROPERTY FOLDER "MCP")

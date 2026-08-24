@@ -27,7 +27,7 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(juceUiLib PUBLIC baseLib)
 
-target_include_directories(juceUiLib PUBLIC ../JUCE/modules)
+target_include_directories(juceUiLib PUBLIC ${JUCE_MODULES_DIR})
 target_compile_definitions(juceUiLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET juceUiLib PROPERTY FOLDER "Gearmulator")
 

@@ -19,3 +19,4 @@ _copilot.bat
 target/logs/
 claude*.bat
 .mcp.json
+/wt/
