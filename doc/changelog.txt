@@ -15,6 +15,13 @@ Framework:
         plugin editor was hidden or minimized, causing a high GPU load. The
         UI is not rendered anymore while it is not visible on screen.
 
+- [Imp] Faster DSP emulation. The emulation core shared by all synths has
+        been optimized and now runs about 20% faster on average, measured
+        on Windows, Linux and macOS with both Intel/AMD and ARM CPUs. How
+        much is gained depends on the patch, some benefit considerably
+        more than others. This lowers CPU usage and allows running more
+        instances at once.
+
 2.2.9:
 
 Framework:
