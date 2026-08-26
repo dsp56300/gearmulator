@@ -20,3 +20,7 @@ target/logs/
 claude*.bat
 .mcp.json
 /wt/
+
+# python bytecode (scripts/perfhist.py)
+__pycache__/
+*.pyc

@@ -1,0 +1,129 @@
+Date,Tag,Commit,ROM,Preset,CPU,MIPS,Notes,StdDev,Samples,RunMedians
+2021-07-06,0.0.2_closed_beta,8d310053e,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,,no aarch64 build: x86-only compiler flags (-msse),,,
+2021-07-06,0.0.2_closed_beta,8d310053e,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,,no aarch64 build: x86-only compiler flags (-msse),,,
+2021-07-06,0.0.2_closed_beta,8d310053e,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,324.22,build-only patch,12.31,157,321.1|326.6|324.2
+2021-07-06,0.0.2_closed_beta,8d310053e,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,206.45,build-only patch,7.91,134,204.5|206.4|211.1
+2021-08-12,1.1.9_open_beta,2d359f339,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,375.06,build-only patch,9.82,180,376.4|375.1|373.9
+2021-08-12,1.1.9_open_beta,2d359f339,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,,no aarch64 build: synthLib/audiobuffer.cpp rejected by GCC 11,,,
+2021-08-12,1.1.9_open_beta,2d359f339,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,235.99,build-only patch,6.13,151,238.3|235.3|236.0
+2021-08-12,1.1.9_open_beta,2d359f339,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,,no aarch64 build: synthLib/audiobuffer.cpp rejected by GCC 11,,,
+2022-01-29,1.2.5_open_beta,92174cdd2,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,456.78,build-only patch,13.93,102,477.5|456.8|455.8
+2022-01-29,1.2.5_open_beta,92174cdd2,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,277.94,build-only patch,6.79,64,276.6|277.9|284.9
+2022-01-29,1.2.5_open_beta,92174cdd2,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,5.80,build-only patch,1.94,180,5.8|5.8|5.8
+2022-01-29,1.2.5_open_beta,92174cdd2,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,3.79,build-only patch,6503140931.55,120,3.8|3.8|3.8
+2022-03-26,1.2.15,32257cea2,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,450.64,build-only patch,9.76,99,450.7|450.6|434.7
+2022-03-26,1.2.15,32257cea2,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,279.22,build-only patch,7.63,64,279.2|282.9|275.6
+2022-03-26,1.2.15,32257cea2,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,5.82,build-only patch,1.95,180,5.8|5.8|5.8
+2022-03-26,1.2.15,32257cea2,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,3.78,build-only patch,6498402116.27,120,3.8|3.8|3.8
+2022-06-22,waldorf_ship00,728191bf1,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,598.49,build-only patch,8.12,80,594.6|602.8|598.5
+2022-06-22,waldorf_ship00,728191bf1,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,,no aarch64 build: JitEmitter of this vintage has no ARM path,,,
+2022-06-22,waldorf_ship00,728191bf1,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,342.61,build-only patch,5.79,67,338.6|342.6|342.8
+2022-06-22,waldorf_ship00,728191bf1,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,,no aarch64 build: JitEmitter of this vintage has no ARM path,,,
+2022-12-08,1.2.22_openBeta,0da4919cd,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,673.68,build-only patch,19.76,90,667.9|673.7|678.4
+2022-12-08,1.2.22_openBeta,0da4919cd,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,233.76,build-only patch,5.29,90,232.7|233.8|235.1
+2022-12-08,1.2.22_openBeta,0da4919cd,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,410.60,build-only patch,7.95,81,409.4|411.9|410.6
+2022-12-08,1.2.22_openBeta,0da4919cd,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,161.30,build-only patch,2.67,96,163.7|160.4|161.3
+2023-01-09,1.2.25,929df1d81,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,228.94,,4.41,90,228.9|231.0|226.5
+2023-01-09,1.2.25,929df1d81,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,156.26,,2.65,90,157.3|156.3|155.9
+2023-01-09,1.2.25,929df1d81,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,717.55,build-only patch,19.61,95,718.1|717.6|687.5
+2023-01-09,1.2.25,929df1d81,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,439.79,build-only patch,7.90,87,442.5|439.8|439.2
+2023-02-13,1.2.29,5124f5e4e,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,270.88,,8.46,108,270.0|271.3|270.9
+2023-02-13,1.2.29,5124f5e4e,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,189.54,,4.65,114,189.5|189.0|190.5
+2023-02-13,1.2.29,5124f5e4e,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,829.26,build-only patch,31.72,109,833.0|829.3|812.4
+2023-02-13,1.2.29,5124f5e4e,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,480.67,build-only patch,10.67,95,481.3|478.9|480.7
+2023-04-23,osirus_1.2.30,14b092463,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,265.50,,8.18,102,267.7|265.5|264.5
+2023-04-23,osirus_1.2.30,14b092463,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,191.04,,4.03,110,191.1|191.0|190.3
+2023-04-23,osirus_1.2.30,14b092463,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,790.82,build-only patch,12.21,108,785.1|790.8|791.2
+2023-04-23,osirus_1.2.30,14b092463,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,477.55,build-only patch,13.55,97,495.4|477.5|477.3
+2024-02-07,Osirus_1.3.3_DonatorsAlpha,33646bff6,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,788.13,build-only patch,10.50,79,786.7|788.1|791.2
+2024-02-07,Osirus_1.3.3_DonatorsAlpha,33646bff6,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,271.18,build-only patch,10.36,108,271.2|272.0|266.9
+2024-02-07,Osirus_1.3.3_DonatorsAlpha,33646bff6,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,501.49,build-only patch,14.29,75,501.5|501.9|498.5
+2024-02-07,Osirus_1.3.3_DonatorsAlpha,33646bff6,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,195.33,build-only patch,4.77,114,193.6|195.3|195.8
+2024-03-03,Osirus_1.3.6,f7dd0c048,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,893.98,build-only patch,21.61,90,894.0|891.1|907.4
+2024-03-03,Osirus_1.3.6,f7dd0c048,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,282.10,build-only patch,6.70,114,282.1|282.9|279.9
+2024-03-03,Osirus_1.3.6,f7dd0c048,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,542.30,build-only patch,10.39,80,551.6|542.3|542.2
+2024-03-03,Osirus_1.3.6,f7dd0c048,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,205.15,build-only patch,4.41,120,204.0|206.1|205.1
+2024-04-22,OsTIrus_1.3.12,308d112f9,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,264.09,,5.88,102,259.7|264.1|266.7
+2024-04-22,OsTIrus_1.3.12,308d112f9,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,190.99,,3.80,114,190.0|191.0|191.0
+2024-04-22,OsTIrus_1.3.12,308d112f9,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,851.41,build-only patch,22.30,87,860.2|848.7|851.4
+2024-04-22,OsTIrus_1.3.12,308d112f9,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,524.27,build-only patch,11.61,79,524.3|525.2|512.5
+2024-05-12,1.3.14,0558cb085,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,263.95,,6.12,102,261.4|266.6|264.0
+2024-05-12,1.3.14,0558cb085,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,193.46,,3.56,114,193.5|193.9|191.4
+2024-05-12,1.3.14,0558cb085,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,858.14,build-only patch,11.90,87,853.9|858.1|860.4
+2024-05-12,1.3.14,0558cb085,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,525.89,build-only patch,10.17,81,527.4|525.9|523.7
+2024-07-06,1.3.15,f50ed1a14,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,268.51,,6.50,104,272.1|266.8|268.5
+2024-07-06,1.3.15,f50ed1a14,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,196.01,,4.05,114,196.3|196.0|195.7
+2024-07-06,1.3.15,f50ed1a14,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,838.74,build-only patch,16.92,87,842.2|838.7|836.1
+2024-07-06,1.3.15,f50ed1a14,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,527.57,build-only patch,8.73,81,522.2|530.7|527.6
+2024-08-04,1.3.17,cdbf91bdc,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,265.74,,5.46,104,265.2|267.2|265.7
+2024-08-04,1.3.17,cdbf91bdc,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,199.26,,4.89,114,199.3|198.5|201.3
+2024-08-04,1.3.17,cdbf91bdc,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,851.10,build-only patch,24.42,86,853.2|851.1|850.7
+2024-08-04,1.3.17,cdbf91bdc,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,527.40,build-only patch,22.39,79,512.4|529.6|527.4
+2024-09-08,1.3.20,ebdc38090,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,266.46,,7.09,106,262.8|268.9|266.5
+2024-09-08,1.3.20,ebdc38090,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,196.82,,4.38,114,196.8|198.7|194.1
+2024-09-08,1.3.20,ebdc38090,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,866.98,build-only patch,16.22,88,867.0|867.4|857.2
+2024-09-08,1.3.20,ebdc38090,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,532.55,build-only patch,15.38,78,537.8|532.6|524.9
+2024-10-29,1.3.21,020ffa444,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,340.69,,10.90,67,341.2|340.7|337.2
+2024-10-29,1.3.21,020ffa444,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,234.14,,6.40,67,238.0|234.1|233.8
+2024-10-29,1.3.21,020ffa444,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,996.17,build-only patch,18.22,102,996.2|994.8|997.4
+2024-10-29,1.3.21,020ffa444,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,600.48,build-only patch,13.11,90,599.4|604.4|600.5
+2024-11-18,1.4.0,3fedce01b,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,324.13,,10.35,63,326.2|320.5|324.1
+2024-11-18,1.4.0,3fedce01b,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,235.52,,6.99,66,236.3|234.5|235.5
+2024-11-18,1.4.0,3fedce01b,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,976.70,build-only patch,25.99,98,947.5|976.7|976.8
+2024-11-18,1.4.0,3fedce01b,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,598.36,build-only patch,14.88,89,596.5|602.8|598.4
+2024-12-14,1.4.1,be80626bb,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,938.47,build-only patch,21.41,96,938.9|938.5|934.3
+2024-12-14,1.4.1,be80626bb,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,336.54,build-only patch,12.38,67,335.7|336.5|350.7
+2024-12-14,1.4.1,be80626bb,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,558.87,build-only patch,25.71,82,558.9|568.8|521.4
+2024-12-14,1.4.1,be80626bb,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,238.39,build-only patch,6.73,69,237.9|238.4|239.0
+2025-02-01,1.4.2,4e31c7314,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,339.97,,13.15,69,343.7|337.4|340.0
+2025-02-01,1.4.2,4e31c7314,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,237.98,,6.06,69,238.8|238.0|238.0
+2025-02-01,1.4.2,4e31c7314,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,960.31,build-only patch,14.99,97,950.2|960.3|963.6
+2025-02-01,1.4.2,4e31c7314,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,580.31,build-only patch,10.50,87,580.3|573.1|581.1
+2025-03-09,1.4.4,30c101d5e,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1010.94,,20.24,103,1019.0|1010.9|990.3
+2025-03-09,1.4.4,30c101d5e,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,335.74,,20.74,69,354.4|334.1|335.7
+2025-03-09,1.4.4,30c101d5e,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,595.04,,13.01,89,588.2|597.1|595.0
+2025-03-09,1.4.4,30c101d5e,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,233.33,,6.71,67,229.5|233.3|234.7
+2025-09-23,2.0.0,d9ad3ae70,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1001.27,,31.41,101,993.0|1013.2|1001.3
+2025-09-23,2.0.0,d9ad3ae70,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,337.74,,16.18,68,348.5|337.7|336.9
+2025-09-23,2.0.0,d9ad3ae70,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,599.70,,11.89,89,599.7|596.2|600.6
+2025-09-23,2.0.0,d9ad3ae70,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,230.78,,6.59,67,229.7|230.8|232.5
+2025-10-23,2.0.9,cae361c74,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1010.00,,23.25,102,1010.0|1007.6|1010.1
+2025-10-23,2.0.9,cae361c74,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,353.69,,14.50,70,351.0|353.7|360.4
+2025-10-23,2.0.9,cae361c74,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,598.70,,13.31,89,600.2|589.8|598.7
+2025-10-23,2.0.9,cae361c74,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,241.96,,5.95,69,242.0|240.2|242.3
+2025-11-11,2.0.12,9d6c4f868,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1013.21,,30.03,104,1013.2|1017.1|1009.0
+2025-11-11,2.0.12,9d6c4f868,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,343.53,,15.07,68,346.5|339.3|343.5
+2025-11-11,2.0.12,9d6c4f868,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,601.08,,32.21,88,603.8|601.1|594.8
+2025-11-11,2.0.12,9d6c4f868,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,240.70,,6.56,69,244.3|238.6|240.7
+2025-12-16,2.0.14,b29d68be9,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1017.23,,26.99,103,1017.2|1011.3|1018.7
+2025-12-16,2.0.14,b29d68be9,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,353.87,,13.46,69,349.2|361.0|353.9
+2025-12-16,2.0.14,b29d68be9,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,602.36,,30.54,89,599.2|603.1|602.4
+2025-12-16,2.0.14,b29d68be9,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,241.52,,7.25,69,241.5|243.5|236.5
+2025-12-27,2.1.0,268bbd820,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1017.61,,17.44,104,1018.0|1017.2|1017.6
+2025-12-27,2.1.0,268bbd820,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,340.81,,13.13,68,335.7|340.8|341.2
+2025-12-27,2.1.0,268bbd820,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,600.98,,10.31,90,599.2|604.7|601.0
+2025-12-27,2.1.0,268bbd820,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,234.83,,5.55,66,231.4|234.8|236.1
+2026-02-24,2.1.4,da8b3d327,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1016.16,,16.48,105,1018.4|1016.2|1007.7
+2026-02-24,2.1.4,da8b3d327,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,350.49,,15.29,68,352.6|345.1|350.5
+2026-02-24,2.1.4,da8b3d327,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,605.45,,8.49,90,605.7|605.4|598.7
+2026-02-24,2.1.4,da8b3d327,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,237.97,,7.13,70,238.0|244.0|232.3
+2026-03-21,2.2.2,8bb6b4515,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1012.06,,36.38,104,1012.1|1014.9|1011.1
+2026-03-21,2.2.2,8bb6b4515,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,344.73,,14.27,68,346.5|344.7|344.2
+2026-03-21,2.2.2,8bb6b4515,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,598.92,,11.41,90,600.6|597.9|598.9
+2026-03-21,2.2.2,8bb6b4515,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,241.44,,6.51,69,238.4|241.4|244.5
+2026-04-06,2.2.3,230d74f42,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1027.18,,17.47,102,1027.2|1029.6|1016.9
+2026-04-06,2.2.3,230d74f42,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,354.92,,13.21,70,355.5|347.6|354.9
+2026-04-06,2.2.3,230d74f42,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,610.26,,10.36,90,612.1|610.3|604.4
+2026-04-06,2.2.3,230d74f42,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,238.42,,6.91,70,235.9|238.4|243.5
+2026-05-26,2.2.6,26cec5578,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1041.00,,10.57,105,1036.9|1041.0|1041.4
+2026-05-26,2.2.6,26cec5578,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,351.34,,15.61,69,351.3|349.2|353.6
+2026-05-26,2.2.6,26cec5578,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,607.58,,12.41,90,607.6|609.0|607.0
+2026-05-26,2.2.6,26cec5578,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,237.82,,7.07,69,236.9|238.3|237.8
+2026-07-29,2.2.9,6ff5ef3b1,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,988.62,,52.03,99,953.0|999.7|988.6
+2026-07-29,2.2.9,6ff5ef3b1,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,347.50,,13.39,69,347.5|348.3|346.0
+2026-07-29,2.2.9,6ff5ef3b1,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,587.79,,10.15,88,587.4|587.8|589.1
+2026-07-29,2.2.9,6ff5ef3b1,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,236.73,,5.42,69,236.7|235.2|240.1
+2026-08-26,HEAD,54f216436,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Ryzen 9 7950X3D,1482.08,,51.93,148,1482.1|1488.5|1479.7
+2026-08-26,HEAD,54f216436,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,420.78,,31.68,82,431.6|420.8|415.1
+2026-08-26,HEAD,54f216436,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,751.33,,49.93,110,742.7|751.3|772.4
+2026-08-26,HEAD,54f216436,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,260.10,,7.69,75,260.1|258.0|260.5
