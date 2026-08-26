@@ -2,7 +2,7 @@
 
 #include "logging.h"
 
-#include "../ptypes/pinet.h"
+#include "ptypes/pinet.h"
 
 #ifdef _WIN32
 #define NOMINMAX

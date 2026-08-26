@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/../../scripts/rclone.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../../scripts/rclone.cmake)
 
 set(TEST_DATA_DIR integrationTestsData)
 

@@ -8,10 +8,6 @@ set(SOURCES
 	mqTestConsole.cpp
 )
 
-if(NOT ANDROID)
-	list(APPEND SOURCES ../portmidi/pm_common/portmidi.h)
-endif()
-
 target_sources(mqTestConsole PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 

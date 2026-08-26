@@ -5,7 +5,7 @@
 #include "logging.h"
 #include "tcpStream.h"
 
-#include "../ptypes/pinet.h"
+#include "ptypes/pinet.h"
 
 #ifndef _WIN32
 #	include <netinet/tcp.h>	// TCP_NODELAY

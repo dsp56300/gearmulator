@@ -3,7 +3,7 @@
 #include <utility>
 
 #include "logging.h"
-#include "../ptypes/pinet.h"
+#include "ptypes/pinet.h"
 
 namespace networkLib
 {

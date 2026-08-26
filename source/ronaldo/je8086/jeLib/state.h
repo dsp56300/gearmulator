@@ -10,8 +10,6 @@
 #include "jemiditypes.h"
 #include "common/storage.h"
 
-#include "jucePluginLib/patchdb/patchdbtypes.h"
-
 #include "synthLib/midiTypes.h"
 
 namespace jeLib

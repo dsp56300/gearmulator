@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 # build a fat binary that runs on both intel and the new Apple M1 chip
 if(APPLE)
-	include(xcodeversion.cmake)
+	include(source/cmake/xcodeversion.cmake)
 
 	set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "OS X Architectures")
 
@@ -29,7 +29,7 @@ endif()
 
 project(gearmulator VERSION 2.2.14)
 
-include(base.cmake)
+include(source/cmake/base.cmake)
 include(CTest)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)

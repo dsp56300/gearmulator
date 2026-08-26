@@ -3,7 +3,8 @@
 #include "n2xhardware.h"
 #include "n2xstate.h"
 
-#include "wLib/wDevice.h"
+#include "synthLib/device.h"
+#include "synthLib/midiBufferParser.h"
 
 namespace n2x
 {

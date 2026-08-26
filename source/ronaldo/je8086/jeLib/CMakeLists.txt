@@ -24,7 +24,7 @@ source_group("source" FILES ${SOURCES})
 
 set_property(TARGET jeLib PROPERTY FOLDER "JE8086")
 
-target_link_libraries(jeLib PUBLIC synthLib hardwareLib rLib esp)
+target_link_libraries(jeLib PUBLIC synthLib hardwareLib rLib esp h8s)
 
 target_include_directories(jeLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
