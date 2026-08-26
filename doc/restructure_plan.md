@@ -1,9 +1,11 @@
 # Repository restructure plan
 
-Status: **proposal, nothing moved yet**
+Status: **Phase 1 and Phase 2 done.** The tree below is the tree on disk.
+Remaining: Phase 3 (rebase the 13 worktrees) and Phase 4 (docs).
 
 Decided: codenames per §5 (`axel` / `waldi` / `claudia` / `enzo` / `novak`), and
-`framework/{core-level, juce/, tools/}` per §3. Everything else still open.
+`framework/{core-level, juce/, tools/}` per §3. `axel/` is flat — Access only
+built the Virus, so the family level would hold exactly one entry.
 
 ## 1. What is there today
 
@@ -66,7 +68,8 @@ source/
 ├── cpu/                      processor + DSP cores — silicon, not synths
 │   ├── dsp56300/             (submodule, ours)
 │   ├── mc68k/                (submodule, ours)
-│   └── h8s/                  ← from ronaldo/h8s, merged with device/nova's h8sEmu
+│   └── h8s/                  ← from ronaldo/h8s, now a standalone interface target
+│                                so device/nova can link it instead of forking a copy
 │
 ├── framework/                everything synth-agnostic
 │   ├── baseLib/  synthLib/  hardwareLib/  networkLib/
@@ -74,8 +77,8 @@ source/
 │   │                         juceRmlPlugin, juceUiLib, jucePluginData, mcpServerLib
 │   └── tools/                bridge, pluginTester, midiLearnTest, changelogGenerator
 │
-├── axel/                     Access
-│   └── virus/                virusLib, virusJucePlugin, virusConsoleLib,
+├── axel/                     Access — flat, the Virus was their only synth series
+│                             virusLib, virusJucePlugin, virusConsoleLib,
 │                             virusTestConsole, virusIntegrationTest,
 │                             osirusJucePlugin, osTIrusJucePlugin
 ├── waldi/                    Waldorf
@@ -99,7 +102,9 @@ The rule, which `ronaldo/` already follows and everything else adopts:
 
 > `<maker>/<family>/<target-dir>`, plus `<maker>/common/` for code shared across that
 > maker's families and `<maker>/<chip>/` for that maker's custom silicon (`esp`, `csp`,
-> `es5510`). Generic CPUs used by more than one maker go to `cpu/`.
+> `es5510`). Generic CPUs used by more than one maker go to `cpu/`. A maker with only
+> one family skips the family level — `axel/` is flat because Access only ever built
+> the Virus.
 
 `source/` drops from 60 entries to **11**.
 
@@ -182,7 +187,8 @@ A bounded list of **~12 lines**, all found by `git grep '\.\./'` over our CMakeL
 
 | File(s) | Line | Fix |
 |---|---|---|
-| ~~8 × `target_include_directories(… ../JUCE/modules)`~~ | — | **done in Phase 1**: 6 deleted as redundant, 2 now use `${JUCE_MODULES_DIR}`. Phase 2 edits one line. |
+| ~~8 × `target_include_directories(… ../JUCE/modules)`~~ | — | **done in Phase 1**: 6 deleted as redundant, 2 now use `${JUCE_MODULES_DIR}`. Phase 2 edited one line. |
+| `cpu/mc68k` | — | **The one real gap.** `mc68k` declares no include root of its own; `#include "mc68k/…"` resolved only through the blanket `source/` root that `baseLib` exported, which this restructure removes. Handed the `cpu/` root from `source/CMakeLists.txt` after `add_subdirectory`. Should eventually move into the submodule itself. |
 | `mqTestConsole/CMakeLists.txt:12` | `../portmidi/pm_common/portmidi.h` | drop the header from `SOURCES`, or use the portmidi target's interface |
 | `findvst2.cmake:1` | `../scripts/rclone.cmake` | repath |
 | `virusIntegrationTest/runTest.cmake:1` | `../../scripts/rclone.cmake` | repath |
@@ -232,21 +238,51 @@ those land turns every one of them into a rename-conflict exercise.
   The real bug behind them — those branches commit the paths as gitlinks with no matching
   `.gitmodules` entry — should be fixed on those branches, not here.
 
-**Phase 2 — the move (one commit, pure `git mv` + CMake path edits, no content changes)**
+**Phase 2 — the move** — ✅ **done**
 
-Keeping it to a single mechanical commit is what makes rename detection work, and lets
-every branch rebase across it in one step.
+Landed as one commit. Git recorded **2025 renames and zero delete+add pairs**, which is
+what lets the worktree branches rebase across it in a single step.
 
-1. `source/cmake/` — move the 9 glue files + root `base.cmake`, `xcodeversion.cmake`.
-2. `source/3rdparty/` — move `JUCE`, `cpp-terminal`, `clap-juce-extensions`, `fst`,
-   `libresample`, `portaudio`, `portmidi`, `ptypes`, `vstsdk2.4.2` in. Write the README.
-3. `source/cpu/` — move `dsp56300`, `mc68k`, `ronaldo/h8s`.
-4. `source/framework/` — move the 15 framework dirs into `framework/`, `framework/juce/`,
-   `framework/tools/`.
-5. `source/axel/virus/`, `source/waldi/*`, rename `nord` → `claudia`.
-6. Split `source/CMakeLists.txt` into per-folder CMakeLists; fix the ~12 lines from §7.
-7. Configure + build Debug on Windows, Linux, macOS. `ctest -C Release` for the virus
-   integration tests. No behaviour changed, so a green build *is* the verification.
+1. ✅ `source/cmake/` — the 9 glue files + root `base.cmake`, `xcodeversion.cmake`.
+2. ✅ `source/3rdparty/` — `JUCE`, `cpp-terminal`, `clap-juce-extensions`, `fst`,
+   `libresample`, `portaudio`, `portmidi`, `ptypes`, `vstsdk2.4.2`, plus the README.
+3. ✅ `source/cpu/` — `dsp56300`, `mc68k`, and `h8s` out of `ronaldo/`.
+4. ✅ `source/framework/` — 15 dirs into `framework/`, `framework/juce/`, `framework/tools/`.
+5. ✅ `source/axel/` (flat), `source/waldi/{common,microq,xt}`, `nord` → `claudia`.
+6. ✅ Paths fixed. **Not** split into per-folder CMakeLists — see below.
+7. ✅ Configure + full Debug build on Windows, zero errors.
+
+Two deviations from the plan as written, both deliberate:
+
+- **`source/CMakeLists.txt` was repathed, not split.** Its `add_subdirectory` order is
+  load-bearing, and splitting it is a content change in a commit whose whole value is
+  being purely mechanical. The per-folder split is a separate, independent change that
+  can happen when it is the only thing moving. `ronaldo/` and `claudia/` keep the
+  per-folder CMakeLists they already had.
+- **`h8s` became a real target.** It is header-only and had no CMakeLists at all; it
+  resolved purely through `rLib`'s exported `source/ronaldo/` root. Moving it to `cpu/`
+  meant giving it an INTERFACE library that hands out the `cpu/` include root, and
+  linking it from `jeLib`. Done this way specifically so `device/nova` can link the same
+  target rather than carrying its own `h8sEmu` copy.
+
+Still to verify on other platforms: Linux and macOS builds, and `ctest -C Release` for
+the virus integration tests.
+
+### Latent bugs the move exposed
+
+Removing the blanket `source/` include root did what it should: three files were relying
+on headers reaching them by accident. All three fixes are include-what-you-use, and all
+three are correct independently of the restructure.
+
+| File | Was | Now |
+|---|---|---|
+| `claudia/n2x/n2xLib/n2xdevice.h` | `#include "wLib/wDevice.h"` — a Clavia device lib pulling in a **Waldorf** header. Nothing in `claudia/` references `wLib::` at all; the include survived as a copy-paste from `mqLib`/`xtLib` and was load-bearing only because `wDevice.h` transitively supplies `synthLib/device.h` | includes `synthLib/device.h` and `synthLib/midiBufferParser.h` directly |
+| `ronaldo/je8086/jeLib/state.h` | `#include "jucePluginLib/patchdb/patchdbtypes.h"` — a **device** lib reaching into the **JUCE plugin** layer, a straight layering inversion. Nothing in `jeLib` references `pluginLib::` or `patchDB::` | removed |
+| `ronaldo/je8086/jeTestConsole/jeTestConsole.cpp` | used `std::chrono::high_resolution_clock` with no `<chrono>`, getting it transitively through `patchdbtypes.h` via `jeLib/state.h` | `#include <chrono>` |
+
+Adding the missing link edges instead of removing the includes would have been the wrong
+fix for the first two: it would have made Clavia depend on Waldorf, and the device layer
+depend on the plugin layer. Neither dependency is real.
 
 **Phase 3 — rebase the worktrees**, one at a time, `q` and `vfx` first (biggest, most
 new files). Each branch's new directories get placed under the new scheme as part of its
