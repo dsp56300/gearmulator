@@ -309,6 +309,18 @@ Sanitisation is a **merge-boundary job, not a per-branch hygiene rule.** It happ
 shared code crosses into `oss/main`, and it is the responsibility of whoever holds that
 gate — not something every device branch maintains ahead of time.
 
+The gate belongs where the audience changes, and to whoever owns that side. A device
+branch cannot reliably know what is unreleased at the moment it writes a comment —
+release state changes under it — whereas the merge into `oss/main` is a single point
+where someone with full visibility looks once. Every branch pre-sanitising is both more
+work and less reliable.
+
+It is also worth being clear that the device name is the *better* comment on a private
+branch. "Safe for <device>, which only ever streams sequential right-direction runs"
+tells the next reader which firmware validated that bound, and therefore how far to trust
+it; the neutral rewrite is the same sentence with the evidence removed. Strip the name at
+the gate, not at the keyboard.
+
 The restructure made the boundary sharper, because code that used to sit beside a device
 now sits in `framework/` or `cpu/`. The recurring shape is a comment justifying *why*
 shared code behaves a certain way by naming the device that motivated it:
@@ -329,7 +341,8 @@ which firmware it was checked against, so the fix is to describe the behaviour a
 the name. Two practical notes: a wholesale rewrite of a file can silently reintroduce a
 name that was already redacted (this has happened), and `hardwareLib/lcd.*` has been split
 into `hd44780.*` / `sed1335.*` on a private branch, so that is new shared code to check
-whenever it arrives.
+whenever it arrives. Treat any instance count here as a snapshot — those files are still
+being written, so re-grep at the gate rather than trusting a number recorded earlier.
 
 **The boundary within the boundary: this covers prose, not device registration.**
 `source/CMakeLists.txt` names every device in its build options, and it has to — the
