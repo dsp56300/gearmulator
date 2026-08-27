@@ -299,7 +299,38 @@ further manufacturer folders come into existence there, not in Phase 2.
 **Phase 4 — docs.** `CLAUDE.md` (the per-synth table and "Where to Make Changes"),
 `.github/copilot-instructions.md`, `README.md`.
 
-## 9. Deliberately not in scope
+## 9. Device names in shared code
+
+`oss/main` is the public remote, so anything that reaches it names only released
+devices. The restructure made this sharper than it was: code that used to sit beside a
+device now sits in `framework/` or `cpu/`, and a comment that was harmless next to its
+own device becomes a disclosure once the file is shared.
+
+The recurring shape is a comment justifying *why* shared code behaves a certain way by
+naming the device that motivated it. Instances found so far:
+
+| File | Kind |
+|---|---|
+| `cpu/h8s/CMakeLists.txt` | why the core lives under `cpu/` |
+| `framework/synthLib/midiRunningStatus.h` | why running status is handled that way |
+| `framework/juce/juceRmlUi/rmlElemComboBox.h` | why the menu drops duplicates |
+| `framework/hardwareLib/sed1335.*` | TODOs bounding what the chip emulation implements |
+
+In every case the claim stands on its own — it does not depend on which firmware it was
+checked against — so the fix is to describe the behaviour and drop the name. That is
+also why it keeps happening: naming the device is the natural way to write the comment.
+
+**The boundary: this covers prose in device-independent code, not device registration.**
+`source/CMakeLists.txt` names every device in its build options, and it has to — the
+option names *are* the product list, they cannot be neutralised without breaking the
+build, and they only reach the public remote when the device itself does. A grep for
+device names will light that file up; that is expected, not a leak.
+
+Worth a sweep of `framework/` and `cpu/` before any push to a public remote. Note also
+that a wholesale rewrite of a file can silently reintroduce a name that was already
+redacted — that has happened once already.
+
+## 10. Deliberately not in scope
 
 - Renaming libs / CMake targets / C++ namespaces (`virusLib` → `axelLib` etc.). Huge
   diff, separate decision. §5.
