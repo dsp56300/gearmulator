@@ -282,6 +282,16 @@ Adding the missing link edges instead of removing the includes would have been t
 fix for the first two: it would have made Clavia depend on Waldorf, and the device layer
 depend on the plugin layer. Neither dependency is real.
 
+**There are two subtypes, and they want opposite fixes.** All three above are *phantom
+dependencies* — the include was not needed at all, so the fix is to delete it (or, where
+it was silently supplying something else, to include what is actually used). A further
+instance on another branch was the other kind: two plugin editors shared a common LCD
+header through the blanket root, and there the dependency was entirely **real**. The fix
+was to correct the path — drop the leading directory so it resolves through the shared
+library's own exported parent — not to remove the include. Diagnose which kind you have
+before reaching for a fix: ask whether the consumer genuinely uses the symbols, and only
+then decide between deleting the include and repathing it.
+
 **Phase 3 — bring the in-flight branches across**, one at a time, biggest first. Each
 branch's new directories get placed under the new scheme as part of its own merge, so any
 further manufacturer folders come into existence there, not in Phase 2.
