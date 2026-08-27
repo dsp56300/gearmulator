@@ -299,15 +299,19 @@ further manufacturer folders come into existence there, not in Phase 2.
 **Phase 4 — docs.** `CLAUDE.md` (the per-synth table and "Where to Make Changes"),
 `.github/copilot-instructions.md`, `README.md`.
 
-## 9. Device names in shared code
+## 9. Device names in shared code — a merge-boundary gate
 
-`oss/main` is the public remote, so anything that reaches it names only released
-devices. The restructure made this sharper than it was: code that used to sit beside a
-device now sits in `framework/` or `cpu/`, and a comment that was harmless next to its
-own device becomes a disclosure once the file is shared.
+**This applies only to `oss/main`.** The private branches do not need it. Nothing has to
+be removed, hidden or pre-emptively avoided on a `device/*` branch; a comment naming the
+device it was written for is fine there, and often more useful than a neutral one.
 
-The recurring shape is a comment justifying *why* shared code behaves a certain way by
-naming the device that motivated it. Instances found so far:
+Sanitisation is a **merge-boundary job, not a per-branch hygiene rule.** It happens when
+shared code crosses into `oss/main`, and it is the responsibility of whoever holds that
+gate — not something every device branch maintains ahead of time.
+
+The restructure made the boundary sharper, because code that used to sit beside a device
+now sits in `framework/` or `cpu/`. The recurring shape is a comment justifying *why*
+shared code behaves a certain way by naming the device that motivated it:
 
 | File | Kind |
 |---|---|
@@ -316,21 +320,39 @@ naming the device that motivated it. Instances found so far:
 | `framework/juce/juceRmlUi/rmlElemComboBox.h` | why the menu drops duplicates |
 | `framework/hardwareLib/sed1335.*` | TODOs bounding what the chip emulation implements |
 
-In every case the claim stands on its own — it does not depend on which firmware it was
-checked against — so the fix is to describe the behaviour and drop the name. That is
-also why it keeps happening: naming the device is the natural way to write the comment.
+Only the first is on `oss/main`, and it is already redacted. The rest are on private
+branches and are listed so the gate knows to look at them *if and when* those files land
+here — not as a to-do for their owners.
 
-**The boundary: this covers prose in device-independent code, not device registration.**
+At the gate, the claim in such a comment always stands on its own: it does not depend on
+which firmware it was checked against, so the fix is to describe the behaviour and drop
+the name. Two practical notes: a wholesale rewrite of a file can silently reintroduce a
+name that was already redacted (this has happened), and `hardwareLib/lcd.*` has been split
+into `hd44780.*` / `sed1335.*` on a private branch, so that is new shared code to check
+whenever it arrives.
+
+**The boundary within the boundary: this covers prose, not device registration.**
 `source/CMakeLists.txt` names every device in its build options, and it has to — the
 option names *are* the product list, they cannot be neutralised without breaking the
 build, and they only reach the public remote when the device itself does. A grep for
-device names will light that file up; that is expected, not a leak.
+device names lights that file up; that is expected, not a leak.
 
-Worth a sweep of `framework/` and `cpu/` before any push to a public remote. Note also
-that a wholesale rewrite of a file can silently reintroduce a name that was already
-redacted — that has happened once already.
+## 10. Coordinating branches through one `.git`
 
-## 10. Deliberately not in scope
+All the device branches are worktrees of this repository, so they share one `.git` and
+one set of remote-tracking refs. Two consequences that have already caused mistakes:
+
+- **A push from any session moves the shared remote-tracking ref.** Two branches were
+  found to be already published by something other than the session that authored them.
+- **"Not pushed yet" cannot be asserted from memory of your own commands.** It needs
+  `git ls-remote` or the remote-tracking reflog. Two sessions reported work as local when
+  it had been live for hours.
+
+Check the remote before claiming publication state, and before deciding whether a fix can
+be an amend or has to be a forward-only commit. Amending a commit that peers may already
+have fetched, on a branch several sessions merge from, is not worth it to fix a comment.
+
+## 11. Deliberately not in scope
 
 - Renaming libs / CMake targets / C++ namespaces (`virusLib` → `axelLib` etc.). Huge
   diff, separate decision. §5.
