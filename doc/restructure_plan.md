@@ -1,9 +1,9 @@
 # Repository restructure plan
 
 Status: **Phase 1 and Phase 2 done.** The tree below is the tree on disk.
-Remaining: Phase 3 (rebase the 13 worktrees) and Phase 4 (docs).
+Remaining: Phase 3 (bring the in-flight branches across) and Phase 4 (docs).
 
-Decided: codenames per §5 (`axel` / `waldi` / `claudia` / `enzo` / `novak`), and
+Decided: codenames per §5 (`axel` / `waldi` / `claudia`), and
 `framework/{core-level, juce/, tools/}` per §3. `axel/` is flat — Access only
 built the Virus, so the family level would hold exactly one entry.
 
@@ -21,7 +21,7 @@ Sorted by what they actually are:
 | **3rd party, submodule, pristine upstream** | `3rdparty/freetype`, `3rdparty/lunasvg` |
 | **3rd party, submodule, our fork** (`github.com/dsp56300/*`) | `JUCE`, `cpp-terminal`, `clap-juce-extensions`, `3rdparty/RmlUi` |
 | **3rd party, vendored in tree** (no upstream link) | `fst`, `libresample`, `portaudio`, `portmidi`, `ptypes`, `3rdparty/lua`, `vstsdk2.4.2` (fetch stub) |
-| **Ours — processor emulators** (submodules we own) | `dsp56300`, `mc68k`, `ronaldo/h8s`, (`h8sEmu` on `device/nova`) |
+| **Ours — processor emulators** (submodules we own) | `dsp56300`, `mc68k`, `ronaldo/h8s` |
 | **Ours — framework** | `baseLib`, `synthLib`, `hardwareLib`, `networkLib`, `mcpServerLib`, `jucePluginLib`, `jucePluginEditorLib`, `juceRmlUi`, `juceRmlPlugin`, `juceUiLib`, `jucePluginData`, `bridge`, `pluginTester`, `midiLearnTest`, `changelogGenerator` |
 | **Access** | `virusLib`, `virusJucePlugin`, `virusConsoleLib`, `virusTestConsole`, `virusIntegrationTest`, `osirusJucePlugin`, `osTIrusJucePlugin` |
 | **Waldorf** | `wLib`, `mqLib`, `mqJucePlugin`, `mqConsoleLib`, `mqTestConsole`, `mqPerformanceTest`, `xtLib`, `xtJucePlugin`, `xtTestConsole` |
@@ -29,12 +29,11 @@ Sorted by what they actually are:
 | **Roland** | `ronaldo/{common,esp,h8s,je8086}` |
 | **Build glue** | `juce.cmake`, `skins.cmake`, `skins.h.in`, `macsetup.cmake`, `macsetup.command.in`, `exporttarget.cmake`, `changelog.cmake`, `findvst2.cmake`, `runAuValidation.cmake` |
 | **Dead** | `mqVst2` (only a `.gitignore`), `Android` (only `.gitignore`s tracked; the app itself was never committed), `/azure-pipelines.yml` (unmodified "Hello, world" starter template) |
-| **Stray, untracked** | `3rdparty/SDL`, `3rdparty/asmjit`, `3rdparty/portmidi-latest` — clean clones of upstream, left over from a previous branch checkout in this working copy; owned by the `vfx` / `jade` / `sxx330` branches, which carry their own copies |
+| **Stray, untracked** | `3rdparty/SDL`, `3rdparty/asmjit`, `3rdparty/portmidi-latest` — clean clones of upstream, left over from a previous branch checkout in this working copy; owned by other branches, which carry their own copies |
 
-The pipeline in `wt/` roughly doubles this: `q` adds `goldfingerJucePlugin`,
-`vavraJucePlugin`, `qPerformanceTest`, `syx2bin`; `vfx` adds a whole `ensoniq/` tree
-(9 dirs); `sn2` adds `nova/` + `h8sEmu`; `jade`/`sxx330` grow `ronaldo/` to 10 dirs.
-On current trends `source/` reaches ~85 flat entries. That is the actual problem to
+Work in progress on other branches roughly doubles this — new device libraries,
+their plugin front-ends and test consoles, plus additional processor cores. On
+current trends `source/` reaches ~85 flat entries. That is the actual problem to
 solve — not today's 60.
 
 ## 2. Specific problems
@@ -48,8 +47,9 @@ solve — not today's 60.
 4. **Two different nesting conventions.** `ronaldo/je8086/jeLib` (3 levels) vs
    `virusLib` (1 level), for the same kind of thing.
 5. **Cross-cutting CPU cores are filed under a manufacturer.** `ronaldo/h8s` is the
-   Hitachi H8S core — the Supernova II needs it too, which is why `device/nova` grew a
-   second copy at `source/h8sEmu`. That duplication is a direct symptom of the layout.
+   Hitachi H8S core, but it is not Roland-specific — another manufacturer's device uses
+   the same core, so a second copy grew on another branch. That duplication is a direct
+   symptom of the layout.
 6. **Trademarked directory names.** `nord/` is the one that stands out (Nord is the
    product brand); `virus*`, `mq*`, `xt*` are the same issue one level down.
 
@@ -69,7 +69,7 @@ source/
 │   ├── dsp56300/             (submodule, ours)
 │   ├── mc68k/                (submodule, ours)
 │   └── h8s/                  ← from ronaldo/h8s, now a standalone interface target
-│                                so device/nova can link it instead of forking a copy
+│                                so every consumer links one copy instead of forking it
 │
 ├── framework/                everything synth-agnostic
 │   ├── baseLib/  synthLib/  hardwareLib/  networkLib/
@@ -84,25 +84,22 @@ source/
 ├── waldi/                    Waldorf
 │   ├── common/               wLib
 │   ├── microq/               mqLib, mqJucePlugin, mqConsoleLib, mqTestConsole, mqPerformanceTest
-│   ├── xt/                   xtLib, xtJucePlugin, xtTestConsole
-│   └── q/                    (from wt/q)
+│   └── xt/                   xtLib, xtJucePlugin, xtTestConsole
 ├── claudia/                  Clavia  (was nord/)
 │   └── n2x/                  n2xLib, n2xJucePlugin, n2xTestConsole
-├── ronaldo/                  Roland  (unchanged, minus h8s → cpu/)
-│   ├── common/  esp/  csp/  v55pi/  h8500/
-│   └── je8086/  jade/  se70/  sxx330/
-├── novak/                    Novation  (from wt/sn2)
-│   └── nova/
-└── enzo/                     Ensoniq  (from wt/vfx)
-    ├── common/
-    └── vfx/  ts10/
+└── ronaldo/                  Roland  (unchanged, minus h8s → cpu/)
+    ├── common/  esp/
+    └── je8086/
 ```
+
+Further manufacturer folders and families get added as their branches land; the
+rule below is what decides where each one goes.
 
 The rule, which `ronaldo/` already follows and everything else adopts:
 
 > `<maker>/<family>/<target-dir>`, plus `<maker>/common/` for code shared across that
-> maker's families and `<maker>/<chip>/` for that maker's custom silicon (`esp`, `csp`,
-> `es5510`). Generic CPUs used by more than one maker go to `cpu/`. A maker with only
+> maker's families and `<maker>/<chip>/` for that maker's own custom silicon (`esp` is
+> the existing example). Generic CPUs used by more than one maker go to `cpu/`. A maker with only
 > one family skips the family level — `axel/` is flat because Access only ever built
 > the Virus.
 
@@ -154,8 +151,9 @@ Carrying it through:
 | Access | `axel` | German first name, German company |
 | Waldorf | `waldi` | German company; `waldemar` if you prefer a full name |
 | Clavia | `claudia` | replaces `nord/`, which is the actual product trademark |
-| Ensoniq | `enzo` | |
-| Novation | `novak` | replaces `nova/`, which is a Novation product line |
+
+Manufacturers whose devices are not released yet get a codename by the same rule
+when their branch lands.
 
 Scope limit: **rename the manufacturer folders only.** Leave `virusLib`, `mqLib`,
 `xtLib`, `n2xLib`, `jeLib` and their CMake targets and C++ namespaces alone in this pass.
@@ -201,13 +199,13 @@ which splits into one CMakeLists per new folder.
 
 ## 8. Migration plan
 
-**Order matters more than the moves.** There are 14 live worktrees, several with large
-uncommitted or unpushed arcs (`sn2mc`, `q`, `vfx`, `jade`). A tree-wide move made before
-those land turns every one of them into a rename-conflict exercise.
+**Order matters more than the moves.** Several branches carry large uncommitted or
+unpushed arcs. A tree-wide move made before those land turns every one of them into a
+rename-conflict exercise.
 
 **Phase 0 — prerequisites (do first, separately)**
-- Land or park the in-flight branches you care about. At minimum `device/nova`,
-  `device/nova-mc`, `device/q` should be pushed to their remotes before Phase 2.
+- Land or park the in-flight branches you care about — push them to their remotes
+  before Phase 2.
 - `git config rerere.enabled true` on every worktree, so a conflict resolved once during
   rebase is not re-resolved per branch.
 
@@ -231,8 +229,8 @@ those land turns every one of them into a rename-conflict exercise.
   your call, and the stale artifacts date from March 2025.
 - ⏸ `3rdparty/{SDL,asmjit,portmidi-latest}` — **left in place deliberately.** All three
   are clean clones of their public upstreams with zero local modifications, and the
-  branches that need them (`vfx`, `jade`, `sxx330`) carry their own copies inside their
-  worktrees. The copies here are leftovers from a previous branch checkout in this working
+  branches that need them carry their own copies inside their worktrees. The copies here
+  are leftovers from a previous branch checkout in this working
   copy. Deleting them buys three lines of `git status` quiet and costs a multi-hundred-MB
   re-clone next time one of those branches is checked out here. Not worth it.
   The real bug behind them — those branches commit the paths as gitlinks with no matching
@@ -262,8 +260,8 @@ Two deviations from the plan as written, both deliberate:
 - **`h8s` became a real target.** It is header-only and had no CMakeLists at all; it
   resolved purely through `rLib`'s exported `source/ronaldo/` root. Moving it to `cpu/`
   meant giving it an INTERFACE library that hands out the `cpu/` include root, and
-  linking it from `jeLib`. Done this way specifically so `device/nova` can link the same
-  target rather than carrying its own `h8sEmu` copy.
+  linking it from `jeLib`. Done this way specifically so the other branch that uses this
+  core can link the same target rather than carrying its own copy.
 
 Still to verify on other platforms: Linux and macOS builds, and `ctest -C Release` for
 the virus integration tests.
@@ -284,9 +282,9 @@ Adding the missing link edges instead of removing the includes would have been t
 fix for the first two: it would have made Clavia depend on Waldorf, and the device layer
 depend on the plugin layer. Neither dependency is real.
 
-**Phase 3 — rebase the worktrees**, one at a time, `q` and `vfx` first (biggest, most
-new files). Each branch's new directories get placed under the new scheme as part of its
-own rebase — `enzo/` and `novak/` come into existence there, not in Phase 2.
+**Phase 3 — bring the in-flight branches across**, one at a time, biggest first. Each
+branch's new directories get placed under the new scheme as part of its own merge, so any
+further manufacturer folders come into existence there, not in Phase 2.
 
 **Phase 4 — docs.** `CLAUDE.md` (the per-synth table and "Where to Make Changes"),
 `.github/copilot-instructions.md`, `README.md`.
