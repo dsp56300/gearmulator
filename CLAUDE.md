@@ -134,8 +134,8 @@ Responsibilities: load firmware ROM, initialize DSP/CPU memory, handle MIDI via 
 ## Git Conventions
 
 - Do NOT include `Co-authored-by` trailers in commit messages
-- Do NOT commit without explicit user approval — the user stages changes themselves
-- Git remotes: `gearmulator` (public OSS, `dsp56300/gearmulator`), `private` (development), also `nas`, `codeberg`, `EvilDragon`. Jenkins SCM points at `private`.
+- Do NOT commit without explicit user approval
+- Git remotes: `gearmulator` (public OSS, `dsp56300/gearmulator`), `private_gearmulator` (development), also `nas` and `codeberg`. Jenkins SCM points at `private_gearmulator`.
 - DSP submodule (`source/cpu/dsp56300/`) is also owned by user — changes there are fine
 - The device branches are **worktrees of this repository**, so they share one `.git` and one set of remote-tracking refs. A push from any session moves the shared ref: check `git ls-remote` rather than assuming something is unpushed.
 - `oss/main` is the public remote. Unreleased devices must not be named in anything that lands there; private branches need no such care. See §9 of `doc/restructure_plan.md`.
