@@ -296,8 +296,10 @@ then decide between deleting the include and repathing it.
 branch's new directories get placed under the new scheme as part of its own merge, so any
 further manufacturer folders come into existence there, not in Phase 2.
 
-**Phase 4 — docs.** `CLAUDE.md` (the per-synth table and "Where to Make Changes"),
-`.github/copilot-instructions.md`, `README.md`.
+**Phase 4 — docs.** ✅ `CLAUDE.md` rewritten against the new tree, with every path
+verified to exist. `.github/copilot-instructions.md` was folded into it and deleted — it
+duplicated roughly half of `CLAUDE.md`, its build commands still named Visual Studio 2017,
+and every path in it predated the move. Remaining: `README.md`.
 
 ## 9. Device names in shared code — a merge-boundary gate
 
