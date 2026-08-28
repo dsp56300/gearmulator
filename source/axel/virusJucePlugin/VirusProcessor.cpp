@@ -25,6 +25,12 @@ namespace virus
 		destroyEditorState();
 	}
 
+	void VirusProcessor::prepareToPlay(const double _sampleRate, const int _samplesPerBlock)
+	{
+		Processor::prepareToPlay(_sampleRate, _samplesPerBlock);
+		getController().onStateLoaded();
+	}
+
 	//==============================================================================
 
 	void VirusProcessor::processBpm(const float _bpm)

@@ -179,9 +179,9 @@ namespace pluginLib
 
 	protected:
 		void destroyController();
+		void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 
 	private:
-		void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 		void releaseResources() override;
 
 		//==============================================================================
