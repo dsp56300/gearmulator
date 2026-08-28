@@ -151,6 +151,7 @@ namespace juceRmlUi
 
 	private:
 		void update();
+		void dispatchFrameEvent();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
@@ -203,6 +204,7 @@ namespace juceRmlUi
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
 
 		double m_time = 0;
+		double m_frameEventTime = 0;
 		float m_fps = 0;
 		float m_targetFPS = 0;
 

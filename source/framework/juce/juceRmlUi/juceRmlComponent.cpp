@@ -882,6 +882,8 @@ namespace juceRmlUi
 
 			evPreUpdate(this);
 
+			dispatchFrameEvent();
+
 			m_rmlContext->Update();
 
 			if (visible)
@@ -960,6 +962,29 @@ namespace juceRmlUi
 		std::scoped_lock lock(m_timerMutex);
 		// we make the timer run a bit faster to prevent that we miss the next frame time by a too large margin
 		startNextFrameTimer();
+	}
+
+	// Sends a "frame" event to the document before every context update, carrying the elapsed seconds
+	// since the previous one as "dt". A document opts in by declaring an onframe handler, which also keeps
+	// the frame loop awake. Documents without one are untouched and the loop keeps idling as before.
+	void RmlComponent::dispatchFrameEvent()
+	{
+		auto* doc = getDocument();
+
+		if (!doc || !doc->HasAttribute("onframe"))
+			return;
+
+		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+
+		if (m_frameEventTime <= 0)
+			m_frameEventTime = t;
+
+		const auto dt = static_cast<float>(t - m_frameEventTime);
+		m_frameEventTime = t;
+
+		doc->DispatchEvent("frame", Rml::Dictionary{{"dt", Rml::Variant(dt)}}, false);
+
+		enqueueUpdate();
 	}
 
 	void RmlComponent::enqueueUpdate()

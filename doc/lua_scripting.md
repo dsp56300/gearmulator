@@ -31,6 +31,7 @@ Add a `<script>` block in your RML file's `<head>` section:
 - Use `onload="myFunction()"` on `<body>` to run code after all elements are created but before layout is computed.
 - Use `onshow="myFunction()"` on an element to run code when that element becomes visible. Layout is computed at this point, so `offset_width`/`offset_height` return correct values.
 - Inline event handlers like `onclick="..."` receive `event`, `element`, and `document` as parameters.
+- Use `onframe="myFunction(event)"` on `<body>` to run code before every rendered frame, after the document is loaded and laid out. See [Per-Frame Updates](#per-frame-updates-onframe).
 
 ### Globals
 
@@ -115,6 +116,27 @@ local part = params.getCurrentPart()
 local id = params.onPartChanged(function(newPart)
   -- newPart: 0-based part number
 end)
+```
+
+## Per-Frame Updates (`onframe`)
+
+A per-frame handler may be added to `<body>` to implement looping animations beyond the capabilities of
+RCSS `@keyframes` and `transition` (e.g. oscilliscopes).
+
+```html
+<body onframe="myFrameHandler(event)" ...>
+```
+
+```lua
+function myFrameHandler(event)
+
+  -- Do stuff every frame
+  myCanvas:repaint()
+
+  -- Determine the number of seconds since the previous frame
+  local elapsedTime = event.parameters['dt']
+
+end
 ```
 
 ## DOM Manipulation
