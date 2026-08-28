@@ -1,9 +1,12 @@
+#include "FixtureLoader.h"
+
 #include "virusJucePlugin/VirusPatchFileParser.h"
 
 #include "virusLib/microcontrollerTypes.h"
 
 #include <cstdint>
 #include <iostream>
+#include <string>
 #include <vector>
 
 namespace
@@ -65,21 +68,24 @@ namespace
 
 	bool testTIControlArrangementIsMerged()
 	{
-		const auto state = makeTIControlState(16);
+		const auto state = virusLibTest::loadHexFixture("3Slimey-processor-state.hex");
 		synthLib::SysexBufferList results;
 
 		bool result = true;
 		result &= expect(genericVirusUI::VirusPatchFileParser::parse(results, state, {}),
-			"TI Control state is accepted by the preset parser");
-		result &= expect(results.size() == 1, "multi and 16 singles are merged into one arrangement");
-		if(results.size() != 1)
+			"captured TI Control ProcessorState is accepted by the preset parser");
+		result &= expect(results.size() == 3,
+			"captured multi and 16 singles merge while two parameter messages remain separate");
+		if(results.size() != 3)
 			return false;
 
 		constexpr size_t multiSize = 267;
 		constexpr size_t singleSize = 524;
 		result &= expect(results[0].size() == multiSize + 16 * singleSize,
-			"arrangement retains the complete multi and single dumps");
+			"captured arrangement retains the complete multi and single dumps");
 		result &= expect(results[0][6] == virusLib::DUMP_MULTI, "arrangement begins with the multi dump");
+		result &= expect(std::string(reinterpret_cast<const char*>(results[0].data() + multiSize + 249), 10) == "3Slimey   ",
+			"captured arrangement retains the first part name");
 		for(size_t part = 0; part < 16; ++part)
 		{
 			const auto offset = multiSize + part * singleSize;
@@ -102,13 +108,89 @@ namespace
 
 	bool testRawSysexFallbackStillLoads()
 	{
-		const auto single = makeSysex(524, virusLib::DUMP_SINGLE, 7);
+		const auto single = virusLibTest::loadHexFixture("3Slimey_part0.syx.hex");
 		synthLib::SysexBufferList results;
 
 		return expect(genericVirusUI::VirusPatchFileParser::parse(results, single, {}),
-			"ordinary raw SysEx still loads")
+			"captured single-patch SysEx loads")
 			&& expect(results.size() == 1 && results.front() == single,
-				"raw SysEx fallback preserves the original dump");
+				"single-patch import preserves the captured dump")
+			&& expect(std::string(reinterpret_cast<const char*>(results.front().data() + 249), 10) == "3Slimey   ",
+				"single-patch import retains its name");
+	}
+
+	bool testCapturedPartialBankLoadsAsPatches()
+	{
+		const auto bank = virusLibTest::loadBinaryFixture("Bank.mid");
+		synthLib::SysexBufferList results;
+		constexpr uint8_t programs[] = {0, 1, 2, 3, 4, 5, 6, 21, 56, 127};
+		constexpr const char* names[] = {
+			"3Slimey   ", "3Slimey!  ", "3Slimey!! ", "35limey!! ", "SSLLIIMMEE",
+			"EEEEEEEE  ", "Rave!!!   ", "5Slimey   ", "5Slimier  ", "5Slimist  "
+		};
+
+		bool result = true;
+		result &= expect(genericVirusUI::VirusPatchFileParser::parse(results, bank, "Bank.mid"),
+			"captured partial MIDI bank loads");
+		result &= expect(results.size() == 10, "partial bank exposes exactly its 10 stored patches without padding");
+		if(results.size() != 10)
+			return false;
+
+		for(size_t index = 0; index < results.size(); ++index)
+		{
+			const auto& patch = results[index];
+			result &= expect(patch.size() == 524, "every partial bank entry is a complete single dump");
+			if(patch.size() != 524)
+				continue;
+			result &= expect(patch[6] == virusLib::DUMP_SINGLE, "partial bank entries remain separate single patches");
+			result &= expect(patch[7] == 1, "partial bank entries retain Bank A");
+			result &= expect(patch[8] == programs[index], "partial bank retains sparse program numbers and ordering");
+			result &= expect(std::string(reinterpret_cast<const char*>(patch.data() + 249), 10) == names[index],
+				"partial bank retains the patch name at each stored program");
+		}
+		return result;
+	}
+
+	bool testCapturedBankLoadsAsPatches()
+	{
+		const auto bank = virusLibTest::loadBinaryFixture("BankFull.mid");
+		synthLib::SysexBufferList results;
+
+		bool result = true;
+		result &= expect(genericVirusUI::VirusPatchFileParser::parse(results, bank, "BankFull.mid"),
+			"captured 128-patch bank loads");
+		result &= expect(results.size() == 128, "bank exposes all 128 patches to the data source");
+		if(results.size() != 128)
+			return false;
+
+		for(size_t program = 0; program < results.size(); ++program)
+		{
+			const auto& patch = results[program];
+			result &= expect(patch.size() == 524, "every bank entry is a complete single dump");
+			if(patch.size() != 524)
+				continue;
+			result &= expect(patch[6] == virusLib::DUMP_SINGLE, "every bank entry is a single patch");
+			result &= expect(patch[7] == 1, "every bank entry retains Bank A");
+			result &= expect(patch[8] == program, "every bank entry retains its program number");
+		}
+
+		result &= expect(std::string(reinterpret_cast<const char*>(results.front().data() + 249), 10) == "3Slimey   ",
+			"bank retains its first patch name");
+		result &= expect(std::string(reinterpret_cast<const char*>(results.back().data() + 249), 10) == "3Slimey   ",
+			"bank retains its last patch name");
+		constexpr size_t boundaryPrograms[] = {16, 32, 48, 64, 80, 96, 112, 126};
+		constexpr const char* boundaryNames[] = {
+			"SSSSSS    ", "IIIIIIIII ", "MMMMMM    ", "EEEEEEEE  ",
+			"YYYYYYY   ", "5Slimist  ", "TRAPGOD   ", "Signed,   "
+		};
+		for(size_t index = 0; index < sizeof(boundaryPrograms) / sizeof(boundaryPrograms[0]); ++index)
+		{
+			const auto& patch = results[boundaryPrograms[index]];
+			result &= expect(patch.size() == 524
+				&& std::string(reinterpret_cast<const char*>(patch.data() + 249), 10) == boundaryNames[index],
+				"full bank retains patch names at program-group boundaries and the penultimate slot");
+		}
+		return result;
 	}
 }
 
@@ -116,5 +198,7 @@ bool testVirusPatchFileParser()
 {
 	return testTIControlArrangementIsMerged()
 		&& testIncompleteArrangementIsNotMerged()
-		&& testRawSysexFallbackStillLoads();
+		&& testRawSysexFallbackStillLoads()
+		&& testCapturedPartialBankLoadsAsPatches()
+		&& testCapturedBankLoadsAsPatches();
 }

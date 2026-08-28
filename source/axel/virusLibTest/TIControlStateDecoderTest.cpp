@@ -1,10 +1,11 @@
+#include "FixtureLoader.h"
+
 #include "virusLib/import/TIControlStateDecoder.h"
 #include "virusLib/microcontrollerTypes.h"
 
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <utility>
 #include <vector>
 
 bool testVirusPatchFileParser();
@@ -64,43 +65,9 @@ namespace
 		return result;
 	}
 
-	std::vector<Bytes> makeCapturedStateMessages()
-	{
-		std::vector<Bytes> messages;
-		messages.push_back(makeSysex(267, virusLib::DUMP_MULTI, 0));
-
-		constexpr const char* names[] =
-		{
-			"HOOV44    ", "PLAY WITH ", "TBLIPS    ", "HOVBASS   ",
-			"HOVSINE   ", "BsMoovin'@", "HOVSINE   ", "HOOV44 VAR",
-			"HOOV44    ", "HOOV44    ", "Auto 5ths@", " -Init-   ",
-			"HOOV44 VAR", "ArpBass2JL", " -Init-   ", " -Init-   "
-		};
-
-		for(uint8_t part = 0; part < 16; ++part)
-		{
-			auto single = makeSysex(524, virusLib::DUMP_SINGLE, part);
-			for(size_t i = 0; i < 10; ++i)
-				single[249 + i] = static_cast<uint8_t>(names[part][i]);
-			messages.push_back(std::move(single));
-		}
-
-		messages.push_back(makeSysex(11, virusLib::PAGE_D, 2));
-		messages.push_back(makeSysex(11, virusLib::PAGE_D, 2));
-
-		constexpr uint8_t controllers[] = {1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16};
-		for(const auto controller : controllers)
-		{
-			for(uint8_t channel = 0; channel < 16; ++channel)
-				messages.push_back(Bytes{static_cast<uint8_t>(synthLib::M_CONTROLCHANGE + channel), controller, channel});
-		}
-
-		return messages;
-	}
-
 	bool testCapturedStateShape()
 	{
-		const auto state = makeMidiBlock(makeCapturedStateMessages());
+		const auto state = virusLibTest::loadHexFixture("3Slimey-processor-state.hex");
 		Events events;
 
 		bool result = true;
@@ -120,7 +87,7 @@ namespace
 				"each part contains a single dump");
 			result &= expect(event.sysex[8] == part, "single dumps retain their part numbers");
 		}
-		result &= expect(std::string(reinterpret_cast<const char*>(events[1].sysex.data() + 249), 10) == "HOOV44    ",
+		result &= expect(std::string(reinterpret_cast<const char*>(events[1].sysex.data() + 249), 10) == "3Slimey   ",
 			"single dump payload and patch name are retained");
 
 		size_t sysexCount = 0;
