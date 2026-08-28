@@ -5,6 +5,7 @@ project(virusLibTest)
 add_executable(virusLibTest
 	FixtureLoader.cpp
 	FixtureLoader.h
+	TestRunner.h
 	TIControlStateDecoderTest.cpp
 	VirusPatchFileParserTest.cpp
 	../virusJucePlugin/VirusPatchFileParser.cpp

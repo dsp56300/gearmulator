@@ -1,4 +1,5 @@
 #include "FixtureLoader.h"
+#include "TestRunner.h"
 
 #include "virusJucePlugin/VirusPatchFileParser.h"
 
@@ -234,13 +235,13 @@ namespace
 	}
 }
 
-bool testVirusPatchFileParser()
+void testVirusPatchFileParser(virusLibTest::TestRunner& _runner)
 {
-	return testTIControlArrangementIsMerged()
-		&& testIncompleteArrangementIsNotMerged()
-		&& testRawSysexFallbackStillLoads()
-		&& testCapturedSingleExportsRoundTrip()
-		&& testCapturedArrangementExportsRoundTrip()
-		&& testCapturedPartialBankLoadsAsPatches()
-		&& testCapturedBankLoadsAsPatches();
+	_runner.run("Parser: ProcessorState Arrangement merge", testTIControlArrangementIsMerged);
+	_runner.run("Parser: incomplete Arrangement remains separate", testIncompleteArrangementIsNotMerged);
+	_runner.run("Parser: raw Single SysEx", testRawSysexFallbackStillLoads);
+	_runner.run("Parser: Single SYX/MIDI round trip", testCapturedSingleExportsRoundTrip);
+	_runner.run("Parser: Arrangement SYX/MIDI round trip", testCapturedArrangementExportsRoundTrip);
+	_runner.run("Parser: captured partial MIDI bank", testCapturedPartialBankLoadsAsPatches);
+	_runner.run("Parser: captured 128-Single bank", testCapturedBankLoadsAsPatches);
 }

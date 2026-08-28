@@ -1,4 +1,5 @@
 #include "FixtureLoader.h"
+#include "TestRunner.h"
 
 #include "virusLib/import/TIControlStateDecoder.h"
 #include "virusLib/microcontrollerTypes.h"
@@ -8,7 +9,7 @@
 #include <string>
 #include <vector>
 
-bool testVirusPatchFileParser();
+void testVirusPatchFileParser(virusLibTest::TestRunner& _runner);
 
 namespace
 {
@@ -141,14 +142,11 @@ namespace
 
 int main()
 {
-	bool result = true;
-	result &= testCapturedStateShape();
-	result &= testEmbeddedAndMultipleBlocks();
-	result &= testMalformedLengthIsRejected();
-	result &= testVirusPatchFileParser();
-
-	if(result)
-		std::cout << "Virus import tests passed\n";
-
-	return result ? 0 : 1;
+	virusLibTest::TestRunner runner;
+	runner.run("TI Control: captured ProcessorState", testCapturedStateShape);
+	runner.run("TI Control: embedded and multiple MIDI blocks", testEmbeddedAndMultipleBlocks);
+	runner.run("TI Control: malformed block length", testMalformedLengthIsRejected);
+	testVirusPatchFileParser(runner);
+	runner.printSummary();
+	return runner.allPassed() ? 0 : 1;
 }
