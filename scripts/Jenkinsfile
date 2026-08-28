@@ -80,6 +80,11 @@ pipeline {
 			}
 		}
 	}
+	post {
+		always {
+			script { notifyDiscord() }
+		}
+	}
 }
 
 def genericSh(cmd)
@@ -117,7 +122,7 @@ def buildFxPlugins()
 
 def cmakeBuildDir()
 {
-	return "${CMAKE_BUILD_DIR}_${params.Branch}"
+	return "${CMAKE_BUILD_DIR}_${params.Branch.replace('/', '_')}"
 }
 
 def doCheckout()
@@ -215,4 +220,38 @@ def doGitHub()
 	if("${params.UploadFolder}" == "beta" || "${params.UploadFolder}" == "") {
 		genericSh "cmake -Dgearmulator_SOURCE_DIR=${WORKSPACE} -Dgearmulator_BINARY_DIR=${WORKSPACE}/${buildDir} -P scripts/deployGitHub.cmake"
 	}
+}
+
+def notifyDiscord()
+{
+	def result = currentBuild.currentResult
+	def color  = result == 'SUCCESS' ? 3066993 : (result == 'ABORTED' ? 9807270 : 15158332)
+
+	// writeJSON rather than hand built JSON on the command line: the payload goes to a file,
+	// so there is no cmd-vs-sh quoting to get wrong on the windows/linux/mac agents
+	writeJSON file: 'discord.json', json: [
+		username: 'jenkins',
+		embeds: [[
+			title: currentBuild.fullDisplayName,
+			url:   env.BUILD_URL,
+			color: color,
+			fields: [
+				[name: 'Result',   value: result,            inline: true],
+				[name: 'Platform', value: params.AgentLabel, inline: true],
+				[name: 'Duration', value: currentBuild.durationString.replace(' and counting', ''), inline: true],
+				[name: 'Branch',   value: params.Branch,     inline: true],
+				[name: 'Synths',   value: params.Synths,     inline: false]
+			]
+		]]
+	]
+
+	// a discord outage must never turn a green build red
+	try {
+		withCredentials([string(credentialsId: 'discord_build_webhook', variable: 'DISCORD_HOOK')]) {
+			genericSh 'curl -sS -H "Content-Type: application/json" -d @discord.json ' + formatArg('DISCORD_HOOK')
+		}
+	} catch(e) {
+		echo "Discord notification failed: ${e}"
+	}
+	deleteFile('discord.json')
 }
