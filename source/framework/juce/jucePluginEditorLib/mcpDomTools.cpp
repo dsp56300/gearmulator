@@ -16,6 +16,7 @@
 #include "RmlUi/Core/Input.h"
 
 #include <juce_events/juce_events.h>
+#include <chrono>
 #include <future>
 #include <thread>
 
@@ -23,6 +24,13 @@ namespace jucePluginEditorLib
 {
 	namespace
 	{
+		// How long a synthetic click keeps the mouse button down, unless the caller
+		// overrides it with holdMs. A device whose emulated firmware polls a key matrix
+		// only registers a press that is still down when the matrix is next scanned, so
+		// an instantaneous press/release is invisible to it. This is short enough to keep
+		// scripted clicking snappy and far below a human click (~50-150ms).
+		constexpr int g_defaultClickHoldMs = 80;
+
 		// Helper to get plain text content from an element (strips HTML tags)
 		std::string getTextContent(Rml::Element* _elem)
 		{
@@ -540,12 +548,13 @@ namespace jucePluginEditorLib
 		{
 			mcpServer::ToolDef tool;
 			tool.name = "click_element";
-			tool.description = "Simulate a mouse click on an element by ID or CSS selector. Injects mouse move, button down, and button up through the RmlUI context. Use clickCount=2 for double-click.";
+			tool.description = "Simulate a mouse click on an element by ID or CSS selector. Injects mouse move, button down, a hold, and button up through the RmlUI context. Use clickCount=2 for double-click. The button is held for holdMs so that devices whose emulated firmware scans a key matrix (front-panel buttons) actually see the press.";
 			tool.inputSchema.addProperty("id", "string", "Element ID to click", false);
 			tool.inputSchema.addProperty("selector", "string", "CSS selector to find the element (e.g. '.menuitem', 'div.active'). Uses first match.", false);
 			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
 			tool.inputSchema.addIntProperty("clickCount", "Number of clicks (default: 1, use 2 for double-click)", false, 1, 3);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
+			tool.inputSchema.addIntProperty("holdMs", "How long to keep the button down between press and release, in milliseconds (default: 80). Needed so emulated firmware that scans a key matrix sees the press; 0 presses and releases back to back.", false, 0, 5000);
 			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const auto id = _params.hasProperty("id") ? _params.get("id").getString().toStdString() : std::string();
@@ -553,55 +562,88 @@ namespace jucePluginEditorLib
 				const int button = parseMouseButton(_params);
 				const int mods = parseModifiers(_params);
 				const int clickCount = _params.hasProperty("clickCount") ? _params.get("clickCount").getInt() : 1;
+				const int holdMs = _params.hasProperty("holdMs") ? _params.get("holdMs").getInt() : g_defaultClickHoldMs;
 
 				if (id.empty() && selector.empty())
 					throw std::runtime_error("Either 'id' or 'selector' must be provided");
 
-				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				// Press and release are deliberately separate hops onto the message thread
+				// with a real pause in between. Front-panel buttons of an emulated device are
+				// read by firmware that polls a key matrix, and it only ever sees a button
+				// that is still down when it next scans: pressing and releasing inside a
+				// single callback sets and clears the state before the emulation looks at it,
+				// so the click does nothing while still reporting success. The wait happens
+				// here on the calling thread, holding no RmlUi lock, so the message thread
+				// and the audio thread (which is what actually runs the emulation) keep going.
+				const auto press = [&](const bool _moveFirst) -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
-					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
-
-					Rml::Element* elem = nullptr;
-					std::string elemDesc;
-
-					if (!id.empty())
+					return runOnMessageThread([&]() -> mcpServer::JsonValue
 					{
-						elem = ui.document->GetElementById(id);
-						elemDesc = id;
-					}
-					else
-					{
-						elem = ui.document->QuerySelector(selector);
-						elemDesc = selector;
-					}
+						auto ui = RmlUiAccess::acquire(_processor);
+						juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
-					if (!elem)
-						throw std::runtime_error("Element not found: " + elemDesc);
+						Rml::Element* elem = nullptr;
+						std::string elemDesc;
 
-					const auto [cx, cy] = getElementCenter(elem);
+						if (!id.empty())
+						{
+							elem = ui.document->GetElementById(id);
+							elemDesc = id;
+						}
+						else
+						{
+							elem = ui.document->QuerySelector(selector);
+							elemDesc = selector;
+						}
 
-					ui.context->ProcessMouseMove(cx, cy, mods);
-					for (int i = 0; i < clickCount; ++i)
-					{
+						if (!elem)
+							throw std::runtime_error("Element not found: " + elemDesc);
+
+						const auto [cx, cy] = getElementCenter(elem);
+
+						if (_moveFirst)
+							ui.context->ProcessMouseMove(cx, cy, mods);
 						ui.context->ProcessMouseButtonDown(button, mods);
-						ui.context->ProcessMouseButtonUp(button, mods);
-					}
-					ui.rmlComp->enqueueUpdate();
+						ui.rmlComp->enqueueUpdate();
 
-					auto result = mcpServer::JsonValue::object();
-					result.set("success", mcpServer::JsonValue::fromBool(true));
-					result.set("element", mcpServer::JsonValue::fromString(elemDesc));
-					const auto& elemId = elem->GetId();
-					if (!elemId.empty() && elemId != elemDesc)
-						result.set("id", mcpServer::JsonValue::fromString(elemId));
-					const auto text = getTextContent(elem);
-					if (!text.empty())
-						result.set("text", mcpServer::JsonValue::fromString(text));
-					result.set("x", mcpServer::JsonValue::fromInt(cx));
-					result.set("y", mcpServer::JsonValue::fromInt(cy));
-					return result;
-				});
+						auto result = mcpServer::JsonValue::object();
+						result.set("success", mcpServer::JsonValue::fromBool(true));
+						result.set("element", mcpServer::JsonValue::fromString(elemDesc));
+						const auto& elemId = elem->GetId();
+						if (!elemId.empty() && elemId != elemDesc)
+							result.set("id", mcpServer::JsonValue::fromString(elemId));
+						const auto text = getTextContent(elem);
+						if (!text.empty())
+							result.set("text", mcpServer::JsonValue::fromString(text));
+						result.set("x", mcpServer::JsonValue::fromInt(cx));
+						result.set("y", mcpServer::JsonValue::fromInt(cy));
+						result.set("holdMs", mcpServer::JsonValue::fromInt(holdMs));
+						return result;
+					});
+				};
+
+				const auto release = [&]
+				{
+					runOnMessageThread([&]
+					{
+						auto ui = RmlUiAccess::acquire(_processor);
+						juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+						ui.context->ProcessMouseButtonUp(button, mods);
+						ui.rmlComp->enqueueUpdate();
+					});
+				};
+
+				mcpServer::JsonValue result;
+
+				for (int i = 0; i < clickCount; ++i)
+				{
+					result = press(i == 0);
+					if (holdMs > 0)
+						std::this_thread::sleep_for(std::chrono::milliseconds(holdMs));
+					release();
+				}
+
+				return result;
 			};
 			_server.registerTool(std::move(tool));
 		}

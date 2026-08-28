@@ -355,7 +355,7 @@ These tools inject input events through the RmlUI context, identical to real use
 
 #### `click_element`
 
-Simulate a mouse click on an element by ID or CSS selector. Moves the cursor to the element's center, then injects mouse button down and up. Use `clickCount=2` for double-click.
+Simulate a mouse click on an element by ID or CSS selector. Moves the cursor to the element's center, then injects mouse button down, holds it for `holdMs`, and injects button up. Use `clickCount=2` for double-click.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -363,9 +363,19 @@ Simulate a mouse click on an element by ID or CSS selector. Moves the cursor to 
 | `selector` | string | no* | CSS selector (uses first match, e.g. `.menuitem`) |
 | `button` | string | no | `"left"` (default), `"right"`, or `"middle"` |
 | `clickCount` | integer | no | Number of clicks (default: 1, use 2 for double-click) |
+| `holdMs` | integer | no | How long the button stays down between press and release, in ms (default: 80, max 5000). `0` presses and releases back to back |
 | `modifiers` | object | no | `{ctrl, shift, alt, meta}` as booleans |
 
 \* Either `id` or `selector` must be provided.
+
+**Why the button is held.** A synth's front-panel buttons are read by the emulated
+firmware polling a key matrix, and it only ever sees a button that is still down
+when it next scans. Press and release are therefore issued as two separate events
+with a real pause in between; doing both at once sets and clears the state before
+the emulation looks at it, so the click does nothing while still reporting
+`success: true`. The default hold covers this — only set `holdMs` explicitly if you
+want a long press (say a button whose hold triggers a different action), or `0` for
+a pure UI element where the extra latency is unwelcome.
 
 #### `mouse_move`
 
