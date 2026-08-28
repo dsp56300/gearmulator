@@ -1,4 +1,5 @@
-#include "virusLib/device.h"
+#include "virusLib/import/TIControlStateDecoder.h"
+#include "virusLib/microcontrollerTypes.h"
 
 #include <cstdint>
 #include <iostream>
@@ -101,7 +102,7 @@ namespace
 		Events events;
 
 		bool result = true;
-		result &= expect(virusLib::Device::parseTIcontrolPreset(events, state), "captured-shape state parses");
+		result &= expect(virusLib::TIControlStateDecoder::decode(events, state), "captured-shape state parses");
 		result &= expect(events.size() == 243, "all 243 MIDI records are returned");
 
 		if(events.size() != 243)
@@ -147,7 +148,7 @@ namespace
 
 		Events events;
 		bool result = true;
-		result &= expect(virusLib::Device::parseTIcontrolPreset(events, state), "embedded MIDI blocks parse");
+		result &= expect(virusLib::TIControlStateDecoder::decode(events, state), "embedded MIDI blocks parse");
 		result &= expect(events.size() == 2, "multiple MIDI blocks are parsed");
 		if(events.size() == 2)
 		{
@@ -164,7 +165,7 @@ namespace
 		appendU32(state, 0);
 
 		Events events;
-		return expect(!virusLib::Device::parseTIcontrolPreset(events, state), "oversized block is rejected")
+		return expect(!virusLib::TIControlStateDecoder::decode(events, state), "oversized block is rejected")
 			&& expect(events.empty(), "malformed block produces no events");
 	}
 }
@@ -177,7 +178,7 @@ int main()
 	result &= testMalformedLengthIsRejected();
 
 	if(result)
-		std::cout << "parseTIcontrolPreset tests passed\n";
+		std::cout << "TIControlStateDecoder tests passed\n";
 
 	return result ? 0 : 1;
 }

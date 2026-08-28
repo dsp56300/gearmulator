@@ -11,6 +11,7 @@
 
 #include "virusLib/microcontroller.h"
 #include "virusLib/device.h"
+#include "virusLib/import/TIControlStateDecoder.h"
 #include "virusLib/midiFileToRomData.h"
 
 #include "synthLib/midiToSysex.h"
@@ -608,7 +609,7 @@ namespace genericVirusUI
 
 		{
 			std::vector<synthLib::SMidiEvent> events;
-			virusLib::Device::parseTIcontrolPreset(events, _data);
+			virusLib::TIControlStateDecoder::decode(events, _data);
 
 			for (const auto& e : events)
 			{
