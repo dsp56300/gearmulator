@@ -10,6 +10,7 @@
 #include "synthLib/midiToSysex.h"
 
 #include <cstring>
+#include <iterator>
 
 #include "dspMemoryPatches.h"
 
@@ -245,63 +246,81 @@ namespace virusLib
 		if(_state.size() < 8)
 			return false;
 
-		uint32_t readPos = 0;
-
+		uint32_t searchPos = 0;
 		uint32_t numFound = 0;
 
-		while(readPos < _state.size() - 4)
+		auto readLen = [&_state](const size_t _offset) -> uint32_t
 		{
-			if(!find4CC(readPos, _state, "MIDI"))
+			if(_offset + 4 > _state.size())
+				return 0;
+			return
+				(static_cast<uint32_t>(_state[_offset+0]) << 24) |
+				(static_cast<uint32_t>(_state[_offset+1]) << 16) |
+				(static_cast<uint32_t>(_state[_offset+2]) << 8) |
+				(static_cast<uint32_t>(_state[_offset+3]));
+		};
+
+		while(searchPos <= _state.size() - 4)
+		{
+			uint32_t markerPos = searchPos;
+			if(!find4CC(markerPos, _state, "MIDI"))
 				break;
 
-			if(readPos >= _state.size())
-				break;
+			size_t readPos = static_cast<size_t>(markerPos) + 4;
+			searchPos = markerPos + 4;
 
-			auto readLen = [&_state](const size_t _offset) -> uint32_t
-			{
-				if(_offset + 4 > _state.size())
-					return 0;
-				const uint32_t o =
-					(static_cast<uint32_t>(_state[_offset+0]) << 24) | 
-					(static_cast<uint32_t>(_state[_offset+1]) << 16) |
-					(static_cast<uint32_t>(_state[_offset+2]) << 8) |
-					(static_cast<uint32_t>(_state[_offset+3]));
-				return o;
-			};
+			if(readPos + 4 > _state.size())
+				continue;
 
-			auto nextLen = [&readPos, &readLen]() -> uint32_t
-			{
-				const auto len = readLen(readPos);
-				readPos += 4;
-				return len;
-			};
+			const auto dataLen = readLen(readPos);
+			readPos += 4;
+			if(dataLen > _state.size() - readPos)
+				continue;
 
-			const auto dataLen = nextLen();
+			const auto dataEnd = readPos + dataLen;
+			if(readPos + 4 > dataEnd)
+				continue;
 
-			if(dataLen + readPos > _state.size())
-				break;
-
-			const auto controllerAssignmentsLen = nextLen();
-
+			const auto controllerAssignmentsLen = readLen(readPos);
+			readPos += 4;
+			if(controllerAssignmentsLen > dataEnd - readPos)
+				continue;
 			readPos += controllerAssignmentsLen;
-			
-			while(readPos < _state.size())
-			{
-				const auto midiDataLen = nextLen();
 
+			std::vector<synthLib::SMidiEvent> blockEvents;
+			uint32_t blockSysexCount = 0;
+			bool valid = true;
+
+			while(readPos < dataEnd)
+			{
+				if(readPos + 4 > dataEnd)
+				{
+					valid = false;
+					break;
+				}
+
+				const auto midiDataLen = readLen(readPos);
+				readPos += 4;
 				if(!midiDataLen)
 					break;
 
-				if((readPos + midiDataLen) > _state.size())
+				if(midiDataLen > dataEnd - readPos)
+				{
+					valid = false;
 					break;
+				}
 
-				synthLib::SMidiEvent& e = _events.emplace_back();
+				synthLib::SMidiEvent& e = blockEvents.emplace_back(synthLib::MidiEventSource::Internal);
 
 				e.sysex.assign(_state.begin() + readPos, _state.begin() + readPos + midiDataLen);
 
 				if(e.sysex.front() != 0xf0)
 				{
-					assert(e.sysex.size() <= 3);
+					if(e.sysex.size() > 3)
+					{
+						valid = false;
+						break;
+					}
 					e.a = e.sysex[0];
 					if(e.sysex.size() > 1)
 						e.b = e.sysex[1];
@@ -314,8 +333,16 @@ namespace virusLib
 				readPos += midiDataLen;
 
 				if(!e.sysex.empty())
-					++numFound;
-			}			
+					++blockSysexCount;
+			}
+
+			if(valid)
+			{
+				_events.insert(_events.end(), std::make_move_iterator(blockEvents.begin()), std::make_move_iterator(blockEvents.end()));
+				numFound += blockSysexCount;
+			}
+
+			searchPos = static_cast<uint32_t>(dataEnd);
 		}
 
 		return numFound > 0;
