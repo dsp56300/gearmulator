@@ -119,6 +119,46 @@ namespace
 				"single-patch import retains its name");
 	}
 
+	bool testCapturedSingleExportsRoundTrip()
+	{
+		const auto expected = virusLibTest::loadBinaryFixture("single.syx");
+		const auto midi = virusLibTest::loadBinaryFixture("single.mid");
+		synthLib::SysexBufferList syxResults;
+		synthLib::SysexBufferList midiResults;
+
+		bool result = true;
+		result &= expect(genericVirusUI::VirusPatchFileParser::parse(syxResults, expected, "single.syx"),
+			"captured Single SysEx export parses");
+		result &= expect(syxResults.size() == 1 && syxResults.front() == expected,
+			"captured Single SysEx export remains byte-identical");
+		result &= expect(genericVirusUI::VirusPatchFileParser::parse(midiResults, midi, "single.mid"),
+			"captured Single MIDI export parses");
+		result &= expect(midiResults.size() == 1 && midiResults.front() == expected,
+			"captured Single MIDI export contains the same SysEx dump");
+		return result;
+	}
+
+	bool testCapturedArrangementExportsRoundTrip()
+	{
+		const auto expected = virusLibTest::loadBinaryFixture("arrangement.syx");
+		const auto midi = virusLibTest::loadBinaryFixture("arrangement.mid");
+		synthLib::SysexBufferList syxResults;
+		synthLib::SysexBufferList midiResults;
+
+		bool result = true;
+		result &= expect(expected.size() == 267 + 16 * 524,
+			"captured Arrangement SysEx contains one Multi and 16 Singles");
+		result &= expect(genericVirusUI::VirusPatchFileParser::parse(syxResults, expected, "arrangement.syx"),
+			"captured Arrangement SysEx export parses");
+		result &= expect(syxResults.size() == 1 && syxResults.front() == expected,
+			"captured Arrangement SysEx export merges without changing bytes");
+		result &= expect(genericVirusUI::VirusPatchFileParser::parse(midiResults, midi, "arrangement.mid"),
+			"captured Arrangement MIDI export parses");
+		result &= expect(midiResults.size() == 1 && midiResults.front() == expected,
+			"captured Arrangement MIDI export contains the same Multi and 16 Singles");
+		return result;
+	}
+
 	bool testCapturedPartialBankLoadsAsPatches()
 	{
 		const auto bank = virusLibTest::loadBinaryFixture("Bank.mid");
@@ -199,6 +239,8 @@ bool testVirusPatchFileParser()
 	return testTIControlArrangementIsMerged()
 		&& testIncompleteArrangementIsNotMerged()
 		&& testRawSysexFallbackStillLoads()
+		&& testCapturedSingleExportsRoundTrip()
+		&& testCapturedArrangementExportsRoundTrip()
 		&& testCapturedPartialBankLoadsAsPatches()
 		&& testCapturedBankLoadsAsPatches();
 }
