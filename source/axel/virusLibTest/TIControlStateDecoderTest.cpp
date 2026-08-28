@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+bool testVirusPatchFileParser();
+
 namespace
 {
 	using Bytes = synthLib::SysexBuffer;
@@ -176,9 +178,10 @@ int main()
 	result &= testCapturedStateShape();
 	result &= testEmbeddedAndMultipleBlocks();
 	result &= testMalformedLengthIsRejected();
+	result &= testVirusPatchFileParser();
 
 	if(result)
-		std::cout << "TIControlStateDecoder tests passed\n";
+		std::cout << "Virus import tests passed\n";
 
 	return result ? 0 : 1;
 }
