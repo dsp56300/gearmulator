@@ -244,7 +244,7 @@ The Microwave II/XT and microQ support voice expansion via extra DSP boards; in 
 **GitHub Actions** (`.github/workflows/`): `cmake.yml` (matrix: Ubuntu, macOS 14, Windows 2022, default + Ninja generators), `nightly.yml`, `release.yml`. Linux CI deps: `sudo apt install -y libgl1-mesa-dev xorg-dev libasound2-dev`.
 
 **Jenkins** (private) — three jobs:
-- **`dsp56300_main`** — single-platform build, Jenkinsfile from SCM (`scripts/Jenkinsfile`). Stages: Checkout → Compile → Pack → Integration Tests → Deploy → Upload → GitHub. Params: `Branch`, `AgentLabel`, `Synths` (cmake `-D` flag string), `DisplayName`, `FXPlugins`, `Deploy`, `Upload`, `GitHub`, `IntegrationTests`, `UploadFolder`.
+- **`dsp56300_main`** — single-platform build, inline pipeline (`scripts/Jenkinsfile` is a manually-synced mirror, not loaded from SCM). Stages: Checkout → Compile → Pack → Integration Tests → Deploy → Upload → GitHub. Params: `Branch`, `AgentLabel`, `Synths` (cmake `-D` flag string), `DisplayName`, `FXPlugins`, `Deploy`, `Upload`, `GitHub`, `IntegrationTests`, `UploadFolder`.
 - **`dsp56300_main_multi`** — multi-platform orchestrator, inline pipeline (`scripts/JenkinsfileMulti`). Triggers `dsp56300_main` in parallel per platform; per-synth booleans (`SynthOsirus`, `SynthOsTIrus`, `SynthVavra`, `SynthXenia`, `SynthNodalRed2x`, `SynthJe8086`, `DSPBridge`) are assembled into the `Synths` string. `UploadFolder`: `internal`, `alpha`, `beta`, `donators`. Posts an MQTT notification on completion.
 - **`dsp56300_copy`** — rclone archival of build artifacts.
 
