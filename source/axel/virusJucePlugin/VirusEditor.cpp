@@ -104,7 +104,7 @@ namespace genericVirusUI
 
 		if(auto* versionInfo = findChild("VersionInfo", false))
 		{
-		    const std::string message = "DSP 56300 Emulator Version " + pluginLib::Version::getVersionString() + " - " + pluginLib::Version::getVersionDateTime();
+			const std::string message = "DSP 56300 Emulator Version " + pluginLib::Version::getVersionString() + " - " + pluginLib::Version::getVersionDateTime();
 			versionInfo->SetInnerRML(message);
 		}
 
@@ -467,6 +467,24 @@ namespace genericVirusUI
 		getController().requestArrangement();
 	}
 
+	bool VirusEditor::saveArrangement(const std::string& _pathName, const pluginLib::FileType& _fileType) const
+	{
+		synthLib::SysexBufferList messages;
+		messages.push_back(getController().getMultiEditBuffer().data);
+
+		for(uint8_t i = 0; i < 16; ++i)
+		{
+			const auto dump = getController().createSingleDump(
+				i,
+				toMidiByte(virusLib::BankNumber::EditBuffer),
+				i);
+
+			messages.push_back(dump);
+		}
+
+		return Editor::savePresets(_fileType, _pathName, messages);
+	}
+
 	void VirusEditor::savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/)
 	{
 		Editor::savePreset(_fileType, [this, _saveType, _bankNumber, _fileType](const juce::File& _result)
@@ -482,51 +500,34 @@ namespace genericVirusUI
 #if SYNTHLIB_DEMO_MODE
 		return false;
 #else
-		synthLib::SysexBufferList messages;
-		
 		switch (_saveType)
 		{
 		case SaveType::CurrentSingle:
 			{
 				const auto dump = getController().createSingleDump(getController().getCurrentPart(), toMidiByte(virusLib::BankNumber::A), 0);
-				messages.push_back(dump);
+				return Editor::savePresets(_fileType, _pathName, {dump});
 			}
-			break;
 		case SaveType::Bank:
 			{
 				const auto& presets = getController().getSinglePresets();
-				if(_bankNumber < presets.size())
-				{
-					const auto& bankPresets = presets[_bankNumber];
-					for (const auto& bankPreset : bankPresets)
-						messages.push_back(bankPreset.data);
-				}
+
+				if(_bankNumber >= presets.size())
+					return false;
+
+				synthLib::SysexBufferList messages;
+
+				for(const auto& preset : presets[_bankNumber])
+					messages.push_back(preset.data);
+
+				return Editor::savePresets(_fileType, _pathName, messages);
 			}
-			break;
 		case SaveType::Arrangement:
-			{
-				getController().onMultiReceived = [this, _fileType, _pathName]
-				{
-					synthLib::SysexBufferList messages;
-					messages.push_back(getController().getMultiEditBuffer().data);
+			return saveArrangement(_pathName, _fileType);
 
-					for(uint8_t i=0; i<16; ++i)
-					{
-						const auto dump = getController().createSingleDump(i, toMidiByte(virusLib::BankNumber::EditBuffer), i);
-						messages.push_back(dump);
-						Editor::savePresets(_fileType, _pathName, messages);
-					}
-
-					getController().onMultiReceived = {};
-				};
-				getController().requestMulti(0, 0);
-			}
-			return true;
 		default:
 			return false;
 		}
 
-		return Editor::savePresets(_fileType, _pathName, messages);
 #endif
 	}
 

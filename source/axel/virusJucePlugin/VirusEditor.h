@@ -85,6 +85,7 @@ namespace genericVirusUI
 		void savePreset(const Rml::Event& _event);
 		void loadPreset();
 
+	    bool saveArrangement(const std::string& _pathName, const pluginLib::FileType& _fileType) const;
 		void savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber = 0);
 		bool savePresets(const std::string& _pathName, SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber = 0) const;
 
