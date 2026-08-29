@@ -67,8 +67,16 @@ namespace virusLib
 
 	bool DspMemoryPatchSet::apply(dsp56k::DSP& _dsp, const baseLib::MD5& _md5) const
 	{
+		// a default-constructed MD5 means "nobody computed this" and must not authorise anything
+		static const baseLib::MD5 g_unknown{};	// not constexpr: MD5's default ctor assigns m_h in the body
+
+		if(_md5 == g_unknown)
+			return false;
+
 		for (const auto& e : allowedTargets)
 		{
+			if(e == g_unknown)
+				continue;
 			if(e == _md5)
 				return apply(_dsp, patches);
 		}
