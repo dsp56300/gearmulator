@@ -1,16 +1,16 @@
-[submodule "source/dsp56300"]
+[submodule "source/cpu/dsp56300"]
 	path = source/cpu/dsp56300
 	url = https://github.com/dsp56300/dsp56300
-[submodule "source/JUCE"]
+[submodule "source/3rdparty/JUCE"]
 	path = source/3rdparty/JUCE
 	url = https://github.com/dsp56300/JUCE
-[submodule "source/cpp-terminal"]
+[submodule "source/3rdparty/cpp-terminal"]
 	path = source/3rdparty/cpp-terminal
 	url = https://github.com/dsp56300/cpp-terminal
-[submodule "source/mc68k"]
+[submodule "source/cpu/mc68k"]
 	path = source/cpu/mc68k
 	url = https://github.com/dsp56300/mc68k.git
-[submodule "source/clap-juce-extensions"]
+[submodule "source/3rdparty/clap-juce-extensions"]
 	path = source/3rdparty/clap-juce-extensions
 	url = https://github.com/dsp56300/clap-juce-extensions.git
 [submodule "source/3rdparty/RmlUi"]
