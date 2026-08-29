@@ -34,6 +34,7 @@ include(CTest)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugin" on)
+option(${PROJECT_NAME}_ENABLE_LTO "Enable link-time optimization" on)
 
 # ----------------- CPack basic parameters
 

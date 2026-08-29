@@ -56,8 +56,13 @@ elseif(APPLE)
 	    "-framework OpenGL"
 	    "-framework QuartzCore"  	
 	)
-	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector")
-	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector")
+
+    if(NOT ${PROJECT_NAME}_ENABLE_LTO)
+		message(WARNING "LTO disabled due to requested configuration")
+    endif()
+
+	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -Ofast -fno-stack-protector")
+	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -funroll-loops -Ofast -fno-stack-protector")
 
 	# Ship a dSYM for Release so crashes in released macOS builds can be symbolized (a tester's Live crash
 	# report could only be read as raw offsets because no dSYM existed). The -g below is what makes the Xcode
@@ -84,8 +89,10 @@ else()
 		string(APPEND CMAKE_CXX_FLAGS " -msse")
 	endif()
 
+    if(NOT ${PROJECT_NAME}_ENABLE_LTO)
+		message(WARNING "LTO disabled due to requested configuration")
 	# GCC still has LTO issues
-	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		message(WARNING "LTO disabled due to GCC detected which is causing issues")
 	else()
 		cmake_policy(SET CMP0069 NEW)
