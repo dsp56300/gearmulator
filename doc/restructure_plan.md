@@ -367,6 +367,39 @@ Check the remote before claiming publication state, and before deciding whether 
 be an amend or has to be a forward-only commit. Amending a commit that peers may already
 have fetched, on a branch several sessions merge from, is not worth it to fix a comment.
 
+### Delete the old submodule paths immediately after merging
+
+**This is a trap, not an annoyance.** Merging the restructure leaves the five relocated
+submodules with directories at their *old* paths. They look untracked and inert. They are
+not:
+
+- **A later `git add -A` sweeps them in as gitlinks with no `.gitmodules` mapping.** That
+  breaks `git submodule status --recursive` for the whole repository —
+  `fatal: no submodule mapping found in .gitmodules for path 'source/JUCE'` — and a fresh
+  clone gets empty directories. It has happened once already, hidden inside a commit whose
+  message described a four-line changelog edit.
+- **They can come back on their own.** `git mv` rewrites `.gitmodules` and the
+  working-tree `.git` pointer but *not* `core.worktree` inside
+  `.git/modules/<name>/config`. Git resolves via the gitdir pointer, so builds never
+  notice; any tool that reads the module config directly can rematerialise a full checkout
+  at the stale path. That produced two working trees sharing one gitdir — ~12.8k files —
+  in a working copy that had been verified clean hours earlier.
+
+So after merging: remove the old directories from disk *and* make sure no gitlink for them
+is staged. And fix `core.worktree` in each moved module's config, or the tooling will keep
+recreating what you just deleted:
+
+```
+git config -f .git/modules/source/JUCE/config core.worktree ../../../../source/3rdparty/JUCE
+```
+
+…and the same for `cpp-terminal`, `clap-juce-extensions` (both to `3rdparty/`), `dsp56300`
+and `mc68k` (both to `cpu/`), plus the nested `clap-libs/clap`, `clap-libs/clap-helpers`
+and `dsp56300/source/asmjit`. In a worktree the file is
+`.git/worktrees/<name>/modules/<name>/config` instead. Plain
+`git submodule sync --recursive && git submodule update --init --recursive` populates the
+new paths but does **not** fix `core.worktree`.
+
 ## 11. Deliberately not in scope
 
 - Renaming libs / CMake targets / C++ namespaces (`virusLib` → `axelLib` etc.). Huge
