@@ -141,6 +141,13 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		LV2URI "http://theusualsuspects.lv2/${productName}"
 	)
 
+	# The FST compatibility header intentionally marks unknown VST2 constants as
+	# deprecated, while JUCE's VST2 wrapper still references those constants.
+	# Suppress that third-party-only noise on the generated VST2 wrapper target.
+	if(TARGET ${targetName}_VST AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+		target_compile_options(${targetName}_VST PRIVATE -Wno-deprecated-declarations)
+	endif()
+
 	target_sources(${targetName} PRIVATE ${SOURCES} serverPlugin.cpp)
 
 	source_group("source" FILES ${SOURCES})
