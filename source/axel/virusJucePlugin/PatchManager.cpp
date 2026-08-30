@@ -1,4 +1,5 @@
 #include "PatchManager.h"
+#include "VirusPatchFileParser.h"
 
 #include "VirusEditor.h"
 #include "VirusController.h"
@@ -10,14 +11,10 @@
 #include "jucePluginLib/patchdb/datasource.h"
 
 #include "virusLib/microcontroller.h"
-#include "virusLib/device.h"
-#include "virusLib/midiFileToRomData.h"
 
 #include "synthLib/midiToSysex.h"
 
 #include "juce_cryptography/hashing/juce_MD5.h"
-
-#include "synthLib/sounddiverLibLoader.h"
 
 namespace virus
 {
@@ -564,197 +561,7 @@ namespace genericVirusUI
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
 	{
-		// Convert SysexBuffer to std::vector<uint8_t> for SounddiverLibLoader
-		std::vector<uint8_t> dataVec(_data.begin(), _data.end());
-		
-		if (synthLib::SounddiverLibLoader::isValidData(dataVec))
-		{
-			synthLib::SounddiverLibLoader sd2s(dataVec);
-
-			const auto& results = sd2s.getResults();
-
-			if (!results.empty())
-			{
-				uint8_t prog = 0;
-
-				for (const auto & res : results)
-				{
-					if (res.data.size() != 250)
-						continue;
-
-					// preset, pack into sysex
-
-					synthLib::SysexBuffer& sysex = _results.emplace_back(
-						synthLib::SysexBuffer{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10,
-							static_cast<uint8_t>(prog >> 7), static_cast<uint8_t>(prog & 0x7f)}
-					);
-
-					sysex.insert(sysex.end(), res.data.begin(), res.data.begin() + 240);
-
-					for (size_t i=0; i<10; ++i)
-						sysex.push_back(i < res.name.size() ? res.name[i] : ' ');
-
-					sysex.insert(sysex.end(), res.data.begin() + 240, res.data.end() - 4);
-
-					sysex.push_back(virusLib::Microcontroller::calcChecksum(sysex));
-					sysex.push_back(0xf7);
-
-					++prog;
-				}
-
-				return true;
-			}
-		}
-
-		{
-			std::vector<synthLib::SMidiEvent> events;
-			virusLib::Device::parseTIcontrolPreset(events, _data);
-
-			for (const auto& e : events)
-			{
-				if (!e.sysex.empty())
-					_results.push_back(e.sysex);
-			}
-
-			if (!_results.empty())
-				return true;
-		}
-
-		if (virusLib::Device::parseVTIBackup(_results, _data))
-			return true;
-
-		bool res = virusLib::Device::parsePowercorePreset(_results, _data);
-		res |= synthLib::MidiToSysex::extractSysexFromData(_results, _data);
-
-		if(!res)
-		{
-			// Attempt to extract TDM plugin presets
-
-			if (!virusLib::Device::parseTDMPreset(_results, _data, _filename))
-				return false;
-		}
-
-		if(!_results.empty())
-		{
-			if(_data.size() > 500000)
-			{
-				virusLib::MidiFileToRomData romLoader;
-
-				for (const auto& result : _results)
-				{
-					if(!romLoader.add(result))
-						break;
-				}
-				if(romLoader.isComplete())
-				{
-					const auto& data = romLoader.getData();
-
-					if(data.size() > 0x10000)
-					{
-						// presets are written to ROM address 0x50000, the second half of an OS update is therefore at 0x10000
-						constexpr ptrdiff_t startAddr = 0x10000;
-						ptrdiff_t addr = startAddr;
-						uint32_t index = 0;
-
-						while(addr + 0x100 <= static_cast<ptrdiff_t>(data.size()))
-						{
-							std::vector<uint8_t> chunk(data.begin() + addr, data.begin() + addr + 0x100);
-
-							// validate
-//							const auto idxH = chunk[2];
-							const auto idxL = chunk[3];
-
-							if(/*idxH != (index >> 7) || */idxL != (index & 0x7f))
-								break;
-
-							bool validName = true;
-							for(size_t i=240; i<240+10; ++i)
-							{
-								if(chunk[i] < 32 || chunk[i] > 128)
-								{
-									validName = false;
-									break;
-								}
-							}
-
-							if(!validName)
-								continue;
-
-							addr += 0x100;
-							++index;
-						}
-
-						if(index > 0)
-						{
-							_results.clear();
-
-							for(uint32_t i=0; i<index; ++i)
-							{
-								// pack into sysex
-								synthLib::SysexBuffer& sysex = _results.emplace_back(synthLib::SysexBuffer
-									{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10, static_cast<uint8_t>(0x01 + (i >> 7)), static_cast<uint8_t>(i & 0x7f)}
-								);
-								sysex.insert(sysex.end(), data.begin() + i * 0x100 + startAddr, data.begin() + i * 0x100 + 0x100 + startAddr);
-								sysex.push_back(virusLib::Microcontroller::calcChecksum(sysex));
-								sysex.push_back(0xf7);
-							}
-						}
-					}
-				}
-			}
-
-		}
-
-		// Arrangement detection: scan for a DUMP_MULTI immediately followed by
-		// 16 consecutive DUMP_SINGLE messages and merge each such sequence into
-		// one compound patch. Works for single-arrangement files AND user-bank
-		// files that store multiple patches (and possibly multiple arrangements)
-		// as concatenated sysex messages.
-		{
-			auto isMulti = [](const pluginLib::patchDB::Data& _d)
-			{
-				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_MULTI;
-			};
-			auto isSingle = [](const pluginLib::patchDB::Data& _d)
-			{
-				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_SINGLE;
-			};
-
-			pluginLib::patchDB::DataList merged;
-			merged.reserve(_results.size());
-
-			for (size_t i = 0; i < _results.size();)
-			{
-				if (isMulti(_results[i]) && i + 16 < _results.size())
-				{
-					bool allSingles = true;
-					for (size_t j = 1; j <= 16; ++j)
-					{
-						if (!isSingle(_results[i + j]))
-						{
-							allSingles = false;
-							break;
-						}
-					}
-
-					if (allSingles)
-					{
-						pluginLib::patchDB::Data compound = _results[i];
-						for (size_t j = 1; j <= 16; ++j)
-							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
-						merged.emplace_back(std::move(compound));
-						i += 17;
-						continue;
-					}
-				}
-				merged.emplace_back(std::move(_results[i]));
-				++i;
-			}
-
-			_results = std::move(merged);
-		}
-
-		return !_results.empty();
+		return VirusPatchFileParser::parse(_results, _data, _filename);
 	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)

@@ -37,7 +37,6 @@ namespace virusLib
 		bool setStateFromUnknownCustomData(const std::vector<uint8_t>& _state) override;
 #endif
 		static bool find4CC(uint32_t& _offset, const synthLib::SysexBuffer& _data, const std::string_view& _4cc);
-		static bool parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const synthLib::SysexBuffer& _state);
 		static bool parsePowercorePreset(synthLib::SysexBufferList& _sysexPresets, const synthLib::SysexBuffer& _data);
 		static bool parseTDMPreset(synthLib::SysexBufferList& _sysexPresets, const synthLib::SysexBuffer& _data, const std::string& _filename);
 		static bool parseVTIBackup(synthLib::SysexBufferList& _sysexPresets, const synthLib::SysexBuffer& _data);

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(virusLib)
 
+add_subdirectory(import)
+
 add_library(virusLib STATIC)
 
 set(SOURCES
@@ -30,7 +32,7 @@ set(SOURCES
 target_sources(virusLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(virusLib PUBLIC synthLib dsp56kEmu)
+target_link_libraries(virusLib PUBLIC synthLib dsp56kEmu virusLibImport)
 
 if(DSP56300_DEBUGGER)
 	target_link_libraries(virusLib PUBLIC dsp56kDebugger)

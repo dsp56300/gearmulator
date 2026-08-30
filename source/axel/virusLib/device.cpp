@@ -2,6 +2,7 @@
 
 #include "dspMultiTI.h"
 #include "dspSingleSnow.h"
+#include "import/TIControlStateDecoder.h"
 #include "romfile.h"
 
 #include "dsp56kEmu/jit.h"
@@ -200,7 +201,7 @@ namespace virusLib
 
 		const synthLib::SysexBuffer stateBuffer(_state.begin(), _state.end());
 
-		if(parseTIcontrolPreset(messages, stateBuffer))
+		if(TIControlStateDecoder::decode(messages, stateBuffer))
 			return m_mc->setState(messages);
 
 		synthLib::SysexBufferList sysexMessages;
@@ -238,87 +239,6 @@ namespace virusLib
 			}
 		}
 		return false;
-	}
-
-	bool Device::parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const synthLib::SysexBuffer& _state)
-	{
-		if(_state.size() < 8)
-			return false;
-
-		uint32_t readPos = 0;
-
-		uint32_t numFound = 0;
-
-		while(readPos < _state.size() - 4)
-		{
-			if(!find4CC(readPos, _state, "MIDI"))
-				break;
-
-			if(readPos >= _state.size())
-				break;
-
-			auto readLen = [&_state](const size_t _offset) -> uint32_t
-			{
-				if(_offset + 4 > _state.size())
-					return 0;
-				const uint32_t o =
-					(static_cast<uint32_t>(_state[_offset+0]) << 24) | 
-					(static_cast<uint32_t>(_state[_offset+1]) << 16) |
-					(static_cast<uint32_t>(_state[_offset+2]) << 8) |
-					(static_cast<uint32_t>(_state[_offset+3]));
-				return o;
-			};
-
-			auto nextLen = [&readPos, &readLen]() -> uint32_t
-			{
-				const auto len = readLen(readPos);
-				readPos += 4;
-				return len;
-			};
-
-			const auto dataLen = nextLen();
-
-			if(dataLen + readPos > _state.size())
-				break;
-
-			const auto controllerAssignmentsLen = nextLen();
-
-			readPos += controllerAssignmentsLen;
-			
-			while(readPos < _state.size())
-			{
-				const auto midiDataLen = nextLen();
-
-				if(!midiDataLen)
-					break;
-
-				if((readPos + midiDataLen) > _state.size())
-					break;
-
-				synthLib::SMidiEvent& e = _events.emplace_back();
-
-				e.sysex.assign(_state.begin() + readPos, _state.begin() + readPos + midiDataLen);
-
-				if(e.sysex.front() != 0xf0)
-				{
-					assert(e.sysex.size() <= 3);
-					e.a = e.sysex[0];
-					if(e.sysex.size() > 1)
-						e.b = e.sysex[1];
-					if(e.sysex.size() > 2)
-						e.c = e.sysex[2];
-
-					e.sysex.clear();
-				}
-
-				readPos += midiDataLen;
-
-				if(!e.sysex.empty())
-					++numFound;
-			}			
-		}
-
-		return numFound > 0;
 	}
 
 	bool Device::parsePowercorePreset(synthLib::SysexBufferList& _sysexPresets, const synthLib::SysexBuffer& _data)

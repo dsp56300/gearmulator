@@ -13,9 +13,11 @@ namespace virus
 	{
 	public:
 	    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, virusLib::DeviceModel _defaultModel);
-	    ~VirusProcessor() override;
+		~VirusProcessor() override;
 
-	    void processBpm(float _bpm) override;
+		void prepareToPlay(double _sampleRate, int _samplesPerBlock) override;
+
+		void processBpm(float _bpm) override;
 
 		// _____________
 		//
