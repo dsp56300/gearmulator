@@ -61,8 +61,8 @@ elseif(APPLE)
 		message(WARNING "LTO disabled due to requested configuration")
     endif()
 
-	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -O3 -ffast-math -fno-stack-protector")
-	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -funroll-loops -O3 -ffast-math -fno-stack-protector")
+	string(APPEND CMAKE_C_FLAGS_RELEASE " -O3 -ffast-math -fno-stack-protector")
+	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -O3 -ffast-math -fno-stack-protector")
 
 	# Ship a dSYM for Release so crashes in released macOS builds can be symbolized (a tester's Live crash
 	# report could only be read as raw offsets because no dSYM existed). The -g below is what makes the Xcode
