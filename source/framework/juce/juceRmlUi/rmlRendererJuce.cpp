@@ -15,7 +15,9 @@
 #	include <smmintrin.h>	// SSE 4.1
 #elif IS_ARM64
 #	define HAVE_SSE 1
+#	define SSE2NEON_SUPPRESS_WARNINGS
 #	include "baseLib/sse2neon.h"
+#	undef SSE2NEON_SUPPRESS_WARNINGS
 #else
 #	define HAVE_SSE 0
 #endif
