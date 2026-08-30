@@ -533,6 +533,7 @@ namespace jucePluginEditorLib
 				std::string typeStr;
 				switch (mapping.type)
 				{
+				case pluginLib::MidiLearnMapping::Type::Invalid: typeStr = "Invalid"; break;
 				case pluginLib::MidiLearnMapping::Type::ControlChange: typeStr = "CC"; break;
 				case pluginLib::MidiLearnMapping::Type::PolyPressure: typeStr = "Poly Press"; break;
 				case pluginLib::MidiLearnMapping::Type::ChannelPressure: typeStr = "Chan Press"; break;
