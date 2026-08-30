@@ -87,6 +87,8 @@ namespace juceRmlUi
 		case Rml::EventId::Dblclick:
 			processDoubleClick(_event);
 			break;
+		default:
+			break;
 		}
 	}
 
