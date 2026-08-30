@@ -272,15 +272,20 @@ namespace jucePluginEditorLib
 		if (_mappingIndex >= preset.getMappings().size())
 			return;
 
+		const bool editingCurrentPreset = isCurrentPresetSelected();
 		preset.removeMapping(_mappingIndex);
 		
-		// Save the preset
+		// "Current" is persisted via the internal default preset; named presets
+		// continue to be saved under their own names.
 		const juce::String presetName(preset.getName());
-		if (m_learnManager.savePreset(presetName, preset))
+		if (editingCurrentPreset || m_learnManager.savePreset(presetName, preset))
 		{
 			translator->setPreset(preset); // Refresh subscriptions
-			if (isCurrentPresetSelected())
+			if (editingCurrentPreset)
+			{
 				m_originalPreset = preset;
+				m_processor.saveDefaultMidiLearnPreset();
+			}
 			refreshMappingList();
 			refreshFeedbackCheckboxes();
 		}
@@ -398,6 +403,44 @@ namespace jucePluginEditorLib
 				m_processor.getProductName(),
 				"Failed to save invert change.");
 		}
+	}
+
+	void SettingsMidiLearn::onMidiControlToggled(const std::string& _paramName, uint8_t _part, bool _enabled)
+	{
+		auto* translator = m_processor.getMidiLearnTranslator();
+		if (!translator)
+			return;
+
+		auto& preset = const_cast<pluginLib::MidiLearnPreset&>(translator->getPreset());
+		const bool editingCurrentPreset = isCurrentPresetSelected();
+		const juce::String presetName(preset.getName());
+		if (_enabled)
+			preset.removeInputBlock(_paramName, _part);
+		else
+			preset.addInputBlock({_paramName, _part});
+
+		if (editingCurrentPreset || m_learnManager.savePreset(presetName, preset))
+		{
+			translator->setPreset(preset);
+			if (editingCurrentPreset)
+			{
+				m_originalPreset = preset;
+				m_processor.saveDefaultMidiLearnPreset();
+			}
+			refreshMappingList();
+		}
+		else
+		{
+			genericUI::MessageBox::showOk(
+				genericUI::MessageBox::Icon::Warning,
+				m_processor.getProductName(),
+				"Failed to save MIDI control change.");
+		}
+	}
+
+	void SettingsMidiLearn::onBtRemoveInputBlock(const std::string& _paramName, uint8_t _part)
+	{
+		onMidiControlToggled(_paramName, _part, true);
 	}
 
 	void SettingsMidiLearn::onPartChanged(size_t _mappingIndex, int _newPartIndex)
@@ -523,24 +566,9 @@ namespace jucePluginEditorLib
 			auto* row = m_mappingTableBody->AppendChild(m_mappingRowTemplate->Clone());
 
 			// Fill in the mapping data
-			auto* typeCell = juceRmlUi::helper::findChild(row, "type");
 			auto* controllerCell = juceRmlUi::helper::findChild(row, "controller");
 			auto* parameterCell = juceRmlUi::helper::findChild(row, "parameter");
 			auto* removeButton = juceRmlUi::helper::findChild(row, "btRemove");
-
-			if (typeCell)
-			{
-				std::string typeStr;
-				switch (mapping.type)
-				{
-				case pluginLib::MidiLearnMapping::Type::ControlChange: typeStr = "CC"; break;
-				case pluginLib::MidiLearnMapping::Type::PolyPressure: typeStr = "Poly Press"; break;
-				case pluginLib::MidiLearnMapping::Type::ChannelPressure: typeStr = "Chan Press"; break;
-				case pluginLib::MidiLearnMapping::Type::PitchBend: typeStr = "Pitch Bend"; break;
-				case pluginLib::MidiLearnMapping::Type::NRPN: typeStr = "NRPN"; break;
-				}
-				typeCell->SetInnerRML(typeStr);
-			}
 
 			// Create and populate channel combo box
 			if (auto* channelCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "channelCombo"))
@@ -606,6 +634,18 @@ namespace jucePluginEditorLib
 				});
 			}
 
+			// MIDI Disabled checkbox
+			if (auto* cbMidiControl = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(row, "cbMidiControl"))
+			{
+				const bool inputBlocked = translator->getPreset().isInputBlocked(mapping.paramName, mapping.part);
+				cbMidiControl->setChecked(inputBlocked);
+				juceRmlUi::EventListener::Add(cbMidiControl, Rml::EventId::Click, [this, paramName = mapping.paramName, part = mapping.part, inputBlocked](Rml::Event& _event)
+				{
+					_event.StopPropagation();
+					onMidiControlToggled(paramName, part, inputBlocked);
+				});
+			}
+
 			// Create and populate part combo box
 			if (auto* partCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "partCombo"))
 			{
@@ -635,6 +675,53 @@ namespace jucePluginEditorLib
 				{
 					_event.StopPropagation();
 					onBtRemoveMapping(i);
+				});
+			}
+		}
+
+		const auto& blocks = translator->getPreset().getInputBlocks();
+		for (const auto& block : blocks)
+		{
+			const bool hasMapping = std::any_of(mappings.begin(), mappings.end(), [&](const pluginLib::MidiLearnMapping& _mapping)
+			{
+				return _mapping.paramName == block.paramName &&
+					(block.part == pluginLib::MidiLearnMapping::AutoPart || _mapping.part == block.part);
+			});
+			if (hasMapping)
+				continue;
+
+			auto* row = m_mappingTableBody->AppendChild(m_mappingRowTemplate->Clone());
+			if (auto* cell = juceRmlUi::helper::findChild(row, "controller")) cell->SetInnerRML("Default");
+			if (auto* cell = juceRmlUi::helper::findChild(row, "parameter")) cell->SetInnerRML(block.paramName);
+
+			if (auto* combo = juceRmlUi::helper::findChild(row, "channelCombo")) combo->GetParentNode()->SetInnerRML("All");
+			if (auto* combo = juceRmlUi::helper::findChild(row, "modeCombo")) combo->GetParentNode()->SetInnerRML("-");
+			if (auto* invert = juceRmlUi::helper::findChild(row, "cbInvert")) invert->GetParentNode()->SetInnerRML("-");
+
+			if (auto* partCombo = juceRmlUi::helper::findChildT<juceRmlUi::ElemComboBox>(row, "partCombo"))
+			{
+				partCombo->addOption("Auto");
+				for (uint8_t p = 0; p < m_processor.getController().getPartCount(); ++p)
+					partCombo->addOption(std::to_string(p + 1));
+				partCombo->setSelectedIndex(block.part == pluginLib::MidiLearnMapping::AutoPart ? 0 : block.part + 1, false);
+			}
+
+			if (auto* cb = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(row, "cbMidiControl"))
+			{
+				cb->setChecked(true);
+				juceRmlUi::EventListener::Add(cb, Rml::EventId::Click, [this, paramName = block.paramName, part = block.part](Rml::Event& _event)
+				{
+					_event.StopPropagation();
+					onMidiControlToggled(paramName, part, true);
+				});
+			}
+
+			if (auto* remove = juceRmlUi::helper::findChild(row, "btRemove"))
+			{
+				juceRmlUi::EventListener::Add(remove, Rml::EventId::Click, [this, paramName = block.paramName, part = block.part](Rml::Event& _event)
+				{
+					_event.StopPropagation();
+					onBtRemoveInputBlock(paramName, part);
 				});
 			}
 		}
