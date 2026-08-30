@@ -39,6 +39,10 @@ set_target_properties(Lua::Lua PROPERTIES
 set(LUNASVG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(PLUTOVG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(lunasvg)
+if(MSVC)
+	# Suppress known narrowing conversions only while compiling LunaSVG itself.
+	target_compile_options(lunasvg PRIVATE /wd4244 /wd4267)
+endif()
 
 # Enable the RmlUi SVG plugin, it is compiled into rmlui_core
 set(RMLUI_SVG_PLUGIN ON CACHE BOOL "" FORCE)
