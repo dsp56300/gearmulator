@@ -104,7 +104,7 @@ namespace mqJucePlugin
 	    for(uint32_t i=0; i<16; ++i)
 	    {
 	        char paramName[16];
-	        sprintf(paramName, "Name%02u", i);
+	        snprintf(paramName, sizeof(paramName), "Name%02u", i);
 	        const auto idx = getParameterIndexByName(paramName);
 	        if(idx == InvalidParameterIndex)
 	            break;

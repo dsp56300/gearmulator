@@ -880,9 +880,9 @@ namespace virus
             const auto countTI      = virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI);
             const auto countTI2     = virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI2);
 
-            if(_index < countTI)	                sprintf(temp, "TI Rom %c", 'A' + _index);
-            else if(_index < countTI + countTI2)	sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI));
-            else			    		            sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI - countTI2));
+            if(_index < countTI)	                snprintf(temp, sizeof(temp), "TI Rom %c", 'A' + _index);
+            else if(_index < countTI + countTI2)	snprintf(temp, sizeof(temp), "TI2 Rom %c", 'A' + (_index - countTI));
+            else			    		            snprintf(temp, sizeof(temp), "Snow Rom %c", 'A' + (_index - countTI - countTI2));
         }
         return temp;
     }
