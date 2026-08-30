@@ -152,41 +152,26 @@ namespace n2xJucePlugin
 	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
 	{
 		const auto& cm = getParameterDescriptions().getControllerMap();
-		const auto paramIndices = cm.getParameters(_e);
-
-		if(paramIndices.empty())
+		if(cm.getParameters(_e).empty())
 			return false;
-
-		const auto origin = midiEventSourceToParameterOrigin(_e.source);
 
 		m_state.receive(_e);
 
-		const auto parts = getPartsForMidiEvent(_e);
-
-		for (const uint8_t part : parts)
+		// CC35 packs sync into bit 0 and ring mod into bit 1, which needs handling as a special case
+		if((_e.a & 0xf0) == synthLib::M_CONTROLCHANGE && _e.b == n2x::ControlChange::CCSync)
 		{
-			if(_e.b == n2x::ControlChange::CCSync)
+			const auto origin = midiEventSourceToParameterOrigin(_e.source);
+			for (const uint8_t part : getPartsForMidiEvent(_e))
 			{
-				// this controls both Sync and RingMod
-				// Sync = bit 0
-				// RingMod = bit 1
-				auto* paramSync = getParameter("Sync", part);
-				auto* paramRingMod = getParameter("RingMod", part);
-				paramSync->setValueFromSynth(_e.c & 1, origin);
-				paramRingMod->setValueFromSynth((_e.c>>1) & 1, origin);
+				if(auto* paramSync = getParameter("Sync", part))
+					paramSync->setValueFromSynth(_e.c & 1, origin);
+				if(auto* paramRingMod = getParameter("RingMod", part))
+					paramRingMod->setValueFromSynth((_e.c >> 1) & 1, origin);
 			}
-			else
-			{
-				for (const auto paramIndex : paramIndices)
-				{
-					auto* param = getParameter(paramIndex, part);
-					assert(param && "parameter not found for control change");
-					param->setValueFromSynth(_e.c, origin);
-				}
-			}
+			return true;
 		}
 
-		return true;
+		return pluginLib::Controller::parseControllerMessage(_e);
 	}
 
 	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin)
