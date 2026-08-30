@@ -62,6 +62,12 @@ if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
 	# vendor workaround private to this target without editing its sources.
 	target_compile_options(ptypes PRIVATE -Wno-deprecated-declarations)
 endif()
+
+if(MSVC)
+	# PTypes predates 64-bit Windows handles and emits conversion warnings in
+	# its implementation. Keep these suppressions private to the vendor target.
+	target_compile_options(ptypes PRIVATE /wd4244 /wd4267 /wd4302 /wd4311 /wd4312)
+endif()
 add_subdirectory(framework/networkLib EXCLUDE_FROM_ALL)
 add_subdirectory(framework/tools/bridge)
 
