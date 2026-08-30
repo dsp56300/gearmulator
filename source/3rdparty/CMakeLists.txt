@@ -11,6 +11,9 @@ set(SKIP_INSTALL_LIBRARIES)
 set(SKIP_INSTALL_ALL)
 
 add_subdirectory(freetype)
+if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|Clang")
+    target_compile_options(freetype PRIVATE -Wno-shorten-64-to-32)
+endif()
 
 # RmlUi expects Freetype::Freetype instead of freetype
 add_library(Freetype::Freetype ALIAS freetype)
