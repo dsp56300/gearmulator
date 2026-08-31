@@ -44,6 +44,13 @@ set(RMLUI_SVG_PLUGIN ON CACHE BOOL "" FORCE)
 # finally...
 add_subdirectory(RmlUi)
 
+# RmlUi's private, non-placement operator new stubs assert and return nullptr;
+# layout objects are allocated through its pools instead. Keep this vendor
+# diagnostic suppression local to rmlui_core, without changing its sources.
+if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+	target_compile_options(rmlui_core PRIVATE -Wno-new-returns-null)
+endif()
+
 target_include_directories(rmlui_core PUBLIC 
 	${CMAKE_CURRENT_LIST_DIR}/RmlUi/Include
 	${CMAKE_CURRENT_LIST_DIR}/RmlUi/Source
