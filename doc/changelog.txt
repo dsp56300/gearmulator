@@ -1,5 +1,13 @@
 Release Notes
 
+2.2.15:
+
+OsTIrus:
+
+- [Fix] Three spelling mistakes in the user interface: "ENVELOPER FOLLOWER"
+        in the effects section, "PHASE INT" in the oscillator section and
+        "TRANSPONSE" in the common parameters.
+
 2.2.14:
 
 Framework:
