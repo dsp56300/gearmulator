@@ -13,6 +13,8 @@ set(SKIP_INSTALL_ALL)
 add_subdirectory(freetype)
 if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|Clang")
     target_compile_options(freetype PRIVATE -Wno-shorten-64-to-32)
+    # Bundled zlib defines OS_CODE in overlapping macOS platform branches.
+    target_compile_options(freetype PRIVATE -Wno-macro-redefined)
 endif()
 
 # RmlUi expects Freetype::Freetype instead of freetype
