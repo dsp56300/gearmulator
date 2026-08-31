@@ -449,6 +449,9 @@ namespace pluginLib
 
 		switch (_mapping.type)
 		{
+		case MidiLearnMapping::Type::Invalid:
+			break;
+
 		case MidiLearnMapping::Type::ControlChange:
 		case MidiLearnMapping::Type::PolyPressure:
 			event.b = _mapping.controller;
