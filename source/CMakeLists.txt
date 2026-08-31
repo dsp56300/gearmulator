@@ -42,6 +42,13 @@ add_subdirectory(3rdparty/libresample)
 
 add_subdirectory(3rdparty)
 
+# Lua is intentionally compiled as C++. Explicitly select the language for
+# its .c files without modifying the vendor build or relying on Clang's
+# deprecated extension inference. MSVC-style drivers already receive /TP.
+if(NOT MSVC AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+	target_compile_options(lua PRIVATE -x c++)
+endif()
+
 include(cmake/macsetup.cmake)
 include(cmake/skins.cmake)
 include(cmake/exporttarget.cmake)
