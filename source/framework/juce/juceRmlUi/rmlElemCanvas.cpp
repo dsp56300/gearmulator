@@ -49,6 +49,19 @@ namespace juceRmlUi
 		m_clearEveryFrame = _clearEveryFrame;
 	}
 
+	void ElemCanvas::setFixedTextureSize(const int _width, const int _height)
+	{
+		if (m_fixedTextureSize.x == _width && m_fixedTextureSize.y == _height)
+			return;
+
+		m_fixedTextureSize.x = _width;
+		m_fixedTextureSize.y = _height;
+
+		m_geometryDirty = true;
+
+		repaint();
+	}
+
 	ElemCanvas* ElemCanvas::create(Rml::Element* _parent)
 	{
 		auto canvas = _parent->GetOwnerDocument()->CreateElement("canvas");
@@ -78,8 +91,14 @@ namespace juceRmlUi
 
 		const auto* comp = RmlComponent::fromElement(this);
 
-		const auto w = static_cast<int>(comp->getValidTextureSize(static_cast<uint32_t>(size.x)));
-		const auto h = static_cast<int>(comp->getValidTextureSize(static_cast<uint32_t>(size.y)));
+		// A fixed texture size decouples the canvas resolution from the element size. The quad
+		// below still spans the element with UVs 0..1, so the GPU stretches the texture over it.
+		const auto wanted = m_fixedTextureSize.x > 0 && m_fixedTextureSize.y > 0
+			? Vector2f(static_cast<float>(m_fixedTextureSize.x), static_cast<float>(m_fixedTextureSize.y))
+			: size;
+
+		const auto w = static_cast<int>(comp->getValidTextureSize(static_cast<uint32_t>(wanted.x)));
+		const auto h = static_cast<int>(comp->getValidTextureSize(static_cast<uint32_t>(wanted.y)));
 
 		if (w != m_textureSize.x || h != m_textureSize.y)
 		{

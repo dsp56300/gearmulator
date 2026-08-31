@@ -32,6 +32,14 @@ namespace juceRmlUi
 
 		void setClearEveryFrame(bool _clearEveryFrame);
 
+		// Render into a texture of this size instead of one matching the element's on-screen
+		// size. The quad still covers the element, so the GPU scales the texture to fit with
+		// linear filtering. Content drawn at a fixed resolution - an emulated LCD, say - then
+		// keeps a stable pixel grid at any window size, instead of being re-rasterized to a
+		// different, usually non-integer, scale every time the window is resized.
+		// Pass (0, 0) to go back to following the on-screen size.
+		void setFixedTextureSize(int _width, int _height);
+
 		static ElemCanvas* create(Rml::Element* _parent);
 
 	private:
@@ -48,6 +56,7 @@ namespace juceRmlUi
 		bool m_textureDirty = true;
 		Rml::Geometry m_geometry;
 		Rml::Vector2i m_textureSize{ 0, 0 };
+		Rml::Vector2i m_fixedTextureSize{ 0, 0 };
 		Rml::CallbackTexture m_texture;
 
 		std::unique_ptr<juce::Image> m_image;
