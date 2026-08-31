@@ -57,6 +57,11 @@ include(cmake/changelog.cmake)
 # ----------------- network bridge
 
 add_subdirectory(3rdparty/ptypes EXCLUDE_FROM_ALL)
+if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+	# Legacy ptypes uses sprintf, deprecated by the macOS SDK. Keep the
+	# vendor workaround private to this target without editing its sources.
+	target_compile_options(ptypes PRIVATE -Wno-deprecated-declarations)
+endif()
 add_subdirectory(framework/networkLib EXCLUDE_FROM_ALL)
 add_subdirectory(framework/tools/bridge)
 
