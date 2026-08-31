@@ -51,6 +51,10 @@ add_subdirectory(RmlUi)
 # diagnostic suppression local to rmlui_core, without changing its sources.
 if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
 	target_compile_options(rmlui_core PRIVATE -Wno-new-returns-null)
+	# Some Lua binding overrides do not use their CoreInstance argument.
+	if(TARGET rmlui_lua)
+		target_compile_options(rmlui_lua PRIVATE -Wno-unused-parameter)
+	endif()
 endif()
 
 target_include_directories(rmlui_core PUBLIC 
