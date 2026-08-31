@@ -323,7 +323,8 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		string(REPLACE "FX" "" productNameClean ${productName})
 		install(FILES "${CMAKE_SOURCE_DIR}/doc/changelog_split/changelog_${productNameClean}.txt"
 			DESTINATION .
-			COMPONENT ${productName}-${format})
+			COMPONENT ${productName}-${format}
+			OPTIONAL)
 	endforeach()
 
 	# --------- Server Plugin ---------
