@@ -43,7 +43,9 @@ namespace
 	{
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
+		{
 			DBG("OpenGL error: " << juce::String::toHexString((int)err));
+		}
 	}
 }
 
