@@ -142,7 +142,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	# FST is header-only and is compiled as part of JUCE's generated VST2
 	# wrapper. Suppress its intentional compatibility diagnostics only there.
-	if(TARGET ${targetName}_VST)
+	if(TARGET ${targetName}_VST AND NOT ${CMAKE_PROJECT_NAME}_ENABLE_THIRDPARTY_WARNINGS)
 		# suppress FST's provenance TODOs
 		target_compile_definitions(${targetName}_VST PRIVATE FST_DISABLE_WARNINGS)
 		if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")

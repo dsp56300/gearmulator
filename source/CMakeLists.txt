@@ -57,13 +57,13 @@ include(cmake/changelog.cmake)
 # ----------------- network bridge
 
 add_subdirectory(3rdparty/ptypes EXCLUDE_FROM_ALL)
-if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+if(NOT ${CMAKE_PROJECT_NAME}_ENABLE_THIRDPARTY_WARNINGS AND APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
 	# Legacy ptypes uses sprintf, deprecated by the macOS SDK. Keep the
 	# vendor workaround private to this target without editing its sources.
 	target_compile_options(ptypes PRIVATE -Wno-deprecated-declarations)
 endif()
 
-if(MSVC)
+if(MSVC AND NOT ${CMAKE_PROJECT_NAME}_ENABLE_THIRDPARTY_WARNINGS)
 	# PTypes predates 64-bit Windows handles and emits conversion warnings in
 	# its implementation. Keep these suppressions private to the vendor target.
 	target_compile_options(ptypes PRIVATE /wd4244 /wd4267 /wd4302 /wd4311 /wd4312)
