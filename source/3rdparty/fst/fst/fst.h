@@ -36,9 +36,10 @@
 #define _FST_STRING2(x) #x
 #define _FST_STRING(x) _FST_STRING2(x)
 #define _FST_PRAGMA(x) _Pragma(#x)
-#if defined(__GNUC__) || defined(__clang__)
+
+#if !defined(FST_DISABLE_WARNINGS) && (defined(__GNUC__) || defined(__clang__))
 # define FST_WARNING(x) _FST_PRAGMA(GCC warning x)
-#elif defined _MSC_VER
+#elif !defined(FST_DISABLE_WARNINGS) && defined(_MSC_VER)
 # define FST_WARNING(x) __pragma(message(__FILE__ ":" _FST_STRING(__LINE__) ": warning: " x))
 #else
 # define FST_WARNING(x)
