@@ -22,6 +22,11 @@ add_library(Freetype::Freetype ALIAS freetype)
 
 # Lua 5.4 for RmlUi scripting
 add_subdirectory(lua)
+if(MSVC)
+	# Lua's GC size expressions intentionally shift 32-bit values before they
+	# participate in 64-bit arithmetic. Keep C4334 local to the vendor target.
+	target_compile_options(lua PRIVATE /wd4334)
+endif()
 
 # Enable RmlUi Lua bindings and point to our bundled Lua
 set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
@@ -65,6 +70,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
 	if(TARGET rmlui_lua)
 		target_compile_options(rmlui_lua PRIVATE -Wno-unused-parameter)
 	endif()
+endif()
+if(MSVC AND TARGET rmlui_lua)
+	# Match the unused-parameter suppression above for MSVC-style drivers.
+	target_compile_options(rmlui_lua PRIVATE /wd4100)
 endif()
 
 # Restore CMAKE_CXX_FLAGS from the temporary saved copy.
