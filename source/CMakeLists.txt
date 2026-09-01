@@ -77,7 +77,9 @@ add_subdirectory(framework/tools/bridge)
 
 # ----------------- Try to install VST2 SDK
 
-include(cmake/findvst2.cmake)
+if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN AND ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST2)
+	include(cmake/findvst2.cmake)
+endif()
 
 # ----------------- Juce based audio plugin dependencies
 
