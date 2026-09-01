@@ -559,7 +559,13 @@ typedef struct fstSpeakerProperties_ {
 typedef struct fstSpeakerArrangement_ {
   int type;
   int numChannels;
-  t_fstSpeakerProperties speakers[];
+  /* LOCAL PATCH: upstream declares this as a flexible array member, which makes
+   * sizeof() 8 rather than the 904 of the struct this mirrors. Hosts size the
+   * allocation as "sizeof(arrangement) + (channels - 8) * sizeof(properties)",
+   * which then under-allocates by 896 bytes and corrupts the heap on the first
+   * speaker query - and a plugin compiled against the real header writes into
+   * all eight slots regardless. Eight is the ABI. */
+  t_fstSpeakerProperties speakers[8];
 } t_fstSpeakerArrangement;
 
 typedef struct fstTimeInfo_ {
