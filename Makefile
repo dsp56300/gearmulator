@@ -1,5 +1,20 @@
 # Thin convenience wrapper around the CMake build. Run `make help` for usage.
 
+LAST_CONFIGURATION_FILE := $(CURDIR)/build/.last-configuration
+CONFIGURATION_SELECTOR_VARS := OSIRUS OSTIRUS VAVRA XENIA NODALRED2X JE8086 VST2 VST3 AU CLAP LV2 STANDALONE
+EXPLICIT_CONFIGURATION_SELECTORS := $(strip $(foreach variable,$(CONFIGURATION_SELECTOR_VARS),$(if $(filter command line,$(origin $(variable))),$(variable))))
+EARLY_REQUESTED_GOALS := $(if $(strip $(MAKECMDGOALS)),$(MAKECMDGOALS),build)
+LAST_CONFIGURATION_REQUESTED := $(if $(filter build install package clean,$(EARLY_REQUESTED_GOALS)),$(if $(EXPLICIT_CONFIGURATION_SELECTORS),,1))
+LAST_CONFIGURATION_AVAILABLE := $(wildcard $(LAST_CONFIGURATION_FILE))
+
+# Bare build, install, package, and clean targets reuse the last build selection.
+# Explicit selectors continue to describe a fresh configuration in full.
+ifneq ($(LAST_CONFIGURATION_REQUESTED),)
+ifeq ($(EXPLICIT_CONFIGURATION_SELECTORS),)
+-include $(LAST_CONFIGURATION_FILE)
+endif
+endif
+
 CMAKE ?= cmake
 GENERATOR ?= Ninja
 CONFIG ?= Release
@@ -141,6 +156,7 @@ CMAKE_STANDALONE := $(call cmake_bool,$(call enabled,$(STANDALONE)))
 # Cache each configured combination, so switching back does not reconfigure.
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
+RPAREN := )
 OPTION_PROFILE := $(subst $(SPACE),+,$(strip \
 	$(if $(filter ON,$(CMAKE_OSIRUS)),osirus) \
 	$(if $(filter ON,$(CMAKE_OSTIRUS)),ostirus) \
@@ -184,7 +200,7 @@ CMAKE_CONFIGURE_ARGS := \
 BUILD_PARALLEL := $(if $(strip $(JOBS)),--parallel $(JOBS),--parallel)
 
 .DEFAULT_GOAL := build
-.PHONY: help clean clean-profile configure reconfigure build \
+.PHONY: help clean clean-all configure reconfigure build \
 	install install-deps \
 	android android-abi package
 
@@ -263,21 +279,25 @@ Build dimensions:
   JOBS=N               parallel job limit
   TARGETS="name ..."   explicit additional CMake target(s)
 
-Targets: build (default), package, configure, reconfigure, clean, clean-profile
-  clean removes every profile under BUILD_ROOT; clean-profile removes only the selected profile.
-  package builds the selected targets, then packages the selected build profile.
+Targets: build (default), install, package, configure, reconfigure, clean, clean-all
+  clean removes the selected profile; clean-all removes every profile under BUILD_ROOT.
+  install and package build first when selectors are supplied on the same command.
+  Bare build/install/package/clean commands reuse the last build configuration.
 Dependency setup: install-deps (Linux only)
 Android batch builds (Windows only): android, android-abi (ANDROID_ABI=arm64-v8a)
 Install selected products and formats: install
-  install builds first. macOS destinations under /Library use sudo.
+  macOS destinations under /Library use sudo.
   Standalone and Windows/Linux defaults are user-local.
 
-No product or format is selected by default.
+No product or format is selected by default; builds require at least one of each.
 Build defaults: CONFIG=Release ARCH=native LTO=0 JOBS=12
 
 Examples:
   make OSTIRUS=1 VST2=1 STANDALONE=1
   make OSTIRUS=1 VST3=1 package
+  make OSTIRUS=1 VST3=1
+  make install                       reuse the preceding successful configuration
+  make package                       reuse the preceding successful configuration
   make android-abi ANDROID_ABI=x86_64
   make OSIRUS=1 VST3=1 AU=1 ARCH=universal CONFIG=Release LTO=1
   make VAVRA=1 CLAP=1
@@ -325,32 +345,37 @@ endif
 		'FX variants: FX' \
 		'' \
 		'Build dimensions:' \
-		'  CONFIG=Release       CMake configuration (Debug, RelWithDebInfo, ...)' \
-		'  ARCH=native          universal, native, arm64, x86_64, or another CMake arch' \
-		'  LTO=0                passed through as gearmulator_ENABLE_LTO' \
-		'  THIRDPARTY_WARNINGS=0 show suppressed dependency warnings when set to 1' \
-		'  FX=0                 additionally build available FX plugin variants when set to 1' \
-		'  BUILD_ROOT=path      root containing all Make-managed build profiles' \
-		'  BUILD_DIR=path       override the current profile build directory' \
-		'  GENERATOR=Ninja      CMake generator (Xcode remains available explicitly)' \
-		'  JOBS=N               parallel job limit' \
-		'  TARGETS="name ..."   explicit additional CMake target(s)' \
+		'  CONFIG=Release         CMake configuration (Debug, RelWithDebInfo, ...)' \
+		'  ARCH=native            universal, native, arm64, x86_64, or another CMake arch' \
+		'  LTO=0                  passed through as gearmulator_ENABLE_LTO' \
+		'  THIRDPARTY_WARNINGS=0  show suppressed dependency warnings when set to 1' \
+		'  FX=0                   additionally build available FX plugin variants when set to 1' \
+		'  BUILD_ROOT=path        root containing all Make-managed build profiles' \
+		'  BUILD_DIR=path         override the current profile build directory' \
+		'  GENERATOR=Ninja        CMake generator (Xcode remains available explicitly)' \
+		'  JOBS=N                 parallel job limit' \
+		'  TARGETS="name ..."     explicit additional CMake target(s)' \
 		'' \
-		'Targets: build (default), package, configure, reconfigure, clean, clean-profile' \
-		'  clean removes every profile under BUILD_ROOT; clean-profile removes only the selected profile.' \
-		'  package builds the selected targets, then packages the selected build profile.' \
+		'Targets: build (default), install, package, configure, reconfigure, clean, clean-all' \
+		'  clean removes the selected profile; clean-all removes every profile under BUILD_ROOT.' \
+		'  install and package build first when selectors are supplied on the same command.' \
+		'  Bare build/install/package/clean commands reuse the last build configuration.' \
 		'Dependency setup: install-deps (Linux only)' \
 		'Android batch builds (Windows only): android, android-abi (ANDROID_ABI=arm64-v8a)' \
 		'Install selected products and formats: install' \
-		'  install builds first. macOS destinations under /Library use sudo.' \
+		'  macOS destinations under /Library use sudo.' \
 		'  Standalone and Windows/Linux defaults are user-local.' \
 		'' \
-		'No product or format is selected by default.' \
+		'No product or format is selected by default; builds require at least one of each.' \
 		'Build defaults: CONFIG=Release ARCH=native LTO=0 JOBS=12' \
 		'' \
 		'Examples:' \
 		'  make OSTIRUS=1 VST2=1 STANDALONE=1' \
 		'  make OSTIRUS=1 VST3=1 package' \
+		'  make OSTIRUS=1 VST3=1 install' \
+		'  make OSTIRUS=1 VST3=1' \
+		'  make install                       reuse the preceding successful configuration' \
+		'  make package                       reuse the preceding successful configuration' \
 		'  make android-abi ANDROID_ABI=x86_64' \
 		'  make OSIRUS=1 VST3=1 AU=1 ARCH=universal CONFIG=Release LTO=1' \
 		'  make VAVRA=1 CLAP=1' \
@@ -376,10 +401,10 @@ build: $(CONFIG_STAMP)
 package: build
 	$(call run_with_vcvars,$(CMAKE) -E chdir "$(BUILD_DIR)" $(CMAKE) -P "$(CURDIR)/scripts/pack.cmake")
 
-clean:
+clean-all:
 	$(CMAKE) -E remove_directory "$(BUILD_ROOT)"
 
-clean-profile:
+clean:
 	$(CMAKE) -E remove_directory "$(BUILD_DIR)"
 
 ifeq ($(HOST_OS),Linux)
@@ -449,6 +474,19 @@ install:
 else
 REQUESTED_GOALS := $(if $(strip $(MAKECMDGOALS)),$(MAKECMDGOALS),build)
 RECURSIVE_DRY_RUN := $(if $(findstring n,$(firstword $(MAKEFLAGS))),-n)
+SHOW_BANNER := $(if $(filter clean clean-all,$(REQUESTED_GOALS)),,$(if $(filter install package,$(REQUESTED_GOALS)),$(EXPLICIT_CONFIGURATION_SELECTORS),1))
+SHOW_SUCCESS_MESSAGE := $(if $(filter help clean clean-all,$(REQUESTED_GOALS)),,$(if $(filter install package,$(REQUESTED_GOALS)),$(EXPLICIT_CONFIGURATION_SELECTORS),1))
+SUCCESS_MESSAGE := Proceed, operator. The synthesizers are hungry.
+CONFIGURATION_GOALS := build configure reconfigure package install
+RECORD_CONFIGURATION := $(filter $(CONFIGURATION_GOALS),$(REQUESTED_GOALS))
+SELECTION_REQUIRED := $(filter $(CONFIGURATION_GOALS) clean,$(REQUESTED_GOALS))
+VALID_PRODUCT_SELECTION := $(strip $(SELECTED_PRODUCTS))
+VALID_FORMAT_SELECTION := $(strip $(SELECTED_SUFFIXES))
+CLEAN_ALL_PROMPT := $(if $(filter clean,$(REQUESTED_GOALS)),$(if $(LAST_CONFIGURATION_REQUESTED),$(if $(LAST_CONFIGURATION_AVAILABLE),,1)))
+LAST_CONFIGURATION_VARIABLES := \
+	GENERATOR CONFIG ARCH LTO THIRDPARTY_WARNINGS FX JOBS TARGETS \
+	OSIRUS OSTIRUS VAVRA XENIA NODALRED2X JE8086 \
+	VST2 VST3 AU CLAP LV2 STANDALONE BUILD_ROOT BUILD_DIR
 FORWARDED_VARIABLES := \
 	CMAKE GENERATOR CONFIG ARCH LTO THIRDPARTY_WARNINGS FX JOBS TARGETS ANDROID_ABI \
 	OSIRUS OSTIRUS VAVRA XENIA NODALRED2X JE8086 \
@@ -460,11 +498,23 @@ FORWARDED_VARIABLES := \
 $(REQUESTED_GOALS): __run
 
 __run:
-	@printf '%b\n' '$(BANNER_PRINTF)' | while IFS= read -r line; do \
+	$(if $(and $(LAST_CONFIGURATION_REQUESTED),$(if $(LAST_CONFIGURATION_AVAILABLE),,1),$(if $(CLEAN_ALL_PROMPT),,1)),@echo 'No saved build configuration is available. Run make with product and format selectors first.' >&2; exit 2)
+	$(if $(and $(SELECTION_REQUIRED),$(if $(and $(VALID_PRODUCT_SELECTION),$(VALID_FORMAT_SELECTION)),,1),$(if $(CLEAN_ALL_PROMPT),,1)),@echo 'Select at least one synthesizer and one output format.' >&2; exit 2)
+	$(if $(SHOW_BANNER),@printf '%b\n' '$(BANNER_PRINTF)' | while IFS= read -r line; do \
 		printf '%s\r\n' "$$line"; \
 		sleep 0.01; \
-	done
-	+@make --no-print-directory $(RECURSIVE_DRY_RUN) MAKE_INNER=1 $(REQUESTED_GOALS) \
-		$(foreach variable,$(FORWARDED_VARIABLES),$(variable)=$(call shell_quote,$($(variable))))
-	$(if $(filter help,$(REQUESTED_GOALS)),,@printf '\n%s\n' 'Proceed, operator. The synthesizers are hungry.')
+	done)
+	$(if $(RECORD_CONFIGURATION),@mkdir -p "$(dir $(LAST_CONFIGURATION_FILE))")
+	$(if $(RECORD_CONFIGURATION),@{ $(foreach variable,$(LAST_CONFIGURATION_VARIABLES),printf '%s\n' $(call shell_quote,$(variable) := $($(variable)));) } > "$(LAST_CONFIGURATION_FILE)")
+	$(if $(CLEAN_ALL_PROMPT),+@while true; do \
+		printf '%s' 'No saved build configuration is available. Do you wish to `clean-all`? [Y/n] '; \
+		if ! IFS= read -r answer; then printf '\n%s\n' 'Nothing cleaned.'; break; fi; \
+		case "$$answer" in \
+			''|[Yy]|[Yy][Ee][Ss]$(RPAREN) make --no-print-directory $(RECURSIVE_DRY_RUN) MAKE_INNER=1 clean-all; break ;; \
+			[Nn]|[Nn][Oo]$(RPAREN) echo 'Nothing cleaned.'; break ;; \
+			*$(RPAREN) echo 'Please answer y or n.' ;; \
+		esac; \
+	done,+@make --no-print-directory $(RECURSIVE_DRY_RUN) MAKE_INNER=1 $(REQUESTED_GOALS) \
+		$(foreach variable,$(FORWARDED_VARIABLES),$(variable)=$(call shell_quote,$($(variable)))))
+	$(if $(SHOW_SUCCESS_MESSAGE),@printf '\n%s\n' '$(SUCCESS_MESSAGE)')
 endif
