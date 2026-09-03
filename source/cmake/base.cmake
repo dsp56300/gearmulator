@@ -19,9 +19,20 @@ if(MSVC)
 	# /permissive- Standards Conformance
 	# /MP Multiprocessor Compilation
 
-	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /GL /Zi /Oi /Ot")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /GL /Zi /Oi /Ot")
+	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /Zi /Oi /Ot")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /Zi /Oi /Ot")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive- /MP")
+
+	if(${PROJECT_NAME}_ENABLE_LTO)
+		set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /GL")
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
+		set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
+		set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /LTCG")
+		set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+	else()
+		message(STATUS "LTO disabled due to requested configuration")
+	endif()
 
 	set(ARCHITECTURE ${CMAKE_VS_PLATFORM_NAME})
 
@@ -31,10 +42,9 @@ if(MSVC)
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /D_CRT_SECURE_NO_WARNINGS")
 
-	set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
-	set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /LTCG /DEBUG")
-	set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /LTCG /DEBUG")
-	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG /DEBUG")
+	set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /DEBUG")
+	set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG")
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG")
 
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /SAFESEH:NO")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
@@ -58,7 +68,18 @@ elseif(APPLE)
 	)
 
     if(NOT ${PROJECT_NAME}_ENABLE_LTO)
-		message(WARNING "LTO disabled due to requested configuration")
+		message(STATUS "LTO disabled due to requested configuration")
+	else()
+		cmake_policy(SET CMP0069 NEW)
+		include(CheckIPOSupported)
+
+		check_ipo_supported(RESULT result)
+		if(result)
+			message(STATUS "IPO is supported")
+			set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+		else()
+			message(WARNING "IPO is not supported")
+		endif()
     endif()
 
 	string(APPEND CMAKE_C_FLAGS_RELEASE " -O3 -ffast-math -fno-finite-math-only -fno-stack-protector")
@@ -90,7 +111,7 @@ else()
 	endif()
 
     if(NOT ${PROJECT_NAME}_ENABLE_LTO)
-		message(WARNING "LTO disabled due to requested configuration")
+		message(STATUS "LTO disabled due to requested configuration")
 	# GCC still has LTO issues
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		message(WARNING "LTO disabled due to GCC detected which is causing issues")
