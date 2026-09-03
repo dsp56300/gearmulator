@@ -46,6 +46,8 @@ ifeq ($(HOST_OS),Darwin)
   VST3_INSTALL_DIR ?= /Library/Audio/Plug-Ins/VST3
   VST2_INSTALL_DIR ?= /Library/Audio/Plug-Ins/VST
   AU_INSTALL_DIR ?= /Library/Audio/Plug-Ins/Components
+  CLAP_INSTALL_DIR ?= $(HOME)/Library/Audio/Plug-Ins/CLAP
+  LV2_INSTALL_DIR ?= $(HOME)/Library/Audio/Plug-Ins/LV2
   APP_INSTALL_DIR ?= $(HOME)/Applications
   VST2_EXTENSION := .vst
   APP_EXTENSION := .app
@@ -53,12 +55,13 @@ else ifneq ($(WINDOWS_HOST),)
   # This wrapper requires GNU Make with a POSIX shell, e.g. MSYS2/Git Bash.
   SHELL := sh
   INSTALL_PLATFORM := Windows ($(HOST_ARCH))
-  WINDOWS_USER_DIR := $(subst \,/,$(or $(USERPROFILE),$(HOME)))
-  WINDOWS_LOCAL_DATA := $(subst \,/,$(or $(LOCALAPPDATA),$(WINDOWS_USER_DIR)/AppData/Local))
-  VST3_INSTALL_DIR ?= $(WINDOWS_LOCAL_DATA)/Programs/Common/VST3
-  VST2_INSTALL_DIR ?= $(WINDOWS_LOCAL_DATA)/Programs/Common/VST2
+  LOCALAPPDATA := $(shell powershell -NoProfile -Command "[Environment]::GetFolderPath('LocalApplicationData')")
+  VST3_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/Common/VST3
+  VST2_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/Common/VST2
   AU_INSTALL_DIR ?=
-  APP_INSTALL_DIR ?= $(WINDOWS_LOCAL_DATA)/Programs/OsTIrus
+  CLAP_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/Common/CLAP
+  LV2_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/Common/LV2
+  APP_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/OsTIrus
   VST2_EXTENSION := .dll
   APP_EXTENSION := .exe
 else ifeq ($(HOST_OS),Linux)
@@ -66,6 +69,8 @@ else ifeq ($(HOST_OS),Linux)
   VST3_INSTALL_DIR ?= $(HOME)/.vst3
   VST2_INSTALL_DIR ?= $(HOME)/.vst
   AU_INSTALL_DIR ?=
+  CLAP_INSTALL_DIR ?= $(HOME)/.clap
+  LV2_INSTALL_DIR ?= $(HOME)/.lv2
   APP_INSTALL_DIR ?= $(HOME)/.local/bin
   VST2_EXTENSION := .so
   APP_EXTENSION :=
@@ -74,6 +79,8 @@ else
   VST3_INSTALL_DIR ?=
   VST2_INSTALL_DIR ?=
   AU_INSTALL_DIR ?=
+  CLAP_INSTALL_DIR ?=
+  LV2_INSTALL_DIR ?=
   APP_INSTALL_DIR ?=
 endif
 
@@ -178,7 +185,7 @@ BUILD_PARALLEL := $(if $(strip $(JOBS)),--parallel $(JOBS),--parallel)
 
 .DEFAULT_GOAL := build
 .PHONY: help clean clean-profile configure reconfigure build \
-	install install-vst2 install-au install-standalone install-deps \
+	install install-deps \
 	android android-abi package
 
 
@@ -226,11 +233,15 @@ Install paths: $(INSTALL_PLATFORM)
   VST3        $(or $(VST3_INSTALL_DIR),not configured)
   VST2        $(or $(VST2_INSTALL_DIR),not configured)
   AU          $(if $(filter Darwin,$(HOST_OS)),$(AU_INSTALL_DIR),not supported on this platform)
+  CLAP        $(or $(CLAP_INSTALL_DIR),not configured)
+  LV2         $(or $(LV2_INSTALL_DIR),not configured)
   Standalone  $(or $(APP_INSTALL_DIR),not configured)
 Override with:
   VST3_INSTALL_DIR=/path
   VST2_INSTALL_DIR=/path
   AU_INSTALL_DIR=/path
+  CLAP_INSTALL_DIR=/path
+  LV2_INSTALL_DIR=/path
   APP_INSTALL_DIR=/path
   Quote paths containing spaces. Environment overrides are also accepted.
 $(if $(WINDOWS_HOST),  VST2 is a guessed user-local location; add it to your DAW scan paths if needed.)
@@ -257,8 +268,8 @@ Targets: build (default), package, configure, reconfigure, clean, clean-profile
   package builds the selected targets, then packages the selected build profile.
 Dependency setup: install-deps (Linux only)
 Android batch builds (Windows only): android, android-abi (ANDROID_ABI=arm64-v8a)
-Install existing OsTIrus builds: install (VST3), install-vst2, install-au, install-standalone
-  Installs do not build first. macOS destinations under /Library use sudo.
+Install selected products and formats: install
+  install builds first. macOS destinations under /Library use sudo.
   Standalone and Windows/Linux defaults are user-local.
 
 No product or format is selected by default.
@@ -291,11 +302,15 @@ help:
 		$(call shell_quote,  VST3        $(or $(VST3_INSTALL_DIR),not configured)) \
 		$(call shell_quote,  VST2        $(or $(VST2_INSTALL_DIR),not configured)) \
 		$(call shell_quote,  AU          $(if $(filter Darwin,$(HOST_OS)),$(AU_INSTALL_DIR),not supported on this platform)) \
+		$(call shell_quote,  CLAP        $(or $(CLAP_INSTALL_DIR),not configured)) \
+		$(call shell_quote,  LV2         $(or $(LV2_INSTALL_DIR),not configured)) \
 		$(call shell_quote,  Standalone  $(or $(APP_INSTALL_DIR),not configured)) \
 		'Override with:' \
 		'  VST3_INSTALL_DIR=/path' \
 		'  VST2_INSTALL_DIR=/path' \
 		'  AU_INSTALL_DIR=/path' \
+		'  CLAP_INSTALL_DIR=/path' \
+		'  LV2_INSTALL_DIR=/path' \
 		'  APP_INSTALL_DIR=/path' \
 		'  Quote paths containing spaces. Environment overrides are also accepted.'
 	@sleep 0.3
@@ -326,8 +341,8 @@ endif
 		'  package builds the selected targets, then packages the selected build profile.' \
 		'Dependency setup: install-deps (Linux only)' \
 		'Android batch builds (Windows only): android, android-abi (ANDROID_ABI=arm64-v8a)' \
-		'Install existing OsTIrus builds: install (VST3), install-vst2, install-au, install-standalone' \
-		'  Installs do not build first. macOS destinations under /Library use sudo.' \
+		'Install selected products and formats: install' \
+		'  install builds first. macOS destinations under /Library use sudo.' \
 		'  Standalone and Windows/Linux defaults are user-local.' \
 		'' \
 		'No product or format is selected by default.' \
@@ -401,7 +416,8 @@ endef
 else
 define install_artifact
 	@test -n $(call shell_quote,$(2)) || { echo 'No install directory configured.' >&2; exit 2; }
-	$(call run_with_vcvars,$(CMAKE) -E make_directory "$(2)")
+	$(CMAKE) -E make_directory "$(2)"
+	@printf '\nInstalling %s -> %s\n' $(call shell_quote,$(CURDIR)/bin/plugins/$(CONFIG)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
 	@if test -d $(call shell_quote,$(CURDIR)/bin/plugins/$(CONFIG)/$(1)); then \
 		$(call run_with_vcvars,$(CMAKE) -E copy_directory "$(CURDIR)/bin/plugins/$(CONFIG)/$(1)" "$(2)/$(notdir $(1))"); \
 	else \
@@ -410,23 +426,26 @@ define install_artifact
 endef
 endif
 
+define install_product
+$(if $(call enabled,$(VST3)),$(call install_artifact,VST3/$(1).vst3,$(VST3_INSTALL_DIR)))
+$(if $(call enabled,$(VST2)),$(call install_artifact,VST/$(1)$(VST2_EXTENSION),$(VST2_INSTALL_DIR)))
+$(if $(call enabled,$(AU)),$(call install_artifact,AU/$(1).component,$(AU_INSTALL_DIR)))
+$(if $(call enabled,$(CLAP)),$(call install_artifact,CLAP/$(1).clap,$(CLAP_INSTALL_DIR)))
+$(if $(call enabled,$(LV2)),$(call install_artifact,LV2/$(1).lv2,$(LV2_INSTALL_DIR)))
+$(if $(call enabled,$(STANDALONE)),$(call install_artifact,Standalone/$(1)$(APP_EXTENSION),$(APP_INSTALL_DIR)))
+endef
+
 install:
-	$(call install_artifact,VST3/OsTIrus.vst3,$(VST3_INSTALL_DIR))
-
-install-vst2:
-	$(call install_artifact,VST/OsTIrus$(VST2_EXTENSION),$(VST2_INSTALL_DIR))
-
-install-standalone:
-	$(call install_artifact,Standalone/OsTIrus$(APP_EXTENSION),$(APP_INSTALL_DIR))
-
-ifeq ($(HOST_OS),Darwin)
-install-au:
-	$(call install_artifact,AU/OsTIrus.component,$(AU_INSTALL_DIR))
-else
-install-au:
-	@echo 'Audio Units are only supported on macOS.' >&2
-	@exit 2
-endif
+	$(if $(call enabled,$(OSIRUS)),$(call install_product,Osirus))
+	$(if $(call enabled,$(OSTIRUS)),$(call install_product,OsTIrus))
+	$(if $(call enabled,$(VAVRA)),$(call install_product,Vavra))
+	$(if $(call enabled,$(XENIA)),$(call install_product,Xenia))
+	$(if $(call enabled,$(NODALRED2X)),$(call install_product,NodalRed2x))
+	$(if $(call enabled,$(JE8086)),$(call install_product,JE8086))
+	$(if $(and $(call enabled,$(FX)),$(call enabled,$(OSIRUS))),$(call install_product,OsirusFX))
+	$(if $(and $(call enabled,$(FX)),$(call enabled,$(OSTIRUS))),$(call install_product,OsTIrusFX))
+	$(if $(and $(call enabled,$(FX)),$(call enabled,$(VAVRA))),$(call install_product,VavraFX))
+	$(if $(and $(call enabled,$(FX)),$(call enabled,$(XENIA))),$(call install_product,XeniaFX))
 else
 REQUESTED_GOALS := $(if $(strip $(MAKECMDGOALS)),$(MAKECMDGOALS),build)
 RECURSIVE_DRY_RUN := $(if $(findstring n,$(firstword $(MAKEFLAGS))),-n)
@@ -434,7 +453,7 @@ FORWARDED_VARIABLES := \
 	CMAKE GENERATOR CONFIG ARCH LTO THIRDPARTY_WARNINGS FX JOBS TARGETS ANDROID_ABI \
 	OSIRUS OSTIRUS VAVRA XENIA NODALRED2X JE8086 \
 	VST2 VST3 AU CLAP LV2 STANDALONE \
-	BUILD_ROOT BUILD_DIR VST3_INSTALL_DIR VST2_INSTALL_DIR AU_INSTALL_DIR APP_INSTALL_DIR \
+	BUILD_ROOT BUILD_DIR VST3_INSTALL_DIR VST2_INSTALL_DIR AU_INSTALL_DIR CLAP_INSTALL_DIR LV2_INSTALL_DIR APP_INSTALL_DIR \
 	HOST_OS HOST_ARCH
 .PHONY: __run $(REQUESTED_GOALS)
 
