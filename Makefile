@@ -9,6 +9,7 @@ THIRDPARTY_WARNINGS ?= 0
 FX ?= 0
 JOBS ?=
 TARGETS ?=
+ANDROID_ABI ?= arm64-v8a
 
 enabled = $(filter 1,$(strip $(1)))
 cmake_bool = $(if $(call enabled,$(1)),ON,OFF)
@@ -174,7 +175,8 @@ BUILD_PARALLEL := $(if $(strip $(JOBS)),--parallel $(JOBS),--parallel)
 
 .DEFAULT_GOAL := build
 .PHONY: help clean clean-profile configure reconfigure build \
-	install install-vst2 install-au install-standalone
+	install install-vst2 install-au install-standalone install-deps \
+	android android-abi package
 
 
 define BANNER
@@ -192,7 +194,7 @@ define BANNER
 ║                   .: THE USUAL SUSPECTS :.                         ║
 ║                                                                    ║
 ║              [ OSIRUS ] [ OSTIRUS ] [ VARVA ] [ XENIA ]            ║
-║                    [ JE-8086 ] [ NODALRED2X ]                       ║
+║                    [ JE-8086 ] [ NODALRED2X ]                      ║
 ║                                                                    ║
 ║      <==[------------------------------------------------]==>      ║
 ║                                                                    ║
@@ -234,8 +236,11 @@ Build dimensions:
   JOBS=N               parallel job limit
   TARGETS="name ..."   explicit additional CMake target(s)
 
-Targets: build (default), configure, reconfigure, clean, clean-profile
+Targets: build (default), package, configure, reconfigure, clean, clean-profile
   clean removes every profile under BUILD_ROOT; clean-profile removes only the selected profile.
+  package builds the selected targets, then packages the selected build profile.
+Dependency setup: install-deps (Linux only)
+Android batch builds (Windows only): android, android-abi (ANDROID_ABI=arm64-v8a)
 Install existing OsTIrus builds: install (VST3), install-vst2, install-au, install-standalone
   Installs do not build first. macOS destinations under /Library use sudo.
   Standalone and Windows/Linux defaults are user-local.
@@ -245,6 +250,8 @@ Build defaults: CONFIG=Release ARCH=native LTO=0 JOBS=12
 
 Examples:
   make OSTIRUS=1 VST2=1 STANDALONE=1
+  make OSTIRUS=1 VST3=1 package
+  make android-abi ANDROID_ABI=x86_64
   make OSIRUS=1 VST3=1 AU=1 ARCH=universal CONFIG=Release LTO=1
   make VAVRA=1 CLAP=1
   make OSTIRUS=1 GENERATOR=Xcode
@@ -300,8 +307,11 @@ endif
 		'  JOBS=N               parallel job limit' \
 		'  TARGETS="name ..."   explicit additional CMake target(s)' \
 		'' \
-		'Targets: build (default), configure, reconfigure, clean, clean-profile' \
+		'Targets: build (default), package, configure, reconfigure, clean, clean-profile' \
 		'  clean removes every profile under BUILD_ROOT; clean-profile removes only the selected profile.' \
+		'  package builds the selected targets, then packages the selected build profile.' \
+		'Dependency setup: install-deps (Linux only)' \
+		'Android batch builds (Windows only): android, android-abi (ANDROID_ABI=arm64-v8a)' \
 		'Install existing OsTIrus builds: install (VST3), install-vst2, install-au, install-standalone' \
 		'  Installs do not build first. macOS destinations under /Library use sudo.' \
 		'  Standalone and Windows/Linux defaults are user-local.' \
@@ -311,6 +321,8 @@ endif
 		'' \
 		'Examples:' \
 		'  make OSTIRUS=1 VST2=1 STANDALONE=1' \
+		'  make OSTIRUS=1 VST3=1 package' \
+		'  make android-abi ANDROID_ABI=x86_64' \
 		'  make OSIRUS=1 VST3=1 AU=1 ARCH=universal CONFIG=Release LTO=1' \
 		'  make VAVRA=1 CLAP=1' \
 
@@ -332,11 +344,35 @@ build: $(CONFIG_STAMP)
 		$(call run_with_vcvars,$(CMAKE) --build "$(BUILD_DIR)" --config "$(CONFIG)" $(BUILD_PARALLEL) --target $(BUILD_TARGETS)); \
 	fi
 
+package: build
+	$(call run_with_vcvars,$(CMAKE) -E chdir "$(BUILD_DIR)" $(CMAKE) -P "$(CURDIR)/scripts/pack.cmake")
+
 clean:
 	$(CMAKE) -E remove_directory "$(BUILD_ROOT)"
 
 clean-profile:
 	$(CMAKE) -E remove_directory "$(BUILD_DIR)"
+
+ifeq ($(HOST_OS),Linux)
+install-deps:
+	sh ./scripts/install_linux_dependencies.sh
+else
+install-deps:
+	@echo 'install-deps is currently supported only on Linux.' >&2
+	@exit 2
+endif
+
+ifneq ($(WINDOWS_HOST),)
+android:
+	cmd //D //S //C call scripts/build_android.bat
+
+android-abi:
+	cmd //D //S //C call scripts/build_android_abi.bat "$(ANDROID_ABI)"
+else
+android android-abi:
+	@echo '$@ is currently supported only on Windows.' >&2
+	@exit 2
+endif
 
 # $(1): artifact relative to bin/plugins/CONFIG; $(2): destination directory.
 ifeq ($(HOST_OS),Darwin)
