@@ -157,6 +157,16 @@ CMAKE_STANDALONE := $(call cmake_bool,$(call enabled,$(STANDALONE)))
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 RPAREN := )
+selection_marker = $(if $(call enabled,$($(1))),* )
+PRODUCT_ROW_1 = [ $(call selection_marker,OSIRUS)OSIRUS ] [ $(call selection_marker,OSTIRUS)OSTIRUS ] [ $(call selection_marker,VAVRA)VARVA ] [ $(call selection_marker,XENIA)XENIA ]
+PRODUCT_ROW_2 = [ $(call selection_marker,JE8086)JE-8086 ] [ $(call selection_marker,NODALRED2X)NODALRED2X ]
+FORMAT_ROW_1 = [ $(call selection_marker,VST2)VST2 ] [ $(call selection_marker,VST3)VST3 ] [ $(call selection_marker,AU)AU ] [ $(call selection_marker,CLAP)CLAP ] [ $(call selection_marker,LV2)LV2 ]
+FORMAT_ROW_2 = [ $(call selection_marker,STANDALONE)STANDALONE ] [ $(call selection_marker,FX)FX ]
+CONFIG_ROW = [ $(shell printf '%s' $(call shell_quote,$(CONFIG)) | tr '[:lower:]' '[:upper:]') ]
+define center_banner_command
+text=$(call shell_quote,$(1)); width=67; padding=$$((width-$${#text})); left=$$((padding/2)); right=$$((padding-left)); printf '║%*s%s%*s║' "$$left" '' "$$text" "$$right" ''
+endef
+center_banner_line = $(shell $(call center_banner_command,$(1)))
 OPTION_PROFILE := $(subst $(SPACE),+,$(strip \
 	$(if $(filter ON,$(CMAKE_OSIRUS)),osirus) \
 	$(if $(filter ON,$(CMAKE_OSTIRUS)),ostirus) \
@@ -219,8 +229,13 @@ define BANNER_TOP
 ║                           Developed by:                           ║
 ║                      .: THE USUAL SUSPECTS :.                     ║
 ║                                                                   ║
-║            [ OSIRUS ] [ OSTIRUS ] [ VARVA ] [ XENIA ]             ║
-║                    [ JE-8086 ] [ NODALRED2X ]                     ║
+$(call center_banner_line,$(PRODUCT_ROW_1))
+$(call center_banner_line,$(PRODUCT_ROW_2))
+║                                                                   ║
+$(call center_banner_line,$(FORMAT_ROW_1))
+$(call center_banner_line,$(FORMAT_ROW_2))
+║                                                                   ║
+$(call center_banner_line,$(CONFIG_ROW))
 ║                                                                   ║
 ║      <==[-----------------------------------------------]==>      ║
 endef
