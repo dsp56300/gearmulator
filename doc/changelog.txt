@@ -2,6 +2,15 @@ Release Notes
 
 2.2.15:
 
+Osirus:
+
+- [Fix] EMU-88 Multi mode: changing the MIDI channel, the volume or any
+        other per-part multi parameter of a part was ignored if another part
+        had previously been set to the same value, and only took effect
+        after changing it to a different value and back. These parameters
+        were wrongly treated as global settings, which also caused them to
+        be reported back to the editor as global settings of part 1.
+
 OsTIrus:
 
 - [Fix] Three spelling mistakes in the user interface: "ENVELOPER FOLLOWER"
