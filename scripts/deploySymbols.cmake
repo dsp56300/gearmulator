@@ -109,3 +109,9 @@ string(REPLACE "/" "_" branch "${branch}")
 string(REPLACE "\\" "_" branch "${branch}")
 
 copyArtefacts("dsp56300:deploy" "symbols/${branch}/${CPACK_PACKAGE_VERSION}" "symbols")
+
+# The NAS is the only place these need to live. A macOS archive is 5-7 GB and the build dir is kept per branch
+# as a warm cache, so leaving the zip behind filled the mac's disk over a few releases. copyArtefacts aborts
+# with FATAL_ERROR when rclone fails, so getting here means the upload went through.
+file(REMOVE "${zipPath}")
+message(STATUS "Uploaded and removed local ${zipName}")
