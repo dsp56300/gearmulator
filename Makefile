@@ -129,6 +129,27 @@ SELECTED_FX_PRODUCTS := $(if $(call enabled,$(FX)),\
 	$(if $(call enabled,$(VAVRA)),mqJucePlugin_FX) \
 	$(if $(call enabled,$(XENIA)),xtJucePlugin_FX))
 
+PACKAGE_PRODUCTS := \
+	$(if $(call enabled,$(OSIRUS)),Osirus) \
+	$(if $(call enabled,$(OSTIRUS)),OsTIrus) \
+	$(if $(call enabled,$(VAVRA)),Vavra) \
+	$(if $(call enabled,$(XENIA)),Xenia) \
+	$(if $(call enabled,$(NODALRED2X)),NodalRed2x) \
+	$(if $(call enabled,$(JE8086)),JE8086)
+PACKAGE_FX_PRODUCTS := $(if $(call enabled,$(FX)),\
+	$(if $(call enabled,$(OSIRUS)),OsirusFX) \
+	$(if $(call enabled,$(OSTIRUS)),OsTIrusFX) \
+	$(if $(call enabled,$(VAVRA)),VavraFX) \
+	$(if $(call enabled,$(XENIA)),XeniaFX))
+PACKAGE_FORMATS := \
+	$(if $(call enabled,$(VST2)),VST2) \
+	$(if $(call enabled,$(VST3)),VST3) \
+	$(if $(call enabled,$(AU)),AU) \
+	$(if $(call enabled,$(CLAP)),CLAP) \
+	$(if $(call enabled,$(LV2)),LV2) \
+	$(if $(call enabled,$(STANDALONE)),Standalone)
+PACKAGE_COMPONENTS := $(foreach product,$(PACKAGE_PRODUCTS) $(PACKAGE_FX_PRODUCTS),$(foreach format,$(PACKAGE_FORMATS),$(product)-$(format)))
+
 SELECTED_SUFFIXES := \
 	$(if $(call enabled,$(VST2)),_VST) \
 	$(if $(call enabled,$(VST3)),_VST3) \
@@ -156,6 +177,7 @@ CMAKE_STANDALONE := $(call cmake_bool,$(call enabled,$(STANDALONE)))
 # Cache each configured combination, so switching back does not reconfigure.
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
+PACKAGE_COMPONENTS_CMAKE := $(subst $(SPACE),;,$(strip $(PACKAGE_COMPONENTS)))
 RPAREN := )
 selection_marker = $(if $(call enabled,$($(1))),* )
 PRODUCT_ROW_1 = [ $(call selection_marker,OSIRUS)OSIRUS ] [ $(call selection_marker,OSTIRUS)OSTIRUS ] [ $(call selection_marker,VAVRA)VARVA ] [ $(call selection_marker,XENIA)XENIA ]
@@ -417,7 +439,7 @@ build: $(CONFIG_STAMP)
 	fi
 
 package: build
-	$(CMAKE) -E chdir "$(BUILD_DIR)" $(CMAKE) -P "$(CURDIR)/scripts/pack.cmake"
+	$(CMAKE) -E chdir "$(BUILD_DIR)" $(CMAKE) -DTUS_PACK_COMPONENTS="$(PACKAGE_COMPONENTS_CMAKE)" -P "$(CURDIR)/scripts/pack.cmake"
 
 clean-all:
 	$(CMAKE) -E remove_directory "$(BUILD_ROOT)"
@@ -454,7 +476,6 @@ define install_artifact
 	$(call mac_install_privilege,$(2)) $(CMAKE) -E make_directory "$(2)"
 	$(call mac_install_privilege,$(2)) /usr/bin/ditto $(call shell_quote,$(PRODUCTS_DIR)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
 	$(call mac_install_privilege,$(2)) /usr/bin/codesign --force --sign - $(call shell_quote,$(2)/$(notdir $(1)))
-	$(call mac_install_privilege,$(2)) /usr/bin/xattr -dr com.apple.quarantine $(call shell_quote,$(2)/$(notdir $(1)))
 endef
 else
 define install_artifact
@@ -543,5 +564,5 @@ __run:
 		esac; \
 	done,+@make --no-print-directory $(RECURSIVE_DRY_RUN) MAKE_INNER=1 $(REQUESTED_GOALS) \
 		$(foreach variable,$(FORWARDED_VARIABLES),$(variable)=$(call shell_quote,$($(variable)))))
-	$(if $(SHOW_SUCCESS_MESSAGE),@printf '\n%s\n' '$(SUCCESS_MESSAGE)')
+	$(if $(SHOW_SUCCESS_MESSAGE),@printf '\n%s\n\n' '$(SUCCESS_MESSAGE)')
 endif
