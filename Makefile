@@ -397,13 +397,13 @@ endif
 
 $(CONFIG_STAMP): Makefile CMakeLists.txt source/CMakeLists.txt source/cmake/base.cmake source/cmake/juce.cmake
 	$(call run_with_vcvars,$(CMAKE) $(CMAKE_CONFIGURE_ARGS))
-	$(call run_with_vcvars,$(CMAKE) -E touch "$@")
+	$(CMAKE) -E touch "$@"
 
 configure: $(CONFIG_STAMP)
 
 reconfigure:
 	$(call run_with_vcvars,$(CMAKE) $(CMAKE_CONFIGURE_ARGS))
-	$(call run_with_vcvars,$(CMAKE) -E touch "$(CONFIG_STAMP)")
+	$(CMAKE) -E touch "$(CONFIG_STAMP)"
 
 build: $(CONFIG_STAMP)
 	@if test -z "$(BUILD_TARGETS)"; then \
@@ -414,7 +414,7 @@ build: $(CONFIG_STAMP)
 	fi
 
 package: build
-	$(call run_with_vcvars,$(CMAKE) -E chdir "$(BUILD_DIR)" $(CMAKE) -P "$(CURDIR)/scripts/pack.cmake")
+	$(CMAKE) -E chdir "$(BUILD_DIR)" $(CMAKE) -P "$(CURDIR)/scripts/pack.cmake"
 
 clean-all:
 	$(CMAKE) -E remove_directory "$(BUILD_ROOT)"
@@ -448,7 +448,7 @@ ifeq ($(HOST_OS),Darwin)
 mac_install_privilege = $(if $(filter /Library /Library/%,$(1)),sudo)
 define install_artifact
 	@test -n $(call shell_quote,$(2)) || { echo 'No install directory configured.' >&2; exit 2; }
-	$(call mac_install_privilege,$(2)) $(call run_with_vcvars,$(CMAKE) -E make_directory "$(2)")
+	$(call mac_install_privilege,$(2)) $(CMAKE) -E make_directory "$(2)"
 	$(call mac_install_privilege,$(2)) /usr/bin/ditto $(call shell_quote,$(CURDIR)/bin/plugins/$(CONFIG)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
 	$(call mac_install_privilege,$(2)) /usr/bin/codesign --force --sign - $(call shell_quote,$(2)/$(notdir $(1)))
 	$(call mac_install_privilege,$(2)) /usr/bin/xattr -dr com.apple.quarantine $(call shell_quote,$(2)/$(notdir $(1)))
@@ -459,9 +459,9 @@ define install_artifact
 	$(CMAKE) -E make_directory "$(2)"
 	@printf '\nInstalling %s -> %s\n' $(call shell_quote,$(CURDIR)/bin/plugins/$(CONFIG)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
 	@if test -d $(call shell_quote,$(CURDIR)/bin/plugins/$(CONFIG)/$(1)); then \
-		$(call run_with_vcvars,$(CMAKE) -E copy_directory "$(CURDIR)/bin/plugins/$(CONFIG)/$(1)" "$(2)/$(notdir $(1))"); \
+		$(CMAKE) -E copy_directory "$(CURDIR)/bin/plugins/$(CONFIG)/$(1)" "$(2)/$(notdir $(1))"; \
 	else \
-		$(call run_with_vcvars,$(CMAKE) -E copy_if_different "$(CURDIR)/bin/plugins/$(CONFIG)/$(1)" "$(2)/$(notdir $(1))"); \
+		$(CMAKE) -E copy_if_different "$(CURDIR)/bin/plugins/$(CONFIG)/$(1)" "$(2)/$(notdir $(1))"; \
 	fi
 endef
 endif
