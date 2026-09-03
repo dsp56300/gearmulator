@@ -193,7 +193,7 @@ def copySymbols()
 	// archive debug symbols (.dSYM on macOS, .pdb on Windows) to the private deploy remote (the NAS), keyed
 	// by branch+version so older releases stay symbolizable. Deploy only - symbols never go to the public upload.
 	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
-		genericSh "cmake -Dgearmulator_BINARY_DIR=${buildDir} -Dgearmulator_SOURCE_DIR=${WORKSPACE} -DBRANCH=${params.Branch} -DUPLOAD=1 -P scripts/deploySymbols.cmake"
+		genericSh "cmake -Dgearmulator_BINARY_DIR=${buildDir} -DBRANCH=${params.Branch} -DUPLOAD=1 -P scripts/deploySymbols.cmake"
 	}
 }
 

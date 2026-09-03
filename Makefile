@@ -179,11 +179,14 @@ OPTION_PROFILE := $(subst $(SPACE),+,$(strip \
 	$(if $(filter ON,$(CMAKE_AU)),au) \
 	$(if $(filter ON,$(CMAKE_CLAP)),clap) \
 	$(if $(filter ON,$(CMAKE_LV2)),lv2) \
-	$(if $(filter ON,$(CMAKE_STANDALONE)),standalone)))
+	$(if $(filter ON,$(CMAKE_STANDALONE)),standalone) \
+	$(if $(filter ON,$(CMAKE_FX)),fx)))
 GENERATOR_PROFILE := $(subst $(SPACE),-,$(GENERATOR))
-PROFILE := $(GENERATOR_PROFILE)/$(CONFIG)/$(subst ;,+,$(CMAKE_ARCHS))-lto$(LTO_CMAKE)-tw$(THIRDPARTY_WARNINGS_CMAKE)$(if $(filter ON,$(CMAKE_FX)),-fxON)/$(OPTION_PROFILE)
+BUILD_DIMENSIONS := $(subst ;,+,$(CMAKE_ARCHS))$(if $(filter ON,$(LTO_CMAKE)),-ltoON)$(if $(filter ON,$(THIRDPARTY_WARNINGS_CMAKE)),-twON)
+PROFILE := $(GENERATOR_PROFILE)/$(CONFIG)/$(BUILD_DIMENSIONS)/$(OPTION_PROFILE)
 BUILD_ROOT ?= $(CURDIR)/build
 BUILD_DIR ?= $(BUILD_ROOT)/$(PROFILE)
+PRODUCTS_DIR := $(BUILD_DIR)/bin
 CONFIG_STAMP := $(BUILD_DIR)/.make-configured
 
 CMAKE_CONFIGURE_ARGS := \
@@ -443,13 +446,13 @@ android android-abi:
 	@exit 2
 endif
 
-# $(1): artifact relative to bin/plugins/CONFIG; $(2): destination directory.
+# $(1): artifact relative to the configured build's bin directory; $(2): destination directory.
 ifeq ($(HOST_OS),Darwin)
 mac_install_privilege = $(if $(filter /Library /Library/%,$(1)),sudo)
 define install_artifact
 	@test -n $(call shell_quote,$(2)) || { echo 'No install directory configured.' >&2; exit 2; }
 	$(call mac_install_privilege,$(2)) $(CMAKE) -E make_directory "$(2)"
-	$(call mac_install_privilege,$(2)) /usr/bin/ditto $(call shell_quote,$(CURDIR)/bin/plugins/$(CONFIG)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
+	$(call mac_install_privilege,$(2)) /usr/bin/ditto $(call shell_quote,$(PRODUCTS_DIR)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
 	$(call mac_install_privilege,$(2)) /usr/bin/codesign --force --sign - $(call shell_quote,$(2)/$(notdir $(1)))
 	$(call mac_install_privilege,$(2)) /usr/bin/xattr -dr com.apple.quarantine $(call shell_quote,$(2)/$(notdir $(1)))
 endef
@@ -457,11 +460,11 @@ else
 define install_artifact
 	@test -n $(call shell_quote,$(2)) || { echo 'No install directory configured.' >&2; exit 2; }
 	$(CMAKE) -E make_directory "$(2)"
-	@printf '\nInstalling %s -> %s\n' $(call shell_quote,$(CURDIR)/bin/plugins/$(CONFIG)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
-	@if test -d $(call shell_quote,$(CURDIR)/bin/plugins/$(CONFIG)/$(1)); then \
-		$(CMAKE) -E copy_directory "$(CURDIR)/bin/plugins/$(CONFIG)/$(1)" "$(2)/$(notdir $(1))"; \
+	@printf '\nInstalling %s -> %s\n' $(call shell_quote,$(PRODUCTS_DIR)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
+	@if test -d $(call shell_quote,$(PRODUCTS_DIR)/$(1)); then \
+		$(CMAKE) -E copy_directory "$(PRODUCTS_DIR)/$(1)" "$(2)/$(notdir $(1))"; \
 	else \
-		$(CMAKE) -E copy_if_different "$(CURDIR)/bin/plugins/$(CONFIG)/$(1)" "$(2)/$(notdir $(1))"; \
+		$(CMAKE) -E copy_if_different "$(PRODUCTS_DIR)/$(1)" "$(2)/$(notdir $(1))"; \
 	fi
 endef
 endif

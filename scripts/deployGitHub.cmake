@@ -54,7 +54,7 @@ else()
 	set(changelogApp changelogGenerator)
 endif()
 
-execute_process(COMMAND ${gearmulator_SOURCE_DIR}/bin/tools/${changelogApp} -i ${gearmulator_SOURCE_DIR}/doc/changelog.txt -o ${gearmulator_SOURCE_DIR}/doc/changelog_split COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND ${gearmulator_BINARY_DIR}/tools/${changelogApp} -i ${gearmulator_SOURCE_DIR}/doc/changelog.txt -o ${gearmulator_SOURCE_DIR}/doc/changelog_split COMMAND_ERROR_IS_FATAL ANY)
 
 # ------------------------------
 

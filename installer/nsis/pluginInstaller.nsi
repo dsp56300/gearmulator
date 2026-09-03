@@ -3,7 +3,10 @@
 !define				NAME			Osirus
 !define				VENDOR			"The Usual Suspects"
 	
-!define				DIR_PLUGINS		"..\..\bin\plugins\Release"
+; Pass /DDIR_PLUGINS=<cmake-build-dir>\bin to makensis.
+!ifndef DIR_PLUGINS
+	!error "DIR_PLUGINS must point to the configured build's bin directory"
+!endif
 !define				DIR_SKINS		"..\..\source\osirusJucePlugin\skins\"
 !define				DIR_DATA		"$DOCUMENTS\${VENDOR}\${NAME}"
 

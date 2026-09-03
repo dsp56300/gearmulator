@@ -4,12 +4,11 @@
 # Symbols are private debugging data: they go to the "deploy" remote (the NAS) only, never the public
 # "upload" remote, and are keyed by branch + version so every released build stays symbolizable.
 #
-# The shipped plugins put their PDB / dSYM under <source>/bin/plugins/Release (JUCE PDB_OUTPUT_DIRECTORY,
-# see source/juce.cmake), while the DSP bridge server + libraries land under the build dir - so both roots
-# are scanned. Only Release symbols are collected.
+# Plugin products, the DSP bridge server, and libraries all land under the build directory. Only Release
+# symbols are collected.
 #
-# Invoke with: cmake -Dgearmulator_BINARY_DIR=<buildDir> [-Dgearmulator_SOURCE_DIR=<src>]
-#                    [-DBRANCH=<branch>] [-DUPLOAD=1] -P scripts/deploySymbols.cmake
+# Invoke with: cmake -Dgearmulator_BINARY_DIR=<buildDir> [-DBRANCH=<branch>] [-DUPLOAD=1]
+#                    -P scripts/deploySymbols.cmake
 # Without UPLOAD it only builds the zip (dry run). Linux produces no symbols, so it is a no-op there.
 
 if(NOT gearmulator_BINARY_DIR)
@@ -22,16 +21,10 @@ get_filename_component(gearmulator_BINARY_DIR "${gearmulator_BINARY_DIR}" ABSOLU
 # CPACK_PACKAGE_NAME / CPACK_PACKAGE_VERSION / CPACK_SYSTEM_NAME
 include(${gearmulator_BINARY_DIR}/CPackConfig.cmake)
 
-# Roots that can hold symbols: the build dir (server/bridge, libraries) and <source>/bin (the shipped
-# plugin products). relBase is their common ancestor so archive paths stay relative and tidy; in CI the
-# build dir lives under the source dir. Falls back to the build dir when no source dir is given.
+# All symbols live under the build directory. Use it as the archive base
+# so entries retain only their build-relative paths.
 set(scanRoots "${gearmulator_BINARY_DIR}")
 set(relBase "${gearmulator_BINARY_DIR}")
-if(gearmulator_SOURCE_DIR)
-	get_filename_component(gearmulator_SOURCE_DIR "${gearmulator_SOURCE_DIR}" ABSOLUTE)
-	list(APPEND scanRoots "${gearmulator_SOURCE_DIR}/bin")
-	set(relBase "${gearmulator_SOURCE_DIR}")
-endif()
 
 set(symbols "")
 foreach(root ${scanRoots})
