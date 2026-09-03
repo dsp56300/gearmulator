@@ -178,6 +178,7 @@ CMAKE_STANDALONE := $(call cmake_bool,$(call enabled,$(STANDALONE)))
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 PACKAGE_COMPONENTS_CMAKE := $(subst $(SPACE),;,$(strip $(PACKAGE_COMPONENTS)))
+LPAREN := (
 RPAREN := )
 selection_marker = $(if $(call enabled,$($(1))),* )
 PRODUCT_ROW_1 = [ $(call selection_marker,OSIRUS)OSIRUS ] [ $(call selection_marker,OSTIRUS)OSTIRUS ] [ $(call selection_marker,VAVRA)VARVA ] [ $(call selection_marker,XENIA)XENIA ]
@@ -282,68 +283,6 @@ $(BANNER_TOP)
 $(BANNER_BOTTOM)
 endef
 
-define HELPTEXT
-Usage: make [build] [selectors...] [build dimensions...]
-
-Install paths: $(INSTALL_PLATFORM)
-  VST3        $(or $(VST3_INSTALL_DIR),not configured)
-  VST2        $(or $(VST2_INSTALL_DIR),not configured)
-  AU          $(if $(filter Darwin,$(HOST_OS)),$(AU_INSTALL_DIR),not supported on this platform)
-  CLAP        $(or $(CLAP_INSTALL_DIR),not configured)
-  LV2         $(or $(LV2_INSTALL_DIR),not configured)
-  Standalone  $(or $(APP_INSTALL_DIR),not configured)
-Override with:
-  VST3_INSTALL_DIR=/path
-  VST2_INSTALL_DIR=/path
-  AU_INSTALL_DIR=/path
-  CLAP_INSTALL_DIR=/path
-  LV2_INSTALL_DIR=/path
-  APP_INSTALL_DIR=/path
-  Quote paths containing spaces. Environment overrides are also accepted.
-$(if $(WINDOWS_HOST),  VST2 is a guessed user-local location; add it to your DAW scan paths if needed.)
-
-Set selectors to 1 to enable them (unset or 0 disables them):
-  OSIRUS  OSTIRUS  VAVRA  XENIA  NODALRED2X  JE8086
-Formats: VST2  VST3  AU  CLAP  LV2  STANDALONE
-FX variants: FX
-
-Build dimensions:
-  CONFIG=Release       CMake configuration (Debug, RelWithDebInfo, ...)
-  ARCH=native          universal, native, arm64, x86_64, or another CMake arch
-  LTO=0                passed through as gearmulator_ENABLE_LTO
-  THIRDPARTY_WARNINGS=0 show suppressed dependency warnings when set to 1
-  FX=0                 additionally build available FX plugin variants when set to 1
-  BUILD_ROOT=path      root containing all Make-managed build profiles
-  BUILD_DIR=path       override the current profile build directory
-  GENERATOR=Ninja      CMake generator (Xcode remains available explicitly)
-  JOBS=N               parallel job limit
-  TARGETS="name ..."   explicit additional CMake target(s)
-
-Targets: build (default), install, package, configure, reconfigure, clean, clean-all
-  clean removes the selected profile; clean-all removes every profile under BUILD_ROOT.
-  install and package build first when selectors are supplied on the same command.
-  Bare build/install/package/clean commands reuse the last build configuration.
-Dependency setup: install-deps (Linux only)
-Android batch builds (Windows only): android, android-abi (ANDROID_ABI=arm64-v8a)
-Install selected products and formats: install
-  macOS destinations under /Library use sudo.
-  Standalone and Windows/Linux defaults are user-local.
-
-No product or format is selected by default; builds require at least one of each.
-Build defaults: CONFIG=Release ARCH=native LTO=0 JOBS=12
-
-Examples:
-  make OSTIRUS=1 VST2=1 STANDALONE=1
-  make OSTIRUS=1 VST3=1 package
-  make OSTIRUS=1 VST3=1
-  make install                       reuse the preceding successful configuration
-  make package                       reuse the preceding successful configuration
-  make android-abi ANDROID_ABI=x86_64
-  make OSIRUS=1 VST3=1 AU=1 ARCH=universal CONFIG=Release LTO=1
-  make VAVRA=1 CLAP=1
-  make OSTIRUS=1 GENERATOR=Xcode
-endef
-
 define newline
 
 
@@ -355,70 +294,91 @@ ifeq ($(MAKE_INNER),1)
 help:
 	@sleep 0.5
 	@printf '%s\r\n' \
+		'Usage:' \
+		'  make PRODUCT=1 FORMAT=1 [options] [action...]' \
 		'' \
-		'Usage: make [build] [selectors...] [build dimensions...]' \
+		'Products:' \
+		'  OSIRUS  OSTIRUS  VAVRA  XENIA  NODALRED2X  JE8086' \
 		'' \
-		$(call shell_quote,Install paths: $(INSTALL_PLATFORM)) \
+		'Formats:' \
+		'  VST2  VST3  AU  CLAP  LV2  STANDALONE' \
+		'' \
+		'Options:' \
+		'  FX=0                   Build available FX variants' \
+		'  CONFIG=Release         Debug, Release, RelWithDebInfo, ...' \
+		'  ARCH=native            native, universal, arm64, x86_64, or CMake arch' \
+		'  LTO=0                  Enable link-time optimization' \
+		'  JOBS=12                Parallel job limit'
+	@printf '%s\r\n' \
+		'' \
+		'Actions:' \
+		'  build                   Build selected products (default)' \
+		'  install                 Install the selected build profile' \
+		'  package                 Package the selected build profile' \
+		'  configure               Configure the selected profile' \
+		'  reconfigure             Reconfigure the selected profile' \
+		'  clean                   Remove the selected build profile' \
+		'  clean-all               Remove all Make-managed build profiles' \
+		'  install-deps            Install/update build dependencies (Linux only)' \
+		'  android                 Android batch build (Windows only)' \
+		'  android-abi             Android ABI build (ANDROID_ABI=arm64-v8a)'
+	@printf '%s\r\n' \
+		'' \
+		'Build profiles:' \
+		'  Explicit build selections are remembered for subsequent commands.' \
+		'  Bare build/install/package/clean commands use the last selected build.' \
+		'' \
+		'  No product or format is selected by default.' \
+		'' \
+		'Advanced options:' \
+		'  GENERATOR=Ninja         CMake generator' \
+		'  BUILD_ROOT=path         Root containing Make-managed build profiles' \
+		'  BUILD_DIR=path          Override the selected profile build directory' \
+		'  TARGETS="name ..."      Additional explicit CMake targets' \
+		'  THIRDPARTY_WARNINGS=0   Show suppressed dependency warnings when set to 1'
+	@printf '%s\r\n' \
+		'' \
+		$(call shell_quote,Install paths ($(subst $(LPAREN),,$(subst $(RPAREN),,$(INSTALL_PLATFORM)))):) \
 		$(call shell_quote,  VST3        $(or $(VST3_INSTALL_DIR),not configured)) \
 		$(call shell_quote,  VST2        $(or $(VST2_INSTALL_DIR),not configured)) \
 		$(call shell_quote,  AU          $(if $(filter Darwin,$(HOST_OS)),$(AU_INSTALL_DIR),not supported on this platform)) \
 		$(call shell_quote,  CLAP        $(or $(CLAP_INSTALL_DIR),not configured)) \
 		$(call shell_quote,  LV2         $(or $(LV2_INSTALL_DIR),not configured)) \
 		$(call shell_quote,  Standalone  $(or $(APP_INSTALL_DIR),not configured)) \
-		'Override with:' \
-		'  VST3_INSTALL_DIR=/path' \
-		'  VST2_INSTALL_DIR=/path' \
-		'  AU_INSTALL_DIR=/path' \
-		'  CLAP_INSTALL_DIR=/path' \
-		'  LV2_INSTALL_DIR=/path' \
-		'  APP_INSTALL_DIR=/path' \
+		'' \
+		'  Override with:' \
+		'    VST3_INSTALL_DIR=/path' \
+		'    VST2_INSTALL_DIR=/path' \
+		'    AU_INSTALL_DIR=/path' \
+		'    CLAP_INSTALL_DIR=/path' \
+		'    LV2_INSTALL_DIR=/path' \
+		'    APP_INSTALL_DIR=/path' \
+		'' \
 		'  Quote paths containing spaces. Environment overrides are also accepted.'
-	@sleep 0.3
 ifneq ($(WINDOWS_HOST),)
 	@printf '%s\r\n' '  VST2 is a guessed user-local location; add it to your DAW scan paths if needed.'
 endif
 	@printf '%s\r\n' \
-		'' \
-		'Set selectors to 1 to enable them (unset or 0 disables them):' \
-		'  OSIRUS  OSTIRUS  VAVRA  XENIA  NODALRED2X  JE8086' \
-		'Formats: VST2  VST3  AU  CLAP  LV2  STANDALONE' \
-		'FX variants: FX' \
-		'' \
-		'Build dimensions:' \
-		'  CONFIG=Release         CMake configuration (Debug, RelWithDebInfo, ...)' \
-		'  ARCH=native            universal, native, arm64, x86_64, or another CMake arch' \
-		'  LTO=0                  passed through as gearmulator_ENABLE_LTO' \
-		'  THIRDPARTY_WARNINGS=0  show suppressed dependency warnings when set to 1' \
-		'  FX=0                   additionally build available FX plugin variants when set to 1' \
-		'  BUILD_ROOT=path        root containing all Make-managed build profiles' \
-		'  BUILD_DIR=path         override the current profile build directory' \
-		'  GENERATOR=Ninja        CMake generator (Xcode remains available explicitly)' \
-		'  JOBS=N                 parallel job limit' \
-		'  TARGETS="name ..."     explicit additional CMake target(s)' \
-		'' \
-		'Targets: build (default), install, package, configure, reconfigure, clean, clean-all' \
-		'  clean removes the selected profile; clean-all removes every profile under BUILD_ROOT.' \
-		'  install and package build first when selectors are supplied on the same command.' \
-		'  Bare build/install/package/clean commands reuse the last build configuration.' \
-		'Dependency setup: install-deps (Linux only)' \
-		'Android batch builds (Windows only): android, android-abi (ANDROID_ABI=arm64-v8a)' \
-		'Install selected products and formats: install' \
-		'  macOS destinations under /Library use sudo.' \
-		'  Standalone and Windows/Linux defaults are user-local.' \
-		'' \
-		'No product or format is selected by default; builds require at least one of each.' \
-		'Build defaults: CONFIG=Release ARCH=native LTO=0 JOBS=12' \
+		$(if $(filter Darwin,$(HOST_OS)),'  macOS destinations under /Library use sudo.') \
 		'' \
 		'Examples:' \
-		'  make OSTIRUS=1 VST2=1 STANDALONE=1' \
-		'  make OSTIRUS=1 VST3=1 package' \
-		'  make OSTIRUS=1 VST3=1 install' \
 		'  make OSTIRUS=1 VST3=1' \
-		'  make install                       reuse the preceding successful configuration' \
-		'  make package                       reuse the preceding successful configuration' \
+		'  make OSTIRUS=1 VST3=1 FX=1' \
+		'  make OSIRUS=1 VST3=1 AU=1' \
+		'  make OSIRUS=1 VST3=1 ARCH=universal CONFIG=Debug' \
+		'' \
+		'  make OSTIRUS=1 VST3=1 install' \
+		'  make OSTIRUS=1 VST3=1 package' \
+		'  make OSTIRUS=1 VST3=1 package install' \
+		'' \
+		'  make install                       Install the last selected build' \
+		'  make package                       Package the last selected build' \
+		'  make clean                         Remove the last selected build profile' \
+		'' \
+		'  make VAVRA=1 CLAP=1 THIRDPARTY_WARNINGS=1' \
 		'  make android-abi ANDROID_ABI=x86_64' \
-		'  make OSIRUS=1 VST3=1 AU=1 ARCH=universal CONFIG=Release LTO=1' \
-		'  make VAVRA=1 CLAP=1' \
+		''
+
 
 $(CONFIG_STAMP): Makefile CMakeLists.txt source/CMakeLists.txt source/cmake/base.cmake source/cmake/juce.cmake
 	$(call run_with_vcvars,$(CMAKE) $(CMAKE_CONFIGURE_ARGS))

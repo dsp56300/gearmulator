@@ -52,7 +52,7 @@ options is provided below.
 
 ##### Linux
 ```sh
-sh ./linux_dependencies.sh
+make install-deps
 ```
 
 ##### macOS
@@ -74,7 +74,7 @@ brew install cmake ninja
 Run the following in PowerShell as administrator:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/gearmulator/scripts/install_build_deps.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/gearmulator/scripts/install_windows_dependencies.ps1 | iex
 ```
 
 This will install (or update) the MSVC toolchain, Git, MSYS2, CMake, Make, and Ninja, and add the required tools to your system `PATH`.
