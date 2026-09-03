@@ -492,6 +492,14 @@ RECURSIVE_DRY_RUN := $(if $(findstring n,$(firstword $(MAKEFLAGS))),-n)
 SHOW_BANNER := $(if $(filter clean clean-all,$(REQUESTED_GOALS)),,$(if $(filter install package,$(REQUESTED_GOALS)),$(EXPLICIT_CONFIGURATION_SELECTORS),1))
 SHOW_SUCCESS_MESSAGE := $(if $(filter help clean clean-all,$(REQUESTED_GOALS)),,$(if $(filter install package,$(REQUESTED_GOALS)),$(EXPLICIT_CONFIGURATION_SELECTORS),1))
 SUCCESS_MESSAGE := Proceed, operator. The synthesizers are hungry.
+SUPPORTED_COMMAND_LINE_VARIABLES := \
+	CMAKE GENERATOR CONFIG ARCH LTO THIRDPARTY_WARNINGS FX JOBS TARGETS ANDROID_ABI \
+	OSIRUS OSTIRUS VAVRA XENIA NODALRED2X JE8086 \
+	VST2 VST3 AU CLAP LV2 STANDALONE \
+	BUILD_ROOT BUILD_DIR VST3_INSTALL_DIR VST2_INSTALL_DIR AU_INSTALL_DIR CLAP_INSTALL_DIR LV2_INSTALL_DIR APP_INSTALL_DIR \
+	HOST_OS HOST_ARCH VCVARS
+COMMAND_LINE_VARIABLES := $(foreach variable,$(.VARIABLES),$(if $(filter command line,$(origin $(variable))),$(variable)))
+UNKNOWN_COMMAND_LINE_VARIABLES := $(filter-out $(SUPPORTED_COMMAND_LINE_VARIABLES),$(COMMAND_LINE_VARIABLES))
 CONFIGURATION_GOALS := build configure reconfigure package install
 RECORD_CONFIGURATION := $(filter $(CONFIGURATION_GOALS),$(REQUESTED_GOALS))
 SELECTION_REQUIRED := $(filter $(CONFIGURATION_GOALS) clean,$(REQUESTED_GOALS))
@@ -513,6 +521,7 @@ FORWARDED_VARIABLES := \
 $(REQUESTED_GOALS): __run
 
 __run:
+	$(if $(UNKNOWN_COMMAND_LINE_VARIABLES),@echo 'Unknown option(s): $(UNKNOWN_COMMAND_LINE_VARIABLES)' >&2; echo 'Run `make help` to see supported options.' >&2; exit 2)
 	$(if $(and $(LAST_CONFIGURATION_REQUESTED),$(if $(LAST_CONFIGURATION_AVAILABLE),,1),$(if $(CLEAN_ALL_PROMPT),,1)),@echo 'No saved build configuration is available. Run make with product and format selectors first.' >&2; exit 2)
 	$(if $(and $(SELECTION_REQUIRED),$(if $(and $(VALID_PRODUCT_SELECTION),$(VALID_FORMAT_SELECTION)),,1),$(if $(CLEAN_ALL_PROMPT),,1)),@echo 'Select at least one synthesizer and one output format.' >&2; exit 2)
 	$(if $(SHOW_BANNER),@printf '%b\n' '$(BANNER_PRINTF)' | while IFS= read -r line; do \
