@@ -475,7 +475,6 @@ define install_artifact
 	@test -n $(call shell_quote,$(2)) || { echo 'No install directory configured.' >&2; exit 2; }
 	$(call mac_install_privilege,$(2)) $(CMAKE) -E make_directory "$(2)"
 	$(call mac_install_privilege,$(2)) /usr/bin/ditto $(call shell_quote,$(PRODUCTS_DIR)/$(1)) $(call shell_quote,$(2)/$(notdir $(1)))
-	$(call mac_install_privilege,$(2)) /usr/bin/codesign --force --sign - $(call shell_quote,$(2)/$(notdir $(1)))
 endef
 else
 define install_artifact
@@ -499,7 +498,7 @@ $(if $(call enabled,$(LV2)),$(call install_artifact,LV2/$(1).lv2,$(LV2_INSTALL_D
 $(if $(call enabled,$(STANDALONE)),$(call install_artifact,Standalone/$(1)$(APP_EXTENSION),$(APP_INSTALL_DIR)))
 endef
 
-install:
+install: build
 	$(if $(call enabled,$(OSIRUS)),$(call install_product,Osirus))
 	$(if $(call enabled,$(OSTIRUS)),$(call install_product,OsTIrus))
 	$(if $(call enabled,$(VAVRA)),$(call install_product,Vavra))
