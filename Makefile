@@ -20,6 +20,9 @@ WINDOWS_HOST := $(filter Windows_NT MINGW% MSYS% CYGWIN%,$(HOST_OS))
 
 VCVARS := C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat
 
+# Initialize MSVC so Windows builds work from regular shells or Git Bash/MSYS
+# without requiring a Visual Studio developer console. Use Windows-native temp
+# storage to keep MSVC tooling reliable across shell environments.
 ifneq ($(WINDOWS_HOST),)
 VCVARS_CMD := $(shell cygpath -m -s "$(VCVARS)")
 WINDOWS_CURDIR := $(shell cygpath -m "$(CURDIR)")
@@ -83,7 +86,7 @@ else
   CMAKE_ARCHS := $(HOST_ARCH)
 endif
 
-LTO_CMAKE := $(call cmake_bool,$(EFFECTIVE_LTO))
+LTO_CMAKE := $(call cmake_bool,$(LTO))
 THIRDPARTY_WARNINGS_CMAKE := $(call cmake_bool,$(THIRDPARTY_WARNINGS))
 CMAKE_FX := $(call cmake_bool,$(FX))
 
@@ -179,28 +182,41 @@ BUILD_PARALLEL := $(if $(strip $(JOBS)),--parallel $(JOBS),--parallel)
 	android android-abi package
 
 
+define BANNER_TOP
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║      <==[--==[--==[   G E A R M U L A T O R   ]==--]==--]==>      ║
+║                                                                   ║
+║                     ▄████  ██▀▀ ▄▀█ █▀█ █▄ ▄█                     ║
+║                    ██  ▄▄ ██▄▄ █▀█ █▀▄ █ ▀ █                      ║
+║                     ▀███▀ ▀▀▀▀ ▀ ▀ ▀ ▀ ▀   ▀                      ║
+║                                                                   ║
+║                       G E A R M U L A T O R                       ║
+║                                                                   ║
+║                           Developed by:                           ║
+║                      .: THE USUAL SUSPECTS :.                     ║
+║                                                                   ║
+║            [ OSIRUS ] [ OSTIRUS ] [ VARVA ] [ XENIA ]             ║
+║                    [ JE-8086 ] [ NODALRED2X ]                     ║
+║                                                                   ║
+║      <==[-----------------------------------------------]==>      ║
+endef
+
+define BANNER_BOTTOM
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+endef
+
 define BANNER
-╔════════════════════════════════════════════════════════════════════╗
-║                                                                    ║
-║      <==[--==[--==[  G E A R M U L A T O R  ]==--]==--]==>         ║
-║                                                                    ║
-║                   ▄████  ██▀▀ ▄▀█ █▀█ █▄ ▄█                        ║
-║                  ██  ▄▄ ██▄▄ █▀█ █▀▄ █ ▀ █                         ║
-║                   ▀███▀ ▀▀▀▀ ▀ ▀ ▀ ▀ ▀   ▀                         ║
-║                                                                    ║
-║                      G E A R M U L A T O R                         ║
-║                                                                    ║
-║                        Developed by:                               ║
-║                   .: THE USUAL SUSPECTS :.                         ║
-║                                                                    ║
-║              [ OSIRUS ] [ OSTIRUS ] [ VARVA ] [ XENIA ]            ║
-║                    [ JE-8086 ] [ NODALRED2X ]                      ║
-║                                                                    ║
-║      <==[------------------------------------------------]==>      ║
-║                                                                    ║
-║      Proceed, operator. The synthesizers are hungry.               ║
-║                                                                    ║
-╚════════════════════════════════════════════════════════════════════╝
+$(BANNER_TOP)
+$(BANNER_BOTTOM)
+endef
+
+define HELP_BANNER
+$(BANNER_TOP)
+║                                                                   ║
+║      Proceed, operator. The synthesizers are hungry.              ║
+$(BANNER_BOTTOM)
 endef
 
 define HELPTEXT
@@ -261,13 +277,11 @@ define newline
 
 
 endef
-BANNER_PRINTF := $(subst $(newline),\r\n,$(BANNER))
+BANNER_TEXT := $(if $(filter help,$(if $(MAKECMDGOALS),$(MAKECMDGOALS),build)),$(HELP_BANNER),$(BANNER))
+BANNER_PRINTF := $(subst $(newline),\r\n,$(BANNER_TEXT))
 
+ifeq ($(MAKE_INNER),1)
 help:
-	@printf '%b\n' '$(BANNER_PRINTF)' | while IFS= read -r line; do \
-		printf '%s\r\n' "$$line"; \
-		sleep 0.01; \
-	done
 	@sleep 0.5
 	@printf '%s\r\n' \
 		'' \
@@ -412,4 +426,26 @@ else
 install-au:
 	@echo 'Audio Units are only supported on macOS.' >&2
 	@exit 2
+endif
+else
+REQUESTED_GOALS := $(if $(strip $(MAKECMDGOALS)),$(MAKECMDGOALS),build)
+RECURSIVE_DRY_RUN := $(if $(findstring n,$(firstword $(MAKEFLAGS))),-n)
+FORWARDED_VARIABLES := \
+	CMAKE GENERATOR CONFIG ARCH LTO THIRDPARTY_WARNINGS FX JOBS TARGETS ANDROID_ABI \
+	OSIRUS OSTIRUS VAVRA XENIA NODALRED2X JE8086 \
+	VST2 VST3 AU CLAP LV2 STANDALONE \
+	BUILD_ROOT BUILD_DIR VST3_INSTALL_DIR VST2_INSTALL_DIR AU_INSTALL_DIR APP_INSTALL_DIR \
+	HOST_OS HOST_ARCH
+.PHONY: __run $(REQUESTED_GOALS)
+
+$(REQUESTED_GOALS): __run
+
+__run:
+	@printf '%b\n' '$(BANNER_PRINTF)' | while IFS= read -r line; do \
+		printf '%s\r\n' "$$line"; \
+		sleep 0.01; \
+	done
+	+@make --no-print-directory $(RECURSIVE_DRY_RUN) MAKE_INNER=1 $(REQUESTED_GOALS) \
+		$(foreach variable,$(FORWARDED_VARIABLES),$(variable)=$(call shell_quote,$($(variable))))
+	$(if $(filter help,$(REQUESTED_GOALS)),,@printf '\n%s\n' 'Proceed, operator. The synthesizers are hungry.')
 endif
