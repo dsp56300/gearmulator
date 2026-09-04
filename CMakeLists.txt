@@ -27,7 +27,7 @@ if(NOT CMAKE_GENERATOR_TOOLSET AND CMAKE_GENERATOR MATCHES "Visual Studio 18")
 	set(CMAKE_GENERATOR_TOOLSET "v143")
 endif()
 
-project(gearmulator VERSION 2.2.15)
+project(gearmulator VERSION 2.2.16)
 
 include(source/cmake/base.cmake)
 include(CTest)

@@ -342,8 +342,8 @@
 			<knob id="Cutoff2 Offset" class="jucePos juceRotary knob2" data-class-juceConditionDisabled="!(Filter2_Cutoff_Link_value == 1)" data-model="partCurrent" param="Cutoff2 Offset" style="left: 1636dp; top: 45dp; width: 310dp; height: 310dp;"/>
 			<div id="Resonance2Text" class="jucePos juceLabel text4" data-model="partCurrent" param="Filter2 Resonance" style="left: 1445dp; top: 145dp; width: 80dp; height: 45dp; line-height: 35dp;">{{Filter2_Resonance_text}}</div>
 			<knob id="Resonance2" class="jucePos juceRotary knob1" controllerLinkCondition="LinkEnv" controllerLinkTarget="Resonance1" data-model="partCurrent" param="Filter2 Resonance" style="left: 1395dp; top: 73dp; width: 180dp; height: 180dp;"/>
-			<div id="Filter1Mode_CM" class="jucePos" tabgroup="tgFilter1Mode" tabpage="0" style="left: 300dp; top: 286dp; width: 400dp; height: 120dp;">
-				<button id="buttonFilter1Mode_AM" class="jucePos juceButton button_1" isToggle="0" tabbutton="1" tabgroup="tgFilter1Mode" style="left: 0dp; top: 7dp; width: 79dp; height: 78dp;">
+			<div id="Filter1Mode_CM" class="jucePos" data-model="partCurrent" data-class-juceConditionDisabled="Filter1_Mode_value > 3" style="left: 300dp; top: 286dp; width: 400dp; height: 120dp;">
+				<button id="buttonFilter1Mode_AM" class="jucePos juceButton button_1" data-model="partCurrent" isToggle="1" param="Filter1 Mode" valueOn="4" style="left: 0dp; top: 7dp; width: 79dp; height: 78dp;">
 					<buttonhittest class="jucePos" style="left: 0dp; top: 0dp; width: 199dp; height: 58dp;"/>
 				</button>
 				<button id="Filter1Mode_LP" class="jucePos juceButton button_filter_lp" data-model="partCurrent" isToggle="1" param="Filter1 Mode" valueOn="0" style="left: 126dp; top: 20dp; width: 55dp; height: 54dp;"/>
@@ -351,8 +351,8 @@
 				<button id="Filter1Mode_BP" class="jucePos juceButton button_filter_bp" data-model="partCurrent" isToggle="1" param="Filter1 Mode" valueOn="2" style="left: 236dp; top: 20dp; width: 55dp; height: 54dp;"/>
 				<button id="Filter1Mode_BS" class="jucePos juceButton button_filter_bs" data-model="partCurrent" isToggle="1" param="Filter1 Mode" valueOn="3" style="left: 291dp; top: 20dp; width: 55dp; height: 54dp;"/>
 			</div>
-			<div id="Filter1Mode_AM" class="jucePos" tabgroup="tgFilter1Mode" tabpage="1" style="left: 300dp; top: 286dp; width: 400dp; height: 120dp;">
-				<button id="buttonFilter1Mode_CM" class="jucePos juceButton button_AM" isToggle="0" tabbutton="0" tabgroup="tgFilter1Mode" style="left: 0dp; top: 7dp; width: 79dp; height: 78dp;">
+			<div id="Filter1Mode_AM" class="jucePos" data-model="partCurrent" data-class-juceConditionDisabled="!(Filter1_Mode_value > 3)" style="left: 300dp; top: 286dp; width: 400dp; height: 120dp;">
+				<button id="buttonFilter1Mode_CM" class="jucePos juceButton button_AM" data-model="partCurrent" isToggle="1" param="Filter1 Mode" valueOn="0" style="left: 0dp; top: 7dp; width: 79dp; height: 78dp;">
 					<buttonhittest class="jucePos" style="left: 0dp; top: 0dp; width: 199dp; height: 58dp;"/>
 				</button>
 				<button id="Filter1Mode_AP1" class="jucePos juceButton button_filter_ap1" data-model="partCurrent" isToggle="1" param="Filter1 Mode" valueOn="4" style="left: 126dp; top: 20dp; width: 55dp; height: 54dp;"/>

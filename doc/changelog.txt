@@ -1,5 +1,17 @@
 Release Notes
 
+2.2.16:
+
+OsTIrus:
+
+- [Fix] BUG-10276 The filter 1 mode buttons did not follow the loaded
+        patch. A patch that uses one of the analog modes still showed the
+        classic mode row with no button lit, both when loading a patch and
+        when stepping through patches, even though the correct mode was
+        active. Both rows now follow the parameter, and the AM button
+        switches to Analog 1 Pole while the CM button switches back to
+        Low Pass.
+
 2.2.15:
 
 Osirus:
