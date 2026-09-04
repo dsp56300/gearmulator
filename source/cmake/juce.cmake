@@ -165,9 +165,11 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		juce_plugin_modules
 	)
 
-	if(${isSynth})
-		createMacSetupScript(${productName})
-	endif()
+	# Every product needs the macOS quarantine removal script, synth or effect. Gating
+	# this on isSynth left every standalone effect without one: installMacSetupScript()
+	# below then expanded to install(FILES <empty>), which CMake accepts silently, so
+	# the Mac ZIPs shipped without a setup script and nothing ever complained.
+	createMacSetupScript(${productName})
 
 	set(clapFeatures "")
 	if(${isSynth})
