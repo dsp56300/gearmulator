@@ -4,6 +4,7 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
 #include "jucePluginLib/processorPropertiesInit.h"
+#include "jucePluginLib/tools.h"
 
 #include "virusLib/romloader.h"
 
@@ -32,7 +33,8 @@ OsirusProcessor::OsirusProcessor() :
 	, ::getConfigOptions(), pluginLib::initProcessorProperties()
 	, virusLib::DeviceModel::ABC)
 {
-	postConstruct(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::ABC));
+	if (!pluginLib::Tools::isJucePluginHelper())
+		postConstruct(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::ABC));
 }
 
 OsirusProcessor::~OsirusProcessor()

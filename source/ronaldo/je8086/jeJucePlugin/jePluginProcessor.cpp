@@ -8,6 +8,7 @@
 #include "jeLib/device.h"
 #include "jeLib/romloader.h"
 #include "jucePluginLib/processorPropertiesInit.h"
+#include "jucePluginLib/tools.h"
 
 #include "synthLib/deviceException.h"
 
@@ -21,6 +22,9 @@ namespace jeJucePlugin
 	                   .withInput("Input", juce::AudioChannelSet::stereo(), true)
 		, {}, pluginLib::initProcessorProperties())
 	{
+		if (pluginLib::Tools::isJucePluginHelper())
+			return;
+
 		m_roms = jeLib::RomLoader::findROMs();
 
 		// default to keyboard for now

@@ -33,7 +33,10 @@ include(source/cmake/base.cmake)
 include(CTest)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
+option(${PROJECT_NAME}_BUILD_JUCEPLUGIN_VST2 "Build VST2 version of Juce plugins" on)
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugin" on)
+option(${PROJECT_NAME}_ENABLE_LTO "Enable link-time optimization" on)
+option(${PROJECT_NAME}_ENABLE_THIRDPARTY_WARNINGS "Show warnings emitted by bundled dependencies" off)
 
 # ----------------- CPack basic parameters
 

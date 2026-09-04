@@ -828,6 +828,8 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 							return multiProgramChange(value);
 						}
 						return true;
+					default:
+						break;
 					}
 				}
 				else
@@ -1333,6 +1335,10 @@ void Microcontroller::applyToMultiEditBuffer(const Page _page, const uint8_t _pa
 			const auto idx = MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part;
 			m_multiEditBuffer[idx] = _value;
 		}
+		break;
+	case PAGE_6E:
+	case PAGE_6F:
+	case PAGE_D:
 		break;
 	}
 }

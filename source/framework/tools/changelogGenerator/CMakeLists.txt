@@ -13,7 +13,7 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(changelogGenerator PUBLIC baseLib)
 	
-set (outputDir "${CMAKE_SOURCE_DIR}/bin/tools")
+set(outputDir "${CMAKE_BINARY_DIR}/tools")
 
 set_property(TARGET changelogGenerator PROPERTY RUNTIME_OUTPUT_DIRECTORY "${outputDir}")
 

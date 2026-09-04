@@ -27,6 +27,7 @@ namespace bridgeLib
 		case Command::Invalid:
 		case Command::Ping:
 		case Command::Pong:
+		case Command::RequestRom:
 			break;
 		case Command::PluginInfo:			handleStruct<PluginDesc>(_in); break;
 		case Command::ServerInfo:			handleStruct<ServerInfo>(_in); break;

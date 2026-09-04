@@ -2,6 +2,9 @@
 
 #include "mqhardware.h"
 
+#undef LOGTOCONSOLE
+#undef LOGTOFILE
+#undef HEX
 #include "baseLib/logging.h"
 
 #include <thread>

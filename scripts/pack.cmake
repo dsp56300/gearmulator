@@ -9,9 +9,15 @@ removeGlob("*.rpm")
 macro(pack GENERATOR)
 	message(STATUS "Packaging ${GENERATOR}")
 	set(PACK_RESULT 0)
-	execute_process(COMMAND cpack -G ${GENERATOR} 
-		COMMAND_ECHO STDOUT
-		RESULT_VARIABLE PACK_RESULT)
+	if(TUS_PACK_COMPONENTS)
+		execute_process(COMMAND cpack -G ${GENERATOR} "-DCPACK_COMPONENTS_ALL=${TUS_PACK_COMPONENTS}"
+			COMMAND_ECHO STDOUT
+			RESULT_VARIABLE PACK_RESULT)
+	else()
+		execute_process(COMMAND cpack -G ${GENERATOR}
+			COMMAND_ECHO STDOUT
+			RESULT_VARIABLE PACK_RESULT)
+	endif()
 	if(PACK_RESULT)
 		message(FATAL_ERROR "Failed to execute cpack: " ${PACK_RESULT})
 	endif()

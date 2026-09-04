@@ -42,6 +42,13 @@ add_subdirectory(3rdparty/libresample)
 
 add_subdirectory(3rdparty)
 
+# Lua is intentionally compiled as C++. Explicitly select the language for
+# its .c files without modifying the vendor build or relying on Clang's
+# deprecated extension inference. MSVC-style drivers already receive /TP.
+if(NOT MSVC AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+	target_compile_options(lua PRIVATE -x c++)
+endif()
+
 include(cmake/macsetup.cmake)
 include(cmake/skins.cmake)
 include(cmake/exporttarget.cmake)
@@ -50,6 +57,17 @@ include(cmake/changelog.cmake)
 # ----------------- network bridge
 
 add_subdirectory(3rdparty/ptypes EXCLUDE_FROM_ALL)
+if(NOT ${CMAKE_PROJECT_NAME}_ENABLE_THIRDPARTY_WARNINGS AND APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+	# Legacy ptypes uses sprintf, deprecated by the macOS SDK. Keep the
+	# vendor workaround private to this target without editing its sources.
+	target_compile_options(ptypes PRIVATE -Wno-deprecated-declarations)
+endif()
+
+if(MSVC AND NOT ${CMAKE_PROJECT_NAME}_ENABLE_THIRDPARTY_WARNINGS)
+	# PTypes predates 64-bit Windows handles and emits conversion warnings in
+	# its implementation. Keep these suppressions private to the vendor target.
+	target_compile_options(ptypes PRIVATE /wd4244 /wd4267 /wd4302 /wd4311 /wd4312)
+endif()
 add_subdirectory(framework/networkLib EXCLUDE_FROM_ALL)
 add_subdirectory(framework/tools/bridge)
 
@@ -59,7 +77,9 @@ add_subdirectory(framework/tools/bridge)
 
 # ----------------- Try to install VST2 SDK
 
-include(cmake/findvst2.cmake)
+if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN AND ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST2)
+	include(cmake/findvst2.cmake)
+endif()
 
 # ----------------- Juce based audio plugin dependencies
 

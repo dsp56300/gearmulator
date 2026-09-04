@@ -336,6 +336,8 @@ namespace genericVirusUI
 		{
 		case virusLib::DeviceModel::Invalid:
 			return;
+		case virusLib::DeviceModel::A:
+		case virusLib::DeviceModel::B:
 		case virusLib::DeviceModel::ABC:
 			{
 				auto* rom = m_processor.getSelectedRom();

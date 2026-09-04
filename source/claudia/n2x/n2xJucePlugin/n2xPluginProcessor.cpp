@@ -6,6 +6,7 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
 #include "jucePluginLib/processorPropertiesInit.h"
+#include "jucePluginLib/tools.h"
 
 #include "n2xLib/n2xdevice.h"
 #include "n2xLib/n2xromloader.h"
@@ -35,9 +36,12 @@ namespace n2xJucePlugin
 	                   .withOutput("Out CD", juce::AudioChannelSet::stereo(), true)
 		, getOptions(), pluginLib::initProcessorProperties())
 	{
-		getController();
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
+		if (!pluginLib::Tools::isJucePluginHelper())
+		{
+			getController();
+			const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
+			Processor::setLatencyBlocks(latencyBlocks);
+		}
 	}
 
 	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()

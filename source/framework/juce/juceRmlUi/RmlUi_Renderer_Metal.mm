@@ -668,7 +668,10 @@ struct RenderInterface_Metal::Impl
 		NSError* error = nil;
 		NSString* source = [NSString stringWithUTF8String:g_metalShaderSource];
 		MTLCompileOptions* options = [[MTLCompileOptions alloc] init];
-		options.languageVersion = MTLLanguageVersion2_0;
+		if (@available(macOS 10.13, *))
+			options.languageVersion = MTLLanguageVersion2_0;
+		else
+			options.languageVersion = MTLLanguageVersion1_2;
 
 		shaderLibrary = [device newLibraryWithSource:source options:options error:&error];
 		if (!shaderLibrary)

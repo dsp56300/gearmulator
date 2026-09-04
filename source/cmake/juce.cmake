@@ -1,7 +1,6 @@
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugins" on)
 option(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN "Build FX plugin variants" off)
 
-option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST2 "Build VST2 version of Juce plugins" on)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST3 "Build VST3 version of Juce plugins" on)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugins" on)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2 "Build LV2 version of Juce plugins" off)
@@ -131,7 +130,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		COPY_PLUGIN_AFTER_BUILD FALSE                     # Should the plugin be installed to a default location after building?
 		PLUGIN_MANUFACTURER_CODE TusP                     # A four-character manufacturer id with at least one upper-case character
 		PLUGIN_CODE ${plugin4CC}                          # A unique four-character plugin id with exactly one upper-case character
-		PRODUCTS_FOLDER "${CMAKE_SOURCE_DIR}/bin/plugins/$<CONFIG>"
+		PRODUCTS_FOLDER "${CMAKE_BINARY_DIR}/bin"
 		                                                  # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
 		FORMATS ${juce_formats}                           # The formats to build. Other valid formats are: AAX Unity VST AU AUv3 LV2
 		PRODUCT_NAME ${productName}                       # The name of the final executable, which can differ from the target name
@@ -140,6 +139,16 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		BUNDLE_ID "com.theusualsuspects.${productName}"
 		LV2URI "http://theusualsuspects.lv2/${productName}"
 	)
+
+	# FST is header-only and is compiled as part of JUCE's generated VST2
+	# wrapper. Suppress its intentional compatibility diagnostics only there.
+	if(TARGET ${targetName}_VST AND NOT ${CMAKE_PROJECT_NAME}_ENABLE_THIRDPARTY_WARNINGS)
+		# suppress FST's provenance TODOs
+		target_compile_definitions(${targetName}_VST PRIVATE FST_DISABLE_WARNINGS)
+		if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+			target_compile_options(${targetName}_VST PRIVATE -Wno-deprecated-declarations)
+		endif()
+	endif()
 
 	target_sources(${targetName} PRIVATE ${SOURCES} serverPlugin.cpp)
 
