@@ -55,28 +55,29 @@ check-shell:
 endif
 
 # Intel and Apple Silicon Macs use the same system plug-in folders, including
-# for universal builds. Standalone apps and other platforms default to user-local paths.
+# for universal builds.
 ifeq ($(HOST_OS),Darwin)
   INSTALL_PLATFORM := macOS ($(HOST_ARCH))
   VST3_INSTALL_DIR ?= /Library/Audio/Plug-Ins/VST3
   VST2_INSTALL_DIR ?= /Library/Audio/Plug-Ins/VST
   AU_INSTALL_DIR ?= /Library/Audio/Plug-Ins/Components
-  CLAP_INSTALL_DIR ?= $(HOME)/Library/Audio/Plug-Ins/CLAP
-  LV2_INSTALL_DIR ?= $(HOME)/Library/Audio/Plug-Ins/LV2
-  APP_INSTALL_DIR ?= $(HOME)/Applications
+  CLAP_INSTALL_DIR ?= /Library/Audio/Plug-Ins/CLAP
+  LV2_INSTALL_DIR ?= /Library/Audio/Plug-Ins/LV2
+  APP_INSTALL_DIR ?= /Applications
   VST2_EXTENSION := .vst
   APP_EXTENSION := .app
 else ifneq ($(WINDOWS_HOST),)
   # This wrapper requires GNU Make with a POSIX shell, e.g. MSYS2/Git Bash.
   SHELL := sh
   INSTALL_PLATFORM := Windows ($(HOST_ARCH))
-  LOCALAPPDATA := $(shell powershell -NoProfile -Command "[Environment]::GetFolderPath('LocalApplicationData')")
-  VST3_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/Common/VST3
-  VST2_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/Common/VST2
+  WINDOWS_PROGRAM_FILES := $(shell powershell -NoProfile -Command "[Environment]::GetFolderPath('ProgramFiles')")
+  WINDOWS_COMMON_FILES := $(shell powershell -NoProfile -Command "[Environment]::GetFolderPath('CommonProgramFiles')")
+  VST3_INSTALL_DIR ?= $(WINDOWS_COMMON_FILES)/VST3
+  VST2_INSTALL_DIR ?= $(WINDOWS_PROGRAM_FILES)/VSTPlugIns
   AU_INSTALL_DIR ?=
-  CLAP_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/Common/CLAP
-  LV2_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/Common/LV2
-  APP_INSTALL_DIR ?= $(LOCALAPPDATA)/Programs/OsTIrus
+  CLAP_INSTALL_DIR ?= $(WINDOWS_COMMON_FILES)/CLAP
+  LV2_INSTALL_DIR ?= $(WINDOWS_COMMON_FILES)/LV2
+  APP_INSTALL_DIR ?= $(WINDOWS_PROGRAM_FILES)/The Usual Suspects
   VST2_EXTENSION := .dll
   APP_EXTENSION := .exe
 else ifeq ($(HOST_OS),Linux)
@@ -149,6 +150,7 @@ PACKAGE_FORMATS := \
 	$(if $(call enabled,$(LV2)),LV2) \
 	$(if $(call enabled,$(STANDALONE)),Standalone)
 PACKAGE_COMPONENTS := $(foreach product,$(PACKAGE_PRODUCTS) $(PACKAGE_FX_PRODUCTS),$(foreach format,$(PACKAGE_FORMATS),$(product)-$(format)))
+INSTALL_PRODUCTS := $(strip $(PACKAGE_PRODUCTS) $(PACKAGE_FX_PRODUCTS))
 
 SELECTED_SUFFIXES := \
 	$(if $(call enabled,$(VST2)),_VST) \
@@ -210,6 +212,8 @@ PROFILE := $(GENERATOR_PROFILE)/$(CONFIG)/$(BUILD_DIMENSIONS)/$(OPTION_PROFILE)
 BUILD_ROOT ?= $(CURDIR)/build
 BUILD_DIR ?= $(BUILD_ROOT)/$(PROFILE)
 PRODUCTS_DIR := $(BUILD_DIR)/bin
+WINDOWS_BUILD_DIR := $(if $(WINDOWS_HOST),$(shell cygpath -m "$(BUILD_DIR)"),)
+WINDOWS_PRODUCTS_DIR := $(if $(WINDOWS_HOST),$(shell cygpath -m "$(PRODUCTS_DIR)"),)
 CONFIG_STAMP := $(BUILD_DIR)/.make-configured
 
 CMAKE_CONFIGURE_ARGS := \
@@ -355,11 +359,9 @@ help:
 		'    APP_INSTALL_DIR=/path' \
 		'' \
 		'  Quote paths containing spaces. Environment overrides are also accepted.'
-ifneq ($(WINDOWS_HOST),)
-	@printf '%s\r\n' '  VST2 is a guessed user-local location; add it to your DAW scan paths if needed.'
-endif
 	@printf '%s\r\n' \
 		$(if $(filter Darwin,$(HOST_OS)),'  macOS destinations under /Library use sudo.') \
+		$(if $(WINDOWS_HOST),'  Windows installation requests administrator privileges through UAC.') \
 		'' \
 		'Examples:' \
 		'  make OSTIRUS=1 VST3=1' \
@@ -459,6 +461,18 @@ $(if $(call enabled,$(STANDALONE)),$(call install_artifact,Standalone/$(1)$(APP_
 endef
 
 install: build
+ifneq ($(WINDOWS_HOST),)
+	@GEARMULATOR_INSTALL_PRODUCTS=$(call shell_quote,$(INSTALL_PRODUCTS)) \
+	GEARMULATOR_INSTALL_FORMATS=$(call shell_quote,$(strip $(PACKAGE_FORMATS))) \
+	GEARMULATOR_INSTALL_STATE_DIR=$(call shell_quote,$(WINDOWS_BUILD_DIR)) \
+	GEARMULATOR_INSTALL_PRODUCTS_DIR=$(call shell_quote,$(WINDOWS_PRODUCTS_DIR)) \
+	GEARMULATOR_INSTALL_VST3_DIR=$(call shell_quote,$(VST3_INSTALL_DIR)) \
+	GEARMULATOR_INSTALL_VST2_DIR=$(call shell_quote,$(VST2_INSTALL_DIR)) \
+	GEARMULATOR_INSTALL_CLAP_DIR=$(call shell_quote,$(CLAP_INSTALL_DIR)) \
+	GEARMULATOR_INSTALL_LV2_DIR=$(call shell_quote,$(LV2_INSTALL_DIR)) \
+	GEARMULATOR_INSTALL_APP_DIR=$(call shell_quote,$(APP_INSTALL_DIR)) \
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install_windows_artifacts.ps1
+else
 	$(if $(call enabled,$(OSIRUS)),$(call install_product,Osirus))
 	$(if $(call enabled,$(OSTIRUS)),$(call install_product,OsTIrus))
 	$(if $(call enabled,$(VAVRA)),$(call install_product,Vavra))
@@ -469,6 +483,7 @@ install: build
 	$(if $(and $(call enabled,$(FX)),$(call enabled,$(OSTIRUS))),$(call install_product,OsTIrusFX))
 	$(if $(and $(call enabled,$(FX)),$(call enabled,$(VAVRA))),$(call install_product,VavraFX))
 	$(if $(and $(call enabled,$(FX)),$(call enabled,$(XENIA))),$(call install_product,XeniaFX))
+endif
 else
 REQUESTED_GOALS := $(if $(strip $(MAKECMDGOALS)),$(MAKECMDGOALS),build)
 RECURSIVE_DRY_RUN := $(if $(findstring n,$(firstword $(MAKEFLAGS))),-n)
