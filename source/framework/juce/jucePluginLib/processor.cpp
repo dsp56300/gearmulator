@@ -461,6 +461,21 @@ namespace pluginLib
 		return m_device->canModifyDspClock();
 	}
 
+	uint32_t Processor::getMaxDspThreads() const
+	{
+		if(!m_device)
+			return 1;
+		return m_device->getMaxDspThreads();
+	}
+
+	bool Processor::setDspThreads(const uint32_t _threads)
+	{
+		if(_threads > getMaxDspThreads())
+			return false;
+		m_dspThreads = _threads;
+		return true;
+	}
+
 	bool Processor::setPreferredDeviceSamplerate(const float _samplerate)
 	{
 		m_preferredDeviceSamplerate = _samplerate;

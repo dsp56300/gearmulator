@@ -93,6 +93,17 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
+	bool Processor::setDspThreads(const uint32_t _threads)
+	{
+		if(!pluginLib::Processor::setDspThreads(_threads))
+			return false;
+
+		getConfig().setValue("dspThreads", static_cast<int>(_threads));
+		getConfig().saveIfNeeded();
+
+		return true;
+	}
+
 	bool Processor::hasEditor() const
 	{
 		return true; // (change this to false if you choose to not supply an editor)

@@ -142,6 +142,71 @@ namespace jucePluginEditorLib
 			}
 		}
 
+		// Multicore DSP buttons. Only offered by devices that can spread their DSP
+		// over several threads; everything else keeps the container hidden.
+		{
+			const auto maxThreads = m_processor.getMaxDspThreads();
+
+			if (maxThreads > 1)
+			{
+				if (auto* threadsTemplate = juceRmlUi::helper::findChild(_root, "dspThreadsEntry", false))
+				{
+					const auto current = m_processor.getDspThreads();
+					auto* parent = threadsTemplate->GetParentNode();
+
+					for (uint32_t threads = 0; threads <= maxThreads; ++threads)
+					{
+						if (threads == 1)	// one thread is the same thing as Off
+							continue;
+
+						auto clone = threadsTemplate->Clone();
+						auto* clonePtr = clone.get();
+						clonePtr->SetId("");
+						clonePtr->RemoveProperty("display");
+
+						auto* buttonContainer = juceRmlUi::helper::findChild(clonePtr, "dspThreadsButton");
+						auto* button = juceRmlUi::helper::findChildT<juceRmlUi::ElemButton>(buttonContainer, "button");
+						auto* label = juceRmlUi::helper::findChild(buttonContainer, "label");
+
+						std::stringstream ss;
+						if (threads == 0)
+							ss << "Off (default)";
+						else
+							ss << threads;
+						label->SetInnerRML(ss.str());
+
+						button->setChecked(current == threads);
+						m_dspThreadButtons.emplace_back(threads, button);
+
+						juceRmlUi::EventListener::Add(buttonContainer, Rml::EventId::Click, [this, threads](Rml::Event& _event)
+						{
+							_event.StopPropagation();
+
+							if (!m_processor.setDspThreads(threads))
+								return;
+
+							updateDspThreadButtons();
+
+							/* Same warning the latency buttons show, and for the same
+							 * reason: the pipeline delivers audio on a fixed delay that
+							 * forms part of the latency we report to the host. */
+							genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Warning",
+								"This takes effect the next time the plugin is loaded, and it changes the reported latency.\n"
+								"It is advised to save, close & reopen the project to prevent synchronization issues.");
+						});
+
+						parent->InsertBefore(std::move(clone), threadsTemplate);
+					}
+
+					threadsTemplate->GetParentNode()->RemoveChild(threadsTemplate);
+				}
+			}
+			else if (auto* container = juceRmlUi::helper::findChild(_root, "containerDspThreads", false))
+			{
+				juceRmlUi::helper::setVisible(container, false);
+			}
+		}
+
 		// Output Gain slider
 		auto* sliderGain = juceRmlUi::helper::findChild(_root, "sliderGain", false);
 		auto* labelGain = juceRmlUi::helper::findChild(_root, "labelGain", false);
@@ -237,6 +302,16 @@ namespace jucePluginEditorLib
 		for (const auto [percent, button] : m_clockButtons)
 		{
 			button->setChecked(currentPercent == percent);
+		}
+	}
+
+	void SettingsDspAudio::updateDspThreadButtons() const
+	{
+		const auto current = m_processor.getDspThreads();
+
+		for (const auto [threads, button] : m_dspThreadButtons)
+		{
+			button->setChecked(current == threads);
 		}
 	}
 

@@ -25,6 +25,9 @@ namespace synthLib
 		baseLib::MD5 romHash;
 		uint32_t customData = 0;
 		std::string homePath;
+		// 0 or 1 = render on one thread. Higher asks a device that supports it to
+		// spread its DSP over that many threads; see Device::getMaxDspThreads().
+		uint32_t dspThreads = 0;
 	};
 
 	class Device
@@ -82,6 +85,12 @@ namespace synthLib
 		virtual uint32_t getDspClockPercent() const = 0;
 		virtual uint64_t getDspClockHz() const = 0;
 		virtual bool canModifyDspClock() const { return false; }
+
+		/* How many threads this device can spread its DSP over. 1 means it renders
+		 * on the calling thread only, which is the default and true of every device
+		 * that has not opted in. The count is chosen at construction
+		 * (DeviceCreateParams::dspThreads) because it fixes the reported latency. */
+		virtual uint32_t getMaxDspThreads() const { return 1; }
 
 		BASELIB_NOINLINE virtual void release(std::vector<SMidiEvent>& _events);
 
