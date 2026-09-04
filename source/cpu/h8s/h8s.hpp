@@ -50,6 +50,11 @@ public:
 	uint8 ccr {128};
 	uint8 exr {0};
 	H8SDevice* maps[1<<24] {};
+	/* One bit per 256-byte page of address space: set when ANY byte of the page
+	 * is memmap'd. Consulted before maps[] so the common case -- plain ROM/RAM,
+	 * which is every instruction fetch -- never touches the 128 MB table. */
+	uint64_t mappedPages[(1<<16) / 64] {};
+	bool pageMapped(int a) const { return (mappedPages[(a >> 8) >> 6] >> ((a >> 8) & 63)) & 1; }
 	unsigned long long  cycles {0};
 	unsigned long long pending_irqs {0};
 	
@@ -96,7 +101,7 @@ public:
 	void memmap(H8SDevice *dev,int start,int len = 1)
 	{
 		dev->setState(this);
-		for (int i=0;i<len;i++) maps[start+i]=dev;
+		for (int i=0;i<len;i++) { maps[start+i]=dev; mappedPages[((start+i) >> 8) >> 6] |= 1ULL << (((start+i) >> 8) & 63); }
 	}
 	
 	void loadmem(const uint8* data,uint32_t size,uint32_t address)
@@ -127,21 +132,55 @@ public:
 	int16 read16(uint8 *from) {return read16((int)(from-memory));}
 	int8 read8(uint8 *from) {return read8((int)(from-memory));}
 	
-	void write32(int32 val,int to) {write16(val>>16,to);write16(val&0xffff,to+2);}
-	uint32 read32(int from) {uint32 s=read16(from)&0xffff;s=(s<<16)|(read16(from+2)&0xffff);return s;}
-	void write16(int16 val,int to) {write8(val>>8,to);write8(val&255,to+1);}
-	uint16 read16(int from) {uint16 s=read8(from)&255;s=(s<<8)|(read8(from+1)&255);return s;}
+	/* Wide accesses: when every byte lies in one unmapped 256-byte page the
+	 * bytes come straight from memory[] -- the per-byte clockMem() calls are kept
+	 * verbatim so the cycle count (and so the ASIC sample cadence) is unchanged. */
+	bool plainRun(int a, int n) const { return (((a ^ (a + n - 1)) >> 8) == 0) && !pageMapped(a); }
+	void write32(int32 val,int to) {
+		const int a = to & 0xffffff;
+		if (plainRun(a, 4)) {
+			clockMem(a, lastwrite); clockMem(a + 1, lastwrite); clockMem(a + 2, lastwrite); clockMem(a + 3, lastwrite);
+			memory[a] = (uint8)(val >> 24); memory[a + 1] = (uint8)(val >> 16); memory[a + 2] = (uint8)(val >> 8); memory[a + 3] = (uint8)val;
+			return;
+		}
+		write16(val>>16,to);write16(val&0xffff,to+2);
+	}
+	uint32 read32(int from) {
+		const int a = from & 0xffffff;
+		if (plainRun(a, 4)) {
+			clockMem(a, lastread); clockMem(a + 1, lastread); clockMem(a + 2, lastread); clockMem(a + 3, lastread);
+			return ((uint32)memory[a] << 24) | ((uint32)memory[a + 1] << 16) | ((uint32)memory[a + 2] << 8) | memory[a + 3];
+		}
+		uint32 s=read16(from)&0xffff;s=(s<<16)|(read16(from+2)&0xffff);return s;
+	}
+	void write16(int16 val,int to) {
+		const int a = to & 0xffffff;
+		if (plainRun(a, 2)) {
+			clockMem(a, lastwrite); clockMem(a + 1, lastwrite);
+			memory[a] = (uint8)(val >> 8); memory[a + 1] = (uint8)val;
+			return;
+		}
+		write8(val>>8,to);write8(val&255,to+1);
+	}
+	uint16 read16(int from) {
+		const int a = from & 0xffffff;
+		if (plainRun(a, 2)) {
+			clockMem(a, lastread); clockMem(a + 1, lastread);
+			return ((uint16)memory[a] << 8) | memory[a + 1];
+		}
+		uint16 s=read8(from)&255;s=(s<<8)|(read8(from+1)&255);return s;
+	}
 	
 	void write8(int8 byte,int to) {
 		to&=0xffffff;
 		clockMem(to, lastwrite);
-		if (maps[to]) maps[to]->write(to, byte);
+		if (pageMapped(to) && maps[to]) maps[to]->write(to, byte);
 		else memory[to]=byte;
 	}
 	int8 read8(int from) {
 		from&=0xffffff;
 		clockMem(from, lastread);
-		if (maps[from]) return maps[from]->read(from);
+		if (pageMapped(from) && maps[from]) return maps[from]->read(from);
 		return memory[from];
 	}
 	
