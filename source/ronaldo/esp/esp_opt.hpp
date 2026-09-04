@@ -188,29 +188,35 @@ public:
     data_core1.eramPtr = &esp->shared.eram.eram[0];
   }
 
-  void genProgram(ESP<lg2eram_size>* esp)
+  /* `cores` is a bit mask: 1 = core 0, 2 = core 1. A core's generated code
+   * depends only on its own program words (the ERAM decode reads core 1's),
+   * so a write burst that touched one core recompiles one core. The H8S
+   * loads a patch in ~60 bursts per ASIC, each one a full recompile at
+   * ~1 ms on the device, and that is the stall at patch change. */
+  void genProgram(ESP<lg2eram_size>* esp, uint32_t cores = 3)
   {
-    if (runCore0) m_rt.release(runCore0);
-    if (runCore1) m_rt.release(runCore1);
+    if ((cores & 1) && runCore0) m_rt.release(runCore0);
+    if ((cores & 2) && runCore1) m_rt.release(runCore1);
 
-    eramEmitter.init(esp);
-    coreEmitter0.init(esp, &esp->core0);
-    coreEmitter1.init(esp, &esp->core1);
+    if (cores & 2) eramEmitter.init(esp);
+    if (cores & 1) coreEmitter0.init(esp, &esp->core0);
+    if (cores & 2) coreEmitter1.init(esp, &esp->core1);
 
     updateCoef(esp);
 
     // logger.log("#### CORE 0 ####\n");
-    genCore(esp, 0, &coreEmitter0, &runCore0);
+    if (cores & 1) genCore(esp, 0, &coreEmitter0, &runCore0);
     
     // logger.log("\n\n\n#### CORE 1 ####\n");
-    genCore(esp, 1, &coreEmitter1, &runCore1, true);
+    if (cores & 2) genCore(esp, 1, &coreEmitter1, &runCore1, true);
 
     // fflush(logger._file);
     // printf("JITed ESP cores\n");
   }
   
-  void setProgramDirty()
+  void setProgramDirty(uint32_t cores = 3)
   {
+	  m_dirtyCores |= cores;
 	  m_programDirty = 3;
   }
 
@@ -219,7 +225,11 @@ public:
       if (m_programDirty > 0)
       {
           if (--m_programDirty == 0)
-              genProgram(m_esp);
+          {
+              const uint32_t cores = m_dirtyCores;
+              m_dirtyCores = 0;
+              genProgram(m_esp, cores);
+          }
 	  }
   }
 
@@ -261,6 +271,7 @@ private:
   asmjit::JitRuntime m_rt;
   asmjit::FileLogger logger;
   uint32_t m_programDirty = 0;
+  uint32_t m_dirtyCores = 0;
   
   typedef void(*RunCore)(int8_t* coefsPtr, int32_t *iramPtr, int32_t *gramPtr, CoreData *varPtr, uint32_t eramPos, uint32_t iramPos, int64_t unused1, int64_t unused2);
   RunCore runCore0 = nullptr, runCore1 = nullptr;
