@@ -131,6 +131,13 @@ namespace pluginLib
 		uint64_t getDspClockHz() const;
 		bool canModifyDspClock() const;
 
+		/* How many threads the device may spread its DSP over. 1 (the default)
+		 * means it cannot, and the setting is hidden. Applied when the device is
+		 * created, because it fixes the reported latency. */
+		uint32_t getMaxDspThreads() const;
+		uint32_t getDspThreads() const { return m_dspThreads; }
+		virtual bool setDspThreads(uint32_t _threads);
+
 		bool setPreferredDeviceSamplerate(float _samplerate);
 		float getPreferredDeviceSamplerate() const;
 		std::vector<float> getDeviceSupportedSamplerates() const;
@@ -260,6 +267,7 @@ namespace pluginLib
 		float m_outputGain = 1.0f;
 		float m_inputGain = 1.0f;
 		uint32_t m_dspClockPercent = 100;
+		uint32_t m_dspThreads = 0;
 		float m_preferredDeviceSamplerate = 0.0f;
 		synthLib::Resampler::Mode m_resamplerMode = synthLib::Resampler::Mode::Legacy;
 		float m_hostSamplerate = 0.0f;
