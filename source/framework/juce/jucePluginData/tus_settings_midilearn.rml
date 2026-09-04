@@ -25,17 +25,16 @@
 		
 		<table class="settings-table" id="mappingTable" style="padding-top: 0.5em; padding-bottom: 1em;">
 			<tr class="settings-tr settings-tr-headline">
-				<td class="ml-col-type">Type</td>
 				<td class="ml-col-channel">Channel</td>
 				<td class="ml-col-part">Part</td>
 				<td class="ml-col-controller">Controller</td>
 				<td class="ml-col-mode">Mode</td>
 				<td class="ml-col-invert">Invert</td>
+				<td class="ml-col-disabled">Disabled</td>
 				<td class="ml-col-parameter">Parameter</td>
-				<td class="ml-col-remove"></td>
+				<td class="ml-col-remove">Remove</td>
 			</tr>
 			<tr id="mappingRow" class="settings-tr ml-tr">
-				<td id="type" class="ml-col-type">CC</td>
 				<td class="ml-col-channel">
 					<combo id="channelCombo" class="settings-combo-small settings-combo-channel">
 						<combotext>All</combotext>
@@ -55,8 +54,11 @@
 				<td class="ml-col-invert">
 					<button id="cbInvert" class="settings-checkbox"/>
 				</td>
+				<td class="ml-col-disabled">
+					<button id="cbMidiControl" class="settings-checkbox" title="When checked, matching MIDI messages do not change the parameter or reach the synth firmware."/>
+				</td>
 				<td id="parameter" class="ml-col-parameter">Filter Cutoff</td>
-				<td class="ml-col-remove"><button id="btRemove" class="button">Remove</button></td>
+				<td class="ml-col-remove"><button id="btRemove" class="button" title="Remove">×</button></td>
 			</tr>
 		</table>
 		

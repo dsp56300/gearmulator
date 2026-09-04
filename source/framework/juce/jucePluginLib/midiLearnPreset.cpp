@@ -3,6 +3,7 @@
 #include "synthLib/midiTypes.h"
 
 #include <juce_core/juce_core.h>
+#include <algorithm>
 
 namespace pluginLib
 {
@@ -25,6 +26,42 @@ namespace pluginLib
 	void MidiLearnPreset::clearMappings()
 	{
 		m_mappings.clear();
+	}
+
+	void MidiLearnPreset::addInputBlock(const MidiInputBlock& _block)
+	{
+		if (_block.part == MidiLearnMapping::AutoPart)
+		{
+			m_inputBlocks.erase(std::remove_if(m_inputBlocks.begin(), m_inputBlocks.end(), [&](const MidiInputBlock& _existing)
+			{
+				return _existing.paramName == _block.paramName;
+			}), m_inputBlocks.end());
+		}
+		else if (isInputBlocked(_block.paramName, _block.part))
+		{
+			return;
+		}
+
+		m_inputBlocks.push_back(_block);
+	}
+
+	void MidiLearnPreset::removeInputBlock(const std::string& _paramName, uint8_t _part)
+	{
+		m_inputBlocks.erase(std::remove_if(m_inputBlocks.begin(), m_inputBlocks.end(),
+			[&](const MidiInputBlock& _block)
+			{
+				return _block.paramName == _paramName &&
+					(_block.part == _part || _block.part == MidiLearnMapping::AutoPart);
+			}), m_inputBlocks.end());
+	}
+
+	bool MidiLearnPreset::isInputBlocked(const std::string& _paramName, uint8_t _part) const
+	{
+		return std::any_of(m_inputBlocks.begin(), m_inputBlocks.end(), [&](const MidiInputBlock& _block)
+		{
+			return _block.paramName == _paramName &&
+				(_block.part == MidiLearnMapping::AutoPart || _block.part == _part);
+		});
 	}
 
 	const MidiLearnMapping* MidiLearnPreset::findMapping(MidiLearnMapping::Type _type, uint8_t _channel, uint8_t _controller) const
@@ -71,6 +108,16 @@ namespace pluginLib
 			mappingsArray.add(mapping.toJson());
 		}
 		obj->setProperty("mappings", mappingsArray);
+
+		juce::Array<juce::var> inputBlocksArray;
+		for (const auto& block : m_inputBlocks)
+		{
+			auto* blockObj = new juce::DynamicObject();
+			blockObj->setProperty("paramName", juce::String(block.paramName));
+			blockObj->setProperty("part", static_cast<int>(block.part));
+			inputBlocksArray.add(juce::var(blockObj));
+		}
+		obj->setProperty("inputBlocks", inputBlocksArray);
 		obj->setProperty("defaultFeedbackTargets", static_cast<int>(m_defaultFeedbackTargets));
 
 		return juce::var(obj);
@@ -89,13 +136,39 @@ namespace pluginLib
 			return false; // Unsupported version
 
 		m_mappings.clear();
+		m_inputBlocks.clear();
 
 		const auto* mappingsArray = obj->getProperty("mappings").getArray();
 		if (mappingsArray)
 		{
 			for (const auto& mappingVar : *mappingsArray)
 			{
-				m_mappings.push_back(MidiLearnMapping::fromJson(mappingVar));
+				auto mapping = MidiLearnMapping::fromJson(mappingVar);
+				if (auto* mappingObj = mappingVar.getDynamicObject())
+				{
+					const bool discarded = mappingObj->hasProperty("discardInput") && static_cast<bool>(mappingObj->getProperty("discardInput"));
+					const bool firmwareDefault = mappingObj->hasProperty("defaultController") && static_cast<bool>(mappingObj->getProperty("defaultController"));
+					if (discarded)
+						addInputBlock({mapping.paramName, mapping.part});
+					if (firmwareDefault)
+						continue;
+				}
+				m_mappings.push_back(mapping);
+			}
+		}
+
+		if (const auto* inputBlocksArray = obj->getProperty("inputBlocks").getArray())
+		{
+			for (const auto& blockVar : *inputBlocksArray)
+			{
+				if (auto* blockObj = blockVar.getDynamicObject())
+				{
+					const auto paramName = blockObj->getProperty("paramName").toString().toStdString();
+					const auto part = blockObj->hasProperty("part")
+						? static_cast<uint8_t>(static_cast<int>(blockObj->getProperty("part")))
+						: MidiLearnMapping::AutoPart;
+					addInputBlock({paramName, part});
+				}
 			}
 		}
 
@@ -127,7 +200,7 @@ namespace pluginLib
 	bool MidiLearnPreset::operator==(const MidiLearnPreset& _other) const
 	{
 		// Compare mappings only, not names
-		if (m_mappings.size() != _other.m_mappings.size())
+		if (m_mappings.size() != _other.m_mappings.size() || m_inputBlocks != _other.m_inputBlocks)
 			return false;
 
 		for (size_t i = 0; i < m_mappings.size(); ++i)

@@ -661,7 +661,57 @@ namespace jucePluginEditorLib
 			{
 				const auto& preset = translator->getPreset();
 				const auto mappings = preset.findMappingsByParam(param->getDescription().name);
-				if (!mappings.empty())
+				const auto paramPart = param->getPart();
+				const auto appliesToPart = [paramPart](const pluginLib::MidiLearnMapping* _mapping)
+				{
+					return _mapping->part == pluginLib::MidiLearnMapping::AutoPart ||
+						_mapping->part == paramPart;
+				};
+
+				const bool hasApplicableMappings = std::any_of(mappings.begin(), mappings.end(), appliesToPart);
+				const bool ignoreMidiEvents = preset.isInputBlocked(param->getDescription().name, paramPart);
+
+				const auto midiControlAction = ignoreMidiEvents ? "Enable MIDI Control" : "Disable MIDI Control";
+				menu.addEntry(midiControlAction, [this, param, ignoreMidiEvents]()
+				{
+					auto* t = m_processor.getMidiLearnTranslator();
+					if (!t) return;
+
+					auto updatedPreset = t->getPreset();
+					const auto paramName = param->getDescription().name;
+					const auto currentPart = param->getPart();
+					if (ignoreMidiEvents)
+					{
+						auto& blocks = updatedPreset.getInputBlocks();
+						blocks.erase(std::remove_if(blocks.begin(), blocks.end(), [&](const pluginLib::MidiInputBlock& _block)
+						{
+							return _block.paramName == paramName &&
+								(_block.part == pluginLib::MidiLearnMapping::AutoPart || _block.part == currentPart);
+						}), blocks.end());
+					}
+					else
+					{
+						const auto learnedMappings = updatedPreset.findMappingsByParam(paramName);
+						bool addedForMapping = false;
+						for (const auto* mapping : learnedMappings)
+						{
+							if (mapping->part == pluginLib::MidiLearnMapping::AutoPart || mapping->part == currentPart)
+							{
+								updatedPreset.addInputBlock({paramName, mapping->part});
+								addedForMapping = true;
+							}
+						}
+						if (!addedForMapping)
+							updatedPreset.addInputBlock({paramName, currentPart});
+					}
+
+					t->setPreset(updatedPreset);
+					if (m_overlays)
+						m_overlays->refreshMidiLearnOverlays();
+					m_processor.saveDefaultMidiLearnPreset();
+				});
+
+				if (hasApplicableMappings)
 				{
 					menu.addEntry("Clear MIDI Mapping", [this, param]()
 					{
@@ -683,6 +733,7 @@ namespace jucePluginEditorLib
 						t->setPreset(preset);
 						if (m_overlays)
 							m_overlays->refreshMidiLearnOverlays();
+						m_processor.saveDefaultMidiLearnPreset();
 					});
 				}
 			}
