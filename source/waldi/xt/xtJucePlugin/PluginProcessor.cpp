@@ -6,6 +6,7 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
 #include "jucePluginLib/processorPropertiesInit.h"
+#include "jucePluginLib/tools.h"
 
 #include "baseLib/binarystream.h"
 
@@ -39,9 +40,12 @@ namespace xtJucePlugin
 #endif
 		, getOptions(), pluginLib::initProcessorProperties())
 	{
-		getController();
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
+		if (!pluginLib::Tools::isJucePluginHelper())
+		{
+			getController();
+			const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
+			Processor::setLatencyBlocks(latencyBlocks);
+		}
 	}
 
 	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
