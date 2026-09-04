@@ -155,6 +155,7 @@ namespace juceRmlUi
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
 		void startNextFrameTimer();
+		bool dispatchFrameEvent();
 
 		Rml::Vector2i getRenderSize() const;
 
@@ -203,6 +204,7 @@ namespace juceRmlUi
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
 
 		double m_time = 0;
+		double m_lastFrameEventTime = 0;
 		float m_fps = 0;
 		float m_targetFPS = 0;
 

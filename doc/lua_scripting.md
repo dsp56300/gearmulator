@@ -117,6 +117,50 @@ local id = params.onPartChanged(function(newPart)
 end)
 ```
 
+## Frame Events (Animation)
+
+Anything that has to keep moving on its own - an oscilloscope, a VU meter, a scrolling
+marquee - needs a clock, because parameter callbacks only fire when a value changes. A
+document receives a `frame` event once per rendered frame if, and only if, it declares an
+`onframe` handler on its `<body>`:
+
+```html
+<body onframe="onFrame(event)">
+```
+
+```lua
+function onFrame(event)
+  local time  = event.parameters['time']   -- seconds since the editor was opened
+  local delta = event.parameters['delta']  -- seconds since the previous frame event
+
+  local needle = document:GetElementById("needle")
+  needle.style.left = tostring(200 + 180 * math.sin(time * 2)) .. "dp"
+end
+```
+
+Always drive movement from `delta` (or from `time`) rather than counting frames, the frame
+rate is not guaranteed and differs per machine.
+
+To use `AddEventListener` instead of an inline handler, declare an empty attribute -
+`<body onframe="">` - because the attribute is what opts the document in:
+
+```lua
+document:AddEventListener("frame", function(event)
+  -- ...
+end)
+```
+
+Notes:
+
+- The event does not bubble and cannot be interrupted, it is dispatched on the document.
+- Frame events stop while the editor is hidden or minimized, and resume when it comes back.
+  `delta` reports the real interval between two frame events, so an animation driven by it
+  picks up where it should rather than jumping.
+- The rate is capped at 60 Hz. Setting `refreshRateLimitHz` in the plugin's config XML
+  lowers (or raises, up to 300) that limit and paces the whole user interface with it.
+- A skin that does not declare `onframe` costs nothing but an attribute lookup per frame,
+  and leaves the editor idling at its usual two updates per second.
+
 ## DOM Manipulation
 
 The `document` global provides access to the RmlUi DOM:

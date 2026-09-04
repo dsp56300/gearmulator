@@ -2,6 +2,18 @@ Release Notes
 
 2.2.16:
 
+Framework:
+
+- [Imp] BUG-10304 Skins can now animate on their own clock. A skin that
+        declares an onframe handler on its body receives a frame event
+        once per rendered frame, carrying the elapsed time and the time
+        since the previous frame, which is what an oscilloscope or a VU
+        meter needs. Until now the only way to loop an animation was to
+        chain a CSS transition into itself. The rate is capped at 60 Hz,
+        follows the refreshRateLimitHz config setting if one is present,
+        and drops to nothing while the editor is off screen or while no
+        skin asks for it. See doc/lua_scripting.md.
+
 OsTIrus:
 
 - [Fix] BUG-10276 The filter 1 mode buttons did not follow the loaded

@@ -63,6 +63,12 @@ namespace juceRmlUi
 			return false;
 		}
 
+		// the event a skin receives once per frame, the inline handler attribute that opts a
+		// document in, and the rate it is dispatched at if no refresh rate limit is configured
+		constexpr char g_frameEvent[] = "frame";
+		constexpr char g_frameEventHandler[] = "onframe";
+		constexpr float g_defaultFrameEventFPS = 60.0f;
+
 		static constexpr RendererProxy::RendererConfig g_renderConfigSoftware {true, false, false};
 		static constexpr RendererProxy::RendererConfig g_renderConfigGL2 {false, false, false};
 		static constexpr RendererProxy::RendererConfig g_renderConfigGL3 {true, true, true};
@@ -863,6 +869,8 @@ namespace juceRmlUi
 		m_updating = true;
 		m_renderDone = false;
 
+		auto frameEventActive = false;
+
 		{
 			std::scoped_lock lock(m_contextRenderMutex);
 
@@ -881,6 +889,11 @@ namespace juceRmlUi
 			}
 
 			evPreUpdate(this);
+
+			if (visible)
+				frameEventActive = dispatchFrameEvent();
+			else
+				m_lastFrameEventTime = 0.0;	// an editor that is not on screen animates nothing, do not report the gap as one frame
 
 			m_rmlContext->Update();
 
@@ -916,11 +929,19 @@ namespace juceRmlUi
 			// immediate update
 			--m_pendingUpdates;
 		}
-		else
+		else if (!frameEventActive)
 		{
 			// render every 0.5 seconds if there is no update pending
 			m_rmlContext->RequestNextUpdate(0.5f);
 			m_nextFrameTime = std::max(m_nextFrameTime, t + m_rmlContext->GetNextUpdateDelay());
+		}
+		else if (m_targetFPS <= 0)
+		{
+			// A skin is animating, so the idle tick above is skipped to keep the loop running. Without a
+			// configured refresh rate limit nothing else paces it and the animation would run as fast as
+			// the message loop allows, so cap it here. A configured limit takes precedence and is already
+			// applied above.
+			m_nextFrameTime = std::max(m_nextFrameTime, t + 1.0f / g_defaultFrameEventFPS);
 		}
 
 		// ensure that new post frame callbacks that are added by other post frame callbacks are executed in the next frame
@@ -1198,6 +1219,51 @@ namespace juceRmlUi
 			m_rmlContext->SetDensityIndependentPixelRatio(renderScale * m_contentScale);
 			m_rmlContext->SetDimensions({ size.x, size.y });
 		}
+	}
+
+	// A skin that needs to animate on its own clock - an oscilloscope, a VU meter, anything that
+	// has to move without a parameter changing - declares an onframe handler on its body and gets
+	// a 'frame' event once per rendered frame, carrying the elapsed time and the time since the
+	// previous frame. A skin that does not declare one pays nothing but an attribute lookup, and
+	// because this rides the normal update tick it is throttled by the frame rate limit and stops
+	// entirely while the editor is off screen. Returns whether anything listened - while something
+	// does, the caller has to keep the update loop at the frame rate instead of dropping to the
+	// idle tick, or the skin would be animating at two frames per second.
+	bool RmlComponent::dispatchFrameEvent()
+	{
+		const auto numDocuments = m_rmlContext->GetNumDocuments();
+
+		Rml::Dictionary parameters;
+		auto haveParameters = false;
+
+		for (int i=0; i<numDocuments; ++i)
+		{
+			auto* document = m_rmlContext->GetDocument(i);
+
+			if (!document || !document->HasAttribute(g_frameEventHandler))
+				continue;
+
+			if (!haveParameters)
+			{
+				const auto time = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+
+				// nothing listened on the previous frame, so there is no interval to report yet
+				const auto delta = m_lastFrameEventTime > 0.0 ? time - m_lastFrameEventTime : 0.0;
+
+				parameters["time"] = time;
+				parameters["delta"] = delta;
+
+				m_lastFrameEventTime = time;
+				haveParameters = true;
+			}
+
+			document->DispatchEvent(g_frameEvent, parameters, false, false);
+		}
+
+		if (!haveParameters)
+			m_lastFrameEventTime = 0.0;
+
+		return haveParameters;
 	}
 
 	void RmlComponent::startNextFrameTimer()
