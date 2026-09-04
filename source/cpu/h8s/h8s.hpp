@@ -50,6 +50,11 @@ public:
 	uint8 ccr {128};
 	uint8 exr {0};
 	H8SDevice* maps[1<<24] {};
+	/* One bit per 256-byte page of address space: set when ANY byte of the page
+	 * is memmap'd. Consulted before maps[] so the common case -- plain ROM/RAM,
+	 * which is every instruction fetch -- never touches the 128 MB table. */
+	uint64_t mappedPages[(1<<16) / 64] {};
+	bool pageMapped(int a) const { return (mappedPages[(a >> 8) >> 6] >> ((a >> 8) & 63)) & 1; }
 	unsigned long long  cycles {0};
 	unsigned long long pending_irqs {0};
 	
@@ -96,7 +101,7 @@ public:
 	void memmap(H8SDevice *dev,int start,int len = 1)
 	{
 		dev->setState(this);
-		for (int i=0;i<len;i++) maps[start+i]=dev;
+		for (int i=0;i<len;i++) { maps[start+i]=dev; mappedPages[((start+i) >> 8) >> 6] |= 1ULL << (((start+i) >> 8) & 63); }
 	}
 	
 	void loadmem(const uint8* data,uint32_t size,uint32_t address)
@@ -135,13 +140,13 @@ public:
 	void write8(int8 byte,int to) {
 		to&=0xffffff;
 		clockMem(to, lastwrite);
-		if (maps[to]) maps[to]->write(to, byte);
+		if (pageMapped(to) && maps[to]) maps[to]->write(to, byte);
 		else memory[to]=byte;
 	}
 	int8 read8(int from) {
 		from&=0xffffff;
 		clockMem(from, lastread);
-		if (maps[from]) return maps[from]->read(from);
+		if (pageMapped(from) && maps[from]) return maps[from]->read(from);
 		return memory[from];
 	}
 	
