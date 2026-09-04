@@ -20,7 +20,7 @@ namespace esp
 		void eramWrite(uint32_t eramMask) override;
 		void eramComputeAddr(uint32_t immOffset, bool highOffset, bool shouldUseVarOffset) override;
 
-		void emitOp(uint32_t pc, const ESPOptInstr& instr, bool lastMul30) override;
+		void emitOp(uint32_t pc, const ESPOptInstr& instr, bool lastMul30, bool nextIsDmac) override;
 
 	private:
 		Asm& m_asm;

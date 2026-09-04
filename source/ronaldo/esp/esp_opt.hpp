@@ -15,6 +15,9 @@ struct CoreData {
   int32_t mulcoeffs[8];
   int8_t coefs[PRAM_SIZE];
   int8_t shiftAmounts[PRAM_SIZE];
+  // coef << (7 - shiftAmount): (A*coef) >> shiftAmount == (A*coefShifted) >> 7 exactly, so a plain
+  // MAC needs one load and an immediate shift. shiftAmount is one of 3,5,6,7 -> fits int16.
+  int16_t coefsShifted[PRAM_SIZE];
 };
 
 enum { kNone = 0, kSavesA = 1, kSavesB = 2 };
@@ -223,29 +226,24 @@ public:
 	  }
   }
 
+  static void updateCoefEntry(CoreData& data, const uint32_t* pram, size_t i)
+  {
+    uint32_t instr = pram[i];
+    uint32_t op = (instr >> 16) & 0x7c;
+    int8_t coef = se<8>(instr & 0xff);
+    uint32_t shift = (instr >> 8) & 3;
+    uint32_t shiftAmount = (0x3567 >> (shift << 2)) & 0xf;
+    if (op == 0x20 || op == 0x24) shiftAmount = (shift & 1) ? 6 : 7;
+    data.coefs[i] = coef;
+    data.shiftAmounts[i] = shiftAmount;
+    data.coefsShifted[i] = static_cast<int16_t>(static_cast<int32_t>(coef) * (1 << (7 - shiftAmount)));
+  }
+
+  // Recompute every entry of both cores (after a program write / recompile).
   void updateCoef(ESP<lg2eram_size>* esp)
   {
-    for (size_t i = 0; i < PRAM_SIZE; i++) {
-      uint32_t instr = esp->core0.pram[i];
-      uint32_t op = (instr >> 16) & 0x7c;
-      int8_t coef = se<8>(instr & 0xff);
-      uint32_t shift = (instr >> 8) & 3;
-      uint32_t shiftAmount = (0x3567 >> (shift << 2)) & 0xf;
-      if (op == 0x20 || op == 0x24) shiftAmount = (shift & 1) ? 6 : 7;
-      data_core0.coefs[i] = coef;
-      data_core0.shiftAmounts[i] = shiftAmount;
-    }
-
-    for (size_t i = 0; i < PRAM_SIZE; i++) {
-      uint32_t instr = esp->core1.pram[i];
-      uint32_t op = (instr >> 16) & 0x7c;
-      int8_t coef = se<8>(instr & 0xff);
-      uint32_t shift = (instr >> 8) & 3;
-      uint32_t shiftAmount = (0x3567 >> (shift << 2)) & 0xf;
-      if (op == 0x20 || op == 0x24) shiftAmount = (shift & 1) ? 6 : 7;
-      data_core1.coefs[i] = coef;
-      data_core1.shiftAmounts[i] = shiftAmount;
-    }
+    for (size_t i = 0; i < PRAM_SIZE; i++) updateCoefEntry(data_core0, esp->core0.pram, i);
+    for (size_t i = 0; i < PRAM_SIZE; i++) updateCoefEntry(data_core1, esp->core1.pram, i);
   }
 
   inline void callOptimized(ESP<lg2eram_size>* esp)
@@ -446,7 +444,29 @@ private:
 
     	if (instr.opType == kNop) return;
 
-		_jit.emitOp(pc, instr, lastMul30);
+		/* The scan wraps: with the entry/exit state persisted, the "next emitted
+		 * op" of the LAST op in a program is the FIRST op of the next call, so a
+		 * program whose first op is a DMAC still needs the final last_mul values
+		 * written back. */
+		bool nextIsDmac = false, found = false;
+		for (int i = pc + 1; i < PRAM_SIZE; i++)
+		{
+			if (pram_opt[i].opType == kNop) continue;
+			nextIsDmac = pram_opt[i].opType == kDMAC;
+			found = true;
+			break;
+		}
+		if (!found)
+		{
+			for (int i = 0; i < PRAM_SIZE; i++)
+			{
+				if (pram_opt[i].opType == kNop) continue;
+				nextIsDmac = pram_opt[i].opType == kDMAC;
+				break;
+			}
+		}
+
+		_jit.emitOp(pc, instr, lastMul30, nextIsDmac);
 
 		lastMul30 = (instr.op == 0x30);
     }
