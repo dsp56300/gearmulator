@@ -568,11 +568,7 @@ namespace pluginLib
 			for (const auto paramIndex : paramIndices)
 			{
 				auto* param = getParameter(paramIndex, part);
-
-				// This prevents a nullptr dereference caused by swapping between ROMs with different part counts
-				if(!param)
-					continue;
-
+				assert(param && "parameter not found for control change");
 				param->setValueFromSynth(_e.c, origin);
 			}
 		}
