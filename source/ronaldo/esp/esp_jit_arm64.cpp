@@ -76,7 +76,7 @@ namespace esp
 	constexpr auto mulInA = x27;
 	constexpr auto mulInB = x28;
 	
-	EspJitArm64::EspJitArm64(Asm& a, const JitInputData&) : m_asm(a)
+	EspJitArm64::EspJitArm64(Asm& a, const JitInputData& _data) : m_asm(a), m_data(_data)
 	{
 	}
 
@@ -90,10 +90,59 @@ namespace esp
 	    m_asm.stp(x23, x24, Mem(sp, -16).pre());
 	    m_asm.stp(x25, x26, Mem(sp, -16).pre());
 	    m_asm.stp(x27, x28, Mem(sp, -16).pre());
+
+	    /* The ESP's ERAM latch chain, DMAC inputs and accumulators are state that
+	     * PERSISTS across samples: the interpreter keeps them in the ESP object and
+	     * the x64 backend loads and stores them through JitInputData. This backend
+	     * kept them purely in registers, so on entry each held whatever the CALLER
+	     * happened to leave there -- reproducible while the calling code never
+	     * changes, and silently different output the moment it does (a different
+	     * build of the same source is enough). Load the real state instead, and
+	     * write it back in jitExit. */
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramEffectiveAddr);
+	    m_asm.ldr(eramEffectiveAddr.w(), ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramWriteLatchNext);
+	    m_asm.ldrsw(eramWriteLatchNext, ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramReadLatch);
+	    m_asm.ldrsw(eramReadLatch, ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramWriteLatch);
+	    m_asm.ldrsw(eramWriteLatch, ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramVarOffset);
+	    m_asm.ldrsw(eramVarOffset, ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.last_mulInputA_24);
+	    m_asm.ldrsw(last_mulInputA_24, ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.last_mulInputB_24);
+	    m_asm.ldrsw(last_mulInputB_24, ptr(tempA));
+	    for (int i = 0; i < 6; ++i)
+	        m_asm.ldr(acc[i], ptr(ptrVars, int32_t(offsetof(CoreData, accs) + i * sizeof(int64_t))));
+	    // No pointer exists for these; give them a deterministic entry value.
+	    m_asm.mov(condition, 0);
+	    m_asm.mov(tempA, 0);
+	    m_asm.mov(tempB, 0);
+	    m_asm.mov(mulInA, 0);
+	    m_asm.mov(mulInB, 0);
 	}
 
 	void EspJitArm64::jitExit()
 	{
+	    // Write the persistent state back; see jitEnter.
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramEffectiveAddr);
+	    m_asm.str(eramEffectiveAddr.w(), ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramWriteLatchNext);
+	    m_asm.str(eramWriteLatchNext.w(), ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramReadLatch);
+	    m_asm.str(eramReadLatch.w(), ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramWriteLatch);
+	    m_asm.str(eramWriteLatch.w(), ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.eramVarOffset);
+	    m_asm.str(eramVarOffset.w(), ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.last_mulInputA_24);
+	    m_asm.str(last_mulInputA_24.w(), ptr(tempA));
+	    m_asm.mov(tempA, (uint64_t)(uintptr_t)m_data.last_mulInputB_24);
+	    m_asm.str(last_mulInputB_24.w(), ptr(tempA));
+	    for (int i = 0; i < 6; ++i)
+	        m_asm.str(acc[i], ptr(ptrVars, int32_t(offsetof(CoreData, accs) + i * sizeof(int64_t))));
+
 	    // restore x19-x28
 	    m_asm.ldp(x27, x28, Mem(sp, 16).post(0));   // [sp], #16
 	    m_asm.ldp(x25, x26, Mem(sp, 16).post(0));
