@@ -15,7 +15,8 @@ namespace virus
 	    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, virusLib::DeviceModel _defaultModel);
 	    ~VirusProcessor() override;
 
-	    void processBpm(float _bpm) override;
+		void processBpm(float _bpm) override;
+		bool setPreferredDeviceSamplerate(float _samplerate);
 
 		// _____________
 		//
