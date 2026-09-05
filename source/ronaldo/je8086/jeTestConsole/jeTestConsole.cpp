@@ -1,5 +1,6 @@
 #include <chrono>
 #include <iostream>
+#include <cstdlib>
 
 #include "dsp56kEmu/audio.h"
 #include "jeLib/device.h"
@@ -32,6 +33,10 @@ int main(int _argc, char* _argv[])
 	constexpr uint32_t samplerate = 88200;
 	params.hostSamplerate = samplerate;
 	params.preferredSamplerate = samplerate;
+
+	// HARNESS (uncommitted, tools/harness/apply_tc_harness.py)
+	const uint64_t limitSamples = getenv("JE_TC_SECONDS")
+		? static_cast<uint64_t>(atof(getenv("JE_TC_SECONDS")) * samplerate) : 0;
 
 	try
 	{
@@ -138,6 +143,12 @@ int main(int _argc, char* _argv[])
 
 			totalProcessedSamples += blocksize;
 			intervalProcessedSamples += blocksize;
+
+			if (limitSamples && totalProcessedSamples >= limitSamples)
+			{
+				std::cout << "HARNESS: stop at " << totalProcessedSamples << " samples\n";
+				break;
+			}
 
 			if(intervalProcessedSamples >= samplerate)
 			{
