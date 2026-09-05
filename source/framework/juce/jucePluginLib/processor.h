@@ -261,7 +261,7 @@ namespace pluginLib
 		float m_inputGain = 1.0f;
 		uint32_t m_dspClockPercent = 100;
 		float m_preferredDeviceSamplerate = 0.0f;
-		synthLib::Resampler::Mode m_resamplerMode = synthLib::Resampler::Mode::Legacy;
+		synthLib::Resampler::Mode m_resamplerMode = synthLib::Resampler::Mode::MameHq;
 		float m_hostSamplerate = 0.0f;
 		MidiPorts m_midiPorts;
 		BypassBuffer m_bypassBuffer;

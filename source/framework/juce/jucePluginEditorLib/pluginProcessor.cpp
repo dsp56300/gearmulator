@@ -72,6 +72,13 @@ namespace jucePluginEditorLib
 #endif
 		savePluginLoadPath();
 
+		// The resampler mode a state carries wins, but until one is loaded the plugin uses whatever the
+		// user picked last, and Mame HQ if they never picked anything. (BUG-10273, BUG-10277)
+		const auto resamplerMode = m_config.getIntValue("resamplerMode", static_cast<int>(synthLib::Resampler::Mode::MameHq));
+
+		if (resamplerMode >= 0 && resamplerMode < static_cast<int>(synthLib::Resampler::Mode::Count))
+			setResamplerMode(static_cast<synthLib::Resampler::Mode>(resamplerMode));
+
 		if (m_config.getBoolValue("enableMcpServer", false) && !isJuceHelperProcess())
 			startMcpServer();
 	}

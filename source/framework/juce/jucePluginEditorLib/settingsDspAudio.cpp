@@ -210,6 +210,12 @@ namespace jucePluginEditorLib
 			{
 				_event.StopPropagation();
 				m_processor.setResamplerMode(mode);
+
+				// Only a click counts as the manual choice that new instances inherit. Loading a state
+				// also goes through setResamplerMode and must not overwrite it. (BUG-10277)
+				m_processor.getConfig().setValue("resamplerMode", static_cast<int>(mode));
+				m_processor.getConfig().saveIfNeeded();
+
 				updateResamplerButtons();
 			});
 		}

@@ -4,6 +4,14 @@ Release Notes
 
 Framework:
 
+- [Imp] BUG-10273 BUG-10277 Mame HQ is now the default resampler mode, and
+        the mode is remembered. A mode stored in a project is still used for
+        that project; when a project does not carry one, the mode last
+        selected on the settings page applies, and Mame HQ if it was never
+        changed. Note that projects saved before this version did not store
+        the mode at all while it was set to Legacy, so those open in Mame HQ
+        now and need the mode set once if Legacy is wanted.
+
 - [Fix] BUG-10313 Preset files of other plugins failed to import when they
         happened to contain an $f0 and an $f7 byte with arbitrary data in
         between. Such a pair is not a sysex message, but it was read as one,

@@ -232,6 +232,8 @@ namespace pluginLib
 			return onDeviceInvalid(_device);
 		}));
 
+		m_plugin->setResamplerMode(m_resamplerMode);
+
 		return *m_plugin;
 	}
 
@@ -347,8 +349,10 @@ namespace pluginLib
 			s.write(m_preferredDeviceSamplerate);
 		}
 
-		if(m_resamplerMode != synthLib::Resampler::Mode::Legacy)
 		{
+			// Always written, including Legacy. The default is Mame HQ now, so a state that omits the
+			// chunk cannot be read as "Legacy was chosen" any more - it means the state predates this
+			// and the setting falls back to the one the user last picked. (BUG-10273, BUG-10277)
 			baseLib::ChunkWriter cw(s, "RSMP", 1);
 			s.write(static_cast<uint8_t>(m_resamplerMode));
 		}
@@ -497,7 +501,12 @@ namespace pluginLib
 	void Processor::setResamplerMode(const synthLib::Resampler::Mode _mode)
 	{
 		m_resamplerMode = _mode;
-		getPlugin().setResamplerMode(_mode);
+
+		// Do not reach for getPlugin() here: this is set from the config before anything else has
+		// touched the plugin, and booting a device from there would cost seconds at construction.
+		// A plugin created later picks the mode up in getPlugin().
+		if (m_plugin)
+			m_plugin->setResamplerMode(_mode);
 	}
 
 	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const BinaryDataRef& _binaryData,	const std::string& _filename)
