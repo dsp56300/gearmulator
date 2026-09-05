@@ -129,28 +129,34 @@ namespace synthLib
 	{
 		if(!_isMidiFileData)
 		{
-			std::vector<size_t> indices;
-
+			// A sysex message carries seven bit data only, no status byte may appear between its
+			// $f0 and the $f7 that terminates it. Pairing every $f0 with the next $f7 without
+			// checking that turns arbitrary binary into a message: preset files of other plugins
+			// regularly contain such a pair by coincidence, and the caller then believes the file
+			// was parsed and stops looking for the format it actually is. (BUG-10313)
 			for (size_t i = 0; i < _src.size(); ++i)
 			{
-				if (indices.size() & 1)
-				{
-					if (_src[i] == 0xf7)
-						indices.push_back(i);
-				}
-				else if (_src[i] == 0xf0)
-				{
-					indices.push_back(i);
-				}
-			}
+				if (_src[i] != 0xf0)
+					continue;
 
-			if (indices.size() & 1)
-				indices.pop_back();
+				for (size_t j = i + 1; j < _src.size(); ++j)
+				{
+					const auto byte = _src[j];
 
-			for(size_t i=0; i<indices.size(); i += 2)
-			{
-				auto& e =_dst.emplace_back();
-				e.assign(_src.begin() + indices[i], _src.begin() + indices[i + 1] + 1);
+					if (byte == 0xf7)
+					{
+						_dst.emplace_back().assign(_src.begin() + i, _src.begin() + j + 1);
+						i = j;
+						break;
+					}
+
+					if (byte & 0x80)
+					{
+						// not a message, resume at the offending byte, it might start one itself
+						i = j - 1;
+						break;
+					}
+				}
 			}
 			return;
 		}

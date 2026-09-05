@@ -38,6 +38,7 @@ add_subdirectory(cpu/dsp56300/source)
 
 add_subdirectory(framework/baseLib)
 add_subdirectory(framework/synthLib)
+add_subdirectory(framework/tools/synthLibTests)
 add_subdirectory(3rdparty/libresample)
 
 add_subdirectory(3rdparty)

@@ -1,5 +1,22 @@
 Release Notes
 
+2.2.17:
+
+Framework:
+
+- [Fix] BUG-10313 Preset files of other plugins failed to import when they
+        happened to contain an $f0 and an $f7 byte with arbitrary data in
+        between. Such a pair is not a sysex message, but it was read as one,
+        after which the importer considered the file parsed and never tried
+        the format the file actually is.
+
+Osirus:
+
+- [Fix] Presets imported from the TDM plugin lost their name if the file was
+        not named after its position in a factory bank. "A29 Darkroom3" is
+        imported as "Darkroom3" as before, but "Autobend BC" was imported as
+        "BC" and is now kept as it is.
+
 2.2.16:
 
 Framework:
