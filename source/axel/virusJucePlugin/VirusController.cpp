@@ -441,7 +441,13 @@ namespace virus
 		}
 		else
 		{
-			if (_channel == 0)
+			const auto idx = getParameterIndexByName(g_paramMidiChannel);
+
+			if(idx == pluginLib::Controller::InvalidParameterIndex)
+				return parts;
+
+			const auto v = getParameter(idx, 0);
+			if(v->getUnnormalizedValue() == _channel)
 				parts.push_back(0);
 		}
 		return parts;
