@@ -873,12 +873,13 @@ namespace jucePluginEditorLib
 					if (m_midiLearnModeActive)
 					{
 						setMidiLearnMode(false);
+						_event.StopPropagation();
 					}
-					else
+					else if (settingsOpened())
 					{
-						toggleSettings();
+						showSettings(false);
+						_event.StopPropagation();
 					}
-					_event.StopPropagation();
 					break;
 				default:;
 				}
