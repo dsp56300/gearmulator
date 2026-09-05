@@ -125,9 +125,29 @@ namespace virus
 		return false;
     }
 
-    bool Controller::parseControllerMessage(const synthLib::SMidiEvent& e)
+    bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
     {
-		return parseControllerDump(e);
+		const uint8_t status = _e.a & 0xf0;
+		if(status == synthLib::M_PROGRAMCHANGE)
+		{
+			if(isMultiMode())
+			{
+				const uint8_t channel = _e.a & 0x0f;
+				for (const auto& p : getPartsForMidiChannel(channel))
+					requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), p);
+			}
+			else
+			{
+				requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), virusLib::SINGLE);
+			}
+			return true;
+		}
+
+		// device decides if PP is enabled and will echo any parameter change to us. Reject any other source
+		if(status == synthLib::M_POLYPRESSURE && _e.source != synthLib::MidiEventSource::Device)
+			return false;
+
+		return pluginLib::Controller::parseControllerMessage(_e);
     }
 
     void Controller::parseParamChange(const pluginLib::MidiPacket::Data& _data, synthLib::MidiEventSource _source)
@@ -447,6 +467,26 @@ namespace virus
 		return parts;
 	}
 
+	std::vector<uint8_t> Controller::getPartsForMidiEvent(const synthLib::SMidiEvent& _e)
+	{
+		const uint8_t status = _e.a & 0xf0;
+		const uint8_t nibble = _e.a & 0x0f;  // could be either a part or a channel number
+
+		// the device addresses parts by nibble, a midi source addresses channels by nibble
+		// the controller dump is the device talking to us, so it must not be resolved against a channel assignment
+		const auto isParameterTraffic = status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE;
+		const auto isFromDevice = _e.source == synthLib::MidiEventSource::Device;
+		const auto nibbleIsPart = isParameterTraffic && (isMultiMode() || isFromDevice);
+
+		if(!nibbleIsPart)
+			return getPartsForMidiChannel(nibble);
+
+		if(nibble >= getPartCount())
+			return {};
+
+		return {nibble};
+	}
+
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
 	{
         SinglePatch patch;
@@ -603,57 +643,6 @@ namespace virus
 				onMultiReceived();
 		}
     }
-
-	bool Controller::parseControllerDump(const synthLib::SMidiEvent& _e)
-	{
-		const uint8_t status = _e.a & 0xf0;
-    	const uint8_t channel = _e.a & 0x0f;
-
-		uint8_t page;
-
-		if (status == synthLib::M_CONTROLCHANGE)
-		{
-			page = virusLib::PAGE_A;
-		}
-		else if (status == synthLib::M_POLYPRESSURE)
-		{
-			// device decides if PP is enabled and will echo any parameter change to us. Reject any other source
-			if(_e.source != synthLib::MidiEventSource::Device)
-				return false;
-			page = virusLib::PAGE_B;
-		}
-		else if(status == synthLib::M_PROGRAMCHANGE)
-		{
-			if(isMultiMode())
-			{
-				const auto idx = getParameterIndexByName(g_paramPartMidiChannel);
-				assert(idx != pluginLib::Controller::InvalidParameterIndex);
-
-				auto parts = getPartsForMidiChannel(channel);
-				for(const auto& p : parts)
-				{
-					const auto v = getParameter(idx, p);
-					if(v->getUnnormalizedValue() == channel)
-						requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), p);
-				}
-			}
-			else
-			{
-				requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), virusLib::SINGLE);
-			}
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-
-		const auto& params = findSynthParam(channel, page, _e.b);
-		for (const auto & p : params)
-			p->setValueFromSynth(_e.c, midiEventSourceToParameterOrigin(_e.source));
-
-		return true;
-	}
 
     void Controller::printMessage(const pluginLib::SysEx &msg)
     {
