@@ -592,7 +592,7 @@
 		{"page":114, "index":29, "name":"Parameters/Panel Part", "min":0, "max":15, "default":0, "toText":"MIDIChannels", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":114, "index":32, "name":"Part Bank Select", "min":0, "max":29, "default":0, "toText":"locationRAM/ROM", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":114, "index":33, "name":"Part Program Change", "min":0, "max":127, "default":0, "isPublic":false, "isDiscrete":false, "isBool":false},
-		{"page":114, "index":34, "name":"Part Midi Channel", "min":0, "max":15, "default":0, "isPublic":false, "isDiscrete":true, "isBool":false},
+		{"page":114, "index":34, "name":"Part Midi Channel", "min":0, "max":15, "default":0, "toText":"MIDIChannels", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":114, "index":35, "name":"Part Low Key", "min":0, "max":127, "default":0, "toText":"filterKeytrackBase", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":114, "index":36, "name":"Part High Key", "min":0, "max":127, "default":127, "toText":"filterKeytrackBase", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":114, "index":37, "name":"Part Transpose", "min":16, "max":112, "default":64, "toText":"signed", "isPublic":false, "isDiscrete":false, "isBool":false, "isBipolar":true},

@@ -1281,102 +1281,112 @@
 }
 @spritesheet mainbutton_arp
 {
-	mainbutton_arp_active: 0px 69px 191px 69px;
-	mainbutton_arp_checked: 0px 69px 191px 69px;
-	mainbutton_arp_checked-active: 0px 69px 191px 69px;
-	mainbutton_arp_checked-hover: 0px 69px 191px 69px;
-	mainbutton_arp_default: 0px 0px 191px 69px;
-	mainbutton_arp_hover: 0px 69px 191px 69px;
+	mainbutton_arp_active: 0px 69px 173px 69px;
+	mainbutton_arp_checked: 0px 69px 173px 69px;
+	mainbutton_arp_checked-active: 0px 69px 173px 69px;
+	mainbutton_arp_checked-hover: 0px 69px 173px 69px;
+	mainbutton_arp_default: 0px 0px 173px 69px;
+	mainbutton_arp_hover: 0px 69px 173px 69px;
 	src: mainbutton_arp.png;
 }
 @spritesheet mainbutton_browser
 {
-	mainbutton_browser_active: 0px 69px 191px 69px;
-	mainbutton_browser_checked: 0px 69px 191px 69px;
-	mainbutton_browser_checked-active: 0px 69px 191px 69px;
-	mainbutton_browser_checked-hover: 0px 69px 191px 69px;
-	mainbutton_browser_default: 0px 0px 191px 69px;
-	mainbutton_browser_hover: 0px 69px 191px 69px;
+	mainbutton_browser_active: 0px 69px 173px 69px;
+	mainbutton_browser_checked: 0px 69px 173px 69px;
+	mainbutton_browser_checked-active: 0px 69px 173px 69px;
+	mainbutton_browser_checked-hover: 0px 69px 173px 69px;
+	mainbutton_browser_default: 0px 0px 173px 69px;
+	mainbutton_browser_hover: 0px 69px 173px 69px;
 	src: mainbutton_browser.png;
 }
 @spritesheet mainbutton_common
 {
-	mainbutton_common_active: 0px 69px 191px 69px;
-	mainbutton_common_checked: 0px 69px 191px 69px;
-	mainbutton_common_checked-active: 0px 69px 191px 69px;
-	mainbutton_common_checked-hover: 0px 69px 191px 69px;
-	mainbutton_common_default: 0px 0px 191px 69px;
-	mainbutton_common_hover: 0px 69px 191px 69px;
+	mainbutton_common_active: 0px 69px 173px 69px;
+	mainbutton_common_checked: 0px 69px 173px 69px;
+	mainbutton_common_checked-active: 0px 69px 173px 69px;
+	mainbutton_common_checked-hover: 0px 69px 173px 69px;
+	mainbutton_common_default: 0px 0px 173px 69px;
+	mainbutton_common_hover: 0px 69px 173px 69px;
 	src: mainbutton_common.png;
 }
 @spritesheet mainbutton_filter
 {
-	mainbutton_filter_active: 0px 69px 191px 69px;
-	mainbutton_filter_checked: 0px 69px 191px 69px;
-	mainbutton_filter_checked-active: 0px 69px 191px 69px;
-	mainbutton_filter_checked-hover: 0px 69px 191px 69px;
-	mainbutton_filter_default: 0px 0px 191px 69px;
-	mainbutton_filter_hover: 0px 69px 191px 69px;
+	mainbutton_filter_active: 0px 69px 173px 69px;
+	mainbutton_filter_checked: 0px 69px 173px 69px;
+	mainbutton_filter_checked-active: 0px 69px 173px 69px;
+	mainbutton_filter_checked-hover: 0px 69px 173px 69px;
+	mainbutton_filter_default: 0px 0px 173px 69px;
+	mainbutton_filter_hover: 0px 69px 173px 69px;
 	src: mainbutton_filter.png;
 }
 @spritesheet mainbutton_fx1
 {
-	mainbutton_fx1_active: 0px 69px 191px 69px;
-	mainbutton_fx1_checked: 0px 69px 191px 69px;
-	mainbutton_fx1_checked-active: 0px 69px 191px 69px;
-	mainbutton_fx1_checked-hover: 0px 69px 191px 69px;
-	mainbutton_fx1_default: 0px 0px 191px 69px;
-	mainbutton_fx1_hover: 0px 69px 191px 69px;
+	mainbutton_fx1_active: 0px 69px 173px 69px;
+	mainbutton_fx1_checked: 0px 69px 173px 69px;
+	mainbutton_fx1_checked-active: 0px 69px 173px 69px;
+	mainbutton_fx1_checked-hover: 0px 69px 173px 69px;
+	mainbutton_fx1_default: 0px 0px 173px 69px;
+	mainbutton_fx1_hover: 0px 69px 173px 69px;
 	src: mainbutton_fx1.png;
 }
 @spritesheet mainbutton_fx2
 {
-	mainbutton_fx2_active: 0px 69px 191px 69px;
-	mainbutton_fx2_checked: 0px 69px 191px 69px;
-	mainbutton_fx2_checked-active: 0px 69px 191px 69px;
-	mainbutton_fx2_checked-hover: 0px 69px 191px 69px;
-	mainbutton_fx2_default: 0px 0px 191px 69px;
-	mainbutton_fx2_hover: 0px 69px 191px 69px;
+	mainbutton_fx2_active: 0px 69px 173px 69px;
+	mainbutton_fx2_checked: 0px 69px 173px 69px;
+	mainbutton_fx2_checked-active: 0px 69px 173px 69px;
+	mainbutton_fx2_checked-hover: 0px 69px 173px 69px;
+	mainbutton_fx2_default: 0px 0px 173px 69px;
+	mainbutton_fx2_hover: 0px 69px 173px 69px;
 	src: mainbutton_fx2.png;
 }
 @spritesheet mainbutton_lfo
 {
-	mainbutton_lfo_active: 0px 69px 191px 69px;
-	mainbutton_lfo_checked: 0px 69px 191px 69px;
-	mainbutton_lfo_checked-active: 0px 69px 191px 69px;
-	mainbutton_lfo_checked-hover: 0px 69px 191px 69px;
-	mainbutton_lfo_default: 0px 0px 191px 69px;
-	mainbutton_lfo_hover: 0px 69px 191px 69px;
+	mainbutton_lfo_active: 0px 69px 173px 69px;
+	mainbutton_lfo_checked: 0px 69px 173px 69px;
+	mainbutton_lfo_checked-active: 0px 69px 173px 69px;
+	mainbutton_lfo_checked-hover: 0px 69px 173px 69px;
+	mainbutton_lfo_default: 0px 0px 173px 69px;
+	mainbutton_lfo_hover: 0px 69px 173px 69px;
 	src: mainbutton_lfo.png;
 }
 @spritesheet mainbutton_main
 {
-	mainbutton_main_active: 0px 69px 191px 69px;
-	mainbutton_main_checked: 0px 69px 191px 69px;
-	mainbutton_main_checked-active: 0px 69px 191px 69px;
-	mainbutton_main_checked-hover: 0px 69px 191px 69px;
-	mainbutton_main_default: 0px 0px 191px 69px;
-	mainbutton_main_hover: 0px 69px 191px 69px;
+	mainbutton_main_active: 0px 69px 173px 69px;
+	mainbutton_main_checked: 0px 69px 173px 69px;
+	mainbutton_main_checked-active: 0px 69px 173px 69px;
+	mainbutton_main_checked-hover: 0px 69px 173px 69px;
+	mainbutton_main_default: 0px 0px 173px 69px;
+	mainbutton_main_hover: 0px 69px 173px 69px;
 	src: mainbutton_main.png;
 }
 @spritesheet mainbutton_matrix
 {
-	mainbutton_matrix_active: 0px 69px 191px 69px;
-	mainbutton_matrix_checked: 0px 69px 191px 69px;
-	mainbutton_matrix_checked-active: 0px 69px 191px 69px;
-	mainbutton_matrix_checked-hover: 0px 69px 191px 69px;
-	mainbutton_matrix_default: 0px 0px 191px 69px;
-	mainbutton_matrix_hover: 0px 69px 191px 69px;
+	mainbutton_matrix_active: 0px 69px 173px 69px;
+	mainbutton_matrix_checked: 0px 69px 173px 69px;
+	mainbutton_matrix_checked-active: 0px 69px 173px 69px;
+	mainbutton_matrix_checked-hover: 0px 69px 173px 69px;
+	mainbutton_matrix_default: 0px 0px 173px 69px;
+	mainbutton_matrix_hover: 0px 69px 173px 69px;
 	src: mainbutton_matrix.png;
+}
+@spritesheet mainbutton_multi
+{
+	mainbutton_multi_active: 0px 69px 173px 69px;
+	mainbutton_multi_checked: 0px 69px 173px 69px;
+	mainbutton_multi_checked-active: 0px 69px 173px 69px;
+	mainbutton_multi_checked-hover: 0px 69px 173px 69px;
+	mainbutton_multi_default: 0px 0px 173px 69px;
+	mainbutton_multi_hover: 0px 69px 173px 69px;
+	src: mainbutton_multi.png;
 }
 @spritesheet mainbutton_osc
 {
-	mainbutton_osc_active: 0px 69px 191px 69px;
-	mainbutton_osc_checked: 0px 69px 191px 69px;
-	mainbutton_osc_checked-active: 0px 69px 191px 69px;
-	mainbutton_osc_checked-hover: 0px 69px 191px 69px;
-	mainbutton_osc_default: 0px 0px 191px 69px;
-	mainbutton_osc_hover: 0px 69px 191px 69px;
+	mainbutton_osc_active: 0px 69px 173px 69px;
+	mainbutton_osc_checked: 0px 69px 173px 69px;
+	mainbutton_osc_checked-active: 0px 69px 173px 69px;
+	mainbutton_osc_checked-hover: 0px 69px 173px 69px;
+	mainbutton_osc_default: 0px 0px 173px 69px;
+	mainbutton_osc_hover: 0px 69px 173px 69px;
 	src: mainbutton_osc.png;
 }
 .button_1
@@ -3012,6 +3022,26 @@
 {
 	decorator: image(mainbutton_matrix_hover scale-none left top);
 }
+.mainbutton_multi
+{
+	decorator: image(mainbutton_multi_default scale-none left top);
+}
+.mainbutton_multi:checked
+{
+	decorator: image(mainbutton_multi_checked scale-none left top);
+}
+.mainbutton_multi:checked:active
+{
+	decorator: image(mainbutton_multi_checked-active scale-none left top);
+}
+.mainbutton_multi:checked:hover
+{
+	decorator: image(mainbutton_multi_checked-hover scale-none left top);
+}
+.mainbutton_multi:hover
+{
+	decorator: image(mainbutton_multi_hover scale-none left top);
+}
 .mainbutton_osc
 {
 	decorator: image(mainbutton_osc_default scale-none left top);
@@ -3111,6 +3141,40 @@
 	font-size: 26dp;
 	text-align: center;
 	text-decoration: underline;
+}
+
+/* multi page: one vertical stripe per part */
+.multiStripeAlt
+{
+	background-color: rgba(255,255,255,20);
+}
+.txtMultiHdr
+{
+	background-color: rgb(72,72,72);
+	border-radius: 6dp;
+	color: #ffffff;
+	font-family: Koshgarian;
+	font-size: 26dp;
+	text-align: center;
+}
+.txtMultiLbl
+{
+	color: #1a1a1a;
+	font-family: Koshgarian;
+	font-size: 16dp;
+	text-align: center;
+	text-transform: uppercase;
+}
+.txtMultiCombo
+{
+	color: #ffffff;
+	font-size: 16dp;
+	text-align: center;
+	padding: 0dp 42dp 0dp 3dp;
+}
+.combo_multi
+{
+	decorator: image(combo_multi.png scale-none left top);
 }
 
 body

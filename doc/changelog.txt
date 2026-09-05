@@ -27,6 +27,14 @@ Osirus:
 
 OsTIrus:
 
+- [New] BUG-10237 TrancyTI skin: a Multi page. The eleventh tab opens a
+        column per part with its volume, pan, transpose and detune, its low
+        and high key, MIDI channel, output and note steal priority, and its
+        enable switch, so the parts of a multi can be set up in one place
+        instead of one part at a time. The MIDI channel dropdown now reads
+        1 to 16 rather than 0 to 15. Making room for the tab made all eleven
+        of them a little narrower.
+
 - [Fix] BUG-10238 TrancyTI skin: the + and - markings around the SLOPE knob
         of the filter, envelope 3, envelope 4 and amplifier envelopes were
         the wrong way round. The panel had + on the left and - on the right,
