@@ -645,21 +645,22 @@ namespace jucePluginEditorLib
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 						ds.timestamp = std::chrono::system_clock::now();
 
-						auto createPromise = std::make_shared<std::promise<pluginLib::patchDB::DataSourceNodePtr>>();
-						auto createFuture = createPromise->get_future();
+						// addDataSource hands the node back straight away and does the
+						// rest on the loader thread, so take it and carry on.
+						//
+						// It must NOT be waited for. This whole handler already runs on
+						// the message thread, and the completion callback is delivered
+						// via runOnUiThread - so blocking here waits for work that only
+						// this thread can run. That deadlock was the "Timed out creating
+						// user bank" every FIRST save reported: five seconds of waiting
+						// on itself, after which the bank turned out to exist anyway and
+						// the next save worked.
+						//
+						// Ordering still holds without the wait: registering the source
+						// and copying the patches are both queued on the loader thread,
+						// and it runs them in order.
+						targetDs = pm->addDataSource(ds);
 
-						pm->addDataSource(ds, [createPromise](const bool _success, const std::shared_ptr<pluginLib::patchDB::DataSourceNode>& _ds)
-						{
-							if (_success)
-								createPromise->set_value(_ds);
-							else
-								createPromise->set_value(nullptr);
-						});
-
-						if (createFuture.wait_for(std::chrono::seconds(5)) != std::future_status::ready)
-							throw std::runtime_error("Timed out creating user bank");
-
-						targetDs = createFuture.get();
 						if (!targetDs)
 							throw std::runtime_error("Failed to create user bank");
 					}
