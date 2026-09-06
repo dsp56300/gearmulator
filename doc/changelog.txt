@@ -63,6 +63,51 @@ OsTIrus:
         while turning the knob to the right raises the value, as every other
         skin shows it.
 
+Vavra:
+
+- [Fix] BUG-10184 Loading a Multi, Drum map or Arrangement asked the device to
+        send the dump straight back, which is how the editor stays in sync when
+        a single patch is loaded. With a whole arrangement going out at once the
+        device answers such a request with what it held when the request was
+        made, so late answers overwrote dumps that had only just been sent: the
+        first Multi loaded after opening the plugin did nothing at all, and an
+        arrangement lost a varying handful of its sixteen parts. Everything is
+        now read back once, after the last dump is out.
+
+- [Fix] BUG-10184 Drum maps are listed under the name they carry instead of all
+        being called "Drum Map", and a renamed one is saved and exported under
+        its new name.
+
+- [Fix] A Drum map that was loaded is now part of the state the host saves, so
+        it returns with the project instead of being lost.
+
+- [New] BUG-10184 Patch Manager now supports Multi, Arrangement and
+        Drum dumps alongside Singles. They are detected automatically
+        on file import and tagged via the new "Type" category. Loading
+        an Arrangement (Multi + 16 Singles) switches to Multi mode,
+        applies the Multi and distributes the 16 Singles into the
+        parts. Arrangements can be saved to user banks via the Save
+        menu. Dropping a Multi or Arrangement onto a Part Button
+        prompts for confirmation since it replaces more than one part.
+
+Xenia:
+
+- [Fix] BUG-10184 Loading a Multi or Arrangement asked the device to send the
+        dump straight back, and those answers arrived late enough to overwrite
+        what had just been sent, so the first Multi loaded after opening the
+        plugin did nothing. Everything is now read back once, after the last
+        dump is out, and the Singles of all parts are refreshed afterwards the
+        way Vavra already did it.
+
+- [New] BUG-10184 Patch Manager now supports Multi and Arrangement
+        dumps alongside Singles. They are detected automatically on
+        file import and tagged via the new "Type" category. Loading an
+        Arrangement (Multi + 8 Singles) switches to Multi mode, applies
+        the Multi and distributes the 8 Singles into the parts.
+        Arrangements can be saved to user banks via the Save menu.
+        Dropping a Multi or Arrangement onto a Part Button prompts for
+        confirmation since it replaces more than one part.
+
 2.2.16:
 
 Framework:

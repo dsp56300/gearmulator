@@ -8,6 +8,7 @@
 #include "mqFrontPanel.h"
 #include "mqPartSelect.h"
 #include "mqPatchManager.h"
+#include "mqLib/mqmiditypes.h"
 #include "mqSettingsDspAudio.h"
 
 #include "mqLib/mqbuildconfig.h"
@@ -167,11 +168,44 @@ namespace mqJucePlugin
 		});
 	}
 
+	void Editor::saveArrangement(const pluginLib::FileType& _type)
+	{
+		jucePluginEditorLib::Editor::savePreset(_type, [&](const juce::File& _file)
+		{
+			auto type = _type;
+			const auto file = createValidFilename(type, _file);
+
+			const auto& multiBuf = m_controller.getMultiEditBuffer().data;
+			if (multiBuf.empty())
+				return;
+
+			synthLib::SysexBufferList presets;
+			presets.push_back(multiBuf);
+
+			const auto partCount = m_controller.getPartCount();
+			for (uint8_t i = 0; i < partCount; ++i)
+			{
+				auto single = m_controller.createSingleDump(
+					mqLib::MidiBufferNum::SingleEditBufferMultiMode,
+					mqLib::MidiSoundLocation::EditBufferFirstMultiSingle, i, i);
+				presets.push_back(std::move(single));
+			}
+
+			jucePluginEditorLib::Editor::savePresets(type, file, presets);
+		});
+	}
+
 	void Editor::onBtSave(const Rml::Event& _event)
 	{
+		if (m_controller.isMultiMode())
+			m_controller.requestMulti(mqLib::MidiBufferNum::MultiEditBuffer, mqLib::MidiSoundLocation::EditBufferFirstMultiSingle);
+
 		juceRmlUi::Menu menu;
 
-		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
+		uint32_t countAdded = getPatchManager()->createSaveMenuEntries(menu, "Single");
+
+		if (m_controller.isMultiMode())
+			countAdded += getPatchManager()->createSaveMenuEntries(menu, m_controller.getCurrentPart(), "Arrangement", PatchManager::g_userDataArrangement);
 
 		if(countAdded)
 			menu.addSeparator();
@@ -186,10 +220,18 @@ namespace mqJucePlugin
 			_menu.addSubMenu(_name, std::move(subMenu));
 		};
 
-		addEntry(menu, "Current Single (Edit Buffer)", [this](const pluginLib::FileType& _type)
+		addEntry(menu, "Export Current Single (Edit Buffer)", [this](const pluginLib::FileType& _type)
 		{
 			savePreset(_type);
 		});
+
+		if (m_controller.isMultiMode())
+		{
+			addEntry(menu, "Export Arrangement (Multi + Singles)", [this](const pluginLib::FileType& _type)
+			{
+				saveArrangement(_type);
+			});
+		}
 
 		menu.runModal(_event);
 	}

@@ -12,6 +12,14 @@ namespace xtJucePlugin
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
+		enum class PatchType
+		{
+			Invalid,
+			Single,
+			Multi,
+			Arrangement
+		};
+
 		PatchManager(Editor& _editor, Rml::Element* _root);
 		~PatchManager() override;
 
@@ -24,7 +32,15 @@ namespace xtJucePlugin
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
 		bool parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename) override;
 
+		PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex) const;
+
+		static constexpr uint64_t g_userDataArrangement = 1;
+
 	private:
+		static std::string extractMultiName(const pluginLib::patchDB::Data& _sysex);
+		bool activateSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part);
+		bool activateMulti(const pluginLib::patchDB::Data& _multi);
+		bool activateArrangement(const pluginLib::patchDB::Data& _compound);
 		pluginLib::patchDB::Data createCombinedDump(const pluginLib::patchDB::Data& _data) const;
 		void createCombinedDumps(std::vector<pluginLib::patchDB::Data>& _messages);
 		void getWaveDataForSingle(std::vector<pluginLib::patchDB::Data>& _results, const pluginLib::patchDB::Data& _single) const;

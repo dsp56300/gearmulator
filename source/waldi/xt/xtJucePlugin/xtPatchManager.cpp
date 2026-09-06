@@ -12,6 +12,8 @@
 
 #include "xtLib/xtMidiTypes.h"
 
+#include "synthLib/midiToSysex.h"
+
 namespace xtJucePlugin
 {
 	static constexpr std::initializer_list<jucePluginEditorLib::patchManager::GroupType> g_groupTypes =
@@ -30,6 +32,8 @@ namespace xtJucePlugin
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "MW Model");
 		jucePluginEditorLib::patchManager::PatchManager::startLoaderThread();
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
+		setTagTypeName(pluginLib::patchDB::TagType::CustomC, "Type");
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
 	}
 
 	PatchManager::~PatchManager()
@@ -37,8 +41,24 @@ namespace xtJucePlugin
 		stopLoaderThread();
 	}
 
-	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t _userData)
 	{
+		if (_userData == g_userDataArrangement)
+		{
+			const auto& multiBuf = m_controller.getMultiEditBuffer().data;
+			if (multiBuf.empty())
+				return false;
+
+			_data.assign(multiBuf.begin(), multiBuf.end());
+			const auto partCount = m_controller.getPartCount();
+			for (uint8_t i = 0; i < partCount; ++i)
+			{
+				auto single = m_controller.createSingleDump(xt::LocationH::SingleEditBufferMultiMode, i, i);
+				_data.insert(_data.end(), single.begin(), single.end());
+			}
+			return true;
+		}
+
 		_data = m_controller.createSingleDump(xt::LocationH::SingleBankA, 0, static_cast<uint8_t>(_part));
 		_data = createCombinedDump(_data);
 		return !_data.empty();
@@ -51,6 +71,20 @@ namespace xtJucePlugin
 
 	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
 	{
+		const auto patchType = detectPatchType(_sysex);
+
+		if (patchType == PatchType::Multi || patchType == PatchType::Arrangement)
+		{
+			auto patch = std::make_shared<pluginLib::patchDB::Patch>();
+			patch->sysex = std::move(_sysex);
+			patch->name = extractMultiName(patch->sysex);
+			if (patch->name.empty())
+				patch->name = _defaultPatchName.empty() ? "Multi" : _defaultPatchName;
+			patch->tags.add(pluginLib::patchDB::TagType::CustomC,
+				patchType == PatchType::Multi ? "Multi" : "Arrangement");
+			return patch;
+		}
+
 		if(_sysex.size() == xt::Mw1::g_singleDumpLength)
 		{
 			if(_sysex[1] == wLib::IdWaldorf && _sysex[2] == xt::IdMw1)
@@ -66,6 +100,7 @@ namespace xtJucePlugin
 				p->sysex = std::move(_sysex);
 
 				p->tags.add(pluginLib::patchDB::TagType::CustomA, "MW1");
+				p->tags.add(pluginLib::patchDB::TagType::CustomC, "Single");
 				return p;
 			}
 		}
@@ -102,6 +137,7 @@ namespace xtJucePlugin
 		p->name = m_controller.getSingleName(parameters);
 
 		p->tags.add(pluginLib::patchDB::TagType::CustomA, "MW2");
+		p->tags.add(pluginLib::patchDB::TagType::CustomC, "Single");
 
 		if(hasUserTable)
 			p->tags.add(pluginLib::patchDB::TagType::Tag, "UserTable");
@@ -147,6 +183,44 @@ namespace xtJucePlugin
 			return true;
 		};
 
+		// Multi / Arrangement: write the (possibly renamed) Multi name back into
+		// the Multi dump and recompute checksums. Singles in an Arrangement keep
+		// their content; only their checksums are refreshed.
+		if (xt::State::getCommand(_patch->sysex) == xt::SysexCommand::MultiDump)
+		{
+			synthLib::SysexBufferList msgs;
+			synthLib::MidiToSysex::splitMultipleSysex(msgs, _patch->sysex);
+
+			if (msgs.empty())
+				return _patch->sysex;
+
+			if (!_patch->getName().empty())
+			{
+				constexpr size_t nameOffset = xt::SysexIndex::IdxMultiParamFirst + static_cast<size_t>(xt::MultiParameter::Name00);
+				constexpr size_t nameLength = 16;
+
+				auto& multi = msgs.front();
+				if (multi.size() >= nameOffset + nameLength)
+				{
+					const auto& name = _patch->getName();
+					for (size_t i = 0; i < nameLength; ++i)
+						multi[nameOffset + i] = i < name.size() ? static_cast<uint8_t>(name[i]) : ' ';
+				}
+			}
+
+			pluginLib::patchDB::Data result;
+			for (auto& msg : msgs)
+			{
+				if (xt::State::getCommand(msg) == xt::SysexCommand::MultiDump)
+					xt::State::updateChecksum(msg, xt::SysexIndex::IdxMultiChecksumStart);
+				else if (xt::State::getCommand(msg) == xt::SysexCommand::SingleDump)
+					xt::State::updateChecksum(msg, xt::SysexIndex::IdxSingleChecksumStart);
+
+				result.insert(result.end(), msg.begin(), msg.end());
+			}
+			return result;
+		}
+
 		if (xt::State::getCommand(_patch->sysex) == xt::SysexCommand::SingleDump)
 		{
 			auto result = _patch->sysex;
@@ -187,15 +261,19 @@ namespace xtJucePlugin
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		if(!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), static_cast<uint8_t>(_part)))
+		const auto sysex = applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware);
+		const auto type = detectPatchType(sysex);
+
+		switch (type)
 		{
-			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
-				m_editor.getProcessor().getProperties().name + " - Unable to load patch",
-				"MW1 patches can only be loaded to the first part.\n"
-				"\n"
-				"If you want to load a MW1 patch to another part, first convert it by loading it to part 1, then save the loaded patch to a user bank.");
+		case PatchType::Multi:
+			return activateMulti(sysex);
+		case PatchType::Arrangement:
+			return activateArrangement(sysex);
+		case PatchType::Single:
+		default:
+			return activateSingle(_patch, _part);
 		}
-		return true;
 	}
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)
@@ -273,6 +351,47 @@ namespace xtJucePlugin
 				for(size_t p=0; p<64; ++p)
 					readPos = createPreset(_results, source, readPos);
 			}
+		}
+
+		// Detect multi+8singles arrangement pattern and merge into compounds
+		{
+			pluginLib::patchDB::DataList merged;
+			auto isSingle = [](const pluginLib::patchDB::Data& d)
+			{
+				return d.size() >= 8 && xt::State::getCommand(d) == xt::SysexCommand::SingleDump;
+			};
+			auto isMulti = [](const pluginLib::patchDB::Data& d)
+			{
+				return d.size() >= 8 && xt::State::getCommand(d) == xt::SysexCommand::MultiDump;
+			};
+
+			for (size_t i = 0; i < _results.size();)
+			{
+				if (isMulti(_results[i]) && i + m_controller.getPartCount() < _results.size())
+				{
+					bool allSingles = true;
+					for (size_t j = 1; j <= m_controller.getPartCount(); ++j)
+					{
+						if (!isSingle(_results[i + j]))
+						{
+							allSingles = false;
+							break;
+						}
+					}
+					if (allSingles)
+					{
+						pluginLib::patchDB::Data compound = _results[i];
+						for (size_t j = 1; j <= m_controller.getPartCount(); ++j)
+							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
+						merged.emplace_back(std::move(compound));
+						i += 1 + m_controller.getPartCount();
+						continue;
+					}
+				}
+				merged.emplace_back(std::move(_results[i]));
+				++i;
+			}
+			_results = std::move(merged);
 		}
 
 		createCombinedDumps(_results);
@@ -398,5 +517,102 @@ namespace xtJucePlugin
 		}
 
 		_results.emplace_back(itTable->second);
+	}
+
+	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex) const
+	{
+		if (_sysex.size() < 8)
+			return PatchType::Invalid;
+
+		const auto cmd = xt::State::getCommand(_sysex);
+
+		if (cmd == xt::SysexCommand::SingleDump)
+			return PatchType::Single;
+
+		if (cmd != xt::SysexCommand::MultiDump)
+			return PatchType::Invalid;
+
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, _sysex);
+
+		if (msgs.size() == 1)
+			return PatchType::Multi;
+
+		if (msgs.size() == 1 + m_controller.getPartCount()
+			&& xt::State::getCommand(msgs.front()) == xt::SysexCommand::MultiDump)
+		{
+			for (size_t i = 1; i < msgs.size(); ++i)
+			{
+				if (msgs[i].size() < 8 || xt::State::getCommand(msgs[i]) != xt::SysexCommand::SingleDump)
+					return PatchType::Invalid;
+			}
+			return PatchType::Arrangement;
+		}
+
+		return PatchType::Invalid;
+	}
+
+	std::string PatchManager::extractMultiName(const pluginLib::patchDB::Data& _sysex)
+	{
+		constexpr size_t nameOffset = xt::SysexIndex::IdxMultiParamFirst + static_cast<size_t>(xt::MultiParameter::Name00);
+		constexpr size_t nameLength = 16;
+
+		if (_sysex.size() < nameOffset + nameLength)
+			return {};
+
+		std::string name(reinterpret_cast<const char*>(_sysex.data()) + nameOffset, nameLength);
+
+		while (!name.empty() && (name.back() == ' ' || name.back() == '\0'))
+			name.pop_back();
+
+		return name;
+	}
+
+	bool PatchManager::activateSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
+	{
+		if(!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), static_cast<uint8_t>(_part)))
+		{
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+				m_editor.getProcessor().getProperties().name + " - Unable to load patch",
+				"MW1 patches can only be loaded to the first part.\n"
+				"\n"
+				"If you want to load a MW1 patch to another part, first convert it by loading it to part 1, then save the loaded patch to a user bank.");
+		}
+		return true;
+	}
+
+	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
+	{
+		// Ensure the device is in Multi mode so the Multi setup takes effect.
+		m_controller.setBulkTransfer(true);
+		m_controller.setPlayMode(true);
+		m_controller.sendMulti(_multi);
+		m_controller.setBulkTransfer(false);
+		return true;
+	}
+
+	bool PatchManager::activateArrangement(const pluginLib::patchDB::Data& _compound)
+	{
+		synthLib::SysexBufferList msgs;
+		synthLib::MidiToSysex::splitMultipleSysex(msgs, _compound);
+
+		if (msgs.size() != 1 + m_controller.getPartCount()
+			|| xt::State::getCommand(msgs.front()) != xt::SysexCommand::MultiDump)
+			return false;
+
+		// activateMulti() switches to Multi mode and applies the Multi. The mode
+		// switch must happen before the sendSingle() calls below: they only target
+		// the addressed part while in Multi mode (otherwise every Single is sent to
+		// the single edit buffer at location 0 and they overwrite each other).
+		m_controller.setBulkTransfer(true);
+
+		activateMulti(msgs.front());
+
+		for (uint8_t i = 0; i < m_controller.getPartCount(); ++i)
+			m_controller.sendSingle(msgs[i + 1], i);
+
+		m_controller.setBulkTransfer(false);
+
+		return true;
 	}
 }

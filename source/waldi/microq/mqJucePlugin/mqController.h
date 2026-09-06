@@ -55,12 +55,25 @@ namespace mqJucePlugin
 	    void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
+		void sendMulti(const synthLib::SysexBuffer& _sysex);
+		void sendDrum(const synthLib::SysexBuffer& _sysex);
 
 		bool sendSysEx(MidiPacketType _type) const;
 	    bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
 	    bool isMultiMode() const;
 	    void setPlayMode(bool _multiMode);
+
+	    // Sending a dump is followed by a request that reads it back, which keeps the editor in
+	    // sync with the device. That does not work while several dumps are sent in one go: the
+	    // device answers a request with the content it had when the request was issued, so
+	    // answers to requests made before or during the transfer arrive late and overwrite the
+	    // dumps that were just sent. Bracket a Multi or Arrangement with this instead, it asks
+	    // for everything once when the last dump is out. Nesting is allowed.
+	    void setBulkTransfer(bool _bulk);
+	    bool isBulkTransfer() const { return m_bulkTransferCount > 0; }
+
+		const Patch& getMultiEditBuffer() const { return m_multiEditBuffer; }
 
 	    void selectNextPreset();
 	    void selectPrevPreset();
@@ -95,7 +108,11 @@ namespace mqJucePlugin
 		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 	    bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);
 		void requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;
+
+	public:
 		void requestMulti(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;
+
+	private:
 
 	    uint8_t getGlobalParam(mqLib::GlobalParameter _type) const;
 
@@ -107,8 +124,10 @@ namespace mqJucePlugin
 
 	    const uint8_t m_deviceId;
 
+	    uint32_t m_bulkTransferCount = 0;
 	    Patch m_singleEditBuffer;
 	    std::array<Patch,16> m_singleEditBuffers;
+		Patch m_multiEditBuffer;
 	    std::array<uint8_t, 200> m_globalData{};
 	    mqJucePlugin::FrontPanel* m_frontPanel = nullptr;
 	    std::array<uint32_t, 16> m_currentSingles{0};

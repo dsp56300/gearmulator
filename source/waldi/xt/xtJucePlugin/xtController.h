@@ -64,6 +64,7 @@ namespace xtJucePlugin
 
 		bool sendSingle(const synthLib::SysexBuffer& _sysex);
 		bool sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
+		void sendMulti(const synthLib::SysexBuffer& _sysex);
 
 		bool sendSysEx(MidiPacketType _type) const;
 		bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
@@ -71,6 +72,15 @@ namespace xtJucePlugin
 
 		bool isMultiMode() const;
 		void setPlayMode(bool _multiMode);
+
+		// Sending a dump is followed by a request that reads it back, which keeps the editor in
+		// sync with the device. That does not work while several dumps are sent in one go: the
+		// device answers a request with the content it had when the request was issued, so
+		// answers to requests made before or during the transfer arrive late and overwrite the
+		// dumps that were just sent. Bracket a Multi or Arrangement with this instead, it asks
+		// for everything once when the last dump is out. Nesting is allowed.
+		void setBulkTransfer(bool _bulk);
+		bool isBulkTransfer() const { return m_bulkTransferCount > 0; }
 
 		void selectNextPreset();
 		void selectPrevPreset();
@@ -103,7 +113,7 @@ namespace xtJucePlugin
 		void onStateLoaded() override;
 
 		void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
-		void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params) const;
+		void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
 		void parseGlobal(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
 
 		bool parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const;
@@ -114,7 +124,12 @@ namespace xtJucePlugin
 		bool sendGlobalParameterChange(xt::GlobalParameter _param, uint8_t _value);
 		bool sendModeDump() const;
 		void requestSingle(xt::LocationH _buf, uint8_t _location) const;
+
+	public:
 		void requestMulti(xt::LocationH _buf, uint8_t _location) const;
+		const Patch& getMultiEditBuffer() const { return m_multiEditBuffer; }
+
+	private:
 
 		uint8_t getGlobalParam(xt::GlobalParameter _type) const;
 
@@ -124,8 +139,10 @@ namespace xtJucePlugin
 
 		const uint8_t m_deviceId;
 
+		uint32_t m_bulkTransferCount = 0;
 		Patch m_singleEditBuffer;
 		std::array<Patch,8> m_singleEditBuffers;
+		Patch m_multiEditBuffer;
 		std::array<uint8_t, 39> m_globalData{};
 		std::array<uint8_t, 1> m_modeData{};
 		std::array<uint32_t, 8> m_currentSingles{0};

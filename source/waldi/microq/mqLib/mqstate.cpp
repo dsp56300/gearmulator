@@ -215,7 +215,10 @@ namespace mqLib
 
 		const auto isMultiMode = getGlobalParameter(GlobalParameter::SingleMultiMode) != 0;
 
-//		append(sysexState, m_currentDrumMap);
+		// A drum map that was loaded is part of what the user set up, so it has to survive a
+		// project reload. append() skips it while it is still empty, so a session that never
+		// touched a drum map saves exactly what it saved before.
+		append(sysexState, m_currentDrumMap);
 
 		append(sysexState, m_currentMulti);
 

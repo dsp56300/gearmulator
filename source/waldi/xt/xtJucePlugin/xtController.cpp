@@ -71,7 +71,8 @@ namespace xtJucePlugin
 
 		onPlayModeChanged.addListener([this](bool multiMode)
 		{
-			requestAllPatches();
+			if(!isBulkTransfer())
+				requestAllPatches();
 		});
 
 		// slow down edits of the wavetable, device gets overloaded quickly if we send too many changes
@@ -101,7 +102,10 @@ namespace xtJucePlugin
 				return false;	// we cannot support this as the hardware loads a MW1 to the "current" instrument, which is always the first one
 
 			pluginLib::Controller::sendSysEx(_sysex);
-			requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
+
+			if(!isBulkTransfer())
+				requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
+
 			return true;
 		}
 
@@ -146,9 +150,36 @@ namespace xtJucePlugin
 
 		sendLockedParameters(_part);
 
-		requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
+		if(!isBulkTransfer())
+			requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
 
 		return true;
+	}
+
+	void Controller::setBulkTransfer(const bool _bulk)
+	{
+		if(_bulk)
+		{
+			++m_bulkTransferCount;
+			return;
+		}
+
+		if(!m_bulkTransferCount || --m_bulkTransferCount)
+			return;
+
+		requestAllPatches();
+	}
+
+	void Controller::sendMulti(const synthLib::SysexBuffer& _sysex)
+	{
+		auto data = _sysex;
+		data[wLib::IdxBuffer] = static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer);
+		data[wLib::IdxDeviceId] = m_deviceId;
+		xt::State::updateChecksum(data, xt::SysexIndex::IdxMultiChecksumStart);
+		pluginLib::Controller::sendSysEx(data);
+
+		if(!isBulkTransfer())
+			requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
 	}
 
 	void Controller::onStateLoaded()
@@ -299,7 +330,7 @@ namespace xtJucePlugin
 		onProgramChanged(prog);
 	}
 
-	void Controller::parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data,	const pluginLib::MidiPacket::ParamValues& _params) const
+	void Controller::parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data,	const pluginLib::MidiPacket::ParamValues& _params)
 	{
 		Patch patch;
 		patch.data = _msg;
@@ -310,6 +341,7 @@ namespace xtJucePlugin
 
 		if(bank == static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer))
 		{
+			m_multiEditBuffer = patch;
 			applyPatchParameters(_params, 0);
 
 			if(isMultiMode())
@@ -751,6 +783,9 @@ namespace xtJucePlugin
 		if (isMultiMode())
 		{
 			requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
+
+			// the other singles are requested one after the other as each one arrives
+			requestSingle(xt::LocationH::SingleEditBufferMultiMode, 0);
 		}
 		else
 		{

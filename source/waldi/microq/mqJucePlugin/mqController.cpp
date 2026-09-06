@@ -52,7 +52,8 @@ namespace mqJucePlugin
 
 		onPlayModeChanged.addListener(0, [this](bool multiMode)
 		{
-			requestAllPatches();
+			if(!isBulkTransfer())
+				requestAllPatches();
 		});
 	}
 
@@ -90,8 +91,46 @@ namespace mqJucePlugin
 
 		sendLockedParameters(_part);
 
-		requestSingle(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode, 
-			isMultiMode() ? mqLib::MidiSoundLocation::EditBufferFirstMultiSingle : mqLib::MidiSoundLocation::EditBufferCurrentSingle);
+		if(!isBulkTransfer())
+		{
+			requestSingle(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode,
+				isMultiMode() ? mqLib::MidiSoundLocation::EditBufferFirstMultiSingle : mqLib::MidiSoundLocation::EditBufferCurrentSingle);
+		}
+	}
+
+	void Controller::setBulkTransfer(const bool _bulk)
+	{
+		if(_bulk)
+		{
+			++m_bulkTransferCount;
+			return;
+		}
+
+		if(!m_bulkTransferCount || --m_bulkTransferCount)
+			return;
+
+		requestAllPatches();
+	}
+
+	void Controller::sendMulti(const synthLib::SysexBuffer& _sysex)
+	{
+		auto data = _sysex;
+		data[wLib::IdxBuffer] = static_cast<uint8_t>(mqLib::MidiBufferNum::MultiEditBuffer);
+		data[wLib::IdxDeviceId] = m_deviceId;
+		mqLib::State::updateChecksum(data);
+		pluginLib::Controller::sendSysEx(data);
+
+		if(!isBulkTransfer())
+			requestMulti(mqLib::MidiBufferNum::MultiEditBuffer, mqLib::MidiSoundLocation::EditBufferFirstMultiSingle);
+	}
+
+	void Controller::sendDrum(const synthLib::SysexBuffer& _sysex)
+	{
+		auto data = _sysex;
+		data[wLib::IdxBuffer] = static_cast<uint8_t>(mqLib::MidiBufferNum::DrumEditBuffer);
+		data[wLib::IdxDeviceId] = m_deviceId;
+		mqLib::State::updateChecksum(data);
+		pluginLib::Controller::sendSysEx(data);
 	}
 
 	void Controller::onStateLoaded()
@@ -208,6 +247,7 @@ namespace mqJucePlugin
 
 		if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::MultiEditBuffer))
 		{
+			m_multiEditBuffer = patch;
 			applyPatchParameters(_params, 0);
 		}
 	}

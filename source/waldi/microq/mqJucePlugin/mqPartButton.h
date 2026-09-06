@@ -14,6 +14,8 @@ namespace mqJucePlugin
 
 		void onClick(Rml::Event&) override;
 
+		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
+
 	private:
 		Editor& m_mqEditor;
 	};
