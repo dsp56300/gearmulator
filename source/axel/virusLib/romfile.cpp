@@ -6,6 +6,8 @@
 
 #include "unpacker.h"
 
+#include "baseLib/filesystem.h"
+
 #include "dsp56kEmu/dsp.h"
 #include "dsp56kBase/logging.h"
 
@@ -19,14 +21,40 @@ namespace virusLib
 
 ROMFile::ROMFile(std::vector<uint8_t> _data, std::string _name, const DeviceModel _model/* = DeviceModel::ABC*/) : m_model(_model), m_romFileName(std::move(_name)), m_romFileData(std::move(_data))
 {
-	// hash the raw image before initialize() clears it, so the hash identifies content, not validity
+	// read the raw image before initialize() clears it, so hash and version identify content, not validity
 	if(!m_romFileData.empty())
+	{
 		m_romDataHash = baseLib::MD5(m_romFileData);
+		m_osVersion = readOsVersion(m_romFileData);
+	}
 
 	if(initialize())
 		return;
 	m_romFileData.clear();
 	m_bootRom.size = 0;
+}
+
+std::string ROMFile::readOsVersion(const std::vector<uint8_t>& _data)
+{
+	// examples
+	// A: (C)ACCESS [08-20-2001-16:58:54][v280g]
+	// B: (C)ACCESS [12-23-2003-14:43:27][VB_490T]
+	// C: (C)ACCESS [11-10-2003-12:15:42][vc_650b]
+
+	const std::string key = "(C)ACCESS [";
+	const auto result = std::search(_data.begin(), _data.end(), std::begin(key), std::end(key));
+	if(result == _data.end())
+		return {};
+
+	const auto bracketOpen = std::find(result + static_cast<int32_t>(key.size()) + 1, _data.end(), '[');
+	if(bracketOpen == _data.end())
+		return {};
+
+	const auto bracketClose = std::find(bracketOpen + 1, _data.end(), ']');
+	if(bracketClose == _data.end())
+		return {};
+
+	return baseLib::filesystem::lowercase(std::string(bracketOpen + 1, bracketClose));
 }
 
 ROMFile ROMFile::invalid()

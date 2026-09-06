@@ -1,7 +1,5 @@
 #include "romloader.h"
 
-#include <algorithm>
-
 #include "midiFileToRomData.h"
 
 #include "baseLib/filesystem.h"
@@ -127,25 +125,9 @@ namespace virusLib
 
 	DeviceModel ROMLoader::detectModel(const std::vector<uint8_t>& _data)
 	{
-		// examples
-		// A: (C)ACCESS [08-20-2001-16:58:54][v280g]
-		// B: (C)ACCESS [12-23-2003-14:43:27][VB_490T]
-		// C: (C)ACCESS [11-10-2003-12:15:42][vc_650b]
-
-		const std::string key = "(C)ACCESS [";
-		const auto result = std::search(_data.begin(), _data.end(), std::begin(key), std::end(key));
-		if(result == _data.end())
+		const auto versionString = ROMFile::readOsVersion(_data);
+		if(versionString.empty())
 			return DeviceModel::Invalid;
-
-		const auto bracketOpen = std::find(result+static_cast<int32_t>(key.size())+1, _data.end(), '[');
-		if(bracketOpen == _data.end())
-			return DeviceModel::Invalid;
-
-		const auto bracketClose = std::find(bracketOpen+1, _data.end(), ']');
-		if(bracketClose == _data.end())
-			return DeviceModel::Invalid;
-
-		const auto versionString = baseLib::filesystem::lowercase(std::string(bracketOpen+1, bracketClose-1));
 
 		const auto test = [&versionString](const char* _key)
 		{

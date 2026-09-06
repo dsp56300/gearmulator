@@ -655,6 +655,13 @@ namespace virusLib
 		else
 		{
 			conf.aguSupportBitreverse = false;
+
+			// Virus A OS 2.52 ends a DO loop with a jsr, which the 56300 manual calls an
+			// undefined operation but real silicon executes. Without this the loop is never
+			// retired and the DSP derails into a garbage PC while still booting. Verified on
+			// 2.52, the whole 2.5x range is assumed to share it. Later OSs contain the pattern
+			// too but not on a path that derails, so keep them as they are.
+			conf.supportBranchAtLoopEnd = _rom.getOsVersion().find("v25") == 0;
 		}
 
 		jit.setConfig(conf);

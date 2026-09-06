@@ -128,6 +128,10 @@ public:
 
 	const auto& getRomFileData() const { return m_romFileData; }
 
+	// the OS version as printed in the firmware, lowercase, for example "v280g" (A), "vb_490t" (B), "vc_650b" (C)
+	const std::string& getOsVersion() const { return m_osVersion; }
+	static std::string readOsVersion(const std::vector<uint8_t>& _data);
+
 private:
 	std::vector<Chunk> readChunks(std::istream& _file) const;
 	bool loadPresetFiles();
@@ -147,6 +151,7 @@ private:
 	std::string m_romFileName;
 	std::vector<uint8_t> m_romFileData;
 	baseLib::MD5 m_romDataHash;
+	std::string m_osVersion;
 };
 
 }
