@@ -4,6 +4,11 @@ Release Notes
 
 Framework:
 
+- [Fix] BUG-10308 Skins: an animation did nothing at all when its keyframes
+        name contained an uppercase letter, because the name was folded to
+        lower case before it was looked up. Keyframe names are now case
+        sensitive, the same as in CSS.
+
 - [New] BUG-10200 Skins can react to notes being played. A skin script can
         now register for note on and note off and draw a keyboard, a velocity
         meter or an activity indicator, which was impossible before because
