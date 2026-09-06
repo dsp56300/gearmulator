@@ -1,0 +1,1200 @@
+#include "processor.h"
+
+#include <chrono>
+
+#include "dummydevice.h"
+#include "midiLearnManager.h"
+#include "pluginVersion.h"
+#include "tools.h"
+#include "types.h"
+
+#include "baseLib/binarystream.h"
+#include "baseLib/filesystem.h"
+
+#include "bridgeLib/commands.h"
+
+#include "client/remoteDevice.h"
+
+#include "synthLib/deviceException.h"
+#include "synthLib/os.h"
+#include "synthLib/midiBufferParser.h"
+#include "synthLib/romLoader.h"
+#include "synthLib/wavWriter.h"
+
+#include "dsp56kBase/fastmath.h"
+#include "dsp56kBase/logging.h"
+
+#include "juceUiLib/messageBox.h"
+
+namespace synthLib
+{
+	class DeviceException;
+}
+
+namespace pluginLib
+{
+	constexpr char g_saveMagic[] = "DSP56300";
+	constexpr uint32_t g_saveVersion = 2;
+	constexpr const char* const g_defaultProgramName = "default";
+
+	bridgeLib::SessionId generateRemoteSessionId()
+	{
+		return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	}
+
+	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties)
+		: juce::AudioProcessor(_busesProperties)
+		, m_properties(std::move(_properties))
+		, m_midiPorts(*this)
+		, m_remoteSessionId(generateRemoteSessionId())
+		, m_programName(g_defaultProgramName)
+	{
+		juce::File(getPublicRomFolder()).createDirectory();
+
+		synthLib::RomLoader::addSearchPath(getPublicRomFolder());
+		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(true));
+		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(false));
+	}
+
+	Processor::~Processor()
+	{
+		m_midiPorts.close();
+		destroyController();
+		m_plugin.reset();
+		m_device.reset();
+	}
+
+	void Processor::addMidiEvent(const synthLib::SMidiEvent& _ev)
+	{
+		audioCaptureCheckArm(_ev);
+
+		// before midi learn or the program change router get a chance to swallow the event: a skin
+		// drawing a keyboard wants to see what was played either way
+		m_midiNotifier.onMidiEvent(_ev);
+
+		// Process through MIDI Learn translator first
+		if (_ev.source != synthLib::MidiEventSource::Device)
+		{
+			if (m_midiLearnTranslator && m_midiLearnTranslator->processMidiInput(_ev))
+			{
+				// MIDI event was consumed by MIDI Learn (learned mapping or learning mode)
+				return;
+			}
+
+			if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+			{
+				if (m_programChangeRouter.processMidiEvent(_ev))
+				{
+					// Program change was handled by patch manager
+					return;
+				}
+			}
+		}
+
+		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Editor))
+			getController().enqueueMidiMessages({_ev});
+		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+			getPlugin().addMidiEvent(_ev);
+		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Physical))
+			m_midiPorts.send(_ev);
+	}
+
+	void Processor::handleIncomingMidiMessage(juce::MidiInput *_source, const juce::MidiMessage &_message)
+	{
+		synthLib::SMidiEvent sm(synthLib::MidiEventSource::Physical);
+
+		const auto* raw = _message.getSysExData();
+		if (raw)
+		{
+			const auto count = _message.getSysExDataSize();
+			auto syx = SysEx();
+			syx.push_back(0xf0);
+			for (int i = 0; i < count; i++)
+			{
+				syx.push_back(raw[i]);
+			}
+			syx.push_back(0xf7);
+			sm.sysex = std::move(syx);
+		}
+		else
+		{
+			const auto count = _message.getRawDataSize();
+			const auto* rawData = _message.getRawData();
+			if (count >= 1 && count <= 3)
+			{
+				sm.a = rawData[0];
+				sm.b = count > 1 ? rawData[1] : 0;
+				sm.c = count > 2 ? rawData[2] : 0;
+			}
+			else
+			{
+				auto syx = SysEx();
+				for (int i = 0; i < count; i++)
+					syx.push_back(rawData[i]);
+				sm.sysex = syx;
+			}
+		}
+
+		addMidiEvent(sm);
+	}
+
+	Controller& Processor::getController()
+	{
+	    if (m_controller == nullptr)
+		{
+	        m_controller.reset(createController());
+			
+			// Initialize MIDI Learn translator with controller
+			if (m_controller && !m_midiLearnTranslator)
+			{
+				m_midiLearnTranslator = std::make_unique<MidiLearnTranslator>(*m_controller, m_controller->getParameterDescriptions().getControllerMap());
+				
+				// Setup MIDI feedback callback
+				m_midiLearnTranslator->onSendMidiOutput = [this](const synthLib::MidiEventSource _target, const synthLib::SMidiEvent& _event)
+				{
+					if (_target == synthLib::MidiEventSource::Editor && _event.source != synthLib::MidiEventSource::Editor)
+						getController().enqueueMidiMessages({_event});
+					else if (_target == synthLib::MidiEventSource::Physical && _event.source != synthLib::MidiEventSource::Physical)
+						m_midiPorts.send(_event);
+					else if (_target == synthLib::MidiEventSource::Host && _event.source != synthLib::MidiEventSource::Host)
+						addHostMidiFeedback(_event);
+				};
+
+				// Load default MIDI learn preset from disk. DAW state restore
+				// (setStateInformation) will override this if present.
+				loadDefaultMidiLearnPreset();
+			}
+		}
+
+	    return *m_controller;
+	}
+
+	synthLib::Plugin& Processor::getPlugin()
+	{
+		// Serialize lazy device/plugin creation (see m_deviceCreateMutex). In steady state this is
+		// uncontended and the m_plugin check below returns immediately; only the very first call holds it
+		// for the whole boot, during which any concurrent caller correctly waits instead of creating a
+		// second device on top of the one still booting.
+		std::lock_guard<std::mutex> lock(m_deviceCreateMutex);
+
+		if(m_plugin)
+			return *m_plugin;
+
+		try
+		{
+			m_device.reset(createDevice());
+			if(!m_device->isValid())
+				throw synthLib::DeviceException(synthLib::DeviceError::Unknown, "Device initialization failed");
+		}
+		catch(const synthLib::DeviceException& e)
+		{
+			LOG("Failed to create device: " << e.what());
+
+			// Juce loads the LV2/VST3 versions of the plugin as part of the build process, if we open a message box in this case, the build process gets stuck
+			const auto host = juce::PluginHostType::getHostPath();
+			if(!Tools::isHeadless())
+			{
+				std::string msg = e.what();
+
+				m_deviceError = e.errorCode();
+
+				if(e.errorCode() == synthLib::DeviceError::FirmwareMissing)
+				{
+					msg += "\n\n";
+					msg += "The firmware file needs to be copied to\n";
+					msg += baseLib::filesystem::validatePath(getPublicRomFolder()) + "\n";
+					msg += "\n";
+					msg += "The target folder will be opened once you click OK. Copy the firmware to this folder and reload the plugin.";
+#ifdef _DEBUG
+					msg += "\n\n" + std::string("[Debug] Host ") + host.toStdString() + "\n\n";
+#endif
+				}
+				juce::Timer::callAfterDelay(2000, [this, msg]
+				{
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+						"Device Initialization failed", msg, 
+						[this]
+						{
+							const auto path = juce::File(getPublicRomFolder());
+							(void)path.createDirectory();
+							path.revealToUser();
+						}
+					);
+				});
+			}
+		}
+
+		if(!m_device)
+		{
+			m_device.reset(new DummyDevice({}));
+		}
+
+		m_device->setDspClockPercent(m_dspClockPercent);
+
+		m_plugin.reset(new synthLib::Plugin(m_device.get(), [this](synthLib::Device* _device)
+		{
+			return onDeviceInvalid(_device);
+		}));
+
+		m_plugin->setResamplerMode(m_resamplerMode);
+
+		return *m_plugin;
+	}
+
+	bridgeClient::RemoteDevice* Processor::createRemoteDevice(const synthLib::DeviceCreateParams& _params)
+	{
+		bridgeLib::PluginDesc desc;
+		getPluginDesc(desc);
+		return new bridgeClient::RemoteDevice(_params, std::move(desc), m_remoteHost, m_remotePort);
+	}
+
+	void Processor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
+	{
+		_params.preferredSamplerate = getPreferredDeviceSamplerate();
+		_params.hostSamplerate = getHostSamplerate();
+	}
+
+	bridgeClient::RemoteDevice* Processor::createRemoteDevice()
+	{
+		synthLib::DeviceCreateParams params;
+		getRemoteDeviceParams(params);
+		return createRemoteDevice(params);
+	}
+
+	synthLib::Device* Processor::createDevice(const DeviceType _type)
+	{
+		switch (_type)
+		{
+		case DeviceType::Local:		return createDevice();
+		case DeviceType::Remote:	return createRemoteDevice();
+		case DeviceType::Dummy:		return new DummyDevice({});
+		}
+		return nullptr;
+	}
+
+	bool Processor::setLatencyBlocks(uint32_t _blocks)
+	{
+		if (!getPlugin().setLatencyBlocks(_blocks))
+			return false;
+		updateLatencySamples();
+		return true;
+	}
+
+	void Processor::updateLatencySamples()
+	{
+		if(getProperties().isSynth)
+			setLatencySamples(getPlugin().getLatencyMidiToOutput());
+		else
+			setLatencySamples(getPlugin().getLatencyInputToOutput());
+	}
+
+	void Processor::saveCustomData(std::vector<uint8_t>& _targetBuffer)
+	{
+		baseLib::BinaryStream s;
+		saveChunkData(s);
+		s.toVector(_targetBuffer, true);
+	}
+
+	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	{
+		if(_sourceBuffer.empty())
+			return true;
+
+		// In Vavra, the only data we had was the gain parameters
+		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		{
+			baseLib::BinaryStream ss(_sourceBuffer);
+			readGain(ss);
+			return true;
+		}
+
+		baseLib::BinaryStream s(_sourceBuffer);
+		baseLib::ChunkReader cr(s);
+
+		loadChunkData(cr);
+
+		return _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
+	}
+
+	void Processor::saveChunkData(baseLib::BinaryStream& s)
+	{
+		// it is important that this is stored before other chunks to restore state to the remote properly
+		if (m_deviceType == DeviceType::Remote)
+		{
+			baseLib::ChunkWriter cw(s, "REMO", 1);
+			s.write(static_cast<int32_t>(m_deviceType));
+			s.write(m_remoteHost);
+			s.write(m_remotePort);
+		}
+
+		{
+			std::vector<uint8_t> buffer;
+			getPlugin().getState(buffer, synthLib::StateTypeGlobal);
+
+			baseLib::ChunkWriter cw(s, "MIDI", 1);
+			s.write(buffer);
+		}
+		{
+			baseLib::ChunkWriter cw(s, "GAIN", 1);
+			s.write<uint32_t>(1);	// version
+			s.write(m_inputGain);
+			s.write(m_outputGain);
+		}
+
+		if(m_dspClockPercent != 100)
+		{
+			baseLib::ChunkWriter cw(s, "DSPC", 1);
+			s.write(m_dspClockPercent);
+		}
+
+		if(m_preferredDeviceSamplerate > 0)
+		{
+			baseLib::ChunkWriter cw(s, "DSSR", 1);
+			s.write(m_preferredDeviceSamplerate);
+		}
+
+		{
+			// Always written, including Legacy. The default is Mame HQ now, so a state that omits the
+			// chunk cannot be read as "Legacy was chosen" any more - it means the state predates this
+			// and the setting falls back to the one the user last picked. (BUG-10273, BUG-10277)
+			baseLib::ChunkWriter cw(s, "RSMP", 1);
+			s.write(static_cast<uint8_t>(m_resamplerMode));
+		}
+
+		m_midiPorts.saveChunkData(s);
+		m_skinVariables.saveChunkData(s);
+		m_midiRoutingMatrix.saveChunkData(s);
+
+		if (m_midiLearnTranslator)
+			m_midiLearnTranslator->saveChunkData(s);
+
+		if (m_programName != g_defaultProgramName)
+		{
+			baseLib::ChunkWriter cw(s, "PROG", 1);
+			s.write(m_programName);
+		}
+	}
+
+	void Processor::loadChunkData(baseLib::ChunkReader& _cr)
+	{
+		_cr.add("MIDI", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			std::vector<uint8_t> buffer;
+			_binaryStream.read(buffer);
+			getPlugin().setState(buffer);
+		});
+
+		_cr.add("GAIN", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			readGain(_binaryStream);
+		});
+
+		_cr.add("DSPC", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			auto p = _binaryStream.read<uint32_t>();
+			p = dsp56k::clamp<uint32_t>(p, 50, 200);
+			setDspClockPercent(p);
+		});
+
+		_cr.add("DSSR", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			const auto sr = _binaryStream.read<float>();
+			setPreferredDeviceSamplerate(sr);
+		});
+
+		_cr.add("RSMP", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			const auto mode = _binaryStream.read<uint8_t>();
+			if(mode < static_cast<uint8_t>(synthLib::Resampler::Mode::Count))
+				setResamplerMode(static_cast<synthLib::Resampler::Mode>(mode));
+		});
+
+		_cr.add("PROG", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			m_programName = _binaryStream.readString();
+		});
+
+		_cr.add("REMO", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			const auto type = static_cast<DeviceType>(_binaryStream.read<int32_t>());
+			const auto host = _binaryStream.readString();
+			const auto port = _binaryStream.read<uint32_t>();
+			if (type == DeviceType::Remote)
+				setRemoteDevice(host, port);
+		});
+
+		m_midiPorts.loadChunkData(_cr);
+		m_skinVariables.loadChunkData(_cr);
+		m_midiRoutingMatrix.loadChunkData(_cr);
+		
+		if (m_midiLearnTranslator)
+			m_midiLearnTranslator->loadChunkData(_cr);
+	}
+
+	void Processor::readGain(baseLib::BinaryStream& _s)
+	{
+		const auto version = _s.read<uint32_t>();
+		if (version != 1)
+			return;
+		m_inputGain = _s.read<float>();
+		m_outputGain = _s.read<float>();
+	}
+
+	bool Processor::setDspClockPercent(const uint32_t _percent)
+	{
+		if(!m_device)
+			return false;
+		if(!m_device->setDspClockPercent(_percent))
+			return false;
+		m_dspClockPercent = _percent;
+		return true;
+	}
+
+	uint32_t Processor::getDspClockPercent() const
+	{
+		if(!m_device)
+			return m_dspClockPercent;
+		return m_device->getDspClockPercent();
+	}
+
+	uint64_t Processor::getDspClockHz() const
+	{
+		if(!m_device)
+			return 0;
+		return m_device->getDspClockHz();
+	}
+
+	bool Processor::canModifyDspClock() const
+	{
+		if(!m_device)
+			return false;
+		return m_device->canModifyDspClock();
+	}
+
+	bool Processor::setPreferredDeviceSamplerate(const float _samplerate)
+	{
+		m_preferredDeviceSamplerate = _samplerate;
+
+		if(!m_device)
+			return false;
+
+		return getPlugin().setPreferredDeviceSamplerate(_samplerate);
+	}
+
+	float Processor::getPreferredDeviceSamplerate() const
+	{
+		return m_preferredDeviceSamplerate;
+	}
+
+	std::vector<float> Processor::getDeviceSupportedSamplerates() const
+	{
+		if(!m_device)
+			return {};
+		std::vector<float> result;
+		m_device->getSupportedSamplerates(result);
+		return result;
+	}
+
+	std::vector<float> Processor::getDevicePreferredSamplerates() const
+	{
+		if(!m_device)
+			return {};
+		std::vector<float> result;
+		m_device->getPreferredSamplerates(result);
+		return result;
+	}
+
+	void Processor::setResamplerMode(const synthLib::Resampler::Mode _mode)
+	{
+		m_resamplerMode = _mode;
+
+		// Do not reach for getPlugin() here: this is set from the config before anything else has
+		// touched the plugin, and booting a device from there would cost seconds at construction.
+		// A plugin created later picks the mode up in getPlugin().
+		if (m_plugin)
+			m_plugin->setResamplerMode(_mode);
+	}
+
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const BinaryDataRef& _binaryData,	const std::string& _filename)
+	{
+		for(uint32_t i=0; i<_binaryData.listSize; ++i)
+		{
+			if (_binaryData.originalFileNames[i] != _filename)
+				continue;
+
+			int size = 0;
+			const auto res = _binaryData.getNamedResourceFunc(_binaryData.namedResourceList[i], size);
+			return {std::make_pair(res, static_cast<uint32_t>(size))};
+		}
+		return {};
+	}
+
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
+	{
+		return findResource(m_properties.binaryData, _filename);
+	}
+
+	std::string Processor::getDataFolder(const bool _useFxFolder) const
+	{
+		return Tools::getPublicDataFolder(getProperties().vendor, getProductName(_useFxFolder));
+	}
+
+	std::string Processor::getPublicRomFolder() const
+	{
+		return baseLib::filesystem::validatePath(getDataFolder() + "roms/");
+	}
+
+	std::string Processor::getConfigFolder(const bool _useFxFolder) const
+	{
+		return baseLib::filesystem::validatePath(getDataFolder(_useFxFolder) + "config/");
+	}
+
+	std::string Processor::getPatchManagerDataFolder(bool _useFxFolder) const
+	{
+		return baseLib::filesystem::validatePath(getDataFolder(_useFxFolder) + "patchmanager/");
+	}
+
+	std::string Processor::getConfigFile(const bool _useFxFolder) const
+	{
+		return getConfigFolder(_useFxFolder) + getProductName(_useFxFolder) + ".xml";
+	}
+
+	std::string Processor::getProductName(const bool _useFxName) const
+	{
+		const auto& p = getProperties();
+		auto name = p.name;
+		if(!_useFxName && !p.isSynth && name.substr(name.size()-2, 2) == "FX")
+			return name.substr(0, name.size() - 2);
+		return name;
+	}
+
+	void Processor::saveDefaultMidiLearnPreset()
+	{
+		if (!m_midiLearnTranslator)
+			return;
+
+		MidiLearnManager manager{juce::File(getMidiLearnFolder())};
+		manager.savePreset("__default", m_midiLearnTranslator->getPreset());
+	}
+
+	void Processor::loadDefaultMidiLearnPreset()
+	{
+		if (!m_midiLearnTranslator)
+			return;
+
+		MidiLearnManager manager{juce::File(getMidiLearnFolder())};
+		MidiLearnPreset preset;
+
+		if (manager.loadPreset("__default", preset))
+			m_midiLearnTranslator->setPreset(preset);
+	}
+
+	std::string Processor::getMidiLearnFolder() const
+	{
+		return getConfigFolder() + "midilearn";
+	}
+
+	void Processor::getPluginDesc(bridgeLib::PluginDesc& _desc) const
+	{
+		_desc.plugin4CC = getProperties().plugin4CC;
+		_desc.pluginName = getProperties().name;
+		_desc.pluginVersion = Version::getVersionNumber();
+		_desc.sessionId = m_remoteSessionId;
+	}
+
+	void Processor::setDeviceType(const DeviceType _type, const bool _forceChange/* = false*/)
+	{
+		if(m_deviceType == _type && !_forceChange)
+			return;
+
+		try
+		{
+			if(auto* dev = createDevice(_type))
+			{
+				getPlugin().setDevice(dev);
+				(void)m_device.release();
+				m_device.reset(dev);
+				m_deviceType = _type;
+			}
+		}
+		catch(synthLib::DeviceException& e)
+		{
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+				getName().toStdString() + " - Failed to switch device type",
+				std::string("Failed to create device:\n\n") + 
+				e.what() + "\n\n");
+		}
+
+		if(_type != DeviceType::Remote)
+			m_remoteSessionId = generateRemoteSessionId();
+	}
+
+	void Processor::setRemoteDevice(const std::string& _host, const uint32_t _port)
+	{
+		if(m_remotePort == _port && m_remoteHost == _host && m_deviceType == DeviceType::Remote)
+			return;
+
+		m_remoteHost = _host;
+		m_remotePort = _port;
+		setDeviceType(DeviceType::Remote, true);
+	}
+
+	void Processor::destroyController()
+	{
+		m_midiLearnTranslator.reset();
+		m_controller.reset();
+	}
+
+	//==============================================================================
+	void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
+	{
+		// Use this method as the place to do any pre-playback
+		// initialisation that you need
+		m_hostSamplerate = static_cast<float>(sampleRate);
+
+		getPlugin().setHostSamplerate(static_cast<float>(sampleRate), m_preferredDeviceSamplerate);
+		getPlugin().setBlockSize(samplesPerBlock);
+
+		updateLatencySamples();
+
+		// (Re)allocate the audio-capture buffer for this sample rate, hard-capped so a capture that is never
+		// stopped cannot grow unbounded. Done here (no audio running) so the audio thread never allocates.
+		{
+			constexpr double captureMaxSeconds = 30.0;
+			m_captureState.store(CaptureState::Idle, std::memory_order_release);
+			m_capturePos.store(0, std::memory_order_relaxed);
+			m_captureMaxFrames.store(0, std::memory_order_relaxed);
+			m_captureBuffer.setSize(g_captureChannels, static_cast<int>(captureMaxSeconds * sampleRate), false, true, true);
+			m_captureBuffer.clear();
+		}
+	}
+
+	void Processor::releaseResources()
+	{
+		// When playback stops, you can use this as an opportunity to free up any
+		// spare memory, etc.
+	}
+
+	bool Processor::isBusesLayoutSupported(const BusesLayout& _busesLayout) const
+	{
+	    // This is the place where you check if the layout is supported.
+	    // In this template code we only support mono or stereo.
+	    // Some plugin hosts, such as certain GarageBand versions, will only
+	    // load plugins that support stereo bus layouts.
+	    if (_busesLayout.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+	        return false;
+
+	    // This checks if the input is stereo
+	    if (_busesLayout.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+	        return false;
+
+	    return true;
+	}
+
+	//==============================================================================
+	void Processor::getStateInformation (juce::MemoryBlock& destData)
+	{
+	    // You should use this method to store your parameters in the memory block.
+	    // You could do that either as raw data, or use the XML or ValueTree classes
+	    // as intermediaries to make it easy to save and load complex data.
+#if !SYNTHLIB_DEMO_MODE
+		PluginStream ss;
+		ss.write(g_saveMagic);
+		ss.write(g_saveVersion);
+		std::vector<uint8_t> buffer;
+		saveCustomData(buffer);
+		ss.write(buffer);
+
+		std::vector<uint8_t> buf;
+		ss.toVector(buf);
+
+		destData.append(buf.data(), buf.size());
+#endif
+	}
+
+	void Processor::setStateInformation (const void* _data, const int _sizeInBytes)
+	{
+#if !SYNTHLIB_DEMO_MODE
+		// You should use this method to restore your parameters from this memory block,
+	    // whose contents will have been created by the getStateInformation() call.
+		setState(_data, _sizeInBytes);
+#endif
+	}
+
+	void Processor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
+	{
+#if !SYNTHLIB_DEMO_MODE
+		std::vector<uint8_t> state;
+		getPlugin().getState(state, synthLib::StateTypeCurrentProgram);
+		destData.append(state.data(), state.size());
+#endif
+	}
+
+	void Processor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
+	{
+#if !SYNTHLIB_DEMO_MODE
+		setState(data, sizeInBytes);
+#endif
+	}
+		
+	const juce::String Processor::getName() const
+	{
+	    return getProperties().name;
+	}
+
+	bool Processor::acceptsMidi() const
+	{
+		return getProperties().wantsMidiInput;
+	}
+
+	bool Processor::producesMidi() const
+	{
+		return getProperties().producesMidiOut;
+	}
+
+	bool Processor::isMidiEffect() const
+	{
+		return getProperties().isMidiEffect;
+	}
+
+	void Processor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+	{
+	    juce::ScopedNoDenormals noDenormals;
+	    const auto totalNumInputChannels  = getTotalNumInputChannels();
+	    const auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+	    const int numSamples = buffer.getNumSamples();
+
+	    // In case we have more outputs than inputs, this code clears any output
+	    // channels that didn't contain input data, (because these aren't
+	    // guaranteed to be empty - they may contain garbage).
+	    // This is here to avoid people getting screaming feedback
+	    // when they first compile a plugin, but obviously you don't need to keep
+	    // this code if your algorithm always overwrites all the output channels.
+	    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+			buffer.clear (i, 0, numSamples);
+
+	    // This is the place where you'd normally do the guts of your plugin's
+	    // audio processing...
+	    // Make sure to reset the state if your inner loop is processing
+	    // the samples and the outer loop is handling the channels.
+	    // Alternatively, you can process the samples with the channels
+	    // interleaved by keeping the same state.
+
+	    synthLib::TAudioInputs inputs{};
+	    synthLib::TAudioOutputs outputs{};
+
+		for (int channel = 0; channel < totalNumInputChannels; ++channel)
+			inputs[channel] = buffer.getReadPointer(channel);
+
+		for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+			outputs[channel] = buffer.getWritePointer(channel);
+
+		for(const auto metadata : midiMessages)
+		{
+			const auto message = metadata.getMessage();
+
+			synthLib::SMidiEvent ev(synthLib::MidiEventSource::Host);
+
+			if(message.isSysEx() || message.getRawDataSize() > 3)
+			{
+				ev.sysex.resize(message.getRawDataSize());
+				memcpy(ev.sysex.data(), message.getRawData(), ev.sysex.size());
+
+				// Juce bug? Or VSTHost bug? Juce inserts f0/f7 when converting VST3 midi packet to Juce packet, but it's already there
+				if(ev.sysex.size() > 1)
+				{
+					if(ev.sysex.front() == 0xf0 && ev.sysex[1] == 0xf0)
+						ev.sysex.erase(ev.sysex.begin());
+
+					if(ev.sysex.size() > 1)
+					{
+						if(ev.sysex[ev.sysex.size()-1] == 0xf7 && ev.sysex[ev.sysex.size()-2] == 0xf7)
+							ev.sysex.erase(ev.sysex.begin());
+					}
+				}
+			}
+			else
+			{
+				ev.a = message.getRawData()[0];
+				ev.b = message.getRawDataSize() > 0 ? message.getRawData()[1] : 0;
+				ev.c = message.getRawDataSize() > 1 ? message.getRawData()[2] : 0;
+			}
+
+			ev.offset = std::max(0, metadata.samplePosition);
+
+			addMidiEvent(ev);
+		}
+
+		midiMessages.clear();
+
+		bool isPlaying = true;
+		float bpm = 0.0f;
+		float ppqPos = 0.0f;
+
+	    if(const auto* playHead = getPlayHead())
+		{
+			if(auto pos = playHead->getPosition())
+			{
+				isPlaying = pos->getIsPlaying();
+
+				if(pos->getBpm())
+				{
+					bpm = static_cast<float>(*pos->getBpm());
+					processBpm(bpm);
+				}
+				if(pos->getPpqPosition())
+				{
+					ppqPos = static_cast<float>(*pos->getPpqPosition());
+				}
+			}
+		}
+
+		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying);
+
+		applyOutputGain(outputs, numSamples);
+
+		captureAudioBlock(buffer, numSamples);
+
+		m_midiOut.clear();
+		getPlugin().getMidiOut(m_midiOut);
+
+	    for (auto& e : m_midiOut)
+	    {
+		    addMidiEvent(e);
+
+			if (!getMidiRoutingMatrix().enabled(e, synthLib::MidiEventSource::Host))
+			    continue;
+
+	    	const auto mm = MidiPorts::toJuceMidiMessage(e);
+		    midiMessages.addEvent(mm, 0);
+	    }
+
+		// Drain MIDI Learn feedback events destined for the host
+		{
+			const std::scoped_lock lock(m_hostFeedbackMutex);
+			for (const auto& e : m_hostFeedbackQueue)
+			{
+				const auto mm = MidiPorts::toJuceMidiMessage(e);
+				midiMessages.addEvent(mm, 0);
+			}
+			m_hostFeedbackQueue.clear();
+		}
+	}
+
+	namespace
+	{
+		// Interleave the float capture to 16-bit PCM (clamped to [-1,1]) and write it with the shared
+		// synthLib::WavWriter rather than hand-rolling a RIFF header.
+		void writeWav16(const std::string& _path, const juce::AudioBuffer<float>& _buffer, const int _frames, const int _channels, const double _sampleRate)
+		{
+			std::vector<int16_t> pcm;
+			pcm.reserve(static_cast<size_t>(_frames) * static_cast<size_t>(_channels));
+			for(int i = 0; i < _frames; ++i)
+			{
+				for(int ch = 0; ch < _channels; ++ch)
+				{
+					const float s = std::max(-1.0f, std::min(1.0f, _buffer.getReadPointer(ch)[i]));
+					pcm.push_back(static_cast<int16_t>(s * 32767.0f));
+				}
+			}
+			synthLib::WavWriter().write(_path, 16, false, _channels, static_cast<int>(_sampleRate), pcm);
+		}
+	}
+
+	void Processor::audioCaptureCheckArm(const synthLib::SMidiEvent& _ev)
+	{
+		// A played note-on (not a device echo) starts a pending (armed) capture.
+		if(m_captureState.load(std::memory_order_acquire) != CaptureState::Armed)
+			return;
+		if(_ev.source == synthLib::MidiEventSource::Device)
+			return;
+		if((_ev.a & 0xf0) != synthLib::M_NOTEON || _ev.c == 0)
+			return;
+		m_captureStarted.store(true, std::memory_order_relaxed);
+		m_captureState.store(CaptureState::Recording, std::memory_order_release);
+	}
+
+	void Processor::captureAudioBlock(const juce::AudioBuffer<float>& _buffer, const int _numSamples)
+	{
+		if(m_captureState.load(std::memory_order_acquire) != CaptureState::Recording)
+			return;
+
+		const int capacity = m_captureBuffer.getNumSamples();
+		const int limit = std::min(m_captureMaxFrames.load(std::memory_order_relaxed), capacity);
+		const int pos = m_capturePos.load(std::memory_order_relaxed);
+		const int room = limit - pos;
+		if(room <= 0)
+		{
+			m_captureState.store(CaptureState::Done, std::memory_order_release);
+			return;
+		}
+
+		const int n = std::min(_numSamples, room);
+		const int srcChannels = _buffer.getNumChannels();
+		for(int ch = 0; ch < m_captureBuffer.getNumChannels(); ++ch)
+		{
+			if(srcChannels <= 0)
+			{
+				m_captureBuffer.clear(ch, pos, n);
+				continue;
+			}
+			const int srcCh = ch < srcChannels ? ch : srcChannels - 1;
+			m_captureBuffer.copyFrom(ch, pos, _buffer, srcCh, 0, n);
+		}
+
+		// Publish pos only after the samples are written, so a concurrent stopAudioCapture reads a count whose
+		// data is fully present.
+		m_capturePos.store(pos + n, std::memory_order_release);
+		if(pos + n >= limit)
+			m_captureState.store(CaptureState::Done, std::memory_order_release);
+	}
+
+	void Processor::startAudioCapture(const uint32_t _maxFrames, const bool _armOnNote)
+	{
+		// Halt any in-flight capture first; the audio thread stops touching the buffer once state != Recording.
+		m_captureState.store(CaptureState::Idle, std::memory_order_release);
+		const int capacity = m_captureBuffer.getNumSamples();
+		const int frames = _maxFrames == 0 ? capacity : std::min(static_cast<int>(_maxFrames), capacity);
+		m_captureMaxFrames.store(frames, std::memory_order_relaxed);
+		m_captureStarted.store(!_armOnNote, std::memory_order_relaxed);
+		m_capturePos.store(0, std::memory_order_release);
+		m_captureState.store(_armOnNote ? CaptureState::Armed : CaptureState::Recording, std::memory_order_release);
+	}
+
+	bool Processor::isAudioCaptureActive() const
+	{
+		const auto s = m_captureState.load(std::memory_order_acquire);
+		return s == CaptureState::Armed || s == CaptureState::Recording;
+	}
+
+	Processor::AudioCaptureResult Processor::stopAudioCapture(const std::string& _wavPath)
+	{
+		// Stop the audio thread from writing further, then read what was captured (the region [0, pos) is stable
+		// once we observe pos, since the audio thread only ever appends).
+		m_captureState.store(CaptureState::Done, std::memory_order_release);
+
+		AudioCaptureResult r;
+		const int channels = m_captureBuffer.getNumChannels();
+		const int frames = std::max(0, std::min(m_capturePos.load(std::memory_order_acquire), m_captureBuffer.getNumSamples()));
+		r.valid = true;
+		r.started = m_captureStarted.load(std::memory_order_relaxed);
+		r.frames = static_cast<uint32_t>(frames);
+		r.channels = static_cast<uint32_t>(channels);
+		r.sampleRate = getSampleRate();
+
+		double sumSquares = 0.0;
+		float peak = 0.0f;
+		for(int ch = 0; ch < channels; ++ch)
+		{
+			const float* data = m_captureBuffer.getReadPointer(ch);
+			for(int i = 0; i < frames; ++i)
+			{
+				const float a = std::fabs(data[i]);
+				if(a > peak)
+					peak = a;
+				sumSquares += static_cast<double>(data[i]) * data[i];
+			}
+		}
+		const double sampleTotal = static_cast<double>(frames) * channels;
+		r.peak = peak;
+		r.rms = sampleTotal > 0.0 ? static_cast<float>(std::sqrt(sumSquares / sampleTotal)) : 0.0f;
+
+		if(frames > 0 && !_wavPath.empty())
+			writeWav16(_wavPath, m_captureBuffer, frames, channels, r.sampleRate);
+
+		m_captureState.store(CaptureState::Idle, std::memory_order_release);
+		return r;
+	}
+
+	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)
+	{
+		if(getProperties().isSynth || getTotalNumInputChannels() <= 0)
+		{
+			_buffer.clear(0, _buffer.getNumSamples());
+			return;
+		}
+
+		const auto sampleCount = static_cast<uint32_t>(_buffer.getNumSamples());
+		const auto outCount = static_cast<uint32_t>(getTotalNumOutputChannels());
+		const auto inCount = static_cast<uint32_t>(getTotalNumInputChannels());
+
+		uint32_t inCh = 0;
+
+		for(uint32_t outCh=0; outCh<outCount; ++outCh)
+		{
+			auto* input = _buffer.getReadPointer(static_cast<int>(inCh));
+			auto* output = _buffer.getWritePointer(static_cast<int>(outCh));
+
+			m_bypassBuffer.write(input, outCh, sampleCount, getLatencySamples());
+			m_bypassBuffer.read(output, outCh, sampleCount);
+
+			++inCh;
+
+			if(inCh >= inCount)
+				inCh = 0;
+		}
+
+//		AudioProcessor::processBlockBypassed(_buffer, _midiMessages);
+	}
+
+#if !SYNTHLIB_DEMO_MODE
+	void Processor::setState(const void* _data, const size_t _sizeInBytes)
+	{
+		if(_sizeInBytes < 1)
+			return;
+
+		std::vector<uint8_t> state;
+		state.resize(_sizeInBytes);
+		memcpy(state.data(), _data, _sizeInBytes);
+
+		PluginStream ss(state);
+
+		if (ss.checkString(g_saveMagic))
+		{
+			try
+			{
+				const std::string magic = ss.readString();
+
+				if (magic != g_saveMagic)
+					return;
+
+				const auto version = ss.read<uint32_t>();
+
+				if (version > g_saveVersion)
+					return;
+
+				std::vector<uint8_t> buffer;
+
+				if(version == 1)
+				{
+					ss.read(buffer);
+					getPlugin().setState(buffer);
+				}
+
+				ss.read(buffer);
+
+				if(!buffer.empty())
+				{
+					try
+					{
+						loadCustomData(buffer);
+					}
+					catch (std::range_error&)
+					{
+					}
+				}
+			}
+			catch (std::range_error& e)
+			{
+				LOG("Failed to read state: " << e.what());
+				return;
+			}
+		}
+		else
+		{
+			getPlugin().setState(state);
+		}
+
+		if (hasController())
+			getController().onStateLoaded();
+	}
+#endif
+
+	//==============================================================================
+
+	int Processor::getNumPrograms()
+	{
+		return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+				  // so this should be at least 1, even if you're not really implementing programs.
+	}
+
+	int Processor::getCurrentProgram()
+	{
+		return 0;
+	}
+
+	void Processor::setCurrentProgram(int _index)
+	{
+		juce::ignoreUnused(_index);
+	}
+
+	const juce::String Processor::getProgramName(int _index)
+	{
+		juce::ignoreUnused(_index);
+		return m_programName;
+	}
+
+	void Processor::addHostMidiFeedback(const synthLib::SMidiEvent& _event)
+	{
+		const std::scoped_lock lock(m_hostFeedbackMutex);
+		m_hostFeedbackQueue.push_back(_event);
+	}
+
+	void Processor::changeProgramName(int _index, const juce::String& _newName)
+	{
+		m_programName = _newName.toStdString();
+	}
+
+	double Processor::getTailLengthSeconds() const
+	{
+		return 0.0f;
+	}
+
+	synthLib::Device* Processor::onDeviceInvalid(synthLib::Device* _device)
+	{
+		if(dynamic_cast<bridgeClient::RemoteDevice*>(_device))
+		{
+			try
+			{
+				// attempt one reconnect
+				auto* newDevice = createRemoteDevice();
+				if(newDevice && newDevice->isValid())
+				{
+					m_device.reset(newDevice);
+					return newDevice;
+				}
+			}
+			catch (synthLib::DeviceException& e)
+			{
+				juce::MessageManager::callAsync([e]
+				{
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+						"Device creation failed:",
+						std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
+						e.what() + "\n\n");
+				});
+			}
+		}
+
+		setDeviceType(DeviceType::Local);
+
+		juce::MessageManager::callAsync([this]
+		{
+			getController().onStateLoaded();
+		});
+
+		return m_device.get();
+	}
+
+	bool Processor::rebootDevice()
+	{
+		try
+		{
+			synthLib::Device* device = createDevice();
+			getPlugin().setDevice(device);
+			(void)m_device.release();
+			m_device.reset(device);
+
+			return true;
+		}
+		catch(const synthLib::DeviceException& e)
+		{
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+				"Device creation failed:",
+				std::string("Failed to create device:\n\n") + 
+				e.what() + "\n\n");
+			return false;
+		}
+	}
+}

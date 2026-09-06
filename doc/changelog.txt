@@ -1,6 +1,67 @@
 Release Notes
 
-2.2.7:
+2.2.17:
+
+Framework:
+
+- [Fix] BUG-10308 Skins: an animation did nothing at all when its keyframes
+        name contained an uppercase letter, because the name was folded to
+        lower case before it was looked up. Keyframe names are now case
+        sensitive, the same as in CSS.
+
+- [New] BUG-10200 Skins can react to notes being played. A skin script can
+        now register for note on and note off and draw a keyboard, a velocity
+        meter or an activity indicator, which was impossible before because
+        notes go straight to the emulated hardware and never reach the
+        parameter API. Notes are reported whatever their source and before
+        MIDI Learn can consume them, and a note on with velocity 0 is
+        reported as the note off it means. See doc/lua_scripting.md.
+
+- [New] BUG-10302 Skins can store their own variables. A skin can now keep
+        state the synth knows nothing about, such as which of its knobs it
+        has linked together, in one of two scopes: per instance, saved and
+        restored with the host project, or global, shared by every instance
+        through the plugin config. Reading without naming a scope answers
+        from the instance and falls back to the global, so a skin can ship a
+        default and let a project override it. Values are numbers or strings
+        and a callback reports changes. See doc/lua_scripting.md.
+
+- [Imp] BUG-10273 BUG-10277 Mame HQ is now the default resampler mode, and
+        the mode is remembered. A mode stored in a project is still used for
+        that project; when a project does not carry one, the mode last
+        selected on the settings page applies, and Mame HQ if it was never
+        changed. Note that projects saved before this version did not store
+        the mode at all while it was set to Legacy, so those open in Mame HQ
+        now and need the mode set once if Legacy is wanted.
+
+- [Fix] BUG-10313 Preset files of other plugins failed to import when they
+        happened to contain an $f0 and an $f7 byte with arbitrary data in
+        between. Such a pair is not a sysex message, but it was read as one,
+        after which the importer considered the file parsed and never tried
+        the format the file actually is.
+
+Osirus:
+
+- [Fix] Presets imported from the TDM plugin lost their name if the file was
+        not named after its position in a factory bank. "A29 Darkroom3" is
+        imported as "Darkroom3" as before, but "Autobend BC" was imported as
+        "BC" and is now kept as it is.
+
+OsTIrus:
+
+- [New] BUG-10237 TrancyTI skin: a Multi page. The eleventh tab opens a
+        column per part with its volume, pan, transpose and detune, its low
+        and high key, MIDI channel, output and note steal priority, and its
+        enable switch, so the parts of a multi can be set up in one place
+        instead of one part at a time. The MIDI channel dropdown now reads
+        1 to 16 rather than 0 to 15. Making room for the tab made all eleven
+        of them a little narrower.
+
+- [Fix] BUG-10238 TrancyTI skin: the + and - markings around the SLOPE knob
+        of the filter, envelope 3, envelope 4 and amplifier envelopes were
+        the wrong way round. The panel had + on the left and - on the right,
+        while turning the knob to the right raises the value, as every other
+        skin shows it.
 
 Vavra:
 
@@ -23,6 +84,112 @@ Xenia:
         Arrangements can be saved to user banks via the Save menu.
         Dropping a Multi or Arrangement onto a Part Button prompts for
         confirmation since it replaces more than one part.
+
+2.2.16:
+
+Framework:
+
+- [Imp] BUG-10304 Skins can now animate on their own clock. A skin that
+        declares an onframe handler on its body receives a frame event
+        once per rendered frame, carrying the elapsed time and the time
+        since the previous frame, which is what an oscilloscope or a VU
+        meter needs. Until now the only way to loop an animation was to
+        chain a CSS transition into itself. The rate is capped at 60 Hz,
+        follows the refreshRateLimitHz config setting if one is present,
+        and drops to nothing while the editor is off screen or while no
+        skin asks for it. See doc/lua_scripting.md.
+
+OsTIrus:
+
+- [Fix] BUG-10276 The filter 1 mode buttons did not follow the loaded
+        patch. A patch that uses one of the analog modes still showed the
+        classic mode row with no button lit, both when loading a patch and
+        when stepping through patches, even though the correct mode was
+        active. Both rows now follow the parameter, and the AM button
+        switches to Analog 1 Pole while the CM button switches back to
+        Low Pass.
+
+2.2.15:
+
+Osirus:
+
+- [Fix] EMU-88 Multi mode: changing the MIDI channel, the volume or any
+        other per-part multi parameter of a part was ignored if another part
+        had previously been set to the same value, and only took effect
+        after changing it to a different value and back. These parameters
+        were wrongly treated as global settings, which also caused them to
+        be reported back to the editor as global settings of part 1.
+
+OsTIrus:
+
+- [Fix] Three spelling mistakes in the user interface: "ENVELOPER FOLLOWER"
+        in the effects section, "PHASE INT" in the oscillator section and
+        "TRANSPONSE" in the common parameters.
+
+2.2.14:
+
+Framework:
+
+- [Fix] BUG-10281 BUG-10288 BUG-10278 macOS: the plugin failed to load and
+        did not pass validation on macOS versions below 14, with dyld
+        reporting a missing symbol for std::pmr::get_default_resource. The
+        sysex buffer used a std::pmr::vector whose runtime symbols are only
+        available on macOS 14 and newer; it now falls back to std::vector
+        unless the deployment target is macOS 14 or later.
+
+- [Fix] BUG-10293 macOS: the user interface was rendered even though the
+        plugin editor was hidden or minimized, causing a high GPU load. The
+        UI is not rendered anymore while it is not visible on screen.
+
+- [Imp] Faster DSP emulation. The emulation core shared by all synths has
+        been optimized and now runs about 20% faster on average, measured
+        on Windows, Linux and macOS with both Intel/AMD and ARM CPUs. How
+        much is gained depends on the patch, some benefit considerably
+        more than others. This lowers CPU usage and allows running more
+        instances at once.
+
+2.2.9:
+
+Framework:
+
+- [Fix] macOS: emulation threads could lose their realtime status and end
+        up being scheduled like background work, causing spikes and
+        dropouts. The realtime scheduling parameters were computed with
+        wrong units (microseconds instead of Mach time units) and an
+        invalid period, and thread QOS classes were never applied.
+- [Fix] Linux: thread priorities were never applied due to a bug in the
+        priority mapping.
+- [Fix] macOS: gradient decorators were rendered incorrectly with the
+        Metal renderer and could break the rendering of the whole UI,
+        leaving most of it black and seemingly frozen. The gradient
+        parameters were uploaded to the GPU with a wrong memory layout.
+- [New] macOS: setting disableMetalRenderer to 1 in the plugin config
+        file makes the UI render with OpenGL instead of Metal. This
+        helps to find out whether a rendering issue is Metal specific.
+- [Fix] EMU-80 The MCP screenshot tool now works with the Metal renderer
+        on macOS. Previously only the OpenGL path could capture.
+- [New] Skins can now use SVG images via the RmlUi SVG plugin (svg
+        element and svg() decorator), rendered with LunaSVG.
+- [New] Lua binding for the canvas element with an HTML5-compatible 2D
+        drawing context (fillStyle, strokeStyle, lineWidth, fillRect,
+        strokeRect, beginPath, moveTo, lineTo, rect, arc, ellipse, fill,
+        stroke). Skin scripts can draw custom graphics on a canvas.
+
+2.2.7:
+
+Framework:
+
+- [Fix] BUG-10214 Linux: VST2 plugins were named "lib<Name>" because the
+        shared object kept the default "lib" prefix. The prefix is now
+        cleared so the VST2 is named like the other formats.
+
+Osirus:
+
+- [New] Galaxpel skin: added a Multi editor page with per-part controls
+        for editing multi-mode patches.
+- [Change] Osirus now ships with the Galaxpel skin only. The Hoverland
+        and Trancy skins have been removed from the build. Existing users
+        of those skins will fall back to Galaxpel.
 
 2.2.6:
 

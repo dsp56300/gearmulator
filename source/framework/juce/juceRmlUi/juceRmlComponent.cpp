@@ -1,0 +1,1385 @@
+#include "juceRmlComponent.h"
+
+#include <cassert>
+#include <algorithm> // std::transform
+
+#include "juceRmlComponentConfig.h"
+#include "juceRmlLookAndFeel.h"
+#include "rmlDataProvider.h"
+#include "rmlHelper.h"
+#include "rmlInterfaces.h"
+#include "rmlRendererJuce.h"
+
+#include "RmlUi_Renderer_GL2.h"
+#include "RmlUi_Renderer_GL3.h"
+
+#ifdef RMLUI_METAL_RENDERER
+#include "RmlUi_Renderer_Metal.h"
+#include "MetalContext.h"
+#endif
+
+#include "baseLib/filesystem.h"
+#include "baseLib/logging.h"
+
+#include "dsp56kBase/threadtools.h"
+
+#include "juceUiLib/messageBox.h"
+
+#include "RmlUi/Core/Context.h"
+#include "RmlUi/Core/Core.h"
+#include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Debugger/Debugger.h"
+
+namespace juceRmlUi
+{
+	namespace
+	{
+		bool consumed(const bool _keyEventResult)
+		{
+			return _keyEventResult == false;
+		}
+
+		constexpr uint32_t g_advancedRendererMinimumGLversion = 33;
+
+		bool isSoftwareRenderer(const std::string& _glRenderer)
+		{
+		    static const char* indicators[] = {
+		        "llvmpipe",
+		        "softpipe",
+		        "swiftshader",
+		        "gdi generic",
+				"apple software renderer"
+		    };
+
+			// make lowercase
+			std::string r = _glRenderer;
+			std::transform(r.begin(), r.end(), r.begin(), ::tolower);
+
+		    for (auto* s : indicators)
+		    {
+		        if (r.find(s) != std::string::npos)
+		            return true;
+		    }
+			return false;
+		}
+
+		// the event a skin receives once per frame, the inline handler attribute that opts a
+		// document in, and the rate it is dispatched at if no refresh rate limit is configured
+		constexpr char g_frameEvent[] = "frame";
+		constexpr char g_frameEventHandler[] = "onframe";
+		constexpr float g_defaultFrameEventFPS = 60.0f;
+
+		static constexpr RendererProxy::RendererConfig g_renderConfigSoftware {true, false, false};
+		static constexpr RendererProxy::RendererConfig g_renderConfigGL2 {false, false, false};
+		static constexpr RendererProxy::RendererConfig g_renderConfigGL3 {true, true, true};
+#ifdef RMLUI_METAL_RENDERER
+		static constexpr RendererProxy::RendererConfig g_renderConfigMetal {true, true, true};
+#endif
+	}
+
+	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, const RmlComponentConfig& _config)
+		: m_rmlInterfaces(_interfaces)
+		, m_coreInstance(_interfaces.getCoreInstance())
+		, m_dataProvider(_dataProvider)
+		, m_rootRmlFilename(std::move(_rootRmlFilename))
+		, m_contentScale(_contentScale)
+		, m_drag(*this)
+		, m_nextFrameTime(_interfaces.getSystemInterface().GetElapsedTime())
+		, m_config(_config)
+	{
+		if (_config.refreshRateLimitHz > 0 && _config.refreshRateLimitHz <= 300)
+			m_targetFPS = static_cast<float>(_config.refreshRateLimitHz);
+
+		m_renderProxy.reset(new RendererProxy(m_coreInstance, m_dataProvider));
+
+		if (_config.forceSoftwareRenderer == SoftwareRendererMode::ForceOn)
+		{
+			m_renderInterface.reset(new RendererJuce(m_coreInstance));
+			m_renderType = Renderer::Software;
+			m_renderProxy->setRenderer(m_renderInterface.get(), g_renderConfigSoftware);
+		}
+		else
+		{
+#ifdef RMLUI_METAL_RENDERER
+			// disableMetalRenderer falls back to OpenGL below, to tell Metal specific rendering
+			// problems apart from general ones
+			if (RmlMetal::IsSupported() && !_config.disableMetalRenderer)
+			{
+					m_metalContext = std::make_unique<MetalContext>();
+				m_metalContext->setListener(this);
+			}
+			else
+			{
+				}
+			if (!m_metalContext)
+#endif
+			{
+				m_openGLContext.reset(new juce::OpenGLContext());
+
+				m_openGLContext->setMultisamplingEnabled(true);
+				m_openGLContext->setRenderer(this);
+				m_openGLContext->setComponentPaintingEnabled(false);
+				m_openGLContext->setContinuousRepainting(false);
+
+#if JUCE_MAC
+				// Required on macOS to get a core profile, we don't want a compatibility profile
+				m_openGLContext->setOpenGLVersionRequired(juce::OpenGLContext::openGL4_1);
+#endif
+			}
+		}
+
+		setWantsKeyboardFocus(true);
+
+		// set some reasonable default size, correct size will be set when loading the RML document
+		setSize(1280, 720);
+
+		{
+			RmlInterfaces::ScopedAccess access(*this);
+
+			const auto files = m_dataProvider.getAllFilenames();
+
+			for (const auto & file : files)
+			{
+				if (baseLib::filesystem::hasExtension(file, ".ttf"))
+				{
+					Rml::Log::Message(Rml::Log::LT_INFO, "Loading font face from file %s", file.c_str());
+					Rml::LoadFontFace(m_coreInstance, file, true);
+				}
+			}
+		}
+
+		try
+		{
+			createRmlContext(_contextCreatedCallback);
+		}
+		catch (std::runtime_error& e)
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "%s", e.what());
+
+			if (m_openGLContext)
+				m_openGLContext->detach();
+			_docLoadFailedCallback(*this, *m_rmlContext);
+			destroyRmlContext();
+			deleteAllChildren();
+			throw;
+		}
+
+		m_drag.onDocumentLoaded();
+
+		m_updating = false;
+		enqueueUpdate();
+	}
+
+	RmlComponent::~RmlComponent()
+	{
+#ifdef RMLUI_METAL_RENDERER
+		if (m_metalContext)
+			m_metalContext->detach();
+#endif
+		m_renderProxy->setRenderer(nullptr, g_renderConfigSoftware);
+
+		if (m_lookAndFeelParent)
+			m_lookAndFeelParent->setLookAndFeel(nullptr);
+		m_lookAndFeelParent = nullptr;
+
+		delete m_lookAndFeel;
+
+		enableDebugger(false);
+
+		if (m_openGLContext)
+			m_openGLContext->detach();
+		destroyRmlContext();
+
+		deleteAllChildren();
+	}
+
+	void RmlComponent::newOpenGLContextCreated()
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+
+		using namespace juce::gl;
+
+		auto* renderer = glGetString(GL_RENDERER);
+
+		if (renderer)
+		{
+			const auto software = isSoftwareRenderer(reinterpret_cast<const char*>(renderer));
+
+			Rml::Log::Message(Rml::Log::LT_INFO, "OpenGL Renderer: %s, is software: %d", renderer, software ? 1 : 0);
+
+			if (software && m_config.forceSoftwareRenderer != SoftwareRendererMode::ForceOff)
+			{
+				Rml::Log::Message(Rml::Log::LT_WARNING, "Detected software OpenGL renderer (%s), falling back to own software renderer instead", renderer);
+				m_renderType = Renderer::Software;
+				return;
+			}
+		}
+		else
+		{
+			if (m_config.forceSoftwareRenderer != SoftwareRendererMode::ForceOff)
+			{
+				Rml::Log::Message(Rml::Log::LT_WARNING, "Could not determine OpenGL renderer, falling back to own software renderer");
+				m_renderType = Renderer::Software;
+				return;
+			}
+
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Could not determine OpenGL renderer");
+		}
+
+		m_openGLContext->setSwapInterval(1);
+
+		bool haveCustomFPS = m_targetFPS >= 0;
+
+		if (!haveCustomFPS)
+		{
+#if JUCE_MAC
+			m_targetFPS = 60; // default limit is 60 Hz on macOS
+#else
+			m_targetFPS = 30; // default limit is 30 Hz, updated below if renderer is capable
+#endif
+		}
+		int major = 0, minor = 0;
+
+#if JUCE_MAC
+		constexpr auto version = g_advancedRendererMinimumGLversion;
+#else
+		// clear any previous error
+		while (glGetError() != GL_NO_ERROR) {}
+
+		// attempt to get the actual GL version, this requires a context supporting OpenGL 3.0 or higher
+		glGetIntegerv(GL_MAJOR_VERSION, &major);
+		glGetIntegerv(GL_MINOR_VERSION, &minor);
+
+		// if that fails, we are probably on an old GL version that doesn't support these queries, so fall back to GL2
+		const auto version = glGetError() == GL_NO_ERROR ? (major * 10 + minor) : 20;
+#endif
+		GLint maxSize = 0;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
+
+		if (version >= static_cast<int>(g_advancedRendererMinimumGLversion) && version < 60)
+		{
+			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 3 renderer for RmlUi, version detected: %d.%d", major, minor);
+			m_renderInterface.reset(new RenderInterface_GL3(m_coreInstance));
+			m_renderType = Renderer::Gl3;
+
+			if (!haveCustomFPS)
+			{
+				const GLubyte* vendor = glGetString(GL_VENDOR);
+
+				if (vendor)
+				{
+					std::string vendorStr = reinterpret_cast<const char*>(vendor);
+					std::transform(vendorStr.begin(), vendorStr.end(), vendorStr.begin(), ::tolower);
+
+					if (vendorStr.find("nvidia") != std::string::npos || 
+						vendorStr.find("amd") != std::string::npos ||
+						vendorStr.find("advanced micro devices") != std::string::npos
+						)
+						m_targetFPS = 60;
+				}
+			}
+			m_renderProxy->setTextureParameters(static_cast<uint32_t>(maxSize), true);
+		}
+		else
+		{
+			const auto npotSupported = m_openGLContext->isTextureNpotSupported();
+
+			Rml::Log::Message(Rml::Log::LT_INFO, "Using OpenGL 2 renderer for RmlUi, version detected: %d.%d, max texture size %d, NPOT supported %d", major, minor, maxSize, npotSupported ? 1 : 0);
+
+			m_renderProxy->setTextureParameters(static_cast<uint32_t>(maxSize), npotSupported);
+			m_renderInterface.reset(new RenderInterface_GL2(m_coreInstance));
+			m_renderType = Renderer::Gl2;
+		}
+
+		m_openGLversion = version;
+
+		m_renderProxy->setRenderer(m_renderInterface.get(), m_renderType == Renderer::Gl3 ? g_renderConfigGL3 : g_renderConfigGL2);
+
+		{
+			std::scoped_lock lock(m_timerMutex);
+			m_nextFrameTime = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+			startNextFrameTimer();
+		}
+
+		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Lowest);
+		dsp56k::ThreadTools::setCurrentThreadName("RmlUI-Renderer");
+	}
+
+	void RmlComponent::renderOpenGL()
+	{
+		{
+			// although we set that we render only manually, juce still calls this function eventhough we didn't
+			// request a repaint, for example when the window is resized.
+			// This results in massive flickering if the render queue is empty so we ask RmlUi to just do a
+			// render for us from the OpenGL thread
+			std::scoped_lock lock(m_contextRenderMutex);
+			if (!m_renderProxy->hasRenderFunctions())
+			{
+				m_rmlContext->Render();
+				m_renderProxy->finishFrame();
+			}
+		}
+
+		using namespace juce::gl;
+
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+		const Rml::Vector2i size{viewport[2], viewport[3]};
+
+		glDisable(GL_DEBUG_OUTPUT);
+		glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		auto* gl2 = dynamic_cast<RenderInterface_GL2*>(m_renderInterface.get());
+		auto* gl3 = dynamic_cast<RenderInterface_GL3*>(m_renderInterface.get());
+
+		if (gl3)
+		{
+			gl3->SetViewport(size.x, size.y);
+			gl3->BeginFrame();
+		}
+		else if (gl2)
+		{
+			gl2->SetViewport(size.x, size.y);
+			gl2->BeginFrame();
+		}
+
+		bool haveMore = true;
+		while (haveMore)
+			haveMore = m_renderProxy->executeRenderFunctions();
+
+		if (gl3)
+			gl3->EndFrame();
+		else if (gl2)
+			gl2->EndFrame();
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR)
+			DBG("OpenGL error: " << juce::String::toHexString((int)err));
+
+		if (m_screenshotState == ScreenshotState::RequestScreenshot)
+		{
+			m_screenshot = juce::Image(juce::Image::ARGB, size.x, size.y, true);
+
+			const juce::Image::BitmapData data(m_screenshot, juce::Image::BitmapData::writeOnly);
+
+			glReadPixels(0, 0, size.x, size.y, GL_BGRA, GL_UNSIGNED_BYTE, data.data);
+
+			// OpenGL has the origin in the lower left, juce in the upper left, so we need to flip the image vertically
+			juce::Image flipped = juce::Image(m_screenshot.getFormat(), m_screenshot.getWidth(), m_screenshot.getHeight(), false);
+
+			juce::Graphics g(flipped);
+
+			// Flip vertically around the image center
+			juce::AffineTransform transform = juce::AffineTransform::scale(1.0f, -1.0f)
+			    .translated(0, static_cast<float>(m_screenshot.getHeight()));
+
+			g.drawImageTransformed(m_screenshot, transform);
+			m_screenshot = flipped;
+
+			m_screenshotState = ScreenshotState::ScreenshotReady;
+		}
+
+		m_renderDone = true;
+	}
+
+	void RmlComponent::openGLContextClosing()
+	{
+		// nothing to be done if using software renderer, this is only done to discard the GL context as we didn't like it
+		if (m_renderType == Renderer::Software)
+			return;
+
+		m_renderProxy->setRenderer(nullptr, g_renderConfigSoftware);
+		m_renderInterface.reset();
+	}
+
+#ifdef RMLUI_METAL_RENDERER
+	void RmlComponent::metalContextCreated(MetalContext& _context)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+
+		m_renderInterface.reset(new RenderInterface_Metal(m_coreInstance, _context.getDevice()));
+		m_renderType = Renderer::Metal;
+
+		auto* metalRenderer = dynamic_cast<RenderInterface_Metal*>(m_renderInterface.get());
+		if (!metalRenderer || !*metalRenderer)
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to initialize Metal renderer, falling back to software");
+			m_renderInterface.reset();
+			m_renderType = Renderer::Software;
+			return;
+		}
+
+		m_renderProxy->setRenderer(m_renderInterface.get(), g_renderConfigMetal);
+
+		// Set a fake GL version to trigger the advancedrenderer theme activation in update()
+		m_openGLversion = g_advancedRendererMinimumGLversion;
+
+		{
+			std::scoped_lock lock(m_timerMutex);
+			m_nextFrameTime = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+			startNextFrameTimer();
+		}
+
+		if (!m_rmlContext)
+			createRmlContext(nullptr);
+
+		// Allow update() to proceed. Without this, the update/render
+		// cycle deadlocks after a renderer switch because m_renderDone
+		// defaults to false and update() waits for it.
+		m_renderDone = true;
+	}
+
+	void RmlComponent::renderMetal(MetalContext& _context)
+	{
+		// Skip frame if there's nothing to render — keeps the last presented
+		// drawable visible instead of flashing black during rate limiting.
+		if (!m_renderProxy->hasRenderFunctions())
+			return;
+
+		RmlInterfaces::ScopedAccess access(*this);
+
+		if (!m_rmlContext || !m_renderInterface)
+			return;
+
+		auto* metal = dynamic_cast<RenderInterface_Metal*>(m_renderInterface.get());
+		if (!metal) return;
+
+		const auto size = getRenderSize();
+		if (size.x <= 0 || size.y <= 0) return;
+		auto* drawable = _context.nextDrawable();
+		if (!drawable) return;
+
+		metal->SetViewport(size.x, size.y);
+		metal->BeginFrame(drawable);
+
+		m_renderProxy->executeRenderFunctions();
+
+		if (m_screenshotState == ScreenshotState::RequestScreenshot)
+		{
+			m_screenshot = juce::Image(juce::Image::ARGB, size.x, size.y, true);
+
+			const juce::Image::BitmapData data(m_screenshot, juce::Image::BitmapData::writeOnly);
+
+			if (metal->EndFrame(data.data, static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y), static_cast<uint32_t>(data.lineStride)))
+				m_screenshotState = ScreenshotState::ScreenshotReady;
+			else
+				m_screenshotState = ScreenshotState::NoScreenshot;	// capture failed, do not block future requests
+		}
+		else
+		{
+			metal->EndFrame();
+		}
+
+		m_renderDone = true;
+	}
+
+	void RmlComponent::metalContextClosing(MetalContext&)
+	{
+		m_renderProxy->setRenderer(nullptr, g_renderConfigSoftware);
+		m_renderInterface.reset();
+	}
+#endif
+
+	void RmlComponent::visibilityChanged()
+	{
+		Component::visibilityChanged();
+
+		// we skip rendering while off screen, redraw as soon as possible instead of waiting for the next scheduled frame
+		if (isVisible())
+			enqueueUpdate();
+
+		if (isVisible() && m_openGLContext && !m_openGLContext->isAttached())
+			m_openGLContext->attachTo(*this);
+
+#ifdef RMLUI_METAL_RENDERER
+		if (isVisible() && m_metalContext)
+			m_metalContext->attachTo(*this);
+#endif
+	}
+
+	void RmlComponent::mouseDown(const juce::MouseEvent& _event)
+	{
+		Component::mouseDown(_event);
+		RmlInterfaces::ScopedAccess access(*this);
+
+		m_rmlContext->ProcessMouseButtonDown(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
+		enqueueUpdate();
+	}
+
+	void RmlComponent::mouseUp(const juce::MouseEvent& _event)
+	{
+		Component::mouseUp(_event);
+		RmlInterfaces::ScopedAccess access(*this);
+		m_rmlContext->ProcessMouseButtonUp(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
+		enqueueUpdate();
+	}
+
+	void RmlComponent::mouseMove(const juce::MouseEvent& _event)
+	{
+		Component::mouseMove(_event);
+		RmlInterfaces::ScopedAccess access(*this);
+
+		const auto pos = toRmlPosition(_event);
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+		enqueueUpdate();
+	}
+
+	void RmlComponent::mouseDrag(const juce::MouseEvent& _event)
+	{
+		Component::mouseDrag(_event);
+		RmlInterfaces::ScopedAccess access(*this);
+
+		const auto pos = toRmlPosition(_event);
+
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+
+		// forward out-of-bounds drag events to the drag handler to allow it to convert to a juce drag if the drag source can export files
+		if (pos.x < 0 || pos.y < 0 || pos.x >= m_rmlContext->GetDimensions().x || pos.y >= m_rmlContext->GetDimensions().y)
+			m_drag.processOutOfBoundsDrag(pos);
+
+		enqueueUpdate();
+	}
+
+	void RmlComponent::mouseExit(const juce::MouseEvent& _event)
+	{
+		Component::mouseExit(_event);
+		RmlInterfaces::ScopedAccess access(*this);
+		if (m_rmlContext)
+			m_rmlContext->ProcessMouseLeave();
+
+		enqueueUpdate();
+	}
+
+	void RmlComponent::mouseEnter(const juce::MouseEvent& _event)
+	{
+		Component::mouseEnter(_event);
+		RmlInterfaces::ScopedAccess access(*this);
+
+		const auto pos = toRmlPosition(_event);
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+		enqueueUpdate();
+	}
+
+	void RmlComponent::mouseWheelMove(const juce::MouseEvent& _event, const juce::MouseWheelDetails& _wheel)
+	{
+		Component::mouseWheelMove(_event, _wheel);
+
+		RmlInterfaces::ScopedAccess access(*this);
+
+		// wheel direction is right/down for positive values, in juce its the other way around, thats why we flip
+		const auto deltaX = -_wheel.deltaX;
+		const auto deltaY = -_wheel.deltaY;
+
+		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(deltaX, deltaY), toRmlModifiers(_event));
+		enqueueUpdate();
+	}
+
+	void RmlComponent::mouseDoubleClick(const juce::MouseEvent& _event)
+	{
+		Component::mouseDoubleClick(_event);
+		// this confuses rml as it has its own double click handling. This causes a double click plus another single click to be triggered
+/*
+		RmlInterfaces::ScopedAccess access(*this);
+
+		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), toRmlModifiers(_event));
+		enqueueUpdate();
+*/	}
+
+	bool RmlComponent::keyPressed(const juce::KeyPress& _key)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+
+		m_pressedKeys.push_back(_key);
+
+		bool res = false;
+
+		auto juceChar = _key.getTextCharacter();
+		if (juce::CharacterFunctions::isPrintable(juceChar) || juceChar == '\n')
+		{
+			auto string = juce::String::charToString(juceChar);
+			if (consumed(m_rmlContext->ProcessTextInput(string.toStdString())))
+				res = true;
+		}
+
+		const Rml::Input::KeyIdentifier key = helper::toRmlKey(_key);
+
+		if (key != Rml::Input::KI_UNKNOWN)
+		{
+			if (consumed(m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key))))
+				res = true;
+		}
+		if (res)
+			enqueueUpdate();
+		return res;
+	}
+
+	bool RmlComponent::keyStateChanged(const bool _isKeyDown)
+	{
+		// this API is so WTF...
+
+		bool res = false;
+
+		if (!_isKeyDown)
+		{
+			RmlInterfaces::ScopedAccess access(*this);
+
+			if (m_rmlContext)
+			{
+				// Two phases so we never hold an iterator into m_pressedKeys across ProcessKeyUp:
+				// a key handler can pump the message loop (a modal or native menu), during which a
+				// new keystroke re-enters keyPressed() and push_back()s here, reallocating the
+				// vector - erasing through the now-stale iterator would be a use-after-free.
+				std::vector<juce::KeyPress> released;
+				for (auto it = m_pressedKeys.begin(); it != m_pressedKeys.end();)
+				{
+					if (it->isCurrentlyDown())
+					{
+						++it;
+						continue;
+					}
+					released.push_back(*it);
+					it = m_pressedKeys.erase(it);
+				}
+
+				for (const auto& key : released)
+				{
+					if (consumed(m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key))))
+						res = true;
+				}
+
+				if (res)
+					enqueueUpdate();
+			}
+		}
+		if (res)
+			return res;
+		return Component::keyStateChanged(_isKeyDown);
+	}
+
+	void RmlComponent::modifierKeysChanged(const juce::ModifierKeys& _modifiers)
+	{
+		Component::modifierKeysChanged(_modifiers);
+
+		const auto changes = _modifiers.getRawFlags() - m_currentModifierKeys.getRawFlags();
+
+		if (!changes)
+			return;
+
+		m_currentModifierKeys = _modifiers;
+
+		RmlInterfaces::ScopedAccess access(*this);
+
+		// generate a fake key event to trigger the modifier change
+		if (changes > 0)
+			m_rmlContext->ProcessKeyDown(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
+		else
+			m_rmlContext->ProcessKeyUp(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
+		enqueueUpdate();
+	}
+
+	void RmlComponent::focusLost(FocusChangeType _cause)
+	{
+		Component::focusLost(_cause);
+
+		// We skip this on Linux because apparently focusLost is called when the mouse button is released?!
+		// https://tus.youtrack.cloud/tickets/BUG-10084/
+#if JUCE_WINDOWS || JUCE_MAC
+		RmlInterfaces::ScopedAccess access(*this);
+		if (m_rmlContext)
+			m_rmlContext->ProcessMouseLeave();
+#endif
+
+		enqueueUpdate();
+	}
+
+	void RmlComponent::focusGained(const FocusChangeType _cause)
+	{
+		Component::focusGained(_cause);
+
+		enqueueUpdate();
+	}
+
+	void RmlComponent::parentHierarchyChanged()
+	{
+		auto* rootComponent = getTopLevelComponent();
+		if (!m_lookAndFeel)
+			m_lookAndFeel = new LookAndFeel();
+		if (m_lookAndFeelParent)
+			m_lookAndFeelParent->setLookAndFeel(nullptr);
+		m_lookAndFeelParent = rootComponent;
+		rootComponent->setLookAndFeel(m_lookAndFeel);
+
+#ifdef RMLUI_METAL_RENDERER
+		// Retry Metal attachment now that we have a parent hierarchy (and likely a native peer)
+		if (m_metalContext)
+			m_metalContext->attachTo(*this);
+#endif
+
+		Component::parentHierarchyChanged();
+	}
+
+	void RmlComponent::timerCallback()
+	{
+		{
+			std::scoped_lock lock(m_timerMutex);
+			stopTimer();
+		}
+
+		// do not update again while still rendering
+		if (m_renderDone)
+		{
+			// do not update if not yet time
+			const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+			if (t >= m_nextFrameTime)
+			{
+				update();
+				return;
+			}
+		}
+
+		// continue waiting
+		startNextFrameTimer();
+	}
+
+	juce::Point<int> RmlComponent::toRmlPosition(const juce::MouseEvent& _e) const
+	{
+		return toRmlPosition(_e.x, _e.y);
+	}
+
+	juce::Point<int> RmlComponent::toRmlPosition(int _x, int _y) const
+	{
+		return {
+			juce::roundToInt(static_cast<float>(_x) * getOpenGLRenderingScale()),
+			juce::roundToInt(static_cast<float>(_y) * getOpenGLRenderingScale())
+		};
+	}
+
+	float RmlComponent::getOpenGLRenderingScale() const
+	{
+		if (m_openGLContext)
+			return static_cast<float>(m_openGLContext->getRenderingScale());
+
+#ifdef RMLUI_METAL_RENDERER
+		if (m_metalContext)
+			return static_cast<float>(m_metalContext->getRenderingScale());
+#endif
+
+		float scale = 1.0f;
+		const Component* t = this;
+		while (t)
+		{
+			scale *= std::sqrt (std::abs (t->getTransform().getDeterminant()));
+			t = t->getParentComponent();
+		}
+		return scale;
+	}
+
+	void RmlComponent::resize(const int _width, const int _height)
+	{
+		setSize(_width, _height);
+		m_renderDone = true;
+		m_updating = false;
+		update();
+	}
+
+	void RmlComponent::requestUpdate(const Rml::Element* _elem)
+	{
+		if (!_elem)
+			return;
+		auto* comp = fromElement(_elem);
+		if (comp)
+			comp->enqueueUpdate();
+		else if (auto* context = _elem->GetContext())
+			context->RequestNextUpdate(0.0f);
+	}
+
+	RmlComponent* RmlComponent::fromElement(const Rml::Element* _element)
+	{
+		if (!_element)
+			return nullptr;
+		auto* doc = _element->GetOwnerDocument();
+		if (!doc)
+			return nullptr;
+		auto* p = doc->GetAttribute<void*>("rmlComponent", nullptr);
+		if (!p)
+		{
+			// this can fail if the document is the temporary drag & drop document, so we search all documents in the context
+			auto* context = _element->GetContext();
+
+			if (!context)
+				return nullptr;
+
+			for (int i=0; i<context->GetNumDocuments(); ++i)
+			{
+				doc = _element->GetContext()->GetDocument(i);
+				p = doc->GetAttribute<void*>("rmlComponent", nullptr);
+				if(p)
+					break;
+			}
+		}
+		return static_cast<RmlComponent*>(p);
+	}
+
+	bool RmlComponent::isOnScreen() const
+	{
+		if (!isShowing())
+			return false;
+
+		const auto* peer = getPeer();
+		return peer == nullptr || !peer->isMinimised();
+	}
+
+	void RmlComponent::update()
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+
+		if (m_screenshotState == ScreenshotState::ScreenshotReady)
+		{
+			if (m_screenshotCallback)
+				m_screenshotCallback(m_screenshot);
+			m_screenshotState = ScreenshotState::NoScreenshot;
+		}
+
+		if (m_updating || !m_renderDone)
+			return;
+
+		if (m_renderType == Renderer::Software && !m_renderInterface)
+		{
+			m_renderInterface.reset(new RendererJuce(m_coreInstance));
+			m_renderProxy->setRenderer(m_renderInterface.get(), g_renderConfigSoftware);
+		}
+		else if (!m_renderInterface)
+			return;
+
+		{
+			std::scoped_lock lockTimer(m_timerMutex);
+			stopTimer();
+		}
+
+		// There is no point in producing frames that nobody can see. On macOS this is not just a waste but a real
+		// problem: an off-screen CAMetalLayer keeps handing out drawables immediately instead of blocking on vsync,
+		// so the render pipeline loses its pacing and burns the GPU while the editor is hidden or minimized.
+		// The software and OpenGL renderers get this for free from juce, the Metal renderer drives its own thread.
+		const bool visible = isOnScreen() || m_screenshotState == ScreenshotState::RequestScreenshot;
+
+		m_updating = true;
+		m_renderDone = false;
+
+		auto frameEventActive = false;
+
+		{
+			std::scoped_lock lock(m_contextRenderMutex);
+
+			updateRmlContextDimensions();
+
+			if (m_openGLversion != m_lastOpenGLversion)
+			{
+				m_lastOpenGLversion = m_openGLversion;
+
+				const bool isAdvanced = m_lastOpenGLversion >= g_advancedRendererMinimumGLversion
+#ifdef RMLUI_METAL_RENDERER
+				|| m_renderType == Renderer::Metal
+#endif
+				;
+			m_rmlContext->ActivateTheme("advancedrenderer", isAdvanced);
+			}
+
+			evPreUpdate(this);
+
+			if (visible)
+				frameEventActive = dispatchFrameEvent();
+			else
+				m_lastFrameEventTime = 0.0;	// an editor that is not on screen animates nothing, do not report the gap as one frame
+
+			m_rmlContext->Update();
+
+			if (visible)
+			{
+				m_rmlContext->Render();
+
+				m_renderProxy->finishFrame();
+			}
+
+			evPostUpdate(this);
+		}
+
+
+		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+		const auto dt = static_cast<float>(t - m_time);
+		m_time = t;
+
+		auto fps = (dt > 0) ? (1.0f / dt) : 0.0f;
+		m_fps += (fps - m_fps) * 0.1f;
+
+//		LOG("FPS: " << m_fps << " avg, " << fps << " current, next update delay " << m_rmlContext->GetNextUpdateDelay());
+
+		// we get a more stable timing by doing increments, but if we are too far off, we just set the next frame time to now + delta instead
+		if ((std::abs(m_nextFrameTime) - t) > 0.5f)
+			m_nextFrameTime = t;
+
+		if (m_targetFPS > 0)
+			m_nextFrameTime += 1.0f / m_targetFPS;
+
+		if (m_pendingUpdates > 0)
+		{
+			// immediate update
+			--m_pendingUpdates;
+		}
+		else if (!frameEventActive)
+		{
+			// render every 0.5 seconds if there is no update pending
+			m_rmlContext->RequestNextUpdate(0.5f);
+			m_nextFrameTime = std::max(m_nextFrameTime, t + m_rmlContext->GetNextUpdateDelay());
+		}
+		else if (m_targetFPS <= 0)
+		{
+			// A skin is animating, so the idle tick above is skipped to keep the loop running. Without a
+			// configured refresh rate limit nothing else paces it and the animation would run as fast as
+			// the message loop allows, so cap it here. A configured limit takes precedence and is already
+			// applied above.
+			m_nextFrameTime = std::max(m_nextFrameTime, t + 1.0f / g_defaultFrameEventFPS);
+		}
+
+		// ensure that new post frame callbacks that are added by other post frame callbacks are executed in the next frame
+		std::swap(m_postFrameCallbacks, m_tempPostFrameCallbacks);
+
+		for (const auto& postFrameCallback : m_tempPostFrameCallbacks)
+			postFrameCallback();
+		m_tempPostFrameCallbacks.clear();
+
+		m_updating = false;
+
+		// trigger a repaint and wait for OpenGL to be done with it
+		if (!visible)
+		{
+			// no frame was produced, unblock the next update
+			m_renderDone = true;
+		}
+		else if (m_renderType == Renderer::Software)
+		{
+			// get rid of opengl context if we switched to software rendering
+			if (m_openGLContext)
+			{
+				m_openGLContext->detach();
+				m_openGLContext.reset();
+				return;
+			}
+
+			repaint();
+		}
+		else if (m_openGLContext)
+			m_openGLContext->triggerRepaint();
+#ifdef RMLUI_METAL_RENDERER
+		else if (m_metalContext)
+			m_metalContext->triggerRepaint();
+#endif
+
+		std::scoped_lock lock(m_timerMutex);
+		// we make the timer run a bit faster to prevent that we miss the next frame time by a too large margin
+		startNextFrameTimer();
+	}
+
+	void RmlComponent::enqueueUpdate()
+	{
+		// One is not enough, because RmlUi might do property changes that in turn require another update. We do three to be sure.
+		m_pendingUpdates = 3;
+
+		const auto t = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+		auto minTime = t;
+
+		if (m_targetFPS > 0)
+			minTime += 1.0f / m_targetFPS;
+
+		m_nextFrameTime = std::min(m_nextFrameTime, minTime);
+
+		startNextFrameTimer();
+	}
+
+	void RmlComponent::enableDebugger(const bool _enable)
+	{
+		if (_enable == m_debuggerActive)
+			return;
+
+		m_debuggerActive = _enable;
+
+		if (_enable)
+		{
+			Rml::Debugger::Initialise(m_rmlContext);
+			Rml::Debugger::SetVisible(true);
+		}
+		else
+		{
+			Rml::Debugger::Shutdown();
+		}
+	}
+
+	bool RmlComponent::takeScreenshot(const ScreenshotCallback& _callback)
+	{
+		if (!_callback)
+			return false;
+
+		RmlInterfaces::ScopedAccess access(*this);
+
+		if (!m_rmlContext || !m_renderInterface)
+			return false;
+
+		if (m_screenshotState != ScreenshotState::NoScreenshot)
+			return false;
+
+		m_screenshotState = ScreenshotState::RequestScreenshot;
+		m_screenshotCallback = _callback;
+
+		enqueueUpdate();
+
+		return true;
+	}
+
+	bool RmlComponent::supportsPowerOfTwo() const
+	{
+		return m_renderProxy->supportsNpotTextures();
+	}
+
+	uint32_t RmlComponent::getMaximumTextureSize() const
+	{
+		return m_renderProxy->getMaximumTextureSize();
+	}
+
+	uint32_t RmlComponent::getValidTextureSize(const uint32_t _size) const
+	{
+		if (m_renderProxy)
+			return m_renderProxy->getValidTextureSize(_size);
+		return _size;
+	}
+
+	void RmlComponent::paint(juce::Graphics& _g)
+	{
+		if (m_openGLContext)
+			return;
+
+		auto* r = dynamic_cast<RendererJuce*>(m_renderInterface.get());
+		if (!r)
+			return;
+
+		auto* rootComp = getTopLevelComponent();
+		auto* laf = dynamic_cast<LookAndFeel*>(&rootComp->getLookAndFeel());
+
+		const auto& img = laf ? laf->getCurrentImage() : juce::Image();
+
+		// If the clip origin is offset (window partially off-screen), we cannot render
+		// directly to the LookAndFeel image as it ignores the clip offset. Fall back to
+		// the slower Graphics path which respects the JUCE transform/clip pipeline.
+		const auto clipOrigin = _g.getClipBounds().getPosition();
+		const bool useDirectPath = img.isValid() && clipOrigin.isOrigin();
+
+		const auto size = getRenderSize();
+
+		r->beginFrame(_g, size);
+
+		m_renderProxy->executeRenderFunctions();
+
+		r->endFrame(useDirectPath ? img : juce::Image(), getOpenGLRenderingScale());
+
+		m_renderDone = true;
+	}
+
+	juce::Component* RmlComponent::getComponentAt(const juce::Point<float> _position)
+	{
+		if (auto* elem = m_rmlContext->GetElementAtPoint(Rml::Vector2f(_position.x, _position.y)))
+			m_lastGetComponentAt = elem->GetObserverPtr(elem->GetCoreInstance());
+		else
+			m_lastGetComponentAt.reset();
+
+		return Component::getComponentAt(_position);
+	}
+
+	void RmlComponent::createRmlContext(const ContextCreatedCallback& _contextCreatedCallback)
+	{
+		const auto size = getScreenBounds();
+
+		if (size.isEmpty())
+			return;
+
+		{
+			RmlInterfaces::ScopedAccess access(*this);
+
+			if (m_rmlContext)
+				return;
+
+			m_rmlContext = CreateContext(m_coreInstance, getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
+
+			m_rmlContext->SetDensityIndependentPixelRatio(getOpenGLRenderingScale() * m_contentScale);
+
+			m_rmlContext->SetDefaultScrollBehavior(Rml::ScrollBehavior::Smooth, 5.0f);
+
+			if (_contextCreatedCallback)
+				_contextCreatedCallback(*this, *m_rmlContext);
+
+			auto& sys = m_rmlInterfaces.getSystemInterface();
+			sys.beginLogRecording();
+
+			// On Linux, some hosts (for example Carla) like to set the locale to the current user language, this breaks float number parsing, so we force the "C" locale here
+			(void)setlocale(LC_NUMERIC, "C");
+
+			Rml::String rmlString;
+			m_coreInstance.file_interface->LoadFile(m_rootRmlFilename, rmlString);
+
+			// inject more templates to prevent that each GUI has to add them
+			const std::string key = "<head>";
+			auto pos = rmlString.find(key);
+			if (pos != Rml::String::npos)
+			{
+				auto addTemplate = [&](const std::string& _name)
+				{
+					const Rml::String templates = R"(<link type="text/template" href=")" + _name + "\"/>";
+					rmlString.insert(pos + key.length(), templates);
+				};
+
+				addTemplate("tus_patchmanager.rml");
+				addTemplate("tus_colorpicker.rml");
+				addTemplate("tus_settings.rml");
+
+				for (const auto& templateName : m_config.additionalTemplateFiles)
+					addTemplate(templateName);
+			}
+
+			m_document = m_rmlContext->LoadDocumentFromMemory(rmlString, m_rootRmlFilename);
+
+			if (m_document)
+			{
+				m_document->SetAttribute("rmlComponent", static_cast<void*>(this));
+
+				const Rml::Vector2f s = m_document->GetBox().GetSize(Rml::BoxArea::Margin);
+
+				if (s.x > 0 && s.y > 0)
+				{
+					m_documentSize.x = static_cast<int>(s.x);
+					m_documentSize.y = static_cast<int>(s.y);
+				}
+				else
+					throw std::runtime_error("RMLUI document '" + m_rootRmlFilename + "' has no valid size, explicit default size needs to be specified on the <body> element.");
+				m_document->Show();
+			}
+			else
+			{
+				throw std::runtime_error("Failed to load RMLUI document: " + m_rootRmlFilename);
+			}
+
+			sys.endLogRecording();
+
+			auto logs = sys.getRecordedLogEntries();
+			SystemInterface::filterLogEntries(logs, {Rml::Log::LT_ERROR, Rml::Log::LT_ASSERT, Rml::Log::LT_WARNING});
+
+			if (!logs.empty())
+			{
+				std::stringstream ss;
+				ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
+				for (const auto& log : logs)
+					ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
+				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Error loading RMLUI document", ss.str(), this);
+			}
+		}
+
+		setSize(m_documentSize.x, m_documentSize.y);
+	}
+
+	void RmlComponent::destroyRmlContext()
+	{
+		{
+			std::scoped_lock lock(m_timerMutex);
+			stopTimer();
+		}
+
+		RmlInterfaces::ScopedAccess access(*this);
+
+		m_rmlContext->UnloadAllDocuments();
+		Rml::RemoveContext(m_coreInstance, m_rmlContext->GetName());
+		m_rmlContext = nullptr;
+
+		Rml::ReleaseRenderManagers(m_coreInstance);
+	}
+
+	void RmlComponent::updateRmlContextDimensions()
+	{
+		if (!m_rmlContext)
+			return;
+
+		auto contextDims = m_rmlContext->GetDimensions();
+
+		const auto size = getRenderSize();
+
+		const float renderScale = static_cast<float>(size.x) / static_cast<float>(m_documentSize.x);// * getRenderingScale();
+
+		if (contextDims.x != size.x || contextDims.y != size.y || m_currentRenderScale != renderScale)
+		{
+			m_currentRenderScale = renderScale;
+			m_rmlContext->SetDensityIndependentPixelRatio(renderScale * m_contentScale);
+			m_rmlContext->SetDimensions({ size.x, size.y });
+		}
+	}
+
+	// A skin that needs to animate on its own clock - an oscilloscope, a VU meter, anything that
+	// has to move without a parameter changing - declares an onframe handler on its body and gets
+	// a 'frame' event once per rendered frame, carrying the elapsed time and the time since the
+	// previous frame. A skin that does not declare one pays nothing but an attribute lookup, and
+	// because this rides the normal update tick it is throttled by the frame rate limit and stops
+	// entirely while the editor is off screen. Returns whether anything listened - while something
+	// does, the caller has to keep the update loop at the frame rate instead of dropping to the
+	// idle tick, or the skin would be animating at two frames per second.
+	bool RmlComponent::dispatchFrameEvent()
+	{
+		const auto numDocuments = m_rmlContext->GetNumDocuments();
+
+		Rml::Dictionary parameters;
+		auto haveParameters = false;
+
+		for (int i=0; i<numDocuments; ++i)
+		{
+			auto* document = m_rmlContext->GetDocument(i);
+
+			if (!document || !document->HasAttribute(g_frameEventHandler))
+				continue;
+
+			if (!haveParameters)
+			{
+				const auto time = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+
+				// nothing listened on the previous frame, so there is no interval to report yet
+				const auto delta = m_lastFrameEventTime > 0.0 ? time - m_lastFrameEventTime : 0.0;
+
+				parameters["time"] = time;
+				parameters["delta"] = delta;
+
+				m_lastFrameEventTime = time;
+				haveParameters = true;
+			}
+
+			document->DispatchEvent(g_frameEvent, parameters, false, false);
+		}
+
+		if (!haveParameters)
+			m_lastFrameEventTime = 0.0;
+
+		return haveParameters;
+	}
+
+	void RmlComponent::startNextFrameTimer()
+	{
+		const auto now = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+		startTimer(std::max(1, static_cast<int>((m_nextFrameTime - now) * 1000.0f * 0.34f)));
+	}
+
+	Rml::Vector2i RmlComponent::getRenderSize() const
+	{
+		const auto s = static_cast<double>(getOpenGLRenderingScale());
+		const auto b = getLocalBounds();
+		return { static_cast<int>(b.getWidth() * s), static_cast<int>(b.getHeight() * s) };
+	}
+
+	int RmlComponent::toRmlModifiers(const juce::MouseEvent& _event)
+	{
+		return toRmlModifiers(_event.mods);
+	}
+
+	int RmlComponent::toRmlModifiers(const juce::KeyPress& _event)
+	{
+		return toRmlModifiers(_event.getModifiers());
+	}
+
+	int RmlComponent::toRmlModifiers(const juce::ModifierKeys& _mods)
+	{
+		m_currentModifierKeys = _mods;
+		return helper::toRmlModifiers(_mods);
+	}
+
+	void RmlComponent::resized()
+	{
+		{
+			RmlInterfaces::ScopedAccess access(*this);
+			updateRmlContextDimensions();
+
+			// enqueueUpdate might cause rendering immediately, we want the update to happen *after* the resize so we queue a timer to do the update
+			std::scoped_lock lock(m_timerMutex);
+			m_nextFrameTime = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
+			startNextFrameTimer();
+		}
+		Component::resized();
+	}
+
+	void RmlComponent::parentSizeChanged()
+	{
+		Component::parentSizeChanged();
+	}
+
+	Rml::ElementDocument* RmlComponent::getDocument() const
+	{
+		return m_document;
+	}
+
+	Rml::Context* RmlComponent::getContext() const
+	{
+		return m_rmlContext;
+	}
+
+	bool RmlComponent::isInterestedInFileDrag(const juce::StringArray& _files)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		return m_drag.isInterestedInFileDrag(_files);
+	}
+
+	void RmlComponent::fileDragEnter(const juce::StringArray& _files, const int _x, const int _y)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.fileDragEnter(_files, _x, _y);
+	}
+
+	void RmlComponent::fileDragMove(const juce::StringArray& _files, const int _x, const int _y)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.fileDragMove(_files, _x, _y);
+	}
+
+	void RmlComponent::fileDragExit(const juce::StringArray& _files)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.fileDragExit(_files);
+	}
+
+	void RmlComponent::filesDropped(const juce::StringArray& _files, int _x, int _y)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.filesDropped(_files, _x, _y);
+	}
+
+	bool RmlComponent::isInterestedInDragSource(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		return m_drag.isInterestedInDragSource(_dragSourceDetails);
+	}
+
+	void RmlComponent::itemDragEnter(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.itemDragEnter(_dragSourceDetails);
+	}
+
+	void RmlComponent::itemDragExit(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.itemDragExit(_dragSourceDetails);
+	}
+
+	void RmlComponent::itemDropped(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.itemDropped(_dragSourceDetails);
+	}
+
+	bool RmlComponent::shouldDropFilesWhenDraggedExternally(const SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles)
+	{
+		return m_drag.shouldDropFilesWhenDraggedExternally(_sourceDetails, _files, _canMoveFiles);
+	}
+}

@@ -15,10 +15,6 @@ createMacSetupScript("JE8086TestConsole")
 
 target_link_libraries(JE8086TestConsole PUBLIC jeLib)
 
-if(UNIX AND NOT APPLE)
-	target_link_libraries(JE8086TestConsole PUBLIC -static-libgcc -static-libstdc++)
-endif()
-
 install(TARGETS JE8086TestConsole DESTINATION . COMPONENT JE8086TestConsole)
 
 if(APPLE)

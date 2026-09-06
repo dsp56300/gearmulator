@@ -38,6 +38,7 @@ Add a `<script>` block in your RML file's `<head>` section:
 |--------|------|-------------|
 | `document` | ElementDocument | The current RML document. Available in `<script>` blocks and event handlers. |
 | `params` | table | Parameter API for reading/writing synth parameters and subscribing to changes. |
+| `midi` | table | Live note on/off events. |
 | `Log` | table | RmlUi logging. Use `Log.Message(Log.logtype.info, "message")`. |
 | `rmlui` | table | RmlUi core API (contexts, font loading, etc.). |
 
@@ -116,6 +117,146 @@ local id = params.onPartChanged(function(newPart)
   -- newPart: 0-based part number
 end)
 ```
+
+## Frame Events (Animation)
+
+Anything that has to keep moving on its own - an oscilloscope, a VU meter, a scrolling
+marquee - needs a clock, because parameter callbacks only fire when a value changes. A
+document receives a `frame` event once per rendered frame if, and only if, it declares an
+`onframe` handler on its `<body>`:
+
+```html
+<body onframe="onFrame(event)">
+```
+
+```lua
+function onFrame(event)
+  local time  = event.parameters['time']   -- seconds since the editor was opened
+  local delta = event.parameters['delta']  -- seconds since the previous frame event
+
+  local needle = document:GetElementById("needle")
+  needle.style.left = tostring(200 + 180 * math.sin(time * 2)) .. "dp"
+end
+```
+
+Always drive movement from `delta` (or from `time`) rather than counting frames, the frame
+rate is not guaranteed and differs per machine.
+
+To use `AddEventListener` instead of an inline handler, declare an empty attribute -
+`<body onframe="">` - because the attribute is what opts the document in:
+
+```lua
+document:AddEventListener("frame", function(event)
+  -- ...
+end)
+```
+
+Notes:
+
+- The event does not bubble and cannot be interrupted, it is dispatched on the document.
+- Frame events stop while the editor is hidden or minimized, and resume when it comes back.
+  `delta` reports the real interval between two frame events, so an animation driven by it
+  picks up where it should rather than jumping.
+- The rate is capped at 60 Hz. Setting `refreshRateLimitHz` in the plugin's config XML
+  lowers (or raises, up to 300) that limit and paces the whole user interface with it.
+- A skin that does not declare `onframe` costs nothing but an attribute lookup per frame,
+  and leaves the editor idling at its usual two updates per second.
+
+## MIDI Notes (`midi`)
+
+Notes played into the plugin never reach the parameter API - they go straight to the emulated
+hardware - so a skin cannot draw a keyboard from `params` alone. The `midi` table reports them
+as they arrive:
+
+```lua
+midi.onNoteOn(function(note, velocity, channel)
+  -- note 0-127, velocity 1-127, channel 1-16
+  local key = document:GetElementById("key" .. note)
+  if key then key:SetClass("pressed", true) end
+end)
+
+midi.onNoteOff(function(note, channel)
+  local key = document:GetElementById("key" .. note)
+  if key then key:SetClass("pressed", false) end
+end)
+```
+
+Both return an id for `midi.removeListener(id)`.
+
+Notes are reported whatever their source - the host, a connected controller, or the plugin's own
+editor - and before MIDI Learn or program change routing can consume them, so a key mapped to
+something else still lights up.
+
+**A note on with velocity 0 arrives as a note off**, which is how a lot of gear and many DAWs
+release a note. Handling it any other way leaves keys stuck down, so `onNoteOff` fires for it
+and `onNoteOn` does not.
+
+Callbacks run on the UI thread even though the notes arrive on the audio thread, so a callback
+can touch the DOM directly. A skin that registers no note callbacks costs nothing per event.
+
+Only note on and note off are reported. Control changes, pitch bend and aftertouch are not,
+because a mod wheel or an automation lane produces them by the thousand and a skin cannot keep
+up with that on the UI thread.
+
+## Skin Variables (`skinvars`)
+
+State that belongs to the skin rather than to the synth - which knobs a skin has linked
+together, which of its own pages was open - has nowhere to live in the parameter set, and a
+plain Lua variable is gone as soon as the editor closes. `skinvars` is a small store for
+exactly that, in two scopes:
+
+| scope | lives in | survives |
+|-------|----------|----------|
+| `"instance"` | the plugin state | saved and loaded with the host project, per instance |
+| `"global"` | the plugin config file | every instance, every project, until changed |
+
+```lua
+skinvars.set("oscLink", 1)                  -- instance scope, the default
+skinvars.set("theme", "dark", "global")     -- shared by every instance
+
+local link  = skinvars.get("oscLink")       -- instance first, then global, nil if neither
+local theme = skinvars.get("theme", "global")
+```
+
+Values are numbers or strings. A number comes back as a number and a string as a string, so
+`"7"` and `7` stay apart. Booleans are accepted and stored as 1 and 0.
+
+**Reading without a scope answers from the instance first and falls back to the global**, which
+is what makes a skin-wide default work: ship the default in the global scope, and let a project
+override it for one instance without disturbing the others.
+
+### Reacting to changes
+
+```lua
+local id = skinvars.onChange("oscLink", function(value, scope)
+  -- scope is "instance" or "global"
+end)
+
+skinvars.removeListener(id)
+```
+
+Passing a scope as the third argument limits the callback to changes in that scope:
+
+```lua
+skinvars.onChange("theme", onThemeChanged, "global")
+```
+
+A callback registered without a scope fires for both, and the value it receives is what a plain
+`get()` would answer - so if an instance value shadows the global one, a change to the global
+reports the instance value. Ask for the scope explicitly when that matters.
+
+Loading a project reports every instance-scope variable it carries as a change, so a skin that
+rebuilds its UI in the callback picks a restored project up on its own.
+
+### Removing
+
+```lua
+skinvars.remove("oscLink")            -- instance scope
+skinvars.remove("theme", "global")
+```
+
+Global variables are stored one per key in the plugin's config XML, prefixed `skinvar_`, and
+written as soon as they change.
 
 ## DOM Manipulation
 

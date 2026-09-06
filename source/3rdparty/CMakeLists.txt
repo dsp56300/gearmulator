@@ -29,6 +29,15 @@ set_target_properties(Lua::Lua PROPERTIES
 	INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lua"
 )
 
+# LunaSVG (+ bundled PlutoVG) for the RmlUi SVG plugin. Provides the
+# lunasvg::lunasvg target so RmlUi's Dependencies.cmake skips find_package
+set(LUNASVG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(PLUTOVG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(lunasvg)
+
+# Enable the RmlUi SVG plugin, it is compiled into rmlui_core
+set(RMLUI_SVG_PLUGIN ON CACHE BOOL "" FORCE)
+
 # finally...
 add_subdirectory(RmlUi)
 

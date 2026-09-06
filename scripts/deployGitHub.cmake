@@ -27,7 +27,10 @@ set(FILTERED_FILES "")
 foreach(file ${filesToUpload})
     get_filename_component(fname "${file}" NAME)
 
-    if(fname MATCHES "Source|pkgconfig|headers")
+    # -symbols- is the debug symbol archive (see deploySymbols.cmake). It carries the version so it matches
+    # the glob above, but it is private debugging data for the deploy remote only - and at multiple GB it
+    # exceeds the GitHub asset size limit, which failed the whole upload.
+    if(fname MATCHES "Source|pkgconfig|headers|-symbols-")
         message(STATUS "Skipping ${fname}")
     else()
         list(APPEND FILTERED_FILES "${file}")
