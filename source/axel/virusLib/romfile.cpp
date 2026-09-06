@@ -61,6 +61,13 @@ bool ROMFile::initialize()
 
 	m_bootRom.size = chunks[0].items[0];
 	m_bootRom.offset = chunks[0].items[1];
+
+	if(chunks[0].items.size() < m_bootRom.size + 2)	// truncated or not a boot rom chunk at all
+	{
+		LOG("Invalid ROM, boot rom of size " << m_bootRom.size << " does not fit into the first chunk");
+		return false;
+	}
+
 	m_bootRom.data = std::vector<uint32_t>(m_bootRom.size);
 
 	// The first chunk contains the bootrom
@@ -219,8 +226,10 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file) const
 		_file.read(reinterpret_cast<char*>(&chunk.size1), 1);
 		_file.read(reinterpret_cast<char*>(&chunk.size2), 1);
 
-		if(i == 0 && chunk.chunk_id == 3 && lastChunkId == 4)	// Virus A and old Virus B OSs have one chunk less
-			lastChunkId = 3;
+		// Virus A and old Virus B OSs have fewer chunks, the first chunk id tells how many
+		// (OS 2.8 starts at 3, OS 2.52 at 2)
+		if(i == 0 && lastChunkId == 4 && chunk.chunk_id < lastChunkId)
+			lastChunkId = chunk.chunk_id;
 
 		if(chunk.chunk_id != lastChunkId - i)
 			return {};
