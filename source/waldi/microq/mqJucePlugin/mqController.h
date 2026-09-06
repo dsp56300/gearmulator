@@ -64,6 +64,15 @@ namespace mqJucePlugin
 	    bool isMultiMode() const;
 	    void setPlayMode(bool _multiMode);
 
+	    // Sending a dump is followed by a request that reads it back, which keeps the editor in
+	    // sync with the device. That does not work while several dumps are sent in one go: the
+	    // device answers a request with the content it had when the request was issued, so
+	    // answers to requests made before or during the transfer arrive late and overwrite the
+	    // dumps that were just sent. Bracket a Multi or Arrangement with this instead, it asks
+	    // for everything once when the last dump is out. Nesting is allowed.
+	    void setBulkTransfer(bool _bulk);
+	    bool isBulkTransfer() const { return m_bulkTransferCount > 0; }
+
 		const Patch& getMultiEditBuffer() const { return m_multiEditBuffer; }
 
 	    void selectNextPreset();
@@ -115,6 +124,7 @@ namespace mqJucePlugin
 
 	    const uint8_t m_deviceId;
 
+	    uint32_t m_bulkTransferCount = 0;
 	    Patch m_singleEditBuffer;
 	    std::array<Patch,16> m_singleEditBuffers;
 		Patch m_multiEditBuffer;

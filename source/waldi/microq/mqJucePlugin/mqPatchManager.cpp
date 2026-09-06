@@ -12,6 +12,9 @@
 
 namespace mqJucePlugin
 {
+	static constexpr size_t g_multiNameOffset = mqLib::IdxMultiParamFirst + static_cast<size_t>(mqLib::MultiParameter::Name00);
+	static constexpr size_t g_multiNameLength = 16;
+
 	static constexpr std::initializer_list<jucePluginEditorLib::patchManager::GroupType> g_groupTypes =
 	{
 		jucePluginEditorLib::patchManager::GroupType::Favourites,
@@ -99,15 +102,12 @@ namespace mqJucePlugin
 		return PatchType::Invalid;
 	}
 
-	std::string PatchManager::extractMultiName(const pluginLib::patchDB::Data& _sysex)
+	std::string PatchManager::extractName(const pluginLib::patchDB::Data& _sysex, const size_t _offset, const size_t _length)
 	{
-		constexpr size_t nameOffset = mqLib::IdxMultiParamFirst + static_cast<size_t>(mqLib::MultiParameter::Name00);
-		constexpr size_t nameLength = 16;
-
-		if (_sysex.size() < nameOffset + nameLength)
+		if (_sysex.size() < _offset + _length)
 			return {};
 
-		std::string name(reinterpret_cast<const char*>(_sysex.data()) + nameOffset, nameLength);
+		std::string name(reinterpret_cast<const char*>(_sysex.data()) + _offset, _length);
 
 		while (!name.empty() && (name.back() == ' ' || name.back() == '\0'))
 			name.pop_back();
@@ -126,12 +126,14 @@ namespace mqJucePlugin
 
 			if (patchType == PatchType::Drum)
 			{
-				patch->name = _defaultPatchName.empty() ? "Drum Map" : _defaultPatchName;
+				patch->name = extractName(patch->sysex, mqLib::mq::g_drumMapNameOffset, mqLib::mq::g_drumMapNameLength);
+				if (patch->name.empty())
+					patch->name = _defaultPatchName.empty() ? "Drum Map" : _defaultPatchName;
 				patch->tags.add(pluginLib::patchDB::TagType::CustomC, "Drum");
 			}
 			else
 			{
-				patch->name = extractMultiName(patch->sysex);
+				patch->name = extractName(patch->sysex, g_multiNameOffset, g_multiNameLength);
 				if (patch->name.empty())
 					patch->name = _defaultPatchName.empty() ? "Multi" : _defaultPatchName;
 
@@ -218,30 +220,29 @@ namespace mqJucePlugin
 	{
 		const auto patchType = detectPatchType(_patch->sysex);
 
-		// Writes the patch's display name into a Multi dump's embedded name field
-		// (the same offset extractMultiName() reads back), so a renamed Multi or
-		// Arrangement exports/saves with the updated name.
-		const auto writeMultiName = [&_patch](pluginLib::patchDB::Data& _multi)
+		// Writes the patch's display name into the dump's embedded name field (the same offset
+		// extractName() reads back), so a renamed Multi, Drum map or Arrangement exports and
+		// saves with the updated name.
+		const auto writeName = [&_patch](pluginLib::patchDB::Data& _dump, const size_t _offset, const size_t _length)
 		{
 			if (_patch->getName().empty())
 				return;
 
-			constexpr size_t nameOffset = mqLib::IdxMultiParamFirst + static_cast<size_t>(mqLib::MultiParameter::Name00);
-			constexpr size_t nameLength = 16;
-
-			if (_multi.size() < nameOffset + nameLength)
+			if (_dump.size() < _offset + _length)
 				return;
 
 			const auto& name = _patch->getName();
-			for (size_t i = 0; i < nameLength; ++i)
-				_multi[nameOffset + i] = i < name.size() ? static_cast<uint8_t>(name[i]) : ' ';
+			for (size_t i = 0; i < _length; ++i)
+				_dump[_offset + i] = i < name.size() ? static_cast<uint8_t>(name[i]) : ' ';
 		};
 
 		if (patchType == PatchType::Multi || patchType == PatchType::Drum)
 		{
 			auto result = _patch->sysex;
 			if (patchType == PatchType::Multi)
-				writeMultiName(result);
+				writeName(result, g_multiNameOffset, g_multiNameLength);
+			else
+				writeName(result, mqLib::mq::g_drumMapNameOffset, mqLib::mq::g_drumMapNameLength);
 			mqLib::State::updateChecksum(result);
 			return result;
 		}
@@ -254,7 +255,7 @@ namespace mqJucePlugin
 			if (msgs.size() != 1 + m_controller.getPartCount())
 				return _patch->sysex;
 
-			writeMultiName(msgs[0]);
+			writeName(msgs[0], g_multiNameOffset, g_multiNameLength);
 			mqLib::State::updateChecksum(msgs[0]);
 			for (size_t i = 1; i < msgs.size(); ++i)
 				mqLib::State::updateChecksum(msgs[i]);
@@ -338,8 +339,10 @@ namespace mqJucePlugin
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
 	{
 		// Ensure the device is in Multi mode so the Multi setup takes effect.
+		m_controller.setBulkTransfer(true);
 		m_controller.setPlayMode(true);
 		m_controller.sendMulti(_multi);
+		m_controller.setBulkTransfer(false);
 		return true;
 	}
 
@@ -362,10 +365,14 @@ namespace mqJucePlugin
 		// switch must happen before the sendSingle() calls below: they only target
 		// the addressed part while in Multi mode (otherwise every Single is sent to
 		// the single edit buffer at location 0 and they overwrite each other).
+		m_controller.setBulkTransfer(true);
+
 		activateMulti(msgs.front());
 
 		for (uint8_t i = 0; i < m_controller.getPartCount(); ++i)
 			m_controller.sendSingle(msgs[i + 1], i);
+
+		m_controller.setBulkTransfer(false);
 
 		return true;
 	}

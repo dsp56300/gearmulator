@@ -77,6 +77,10 @@ namespace mqLib
 
 		constexpr uint32_t g_categoryLength = 4;
 		constexpr uint32_t g_categoryOffset = 386;
+
+		// a drum map carries a name just like a multi does, but at its own offset
+		constexpr uint32_t g_drumMapNameLength = 16;
+		constexpr uint32_t g_drumMapNameOffset = 375;
 	};
 
 	namespace q

@@ -584,8 +584,10 @@ namespace xtJucePlugin
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
 	{
 		// Ensure the device is in Multi mode so the Multi setup takes effect.
+		m_controller.setBulkTransfer(true);
 		m_controller.setPlayMode(true);
 		m_controller.sendMulti(_multi);
+		m_controller.setBulkTransfer(false);
 		return true;
 	}
 
@@ -602,10 +604,14 @@ namespace xtJucePlugin
 		// switch must happen before the sendSingle() calls below: they only target
 		// the addressed part while in Multi mode (otherwise every Single is sent to
 		// the single edit buffer at location 0 and they overwrite each other).
+		m_controller.setBulkTransfer(true);
+
 		activateMulti(msgs.front());
 
 		for (uint8_t i = 0; i < m_controller.getPartCount(); ++i)
 			m_controller.sendSingle(msgs[i + 1], i);
+
+		m_controller.setBulkTransfer(false);
 
 		return true;
 	}

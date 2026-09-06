@@ -36,7 +36,7 @@ namespace mqJucePlugin
 		static constexpr uint64_t g_userDataArrangement = 1;
 
 	private:
-		static std::string extractMultiName(const pluginLib::patchDB::Data& _sysex);
+		static std::string extractName(const pluginLib::patchDB::Data& _sysex, size_t _offset, size_t _length);
 		bool activateSingle(const pluginLib::patchDB::Data& _sysex, uint32_t _part);
 		bool activateMulti(const pluginLib::patchDB::Data& _multi);
 		bool activateDrum(const pluginLib::patchDB::Data& _drum);
