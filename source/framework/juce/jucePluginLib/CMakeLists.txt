@@ -33,6 +33,7 @@ set(SOURCES
 	processor.cpp processor.h
 	processorPropertiesInit.h
 	programChangeRouter.cpp programChangeRouter.h
+	skinVariables.cpp skinVariables.h
 	softknob.cpp softknob.h
 	tools.cpp tools.h
 	types.h

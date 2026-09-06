@@ -4,6 +4,15 @@ Release Notes
 
 Framework:
 
+- [New] BUG-10302 Skins can store their own variables. A skin can now keep
+        state the synth knows nothing about, such as which of its knobs it
+        has linked together, in one of two scopes: per instance, saved and
+        restored with the host project, or global, shared by every instance
+        through the plugin config. Reading without naming a scope answers
+        from the instance and falls back to the global, so a skin can ship a
+        default and let a project override it. Values are numbers or strings
+        and a callback reports changes. See doc/lua_scripting.md.
+
 - [Imp] BUG-10273 BUG-10277 Mame HQ is now the default resampler mode, and
         the mode is remembered. A mode stored in a project is still used for
         that project; when a project does not carry one, the mode last

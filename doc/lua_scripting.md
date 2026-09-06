@@ -161,6 +161,66 @@ Notes:
 - A skin that does not declare `onframe` costs nothing but an attribute lookup per frame,
   and leaves the editor idling at its usual two updates per second.
 
+## Skin Variables (`skinvars`)
+
+State that belongs to the skin rather than to the synth - which knobs a skin has linked
+together, which of its own pages was open - has nowhere to live in the parameter set, and a
+plain Lua variable is gone as soon as the editor closes. `skinvars` is a small store for
+exactly that, in two scopes:
+
+| scope | lives in | survives |
+|-------|----------|----------|
+| `"instance"` | the plugin state | saved and loaded with the host project, per instance |
+| `"global"` | the plugin config file | every instance, every project, until changed |
+
+```lua
+skinvars.set("oscLink", 1)                  -- instance scope, the default
+skinvars.set("theme", "dark", "global")     -- shared by every instance
+
+local link  = skinvars.get("oscLink")       -- instance first, then global, nil if neither
+local theme = skinvars.get("theme", "global")
+```
+
+Values are numbers or strings. A number comes back as a number and a string as a string, so
+`"7"` and `7` stay apart. Booleans are accepted and stored as 1 and 0.
+
+**Reading without a scope answers from the instance first and falls back to the global**, which
+is what makes a skin-wide default work: ship the default in the global scope, and let a project
+override it for one instance without disturbing the others.
+
+### Reacting to changes
+
+```lua
+local id = skinvars.onChange("oscLink", function(value, scope)
+  -- scope is "instance" or "global"
+end)
+
+skinvars.removeListener(id)
+```
+
+Passing a scope as the third argument limits the callback to changes in that scope:
+
+```lua
+skinvars.onChange("theme", onThemeChanged, "global")
+```
+
+A callback registered without a scope fires for both, and the value it receives is what a plain
+`get()` would answer - so if an instance value shadows the global one, a change to the global
+reports the instance value. Ask for the scope explicitly when that matters.
+
+Loading a project reports every instance-scope variable it carries as a change, so a skin that
+rebuilds its UI in the callback picks a restored project up on its own.
+
+### Removing
+
+```lua
+skinvars.remove("oscLink")            -- instance scope
+skinvars.remove("theme", "global")
+```
+
+Global variables are stored one per key in the plugin's config XML, prefixed `skinvar_`, and
+written as soon as they change.
+
 ## DOM Manipulation
 
 The `document` global provides access to the RmlUi DOM:

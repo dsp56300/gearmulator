@@ -85,6 +85,7 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	add_subdirectory(framework/juce/jucePluginData EXCLUDE_FROM_ALL)
 	add_subdirectory(framework/tools/pluginTester)
 	add_subdirectory(framework/tools/midiLearnTest)
+	add_subdirectory(framework/tools/jucePluginLibTests)
 	include(cmake/juce.cmake)
 endif()
 

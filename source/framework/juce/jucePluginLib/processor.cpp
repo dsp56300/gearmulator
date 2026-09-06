@@ -358,6 +358,7 @@ namespace pluginLib
 		}
 
 		m_midiPorts.saveChunkData(s);
+		m_skinVariables.saveChunkData(s);
 		m_midiRoutingMatrix.saveChunkData(s);
 
 		if (m_midiLearnTranslator)
@@ -419,6 +420,7 @@ namespace pluginLib
 		});
 
 		m_midiPorts.loadChunkData(_cr);
+		m_skinVariables.loadChunkData(_cr);
 		m_midiRoutingMatrix.loadChunkData(_cr);
 		
 		if (m_midiLearnTranslator)

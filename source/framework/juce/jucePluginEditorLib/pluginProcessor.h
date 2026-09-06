@@ -35,6 +35,9 @@ namespace jucePluginEditorLib
 		void setMcpServerEnabled(bool _enabled);
 
 	private:
+		// keeps the global scope of the skin variables in the config file
+		void loadGlobalSkinVariables();
+
 		juce::File initConfigFile(const juce::PropertiesFile::Options& _o) const;
 		void savePluginLoadPath();
 		void startMcpServer();
@@ -44,6 +47,7 @@ namespace jucePluginEditorLib
 
 		juce::PropertiesFile::Options m_configOptions;
 		juce::PropertiesFile m_config;
+		baseLib::EventListener<std::string, pluginLib::SkinVariables::Scope> m_skinVariablesListener;
 
 		std::vector<uint8_t> m_editorStateData;
 

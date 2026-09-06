@@ -1,6 +1,7 @@
 #include "rmlPlugin.h"
 
 #include "rmlLuaParameters.h"
+#include "rmlLuaSkinVariables.h"
 #include "rmlParameterBinding.h"
 #include "rmlPluginContext.h"
 #include "rmlPluginDocument.h"
@@ -26,7 +27,10 @@ namespace rmlPlugin
 	RmlPlugin::~RmlPlugin()
 	{
 		if (auto* L = m_coreInstance.lua_state)
+		{
 			unregisterLuaParameters(L);
+			unregisterLuaSkinVariables(L);
+		}
 
 		Rml::UnregisterPlugin(m_coreInstance, this);
 	}
@@ -36,13 +40,19 @@ namespace rmlPlugin
 		m_contexts.emplace(_context, std::make_unique<RmlPluginContext>(_context, m_controller, _component));
 
 		if (auto* L = _context->GetCoreInstance().lua_state)
+		{
 			registerLuaParameters(L, m_controller);
+			registerLuaSkinVariables(L, m_controller);
+		}
 	}
 
 	void RmlPlugin::OnContextDestroy(Rml::Context* _context)
 	{
 		if (auto* L = _context->GetCoreInstance().lua_state)
+		{
 			unregisterLuaParameters(L);
+			unregisterLuaSkinVariables(L);
+		}
 
 		m_documentBeingLoaded.reset();
 
