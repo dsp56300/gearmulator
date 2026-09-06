@@ -1,5 +1,6 @@
 #include "rmlPlugin.h"
 
+#include "rmlLuaMidi.h"
 #include "rmlLuaParameters.h"
 #include "rmlLuaSkinVariables.h"
 #include "rmlParameterBinding.h"
@@ -30,6 +31,7 @@ namespace rmlPlugin
 		{
 			unregisterLuaParameters(L);
 			unregisterLuaSkinVariables(L);
+			unregisterLuaMidi(L);
 		}
 
 		Rml::UnregisterPlugin(m_coreInstance, this);
@@ -43,6 +45,7 @@ namespace rmlPlugin
 		{
 			registerLuaParameters(L, m_controller);
 			registerLuaSkinVariables(L, m_controller);
+			registerLuaMidi(L, m_controller);
 		}
 	}
 
@@ -52,6 +55,7 @@ namespace rmlPlugin
 		{
 			unregisterLuaParameters(L);
 			unregisterLuaSkinVariables(L);
+			unregisterLuaMidi(L);
 		}
 
 		m_documentBeingLoaded.reset();

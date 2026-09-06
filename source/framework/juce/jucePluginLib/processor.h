@@ -10,6 +10,7 @@
 #include "midiLearnTranslator.h"
 #include "midiports.h"
 #include "programChangeRouter.h"
+#include "midiNotifier.h"
 #include "skinVariables.h"
 
 #include "bridgeLib/types.h"
@@ -150,6 +151,7 @@ namespace pluginLib
 
 		auto& getMidiPorts() { return m_midiPorts; }
 		auto& getSkinVariables() { return m_skinVariables; }
+		auto& getMidiNotifier() { return m_midiNotifier; }
 
 		static std::optional<std::pair<const char*, uint32_t>> findResource(const BinaryDataRef& _binaryData, const std::string& _filename);
 		std::optional<std::pair<const char*, uint32_t>> findResource(const std::string& _filename) const;
@@ -267,6 +269,7 @@ namespace pluginLib
 		float m_hostSamplerate = 0.0f;
 		MidiPorts m_midiPorts;
 		SkinVariables m_skinVariables;
+		MidiNotifier m_midiNotifier;
 		BypassBuffer m_bypassBuffer;
 		DeviceType m_deviceType = DeviceType::Local;
 		std::string m_remoteHost;

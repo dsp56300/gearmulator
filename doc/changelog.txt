@@ -4,6 +4,14 @@ Release Notes
 
 Framework:
 
+- [New] BUG-10200 Skins can react to notes being played. A skin script can
+        now register for note on and note off and draw a keyboard, a velocity
+        meter or an activity indicator, which was impossible before because
+        notes go straight to the emulated hardware and never reach the
+        parameter API. Notes are reported whatever their source and before
+        MIDI Learn can consume them, and a note on with velocity 0 is
+        reported as the note off it means. See doc/lua_scripting.md.
+
 - [New] BUG-10302 Skins can store their own variables. A skin can now keep
         state the synth knows nothing about, such as which of its knobs it
         has linked together, in one of two scopes: per instance, saved and

@@ -18,6 +18,7 @@ set(SOURCES
 	midiLearnMapping.cpp midiLearnMapping.h
 	midiLearnPreset.cpp midiLearnPreset.h
 	midiLearnTranslator.cpp midiLearnTranslator.h
+	midiNotifier.cpp midiNotifier.h
 	midipacket.cpp midipacket.h
 	midiports.cpp midiports.h
 	parameter.cpp parameter.h

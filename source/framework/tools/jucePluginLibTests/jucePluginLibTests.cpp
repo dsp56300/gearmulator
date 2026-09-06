@@ -6,6 +6,7 @@ int main()
 {
 	try
 	{
+		testMidiNotifier();
 		testSkinVariables();
 
 		std::cout << std::endl;

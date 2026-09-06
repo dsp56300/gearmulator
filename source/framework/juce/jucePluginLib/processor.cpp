@@ -68,6 +68,10 @@ namespace pluginLib
 	{
 		audioCaptureCheckArm(_ev);
 
+		// before midi learn or the program change router get a chance to swallow the event: a skin
+		// drawing a keyboard wants to see what was played either way
+		m_midiNotifier.onMidiEvent(_ev);
+
 		// Process through MIDI Learn translator first
 		if (_ev.source != synthLib::MidiEventSource::Device)
 		{
