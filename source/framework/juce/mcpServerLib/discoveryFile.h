@@ -14,6 +14,7 @@ namespace mcpServer
 		std::string plugin4CC;
 		int port = 0;
 		int pid = 0;
+		std::string sessionId;	// client session that owns this instance, empty if started outside of one
 	};
 
 	// Manages a JSON discovery file so MCP clients can find running instances

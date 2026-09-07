@@ -6,6 +6,27 @@ namespace mcpServer
 {
 	std::mutex DiscoveryFile::s_mutex;
 
+	namespace
+	{
+		void writeInstances(const std::vector<DiscoveryEntry>& _instances)
+		{
+			auto arr = JsonValue::array();
+
+			for (const auto& inst : _instances)
+			{
+				auto obj = JsonValue::object();
+				obj.set("pluginName", JsonValue::fromString(inst.pluginName));
+				obj.set("plugin4CC", JsonValue::fromString(inst.plugin4CC));
+				obj.set("port", JsonValue::fromInt(inst.port));
+				obj.set("pid", JsonValue::fromInt(inst.pid));
+				obj.set("sessionId", JsonValue::fromString(inst.sessionId));
+				arr.append(obj);
+			}
+
+			juce::File(DiscoveryFile::getDiscoveryFilePath()).replaceWithText(juce::JSON::toString(arr.getVar(), true));
+		}
+	}
+
 	std::string DiscoveryFile::getDiscoveryFilePath()
 	{
 		const auto homeDir = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
@@ -24,20 +45,7 @@ namespace mcpServer
 
 		instances.push_back(_entry);
 
-		// Write
-		auto arr = JsonValue::array();
-		for (const auto& inst : instances)
-		{
-			auto obj = JsonValue::object();
-			obj.set("pluginName", JsonValue::fromString(inst.pluginName));
-			obj.set("plugin4CC", JsonValue::fromString(inst.plugin4CC));
-			obj.set("port", JsonValue::fromInt(inst.port));
-			obj.set("pid", JsonValue::fromInt(inst.pid));
-			arr.append(obj);
-		}
-
-		const auto path = getDiscoveryFilePath();
-		juce::File(path).replaceWithText(juce::JSON::toString(arr.getVar(), true));
+		writeInstances(instances);
 	}
 
 	void DiscoveryFile::unregisterInstance(const int _port)
@@ -48,19 +56,7 @@ namespace mcpServer
 		instances.erase(std::remove_if(instances.begin(), instances.end(),
 			[&](const DiscoveryEntry& e) { return e.port == _port; }), instances.end());
 
-		auto arr = JsonValue::array();
-		for (const auto& inst : instances)
-		{
-			auto obj = JsonValue::object();
-			obj.set("pluginName", JsonValue::fromString(inst.pluginName));
-			obj.set("plugin4CC", JsonValue::fromString(inst.plugin4CC));
-			obj.set("port", JsonValue::fromInt(inst.port));
-			obj.set("pid", JsonValue::fromInt(inst.pid));
-			arr.append(obj);
-		}
-
-		const auto path = getDiscoveryFilePath();
-		juce::File(path).replaceWithText(juce::JSON::toString(arr.getVar(), true));
+		writeInstances(instances);
 	}
 
 	std::vector<DiscoveryEntry> DiscoveryFile::readInstances()
@@ -89,6 +85,7 @@ namespace mcpServer
 				entry.plugin4CC = obj->getProperty("plugin4CC").toString().toStdString();
 				entry.port = static_cast<int>(obj->getProperty("port"));
 				entry.pid = static_cast<int>(obj->getProperty("pid"));
+				entry.sessionId = obj->getProperty("sessionId").toString().toStdString();
 				result.push_back(entry);
 			}
 		}
