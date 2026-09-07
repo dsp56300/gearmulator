@@ -136,8 +136,16 @@ def doCheckout()
 			, parentCredentials: false
 			, recursiveSubmodules: true
 			, reference: ''
-			, trackingSubmodules: false]]
-			, userRemoteConfigs: [[ url: GIT_URL ]]
+			, trackingSubmodules: false]
+			// Fetch ONLY the branch we build. The default refspec pulls every branch of the repo, and
+			// git's fetch.recurseSubmodules=on-demand then fetches the submodule commits each newly
+			// fetched superproject commit points at. One branch whose submodule commit was never pushed
+			// ("upload-pack: not our ref") therefore failed the fetch, and with it the checkout of every
+			// build on every agent, no matter which branch it was building. honorRefspec applies the
+			// narrow refspec to the initial clone too; tags are not used by this pipeline and pulling
+			// them would drag in unrelated commits the same way.
+			, [$class: 'CloneOption', honorRefspec: true, noTags: true, shallow: false, depth: 0, reference: '', timeout: 30]]
+			, userRemoteConfigs: [[ url: GIT_URL, refspec: "+refs/heads/${params.Branch}:refs/remotes/origin/${params.Branch}" ]]
 		]
 	)
 }
