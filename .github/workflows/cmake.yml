@@ -39,6 +39,17 @@ jobs:
       if: matrix.cmake_generator == 'default'
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
+    # Turns compiler output into annotations, so a failed build reports the actual error
+    # on the run and through the API instead of just a non-zero exit code.
+    - name: Register compiler problem matcher
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          echo "::add-matcher::.github/problem-matchers/msvc.json"
+        else
+          echo "::add-matcher::.github/problem-matchers/gcc.json"
+        fi
+
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel 3
 

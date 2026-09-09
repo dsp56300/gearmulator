@@ -1,0 +1,18 @@
+{
+	"problemMatcher": [
+		{
+			"owner": "msvc",
+			"pattern": [
+				{
+					"regexp": "^\\s*(.+?)\\((\\d+),(\\d+)\\):\\s+(?:fatal\\s+)?(warning|error)\\s+([A-Z]+\\d+):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"code": 5,
+					"message": 6
+				}
+			]
+		}
+	]
+}
