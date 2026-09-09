@@ -42,6 +42,12 @@ Framework:
 
 Osirus:
 
+- [Fix] Virus A OS 2.52 could not be used at all. The ROM was rejected while
+        loading, because that OS carries one firmware chunk less than every
+        later one, and it also derailed the emulated DSP while booting, over
+        a loop construct that OS 2.80 no longer uses, leaving it silent.
+        Both the .mid update files and a flash dump of that OS now work.
+
 - [Fix] Presets imported from the TDM plugin lost their name if the file was
         not named after its position in a factory bank. "A29 Darkroom3" is
         imported as "Darkroom3" as before, but "Autobend BC" was imported as
