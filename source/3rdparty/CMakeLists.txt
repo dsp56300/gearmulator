@@ -6,9 +6,7 @@ set(FT_DISABLE_HARFBUZZ TRUE)
 set(FT_DISABLE_BROTLI TRUE)
 
 # we don't want to install anything from freetype
-set(SKIP_INSTALL_HEADERS)
-set(SKIP_INSTALL_LIBRARIES)
-set(SKIP_INSTALL_ALL)
+set(SKIP_INSTALL_ALL TRUE)
 
 add_subdirectory(freetype)
 
