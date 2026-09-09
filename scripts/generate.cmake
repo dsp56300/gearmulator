@@ -38,6 +38,17 @@ set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON)
 set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON)
 set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_AU=ON)
 
+# Forward the opt-in standalone build flag.
+if(NOT DEFINED gearmulator_BUILD_JUCEPLUGIN_Standalone)
+	set(gearmulator_BUILD_JUCEPLUGIN_Standalone off)
+endif()
+set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=${gearmulator_BUILD_JUCEPLUGIN_Standalone})
+
+# An unspecified SDK path leaves automatic ASIO discovery enabled.
+if(DEFINED gearmulator_ASIO_SDK_PATH)
+	set(args ${args} -Dgearmulator_ASIO_SDK_PATH=${gearmulator_ASIO_SDK_PATH})
+endif()
+
 foreach(S IN LISTS products)
 	set(args ${args} -D${S}=${${S}})
 endforeach()

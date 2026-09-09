@@ -3,6 +3,8 @@
 
 #include "Debugger/ElementDebugDocument.h"
 
+#include "juceRmlUi/juceRmlComponent.h"
+
 #include "RmlUi/Core/ElementDocument.h"
 
 namespace rmlPlugin
@@ -10,6 +12,12 @@ namespace rmlPlugin
 	RmlPluginContext::RmlPluginContext(Rml::Context* _context, pluginLib::Controller& _controller, juceRmlUi::RmlComponent& _component)
 	: m_context(_context)
 	, m_binding(_controller, _context, _component)
+	, m_onPreUpdate(_component.evPreUpdate, [this](juceRmlUi::RmlComponent*)
+	{
+		// Retry parameter bindings for elements created at runtime — by now
+		// they are attached to the tree and their data-model scope resolves.
+		bindPendingElements();
+	})
 	{
 	}
 
@@ -41,18 +49,34 @@ namespace rmlPlugin
 		RMLUI_ASSERT(false && "RmlPluginContext::removeDocument: Document not found");
 	}
 
-	void RmlPluginContext::elementCreated(Rml::Element* _element)
+	void RmlPluginContext::elementCreated(Rml::Element* _element, const bool _documentLoading)
 	{
 		const auto* attribParam = _element->GetAttribute("param");
 
 		if (!attribParam)
 			return;
 
-		// this will usually fail here because the document is not fully loaded
-		// yet, we attempt to bind pending elements later again
+		// This usually fails at creation time: while a document is loading the
+		// document isn't complete yet, and elements created at runtime (e.g.
+		// via SetInnerRML) have no parent at all, so the data-model scope
+		// cannot be resolved. Failed elements are retried — at document-load
+		// completion and once per frame. Runtime-created elements additionally
+		// still need the per-element document setup (slider drag overrides,
+		// double-click reset, mouse wheel), which only ran automatically for
+		// elements created during a document load.
 
 		if (!m_binding.bind(*_element, attribParam->Get<Rml::String>(_element->GetCoreInstance())))
-			m_pendingElementsToBind.insert(_element);
+			m_pendingElementsToBind.emplace(_element, !_documentLoading);
+	}
+
+	void RmlPluginContext::elementDestroyed(Rml::Element* _element)
+	{
+		m_pendingElementsToBind.erase(_element);
+
+		// release a live binding too: the element pointer is about to go
+		// stale and RmlUi only detaches the change listener, it does not
+		// know about the element maps of the binding or the overlays
+		m_binding.elementDestroyed(_element);
 	}
 
 	bool RmlPluginContext::selectTabWithElement(const Rml::Element* _element) const
@@ -83,22 +107,30 @@ namespace rmlPlugin
 
 		for (auto it = m_pendingElementsToBind.begin(); it != m_pendingElementsToBind.end();)
 		{
-			auto* elem = *it;
+			auto* elem = it->first;
 			const auto param = elem->GetAttribute("param", std::string());
 			if (param.empty())
 			{
-				// param no longer needed
-				++it;
+				// param attribute removed — never bindable
+				it = m_pendingElementsToBind.erase(it);
 				continue;
 			}
 
 			if (m_binding.bind(*elem, param))
 			{
+				if (it->second)
+				{
+					// runtime-created element: run the per-element document
+					// setup that load-time elements got at creation
+					if (auto* doc = getPluginDocument(elem->GetOwnerDocument()))
+						doc->elementCreated(elem);
+				}
 				it = m_pendingElementsToBind.erase(it);
 				continue;
 			}
 
-			assert(false && "RmlPluginContext::bindPendingElements: Binding failed");
+			// not attached to a data-model scope (yet) — retried next frame,
+			// removed on element destruction
 			allBound = false;
 			++it;
 		}

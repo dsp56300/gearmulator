@@ -38,6 +38,7 @@ namespace rmlPlugin
 		// Rml::Plugin overrides
 		void OnContextDestroy(Rml::Context* _context) override;
 		void OnElementCreate(Rml::Element* _element) override;
+		void OnElementDestroy(Rml::Element* _element) override;
 		void OnDocumentOpen(Rml::Context* _context, const Rml::String& _documentPath) override;
 		void OnDocumentLoad(Rml::ElementDocument* _document) override;
 		void OnDocumentUnload(Rml::ElementDocument* _document) override;

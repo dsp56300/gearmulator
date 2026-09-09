@@ -76,6 +76,21 @@ namespace synthLib
 		M_POLYMODEON		= 0x7f
 	};
 
+	// Universal tuning messages emitted by some hosts even for instruments that
+	// do not implement MIDI Tuning Standard. Keep this deliberately narrow: the
+	// caller decides whether to reject them, while other universal SysEx (for
+	// example identity traffic) remains untouched.
+	inline bool isUniversalTuningSysex(const SysexBuffer& _sysex)
+	{
+		if (_sysex.size() < 6 || _sysex.front() != M_STARTOFSYSEX || _sysex.back() != M_ENDOFSYSEX)
+			return false;
+
+		const bool midiTuningBulkDump = _sysex[1] == 0x7e && _sysex[3] == 0x08 && _sysex[4] == 0x01;
+		const bool masterFineTuning = _sysex.size() == 8 && _sysex[1] == 0x7f &&
+			_sysex[3] == 0x04 && _sysex[4] == 0x03;
+		return midiTuningBulkDump || masterFineTuning;
+	}
+
 	// control changes
 
 	enum
@@ -241,24 +256,46 @@ namespace synthLib
 		Count
 	};
 
+	enum class MidiEventType : uint8_t
+	{
+		Midi,
+		TransportDiscontinuity
+	};
+
+	enum class TransportDiscontinuity : uint8_t
+	{
+		None,
+		Start,
+		Stop,
+		Seek
+	};
+
 	struct SMidiEvent
 	{
 		uint8_t a, b, c;
 		SysexBuffer sysex;
 		uint32_t offset;
 		MidiEventSource source;
-
+		MidiEventType type = MidiEventType::Midi;
+		uint32_t transportGeneration = 0;
+		// Physical / virtual MIDI port the event belongs to (devices with several
+		// MIDI inputs or outputs, e.g. the SC-88 family's IN A/B and USB cables).
+		uint8_t port = 0;
 		SMidiEvent(const MidiEventSource _source = MidiEventSource::Unknown, const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const uint32_t _offset = 0)
 			: a(_a), b(_b), c(_c), offset(_offset), source(_source)
 		{
 		}
 
-		SMidiEvent(const SMidiEvent& _e) : a(_e.a), b(_e.b), c(_e.c), sysex(_e.sysex), offset(_e.offset), source(_e.source)
+		SMidiEvent(const SMidiEvent& _e)
+			: a(_e.a), b(_e.b), c(_e.c), sysex(_e.sysex), offset(_e.offset), source(_e.source), type(_e.type)
+			, transportGeneration(_e.transportGeneration), port(_e.port)
 		{
 			assert(empty() || source != MidiEventSource::Unknown);
 		}
 
-		SMidiEvent(SMidiEvent&& _e) noexcept : a(_e.a), b(_e.b), c(_e.c), sysex(std::move(_e.sysex)), offset(_e.offset), source(_e.source)
+		SMidiEvent(SMidiEvent&& _e) noexcept
+			: a(_e.a), b(_e.b), c(_e.c), sysex(std::move(_e.sysex)), offset(_e.offset), source(_e.source), type(_e.type)
+			, transportGeneration(_e.transportGeneration), port(_e.port)
 		{
 			assert(empty() || source != MidiEventSource::Unknown);
 		}
@@ -273,6 +310,9 @@ namespace synthLib
 			sysex = _e.sysex;
 			offset = _e.offset;
 			source = _e.source;
+			type = _e.type;
+			transportGeneration = _e.transportGeneration;
+			port = _e.port;
 			assert(empty() || source != MidiEventSource::Unknown);
 			return *this;
 		}
@@ -285,13 +325,16 @@ namespace synthLib
 			sysex = std::move(_e.sysex);
 			offset = _e.offset;
 			source = _e.source;
+			type = _e.type;
+			transportGeneration = _e.transportGeneration;
+			port = _e.port;
 			assert(empty() || source != MidiEventSource::Unknown);
 			return *this;
 		}
 
 		bool empty() const
 		{
-			return a == 0 && sysex.empty();
+			return type == MidiEventType::Midi && a == 0 && sysex.empty();
 		}
 	};
 }

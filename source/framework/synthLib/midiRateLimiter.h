@@ -3,6 +3,7 @@
 #include <functional>
 #include <cstdint>
 #include <deque>
+#include <optional>
 
 #include "midiTypes.h"
 
@@ -25,6 +26,7 @@ namespace synthLib
 		void disableRateLimit();
 
 		void write(SMidiEvent&& _event);
+		void transportDiscontinuity(uint32_t _generation);
 
 		void processSample();
 
@@ -34,6 +36,9 @@ namespace synthLib
 
 	private:
 		void sendByte();
+		void beginEvent(SMidiEvent&& _event);
+		void completeCurrentEvent();
+		static bool isTransportBound(const SMidiEvent& _event);
 
 		WriteCallback m_writeCallback;
 
@@ -46,11 +51,17 @@ namespace synthLib
 		std::deque<uint8_t> m_pendingBytes;
 		std::deque<SMidiEvent> m_pendingSysex;
 		std::deque<SMidiEvent> m_pendingRealtime;
+		std::optional<SMidiEvent> m_currentEvent;
 
 		bool m_sendingSysex = false;
 		float m_sysexPause = 0.0f;
 		float m_remainingSysexPause = 0.0f;
 		uint32_t m_sysexPauseLengthThreshold = 0;
 		uint32_t m_currentSysexLength = 0;
+		uint32_t m_currentBytesSent = 0;
+		uint8_t m_runningStatus = 0;
+		uint16_t m_activeChannels = 0;
+		uint32_t m_transportGeneration = 0;
+		bool m_currentObsolete = false;
 	};
 }

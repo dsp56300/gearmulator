@@ -116,7 +116,10 @@ namespace juceRmlUi
 		// we use the default behaviour if ctrl/cmd is not pressed and the range is large enough
 		if(range > 32 && !helper::getKeyModCommand(_event))
 		{
-			setValue(&_element, getValue(&_element) - range * delta / 7.5f);	// this should be pretty close to what Juce did
+			// delta is in wheel notches (see RmlComponent::mouseWheelMove), so one
+			// detent moves ~3% of the range - what juce::Slider does on a platform
+			// whose raw delta is 0.234 per detent.
+			setValue(&_element, getValue(&_element) - range * delta / 32.0f);
 			return;
 		}
 

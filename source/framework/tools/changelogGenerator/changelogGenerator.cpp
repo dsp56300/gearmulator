@@ -109,8 +109,14 @@ namespace
 
 	std::string parseProduct(const std::string& _line)
 	{
-		// Needs to start with an uppercase letter A-Z
-		if (_line.empty() || !std::isupper(_line.front()))
+		// Needs to start with an uppercase letter or a digit - a product name may begin
+		// with one (88emuPlayer). Version headers also start with a digit, but they are
+		// consumed by the outer grouping before this ever sees them; reject them anyway
+		// so the two can never be confused.
+		if (_line.empty() || !(std::isupper(_line.front()) || std::isdigit(_line.front())))
+			return {};
+
+		if (!parseVersion(_line).empty())
 			return {};
 
 		// Needs to have : at the end
@@ -294,7 +300,9 @@ int main(const int _argc, char* _argv[])
 		productPerVersion.insert({ version, linesPerProduct });
 	}
 
-	// multiple products might have been specified via /, i.e. Osirus/OsTIrus, add them to two individual products
+	// multiple products might have been specified via /, i.e. Osirus/OsTIrus, add them to individual
+	// products. Any number of them: splitting only the first / left the remainder as one product whose
+	// name still contained a /, which is not a legal filename.
 	for (auto& itVersion : productPerVersion)
 	{
 		const auto& version = itVersion.first;
@@ -304,20 +312,24 @@ int main(const int _argc, char* _argv[])
 		{
 			const auto& product = itProduct->first;
 			const auto& lines = itProduct->second;
-			const auto pos = product.find('/');
-			
-			if (pos == std::string::npos)
+
+			if (product.find('/') == std::string::npos)
 			{
 				++itProduct;
 				continue;
 			}
 
-			const auto productA = product.substr(0, pos);
-			const auto productB = product.substr(pos + 1);
-			auto& linesA = productPerVersion[version][productA];
-			linesA.insert(linesA.end(), lines.begin(), lines.end());
-			auto& linesB = productPerVersion[version][productB];
-			linesB.insert(linesB.end(), lines.begin(), lines.end());
+			for (size_t begin = 0; begin <= product.size();)
+			{
+				const auto pos = product.find('/', begin);
+				const auto name = product.substr(begin, pos - begin);
+				auto& l = productPerVersion[version][name];
+				l.insert(l.end(), lines.begin(), lines.end());
+				if (pos == std::string::npos)
+					break;
+				begin = pos + 1;
+			}
+
 			itProduct = productPerLines.erase(itProduct);
 		}
 	}

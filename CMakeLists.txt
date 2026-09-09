@@ -27,13 +27,19 @@ if(NOT CMAKE_GENERATOR_TOOLSET AND CMAKE_GENERATOR MATCHES "Visual Studio 18")
 	set(CMAKE_GENERATOR_TOOLSET "v143")
 endif()
 
-project(gearmulator VERSION 2.2.17)
+project(gearmulator VERSION 2.2.19)
 
 include(source/cmake/base.cmake)
 include(CTest)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugin" on)
+
+# Steinberg's ASIO SDK cannot be redistributed, so ASIO support is opt-in:
+# point this at an extracted asiosdk directory (the one containing "common")
+# and the standalones gain ASIO in their audio device list. Windows only;
+# ignored everywhere else.
+set(${PROJECT_NAME}_ASIO_SDK_PATH "" CACHE PATH "Path to an extracted Steinberg ASIO SDK. Enables ASIO in the standalone audio settings on Windows.")
 
 # ----------------- CPack basic parameters
 

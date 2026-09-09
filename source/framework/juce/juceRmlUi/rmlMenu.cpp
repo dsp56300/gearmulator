@@ -124,11 +124,21 @@ namespace juceRmlUi
 			}
 			if (!entry.separator && entry.action && entry.enabled)
 			{
-				juceRmlUi::EventListener::Add(div, Rml::EventId::Click, [this, action = entry.action](Rml::Event& _event)
+				// An entry's action can tear down the document this menu lives
+				// in - picking a skin or a renderer closes the settings window -
+				// which destroys the menu with it. Only touch it again if it
+				// outlived the action. A menu that is not shared-owned cannot be
+				// observed this way, and keeps the unguarded behaviour.
+				auto weakSelf = weak_from_this();
+				const bool observable = !weakSelf.expired();
+
+				juceRmlUi::EventListener::Add(div, Rml::EventId::Click,
+					[this, weakSelf = std::move(weakSelf), observable, action = entry.action](Rml::Event& _event)
 				{
 					action();
 					_event.StopPropagation();
-					closeAll();
+					if (!observable || !weakSelf.expired())
+						closeAll();
 				});
 			}
 
@@ -149,58 +159,66 @@ namespace juceRmlUi
         menu->SetProperty("left", std::to_string(_position.x) + "px");
         menu->SetProperty("top", std::to_string(_position.y) + "px");
 
-		m_root = doc->AppendChild(std::move(menu), true);
+		auto& coreInstance = _parent->GetCoreInstance();
+
+		auto* root = doc->AppendChild(std::move(menu), true);
+		m_root = root->GetObserverPtr(coreInstance);
 
 		auto dims = Rml::Vector2f(context->GetDimensions());
 
 		// we mess with the update loop here, just in case request a new update immediately as this might cause delays because, eventhough we update, we don't render
 		context->Update();
-		RmlComponent::fromElement(m_root)->enqueueUpdate();
+		RmlComponent::fromElement(root)->enqueueUpdate();
 
 		// make sure the dropdown is not outside the document bounds
-		const auto box = m_root->GetBox();
+		const auto box = root->GetBox();
 		auto size = box.GetSize(Rml::BoxArea::Border);
 		if (_position.x + size.x > dims.x)
-			m_root->SetProperty("left", std::to_string(dims.x - size.x) + "px");
+			root->SetProperty("left", std::to_string(dims.x - size.x) + "px");
 		if (_position.y + size.y > dims.y)
-			m_root->SetProperty("top", std::to_string(dims.y - size.y) + "px");
+			root->SetProperty("top", std::to_string(dims.y - size.y) + "px");
 
-		m_document = _parent->GetOwnerDocument();
-		m_document->AddEventListener(Rml::EventId::Mousedown, this, true);
-		m_document->AddEventListener(Rml::EventId::Keydown, this, true);
+		m_document = doc->GetObserverPtr(coreInstance);
+		doc->AddEventListener(Rml::EventId::Mousedown, this, true);
+		doc->AddEventListener(Rml::EventId::Keydown, this, true);
 
-		m_root->AddEventListener(Rml::EventId::Mouseover, this);
+		root->AddEventListener(Rml::EventId::Mouseover, this);
 	}
 
 	void Menu::close()
 	{
 		closeSubmenu();
 
-		Rml::Element* root = nullptr;
+		auto* root = m_root.get();
+		m_root.reset();
 
-		if (m_root)
-		{
-			root = m_root;
-			m_root->RemoveEventListener(Rml::EventId::Mouseover, this);
-			m_root = nullptr;
-		}
+		if (root)
+			root->RemoveEventListener(Rml::EventId::Mouseover, this);
 
-		if (m_document)
+		if (auto* document = m_document.get())
 		{
-			m_document->RemoveEventListener(Rml::EventId::Mousedown, this, true);
-			m_document->RemoveEventListener(Rml::EventId::Keydown, this, true);
-			m_document = nullptr;
+			document->RemoveEventListener(Rml::EventId::Mousedown, this, true);
+			document->RemoveEventListener(Rml::EventId::Keydown, this, true);
 		}
+		m_document.reset();
 
 		m_parentMenu = nullptr;
 
+		// No parent means the document is already tearing itself down: RmlUi
+		// detaches every child before destroying any of them, so an open menu
+		// reaches this point parentless and there is nothing left to remove it
+		// from. Dereferencing that null is what crashed when the settings window
+		// was closed with a menu still open.
 		if (root)
-			root->GetParentNode()->RemoveChild(root);
+		{
+			if (auto* parent = root->GetParentNode())
+				parent->RemoveChild(root);
+		}
 	}
 
 	bool Menu::isOpen() const
 	{
-		return m_root != nullptr;
+		return m_root.get() != nullptr;
 	}
 
 	void Menu::ProcessEvent(Rml::Event& _event)
@@ -238,7 +256,7 @@ namespace juceRmlUi
 
 		m->open(_parent, _position, _itemsPerColumn);
 
-		const auto root = m->m_root;
+		auto* const root = m->m_root.get();
 
 		OnDetachListener::add(root, [menu = std::move(m)](Rml::Element*) mutable
 		{
@@ -311,7 +329,7 @@ namespace juceRmlUi
 	{
 		if (!_elem)
 			return false;
-		if (helper::isChildOf(m_root, _elem))
+		if (helper::isChildOf(m_root.get(), _elem))
 			return true;
 		if (_checkSubmenu && _checkParentmenu)
 		{

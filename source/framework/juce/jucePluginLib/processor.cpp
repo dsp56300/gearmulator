@@ -829,6 +829,7 @@ namespace pluginLib
 		midiMessages.clear();
 
 		bool isPlaying = true;
+		bool hasPpqPosition = false;
 		float bpm = 0.0f;
 		float ppqPos = 0.0f;
 
@@ -846,11 +847,13 @@ namespace pluginLib
 				if(pos->getPpqPosition())
 				{
 					ppqPos = static_cast<float>(*pos->getPpqPosition());
+					hasPpqPosition = true;
 				}
 			}
 		}
 
-		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying);
+		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying, hasPpqPosition);
+		updateLatencySamples();
 
 		applyOutputGain(outputs, numSamples);
 
@@ -1179,12 +1182,33 @@ namespace pluginLib
 
 	bool Processor::rebootDevice()
 	{
+		// Make sure the plugin (and with it the device it wraps) exists before we
+		// build its replacement, otherwise the lazy creation below would boot a
+		// device just to throw it away again.
+		auto& plugin = getPlugin();
+
 		try
 		{
-			synthLib::Device* device = createDevice();
-			getPlugin().setDevice(device);
+			// Recreate the device type that is actually in use. Creating a local
+			// device unconditionally would silently drop a remote (bridged)
+			// session while m_deviceType still claims Remote.
+			synthLib::Device* device = createDevice(m_deviceType);
+			if(!device)
+				return false;
+
+			// Carry over what lives on the processor rather than in the device
+			// state blob. Latency and samplerate are reapplied by setDevice(),
+			// which also transfers the state of the device being replaced.
+			device->setDspClockPercent(m_dspClockPercent);
+
+			plugin.setDevice(device);
 			(void)m_device.release();
 			m_device.reset(device);
+
+			// The same resync a DAW restore performs: the editor is talking to a
+			// device that just came up fresh, so it has to re-read it.
+			if(hasController())
+				getController().onStateLoaded();
 
 			return true;
 		}

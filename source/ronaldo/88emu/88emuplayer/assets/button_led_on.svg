@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="8" cy="8" r="7.75" fill="url(#base)"/>
+<circle cx="8" cy="8" r="7.75" fill="url(#light)" fill-opacity="0.8"/>
+<circle cx="8" cy="8" r="7.75" fill="url(#shine)" fill-opacity="0.6"/>
+<circle cx="8" cy="8" r="7.75" stroke="#3C3E40" stroke-width="0.5"/>
+<circle cx="8" cy="8" r="7.75" stroke="#FF5900" stroke-opacity="0.5" stroke-width="0.5"/>
+<defs>
+<linearGradient id="base" x1="4" y1="2" x2="8" y2="15.5" gradientUnits="userSpaceOnUse">
+<stop stop-color="#7A787D"/><stop offset="0.168269" stop-color="#79787E"/><stop offset="1" stop-color="#DAD8E3"/>
+</linearGradient>
+<radialGradient id="light" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(8 8) rotate(90) scale(7.5)">
+<stop stop-color="#FF5900"/><stop offset="1" stop-color="#9E3700"/>
+</radialGradient>
+<radialGradient id="shine" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(5 2.5) rotate(60.9454) scale(5.14781 8.58249)">
+<stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/>
+</radialGradient>
+</defs>
+</svg>

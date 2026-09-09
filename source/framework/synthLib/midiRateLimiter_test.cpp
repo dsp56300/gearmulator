@@ -1,0 +1,120 @@
+#include "midiRateLimiter.h"
+
+#include <cstdint>
+#include <cstdlib>
+#include <initializer_list>
+#include <vector>
+
+namespace
+{
+    using namespace synthLib;
+
+    SMidiEvent midi(const uint32_t _generation, const uint8_t _status, const uint8_t _data1 = 0,
+                    const uint8_t _data2 = 0)
+    {
+        SMidiEvent event(MidiEventSource::Host, _status, _data1, _data2);
+        event.transportGeneration = _generation;
+        return event;
+    }
+
+    void expect(const std::vector<uint8_t>& _actual, const std::initializer_list<uint8_t> _expected)
+    {
+        if (_actual != std::vector<uint8_t>(_expected))
+            std::abort();
+    }
+
+    void testRunningStatus()
+    {
+        std::vector<uint8_t> bytes;
+        MidiRateLimiter limiter([&](const uint8_t _byte) { bytes.push_back(_byte); });
+        limiter.disableRateLimit();
+
+        limiter.write(midi(0, M_CONTROLCHANGE, MC_EXPRESSION, 1));
+        limiter.write(midi(0, M_CONTROLCHANGE, MC_EXPRESSION, 2));
+        limiter.write(midi(0, M_TIMINGCLOCK));
+        limiter.write(midi(0, M_CONTROLCHANGE, MC_EXPRESSION, 3));
+        limiter.processSample();
+        expect(bytes, {M_CONTROLCHANGE, MC_EXPRESSION, 1, MC_EXPRESSION, 2, M_TIMINGCLOCK, MC_EXPRESSION, 3});
+
+        SMidiEvent sysex(MidiEventSource::Host);
+        sysex.sysex = {M_STARTOFSYSEX, 1, M_ENDOFSYSEX};
+        limiter.write(std::move(sysex));
+        limiter.processSample();
+        limiter.write(midi(0, M_CONTROLCHANGE, MC_EXPRESSION, 4));
+        limiter.processSample();
+        expect(bytes,
+               {M_CONTROLCHANGE, MC_EXPRESSION, 1, MC_EXPRESSION, 2, M_TIMINGCLOCK, MC_EXPRESSION, 3, M_STARTOFSYSEX, 1,
+                M_ENDOFSYSEX, M_CONTROLCHANGE, MC_EXPRESSION, 4});
+    }
+
+    void testTransportDropsQueuedEvents()
+    {
+        std::vector<uint8_t> bytes;
+        MidiRateLimiter limiter([&](const uint8_t _byte) { bytes.push_back(_byte); });
+        limiter.disableRateLimit();
+
+        limiter.write(midi(0, M_CONTROLCHANGE, MC_EXPRESSION, 10));
+        limiter.write(midi(0, M_NOTEON, 60, 100));
+		limiter.transportDiscontinuity(1);
+        limiter.write(midi(0, M_CONTROLCHANGE, MC_EXPRESSION, 11)); // stale worker output
+        limiter.write(midi(1, M_NOTEON, 62, 100));
+        limiter.processSample();
+
+        expect(bytes, {M_NOTEON, 62, 100});
+    }
+
+    void testTransportFinishesPartialMessageThenSilences()
+    {
+        std::vector<uint8_t> bytes;
+        MidiRateLimiter limiter([&](const uint8_t _byte) { bytes.push_back(_byte); });
+        limiter.setSamplerate(1000.0f);
+        limiter.setRateLimit(1000.0f); // exactly one byte per processSample()
+
+        limiter.write(midi(0, M_NOTEON, 60, 100));
+        limiter.processSample(); // status byte is already on the wire
+		limiter.transportDiscontinuity(1);
+        for (int i = 0; i < 5; ++i)
+            limiter.processSample();
+
+        // The old message must be completed to keep the firmware parser aligned,
+        // followed immediately by an explicit silence command for that channel.
+        expect(bytes, {M_NOTEON, 60, 100, M_CONTROLCHANGE, MC_ALLSOUNDOFF, 0});
+    }
+
+    SMidiEvent sysex(std::initializer_list<uint8_t> _bytes)
+    {
+        SMidiEvent event(MidiEventSource::Host);
+        event.sysex.assign(_bytes.begin(), _bytes.end());
+        return event;
+    }
+
+    void testSysexPauseExpiresWhileIdle()
+    {
+        std::vector<uint8_t> bytes;
+        MidiRateLimiter limiter([&](const uint8_t _byte) { bytes.push_back(_byte); });
+        limiter.setSamplerate(100.0f);
+        limiter.setRateLimit(100.0f); // exactly one byte per processSample()
+        limiter.setSysexPause(0.02f);
+        limiter.setSysexPauseLengthThreshold(2);
+
+        limiter.write(sysex({0xf0, 0x01, 0xf7}));
+        for (int i = 0; i < 3; ++i)
+            limiter.processSample();
+        for (int i = 0; i < 3; ++i)
+            limiter.processSample(); // the two-sample post-SysEx pause expires while idle
+
+        limiter.write(sysex({0xf0, 0x02, 0xf7}));
+        limiter.processSample();
+        expect(bytes, {0xf0, 0x01, 0xf7, 0xf0});
+    }
+
+} // namespace
+
+int main()
+{
+    testRunningStatus();
+    testTransportDropsQueuedEvents();
+    testTransportFinishesPartialMessageThenSilences();
+	testSysexPauseExpiresWhileIdle();
+	return 0;
+}

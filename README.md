@@ -24,7 +24,7 @@ architectures are not supported!
 
 Platforms: Windows 7+, macOS 10.13+, Linux
 
-At the moment, the following synthesizers are supported:
+At the moment, the following devices are supported:
 
 * Osirus: Access Virus A,B,C
 * OsTIrus: Access Virus TI/TI2/Snow
@@ -32,6 +32,7 @@ At the moment, the following synthesizers are supported:
 * Xenia: Waldorf Microwave II/XT
 * Nodal Red 2x: Clavia Nord Lead/Rack 2x
 * JE-8086: Roland JP-8000
+* 88emu: Roland SC-88, SC-88VL, SC-88Pro, SC-8850 and SC-55mkII.
 
 ### Compiling
 
@@ -58,6 +59,7 @@ Additional options to select which devices to build:
 | gearmulator_SYNTH_XENIA | Build Xenia | on |
 | gearmulator_SYNTH_NODALRED2X | Build Nodal Red 2x | on |
 | gearmulator_SYNTH_JE8086 | Build JE-8086 | on |
+| gearmulator_SYNTH_88EMU | Build 88emu | on |
 
 ### Join us on Discord
 

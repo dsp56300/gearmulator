@@ -184,7 +184,7 @@ def doPack()
 	dir(cmakeBuildDir()) {
 		genericSh 'cmake -P ../../scripts/pack.cmake'
 	}
-	if("${params.UploadFolder}" == "donators") {
+	if("${params.UploadFolder}".contains("donators")) {
 		genericSh "cmake -Dgearmulator_BINARY_DIR=${WORKSPACE}/${buildDir} -P scripts/packagesource.cmake"
 	}
 }
@@ -225,7 +225,7 @@ def doGitHub()
 {
     def buildDir = cmakeBuildDir()
 
-	if("${params.UploadFolder}" == "beta" || "${params.UploadFolder}" == "") {
+	if("${params.UploadFolder}".contains("beta") || "${params.UploadFolder}" == "") {
 		genericSh "cmake -Dgearmulator_SOURCE_DIR=${WORKSPACE} -Dgearmulator_BINARY_DIR=${WORKSPACE}/${buildDir} -P scripts/deployGitHub.cmake"
 	}
 }

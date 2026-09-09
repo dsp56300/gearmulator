@@ -8,32 +8,13 @@
 
 namespace
 {
-	constexpr int g_pixelsPerCharW = 5;
-	constexpr int g_pixelsPerCharH = 8;
-
-	constexpr float g_pixelSpacingAdjust = 3.0f;	// 1.0f = 100% as on the hardware, but it looks better on screen if it's a bit more
-
-	constexpr float g_pixelSpacingW = 0.05f * g_pixelSpacingAdjust;
-	constexpr float g_pixelSizeW = 0.6f;
-	constexpr float g_charSpacingW = 0.4f;
-
-	constexpr float g_charSizeW = g_pixelsPerCharW * g_pixelSizeW + g_pixelSpacingW * (g_pixelsPerCharW - 1);
-	constexpr float g_pixelStrideW = g_pixelSizeW + g_pixelSpacingW;
-	constexpr float g_charStrideW = g_charSizeW + g_charSpacingW;
-
-	constexpr float g_pixelSpacingH = 0.05f * g_pixelSpacingAdjust;
-	constexpr float g_pixelSizeH = 0.65f;
-	constexpr float g_charSpacingH = 0.4f;
-
-	constexpr float g_charSizeH = g_pixelsPerCharH * g_pixelSizeH + g_pixelSpacingH * (g_pixelsPerCharH - 1);
-	constexpr float g_pixelStrideH = g_pixelSizeH + g_pixelSpacingH;
-	constexpr float g_charStrideH = g_charSizeH + g_charSpacingH;
 }
 
 namespace jucePluginEditorLib
 {
-	Lcd::Lcd(Rml::Element* _parent, uint32_t _numCharsX, uint32_t _numCharsY)
-	: m_numCharsX(_numCharsX)
+	Lcd::Lcd(Rml::Element* _parent, const uint32_t _numCharsX, const uint32_t _numCharsY, const float _pixelSpacing)
+	: m_config(_pixelSpacing)
+	, m_numCharsX(_numCharsX)
 	, m_numCharsY(_numCharsY)
 	{
 		m_canvas = juceRmlUi::ElemCanvas::create(_parent);
@@ -119,8 +100,8 @@ namespace jucePluginEditorLib
 		m_width = _width;
 		m_height = _height;
 
-		m_scaleW = static_cast<float>(m_width) / (static_cast<float>(m_numCharsX) * g_charSizeW + g_charSpacingW * (static_cast<float>(m_numCharsX) - 1));
-	    m_scaleH = static_cast<float>(m_height) / (static_cast<float>(m_numCharsY) * g_charSizeH + g_charSpacingH * (static_cast<float>(m_numCharsY) - 1));
+		m_scaleW = static_cast<float>(m_width) / (static_cast<float>(m_numCharsX) * m_config.charSizeW + m_config.charSpacingW * (static_cast<float>(m_numCharsX) - 1));
+	    m_scaleH = static_cast<float>(m_height) / (static_cast<float>(m_numCharsY) * m_config.charSizeH + m_config.charSpacingH * (static_cast<float>(m_numCharsY) - 1));
 
 		for (uint32_t i=0; i<m_characterPaths.size(); ++i)
 			m_characterPaths[i] = createPath(static_cast<uint8_t>(i));
@@ -136,11 +117,11 @@ namespace jucePluginEditorLib
 
 		for (uint32_t y=0; y < m_numCharsY; ++y)
 		{
-			const auto ty = static_cast<float>(y) * g_charStrideH * m_scaleH;
+			const auto ty = static_cast<float>(y) * m_config.charStrideH * m_scaleH;
 
 			for (uint32_t x = 0; x < m_numCharsX; ++x, ++charIdx)
 			{
-				const auto tx = static_cast<float>(x) * g_charStrideW * m_scaleW;
+				const auto tx = static_cast<float>(x) * m_config.charStrideW * m_scaleW;
 
 				const auto t = juce::AffineTransform::translation(tx, ty);
 
@@ -152,8 +133,50 @@ namespace jucePluginEditorLib
 					_g.setColour(juce::Colour(m_charBgColor));
 					_g.fillPath(m_characterPaths[255], t);
 				}
-				_g.setColour(juce::Colour(m_charColor));
-				_g.fillPath(p, t);
+
+				// HD44780: when display is off the panel is blank — skip the
+				// glyph entirely (background still renders so the LCD doesn't
+				// disappear visually).
+				if (!m_displayOn)
+					continue;
+
+				const bool isCursorCell = (static_cast<int>(x) == m_cursorCol && static_cast<int>(y) == m_cursorRow);
+
+				// Blink: HD44780 alternates the cell between the character and a
+				// solid block. Skip the glyph during the "block" phase; the
+				// block is drawn explicitly below.
+				if (isCursorCell && m_cursorBlinking && m_blinkPhase)
+				{
+					_g.setColour(juce::Colour(m_charColor));
+					_g.fillPath(m_characterPaths[255], t);
+				}
+				else
+				{
+					_g.setColour(juce::Colour(m_charColor));
+					_g.fillPath(p, t);
+				}
+			}
+		}
+
+		// Cursor underline. Drawn last so it sits on top of the glyph row.
+		// Rendered as 5 individual dots in the bottom pixel row to match the
+		// LCD's pixel grid — a solid bar would betray the dot-matrix look.
+		if (m_displayOn && m_cursorOn && m_cursorCol >= 0 && m_cursorRow >= 0 &&
+			m_cursorCol < static_cast<int>(m_numCharsX) && m_cursorRow < static_cast<int>(m_numCharsY))
+		{
+			const auto tx = static_cast<float>(m_cursorCol) * m_config.charStrideW * m_scaleW;
+			const auto ty = static_cast<float>(m_cursorRow) * m_config.charStrideH * m_scaleH;
+
+			const auto pxW = m_config.pixelSizeW * m_scaleW;
+			const auto pxH = m_config.pixelSizeH * m_scaleH;
+			const auto pxStrideW = m_config.pixelStrideW * m_scaleW;
+			const auto pxY = ty + 7.0f * m_config.pixelStrideH * m_scaleH;
+
+			_g.setColour(juce::Colour(m_charColor));
+			for (int px = 0; px <= 4; ++px)
+			{
+				const auto pxX = tx + static_cast<float>(px) * pxStrideW;
+				_g.fillRect(pxX, pxY, pxW, pxH);
 			}
 		}
 	}
@@ -164,12 +187,12 @@ namespace jucePluginEditorLib
 
 		juce::Path path;
 
-		const auto h = g_pixelSizeH * m_scaleH;
-		const auto w = g_pixelSizeW * m_scaleW;
+		const auto h = m_config.pixelSizeH * m_scaleH;
+		const auto w = m_config.pixelSizeW * m_scaleW;
 
 		for (auto y=0; y<8; ++y)
 		{
-			const auto y0 = static_cast<float>(y) * g_pixelStrideH * m_scaleH;
+			const auto y0 = static_cast<float>(y) * m_config.pixelStrideH * m_scaleH;
 
 			for (auto x=0; x<=4; ++x)
 			{
@@ -180,7 +203,7 @@ namespace jucePluginEditorLib
 				if(!set)
 					continue;
 
-				const auto x0 = static_cast<float>(x) * g_pixelStrideW * m_scaleW;
+				const auto x0 = static_cast<float>(x) * m_config.pixelStrideW * m_scaleW;
 
 				path.addRectangle(x0, y0, w, h);
 			}
@@ -191,7 +214,7 @@ namespace jucePluginEditorLib
 
 	void Lcd::onClicked()
 	{
-		if(isTimerRunning())
+		if(isTimerRunning(kTimerOverrideText))
 			return;
 
 		std::vector<std::vector<uint8_t>> lines;
@@ -205,7 +228,36 @@ namespace jucePluginEditorLib
 			memcpy(&m_overrideText[m_numCharsX*y], lines[y].data(), std::min(lines[y].size(), static_cast<size_t>(m_numCharsX)));
 		}
 
-		startTimer(3000);
+		startTimer(kTimerOverrideText, 3000);
+		repaint();
+	}
+
+	void Lcd::setCursor(const bool _displayOn, const bool _cursorOn, const bool _blinking, const int _col, const int _row)
+	{
+		if (m_displayOn == _displayOn && m_cursorOn == _cursorOn &&
+			m_cursorBlinking == _blinking && m_cursorCol == _col && m_cursorRow == _row)
+			return;
+
+		m_displayOn = _displayOn;
+		m_cursorOn = _cursorOn;
+		m_cursorBlinking = _blinking;
+		m_cursorCol = _col;
+		m_cursorRow = _row;
+
+		// Drive the blink animation only while it would be visible; saves the
+		// repaint loop when the cursor is off-screen or not blinking.
+		const bool wantBlink = _displayOn && _blinking && _col >= 0 && _row >= 0;
+		if (wantBlink)
+		{
+			if (!isTimerRunning(kTimerBlink))
+				startTimer(kTimerBlink, 500);
+		}
+		else
+		{
+			stopTimer(kTimerBlink);
+			m_blinkPhase = false;
+		}
+
 		repaint();
 	}
 
@@ -231,10 +283,21 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
-	void Lcd::timerCallback()
+	void Lcd::timerCallback(const int _timerId)
 	{
-		stopTimer();
-		m_overrideText[0] = 0;
-		repaint();
+		switch (_timerId)
+		{
+		case kTimerOverrideText:
+			stopTimer(kTimerOverrideText);
+			m_overrideText[0] = 0;
+			repaint();
+			break;
+		case kTimerBlink:
+			m_blinkPhase = !m_blinkPhase;
+			repaint();
+			break;
+		default:
+			break;
+		}
 	}
 }

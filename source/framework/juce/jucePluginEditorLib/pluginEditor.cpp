@@ -31,6 +31,7 @@
 #include "juceRmlUi/juceRmlComponentConfig.h"
 
 #include "juceUiLib/messageBox.h"
+#include "juceUiLib/legalDisclaimer.h"
 
 #include "synthLib/os.h"
 #include "synthLib/sysexToMidi.h"
@@ -387,20 +388,14 @@ namespace jucePluginEditorLib
 
 		if(!m_processor.getConfig().getBoolValue("disclaimerSeen", false))
 		{
-			const juce::MessageBoxOptions options = juce::MessageBoxOptions::makeOptionsOk(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name,
-	           "It is the sole responsibility of the user to operate this emulator within the bounds of all applicable laws.\n\n"
-
-				"Usage of emulators in conjunction with ROM images you are not legally entitled to own is forbidden by copyright law.\n\n"
-
-				"If you are not legally entitled to use this emulator please discontinue usage immediately.\n\n", 
-
-				"I Agree"
-			);
-
-			juce::NativeMessageBox::showAsync(options, [this](int)
+			const juce::WeakReference<Editor> safeThis(const_cast<Editor*>(this));
+			genericUI::showLegalDisclaimer(m_processor.getProperties().name, [safeThis]
 			{
-				m_processor.getConfig().setValue("disclaimerSeen", true);
-				onDisclaimerFinished();
+				if(auto* editor = safeThis.get())
+				{
+					editor->m_processor.getConfig().setValue("disclaimerSeen", true);
+					editor->onDisclaimerFinished();
+				}
 			});
 		}
 		else

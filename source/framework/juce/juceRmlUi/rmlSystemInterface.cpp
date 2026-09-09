@@ -80,6 +80,9 @@ namespace juceRmlUi
 	{
 		Rml::Log::Message(m_coreInstance, Rml::Log::LT_INFO, "SetMouseCursor %s", _cursorName.c_str());
 		Rml::SystemInterface::SetMouseCursor(_cursorName);
+
+		if (m_cursorChangedCallback)
+			m_cursorChangedCallback(_cursorName);
 	}
 
 	void SystemInterface::SetClipboardText(const Rml::String& _text)

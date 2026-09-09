@@ -10,16 +10,22 @@
 /build_win64_VS2019.bat
 /out/
 /build/
+/build-*/
+/build_x86/
+/build_arm/
 *atom*.sh
 *debug.sh
 CMakeUserPresets.json
 bin/
 .DS_Store
+*.dSYM
+a.out
 _copilot.bat
 target/logs/
 claude*.bat
 .mcp.json
 /wt/
+/tmp/
 
 # python bytecode (scripts/perfhist.py)
 __pycache__/

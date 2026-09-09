@@ -1,0 +1,152 @@
+@spritesheet knob
+{
+	knob_000: 0px 0px 128px 128px; knob_001: 0px 128px 128px 128px;
+	knob_002: 0px 256px 128px 128px; knob_003: 0px 384px 128px 128px;
+	knob_004: 0px 512px 128px 128px; knob_005: 0px 640px 128px 128px;
+	knob_006: 0px 768px 128px 128px; knob_007: 0px 896px 128px 128px;
+	knob_008: 0px 1024px 128px 128px; knob_009: 0px 1152px 128px 128px;
+	knob_010: 0px 1280px 128px 128px; knob_011: 0px 1408px 128px 128px;
+	knob_012: 0px 1536px 128px 128px; knob_013: 0px 1664px 128px 128px;
+	knob_014: 0px 1792px 128px 128px; knob_015: 0px 1920px 128px 128px;
+	knob_016: 0px 2048px 128px 128px; knob_017: 0px 2176px 128px 128px;
+	knob_018: 0px 2304px 128px 128px; knob_019: 0px 2432px 128px 128px;
+	knob_020: 0px 2560px 128px 128px; knob_021: 0px 2688px 128px 128px;
+	knob_022: 0px 2816px 128px 128px; knob_023: 0px 2944px 128px 128px;
+	knob_024: 0px 3072px 128px 128px; knob_025: 0px 3200px 128px 128px;
+	knob_026: 0px 3328px 128px 128px; knob_027: 0px 3456px 128px 128px;
+	knob_028: 0px 3584px 128px 128px; knob_029: 0px 3712px 128px 128px;
+	knob_030: 0px 3840px 128px 128px; src: knob.png;
+}
+
+/* Crops of the 3x SC8850 assets export (sc8850_assets.svg): the plain switch
+ * face, its LED-off and LED-on variants and the PREVIEW push. */
+@spritesheet sc8850Assets
+{
+	sc8850_button: 108px 66px 50px 51px;
+	sc8850_led_off: 14px 159px 51px 49px;
+	sc8850_led_on: 96px 149px 63px 64px;
+	sc8850_preview: 0px 54px 78px 79px;
+	src: sc8850_assets.png;
+}
+
+/* The VALUE encoder is endless: four knurl phases repeat every four detents,
+ * so 33 frame names (one per encoder value, 32 == 0) map onto four images. */
+@spritesheet sc8850ValueKnob
+{
+	value_000: 0px 0px 128px 128px; value_001: 0px 128px 128px 128px;
+	value_002: 0px 256px 128px 128px; value_003: 0px 384px 128px 128px;
+	value_004: 0px 0px 128px 128px; value_005: 0px 128px 128px 128px;
+	value_006: 0px 256px 128px 128px; value_007: 0px 384px 128px 128px;
+	value_008: 0px 0px 128px 128px; value_009: 0px 128px 128px 128px;
+	value_010: 0px 256px 128px 128px; value_011: 0px 384px 128px 128px;
+	value_012: 0px 0px 128px 128px; value_013: 0px 128px 128px 128px;
+	value_014: 0px 256px 128px 128px; value_015: 0px 384px 128px 128px;
+	value_016: 0px 0px 128px 128px; value_017: 0px 128px 128px 128px;
+	value_018: 0px 256px 128px 128px; value_019: 0px 384px 128px 128px;
+	value_020: 0px 0px 128px 128px; value_021: 0px 128px 128px 128px;
+	value_022: 0px 256px 128px 128px; value_023: 0px 384px 128px 128px;
+	value_024: 0px 0px 128px 128px; value_025: 0px 128px 128px 128px;
+	value_026: 0px 256px 128px 128px; value_027: 0px 384px 128px 128px;
+	value_028: 0px 0px 128px 128px; value_029: 0px 128px 128px 128px;
+	value_030: 0px 256px 128px 128px; value_031: 0px 384px 128px 128px;
+	value_032: 0px 0px 128px 128px; src: value_knob.png;
+}
+
+body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; background-color: #000; overflow: hidden; }
+.panel { position: absolute; left: 0dp; top: 0dp; width: 612dp; height: 187dp; pointer-events: none; }
+.lcd { position: absolute; left: 156dp; top: 22dp; width: 209dp; height: 76dp; pointer-events: none; }
+.modelSc8850 .lcd { left: 165dp; top: 28dp; width: 175dp; height: 70dp; }
+.volumeKnob { position: absolute; left: 112dp; top: 24dp; width: 28dp; height: 28dp; frames: 31; spriteprefix: knob_; decorator: image(knob_030 contain); cursor: pointer; }
+.deviceSelect { left: 25dp; top: 160dp; width: 120dp; height: 24dp; }
+.deviceSelect:hover { box-shadow: none; }
+.model8850 { display: none; }
+.modelSc8850 .modelLegacy { display: none; }
+.modelSc8850 .model8850 { display: block; }
+.modelSc88VL .modelExtended { display: none; }
+.modelSc88VL .modelPreview { display: none; }
+/* SC-55mk2: the SC-88 layout minus the map/EQ, PREVIEW and USER INST/VIB rows.
+ * ALL and MUTE keep the SC-88's round faces, LED overlays, centres and size. */
+.modelSc55Mk2 .modelMap, .modelSc55Mk2 .modelExtended, .modelSc55Mk2 .modelPreview { display: none; }
+.hit { position: absolute; margin: 0dp; padding: 0dp; background-color: transparent; border: 0dp transparent; cursor: pointer; }
+.hit:hover { box-shadow: 0dp 0dp 2dp #ffad5c; }
+/* Keep every sprite locked to its SVG bounds. Zero button padding above is
+ * essential: RmlUi's default button content box otherwise shifts the artwork. */
+.hit:active, .hit.pressed { background-color: rgba(0, 0, 0, 48); box-shadow: inset 0dp 1dp 2dp rgba(0, 0, 0, 100); }
+.buttonGraphic { position: absolute; left: 0dp; top: 0dp; width: 100%; height: 100%; pointer-events: none; }
+.hit:active .buttonGraphic, .hit.pressed .buttonGraphic { image-color: #bbb; }
+.buttonOnGraphic { position: absolute; left: -0.5dp; top: -0.5dp; display: none; width: 16dp; height: 16dp; pointer-events: none; }
+.hit:active .buttonOnGraphic, .hit.pressed .buttonOnGraphic { image-color: #ccc; }
+
+.modeButton { width: 15dp; height: 15dp; border-radius: 8dp; }
+.modeButton .buttonGraphic { left: -0.5dp; top: -0.5dp; width: 16dp; height: 16dp; }
+.modeButton.on .buttonGraphic { display: none; }
+.modeButton.on .buttonOnGraphic { display: block; }
+
+.partRound { width: 13dp; height: 13dp; border-radius: 7dp; }
+.preview { width: 20dp; height: 20dp; border-radius: 10dp; }
+.rocker { width: 27dp; height: 9dp; border-radius: 5dp; }
+.sc8850PanelButton { width: 17dp; height: 17dp; border-radius: 9dp; }
+.sc8850Preview { left: 114dp; top: 76dp; width: 24dp; height: 25dp; border-radius: 12dp; }
+ /* Each face sprite is offset so the face circle from the SVG sits on the hit
+ * box centre, i.e. on the switch hole baked into the panel; the crops carry
+ * asymmetric drop shadows and glows, hence the odd offsets. */
+/* Tight to the artwork: the face runs to sheet x=146 and its drop shadow fades
+ * out by x=158, so the old 99..149 crop sliced the shadow off mid-fade at alpha
+ * 101 and left a hard vertical edge. The box moves right by the 9px of empty
+ * margin the old crop carried (3px = 1dp at this 3x export), so the face itself
+ * does not move. */
+.sc8850ButtonGraphic { position: absolute; left: 2dp; top: 0.6dp; width: 16.667dp; height: 17dp; pointer-events: none; decorator: image(sc8850_button contain); }
+.sc8850LedOffGraphic { position: absolute; left: 1.667dp; top: 1.2dp; width: 17dp; height: 16.333dp; pointer-events: none; decorator: image(sc8850_led_off contain); }
+.sc8850LedOnGraphic { position: absolute; left: -2dp; top: -3.133dp; width: 21dp; height: 21.333dp; pointer-events: none; display: none; decorator: image(sc8850_led_on contain); }
+.sc8850LedButton.on .sc8850LedOffGraphic { display: none; }
+.sc8850LedButton.on .sc8850LedOnGraphic { display: block; }
+.sc8850PreviewGraphic { position: absolute; left: 0.5dp; top: -0.3dp; width: 26dp; height: 26.333dp; pointer-events: none; decorator: image(sc8850_preview contain); }
+.hit:active .sc8850ButtonGraphic, .hit.pressed .sc8850ButtonGraphic,
+.hit:active .sc8850LedOffGraphic, .hit.pressed .sc8850LedOffGraphic,
+.hit:active .sc8850LedOnGraphic, .hit.pressed .sc8850LedOnGraphic,
+.hit:active .sc8850PreviewGraphic, .hit.pressed .sc8850PreviewGraphic { image-color: #bbb; }
+/* speed 224 = 7 logical pixels of drag per detent, the the panel feel. */
+.sc8850Value { left: 517dp; top: 17dp; width: 76dp; height: 76dp; border-radius: 38dp; frames: 33; spriteprefix: value_; decorator: image(value_000 contain); speed: 224; }
+.sc8850Value:active, .sc8850Value.pressed { image-color: #bbb; }
+
+.playlist { position: absolute; left: 18dp; top: 24dp; width: 78dp; height: 74dp; box-sizing: border-box; overflow-y: auto; overflow-x: hidden; font-family: Roboto; font-size: 6dp; color: #d9d9d9; }
+/* The entry container stretches over the whole playlist, so leaving it
+ * hit-testable puts it between an OS file drop and #playlist, whose drop target
+ * only consumes an event dispatched straight to it - the drop then reached
+ * neither. Transparent here, with the rows opting back in (pointer-events is an
+ * inherited property, so they have to say so explicitly). */
+.playlistEntries { display: block; width: 100%; min-height: 100%; box-sizing: border-box; pointer-events: none; }
+.playlistEmpty { display: block; width: 100%; height: 74dp; line-height: 74dp; color: #6f7278; text-align: center; white-space: nowrap; pointer-events: none; }
+.playlistEntry { position: relative; display: block; width: 100%; height: 9dp; box-sizing: border-box; font-family: Roboto; font-size: 6dp; font-weight: 500; line-height: 9dp; padding: 0dp 10dp 0dp 2dp; overflow: hidden; white-space: nowrap; cursor: pointer; pointer-events: auto; }
+.playlistEntryName { display: block; width: 100%; height: 9dp; overflow: hidden; white-space: nowrap; pointer-events: none; }
+.playlistRemove { position: absolute; display: none; right: 0dp; top: 0dp; width: 9dp; height: 9dp; margin: 0dp; padding: 0dp; border: 0dp transparent; background-color: #30333a; color: #d9d9d9; font-family: Roboto; font-size: 6dp; font-weight: 500; line-height: 9dp; text-align: center; cursor: pointer; drag: none; }
+.playlistEntry:hover .playlistRemove { display: block; }
+.playlistRemove:hover { color: #ffffff; background-color: #9c3028; }
+.playlistEntry:hover { background-color: rgba(255, 111, 15, 45); }
+.playlistEntry.current { color: #ffffff; background-color: rgba(255, 111, 15, 105); }
+.playlistEntry:drag { width: 74dp; font-family: Roboto; font-size: 6dp; font-weight: 500; }
+.playlistEntry:drag .playlistRemove { display: none; }
+.playlistEntry:dragover, .playlistEntry:dragover-top { border-top: 1dp #ff6f0f; }
+.playlistEntry:dragover-bottom { border-bottom: 1dp #ff6f0f; }
+.playlist:dragover { box-shadow: inset 0dp 0dp 2dp #ff6f0f; }
+.playlist scrollbarvertical { width: 4dp; }
+.playlist scrollbarvertical sliderbar { min-height: 4dp; border-radius: 2dp; }
+.playlistAdd { left: 77dp; top: 8dp; width: 16dp; height: 16dp; border-radius: 2dp; }
+.playerButton { top: 102dp; width: 23dp; height: 11dp; border-radius: 1dp; }
+.playerToggle { left: 32dp; }
+.playerStop { left: 59dp; }
+.hidden { display: none; }
+
+.panelLed { position: absolute; pointer-events: none; }
+.selectorLed { width: 8.3467dp; height: 8dp; }
+.efxLed { width: 9dp; height: 9dp; }
+.ledOffGraphic, .ledOnGraphic { position: absolute; left: 0dp; top: 0dp; width: 100%; height: 100%; pointer-events: none; }
+.ledOnGraphic { display: none; }
+.panelLed.on .ledOffGraphic { display: none; }
+.panelLed.on .ledOnGraphic { display: block; }
+
+/* Keep menus compact despite the panel document's 1.7 root scale. */
+.menubox { font-size: 8dp; padding: 2dp; gap: 1dp; }
+.menucolumn { gap: 0dp; }
+.menuitem { padding: 1.5dp; padding-left: 1.5em; padding-right: 2em; }
+.menuitem:separator { height: 1dp; margin: 1dp 0dp 1dp 0dp; }

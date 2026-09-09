@@ -7,7 +7,6 @@ set(SOURCES
 	juceRmlComponent.cpp juceRmlComponent.h 
 	juceRmlComponentConfig.h
 	juceRmlDrag.cpp juceRmlDrag.h
-	juceRmlLookAndFeel.cpp juceRmlLookAndFeel.h
 	juceRmlUi.cpp juceRmlUi.h
 	rmlColorPicker.cpp rmlColorPicker.h
 	rmlDataProvider.h

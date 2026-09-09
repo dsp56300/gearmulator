@@ -1,5 +1,136 @@
 Release Notes
 
+
+2.2.19:
+
+Framework:
+
+- [Fix] Closing a window while one of its drop-down or context menus was
+        still open could crash. The menu removed itself from a document that
+        was already tearing down, where every child has been detached from
+        its parent before any of them is destroyed.
+
+- [Fix] On macOS, the Metal renderer read the window and view geometry from
+        its own render thread. AppKit is not thread-safe, and doing so while
+        the message thread rearranges windows - reloading a skin, closing a
+        settings window - can corrupt state that only fails much later, in an
+        unrelated redraw. The geometry is now taken on the message thread.
+
+- [Fix] On macOS, the interface could freeze or stutter while its window was
+        hidden or covered by another one: the Metal render thread waited for
+        a drawable while holding the UI lock, up to a second at a time, and
+        the message thread starved waiting for it. And once that wait timed
+        out, the frame was dropped without telling the update loop, which
+        then waited for it forever - the window never updated again.
+
+- [Fix] On Windows and Linux, the OpenGL thread could draw the interface
+        while the message thread was changing it, without any lock between
+        them. The redraw juce requests on a resize took that path.
+
+- [Fix] With software rendering forced on Windows and Linux, the interface
+        was drawn from the top left corner of the window rather than at the
+        editor's position, so in a standalone it covered the title bar and
+        lost its bottom rows.
+
+- [Fix] After falling back from a software OpenGL rasterizer to the built-in
+        software renderer, the interface stopped updating.
+
+88emuPlayer:
+
+- [Fix] Selecting ASIO now waits for an explicit output-device choice,
+        avoiding crashes from automatically loading an unsuitable driver.
+        Opening the driver's control panel no longer uses a deleted device.
+
+- [Fix] With software rendering forced, the interface was drawn into the top
+        left corner of the window on Windows displays running at a scaling
+        other than 100%, and mouse positions were off by the same factor. The
+        software renderer sized its output in logical pixels while the image
+        it draws into is sized in physical ones.
+
+- [Fix] On the SC-8850, the front panel could stop responding after a while
+        of playing a song: PART < and PART > did nothing, or a single press
+        switched ALL mode on and off. The emulated CPU delivered an interrupt
+        the firmware had just requested up to one audio sample late, and in
+        that gap the firmware's own task scheduler lost the task that times
+        the panel keys. Interrupts now arrive right after the instruction
+        that requested them.
+
+- [Fix] Panel switches are released when the window loses focus, so a stuck
+        switch can no longer turn every later press into a key combination.
+
+- [Fix] On the SC-88 and SC-88Pro, Display Letter and Display Dot Data
+        messages were ignored: the emulated sub-MCU only passed SysEx with
+        the GS model ID through to the main CPU, and the display messages
+        use model ID 45H. Songs that draw on the level-meter dots now do.
+
+- [Fix] On the SC-55mkII, a dense SysEx stream such as a display dot
+        animation produced "Check Sum Error" and "DT1 Data Error" every few
+        seconds. The emulated sub-MCU could hand the main CPU the same byte
+        twice when its periodic wake-up fell between the CPU reading the
+        status and reading the data.
+
+- [Fix] On the SC-88 and SC-88VL, a song that follows its GS Reset with a
+        burst of parameter SysEx without the pause the GS spec asks for could
+        lock the module up: no sound, no panel. The emulated MIDI wire
+        delivered such messages about a fifth faster than a real cable can,
+        which drained the firmware's transfer buffers while it was still
+        busy with the reset. SysEx is now paced by its full wire length.
+
+- [Fix] Stopping or pausing a song left notes hanging on the SC-8850's part
+        groups C and D, and so did removing the song that was playing. Panic
+        and the GM/GS reset buttons reached only groups A and B as well. The
+        player silenced two MIDI ports where a song can address four.
+
+- [Fix] The player no longer sends MIDI clock to the emulated module.
+
+- [Fix] On Linux the data and ROM folder was $HOME/Documents/The Usual
+        Suspects instead of the XDG location the other plugins use. It is now
+        $XDG_DATA_HOME (or $HOME/.local/share); the old folder is still read
+        so an existing installation keeps finding its ROMs.
+
+- [Fix] The MIDI settings no longer offer "Enable Virtual Port" on Windows.
+        PortMidi can only create virtual endpoints on macOS and Linux, so the
+        switch never did anything and left a polling thread running.
+
+- [Fix] Added missing ASIO support.
+
+- [Imp] "Force software rendering" now takes effect in the settings window as
+        well, not only in the panel. Until now the settings kept drawing with
+        the old renderer until they were closed and reopened.
+
+- [Imp] The drop-down lists in the audio and MIDI settings open in a window of
+        their own. They are no longer cut off at the edge of the settings
+        dialog, and a long list such as the buffer sizes scrolls instead of
+        spreading into columns across the whole page.
+
+- [Imp] MIDI settings: the list of MIDI inputs is three times as tall, with one
+        compact line per device, and the note about virtual MIDI ports on
+        Windows sits below the list instead of crowding the output selector.
+
+- [Fix] Fixed midi receive in the high level sub mcu emulation with midi files
+        that send custom LCD messages.
+
+- [Imp] ROM images are now identified by their size and content instead of by
+        filename, and subfolders of a ROM search path are searched too. Dumps
+        can be renamed or kept in an unsorted collection, either byte order of
+        a mask ROM is accepted, and a truncated or unrelated file of the right
+        size can no longer be mistaken for a ROM.
+
+- [Imp] A device can only be selected once every ROM it needs is present.
+        Incomplete ones are greyed out instead of failing when picked, the
+        first complete device is used when the configured one is unavailable,
+        and the missing-ROM notice names each image with its size and hash.
+
+- [Imp] Added icon for the app.
+
+
+2.2.18:
+
+88emuPlayer:
+
+- [New] First internal release.
+
+
 2.2.17:
 
 Framework:

@@ -19,6 +19,7 @@ namespace juceRmlUi
 		// macOS only: Metal is used whenever it is supported. Set this to fall back to OpenGL instead,
 		// which is useful to find out whether a rendering problem is specific to the Metal backend.
 		bool disableMetalRenderer = false;
+		bool includeDefaultTemplates = true;
 		std::vector<std::string> additionalTemplateFiles;
 	};
 }

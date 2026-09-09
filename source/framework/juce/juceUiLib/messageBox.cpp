@@ -16,6 +16,9 @@ namespace genericUI
 			});
 		}
 
+		// juce::String's const char* constructor is ASCII-only by contract - it
+		// does not decode anything above 127 - so a UTF-8 message handed to it
+		// arrives as mojibake. Every string that reaches this file is UTF-8.
 		juce::MessageBoxIconType toJuceIcon(const MessageBox::Icon _icon)
 		{
 			switch (_icon)
@@ -31,22 +34,22 @@ namespace genericUI
 
 	void MessageBox::showYesNo(const Icon _icon, const std::string& _header, const std::string& _message, Callback _callback)
 	{
-		juce::NativeMessageBox::showYesNoBox(toJuceIcon(_icon), _header.c_str(), _message.c_str(), nullptr, addCallback(std::move(_callback)));
+		juce::NativeMessageBox::showYesNoBox(toJuceIcon(_icon), juce::String::fromUTF8(_header.c_str()), juce::String::fromUTF8(_message.c_str()), nullptr, addCallback(std::move(_callback)));
 	}
 
 	void MessageBox::showOkCancel(const Icon _icon, const std::string& _header, const std::string& _message, Callback _callback)
 	{
-		juce::NativeMessageBox::showOkCancelBox(toJuceIcon(_icon), _header.c_str(), _message.c_str(), nullptr, addCallback(std::move(_callback)));
+		juce::NativeMessageBox::showOkCancelBox(toJuceIcon(_icon), juce::String::fromUTF8(_header.c_str()), juce::String::fromUTF8(_message.c_str()), nullptr, addCallback(std::move(_callback)));
 	}
 
 	void MessageBox::showOk(const Icon _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent/* = nullptr*/)
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(toJuceIcon(_icon), _header.c_str(), _message.c_str(), _associatedComponent);
+		juce::NativeMessageBox::showMessageBoxAsync(toJuceIcon(_icon), juce::String::fromUTF8(_header.c_str()), juce::String::fromUTF8(_message.c_str()), _associatedComponent);
 	}
 
 	void MessageBox::showOk(Icon _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent, std::function<void()> _callback)
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(toJuceIcon(_icon), _header.c_str(), _message.c_str(), _associatedComponent, 
+		juce::NativeMessageBox::showMessageBoxAsync(toJuceIcon(_icon), juce::String::fromUTF8(_header.c_str()), juce::String::fromUTF8(_message.c_str()), _associatedComponent, 
 			juce::ModalCallbackFunction::create([_callback = std::move(_callback)](int)
 			{
 				_callback();

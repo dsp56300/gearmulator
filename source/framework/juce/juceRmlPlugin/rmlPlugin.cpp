@@ -101,7 +101,7 @@ namespace rmlPlugin
 			return;
 		}
 
-		it->second->elementCreated(_element);
+		it->second->elementCreated(_element, m_documentBeingLoaded != nullptr);
 
 		if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(_element))
 		{
@@ -124,6 +124,17 @@ namespace rmlPlugin
 				}
 			}
 		}
+	}
+
+	void RmlPlugin::OnElementDestroy(Rml::Element* _element)
+	{
+		// drop the element from any pending-binding list before the pointer
+		// goes stale (runtime-created elements can be destroyed while still
+		// waiting for their first bind, e.g. when a dynamic grid is rebuilt)
+		for (const auto& [context, pluginContext] : m_contexts)
+			pluginContext->elementDestroyed(_element);
+
+		Plugin::OnElementDestroy(_element);
 	}
 
 	void RmlPlugin::OnDocumentOpen(Rml::Context* _context, const Rml::String& _documentPath)

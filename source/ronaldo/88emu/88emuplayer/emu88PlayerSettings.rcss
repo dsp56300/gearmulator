@@ -1,0 +1,344 @@
+body {
+	width: 560dp;
+	height: 360dp;
+	background-color: #252b30;
+	color: #dce2e6;
+	font-family: Roboto;
+	font-size: 12dp;
+	font-weight: 400;
+	overflow: hidden;
+}
+
+.hardwareSettingsRoot {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	height: 100%;
+	background-color: #252b30;
+}
+
+.hardwareSettingsSidebar {
+	display: flex;
+	flex-direction: column;
+	flex: 0 0 122dp;
+	box-sizing: border-box;
+	gap: 4dp;
+	padding: 14dp 10dp;
+	background-color: #1c2226;
+	border-right: 1dp #3b444b;
+}
+
+.hardwareSettingsNavButton {
+	width: 101dp;
+	height: 29dp;
+	box-sizing: border-box;
+	padding: 7dp 9dp;
+	background-color: transparent;
+	border: 1dp transparent;
+	border-radius: 4dp;
+	color: #b8c0c5;
+	font-size: 11dp;
+	text-align: left;
+	cursor: pointer;
+}
+
+.hardwareSettingsNavButton:hover {
+	background-color: #293137;
+	color: #ffffff;
+}
+
+.hardwareSettingsNavButton:checked {
+	background-color: #343f46;
+	border: 1dp #56636c;
+	color: #ffffff;
+}
+
+.hardwareSettingsPages {
+	flex: 1 1 auto;
+	box-sizing: border-box;
+	padding: 15dp 17dp;
+	overflow: hidden;
+}
+
+.hardwareSettingsPage {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.hardwareSettingsPageHeader {
+	display: block;
+	height: 32dp;
+	border-bottom: 1dp #3b444b;
+}
+
+.hardwareSettingsPageHeader h1 {
+	display: block;
+	margin: 0dp 0dp 3dp 0dp;
+	padding: 0dp;
+	color: #f3f5f6;
+	font-size: 17dp;
+	font-weight: 600;
+	text-align: left;
+}
+
+.hardwareSettingsSectionLabel {
+	display: block;
+	margin: 12dp 0dp 7dp 0dp;
+	color: #aeb8be;
+	font-size: 10dp;
+	font-weight: 600;
+}
+
+.hardwareSettingsPages .button {
+	min-width: 55dp;
+	height: 24dp;
+	box-sizing: border-box;
+	padding: 5dp 9dp;
+	border: 1dp #515c64;
+	border-radius: 3dp;
+	background-color: #333c42;
+	box-shadow: none;
+	color: #e4e8ea;
+	font-size: 10dp;
+	line-height: 12dp;
+	cursor: pointer;
+}
+
+.hardwareSettingsPages .button:hover {
+	background-color: #3d484f;
+	border-color: #68747d;
+}
+
+.hardwareSettingsPages .button:active {
+	background-color: #2b3338;
+	box-shadow: none;
+}
+
+.hardwareSkinTable {
+	width: 100%;
+	box-sizing: border-box;
+	border: 1dp #414b52;
+	border-radius: 3dp;
+}
+
+.hardwareSkinHeader {
+	height: 25dp;
+	background-color: #20262a;
+	color: #88949c;
+	font-size: 9dp;
+	font-weight: 600;
+}
+
+.hardwareSkinRow {
+	height: 34dp;
+	background-color: #2c3338;
+	border-top: 1dp #414b52;
+}
+
+.hardwareSkinRow:current {
+	background-color: #354148;
+}
+
+.hardwareSkinTable td {
+	box-sizing: border-box;
+	padding: 5dp 7dp;
+	vertical-align: middle;
+}
+
+.hardwareSkinName { width: 48%; }
+.hardwareSkinType { width: 22%; color: #9ba6ad; }
+.hardwareSkinAction { width: 30%; }
+
+.hardwareSkinActions {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	gap: 5dp;
+}
+
+.hardwareSkinFooter {
+	display: block;
+	padding-top: 16dp;
+}
+
+.hardwareChoiceGrid {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6dp;
+}
+
+.hardwareChoiceGrid .hardwareChoice {
+	width: 91dp;
+}
+
+.hardwareWideChoice {
+	width: 220dp;
+}
+
+.hardwareChoice {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 27dp;
+	box-sizing: border-box;
+	gap: 7dp;
+	padding: 5dp 7dp;
+	border: 1dp #414b52;
+	border-radius: 3dp;
+	background-color: #2b3237;
+	color: #c9d0d4;
+	cursor: pointer;
+}
+
+.hardwareChoice:hover {
+	background-color: #343d43;
+}
+
+.settings-checkbox {
+	display: block;
+	position: relative;
+	width: 11dp;
+	min-width: 11dp;
+	height: 11dp;
+	padding: 0dp;
+	border: 1dp #66737c;
+	border-radius: 2dp;
+	background-color: #171c1f;
+}
+
+.settings-checkbox:checked {
+	decorator: image(check.png fill);
+	background-color: #52616a;
+	image-color: #ffffff;
+}
+
+.hardwareFormGrid {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 7dp 10dp;
+}
+
+.hardwareField {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	width: 198dp;
+	height: 25dp;
+	color: #aeb8be;
+	font-size: 10dp;
+}
+
+.hardwareField combo {
+	width: 130dp;
+	height: 22dp;
+	box-sizing: border-box;
+	padding: 4dp 16dp 4dp 6dp;
+	border: 1dp #515c64;
+	border-radius: 3dp;
+	background-color: #1f2529;
+	color: #eef1f2;
+	font-size: 10dp;
+	/* the default paints the arrow over the whole padding box, which makes it as tall as the field */
+	decorator: image(arrow_drop_down.png contain right) content-box;
+}
+
+.hardwareField combotext {
+	height: 100%;
+	line-height: 12dp;
+}
+
+.hardwareInlineChoices {
+	display: flex;
+	flex-direction: row;
+	gap: 6dp;
+}
+
+.hardwareInlineChoices .hardwareChoice {
+	flex: 1 1 auto;
+}
+
+.hardwareMidiRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10dp;
+	margin-top: 12dp;
+}
+
+.hardwareMidiOutput {
+	width: 198dp;
+}
+
+.hardwarePortMidi {
+	flex: 1 1 auto;
+}
+
+.hardwareInputLabel {
+	margin: 9dp 0dp 5dp 0dp;
+	color: #8e9aa2;
+	font-size: 9dp;
+}
+
+/* Sized to fill the page: header, output row, this list and the note below add up to the
+   window height. One dense row per device, the names can be long. */
+.hardwareMidiInputList {
+	display: flex;
+	flex-direction: column;
+	gap: 1dp;
+	height: 206dp;
+	box-sizing: border-box;
+	padding: 3dp;
+	border: 1dp #414b52;
+	border-radius: 3dp;
+	background-color: #20262a;
+	overflow-y: auto;
+}
+
+.hardwareMidiInputList .hardwareChoice {
+	width: 100%;
+	height: 20dp;
+	min-height: 20dp;
+	padding: 2dp 6dp;
+	gap: 6dp;
+	border-width: 0dp;
+	border-radius: 2dp;
+	background-color: transparent;
+	font-size: 10dp;
+}
+
+.hardwareMidiInputList .hardwareChoice:hover {
+	background-color: #2e373d;
+}
+
+.hardwareMidiNote {
+	margin-top: 6dp;
+	color: #77838b;
+	font-size: 9dp;
+	line-height: 11dp;
+}
+
+.hardwareMidiInputEmpty {
+	padding: 4dp 2dp;
+	color: #77838b;
+	font-size: 9dp;
+}
+
+.hardwareDeveloperChoices {
+	display: flex;
+	flex-direction: column;
+	gap: 7dp;
+}
+
+scrollbarvertical {
+	width: 8dp;
+}
+
+scrollbarvertical sliderbar {
+	min-height: 12dp;
+	border-radius: 4dp;
+	background-color: #59656d;
+}

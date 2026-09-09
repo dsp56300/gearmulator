@@ -85,6 +85,7 @@ target_compile_definitions(juce_plugin_modules PUBLIC
 	JUCE_USE_MP3AUDIOFORMAT=0
 	JUCE_USE_FLAC=0
 	JUCE_USE_WINDOWS_MEDIA_FORMAT=0
+	JUCE_DISPLAY_SPLASH_SCREEN=0  # Permitted by the JUCE 7 EULA because we ship under the GPLv3
 	JUCE_MODULE_AVAILABLE_juce_core=1
 	JUCE_MODULE_AVAILABLE_juce_audio_basics=1
 	JUCE_MODULE_AVAILABLE_juce_audio_utils=1
@@ -92,6 +93,19 @@ target_compile_definitions(juce_plugin_modules PUBLIC
 	JUCE_MODULE_AVAILABLE_juce_audio_processors=1
 	JUCE_MODULE_AVAILABLE_juce_cryptopgraphy=1
 )
+
+# ASIO is Steinberg's, and its SDK may not be redistributed, so JUCE only
+# builds the backend when the headers are present. Without this the audio
+# settings of every standalone offer DirectSound and WASAPI only.
+if(WIN32 AND ${CMAKE_PROJECT_NAME}_ASIO_SDK_PATH)
+	if(EXISTS "${${CMAKE_PROJECT_NAME}_ASIO_SDK_PATH}/common/iasiodrv.h")
+		message(STATUS "ASIO SDK found at ${${CMAKE_PROJECT_NAME}_ASIO_SDK_PATH}, enabling ASIO")
+		target_compile_definitions(juce_plugin_modules PUBLIC JUCE_ASIO=1)
+		target_include_directories(juce_plugin_modules PUBLIC "${${CMAKE_PROJECT_NAME}_ASIO_SDK_PATH}/common")
+	else()
+		message(WARNING "${CMAKE_PROJECT_NAME}_ASIO_SDK_PATH is set to '${${CMAKE_PROJECT_NAME}_ASIO_SDK_PATH}' but common/iasiodrv.h is not there, ASIO stays disabled")
+	endif()
+endif()
 
 target_include_directories(juce_plugin_modules
     INTERFACE
@@ -287,7 +301,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		set_tests_properties(${targetName}_AU_Validate PROPERTIES LABELS "PluginTest")
 	endif()
 
-	if(USE_Standalone)
+	if(USE_Standalone AND TARGET ${targetName}_Standalone)
 		add_dependencies(PluginFormat_Standalone ${targetName}_Standalone)
 	endif()
 

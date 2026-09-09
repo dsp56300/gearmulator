@@ -185,16 +185,19 @@ namespace rmlPlugin
 
 		if (it != m_elementToParam.end())
 		{
-			auto oldParam = it->second->getParameter();
+			auto* bp = it->second;
+			auto* oldParam = bp->getParameter();
 
-			auto* bp = m_paramToElements.find(oldParam)->second;
+			// both maps are always updated together, an entry in one without
+			// the other means a stale element pointer slipped through
+			assert(m_paramToElements.find(oldParam) != m_paramToElements.end() && m_paramToElements.find(oldParam)->second == bp);
 
 			bp->removeElement(&_element);
 
 			if (bp->empty())
 			{
-				delete bp;
 				m_paramToElements.erase(oldParam);
+				delete bp;
 			}
 
 			m_elementToParam.erase(it);
@@ -202,6 +205,13 @@ namespace rmlPlugin
 
 			evUnbind.invoke(oldParam, &_element);
 		}
+	}
+
+	void RmlParameterBinding::elementDestroyed(Rml::Element* _element)
+	{
+		unbind(*_element);
+
+		evElementDestroyed.invoke(_element);
 	}
 
 	void RmlParameterBinding::getElementsForParameter(std::vector<Rml::Element*>& _results, const std::string& _param, const uint8_t _part, const bool _visibleOnly) const

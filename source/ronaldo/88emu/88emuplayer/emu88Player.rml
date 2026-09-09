@@ -1,0 +1,94 @@
+<rml>
+	<head>
+		<link type="text/rcss" href="tus_default.rcss"/>
+		<link type="text/rcss" href="emu88Player.rcss"/>
+	</head>
+	<body debugger="0" id="Root" rootScale="1.7">
+		<img id="hardwarePanel" class="panel" src="sc88pro_panel.png"/>
+		<div id="playlist" class="playlist">
+			<div id="playlistEntries" class="playlistEntries"/>
+		</div>
+		<button id="btPlaylistAdd" class="hit playlistAdd" title="Add MIDI files"/>
+		<button id="btPlayerToggle" class="hit playerButton playerToggle" title="Play / pause">
+			<svg id="playerPlayGraphic" class="buttonGraphic" src="player_play.svg"/>
+			<svg id="playerPauseGraphic" class="buttonGraphic hidden" src="player_pause.svg"/>
+		</button>
+		<button id="btPlayerStop" class="hit playerButton playerStop" title="Stop">
+			<svg class="buttonGraphic" src="player_stop.svg"/>
+		</button>
+		<div id="hardwareLcd" class="lcd"/>
+		<knob id="outputVolume" class="volumeKnob"/>
+		<button id="btDeviceSelect" class="hit deviceSelect" title="Select SC-88 device"/>
+
+		<!-- Exact bounds from the supplied SVG. The panel PNG contains the button
+		     recesses; these transparent SVGs provide the actual button faces. -->
+		<div class="modelLegacy">
+		<button id="btAll" class="hit modeButton modeAll" style="left: 420dp; top: 14dp;" title="ALL (W)"><svg class="buttonGraphic" src="button_all.svg"/><svg class="buttonOnGraphic" src="button_led_on.svg"/></button>
+		<button id="btMute" class="hit modeButton modeRound" style="left: 420dp; top: 40dp;" title="MUTE (E)"><svg class="buttonGraphic" src="button_round.svg"/><svg class="buttonOnGraphic" src="button_led_on.svg"/></button>
+		<button id="btSc55Map" class="hit modeButton modeRound modelMap" style="left: 420dp; top: 66dp;" title="SC-55 MAP (1)"><svg class="buttonGraphic" src="button_round.svg"/><svg class="buttonOnGraphic" src="button_led_on.svg"/></button>
+		<button id="btSc88Map" class="hit modeButton modeRound modelMap" style="left: 420dp; top: 92dp;" title="SC-88 MAP (2)"><svg class="buttonGraphic" src="button_round.svg"/><svg class="buttonOnGraphic" src="button_led_on.svg"/></button>
+
+		<button id="btPreview" class="hit preview modelPreview" style="left: 116dp; top: 78dp;" title="PREVIEW (Tab)"><svg class="buttonGraphic" src="preview.svg"/></button>
+		<button id="btUserInst" class="hit rocker plain modelExtended" style="left: 311dp; top: 166dp;" title="USER INST (3)"><svg class="buttonGraphic" src="button_plain.svg"/></button>
+		<button id="btSelect" class="hit rocker plain modelExtended" style="left: 339dp; top: 166dp;" title="SELECT (4)"><svg class="buttonGraphic" src="button_plain.svg"/></button>
+		<button id="btPartL" class="hit partRound partLeft" style="left: 472dp; top: 14dp;" title="PART left (R)"><svg class="buttonGraphic" src="button_part_left.svg"/></button>
+		<button id="btPartR" class="hit partRound partRight" style="left: 500dp; top: 14dp;" title="PART right (T)"><svg class="buttonGraphic" src="button_part_right.svg"/></button>
+		<button id="btInstL" class="hit rocker left" style="left: 538dp; top: 17dp;" title="INSTRUMENT left (Y)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btInstR" class="hit rocker right" style="left: 566dp; top: 17dp;" title="INSTRUMENT right (U)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btLevelL" class="hit rocker left" style="left: 465dp; top: 43dp;" title="LEVEL left (P)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btLevelR" class="hit rocker right" style="left: 493dp; top: 43dp;" title="LEVEL right ([)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btPanL" class="hit rocker left" style="left: 538dp; top: 43dp;" title="PAN left (D)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btPanR" class="hit rocker right" style="left: 566dp; top: 43dp;" title="PAN right (F)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btReverbL" class="hit rocker left" style="left: 465dp; top: 69dp;" title="REVERB left (G)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btReverbR" class="hit rocker right" style="left: 493dp; top: 69dp;" title="REVERB right (H)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btChorusL" class="hit rocker left" style="left: 538dp; top: 69dp;" title="CHORUS left (J)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btChorusR" class="hit rocker right" style="left: 566dp; top: 69dp;" title="CHORUS right (K)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btKeyShiftL" class="hit rocker left" style="left: 465dp; top: 95dp;" title="KEY SHIFT left (I)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btKeyShiftR" class="hit rocker right" style="left: 493dp; top: 95dp;" title="KEY SHIFT right (O)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btMidiChL" class="hit rocker left" style="left: 538dp; top: 95dp;" title="MIDI CH left (A)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btMidiChR" class="hit rocker right" style="left: 566dp; top: 95dp;" title="MIDI CH right (S)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btVibRateL" class="hit rocker left modelExtended" style="left: 392dp; top: 166dp;" title="VIB RATE / EFX TYPE left (Z)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btVibRateR" class="hit rocker right modelExtended" style="left: 420dp; top: 166dp;" title="VIB RATE / EFX TYPE right (X)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btVibDepthL" class="hit rocker left modelExtended" style="left: 465dp; top: 166dp;" title="VIB DEPTH / EFX PARAM left (C)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btVibDepthR" class="hit rocker right modelExtended" style="left: 493dp; top: 166dp;" title="VIB DEPTH / EFX PARAM right (V)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+		<button id="btVibDelayL" class="hit rocker left modelExtended" style="left: 538dp; top: 166dp;" title="VIB DELAY / EFX VALUE left (B)"><svg class="buttonGraphic" src="button_left.svg"/></button>
+		<button id="btVibDelayR" class="hit rocker right modelExtended" style="left: 566dp; top: 166dp;" title="VIB DELAY / EFX VALUE right (N)"><svg class="buttonGraphic" src="button_right.svg"/></button>
+
+		<!-- Exact path origins from the supplied SVG. Lit and unlit sprites share
+		     the same box so a firmware state change cannot move an LED. -->
+		<div id="ledSelectBottom" class="panelLed selectorLed modelExtended" style="left: 378.25dp; top: 132dp;"><svg class="ledOffGraphic" src="selector_led_off.svg"/><svg class="ledOnGraphic" src="selector_led_on.svg"/></div>
+		<div id="ledSelectMiddle" class="panelLed selectorLed modelExtended" style="left: 378.25dp; top: 143dp;"><svg class="ledOffGraphic" src="selector_led_off.svg"/><svg class="ledOnGraphic" src="selector_led_on.svg"/></div>
+		<div id="ledSelectTop" class="panelLed selectorLed modelExtended" style="left: 378.25dp; top: 154dp;"><svg class="ledOffGraphic" src="selector_led_off.svg"/><svg class="ledOnGraphic" src="selector_led_on.svg"/></div>
+		<div id="ledEfx" class="panelLed efxLed modelExtended" style="left: 287.5dp; top: 165.5dp;"><svg class="ledOffGraphic" src="efx_led_off.svg"/><svg class="ledOnGraphic" src="efx_led_on.svg"/></div>
+		</div>
+
+		<!-- SC-8850 uses its native switch order and the exact control centres from
+		     the owner-supplied 612 x 187 SVG. The panel bakes the switch holes; the
+		     faces are sprites, and the six latching mode switches (EDIT, DRUM,
+		     EFFECTS, SHIFT, SOLO, MUTE) swap between a lit and an unlit face from
+		     the firmware's LED port. -->
+		<div class="model8850">
+			<button id="bt8850Edit" class="hit sc8850PanelButton sc8850LedButton" style="left: 400dp; top: 20dp;" title="EDIT (E)"><div class="sc8850LedOffGraphic"/><div class="sc8850LedOnGraphic"/></button>
+			<button id="bt8850PartL" class="hit sc8850PanelButton" style="left: 439dp; top: 20dp;" title="PART left (Left arrow)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850PartR" class="hit sc8850PanelButton" style="left: 478dp; top: 20dp;" title="PART right (Right arrow)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850Drum" class="hit sc8850PanelButton sc8850LedButton" style="left: 400dp; top: 46dp;" title="DRUM (D)"><div class="sc8850LedOffGraphic"/><div class="sc8850LedOnGraphic"/></button>
+			<button id="bt8850Variation" class="hit sc8850PanelButton" style="left: 439dp; top: 46dp;" title="VARIATION (V)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850Instrument" class="hit sc8850PanelButton" style="left: 478dp; top: 46dp;" title="INSTRUMENT (N)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850Effects" class="hit sc8850PanelButton sc8850LedButton" style="left: 400dp; top: 72dp;" title="EFFECTS (X)"><div class="sc8850LedOffGraphic"/><div class="sc8850LedOnGraphic"/></button>
+			<button id="bt8850Exit" class="hit sc8850PanelButton" style="left: 439dp; top: 72dp;" title="EXIT (Backspace)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850Enter" class="hit sc8850PanelButton" style="left: 478dp; top: 72dp;" title="ENTER (Return)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850Shift" class="hit sc8850PanelButton sc8850LedButton" style="left: 400dp; top: 102dp;" title="SHIFT (Left shift)"><div class="sc8850LedOffGraphic"/><div class="sc8850LedOnGraphic"/></button>
+			<button id="bt8850Solo" class="hit sc8850PanelButton sc8850LedButton" style="left: 439dp; top: 102dp;" title="SOLO (S)"><div class="sc8850LedOffGraphic"/><div class="sc8850LedOnGraphic"/></button>
+			<button id="bt8850Mute" class="hit sc8850PanelButton sc8850LedButton" style="left: 478dp; top: 102dp;" title="MUTE (M)"><div class="sc8850LedOffGraphic"/><div class="sc8850LedOnGraphic"/></button>
+			<button id="bt8850Dec" class="hit sc8850PanelButton" style="left: 517dp; top: 102dp;" title="DEC (-)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850Inc" class="hit sc8850PanelButton" style="left: 556dp; top: 102dp;" title="INC (+)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850F1" class="hit sc8850PanelButton" style="left: 178dp; top: 149dp;" title="F1"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850F2" class="hit sc8850PanelButton" style="left: 222dp; top: 149dp;" title="F2"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850F3" class="hit sc8850PanelButton" style="left: 266dp; top: 149dp;" title="F3"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850F4" class="hit sc8850PanelButton" style="left: 310dp; top: 149dp;" title="F4"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850InstMap" class="hit sc8850PanelButton" style="left: 354dp; top: 149dp;" title="INST MAP (I)"><div class="sc8850ButtonGraphic"/></button>
+			<button id="bt8850Preview" class="hit sc8850Preview" title="PREVIEW (P)"><div class="sc8850PreviewGraphic"/></button>
+			<knob id="bt8850Value" class="hit sc8850Value" title="VALUE: drag or scroll to turn, click to push (Space)"/>
+		</div>
+	</body>
+</rml>

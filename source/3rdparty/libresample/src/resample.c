@@ -46,6 +46,13 @@ typedef struct {
    double  Time;
 } rsdata;
 
+void resample_clear_history(void *handle)
+{
+   rsdata *hp = (rsdata *)handle;
+   memset(hp->X, 0, (hp->XSize + hp->Xoff) * sizeof(float));
+   memset(hp->Y, 0, hp->YSize * sizeof(float));
+}
+
 void *resample_dup(const void *	handle)
 {
    const rsdata *cpy = (const rsdata *)handle;

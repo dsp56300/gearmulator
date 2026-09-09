@@ -56,3 +56,20 @@ endif()
 set_property(TARGET synthLib PROPERTY FOLDER "Gearmulator")
 
 target_include_directories(synthLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+if(BUILD_TESTING)
+	add_executable(dynamicSamplerate_test dynamicSamplerate_test.cpp)
+	target_link_libraries(dynamicSamplerate_test PRIVATE synthLib)
+	set_property(TARGET dynamicSamplerate_test PROPERTY FOLDER "Tests")
+	add_test(NAME dynamicSamplerate COMMAND dynamicSamplerate_test)
+
+	add_executable(midiRateLimiter_test midiRateLimiter_test.cpp)
+	target_link_libraries(midiRateLimiter_test PRIVATE synthLib)
+	set_property(TARGET midiRateLimiter_test PROPERTY FOLDER "Tests")
+	add_test(NAME midiRateLimiter COMMAND midiRateLimiter_test)
+
+	add_executable(device_test device_test.cpp)
+	target_link_libraries(device_test PRIVATE synthLib)
+	set_property(TARGET device_test PROPERTY FOLDER "Tests")
+	add_test(NAME device COMMAND device_test)
+endif()

@@ -24,6 +24,9 @@ void *resample_open(int      highQuality,
 
 void *resample_dup(const void *handle);
 
+/* Silence buffered audio without changing timing or rebuilding filters. */
+void resample_clear_history(void *handle);
+
 int resample_get_filter_width(const void *handle);
 
 int resample_process(void   *handle,

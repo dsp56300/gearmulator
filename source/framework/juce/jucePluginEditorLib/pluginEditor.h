@@ -18,6 +18,8 @@
 #include "juceRmlUi/rmlInterfaces.h"
 #include "juceRmlUi/rmlMenu.h"
 
+#include <juce_core/juce_core.h>
+
 namespace juce
 {
 	class FileChooser;
@@ -253,5 +255,7 @@ namespace jucePluginEditorLib
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
 
 		std::unique_ptr<Settings> m_settings;
+
+		JUCE_DECLARE_WEAK_REFERENCEABLE(Editor)
 	};
 }

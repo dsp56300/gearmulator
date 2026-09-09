@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "frameRateLimiter.h"
 #include "juceRmlComponentConfig.h"
 #include "juceRmlDrag.h"
@@ -22,7 +24,6 @@ namespace Rml
 
 namespace juceRmlUi
 {
-	class LookAndFeel;
 	struct RmlInterfaces;
 	class Renderer;
 	class JuceRmlUi;
@@ -57,6 +58,8 @@ namespace juceRmlUi
 
 		baseLib::Event<RmlComponent*> evPreUpdate;
 		baseLib::Event<RmlComponent*> evPostUpdate;
+		// Fired when the component loses keyboard focus, after every key RmlUi still saw as held has been released.
+		baseLib::Event<RmlComponent*> evFocusLost;
 
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentLoadFailedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
@@ -184,6 +187,10 @@ namespace juceRmlUi
 		std::vector<juce::KeyPress> m_pressedKeys;
 		float m_contentScale = 1.0f;
 		float m_currentRenderScale = 0.0f;
+		// Device pixels per logical pixel for the software renderer. OpenGL and
+		// Metal report this themselves; the software path has to be told, and
+		// the component transform chain does not carry it - see paint().
+		std::atomic<float> m_softwareRenderScale{1.0f};
 
 		std::mutex m_timerMutex;
 		std::mutex m_contextRenderMutex;
@@ -220,9 +227,6 @@ namespace juceRmlUi
 		juce::Image m_screenshot;
 		ScreenshotState m_screenshotState = ScreenshotState::NoScreenshot;
 		ScreenshotCallback m_screenshotCallback;
-
-		LookAndFeel* m_lookAndFeel = nullptr;
-		juce::Component* m_lookAndFeelParent = nullptr;
 
 		RmlComponentConfig m_config;
 

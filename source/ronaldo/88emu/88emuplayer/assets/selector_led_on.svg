@@ -1,0 +1,7 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="8.3467" height="8" viewBox="0 0 8.3467 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M7.8545 4.227L0.3545 7.691L0 7.854V0.146L0.3545 0.309L7.8545 3.773L8.3467 4L7.8545 4.227Z" fill="#3C3F46"/>
+<path d="M7.8545 4.227L0.3545 7.691L0 7.854V0.146L0.3545 0.309L7.8545 3.773L8.3467 4L7.8545 4.227Z" fill="url(#light)"/>
+<path d="M7.8545 4.227L0.3545 7.691L0 7.854V0.146L0.3545 0.309L7.8545 3.773L8.3467 4L7.8545 4.227Z" stroke="#353535" stroke-width="0.5"/>
+<path d="M7.8545 4.227L0.3545 7.691L0 7.854V0.146L0.3545 0.309L7.8545 3.773L8.3467 4L7.8545 4.227Z" stroke="#FF0000" stroke-opacity="0.3" stroke-width="0.5"/>
+<defs><radialGradient id="light" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(2.75 4) rotate(180) scale(11.25 9)"><stop stop-color="#FF0000" stop-opacity="0.7"/><stop offset="1" stop-color="#FF0000" stop-opacity="0"/></radialGradient></defs>
+</svg>

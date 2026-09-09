@@ -186,6 +186,89 @@ namespace baseLib::filesystem
         return !_files.empty();
     }
 
+	namespace
+    {
+        // One stat answers both questions the sweep needs, which matters: a
+        // recursive search root can hold thousands of files, and opening each
+        // one just to measure it is what made a scan expensive.
+        bool statEntry(const std::string& _path, bool& _isDirectory, size_t& _size)
+        {
+#ifdef USE_DIRENT
+            struct stat statbuf;
+            if (stat(_path.c_str(), &statbuf) != 0)
+                return false;
+            _isDirectory = S_ISDIR(statbuf.st_mode);
+            _size = _isDirectory ? 0 : static_cast<size_t>(statbuf.st_size);
+            return true;
+#else
+            // getDirectoryEntries hands back u8string()s, so the path has to be
+            // read back as UTF-8. std::filesystem::path's std::string constructor
+            // decodes with the native narrow encoding instead, which on Windows
+            // is the ANSI code page - anything outside ASCII would resolve to the
+            // wrong file, or to none.
+            const auto u8Path = std::filesystem::u8path(_path);
+            std::error_code ec;
+            _isDirectory = std::filesystem::is_directory(u8Path, ec);
+            if (ec)
+                return false;
+            if (_isDirectory)
+            {
+                _size = 0;
+                return true;
+            }
+            _size = static_cast<size_t>(std::filesystem::file_size(u8Path, ec));
+            return !ec;
+#endif
+        }
+    }
+
+	bool findFilesRecursive(std::vector<FoundFile>& _files, const std::string& _rootPath, const std::string& _extension, const size_t _minSize, const size_t _maxSize, const uint32_t _maxDepth, const size_t _maxEntries)
+    {
+        std::vector<std::string> folders{_rootPath};
+        size_t visited = 0;
+
+        for (uint32_t depth = 0; depth <= _maxDepth && !folders.empty(); ++depth)
+        {
+            std::vector<std::string> next;
+
+            for (const auto& folder : folders)
+            {
+                std::vector<std::string> entries;
+                getDirectoryEntries(entries, folder);
+
+                for (const auto& entry : entries)
+                {
+                    if (++visited > _maxEntries)
+                        return !_files.empty();
+
+                    bool isDir = false;
+                    size_t size = 0;
+                    if (!statEntry(entry, isDir, size))
+                        continue;
+
+                    if (isDir)
+                    {
+                        next.push_back(entry);
+                        continue;
+                    }
+
+                    if (!hasExtension(entry, _extension))
+                        continue;
+
+                    if (_minSize && size < _minSize)
+                        continue;
+                    if (_maxSize && size > _maxSize)
+                        continue;
+
+                    _files.push_back({entry, size});
+                }
+            }
+
+            folders = std::move(next);
+        }
+        return !_files.empty();
+    }
+
 	std::string findFile(const std::string& _rootPath, const std::string& _extension, const size_t _minSize, const size_t _maxSize)
     {
         std::vector<std::string> files;
@@ -245,6 +328,22 @@ namespace baseLib::filesystem
         const auto size = static_cast<size_t>(ftell(hFile));
         fclose(hFile);
         return size;
+    }
+
+    uint64_t getFileModificationTime(const std::string& _file)
+    {
+#ifdef USE_DIRENT
+        struct stat statbuf;
+        if (stat(_file.c_str(), &statbuf) != 0)
+            return 0;
+        return static_cast<uint64_t>(statbuf.st_mtime);
+#else
+        std::error_code ec;
+        const auto t = std::filesystem::last_write_time(std::filesystem::u8path(_file), ec);
+        if (ec)
+            return 0;
+        return static_cast<uint64_t>(t.time_since_epoch().count());
+#endif
     }
 
     bool isDirectory(const std::string& _path)

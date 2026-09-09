@@ -23,6 +23,17 @@ synthLib::Resampler::~Resampler()
 	destroyResamplers();
 }
 
+void synthLib::Resampler::clearHistory()
+{
+	for(auto* resampler : m_resamplerOut)
+		if(resampler)
+			resample_clear_history(resampler);
+	for(auto& buffer : m_tempOutput)
+		std::fill(buffer.begin(), buffer.end(), 0.0f);
+	for(auto& buffer : m_mameTempOutput)
+		std::fill(buffer.begin(), buffer.end(), 0.0f);
+}
+
 uint32_t synthLib::Resampler::process(TAudioOutputs& _output, const uint32_t _numChannels, const uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc)
 {
 	assert(_numChannels <= m_outputPtrs.size());

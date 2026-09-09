@@ -163,8 +163,8 @@ namespace juceRmlUi
 
 			@autoreleasepool
 			{
-				updateDrawableSize();
-
+				// The drawable size is kept current by the message thread (updateDrawableSize), which
+				// is the only thread allowed to look at the view and window it is derived from.
 				if (m_listener && m_viewportWidth > 0 && m_viewportHeight > 0)
 					m_listener->renderMetal(*this);
 			}
@@ -241,6 +241,12 @@ namespace juceRmlUi
 
 	void MetalContext::updateDrawableSize()
 	{
+		// Message thread only: NSView and NSWindow are not thread-safe, and changing layer geometry
+		// while AppKit is rearranging the view hierarchy on the other thread - a window being
+		// hidden, the view being re-parented - corrupts state that only surfaces much later, in an
+		// unrelated CoreAnimation commit.
+		jassert(juce::MessageManager::getInstance()->isThisTheMessageThread());
+
 		if (!m_metalLayer || !m_metalView)
 			return;
 
@@ -255,17 +261,12 @@ namespace juceRmlUi
 		m_renderingScale = scale;
 		layer.contentsScale = scale;
 
-		// The NSView auto-resizes via autoresizingMask. Just sync the
-		// layer frame to the view bounds and update the drawable size.
+		// NSView owns the geometry of its backing layer. In particular, the layer
+		// frame is expressed in the superview's coordinate system, while bounds are
+		// local to the view. Overwriting the frame with the local bounds moves the
+		// rendered surface to the top-left of a standalone window after a resize,
+		// even though JUCE's mouse target remains below the title bar.
 		const CGRect viewBounds = metalView.bounds;
-
-		if (!CGRectEqualToRect(layer.frame, viewBounds))
-		{
-			[CATransaction begin];
-			[CATransaction setDisableActions:YES];
-			layer.frame = viewBounds;
-			[CATransaction commit];
-		}
 
 		const auto drawableWidth = static_cast<int>(viewBounds.size.width * scale);
 		const auto drawableHeight = static_cast<int>(viewBounds.size.height * scale);

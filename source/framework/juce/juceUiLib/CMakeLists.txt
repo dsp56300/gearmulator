@@ -9,6 +9,7 @@ set(SOURCES
 	comboboxStyle.cpp comboboxStyle.h
 	buttonStyle.cpp buttonStyle.h
 	labelStyle.cpp labelStyle.h
+	legalDisclaimer.cpp legalDisclaimer.h
 	messageBox.cpp messageBox.h
 	scrollbarStyle.cpp scrollbarStyle.h
 	textbuttonStyle.cpp textbuttonStyle.h

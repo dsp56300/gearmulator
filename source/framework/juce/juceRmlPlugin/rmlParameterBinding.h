@@ -32,6 +32,13 @@ namespace rmlPlugin
 		baseLib::Event<pluginLib::Parameter*, Rml::Element*> evBind;
 		baseLib::Event<pluginLib::Parameter*, Rml::Element*> evUnbind;
 
+		// Fired from RmlUi's OnElementDestroy for every element of the context,
+		// after any binding of that element has been released. The element is
+		// still fully intact at this point (RmlUi notifies plugins before it
+		// tears the element down), so listeners may still detach from it. Any
+		// raw Rml::Element* kept outside of RmlUi must be dropped here.
+		baseLib::Event<Rml::Element*> evElementDestroyed;
+
 		static constexpr uint8_t CurrentPart = pluginLib::MidiPacket::AnyPart;
 
 		explicit RmlParameterBinding(pluginLib::Controller& _controller, Rml::Context* _context, juceRmlUi::RmlComponent& _component);
@@ -55,6 +62,13 @@ namespace rmlPlugin
 		void bind(Rml::Element& _element, const std::string& _parameterName, uint8_t _part);
 
 		void unbind(Rml::Element& _element);
+
+		// Called when RmlUi destroys an element. Releases the binding of that
+		// element (if any) and notifies evElementDestroyed. Elements that are
+		// created and destroyed at runtime (SetInnerRML on a dynamic grid)
+		// would otherwise leave dangling keys in the element maps, which
+		// blow up once the allocator recycles the address for a new element.
+		void elementDestroyed(Rml::Element* _element);
 
 		void getElementsForParameter(std::vector<Rml::Element*>& _results, const std::string& _param, uint8_t _part = 0, bool _visibleOnly = true) const;
 		void getElementsForParameter(std::vector<Rml::Element*>& _results, const pluginLib::Parameter* _param, bool _visibleOnly = true) const;

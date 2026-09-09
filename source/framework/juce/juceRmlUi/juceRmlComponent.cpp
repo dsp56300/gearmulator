@@ -4,7 +4,6 @@
 #include <algorithm> // std::transform
 
 #include "juceRmlComponentConfig.h"
-#include "juceRmlLookAndFeel.h"
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
@@ -28,6 +27,7 @@
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/Factory.h"
 #include "RmlUi/Debugger/Debugger.h"
 
 namespace juceRmlUi
@@ -75,6 +75,36 @@ namespace juceRmlUi
 #ifdef RMLUI_METAL_RENDERER
 		static constexpr RendererProxy::RendererConfig g_renderConfigMetal {true, true, true};
 #endif
+
+		// Map RmlUi cursor names (the strings used in RCSS `cursor:` and the
+		// few extra hints RmlUi emits internally) to JUCE cursors. Unknown
+		// names fall through to the default arrow.
+		juce::MouseCursor translateRmlCursor(const Rml::String& _name)
+		{
+			if (_name.empty() || _name == "arrow" || _name == "default" || _name == "auto")
+				return juce::MouseCursor::NormalCursor;
+			if (_name == "pointer" || _name == "hand")
+				return juce::MouseCursor::PointingHandCursor;
+			if (_name == "move")
+				return juce::MouseCursor::DraggingHandCursor;
+			if (_name == "text")
+				return juce::MouseCursor::IBeamCursor;
+			if (_name == "crosshair")
+				return juce::MouseCursor::CrosshairCursor;
+			if (_name == "wait")
+				return juce::MouseCursor::WaitCursor;
+			if (_name == "ew-resize" || _name == "col-resize" || _name == "resize-horizontal")
+				return juce::MouseCursor::LeftRightResizeCursor;
+			if (_name == "ns-resize" || _name == "row-resize" || _name == "resize-vertical")
+				return juce::MouseCursor::UpDownResizeCursor;
+			if (_name == "nesw-resize")
+				return juce::MouseCursor::TopRightCornerResizeCursor;
+			if (_name == "nwse-resize" || _name == "resize")
+				return juce::MouseCursor::TopLeftCornerResizeCursor;
+			// JUCE has no native "not-allowed" cursor (NoCursor is fully
+			// invisible, which would be confusing); fall back to default.
+			return juce::MouseCursor::NormalCursor;
+		}
 	}
 
 	RmlComponent::RmlComponent(RmlInterfaces& _interfaces, DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/, const ContextCreatedCallback& _contextCreatedCallback, const DocumentLoadFailedCallback& _docLoadFailedCallback, const RmlComponentConfig& _config)
@@ -130,6 +160,13 @@ namespace juceRmlUi
 
 		setWantsKeyboardFocus(true);
 
+		// Hook RmlUi cursor changes (cursor: <name> in RCSS) into JUCE so the
+		// OS cursor actually updates over interactive elements.
+		_interfaces.getSystemInterface().setCursorChangedCallback([this](const Rml::String& _name)
+		{
+			setMouseCursor(translateRmlCursor(_name));
+		});
+
 		// set some reasonable default size, correct size will be set when loading the RML document
 		setSize(1280, 720);
 
@@ -172,17 +209,15 @@ namespace juceRmlUi
 
 	RmlComponent::~RmlComponent()
 	{
+		// Drop the cursor callback before any of our state goes away — the
+		// SystemInterface may outlive this component if it's shared.
+		m_rmlInterfaces.getSystemInterface().setCursorChangedCallback({});
+
 #ifdef RMLUI_METAL_RENDERER
 		if (m_metalContext)
 			m_metalContext->detach();
 #endif
 		m_renderProxy->setRenderer(nullptr, g_renderConfigSoftware);
-
-		if (m_lookAndFeelParent)
-			m_lookAndFeelParent->setLookAndFeel(nullptr);
-		m_lookAndFeelParent = nullptr;
-
-		delete m_lookAndFeel;
 
 		enableDebugger(false);
 
@@ -307,6 +342,11 @@ namespace juceRmlUi
 
 	void RmlComponent::renderOpenGL()
 	{
+		// Same lock, same order as update(): the render below walks the element tree, and the message
+		// thread changes that tree under the access lock only. Nothing may hold this lock while joining
+		// the GL thread, or the join waits for a frame that waits for the lock - see update().
+		RmlInterfaces::ScopedAccess access(*this);
+
 		{
 			// although we set that we render only manually, juce still calls this function eventhough we didn't
 			// request a repaint, for example when the window is resized.
@@ -440,6 +480,21 @@ namespace juceRmlUi
 		if (!m_renderProxy->hasRenderFunctions())
 			return;
 
+		// update() handed us a frame and waits for m_renderDone before it produces the next one, so
+		// every way out of here has to give it back - a frame that could not be drawn is dropped,
+		// not held on to, or the component never updates again.
+		const juce::ScopeGuard frameDone { [this] { m_renderDone = true; } };
+
+		const auto size = getRenderSize();
+		if (size.x <= 0 || size.y <= 0) return;
+
+		// Wait for the drawable before taking the access lock. nextDrawable blocks - for up to a
+		// second at a time when the layer is not being presented, i.e. whenever the window is hidden
+		// or covered - and holding the lock across that starved the message thread, which needs it
+		// for every timer tick, until the UI stood still.
+		auto* drawable = _context.nextDrawable();
+		if (!drawable) return;
+
 		RmlInterfaces::ScopedAccess access(*this);
 
 		if (!m_rmlContext || !m_renderInterface)
@@ -447,11 +502,6 @@ namespace juceRmlUi
 
 		auto* metal = dynamic_cast<RenderInterface_Metal*>(m_renderInterface.get());
 		if (!metal) return;
-
-		const auto size = getRenderSize();
-		if (size.x <= 0 || size.y <= 0) return;
-		auto* drawable = _context.nextDrawable();
-		if (!drawable) return;
 
 		metal->SetViewport(size.x, size.y);
 		metal->BeginFrame(drawable);
@@ -473,8 +523,6 @@ namespace juceRmlUi
 		{
 			metal->EndFrame();
 		}
-
-		m_renderDone = true;
 	}
 
 	void RmlComponent::metalContextClosing(MetalContext&)
@@ -515,6 +563,25 @@ namespace juceRmlUi
 		Component::mouseUp(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 		m_rmlContext->ProcessMouseButtonUp(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
+
+		if (!m_rmlContext->GetHoverElement())
+		{
+			// RmlUi delivers a mouse-up to the hovered element only. With the cursor outside the context - a press
+			// released off the window, or a focus loss that we turned into a mouse-leave - there is none, and
+			// document-level listeners never learn that the button went up. Hand the release to the documents.
+			const auto pos = toRmlPosition(_event);
+			const int modifiers = toRmlModifiers(_event);
+			Rml::Dictionary parameters;
+			parameters["mouse_x"] = pos.x;
+			parameters["mouse_y"] = pos.y;
+			parameters["button"] = static_cast<int>(helper::toRmlMouseButton(_event));
+			static constexpr const char* modifierNames[] = {"ctrl_key", "shift_key", "alt_key", "meta_key", "caps_lock_key", "num_lock_key", "scroll_lock_key"};
+			for (int i = 0; i < 7; ++i)
+				parameters[modifierNames[i]] = (modifiers & (1 << i)) ? 1 : 0;
+			for (int i = 0; i < m_rmlContext->GetNumDocuments(); ++i)
+				if (auto* document = m_rmlContext->GetDocument(i))
+					document->DispatchEvent(Rml::EventId::Mouseup, parameters);
+		}
 		enqueueUpdate();
 	}
 
@@ -564,15 +631,60 @@ namespace juceRmlUi
 		enqueueUpdate();
 	}
 
+	namespace
+	{
+		// RmlUi wants the wheel delta in NOTCHES: it scrolls UNIT_SCROLL_LENGTH
+		// (80dp) per unit, the same convention its SDL/GLFW backends use. JUCE
+		// instead reports a platform-scaled fraction, so passing its value
+		// through unchanged moved a notch by a couple of pixels on macOS and a
+		// trackpad flick by nothing at all.
+		//
+		// One detent, as the platform peers produce it:
+#if JUCE_MAC
+		constexpr float g_wheelDeltaPerNotch = 10.0f / 256.0f;
+#elif JUCE_WINDOWS
+		constexpr float g_wheelDeltaPerNotch = 60.0f / 256.0f;
+#else
+		constexpr float g_wheelDeltaPerNotch = 50.0f / 256.0f;
+#endif
+		// Pixel-precise (trackpad) deltas arrive divided by this, so multiplying
+		// it back gives the pixel count the OS computed - which already carries
+		// the system's own scroll acceleration.
+		constexpr float g_wheelDeltaPerPixel = 0.5f / 256.0f;
+
+		// RmlUi's UNIT_SCROLL_LENGTH. Dividing the pixel count by it turns a
+		// gesture into units, i.e. tracks the fingers roughly 1:1.
+		constexpr float g_rmlUnitScrollLength = 80.0f;
+
+		// A single event should never fling the view across the document; the
+		// OS emits many small ones instead.
+		constexpr float g_maxWheelUnitsPerEvent = 10.0f;
+
+		float toRmlWheelUnits(const float _delta, const bool _isSmooth)
+		{
+			if (_delta == 0.0f)
+				return 0.0f;
+
+			const auto units = _isSmooth
+				? _delta / g_wheelDeltaPerPixel / g_rmlUnitScrollLength
+				: _delta / g_wheelDeltaPerNotch;
+
+			return juce::jlimit(-g_maxWheelUnitsPerEvent, g_maxWheelUnitsPerEvent, units);
+		}
+	}
+
 	void RmlComponent::mouseWheelMove(const juce::MouseEvent& _event, const juce::MouseWheelDetails& _wheel)
 	{
 		Component::mouseWheelMove(_event, _wheel);
 
 		RmlInterfaces::ScopedAccess access(*this);
 
-		// wheel direction is right/down for positive values, in juce its the other way around, thats why we flip
-		const auto deltaX = -_wheel.deltaX;
-		const auto deltaY = -_wheel.deltaY;
+		// wheel direction is right/down for positive values, in juce its the other way around, thats why we flip.
+		// Note that _wheel.isReversed must NOT be applied on top: the platform
+		// deltas already have the system's natural-scrolling preference baked in,
+		// the flag only reports that they do. Inverting again would ignore it.
+		const auto deltaX = -toRmlWheelUnits(_wheel.deltaX, _wheel.isSmooth);
+		const auto deltaY = -toRmlWheelUnits(_wheel.deltaY, _wheel.isSmooth);
 
 		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(deltaX, deltaY), toRmlModifiers(_event));
 		enqueueUpdate();
@@ -685,13 +797,27 @@ namespace juceRmlUi
 	{
 		Component::focusLost(_cause);
 
-		// We skip this on Linux because apparently focusLost is called when the mouse button is released?!
-		// https://tus.youtrack.cloud/tickets/BUG-10084/
+		{
+			RmlInterfaces::ScopedAccess access(*this);
+
+			// We skip this on Linux because apparently focusLost is called when the mouse button is released?!
+			// https://tus.youtrack.cloud/tickets/BUG-10084/
 #if JUCE_WINDOWS || JUCE_MAC
-		RmlInterfaces::ScopedAccess access(*this);
-		if (m_rmlContext)
-			m_rmlContext->ProcessMouseLeave();
+			if (m_rmlContext)
+			{
+				m_rmlContext->ProcessMouseLeave();
+
+				// Key-ups only reach the focused component, so a key held across a focus change never gets its
+				// release inferred in keyStateChanged() and stays down in RmlUi - and in every listener that mirrors
+				// the key state - until the next unrelated key-up. Release everything we still consider held.
+				std::vector<juce::KeyPress> released;
+				released.swap(m_pressedKeys);
+				for (const auto& key : released)
+					m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key));
+			}
 #endif
+			evFocusLost(this);
+		}
 
 		enqueueUpdate();
 	}
@@ -705,14 +831,6 @@ namespace juceRmlUi
 
 	void RmlComponent::parentHierarchyChanged()
 	{
-		auto* rootComponent = getTopLevelComponent();
-		if (!m_lookAndFeel)
-			m_lookAndFeel = new LookAndFeel();
-		if (m_lookAndFeelParent)
-			m_lookAndFeelParent->setLookAndFeel(nullptr);
-		m_lookAndFeelParent = rootComponent;
-		rootComponent->setLookAndFeel(m_lookAndFeel);
-
 #ifdef RMLUI_METAL_RENDERER
 		// Retry Metal attachment now that we have a parent hierarchy (and likely a native peer)
 		if (m_metalContext)
@@ -768,7 +886,13 @@ namespace juceRmlUi
 			return static_cast<float>(m_metalContext->getRenderingScale());
 #endif
 
-		float scale = 1.0f;
+		// The component transform chain only carries scaling this code applied
+		// itself. The platform's own DPI scaling never appears in it, so the
+		// factor observed while painting has to be folded back in here - without
+		// it the render target is sized in logical pixels while the image juce
+		// hands the software renderer is sized in physical ones, and the UI ends
+		// up drawn into a corner of the window.
+		float scale = m_softwareRenderScale.load(std::memory_order_relaxed);
 		const Component* t = this;
 		while (t)
 		{
@@ -961,11 +1085,21 @@ namespace juceRmlUi
 		}
 		else if (m_renderType == Renderer::Software)
 		{
-			// get rid of opengl context if we switched to software rendering
+			// The GL context turned out to be a software rasterizer (newOpenGLContextCreated), so we
+			// draw with our own software renderer and drop it. Detaching joins the GL thread, whose
+			// renderOpenGL() takes the access lock we hold right now, so it has to wait until the
+			// lock is gone. Rendering stays blocked (m_renderDone) until then; the detach restarts it.
 			if (m_openGLContext)
 			{
-				m_openGLContext->detach();
-				m_openGLContext.reset();
+				juce::MessageManager::callAsync([safe = juce::Component::SafePointer<RmlComponent>(this)]
+				{
+					if (!safe || !safe->m_openGLContext)
+						return;
+					safe->m_openGLContext->detach();
+					safe->m_openGLContext.reset();
+					safe->m_renderDone = true;
+					safe->enqueueUpdate();
+				});
 				return;
 			}
 
@@ -975,7 +1109,11 @@ namespace juceRmlUi
 			m_openGLContext->triggerRepaint();
 #ifdef RMLUI_METAL_RENDERER
 		else if (m_metalContext)
+		{
+			// The layer geometry comes from AppKit objects, which only the message thread may read.
+			m_metalContext->updateDrawableSize();
 			m_metalContext->triggerRepaint();
+		}
 #endif
 
 		std::scoped_lock lock(m_timerMutex);
@@ -1064,26 +1202,32 @@ namespace juceRmlUi
 		if (!r)
 			return;
 
-		auto* rootComp = getTopLevelComponent();
-		auto* laf = dynamic_cast<LookAndFeel*>(&rootComp->getLookAndFeel());
-
-		const auto& img = laf ? laf->getCurrentImage() : juce::Image();
-
-		// If the clip origin is offset (window partially off-screen), we cannot render
-		// directly to the LookAndFeel image as it ignores the clip offset. Fall back to
-		// the slower Graphics path which respects the JUCE transform/clip pipeline.
-		const auto clipOrigin = _g.getClipBounds().getPosition();
-		const bool useDirectPath = img.isValid() && clipOrigin.isOrigin();
-
+		// Always hand the frame to juce through _g. An earlier shortcut wrote it straight into the
+		// bitmap the window peer paints into, at that bitmap's origin - which is the window's
+		// top-left corner, not this component's, so in a standalone the panel landed on top of
+		// the title bar and lost its bottom rows.
 		const auto size = getRenderSize();
 
 		r->beginFrame(_g, size);
 
 		m_renderProxy->executeRenderFunctions();
 
-		r->endFrame(useDirectPath ? img : juce::Image(), getOpenGLRenderingScale());
+		r->endFrame(getOpenGLRenderingScale());
 
 		m_renderDone = true;
+
+		// This is the only place the device-pixel scale is observable without a
+		// GL or Metal context: juce composes the platform DPI scale into the
+		// graphics context it paints with. Adopt it *after* the frame, so the
+		// render target size and the scale endFrame was given stay consistent,
+		// and let the next update() resize the RmlUi context to match.
+		const auto physicalScale = _g.getInternalContext().getPhysicalPixelScaleFactor();
+
+		if (physicalScale > 0.0f && physicalScale != m_softwareRenderScale.load(std::memory_order_relaxed))
+		{
+			m_softwareRenderScale.store(physicalScale, std::memory_order_relaxed);
+			enqueueUpdate();
+		}
 	}
 
 	juce::Component* RmlComponent::getComponentAt(const juce::Point<float> _position)
@@ -1138,9 +1282,12 @@ namespace juceRmlUi
 					rmlString.insert(pos + key.length(), templates);
 				};
 
-				addTemplate("tus_patchmanager.rml");
-				addTemplate("tus_colorpicker.rml");
-				addTemplate("tus_settings.rml");
+				if (m_config.includeDefaultTemplates)
+				{
+					addTemplate("tus_patchmanager.rml");
+					addTemplate("tus_colorpicker.rml");
+					addTemplate("tus_settings.rml");
+				}
 
 				for (const auto& templateName : m_config.additionalTemplateFiles)
 					addTemplate(templateName);
@@ -1199,6 +1346,10 @@ namespace juceRmlUi
 		Rml::RemoveContext(m_coreInstance, m_rmlContext->GetName());
 		m_rmlContext = nullptr;
 
+		// Cached stylesheets share spritesheet TextureSources, whose texture views are keyed by
+		// RenderManager address. Drop them before releasing the manager: a later component can
+		// reuse that address and otherwise inherit indices into the old texture database.
+		m_coreInstance.factory->ClearStyleSheetCache();
 		Rml::ReleaseRenderManagers(m_coreInstance);
 	}
 

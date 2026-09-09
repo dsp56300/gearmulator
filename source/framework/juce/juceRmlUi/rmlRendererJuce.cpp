@@ -1579,30 +1579,22 @@ namespace juceRmlUi
 		}
 	}
 
-	void RendererJuce::endFrame(const juce::Image& _renderTarget, const float _renderScale/* = 1.0f*/)
+	void RendererJuce::endFrame(const float _renderScale/* = 1.0f*/)
 	{
 		// copy render target to juce::Image
 		{
-			const juce::Image::BitmapData dstBitmapData(_renderTarget.isNull() ? *m_renderImage : _renderTarget, juce::Image::BitmapData::writeOnly);
-
-			if (_renderTarget.isNull())
-			{
-				copyToBitmap(dstBitmapData, *m_renderTarget);
-
-				auto& context = m_graphics->getInternalContext();
-
-				// The render image may be larger than the component's logical bounds (when
-				// rendered at a DPI scale > 1). Scale down by the render scale so the image
-				// maps to logical coordinates correctly.
-				const auto transform = _renderScale != 1.0f ? juce::AffineTransform::scale(1.0f / _renderScale) : juce::AffineTransform();
-
-				context.drawImage(*m_renderImage, transform);
-			}
-			else
-			{
-				copyToBitmap(dstBitmapData, *m_renderTarget);
-			}
+			const juce::Image::BitmapData dstBitmapData(*m_renderImage, juce::Image::BitmapData::writeOnly);
+			copyToBitmap(dstBitmapData, *m_renderTarget);
 		}
+
+		auto& context = m_graphics->getInternalContext();
+
+		// The render image may be larger than the component's logical bounds (when
+		// rendered at a DPI scale > 1). Scale down by the render scale so the image
+		// maps to logical coordinates correctly.
+		const auto transform = _renderScale != 1.0f ? juce::AffineTransform::scale(1.0f / _renderScale) : juce::AffineTransform();
+
+		context.drawImage(*m_renderImage, transform);
 
 		m_graphics = nullptr;
 	}

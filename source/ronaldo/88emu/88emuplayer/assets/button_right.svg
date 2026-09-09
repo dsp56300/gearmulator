@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="27" height="9" viewBox="0 0 27 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 46">
+<path id="LEVEL_R btn" d="M1 0.25H26C26.4142 0.25 26.75 0.585786 26.75 1V8C26.75 8.41421 26.4142 8.75 26 8.75H1C0.585787 8.75 0.25 8.41421 0.25 8V1C0.25 0.585786 0.585786 0.25 1 0.25Z" fill="url(#paint0_linear_0_10)" stroke="url(#paint1_linear_0_10)" stroke-width="0.5"/>
+<path id="Polygon 4" d="M17 4.5L12.5 6.66506V2.33494L17 4.5Z" fill="#DFDFDF"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_10" x1="14" y1="1.34043e-07" x2="14" y2="8.4375" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E5ECF2"/>
+<stop offset="0.237781" stop-color="#798291"/>
+<stop offset="0.61889" stop-color="#55565B"/>
+<stop offset="1" stop-color="#666B6E"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_10" x1="14" y1="2.4173e-07" x2="14" y2="9" gradientUnits="userSpaceOnUse">
+<stop stop-color="#EAF1F7"/>
+<stop offset="1" stop-color="#52575A"/>
+</linearGradient>
+</defs>
+</svg>

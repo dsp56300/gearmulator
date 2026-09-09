@@ -399,22 +399,18 @@ namespace juceRmlUi
 
 	bool RendererProxy::executeRenderFunctions()
 	{
-		std::vector<std::vector<Func>> renderFunctions;
+	    std::lock_guard lock(m_mutexRender);
 
-		{
-			std::lock_guard lock(m_mutexRender);
+		if (!m_renderer)
+			return false;
 
-			if (!m_renderer)
-				return false;
-
-			std::swap(renderFunctions, m_renderFunctions);
-		}
-
-		for (const auto& funcs : renderFunctions)
+	    for (const auto& funcs : m_renderFunctions)
 		{
 			for (const auto& func : funcs)
 				func();
 		}
+
+		m_renderFunctions.clear();
 
 		return false;
 	}

@@ -40,6 +40,9 @@ namespace juceRmlUi
 		void detach();
 		void triggerRepaint();
 		void setContinuousRepainting(bool _enabled);
+		// Reads the view geometry and resizes the layer to match. Message thread only, the render
+		// thread just consumes the result.
+		void updateDrawableSize();
 
 		double getRenderingScale() const;
 		int getViewportWidth() const;
@@ -56,7 +59,6 @@ namespace juceRmlUi
 		void renderLoop();
 		void createMetalLayer();
 		void destroyMetalLayer();
-		void updateDrawableSize();
 
 		void* m_device = nullptr;
 		void* m_commandQueue = nullptr;

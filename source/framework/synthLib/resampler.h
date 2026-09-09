@@ -43,6 +43,7 @@ namespace synthLib
 		float getSamplerateIn() const { return m_samplerateIn; }
 		float getSamplerateOut() const { return m_samplerateOut; }
 		Mode getMode() const { return m_mode; }
+		void clearHistory();
 
 	private:
 		uint32_t processResample(const TAudioOutputs& _output, uint32_t _numChannels, uint32_t _numSamples, const TProcessFunc& _processFunc);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <set>
 
 #include "RmlUi/Core/SystemInterface.h"
@@ -10,6 +11,7 @@ namespace juceRmlUi
 	{
 	public:
 		using LogEntry = std::pair<Rml::Log::Type, Rml::String>;
+		using CursorChangedCallback = std::function<void(const Rml::String&)>;
 
 		explicit SystemInterface(Rml::CoreInstance& _coreInstance);
 		SystemInterface(const SystemInterface&) = delete;
@@ -28,6 +30,13 @@ namespace juceRmlUi
 		void GetClipboardText(Rml::String& _text) override;
 		void ActivateKeyboard(Rml::Vector2f _caretPosition, float _lineHeight) override;
 		void DeactivateKeyboard() override;
+
+		// Register a callback invoked whenever RmlUi requests a cursor change
+		// (cursor: <name> in RCSS, or pointer-shape hints from drag/etc).
+		// The callback receives the RmlUi cursor name; the consumer is
+		// responsible for translating it to a platform cursor. Pass an empty
+		// callback to detach.
+		void setCursorChangedCallback(CursorChangedCallback _callback) { m_cursorChangedCallback = std::move(_callback); }
 
 		void beginLogRecording();
 		void endLogRecording();
@@ -48,5 +57,7 @@ namespace juceRmlUi
 
 		std::vector<LogEntry> m_logEntries;
 		bool m_recordingLog = false;
+
+		CursorChangedCallback m_cursorChangedCallback;
 	};
 }

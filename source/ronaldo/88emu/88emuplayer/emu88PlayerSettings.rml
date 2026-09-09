@@ -1,0 +1,115 @@
+<template name="emu88_player_settings">
+<head>
+	<link type="text/rcss" href="tus_default.rcss"/>
+	<link type="text/rcss" href="emu88PlayerSettings.rcss"/>
+</head>
+<body>
+	<div id="hardwareSettingsRoot" class="hardwareSettingsRoot">
+		<div class="hardwareSettingsSidebar">
+			<button id="btSettingsSkin" class="hardwareSettingsNavButton">Skins</button>
+			<button id="btSettingsGui" class="hardwareSettingsNavButton">Interface</button>
+			<button id="btSettingsAudio" class="hardwareSettingsNavButton">Audio</button>
+			<button id="btSettingsMidi" class="hardwareSettingsNavButton">MIDI</button>
+			<button id="btSettingsDeveloper" class="hardwareSettingsNavButton">Developer</button>
+		</div>
+
+		<div class="hardwareSettingsPages">
+			<div id="pageSettingsSkin" class="hardwareSettingsPage">
+				<div class="hardwareSettingsPageHeader">
+					<h1>Skins</h1>
+				</div>
+				<div class="hardwareSettingsSectionLabel">Available skins</div>
+				<table class="hardwareSkinTable">
+					<tr class="hardwareSkinHeader">
+						<td class="hardwareSkinName">Name</td>
+						<td class="hardwareSkinType">Type</td>
+						<td class="hardwareSkinAction">Action</td>
+					</tr>
+					<tr id="hardwareSkinEntry" class="hardwareSkinRow" style="display: none;">
+						<td id="lbName" class="hardwareSkinName">Skin</td>
+						<td id="lbType" class="hardwareSkinType">Embedded</td>
+						<td class="hardwareSkinAction"><div class="hardwareSkinActions">
+							<button id="btActivate" class="button">Activate</button>
+							<button id="btExport" class="button">Export</button>
+						</div></td>
+					</tr>
+				</table>
+				<div class="hardwareSkinFooter">
+					<button id="btOpenSkinFolder" class="button">Open skins folder in File Browser</button>
+				</div>
+			</div>
+
+			<div id="pageSettingsGui" class="hardwareSettingsPage" style="display: none;">
+				<div class="hardwareSettingsPageHeader">
+					<h1>Interface</h1>
+				</div>
+				<div class="hardwareSettingsSectionLabel">Rendering</div>
+				<div id="btForceSoftwareRendering" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Force software rendering</label></div>
+				<div class="hardwareSettingsSectionLabel">Window scale</div>
+				<div class="hardwareChoiceGrid">
+					<div id="btScale50" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>50%</label></div>
+					<div id="btScale65" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>65%</label></div>
+					<div id="btScale75" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>75%</label></div>
+					<div id="btScale85" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>85%</label></div>
+					<div id="btScale100" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>100%</label></div>
+					<div id="btScale125" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>125%</label></div>
+					<div id="btScale150" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>150%</label></div>
+					<div id="btScale175" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>175%</label></div>
+					<div id="btScale200" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>200%</label></div>
+					<div id="btScale250" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>250%</label></div>
+					<div id="btScale300" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>300%</label></div>
+				</div>
+			</div>
+
+			<div id="pageSettingsAudio" class="hardwareSettingsPage" style="display: none;">
+				<div class="hardwareSettingsPageHeader">
+					<h1>Audio</h1>
+				</div>
+				<div class="hardwareSettingsSectionLabel">Audio device</div>
+				<div class="hardwareFormGrid">
+					<div class="hardwareField"><label>Driver</label><combo id="audioDeviceType" popup="window"/></div>
+					<div class="hardwareField"><label>Output</label><combo id="audioOutputDevice" popup="window"/></div>
+					<div class="hardwareField"><label>Sample rate</label><combo id="audioSampleRate" popup="window"/></div>
+					<div class="hardwareField"><label>Buffer size</label><combo id="audioBufferSize" popup="window"/></div>
+				</div>
+				<div id="audioControlPanelRow" class="hardwareInlineChoices" style="display: none;">
+					<button id="btAudioControlPanel" class="button">Driver Control Panel...</button>
+				</div>
+				<div class="hardwareSettingsSectionLabel">Resampler</div>
+				<div class="hardwareInlineChoices">
+					<div id="btResamplerLegacy" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>Legacy</label></div>
+					<div id="btResamplerHq" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>MAME High Quality</label></div>
+					<div id="btResamplerLofi" class="hardwareChoice"><button id="button" class="settings-checkbox"/><label>MAME Lo-Fi</label></div>
+				</div>
+			</div>
+
+			<div id="pageSettingsMidi" class="hardwareSettingsPage" style="display: none;">
+				<div class="hardwareSettingsPageHeader">
+					<h1>MIDI</h1>
+				</div>
+				<div class="hardwareMidiRow">
+					<div class="hardwareField hardwareMidiOutput"><label>Output</label><combo id="midiOutputDevice" popup="window"/></div>
+					<div id="btPortMidi" class="hardwareChoice hardwarePortMidi"><button id="button" class="settings-checkbox"/><label>Enable Virtual Port</label></div>
+				</div>
+				<div class="hardwareInputLabel">Enabled MIDI inputs</div>
+				<div id="midiInputList" class="hardwareMidiInputList">
+					<div id="midiInputEmpty" class="hardwareMidiInputEmpty">No MIDI input devices available</div>
+					<div id="midiInputEntry" class="hardwareChoice" style="display: none;"><button id="button" class="settings-checkbox"/><label id="label">MIDI input</label></div>
+				</div>
+				<div id="portMidiUnsupported" class="hardwareMidiNote" style="display: none;">Virtual MIDI ports are not supported on Windows. To connect other applications, install a loopback driver such as loopMIDI and enable its port above.</div>
+			</div>
+
+			<div id="pageSettingsDeveloper" class="hardwareSettingsPage" style="display: none;">
+				<div class="hardwareSettingsPageHeader">
+					<h1>Developer</h1>
+				</div>
+				<div class="hardwareSettingsSectionLabel">Skin development</div>
+				<div class="hardwareDeveloperChoices">
+					<div id="btReloadViaF5" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Reload skin with F5</label></div>
+					<div id="btEnableRmlUiDebugger" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Enable RmlUi debugger</label></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</template>

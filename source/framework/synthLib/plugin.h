@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <mutex>
 #include <functional>
 
@@ -37,7 +38,8 @@ namespace synthLib
 		uint32_t getLatencyMidiToOutput() const;
 		uint32_t getLatencyInputToOutput() const;
 
-		void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, float _bpm, float _ppqPos, bool _isPlaying);
+		void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, float _bpm, float _ppqPos,
+			bool _isPlaying, bool _hasPpqPosition);
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
 		bool isValid() const;
@@ -53,12 +55,17 @@ namespace synthLib
 		bool setLatencyBlocks(uint32_t _latencyBlocks);
 		uint32_t getLatencyBlocks() const { return m_extraLatencyBlocks; }
 
+		void setMidiClockEnabled(bool _enabled);
+
 	private:
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
 		void updateDeviceLatency();
 		void processMidiInEvents();
 		void processMidiInEvent(const SMidiEvent& _ev);
+		TransportDiscontinuity updateTransport(float _bpm, float _ppqPos, bool _isPlaying, bool _hasPpqPosition,
+			size_t _sampleCount);
+		void stampTransportGeneration(SMidiEvent& _event) const;
 
 		dsp56k::RingBuffer<SMidiEvent, 1024, false> m_midiInRingBuffer;
 		std::vector<SMidiEvent> m_midiIn;
@@ -83,10 +90,19 @@ namespace synthLib
 		uint32_t m_deviceLatencyInputToOutput = 0;
 
 		MidiClock m_midiClock;
+		bool m_midiClockEnabled = true;
 
 		uint32_t m_extraLatencyBlocks = 1;
 
 		float m_deviceSamplerate = 0.0f;
 		CallbackDeviceInvalid m_callbackDeviceInvalid;
+
+		bool m_transportInitialized = false;
+		bool m_lastIsPlaying = false;
+		float m_lastBpm = 0.0f;
+		float m_lastPpqPos = 0.0f;
+		bool m_lastHasPpqPosition = false;
+		size_t m_lastSampleCount = 0;
+		std::atomic<uint32_t> m_transportGeneration{0};
 	};
 }

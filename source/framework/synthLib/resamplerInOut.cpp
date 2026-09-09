@@ -1,6 +1,7 @@
 #include "resamplerInOut.h"
 
 #include <array>
+#include <algorithm>
 
 #include "dsp56kBase/fastmath.h"
 #include "dsp56kBase/logging.h"
@@ -26,6 +27,7 @@ namespace synthLib
 
 		m_mode = _mode;
 		recreate();
+		prepareAlternatives();
 	}
 
 	void ResamplerInOut::setDeviceSamplerate(float _samplerate)
@@ -33,8 +35,24 @@ namespace synthLib
 		if(m_samplerateDevice == _samplerate)
 			return;
 
+		if(m_samplerateDevice > 0)
+			for(auto& event : m_midiIn)
+				event.offset = floor_int(event.offset * _samplerate / m_samplerateDevice);
+
+		for(auto& alternative : m_alternatives)
+		{
+			if(alternative->m_samplerateDevice != _samplerate)
+				continue;
+			// Queued MIDI belongs to the live stream, never to a cached rate.
+			alternative->m_midiIn.swap(m_midiIn);
+			swapStream(*alternative);
+			clearAudioHistory();
+			return;
+		}
+
 		m_samplerateDevice = _samplerate;
 		recreate();
+		prepareAlternatives();
 	}
 	
 	void ResamplerInOut::setHostSamplerate(float _samplerate)
@@ -44,6 +62,7 @@ namespace synthLib
 
 		m_samplerateHost = _samplerate;
 		recreate();
+		prepareAlternatives();
 	}
 
 	void ResamplerInOut::setSamplerates(const float _hostSamplerate, const float _deviceSamplerate)
@@ -51,10 +70,72 @@ namespace synthLib
 		if(m_samplerateDevice == _deviceSamplerate && m_samplerateHost == _hostSamplerate)
 			return;
 
+		if(m_samplerateHost == _hostSamplerate)
+		{
+			setDeviceSamplerate(_deviceSamplerate);
+			return;
+		}
+		if(m_samplerateDevice > 0)
+			for(auto& event : m_midiIn)
+				event.offset = floor_int(event.offset * _deviceSamplerate / m_samplerateDevice);
+
 		m_samplerateDevice = _deviceSamplerate;
 		m_samplerateHost = _hostSamplerate;
 
 		recreate();
+		prepareAlternatives();
+	}
+
+	void ResamplerInOut::prepareDeviceSamplerates(const std::vector<float>& _samplerates)
+	{
+		m_dynamicSamplerates = _samplerates;
+		prepareAlternatives();
+	}
+
+	void ResamplerInOut::prepareAlternatives()
+	{
+		m_alternatives.clear();
+		if(m_samplerateHost < 1)
+			return;
+		for(const auto rate : m_dynamicSamplerates)
+		{
+			if(rate < 1 || rate == m_samplerateDevice)
+				continue;
+			auto alternative = std::make_unique<ResamplerInOut>(m_channelCountIn, m_channelCountOut);
+			alternative->m_mode = m_mode;
+			alternative->setSamplerates(m_samplerateHost, rate);
+			m_alternatives.push_back(std::move(alternative));
+		}
+	}
+
+	void ResamplerInOut::swapStream(ResamplerInOut& _other)
+	{
+		using std::swap;
+		swap(m_samplerateDevice, _other.m_samplerateDevice);
+		swap(m_in, _other.m_in);
+		swap(m_out, _other.m_out);
+		swap(m_input, _other.m_input);
+		swap(m_scaledInput, _other.m_scaledInput);
+		swap(m_scaledInputSize, _other.m_scaledInputSize);
+		swap(m_midiIn, _other.m_midiIn);
+		swap(m_midiOut, _other.m_midiOut);
+		swap(m_processedMidiIn, _other.m_processedMidiIn);
+		swap(m_scaledMidiIn, _other.m_scaledMidiIn);
+		swap(m_inputLatency, _other.m_inputLatency);
+		swap(m_outputLatency, _other.m_outputLatency);
+	}
+
+	void ResamplerInOut::clearAudioHistory()
+	{
+		m_in->clearHistory();
+		m_out->clearHistory();
+		for(uint32_t channel = 0; channel < m_channelCountIn; ++channel)
+		{
+			if(m_input.size())
+				std::fill_n(m_input.getChannel(channel), m_input.size(), 0.0f);
+			if(m_scaledInput.size())
+				std::fill_n(m_scaledInput.getChannel(channel), m_scaledInput.size(), 0.0f);
+		}
 	}
 
 	void ResamplerInOut::recreate()
@@ -66,6 +147,8 @@ namespace synthLib
 		m_in.reset(new Resampler(m_samplerateHost, m_samplerateDevice, m_mode));
 
 		m_scaledInputSize = 0;
+		m_input.resize(0);
+		m_scaledInput.resize(0);
 		m_inputLatency = 0;
 		m_outputLatency = 0;
 
@@ -85,9 +168,15 @@ namespace synthLib
 			outs[i] = i >= data.size() ? nullptr : &data[i][0];
 
 		TMidiVec midiIn, midiOut;
-		process(ins, outs, TMidiVec(), midiOut, static_cast<uint32_t>(data[0].size()), [&](const TAudioInputs&, const TAudioOutputs&, size_t, const TMidiVec&, TMidiVec&)
+		midiIn.swap(m_midiIn);
+		process(ins, outs, TMidiVec(), midiOut, static_cast<uint32_t>(data[0].size()),
+			[&](const TAudioInputs&, const TAudioOutputs& _outs, size_t _count, const TMidiVec&, TMidiVec&)
 		{
+			for(uint32_t channel = 0; channel < m_channelCountOut; ++channel)
+				std::fill_n(_outs[channel], _count, 0.0f);
 		});
+		midiIn.swap(m_midiIn);
+		clearAudioHistory();
 	}
 
 	void ResamplerInOut::scaleMidiEvents(TMidiVec& _dst, const TMidiVec& _src, float _scale)
@@ -135,7 +224,14 @@ namespace synthLib
 
 		if(m_samplerateDevice == m_samplerateHost)
 		{
-			_processFunc(_inputs, _outputs, _numSamples, _midiIn, _midiOut);
+			if(m_midiIn.empty())
+			{
+				_processFunc(_inputs, _outputs, _numSamples, _midiIn, _midiOut);
+				return;
+			}
+			m_midiIn.insert(m_midiIn.end(), _midiIn.begin(), _midiIn.end());
+			_processFunc(_inputs, _outputs, _numSamples, m_midiIn, _midiOut);
+			m_midiIn.clear();
 			return;
 		}
 
@@ -144,7 +240,14 @@ namespace synthLib
 
 		m_scaledInput.ensureSize(static_cast<uint32_t>(static_cast<float>(_numSamples) * devDivHost * 2.0f));
 
-		scaleMidiEvents(m_midiIn, _midiIn, devDivHost);
+		// APPEND this block's (offset-scaled) events to the staged queue.
+		// scaleMidiEvents clears its destination, so scaling directly into
+		// m_midiIn destroyed any events a previous host block had staged but
+		// no device chunk had consumed yet (feedOutput does not necessarily
+		// run on every host block) — at mismatched sample rates that silently
+		// swallowed incoming MIDI.
+		scaleMidiEvents(m_scaledMidiIn, _midiIn, devDivHost);
+		m_midiIn.insert(m_midiIn.end(), m_scaledMidiIn.begin(), m_scaledMidiIn.end());
 
 		m_input.append(_inputs, _numSamples);
 

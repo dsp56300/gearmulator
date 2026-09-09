@@ -1,11 +1,13 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <string>
 
 #include "rmlEventListener.h"
 
 #include "RmlUi/Core/EventListener.h"
+#include "RmlUi/Core/ObserverPtr.h"
 
 namespace Rml
 {
@@ -82,8 +84,12 @@ namespace juceRmlUi
 		};
 
 		std::vector<Entry> m_entries;
-		Rml::Element* m_root = nullptr;
-		Rml::ElementDocument* m_document = nullptr;
+		// Observed, not owned: both belong to the document, and a document can be
+		// torn down while a menu is still open - closing the settings window from
+		// inside a menu action does exactly that. An ObserverPtr goes null when
+		// the element dies instead of dangling.
+		Rml::ObserverPtr<Rml::Element> m_root;
+		Rml::ObserverPtr<Rml::Element> m_document;
 
 		std::shared_ptr<Menu> m_subMenu;
 		Rml::ObserverPtr<Rml::Element> m_subMenuParentEntry = nullptr;

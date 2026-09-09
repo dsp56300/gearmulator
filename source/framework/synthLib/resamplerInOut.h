@@ -20,6 +20,7 @@ namespace synthLib
 		void setDeviceSamplerate(float _samplerate);
 		void setHostSamplerate(float _samplerate);
 		void setSamplerates(float _hostSamplerate, float _deviceSamplerate);
+		void prepareDeviceSamplerates(const std::vector<float>& _samplerates);
 
 		void process(const TAudioInputs& _inputs, TAudioOutputs& _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc);
 
@@ -28,6 +29,11 @@ namespace synthLib
 
 	private:
 		void recreate();
+		void prepareAlternatives();
+		void swapStream(ResamplerInOut& _other);
+		void clearAudioHistory();
+		std::vector<float> m_dynamicSamplerates;
+		std::vector<std::unique_ptr<ResamplerInOut>> m_alternatives;
 		static void scaleMidiEvents(TMidiVec& _dst, const TMidiVec& _src, float _scale);
 		static void clampMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax);
 		static void extractMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax);
@@ -48,6 +54,7 @@ namespace synthLib
 		size_t m_scaledInputSize = 0;
 
 		TMidiVec m_processedMidiIn;
+		TMidiVec m_scaledMidiIn;	// per-call scale scratch (see process)
 
 		TMidiVec m_midiIn;
 		TMidiVec m_midiOut;

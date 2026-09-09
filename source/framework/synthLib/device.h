@@ -52,6 +52,9 @@ namespace synthLib
 			_dst.push_back(getSamplerate());
 		}
 		virtual float getSamplerate() const = 0;
+		// Rates selected by firmware during processing, rather than by the host.
+		// Declare these so the plugin can prepare conversion filters in advance.
+		virtual void getDynamicSamplerates(std::vector<float>& _dst) const {}
 		virtual void getPreferredSamplerates(std::vector<float>& _dst) const
 		{
 			return getSupportedSamplerates(_dst);
@@ -91,6 +94,14 @@ namespace synthLib
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;
 		virtual void processAudio(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _samples) = 0;
 		virtual bool sendMidi(const SMidiEvent& _ev, std::vector<SMidiEvent>& _response) = 0;
+
+		// Host transport start / stop / seek. This is a marker, not MIDI: it carries no
+		// status or data bytes, so it must never be handed to sendMidi, where a device
+		// pushes an event's bytes into its emulated UART - a lone 0x00 there completes the
+		// firmware's running-status message and fakes a Program Change. Devices that rate
+		// limit their MIDI input override this to pass the generation on; for everyone
+		// else it is a no-op.
+		virtual void onTransportDiscontinuity(const SMidiEvent& /*_ev*/) {}
 
 		void dummyProcess(uint32_t _numSamples);
 

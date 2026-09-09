@@ -7,9 +7,12 @@ set(SOURCES
 	am29f.cpp am29f.h
 	i2c.cpp i2c.h
 	i2cFlash.cpp i2cFlash.h
+	hd44780.cpp hd44780.h
 	lcd.cpp lcd.h
 	lcdfonts.cpp lcdfonts.h
 	sciMidi.cpp sciMidi.h
+	sed1335.cpp sed1335.h
+	tc160g22af.h
 )
 
 target_sources(hardwareLib PRIVATE ${SOURCES})

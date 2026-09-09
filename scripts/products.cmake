@@ -5,6 +5,7 @@ set(products
 	gearmulator_SYNTH_XENIA
 	gearmulator_SYNTH_NODALRED2X
 	gearmulator_SYNTH_JE8086
+	gearmulator_SYNTH_88EMU
 	gearmulator_COMPONENT_DSPBRIDGE
 )
 

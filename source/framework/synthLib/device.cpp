@@ -38,6 +38,12 @@ namespace synthLib
 
 		for (const auto& ev : _midiIn)
 		{
+			if (ev.type == MidiEventType::TransportDiscontinuity)
+			{
+				onTransportDiscontinuity(ev);
+				continue;
+			}
+
 			m_translatorOut.clear();
 
 			m_midiTranslator.process(m_translatorOut, ev);

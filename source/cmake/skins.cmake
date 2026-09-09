@@ -21,6 +21,10 @@ macro(addSkin productName skinName skinFolder skinRootFile)
 
 	list(APPEND ASSETS_SKINS ${SKIN_FILES})
 
+	# Several skins may share one folder (same artwork, different root rml). The
+	# binary data target must not list a file twice.
+	list(REMOVE_DUPLICATES ASSETS_SKINS)
+
 	set(SKIN_FILENAMES "")
 	foreach(f ${SKIN_FILES})
 	    get_filename_component(fname "${f}" NAME)
