@@ -1,6 +1,7 @@
 #include "deviceModel.h"
 
 #include <array>
+#include <cstddef>
 
 namespace emu88Lib
 {
