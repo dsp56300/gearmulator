@@ -266,6 +266,23 @@ Agent labels: `win`, `mac`, `linux && arm`, `linux && x86`.
 
 **When a ticket is done:** set State/Stage to **Review**, assign to **bax**, and set **Fixed in Version** (BUG) or **Fixed in build** (EMU) to the current version from `CMakeLists.txt` (`project(gearmulator VERSION x.y.z)`). The Emulator/Product field tells you which source directories are relevant — see the per-synth table above.
 
+**If the version is missing from the field, add it — never skip the field or pick a wrong
+version because the right one is not offered.** Those lists are YouTrack bundles, not a fixed
+schema, and they routinely lag the current version (EMU's stopped at 2.2.15 while 2.2.17 was
+shipping, which left fixes recorded against a version that had already been released). Adding
+the next version before it exists is fine too.
+
+The MCP tools only reach issues, so use the REST API with the bearer token from the
+`YouTrackTUS` entry in `.mcp.json` (`https://tus.youtrack.cloud/api`):
+
+1. Find the bundle — `GET /admin/projects/{projectId}/customFields?fields=id,field(name),bundle(id,$type)`.
+   BUG "Fixed in Version" is a `VersionBundle`; EMU "Fixed in build" is a `BuildBundle`
+   (project `0-3`, bundle `183-1`).
+2. Add the value — `POST /admin/customFieldSettings/bundles/{version|build}/{bundleId}/values`
+   with `{"name":"2.2.18"}`. Append in release order; the list is not sorted for you.
+
+Then set the field as usual and confirm with `get_issue_fields_schema`.
+
 ## Release Workflow
 
 **Hotfix:**
