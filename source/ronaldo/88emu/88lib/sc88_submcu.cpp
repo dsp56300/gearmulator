@@ -1,6 +1,7 @@
 #include "sc88_submcu.h"
 
 #include <algorithm>
+#include <cstddef>
 
 namespace emu88Lib
 {

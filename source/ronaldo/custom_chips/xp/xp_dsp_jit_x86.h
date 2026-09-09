@@ -12,6 +12,7 @@
 #include "xp_dsp_program.h"
 #include "xp_dsp_state.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <vector>
 

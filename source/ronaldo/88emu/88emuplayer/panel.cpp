@@ -19,6 +19,7 @@
 #include "panel.hpp"
 
 #include <algorithm>
+#include <cstddef>
 
 namespace sc88panel
 {

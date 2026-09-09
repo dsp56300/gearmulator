@@ -13,6 +13,7 @@
 #include "juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h"
 
 #include <algorithm>
+#include <cmath>
 #include <set>
 
 namespace emu88Player
