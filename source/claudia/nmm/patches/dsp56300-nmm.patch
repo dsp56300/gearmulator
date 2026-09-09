@@ -1,0 +1,1737 @@
+diff --git a/source/dsp56kEmu/dma.cpp b/source/dsp56kEmu/dma.cpp
+index bd3e6034..dd0d5b0a 100644
+--- a/source/dsp56kEmu/dma.cpp
++++ b/source/dsp56kEmu/dma.cpp
+@@ -25,34 +25,21 @@ namespace dsp56k
+ 	{
+ 		using RequestSource = DmaChannel::RequestSource;
+ 
+-		/*
+-		Unfortunately the doc is a bit unclear here, at the moment we assume that DMA does never instantly trigger if it is enabled.
+-		It needs the request from the peripheral and acts if its state **changes**
+-
+-		"
+-		DMA Channel Enable
+-		Enables the channel operation. Setting DE either triggers a single block DMA transfer
+-		in the DMA transfer mode that uses DE as a trigger or enables a single-block,
+-		single-line, or single-word DMA transfer in the transfer modes that use a requesting
+-		device as a trigger."
+-
+-		For DE based triggers, it says  **triggers a ... transfer**, but for requests it says **enables a .... transfer**, assuming that
+-		enabling means just setting it up so that its ready for transfer, but not immediately executing one
+-		*/
++		// Check pending level requests on enable for the verified 56303 ESSI
++		// sources. Other peripherals retain their existing request-edge behavior.
+ 
+ 		bool checkTrigger(Peripherals56303& _p, const RequestSource _src)
+ 		{
+-			return false;
++			// ESSI requests are the TDE/RDF conditions, not just their edges.
++			// A channel armed after the flag was set must service the pending
++			// word before the next frame can reuse the source buffer.
+ 			switch (_src)
+ 			{
+ 			case RequestSource::Essi0TransmitData:			return _p.getEssi0().getSR().test(Essi::SSISR_TDE);
+ 			case RequestSource::Essi0ReceiveData:			return _p.getEssi0().getSR().test(Essi::SSISR_RDF);
+ 			case RequestSource::Essi1TransmitData:			return _p.getEssi1().getSR().test(Essi::SSISR_TDE);
+ 			case RequestSource::Essi1ReceiveData:			return _p.getEssi1().getSR().test(Essi::SSISR_RDF);
+-			case RequestSource::Hi08ReceiveDataFull:		return _p.getHI08().readStatusRegister() & (1 << dsp56k::HDI08::HSR_HRDF);
+-			case RequestSource::Hi08TransmitDataEmpty:		return _p.getHI08().readStatusRegister() & (1 << dsp56k::HDI08::HSR_HTDE);
+ 			default:
+-				assert("Unsupported request source for 56303");
+ 				return false;
+ 			}
+ 		}
+@@ -182,8 +169,8 @@ namespace dsp56k
+ 				// "When the needed resources are available, each word transfer performed by the DMA takes at least two core clock cycles"
+ 				m_pendingTransfer = std::max(1, static_cast<int32_t>((m_dco + 1) << 1));
+ //				m_pendingTransfer = 1;
+-				m_peripherals.setDelayCycles(m_pendingTransfer);
+-				m_lastClock = m_peripherals.getDSP().getInstructionCounter();
++				m_peripherals.setDelayCycles(m_pendingTransfer >> unsigned(m_dma.useCycles()));
++				m_lastClock = m_dma.useCycles() ? m_peripherals.getDSP().getCycles() : m_peripherals.getDSP().getInstructionCounter();
+ 			}
+ 			return;
+ 		}
+@@ -251,7 +238,7 @@ namespace dsp56k
+ 		if(m_pendingTransfer <= 0)
+ 			return IPeripherals::MaxDelayCycles;
+ 
+-		const auto clock = m_peripherals.getDSP().getInstructionCounter();
++		const auto clock = m_dma.useCycles() ? m_peripherals.getDSP().getCycles() : m_peripherals.getDSP().getInstructionCounter();
+ 		const auto diff = clock - m_lastClock;
+ 		m_lastClock = clock;
+ 
+@@ -270,7 +257,7 @@ namespace dsp56k
+ 			}
+ 		}
+ 
+-		return m_pendingTransfer;
++		return std::max(0,m_pendingTransfer) >> unsigned(m_dma.useCycles());
+ 	}
+ 
+ 	void DmaChannel::triggerByRequest()
+@@ -643,6 +630,52 @@ namespace dsp56k
+ 		const auto agmS = getSourceAddressGenMode();
+ 		const auto agmD = getDestinationAddressGenMode();
+ 
++		if(agmS == AddressGenMode::SingleCounterAnoUpdate && agmD == AddressGenMode::SingleCounterAnoUpdate)
++		{
++			// A request transfers one word even when neither address advances.
++			// Repeating peripheral-to-latch transfers use DCO=0 and retain DE.
++			do
++			{
++				memWrite(areaD, m_ddr, memRead(areaS, m_dsr));
++				if(!m_dco) {m_dco = m_dcomInit; return true;}
++				--m_dco;
++			} while(!isRequestTrigger());
++			return false;
++		}
++
++		if (static_cast<unsigned>(agmS) < 4 && static_cast<unsigned>(agmD) < 4)
++		{
++			// Both addresses share the two-dimensional counter. Update it once
++			// per word/line, applying each address's own end-of-line offset.
++			// Block mode can copy a whole line without a per-word dispatch.
++			const auto tm = getTransferMode();
++			const bool block = tm == TransferMode::BlockTriggerDEClearDE;
++			const bool line = tm == TransferMode::LineTriggerRequestClearDE;
++			do
++			{
++				const TWord count = block || line ? m_dcol + 1 : 1;
++				memCopy(areaD, m_ddr, areaS, m_dsr, count);
++				m_dsr += count - 1;
++				m_ddr += count - 1;
++				if (m_dcol == count - 1)
++				{
++					m_dsr = (m_dsr + m_dma.getDOR(static_cast<unsigned>(agmS))) & 0xffffff;
++					m_ddr = (m_ddr + m_dma.getDOR(static_cast<unsigned>(agmD))) & 0xffffff;
++					if (!m_dcoh) return true;
++					--m_dcoh;
++					m_dcol = m_dcolInit;
++				}
++				else
++				{
++					m_dcol -= count;
++					m_dsr = (m_dsr + 1) & 0xffffff;
++					m_ddr = (m_ddr + 1) & 0xffffff;
++				}
++			}
++			while (block);
++			return false;
++		}
++
+ 		if (agmS == AddressGenMode::SingleCounterApostInc && agmD == AddressGenMode::SingleCounterApostInc)
+ 		{
+ 			assert(!isRequestTrigger() && "not supported yet, needs to be transfer one word at a time");
+@@ -795,6 +828,14 @@ namespace dsp56k
+ 
+ 	inline void Dma::clearActiveChannel()
+ 	{
++		// Completing a peripheral word must not stop another channel's delayed
++		// block transfer (e.g. ESSI TX while a mix-buffer clear is pending).
++		for (TWord i = 0; i < m_channels.size(); ++i)
++			if (m_channels[i].hasPendingTransfer())
++			{
++				setActiveChannel(i);
++				return;
++			}
+ 		m_dstr &= ~(1 << Dact);
+ 	}
+ 
+diff --git a/source/dsp56kEmu/dma.h b/source/dsp56kEmu/dma.h
+index 9979c8fc..1a1b8276 100644
+--- a/source/dsp56kEmu/dma.h
++++ b/source/dsp56kEmu/dma.h
+@@ -110,6 +110,10 @@ namespace dsp56k
+ 		const TWord& getDDR() const;
+ 		const TWord& getDCO() const;
+ 		const TWord& getDCR() const;
++		bool hasPendingTransfer() const { return m_pendingTransfer > 0; }
++        // Read-only offline diagnostics; no counters or callbacks in execution.
++        int32_t pendingTransferClocks() const { return m_pendingTransfer; }
++        uint64_t lastTransferClock() const { return m_lastClock; }
+ 
+ 		uint32_t exec();
+ 
+@@ -211,9 +215,12 @@ namespace dsp56k
+ 		const TWord& getDCO(const TWord _channel) const { return m_channels[_channel].getDCO(); }
+ 		const TWord& getDCR(const TWord _channel) const { return m_channels[_channel].getDCR(); }
+ 
+-		uint32_t exec() noexcept;
++		const DmaChannel& channel(TWord index) const { return m_channels.at(index); }
++        uint32_t exec() noexcept;
+ 		void setActiveChannel(TWord _channel);
+ 		void clearActiveChannel();
++		void setUseCycles(bool value) {m_useCycles=value;}
++		bool useCycles() const {return m_useCycles;}
+ 
+ 		bool hasTrigger(DmaChannel::RequestSource _source) const;
+ 		bool trigger(DmaChannel::RequestSource _source) const;
+@@ -221,6 +228,7 @@ namespace dsp56k
+ 		void removeTriggerTarget(const DmaChannel* _channel);
+ 
+ 	private:
++		bool m_useCycles=false;
+ 		TWord m_dstr;
+ 		std::array<DmaChannel, 6> m_channels;
+ 		std::array<TWord, 4> m_dor{};
+diff --git a/source/dsp56kEmu/dsp.cpp b/source/dsp56kEmu/dsp.cpp
+index 816d2c30..89b90ea6 100644
+--- a/source/dsp56kEmu/dsp.cpp
++++ b/source/dsp56kEmu/dsp.cpp
+@@ -49,6 +49,7 @@ namespace dsp56k
+ 	void dspExecNop(DSP*) noexcept
+ 	{
+ 	}
++    DSP::TInterruptFunc DSP::noopInterruptFunc() {return &dspExecNop;}
+ 	void dspExecInterrupts(DSP* _dsp) noexcept
+ 	{
+ 		_dsp->execInterrupts();
+@@ -193,6 +194,7 @@ namespace dsp56k
+ 
+ 	void DSP::execInterrupt(const TWord vba)
+ 	{
++        if(m_interruptObserver) m_interruptObserver(m_interruptObserverContext,vba,getCycles());
+ 		pcCurrentInstruction = vba;
+ 		m_processingMode = FastInterrupt;
+ 
+diff --git a/source/dsp56kEmu/dsp.h b/source/dsp56kEmu/dsp.h
+index a3898134..aa30063c 100644
+--- a/source/dsp56kEmu/dsp.h
++++ b/source/dsp56kEmu/dsp.h
+@@ -81,10 +81,13 @@ namespace dsp56k
+ 		};
+ 
+ 		typedef void (*TInterruptFunc)(DSP*) noexcept;
++        using InterruptObserver=void(*)(void*,TWord,uint64_t);
+ 
+ 		static constexpr uint32_t PeripheralsProcessingStepSize = 32;
+ 
+ 	private:
++        InterruptObserver m_interruptObserver=nullptr;
++        void* m_interruptObserverContext=nullptr;
+ 		// _____________________________________________________________________________
+ 		// members
+ 		//
+@@ -251,6 +254,8 @@ namespace dsp56k
+ 
+ 		void	execInterrupts					();
+ 		void	execInterrupt					(uint32_t vba);
++        // Optional diagnostics, called on the DSP execution thread at acceptance.
++        void setInterruptObserver(InterruptObserver observer,void* context=nullptr) {m_interruptObserver=observer;m_interruptObserverContext=context;}
+ 		void	execDefaultPreventInterrupt		();
+ 
+ 		bool	readReg							( EReg _reg, TReg8& _res ) const;
+@@ -266,6 +271,8 @@ namespace dsp56k
+ 		bool	readRegToInt					( EReg _reg, int64_t& _dst ) const;
+ 
+ 		const uint64_t&		getInstructionCounter		() const	{ return m_instructions; }
++        static TInterruptFunc noopInterruptFunc();
++        uint64_t jitCycleDeadline=~uint64_t(0); // Serialized owner; only deadline-checked linking observes this.
+ 		const uint64_t&		getCycles					() const	{ return m_cycles; }
+ 
+ 		const char*			getASM						(TWord wordA, TWord wordB);
+diff --git a/source/dsp56kEmu/dsp_ops_move.inl b/source/dsp56kEmu/dsp_ops_move.inl
+index 4a4d7051..1db0325e 100644
+--- a/source/dsp56kEmu/dsp_ops_move.inl
++++ b/source/dsp56kEmu/dsp_ops_move.inl
+@@ -347,7 +347,12 @@ namespace dsp56k
+ 	}
+ 	inline void DSP::op_Movem_aa(const TWord op)
+ 	{
+-		errNotImplemented("MOVE(M) S,P:aa");
++		const auto address = getFieldValue<Movem_aa, Field_aaaaaa>(op);
++		const auto reg = getFieldValue<Movem_aa, Field_dddddd>(op);
++		if(getFieldValue<Movem_aa, Field_W>(op))
++			decode_dddddd_write(reg, TReg24(memRead(MemArea_P, address)));
++		else
++			memWriteP(address, decode_dddddd_read(reg).toWord());
+ 	}
+ 	inline void DSP::op_Movep_ppea(const TWord op)
+ 	{
+diff --git a/source/dsp56kEmu/essi.cpp b/source/dsp56kEmu/essi.cpp
+index 9b633748..d3b336ea 100644
+--- a/source/dsp56kEmu/essi.cpp
++++ b/source/dsp56kEmu/essi.cpp
+@@ -38,6 +38,8 @@ namespace dsp56k
+ 			return;
+ 
+ 		// note that this transfers the data in TX that has been written to it before
++		const bool active = !m_crb.test(CRB_MOD) ||
++			(((m_txSlotCounter < 16 ? m_tsma : m_tsmb) >> (m_txSlotCounter & 15)) & 1);
+ 		writeSlotToFrame();
+ 
+ 		if (0 == m_txSlotCounter)
+@@ -61,6 +63,8 @@ namespace dsp56k
+ 				injectInterrupt(Vba_ESSI0transmitlastslot);
+ 		}
+ 
++		if (!active) return;
++
+ 		if (m_sr.test(RegSSISRbits::SSISR_TUE) && m_crb.test(RegCRBbits::CRB_TEIE))
+ 		{
+ 			injectInterrupt(Vba_ESSI0transmitdatawithexceptionstatus);
+@@ -80,6 +84,8 @@ namespace dsp56k
+ 		if(!rem)
+ 			return;
+ 
++		const bool active = !m_crb.test(CRB_MOD) ||
++			(((m_rxSlotCounter < 16 ? m_rsma : m_rsmb) >> (m_rxSlotCounter & 15)) & 1);
+ 		readSlotFromFrame();
+ 
+ 		if (0 == m_rxSlotCounter)
+@@ -87,12 +93,12 @@ namespace dsp56k
+ 		else
+ 			m_sr.clear(SSISR_RFS);
+ 
+-		if (m_sr.test(RegSSISRbits::SSISR_ROE) && m_crb.test(RegCRBbits::CRB_REIE))
++		if (active && m_sr.test(RegSSISRbits::SSISR_ROE) && m_crb.test(RegCRBbits::CRB_REIE))
+ 		{
+ 			injectInterrupt(Vba_ESSI0receivedatawithexceptionstatus);
+ 			m_sr.clear(RegSSISRbits::SSISR_ROE);
+ 		}
+-		else if (m_crb.test(RegCRBbits::CRB_RIE))
++		else if (active && m_crb.test(RegCRBbits::CRB_RIE))
+ 		{
+ 			injectInterrupt(Vba_ESSI0receivedata);
+ 		}
+@@ -472,11 +478,12 @@ namespace dsp56k
+ 		if(!rem)
+ 			return;
+ 
+-		if(m_readRX)
+-			m_sr.set(RegSSISRbits::SSISR_ROE);
+-
+ 		if (m_rxSlotCounter == 0)
+ 			readRXimpl(m_rxFrame);
++		if(m_crb.test(CRB_MOD) && !(((m_rxSlotCounter < 16 ? m_rsma : m_rsmb) >> (m_rxSlotCounter & 15)) & 1))
++			return;
++		if(m_readRX)
++			m_sr.set(RegSSISRbits::SSISR_ROE);
+ 
+ 		if(m_rxSlotCounter < m_rxFrame.size())
+ 			m_rx = m_rxFrame[m_rxSlotCounter];
+@@ -494,6 +501,13 @@ namespace dsp56k
+ 		if(!tem)
+ 			return;
+ 
++		if(m_crb.test(CRB_MOD) && !(((m_txSlotCounter < 16 ? m_tsma : m_tsmb) >> (m_txSlotCounter & 15)) & 1))
++		{
++			// The pins are tri-stated and no TDE/TUE or DMA request is
++			// generated in a masked slot (DSP56303UM section 7.5.9).
++			m_txFrame[m_txSlotCounter].fill(0);
++			return;
++		}
+ 		m_txFrame[m_txSlotCounter] = m_tx;
+ 
+ //		m_tx.fill(0);
+diff --git a/source/dsp56kEmu/jit.cpp b/source/dsp56kEmu/jit.cpp
+index 2afe969f..057b24f1 100644
+--- a/source/dsp56kEmu/jit.cpp
++++ b/source/dsp56kEmu/jit.cpp
+@@ -1,5 +1,7 @@
+ #include "jit.h"
+ 
++#include <algorithm>
++
+ #include "dsp.h"
+ #include "jitblock.h"
+ #include "jitdspmode.h"
+@@ -14,6 +16,11 @@ using namespace asmjit;
+ 
+ namespace dsp56k
+ {
++	void funcRunCheckLoopAddress(JitDspPtr* _dsp, TWord _pc) noexcept
++	{
++		Jit::toJitPtr(_dsp)->runCheckLoopAddress(_pc);
++	}
++
+ #ifndef __ANDROID__
+ 	// TODO: a.equals(b) is not a constant expression, android toolchain says. Maybe it needs an update?
+ 	namespace
+@@ -195,7 +202,6 @@ namespace dsp56k
+ 			return;
+ 		}
+ 
+-		assert(m_loopEnds.find(_end) == m_loopEnds.end());
+ 
+ 		m_loops.insert(std::make_pair(_begin, _end));
+ 		m_loopEnds.insert(_end);
+@@ -217,8 +223,10 @@ namespace dsp56k
+ 
+ 		assert(m_loopEnds.find(it->second) != m_loopEnds.end());
+ 
+-		m_loopEnds.erase(it->second);
++		const auto end = it->second;
+ 		m_loops.erase(it);
++		if(!m_dynamicLoopEnds.count(end) && std::none_of(m_loops.begin(), m_loops.end(), [end](const auto& loop){return loop.second == end;}))
++			m_loopEnds.erase(end);
+ 	}
+ 
+ 	void Jit::destroy(TWord _pc)
+@@ -280,6 +288,20 @@ namespace dsp56k
+ 		checkModeChange();
+ 	}
+ 
++	void Jit::runCheckLoopAddress(const TWord _pc) noexcept
++	{
++		run(_pc);
++		const TWord end = m_dsp.regs().la.var + 1;
++		if(end && end <= m_dsp.memory().sizeP() && m_dynamicLoopEnds.insert(end).second)
++		{
++			// Retain observed boundaries: another loop or a subsequent LA write
++			// may reuse them. Generated checks validate the live LA and LF/FV.
++			m_loopEnds.insert(end);
++			for(auto& chain : m_chains) chain.second->invalidateLoopEnd(end);
++		}
++		checkModeChange();
++	}
++
+ 	void Jit::runCheckModeChange(const TWord _pc) noexcept
+ 	{
+ 		run(_pc);
+@@ -306,6 +328,10 @@ namespace dsp56k
+ 	{
+ 		const auto& i = e.block->getInfo();
+ 
++		if(i.terminationReason == JitBlockInfo::TerminationReason::WriteLoopRegs
++			&& i.loopBegin == g_invalidAddress && any(i.writtenRegs, RegisterMask::LA))
++			return &funcRunCheckLoopAddress;
++
+ 		if(i.terminationReason == JitBlockInfo::TerminationReason::WritePMem)
+ 		{
+ 			if(i.hasFlag(JitBlockInfo::Flags::ModeChange))
+diff --git a/source/dsp56kEmu/jit.h b/source/dsp56kEmu/jit.h
+index 51084b84..e5f7275c 100644
+--- a/source/dsp56kEmu/jit.h
++++ b/source/dsp56kEmu/jit.h
+@@ -55,6 +55,8 @@ namespace dsp56k
+ 		void runCheckPMemWrite(TWord _pc) noexcept;
+ 		void runCheckPMemWriteAndModeChange(TWord _pc) noexcept;
+ 		void runCheckModeChange(TWord _pc) noexcept;
++		void runCheckLoopAddress(TWord _pc) noexcept;
++		bool isDynamicLoopEnd(TWord _end) const { return m_dynamicLoopEnds.count(_end) != 0; }
+ 
+ 		const JitConfig& getConfig() const { return m_config; }
+ 		JitConfig getConfig(TWord _pc) const;
+@@ -123,6 +125,7 @@ namespace dsp56k
+ 		std::set<TWord> m_volatileP;
+ 		std::map<TWord, TWord> m_loops;
+ 		std::set<TWord> m_loopEnds;
++		std::set<TWord> m_dynamicLoopEnds;
+ 
+ 		std::unique_ptr<JitProfilingSupport> m_profiling;
+ 
+diff --git a/source/dsp56kEmu/jitblock.cpp b/source/dsp56kEmu/jitblock.cpp
+index 921ca761..688e1bac 100644
+--- a/source/dsp56kEmu/jitblock.cpp
++++ b/source/dsp56kEmu/jitblock.cpp
+@@ -51,10 +51,9 @@ namespace dsp56k
+ 
+ 		_info.pc = _pc;
+ 
+-		/*	Whether a loop is a DO FOREVER is a property of the DO that opened it, so it can be
+-			settled here instead of testing SR_FV at runtime on every iteration of every loop. Both
+-			forever opcodes are fixed 24 bit words with no operand fields, so comparing the word is
+-			exact.
++		/*	Classify static DO FOREVER openers for optimization decisions. Generated loop
++			endings still check live SR_FV because LA can be changed dynamically. Both
++			forever opcodes are fixed 24 bit words with no operand fields.
+ 		*/
+ 		auto isForeverLoop = [&_dsp](const TWord _doPc)
+ 		{
+@@ -63,8 +62,8 @@ namespace dsp56k
+ 		};
+ 
+ 		/*	A block can end a loop without beginning it, so the opening DO has to be found through
+-			the loop map rather than at a fixed offset. Loop ends are unique, one begin per end, so
+-			the first match is the right one.
++			the loop map rather than at a fixed offset. This static classification is only
++			an optimization hint; dynamic endpoints are handled conservatively below.
+ 		*/
+ 		auto markForeverLoopEndingAt = [&](const TWord _loopEnd)
+ 		{
+@@ -77,24 +76,23 @@ namespace dsp56k
+ 					continue;
+ 
+ 				if(isForeverLoop(loop.first))
++                {
++                    // Several openers can share an endpoint. A counted opener
++                    // earlier in the map must not hide a forever-loop user.
+ 					_info.addFlag(JitBlockInfo::Flags::IsLoopForever);
+-				break;
++                    break;
++                }
+ 			}
+ 		};
+ 
+ 		if(_loopStarts.find(_pc - 2) != _loopStarts.end())
+ 		{
+-			assert(_pc == hiword(_dsp.regs().ss[_dsp.ssIndex()]).toWord());
+ 			_info.addFlag(JitBlockInfo::Flags::IsLoopBodyBegin);
+ 
+ 			// the DO sits immediately in front of the body, which is what the lookup above assumes
+ 			if(isForeverLoop(_pc - 2))
+ 				_info.addFlag(JitBlockInfo::Flags::IsLoopForever);
+ 		}
+-		else
+-		{
+-			assert(_pc == 0 || _pc != hiword(_dsp.regs().ss[_dsp.ssIndex()]).toWord());
+-		}
+ 
+ 		auto writesM = RegisterMask::None;
+ 		auto readsM = RegisterMask::None;
+@@ -260,20 +258,7 @@ namespace dsp56k
+ 			// always terminate block if loop end has reached
+ 			if(_loopEnds.find(_pc + numWords) != _loopEnds.end())
+ 			{
+-				/*	la only describes the loop the DSP is inside right now, while a block is classified by
+-					the loop registry, which is what makes the classification position independent. The two
+-					can legitimately disagree: ENDDO leaves a loop but execution carries on through the
+-					addresses it covered, so a block ending at that address is compiled with the loop already
+-					gone. Only check the correspondence when we really are in a loop.
+-
+-					Still incomplete: do_end restores LF from the stack along with LA/LC, so LF only
+-					ends up clear when the loop ENDDO left was the outermost one. An ENDDO inside a
+-					nested loop restores LF=1 and the outer LA, and a block ending at the inner loop's
+-					end trips this again. The guard narrows the false positive, it does not remove it -
+-					the real invariant is that la describes this instant while the registry describes
+-					the block, and the two are allowed to disagree.
+-				*/
+-				assert(!(_dsp.regs().sr.var & SR_LF) || (_pc + numWords) == static_cast<TWord>(_dsp.regs().la.var + 1));
++
+ 				terminationReason = JitBlockInfo::TerminationReason::LoopEnd;
+ 				markForeverLoopEndingAt(_pc + numWords);
+ 				break;
+@@ -477,7 +462,8 @@ namespace dsp56k
+ 		const auto isLoopStart = info.hasFlag(JitBlockInfo::Flags::IsLoopBodyBegin);
+ 		const auto isLoopEnd = info.terminationReason == JitBlockInfo::TerminationReason::LoopEnd;
+ 		const auto isLoopBody = isLoopStart && isLoopEnd;
+-		const auto isLoopForever = info.hasFlag(JitBlockInfo::Flags::IsLoopForever) != 0;
++		const auto isLoopForever = info.hasFlag(JitBlockInfo::Flags::IsLoopForever) != 0
++			|| dsp().getJit().isDynamicLoopEnd(pcNext);
+ 
+ 		bool childIsConditional = false;
+ 
+@@ -534,11 +520,14 @@ namespace dsp56k
+ 			}
+ 			else if(!isLoopBody)
+ 			{
+-				if ((info.terminationReason == JitBlockInfo::TerminationReason::ExistingCode || info.terminationReason == JitBlockInfo::TerminationReason::VolatileP))
++				if ((info.terminationReason == JitBlockInfo::TerminationReason::ExistingCode || info.terminationReason == JitBlockInfo::TerminationReason::VolatileP ||
++                    (info.terminationReason == JitBlockInfo::TerminationReason::InstructionLimit &&
++                     m_config.linkInstructionLimitBlocks && m_config.linkedBlockDeadlineChecks)))
+ 				{
+ 					if(!isFastInterrupt && !blockFlags && !isLoopEnd)
+ 					{
+-						nonBranchChild = _chain->getChildBlock(&_rt, pcNext, false);
++						nonBranchChild = _chain->getChildBlock(&_rt, pcNext,
++                            info.terminationReason == JitBlockInfo::TerminationReason::InstructionLimit);
+ 						if(nonBranchChild)
+ 						{
+ 							childAddr = pcNext;
+@@ -633,7 +622,7 @@ namespace dsp56k
+ 			RegGP temp(*this);
+ 
+ 			const auto& sr = r32(m_dspRegPool.get(PoolReg::DspSR, true, true));
+-			                 r32(m_dspRegPool.get(PoolReg::DspLA, true, true));	// we don't use it here but do_end does
++			                 const auto& la = r32(m_dspRegPool.get(PoolReg::DspLA, true, true));
+ 			const auto& lc = r32(m_dspRegPool.get(PoolReg::DspLC, true, true));
+ 
+ 			m_dspRegPool.lock(PoolReg::DspSR);
+@@ -646,28 +635,23 @@ namespace dsp56k
+ 
+ 			m_asm.bitTest(sr, SRB_LF);
+ 			m_asm.jz(skip);
+-
+-			/*	A DO FOREVER never ends on the loop counter - it does not even load one - and is
+-				left only by ENDDO. Which kind of loop this is was settled when the block was
+-				compiled, so a counted DO emits exactly what it always did.
+-			*/
+-			if(!isLoopForever)
+-			{
+-				m_asm.cmp(lc, asmjit::Imm(1));
+-				m_asm.jle(enddo);
+-				m_asm.dec(lc);
+-			}
+-
+-			if(isLoopBody)
+-			{
+-				m_asm.mov(r32(pc), asmjit::Imm(pcFirst));
+-			}
+-			else
+-			{
+-				const auto ss = r64(pc);
+-				m_dspRegs.getSS(ss);				// note: not calling getSSH as it will dec the SP
+-				m_asm.shr(ss, asmjit::Imm(24));
+-			}
++			m_asm.mov(r32(temp), asmjit::Imm(pcNext - 1));
++			m_asm.cmp(la, r32(temp));
++			m_asm.jnz(skip);
++
++			// FV belongs to the active loop, including dynamically relocated ends.
++			const auto repeat = m_asm.newLabel();
++			m_asm.bitTest(sr, SRB_FV);
++			m_asm.jnz(repeat);
++			m_asm.cmp(lc, asmjit::Imm(1));
++			m_asm.jle(enddo);
++			m_asm.dec(lc);
++			m_asm.bind(repeat);
++
++			// The active loop frame, rather than cached layout, owns the return PC.
++			const auto ss = r64(pc);
++			m_dspRegs.getSS(ss);
++			m_asm.shr(ss, asmjit::Imm(24));
+ 			m_asm.jmp(skip);
+ 
+ 			m_asm.bind(enddo);
+@@ -699,7 +683,7 @@ namespace dsp56k
+ 				ccrOverwritten = nonBranchChild->getInfo().ccrOverwrite;
+ 			}
+ 
+-			ccrDirty = static_cast<CCRMask>(ccrDirty & ~ccrOverwritten);
++			if(!m_config.linkedBlockDeadlineChecks) ccrDirty = static_cast<CCRMask>(ccrDirty & ~ccrOverwritten);
+ 
+ 			if(ccrDirty)
+ 			{
+@@ -797,7 +781,7 @@ namespace dsp56k
+ 
+ 		const auto pcWritten = m_dspRegPool.isWritten(PoolReg::DspPC);
+ 
+-		if(pcWritten && childrenEstablishPc)
++		if(pcWritten && childrenEstablishPc && !m_config.linkedBlockDeadlineChecks)
+ 			m_dspRegPool.discardWritten(PoolReg::DspPC);
+ 
+ 		_rt.setEstablishesPc(pcWritten || childrenEstablishPc);
+@@ -821,6 +805,51 @@ namespace dsp56k
+ 			lj = profileBegin("jump");
+ 		}
+ 
++        if(m_config.linkedBlockDeadlineChecks && (child || nonBranchChild))
++        {
++            // Registers and CCR are materialized above. Check before taking any
++            // linked edge, preserving regPC for conditional branch selection.
++            const auto a=r64(g_funcArgGPs[0]);
++            const auto b=r64(regPC==r32(g_funcArgGPs[1])?g_funcArgGPs[2]:g_funcArgGPs[1]);
++            const auto yield=m_asm.newLabel(),resume=m_asm.newLabel();
++            const auto allowed=m_asm.newLabel();
++#ifdef HAVE_ARM64
++            m_asm.ldr(a,Jitmem::makeRelativePtr(&m_dsp.getInterruptFunc(),&m_dsp.regs(),regDspPtr,8));
++#else
++            m_asm.mov(a,Jitmem::makeRelativePtr(&m_dsp.getInterruptFunc(),&m_dsp.regs(),regDspPtr,8));
++#endif
++            m_asm.mov(b,asmjit::Imm(reinterpret_cast<const void*>(m_dsp.getExecPeripheralsFunc())));
++            m_asm.cmp(a,b);
++#ifdef HAVE_ARM64
++            m_asm.b(asmjit::arm::CondCode::kEQ,allowed);
++#else
++            m_asm.je(allowed);
++#endif
++            m_asm.mov(b,asmjit::Imm(reinterpret_cast<const void*>(DSP::noopInterruptFunc())));
++            m_asm.cmp(a,b);
++#ifdef HAVE_ARM64
++            m_asm.b(asmjit::arm::CondCode::kNE,yield);
++#else
++            m_asm.jne(yield);
++#endif
++            m_asm.bind(allowed);
++            m_asm.mov(b,asmjit::Imm(m_dsp.getPeriph(0)->getTargetClockPtr()));
++#ifdef HAVE_ARM64
++            m_asm.ldr(a,Jitmem::makePtr(b,8));
++            m_asm.ldr(b,Jitmem::makeRelativePtr(&m_dsp.getInstructionCounter(),&m_dsp.regs(),regDspPtr,8));
++            m_asm.cmp(b,a);m_asm.b(asmjit::arm::CondCode::kHS,yield);
++            m_asm.ldr(a,Jitmem::makeRelativePtr(&m_dsp.getCycles(),&m_dsp.regs(),regDspPtr,8));
++            m_asm.ldr(b,Jitmem::makeRelativePtr(&m_dsp.jitCycleDeadline,&m_dsp.regs(),regDspPtr,8));
++            m_asm.cmp(a,b);m_asm.b(asmjit::arm::CondCode::kLO,resume);
++#else
++            m_asm.mov(a,Jitmem::makeRelativePtr(&m_dsp.getInstructionCounter(),&m_dsp.regs(),regDspPtr,8));
++            m_asm.cmp(a,Jitmem::makePtr(b,8));m_asm.jae(yield);
++            m_asm.mov(a,Jitmem::makeRelativePtr(&m_dsp.getCycles(),&m_dsp.regs(),regDspPtr,8));
++            m_asm.cmp(a,Jitmem::makeRelativePtr(&m_dsp.jitCycleDeadline,&m_dsp.regs(),regDspPtr,8));m_asm.jb(resume);
++#endif
++            m_asm.bind(yield);m_asm.ret();m_asm.bind(resume);
++        }
++
+ 		if (child)
+ 		{
+ 			if (childIsConditional)
+diff --git a/source/dsp56kEmu/jitblockchain.cpp b/source/dsp56kEmu/jitblockchain.cpp
+index cbef8577..872d0367 100644
+--- a/source/dsp56kEmu/jitblockchain.cpp
++++ b/source/dsp56kEmu/jitblockchain.cpp
+@@ -243,6 +243,29 @@ namespace dsp56k
+ 			destroy(block);
+ 	}
+ 
++	void JitBlockChain::invalidateLoopEnd(const TWord _end)
++	{
++		// Called after generated code has returned. A newly discovered boundary
++		// changes the block covering its final word, including chained parents.
++		destroy(_end - 1);
++		// destroy() retains single-op variants. Their opcode key does not encode
++		// loop boundaries, so evict variants that could cover this word as well.
++		for(TWord pc = _end > 1 ? _end - 2 : 0; pc < _end && pc < m_jitCache.size(); ++pc)
++		{
++			auto& entry = m_jitCache[pc];
++			if(!entry.singleOpCache) continue;
++			for(auto it = entry.singleOpCache->begin(); it != entry.singleOpCache->end();)
++			{
++				if(pc + it->second->getPMemSize() >= _end)
++				{
++					release(it->second);
++					entry.singleOpCache->erase(it++);
++				}
++				else ++it;
++			}
++		}
++	}
++
+ 	void JitBlockChain::destroyToRecreate(const TWord _pc)
+ 	{
+ 		if(_pc >= m_jitCache.size())
+@@ -322,6 +345,11 @@ namespace dsp56k
+ 				destroy(e.block);
+ 		}
+ 
++        // Bound speculative continuation compilation, including branches reached
++        // while generating it. Existing compiled successors remain linkable.
++        if (m_jit.getConfig().linkInstructionLimitBlocks && m_generatingBlocks.size() >= 8)
++            return nullptr;
++
+ 		create(_pc, false);
+ 
+ 		if (!canBeDefaultExecuted(_pc))
+diff --git a/source/dsp56kEmu/jitblockchain.h b/source/dsp56kEmu/jitblockchain.h
+index 341f2071..d5e0545e 100644
+--- a/source/dsp56kEmu/jitblockchain.h
++++ b/source/dsp56kEmu/jitblockchain.h
+@@ -28,6 +28,7 @@ namespace dsp56k
+ 		void recreate(TWord _pc);
+ 		void destroy(TWord _pc);
+ 		void destroyToRecreate(TWord _pc);
++		void invalidateLoopEnd(TWord _end);
+ 
+ 		JitBlockRuntimeData* getChildBlock(JitBlockRuntimeData* _parent, TWord _pc, bool _allowCreate = true);
+ 		JitBlockRuntimeData* emit(TWord _pc);
+diff --git a/source/dsp56kEmu/jitconfig.h b/source/dsp56kEmu/jitconfig.h
+index f740e523..8c118738 100644
+--- a/source/dsp56kEmu/jitconfig.h
++++ b/source/dsp56kEmu/jitconfig.h
+@@ -14,6 +14,10 @@ namespace dsp56k
+ 		bool aguSupportMultipleWrapModulo = true;
+ 		bool cacheSingleOpBlocks = true;
+ 		bool linkJitBlocks = true;
++        // Yield linked paths at peripheral or owner cycle deadlines. Keeps PC/CCR materialized.
++        bool linkedBlockDeadlineChecks = false;
++        // Experimental bounded fallthrough linking; requires deadline checks.
++        bool linkInstructionLimitBlocks = false;
+ 		bool splitOpsByNops = false;
+ 		bool dynamicPeripheralAddressing = false;
+ 
+diff --git a/source/dsp56kEmu/jitops.cpp b/source/dsp56kEmu/jitops.cpp
+index 9bc20831..abf2c220 100644
+--- a/source/dsp56kEmu/jitops.cpp
++++ b/source/dsp56kEmu/jitops.cpp
+@@ -537,7 +537,7 @@ namespace dsp56k
+ 		const RegGP temp(m_block);
+ 
+ 		const auto sr = r32(pool.get(PoolReg::DspSR, true, true));
+-		                r32(pool.get(PoolReg::DspLA, true, true));	// unused here, but do_end needs it
++		                const auto la = r32(pool.get(PoolReg::DspLA, true, true));
+ 		const auto lc = r32(pool.get(PoolReg::DspLC, true, true));
+ 
+ 		pool.lock(PoolReg::DspSR);
+@@ -551,29 +551,24 @@ namespace dsp56k
+ 		m_asm.bitTest(sr, SRB_LF);
+ 		m_asm.jz(done);										// not inside a loop at all
+ 
+-		// a DO FOREVER has no loop counter and cannot retire here - it only ends via ENDDO or BRKcc
+-		if(!_loopIsForever)
+-		{
+-			m_asm.cmp(lc, asmjit::Imm(1));
+-			m_asm.jle(lastIteration);
+-			m_asm.dec(lc);
+-		}
+-
+-		if(_loopStartIsBlockStart)
+-		{
+-			m_asm.mov(r32(pc), asmjit::Imm(_blockPc));
+-		}
+-		else
+-		{
+-			const auto ss = r64(pc);
+-			m_dspRegs.getSS(ss);							// note: not getSSH, that would move SP
+-			m_asm.shr(ss, asmjit::Imm(24));
+-		}
++		m_asm.mov(r32(temp), asmjit::Imm(_pcAfterBranch - 1));
++		m_asm.cmp(la, r32(temp));
++		m_asm.jnz(done);
++		const auto repeat = m_asm.newLabel();
++		m_asm.bitTest(sr, SRB_FV);
++		m_asm.jnz(repeat);
++		m_asm.cmp(lc, asmjit::Imm(1));
++		m_asm.jle(lastIteration);
++		m_asm.dec(lc);
++		m_asm.bind(repeat);
++
++		const auto ss = r64(pc);
++		m_dspRegs.getSS(ss);
++		m_asm.shr(ss, asmjit::Imm(24));
+ 		m_asm.jmp(done);
+ 
+ 		m_asm.bind(lastIteration);
+-		if(!_loopIsForever)
+-			do_end(temp);									// pops LA/LC, restores LF
++		do_end(temp);									// pops LA/LC, restores LF
+ 
+ 		m_asm.bind(done);
+ 
+diff --git a/source/dsp56kEmu/jitops.h b/source/dsp56kEmu/jitops.h
+index 43c90740..6fb1031f 100644
+--- a/source/dsp56kEmu/jitops.h
++++ b/source/dsp56kEmu/jitops.h
+@@ -228,7 +228,7 @@ namespace dsp56k
+ 		void op_Movec_S1D2(TWord op);
+ 		void op_Movec_xx(TWord op);
+ 		void op_Movem_ea(TWord op);
+-		void op_Movem_aa(TWord op)				{ errNotImplemented(op); }
++		void op_Movem_aa(TWord op);
+ 		void op_Movep_ppea(TWord op);
+ 		void op_Movep_Xqqea(TWord op);
+ 		void op_Movep_Yqqea(TWord op);
+diff --git a/source/dsp56kEmu/jitops_mem.inl b/source/dsp56kEmu/jitops_mem.inl
+index 9549e485..4d21fb13 100644
+--- a/source/dsp56kEmu/jitops_mem.inl
++++ b/source/dsp56kEmu/jitops_mem.inl
+@@ -138,7 +138,13 @@ namespace dsp56k
+ 
+ 	template <Instruction Inst> void JitOps::writePmem(const TWord _op, const DspValue& _src)
+ 	{
+-		auto ea = effectiveAddress<Inst>(_op);
++		auto ea = [&]()
++		{
++			if constexpr(hasFieldT<Inst, Field_aaaaaa>())
++				return DspValue(m_block, getFieldValue<Inst, Field_aaaaaa>(_op), DspValue::Immediate24);
++			else
++				return effectiveAddress<Inst>(_op);
++		}();
+ 
+ 		DspValue compare(m_block, UsePooledTemp);
+ 
+diff --git a/source/dsp56kEmu/jitops_move.cpp b/source/dsp56kEmu/jitops_move.cpp
+index 1ee45755..2486b883 100644
+--- a/source/dsp56kEmu/jitops_move.cpp
++++ b/source/dsp56kEmu/jitops_move.cpp
+@@ -462,6 +462,27 @@ namespace dsp56k
+ 			writePmem<Movem_ea>(op, r);
+ 		}
+ 	}
++	void JitOps::op_Movem_aa(TWord op)
++	{
++		const auto write = getFieldValue<Movem_aa, Field_W>(op);
++		const auto dddddd = getFieldValue<Movem_aa, Field_dddddd>(op);
++
++		if (write)
++		{
++			copy24ToDDDDDD<Movem_aa>(op, dddddd, UsePooledTemp, [&](DspValue& r)
++			{
++				readMem<Movem_aa>(r, op, MemArea_P);
++			});
++		}
++		else
++		{
++			DspValue r(m_block, UsePooledTemp);
++
++			decode_dddddd_read(r, dddddd);
++
++			writePmem<Movem_aa>(op, r);
++		}
++	}
+ 
+ 	void JitOps::op_Movep_ppea(TWord op)
+ 	{
+diff --git a/source/dsp56kEmu/jitoptimizer.cpp b/source/dsp56kEmu/jitoptimizer.cpp
+index 87207a16..259dece4 100644
+--- a/source/dsp56kEmu/jitoptimizer.cpp
++++ b/source/dsp56kEmu/jitoptimizer.cpp
+@@ -58,7 +58,7 @@ namespace dsp56k
+ 		// folding opportunities.  Iterate until stable.
+ 		for(;;)
+ 		{
+-			const size_t changed = constantFolding() + spillCopyPropagation() + deadCodeElimination();
++			const size_t changed = constantFolding() + spillCopyPropagation() + redundantComparisons() + deadCodeElimination();
+ 			total += changed;
+ 			if(changed == 0)
+ 				break;
+@@ -72,6 +72,40 @@ namespace dsp56k
+ 		return total;
+ 	}
+ 
++	// ARM64 CSEL reads but preserves NZCV. Reuse an identical preceding
++	// comparison only across this one instruction, with unchanged operands.
++	// Never cross labels, calls, arbitrary instructions, or W/X aliases written
++	// by the select. This occurs in bridged-memory selection plus bounds checks.
++	size_t JitOptimizer::redundantComparisons() const
++	{
++		size_t removed=0;
++#ifdef HAVE_ARM64
++		for(auto* node=m_asm.firstNode();node;node=node->next())
++		{
++			if(!node->isInst()) continue;
++			auto* first=node->as<asmjit::InstNode>();
++			if(first->id()!=Inst::kIdCmp || first->opCount()!=2) continue;
++			auto* middle=node->next();
++			if(!middle || !middle->isInst()) continue;
++			auto* select=middle->as<asmjit::InstNode>();
++			if(select->id()!=Inst::kIdCsel || !select->op(0).isReg()) continue;
++			auto* last=middle->next();
++			if(!last || !last->isInst()) continue;
++			auto* second=last->as<asmjit::InstNode>();
++			if(second->id()!=Inst::kIdCmp || second->opCount()!=2) continue;
++			bool safe=true;
++			for(unsigned i=0;i<2;++i)
++			{
++				const auto& operand=first->op(i);
++				if(operand!=second->op(i) || (!operand.isReg() && !operand.isImm())) {safe=false;break;}
++				if(operand.isReg() && operand.as<asmjit::BaseReg>().id()==select->op(0).as<asmjit::BaseReg>().id()) {safe=false;break;}
++			}
++			if(safe) {m_asm.removeNode(last);++removed;}
++		}
++#endif
++		return removed;
++	}
++
+ 	int64_t JitOptimizer::maskToRegSize(const asmjit::Operand& _reg, int64_t _value)
+ 	{
+ 		if(!_reg.isReg())
+diff --git a/source/dsp56kEmu/jitoptimizer.h b/source/dsp56kEmu/jitoptimizer.h
+index 7f007431..803fad7e 100644
+--- a/source/dsp56kEmu/jitoptimizer.h
++++ b/source/dsp56kEmu/jitoptimizer.h
+@@ -27,6 +27,7 @@ namespace dsp56k
+ 		size_t optimize();
+ 
+ 	private:
++		size_t redundantComparisons() const;
+ 		// Register key: compact index into a flat array.
+ 		// GP registers: 0-31, Vec registers: 32-63, CPU flags: 64
+ 		static constexpr uint32_t kGpBase  = 0;
+diff --git a/source/dsp56kEmu/jitoptimizertests.cpp b/source/dsp56kEmu/jitoptimizertests.cpp
+index 2ddbfea4..ccbffcdf 100644
+--- a/source/dsp56kEmu/jitoptimizertests.cpp
++++ b/source/dsp56kEmu/jitoptimizertests.cpp
+@@ -30,6 +30,7 @@ namespace dsp56k
+ 		testMoveImmAdd();
+ 		testFullBlockPipeline();
+ 		testAGUOperations();
++		testRedundantComparisons();
+ 
+ 		LOG("JIT Optimizer Tests finished.");
+ 	}
+@@ -165,6 +166,46 @@ namespace dsp56k
+ 		compareDspState(_name, withoutOpt, withOpt);
+ 	}
+ 
++	void JitOptimizerTests::testRedundantComparisons()
++	{
++#ifdef HAVE_ARM64
++		using namespace asmjit::a64;
++		// Positive case, written operand, changed immediate, changed width,
++		// intervening label, and intervening flag write.
++		for(unsigned variant=0;variant<6;++variant)
++		{
++			using Func=uint64_t(*)(uint64_t,uint64_t);
++			Func funcs[2]{};
++			for(unsigned optimized=0;optimized<2;++optimized)
++			{
++				asmjit::CodeHolder code;code.init(m_rt.environment());JitEmitter e(&code);
++				e.cmp(w0,asmjit::Imm(512));
++				e.csel(variant==1?x0:x2,x0,x1,asmjit::arm::CondCode::kGE);
++				if(variant==4) e.bind(e.newLabel());
++				if(variant==5) e.adds(w3,w1,asmjit::Imm(1));
++				if(variant==3) e.cmp(x0,asmjit::Imm(512));
++				else e.cmp(w0,asmjit::Imm(variant==2?513:512));
++				e.cset(w3,asmjit::arm::CondCode::kGE);
++				e.add(x0,variant==1?x0:x2,x3);e.ret();
++				if(optimized)
++				{
++					JitOptimizer optimizer(e);optimizer.optimize();
++					unsigned comparisons=0;
++					for(auto* n=e.firstNode();n;n=n->next())
++						if(n->isInst() && n->as<asmjit::InstNode>()->id()==Inst::kIdCmp) ++comparisons;
++					// DCE can remove the intervening dead flag write in variant 5,
++					// exposing a valid opportunity on the next optimization pass.
++					if(comparisons!=((variant==0 || variant==5)?1u:2u)) throw std::string("Unexpected redundant comparison count");
++				}
++				e.finalize();if(m_rt.add(&funcs[optimized],&code)) throw std::string("Compare test JIT failed");
++			}
++			for(uint64_t input:{0ull,511ull,512ull,513ull,0xffffffffull,0x100000200ull})
++				if(funcs[0](input,7)!=funcs[1](input,7)) throw std::string("Redundant compare changed flags/result");
++			for(auto f:funcs) m_rt.release(f);
++		}
++#endif
++	}
++
+ 	void JitOptimizerTests::emitOp(JitBlock& _block, JitOps& _ops, TWord _opA, TWord _opB)
+ 	{
+ 		JitDspMode mode;
+diff --git a/source/dsp56kEmu/jitoptimizertests.h b/source/dsp56kEmu/jitoptimizertests.h
+index fcee45fa..732e2b17 100644
+--- a/source/dsp56kEmu/jitoptimizertests.h
++++ b/source/dsp56kEmu/jitoptimizertests.h
+@@ -54,6 +54,7 @@ namespace dsp56k
+ 		void testMoveImmAdd();
+ 		void testFullBlockPipeline();
+ 		void testAGUOperations();
++		void testRedundantComparisons();
+ 
+ 		Peripherals56362 peripheralsX;
+ 		Peripherals56367 peripheralsY;
+diff --git a/source/dsp56kEmu/jittrampoline.cpp b/source/dsp56kEmu/jittrampoline.cpp
+index 41680d1a..60d1863b 100644
+--- a/source/dsp56kEmu/jittrampoline.cpp
++++ b/source/dsp56kEmu/jittrampoline.cpp
+@@ -38,7 +38,15 @@ namespace dsp56k
+ 	{
+ 	}
+ 
+-	void JitTrampoline::generateExecLoopFunc()
++	void JitTrampoline::execUntilCycle(DSP* dsp,uint64_t target) const noexcept
++	{
++		if(dsp->getCycles()<target) {
++            const auto previous=dsp->jitCycleDeadline;dsp->jitCycleDeadline=target;
++            m_funcExecCycle(dsp,target);dsp->jitCycleDeadline=previous;
++        }
++	}
++
++	void JitTrampoline::generateExecLoopFunc(bool cycleMode)
+ 	{
+ 		asmjit::CodeHolder codeHolder;
+ 		codeHolder.init(m_runtime.environment());
+@@ -99,10 +107,12 @@ namespace dsp56k
+ 
+ #ifdef HAVE_ARM64
+ 		m_asm.mov(r64(g_ptrDSP), argDspPtr);
+-		m_asm.mov(r32(g_counter), argCounter);
++		if(cycleMode) m_asm.mov(r64(g_counter),r64(g_funcArgGPs[1]));
++		else m_asm.mov(r32(g_counter),argCounter);
+ #else
+ 		m_asm.mov(asmjit::x86::ptr(asmjit::x86::regs::rsp, g_slotDsp, 8), argDspPtr);
+-		m_asm.mov(asmjit::x86::ptr(asmjit::x86::regs::rsp, g_slotCounter, 4), argCounter);
++		if(cycleMode) m_asm.mov(asmjit::x86::ptr(asmjit::x86::regs::rsp,g_slotCounter,8),r64(g_funcArgGPs[1]));
++		else m_asm.mov(asmjit::x86::ptr(asmjit::x86::regs::rsp,g_slotCounter,4),argCounter);
+ #endif
+ 
+ 		m_asm.lea_(g_ptrJitEntries   , argDspPtr, &m_dsp.getJitEntries(), &m_dsp);
+@@ -142,7 +152,7 @@ namespace dsp56k
+ 		m_asm.align(asmjit::AlignMode::kCode, 64);
+ 		m_asm.bind(label);
+ 
+-		for(uint32_t i=0; i<UnrollSize; ++i)
++		for(uint32_t i=0; i<(cycleMode?1:UnrollSize); ++i)
+ 		{
+ 			// 1) call interrupt func: (DSP*)
+ 			// 2) call JIT func:       (DspRegs*, PC)
+@@ -204,12 +214,48 @@ namespace dsp56k
+ #endif
+ 		}
+ 
++		if(cycleMode)
++		{
++			// Mirror the device-side post-block poll, including IRQ bodies.
++			// Both the cheap due test and the loop backedge stay in native code.
++			const auto skip=m_asm.newLabel();
++#ifdef HAVE_ARM64
++			m_asm.ldr(g_funcArgGPs[0],Jitmem::makePtr(g_ptrTargetClock,8));
++			m_asm.ldr(g_funcArgGPs[1],Jitmem::makePtr(g_ptrInstructions,8));
++			m_asm.cmp(g_funcArgGPs[0],g_funcArgGPs[1]);
++			m_asm.b(asmjit::arm::CondCode::kHI,skip);
++			m_asm.mov(g_funcArgGPs[0],g_ptrDSP);
++			m_asm.blr(g_periphFunc);
++			m_asm.bind(skip);
++			m_asm.ldr(g_funcArgGPs[0],Jitmem::makeRelativePtr(&m_dsp.getCycles(),&m_dsp,g_ptrDSP,8));
++			m_asm.cmp(g_funcArgGPs[0],g_counter);
++			m_asm.b(asmjit::arm::CondCode::kLO,label);
++#else
++			const auto dsp=asmjit::x86::rax;
++			const auto scratch=asmjit::x86::r10;
++			m_asm.mov(dsp,asmjit::x86::ptr(asmjit::x86::rsp,g_slotDsp,8));
++			m_asm.mov(scratch,asmjit::x86::ptr(asmjit::x86::rsp,g_slotClockPtr,8));
++			m_asm.mov(scratch,asmjit::x86::ptr(scratch,0,8));
++			m_asm.cmp(scratch,Jitmem::makeRelativePtr(&m_dsp.getInstructionCounter(),&m_dsp,dsp,8));
++			m_asm.ja(skip);
++			m_asm.mov(g_funcArgGPs[0],dsp);
++			m_asm.call(asmjit::x86::ptr(asmjit::x86::rsp,g_slotPeriphFunc,8));
++			m_asm.mov(dsp,asmjit::x86::ptr(asmjit::x86::rsp,g_slotDsp,8));
++			m_asm.bind(skip);
++			m_asm.mov(scratch,Jitmem::makeRelativePtr(&m_dsp.getCycles(),&m_dsp,dsp,8));
++			m_asm.cmp(scratch,asmjit::x86::ptr(asmjit::x86::rsp,g_slotCounter,8));
++			m_asm.jb(label);
++#endif
++		}
++		else
++		{
+ #ifdef HAVE_ARM64
+ 		m_asm.subs(r32(g_counter), r32(g_counter), asmjit::Imm(1));
+ #else
+ 		m_asm.dec(asmjit::x86::ptr(asmjit::x86::regs::rsp, g_slotCounter, 4));
+ #endif
+ 		m_asm.jnz(label);
++		}
+ 
+ #ifdef HAVE_X86_64
+ 		m_asm.add(asmjit::x86::regs::rsp, asmjit::Imm(g_additionalStackSize));
+@@ -236,10 +282,11 @@ namespace dsp56k
+ 
+ 		m_asm.ret();
+ 		m_asm.finalize();
+-		m_runtime.add(&m_funcExecLoop, &codeHolder);
++		if(cycleMode) m_runtime.add(&m_funcExecCycle,&codeHolder);
++		else m_runtime.add(&m_funcExecLoop, &codeHolder);
+ 
+ 		if (auto* profiling = m_dsp.getJit().getProfilingSupport())
+-			profiling->addFunction("trampolineExecLoop", reinterpret_cast<void*>(m_funcExecLoop), codeHolder);
++			profiling->addFunction(cycleMode?"trampolineExecUntilCycle":"trampolineExecLoop", cycleMode?reinterpret_cast<void*>(m_funcExecCycle):reinterpret_cast<void*>(m_funcExecLoop), codeHolder);
+ 	}
+ 
+ 	void JitTrampoline::generateExecOneFunc()
+diff --git a/source/dsp56kEmu/jittrampoline.h b/source/dsp56kEmu/jittrampoline.h
+index b2ce42d8..b5fb5259 100644
+--- a/source/dsp56kEmu/jittrampoline.h
++++ b/source/dsp56kEmu/jittrampoline.h
+@@ -24,7 +24,8 @@ namespace dsp56k
+ 
+ 		void generateCode()
+ 		{
+-			generateExecLoopFunc();
++			generateExecLoopFunc(false);
++			generateExecLoopFunc(true);
+ 			generateExecOneFunc();
+ 		}
+ 
+@@ -39,8 +40,14 @@ namespace dsp56k
+ 			m_funcExecOne(_jit, _pc, _func);
+ 		}
+ 
++		// Serialized owner only. Stops at a JIT return boundary, polling local
++		// peripherals even during long interrupts. The caller must bound linked
++		// chains/DO loops; the deadline is a cycle target, not an instruction count.
++		void execUntilCycle(DSP* dsp, uint64_t target) const noexcept;
+ 	private:
+-		void generateExecLoopFunc();
++		using TExecCycleFunc = void (*)(DSP*, uint64_t) noexcept;
++		TExecCycleFunc m_funcExecCycle=nullptr;
++		void generateExecLoopFunc(bool cycleMode);
+ 		void generateExecOneFunc();
+ 
+ 		DSP& m_dsp;
+diff --git a/source/dsp56kEmu/jitunittests.cpp b/source/dsp56kEmu/jitunittests.cpp
+index 3aaf380b..bfd2ecdc 100644
+--- a/source/dsp56kEmu/jitunittests.cpp
++++ b/source/dsp56kEmu/jitunittests.cpp
+@@ -29,6 +29,100 @@ namespace dsp56k
+ 	{
+ 		// DO FOREVER is implemented in the JIT only, so its test lives here and not in runAllTests
+ 		do_forever();
++		dynamicLoopAddress();
++
++		// Cycle bursts must respect 64-bit deadlines and preserve the same
++		// architectural state as repeated dispatcher calls.
++		{
++			const auto config=dsp.getJit().getConfig();
++			auto bounded=config;bounded.linkJitBlocks=false;bounded.maxInstructionsPerBlock=16;
++			dsp.getJit().setConfig(bounded);
++			uint64_t cycles=0;TWord pc=0,r0=0;
++			for(unsigned pass=0;pass<2;++pass)
++			{
++				dsp.resetHW();
++				emitToMemory("move (r0)+",0x900);
++				emitToMemory("jmp $900",0x901);
++				dsp.setPC(0x900);dsp.regs().r[0].var=0;
++				dsp.fastForward(0,0xfffffff0);
++				const auto target=dsp.getCycles()+1024;
++				if(pass)
++				{
++					auto& trampoline=dsp.getJit().getTrampoline();
++					const auto before=dsp.getCycles();
++					trampoline.execUntilCycle(&dsp,before);
++					trampoline.execUntilCycle(&dsp,before-1);
++					verify(dsp.getCycles()==before && dsp.regs().r[0].var==0);
++					trampoline.execUntilCycle(&dsp,target);
++					verify(dsp.getCycles()==cycles && dsp.getPC().var==pc && dsp.regs().r[0].var==r0);
++				}
++				else
++				{
++					while(dsp.getCycles()<target) dsp.exec();
++					cycles=dsp.getCycles();pc=dsp.getPC().var;r0=dsp.regs().r[0].var;
++				}
++				verify(dsp.getCycles()>=target && dsp.getCycles()<target+64);
++			}
++			dsp.resetHW();dsp.getJit().setConfig(config);
++		}
++
++
++        {
++            const auto original=dsp.getJit().getConfig();
++            for(uint64_t budget:{1u,2u,3u,17u,1024u})
++            {
++                uint64_t expectedCycles=0;TWord expectedPC=0,expectedSR=0,expectedR=0;
++                for(bool linked:{false,true})
++                {
++                    dsp.resetHW();dsp.getJit().destroyAllBlocks();
++                    auto config=original;config.maxInstructionsPerBlock=1;config.maxDoIterations=1;
++                    config.linkJitBlocks=linked;config.linkedBlockDeadlineChecks=linked;dsp.getJit().setConfig(config);
++                    auto pc=emitToMemory("clr a",0x980);
++                    pc=emitToMemory("tst a",pc);
++                    pc=emitToMemory("jne $980",pc);
++                    pc=emitToMemory("move (r0)+",pc);
++                    emitToMemory("jmp $980",pc);
++                    dsp.setPC(0x980);dsp.regs().r[0].var=0;
++                    dsp.getJit().getTrampoline().execUntilCycle(&dsp,budget);
++                    if(linked) {
++                        verify(dsp.getCycles()==expectedCycles && dsp.getPC().var==expectedPC);
++                        verify(dsp.regs().sr.var==expectedSR && dsp.regs().r[0].var==expectedR);
++                    } else {expectedCycles=dsp.getCycles();expectedPC=dsp.getPC().var;expectedSR=dsp.regs().sr.var;expectedR=dsp.regs().r[0].var;}
++                }
++            }
++            dsp.resetHW();dsp.getJit().destroyAllBlocks();dsp.getJit().setConfig(original);
++        }
++
++        // Instruction-limit continuations must preserve deadline boundaries and
++        // invalidate a linked parent when its successor is rewritten.
++        {
++            const auto original=dsp.getJit().getConfig();
++            for(uint64_t budget:{1u,17u,63u,1024u})
++            {
++                uint64_t cycles[2]{};TWord pcs[2]{},rs[2]{};
++                for(bool candidate:{false,true})
++                {
++                    dsp.resetHW();dsp.getJit().destroyAllBlocks();
++                    auto config=original;config.maxInstructionsPerBlock=16;config.maxDoIterations=1;
++                    config.linkJitBlocks=true;config.linkedBlockDeadlineChecks=true;
++                    config.linkInstructionLimitBlocks=candidate;dsp.getJit().setConfig(config);
++                    for(TWord pc=0xa00;pc<0xa30;++pc) emitToMemory("move (r0)+",pc);
++                    emitToMemory("jmp $a00",0xa30);
++                    for(unsigned phase=0;phase<2;++phase)
++                    {
++                        if(phase) emitToMemory("move (r0)-",0xa10);
++                        dsp.setPC(0xa00);dsp.regs().r[0].var=0;
++                        const auto before=dsp.getCycles();
++                        dsp.getJit().getTrampoline().execUntilCycle(&dsp,before+budget);
++                        if(candidate) {
++                            verify(dsp.getCycles()-before==cycles[phase]);
++                            verify(dsp.getPC().var==pcs[phase] && dsp.regs().r[0].var==rs[phase]);
++                        } else {cycles[phase]=dsp.getCycles()-before;pcs[phase]=dsp.getPC().var;rs[phase]=dsp.regs().r[0].var;}
++                    }
++                }
++            }
++            dsp.resetHW();dsp.getJit().destroyAllBlocks();dsp.getJit().setConfig(original);
++        }
+ 
+ 		runTest(&JitUnittests::conversion_build, &JitUnittests::conversion_verify);
+ 		runTest(&JitUnittests::signextend_build, &JitUnittests::signextend_verify);
+@@ -69,6 +163,81 @@ namespace dsp56k
+ 		parallelMoveXY();
+ 	}
+ 
++	void JitUnittests::dynamicLoopAddress()
++	{
++		// Change LA from a called routine, where SSH is a return address, not
++		// the loop start. Alternate lengths to exercise already cached endings.
++		dsp.resetHW();
++		auto pc = emitToMemory("jsr $700", 0x680);
++		const auto returned = pc;
++		emitToMemory("nop", pc);
++		emitToMemory("do #3,>$705", 0x700);
++		emitToMemory("jsr $740", 0x702);
++		emitToMemory("nop", 0x703);
++		emitToMemory("move (r0)+", 0x704);
++		for(TWord p=0x705;p<0x708;++p) emitToMemory("nop",p);
++		emitToMemory("move (r1)+", 0x708);
++		emitToMemory("rts", 0x709);
++		emitToMemory("move r2,la", 0x740);
++		emitToMemory("rts", 0x741);
++		auto written=RegisterMask::None, read=RegisterMask::None;
++		getRegisters(written,read,Movep_Spp,0x087e06); // movep x:$ffffc6,la
++		verify(any(written,RegisterMask::LA));
++		// Leave a single-op variant cached before this address becomes a loop end.
++		const auto config=dsp.getJit().getConfig();
++		auto single=config;single.maxInstructionsPerBlock=1;
++		dsp.getJit().setConfig(single);dsp.setPC(0x708);execStep();
++		verify(dsp.getPC().var==0x709);
++		dsp.getJit().destroy(0x708);
++		dsp.getJit().setConfig(config);
++		for(const auto end : {0x708u,0x704u,0x708u})
++		{
++			dsp.regs().r[0].var=0;dsp.regs().r[1].var=0;
++			dsp.regs().r[2].var=end;
++			dsp.setPC(0x680);execUntil(returned);
++			verifyLoopRetired(3);
++			verify(dsp.regs().r[1].var == (end==0x708 ? 3 : 1));
++		}
++		// Shorten an inner loop, then pass its stale original endpoint while
++		// the outer loop is still active. LF alone must not retire the outer loop.
++		emitToMemory("jsr $800",0x780);emitToMemory("nop",0x781);
++		emitToMemory("do #2,>$80c",0x800);
++		emitToMemory("do #3,>$809",0x802);
++		emitToMemory("jsr $740",0x804);
++		emitToMemory("move (r0)+",0x805);
++		emitToMemory("nop",0x806);emitToMemory("nop",0x807);
++		emitToMemory("move (r1)+",0x808);
++		emitToMemory("nop",0x809);emitToMemory("nop",0x80a);
++		emitToMemory("move (r3)+",0x80b);emitToMemory("rts",0x80c);
++		dsp.regs().r[0].var=0;dsp.regs().r[1].var=0;dsp.regs().r[3].var=0;
++		dsp.regs().r[2].var=0x807;dsp.setPC(0x780);execUntil(0x781);
++		verifyLoopRetired(6);
++		verify(dsp.regs().r[1].var==2 && dsp.regs().r[3].var==2);
++		// Forever loops must yield to the dispatcher even when their new end
++		// was previously compiled as a counted loop (LC is deliberately nonzero).
++		emitToMemory("do forever,>$705", 0x700);
++		dsp.regs().lc.var=7;dsp.regs().r[2].var=0x708;
++		dsp.regs().r[0].var=0;dsp.regs().r[1].var=0;
++		dsp.setPC(0x700);
++		for(unsigned i=0;i<30;++i) execStep();
++		verify(dsp.regs().r[0].var>2 && dsp.regs().r[1].var>2);
++		verify(dsp.regs().lc.var==7 && (dsp.getSR().var & SR_FV));
++		emitToMemory("enddo",0x760);emitToMemory("nop",0x761);
++		dsp.setPC(0x760);execUntil(0x761);
++		verify(dsp.regs().sp.var==0 && !(dsp.getSR().var & SR_LF));
++		MmuArray<JitCacheEntry> emptyCache;emptyCache.init(0x1000,[](JitCacheEntry* ptr,size_t count) {for(size_t i=0;i<count;++i) new (&ptr[i]) JitCacheEntry();});
++		for(unsigned reverse=0;reverse<2;++reverse)
++		{
++			emitToMemory(reverse?"do forever,>$907":"do #3,>$907",0x880);
++			emitToMemory(reverse?"do #3,>$907":"do forever,>$907",0x900);
++			for(TWord p=0x904;p<0x907;++p) emitToMemory("nop",p);
++			JitBlockInfo info;
++			JitBlock::getInfo(info,dsp,0x904,config,emptyCache,{},{{0x880,0x907},{0x900,0x907}},{0x907});
++			verify(info.hasFlag(JitBlockInfo::Flags::IsLoopForever));
++		}
++
++	}
++
+ 	JitUnittests::~JitUnittests()
+ 	{
+ 		m_rt.reset(asmjit::ResetPolicy::kHard);
+diff --git a/source/dsp56kEmu/jitunittests.h b/source/dsp56kEmu/jitunittests.h
+index 3f93c1cc..75cfae65 100644
+--- a/source/dsp56kEmu/jitunittests.h
++++ b/source/dsp56kEmu/jitunittests.h
+@@ -18,6 +18,7 @@ namespace dsp56k
+ 		virtual ~JitUnittests();
+ 
+ 	private:
++		void dynamicLoopAddress();
+ 		void runTest(void(JitUnittests::*_build)(), void(JitUnittests::*_verify)());
+ 		void runTest(const std::function<void()>& _build, const std::function<void()>& _verify) override;
+ 		void nop(size_t _count = 1) const;
+diff --git a/source/dsp56kEmu/memory.cpp b/source/dsp56kEmu/memory.cpp
+index 98c2226a..0473c605 100644
+--- a/source/dsp56kEmu/memory.cpp
++++ b/source/dsp56kEmu/memory.cpp
+@@ -381,7 +381,7 @@ namespace dsp56k
+ 
+ 	void Memory::memTranslateAddress(EMemArea& _area, const TWord& _addr) const
+ 	{
+-		if(m_mmuBuffer->isValid())
++		if(m_mmuBuffer && m_mmuBuffer->isValid())
+ 			return;
+ 
+ //		if(_addr >= m_bridgedMemoryAddress)
+diff --git a/source/dsp56kEmu/opcodeanalysis.h b/source/dsp56kEmu/opcodeanalysis.h
+index a32d6ae9..5879599f 100644
+--- a/source/dsp56kEmu/opcodeanalysis.h
++++ b/source/dsp56kEmu/opcodeanalysis.h
+@@ -1038,6 +1038,8 @@ namespace dsp56k
+ 				const auto writePeriph = getFieldValue(_inst, Field_W, _op);
+ 				if (writePeriph)
+ 					readf(Field_dddddd);
++				else
++					writef(Field_dddddd);
+ 			}
+ 			break;
+ 		case Mpy_S1S2D:
+@@ -1214,6 +1216,8 @@ namespace dsp56k
+ 	{
+ 		switch (_inst)
+ 		{
++		case Movem_aa:
++			return !getFieldValue<Movem_aa, Field_W>(op);
+ 		case Movem_ea:
+ 			{
+ 				const auto write = getFieldValue<Movem_ea, Field_W>(op);
+diff --git a/source/dsp56kEmu/peripherals.h b/source/dsp56kEmu/peripherals.h
+index fb3bd9ce..aca6cfd4 100644
+--- a/source/dsp56kEmu/peripherals.h
++++ b/source/dsp56kEmu/peripherals.h
+@@ -187,6 +187,7 @@ namespace dsp56k
+ 		Essi& getEssi0()				{ return m_essi0; }
+ 		Essi& getEssi1()				{ return m_essi1; }
+ 		HDI08& getHI08()				{ return m_hi08; }
++		Timers& getTimers() { return m_timers; }
+ 		const Timers& getTimers() const	{ return m_timers; }
+ 
+ 		void setSymbols(Disassembler& _disasm) const override;
+diff --git a/source/dsp56kEmu/timers.cpp b/source/dsp56kEmu/timers.cpp
+index ee9c563c..0089886c 100644
+--- a/source/dsp56kEmu/timers.cpp
++++ b/source/dsp56kEmu/timers.cpp
+@@ -3,15 +3,13 @@
+ #include "dsp.h"
+ 
+ #include "timers.h"
++#include <limits>
+ 
+ namespace dsp56k
+ {
+ 	uint32_t Timers::exec() noexcept
+ 	{
+-		// Prescaler Counter
+-		// The prescaler counter is a 21-bit counter that is decremented on the rising edge of the prescaler input clock.
+-		// The counter is enabled when at least one of the three timers is enabled (i.e., one or more of the timer enable
+-		// (TE) bits are set) and is using the prescaler output as its source (i.e., one or more of the PCE bits are set).
++		// External clock/capture and prescaled input sources remain unmodeled.
+ 
+ 		// If the timer runs on internal clock, the frequency is DSP / 2
+ 		const auto clock = *m_dspInstructionCounter;
+@@ -19,112 +17,168 @@ namespace dsp56k
+ 		const auto diff = clock - m_lastClock;
+ 
+ 		if(diff < m_timerupdateInterval)
+-			return static_cast<uint32_t>(m_timerupdateInterval - diff);
++			return static_cast<uint32_t>(m_timerupdateInterval - diff) >> unsigned(m_useCycles);
+ 
+-		const uint32_t diffDiv2 = static_cast<uint32_t>(diff >> 1);
+-
+-		m_lastClock = clock;
+-
+-//		m_prescalerClock ^= 1;
+-//		m_tpcr -= m_prescalerClock;
+-
+-		if(m_tpcr == 0)
+-			m_tpcr = m_tplr & 0xfffff;
+-
+-		execTimer(m_timers[0], 0, diffDiv2);
+-		execTimer(m_timers[1], 1, diffDiv2);
+-		execTimer(m_timers[2], 2, diffDiv2);
++		advance();
+ 
+ 		if(diff > m_timerupdateInterval<<1)
+ 			return 0;
+-		return static_cast<uint32_t>((m_timerupdateInterval << 1) - diff);
++		return static_cast<uint32_t>((m_timerupdateInterval << 1) - diff) >> unsigned(m_useCycles);
+ 	}
+ 
+-	void Timers::execTimer(Timer& _t, const uint32_t _index, uint32_t _cycles) const
++	void Timers::advance()
+ 	{
+-		if (!_t.m_tcsr.test(Timer::M_TE))
+-			return;
+-
+-		_t.m_tcr += _cycles;
++		if(!m_dspInstructionCounter) return;
++		const auto ticks = (*m_dspInstructionCounter - m_lastClock) >> 1;
++		m_lastClock += ticks << 1; // retain the unconsumed half tick
++		if(m_tpcr == 0) m_tpcr = m_tplr & 0xfffff; // retain existing prescaler register behavior
++		for(uint32_t i = 0; i < m_timers.size(); ++i)
++			execTimer(m_timers[i], i, ticks);
++	}
+ 
+-		if (_t.m_tcr > 0xffffff)
++	void Timers::execTimer(Timer& _t, const uint32_t _index, uint64_t _cycles) const
++	{
++		if (!_t.m_tcsr.test(Timer::M_TE) || !_cycles) return;
++		constexpr uint64_t wrap = 0x1000000;
++		constexpr uint64_t mask = wrap - 1;
++		const auto load = uint64_t(_t.m_tlr);
++		const auto compare = uint64_t(_t.m_tcpr);
++		const bool pwm = mode(_index) == ModePWM;
++		const bool restart = _t.m_tcsr.test(Timer::M_TRM);
++		bool compared = false, overflowed = false;
++        uint64_t toggles=0;
++
++		// Enabling loads on the first tick, not at the register write. A
++		// non-PWM compare reload also consumes the tick following the match.
++		if(_t.m_loadPending)
+ 		{
+-			// Overflow
+-			_t.m_tcr &= 0xFFFFFF;
+-
+-			if(_t.m_tcsr.test(Timer::M_TOIE))
+-				injectInterrupt(Vba_TIMER0_Overflow, _index);
+-			else
+-				_t.m_tcsr.set(Timer::M_TOF);
+-
+-			if(mode(_index) == ModePWM && _t.m_tcsr.test(Timer::M_TRM))
+-				_t.m_tcr = _t.m_tlr + _t.m_tcr;	// keep the overshoot
++			_t.m_loadPending = false;
++			_t.m_tcr = static_cast<TWord>(load);
++			--_cycles;
++			compared = load == compare;
++            if(pwm && compared) ++toggles;
+ 		}
++		const auto start = uint64_t(_t.m_tcr);
++		auto distance = (compare - start) & mask;
++		if(!distance) distance = wrap; // equality is an event, not a level
+ 
+-		if (_t.m_tcr >= _t.m_tcpr)
++		if(pwm && restart)
+ 		{
+-			// Compare
+-			const auto overshoot = _t.m_tcr - _t.m_tcpr;
+-
+-			if(_t.m_tcsr.test(Timer::M_TCIE))
+-				injectInterrupt(Vba_TIMER0_Compare, _index);
++			const auto toOverflow = wrap - start;
++			compared |= distance <= _cycles && distance < toOverflow;
++            if(distance <= _cycles && distance < toOverflow) ++toggles;
++			if(_cycles >= toOverflow)
++			{
++				overflowed = true;
++				const auto remaining = _cycles - toOverflow;
++				const auto period = wrap - load;
++                toggles += 1 + remaining / period;
++                if(compare>=load && remaining>=compare-load) toggles += 1 + (remaining-(compare-load))/period;
++				// Include compares in complete periods even when the final
++				// phase is below TCPR. No loop proportional to elapsed time.
++				compared |= compare >= load && remaining >= compare - load;
++				_t.m_tcr = static_cast<TWord>(load + remaining % period);
++			}
++			else _t.m_tcr = static_cast<TWord>(start + _cycles);
++		}
++		else if(!pwm && restart && (compared || _cycles >= distance))
++		{
++			const auto first = compared ? 0 : distance;
++			overflowed = !compared && first >= wrap - start;
++			const auto remaining = _cycles - first;
++			const auto period = ((compare - load) & mask) + 1;
++			compared = true;
++			// At phase zero the compare value is still visible; reload is
++			// due next tick. Modular arithmetic also covers TLR > TCPR.
++			const auto phase = remaining % period;
++			_t.m_loadPending = phase == 0;
++			_t.m_tcr = static_cast<TWord>(phase ? (load + phase - 1) & mask : compare);
++			overflowed |= compare < load && remaining >= 1 + wrap - load;
++		}
++		else
++		{
++			compared |= _cycles >= distance;
++            if(pwm)
++            {
++                if(_cycles>=distance) toggles += 1+(_cycles-distance)/wrap;
++                if(_cycles>=wrap-start) toggles += 1+(_cycles-(wrap-start))/wrap;
++            }
++			overflowed = _cycles >= wrap - start;
++			_t.m_tcr = static_cast<TWord>((start + _cycles) & mask);
++		}
+ 
++        if(pwm && _t.m_tcsr.test(Timer::M_DIR))
++        {
++            _t.m_risingEdges += (toggles + !_t.m_output)/2;
++            _t.m_fallingEdges += (toggles + _t.m_output)/2;
++            _t.m_output ^= bool(toggles&1);
++        }
++		if(overflowed)
++		{
++			_t.m_tcsr.set(Timer::M_TOF);
++			if(_t.m_tcsr.test(Timer::M_TOIE)) injectInterrupt(Vba_TIMER0_Overflow, _index);
++		}
++		if(compared)
++		{
+ 			_t.m_tcsr.set(Timer::M_TCF);
+-
+-			if(mode(_index) != ModePWM && _t.m_tcsr.test(Timer::M_TRM))
+-				_t.m_tcr = _t.m_tlr + overshoot;
++			if(_t.m_tcsr.test(Timer::M_TCIE)) injectInterrupt(Vba_TIMER0_Compare, _index);
+ 		}
+ 	}
+ 
++    uint64_t Timers::ticksUntilOutputEdge(unsigned index) const
++    {
++        const auto& t=m_timers[index];
++        if(!t.m_tcsr.test(Timer::M_TE) || !t.m_tcsr.test(Timer::M_DIR) || mode(index)!=ModePWM)
++            return std::numeric_limits<uint64_t>::max();
++        constexpr uint64_t wrap=0x1000000;
++        if(t.m_loadPending && t.m_tlr==t.m_tcpr) return 1;
++        const auto counter=t.m_loadPending?t.m_tlr:t.m_tcr;
++        auto compare=(uint64_t(t.m_tcpr)-counter)&(wrap-1);
++        if(!compare) compare=wrap;
++        return std::min(compare,wrap-counter)+unsigned(t.m_loadPending);
++    }
++
+ 	void Timers::writeTCSR(int _index, TWord _val)
+ 	{
+-//		if(_index != 2)
+-//			LOG("Write Timer " << _index << " TCSR: " << HEX(_val));
+-
++		// Account for time before the write with the old enable/mode/flags.
++		advance();
+ 		auto& t = m_timers[_index];
+-
+-		auto pc = m_peripherals.getDSP().getPC().var;
+-
+-		// If the timer gets enabled, reset the counter register with the load register content
+-		if (!t.m_tcsr.test(Timer::M_TE) && bittest<TWord, Timer::M_TE>(_val))
+-		{
+-			// In timer (0-3) and watchdog (9-10) modes, the counter is preloaded with the TLR value after
+-			// the TE bit is set and the first internal or external clock signal is received.
+-			const auto m = mode(_index);
+-			if(m <= 3 || m == ModeWatchdogPulse || m == ModeWatchdogToggle)
+-				t.m_tcr = t.m_tlr;
+-
+-		}
+-		else if (t.m_tcsr.test(Timer::M_TE) && !bittest<TWord, Timer::M_TE>(_val))
++		constexpr TWord flags = (1 << Timer::M_TOF) | (1 << Timer::M_TCF);
++		const bool enabled = bittest<TWord, Timer::M_TE>(_val);
++		const bool wasEnabled = t.m_tcsr.test(Timer::M_TE);
++		const auto keptFlags = (TWord(t.m_tcsr) & flags) & ~_val;
++		_val = (_val & ~flags) | keptFlags;
++		if(wasEnabled && !enabled) _val &= ~flags;
++		t.m_tcsr = _val;
++		if(!enabled) t.m_loadPending = false;
++		else if(!wasEnabled)
+ 		{
+-			// force clear of overflow and compare flags below
+-			_val |= (1<<Timer::M_TOF);
+-			_val |= (1<<Timer::M_TCF);
+-//			const auto dsr0 = static_cast<Peripherals56362&>(m_peripherals).getDMA().getDSR(0);
+-//			LOG("Timer " << _index << " disabled, TCR=" << HEX(t.m_tcr) << ", DSR0=" << dsr0 << ", TPCR=" << HEX(t.m_tcpr));
++			const auto m = mode(_index); // decode the newly written mode
++            if(m==ModePWM) t.m_output=t.m_tcsr.test(Timer::M_INV);
++			t.m_loadPending = m <= ModeEventCounter || m == ModePWM
++				|| m == ModeWatchdogPulse || m == ModeWatchdogToggle;
+ 		}
+-
+-		timerFlagReset<Timer::M_TOF>(t.m_tcsr, _val);
+-		timerFlagReset<Timer::M_TCF>(t.m_tcsr, _val);
+-
+-		t.m_tcsr = _val;
+ 	}
+ 
+ 	void Timers::writeTLR(int _index, TWord _val)
+ 	{
+-		m_timers[_index].m_tlr = _val;
++		advance();
++		m_timers[_index].m_tlr = _val & 0xffffff;
+ 		LOG("Write Timer " << _index << " TLR: " << HEX(_val));
+ 	}
+ 
+ 	void Timers::writeTCPR(int _index, TWord _val)
+ 	{
+-		m_timers[_index].m_tcpr = _val;
++		advance();
++		m_timers[_index].m_tcpr = _val & 0xffffff;
+ //		LOG("Write Timer " << _index << " TCPR: " << HEX(_val));
+ 	}
+ 
+ 	void Timers::writeTCR(int _index, TWord _val)
+ 	{
+-		m_timers[_index].m_tcr = _val;
++		advance();
++		m_timers[_index].m_tcr = _val & 0xffffff;
++		m_timers[_index].m_loadPending = false; // explicit debugger/emulator counter write
+ 		LOG("Write Timer " << _index << " TCR: " << HEX(_val));
+ 	}
+ 
+@@ -140,9 +194,11 @@ namespace dsp56k
+ 		LOG("Write Timer TPCR " << ": " << HEX(_val));
+ 	}
+ 
+-	void Timers::setDSP(const DSP* _dsp)
++	void Timers::setDSP(const DSP* _dsp, const bool _useCycles)
+ 	{
+-		m_dspInstructionCounter = &_dsp->getInstructionCounter();
++		m_useCycles = _useCycles;
++		m_dspInstructionCounter = _useCycles ? &_dsp->getCycles() : &_dsp->getInstructionCounter();
++		m_lastClock = *m_dspInstructionCounter;
+ 	}
+ 
+ 	void Timers::setTimerUpdateInterval(const TWord _instructions)
+diff --git a/source/dsp56kEmu/timers.h b/source/dsp56kEmu/timers.h
+index f73305ff..e38cfec8 100644
+--- a/source/dsp56kEmu/timers.h
++++ b/source/dsp56kEmu/timers.h
+@@ -43,6 +43,9 @@ namespace dsp56k
+ 	private:
+ 		TWord m_tlr = 0;							// Timer Load Register
+ 		TWord m_tcpr = 0;							// Timer Compare Register
++		bool m_loadPending = false;
++        bool m_output = false;
++        uint64_t m_risingEdges=0,m_fallingEdges=0;
+ 		TWord m_tcr = 0;							// Timer Count Register
+ 
+ 		Bitfield<TWord, TcsrBits, 22> m_tcsr;		// Timer Control/Status Register
+@@ -105,7 +108,7 @@ namespace dsp56k
+ 
+ 		Timers(IPeripherals& _peripherals, const TWord _vbaBase) : m_peripherals(_peripherals), m_vbaBase(_vbaBase) {}
+ 		uint32_t exec() noexcept;
+-		void execTimer(Timer& _t, uint32_t _index, uint32_t _cycles) const;
++		void execTimer(Timer& _t, uint32_t _index, uint64_t _cycles) const;
+ 
+ 		void writeTCSR(int _index, TWord _val);
+ 
+@@ -127,27 +130,18 @@ namespace dsp56k
+ 		const TWord& readTPLR() const					{ return m_tplr; }
+ 		const TWord& readTPCR() const					{ return m_tpcr; }
+ 
+-		void setDSP(const DSP* _dsp);
++		uint64_t ticksUntilOutputEdge(unsigned index) const;
++
++        struct Output {bool level;uint64_t risingEdges,fallingEdges;};
++        Output output(unsigned index) const {const auto& t=m_timers[index];return {t.m_output,t.m_risingEdges,t.m_fallingEdges};}
++		void setDSP(const DSP* _dsp, bool _useCycles = false);
+ 
+ 		void setTimerUpdateInterval(const TWord _instructions);
+ 
+ 		void setSymbols(Disassembler& _disasm) const;
+ 
+ 	private:
+-		template<Timer::TcsrBits B> static void timerFlagReset(const Bitfield<unsigned, Timer::TcsrBits, 22>& _tcsr, TWord& _val)
+-		{
+-			// This is so WTF. Why not clearing it when writing a 0???
+-
+-			// The TOF/TCF bit is set to indicate that counter overflow has occurred. This bit is cleared by writing a 1 to the
+-			// TOF/TCF bit. Writing a 0 to the TOF/TCF bit has no effect.
+-			if(!_tcsr.test(B))
+-				return;
+-
+-			if(bittest<TWord, B>(_val))
+-				_val &= ~(1<<B);
+-			else
+-				_val |= (1<<B);
+-		}
++		void advance();
+ 
+ 		TimerMode mode(const uint32_t _index) const
+ 		{
+@@ -167,6 +161,7 @@ namespace dsp56k
+ 		TWord m_tpcr = 0;							// Timer Prescaler Count
+ 
+ 		uint64_t m_lastClock = 0;
++		bool m_useCycles = false;
+ 		std::array<Timer,3> m_timers;
+ 	};
+ }
+diff --git a/source/dsp56kEmu/unittests.cpp b/source/dsp56kEmu/unittests.cpp
+index 93184be9..0ed6465d 100644
+--- a/source/dsp56kEmu/unittests.cpp
++++ b/source/dsp56kEmu/unittests.cpp
+@@ -3770,6 +3770,18 @@ namespace dsp56k
+ 			verify(dsp.y1() == 0x223344);
+ 		});
+ 
++		// Absolute short program-memory moves used to patch the NMM IRQ vector.
++		runTest([&]()
++		{
++			dsp.x0(0x123456);
++			emit(0x071704); // move x0,p:<$17 (assembler lacks the short form)
++		}, [&]() { verify(dsp.memory().get(MemArea_P, 0x17) == 0x123456); });
++		runTest([&]()
++		{
++			dsp.memory().set(MemArea_P, 0x17, 0xabcdef);
++			emit(0x079704); // move p:<$17,x0
++		}, [&]() { verify(dsp.x0() == 0xabcdef); });
++
+ 		// op_Movem_ea
+ 		runTest([&]()
+ 		{

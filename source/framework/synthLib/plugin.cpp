@@ -230,6 +230,7 @@ namespace synthLib
 
 		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize * m_extraLatencyBlocks) * m_device->getSamplerate() * m_hostSamplerateInv));
 		m_device->setExtraLatencySamples(latency);
+		m_device->setProcessingBlockSize(static_cast<uint32_t>(std::ceil(static_cast<double>(m_blockSize) * m_device->getSamplerate() / m_hostSamplerate)));
 
 		m_deviceLatencyMidiToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyMidiToOutput()) * m_hostSamplerate / m_device->getSamplerate());
 		m_deviceLatencyInputToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyInputToOutput()) * m_hostSamplerate / m_device->getSamplerate());

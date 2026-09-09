@@ -31,8 +31,10 @@ namespace jucePluginEditorLib
 
 		enableAdvancedOptions(allowAdvanced);
 
-		juce::MessageManager::callAsync([this]
+		const std::weak_ptr<int> lifetime = m_lifetime;
+		juce::MessageManager::callAsync([this, lifetime]
 		{
+			if (lifetime.expired()) return;
 			m_categories.selectLastCategory();
 		});
 
@@ -45,16 +47,17 @@ namespace jucePluginEditorLib
 		auto* btClose = juceRmlUi::helper::findChild(_root, "btSettingsClose");
 		if (btClose)
 		{
-			juceRmlUi::EventListener::AddClick(btClose, [this]
+			juceRmlUi::EventListener::AddClick(btClose, [this, lifetime]
 			{
-				juce::MessageManager::callAsync([this]
+				juce::MessageManager::callAsync([this, lifetime]
 				{
+					if (lifetime.expired()) return;
 					m_editor.showSettings(false);
 				});
 			});
 		}
 
-		juceRmlUi::EventListener::AddClick(btAllowAdvanced, [this, bt]
+		juceRmlUi::EventListener::AddClick(btAllowAdvanced, [this, bt, lifetime]
 		{
 			auto& c = m_editor.getProcessor().getConfig();
 			const auto enabled = !c.getBoolValue(g_allowAdvancedOptions, false);
@@ -71,8 +74,9 @@ namespace jucePluginEditorLib
 				genericUI::MessageBox::Icon::Warning, 
 				"Warning", 
 				"Changing these settings may cause instability of the plugin.\n\nPlease confirm to continue.", 
-				[this, bt, &c](const genericUI::MessageBox::Result _result)
+				[this, bt, &c, lifetime](const genericUI::MessageBox::Result _result)
 				{
+					if (lifetime.expired()) return;
 					if (_result == genericUI::MessageBox::Result::Ok)
 					{
 						enableAdvancedOptions(true);
@@ -86,6 +90,7 @@ namespace jucePluginEditorLib
 
 	Settings::~Settings()
 	{
+		m_lifetime.reset();
 		juceRmlUi::helper::removeFromParent(m_root);
 	}
 

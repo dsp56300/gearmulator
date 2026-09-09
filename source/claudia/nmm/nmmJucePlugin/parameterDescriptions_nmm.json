@@ -1,0 +1,46 @@
+{
+  "parameterdescriptiondefaults": {
+    "isPublic": true,
+    "isBipolar": false,
+    "toText": {
+      "format": "%d"
+    },
+    "name": "",
+    "class": "",
+    "min": 0,
+    "max": 127,
+    "isBool": false,
+    "isDiscrete": true,
+    "page": 0,
+    "step": 1
+  },
+  "parameterdescriptions": [
+    {
+      "index": 0,
+      "name": "MasterVolume",
+      "displayName": "Volume",
+      "default": 100
+    },
+    {
+      "index": 1,
+      "name": "Knob1",
+      "displayName": "Knob 1",
+      "default": 64
+    },
+    {
+      "index": 2,
+      "name": "Knob2",
+      "displayName": "Knob 2",
+      "default": 64
+    },
+    {
+      "index": 3,
+      "name": "Knob3",
+      "displayName": "Knob 3",
+      "default": 64
+    }
+  ],
+  "valuelists": {},
+  "midipackets": {},
+  "regions": []
+}

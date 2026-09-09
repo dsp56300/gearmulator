@@ -17,7 +17,8 @@ macro(addSkin productName skinName skinFolder skinRootFile)
 		message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/${skinFolder}/${skinRootFile} not found")
 	endif()
 
-	list(APPEND SKIN_FILES "${skinFolder}/${skinRootFile}")
+	list(APPEND SKIN_FILES "${skinFolder}/${skinRootFile}" ${ARGN})
+	list(REMOVE_DUPLICATES SKIN_FILES)
 
 	list(APPEND ASSETS_SKINS ${SKIN_FILES})
 

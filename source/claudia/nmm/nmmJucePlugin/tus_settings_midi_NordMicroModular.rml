@@ -1,0 +1,18 @@
+<template name="tus_settings_midi_NordMicroModular">
+<head>
+</head>
+<body>
+    <settingsspacer1/>
+    <h1>Nord Modular web editor</h1>
+    <settingsspacer1/>
+    <div id="EditorMidiEnabled" class="settings-checkboxwithlabel">
+        <button id="button" class="settings-checkbox"/>
+        <label>Enable virtual PC MIDI ports</label>
+    </div>
+    <settingsspacer1/>
+    <div id="EditorMidiPorts" style="display: block; margin-bottom: 0.5em;"/>
+    <div style="display: block;">Web editor MIDI input: PC Out. MIDI output: PC In.</div>
+    <div style="display: block;">Use the regular MIDI input or Note Trig to play notes.</div>
+    <settingsspacer1/>
+</body>
+</template>

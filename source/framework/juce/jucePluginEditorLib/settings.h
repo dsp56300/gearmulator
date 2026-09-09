@@ -34,5 +34,7 @@ namespace jucePluginEditorLib
 		Rml::Element* m_pageButtonTemplate = nullptr;
 
 		SettingsCategories m_categories;
+		// Deferred UI callbacks must not outlive an Escape/close operation.
+		std::shared_ptr<int> m_lifetime = std::make_shared<int>(0);
 	};
 }

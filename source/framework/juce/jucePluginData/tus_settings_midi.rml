@@ -4,6 +4,7 @@
 </head>
 <body>
 	<div class="settings-page">
+		<div id="containerDeviceSpecific"/>
 		<h1>Physical MIDI Ports</h1>
 		<table class="settings-table" style="padding-top: 0.5em; padding-bottom: 2em;">
 			<tr class="settings-tr">

@@ -1,0 +1,102 @@
+diff --git a/qsm.cpp b/qsm.cpp
+index 5d840f1..8bcf599 100644
+--- a/qsm.cpp
++++ b/qsm.cpp
+@@ -80,9 +80,11 @@ namespace mc68k
+ 			m_portQS.setDirection(_val & 0xff);
+ 			return;
+ 		case PeriphAddress::SciControl0:
++            m_sciFrameCycles=sciFrameCycles();
+ 			MCLOG("Set SCCR0 to " << MCHEXN(_val, 4));
+ 			return;
+ 		case PeriphAddress::SciControl1:
++            m_sciFrameCycles=sciFrameCycles();
+ //			MCLOG("Set SCCR1 to " << MCHEXN(_val, 4));
+ 			if(bitTest(_val, Sccr1Bits::TransmitInterruptEnable) && !bitTest(prev, Sccr1Bits::TransmitInterruptEnable))
+ 				injectInterrupt(ScsrBits::TransmitDataRegisterEmpty);
+@@ -120,11 +122,13 @@ namespace mc68k
+ 	{
+ //		MCLOG("write8 addr=" << MCHEXN(_addr, 8) << ", val=" << MCHEXN(static_cast<int>(_val),2));
+ 
+-		if(_addr == PeriphAddress::SciControl1LSB)
+-		{
+-			write16(PeriphAddress::SciControl1, (read16(PeriphAddress::SciControl1) & 0xff00) | _val);
+-			return;
+-		}
++        const auto controlWord=static_cast<PeriphAddress>(static_cast<uint32_t>(_addr)&~1u);
++        if(controlWord==PeriphAddress::SciControl0 || controlWord==PeriphAddress::SciControl1)
++        {
++            const auto current=PeripheralBase::read16(controlWord);
++            const auto value=(static_cast<uint32_t>(_addr)&1)?((current&0xff00)|_val):((current&0xff)|(uint16_t(_val)<<8));
++            write16(controlWord,uint16_t(value));return;
++        }
+ 
+ 		const auto prev = read16(_addr);
+ 
+@@ -236,7 +240,14 @@ namespace mc68k
+ 				injectInterrupt(ScsrBits::TransmitComplete);
+ 		}
+ 
+-		if(m_sciRxDelay > 0)
++        if(m_sciRxCycleTiming)
++        {
++            // Relative wire clock: no receive timing work while the queue is empty.
++            if(m_sciRxDataEmpty) return;
++            m_sciRxClock+=_deltaCycles;
++            if(!m_sciFrameCycles || m_sciRxClock<m_sciRxNext) return;
++        }
++		if(!m_sciRxCycleTiming && m_sciRxDelay > 0)
+ 		{
+ 			--m_sciRxDelay;
+ 			return;
+@@ -261,9 +272,17 @@ namespace mc68k
+ 		}
+ 	}
+ 
++    uint32_t Qsm::sciFrameCycles()
++    {
++        // MC68331UM: baud = Fsys/(32*SCBR), M selects 10/11-bit frames.
++        const auto divider=PeripheralBase::read16(PeriphAddress::SciControl0)&0x1fff;
++        const auto bits=(PeripheralBase::read16(PeriphAddress::SciControl1)&0x200)?11u:10u;
++        return 32u*divider*bits;
++    }
+ 	void Qsm::writeSciRX(uint16_t _data)
+ 	{
+ 		std::lock_guard lock(m_mutexSciRx);
++        if(m_sciRxCycleTiming && m_sciRxData.empty()) m_sciRxNext=m_sciRxClock+m_sciFrameCycles;
+ 		m_sciRxData.push_back(_data);
+ 		m_sciRxDataEmpty = false;
+ 	}
+@@ -419,6 +438,7 @@ namespace mc68k
+ 		const auto res = m_sciRxData.front();
+ 		m_sciRxData.pop_front();
+ 		m_sciRxDataEmpty = m_sciRxData.empty();
++        if(m_sciRxCycleTiming) m_sciRxNext+=m_sciFrameCycles;
+ 		m_sciRxDelay = g_sciRxDelay;
+ 		m_lastSciRxByte = res;
+ 		return res;
+diff --git a/qsm.h b/qsm.h
+index a41cf43..c94da72 100644
+--- a/qsm.h
++++ b/qsm.h
+@@ -72,6 +72,10 @@ namespace mc68k
+ 		void spcr3(uint16_t _value)	{ PeripheralBase::write16(PeriphAddress::Spcr3, _value); }
+ 		void spsr(uint8_t _value)	{ PeripheralBase::write8(PeriphAddress::Spsr, _value); }
+ 
++        // Serialized owner only. Cycle-paced receive wire; legacy pacing remains
++        // the default for existing devices. Host input queue remains lossless.
++        void setSciRxCycleTiming(bool enabled) { m_sciRxCycleTiming=enabled;m_sciRxClock=m_sciRxNext=0;m_sciFrameCycles=sciFrameCycles(); }
++        uint32_t sciFrameCycles();
+ 		void writeSciRX(uint16_t _data);
+ 		void readSciTX(std::deque<uint16_t>& _dst);
+ 
+@@ -112,6 +116,9 @@ namespace mc68k
+ 		std::deque<uint16_t> m_sciRxData;
+ 		bool m_sciRxDataEmpty = true;
+ 		uint32_t m_sciRxDelay = 0;
++        bool m_sciRxCycleTiming=false;
++        uint32_t m_sciFrameCycles=0;
++        uint64_t m_sciRxClock=0,m_sciRxNext=0;
+ 		uint16_t m_lastSciRxByte = 0;
+ 
+ 		uint16_t m_pendingTxDataCounter = 0;

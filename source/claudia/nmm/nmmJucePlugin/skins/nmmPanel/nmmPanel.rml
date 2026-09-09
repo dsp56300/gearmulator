@@ -1,0 +1,21 @@
+<rml>
+<head>
+    <link type="text/rcss" href="tus_default.rcss"/>
+    <link type="text/rcss" href="tus_juceskin.rcss"/>
+    <link type="text/rcss" href="nmmPanel.rcss"/>
+</head>
+<body id="Root" rootScale="0.85" style="width: 1571dp; height: 922dp;">
+    <!-- Coordinates use the cleaned photograph’s native 1571 × 922 canvas. -->
+    <img id="PanelPhoto" class="jucePos" src="nordmm-final.jpg" style="left: 0dp; top: 0dp; width: 1571dp; height: 922dp; pointer-events: none;"/>
+    <button id="Shift" class="jucePos juceButton panel-button" isToggle="1" tooltip="Toggle alternate controls" style="left: 58dp; top: 749dp; width: 133dp; height: 73dp;"/>
+    <knob id="MasterVolume" class="jucePos juceRotary panel-knob" data-model="partCurrent" param="MasterVolume" tooltip="Volume" style="left: 236dp; top: 733dp; width: 128dp; height: 128dp;"/>
+    <knob id="Knob1" class="jucePos juceRotary panel-knob" data-model="partCurrent" param="Knob1" tooltip="Assignable knob 1" style="left: 475dp; top: 733dp; width: 128dp; height: 128dp;"/>
+    <knob id="Knob2" class="jucePos juceRotary panel-knob" data-model="partCurrent" param="Knob2" tooltip="Assignable knob 2" style="left: 710dp; top: 733dp; width: 128dp; height: 128dp;"/>
+    <knob id="Knob3" class="jucePos juceRotary panel-knob" data-model="partCurrent" param="Knob3" tooltip="Assignable knob 3" style="left: 943dp; top: 733dp; width: 128dp; height: 128dp;"/>
+    <knob id="PatchSelect" class="jucePos juceRotary panel-knob" min="1" max="3" step="1" value="1" default="1" tooltip="Patch Select" style="left: 943dp; top: 733dp; width: 128dp; height: 128dp; display: none;"/>
+    <div id="PatchNumber" class="jucePos" tooltip="Loaded patch" style="left: 1149dp; top: 718dp; width: 119dp; height: 101dp;">00</div>
+    <button id="NoteTrig" class="jucePos juceButton panel-button" tooltip="Patch Increment; with Shift on, trigger a note" style="left: 1362dp; top: 648dp; width: 132dp; height: 72dp;"/>
+    <button id="Patch" class="jucePos juceButton panel-button" tooltip="Patch Decrement; with Shift on, use assigned Button 4" style="left: 1362dp; top: 742dp; width: 132dp; height: 72dp;"/>
+    <div id="PanelStatus" class="jucePos" style="left: 920dp; top: 853dp; width: 570dp; height: 28dp;">Esc · Settings</div>
+</body>
+</rml>

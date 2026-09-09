@@ -44,6 +44,10 @@ namespace synthLib
 		void setExtraLatencySamples(uint32_t _size);
 		uint32_t getExtraLatencySamples() const { return m_extraLatency; }
 
+		// Maximum host processing block, expressed at the device sample rate.
+		// Asynchronous devices may use it to size their reported scheduling delay.
+		virtual void setProcessingBlockSize(uint32_t) {}
+
 		virtual uint32_t getInternalLatencyMidiToOutput() const { return 0; }
 		virtual uint32_t getInternalLatencyInputToOutput() const { return 0; }
 
