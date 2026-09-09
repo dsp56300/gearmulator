@@ -22,8 +22,8 @@ namespace virusLib
 	class Hdi08MidiQueue
 	{
 	public:
-		explicit Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, bool _useEsaiBasedTiming, bool _isTI);
-		explicit Hdi08MidiQueue(Hdi08MidiQueue&& _s) noexcept : m_output(_s.m_output), m_esai(_s.m_esai), m_useEsaiBasedTiming(_s.m_useEsaiBasedTiming), m_isTI(_s.m_isTI)
+		explicit Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, bool _useEsaiBasedTiming, bool _isTI, bool _needsMidiHeartbeat = false);
+		explicit Hdi08MidiQueue(Hdi08MidiQueue&& _s) noexcept : m_output(_s.m_output), m_esai(_s.m_esai), m_useEsaiBasedTiming(_s.m_useEsaiBasedTiming), m_isTI(_s.m_isTI), m_needsMidiHeartbeat(_s.m_needsMidiHeartbeat)
 		{
 			assert(_s.m_pendingMidiEvents.empty());
 			_s.m_useEsaiBasedTiming = false;
@@ -37,15 +37,17 @@ namespace virusLib
 		void onAudioWritten();
 
 	private:
-		void sendMidiToDSP(uint8_t _a, uint8_t _b, uint8_t _c) const;
+		void sendMidiToDSP(uint8_t _a, uint8_t _b, uint8_t _c);
 
 		Hdi08Queue& m_output;
 		dsp56k::Audio& m_esai;
 		bool m_useEsaiBasedTiming;
 		bool m_isTI;
+		bool m_needsMidiHeartbeat;
 
 		dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
 
 		uint32_t m_numSamplesWritten = 0;
+		uint32_t m_lastMidiSample = 0;
 	};
 }

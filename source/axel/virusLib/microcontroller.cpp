@@ -1173,7 +1173,7 @@ void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {
 	m_hdi08.addHDI08(_dsp.getHDI08());
 	m_hdi08TxParsers.emplace_back(*this);
-	m_midiQueues.emplace_back(_dsp, m_hdi08.getQueue(m_hdi08.size()-1), _useEsaiBasedMidiTiming, m_rom.isTIFamily());
+	m_midiQueues.emplace_back(_dsp, m_hdi08.getQueue(m_hdi08.size()-1), _useEsaiBasedMidiTiming, m_rom.isTIFamily(), m_rom.getModel() == DeviceModel::A);
 }
 
 void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents)

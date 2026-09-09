@@ -254,6 +254,8 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 			sem.notify();
 		}
 
+		m_uc->getMidiQueue(0).onAudioWritten();
+
 		callbackCount++;
 		if((callbackCount & 0x3) == 0)
 		{
