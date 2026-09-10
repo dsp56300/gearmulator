@@ -238,7 +238,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       Magic MIDI Tuning byte patterns in the header every synth includes, with no consumer and no
       test. Wire it up or delete it.
 
-- [ ] **F5 `juceRmlUi/juceRmlComponentConfig.h:22` — `includeDefaultTemplates` is an all-or-nothing opt-out.**
+- [-] **F5 `juceRmlUi/juceRmlComponentConfig.h:22` — `includeDefaultTemplates` is an all-or-nothing opt-out.** RETRACTED, see below.
       The real defect is that three fixed templates are spliced into every document whether it
       references them or not. `additionalTemplateFiles` already models "inject because the
       document asked".
@@ -339,6 +339,13 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **F5, the default templates** — the premise and my suggested alternative were both wrong. All
+  three templates are instantiated from C++ by name (`createFromTemplate("settings")`,
+  `"colorpicker"`, `src="patchmanager"`), so a document cannot know it will be asked for them and
+  cannot declare them on demand. 9 of 11 skins already declare colorpicker and patchmanager
+  themselves; NOTHING declares tus_settings, so the injection is what gives every plugin a settings
+  dialog. And `additionalTemplateFiles` is not document-driven either - pluginEditor scans for
+  per-product `tus_settings_<product>.rml`. Documented what the flag really controls instead.
 - **F4, the tuning sysex predicate** — no caller, but it is an `inline` free function so an
   uncalled one costs nothing. Both patterns check out against the spec (Bulk Dump `F0 7E dd 08 01`,
   Master Fine Tuning `F0 7F dd 04 03 ll mm F7` at exactly 8 bytes). The risk was that it is
