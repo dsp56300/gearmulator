@@ -105,7 +105,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       worst consequence, the empty-stack pop, but the race itself stands. Either make the
       config atomic or take the lock on read.
 
-- [ ] **B3 `juceRmlUi/juceRmlComponent.cpp:488` — `getRenderSize()` hoisted above `ScopedAccess`.**
+- [x] **B3 `juceRmlUi/juceRmlComponent.cpp:488` — `getRenderSize()` hoisted above `ScopedAccess`.**
       The Metal render thread now walks the JUCE component tree — `getLocalBounds()`,
       `getParentComponent()`, `getTransform()` — unsynchronised against the message thread's
       `setBounds()`/`resized()`/`parentHierarchyChanged()`. A resize concurrent with a frame gives

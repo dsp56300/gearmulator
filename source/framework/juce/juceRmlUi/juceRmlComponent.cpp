@@ -488,7 +488,11 @@ namespace juceRmlUi
 		// not held on to, or the component never updates again.
 		const juce::ScopeGuard frameDone { [this] { m_renderDone = true; } };
 
-		const auto size = getRenderSize();
+		// Not getRenderSize(): that walks the juce component tree - getLocalBounds(), and the parent
+		// chain that getOpenGLRenderingScale() follows - which the message thread rewrites in
+		// setBounds()/resized(), so a resize in flight hands the render thread a torn rectangle.
+		// updateDrawableSize() publishes the identical value from the message thread instead.
+		const Rml::Vector2i size { _context.getViewportWidth(), _context.getViewportHeight() };
 		if (size.x <= 0 || size.y <= 0) return;
 
 		// Wait for the drawable before taking the access lock. nextDrawable blocks - for up to a
