@@ -229,8 +229,13 @@ namespace synthLib
 				_processFunc(_inputs, _outputs, _numSamples, _midiIn, _midiOut);
 				return;
 			}
+			// Staged events were scaled against a device chunk of a *previous* rate pairing, and
+			// setHostSamplerate() does not rescale them, so their offsets can sit past the end of
+			// this block. Clamp them the same way the resampling path below does - a device that
+			// indexes a per-block array by offset would otherwise read out of bounds.
 			m_midiIn.insert(m_midiIn.end(), _midiIn.begin(), _midiIn.end());
-			_processFunc(_inputs, _outputs, _numSamples, m_midiIn, _midiOut);
+			clampMidiEvents(m_processedMidiIn, m_midiIn, 0, _numSamples - 1);
+			_processFunc(_inputs, _outputs, _numSamples, m_processedMidiIn, _midiOut);
 			m_midiIn.clear();
 			return;
 		}

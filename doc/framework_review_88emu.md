@@ -128,7 +128,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
 ## C. Device / MIDI behaviour
 
-- [ ] **C1 `synthLib/resamplerInOut.cpp:232` — equal-rate fast path skips `clampMidiEvents`.**
+- [x] **C1 `synthLib/resamplerInOut.cpp:232` — equal-rate fast path skips `clampMidiEvents`.**
       It prepends MIDI staged during an earlier block without clamping to the current block
       length, unlike the resampling path. Offsets can exceed `_numSamples`; a device indexing a
       per-block array by offset reads out of bounds, and at minimum note order inverts.

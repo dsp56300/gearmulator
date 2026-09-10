@@ -68,6 +68,9 @@ namespace
 		{
 			received += _midi.size();
 			if(!_midi.empty()) lastOffset = _midi.back().offset;
+			// A device is entitled to index a per-block array by offset.
+			for(const auto& e : _midi)
+				require(_count == 0 || e.offset < _count, "midi offset past the end of the block");
 			for(size_t c = 0; c < 2; ++c)
 				std::copy_n(_ins[c], _count, _outs[c]);
 		};
@@ -116,32 +119,52 @@ namespace
 		const auto expectedOffset = static_cast<uint32_t>(std::floor(std::floor(17 * oldRate / _host) * newRate / oldRate));
 		require(received == 201 && lastOffset == expectedOffset, "pending MIDI offset did not follow the new rate");
 
+		// setHostSamplerate() does not rescale queued events, unlike setDeviceSamplerate(). So an
+		// event staged while the rates differed keeps its device-scaled offset once the host rate
+		// equalises them, and lands in the equal-rate fast path with an offset past the block end.
+		resampler.setSamplerates(32000, 48000);
+		midi.assign(1, synthLib::SMidiEvent{});
+		midi.front().offset = 250;
+		resampler.process(ins, outs, midi, midiOut, 0, render);
+		resampler.setHostSamplerate(48000);
+		resampler.process(ins, outs, {}, midiOut, 8, render);
+		resampler.setSamplerates(_host, 32000);
+
 		ClockDevice device;
 		synthLib::Plugin plugin(&device, [](auto* _d) { return _d; });
 		plugin.setMidiClockEnabled(false);
 		plugin.setResamplerMode(_mode);
 		plugin.setHostSamplerate(_host, 0);
 		plugin.setBlockSize(256);
+		// Plugin::process() only records a new device rate - switching the resampler over builds
+		// and prewarms filters, which must not happen on the audio thread. Stand in for the host
+		// wrapper that applies it between blocks.
+		auto block = [&]
+		{
+			plugin.process(ins, outs, 256, 120, 0, false, false);
+			plugin.applyPendingDeviceSamplerate();
+		};
+
 		for(float rate : {32000.0f, 48000.0f, 32000.0f, 48000.0f})
 		{
 			device.rate = rate;
 			for(int i = 0; i < 8; ++i)
-				plugin.process(ins, outs, 256, 120, 0, false, false);
+				block();
 			const auto start = device.samples;
 			for(int i = 0; i < 100; ++i)
-				plugin.process(ins, outs, 256, 120, 0, false, false);
+				block();
 			const double expected = 25600.0 * rate / _host;
 			require(std::abs(static_cast<double>(device.samples - start) - expected) < 4,
 				"framework did not follow the device clock");
 		}
 		device.rate = 32000;
-		plugin.process(ins, outs, 256, 120, 0, false, false);
+		block();
 		require(plugin.setState({1, synthLib::StateTypeGlobal}), "state restore failed");
 		for(int i = 0; i < 8; ++i)
-			plugin.process(ins, outs, 256, 120, 0, false, false);
+			block();
 		const auto start = device.samples;
 		for(int i = 0; i < 100; ++i)
-			plugin.process(ins, outs, 256, 120, 0, false, false);
+			block();
 		require(std::abs(static_cast<double>(device.samples - start) - 25600.0 * 48000 / _host) < 4,
 			"state-restored clock did not reach resampler");
 		std::printf("PASS mode=%d host=%.0f\n", static_cast<int>(_mode), _host);
