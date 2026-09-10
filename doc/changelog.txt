@@ -35,6 +35,9 @@ Framework:
 - [Fix] After falling back from a software OpenGL rasterizer to the built-in
         software renderer, the interface stopped updating.
 
+- [Fix] The DSP Bridge could crash or freeze the plugin, most often while a
+        project was being saved or when the connection to the server stalled.
+
 88emuPlayer:
 
 - [Fix] Selecting ASIO now waits for an explicit output-device choice,
