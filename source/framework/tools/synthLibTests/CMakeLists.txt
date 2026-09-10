@@ -5,6 +5,7 @@ project(synthLibTests VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	synthLibTests.cpp
 	midiToSysexTest.cpp
+	universalTuningTest.cpp
 )
 
 add_executable(synthLibTests)

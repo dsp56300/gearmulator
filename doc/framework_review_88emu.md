@@ -234,7 +234,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       three-argument constructor; the underline renderer is unreachable. The Sound Canvas panel
       does not use this class at all.
 
-- [ ] **F4 `synthLib/midiTypes.h:83` — `isUniversalTuningSysex()` has no callers.**
+- [x] **F4 `synthLib/midiTypes.h:83` — `isUniversalTuningSysex()` has no callers.** Kept and tested, see below.
       Magic MIDI Tuning byte patterns in the header every synth includes, with no consumer and no
       test. Wire it up or delete it.
 
@@ -339,6 +339,12 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **F4, the tuning sysex predicate** — no caller, but it is an `inline` free function so an
+  uncalled one costs nothing. Both patterns check out against the spec (Bulk Dump `F0 7E dd 08 01`,
+  Master Fine Tuning `F0 7F dd 04 03 ll mm F7` at exactly 8 bytes). The risk was that it is
+  unverified byte matching in the header every synth includes, so it is now pinned by tests in
+  `synthLibTests` instead of deleted - near misses in the same universal families, manufacturer
+  dumps and malformed input included.
 - **F3, the Lcd surface** — checked all four claims. `setCursor()` genuinely has no caller
   anywhere, so the blink timer and the underline renderer have never run (which means the C8 fix
   landed in unreached code - correct, but untested by anything). `LcdConfig` is always built with

@@ -7,6 +7,7 @@ int main()
 	try
 	{
 		testMidiToSysex();
+		testUniversalTuning();
 
 		std::cout << std::endl;
 		std::cout << "All tests passed successfully!" << std::endl;
