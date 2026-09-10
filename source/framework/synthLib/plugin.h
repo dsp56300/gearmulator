@@ -57,6 +57,13 @@ namespace synthLib
 
 		void setMidiClockEnabled(bool _enabled);
 
+		// A device whose firmware retunes its clock is noticed on the audio thread, but
+		// switching the resampler over allocates and builds filter tables, so the work is
+		// left to whoever drives the message thread. Until then the old rate keeps being
+		// used, which costs a little pitch drift rather than a dropout.
+		bool hasPendingDeviceSamplerate() const { return m_pendingDeviceSamplerate.load(std::memory_order_relaxed) > 0.0f; }
+		bool applyPendingDeviceSamplerate();
+
 	private:
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
@@ -102,6 +109,7 @@ namespace synthLib
 		uint32_t m_extraLatencyBlocks = 1;
 
 		float m_deviceSamplerate = 0.0f;
+		std::atomic<float> m_pendingDeviceSamplerate{0.0f};
 		CallbackDeviceInvalid m_callbackDeviceInvalid;
 
 		bool m_transportInitialized = false;

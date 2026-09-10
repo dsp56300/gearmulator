@@ -293,6 +293,8 @@ namespace pluginLib
 
 	void Processor::handleAsyncUpdate()
 	{
+		// Order matters: switching the resampler moves the latency, so publish it afterwards.
+		getPlugin().applyPendingDeviceSamplerate();
 		updateLatencySamples();
 	}
 
@@ -862,9 +864,9 @@ namespace pluginLib
 
 		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying, hasPpqPosition);
 
-		// getLatency*() is a plain atomic load, cheap enough per block. The host is only told
-		// once the message thread gets round to it, see handleAsyncUpdate().
-		if(getCurrentLatency() != m_reportedLatency)
+		// Both checks are plain atomic loads, cheap enough per block. The work they stand for
+		// belongs to the message thread, see handleAsyncUpdate().
+		if(getCurrentLatency() != m_reportedLatency || getPlugin().hasPendingDeviceSamplerate())
 			triggerAsyncUpdate();
 
 		applyOutputGain(outputs, numSamples);

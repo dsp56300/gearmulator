@@ -25,7 +25,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       Fix: only recompute when something actually changed, and never call the host from the
       audio thread — flag it and let the message thread publish it.
 
-- [ ] **A2 `synthLib/plugin.cpp:109` — device-rate switch rebuilds the resampler on the audio thread.**
+- [x] **A2 `synthLib/plugin.cpp:109` — device-rate switch rebuilds the resampler on the audio thread.**
       On a cache miss `setDeviceSamplerate()` reaches `recreate()`: two `new Resampler`, each
       `resample_open()` building a windowed-sinc table and allocating, plus a 512-sample prewarm.
       `Device::getDynamicSamplerates()` is a no-op in the base and nothing overrides it, so the

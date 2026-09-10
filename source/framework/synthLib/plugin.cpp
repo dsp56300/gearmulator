@@ -100,15 +100,12 @@ namespace synthLib
 				return;
 		}
 
-		// Firmware can change the device clock during a patch/state change.
-		// Switch conversion at a host-block boundary, outside its callbacks.
+		// Firmware can change the device clock during a patch/state change. Switching the
+		// resampler over means building new filter tables and prewarming them, which must not
+		// happen on this thread, so only note it down here.
 		const auto deviceRate = m_device->getSamplerate();
 		if(deviceRate > 0 && deviceRate != m_deviceSamplerate)
-		{
-			m_deviceSamplerate = deviceRate;
-			m_resampler.setDeviceSamplerate(deviceRate);
-			updateDeviceLatency();
-		}
+			m_pendingDeviceSamplerate.store(deviceRate, std::memory_order_relaxed);
 
 		const auto discontinuity = updateTransport(_bpm, _ppqPos, _isPlaying, _hasPpqPosition, _count);
 		if (discontinuity != TransportDiscontinuity::None)
@@ -275,6 +272,25 @@ namespace synthLib
 			m_dummyBuffer.resize(_minimumSize);
 
 		return m_dummyBuffer.data();
+	}
+
+	bool Plugin::applyPendingDeviceSamplerate()
+	{
+		const auto rate = m_pendingDeviceSamplerate.exchange(0.0f, std::memory_order_relaxed);
+
+		if(rate <= 0.0f)
+			return false;
+
+		std::lock_guard lock(m_lock);
+
+		if(rate == m_deviceSamplerate)
+			return false;
+
+		m_deviceSamplerate = rate;
+		m_resampler.setDeviceSamplerate(rate);
+		updateDeviceLatency();
+
+		return true;
 	}
 
 	void Plugin::updateDeviceLatency()
