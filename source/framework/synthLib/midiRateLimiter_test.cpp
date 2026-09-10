@@ -81,6 +81,34 @@ namespace
         expect(bytes, {M_NOTEON, 60, 100, M_CONTROLCHANGE, MC_ALLSOUNDOFF, 0});
     }
 
+    void testSecondDiscontinuityStillSilences()
+    {
+        std::vector<uint8_t> bytes;
+        MidiRateLimiter limiter([&](const uint8_t _byte) { bytes.push_back(_byte); });
+        limiter.setSamplerate(1000.0f);
+        limiter.setRateLimit(1000.0f); // exactly one byte per processSample()
+
+        limiter.write(midi(0, M_NOTEON, 60, 100));
+        for (int i = 0; i < 3; ++i)
+            limiter.processSample(); // note is on the wire, the channel is ringing
+
+        // Two discontinuities before the queue drains. The first one queues the All Sound Off,
+        // the second purges it as belonging to an older generation - so the channel has to still
+        // be on the books, or nothing ever silences it.
+        limiter.transportDiscontinuity(1);
+        limiter.transportDiscontinuity(2);
+        for (int i = 0; i < 5; ++i)
+            limiter.processSample();
+
+        expect(bytes, {M_NOTEON, 60, 100, M_CONTROLCHANGE, MC_ALLSOUNDOFF, 0});
+
+        // ...and exactly once: the debt is cleared when the message actually goes out.
+        limiter.transportDiscontinuity(3);
+        for (int i = 0; i < 5; ++i)
+            limiter.processSample();
+        expect(bytes, {M_NOTEON, 60, 100, M_CONTROLCHANGE, MC_ALLSOUNDOFF, 0});
+    }
+
     SMidiEvent sysex(std::initializer_list<uint8_t> _bytes)
     {
         SMidiEvent event(MidiEventSource::Host);
@@ -115,6 +143,7 @@ int main()
     testRunningStatus();
     testTransportDropsQueuedEvents();
     testTransportFinishesPartialMessageThenSilences();
+    testSecondDiscontinuityStillSilences();
 	testSysexPauseExpiresWhileIdle();
 	return 0;
 }

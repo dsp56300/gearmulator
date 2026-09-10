@@ -133,7 +133,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       length, unlike the resampling path. Offsets can exceed `_numSamples`; a device indexing a
       per-block array by offset reads out of bounds, and at minimum note order inverts.
 
-- [ ] **C2 `synthLib/midiRateLimiter.cpp:96` — a second discontinuity erases the All Sound Off.**
+- [x] **C2 `synthLib/midiRateLimiter.cpp:96` — a second discontinuity erases the All Sound Off.**
       `m_activeChannels` is cleared when the ASO is *queued*, not sent, and the purge loop drops
       still-queued ASOs from an older generation. Two discontinuities inside the drain window
       leave the notes hanging. Verified by compiling and running the file: wire output is empty

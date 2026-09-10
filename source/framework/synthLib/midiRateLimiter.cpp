@@ -93,7 +93,11 @@ namespace synthLib
 		}
 
 		m_runningStatus = 0;
-		m_activeChannels = 0;
+		// A channel stays owed its silence until the All Sound Off is actually on the wire -
+		// completeCurrentEvent() clears the bit then. Clearing it here instead left the queue as
+		// the only record of the debt, and the purge above deletes that record on the next
+		// discontinuity, so two of them inside the drain window hung every ringing note.
+		m_activeChannels = channelsToSilence;
 		for (int channel = 15; channel >= 0; --channel)
 		{
 			if ((channelsToSilence & static_cast<uint16_t>(1u << channel)) == 0)
