@@ -58,8 +58,8 @@ Not part of the numbered list, but do not lose these.
 
 **Not committed anywhere yet**
 
-- [ ] 51 commits sit on `oss/main` ahead of `gearmulator/main`. Nothing from this review has been
-      pushed.
+- [ ] Push what is ahead of `gearmulator/main`. Everything up to `de36fa813` (H3) is already pushed;
+      the "Still to do" doc commit and group I are not.
 
 ---
 
@@ -358,7 +358,7 @@ Not part of the numbered list, but do not lose these.
 
 ## I. Conventions (CLAUDE.md)
 
-- [ ] **I1 `synthLib/device_test.cpp` and `midiRateLimiter_test.cpp` are space-indented.**
+- [x] **I1 `synthLib/device_test.cpp` and `midiRateLimiter_test.cpp` are space-indented.**
       "Tabs for indentation (tab size 4, UseTab: Always)". `device_test.cpp` is 58 space lines and
       0 tab lines; `midiRateLimiter_test.cpp` mixes both. `dynamicSamplerate_test.cpp`, added in
       the same commit, is correctly tabbed.
