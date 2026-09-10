@@ -174,7 +174,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
 ## D. Cross-platform and tooling
 
-- [ ] **D1 `baseLib/filesystem.cpp:339` — `getFileModificationTime` unit differs by platform.**
+- [x] **D1 `baseLib/filesystem.cpp:339` — `getFileModificationTime` unit differs by platform.** Mostly overstated, see below.
       `st_mtime` seconds on the dirent branch, raw `file_time_type` ticks (100 ns since 1601 on
       MSVC) otherwise, while the header documents "seconds since the epoch". The new 88emu
       romloader uses it as a cache key. Pre-epoch files wrap through `static_cast<uint64_t>`, and
@@ -339,6 +339,12 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **D1's consequences** — only the header comment was wrong. Both romloader caches are
+  process-local `static std::map`s, so the platform unit never crosses a boundary and every use
+  is an equality test. The 0-on-failure sentinel cannot equal a real stamp, so it forces a cache
+  *miss* and a re-read - the safe direction, not "unchanged forever" as filed. Pre-epoch wrap is
+  harmless for equality. Fixed the documented contract; deliberately did not `duration_cast` the
+  Windows branch down to seconds, which would lose change detection within a second.
 - **C5's stated mechanism, the write-path wedge** — wrong on both counts. CSRR takes no written
   parameters at all (it is a read command, answered by two `readData()` calls), and
   `writeCommand()` reassigns `m_mode` unconditionally, so nothing can stay armed past the next

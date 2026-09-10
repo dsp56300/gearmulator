@@ -43,8 +43,11 @@ namespace baseLib
 
 		bool hasExtension(const std::string& _filename, const std::string& _extension);
 		size_t getFileSize(const std::string& _file);
-		// Seconds since the epoch, or 0 when the file cannot be stat'ed. Only
-		// meaningful as a change indicator, so the resolution does not matter.
+		// An opaque stamp that changes when the file does, or 0 when it cannot be
+		// stat'ed. Compare two of these for equality and nothing else: the epoch and
+		// the resolution are whatever the platform gives us - st_mtime seconds since
+		// 1970 where dirent is used, file_time_type ticks (100ns since 1601 on MSVC)
+		// otherwise - so a difference of these is not a duration in any unit.
 		uint64_t getFileModificationTime(const std::string& _file);
 
 		bool isDirectory(const std::string& _path);
