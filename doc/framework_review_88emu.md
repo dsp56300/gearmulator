@@ -32,7 +32,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       cache is always empty and every runtime clock change takes that path. Multi-millisecond
       allocating stall inside `processBlock`.
 
-- [ ] **A3 `juceRmlUi/rmlRendererProxy.cpp:402` — `m_mutexRender` held across the entire frame.**
+- [x] **A3 `juceRmlUi/rmlRendererProxy.cpp:402` — `m_mutexRender` held across the entire frame.**
       Previously the queue was swapped into a local and executed unlocked. Now the message
       thread blocks in `finishFrame()` and `setRenderer()` for a whole frame, so every mouse and
       key event queues behind it. A render lambda that re-enters the proxy self-deadlocks on a

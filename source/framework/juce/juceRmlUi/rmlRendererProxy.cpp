@@ -399,18 +399,27 @@ namespace juceRmlUi
 
 	bool RendererProxy::executeRenderFunctions()
 	{
-	    std::lock_guard lock(m_mutexRender);
+		std::vector<std::vector<Func>> renderFunctions;
 
-		if (!m_renderer)
-			return false;
+		{
+			std::lock_guard lock(m_mutexRender);
 
-	    for (const auto& funcs : m_renderFunctions)
+			if (!m_renderer)
+				return false;
+
+			// Take the queue away and run it with the lock released. Holding it for the whole
+			// frame blocks the message thread in finishFrame() and setRenderer() for exactly as
+			// long as the frame takes, so every mouse and key event queues behind it. It also
+			// deadlocks any render function that reaches back into the proxy, because the mutex
+			// is not recursive, and lets one that enqueues more work invalidate the iteration.
+			std::swap(renderFunctions, m_renderFunctions);
+		}
+
+		for (const auto& funcs : renderFunctions)
 		{
 			for (const auto& func : funcs)
 				func();
 		}
-
-		m_renderFunctions.clear();
 
 		return false;
 	}
