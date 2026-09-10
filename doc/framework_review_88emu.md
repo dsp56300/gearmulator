@@ -184,7 +184,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       The multi-`/` split uses `begin <= product.size()`, so a heading ending in `/` produces a
       trailing empty name and an output file with an empty basename.
 
-- [ ] **D3 `synthLib/romLoader.cpp:21` — lazy static init is unsynchronised.**
+- [x] **D3 `synthLib/romLoader.cpp:21` — lazy static init is unsynchronised.**
       `static bool s_initialized` with no mutex, now also reached from the mutating
       `addSearchPath()`. `Processor::getPlugin()` documents concurrent first-callers, so two
       threads can insert into `g_searchPaths` at once.
