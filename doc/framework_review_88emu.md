@@ -260,7 +260,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
 ## G. Duplication
 
-- [ ] **G1 `hardwareLib/hd44780.*` duplicates `hardwareLib/lcd.h`.**
+- [x] **G1 `hardwareLib/hd44780.*` duplicates `hardwareLib/lcd.h`.** Done as an adapter, not a migration.
       Same chip, same namespace, overlapping API down to identical signatures — and the new
       `sed1335.h` comment even calls itself "sibling of the HD44780 character LCD (lcd.h)".
       `Hd44780` is the better implementation (real 80-cell DDRAM, correct shift model);
