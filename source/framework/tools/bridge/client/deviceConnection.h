@@ -48,15 +48,23 @@ namespace bridgeClient
 
 	private:
 		bool sendAwaitReply(const std::function<void()>& _send, const std::function<void(baseLib::BinaryStream&)>& _reply, bridgeLib::Command _replyCommand);
+		void onReply(bridgeLib::Command _command, baseLib::BinaryStream& _in);
 
 		RemoteDevice& m_device;
 		bridgeLib::DeviceDesc m_deviceDesc;
 
-		std::function<void(bridgeLib::Command, baseLib::BinaryStream&)> m_handleReplyFunc;
-
 		std::mutex m_cvWaitMutex;
 		std::condition_variable m_cvWait;
 
+		// Reply state of a pending sendAwaitReply, guarded by m_cvWaitMutex. The network thread runs the
+		// callback, the caller waits for it - so both the callback and the flag it sets have to live in the
+		// object, not on the waiting thread's stack, which is gone once that wait times out.
+		std::function<void(baseLib::BinaryStream&)> m_replyFunc;
+		bridgeLib::Command m_replyCommand = bridgeLib::Command::Invalid;
+		bool m_replyReceived = false;
+
+		// Filled by the network thread, drained by the audio thread.
+		std::mutex m_midiOutMutex;
 		std::vector<synthLib::SMidiEvent> m_midiOut;
 
 		bridgeLib::AudioBuffers m_audioBuffers;

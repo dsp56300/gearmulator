@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "commandReader.h"
 #include "commandWriter.h"
 
@@ -35,11 +37,10 @@ namespace bridgeLib
 		void threadFunc() override;
 		void threadLoopFunc() override;
 
-		auto& writer() { return m_writer; }
-		void send()
-		{
-			m_writer.write(*m_stream);
-		}
+		// Everything below shares one CommandWriter and one socket while the audio thread (audio +
+		// MIDI), the message thread (device state, samplerate, dsp clock) and the network thread (rom
+		// upload) all send. Each of these builds the command and writes it as one atomic operation.
+		void send();
 		void send(Command _command, const CommandStruct& _data);
 		void send(Command _command);
 
@@ -95,12 +96,18 @@ namespace bridgeLib
 		void shutdown();
 
 	private:
+		// Call with m_sendMutex held.
+		void sendUnlocked();
+
 		std::unique_ptr<networkLib::TcpStream> m_stream;
+		std::mutex m_sendMutex;
 		CommandWriter m_writer;
 
 		synthLib::SMidiEvent m_midiEvent;	// preallocated for receiver
 
+		// Separate buffers per direction: sending runs on the audio thread, receiving on the network thread.
 		std::vector<float> m_audioTransferBuffer;
+		std::vector<float> m_audioReceiveBuffer;
 
 		DeviceState m_deviceState;
 	};

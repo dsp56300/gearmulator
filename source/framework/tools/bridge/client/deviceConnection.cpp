@@ -10,8 +10,6 @@ namespace bridgeClient
 
 	DeviceConnection::DeviceConnection(RemoteDevice& _device, std::unique_ptr<networkLib::TcpStream>&& _stream) : TcpConnection(std::move(_stream)), m_device(_device)
 	{
-		m_handleReplyFunc = [](bridgeLib::Command, baseLib::BinaryStream&){};
-
 		// send plugin description and device creation parameters, this will cause the server to either boot the device or ask for the rom if it doesn't have it yet
 		send(bridgeLib::Command::PluginInfo, m_device.getPluginDesc());
 
@@ -46,7 +44,7 @@ namespace bridgeClient
 	void DeviceConnection::handleDeviceInfo(baseLib::BinaryStream& _in)
 	{
 		TcpConnection::handleDeviceInfo(_in);
-		m_handleReplyFunc(bridgeLib::Command::DeviceInfo, _in);
+		onReply(bridgeLib::Command::DeviceInfo, _in);
 	}
 
 	void DeviceConnection::handleException(const networkLib::NetException& _e)
@@ -117,11 +115,13 @@ namespace bridgeClient
 
 	void DeviceConnection::handleMidi(const synthLib::SMidiEvent& _e)
 	{
+		std::lock_guard lock(m_midiOutMutex);
 		m_midiOut.push_back(_e);
 	}
 
 	void DeviceConnection::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
+		std::lock_guard lock(m_midiOutMutex);
 		_midiOut.insert(_midiOut.end(), m_midiOut.begin(), m_midiOut.end());
 		m_midiOut.clear();
 	}
@@ -143,7 +143,7 @@ namespace bridgeClient
 	void DeviceConnection::handleDeviceState(baseLib::BinaryStream& _in)
 	{
 		TcpConnection::handleDeviceState(_in);
-		m_handleReplyFunc(bridgeLib::Command::DeviceState, _in);
+		onReply(bridgeLib::Command::DeviceState, _in);
 	}
 
 	bool DeviceConnection::setDeviceState(const std::vector<uint8_t>& _state, const synthLib::StateType _type)
@@ -200,38 +200,50 @@ namespace bridgeClient
 		}, bridgeLib::Command::DeviceInfo);
 	}
 
+	void DeviceConnection::onReply(const bridgeLib::Command _command, baseLib::BinaryStream& _in)
+	{
+		std::unique_lock lock(m_cvWaitMutex);
+
+		if(!m_replyFunc || _command != m_replyCommand)
+			return;
+
+		// Run it while holding the lock. sendAwaitReply only clears m_replyFunc under the same lock, so
+		// whatever the callback refers to is still alive for as long as we are in here.
+		m_replyFunc(_in);
+		m_replyReceived = true;
+
+		lock.unlock();
+		m_cvWait.notify_one();
+	}
+
 	bool DeviceConnection::sendAwaitReply(const std::function<void()>& _send, const std::function<void(baseLib::BinaryStream&)>& _reply, const bridgeLib::Command _replyCommand)
 	{
-		bool receiveDone = false;
-
-		m_handleReplyFunc = [&](const bridgeLib::Command _command, baseLib::BinaryStream& _in)
 		{
-			if(_command != _replyCommand)
-				return;
-
-			_reply(_in);
-
-			{
-				std::unique_lock lockCv(m_cvWaitMutex);
-				receiveDone = true;
-			}
-			m_cvWait.notify_one();
-		};
+			std::unique_lock lock(m_cvWaitMutex);
+			m_replyFunc = _reply;
+			m_replyCommand = _replyCommand;
+			m_replyReceived = false;
+		}
 
 		_send();
 
-		std::unique_lock lockCv(m_cvWaitMutex);
-		m_cvWait.wait_for(lockCv, std::chrono::seconds(g_replyTimeoutSecs), [&]
+		std::unique_lock lock(m_cvWaitMutex);
+
+		const auto received = m_cvWait.wait_for(lock, std::chrono::seconds(g_replyTimeoutSecs), [this]
 		{
-			return receiveDone;
+			return m_replyReceived;
 		});
 
-		m_handleReplyFunc = [](bridgeLib::Command, baseLib::BinaryStream&)
-		{
-		};
+		// Disarm before returning: a reply that arrives after this point must not run a callback that
+		// refers to our caller's stack any more.
+		m_replyFunc = nullptr;
+		m_replyCommand = bridgeLib::Command::Invalid;
 
-		if(receiveDone)
+		if(received)
 			return true;
+
+		lock.unlock();
+
 		LOG("Receive timeout, closing connection");
 		close();
 		return false;

@@ -11,6 +11,7 @@ namespace bridgeLib
 	TcpConnection::TcpConnection(std::unique_ptr<networkLib::TcpStream>&& _stream) : CommandReader(nullptr), m_stream(std::move(_stream))
 	{
 		m_audioTransferBuffer.reserve(16384);
+		m_audioReceiveBuffer.reserve(16384);
 
 		start();
 	}
@@ -62,16 +63,29 @@ namespace bridgeLib
 		read(*m_stream);
 	}
 
+	void TcpConnection::send()
+	{
+		std::lock_guard lock(m_sendMutex);
+		sendUnlocked();
+	}
+
+	void TcpConnection::sendUnlocked()
+	{
+		m_writer.write(*m_stream);
+	}
+
 	void TcpConnection::send(const Command _command, const CommandStruct& _data)
 	{
+		std::lock_guard lock(m_sendMutex);
 		m_writer.build(_command, _data);
-		m_writer.write(*m_stream);
+		sendUnlocked();
 	}
 
 	void TcpConnection::send(Command _command)
 	{
+		std::lock_guard lock(m_sendMutex);
 		m_writer.build(_command);
-		m_writer.write(*m_stream);
+		sendUnlocked();
 	}
 
 	void TcpConnection::handleMidi(baseLib::BinaryStream& _in)
@@ -88,6 +102,8 @@ namespace bridgeLib
 
 	void TcpConnection::sendAudio(const float* const* _data, const uint32_t _numChannels, const uint32_t _numSamplesPerChannel)
 	{
+		std::lock_guard lock(m_sendMutex);
+
 		auto& s = m_writer.build(Command::Audio);
 		s.write(static_cast<uint8_t>(_numChannels));
 		s.write(_numSamplesPerChannel);
@@ -105,11 +121,13 @@ namespace bridgeLib
 				s.write(0);
 			}
 		}
-		send();
+		sendUnlocked();
 	}
 
 	void TcpConnection::sendAudio(AudioBuffers& _buffers, const uint32_t _numChannels, uint32_t _numSamplesPerChannel)
 	{
+		std::lock_guard lock(m_sendMutex);
+
 		auto& s = m_writer.build(Command::Audio);
 		s.write(static_cast<uint8_t>(_numChannels));
 		s.write(_numSamplesPerChannel);
@@ -126,7 +144,7 @@ namespace bridgeLib
 
 		_buffers.onInputRead(_numSamplesPerChannel);
 
-		send();
+		sendUnlocked();
 	}
 
 	uint32_t TcpConnection::handleAudio(float* const* _output, baseLib::BinaryStream& _in)
@@ -157,10 +175,10 @@ namespace bridgeLib
 
 			if(numSamples)
 			{
-				if(m_audioTransferBuffer.size() < numSamples)
-					m_audioTransferBuffer.resize(numSamples);
-				_in.read(m_audioTransferBuffer.data(), numSamples);
-				_buffers.writeOutput(i, m_audioTransferBuffer, numSamples);
+				if(m_audioReceiveBuffer.size() < numSamples)
+					m_audioReceiveBuffer.resize(numSamples);
+				_in.read(m_audioReceiveBuffer.data(), numSamples);
+				_buffers.writeOutput(i, m_audioReceiveBuffer, numSamples);
 			}
 		}
 		_buffers.onOutputWritten(numSamplesMax);
@@ -192,6 +210,9 @@ namespace bridgeLib
 	{
 		if(!isValid())
 			return false;
+
+		std::lock_guard lock(m_sendMutex);
+
 		auto& bs = m_writer.build(Command::Midi);
 		bs.write(_ev.a);
 		bs.write(_ev.b);
@@ -199,7 +220,7 @@ namespace bridgeLib
 		bs.write(_ev.sysex);
 		bs.write(_ev.offset);
 		bs.write<uint8_t>(static_cast<uint8_t>(_ev.source));
-		send();
+		sendUnlocked();
 		return true;
 	}
 
