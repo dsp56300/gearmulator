@@ -224,7 +224,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       (see A2) plus a duplicate `ResamplerInOut` per declared rate and a hand-written 12-field
       `swapStream()` that silently misses any member added later.
 
-- [ ] **F2 `synthLib/plugin.h:58` — `setMidiClockEnabled()` has two callers, both passing `false`.**
+- [-] **F2 `synthLib/plugin.h:58` — `setMidiClockEnabled()` has two callers, both passing `false`.** RETRACTED, see below.
       Every other plugin carries a flag it never asked about, it must be re-applied on every
       device replacement, and the condition is now spelled in three places.
 
@@ -339,6 +339,14 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **F2, the MIDI clock flag** — not shared code bent for one caller; it is load bearing.
+  `MidiClock::process()` advances its tick counter from `_bpm` alone and never consults
+  `_isPlaying`, so the standalone player - which passes a fixed 120 bpm and `isPlaying=false` on
+  every block - would emit `M_TIMINGCLOCK` into the Sound Canvas forever without it. Deleting the
+  flag would break the player. The three sites that read it are three different actions (restart on
+  enable, restart after a state load, run the clock), not a duplicated condition. Documented why it
+  exists so nobody removes it as unused; the residual hazard - a future third construction site
+  forgetting it - is now named in the header.
 - **F1, the dynamic-samplerate subsystem** — no implementer today (verified: no device's rate moves
   at runtime, 88emu model switching replaces the whole `Plugin`, `setState` re-reads the rate), but
   it is NOT speculative. The TC M-One XL selects its sample rate from a front panel menu, i.e. the

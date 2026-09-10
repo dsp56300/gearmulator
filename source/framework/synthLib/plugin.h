@@ -55,6 +55,11 @@ namespace synthLib
 		bool setLatencyBlocks(uint32_t _latencyBlocks);
 		uint32_t getLatencyBlocks() const { return m_extraLatencyBlocks; }
 
+		// Turn this off in a host that has no transport to derive a clock from - a standalone
+		// application, say. MidiClock::process() advances its tick counter from _bpm alone and does
+		// not consult _isPlaying, so a host that passes a fixed bpm would otherwise flood the device
+		// with timing clocks forever. Set it on every Plugin you build: replacing a device builds a
+		// new one, and forgetting it there fails silently.
 		void setMidiClockEnabled(bool _enabled);
 
 		// A device whose firmware retunes its clock is noticed on the audio thread, but
