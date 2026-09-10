@@ -161,13 +161,6 @@ namespace juceRmlUi
 
 		setWantsKeyboardFocus(true);
 
-		// Hook RmlUi cursor changes (cursor: <name> in RCSS) into JUCE so the
-		// OS cursor actually updates over interactive elements.
-		_interfaces.getSystemInterface().setCursorChangedCallback([this](const Rml::String& _name)
-		{
-			setMouseCursor(translateRmlCursor(_name));
-		});
-
 		// set some reasonable default size, correct size will be set when loading the RML document
 		setSize(1280, 720);
 
@@ -201,6 +194,15 @@ namespace juceRmlUi
 			deleteAllChildren();
 			throw;
 		}
+
+		// Hook RmlUi cursor changes (cursor: <name> in RCSS) into JUCE so the OS cursor actually
+		// updates over interactive elements. Installed only once construction can no longer fail:
+		// the SystemInterface outlives us, and a throw above means the destructor that drops this
+		// again never runs, leaving it holding a `this` that no longer exists.
+		m_rmlInterfaces.getSystemInterface().setCursorChangedCallback([this](const Rml::String& _name)
+		{
+			setMouseCursor(translateRmlCursor(_name));
+		});
 
 		m_drag.onDocumentLoaded();
 

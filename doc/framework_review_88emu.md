@@ -194,7 +194,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       plugin does. Low severity: JE8086 validates ROM content, not just size, so this is an
       ordering quirk rather than a hijack — but a DAW's cwd is arbitrary.
 
-- [ ] **D5 `juceRmlUi/juceRmlComponent.cpp` ctor failure path — cursor callback not cleared.**
+- [x] **D5 `juceRmlUi/juceRmlComponent.cpp` ctor failure path — cursor callback not cleared.**
       The constructor installs a `this`-capturing callback and rethrows on failure without
       clearing it, so the lambda outlives an object whose destructor never runs.
 
