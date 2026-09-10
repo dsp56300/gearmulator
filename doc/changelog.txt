@@ -38,6 +38,24 @@ Framework:
 - [Fix] The DSP Bridge could crash or freeze the plugin, most often while a
         project was being saved or when the connection to the server stalled.
 
+- [Fix] Picking a skin or a renderer from a menu could crash: choosing it closes
+        the window the menu itself lives in, and the menu kept working with what
+        was already gone.
+
+- [Fix] After the renderer changed, anything drawn from a cached snapshot - a box
+        shadow, for example - stayed invisible for the rest of the session.
+
+- [Fix] Keys held down while the window lost focus stayed down on Linux, and a
+        key that auto-repeated was reported as released once per repeat.
+
+- [Fix] The plugin told the host its latency from the audio thread, once per
+        block. Hosts answer that by suspending and re-preparing the plugin, so
+        playback could be interrupted at any moment.
+
+- [Fix] The interface could stall for as long as a frame took to draw, with
+        mouse and keyboard input queuing up behind it, and a redraw that called
+        back into the renderer could lock up completely.
+
 88emuPlayer:
 
 - [Fix] Selecting ASIO now waits for an explicit output-device choice,
