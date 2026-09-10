@@ -17,8 +17,8 @@ namespace
 	public:
 		TestDevice() : Device(DeviceCreateParams()) {}
 
-		std::vector<SMidiEvent> midiSent;
-		std::vector<SMidiEvent> transportEvents;
+		std::vector<SMidiEvent> m_midiSent;
+		std::vector<SMidiEvent> m_transportEvents;
 
 		float getSamplerate() const override { return 44100.0f; }
 		bool isValid() const override { return true; }
@@ -35,12 +35,12 @@ namespace
 		void processAudio(const TAudioInputs&, const TAudioOutputs&, size_t) override {}
 		bool sendMidi(const SMidiEvent& _ev, std::vector<SMidiEvent>&) override
 		{
-			midiSent.push_back(_ev);
+			m_midiSent.push_back(_ev);
 			return true;
 		}
 		void onTransportDiscontinuity(const SMidiEvent& _ev) override
 		{
-			transportEvents.push_back(_ev);
+			m_transportEvents.push_back(_ev);
 		}
 	};
 
@@ -69,14 +69,14 @@ namespace
 		device.process(in, out, 8, {marker, note}, midiOut);
 
 		// The marker reaches the transport hook and nothing else...
-		expect(device.transportEvents.size() == 1);
-		expect(device.transportEvents.front().transportGeneration == 7);
+		expect(device.m_transportEvents.size() == 1);
+		expect(device.m_transportEvents.front().transportGeneration == 7);
 
 		// ...while sendMidi sees only real MIDI. A marker leaking in here would be
 		// pushed to the firmware as a 0x00 byte.
-		expect(device.midiSent.size() == 1);
-		expect(device.midiSent.front().type == MidiEventType::Midi);
-		expect(device.midiSent.front().a == 0x90);
+		expect(device.m_midiSent.size() == 1);
+		expect(device.m_midiSent.front().type == MidiEventType::Midi);
+		expect(device.m_midiSent.front().a == 0x90);
 	}
 } // namespace
 

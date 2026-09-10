@@ -363,7 +363,7 @@ Not part of the numbered list, but do not lose these.
       0 tab lines; `midiRateLimiter_test.cpp` mixes both. `dynamicSamplerate_test.cpp`, added in
       the same commit, is correctly tabbed.
 
-- [ ] **I2 Test-class members lack the `m_` prefix.**
+- [x] **I2 Test-class members lack the `m_` prefix.**
       "`m_` member prefix" — `device_test.cpp:20-21` (`midiSent`, `transportEvents`) and
       `dynamicSamplerate_test.cpp:28-29` (`rate`, `samples`).
 
