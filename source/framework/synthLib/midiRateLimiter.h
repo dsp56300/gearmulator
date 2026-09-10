@@ -36,6 +36,7 @@ namespace synthLib
 
 	private:
 		void sendByte();
+		bool popNextEvent();
 		void beginEvent(SMidiEvent&& _event);
 		void completeCurrentEvent();
 

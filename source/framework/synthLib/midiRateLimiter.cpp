@@ -112,53 +112,18 @@ namespace synthLib
 		{
 			// No rate limit: drain both the byte-level message in flight and the
 			// event-level queues introduced for running status/transport control.
-			while (true)
+			do
 			{
-				if (m_pendingBytes.empty())
-				{
-					if (!m_pendingRealtime.empty())
-					{
-						auto e = std::move(m_pendingRealtime.front());
-						m_pendingRealtime.pop_front();
-						beginEvent(std::move(e));
-					}
-					else if (!m_pendingSysex.empty())
-					{
-						auto e = std::move(m_pendingSysex.front());
-						m_pendingSysex.pop_front();
-						beginEvent(std::move(e));
-					}
-					else
-					{
-						break;
-					}
-				}
-
 				while (!m_pendingBytes.empty())
 					sendByte();
 			}
+			while (popNextEvent());
+
 			return;
 		}
 
-		if (m_pendingBytes.empty())
-		{
-			if (!m_pendingRealtime.empty())
-			{
-				auto e = std::move(m_pendingRealtime.front());
-				m_pendingRealtime.pop_front();
-				beginEvent(std::move(e));
-			}
-			else if (!m_pendingSysex.empty())
-			{
-				auto e = std::move(m_pendingSysex.front());
-				m_pendingSysex.pop_front();
-				beginEvent(std::move(e));
-			}
-			else
-			{
-				return;
-			}
-		}
+		if (m_pendingBytes.empty() && !popNextEvent())
+			return;
 
 		// The pop above may have queued nothing — e.g. a status byte whose
 		// lengthFromStatusByte() is 0 (0xf0/0xf7 arriving as a realtime event).
@@ -179,6 +144,22 @@ namespace synthLib
 			sendByte();
 			m_remainingBytes -= 1.0f;
 		}
+	}
+
+	// Starts the next queued event, realtime ahead of sysex - which is what the two queues exist
+	// for. Returns false when there was nothing to start.
+	bool MidiRateLimiter::popNextEvent()
+	{
+		auto* queue = !m_pendingRealtime.empty() ? &m_pendingRealtime
+		            : !m_pendingSysex.empty()    ? &m_pendingSysex
+		                                         : nullptr;
+		if (!queue)
+			return false;
+
+		auto event = std::move(queue->front());
+		queue->pop_front();
+		beginEvent(std::move(event));
+		return true;
 	}
 
 	void MidiRateLimiter::beginEvent(SMidiEvent&& _event)

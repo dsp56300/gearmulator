@@ -295,7 +295,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       the live MIDI queue to a cached resampler. Also: `prepareAlternatives()` is called at four
       sites, every one immediately after `recreate()`.
 
-- [ ] **H2 `synthLib/midiRateLimiter.cpp:120` — the queue-pop block is pasted twice.**
+- [x] **H2 `synthLib/midiRateLimiter.cpp:120` — the queue-pop block is pasted twice.**
       Sixteen lines duplicated, differing only in `break` vs `return`, wrapped in a `while(true)`
       whose inner loop already guarantees the outer condition. One `popNextEvent()` collapses
       roughly forty lines to five.
@@ -339,6 +339,13 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **Rate limiter coverage, measured** — after H2 the suite went green, so it was mutation tested
+  against the four things that refactor could break. Caught: dropping the `m_pendingBytes.empty()`
+  short-circuit, and `popNextEvent()` forgetting `pop_front()`. NOT caught: queue priority, now
+  covered by `testRealtimeOvertakesSysex`. Still not caught: `do { drain } while(pop)` swapped for
+  `while(pop) { drain }`, which only differs when bytes are in flight and both queues are empty -
+  reachable only after a discontinuity abandons a partial message with no channel owing an All
+  Sound Off. Left uncovered on purpose rather than pinned with a contrived test.
 - **F8, the rebinding sweep** — the suggested remedy does not exist. `Rml::Plugin` provides
   `OnElementCreate` and `OnElementDestroy` and no attach notification, so "bind on attach" is not
   implementable; an element made by `SetInnerRML` has no parent when it is created and nothing

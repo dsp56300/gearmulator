@@ -116,6 +116,34 @@ namespace
         return event;
     }
 
+    // The two queues exist so that channel voice traffic is not stuck behind a dump. Nothing
+    // else in here queues both at once, so nothing else would notice the order being flipped.
+    void testRealtimeOvertakesSysex()
+    {
+        std::vector<uint8_t> bytes;
+        MidiRateLimiter limiter([&](const uint8_t _byte) { bytes.push_back(_byte); });
+        limiter.disableRateLimit();
+
+        limiter.write(sysex({0xf0, 0x01, 0x02, 0xf7}));
+        limiter.write(midi(0, M_CONTROLCHANGE, MC_EXPRESSION, 7));
+        limiter.processSample();
+
+        expect(bytes, {M_CONTROLCHANGE, MC_EXPRESSION, 7, 0xf0, 0x01, 0x02, 0xf7});
+
+        // ...and the same when the rate limiter is metering the wire one byte at a time.
+        std::vector<uint8_t> limited;
+        MidiRateLimiter rateLimited([&](const uint8_t _byte) { limited.push_back(_byte); });
+        rateLimited.setSamplerate(1000.0f);
+        rateLimited.setRateLimit(1000.0f);
+
+        rateLimited.write(sysex({0xf0, 0x01, 0x02, 0xf7}));
+        rateLimited.write(midi(0, M_CONTROLCHANGE, MC_EXPRESSION, 7));
+        for (int i = 0; i < 8; ++i)
+            rateLimited.processSample();
+
+        expect(limited, {M_CONTROLCHANGE, MC_EXPRESSION, 7, 0xf0, 0x01, 0x02, 0xf7});
+    }
+
     void testSysexPauseExpiresWhileIdle()
     {
         std::vector<uint8_t> bytes;
@@ -144,6 +172,7 @@ int main()
     testTransportDropsQueuedEvents();
     testTransportFinishesPartialMessageThenSilences();
     testSecondDiscontinuityStillSilences();
+    testRealtimeOvertakesSysex();
 	testSysexPauseExpiresWhileIdle();
 	return 0;
 }
