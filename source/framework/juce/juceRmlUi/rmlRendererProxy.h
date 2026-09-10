@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <mutex>
 #include <variant>
 
@@ -166,7 +167,17 @@ namespace juceRmlUi
 
 		Handle m_nextHandle = 1;
 		Rml::RenderInterface* m_renderer = nullptr;
-		RendererConfig m_config;
+		// setRenderer() writes these from whichever thread tears the renderer down - openGLContextClosing()
+		// runs on the GL thread - while the render callbacks below read them on the message thread. Relaxed
+		// is enough: they gate a capability, not an ordering, and the switch drops everything the old
+		// renderer produced anyway.
+		bool canLayer() const { return m_canLayer.load(std::memory_order_relaxed); }
+		bool canFilter() const { return m_canFilter.load(std::memory_order_relaxed); }
+		bool canShader() const { return m_canShader.load(std::memory_order_relaxed); }
+
+		std::atomic<bool> m_canLayer{true};
+		std::atomic<bool> m_canFilter{true};
+		std::atomic<bool> m_canShader{true};
 		std::mutex m_mutex;
 		std::mutex m_mutexRender;
 		std::vector<Func> m_enqueuedFunctions;

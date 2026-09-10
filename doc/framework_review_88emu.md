@@ -99,7 +99,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
       The unlocked `m_config` read is NOT fixed and is now tracked as B6.
 
-- [ ] **B6 `juceRmlUi/rmlRendererProxy.cpp` — `m_config` is a data race.**
+- [x] **B6 `juceRmlUi/rmlRendererProxy.cpp` — `m_config` is a data race.**
       Read without a lock at nine sites, written under `m_mutexRender` at one, from a
       different thread (`openGLContextClosing()` runs on the GL thread). B2 removed its
       worst consequence, the empty-stack pop, but the race itself stands. Either make the

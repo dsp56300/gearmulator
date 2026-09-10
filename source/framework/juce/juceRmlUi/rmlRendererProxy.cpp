@@ -209,7 +209,7 @@ namespace juceRmlUi
 
 	Rml::LayerHandle RendererProxy::PushLayer()
 	{
-		if (!m_config.canLayer)
+		if (!canLayer())
 			return {};
 
 		auto dummyHandle = createDummyHandle();
@@ -228,7 +228,7 @@ namespace juceRmlUi
 
 	void RendererProxy::CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, const Rml::Span<const Rml::CompiledFilterHandle> _filters)
 	{
-		if (!m_config.canLayer)
+		if (!canLayer())
 			return;
 
 		auto f = copySpan(_filters);
@@ -262,7 +262,7 @@ namespace juceRmlUi
 
 	void RendererProxy::PopLayer()
 	{
-		if (!m_config.canLayer)
+		if (!canLayer())
 			return;
 
 		addRenderFunction([this]
@@ -284,7 +284,7 @@ namespace juceRmlUi
 
 	Rml::TextureHandle RendererProxy::SaveLayerAsTexture()
 	{
-		if (!m_config.canLayer)
+		if (!canLayer())
 			return {};
 
 		auto dummyHandle = createDummyHandle();
@@ -300,7 +300,7 @@ namespace juceRmlUi
 
 	Rml::CompiledFilterHandle RendererProxy::SaveLayerAsMaskImage()
 	{
-		if (!m_config.canLayer || !m_config.canFilter)
+		if (!canLayer() || !canFilter())
 			return {};
 
 		auto dummyHandle = createDummyHandle();
@@ -316,7 +316,7 @@ namespace juceRmlUi
 
 	Rml::CompiledFilterHandle RendererProxy::CompileFilter(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
-		if (!m_config.canFilter)
+		if (!canFilter())
 			return {};
 
 		auto dummyHandle = createDummyHandle();
@@ -332,7 +332,7 @@ namespace juceRmlUi
 
 	void RendererProxy::ReleaseFilter(Rml::CompiledFilterHandle _filter)
 	{
-		if (!m_config.canFilter)
+		if (!canFilter())
 			return;
 
 		addRenderFunction([this, _filter]
@@ -347,7 +347,7 @@ namespace juceRmlUi
 
 	Rml::CompiledShaderHandle RendererProxy::CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
-		if (!m_config.canShader)
+		if (!canShader())
 			return {};
 
 		auto dummyHandle = createDummyHandle();
@@ -363,7 +363,7 @@ namespace juceRmlUi
 
 	void RendererProxy::RenderShader(Rml::CompiledShaderHandle _shader, const Rml::CompiledGeometryHandle _geometry, const Rml::Vector2f _translation, const Rml::TextureHandle _texture)
 	{
-		if (!m_config.canShader)
+		if (!canShader())
 			return;
 
 		addRenderFunction([this, _shader, _geometry, _translation, _texture]
@@ -380,7 +380,7 @@ namespace juceRmlUi
 
 	void RendererProxy::ReleaseShader(Rml::CompiledShaderHandle _shader)
 	{
-		if (!m_config.canShader)
+		if (!canShader())
 			return;
 
 		addRenderFunction([this, _shader]
@@ -497,7 +497,9 @@ namespace juceRmlUi
 		}
 
 		m_renderer = _renderer;
-		m_config = _config;
+		m_canLayer.store(_config.canLayer, std::memory_order_relaxed);
+		m_canFilter.store(_config.canFilter, std::memory_order_relaxed);
+		m_canShader.store(_config.canShader, std::memory_order_relaxed);
 
 		if (m_renderer)
 		{
