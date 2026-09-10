@@ -200,7 +200,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
 ## E. Efficiency
 
-- [ ] **E1 `synthLib/plugin.cpp:301` and `:219` — a whole `SMidiEvent` copied per event on the RT thread.**
+- [x] **E1 `synthLib/plugin.cpp:301` and `:219` — a whole `SMidiEvent` copied per event on the RT thread.**
       `auto event = _ev;` exists only to stamp a field that `stampTransportGeneration` skips for
       sysex, so the copy allocates precisely where it is useless, and the event is copied again
       into the vector. Push first, stamp in place.
@@ -364,8 +364,11 @@ Recorded so they are not re-litigated:
 
 Worth fixing, but do not attribute them to the 88emu work:
 
-- `plugin.cpp:336` — partial-sysex handling falls through and delivers the raw fragment as well as
-  the reassembled message (2021, `e8d79d02c`).
+- `plugin.cpp:361` — partial-sysex handling falls through and delivers the raw fragment as well as
+  the reassembled message (2021, `e8d79d02c`). Re-confirmed against `d38b098353^` while doing E1:
+  the `if (!_ev.sysex.empty())` block needs a `return` at its end. A middle or end chunk is
+  appended to `m_pendingSysexInput` and then *also* pushed raw, so the device sees a headless
+  fragment alongside the reassembled message. Reachable whenever hardware splits a dump.
 - `processor.cpp:812` — the doubled-`F7` branch erases the **front** byte (the `F0`) instead of the
   duplicate tail; copy-paste of the doubled-`F0` branch above it. Host-reachable via VST3
   double-wrapping, and it produces exactly the state that walks into the fall-through above.

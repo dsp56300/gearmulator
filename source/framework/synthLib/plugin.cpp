@@ -216,25 +216,20 @@ namespace synthLib
 #endif
 	void Plugin::insertMidiEvent(const SMidiEvent& _ev)
 	{
-		auto ev = _ev;
-		stampTransportGeneration(ev);
+		// Find the slot before inserting: stampTransportGeneration() only writes
+		// transportGeneration, never offset, so the position does not depend on it. That lets the
+		// event be copied into place once and stamped there, instead of copied into a local and
+		// then again into the vector - this runs per clock tick on the audio thread.
+		auto it = m_midiIn.end();
 
-		if(m_midiIn.empty() || m_midiIn.back().offset <= ev.offset)
+		if(!m_midiIn.empty() && m_midiIn.back().offset > _ev.offset)
 		{
-			m_midiIn.push_back(ev);
-			return;
+			it = m_midiIn.begin();
+			while (it != m_midiIn.end() && it->offset <= _ev.offset)
+				++it;
 		}
 
-		for (auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
-		{
-			if (it->offset > ev.offset)
-			{
-				m_midiIn.insert(it, ev);
-				return;
-			}
-		}
-
-		m_midiIn.push_back(ev);
+		stampTransportGeneration(*m_midiIn.insert(it, _ev));
 	}
 
 	bool Plugin::setLatencyBlocks(uint32_t _latencyBlocks)
@@ -328,32 +323,32 @@ namespace synthLib
 
 	void Plugin::processMidiInEvent(const SMidiEvent& _ev)
 	{
-		auto event = _ev;
-		stampTransportGeneration(event);
-
-		// sysex might be sent in multiple chunks. Happens if coming from hardware
-		if (!event.sysex.empty())
+		// sysex might be sent in multiple chunks. Happens if coming from hardware.
+		// Nothing here needs a mutable copy: stampTransportGeneration() skips sysex entirely, so
+		// copying the event up front allocated a second buffer for exactly the kind of event where
+		// the stamp does nothing. Plain events are stamped in place after the push instead.
+		if (!_ev.sysex.empty())
 		{
-			const bool isComplete = event.sysex.front() == M_STARTOFSYSEX && event.sysex.back() == M_ENDOFSYSEX;
+			const bool isComplete = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
 
 			if (isComplete)
 			{
-				m_midiIn.push_back(event);
+				m_midiIn.push_back(_ev);
 				return;
 			}
 
-			const bool isStart = event.sysex.front() == M_STARTOFSYSEX && event.sysex.back() != M_ENDOFSYSEX;
-			const bool isEnd = event.sysex.front() != M_STARTOFSYSEX && event.sysex.back() == M_ENDOFSYSEX;
+			const bool isStart = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() != M_ENDOFSYSEX;
+			const bool isEnd = _ev.sysex.front() != M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
 
 			if (isStart)
 			{
-				m_pendingSysexInput = event;
+				m_pendingSysexInput = _ev;
 				return;
 			}
 
 			if (!m_pendingSysexInput.sysex.empty())
 			{
-				m_pendingSysexInput.sysex.insert(m_pendingSysexInput.sysex.end(), event.sysex.begin(), event.sysex.end());
+				m_pendingSysexInput.sysex.insert(m_pendingSysexInput.sysex.end(), _ev.sysex.begin(), _ev.sysex.end());
 
 				if (isEnd)
 				{
@@ -363,7 +358,8 @@ namespace synthLib
 			}
 		}
 
-		m_midiIn.push_back(event);
+		m_midiIn.push_back(_ev);
+		stampTransportGeneration(m_midiIn.back());
 	}
 
 	void Plugin::stampTransportGeneration(SMidiEvent& _event) const
