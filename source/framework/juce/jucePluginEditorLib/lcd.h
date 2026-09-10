@@ -67,6 +67,11 @@ namespace jucePluginEditorLib
 		void setText(const std::vector<uint8_t> &_text);
 		void setCgRam(const std::array<uint8_t, 64> &_data);
 
+		// NOTE: nothing calls this yet, so the blink timer and the underline renderer below have
+		// never run. The 88emu boards are the only owners of an hwLib::Hd44780 and they draw
+		// through their own DisplaySnapshot, not this class. Drive it from a panel that has cursor
+		// state and both paths come alive at once - expect them to be untested until then.
+		//
 		// Cursor state (HD44780 semantics). _col/_row are character coordinates;
 		// pass -1/-1 (or any out-of-range pair) to indicate the cursor is not
 		// currently over a visible cell.

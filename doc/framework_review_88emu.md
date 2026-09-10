@@ -228,7 +228,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       Every other plugin carries a flag it never asked about, it must be re-applied on every
       device replacement, and the condition is now spelled in three places.
 
-- [ ] **F3 `jucePluginEditorLib/lcd.h:64` — `LcdConfig`, `setCursor`, blink timer, `onClicked` all unused.**
+- [-] **F3 `jucePluginEditorLib/lcd.h:64` — `LcdConfig`, `setCursor`, blink timer, `onClicked` all unused.** Partly wrong, not deleting, see below.
       Fifteen `constexpr` constants became `const` instance members (which also makes `Lcd`
       non-assignable) to parameterise one float nobody passes; all three subclasses still use the
       three-argument constructor; the underline renderer is unreachable. The Sound Canvas panel
@@ -339,6 +339,13 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **F3, the Lcd surface** — checked all four claims. `setCursor()` genuinely has no caller
+  anywhere, so the blink timer and the underline renderer have never run (which means the C8 fix
+  landed in unreached code - correct, but untested by anything). `LcdConfig` is always built with
+  the default 3.0f because all three subclasses use the three-argument constructor. But `onClicked`
+  is NOT unused - `lcd.cpp:48,57` call it for the override-text splash; that claim was wrong. And
+  `_pixelSpacing` is a documented extension point, not an accident. Following the F1 decision,
+  keeping rather than deleting: the note is now in the header so the cursor path is known-undriven.
 - **F2, the MIDI clock flag** — not shared code bent for one caller; it is load bearing.
   `MidiClock::process()` advances its tick counter from `_bpm` alone and never consults
   `_isPlaying`, so the standalone player - which passes a fixed 120 bpm and `isPlaying=false` on
