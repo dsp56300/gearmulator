@@ -108,18 +108,21 @@ namespace synthLib
 		}
 	}
 
+	// Hands the live stream over to a cached alternative built for the new device rate. Swaps
+	// exactly the "swapped by swapStream()" block in the header, in declaration order, so the two
+	// can be read side by side. Anything above that block in the header stays deliberately put.
 	void ResamplerInOut::swapStream(ResamplerInOut& _other)
 	{
 		using std::swap;
-		swap(m_samplerateDevice, _other.m_samplerateDevice);
-		swap(m_in, _other.m_in);
 		swap(m_out, _other.m_out);
-		swap(m_input, _other.m_input);
+		swap(m_in, _other.m_in);
+		swap(m_samplerateDevice, _other.m_samplerateDevice);
 		swap(m_scaledInput, _other.m_scaledInput);
+		swap(m_input, _other.m_input);
 		swap(m_scaledInputSize, _other.m_scaledInputSize);
+		swap(m_processedMidiIn, _other.m_processedMidiIn);
 		swap(m_midiIn, _other.m_midiIn);
 		swap(m_midiOut, _other.m_midiOut);
-		swap(m_processedMidiIn, _other.m_processedMidiIn);
 		swap(m_inputLatency, _other.m_inputLatency);
 		swap(m_outputLatency, _other.m_outputLatency);
 	}

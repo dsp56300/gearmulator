@@ -40,15 +40,27 @@ namespace synthLib
 		static void clampMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax);
 		static void extractMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax);
 
+		// --- Members are in two groups. swapStream() hands the live stream over to a cached
+		// alternative when the device rate changes, so every member below that describes *where the
+		// stream currently is* has to move with it, and every member that describes *what this
+		// object is for* must stay put. There is no way to check that at compile time here - the
+		// class holds a pmr vector and pointers, so its size differs per target - so the grouping
+		// is the check: add a member to the right block and swapStream() reads as obviously
+		// complete or obviously not.
+
+		// Not swapped: identity and configuration. Both objects are built for the same host rate,
+		// channel counts and conversion mode, and the alternatives belong to the live object only.
 		const uint32_t m_channelCountIn;
 		const uint32_t m_channelCountOut;
+		float m_samplerateHost = 0;
+		Resampler::Mode m_mode = Resampler::Mode::Legacy;
 
+		// Swapped by swapStream(): the converters, the audio in flight and the MIDI staged
+		// against it. Keep this block and swapStream() in step.
 		std::unique_ptr<Resampler> m_out = nullptr;
 		std::unique_ptr<Resampler> m_in = nullptr;
 
 		float m_samplerateDevice = 0;
-		float m_samplerateHost = 0;
-		Resampler::Mode m_mode = Resampler::Mode::Legacy;
 
 		AudioBuffer m_scaledInput;
 		AudioBuffer m_input;

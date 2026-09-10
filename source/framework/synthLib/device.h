@@ -54,6 +54,17 @@ namespace synthLib
 		virtual float getSamplerate() const = 0;
 		// Rates selected by firmware during processing, rather than by the host.
 		// Declare these so the plugin can prepare conversion filters in advance.
+		// Every rate this device can switch to *while running*, i.e. because its own firmware
+		// changed the clock - a front panel menu selecting 44.1 vs 48 kHz, say. Nothing here means
+		// "my rate never moves", which is true of every device that picks a rate at construction.
+		//
+		// Declaring them is what makes such a change cheap. Plugin::process() notices the new rate
+		// and hands it to the message thread (see applyPendingDeviceSamplerate), which switches the
+		// resampler over; a rate listed here already has its converters built and prewarmed, so the
+		// switch allocates nothing. A rate that is not listed has to build them on the spot.
+		//
+		// Note the rate itself is reported by getSamplerate(): this list only says which values it
+		// may take, so keep the two in step.
 		virtual void getDynamicSamplerates(std::vector<float>& _dst) const {}
 		virtual void getPreferredSamplerates(std::vector<float>& _dst) const
 		{

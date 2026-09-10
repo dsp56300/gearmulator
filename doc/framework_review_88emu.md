@@ -219,7 +219,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
 ## F. Shared code bent for one caller
 
-- [ ] **F1 `synthLib/device.h:57` — `getDynamicSamplerates()` has no implementer.**
+- [x] **F1 `synthLib/device.h:57` — `getDynamicSamplerates()` has no implementer.** Kept, see below.
       Nothing overrides it, yet it costs a per-block `getSamplerate()` poll on the audio thread
       (see A2) plus a duplicate `ResamplerInOut` per declared rate and a hand-written 12-field
       `swapStream()` that silently misses any member added later.
@@ -339,6 +339,12 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **F1, the dynamic-samplerate subsystem** — no implementer today (verified: no device's rate moves
+  at runtime, 88emu model switching replaces the whole `Plugin`, `setState` re-reads the rate), but
+  it is NOT speculative. The TC M-One XL selects its sample rate from a front panel menu, i.e. the
+  firmware changes the clock while running, and the per-block `getSamplerate()` poll is the only
+  thing that would notice. Kept and documented rather than deleted, on the user's call.
+  A device opts in by overriding `getDynamicSamplerates()`; that is the whole contract.
 - **D1's consequences** — only the header comment was wrong. Both romloader caches are
   process-local `static std::map`s, so the platform unit never crosses a boundary and every use
   is an equality test. The 0-on-failure sentinel cannot equal a real stamp, so it forces a cache
