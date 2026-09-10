@@ -103,8 +103,9 @@ namespace hwLib
 		if(!ddRamIndex(_addr, index))
 			return;
 
-		const auto column = index % Columns;
-		const auto relative = (column + Columns - m_displayShiftOffset) % Columns;
+		const auto mod = shiftModulus();
+		const auto column = index % mod;
+		const auto relative = (column + mod - m_displayShiftOffset) % mod;
 
 		if(relative < m_visibleColumns)
 			return;	// already in view
@@ -112,11 +113,11 @@ namespace hwLib
 		// Bring it in with the smaller of the two possible window movements:
 		// scroll right until it is the last visible cell, or left until it is
 		// the first.
-		const auto offsetRight = (column + Columns - (m_visibleColumns - 1)) % Columns;
-		const auto moveRight = (offsetRight + Columns - m_displayShiftOffset) % Columns;
+		const auto offsetRight = (column + mod - (m_visibleColumns - 1)) % mod;
+		const auto moveRight = (offsetRight + mod - m_displayShiftOffset) % mod;
 
 		const auto offsetLeft = column;
-		const auto moveLeft = (m_displayShiftOffset + Columns - offsetLeft) % Columns;
+		const auto moveLeft = (m_displayShiftOffset + mod - offsetLeft) % mod;
 
 		m_displayShiftOffset = (moveRight <= moveLeft) ? offsetRight : offsetLeft;
 	}
@@ -208,8 +209,8 @@ namespace hwLib
 					// Shifting the display right moves the content right, which
 					// means the window starts one cell earlier.
 					m_displayShiftOffset = toTheRight
-						? (m_displayShiftOffset + Columns - 1) % Columns
-						: (m_displayShiftOffset + 1) % Columns;
+						? (m_displayShiftOffset + shiftModulus() - 1) % shiftModulus()
+						: (m_displayShiftOffset + 1) % shiftModulus();
 				}
 				else
 				{
@@ -270,8 +271,8 @@ namespace hwLib
 				if(m_shiftOnWrite)
 				{
 					m_displayShiftOffset = m_increment
-						? (m_displayShiftOffset + 1) % Columns
-						: (m_displayShiftOffset + Columns - 1) % Columns;
+						? (m_displayShiftOffset + 1) % shiftModulus()
+						: (m_displayShiftOffset + shiftModulus() - 1) % shiftModulus();
 				}
 			}
 		}

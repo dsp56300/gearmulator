@@ -163,7 +163,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       Only MWRITE and DISP ON set it, so a driver that double-buffers by writing a page and
       flipping with SCROLL produces no notification and the UI keeps showing the old page.
 
-- [ ] **C7 `hardwareLib/hd44780.cpp:205` — one-line mode shift wraps at the wrong modulus.**
+- [x] **C7 `hardwareLib/hd44780.cpp:205` — one-line mode shift wraps at the wrong modulus.**
       `m_displayShiftOffset` is reduced `% Columns` (40) while one-line DDRAM is 80 cells and
       `advanceDdAddr` wraps at 0x4f, so cells 0x28-0x4f can never be scrolled into view.
 

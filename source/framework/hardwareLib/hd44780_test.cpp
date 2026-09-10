@@ -48,6 +48,39 @@ namespace
 		require(lcd.getCgRam()[2] == 0x15);
 		require(lcd.getDdRam()[0] != 0x15);
 	}
+
+	// One-line mode is a single 80-cell run (0x00-0x4f) and advanceDdAddr() writes all of it,
+	// but the display shift was reduced modulo 40, so the window could never start past cell
+	// 39 and everything from 0x28 up was impossible to scroll into view.
+	void testOneLineShiftReachesEveryCell()
+	{
+		Hd44780 lcd(20, 1);
+
+		lcd.write(false, 0x30);				// Function set: 8 bit, one line
+		lcd.write(false, 0x01);				// Clear display
+		lcd.write(false, 0x80 | 0x45);		// Set DDRAM address 0x45
+		lcd.write(true, 'Z');
+		require(lcd.getDdRam()[0x45] == 'Z');
+
+		// Shift the display left until 0x45 is the leftmost visible cell.
+		for(uint32_t i = 0; i < 0x45; ++i)
+			lcd.write(false, 0x18);			// Cursor/display shift: display, left
+
+		require(lcd.getDisplayShift() == 0x45);
+		require(lcd.getVisibleCharacter(0, 0) == 'Z');
+	}
+
+	// ...while two-line mode shifts each line over its own 40 cells, so a full lap is 40.
+	void testTwoLineShiftWrapsAtOneLine()
+	{
+		Hd44780 lcd(20, 2);
+
+		lcd.write(false, 0x38);				// Function set: 8 bit, two lines
+		for(uint32_t i = 0; i < Hd44780::Columns; ++i)
+			lcd.write(false, 0x18);
+
+		require(lcd.getDisplayShift() == 0);
+	}
 }
 
 int main()
@@ -57,5 +90,7 @@ int main()
 	testLeavingCgRam(0x03);					// Return home, don't-care bit set
 	testLeavingCgRam(0x80);					// Set DDRAM address 0
 	testUndefinedInstructionIsANop();
+	testOneLineShiftReachesEveryCell();
+	testTwoLineShiftWrapsAtOneLine();
 	return 0;
 }

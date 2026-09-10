@@ -103,6 +103,12 @@ namespace hwLib
 		void advanceDdAddr();
 		void followWindow(uint8_t _addr);
 
+		// How far the display shift runs before it wraps. Two-line mode shifts each
+		// line over its own 40 cells; one-line mode is a single 80-cell run, and
+		// reducing the shift by 40 there left cells 0x28-0x4f impossible to scroll
+		// into view even though advanceDdAddr() happily writes them.
+		uint32_t shiftModulus() const { return m_twoLine ? Columns : DdRamSize; }
+
 		std::array<uint8_t, DdRamSize> m_ddRam{};
 		std::array<uint8_t, CgRamSize> m_cgRam{};
 
