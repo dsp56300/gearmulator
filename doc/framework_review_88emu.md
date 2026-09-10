@@ -40,14 +40,22 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       the range-`for`. If a `func()` throws, the `clear()` is skipped and the batch replays,
       double-releasing handles.
 
-- [ ] **A4 `synthLib/plugin.cpp:123` — transport re-stamp promotes exactly the events it should drop.**
+- [-] **A4 `synthLib/plugin.cpp:123` — transport re-stamp promotes exactly the events it should drop.** RETRACTED, see below.
       On a discontinuity every event already staged in `m_midiIn` is re-stamped with the new
       generation. `processMidiInEvents()` has not run yet, so those are leftovers from earlier
       host blocks — the pre-discontinuity events the counter exists to discard. A Note On staged
       before the DAW stops survives the purge and arrives after the All Sound Off meant to cancel
       it. Hung note on transport stop.
 
-- [ ] **A5 `juceRmlUi/rmlMenu.cpp:140` — use-after-free moved, not removed.**
+      Not a defect. `Plugin::m_midiIn` does not survive a block: `processMidiInEvents()`
+      drains the whole ring buffer and `m_midiIn.clear()` runs at the end of every
+      `process()`, skipped only on the invalid-device early return. What it holds at the
+      discontinuity check is what the overflow path staged since the last block, i.e.
+      current-block events, which do belong to the new generation. The buffer that is
+      carried across blocks is `ResamplerInOut::m_midiIn`, a different member - that one is
+      C1.
+
+- [x] **A5 `juceRmlUi/rmlMenu.cpp:140` — use-after-free moved, not removed.**
       The deleted unconditional `closeAll()` became a guard whose operands live in the click
       lambda itself. An action that swaps skin or renderer destroys the document, the menu root,
       the `div` and — via `EventListener::OnDetach`'s `delete this` — the `std::function` holding

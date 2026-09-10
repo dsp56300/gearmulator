@@ -124,21 +124,24 @@ namespace juceRmlUi
 			}
 			if (!entry.separator && entry.action && entry.enabled)
 			{
-				// An entry's action can tear down the document this menu lives
-				// in - picking a skin or a renderer closes the settings window -
-				// which destroys the menu with it. Only touch it again if it
-				// outlived the action. A menu that is not shared-owned cannot be
-				// observed this way, and keeps the unguarded behaviour.
-				auto weakSelf = weak_from_this();
-				const bool observable = !weakSelf.expired();
-
 				juceRmlUi::EventListener::Add(div, Rml::EventId::Click,
-					[this, weakSelf = std::move(weakSelf), observable, action = entry.action](Rml::Event& _event)
+					[weakSelf = weak_from_this(), action = entry.action](Rml::Event& _event)
 				{
-					action();
+					// The action can tear down the document this menu lives in - picking a
+					// skin or a renderer closes the settings window - which destroys the menu,
+					// the entry element, and with it the listener holding this very lambda.
+					// So take everything needed onto the stack first: a strong reference that
+					// keeps the menu alive, and a copy of the action, because calling it
+					// through the captured copy would free the callable while it runs.
+					const auto self = weakSelf.lock();
+					const auto fn = action;
+
+					fn();
+
 					_event.StopPropagation();
-					if (!observable || !weakSelf.expired())
-						closeAll();
+
+					if (self)
+						self->closeAll();
 				});
 			}
 
