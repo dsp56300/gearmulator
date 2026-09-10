@@ -249,7 +249,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       in-document menu wraps into columns instead of scrolling; making `Menu` scroll fixes that
       for every plugin and leaves one menu code path instead of two.
 
-- [ ] **F7 `juceRmlPlugin/rmlParameterBinding.h:40` — `evElementDestroyed` has no subscribers.**
+- [x] **F7 `juceRmlPlugin/rmlParameterBinding.h:40` — `evElementDestroyed` has no subscribers.** Premise wrong, wired up instead.
       Declared, documented with a five-line contract, invoked — and the case its comment names is
       already covered by `evUnbind`, fired one line earlier. A teardown hook that does nothing.
 
@@ -339,6 +339,11 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **F7's premise** — `evElementDestroyed` is NOT covered by `evUnbind`: `unbind()` only fires that
+  inside the "was bound" branch, so destroying an unbound element notifies nobody. The hook was
+  missing its consumer, not redundant. `ParameterOverlays::m_overlays` is insert-only and keyed by
+  raw element pointers, so it now subscribes and erases. Teardown was already safe - `~Editor`
+  resets `m_overlays` before the component - so this covers mid-context destruction only.
 - **F6, the native combo popup** — the finding's remedy was wrong. Making `Menu` scroll would not
   let it replace this: an in-document RmlUi menu is clipped to its component, and the standalone
   settings window is too small to show a long list. The native popup escapes the window, which is

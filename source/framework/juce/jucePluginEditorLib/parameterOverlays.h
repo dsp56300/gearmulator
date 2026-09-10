@@ -41,6 +41,7 @@ namespace jucePluginEditorLib
 	private:
 		void onBind(pluginLib::Parameter* _param, Rml::Element* _elem);
 		void onUnbind(pluginLib::Parameter* _param, Rml::Element* _elem);
+		void onElementDestroyed(Rml::Element* _elem);
 
 		ParameterOverlay* getOverlay(const Rml::Element* _comp);
 
@@ -51,5 +52,6 @@ namespace jucePluginEditorLib
 
 		size_t m_onBindListenerId;
 		size_t m_onUnbindListenerId;
+		size_t m_onElementDestroyedListenerId;
 	};
 }

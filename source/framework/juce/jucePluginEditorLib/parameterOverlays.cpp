@@ -15,12 +15,18 @@ namespace jucePluginEditorLib
 		{
 			onUnbind(_param, _element);
 		});
+
+		m_onElementDestroyedListenerId = m_binding.evElementDestroyed.addListener([this](Rml::Element* _element)
+		{
+			onElementDestroyed(_element);
+		});
 	}
 
 	ParameterOverlays::~ParameterOverlays()
 	{
 		m_binding.evBind.removeListener(m_onBindListenerId);
 		m_binding.evUnbind.removeListener(m_onUnbindListenerId);
+		m_binding.evElementDestroyed.removeListener(m_onElementDestroyedListenerId);
 	}
 
 	bool ParameterOverlays::registerComponent(Rml::Element* _component)
@@ -95,6 +101,16 @@ namespace jucePluginEditorLib
 			return;
 
 		o->onUnbind(_param, _elem);
+	}
+
+	void ParameterOverlays::onElementDestroyed(Rml::Element* _elem)
+	{
+		// m_overlays is keyed by raw element pointers and nothing else ever erases from it, so an
+		// element destroyed while this object lives - SetInnerRML on a dynamic area does exactly
+		// that - would leave both a dangling key and an overlay for an element that is gone. The
+		// allocator can then hand the same address to a new element and getOverlay() would match it.
+		// RmlUi fires this while the element is still intact, so the overlay can still detach.
+		m_overlays.erase(_elem);
 	}
 
 	ParameterOverlay* ParameterOverlays::getOverlay(const Rml::Element* _comp)
