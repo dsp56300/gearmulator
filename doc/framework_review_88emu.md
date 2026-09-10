@@ -283,7 +283,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       The same loop appears in `setDeviceSamplerate` and `setSamplerates`; the class already has
       the helper, unusable in place only because it clears its destination.
 
-- [ ] **G5 `plugin.cpp:341` / `midiRateLimiter.cpp:52` — `isTransportBound` written twice.**
+- [x] **G5 `plugin.cpp:341` / `midiRateLimiter.cpp:52` — `isTransportBound` written twice.** Three times, actually.
       The write side and the read side of one protocol. If they ever disagree an event either
       survives a seek forever or is never flushed. `midiTypes.h` is the natural home.
 

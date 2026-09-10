@@ -364,8 +364,7 @@ namespace synthLib
 
 	void Plugin::stampTransportGeneration(SMidiEvent& _event) const
 	{
-		if (_event.sysex.empty() &&
-			(_event.source == MidiEventSource::Host || _event.source == MidiEventSource::Internal))
+		if (isTransportBound(_event))
 			_event.transportGeneration = m_transportGeneration.load(std::memory_order_relaxed);
 	}
 

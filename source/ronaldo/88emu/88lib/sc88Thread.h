@@ -48,7 +48,6 @@ namespace emu88Lib
 		void recoverFromQueueOverflow();
 		void silenceActiveChannels();
 		void trackMidiActivity(const synthLib::SMidiEvent& _event);
-		static bool isTransportBound(const synthLib::SMidiEvent& _event);
 
 		Render m_render;
 		SendMidi m_sendMidi;

@@ -35,6 +35,9 @@ target_include_directories(88lib
 if(BUILD_TESTING)
 	add_executable(sc88Thread_test sc88Thread_test.cpp)
 	target_link_libraries(sc88Thread_test PRIVATE 88lib)
+	# This directory is pulled in with EXCLUDE_FROM_ALL, which kept the test out of the generated
+	# solution entirely - ctest has been reporting it as "Not Run" rather than running it.
+	set_property(TARGET sc88Thread_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 	set_property(TARGET sc88Thread_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME sc88Thread COMMAND sc88Thread_test)
 	set_tests_properties(sc88Thread PROPERTIES TIMEOUT 20)

@@ -337,4 +337,20 @@ namespace synthLib
 			return type == MidiEventType::Midi && a == 0 && sysex.empty();
 		}
 	};
+
+	// Whether this event's delivery is tied to the host transport: it belongs to a generation, is
+	// discarded when the transport jumps, and is replaced by the All Sound Off that follows. SysEx
+	// never is - a dump has to arrive whole no matter what the transport does - and neither is
+	// anything a device produced itself.
+	//
+	// The write side (Plugin::stampTransportGeneration) and the read side
+	// (MidiRateLimiter::transportDiscontinuity) must agree on this exactly, which is why it lives
+	// here rather than in either of them. Disagreeing either way is silent: an event that is
+	// stamped but not purged survives a seek forever, and one that is purged but never stamped
+	// keeps generation 0 and is dropped on every discontinuity there is.
+	inline bool isTransportBound(const SMidiEvent& _event)
+	{
+		return _event.sysex.empty() &&
+			(_event.source == MidiEventSource::Host || _event.source == MidiEventSource::Internal);
+	}
 }

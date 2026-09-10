@@ -49,12 +49,6 @@ namespace synthLib
 			m_pendingRealtime.emplace_back(std::move(_event));
 	}
 
-	bool MidiRateLimiter::isTransportBound(const SMidiEvent& _event)
-	{
-		return _event.sysex.empty() &&
-			(_event.source == MidiEventSource::Host || _event.source == MidiEventSource::Internal);
-	}
-
 	void MidiRateLimiter::transportDiscontinuity(const uint32_t _generation)
 	{
 		m_transportGeneration = std::max(m_transportGeneration, _generation);

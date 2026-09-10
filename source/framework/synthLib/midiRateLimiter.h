@@ -38,7 +38,6 @@ namespace synthLib
 		void sendByte();
 		void beginEvent(SMidiEvent&& _event);
 		void completeCurrentEvent();
-		static bool isTransportBound(const SMidiEvent& _event);
 
 		WriteCallback m_writeCallback;
 

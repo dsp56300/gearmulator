@@ -145,7 +145,7 @@ namespace emu88Lib
 						eventIndex = 0;
 						continue;
 					}
-					if(isTransportBound(event) && event.transportGeneration < m_workerGeneration)
+					if(synthLib::isTransportBound(event) && event.transportGeneration < m_workerGeneration)
 						continue;
 					if(m_sendMidi)
 						m_sendMidi(event);
@@ -169,19 +169,12 @@ namespace emu88Lib
 		_job.samplesToProcess = 0;
 	}
 
-	bool Sc88Thread::isTransportBound(const synthLib::SMidiEvent& _event)
-	{
-		return _event.sysex.empty() &&
-		       (_event.source == synthLib::MidiEventSource::Host ||
-		        _event.source == synthLib::MidiEventSource::Internal);
-	}
-
 	void Sc88Thread::handleTransportDiscontinuity(const uint32_t _generation)
 	{
 		m_workerGeneration = std::max(m_workerGeneration, _generation);
 		for(auto it = m_tempMidiIn.begin(); it != m_tempMidiIn.end();)
 		{
-			if(isTransportBound(it->second) && it->second.transportGeneration < m_workerGeneration)
+			if(synthLib::isTransportBound(it->second) && it->second.transportGeneration < m_workerGeneration)
 				it = m_tempMidiIn.erase(it);
 			else
 				++it;
@@ -195,7 +188,7 @@ namespace emu88Lib
 		m_workerGeneration = std::max(m_workerGeneration, m_outputGeneration.load(std::memory_order_acquire));
 		for(auto it = m_tempMidiIn.begin(); it != m_tempMidiIn.end();)
 		{
-			if(isTransportBound(it->second))
+			if(synthLib::isTransportBound(it->second))
 				it = m_tempMidiIn.erase(it);
 			else
 				++it;
@@ -225,7 +218,7 @@ namespace emu88Lib
 
 	void Sc88Thread::trackMidiActivity(const synthLib::SMidiEvent& _event)
 	{
-		if(!isTransportBound(_event) || _event.a < 0x80 || _event.a >= 0xf0)
+		if(!synthLib::isTransportBound(_event) || _event.a < 0x80 || _event.a >= 0xf0)
 			return;
 		const auto status = _event.a & 0xf0;
 		if(_event.port >= 4)
