@@ -51,9 +51,10 @@ namespace emu88Player
 	{
 		(void)juce::File(m_romFolder).createDirectory();
 		// These three are ours, so they are searched recursively - a user can sort
-		// a ROM collection into subfolders. The module and working directories are
-		// added by synthLib itself and stay flat on purpose: a double-clicked
-		// application runs with "/" as its working directory.
+		// a ROM collection into subfolders. The module directory is added by synthLib
+		// itself and stays flat on purpose. The working directory is not searched at
+		// all once we have named paths of our own: a double-clicked application runs
+		// with "/" as its working directory.
 		synthLib::RomLoader::addSearchPath(m_romFolder, true);
 		// The player read the SC-88 plugin's ROM folder before it had one of its own. It stays
 		// a fallback so an existing install keeps working, but it is never created and the

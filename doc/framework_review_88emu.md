@@ -189,7 +189,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       `addSearchPath()`. `Processor::getPlugin()` documents concurrent first-callers, so two
       threads can insert into `g_searchPaths` at once.
 
-- [ ] **D4 `synthLib/romLoader.cpp:28` — the process working directory is now always searched.**
+- [x] **D4 `synthLib/romLoader.cpp:28` — the process working directory is now always searched.**
       Previously the defaults were skipped whenever a caller had registered a path, which every
       plugin does. Low severity: JE8086 validates ROM content, not just size, so this is an
       ordering quirk rather than a hijack — but a DAW's cwd is arbitrary.

@@ -23,11 +23,14 @@ namespace synthLib
 			return mutex;
 		}
 
-		// The built-in locations (module directory + current directory) are
-		// installed lazily, but they must be installed before any caller-added
-		// path too — otherwise an addSearchPath() made before the first lookup
-		// leaves the set non-empty and silently *replaces* the defaults instead
-		// of adding to them.
+		// True once a caller has named a search path of its own. Every plugin does, from its
+		// constructor, before anything looks a ROM up.
+		bool g_callerAddedPath = false;
+
+		// The module directory belongs to the binary, so it is always searched. It is installed
+		// lazily but must land before any caller-added path too — otherwise an addSearchPath()
+		// made before the first lookup leaves the set non-empty and silently *replaces* the
+		// defaults instead of adding to them.
 		// Call with searchPathMutex() held.
 		void ensureDefaultSearchPaths()
 		{
@@ -38,7 +41,19 @@ namespace synthLib
 
 			g_searchPaths.insert(getModulePath(true));
 			g_searchPaths.insert(getModulePath(false));
-			g_searchPaths.insert(baseLib::filesystem::getCurrentDirectory());
+		}
+
+		// The working directory is a fallback for the command-line tools, which are run from
+		// wherever the ROMs are. Once a caller has named a path of its own there is no reason to
+		// scan it: a plugin's working directory is whatever the DAW happened to leave behind, and
+		// for a double-clicked application it is "/" or "C:\". Picking an unrelated file of the
+		// right size out of it only produces a device that will not boot.
+		// Call with searchPathMutex() held.
+		void ensureLookupSearchPaths()
+		{
+			ensureDefaultSearchPaths();
+			if(!g_callerAddedPath)
+				g_searchPaths.insert(baseLib::filesystem::getCurrentDirectory());
 		}
 	}
 
@@ -47,7 +62,7 @@ namespace synthLib
 		std::vector<std::string> results;
 
 		const std::lock_guard lock(searchPathMutex());
-		ensureDefaultSearchPaths();
+		ensureLookupSearchPaths();
 
 		for (const auto& path : g_searchPaths)
 			baseLib::filesystem::findFiles(results, path, _extension, _minSize, _maxSize);
@@ -60,12 +75,12 @@ namespace synthLib
 		std::vector<baseLib::filesystem::FoundFile> results;
 
 		const std::lock_guard lock(searchPathMutex());
-		ensureDefaultSearchPaths();
+		ensureLookupSearchPaths();
 
 		// Only paths the caller explicitly claimed are descended into. The rest
-		// keep the flat "drop a ROM next to the executable" behaviour: the
-		// working directory is one of them, and for a double-clicked
-		// application that is the root of the filesystem.
+		// keep the flat "drop a ROM next to the executable" behaviour - including
+		// the working directory on the tools-only path above, which for a
+		// double-clicked application is the root of the filesystem.
 		for (const auto& path : g_searchPaths)
 		{
 			// Depth 0 is the folder itself and nothing below it, which is the
@@ -93,6 +108,7 @@ namespace synthLib
 	{
 		const std::lock_guard lock(searchPathMutex());
 		ensureDefaultSearchPaths();
+		g_callerAddedPath = true;
 		const auto path = baseLib::filesystem::validatePath(_path);
 		g_searchPaths.insert(path);
 		if (_recursive)
