@@ -279,7 +279,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       `statbuf` — that were not applied to the public helpers. Back-port them.
       `getFileModificationTime` is a fourth copy of the same `#ifdef` pair (see D1).
 
-- [ ] **G4 `synthLib/resamplerInOut.cpp:40` — offset rescale pasted twice, and `scaleMidiEvents` exists.**
+- [x] **G4 `synthLib/resamplerInOut.cpp:40` — offset rescale pasted twice, and `scaleMidiEvents` exists.**
       The same loop appears in `setDeviceSamplerate` and `setSamplerates`; the class already has
       the helper, unusable in place only because it clears its destination.
 

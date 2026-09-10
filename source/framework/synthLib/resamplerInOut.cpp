@@ -35,9 +35,7 @@ namespace synthLib
 		if(m_samplerateDevice == _samplerate)
 			return;
 
-		if(m_samplerateDevice > 0)
-			for(auto& event : m_midiIn)
-				event.offset = floor_int(event.offset * _samplerate / m_samplerateDevice);
+		rescaleQueuedMidi(_samplerate);
 
 		for(auto& alternative : m_alternatives)
 		{
@@ -75,15 +73,26 @@ namespace synthLib
 			setDeviceSamplerate(_deviceSamplerate);
 			return;
 		}
-		if(m_samplerateDevice > 0)
-			for(auto& event : m_midiIn)
-				event.offset = floor_int(event.offset * _deviceSamplerate / m_samplerateDevice);
+		rescaleQueuedMidi(_deviceSamplerate);
 
 		m_samplerateDevice = _deviceSamplerate;
 		m_samplerateHost = _hostSamplerate;
 
 		recreate();
 		prepareAlternatives();
+	}
+
+	// Queued events carry offsets into the device stream, so changing the device rate has to move
+	// them with it. Call before m_samplerateDevice is updated - the old rate is what they are
+	// currently expressed in - and note there is nothing to scale from before the first rate is
+	// known.
+	void ResamplerInOut::rescaleQueuedMidi(const float _newDeviceSamplerate)
+	{
+		if(m_samplerateDevice <= 0)
+			return;
+
+		for(auto& event : m_midiIn)
+			event.offset = floor_int(event.offset * _newDeviceSamplerate / m_samplerateDevice);
 	}
 
 	void ResamplerInOut::prepareDeviceSamplerates(const std::vector<float>& _samplerates)

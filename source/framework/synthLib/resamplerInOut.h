@@ -32,6 +32,7 @@ namespace synthLib
 		void prepareAlternatives();
 		void swapStream(ResamplerInOut& _other);
 		void clearAudioHistory();
+		void rescaleQueuedMidi(float _newDeviceSamplerate);
 		std::vector<float> m_dynamicSamplerates;
 		std::vector<std::unique_ptr<ResamplerInOut>> m_alternatives;
 		// Appends _src to _dst with every offset scaled. scaleMidiEvents() replaces _dst instead.
