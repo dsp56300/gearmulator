@@ -118,7 +118,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       `keyPressed()` push_backs unconditionally including auto-repeat, so the vector grows on
       every focus loss and the stale modifier alters later knob drags.
 
-- [ ] **B5 `juceRmlUi/juceRmlComponent.cpp:686` — wheel rescale only compensated in `ElemKnob`.**
+- [-] **B5 `juceRmlUi/juceRmlComponent.cpp:686` — wheel rescale only compensated in `ElemKnob`.** RETRACTED, see below.
       A detent goes 0.234 -> 1.0 units on Windows (4.27x), 0.195 -> 1.0 on Linux, 0.039 -> 1.0 on
       macOS (25.6x); RmlUi then multiplies by `UNIT_SCROLL_LENGTH` = 80. `rmlElemKnob.cpp` was
       retuned `/7.5f` -> `/32.0f`, but `ElemList::onMouseScroll` re-dispatches the delta verbatim,
@@ -339,6 +339,14 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **B5, wheel rescale** — traced every consumer of the delta. `ElemComboBox`, the radio-button
+  handler in `rmlPluginDocument` and `rmlControllerLink` read the sign only; `ElemList::onMouseScroll`
+  swaps the axes and leaves the magnitude alone; the slider handler delegates to `ElemKnob`. The
+  only magnitude consumers are `ElemKnob`, which was retuned, and RmlUi's native scroller, which
+  multiplies by `UNIT_SCROLL_LENGTH` (`Context.cpp:826`) — 80dp per notch is exactly the convention
+  it is written for, the same one its SDL/GLFW backends feed. The old raw delta gave that scroller
+  19dp per detent on Windows and 3dp on macOS. The rescale is the fix, not the regression, and it
+  makes the knob uniform at 3.1% of range per detent instead of 3.1% on Windows / 0.5% on macOS.
 
 ## Pre-existing, not from this commit
 
