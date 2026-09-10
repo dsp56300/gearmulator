@@ -12,6 +12,57 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
 ---
 
+## Still to do
+
+Not part of the numbered list, but do not lose these.
+
+**Blocking a release**
+
+- [ ] **Build the two macOS-only fixes on a Mac.** B3 (`f6116ea2a`, the Metal viewport was read
+      off the juce component tree from the render thread) and C4 (`ad1e594dc`, a zero viewport
+      deadlocked the render handshake) are both inside `#ifdef RMLUI_METAL_RENDERER` and have
+      never been compiled, here or anywhere. They also depend on each other: C4 removes the gate
+      that makes B3's own size guard load bearing, so neither is correct without the other. A Mac
+      build, not the CI leg being the first look.
+
+**Worth doing soon**
+
+- [ ] **Audit ctest for other silently unrun tests.** `sc88Thread` reported "Not Run" for its whole
+      life because `88lib` is added with `EXCLUDE_FROM_ALL`, which keeps its targets out of the
+      generated solution entirely. Same for `hardwareLib`. Both are fixed with one
+      `set_property(... EXCLUDE_FROM_ALL FALSE)`, but nobody has checked what else in the tree is
+      registered with `add_test` and never built.
+- [ ] **Fix the partial-sysex fall-through** in `plugin.cpp:361` - see "Pre-existing, not from this
+      commit" below. It has a diagnosis and a one word fix (`return`), it just does not belong in a
+      commit from this review.
+
+**Offered during the review, not started**
+
+- [ ] **M-One XL runtime samplerate switching.** The framework already supports it end to end;
+      a device opts in by overriding `getDynamicSamplerates()` and reporting the current rate from
+      `getSamplerate()`. See F1 - the whole subsystem was nearly deleted as unused before this use
+      case turned up, so it is worth having a real consumer.
+- [ ] **Drive the LCD cursor path.** `jucePluginEditorLib::Lcd::setCursor()` has no caller, so the
+      blink timer and the underline renderer have never run and the C8 fix protects nothing. The
+      natural driver is the Waldorf panels - microQ/XT are HD44780 based and do show a cursor.
+      See F3.
+- [ ] **Make the combo window popup skinnable.** `ComboPopupLookAndFeel` has four colours and a
+      font size compiled into framework code, shared by every combo that asks for `popup="window"`.
+      Fine while only the 88emu player uses it. Reading them from the element's computed values is
+      ~20 lines, but it changes how a window looks and wants eyes on the result. See F6.
+
+**Trivia**
+
+- [ ] `dynamicSamplerate_test.cpp:112` warns C4244 - `const float oldRate = _host == 32000 ? 48000
+      : 32000` needs `.0f` suffixes. Pre-existing, left alone to keep it out of unrelated commits.
+
+**Not committed anywhere yet**
+
+- [ ] 51 commits sit on `oss/main` ahead of `gearmulator/main`. Nothing from this review has been
+      pushed.
+
+---
+
 ## A. Real-time and threading — fix before the release build
 
 - [x] **A1 `jucePluginLib/processor.cpp:856` — `updateLatencySamples()` runs inside `processBlock`.**
