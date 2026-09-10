@@ -289,7 +289,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
 ## H. Simplification
 
-- [ ] **H1 `synthLib/resamplerInOut.cpp:47` — a swap that cancels the next line's swap.**
+- [x] **H1 `synthLib/resamplerInOut.cpp:47` — a swap that cancels the next line's swap.** Swap fixed; the recreate/prepare fold deliberately NOT done - `recreate()` early-returns on a zero device rate where `prepareAlternatives()` does not, so folding them changes behaviour.
       `alternative->m_midiIn.swap(m_midiIn)` undoes what `swapStream()` does one line later, so the
       queue ends where it started via two operations. Anyone deleting either half silently hands
       the live MIDI queue to a cached resampler. Also: `prepareAlternatives()` is called at four

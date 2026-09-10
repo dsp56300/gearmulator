@@ -56,8 +56,8 @@ namespace synthLib
 		float m_samplerateHost = 0;
 		Resampler::Mode m_mode = Resampler::Mode::Legacy;
 
-		// Swapped by swapStream(): the converters, the audio in flight and the MIDI staged
-		// against it. Keep this block and swapStream() in step.
+		// Swapped by swapStream(): the converters and the audio in flight. Keep this block and
+		// swapStream() in step.
 		std::unique_ptr<Resampler> m_out = nullptr;
 		std::unique_ptr<Resampler> m_in = nullptr;
 
@@ -70,7 +70,12 @@ namespace synthLib
 
 		TMidiVec m_processedMidiIn;
 
+		// Queued input belongs to the live stream, never to a cached rate, so this one stays put
+		// while everything around it is handed over. It used to be swapped here and swapped back by
+		// the caller one line earlier - deleting either half handed the live queue to a resampler
+		// nothing is reading.
 		TMidiVec m_midiIn;
+
 		TMidiVec m_midiOut;
 
 		uint32_t m_inputLatency = 0;

@@ -41,8 +41,6 @@ namespace synthLib
 		{
 			if(alternative->m_samplerateDevice != _samplerate)
 				continue;
-			// Queued MIDI belongs to the live stream, never to a cached rate.
-			alternative->m_midiIn.swap(m_midiIn);
 			swapStream(*alternative);
 			clearAudioHistory();
 			return;
@@ -130,7 +128,6 @@ namespace synthLib
 		swap(m_input, _other.m_input);
 		swap(m_scaledInputSize, _other.m_scaledInputSize);
 		swap(m_processedMidiIn, _other.m_processedMidiIn);
-		swap(m_midiIn, _other.m_midiIn);
 		swap(m_midiOut, _other.m_midiOut);
 		swap(m_inputLatency, _other.m_inputLatency);
 		swap(m_outputLatency, _other.m_outputLatency);
