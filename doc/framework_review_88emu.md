@@ -205,7 +205,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       sysex, so the copy allocates precisely where it is useless, and the event is copied again
       into the vector. Push first, stamp in place.
 
-- [ ] **E2 `synthLib/resamplerInOut.cpp:249` — every incoming event copied twice per block.**
+- [x] **E2 `synthLib/resamplerInOut.cpp:249` — every incoming event copied twice per block.**
       Into `m_scaledMidiIn`, then into `m_midiIn`. The scratch member exists only because
       `scaleMidiEvents` clears its destination; an append loop removes both the copies and the
       member.

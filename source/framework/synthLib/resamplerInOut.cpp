@@ -120,7 +120,6 @@ namespace synthLib
 		swap(m_midiIn, _other.m_midiIn);
 		swap(m_midiOut, _other.m_midiOut);
 		swap(m_processedMidiIn, _other.m_processedMidiIn);
-		swap(m_scaledMidiIn, _other.m_scaledMidiIn);
 		swap(m_inputLatency, _other.m_inputLatency);
 		swap(m_outputLatency, _other.m_outputLatency);
 	}
@@ -179,16 +178,21 @@ namespace synthLib
 		clearAudioHistory();
 	}
 
-	void ResamplerInOut::scaleMidiEvents(TMidiVec& _dst, const TMidiVec& _src, float _scale)
+	void ResamplerInOut::appendScaledMidiEvents(TMidiVec& _dst, const TMidiVec& _src, const float _scale)
+	{
+		_dst.reserve(_dst.size() + _src.size());
+
+		for(const auto& event : _src)
+		{
+			_dst.push_back(event);
+			_dst.back().offset = floor_int(static_cast<float>(event.offset) * _scale);
+		}
+	}
+
+	void ResamplerInOut::scaleMidiEvents(TMidiVec& _dst, const TMidiVec& _src, const float _scale)
 	{
 		_dst.clear();
-		_dst.reserve(_src.size());
-
-		for(size_t i=0; i<_src.size(); ++i)
-		{
-			_dst.push_back(_src[i]);
-			_dst[i].offset = floor_int(static_cast<float>(_src[i].offset) * _scale);
-		}
+		appendScaledMidiEvents(_dst, _src, _scale);
 	}
 
 	void ResamplerInOut::clampMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax)
@@ -245,14 +249,12 @@ namespace synthLib
 
 		m_scaledInput.ensureSize(static_cast<uint32_t>(static_cast<float>(_numSamples) * devDivHost * 2.0f));
 
-		// APPEND this block's (offset-scaled) events to the staged queue.
-		// scaleMidiEvents clears its destination, so scaling directly into
-		// m_midiIn destroyed any events a previous host block had staged but
-		// no device chunk had consumed yet (feedOutput does not necessarily
-		// run on every host block) — at mismatched sample rates that silently
-		// swallowed incoming MIDI.
-		scaleMidiEvents(m_scaledMidiIn, _midiIn, devDivHost);
-		m_midiIn.insert(m_midiIn.end(), m_scaledMidiIn.begin(), m_scaledMidiIn.end());
+		// APPEND this block's (offset-scaled) events to the staged queue. Scaling into a scratch
+		// vector and copying that in would copy every event twice per block; scaling straight into
+		// m_midiIn with the clearing variant would destroy events a previous host block staged but
+		// no device chunk has consumed yet (feedOutput does not necessarily run on every host
+		// block), which at mismatched sample rates silently swallowed incoming MIDI.
+		appendScaledMidiEvents(m_midiIn, _midiIn, devDivHost);
 
 		m_input.append(_inputs, _numSamples);
 

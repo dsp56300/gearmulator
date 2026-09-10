@@ -34,6 +34,8 @@ namespace synthLib
 		void clearAudioHistory();
 		std::vector<float> m_dynamicSamplerates;
 		std::vector<std::unique_ptr<ResamplerInOut>> m_alternatives;
+		// Appends _src to _dst with every offset scaled. scaleMidiEvents() replaces _dst instead.
+		static void appendScaledMidiEvents(TMidiVec& _dst, const TMidiVec& _src, float _scale);
 		static void scaleMidiEvents(TMidiVec& _dst, const TMidiVec& _src, float _scale);
 		static void clampMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax);
 		static void extractMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax);
@@ -54,7 +56,6 @@ namespace synthLib
 		size_t m_scaledInputSize = 0;
 
 		TMidiVec m_processedMidiIn;
-		TMidiVec m_scaledMidiIn;	// per-call scale scratch (see process)
 
 		TMidiVec m_midiIn;
 		TMidiVec m_midiOut;
