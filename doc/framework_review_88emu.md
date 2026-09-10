@@ -89,13 +89,21 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       captures whatever layer is current at restore time. The resource has to be invalidated and
       regenerated through RmlUi.
 
-- [ ] **B2 `juceRmlUi/rmlRendererProxy.cpp:270` — `PopLayer` can pop an empty stack.**
+- [x] **B2 `juceRmlUi/rmlRendererProxy.cpp:270` — `PopLayer` can pop an empty stack.**
       `openGLContextClosing()` is the one renderer-switch site that does not take `ScopedAccess`
       and it runs on the GL thread. Under GL2 (`canLayer=false`) a `PushLayer` pushes nothing;
       the flip to software (`canLayer=true`) lets the matching `PopLayer` through, and `top()`
       hits an empty `std::stack`. Second path, no race needed: `setRenderer()` clears `m_handles`
       but never `m_layerHandles`, so the restore re-pushes a handle already on the stack.
       `m_config` is also read unlocked at nine sites and written under the mutex at one.
+
+      The unlocked `m_config` read is NOT fixed and is now tracked as B6.
+
+- [ ] **B6 `juceRmlUi/rmlRendererProxy.cpp` — `m_config` is a data race.**
+      Read without a lock at nine sites, written under `m_mutexRender` at one, from a
+      different thread (`openGLContextClosing()` runs on the GL thread). B2 removed its
+      worst consequence, the empty-stack pop, but the race itself stands. Either make the
+      config atomic or take the lock on read.
 
 - [ ] **B3 `juceRmlUi/juceRmlComponent.cpp:488` — `getRenderSize()` hoisted above `ScopedAccess`.**
       The Metal render thread now walks the JUCE component tree — `getLocalBounds()`,

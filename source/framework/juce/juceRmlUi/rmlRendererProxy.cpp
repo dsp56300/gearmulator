@@ -214,10 +214,11 @@ namespace juceRmlUi
 
 		auto dummyHandle = createDummyHandle();
 
-		addRenderFunction(dummyHandle, [this, dummyHandle]
+		// Deliberately not registered for context restore. A layer only exists within the render
+		// pass that pushed it, so replaying the push on a new renderer would put a handle on the
+		// stack that the pass never asked for, on top of the one already there.
+		addRenderFunction([this, dummyHandle]
 		{
-			if (exists(dummyHandle))
-				return;
 			auto handle = m_renderer->PushLayer();
 			addHandle<HandleLayer>(dummyHandle, handle);
 			m_layerHandles.push(dummyHandle);
@@ -266,7 +267,15 @@ namespace juceRmlUi
 
 		addRenderFunction([this]
 		{
+			// The push that belongs to this pop can be missing: canLayer is read without a lock
+			// and openGLContextClosing() flips it from the GL thread, so a pass can have its
+			// PushLayer suppressed and its PopLayer let through. Leave the renderer's own stack
+			// alone in that case rather than popping ours empty.
+			if (m_layerHandles.empty())
+				return;
+
 			m_renderer->PopLayer();
+
 			const auto dummy = m_layerHandles.top();
 			m_layerHandles.pop();
 			removeHandle(dummy);
@@ -482,6 +491,9 @@ namespace juceRmlUi
 			}
 
 			m_handles.clear();
+
+			// Pass-scoped, and the pass it belonged to cannot survive the switch
+			m_layerHandles = {};
 		}
 
 		m_renderer = _renderer;
