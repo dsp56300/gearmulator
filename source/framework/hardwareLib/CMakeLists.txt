@@ -32,6 +32,12 @@ if(BUILD_TESTING)
 	set_property(TARGET hd44780_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 	set_property(TARGET hd44780_test PROPERTY FOLDER "Tests")
 	add_test(NAME hd44780 COMMAND hd44780_test)
+
+	add_executable(sed1335_test sed1335_test.cpp)
+	target_link_libraries(sed1335_test PRIVATE hardwareLib)
+	set_property(TARGET sed1335_test PROPERTY EXCLUDE_FROM_ALL FALSE)
+	set_property(TARGET sed1335_test PROPERTY FOLDER "Tests")
+	add_test(NAME sed1335 COMMAND sed1335_test)
 endif()
 
 #target_compile_options(hardwareLib PRIVATE -fsanitize=thread)

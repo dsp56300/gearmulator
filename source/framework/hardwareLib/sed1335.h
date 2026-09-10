@@ -35,7 +35,6 @@ namespace hwLib
 	//   * Per-block text/graphics select (DM1/DM2) and 3-layer OV — OVLAY handler.
 	//   * Hardware cursor (CSRFORM size/shape, cursor flash) — writeData().
 	//   * MX composition beyond OR/XOR (AND, priority-OR) — renderMono()'s blend.
-	//   * CSRR (0x47) cursor-address read-back — readData().
 	//
 	class SED1335
 	{

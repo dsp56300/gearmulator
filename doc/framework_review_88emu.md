@@ -153,7 +153,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       plain host-driven resize does not re-arm it. Simplest fix: call the listener anyway and let
       `renderMetal`'s own size guard drop the frame through the ScopeGuard.
 
-- [ ] **C5 `hardwareLib/sed1335.cpp:79` — CSRR wedges the data path.**
+- [x] **C5 `hardwareLib/sed1335.cpp:79` — CSRR wedges the data path.** Premise was WRONG, see below.
       `writeCommand` arms CSRR with `startParam(0x47, 2)` but `writeData()` has no `0x47` branch,
       so the parameter bytes hit the terminal `else { return; }` before the `m_stage`/
       `m_dataRemaining` bookkeeping. `m_mode` stays `0x47` forever and every later `writeData()`
@@ -339,6 +339,12 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **C5's stated mechanism, the write-path wedge** — wrong on both counts. CSRR takes no written
+  parameters at all (it is a read command, answered by two `readData()` calls), and
+  `writeCommand()` reassigns `m_mode` unconditionally, so nothing can stay armed past the next
+  command byte. The real defect underneath was on the read side: `readData()` answered CSRR with
+  VRAM at the cursor instead of the cursor address, so a driver asking where the cursor ended up
+  got a pixel byte and wrote to a garbage address. Fixed by implementing CSRR properly.
 - **B5, wheel rescale** — traced every consumer of the delta. `ElemComboBox`, the radio-button
   handler in `rmlPluginDocument` and `rmlControllerLink` read the sign only; `ElemList::onMouseScroll`
   swaps the axes and leaves the magnitude alone; the slider handler delegates to `ElemKnob`. The

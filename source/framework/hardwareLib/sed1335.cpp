@@ -76,8 +76,8 @@ namespace hwLib
 		case 0x46:	// CSRW (2 bytes)
 			startParam(0x46, 2);
 			return;
-		case 0x47:	// CSRR (2 bytes)
-			startParam(0x47, 2);
+		case 0x47:	// CSRR - the cursor address is READ back, no parameters are written
+			startParam(0x47, 0);
 			return;
 		case 0x4c: case 0x4d: case 0x4e: case 0x4f:	// CSRDIR (no data)
 			m_cursorDir = _cmd & 3;
@@ -213,11 +213,17 @@ namespace hwLib
 
 	uint8_t SED1335::readData()
 	{
+		// CSRR answers with the cursor address itself, low byte then high, and does not
+		// move it. Returning VRAM here instead handed the driver a garbage address.
+		if (m_mode == 0x47)
+		{
+			const auto v = static_cast<uint8_t>(m_stage == 0 ? (m_cursor & 0xff) : (m_cursor >> 8));
+			m_stage = 1;
+			return v;
+		}
+
 		// MREAD auto-increment (approximate — the host rarely reads back).
-		// TODO: incomplete read side. (1) CSRR (0x47) should return the cursor
-		//       address low/high bytes on successive reads; we return VRAM at the
-		//       cursor instead. (2) MREAD ignores m_cursorDir (always +1). Neither
-		//       is exercised here (the host drives writes, not read-back).
+		// TODO: MREAD ignores m_cursorDir (always +1). Not exercised here.
 		const auto v = m_memory[m_cursor & m_memMask];
 		if (m_mode == 0x43)
 			m_cursor += 1;
