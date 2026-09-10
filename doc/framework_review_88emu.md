@@ -180,7 +180,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       romloader uses it as a cache key. Pre-epoch files wrap through `static_cast<uint64_t>`, and
       both branches return 0 on stat failure so an unreadable file caches as unchanged forever.
 
-- [ ] **D2 `tools/changelogGenerator/changelogGenerator.cpp:322` — off-by-one yields an empty product.**
+- [x] **D2 `tools/changelogGenerator/changelogGenerator.cpp:322` — off-by-one yields an empty product.**
       The multi-`/` split uses `begin <= product.size()`, so a heading ending in `/` produces a
       trailing empty name and an output file with an empty basename.
 

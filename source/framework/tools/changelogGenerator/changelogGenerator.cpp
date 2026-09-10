@@ -323,8 +323,13 @@ int main(const int _argc, char* _argv[])
 			{
 				const auto pos = product.find('/', begin);
 				const auto name = product.substr(begin, pos - begin);
-				auto& l = productPerVersion[version][name];
-				l.insert(l.end(), lines.begin(), lines.end());
+				// A heading written "Osirus/", "/Osirus" or "Osirus//OsTIrus" has an empty
+				// segment, which would become an output file with no basename at all.
+				if (!name.empty())
+				{
+					auto& l = productPerVersion[version][name];
+					l.insert(l.end(), lines.begin(), lines.end());
+				}
 				if (pos == std::string::npos)
 					break;
 				begin = pos + 1;
