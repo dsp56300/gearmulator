@@ -367,7 +367,10 @@ Not part of the numbered list, but do not lose these.
       "`m_` member prefix" — `device_test.cpp:20-21` (`midiSent`, `transportEvents`) and
       `dynamicSamplerate_test.cpp:28-29` (`rate`, `samples`).
 
-- [ ] **I3 `hardwareLib/sed1335.cpp:131` exceeds the 120-column limit** (133 at tab=4).
+- [x] **I3 `hardwareLib/sed1335.cpp:131` exceeds the 120-column limit** (133 at tab=4).
+      Also fixed the three over-limit lines this review itself wrote (A1 `plugin.cpp`, A2 `plugin.h`,
+      H3 `rmlElemComboBox.cpp`), found with `git blame -w` restricted to review commits. The other
+      long lines in the touched files predate the review and were left alone.
 
 ---
 

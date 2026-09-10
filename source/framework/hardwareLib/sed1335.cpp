@@ -129,7 +129,8 @@ namespace hwLib
 				m_configFx = _value & 0x7;
 				m_configWf = (_value & 128) != 0;
 				break;
-			case 2: m_configFy = _value & 0x1f; break;	// TODO: datasheet FY is 4-bit (& 0x0f); 0x1f harmless for the current caller
+			// TODO: datasheet FY is 4-bit (& 0x0f); 0x1f harmless for the current caller
+			case 2: m_configFy = _value & 0x1f; break;
 			case 3: m_configCr = _value; break;
 			case 4: m_configTcr = _value; break;
 			case 5: m_configLf = _value; break;

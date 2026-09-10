@@ -222,7 +222,8 @@ namespace juceRmlUi
 		// The document may be reloaded while the popup is up - a driver change rebuilds the
 		// settings - so the element is observed, not captured. The look-and-feel is kept alive
 		// here because the menu window uses it until it is dismissed.
-		menu.showMenuAsync(options, [observer = Rml::Element::GetObserverPtr(GetCoreInstance()), lookAndFeel](const int _result)
+		auto observer = Rml::Element::GetObserverPtr(GetCoreInstance());
+		menu.showMenuAsync(options, [observer = std::move(observer), lookAndFeel](const int _result)
 		{
 			if (_result <= 0 || !observer)
 				return;

@@ -306,9 +306,10 @@ namespace synthLib
 	{
 		const auto blocks = m_blockSize * m_extraLatencyBlocks;
 		const auto out = m_resampler.getOutputLatency();
+		const auto in = m_resampler.getInputLatency();
 
 		m_latencyMidiToOutput.store(blocks + m_deviceLatencyMidiToOutput + out, std::memory_order_relaxed);
-		m_latencyInputToOutput.store(blocks + m_deviceLatencyInputToOutput + out + m_resampler.getInputLatency(), std::memory_order_relaxed);
+		m_latencyInputToOutput.store(blocks + m_deviceLatencyInputToOutput + out + in, std::memory_order_relaxed);
 	}
 
 	void Plugin::processMidiInEvents()

@@ -66,7 +66,10 @@ namespace synthLib
 		// switching the resampler over allocates and builds filter tables, so the work is
 		// left to whoever drives the message thread. Until then the old rate keeps being
 		// used, which costs a little pitch drift rather than a dropout.
-		bool hasPendingDeviceSamplerate() const { return m_pendingDeviceSamplerate.load(std::memory_order_relaxed) > 0.0f; }
+		bool hasPendingDeviceSamplerate() const
+		{
+			return m_pendingDeviceSamplerate.load(std::memory_order_relaxed) > 0.0f;
+		}
 		bool applyPendingDeviceSamplerate();
 
 	private:
