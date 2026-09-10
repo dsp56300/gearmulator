@@ -712,7 +712,11 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
-		m_pressedKeys.push_back(_key);
+		// Auto-repeat calls us again for a key that is still held. Recording it twice means two
+		// ProcessKeyUp for one physical release, and on a platform where the vector is only drained
+		// by a real key-up it grows for as long as the key is down.
+		if (std::find(m_pressedKeys.begin(), m_pressedKeys.end(), _key) == m_pressedKeys.end())
+			m_pressedKeys.push_back(_key);
 
 		bool res = false;
 
@@ -807,13 +811,14 @@ namespace juceRmlUi
 		{
 			RmlInterfaces::ScopedAccess access(*this);
 
-			// We skip this on Linux because apparently focusLost is called when the mouse button is released?!
-			// https://tus.youtrack.cloud/tickets/BUG-10084/
-#if JUCE_WINDOWS || JUCE_MAC
 			if (m_rmlContext)
 			{
+				// We skip the mouse leave on Linux because apparently focusLost is called when the mouse button
+				// is released?! https://tus.youtrack.cloud/tickets/BUG-10084/
+				// The key release below is not part of that quirk and has to happen on every platform.
+#if JUCE_WINDOWS || JUCE_MAC
 				m_rmlContext->ProcessMouseLeave();
-
+#endif
 				// Key-ups only reach the focused component, so a key held across a focus change never gets its
 				// release inferred in keyStateChanged() and stays down in RmlUi - and in every listener that mirrors
 				// the key state - until the next unrelated key-up. Release everything we still consider held.
@@ -822,7 +827,6 @@ namespace juceRmlUi
 				for (const auto& key : released)
 					m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), toRmlModifiers(key));
 			}
-#endif
 			evFocusLost(this);
 		}
 

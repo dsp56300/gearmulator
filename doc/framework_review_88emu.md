@@ -111,7 +111,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       `setBounds()`/`resized()`/`parentHierarchyChanged()`. A resize concurrent with a frame gives
       a torn `Rectangle<int>`.
 
-- [ ] **B4 `juceRmlUi/juceRmlComponent.cpp:805` — `focusLost()` key release skipped on Linux.**
+- [x] **B4 `juceRmlUi/juceRmlComponent.cpp:805` — `focusLost()` key release skipped on Linux.**
       The new release-everything block was put inside the pre-existing
       `#if JUCE_WINDOWS || JUCE_MAC` guard, which is there for an unrelated mouse-leave quirk.
       Alt-tab away with a key held and it stays down in RmlUi and in `m_pressedKeys` forever;
