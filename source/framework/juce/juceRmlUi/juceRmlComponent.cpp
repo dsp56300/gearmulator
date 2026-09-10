@@ -127,6 +127,7 @@ namespace juceRmlUi
 			m_renderInterface.reset(new RendererJuce(m_coreInstance));
 			m_renderType = Renderer::Software;
 			m_renderProxy->setRenderer(m_renderInterface.get(), g_renderConfigSoftware);
+			onRendererChanged();
 		}
 		else
 		{
@@ -329,6 +330,7 @@ namespace juceRmlUi
 		m_openGLversion = version;
 
 		m_renderProxy->setRenderer(m_renderInterface.get(), m_renderType == Renderer::Gl3 ? g_renderConfigGL3 : g_renderConfigGL2);
+		onRendererChanged();
 
 		{
 			std::scoped_lock lock(m_timerMutex);
@@ -454,6 +456,7 @@ namespace juceRmlUi
 		}
 
 		m_renderProxy->setRenderer(m_renderInterface.get(), g_renderConfigMetal);
+		onRendererChanged();
 
 		// Set a fake GL version to trigger the advancedrenderer theme activation in update()
 		m_openGLversion = g_advancedRendererMinimumGLversion;
@@ -975,6 +978,7 @@ namespace juceRmlUi
 		{
 			m_renderInterface.reset(new RendererJuce(m_coreInstance));
 			m_renderProxy->setRenderer(m_renderInterface.get(), g_renderConfigSoftware);
+			onRendererChanged();
 		}
 		else if (!m_renderInterface)
 			return;
@@ -1119,6 +1123,18 @@ namespace juceRmlUi
 		std::scoped_lock lock(m_timerMutex);
 		// we make the timer run a bit faster to prevent that we miss the next frame time by a too large margin
 		startNextFrameTimer();
+	}
+
+	void RmlComponent::onRendererChanged() const
+	{
+		if (!m_rmlContext)
+			return;
+
+		// Dropping the textures makes RmlUi regenerate them through a proper render pass, which
+		// is the only way a box shadow - a CallbackTexture built with SaveLayerAsTexture - can
+		// come back correctly. Without this it keeps the handle it already has, that handle no
+		// longer resolves on the new renderer, and the element silently draws nothing forever.
+		Rml::ReleaseTextures(m_coreInstance);
 	}
 
 	void RmlComponent::enqueueUpdate()

@@ -62,15 +62,25 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       `weakSelf`/`observable`, while `ProcessEvent` is still inside it. The guard then reads freed
       heap.
 
-- [ ] **A6 `juceRmlUi/juceRmlComponent.cpp:480` — render-done guard installed after the early return.**
+- [-] **A6 `juceRmlUi/juceRmlComponent.cpp:480` — render-done guard installed after the early return.** RETRACTED, see below.
       The `hasRenderFunctions()` return sits above the `frameDone` ScopeGuard, so the one exit the
       comment warns about never releases the handshake. `m_renderDone` stays false, `timerCallback()`
       and `update()` both bail on it, and the editor stops repainting for the session.
       Same shape on the Metal viewport-zero path (`MetalContext.mm:165`) — see C4.
 
+      Not a defect, and moving the guard would be a regression. `MetalContext::renderLoop`
+      waits with a 16 ms timeout, so `renderMetal` runs at 60 Hz whether or not a repaint was
+      requested. `hasRenderFunctions()` is false only when no frame was handed over - a
+      spurious tick, or the one after the queue was drained - because `finishFrame()` always
+      pushes an entry, empty or not. Releasing the handshake there would free a frame that
+      was never consumed, and since `update()` clears `m_updating` before the render
+      completes, that lets a second `update()` in. The real defect on this path is C4: the
+      loop clears `m_repaintRequested` before the viewport gate, so a zero viewport eats the
+      request and nothing re-arms `m_renderDone`.
+
 ## B. Rendering correctness
 
-- [ ] **B1 `juceRmlUi/rmlRendererProxy.cpp:282` — `SaveLayerAsTexture` is never restored.**
+- [x] **B1 `juceRmlUi/rmlRendererProxy.cpp:282` — `SaveLayerAsTexture` is never restored.**
       It is the only handle-producing method using the non-registering `addRenderFunction(Func)`
       overload, and it backs `CallbackTexture`-cached box-shadow textures that persist across
       frames. After any renderer switch the handle resolves to `InvalidHandle` and the element

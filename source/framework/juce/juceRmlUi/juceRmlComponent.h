@@ -138,6 +138,10 @@ namespace juceRmlUi
 		static RmlComponent* fromElement(const Rml::Element* _element);
 
 		void enqueueUpdate();
+		// Call after a new renderer has been installed. Resources built from a layer snapshot
+		// cannot be carried over - replaying the snapshot on the new renderer would capture
+		// whatever layer happens to be current - so RmlUi has to build them again itself.
+		void onRendererChanged() const;
 
 		void enableDebugger(bool _enable);
 
