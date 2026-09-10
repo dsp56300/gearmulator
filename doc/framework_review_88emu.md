@@ -268,7 +268,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       (`mqLib/lcd.h`) and JE8086 (`jeLib/jeLcd.h`, plus `sysexRemoteControl`) onto `Hd44780` and
       delete `LCD`. Depends on C3 and C7 being fixed first.
 
-- [ ] **G2 `baseLib/filesystem.cpp:225` — `findFilesRecursive` re-implements `findFiles`.**
+- [x] **G2 `baseLib/filesystem.cpp:225` — `findFilesRecursive` re-implements `findFiles`.**
       `findFiles` is `findFilesRecursive` at depth 0 — its own caller in `romLoader.cpp:57`
       is an if/else differing only in the depth argument. Forwarding also fixes `findFiles`
       returning directories whose name matches the extension.
