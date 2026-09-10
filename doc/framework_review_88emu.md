@@ -159,7 +159,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       `m_dataRemaining` bookkeeping. `m_mode` stays `0x47` forever and every later `writeData()`
       is dropped — panel freezes on its last content.
 
-- [ ] **C6 `hardwareLib/sed1335.cpp:73` — `m_dirty` not set for SCROLL / DISP OFF / HDOT SCR.**
+- [x] **C6 `hardwareLib/sed1335.cpp:73` — `m_dirty` not set for SCROLL / DISP OFF / HDOT SCR.**
       Only MWRITE and DISP ON set it, so a driver that double-buffers by writing a page and
       flipping with SCROLL produces no notification and the UI keeps showing the old page.
 

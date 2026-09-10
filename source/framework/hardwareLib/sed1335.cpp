@@ -85,6 +85,7 @@ namespace hwLib
 			return;
 		case 0x58:	// DISP OFF (1 byte cursor-blink param)
 			m_displayEnabled = false;
+			m_dirty = true;
 			startParam(0x58, 1);
 			return;
 		case 0x59:	// DISP ON (1 byte cursor-blink param)
@@ -205,6 +206,15 @@ namespace hwLib
 			// No command is expecting data — drop silently.
 			return;
 		}
+
+		// Anything that gets this far is a parameter of a command that changes what the panel
+		// shows - SCROLL flips the displayed page, SYSTEM SET and CGRAM ADR redraw everything,
+		// HDOT SCR and OVLAY move or recompose it. Only MWRITE and DISP ON used to mark the
+		// panel dirty, so a driver that double-buffers by writing a page and flipping with
+		// SCROLL notified nobody and the UI kept showing the old page. Marking here rather than
+		// per handler also means a command added later cannot forget to. flush() coalesces, so
+		// the cost of a redundant mark - CSRW is the only one - is nothing.
+		m_dirty = true;
 
 		m_stage += 1;
 		if (m_dataRemaining > 0 && --m_dataRemaining == 0)

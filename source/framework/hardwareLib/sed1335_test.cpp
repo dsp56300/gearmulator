@@ -69,11 +69,60 @@ namespace
 		require(lcd.readData() == 0x01);	// advanced by exactly one
 		require(lcd.readData() == 0x01);
 	}
+
+	// A driver that double-buffers writes a page and flips to it with SCROLL. Only MWRITE and
+	// DISP ON used to mark the panel dirty, so that flip notified nobody and the UI kept
+	// showing the old page.
+	void testDisplayCommandsNotify()
+	{
+		auto lcd = makePanel();
+
+		int changes = 0;
+		lcd.evChanged.addListener([&](auto&&...) { ++changes; });
+
+		lcd.flush();						// drain whatever SYSTEM SET left behind
+		changes = 0;
+
+		// SCROLL: flips which VRAM region is displayed without touching a single pixel.
+		lcd.writeCommand(0x44);
+		for(int i = 0; i < 10; ++i)
+			lcd.writeData(0x10);
+		lcd.flush();
+		require(changes == 1);
+
+		// DISP OFF blanks the panel.
+		lcd.writeCommand(0x58);
+		lcd.writeData(0x00);
+		lcd.flush();
+		require(changes == 2);
+
+		// HDOT SCR moves the whole image sideways.
+		lcd.writeCommand(0x59);
+		lcd.writeData(0x00);
+		lcd.flush();
+		changes = 0;
+		lcd.writeCommand(0x5a);
+		lcd.writeData(0x03);
+		lcd.flush();
+		require(changes == 1);
+
+		// CGRAM ADR repoints the font, so every character on screen changes.
+		lcd.writeCommand(0x5c);
+		lcd.writeData(0x00);
+		lcd.writeData(0x20);
+		lcd.flush();
+		require(changes == 2);
+
+		// ...and a flush with nothing pending stays quiet.
+		lcd.flush();
+		require(changes == 2);
+	}
 }
 
 int main()
 {
 	testCursorReadBack();
 	testCursorReadBackDoesNotDisturbTheCursor();
+	testDisplayCommandsNotify();
 	return 0;
 }
