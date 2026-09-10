@@ -374,6 +374,11 @@ namespace emu88Player
 		       _layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
 	}
 
+	void Processor::handleAsyncUpdate()
+	{
+		m_engine->applyPendingDeviceSamplerate();
+	}
+
 	void Processor::processBlock(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midi)
 	{
 		juce::ScopedNoDenormals noDenormals;
@@ -425,6 +430,11 @@ namespace emu88Player
 		synthLib::TAudioOutputs outputs{_buffer.getWritePointer(0), _buffer.getWritePointer(1)};
 		m_engine->process(inputs, outputs, static_cast<size_t>(_buffer.getNumSamples()),
 		                  120.0f, 0.0f, false, false);
+
+		// The device can change its clock while playing. Switching the resampler over builds and
+		// prewarms new filters, so Plugin only records the new rate here - apply it off this thread.
+		if(m_engine->hasPendingDeviceSamplerate())
+			triggerAsyncUpdate();
 		_buffer.applyGain(outputGain());
 		recordBlock(_buffer);
 

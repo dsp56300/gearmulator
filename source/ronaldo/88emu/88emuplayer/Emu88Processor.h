@@ -24,7 +24,7 @@ namespace emu88Player
 {
 	class PortMidiBridge;
 
-	class Processor final : public juce::AudioProcessor
+	class Processor final : public juce::AudioProcessor, juce::AsyncUpdater
 	{
 	public:
 		Processor();
@@ -34,6 +34,10 @@ namespace emu88Player
 		void releaseResources() override {}
 		bool isBusesLayoutSupported(const BusesLayout& _layouts) const override;
 		void processBlock(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midi) override;
+
+		// The device can change its clock at any time, but switching the resampler over builds
+		// and prewarms new filters. processBlock() only notes the new rate down; this applies it.
+		void handleAsyncUpdate() override;
 
 		juce::AudioProcessorEditor* createEditor() override;
 		bool hasEditor() const override { return true; }
