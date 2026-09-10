@@ -305,31 +305,41 @@ namespace hwLib
 			}
 		};
 
+		// The graphics layer walks the same cell grid as the text layer - the SED1335 shifts FX
+		// dots from each display memory byte, starting at D7, and the remaining low bits are not
+		// shown. SC-8850 programs FX=6 and AP=27, giving 162 addressable dots per row; treating a
+		// byte as eight dots produces a seam every six pixels.
+		// So one cell decides both layers, and the character, its glyph row and the graphics byte
+		// only need fetching when the cell changes rather than once per pixel.
+		const int pitch = m_configAp ? m_configAp : cr;
+
 		for (int py = 0; py < int(m_height); ++py)
 		{
 			const int cy = py / fh;
 			const int fy = py % fh;
+
+			const auto rowBase2 = static_cast<uint16_t>(m_scrollSad2 + py * pitch);
+			const size_t outRow = static_cast<size_t>(py) * m_width;
+
+			int cx = 0;		// cell column
+			int fx = 0;		// dot within the cell
+
+			uint8_t g1 = fontChar(textChar(m_scrollSad1, 0, cy, cr), fy);	// text glyph row
+			uint8_t g2 = m_memory[rowBase2 & m_memMask];						// graphics byte
+
 			for (int px = 0; px < int(m_width); ++px)
 			{
-				// Layer 1 (text)
-				const int cxText = px / fw;
-				const int fxText = px % fw;
-				const uint8_t ch1 = textChar(m_scrollSad1, cxText, cy, cr);
-				const uint8_t g1  = fontChar(ch1, fy);
-				const uint8_t l1  = (g1 & (1 << (7 - fxText))) ? 1 : 0;
+				const auto mask = static_cast<uint8_t>(1 << (7 - fx));
 
-				// Layer 2 (graphics). The SED1335 shifts FX dots from each display
-				// memory byte, starting at D7; the remaining low bits are not shown.
-				// SC-8850 programs FX=6 and AP=27, giving 162 addressable dots per
-				// row. Treating a byte as eight dots produces a seam every six pixels.
-				const int byteInRow = px / fw;
-				const int bitInByte = px % fw;
-				const int pitch = m_configAp ? m_configAp : cr;
-				const uint16_t addr = static_cast<uint16_t>(m_scrollSad2 + py * pitch + byteInRow);
-				const uint8_t gb = m_memory[addr & m_memMask];
-				const uint8_t l2 = (gb & (1 << (7 - bitInByte))) ? 1 : 0;
+				_out[outRow + px] = blend((g1 & mask) ? 1 : 0, (g2 & mask) ? 1 : 0) ? 1 : 0;
 
-				_out[py * m_width + px] = blend(l1, l2) ? 1 : 0;
+				if (++fx < fw)
+					continue;
+
+				fx = 0;
+				++cx;
+				g1 = fontChar(textChar(m_scrollSad1, cx, cy, cr), fy);
+				g2 = m_memory[static_cast<uint16_t>(rowBase2 + cx) & m_memMask];
 			}
 		}
 	}

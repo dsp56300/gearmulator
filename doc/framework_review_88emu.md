@@ -213,7 +213,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 - [x] **E3 `synthLib/midiRateLimiter.cpp:65` — `deque::erase` inside the iteration is O(n^2).**
       One `remove_if` compaction plus a single `erase(it, end())` is O(n).
 
-- [ ] **E4 `hardwareLib/sed1335.cpp:299` — `renderMono` recomputes per pixel what is constant per cell.**
+- [x] **E4 `hardwareLib/sed1335.cpp:299` — `renderMono` recomputes per pixel what is constant per cell.**
       Two divides and two modulos where one pair suffices, the character byte and glyph row
       re-fetched per pixel, and a loop-invariant `pitch` re-evaluated in the inner loop.
 
