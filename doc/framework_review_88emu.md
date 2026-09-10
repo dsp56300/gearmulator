@@ -210,7 +210,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       `scaleMidiEvents` clears its destination; an append loop removes both the copies and the
       member.
 
-- [ ] **E3 `synthLib/midiRateLimiter.cpp:65` — `deque::erase` inside the iteration is O(n^2).**
+- [x] **E3 `synthLib/midiRateLimiter.cpp:65` — `deque::erase` inside the iteration is O(n^2).**
       One `remove_if` compaction plus a single `erase(it, end())` is O(n).
 
 - [ ] **E4 `hardwareLib/sed1335.cpp:299` — `renderMono` recomputes per pixel what is constant per cell.**

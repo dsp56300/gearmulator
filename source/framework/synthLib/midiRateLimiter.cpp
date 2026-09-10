@@ -58,17 +58,14 @@ namespace synthLib
 	void MidiRateLimiter::transportDiscontinuity(const uint32_t _generation)
 	{
 		m_transportGeneration = std::max(m_transportGeneration, _generation);
-		for (auto it = m_pendingRealtime.begin(); it != m_pendingRealtime.end();)
-		{
-			if (isTransportBound(*it) && it->transportGeneration < m_transportGeneration)
+		// Compact once and drop the tail in a single erase. Erasing from the middle of a deque as
+		// we go shifts elements every time, so purging k of n queued events was O(n*k).
+		m_pendingRealtime.erase(
+			std::remove_if(m_pendingRealtime.begin(), m_pendingRealtime.end(), [this](const SMidiEvent& _event)
 			{
-				it = m_pendingRealtime.erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
+				return isTransportBound(_event) && _event.transportGeneration < m_transportGeneration;
+			}),
+			m_pendingRealtime.end());
 
 		uint16_t channelsToSilence = m_activeChannels;
 		if (m_currentEvent && isTransportBound(*m_currentEvent) &&
