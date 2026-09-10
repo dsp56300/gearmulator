@@ -38,8 +38,11 @@ namespace jucePluginEditorLib
 		// overhead and was provoking a port-13710 race that crashed n2x builds.
 		bool isJuceHelperProcess()
 		{
+			// hostApplicationPath, not currentExecutableFile: inside a plugin the latter is the module JUCE
+			// itself lives in - our own .dll/.so - so the comparison below could never match and every helper
+			// went on starting a server. hostApplicationPath is the process, which is what we are asking about.
 			const auto exeName = juce::File::getSpecialLocation(
-				juce::File::currentExecutableFile).getFileNameWithoutExtension().toLowerCase();
+				juce::File::hostApplicationPath).getFileNameWithoutExtension().toLowerCase();
 			return exeName.contains("juce_vst3_helper")
 				|| exeName.contains("juce_lv2_helper")
 				|| exeName.contains("juce_au_helper");
