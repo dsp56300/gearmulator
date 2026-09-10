@@ -280,12 +280,20 @@ namespace pluginLib
 		return true;
 	}
 
+	uint32_t Processor::getCurrentLatency()
+	{
+		return getProperties().isSynth ? getPlugin().getLatencyMidiToOutput() : getPlugin().getLatencyInputToOutput();
+	}
+
 	void Processor::updateLatencySamples()
 	{
-		if(getProperties().isSynth)
-			setLatencySamples(getPlugin().getLatencyMidiToOutput());
-		else
-			setLatencySamples(getPlugin().getLatencyInputToOutput());
+		m_reportedLatency = getCurrentLatency();
+		setLatencySamples(static_cast<int>(m_reportedLatency));
+	}
+
+	void Processor::handleAsyncUpdate()
+	{
+		updateLatencySamples();
 	}
 
 	void Processor::saveCustomData(std::vector<uint8_t>& _targetBuffer)
@@ -853,7 +861,11 @@ namespace pluginLib
 		}
 
 		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying, hasPpqPosition);
-		updateLatencySamples();
+
+		// getLatency*() is a plain atomic load, cheap enough per block. The host is only told
+		// once the message thread gets round to it, see handleAsyncUpdate().
+		if(getCurrentLatency() != m_reportedLatency)
+			triggerAsyncUpdate();
 
 		applyOutputGain(outputs, numSamples);
 

@@ -14,7 +14,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
 
 ## A. Real-time and threading — fix before the release build
 
-- [ ] **A1 `jucePluginLib/processor.cpp:856` — `updateLatencySamples()` runs inside `processBlock`.**
+- [x] **A1 `jucePluginLib/processor.cpp:856` — `updateLatencySamples()` runs inside `processBlock`.**
       `setLatencySamples()` fires `updateHostDisplay(withLatencyChanged)`, which the VST3
       wrapper turns into a synchronous `IComponentHandler::restartComponent(kLatencyChanged)`
       from inside `process()` — forbidden by VST3, a known re-entrancy hang in Cubase and Live.

@@ -135,6 +135,9 @@ namespace synthLib
 		});
 
 		m_midiIn.clear();
+
+		// The resampler grows its latency while it prewarms, which happens right here
+		updateLatencies();
 	}
 
 	void Plugin::getMidiOut(std::vector<SMidiEvent>& _midiOut)
@@ -284,6 +287,17 @@ namespace synthLib
 
 		m_deviceLatencyMidiToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyMidiToOutput()) * m_hostSamplerate / m_device->getSamplerate());
 		m_deviceLatencyInputToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyInputToOutput()) * m_hostSamplerate / m_device->getSamplerate());
+
+		updateLatencies();
+	}
+
+	void Plugin::updateLatencies()
+	{
+		const auto blocks = m_blockSize * m_extraLatencyBlocks;
+		const auto out = m_resampler.getOutputLatency();
+
+		m_latencyMidiToOutput.store(blocks + m_deviceLatencyMidiToOutput + out, std::memory_order_relaxed);
+		m_latencyInputToOutput.store(blocks + m_deviceLatencyInputToOutput + out + m_resampler.getInputLatency(), std::memory_order_relaxed);
 	}
 
 	void Plugin::processMidiInEvents()
@@ -382,13 +396,11 @@ namespace synthLib
 
 	uint32_t Plugin::getLatencyMidiToOutput() const
 	{
-		std::lock_guard lock(m_lock);
-		return m_blockSize * m_extraLatencyBlocks + m_deviceLatencyMidiToOutput + m_resampler.getOutputLatency();
+		return m_latencyMidiToOutput.load(std::memory_order_relaxed);
 	}
 
 	uint32_t Plugin::getLatencyInputToOutput() const
 	{
-		std::lock_guard lock(m_lock);
-		return m_blockSize * m_extraLatencyBlocks + m_deviceLatencyInputToOutput + m_resampler.getOutputLatency() + m_resampler.getInputLatency();
+		return m_latencyInputToOutput.load(std::memory_order_relaxed);
 	}
 }

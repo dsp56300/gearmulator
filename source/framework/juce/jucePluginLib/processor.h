@@ -43,7 +43,7 @@ namespace synthLib
 
 namespace pluginLib
 {
-	class Processor : public juce::AudioProcessor
+	class Processor : public juce::AudioProcessor, juce::AsyncUpdater
 	{
 	public:
 		struct BinaryDataRef
@@ -93,7 +93,14 @@ namespace pluginLib
 		}
 
 		virtual bool setLatencyBlocks(uint32_t _blocks);
+		uint32_t getCurrentLatency();
 		virtual void updateLatencySamples();
+
+		// Telling the host about a latency change means calling back into it, which must not
+		// happen from the audio thread - a VST3 host answers restartComponent() by suspending
+		// and re-preparing the plugin, re-entering us from inside process(). The audio thread
+		// only compares two integers and hands the publishing to the message thread.
+		void handleAsyncUpdate() override;
 
 		virtual void saveCustomData(std::vector<uint8_t>& _targetBuffer);
 		virtual void saveChunkData(baseLib::BinaryStream& s);
@@ -275,6 +282,7 @@ namespace pluginLib
 		std::string m_remoteHost;
 		uint32_t m_remotePort = 0;
 		bridgeLib::SessionId m_remoteSessionId;
+		uint32_t m_reportedLatency = 0;
 		synthLib::MidiRoutingMatrix m_midiRoutingMatrix;
 		std::string m_programName;
 		std::unique_ptr<MidiLearnTranslator> m_midiLearnTranslator;

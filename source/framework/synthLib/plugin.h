@@ -61,6 +61,10 @@ namespace synthLib
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
 		void updateDeviceLatency();
+		// Composes the values the host is told about. The inputs only change while m_lock is
+		// held, so publishing them here lets getLatency*() read without taking it - that read
+		// happens once per audio block.
+		void updateLatencies();
 		void processMidiInEvents();
 		void processMidiInEvent(const SMidiEvent& _ev);
 		TransportDiscontinuity updateTransport(float _bpm, float _ppqPos, bool _isPlaying, bool _hasPpqPosition,
@@ -88,6 +92,9 @@ namespace synthLib
 
 		uint32_t m_deviceLatencyMidiToOutput = 0;
 		uint32_t m_deviceLatencyInputToOutput = 0;
+
+		std::atomic<uint32_t> m_latencyMidiToOutput{0};
+		std::atomic<uint32_t> m_latencyInputToOutput{0};
 
 		MidiClock m_midiClock;
 		bool m_midiClockEnabled = true;
