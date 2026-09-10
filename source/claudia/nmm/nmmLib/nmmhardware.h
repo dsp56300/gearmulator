@@ -45,6 +45,10 @@ namespace nmm
 		// Serialized emulator worker only: bounded firmware parameter adapter.
 		void setPatchParameter(uint16_t area, uint16_t module, uint16_t parameter, uint8_t value);
 		void setMasterVolume(uint8_t value);
+        // Live controls: advance a bounded slice to a quiet main-loop boundary.
+        // False means keep the latest control value pending and render normally.
+        // Call immediately before each setter, on the hardware worker only.
+        bool prepareControlUpdate();
         // Disable only while loading: native control calls still advance hardware,
         // but their startup audio is discarded before host playback begins.
         void setControlAudioCapture(bool enabled);

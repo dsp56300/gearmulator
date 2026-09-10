@@ -60,9 +60,14 @@ int main(int argc,char** argv)
         panel->values[1]=70;
         std::vector<uint8_t> state;
         require(device.getState(state,synthLib::StateTypeGlobal),"Save state");
-        require(state[3]==4 && state.size()>0x100000,"Version 4 includes native flash");
+        require(state[3]==5 && state.size()>0x100000,"Version 5 includes native flash and separate working patch");
+        size_t flashOffset=10;
+        auto skipString=[&]() {uint32_t size=0;for(unsigned i=0;i<4;++i) size|=uint32_t(state[flashOffset+i])<<(8*i);flashOffset+=4+size;};
+        for(unsigned i=0;i<state[9]*3u;++i) skipString();
+        const auto legacyEnd=flashOffset;
+        const auto flashEnd=flashOffset+4+0x100000;
         auto truncated=state;truncated.pop_back();require(!device.setState(truncated,synthLib::StateTypeGlobal),"Reject truncated flash state");
-        state.back()=0x5a; // unused tail byte: verify flash survives worker reboot
+        state[flashEnd-1]=0x5a; // unused tail byte: verify flash survives worker reboot
 
         panel->values[1]=20;
         require(device.setState(state,synthLib::StateTypeGlobal),"Restore state");
@@ -70,8 +75,9 @@ int main(int argc,char** argv)
         while(!panel->ready && std::chrono::steady_clock::now()<restoredDeadline) std::this_thread::sleep_for(std::chrono::milliseconds(5));
         {std::lock_guard<std::mutex> lock(panel->mutex); if(!panel->ready || panel->values[1]!=70) throw std::runtime_error("Restore knob after worker compilation: " + panel->status + " value=" + std::to_string(panel->values[1].load()));}
         std::vector<uint8_t> again;require(device.getState(again,synthLib::StateTypeGlobal),"Save restored flash");
-        require(again.back()==0x5a,"Flash contents survive host state restoration");
-        auto legacy=state;legacy.resize(legacy.size()-0x100000-4);legacy[3]=3;
+        nmmJucePlugin::PanelState decoded;require(nmmJucePlugin::applyPanelState(again,decoded),"Decode restored state");
+        require(decoded.flash.back()==0x5a,"Flash contents survive host state restoration");
+        auto legacy=state;legacy.resize(legacyEnd);legacy[3]=3;
         require(device.setState(legacy,synthLib::StateTypeGlobal),"Legacy version 3 remains readable");
         std::cout<<"PASS worker: MIDI offsets, audio/release, queue continuity, patch/knob state; AC="<<ac<<" realtime_four="<<realtimeFour<<'\n';
         return 0;

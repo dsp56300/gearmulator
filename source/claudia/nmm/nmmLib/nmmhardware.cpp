@@ -757,6 +757,28 @@ namespace nmm
 		h.milestone="patch compiled";
 		if(h.trace) {report(*h.trace); for(uint32_t a=0x175;a<0x400;++a) *h.trace << "program " << std::hex << a << " " << h.memory.get(dsp56k::MemArea_P,a) << "\n";}
 	}
+    bool Hardware::prepareControlUpdate()
+    {
+        auto& h=*m_impl;
+        const auto clock=h.cpu.getSim().getSystemClockHz();
+        if(!h.patchLoaded || !h.cpu.pcPort.inputIdle(clock)) return false;
+        // Never suspend a compiler/editor handler to inject a control call.
+        // Unlike startup, live playback must defer rather than exhaust a long
+        // wait budget (which would turn an ordinary busy editor into a reboot).
+        h.capturing=h.captureControlAudio;
+        try
+        {
+            for(unsigned i=0;i<4096;++i)
+            {
+                if(h.cpu.getPC()==0x100b38 && !h.ram16(0x172ffc))
+                {h.capturing=false;return true;}
+                h.step();
+            }
+        }
+        catch(...) {h.capturing=false;throw;}
+        h.capturing=false;
+        return false;
+    }
 	void Hardware::setPatchParameter(uint16_t area,uint16_t module,uint16_t parameter,uint8_t value)
 	{
 		auto& h=*m_impl;

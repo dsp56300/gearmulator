@@ -1,0 +1,4 @@
+/build/
+/teensy/.pio/
+__pycache__/
+*.pyc

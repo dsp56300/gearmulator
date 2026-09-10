@@ -148,10 +148,18 @@ namespace synthLib
 		if(!m_device)
 			return false;
 
+		const auto originalSize = _state.size();
 		_state.push_back(g_stateVersion);
 		_state.push_back(_type);
 
-		return m_device->getState(_state, _type);
+		if(m_device->getState(_state, _type))
+			return true;
+
+		// Device state methods append to the caller's buffer. Roll back their
+		// prefix on failure so callers cannot accidentally persist a partial
+		// state that later restores as factory defaults.
+		_state.resize(originalSize);
+		return false;
 	}
 
 	bool Plugin::setState(const std::vector<uint8_t>& _state) const

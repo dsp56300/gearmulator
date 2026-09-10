@@ -323,10 +323,11 @@ namespace pluginLib
 
 		{
 			std::vector<uint8_t> buffer;
-			getPlugin().getState(buffer, synthLib::StateTypeGlobal);
-
-			baseLib::ChunkWriter cw(s, "MIDI", 1);
-			s.write(buffer);
+			if(getPlugin().getState(buffer, synthLib::StateTypeGlobal))
+			{
+				baseLib::ChunkWriter cw(s, "MIDI", 1);
+				s.write(buffer);
+			}
 		}
 		{
 			baseLib::ChunkWriter cw(s, "GAIN", 1);

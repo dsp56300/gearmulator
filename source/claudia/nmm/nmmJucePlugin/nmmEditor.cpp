@@ -104,7 +104,7 @@ namespace nmmJucePlugin
     {
         if(down==m_button4Down) return;
         m_button4Down=down;
-        m_panel->button4=down?127:0;
+        m_panel->setButton4(down?127:0);
     }
     void Editor::note(bool down)
     {

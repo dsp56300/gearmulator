@@ -71,21 +71,34 @@ with the framework's missing-firmware message when no valid image is found.
   the current patch has no knob-3 assignment. Turn Shift off to return to the
   assignment. No audio-thread compilation or filesystem access is added.
 - The initial bank is `01: 101`, `02: SimpleSqr1`, `03: BasicOsc`, `04: FourVoices`. The shared
-  Options menu's `Load Patch...` entry opens a `.pch` chooser and adds the imported patch to the bank (identical content
-  reuses its entry). Empty positions are reused first. Browser patch lists show
-  the same bank; native browser saves populate their numbered slots, and the knob
-  skips empty positions in both directions. Up to 99 positions are available; importing when full replaces
-  the selected entry. File parsing, boot and compilation occur on the worker.
+  Options menu's `Load Patch...` entry opens a `.pch` into the working edit buffer.
+  File loads and editor New/Open/uploads do not modify saved bank entries, even
+  when all 99 memory locations are occupied. Browser patch lists show the saved
+  bank; explicit browser Store operations populate or overwrite their numbered
+  slots. The knob skips empty positions in both directions and loads the saved
+  program, discarding unsaved working edits. File parsing, boot and compilation
+  occur on the worker.
   The LED shows the selected bank position immediately, flashes during loading,
   and shows `Er` on failure; the status text identifies the patch or error.
 - The remaining Shift+Knob 1/2 functions (Master Tune and MIDI Channel) are
   still pending; the panel buttons and Shift+Knob 3 patch selector follow the
   hardware behavior above.
-- Native state v4 contains the bank, selected position, panel values, 1 MiB flash and native
-  patch packets, preserving browser edits, module layout/names and mappings.
-  Older v1/v2/v3 states remain readable. Switching bank entries preserves edits.
+- Native state v5 contains the saved bank, selected position, panel values and
+  1 MiB flash, plus a separate working patch (name, source text and native packets).
+  DAW save/restore preserves unsaved editor work without implicitly storing it
+  into a bank location. Older v1/v2/v3/v4 states remain readable; their selected
+  bank entry seeds the working copy. Previously overwritten bank data cannot be
+  reconstructed by migration.
   Device state appends to the shared framework's version/type header. It is not
   a cycle-exact CPU/DSP savestate.
+- A background recovery autosave writes the same coherent v5 panel state to
+  `config/nmm-recovery.state` after 500 ms of edit inactivity. It includes the
+  saved bank, independent working patch and 1 MiB flash image. The file is written
+  through a temporary file and replacement with retries, and is validated with
+  a checksum before loading. A small active-session marker is removed on clean
+  shutdown, so the recovery file is only loaded after an unclean termination.
+  Autosave serialization and filesystem work never run in the audio callback;
+  the normal DAW project state remains authoritative when it is restored.
 - Remote DSP bridge is explicitly unsupported for this device. Local operation,
   shared settings, host MIDI and optional stereo input are implemented. Open
   `StereoInput.pch` and enable the host input bus to test the input path.
@@ -105,8 +118,8 @@ host is stopped. Knob mappings/values follow native editor changes.
 **Chrome 152.0.7977.77 on this Mac required `--disable-features=MidiMacUmp`** to
 receive SysEx replies. See the [connection instructions and investigation](../../../../nord-micro-modular/analysis/editor-midi.md)
 for the tested launch command, protocol details and limitations. Linux remains
-untested; Windows virtual PC ports are not implemented. The plugin bank and host
-state preserve edits and raw flash contents. Native flash storage and the shared
+untested; Windows virtual PC ports are not implemented. Host state preserves working edits separately from the saved bank and raw flash
+contents. Native flash storage and the shared
 browser/panel list/load/delete workflow are integrated. Complete global-settings
 workflows still need validation.
 
@@ -283,3 +296,14 @@ existing hardware worker, with checked JIT linking. No extra DSP thread is
 started. Bounded capture remains opt-in and uses the native batching path.
 See [promotion validation](../../../../nord-micro-modular/analysis/default-audio-batching.md)
 for default-mode latency, loading, voice and host regression coverage.
+
+## Working-patch regression
+
+`nmmWorkingPatchTests` runs without MIDI ports and checks live edits, editor
+New/Open uploads, explicit Store, bank selection, deletion of the selected
+saved location, version-5 host restoration and version-4 migration. It verifies
+that saved patches survive a blank upload and that only Store changes a memory
+location. Configure `NMM_MODULE_TEST_FIRMWARE` to register it with CTest, then run
+`ctest --test-dir build/nmm-ui -R '^nmmWorkingPatchTests$' --output-on-failure`.
+The editor's handling of unsaved documents before New/Open is separate from
+this emulator state model.

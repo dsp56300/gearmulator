@@ -113,7 +113,7 @@ resident vector map and the provisional ESSI/clock assumptions.
   and cached variants crossing a newly observed endpoint. Loop exits use live
   LF/LA/FV and stack state; no Nord-specific endpoint synchronization remains.
 - Cable endpoints use bit 6 to distinguish output ports. The internal fixture uses input module/port, output module/(port | `0x40`), color, reserved. The oscillator and output code are produced by the firmware.
-- An AM29F080B command decoder supports identification, byte programming, sector/chip erase and reset. Its 1 MiB array persists per instance in host state v4; electrical busy/suspend timing remains unmodeled.
+- An AM29F080B command decoder supports identification, byte programming, sector/chip erase and reset. Its 1 MiB array persists per instance in host state v5 (with v4 migration); electrical busy/suspend timing remains unmodeled.
 - Clock configuration uses an inferred 12.288 MHz external clock, yielding
   82.944 MHz after the firmware PLL and 96 kHz stereo frames from ESSI CRA.
   Timer0's period independently agrees. The physical IRQD connection is still
@@ -126,7 +126,9 @@ resident vector map and the provisional ESSI/clock assumptions.
 
 The [PC UART / Web MIDI integration](../../../nord-micro-modular/analysis/editor-midi.md)
 now runs discovery, patch queries, live edits and uploads through the native MCU.
-Plugin state preserves native edited patches. Remaining work includes physical
+Plugin state preserves native working patches separately from saved bank entries;
+New/Open and live edits do not overwrite saved locations. Explicit Store writes
+the chosen memory location. Remaining work includes physical
 analog ADC/filter and panel behavior, remaining historical PCH variants, native
 global-settings workflows, physical timer/pin timing and comparison
 against recordings from hardware.
@@ -181,3 +183,34 @@ See [production audio batching](../../../nord-micro-modular/analysis/default-aud
 for promotion validation and [the architecture experiment](../../../nord-micro-modular/analysis/audio-driven-scheduler.md)
 for the original CPU comparison. [System scheduling and capture](../../../nord-micro-modular/analysis/system-scheduling-capture.md)
 describes the bounded capture format and remaining hardware investigation.
+
+### Live module-edit regression
+
+The optional `nmmModuleEditTests` target compiles Animatek-NME's actual module
+and cable encoders against the emulator. Enable it in a JUCE-enabled build:
+
+```sh
+cmake -S . -B build/nmm-ui -DNMM_EDITOR_SOURCE_DIR=/path/to/Animatek-NME
+cmake --build build/nmm-ui --target nmmModuleEditTests -j 4
+build/nmm-ui/source/claudia/nmm/nmmTestConsole/nmmModuleEditTests_artefacts/Release/nmmModuleEditTests \
+  '/path/to/decoded firmware.bin' /path/to/Animatek-NME/data/modules.xml all
+```
+
+Configure `NMM_MODULE_TEST_FIRMWARE` with an absolute firmware path to register
+the sweep with CTest (`ctest --test-dir build/nmm-ui -R nmmModuleEditTests`).
+Replace `all` with a module type ID to isolate a failure. Append `--reference`
+to compare with MCU-led execution; the default uses the plugin's cooperative,
+64-frame audio execution and linked JIT settings. No external MIDI ports are
+opened. The firmware and editor checkout are local inputs, not downloaded or
+included in the test binary.
+
+Each instantiable module is tested in both voice areas on a fresh baseline
+patch: native add, a compatible cable where connectors exist, every ordinary
+parameter, cable removal, and module removal. Patch section replies and native
+parameter values verify the result, and non-finite audio or firmware exceptions
+fail the case. Pending volume automation exercises the live-control boundary.
+The test mirrors the editor's current empty custom-value list for individual
+module creation, so it also exposes differences from full-patch loading. It
+prints each failure and returns a nonzero status if any case fails. This sweep
+does not establish correctness for every module combination or resource-limit
+condition.

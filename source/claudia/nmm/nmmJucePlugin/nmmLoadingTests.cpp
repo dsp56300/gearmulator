@@ -44,6 +44,17 @@ int main(int argc,char** argv)
             {std::lock_guard<std::mutex> lock(panel->mutex);if(!panel->ready) throw std::runtime_error(panel->status);}
         };
         ready();std::cout<<"startup_ms="<<std::chrono::duration<double,std::milli>(Clock::now()-begin).count()<<'\n';
+        // A stopped/active editor can have UART work pending while host
+        // automation keeps changing. Keep only the latest mapped value and
+        // keep the saved bank independent when switching away and back below.
+        const auto initialLoads=panel->startedLoads.load();
+        const uint8_t hello[]{0xf0,0x33,0,6,0,3,3,0xf7};
+        for(unsigned i=0;i<64;++i)
+            require(panel->editor->receive(hello,sizeof hello),"Editor traffic accepted");
+        for(int value=60;value<=73;++value)
+        {panel->values[1]=value;panel->values[0]=100;pump();}
+        for(unsigned i=0;i<500;++i) pump();
+        require(panel->ready && panel->startedLoads==initialLoads,"Pending controls must not reboot hardware");
         auto select=[&](unsigned index,const char* label)
         {
             const auto start=Clock::now();const auto c=std::clock();require(panel->selectPatch(index),"select");ready();
@@ -54,6 +65,7 @@ int main(int argc,char** argv)
         events.emplace_back(synthLib::MidiEventSource::Host,0x90,60,100,0);
         for(unsigned i=0;i<100;++i) pump();
         select(1,"cold");select(0,"return");
+        require(panel->values[1]==127,"Patch selection must restore the saved program, not deferred edits");
         double sum=0,sq=0;unsigned count=0;
         for(unsigned i=0;i<400;++i) {pump();if(i>=200) for(auto v:right) {sum+=v;sq+=v*v;++count;}}
         const auto ac=std::sqrt(std::max(0.0,sq/count-std::pow(sum/count,2)));std::cout<<"return_without_note_ac="<<ac<<'\n';
@@ -77,7 +89,13 @@ int main(int argc,char** argv)
         if(!baseline) require(panel->cancelledLoads>0,"Superseded compilation was not cancelled");
         panel->selectPatch(brokenIndex);
         const auto deadline=Clock::now()+std::chrono::seconds(15);while(!panel->failed && Clock::now()<deadline) pump();
-        require(panel->failed,"Invalid patch must fail explicitly");select(0,"recovery");
+        require(panel->failed,"Invalid patch must fail explicitly");
+        // A failed worker must still yield a valid panel snapshot. This is the
+        // state that a host can use if it recreates the device after the error.
+        std::vector<uint8_t> failedState;
+        require(device.getState(failedState,synthLib::StateTypeGlobal),"State snapshot after worker failure");
+        require(failedState.size()>10 && failedState[0]=='N' && failedState[1]=='M' && failedState[2]=='M' && failedState[3]==5,"Failed worker returned valid state");
+        select(0,"recovery");
         std::cout<<"underruns="<<panel->underruns<<" dropped="<<panel->droppedJobs<<" total_cpu_ms="<<1000.0*(std::clock()-cpu)/CLOCKS_PER_SEC<<'\n';
         for(const unsigned index:{2u,3u,4u,5u}) select(index,"cold_matrix");
         for(const unsigned index:{0u,4u,3u,2u,1u,5u,0u})

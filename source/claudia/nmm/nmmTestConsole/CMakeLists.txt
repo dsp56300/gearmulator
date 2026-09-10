@@ -2,6 +2,31 @@ add_executable(nmmTestConsole nmmTestConsole.cpp)
 target_link_libraries(nmmTestConsole PRIVATE nmmLib)
 set_property(TARGET nmmTestConsole PROPERTY FOLDER "NordMicroModular")
 if(BUILD_TESTING)
+    set(NMM_EDITOR_SOURCE_DIR "" CACHE PATH "Optional Animatek-NME checkout for live module-edit regression tests")
+    if(NMM_EDITOR_SOURCE_DIR)
+        if(NOT TARGET juce::juce_graphics)
+            message(FATAL_ERROR "Module-edit tests require a JUCE-enabled build")
+        endif()
+        juce_add_console_app(nmmModuleEditTests PRODUCT_NAME "nmmModuleEditTests")
+        target_sources(nmmModuleEditTests PRIVATE nmmModuleEditTests.cpp
+            ${NMM_EDITOR_SOURCE_DIR}/source/model/ModuleDescriptions.cpp
+            ${NMM_EDITOR_SOURCE_DIR}/source/model/ModuleTags.cpp
+            ${NMM_EDITOR_SOURCE_DIR}/source/protocol/SysExMessage.cpp
+            ${NMM_EDITOR_SOURCE_DIR}/source/protocol/ParameterEncoder.cpp
+            ${NMM_EDITOR_SOURCE_DIR}/source/protocol/NewModuleMessage.cpp
+            ${NMM_EDITOR_SOURCE_DIR}/source/protocol/NewCableMessage.cpp
+            ${NMM_EDITOR_SOURCE_DIR}/source/protocol/DeleteCableMessage.cpp
+            ${NMM_EDITOR_SOURCE_DIR}/source/protocol/DeleteModuleMessage.cpp)
+        target_include_directories(nmmModuleEditTests PRIVATE ${NMM_EDITOR_SOURCE_DIR}/source)
+        target_compile_definitions(nmmModuleEditTests PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
+        target_link_libraries(nmmModuleEditTests PRIVATE nmmLib juce::juce_graphics)
+        set(NMM_MODULE_TEST_FIRMWARE "" CACHE FILEPATH "Optional local firmware for the module-edit CTest sweep")
+        if(NMM_MODULE_TEST_FIRMWARE)
+            add_test(NAME nmmModuleEditTests COMMAND nmmModuleEditTests
+                "${NMM_MODULE_TEST_FIRMWARE}" "${NMM_EDITOR_SOURCE_DIR}/data/modules.xml" all)
+            set_tests_properties(nmmModuleEditTests PROPERTIES TIMEOUT 900)
+        endif()
+    endif()
     add_executable(nmmArchitectureInspect nmmArchitectureInspect.cpp)
     target_link_libraries(nmmArchitectureInspect PRIVATE nmmLib)
     add_executable(nmmJitProfile nmmJitProfile.cpp)

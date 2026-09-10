@@ -13,20 +13,79 @@
 
 namespace nmmJucePlugin
 {
+    namespace
+    {
+        void writeStateString(std::vector<uint8_t>& state,const std::string& value)
+        {
+            const auto size=static_cast<uint32_t>(value.size());
+            for(unsigned i=0;i<4;++i) state.push_back(static_cast<uint8_t>(size>>(8*i)));
+            state.insert(state.end(),value.begin(),value.end());
+        }
+
+    }
+
+    // This is deliberately a panel snapshot, not a hardware snapshot. It is
+    // safe to use when the live MCU is busy or has just failed, and it contains
+    // the last native/flash data that the worker committed.
+    std::vector<uint8_t> encodePanelState(const PanelState& panel)
+    {
+        std::vector<uint8_t> state{'N','M','M',5};
+        for(const auto& value:panel.values) state.push_back(static_cast<uint8_t>(value.load()));
+        const auto count=std::min<size_t>(PanelState::MaxPatches,std::max<size_t>(1,panel.bank.size()));
+        const auto selected=panel.bank.empty()?0u:std::min<unsigned>(panel.selectedPatch,static_cast<unsigned>(count-1));
+        state.push_back(static_cast<uint8_t>(selected));
+        state.push_back(static_cast<uint8_t>(count));
+        if(panel.bank.empty())
+        {
+            // A working patch without a bank must not become a saved slot.
+            writeStateString(state,{});
+            writeStateString(state,{});
+            writeStateString(state,{});
+        }
+        else for(size_t i=0;i<count;++i)
+        {
+            const auto& patch=panel.bank[i];
+            writeStateString(state,patch.name);
+            writeStateString(state,patch.text);
+            writeStateString(state,std::string(patch.native.begin(),patch.native.end()));
+        }
+        writeStateString(state,panel.flash.size()==0x100000?std::string(panel.flash.begin(),panel.flash.end()):std::string{});
+        writeStateString(state,panel.patchName);
+        writeStateString(state,panel.patchText);
+        writeStateString(state,std::string(panel.patchNative.begin(),panel.patchNative.end()));
+        state.push_back(panel.patchFromBank?1:0);
+        state.push_back(static_cast<uint8_t>(panel.button4.load()));
+        return state;
+    }
+
+    void PanelState::markStateChanged()
+    {
+        stateRevision.fetch_add(1,std::memory_order_release);
+        snapshotChanged.notify_all();
+    }
+
+    void PanelState::setValue(const unsigned index,const int value)
+    {
+        if(index>=values.size()) return;
+        const auto old=values[index].exchange(value,std::memory_order_acq_rel);
+        if(old!=value) markStateChanged();
+    }
+
+    void PanelState::setButton4(const int value)
+    {
+        const auto old=button4.exchange(value,std::memory_order_acq_rel);
+        if(old!=value) markStateChanged();
+    }
+
     void PanelState::requestPatch(std::string text,std::string name)
     {
         std::lock_guard<std::mutex> lock(mutex);
-        const auto found=std::find_if(bank.begin(),bank.end(),[&](const PatchEntry& p){return p.text==text;});
-        if(found!=bank.end()) selectedPatch=static_cast<unsigned>(found-bank.begin());
-        else
-        {
-            const auto empty=std::find_if(bank.begin(),bank.end(),[](const auto& p){return p.name.empty() && p.text.empty() && p.native.empty();});
-            if(empty!=bank.end()) {selectedPatch=unsigned(empty-bank.begin());*empty={std::move(name),std::move(text)};}
-            else if(bank.size()<MaxPatches) {selectedPatch=static_cast<unsigned>(bank.size());bank.push_back({std::move(name),std::move(text)});}
-            else bank[selectedPatch]={std::move(name),std::move(text)};
-        }
-        queuePatch();
+        // Loading a file replaces the edit buffer, never a saved memory slot.
+        patchText=std::move(text);patchName=std::move(name);patchNative.clear();patchFromBank=false;loadSavedPatch=false;
+        status="Loading "+patchName;ready=false;loading=true;failed=false;restoreKnobs.fill(-1);
+        patchGeneration.fetch_add(1);markStateChanged();
     }
+
     bool PanelState::selectPatch(unsigned index,bool force)
     {
         std::lock_guard<std::mutex> lock(mutex);
@@ -61,9 +120,92 @@ namespace nmmJucePlugin
     void PanelState::queuePatch()
     {
         patchText=bank[selectedPatch].text;patchName=bank[selectedPatch].name.empty()?"Empty":bank[selectedPatch].name;
+        patchNative=bank[selectedPatch].native;patchFromBank=true;loadSavedPatch=true;
+        button4=0;
         status="Loading "+patchName; ready=false;loading=true;failed=false;restoreKnobs.fill(-1);
         patchGeneration.fetch_add(1);
+        markStateChanged();
     }
+
+    bool applyPanelState(const std::vector<uint8_t>& state,PanelState& panel)
+    {
+        if(state.size()<8 || state[0]!='N' || state[1]!='M' || state[2]!='M' || (state[3]<1 || state[3]>5)) return false;
+        for(unsigned i=0;i<4;++i) if(state[4+i]>127) return false;
+        std::vector<PanelState::PatchEntry> bank;
+        std::vector<uint8_t> flash;
+        unsigned selected=0;
+        PanelState::PatchEntry working;
+        bool fromBank=true;uint8_t button4=0;
+        if(state[3]==1) bank.push_back({"Restored patch",std::string(state.begin()+8,state.end())});
+        else
+        {
+            if(state.size()<10 || !state[9] || state[9]>PanelState::MaxPatches || state[8]>=state[9]) return false;
+            selected=state[8];size_t cursor=10;
+            auto readString=[&](std::string& value,size_t limit)
+            {
+                if(state.size()-cursor<4) return false;
+                uint32_t size=0;
+                for(unsigned i=0;i<4;++i) size|=uint32_t(state[cursor++])<<(8*i);
+                if(size>limit || size>state.size()-cursor) return false;
+                value.assign(state.begin()+cursor,state.begin()+cursor+size);cursor+=size;return true;
+            };
+            for(unsigned i=0;i<state[9];++i)
+            {
+                PanelState::PatchEntry patch;
+                if(!readString(patch.name,1024) || !readString(patch.text,1024*1024)) return false;
+                if(state[3]>=3)
+                {
+                    std::string native;if(!readString(native,65536)) return false;
+                    patch.native.assign(native.begin(),native.end());
+                    if(!patch.native.empty() && !nmm::validEditorPatch(patch.native)) return false;
+                }
+                bank.push_back(std::move(patch));
+            }
+            if(state[3]>=4)
+            {
+                std::string bytes;if(!readString(bytes,0x100000) || (!bytes.empty() && bytes.size()!=0x100000)) return false;
+                flash.assign(bytes.begin(),bytes.end());
+            }
+            if(state[3]>=5)
+            {
+                std::string native;
+                if(!readString(working.name,1024) || !readString(working.text,1024*1024) || !readString(native,65536)) return false;
+                working.native.assign(native.begin(),native.end());
+                if(!working.native.empty() && !nmm::validEditorPatch(working.native)) return false;
+                if(state.size()-cursor!=2 || state[cursor]>1 || state[cursor+1]>127) return false;
+                fromBank=state[cursor++]!=0;button4=state[cursor++];
+            }
+            if(cursor!=state.size()) return false;
+        }
+        std::lock_guard<std::mutex> lock(panel.mutex);
+        panel.flash=std::move(flash);
+        // Legacy states held only one patch; keep the bundled bank available.
+        ++panel.bankRevision;
+        if(state[3]==1 && !panel.bank.empty())
+        {
+            const auto found=std::find_if(panel.bank.begin(),panel.bank.end(),[&](const auto& p){return p.text==bank[0].text;});
+            if(found!=panel.bank.end()) selected=static_cast<unsigned>(found-panel.bank.begin());
+            else
+            {
+                selected=static_cast<unsigned>(panel.bank.size()<PanelState::MaxPatches?panel.bank.size():panel.selectedPatch);
+                if(selected==panel.bank.size()) panel.bank.push_back(std::move(bank[0]));
+                else panel.bank[selected]=std::move(bank[0]);
+            }
+        }
+        else panel.bank=std::move(bank);
+        panel.selectedPatch=selected;
+        if(state[3]<5) working=panel.bank[selected];
+        panel.patchText=std::move(working.text);panel.patchName=std::move(working.name);
+        panel.patchNative=std::move(working.native);panel.patchFromBank=fromBank;panel.loadSavedPatch=false;
+        panel.ready=false;panel.loading=true;panel.failed=false;panel.status="Loading "+panel.patchName;
+        for(unsigned i=0;i<4;++i) panel.values[i]=state[4+i];
+        panel.button4=button4;
+        for(unsigned i=0;i<3;++i) panel.restoreKnobs[i]=state[5+i];
+        panel.patchGeneration.fetch_add(1);
+        panel.markStateChanged();
+        return true;
+    }
+
     Device::Device(const synthLib::DeviceCreateParams& params,std::string firmware,std::shared_ptr<PanelState> panel)
         : synthLib::Device(params),m_panel(std::move(panel)),m_worker([this,firmware]{run(firmware);}) {}
     Device::~Device() { m_stop=true; m_worker.join(); }
@@ -195,6 +337,7 @@ namespace nmmJucePlugin
         int previousButton4=-1;
         uint64_t pendingEditorRevision=0,flashRevision=~uint64_t(0);
         unsigned loadedIndex=0;uint64_t loadedBankRevision=0;std::string loadedText;
+        bool hardwareReady=false;
         std::array<uint64_t,99> libraryFingerprints{};
         uint64_t libraryRevision=~uint64_t(0);
         bool libraryInitialized=false;
@@ -202,13 +345,14 @@ namespace nmmJucePlugin
         int pendingDelete=-1;unsigned deleteGeneration=0;std::vector<uint8_t> libraryReply;libraryReply.reserve(256);
         auto syncNativeKnobs=[&]
         {
-                    unsigned mask=0;const auto knobs=hw->editorKnobs();
+                    unsigned mask=0;bool changed=false;const auto knobs=hw->editorKnobs();
                     for(unsigned i=0;i<3;++i) if(knobs[i].module)
                     {
                         mask|=1u<<i;int expected=previous[i];
-                        if(m_panel->values[i+1].compare_exchange_strong(expected,knobs[i].value)) previous[i]=knobs[i].value;
+                        if(m_panel->values[i+1].compare_exchange_strong(expected,knobs[i].value)) {previous[i]=knobs[i].value;changed=true;}
                     }
                     m_panel->knobMask=mask;
+                    if(changed) m_panel->markStateChanged();
         };
         auto controlsChanged=[&]
         {
@@ -219,27 +363,131 @@ namespace nmmJucePlugin
         };
         auto applyControls=[&]
         {
+            // A deferred value stays different from previous, so subsequent
+            // gestures coalesce in the panel atomics until it can be applied.
             const auto volume=m_panel->values[0].load();
-            if(volume!=previousVolume) {hw->setMasterVolume(uint8_t(volume));previousVolume=volume;}
-            const auto knobs=hw->editorKnobs();
+            if(volume!=previousVolume)
+            {
+                if(!hw->prepareControlUpdate()) return;
+                hw->setMasterVolume(uint8_t(volume));previousVolume=volume;
+            }
             for(unsigned i=0;i<3;++i)
             {
                 const auto value=m_panel->values[i+1].load();
                 if(value==previous[i]) continue;
+                if(!hw->prepareControlUpdate()) return;
+                const auto knobs=hw->editorKnobs();
                 if(knobs[i].module) hw->setPatchParameter(knobs[i].area,knobs[i].module,knobs[i].parameter,uint8_t(value));
                 previous[i]=value;
             }
-            const auto button=hw->editorButton();
             const auto value=m_panel->button4.load();
             if(value!=previousButton4)
             {
+                if(!hw->prepareControlUpdate()) return;
+                const auto button=hw->editorButton();
                 if(button.module) hw->setPatchParameter(button.area,button.module,button.parameter,uint8_t(value));
                 previousButton4=value;
+            }
+        };
+        auto syncLibrary=[&]
+        {
+            const auto entries=hw->flashPatches();
+            std::lock_guard<std::mutex> lock(m_panel->mutex);
+            if(generation==m_panel->patchGeneration.load())
+            {
+                for(unsigned i=0;i<entries.size();++i)
+                {
+                    const auto& entry=entries[i];
+                    const bool changed=libraryInitialized && libraryFingerprints[i]!=entry.fingerprint;
+                    const bool missing=i>=m_panel->bank.size() || m_panel->bank[i].name.empty();
+                    if(entry.fingerprint && (changed || missing))
+                    {
+                        if(i>=m_panel->bank.size()) m_panel->bank.resize(i+1);
+                        // An empty text with a name is a native flash-backed slot.
+                        // It loads through the MCU, not through the text compiler shim.
+                        m_panel->bank[i]={entry.name,{},{}};
+                    }
+                    else if(changed && !entry.fingerprint && i<m_panel->bank.size() && m_panel->bank[i].text.empty())
+                        m_panel->bank[i]={};
+                    libraryFingerprints[i]=entry.fingerprint;
+                }
+                libraryInitialized=true;libraryRevision=hw->flashRevision();
+                m_panel->markStateChanged();
+            }
+        };
+        unsigned recoveryAttempts=0;
+        bool recoveryPending=false;
+        auto recoveryNotBefore=std::chrono::steady_clock::time_point{};
+        auto snapshotRetryNotBefore=std::chrono::steady_clock::time_point{};
+        auto preserveHardwareState=[&]
+        {
+            if(!hw) return;
+            // Flash is physically persistent on the instrument. Copy it out
+            // before destroying a failed/cancelled hardware instance.
+            try
+            {
+                const auto revision=hw->flashRevision();
+                if(revision!=flashRevision)
+                {
+                    const auto image=hw->flashImage();
+                    std::lock_guard<std::mutex> lock(m_panel->mutex);
+                    if(loadedBankRevision==m_panel->bankRevision)
+                    { m_panel->flash=image; flashRevision=revision; m_panel->markStateChanged(); }
+                }
+            }
+            catch(...) {}
+            // An editor edit may not yet have reached the normal periodic
+            // snapshot. Best-effort export here closes that narrow reset
+            // window without ever running on the real-time callback.
+            try
+            {
+                if(!hardwareReady || !hw->editorSnapshotReady()) return;
+                const auto packets=hw->exportEditorPatch();std::vector<uint8_t> native;
+                for(const auto& packet:packets) native.insert(native.end(),packet.begin(),packet.end());
+                std::lock_guard<std::mutex> lock(m_panel->mutex);
+                if(generation==m_panel->patchGeneration.load())
+                {
+                    m_panel->patchNative=std::move(native);
+                    m_panel->patchName=hw->editorPatchName();
+                    m_panel->markStateChanged();
+                }
+            }
+            catch(...) {}
+        };
+        auto scheduleRecovery=[&](const std::string& reason)
+        {
+            preserveHardwareState();
+            attachedCapture=nullptr;
+            hw.reset();hardwareReady=false;
+            if(++recoveryAttempts<=3)
+            {
+                recoveryPending=true;
+                recoveryNotBefore=std::chrono::steady_clock::now()+std::chrono::milliseconds(50*recoveryAttempts);
+                {
+                    std::lock_guard<std::mutex> lock(m_panel->mutex);
+                    m_panel->ready=false;m_panel->loading=true;m_panel->failed=false;
+                    m_panel->status="Recovering: "+reason;
+                }
+                // Force the normal generation loader to rebuild the machine
+                // from the committed panel/native/flash state.
+                m_panel->patchGeneration.fetch_add(1);
+            }
+            else
+            {
+                recoveryPending=false;
+                std::lock_guard<std::mutex> lock(m_panel->mutex);
+                m_panel->ready=false;m_panel->loading=false;m_panel->failed=true;
+                m_panel->status="Recovery failed: "+reason;
             }
         };
         while(!m_stop)
         {
             const auto requested=m_panel->patchGeneration.load();
+            if(recoveryPending && std::chrono::steady_clock::now()<recoveryNotBefore)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                continue;
+            }
             if(requested!=generation)
             {
                 setPlaybackPriority(false);
@@ -254,26 +502,37 @@ namespace nmmJucePlugin
                 generation=requested;++m_panel->startedLoads;
                 try
                 {
+                    hardwareReady=false;
+                    bool replacedBank;
+                    {std::lock_guard<std::mutex> lock(m_panel->mutex);replacedBank=loadedBankRevision!=m_panel->bankRevision;}
+                    // Host state replaces the whole machine/bank context.
+                    if(hw && replacedBank) {hw.reset();attachedCapture=nullptr;}
                     if(hw)
                     {
                         hw->setCancellation(&m_panel->patchGeneration,requested,&m_stop);
-                        bool preserve;
-                        {std::lock_guard<std::mutex> lock(m_panel->mutex);preserve=loadedBankRevision==m_panel->bankRevision && loadedIndex<m_panel->bank.size() && m_panel->bank[loadedIndex].text==loadedText;}
-                        if(preserve)
-                        {
-                            // Finish already received editor work before leaving this bank entry.
-                            std::array<std::array<float,2>,Block> discard{};
-                            for(unsigned i=0;i<750 && !hw->editorIdle();++i) hw->renderInto(discard.data(),Block,1000000);
-                            if(!hw->editorIdle()) throw std::runtime_error("Editor is busy; finish the upload before switching patches");
-                            const auto packets=hw->exportEditorPatch();std::vector<uint8_t> native;
-                            for(const auto& packet:packets) native.insert(native.end(),packet.begin(),packet.end());
-                            std::lock_guard<std::mutex> lock(m_panel->mutex);
-                            if(loadedBankRevision==m_panel->bankRevision && loadedIndex<m_panel->bank.size() && !m_panel->bank[loadedIndex].name.empty() && m_panel->bank[loadedIndex].text==loadedText)
-                                m_panel->bank[loadedIndex].native=std::move(native);
-                        }
+                        // Finish native work (especially Store) before changing
+                        // programs, but never save the outgoing edits into a bank.
+                        std::array<std::array<float,2>,Block> discard{};
+                        for(unsigned i=0;i<750 && !hw->editorIdle();++i) hw->renderInto(discard.data(),Block,1000000);
+                        if(!hw->editorIdle()) throw std::runtime_error("Editor is busy; finish the upload before switching patches");
+                        if(libraryRevision!=hw->flashRevision()) syncLibrary();
                     }
                     std::string text; std::array<int,3> restore;std::vector<uint8_t> native;
-                    {std::lock_guard<std::mutex> lock(m_panel->mutex);text=m_panel->patchText;restore=m_panel->restoreKnobs;generation=m_panel->patchGeneration.load();loadedIndex=m_panel->selectedPatch;loadedText=text;loadedBankRevision=m_panel->bankRevision;if(!m_panel->bank.empty()) native=m_panel->bank[m_panel->selectedPatch].native;}
+                    bool fromBank;
+                    {
+                        std::lock_guard<std::mutex> lock(m_panel->mutex);
+                        // A just-completed Store may have updated this destination
+                        // after the UI requested it. Resolve the saved program now.
+                        if(m_panel->loadSavedPatch)
+                        {
+                            const auto& saved=m_panel->bank[m_panel->selectedPatch];
+                            m_panel->patchText=saved.text;m_panel->patchName=saved.name;
+                            m_panel->patchNative=saved.native;m_panel->loadSavedPatch=false;
+                        }
+                        text=m_panel->patchText;restore=m_panel->restoreKnobs;generation=m_panel->patchGeneration.load();
+                        loadedIndex=m_panel->selectedPatch;loadedText=text;loadedBankRevision=m_panel->bankRevision;
+                        native=m_panel->patchNative;fromBank=m_panel->patchFromBank;
+                    }
                     const bool warm=hw && previousBankRevision==loadedBankRevision && !native.empty();
                     if(!warm)
                     {
@@ -282,7 +541,7 @@ namespace nmmJucePlugin
                         {std::lock_guard<std::mutex> lock(m_panel->mutex);patch.name=m_panel->patchName;}
                         std::vector<uint8_t> flash;
                         {std::lock_guard<std::mutex> lock(m_panel->mutex);
-                         if(hw && previousBankRevision==m_panel->bankRevision && flashRevision!=hw->flashRevision()) m_panel->flash=hw->flashImage();
+                         if(hw && previousBankRevision==m_panel->bankRevision && flashRevision!=hw->flashRevision()) {m_panel->flash=hw->flashImage();m_panel->markStateChanged();}
                          flash=m_panel->flash;}
                         hw.reset();
                         if(!image) image=std::make_shared<const nmm::Rom>(firmware);
@@ -295,7 +554,7 @@ namespace nmmJucePlugin
                         hw->setCancellation(&m_panel->patchGeneration,generation,&m_stop);
                         if(!flash.empty()) hw->restoreFlash(flash);
                         hw->boot(30000000);
-                        if(text.empty() && hw->flashPatches()[loadedIndex].fingerprint) hw->loadFlashPatch(loadedIndex,30000000);
+                        if(fromBank && native.empty() && text.empty() && hw->flashPatches()[loadedIndex].fingerprint) hw->loadFlashPatch(loadedIndex,30000000);
                         else hw->loadPatch(patch,30000000);
                         ++m_panel->coldLoads;
                         flashRevision=~uint64_t(0);libraryRevision=~uint64_t(0);
@@ -304,6 +563,23 @@ namespace nmmJucePlugin
                     else {hw->setCancellation(&m_panel->patchGeneration,generation,&m_stop);++m_panel->warmLoads;}
                     hw->setControlAudioCapture(false);
                     if(!native.empty()) hw->restoreEditorPatch(native);
+                    else if(fromBank)
+                    {
+                        // Materialize the saved program once, before applying
+                        // host-restored controls or accepting any live edits.
+                        // This cache enables warm switching without ever caching
+                        // the outgoing working patch as a saved bank entry.
+                        std::vector<uint8_t> saved;
+                        for(const auto& packet:hw->exportEditorPatch()) saved.insert(saved.end(),packet.begin(),packet.end());
+                        std::lock_guard<std::mutex> lock(m_panel->mutex);
+                        if(generation==m_panel->patchGeneration.load() && loadedBankRevision==m_panel->bankRevision &&
+                           loadedIndex<m_panel->bank.size() && m_panel->bank[loadedIndex].text==loadedText &&
+                           !m_panel->bank[loadedIndex].name.empty() && m_panel->bank[loadedIndex].native.empty())
+                        {m_panel->bank[loadedIndex].native=std::move(saved);m_panel->markStateChanged();}
+                    }
+                    // Establish directory fingerprints before accepting editor
+                    // commands, including a Store immediately after New/Open.
+                    if(libraryRevision!=hw->flashRevision()) syncLibrary();
                     // Startup controls advance hardware without queuing unsolicited audio.
                     previousVolume=m_panel->values[0].load();
                     hw->setMasterVolume(static_cast<uint8_t>(previousVolume));
@@ -328,48 +604,26 @@ namespace nmmJucePlugin
                     previousButton4=m_panel->button4.load();
                     m_panel->knobMask=mask;
                     hw->notifyEditorPatchChanged();
-                    hw->setControlAudioCapture(true);hw->clearCancellation();
+                    hw->setControlAudioCapture(true);hw->clearCancellation();hardwareReady=true;
                     std::lock_guard<std::mutex> lock(m_panel->mutex);
-                    if(generation==m_panel->patchGeneration.load()) {m_panel->status=m_panel->patchName; m_panel->ready=true;m_panel->loading=false;m_panel->failed=false;}
+                    if(generation==m_panel->patchGeneration.load()) {m_panel->status=m_panel->patchName; m_panel->ready=true;m_panel->loading=false;m_panel->failed=false;++m_panel->snapshotRequest;}
+                    recoveryAttempts=0;recoveryPending=false;
                 }
                 catch(const nmm::Hardware::Cancelled&)
                 {
+                    preserveHardwareState();
                     hw.reset();++m_panel->cancelledLoads;
                     continue; // Never publish partially compiled or superseded hardware.
                 }
                 catch(const std::exception& e)
                 {
+                    preserveHardwareState();
                     hw.reset();
                     std::lock_guard<std::mutex> lock(m_panel->mutex);
                     if(generation==m_panel->patchGeneration.load()) {m_panel->ready=false;m_panel->loading=false;m_panel->failed=true;m_panel->status=e.what();}
                 }
             }
-            if(hw && libraryRevision!=hw->flashRevision() && hw->editorIdle())
-            {
-                const auto entries=hw->flashPatches();
-                std::lock_guard<std::mutex> lock(m_panel->mutex);
-                if(generation==m_panel->patchGeneration.load())
-                {
-                    for(unsigned i=0;i<entries.size();++i)
-                    {
-                        const auto& entry=entries[i];
-                        const bool changed=libraryInitialized && libraryFingerprints[i]!=entry.fingerprint;
-                        const bool missing=i>=m_panel->bank.size() || m_panel->bank[i].name.empty();
-                        if(entry.fingerprint && (changed || missing))
-                        {
-                            if(i>=m_panel->bank.size()) m_panel->bank.resize(i+1);
-                            // An empty text with a name is a native flash-backed slot.
-                            // It loads through the MCU, not through the text compiler shim.
-                            m_panel->bank[i]={entry.name,{},{}};
-                            if(i==loadedIndex) {loadedText.clear();m_panel->patchText.clear();}
-                        }
-                        else if(changed && !entry.fingerprint && i<m_panel->bank.size() && m_panel->bank[i].text.empty())
-                            m_panel->bank[i]={};
-                        libraryFingerprints[i]=entry.fingerprint;
-                    }
-                    libraryInitialized=true;libraryRevision=hw->flashRevision();
-                }
-            }
+            if(hw && libraryRevision!=hw->flashRevision() && hw->editorIdle()) syncLibrary();
             if(hw)
             {
                 auto& transport=*m_panel->editor;
@@ -430,7 +684,7 @@ namespace nmmJucePlugin
                         // after the MCU confirms success, never on a failed request.
                         std::lock_guard<std::mutex> panelLock(m_panel->mutex);
                         if(deleteGeneration==m_panel->patchGeneration.load() && unsigned(pendingDelete)<m_panel->bank.size())
-                            m_panel->bank[size_t(pendingDelete)]={};
+                            m_panel->bank[size_t(pendingDelete)]={};m_panel->markStateChanged();
                         pendingDelete=-1;
                     }
                 }
@@ -442,7 +696,7 @@ namespace nmmJucePlugin
             {
                 bool needed;uint64_t request;
                 {std::lock_guard<std::mutex> lock(m_panel->mutex);request=m_panel->snapshotRequest;needed=m_panel->snapshotRevision<pendingEditorRevision || m_panel->snapshotCompleted<request;}
-                if(needed) try
+                if(needed && std::chrono::steady_clock::now()>=snapshotRetryNotBefore) try
                 {
                     auto* capture=m_panel->capture.load(std::memory_order_acquire);
                     if(capture && capture->full) capture=nullptr;
@@ -454,9 +708,8 @@ namespace nmmJucePlugin
                     if(generation==m_panel->patchGeneration.load())
                     {
                         m_panel->patchName=hw->editorPatchName();m_panel->status=m_panel->patchName;
-                        if(m_panel->bank.empty()) m_panel->bank.push_back({m_panel->patchName,m_panel->patchText});
-                        auto& entry=m_panel->bank[m_panel->selectedPatch];if(!entry.name.empty()) {entry.native=std::move(native);entry.name=m_panel->patchName;}
-                        if(flashRevision!=hw->flashRevision()) {m_panel->flash=hw->flashImage();flashRevision=hw->flashRevision();}
+                        m_panel->patchNative=std::move(native);m_panel->markStateChanged();
+                        if(flashRevision!=hw->flashRevision()) {m_panel->flash=hw->flashImage();flashRevision=hw->flashRevision();m_panel->markStateChanged();}
                         m_panel->snapshotRevision=pendingEditorRevision;m_panel->snapshotCompleted=request;m_panel->snapshotChanged.notify_all();
                         if(capture) {
                             const auto cpuEnd=threadCpu();const auto wall=std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-wallStart).count();
@@ -466,7 +719,10 @@ namespace nmmJucePlugin
                     }
                 }
                 catch(const std::exception& e)
-                {std::lock_guard<std::mutex> lock(m_panel->mutex);m_panel->status=std::string("Editor snapshot: ")+e.what();}
+                {
+                    snapshotRetryNotBefore=std::chrono::steady_clock::now()+std::chrono::milliseconds(100);
+                    std::lock_guard<std::mutex> lock(m_panel->mutex);m_panel->status=std::string("Editor snapshot: ")+e.what();
+                }
             }
             const auto read=m_jobRead.load(std::memory_order_relaxed);
             if(read==m_jobWrite.load(std::memory_order_acquire))
@@ -488,8 +744,7 @@ namespace nmmJucePlugin
                     }
                     catch(const std::exception& e)
                     {
-                        hw.reset();m_panel->ready=false;m_panel->failed=true;
-                        std::lock_guard<std::mutex> lock(m_panel->mutex);m_panel->status=e.what();
+                        scheduleRecovery(e.what());
                     }
                 }
                 std::this_thread::sleep_for(std::chrono::microseconds(stopped?(service?1000:2000):500));continue;
@@ -561,8 +816,7 @@ namespace nmmJucePlugin
             }
             catch(const std::exception& e)
             {
-                hw.reset(); m_panel->ready=false;m_panel->loading=false;m_panel->failed=true;
-                std::lock_guard<std::mutex> lock(m_panel->mutex);m_panel->status=e.what();
+                scheduleRecovery(e.what());
             }
             for(unsigned i=0;i<job.size;++i) m_audio[(write+i)%AudioCapacity]={job.start+i,audio[i]};
             m_audioWrite.store(write+job.size,std::memory_order_release);
@@ -590,86 +844,18 @@ namespace nmmJucePlugin
         std::unique_lock<std::mutex> lock(m_panel->mutex);
         const auto revision=m_panel->editor->revision.load();
         const auto request=++m_panel->snapshotRequest;
-        if(!m_panel->snapshotChanged.wait_for(lock,std::chrono::seconds(2),[&]{return m_panel->snapshotRevision>=revision && m_panel->snapshotCompleted>=request;})) return false;
+        // Do not let a host save block behind a wedged editor export. The
+        // panel contains a coherent last-committed state and is sufficient to
+        // preserve the bank while the worker recovers.
+        m_panel->snapshotChanged.wait_for(lock,std::chrono::milliseconds(500),[&]{return m_panel->snapshotRevision>=revision && m_panel->snapshotCompleted>=request;});
+        const auto snapshot=encodePanelState(*m_panel);
         // Append: synthLib::Plugin has already written its version/type prefix.
-        state.insert(state.end(),{'N','M','M',4});
-        for(const auto& value:m_panel->values) state.push_back(static_cast<uint8_t>(value.load()));
-        state.push_back(static_cast<uint8_t>(m_panel->selectedPatch));
-        state.push_back(static_cast<uint8_t>(std::max<size_t>(1,m_panel->bank.size())));
-        auto writeString=[&](const std::string& value)
-        {
-            const auto size=static_cast<uint32_t>(value.size());
-            for(unsigned i=0;i<4;++i) state.push_back(static_cast<uint8_t>(size>>(8*i)));
-            state.insert(state.end(),value.begin(),value.end());
-        };
-        if(m_panel->bank.empty()) {writeString(m_panel->patchName);writeString(m_panel->patchText);writeString({});}
-        else for(const auto& patch:m_panel->bank) {writeString(patch.name);writeString(patch.text);writeString(std::string(patch.native.begin(),patch.native.end()));}
-        writeString(std::string(m_panel->flash.begin(),m_panel->flash.end()));
+        state.insert(state.end(),snapshot.begin(),snapshot.end());
         return true;
     }
     bool Device::setState(const std::vector<uint8_t>& state,synthLib::StateType)
     {
-        if(state.size()<8 || state[0]!='N' || state[1]!='M' || state[2]!='M' || (state[3]<1 || state[3]>4)) return false;
-        for(unsigned i=0;i<4;++i) if(state[4+i]>127) return false;
-        std::vector<PanelState::PatchEntry> bank;
-        std::vector<uint8_t> flash;
-        unsigned selected=0;
-        if(state[3]==1) bank.push_back({"Restored patch",std::string(state.begin()+8,state.end())});
-        else
-        {
-            if(state.size()<10 || !state[9] || state[9]>PanelState::MaxPatches || state[8]>=state[9]) return false;
-            selected=state[8];size_t cursor=10;
-            auto readString=[&](std::string& value,size_t limit)
-            {
-                if(state.size()-cursor<4) return false;
-                uint32_t size=0;
-                for(unsigned i=0;i<4;++i) size|=uint32_t(state[cursor++])<<(8*i);
-                if(size>limit || size>state.size()-cursor) return false;
-                value.assign(state.begin()+cursor,state.begin()+cursor+size);cursor+=size;return true;
-            };
-            for(unsigned i=0;i<state[9];++i)
-            {
-                PanelState::PatchEntry patch;
-                if(!readString(patch.name,1024) || !readString(patch.text,1024*1024)) return false;
-                if(state[3]>=3)
-                {
-                    std::string native;if(!readString(native,65536)) return false;
-                    patch.native.assign(native.begin(),native.end());
-                    if(!patch.native.empty() && !nmm::validEditorPatch(patch.native)) return false;
-                }
-                bank.push_back(std::move(patch));
-            }
-            if(state[3]>=4)
-            {
-                std::string bytes;if(!readString(bytes,0x100000) || (!bytes.empty() && bytes.size()!=0x100000)) return false;
-                flash.assign(bytes.begin(),bytes.end());
-            }
-            if(cursor!=state.size()) return false;
-        }
-        std::lock_guard<std::mutex> lock(m_panel->mutex);
-        m_panel->flash=std::move(flash);
-        // Legacy states held only one patch; keep the bundled bank available.
-        ++m_panel->bankRevision;
-        if(state[3]==1 && !m_panel->bank.empty())
-        {
-            const auto found=std::find_if(m_panel->bank.begin(),m_panel->bank.end(),[&](const auto& p){return p.text==bank[0].text;});
-            if(found!=m_panel->bank.end()) selected=static_cast<unsigned>(found-m_panel->bank.begin());
-            else
-            {
-                selected=static_cast<unsigned>(m_panel->bank.size()<PanelState::MaxPatches?m_panel->bank.size():m_panel->selectedPatch);
-                if(selected==m_panel->bank.size()) m_panel->bank.push_back(std::move(bank[0]));
-                else m_panel->bank[selected]=std::move(bank[0]);
-            }
-        }
-        else m_panel->bank=std::move(bank);
-        m_panel->selectedPatch=selected;
-        m_panel->patchText=m_panel->bank[selected].text;m_panel->patchName=m_panel->bank[selected].name;
-        m_panel->ready=false;m_panel->loading=true;m_panel->failed=false;m_panel->status="Loading "+m_panel->patchName;
-        for(unsigned i=0;i<4;++i) m_panel->values[i]=state[4+i];
-        m_panel->button4=0;
-        for(unsigned i=0;i<3;++i) m_panel->restoreKnobs[i]=state[5+i];
-        m_panel->patchGeneration.fetch_add(1);
-        return true;
+        return applyPanelState(state,*m_panel);
     }
 #endif
 }

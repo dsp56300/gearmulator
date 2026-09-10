@@ -1,6 +1,7 @@
 #pragma once
 #include "jucePluginEditorLib/pluginProcessor.h"
 #include "nmmDevice.h"
+#include "nmmAutosave.h"
 
 namespace nmmJucePlugin
 {
@@ -20,6 +21,7 @@ namespace nmmJucePlugin
         void setEditorMidiEnabled(bool enabled);
     private:
         std::shared_ptr<PanelState> m_panel=std::make_shared<PanelState>();
+        std::unique_ptr<Autosave> m_autosave;
         std::unique_ptr<EditorMidi> m_editorMidi;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Processor)
     };

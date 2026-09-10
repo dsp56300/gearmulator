@@ -23,6 +23,9 @@ namespace nmmJucePlugin
         std::atomic<int> button4{0};
         std::atomic<bool> button4Mapped{false};
         std::atomic<unsigned> patchGeneration{1}, knobMask{0};
+        // Monotonic control/native-state revision used by the background
+        // recovery writer. It is never consulted by the audio callback.
+        std::atomic<uint64_t> stateRevision{1};
         std::atomic<bool> ready{false}, offline{false};
         std::atomic<bool> loading{true}, failed{false};
         std::atomic<uint64_t> underruns{0}, droppedJobs{0};
@@ -48,16 +51,29 @@ namespace nmmJucePlugin
         uint64_t snapshotRequest=0,snapshotCompleted=0;
         std::array<int,3> restoreKnobs{{-1,-1,-1}};
         std::string patchText, patchName="Init", status="Starting";
+        // Active edit buffer, separate from saved bank entries. Native packets
+        // are authoritative once an editor upload/edit has been snapshotted.
+        std::vector<uint8_t> patchNative;
+        bool patchFromBank=true; // Allows a not-yet-materialized flash entry to load.
+        bool loadSavedPatch=false; // Pending bank selection; not persisted as working state.
         std::vector<PatchEntry> bank;
         std::vector<uint8_t> flash;
         unsigned selectedPatch=0;
         uint64_t bankRevision=0;
+        void markStateChanged();
+        void setValue(unsigned index,int value);
+        void setButton4(int value);
         void requestPatch(std::string text,std::string name);
         bool selectPatch(unsigned index,bool force=false);
         bool selectPatchRelative(int direction);
     private:
         void queuePatch(); // mutex held
     };
+
+    // These operate on the coherent panel representation, rather than the
+    // live CPU/DSP. They are also used by disk recovery before a Device exists.
+    std::vector<uint8_t> encodePanelState(const PanelState&);
+    bool applyPanelState(const std::vector<uint8_t>&,PanelState&);
 
     class Device final : public synthLib::Device
     {

@@ -86,7 +86,7 @@ int main(int argc,char** argv)
         while(!panel->editor->revision.load() && std::chrono::steady_clock::now()<editDeadline) std::this_thread::sleep_for(std::chrono::milliseconds(5));
         require(panel->editor->revision.load()>0,"Editor edit received");
         std::vector<uint8_t> state;require(device.getState(state,synthLib::StateTypeGlobal),"Snapshot waits for native editor edit");
-        {std::lock_guard<std::mutex> lock(panel->mutex);require(!panel->bank[0].native.empty(),"Native editor patch stored in host state");}
+        {std::lock_guard<std::mutex> lock(panel->mutex);require(!panel->patchNative.empty(),"Working editor patch stored in host state");}
         require(panel->values[1]==80,"Native edit updates front-panel knob");
         auto waitReady=[&]
         {
@@ -97,13 +97,13 @@ int main(int argc,char** argv)
         require(panel->selectPatch(1),"Select second front-panel patch");waitReady();
         require(panel->values[1]==127,"Second patch has its own parameter values");
         require(panel->selectPatch(0),"Return to edited patch");waitReady();
-        require(panel->values[1]==80,"Front-panel patch selection retains browser edits");
+        require(panel->values[1]==127,"Front-panel patch selection restores the saved program");
         auto damaged=state;
         const auto packet=std::find(damaged.begin(),damaged.end(),0xf0);
         auto end=std::find(packet,damaged.end(),0xf7);
         require(end!=damaged.end(),"Saved native packet framing");
         *(end-1)^=1;require(!device.setState(damaged,synthLib::StateTypeGlobal),"Reject corrupted native snapshot checksum");
-        require(device.setState(state,synthLib::StateTypeGlobal),"Restore version 4 host state");
+        require(device.setState(state,synthLib::StateTypeGlobal),"Restore version 5 host state");
         const auto restoreDeadline=std::chrono::steady_clock::now()+std::chrono::seconds(15);
         while(!panel->ready && std::chrono::steady_clock::now()<restoreDeadline) std::this_thread::sleep_for(std::chrono::milliseconds(5));
         require(panel->ready && panel->values[1]==80,"Edited native knob value survives host state round trip");
@@ -165,7 +165,7 @@ int main(int argc,char** argv)
         waitLibrary([&]{return panel->bank[1].name.empty();});
         std::string reimport;{std::lock_guard<std::mutex> lock(panel->mutex);reimport=panel->bank[0].text+"\n";}
         panel->requestPatch(reimport,"Reimport");waitReady();
-        {std::lock_guard<std::mutex> lock(panel->mutex);require(panel->selectedPatch==1,"Patch Load reuses an empty position before extending the bank");}
+        {std::lock_guard<std::mutex> lock(panel->mutex);require(panel->selectedPatch==0 && panel->bank[1].name.empty() && panel->patchName=="Reimport","Patch Load replaces only the working patch");}
         std::cout<<"PASS shared library: imported names, native save to slot 99, panel/browser load, sparse host state and delete\n";
         input->stop();
         std::cout << "PASS virtual MIDI: discoverable ports, stopped-host firmware handshake, live edit, native host-state round trip\n";

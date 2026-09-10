@@ -28,7 +28,7 @@ namespace nmmJucePlugin
             void sendParameterChange(const pluginLib::Parameter& p,pluginLib::ParamValue v,pluginLib::Parameter::Origin) override
             {
                 const auto index=p.getDescription().index;
-                if(index<4) m_panel->values[index]=std::clamp<int>(v,0,127);
+                if(index<4) m_panel->setValue(index,std::clamp<int>(v,0,127));
             }
             bool parseSysexMessage(const pluginLib::SysEx&,synthLib::MidiEventSource) override {return false;}
             void onStateLoaded() override
@@ -51,12 +51,13 @@ namespace nmmJucePlugin
                 m_panel->bank.push_back({juce::String(filename).upToLastOccurrenceOf(".",false,false).toStdString(),std::string(data,static_cast<size_t>(size))});
             }
         m_panel->patchText=m_panel->bank.front().text;m_panel->patchName=m_panel->bank.front().name;
+        m_autosave=std::make_unique<Autosave>(m_panel,juce::File(getConfigFolder()));
         getController();
         if(getConfig().getBoolValue("nmmEditorMidi",true)) m_editorMidi=std::make_unique<EditorMidi>(m_panel->editor);
         else m_panel->editor->ports="Editor MIDI disabled";
         setLatencyBlocks(getConfig().getIntValue("latencyBlocks",static_cast<int>(getPlugin().getLatencyBlocks())));
     }
-    Processor::~Processor() {destroyEditorState();}
+    Processor::~Processor() {destroyEditorState();m_editorMidi.reset();m_autosave.reset();}
     void Processor::setEditorMidiEnabled(bool enabled)
     {
         if(enabled && !m_editorMidi) m_editorMidi=std::make_unique<EditorMidi>(m_panel->editor);
