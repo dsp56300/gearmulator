@@ -140,7 +140,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       where a single discontinuity emits `b0 78 00`. Latent today — nothing calls
       `transportDiscontinuity()` in production.
 
-- [ ] **C3 `hardwareLib/hd44780.cpp:174` — Clear/Home do not leave CGRAM mode.**
+- [x] **C3 `hardwareLib/hd44780.cpp:174` — Clear/Home do not leave CGRAM mode.**
       Only "Set DDRAM address" clears `m_cgRamMode`, so *define glyphs -> clear -> write text*
       puts the text in CGRAM: glyph corrupted, panel blank. Same decoder: instruction `0x00` is
       unclaimed by every mask and falls into the trailing `else` as "Set DDRAM address", so

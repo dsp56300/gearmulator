@@ -24,5 +24,15 @@ set_property(TARGET hardwareLib PROPERTY FOLDER "Gearmulator")
 
 target_include_directories(hardwareLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+if(BUILD_TESTING)
+	add_executable(hd44780_test hd44780_test.cpp)
+	target_link_libraries(hd44780_test PRIVATE hardwareLib)
+	# This directory is pulled in with EXCLUDE_FROM_ALL, which would keep the test out of the
+	# generated solution and leave ctest reporting it as "Not Run" forever.
+	set_property(TARGET hd44780_test PROPERTY EXCLUDE_FROM_ALL FALSE)
+	set_property(TARGET hd44780_test PROPERTY FOLDER "Tests")
+	add_test(NAME hd44780 COMMAND hd44780_test)
+endif()
+
 #target_compile_options(hardwareLib PRIVATE -fsanitize=thread)
 #target_link_options(hardwareLib PUBLIC -fsanitize=thread)

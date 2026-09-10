@@ -172,6 +172,10 @@ namespace hwLib
 				contentChanged = contentChanged || m_displayShiftOffset != 0;
 				m_ddRam.fill(' ');
 				m_ddAddr = 0;
+				// Both this and Return home load the address counter with a DDRAM address, so like
+				// Set DDRAM address they take the data register back out of CGRAM. Without it,
+				// define glyphs -> clear -> write text put the text into CGRAM.
+				m_cgRamMode = false;
 				m_displayShiftOffset = 0;
 				m_increment = true;
 				changed = true;
@@ -179,6 +183,7 @@ namespace hwLib
 			else if((_data & 0xfe) == 0x02)					// Return home
 			{
 				m_ddAddr = 0;
+				m_cgRamMode = false;
 				m_displayShiftOffset = 0;
 			}
 			else if((_data & 0xfc) == 0x04)					// Entry mode set
@@ -225,7 +230,10 @@ namespace hwLib
 				m_cgAddr = _data & 0x3f;
 				m_cgRamMode = true;
 			}
-			else											// Set DDRAM address
+			// 0b1AAAAAAA. Masked rather than left as the trailing else, because that swallowed
+			// instruction 0x00 - undefined on the real controller - and firmware idling with it
+			// between Set CGRAM address and its data silently reset the counter out of CGRAM.
+			else if(_data & 0x80)							// Set DDRAM address
 			{
 				m_ddAddr = _data & 0x7f;
 				m_cgRamMode = false;
