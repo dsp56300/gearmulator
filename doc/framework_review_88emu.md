@@ -253,7 +253,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       Declared, documented with a five-line contract, invoked — and the case its comment names is
       already covered by `evUnbind`, fired one line earlier. A teardown hook that does nothing.
 
-- [ ] **F8 `juceRmlPlugin/rmlPluginContext.cpp:15` — per-frame rebinding sweep replaced an assert.**
+- [-] **F8 `juceRmlPlugin/rmlPluginContext.cpp:15` — per-frame rebinding sweep replaced an assert.** RETRACTED, see below.
       Binding failure used to `assert(false)`; now it is a supported steady state retried at frame
       rate for the life of the editor, constructing a `std::string` and doing a parameter lookup
       per pending element per frame. Bind on attach instead.
@@ -339,6 +339,13 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **F8, the rebinding sweep** — the suggested remedy does not exist. `Rml::Plugin` provides
+  `OnElementCreate` and `OnElementDestroy` and no attach notification, so "bind on attach" is not
+  implementable; an element made by `SetInnerRML` has no parent when it is created and nothing
+  reports when that changes. The cost claim is wrong too: the loop body does not run while the
+  pending set is empty, which is the steady state, and an element that never binds is a visibly
+  broken control rather than a silent tax. Recorded in the code so it is not "fixed" into dropping
+  runtime-created elements.
 - **F7's premise** — `evElementDestroyed` is NOT covered by `evUnbind`: `unbind()` only fires that
   inside the "was bound" branch, so destroying an unbound element notifies nobody. The hook was
   missing its consumer, not redundant. `ParameterOverlays::m_overlays` is insert-only and keyed by

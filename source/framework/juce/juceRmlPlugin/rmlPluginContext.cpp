@@ -16,6 +16,11 @@ namespace rmlPlugin
 	{
 		// Retry parameter bindings for elements created at runtime — by now
 		// they are attached to the tree and their data-model scope resolves.
+		// This sweep is not a choice: Rml::Plugin offers OnElementCreate and
+		// OnElementDestroy and nothing in between, so there is no attach hook to
+		// bind on. Costs nothing while the set is empty, which is the steady
+		// state - an element that never binds is a control that never works, so
+		// it announces itself rather than lingering silently.
 		bindPendingElements();
 	})
 	{
