@@ -243,7 +243,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       references them or not. `additionalTemplateFiles` already models "inject because the
       document asked".
 
-- [ ] **F6 `juceRmlUi/rmlElemComboBox.cpp:166` — a second dropdown implementation with hard-coded colours.**
+- [-] **F6 `juceRmlUi/rmlElemComboBox.cpp:166` — a second dropdown implementation with hard-coded colours.** Remedy retracted, see below.
       `popup="window"` bypasses the skinning system entirely — `0xff252b30`, `Font(13.0f)`,
       `withStandardItemHeight(22)` compiled into framework code. Motivation was that the
       in-document menu wraps into columns instead of scrolling; making `Menu` scroll fixes that
@@ -339,6 +339,14 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **F6, the native combo popup** — the finding's remedy was wrong. Making `Menu` scroll would not
+  let it replace this: an in-document RmlUi menu is clipped to its component, and the standalone
+  settings window is too small to show a long list. The native popup escapes the window, which is
+  why it exists. What is real is narrower - the theme is compiled into framework code and shared by
+  every combo that asks for a window popup, so a plugin adopting `popup="window"` would inherit the
+  player's palette. Only `emu88PlayerSettings.rml` uses it (5 combos). Marked in place rather than
+  changed: rewiring the colours to computed RCSS values is a visual change that cannot be verified
+  without running the player.
 - **F5, the default templates** — the premise and my suggested alternative were both wrong. All
   three templates are instantiated from C++ by name (`createFromTemplate("settings")`,
   `"colorpicker"`, `src="patchmanager"`), so a document cannot know it will be asked for them and

@@ -18,6 +18,16 @@ namespace juceRmlUi
 	{
 		// Styling for the popup window variant. juce's stock menu is sized for its own demo apps,
 		// 17px text and roomy rows; this matches the compact dialogs the variant is used in.
+		// popup="window" hands the list to a native juce popup instead of the in-document Menu.
+		// That is deliberate: an RmlUi menu is clipped to its component, and the standalone
+		// settings window is small enough that a long list - audio buffer sizes, MIDI ports - would
+		// be cut off. Making Menu scroll would not change that.
+		//
+		// The price is this theme, which is NOT skinned: these colours are compiled in and one
+		// instance is shared by every combo that asks for a window popup. Only the 88emu player
+		// uses it today and they match its skin. A plugin adding popup="window" would get this
+		// palette regardless of its own skin - read them from the element's computed values first
+		// if that ever needs to work.
 		class ComboPopupLookAndFeel final : public juce::LookAndFeel_V4
 		{
 		public:
