@@ -140,7 +140,9 @@ message( STATUS "Build Configration: ${CMAKE_BUILD_TYPE}" )
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(/D_DEBUG)
 else()
-	add_definitions(/DRELEASE)
+	# NDEBUG on every target, not just the JUCE-linked ones: build types that do
+	# not inject it (None, or unset) otherwise disagree on JUCE_DEBUG and sizeof
+	add_definitions(/DRELEASE /DNDEBUG)
 endif()
 
 # we need C++17
