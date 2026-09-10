@@ -146,7 +146,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       unclaimed by every mask and falls into the trailing `else` as "Set DDRAM address", so
       firmware idling with `0x00` between Set CGRAM and its data silently resets the counter.
 
-- [ ] **C4 `juceRmlUi/MetalContext.mm:165` — zero viewport latches with no recovery.**
+- [x] **C4 `juceRmlUi/MetalContext.mm:165` — zero viewport latches with no recovery.**
       `updateDrawableSize()` was removed from `renderLoop()` in favour of a
       `m_viewportWidth > 0` gate. `renderMetal` is the only thing that releases the frame, so a
       zero viewport at post time leaves `m_renderDone` false with nothing to clear it — and a

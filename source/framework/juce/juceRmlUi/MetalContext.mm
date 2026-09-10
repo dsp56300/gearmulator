@@ -164,8 +164,12 @@ namespace juceRmlUi
 			@autoreleasepool
 			{
 				// The drawable size is kept current by the message thread (updateDrawableSize), which
-				// is the only thread allowed to look at the view and window it is derived from.
-				if (m_listener && m_viewportWidth > 0 && m_viewportHeight > 0)
+				// is the only thread allowed to look at the view and window it is derived from. Do
+				// not gate the call on it being valid: renderMetal() is the only thing that hands
+				// the frame back to update(), and it already drops a frame it cannot draw. Skipping
+				// it left m_renderDone false with nothing to clear it, and the editor never updated
+				// again - a plain host-driven resize does not re-arm it.
+				if (m_listener)
 					m_listener->renderMetal(*this);
 			}
 		}
