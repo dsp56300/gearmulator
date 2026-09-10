@@ -273,7 +273,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       is an if/else differing only in the depth argument. Forwarding also fixes `findFiles`
       returning directories whose name matches the extension.
 
-- [ ] **G3 `baseLib/filesystem.cpp:194` — `statEntry` duplicates `isDirectory` and `getFileSize`.**
+- [x] **G3 `baseLib/filesystem.cpp:194` — `statEntry` duplicates `isDirectory` and `getFileSize`.**
       Combining two stats into one is a fair reason for a helper, but the copy carries two fixes —
       `u8path` instead of a narrow string, and an `error_code` instead of reading an uninitialised
       `statbuf` — that were not applied to the public helpers. Back-port them.

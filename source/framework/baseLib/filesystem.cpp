@@ -179,6 +179,13 @@ namespace baseLib::filesystem
         // One stat answers both questions the sweep needs, which matters: a
         // recursive search root can hold thousands of files, and opening each
         // one just to measure it is what made a scan expensive.
+        //
+        // This is also what isDirectory() and getFileSize() are built from, so the two things
+        // that are easy to get wrong here are only written once: the return value of stat() has
+        // to be checked before statbuf is read, and on the other branch the path has to go
+        // through u8path with an error_code - the std::string overload decodes with the native
+        // narrow encoding, which on Windows is the ANSI code page, and the throwing overload
+        // would turn a missing file into an exception.
         bool statEntry(const std::string& _path, bool& _isDirectory, size_t& _size)
         {
 #ifdef USE_DIRENT
@@ -308,13 +315,12 @@ namespace baseLib::filesystem
 
     size_t getFileSize(const std::string& _file)
     {
-        FILE* hFile = openFile(_file, "rb");
-        if (!hFile)
+        bool isDir = false;
+        size_t size = 0;
+
+        if (!statEntry(_file, isDir, size) || isDir)
             return 0;
 
-        fseek(hFile, 0, SEEK_END);
-        const auto size = static_cast<size_t>(ftell(hFile));
-        fclose(hFile);
         return size;
     }
 
@@ -336,15 +342,10 @@ namespace baseLib::filesystem
 
     bool isDirectory(const std::string& _path)
     {
-#ifdef USE_DIRENT
-		struct stat statbuf;
-		stat(_path.c_str(), &statbuf);
-		if (S_ISDIR(statbuf.st_mode))
-            return true;
-        return false;
-#else
-        return std::filesystem::is_directory(_path);
-#endif
+        bool isDir = false;
+        size_t size = 0;
+
+        return statEntry(_path, isDir, size) && isDir;
     }
     bool hasExtension(const std::string& _filename, const std::string& _extension)
     {
