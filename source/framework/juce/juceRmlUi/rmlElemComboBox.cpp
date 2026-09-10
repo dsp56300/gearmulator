@@ -179,11 +179,14 @@ namespace juceRmlUi
 		if (!component)
 			return;
 
-		if (!m_popupLookAndFeel)
-			m_popupLookAndFeel = getPopupLookAndFeel();
+		// Held for the duration of this call and then by the completion callback below, which is
+		// what keeps it alive while the menu window is up. The cache behind it hands every combo
+		// the same instance and drops it once the last popup closes - deliberately, rather than a
+		// plain function-local static, which would be destroyed after juce has already shut down.
+		auto lookAndFeel = getPopupLookAndFeel();
 
 		juce::PopupMenu menu;
-		menu.setLookAndFeel(m_popupLookAndFeel.get());
+		menu.setLookAndFeel(lookAndFeel.get());
 
 		const auto currentValue = static_cast<int>(getValue());
 
@@ -219,7 +222,7 @@ namespace juceRmlUi
 		// The document may be reloaded while the popup is up - a driver change rebuilds the
 		// settings - so the element is observed, not captured. The look-and-feel is kept alive
 		// here because the menu window uses it until it is dismissed.
-		menu.showMenuAsync(options, [observer = Rml::Element::GetObserverPtr(GetCoreInstance()), lookAndFeel = m_popupLookAndFeel](const int _result)
+		menu.showMenuAsync(options, [observer = Rml::Element::GetObserverPtr(GetCoreInstance()), lookAndFeel](const int _result)
 		{
 			if (_result <= 0 || !observer)
 				return;

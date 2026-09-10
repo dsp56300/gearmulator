@@ -300,7 +300,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       whose inner loop already guarantees the outer condition. One `popNextEvent()` collapses
       roughly forty lines to five.
 
-- [ ] **H3 `juceRmlUi/rmlElemComboBox.cpp:39` — three lifetime layers for a stateless object.**
+- [x] **H3 `juceRmlUi/rmlElemComboBox.cpp:39` — three lifetime layers for a stateless object.** Member removed; the suggested function-local static would have been a bug, see below.
       A `static weak_ptr` cache, a per-element `shared_ptr` member and a capture in the async
       callback, for an immutable four-colour `LookAndFeel`. A function-local `static` is one line.
       The header also documents an option that has no member, setter or code path.
@@ -339,6 +339,11 @@ Recorded so they are not re-litigated:
 - **Unreleased-device naming on the public remote** — `doc/restructure_plan.md` §9 is scoped to
   *unreleased* devices, and this is the commit that releases the Sound Canvas.
 - **Include paths, brace style, `_` parameter prefix, `getState()` append semantics** — clean.
+- **H3's remedy** — "a function-local static is one line" was wrong. A static juce::LookAndFeel is
+  destroyed after juce itself has shut down, which is a crash on exit. The weak_ptr cache is there
+  so the instance dies with the last open popup, and that is now stated in the code. Only the
+  per-element member was genuinely redundant - the cache already shares, the lambda capture already
+  covers the async lifetime - so it became a local.
 - **Rate limiter coverage, measured** — after H2 the suite went green, so it was mutation tested
   against the four things that refactor could break. Caught: dropping the `m_pendingBytes.empty()`
   short-circuit, and `popNextEvent()` forgetting `pop_front()`. NOT caught: queue priority, now

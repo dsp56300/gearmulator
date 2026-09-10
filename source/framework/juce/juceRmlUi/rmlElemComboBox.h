@@ -33,11 +33,6 @@ namespace juceRmlUi
 
 		void clearOptions();
 
-		// Collapse the dropdown menu to one item per distinct label (opt-in, default off).
-		// The value mapping used for display + selection still covers every entry, so the
-		// box reflects any value; only the menu drops repeats. Meant for algorithm lists
-		// that want one entry per base structure, where variants share a base name.
-
 		void onChangeValue() override;
 
 		void ProcessEvent(Rml::Event& _event) override;
@@ -62,7 +57,6 @@ namespace juceRmlUi
 		baseLib::EventListener<Rml::String> m_onOptionSelected;
 
 		std::shared_ptr<Menu> m_menu;
-		std::shared_ptr<juce::LookAndFeel> m_popupLookAndFeel;
 		Rml::Element* m_textElem = nullptr;
 
 		bool m_valueTextDirty;
