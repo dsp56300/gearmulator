@@ -161,8 +161,7 @@ namespace jucePluginEditorLib
 		// Cursor underline. Drawn last so it sits on top of the glyph row.
 		// Rendered as 5 individual dots in the bottom pixel row to match the
 		// LCD's pixel grid — a solid bar would betray the dot-matrix look.
-		if (m_displayOn && m_cursorOn && m_cursorCol >= 0 && m_cursorRow >= 0 &&
-			m_cursorCol < static_cast<int>(m_numCharsX) && m_cursorRow < static_cast<int>(m_numCharsY))
+		if (m_displayOn && m_cursorOn && isCursorInWindow())
 		{
 			const auto tx = static_cast<float>(m_cursorCol) * m_config.charStrideW * m_scaleW;
 			const auto ty = static_cast<float>(m_cursorRow) * m_config.charStrideH * m_scaleH;
@@ -246,7 +245,7 @@ namespace jucePluginEditorLib
 
 		// Drive the blink animation only while it would be visible; saves the
 		// repaint loop when the cursor is off-screen or not blinking.
-		const bool wantBlink = _displayOn && _blinking && _col >= 0 && _row >= 0;
+		const bool wantBlink = _displayOn && _blinking && isCursorInWindow();
 		if (wantBlink)
 		{
 			if (!isTimerRunning(kTimerBlink))
@@ -264,6 +263,12 @@ namespace jucePluginEditorLib
 	void Lcd::repaint() const
 	{
 		m_canvas->repaint();
+	}
+
+	bool Lcd::isCursorInWindow() const
+	{
+		return m_cursorCol >= 0 && m_cursorCol < static_cast<int>(m_numCharsX) &&
+		       m_cursorRow >= 0 && m_cursorRow < static_cast<int>(m_numCharsY);
 	}
 
 	bool Lcd::getOverrideText(std::vector<std::vector<uint8_t>>& _lines)

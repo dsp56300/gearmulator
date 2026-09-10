@@ -94,6 +94,12 @@ namespace jucePluginEditorLib
 
 		void repaint() const;
 
+		// Whether the cursor cell is one the canvas actually draws. setCursor() uses it to
+		// decide whether the blink timer is worth running, so it has to agree with paint() -
+		// checking only for a non-negative position there left the timer repainting the whole
+		// LCD twice a second for a cursor parked past the end of the window.
+		bool isCursorInWindow() const;
+
 		virtual bool getOverrideText(std::vector<std::string>& _lines) { return false; }
 		virtual bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines);
 		virtual const uint8_t* getCharacterData(uint8_t _character) const = 0;

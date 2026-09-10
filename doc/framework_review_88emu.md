@@ -167,7 +167,7 @@ Legend: `[ ]` open, `[x]` done, `[-]` deliberately not doing.
       `m_displayShiftOffset` is reduced `% Columns` (40) while one-line DDRAM is 80 cells and
       `advanceDdAddr` wraps at 0x4f, so cells 0x28-0x4f can never be scrolled into view.
 
-- [ ] **C8 `jucePluginEditorLib/lcd.cpp:249` — blink predicate disagrees with the draw predicate.**
+- [x] **C8 `jucePluginEditorLib/lcd.cpp:249` — blink predicate disagrees with the draw predicate.**
       `wantBlink` checks only `>= 0`; the drawing code additionally requires `< m_numCharsX/Y`.
       A cursor parked outside the visible window arms the 500 ms blink timer forever, repainting
       the whole LCD at 2 Hz with nothing on screen changing.
