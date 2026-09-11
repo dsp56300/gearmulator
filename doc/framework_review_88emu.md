@@ -18,20 +18,39 @@ Not part of the numbered list, but do not lose these.
 
 **Blocking a release**
 
-- [ ] **Build the two macOS-only fixes on a Mac.** B3 (`f6116ea2a`, the Metal viewport was read
+- [x] **Build the two macOS-only fixes on a Mac.** B3 (`f6116ea2a`, the Metal viewport was read
       off the juce component tree from the render thread) and C4 (`ad1e594dc`, a zero viewport
       deadlocked the render handshake) are both inside `#ifdef RMLUI_METAL_RENDERER` and have
       never been compiled, here or anywhere. They also depend on each other: C4 removes the gate
       that makes B3's own size guard load bearing, so neither is correct without the other. A Mac
       build, not the CI leg being the first look.
+      *Compiled 2026-09-11 on m2mac:* public `gearmulator/main` at `de36fa813`, which contains both, in
+      a throwaway worktree `wt/review88` (Unix Makefiles, deployment target 11.0). `juceRmlUi` built
+      universal (`x86_64 arm64`) with `RMLUI_METAL_RENDERER=1`; `juceRmlComponent.cpp` and
+      `MetalContext.mm` compiled with no warnings, and the build had 0 errors. Not verified at
+      runtime: an app launched over SSH gets no window peer, so actually rendering through Metal - the
+      startup and resize paths these two fix - still needs a GUI session.
+
+- [ ] **Merge `oss/main` into private `main` - its Jenkins build fails the Virus integration test.**
+      Jenkins #1776 (2026-09-10) built private `main` at `9f039161d` and failed `virusIntegrationTests`
+      ("difference starting at frame 50348, ROM First_A_28, preset Overture K"), so Deploy, Upload and
+      GitHub were skipped. Frame 50348 is 1.049 s, the Virus A MIDI watchdog timeout: the NAS reference
+      wavs were regenerated 2026-09-09 15:10 for `028b86d60` ("feed the Virus A MIDI watchdog"), which
+      is on `oss/main`, `gearmulator/main` and `device/nova` but not private `main`. Not a code defect,
+      and not the TCC stall that build is otherwise remembered for.
+      Verified 2026-09-11: `oss/main` at `92f4ab75f` passes every integration case on Windows after a
+      fresh ctest rclone sync. Private `main` keeps failing until it is merged; that push needs approval.
 
 **Worth doing soon**
 
-- [ ] **Audit ctest for other silently unrun tests.** `sc88Thread` reported "Not Run" for its whole
-      life because `88lib` is added with `EXCLUDE_FROM_ALL`, which keeps its targets out of the
-      generated solution entirely. Same for `hardwareLib`. Both are fixed with one
-      `set_property(... EXCLUDE_FROM_ALL FALSE)`, but nobody has checked what else in the tree is
-      registered with `add_test` and never built.
+- [x] **Audit ctest for other silently unrun tests.** `sc88Thread` reported "Not Run" for its whole
+      life because `88lib` is added with `EXCLUDE_FROM_ALL`. Same for `hardwareLib`. Both fixed.
+      *Done 2026-09-11:* all 50 registered tests are referenced by `ALL_BUILD`, so a full build
+      compiles every one; nothing else is excluded. Jenkins `main` builds run ctest after a full build
+      and were clean on 2026-09-05 (39/39 Linux x86, ARM and Windows, 51/51 Mac, no "Not Run").
+      Device-branch builds switch `IntegrationTests` off. The public GitHub workflows (`cmake.yml`,
+      `nightly.yml`, `release.yml`) never run ctest at all - only the private `private-build.yml`
+      does. Adding a ctest step to `cmake.yml` would be cheap; not done, it is a CI decision.
 - [ ] **Fix the partial-sysex fall-through** in `plugin.cpp:361` - see "Pre-existing, not from this
       commit" below. It has a diagnosis and a one word fix (`return`), it just does not belong in a
       commit from this review.
