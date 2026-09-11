@@ -75,7 +75,7 @@ namespace genericVirusUI
 	private:
 		void onProgramChange(int _part);
 		void onPlayModeChanged();
-		void onCurrentPartChanged();
+		void onCurrentPartChanged(uint8_t _part) override;
 
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;

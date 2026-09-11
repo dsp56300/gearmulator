@@ -149,13 +149,15 @@ namespace xtJucePlugin
 		return *m_parts;
 	}
 
-	void Editor::setCurrentPart(const uint8_t _part)
+	void Editor::onCurrentPartChanged(const uint8_t _part)
 	{
-		m_controller.setCurrentPart(_part);
+		jucePluginEditorLib::Editor::onCurrentPartChanged(_part);
 
-		jucePluginEditorLib::Editor::setCurrentPart(_part);
+		if(m_parts)
+			m_parts->updateUi();
 
-		m_frontPanel->getLcd()->refresh();
+		if(m_frontPanel)
+			m_frontPanel->getLcd()->refresh();
 	}
 
 	void Editor::changeWave(const int _step) const

@@ -56,6 +56,10 @@ Framework:
         mouse and keyboard input queuing up behind it, and a redraw that called
         back into the renderer could lock up completely.
 
+- [Fix] Switching the part through the MCP server left Vavra, Xenia, Osirus
+        and OsTIrus showing the old part: the part selection did not move and
+        the patch manager kept targeting the previous part.
+
 88emuPlayer:
 
 - [Fix] Selecting ASIO now waits for an explicit output-device choice,

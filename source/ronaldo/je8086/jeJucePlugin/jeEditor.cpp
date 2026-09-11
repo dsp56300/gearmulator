@@ -60,11 +60,6 @@ namespace jeJucePlugin
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
-		onPartChanged.set(m_controller.onCurrentPartChanged, [this](const uint8_t& _part)
-		{
-			setCurrentPart(_part);
-		});
-
 		if (m_lcd)
 			m_focusedParameter.reset(new JeFocusedParameter(*this, *m_lcd));
 		else

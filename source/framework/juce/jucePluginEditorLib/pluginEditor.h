@@ -221,6 +221,13 @@ namespace jucePluginEditorLib
 		void showSettings(bool _show);
 		bool settingsOpened() const { return m_settings != nullptr; }
 
+	protected:
+		// Runs for every change of the controller's current part, whoever made it - a part button, the MCP
+		// server, a product switching the controller directly - and when the current part is selected again.
+		// Updates the patch manager and the plugin data model. Override it to refresh a product's own part
+		// highlight, and call the base.
+		virtual void onCurrentPartChanged(uint8_t _part);
+
 	private:
 		void onDisclaimerFinished() const;
 
@@ -255,6 +262,8 @@ namespace jucePluginEditorLib
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
 
 		std::unique_ptr<Settings> m_settings;
+
+		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 
 		JUCE_DECLARE_WEAK_REFERENCEABLE(Editor)
 	};
