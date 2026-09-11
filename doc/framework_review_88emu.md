@@ -55,9 +55,14 @@ Not part of the numbered list, but do not lose these.
       Device-branch builds switch `IntegrationTests` off. The public GitHub workflows (`cmake.yml`,
       `nightly.yml`, `release.yml`) never run ctest at all - only the private `private-build.yml`
       does. Adding a ctest step to `cmake.yml` would be cheap; not done, it is a CI decision.
-- [ ] **Fix the partial-sysex fall-through** in `plugin.cpp:361` - see "Pre-existing, not from this
+- [x] **Fix the partial-sysex fall-through** in `plugin.cpp:361` - see "Pre-existing, not from this
       commit" below. It has a diagnosis and a one word fix (`return`), it just does not belong in a
       commit from this review.
+      *Done 2026-09-11:* the block now returns once a chunk is folded into the pending message, so the
+      device sees the reassembled dump only. A fragment with no start before it is dropped instead of
+      sent raw - every producer checked (host, hardware input, 88emu player and bridge, MCP) delivers
+      complete messages; the only headless source is the `processor.cpp` doubled-`F7` bug below.
+      `device_test` drives a real `Plugin` with three chunks plus an orphan and aborts without the fix.
 
 **Offered during the review, not started**
 
@@ -512,6 +517,7 @@ Worth fixing, but do not attribute them to the 88emu work:
   the `if (!_ev.sysex.empty())` block needs a `return` at its end. A middle or end chunk is
   appended to `m_pendingSysexInput` and then *also* pushed raw, so the device sees a headless
   fragment alongside the reassembled message. Reachable whenever hardware splits a dump.
+  *Fixed 2026-09-11, see "Still to do".*
 - `processor.cpp:812` — the doubled-`F7` branch erases the **front** byte (the `F0`) instead of the
   duplicate tail; copy-paste of the doubled-`F0` branch above it. Host-reachable via VST3
   double-wrapping, and it produces exactly the state that walks into the fall-through above.

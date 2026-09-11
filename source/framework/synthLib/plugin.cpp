@@ -357,6 +357,12 @@ namespace synthLib
 					m_pendingSysexInput.sysex.clear();
 				}
 			}
+
+			// The chunk has been folded into m_pendingSysexInput, and the whole message pushed if this
+			// was its last piece. Falling through used to push the raw fragment as well, so the device
+			// got headless slices of the dump on top of the reassembled message. A fragment with no
+			// start before it is garbage to the firmware's parser too, so it is dropped the same way.
+			return;
 		}
 
 		m_midiIn.push_back(_ev);
