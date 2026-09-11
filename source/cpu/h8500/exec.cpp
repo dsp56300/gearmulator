@@ -27,12 +27,12 @@ namespace h8500 {
 // Re-dispatch the same cell (after filling it).
 #define H8_GOTO(c, ip) [[clang::musttail]] return (ip)->fn((c), (ip))
 #else
-// Without guaranteed tail calls the run loop dispatches; handlers just return
-// the next cell.
+// Without guaranteed tail calls the run loop dispatches: handlers return the
+// next cell, but the fill runs the cell it decoded so step() never only decodes.
 #define H8_END(c, next, states) \
   (c).budget_ -= s32(states);   \
   return (next)
-#define H8_GOTO(c, ip) return (ip)
+#define H8_GOTO(c, ip) return (ip)->fn((c), (ip))
 #endif
 
 struct ExecImpl {
