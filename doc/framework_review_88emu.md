@@ -357,6 +357,20 @@ Not part of the numbered list, but do not lose these.
       `findFiles` is `findFilesRecursive` at depth 0 — its own caller in `romLoader.cpp:57`
       is an if/else differing only in the depth argument. Forwarding also fixes `findFiles`
       returning directories whose name matches the extension.
+      *Wrong, reverted 2026-09-11:* both branches of that if/else call `findFilesRecursive`. It never
+      involved `findFiles`, and "depth 0 is the flat scan" holds for a ROM search and nothing else.
+      Without a filter, `findFiles` returns every entry of the folder, subfolders included, and
+      `DB::loadFolder` builds its child folder sources from exactly that. `findFilesRecursive` never
+      returns a folder, so the forward (`8183f0a62`, public) left every folder data source in every
+      product without its subfolders. The review checked the ROM loaders and no other caller, and
+      nothing tested what `findFiles` returns.
+      The pre-review `findFiles` is back with one line more. G3 made `getFileSize` report 0 for a
+      folder; on Linux it used to report what `ftell` says for one, 2^63-1 on ext4, and that kept
+      folders out of every size range. Without the skip, the DSP Bridge server's ROM search (no
+      extension, 0 to 16 MB) returns its subfolders, and `readFile` throws `std::bad_alloc` on the
+      first one. `synthLibTests` pins what `findFiles` returns, and `jucePluginLibTests` checks that
+      a folder source finds a nested folder. Nothing saved was lost, and no release had it: 2.2.19
+      was built from `a099fec78`, 13 minutes before the forward.
 
 - [x] **G3 `baseLib/filesystem.cpp:194` — `statEntry` duplicates `isDirectory` and `getFileSize`.**
       Combining two stats into one is a fair reason for a helper, but the copy carries two fixes —

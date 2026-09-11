@@ -110,10 +110,58 @@ namespace
 
 		std::cout << "  legacy modification key tests passed" << std::endl;
 	}
+
+	// A DB with nothing to load, enough to scan folders. The loader thread is never started.
+	class FolderScanDb final : public DB
+	{
+	public:
+		explicit FolderScanDb(const juce::File& _settingsDir) : DB(_settingsDir) {}
+		~FolderScanDb() override { stopLoaderThread(); }
+
+		bool requestPatchForPart(Data&, uint32_t, uint64_t) override { return false; }
+		bool loadRomData(DataList&, uint32_t, uint32_t) override { return false; }
+		PatchPtr initializePatch(Data&&, const std::string&) override { return {}; }
+		Data applyModifications(const PatchPtr&, const pluginLib::FileType&, pluginLib::ExportType) const override { return {}; }
+		void processDirty(const Dirty&) const override {}
+	};
+
+	void testFolderFindsSubfolders()
+	{
+		std::cout << "Testing DB::loadFolder..." << std::endl;
+
+		const auto root = juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("patchDbTest", "");
+		const auto folder = root.getChildFile("presets");
+		TEST_ASSERT(folder.getChildFile("factory").createDirectory());
+
+		// presets often live in subfolders only, and each subfolder has to become a child folder source
+		bool foundSubfolder = false;
+		{
+			FolderScanDb db(root.getChildFile("settings"));
+
+			const auto source = std::make_shared<DataSourceNode>();
+			source->type = SourceType::Folder;
+			source->name = folder.getFullPathName().toStdString();
+
+			db.loadFolder(source);
+
+			for (const auto& child : source->getChildren())
+			{
+				const auto c = child.lock();
+				if (c && c->type == SourceType::Folder && juce::File(juce::String::fromUTF8(c->name.c_str())).getFileName() == "factory")
+					foundSubfolder = true;
+			}
+		}
+
+		root.deleteRecursively();
+		TEST_ASSERT(foundSubfolder);
+
+		std::cout << "  loadFolder tests passed" << std::endl;
+	}
 }
 
 void testPatchDb()
 {
 	testHash();
 	testLegacyModificationKeys();
+	testFolderFindsSubfolders();
 }
