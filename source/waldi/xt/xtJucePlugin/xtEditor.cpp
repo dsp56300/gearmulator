@@ -129,7 +129,7 @@ namespace xtJucePlugin
 
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
 	{
-		return {"Vavra",
+		return {"Xenia",
 			"Xenia runs in demo mode\n"
 			"\n"
 			"The following features are disabled:\n"
