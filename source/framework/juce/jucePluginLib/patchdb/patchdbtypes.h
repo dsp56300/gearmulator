@@ -100,6 +100,6 @@ namespace pluginLib::patchDB
 
 	namespace chunkVersions
 	{
-		constexpr uint32_t g_patchManager = 3;
+		constexpr uint32_t g_patchManager = 4;	// 4: rescan once, Vavra and Xenia patches were cached without a hash
 	}
 }

@@ -82,6 +82,7 @@ namespace xtJucePlugin
 				patch->name = _defaultPatchName.empty() ? "Multi" : _defaultPatchName;
 			patch->tags.add(pluginLib::patchDB::TagType::CustomC,
 				patchType == PatchType::Multi ? "Multi" : "Arrangement");
+			patch->setHashFromMessages(wLib::IdxLocation + 1, 2);
 			return patch;
 		}
 
@@ -101,6 +102,7 @@ namespace xtJucePlugin
 
 				p->tags.add(pluginLib::patchDB::TagType::CustomA, "MW1");
 				p->tags.add(pluginLib::patchDB::TagType::CustomC, "Single");
+				p->setHashFromMessages(xt::Mw1::g_sysexHeaderSize, xt::Mw1::g_sysexFooterSize);
 				return p;
 			}
 		}
@@ -145,6 +147,7 @@ namespace xtJucePlugin
 		if(hasUserWaves)
 			p->tags.add(pluginLib::patchDB::TagType::Tag, "UserWave");
 
+		p->setHashFromMessages(wLib::IdxLocation + 1, 2);
 		return p;
 	}
 

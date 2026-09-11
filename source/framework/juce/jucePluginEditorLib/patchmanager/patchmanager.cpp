@@ -544,7 +544,7 @@ namespace jucePluginEditorLib::patchManager
 
 			for (auto& result : results)
 			{
-				if(const auto patch = initializePatch(std::move(result), defaultName))
+				if(const auto patch = createPatch(std::move(result), defaultName))
 					patches.push_back(patch);
 			}
 		}
@@ -607,7 +607,7 @@ namespace jucePluginEditorLib::patchManager
 		pluginLib::patchDB::Data data;
 		if(!requestPatchForPart(data, _part, 0))
 			return;
-		const auto patch = initializePatch(std::move(data), {});
+		const auto patch = createPatch(std::move(data), {});
 		if(!patch)
 			return;
 		updateStateAsync(_part, patch);
@@ -738,7 +738,7 @@ namespace jucePluginEditorLib::patchManager
 
 		for (auto& result : results)
 		{
-			if(const auto patch = initializePatch(std::move(result), {}))
+			if(const auto patch = createPatch(std::move(result), {}))
 				patches.push_back(patch);
 		}
 

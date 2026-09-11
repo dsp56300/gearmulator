@@ -148,6 +148,15 @@ Framework:
 
 - [Imp] Added icon for the app.
 
+Vavra/Xenia:
+
+- [Fix] The patch manager saw every patch as a duplicate of every other one,
+        because Vavra and Xenia never computed the fingerprint it compares:
+        "Hide duplicates (by hash)" left a single patch, and finding a patch by
+        its content matched all of them. Tags, favourites and renames saved
+        before are kept. Once they are saved again by this version, older
+        versions no longer show them.
+
 
 2.2.18:
 

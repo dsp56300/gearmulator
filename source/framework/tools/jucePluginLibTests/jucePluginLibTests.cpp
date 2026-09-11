@@ -7,6 +7,7 @@ int main()
 	try
 	{
 		testMidiNotifier();
+		testPatchDb();
 		testSkinVariables();
 
 		std::cout << std::endl;

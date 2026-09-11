@@ -671,7 +671,17 @@ namespace pluginLib::patchDB
 		Data data;
 		if (!requestPatchForPart(data, _part, _userData) || data.empty())
 			return {};
-		return initializePatch(std::move(data), {});
+		return createPatch(std::move(data), {});
+	}
+
+	PatchPtr DB::createPatch(Data&& _sysex, const std::string& _defaultPatchName)
+	{
+		auto patch = initializePatch(std::move(_sysex), _defaultPatchName);
+
+		[[maybe_unused]] const bool hasHash = !patch || patch->hash != PatchHash{};
+		assert(hasHash && "initializePatch has to set Patch::hash");
+
+		return patch;
 	}
 
 	void DB::getTags(const TagType _type, std::set<Tag>& _tags)
@@ -1039,7 +1049,7 @@ namespace pluginLib::patchDB
 
 			for (uint32_t p = 0; p < data.size(); ++p)
 			{
-				if (const auto patch = initializePatch(std::move(data[p]), defaultName))
+				if (const auto patch = createPatch(std::move(data[p]), defaultName))
 				{
 					patch->source = ds->weak_from_this();
 
@@ -1061,6 +1071,19 @@ namespace pluginLib::patchDB
 		}
 	}
 
+	std::map<PatchKey, PatchModificationsPtr>::iterator DB::findModifications(
+		std::map<PatchKey, PatchModificationsPtr>& _modifications, const Patch& _patch)
+	{
+		PatchKey key(_patch);
+
+		const auto it = _modifications.find(key);
+		if (it != _modifications.end() || key.hash == PatchHash{})
+			return it;
+
+		key.hash.fill(0);
+		return _modifications.find(key);
+	}
+
 	bool DB::addPatches(const std::vector<PatchPtr>& _patches)
 	{
 		if (_patches.empty())
@@ -1070,10 +1093,8 @@ namespace pluginLib::patchDB
 
 		for (const auto& patch : _patches)
 		{
-			const auto key = PatchKey(*patch);
-
 			// find modification and apply it to the patch
-			const auto itMod = m_patchModifications.find(key);
+			const auto itMod = findModifications(m_patchModifications, *patch);
 			if (itMod != m_patchModifications.end())
 			{
 				auto mods = itMod->second;
@@ -1559,8 +1580,7 @@ namespace pluginLib::patchDB
 		// apply modifications to patches
 		for (const auto& patch : _patches)
 		{
-			const auto key = PatchKey(*patch);
-			const auto it = patchModifications.find(key);
+			const auto it = findModifications(patchModifications, *patch);
 			if(it != patchModifications.end())
 			{
 				assign(patch, it->second);

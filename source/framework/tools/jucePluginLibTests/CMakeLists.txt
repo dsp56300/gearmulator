@@ -5,6 +5,7 @@ project(jucePluginLibTests VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	jucePluginLibTests.cpp
 	midiNotifierTest.cpp
+	patchDbTest.cpp
 	skinVariablesTest.cpp
 )
 

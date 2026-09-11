@@ -91,6 +91,13 @@ namespace pluginLib::patchDB
 
 		static void assign(const PatchPtr& _patch, const PatchModificationsPtr& _mods);
 
+		// The modifications saved for a patch: tags, favourites, a rename. They are keyed by data source, program and
+		// patch hash, but a product that did not hash its patches saved them under an all-zero hash, which stops
+		// matching once it does. Data source and program alone identified the patch then, so such an entry is still
+		// found that way. A product that always hashed never saved one, and an entry with the real hash wins.
+		static std::map<PatchKey, PatchModificationsPtr>::iterator findModifications(
+			std::map<PatchKey, PatchModificationsPtr>& _modifications, const Patch& _patch);
+
 		static std::string createValidFilename(const std::string& _name);
 
 	protected:
@@ -105,6 +112,9 @@ namespace pluginLib::patchDB
 		virtual bool loadLocalStorage(DataList& _results, const DataSource& _ds);
 		virtual bool loadFolder(const DataSourceNodePtr& _folder);
 		virtual PatchPtr initializePatch(Data&& _sysex, const std::string& _defaultPatchName) = 0;
+		// initializePatch() plus the check that it set Patch::hash, which patch modifications, duplicate detection and
+		// search by content all rely on. The DB and the patch manager create every patch through this.
+		PatchPtr createPatch(Data&& _sysex, const std::string& _defaultPatchName);
 		virtual Data applyModifications(const PatchPtr& _patch, const FileType& _fileType, ExportType _exportType) const = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data, const std::string& _filename);
 		virtual bool equals(const PatchPtr& _a, const PatchPtr& _b) const
