@@ -34,7 +34,7 @@ Per-synth CMake flags: `-Dgearmulator_SYNTH_OSIRUS=ON`, `_OSTIRUS`, `_VAVRA`, `_
 Convenience scripts: `build_win64.bat`, `build_linux.sh`, `build_mac.sh`.
 
 **Test consoles** — the fastest way to iterate on DSP/device code without building a plugin:
-`virusTestConsole`, `virusIntegrationTest`, `mqTestConsole`, `xtTestConsole`, `n2xTestConsole`, `jeTestConsole`.
+`virusTestConsole`, `virusIntegrationTest`, `mqTestConsole`, `xtTestConsole`, `n2xTestConsole`, `JE8086TestConsole`.
 
 ### Platform-specific build settings
 
@@ -158,6 +158,7 @@ Responsibilities: load firmware ROM, initialize DSP/CPU memory, handle MIDI via 
 3. **Shared plugin infra** → `source/framework/juce/jucePluginLib/` or `source/framework/synthLib/`
 4. **DSP emulator** → `source/cpu/dsp56300/source/dsp56kEmu/`
 5. **New parameter** → update `parameterDescriptions_*.json` in the plugin dir, map to MIDI CC/SysEx in the processor, update skin RML if it should appear in the UI
+6. **New synth or FX product** → follow `doc/adding_a_product.md` end to end: MIDI-only controller/device contract, identifiers, CMake, CI, deploy folder, Discord, YouTrack, website, checklist
 
 Test with the test consoles before building full plugins.
 
