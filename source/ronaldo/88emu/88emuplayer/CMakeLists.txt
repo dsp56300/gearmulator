@@ -73,6 +73,7 @@ target_sources(88emuplayer PRIVATE
 	Emu88EditorBindings.h
 	Emu88AudioSettings.h
 	Emu88MidiPlayer.cpp Emu88MidiPlayer.h
+	RcpFilePlayer.cpp RcpFilePlayer.h
 	Emu88PortMidiBridge.cpp Emu88PortMidiBridge.h
 	panel.cpp panel.hpp
 	midifile.hpp
@@ -127,3 +128,10 @@ install(FILES "${CMAKE_SOURCE_DIR}/doc/changelog_split/changelog_${playerProduct
 	DESTINATION .
 	COMPONENT ${playerProductName}-Standalone
 	OPTIONAL)
+
+if(BUILD_TESTING)
+	add_executable(RcpFilePlayer_test RcpFilePlayer.cpp RcpFilePlayer_test.cpp)
+	target_include_directories(RcpFilePlayer_test PRIVATE "${CMAKE_SOURCE_DIR}/source")
+	set_property(TARGET RcpFilePlayer_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME RcpFilePlayer COMMAND RcpFilePlayer_test)
+endif()

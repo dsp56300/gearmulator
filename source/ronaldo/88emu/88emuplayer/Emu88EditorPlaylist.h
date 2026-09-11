@@ -47,7 +47,7 @@ namespace emu88Player
 			return std::any_of(_files.begin(), _files.end(), [](const std::string& _file)
 			{
 				const auto extension = juce::File(_file).getFileExtension().toLowerCase();
-				return extension == ".mid" || extension == ".midi";
+				return extension == ".mid" || extension == ".midi" || extension == ".rcp" || extension == ".r36";
 			});
 		}
 
@@ -97,7 +97,7 @@ namespace emu88Player
 			return std::any_of(_files.begin(), _files.end(), [](const std::string& _file)
 			{
 				const auto extension = juce::File(_file).getFileExtension().toLowerCase();
-				return extension == ".mid" || extension == ".midi";
+				return extension == ".mid" || extension == ".midi" || extension == ".rcp" || extension == ".r36";
 			});
 		}
 

@@ -17,7 +17,7 @@ namespace emu88Player
 	void Editor::chooseMidiFiles()
 	{
 		m_playlistChooser = std::make_unique<juce::FileChooser>(
-			"Add MIDI files", juce::File{}, "*.mid;*.midi", true);
+			"Add MIDI/RCP files", juce::File{}, "*.mid;*.midi;*.rcp;*.r36", true);
 		const auto flags = juce::FileBrowserComponent::openMode |
 		                   juce::FileBrowserComponent::canSelectFiles |
 		                   juce::FileBrowserComponent::canSelectMultipleItems;
@@ -163,7 +163,7 @@ namespace emu88Player
 		const auto entries = m_processor.midiPlayer().entries();
 		std::ostringstream rml;
 		if(entries.empty())
-			rml << "<div class=\"playlistEmpty\">Drop MIDI files here</div>";
+			rml << "<div class=\"playlistEmpty\">Drop MIDI, RCP, or R36 files here</div>";
 		for(size_t i = 0; i < entries.size(); ++i)
 			rml << "<div id=\"playlistEntry" << i << "\" class=\"playlistEntry\">"
 			    << "<div class=\"playlistEntryName\">"
