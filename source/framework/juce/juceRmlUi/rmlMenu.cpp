@@ -44,7 +44,7 @@ namespace juceRmlUi
 
 	void Menu::open(const Rml::Element* _parent, const Rml::Vector2f& _position, const uint32_t _itemsPerColumn)
 	{
-		if (!isOpen())
+		if (isOpen())
 			close();
 
 

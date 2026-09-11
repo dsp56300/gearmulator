@@ -539,6 +539,10 @@ Worth fixing, but do not attribute them to the 88emu work:
   `synthLibTests`. Found while fixing the entry above.
 - `rmlMenu.cpp:47` — `if (!isOpen()) close();` is inverted. Latent: every current caller allocates
   a fresh `Menu`, so the second-open path is unreachable.
+  *Fixed 2026-09-11:* the guard now closes a menu that is still open before building it again.
+  Compile-checked only - no caller reaches the path, and RmlUi has no headless test context here.
 - `midiRateLimiter.cpp:150` — channel voice messages jump ahead of queued sysex because everything
   non-sysex goes into `m_pendingRealtime`. Live on JE8086; only System Real Time is entitled to
   overtake.
+  *Not a bug, left as is (2026-09-11):* notes overtaking queued sysex is intended - note timing
+  matters more than sysex order.
