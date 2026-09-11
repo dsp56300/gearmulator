@@ -36,7 +36,7 @@ Not part of the numbered list, but do not lose these.
       ("difference starting at frame 50348, ROM First_A_28, preset Overture K"), so Deploy, Upload and
       GitHub were skipped. Frame 50348 is 1.049 s, the Virus A MIDI watchdog timeout: the NAS reference
       wavs were regenerated 2026-09-09 15:10 for `028b86d60` ("feed the Virus A MIDI watchdog"), which
-      is on `oss/main`, `gearmulator/main` and `device/nova` but not private `main`. Not a code defect,
+      is on `oss/main`, `gearmulator/main` and a device branch but not private `main`. Not a code defect,
       and not the TCC stall that build is otherwise remembered for.
       Verified 2026-09-11: `oss/main` at `92f4ab75f` passes every integration case on Windows after a
       fresh ctest rclone sync.
@@ -61,10 +61,10 @@ Not part of the numbered list, but do not lose these.
 
 **Offered during the review, not started**
 
-- [ ] **M-One XL runtime samplerate switching.** The framework already supports it end to end;
-      a device opts in by overriding `getDynamicSamplerates()` and reporting the current rate from
-      `getSamplerate()`. See F1 - the whole subsystem was nearly deleted as unused before this use
-      case turned up, so it is worth having a real consumer.
+- [ ] **Runtime samplerate switching for a device that sets its rate from a menu.** The framework
+      already supports it end to end; a device opts in by overriding `getDynamicSamplerates()` and
+      reporting the current rate from `getSamplerate()`. See F1 - the whole subsystem was nearly
+      deleted as unused before this use case turned up, so it is worth having a real consumer.
 - [ ] **Drive the LCD cursor path.** `jucePluginEditorLib::Lcd::setCursor()` has no caller, so the
       blink timer and the underline renderer have never run and the C8 fix protects nothing. The
       natural driver is the Waldorf panels - microQ/XT are HD44780 based and do show a cursor.
@@ -478,7 +478,7 @@ Recorded so they are not re-litigated:
   forgetting it - is now named in the header.
 - **F1, the dynamic-samplerate subsystem** — no implementer today (verified: no device's rate moves
   at runtime, 88emu model switching replaces the whole `Plugin`, `setState` re-reads the rate), but
-  it is NOT speculative. The TC M-One XL selects its sample rate from a front panel menu, i.e. the
+  it is NOT speculative. Some hardware selects its sample rate from a front panel menu, i.e. the
   firmware changes the clock while running, and the per-block `getSamplerate()` poll is the only
   thing that would notice. Kept and documented rather than deleted, on the user's call.
   A device opts in by overriding `getDynamicSamplerates()`; that is the whole contract.
