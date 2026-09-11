@@ -22,6 +22,7 @@ namespace bridgeClient
 		void handleCommand(bridgeLib::Command _command, baseLib::BinaryStream& _in) override;
 
 		void handleData(const bridgeLib::DeviceDesc& _desc) override;
+		void handleData(const bridgeLib::Error& _error) override;
 		void handleDeviceInfo(baseLib::BinaryStream& _in) override;
 
 		void handleException(const networkLib::NetException& _e) override;

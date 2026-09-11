@@ -240,11 +240,12 @@ namespace bridgeServer
 		if(m_pluginDesc.pluginVersion == 0 || m_deviceCreateParams.romData.empty())
 			return;
 
-		m_device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc);
+		std::string error;
+		m_device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc, error);
 
 		if(!m_device)
 		{
-			errorClose(bridgeLib::ErrorCode::FailedToCreateDevice,"Failed to create device");
+			errorClose(bridgeLib::ErrorCode::FailedToCreateDevice, error);
 			return;
 		}
 

@@ -15,7 +15,8 @@
 #define RTLD_LAZY 0
 void* dlopen (const char* _filename, int)
 {
-	return LoadLibraryA(_filename);
+	// The path is UTF-8. LoadLibraryA would read it in the ANSI code page and miss a folder with an accented name.
+	return LoadLibraryW(baseLib::filesystem::utf8ToWide(_filename).c_str());
 }
 FARPROC dlsym (void* _handle, const char* _name)
 {
@@ -31,6 +32,16 @@ int dlclose(void* _handle)
 
 namespace bridgeServer
 {
+	namespace
+	{
+		std::string describe(const bridgeLib::PluginDesc& _desc)
+		{
+			const auto v = _desc.pluginVersion;
+			return _desc.pluginName + ' ' + std::to_string(v / 10000) + '.' + std::to_string(v / 100 % 100) + '.' +
+				std::to_string(v % 100) + " (" + _desc.plugin4CC + ')';
+		}
+	}
+
 	Import::Import(const Config& _config) : m_config(_config)
 	{
 		findPlugins();
@@ -43,7 +54,7 @@ namespace bridgeServer
 		m_loadedPlugins.clear();
 	}
 
-	synthLib::Device* Import::createDevice(const synthLib::DeviceCreateParams& _params, const bridgeLib::PluginDesc& _desc)
+	synthLib::Device* Import::createDevice(const synthLib::DeviceCreateParams& _params, const bridgeLib::PluginDesc& _desc, std::string& _error)
 	{
 		std::scoped_lock lock(m_mutex);
 
@@ -55,7 +66,8 @@ namespace bridgeServer
 		it = m_loadedPlugins.find(_desc);
 		if(it == m_loadedPlugins.end())
 		{
-			LOGNET(networkLib::LogLevel::Warning, "Failed to create device for plugin '" << _desc.pluginName << "', version " << _desc.pluginVersion << ", id " << _desc.plugin4CC << ", no matching plugin available");
+			_error = "The server has no " + describe(_desc) + ". Copy that exact version of the plugin, or its server plugin, into the server's plugins folder:\n" + m_config.pluginsPath;
+			LOGNET(networkLib::LogLevel::Warning, _error);
 			return nullptr;	// still not found
 		}
 
@@ -65,8 +77,8 @@ namespace bridgeServer
 		}
 		catch(synthLib::DeviceException& e)
 		{
-			LOGNET(networkLib::LogLevel::Error, "Failed to create device for plugin '" << _desc.pluginName << "', version " << _desc.pluginVersion << ", id " << _desc.plugin4CC << 
-				", device creation caused exception: code " << static_cast<uint32_t>(e.errorCode()) << ", message: " << e.what());
+			_error = "Creating the device of " + describe(_desc) + " failed: " + e.what();
+			LOGNET(networkLib::LogLevel::Error, _error << ", code " << static_cast<uint32_t>(e.errorCode()));
 			return nullptr;
 		}
 	}
@@ -96,28 +108,47 @@ namespace bridgeServer
 
 	void Import::findPlugins(const std::string& _rootPath)
 	{
-		findPlugins(_rootPath, ".dll");
-		findPlugins(_rootPath, ".so");
-		findPlugins(_rootPath, ".dylib");
+		// A server plugin is a single library, as are VST2 and, outside macOS, CLAP plugins. VST3 and LV2 plugins are
+		// bundle folders that keep their library further down, <name>.vst3/Contents/x86_64-win/<name>.vst3 for example.
+		for (const auto* extension : {".dll", ".so", ".dylib", ".vst3", ".clap"})
+		{
+			std::vector<baseLib::filesystem::FoundFile> files;
+			baseLib::filesystem::findFilesRecursive(files, _rootPath, extension, 0, 0, 3);
 
-		findPlugins(_rootPath, ".vst3");
-		findPlugins(_rootPath, ".clap");
-		findPlugins(_rootPath, ".lv2");
-	}
+			for (const auto& file : files)
+				loadPlugin(file.path);
+		}
 
-	void Import::findPlugins(const std::string& _rootPath, const std::string& _extension)
-	{
-		std::vector<std::string> files;
-		baseLib::filesystem::findFiles(files, _rootPath, _extension, 0, std::numeric_limits<uint32_t>::max());
+#ifdef __APPLE__
+		// On macOS every plugin format is a bundle, and its binary has no extension: <name>.vst3/Contents/MacOS/<name>
+		std::vector<std::string> entries;
+		baseLib::filesystem::getDirectoryEntries(entries, _rootPath);
 
-		for (const auto& file : files)
-			loadPlugin(file);
+		for (const auto& entry : entries)
+		{
+			if(!baseLib::filesystem::isDirectory(entry))
+				continue;
+
+			for (const auto* extension : {".vst3", ".clap", ".vst", ".component"})
+			{
+				if(!baseLib::filesystem::hasExtension(entry, extension))
+					continue;
+
+				const auto binary = entry + "/Contents/MacOS/" + baseLib::filesystem::stripExtension(baseLib::filesystem::getFilenameWithoutPath(entry));
+
+				if(baseLib::filesystem::exists(binary))
+					loadPlugin(binary);
+			}
+		}
+#endif
 	}
 
 	void Import::loadPlugin(const std::string& _file)
 	{
-		// load each plugin lib only once
-		if(m_loadedFiles.find(_file) != m_loadedFiles.end())
+		// Look at each file once. A rescan runs whenever a client asks for a plugin we do not have, and libraries that
+		// turn out not to be bridge plugins would otherwise be loaded and unloaded again every time. A file replaced
+		// while the server runs is therefore only picked up after a restart.
+		if(!m_probedFiles.insert(_file).second)
 			return;
 
 		Plugin plugin;
@@ -151,9 +182,8 @@ namespace bridgeServer
 			return;
 		}
 
-		LOGNET(networkLib::LogLevel::Info, "Found plugin '" << desc.pluginName << "', version " << desc.pluginVersion << ", id " << desc.plugin4CC);
+		LOGNET(networkLib::LogLevel::Info, "Found plugin " << describe(desc) << " in " << _file);
 
 		m_loadedPlugins.insert({desc, plugin});
-		m_loadedFiles.insert(_file);
 	}
 }

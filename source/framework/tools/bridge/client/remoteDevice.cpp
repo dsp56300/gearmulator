@@ -156,6 +156,13 @@ namespace bridgeClient
 		m_cvWait.notify_one();
 	}
 
+	void RemoteDevice::onServerError(const bridgeLib::Error& _error)
+	{
+		LOG("Server error " << static_cast<uint32_t>(_error.code) << ": " << _error.msg);
+		std::unique_lock lock(m_cvWaitMutex);
+		m_serverError = _error.msg;
+	}
+
 	void RemoteDevice::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
 		safeCall([&]
@@ -278,8 +285,9 @@ namespace bridgeClient
 			return !m_connection->isValid() || m_deviceDesc.outChannels > 0;
 		});
 
+		// The server closes the connection if it cannot create the device, and sends the reason before it does
 		if(!m_connection->isValid() || m_deviceDesc.outChannels == 0)
-			throw synthLib::DeviceException(synthLib::DeviceError::RemoteTcpConnectFailed);
+			throw synthLib::DeviceException(synthLib::DeviceError::RemoteTcpConnectFailed, m_serverError);
 
 		m_valid = true;
 

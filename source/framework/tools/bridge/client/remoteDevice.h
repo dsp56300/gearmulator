@@ -50,6 +50,7 @@ namespace bridgeClient
 
 		void onBootFinished(const bridgeLib::DeviceDesc& _desc);
 		void onDisconnect();
+		void onServerError(const bridgeLib::Error& _error);
 
 	protected:
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
@@ -67,5 +68,6 @@ namespace bridgeClient
 		std::mutex m_cvWaitMutex;
 		std::condition_variable m_cvWait;
 		bool m_valid = false;
+		std::string m_serverError;	// why the server refused to create the device, guarded by m_cvWaitMutex
 	};
 }

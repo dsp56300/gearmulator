@@ -157,6 +157,17 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	target_sources(${targetName} PRIVATE ${SOURCES} serverPlugin.cpp)
 
+	# serverPlugin.cpp lands in the shared code library, and nothing in the plugin calls the bridge entry points it
+	# exports, so the linker leaves it out of every plugin binary. Pull it in: the DSPBridge server can then load a regular
+	# plugin of the same version, not only the server plugin built next to it.
+	if(MSVC)
+		target_link_options(${targetName} INTERFACE /INCLUDE:bridgeDeviceCreate)
+	elseif(APPLE)
+		target_link_options(${targetName} INTERFACE -Wl,-u,_bridgeDeviceCreate)
+	else()
+		target_link_options(${targetName} INTERFACE -Wl,-u,bridgeDeviceCreate)
+	endif()
+
 	source_group("source" FILES ${SOURCES})
 
 	removeJuceDependencies(${targetName})

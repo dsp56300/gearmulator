@@ -41,6 +41,11 @@ namespace bridgeClient
 		m_device.onBootFinished(_desc);
 	}
 
+	void DeviceConnection::handleData(const bridgeLib::Error& _error)
+	{
+		m_device.onServerError(_error);
+	}
+
 	void DeviceConnection::handleDeviceInfo(baseLib::BinaryStream& _in)
 	{
 		TcpConnection::handleDeviceInfo(_in);
