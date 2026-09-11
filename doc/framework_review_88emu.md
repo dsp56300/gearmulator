@@ -31,7 +31,7 @@ Not part of the numbered list, but do not lose these.
       runtime: an app launched over SSH gets no window peer, so actually rendering through Metal - the
       startup and resize paths these two fix - still needs a GUI session.
 
-- [ ] **Merge `oss/main` into private `main` - its Jenkins build fails the Virus integration test.**
+- [x] **Merge `oss/main` into private `main` - its Jenkins build fails the Virus integration test.**
       Jenkins #1776 (2026-09-10) built private `main` at `9f039161d` and failed `virusIntegrationTests`
       ("difference starting at frame 50348, ROM First_A_28, preset Overture K"), so Deploy, Upload and
       GitHub were skipped. Frame 50348 is 1.049 s, the Virus A MIDI watchdog timeout: the NAS reference
@@ -39,7 +39,11 @@ Not part of the numbered list, but do not lose these.
       is on `oss/main`, `gearmulator/main` and `device/nova` but not private `main`. Not a code defect,
       and not the TCC stall that build is otherwise remembered for.
       Verified 2026-09-11: `oss/main` at `92f4ab75f` passes every integration case on Windows after a
-      fresh ctest rclone sync. Private `main` keeps failing until it is merged; that push needs approval.
+      fresh ctest rclone sync.
+      *Done 2026-09-11:* merged without a checkout and pushed, private `main` `9f039161d..0d0c394c5`, a
+      fast-forward. Before pushing, all 13 submodule pointers in the range fetched from their public repos,
+      and `virusIntegrationTests` passed 19/19 on exactly that code (`dsp56300` at `04d30c02`) after a
+      fresh sync. Jenkins has not been re-run: a `main` build deploys and uploads by default.
 
 **Worth doing soon**
 
@@ -77,8 +81,8 @@ Not part of the numbered list, but do not lose these.
 
 **Not committed anywhere yet**
 
-- [ ] Push what is ahead of `gearmulator/main`. Everything up to `de36fa813` (H3) is already pushed;
-      the "Still to do" doc commit and group I are not.
+- [ ] Push what is ahead of `gearmulator/main`. Public `gearmulator/main` stops at `de36fa813` (H3);
+      group I and the doc commits are only on private `main` (`0d0c394c5`) so far.
 
 ---
 
