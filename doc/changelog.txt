@@ -67,6 +67,9 @@ Framework:
         configuration and only loaded plugins from the folder next to its
         executable.
 
+- [Fix] The DSP Bridge server still started a device from a ROM that was
+        damaged while being sent to it.
+
 88emuPlayer:
 
 - [Fix] Selecting ASIO now waits for an explicit output-device choice,

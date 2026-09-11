@@ -94,6 +94,7 @@ namespace bridgeServer
 			{
 				LOGNET(networkLib::LogLevel::Error, "Calculated hash " << calculatedHash.toString() << " of ROM " << p.romName << " does not match sent hash " <<  p.romHash.toString() << ", transfer error");
 				close();
+				return;
 			}
 
 			LOGNET(networkLib::LogLevel::Info, "Adding ROM " << p.romName << " with hash " << p.romHash.toString() << " to pool");
