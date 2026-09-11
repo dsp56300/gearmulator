@@ -208,6 +208,11 @@ namespace emu88Lib
 		}
 
 	private:
+		friend struct Sc88ProReleaseTest;
+		bool m_autoVoiceReset = false;
+		uint64_t m_pendingVoiceResets = 0;
+		void observeReleaseEgWrite(uint16_t _offset);
+		void resetFinishedVoices();
 		// Set up the bus map and the chip's host hooks. Runs once, from the
 		// constructor.
 		void    wireChip();

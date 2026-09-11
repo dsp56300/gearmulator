@@ -1,4 +1,5 @@
 #include "sc88pro.h"
+#include "baseLib/md5.h"
 
 #include "rom.h"
 
@@ -86,6 +87,9 @@ namespace emu88Lib
 		}
 
 		m_valid = true;
+		// This SRAM layout and the release-zero write were verified against
+		// this control ROM. Other firmware must be mapped before enabling it.
+		m_autoVoiceReset = baseLib::MD5(m_rom) == baseLib::MD5("784b3ea762b5f96cabdceb33d121d5e4");
 		powerCycle();
 
 		// A new emulator instance has blank battery SRAM. Initialise it through
@@ -102,6 +106,7 @@ namespace emu88Lib
 		// device/latch so the next sample is a genuine power-on boot.
 		m_xp.reset();
 		m_machine.reset();
+		m_pendingVoiceResets = 0;
 		m_lcd.reset();
 		m_lsp.clear();
 
@@ -267,9 +272,32 @@ namespace emu88Lib
 		const uint16_t off = static_cast<uint16_t>(_addr);
 
 		if(page >= PageSramFirst && page <= PageSramLast)
+		{
 			m_sram[off] = _val;
+			if(m_autoVoiceReset && off >= 0x41ca && off < 0x424a)
+				observeReleaseEgWrite(off);
+			if(m_autoVoiceReset && off >= 0xe693 && off < 0xe713 && (off & 1))
+			{
+				// The H8 completion queue (00:7480) can free a voice without
+				// zeroing its old software EG. 00:936B uses the same free state.
+				const auto bit = uint64_t{1} << ((off - 0xe693) / 2);
+				if(_val == 0xff)
+					m_pendingVoiceResets |= bit;
+				else
+					m_pendingVoiceResets &= ~bit;
+			}
+		}
 		else if(page == PageXp)
+		{
 			m_xp.hostWrite8(off, _val);
+			if(off >= 0x3900 && off < 0x3908 && (off & 1))
+			{
+				const auto first = ((off - 0x3900) / 2) * 16;
+				for(unsigned i = first; i < first + 16; ++i)
+					if(!m_xp.state().voices[i].resetState_3900.shadow)
+						m_pendingVoiceResets &= ~(uint64_t{1} << i);
+			}
+		}
 		else if(page >= PageSubMcuFirst && page <= PageSubMcuLast)
 			subMcuWrite(off, _val);
 		else if(page == PageGateArray)
@@ -580,6 +608,29 @@ namespace emu88Lib
 		m_machine.sci(1).set_tx_sink([this](const uint8_t _byte, uint64_t) { uart2Transmit(_byte); });
 	}
 
+	void Sc88Pro::observeReleaseEgWrite(const uint16_t _offset)
+	{
+		// H8 routine 00:B03E writes this word to zero while 3D4A bit 7 is
+		// still set; 00:B044 immediately clears that bit. Latch on the low
+		// byte, not by periodically sampling RAM or by looking at XP volume.
+		const auto voice = (_offset - 0x41ca) / 2;
+		const auto bit = uint64_t{1} << voice;
+		const auto eg = static_cast<uint16_t>((m_sram[0x41ca + voice * 2] << 8) | m_sram[0x41cb + voice * 2]);
+		if(eg != 0)
+			m_pendingVoiceResets &= ~bit;
+		else if((_offset & 1) && (m_sram[0x3d4a + voice * 2] & 0x80))
+			m_pendingVoiceResets |= bit;
+	}
+
+	void Sc88Pro::resetFinishedVoices()
+	{
+		const auto pending = m_pendingVoiceResets;
+		m_pendingVoiceResets = 0;
+		for(unsigned voice = 0; voice < 64; ++voice)
+			if(pending & (uint64_t{1} << voice))
+				m_xp.retireVoice(voice);
+	}
+
 	Sc88Pro::SampleFrame Sc88Pro::renderSample()
 	{
 		if(!m_valid)
@@ -605,6 +656,8 @@ namespace emu88Lib
 		if(!m_xpEnabled)
 			return {0, 0};
 
+		if((m_samplesRendered & 127u) == 0 && m_pendingVoiceResets)
+			resetFinishedVoices(); // 128 frames at 32 kHz = 4 ms.
 		m_xp.step();
 		auto& xpDsp = m_xp.dsp();
 		const auto& busB = xpDsp.serialOutput(xpLib::Dsp::SerialBus::b);
