@@ -43,7 +43,9 @@ Not part of the numbered list, but do not lose these.
       *Done 2026-09-11:* merged without a checkout and pushed, private `main` `9f039161d..0d0c394c5`, a
       fast-forward. Before pushing, all 13 submodule pointers in the range fetched from their public repos,
       and `virusIntegrationTests` passed 19/19 on exactly that code (`dsp56300` at `04d30c02`) after a
-      fresh sync. Jenkins has not been re-run: a `main` build deploys and uploads by default.
+      fresh sync. Jenkins `dsp56300_main_multi` #492 re-ran it with Deploy, Upload and GitHub off: all
+      four platforms built `0d0c394c5` and passed ctest including `virusIntegrationTests` - win #1790
+      46/46, mac #1791 58/58, linux arm #1792 46/46, linux x86 #1793 46/46.
 
 **Worth doing soon**
 
@@ -86,8 +88,10 @@ Not part of the numbered list, but do not lose these.
 
 **Not committed anywhere yet**
 
-- [ ] Push what is ahead of `gearmulator/main`. Public `gearmulator/main` stops at `de36fa813` (H3);
+- [x] Push what is ahead of `gearmulator/main`. Public `gearmulator/main` stops at `de36fa813` (H3);
       group I and the doc commits are only on private `main` (`0d0c394c5`) so far.
+      *Done 2026-09-11:* pushed `de36fa813..ce43cd5cd`, a fast-forward. The range's one submodule bump
+      (`dsp56300` at `04d30c02`) fetched from its public repo first.
 
 ---
 
