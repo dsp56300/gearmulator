@@ -63,6 +63,10 @@ Framework:
 - [Fix] The FX versions of OsTIrus, Vavra and Xenia did not show their device
         specific settings, such as the voice expansion option of Vavra and Xenia.
 
+- [Fix] The DSP Bridge server ignored the plugins folder set in its
+        configuration and only loaded plugins from the folder next to its
+        executable.
+
 88emuPlayer:
 
 - [Fix] Selecting ASIO now waits for an explicit output-device choice,

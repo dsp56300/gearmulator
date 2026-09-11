@@ -107,9 +107,8 @@ namespace bridgeServer
 
 	void Import::findPlugins(const std::string& _rootPath, const std::string& _extension)
 	{
-		const auto path = synthLib::getModulePath() + "plugins/";
 		std::vector<std::string> files;
-		baseLib::filesystem::findFiles(files, path, _extension, 0, std::numeric_limits<uint32_t>::max());
+		baseLib::filesystem::findFiles(files, _rootPath, _extension, 0, std::numeric_limits<uint32_t>::max());
 
 		for (const auto& file : files)
 			loadPlugin(file);
