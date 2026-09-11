@@ -18,6 +18,7 @@
 #include "synthLib/deviceException.h"
 #include "synthLib/os.h"
 #include "synthLib/midiBufferParser.h"
+#include "synthLib/midiToSysex.h"
 #include "synthLib/romLoader.h"
 #include "synthLib/wavWriter.h"
 
@@ -811,18 +812,8 @@ namespace pluginLib
 				ev.sysex.resize(message.getRawDataSize());
 				memcpy(ev.sysex.data(), message.getRawData(), ev.sysex.size());
 
-				// Juce bug? Or VSTHost bug? Juce inserts f0/f7 when converting VST3 midi packet to Juce packet, but it's already there
-				if(ev.sysex.size() > 1)
-				{
-					if(ev.sysex.front() == 0xf0 && ev.sysex[1] == 0xf0)
-						ev.sysex.erase(ev.sysex.begin());
-
-					if(ev.sysex.size() > 1)
-					{
-						if(ev.sysex[ev.sysex.size()-1] == 0xf7 && ev.sysex[ev.sysex.size()-2] == 0xf7)
-							ev.sysex.erase(ev.sysex.begin());
-					}
-				}
+				// guards against hosts that hand over sysex framed twice (f0 f0 ... f7 f7)
+				synthLib::MidiToSysex::removeDuplicateFraming(ev.sysex);
 			}
 			else
 			{

@@ -61,9 +61,38 @@ namespace
 
 		std::cout << "  splitMultipleSysex tests passed" << std::endl;
 	}
+
+	void testRemoveDuplicateFraming()
+	{
+		std::cout << "Testing MidiToSysex::removeDuplicateFraming..." << std::endl;
+
+		using synthLib::MidiToSysex;
+		using synthLib::SysexBuffer;
+
+		auto stripped = [](SysexBuffer _sysex)
+		{
+			MidiToSysex::removeDuplicateFraming(_sysex);
+			return _sysex;
+		};
+
+		const SysexBuffer message{0xf0, 0x00, 0x20, 0x33, 0x01, 0xf7};
+
+		// a message framed once is left alone
+		TEST_ASSERT(stripped(message) == message);
+
+		// framed twice, as a wrapper that adds f0/f7 to data already carrying them delivers it
+		TEST_ASSERT(stripped({0xf0, 0xf0, 0x00, 0x20, 0x33, 0x01, 0xf7, 0xf7}) == message);
+
+		// only one end doubled
+		TEST_ASSERT(stripped({0xf0, 0xf0, 0x00, 0x20, 0x33, 0x01, 0xf7}) == message);
+		TEST_ASSERT(stripped({0xf0, 0x00, 0x20, 0x33, 0x01, 0xf7, 0xf7}) == message);
+
+		std::cout << "  removeDuplicateFraming tests passed" << std::endl;
+	}
 }
 
 void testMidiToSysex()
 {
 	testSplitMultipleSysex();
+	testRemoveDuplicateFraming();
 }

@@ -194,6 +194,17 @@ namespace synthLib
 		}
 	}
 
+	// A message framed twice - $f0 $f0 ... $f7 $f7 - can come from a host or wrapper that puts
+	// $f0/$f7 around data which already carries them. Drop the extra byte at whichever end has one.
+	void MidiToSysex::removeDuplicateFraming(SysexBuffer& _sysex)
+	{
+		if (_sysex.size() > 1 && _sysex[0] == 0xf0 && _sysex[1] == 0xf0)
+			_sysex.erase(_sysex.begin());
+
+		if (_sysex.size() > 1 && _sysex[_sysex.size() - 1] == 0xf7 && _sysex[_sysex.size() - 2] == 0xf7)
+			_sysex.pop_back();
+	}
+
 	bool MidiToSysex::extractSysexFromFile(SysexBufferList& _messages, const std::string& _filename)
 	{
 		SysexBuffer data;

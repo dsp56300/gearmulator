@@ -523,8 +523,13 @@ Worth fixing, but do not attribute them to the 88emu work:
   fragment alongside the reassembled message. Reachable whenever hardware splits a dump.
   *Fixed 2026-09-11, see "Still to do".*
 - `processor.cpp:812` — the doubled-`F7` branch erases the **front** byte (the `F0`) instead of the
-  duplicate tail; copy-paste of the doubled-`F0` branch above it. Host-reachable via VST3
-  double-wrapping, and it produces exactly the state that walks into the fall-through above.
+  duplicate tail; copy-paste of the doubled-`F0` branch above it. It produced exactly the state that
+  walks into the fall-through above. Not reachable through any wrapper in the tree: JUCE's VST3
+  wrapper requires the host's `F0`/`F7`, strips them and adds one frame back, our VST2 fork
+  reassembles chunks and passes complete dumps, and CLAP passes the host buffer as is - only a host
+  that frames twice itself gets here.
+  *Fixed 2026-09-11:* the cleanup is now `synthLib::MidiToSysex::removeDuplicateFraming()`, which drops
+  the doubled tail, with a test in `synthLibTests`.
 - `rmlMenu.cpp:47` — `if (!isOpen()) close();` is inverted. Latent: every current caller allocates
   a fresh `Menu`, so the second-open path is unreachable.
 - `midiRateLimiter.cpp:150` — channel voice messages jump ahead of queued sysex because everything
