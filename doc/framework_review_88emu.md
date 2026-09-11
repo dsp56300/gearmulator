@@ -83,8 +83,10 @@ Not part of the numbered list, but do not lose these.
 
 **Trivia**
 
-- [ ] `dynamicSamplerate_test.cpp:112` warns C4244 - `const float oldRate = _host == 32000 ? 48000
+- [x] `dynamicSamplerate_test.cpp:112` warns C4244 - `const float oldRate = _host == 32000 ? 48000
       : 32000` needs `.0f` suffixes. Pre-existing, left alone to keep it out of unrelated commits.
+      *Done 2026-09-11:* it was six warnings, on lines 84, 106, 111 and 112 - every sample rate written
+      as an int literal where a float is meant. They are float literals now and the file builds clean.
 
 **Not committed anywhere yet**
 

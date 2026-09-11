@@ -81,7 +81,7 @@ namespace
 		{
 			g_allocations = 0;
 			g_countAllocations = true;
-			resampler.setDeviceSamplerate(pass % 2 ? 48000 : 32000);
+			resampler.setDeviceSamplerate(pass % 2 ? 48000.0f : 32000.0f);
 			g_countAllocations = false;
 			require(g_allocations == 0, "prepared rate switch allocated");
 			std::fill_n(in, 256, 0.0f);
@@ -103,13 +103,13 @@ namespace
 		{
 			midi.assign(1, synthLib::SMidiEvent{});
 			resampler.process(ins, outs, midi, midiOut, 1, render);
-			resampler.setDeviceSamplerate(i % 2 ? 32000 : 48000);
+			resampler.setDeviceSamplerate(i % 2 ? 32000.0f : 48000.0f);
 		}
 		for(int i = 0; i < 8; ++i)
 			resampler.process(ins, outs, {}, midiOut, 256, render);
 		require(received == 200, "rate switch lost or duplicated queued MIDI");
-		const float oldRate = _host == 32000 ? 48000 : 32000;
-		const float newRate = oldRate == 32000 ? 48000 : 32000;
+		const float oldRate = _host == 32000.0f ? 48000.0f : 32000.0f;
+		const float newRate = oldRate == 32000.0f ? 48000.0f : 32000.0f;
 		resampler.setDeviceSamplerate(oldRate);
 		midi.front().offset = 17;
 		resampler.process(ins, outs, midi, midiOut, 0, render);
