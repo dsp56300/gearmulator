@@ -406,13 +406,10 @@ namespace emu88Player
 			}
 			else
 			{
-				const auto* data = message.getRawData();
 				const int size = message.getRawDataSize();
 				if(size == 0 || size > 3)
 					continue;
-				event.a = data[0];
-				event.b = size > 1 ? data[1] : 0;
-				event.c = size > 2 ? data[2] : 0;
+				synthLib::setShortMessage(event, message.getRawData(), static_cast<size_t>(size));
 			}
 			m_engine->addMidiEvent(event);
 		}

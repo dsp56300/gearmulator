@@ -530,6 +530,13 @@ Worth fixing, but do not attribute them to the 88emu work:
   that frames twice itself gets here.
   *Fixed 2026-09-11:* the cleanup is now `synthLib::MidiToSysex::removeDuplicateFraming()`, which drops
   the doubled tail, with a test in `synthLibTests`.
+- `processor.cpp:821` — the short-message branch of host MIDI read `getRawData()[1]` when the message
+  had more than zero bytes and `[2]` when it had more than one, so 1- and 2-byte host messages (clock,
+  start/stop, program change, channel pressure) got an indeterminate `b`/`c`. Not a crash - JUCE keeps
+  messages up to eight bytes inline - but the bytes were junk. The hardware input path and the 88emu
+  player had it right; three copies of the same conversion had drifted apart.
+  *Fixed 2026-09-11:* all three now call `synthLib::setShortMessage()` in `midiTypes.h`, with a test in
+  `synthLibTests`. Found while fixing the entry above.
 - `rmlMenu.cpp:47` — `if (!isOpen()) close();` is inverted. Latent: every current caller allocates
   a fresh `Menu`, so the second-open path is unreachable.
 - `midiRateLimiter.cpp:150` — channel voice messages jump ahead of queued sysex because everything

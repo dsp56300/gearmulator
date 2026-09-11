@@ -123,9 +123,7 @@ namespace pluginLib
 			const auto* rawData = _message.getRawData();
 			if (count >= 1 && count <= 3)
 			{
-				sm.a = rawData[0];
-				sm.b = count > 1 ? rawData[1] : 0;
-				sm.c = count > 2 ? rawData[2] : 0;
+				synthLib::setShortMessage(sm, rawData, static_cast<size_t>(count));
 			}
 			else
 			{
@@ -817,9 +815,7 @@ namespace pluginLib
 			}
 			else
 			{
-				ev.a = message.getRawData()[0];
-				ev.b = message.getRawDataSize() > 0 ? message.getRawData()[1] : 0;
-				ev.c = message.getRawDataSize() > 1 ? message.getRawData()[2] : 0;
+				synthLib::setShortMessage(ev, message.getRawData(), static_cast<size_t>(message.getRawDataSize()));
 			}
 
 			ev.offset = std::max(0, metadata.samplePosition);

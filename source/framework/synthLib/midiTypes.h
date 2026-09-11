@@ -353,4 +353,15 @@ namespace synthLib
 		return _event.sysex.empty() &&
 			(_event.source == MidiEventSource::Host || _event.source == MidiEventSource::Internal);
 	}
+
+	// Copies a message of one to three bytes - anything but SysEx - into a, b and c. The data bytes
+	// a message does not have are zeroed, not read: a MIDI API's buffer may hold anything past the
+	// end of the message, and a program change must not pick up a third byte from it.
+	inline void setShortMessage(SMidiEvent& _event, const uint8_t* _data, const size_t _size)
+	{
+		assert(_size >= 1 && _size <= 3);
+		_event.a = _data[0];
+		_event.b = _size > 1 ? _data[1] : 0;
+		_event.c = _size > 2 ? _data[2] : 0;
+	}
 }

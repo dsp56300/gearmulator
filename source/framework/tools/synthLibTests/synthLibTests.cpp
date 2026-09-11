@@ -7,6 +7,7 @@ int main()
 	try
 	{
 		testMidiToSysex();
+		testShortMessage();
 		testUniversalTuning();
 
 		std::cout << std::endl;
