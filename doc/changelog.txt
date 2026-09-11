@@ -60,6 +60,9 @@ Framework:
         and OsTIrus showing the old part: the part selection did not move and
         the patch manager kept targeting the previous part.
 
+- [Fix] The FX versions of OsTIrus, Vavra and Xenia did not show their device
+        specific settings, such as the voice expansion option of Vavra and Xenia.
+
 88emuPlayer:
 
 - [Fix] Selecting ASIO now waits for an explicit output-device choice,

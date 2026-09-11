@@ -26,7 +26,8 @@ namespace jucePluginEditorLib
 		// add device specific settings if available
 		if (auto* containerDeviceSpecific = juceRmlUi::helper::findChild(m_page, "containerDeviceSpecific", false))
 		{
-			const auto templateName = _plugin->getTemplateName() + '_' + _settings.getEditor().getProcessor().getProperties().name;
+			// product name without the FX suffix, an FX variant uses the templates of its synth
+			const auto templateName = _plugin->getTemplateName() + '_' + _settings.getEditor().getProcessor().getProductName();
 
 			if (juceRmlUi::helper::hasTemplate(templateName, containerDeviceSpecific))
 			{
