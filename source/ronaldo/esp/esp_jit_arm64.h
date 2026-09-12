@@ -24,5 +24,6 @@ namespace esp
 
 	private:
 		Asm& m_asm;
+		JitInputData m_data;
 	};
 }
