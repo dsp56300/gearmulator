@@ -100,6 +100,9 @@ namespace pluginLib::patchDB
 
 	namespace chunkVersions
 	{
-		constexpr uint32_t g_patchManager = 4;	// 4: rescan once, Vavra and Xenia patches were cached without a hash
+		// The cache only loads if its version matches exactly, so bumping this makes the patch manager rescan every
+		// data source once. 4: Vavra and Xenia patches were cached without a hash. 5: a ROM data source changed
+		// what its factory presets contain after 4 went in.
+		constexpr uint32_t g_patchManager = 5;
 	}
 }
