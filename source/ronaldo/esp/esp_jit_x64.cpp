@@ -123,7 +123,7 @@ namespace esp
 		m_pool.checkUninit(reg);
 	}
 
-	void EspJitX64::emitOp(uint32_t pc, const ESPOptInstr& instr, bool lastMul30)
+	void EspJitX64::emitOp(uint32_t pc, const ESPOptInstr& instr, bool lastMul30, bool)
 	{
 		auto tempA = m_pool.getTemp();
 		auto tempB = m_pool.getTemp();

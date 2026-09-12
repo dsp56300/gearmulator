@@ -21,7 +21,7 @@ namespace esp
 		void eramComputeAddr(uint32_t immOffset, bool highOffset, bool shouldUseVarOffset);
 
 		void checkUninit(const asmjit::x86::Gpq& reg) const;
-		void emitOp(uint32_t pc, const ESPOptInstr& instr, bool lastMul30);
+		void emitOp(uint32_t pc, const ESPOptInstr& instr, bool lastMul30, bool nextIsDmac);
 
 	private:
 		asmjit::x86::Mem iramPtr(const asmjit::x86::Gpq& offset) const;
