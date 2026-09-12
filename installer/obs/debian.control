@@ -9,14 +9,48 @@ Build-Depends: debhelper (>= 12), cmake (>= 3.15), g++, pkg-config,
 Standards-Version: 4.6.2
 Homepage: https://theusualsuspects.io
 
-Package: theusualsuspects
+Package: theusualsuspects-osirus
 Architecture: amd64 arm64
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Emulations of classic virtual analog synthesizers
- Low-level IC emulations of classic virtual analog synthesizers (Access Virus,
- Waldorf microQ/XT, Clavia Nord Lead 2x, Roland JP-8000), recreated by
- emulating the original DSP56300, MC68K and H8S processors and running the
- original firmware.
- .
- Ships VST2, VST3, CLAP and LV2 plugins. No firmware is included: each
- emulation needs a ROM image dumped from the corresponding hardware.
+Description: Access Virus A, B and C emulation
+ Osirus emulates the Access Virus A, B and C, as VST2, VST3, CLAP and LV2
+ plugins. It needs a firmware ROM image from the hardware, which is not
+ included.
+
+Package: theusualsuspects-ostirus
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Access Virus TI, TI2 and Snow emulation
+ OsTIrus emulates the Access Virus TI, TI2 and Snow, as VST2, VST3, CLAP and
+ LV2 plugins. It needs a firmware ROM image from the hardware, which is not
+ included.
+
+Package: theusualsuspects-vavra
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Waldorf microQ emulation
+ Vavra emulates the Waldorf microQ, as VST2, VST3, CLAP and LV2 plugins. It
+ needs a firmware ROM image from the hardware, which is not included.
+
+Package: theusualsuspects-xenia
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Waldorf Microwave II and XT emulation
+ Xenia emulates the Waldorf Microwave II and XT, as VST2, VST3, CLAP and LV2
+ plugins. It needs a firmware ROM image from the hardware, which is not
+ included.
+
+Package: theusualsuspects-nodalred2x
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Clavia Nord Lead 2X and Nord Rack 2X emulation
+ Nodal Red 2x emulates the Clavia Nord Lead 2X and Nord Rack 2X, as VST2,
+ VST3, CLAP and LV2 plugins. It needs a firmware ROM image from the hardware,
+ which is not included.
+
+Package: theusualsuspects-je8086
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Roland JP-8000 emulation
+ JE-8086 emulates the Roland JP-8000, as VST2, VST3, CLAP and LV2 plugins. It
+ needs a firmware ROM image from the hardware, which is not included.

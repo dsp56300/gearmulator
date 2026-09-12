@@ -12,8 +12,8 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 override_dh_auto_configure:
 	dh_auto_configure -- -Dgearmulator_BUILD_JUCEPLUGIN=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=OFF
 
-# One synth alone produced 378 MB of dbgsym; seven would be multiple GB per
-# revision, and OBS disables debuginfo on the RPM side anyway. Drop this
+# One synth alone produced 378 MB of dbgsym, so all of them would add several GB
+# per revision, and OBS disables debuginfo on the RPM side anyway. Drop this
 # override to get -dbgsym packages back.
 override_dh_strip:
 	dh_strip --no-automatic-dbgsym
@@ -24,10 +24,9 @@ override_dh_strip:
 override_dh_auto_test:
 	cd obj-$(DEB_HOST_GNU_TYPE) && ctest --output-on-failure --exclude-regex 'virusIntegrationTests|virusRomHashTests'
 
-# Same whitelist as the spec: the tree's install rules are shaped for the CPack
-# ZIPs, so a plain install also drops the vendored lunasvg, plutovg and RmlUi
-# static libs, headers, cmake and pkgconfig files into the prefix, plus the
-# test console and the bridge server plugin.
+# With several binary packages the install goes to debian/tmp, and each synth's
+# .install file picks its plugins out of it. The tree's install rules are shaped
+# for the CPack ZIPs, so drop everything but the four plugin directories first.
 execute_after_dh_auto_install:
-	find debian/theusualsuspects/usr -mindepth 1 -maxdepth 1 ! -name lib ! -name share -exec rm -rf {} +
-	find debian/theusualsuspects/usr/lib -mindepth 1 -maxdepth 1 ! -name vst ! -name vst3 ! -name clap ! -name lv2 -exec rm -rf {} +
+	find debian/tmp/usr -mindepth 1 -maxdepth 1 ! -name lib ! -name share -exec rm -rf {} +
+	find debian/tmp/usr/lib -mindepth 1 -maxdepth 1 ! -name vst ! -name vst3 ! -name clap ! -name lv2 -exec rm -rf {} +

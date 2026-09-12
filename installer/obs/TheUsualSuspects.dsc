@@ -1,7 +1,7 @@
 Format: 1.0
 Source: theusualsuspects
 Version: 2.2.19
-Binary: theusualsuspects
+Binary: theusualsuspects-osirus, theusualsuspects-ostirus, theusualsuspects-vavra, theusualsuspects-xenia, theusualsuspects-nodalred2x, theusualsuspects-je8086
 Maintainer: The Usual Suspects <dsp56300@protonmail.com>
 Architecture: any
 Build-Depends: debhelper (>= 12), cmake (>= 3.15), g++, pkg-config,

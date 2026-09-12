@@ -1,0 +1,10 @@
+<constraints>
+  <hardware>
+    <disk>
+      <size unit="G">30</size>
+    </disk>
+    <physicalmemory>
+      <size unit="G">8</size>
+    </physicalmemory>
+  </hardware>
+</constraints>
