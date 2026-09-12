@@ -28,6 +28,32 @@ Framework:
         why, for example that the server has no plugin of that version,
         instead of showing "Error code 4".
 
+- [Fix] BUG-10269 Dragging any edge of the plugin window other than a corner
+        made the interface smaller and never larger again. The fixed aspect
+        ratio was resolved from the proposed size alone, which always corrects
+        the larger of the two dimensions - exactly the one an edge drag
+        changes.
+
+- [Fix] VST2 builds that use the fst fallback, which steps in when the
+        Steinberg SDK is not present, corrupted the heap the first time the
+        host asked for the speaker arrangement. Every channel count was
+        affected, a mono bus included, and it could take down the plugin or
+        the host.
+
+- [Fix] Clock, start/stop, program change and channel pressure coming from the
+        host carried whatever bytes happened to follow them in memory: three
+        bytes were read from every message, however short it is.
+
+- [Fix] SysEx that reaches the plugin in pieces was handed to the emulation
+        twice, once reassembled and once as the raw fragments, which a
+        firmware can read as channel data.
+
+- [Fix] SysEx from a host that frames it twice lost its start byte instead of
+        the surplus end byte, leaving a headless message behind.
+
+- [Fix] On macOS, the packages of the standalone effect plugins never
+        contained the script that removes the quarantine flag.
+
 Vavra/Xenia:
 
 - [Fix] The patch manager saw every patch as a duplicate of every other one,
@@ -36,6 +62,10 @@ Vavra/Xenia:
         its content matched all of them. Tags, favourites and renames saved
         before are kept. Once they are saved again by this version, older
         versions no longer show them.
+
+Xenia:
+
+- [Fix] The dialog shown in demo mode was titled Vavra.
 
 
 2.2.19:
