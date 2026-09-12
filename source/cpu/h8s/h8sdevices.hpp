@@ -20,7 +20,18 @@ public:
 	void tick_extclock(int which) {
 		channels[which].gra++;
 	}
+	/* Called once per H8S instruction. Nothing observable happens between
+	 * events (a channel reaching gra, grb or 0), and `nextEvent` is the first
+	 * cycle at which one can, so until then this is one compare. The deferred
+	 * increments are the same as the per-instruction ones because inc is a
+	 * difference of floors, which is additive across any split. Register
+	 * accesses catch up first (`catchUp`), so the H8S never sees a stale tcnt. */
 	void tick()
+	{
+		if (state->cycles < nextEvent) return;
+		update(state->cycles);
+	}
+	void update(unsigned long long now)
 	{
 		for (int i = 0; i < 5; i++)
 		{
@@ -29,9 +40,21 @@ public:
 			class channel& c = channels[i];
 			if (c.tcr & 4) continue;			// skip externally clocked channels
 			int shift = (c.tcr & 3);
-			unsigned int inc = (unsigned int)((state->cycles >> shift) - (lastCycles >> shift));	// how many cycles have passed?
-			for (int j = 0; j < inc; j++)
+			unsigned int inc = (unsigned int)((now >> shift) - (lastCycles >> shift));	// how many cycles have passed?
+			/* Per-cycle stepping, but only the cycles that START on an event
+			 * (tcnt == gra, == grb or == 0) do anything besides tcnt++, so jump
+			 * straight to the next one. Same tsr bits, interrupts and final
+			 * tcnt as stepping every cycle; this used to loop ~180 times per
+			 * sample per channel. */
+			while (inc)
 			{
+				unsigned int d = (uint16)(c.gra - c.tcnt);
+				const unsigned int db = (uint16)(c.grb - c.tcnt), dz = (uint16)(0 - c.tcnt);
+				if (db < d) d = db;
+				if (dz < d) d = dz;
+				if (d >= inc) { c.tcnt += inc; break; }
+				c.tcnt += d;
+				inc -= d + 1;
 				uint16 nt = c.tcnt + 1;
 				if (c.tcnt == c.gra)
 				{
@@ -53,10 +76,36 @@ public:
 				c.tcnt = nt;
 			}
 		}
-		lastCycles = state->cycles;
+		lastCycles = now;
+
+		/* Next cycle at which any running channel's tcnt reaches an event:
+		 * the loop above fires when inc >= d + 1 for that channel's shift. */
+		unsigned long long next = ~0ULL;
+		for (int i = 0; i < 5; i++)
+		{
+			if (!(tstr & (1 << i))) continue;
+			if (tmdr & (1 << i)) continue;
+			const class channel& c = channels[i];
+			if (c.tcr & 4) continue;
+			int shift = (c.tcr & 3);
+			unsigned int d = (uint16)(c.gra - c.tcnt);
+			const unsigned int db = (uint16)(c.grb - c.tcnt), dz = (uint16)(0 - c.tcnt);
+			if (db < d) d = db;
+			if (dz < d) d = dz;
+			unsigned long long at = ((now >> shift) + d + 1) << shift;
+			if (at < next) next = at;
+		}
+		nextEvent = next;
+	}
+	/* Bring the counters to where the original per-instruction tick would
+	 * have left them before this instruction started. */
+	void catchUp()
+	{
+		if (state->instrStartCycles > lastCycles) update(state->instrStartCycles);
 	}
 	virtual uint8_t read(uint32_t address) {
 		if (address<0xffff60 || address >= 0xffffa0) return 0;
+		catchUp();
 		address -= 0xffff60;
 		switch (address)
 		{
@@ -94,6 +143,8 @@ public:
 		
 	virtual void write(uint32_t address, uint8_t value) {
 		if (address<0xffff60 || address >= 0xffffa0) return;
+		catchUp();
+		nextEvent = 0;	// any write can change the schedule; recompute on the next tick
 		address -= 0xffff60;
 		switch (address)
 		{
@@ -130,6 +181,7 @@ public:
 
 private:	// 0x9f -> 0x60
 	unsigned long long lastCycles {0};
+	unsigned long long nextEvent {0};
 	int8 space[64] {};
 	uint8 tstr {0xc0}, tsnc {0xc0}, tmdr {0x80}, tfcr {0xc0};	// timer start, timer sync, timer mode reg, timer function control
 	class channel
