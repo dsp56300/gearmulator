@@ -117,6 +117,14 @@ namespace mqJucePlugin
 		return new PatchManager(*this, _parent);
 	}
 
+	void Editor::onCurrentPartChanged(const uint8_t _part)
+	{
+		jucePluginEditorLib::Editor::onCurrentPartChanged(_part);
+
+		if(m_partSelect)
+			m_partSelect->updateUiState();
+	}
+
 	std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> Editor::createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root)
 	{
 		if (_templateName == "tus_settings_dspaudio_Vavra")

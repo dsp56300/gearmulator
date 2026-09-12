@@ -56,20 +56,22 @@ This file contains an array of running instances:
 [
   {
     "pluginName": "Osirus",
-    "plugin4CC": "Osir",
+    "plugin4CC": "TusV",
     "port": 13710,
-    "pid": 12345
+    "pid": 12345,
+    "sessionId": ""
   },
   {
     "pluginName": "Vavra",
-    "plugin4CC": "Vavr",
+    "plugin4CC": "Tmqs",
     "port": 13711,
-    "pid": 12345
+    "pid": 12345,
+    "sessionId": ""
   }
 ]
 ```
 
-Use this file to find which port to connect to.
+Use this file to find which port to connect to. `pid` is the host process id. `sessionId` is the value of the environment variable `CLAUDE_CODE_SESSION_ID` of the host process, or empty; it lets a Claude Code session pick the instance it launched itself.
 
 ### Transport
 
@@ -78,8 +80,8 @@ The server uses HTTP with Server-Sent Events (SSE):
 | Endpoint | Method | Description |
 |---|---|---|
 | `/sse` | GET | SSE stream for receiving server events |
-| `/message` | POST | Send JSON-RPC 2.0 requests |
-| `/` | GET | Health check (returns server info) |
+| `/message`, `/mcp`, `/sse` | POST | Send JSON-RPC 2.0 requests |
+| `/`, `/health` | GET | Health check (returns server info) |
 
 ### Protocol
 
@@ -134,7 +136,7 @@ List all parameters with their current values, ranges, and metadata for a given 
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `part` | integer | no | Part number (default: 0) |
+| `part` | integer | no | Part number (default: the current part) |
 
 Returns an array of parameter objects with `name`, `displayName`, `value`, `min`, `max`, `text`, `part`, `page`, `index`, `isDiscrete`, `isBool`, `isBipolar`.
 
@@ -145,7 +147,7 @@ Get a specific parameter's value and metadata by name.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | Parameter name |
-| `part` | integer | no | Part number (default: 0) |
+| `part` | integer | no | Part number (default: the current part) |
 
 Returns `name`, `displayName`, `value`, `min`, `max`, `text`, `part`, `isLocked`. If the parameter has a discrete value list, it is included as `valueList`.
 
@@ -157,7 +159,7 @@ Set a parameter value by name.
 |---|---|---|---|
 | `name` | string | yes | Parameter name |
 | `value` | number | yes | New parameter value |
-| `part` | integer | no | Part number (default: 0) |
+| `part` | integer | no | Part number (default: the current part) |
 
 #### `set_parameters_batch`
 
@@ -166,7 +168,9 @@ Set multiple parameters at once.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `parameters` | array | yes | Array of `{name, value}` objects |
-| `part` | integer | no | Part number (default: 0) |
+| `part` | integer | no | Part number (default: the current part) |
+
+> **Note:** the parameter tools default to the current part, the patch manager tools below default to part 0.
 
 #### `dump_all_parameters`
 
@@ -295,6 +299,31 @@ Cleanly terminate **this** plugin instance's host process. Only this process exi
 No parameters required.
 
 > **Warning:** this terminates the entire host process. That is exactly what you want for a dedicated test host (e.g. VSTHost), but in a full DAW it would close the DAW.
+
+---
+
+### Audio
+
+#### `record_start`
+
+Start capturing the plugin's main stereo output. The capture stops on its own after `duration_ms`, or after an internal cap of about 30 seconds, even if `record_stop` is never called.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `duration_ms` | integer | no | Maximum capture length in ms (1-30000). Omit to capture until `record_stop` or the cap |
+| `arm_on_note` | boolean | no | Start capturing on the next note-on instead of immediately (default: false) |
+
+Returns `success`, `armed`, `maxDurationMs`.
+
+#### `record_stop`
+
+Stop the capture and write it to a `.wav` file.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `path` | string | no | Output file (default: `gearmulator_capture.wav` in the temp directory) |
+
+Returns `success`, `path`, `started`, `frames`, `channels`, `sampleRate`, `durationMs`, `peak`, `rms` and `silent`, which is true when the peak stays below 0.0001, i.e. the device produced no sound.
 
 ---
 
@@ -477,6 +506,24 @@ Hit-test: find the topmost element at a given point in document space. Returns t
 Capture a screenshot of the plugin editor UI. Saves as PNG to a temp file and returns the file path. Use the Read tool to view the image.
 
 No parameters required.
+
+#### `get_gui_scale`
+
+Get the editor GUI scale as a percentage (100 = the skin's native size) and the current editor size in pixels.
+
+No parameters required.
+
+Returns `scale`, plus `width` and `height` while the editor is open.
+
+#### `set_gui_scale`
+
+Set the editor GUI scale. Resizes the open editor immediately and stores the value in the plugin config.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `scale` | integer | yes | Scale in percent (25-400) |
+
+Returns `success`, `scale`, plus `width` and `height` while the editor is open.
 
 ---
 

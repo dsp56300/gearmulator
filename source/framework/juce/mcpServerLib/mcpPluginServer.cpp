@@ -673,7 +673,12 @@ namespace mcpServer
 					throw std::runtime_error("Controller not available");
 
 				const uint8_t part = static_cast<uint8_t>(_params.get("part").getInt());
-				m_processor.getController().setCurrentPart(part);
+
+				// Parameter bindings, the editor and the patch manager all follow the part, and they are UI state.
+				runOnMessageThread([&]
+				{
+					m_processor.getController().setCurrentPart(part);
+				});
 
 				auto result = JsonValue::object();
 				result.set("success", JsonValue::fromBool(true));

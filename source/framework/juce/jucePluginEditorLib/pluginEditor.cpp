@@ -60,6 +60,11 @@ namespace jucePluginEditorLib
 		, m_skin(std::move(_skin))
 		, m_rmlInterfaces(*this)
 	{
+		m_onCurrentPartChanged.set(m_processor.getController().onCurrentPartChanged, [this](const uint8_t& _part)
+		{
+			onCurrentPartChanged(_part);
+		});
+
 		showDisclaimer();
 	}
 
@@ -374,11 +379,21 @@ namespace jucePluginEditorLib
 
 	void Editor::setCurrentPart(const uint8_t _part)
 	{
-		getProcessor().getController().setCurrentPart(_part);
+		// A change comes back through onCurrentPartChanged via the controller's event, the same way as one
+		// made anywhere else. Selecting the current part again fires nothing, so apply it directly - that still
+		// re-selects the part's patch in the patch manager.
+		if(!getProcessor().getController().setCurrentPart(_part))
+			onCurrentPartChanged(_part);
+	}
+
+	void Editor::onCurrentPartChanged(const uint8_t _part)
+	{
 		if(m_patchManager)
 			m_patchManager->setCurrentPart(_part);
 
-		m_pluginDataModel->set("currentPart", std::to_string(_part));
+		// created with the RmlUi context, which a part change can precede
+		if(m_pluginDataModel)
+			m_pluginDataModel->set("currentPart", std::to_string(_part));
 	}
 
 	void Editor::showDisclaimer() const

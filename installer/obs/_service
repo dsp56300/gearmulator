@@ -1,0 +1,26 @@
+<services>
+	<!-- tar_scm, not obs_scm: obs_scm emits a .obscpio that a follow-up tar +
+	     recompress must convert, and those two services exist neither on the OBS
+	     source host (404) nor in the Debian/Ubuntu build chroots (unresolvable).
+	     tar_scm writes the tarball directly, server-side. It has no "compression"
+	     parameter, and dpkg-source rejects an uncompressed .orig.tar, so recompress
+	     has to run after it: the earlier 404 was for tar.service specifically and
+	     never reached recompress, so this is the open question.
+	     No set_version: the version is pinned here and in the spec/dsc. -->
+	<service name="tar_scm">
+		<param name="scm">git</param>
+		<param name="url">https://github.com/dsp56300/gearmulator.git</param>
+		<param name="revision">main</param>
+		<param name="version">2.2.19</param>
+		<param name="submodules">enable</param>
+		<param name="filename">TheUsualSuspects</param>
+		<param name="exclude">.git</param>
+		<param name="exclude">wt</param>
+		<param name="exclude">temp</param>
+		<param name="exclude">bin</param>
+	</service>
+	<service name="recompress">
+		<param name="file">*.tar</param>
+		<param name="compression">xz</param>
+	</service>
+</services>

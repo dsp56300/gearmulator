@@ -52,11 +52,10 @@ namespace xtJucePlugin
 		XtLcd* getLcd() const;
 		Parts& getParts() const;
 
-		void setCurrentPart(uint8_t _part) override;
-
 		const WaveEditor* getWaveEditor() const { return m_waveEditor; }
 
 	private:
+		void onCurrentPartChanged(uint8_t _part) override;
 		void changeWave(int _step) const;
 
 		Controller& m_controller;

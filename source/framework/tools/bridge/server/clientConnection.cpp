@@ -94,6 +94,7 @@ namespace bridgeServer
 			{
 				LOGNET(networkLib::LogLevel::Error, "Calculated hash " << calculatedHash.toString() << " of ROM " << p.romName << " does not match sent hash " <<  p.romHash.toString() << ", transfer error");
 				close();
+				return;
 			}
 
 			LOGNET(networkLib::LogLevel::Info, "Adding ROM " << p.romName << " with hash " << p.romHash.toString() << " to pool");
@@ -239,11 +240,12 @@ namespace bridgeServer
 		if(m_pluginDesc.pluginVersion == 0 || m_deviceCreateParams.romData.empty())
 			return;
 
-		m_device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc);
+		std::string error;
+		m_device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc, error);
 
 		if(!m_device)
 		{
-			errorClose(bridgeLib::ErrorCode::FailedToCreateDevice,"Failed to create device");
+			errorClose(bridgeLib::ErrorCode::FailedToCreateDevice, error);
 			return;
 		}
 

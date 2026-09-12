@@ -157,20 +157,37 @@ namespace baseLib::filesystem
         return !_files.empty();
     }
 
-	// A flat scan is the recursive one that never descends, so forward rather than keeping a
-	// second copy of the filter. Two things come along with that: a directory whose name happens
-	// to end in the extension is skipped, which this used to report as a file, and the size comes
-	// from the same stat as the type instead of opening every candidate to measure it.
 	bool findFiles(std::vector<std::string>& _files, const std::string& _rootPath, const std::string& _extension, const size_t _minSize, const size_t _maxSize)
     {
-        std::vector<FoundFile> found;
-        findFilesRecursive(found, _rootPath, _extension, _minSize, _maxSize, 0);
+        std::vector<std::string> files;
 
-        _files.reserve(_files.size() + found.size());
+        getDirectoryEntries(files, _rootPath);
 
-        for (auto& file : found)
-            _files.push_back(std::move(file.path));
+        for (const auto& file : files)
+        {
+            if(!hasExtension(file, _extension))
+                continue;
 
+            if (!_minSize && !_maxSize)
+            {
+                _files.push_back(file);
+                continue;
+            }
+
+            // a size range asks for files. getFileSize() reports 0 for a folder, which would pass a range that starts
+            // at 0, and callers read what this returns: readFile() on a folder on ext4 asks for 2^63-1 bytes
+            if (isDirectory(file))
+                continue;
+
+            const auto size = getFileSize(file);
+
+            if (_minSize && size < _minSize)
+	            continue;
+            if (_maxSize && size > _maxSize)
+	            continue;
+
+            _files.push_back(file);
+        }
         return !_files.empty();
     }
 

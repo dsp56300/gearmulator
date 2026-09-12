@@ -66,6 +66,11 @@ namespace pluginLib::patchDB
 		const TypedTags& getTags() const;
 		const Tags& getTags(TagType _type) const;
 		const std::string& getName() const;
+
+		// Hash over the payload of every F0..F7 message in sysex. Each message loses its _headerSize leading bytes
+		// (device id, dump location) and its _footerSize trailing ones (checksum, F7), so the same sound hashes the
+		// same wherever it was stored.
+		void setHashFromMessages(size_t _headerSize, size_t _footerSize);
 	};
 
 	struct PatchKey

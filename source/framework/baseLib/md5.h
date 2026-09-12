@@ -61,6 +61,8 @@ namespace baseLib
 
 		std::string toString() const;
 
+		const std::array<uint32_t, 4>& getWords() const { return m_h; }
+
 		constexpr bool operator == (const MD5& _md5) const
 		{
 			return m_h[0] == _md5.m_h[0] && m_h[1] == _md5.m_h[1] && m_h[2] == _md5.m_h[2] && m_h[3] == _md5.m_h[3];

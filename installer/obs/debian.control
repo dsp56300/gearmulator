@@ -1,0 +1,22 @@
+Source: theusualsuspects
+Section: sound
+Priority: optional
+Maintainer: The Usual Suspects <dsp56300@protonmail.com>
+Build-Depends: debhelper (>= 12), cmake (>= 3.15), g++, pkg-config,
+ libfreetype-dev, libfontconfig-dev, libgl-dev, libasound2-dev,
+ libx11-dev, libxcomposite-dev, libxcursor-dev, libxext-dev,
+ libxinerama-dev, libxrandr-dev
+Standards-Version: 4.6.2
+Homepage: https://theusualsuspects.io
+
+Package: theusualsuspects
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Emulations of classic virtual analog synthesizers
+ Low-level IC emulations of classic virtual analog synthesizers (Access Virus,
+ Waldorf microQ/XT, Clavia Nord Lead 2x, Roland JP-8000), recreated by
+ emulating the original DSP56300, MC68K and H8S processors and running the
+ original firmware.
+ .
+ Ships VST2, VST3, CLAP and LV2 plugins. No firmware is included: each
+ emulation needs a ROM image dumped from the corresponding hardware.

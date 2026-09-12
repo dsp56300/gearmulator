@@ -151,7 +151,7 @@ namespace pluginLib
 
 			bool operator==(const ParamIndex& _p) const
             {
-	            return page == _p.page && partNum == _p.partNum && paramNum && _p.paramNum;
+	            return page == _p.page && partNum == _p.partNum && paramNum == _p.paramNum;
             }
         };
 

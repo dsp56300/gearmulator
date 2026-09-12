@@ -32,12 +32,11 @@ namespace mqJucePlugin
 		void onPlayModeChanged() const;
 
 		void selectPart(uint8_t _index) const;
+		void updateUiState() const;
 
 	private:
 		void updatePatchName(uint8_t _part) const;
 		void onPatchNameChanged(uint8_t _part) const;
-
-		void updateUiState() const;
 
 		struct Part
 		{

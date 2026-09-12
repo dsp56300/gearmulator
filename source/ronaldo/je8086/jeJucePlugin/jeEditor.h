@@ -51,8 +51,6 @@ namespace jeJucePlugin
 
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 
-		baseLib::EventListener<uint8_t> onPartChanged;
-
 		std::array<std::string, 4> m_activePatchNames;
 
 		std::unique_ptr<JeLcd> m_lcd;

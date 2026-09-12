@@ -74,11 +74,6 @@ namespace n2xJucePlugin
 		m_vmMap.reset(new VmMap(*this));
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
-		onPartChanged.set(m_controller.onCurrentPartChanged, [this](const uint8_t& _part)
-		{
-			setCurrentPart(_part);
-		});
-
 		if(auto* bt = findChild("button_store"))
 		{
 			juceRmlUi::EventListener::Add(bt, Rml::EventId::Click, [this](Rml::Event& _event)

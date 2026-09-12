@@ -103,7 +103,6 @@ namespace mqJucePlugin
 	void mqPartSelect::selectPart(const uint8_t _index) const
 	{
 		m_editor.setCurrentPart(_index);
-		updateUiState();
 	}
 
 	void mqPartSelect::updatePatchName(uint8_t _part) const

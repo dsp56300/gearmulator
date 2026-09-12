@@ -13,10 +13,9 @@ namespace xtJucePlugin
 		Parts(Editor& _editor);
 
 		bool selectPart(uint8_t _part) const;
-
-	private:
 		void updateUi() const;
 
+	private:
 		Editor& m_editor;
 
 		struct Part

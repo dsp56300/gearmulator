@@ -48,8 +48,6 @@ namespace xtJucePlugin
 			return fail();
 		m_editor.setCurrentPart(_part);
 
-		updateUi();
-
 		return true;
 	}
 

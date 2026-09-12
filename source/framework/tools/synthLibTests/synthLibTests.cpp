@@ -6,6 +6,7 @@ int main()
 {
 	try
 	{
+		testFilesystem();
 		testMidiToSysex();
 		testShortMessage();
 		testUniversalTuning();

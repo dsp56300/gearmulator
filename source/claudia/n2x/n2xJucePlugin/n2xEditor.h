@@ -104,8 +104,6 @@ namespace n2xJucePlugin
 		std::unique_ptr<VmMap> m_vmMap;
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 
-		baseLib::EventListener<uint8_t> onPartChanged;
-
 		std::array<std::string, 4> m_activePatchNames;
 
 		baseLib::EventListener<uint32_t, pluginLib::patchDB::PatchKey> m_onSelectedPatchChanged;

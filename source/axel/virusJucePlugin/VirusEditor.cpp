@@ -298,8 +298,14 @@ namespace genericVirusUI
 		updatePlayModeButtons();
 	}
 
-	void VirusEditor::onCurrentPartChanged()
+	void VirusEditor::onCurrentPartChanged(const uint8_t _part)
 	{
+		Editor::onCurrentPartChanged(_part);
+
+		// the base subscribes before create() has built the panel
+		if(!m_parts)
+			return;
+
 		m_parts->onCurrentPartChanged();
 		if(m_arpUserPattern)
 			m_arpUserPattern->onCurrentPartChanged();
@@ -533,6 +539,5 @@ namespace genericVirusUI
 	void VirusEditor::setPart(const size_t _part)
 	{
 		setCurrentPart(static_cast<uint8_t>(_part));
-		onCurrentPartChanged();
 	}
 }

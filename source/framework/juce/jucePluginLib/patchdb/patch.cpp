@@ -1,6 +1,7 @@
 #include "patch.h"
 
 #include <cassert>
+#include <cstring>
 #include <sstream>
 
 #include "db.h"
@@ -10,6 +11,9 @@
 #include "juce_core/juce_core.h"
 
 #include "baseLib/binarystream.h"
+#include "baseLib/md5.h"
+
+#include "synthLib/midiToSysex.h"
 
 namespace pluginLib::patchDB
 {
@@ -117,6 +121,26 @@ namespace pluginLib::patchDB
 		if (!m || m->name.empty())
 			return name;
 		return m->name;
+	}
+
+	void Patch::setHashFromMessages(const size_t _headerSize, const size_t _footerSize)
+	{
+		synthLib::SysexBufferList messages;
+		synthLib::MidiToSysex::splitMultipleSysex(messages, sysex);
+
+		std::vector<uint8_t> payload;
+		payload.reserve(sysex.size());
+
+		for (const auto& m : messages)
+		{
+			if (m.size() > _headerSize + _footerSize)
+				payload.insert(payload.end(), m.begin() + static_cast<ptrdiff_t>(_headerSize),
+					m.end() - static_cast<ptrdiff_t>(_footerSize));
+		}
+
+		const baseLib::MD5 md5(payload.data(), static_cast<uint32_t>(payload.size()));
+		static_assert(sizeof(md5.getWords()) == std::tuple_size_v<PatchHash>);
+		memcpy(hash.data(), md5.getWords().data(), std::size(hash));
 	}
 
 	std::string PatchKey::toString(const bool _includeDatasource) const

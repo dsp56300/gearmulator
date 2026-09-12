@@ -141,6 +141,7 @@ namespace mqJucePlugin
 					patchType == PatchType::Multi ? "Multi" : "Arrangement");
 			}
 
+			patch->setHashFromMessages(wLib::IdxLocation + 1, 2);
 			return patch;
 		}
 
@@ -168,6 +169,7 @@ namespace mqJucePlugin
 		if(!category.empty())
 			p->tags.add(pluginLib::patchDB::TagType::Category, category);
 
+		p->setHashFromMessages(wLib::IdxLocation + 1, 2);
 		return p;
 	}
 

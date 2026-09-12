@@ -1,6 +1,43 @@
 Release Notes
 
 
+2.2.20:
+
+Framework:
+
+- [Fix] Switching the part through the MCP server left Vavra, Xenia, Osirus
+        and OsTIrus showing the old part: the part selection did not move and
+        the patch manager kept targeting the previous part.
+
+- [Fix] The FX versions of OsTIrus, Vavra and Xenia did not show their device
+        specific settings, such as the voice expansion option of Vavra and Xenia.
+
+- [Fix] The DSP Bridge server ignored the plugins folder set in its
+        configuration and only loaded plugins from the folder next to its
+        executable.
+
+- [Fix] The DSP Bridge server still started a device from a ROM that was
+        damaged while being sent to it.
+
+- [Imp] BUG-10327 The DSP Bridge server can now run a device from a regular
+        plugin, not only from the server plugins that come with it. The
+        plugin has to be the same version as the one in the DAW, and goes
+        into the server's plugins folder.
+
+- [Imp] If the DSP Bridge server cannot create the device, the plugin now says
+        why, for example that the server has no plugin of that version,
+        instead of showing "Error code 4".
+
+Vavra/Xenia:
+
+- [Fix] The patch manager saw every patch as a duplicate of every other one,
+        because Vavra and Xenia never computed the fingerprint it compares:
+        "Hide duplicates (by hash)" left a single patch, and finding a patch by
+        its content matched all of them. Tags, favourites and renames saved
+        before are kept. Once they are saved again by this version, older
+        versions no longer show them.
+
+
 2.2.19:
 
 Framework:
