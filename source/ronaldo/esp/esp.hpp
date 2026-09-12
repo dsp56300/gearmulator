@@ -388,6 +388,11 @@ public:
 	void sync_cores() {core0.sync(); core1.sync(); if (lg2eram_size) shared.eram.tickSample();}
 
 	uint8_t readuC(uint32_t address) { return shared.readback_regs[address & 3]; }
+	/* The readback registers as a block. A pipeline stage that does not own this
+	 * ASIC still has to see its readback state, so the owning stage publishes it
+	 * and the others copy it in; see jePipeline.h. */
+	void getReadbackRegs(uint8_t *out) const { memcpy(out, shared.readback_regs, 4); }
+	void setReadbackRegs(const uint8_t *in) { memcpy(shared.readback_regs, in, 4); }
 
 	void writeuC(uint32_t address, uint8_t value) {
 		address&=0x3fff;

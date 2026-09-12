@@ -19,6 +19,7 @@ namespace jucePluginEditorLib
 		juce::PropertiesFile& getConfig() { return m_config; }
 
 		bool setLatencyBlocks(uint32_t _blocks) override;
+		bool setDspThreads(uint32_t _threads) override;
 
 		bool hasEditor() const override;
 		juce::AudioProcessorEditor* createEditor() override;

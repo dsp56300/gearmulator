@@ -10,6 +10,7 @@ set(SOURCES
 	je8086devices.cpp je8086devices.h
 	jeLcd.cpp jeLcd.h
 	jemiditypes.h
+	jePipeline.cpp jePipeline.h
 	jeThread.cpp jeThread.h
 	jetypes.h
 	patch.cpp patch.h

@@ -43,6 +43,10 @@ namespace jeJucePlugin
 		getController();
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
 		Processor::setLatencyBlocks(latencyBlocks);
+
+		/* Read before the device exists: the thread count is applied at creation
+		 * because it fixes the reported latency and cannot change while running. */
+		pluginLib::Processor::setDspThreads(static_cast<uint32_t>(getConfig().getIntValue("dspThreads", 0)));
 	}
 
 	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
@@ -69,6 +73,7 @@ namespace jeJucePlugin
 		params.romData = rom.getData();
 		params.romName = rom.getName();
 		params.homePath = getDataFolder();
+		params.dspThreads = getDspThreads();
 
 		auto* d = new jeLib::Device(params);
 		if(!d->isValid())
