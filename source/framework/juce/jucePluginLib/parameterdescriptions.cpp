@@ -896,7 +896,7 @@ namespace pluginLib
 		const auto nrpnStr = _value["nrpn"].toString().toStdString();
 		const auto paramName = _value["param"].toString().toStdString();
 
-		if(ccStr.empty() && ppStr.empty())
+		if(ccStr.empty() && ppStr.empty() && nrpnStr.empty())
 		{
 			_errors << "Controller needs to define control change (cc), poly pressure (pp) or NRPN (nrpn) parameter\n";
 			return;
@@ -906,34 +906,38 @@ namespace pluginLib
 		uint8_t pp = 0xff;
 		uint16_t nrpn = 0xffff;
 
+		// range check before casting
 		if(!ccStr.empty())
 		{
-			cc = static_cast<uint8_t>(::strtol(ccStr.c_str(), nullptr, 10));
-			if(cc < 0 || cc > 127)
+			const auto value = ::strtol(ccStr.c_str(), nullptr, 10);
+			if(value < 0 || value > 127)
 			{
 				_errors << "Controller needs to be in range 0-127, param " << paramName << '\n';
 				return;
 			}
+			cc = static_cast<uint8_t>(value);
 		}
 
 		if(!ppStr.empty())
 		{
-			pp = static_cast<uint8_t>(::strtol(ppStr.c_str(), nullptr, 10));
-			if(pp < 0 || pp > 127)
+			const auto value = ::strtol(ppStr.c_str(), nullptr, 10);
+			if(value < 0 || value > 127)
 			{
 				_errors << "Poly Pressure parameter needs to be in range 0-127, param " << paramName << '\n';
 				return;
 			}
+			pp = static_cast<uint8_t>(value);
 		}
 
 		if(!nrpnStr.empty())
 		{
-			nrpn = static_cast<uint8_t>(::strtol(nrpnStr.c_str(), nullptr, 16));
-			if(nrpn < 0 || nrpn > 0x3fff)
+			const auto value = ::strtol(nrpnStr.c_str(), nullptr, 16);
+			if(value < 0 || value > 0x3fff)
 			{
 				_errors << "NRPN parameter needs to be in range $0-$3fff, param " << paramName << '\n';
 				return;
 			}
+			nrpn = static_cast<uint16_t>(value);
 		}
 
 		if(paramName.empty())
