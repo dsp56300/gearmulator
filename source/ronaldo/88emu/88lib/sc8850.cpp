@@ -654,6 +654,8 @@ namespace emu88Lib
 
 	void Sc8850::resetFinishedVoices()
 	{
+		if(!m_autoVoiceReset)
+			return;
 		// SH-2 routine 0x6604 marks a completed allocation free. The
 		// envelope accumulator can retain a nonzero value after completion.
 		const auto* records = m_machine.bus().ptr(WorkRamBase + 0x22024);
@@ -681,7 +683,7 @@ namespace emu88Lib
 		while(m_machine.now() < m_cycleTarget)
 			m_machine.run(m_cycleTarget - m_machine.now());
 
-		if(m_autoVoiceReset && (++m_voiceResetSamples & 127u) == 0)
+		if((++m_voiceResetSamples & 127u) == 0)
 			resetFinishedVoices();
 
 		m_lcd.flush();

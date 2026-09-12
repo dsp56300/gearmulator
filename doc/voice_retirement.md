@@ -2,7 +2,16 @@
 
 The board firmware determines whether a voice has finished. Output amplitude,
 channel volume and expression are not used as retirement conditions. Unknown
-control-ROM hashes keep the original behavior.
+control-ROM hashes keep the original behavior. Selection uses complete loaded
+firmware contents, not filenames or model names. SC-88 and SC-88VL also require
+the matching board model. SC-55mk2 requires both firmware images to match;
+SC-8850 requires all three. Wave ROMs do not select the firmware memory layout.
+
+The portable tests inject completion-shaped RAM state into unrecognized-ROM
+boards and verify that no voice is retired. With local ROMs, the tests also
+change one byte in each firmware image independently and check that retirement
+is disabled. Altered images are never executed. SC-88/88VL mismatches and an
+oversized SC-55mk2 program image are rejected too.
 
 ## SC-88 and SC-88VL
 

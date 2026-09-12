@@ -55,11 +55,11 @@ namespace emu88Lib
 		m_valid = m_roms.internalRom.size() >= InternalRomSize
 		       && !m_roms.programRom.empty();
 
-		if(m_roms.programRom.size() > ProgramRomSize)
-			m_roms.programRom.resize(ProgramRomSize);
-
 		m_autoVoiceReset = baseLib::MD5(m_roms.internalRom) == baseLib::MD5("4ca058f7db05f51e97bb30a162e9610a")
 			&& baseLib::MD5(m_roms.programRom) == baseLib::MD5("63b24c7193ce34afefce9cec32ac39f0");
+
+		if(m_roms.programRom.size() > ProgramRomSize)
+			m_roms.programRom.resize(ProgramRomSize);
 
 		// The GP's two PCM mask ROMs sit on chip selects 0 and 1. The dumps
 		// are raw, so undo the board's address/data line scramble first.

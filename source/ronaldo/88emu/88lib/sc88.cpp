@@ -69,13 +69,13 @@ namespace emu88Lib
 			                       xpLib::XP::PhysicalWaveRomWidth::bits16);
 
 		const auto hash = baseLib::MD5(m_rom);
-		if(hash == baseLib::MD5("0ac771782ea58a53af590ebdf140d517"))
+		if(m_model == Model::Sc88 && hash == baseLib::MD5("0ac771782ea58a53af590ebdf140d517"))
 		{
 			m_releaseEg = 0x405a;
 			m_releaseFlags = 0x3bda;
 			m_voiceAllocation = 0xf609;
 		}
-		else if(hash == baseLib::MD5("25e016e93c8a44ba3c35584462b56d72"))
+		else if(m_model == Model::Sc88VL && hash == baseLib::MD5("25e016e93c8a44ba3c35584462b56d72"))
 		{
 			m_releaseEg = 0x40d6;
 			m_releaseFlags = 0x3c56;

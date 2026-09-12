@@ -22,6 +22,71 @@ namespace emu88Lib
 		static bool enabled(const Sc88& b) { return b.m_releaseEg != 0; }
 		static bool enabled(const Sc8850& b) { return b.m_autoVoiceReset; }
 		static bool enabled(const Sc55Mk2& b) { return b.m_autoVoiceReset; }
+		static void unknown(Sc88& b)
+		{
+			CHECK(b.isValid());
+			CHECK(!enabled(b));
+			for (const auto flags : {0x3bda, 0x3c56})
+				b.extWrite8(0x80000 + flags, 0x80);
+			for (const auto eg : {0x405a, 0x40d6})
+			{
+				b.extWrite8(0x80000 + eg, 0);
+				b.extWrite8(0x80000 + eg + 1, 0);
+			}
+			for (const auto allocation : {0xf609, 0xf61d})
+				b.extWrite8(0x80000 + allocation, 0xff);
+			CHECK_EQ(b.m_pendingVoiceResets, uint64_t{0});
+		}
+		static void unknown(Sc55Mk2& b)
+		{
+			CHECK(b.isValid());
+			CHECK(!enabled(b));
+			b.extWrite8(0xadae, 0);
+			b.extWrite8(0xadaf, 0x0c);
+			b.extWrite8(0xadaf, 0x16);
+			CHECK_EQ(b.m_pendingVoiceResets, 0u);
+			CHECK_EQ(b.m_gp.retiredVoices(), 0u);
+		}
+		static void unknown(Sc8850& b)
+		{
+			CHECK(b.isValid());
+			CHECK(!enabled(b));
+			for (auto& xp : b.m_xp)
+			{
+				xp.hostWrite(0x3900, 1);
+				(void)xp.hostRead(0x3900);
+			}
+			for (const auto voice : {0u, 64u})
+			{
+				auto* record = b.m_machine.bus().ptr(Sc8850::WorkRamBase + 0x22024 + voice * 0x1e4);
+				record[0] = voice;
+				record[1] = 1;
+				record[0x148] = 0;
+				record[0x149] = 1;
+			}
+			b.resetFinishedVoices();
+			CHECK_EQ(live(b), 2u);
+		}
+		static void unknownRoms()
+		{
+			for (const auto model : {Model::Sc88, Model::Sc88VL})
+			{
+				Sc88 b(std::vector<uint8_t>(Sc88::RomSize), {}, model, false);
+				unknown(b);
+			}
+			{
+				Sc55RomSet roms;
+				roms.internalRom.resize(Sc55Mk2::InternalRomSize);
+				roms.programRom.resize(Sc55Mk2::ProgramRomSize);
+				Sc55Mk2 b(std::move(roms));
+				unknown(b);
+			}
+			{
+				Sc8850 b(std::vector<uint8_t>(Sc8850::CpuRomSize), std::vector<uint8_t>(Sc8850::ProgramRomSize),
+						 std::vector<uint8_t>(Sc8850::DataRomSize), {}, {}, false);
+				unknown(b);
+			}
+		}
 		static unsigned live(const xpLib::XP& xp)
 		{
 			unsigned count = 0;
@@ -219,12 +284,39 @@ namespace emu88Lib
 				auto rom = RomLoader::findROM(type);
 				auto wave = RomLoader::findWaveRom();
 				auto firmware = rom.takeData(), samples = wave.takeData();
+				CHECK(!firmware.empty());
+				if (firmware.empty())
+					return;
+				{
+					const auto other = type == Model::Sc88 ? Model::Sc88VL : Model::Sc88;
+					Sc88 mismatched(firmware, {}, other, false);
+					unknown(mismatched);
+					auto changed = firmware;
+					changed.back() ^= 1;
+					Sc88 modified(std::move(changed), {}, type, false);
+					unknown(modified);
+				}
 				Sc88 actual(firmware, samples, type), reference(firmware, samples, type);
 				run(actual, reference, model.c_str(), 32000, 2);
 			}
 			else if (model == "55")
 			{
 				auto roms = RomLoader::findSc55RomSet();
+				CHECK(!roms.internalRom.empty() && !roms.programRom.empty());
+				if (roms.internalRom.empty() || roms.programRom.empty())
+					return;
+				for (unsigned part = 0; part < 3; ++part)
+				{
+					Sc55RomSet changed;
+					changed.internalRom = roms.internalRom;
+					changed.programRom = roms.programRom;
+					if (part == 2)
+						changed.programRom.resize(Sc55Mk2::ProgramRomSize + 1);
+					else
+						(part == 0 ? changed.internalRom : changed.programRom).back() ^= 1;
+					Sc55Mk2 modified(std::move(changed));
+					unknown(modified);
+				}
 				Sc55Mk2 actual(roms), reference(roms);
 				actual.setSwitchPosition(Sc55Mk2::SwitchMidi);
 				reference.setSwitchPosition(Sc55Mk2::SwitchMidi);
@@ -234,6 +326,17 @@ namespace emu88Lib
 			{
 				auto roms = RomLoader::findSc8850RomSet();
 				auto waves = RomLoader::findSc8850WaveRomSet();
+				CHECK(!roms.cpu.empty() && !roms.program.empty() && !roms.data.empty());
+				if (roms.cpu.empty() || roms.program.empty() || roms.data.empty())
+					return;
+				for (unsigned part = 0; part < 3; ++part)
+				{
+					auto changed = roms;
+					(part == 0 ? changed.cpu : part == 1 ? changed.program : changed.data).back() ^= 1;
+					Sc8850 modified(std::move(changed.cpu), std::move(changed.program), std::move(changed.data), {}, {},
+									false);
+					unknown(modified);
+				}
 				Sc8850 actual(roms.cpu, roms.program, roms.data, waves.romA, waves.romB);
 				Sc8850 reference(roms.cpu, roms.program, roms.data, waves.romA, waves.romB);
 				run(actual, reference, "8850", 32000, 4);
@@ -244,6 +347,7 @@ namespace emu88Lib
 int main(int argc, char** argv)
 {
 	using namespace test;
+	emu88Lib::VoiceReleaseTest::unknownRoms();
 	gpLib::GP gp;
 	gp.write8(3, 1);
 	(void)gp.read8(0);

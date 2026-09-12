@@ -13,6 +13,22 @@ namespace emu88Lib
 {
 	struct Sc88ProReleaseTest
 	{
+		static void unknown(std::vector<uint8_t> firmware)
+		{
+			Sc88Pro b(std::move(firmware), {}, false);
+			CHECK(b.isValid());
+			CHECK(!b.m_autoVoiceReset);
+			for(const auto flags : {0x3d4a, 0x3d8a})
+				b.extWrite8(0xc00000 + flags, 0x80);
+			for(const auto eg : {0x41ca, 0x420a})
+			{
+				b.extWrite8(0xc00000 + eg, 0);
+				b.extWrite8(0xc00000 + eg + 1, 0);
+			}
+			for(const auto allocation : {0xe693, 0xe695})
+				b.extWrite8(0xc00000 + allocation, 0xff);
+			CHECK_EQ(b.m_pendingVoiceResets, uint64_t{0});
+		}
 		static void reuse(const char* _romPath, const unsigned _halfPeriod)
 		{
 			using namespace test;
@@ -21,6 +37,12 @@ namespace emu88Lib
 			CHECK(roms.isValid());
 			if (!roms.isValid())
 				return;
+			if(_halfPeriod == 8000)
+			{
+				auto changed = roms.firmware;
+				changed.back() ^= 1;
+				unknown(std::move(changed));
+			}
 			const bool diagnostics = std::getenv("EMU88_IDLE_DIAGNOSTICS") != nullptr;
 			std::vector<uint8_t> waves;
 			for (const auto* chip : {&roms.waveA, &roms.waveB, &roms.waveC})
@@ -307,4 +329,9 @@ void runSc88VoiceReuseTests(const char* path)
 {
 	emu88Lib::Sc88ProReleaseTest::reuse(path, 8000);
 	emu88Lib::Sc88ProReleaseTest::reuse(path, 32000);
+}
+
+void runUnknownSc88ProRomTest()
+{
+	emu88Lib::Sc88ProReleaseTest::unknown(std::vector<uint8_t>(emu88Lib::Sc88Pro::RomSize));
 }

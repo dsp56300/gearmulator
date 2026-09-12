@@ -4,11 +4,13 @@
 #include "custom_chips/xp/xp.h"
 
 void runSc88ReleaseTests(const char*);
+void runUnknownSc88ProRomTest();
 void runSc88VoiceReuseTests(const char*);
 
 int main(int argc, char** argv)
 {
 	using namespace test;
+	runUnknownSc88ProRomTest();
 	{
 		auto xp = std::make_unique<xpLib::XP>();
 		xp->hostWrite(0x3900, 1);
