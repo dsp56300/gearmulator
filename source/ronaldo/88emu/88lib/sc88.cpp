@@ -1,4 +1,5 @@
 #include "sc88.h"
+#include "baseLib/md5.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -67,6 +68,20 @@ namespace emu88Lib
 			m_xp.mapWaveRom(chip, m_waveRom.data() + chip * waveChipSize, waveChipSize,
 			                       xpLib::XP::PhysicalWaveRomWidth::bits16);
 
+		const auto hash = baseLib::MD5(m_rom);
+		if(m_model == Model::Sc88 && hash == baseLib::MD5("0ac771782ea58a53af590ebdf140d517"))
+		{
+			m_releaseEg = 0x405a;
+			m_releaseFlags = 0x3bda;
+			m_voiceAllocation = 0xf609;
+		}
+		else if(m_model == Model::Sc88VL && hash == baseLib::MD5("25e016e93c8a44ba3c35584462b56d72"))
+		{
+			m_releaseEg = 0x40d6;
+			m_releaseFlags = 0x3c56;
+			m_voiceAllocation = 0xf61d;
+		}
+
 		// Bus map + chip host hooks.
 		wireChip();
 
@@ -94,6 +109,7 @@ namespace emu88Lib
 		m_lcdEnabled = true;
 
 		m_samplesRendered = 0;
+		m_pendingVoiceResets = 0;
 		// The chip's state counter is monotonic across a reset, so the pacing
 		// target rebases onto it rather than onto zero.
 		m_cycleTarget = m_machine.now();
@@ -234,21 +250,33 @@ namespace emu88Lib
 		{
 		case 0x0:
 			if(off >= 0x8000)
+			{
 				m_sram[off] = _val;
+				observeVoiceWrite(off);
+			}
 			// below 0x8000 is mask ROM — writes are dropped
 			return;
 
 		case 0x8:
 			m_sram[off] = _val;
+			observeVoiceWrite(off);
 			return;
 
 		case 0xe:
 			if(off >= 0x4000)
 			{
 				m_sram[off] = _val;
+				observeVoiceWrite(off);
 				return;
 			}
 			m_xp.hostWrite8(off, _val);
+			if(off >= 0x3900 && off < 0x3908 && (off & 1))
+			{
+				const auto first = ((off - 0x3900) / 2) * 16;
+				for(unsigned voice = first; voice < first + 16; ++voice)
+					if(!m_xp.state().voices[voice].resetState_3900.shadow)
+						m_pendingVoiceResets &= ~(uint64_t{1} << voice);
+			}
 			return;
 
 		case 0xf:
@@ -681,6 +709,30 @@ namespace emu88Lib
 		m_machine.sci(1).set_tx_sink([this](const uint8_t _byte, uint64_t) { uart2Transmit(_byte); });
 	}
 
+	void Sc88::observeVoiceWrite(const uint16_t _offset)
+	{
+		if(!m_releaseEg)
+			return;
+		if(_offset >= m_releaseEg && _offset < m_releaseEg + 128)
+		{
+			const auto voice = (_offset - m_releaseEg) / 2;
+			const auto bit = uint64_t{1} << voice;
+			const auto eg = (m_sram[m_releaseEg + voice * 2] << 8) | m_sram[m_releaseEg + voice * 2 + 1];
+			if(eg)
+				m_pendingVoiceResets &= ~bit;
+			else if((_offset & 1) && (m_sram[m_releaseFlags + voice * 2] & 0x80))
+				m_pendingVoiceResets |= bit;
+		}
+		if(_offset >= m_voiceAllocation && _offset < m_voiceAllocation + 128 && (_offset & 1))
+		{
+			const auto bit = uint64_t{1} << ((_offset - m_voiceAllocation) / 2);
+			if(m_sram[_offset] == 0xff)
+				m_pendingVoiceResets |= bit;
+			else
+				m_pendingVoiceResets &= ~bit;
+		}
+	}
+
 	Sc88::SampleFrame Sc88::renderSample()
 	{
 		if(!m_valid)
@@ -708,6 +760,13 @@ namespace emu88Lib
 		if(!m_xpEnabled)
 			return {0, 0};
 
+		if((m_samplesRendered & 127u) == 0 && m_pendingVoiceResets)
+		{
+			for(unsigned voice = 0; voice < 64; ++voice)
+				if(m_pendingVoiceResets & (uint64_t{1} << voice))
+					m_xp.retireVoice(voice);
+			m_pendingVoiceResets = 0;
+		}
 		m_xp.step();
 		return renderXpAudioFrame();
 	}

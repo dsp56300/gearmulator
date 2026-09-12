@@ -18,6 +18,7 @@
  */
 
 #include "sc55mk2.h"
+#include "baseLib/md5.h"
 
 #include <cstring>
 
@@ -53,6 +54,9 @@ namespace emu88Lib
 		// lives; a board without it boots into garbage, so require both.
 		m_valid = m_roms.internalRom.size() >= InternalRomSize
 		       && !m_roms.programRom.empty();
+
+		m_autoVoiceReset = baseLib::MD5(m_roms.internalRom) == baseLib::MD5("4ca058f7db05f51e97bb30a162e9610a")
+			&& baseLib::MD5(m_roms.programRom) == baseLib::MD5("63b24c7193ce34afefce9cec32ac39f0");
 
 		if(m_roms.programRom.size() > ProgramRomSize)
 			m_roms.programRom.resize(ProgramRomSize);
@@ -198,11 +202,17 @@ namespace emu88Lib
 			if(off < g_gpBase)
 			{
 				m_sram[(off - g_sramBase) & (SramSize - 1)] = _val;
+				observeVoiceWrite((off - g_sramBase) & (SramSize - 1));
 				return;
 			}
 			if(off <= g_gpEnd)
 			{
 				m_gp.write8(off & 0x3F, _val);
+				if((off & 0x3f) < 4)
+				{
+					const auto shift = (3 - (off & 3)) * 8;
+					m_pendingVoiceResets &= ~(uint32_t(static_cast<uint8_t>(~_val)) << shift);
+				}
 				return;
 			}
 			if(off >= g_gaBase && off <= g_gaEnd)
@@ -219,7 +229,10 @@ namespace emu88Lib
 		}
 
 		if(page == 10 || page == 11)
+		{
 			m_sram[off & (SramSize - 1)] = _val;
+			observeVoiceWrite(off & (SramSize - 1));
+		}
 		// Everything else is ROM or unmapped.
 	}
 
@@ -428,6 +441,33 @@ namespace emu88Lib
 		});
 	}
 
+	void Sc55Mk2::observeVoiceWrite(const uint16_t _offset)
+	{
+		constexpr uint16_t first = 0x2dae;
+		constexpr uint16_t stride = 0x12a;
+		if(!m_autoVoiceReset || _offset < first || _offset >= first + stride * 28)
+			return;
+		const auto voice = (_offset - first) / stride;
+		const auto field = (_offset - first) % stride;
+		const auto bit = uint32_t{1} << voice;
+		const auto base = first + stride * voice;
+		const auto state = (m_sram[base] << 8) | m_sram[base + 1];
+		if(field == 1)
+		{
+			if(state == 0x0c)
+				m_releasingVoices |= bit;
+			else if(state < 0x0c)
+			{
+				m_releasingVoices &= ~bit;
+				m_pendingVoiceResets &= ~bit;
+			}
+		}
+		// H8 routine 0x3095 ends the release after GP completion. The
+		// software accumulator may retain its final fractional remainder.
+		if(field == 1 && (m_releasingVoices & bit) && state == 0x16)
+			m_pendingVoiceResets |= bit;
+	}
+
 	Sc55Mk2::SampleFrame Sc55Mk2::renderSample()
 	{
 		if(!m_valid)
@@ -454,6 +494,13 @@ namespace emu88Lib
 		// on the next one, which is the direction the real handshake runs.
 		m_subMcu.update(subMcuCycles(m_samplesRendered));
 
+		if((m_samplesRendered & 255u) == 0 && m_pendingVoiceResets)
+		{
+			for(unsigned voice = 0; voice < 28; ++voice)
+				if(m_pendingVoiceResets & (uint32_t{1} << voice))
+					m_gp.retireVoice(voice);
+			m_pendingVoiceResets = 0;
+		}
 		return m_gp.renderFrame();
 	}
 }

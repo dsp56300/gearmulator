@@ -39,6 +39,7 @@ namespace emu88Lib
 	//
 	class Sc55Mk2
 	{
+		friend struct VoiceReleaseTest;
 	public:
 
 		// External interrupt pins as this board wires them: the GP's voice-end
@@ -238,6 +239,10 @@ namespace emu88Lib
 
 		std::vector<uint8_t> m_sram = std::vector<uint8_t>(SramSize, 0);
 
+		bool m_autoVoiceReset = false;
+		uint32_t m_releasingVoices = 0;
+		uint32_t m_pendingVoiceResets = 0;
+		void observeVoiceWrite(uint16_t _offset);
 		GP  m_gp { gpLib::GpConfig{ GpClockHz, false } };
 		Lcd m_lcd;
 		Sc55SubMcu m_subMcu;

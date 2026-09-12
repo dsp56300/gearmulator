@@ -47,6 +47,7 @@ namespace emu88Lib
 	//   page 0xF                 sub-MCU (0x00xx) and gate array (0xC1xx)
 	class Sc88
 	{
+		friend struct VoiceReleaseTest;
 	public:
 
 		// External interrupt pins as this board wires them.
@@ -194,6 +195,7 @@ namespace emu88Lib
 		// these — the chip decodes it on-chip).
 		uint8_t  extRead8 (uint32_t _addr);
 		void     extWrite8(uint32_t _addr, uint8_t _val);
+		void observeVoiceWrite(uint16_t _offset);
 		// A port data-register read, with the value the port model computed
 		// from its latch and pin levels.
 		uint8_t portRead (uint32_t _addr, uint8_t _value);
@@ -282,6 +284,10 @@ namespace emu88Lib
 		std::vector<uint8_t> m_sram = std::vector<uint8_t>(SramSize, 0);
 		std::vector<uint8_t> m_waveRom;
 
+		uint16_t m_releaseEg = 0;
+		uint16_t m_releaseFlags = 0;
+		uint16_t m_voiceAllocation = 0;
+		uint64_t m_pendingVoiceResets = 0;
 		xpLib::XP m_xp;
 		bool m_xpEnabled = true;
 
