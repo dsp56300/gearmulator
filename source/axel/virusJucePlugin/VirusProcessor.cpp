@@ -11,6 +11,11 @@
 #include "synthLib/deviceException.h"
 #include "synthLib/lv2PresetExport.h"
 
+namespace
+{
+	constexpr auto g_preferredDeviceSamplerateKey = "preferredDeviceSamplerate";
+}
+
 namespace virus
 {
 	VirusProcessor::VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const virusLib::DeviceModel _defaultModel)
@@ -23,6 +28,13 @@ namespace virus
 	{
 		destroyController();
 		destroyEditorState();
+	}
+
+	bool VirusProcessor::setPreferredDeviceSamplerate(const float _samplerate)
+	{
+		getConfig().setValue(g_preferredDeviceSamplerateKey, _samplerate);
+		getConfig().saveIfNeeded();
+		return Processor::setPreferredDeviceSamplerate(_samplerate);
 	}
 
 	//==============================================================================
@@ -74,6 +86,7 @@ namespace virus
 	void VirusProcessor::postConstruct(std::vector<virusLib::ROMFile>&& _roms)
 	{
 		m_roms = std::move(_roms);
+		Processor::setPreferredDeviceSamplerate(static_cast<float>(getConfig().getDoubleValue(g_preferredDeviceSamplerateKey, 0.0)));
 
 		evRomChanged.retain(getSelectedRom());
 
