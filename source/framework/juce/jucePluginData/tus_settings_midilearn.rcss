@@ -28,11 +28,15 @@
 	padding-bottom: 0.3em;
 }
 
-.ml-col-type { width: 7%; }
+#mappingTable {
+	column-gap: 0.65em;
+}
+
 .ml-col-channel { width: 8%; }
 .ml-col-part { width: 8%; }
 .ml-col-controller { width: 9%; }
 .ml-col-mode { width: 17%; }
 .ml-col-invert { width: 7%; }
-.ml-col-parameter { width: 19%; }
-.ml-col-remove { width: 15%; }
+.ml-col-disabled { width: 10%; }
+.ml-col-parameter { width: 23%; }
+.ml-col-remove { width: 8%; }

@@ -6,6 +6,7 @@
 #include "baseLib/binarystream.h"
 
 #include <juce_data_structures/juce_data_structures.h>
+#include <algorithm>
 
 namespace pluginLib
 {
@@ -82,10 +83,14 @@ namespace pluginLib
 		const auto* mapping = m_preset.findMapping(_event);
 		if (mapping)
 		{
-			// Found a learned mapping - apply it and consume the event
-			applyMapping(*mapping, _event);
+			if (!isMappingInputBlocked(*mapping, _event))
+				applyMapping(*mapping, _event);
 			return true; // Consumed - don't forward to device
 		}
+
+		// A parameter can discard MIDI input without having a learned override
+		if (isBlockedDefaultControllerMapping(_event))
+			return true;
 
 		// No learned mapping found
 		// Check if this is a default controller mapping handled by firmware
@@ -119,6 +124,44 @@ namespace pluginLib
 		// Check if this MIDI event matches any default controller mapping
 		const auto& params = m_controllerMap.getParameters(_event);
 		return !params.empty();
+	}
+
+	bool MidiLearnTranslator::isMappingInputBlocked(const MidiLearnMapping& _mapping, const synthLib::SMidiEvent& _event) const
+	{
+		if (_mapping.part != MidiLearnMapping::AutoPart)
+			return m_preset.isInputBlocked(_mapping.paramName, _mapping.part);
+
+		const auto eventParts = m_controller.getPartsForMidiEvent(_event);
+		if (eventParts.empty())
+			return m_preset.isInputBlocked(_mapping.paramName, MidiLearnMapping::AutoPart);
+
+		return std::any_of(eventParts.begin(), eventParts.end(), [&](uint8_t _part)
+		{
+			return m_preset.isInputBlocked(_mapping.paramName, _part);
+		});
+	}
+
+	bool MidiLearnTranslator::isBlockedDefaultControllerMapping(const synthLib::SMidiEvent& _event) const
+	{
+		const auto& paramIndices = m_controllerMap.getParameters(_event);
+		if (paramIndices.empty())
+			return false;
+
+		const auto eventParts = m_controller.getPartsForMidiEvent(_event);
+
+		for (const auto& block : m_preset.getInputBlocks())
+		{
+			const auto paramIndex = m_controller.getParameterIndexByName(block.paramName);
+			if (paramIndex == Controller::InvalidParameterIndex ||
+				std::find(paramIndices.begin(), paramIndices.end(), paramIndex) == paramIndices.end())
+				continue;
+
+			if (block.part == MidiLearnMapping::AutoPart || eventParts.empty() ||
+				std::find(eventParts.begin(), eventParts.end(), block.part) != eventParts.end())
+				return true;
+		}
+
+		return false;
 	}
 
 	void MidiLearnTranslator::applyMapping(const MidiLearnMapping& _mapping, const synthLib::SMidiEvent& _event)
@@ -406,7 +449,8 @@ namespace pluginLib
 		
 		for (const auto* mapping : mappings)
 		{
-			if (!mapping || mapping->feedbackTargets == 0)
+			if (!mapping || mapping->type == MidiLearnMapping::Type::Invalid ||
+				m_preset.isInputBlocked(mapping->paramName, mapping->part) || mapping->feedbackTargets == 0)
 				continue;
 
 			// Create the feedback MIDI event
@@ -449,6 +493,10 @@ namespace pluginLib
 
 		switch (_mapping.type)
 		{
+		case MidiLearnMapping::Type::Invalid:
+			// Invalid mappings cannot produce meaningful MIDI feedback.
+			break;
+
 		case MidiLearnMapping::Type::ControlChange:
 		case MidiLearnMapping::Type::PolyPressure:
 			event.b = _mapping.controller;

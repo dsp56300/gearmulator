@@ -10,6 +10,17 @@ namespace synthLib { struct SMidiEvent; }
 
 namespace pluginLib
 {
+	struct MidiInputBlock
+	{
+		std::string paramName;
+		uint8_t part = MidiLearnMapping::AutoPart;
+
+		bool operator==(const MidiInputBlock& _other) const
+		{
+			return paramName == _other.paramName && part == _other.part;
+		}
+	};
+
 	class MidiLearnPreset
 	{
 	public:
@@ -26,6 +37,13 @@ namespace pluginLib
 		void clearMappings();
 		const std::vector<MidiLearnMapping>& getMappings() const { return m_mappings; }
 		std::vector<MidiLearnMapping>& getMappings() { return m_mappings; }
+
+		// Parameter-level MIDI suppression, independent of learned mappings.
+		void addInputBlock(const MidiInputBlock& _block);
+		void removeInputBlock(const std::string& _paramName, uint8_t _part);
+		bool isInputBlocked(const std::string& _paramName, uint8_t _part) const;
+		const std::vector<MidiInputBlock>& getInputBlocks() const { return m_inputBlocks; }
+		std::vector<MidiInputBlock>& getInputBlocks() { return m_inputBlocks; }
 
 		// Find mapping by MIDI message
 		const MidiLearnMapping* findMapping(MidiLearnMapping::Type _type, uint8_t _channel, uint8_t _controller) const;
@@ -46,7 +64,7 @@ namespace pluginLib
 		bool operator==(const MidiLearnPreset& _other) const;
 
 		// Returns true if preset is empty (no mappings and no name)
-		bool empty() const { return m_name.empty() && m_mappings.empty(); }
+		bool empty() const { return m_name.empty() && m_mappings.empty() && m_inputBlocks.empty(); }
 
 		// Default feedback targets applied to newly learned mappings
 		uint8_t getDefaultFeedbackTargets() const { return m_defaultFeedbackTargets; }
@@ -55,6 +73,7 @@ namespace pluginLib
 	private:
 		std::string m_name;
 		std::vector<MidiLearnMapping> m_mappings;
+		std::vector<MidiInputBlock> m_inputBlocks;
 		uint8_t m_defaultFeedbackTargets = 0;
 	};
 }
