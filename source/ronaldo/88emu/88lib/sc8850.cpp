@@ -1,4 +1,5 @@
 #include "sc8850.h"
+#include "baseLib/md5.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -75,6 +76,10 @@ namespace emu88Lib
 			std::fprintf(stderr, "Sc8850: data flash must be %u bytes, got %zu\n", DataRomSize, m_dataRom.size());
 			return;
 		}
+		m_autoVoiceReset = baseLib::MD5(m_cpuRom) == baseLib::MD5("efe1ffb0ccbe1b2ec454692c522494fc")
+			&& baseLib::MD5(m_programRom) == baseLib::MD5("554d5997dcd9ce6fa0777092ff48f6fa")
+			&& baseLib::MD5(m_dataRom) == baseLib::MD5("06eee65647b66109efb01eabd6d71248");
+
 		// ---- bus map ----
 		Bus& bus = m_machine.bus();
 		bus.load(0, m_cpuRom.data(), m_cpuRom.size());
@@ -214,6 +219,7 @@ namespace emu88Lib
 		for(auto& xp : m_xp)
 			xp.reset();
 		m_lsp.clear();
+		m_voiceResetSamples = 0;
 		m_lcd.reset();
 		m_gateArray.reset();
 		m_gateIrqPending = false;
@@ -646,6 +652,20 @@ namespace emu88Lib
 	// Frame
 	// =====================================================================
 
+	void Sc8850::resetFinishedVoices()
+	{
+		// SH-2 routine 0x6604 marks a completed allocation free. The
+		// envelope accumulator can retain a nonzero value after completion.
+		const auto* records = m_machine.bus().ptr(WorkRamBase + 0x22024);
+		for(unsigned voice = 0; voice < 128; ++voice)
+		{
+			const auto* record = records + voice * 0x1e4;
+			if(record[0] != voice || record[1] != 1 || record[0x148] != 0)
+				continue;
+			m_xp[voice < 64 ? 1 : 0].retireVoice(voice & 63);
+		}
+	}
+
 	Sc8850::SampleFrame Sc8850::renderSample()
 	{
 		if(!m_valid) return {0, 0};
@@ -660,6 +680,9 @@ namespace emu88Lib
 		m_cycleTarget += StatesPerSample;
 		while(m_machine.now() < m_cycleTarget)
 			m_machine.run(m_cycleTarget - m_machine.now());
+
+		if(m_autoVoiceReset && (++m_voiceResetSamples & 127u) == 0)
+			resetFinishedVoices();
 
 		m_lcd.flush();
 		auto& xp0Dsp = m_xp[0].dsp();

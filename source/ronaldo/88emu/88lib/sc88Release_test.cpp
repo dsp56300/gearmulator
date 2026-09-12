@@ -56,9 +56,10 @@ namespace emu88Lib
 					if (!voice.resetState_3900.released)
 						continue;
 					++active;
-					egZero += !(actual.m_sram[0x41ca + 2 * v] || actual.m_sram[0x41cb + 2 * v]);
+					egZero += !(actual.m_sram[actual.m_releaseEg + 2 * v]
+						|| actual.m_sram[actual.m_releaseEg + 2 * v + 1]);
 					ampZero += voice.ampCurrent_1e00 == 0;
-					firmwareFree += actual.m_sram[0xe693 + 2 * v] == 0xff;
+					firmwareFree += actual.m_sram[actual.m_voiceAllocation + 2 * v] == 0xff;
 				}
 				std::cout << "Idle " << label << " active=" << active << " egZero=" << egZero << " ampZero=" << ampZero
 						  << " firmwareFree=" << firmwareFree << std::endl;
@@ -240,7 +241,8 @@ namespace emu88Lib
 					const auto newlyRetired = launched & ~active & ~retired;
 					if (newlyRetired && i < (c.mode == 2 || c.mode == 3 ? 4u : 2u) * 32000)
 						for (unsigned voice = 0; voice < 64; ++voice)
-							if ((newlyRetired & (uint64_t{1} << voice)) && b.m_sram[0xe693 + voice * 2] != 0xff)
+							if ((newlyRetired & (uint64_t{1} << voice))
+								&& b.m_sram[b.m_voiceAllocation + voice * 2] != 0xff)
 								early = true;
 					retired |= newlyRetired;
 				}
@@ -280,20 +282,20 @@ namespace emu88Lib
 					}
 				}
 				// A completion followed by a new EG value before the 4 ms tick is cancelled.
-				b.m_sram[0x3d4a] = 0x80;
-				b.extWrite8(0xc041ca, 0);
-				b.extWrite8(0xc041cb, 0);
+				b.m_sram[b.m_releaseFlags] = 0x80;
+				b.extWrite8(0xc00000 + b.m_releaseEg, 0);
+				b.extWrite8(0xc00000 + b.m_releaseEg + 1, 0);
 				CHECK(b.m_pendingVoiceResets & 1);
-				b.extWrite8(0xc041ca, 0xff);
+				b.extWrite8(0xc00000 + b.m_releaseEg, 0xff);
 				CHECK(!(b.m_pendingVoiceResets & 1));
 				b.m_pendingVoiceResets = 1;
 				b.extWrite8(0xc83900, 0);
 				b.extWrite8(0xc83901, 0);
 				CHECK(!(b.m_pendingVoiceResets & 1));
 				// A freed slot may be reallocated before the next 4 ms tick.
-				b.extWrite8(0xc0e693, 0xff);
+				b.extWrite8(0xc00000 + b.m_voiceAllocation, 0xff);
 				CHECK(b.m_pendingVoiceResets & 1);
-				b.extWrite8(0xc0e693, 2);
+				b.extWrite8(0xc00000 + b.m_voiceAllocation, 2);
 				CHECK(!(b.m_pendingVoiceResets & 1));
 			}
 		}

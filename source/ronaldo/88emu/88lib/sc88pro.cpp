@@ -87,9 +87,20 @@ namespace emu88Lib
 		}
 
 		m_valid = true;
-		// This SRAM layout and the release-zero write were verified against
-		// this control ROM. Other firmware must be mapped before enabling it.
-		m_autoVoiceReset = baseLib::MD5(m_rom) == baseLib::MD5("784b3ea762b5f96cabdceb33d121d5e4");
+		const auto hash = baseLib::MD5(m_rom);
+		if(hash == baseLib::MD5("784b3ea762b5f96cabdceb33d121d5e4"))
+		{
+			m_releaseEg = 0x41ca;
+			m_releaseFlags = 0x3d4a;
+			m_voiceAllocation = 0xe693;
+		}
+		else if(hash == baseLib::MD5("9d4c2f123b4451d8ee75c3b982760f28"))
+		{
+			m_releaseEg = 0x420a;
+			m_releaseFlags = 0x3d8a;
+			m_voiceAllocation = 0xe695;
+		}
+		m_autoVoiceReset = m_releaseEg != 0;
 		powerCycle();
 
 		// A new emulator instance has blank battery SRAM. Initialise it through
@@ -274,13 +285,12 @@ namespace emu88Lib
 		if(page >= PageSramFirst && page <= PageSramLast)
 		{
 			m_sram[off] = _val;
-			if(m_autoVoiceReset && off >= 0x41ca && off < 0x424a)
+			if(m_autoVoiceReset && off >= m_releaseEg && off < m_releaseEg + 128)
 				observeReleaseEgWrite(off);
-			if(m_autoVoiceReset && off >= 0xe693 && off < 0xe713 && (off & 1))
+			if(m_autoVoiceReset && off >= m_voiceAllocation && off < m_voiceAllocation + 128 && (off & 1))
 			{
-				// The H8 completion queue (00:7480) can free a voice without
-				// zeroing its old software EG. 00:936B uses the same free state.
-				const auto bit = uint64_t{1} << ((off - 0xe693) / 2);
+				// The H8 completion queue can free a voice without zeroing its old EG.
+				const auto bit = uint64_t{1} << ((off - m_voiceAllocation) / 2);
 				if(_val == 0xff)
 					m_pendingVoiceResets |= bit;
 				else
@@ -610,15 +620,15 @@ namespace emu88Lib
 
 	void Sc88Pro::observeReleaseEgWrite(const uint16_t _offset)
 	{
-		// H8 routine 00:B03E writes this word to zero while 3D4A bit 7 is
-		// still set; 00:B044 immediately clears that bit. Latch on the low
-		// byte, not by periodically sampling RAM or by looking at XP volume.
-		const auto voice = (_offset - 0x41ca) / 2;
+		// The H8 clears the software EG before clearing its release flag.
+		// Latch the low-byte write so completion cannot fall between polls.
+		const auto voice = (_offset - m_releaseEg) / 2;
 		const auto bit = uint64_t{1} << voice;
-		const auto eg = static_cast<uint16_t>((m_sram[0x41ca + voice * 2] << 8) | m_sram[0x41cb + voice * 2]);
+		const auto eg = static_cast<uint16_t>((m_sram[m_releaseEg + voice * 2] << 8)
+			| m_sram[m_releaseEg + voice * 2 + 1]);
 		if(eg != 0)
 			m_pendingVoiceResets &= ~bit;
-		else if((_offset & 1) && (m_sram[0x3d4a + voice * 2] & 0x80))
+		else if((_offset & 1) && (m_sram[m_releaseFlags + voice * 2] & 0x80))
 			m_pendingVoiceResets |= bit;
 	}
 

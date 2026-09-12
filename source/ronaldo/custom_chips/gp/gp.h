@@ -80,6 +80,8 @@ namespace gpLib
 		// Clears every register and the working state; installed wave ROMs
 		// survive, as they would a chip reset.
 		void reset();
+		void retireVoice(uint32_t _voice);
+		uint32_t retiredVoices() const { return m_retiredVoices; }
 
 		const GpConfig& config() const { return m_config; }
 
@@ -142,6 +144,7 @@ namespace gpLib
 		uint32_t voiceSlots() const { return (m_regs.config_reg_3d & 31) + 1; }
 
 	private:
+		uint32_t m_retiredVoices = 0;
 		// The six effect-return pairs the microprogram produces per
 		// iteration: a mix contribution and a send-sum contribution each,
 		// folded in by the voice pass at fixed time slots.

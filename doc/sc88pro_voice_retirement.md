@@ -1,8 +1,16 @@
 # SC-88 Pro voice retirement
 
-Voice retirement is enabled only for control ROM MD5
-`784b3ea762b5f96cabdceb33d121d5e4`. Other ROMs retain the existing behavior.
-No firmware bytes are included in this change.
+Voice retirement is enabled for the verified VE-GSPro A and SC-88Pro 1.02
+control ROMs. Other ROMs retain the existing behavior. No firmware bytes are
+included in this change.
+
+| ROM | MD5 | EG base | Release flag base | Allocation base |
+| --- | --- | --- | --- | --- |
+| VE-GSPro A | `784b3ea762b5f96cabdceb33d121d5e4` | `41CA` | `3D4A` | `E693` |
+| SC-88Pro 1.02 | `9d4c2f123b4451d8ee75c3b982760f28` | `420A` | `3D8A` | `E695` |
+
+SC-88Pro 1.02 routines `B088`/`B08E` finish the release and `74E4` marks a
+completed allocation free. The following routine addresses describe VE-GSPro A.
 
 The H8 writes the following per-slot SRAM fields (`v` is the XP slot index):
 

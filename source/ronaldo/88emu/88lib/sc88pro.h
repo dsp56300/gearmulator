@@ -210,6 +210,9 @@ namespace emu88Lib
 	private:
 		friend struct Sc88ProReleaseTest;
 		bool m_autoVoiceReset = false;
+		uint16_t m_releaseEg = 0;
+		uint16_t m_releaseFlags = 0;
+		uint16_t m_voiceAllocation = 0;
 		uint64_t m_pendingVoiceResets = 0;
 		void observeReleaseEgWrite(uint16_t _offset);
 		void resetFinishedVoices();
