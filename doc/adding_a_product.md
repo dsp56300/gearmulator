@@ -725,7 +725,40 @@ One CPack component per product and format; archive names
 `<Product>ServerPlugin`. No README or license file is packaged, and there is no signing tooling
 in the repository.
 
-### 14.5 Changelog, `doc/changelog.txt`
+### 14.5 Linux distribution packages (OBS)
+
+`installer/obs/` is the openSUSE Build Service package `home:theusualsuspects/TheUsualSuspects`.
+It builds public `main` for openSUSE Tumbleweed and Leap, Fedora, Debian and Ubuntu, on x86_64
+and on aarch64 where OBS offers it, and publishes installable repositories. One build per target
+produces one package per product, `theusualsuspects-<lowercase product>`, holding that product's
+VST2, VST3, CLAP and LV2 plugins. `installer/obs/README.md` has the mechanics, the target list
+and the version bump.
+
+A new product is four edits. The package name is lowercase, the paths inside keep the product
+name:
+
+| File | Add |
+|---|---|
+| `TheUsualSuspects.spec` | `%package -n theusualsuspects-<lower>` with `Summary:` and `%description`, and a `%files` block: `%license LICENSE.md`, the four `%dir` entries, then `%{_prefix}/lib/vst/<Product>.so`, `vst3/<Product>.vst3`, `clap/<Product>.clap`, `lv2/<Product>.lv2` |
+| `debian.control` | a `Package: theusualsuspects-<lower>` stanza: `Architecture: amd64 arm64`, `Depends: ${shlibs:Depends}, ${misc:Depends}`, description |
+| `debian.theusualsuspects-<lower>.install` | the same four paths as `usr/lib/...`, one per line |
+| `TheUsualSuspects.dsc` | the package in the `Binary:` list |
+
+Traps:
+
+- **Public products only.** OBS clones `main` from the public GitHub repository, so a product
+  that is not public yet neither builds there nor belongs in these files (name gate,
+  restructure_plan.md §9).
+- Debian package names must be lowercase, while the plugin files keep the product's case. Those
+  file names are what `%files` and the `.install` file match: a rename breaks both silently.
+- `%install` and `debian.rules` keep only the four plugin directories and delete everything else
+  the tree installs, the test console and the bridge server plugin included. A product that ships
+  more than plugins needs a rule there, not just a `%files` entry.
+- Standalone-only products are not built at all: the OBS build passes
+  `gearmulator_BUILD_JUCEPLUGIN_Standalone=OFF`.
+- Nothing in the OBS project itself is per-product; its repositories are per distribution.
+
+### 14.6 Changelog, `doc/changelog.txt`
 
 - The section header `<Product>:` must equal the product name, case-sensitive. Entries shared by
   products use slash headers (`Vavra/Xenia:`); `Framework`, `DSP` and `Patch Manager` are global
@@ -737,7 +770,7 @@ in the repository.
 - GitHub release notes need a `<version>:` header equal to `project(gearmulator VERSION ...)`.
 - Entries `- [New]`, `- [Imp]`, `- [Fix]`, continuation lines indented 8 spaces (`CLAUDE.md`).
 
-### 14.6 Portability traps every new product has hit
+### 14.7 Portability traps every new product has hit
 
 - Path casing in `#include` and CMake: Windows and macOS forgive it, Linux CI does not
   (`addSkin` stops configure on a case mismatch).
@@ -880,7 +913,7 @@ Confirm with `get_issue_fields_schema`.
 
 1. Name gate on everything that lands on `oss/main`, commit messages included (restructure_plan.md §9).
 2. `README.md` device list and option table; `CLAUDE.md` per-synth table, test console list and
-   CMake flags; `CMakePresets.json` presets.
+   CMake flags; `CMakePresets.json` presets; `installer/obs` packaging (§14.5).
 3. Remove the slug from the root `IndexIgnore`; the tiers stay protected.
 4. Release per `CLAUDE.md` "Release Workflow"; Jenkins with `GitHub=true` runs
    `scripts/deployGitHub.cmake` (draft release, notes from `doc/changelog_split/<version>.txt`).
@@ -938,6 +971,7 @@ Build and CI
 - [ ] `scripts/products.cmake`
 - [ ] `scripts/JenkinsfileMulti` and the live `dsp56300_main_multi` pipeline
 - [ ] `doc/changelog.txt` section `<Product>:`
+- [ ] `installer/obs`: spec subpackage, `debian.control` stanza, `.install` file, dsc `Binary:` (public products)
 - [ ] green on Windows, macOS, Linux x86_64 and aarch64, ctest included
 
 Infrastructure
