@@ -1,7 +1,6 @@
 #include "audiobuffer.h"
 
 #include <cassert>
-#include <cstring>	// memcpy
 
 namespace synthLib
 {
@@ -99,9 +98,7 @@ namespace synthLib
 
 	void AudioBuffer::append(TChannel& _dst, const float* _data, size_t _size)
 	{
-		const auto oldSize = _dst.size();
-		_dst.resize(oldSize + _size);
-		memcpy(&_dst[oldSize], _data, _size * sizeof(float));
+		_dst.insert(_dst.end(), _data, _data + _size);
 	}
 
 }
