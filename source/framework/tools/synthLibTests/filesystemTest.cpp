@@ -1,30 +1,47 @@
 #include "synthLibTests.h"
 
 #include <algorithm>
-#include <filesystem>
-#include <fstream>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
 
 #include "baseLib/filesystem.h"
 
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
+
 namespace
 {
+	// No <filesystem> in here. It is unavailable below macOS 10.15 while we build for 10.13, and
+	// avoiding it is the whole reason baseLib::filesystem has its USE_DIRENT path. So the test drives
+	// the API it tests, and borrows rmdir for the one thing that API has no counterpart for.
+	void removeDirectory(const std::string& _dir)
+	{
+#ifdef _WIN32
+		_rmdir(_dir.c_str());
+#else
+		rmdir(_dir.c_str());
+#endif
+	}
+
 	std::vector<std::string> sortedNames(const std::vector<std::string>& _paths)
 	{
 		std::vector<std::string> names;
 		names.reserve(_paths.size());
 		for (const auto& p : _paths)
-			names.push_back(std::filesystem::u8path(p).filename().u8string());
+			names.push_back(baseLib::filesystem::getFilenameWithoutPath(p));
 		std::sort(names.begin(), names.end());
 		return names;
 	}
 
-	void writeBytes(const std::filesystem::path& _file, const size_t _count)
+	void writeBytes(const std::string& _file, const size_t _count)
 	{
-		std::ofstream out(_file, std::ios::binary);
-		out << std::string(_count, 'x');
+		const std::vector<uint8_t> data(_count, 'x');
+		baseLib::filesystem::writeFile(_file, data);
 	}
 }
 
@@ -36,27 +53,38 @@ void testFilesystem()
 {
 	std::cout << "Testing baseLib::filesystem::findFiles..." << std::endl;
 
-	const auto root = std::filesystem::temp_directory_path() / "synthLibTests_findFiles";
-	std::filesystem::remove_all(root);
-	std::filesystem::create_directories(root / "subfolder");
-	writeBytes(root / "patch.syx", 10);
-	writeBytes(root / "notes.txt", 100);
+	const auto root = baseLib::filesystem::validatePath(baseLib::filesystem::getCurrentDirectory()) + "synthLibTests_findFiles";
+	const auto subfolder = root + "/subfolder";
+	const auto syxFile = root + "/patch.syx";
+	const auto txtFile = root + "/notes.txt";
 
-	const auto rootPath = root.u8string();
+	auto cleanup = [&]()
+	{
+		baseLib::filesystem::remove(syxFile);
+		baseLib::filesystem::remove(txtFile);
+		removeDirectory(subfolder);
+		removeDirectory(root);
+	};
+
+	cleanup();	// in case a previous run was killed before it got to clean up after itself
+
+	baseLib::filesystem::createDirectory(subfolder);	// creates the root along with it
+	writeBytes(syxFile, 10);
+	writeBytes(txtFile, 100);
 
 	std::vector<std::string> everything;
-	baseLib::filesystem::findFiles(everything, rootPath, {}, 0, 0);
+	baseLib::filesystem::findFiles(everything, root, {}, 0, 0);
 
 	std::vector<std::string> byExtension;
-	baseLib::filesystem::findFiles(byExtension, rootPath, ".syx", 0, 0);
+	baseLib::filesystem::findFiles(byExtension, root, ".syx", 0, 0);
 
 	std::vector<std::string> upTo50;
-	baseLib::filesystem::findFiles(upTo50, rootPath, {}, 0, 50);
+	baseLib::filesystem::findFiles(upTo50, root, {}, 0, 50);
 
 	std::vector<std::string> from50;
-	baseLib::filesystem::findFiles(from50, rootPath, {}, 50, 0);
+	baseLib::filesystem::findFiles(from50, root, {}, 50, 0);
 
-	std::filesystem::remove_all(root);
+	cleanup();
 
 	TEST_ASSERT(sortedNames(everything) == std::vector<std::string>({"notes.txt", "patch.syx", "subfolder"}));
 	TEST_ASSERT(sortedNames(byExtension) == std::vector<std::string>({"patch.syx"}));
