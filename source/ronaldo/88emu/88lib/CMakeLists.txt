@@ -7,7 +7,7 @@ add_library(88lib STATIC)
 set(SOURCES
 	deviceModel.cpp deviceModel.h
 	hardwareDevice.cpp hardwareDevice.h
-	sc88Thread.cpp sc88Thread.h
+	sc88Renderer.cpp sc88Renderer.h
 	rom.cpp rom.h
 	romloader.cpp romloader.h
 	romRegistry.h
@@ -33,12 +33,12 @@ target_include_directories(88lib
 )
 
 if(BUILD_TESTING)
-	add_executable(sc88Thread_test sc88Thread_test.cpp)
-	target_link_libraries(sc88Thread_test PRIVATE 88lib)
+	add_executable(sc88Renderer_test sc88Renderer_test.cpp)
+	target_link_libraries(sc88Renderer_test PRIVATE 88lib)
 	# This directory is pulled in with EXCLUDE_FROM_ALL, which kept the test out of the generated
 	# solution entirely - ctest has been reporting it as "Not Run" rather than running it.
-	set_property(TARGET sc88Thread_test PROPERTY EXCLUDE_FROM_ALL FALSE)
-	set_property(TARGET sc88Thread_test PROPERTY FOLDER "Ronaldo/tests")
-	add_test(NAME sc88Thread COMMAND sc88Thread_test)
-	set_tests_properties(sc88Thread PROPERTIES TIMEOUT 20)
+	set_property(TARGET sc88Renderer_test PROPERTY EXCLUDE_FROM_ALL FALSE)
+	set_property(TARGET sc88Renderer_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME sc88Renderer COMMAND sc88Renderer_test)
+	set_tests_properties(sc88Renderer PROPERTIES TIMEOUT 20)
 endif()
