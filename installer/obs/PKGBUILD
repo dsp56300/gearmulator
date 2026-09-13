@@ -1,0 +1,93 @@
+# Maintainer: The Usual Suspects <dsp56300@protonmail.com>
+#
+# One build, one package per synth. OBS builds this for Arch from the same source service as
+# the spec and the dsc; see README.md.
+
+pkgbase=theusualsuspects
+pkgname=(
+  theusualsuspects-osirus
+  theusualsuspects-ostirus
+  theusualsuspects-vavra
+  theusualsuspects-xenia
+  theusualsuspects-nodalred2x
+  theusualsuspects-je8086
+)
+pkgver=2.2.19
+pkgrel=1
+pkgdesc='Emulations of classic virtual analog synthesizers'
+arch=('x86_64' 'aarch64')
+url='https://theusualsuspects.io'
+license=('GPL-3.0-or-later')
+# pacman detects no dependencies, and JUCE loads the X11 libraries at run time: list them all.
+depends=('alsa-lib' 'libglvnd' 'libx11' 'libxext' 'libxinerama' 'libxrandr' 'libxcursor')
+# freetype2 and fontconfig: JUCE builds juceaide as a host tool that needs the system headers.
+makedepends=('cmake' 'ninja' 'freetype2' 'fontconfig' 'libxcomposite')
+options=('!debug')
+source=("TheUsualSuspects-$pkgver.tar.xz")
+sha256sums=('SKIP')
+
+_src="TheUsualSuspects-$pkgver"
+
+build() {
+  # CMAKE_BUILD_TYPE=None keeps makepkg's flags; base.cmake defines NDEBUG for it. VST2 builds
+  # against the bundled GPL-3.0 FST headers.
+  local _cmake_args=(
+    -DCMAKE_BUILD_TYPE=None
+    -DCMAKE_INSTALL_PREFIX=/usr
+    -Dgearmulator_BUILD_JUCEPLUGIN=ON
+    -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON
+    -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON
+    -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON
+    -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON
+    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=OFF
+  )
+  cmake -S "$_src" -B build -G Ninja "${_cmake_args[@]}"
+  cmake --build build
+  # The install rules are shaped for the CPack ZIPs and install much more than the plugins;
+  # each package function copies only its synth's four plugins out of this staging tree.
+  DESTDIR="$srcdir/stage" cmake --install build
+}
+
+check() {
+  # The Virus integration and ROM hash tests need firmware we cannot ship.
+  ctest --test-dir build --output-on-failure --exclude-regex 'virusIntegrationTests|virusRomHashTests'
+}
+
+_package_synth() {
+  install -d "$pkgdir"/usr/lib/{vst,vst3,clap,lv2}
+  cp -a "$srcdir/stage/usr/lib/vst/$1.so" "$pkgdir/usr/lib/vst/"
+  cp -a "$srcdir/stage/usr/lib/vst3/$1.vst3" "$pkgdir/usr/lib/vst3/"
+  cp -a "$srcdir/stage/usr/lib/clap/$1.clap" "$pkgdir/usr/lib/clap/"
+  cp -a "$srcdir/stage/usr/lib/lv2/$1.lv2" "$pkgdir/usr/lib/lv2/"
+  install -Dm644 "$srcdir/$_src/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE.md"
+}
+
+package_theusualsuspects-osirus() {
+  pkgdesc='Access Virus A, B and C emulation (VST2, VST3, CLAP, LV2)'
+  _package_synth Osirus
+}
+
+package_theusualsuspects-ostirus() {
+  pkgdesc='Access Virus TI, TI2 and Snow emulation (VST2, VST3, CLAP, LV2)'
+  _package_synth OsTIrus
+}
+
+package_theusualsuspects-vavra() {
+  pkgdesc='Waldorf microQ emulation (VST2, VST3, CLAP, LV2)'
+  _package_synth Vavra
+}
+
+package_theusualsuspects-xenia() {
+  pkgdesc='Waldorf Microwave II and XT emulation (VST2, VST3, CLAP, LV2)'
+  _package_synth Xenia
+}
+
+package_theusualsuspects-nodalred2x() {
+  pkgdesc='Clavia Nord Lead 2X and Nord Rack 2X emulation (VST2, VST3, CLAP, LV2)'
+  _package_synth NodalRed2x
+}
+
+package_theusualsuspects-je8086() {
+  pkgdesc='Roland JP-8000 emulation (VST2, VST3, CLAP, LV2)'
+  _package_synth JE8086
+}

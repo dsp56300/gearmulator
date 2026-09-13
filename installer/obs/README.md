@@ -2,14 +2,15 @@
 
 These files are the OBS package `home:theusualsuspects/TheUsualSuspects`:
 `_service`, `_constraints`, `TheUsualSuspects.spec` and `.changes` for the RPM
-distributions, and `TheUsualSuspects.dsc` plus `debian.*` for Debian and Ubuntu.
-OBS picks the spec or the dsc per target from the same package.
+distributions, `TheUsualSuspects.dsc` plus `debian.*` for Debian and Ubuntu, and `PKGBUILD` for
+Arch. OBS picks the recipe per target from the same package.
 
 One build per target produces one package per synth, each holding that synth's
 VST2, VST3, CLAP and LV2 plugins: `theusualsuspects-osirus`, `-ostirus`,
 `-vavra`, `-xenia`, `-nodalred2x` and `-je8086`. Adding a synth means a
-subpackage in the spec, a `Package:` stanza in `debian.control` and a
-`debian.<package>.install` file.
+subpackage in the spec, a `Package:` stanza in `debian.control`, a
+`debian.<package>.install` file, an entry in the dsc's `Binary:` list and a
+package function in the `PKGBUILD`.
 
 ## Targets
 
@@ -20,11 +21,35 @@ subpackage in the spec, a `Package:` stanza in `debian.control` and a
 | Fedora 43, 44 | `Fedora_43`, `Fedora_44` | same repositories |
 | Debian 12, 13 | `Debian_12`, `Debian_13` | not offered by OBS |
 | Ubuntu 22.04, 24.04, 26.04 | `xUbuntu_22.04`, `xUbuntu_24.04`, `xUbuntu_26.04` | not offered by OBS |
+| Arch Linux | `Arch` | not offered by OBS |
 
 The names are the repository directories under
 https://download.opensuse.org/repositories/home:/theusualsuspects/. OBS builds
 Debian and Ubuntu for x86_64 only, and Tumbleweed's aarch64 port lives in a
 separate project, hence its own repository.
+
+## Which repository for which distribution
+
+Most well-known distributions are rebuilds of one of the targets above and install our
+packages from that base's repository. Match the base release exactly: from Ubuntu 24.04 and
+Debian 13 on, the packages depend on `libasound2t64`, which older bases do not have.
+
+| Distribution | Repository |
+|---|---|
+| Kubuntu, Xubuntu, Lubuntu, Ubuntu Studio | the `xUbuntu_` repository with the same release number |
+| Linux Mint | the Ubuntu LTS it is built on: Mint 21 → `xUbuntu_22.04`, Mint 22 → `xUbuntu_24.04` |
+| Pop!_OS, elementary OS, Zorin OS, KDE neon | the Ubuntu LTS it is built on, e.g. Pop!_OS 22.04 → `xUbuntu_22.04` |
+| LMDE, MX Linux, AV Linux | the Debian release it is built on, e.g. LMDE 6 → `Debian_12` |
+| Nobara, Ultramarine | the Fedora release with the same number |
+| EndeavourOS, CachyOS, Garuda, Manjaro | `Arch` (Manjaro holds updates back for weeks, so a fresh build can occasionally need a newer library than it has) |
+| openSUSE Slowroll | not built; the Tumbleweed repository usually installs |
+
+Not covered:
+
+- **Raspberry Pi OS, Zynthian and any other arm64 Debian or Ubuntu**: OBS builds neither for
+  aarch64; use the portable Linux aarch64 builds.
+- **Immutable distributions and Flatpak DAWs** (Fedora Silverblue, Bazzite, SteamOS, openSUSE
+  Aeon): a sandboxed DAW only loads plugins shipped as Flatpak extensions.
 
 ## Source
 

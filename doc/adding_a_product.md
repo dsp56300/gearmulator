@@ -728,13 +728,13 @@ in the repository.
 ### 14.5 Linux distribution packages (OBS)
 
 `installer/obs/` is the openSUSE Build Service package `home:theusualsuspects/TheUsualSuspects`.
-It builds public `main` for openSUSE Tumbleweed and Leap, Fedora, Debian and Ubuntu, on x86_64
+It builds public `main` for openSUSE Tumbleweed and Leap, Fedora, Debian, Ubuntu and Arch, on x86_64
 and on aarch64 where OBS offers it, and publishes installable repositories. One build per target
 produces one package per product, `theusualsuspects-<lowercase product>`, holding that product's
 VST2, VST3, CLAP and LV2 plugins. `installer/obs/README.md` has the mechanics, the target list
 and the version bump.
 
-A new product is four edits. The package name is lowercase, the paths inside keep the product
+A new product is five edits. The package name is lowercase, the paths inside keep the product
 name:
 
 | File | Add |
@@ -743,6 +743,7 @@ name:
 | `debian.control` | a `Package: theusualsuspects-<lower>` stanza: `Architecture: amd64 arm64`, `Depends: ${shlibs:Depends}, ${misc:Depends}`, description |
 | `debian.theusualsuspects-<lower>.install` | the same four paths as `usr/lib/...`, one per line |
 | `TheUsualSuspects.dsc` | the package in the `Binary:` list |
+| `PKGBUILD` | the package in `pkgname`, and a `package_theusualsuspects-<lower>()` function that sets `pkgdesc` and calls `_package_synth <Product>` |
 
 Traps:
 
@@ -750,10 +751,11 @@ Traps:
   that is not public yet neither builds there nor belongs in these files (name gate,
   restructure_plan.md §9).
 - Debian package names must be lowercase, while the plugin files keep the product's case. Those
-  file names are what `%files` and the `.install` file match: a rename breaks both silently.
+  file names are what `%files`, the `.install` file and `_package_synth` match: a rename breaks
+  all three silently.
 - `%install` and `debian.rules` keep only the four plugin directories and delete everything else
   the tree installs, the test console and the bridge server plugin included. A product that ships
-  more than plugins needs a rule there, not just a `%files` entry.
+  more than plugins needs a rule there and in `_package_synth`, not just a `%files` entry.
 - Standalone-only products are not built at all: the OBS build passes
   `gearmulator_BUILD_JUCEPLUGIN_Standalone=OFF`.
 - Nothing in the OBS project itself is per-product; its repositories are per distribution.
@@ -971,7 +973,7 @@ Build and CI
 - [ ] `scripts/products.cmake`
 - [ ] `scripts/JenkinsfileMulti` and the live `dsp56300_main_multi` pipeline
 - [ ] `doc/changelog.txt` section `<Product>:`
-- [ ] `installer/obs`: spec subpackage, `debian.control` stanza, `.install` file, dsc `Binary:` (public products)
+- [ ] `installer/obs`: spec subpackage, `debian.control` stanza, `.install` file, dsc `Binary:`, `PKGBUILD` package function (public products)
 - [ ] green on Windows, macOS, Linux x86_64 and aarch64, ctest included
 
 Infrastructure
