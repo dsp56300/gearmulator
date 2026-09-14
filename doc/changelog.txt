@@ -63,6 +63,15 @@ Vavra/Xenia:
         before are kept. Once they are saved again by this version, older
         versions no longer show them.
 
+Vavra:
+
+- [Fix] The FM source lists of the oscillators and filters had no entries for
+        the external input, so every choice after Noise landed three places
+        further down: LFO 1 selected the left external input, Filter Env
+        selected LFO 1, and the amp envelope, envelope 3 and envelope 4 could
+        not be reached at all. Existing sounds are unaffected, they now show
+        the source they actually use.
+
 Xenia:
 
 - [Fix] The dialog shown in demo mode was titled Vavra.
