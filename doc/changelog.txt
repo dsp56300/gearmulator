@@ -51,6 +51,10 @@ Framework:
 - [Fix] SysEx from a host that frames it twice lost its start byte instead of
         the surplus end byte, leaving a headless message behind.
 
+- [Fix] BUG-10332 BUG-10337 The software renderer drew garbage and could crash
+        the plugin with a skin that tiles an image across an area: it read
+        past the end of the image instead of repeating it.
+
 - [Fix] On macOS, the packages of the standalone effect plugins never
         contained the script that removes the quarantine flag.
 

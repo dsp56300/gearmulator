@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include "baseLib/endian.h"
 
@@ -731,6 +732,42 @@ namespace juceRmlUi
 			// we have values > 0 only so that is fine
 			return static_cast<int>(_in + 0.5f);
 		}
+
+		// RmlUi repeats a texture with UVs beyond 0..1 and leaves the wrapping to the renderer (GL_REPEAT), for example
+		// for image(... repeat) decorators. The blitters read at most one texel past their source rectangle, so split
+		// an axis into one span per repeat, each inside the texture, and call _func(srcPos, srcSize, dstPos, dstSize)
+		template<typename Func>
+		void forEachTile(const float _uv, const float _uvSize, const int _dst, const int _dstSize, const int _texSize, const Func& _func)
+		{
+			const auto first = std::floor(_uv);
+			const auto uvEnd = _uv + _uvSize;
+
+			// more repeats than pixels cannot be told apart, and the limit keeps odd UVs from looping for ages
+			const auto repeats = std::ceil(uvEnd - first);
+			const auto count = repeats > 1.0f ? static_cast<int>(std::min(repeats, static_cast<float>(_dstSize))) : 1;
+
+			auto dst = _dst;
+
+			for (int i = 0; i < count; ++i)
+			{
+				const auto tile = first + static_cast<float>(i);
+				const auto isLast = i == count - 1;
+
+				const auto u0 = std::max(_uv, tile);
+				const auto u1 = isLast ? uvEnd : tile + 1.0f;
+
+				const auto dstEnd = isLast ? _dst + _dstSize : _dst + roundToInt((u1 - _uv) / _uvSize * static_cast<float>(_dstSize));
+
+				if (dstEnd > dst)
+				{
+					const auto src = std::min(roundToInt((u0 - tile) * static_cast<float>(_texSize)), _texSize - 1);
+					const auto srcSize = std::clamp(roundToInt((u1 - u0) * static_cast<float>(_texSize)), 0, _texSize - src);
+					_func(src, srcSize, dst, dstEnd - dst);
+				}
+
+				dst = dstEnd;
+			}
+		}
 	}
 
 	RendererJuce::RendererJuce(Rml::CoreInstance& _coreInstance) : RenderInterface(_coreInstance)
@@ -1037,22 +1074,26 @@ namespace juceRmlUi
 				// select a mipmap level to prevent that we scale down to less than 50% to reduce aliasing
 				while (srcW > 1 && srcH > 1 && (srcW > (dstW << 1) || srcH > (dstH << 1)))
 				{
+					// a repeated texture can ask for more texels than its smallest mip has
+					auto* mip = img->getMip();
+					if (!mip)
+						break;
 					srcW >>= 1;
 					srcH >>= 1;
-					img = img->getMip();
+					img = mip;
 				}
 
-				const auto srcX = roundToInt(uvX * static_cast<float>(img->width));
-				const auto srcY = roundToInt(uvY * static_cast<float>(img->height));
-
-				srcW = roundToInt(uvW * static_cast<float>(img->width));
-				srcH = roundToInt(uvH * static_cast<float>(img->height));
-
-				// use templated blitting function based on used features
-				const auto hasScale = (srcW != dstW) || (srcH != dstH);
 				const auto hasAlphaBlend = img->hasAlpha || col.a < 255;
 
-				blit(*m_renderTarget, *img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, col, hasScale, hasAlphaBlend, hasColor);
+				forEachTile(uvX, uvW, dstX, dstW, img->width, [&](const int _srcX, const int _srcW, const int _dstX, const int _dstW)
+				{
+					forEachTile(uvY, uvH, dstY, dstH, img->height, [&](const int _srcY, const int _srcH, const int _dstY, const int _dstH)
+					{
+						// use templated blitting function based on used features
+						const auto hasScale = (_srcW != _dstW) || (_srcH != _dstH);
+						blit(*m_renderTarget, *img, _srcX, _srcY, _srcW, _srcH, _dstX, _dstY, _dstW, _dstH, col, hasScale, hasAlphaBlend, hasColor);
+					});
+				});
 			}
 			else
 			{
