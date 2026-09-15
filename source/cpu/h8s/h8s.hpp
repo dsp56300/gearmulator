@@ -51,6 +51,11 @@ public:
 	uint8 exr {0};
 	H8SDevice* maps[1<<24] {};
 	unsigned long long  cycles {0};
+	/* `cycles` as it stood when the current instruction began. Devices that
+	 * defer their per-instruction tick (Timers) catch up to THIS on a register
+	 * access, which is the state the original end-of-previous-instruction tick
+	 * would have left them in. */
+	unsigned long long instrStartCycles {0};
 	unsigned long long pending_irqs {0};
 	
 	enum
@@ -273,6 +278,7 @@ public:
 	uint8 *handle_instr(uint8 *_pc)
 	{
 		pc = _pc;
+		instrStartCycles = cycles;
 		if (execute && pending_irqs)
 		{
 			bool ue = read8(0xfffff2) & 8;
