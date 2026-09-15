@@ -800,6 +800,72 @@ void testMidiLearnInvert()
 	std::cout << "  Invert flag tests passed!" << std::endl;
 }
 
+void testMidiInputBlocks()
+{
+	std::cout << "Testing independent MIDI input blocks..." << std::endl;
+
+	MidiLearnMapping mapping;
+	mapping.type = MidiLearnMapping::Type::ControlChange;
+	mapping.channel = 0;
+	mapping.controller = 74;
+	mapping.paramName = "Filter Cutoff";
+
+	MidiLearnPreset normalPreset("Normal");
+	normalPreset.addMapping(mapping);
+
+	MidiLearnPreset blockedPreset("Blocked");
+	blockedPreset.addMapping(mapping);
+	blockedPreset.addInputBlock({"Filter Cutoff", 0});
+	TEST_ASSERT(blockedPreset.isInputBlocked("Filter Cutoff", 0));
+	TEST_ASSERT(!blockedPreset.isInputBlocked("Filter Cutoff", 1));
+	TEST_ASSERT(!(normalPreset == blockedPreset));
+
+	auto presetJson = blockedPreset.toJson();
+	MidiLearnPreset restoredPreset;
+	TEST_ASSERT(restoredPreset.fromJson(presetJson));
+	TEST_ASSERT(restoredPreset.getMappings().size() == 1);
+	TEST_ASSERT(restoredPreset.getInputBlocks().size() == 1);
+	TEST_ASSERT(restoredPreset.isInputBlocked("Filter Cutoff", 0));
+
+	// Clearing a learned mapping must not clear the independent input block.
+	restoredPreset.clearMappings();
+	TEST_ASSERT(restoredPreset.getMappings().empty());
+	TEST_ASSERT(restoredPreset.isInputBlocked("Filter Cutoff", 0));
+	restoredPreset.removeInputBlock("Filter Cutoff", 0);
+	TEST_ASSERT(restoredPreset.getInputBlocks().empty());
+
+	// Migrate presets written by the earlier placeholder-mapping implementation.
+	auto legacyJson = normalPreset.toJson();
+	if (auto* root = legacyJson.getDynamicObject())
+	{
+		root->removeProperty("inputBlocks");
+		if (auto* mappings = root->getProperty("mappings").getArray())
+		{
+			if (auto* mappingObj = (*mappings)[0].getDynamicObject())
+				mappingObj->setProperty("discardInput", true);
+
+			auto placeholder = mapping.toJson();
+			if (auto* placeholderObj = placeholder.getDynamicObject())
+			{
+				placeholderObj->setProperty("type", "Invalid");
+				placeholderObj->setProperty("paramName", "Oscillator Shape");
+				placeholderObj->setProperty("discardInput", true);
+				placeholderObj->setProperty("defaultController", true);
+			}
+			mappings->add(placeholder);
+		}
+	}
+
+	MidiLearnPreset migrated;
+	TEST_ASSERT(migrated.fromJson(legacyJson));
+	TEST_ASSERT(migrated.getMappings().size() == 1);
+	TEST_ASSERT(migrated.getInputBlocks().size() == 2);
+	TEST_ASSERT(migrated.isInputBlocked("Filter Cutoff", MidiLearnMapping::AutoPart));
+	TEST_ASSERT(migrated.isInputBlocked("Oscillator Shape", MidiLearnMapping::AutoPart));
+
+	std::cout << "  MIDI input block tests passed!" << std::endl;
+}
+
 void testMidiLearnMixedTypes()
 {
 	std::cout << "Testing MIDI Learn Mixed Types preset..." << std::endl;
@@ -907,6 +973,7 @@ int main()
 		testMidiLearnChannelPressure();
 		testMidiLearnPolyPressure();
 		testMidiLearnInvert();
+		testMidiInputBlocks();
 		testMidiLearnMixedTypes();
 
 		std::cout << std::endl;
