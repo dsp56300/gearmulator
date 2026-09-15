@@ -670,7 +670,7 @@
 		{"page":115, "index":124, "class":"Global", "name":"Midi Channel", "min":0, "max":15, "default":0, "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":125, "class":"Global", "name":"Led Mode", "min":0, "max":6, "default":2, "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":126, "class":"Global", "name":"LCD Contrast", "min":0, "max":127, "default":64, "isPublic":false, "isDiscrete":false, "isBool":false},
-		{"page":115, "index":127, "class":"Global", "name":"Master Volume", "min":0, "max":127, "default":92, "isPublic":true, "isDiscrete":false, "isBool":false},		
+		{"page":115, "index":127, "class":"Global", "name":"Master Volume", "min":0, "max":127, "default":92, "isPublic":true, "isDiscrete":false, "isBool":false}		
 	],
 	"regions":
 	[
@@ -2693,6 +2693,11 @@
 		]
 	},
 	"controllerMap": [
+		{"cc":1, "param":"Modulation Wheel"},
+		{"cc":2, "param":"Breath Controller"},
+		{"cc":3, "param":"Contr 3"},
+		{"cc":4, "param":"Foot Controller"},
+		{"cc":5, "param":"Portamento Time"},
 		{"cc":7, "param":"Channel Volume"},
 		{"cc":8, "param":"Balance"},
 		{"cc":9, "param":"Contr 9"},
@@ -2840,6 +2845,9 @@
 		{"pp":48, "param":"Osc2 Shape Velocity"},
 		{"pp":49, "param":"PulseWidth Velocity"},
 		{"pp":50, "param":"Fm Amount Velocity"},
+		{"pp":51, "param":"Soft Knob1 ShortName"},
+		{"pp":52, "param":"Soft Knob2 ShortName"},
+		{"pp":53, "param":"Soft Knob3 ShortName"},
 		{"pp":54, "param":"Flt1 EnvAmt Velocity"},
 		{"pp":55, "param":"Flt2 EnvAmt Velocity"},
 		{"pp":56, "param":"Resonance1 Velocity"},
@@ -2894,7 +2902,19 @@
 		{"pp":109, "param":"Assign 6 Source"},
 		{"pp":110, "param":"Assign 6 Destination"},
 		{"pp":111, "param":"Assign 6 Amount"},
+		{"pp":112, "param":"SingleName0"},
+		{"pp":113, "param":"SingleName1"},
+		{"pp":114, "param":"SingleName2"},
+		{"pp":115, "param":"SingleName3"},
+		{"pp":116, "param":"SingleName4"},
+		{"pp":117, "param":"SingleName5"},
+		{"pp":118, "param":"SingleName6"},
+		{"pp":119, "param":"SingleName7"},
+		{"pp":120, "param":"SingleName8"},
+		{"pp":121, "param":"SingleName9"},
 		{"pp":122, "param":"Filter Select"},
+		{"pp":123, "param":"Category1"},
+		{"pp":124, "param":"Category2"},
 		{"pp":127, "param":"Oscillators/Select"}
  	]	
 }
