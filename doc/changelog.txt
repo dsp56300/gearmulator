@@ -63,6 +63,11 @@ Framework:
 - [Fix] On macOS, the packages of the standalone effect plugins never
         contained the script that removes the quarantine flag.
 
+- [Fix] BUG-10355 After switching to another ROM, the patch manager could keep
+        offering the presets of the previous ROM, taken from its cache, instead
+        of the ones of the ROM that is loaded. Tags, favourites, renames and
+        MIDI bank numbers of ROM presets and banks are kept.
+
 Vavra/Xenia:
 
 - [Fix] The patch manager saw every patch as a duplicate of every other one,

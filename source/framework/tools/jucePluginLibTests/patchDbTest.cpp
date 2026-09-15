@@ -1,8 +1,10 @@
 #include "jucePluginLibTests.h"
 
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <memory>
+#include <thread>
 
 #include "jucePluginLib/patchdb/db.h"
 #include "jucePluginLib/patchdb/patch.h"
@@ -157,6 +159,144 @@ namespace
 
 		std::cout << "  loadFolder tests passed" << std::endl;
 	}
+
+	// A DB with one ROM bank that holds whatever presets it is given. It registers the bank at startup, the way a
+	// product registers the banks of the ROM it has loaded.
+	class RomDb final : public DB
+	{
+	public:
+		RomDb(const juce::File& _settingsDir, DataList _presets, const uint32_t _bank = 0)
+			: DB(_settingsDir), m_presets(std::move(_presets)), m_bank(_bank)
+		{
+			startLoaderThread();
+			addDataSource(romBank(_bank));
+		}
+
+		~RomDb() override { stopLoaderThread(); }
+
+		static DataSource romBank(const uint32_t _bank = 0)
+		{
+			DataSource ds;
+			ds.type = SourceType::Rom;
+			ds.name = std::string("ROM Bank ") + static_cast<char>('A' + _bank);
+			ds.bank = _bank;
+			return ds;
+		}
+
+		bool waitIdle() const
+		{
+			for (int i = 0; i < 500 && isScanning(); ++i)
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			return !isScanning();
+		}
+
+		bool requestPatchForPart(Data&, uint32_t, uint64_t) override { return false; }
+
+		bool loadRomData(DataList& _results, const uint32_t _bank, uint32_t) override
+		{
+			if (_bank != m_bank)
+				return false;
+			_results = m_presets;
+			return true;
+		}
+
+		PatchPtr initializePatch(Data&& _sysex, const std::string&) override
+		{
+			const auto patch = std::make_shared<Patch>();
+			patch->sysex = std::move(_sysex);
+			patch->name = "Preset";
+			patch->setHashFromMessages(7, 2);
+			return patch;
+		}
+
+		Data applyModifications(const PatchPtr&, const pluginLib::FileType&, pluginLib::ExportType) const override { return {}; }
+		void processDirty(const Dirty&) const override {}
+
+	private:
+		const DataList m_presets;
+		const uint32_t m_bank;
+	};
+
+	void testRomBanksAreNotTakenFromCache()
+	{
+		std::cout << "Testing that ROM banks come from the plugin, not from the cache..." << std::endl;
+
+		const auto root = juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("patchDbTest", "");
+		const auto settings = root.getChildFile("settings");
+
+		const auto unchanged = dump(0x00, 0x00, {0x11}, 0x40);
+		const auto before = dump(0x00, 0x01, {0x22}, 0x40);
+		const auto after = dump(0x00, 0x01, {0x33}, 0x40);
+
+		// first start: the user renames a factory preset and gives the bank a MIDI bank number
+		{
+			RomDb db(settings, {unchanged, before});
+			TEST_ASSERT(db.waitIdle());
+
+			const auto bank = db.getDataSource(RomDb::romBank());
+			TEST_ASSERT(bank && bank->patches.size() == 2);
+
+			for (const auto& patch : bank->patches)
+			{
+				if (patch->program == 0)
+					TEST_ASSERT(db.renamePatch(patch, "Renamed"));
+			}
+
+			TEST_ASSERT(db.setDataSourceMidiBankNumber(bank, 7));
+			TEST_ASSERT(db.waitIdle());
+		}
+
+		// closing the DB wrote the cache, which now holds the bank as it was
+		TEST_ASSERT(settings.getChildFile("patchmanagerdb.cache").existsAsFile());
+
+		// next start with another ROM, whose second preset differs: another model, another version, or presets built
+		// by newer code
+		{
+			RomDb db(settings, {unchanged, after});
+			TEST_ASSERT(db.waitIdle());
+
+			const auto bank = db.getDataSource(RomDb::romBank());
+			TEST_ASSERT(bank && bank->patches.size() == 2);
+
+			for (const auto& patch : bank->patches)
+			{
+				if (patch->program == 1)
+					TEST_ASSERT(patch->sysex == after);				// the preset of the ROM that is loaded now
+				else
+					TEST_ASSERT(patch->getName() == "Renamed");		// what the user set stays with the preset that did not change
+			}
+
+			TEST_ASSERT(bank->midiBankNumber == 7);
+		}
+
+		// a start with a ROM that lacks the bank, in which the user changes something else and so saves: the json and
+		// the cache have to keep the MIDI bank number of the bank that is missing
+		{
+			RomDb db(settings, {unchanged}, 1);
+			TEST_ASSERT(db.waitIdle());
+
+			const auto bank = db.getDataSource(RomDb::romBank(1));
+			TEST_ASSERT(bank && db.setDataSourceMidiBankNumber(bank, 8));
+			TEST_ASSERT(db.waitIdle());
+		}
+
+		const auto midiBankNumberOfBankA = [&]
+		{
+			RomDb db(settings, {unchanged, after});
+			const auto bank = db.waitIdle() ? db.getDataSource(RomDb::romBank()) : nullptr;
+			return bank ? bank->midiBankNumber : g_invalidMidiBankNumber;
+		};
+
+		TEST_ASSERT(settings.getChildFile("patchmanagerdb.cache").existsAsFile());
+		TEST_ASSERT(midiBankNumberOfBankA() == 7);		// from the cache
+
+		TEST_ASSERT(settings.getChildFile("patchmanagerdb.cache").deleteFile());
+		TEST_ASSERT(midiBankNumberOfBankA() == 7);		// from the json
+
+		root.deleteRecursively();
+
+		std::cout << "  ROM bank cache tests passed" << std::endl;
+	}
 }
 
 void testPatchDb()
@@ -164,4 +304,5 @@ void testPatchDb()
 	testHash();
 	testLegacyModificationKeys();
 	testFolderFindsSubfolders();
+	testRomBanksAreNotTakenFromCache();
 }
