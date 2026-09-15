@@ -55,6 +55,11 @@ Framework:
         the plugin with a skin that tiles an image across an area: it read
         past the end of the image instead of repeating it.
 
+- [Fix] The DSP Bridge server kept a device that could not be initialized,
+        for example because its firmware did not finish booting, and the
+        connection to it hung. The plugin now shows why the device could not
+        be created.
+
 - [Fix] On macOS, the packages of the standalone effect plugins never
         contained the script that removes the quarantine flag.
 

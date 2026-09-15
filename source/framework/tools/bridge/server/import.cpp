@@ -73,7 +73,19 @@ namespace bridgeServer
 
 		try
 		{
-			return it->second.funcCreate(_params);
+			auto* device = it->second.funcCreate(_params);
+
+			// A device can be constructed and still be unusable, for example when its firmware did not finish booting.
+			// Processing it could hang this connection, so report it like any other failure.
+			if(device && !device->isValid())
+			{
+				it->second.funcDestroy(device);
+				_error = "Creating the device of " + describe(_desc) + " failed: the device did not initialize, for example because its firmware did not finish booting";
+				LOGNET(networkLib::LogLevel::Error, _error);
+				return nullptr;
+			}
+
+			return device;
 		}
 		catch(synthLib::DeviceException& e)
 		{
