@@ -12,6 +12,7 @@ set(SOURCES
 	audioTypes.h
 	buildconfig.h buildconfig.h.in
 	dac.cpp dac.h
+	dcFilter.h
 	device.cpp device.h
 	deviceException.cpp deviceException.h
 	deviceTypes.h
@@ -58,6 +59,11 @@ set_property(TARGET synthLib PROPERTY FOLDER "Gearmulator")
 target_include_directories(synthLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 if(BUILD_TESTING)
+	add_executable(dcFilter_test dcFilter_test.cpp)
+	target_link_libraries(dcFilter_test PRIVATE synthLib)
+	set_property(TARGET dcFilter_test PROPERTY FOLDER "Tests")
+	add_test(NAME dcFilter COMMAND dcFilter_test)
+
 	add_executable(dynamicSamplerate_test dynamicSamplerate_test.cpp)
 	target_link_libraries(dynamicSamplerate_test PRIVATE synthLib)
 	set_property(TARGET dynamicSamplerate_test PROPERTY FOLDER "Tests")
