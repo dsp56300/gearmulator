@@ -1,5 +1,7 @@
 #include "je8086.h"
 
+#include "jePipeline.h"
+
 #include "baseLib/filesystem.h"
 
 #include "synthLib/deviceException.h"
@@ -89,11 +91,30 @@ namespace jeLib
 			m_midiInEvents.clear();
 		}
 
+		/* First step on this thread: this is where the pipeline has to be built,
+		 * because the stage state it installs is thread_local. */
+		if (m_pipelineRequested && !m_pipeline)
+		{
+			m_pipelineRequested = false;
+			m_pipeline.reset(new JePipeline(*this, m_pipelineBounds));
+			if (!m_pipeline->valid())
+				m_pipeline.reset();	// bad split; stay serial
+		}
+
 		emu.step();
 		timers.tick();
 		midi.tick();
 
 		asics.runForCycles(emu.getCycles() * 1323 / 625); // Convert from uC cycles to DSP steps. (this is (clockrate / 2) / (uc clock = 16000000), simplified)
+
+		if (m_pipeline)
+		{
+			/* Audio is produced on the last stage's thread but must be appended
+			 * here: the sample buffer and the MIDI rate limiter behind it belong
+			 * to this thread. */
+			m_pipeline->refreshParentReadbacks();
+			m_pipeline->deliver([this](const int32_t _l, const int32_t _r) { onReceiveSample(_l, _r); }, m_pipelineWindow);
+		}
 	}
 
 	void Je8086::setButton(const devices::SwitchType _type, const bool _pressed)
@@ -114,6 +135,20 @@ namespace jeLib
 		m_midiOutParser.write(_byte);
 	}
 
+	Je8086::~Je8086() = default;
+
+	void Je8086::requestParallelPipeline(const std::vector<int>& _bounds, const int64_t _window)
+	{
+		m_pipelineBounds = _bounds;
+		m_pipelineWindow = _window < 1 ? 1 : _window;
+		m_pipelineRequested = !_bounds.empty();
+	}
+
+	bool Je8086::hasParallelPipeline() const
+	{
+		return m_pipeline != nullptr;
+	}
+
 	void Je8086::onReceiveSample(int32_t _left, int32_t _right)
 	{
 		m_midiInRateLimiter.processSample();
@@ -129,6 +164,7 @@ namespace jeLib
 	{
 		SysexRemoteControl::sendSysexLcdCgRam(m_midiOutEvents, lcd);
 	}
+
 
 	void Je8086::runfactoryreset(const std::string& _ramDataFilename)
 	{

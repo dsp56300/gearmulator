@@ -33,6 +33,8 @@ namespace jeLib
 		uint32_t getChannelCountOut() override;
 		bool setDspClockPercent(uint32_t _percent) override;
 		uint32_t getDspClockPercent() const override;
+		uint32_t getMaxDspThreads() const override;
+		uint32_t getInternalLatencyInputToOutput() const override;
 		uint64_t getDspClockHz() const override;
 
 		uint32_t getInternalLatencyMidiToOutput() const override;
@@ -48,6 +50,8 @@ namespace jeLib
 		}
 
 	protected:
+		uint32_t pipelineDelay() const;
+
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
