@@ -44,10 +44,17 @@ namespace gpLib
 	void GP::reset()
 	{
 		memset(&m_regs, 0, sizeof(m_regs));
+		m_retiredVoices = 0;
 		m_dacPhase = 0;
 		m_emitted = 0;
 		m_dacOut[0] = m_dacOut[1] = {0, 0};
 		driveIrq(false);
+	}
+
+	void GP::retireVoice(const uint32_t _voice)
+	{
+		if(_voice < VoiceChannels)
+			m_retiredVoices |= uint32_t{1} << _voice;
 	}
 
 	void GP::write8(uint32_t address, const uint8_t data)
@@ -60,6 +67,7 @@ namespace gpLib
 			m_regs.voice_mask_pending &= ~(mask << shift);
 			m_regs.voice_mask_pending |= (data & mask) << shift;
 			m_regs.voice_mask_updating = 1;
+			m_retiredVoices &= ~((~data & mask) << shift);
 		}
 		else if(address >= 0x20 && address < 0x24) // wave rom read aperture
 		{
@@ -477,7 +485,7 @@ namespace gpLib
 	{
 		const uint32_t regSlots = voiceSlots();
 		// A voice plays only where BOTH mask copies agree.
-		const uint32_t voiceActive = m_regs.voice_mask & m_regs.voice_mask_pending;
+		const uint32_t voiceActive = m_regs.voice_mask & m_regs.voice_mask_pending & ~m_retiredVoices;
 
 		auto* mix = m_regs.ram1[Lfo];
 		mix[MixL] = 0;

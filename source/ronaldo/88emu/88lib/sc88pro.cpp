@@ -1,4 +1,5 @@
 #include "sc88pro.h"
+#include "baseLib/md5.h"
 
 #include "rom.h"
 
@@ -86,6 +87,20 @@ namespace emu88Lib
 		}
 
 		m_valid = true;
+		const auto hash = baseLib::MD5(m_rom);
+		if(hash == baseLib::MD5("784b3ea762b5f96cabdceb33d121d5e4"))
+		{
+			m_releaseEg = 0x41ca;
+			m_releaseFlags = 0x3d4a;
+			m_voiceAllocation = 0xe693;
+		}
+		else if(hash == baseLib::MD5("9d4c2f123b4451d8ee75c3b982760f28"))
+		{
+			m_releaseEg = 0x420a;
+			m_releaseFlags = 0x3d8a;
+			m_voiceAllocation = 0xe695;
+		}
+		m_autoVoiceReset = m_releaseEg != 0;
 		powerCycle();
 
 		// A new emulator instance has blank battery SRAM. Initialise it through
@@ -102,6 +117,7 @@ namespace emu88Lib
 		// device/latch so the next sample is a genuine power-on boot.
 		m_xp.reset();
 		m_machine.reset();
+		m_pendingVoiceResets = 0;
 		m_lcd.reset();
 		m_lsp.clear();
 
@@ -267,9 +283,31 @@ namespace emu88Lib
 		const uint16_t off = static_cast<uint16_t>(_addr);
 
 		if(page >= PageSramFirst && page <= PageSramLast)
+		{
 			m_sram[off] = _val;
+			if(m_autoVoiceReset && off >= m_releaseEg && off < m_releaseEg + 128)
+				observeReleaseEgWrite(off);
+			if(m_autoVoiceReset && off >= m_voiceAllocation && off < m_voiceAllocation + 128 && (off & 1))
+			{
+				// The H8 completion queue can free a voice without zeroing its old EG.
+				const auto bit = uint64_t{1} << ((off - m_voiceAllocation) / 2);
+				if(_val == 0xff)
+					m_pendingVoiceResets |= bit;
+				else
+					m_pendingVoiceResets &= ~bit;
+			}
+		}
 		else if(page == PageXp)
+		{
 			m_xp.hostWrite8(off, _val);
+			if(off >= 0x3900 && off < 0x3908 && (off & 1))
+			{
+				const auto first = ((off - 0x3900) / 2) * 16;
+				for(unsigned i = first; i < first + 16; ++i)
+					if(!m_xp.state().voices[i].resetState_3900.shadow)
+						m_pendingVoiceResets &= ~(uint64_t{1} << i);
+			}
+		}
 		else if(page >= PageSubMcuFirst && page <= PageSubMcuLast)
 			subMcuWrite(off, _val);
 		else if(page == PageGateArray)
@@ -580,6 +618,29 @@ namespace emu88Lib
 		m_machine.sci(1).set_tx_sink([this](const uint8_t _byte, uint64_t) { uart2Transmit(_byte); });
 	}
 
+	void Sc88Pro::observeReleaseEgWrite(const uint16_t _offset)
+	{
+		// The H8 clears the software EG before clearing its release flag.
+		// Latch the low-byte write so completion cannot fall between polls.
+		const auto voice = (_offset - m_releaseEg) / 2;
+		const auto bit = uint64_t{1} << voice;
+		const auto eg = static_cast<uint16_t>((m_sram[m_releaseEg + voice * 2] << 8)
+			| m_sram[m_releaseEg + voice * 2 + 1]);
+		if(eg != 0)
+			m_pendingVoiceResets &= ~bit;
+		else if((_offset & 1) && (m_sram[m_releaseFlags + voice * 2] & 0x80))
+			m_pendingVoiceResets |= bit;
+	}
+
+	void Sc88Pro::resetFinishedVoices()
+	{
+		const auto pending = m_pendingVoiceResets;
+		m_pendingVoiceResets = 0;
+		for(unsigned voice = 0; voice < 64; ++voice)
+			if(pending & (uint64_t{1} << voice))
+				m_xp.retireVoice(voice);
+	}
+
 	Sc88Pro::SampleFrame Sc88Pro::renderSample()
 	{
 		if(!m_valid)
@@ -605,6 +666,8 @@ namespace emu88Lib
 		if(!m_xpEnabled)
 			return {0, 0};
 
+		if((m_samplesRendered & 127u) == 0 && m_pendingVoiceResets)
+			resetFinishedVoices(); // 128 frames at 32 kHz = 4 ms.
 		m_xp.step();
 		auto& xpDsp = m_xp.dsp();
 		const auto& busB = xpDsp.serialOutput(xpLib::Dsp::SerialBus::b);

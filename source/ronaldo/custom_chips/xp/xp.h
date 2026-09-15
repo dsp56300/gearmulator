@@ -254,6 +254,10 @@ namespace xpLib
 		// Hardware power-on reset. ROM mappings and
 		// the interrupt callback are board wiring, so they remain installed.
 		void reset();
+		// Board-level optimisation after the firmware's software EG has finished.
+		// Stay reset until the host explicitly resets/relaunches this voice.
+		void retireVoice(size_t _voice);
+		uint64_t retiredControlVoices() const { return m_retiredVoices & ~m_idleRetiredVoices; }
 		void step();
 		// Step a pair of XPs sharing their synchronous SDOA/SDIA link. Voice and
 		// mixer work is prepared on both chips first, then their DSPs advance in
@@ -272,6 +276,9 @@ namespace xpLib
 						uint8_t _apertureBankShift = 0, uint8_t _voiceBankShift = 0);
 
 	private:
+		uint64_t m_retiredVoices = 0;
+		uint64_t m_idleRetiredVoices = 0;
+		bool retiredControlIdle(const VoiceState& _voice) const;
 		struct WaveRomView
 		{
 			const uint8_t* data = nullptr;

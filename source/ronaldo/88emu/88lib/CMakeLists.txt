@@ -28,6 +28,15 @@ set_property(TARGET 88lib PROPERTY FOLDER "Ronaldo/88emu")
 
 target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 xpLib gpLib asmjit)
 
+if(BUILD_TESTING)
+	add_executable(sc88VoiceRelease_test sc88VoiceRelease_test.cpp sc88Release_test.cpp)
+	target_link_libraries(sc88VoiceRelease_test PRIVATE 88lib)
+	target_compile_definitions(sc88VoiceRelease_test PRIVATE EMU88_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests")
+	set_property(TARGET sc88VoiceRelease_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME sc88VoiceRelease COMMAND sc88VoiceRelease_test)
+	set_tests_properties(sc88VoiceRelease PROPERTIES TIMEOUT 20)
+endif()
+
 target_include_directories(88lib
 	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../..
 )
@@ -41,4 +50,14 @@ if(BUILD_TESTING)
 	set_property(TARGET sc88Thread_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME sc88Thread COMMAND sc88Thread_test)
 	set_tests_properties(sc88Thread PROPERTIES TIMEOUT 20)
+endif()
+
+if(BUILD_TESTING)
+	add_executable(voiceRelease_test voiceRelease_test.cpp)
+	target_link_libraries(voiceRelease_test PRIVATE 88lib)
+	target_compile_definitions(voiceRelease_test PRIVATE EMU88_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests")
+	set_property(TARGET voiceRelease_test PROPERTY FOLDER "Ronaldo/tests")
+	set_property(TARGET voiceRelease_test PROPERTY EXCLUDE_FROM_ALL FALSE)
+	add_test(NAME voiceRelease COMMAND voiceRelease_test)
+	set_tests_properties(voiceRelease PROPERTIES TIMEOUT 20)
 endif()

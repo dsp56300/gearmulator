@@ -19,6 +19,8 @@ namespace xpLib
 	{
 		const bool interruptWasAsserted = m_interruptLine;
 		m_state = State{};
+		m_retiredVoices = 0;
+		m_idleRetiredVoices = 0;
 		m_hostWriteBytes.fill(0);
 		m_hostReadWord = 0;
 		m_hostReadAddress = 0xffff;
@@ -51,6 +53,23 @@ namespace xpLib
 				(phase == VoiceRuntimePhaseCache::starting || phase == VoiceRuntimePhaseCache::running))
 				stepTvaGain(_voice);
 		};
+		const auto serviceRetiredVoice = [this](const size_t _index, VoiceState& _voice)
+		{
+			if(!(m_retiredVoices & (uint64_t{1} << _index)))
+				return;
+			// Retirement stops waveform/filter work, but the firmware can still
+			// request a ramp terminal or mute IRQ before reusing this slot.
+			// Keep the visible counter phase even while idle. Register writes
+			// wake control work before the next slot, in normal voice order.
+			_voice.playbackStateConfig_1000 = (_voice.playbackStateConfig_1000 & ~7u) |
+				((_voice.playbackStateConfig_1000 + 1) & 7);
+			const auto bit = uint64_t{1} << _index;
+			if(m_idleRetiredVoices & bit) return;
+			raiseVoiceMuteEvent(_index, _voice);
+			stepVoiceRamps(_index, _voice);
+			if((m_state.sampleClock & 127u) == 0 && retiredControlIdle(_voice))
+				m_idleRetiredVoices |= bit;
+		};
 
 		for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex)
 		{
@@ -69,14 +88,20 @@ namespace xpLib
 					ownerStep = stepVoiceSource(voiceIndex, voice);
 				}
 				else
+				{
+					serviceRetiredVoice(voiceIndex, voice);
 					voice.filterBp_2800 = voice.filterLp_2900 = voice.filterOutput_2a00 = 0;
+				}
 				if (partner.resetState_3900.released)
 				{
 					updateTvaBeforeAudio(partner);
 					partnerStep = stepVoiceSource(voiceIndex + 1, partner);
 				}
 				else
+				{
+					serviceRetiredVoice(voiceIndex + 1, partner);
 					partner.filterBp_2800 = partner.filterLp_2900 = partner.filterOutput_2a00 = 0;
+				}
 				if (ownerStep.filterDue || partnerStep.filterDue)
 					stepPairedVoiceFilter(voice, partner, ownerStep.filterDue ? ownerStep.sample : 0,
 										  partnerStep.filterDue ? partnerStep.sample : 0);
@@ -97,6 +122,7 @@ namespace xpLib
 			}
 			else
 			{
+				serviceRetiredVoice(voiceIndex, voice);
 				voice.filterBp_2800 = 0;
 				voice.filterLp_2900 = 0;
 				voice.filterOutput_2a00 = 0;
@@ -586,12 +612,56 @@ namespace xpLib
 		_voice.waveControl_0000 |= WaveControl::muteStatus;
 	}
 
+	bool XP::retiredControlIdle(const VoiceState& _voice) const
+	{
+		const auto settled =
+			[this](uint32_t _current, uint32_t _destination, uint32_t _control, uint8_t _reason, uint32_t _target)
+		{
+			if (!(_destination & rampAcknowledge))
+				return false;
+			if (_control & rampHold)
+				return true;
+			return _current == _target && !((_control & rampEventArm) && (m_state.irqConfigMask & (1u << _reason)));
+		};
+		if ((_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus | WaveControl::irqEnable)) ==
+				(WaveControl::muteRequest | WaveControl::irqEnable) &&
+			(m_state.irqConfigMask & (1u << IrqReason::muteTransition)))
+			return false;
+		// Trunk curves have accumulator dynamics even at zero; only a held
+		// trunk is quiescent. Pending entry/acknowledgement must run first.
+		if (_voice.combinedAmp_2300 != combineAmp(_voice) || _voice.runtimeCache.ampCurve2EntryPending ||
+			((_voice.ampRamp_1a00 & rampCurveMask) >= 0x08000 && !(_voice.ampRamp_1a00 & rampHold)))
+			return false;
+		return settled(_voice.pitchCurrent_1b00, _voice.pitchDestination_1200, _voice.pitchRamp_1700,
+					   IrqReason::pitchTerminal, _voice.pitchDestination_1200 & ~rampAcknowledge) &&
+			settled(_voice.tvfFCurrent_1c00, _voice.tvfFDestination_1300, _voice.tvfFRamp_1800, IrqReason::tvfFTerminal,
+					_voice.tvfFDestination_1300 & ~rampAcknowledge) &&
+			settled(_voice.tvfQCurrent_2100, _voice.tvfQDestination_1100, _voice.tvfQRamp_1600, IrqReason::tvfQTerminal,
+					((_voice.tvfQDestination_1100 & ~rampAcknowledge) << 2) & rampScratchMask) &&
+			settled(_voice.ampModCurrent_1d00, _voice.ampModDestination_1400, _voice.ampModRamp_1900,
+					IrqReason::ampModTerminal, _voice.ampModDestination_1400 & ~rampAcknowledge) &&
+			settled(_voice.ampCurrent_1e00, _voice.ampDestination_1500, _voice.ampRamp_1a00, IrqReason::ampTerminal,
+					_voice.ampDestination_1500 & ~rampAcknowledge);
+	}
+
+	void XP::retireVoice(const size_t _voice)
+	{
+		if (_voice >= nMaxVoices || !m_state.voices[_voice].resetState_3900.released)
+			return;
+		m_retiredVoices |= uint64_t{1} << _voice;
+		m_idleRetiredVoices &= ~(uint64_t{1} << _voice);
+		m_state.voices[_voice].resetState_3900.released = false;
+		m_state.voices[_voice].runtimeCache.runtimePhase = VoiceRuntimePhaseCache::parked;
+	}
+
 	void XP::writeReleaseMask(const size_t _word, const uint16_t _value)
 	{
 		for (size_t bit = 0; bit < 16; ++bit)
 		{
 			auto& resetState = m_state.voices[_word * 16 + bit].resetState_3900;
 			const bool released = (_value & (uint16_t{1} << bit)) != 0;
+			if(!released)
+				m_retiredVoices &= ~(uint64_t{1} << (_word * 16 + bit));
 			if (resetState.shadow && !released)
 			{
 				resetState.released = false;
@@ -603,10 +673,11 @@ namespace xpLib
 
 	void XP::commitReleasedVoices()
 	{
-		for (auto& voice : m_state.voices)
+		for (size_t i = 0; i < m_state.voices.size(); ++i)
 		{
+			auto& voice = m_state.voices[i];
 			auto& resetState = voice.resetState_3900;
-			if (resetState.shadow && !resetState.released)
+			if (resetState.shadow && !resetState.released && !(m_retiredVoices & (uint64_t{1} << i)))
 			{
 				resetState.released = true;
 				voice.runtimeCache.runtimePhase = VoiceRuntimePhaseCache::preload;
