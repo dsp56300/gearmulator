@@ -40,6 +40,9 @@ namespace juceRmlUi
 		// Pass (0, 0) to go back to following the on-screen size.
 		void setFixedTextureSize(int _width, int _height);
 
+		// the size actually drawn into, which follows the element's rendered size unless one was fixed
+		Rml::Vector2i getTextureSize() const { return m_textureSize; }
+
 		static ElemCanvas* create(Rml::Element* _parent);
 
 	private:
