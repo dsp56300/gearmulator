@@ -1,6 +1,7 @@
 #include "Emu88MidiPlayer.h"
 
 #include "midifile.hpp"
+#include "RcpFilePlayer.h"
 
 #include "juce_core/juce_core.h"
 
@@ -31,6 +32,12 @@ namespace emu88Player
 			const auto extension = juce::File(_path).getFileExtension().toLowerCase();
 			return extension == ".mid" || extension == ".midi";
 		}
+
+		bool isRcpFile(const std::string& _path)
+		{
+			const auto extension = juce::File(_path).getFileExtension().toLowerCase();
+			return extension == ".rcp" || extension == ".r36";
+		}
 	}
 
 	MidiPlayer::MidiPlayer()
@@ -50,16 +57,31 @@ namespace emu88Player
 
 		for(const auto& path : _paths)
 		{
-			if(!isMidiFile(path))
+			if(!isMidiFile(path) && !isRcpFile(path))
 			{
 				result.errors.push_back(juce::File(path).getFileName().toStdString() +
-				                        ": expected a .mid or .midi file");
+					                        ": expected a .mid, .midi, .rcp, or .r36 file");
 				continue;
 			}
 
 			auto song = std::make_shared<Song>();
 			std::string error;
-			if(!sc88smf::read(path, song->events, error))
+			const bool loaded = isRcpFile(path)
+				? [&]
+				{
+					juce::MemoryBlock contents;
+					if(!juce::File(path).loadFileAsData(contents))
+					{
+						error = "cannot read '" + path + "'";
+						return false;
+					}
+					const auto* begin = static_cast<const uint8_t*>(contents.getData());
+					std::vector<uint8_t> data;
+					if(contents.getSize()) data.assign(begin, begin + contents.getSize());
+					return rcpfile::loadRcpV2(data, song->events, error);
+				}()
+				: sc88smf::read(path, song->events, error);
+			if(!loaded)
 			{
 				result.errors.push_back(std::move(error));
 				continue;
