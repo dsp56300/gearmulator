@@ -1002,7 +1002,15 @@ namespace juceRmlUi
 		// problem: an off-screen CAMetalLayer keeps handing out drawables immediately instead of blocking on vsync,
 		// so the render pipeline loses its pacing and burns the GPU while the editor is hidden or minimized.
 		// The software and OpenGL renderers get this for free from juce, the Metal renderer drives its own thread.
-		const bool visible = isOnScreen() || m_screenshotState == ScreenshotState::RequestScreenshot;
+		const bool onScreen = isOnScreen();
+
+		// A pending screenshot forces a frame, but the software renderer cannot serve it off screen: it draws in
+		// paint(), which juce does not call then. The frame would hold m_renderDone until the editor is painted
+		// again, and the request would refuse every other one until then, so drop it instead.
+		if (!onScreen && m_renderType == Renderer::Software && m_screenshotState == ScreenshotState::RequestScreenshot)
+			m_screenshotState = ScreenshotState::NoScreenshot;
+
+		const bool visible = onScreen || m_screenshotState == ScreenshotState::RequestScreenshot;
 
 		m_updating = true;
 		m_renderDone = false;
@@ -1239,6 +1247,15 @@ namespace juceRmlUi
 		m_renderProxy->executeRenderFunctions();
 
 		r->endFrame(getOpenGLRenderingScale());
+
+		// Serve a screenshot from the frame just drawn. Copy it, the next frame is drawn into the same image. It is
+		// sized in render pixels, so above a render scale of 1 it is larger than the component, like the OpenGL
+		// viewport that renderOpenGL() reads back.
+		if (m_screenshotState == ScreenshotState::RequestScreenshot)
+		{
+			m_screenshot = r->getRenderImage()->createCopy();
+			m_screenshotState = ScreenshotState::ScreenshotReady;
+		}
 
 		m_renderDone = true;
 

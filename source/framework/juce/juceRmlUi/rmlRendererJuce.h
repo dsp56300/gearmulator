@@ -45,6 +45,7 @@ namespace juceRmlUi
 
 		void beginFrame(juce::Graphics& _g, Rml::Vector2i _size);
 		void endFrame(float _renderScale = 1.0f);
+		const juce::Image* getRenderImage() const { return m_renderImage.get(); }
 
 		Rml::CompiledGeometryHandle	CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
 		void ReleaseGeometry(Rml::CompiledGeometryHandle _geometry) override;
