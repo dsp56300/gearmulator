@@ -27,7 +27,7 @@ namespace bridgeServer
 		config.add(commandLine, true);
 
 		portTcp = config.getInt("tcpPort", static_cast<int>(portTcp));
-		portUdp = config.getInt("tcpPort", static_cast<int>(portUdp));
+		portUdp = config.getInt("udpPort", static_cast<int>(portUdp));
 		deviceStateRefreshMinutes = config.getInt("deviceStateRefreshMinutes", static_cast<int>(deviceStateRefreshMinutes));
 		pluginsPath = config.get("pluginsPath", pluginsPath);
 		romsPath = config.get("romsPath", romsPath);
