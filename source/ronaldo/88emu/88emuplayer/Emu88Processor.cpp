@@ -90,6 +90,7 @@ namespace emu88Player
 		// The boards are sound modules, not sequencers: the host clock the
 		// engine would otherwise generate is just traffic on their MIDI in.
 		m_engine->setMidiClockEnabled(false);
+		m_engine->setLatencyBlocks(0);
 
 		const auto configuredMode = m_config->getIntValue("resamplerMode",
 			static_cast<int>(synthLib::Resampler::Mode::MameHq));
@@ -223,6 +224,7 @@ namespace emu88Player
 		auto replacementEngine = std::make_unique<synthLib::Plugin>(
 			replacementDevice.get(), [](synthLib::Device*) { return nullptr; });
 		replacementEngine->setMidiClockEnabled(false);
+		replacementEngine->setLatencyBlocks(0);
 		if(getSampleRate() > 0.0)
 			replacementEngine->setHostSamplerate(static_cast<float>(getSampleRate()), 0.0f);
 		if(getBlockSize() > 0)

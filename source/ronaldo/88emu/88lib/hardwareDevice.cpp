@@ -5,7 +5,7 @@
 #include "sc8850.h"
 #include "sc55mk2.h"
 #include "sc88pro.h"
-#include "sc88Thread.h"
+#include "sc88Renderer.h"
 #include "sc88types.h"
 
 #include <algorithm>
@@ -73,16 +73,16 @@ namespace emu88Lib
 		if(!isValid())
 			return;
 
-		m_thread = std::make_unique<Sc88Thread>(
+		m_renderer = std::make_unique<Sc88Renderer>(
 			[this] { return renderBoardSample(); },
 			[this](const synthLib::SMidiEvent& _event) { return sendMidiToBoard(_event); },
 			[this](std::vector<synthLib::SMidiEvent>& _events) { readMidiOutFromBoard(_events); },
-			[this] { beforeWorkerJob(); });
+			[this] { beforeRenderBlock(); });
 	}
 
 	HardwareDevice::~HardwareDevice()
 	{
-		m_thread.reset();
+		m_renderer.reset();
 	}
 
 	float HardwareDevice::getSamplerate() const
@@ -234,22 +234,24 @@ namespace emu88Lib
 		}
 	}
 
-	void HardwareDevice::beforeWorkerJob()
+	void HardwareDevice::beforeRenderBlock()
 	{
-		std::lock_guard lock(m_panelMutex);
+		std::unique_lock lock(m_panelMutex, std::try_to_lock);
+		if(!lock.owns_lock())
+			return; // Pick up panel input next block instead of waiting on the UI.
 		while(!m_pendingPanelCommands.empty())
 		{
-			m_workerPanelCommands.emplace_back(m_pendingPanelCommands.front());
+			m_audioPanelCommands.emplace_back(m_pendingPanelCommands.front());
 			m_pendingPanelCommands.pop_front();
 		}
 	}
 
 	void HardwareDevice::applyDuePanelCommand()
 	{
-		if(m_workerPanelCommands.empty() || m_renderedSamples < m_nextPanelCommandSample)
+		if(m_audioPanelCommands.empty() || m_renderedSamples < m_nextPanelCommandSample)
 			return;
-		const auto command = m_workerPanelCommands.front();
-		m_workerPanelCommands.pop_front();
+		const auto command = m_audioPanelCommands.front();
+		m_audioPanelCommands.pop_front();
 		if(command.type == PanelCommandType::Buttons)
 		{
 			const auto buttons = static_cast<uint32_t>(command.value);
@@ -305,7 +307,9 @@ namespace emu88Lib
 			next.leds = m_sc8850->leds();
 			m_sc8850->lcd().renderMono(next.mono);
 		}
-		std::lock_guard lock(m_displayMutex);
+		std::unique_lock lock(m_displayMutex, std::try_to_lock);
+		if(!lock.owns_lock())
+			return; // A missed display refresh must never stall audio generation.
 		next.revision = m_display.revision + 1;
 		m_display = std::move(next);
 	}
@@ -314,14 +318,7 @@ namespace emu88Lib
 	                                  const synthLib::TAudioOutputs& _outputs,
 	                                  const size_t _samples)
 	{
-		m_thread->processSamples(static_cast<uint32_t>(_samples), getExtraLatencySamples(),
-		                         m_midiIn, m_midiOut);
-		for(size_t i = 0; i < _samples; ++i)
-		{
-			Sc88Thread::SampleFrame frame{};
-			m_thread->popSample(frame);
-			if(_outputs[0]) _outputs[0][i] = static_cast<float>(frame.first) * g_dacScale;
-			if(_outputs[1]) _outputs[1][i] = static_cast<float>(frame.second) * g_dacScale;
-		}
+		m_renderer->processSamples(static_cast<uint32_t>(_samples), _outputs[0], _outputs[1],
+		                           g_dacScale, m_midiIn, m_midiOut);
 	}
 }

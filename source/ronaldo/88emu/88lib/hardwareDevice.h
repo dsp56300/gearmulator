@@ -19,7 +19,7 @@ namespace emu88Lib
 	class Sc88Pro;
 	class Sc8850;
 	class Sc55Mk2;
-	class Sc88Thread;
+	class Sc88Renderer;
 
 	// Runs a board and exposes audio, MIDI and front-panel snapshots.
 	class HardwareDevice final : public synthLib::Device
@@ -76,7 +76,7 @@ namespace emu88Lib
 		std::pair<int32_t, int32_t> renderBoardSample();
 		void sendMidiToBoard(const synthLib::SMidiEvent& _event);
 		void readMidiOutFromBoard(std::vector<synthLib::SMidiEvent>& _midiOut);
-		void beforeWorkerJob();
+		void beforeRenderBlock();
 		void applyDuePanelCommand();
 		void publishDisplaySnapshot();
 
@@ -85,7 +85,7 @@ namespace emu88Lib
 		std::unique_ptr<Sc88Pro> m_sc88Pro;
 		std::unique_ptr<Sc8850> m_sc8850;
 		std::unique_ptr<Sc55Mk2> m_sc55;
-		std::unique_ptr<Sc88Thread> m_thread;
+		std::unique_ptr<Sc88Renderer> m_renderer;
 		std::array<synthLib::MidiBufferParser, 2> m_sc88ProMidiOut{
 			synthLib::MidiBufferParser{synthLib::MidiEventSource::Device},
 			synthLib::MidiBufferParser{synthLib::MidiEventSource::Device}};
@@ -100,7 +100,7 @@ namespace emu88Lib
 
 		mutable std::mutex m_panelMutex;
 		std::deque<PanelCommand> m_pendingPanelCommands;
-		std::deque<PanelCommand> m_workerPanelCommands;
+		std::deque<PanelCommand> m_audioPanelCommands;
 		uint64_t m_nextPanelCommandSample = 0;
 		uint64_t m_renderedSamples = 0;
 
