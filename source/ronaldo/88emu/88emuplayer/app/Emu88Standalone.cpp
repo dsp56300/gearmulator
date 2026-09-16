@@ -319,8 +319,9 @@ namespace emu88Player
             // requested setup ourselves, with fallback disabled for explicit options.
             juce::XmlElement emptyAudio("DEVICESETUP");
             config->setValue("audioSetup", &emptyAudio);
-            window = std::make_unique<juce::StandaloneFilterWindow>(getApplicationName(), juce::Colours::black,
-                                                                    config.get(), false);
+            window = std::make_unique<juce::StandaloneFilterWindow>(getApplicationName(),
+                juce::LookAndFeel::getDefaultLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId),
+                config.get(), false);
             auto* holder = window->getPluginHolder();
             const bool audioOverrides = options.has("audio-backend") || options.has("audio-device") ||
                 options.has("sample-rate") || options.has("buffer-size") || options.has("output-channels");

@@ -19,7 +19,7 @@ namespace juceRmlUi
 	MetalContext::MetalContext()
 	{
 		id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-		m_device = (void*)[device retain];
+		m_device = (void*)device;
 		if (m_device)
 		{
 			id<MTLCommandQueue> queue = [MTL_DEVICE newCommandQueue];
@@ -215,7 +215,7 @@ namespace juceRmlUi
 		if (attachment) attachment->incReferenceCount();
 		m_viewAttachment = attachment;
 
-		m_metalView = (void*)[metalView retain];
+		m_metalView = (void*)metalView;
 		m_metalLayer = (void*)[layer retain];
 
 		m_attached = true;

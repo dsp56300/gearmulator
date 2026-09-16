@@ -13,6 +13,17 @@ Release Notes
 - [Fix] MIDI Player: Clear sustained and releasing notes on transport changes
         even after an All Notes Off message.
 
+- [Fix] macOS: Restore software rendering when Metal initialization fails,
+        removing the native Metal view that could leave the window black.
+
+- [Fix] macOS: Support GPUs requiring 4x instead of 2x Metal antialiasing and
+        correct Metal texture transfers and unsupported OpenGL calls.
+
+- [Fix] macOS: Release Metal resources when closing or recreating the interface
+        to prevent graphics memory usage from growing.
+
+- [Fix] Standalone: Restore the standard window border color.
+
 2.2.21:
 
 Framework:
