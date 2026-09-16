@@ -136,6 +136,11 @@ Release Notes
 - [Fix] UI: On macOS, opening a temporary popup no longer hides the close button
         of windows without minimize/maximize controls.
 
+Vavra:
+
+- [Fix] Saving a sound limited some FX2 values to 29: the Speed of Chorus,
+        Flanger, Phaser and Five FX, the Size of Reverb and the Delay time of
+        the 5.1 Delay.
 
 2.2.20:
 

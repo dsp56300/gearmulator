@@ -437,7 +437,7 @@ namespace pluginLib
 			const auto& derived = p->getDerivedParameters();
 			for (const auto& parameter : derived)
 	        {
-				if(parameter->getDescription().range.getLength() > p->getDescription().range.getLength())
+				if(parameter->getDescription().range.getLength() > largestP->getDescription().range.getLength())
 					largestP = parameter;
 	        }
 	        const auto v = getParameterValue(largestP);
