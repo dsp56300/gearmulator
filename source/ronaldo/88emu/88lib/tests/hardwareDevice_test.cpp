@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <tuple>
 #include "baseLib/filesystem.h"
 #include "synthLib/plugin.h"
 #ifdef TEST_JUCE_INPUT
@@ -87,6 +88,72 @@ int main()
 	CHECK(output.empty()); // The previously queued future note is obsolete too.
 	CHECK_EQ(device.getExtraLatencySamples(), 0u);
 	CHECK(device.displaySnapshot().revision > 0);
+
+	// All Notes Off can leave sustain/release voices sounding when transport jumps.
+	{
+		HardwareDevice board(params, BootOptions{false, false});
+		board.process({}, {}, 512, {
+			SMidiEvent(MidiEventSource::Host, 0x90, 60, 100),
+			SMidiEvent(MidiEventSource::Host, 0xb0, 64, 127, 64),
+			SMidiEvent(MidiEventSource::Host, 0xb0, MC_ALLNOTESOFF, 0, 128)}, output);
+		board.process({}, {}, 512, {jump}, output);
+		bytes.clear();
+		for(const auto& event : output)
+		{
+			bytes.push_back(event.a);
+			const auto length = MidiBufferParser::lengthFromStatusByte(event.a);
+			if(length > 1) bytes.push_back(event.b);
+			if(length > 2) bytes.push_back(event.c);
+		}
+		// Both the board's UART queue and HardwareDevice retain their cleanup.
+		CHECK(bytes == std::vector<uint8_t>({0xb0, 120, 0, 120, 0}));
+		board.process({}, {}, 512, {jump}, output);
+		CHECK(output.empty());
+	}
+
+	// UART reply timestamps must be independent of callback boundaries and use output samples.
+	using TimedReply = std::tuple<uint64_t, uint8_t, uint8_t, uint8_t, uint8_t>;
+	const auto timedReplies = [&](uint32_t oversampling, const std::vector<size_t>& blocks)
+	{
+		HardwareDevice board(params, BootOptions{false, false});
+		if(oversampling != 1)
+		{
+			board.setAnalogOutputMode(AnalogOutputMode::Auto);
+			CHECK(board.setSamplerate(32000.0f * oversampling));
+		}
+		std::vector<SMidiEvent> input{
+			SMidiEvent(MidiEventSource::Physical, 0x90, 60, 100, 32 * oversampling),
+			SMidiEvent(MidiEventSource::Physical, 0x91, 61, 100, 160 * oversampling),
+			SMidiEvent(MidiEventSource::Physical, 0x92, 62, 100, 420 * oversampling)};
+		std::vector<TimedReply> replies;
+		uint64_t position = 0;
+		for(const auto count : blocks)
+		{
+			board.process({}, {}, count, input, output);
+			input.clear();
+			for(const auto& event : output)
+			{
+				CHECK(event.offset < count);
+				replies.emplace_back(position + event.offset, event.a, event.b, event.c, event.port);
+			}
+			position += count;
+		}
+		return replies;
+	};
+	const auto nativeReplies = timedReplies(1, {1024});
+	CHECK_EQ(nativeReplies.size(), 3u);
+	CHECK(nativeReplies == timedReplies(1, {0, 1, 31, 0, 129, 351, 512}));
+	const auto oversampledReplies = timedReplies(8, {8192});
+	CHECK(oversampledReplies == timedReplies(8, {0, 1, 31, 0, 129, 351, 7680}));
+	auto scaledReplies = nativeReplies;
+	for(auto& reply : scaledReplies) std::get<0>(reply) *= 8;
+	CHECK(oversampledReplies == scaledReplies);
+	if(nativeReplies.size() == 3)
+	{
+		CHECK(std::get<0>(nativeReplies[0]) >= 32);
+		CHECK(std::get<0>(nativeReplies[1]) >= 160);
+		CHECK(std::get<0>(nativeReplies[2]) >= 420);
+	}
 
 	// An analogue model that oversamples changes the device rate only once the engine asks for it.
 	HardwareDevice analog(params);

@@ -332,7 +332,9 @@ namespace emu88Lib
 
 	void HardwareDevice::collectPanelCommands()
 	{
-		std::lock_guard lock(m_panelMutex);
+		std::unique_lock lock(m_panelMutex, std::try_to_lock);
+		if(!lock.owns_lock())
+			return; // Leave pending input for the next audio block.
 		while(!m_pendingPanelCommands.empty())
 		{
 			m_panelCommands.emplace_back(m_pendingPanelCommands.front());
@@ -423,7 +425,9 @@ namespace emu88Lib
 			next.leds = m_sc8850->leds();
 			m_sc8850->lcd().renderMono(next.mono);
 		}
-		std::lock_guard lock(m_displayMutex);
+		std::unique_lock lock(m_displayMutex, std::try_to_lock);
+		if(!lock.owns_lock())
+			return; // The UI can keep its previous snapshot if it is busy.
 		next.revision = m_display.revision + 1;
 		m_display = std::move(next);
 	}
@@ -450,12 +454,17 @@ namespace emu88Lib
 			}
 			// With an analogue model each DAC frame is held for several output samples.
 			if(m_holdPhase == 0)
+			{
 				m_heldFrame = isValid() ? renderBoardSample() : std::pair<int32_t, int32_t>{};
+				const auto firstOutput = m_midiOut.size();
+				readMidiOutFromBoard(m_midiOut);
+				for(auto j = firstOutput; j < m_midiOut.size(); ++j)
+					m_midiOut[j].offset = static_cast<uint32_t>(i);
+			}
 			writeOutputSample(_outputs, i);
 		}
 		m_midiIn.erase(m_midiIn.begin(), m_midiIn.begin() + static_cast<ptrdiff_t>(next));
 		for(auto& event : m_midiIn) event.offset -= static_cast<uint32_t>(_samples);
-		readMidiOutFromBoard(m_midiOut);
 		if(_samples && isValid()) publishDisplaySnapshot();
 	}
 
@@ -511,7 +520,7 @@ namespace emu88Lib
 		if(status == synthLib::M_NOTEON && _event.c != 0)
 			m_activeChannels |= channelMask;
 		else if(status == synthLib::M_CONTROLCHANGE &&
-		        (_event.b == synthLib::MC_ALLSOUNDOFF || _event.b == synthLib::MC_ALLNOTESOFF))
+		        _event.b == synthLib::MC_ALLSOUNDOFF)
 			m_activeChannels &= ~channelMask;
 	}
 }

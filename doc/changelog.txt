@@ -1,5 +1,18 @@
 Release Notes
 
+2.2.22:
+
+88emuPlayer:
+
+- [Fix] Audio: Avoid waiting for the user interface when processing front-panel
+        input and updating the display from the audio thread.
+
+- [Fix] MIDI: Preserve outgoing MIDI timing within audio blocks, including when
+        analog output emulation uses oversampling.
+
+- [Fix] MIDI Player: Clear sustained and releasing notes on transport changes
+        even after an All Notes Off message.
+
 2.2.21:
 
 Framework:
