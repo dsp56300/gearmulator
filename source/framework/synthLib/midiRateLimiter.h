@@ -26,6 +26,8 @@ namespace synthLib
 		void disableRateLimit();
 
 		void write(SMidiEvent&& _event);
+		void setPreserveEventOrder(bool _enabled) { m_preserveEventOrder = _enabled; }
+		void setResetPause(float _seconds) { m_resetPause = _seconds; }
 		void transportDiscontinuity(uint32_t _generation);
 
 		void processSample();
@@ -54,7 +56,10 @@ namespace synthLib
 		std::optional<SMidiEvent> m_currentEvent;
 
 		bool m_sendingSysex = false;
+		bool m_preserveEventOrder = false;
 		float m_sysexPause = 0.0f;
+		float m_resetPause = 0.0f;
+		float m_remainingResetPause = 0.0f;
 		float m_remainingSysexPause = 0.0f;
 		uint32_t m_sysexPauseLengthThreshold = 0;
 		uint32_t m_currentSysexLength = 0;

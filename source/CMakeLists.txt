@@ -100,6 +100,7 @@ endif()
 if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU)
 	add_subdirectory(cpu/common)
 	add_subdirectory(cpu/h8500)
+	add_subdirectory(cpu/mcs96)
 	add_subdirectory(cpu/sh2)
 endif()
 add_subdirectory(cpu/h8s)
@@ -159,18 +160,18 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
 	endif()
 endif()
 
-# The SC-88 player needs PortMidi for its MIDI bridge. We use
-# 3rdparty/portmidi-latest specifically, not the older 3rdparty/portmidi tree that
-# Vavra pulls in, because it exposes virtual-device creation (Pm_CreateVirtualInput/
-# Output), which lets the player publish its own MIDI ports to the host instead of
-# needing a loop-back driver. The two trees produce different target names
-# (portmidi-static vs. portmidi) so they coexist when both Vavra and the SC-88 are on.
+# Virtual MIDI ports require the newer PortMidi API. Its target name differs from
+# Vavra's portmidi-static, so both versions can coexist.
 if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU AND NOT ANDROID AND NOT TARGET portmidi)
 	# Build static even if a parent set BUILD_SHARED_LIBS ON.
 	set(_pm_prev_shared ${BUILD_SHARED_LIBS})
 	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 	add_subdirectory(3rdparty/portmidi-latest EXCLUDE_FROM_ALL)
 	set(BUILD_SHARED_LIBS ${_pm_prev_shared} CACHE BOOL "" FORCE)
+endif()
+
+if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
+	add_subdirectory(framework/juce/jucePlayerLib EXCLUDE_FROM_ALL)
 endif()
 
 # ----------------- Synth Xenia

@@ -1,17 +1,14 @@
-#include "Emu88Processor.h"
+#include "88emuplayer/Emu88Processor.h"
+#include "88emuplayer/app/Emu88LaunchOptions.h"
 
-#include "Emu88Editor.h"
-#include "Emu88PortMidiBridge.h"
+#include "88emuplayer/ui/Emu88Editor.h"
+#include "jucePlayerLib/portMidiBridge.h"
 
-#include "88lib/romloader.h"
-
-#include <cstdlib>
+#include "88lib/rom/romloader.h"
 
 #include "baseLib/filesystem.h"
 #include "baseLib/md5.h"
 
-#include "synthLib/os.h"
-#include "synthLib/romLoader.h"
 
 namespace emu88Player
 {
@@ -19,55 +16,26 @@ namespace emu88Player
 	{
 		constexpr auto g_deviceModelKey = "deviceModel";
 		constexpr auto g_outputGainKey = "outputGain";
-
-		// The same location every other TUS plugin uses, which is not the same
-		// thing as JUCE's userDocumentsDirectory: baseLib follows the XDG base
-		// directory spec on Linux, where the data folder is $XDG_DATA_HOME or
-		// ~/.local/share rather than ~/Documents. It also honours the
-		// TUS_DATA_FOLDER override that pluginLib::Tools::getPublicDataFolder
-		// applies for environments where the documents folder is not usable.
-		std::string documentsFolder(const char* _product, const char* _subFolder = nullptr)
-		{
-			const auto* overrideFolder = std::getenv("TUS_DATA_FOLDER");
-			const auto root = overrideFolder && *overrideFolder
-				? baseLib::filesystem::validatePath(overrideFolder)
-				: baseLib::filesystem::getSpecialFolderPath(
-					baseLib::filesystem::SpecialFolderType::UserDocuments);
-
-			auto folder = baseLib::filesystem::validatePath(root + "The Usual Suspects/" + _product + '/');
-			if(_subFolder)
-				folder = baseLib::filesystem::validatePath(folder + _subFolder + '/');
-			return folder;
-		}
+		constexpr auto g_factoryResetOnLoadKey = "factoryResetOnLoad";
+		constexpr auto g_fastBootKey = "fastBoot";
 
 	}
 
 	Processor::Processor()
 		: juce::AudioProcessor(BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true)),
-		  m_dataFolder(documentsFolder("88emuPlayer")),
-		  m_romFolder(documentsFolder("88emuPlayer", "roms")),
-		  m_ownedConfig(createConfig(m_dataFolder)),
-		  m_config(m_ownedConfig.get())
+		  m_dataFolder(defaultDataFolder()),
+		  m_romFolder(standaloneLaunch && standaloneLaunch->has("rom-dir")
+			? launchFile(standaloneLaunch->get("rom-dir")).getFullPathName().toStdString()
+			: defaultDataFolder() + "roms/"),
+		  m_ownedConfig(standaloneConfig ? nullptr : createConfig(m_dataFolder)),
+		  m_config(standaloneConfig ? standaloneConfig : m_ownedConfig.get())
 	{
-		(void)juce::File(m_romFolder).createDirectory();
-		// These three are ours, so they are searched recursively - a user can sort
-		// a ROM collection into subfolders. The module directory is added by synthLib
-		// itself and stays flat on purpose. The working directory is not searched at
-		// all once we have named paths of our own: a double-clicked application runs
-		// with "/" as its working directory.
-		synthLib::RomLoader::addSearchPath(m_romFolder, true);
-		// The player read the SC-88 plugin's ROM folder before it had one of its own. It stays
-		// a fallback so an existing install keeps working, but it is never created and the
-		// missing-ROM dialog points at m_romFolder above.
-		synthLib::RomLoader::addSearchPath(documentsFolder("SC-88", "roms"), true);
-		// Earlier builds asked JUCE for the documents folder directly, which on Linux is
-		// ~/Documents rather than the XDG data folder every other TUS plugin uses. Keep reading
-		// from there so an install that predates the fix still finds its ROMs.
-		synthLib::RomLoader::addSearchPath(baseLib::filesystem::validatePath(
-			juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
-				.getChildFile("The Usual Suspects").getFullPathName().toStdString()), true);
-		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(true));
-		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(false));
+		if(!standaloneLaunch || !standaloneLaunch->has("rom-dir"))
+			(void)juce::File(m_romFolder).createDirectory();
+		configureRomSearchPaths(standaloneLaunch ? *standaloneLaunch : LaunchOptions{});
+		// Live MIDI can arrive before the audio device starts; prepareToPlay() sets the real rate.
+		for(auto& collector : m_liveMidi)
+			collector.reset(44100.0);
 
 		const auto configuredModel = m_config->getIntValue(g_deviceModelKey,
 			static_cast<int>(emu88Lib::DeviceModel::Sc88Pro));
@@ -78,18 +46,35 @@ namespace emu88Player
 		// present. If the configured one is not, start on the first that is
 		// rather than booting into a dead device - the configured choice is left
 		// in the config so it comes back once its ROMs turn up.
-		if(!isModelAvailable(m_deviceModel))
+		if(!(standaloneLaunch && standaloneLaunch->has("device")) && !isModelAvailable(m_deviceModel))
 		{
 			if(const auto fallback = firstAvailableModel())
 				m_deviceModel = *fallback;
 		}
 
+		m_midiPlayer.setResetMode(static_cast<jucePlayer::MidiPlayer::ResetMode>(
+			m_config->getIntValue("songResetMode", static_cast<int>(jucePlayer::MidiPlayer::ResetMode::Gs))));
+		m_midiPlayer.setSongGapMs(static_cast<uint32_t>(std::max(0, m_config->getIntValue("songGapMs", 1000))));
+		m_midiPlayer.setPortCount(midiPortCount());
+
+		const auto analogMode = m_config->getIntValue("analogOutputMode",
+			static_cast<int>(emu88Lib::AnalogOutputMode::Off));
+		if(analogMode >= 0 && emu88Lib::isAnalogOutputModeValue(static_cast<uint32_t>(analogMode)))
+			m_analogOutputMode = static_cast<emu88Lib::AnalogOutputMode>(analogMode);
+
+		// The launcher has already checked the card.
+		if(standaloneLaunch)
+			m_pcmCard = loadPcmCard(*standaloneLaunch);
 		auto params = createDeviceParams(m_deviceModel);
-		m_device = std::make_unique<emu88Lib::HardwareDevice>(params);
+		m_device = std::make_unique<emu88Lib::HardwareDevice>(params, bootOptions(), m_pcmCard);
+		// Before the engine sees the device, so the first host rate it negotiates already
+		// includes the model's oversampling.
+		m_device->setAnalogOutputMode(m_analogOutputMode);
 		m_engine = std::make_unique<synthLib::Plugin>(m_device.get(), [](synthLib::Device*) { return nullptr; });
 		// The boards are sound modules, not sequencers: the host clock the
 		// engine would otherwise generate is just traffic on their MIDI in.
 		m_engine->setMidiClockEnabled(false);
+		m_engine->setLatencyBlocks(0);
 
 		const auto configuredMode = m_config->getIntValue("resamplerMode",
 			static_cast<int>(synthLib::Resampler::Mode::MameHq));
@@ -99,23 +84,23 @@ namespace emu88Player
 		m_resamplerMode.store(static_cast<int>(mode), std::memory_order_relaxed);
 		m_engine->setResamplerMode(mode);
 
+		m_limiterEnabled.store(m_config->getBoolValue("outputLimiter", false));
 		const auto gain = static_cast<float>(m_config->getDoubleValue(g_outputGainKey, kUnityOutputGain));
 		m_outputGain.store(std::clamp(gain, kMinimumOutputGain, kMaximumOutputGain),
 		                   std::memory_order_relaxed);
 
-		// Without virtual-port support there is nothing for the bridge to open,
-		// and starting it anyway leaves a thread polling two null ports at 1 kHz.
-		const auto portMidiEnabled = PortMidiBridge::virtualPortsSupported() &&
+		// Start the bridge only on backends that provide virtual endpoints.
+		const auto portMidiEnabled = jucePlayer::PortMidiBridge::virtualPortsSupported() &&
 			m_config->getBoolValue("portMidiEnabled", true);
 		m_portMidiEnabled.store(portMidiEnabled, std::memory_order_release);
-		if(PortMidiBridge::virtualPortsSupported())
+		if(jucePlayer::PortMidiBridge::virtualPortsSupported())
 		{
-			m_portMidiBridge = std::make_unique<PortMidiBridge>([this](synthLib::SMidiEvent _event)
+			m_portMidiBridge = std::make_unique<jucePlayer::PortMidiBridge>([this](synthLib::SMidiEvent _event)
 			{
 				const juce::ScopedLock lock(getCallbackLock());
-				if(m_engine)
+				if(m_engine && _event.port < midiPortCount())
 					m_engine->addMidiEvent(_event);
-			});
+			}, m_config->getValue("virtualPortName", "88emu").toStdString(), 4);
 			m_portMidiBridge->setEnabled(portMidiEnabled);
 		}
 	}
@@ -167,14 +152,13 @@ namespace emu88Player
 
 	bool Processor::isModelAvailable(const emu88Lib::DeviceModel _model)
 	{
-		return emu88Lib::RomLoader::isDeviceAvailable(_model);
+		return emu88Lib::isDeviceListed(_model) && emu88Lib::RomLoader::isDeviceAvailable(_model);
 	}
 
 	std::optional<emu88Lib::DeviceModel> Processor::firstAvailableModel()
 	{
-		for(uint32_t value = 0; value < emu88Lib::deviceModelCount(); ++value)
+		for(const auto model : emu88Lib::g_deviceMenuOrder)
 		{
-			const auto model = static_cast<emu88Lib::DeviceModel>(value);
 			if(isModelAvailable(model))
 				return model;
 		}
@@ -189,6 +173,21 @@ namespace emu88Player
 		params.romName = emu88Lib::getDeviceProfile(_model).displayName;
 
 		return params;
+	}
+
+	emu88Lib::BootOptions Processor::bootOptions() const
+	{
+		emu88Lib::BootOptions boot;
+		boot.factoryReset = m_config->getBoolValue(g_factoryResetOnLoadKey, boot.factoryReset);
+		boot.fastBoot = m_config->getBoolValue(g_fastBootKey, boot.fastBoot);
+		return boot;
+	}
+
+	void Processor::setBootOptions(const emu88Lib::BootOptions& _boot)
+	{
+		m_config->setValue(g_factoryResetOnLoadKey, _boot.factoryReset);
+		m_config->setValue(g_fastBootKey, _boot.fastBoot);
+		m_config->saveIfNeeded();
 	}
 
 	bool Processor::setDeviceModel(const emu88Lib::DeviceModel _model)
@@ -210,7 +209,27 @@ namespace emu88Player
 		return replaceDevice(m_deviceModel, false);
 	}
 
-	bool Processor::replaceDevice(const emu88Lib::DeviceModel _model, const bool _persistModel)
+	bool Processor::setPower(const bool enabled, const uint32_t heldButtons)
+	{
+		if(enabled == isPoweredOn()) return !enabled || hasValidRom();
+		if(enabled) return replaceDevice(m_deviceModel, false, heldButtons);
+
+		std::unique_ptr<emu88Lib::HardwareDevice> previousDevice;
+		std::unique_ptr<synthLib::Plugin> previousEngine;
+		{
+			const juce::ScopedLock lock(getCallbackLock());
+			m_midiPlayer.stop();
+			std::vector<synthLib::SMidiEvent> discarded;
+			m_midiPlayer.processBlock(discarded, 1, std::max(1.0, getSampleRate()), false);
+			previousEngine = std::move(m_engine);
+			previousDevice = std::move(m_device);
+		}
+		previousEngine.reset();
+		previousDevice.reset();
+		return true;
+	}
+
+	bool Processor::replaceDevice(const emu88Lib::DeviceModel _model, const bool _persistModel, const uint32_t heldButtons)
 	{
 		if(!emu88Lib::isDeviceModelValue(static_cast<uint32_t>(_model)))
 			return false;
@@ -219,10 +238,14 @@ namespace emu88Player
 		// dropped the missing dump into the ROM folder, so look again.
 		(void)emu88Lib::RomLoader::rescan();
 
-		auto replacementDevice = std::make_unique<emu88Lib::HardwareDevice>(createDeviceParams(_model));
+		auto boot = bootOptions();
+		boot.initialPanelButtons = heldButtons;
+		auto replacementDevice = std::make_unique<emu88Lib::HardwareDevice>(createDeviceParams(_model), boot, m_pcmCard);
+		replacementDevice->setAnalogOutputMode(m_analogOutputMode);
 		auto replacementEngine = std::make_unique<synthLib::Plugin>(
 			replacementDevice.get(), [](synthLib::Device*) { return nullptr; });
 		replacementEngine->setMidiClockEnabled(false);
+		replacementEngine->setLatencyBlocks(0);
 		if(getSampleRate() > 0.0)
 			replacementEngine->setHostSamplerate(static_cast<float>(getSampleRate()), 0.0f);
 		if(getBlockSize() > 0)
@@ -240,6 +263,7 @@ namespace emu88Player
 			m_device = std::move(replacementDevice);
 			m_engine = std::move(replacementEngine);
 			m_deviceModel = _model;
+			m_midiPlayer.setPortCount(midiPortCount());
 		}
 		suspendProcessing(false);
 
@@ -315,11 +339,21 @@ namespace emu88Player
 
 	void Processor::prepareToPlay(const double _sampleRate, const int _maximumBlockSize)
 	{
+		m_outputLimiter.prepare(_sampleRate);
+		for(auto& collector : m_liveMidi)
+			collector.reset(_sampleRate);
 		if(!m_engine)
 			return;
 		m_engine->setHostSamplerate(static_cast<float>(_sampleRate), 0.0f);
 		m_engine->setBlockSize(static_cast<uint32_t>(std::max(1, _maximumBlockSize)));
 		m_engine->setResamplerMode(resamplerMode());
+	}
+
+	void Processor::setOutputLimiterEnabled(bool enabled)
+	{
+		m_limiterEnabled.store(enabled);
+		m_config->setValue("outputLimiter", enabled);
+		m_config->saveIfNeeded();
 	}
 
 	void Processor::setOutputGain(const float _gain)
@@ -347,9 +381,27 @@ namespace emu88Player
 		m_config->saveIfNeeded();
 	}
 
+	void Processor::setAnalogOutputMode(const emu88Lib::AnalogOutputMode _mode)
+	{
+		if(!emu88Lib::isAnalogOutputModeValue(static_cast<uint32_t>(_mode)))
+			return;
+		m_analogOutputMode = _mode;
+		m_config->setValue("analogOutputMode", static_cast<int>(_mode));
+		m_config->saveIfNeeded();
+
+		// A model that oversamples changes the device rate. The board and the engine's
+		// resampler switch together, between two audio callbacks.
+		const juce::ScopedLock lock(getCallbackLock());
+		if(!m_device || !m_engine)
+			return;
+		m_device->setAnalogOutputMode(_mode);
+		if(getSampleRate() > 0.0)
+			m_engine->setPreferredDeviceSamplerate(0.0f);
+	}
+
 	void Processor::setPortMidiEnabled(const bool _enabled)
 	{
-		if(!PortMidiBridge::virtualPortsSupported())
+		if(!jucePlayer::PortMidiBridge::virtualPortsSupported())
 			return;
 		m_portMidiEnabled.store(_enabled, std::memory_order_release);
 		if(m_portMidiBridge)
@@ -377,7 +429,36 @@ namespace emu88Player
 
 	void Processor::handleAsyncUpdate()
 	{
-		m_engine->applyPendingDeviceSamplerate();
+		if(m_engine) m_engine->applyPendingDeviceSamplerate();
+	}
+
+	void Processor::addLiveMidi(const juce::MidiMessage& _message, const uint8_t _groups)
+	{
+		for(uint8_t group = 0; group < m_liveMidi.size(); ++group)
+			if(_groups & (1u << group))
+				m_liveMidi[group].addMessageToQueue(_message);
+	}
+
+	void Processor::addMidiBuffer(const juce::MidiBuffer& _midi, const uint8_t _port, const synthLib::MidiEventSource _source)
+	{
+		jucePlayer::forEachMidiEvent(_midi, _port, _source,
+			[this](synthLib::SMidiEvent event) { m_engine->addMidiEvent(event); });
+	}
+
+	void Processor::takeLiveMidi(const int _samples, const bool _deliver)
+	{
+		if(_samples <= 0)
+			return;
+		// A device with fewer part groups drops the others, as it does for the virtual ports.
+		const auto groups = _deliver ? midiPortCount() : uint8_t{0};
+		for(uint8_t group = 0; group < m_liveMidi.size(); ++group)
+		{
+			m_liveMidiBlock.clear();
+			m_liveMidi[group].removeNextBlockOfMessages(m_liveMidiBlock, _samples);
+			if(group < groups)
+				addMidiBuffer(m_liveMidiBlock, group, synthLib::MidiEventSource::Physical);
+		}
+		m_liveMidiBlock.clear();
 	}
 
 	void Processor::processBlock(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midi)
@@ -386,34 +467,21 @@ namespace emu88Player
 		_buffer.clear();
 		if(!m_engine || !m_device || !m_device->isValid())
 		{
-			// Silence is still output; recording it keeps the WAV timeline honest.
+			_midi.clear();
+			// Drop what arrived while off, rather than playing it all at the next power-on.
+			takeLiveMidi(_buffer.getNumSamples(), false);
+			std::vector<synthLib::SMidiEvent> discarded;
+			m_midiPlayer.processBlock(discarded, static_cast<uint32_t>(_buffer.getNumSamples()), getSampleRate(), false);
+			// Preserve the recording timeline while the board is off or unavailable.
 			recordBlock(_buffer);
 			return;
 		}
 
-		for(const auto metadata : _midi)
-		{
-			const auto message = metadata.getMessage();
-			synthLib::SMidiEvent event(synthLib::MidiEventSource::Host);
-			event.offset = static_cast<uint32_t>(std::max(0, metadata.samplePosition));
-			if(message.isSysEx())
-			{
-				event.sysex.push_back(0xf0);
-				const auto* data = message.getSysExData();
-				for(int i = 0; i < message.getSysExDataSize(); ++i)
-					event.sysex.push_back(data[i]);
-				event.sysex.push_back(0xf7);
-			}
-			else
-			{
-				const int size = message.getRawDataSize();
-				if(size == 0 || size > 3)
-					continue;
-				synthLib::setShortMessage(event, message.getRawData(), static_cast<size_t>(size));
-			}
-			m_engine->addMidiEvent(event);
-		}
+		// The standalone detaches the player's merged input, so this is empty there; inputs arrive
+		// through jucePlayer::MidiInputRouting, per part group.
+		addMidiBuffer(_midi, 0, synthLib::MidiEventSource::Host);
 		_midi.clear();
+		takeLiveMidi(_buffer.getNumSamples(), true);
 
 		std::vector<synthLib::SMidiEvent> playerEvents;
 		m_midiPlayer.processBlock(playerEvents, static_cast<uint32_t>(_buffer.getNumSamples()),
@@ -421,9 +489,7 @@ namespace emu88Player
 		for(auto& event : playerEvents)
 			m_engine->addMidiEvent(event);
 
-		// This standalone has no audio inputs. Value-initialise every pointer:
-		// leaving std::array's pointer elements indeterminate is undefined
-		// behaviour and made the first valid-ROM audio callback crash under LTO.
+		// This standalone has no audio inputs.
 		synthLib::TAudioInputs inputs{};
 		synthLib::TAudioOutputs outputs{_buffer.getWritePointer(0), _buffer.getWritePointer(1)};
 		m_engine->process(inputs, outputs, static_cast<size_t>(_buffer.getNumSamples()),
@@ -434,7 +500,13 @@ namespace emu88Player
 		if(m_engine->hasPendingDeviceSamplerate())
 			triggerAsyncUpdate();
 		_buffer.applyGain(outputGain());
+		m_outputLimiter.process(_buffer.getWritePointer(0), _buffer.getWritePointer(1),
+			static_cast<size_t>(_buffer.getNumSamples()), m_limiterEnabled.load());
 		recordBlock(_buffer);
+		// Hardware routing must not reverse the logical stereo recording.
+		if(m_reverseOutputChannels.load())
+			for(int i = 0; i < _buffer.getNumSamples(); ++i)
+				std::swap(_buffer.getWritePointer(0)[i], _buffer.getWritePointer(1)[i]);
 
 		std::vector<synthLib::SMidiEvent> midiOut;
 		m_engine->getMidiOut(midiOut);

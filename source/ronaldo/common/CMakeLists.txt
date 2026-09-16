@@ -6,6 +6,7 @@ add_library(rLib STATIC)
 
 set(SOURCES
 	storage.cpp storage.h
+	romDescramble.h
 )
 
 target_sources(rLib PRIVATE ${SOURCES})

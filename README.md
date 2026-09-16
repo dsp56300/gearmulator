@@ -32,7 +32,7 @@ At the moment, the following devices are supported:
 * Xenia: Waldorf Microwave II/XT
 * Nodal Red 2x: Clavia Nord Lead/Rack 2x
 * JE-8086: Roland JP-8000
-* 88emu: Roland SC-88, SC-88VL, SC-88Pro, SC-8850 and SC-55mkII.
+* 88emu: Roland CM (CM-32P) and Sound Canvas family (SC-55, SC-88, SC-88pro, SC-8820, SC-8850 and variants)
 
 ### Compiling
 

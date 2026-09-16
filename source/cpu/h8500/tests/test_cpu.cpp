@@ -625,6 +625,75 @@ void test_run_budget() {
   CHECK_EQ(s.cpu.regs().pc, 0x0102);
 }
 
+// Sequential flow off the end of a page.  PC is a 16-bit register and minimum
+// mode has one 64-kbyte page, so the instruction after H'FFFF is at H'0000.
+// run() chains across the page end instead of stopping there.
+void test_pc_wraps_at_page_end() {
+  System s;
+  s.start(0xFFF0);                     // H'FFF0-H'FFFF: RAM clears to H'00 = NOP
+  s.poke(0x0000, {0x50, 0x5A, 0x1A});  // MOV:E #H'5A,R0 ; SLEEP  (over the consumed reset vector)
+  s.cpu.run(1000);
+  CHECK_EQ(s.cpu.regs().r[0] & 0xFF, 0x5A);
+  CHECK_EQ(s.cpu.regs().pc, 0x0003);
+  CHECK(s.cpu.sleeping());
+  CHECK_EQ(s.cpu.instructions_executed(), 18u);  // 16 NOPs, MOV:E, SLEEP
+
+  // An instruction straddling the page end takes its last bytes from the
+  // start of the page, and execution continues after them.
+  System t;
+  t.start(0xFFFE);
+  t.poke(0xFFFE, {0x59, 0x12});              // MOV:I #H'1234,R1 ...
+  t.poke(0x0000, {0x34, 0x50, 0x5A, 0x1A});  // ... H'34 ; MOV:E #H'5A,R0 ; SLEEP
+  t.cpu.run(1000);
+  CHECK_EQ(t.cpu.regs().r[1], 0x1234);
+  CHECK_EQ(t.cpu.regs().r[0] & 0xFF, 0x5A);
+  CHECK_EQ(t.cpu.regs().pc, 0x0004);
+}
+
+// Maximum mode: the pages are separate and sequential flow never changes CP
+// (H8/510 manual 3.6.2), so the PC wraps to H'0000 of the same page.
+void test_pc_wraps_within_code_page() {
+  System s(ChipModel::H8_510, 4);
+  s.bus.map_ram(0x010000, 0x20000, BusClass::W16_S2);  // pages 1 and 2, cleared to NOPs
+  s.poke(0x0000, {0x00, 0x01, 0xFF, 0xF0});            // reset vector: CP=1, PC=H'FFF0
+  s.poke(0x010000, {0x50, 0x5A, 0x1A});                // MOV:E #H'5A,R0 ; SLEEP
+  s.poke(0x020000, {0x50, 0xA5, 0x1A});                // not reached: CP stays 1
+  s.cpu.reset();
+  s.cpu.run(1000);
+  CHECK_EQ(s.cpu.regs().cp, 1);
+  CHECK_EQ(s.cpu.regs().pc, 0x0003);
+  CHECK_EQ(s.cpu.regs().r[0] & 0xFF, 0x5A);
+  CHECK_EQ(s.cpu.cache_pages_allocated(), 1u);
+}
+
+// A write to either half of an instruction straddling the page end drops its
+// cell.  The line at H'0000 holds code only because of that instruction.
+void test_page_end_straddle_invalidation() {
+  System s;
+  s.start(0xFFFE);
+  s.poke(0xFFFE, {0x10, 0x20});        // JMP @H'2000:16  (address low byte at H'0000)
+  s.poke(0x0000, {0x00});
+  s.poke(0x2000, {0x50, 0x5A, 0x1A});  // MOV:E #H'5A,R0 ; SLEEP
+  s.poke(0x2080, {0x50, 0xA5, 0x1A});  // MOV:E #H'A5,R0 ; SLEEP
+  s.poke(0x2180, {0x50, 0x3C, 0x1A});  // MOV:E #H'3C,R0 ; SLEEP
+  s.cpu.run(1000);
+  CHECK_EQ(s.cpu.regs().r[0] & 0xFF, 0x5A);
+
+  s.bus.write8(0x0000, 0x80);          // -> JMP @H'2080
+  s.cpu.regs().pc = 0xFFFE;
+  s.cpu.set_sleeping(false);
+  s.cpu.run(1000);
+  CHECK_EQ(s.cpu.regs().r[0] & 0xFF, 0xA5);
+  CHECK_EQ(s.cpu.regs().pc, 0x2083);
+
+  s.bus.write8(0xFFFF, 0x21);          // -> JMP @H'2180
+  s.cpu.regs().pc = 0xFFFE;
+  s.cpu.set_sleeping(false);
+  s.cpu.run(1000);
+  CHECK_EQ(s.cpu.regs().r[0] & 0xFF, 0x3C);
+  CHECK_EQ(s.cpu.regs().pc, 0x2183);
+}
+
 }  // namespace
 
 int main() {
@@ -655,5 +724,8 @@ int main() {
   test_sleep_and_wake();
   test_self_modifying_code();
   test_run_budget();
+  test_pc_wraps_at_page_end();
+  test_pc_wraps_within_code_page();
+  test_page_end_straddle_invalidation();
   return test::finish("test_cpu");
 }

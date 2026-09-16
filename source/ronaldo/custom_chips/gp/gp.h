@@ -38,11 +38,11 @@ namespace gpLib
 		static constexpr uint32_t RegWindowSize = 0x40;
 		static constexpr uint32_t BankCount = 8;	// wave-ROM chip selects
 
-		// Output scale: renderFrame() returns values where +/- (1 << 21) is
+		// Output scale: renderFrame() returns values where +/- (1 << 23) is
 		// full scale, matching the convention xpLib uses so a board can mix
 		// the two without a second scaling law. The DAC word is 20 bits with
-		// a nominal full scale of 2^18, hence the <<3 on the way out.
-		static constexpr int32_t OutputFullScale = 1 << 21;
+		// a nominal full scale of 2^18, hence the <<5 on the way out.
+		static constexpr int32_t OutputFullScale = 1 << 23;
 
 		// The chip's register files and working state. RAM1 holds 20-bit
 		// words and RAM2 16-bit words; six and twelve per channel are

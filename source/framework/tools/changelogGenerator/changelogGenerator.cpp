@@ -40,9 +40,9 @@ namespace
 
 	Lines& trim(Lines& _lines)
 	{
-		while (_lines.front().empty())
+		while (!_lines.empty() && _lines.front().empty())
 			_lines.erase(_lines.begin());
-		while (_lines.back().empty())
+		while (!_lines.empty() && _lines.back().empty())
 			_lines.pop_back();
 		return _lines;
 	}

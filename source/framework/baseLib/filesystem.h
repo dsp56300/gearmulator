@@ -66,6 +66,7 @@ namespace baseLib
 		}
 
 		bool readFile(std::vector<uint8_t>& _data, const std::string& _filename);
+		bool readFileRegion(std::vector<uint8_t>& _data, const std::string& _filename, size_t _offset, size_t _size);
 
 		template<typename T> bool readFile(T& _data, const std::string& _filename)
 		{

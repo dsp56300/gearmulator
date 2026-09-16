@@ -177,6 +177,9 @@ namespace juceRmlUi
 					Rml::LoadFontFace(m_coreInstance, file, true);
 				}
 			}
+
+			if (_config.systemFallbackFonts)
+				m_rmlInterfaces.loadSystemFallbackFonts();
 		}
 
 		try
@@ -794,15 +797,19 @@ namespace juceRmlUi
 		if (!changes)
 			return;
 
+		const bool shiftChanged = _modifiers.isShiftDown() != m_currentModifierKeys.isShiftDown();
 		m_currentModifierKeys = _modifiers;
 
 		RmlInterfaces::ScopedAccess access(*this);
 
-		// generate a fake key event to trigger the modifier change
-		if (changes > 0)
-			m_rmlContext->ProcessKeyDown(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
+		// Generate a key event to carry the modifier change. JUCE reports Shift only this way, never as
+		// a key press, and can't tell the left key from the right, so a Shift change goes out as the
+		// left Shift key, which a listener can bind like any other.
+		const auto key = shiftChanged ? Rml::Input::KI_LSHIFT : Rml::Input::KI_UNKNOWN;
+		if (shiftChanged ? _modifiers.isShiftDown() : changes > 0)
+			m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_modifiers));
 		else
-			m_rmlContext->ProcessKeyUp(Rml::Input::KI_UNKNOWN, toRmlModifiers(_modifiers));
+			m_rmlContext->ProcessKeyUp(key, toRmlModifiers(_modifiers));
 		enqueueUpdate();
 	}
 

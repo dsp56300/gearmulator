@@ -164,10 +164,73 @@ namespace
 		expect(bytes, {0xf0, 0x01, 0xf7, 0xf0});
 	}
 
+	void testFileSysexCancellation()
+	{
+		for(bool ordered : {false, true})
+		{
+			std::vector<uint8_t> bytes;
+			MidiRateLimiter limiter([&](uint8_t b) { bytes.push_back(b); });
+			limiter.setPreserveEventOrder(ordered);
+			for(uint32_t generation = 0; generation < 100; ++generation)
+			{
+				SMidiEvent reset(MidiEventSource::Host);
+				reset.sysex = {0xf0, 0x7e, 0x7f, 9, 1, 0xf7};
+				reset.cancelOnTransportChange = true;
+				reset.transportGeneration = generation;
+				limiter.write(std::move(reset));
+				limiter.transportDiscontinuity(generation + 1);
+			}
+			SMidiEvent dump(MidiEventSource::Host);
+			dump.sysex = {0xf0, 1, 0xf7};
+			limiter.write(std::move(dump));
+			limiter.transportDiscontinuity(101);
+			limiter.processSample();
+			expect(bytes, {0xf0, 1, 0xf7});
+		}
+
+		std::vector<uint8_t> bytes;
+		MidiRateLimiter limiter([&](uint8_t b) { bytes.push_back(b); });
+		limiter.setSamplerate(1000);
+		limiter.setRateLimit(1000);
+		SMidiEvent fileSysex(MidiEventSource::Host);
+		fileSysex.sysex = {0xf0, 1, 2, 0xf7};
+		fileSysex.cancelOnTransportChange = true;
+		limiter.write(std::move(fileSysex));
+		limiter.processSample();
+		limiter.transportDiscontinuity(1);
+		for(int i = 0; i < 10; ++i) limiter.processSample();
+		expect(bytes, {0xf0, 1, 2, 0xf7}); // finish an already-started message
+	}
+
+	void testOrderedResetPause()
+	{
+		int sample = 0, resetEnd = -1, noteStart = -1;
+		std::vector<uint8_t> bytes;
+		MidiRateLimiter limiter([&](uint8_t b)
+		{
+			bytes.push_back(b);
+			if(b == 0xf7) resetEnd = sample;
+			if(b == 0x90) noteStart = sample;
+		});
+		limiter.setPreserveEventOrder(true);
+		limiter.setResetPause(0.05f);
+		limiter.setSamplerate(1000);
+		limiter.setRateLimit(1000);
+		SMidiEvent reset(MidiEventSource::Host);
+		reset.sysex = {0xf0, 0x7e, 0x7f, 9, 1, 0xf7};
+		limiter.write(std::move(reset));
+		limiter.write(midi(0, 0x90, 60, 100));
+		for(; sample < 100; ++sample) limiter.processSample();
+		expect(bytes, {0xf0, 0x7e, 0x7f, 9, 1, 0xf7, 0x90, 60, 100});
+		if(resetEnd < 0 || noteStart - resetEnd < 50) std::abort();
+	}
+
 } // namespace
 
 int main()
 {
+	testFileSysexCancellation();
+	testOrderedResetPause();
 	testRunningStatus();
 	testTransportDropsQueuedEvents();
 	testTransportFinishesPartialMessageThenSilences();

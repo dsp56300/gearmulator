@@ -153,6 +153,9 @@ namespace juceRmlUi
 		    if (keyCode == 'z' || keyCode == 'Z') return Rml::Input::KI_Z;
 		    if (keyCode == ';' || keyCode == ':') return Rml::Input::KI_OEM_1;
 		    if (keyCode == '[' || keyCode == '{') return Rml::Input::KI_OEM_4;
+		    // The unshifted and shifted characters of one physical key, as for the two above.
+		    if (keyCode == '-' || keyCode == '_') return Rml::Input::KI_OEM_MINUS;
+		    if (keyCode == '=' || keyCode == '+') return Rml::Input::KI_OEM_PLUS;
 		    return Rml::Input::KI_UNKNOWN;
 		}
 

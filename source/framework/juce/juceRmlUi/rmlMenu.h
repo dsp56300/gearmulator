@@ -35,7 +35,7 @@ namespace juceRmlUi
 
 		void addEntry(const std::string& _name, std::function<void()> _action);
 		void addEntry(const std::string& _name, bool _checked, std::function<void()> _action);
-		void addEntry(const std::string& _name, bool _enabled, bool _checked, std::function<void()> _action);
+		void addEntry(const std::string& _name, bool _enabled, bool _checked, std::function<void()> _action, const std::string& _className = {});
 		void addSeparator();
 		void addSubMenu(const std::string& _name, const std::shared_ptr<Menu>& _subMenu);
 		void addSubMenu(const std::string& _name, Menu&& _subMenu)
@@ -51,6 +51,11 @@ namespace juceRmlUi
 		bool empty() const { return m_entries.empty(); }
 
 		void open(const Rml::Element* _parent, const Rml::Vector2f& _position, uint32_t _itemsPerColumn);
+		// The entries in a juce popup window instead of the document, so the list can extend past
+		// the window's edges. It drops down from the area _position/_size of _parent's document, or
+		// from a point when _size is zero. The menu does not need to outlive the call.
+		void openPopupWindow(const Rml::Element* _parent, const Rml::Vector2f& _position,
+			const Rml::Vector2f& _size = Rml::Vector2f(0.0f, 0.0f));
 		void close();
 
 		bool isOpen() const;
@@ -81,6 +86,7 @@ namespace juceRmlUi
 			bool enabled = true;
 			std::function<void()> action;
 			std::shared_ptr<Menu> submenu;
+			std::string className;
 		};
 
 		std::vector<Entry> m_entries;

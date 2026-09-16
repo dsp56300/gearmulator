@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstring>
 
-// Fujitsu MB87837 effects processor used by the SC-88Pro and SC-8850.
+// Fujitsu MB87837 effects processor used by the SC-88Pro, SC-8820 and SC-8850.
 // Executes 384 instructions per sample with 24-bit arithmetic, a 128-word
 // internal ring and 64 Kiwords of external delay RAM.
 // Immediate MUL uses a unit mantissa; its coefficient byte contains flags.

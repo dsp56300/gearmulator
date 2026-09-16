@@ -3,6 +3,7 @@
 #include <array>
 #include <iostream>
 #include <cstdio>
+#include <memory>
 
 #ifndef _WIN32
 // filesystem is only available on macOS Catalina 10.15+
@@ -43,6 +44,27 @@
 
 namespace baseLib::filesystem
 {
+	bool readFileRegion(std::vector<uint8_t>& _data, const std::string& _path,
+	                    const size_t _offset, const size_t _size)
+	{
+		const std::unique_ptr<FILE, decltype(&std::fclose)> file(
+			baseLib::filesystem::openFile(_path, "rb"), &std::fclose);
+		_data.clear();
+		if(!file)
+			return false;
+#ifdef _WIN32
+		if(_fseeki64(file.get(), static_cast<int64_t>(_offset), SEEK_SET) != 0)
+#else
+		if(fseeko(file.get(), static_cast<off_t>(_offset), SEEK_SET) != 0)
+#endif
+			return false;
+		_data.resize(_size);
+		if(std::fread(_data.data(), 1, _size, file.get()) == _size)
+			return true;
+		_data.clear();
+		return false;
+	}
+
 #ifdef _WIN32
 	constexpr char g_nativePathSeparator = '\\';
 #else
