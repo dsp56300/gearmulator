@@ -23,6 +23,9 @@ namespace jucePluginEditorLib
 		void setGuiScale(float _percent);
 		void setUiRoot(juce::Component* _component);
 
+		juce::Point<int> getSizeForScale(float _percent) const;
+		bool isMinimumSize(int _width, int _height) const;
+
 		void timerCallback() override;
 		void fixParentWindowSize() const;
 

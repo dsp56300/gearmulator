@@ -2,6 +2,14 @@ Release Notes
 
 2.2.21:
 
+Framework:
+
+- [Fix] BUG-10323 Plugin windows could open at their smallest possible size
+        and stay that small every time they were opened again. When a host,
+        the window manager or a display change asked for a smaller window
+        than that, the result was remembered as the chosen scale. It no
+        longer is, and a window that was saved that small opens at 100%.
+
 88emuPlayer:
 
 - [New] Added comprehensive README, shipped with the binaries.
