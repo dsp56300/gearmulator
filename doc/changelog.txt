@@ -24,8 +24,8 @@ Release Notes
 
 - [Fix] Standalone: Restore the standard window border color.
 
-- [Fix] SC-88Pro / VE-GS Pro: Correct the USER INST / EFX indicator to
-        display green, red or amber according to the front-panel LED controls.
+- [Fix] SC-88Pro: Correct the USER INST / EFX indicator to display green,
+        red or amber according to the front-panel LED controls.
 
 2.2.21:
 
