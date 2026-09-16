@@ -1,5 +1,7 @@
 #include "rcc.h"
 
+#include <algorithm>
+
 namespace rccLib
 {
 	void RCC::reset()
@@ -20,7 +22,7 @@ namespace rccLib
 		m_previousDelayRead = 0;
 		m_delayCounter = 0xbbbb;
 		m_hasPreviousFrame = false;
-		m_dram = {};
+		std::fill(m_dram.begin(), m_dram.end(), 0u);
 	}
 
 	std::optional<RCC::OutputFrame> RCC::processFrame(const Voices& _voices)

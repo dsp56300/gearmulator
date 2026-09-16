@@ -170,8 +170,10 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU AND NOT ANDROID AND NOT TARGET portmidi)
 	set(BUILD_SHARED_LIBS ${_pm_prev_shared} CACHE BOOL "" FORCE)
 endif()
 
-if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
-	add_subdirectory(framework/juce/jucePlayerLib EXCLUDE_FROM_ALL)
+# Only 88emu uses the player library, so it is built along with it, tests included. Excluded from
+# ALL, its tests were registered with ctest but never built.
+if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU AND ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
+	add_subdirectory(framework/juce/jucePlayerLib)
 endif()
 
 # ----------------- Synth Xenia

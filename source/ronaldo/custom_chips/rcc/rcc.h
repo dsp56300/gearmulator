@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 namespace rccLib
 {
@@ -231,7 +232,9 @@ namespace rccLib
 		uint16_t m_previousDelayRead = 0;
 		uint16_t m_delayCounter = 0xbbbb;
 		bool m_hasPreviousFrame = false;
-		std::array<uint32_t, DramSize> m_dram{};
+		// 256 KB, so it lives on the heap. Inline, it made the chip - and every board holding one - too
+		// big for a 1 MB stack.
+		std::vector<uint32_t> m_dram = std::vector<uint32_t>(DramSize, 0);
 		uint16_t m_dramWordMask = 0x3fff;
 		// C[2:0]/C[5:3] select serial timing taps; they do not affect parallel output.
 		// D0: short program/bus mode (short execution unsupported); D1: ROM readback (unsupported).

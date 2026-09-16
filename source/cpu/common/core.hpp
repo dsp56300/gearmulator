@@ -40,7 +40,11 @@ namespace emu {
     (cpu).budget_ -= ::emu::s32(states);                            \
     return (next);                                                  \
   } while (0)
-#define EMU_GOTO(cpu, ip) return (ip)
+// A jump runs its target at once, as a plain call. Handing it back to the run loop is not enough:
+// the loop stops once the budget is spent and step() starts with none, so the step would end
+// before the instruction just decoded ran. The depth stays bounded - a page cross leads to a
+// cell, a fill to the handler it decoded, and handlers end in EMU_END.
+#define EMU_GOTO(cpu, ip) return (ip)->fn((cpu), (ip))
 #endif
 
 class SliceCore : public CodeSink, public Clock {
