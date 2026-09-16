@@ -348,6 +348,7 @@ namespace xpLib
 
 		if (const auto reg = findVoiceWideRegister(_address); reg.value != nullptr)
 		{
+			m_idleRetiredVoices &= ~(uint64_t{1} << ((_address & 0xff) / voiceWideStride));
 			writeWide(reg, _address, _value);
 			if ((_address & 0xff02) == (Address::ampRamp_1a00 | 2))
 			{
@@ -448,6 +449,7 @@ namespace xpLib
 			m_state.dspControl = _value;
 			return;
 		case Address::irqStatusConfig_3918:
+			m_idleRetiredVoices = 0;
 			m_state.irqConfigMask = _value;
 			return;
 		case Address::waveRomPage_3920:

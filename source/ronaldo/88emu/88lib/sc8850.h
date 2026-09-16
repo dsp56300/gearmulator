@@ -72,6 +72,7 @@ namespace emu88Lib
 	// LCD interface rate while the channel is enabled.
 	class Sc8850
 	{
+		friend struct VoiceReleaseTest;
 	public:
 		enum class MidiTransport : uint8_t
 		{
@@ -262,6 +263,9 @@ namespace emu88Lib
 		emu::Scheduler::EventId m_gateTimerEvent[2] = {0, 0};
 		emu::Scheduler::EventId m_lcdDmaEvent = 0;
 
+		bool m_autoVoiceReset = false;
+		uint32_t m_voiceResetSamples = 0;
+		void resetFinishedVoices();
 		bool m_valid = false;
 		bool m_lspEnabled = true;
 		uint64_t m_cycleTarget = 0;
