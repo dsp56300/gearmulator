@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- * Interpolation coefficients shared by the GP and XP sample engines.
+ * Interpolation coefficients shared by the GP, XP and LP sample engines.
  * Thanks to InfoSecDJ and NukeYKT.
  */
 

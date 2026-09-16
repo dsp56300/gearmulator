@@ -104,6 +104,15 @@ namespace synthLib
 		return results;
 	}
 
+	void RomLoader::setSearchPath(const std::string& _path)
+	{
+		const std::lock_guard lock(searchPathMutex());
+		ensureDefaultSearchPaths();
+		g_searchPaths = {_path};
+		g_recursiveSearchPaths = {_path};
+		g_callerAddedPath = true;
+	}
+
 	void RomLoader::addSearchPath(const std::string& _path, const bool _recursive)
 	{
 		const std::lock_guard lock(searchPathMutex());

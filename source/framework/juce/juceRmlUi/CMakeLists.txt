@@ -35,9 +35,11 @@ set(SOURCES
 	rmlList.cpp rmlList.h
 	rmlListEntry.cpp rmlListEntry.h
 	rmlMenu.cpp rmlMenu.h
+	rmlPopupWindow.cpp rmlPopupWindow.h
 	rmlRendererProxy.cpp rmlRendererProxy.h
 	rmlRendererJuce.cpp rmlRendererJuce.h
 	rmlShaders.h
+	rmlSystemFonts.cpp rmlSystemFonts.h
 	rmlSystemInterface.cpp rmlSystemInterface.h
 	rmlTree.cpp rmlTree.h
 	rmlTreeNode.cpp rmlTreeNode.h

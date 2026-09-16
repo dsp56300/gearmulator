@@ -11,6 +11,9 @@
 // Handlers chain with a guaranteed tail call.  The program counter is implicit
 // in the cell pointer (pc = ip - page_base); the next sequential instruction is
 // `ip + len`, a branch target inside the page is `page_base + target`.
+// Sequential flow past offset H'FFFF lands in guard cells behind the page,
+// which continue at the start of the same page, so `ip + len` needs no
+// page-end check.
 #pragma once
 #include "cpu/h8500/types.hpp"
 
@@ -33,10 +36,17 @@ struct Cell {
 static_assert(sizeof(Cell) == 16, "Cell must stay 16 bytes: one per guest code byte");
 
 constexpr unsigned kCellsPerPage = 0x10000;
+// Guard cells behind the last cell of a page, all holding detail::cell_wrap.
+// Seven cover every value of the 3-bit length field (instructions are at most
+// 6 bytes), so seq() from any cell of the page stays inside the allocation.
+constexpr unsigned kGuardCells = 7;
 
 namespace detail {
 // Handler installed in every cell of a freshly allocated page.
 const Cell* cell_fill(Cpu& cpu, const Cell* ip);
+// Handler of the guard cells: continues at the same offset from the start of
+// the page (the PC wraps within the page).
+const Cell* cell_wrap(Cpu& cpu, const Cell* ip);
 }  // namespace detail
 
 }  // namespace h8500

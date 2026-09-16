@@ -8,6 +8,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.in ${CMAKE_CURRENT_SOUR
 add_library(synthLib STATIC)
 
 set(SOURCES
+	midi/songReset.h midi/songReset.cpp
+	midi/midiFile.h midi/smfReader.cpp midi/rcpDecoder.cpp midi/rcpInternal.h midi/rcpTrack.cpp midi/rcpTempo.cpp
+	analog/analogFilter.cpp analog/analogFilter.h
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
 	buildconfig.h buildconfig.h.in
@@ -40,6 +43,11 @@ set(SOURCES
 )
 
 target_sources(synthLib PRIVATE ${SOURCES})
+if(MSVC)
+	set_source_files_properties(midi/rcpTempo.cpp PROPERTIES COMPILE_OPTIONS /fp:precise)
+else()
+	set_source_files_properties(midi/rcpTempo.cpp PROPERTIES COMPILE_OPTIONS -fno-finite-math-only)
+endif()
 source_group("source" FILES ${SOURCES})
 
 target_link_libraries(synthLib PUBLIC resample dsp56kBase baseLib)
@@ -78,4 +86,15 @@ if(BUILD_TESTING)
 	target_link_libraries(device_test PRIVATE synthLib)
 	set_property(TARGET device_test PROPERTY FOLDER "Tests")
 	add_test(NAME device COMMAND device_test)
+endif()
+
+if(BUILD_TESTING)
+	add_executable(stereoPeakLimiter_test stereoPeakLimiter_test.cpp)
+	target_link_libraries(stereoPeakLimiter_test PRIVATE synthLib)
+	add_test(NAME stereoPeakLimiter COMMAND stereoPeakLimiter_test)
+	if(MSVC)
+		target_compile_options(stereoPeakLimiter_test PRIVATE /fp:precise)
+	else()
+		target_compile_options(stereoPeakLimiter_test PRIVATE -fno-finite-math-only)
+	endif()
 endif()

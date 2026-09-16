@@ -30,6 +30,7 @@ namespace juceRmlUi
 		void processMouseWheel(const Rml::Event& _event);
 		void processDoubleClick(const Rml::Event& _event);
 
+		float wrapValue(float _value) const;
 		void updateSprite();
 
 		Rml::Vector2<float> m_lastMousePos;

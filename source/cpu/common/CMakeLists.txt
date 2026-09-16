@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(emucommon)
 
-set(SOURCES device.hpp iomux.hpp sched.hpp types.hpp)
+set(SOURCES device.hpp iomux.hpp sched.hpp types.hpp cells.hpp core.hpp flatbus.hpp le_device.hpp)
 
 add_library(emucommon INTERFACE)
 target_include_directories(emucommon INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../..)

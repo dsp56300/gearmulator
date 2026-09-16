@@ -1,5 +1,141 @@
 Release Notes
 
+2.2.21:
+
+88emuPlayer:
+
+- [New] Added comprehensive README, shipped with the binaries.
+
+- [New] Added `88EmuCli` for rendering MIDI files offline.
+
+- [New] Added standalone cli params for scripting and advanced options.
+
+- [Imp] Performance: Removed the additional emulation-worker buffering from
+        playback and live MIDI for performance. The player now renders the board
+        synchronously.
+
+- [New] Devices: Added support for the original SC-55, SC-155, SC-155mkII,
+        SCC-1A and SCB-55.
+
+- [New] Devices: Added the XPGS / G-800 sound engine.
+
+- [New] Devices: Added VE-GS Pro as a separate device.
+
+- [New] Devices: Added experimental SC-8820 emulation.
+
+- [New] Devices: Added experimental CM-32P emulation.
+
+- [New] Devices: Added emulated power on/off button using the Q shortcut.
+
+- [New] Devices: Added “Factory Reset on load” and “Fast Boot (skip intro)”
+        settings.
+
+- [Fix] Devices: Firmware that ran past the end of a 64 KB code page crashed the
+        player, for example a program ROM booted with the wrong MCU ROM. The
+        program counter now wraps to the start of the same page, as on the real
+        CPU.
+
+- [New] MIDI Player: Added Recomposer RCP/R36 (V2) and G36 (V3) playback support
+        (thanks to masanaohayashi and shingo45endo).
+
+- [New] MIDI Player: Added a configurable GM/GS/MT32 reset before each song.
+
+- [New] MIDI Player: Added a configurable pause between automatically advancing
+        songs.
+
+- [Fix] MIDI Player: Starting another song now clears channel controllers and
+        pitch bend, including when the per-song reset is Off, preventing the
+        previous song's pitch bend from leaving instruments out of tune.
+        Transport changes also invalidate file events still waiting in the
+        player/engine queues.
+
+- [Fix] MIDI Player: MIDI files with non-ASCII filenames can be opened through
+        the Unicode-aware filesystem path, including on Windows.
+
+- [New] Audio: Added selectable left and right hardware output channels,
+        remembered separately for each audio backend and device.
+
+- [New] Audio: Added “Use system device” for CoreAudio and Windows Audio
+        (WASAPI), enabled by default for configurations without an explicit
+        output choice.
+
+- [New] Audio: Added an optional stereo-linked output limiter after the volume
+        control, protecting playback and WAV recording when gain is increased.
+
+- [New] Audio: Added optional analog output emulation, including DAC word
+        precision and modeled output filtering. Select Off, Auto for the current
+        device, or a specific circuit: CM-32P, SC-55, SC-55mkII, SCC-1, G-800,
+        SC-88, SC-88VL, SC-88Pro, SC-8820 or SC-8850. Off remains the default.
+
+- [New] MIDI: Each MIDI input can now play one or more independently selected
+        part groups A–D, with assignments saved in MIDI settings. Available
+        groups depend on the selected device.
+
+- [Imp] MIDI: Expanded virtual MIDI inputs and outputs from A/B to A–D on
+        supported platforms, exposing all four SC-8850 groups. Device output
+        retains its original group, and launch options can customize the
+        port-name prefix.
+
+- [Fix] MIDI: Implemented the SC-88/SC-88Pro firmware's MIDI output path,
+        allowing messages such as front-panel bulk dumps to reach the selected
+        MIDI output.
+
+- [Fix] MIDI: Forwarded the Yamaha SysEx messages needed to activate the
+        SC-88Pro firmware's XG compatibility mode. This exposes the firmware's
+        existing compatibility behavior; it does not add full Yamaha XG
+        emulation.
+
+- [Fix] MIDI: Paced SC-55mkII MIDI bursts to avoid overflowing the emulated
+        controller's input buffer when many events arrive together.
+
+- [New] ROMs: Added custom ROM loading by conventional filename and exact size,
+        taking precedence over hash-based discovery. Known images still work
+        under arbitrary filenames. Unrecognized or modified content produces a
+        warning, with an option to suppress custom-ROM warnings.
+
+- [New] ROMs: Unavailable devices in the device menu now open a ROM requirements
+        dialog showing accepted filenames, sizes, hashes, missing components and
+        compatible alternatives. The details can be copied, and the ROM folder
+        can be opened directly.
+
+- [Imp] ROMs: SC-8850 wave ROMs can now be supplied as two distinct 16 MiB
+        banks, including recognized raw XP dump layouts, in addition to the
+        existing combined decoded image.
+
+- [Imp] ROMs: Recognized the SC-55mkII GS-28 2.00 image pre-patched with
+        shingo45endo's capital-tone-fallback patcher using its default SC-55
+        tone and v1 drum options. The player loads the patched image; it does
+        not apply the patch itself.
+
+- [Imp] ROMs: Limited automatic ROM searches to the player's data folder and its
+        subfolders, avoiding unrelated legacy/product locations. `--rom-dir`
+        selects an exclusive alternative folder. ROMs previously found only in
+        older search locations must be moved or selected through this option.
+
+- [Imp] ROMs: Optimized wave-ROM descrambling and compatible Pro-wave conversion
+        during loading (thanks to hackyourlife).
+
+- [Imp] UI: Reorganized the device menu to keep related models together.
+
+- [Imp] UI: Device and context menus now open in separate scrolling popup
+        windows, avoiding clipping at the edge of the player.
+
+- [Imp] UI: Added system-font fallbacks for names containing characters absent
+        from the bundled font, including CJK text, and normalized decomposed
+        macOS filenames for display.
+
+- [Fix] UI: The SC-8850 SHIFT, DEC and INC keyboard shortcuts now reach the
+        corresponding panel controls, including shifted minus/plus keys.
+
+- [Fix] UI: Mouse-wheel input on endless knobs now wraps instead of stopping at
+        the ends of the range, including the SC-8850 value encoder.
+
+- [Fix] UI: Clicking an open drop-down's control to dismiss its popup no longer
+        immediately reopens it.
+
+- [Fix] UI: On macOS, opening a temporary popup no longer hides the close button
+        of windows without minimize/maximize controls.
+
 
 2.2.20:
 

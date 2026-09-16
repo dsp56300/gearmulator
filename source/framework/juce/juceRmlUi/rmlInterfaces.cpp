@@ -15,6 +15,7 @@
 #include "rmlElemTreeNode.h"
 #include "rmlInstancers.h"
 #include "rmlLuaCanvas.h"
+#include "rmlSystemFonts.h"
 
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/Factory.h"
@@ -109,6 +110,14 @@ namespace juceRmlUi
 	void RmlInterfaces::detach()
 	{
 		m_accessMutex.unlock();
+	}
+
+	void RmlInterfaces::loadSystemFallbackFonts()
+	{
+		if (m_systemFallbackFontsLoaded)
+			return;
+		m_systemFallbackFontsLoaded = true;
+		m_systemFallbackFonts = systemFonts::loadFallbackFaces(m_coreInstance);
 	}
 
 	template <typename T> Rml::ElementInstancerGeneric<T>& RmlInterfaces::getInstancer()

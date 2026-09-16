@@ -37,8 +37,14 @@ DecodedInsn Cpu::decode_at(u32 addr) const {
 // Instruction cache storage
 
 Cell* Cpu::alloc_page(unsigned page) {
-  pages_[page].reset(new Cell[kCellsPerPage]);
+  pages_[page].reset(new Cell[kCellsPerPage + kGuardCells]);
   reset_cells(page, 0, kCellsPerPage);
+  // The guard cells keep this for the life of the page: reset_cells() stops at
+  // kCellsPerPage, and fill() only ever rewrites the cell it runs from.
+  Cell guard{};
+  guard.fn = &detail::cell_wrap;
+  guard.x = 1;
+  std::fill_n(pages_[page].get() + kCellsPerPage, kGuardCells, guard);
   return pages_[page].get();
 }
 
@@ -59,9 +65,12 @@ void Cpu::invalidate_all() {
 void Cpu::invalidate_range(u32 addr, u32 len) {
   const unsigned page = max_mode_ ? ((addr >> 16) & 0xFF) : 0;
   // An instruction starting up to 5 bytes before the range may extend into it.
+  // The PC wraps within the page, so for a range near the start of the page
+  // some of those bytes are at the end of the same page.
   const u32 first = addr & 0xFFFF;
   const u32 back = std::min<u32>(first, 5);
   reset_cells(page, first - back, len + back);
+  if (back < 5) reset_cells(page, kCellsPerPage - (5 - back), 5 - back);
 }
 
 void Cpu::code_line_written(u32 addr) {

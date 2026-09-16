@@ -25,11 +25,7 @@ namespace xpLib
 		static constexpr size_t nDspSlots = Dsp::nProgramSlots;
 		static constexpr size_t nIramSlots = Dsp::nIramSlots;
 		static constexpr size_t nEramWords = Dsp::nEramWords;
-		static constexpr int32_t outputFullScale = 1 << 21;
-		static int32_t serialWordToOutput(const int32_t _word)
-		{
-			return _word >= 0 ? _word / 4 : -static_cast<int32_t>((-int64_t{_word} + 3) / 4);
-		}
+		static constexpr int32_t outputFullScale = 1 << 23;
 
 		struct WaveControl
 		{

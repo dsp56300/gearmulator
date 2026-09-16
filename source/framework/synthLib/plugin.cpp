@@ -324,10 +324,17 @@ namespace synthLib
 
 	void Plugin::processMidiInEvent(const SMidiEvent& _ev)
 	{
+		if (_ev.type == MidiEventType::TransportDiscontinuity)
+		{
+			auto marker = _ev;
+			marker.transportGeneration = m_transportGeneration.fetch_add(1, std::memory_order_relaxed) + 1;
+			m_midiIn.push_back(std::move(marker));
+			return;
+		}
+
 		// sysex might be sent in multiple chunks. Happens if coming from hardware.
-		// Nothing here needs a mutable copy: stampTransportGeneration() skips sysex entirely, so
-		// copying the event up front allocated a second buffer for exactly the kind of event where
-		// the stamp does nothing. Plain events are stamped in place after the push instead.
+		// Stamp in place after copying, including file-player SysEx that opted
+		// into cancellation when its song changes.
 		if (!_ev.sysex.empty())
 		{
 			const bool isComplete = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
@@ -335,6 +342,7 @@ namespace synthLib
 			if (isComplete)
 			{
 				m_midiIn.push_back(_ev);
+				stampTransportGeneration(m_midiIn.back());
 				return;
 			}
 
@@ -354,6 +362,7 @@ namespace synthLib
 				if (isEnd)
 				{
 					m_midiIn.push_back(m_pendingSysexInput);
+					stampTransportGeneration(m_midiIn.back());
 					m_pendingSysexInput.sysex.clear();
 				}
 			}

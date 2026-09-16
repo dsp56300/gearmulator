@@ -43,7 +43,7 @@ namespace synthLib
 		if (isTransportBound(_event) && _event.transportGeneration < m_transportGeneration)
 			return;
 
-		if (!_event.sysex.empty())
+		if (!_event.sysex.empty() && !m_preserveEventOrder)
 			m_pendingSysex.emplace_back(std::move(_event));
 		else
 			m_pendingRealtime.emplace_back(std::move(_event));
@@ -54,12 +54,11 @@ namespace synthLib
 		m_transportGeneration = std::max(m_transportGeneration, _generation);
 		// Compact once and drop the tail in a single erase. Erasing from the middle of a deque as
 		// we go shifts elements every time, so purging k of n queued events was O(n*k).
-		m_pendingRealtime.erase(
-			std::remove_if(m_pendingRealtime.begin(), m_pendingRealtime.end(), [this](const SMidiEvent& _event)
+		for(auto* queue : {&m_pendingRealtime, &m_pendingSysex})
+			queue->erase(std::remove_if(queue->begin(), queue->end(), [this](const SMidiEvent& _event)
 			{
 				return isTransportBound(_event) && _event.transportGeneration < m_transportGeneration;
-			}),
-			m_pendingRealtime.end());
+			}), queue->end());
 
 		uint16_t channelsToSilence = m_activeChannels;
 		if (m_currentEvent && isTransportBound(*m_currentEvent) &&
@@ -102,6 +101,11 @@ namespace synthLib
 
 	void MidiRateLimiter::processSample()
 	{
+		if(m_remainingResetPause > 0.0f)
+		{
+			m_remainingResetPause = std::max(0.0f, m_remainingResetPause - m_samplerateInv);
+			return;
+		}
 		// This is elapsed wire-idle time, not a delay to be charged to the next
 		// SysEx. Age it even when no event is queued so an idle device does not
 		// unexpectedly stall the first message sent much later.
@@ -116,6 +120,8 @@ namespace synthLib
 			{
 				while (!m_pendingBytes.empty())
 					sendByte();
+				if(m_remainingResetPause > 0.0f)
+					return;
 			}
 			while (popNextEvent());
 
@@ -241,6 +247,12 @@ namespace synthLib
 			return;
 
 		const auto& event = *m_currentEvent;
+		const auto& sx = event.sysex;
+		const bool gmReset = sx.size() == 6 && sx[1] == 0x7e && sx[3] == 0x09;
+		const bool gsReset = sx.size() == 11 && sx[1] == 0x41 && sx[3] == 0x42 && sx[4] == 0x12 &&
+			sx[5] == 0x40 && sx[6] == 0 && sx[7] == 0x7f && sx[8] == 0;
+		if(gmReset || gsReset)
+			m_remainingResetPause = m_resetPause;
 		if (!m_currentObsolete && event.sysex.empty())
 		{
 			const auto command = event.a & 0xf0;

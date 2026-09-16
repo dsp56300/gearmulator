@@ -12,6 +12,14 @@ namespace juce
 
 namespace synthLib
 {
+	inline constexpr uint8_t DacInterfaceBits = 24;
+
+	// Discard low bits of a signed 24-bit DAC-interface word, preserving two's-complement floor.
+	inline int32_t quantiseDacWord(const int32_t word, const uint8_t bits)
+	{
+		return bits >= 24 ? word : word & ~((int32_t{1} << (24 - bits)) - 1);
+	}
+
 	struct DacState
 	{
 		uint32_t randomValue = 56362;

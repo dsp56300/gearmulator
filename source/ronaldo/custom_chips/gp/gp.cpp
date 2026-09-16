@@ -248,7 +248,7 @@ namespace gpLib
 		// `_left`/`_right` are the 20-bit DAC words at bit 12; keep the full
 		// precision and scale to OutputFullScale.
 		if(m_emitted < 2)
-			m_dacOut[m_emitted] = { sar(_left, 9), sar(_right, 9) };
+			m_dacOut[m_emitted] = { sar(_left, 7), sar(_right, 7) };
 		++m_emitted;
 	}
 

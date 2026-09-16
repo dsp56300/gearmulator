@@ -1,11 +1,19 @@
 #include "rmlMenu.h"
 
+#include <map>
+#include <set>
+#include <vector>
+
 #include "juceRmlComponent.h"
 #include "rmlHelper.h"
+#include "rmlPopupWindow.h"
 
+#include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementDocument.h"
+
+#include "juce_gui_basics/juce_gui_basics.h"
 
 namespace juceRmlUi
 {
@@ -26,9 +34,9 @@ namespace juceRmlUi
 		m_entries.push_back({ _name, _checked, false, true, std::move(_action), {} });
 	}
 
-	void Menu::addEntry(const std::string& _name, const bool _enabled, const bool _checked, std::function<void()> _action)
+	void Menu::addEntry(const std::string& _name, const bool _enabled, const bool _checked, std::function<void()> _action, const std::string& _className)
 	{
-		m_entries.push_back({ _name, _checked, false, _enabled, std::move(_action), {} });
+		m_entries.push_back({ _name, _checked, false, _enabled, std::move(_action), {}, _className });
 	}
 
 	void Menu::addSeparator()
@@ -87,6 +95,8 @@ namespace juceRmlUi
 			auto div = doc->CreateElement("div");
 
 			div->SetClass("menuitem", true);
+			if (!entry.className.empty())
+				div->SetClass(entry.className, true);
 
 			if (entry.submenu)
 				div->SetPseudoClass("submenu", true);
@@ -186,6 +196,121 @@ namespace juceRmlUi
 		doc->AddEventListener(Rml::EventId::Keydown, this, true);
 
 		root->AddEventListener(Rml::EventId::Mouseover, this);
+	}
+
+	namespace
+	{
+		// The text colour the skin gives entries of each class, where it differs from a plain
+		// entry's: how "romMissing" greys out a device when juce draws the list rather than RmlUi.
+		// Probes laid out like a real menu are styled, read and removed before anything renders.
+		std::map<std::string, juce::Colour> getEntryColours(const Rml::Element& _parent, const std::set<std::string>& _classNames)
+		{
+			std::map<std::string, juce::Colour> colours;
+			auto* doc = _parent.GetOwnerDocument();
+			auto* context = _parent.GetContext();
+			if (_classNames.empty() || !doc || !context)
+				return colours;
+
+			auto box = doc->CreateElement("div");
+			box->SetClass("menubox", true);
+			box->SetClass("dialogbox", true);
+			box->SetProperty("visibility", "hidden");
+			auto* column = box->AppendChild(doc->CreateElement("div"));
+			column->SetClass("menucolumn", true);
+
+			const auto addProbe = [&](const std::string& _className)
+			{
+				auto* probe = column->AppendChild(doc->CreateElement("div"));
+				probe->SetClass("menuitem", true);
+				if (!_className.empty())
+					probe->SetClass(_className, true);
+				return probe;
+			};
+
+			const auto* plain = addProbe({});
+			std::vector<std::pair<std::string, const Rml::Element*>> probes;
+			for (const auto& className : _classNames)
+				probes.emplace_back(className, addProbe(className));
+
+			auto* root = doc->AppendChild(std::move(box));
+			context->Update();
+
+			const auto plainColour = plain->GetComputedValues().color();
+			for (const auto& [className, probe] : probes)
+			{
+				const auto colour = probe->GetComputedValues().color();
+				if (colour != plainColour)
+					colours[className] = juce::Colour(colour.red, colour.green, colour.blue, colour.alpha);
+			}
+
+			doc->RemoveChild(root);
+			return colours;
+		}
+	}
+
+	void Menu::openPopupWindow(const Rml::Element* _parent, const Rml::Vector2f& _position, const Rml::Vector2f& _size)
+	{
+		auto* component = _parent ? RmlComponent::fromElement(_parent) : nullptr;
+		if (!component || m_entries.empty())
+			return;
+
+		// Lambdas rather than members keep juce out of the header, and can still reach the
+		// entries of a submenu.
+		std::set<std::string> classNames;
+		const std::function<void(const Menu&)> collectClassNames = [&](const Menu& _menu)
+		{
+			for (const auto& entry : _menu.m_entries)
+			{
+				if (!entry.className.empty())
+					classNames.insert(entry.className);
+				if (entry.submenu)
+					collectClassNames(*entry.submenu);
+			}
+		};
+		collectClassNames(*this);
+		const auto colours = getEntryColours(*_parent, classNames);
+
+		// Item ids index the actions; they must be positive, 0 is "dismissed".
+		std::vector<std::function<void()>> actions;
+		const std::function<juce::PopupMenu(const Menu&)> build = [&](const Menu& _menu)
+		{
+			juce::PopupMenu popup;
+			for (const auto& entry : _menu.m_entries)
+			{
+				const auto name = juce::String::fromUTF8(entry.name.c_str());
+				if (entry.separator)
+				{
+					popup.addSeparator();
+				}
+				else if (entry.submenu)
+				{
+					popup.addSubMenu(name, build(*entry.submenu), entry.enabled);
+				}
+				else
+				{
+					juce::PopupMenu::Item item(name);
+					actions.push_back(entry.action);
+					item.itemID = static_cast<int>(actions.size());
+					item.isEnabled = entry.enabled;
+					item.isTicked = entry.checked;
+					if (const auto it = colours.find(entry.className); it != colours.end())
+						item.colour = it->second;
+					popup.addItem(std::move(item));
+				}
+			}
+			return popup;
+		};
+		auto menu = build(*this);
+
+		popupWindow::show(menu, *component, _position, _size, [actions = std::move(actions)](const int _result)
+		{
+			if (_result < 1 || static_cast<size_t>(_result) > actions.size())
+				return;
+			// A copy, as the action may tear down whatever holds this callback.
+			const auto action = actions[static_cast<size_t>(_result) - 1];
+			if (action)
+				action();
+		});
 	}
 
 	void Menu::close()

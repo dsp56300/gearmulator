@@ -113,24 +113,15 @@ namespace juceRmlUi
 
 		const auto range = getRange(&_element);
 
-		// we use the default behaviour if ctrl/cmd is not pressed and the range is large enough
-		if(range > 32 && !helper::getKeyModCommand(_event))
-		{
-			// delta is in wheel notches (see RmlComponent::mouseWheelMove), so one
-			// detent moves ~3% of the range - what juce::Slider does on a platform
-			// whose raw delta is 0.234 per detent.
-			setValue(&_element, getValue(&_element) - range * delta / 32.0f);
+		if (delta == 0.0f || range <= 0.0f)
 			return;
-		}
 
-		// Otherwise inc/dec single steps
-
-		constexpr auto diff = 1;
-
-		if(delta > 0)
-			setValue(&_element, getValue(&_element) - diff);
-		else
-			setValue(&_element, getValue(&_element) + diff);
+		const auto step = range > 32 && !helper::getKeyModCommand(_event)
+			? range * delta / 32.0f : (delta > 0.0f ? 1.0f : -1.0f);
+		auto value = getValue(&_element) - step;
+		if (const auto* knob = dynamic_cast<const ElemKnob*>(&_element))
+			value = knob->wrapValue(value);
+		setValue(&_element, value);
 	}
 
 	void ElemKnob::processMouseMove(const Rml::Event& _event)
@@ -162,15 +153,20 @@ namespace juceRmlUi
 
 		auto value = m_mouseDownValue + d;
 
-		if (m_endless)
-		{
-			while (value > getMaxValue())
-				value -= range;
-			while (value < getMinValue())
-				value += range;
-		}
+		setValue(wrapValue(value));
+	}
 
-		setValue(value);
+	float ElemKnob::wrapValue(float _value) const
+	{
+		const auto range = getRange();
+		if (m_endless && range > 0.0f)
+		{
+			while (_value > getMaxValue())
+				_value -= range;
+			while (_value < getMinValue())
+				_value += range;
+		}
+		return _value;
 	}
 
 	void ElemKnob::processMouseWheel(const Rml::Event& _event)

@@ -26,6 +26,12 @@ namespace juceRmlUi
 		// no settings dialog. Only correct for a UI that brings its own, like the 88emu player.
 		bool includeDefaultTemplates = true;
 
+		// Adds the operating system's Japanese, Chinese and Korean fonts, and a wide-coverage one
+		// where there is one, as fallbacks for text the embedded fonts cannot draw, such as file
+		// names. They are memory-mapped rather than copied, so only the glyphs drawn are ever read.
+		// Leave it off for a UI that only shows its own labels.
+		bool systemFallbackFonts = false;
+
 		// Registered on top of the above. Editor-driven too: pluginEditor scans the data provider
 		// for per-product tus_settings_<product>.rml pages.
 		std::vector<std::string> additionalTemplateFiles;
