@@ -9,8 +9,8 @@
 #include "synthLib/plugin.h"
 #include "synthLib/stereoPeakLimiter.h"
 #if JUCE_WINDOWS
-#include <shellapi.h>
 #include <windows.h>
+#include <shellapi.h>
 #else
 #include <unistd.h>
 #if JUCE_MAC
