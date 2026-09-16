@@ -49,7 +49,7 @@ namespace emu88Lib
 			std::vector<uint8_t> mono;
 			uint16_t width = 0;
 			uint16_t height = 0;
-			uint8_t leds = 0;
+			uint16_t leds = 0;
 			bool displayOn = false;
 			uint64_t revision = 0;
 		};

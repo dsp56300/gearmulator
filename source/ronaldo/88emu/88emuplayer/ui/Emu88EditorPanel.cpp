@@ -377,11 +377,21 @@ namespace emu88Player
 				m_buttonElements[button]->SetClass("pressed", (buttons & (uint32_t{1} << button)) != 0);
 	}
 
-	void Editor::updateLeds(const uint8_t _value)
+	void Editor::updateLeds(const uint16_t _value)
 	{
 		for(uint8_t i = 0; i < m_leds.size(); ++i)
 			if(m_leds[i])
-				m_leds[i]->SetClass("on", (_value & (uint8_t{1} << i)) != 0);
+				m_leds[i]->SetClass("on", (_value & (uint16_t{1} << i)) != 0);
+
+		if(auto* efx = m_leds[7])
+		{
+			const auto model = m_processor.deviceModel();
+			const bool pro = model == emu88Lib::DeviceModel::Sc88Pro || model == emu88Lib::DeviceModel::VeGsPro;
+			efx->SetClass("green", pro && (_value & 0x80));
+			efx->SetClass("red", pro && (_value & 0x100));
+			if(pro)
+				efx->SetClass("on", (_value & 0x180) != 0);
+		}
 	}
 
 	KeyboardShortcutGroups Editor::buildKeyboardGroups()

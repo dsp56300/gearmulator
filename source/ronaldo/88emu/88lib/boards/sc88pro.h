@@ -148,6 +148,7 @@ namespace emu88Lib
 		enum GateArrayReg : uint16_t
 		{
 			GaLeds       = 0xC100,
+			GaLedControl = 0xC101,
 			GaIrqStatus  = 0xC104,
 			GaIrqMask    = 0xC105,
 			GaLcdStart   = 0xC11E,
@@ -186,7 +187,8 @@ namespace emu88Lib
 
 		void setButtons(const uint32_t _b) { m_buttons = _b; }
 		uint32_t buttons() const { return m_buttons; }
-		uint8_t leds() const { return m_leds; }
+		// Bits 0-7 are LDD0-7 (bit 7 is green); bit 8 is the red User Inst LED.
+		uint16_t leds() const;
 
 		Lcd&       lcd()       { return m_lcd; }
 		const Lcd& lcd() const { return m_lcd; }
@@ -260,6 +262,7 @@ namespace emu88Lib
 		uint8_t  m_gaIrqMask = 0x0f;	// 1 = masked
 		uint8_t  m_gaIntTrigger = 0;
 		uint8_t  m_leds = 0;
+		uint8_t  m_ledControl = 0;
 		uint8_t  m_lcdInstr = 0;
 		uint8_t  m_lcdStaged = 0;
 		std::array<uint8_t, GaLcdDataEnd - GaLcdData + 1> m_lcdBuffer{};

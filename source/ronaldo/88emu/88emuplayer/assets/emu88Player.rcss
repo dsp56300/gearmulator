@@ -152,10 +152,14 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .panelLed { position: absolute; pointer-events: none; }
 .selectorLed { width: 8.3467dp; height: 8dp; }
 .efxLed { width: 9dp; height: 9dp; }
-.ledOffGraphic, .ledOnGraphic { position: absolute; left: 0dp; top: 0dp; width: 100%; height: 100%; pointer-events: none; }
-.ledOnGraphic { display: none; }
+.ledOffGraphic, .ledOnGraphic, .ledGreenGraphic, .ledAmberGraphic { position: absolute; left: 0dp; top: 0dp; width: 100%; height: 100%; pointer-events: none; }
+.ledOnGraphic, .ledGreenGraphic, .ledAmberGraphic { display: none; }
 .panelLed.on .ledOffGraphic { display: none; }
 .panelLed.on .ledOnGraphic { display: block; }
+.efxLed.green .ledOnGraphic { display: none; }
+.efxLed.green .ledGreenGraphic { display: block; }
+.efxLed.green.red .ledGreenGraphic { display: none; }
+.efxLed.green.red .ledAmberGraphic { display: block; }
 /* The CM bezel, shared by the CM-32P and the CM-64 whose artwork differs only in the name.
  * Only MIDI MESSAGE is driven; POWER is painted on, as is the unlit lamp, so the element
  * only ever paints the lit state. */

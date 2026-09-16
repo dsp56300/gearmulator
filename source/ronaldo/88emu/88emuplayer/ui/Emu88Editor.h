@@ -122,7 +122,7 @@ namespace emu88Player
 		void refreshButtonElements(emu88Lib::DeviceModel _model);
 		void refreshLedElements(emu88Lib::DeviceModel _model);
 		void updateButtonVisuals();
-		void updateLeds(uint8_t _leds);
+		void updateLeds(uint16_t _leds);
 
 		Processor& m_processor;
 		juceRmlUi::RmlInterfaces m_interfaces;

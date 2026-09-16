@@ -117,6 +117,7 @@ namespace emu88Lib
 		m_gaIrqMask = 0x0f;
 		m_gaIntTrigger = 0;
 		m_leds = 0;
+		m_ledControl = 0;
 		m_lcdInstr = 0;
 		m_lcdStaged = 0;
 		m_lcdBuffer.fill(0);
@@ -377,12 +378,22 @@ namespace emu88Lib
 	// Gate array (page 0xEF)
 	// =====================================================================
 
+	uint16_t Sc88Pro::leds() const
+	{
+		// LDS0 drives the common anode supply through Q3; LDS1 drives the red cathode through Q4.
+		if(m_ledControl & 1)
+			return 0;
+		return static_cast<uint16_t>(m_leds | ((m_ledControl & 2) << 7));
+	}
+
 	uint8_t Sc88Pro::gateArrayRead(const uint16_t _addr)
 	{
 		switch(_addr)
 		{
 		case GaLeds:
 			return m_leds;
+		case GaLedControl:
+			return m_ledControl;
 		case GaIrqMask:
 			return m_gaIrqMask;
 		case GaIrqStatus:
@@ -403,6 +414,9 @@ namespace emu88Lib
 		{
 		case GaLeds:
 			m_leds = _val;
+			return;
+		case GaLedControl:
+			m_ledControl = _val;
 			return;
 		case GaIrqMask:
 			m_gaIrqMask = _val;

@@ -60,7 +60,7 @@
 		<div id="ledSelectBottom" class="panelLed selectorLed modelExtended" style="left: 378.25dp; top: 132dp;"><svg class="ledOffGraphic" src="selector_led_off.svg"/><svg class="ledOnGraphic" src="selector_led_on.svg"/></div>
 		<div id="ledSelectMiddle" class="panelLed selectorLed modelExtended" style="left: 378.25dp; top: 143dp;"><svg class="ledOffGraphic" src="selector_led_off.svg"/><svg class="ledOnGraphic" src="selector_led_on.svg"/></div>
 		<div id="ledSelectTop" class="panelLed selectorLed modelExtended" style="left: 378.25dp; top: 154dp;"><svg class="ledOffGraphic" src="selector_led_off.svg"/><svg class="ledOnGraphic" src="selector_led_on.svg"/></div>
-		<div id="ledEfx" class="panelLed efxLed modelExtended" style="left: 287.5dp; top: 165.5dp;"><svg class="ledOffGraphic" src="efx_led_off.svg"/><svg class="ledOnGraphic" src="efx_led_on.svg"/></div>
+		<div id="ledEfx" class="panelLed efxLed modelExtended" style="left: 287.5dp; top: 165.5dp;"><svg class="ledOffGraphic" src="efx_led_off.svg"/><svg class="ledOnGraphic" src="efx_led_on.svg"/><svg class="ledGreenGraphic" src="efx_led_green.svg"/><svg class="ledAmberGraphic" src="efx_led_amber.svg"/></div>
 		</div>
 
 		<!-- SC-8850 uses its native switch order and the exact control centres from

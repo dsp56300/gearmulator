@@ -1,4 +1,5 @@
 #include "88lib/hardwareDevice.h"
+#include "88lib/boards/sc88pro.h"
 #include "88lib/rom/romloader.h"
 #include "common/test_util.hpp"
 
@@ -16,6 +17,34 @@ int main()
 {
 	using namespace emu88Lib;
 	using namespace synthLib;
+	// SC-88Pro switch-board wiring: common supply, eight cathodes and a separate red cathode.
+	{
+		struct PanelBoard : Sc88Pro
+		{
+			PanelBoard() : Sc88Pro(std::vector<uint8_t>(RomSize), {}, false) {}
+			using Sc88Pro::extRead8;
+			using Sc88Pro::extWrite8;
+		};
+		PanelBoard panel;
+		panel.extWrite8(0xefc101, 0xfc);
+		for(unsigned bit = 0; bit < 8; ++bit)
+		{
+			panel.extWrite8(0xefc100, static_cast<uint8_t>(1u << bit));
+			CHECK_EQ(panel.leds(), 1u << bit);
+		}
+		panel.extWrite8(0xefc101, 0xfe);
+		CHECK_EQ(panel.leds(), 0x180u); // Both dies: orange.
+		panel.extWrite8(0xefc100, 0);
+		CHECK_EQ(panel.leds(), 0x100u); // Red without green.
+		panel.extWrite8(0xefc100, 0xff);
+		panel.extWrite8(0xefc101, 0xff);
+		CHECK_EQ(panel.leds(), 0u); // Common supply disabled.
+		CHECK_EQ(panel.extRead8(0xefc100), 0xffu);
+		CHECK_EQ(panel.extRead8(0xefc101), 0xffu);
+		panel.extWrite8(0xefc101, 0xfc);
+		CHECK_EQ(panel.leds(), 0xffu); // Data latch survives blanking.
+	}
+
 	namespace fs = baseLib::filesystem;
 	const auto folder = fs::getCurrentDirectory() + "88emu-transport-" +
 		std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + "/";
