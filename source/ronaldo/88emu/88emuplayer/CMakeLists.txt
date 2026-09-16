@@ -113,8 +113,7 @@ set_target_properties(88emuplayer PROPERTIES TUS_PRODUCT_NAME "${playerProductNa
 tus_exportTarget(88emuplayer)
 # The generated changelog may be absent when this product has no entries.
 tus_registerChangelog(88emuplayer)
-install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.md" "${CMAKE_SOURCE_DIR}/doc/88emu_launch.md"
-	"${CMAKE_SOURCE_DIR}/doc/88emu_analog_output.md"
+install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.md"
 	DESTINATION .
 	COMPONENT ${playerProductName}-Standalone)
 install(FILES "${CMAKE_SOURCE_DIR}/doc/88emu_readme.md"
