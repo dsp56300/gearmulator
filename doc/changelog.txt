@@ -10,6 +10,13 @@ Framework:
         than that, the result was remembered as the chosen scale. It no
         longer is, and a window that was saved that small opens at 100%.
 
+- [Imp] BUG-10322 The skin canvas supports more of the HTML5 2D drawing
+        context: linear and radial gradients (createLinearGradient,
+        createRadialGradient, addColorStop), clip, clearRect, lineJoin,
+        lineCap and ctx.canvas, the canvas element being drawn, whose
+        client_width and client_height give its size in pixels. strokeRect
+        now centres its outline on the rectangle, as HTML5 does.
+
 88emuPlayer:
 
 - [New] Added comprehensive README, shipped with the binaries.

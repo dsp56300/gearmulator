@@ -2,8 +2,12 @@
 
 #include "rmlElemCanvas.h"
 
+#include <algorithm>
+#include <cmath>
 #include <cstdio>
+#include <cstring>
 #include <memory>
+#include <optional>
 
 #include "RmlUi/Core/Log.h"
 #include "RmlUi/Lua/LuaType.h"
@@ -16,8 +20,9 @@ namespace Rml
 	namespace Lua
 	{
 		// Lua-visible type names are derived from these aliases:
-		//   Canvas        -> the <canvas> element, cast via Element.As.Canvas(el)
-		//   CanvasContext -> the 2D drawing context passed to the paint function
+		//   Canvas         -> the <canvas> element, cast via Element.As.Canvas(el)
+		//   CanvasContext  -> the 2D drawing context passed to the paint function
+		//   CanvasGradient -> a gradient made by createLinearGradient / createRadialGradient
 		//
 		// Method functions receive their Lua arguments starting at stack index 1
 		// (the LuaType thunk removes 'self' and passes it as the C++ pointer).
@@ -25,10 +30,12 @@ namespace Rml
 		// assigned value at index 2.
 		using Canvas = juceRmlUi::ElemCanvas;
 		using CanvasContext = juceRmlUi::Context2D;
+		using CanvasGradient = juceRmlUi::CanvasGradient;
+		using CanvasStyle = juceRmlUi::CanvasStyle;
 
 		namespace
 		{
-			juce::Colour parseCssColour(const juce::String& _in, const juce::Colour _fallback)
+			std::optional<juce::Colour> parseCssColour(const juce::String& _in)
 			{
 				const auto s = _in.trim();
 
@@ -51,7 +58,7 @@ namespace Rml
 					case 8:	// #rrggbbaa
 						return juce::Colour(static_cast<uint8_t>(v >> 24), static_cast<uint8_t>(v >> 16), static_cast<uint8_t>(v >> 8), static_cast<uint8_t>(v));
 					default:
-						return _fallback;
+						return {};
 					}
 				}
 
@@ -60,14 +67,14 @@ namespace Rml
 					const auto open = s.indexOfChar('(');
 					const auto close = s.lastIndexOfChar(')');
 					if (open < 0 || close < open)
-						return _fallback;
+						return {};
 
 					juce::StringArray parts;
 					parts.addTokens(s.substring(open + 1, close), ",", "");
 					parts.trim();
 
 					if (parts.size() < 3)
-						return _fallback;
+						return {};
 
 					const auto r = static_cast<uint8_t>(juce::jlimit(0, 255, parts[0].getIntValue()));
 					const auto g = static_cast<uint8_t>(juce::jlimit(0, 255, parts[1].getIntValue()));
@@ -78,7 +85,7 @@ namespace Rml
 					return juce::Colour(r, g, b, a);
 				}
 
-				return _fallback;
+				return {};
 			}
 
 			juce::String colourToCss(const juce::Colour _c)
@@ -91,6 +98,21 @@ namespace Rml
 			}
 
 			juce::Graphics* gfx(const CanvasContext* _c) { return _c ? _c->graphics() : nullptr; }
+
+			float numberArg(lua_State* L, const int _index)
+			{
+				return static_cast<float>(luaL_checknumber(L, _index));
+			}
+
+			// HTML5 rectangles may have a negative width or height
+			juce::Rectangle<float> rectArgs(lua_State* L, const int _first)
+			{
+				const auto x = numberArg(L, _first);
+				const auto y = numberArg(L, _first + 1);
+				const auto w = numberArg(L, _first + 2);
+				const auto h = numberArg(L, _first + 3);
+				return { juce::Point<float>(x, y), juce::Point<float>(x + w, y + h) };
+			}
 
 			// HTML5 measures angles from the +x axis (3 o'clock), juce's
 			// addCentredArc from 12 o'clock; both go clockwise in screen space.
@@ -109,6 +131,261 @@ namespace Rml
 				_c->path().addCentredArc(_x, _y, _rx, _ry, _rot, from, to, startNew);
 				_c->pathStarted() = true;
 			}
+
+			// needs at least one stop
+			juce::ColourGradient toColourGradient(const CanvasGradient::Data& _d)
+			{
+				juce::ColourGradient g;
+				g.point1 = _d.start;
+				g.point2 = _d.end;
+				g.isRadial = false;
+
+				// juce needs a colour at 0, HTML5 extends the first and the last stop to the ends
+				g.addColour(0.0, _d.stops.front().second);
+				for (const auto& [offset, colour] : _d.stops)
+					g.addColour(offset, colour);
+				g.addColour(1.0, _d.stops.back().second);
+				return g;
+			}
+
+			// An HTML5 radial gradient runs between two circles: a pixel takes the colour at the largest w for which the
+			// circle interpolated between them has a positive radius and passes through the pixel, and stays transparent
+			// if there is none. juce only knows gradients around one centre, so the colours are computed here.
+			juce::Image renderRadialGradient(const CanvasGradient::Data& _d, const juce::Rectangle<int>& _area)
+			{
+				constexpr int lutSize = 1024;
+				juce::PixelARGB lut[lutSize];
+				toColourGradient(_d).createLookupTable(lut, lutSize);
+
+				juce::Image image(juce::Image::ARGB, _area.getWidth(), _area.getHeight(), true);
+				const juce::Image::BitmapData pixels(image, juce::Image::BitmapData::writeOnly);
+
+				const double cx = _d.end.x - _d.start.x;
+				const double cy = _d.end.y - _d.start.y;
+				const double r0 = _d.startRadius;
+				const double dr = _d.endRadius - _d.startRadius;
+				const double a = cx * cx + cy * cy - dr * dr;
+
+				for (int y = 0; y < _area.getHeight(); ++y)
+				{
+					const double py = _area.getY() + y + 0.5 - _d.start.y;
+
+					for (int x = 0; x < _area.getWidth(); ++x)
+					{
+						const double px = _area.getX() + x + 0.5 - _d.start.x;
+
+						// |p - w*c| = r0 + w*dr  ->  a*w^2 - 2*b*w + c = 0
+						const double b = px * cx + py * cy + r0 * dr;
+						const double c = px * px + py * py - r0 * r0;
+
+						double w;
+
+						if (std::abs(a) < 1e-9)
+						{
+							if (b == 0.0)
+								continue;
+							w = c / (2.0 * b);
+						}
+						else
+						{
+							const double discriminant = b * b - a * c;
+							if (discriminant < 0.0)
+								continue;
+							const double root = std::sqrt(discriminant);
+							const double w0 = (b - root) / a;
+							const double w1 = (b + root) / a;
+							w = std::max(w0, w1);
+							if (r0 + w * dr <= 0.0)
+								w = std::min(w0, w1);
+						}
+
+						if (r0 + w * dr <= 0.0)
+							continue;
+
+						const auto index = juce::roundToInt(std::clamp(w, 0.0, 1.0) * (lutSize - 1));
+						reinterpret_cast<juce::PixelARGB*>(pixels.getPixelPointer(x, y))->set(lut[index]);
+					}
+				}
+
+				return image;
+			}
+
+			// Makes the style the fill of the graphics for the given area. Returns false if it paints nothing.
+			bool setFill(juce::Graphics& _g, const juce::Rectangle<int>& _area, const CanvasStyle& _style)
+			{
+				if (!_style.gradient)
+				{
+					_g.setColour(_style.colour);
+					return true;
+				}
+
+				const auto& d = *_style.gradient;
+
+				// HTML5 paints nothing with a gradient that has no stops or no extent
+				if (d.stops.empty())
+					return false;
+
+				if (!d.radial)
+				{
+					if (d.start == d.end)
+						return false;
+					_g.setGradientFill(toColourGradient(d));
+					return true;
+				}
+
+				if (d.start == d.end && juce::exactlyEqual(d.startRadius, d.endRadius))
+					return false;
+
+				const auto offset = juce::AffineTransform::translation(static_cast<float>(_area.getX()), static_cast<float>(_area.getY()));
+				_g.setFillType(juce::FillType(renderRadialGradient(d, _area), offset));
+				return true;
+			}
+
+			void fillShape(const CanvasContext* _c, const juce::Path& _shape, const CanvasStyle& _style)
+			{
+				auto* g = gfx(_c);
+				if (!g)
+					return;
+
+				const auto area = _shape.getBounds().getSmallestIntegerContainer().getIntersection(g->getClipBounds());
+				if (area.isEmpty() || !setFill(*g, area, _style))
+					return;
+
+				g->fillPath(_shape);
+			}
+
+			void strokeShape(const CanvasContext* _c, const juce::Path& _shape)
+			{
+				if (!gfx(_c))
+					return;
+
+				juce::Path outline;
+				juce::PathStrokeType(_c->lineWidth, _c->lineJoin, _c->lineCap).createStrokedPath(outline, _shape);
+				fillShape(_c, outline, _c->strokeStyle);
+			}
+
+			constexpr std::pair<const char*, juce::PathStrokeType::JointStyle> g_lineJoins[] =
+			{
+				{ "miter", juce::PathStrokeType::mitered },
+				{ "round", juce::PathStrokeType::curved },
+				{ "bevel", juce::PathStrokeType::beveled },
+			};
+
+			constexpr std::pair<const char*, juce::PathStrokeType::EndCapStyle> g_lineCaps[] =
+			{
+				{ "butt", juce::PathStrokeType::butt },
+				{ "round", juce::PathStrokeType::rounded },
+				{ "square", juce::PathStrokeType::square },
+			};
+
+			template <typename Names, typename T>
+			void pushName(lua_State* L, const Names& _names, const T _value)
+			{
+				for (const auto& [name, value] : _names)
+				{
+					if (value == _value)
+					{
+						lua_pushstring(L, name);
+						return;
+					}
+				}
+				lua_pushnil(L);
+			}
+
+			// HTML5 ignores a value that is none of the names
+			template <typename Names, typename T>
+			void setFromName(lua_State* L, const Names& _names, T& _value)
+			{
+				if (lua_type(L, 2) != LUA_TSTRING)
+					return;
+
+				const auto* text = lua_tostring(L, 2);
+
+				for (const auto& [name, value] : _names)
+				{
+					if (std::strcmp(text, name) == 0)
+						_value = value;
+				}
+			}
+		}
+
+		// ---------------------------------------------------------------------
+		// CanvasGradient (HTML5 CanvasGradient); method args start at stack index 1
+		// ---------------------------------------------------------------------
+
+		int CanvasGradientaddColorStop(lua_State* L, CanvasGradient* gradient)
+		{
+			const auto offset = numberArg(L, 1);
+			const auto* text = luaL_checkstring(L, 2);
+
+			// HTML5 throws for both
+			if (!(offset >= 0.0f && offset <= 1.0f))
+				return luaL_error(L, "addColorStop: offset %f is outside of 0..1", static_cast<double>(offset));
+
+			const auto colour = parseCssColour(text);
+			if (!colour)
+				return luaL_error(L, "addColorStop: '%s' is not a colour", text);
+
+			auto& stops = gradient->data->stops;
+			const auto pos = std::upper_bound(stops.begin(), stops.end(), offset, [](const float _offset, const auto& _stop)
+			{
+				return _offset < _stop.first;
+			});
+			stops.insert(pos, { offset, *colour });
+			return 0;
+		}
+
+		RegType<CanvasGradient> CanvasGradientMethods[] = {
+			RMLUI_LUAMETHOD(CanvasGradient, addColorStop),
+			{ nullptr, nullptr },
+		};
+
+		luaL_Reg CanvasGradientGetters[] = { { nullptr, nullptr } };
+		luaL_Reg CanvasGradientSetters[] = { { nullptr, nullptr } };
+
+		template <>
+		void ExtraInit<CanvasGradient>(lua_State*, int)
+		{
+		}
+		RMLUI_LUATYPE_DEFINE(CanvasGradient)
+
+		namespace
+		{
+			int pushGradient(lua_State* L, const std::shared_ptr<CanvasGradient::Data>& _data)
+			{
+				auto* gradient = new CanvasGradient();
+				gradient->data = _data;
+				LuaType<CanvasGradient>::push(L, gradient, true);
+				return 1;
+			}
+
+			int pushStyle(lua_State* L, const CanvasStyle& _style)
+			{
+				if (_style.gradient)
+					return pushGradient(L, _style.gradient);
+
+				lua_pushstring(L, colourToCss(_style.colour).toRawUTF8());
+				return 1;
+			}
+
+			// HTML5 ignores a value that is neither a colour nor a gradient
+			void setStyle(lua_State* L, CanvasStyle& _style)
+			{
+				if (const auto* gradient = static_cast<CanvasGradient**>(luaL_testudata(L, 2, GetTClassName<CanvasGradient>())))
+				{
+					_style.gradient = (*gradient)->data;
+					return;
+				}
+
+				if (lua_type(L, 2) != LUA_TSTRING)
+					return;
+
+				if (const auto colour = parseCssColour(lua_tostring(L, 2)))
+				{
+					_style.colour = *colour;
+					_style.gradient.reset();
+				}
+			}
 		}
 
 		// ---------------------------------------------------------------------
@@ -118,29 +395,33 @@ namespace Rml
 
 		int CanvasContextfillRect(lua_State* L, CanvasContext* c)
 		{
-			auto* g = gfx(c);
-			if (!g)
-				return 0;
-			const auto x = static_cast<float>(luaL_checknumber(L, 1));
-			const auto y = static_cast<float>(luaL_checknumber(L, 2));
-			const auto w = static_cast<float>(luaL_checknumber(L, 3));
-			const auto h = static_cast<float>(luaL_checknumber(L, 4));
-			g->setColour(c->fillColour);
-			g->fillRect(juce::Rectangle<float>(x, y, w, h));
+			juce::Path shape;
+			shape.addRectangle(rectArgs(L, 1));
+			fillShape(c, shape, c->fillStyle);
 			return 0;
 		}
 
 		int CanvasContextstrokeRect(lua_State* L, CanvasContext* c)
 		{
+			juce::Path shape;
+			shape.addRectangle(rectArgs(L, 1));
+			strokeShape(c, shape);
+			return 0;
+		}
+
+		int CanvasContextclearRect(lua_State* L, CanvasContext* c)
+		{
+			const auto area = rectArgs(L, 1).toNearestIntEdges();
+
 			auto* g = gfx(c);
 			if (!g)
 				return 0;
-			const auto x = static_cast<float>(luaL_checknumber(L, 1));
-			const auto y = static_cast<float>(luaL_checknumber(L, 2));
-			const auto w = static_cast<float>(luaL_checknumber(L, 3));
-			const auto h = static_cast<float>(luaL_checknumber(L, 4));
-			g->setColour(c->strokeColour);
-			g->drawRect(juce::Rectangle<float>(x, y, w, h), c->lineWidth);
+
+			// HTML5 sets the pixels inside the clip to transparent black, which no blending fill does
+			g->saveState();
+			g->setColour(juce::Colours::transparentBlack);
+			g->getInternalContext().fillRect(area, true);
+			g->restoreState();
 			return 0;
 		}
 
@@ -231,22 +512,57 @@ namespace Rml
 
 		int CanvasContextfill(lua_State*, CanvasContext* c)
 		{
-			auto* g = gfx(c);
-			if (!g)
-				return 0;
-			g->setColour(c->fillColour);
-			g->fillPath(c->path());
+			fillShape(c, c->path(), c->fillStyle);
 			return 0;
 		}
 
 		int CanvasContextstroke(lua_State*, CanvasContext* c)
 		{
-			auto* g = gfx(c);
-			if (!g)
-				return 0;
-			g->setColour(c->strokeColour);
-			g->strokePath(c->path(), juce::PathStrokeType(c->lineWidth));
+			strokeShape(c, c->path());
 			return 0;
+		}
+
+		// lasts until the paint function returns
+		int CanvasContextclip(lua_State*, CanvasContext* c)
+		{
+			if (auto* g = gfx(c))
+				g->reduceClipRegion(c->path());
+			return 0;
+		}
+
+		int CanvasContextcreateLinearGradient(lua_State* L, CanvasContext*)
+		{
+			const auto x0 = numberArg(L, 1);
+			const auto y0 = numberArg(L, 2);
+			const auto x1 = numberArg(L, 3);
+			const auto y1 = numberArg(L, 4);
+
+			auto data = std::make_shared<CanvasGradient::Data>();
+			data->start = { x0, y0 };
+			data->end = { x1, y1 };
+			return pushGradient(L, data);
+		}
+
+		int CanvasContextcreateRadialGradient(lua_State* L, CanvasContext*)
+		{
+			const auto x0 = numberArg(L, 1);
+			const auto y0 = numberArg(L, 2);
+			const auto r0 = numberArg(L, 3);
+			const auto x1 = numberArg(L, 4);
+			const auto y1 = numberArg(L, 5);
+			const auto r1 = numberArg(L, 6);
+
+			// HTML5 throws
+			if (r0 < 0.0f || r1 < 0.0f)
+				return luaL_error(L, "createRadialGradient: a radius is negative");
+
+			auto data = std::make_shared<CanvasGradient::Data>();
+			data->radial = true;
+			data->start = { x0, y0 };
+			data->end = { x1, y1 };
+			data->startRadius = r0;
+			data->endRadius = r1;
+			return pushGradient(L, data);
 		}
 
 		// getters / setters (dot-syntax properties): self at 1, value at 2
@@ -255,14 +571,13 @@ namespace Rml
 		{
 			auto* c = LuaType<CanvasContext>::check(L, 1);
 			RMLUI_CHECK_OBJ(c);
-			lua_pushstring(L, colourToCss(c->fillColour).toRawUTF8());
-			return 1;
+			return pushStyle(L, c->fillStyle);
 		}
 		int CanvasContextSetAttrfillStyle(lua_State* L)
 		{
 			auto* c = LuaType<CanvasContext>::check(L, 1);
 			RMLUI_CHECK_OBJ(c);
-			c->fillColour = parseCssColour(luaL_checkstring(L, 2), c->fillColour);
+			setStyle(L, c->fillStyle);
 			return 0;
 		}
 
@@ -270,14 +585,13 @@ namespace Rml
 		{
 			auto* c = LuaType<CanvasContext>::check(L, 1);
 			RMLUI_CHECK_OBJ(c);
-			lua_pushstring(L, colourToCss(c->strokeColour).toRawUTF8());
-			return 1;
+			return pushStyle(L, c->strokeStyle);
 		}
 		int CanvasContextSetAttrstrokeStyle(lua_State* L)
 		{
 			auto* c = LuaType<CanvasContext>::check(L, 1);
 			RMLUI_CHECK_OBJ(c);
-			c->strokeColour = parseCssColour(luaL_checkstring(L, 2), c->strokeColour);
+			setStyle(L, c->strokeStyle);
 			return 0;
 		}
 
@@ -292,13 +606,49 @@ namespace Rml
 		{
 			auto* c = LuaType<CanvasContext>::check(L, 1);
 			RMLUI_CHECK_OBJ(c);
-			c->lineWidth = static_cast<float>(luaL_checknumber(L, 2));
+			const auto width = luaL_checknumber(L, 2);
+			// HTML5 ignores zero, negative, infinite and NaN widths
+			if (width > 0.0 && std::isfinite(width))
+				c->lineWidth = static_cast<float>(width);
 			return 0;
 		}
+
+		int CanvasContextGetAttrlineJoin(lua_State* L)
+		{
+			auto* c = LuaType<CanvasContext>::check(L, 1);
+			RMLUI_CHECK_OBJ(c);
+			pushName(L, g_lineJoins, c->lineJoin);
+			return 1;
+		}
+		int CanvasContextSetAttrlineJoin(lua_State* L)
+		{
+			auto* c = LuaType<CanvasContext>::check(L, 1);
+			RMLUI_CHECK_OBJ(c);
+			setFromName(L, g_lineJoins, c->lineJoin);
+			return 0;
+		}
+
+		int CanvasContextGetAttrlineCap(lua_State* L)
+		{
+			auto* c = LuaType<CanvasContext>::check(L, 1);
+			RMLUI_CHECK_OBJ(c);
+			pushName(L, g_lineCaps, c->lineCap);
+			return 1;
+		}
+		int CanvasContextSetAttrlineCap(lua_State* L)
+		{
+			auto* c = LuaType<CanvasContext>::check(L, 1);
+			RMLUI_CHECK_OBJ(c);
+			setFromName(L, g_lineCaps, c->lineCap);
+			return 0;
+		}
+
+		int CanvasContextGetAttrcanvas(lua_State* L);	// needs the Canvas type, defined below
 
 		RegType<CanvasContext> CanvasContextMethods[] = {
 			RMLUI_LUAMETHOD(CanvasContext, fillRect),
 			RMLUI_LUAMETHOD(CanvasContext, strokeRect),
+			RMLUI_LUAMETHOD(CanvasContext, clearRect),
 			RMLUI_LUAMETHOD(CanvasContext, beginPath),
 			RMLUI_LUAMETHOD(CanvasContext, closePath),
 			RMLUI_LUAMETHOD(CanvasContext, moveTo),
@@ -308,6 +658,9 @@ namespace Rml
 			RMLUI_LUAMETHOD(CanvasContext, ellipse),
 			RMLUI_LUAMETHOD(CanvasContext, fill),
 			RMLUI_LUAMETHOD(CanvasContext, stroke),
+			RMLUI_LUAMETHOD(CanvasContext, clip),
+			RMLUI_LUAMETHOD(CanvasContext, createLinearGradient),
+			RMLUI_LUAMETHOD(CanvasContext, createRadialGradient),
 			{ nullptr, nullptr },
 		};
 
@@ -315,6 +668,9 @@ namespace Rml
 			RMLUI_LUAGETTER(CanvasContext, fillStyle),
 			RMLUI_LUAGETTER(CanvasContext, strokeStyle),
 			RMLUI_LUAGETTER(CanvasContext, lineWidth),
+			RMLUI_LUAGETTER(CanvasContext, lineJoin),
+			RMLUI_LUAGETTER(CanvasContext, lineCap),
+			RMLUI_LUAGETTER(CanvasContext, canvas),
 			{ nullptr, nullptr },
 		};
 
@@ -322,6 +678,8 @@ namespace Rml
 			RMLUI_LUASETTER(CanvasContext, fillStyle),
 			RMLUI_LUASETTER(CanvasContext, strokeStyle),
 			RMLUI_LUASETTER(CanvasContext, lineWidth),
+			RMLUI_LUASETTER(CanvasContext, lineJoin),
+			RMLUI_LUASETTER(CanvasContext, lineCap),
 			{ nullptr, nullptr },
 		};
 
@@ -346,7 +704,7 @@ namespace Rml
 				int ref;
 				CanvasContext ctx;
 
-				CanvasPaintState(lua_State* _L, const int _ref) : L(_L), ref(_ref) {}
+				CanvasPaintState(lua_State* _L, const int _ref, Canvas* _canvas) : L(_L), ref(_ref), ctx(_canvas) {}
 				~CanvasPaintState()
 				{
 					if (ref != LUA_NOREF)
@@ -376,7 +734,7 @@ namespace Rml
 			lua_pushvalue(L, 1);
 			const int ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-			auto state = std::make_shared<CanvasPaintState>(L, ref);
+			auto state = std::make_shared<CanvasPaintState>(L, ref, canvas);
 
 			// Default to a fresh frame each paint; authors can opt into a
 			// persistent canvas via setClearEveryFrame(false).
@@ -418,6 +776,15 @@ namespace Rml
 			AddTypeToElementAsTable<Canvas>(L);
 		}
 		RMLUI_LUATYPE_DEFINE(Canvas)
+
+		// HTML5 ctx.canvas, the element the context draws on
+		int CanvasContextGetAttrcanvas(lua_State* L)
+		{
+			auto* c = LuaType<CanvasContext>::check(L, 1);
+			RMLUI_CHECK_OBJ(c);
+			LuaType<Canvas>::push(L, c->canvas(), false);
+			return 1;
+		}
 	}
 }
 
@@ -429,5 +796,6 @@ namespace juceRmlUi
 			return;
 		Rml::Lua::LuaType<ElemCanvas>::Register(_L);
 		Rml::Lua::LuaType<Context2D>::Register(_L);
+		Rml::Lua::LuaType<CanvasGradient>::Register(_L);
 	}
 }
