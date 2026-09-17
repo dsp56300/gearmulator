@@ -18,6 +18,9 @@ namespace synthLib
 
 extern "C"
 {
+	// The server calls this before any of the others. They pass C++ types, so it only uses a plugin built with the same
+	// bridgeLib::g_protocolVersion.
+	BRIDGE_CLIENT_API uint32_t bridgeProtocolVersion();
 	BRIDGE_CLIENT_API synthLib::Device* bridgeDeviceCreate(const synthLib::DeviceCreateParams&);
 	BRIDGE_CLIENT_API void bridgeDeviceDestroy(const synthLib::Device* _device);
 	BRIDGE_CLIENT_API void bridgeDeviceGetDesc(bridgeLib::PluginDesc& _desc);

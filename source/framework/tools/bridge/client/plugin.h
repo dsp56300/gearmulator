@@ -29,6 +29,11 @@ synthLib::Device* createBridgeDevice(const synthLib::DeviceCreateParams& _params
 
 extern "C"
 {
+	BRIDGE_CLIENT_API uint32_t bridgeProtocolVersion()
+	{
+		return bridgeLib::g_protocolVersion;
+	}
+
 	BRIDGE_CLIENT_API synthLib::Device* bridgeDeviceCreate(const synthLib::DeviceCreateParams& _params)
 	{
 		return createBridgeDevice(_params);

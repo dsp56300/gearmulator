@@ -19,6 +19,7 @@ namespace bridgeServer
 	class Import
 	{
 	public:
+		typedef uint32_t (*FuncBridgeProtocolVersion)();
 		typedef synthLib::Device* (*FuncBridgeDeviceCreate)(const synthLib::DeviceCreateParams& _params);
 		typedef void (*FuncBridgeDeviceDestroy)(synthLib::Device*);
 		typedef void (*FuncBridgeDeviceGetDesc)(bridgeLib::PluginDesc&);

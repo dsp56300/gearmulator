@@ -66,7 +66,8 @@ namespace bridgeServer
 		it = m_loadedPlugins.find(_desc);
 		if(it == m_loadedPlugins.end())
 		{
-			_error = "The server has no " + describe(_desc) + ". Copy that exact version of the plugin, or its server plugin, into the server's plugins folder:\n" + m_config.pluginsPath;
+			_error = "The server has no " + describe(_desc) + ". Copy that exact version of the plugin, or its server plugin, into the server's plugins folder:\n" + m_config.pluginsPath +
+				"\nIt has to use bridge protocol " + std::to_string(bridgeLib::g_protocolVersion) + ", the one of this server.";
 			LOGNET(networkLib::LogLevel::Warning, _error);
 			return nullptr;	// still not found
 		}
@@ -168,6 +169,18 @@ namespace bridgeServer
 		plugin.handle = dlopen(_file.c_str(), RTLD_LAZY);
 		if(!plugin.handle)
 			return;
+
+		// The other exports pass C++ types, which are only safe to share with a plugin that uses our protocol version.
+		// Any plugin version that does can be hosted. Plugins built before the protocol version was exported do not have it.
+		const auto funcProtocolVersion = reinterpret_cast<FuncBridgeProtocolVersion>(dlsym(plugin.handle, "bridgeProtocolVersion")); // NOLINT(clang-diagnostic-cast-function-type-strict)
+
+		if(!funcProtocolVersion || funcProtocolVersion() != bridgeLib::g_protocolVersion)
+		{
+			if(funcProtocolVersion)
+				LOGNET(networkLib::LogLevel::Warning, "Skipping " << _file << ", it uses bridge protocol " << funcProtocolVersion() << " but this server uses " << bridgeLib::g_protocolVersion);
+			dlclose(plugin.handle);
+			return;
+		}
 
 		plugin.funcCreate = reinterpret_cast<FuncBridgeDeviceCreate>(dlsym(plugin.handle, "bridgeDeviceCreate")); // NOLINT(clang-diagnostic-cast-function-type-strict)
 		plugin.funcDestroy = reinterpret_cast<FuncBridgeDeviceDestroy>(dlsym(plugin.handle, "bridgeDeviceDestroy")); // NOLINT(clang-diagnostic-cast-function-type-strict)

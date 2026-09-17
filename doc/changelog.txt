@@ -17,6 +17,12 @@ Framework:
         client_width and client_height give its size in pixels. strokeRect
         now centres its outline on the rectangle, as HTML5 does.
 
+- [Imp] DSPBridge: The server is no longer limited to plugins of its own
+        version. It can host any plugin version that uses the same bridge
+        protocol, so new plugin versions can be copied into the server's
+        plugins folder next to the old ones without reinstalling the server.
+        A client still gets the exact plugin version it asks for.
+
 88emuPlayer:
 
 - [New] Added comprehensive README, shipped with the binaries.
