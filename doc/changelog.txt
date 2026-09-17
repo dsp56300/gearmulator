@@ -4,6 +4,18 @@ Release Notes
 
 88emuPlayer:
 
+- [Imp] UI: The Settings panel has now a more readable font size.
+
+- [Fix] UI: Restore the standard window border color.
+
+- [Fix] UI: Correct the SC-88Pro USER INST / EFX indicator to display green,
+        red or amber according to the front-panel LED controls.
+
+- [Imp] Devices: The PWM-controlled VCA in the CM-32P is now modelled.
+
+- [Fix] Devices: LP chip emulation was using a wrong scaling factor that was
+        affecting the total output volume.
+
 - [Fix] Audio: Avoid waiting for the user interface when processing front-panel
         input and updating the display from the audio thread.
 
@@ -22,10 +34,7 @@ Release Notes
 - [Fix] macOS: Release Metal resources when closing or recreating the interface
         to prevent graphics memory usage from growing.
 
-- [Fix] Standalone: Restore the standard window border color.
-
-- [Fix] SC-88Pro: Correct the USER INST / EFX indicator to display green,
-        red or amber according to the front-panel LED controls.
+- [Imp] ROMs: Added support for the SC-88Pro correct wave set as 5 separate chips.
 
 2.2.21:
 
