@@ -11,6 +11,7 @@ set(SOURCES
 	lcd.cpp lcd.h
 	lcdfonts.cpp lcdfonts.h
 	sciMidi.cpp sciMidi.h
+	sed1200.cpp sed1200.h
 	sed1335.cpp sed1335.h
 	tc160g22af.h
 )
