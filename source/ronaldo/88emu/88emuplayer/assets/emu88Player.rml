@@ -18,6 +18,9 @@
 		</button>
 		<div id="hardwareLcd" class="lcd"/>
 		<div class="lcd powerOffDisplay">Power Off</div>
+		<!-- The CM-64's second window, its CM-32L half below the CM-32P's. Hidden everywhere else. -->
+		<div id="hardwareLcd2" class="lcdSecond"/>
+		<div id="powerOffDisplay2" class="lcdSecond powerOffPanel"/>
 		<knob id="outputVolume" class="volumeKnob"/>
 		<button id="btDeviceSelect" class="hit deviceSelect" title="Select SC-88 device"/>
 

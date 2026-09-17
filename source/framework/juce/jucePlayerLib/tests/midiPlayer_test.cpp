@@ -89,7 +89,10 @@ namespace
             player.setResetMode(mode);
             player.setPortCount(1);
             player.play(0);
-            auto events = block(player, 100);
+            // One settle per block, so the song's first note falls at the head of the
+            // block after the one that carries the reset. block() runs at 1 kHz.
+            constexpr auto settle = MidiPlayer::kResetSettleMs;
+            auto events = block(player, settle);
             CHECK(events.front().type == MidiEventType::TransportDiscontinuity);
             CHECK_EQ(
                 std::count_if(events.begin(), events.end(), [](const auto& e) { return e.a == 0xb0 && e.b == 121; }),
@@ -100,7 +103,7 @@ namespace
             CHECK((reset == events.end()) == (mode == MidiPlayer::ResetMode::Off));
             if (reset != events.end())
                 CHECK_EQ(reset->sysex[1], mode == MidiPlayer::ResetMode::Gm ? 0x7e : 0x41);
-            events = block(player, 100);
+            events = block(player, settle);
             CHECK_EQ(noteCount(events), mode == MidiPlayer::ResetMode::Gs || mode == MidiPlayer::ResetMode::Gm ? 1 : 0);
             if (mode == MidiPlayer::ResetMode::Mt32)
             {
@@ -168,7 +171,8 @@ namespace
         CHECK_EQ(noteCount(block(player, 1000)), 0);
         player.play(1);
         block(player, 50);
-        CHECK_EQ(noteCount(block(player, 100, 2000)), 0); // remaining 50 ms at the new rate
+        // The rest of the settle, at twice the rate it was started on.
+        CHECK_EQ(noteCount(block(player, (MidiPlayer::kResetSettleMs - 50) * 2, 2000)), 0);
         CHECK_EQ(noteCount(block(player, 1, 2000)), 1);
     }
 

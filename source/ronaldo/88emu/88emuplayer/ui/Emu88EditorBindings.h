@@ -169,7 +169,8 @@ namespace emu88Player::editor
 
 	constexpr uint32_t panelButtonsForDevice(const emu88Lib::DeviceModel _model, uint32_t _buttons)
 	{
-		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro || _model == emu88Lib::DeviceModel::Sc8820 || _model == emu88Lib::DeviceModel::Cm32p) return 0;
+		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro ||
+		   _model == emu88Lib::DeviceModel::Sc8820 || emu88Lib::isCmModel(_model)) return 0;
 		constexpr auto preview = proButtonBit(emu88Lib::Sc88ProButton::Preview);
 		if(_model == emu88Lib::DeviceModel::Sc88VL)
 			return _buttons & ~preview;
@@ -178,6 +179,11 @@ namespace emu88Player::editor
 				? 0 : _buttons & g_sc55Buttons;
 		return _buttons;
 	}
+
+	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Cm32p, ~uint32_t{0}) == 0 &&
+	              panelButtonsForDevice(emu88Lib::DeviceModel::Cm32l, ~uint32_t{0}) == 0 &&
+	              panelButtonsForDevice(emu88Lib::DeviceModel::Cm64, ~uint32_t{0}) == 0,
+	              "the CM bezels have no switches to press");
 
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc88VL,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::Preview)) == 0);

@@ -30,6 +30,11 @@ namespace emu88Player
 			m_lcd = std::make_unique<HardwareLcd>(*lcd);
 			m_lcd->reset(m_processor.deviceModel());
 		}
+		if(auto* lcd = document->GetElementById("hardwareLcd2"))
+		{
+			m_lcd2 = std::make_unique<HardwareLcd>(*lcd);
+			m_lcd2->reset(m_processor.deviceModel(), 1);
+		}
 		m_playlistEntries = document->GetElementById("playlistEntries");
 		m_playerPlayGraphic = document->GetElementById("playerPlayGraphic");
 		m_playerPauseGraphic = document->GetElementById("playerPauseGraphic");
@@ -357,8 +362,9 @@ namespace emu88Player
 			assign({"btAll", "btMute"});
 			break;
 		case emu88Lib::DeviceModel::Cm32p:
+		case emu88Lib::DeviceModel::Cm32l:
 		case emu88Lib::DeviceModel::Cm64:
-			// The bezel's only driven lamp, bit 0 of Cm32p::leds(); POWER is painted on.
+			// The bezel's only driven lamp, bit 0 of the board's leds(); POWER is painted on.
 			assign({"ledCmMidi"});
 			break;
 		default:

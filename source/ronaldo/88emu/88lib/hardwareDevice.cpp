@@ -5,6 +5,8 @@
 #include "88lib/boards/sc8850.h"
 #include "88lib/boards/sc8820.h"
 #include "88lib/boards/cm32p.h"
+#include "88lib/boards/cm32l.h"
+#include "88lib/boards/cm64.h"
 #include "hardwareLib/lcdfonts.h"
 #include "88lib/boards/sc55Board.h"
 #include "88lib/boards/sc88pro.h"
@@ -24,6 +26,48 @@ namespace emu88Lib
 		constexpr uint64_t g_minimumPanelEdgeSamples = 64;
 		// Longer than any supported board's power-on intro.
 		constexpr float g_fastBootSeconds = 10.0f;
+
+		using Screen = HardwareDevice::DisplaySnapshot::Screen;
+
+		// A character panel as a dot grid: 5x8 glyphs on a 6x9 pitch, the low 16 codes taken
+		// from the controller's CGRAM and the rest from the shared font. The controllers differ
+		// in how a cell is addressed, so the caller supplies the two lookups.
+		template<typename CharacterFn, typename CgFn>
+		void renderCharacterGrid(Screen& _screen, const unsigned _columns, const unsigned _lines,
+		                         const bool _displayOn, CharacterFn&& _character, CgFn&& _cgCharacter)
+		{
+			_screen.type = HardwareDevice::DisplaySnapshot::Type::Graphic;
+			_screen.width = static_cast<uint16_t>(_columns * 6);
+			_screen.height = static_cast<uint16_t>(_lines * 9);
+			_screen.displayOn = _displayOn;
+			_screen.mono.assign(static_cast<size_t>(_screen.width) * _screen.height, 0);
+			for(unsigned line = 0; line < _lines; ++line)
+				for(unsigned column = 0; column < _columns; ++column)
+				{
+					const auto character = _character(line, column);
+					const auto custom = _cgCharacter(character & 7);
+					const auto* glyph = character < 16 ? custom.data() : hwLib::getCharacterData(character);
+					for(unsigned y = 0; y < 8; ++y)
+						for(unsigned x = 0; x < 5; ++x)
+							_screen.mono[(line * 9 + y) * _screen.width + column * 6 + x] = (glyph[y] >> (4 - x)) & 1;
+				}
+		}
+
+		// The CM-32P's HD44780, 16 columns over two lines.
+		void renderCm32pDisplay(Screen& _screen, const hwLib::Hd44780& _lcd)
+		{
+			renderCharacterGrid(_screen, 16, 2, _lcd.isDisplayOn(),
+				[&](const unsigned _line, const unsigned _column) { return _lcd.getVisibleCharacter(_line, _column); },
+				[&](const unsigned _index) { return _lcd.getCgCharacter(_index); });
+		}
+
+		// The CM-32L's SED1200, one strip of 20.
+		void renderCm32lDisplay(Screen& _screen, const hwLib::Sed1200& _lcd)
+		{
+			renderCharacterGrid(_screen, 20, 1, _lcd.isDisplayOn(),
+				[&](unsigned, const unsigned _column) { return _lcd.getVisibleCharacter(_column); },
+				[&](const unsigned _index) { return _lcd.getCgCharacter(_index); });
+		}
 	}
 
 	HardwareDevice::HardwareDevice(const synthLib::DeviceCreateParams& _params, const BootOptions& _boot,
@@ -34,6 +78,7 @@ namespace emu88Lib
 			return;
 		m_model = static_cast<DeviceModel>(_params.customData);
 		m_dacBits = getDacBits(m_model);
+		m_boardGain = getBoardOutputGain(m_model);
 		const bool factoryReset = _boot.factoryReset && !_boot.initialPanelButtons;
 
 		switch(m_model)
@@ -55,9 +100,11 @@ namespace emu88Lib
 		case DeviceModel::Cm32p:
 			m_cm32p = std::make_unique<Cm32p>(RomLoader::findCm32pRomSet(), _pcmCard);
 			break;
+		case DeviceModel::Cm32l:
+			m_cm32l = std::make_unique<Cm32l>(RomLoader::findCm32lRomSet());
+			break;
 		case DeviceModel::Cm64:
-			// Scaffolding. The CM-64 is this Cm32p board plus a CM-32L, and 88lib has no LA
-			// engine to pair it with, so nothing is built and isValid() stays false.
+			m_cm64 = std::make_unique<Cm64>(RomLoader::findCm32lRomSet(), RomLoader::findCm32pRomSet(), _pcmCard);
 			break;
 		case DeviceModel::Sc8820:
 		{
@@ -131,6 +178,8 @@ namespace emu88Lib
 			else if(m_sc88) m_sc88->setButtons(_boot.initialPanelButtons);
 			else if(m_sc8850) m_sc8850->setButtons(_boot.initialPanelButtons);
 			else if(m_sc55) m_sc55->setButtons(_boot.initialPanelButtons);
+			else if(m_cm32l) m_cm32l->setButtons(_boot.initialPanelButtons);
+			else if(m_cm64) m_cm64->setButtons(_boot.initialPanelButtons);
 		}
 
 		if(_boot.fastBoot && !_boot.initialPanelButtons)
@@ -138,7 +187,7 @@ namespace emu88Lib
 			// What the board sends out meanwhile is dropped; its display is published so the panel
 			// starts on the screen the board is now showing.
 			for(auto samples = static_cast<uint64_t>(g_fastBootSeconds * dacSamplerate()); samples > 0; --samples)
-				renderBoardSample();
+				renderBoardFrame();
 			std::vector<synthLib::SMidiEvent> discarded;
 			readMidiOutFromBoard(discarded);
 			publishDisplaySnapshot();
@@ -190,6 +239,8 @@ namespace emu88Lib
 		if(m_sc8850) return static_cast<float>(Sc8850::SampleRate);
 		if(m_sc8820) return static_cast<float>(Sc8820::SampleRate);
 		if(m_cm32p) return static_cast<float>(Cm32p::SampleRate);
+		if(m_cm32l) return static_cast<float>(Cm32l::SampleRate);
+		if(m_cm64) return static_cast<float>(Cm64::SampleRate);
 		if(m_sc55) return static_cast<float>(m_sc55->sampleRate());
 		return static_cast<float>(g_sampleRate);
 	}
@@ -199,6 +250,8 @@ namespace emu88Lib
 		if(m_sc8850) return Sc8850::CpuClockHz;
 		if(m_sc8820) return Sc8820::CpuClockHz;
 		if(m_cm32p) return Cm32p::CpuStateRate * 3;
+		if(m_cm32l) return Cm32l::CpuClock;
+		if(m_cm64) return Cm32l::CpuClock;
 		if(m_sc55) return m_sc55->cpuClockHz();
 		return g_cpuClockHz;
 	}
@@ -206,7 +259,9 @@ namespace emu88Lib
 	bool HardwareDevice::isValid() const
 	{
 		return (m_sc88 && m_sc88->isValid()) || (m_sc88Pro && m_sc88Pro->isValid()) ||
-		       (m_sc8850 && m_sc8850->isValid()) || (m_sc8820 && m_sc8820->isValid()) || (m_cm32p && m_cm32p->isValid()) || (m_sc55 && m_sc55->isValid());
+		       (m_sc8850 && m_sc8850->isValid()) || (m_sc8820 && m_sc8820->isValid()) || (m_cm32p && m_cm32p->isValid()) ||
+		       (m_cm32l && m_cm32l->isValid()) || (m_cm64 && m_cm64->isValid()) ||
+		       (m_sc55 && m_sc55->isValid());
 	}
 
 	void HardwareDevice::setPanelButtons(const uint32_t _buttons)
@@ -259,6 +314,10 @@ namespace emu88Lib
 			m_sc8820->addMidiEvent(_event, _event.port);
 		else if(m_cm32p)
 			m_cm32p->addMidiEvent(_event, _event.port);
+		else if(m_cm32l)
+			m_cm32l->addMidiEvent(_event, _event.port);
+		else if(m_cm64)
+			m_cm64->addMidiEvent(_event, _event.port);
 		else if(m_sc88)
 			m_sc88->addMidiEvent(_event, _event.port);
 		else if(m_sc55MidiIn)
@@ -312,6 +371,10 @@ namespace emu88Lib
 			m_sc8820->readMidiOut(_midiOut);
 		else if(m_cm32p)
 			m_cm32p->readMidiOut(_midiOut);
+		else if(m_cm32l)
+			m_cm32l->readMidiOut(_midiOut);
+		else if(m_cm64)
+			m_cm64->readMidiOut(_midiOut);
 		else if(m_sc55)
 		{
 			m_sc55MidiOutBytes.clear();
@@ -355,6 +418,8 @@ namespace emu88Lib
 			else if(m_sc88) m_sc88->setButtons(buttons);
 			else if(m_sc8850) m_sc8850->setButtons(buttons);
 			else if(m_sc55) m_sc55->setButtons(buttons);
+			else if(m_cm32l) m_cm32l->setButtons(buttons);
+			else if(m_cm64) m_cm64->setButtons(buttons);
 			m_nextPanelCommandSample = m_renderedSamples + g_minimumPanelEdgeSamples;
 		}
 		else if(m_sc8850)
@@ -363,67 +428,74 @@ namespace emu88Lib
 		}
 	}
 
-	std::pair<int32_t, int32_t> HardwareDevice::renderBoardSample()
+	void HardwareDevice::renderBoardFrame()
 	{
 		if(m_sc55MidiIn)
 			m_sc55MidiIn->processSample();
 		applyDuePanelCommand();
-		std::pair<int32_t, int32_t> result;
-		if(m_sc8850) result = m_sc8850->renderSample();
-		else if(m_sc8820) result = m_sc8820->renderSample();
-		else if(m_cm32p) result = m_cm32p->renderSample();
-		else if(m_sc88Pro) result = m_sc88Pro->renderSample();
-		else if(m_sc88) result = m_sc88->renderSample();
-		else if(m_sc55) result = m_sc55->renderSample();
+		m_heldFrame = {};
+		m_heldFrameB = {};
+		if(m_sc8850) m_heldFrame = m_sc8850->renderSample();
+		else if(m_sc8820) m_heldFrame = m_sc8820->renderSample();
+		else if(m_cm32p) m_heldFrame = m_cm32p->renderSample();
+		else if(m_cm32l) m_heldFrame = m_cm32l->renderSample();
+		else if(m_cm64)
+		{
+			// The LA board's line output and the PCM board's, as they arrive at the mixer.
+			const auto frames = m_cm64->renderFrames();
+			m_heldFrame = frames.la;
+			m_heldFrameB = frames.pcm;
+		}
+		else if(m_sc88Pro) m_heldFrame = m_sc88Pro->renderSample();
+		else if(m_sc88) m_heldFrame = m_sc88->renderSample();
+		else if(m_sc55) m_heldFrame = m_sc55->renderSample();
 		++m_renderedSamples;
-		return result;
 	}
 
 	void HardwareDevice::publishDisplaySnapshot()
 	{
 		DisplaySnapshot next;
+		auto& first = next.screens[0];
 		if(deviceHasLcd(m_model) && (m_sc88Pro || m_sc88 || (m_sc55 && m_sc55->hasDisplay())))
 		{
 			const auto& lcd = m_sc88Pro ? m_sc88Pro->lcd() : m_sc88 ? m_sc88->lcd() : m_sc55->lcd();
-			next.type = DisplaySnapshot::Type::Character;
-			std::copy(lcd.getDdRam().begin(), lcd.getDdRam().end(), next.ddRam.begin());
-			std::copy(lcd.getCgRam().begin(), lcd.getCgRam().end(), next.cgRam.begin());
-			next.displayOn = lcd.isDisplayOn() && (!m_sc88 || m_sc88->lcdEnabled()) &&
-			                 (!m_sc55 || m_sc55->lcdEnabled());
-			next.width = 209;
-			next.height = 76;
+			first.type = DisplaySnapshot::Type::Character;
+			std::copy(lcd.getDdRam().begin(), lcd.getDdRam().end(), first.ddRam.begin());
+			std::copy(lcd.getCgRam().begin(), lcd.getCgRam().end(), first.cgRam.begin());
+			first.displayOn = lcd.isDisplayOn() && (!m_sc88 || m_sc88->lcdEnabled()) &&
+			                  (!m_sc55 || m_sc55->lcdEnabled());
+			first.width = 209;
+			first.height = 76;
 			next.leds = m_sc88Pro ? m_sc88Pro->leds()
 			          : m_sc88   ? m_sc88->leds()
 			          : m_sc55   ? m_sc55->leds() : 0;
 		}
 		else if(m_cm32p)
 		{
-			const auto& lcd = m_cm32p->lcd();
-			next.type = DisplaySnapshot::Type::Graphic;
-			next.width = 16 * 6;
-			next.height = 2 * 9;
-			next.displayOn = lcd.isDisplayOn();
+			renderCm32pDisplay(first, m_cm32p->lcd());
 			next.leds = m_cm32p->leds();
-			next.mono.resize(next.width * next.height);
-			for(unsigned line = 0; line < 2; ++line)
-				for(unsigned column = 0; column < 16; ++column)
-				{
-					const auto character = lcd.getVisibleCharacter(line, column);
-					const auto custom = lcd.getCgCharacter(character & 7);
-					const auto* glyph = character < 16 ? custom.data() : hwLib::getCharacterData(character);
-					for(unsigned y = 0; y < 8; ++y)
-						for(unsigned x = 0; x < 5; ++x)
-							next.mono[(line * 9 + y) * next.width + column * 6 + x] = (glyph[y] >> (4 - x)) & 1;
-				}
+		}
+		else if(m_cm32l)
+		{
+			renderCm32lDisplay(first, m_cm32l->lcd());
+			next.leds = m_cm32l->leds();
+		}
+		else if(m_cm64)
+		{
+			// Two boards, two service displays: the PCM half's above the LA half's, as the
+			// bezel has them.
+			renderCm32pDisplay(first, m_cm64->pcm().lcd());
+			renderCm32lDisplay(next.screens[1], m_cm64->la().lcd());
+			next.leds = m_cm64->leds();
 		}
 		else if(m_sc8850)
 		{
-			next.type = DisplaySnapshot::Type::Graphic;
-			next.width = static_cast<uint16_t>(m_sc8850->lcd().width());
-			next.height = static_cast<uint16_t>(m_sc8850->lcd().height());
-			next.displayOn = m_sc8850->lcd().isDisplayEnabled();
+			first.type = DisplaySnapshot::Type::Graphic;
+			first.width = static_cast<uint16_t>(m_sc8850->lcd().width());
+			first.height = static_cast<uint16_t>(m_sc8850->lcd().height());
+			first.displayOn = m_sc8850->lcd().isDisplayEnabled();
 			next.leds = m_sc8850->leds();
-			m_sc8850->lcd().renderMono(next.mono);
+			m_sc8850->lcd().renderMono(first.mono);
 		}
 		std::unique_lock lock(m_displayMutex, std::try_to_lock);
 		if(!lock.owns_lock())
@@ -455,7 +527,8 @@ namespace emu88Lib
 			// With an analogue model each DAC frame is held for several output samples.
 			if(m_holdPhase == 0)
 			{
-				m_heldFrame = isValid() ? renderBoardSample() : std::pair<int32_t, int32_t>{};
+				if(isValid()) renderBoardFrame();
+				else m_heldFrame = m_heldFrameB = {};
 				const auto firstOutput = m_midiOut.size();
 				readMidiOutFromBoard(m_midiOut);
 				for(auto j = firstOutput; j < m_midiOut.size(); ++j)
@@ -470,9 +543,22 @@ namespace emu88Lib
 
 	void HardwareDevice::writeOutputSample(const synthLib::TAudioOutputs& _outputs, const size_t _index)
 	{
-		auto left = static_cast<float>(synthLib::quantiseDacWord(m_heldFrame.first, m_dacBits)) * g_dacScale;
-		auto right = static_cast<float>(synthLib::quantiseDacWord(m_heldFrame.second, m_dacBits)) * g_dacScale;
-		m_analogOutput.process(left, right);
+		const auto word = [this](const int32_t _v)
+		{
+			return static_cast<float>(synthLib::quantiseDacWord(_v, m_dacBits)) * g_dacScale;
+		};
+		// The board's amplifiers are linear and sit after the filters, so scaling here rather
+		// than at the end of the chain comes to the same thing - and keeps the level right when
+		// there is no chain at all.
+		auto left = word(m_heldFrame.first) * m_boardGain.a;
+		auto right = word(m_heldFrame.second) * m_boardGain.a;
+		// The CM-64 is two boards that meet at one mixer, so its halves are summed here rather
+		// than on the board: each passes its own circuit first.
+		if(m_cm64)
+			m_analogOutput.processSplit(left, right, word(m_heldFrameB.first) * m_boardGain.b,
+			                            word(m_heldFrameB.second) * m_boardGain.b);
+		else
+			m_analogOutput.process(left, right);
 		if(_outputs[0]) _outputs[0][_index] = left;
 		if(_outputs[1]) _outputs[1][_index] = right;
 		if(++m_holdPhase == m_analogOutput.oversampling())
@@ -486,6 +572,8 @@ namespace emu88Lib
 		if(m_sc88) m_sc88->transportDiscontinuity(m_transportGeneration);
 		if(m_sc8820) m_sc8820->transportDiscontinuity(m_transportGeneration);
 		if(m_cm32p) m_cm32p->transportDiscontinuity(m_transportGeneration);
+		if(m_cm32l) m_cm32l->transportDiscontinuity(m_transportGeneration);
+		if(m_cm64) m_cm64->transportDiscontinuity(m_transportGeneration);
 		silenceActiveChannels();
 	}
 

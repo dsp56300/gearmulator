@@ -96,6 +96,7 @@ namespace emu88Player
 		m_playerPlayGraphic = nullptr;
 		m_playerPauseGraphic = nullptr;
 		m_lcd.reset();
+		m_lcd2.reset();
 		m_buttonElements.fill(nullptr);
 		m_leds.fill(nullptr);
 		m_onRmlFocusLost.reset();
@@ -181,6 +182,8 @@ namespace emu88Player
 		updatePowerVisuals();
 		if(m_lcd)
 			m_lcd->reset(_model);
+		if(m_lcd2)
+			m_lcd2->reset(_model, 1);
 		updateLeds(0);
 		// The analogue output setting names the circuit Auto picks for the current board, and the
 		// MIDI page dims the part groups it lacks.
@@ -213,6 +216,7 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Sc155: panel = "sc55_panel.png"; break;
 		// Boards without a front panel: artwork with only the player, device selector and volume.
 		case emu88Lib::DeviceModel::Cm32p: panel = "cm32p_panel.png"; break;
+		case emu88Lib::DeviceModel::Cm32l: panel = "cm32l_panel.png"; break;
 		case emu88Lib::DeviceModel::Cm64: panel = "cm64_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8820: panel = "sc8820_panel.png"; break;
 		case emu88Lib::DeviceModel::Xpgs:
@@ -242,6 +246,10 @@ namespace emu88Player
 			root->SetClass("modelSc8850", _model == emu88Lib::DeviceModel::Sc8850);
 			root->SetClass("modelSc55", emu88Lib::isSc55Model(_model) && !noPanel);
 			root->SetClass("modelCm", emu88Lib::isCmModel(_model));
+			// The CM bezels differ in their windows: one 16x2 on the CM-32P, one 20x1 on the
+			// CM-32L, and both on the CM-64.
+			root->SetClass("modelCm32l", _model == emu88Lib::DeviceModel::Cm32l);
+			root->SetClass("modelCm64", _model == emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelSc8820", _model == emu88Lib::DeviceModel::Sc8820);
 			root->SetClass("modelNoPanel", noPanel);
 			root->SetClass("modelNoDisplay", !emu88Lib::deviceHasLcd(_model));
@@ -430,7 +438,9 @@ namespace emu88Player
 		{
 			m_displayRevision = snapshot.revision;
 			if(m_lcd)
-				m_lcd->setSnapshot(snapshot);
+				m_lcd->setSnapshot(snapshot.screens[0]);
+			if(m_lcd2)
+				m_lcd2->setSnapshot(snapshot.screens[1]);
 			updateLeds(snapshot.leds);
 		}
 		if(playlistChanged)

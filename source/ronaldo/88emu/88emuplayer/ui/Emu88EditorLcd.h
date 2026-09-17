@@ -30,29 +30,30 @@ namespace emu88Player
 				});
 		}
 
-		void reset(const emu88Lib::DeviceModel _model)
+		// _screen is 0 for the board's only display, 1 for the second panel of a board that has
+		// one (the CM-64, whose halves each bring their own).
+		void reset(const emu88Lib::DeviceModel _model, const unsigned _screen = 0)
 		{
 			m_source = {};
 			m_graphicBase = {};
 			m_shadow = {};
-			m_style = _model == emu88Lib::DeviceModel::Cm32p ? kCm32pStyle : kSc8850Style;
-			if(!emu88Lib::deviceHasLcd(_model))
+			const auto geometry = geometryFor(_model, _screen);
+			m_style = geometry.style;
+			if(!emu88Lib::deviceHasLcd(_model) || (_screen && !emu88Lib::deviceHasSecondLcd(_model)))
 			{
 				// Nothing to draw: these boards' artwork prints NO DISPLAY, and the stylesheet hides
-				// the canvas (.modelNoDisplay).
+				// the canvas (.modelNoDisplay), as it does the second panel nobody else has.
 				m_canvas->repaint();
 				return;
 			}
-			if(_model == emu88Lib::DeviceModel::Cm32p)
-				composeGraphic(96, 18, nullptr);
-			else if(_model == emu88Lib::DeviceModel::Sc8850)
-				composeGraphic(160, 64, nullptr);
+			if(geometry.width)
+				composeGraphic(geometry.width, geometry.height, nullptr);
 			else
 				m_canvas->setFixedTextureSize(sc88panel::kWidth, sc88panel::kHeight);
 			m_canvas->repaint();
 		}
 
-		void setSnapshot(const emu88Lib::HardwareDevice::DisplaySnapshot& _snapshot)
+		void setSnapshot(const emu88Lib::HardwareDevice::DisplaySnapshot::Screen& _snapshot)
 		{
 			if(_snapshot.type == emu88Lib::HardwareDevice::DisplaySnapshot::Type::Graphic)
 			{
@@ -78,6 +79,73 @@ namespace emu88Player
 		}
 
 	private:
+		static constexpr uint32_t kLcdGlass = 0xffff6f0fu;
+		static constexpr uint32_t kLcdOffOverlay = 0x38000000u;
+		static constexpr uint32_t kLcdOn = 0xff000000u;
+
+		// How a graphic panel is drawn. Each snapshot pixel owns a pitch x pitch square of the texture and
+		// a dot fills dotSize of it. cellWidth/cellHeight are a character cell in snapshot pixels, whose
+		// last column and row are the gap to the next cell, for boards whose snapshot keeps those gaps; 0
+		// means every pixel is a dot. A texture size of 0 is the snapshot's own size at the pitch;
+		// otherwise the texture covers the whole window and the dots start at originX/originY within it.
+		struct GraphicStyle
+		{
+			uint32_t glass;
+			uint32_t off;
+			uint32_t on;
+			int pitch;
+			int dotSize;
+			int cellWidth;
+			int cellHeight;
+			int textureWidth;
+			int textureHeight;
+			int originX;
+			int originY;
+			// The window in the skin, in dp. Zero means no inner shadow is drawn over it.
+			int windowWidthDp;
+			int windowHeightDp;
+		};
+		// The SC-8850: lit dots straight onto the orange glass, edge to edge.
+		static constexpr GraphicStyle kSc8850Style{kLcdGlass, kLcdGlass, kLcdOn, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0};
+		// The CM-32P fills its 218 x 41 dp window at 800 x 150: a yellow-green backlight with black lit
+		// dots and green unlit ones, 6 px on an 8 px pitch. Its HD44780 snapshot has 6x9 cells, each
+		// ending in the gap to the next; the origin insets the dots within the window.
+		static constexpr GraphicStyle kCm32pStyle{0xff51be03u, 0xff00b578u, 0xff000000u, 8, 6, 6, 9, 800, 150, 25, 11,
+		                                          218, 41};
+		// The CM-32L's window is the same width but half the height, 218 x 20 dp at 1000 x 92. Its
+		// SED1200 puts 20 columns where the CM-32P has 16, so the same 6 px dot on an 8 px pitch
+		// fills the same share of the width and the glyphs come out proportionally smaller - which
+		// is how the two read side by side on the CM-64 bezel that carries both.
+		static constexpr GraphicStyle kCm32lStyle{0xff51be03u, 0xff00b578u, 0xff000000u, 8, 6, 6, 9, 1000, 92, 20, 10,
+		                                          218, 20};
+
+		// What each panel is drawn as: its dot grid, and the style that paints it. A zero width
+		// is the SC-88 family's character panel, which sc88panel renders instead.
+		struct ScreenGeometry
+		{
+			GraphicStyle style;
+			int width;
+			int height;
+		};
+
+		static constexpr ScreenGeometry kNoGraphic{kSc8850Style, 0, 0};
+		static constexpr ScreenGeometry kCm32pPanel{kCm32pStyle, 96, 18};
+		static constexpr ScreenGeometry kCm32lPanel{kCm32lStyle, 120, 9};
+
+		static ScreenGeometry geometryFor(const emu88Lib::DeviceModel _model, const unsigned _screen)
+		{
+			using emu88Lib::DeviceModel;
+			// The CM-64 is a CM-32P above a CM-32L, so its two panels are exactly those two boards'.
+			if(_model == DeviceModel::Cm64)
+				return _screen == 0 ? kCm32pPanel : kCm32lPanel;
+			if(_screen)
+				return kNoGraphic;	// nothing else has a second panel
+			if(_model == DeviceModel::Cm32p) return kCm32pPanel;
+			if(_model == DeviceModel::Cm32l) return kCm32lPanel;
+			if(_model == DeviceModel::Sc8850) return {kSc8850Style, 160, 64};
+			return kNoGraphic;
+		}
+
 		// The glass with its unlit dots, the lit dots of _mono (_width x _height, row major; null leaves
 		// them all unlit), then the window's shadow over everything.
 		void composeGraphic(const int _width, const int _height, const uint8_t* _mono)
@@ -108,7 +176,8 @@ namespace emu88Player
 			const int textureWidth = m_style.textureWidth ? m_style.textureWidth : _width * m_style.pitch;
 			const int textureHeight = m_style.textureHeight ? m_style.textureHeight : _height * m_style.pitch;
 			m_graphicBase = juce::Image(juce::Image::ARGB, textureWidth, textureHeight, true);
-			m_shadow = m_style.windowShadow ? createWindowShadow(textureWidth, textureHeight) : juce::Image();
+			m_shadow = m_style.windowWidthDp
+				? createWindowShadow(textureWidth, textureHeight, m_style) : juce::Image();
 			juce::Graphics pixels(m_graphicBase);
 			pixels.fillAll(juce::Colour(m_style.glass));
 			if(m_style.off == m_style.glass)
@@ -133,13 +202,14 @@ namespace emu88Player
 			                   m_style.dotSize, m_style.dotSize);
 		}
 
-		// The CM-32P skin's LCD window has two inner shadows: black at 30% offset by (+2, +2) dp and at
+		// The CM skins' LCD windows have two inner shadows: black at 30% offset by (+2, +2) dp and at
 		// 15% by (-2, -2) dp, each blurred by a 1 dp Gaussian. Blurring the window's offset copy has a
-		// closed form, so the overlay is computed for the texture rather than stored.
-		static juce::Image createWindowShadow(const int _width, const int _height)
+		// closed form, so the overlay is computed for the texture rather than stored. The offsets are
+		// in dp, so the window's own size has to come with it.
+		static juce::Image createWindowShadow(const int _width, const int _height, const GraphicStyle& _style)
 		{
-			constexpr float windowWidth = 218.0f;
-			constexpr float windowHeight = 41.0f;
+			const auto windowWidth = static_cast<float>(_style.windowWidthDp);
+			const auto windowHeight = static_cast<float>(_style.windowHeightDp);
 			const float scale = 1.0f / std::sqrt(2.0f);	// 1 / (sigma * sqrt(2)) with sigma = 1 dp
 			// The share of [_lo, _hi] that a Gaussian centred on _p covers.
 			const auto covered = [scale](const float _p, const float _lo, const float _hi)
@@ -167,37 +237,6 @@ namespace emu88Player
 			return shadow;
 		}
 
-		static constexpr uint32_t kLcdGlass = 0xffff6f0fu;
-		static constexpr uint32_t kLcdOffOverlay = 0x38000000u;
-		static constexpr uint32_t kLcdOn = 0xff000000u;
-
-		// How a graphic panel is drawn. Each snapshot pixel owns a pitch x pitch square of the texture and
-		// a dot fills dotSize of it. cellWidth/cellHeight are a character cell in snapshot pixels, whose
-		// last column and row are the gap to the next cell, for boards whose snapshot keeps those gaps; 0
-		// means every pixel is a dot. A texture size of 0 is the snapshot's own size at the pitch;
-		// otherwise the texture covers the whole window and the dots start at originX/originY within it.
-		struct GraphicStyle
-		{
-			uint32_t glass;
-			uint32_t off;
-			uint32_t on;
-			int pitch;
-			int dotSize;
-			int cellWidth;
-			int cellHeight;
-			int textureWidth;
-			int textureHeight;
-			int originX;
-			int originY;
-			bool windowShadow;
-		};
-		// The SC-8850: lit dots straight onto the orange glass, edge to edge.
-		static constexpr GraphicStyle kSc8850Style{kLcdGlass, kLcdGlass, kLcdOn, 4, 4, 0, 0, 0, 0, 0, 0, false};
-		// The CM-32P fills its 218 x 41 dp window at 800 x 150: a yellow-green backlight with black lit
-		// dots and green unlit ones, 6 px on an 8 px pitch. Its HD44780 snapshot has 6x9 cells, each
-		// ending in the gap to the next; the origin insets the dots within the window.
-		static constexpr GraphicStyle kCm32pStyle{0xff51be03u, 0xff00b578u, 0xff000000u, 8, 6, 6, 9, 800, 150, 25, 11,
-		                                          true};
 
 		juceRmlUi::ElemCanvas* m_canvas = nullptr;
 		juce::Image m_source;

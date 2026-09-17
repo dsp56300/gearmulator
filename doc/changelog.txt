@@ -25,6 +25,11 @@ Release Notes
 - [Fix] MIDI Player: Clear sustained and releasing notes on transport changes
         even after an All Notes Off message.
 
+- [Fix] MIDI Player: Wait longer after the per-song reset before starting the
+        song. The previous pause was shorter than the reset itself takes to
+        reach the device, so songs that set up every part on their first tick
+        lost the notes at their start.
+
 - [Fix] macOS: Restore software rendering when Metal initialization fails,
         removing the native Metal view that could leave the window black.
 

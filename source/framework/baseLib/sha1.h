@@ -8,10 +8,6 @@
 
 namespace baseLib
 {
-	// Content digest in the form the emulation references publish. MD5 identifies
-	// a dump we have hashed ourselves; SHA-1 is what MAME and munt print, so it is
-	// what lets an image be catalogued from a public reference alone, without ever
-	// holding the file.
 	class SHA1
 	{
 	public:

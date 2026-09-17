@@ -89,10 +89,12 @@ namespace
         CHECK_EQ(player.addFiles({files.paths[0], name}).added, 2u);
         player.setPortCount(2);
         player.play(1);
-        const auto played = block(player, 800);
+        // Song time is offset by the settle the Gs reset holds before the song starts.
+        constexpr auto settle = MidiPlayer::kResetSettleMs;
+        const auto played = block(player, settle + 700);
         CHECK_EQ(noteCount(played), 2);
-        CHECK(std::any_of(played.begin(), played.end(),
-                          [](const auto& e) { return e.a == 0x80 && e.b == 60 && e.port == 1 && e.offset == 725; }));
+        CHECK(std::any_of(played.begin(), played.end(), [](const auto& e)
+                          { return e.a == 0x80 && e.b == 60 && e.port == 1 && e.offset == settle + 625; }));
         data.resize(20);
         CHECK(path.replaceWithData(data.data(), data.size()));
         const auto failed = player.addFiles({name});

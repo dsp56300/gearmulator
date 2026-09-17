@@ -15,6 +15,7 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/sc55mk2_panel.png
 	${HARDWARE_SKIN_DIR}/sc8820_panel.png
 	${HARDWARE_SKIN_DIR}/cm32p_panel.png
+	${HARDWARE_SKIN_DIR}/cm32l_panel.png
 	${HARDWARE_SKIN_DIR}/cm64_panel.png
 	${HARDWARE_SKIN_DIR}/sc88exp_panel.png
 	${HARDWARE_SKIN_DIR}/sc55pc_panel.png
