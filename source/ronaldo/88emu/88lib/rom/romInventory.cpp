@@ -439,7 +439,7 @@ namespace emu88Lib
             text << "Wave alternatives: Wave ROM 1 is the complete 1 MiB PCM image, the file munt reads as "
                     "cm32l_pcm.rom. Wave ROM 2 and 3 are the two 512 KiB mask-ROM dumps it is made of, "
                     "R15449121 and R15179945 - together they supply the same image. Provide either form, "
-                    "not both.\n"
+                    "not both.\n";
         if (_device == RomDevice::Mt32)
             text << "Control alternatives: Control ROM 1 is the complete firmware - 64 KiB on a 1.x board, "
                     "128 KiB on a 2.x one. Control ROM 2 and 3 are the two 32 KiB EPROMs a 1.x board carries "
