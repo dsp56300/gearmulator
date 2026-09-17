@@ -251,9 +251,9 @@ int main()
 		}
 	}
 	require(program18Lp.activeVoiceCount() == 2, "program 18 must retain both configured voices");
-	require(program18Peaks[0] == 17704 && program18Peaks[1] == 17704,
+	require(program18Peaks[0] == 70816 && program18Peaks[1] == 70816,
 		"program 18 voices must remain audibly nonzero at their observed levels");
-	require(program18Hash == 0xfc3956e227425cc3ull,
+	require(program18Hash == 0x275905e29f6cc683ull,
 		"program 18 unified-loop waveform changed");
 	require(program18Lp.voiceState(0).predictor == -1892 && program18Lp.voiceState(1).predictor == 1732,
 		"program 18 must retain signed 12-bit predictor wrapping");

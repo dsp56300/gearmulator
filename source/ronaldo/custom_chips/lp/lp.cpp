@@ -302,7 +302,7 @@ namespace lpLib
 				if (segmentActive) signalEnvelopeComplete(static_cast<uint8_t>(i));
 			}
 			setCurrentVolume(static_cast<unsigned>(i), volume);
-			result[i] = static_cast<int32_t>((int64_t(sample) * (volume >> 10)) >> 12);
+			result[i] = static_cast<int32_t>((int64_t(sample) * (volume >> 10)) >> 10);
 		}
 		return result;
 	}
