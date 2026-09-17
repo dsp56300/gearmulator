@@ -43,6 +43,18 @@ namespace emu88Lib
             return false;
         }
 
+        // Only sizes where a revision was catalogued from a published digest need a
+        // second pass over the data.
+        bool anySha1At(const size_t _size)
+        {
+            for (const auto& entry : g_romRegistry)
+            {
+                if (entry.size == _size && !entry.hash.isValid() && entry.sha1.isValid())
+                    return true;
+            }
+            return false;
+        }
+
         // Reuse digests until the file size or modification time changes.
         struct HashCacheEntry
         {
@@ -51,8 +63,20 @@ namespace emu88Lib
             baseLib::MD5 raw;
             baseLib::MD5 swapped;
             bool hasSwapped = false;
+            baseLib::SHA1 sha1;
+            bool hasSha1 = false;
             std::vector<FoundRom> proControlCopies;
         };
+
+        // A row is identified by its MD5 where the dump was hashed here, and by its
+        // published SHA-1 where it was catalogued without one. Never by both, so a
+        // revision cannot be recognized under two identities.
+        bool matchesRaw(const RomRegistryEntry& _entry, const HashCacheEntry& _hashes)
+        {
+            if (_entry.hash.isValid())
+                return _entry.hash == _hashes.raw;
+            return _entry.sha1.isValid() && _hashes.hasSha1 && _entry.sha1 == _hashes.sha1;
+        }
 
         std::mutex& hashCacheMutex()
         {
@@ -69,7 +93,7 @@ namespace emu88Lib
         // Digests for one candidate, from the cache where possible. Returns
         // false if the file could not be read at its expected size.
         bool hashCandidate(HashCacheEntry& _result, const std::string& _file, const size_t _size,
-                           const bool _wantSwapped)
+                           const bool _wantSwapped, const bool _wantSha1)
         {
             const auto modificationTime = baseLib::filesystem::getFileModificationTime(_file);
 
@@ -77,7 +101,8 @@ namespace emu88Lib
                 const std::lock_guard lock(hashCacheMutex());
                 const auto it = hashCache().find(_file);
                 if (it != hashCache().end() && it->second.size == _size &&
-                    it->second.modificationTime == modificationTime && (!_wantSwapped || it->second.hasSwapped))
+                    it->second.modificationTime == modificationTime && (!_wantSwapped || it->second.hasSwapped) &&
+                    (!_wantSha1 || it->second.hasSha1))
                 {
                     _result = it->second;
                     return true;
@@ -121,6 +146,12 @@ namespace emu88Lib
                     }
                 }
             }
+            // Before any swapping: a published digest always describes the file as it
+            // is on disk.
+            _result.hasSha1 = _wantSha1;
+            if (_wantSha1)
+                _result.sha1 = baseLib::SHA1(data);
+
             _result.hasSwapped = _wantSwapped;
             if (_wantSwapped)
             {
@@ -163,9 +194,9 @@ namespace emu88Lib
                     entry.size != _spec.size)
                     continue;
                 _knownHash = true;
-                if (entry.hash == _hashes.raw)
+                if (matchesRaw(entry, _hashes))
                     return &entry;
-                if (_hashes.hasSwapped && entry.wordSwapped && entry.hash == _hashes.swapped)
+                if (_hashes.hasSwapped && entry.wordSwapped && entry.hash.isValid() && entry.hash == _hashes.swapped)
                 {
                     _needsWordSwap = true;
                     return &entry;
@@ -287,7 +318,8 @@ namespace emu88Lib
                     continue;
 
                 HashCacheEntry hashes;
-                if (!hashCandidate(hashes, path, size, spec.normalizeH8Words || anyWordSwappedAt(size)))
+                if (!hashCandidate(hashes, path, size, spec.normalizeH8Words || anyWordSwappedAt(size),
+                                   anySha1At(size)))
                     continue;
                 bool knownHash = false;
                 bool needsWordSwap = false;
@@ -312,7 +344,7 @@ namespace emu88Lib
                 continue;
 
             HashCacheEntry hashes;
-            if (!hashCandidate(hashes, path, size, anyWordSwappedAt(size)))
+            if (!hashCandidate(hashes, path, size, anyWordSwappedAt(size), anySha1At(size)))
                 continue;
             proControlCopies.insert(proControlCopies.end(), hashes.proControlCopies.begin(),
                                     hashes.proControlCopies.end());
@@ -322,8 +354,9 @@ namespace emu88Lib
             {
                 if (entry.size != size)
                     continue;
-                const bool rawMatch = entry.hash == hashes.raw;
-                const bool swappedMatch = hashes.hasSwapped && entry.wordSwapped && entry.hash == hashes.swapped;
+                const bool rawMatch = matchesRaw(entry, hashes);
+                const bool swappedMatch = hashes.hasSwapped && entry.wordSwapped && entry.hash.isValid() &&
+                    entry.hash == hashes.swapped;
                 if ((!rawMatch && !swappedMatch) || !taken.insert(&entry).second)
                     continue;
 

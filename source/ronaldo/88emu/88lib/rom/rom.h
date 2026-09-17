@@ -31,6 +31,26 @@ namespace emu88Lib
         }
     };
 
+    // CM-32L: the 8095's control ROM, the LA32's PCM mask ROM and the Boss
+    // reverb gate array's microcode ROM. The wave image is the two 512 KiB mask
+    // ROMs concatenated in address order, R15449121 followed by R15179945 -
+    // the same file munt reads as CM32L_PCM.ROM.
+    struct Cm32lRomSet
+    {
+        static constexpr size_t ControlSize = 0x10000;
+        static constexpr size_t WaveSize = 0x100000;
+        static constexpr size_t ReverbSize = 0x8000;
+
+        std::vector<uint8_t> control;
+        std::vector<uint8_t> wave;
+        std::vector<uint8_t> reverb;
+
+        bool isValid() const
+        {
+            return control.size() == ControlSize && wave.size() == WaveSize && reverb.size() == ReverbSize;
+        }
+    };
+
     // Mask-ROM dumps of 16-bit parts sometimes store the two bytes of each CPU
     // word swapped, and both orientations of the same image circulate. Brings
     // one into CPU byte order if it is swapped, detected by scoring the H8/500
