@@ -49,7 +49,7 @@ namespace baseLib
 		explicit MD5(const std::vector<uint8_t>& _data);
 		explicit MD5(const uint8_t* _data, uint32_t _size);
 
-		MD5() : m_h({0,0,0,0}) {}
+		constexpr MD5() : m_h({0,0,0,0}) {}
 
 		MD5(const MD5& _src) = default;
 		MD5(MD5&& _src) = default;
@@ -62,6 +62,13 @@ namespace baseLib
 		std::string toString() const;
 
 		const std::array<uint32_t, 4>& getWords() const { return m_h; }
+
+		// A default-constructed digest stands for "not known"; no real data hashes
+		// to zero.
+		constexpr bool isValid() const
+		{
+			return m_h[0] || m_h[1] || m_h[2] || m_h[3];
+		}
 
 		constexpr bool operator == (const MD5& _md5) const
 		{

@@ -51,7 +51,7 @@ namespace emu88Lib
             std::vector<std::pair<RomSlot, uint8_t>> result;
             const auto add = [&](const RomSlot _slot, const uint8_t _index)
             {
-                if (isCompositeHalf(_device, _slot, _index))
+                if (isCompositeChip(_device, _slot, _index))
                     return;
                 const std::pair<RomSlot, uint8_t> slot{_slot, _index};
                 if (std::find(result.begin(), result.end(), slot) == result.end())
@@ -117,24 +117,22 @@ namespace emu88Lib
         return find(RomDevice::Sc8820, RomSlot::Wave, _index == 2 ? 1 : 0);
     }
 
-    // Joins a composite slot's two chips into the whole image, or cuts the whole image back
-    // into one chip, whichever direction the present files allow. Each direction reads only
-    // slots that are physically present, so the two can never call each other in a circle:
-    // read() delegates here exactly when find() came up empty.
+    // Joins a composite slot's chips into the whole image, or cuts the whole image back into
+    // one chip, whichever direction the present files allow. Each direction reads only slots
+    // that are physically present, so the two can never call each other in a circle: read()
+    // delegates here exactly when find() came up empty.
     bool RomInventory::readComposite(std::vector<uint8_t>& _data, const RomDevice _device, const RomSlot _slot,
                                      const uint8_t _index) const
     {
-        const auto* composite = findCompositeSlot(_device, _slot);
         _data.clear();
-        if (!composite || _index > 2)
-            return false;
 
-        if (_index == 0)
+        if (const auto* composite = findCompositeWhole(_device, _slot, _index))
         {
             std::vector<uint8_t> high;
-            if (!find(_device, _slot, 1) || !find(_device, _slot, 2) || !read(_data, _device, _slot, 1) ||
-                !read(high, _device, _slot, 2) || _data.size() != composite->halfSize ||
-                high.size() != composite->halfSize)
+            if (!find(_device, _slot, composite->firstChip) || !find(_device, _slot, composite->firstChip + 1) ||
+                !read(_data, _device, _slot, composite->firstChip) ||
+                !read(high, _device, _slot, composite->firstChip + 1) || _data.size() != composite->chipSize ||
+                high.size() != composite->chipSize)
             {
                 _data.clear();
                 return false;
@@ -145,7 +143,7 @@ namespace emu88Lib
                 return true;
             }
             std::vector<uint8_t> whole(composite->wholeSize);
-            for (size_t i = 0; i < composite->halfSize; ++i)
+            for (size_t i = 0; i < composite->chipSize; ++i)
             {
                 whole[i * 2] = _data[i];
                 whole[i * 2 + 1] = high[i];
@@ -154,25 +152,31 @@ namespace emu88Lib
             return true;
         }
 
+        const auto* composite = findCompositeChip(_device, _slot, _index);
+        if (!composite)
+            return false;
+
         // A whole image of another size is a different generation of the slot - the MT-32's
         // banked 2.x firmware, say - and is not made of these chips.
-        if (!find(_device, _slot, 0) || !read(_data, _device, _slot, 0) || _data.size() != composite->wholeSize)
+        if (!find(_device, _slot, composite->wholeIndex) ||
+            !read(_data, _device, _slot, composite->wholeIndex) || _data.size() != composite->wholeSize)
         {
             _data.clear();
             return false;
         }
-        std::vector<uint8_t> half(composite->halfSize);
+        const uint8_t chip = _index - composite->firstChip;
+        std::vector<uint8_t> part(composite->chipSize);
         if (composite->interleaved)
         {
-            for (size_t i = 0; i < composite->halfSize; ++i)
-                half[i] = _data[i * 2 + (_index - 1)];
+            for (size_t i = 0; i < composite->chipSize; ++i)
+                part[i] = _data[i * 2 + chip];
         }
         else
         {
-            const auto first = _data.begin() + (_index - 1) * composite->halfSize;
-            half.assign(first, first + composite->halfSize);
+            const auto first = _data.begin() + chip * composite->chipSize;
+            part.assign(first, first + composite->chipSize);
         }
-        _data = std::move(half);
+        _data = std::move(part);
         return true;
     }
 
@@ -180,12 +184,18 @@ namespace emu88Lib
     {
         if (find(_device, _slot, _index))
             return true;
-        if (const auto* composite = findCompositeSlot(_device, _slot); composite && _index <= 2)
+        // Both composite directions before the derived sources below: a board's own chips are
+        // its data rather than a substitute for it.
+        if (const auto* composite = findCompositeWhole(_device, _slot, _index))
         {
-            if (_index == 0)
-                return find(_device, _slot, 1) && find(_device, _slot, 2);
-            const auto* whole = find(_device, _slot, 0);
-            return whole && whole->size() == composite->wholeSize;
+            if (find(_device, _slot, composite->firstChip) && find(_device, _slot, composite->firstChip + 1))
+                return true;
+        }
+        if (const auto* composite = findCompositeChip(_device, _slot, _index))
+        {
+            const auto* whole = find(_device, _slot, composite->wholeIndex);
+            if (whole && whole->size() == composite->wholeSize)
+                return true;
         }
         if (_device == RomDevice::Sc8850 && _slot == RomSlot::Wave && _index == 1)
             if (const auto* source = find(_device, _slot, 0); source && source->size() == Sc8850WaveRomSet::Size)
@@ -198,8 +208,10 @@ namespace emu88Lib
                             const uint8_t _index) const
     {
         const auto* found = find(_device, _slot, _index);
-        if (!found && findCompositeSlot(_device, _slot))
-            return readComposite(_data, _device, _slot, _index);
+        // The board's own chips before the derived sources below. A failure here is not
+        // final: the SC-88Pro's waves can still come from an SC-8820 or SC-8850 donor.
+        if (!found && readComposite(_data, _device, _slot, _index))
+            return true;
         size_t sourceOffset = 0;
         const bool deriveProWave = !found && usesProBoard(_device) && _slot == RomSlot::Wave;
         if (deriveProWave)
@@ -306,7 +318,7 @@ namespace emu88Lib
         for (const auto& entry : g_romRegistry)
         {
             if (!usedBy(entry, _device) || has(_device, entry.slot, entry.index) ||
-                isCompositeHalf(_device, entry.slot, entry.index))
+                isCompositeChip(_device, entry.slot, entry.index))
                 continue;
 
             const std::pair<RomSlot, uint8_t> slot{entry.slot, entry.index};
@@ -334,7 +346,7 @@ namespace emu88Lib
         for (const auto& spec : g_romFileSpecs)
         {
             if (spec.device != _device || has(_device, spec.slot, spec.index) ||
-                isCompositeHalf(_device, spec.slot, spec.index))
+                isCompositeChip(_device, spec.slot, spec.index))
                 continue;
             result.push_back(&spec);
         }
@@ -459,6 +471,12 @@ namespace emu88Lib
                          : "SC-88Pro control ROMs run as the SC-88Pro device.\n\n")
                  << "Waves: use the native A+B+C files above, or decoded SC-8850 waves (32 MiB), "
                     "or decoded SC-8820 waves (16+8 MiB). These are alternatives, not additional required files.\n";
+            if (_device == RomDevice::Sc88Pro)
+                text << "The SC-88Pro board carries the same PCM on five 4 MiB mask ROMs instead, one per XP "
+                        "chip select, and those are accepted too: CS0 and CS1 supply Wave ROM 1, CS2 and CS3 "
+                        "supply Wave ROM 2, and CS4 is Wave ROM 3 itself. The four listed above are derived "
+                        "references, hashed by cutting the VE-GSPro images at those boundaries rather than "
+                        "taken from a dump of the board's own parts.\n";
             for (const auto& entry : g_romRegistry)
                 if (entry.slot == RomSlot::Wave &&
                     (usedBy(entry, RomDevice::Sc8850) || usedBy(entry, RomDevice::Sc8820)))

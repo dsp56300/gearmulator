@@ -27,8 +27,10 @@
 				<div class="hardwareSettingsSectionLabel">ROM loading</div>
 				<div id="btWarnRomHashMismatch" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Warn on unknown ROM hash on load</label></div>
 				<div class="hardwareSettingsSectionLabel">Device startup</div>
-				<div id="btFactoryResetOnLoad" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Factory Reset on load</label></div>
-				<div id="btFastBoot" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Fast Boot (skip intro)</label></div>
+				<div class="hardwareChoiceList">
+					<div id="btFactoryResetOnLoad" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Factory Reset on load</label></div>
+					<div id="btFastBoot" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Fast Boot (skip intro)</label></div>
+				</div>
 			</div>
 
 			<div id="pageSettingsSkin" class="hardwareSettingsPage" style="display: none;">
@@ -137,7 +139,7 @@
 					<h1>Developer</h1>
 				</div>
 				<div class="hardwareSettingsSectionLabel">Skin development</div>
-				<div class="hardwareDeveloperChoices">
+				<div class="hardwareChoiceList">
 					<div id="btReloadViaF5" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Reload skin with F5</label></div>
 					<div id="btEnableRmlUiDebugger" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Enable RmlUi debugger</label></div>
 				</div>

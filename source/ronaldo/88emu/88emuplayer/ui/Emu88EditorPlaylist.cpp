@@ -54,6 +54,11 @@ namespace emu88Player
 		if(!window)
 			return;
 
+		// Both buttons in the strip are laid out against this height, and the label they
+		// carry does not fit the shell's default strip - see g_titleBarButtonFontHeight.
+		if(window->getTitleBarHeight() != g_titleBarHeight)
+			window->setTitleBarHeight(g_titleBarHeight);
+
 		if(!m_recordButton)
 		{
 			m_recordButton = std::make_unique<TitleBarButton>(g_recordLabel);

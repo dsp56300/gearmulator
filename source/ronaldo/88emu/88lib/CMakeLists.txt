@@ -53,6 +53,12 @@ if(BUILD_TESTING)
 	add_test(NAME analogOutput COMMAND analogOutput_test)
 	set_tests_properties(analogOutput PROPERTIES TIMEOUT 20)
 
+	add_executable(rom_test tests/rom_test.cpp)
+	target_link_libraries(rom_test PRIVATE 88lib)
+	set_property(TARGET rom_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME rom COMMAND rom_test)
+	set_tests_properties(rom PROPERTIES TIMEOUT 20)
+
 	add_executable(cm32p_test tests/cm32p_test.cpp)
 	target_link_libraries(cm32p_test PRIVATE 88lib)
 	set_property(TARGET cm32p_test PROPERTY FOLDER "Ronaldo/tests")

@@ -87,44 +87,66 @@ namespace emu88Lib
         Count
     };
 
-    // A slot the board reads as one image that was dumped as two chips. Index 0 is
-    // always the whole image and indices 1 and 2 the chips it is made of, in address
-    // order. Either form is enough: the halves are joined on read, and a combined
-    // image is cut back up for anything that asks for a single chip. Only index 0 is
-    // ever required, so a board is complete with either.
+    // An image the board reads as one piece that was dumped as a pair of chips. The whole
+    // is what a board asks for; the two chips are an alternative way to supply it, joined
+    // on read, and the whole is cut back up for anything that asks for a single chip. Only
+    // the whole index is ever required, so a board is complete with either form.
+    //
+    // A chip that happens to be a whole image in its own right needs no entry here: it
+    // already matches that slot by content.
     struct RomCompositeSlot
     {
         RomDevice device;
         RomSlot slot;
+        // The index the board asks for, and the first of the two chip indices that supply
+        // it; the second is the one after.
+        uint8_t wholeIndex;
+        uint8_t firstChip;
         size_t wholeSize;
-        size_t halfSize;
+        size_t chipSize;
         // The MT-32's two firmware EPROMs sit on a 16-bit bus and are byte-multiplexed:
-        // even addresses come from the first chip, odd from the second. The PCM pairs
-        // are consecutive address ranges and simply concatenate.
+        // even addresses come from the first chip, odd from the second. PCM chips are
+        // consecutive address ranges and simply concatenate.
         bool interleaved;
     };
 
     inline constexpr RomCompositeSlot g_romCompositeSlots[] = {
-        {RomDevice::Cm32l, RomSlot::Wave, 0x100000, 0x80000, false},
-        {RomDevice::Mt32, RomSlot::Wave, 0x80000, 0x40000, false},
-        {RomDevice::Mt32, RomSlot::Control, 0x10000, 0x8000, true},
+        {RomDevice::Cm32l, RomSlot::Wave, 0, 1, 0x100000, 0x80000, false},
+        {RomDevice::Mt32, RomSlot::Wave, 0, 1, 0x80000, 0x40000, false},
+        {RomDevice::Mt32, RomSlot::Control, 0, 1, 0x10000, 0x8000, true},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 0, 3, 0x800000, 0x400000, false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 1, 5, 0x800000, 0x400000, false},
     };
 
-    constexpr const RomCompositeSlot* findCompositeSlot(const RomDevice _device, const RomSlot _slot)
+    // The composite this index is the whole image of, if any.
+    constexpr const RomCompositeSlot* findCompositeWhole(const RomDevice _device, const RomSlot _slot,
+                                                         const uint8_t _index)
     {
         for (const auto& composite : g_romCompositeSlots)
         {
-            if (composite.device == _device && composite.slot == _slot)
+            if (composite.device == _device && composite.slot == _slot && composite.wholeIndex == _index)
                 return &composite;
         }
         return nullptr;
     }
 
-    // True for the chip indices of a composite slot, which are an alternative to its
+    // The composite this index is a chip of, if any. Chips are an alternative to their
     // whole image rather than an additional requirement.
-    constexpr bool isCompositeHalf(const RomDevice _device, const RomSlot _slot, const uint8_t _index)
+    constexpr const RomCompositeSlot* findCompositeChip(const RomDevice _device, const RomSlot _slot,
+                                                        const uint8_t _index)
     {
-        return (_index == 1 || _index == 2) && findCompositeSlot(_device, _slot) != nullptr;
+        for (const auto& composite : g_romCompositeSlots)
+        {
+            if (composite.device == _device && composite.slot == _slot && _index >= composite.firstChip &&
+                _index < composite.firstChip + 2)
+                return &composite;
+        }
+        return nullptr;
+    }
+
+    constexpr bool isCompositeChip(const RomDevice _device, const RomSlot _slot, const uint8_t _index)
+    {
+        return findCompositeChip(_device, _slot, _index) != nullptr;
     }
 
     // Required filenames are intentionally independent of the known hashes
@@ -174,6 +196,10 @@ namespace emu88Lib
         {RomDevice::Sc88Pro, RomSlot::Wave, 0, 0x800000, "sc88pro_wave0.bin", false},
         {RomDevice::Sc88Pro, RomSlot::Wave, 1, 0x800000, "sc88pro_wave1.bin", false},
         {RomDevice::Sc88Pro, RomSlot::Wave, 2, 0x400000, "sc88pro_wave2.bin", false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 3, 0x400000, "sc88pro_wave_cs0.bin", false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 4, 0x400000, "sc88pro_wave_cs1.bin", false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 5, 0x400000, "sc88pro_wave_cs2.bin", false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 6, 0x400000, "sc88pro_wave_cs3.bin", false},
         {RomDevice::VeGsPro, RomSlot::Control, 0, 0x100000, "vegspro_control.bin", true},
         {RomDevice::VeGsPro, RomSlot::Wave, 0, 0x800000, "vegspro_wave0.bin", false},
         {RomDevice::VeGsPro, RomSlot::Wave, 1, 0x800000, "vegspro_wave1.bin", false},
@@ -444,6 +470,22 @@ namespace emu88Lib
          baseLib::MD5("125ea2056dc208f04a141b3dcdffdb1b"), "R01567178, SC-GS 1.00", false},
         {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 2, 0x400000,
          baseLib::MD5("48c3887c9a2a574b907242640fa0a320"), "R01233667, SC-GS 1.00", false},
+
+        // The same PCM as the five 4 MiB mask ROMs the SC-88Pro board carries instead, one
+        // per XP chip select. CS4 is R01233667 unchanged, so the row above already is it;
+        // these four are the halves of the two larger parts, in chip-select order.
+        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 3, 0x400000,
+         baseLib::MD5("decc8a499b69e68ee8b121d73410c36b"), "CS0, first half of R01567167, derived reference",
+         false},
+        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 4, 0x400000,
+         baseLib::MD5("69933f0a2a3f6f4ab53932f40ba63f74"), "CS1, second half of R01567167, derived reference",
+         false},
+        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 5, 0x400000,
+         baseLib::MD5("bda725bd1cf8c3911f906314ca162bed"), "CS2, first half of R01567178, derived reference",
+         false},
+        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 6, 0x400000,
+         baseLib::MD5("94e94038993600555b738e8ccc24d8b8"), "CS3, second half of R01567178, derived reference",
+         false},
 
         // -----------------------------------------------------------------
         // VE-GS Pro

@@ -17,6 +17,7 @@ set(SOURCES
 	os.cpp os.h
 	propertyMap.cpp propertyMap.h
 	semaphore.h
+	sha1.cpp sha1.h
 )
 
 target_sources(baseLib PRIVATE ${SOURCES})
