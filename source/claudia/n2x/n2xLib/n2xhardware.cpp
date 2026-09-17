@@ -99,10 +99,11 @@ namespace n2x
 		ensureBufferSize(_frames);
 
 		dsp56k::TWord* outputs[12]{nullptr};
-		outputs[1] = &m_audioOutputs[0].front();
-		outputs[0] = &m_audioOutputs[1].front();
-		outputs[3] = &m_audioOutputs[2].front();
-		outputs[2] = &m_audioOutputs[3].front();
+		// slot 0 is the left channel: FST of DSP B is the LRCK of both DACs, which take the left sample while it is high
+		outputs[0] = &m_audioOutputs[0].front();
+		outputs[1] = &m_audioOutputs[1].front();
+		outputs[2] = &m_audioOutputs[2].front();
+		outputs[3] = &m_audioOutputs[3].front();
 		outputs[4] = m_dummyOutput.data();
 		outputs[5] = m_dummyOutput.data();
 		outputs[6] = m_dummyOutput.data();
