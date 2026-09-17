@@ -178,6 +178,8 @@ namespace bridgeServer
 		{
 			if(funcProtocolVersion)
 				LOGNET(networkLib::LogLevel::Warning, "Skipping " << _file << ", it uses bridge protocol " << funcProtocolVersion() << " but this server uses " << bridgeLib::g_protocolVersion);
+			else if(dlsym(plugin.handle, "bridgeDeviceCreate"))	// stay quiet about libraries that are no bridge plugins at all
+				LOGNET(networkLib::LogLevel::Warning, "Skipping " << _file << ", it was built before bridge plugins reported their protocol version and cannot run on this server");
 			dlclose(plugin.handle);
 			return;
 		}
