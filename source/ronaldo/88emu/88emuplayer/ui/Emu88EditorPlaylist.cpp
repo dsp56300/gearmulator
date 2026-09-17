@@ -54,10 +54,15 @@ namespace emu88Player
 		if(!window)
 			return;
 
-		// Both buttons in the strip are laid out against this height, and the label they
-		// carry does not fit the shell's default strip - see g_titleBarButtonFontHeight.
 		if(window->getTitleBarHeight() != g_titleBarHeight)
+		{
+			// Attaching the editor can reach here before JUCE has sized the window.
+			// Keep title-bar layout from shrinking the content and overwriting its scale.
+			const auto contentBounds = window->getContentComponent()->getLocalBounds();
+			const juce::ScopedValueSetter<bool> changingScale(m_settingGuiScale, true);
 			window->setTitleBarHeight(g_titleBarHeight);
+			window->setContentComponentSize(contentBounds.getWidth(), contentBounds.getHeight());
+		}
 
 		if(!m_recordButton)
 		{

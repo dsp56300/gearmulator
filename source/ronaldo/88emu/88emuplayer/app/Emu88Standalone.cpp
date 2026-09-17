@@ -286,7 +286,7 @@ namespace emu88Player
                     saveTarget = sourceFile;
                 temporary = std::make_unique<juce::TemporaryFile>(".xml");
                 auto session = std::make_unique<juce::PropertiesFile>(temporary->getFile(), storage);
-                session->addAllPropertiesFrom(config.get());
+                session->addAllPropertiesFrom(*config);
                 config = std::move(session);
             }
             if (options.has("device"))
