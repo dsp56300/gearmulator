@@ -1,6 +1,7 @@
 #include "88lib/boards/cm32p.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "common/romDescramble.h"
 
@@ -19,6 +20,10 @@ namespace emu88Lib
 		{
 			Perm::descramble(raw, Cm32pRomSet::WaveSize, decoded, Cm32pRomSet::WaveSize);
 		}
+
+		// The VCA's control voltage is the CPU's PWM smoothed by R63 82k into C89 0.1uF, the
+		// same network the CM-32L uses on its own.
+		constexpr float g_vcaTimeConstant = 82e3f * 0.1e-6f;
 
 		// How many of the first eight tone names' characters read as a name. Across 19 cards the
 		// right dump order scores 75-80 of 80 and the wrong one 36 at most.
@@ -105,6 +110,8 @@ namespace emu88Lib
 		m_machine.cpu().invalidate_range(0x2100, 0x1f00);
 		m_lp.reset();
 		m_rcc.reset();
+		// C89 starts discharged, so the board fades up as the firmware takes the PWM down.
+		m_vcaGain = 0.0f;
 		m_serviceLcd.reset();
 		m_midiOut = synthLib::MidiBufferParser(synthLib::MidiEventSource::Device);
 		m_midiIn = std::make_unique<synthLib::MidiRateLimiter>([this](uint8_t value) { m_machine.periph().receive_serial(value); });
@@ -162,6 +169,18 @@ namespace emu88Lib
 			}, this);
 	}
 
+	float Cm32p::applyVca()
+	{
+		// The PWM's duty is the attenuation, as on the CM-32L. This firmware parks it at 0 and
+		// only sweeps it while the board powers on, so in normal use the VCA is transparent and
+		// this is the mute ramp; nothing else has been seen to move it.
+		const auto duty = static_cast<float>(m_machine.periph().pwm_duty());
+		const auto target = 1.0f - duty * (1.0f / 255.0f);
+		const auto alpha = 1.0f - std::exp(-1.0f / (static_cast<float>(SampleRate) * g_vcaTimeConstant));
+		m_vcaGain += (target - m_vcaGain) * alpha;
+		return m_vcaGain;
+	}
+
 	Cm32p::SampleFrame Cm32p::renderSample()
 	{
 		if(!m_valid) return {};
@@ -173,7 +192,12 @@ namespace emu88Lib
 		// Slot 2 carries left and slot 0 right: the firmware's test mode plays "PCM OUT L" on
 		// slot 2, and MIDI pan then follows the MT-32's convention (CC10 = 0 is right). Scale the
 		// signed 16-bit DAC words to the shared board interface's 24-bit full scale.
-		return {output->serialLoadWords[2] * 256, output->serialLoadWords[0] * 256};
+		const auto gain = applyVca();
+		const auto scale = [gain](const int32_t _word)
+		{
+			return static_cast<int32_t>(static_cast<float>(_word) * gain) * 256;
+		};
+		return {scale(output->serialLoadWords[2]), scale(output->serialLoadWords[0])};
 	}
 
 	void Cm32p::addMidiEvent(const synthLib::SMidiEvent& event, uint8_t port)
