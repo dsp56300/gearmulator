@@ -137,13 +137,14 @@ message( STATUS "Compiler Arguments (Debug): ${CMAKE_CXX_FLAGS_DEBUG}" )
 message( STATUS "Build Configration: ${CMAKE_BUILD_TYPE}" )
 
 # VST3 SDK needs these
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_definitions(/D_DEBUG)
-else()
-	# NDEBUG on every target, not just the JUCE-linked ones: build types that do
-	# not inject it (None, or unset) otherwise disagree on JUCE_DEBUG and sizeof
-	add_definitions(/DRELEASE /DNDEBUG)
-endif()
+# Generator expressions, not CMAKE_BUILD_TYPE: multi-config generators (Visual Studio,
+# Xcode) ignore it, so testing it gave their Debug configuration NDEBUG and no asserts.
+# $<CONFIG:Debug> is the same test JUCE uses for its DEBUG/NDEBUG definitions.
+# NDEBUG on every target, not just the JUCE-linked ones: build types that do
+# not inject it (None, or unset) otherwise disagree on JUCE_DEBUG and sizeof
+add_compile_definitions(
+	$<IF:$<CONFIG:Debug>,_DEBUG,RELEASE>
+	$<$<NOT:$<CONFIG:Debug>>:NDEBUG>)
 
 # we need C++17
 set(CMAKE_CXX_STANDARD 17)
