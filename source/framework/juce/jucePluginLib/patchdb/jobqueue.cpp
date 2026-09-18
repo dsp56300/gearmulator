@@ -61,6 +61,9 @@ namespace pluginLib::patchDB
 			thread->join();
 		m_threads.clear();
 
+		// a queue that was never started has no worker to run the job above
+		m_destroy = true;
+
 		m_funcs.clear();
 		m_emptyCv.notify_all();
 	}
