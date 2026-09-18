@@ -45,6 +45,11 @@ Release Notes
 
 Framework:
 
+- [Fix] BUG-10355 After switching to another ROM, the patch manager could keep
+        offering the presets of the previous ROM, taken from its cache, instead
+        of the ones of the ROM that is loaded. Tags, favourites, renames and
+        MIDI bank numbers of ROM presets and banks are kept.
+
 - [Fix] BUG-10323 Plugin windows could open at their smallest possible size
         and stay that small every time they were opened again. When a host,
         the window manager or a display change asked for a smaller window
@@ -270,11 +275,6 @@ Framework:
 
 - [Fix] On macOS, the packages of the standalone effect plugins never
         contained the script that removes the quarantine flag.
-
-- [Fix] BUG-10355 After switching to another ROM, the patch manager could keep
-        offering the presets of the previous ROM, taken from its cache, instead
-        of the ones of the ROM that is loaded. Tags, favourites, renames and
-        MIDI bank numbers of ROM presets and banks are kept.
 
 Vavra/Xenia:
 
