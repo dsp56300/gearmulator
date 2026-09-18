@@ -369,7 +369,8 @@ Positional files and repeated `--playlist` arguments are appended in argument or
 | `--audio-device NAME` | Exact output name within that backend, `none`, or `system` to follow the default on CoreAudio / Windows Audio. |
 | `--buffer-size N` | Requested callback size in frames; must be supported by the device. |
 | `--output-channels L,R` | Two distinct 1-based hardware channels, such as `3,4` or `4,3`. First is left, second is right. |
-| `--midi-in ID_OR_NAME` | Enable an input; repeat for several. Replaces saved inputs. Use `none` alone to disable all. |
+| `--midi-in ID_OR_NAME` | Enable an input for part group A; repeat for several. Replaces saved inputs. Use `none` alone to disable all. |
+| `--midi-in-a` / `--midi-in-b` / `--midi-in-c` / `--midi-in-d` | Enable an input for the named part group; each is repeatable. The same input can be specified for several groups. `--midi-in-a` is equivalent to `--midi-in`. |
 | `--midi-out ID_OR_NAME` | One output endpoint, or `none`. |
 | `--virtual-ports on\|off` | Enable/disable virtual ports. Supported on macOS/Linux, unavailable on Windows. |
 | `--virtual-port-name PREFIX` | Default `88emu`; produces `PREFIX MIDI IN A` through `D`, and corresponding `MIDI OUT` names. |

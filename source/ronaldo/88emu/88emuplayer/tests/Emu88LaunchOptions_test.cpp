@@ -22,9 +22,13 @@ int main()
 		check(cli.files == std::vector<std::string>{"-\xe6\x9b\xb2.r36"}, "Unicode positional path");
 		check(cli.get("rom-dir") == "/ROM \xe9\x9f\xb3\xe6\xa5\xbd", "Unicode ROM path");
 		check(cli.number("sample-rate", 0) == 48000, "equals syntax");
-		const auto gui = LaunchOptions::parse({"first.mid", "--playlist", juce::String::fromUTF8("\xe6\x9b\xb2.rcp"), "last.midi", "--midi-in", "one", "--midi-in=two", "--audio-device", "Loopback 1", "--virtual-port-name", juce::String::fromUTF8("Game \xe9\x9f\xb3\xe6\xa5\xbd"), "--song-gap-ms", "125", "--play"}, false);
+		const auto gui = LaunchOptions::parse({"first.mid", "--playlist", juce::String::fromUTF8("\xe6\x9b\xb2.rcp"), "last.midi", "--midi-in", "one", "--midi-in=two", "--midi-in-b", "two", "--midi-in-c=three", "--audio-device", "Loopback 1", "--virtual-port-name", juce::String::fromUTF8("Game \xe9\x9f\xb3\xe6\xa5\xbd"), "--song-gap-ms", "125", "--play"}, false);
 		check(gui.files == std::vector<std::string>{"first.mid", "\xe6\x9b\xb2.rcp", "last.midi"}, "Playlist ordering");
-		check(gui.midiInputs == std::vector<std::string>{"one", "two"}, "Repeat MIDI inputs");
+		check(gui.midiInputs.size() == 4, "Repeat MIDI inputs");
+		check(gui.midiInputs[0].value == "one" && gui.midiInputs[0].groups == 1, "Default MIDI input group A");
+		check(gui.midiInputs[1].value == "two" && gui.midiInputs[1].groups == 1, "Explicit MIDI input group A");
+		check(gui.midiInputs[2].value == "two" && gui.midiInputs[2].groups == 2, "MIDI input group B");
+		check(gui.midiInputs[3].value == "three" && gui.midiInputs[3].groups == 4, "MIDI input group C");
 		check(gui.sessionOverrides(), "Session overrides");
 		check(parseOutputChannels("4,3") == std::pair<int, int>{3, 2}, "Reversed output channels");
 		check(parseOutputChannels("1,1024") == std::pair<int, int>{0, 1023}, "Output channel bounds");
@@ -63,6 +67,8 @@ int main()
 		catch(const std::runtime_error&) { missingCardRejected = true; }
 		check(missingCardRejected, "Missing PCM card rejected");
 		rejects({"--virtual-ports=yes"}, false);
+		rejects({"--midi-in", "none", "--midi-in-b", "one"}, false);
+		rejects({"--midi-in-e", "one"}, false);
 		rejects({"--output=a.wav"}, false);
 		rejects({"--device", "--play"}, false);
 		check(LaunchOptions::parse({"--help"}, true).has("help"), "Help without input");

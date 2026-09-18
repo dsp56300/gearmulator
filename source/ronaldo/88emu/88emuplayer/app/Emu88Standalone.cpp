@@ -139,18 +139,37 @@ namespace emu88Player
             if (!options.midiInputs.empty())
             {
                 xml->deleteAllChildElementsWithTagName("MIDIINPUT");
-                if (options.midiInputs.size() > 1 &&
-                    std::find(options.midiInputs.begin(), options.midiInputs.end(), "none") != options.midiInputs.end())
-                    throw std::runtime_error("--midi-in none cannot be combined with MIDI inputs.");
-                for (const auto& value : options.midiInputs)
+                juce::XmlElement routes("MIDIINPUTGROUPS");
+                struct InputRoute
                 {
-                    if (value == "none")
+                    juce::MidiDeviceInfo info;
+                    uint8_t groups = 0;
+                };
+                std::vector<InputRoute> selected;
+                for (const auto& input : options.midiInputs)
+                {
+                    if (input.value == "none")
                         continue;
-                    const auto info = resolveMidi(juce::MidiInput::getAvailableDevices(), value);
-                    auto* child = xml->createNewChildElement("MIDIINPUT");
-                    child->setAttribute("name", info.name);
-                    child->setAttribute("identifier", info.identifier);
+                    const auto info = resolveMidi(juce::MidiInput::getAvailableDevices(), input.value);
+                    const auto existing = std::find_if(selected.begin(), selected.end(), [&](const InputRoute& route)
+                                                       { return route.info.identifier == info.identifier; });
+                    if (existing == selected.end())
+                        selected.push_back({info, input.groups});
+                    else
+                        existing->groups |= input.groups;
                 }
+                for (const auto& route : selected)
+                {
+                    auto* device = xml->createNewChildElement("MIDIINPUT");
+                    device->setAttribute("name", route.info.name);
+                    device->setAttribute("identifier", route.info.identifier);
+                    auto* input = routes.createNewChildElement("INPUT");
+                    input->setAttribute("name", route.info.name);
+                    input->setAttribute("identifier", route.info.identifier);
+                    input->setAttribute("groups", route.groups);
+                }
+                // MidiInputRouting consumes this saved routing table after JUCE opens the selected inputs.
+                config.setValue("midiInputGroups", &routes);
             }
             if (options.has("midi-out"))
             {

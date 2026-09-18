@@ -11,10 +11,17 @@
 
 namespace emu88Player
 {
+    struct MidiInputOption
+    {
+        std::string value;
+        uint8_t groups = 0;
+    };
+
     struct LaunchOptions
     {
         std::map<std::string, std::string> values;
-        std::vector<std::string> files, midiInputs;
+        std::vector<std::string> files;
+        std::vector<MidiInputOption> midiInputs;
         bool has(const std::string& key) const { return values.count(key) != 0; }
         std::string get(const std::string& key, const std::string& fallback = {}) const;
         double number(const std::string& key, double fallback) const;

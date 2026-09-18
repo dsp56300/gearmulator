@@ -4,6 +4,10 @@ Release Notes
 
 88emuPlayer:
 
+- [New] MIDI: Command-line MIDI input options can now assign inputs to
+        groups A-D with `--midi-in-a` through `--midi-in-d`. `--midi-in`
+        remains the group-A shorthand.
+
 - [Fix] Devices: The front-panel POWER switch of the SC-55, SC-55mkII, SC-155,
         SC-155mkII, SC-88VL and SC-88Pro now works as on the hardware. Q puts
         the unit into its standby mode and wakes it again.
