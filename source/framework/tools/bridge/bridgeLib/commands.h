@@ -74,12 +74,6 @@ namespace bridgeLib
 		std::string plugin4CC;
 		SessionId sessionId = 0;
 
-		PluginDesc()
-		{
-			pluginName.reserve(32);
-			plugin4CC.reserve(32);
-		}
-
 		baseLib::BinaryStream& write(baseLib::BinaryStream& _s) const override;
 		baseLib::BinaryStream& read(baseLib::BinaryStream& _s) override;
 

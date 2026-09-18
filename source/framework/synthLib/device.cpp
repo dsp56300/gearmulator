@@ -13,9 +13,33 @@ namespace synthLib
 	}
 	Device::~Device() = default;
 
-	BASELIB_NOINLINE void Device::release(std::vector<SMidiEvent>& _events)
+	const std::vector<SMidiEvent>& Device::bridgeProcess(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn)
 	{
-		_events.clear();
+		process(_inputs, _outputs, _size, _midiIn, m_bridgeMidiOut);
+		return m_bridgeMidiOut;
+	}
+
+#if SYNTHLIB_DEMO_MODE == 0
+	const std::vector<uint8_t>& Device::bridgeGetState(const StateType _type)
+	{
+		m_bridgeState.clear();
+		getState(m_bridgeState, _type);
+		return m_bridgeState;
+	}
+#endif
+
+	const std::vector<float>& Device::bridgeGetSupportedSamplerates()
+	{
+		m_bridgeSupportedSamplerates.clear();
+		getSupportedSamplerates(m_bridgeSupportedSamplerates);
+		return m_bridgeSupportedSamplerates;
+	}
+
+	const std::vector<float>& Device::bridgeGetPreferredSamplerates()
+	{
+		m_bridgePreferredSamplerates.clear();
+		getPreferredSamplerates(m_bridgePreferredSamplerates);
+		return m_bridgePreferredSamplerates;
 	}
 
 	void Device::dummyProcess(const uint32_t _numSamples)

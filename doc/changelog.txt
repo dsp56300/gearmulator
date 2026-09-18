@@ -23,6 +23,11 @@ Framework:
         plugins folder next to the old ones without reinstalling the server.
         A client still gets the exact plugin version it asks for.
 
+- [Fix] DSPBridge: On Windows, the server could corrupt memory and crash
+        when a device sent a lot of MIDI at once or had a large state.
+        Plugins and server have to be updated together for this, older
+        plugins are not loaded by the new server.
+
 88emuPlayer:
 
 - [New] Added comprehensive README, shipped with the binaries.

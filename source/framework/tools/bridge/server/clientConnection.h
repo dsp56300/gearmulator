@@ -54,7 +54,6 @@ namespace bridgeServer
 		std::array<std::vector<float>, std::tuple_size_v<synthLib::TAudioInputs>> m_audioInputBuffers;
 		std::array<std::vector<float>, std::tuple_size_v<synthLib::TAudioOutputs>> m_audioOutputBuffers;
 		std::vector<synthLib::SMidiEvent> m_midiIn;
-		std::vector<synthLib::SMidiEvent> m_midiOut;
 
 		bool m_romRequested = false;
 

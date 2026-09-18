@@ -1,12 +1,14 @@
 #include "import.h"
 
+#include <array>
+
 #include "config.h"
 
 #include "baseLib/filesystem.h"
 
 #include "networkLib/logging.h"
 
-#include "synthLib/deviceException.h"
+#include "synthLib/device.h"
 #include "synthLib/os.h"
 
 #ifdef _WIN32
@@ -72,28 +74,27 @@ namespace bridgeServer
 			return nullptr;	// still not found
 		}
 
-		try
-		{
-			auto* device = it->second.funcCreate(_params);
+		std::array<char, 1024> error{};
+		auto* device = it->second.funcCreate(_params, error.data(), error.size());
 
-			// A device can be constructed and still be unusable, for example when its firmware did not finish booting.
-			// Processing it could hang this connection, so report it like any other failure.
-			if(device && !device->isValid())
-			{
-				it->second.funcDestroy(device);
-				_error = "Creating the device of " + describe(_desc) + " failed: the device did not initialize, for example because its firmware did not finish booting";
-				LOGNET(networkLib::LogLevel::Error, _error);
-				return nullptr;
-			}
-
-			return device;
-		}
-		catch(synthLib::DeviceException& e)
+		if(!device)
 		{
-			_error = "Creating the device of " + describe(_desc) + " failed: " + e.what();
-			LOGNET(networkLib::LogLevel::Error, _error << ", code " << static_cast<uint32_t>(e.errorCode()));
+			_error = "Creating the device of " + describe(_desc) + " failed: " + error.data();
+			LOGNET(networkLib::LogLevel::Error, _error);
 			return nullptr;
 		}
+
+		// A device can be constructed and still be unusable, for example when its firmware did not finish booting.
+		// Processing it could hang this connection, so report it like any other failure.
+		if(!device->isValid())
+		{
+			it->second.funcDestroy(device);
+			_error = "Creating the device of " + describe(_desc) + " failed: the device did not initialize, for example because its firmware did not finish booting";
+			LOGNET(networkLib::LogLevel::Error, _error);
+			return nullptr;
+		}
+
+		return device;
 	}
 
 	bool Import::destroyDevice(const bridgeLib::PluginDesc& _desc, synthLib::Device* _device)
@@ -194,8 +195,14 @@ namespace bridgeServer
 			return;
 		}
 
+		const char* pluginName = nullptr;
+		const char* plugin4CC = nullptr;
 		bridgeLib::PluginDesc desc;
-		plugin.funcGetDesc(desc);
+		plugin.funcGetDesc(pluginName, plugin4CC, desc.pluginVersion);
+
+		// copied here, so the strings are allocated on our heap
+		desc.pluginName = pluginName ? pluginName : "";
+		desc.plugin4CC = plugin4CC ? plugin4CC : "";
 
 		if(desc.plugin4CC.empty() || desc.pluginName.empty() || desc.pluginVersion == 0)
 		{

@@ -28,9 +28,6 @@ namespace bridgeServer
 		}
 
 		m_midiIn.reserve(1024);
-		m_midiOut.reserve(4096);
-
-		getDeviceState().state.reserve(8 * 1024 * 1024);
 	}
 
 	ClientConnection::~ClientConnection()
@@ -124,16 +121,14 @@ namespace bridgeServer
 
 		const auto numSamples = TcpConnection::handleAudio(const_cast<float* const*>(m_audioInputs.data()), _in);
 
-		m_device->process(m_audioInputs, m_audioOutputs, numSamples, m_midiIn, m_midiOut);
+		const auto& midiOuts = m_device->bridgeProcess(m_audioInputs, m_audioOutputs, numSamples, m_midiIn);
 
-		for (const auto& midiOut : m_midiOut)
+		for (const auto& midiOut : midiOuts)
 			send(midiOut);
 
 		sendAudio(m_audioOutputs.data(), std::min(static_cast<uint32_t>(m_audioOutputs.size()), m_device->getChannelCountOut()), numSamples);
 
 		m_midiIn.clear();
-
-		m_device->release(m_midiOut);
 	}
 
 	void ClientConnection::sendDeviceState(const synthLib::StateType _type)
@@ -145,8 +140,7 @@ namespace bridgeServer
 		auto& state = getDeviceState();
 		state.type = _type;
 
-		state.state.clear();
-		m_device->getState(state.state, _type);
+		state.state = m_device->bridgeGetState(_type);
 
 		send(bridgeLib::Command::DeviceState, state);
 	}
@@ -234,11 +228,8 @@ namespace bridgeServer
 		deviceDesc.latencyInToOut = m_device->getInternalLatencyInputToOutput();
 		deviceDesc.latencyMidiToOut = m_device->getInternalLatencyMidiToOutput();
 
-		deviceDesc.preferredSamplerates.reserve(64);
-		deviceDesc.supportedSamplerates.reserve(64);
-
-		m_device->getPreferredSamplerates(deviceDesc.preferredSamplerates);
-		m_device->getSupportedSamplerates(deviceDesc.supportedSamplerates);
+		deviceDesc.preferredSamplerates = m_device->bridgeGetPreferredSamplerates();
+		deviceDesc.supportedSamplerates = m_device->bridgeGetSupportedSamplerates();
 
 		send(bridgeLib::Command::DeviceInfo, deviceDesc);
 	}

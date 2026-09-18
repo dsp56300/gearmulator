@@ -20,9 +20,9 @@ namespace bridgeServer
 	{
 	public:
 		typedef uint32_t (*FuncBridgeProtocolVersion)();
-		typedef synthLib::Device* (*FuncBridgeDeviceCreate)(const synthLib::DeviceCreateParams& _params);
+		typedef synthLib::Device* (*FuncBridgeDeviceCreate)(const synthLib::DeviceCreateParams& _params, char* _error, size_t _errorSize);
 		typedef void (*FuncBridgeDeviceDestroy)(synthLib::Device*);
-		typedef void (*FuncBridgeDeviceGetDesc)(bridgeLib::PluginDesc&);
+		typedef void (*FuncBridgeDeviceGetDesc)(const char*& _pluginName, const char*& _plugin4CC, uint32_t& _pluginVersion);
 
 		struct Plugin final
 		{

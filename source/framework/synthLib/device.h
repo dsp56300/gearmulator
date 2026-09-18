@@ -11,7 +11,6 @@
 #include "buildconfig.h"
 #include "midiTranslator.h"
 
-#include "baseLib/compilerdefs.h"
 #include "baseLib/md5.h"
 
 namespace synthLib
@@ -97,9 +96,20 @@ namespace synthLib
 		virtual uint64_t getDspClockHz() const = 0;
 		virtual bool canModifyDspClock() const { return false; }
 
-		BASELIB_NOINLINE virtual void release(std::vector<SMidiEvent>& _events);
-
 		auto& getMidiTranslator() { return m_midiTranslator; }
+
+		// DSPBridge server entry points. The server runs devices created by plugin libraries, and on Windows each of
+		// them has a heap of its own, so neither side may grow or free memory that the other side allocated. The server
+		// only passes data to read, and what these return lives in the device and stays valid until the next call of the
+		// same function.
+		// They are virtual so that the server runs the code of the library that created the device. Never make them
+		// final: the compiler could then call the server's own copy of them.
+		virtual const std::vector<SMidiEvent>& bridgeProcess(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn);
+#if SYNTHLIB_DEMO_MODE == 0
+		virtual const std::vector<uint8_t>& bridgeGetState(StateType _type);
+#endif
+		virtual const std::vector<float>& bridgeGetSupportedSamplerates();
+		virtual const std::vector<float>& bridgeGetPreferredSamplerates();
 
 	protected:
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;
@@ -124,5 +134,10 @@ namespace synthLib
 
 		MidiTranslator m_midiTranslator;
 		std::vector<SMidiEvent> m_translatorOut;
+
+		std::vector<SMidiEvent> m_bridgeMidiOut;
+		std::vector<uint8_t> m_bridgeState;
+		std::vector<float> m_bridgeSupportedSamplerates;
+		std::vector<float> m_bridgePreferredSamplerates;
 	};
 }
