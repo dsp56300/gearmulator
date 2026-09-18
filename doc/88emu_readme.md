@@ -83,17 +83,17 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | CM-32P | `cm32p_program.bin` — 64 KiB | `cm32p_wave0.bin` — 512 KiB; `cm32p_wave1.bin` — 512 KiB; `cm32p_wave2.bin` — 512 KiB |
 | SC-55 | `sc55mk1_internal.bin` — 32 KiB; `sc55mk1_program.bin` — 256 KiB | `sc55mk1_wave0.bin` — 1 MiB; `sc55mk1_wave1.bin` — 1 MiB; `sc55mk1_wave2.bin` — 1 MiB |
 | SC-55mkII | `sc55mk2_internal.bin` — 32 KiB; `sc55mk2_program.bin` — 512 KiB | `sc55mk2_wave0.bin` — 2 MiB; `sc55mk2_wave1.bin` — 1 MiB |
-| SC-55ST | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 512 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
-| CM-300 / SCC-1 | `cm300_internal.bin` — 32 KiB; `cm300_program.bin` — 256 KiB | `cm300_wave0.bin` — 1 MiB; `cm300_wave1.bin` — 1 MiB; `cm300_wave2.bin` — 1 MiB |
+| SC-55ST (`--device` only) | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 512 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
+| CM-300 / SCC-1 (`--device` only) | `cm300_internal.bin` — 32 KiB; `cm300_program.bin` — 256 KiB | `cm300_wave0.bin` — 1 MiB; `cm300_wave1.bin` — 1 MiB; `cm300_wave2.bin` — 1 MiB |
 | SC-155 | `sc155_internal.bin` — 32 KiB; `sc155_program.bin` — 256 KiB | `sc155_wave0.bin` — 1 MiB; `sc155_wave1.bin` — 1 MiB; `sc155_wave2.bin` — 1 MiB |
 | SC-155mkII | `sc155mk2_internal.bin` — 32 KiB; `sc155mk2_program.bin` — 512 KiB | `sc155mk2_wave0.bin` — 2 MiB; `sc155mk2_wave1.bin` — 1 MiB |
 | SCC-1A | `scc1a_internal.bin` — 32 KiB; `scc1a_program.bin` — 256 KiB | `scc1a_wave0.bin` — 1 MiB; `scc1a_wave1.bin` — 1 MiB; `scc1a_wave2.bin` — 1 MiB |
 | SCB-55 | `scb55_internal.bin` — 32 KiB; `scb55_program.bin` — 256 KiB | `scb55_wave0.bin` — 2 MiB; `scb55_wave1.bin` — 1 MiB |
-| RLP-3237 | `rlp3237_internal.bin` — 32 KiB; `rlp3237_program.bin` — 256 KiB | `rlp3237_wave0.bin` — 2 MiB |
+| RLP-3237 (`--device` only) | `rlp3237_internal.bin` — 32 KiB; `rlp3237_program.bin` — 256 KiB | `rlp3237_wave0.bin` — 2 MiB |
 | SC-88 | `sc88_control.bin` — 512 KiB | `sc88_wave0.bin` — 2 MiB; `sc88_wave1.bin` — 2 MiB; `sc88_wave2.bin` — 2 MiB; `sc88_wave3.bin` — 2 MiB |
 | SC-88VL | `sc88vl_control.bin` — 512 KiB | `sc88vl_wave0.bin` — 2 MiB; `sc88vl_wave1.bin` — 2 MiB; `sc88vl_wave2.bin` — 2 MiB; `sc88vl_wave3.bin` — 2 MiB |
 | XPGS / G-800 | `xpgs_control.bin` — 512 KiB | `xpgs_wave0.bin` — 2 MiB; `xpgs_wave1.bin` — 2 MiB; `xpgs_wave2.bin` — 2 MiB; `xpgs_wave3.bin` — 2 MiB; `xpgs_wave4.bin` — 2 MiB |
-| SC-88Pro | `sc88pro_control.bin` — 1 MiB | `sc88pro_wave0.bin` — 8 MiB; `sc88pro_wave1.bin` — 8 MiB; `sc88pro_wave2.bin` — 4 MiB |
+| SC-88Pro | `sc88pro_control.bin` — 1 MiB | `sc88pro_wave0.bin` — 8 MiB, **or** `sc88pro_wave_cs0.bin` and `sc88pro_wave_cs1.bin` — 4 MiB each; `sc88pro_wave1.bin` — 8 MiB, **or** `sc88pro_wave_cs2.bin` and `sc88pro_wave_cs3.bin` — 4 MiB each; `sc88pro_wave2.bin` — 4 MiB |
 | VE-GS Pro | `vegspro_control.bin` — 1 MiB | `vegspro_wave0.bin` — 8 MiB; `vegspro_wave1.bin` — 8 MiB; `vegspro_wave2.bin` — 4 MiB |
 | SC-8820 | `sc8820_internal.bin` — 128 KiB, or the supported reconstructed 64 KiB image; `sc8820_program.bin` — 2 MiB | `sc8820_wave0.bin` — 16 MiB; `sc8820_wave1.bin` — 8 MiB |
 | SC-8850 | `sc8850_internal.bin` — 64 KiB; `sc8850_program.bin` — 1 MiB; `sc8850_data.bin` — 2 MiB | `sc8850_wave.bin` — 32 MiB; **or** `sc8850_wave0.bin` and `sc8850_wave1.bin` — 16 MiB each |
@@ -103,10 +103,12 @@ SC-88Pro and VE-GS Pro may also use the compatible donor waves described below. 
 Additional supported layouts:
 
 - Recognized H8 control ROMs can be loaded in CPU byte order or the supported word-swapped dump order. Recognized 1 MiB Pro control images embedded in repeated 2/4 MiB dumps are also accepted.
+- The SC-88Pro board carries its PCM on five 4 MiB mask ROMs, one per chip select, instead of the three larger VE-GS Pro parts that `sc88pro_wave0.bin` to `sc88pro_wave2.bin` hold. Dumps of the five are also accepted: CS0 and CS1 together replace `sc88pro_wave0.bin`, CS2 and CS3 replace `sc88pro_wave1.bin`, and CS4 is identical to `sc88pro_wave2.bin`. The hashes registered for CS0–CS3 were derived by splitting the VE-GS Pro images, not taken from dumps of SC-88Pro chips.
 - SC-88Pro and VE-GS Pro can obtain their waves from recognized decoded SC-8850 or SC-8820 wave images. Their own control ROM is still required.
 - Recognized `SCCore.dll` / `SCCore00.dylib` containers can supply the SC-8820 wave regions and compatible Pro waves. They are scanned as data, never executed. They do not supply CPU firmware. For SC-8850 they supply **bank A only**; you still need its distinct bank B.
 - SC-8850 also accepts recognized raw XP wave layouts.
 - The patched [sc55mk2-ctf-patcher](https://github.com/shingo45endo/sc55mk2-ctf-patcher) SC-55mkII GS-28 2.00 ROM patched is supported.
+- SC-88Pro also accepts a second recognized control ROM from an SC-GS board, which identifies itself as "SC-GS A '96" rather than by a version number. If both it and the 1.02 firmware are found, 1.02 is used unless the SC-GS image is the one named `sc88pro_control.bin`.
 
 ## Playlist and MIDI playback
 
