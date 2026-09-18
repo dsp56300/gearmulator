@@ -192,6 +192,8 @@ namespace emu88Lib
 
 		Lcd&       lcd()       { return m_lcd; }
 		const Lcd& lcd() const { return m_lcd; }
+		// The display's supply, P6DR bit 0 as on the SC-88VL. The firmware cuts it in standby.
+		bool lcdEnabled() const { return m_lcdEnabled; }
 
 		uint64_t cycles() const { return m_machine.now(); }
 
@@ -247,6 +249,7 @@ namespace emu88Lib
 
 		xpLib::XP m_xp;
 		Lcd m_lcd;
+		bool m_lcdEnabled = true;
 		bool m_valid = false;
 
 		uint64_t m_samplesRendered = 0;

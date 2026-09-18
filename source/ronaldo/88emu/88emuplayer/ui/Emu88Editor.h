@@ -78,6 +78,7 @@ namespace emu88Player
 		void createRmlUi();
 		void destroyRmlUi();
 		void wirePanel();
+		void pressPowerKey(bool _supply);
 		void togglePower();
 		void updatePowerVisuals();
 		void chooseMidiFiles();

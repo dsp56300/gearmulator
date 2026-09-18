@@ -1,5 +1,13 @@
 Release Notes
 
+2.2.23:
+
+88emuPlayer:
+
+- [Fix] Devices: The front-panel POWER switch of the SC-55, SC-55mkII, SC-155,
+        SC-155mkII, SC-88VL and SC-88Pro now works as on the hardware. Q puts
+        the unit into its standby mode and wakes it again.
+
 2.2.22:
 
 88emuPlayer:

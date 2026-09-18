@@ -462,8 +462,9 @@ namespace emu88Lib
 			first.type = DisplaySnapshot::Type::Character;
 			std::copy(lcd.getDdRam().begin(), lcd.getDdRam().end(), first.ddRam.begin());
 			std::copy(lcd.getCgRam().begin(), lcd.getCgRam().end(), first.cgRam.begin());
-			first.displayOn = lcd.isDisplayOn() && (!m_sc88 || m_sc88->lcdEnabled()) &&
-			                  (!m_sc55 || m_sc55->lcdEnabled());
+			first.powered = (!m_sc88Pro || m_sc88Pro->lcdEnabled()) && (!m_sc88 || m_sc88->lcdEnabled()) &&
+			                (!m_sc55 || m_sc55->lcdEnabled());
+			first.displayOn = lcd.isDisplayOn() && first.powered;
 			first.width = 209;
 			first.height = 76;
 			next.leds = m_sc88Pro ? m_sc88Pro->leds()

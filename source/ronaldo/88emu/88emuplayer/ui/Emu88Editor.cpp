@@ -441,6 +441,7 @@ namespace emu88Player
 				m_lcd->setSnapshot(snapshot.screens[0]);
 			if(m_lcd2)
 				m_lcd2->setSnapshot(snapshot.screens[1]);
+			m_rml->getDocument()->SetClass("lcdUnpowered", !snapshot.screens[0].powered);
 			updateLeds(snapshot.leds);
 		}
 		if(playlistChanged)

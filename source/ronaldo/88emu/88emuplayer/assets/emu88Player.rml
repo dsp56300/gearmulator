@@ -17,6 +17,8 @@
 			<svg id="playerStopGraphic" class="buttonGraphic" src="player_stop.svg"/>
 		</button>
 		<div id="hardwareLcd" class="lcd"/>
+		<!-- The glass with its supply cut, as a board in standby leaves it. -->
+		<div class="lcd powerOffPanel lcdUnlit"/>
 		<div class="lcd powerOffDisplay">Power Off</div>
 		<!-- The CM-64's second window, its CM-32L half below the CM-32P's. Hidden everywhere else. -->
 		<div id="hardwareLcd2" class="lcdSecond"/>

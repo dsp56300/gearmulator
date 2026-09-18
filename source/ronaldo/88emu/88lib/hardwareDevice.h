@@ -56,6 +56,10 @@ namespace emu88Lib
 				uint16_t width = 0;
 				uint16_t height = 0;
 				bool displayOn = false;
+				// Whether the panel has its supply. The boards with a standby switch cut it there, which
+				// leaves the glass dark, where a display that is merely off still shows its backlight.
+				// displayOn is false as well then.
+				bool powered = true;
 			};
 
 			// Only a board with two panels fills the second - see deviceHasSecondLcd(), which is

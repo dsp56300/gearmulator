@@ -103,6 +103,7 @@ namespace emu88Lib
 		m_xp.reset();
 		m_machine.reset();
 		m_lcd.reset();
+		m_lcdEnabled = true;
 		m_lsp.clear();
 
 		m_samplesRendered = 0;
@@ -319,6 +320,10 @@ namespace emu88Lib
 			m_p3dr = _val;
 			m_lspReturnEnabled = _val & 0x80;
 		}
+		// P6DR bit 0 is the display's supply, the SC-88VL's line: the standby routine at 0D:8480
+		// drops it, the wake-up at 0C:5A0C raises it again.
+		else if(_addr == 0xfe8b)
+			m_lcdEnabled = (_val & 1) != 0;
 	}
 
 	// =====================================================================

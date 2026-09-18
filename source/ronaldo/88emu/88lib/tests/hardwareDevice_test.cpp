@@ -44,6 +44,26 @@ int main()
 		panel.extWrite8(0xefc101, 0xfc);
 		CHECK_EQ(panel.leds(), 0xffu); // Data latch survives blanking.
 	}
+	// SC-88Pro display supply: P6DR bit 0, cut by the firmware's standby and restored as it wakes.
+	{
+		struct DisplayBoard : Sc88Pro
+		{
+			DisplayBoard() : Sc88Pro(std::vector<uint8_t>(RomSize), {}, false) {}
+			using Sc88Pro::portWrite;
+		};
+		DisplayBoard display;
+		CHECK(display.lcdEnabled());
+		display.portWrite(0xfe8b, 0xfe);
+		CHECK(!display.lcdEnabled());
+		display.portWrite(0xfe8a, 0x01); // P5DR is not the line.
+		CHECK(!display.lcdEnabled());
+		display.portWrite(0xfe8b, 0x01);
+		CHECK(display.lcdEnabled());
+	}
+	static_assert(getPowerSwitch(DeviceModel::Sc88Pro) == PowerSwitch::Standby);
+	static_assert(getPowerSwitch(DeviceModel::Sc88VL) == PowerSwitch::Standby);
+	static_assert(getPowerSwitch(DeviceModel::Sc88) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::VeGsPro) == PowerSwitch::Supply);
 
 	namespace fs = baseLib::filesystem;
 	const auto folder = fs::getCurrentDirectory() + "88emu-transport-" +

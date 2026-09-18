@@ -154,9 +154,14 @@ namespace emu88Player::editor
 		return uint32_t{1} << static_cast<uint8_t>(_button);
 	}
 
+	// The front-panel POWER switch where the firmware reads it (see emu88Lib::PowerSwitch): one
+	// matrix position, the same on the SC-55 family, the SC-88VL and the SC-88Pro. Q holds it.
+	constexpr uint8_t g_powerSwitchButton = static_cast<uint8_t>(emu88Lib::Sc88ProButton::Power);
+	static_assert(g_powerSwitchButton == static_cast<uint8_t>(emu88Lib::Button::Power));
+
 	// The SC-55 family shares the switch-matrix numbering but populates
 	// only the SC-55 positions: no map/EQ, PREVIEW, USER INST/SELECT or VIB row.
-	constexpr uint32_t g_sc55Buttons =
+	constexpr uint32_t g_sc55Buttons = emu88Lib::buttonBit(emu88Lib::Button::Power) |
 		emu88Lib::buttonBit(emu88Lib::Button::InstL) | emu88Lib::buttonBit(emu88Lib::Button::InstR) |
 		emu88Lib::buttonBit(emu88Lib::Button::InstMute) | emu88Lib::buttonBit(emu88Lib::Button::InstAll) |
 		emu88Lib::buttonBit(emu88Lib::Button::MidiChL) | emu88Lib::buttonBit(emu88Lib::Button::MidiChR) |
