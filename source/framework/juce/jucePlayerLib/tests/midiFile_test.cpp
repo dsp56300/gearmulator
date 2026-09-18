@@ -85,6 +85,27 @@ namespace
             CHECK(std::abs(decoded[2].seconds - 0.5) < 1e-9);
             CHECK(std::abs(decoded[3].seconds - 0.625) < 1e-9);
         }
+
+        // RCP v2 Tr.Excl puts its payload in F7 continuation records.  The
+        // first record's two operands are not part of the generated SysEx.
+        data.assign(0x586 + 0x2c, 0);
+        std::copy(signature.begin(), signature.end(), data.begin());
+        data[0x1c0] = 48;
+        data[0x1c1] = 120;
+        data[0x1c2] = data[0x1c3] = 4;
+        data[0x1e6] = 1;
+        const uint8_t trackExclusive[] = {0x98, 1, 2, 0, 0xf7, 0, 0x41, 0x10, 0xf7, 0, 0x42, 0x12,
+                                           0xf7, 0, 0x40, 0, 0xfe, 0, 0, 0};
+        data.insert(data.end(), std::begin(trackExclusive), std::end(trackExclusive));
+        data[0x586] = 0x2c + sizeof(trackExclusive);
+        CHECK(synthLib::midi::readRcp(data, decoded, error));
+        CHECK_EQ(decoded.size(), 1u);
+        if (decoded.size() == 1)
+        {
+            const std::vector<uint8_t> expected{0xf0, 0x41, 0x10, 0x42, 0x12, 0x40, 0, 0xf7};
+            CHECK(decoded[0].bytes == expected);
+            CHECK(std::abs(decoded[0].seconds) < 1e-9);
+        }
         MidiPlayer player(4, MidiPlayer::ResetMode::Gs);
         CHECK_EQ(player.addFiles({files.paths[0], name}).added, 2u);
         player.setPortCount(2);

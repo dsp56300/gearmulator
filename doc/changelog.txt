@@ -8,6 +8,10 @@ Release Notes
         SC-155mkII, SC-88VL and SC-88Pro now works as on the hardware. Q puts
         the unit into its standby mode and wakes it again.
 
+- [Fix] MIDI Player: Recomposer RCP Track Exclusive messages now read their
+        SysEx payload from F7 continuation records, so SC-88Pro setup data is
+        no longer prefixed with invalid bytes and discarded.
+
 2.2.22:
 
 88emuPlayer:
