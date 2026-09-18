@@ -42,7 +42,7 @@ None of them is under active upstream tracking.
 
 | Directory | Project | Notes |
 |---|---|---|
-| `fst` | FST — Free Studio Technology | Clean-room VST2 plugin headers. Used as the VST2 SDK fallback when the real SDK is not available, see `source/cmake/findvst2.cmake`. **Patched:** `fstSpeakerArrangement_::speakers` is `[8]`, not a flexible array — see the comment on it in `fst/fst.h` |
+| `fst` | FST — Free Studio Technology | Clean-room VST2 plugin headers. Used as the VST2 SDK fallback when the real SDK is not available, see `source/cmake/findvst2.cmake`. **Patched** to the struct sizes of the real SDK: `fstSpeakerArrangement_::speakers` is `[8]` and `fstEvents_::events` is `[2]`, not flexible arrays, and `fstEvent_`, `fstPinProperties_` and `_fstEffect` carry their reserved tails — see the `LOCAL PATCH` comments in `fst/fst.h` |
 | `libresample` | libresample (Dominic Mazzoni, after Julius Smith's resample) | Autotools upstream; our CMake build and `resample_clear_history` API for prepared sample-rate switches |
 | `portaudio` | PortAudio | Used by the Vavra test console only |
 | `portmidi` | PortMidi (Roger B. Dannenberg) | Old release. A clone of current upstream exists as `portmidi-latest` on some branches |

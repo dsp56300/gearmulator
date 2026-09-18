@@ -510,6 +510,9 @@ enum {
 
 typedef struct fstEvent_ {
   FSTEVENT_COMMON;
+  /* LOCAL PATCH: the struct this mirrors has 16 bytes of event data after the
+   * header, which makes it 32 bytes, as large as a MIDI event. */
+  char _padding[16];
 } t_fstEvent;
 
 typedef struct fstMidiEvent_ {
@@ -539,7 +542,10 @@ typedef struct fstMidiSysexEvent_ {
 typedef struct fstEvents_ {
   int numEvents;
   FST_UNKNOWN(t_fstPtrInt _pad);
-  t_fstEvent*events[];
+  /* LOCAL PATCH: two inline slots, not a flexible array member, for the same
+   * reason as speakers[8] below. Hosts allocate the struct plus room for
+   * count - 2 more pointers. */
+  t_fstEvent*events[2];
 } t_fstEvents;
 
 typedef struct fstSpeakerProperties_ {
@@ -597,6 +603,11 @@ typedef struct fstPinProperties_ {
   FST_UNKNOWN(int) flags; /* ? kVstPinIsActive | kVstPinUseSpeaker | kVstPinIsStereo */
   FST_UNKNOWN(int) arrangementType; /* ? */
   char shortLabel[8];
+  /* LOCAL PATCH: 48 reserved bytes follow, 128 in total. A host hands the plugin
+   * a struct of that size, and JUCE's plugin wrapper writes the short label with
+   * its terminator, one byte past shortLabel - past the end of the 80 bytes this
+   * used to be, which /RTC1 reports as a corrupted stack in the host. */
+  char _padding[48];
 } FST_UNKNOWN(t_fstPinProperties);
 
 
@@ -642,6 +653,8 @@ typedef struct _fstEffect {
 
   AEffectProcessProc processReplacing;
   AEffectProcessDoubleProc processDoubleReplacing;
+  /* LOCAL PATCH: 56 reserved bytes follow, 192 in total (144 on 32 bit). */
+  char _padding[56];
 } FST_UNKNOWN(t_fstEffect);
 
 typedef struct _fstRectangle {
