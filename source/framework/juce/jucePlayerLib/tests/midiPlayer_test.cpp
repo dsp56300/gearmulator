@@ -205,6 +205,30 @@ namespace
         }
     }
 
+    void replacePlaylist(const Fixtures& files)
+    {
+        MidiPlayer player(4, MidiPlayer::ResetMode::Gs);
+        CHECK_EQ(player.addFiles({files.paths[0]}).added, 1u);
+        const auto original = player.entries();
+
+        const auto rejected = player.replaceFiles({files.paths[1], "not-a-midi-file.mid"});
+        CHECK_EQ(rejected.added, 1u);
+        CHECK_EQ(rejected.errors.size(), 1u);
+        CHECK(player.entries().size() == original.size());
+        if(player.entries().size() == original.size())
+            CHECK(player.entries()[0].path == original[0].path);
+
+        const auto replaced = player.replaceFiles({files.paths[1], files.paths[2]});
+        CHECK_EQ(replaced.added, 2u);
+        CHECK(replaced.errors.empty());
+        CHECK_EQ(player.entries().size(), 2u);
+        if(player.entries().size() == 2)
+        {
+            CHECK(player.entries()[0].path == files.paths[1]);
+            CHECK(player.entries()[1].path == files.paths[2]);
+        }
+    }
+
     class CaptureDevice final : public Device
     {
     public:
@@ -281,6 +305,7 @@ int main()
     resetTiming(files);
     gapsAndCancellation(files);
     reorderAndPorts(files);
+	    replacePlaylist(files);
     engineGenerations();
     return finish("midiPlayer");
 }

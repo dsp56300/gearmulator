@@ -73,6 +73,38 @@ namespace jucePlayer
         return result;
     }
 
+    MidiPlayer::AddResult MidiPlayer::replaceFiles(const std::vector<std::string>& _paths)
+    {
+        AddResult result;
+        auto next = std::make_shared<Playlist>();
+
+        for (const auto& path : _paths)
+        {
+            auto song = std::make_shared<Song>();
+            std::string error;
+            if (!midiFile::read(path, song->events, error))
+            {
+                result.errors.push_back(std::move(error));
+                continue;
+            }
+
+            const auto file = juce::File::getCurrentWorkingDirectory().getChildFile(path);
+            song->info.path = file.getFullPathName().toStdString();
+            auto name = file.getFileName();
+#if JUCE_MAC
+            name = name.convertToPrecomposedUnicode();
+#endif
+            song->info.name = name.toStdString();
+            song->info.durationSeconds = song->events.empty() ? 0.0 : song->events.back().seconds;
+            next->songs.push_back(std::move(song));
+            ++result.added;
+        }
+
+        if (result.errors.empty())
+            publish(std::move(next));
+        return result;
+    }
+
     bool MidiPlayer::move(const size_t _from, size_t _to)
     {
         auto current = std::atomic_load_explicit(&m_playlist, std::memory_order_acquire);

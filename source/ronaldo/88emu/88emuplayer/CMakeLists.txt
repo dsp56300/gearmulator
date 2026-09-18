@@ -67,6 +67,7 @@ juce_add_plugin(88emuplayer
 target_sources(88emuplayer PRIVATE
 	Emu88Processor.cpp Emu88Processor.h
 	app/Emu88LaunchOptions.cpp app/Emu88LaunchOptions.h
+	app/Emu88Playlist.cpp app/Emu88Playlist.h
 	ui/Emu88Editor.cpp ui/Emu88Editor.h
 	ui/Emu88EditorPlaylist.cpp
 	ui/Emu88EditorSettings.cpp
@@ -146,7 +147,7 @@ else()
 	install(TARGETS 88EmuCli RUNTIME DESTINATION bin COMPONENT ${playerProductName}-Standalone)
 endif()
 if(BUILD_TESTING)
-	add_executable(88emuLaunchOptions_test tests/Emu88LaunchOptions_test.cpp app/Emu88LaunchOptions.cpp)
+	add_executable(88emuLaunchOptions_test tests/Emu88LaunchOptions_test.cpp app/Emu88LaunchOptions.cpp app/Emu88Playlist.cpp)
 	target_link_libraries(88emuLaunchOptions_test PRIVATE 88lib jucePlayerLib)
 	add_test(NAME 88emuLaunchOptions COMMAND 88emuLaunchOptions_test)
 	set_property(TARGET 88emuLaunchOptions_test PROPERTY FOLDER "Ronaldo/tests")

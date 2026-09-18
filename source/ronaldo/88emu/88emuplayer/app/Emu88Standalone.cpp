@@ -2,6 +2,7 @@
 #include <iostream>
 #include "88emuplayer/Emu88Processor.h"
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "88emuplayer/app/Emu88Playlist.h"
 #include "88lib/rom/romloader.h"
 #include "jucePlayerLib/audioRouting.h"
 #include "jucePlayerLib/midiInputRouting.h"
@@ -244,9 +245,24 @@ namespace emu88Player
                 (void)loadPcmCard(options);
                 auto requestedAudio = prepareSession();
                 auto* processor = openDevices(*requestedAudio);
-                const auto loaded = processor->midiPlayer().addFiles(options.files);
+                jucePlayer::MidiPlayer::AddResult loaded;
+                if (options.files.empty())
+                {
+                    std::vector<std::string> paths;
+                    std::string error;
+                    if (playlist::read(playlist::defaultFile(), paths, error))
+                        loaded = processor->midiPlayer().replaceFiles(paths);
+                }
+                else
+                    loaded = processor->midiPlayer().addFiles(options.files);
                 if (!loaded.errors.empty())
                     throw std::runtime_error(loaded.errors.front());
+                if (!options.files.empty())
+                {
+                    std::string error;
+                    if (!playlist::write(playlist::defaultFile(), processor->midiPlayer().entries(), error))
+                        std::cerr << error << '\n';
+                }
                 startupSucceeded = true;
                 window->setVisible(true);
                 if (options.has("play") && loaded.added)

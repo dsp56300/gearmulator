@@ -70,6 +70,9 @@ namespace jucePlayer
         explicit MidiPlayer(uint8_t portCount = 1, ResetMode resetMode = ResetMode::Off);
 
         AddResult addFiles(const std::vector<std::string>& _paths);
+        // Replaces the playlist only when every file can be read. This lets UI operations
+        // such as loading a saved playlist fail without discarding the current one.
+        AddResult replaceFiles(const std::vector<std::string>& _paths);
         bool move(size_t _from, size_t _to);
         bool remove(size_t _index);
         bool clear();

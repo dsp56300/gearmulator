@@ -4,6 +4,10 @@ Release Notes
 
 88emuPlayer:
 
+- [New] MIDI Player: The standalone now restores the last playlist automatically.
+        Right-click the playlist to load or save portable `.m3u` / `.m3u8`
+        playlist files, or add/drop one to append its entries.
+
 - [New] MIDI: Command-line MIDI input options can now assign inputs to
         groups A-D with `--midi-in-a` through `--midi-in-d`. `--midi-in`
         remains the group-A shorthand.

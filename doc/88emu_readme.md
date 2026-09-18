@@ -360,6 +360,8 @@ Explicit options override the selected config, followed by built-in defaults.
 
 Positional files and repeated `--playlist` arguments are appended in argument order. Without `--play` they are loaded without starting playback. `--play` starts the first entry after a five-second boot wait; use Fast Boot when you need the firmware fully past its intro first.
 
+The standalone player restores its previous playlist when launched without input files. Playlist changes are saved automatically to `playlist/last-session.m3u8` in the 88emu data folder. Right-click the playlist to load or save an `.m3u`/`.m3u8` playlist; saved playlists use relative paths where possible. The Add button and playlist drop target also accept playlist files and append their entries. Supplying positional files or `--playlist` starts a new playlist and makes it the next restored playlist.
+
 | GUI-only option | Meaning |
 | --- | --- |
 | `--playlist PATH` | Add one song; repeat for more. |

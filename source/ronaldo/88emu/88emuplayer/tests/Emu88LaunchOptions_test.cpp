@@ -1,4 +1,5 @@
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "88emuplayer/app/Emu88Playlist.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -11,6 +12,27 @@ namespace
 		catch(const std::runtime_error&) { return; }
 		throw std::runtime_error("Invalid arguments accepted: " + args.joinIntoString(" ").toStdString());
 	}
+	void playlistFiles()
+	{
+		const auto directory = juce::File::getSpecialLocation(juce::File::tempDirectory)
+			.getNonexistentChildFile("88emu-playlist-test", "", false);
+		const auto first = directory.getChildFile("music/first.mid");
+		const auto second = directory.getChildFile("music/second.rcp");
+		const auto playlistFile = directory.getChildFile("playlists/saved.m3u8");
+		std::string error;
+		check(emu88Player::playlist::isSupported("saved.m3u"), "M3U playlist filter");
+		check(emu88Player::playlist::isSupported("saved.m3u8"), "M3U8 playlist filter");
+		check(!emu88Player::playlist::isSupported("saved.mid"), "MIDI is not a playlist file");
+		check(emu88Player::playlist::write(playlistFile,
+			{{first.getFullPathName().toStdString(), "first.mid", 0.0},
+			 {second.getFullPathName().toStdString(), "second.rcp", 0.0}}, error),
+			"Write playlist");
+		std::vector<std::string> paths;
+		check(emu88Player::playlist::read(playlistFile, paths, error), "Read playlist");
+		check(paths == std::vector<std::string>{first.getFullPathName().toStdString(), second.getFullPathName().toStdString()},
+			"Playlist relative paths");
+		(void)directory.deleteRecursively();
+	}
 }
 
 int main()
@@ -18,6 +40,7 @@ int main()
 	try
 	{
 		using namespace emu88Player;
+		playlistFiles();
 		const auto cli = LaunchOptions::parse({"--rom-dir", juce::String::fromUTF8("/ROM \xe9\x9f\xb3\xe6\xa5\xbd"), "--device=sc55mk2", "--reset", "mt32", "--sample-rate=48000", "--bits", "24", "--output", "out song.wav", "--", juce::String::fromUTF8("-\xe6\x9b\xb2.r36")}, true);
 		check(cli.files == std::vector<std::string>{"-\xe6\x9b\xb2.r36"}, "Unicode positional path");
 		check(cli.get("rom-dir") == "/ROM \xe9\x9f\xb3\xe6\xa5\xbd", "Unicode ROM path");

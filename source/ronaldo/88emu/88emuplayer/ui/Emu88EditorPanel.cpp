@@ -41,7 +41,11 @@ namespace emu88Player
 		if(auto* playlist = document->GetElementById("playlist"))
 		{
 			m_playlistDropTarget = std::make_unique<PlaylistDropTarget>(playlist,
-				[this](const size_t _from, const size_t _to) { m_processor.midiPlayer().move(_from, _to); },
+				[this](const size_t _from, const size_t _to)
+				{
+					if(m_processor.midiPlayer().move(_from, _to))
+						saveDefaultPlaylist();
+				},
 				[this](const std::vector<std::string>& _files) { addMidiFiles(_files); },
 				[this] { return m_processor.midiPlayer().entries().size(); });
 			juceRmlUi::EventListener::Add(playlist, Rml::EventId::Mousedown, [this](Rml::Event& _event)
