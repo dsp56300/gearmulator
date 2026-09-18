@@ -183,9 +183,11 @@ Real hardware expects initialized battery-backed SRAM. A newly created emulated 
 
 **Restart Device** stops playback, rescans ROMs and constructs a fresh device. It clears SRAM and all runtime hardware state, including edits, controller state, voices and effects buffers, then applies the startup settings above. It retains the playlist and application settings and does not rewrite the ROM files. Use it for a clean start or after changing ROMs.
 
-**Q** is the front-panel POWER switch, and it behaves as the selected model's switch does. On SC-55, SC-55mkII, SC-155, SC-155mkII, SC-88VL and SC-88Pro, POWER is a key the firmware reads, not a supply switch. The unit stays powered, and a press puts it into its standby mode. In standby the display and lamps are dark, the sound is silenced, and incoming MIDI is ignored. The next press wakes it. The emulation keeps running through standby, as the hardware does, and playback is not stopped.
+**Q** is the front-panel POWER switch, and it behaves as the selected model's switch does. On SC-55, SC-55mkII, SC-155, SC-155mkII and SC-88VL, POWER is a key the firmware reads, not a supply switch. The unit stays powered, and a press puts it into its standby mode. In standby the display and lamps are dark, the sound is silenced, and incoming MIDI is ignored. The next press wakes it. The emulation keeps running through standby, as the hardware does, and playback is not stopped.
 
-On every other model, and with **Shift+Q** on the six above, the switch cuts the power supply. Power-off stops playback and discards incoming MIDI; an active WAV recording continues with silence. Power-on starts a fresh board using the startup settings, except that held panel buttons bypass automatic Factory Reset and Fast Boot for that boot. Volatile device state is not preserved across power-off.
+SC-88, SC-88Pro, SC-8820 and SC-8850 use power on/off, as does SC-55st; the SC-55 standby behavior does not apply to every model carrying the SC-55 name.
+
+On models without standby, and with **Shift+Q** on the five standby models, the switch cuts the power supply. Power-off stops playback and discards incoming MIDI; an active WAV recording continues with silence. Power-on starts a fresh board using the startup settings, except that held panel buttons bypass automatic Factory Reset and Fast Boot for that boot. Volatile device state is not preserved across power-off.
 
 ## Settings
 
@@ -275,7 +277,7 @@ Only controls physically present on the selected profile are active. SC-55-famil
 
 | Keys | Hardware buttons |
 | --- | --- |
-| `Q` | POWER: standby / on (SC-55 family, SC-88VL, SC-88Pro); power on/off (SC-88) |
+| `Q` | POWER: standby / on (SC-55/SC-55mkII, SC-155/SC-155mkII, SC-88VL); power on/off (other models) |
 | `Shift`+`Q` | Power supply off / on (SC-55 family, SC-88VL, SC-88Pro) |
 | `W`, `E` | ALL, MUTE |
 | `R` / `T` | PART left / right |
@@ -295,7 +297,7 @@ Only controls physically present on the selected profile are active. SC-55-famil
 
 For example, on SC-88Pro, hold **2** (SC-88 MAP) and press **I** or **O** (KEY SHIFT) to adjust **DELAY**. The bottom edit-row functions change with USER INST and SELECT, as on the hardware.
 
-To enter the SC-88Pro startup test mode, press **Shift+Q** to switch the power supply off, hold **I + O** (both KEY SHIFT buttons), then press **Shift+Q** to switch it on. The firmware checks for this combination only at a cold start, so waking from standby with **Q** does not reach it. At the diagnostic prompt, press **Tab** (PREVIEW). Press Shift+Q to switch the supply off when finished.
+To enter the SC-88Pro startup test mode, press **Q** to switch the power off, hold **I + O** (both KEY SHIFT buttons), then press **Q** to switch it on. At the diagnostic prompt, press **Tab** (PREVIEW). Press **Q** to switch the power off when finished.
 
 ### SC-8850
 

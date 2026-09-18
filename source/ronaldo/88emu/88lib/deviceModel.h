@@ -159,11 +159,13 @@ namespace emu88Lib
 	// press puts the unit in standby - display supply cut, lamps dark, voices silenced, incoming MIDI still read
 	// and thrown away - and the next press wakes it, reading the other keys held as it does, so the manuals'
 	// hold-and-power-on combinations are made with this switch. Only cutting the supply itself cold-boots the
-	// board. On the SC-88VL the firmware's standby is 01:990A and its wake-up 01:98EC; the SC-88Pro's are the
-	// same code at 0D:8480 and 0C:5A0C. The SC-155mkII runs the SC-55mkII program.
+	// board. On the SC-88VL the firmware's standby is 01:990A and its wake-up 01:98EC.
+	// The SC-155mkII runs the SC-55mkII program.
 	//
 	// Supply: the switch cuts the supply, or the board has no switch of its own and runs on its host's. The plain
-	// SC-88's firmware has no standby: nothing in its matrix, POWER position included, takes it there.
+	// SC-88Pro and SC-8850 service schematics put POWER in the mains feed. The Pro firmware still has
+	// a standby handler, but its physical switch is not wired to the panel matrix. Classify the hardware,
+	// not the presence of a firmware handler. SC-55st also has an on/off switch, unlike SC-55/mkII.
 	enum class PowerSwitch : uint8_t { Supply, Standby };
 
 	constexpr PowerSwitch getPowerSwitch(const DeviceModel _model)
@@ -175,7 +177,6 @@ namespace emu88Lib
 		case DeviceModel::Sc155:
 		case DeviceModel::Sc155Mk2:
 		case DeviceModel::Sc88VL:
-		case DeviceModel::Sc88Pro:
 			return PowerSwitch::Standby;
 		default:
 			return PowerSwitch::Supply;

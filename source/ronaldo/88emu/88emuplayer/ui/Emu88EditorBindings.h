@@ -155,7 +155,7 @@ namespace emu88Player::editor
 	}
 
 	// The front-panel POWER switch where the firmware reads it (see emu88Lib::PowerSwitch): one
-	// matrix position, the same on the SC-55 family, the SC-88VL and the SC-88Pro. Q holds it.
+	// matrix position, shared by the SC-55/SC-155 panels and SC-88VL. Q holds it on standby models.
 	constexpr uint8_t g_powerSwitchButton = static_cast<uint8_t>(emu88Lib::Sc88ProButton::Power);
 	static_assert(g_powerSwitchButton == static_cast<uint8_t>(emu88Lib::Button::Power));
 
@@ -177,6 +177,8 @@ namespace emu88Player::editor
 		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro ||
 		   _model == emu88Lib::DeviceModel::Sc8820 || emu88Lib::isCmModel(_model)) return 0;
 		constexpr auto preview = proButtonBit(emu88Lib::Sc88ProButton::Preview);
+		if(_model == emu88Lib::DeviceModel::Sc88Pro)
+			return _buttons & ~proButtonBit(emu88Lib::Sc88ProButton::Power);
 		if(_model == emu88Lib::DeviceModel::Sc88VL)
 			return _buttons & ~preview;
 		if(emu88Lib::isSc55Model(_model))
@@ -192,6 +194,8 @@ namespace emu88Player::editor
 
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc88VL,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::Preview)) == 0);
+	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc88Pro,
+	                                    proButtonBit(emu88Lib::Sc88ProButton::Power)) == 0);
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc55Mk2,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::Sc55Map) |
 	                                    proButtonBit(emu88Lib::Sc88ProButton::UserInst) |

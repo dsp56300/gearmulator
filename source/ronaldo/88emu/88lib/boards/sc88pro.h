@@ -30,7 +30,7 @@ namespace emu88Lib
 	// as VIB, envelope/filter, or EFX controls according to USER INST/SELECT.
 	enum class Sc88ProButton : uint8_t
 	{
-		Power       = 0,
+		Power       = 0, // Unpopulated matrix position; the Pro's POWER switch cuts the mains supply.
 		Sc88Map     = 1,
 		Sc55Map     = 2,
 		InstL       = 3,
@@ -185,14 +185,15 @@ namespace emu88Lib
 		// Bytes the firmware has transmitted, per SCI channel.
 		const std::vector<uint8_t>& serialOut(uint8_t _ch) const { return m_serialOut[_ch & 1]; }
 
-		void setButtons(const uint32_t _b) { m_buttons = _b; }
+		void setButtons(const uint32_t _b) { m_buttons = _b & ~(uint32_t{1} << static_cast<uint8_t>(Sc88ProButton::Power)); }
 		uint32_t buttons() const { return m_buttons; }
 		// Bits 0-7 are LDD0-7 (bit 7 is green); bit 8 is the red User Inst LED.
 		uint16_t leds() const;
 
 		Lcd&       lcd()       { return m_lcd; }
 		const Lcd& lcd() const { return m_lcd; }
-		// The display's supply, P6DR bit 0 as on the SC-88VL. The firmware cuts it in standby.
+		// P6DR bit 0, manipulated by the firmware's retained standby handler. The Pro's
+		// physical POWER switch cuts the mains supply and cannot invoke that handler.
 		bool lcdEnabled() const { return m_lcdEnabled; }
 
 		uint64_t cycles() const { return m_machine.now(); }
