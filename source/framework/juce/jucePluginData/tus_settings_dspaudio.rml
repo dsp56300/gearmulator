@@ -97,6 +97,20 @@
 				</tr>
 			</table>
 		</div>
+		<div id="containerDspThreads" class="settings-advanced">
+			<h1>Multicore DSP (threads)</h1>
+			<settingsspacer1/>
+			<table id="dspThreadsTable" class="settings-table">
+				<tr class="settings-tr" id="dspThreadsEntry" style="display: none;">
+					<td class="settings-td">
+						<div id="dspThreadsButton" class="settings-checkboxwithlabel">
+							<button id="button" class="settings-checkbox"/>
+							<label id="label">Off (default)</label>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
 		<div id="containerDeviceSpecific"/>
 	</div>
 </body>
