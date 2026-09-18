@@ -37,6 +37,10 @@ namespace synthLib
 
 		bool empty() const { return size() == 0; }
 
+		// std::swap would move through a temporary, which allocates in MSVC's debug STL
+		void swap(AudioBuffer& _other) noexcept { m_data.swap(_other.m_data); }
+		friend void swap(AudioBuffer& _a, AudioBuffer& _b) noexcept { _a.swap(_b); }
+
 		AudioBuffer(size_t _channelCount = 2, size_t _capacity = 1024);
 	private:
 		static void append(TChannel& _dst, const float* _data, size_t _size);
