@@ -1,4 +1,5 @@
 #include "jucePlayerLib/audioRouting.h"
+#include "baseLib/os.h"
 #include <iostream>
 #include <stdexcept>
 #include "juce_events/juce_events.h"
@@ -83,6 +84,8 @@ namespace
 } // namespace
 int main()
 {
+    baseLib::disableErrorDialogs();
+
     try
     {
         juce::ScopedJuceInitialiser_GUI initialise;

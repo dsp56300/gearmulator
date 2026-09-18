@@ -18,6 +18,7 @@
 #include "synthLib/midiTypes.h"
 
 #include <juce_core/juce_core.h>
+#include "baseLib/os.h"
 
 using namespace pluginLib;
 
@@ -890,6 +891,8 @@ void testMidiLearnMixedTypes()
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	try
 	{
 		std::cout << "Running MIDI Learn Unit Tests..." << std::endl;

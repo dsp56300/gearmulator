@@ -1,4 +1,5 @@
 #include "midiRateLimiter.h"
+#include "baseLib/os.h"
 
 #include <cstdint>
 #include <cstdlib>
@@ -229,6 +230,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	testFileSysexCancellation();
 	testOrderedResetPause();
 	testRunningStatus();

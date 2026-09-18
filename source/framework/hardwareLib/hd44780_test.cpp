@@ -1,4 +1,5 @@
 #include "hd44780.h"
+#include "baseLib/os.h"
 
 #include <cstdlib>
 
@@ -85,6 +86,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	testLeavingCgRam(0x01);					// Clear display
 	testLeavingCgRam(0x02);					// Return home
 	testLeavingCgRam(0x03);					// Return home, don't-care bit set

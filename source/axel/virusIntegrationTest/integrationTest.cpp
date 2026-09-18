@@ -11,6 +11,7 @@
 
 #include "baseLib/commandline.h"
 #include "baseLib/filesystem.h"
+#include "baseLib/os.h"
 
 #include "synthLib/wavReader.h"
 
@@ -23,6 +24,8 @@ namespace synthLib
 
 int main(int _argc, char* _argv[])
 {
+	baseLib::disableErrorDialogs();
+
 	if constexpr (true)
 	{
 		try

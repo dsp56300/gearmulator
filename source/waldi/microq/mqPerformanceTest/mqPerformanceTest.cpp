@@ -12,24 +12,14 @@
 
 #include "mqConsoleLib/mqSettingsGui.h"
 
-#ifdef _WIN32
-#include <crtdbg.h>
-#include <csignal>
-#endif
+#include "baseLib/os.h"
 
 using ButtonType = mqLib::Buttons::ButtonType;
 using EncoderType = mqLib::Buttons::Encoders;
 
 int main(int _argc, char* _argv[])
 {
-#ifdef _WIN32
-	// Redirect debug assertions to stderr instead of popup dialog
-	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
-#endif
+	baseLib::disableErrorDialogs();
 
 	bool voiceExpansion = false;
 

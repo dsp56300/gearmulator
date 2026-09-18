@@ -1,4 +1,5 @@
 #include "dcFilter.h"
+#include "baseLib/os.h"
 
 #include <cmath>
 #include <cstddef>
@@ -79,6 +80,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	testDefaultPassesEverything();
 	testRemovesDc();
 	testResponse();

@@ -1,9 +1,12 @@
 #include "synthLibTests.h"
+#include "baseLib/os.h"
 
 #include <iostream>
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	try
 	{
 		testFilesystem();

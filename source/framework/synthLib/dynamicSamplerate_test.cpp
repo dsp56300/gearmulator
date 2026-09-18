@@ -1,6 +1,7 @@
 #include "device.h"
 #include "plugin.h"
 #include "resamplerInOut.h"
+#include "baseLib/os.h"
 
 #include <algorithm>
 #include <cmath>
@@ -183,6 +184,8 @@ void operator delete[](void* _p) noexcept { std::free(_p); }
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	for(auto mode : {synthLib::Resampler::Mode::Legacy, synthLib::Resampler::Mode::MameHq,
 		synthLib::Resampler::Mode::MameLofi})
 		for(float host : {32000.0f, 44100.0f, 48000.0f, 96000.0f})

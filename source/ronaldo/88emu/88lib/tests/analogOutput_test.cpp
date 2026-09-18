@@ -1,5 +1,6 @@
 #include "88lib/analog/analogOutput.h"
 #include "common/test_util.hpp"
+#include "baseLib/os.h"
 
 #include <cmath>
 #include <complex>
@@ -220,6 +221,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	CHECK(resolveAnalogModel(AnalogOutputMode::Off, DeviceModel::Cm32p) == AnalogModel::None);
 	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Cm32p) == AnalogModel::Cm32p);
 	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Sc88) == AnalogModel::Sc88);

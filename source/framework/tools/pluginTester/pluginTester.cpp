@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "baseLib/commandline.h"
 #include "baseLib/filesystem.h"
+#include "baseLib/os.h"
 
 class JuceAppLifetimeObjects
 {
@@ -25,6 +26,8 @@ private:
 
 int main(const int _argc, char* _argv[])
 {
+	baseLib::disableErrorDialogs();
+
 	baseLib::CommandLine cmdLine(_argc, _argv);
 
 	StdoutLogger logger;

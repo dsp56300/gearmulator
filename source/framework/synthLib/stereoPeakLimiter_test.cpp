@@ -1,4 +1,5 @@
 #include "synthLib/stereoPeakLimiter.h"
+#include "baseLib/os.h"
 
 #include <array>
 #include <iostream>
@@ -16,6 +17,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	try
 	{
 		using synthLib::StereoPeakLimiter;

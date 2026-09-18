@@ -1,4 +1,5 @@
 #include "sed1335.h"
+#include "baseLib/os.h"
 
 #include <cstdlib>
 
@@ -121,6 +122,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	testCursorReadBack();
 	testCursorReadBackDoesNotDisturbTheCursor();
 	testDisplayCommandsNotify();

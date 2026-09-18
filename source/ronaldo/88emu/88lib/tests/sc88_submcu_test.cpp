@@ -1,5 +1,6 @@
 #include "88lib/mcu/sc88_submcu.h"
 #include "cpu/common/test_util.hpp"
+#include "baseLib/os.h"
 
 using namespace emu88Lib;
 using namespace test;
@@ -97,6 +98,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	outputRing();
 	delayAndReset();
 	rawRequests();

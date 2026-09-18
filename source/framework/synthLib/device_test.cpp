@@ -5,6 +5,7 @@
 // on at least one device turned every "play" into a Program Change.
 #include "device.h"
 #include "plugin.h"
+#include "baseLib/os.h"
 
 #include <cstdlib>
 #include <vector>
@@ -121,6 +122,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	testTransportMarkerBypassesSendMidi();
 	testChunkedSysexReachesDeviceOnce();
 	return 0;

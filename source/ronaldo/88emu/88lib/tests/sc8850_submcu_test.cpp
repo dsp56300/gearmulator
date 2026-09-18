@@ -1,5 +1,6 @@
 #include "88lib/mcu/sc8850_submcu.h"
 #include "cpu/common/test_util.hpp"
+#include "baseLib/os.h"
 
 using namespace emu88Lib;
 
@@ -118,6 +119,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	exercise(Sc8850SubMcu::BootProtocol::Sc8850);
 	exercise(Sc8850SubMcu::BootProtocol::Sc8820);
 	return test::finish("sc8850_submcu");

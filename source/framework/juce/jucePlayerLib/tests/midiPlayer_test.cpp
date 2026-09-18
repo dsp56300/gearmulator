@@ -5,6 +5,7 @@
 #include "synthLib/device.h"
 #include "synthLib/midi/midiFile.h"
 #include "synthLib/plugin.h"
+#include "baseLib/os.h"
 
 #include <algorithm>
 #include <array>
@@ -271,6 +272,8 @@ namespace
 
 int main()
 {
+    baseLib::disableErrorDialogs();
+
     Fixtures files;
     checkMidiFiles();
     poweredOff(files);

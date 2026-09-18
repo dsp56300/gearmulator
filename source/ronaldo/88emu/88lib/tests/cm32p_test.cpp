@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include "common/romDescramble.h"
+#include "baseLib/os.h"
 
 namespace
 {
@@ -61,6 +62,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	std::array<uint8_t, 3> partial{1, 2, 3}, untouched{0x55, 0x55, 0x55};
 	bool rejected = false;
 	try { rLib::rom::Pcm8::scramble(partial.data(), partial.size(), untouched.data()); }

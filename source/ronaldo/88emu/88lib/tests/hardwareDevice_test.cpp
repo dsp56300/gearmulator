@@ -6,6 +6,7 @@
 #include <chrono>
 #include "baseLib/filesystem.h"
 #include "synthLib/plugin.h"
+#include "baseLib/os.h"
 #ifdef TEST_JUCE_INPUT
 #include "jucePlayerLib/midiInputRouting.h"
 #include "jucePlayerLib/midiPlayer.h"
@@ -13,6 +14,8 @@
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	using namespace emu88Lib;
 	using namespace synthLib;
 	namespace fs = baseLib::filesystem;

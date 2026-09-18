@@ -8,6 +8,7 @@
 #include "virusLib/dspSingle.h"
 
 #include "baseLib/md5.h"
+#include "baseLib/os.h"
 
 #include "dsp56kEmu/dsp.h"
 
@@ -62,6 +63,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	std::cout << "Running ROM hash tests..." << std::endl;
 
 	const auto romA  = makeRom(dataA(), "romA");

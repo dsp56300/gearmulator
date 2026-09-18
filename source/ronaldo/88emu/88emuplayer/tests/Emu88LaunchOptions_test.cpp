@@ -1,4 +1,5 @@
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "baseLib/os.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -15,6 +16,8 @@ namespace
 
 int main()
 {
+	baseLib::disableErrorDialogs();
+
 	try
 	{
 		using namespace emu88Player;
