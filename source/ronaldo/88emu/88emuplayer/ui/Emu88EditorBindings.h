@@ -21,14 +21,25 @@ namespace emu88Player::editor
 	// pixels, which move with the GUI scale.
 	constexpr float g_keyboardRowToleranceDp = 8.0f;
 	constexpr int g_aboutHeight = 242;
-	constexpr int g_settingsWidth = 560;
-	constexpr int g_settingsHeight = 360;
+	constexpr int g_settingsWidth = 690;
+	constexpr int g_settingsHeight = 410;
 	constexpr int g_volumeMinimum = 0;
 	// The standalone shell puts its own Options button at (8, 6, 60, h-8);
 	// the recorder button follows it along the same baseline.
 	constexpr int g_titleBarButtonY = 6;
-	constexpr int g_optionsButtonRight = 8 + 60;
+	constexpr int g_optionsButtonX = 8;
+	constexpr int g_optionsButtonWidth = 60;
+	constexpr int g_optionsButtonRight = g_optionsButtonX + g_optionsButtonWidth;
 	constexpr int g_titleBarButtonGap = 6;
+	// Both buttons in the strip carry their label at this height instead of the stock
+	// look and feel's 0.6 * button height. The shell's default 26px strip leaves them
+	// 18px tall, in which drawFittedText would shrink the label straight back down, so
+	// the strip has to grow with the text.
+	constexpr int g_titleBarHeight = 32;
+	constexpr float g_titleBarButtonFontHeight = 15.0f;
+	// LookAndFeel_V2::drawButtonText indents each side by up to 8px at that font
+	// height; a button sized to its own text has to carry both indents.
+	constexpr int g_titleBarTextPadding = 20;
 	constexpr int g_recordIconMargin = 7;
 	constexpr int g_recordIconGap = 5;
 	constexpr uint32_t g_recordIconColour = 0xffe03c3c;
@@ -158,7 +169,8 @@ namespace emu88Player::editor
 
 	constexpr uint32_t panelButtonsForDevice(const emu88Lib::DeviceModel _model, uint32_t _buttons)
 	{
-		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro || _model == emu88Lib::DeviceModel::Sc8820 || _model == emu88Lib::DeviceModel::Cm32p) return 0;
+		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro ||
+		   _model == emu88Lib::DeviceModel::Sc8820 || emu88Lib::isCmModel(_model)) return 0;
 		constexpr auto preview = proButtonBit(emu88Lib::Sc88ProButton::Preview);
 		if(_model == emu88Lib::DeviceModel::Sc88VL)
 			return _buttons & ~preview;
@@ -167,6 +179,11 @@ namespace emu88Player::editor
 				? 0 : _buttons & g_sc55Buttons;
 		return _buttons;
 	}
+
+	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Cm32p, ~uint32_t{0}) == 0 &&
+	              panelButtonsForDevice(emu88Lib::DeviceModel::Cm32l, ~uint32_t{0}) == 0 &&
+	              panelButtonsForDevice(emu88Lib::DeviceModel::Cm64, ~uint32_t{0}) == 0,
+	              "the CM bezels have no switches to press");
 
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc88VL,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::Preview)) == 0);

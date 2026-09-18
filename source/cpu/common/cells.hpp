@@ -15,10 +15,17 @@
 // next page.  Sequential flow then never checks for the page end; the guard
 // count must cover the longest instruction.
 //
+// Banked code windows: a board that pages different contents into the same
+// address range (a ROM bank window) tells the container which bank is in
+// place; each bank keeps its own decoded cells and a switch moves page
+// pointers only.
+//
 #pragma once
 #include <algorithm>
 #include <cassert>
+#include <deque>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "common/types.hpp"
@@ -72,7 +79,37 @@ class CellPages {
   }
   const Cell& blank() const { return blank_; }
 
+  // Put bank `key` in place in the window [base, base+size) (page-aligned;
+  // windows must not overlap).  The first call for a window adopts the cells
+  // already there as that key's.  Returns whether the selection changed.
+  bool select_bank(u32 base, u32 size, u32 key) {
+    assert((base & (kPageSize - 1)) == 0 && (size & (kPageSize - 1)) == 0 && size != 0);
+    Window* w = nullptr;
+    for (auto& x : windows_) if (x.base == base && x.size == size) w = &x;
+    if (!w) {
+      windows_.push_back(Window{base, size, key, {}});
+      return false;
+    }
+    if (w->current == key) return false;
+    const size_t first = base >> PageShift, count = size >> PageShift;
+    auto& out = w->banks[w->current];
+    out.resize(count);
+    auto& in = w->banks[key];
+    in.resize(count);
+    for (size_t i = 0; i < count; ++i) {
+      out[i] = std::move(pages_[first + i]);
+      pages_[first + i] = std::move(in[i]);
+    }
+    w->current = key;
+    return true;
+  }
+
  private:
+  struct Window {
+    u32 base, size, current;
+    std::unordered_map<u32, std::vector<std::unique_ptr<Cell[]>>> banks;  // the banks not in place
+  };
+
   Cell* alloc(size_t idx) {
     pages_[idx].reset(new Cell[kCellsPerPage + guard_]);
     std::fill_n(pages_[idx].get(), kCellsPerPage, blank_);
@@ -81,6 +118,12 @@ class CellPages {
   }
 
   std::vector<std::unique_ptr<Cell[]>> pages_;
+  // deque, not vector: Window holds an unordered_map of move-only vectors, so its move
+  // constructor is not noexcept while the map still *declares* a copy constructor.  A
+  // vector reallocation therefore instantiates that copy, which fails on unique_ptr
+  // (MSVC rejects it; libstdc++ and libc++ never got that far).  A deque does not
+  // relocate the elements it already holds, which also keeps the Window* above stable.
+  std::deque<Window> windows_;
   Cell blank_;
   Cell cross_;
   unsigned guard_;

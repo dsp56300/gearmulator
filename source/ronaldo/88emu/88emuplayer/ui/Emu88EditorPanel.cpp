@@ -30,6 +30,11 @@ namespace emu88Player
 			m_lcd = std::make_unique<HardwareLcd>(*lcd);
 			m_lcd->reset(m_processor.deviceModel());
 		}
+		if(auto* lcd = document->GetElementById("hardwareLcd2"))
+		{
+			m_lcd2 = std::make_unique<HardwareLcd>(*lcd);
+			m_lcd2->reset(m_processor.deviceModel(), 1);
+		}
 		m_playlistEntries = document->GetElementById("playlistEntries");
 		m_playerPlayGraphic = document->GetElementById("playerPlayGraphic");
 		m_playerPauseGraphic = document->GetElementById("playerPauseGraphic");
@@ -357,8 +362,9 @@ namespace emu88Player
 			assign({"btAll", "btMute"});
 			break;
 		case emu88Lib::DeviceModel::Cm32p:
+		case emu88Lib::DeviceModel::Cm32l:
 		case emu88Lib::DeviceModel::Cm64:
-			// The bezel's only driven lamp, bit 0 of Cm32p::leds(); POWER is painted on.
+			// The bezel's only driven lamp, bit 0 of the board's leds(); POWER is painted on.
 			assign({"ledCmMidi"});
 			break;
 		default:
@@ -377,11 +383,21 @@ namespace emu88Player
 				m_buttonElements[button]->SetClass("pressed", (buttons & (uint32_t{1} << button)) != 0);
 	}
 
-	void Editor::updateLeds(const uint8_t _value)
+	void Editor::updateLeds(const uint16_t _value)
 	{
 		for(uint8_t i = 0; i < m_leds.size(); ++i)
 			if(m_leds[i])
-				m_leds[i]->SetClass("on", (_value & (uint8_t{1} << i)) != 0);
+				m_leds[i]->SetClass("on", (_value & (uint16_t{1} << i)) != 0);
+
+		if(auto* efx = m_leds[7])
+		{
+			const auto model = m_processor.deviceModel();
+			const bool pro = model == emu88Lib::DeviceModel::Sc88Pro || model == emu88Lib::DeviceModel::VeGsPro;
+			efx->SetClass("green", pro && (_value & 0x80));
+			efx->SetClass("red", pro && (_value & 0x100));
+			if(pro)
+				efx->SetClass("on", (_value & 0x180) != 0);
+		}
 	}
 
 	KeyboardShortcutGroups Editor::buildKeyboardGroups()

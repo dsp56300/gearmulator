@@ -59,6 +59,18 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .modelSc8850 .lcd { left: 165dp; top: 28dp; width: 175dp; height: 70dp; }
 .modelCm .lcd { left: 162dp; top: 23dp; width: 218dp; height: 41dp; }	/* the whole window; the dots sit inset */
 .modelCm .powerOffDisplay { padding-top: 14dp; }
+/* The CM-32L's own bezel carries a single short window where the CM-32P has its tall one. */
+.modelCm32l .lcd { left: 162dp; top: 34dp; width: 218dp; height: 20dp; }
+.modelCm32l .powerOffDisplay { padding-top: 4dp; font-size: 11dp; }
+/* The CM-64 keeps the CM-32P window above and adds the CM-32L's below it. Only that bezel
+ * has a second one, so it stays out of the layout everywhere else. */
+.lcdSecond { display: none; position: absolute; left: 162dp; top: 81dp; width: 218dp; height: 20dp; pointer-events: none; }
+.modelCm64 #hardwareLcd2 { display: block; }
+.powerOffPanel { background-color: #272c29; }
+/* RML's <body> is the document itself, so the power state and the model class end up on the
+ * same element: these have to be compounded, not nested. */
+.powerOff #hardwareLcd2 { visibility: hidden; }
+.powerOff.modelCm64 #powerOffDisplay2 { display: block; }
 .modelSc8820 .lcd { left: 164dp; top: 28dp; width: 180dp; height: 71dp; }
 .volumeKnob { position: absolute; left: 112dp; top: 24dp; width: 28dp; height: 28dp; frames: 31; spriteprefix: knob_; decorator: image(knob_030 contain); cursor: pointer; }
 .deviceSelect { left: 25dp; top: 160dp; width: 120dp; height: 24dp; }
@@ -152,10 +164,14 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .panelLed { position: absolute; pointer-events: none; }
 .selectorLed { width: 8.3467dp; height: 8dp; }
 .efxLed { width: 9dp; height: 9dp; }
-.ledOffGraphic, .ledOnGraphic { position: absolute; left: 0dp; top: 0dp; width: 100%; height: 100%; pointer-events: none; }
-.ledOnGraphic { display: none; }
+.ledOffGraphic, .ledOnGraphic, .ledGreenGraphic, .ledAmberGraphic { position: absolute; left: 0dp; top: 0dp; width: 100%; height: 100%; pointer-events: none; }
+.ledOnGraphic, .ledGreenGraphic, .ledAmberGraphic { display: none; }
 .panelLed.on .ledOffGraphic { display: none; }
 .panelLed.on .ledOnGraphic { display: block; }
+.efxLed.green .ledOnGraphic { display: none; }
+.efxLed.green .ledGreenGraphic { display: block; }
+.efxLed.green.red .ledGreenGraphic { display: none; }
+.efxLed.green.red .ledAmberGraphic { display: block; }
 /* The CM bezel, shared by the CM-32P and the CM-64 whose artwork differs only in the name.
  * Only MIDI MESSAGE is driven; POWER is painted on, as is the unlit lamp, so the element
  * only ever paints the lit state. */

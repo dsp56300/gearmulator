@@ -23,7 +23,20 @@ namespace jucePlayer
         static constexpr uint8_t kMaximumPortCount = 16;
 
         using ResetMode = synthLib::midi::ResetMode;
-        static constexpr uint32_t kResetSettleMs = 100;
+        // Rendered silence held after the reset messages, before the song's own events
+        // start, and again after the MT-32 arrangement. Only when a reset is enabled.
+        //
+        // It has to outlast the reset leaving the wire, not just being queued. Per port
+        // that is 16x CC120 + 16x CC123 + 16x CC121 + the 11-byte GM/GS SysEx, none of
+        // which compresses - the channel changes every message, so running status never
+        // applies - plus the All Sound Off the discontinuity owes every channel that was
+        // still sounding. At the boards' 3125 bytes/s that is up to ~80 ms, and each
+        // board's MidiRateLimiter then holds the wire a further 50 ms once the reset
+        // SysEx completes (setResetPause). The firmware needs time to apply the reset on
+        // top of that. The 100 ms this used to be was consumed by the burst alone, so a
+        // file with a dense first tick - a General MIDI song setting up 16 parts on tick
+        // zero is 312 bytes on its own - lost the notes at its start.
+        static constexpr uint32_t kResetSettleMs = 200;
         static constexpr uint32_t kMaximumSongGapMs = 60000;
 
         enum class State : uint8_t

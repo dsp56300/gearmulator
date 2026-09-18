@@ -117,7 +117,13 @@ class Cpu final : public emu::SliceCore {
   DecodedInsn decode_at(u16 addr) const;
   void invalidate_all();
   void invalidate_range(u32 addr, u32 len);
-  // Invalidate instructions overlapping an externally written code byte.
+  // Banked code window (see emu::CellPages::select_bank): the board pages
+  // bank `key` into [base, base+size); each bank keeps its own decoded cells.
+  // Safe from within a bus access: the instruction in flight completes and the
+  // next one is fetched from the new bank.
+  void select_code_bank(u32 base, u32 size, u32 key);
+  // Invalidate instructions overlapping an externally written code byte - one
+  // the board keeps outside the flat bus, such as a RAM bank in a window.
   void code_written(u16 addr) {
     if (cells_.page_if_allocated(addr)) invalidate_range(addr, 1);
   }

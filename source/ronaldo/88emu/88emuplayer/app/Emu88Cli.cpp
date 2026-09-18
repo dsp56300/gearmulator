@@ -89,8 +89,10 @@ namespace
                                          inventory.describeRequirements(romDevice));
             if (const auto warnings = inventory.warnings(romDevice); !warnings.empty())
                 std::cerr << "ROM warning:\n" << warnings;
-            if (options.has("pcm-card") && model != emu88Lib::DeviceModel::Cm32p)
-                throw std::runtime_error("--pcm-card needs --device cm32p, the only board with a PCM card slot.");
+            if (options.has("pcm-card") && model != emu88Lib::DeviceModel::Cm32p &&
+                model != emu88Lib::DeviceModel::Cm64)
+                throw std::runtime_error(
+                    "--pcm-card needs a device with a PCM card slot; use --device cm32p.");
             const auto pcmCard = loadPcmCard(options);
             if (!pcmCard.empty() && !options.has("quiet"))
                 std::cerr << "PCM card: " << launchFile(options.get("pcm-card")).getFileName() << '\n';
@@ -192,9 +194,12 @@ namespace
                 process(count, false);
                 remaining -= count;
             }
-            const auto preparation = reset == jucePlayer::MidiPlayer::ResetMode::Off ? 0
-                : reset == jucePlayer::MidiPlayer::ResetMode::Mt32                   ? 0.2
-                                                                                     : 0.1;
+            // The player holds one settle after the reset and, for MT-32, a second one
+            // after the arrangement. Derived rather than restated so the two cannot drift.
+            constexpr auto settle = jucePlayer::MidiPlayer::kResetSettleMs / 1000.0;
+            const auto preparation = reset == jucePlayer::MidiPlayer::ResetMode::Off ? 0.0
+                : reset == jucePlayer::MidiPlayer::ResetMode::Mt32                   ? settle * 2
+                                                                                     : settle;
             const auto duration = preparation + player.entries().front().durationSeconds + tailMs / 1000;
             if (!std::isfinite(duration) || duration < 0 || duration > 1.0e12)
                 throw std::runtime_error("Invalid or excessive song duration.");

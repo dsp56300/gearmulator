@@ -369,13 +369,10 @@ namespace juceRmlUi
 
 		using namespace juce::gl;
 
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
+		GLint viewport[4];
+		glGetIntegerv(GL_VIEWPORT, viewport);
 
 		const Rml::Vector2i size{viewport[2], viewport[3]};
-
-		glDisable(GL_DEBUG_OUTPUT);
-		glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -457,6 +454,15 @@ namespace juceRmlUi
 			Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to initialize Metal renderer, falling back to software");
 			m_renderInterface.reset();
 			m_renderType = Renderer::Software;
+			// Detaching joins this render thread and removes the native view covering the software renderer.
+			juce::MessageManager::callAsync([safe = juce::Component::SafePointer<RmlComponent>(this)]
+			{
+				if (!safe)
+					return;
+				safe->m_metalContext.reset();
+				safe->m_renderDone = true;
+				safe->enqueueUpdate();
+			});
 			return;
 		}
 
@@ -539,6 +545,9 @@ namespace juceRmlUi
 
 	void RmlComponent::metalContextClosing(MetalContext&)
 	{
+		if (m_renderType == Renderer::Software)
+			return;
+
 		m_renderProxy->setRenderer(nullptr, g_renderConfigSoftware);
 		m_renderInterface.reset();
 	}

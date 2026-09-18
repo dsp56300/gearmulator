@@ -195,8 +195,6 @@ namespace emu88Lib
 	//   0xA poly pressure   -> 3     0xE pitch bend     -> 7
 	//   0xB control change  -> 4
 	//
-	// Opcodes 1/2 follow the NukedSC55 reference. Panel observations confirm
-	// 4/5; 3/6/7 follow the encoding but have no panel-visible confirmation.
 	void Sc88SubMcu::voiceMessage(const uint8_t _source, Source& _s)
 	{
 		const uint8_t status = _s.runningStatus & 0xf0;

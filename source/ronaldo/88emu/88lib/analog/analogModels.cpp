@@ -2,7 +2,42 @@
 
 namespace emu88Lib
 {
-    void configureCm32p(synthLib::OutputChain& chain, const double _samplerate)
+    void configureCm32l(synthLib::OutputChain& chain, const double _samplerate)
+    {
+        using namespace synthLib::analogFilter;
+
+        // PCM54HP -> IC28 demultiplexer -> six sample-and-holds, one per channel (IC25-IC27,
+        // unity-gain buffers on 4700p hold capacitors), so each DAC word is held for a whole
+        // frame. The three channels of a side then meet at the summing node of the first
+        // low-pass, each through its own resistor: 6.8k for the two SYN pairs and 10k for the
+        // reverb return. That ratio is a level, applied where the channels are summed; only
+        // the node's total conductance matters here, and it sets this section's Q.
+        //
+        // Two inverting multiple-feedback sections, IC24b then IC24a (IC23b/IC23a on the
+        // right). Both peak - together about 6 dB near 13 kHz - because they are there to
+        // undo the hold's sinc droop, not to be flat on their own. The CM-32P's pair does the
+        // same job with more damping; this board comes out with a few dB of lift left over.
+        constexpr auto inputs = 1.0 / (1.0 / 6.8e3 + 1.0 / 6.8e3 + 1.0 / 10e3); // R74 R73 R75
+        chain.filter.add(lowpass2(MultipleFeedback{inputs, 6.8e3, 6.8e3, 220e-12, 5.6e-9},
+                                  _samplerate)); // R86 R67 C75 C83
+        chain.filter.add(lowpass2(MultipleFeedback{10e3, 10e3, 10e3, 220e-12, 5.6e-9},
+                                  _samplerate)); // R69 R61 R60 C66 C67
+
+        // R51 2.2k into the VCA (IC20 M5207L01), then IC22b turns its current back into a
+        // voltage with 4.7k || 100p. The PWM that sets the VCA's level is master volume and is
+        // modelled on the board itself, not here.
+        chain.filter.add(lowpass1(rcCorner(4.7e3, 100e-12), _samplerate)); // R63 C71
+
+        // C73 10u sees R55 100k in parallel with R56 10k into the virtual ground of IC22a, an
+        // inverter with 15k || 220p.
+        chain.filter.add(highpass1(rcCorner(parallel(100e3, 10e3), 10e-6), _samplerate));
+        chain.filter.add(lowpass1(rcCorner(15e3, 220e-12), _samplerate)); // R57 C62
+
+        // C63 10u into R46 + R48 and R49 to ground, the divider that leaves the board.
+        chain.filter.add(highpass1(rcCorner(4.7e3 + 1.5e3 + 6.8e3, 10e-6), _samplerate));
+    }
+
+    void configureCm32pReconstruction(synthLib::OutputChain& chain, const double _samplerate)
     {
         using namespace synthLib::analogFilter;
 
@@ -11,16 +46,30 @@ namespace emu88Lib
         // the first peaks near 14 kHz and makes up most of the hold's droop.
         chain.filter.add(lowpass2(SallenKey{10e3, 10e3, 5.6e-9, 220e-12}, _samplerate)); // R42A R43A C54A C52A
         chain.filter.add(lowpass2(SallenKey{10e3, 10e3, 1.8e-9, 1.2e-9}, _samplerate)); // R44A R45A C55A C56A
+    }
+
+    void configureCmMixerOutput(synthLib::OutputChain& chain, const double _samplerate)
+    {
+        using namespace synthLib::analogFilter;
 
         // The VCA stage (IC32 M5207L01, I/V IC34a), the mixer (IC33a) and the line amplifier
         // (IC35a) are flat in band apart from their feedback capacitors. Only the mixer's
         // 22p || 100k matters; 6.8k || 100p and 20k || 22p stay under 0.02 dB below 20 kHz.
         // The PWM-controlled VCA level is not modelled.
+        //
+        // On a CM-64 this is where the LA board's line output arrives, through a 100k of its
+        // own into the same 100k feedback - so both boards are mixed at unity.
         chain.filter.add(lowpass1(rcCorner(100e3, 22e-12), _samplerate)); // R49A C61A
 
         // Output network: C62A shunts behind R57A || R60A, C58A blocks DC into R57A + R60A.
         chain.filter.add(lowpass1(rcCorner(parallel(4.7e3, 6.8e3), 1e-9), _samplerate));
         chain.filter.add(highpass1(rcCorner(4.7e3 + 6.8e3, 10e-6), _samplerate));
+    }
+
+    void configureCm32p(synthLib::OutputChain& chain, const double _samplerate)
+    {
+        configureCm32pReconstruction(chain, _samplerate);
+        configureCmMixerOutput(chain, _samplerate);
     }
 
     void configureG800(synthLib::OutputChain& chain, const double _samplerate)

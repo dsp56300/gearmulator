@@ -28,18 +28,6 @@ namespace emu88Lib
 		//                      07:91CE
 		//   bits 2-4  01:1623  index into the DSP config word table at 07:99CA
 		//
-		// 0x2D is the value the NukedSC55 reference feeds the SC-88, so the
-		// latched word is 0x2C. Not measured on hardware — and since it selects
-		// the effects configuration, it is worth measuring.
-		//
-		// The G-800 straps its XPGS board to 0x2D too. That program also reads
-		// bit 7, which picks how its DSP program feeds the DACs (found by booting
-		// with each value and comparing the programs uploaded to the XP):
-		//   clear  left, then right, on SDOC, one per half-frame, OUTP1 the word
-		//          clock: the SC-88's wiring, and the G-800's, whose SDOD is
-		//          unconnected
-		//   set    left on SDOC and right on SDOD in the same half-frame, OUTP0
-		//          the word clock and OUTP1 a latch strobe, as for two mono DACs
 		constexpr uint8_t g_p5drStraps = 0x2d;
 
 		// Gate-array interrupt line the LCD pulses when a burst has been sent.

@@ -32,11 +32,13 @@ set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN=${gearmulator_BUILD_JUCEPLUGIN})
 set(args ${args} -Dgearmulator_BUILD_FX_PLUGIN=${gearmulator_BUILD_FX_PLUGIN})
 set(args ${args} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
 
-set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON)
-set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON)
-set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON)
-set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON)
-set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_AU=ON)
+# Build all plugin formats unless explicitly disabled.
+foreach(F VST2 VST3 CLAP LV2 AU)
+	if(NOT DEFINED gearmulator_BUILD_JUCEPLUGIN_${F})
+		set(gearmulator_BUILD_JUCEPLUGIN_${F} ON)
+	endif()
+	set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_${F}=${gearmulator_BUILD_JUCEPLUGIN_${F}})
+endforeach()
 
 # Forward the opt-in standalone build flag.
 if(NOT DEFINED gearmulator_BUILD_JUCEPLUGIN_Standalone)

@@ -21,6 +21,8 @@ namespace emu88Lib
 	class Sc8850;
 	class Sc8820;
 	class Cm32p;
+	class Cm32l;
+	class Cm64;
 	class Sc55Board;
 
 	// Offline work the device does at construction, before anyone can hear or see it.
@@ -43,19 +45,28 @@ namespace emu88Lib
 		{
 			enum class Type : uint8_t { None, Character, Graphic };
 
-			Type type = Type::None;
-			std::array<uint8_t, 80> ddRam{};
-			std::array<uint8_t, 64> cgRam{};
-			std::vector<uint8_t> mono;
-			uint16_t width = 0;
-			uint16_t height = 0;
-			uint8_t leds = 0;
-			bool displayOn = false;
+			// One display panel. A Character screen hands over the controller's memory for the
+			// SC-88 panel renderer; a Graphic one is already a dot grid, width x height, row major.
+			struct Screen
+			{
+				Type type = Type::None;
+				std::array<uint8_t, 80> ddRam{};
+				std::array<uint8_t, 64> cgRam{};
+				std::vector<uint8_t> mono;
+				uint16_t width = 0;
+				uint16_t height = 0;
+				bool displayOn = false;
+			};
+
+			// Only a board with two panels fills the second - see deviceHasSecondLcd(), which is
+			// the CM-64 and its two service displays.
+			std::array<Screen, 2> screens;
+			uint16_t leds = 0;
 			uint64_t revision = 0;
 		};
 
-		// _pcmCard is a raw card image for a board with a PCM card slot (the CM-32P); empty leaves
-		// the slot empty.
+		// _pcmCard is a raw card image for a board with a PCM card slot (the CM-32P, and the
+		// CM-64's PCM half); empty leaves the slot empty.
 		explicit HardwareDevice(const synthLib::DeviceCreateParams& _params, const BootOptions& _boot = {},
 		                        const std::vector<uint8_t>& _pcmCard = {});
 		// Whether the CM-32P can read _image as a PCM card.
@@ -102,7 +113,9 @@ namespace emu88Lib
 
 		float dacSamplerate() const;
 		void activateAnalogModel(AnalogModel _model);
-		std::pair<int32_t, int32_t> renderBoardSample();
+		// Renders one DAC frame into m_heldFrame, and into m_heldFrameB where the board has a
+		// second path.
+		void renderBoardFrame();
 		void writeOutputSample(const synthLib::TAudioOutputs& _outputs, size_t _index);
 		void sendMidiToBoard(const synthLib::SMidiEvent& _event);
 		void readMidiOutFromBoard(std::vector<synthLib::SMidiEvent>& _midiOut);
@@ -119,6 +132,8 @@ namespace emu88Lib
 		std::unique_ptr<Sc8850> m_sc8850;
 		std::unique_ptr<Sc8820> m_sc8820;
 		std::unique_ptr<Cm32p> m_cm32p;
+		std::unique_ptr<Cm32l> m_cm32l;
+		std::unique_ptr<Cm64> m_cm64;
 		std::unique_ptr<Sc55Board> m_sc55;
 		std::unique_ptr<synthLib::MidiRateLimiter> m_sc55MidiIn;
 		std::array<synthLib::MidiBufferParser, 2> m_sc88ProMidiOut{
@@ -143,10 +158,16 @@ namespace emu88Lib
 		DisplaySnapshot m_display;
 
 		AnalogOutput m_analogOutput;
+		// The board's own output amplifiers, applied whatever the analog setting is: switching
+		// the circuit emulation off should change the tone, not the volume.
+		BoardOutputGain m_boardGain;
 		AnalogModel m_selectedAnalogModel = AnalogModel::None;
 		uint8_t m_dacBits = synthLib::DacInterfaceBits;
-		// Output samples already produced from the held DAC frame.
+		// Output samples already produced from the held DAC frame. A board that is two boards
+		// summed keeps the second half in m_heldFrameB, so each can be filtered on its own way
+		// to the mixer; everything else leaves it zero and never looks at it.
 		uint32_t m_holdPhase = 0;
 		std::pair<int32_t, int32_t> m_heldFrame{};
+		std::pair<int32_t, int32_t> m_heldFrameB{};
 	};
 }

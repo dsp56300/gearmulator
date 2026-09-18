@@ -12,10 +12,31 @@
 namespace emu88Player
 {
 	using namespace editor;
+
+	// Both buttons in the title bar take their label height from here. The stock look
+	// and feel derives it from the button height, which leaves it unreadably small.
+	class TitleBarLookAndFeel final : public juce::LookAndFeel_V4
+	{
+	public:
+		juce::Font getTextButtonFont(juce::TextButton&, int /*_buttonHeight*/) override
+		{
+			return juce::Font(g_titleBarButtonFontHeight);
+		}
+	};
+
 	class TitleBarButton final : public juce::TextButton
 	{
 	public:
 		using juce::TextButton::TextButton;
+
+		~TitleBarButton() override
+		{
+			// The look and feel is a member here, so both buttons have to let go of it
+			// before it dies - the shell's one outlives this button entirely.
+			if(auto* options = optionsButton())
+				options->setLookAndFeel(nullptr);
+			setLookAndFeel(nullptr);
+		}
 
 		void setRecording(const bool _recording)
 		{
@@ -37,9 +58,23 @@ namespace emu88Player
 			const auto height = window->getTitleBarHeight() - 8;
 			if(height <= 0)
 				return;
+			setLookAndFeel(&m_lookAndFeel);
+
+			// The shell sizes its own button for the stock font, which the larger one
+			// overflows. This runs after its resized(), so widen it here and follow it.
+			auto right = g_optionsButtonRight;
+			if(auto* options = optionsButton())
+			{
+				options->setLookAndFeel(&m_lookAndFeel);
+				const auto font = m_lookAndFeel.getTextButtonFont(*options, height);
+				const auto width = std::max(g_optionsButtonWidth,
+					font.getStringWidth(options->getButtonText()) + g_titleBarTextPadding);
+				options->setBounds(g_optionsButtonX, g_titleBarButtonY, width, height);
+				right = options->getRight();
+			}
 			// Sized to its own content, so the glyph and the label stay together
 			// instead of drifting apart inside a box wider than either needs.
-			setBounds(g_optionsButtonRight + g_titleBarButtonGap, g_titleBarButtonY,
+			setBounds(right + g_titleBarButtonGap, g_titleBarButtonY,
 			          iconGutter(height) + textWidth(height) + g_recordIconMargin, height);
 		}
 
@@ -68,6 +103,23 @@ namespace emu88Player
 		}
 
 	private:
+		// The shell's Options button is the only other text button parented to the
+		// window - its own title bar buttons are plain Buttons, not TextButtons.
+		juce::TextButton* optionsButton() const
+		{
+			const auto* window = getParentComponent();
+			if(!window)
+				return nullptr;
+			for(auto* child : window->getChildren())
+			{
+				if(child == this)
+					continue;
+				if(auto* button = dynamic_cast<juce::TextButton*>(child))
+					return button;
+			}
+			return nullptr;
+		}
+
 		static juce::Rectangle<float> iconBounds(const int _height)
 		{
 			const auto size = std::max(5.0f, static_cast<float>(_height) * 0.45f);
@@ -88,6 +140,7 @@ namespace emu88Player
 			return std::max(font.getStringWidth(g_recordLabel), font.getStringWidth(g_recordStopLabel));
 		}
 
+		TitleBarLookAndFeel m_lookAndFeel;
 		bool m_recording = false;
 	};
 

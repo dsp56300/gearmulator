@@ -72,6 +72,14 @@ namespace
 		Complex circuit = 1.0;
 		switch(_model)
 		{
+		case AnalogModel::Cm32l:
+			// The two multiple-feedback sections; the first is fed by the three sample-and-hold
+			// resistors in parallel, which is what damps it. Then the VCA's I/V amplifier and
+			// IC22a's feedback capacitor; the DC blockers are excluded as everywhere here.
+			circuit = multipleFeedback(s, 1.0 / (1.0 / 6.8e3 + 1.0 / 6.8e3 + 1.0 / 10e3), 6.8e3, 6.8e3, 220e-12, 5.6e-9) *
+				multipleFeedback(s, 10e3, 10e3, 10e3, 220e-12, 5.6e-9) *
+				pole(s, 4.7e3, 100e-12) * pole(s, 15e3, 220e-12);
+			break;
 		case AnalogModel::Cm32p:
 			circuit = sallenKey(s, 10e3, 10e3, 5.6e-9, 220e-12) * sallenKey(s, 10e3, 10e3, 1.8e-9, 1.2e-9) *
 				pole(s, 100e3, 22e-12) * pole(s, 4.7e3 * 6.8e3 / 11.5e3, 1e-9);
@@ -266,6 +274,7 @@ int main()
 	CHECK_EQ(left, 0.25f);
 	CHECK_EQ(right, -0.5f);
 
+	checkResponse(AnalogModel::Cm32l);
 	checkResponse(AnalogModel::Cm32p);
 	checkResponse(AnalogModel::Sc88);
 	checkResponse(AnalogModel::Sc88Vl);
@@ -277,6 +286,7 @@ int main()
 	checkResponse(AnalogModel::Sc8820);
 	checkResponse(AnalogModel::Sc55Mk2);
 
+	checkDcBlocked(AnalogModel::Cm32l, 1.0);
 	checkDcBlocked(AnalogModel::Cm32p, 1.0);		// C58A into 11.5k: 1.4 Hz
 	checkDcBlocked(AnalogModel::Sc88, 4.0);			// C147 into 10.7k: 0.32 Hz
 	checkDcBlocked(AnalogModel::Sc88Vl, 4.0);		// C46 into 10.7k: 0.32 Hz

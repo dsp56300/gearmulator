@@ -55,6 +55,7 @@ namespace emu88Lib
 		};
 		static std::vector<uint8_t> decodeWaves(const WaveRoms& waves);
 		void writeLcd(bool data, uint8_t value);
+		float applyVca();
 
 		mcs96::Machine m_machine{mcs96::Variant::I8x9x};
 		std::vector<uint8_t> m_waves;
@@ -66,6 +67,9 @@ namespace emu88Lib
 		synthLib::MidiBufferParser m_midiOut{synthLib::MidiEventSource::Device};
 		uint64_t m_cycleTarget = 0;
 		emu::Scheduler::EventId m_lcdReadyEvent = 0;
+		// The VCA's control voltage, the CPU's PWM smoothed by R63/C89, held as the gain it
+		// produces. The firmware parks it at full and only sweeps it over the power-on fade.
+		float m_vcaGain = 0.0f;
 		bool m_valid = false;
 		bool m_cardInserted = false;
 	};

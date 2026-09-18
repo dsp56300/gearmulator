@@ -209,9 +209,11 @@ int main()
 	routing.finish();
 	Cm32p routed({routing.bytes, waves});
 	Cm32p::SampleFrame frame{};
-	for(unsigned i = 0; i < 200; ++i)
+	// The board fades in: C89 starts discharged, so the VCA needs a few of its 8.2 ms time
+	// constants before the DAC word reaches the output unattenuated.
+	for(unsigned i = 0; i < 8 * 262; ++i)
 		frame = routed.renderSample();
-	CHECK_EQ(frame.first, (0x100000 >> 8) * 256);
+	CHECK(std::abs(frame.first - (0x100000 >> 8) * 256) < (0x100000 >> 8) * 256 / 200);
 	CHECK_EQ(frame.second, 0);
 
 	// A synthetic PCM card: eight tone names where the tone list starts, and a byte at the LP

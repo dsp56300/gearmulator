@@ -57,7 +57,8 @@ namespace emu88Player
     {
         static constexpr const char* ids[] = {"sc88",   "sc88vl", "sc88pro", "sc8850",  "sc55mk2", "sc55",
                                               "sc55st", "cm300",  "scb55",   "rlp3237", "sc155",   "sc155mk2",
-                                              "xpgs",   "sc8820", "cm32p",   "vegspro", "scc1a",   "cm64"};
+                                              "xpgs",   "sc8820", "cm32p",   "vegspro", "scc1a",   "cm64",
+                                              "cm32l"};
         static_assert(std::size(ids) == emu88Lib::g_deviceMenuOrder.size(), "one ID per device model, in enum order");
         return ids[static_cast<size_t>(model)];
     }

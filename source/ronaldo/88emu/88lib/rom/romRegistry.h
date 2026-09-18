@@ -5,6 +5,7 @@
 #include <string>
 
 #include "baseLib/md5.h"
+#include "baseLib/sha1.h"
 
 namespace emu88Lib
 {
@@ -41,9 +42,11 @@ namespace emu88Lib
         Cm32p,
         VeGsPro,
         Scc1a,
-        // Scaffolding: no registry row names the CM-64 yet, which is what keeps
-        // RomInventory::isComplete() - and so the board - reporting unavailable.
+        // Has no registry rows of its own: it is a CM-32L and a CM-32P in one case, and the
+        // inventory answers every question about it by asking those two.
         Cm64,
+        Cm32l,
+        Mt32,
 
         Count
     };
@@ -77,9 +80,74 @@ namespace emu88Lib
         Data,
         // PCM sample data.
         Wave,
+        // Microcode for a fixed-function DSP: the CM-32L's Boss reverb gate
+        // array steps through it once per sample.
+        Reverb,
 
         Count
     };
+
+    // An image the board reads as one piece that was dumped as a pair of chips. The whole
+    // is what a board asks for; the two chips are an alternative way to supply it, joined
+    // on read, and the whole is cut back up for anything that asks for a single chip. Only
+    // the whole index is ever required, so a board is complete with either form.
+    //
+    // A chip that happens to be a whole image in its own right needs no entry here: it
+    // already matches that slot by content.
+    struct RomCompositeSlot
+    {
+        RomDevice device;
+        RomSlot slot;
+        // The index the board asks for, and the first of the two chip indices that supply
+        // it; the second is the one after.
+        uint8_t wholeIndex;
+        uint8_t firstChip;
+        size_t wholeSize;
+        size_t chipSize;
+        // The MT-32's two firmware EPROMs sit on a 16-bit bus and are byte-multiplexed:
+        // even addresses come from the first chip, odd from the second. PCM chips are
+        // consecutive address ranges and simply concatenate.
+        bool interleaved;
+    };
+
+    inline constexpr RomCompositeSlot g_romCompositeSlots[] = {
+        {RomDevice::Cm32l, RomSlot::Wave, 0, 1, 0x100000, 0x80000, false},
+        {RomDevice::Mt32, RomSlot::Wave, 0, 1, 0x80000, 0x40000, false},
+        {RomDevice::Mt32, RomSlot::Control, 0, 1, 0x10000, 0x8000, true},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 0, 3, 0x800000, 0x400000, false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 1, 5, 0x800000, 0x400000, false},
+    };
+
+    // The composite this index is the whole image of, if any.
+    constexpr const RomCompositeSlot* findCompositeWhole(const RomDevice _device, const RomSlot _slot,
+                                                         const uint8_t _index)
+    {
+        for (const auto& composite : g_romCompositeSlots)
+        {
+            if (composite.device == _device && composite.slot == _slot && composite.wholeIndex == _index)
+                return &composite;
+        }
+        return nullptr;
+    }
+
+    // The composite this index is a chip of, if any. Chips are an alternative to their
+    // whole image rather than an additional requirement.
+    constexpr const RomCompositeSlot* findCompositeChip(const RomDevice _device, const RomSlot _slot,
+                                                        const uint8_t _index)
+    {
+        for (const auto& composite : g_romCompositeSlots)
+        {
+            if (composite.device == _device && composite.slot == _slot && _index >= composite.firstChip &&
+                _index < composite.firstChip + 2)
+                return &composite;
+        }
+        return nullptr;
+    }
+
+    constexpr bool isCompositeChip(const RomDevice _device, const RomSlot _slot, const uint8_t _index)
+    {
+        return findCompositeChip(_device, _slot, _index) != nullptr;
+    }
 
     // Required filenames are intentionally independent of the known hashes
     // below. A correctly sized file with one of these basenames is allowed to
@@ -96,6 +164,17 @@ namespace emu88Lib
     };
 
     inline constexpr RomFileSpec g_romFileSpecs[] = {
+        {RomDevice::Cm32l, RomSlot::Control, 0, 0x10000, "cm32l_control.bin", false},
+        {RomDevice::Cm32l, RomSlot::Wave, 0, 0x100000, "cm32l_wave.bin", false},
+        {RomDevice::Cm32l, RomSlot::Wave, 1, 0x80000, "r15449121.bin", false},
+        {RomDevice::Cm32l, RomSlot::Wave, 2, 0x80000, "r15179945.bin", false},
+        {RomDevice::Cm32l, RomSlot::Reverb, 0, 0x8000, "cm32l_reverb.bin", false},
+        {RomDevice::Mt32, RomSlot::Control, 0, 0x10000, "mt32_control.bin", false},
+        {RomDevice::Mt32, RomSlot::Control, 0, 0x20000, "mt32_control.bin", false},
+        {RomDevice::Mt32, RomSlot::Wave, 0, 0x80000, "mt32_wave.bin", false},
+        {RomDevice::Mt32, RomSlot::Wave, 1, 0x40000, "r15179844.bin", false},
+        {RomDevice::Mt32, RomSlot::Wave, 2, 0x40000, "r15179845.bin", false},
+        {RomDevice::Mt32, RomSlot::Reverb, 0, 0x8000, "mt32_reverb.bin", false},
         {RomDevice::Cm32p, RomSlot::Program, 0, 0x10000, "cm32p_program.bin", false},
         {RomDevice::Cm32p, RomSlot::Wave, 0, 0x80000, "cm32p_wave0.bin", false},
         {RomDevice::Cm32p, RomSlot::Wave, 1, 0x80000, "cm32p_wave1.bin", false},
@@ -117,6 +196,10 @@ namespace emu88Lib
         {RomDevice::Sc88Pro, RomSlot::Wave, 0, 0x800000, "sc88pro_wave0.bin", false},
         {RomDevice::Sc88Pro, RomSlot::Wave, 1, 0x800000, "sc88pro_wave1.bin", false},
         {RomDevice::Sc88Pro, RomSlot::Wave, 2, 0x400000, "sc88pro_wave2.bin", false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 3, 0x400000, "sc88pro_wave_cs0.bin", false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 4, 0x400000, "sc88pro_wave_cs1.bin", false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 5, 0x400000, "sc88pro_wave_cs2.bin", false},
+        {RomDevice::Sc88Pro, RomSlot::Wave, 6, 0x400000, "sc88pro_wave_cs3.bin", false},
         {RomDevice::VeGsPro, RomSlot::Control, 0, 0x100000, "vegspro_control.bin", true},
         {RomDevice::VeGsPro, RomSlot::Wave, 0, 0x800000, "vegspro_wave0.bin", false},
         {RomDevice::VeGsPro, RomSlot::Wave, 1, 0x800000, "vegspro_wave1.bin", false},
@@ -204,6 +287,13 @@ namespace emu88Lib
         bool badDump = false;
         // Linear XP dumps require address/data conversion before board loading.
         bool xpWaveDump = false;
+        // Set instead of the MD5 above on a revision catalogued from a published
+        // digest rather than from a dump we hold: MAME and munt both print SHA-1, so
+        // a firmware nobody here has can still be recognized on a user's machine. The
+        // scanner falls back to it exactly when hash is unset, and a row never needs
+        // both. Word swapping is not supported alongside it - no such dump circulates
+        // in two orientations.
+        baseLib::SHA1 sha1 = {};
     };
 
     // The SC-88 and SC-88VL run different firmware on the same board, and the
@@ -211,6 +301,116 @@ namespace emu88Lib
     // booting one image as the other blanks the display. Content addressing is
     // what keeps them apart.
     inline constexpr RomRegistryEntry g_romRegistry[] = {
+        // -----------------------------------------------------------------
+        // CM-32L
+        // -----------------------------------------------------------------
+        // Three control ROMs run this board, in preference order: the CM-32L's own 1.02, the
+        // LAPC-I's 1.00, which is the same firmware on an ISA card and boots identically here,
+        // and the CM-32LN's, shared with the CM-500 and LAPC-N. The wave image is R15449121
+        // (the complete MT-32 PCM set) followed by the CM-32L's own extension chip R15179945;
+        // the halves are also accepted separately. The reverb ROM is shared with the MT-100
+        // and RA-50.
+        {romDevices(RomDevice::Cm32l), RomSlot::Control, 0, 0x10000, baseLib::MD5("bfff32b6144c1d706109accb6e6b1113"),
+         "1.02", false},
+        {romDevices(RomDevice::Cm32l), RomSlot::Control, 0, 0x10000, baseLib::MD5("099552dcbc6a94bb0d2abf1281873fa1"),
+         "1.00, LAPC-I", false},
+        {romDevices(RomDevice::Cm32l), RomSlot::Control, 0, 0x10000, {}, "1.00, CM-32LN/CM-500/LAPC-N", false, false,
+         false, baseLib::SHA1("dc1c5b1b90a4646d00f7daf3679733c7badc7077")},
+        {romDevices(RomDevice::Cm32l), RomSlot::Wave, 0, 0x100000, baseLib::MD5("08cdcfa0ed93e9cb16afa76e6ac5f0a4"),
+         "R15449121+R15179945", false},
+        {romDevices(RomDevice::Cm32l), RomSlot::Reverb, 0, 0x8000, baseLib::MD5("46d3bb96193004181a4db38c0ba92b25"),
+         "R15179917", false},
+        // The wave chips as separately dumped halves. They are not required when the combined
+        // image above is present; RomInventory::read() joins them when it is not.
+        {romDevices(RomDevice::Cm32l), RomSlot::Wave, 1, 0x80000, baseLib::MD5("89e42e386e82e0cacb4a2704a03706ca"),
+         "R15449121", false},
+        {romDevices(RomDevice::Cm32l), RomSlot::Wave, 2, 0x80000, baseLib::MD5("f7909bed95b04d8dc4cc47970e2bc3e6"),
+         "R15179945", false},
+
+        // -----------------------------------------------------------------
+        // MT-32
+        // -----------------------------------------------------------------
+        // Two generations of board. The 1.x firmware is a pair of 32 KiB EPROMs on a 16-bit
+        // bus, so its combined image is the two byte-multiplexed rather than concatenated;
+        // both forms are accepted. The 2.x board replaced them with a single banked 128 KiB
+        // mask ROM. Blue Ridge and M-9 are third-party 1.x firmwares, the latter built on
+        // 1.07, which it still reports as its version.
+        //
+        // Control ROMs are listed newest-first within each generation. 2.03 is the MT-100's
+        // firmware; that machine is an MT-32 with a sequencer and a Quick Disk drive on the
+        // same main board.
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("5626206284b22c2734f3e9efefcd2675"),
+         "1.07, 10 Oct 87", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("abe0982e4f662f881affa7d8a932c739"),
+         "1.06, 31 Aug 87", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("5de47ca37a3712ed32993f865ee9fb5b"),
+         "1.05, 06 Aug 87", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("c5233e4594f9b7bc4f773ae6ba5aa87d"),
+         "1.04, 14 July 87", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("9513fec4f09a7d327748340ce3a2a59b"),
+         "Blue Ridge, verX.XX 30 Sep 88", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("b7180ac1be56e740b0f635062c791b5a"),
+         "M-9, ver1.07 10 Oct 87", false},
+        // The 2.x line. Only 2.04 has been hashed here; the other three are catalogued from
+        // munt's published digests.
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x20000, {}, "2.07", false, false, false,
+         baseLib::SHA1("47b52adefedaec475c925e54340e37673c11707c")},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x20000, {}, "2.06", false, false, false,
+         baseLib::SHA1("2869cf4c235d671668cfcb62415e2ce8323ad4ed")},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x20000, baseLib::MD5("615a866337ecb752768ac03ed4ddf85c"),
+         "2.04, 88-11-11", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x20000, {}, "2.03, MT-100", false, false, false,
+         baseLib::SHA1("5837064c9df4741a55f7c4d8787ac158dff2d3ce")},
+
+        // The 1.x firmware EPROMs as separately dumped chips: A at IC27 supplies the even
+        // addresses, B at IC26 the odd ones. On 1.07 they were also produced as mask ROMs
+        // R15449122 and R15449123, but the dumps in circulation are of the socketed parts,
+        // so the pair is catalogued by content alone rather than by part number.
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("d241220ed9c171ffcf347413eaf5969b"),
+         "1.07 A, IC27", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("346d6c8ef954c1901822d349dd658aef"),
+         "1.07 B, IC26", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("2a2e1a6f83d3bfd5799b1b835b68784f"),
+         "1.06 A, IC27", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("04d9852b98409301ec59f300f6e3d0e9"),
+         "1.06 B, IC26", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("0dfb58615f6789f9ba382988d88d2014"),
+         "1.05 A, IC27", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("cd83d3b708887a5822d5155782b922d0"),
+         "1.05 B, IC26", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("1eddb73995829e4befecd40b13dfb408"),
+         "1.04 A, IC27", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("87546da1c1b9ad1354baea23a28e6981"),
+         "1.04 B, IC26", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("c6c8ba9fef6923e1788b8e5e7308df68"),
+         "Blue Ridge A", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("d5ed9d93730d625df29e910527082a0b"),
+         "Blue Ridge B", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("4194e653a5ebb2e3217318fc5ea8b9ea"),
+         "M-9 A, IC27", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("65cf18bdf8569abe30892be9e12976d0"),
+         "M-9 B, IC26", false},
+
+        // The PCM set. The late board carries it as the single mask ROM R15449121, which the
+        // CM-32L reuses as the lower half of its own image; the early board splits the same
+        // data over R15179844 and R15179845.
+        //
+        // Both reverb microcodes belong here, in board order: the early board's R15179857 and
+        // the R15179917 the late board and the MT-100 carry in the same IC13 position, which
+        // the CM-32L then reuses at IC19.
+        {romDevices(RomDevice::Mt32), RomSlot::Wave, 0, 0x80000, baseLib::MD5("89e42e386e82e0cacb4a2704a03706ca"),
+         "R15449121", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Wave, 1, 0x40000, baseLib::MD5("499539a02b726aa43f9a22cf05c48e7b"),
+         "R15179844", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Wave, 2, 0x40000, baseLib::MD5("0d4908e119ddfa6f0283b46bc9fe744d"),
+         "R15179845", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Wave, 0, 0x80000, baseLib::MD5("21efb00e7881f7fa0b6fcdfadd2d33c3"),
+         "BAD_DUMP: R15449121", false, true},
+        {romDevices(RomDevice::Mt32), RomSlot::Reverb, 0, 0x8000, baseLib::MD5("181499301ad745424fee81ad61102588"),
+         "R15179857", false},
+        {romDevices(RomDevice::Mt32), RomSlot::Reverb, 0, 0x8000, baseLib::MD5("46d3bb96193004181a4db38c0ba92b25"),
+         "R15179917", false},
+
         {romDevices(RomDevice::Cm32p), RomSlot::Program, 0, 0x10000, baseLib::MD5("ccd61a220f433a62a53b48eb9bb36827"),
          "1.00", false},
         {romDevices(RomDevice::Cm32p), RomSlot::Wave, 0, 0x80000, baseLib::MD5("21efdc888020fe99303ef34265349021"),
@@ -270,6 +470,22 @@ namespace emu88Lib
          baseLib::MD5("125ea2056dc208f04a141b3dcdffdb1b"), "R01567178, SC-GS 1.00", false},
         {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 2, 0x400000,
          baseLib::MD5("48c3887c9a2a574b907242640fa0a320"), "R01233667, SC-GS 1.00", false},
+
+        // The same PCM as the five 4 MiB mask ROMs the SC-88Pro board carries instead, one
+        // per XP chip select. CS4 is R01233667 unchanged, so the row above already is it;
+        // these four are the halves of the two larger parts, in chip-select order.
+        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 3, 0x400000,
+         baseLib::MD5("decc8a499b69e68ee8b121d73410c36b"), "CS0, first half of R01567167, derived reference",
+         false},
+        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 4, 0x400000,
+         baseLib::MD5("69933f0a2a3f6f4ab53932f40ba63f74"), "CS1, second half of R01567167, derived reference",
+         false},
+        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 5, 0x400000,
+         baseLib::MD5("bda725bd1cf8c3911f906314ca162bed"), "CS2, first half of R01567178, derived reference",
+         false},
+        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 6, 0x400000,
+         baseLib::MD5("94e94038993600555b738e8ccc24d8b8"), "CS3, second half of R01567178, derived reference",
+         false},
 
         // -----------------------------------------------------------------
         // VE-GS Pro
@@ -406,6 +622,8 @@ namespace emu88Lib
             return "Data ROM";
         case RomSlot::Wave:
             return "Wave ROM";
+        case RomSlot::Reverb:
+            return "Reverb ROM";
         default:
             return "ROM";
         }
@@ -443,6 +661,12 @@ namespace emu88Lib
             return "SCC-1A";
         case RomDevice::Cm32p:
             return "CM-32P";
+        case RomDevice::Cm32l:
+            return "CM-32L";
+        case RomDevice::Mt32:
+            return "MT-32";
+        case RomDevice::Cm64:
+            return "CM-64";
         case RomDevice::Scb55:
             return "SCB-55";
         case RomDevice::Rlp3237:
@@ -498,13 +722,14 @@ namespace emu88Lib
 
     // Looks a candidate up by content. _wordSwappedOnly restricts the search to
     // rows whose dump is known to circulate byte-swapped, so a normalization is
-    // never invented for a ROM that does not need one.
+    // never invented for a ROM that does not need one. SHA-1-only rows are never
+    // returned: they carry no MD5 to compare against.
     inline const RomRegistryEntry* findRegistryEntry(const size_t _size, const baseLib::MD5& _hash,
                                                      const bool _wordSwappedOnly = false)
     {
         for (const auto& entry : g_romRegistry)
         {
-            if (entry.size != _size || (_wordSwappedOnly && !entry.wordSwapped))
+            if (entry.size != _size || (_wordSwappedOnly && !entry.wordSwapped) || !entry.hash.isValid())
                 continue;
             if (entry.hash == _hash)
                 return &entry;

@@ -1,10 +1,10 @@
 body {
-	width: 560dp;
-	height: 360dp;
+	width: 690dp;
+	height: 410dp;
 	background-color: #252b30;
 	color: #dce2e6;
 	font-family: Roboto;
-	font-size: 12dp;
+	font-size: 13dp;
 	font-weight: 400;
 	overflow: hidden;
 }
@@ -30,14 +30,14 @@ body {
 
 .hardwareSettingsNavButton {
 	width: 101dp;
-	height: 29dp;
+	height: 31dp;
 	box-sizing: border-box;
 	padding: 7dp 9dp;
 	background-color: transparent;
 	border: 1dp transparent;
 	border-radius: 4dp;
 	color: #b8c0c5;
-	font-size: 11dp;
+	font-size: 12dp;
 	text-align: left;
 	cursor: pointer;
 }
@@ -68,7 +68,7 @@ body {
 
 .hardwareSettingsPageHeader {
 	display: block;
-	height: 32dp;
+	height: 36dp;
 	border-bottom: 1dp #3b444b;
 }
 
@@ -77,7 +77,7 @@ body {
 	margin: 0dp 0dp 3dp 0dp;
 	padding: 0dp;
 	color: #f3f5f6;
-	font-size: 17dp;
+	font-size: 19dp;
 	font-weight: 600;
 	text-align: left;
 }
@@ -86,13 +86,13 @@ body {
 	display: block;
 	margin: 12dp 0dp 7dp 0dp;
 	color: #aeb8be;
-	font-size: 10dp;
+	font-size: 11dp;
 	font-weight: 600;
 }
 
 .hardwareSettingsPages .button {
 	min-width: 55dp;
-	height: 24dp;
+	height: 26dp;
 	box-sizing: border-box;
 	padding: 5dp 9dp;
 	border: 1dp #515c64;
@@ -100,8 +100,8 @@ body {
 	background-color: #333c42;
 	box-shadow: none;
 	color: #e4e8ea;
-	font-size: 10dp;
-	line-height: 12dp;
+	font-size: 11dp;
+	line-height: 13dp;
 	cursor: pointer;
 }
 
@@ -123,15 +123,15 @@ body {
 }
 
 .hardwareSkinHeader {
-	height: 25dp;
+	height: 27dp;
 	background-color: #20262a;
 	color: #88949c;
-	font-size: 9dp;
+	font-size: 10dp;
 	font-weight: 600;
 }
 
 .hardwareSkinRow {
-	height: 34dp;
+	height: 36dp;
 	background-color: #2c3338;
 	border-top: 1dp #414b52;
 }
@@ -174,14 +174,14 @@ body {
 }
 
 .hardwareWideChoice {
-	width: 260dp;
+	width: 310dp;
 }
 
 .hardwareChoice {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	height: 27dp;
+	height: 29dp;
 	box-sizing: border-box;
 	gap: 7dp;
 	padding: 5dp 7dp;
@@ -199,9 +199,9 @@ body {
 .settings-checkbox {
 	display: block;
 	position: relative;
-	width: 11dp;
-	min-width: 11dp;
-	height: 11dp;
+	width: 12dp;
+	min-width: 12dp;
+	height: 12dp;
 	padding: 0dp;
 	border: 1dp #66737c;
 	border-radius: 2dp;
@@ -214,7 +214,7 @@ body {
 	image-color: #ffffff;
 }
 
-/* Two fields to a row: each is half the page's 404dp content width, less the gap. */
+/* Two fields to a row: each is half the page's 534dp content width, less the gap. */
 .hardwareFormGrid {
 	display: flex;
 	flex-direction: row;
@@ -232,27 +232,27 @@ body {
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
-	width: 196dp;
-	height: 25dp;
+	width: 261dp;
+	height: 29dp;
 	color: #aeb8be;
-	font-size: 10dp;
+	font-size: 13dp;
 }
 
 .hardwareFormList .hardwareField {
-	width: 260dp;
+	width: 310dp;
 }
 
 /* Every control one width; flex would otherwise shrink the ones beside a long label. */
 .hardwareField combo, .hardwareField input {
-	flex: 0 0 116dp;
-	width: 116dp;
-	height: 22dp;
+	flex: 0 0 132dp;
+	width: 132dp;
+	height: 26dp;
 	box-sizing: border-box;
 	border: 1dp #515c64;
 	border-radius: 3dp;
 	background-color: #1f2529;
 	color: #eef1f2;
-	font-size: 10dp;
+	font-size: 13dp;
 }
 
 .hardwareField combo {
@@ -272,7 +272,7 @@ body {
 	margin-right: 14dp;
 	overflow: hidden;
 	white-space: nowrap;
-	line-height: 12dp;
+	line-height: 14dp;
 }
 
 /* The controls under the audio device grid would otherwise touch its last row. */
@@ -299,7 +299,7 @@ body {
 }
 
 .hardwareMidiOutput {
-	width: 198dp;
+	width: 210dp;
 }
 
 .hardwarePortMidi {
@@ -309,7 +309,7 @@ body {
 .hardwareInputLabel {
 	margin: 9dp 0dp 5dp 0dp;
 	color: #8e9aa2;
-	font-size: 9dp;
+	font-size: 10dp;
 }
 
 /* Sized to fill the page: header, output row, this list and the note below add up to the
@@ -318,7 +318,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	gap: 1dp;
-	height: 206dp;
+	height: 240dp;
 	box-sizing: border-box;
 	padding: 3dp;
 	border: 1dp #414b52;
@@ -333,14 +333,14 @@ body {
 	flex-direction: row;
 	align-items: center;
 	width: 100%;
-	height: 20dp;
-	min-height: 20dp;
+	height: 22dp;
+	min-height: 22dp;
 	box-sizing: border-box;
 	padding: 2dp 3dp 2dp 6dp;
 	gap: 3dp;
 	border-radius: 2dp;
 	color: #c9d0d4;
-	font-size: 10dp;
+	font-size: 11dp;
 }
 
 .hardwareMidiInput:hover {
@@ -363,9 +363,9 @@ body {
 
 .hardwareMidiGroup {
 	display: block;
-	width: 17dp;
-	min-width: 17dp;
-	height: 15dp;
+	width: 19dp;
+	min-width: 19dp;
+	height: 17dp;
 	box-sizing: border-box;
 	padding: 0dp;
 	border-width: 1dp 0dp 1dp 1dp;
@@ -373,8 +373,8 @@ body {
 	border-radius: 0dp;
 	background-color: #171c1f;
 	color: #8e9aa2;
-	font-size: 9dp;
-	line-height: 13dp;
+	font-size: 10dp;
+	line-height: 14dp;
 	text-align: center;
 	cursor: pointer;
 }
@@ -409,20 +409,21 @@ body {
 .hardwareMidiNote {
 	margin-top: 6dp;
 	color: #77838b;
-	font-size: 9dp;
-	line-height: 11dp;
+	font-size: 10dp;
+	line-height: 13dp;
 }
 
 .hardwareMidiInputEmpty {
 	padding: 4dp 2dp;
 	color: #77838b;
-	font-size: 9dp;
+	font-size: 10dp;
 }
 
-.hardwareDeveloperChoices {
+/* Wide choices stacked one per row; without the gap their boxes would touch. */
+.hardwareChoiceList {
 	display: flex;
 	flex-direction: column;
-	gap: 7dp;
+	gap: 8dp;
 }
 
 scrollbarvertical {

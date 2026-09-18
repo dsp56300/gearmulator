@@ -15,6 +15,7 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/sc55mk2_panel.png
 	${HARDWARE_SKIN_DIR}/sc8820_panel.png
 	${HARDWARE_SKIN_DIR}/cm32p_panel.png
+	${HARDWARE_SKIN_DIR}/cm32l_panel.png
 	${HARDWARE_SKIN_DIR}/cm64_panel.png
 	${HARDWARE_SKIN_DIR}/sc88exp_panel.png
 	${HARDWARE_SKIN_DIR}/sc55pc_panel.png
@@ -38,6 +39,8 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/selector_led_on.svg
 	${HARDWARE_SKIN_DIR}/efx_led_off.svg
 	${HARDWARE_SKIN_DIR}/efx_led_on.svg
+	${HARDWARE_SKIN_DIR}/efx_led_green.svg
+	${HARDWARE_SKIN_DIR}/efx_led_amber.svg
 	${HARDWARE_SKIN_DIR}/cm_led_on.png
 	${HARDWARE_SKIN_DIR}/knob.png
 	${HARDWARE_SKIN_DIR}/value_knob.png

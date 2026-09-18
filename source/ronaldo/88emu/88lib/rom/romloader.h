@@ -78,6 +78,7 @@ namespace emu88Lib
 
     private:
         const FoundRom* findSc88ProWaveSource(uint8_t _index, size_t& _offset) const;
+        bool readComposite(std::vector<uint8_t>& _data, RomDevice _device, RomSlot _slot, uint8_t _index) const;
         std::vector<FoundRom> m_roms;
     };
 
@@ -134,6 +135,9 @@ namespace emu88Lib
         // ROM required by the selected board revision.
         static Sc55RomSet findSc55RomSet(DeviceModel _model);
         static Cm32pRomSet findCm32pRomSet();
+
+        // CM-32L: control ROM, the LA32's PCM image and the Boss reverb microcode.
+        static Cm32lRomSet findCm32lRomSet();
 
         // The four internal PCM chips, de-scrambled into the XP's flat 8 MiB
         // space.

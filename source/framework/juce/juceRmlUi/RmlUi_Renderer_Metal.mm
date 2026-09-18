@@ -470,6 +470,7 @@ struct RenderInterface_Metal::Impl
 	id<MTLDevice> device = nil;
 	id<MTLCommandQueue> commandQueue = nil;
 	id<MTLLibrary> shaderLibrary = nil;
+	int sampleCount = RMLUI_NUM_MSAA_SAMPLES;
 
 	// Vertex descriptor shared across pipelines
 	MTLVertexDescriptor* vertexDescriptor = nil;
@@ -541,8 +542,8 @@ struct RenderInterface_Metal::Impl
 	// Layer stack
 	class RenderLayerStack {
 	public:
-		RenderLayerStack(Rml::CoreInstance& _coreInstance, id<MTLDevice> _device)
-			: core_instance(_coreInstance), device(_device) { fb_postprocess.resize(4); }
+		RenderLayerStack(Rml::CoreInstance& _coreInstance, id<MTLDevice> _device, int _sampleCount)
+			: core_instance(_coreInstance), device(_device), sampleCount(_sampleCount) { fb_postprocess.resize(4); }
 		~RenderLayerStack() { DestroyAll(); }
 
 		Rml::LayerHandle PushLayer()
@@ -553,7 +554,7 @@ struct RenderInterface_Metal::Impl
 			{
 				id<MTLTexture> sharedStencil = fb_layers.empty() ? nil : fb_layers.front().stencilTexture;
 				fb_layers.push_back({});
-				MetalGfx::CreateRenderTarget(device, fb_layers.back(), width, height, RMLUI_NUM_MSAA_SAMPLES, sharedStencil);
+				MetalGfx::CreateRenderTarget(device, fb_layers.back(), width, height, sampleCount, sharedStencil);
 			}
 
 			layers_size += 1;
@@ -629,6 +630,7 @@ struct RenderInterface_Metal::Impl
 
 		Rml::CoreInstance& core_instance;
 		id<MTLDevice> device;
+		const int sampleCount;
 		int width = 0, height = 0;
 		int layers_size = 0;
 		Rml::Vector<MetalGfx::RenderTargetData> fb_layers;
@@ -645,9 +647,36 @@ struct RenderInterface_Metal::Impl
 		commandQueue = [device newCommandQueue];
 	}
 
+	~Impl()
+	{
+		for (const auto& entry : pipelineStates)
+			[entry.second release];
+		for (const auto& entry : postprocessPipelineStates)
+			[entry.second release];
+		[drawablePipeline release];
+		[stencilDisabled release];
+		[stencilAlwaysKeep release];
+		[stencilTestEqual release];
+		[stencilWriteReplace release];
+		[stencilWriteIncrement release];
+		[samplerLinearClamp release];
+		[samplerLinearRepeat release];
+		[vertexDescriptor release];
+		[shaderLibrary release];
+		[commandQueue release];
+	}
+
 	bool Initialize()
 	{
-		if (!CreateShaderLibrary())
+		// Some Mac GPUs support 4x MSAA but not the preferred 2x mode.
+		if (![device supportsTextureSampleCount:sampleCount])
+			sampleCount = 4;
+		if (![device supportsTextureSampleCount:sampleCount])
+		{
+			Rml::Log::Message(core_instance, Rml::Log::LT_ERROR, "No supported Metal MSAA sample count");
+			return false;
+		}
+		if (!commandQueue || !CreateShaderLibrary())
 			return false;
 		if (!CreateVertexDescriptor())
 			return false;
@@ -658,7 +687,7 @@ struct RenderInterface_Metal::Impl
 		if (!CreateSamplerStates())
 			return false;
 
-		renderLayers = Rml::MakeUnique<RenderLayerStack>(core_instance, device);
+		renderLayers = Rml::MakeUnique<RenderLayerStack>(core_instance, device, sampleCount);
 
 		return true;
 	}
@@ -667,7 +696,7 @@ struct RenderInterface_Metal::Impl
 	{
 		NSError* error = nil;
 		NSString* source = [NSString stringWithUTF8String:g_metalShaderSource];
-		MTLCompileOptions* options = [[MTLCompileOptions alloc] init];
+		MTLCompileOptions* options = [[[MTLCompileOptions alloc] init] autorelease];
 		options.languageVersion = MTLLanguageVersion2_0;
 
 		shaderLibrary = [device newLibraryWithSource:source options:options error:&error];
@@ -750,8 +779,8 @@ struct RenderInterface_Metal::Impl
 
 	bool CreateSinglePipeline(const PipelineDef& def)
 	{
-		id<MTLFunction> vertFunc = [shaderLibrary newFunctionWithName:[NSString stringWithUTF8String:def.vertFunc]];
-		id<MTLFunction> fragFunc = [shaderLibrary newFunctionWithName:[NSString stringWithUTF8String:def.fragFunc]];
+		id<MTLFunction> vertFunc = [[shaderLibrary newFunctionWithName:[NSString stringWithUTF8String:def.vertFunc]] autorelease];
+		id<MTLFunction> fragFunc = [[shaderLibrary newFunctionWithName:[NSString stringWithUTF8String:def.fragFunc]] autorelease];
 
 		if (!vertFunc || !fragFunc)
 		{
@@ -759,13 +788,13 @@ struct RenderInterface_Metal::Impl
 			return false;
 		}
 
-		MTLRenderPipelineDescriptor* pipeDesc = [[MTLRenderPipelineDescriptor alloc] init];
+		MTLRenderPipelineDescriptor* pipeDesc = [[[MTLRenderPipelineDescriptor alloc] init] autorelease];
 		pipeDesc.vertexFunction = vertFunc;
 		pipeDesc.fragmentFunction = fragFunc;
 		pipeDesc.vertexDescriptor = vertexDescriptor;
 
 		// MSAA render targets
-		pipeDesc.rasterSampleCount = RMLUI_NUM_MSAA_SAMPLES;
+		pipeDesc.rasterSampleCount = sampleCount;
 		pipeDesc.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
 		pipeDesc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
 		pipeDesc.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
@@ -814,25 +843,6 @@ struct RenderInterface_Metal::Impl
 		PipelineKey key{def.id, def.blend, def.colorWriteDisabled};
 		pipelineStates[key] = pso;
 
-		// Also create non-MSAA variant for postprocess passes
-		if (def.blend != MetalGfx::BlendMode::PremultipliedAlpha || def.id == MetalGfx::PipelineId::Passthrough ||
-			def.id == MetalGfx::PipelineId::ColorMatrix || def.id == MetalGfx::PipelineId::BlendMask ||
-			def.id == MetalGfx::PipelineId::Blur || def.id == MetalGfx::PipelineId::DropShadow)
-		{
-			pipeDesc.rasterSampleCount = 1;
-			pipeDesc.stencilAttachmentPixelFormat = MTLPixelFormatInvalid;
-
-			id<MTLRenderPipelineState> ppPso = [device newRenderPipelineStateWithDescriptor:pipeDesc error:&error];
-			if (ppPso)
-			{
-				// Store with a special marker — use negative blend enum to distinguish
-				// We'll use a different approach: postprocess pipelines have colorWriteDisabled = false and blend as-is,
-				// but we need a way to look them up. Let's use a flag.
-				// For simplicity, we store postprocess variants using sampleCount=1 prefix in the key.
-				// Actually, let's just create these on the fly or use a separate map.
-			}
-		}
-
 		return true;
 	}
 
@@ -862,11 +872,11 @@ struct RenderInterface_Metal::Impl
 		default: break;
 		}
 
-		id<MTLFunction> vf = [shaderLibrary newFunctionWithName:[NSString stringWithUTF8String:vertFuncName]];
-		id<MTLFunction> ff = [shaderLibrary newFunctionWithName:[NSString stringWithUTF8String:fragFuncName]];
+		id<MTLFunction> vf = [[shaderLibrary newFunctionWithName:[NSString stringWithUTF8String:vertFuncName]] autorelease];
+		id<MTLFunction> ff = [[shaderLibrary newFunctionWithName:[NSString stringWithUTF8String:fragFuncName]] autorelease];
 		if (!vf || !ff) return nil;
 
-		MTLRenderPipelineDescriptor* desc = [[MTLRenderPipelineDescriptor alloc] init];
+		MTLRenderPipelineDescriptor* desc = [[[MTLRenderPipelineDescriptor alloc] init] autorelease];
 		desc.vertexFunction = vf;
 		desc.fragmentFunction = ff;
 		desc.vertexDescriptor = vertexDescriptor;
@@ -921,11 +931,11 @@ struct RenderInterface_Metal::Impl
 		if (drawablePipeline)
 			return true;
 
-		id<MTLFunction> vf = [shaderLibrary newFunctionWithName:@"vertex_passthrough"];
-		id<MTLFunction> ff = [shaderLibrary newFunctionWithName:@"fragment_passthrough"];
+		id<MTLFunction> vf = [[shaderLibrary newFunctionWithName:@"vertex_passthrough"] autorelease];
+		id<MTLFunction> ff = [[shaderLibrary newFunctionWithName:@"fragment_passthrough"] autorelease];
 		if (!vf || !ff) return false;
 
-		MTLRenderPipelineDescriptor* desc = [[MTLRenderPipelineDescriptor alloc] init];
+		MTLRenderPipelineDescriptor* desc = [[[MTLRenderPipelineDescriptor alloc] init] autorelease];
 		desc.vertexFunction = vf;
 		desc.fragmentFunction = ff;
 		desc.vertexDescriptor = vertexDescriptor;
@@ -950,7 +960,7 @@ struct RenderInterface_Metal::Impl
 	{
 		// Disabled (no stencil — for postprocess passes without stencil attachment)
 		{
-			MTLDepthStencilDescriptor* desc = [[MTLDepthStencilDescriptor alloc] init];
+			MTLDepthStencilDescriptor* desc = [[[MTLDepthStencilDescriptor alloc] init] autorelease];
 			desc.depthCompareFunction = MTLCompareFunctionAlways;
 			desc.depthWriteEnabled = NO;
 			stencilDisabled = [device newDepthStencilStateWithDescriptor:desc];
@@ -958,11 +968,11 @@ struct RenderInterface_Metal::Impl
 
 		// Always pass, keep ops (default for MSAA layers — matches GL3's BeginFrame state)
 		{
-			MTLDepthStencilDescriptor* desc = [[MTLDepthStencilDescriptor alloc] init];
+			MTLDepthStencilDescriptor* desc = [[[MTLDepthStencilDescriptor alloc] init] autorelease];
 			desc.depthCompareFunction = MTLCompareFunctionAlways;
 			desc.depthWriteEnabled = NO;
 
-			MTLStencilDescriptor* stencilDesc = [[MTLStencilDescriptor alloc] init];
+			MTLStencilDescriptor* stencilDesc = [[[MTLStencilDescriptor alloc] init] autorelease];
 			stencilDesc.stencilCompareFunction = MTLCompareFunctionAlways;
 			stencilDesc.stencilFailureOperation = MTLStencilOperationKeep;
 			stencilDesc.depthFailureOperation = MTLStencilOperationKeep;
@@ -977,11 +987,11 @@ struct RenderInterface_Metal::Impl
 
 		// Test equal
 		{
-			MTLDepthStencilDescriptor* desc = [[MTLDepthStencilDescriptor alloc] init];
+			MTLDepthStencilDescriptor* desc = [[[MTLDepthStencilDescriptor alloc] init] autorelease];
 			desc.depthCompareFunction = MTLCompareFunctionAlways;
 			desc.depthWriteEnabled = NO;
 
-			MTLStencilDescriptor* stencilDesc = [[MTLStencilDescriptor alloc] init];
+			MTLStencilDescriptor* stencilDesc = [[[MTLStencilDescriptor alloc] init] autorelease];
 			stencilDesc.stencilCompareFunction = MTLCompareFunctionEqual;
 			stencilDesc.stencilFailureOperation = MTLStencilOperationKeep;
 			stencilDesc.depthFailureOperation = MTLStencilOperationKeep;
@@ -996,11 +1006,11 @@ struct RenderInterface_Metal::Impl
 
 		// Write replace (for Set/SetInverse)
 		{
-			MTLDepthStencilDescriptor* desc = [[MTLDepthStencilDescriptor alloc] init];
+			MTLDepthStencilDescriptor* desc = [[[MTLDepthStencilDescriptor alloc] init] autorelease];
 			desc.depthCompareFunction = MTLCompareFunctionAlways;
 			desc.depthWriteEnabled = NO;
 
-			MTLStencilDescriptor* stencilDesc = [[MTLStencilDescriptor alloc] init];
+			MTLStencilDescriptor* stencilDesc = [[[MTLStencilDescriptor alloc] init] autorelease];
 			stencilDesc.stencilCompareFunction = MTLCompareFunctionAlways;
 			stencilDesc.stencilFailureOperation = MTLStencilOperationKeep;
 			stencilDesc.depthFailureOperation = MTLStencilOperationKeep;
@@ -1015,11 +1025,11 @@ struct RenderInterface_Metal::Impl
 
 		// Write increment (for Intersect)
 		{
-			MTLDepthStencilDescriptor* desc = [[MTLDepthStencilDescriptor alloc] init];
+			MTLDepthStencilDescriptor* desc = [[[MTLDepthStencilDescriptor alloc] init] autorelease];
 			desc.depthCompareFunction = MTLCompareFunctionAlways;
 			desc.depthWriteEnabled = NO;
 
-			MTLStencilDescriptor* stencilDesc = [[MTLStencilDescriptor alloc] init];
+			MTLStencilDescriptor* stencilDesc = [[[MTLStencilDescriptor alloc] init] autorelease];
 			stencilDesc.stencilCompareFunction = MTLCompareFunctionAlways;
 			stencilDesc.stencilFailureOperation = MTLStencilOperationKeep;
 			stencilDesc.depthFailureOperation = MTLStencilOperationKeep;
@@ -1039,7 +1049,7 @@ struct RenderInterface_Metal::Impl
 	{
 		// Linear clamp (for postprocess FBs)
 		{
-			MTLSamplerDescriptor* desc = [[MTLSamplerDescriptor alloc] init];
+			MTLSamplerDescriptor* desc = [[[MTLSamplerDescriptor alloc] init] autorelease];
 			desc.minFilter = MTLSamplerMinMagFilterLinear;
 			desc.magFilter = MTLSamplerMinMagFilterLinear;
 			desc.sAddressMode = MTLSamplerAddressModeClampToZero;
@@ -1049,7 +1059,7 @@ struct RenderInterface_Metal::Impl
 
 		// Linear repeat (for UI textures — no mipmap filter for now)
 		{
-			MTLSamplerDescriptor* desc = [[MTLSamplerDescriptor alloc] init];
+			MTLSamplerDescriptor* desc = [[[MTLSamplerDescriptor alloc] init] autorelease];
 			desc.minFilter = MTLSamplerMinMagFilterLinear;
 			desc.magFilter = MTLSamplerMinMagFilterLinear;
 			desc.mipFilter = MTLSamplerMipFilterNotMipmapped;
@@ -1379,7 +1389,7 @@ bool RenderInterface_Metal::EndFrame(uint8_t* _screenshotDest, const uint32_t _d
 						 toBuffer:readback
 				destinationOffset:0
 		   destinationBytesPerRow:copyW * 4
-		 destinationBytesPerImage:copyW * 4 * copyH];
+		 destinationBytesPerImage:0];
 			[blit endEncoding];
 		}
 	}
@@ -1595,7 +1605,7 @@ Rml::TextureHandle RenderInterface_Metal::GenerateTexture(Rml::Span<const Rml::b
 	[blit copyFromBuffer:staging
 			sourceOffset:0
 	   sourceBytesPerRow:bytesPerRow
-	 sourceBytesPerImage:totalBytes
+	 sourceBytesPerImage:0
 			  sourceSize:MTLSizeMake(_sourceDimensions.x, _sourceDimensions.y, 1)
 			   toTexture:texture
 		destinationSlice:0
@@ -2609,7 +2619,9 @@ void RenderInterface_Metal::ResetPipeline()
 bool RmlMetal::IsSupported()
 {
 	id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-	return device != nil;
+	const bool supported = device != nil;
+	[device release];
+	return supported;
 }
 
 #endif // __APPLE__

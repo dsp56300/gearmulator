@@ -104,6 +104,16 @@ void Cpu::invalidate_range(u32 addr, u32 len) {
 }
 
 
+void Cpu::select_code_bank(u32 base, u32 size, u32 key) {
+  if (!cells_.select_bank(base, size, key)) return;
+  // The current page pointer may now refer to the bank moved out; it stays
+  // valid for the instruction in flight (its pc_of), and the next slice
+  // re-resolves through the new bank.
+  if (in_slice_) raise(kPendRefetch);
+  else page_pc_ = kNoPage;
+}
+
+
 void Cpu::code_line_written(u32 addr) {
   invalidate_range(addr & ~(Bus::kLineSize - 1), Bus::kLineSize);
   bus_.unmark_code(addr);

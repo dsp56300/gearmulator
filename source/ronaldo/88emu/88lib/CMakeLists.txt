@@ -8,7 +8,9 @@ set(SOURCES
 	analog/analogOutput.cpp analog/analogOutput.h
 	analog/analogModels.cpp analog/analogModels.h
 	deviceModel.cpp deviceModel.h
+	boards/cm32l.cpp boards/cm32l.h
 	boards/cm32p.cpp boards/cm32p.h
+	boards/cm64.cpp boards/cm64.h
 	hardwareDevice.cpp hardwareDevice.h
 	rom/rom.cpp rom/rom.h
 	rom/romloader.cpp rom/romloader.h
@@ -30,7 +32,7 @@ source_group("source" FILES ${SOURCES})
 
 set_property(TARGET 88lib PROPERTY FOLDER "Ronaldo/88emu")
 
-target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib gpLib lpLib rccLib asmjit)
+target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib gpLib lpLib rccLib mt32ReverbLib asmjit)
 
 target_include_directories(88lib
 	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -52,6 +54,12 @@ if(BUILD_TESTING)
 	set_property(TARGET analogOutput_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME analogOutput COMMAND analogOutput_test)
 	set_tests_properties(analogOutput PROPERTIES TIMEOUT 20)
+
+	add_executable(rom_test tests/rom_test.cpp)
+	target_link_libraries(rom_test PRIVATE 88lib)
+	set_property(TARGET rom_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME rom COMMAND rom_test)
+	set_tests_properties(rom PROPERTIES TIMEOUT 20)
 
 	add_executable(cm32p_test tests/cm32p_test.cpp)
 	target_link_libraries(cm32p_test PRIVATE 88lib)

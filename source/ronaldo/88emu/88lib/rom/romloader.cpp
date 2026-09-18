@@ -43,6 +43,8 @@ namespace emu88Lib
             return RomDevice::Sc8820;
         case DeviceModel::Cm32p:
             return RomDevice::Cm32p;
+        case DeviceModel::Cm32l:
+            return RomDevice::Cm32l;
         case DeviceModel::Cm64:
             return RomDevice::Cm64;
         case DeviceModel::Sc88:
@@ -156,6 +158,17 @@ namespace emu88Lib
             if (!inventory.read(result.waves[i], RomDevice::Cm32p, RomSlot::Wave, i))
                 return {};
         return result.isValid() ? result : Cm32pRomSet{};
+    }
+
+    Cm32lRomSet RomLoader::findCm32lRomSet()
+    {
+        const auto inventory = scan();
+        Cm32lRomSet result;
+        if (!inventory.read(result.control, RomDevice::Cm32l, RomSlot::Control) ||
+            !inventory.read(result.wave, RomDevice::Cm32l, RomSlot::Wave) ||
+            !inventory.read(result.reverb, RomDevice::Cm32l, RomSlot::Reverb))
+            return {};
+        return result.isValid() ? result : Cm32lRomSet{};
     }
 
     WaveRom RomLoader::findWaveRom()
