@@ -61,7 +61,7 @@ namespace
         CHECK_EQ(player.addFiles(files.paths).added, 3u);
         player.setResetMode(MidiPlayer::ResetMode::Off);
         player.play(0);
-        CHECK_EQ(noteCount(block(player, 100)), 1);
+        CHECK_EQ(noteCount(block(player, MidiPlayer::kResetSettleMs + 100)), 1);
         std::vector<SMidiEvent> discarded;
         player.processBlock(discarded, 100, 1000, false);
         CHECK(player.status().state == MidiPlayer::State::Stopped);
@@ -75,7 +75,7 @@ namespace
         CHECK_EQ(noteCount(block(player, 100)), 0);
         CHECK_EQ(player.entries().size(), 3u);
         player.play(1);
-        CHECK_EQ(noteCount(block(player, 100)), 1);
+        CHECK_EQ(noteCount(block(player, MidiPlayer::kResetSettleMs + 100)), 1);
         CHECK_EQ(player.status().currentIndex, 1);
     }
 
@@ -97,14 +97,14 @@ namespace
             CHECK_EQ(
                 std::count_if(events.begin(), events.end(), [](const auto& e) { return e.a == 0xb0 && e.b == 121; }),
                 1);
-            CHECK_EQ(noteCount(events), mode == MidiPlayer::ResetMode::Off ? 1 : 0);
+            CHECK_EQ(noteCount(events), 0);
             const auto reset =
                 std::find_if(events.begin(), events.end(), [](const auto& e) { return !e.sysex.empty(); });
             CHECK((reset == events.end()) == (mode == MidiPlayer::ResetMode::Off));
             if (reset != events.end())
                 CHECK_EQ(reset->sysex[1], mode == MidiPlayer::ResetMode::Gm ? 0x7e : 0x41);
             events = block(player, settle);
-            CHECK_EQ(noteCount(events), mode == MidiPlayer::ResetMode::Gs || mode == MidiPlayer::ResetMode::Gm ? 1 : 0);
+            CHECK_EQ(noteCount(events), mode != MidiPlayer::ResetMode::Mt32 ? 1 : 0);
             if (mode == MidiPlayer::ResetMode::Mt32)
             {
                 CHECK(
@@ -136,11 +136,12 @@ namespace
                 player.setResetMode(MidiPlayer::ResetMode::Off);
                 player.setSongGapMs(gap);
                 player.play(0);
-                const uint32_t end = static_cast<uint32_t>(std::ceil(4.5 * rate)) + 1;
+                const uint32_t end = static_cast<uint32_t>(std::ceil((4.5 + MidiPlayer::kResetSettleMs / 1000.) * rate)) + 1;
                 const uint32_t wait = static_cast<uint32_t>(std::ceil(gap * rate / 1000.));
                 CHECK_EQ(noteCount(block(player, end, rate)), 1);
                 if (wait)
                     CHECK_EQ(noteCount(block(player, wait, rate)), 0);
+                CHECK_EQ(noteCount(block(player, static_cast<uint32_t>(std::ceil(MidiPlayer::kResetSettleMs * rate / 1000.)), rate)), 0);
                 const auto events = block(player, 1, rate);
                 CHECK_EQ(noteCount(events), 1);
                 CHECK_EQ(player.status().currentIndex, 1);
@@ -151,18 +152,18 @@ namespace
         player.setResetMode(MidiPlayer::ResetMode::Off);
         player.setSongGapMs(1000);
         player.play(0);
-        block(player, 4502);
+        block(player, 4502 + MidiPlayer::kResetSettleMs);
         CHECK_EQ(player.status().currentIndex, 1);
         player.stop();
         CHECK_EQ(noteCount(block(player, 3000)), 0);
         player.play(2);
-        auto events = block(player, 1);
+        auto events = block(player, MidiPlayer::kResetSettleMs + 1);
         CHECK_EQ(noteCount(events), 1);
         CHECK_EQ(player.status().currentIndex, 2);
         player.play(0);
-        block(player, 4502);
+        block(player, 4502 + MidiPlayer::kResetSettleMs);
         player.play(2);
-        CHECK_EQ(noteCount(block(player, 1)), 1); // explicit selection cancels the gap
+        CHECK_EQ(noteCount(block(player, MidiPlayer::kResetSettleMs + 1)), 1); // selection cancels the gap, but retains cleanup
 
         player.setResetMode(MidiPlayer::ResetMode::Gs);
         player.play(0);
@@ -182,7 +183,7 @@ namespace
         player.addFiles(files.paths);
         player.setResetMode(MidiPlayer::ResetMode::Off);
         player.play(0);
-        block(player, 100);
+        block(player, MidiPlayer::kResetSettleMs + 100);
         CHECK(player.move(0, 3));
         CHECK(block(player, 1).empty());
         CHECK_EQ(player.status().currentIndex, 2);
@@ -196,7 +197,7 @@ namespace
         for (int i = 0; i < 100; ++i)
         {
             player.play(i % 3);
-            const auto switched = block(player, 1);
+            const auto switched = block(player, MidiPlayer::kResetSettleMs + 1);
             CHECK_EQ(noteCount(switched), 1);
             const auto cleanup =
                 std::find_if(switched.begin(), switched.end(), [](const auto& e) { return e.a == 0xb0 && e.b == 121; });
@@ -227,6 +228,122 @@ namespace
             CHECK(player.entries()[0].path == files.paths[1]);
             CHECK(player.entries()[1].path == files.paths[2]);
         }
+    }
+
+    void openingSetup(const Fixtures& files)
+    {
+        // Interleaved channel setup, an intentional PC after a note, a second port,
+        // then a SysEx barrier. Only setup before each channel's first note can move.
+        const std::vector<uint8_t> track{
+            0, 0xb0, 0, 0, 0, 0xc0, 10, 0, 0x90, 60, 100,
+            0, 0xc0, 20, 0, 0x90, 64, 100,
+            0, 0xb1, 0, 0, 0, 0xc1, 30, 0, 0x91, 61, 100, 0, 0xb1, 7, 20,
+            0, 0xff, 0x21, 1, 1, 0, 0xc0, 40, 0, 0x90, 65, 100,
+            0, 0xf0, 5, 0x7e, 0x7f, 9, 1, 0xf7, 0, 0xc2, 50,
+            96, 0x80, 65, 0, 0, 0xff, 0x2f, 0};
+        auto writeTrack = [&](const std::vector<uint8_t>& bytes)
+        {
+            std::vector<uint8_t> data{'M','T','h','d',0,0,0,6,0,0,0,1,0,96,'M','T','r','k'};
+            for (int shift = 24; shift >= 0; shift -= 8)
+                data.push_back(static_cast<uint8_t>(bytes.size() >> shift));
+            data.insert(data.end(), bytes.begin(), bytes.end());
+            const auto file = files.directory.getChildFile("opening.mid");
+            CHECK(file.replaceWithData(data.data(), data.size()));
+            return file.getFullPathName().toStdString();
+        };
+        const auto path = writeTrack(track);
+        for (const auto mode : {MidiPlayer::ResetMode::Off, MidiPlayer::ResetMode::Gs, MidiPlayer::ResetMode::Mt32})
+            for (const double rate : {1000., 44100., 48000.})
+                for (const uint32_t count : {1u, 127u, 512u})
+                {
+                    MidiPlayer player(2, mode);
+                    CHECK_EQ(player.addFiles({path}).added, 1u);
+                    const auto resetSamples = static_cast<uint32_t>(std::ceil(MidiPlayer::kResetSettleMs * rate / 1000.));
+                    const auto setupAt = resetSamples * (mode == MidiPlayer::ResetMode::Mt32 ? 2 : 1);
+                    // 12 setup bytes at 3125 bytes/s, plus 50 ms for firmware processing.
+                    const auto songAt = setupAt + static_cast<uint32_t>(std::ceil(54 * rate / 1000.));
+                    CHECK(std::abs(player.preparationSeconds(0) - (setupAt / rate + 0.054)) < 1e-9);
+                    player.play(0);
+                    std::vector<SMidiEvent> all;
+                    for (uint32_t offset = 0; offset < songAt + rate * .51; offset += count)
+                    {
+                        auto events = block(player, count, rate);
+                        for (auto& e : events)
+                        {
+                            e.offset += offset;
+                            all.push_back(std::move(e));
+                        }
+                        if (offset + count <= songAt)
+                            CHECK_EQ(player.status().positionSeconds, 0.0);
+                    }
+                    const auto find = [&](uint8_t a, uint8_t b, uint8_t port = 0)
+                    {
+                        return std::find_if(all.begin(), all.end(), [&](const auto& e)
+                            { return e.a == a && e.b == b && e.port == port &&
+                                (a != 0xb1 || b != 7 || e.c == 20); });
+                    };
+                    const auto checkAt = [&](uint8_t a, uint8_t b, uint8_t port, uint32_t when)
+                    {
+                        const auto e = find(a, b, port);
+                        CHECK(e != all.end());
+                        if (e != all.end()) CHECK_EQ(e->offset, when);
+                    };
+                    checkAt(0xc0, 10, 0, setupAt);
+                    checkAt(0xc1, 30, 0, setupAt);
+                    checkAt(0xc0, 40, 1, setupAt); // Same channel number, independent port.
+                    checkAt(0xc0, 20, 0, songAt);
+                    checkAt(0xb1, 7, 0, songAt);
+                    checkAt(0xc2, 50, 1, songAt); // Must stay after the file's SysEx.
+                    checkAt(0x80, 65, 1, songAt + static_cast<uint32_t>(std::llround(.5 * rate)));
+                    CHECK(find(0x90, 60) < find(0xc0, 20));
+                    CHECK(find(0xc0, 20) < find(0x90, 64));
+                    CHECK_EQ(noteCount(all), 4);
+                    CHECK_EQ(std::count_if(all.begin(), all.end(), [](const auto& e)
+                        { return e.a == 0xc0 && e.b == 10; }), 1);
+                }
+
+        MidiPlayer player(2, MidiPlayer::ResetMode::Gs);
+        CHECK_EQ(player.replaceFiles({path}).added, 1u);
+        player.play(0);
+        CHECK_EQ(noteCount(block(player, MidiPlayer::kResetSettleMs + 20)), 0);
+        player.togglePlayPause();
+        block(player, 1);
+        player.togglePlayPause();
+        CHECK_EQ(noteCount(block(player, MidiPlayer::kResetSettleMs + 54)), 0);
+        CHECK_EQ(noteCount(block(player, 1)), 4); // Resume restarts preparation after cleanup.
+        player.play(0);
+        block(player, MidiPlayer::kResetSettleMs + 20);
+        player.stop();
+        CHECK_EQ(noteCount(block(player, 1000)), 0);
+
+        player.play(0);
+        block(player, MidiPlayer::kResetSettleMs + 20);
+        CHECK_EQ(noteCount(block(player, 68, 2000)), 0); // 34 ms of setup remain at the new rate.
+        CHECK_EQ(noteCount(block(player, 1, 2000)), 4);
+
+        MidiPlayer transitions(2, MidiPlayer::ResetMode::Off);
+        transitions.addFiles({path, path});
+        transitions.setEndTailMs(0);
+        transitions.setSongGapMs(23);
+        transitions.play(0);
+        const auto both = block(transitions, 1100);
+        CHECK_EQ(noteCount(both), 8);
+        std::vector<uint32_t> starts;
+        for (const auto& e : both)
+            if (e.a == 0x90 && e.b == 60 && e.c) starts.push_back(e.offset);
+        CHECK(starts == std::vector<uint32_t>({254, 1032}));
+
+        // A large setup needs a wire-length-dependent wait, not another fixed delay.
+        std::vector<uint8_t> dense;
+        for (int i = 0; i < 300; ++i)
+            dense.insert(dense.end(), {0, 0xb0, 7, 100});
+        dense.insert(dense.end(), {0, 0x90, 60, 100, 96, 0x80, 60, 0, 0, 0xff, 0x2f, 0});
+        MidiPlayer large(1, MidiPlayer::ResetMode::Off);
+        large.addFiles({writeTrack(dense)});
+        large.play(0);
+        constexpr auto wait = MidiPlayer::kResetSettleMs + 288 + 50;
+        CHECK_EQ(noteCount(block(large, wait)), 0);
+        CHECK_EQ(noteCount(block(large, 1)), 1);
     }
 
     class CaptureDevice final : public Device
@@ -306,6 +423,7 @@ int main()
     gapsAndCancellation(files);
     reorderAndPorts(files);
 	    replacePlaylist(files);
+    openingSetup(files);
     engineGenerations();
     return finish("midiPlayer");
 }

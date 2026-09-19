@@ -8,13 +8,16 @@ Release Notes
         Right-click the playlist to load or save portable `.m3u` / `.m3u8`
         playlist files, or add/drop one to append its entries.
 
+- [Fix] MIDI Player: Prevent shortened opening notes in songs with dense
+        initial instrument setup. Send safe opening setup ahead of playback
+        and let cleanup finish even when the per-song reset is off.
+
 - [New] MIDI: Command-line MIDI input options can now assign inputs to
         groups A-D with `--midi-in-a` through `--midi-in-d`. `--midi-in`
         remains the group-A shorthand.
 
-- [Fix] Devices: The front-panel POWER switch of the SC-55, SC-55mkII, SC-155,
-        SC-155mkII, SC-88VL and SC-88Pro now works as on the hardware. Q puts
-        the unit into its standby mode and wakes it again.
+- [Fix] Devices: The front-panel POWER switch and Q shortcut now use standby
+        on the SC-55, SC-55mkII, SC-155, SC-155mkII and SC-88VL.
 
 - [Fix] MIDI Player: Recomposer RCP Track Exclusive messages now read their
         SysEx payload from F7 continuation records, so SC-88Pro setup data is

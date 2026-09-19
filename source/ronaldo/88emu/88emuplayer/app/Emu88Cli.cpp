@@ -194,12 +194,8 @@ namespace
                 process(count, false);
                 remaining -= count;
             }
-            // The player holds one settle after the reset and, for MT-32, a second one
-            // after the arrangement. Derived rather than restated so the two cannot drift.
-            constexpr auto settle = jucePlayer::MidiPlayer::kResetSettleMs / 1000.0;
-            const auto preparation = reset == jucePlayer::MidiPlayer::ResetMode::Off ? 0.0
-                : reset == jucePlayer::MidiPlayer::ResetMode::Mt32                   ? settle * 2
-                                                                                     : settle;
+            // Include the same cleanup/reset/setup preroll used by live playback.
+            const auto preparation = player.preparationSeconds(0);
             const auto duration = preparation + player.entries().front().durationSeconds + tailMs / 1000;
             if (!std::isfinite(duration) || duration < 0 || duration > 1.0e12)
                 throw std::runtime_error("Invalid or excessive song duration.");
