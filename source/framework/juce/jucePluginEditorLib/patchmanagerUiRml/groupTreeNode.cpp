@@ -12,17 +12,22 @@
 #include "juceRmlUi/rmlInplaceEditor.h"
 #include "juceRmlUi/rmlMenu.h"
 
+#include <unordered_set>
+
 namespace jucePluginEditorLib::patchManagerRml
 {
 	void GroupNode::updateFromDataSources(const std::vector<pluginLib::patchDB::DataSourceNodePtr>& _dataSources)
 	{
+		// a folder can hold tens of thousands of data sources, a linear search per item made this quadratic
+		const std::unordered_set<pluginLib::patchDB::DataSourceNodePtr> dataSources(_dataSources.begin(), _dataSources.end());
+
 		const auto previousItems = m_itemsByDataSource;
 
 		for (const auto& previousItem : previousItems)
 		{
 			const auto& ds = previousItem.first;
 
-			if (std::find(_dataSources.begin(), _dataSources.end(), ds) == _dataSources.end())
+			if (dataSources.find(ds) == dataSources.end())
 				removeDataSource(ds);
 		}
 
@@ -113,6 +118,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		if (it == m_itemsByDataSource.end())
 			return;
 		it->second->removeFromParent();
+		m_itemsByDataSource.erase(it);
 	}
 
 	GroupNode::TagItemPtr GroupNode::createSubItem(const pluginLib::patchDB::Tag& _tag)
