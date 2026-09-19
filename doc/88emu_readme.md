@@ -33,7 +33,7 @@ ROMs are rescanned on device selection and **Restart Device**. After adding miss
 
 ## Emulated hardware and devices
 
-The main CPUs execute the original device firmware as accurately as possible. 88Emu implements low-level high-performance emulators for the following CPUs: Hitachi **H8/500** (H8/532 and H8/510), Hitachi **SH-2** and Intel **MCS-96**. We do not use JIT for those, but we achieve decent performance thanks to an event-loop driven peripherals implementation and an efficient instruction cache that pre-bakes the opcode handlers as function pointers.
+The main CPUs execute the original device firmware as accurately as possible. 88Emu implements low-level high-performance emulators for the following CPUs: Hitachi **H8/500** (H8/532 and H8/510), Hitachi **SH-1** / **SH-2** and Intel **MCS-96**. We do not use JIT for those, but we achieve decent performance thanks to an event-loop driven peripherals implementation and an efficient instruction cache that pre-bakes the opcode handlers as function pointers.
 
 To actually generate the sound in the emulator we implement low-level emulation of different custom sound chips:
 
@@ -68,6 +68,8 @@ If you find any, please report it as a bug.
 | VE-GS Pro | `vegspro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input, no hardware panel present |
 | SC-8820 | `sc8820` | SH7017 (SH-2) | XP6 + LSP | experimental, uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
 | SC-8850 | `sc8850` | SH7016 (SH-2) | 2 × XP6 + LSP | uses high-level sub-mcu emulation in USB mode, 4x midi input |
+| NU-10B | `nu10b` | SH7034 (SH-1) | XP | experimental, runs in GM mode only, no hardware panel or display emulated |
+| MIIG5 | `miig5` | SH7042A (SH-2) | 2 × XP6 | experimental, runs in GM mode only, no hardware panel or display emulated |
 
 
 ## ROM loading
@@ -97,6 +99,8 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | VE-GS Pro | `vegspro_control.bin` — 1 MiB | `vegspro_wave0.bin` — 8 MiB; `vegspro_wave1.bin` — 8 MiB; `vegspro_wave2.bin` — 4 MiB |
 | SC-8820 | `sc8820_internal.bin` — 128 KiB, or the supported reconstructed 64 KiB image; `sc8820_program.bin` — 2 MiB | `sc8820_wave0.bin` — 16 MiB; `sc8820_wave1.bin` — 8 MiB |
 | SC-8850 | `sc8850_internal.bin` — 64 KiB; `sc8850_program.bin` — 1 MiB; `sc8850_data.bin` — 2 MiB | `sc8850_wave.bin` — 32 MiB; **or** `sc8850_wave0.bin` and `sc8850_wave1.bin` — 16 MiB each |
+| NU-10B | `nu10b_internal.bin` — 64 KiB; `nu10b_program.bin` — 1 MiB | `nu10b_wave0.bin` — 2 MiB; `nu10b_wave1.bin` — 2 MiB; `nu10b_wave2.bin` — 2 MiB; `nu10b_wave3.bin` — 2 MiB |
+| MIIG5 | `miig5_internal.bin` — 256 KiB; `miig5_program.bin` — 2 MiB | `miig5_wave.bin` — 32 MiB, already unscrambled |
 
 SC-88Pro and VE-GS Pro may also use the compatible donor waves described below. The standardized names select a device and layout; they do not change the required byte order or contents.
 

@@ -175,7 +175,8 @@ namespace emu88Player::editor
 	constexpr uint32_t panelButtonsForDevice(const emu88Lib::DeviceModel _model, uint32_t _buttons)
 	{
 		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro ||
-		   _model == emu88Lib::DeviceModel::Sc8820 || emu88Lib::isCmModel(_model)) return 0;
+		   _model == emu88Lib::DeviceModel::Sc8820 || emu88Lib::isCmModel(_model) ||
+		   emu88Lib::isGmModuleModel(_model)) return 0;
 		constexpr auto preview = proButtonBit(emu88Lib::Sc88ProButton::Preview);
 		if(_model == emu88Lib::DeviceModel::Sc88Pro)
 			return _buttons & ~proButtonBit(emu88Lib::Sc88ProButton::Power);

@@ -7,6 +7,8 @@
 #include "88lib/boards/cm32p.h"
 #include "88lib/boards/cm32l.h"
 #include "88lib/boards/cm64.h"
+#include "88lib/boards/miig5.h"
+#include "88lib/boards/nu10b.h"
 #include "hardwareLib/lcdfonts.h"
 #include "88lib/boards/sc55Board.h"
 #include "88lib/boards/sc88pro.h"
@@ -155,6 +157,31 @@ namespace emu88Lib
 			m_sc55->setSwitchPosition(Sc55Board::SwitchMidi);
 			break;
 		}
+		case DeviceModel::Nu10b:
+		{
+			const auto inventory = RomLoader::scan();
+			std::vector<uint8_t> cpu, program;
+			std::array<std::vector<uint8_t>, WaveRom::ChipCount> chips;
+			if(!inventory.read(cpu, RomDevice::Nu10b, RomSlot::Internal) ||
+				!inventory.read(program, RomDevice::Nu10b, RomSlot::Program)) break;
+			bool waves = true;
+			for(uint8_t chip = 0; chip < chips.size(); ++chip)
+				waves = waves && inventory.read(chips[chip], RomDevice::Nu10b, RomSlot::Wave, chip);
+			if(!waves) break;
+			// Four 2 MiB chips wired like the SC-88's, so the same de-scramble applies.
+			m_nu10b = std::make_unique<Nu10b>(cpu, program, WaveRom(chips).takeData(), factoryReset);
+			break;
+		}
+		case DeviceModel::Miig5:
+		{
+			const auto inventory = RomLoader::scan();
+			std::vector<uint8_t> cpu, program, wave;
+			if(!inventory.read(cpu, RomDevice::Miig5, RomSlot::Internal) ||
+				!inventory.read(program, RomDevice::Miig5, RomSlot::Program) ||
+				!inventory.read(wave, RomDevice::Miig5, RomSlot::Wave)) break;
+			m_miig5 = std::make_unique<Miig5>(cpu, program, std::move(wave), factoryReset);
+			break;
+		}
 		}
 
 		if(!isValid())
@@ -242,6 +269,8 @@ namespace emu88Lib
 		if(m_cm32l) return static_cast<float>(Cm32l::SampleRate);
 		if(m_cm64) return static_cast<float>(Cm64::SampleRate);
 		if(m_sc55) return static_cast<float>(m_sc55->sampleRate());
+		if(m_nu10b) return static_cast<float>(Nu10b::SampleRate);
+		if(m_miig5) return static_cast<float>(Miig5::SampleRate);
 		return static_cast<float>(g_sampleRate);
 	}
 
@@ -253,6 +282,8 @@ namespace emu88Lib
 		if(m_cm32l) return Cm32l::CpuClock;
 		if(m_cm64) return Cm32l::CpuClock;
 		if(m_sc55) return m_sc55->cpuClockHz();
+		if(m_nu10b) return Nu10b::CpuClockHz;
+		if(m_miig5) return Miig5::CpuClockHz;
 		return g_cpuClockHz;
 	}
 
@@ -261,7 +292,7 @@ namespace emu88Lib
 		return (m_sc88 && m_sc88->isValid()) || (m_sc88Pro && m_sc88Pro->isValid()) ||
 		       (m_sc8850 && m_sc8850->isValid()) || (m_sc8820 && m_sc8820->isValid()) || (m_cm32p && m_cm32p->isValid()) ||
 		       (m_cm32l && m_cm32l->isValid()) || (m_cm64 && m_cm64->isValid()) ||
-		       (m_sc55 && m_sc55->isValid());
+		       (m_sc55 && m_sc55->isValid()) || (m_nu10b && m_nu10b->isValid()) || (m_miig5 && m_miig5->isValid());
 	}
 
 	void HardwareDevice::setPanelButtons(const uint32_t _buttons)
@@ -322,6 +353,10 @@ namespace emu88Lib
 			m_sc88->addMidiEvent(_event, _event.port);
 		else if(m_sc55MidiIn)
 			m_sc55MidiIn->write(synthLib::SMidiEvent(_event));
+		else if(m_nu10b)
+			m_nu10b->addMidiEvent(_event);
+		else if(m_miig5)
+			m_miig5->addMidiEvent(_event);
 		else
 			return;
 	}
@@ -391,6 +426,10 @@ namespace emu88Lib
 				_midiOut.emplace_back(std::move(event));
 			}
 		}
+		else if(m_nu10b)
+			m_nu10b->readMidiOut(_midiOut);
+		else if(m_miig5)
+			m_miig5->readMidiOut(_midiOut);
 	}
 
 	void HardwareDevice::collectPanelCommands()
@@ -449,6 +488,8 @@ namespace emu88Lib
 		else if(m_sc88Pro) m_heldFrame = m_sc88Pro->renderSample();
 		else if(m_sc88) m_heldFrame = m_sc88->renderSample();
 		else if(m_sc55) m_heldFrame = m_sc55->renderSample();
+		else if(m_nu10b) m_heldFrame = m_nu10b->renderSample();
+		else if(m_miig5) m_heldFrame = m_miig5->renderSample();
 		++m_renderedSamples;
 	}
 
@@ -575,6 +616,8 @@ namespace emu88Lib
 		if(m_cm32p) m_cm32p->transportDiscontinuity(m_transportGeneration);
 		if(m_cm32l) m_cm32l->transportDiscontinuity(m_transportGeneration);
 		if(m_cm64) m_cm64->transportDiscontinuity(m_transportGeneration);
+		if(m_nu10b) m_nu10b->transportDiscontinuity(m_transportGeneration);
+		if(m_miig5) m_miig5->transportDiscontinuity(m_transportGeneration);
 		silenceActiveChannels();
 	}
 

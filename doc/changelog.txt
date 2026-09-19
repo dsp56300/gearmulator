@@ -20,11 +20,13 @@ Release Notes
         groups A-D with `--midi-in-a` through `--midi-in-d`. `--midi-in`
         remains the group-A shorthand.
 
+- [Imp] UI: The CM-32P PCM card image can be chosen in the settings and is
+        remembered, instead of only through the --pcm-card launch option.
+
 - [Fix] Devices: The front-panel POWER switch and Q shortcut now use standby
         on the SC-55, SC-55mkII, SC-155, SC-155mkII and SC-88VL.
 
-- [Imp] UI: The CM-32P PCM card image can be chosen in the settings and is
-        remembered, instead of only through the --pcm-card launch option.
+- [New] Devices: Added experimental support for NU-10B and MIIG5 (GM mode only).
 
 2.2.22:
 

@@ -11,6 +11,8 @@ set(SOURCES
 	boards/cm32l.cpp boards/cm32l.h
 	boards/cm32p.cpp boards/cm32p.h
 	boards/cm64.cpp boards/cm64.h
+	boards/miig5.cpp boards/miig5.h
+	boards/nu10b.cpp boards/nu10b.h
 	hardwareDevice.cpp hardwareDevice.h
 	rom/rom.cpp rom/rom.h
 	rom/romloader.cpp rom/romloader.h

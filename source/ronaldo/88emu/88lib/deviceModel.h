@@ -27,11 +27,13 @@ namespace emu88Lib
 		Scc1a,
 		Cm64,
 		Cm32l,
+		Nu10b,
+		Miig5,
 	};
 
 	// Curated presentation order. Enum values remain
 	// stable because they are persisted in plugin settings and project state.
-	inline constexpr std::array<DeviceModel, 19> g_deviceMenuOrder = {
+	inline constexpr std::array<DeviceModel, 21> g_deviceMenuOrder = {
 		DeviceModel::Cm32l,
 		DeviceModel::Cm32p,
 		DeviceModel::Cm64,
@@ -51,6 +53,8 @@ namespace emu88Lib
 		DeviceModel::VeGsPro,
 		DeviceModel::Sc8820,
 		DeviceModel::Sc8850,
+		DeviceModel::Nu10b,
+		DeviceModel::Miig5,
 	};
 
 	struct DeviceProfile
@@ -131,12 +135,20 @@ namespace emu88Lib
 		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64;
 	}
 
+	// Modules that run in their GM mode and nothing else: construction sets them up, and they
+	// have no panel or display here.
+	constexpr bool isGmModuleModel(const DeviceModel _model)
+	{
+		return _model == DeviceModel::Nu10b || _model == DeviceModel::Miig5;
+	}
+
 	// The CM-32L's display is a service screen the case has no window for: the firmware
 	// drives its SED1200 whether or not one is attached, and those screens are the only way
 	// to read the board's state, so it is shown here the way the CM-32P's is.
 	constexpr bool deviceHasLcd(const DeviceModel model)
 	{
-		return model != DeviceModel::Xpgs && model != DeviceModel::VeGsPro && model != DeviceModel::Sc8820 && (!isSc55Model(model) || getSc55DeviceProfile(model).panel != Sc55Panel::None);
+		return model != DeviceModel::Xpgs && model != DeviceModel::VeGsPro && model != DeviceModel::Sc8820 &&
+		       !isGmModuleModel(model) && (!isSc55Model(model) || getSc55DeviceProfile(model).panel != Sc55Panel::None);
 	}
 
 	// Left out of the device menu and the CLI's device list for now, for want of a
