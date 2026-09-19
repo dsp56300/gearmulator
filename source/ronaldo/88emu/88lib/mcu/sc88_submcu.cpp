@@ -330,6 +330,14 @@ namespace emu88Lib
 		uint8_t command = _sysEx[DT1AddrOffset];	// address high byte
 		uint8_t source = src;
 
+		// System parameters use the 0x20 mailbox family. Command 0 would
+		// enter the display-only branch and discard them. Keep the staged
+		// address intact: the firmware parameter parser handles 00 00 7F
+		// (mode) and 00 01 00..1F (per-part input assignment) itself.
+		// SC-88: 00:18DE -> 00:3640; Pro: 00:1C4A -> 00:5106.
+		if(command == 0)
+			command = 0x20;
+
 		// The main firmware routes patch/drum parameters to the A or B part
 		// bank by the record's INPUT SOURCE alone — its apply path (00:4E18 on
 		// the Pro) folds address blocks 0x50-0x5F onto the 0x40-0x4F handlers

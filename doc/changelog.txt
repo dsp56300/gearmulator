@@ -4,6 +4,10 @@ Release Notes
 
 88emuPlayer:
 
+- [Fix] MIDI: Deliver System DT1 messages to the SC-88, SC-88VL and SC-88Pro
+        firmware, restoring per-part `CHANNEL MSG RX PORT` assignments and
+        System Mode Set. Individual parts can layer from the same MIDI input.
+
 - [New] MIDI Player: The standalone now restores the last playlist automatically.
         Right-click the playlist to load or save portable `.m3u` / `.m3u8`
         playlist files, or add/drop one to append its entries.
