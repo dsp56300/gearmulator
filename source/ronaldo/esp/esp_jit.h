@@ -20,7 +20,9 @@ namespace esp
 		virtual void eramWrite(uint32_t _eramMask) = 0;
 		virtual void eramComputeAddr(uint32_t immOffset, bool highOffset, bool shouldUseVarOffset) = 0;
 
-		virtual void emitOp(uint32_t pc, const ESPOptInstr& instr, bool lastMul30) = 0;
+		// nextIsDmac: the next *emitted* (non-nop) op of this core is a kDMAC, i.e. the only reader of
+		// last_mulInputA_24 / last_mulInputB_24 follows immediately. Emitters may skip those writes otherwise.
+		virtual void emitOp(uint32_t pc, const ESPOptInstr& instr, bool lastMul30, bool nextIsDmac) = 0;
 	};
 
 	struct JitInputData
