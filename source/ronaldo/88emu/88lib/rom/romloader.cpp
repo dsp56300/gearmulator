@@ -75,6 +75,10 @@ namespace emu88Lib
             return RomDevice::Sc155;
         case DeviceModel::Sc155Mk2:
             return RomDevice::Sc155Mk2;
+        case DeviceModel::Nu10b:
+            return RomDevice::Nu10b;
+        case DeviceModel::Miig5:
+            return RomDevice::Miig5;
         }
         return RomDevice::Sc88;
     }

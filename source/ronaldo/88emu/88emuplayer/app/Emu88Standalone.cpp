@@ -2,6 +2,7 @@
 #include <iostream>
 #include "88emuplayer/Emu88Processor.h"
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "88emuplayer/app/Emu88Playlist.h"
 #include "88lib/rom/romloader.h"
 #include "jucePlayerLib/audioRouting.h"
 #include "jucePlayerLib/midiInputRouting.h"
@@ -139,18 +140,37 @@ namespace emu88Player
             if (!options.midiInputs.empty())
             {
                 xml->deleteAllChildElementsWithTagName("MIDIINPUT");
-                if (options.midiInputs.size() > 1 &&
-                    std::find(options.midiInputs.begin(), options.midiInputs.end(), "none") != options.midiInputs.end())
-                    throw std::runtime_error("--midi-in none cannot be combined with MIDI inputs.");
-                for (const auto& value : options.midiInputs)
+                juce::XmlElement routes("MIDIINPUTGROUPS");
+                struct InputRoute
                 {
-                    if (value == "none")
+                    juce::MidiDeviceInfo info;
+                    uint8_t groups = 0;
+                };
+                std::vector<InputRoute> selected;
+                for (const auto& input : options.midiInputs)
+                {
+                    if (input.value == "none")
                         continue;
-                    const auto info = resolveMidi(juce::MidiInput::getAvailableDevices(), value);
-                    auto* child = xml->createNewChildElement("MIDIINPUT");
-                    child->setAttribute("name", info.name);
-                    child->setAttribute("identifier", info.identifier);
+                    const auto info = resolveMidi(juce::MidiInput::getAvailableDevices(), input.value);
+                    const auto existing = std::find_if(selected.begin(), selected.end(), [&](const InputRoute& route)
+                                                       { return route.info.identifier == info.identifier; });
+                    if (existing == selected.end())
+                        selected.push_back({info, input.groups});
+                    else
+                        existing->groups |= input.groups;
                 }
+                for (const auto& route : selected)
+                {
+                    auto* device = xml->createNewChildElement("MIDIINPUT");
+                    device->setAttribute("name", route.info.name);
+                    device->setAttribute("identifier", route.info.identifier);
+                    auto* input = routes.createNewChildElement("INPUT");
+                    input->setAttribute("name", route.info.name);
+                    input->setAttribute("identifier", route.info.identifier);
+                    input->setAttribute("groups", route.groups);
+                }
+                // MidiInputRouting consumes this saved routing table after JUCE opens the selected inputs.
+                config.setValue("midiInputGroups", &routes);
             }
             if (options.has("midi-out"))
             {
@@ -225,9 +245,24 @@ namespace emu88Player
                 (void)loadPcmCard(options);
                 auto requestedAudio = prepareSession();
                 auto* processor = openDevices(*requestedAudio);
-                const auto loaded = processor->midiPlayer().addFiles(options.files);
+                jucePlayer::MidiPlayer::AddResult loaded;
+                if (options.files.empty())
+                {
+                    std::vector<std::string> paths;
+                    std::string error;
+                    if (playlist::read(playlist::defaultFile(), paths, error))
+                        loaded = processor->midiPlayer().replaceFiles(paths);
+                }
+                else
+                    loaded = processor->midiPlayer().addFiles(options.files);
                 if (!loaded.errors.empty())
                     throw std::runtime_error(loaded.errors.front());
+                if (!options.files.empty())
+                {
+                    std::string error;
+                    if (!playlist::write(playlist::defaultFile(), processor->midiPlayer().entries(), error))
+                        std::cerr << error << '\n';
+                }
                 startupSucceeded = true;
                 window->setVisible(true);
                 if (options.has("play") && loaded.added)
@@ -301,6 +336,8 @@ namespace emu88Player
                 config->setValue("factoryResetOnLoad", options.get("factory-reset") == "on");
             if (options.has("fast-boot"))
                 config->setValue("fastBoot", options.get("fast-boot") == "on");
+            if (options.has("pcm-card"))
+                config->setValue("pcmCardPath", launchFile(options.get("pcm-card")).getFullPathName());
             if (options.has("gain"))
                 config->setValue("outputGain", options.number("gain", 1));
             if (options.has("virtual-ports"))

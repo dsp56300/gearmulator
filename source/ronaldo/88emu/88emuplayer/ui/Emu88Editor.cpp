@@ -137,6 +137,9 @@ namespace emu88Player
 			if(!emu88Lib::isDeviceListed(model) && model != m_processor.deviceModel())
 				continue;
 			const auto available = inventory.isComplete(emu88Lib::RomLoader::toRomDevice(model));
+			// The GM modules are offered only once their ROMs are there.
+			if(emu88Lib::isGmModuleModel(model) && !available && model != m_processor.deviceModel())
+				continue;
 			const auto label = std::string(emu88Lib::getDeviceProfile(model).displayName) +
 				(available ? "" : " (ROMs missing)");
 			m_contextMenu->addEntry(label, true, model == m_processor.deviceModel(), [this, model, available]
@@ -220,7 +223,9 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Cm64: panel = "cm64_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8820: panel = "sc8820_panel.png"; break;
 		case emu88Lib::DeviceModel::Xpgs:
-		case emu88Lib::DeviceModel::VeGsPro: panel = "sc88exp_panel.png"; break;
+		case emu88Lib::DeviceModel::VeGsPro:
+		case emu88Lib::DeviceModel::Nu10b:
+		case emu88Lib::DeviceModel::Miig5: panel = "sc88exp_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc55St:
 		case emu88Lib::DeviceModel::Cm300:
 		case emu88Lib::DeviceModel::Scc1a:
@@ -441,6 +446,7 @@ namespace emu88Player
 				m_lcd->setSnapshot(snapshot.screens[0]);
 			if(m_lcd2)
 				m_lcd2->setSnapshot(snapshot.screens[1]);
+			m_rml->getDocument()->SetClass("lcdUnpowered", !snapshot.screens[0].powered);
 			updateLeds(snapshot.leds);
 		}
 		if(playlistChanged)

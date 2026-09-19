@@ -5,6 +5,7 @@
 #include "juce_core/juce_core.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 
@@ -14,6 +15,50 @@ namespace jucePlayer
     {
         Entry info;
         std::vector<synthLib::midi::Event> events;
+        std::vector<synthLib::midi::Event> opening;
+        uint32_t openingMs = 0;
+
+        void prepareOpening()
+        {
+            // Move only time-zero setup preceding the first note on each port/channel.
+            // Never cross a note on that channel, or any system/SysEx message. In
+            // particular, PC -> note -> PC must retain its instrument selection.
+            std::array<bool, 256 * 16> blocked{};
+            size_t bytes = 0;
+            auto end = events.begin();
+            for (auto it = events.begin(); it != events.end(); ++it)
+            {
+                if (it->seconds != 0 || it->bytes.empty() || it->bytes[0] >= 0xf0)
+                {
+                    if (end != it)
+                        end = std::move(it, events.end(), end);
+                    else
+                        end = events.end();
+                    break;
+                }
+                const auto status = it->bytes[0];
+                const auto channel = size_t(it->port) * 16 + (status & 0x0f);
+                const auto kind = status & 0xf0;
+                const bool setup = kind == 0xb0 || kind == 0xc0 || kind == 0xd0 || kind == 0xe0;
+                if (setup && !blocked[channel])
+                {
+                    bytes += it->bytes.size();
+                    opening.push_back(std::move(*it));
+                }
+                else
+                {
+                    blocked[channel] = true;
+                    if (end != it)
+                        *end = std::move(*it);
+                    ++end;
+                }
+            }
+            events.erase(end, events.end());
+            // Budget the uncompressed wire bytes across all ports, plus firmware
+            // processing time. The song clock remains at zero throughout this wait.
+            if (bytes)
+                openingMs = static_cast<uint32_t>((bytes * 1000 + 3124) / 3125 + 50);
+        }
     };
 
     struct MidiPlayer::Playlist
@@ -64,11 +109,45 @@ namespace jucePlayer
 #endif
             song->info.name = name.toStdString();
             song->info.durationSeconds = song->events.empty() ? 0.0 : song->events.back().seconds;
+            song->prepareOpening();
             next->songs.push_back(std::move(song));
             ++result.added;
         }
 
         if (result.added)
+            publish(std::move(next));
+        return result;
+    }
+
+    MidiPlayer::AddResult MidiPlayer::replaceFiles(const std::vector<std::string>& _paths)
+    {
+        AddResult result;
+        auto next = std::make_shared<Playlist>();
+
+        for (const auto& path : _paths)
+        {
+            auto song = std::make_shared<Song>();
+            std::string error;
+            if (!midiFile::read(path, song->events, error))
+            {
+                result.errors.push_back(std::move(error));
+                continue;
+            }
+
+            const auto file = juce::File::getCurrentWorkingDirectory().getChildFile(path);
+            song->info.path = file.getFullPathName().toStdString();
+            auto name = file.getFileName();
+#if JUCE_MAC
+            name = name.convertToPrecomposedUnicode();
+#endif
+            song->info.name = name.toStdString();
+            song->info.durationSeconds = song->events.empty() ? 0.0 : song->events.back().seconds;
+            song->prepareOpening();
+            next->songs.push_back(std::move(song));
+            ++result.added;
+        }
+
+        if (result.errors.empty())
             publish(std::move(next));
         return result;
     }
@@ -250,8 +329,10 @@ namespace jucePlayer
                     m_startPhase = StartPhase::Arrangement;
                     m_waitSamples = static_cast<uint64_t>(std::ceil(kResetSettleMs * _sampleRate / 1000.0));
                 }
-                else
+                else if (m_startPhase == StartPhase::Opening)
                     m_startPhase = StartPhase::Ready;
+                else
+                    beginOpening(outputOffset, _events);
                 continue;
             }
             const auto endSample = std::max<uint64_t>(
@@ -339,7 +420,8 @@ namespace jucePlayer
             else if (m_audioSong && m_audioState == State::Paused)
             {
                 m_audioState = State::Playing;
-                if (m_startPhase == StartPhase::Reset || m_startPhase == StartPhase::Arrangement)
+                if (m_startPhase == StartPhase::Reset || m_startPhase == StartPhase::Arrangement ||
+                    m_startPhase == StartPhase::Opening)
                     beginReset(0, _events);
             }
             else if (m_audioSong)
@@ -390,10 +472,30 @@ namespace jucePlayer
     {
         synthLib::midi::appendSongReset(_events, m_startResetMode, m_portCount.load(std::memory_order_relaxed),
                                         _offset);
-        m_startPhase = m_startResetMode == ResetMode::Off ? StartPhase::Ready : StartPhase::Reset;
-        m_waitSamples = m_startPhase == StartPhase::Ready
-            ? 0
-            : static_cast<uint64_t>(std::ceil(kResetSettleMs * m_lastSampleRate / 1000.0));
+        m_startPhase = StartPhase::Reset;
+        m_waitSamples = static_cast<uint64_t>(std::ceil(kResetSettleMs * m_lastSampleRate / 1000.0));
+    }
+
+    void MidiPlayer::beginOpening(const uint32_t _offset, std::vector<synthLib::SMidiEvent>& _events)
+    {
+        for (const auto& source : m_audioSong->opening)
+        {
+            auto& event = _events.emplace_back(synthLib::MidiEventSource::Host, source.bytes[0],
+                source.bytes.size() > 1 ? source.bytes[1] : 0,
+                source.bytes.size() > 2 ? source.bytes[2] : 0, _offset);
+            event.port = source.port;
+        }
+        m_startPhase = m_audioSong->opening.empty() ? StartPhase::Ready : StartPhase::Opening;
+        m_waitSamples = static_cast<uint64_t>(std::ceil(m_audioSong->openingMs * m_lastSampleRate / 1000.0));
+    }
+
+    double MidiPlayer::preparationSeconds(const size_t _index) const
+    {
+        const auto playlist = std::atomic_load_explicit(&m_playlist, std::memory_order_acquire);
+        if (!playlist || _index >= playlist->songs.size())
+            return 0;
+        return (kResetSettleMs * (resetMode() == ResetMode::Mt32 ? 2 : 1) +
+                playlist->songs[_index]->openingMs) / 1000.0;
     }
 
     void MidiPlayer::silence(const uint32_t _offset, std::vector<synthLib::SMidiEvent>& _events) const

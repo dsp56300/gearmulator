@@ -11,6 +11,8 @@ set(SOURCES
 	boards/cm32l.cpp boards/cm32l.h
 	boards/cm32p.cpp boards/cm32p.h
 	boards/cm64.cpp boards/cm64.h
+	boards/miig5.cpp boards/miig5.h
+	boards/nu10b.cpp boards/nu10b.h
 	hardwareDevice.cpp hardwareDevice.h
 	rom/rom.cpp rom/rom.h
 	rom/romloader.cpp rom/romloader.h
@@ -79,6 +81,11 @@ if(BUILD_TESTING)
 	set_property(TARGET sc88_submcu_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 	set_property(TARGET sc88_submcu_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME sc88_submcu COMMAND sc88_submcu_test)
+	add_executable(sc88_system_dt1_test tests/sc88_system_dt1_test.cpp)
+	target_link_libraries(sc88_system_dt1_test PRIVATE 88lib)
+	set_property(TARGET sc88_system_dt1_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME sc88_system_dt1 COMMAND sc88_system_dt1_test)
+	set_tests_properties(sc88_system_dt1 PROPERTIES SKIP_RETURN_CODE 77)
 	set_tests_properties(sc88_submcu PROPERTIES TIMEOUT 20)
 
 endif()

@@ -31,6 +31,11 @@
 					<div id="btFactoryResetOnLoad" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Factory Reset on load</label></div>
 					<div id="btFastBoot" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Fast Boot (skip intro)</label></div>
 				</div>
+				<div class="hardwareSettingsSectionLabel">CM-32P PCM card</div>
+				<div class="hardwareFileRow">
+					<input id="pcmCardPath" type="text"/>
+					<button id="btPcmCardBrowse" class="button">Open...</button>
+				</div>
 			</div>
 
 			<div id="pageSettingsSkin" class="hardwareSettingsPage" style="display: none;">

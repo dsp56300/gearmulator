@@ -2,6 +2,8 @@
 #include "88emuplayer/ui/Emu88EditorBindings.h"
 #include "88emuplayer/ui/Emu88EditorPlaylist.h"
 #include "88emuplayer/ui/Emu88EditorWindows.h"
+#include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "88emuplayer/app/Emu88Playlist.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlMenu.h"
@@ -16,8 +18,9 @@ namespace emu88Player
 
 	void Editor::chooseMidiFiles()
 	{
+		const auto filter = std::string(jucePlayer::midiFile::fileFilter) + ";" + playlist::fileFilter;
 		m_playlistChooser = std::make_unique<juce::FileChooser>(
-			"Add MIDI/RCP files", juce::File{}, jucePlayer::midiFile::fileFilter, true);
+			"Add MIDI/RCP files or playlists", juce::File{}, filter, true);
 		const auto flags = juce::FileBrowserComponent::openMode |
 		                   juce::FileBrowserComponent::canSelectFiles |
 		                   juce::FileBrowserComponent::canSelectMultipleItems;
@@ -37,15 +40,133 @@ namespace emu88Player
 
 	void Editor::addMidiFiles(const std::vector<std::string>& _files)
 	{
-		const auto result = m_processor.midiPlayer().addFiles(_files);
-		if(result.errors.empty())
+		std::vector<std::string> midiFiles;
+		std::vector<std::string> errors;
+		for(const auto& file : _files)
+		{
+			if(!playlist::isSupported(file))
+			{
+				midiFiles.push_back(file);
+				continue;
+			}
+			std::vector<std::string> paths;
+			std::string error;
+			if(playlist::read(juce::File(file), paths, error))
+				midiFiles.insert(midiFiles.end(), paths.begin(), paths.end());
+			else
+				errors.push_back(std::move(error));
+		}
+
+		const auto result = m_processor.midiPlayer().addFiles(midiFiles);
+		if(result.added)
+			saveDefaultPlaylist();
+		errors.insert(errors.end(), result.errors.begin(), result.errors.end());
+		if(errors.empty())
 			return;
 		std::ostringstream message;
-		message << "Some files could not be added:";
-		for(const auto& error : result.errors)
+		message << "Some files could not be added or loaded:";
+		for(const auto& error : errors)
 			message << "\n\n" << error;
 		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 			"88emuPlayer - MIDI playlist", message.str());
+	}
+
+	void Editor::loadPlaylist()
+	{
+		const auto lastFolder = m_processor.config().getValue("lastPlaylistFolder");
+		auto folder = lastFolder.isNotEmpty() ? juce::File(lastFolder)
+		                                      : juce::File::getSpecialLocation(juce::File::userMusicDirectory);
+		if(!folder.isDirectory())
+			folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
+		m_playlistFileChooser = std::make_unique<juce::FileChooser>(
+			"Load MIDI playlist", folder, playlist::fileFilter, true);
+		const auto flags = juce::FileBrowserComponent::openMode |
+		                   juce::FileBrowserComponent::canSelectFiles;
+		const juce::WeakReference<Editor> safeThis(this);
+		m_playlistFileChooser->launchAsync(flags, [safeThis](const juce::FileChooser& _chooser)
+		{
+			auto* editor = safeThis.get();
+			if(!editor)
+				return;
+			const auto file = _chooser.getResult();
+			if(file != juce::File())
+			{
+				std::vector<std::string> paths;
+				std::string error;
+				if(!playlist::read(file, paths, error))
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+						"Load MIDI playlist", error, editor);
+				else
+				{
+					const auto result = editor->m_processor.midiPlayer().replaceFiles(paths);
+					if(result.errors.empty())
+					{
+						editor->m_processor.config().setValue("lastPlaylistFolder",
+							file.getParentDirectory().getFullPathName());
+						editor->m_processor.config().saveIfNeeded();
+						editor->saveDefaultPlaylist();
+					}
+					else
+					{
+						std::ostringstream message;
+						message << "The playlist was not loaded; the current playlist is unchanged:";
+						for(const auto& item : result.errors)
+							message << "\n\n" << item;
+						genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+							"Load MIDI playlist", message.str(), editor);
+					}
+				}
+			}
+			editor->m_playlistFileChooser.reset();
+		});
+	}
+
+	void Editor::savePlaylist()
+	{
+		const auto lastFolder = m_processor.config().getValue("lastPlaylistFolder");
+		auto folder = lastFolder.isNotEmpty() ? juce::File(lastFolder)
+		                                      : juce::File::getSpecialLocation(juce::File::userMusicDirectory);
+		if(!folder.isDirectory())
+			folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
+		m_playlistFileChooser = std::make_unique<juce::FileChooser>(
+			"Save MIDI playlist", folder.getChildFile("playlist.m3u8"), playlist::fileFilter, true);
+		const auto flags = juce::FileBrowserComponent::saveMode |
+			                   juce::FileBrowserComponent::canSelectFiles |
+			                   juce::FileBrowserComponent::warnAboutOverwriting;
+		const juce::WeakReference<Editor> safeThis(this);
+		m_playlistFileChooser->launchAsync(flags, [safeThis](const juce::FileChooser& _chooser)
+		{
+			auto* editor = safeThis.get();
+			if(!editor)
+				return;
+			auto file = _chooser.getResult();
+			if(file != juce::File())
+			{
+				if(!file.hasFileExtension("m3u") && !file.hasFileExtension("m3u8"))
+					file = file.withFileExtension("m3u8");
+				std::string error;
+				if(playlist::write(file, editor->m_processor.midiPlayer().entries(), error))
+				{
+					editor->m_processor.config().setValue("lastPlaylistFolder",
+						file.getParentDirectory().getFullPathName());
+					editor->m_processor.config().saveIfNeeded();
+				}
+				else
+					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+						"Save MIDI playlist", error, editor);
+			}
+			editor->m_playlistFileChooser.reset();
+		});
+	}
+
+	void Editor::saveDefaultPlaylist()
+	{
+		if(!standaloneLaunch)
+			return;
+		std::string error;
+		if(!playlist::write(playlist::defaultFile(), m_processor.midiPlayer().entries(), error))
+			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+				"88emuPlayer - MIDI playlist", error + "\n\nThe playlist will not be restored next time.", this);
 	}
 
 	void Editor::attachRecordButton()
@@ -200,15 +321,20 @@ namespace emu88Player
 						if(juceRmlUi::helper::isContextMenu(_event))
 							openPlaylistContextMenu(_event);
 					});
-				juceRmlUi::EventListener::Add(remove, Rml::EventId::Click,
-					[this, i](Rml::Event& _event)
-					{
-						_event.StopPropagation();
-						m_processor.midiPlayer().remove(i);
-					});
+			juceRmlUi::EventListener::Add(remove, Rml::EventId::Click,
+				[this, i](Rml::Event& _event)
+				{
+					_event.StopPropagation();
+					if(m_processor.midiPlayer().remove(i))
+						saveDefaultPlaylist();
+				});
 			}
 			m_playlistRows.push_back(std::make_unique<PlaylistRowDrag>(row, i,
-				[this](const size_t _from, const size_t _to) { m_processor.midiPlayer().move(_from, _to); },
+				[this](const size_t _from, const size_t _to)
+				{
+					if(m_processor.midiPlayer().move(_from, _to))
+						saveDefaultPlaylist();
+				},
 				[this](const std::vector<std::string>& _files) { addMidiFiles(_files); }));
 		}
 		m_playlistRevision = m_processor.midiPlayer().playlistRevision();
@@ -232,9 +358,13 @@ namespace emu88Player
 	{
 		const auto position = juceRmlUi::helper::getMousePos(_event);
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
+		m_contextMenu->addEntry("Load Playlist", true, false, [this] { loadPlaylist(); });
+		m_contextMenu->addEntry("Save Playlist", !m_processor.midiPlayer().entries().empty(), false,
+			[this] { savePlaylist(); });
 		m_contextMenu->addEntry("Clear Playlist", !m_processor.midiPlayer().entries().empty(), false, [this]
 		{
-			m_processor.midiPlayer().clear();
+			if(m_processor.midiPlayer().clear())
+				saveDefaultPlaylist();
 		});
 		m_contextMenu->openPopupWindow(_event.GetTargetElement(), position);
 	}

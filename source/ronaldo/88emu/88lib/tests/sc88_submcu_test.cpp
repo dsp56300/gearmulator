@@ -94,6 +94,34 @@ namespace
 		CHECK_EQ(f.records[0].param1, 7);
 		CHECK_EQ(f.records[0].payload[0], 0x43);
 	}
+
+	void channelMessageRxPort()
+	{
+		for(uint8_t part = 0; part < 32; ++part)
+		{
+			Fixture f;
+			const auto checksum = static_cast<uint8_t>((-1 - part) & 0x7f);
+			f.input({0xf0, 0x41, 0x10, 0x42, 0x12, 0, 1, part, 0, checksum, 0xf7}, 1);
+			CHECK_EQ(f.records.size(), 1u);
+			if(f.records.empty()) continue;
+			const auto& r = f.records.front();
+			CHECK_EQ(r.command, 0x20);
+			CHECK_EQ(r.channel, 0x90); // Original physical source, bulk flag.
+			CHECK(r.payload == std::vector<uint8_t>({0, 0, 0, 0, 0, 1, part, 0, checksum}));
+			// Routing state belongs to firmware: channel events stay on their input.
+			f.input({0x90, 60, 100});
+			CHECK_EQ(f.records.size(), 2u);
+			CHECK_EQ(f.records.back().channel, 0);
+		}
+		Fixture f;
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x12, 0, 1, 0x10, 0, 0x70, 0xf7});
+		CHECK_EQ(f.records.size(), 1u);
+		CHECK_EQ(f.records.front().command, 0xe0); // Bad checksum cannot change routing.
+		f.records.clear();
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x12, 0, 0, 0x7f, 1, 0, 0xf7});
+		CHECK_EQ(f.records.size(), 1u);
+		CHECK_EQ(f.records.front().command, 0x20); // System Mode Set uses same family.
+	}
 }
 
 int main()
@@ -103,5 +131,6 @@ int main()
 	outputRing();
 	delayAndReset();
 	rawRequests();
+	channelMessageRxPort();
 	return finish("sc88_submcu");
 }

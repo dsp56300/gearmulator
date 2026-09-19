@@ -110,6 +110,12 @@ namespace emu88Player
 		emu88Lib::BootOptions bootOptions() const;
 		void setBootOptions(const emu88Lib::BootOptions& _boot);
 
+		// The PCM card in the CM-32P's slot, by the path of its image; empty for no card.
+		std::string pcmCardPath() const;
+		// Loads the card at _path for every CM-32P from the next device load on and remembers
+		// the path; an empty one empties the slot. On failure nothing changes and _error says why.
+		bool setPcmCardPath(const std::string& _path, std::string& _error);
+
 		// A board can only be selected once every ROM the registry lists for it
 		// is present; the device menu offers the rest greyed out.
 		static bool isModelAvailable(emu88Lib::DeviceModel _model);
@@ -139,7 +145,7 @@ namespace emu88Player
 		std::unique_ptr<synthLib::Plugin> m_engine;
 		std::unique_ptr<jucePlayer::PortMidiBridge> m_portMidiBridge;
 		jucePlayer::MidiPlayer m_midiPlayer;
-		// From --pcm-card: the card in every CM-32P this session loads.
+		// The card in every CM-32P this session loads, see pcmCardPath().
 		std::vector<uint8_t> m_pcmCard;
 		emu88Lib::DeviceModel m_deviceModel = emu88Lib::DeviceModel::Sc88Pro;
 		std::atomic<bool> m_reverseOutputChannels{false};
