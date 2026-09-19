@@ -84,7 +84,7 @@ body {
 
 .hardwareSettingsSectionLabel {
 	display: block;
-	margin: 12dp 0dp 7dp 0dp;
+	margin: 18dp 0dp 7dp 0dp;
 	color: #aeb8be;
 	font-size: 11dp;
 	font-weight: 600;
