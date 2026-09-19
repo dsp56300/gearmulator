@@ -33,7 +33,7 @@ ROMs are rescanned on device selection and **Restart Device**. After adding miss
 
 ## Emulated hardware and devices
 
-The main CPUs execute the original device firmware as accurately as possible. 88Emu implements low-level high-performance emulators for the following CPUs: Hitachi **H8/500** (H8/532 and H8/510), Hitachi **SH-2** and Intel **MCS-96**. We do not use JIT for those, but we achieve decent performance thanks to an event-loop driven peripherals implementation and an efficient instruction cache that pre-bakes the opcode handlers as function pointers.
+The main CPUs execute the original device firmware as accurately as possible. 88Emu implements low-level high-performance emulators for the following CPUs: Hitachi **H8/500** (H8/532 and H8/510), Hitachi **SH-1** / **SH-2** and Intel **MCS-96**. We do not use JIT for those, but we achieve decent performance thanks to an event-loop driven peripherals implementation and an efficient instruction cache that pre-bakes the opcode handlers as function pointers.
 
 To actually generate the sound in the emulator we implement low-level emulation of different custom sound chips:
 
@@ -68,6 +68,8 @@ If you find any, please report it as a bug.
 | VE-GS Pro | `vegspro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input, no hardware panel present |
 | SC-8820 | `sc8820` | SH7017 (SH-2) | XP6 + LSP | experimental, uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
 | SC-8850 | `sc8850` | SH7016 (SH-2) | 2 × XP6 + LSP | uses high-level sub-mcu emulation in USB mode, 4x midi input |
+| NU-10B | `nu10b` | SH7034 (SH-1) | XP | experimental, runs in GM mode only, no hardware panel or display emulated |
+| MIIG5 | `miig5` | SH7042A (SH-2) | 2 × XP6 | experimental, runs in GM mode only, no hardware panel or display emulated |
 
 
 ## ROM loading
@@ -83,30 +85,34 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | CM-32P | `cm32p_program.bin` — 64 KiB | `cm32p_wave0.bin` — 512 KiB; `cm32p_wave1.bin` — 512 KiB; `cm32p_wave2.bin` — 512 KiB |
 | SC-55 | `sc55mk1_internal.bin` — 32 KiB; `sc55mk1_program.bin` — 256 KiB | `sc55mk1_wave0.bin` — 1 MiB; `sc55mk1_wave1.bin` — 1 MiB; `sc55mk1_wave2.bin` — 1 MiB |
 | SC-55mkII | `sc55mk2_internal.bin` — 32 KiB; `sc55mk2_program.bin` — 512 KiB | `sc55mk2_wave0.bin` — 2 MiB; `sc55mk2_wave1.bin` — 1 MiB |
-| SC-55ST | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 512 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
-| CM-300 / SCC-1 | `cm300_internal.bin` — 32 KiB; `cm300_program.bin` — 256 KiB | `cm300_wave0.bin` — 1 MiB; `cm300_wave1.bin` — 1 MiB; `cm300_wave2.bin` — 1 MiB |
+| SC-55ST (`--device` only) | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 512 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
+| CM-300 / SCC-1 (`--device` only) | `cm300_internal.bin` — 32 KiB; `cm300_program.bin` — 256 KiB | `cm300_wave0.bin` — 1 MiB; `cm300_wave1.bin` — 1 MiB; `cm300_wave2.bin` — 1 MiB |
 | SC-155 | `sc155_internal.bin` — 32 KiB; `sc155_program.bin` — 256 KiB | `sc155_wave0.bin` — 1 MiB; `sc155_wave1.bin` — 1 MiB; `sc155_wave2.bin` — 1 MiB |
 | SC-155mkII | `sc155mk2_internal.bin` — 32 KiB; `sc155mk2_program.bin` — 512 KiB | `sc155mk2_wave0.bin` — 2 MiB; `sc155mk2_wave1.bin` — 1 MiB |
 | SCC-1A | `scc1a_internal.bin` — 32 KiB; `scc1a_program.bin` — 256 KiB | `scc1a_wave0.bin` — 1 MiB; `scc1a_wave1.bin` — 1 MiB; `scc1a_wave2.bin` — 1 MiB |
 | SCB-55 | `scb55_internal.bin` — 32 KiB; `scb55_program.bin` — 256 KiB | `scb55_wave0.bin` — 2 MiB; `scb55_wave1.bin` — 1 MiB |
-| RLP-3237 | `rlp3237_internal.bin` — 32 KiB; `rlp3237_program.bin` — 256 KiB | `rlp3237_wave0.bin` — 2 MiB |
+| RLP-3237 (`--device` only) | `rlp3237_internal.bin` — 32 KiB; `rlp3237_program.bin` — 256 KiB | `rlp3237_wave0.bin` — 2 MiB |
 | SC-88 | `sc88_control.bin` — 512 KiB | `sc88_wave0.bin` — 2 MiB; `sc88_wave1.bin` — 2 MiB; `sc88_wave2.bin` — 2 MiB; `sc88_wave3.bin` — 2 MiB |
 | SC-88VL | `sc88vl_control.bin` — 512 KiB | `sc88vl_wave0.bin` — 2 MiB; `sc88vl_wave1.bin` — 2 MiB; `sc88vl_wave2.bin` — 2 MiB; `sc88vl_wave3.bin` — 2 MiB |
 | XPGS / G-800 | `xpgs_control.bin` — 512 KiB | `xpgs_wave0.bin` — 2 MiB; `xpgs_wave1.bin` — 2 MiB; `xpgs_wave2.bin` — 2 MiB; `xpgs_wave3.bin` — 2 MiB; `xpgs_wave4.bin` — 2 MiB |
-| SC-88Pro | `sc88pro_control.bin` — 1 MiB | `sc88pro_wave0.bin` — 8 MiB; `sc88pro_wave1.bin` — 8 MiB; `sc88pro_wave2.bin` — 4 MiB |
+| SC-88Pro | `sc88pro_control.bin` — 1 MiB | `sc88pro_wave0.bin` — 8 MiB, **or** `sc88pro_wave_cs0.bin` and `sc88pro_wave_cs1.bin` — 4 MiB each; `sc88pro_wave1.bin` — 8 MiB, **or** `sc88pro_wave_cs2.bin` and `sc88pro_wave_cs3.bin` — 4 MiB each; `sc88pro_wave2.bin` — 4 MiB |
 | VE-GS Pro | `vegspro_control.bin` — 1 MiB | `vegspro_wave0.bin` — 8 MiB; `vegspro_wave1.bin` — 8 MiB; `vegspro_wave2.bin` — 4 MiB |
 | SC-8820 | `sc8820_internal.bin` — 128 KiB, or the supported reconstructed 64 KiB image; `sc8820_program.bin` — 2 MiB | `sc8820_wave0.bin` — 16 MiB; `sc8820_wave1.bin` — 8 MiB |
 | SC-8850 | `sc8850_internal.bin` — 64 KiB; `sc8850_program.bin` — 1 MiB; `sc8850_data.bin` — 2 MiB | `sc8850_wave.bin` — 32 MiB; **or** `sc8850_wave0.bin` and `sc8850_wave1.bin` — 16 MiB each |
+| NU-10B | `nu10b_internal.bin` — 64 KiB; `nu10b_program.bin` — 1 MiB | `nu10b_wave0.bin` — 2 MiB; `nu10b_wave1.bin` — 2 MiB; `nu10b_wave2.bin` — 2 MiB; `nu10b_wave3.bin` — 2 MiB |
+| MIIG5 | `miig5_internal.bin` — 256 KiB; `miig5_program.bin` — 2 MiB | `miig5_wave.bin` — 32 MiB, already unscrambled |
 
 SC-88Pro and VE-GS Pro may also use the compatible donor waves described below. The standardized names select a device and layout; they do not change the required byte order or contents.
 
 Additional supported layouts:
 
 - Recognized H8 control ROMs can be loaded in CPU byte order or the supported word-swapped dump order. Recognized 1 MiB Pro control images embedded in repeated 2/4 MiB dumps are also accepted.
+- The SC-88Pro board carries its PCM on five 4 MiB mask ROMs, one per chip select, instead of the three larger VE-GS Pro parts that `sc88pro_wave0.bin` to `sc88pro_wave2.bin` hold. Dumps of the five are also accepted: CS0 and CS1 together replace `sc88pro_wave0.bin`, CS2 and CS3 replace `sc88pro_wave1.bin`, and CS4 is identical to `sc88pro_wave2.bin`. The hashes registered for CS0–CS3 were derived by splitting the VE-GS Pro images, not taken from dumps of SC-88Pro chips.
 - SC-88Pro and VE-GS Pro can obtain their waves from recognized decoded SC-8850 or SC-8820 wave images. Their own control ROM is still required.
 - Recognized `SCCore.dll` / `SCCore00.dylib` containers can supply the SC-8820 wave regions and compatible Pro waves. They are scanned as data, never executed. They do not supply CPU firmware. For SC-8850 they supply **bank A only**; you still need its distinct bank B.
 - SC-8850 also accepts recognized raw XP wave layouts.
 - The patched [sc55mk2-ctf-patcher](https://github.com/shingo45endo/sc55mk2-ctf-patcher) SC-55mkII GS-28 2.00 ROM patched is supported.
+- SC-88Pro also accepts a second recognized control ROM from an SC-GS board, which identifies itself as "SC-GS A '96" rather than by a version number. If both it and the 1.02 firmware are found, 1.02 is used unless the SC-GS image is the one named `sc88pro_control.bin`.
 
 ## Playlist and MIDI playback
 
@@ -183,7 +189,11 @@ Real hardware expects initialized battery-backed SRAM. A newly created emulated 
 
 **Restart Device** stops playback, rescans ROMs and constructs a fresh device. It clears SRAM and all runtime hardware state, including edits, controller state, voices and effects buffers, then applies the startup settings above. It retains the playlist and application settings and does not rewrite the ROM files. Use it for a clean start or after changing ROMs.
 
-**Q** toggles device power. Power-off stops playback and discards incoming MIDI; an active WAV recording continues with silence. Power-on starts a fresh board using the startup settings, except that held panel buttons bypass automatic Factory Reset and Fast Boot for that boot. Volatile device state is not preserved across power-off.
+**Q** is the front-panel POWER switch, and it behaves as the selected model's switch does. On SC-55, SC-55mkII, SC-155, SC-155mkII and SC-88VL, POWER is a key the firmware reads, not a supply switch. The unit stays powered, and a press puts it into its standby mode. In standby the display and lamps are dark, the sound is silenced, and incoming MIDI is ignored. The next press wakes it. The emulation keeps running through standby, as the hardware does, and playback is not stopped.
+
+SC-88, SC-88Pro, SC-8820 and SC-8850 use power on/off, as does SC-55st; the SC-55 standby behavior does not apply to every model carrying the SC-55 name.
+
+On models without standby, and with **Shift+Q** on the five standby models, the switch cuts the power supply. Power-off stops playback and discards incoming MIDI; an active WAV recording continues with silence. Power-on starts a fresh board using the startup settings, except that held panel buttons bypass automatic Factory Reset and Fast Boot for that boot. Volatile device state is not preserved across power-off.
 
 ## Settings
 
@@ -259,7 +269,13 @@ The figures below are **calculated circuit responses**, not measurements of phys
 
 Open **Keyboard Shortcuts** from the context menu for the current model's bindings. Focus the hardware panel before using them. A held key is a held physical button; release it to release the button. You can hold multiple keys, or hold a key while clicking another panel button, to enter the firmware's button combinations and special menus.
 
-These combinations work on the running hardware panel. **Q preserves held panel buttons across power-off/on.** Turn power off with Q, hold the desired panel keys, press Q again and keep holding the keys until the firmware responds. When powering on with held buttons, automatic Factory Reset and Fast Boot are bypassed for that boot so they cannot consume or replace the chord. Restart Device and model changes release held buttons; use Q for startup chords. Special-menu combinations depend on the device and firmware revision.
+These combinations work on the running hardware panel. Power-on combinations are made as on the hardware.
+
+**Models with a standby.** Put the unit in standby with **Q**, hold the desired panel keys, then press **Q** again. The firmware reads the held keys as it wakes. For example, to initialize an SC-55mkII, hold **Y + U** (both INSTRUMENT buttons) while pressing **Q**, then press **W** (ALL) at "Init All, Sure?".
+
+**Power supply.** The power supply switch also preserves held panel buttons across power-off/on. That switch is **Q** on the other models and **Shift+Q** on the standby models. Turn the power off, hold the desired panel keys, turn it on again, and keep holding the keys until the firmware responds. Use it for combinations the firmware reads only at a cold start, such as the SC-88Pro test mode below. When powering on with held buttons, automatic Factory Reset and Fast Boot are bypassed for that boot so they cannot consume or replace the chord.
+
+Restart Device and model changes release held buttons. Special-menu combinations depend on the device and firmware revision.
 
 ### SC-55 / SC-88 / SC-88Pro panel family
 
@@ -267,7 +283,8 @@ Only controls physically present on the selected profile are active. SC-55-famil
 
 | Keys | Hardware buttons |
 | --- | --- |
-| `Q` | Power on/off, on all models |
+| `Q` | POWER: standby / on (SC-55/SC-55mkII, SC-155/SC-155mkII, SC-88VL); power on/off (other models) |
+| `Shift`+`Q` | Power supply off / on (SC-55 family, SC-88VL, SC-88Pro) |
 | `W`, `E` | ALL, MUTE |
 | `R` / `T` | PART left / right |
 | `Y` / `U` | INSTRUMENT left / right |
@@ -286,7 +303,7 @@ Only controls physically present on the selected profile are active. SC-55-famil
 
 For example, on SC-88Pro, hold **2** (SC-88 MAP) and press **I** or **O** (KEY SHIFT) to adjust **DELAY**. The bottom edit-row functions change with USER INST and SELECT, as on the hardware.
 
-To enter the SC-88Pro startup test mode, press **Q** to power off, hold **I + O** (both KEY SHIFT buttons), then press **Q** to power on. At the diagnostic prompt, press **Tab** (PREVIEW). Press Q to power off when finished.
+To enter the SC-88Pro startup test mode, press **Q** to switch the power off, hold **I + O** (both KEY SHIFT buttons), then press **Q** to switch it on. At the diagnostic prompt, press **Tab** (PREVIEW). Press **Q** to switch the power off when finished.
 
 ### SC-8850
 
@@ -351,6 +368,8 @@ Explicit options override the selected config, followed by built-in defaults.
 
 Positional files and repeated `--playlist` arguments are appended in argument order. Without `--play` they are loaded without starting playback. `--play` starts the first entry after a five-second boot wait; use Fast Boot when you need the firmware fully past its intro first.
 
+The standalone player restores its previous playlist when launched without input files. Playlist changes are saved automatically to `playlist/last-session.m3u8` in the 88emu data folder. Right-click the playlist to load or save an `.m3u`/`.m3u8` playlist; saved playlists use relative paths where possible. The Add button and playlist drop target also accept playlist files and append their entries. Supplying positional files or `--playlist` starts a new playlist and makes it the next restored playlist.
+
 | GUI-only option | Meaning |
 | --- | --- |
 | `--playlist PATH` | Add one song; repeat for more. |
@@ -360,7 +379,8 @@ Positional files and repeated `--playlist` arguments are appended in argument or
 | `--audio-device NAME` | Exact output name within that backend, `none`, or `system` to follow the default on CoreAudio / Windows Audio. |
 | `--buffer-size N` | Requested callback size in frames; must be supported by the device. |
 | `--output-channels L,R` | Two distinct 1-based hardware channels, such as `3,4` or `4,3`. First is left, second is right. |
-| `--midi-in ID_OR_NAME` | Enable an input; repeat for several. Replaces saved inputs. Use `none` alone to disable all. |
+| `--midi-in ID_OR_NAME` | Enable an input for part group A; repeat for several. Replaces saved inputs. Use `none` alone to disable all. |
+| `--midi-in-a` / `--midi-in-b` / `--midi-in-c` / `--midi-in-d` | Enable an input for the named part group; each is repeatable. The same input can be specified for several groups. `--midi-in-a` is equivalent to `--midi-in`. |
 | `--midi-out ID_OR_NAME` | One output endpoint, or `none`. |
 | `--virtual-ports on\|off` | Enable/disable virtual ports. Supported on macOS/Linux, unavailable on Windows. |
 | `--virtual-port-name PREFIX` | Default `88emu`; produces `PREFIX MIDI IN A` through `D`, and corresponding `MIDI OUT` names. |

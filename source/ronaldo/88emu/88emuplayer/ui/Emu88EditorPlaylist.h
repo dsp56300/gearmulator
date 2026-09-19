@@ -2,6 +2,7 @@
 
 #include "jucePlayerLib/midiFile.h"
 
+#include "88emuplayer/app/Emu88Playlist.h"
 #include "88emuplayer/ui/Emu88Editor.h"
 #include "juceRmlUi/rmlDragData.h"
 #include "juceRmlUi/rmlDragSource.h"
@@ -48,7 +49,7 @@ namespace emu88Player
 		{
 			return std::any_of(_files.begin(), _files.end(), [](const std::string& _file)
 			{
-				return jucePlayer::midiFile::isSupported(_file);
+				return jucePlayer::midiFile::isSupported(_file) || playlist::isSupported(_file);
 			});
 		}
 
@@ -97,7 +98,7 @@ namespace emu88Player
 		{
 			return std::any_of(_files.begin(), _files.end(), [](const std::string& _file)
 			{
-				return jucePlayer::midiFile::isSupported(_file);
+				return jucePlayer::midiFile::isSupported(_file) || playlist::isSupported(_file);
 			});
 		}
 

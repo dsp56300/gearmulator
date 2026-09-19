@@ -27,11 +27,13 @@ namespace emu88Lib
 		Scc1a,
 		Cm64,
 		Cm32l,
+		Nu10b,
+		Miig5,
 	};
 
 	// Curated presentation order. Enum values remain
 	// stable because they are persisted in plugin settings and project state.
-	inline constexpr std::array<DeviceModel, 19> g_deviceMenuOrder = {
+	inline constexpr std::array<DeviceModel, 21> g_deviceMenuOrder = {
 		DeviceModel::Cm32l,
 		DeviceModel::Cm32p,
 		DeviceModel::Cm64,
@@ -51,6 +53,8 @@ namespace emu88Lib
 		DeviceModel::VeGsPro,
 		DeviceModel::Sc8820,
 		DeviceModel::Sc8850,
+		DeviceModel::Nu10b,
+		DeviceModel::Miig5,
 	};
 
 	struct DeviceProfile
@@ -124,12 +128,27 @@ namespace emu88Lib
 		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64 || _model == DeviceModel::Cm32l;
 	}
 
+	// The boards with a slot for an SN-U110 series PCM card: the CM-32P, and the CM-64
+	// built on it.
+	constexpr bool hasPcmCardSlot(const DeviceModel _model)
+	{
+		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64;
+	}
+
+	// Modules that run in their GM mode and nothing else: construction sets them up, and they
+	// have no panel or display here.
+	constexpr bool isGmModuleModel(const DeviceModel _model)
+	{
+		return _model == DeviceModel::Nu10b || _model == DeviceModel::Miig5;
+	}
+
 	// The CM-32L's display is a service screen the case has no window for: the firmware
 	// drives its SED1200 whether or not one is attached, and those screens are the only way
 	// to read the board's state, so it is shown here the way the CM-32P's is.
 	constexpr bool deviceHasLcd(const DeviceModel model)
 	{
-		return model != DeviceModel::Xpgs && model != DeviceModel::VeGsPro && model != DeviceModel::Sc8820 && (!isSc55Model(model) || getSc55DeviceProfile(model).panel != Sc55Panel::None);
+		return model != DeviceModel::Xpgs && model != DeviceModel::VeGsPro && model != DeviceModel::Sc8820 &&
+		       !isGmModuleModel(model) && (!isSc55Model(model) || getSc55DeviceProfile(model).panel != Sc55Panel::None);
 	}
 
 	// Left out of the device menu and the CLI's device list for now, for want of a
@@ -151,6 +170,36 @@ namespace emu88Lib
 	constexpr bool deviceHasSecondLcd(const DeviceModel _model)
 	{
 		return _model == DeviceModel::Cm64;
+	}
+
+	// What the front-panel POWER switch does.
+	//
+	// Standby: it is matrix position 0, a key like any other, and the firmware keeps running on the supply. A
+	// press puts the unit in standby - display supply cut, lamps dark, voices silenced, incoming MIDI still read
+	// and thrown away - and the next press wakes it, reading the other keys held as it does, so the manuals'
+	// hold-and-power-on combinations are made with this switch. Only cutting the supply itself cold-boots the
+	// board. On the SC-88VL the firmware's standby is 01:990A and its wake-up 01:98EC.
+	// The SC-155mkII runs the SC-55mkII program.
+	//
+	// Supply: the switch cuts the supply, or the board has no switch of its own and runs on its host's. The plain
+	// SC-88Pro and SC-8850 service schematics put POWER in the mains feed. The Pro firmware still has
+	// a standby handler, but its physical switch is not wired to the panel matrix. Classify the hardware,
+	// not the presence of a firmware handler. SC-55st also has an on/off switch, unlike SC-55/mkII.
+	enum class PowerSwitch : uint8_t { Supply, Standby };
+
+	constexpr PowerSwitch getPowerSwitch(const DeviceModel _model)
+	{
+		switch(_model)
+		{
+		case DeviceModel::Sc55Mk1:
+		case DeviceModel::Sc55Mk2:
+		case DeviceModel::Sc155:
+		case DeviceModel::Sc155Mk2:
+		case DeviceModel::Sc88VL:
+			return PowerSwitch::Standby;
+		default:
+			return PowerSwitch::Supply;
+		}
 	}
 
 	const DeviceProfile& getDeviceProfile(DeviceModel _model);

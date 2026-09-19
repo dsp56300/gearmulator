@@ -78,10 +78,14 @@ namespace emu88Player
 		void createRmlUi();
 		void destroyRmlUi();
 		void wirePanel();
+		void pressPowerKey(bool _supply);
 		void togglePower();
 		void updatePowerVisuals();
 		void chooseMidiFiles();
 		void addMidiFiles(const std::vector<std::string>& _files);
+		void loadPlaylist();
+		void savePlaylist();
+		void saveDefaultPlaylist();
 		void attachRecordButton();
 		void updateRecordButton();
 		void toggleWavRecording();
@@ -114,6 +118,8 @@ namespace emu88Player
 		void showRomNotices();
 		void showMissingRomNotice(emu88Lib::DeviceModel _model);
 		void showRomWarnings() const;
+		void browsePcmCard();
+		void applyPcmCardPath(const std::string& _path);
 
 		void timerCallback() override;
 		void setPointerButton(uint32_t _button, bool _pressed);
@@ -139,7 +145,9 @@ namespace emu88Player
 		std::unique_ptr<PlaylistDropTarget> m_playlistDropTarget;
 		std::vector<std::unique_ptr<PlaylistRowDrag>> m_playlistRows;
 		std::unique_ptr<juce::FileChooser> m_playlistChooser;
+		std::unique_ptr<juce::FileChooser> m_playlistFileChooser;
 		std::unique_ptr<juce::FileChooser> m_recordingChooser;
+		std::unique_ptr<juce::FileChooser> m_pcmCardChooser;
 		std::unique_ptr<TitleBarButton> m_recordButton;
 		Skin m_skin;
 		std::map<std::string, std::vector<char>> m_fileCache;

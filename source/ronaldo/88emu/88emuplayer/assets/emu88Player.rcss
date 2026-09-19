@@ -192,3 +192,6 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .powerOffDisplay { display: none; background-color: #272c29; color: #81877f; text-align: center; padding-top: 26dp; box-sizing: border-box; font-size: 12dp; }
 .powerOff .powerOffDisplay { display: block; }
 .powerOff #hardwareLcd { visibility: hidden; }
+/* Standby: the board runs on, but its firmware has cut the display supply, backlight and all. */
+.lcdUnlit { display: none; }
+.lcdUnpowered .lcdUnlit { display: block; }

@@ -11,10 +11,17 @@
 
 namespace emu88Player
 {
+    struct MidiInputOption
+    {
+        std::string value;
+        uint8_t groups = 0;
+    };
+
     struct LaunchOptions
     {
         std::map<std::string, std::string> values;
-        std::vector<std::string> files, midiInputs;
+        std::vector<std::string> files;
+        std::vector<MidiInputOption> midiInputs;
         bool has(const std::string& key) const { return values.count(key) != 0; }
         std::string get(const std::string& key, const std::string& fallback = {}) const;
         double number(const std::string& key, double fallback) const;
@@ -28,7 +35,9 @@ namespace emu88Player
     jucePlayer::MidiPlayer::ResetMode parseReset(const std::string& name);
     std::pair<int, int> parseOutputChannels(const std::string& value);
     juce::File launchFile(const std::string& path);
-    // The --pcm-card image, or empty without the option. Throws if the file is missing or not a card.
+    // The PCM card image in the file. Throws if the file is missing or not a card.
+    std::vector<uint8_t> loadPcmCard(const juce::File& file);
+    // The --pcm-card image, or empty without the option. Throws as above.
     std::vector<uint8_t> loadPcmCard(const LaunchOptions& options);
     void listDevices();
     std::string defaultDataFolder();

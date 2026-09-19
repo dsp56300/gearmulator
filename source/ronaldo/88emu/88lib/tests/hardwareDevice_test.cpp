@@ -46,7 +46,45 @@ int main()
 		CHECK_EQ(panel.extRead8(0xefc101), 0xffu);
 		panel.extWrite8(0xefc101, 0xfc);
 		CHECK_EQ(panel.leds(), 0xffu); // Data latch survives blanking.
+
+		// POWER is a mains switch, not a key at matrix position 0. Even a raw panel
+		// command must leave that input open, while the adjacent SC-88 MAP key works.
+		panel.extWrite8(0xe000fe, 1); // Scan the first column.
+		panel.setButtons(1u << static_cast<uint8_t>(Sc88ProButton::Power));
+		CHECK_EQ(panel.extRead8(0xe000fe), 0xffu);
+		panel.setButtons((1u << static_cast<uint8_t>(Sc88ProButton::Power)) |
+		                 (1u << static_cast<uint8_t>(Sc88ProButton::Sc88Map)));
+		CHECK_EQ(panel.extRead8(0xe000fe), 0xfdu);
+		panel.setButtons(0);
+		CHECK_EQ(panel.extRead8(0xe000fe), 0xffu);
 	}
+	// Retain P6DR behavior independently of the physical POWER switch classification.
+	{
+		struct DisplayBoard : Sc88Pro
+		{
+			DisplayBoard() : Sc88Pro(std::vector<uint8_t>(RomSize), {}, false) {}
+			using Sc88Pro::portWrite;
+		};
+		DisplayBoard display;
+		CHECK(display.lcdEnabled());
+		display.portWrite(0xfe8b, 0xfe);
+		CHECK(!display.lcdEnabled());
+		display.portWrite(0xfe8a, 0x01); // P5DR is not the line.
+		CHECK(!display.lcdEnabled());
+		display.portWrite(0xfe8b, 0x01);
+		CHECK(display.lcdEnabled());
+	}
+	static_assert(getPowerSwitch(DeviceModel::Sc55Mk1) == PowerSwitch::Standby);
+	static_assert(getPowerSwitch(DeviceModel::Sc55Mk2) == PowerSwitch::Standby);
+	static_assert(getPowerSwitch(DeviceModel::Sc155) == PowerSwitch::Standby);
+	static_assert(getPowerSwitch(DeviceModel::Sc155Mk2) == PowerSwitch::Standby);
+	static_assert(getPowerSwitch(DeviceModel::Sc88VL) == PowerSwitch::Standby);
+	static_assert(getPowerSwitch(DeviceModel::Sc55St) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::Sc88) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::Sc88Pro) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::Sc8820) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::Sc8850) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::VeGsPro) == PowerSwitch::Supply);
 
 	namespace fs = baseLib::filesystem;
 	const auto folder = fs::getCurrentDirectory() + "88emu-transport-" +

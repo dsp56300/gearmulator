@@ -325,8 +325,12 @@ namespace synthLib::midi::rcp
                 case 0x98:
                     {
                         std::vector<std::uint8_t> body;
-                        if (!m_document.isG36)
-                            body = {static_cast<std::uint8_t>(event.param1), event.param2};
+                        // An RCP v2 Tr.Excl record only supplies its step time
+                        // and two control operands.  Its SysEx payload begins in
+                        // the following F7 continuation records, just as it does
+                        // in G36.  Treating param1/param2 as payload prefixes the
+                        // message with invalid bytes (for example F0 02 00 41...),
+                        // so GS devices discard the setup write.
                         auto next = index + 1;
                         while (next < m_track.events.size() && m_track.events[next].command == 0xf7)
                         {

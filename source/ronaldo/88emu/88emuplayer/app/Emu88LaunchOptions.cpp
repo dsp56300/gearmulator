@@ -58,7 +58,7 @@ namespace emu88Player
         static constexpr const char* ids[] = {"sc88",   "sc88vl", "sc88pro", "sc8850",  "sc55mk2", "sc55",
                                               "sc55st", "cm300",  "scb55",   "rlp3237", "sc155",   "sc155mk2",
                                               "xpgs",   "sc8820", "cm32p",   "vegspro", "scc1a",   "cm64",
-                                              "cm32l"};
+                                              "cm32l",  "nu10b",  "miig5"};
         static_assert(std::size(ids) == emu88Lib::g_deviceMenuOrder.size(), "one ID per device model, in enum order");
         return ids[static_cast<size_t>(model)];
     }
@@ -93,7 +93,11 @@ namespace emu88Player
     {
         if (!options.has("pcm-card"))
             return {};
-        const auto file = launchFile(options.get("pcm-card"));
+        return loadPcmCard(launchFile(options.get("pcm-card")));
+    }
+
+    std::vector<uint8_t> loadPcmCard(const juce::File& file)
+    {
         juce::MemoryBlock data;
         if (!file.existsAsFile() || !file.loadFileAsData(data))
             throw std::runtime_error("PCM card not found: " + file.getFullPathName().toStdString());
@@ -131,8 +135,10 @@ namespace emu88Player
                                            "factory-reset", "fast-boot",   "pcm-card"};
         const std::set<std::string> render{"output", "bits", "boot-ms", "tail-ms", "max-seconds"};
         const std::set<std::string> gui{"audio-backend",     "audio-device", "buffer-size",
-                                        "midi-in",           "midi-out",     "virtual-ports",
-                                        "virtual-port-name", "playlist",     "output-channels"};
+                                        "midi-in",           "midi-in-a",    "midi-in-b",
+                                        "midi-in-c",         "midi-in-d",    "midi-out",
+                                        "virtual-ports",     "virtual-port-name", "playlist",
+                                        "output-channels"};
         const std::set<std::string> flags = cli
             ? std::set<std::string>{"help", "list-devices", "overwrite", "quiet"}
             : std::set<std::string>{"help", "list-devices", "list-endpoints", "play", "save-settings"};
@@ -178,9 +184,11 @@ namespace emu88Player
                 result.files.push_back(value);
                 continue;
             }
-            if (key == "midi-in")
+            if (key == "midi-in" || (key.size() == 9 && key.starts_with("midi-in-") &&
+                                      key.back() >= 'a' && key.back() <= 'd'))
             {
-                result.midiInputs.push_back(value);
+                const auto group = key == "midi-in" ? 0 : static_cast<unsigned>(key.back() - 'a');
+                result.midiInputs.push_back({value, static_cast<uint8_t>(1u << group)});
                 continue;
             }
             if (!result.values.emplace(key, value).second)
@@ -222,6 +230,10 @@ namespace emu88Player
         if (result.has("bits") && result.get("bits") != "16" && result.get("bits") != "24" &&
             result.get("bits") != "32")
             throw std::runtime_error("--bits must be 16, 24 or 32 (16/24-bit integer PCM or 32-bit float).");
+        if (result.midiInputs.size() > 1 &&
+            std::any_of(result.midiInputs.begin(), result.midiInputs.end(),
+                        [](const MidiInputOption& input) { return input.value == "none"; }))
+            throw std::runtime_error("--midi-in none cannot be combined with MIDI inputs.");
         for (const auto* key : {"virtual-ports", "limiter", "factory-reset", "fast-boot"})
             if (result.has(key) && result.get(key) != "on" && result.get(key) != "off")
                 throw std::runtime_error(std::string("--") + key + " must be on or off.");
@@ -262,7 +274,8 @@ namespace emu88Player
                    "  --audio-device NAME    Exact output name, 'none', or 'system'\n"
                    "  --buffer-size N        Audio callback frames\n"
                    "  --output-channels L,R  Two distinct 1-based hardware output channels\n"
-                   "  --midi-in ID_OR_NAME   Repeatable; 'none' disables saved inputs\n"
+                   "  --midi-in ID_OR_NAME   Repeatable input for group A; 'none' disables saved inputs\n"
+                   "  --midi-in-a/b/c/d ID   Repeatable input for the named part group\n"
                    "  --midi-out ID_OR_NAME  Output endpoint, or 'none'\n"
                    "  --virtual-ports on|off Enable or disable virtual MIDI ports\n"
                    "  --virtual-port-name N Prefix for virtual MIDI IN/OUT A-D names\n"

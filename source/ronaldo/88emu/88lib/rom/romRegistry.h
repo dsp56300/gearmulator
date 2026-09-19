@@ -47,6 +47,8 @@ namespace emu88Lib
         Cm64,
         Cm32l,
         Mt32,
+        Nu10b,
+        Miig5,
 
         Count
     };
@@ -257,6 +259,15 @@ namespace emu88Lib
         {RomDevice::Sc88VL, RomSlot::Wave, 1, 0x200000, "sc88vl_wave1.bin", false},
         {RomDevice::Sc88VL, RomSlot::Wave, 2, 0x200000, "sc88vl_wave2.bin", false},
         {RomDevice::Sc88VL, RomSlot::Wave, 3, 0x200000, "sc88vl_wave3.bin", false},
+        {RomDevice::Nu10b, RomSlot::Internal, 0, 0x10000, "nu10b_internal.bin", false},
+        {RomDevice::Nu10b, RomSlot::Program, 0, 0x100000, "nu10b_program.bin", false},
+        {RomDevice::Nu10b, RomSlot::Wave, 0, 0x200000, "nu10b_wave0.bin", false},
+        {RomDevice::Nu10b, RomSlot::Wave, 1, 0x200000, "nu10b_wave1.bin", false},
+        {RomDevice::Nu10b, RomSlot::Wave, 2, 0x200000, "nu10b_wave2.bin", false},
+        {RomDevice::Nu10b, RomSlot::Wave, 3, 0x200000, "nu10b_wave3.bin", false},
+        {RomDevice::Miig5, RomSlot::Internal, 0, 0x40000, "miig5_internal.bin", false},
+        {RomDevice::Miig5, RomSlot::Program, 0, 0x200000, "miig5_program.bin", false},
+        {RomDevice::Miig5, RomSlot::Wave, 0, 0x2000000, "miig5_wave.bin", false},
     };
 
     inline constexpr size_t g_romFileSpecCount = sizeof(g_romFileSpecs) / sizeof(g_romFileSpecs[0]);
@@ -598,6 +609,36 @@ namespace emu88Lib
          "SC-155 control", false},
 
         // -----------------------------------------------------------------
+        // NU-10B
+        // -----------------------------------------------------------------
+        // The SH7034's on-chip boot ROM, the program ROM and the four PCM mask ROMs as raw
+        // dumps, which de-scramble like the SC-88's.
+        {romDevices(RomDevice::Nu10b), RomSlot::Internal, 0, 0x10000, baseLib::MD5("e81ac462597571c9cde1739e92c08da2"),
+         "R00677323", false},
+        {romDevices(RomDevice::Nu10b), RomSlot::Program, 0, 0x100000, baseLib::MD5("6a950fe278c88d33b3b60f936abcedca"),
+         "R00678167", false},
+        {romDevices(RomDevice::Nu10b), RomSlot::Wave, 0, 0x200000, baseLib::MD5("3a2b61cf66ed3edc447a762accd5fc40"),
+         "PCM 1", false},
+        {romDevices(RomDevice::Nu10b), RomSlot::Wave, 1, 0x200000, baseLib::MD5("ab91066ef997237039655ad676195746"),
+         "PCM 2", false},
+        {romDevices(RomDevice::Nu10b), RomSlot::Wave, 2, 0x200000, baseLib::MD5("d42c1efacde5cff241e9e5be0d183d4e"),
+         "PCM 3", false},
+        {romDevices(RomDevice::Nu10b), RomSlot::Wave, 3, 0x200000, baseLib::MD5("f6448c563ce0df27d18bb59abc58ab72"),
+         "PCM 4", false},
+
+        // -----------------------------------------------------------------
+        // MIIG5
+        // -----------------------------------------------------------------
+        // The SH7042A's mask ROM, the program ROM and the wave image both XPs read, already
+        // decoded - its header text is legible - and stamped "Ver001" and 1999-10-13.
+        {romDevices(RomDevice::Miig5), RomSlot::Internal, 0, 0x40000, baseLib::MD5("d44e423549b50f2f7d5cd6b71067e3b0"),
+         "SH7042A mask ROM", false},
+        {romDevices(RomDevice::Miig5), RomSlot::Program, 0, 0x200000, baseLib::MD5("34cd67b9ba09a1f4ad078f1595e76b50"),
+         "1.11", false},
+        {romDevices(RomDevice::Miig5), RomSlot::Wave, 0, 0x2000000, baseLib::MD5("54731f82ec7fba29baf8ad1ee043fb17"),
+         "Ver001 1999-10-13, decoded", false},
+
+        // -----------------------------------------------------------------
     };
 
     inline constexpr size_t g_romRegistrySize = sizeof(g_romRegistry) / sizeof(g_romRegistry[0]);
@@ -675,6 +716,10 @@ namespace emu88Lib
             return "SC-155";
         case RomDevice::Sc155Mk2:
             return "SC-155mkII";
+        case RomDevice::Nu10b:
+            return "NU-10B";
+        case RomDevice::Miig5:
+            return "MIIG5";
         default:
             return "unknown";
         }

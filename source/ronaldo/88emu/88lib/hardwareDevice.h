@@ -24,6 +24,8 @@ namespace emu88Lib
 	class Cm32l;
 	class Cm64;
 	class Sc55Board;
+	class Nu10b;
+	class Miig5;
 
 	// Offline work the device does at construction, before anyone can hear or see it.
 	struct BootOptions
@@ -56,6 +58,10 @@ namespace emu88Lib
 				uint16_t width = 0;
 				uint16_t height = 0;
 				bool displayOn = false;
+				// Whether the panel has its supply. The boards with a standby switch cut it there, which
+				// leaves the glass dark, where a display that is merely off still shows its backlight.
+				// displayOn is false as well then.
+				bool powered = true;
 			};
 
 			// Only a board with two panels fills the second - see deviceHasSecondLcd(), which is
@@ -135,6 +141,8 @@ namespace emu88Lib
 		std::unique_ptr<Cm32l> m_cm32l;
 		std::unique_ptr<Cm64> m_cm64;
 		std::unique_ptr<Sc55Board> m_sc55;
+		std::unique_ptr<Nu10b> m_nu10b;
+		std::unique_ptr<Miig5> m_miig5;
 		std::unique_ptr<synthLib::MidiRateLimiter> m_sc55MidiIn;
 		std::array<synthLib::MidiBufferParser, 2> m_sc88ProMidiOut{
 			synthLib::MidiBufferParser{synthLib::MidiEventSource::Device},

@@ -41,7 +41,11 @@ namespace emu88Player
 		if(auto* playlist = document->GetElementById("playlist"))
 		{
 			m_playlistDropTarget = std::make_unique<PlaylistDropTarget>(playlist,
-				[this](const size_t _from, const size_t _to) { m_processor.midiPlayer().move(_from, _to); },
+				[this](const size_t _from, const size_t _to)
+				{
+					if(m_processor.midiPlayer().move(_from, _to))
+						saveDefaultPlaylist();
+				},
 				[this](const std::vector<std::string>& _files) { addMidiFiles(_files); },
 				[this] { return m_processor.midiPlayer().entries().size(); });
 			juceRmlUi::EventListener::Add(playlist, Rml::EventId::Mousedown, [this](Rml::Event& _event)
@@ -142,7 +146,7 @@ namespace emu88Player
 			if(key == Rml::Input::KI_Q && !juceRmlUi::helper::getKeyModCtrl(_event) &&
 			   !juceRmlUi::helper::getKeyModCommand(_event) && !juceRmlUi::helper::getKeyModAlt(_event))
 			{
-				if(!m_powerKeyDown) togglePower();
+				if(!m_powerKeyDown) pressPowerKey(juceRmlUi::helper::getKeyModShift(_event));
 				m_powerKeyDown = true;
 				_event.StopPropagation();
 				return;
@@ -183,6 +187,9 @@ namespace emu88Player
 			if(key == Rml::Input::KI_Q)
 			{
 				m_powerKeyDown = false;
+				// Only Q holds that matrix position there; on the other boards it is some other key.
+				if(emu88Lib::getPowerSwitch(m_processor.deviceModel()) == emu88Lib::PowerSwitch::Standby)
+					setKeyboardButton(g_powerSwitchButton, false);
 				_event.StopPropagation();
 				return;
 			}
@@ -254,6 +261,20 @@ namespace emu88Player
 		refreshLedElements(m_processor.deviceModel());
 	}
 
+	void Editor::pressPowerKey(const bool _supply)
+	{
+		// Where the firmware reads the POWER switch, Q is that key, held as long as Q is: the board
+		// stays on its supply and goes in and out of standby itself, taking any other keys held with
+		// it. Shift+Q is the supply, which is what Q switches on every other board.
+		if(!_supply && m_processor.hasValidRom() &&
+		   emu88Lib::getPowerSwitch(m_processor.deviceModel()) == emu88Lib::PowerSwitch::Standby)
+		{
+			setKeyboardButton(g_powerSwitchButton, true);
+			return;
+		}
+		togglePower();
+	}
+
 	void Editor::togglePower()
 	{
 		if(!m_processor.isPoweredOn())
@@ -274,6 +295,9 @@ namespace emu88Player
 		auto* document = m_rml->getDocument();
 		const bool powered = m_processor.isPoweredOn();
 		document->SetClass("powerOff", !powered);
+		// A standby goes with the board that was in it. The next display snapshot says whether the
+		// one running now has cut its display supply.
+		document->SetClass("lcdUnpowered", false);
 	}
 
 	void Editor::setPointerButton(const uint32_t _button, const bool _pressed)
@@ -423,6 +447,8 @@ namespace emu88Player
 		};
 
 		KeyboardShortcutGroups groups{{"Power", {{"Q", "Power on / off"}}}};
+		if(emu88Lib::getPowerSwitch(model) == emu88Lib::PowerSwitch::Standby)
+			groups.front().rows = {{"Q", "POWER: standby / on"}, {"Shift + Q", "Power supply off / on"}};
 		const auto walk = [&](const auto& _layout)
 		{
 			// The heading is carried until a row of its group survives: on a
