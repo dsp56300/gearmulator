@@ -315,6 +315,33 @@ namespace emu88Player
                        m_processor.setBootOptions(boot);
                    });
 
+        // A typed path applies on Enter or on leaving the field, and emptying it empties the slot.
+        // Leaving it can be the settings window closing, so the work waits until the event is done.
+        if (auto* card = dynamic_cast<Rml::ElementFormControlInput*>(m_settingsRoot->GetElementById("pcmCardPath")))
+        {
+            card->SetValue(m_processor.pcmCardPath());
+            const auto apply = [this](const Rml::String& _path)
+            {
+                const juce::WeakReference<Editor> safeThis(this);
+                juce::MessageManager::callAsync(
+                    [safeThis, _path]
+                    {
+                        if (auto* editor = safeThis.get())
+                            editor->applyPcmCardPath(_path);
+                    });
+            };
+            juceRmlUi::EventListener::Add(card, Rml::EventId::Change,
+                                          [card, apply](Rml::Event& _event)
+                                          {
+                                              if (_event.GetParameter("linebreak", false))
+                                                  apply(card->GetValue());
+                                          });
+            juceRmlUi::EventListener::Add(card, Rml::EventId::Blur,
+                                          [card, apply](Rml::Event&) { apply(card->GetValue()); });
+        }
+        if (auto* browse = m_settingsRoot->GetElementById("btPcmCardBrowse"))
+            juceRmlUi::EventListener::AddClick(browse, [this] { browsePcmCard(); });
+
         wireToggle("btReloadViaF5", m_processor.config().getBoolValue("reloadSkinViaF5", false),
                    [this](const bool _enabled)
                    {
@@ -428,5 +455,56 @@ namespace emu88Player
         selectSettingsPage(_pageId, _buttonId);
         m_settingsWindow->setVisible(true);
         m_settingsWindow->toFront(true);
+    }
+
+    void Editor::browsePcmCard()
+    {
+        // Start beside the card in the slot; failing that, among the ROMs, where card dumps usually live.
+        const auto current = juce::String::fromUTF8(m_processor.pcmCardPath().c_str());
+        auto folder = juce::File::isAbsolutePath(current) ? juce::File(current).getParentDirectory()
+                                                          : juce::File(m_processor.romFolder());
+        if (!folder.isDirectory())
+            folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
+        // Card dumps carry no agreed extension, so every file is offered.
+        m_pcmCardChooser = std::make_unique<juce::FileChooser>("Select CM-32P PCM card image", folder, "*", true);
+        const juce::WeakReference<Editor> safeThis(this);
+        m_pcmCardChooser->launchAsync(juce::FileBrowserComponent::openMode |
+                                          juce::FileBrowserComponent::canSelectFiles,
+                                      [safeThis](const juce::FileChooser& _chooser)
+                                      {
+                                          auto* editor = safeThis.get();
+                                          if (!editor)
+                                              return;
+                                          const auto file = _chooser.getResult();
+                                          if (file != juce::File())
+                                              editor->applyPcmCardPath(file.getFullPathName().toStdString());
+                                          editor->m_pcmCardChooser.reset();
+                                      });
+    }
+
+    void Editor::applyPcmCardPath(const std::string& _path)
+    {
+        // A pasted path often brings a trailing space or line break along.
+        const auto path = juce::String::fromUTF8(_path.c_str()).trim().toStdString();
+        std::string error;
+        const bool changed = path != m_processor.pcmCardPath();
+        const bool applied = !changed || m_processor.setPcmCardPath(path, error);
+
+        // Show the card actually in the slot: the new one, or the old one after a failure.
+        if (m_settingsWindow && m_settingsRoot)
+        {
+            juceRmlUi::RmlInterfaces::ScopedAccess access(m_settingsWindow->rmlComponent());
+            if (auto* card = dynamic_cast<Rml::ElementFormControlInput*>(m_settingsRoot->GetElementById("pcmCardPath")))
+                card->SetValue(m_processor.pcmCardPath());
+        }
+
+        if (!applied)
+        {
+            genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "CM-32P PCM card", error, this);
+            return;
+        }
+        // A board reads its card only while booting, so a running one restarts to take the new card.
+        if (changed && emu88Lib::hasPcmCardSlot(m_processor.deviceModel()) && m_processor.isPoweredOn())
+            selectDeviceModel(m_processor.deviceModel(), true);
     }
 } // namespace emu88Player

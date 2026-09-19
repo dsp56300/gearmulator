@@ -275,6 +275,26 @@ body {
 	line-height: 14dp;
 }
 
+/* A file path and its Open button: the path takes whatever width the button leaves. */
+.hardwareFileRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 6dp;
+}
+
+.hardwareFileRow input {
+	flex: 1 1 auto;
+	height: 26dp;
+	box-sizing: border-box;
+	padding: 4dp 6dp;
+	border: 1dp #515c64;
+	border-radius: 3dp;
+	background-color: #1f2529;
+	color: #eef1f2;
+	font-size: 13dp;
+}
+
 /* The controls under the audio device grid would otherwise touch its last row. */
 #audioControlPanelRow, #btOutputLimiter {
 	margin-top: 12dp;

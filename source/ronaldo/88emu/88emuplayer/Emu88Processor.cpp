@@ -18,6 +18,7 @@ namespace emu88Player
 		constexpr auto g_outputGainKey = "outputGain";
 		constexpr auto g_factoryResetOnLoadKey = "factoryResetOnLoad";
 		constexpr auto g_fastBootKey = "fastBoot";
+		constexpr auto g_pcmCardPathKey = "pcmCardPath";
 
 	}
 
@@ -62,9 +63,21 @@ namespace emu88Player
 		if(analogMode >= 0 && emu88Lib::isAnalogOutputModeValue(static_cast<uint32_t>(analogMode)))
 			m_analogOutputMode = static_cast<emu88Lib::AnalogOutputMode>(analogMode);
 
-		// The launcher has already checked the card.
-		if(standaloneLaunch)
-			m_pcmCard = loadPcmCard(*standaloneLaunch);
+		// The card chosen in the settings, or this session's --pcm-card, which the launcher
+		// has already checked. One that has gone missing since it was chosen leaves the slot
+		// empty rather than keeping the player from starting.
+		if(const auto cardPath = juce::String::fromUTF8(pcmCardPath().c_str());
+		   cardPath.isNotEmpty() && juce::File::isAbsolutePath(cardPath))
+		{
+			try
+			{
+				m_pcmCard = loadPcmCard(juce::File(cardPath));
+			}
+			catch(const std::exception&)
+			{
+				m_pcmCard.clear();
+			}
+		}
 		auto params = createDeviceParams(m_deviceModel);
 		m_device = std::make_unique<emu88Lib::HardwareDevice>(params, bootOptions(), m_pcmCard);
 		// Before the engine sees the device, so the first host rate it negotiates already
@@ -188,6 +201,40 @@ namespace emu88Player
 		m_config->setValue(g_factoryResetOnLoadKey, _boot.factoryReset);
 		m_config->setValue(g_fastBootKey, _boot.fastBoot);
 		m_config->saveIfNeeded();
+	}
+
+	std::string Processor::pcmCardPath() const
+	{
+		return m_config->getValue(g_pcmCardPathKey).toStdString();
+	}
+
+	bool Processor::setPcmCardPath(const std::string& _path, std::string& _error)
+	{
+		std::vector<uint8_t> card;
+		const auto path = juce::String::fromUTF8(_path.c_str());
+		if(path.isNotEmpty())
+		{
+			// juce::File asserts on anything relative, and a GUI app's working folder is
+			// nothing the user could have meant.
+			if(!juce::File::isAbsolutePath(path))
+			{
+				_error = "Enter the full path to the card image, or choose it with Open.";
+				return false;
+			}
+			try
+			{
+				card = loadPcmCard(juce::File(path));
+			}
+			catch(const std::exception& _e)
+			{
+				_error = _e.what();
+				return false;
+			}
+		}
+		m_pcmCard = std::move(card);
+		m_config->setValue(g_pcmCardPathKey, path);
+		m_config->saveIfNeeded();
+		return true;
 	}
 
 	bool Processor::setDeviceModel(const emu88Lib::DeviceModel _model)

@@ -93,7 +93,11 @@ namespace emu88Player
     {
         if (!options.has("pcm-card"))
             return {};
-        const auto file = launchFile(options.get("pcm-card"));
+        return loadPcmCard(launchFile(options.get("pcm-card")));
+    }
+
+    std::vector<uint8_t> loadPcmCard(const juce::File& file)
+    {
         juce::MemoryBlock data;
         if (!file.existsAsFile() || !file.loadFileAsData(data))
             throw std::runtime_error("PCM card not found: " + file.getFullPathName().toStdString());

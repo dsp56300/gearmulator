@@ -89,13 +89,34 @@ namespace
                                          inventory.describeRequirements(romDevice));
             if (const auto warnings = inventory.warnings(romDevice); !warnings.empty())
                 std::cerr << "ROM warning:\n" << warnings;
-            if (options.has("pcm-card") && model != emu88Lib::DeviceModel::Cm32p &&
-                model != emu88Lib::DeviceModel::Cm64)
+            if (options.has("pcm-card") && !emu88Lib::hasPcmCardSlot(model))
                 throw std::runtime_error(
                     "--pcm-card needs a device with a PCM card slot; use --device cm32p.");
-            const auto pcmCard = loadPcmCard(options);
+            // --pcm-card, else the card the player keeps in its slot, so a render matches playback. The
+            // option has to name a card; a saved one that has gone missing only leaves the slot empty,
+            // as it does in the player.
+            std::vector<uint8_t> pcmCard;
+            juce::File pcmCardFile;
+            if (options.has("pcm-card"))
+            {
+                pcmCardFile = launchFile(options.get("pcm-card"));
+                pcmCard = loadPcmCard(pcmCardFile);
+            }
+            else if (const auto saved = config.getValue("pcmCardPath");
+                     emu88Lib::hasPcmCardSlot(model) && juce::File::isAbsolutePath(saved))
+            {
+                try
+                {
+                    pcmCardFile = juce::File(saved);
+                    pcmCard = loadPcmCard(pcmCardFile);
+                }
+                catch (const std::exception& error)
+                {
+                    std::cerr << "Saved PCM card skipped: " << error.what() << '\n';
+                }
+            }
             if (!pcmCard.empty() && !options.has("quiet"))
-                std::cerr << "PCM card: " << launchFile(options.get("pcm-card")).getFileName() << '\n';
+                std::cerr << "PCM card: " << pcmCardFile.getFileName() << '\n';
 
             jucePlayer::MidiPlayer player;
             const auto loaded = player.addFiles(options.files);

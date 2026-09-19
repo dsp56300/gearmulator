@@ -124,6 +124,13 @@ namespace emu88Lib
 		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64 || _model == DeviceModel::Cm32l;
 	}
 
+	// The boards with a slot for an SN-U110 series PCM card: the CM-32P, and the CM-64
+	// built on it.
+	constexpr bool hasPcmCardSlot(const DeviceModel _model)
+	{
+		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64;
+	}
+
 	// The CM-32L's display is a service screen the case has no window for: the firmware
 	// drives its SED1200 whether or not one is attached, and those screens are the only way
 	// to read the board's state, so it is shown here the way the CM-32P's is.

@@ -336,6 +336,8 @@ namespace emu88Player
                 config->setValue("factoryResetOnLoad", options.get("factory-reset") == "on");
             if (options.has("fast-boot"))
                 config->setValue("fastBoot", options.get("fast-boot") == "on");
+            if (options.has("pcm-card"))
+                config->setValue("pcmCardPath", launchFile(options.get("pcm-card")).getFullPathName());
             if (options.has("gain"))
                 config->setValue("outputGain", options.number("gain", 1));
             if (options.has("virtual-ports"))
