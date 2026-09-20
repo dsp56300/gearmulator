@@ -12,27 +12,6 @@
 
 namespace h8500 {
 
-// Whether handlers chain by tail call is a property of the host: common/host.hpp.
-#define H8_HAS_MUSTTAIL EMU_HAS_MUSTTAIL
-
-#if H8_HAS_MUSTTAIL
-// Charge `states`, then continue with `next` unless the budget ran out (or a
-// pending condition forced it negative), in which case return the resume point.
-#define H8_END(c, next, states)                          \
-  (c).budget_ -= s32(states);                            \
-  if (H8_UNLIKELY((c).budget_ <= 0)) return (next);     \
-  [[clang::musttail]] return (next)->fn((c), (next))
-// Re-dispatch the same cell (after filling it).
-#define H8_GOTO(c, ip) [[clang::musttail]] return (ip)->fn((c), (ip))
-#else
-// Without guaranteed tail calls the run loop dispatches: handlers return the
-// next cell, but the fill runs the cell it decoded so step() never only decodes.
-#define H8_END(c, next, states) \
-  (c).budget_ -= s32(states);   \
-  return (next)
-#define H8_GOTO(c, ip) return (ip)->fn((c), (ip))
-#endif
-
 struct ExecImpl {
   static constexpr u16 kC = Cpu::kC, kV = Cpu::kV, kZ = Cpu::kZ, kN = Cpu::kN;
 
@@ -92,7 +71,7 @@ struct ExecImpl {
     constexpr u8 kWord[4] = {0, 1, 2, 4};  // 0, I/2, I, 2I
     unsigned pen = (((SZ == Size::Word) ? kWord[cls] : kByte[cls]) * icnt) >> 1;
     const unsigned wait = attr >> Bus::kWaitShift;
-    if (H8_UNLIKELY(wait)) pen += wait * operand_bus_cycles(BusClass(cls), icnt, SZ);
+    if (EMU_UNLIKELY(wait)) pen += wait * operand_bus_cycles(BusClass(cls), icnt, SZ);
     return pen;
   }
   static unsigned stack_pen(const Cpu& c, unsigned icnt) { return opnd_pen<Size::Word>(c.last_attr_, icnt); }
@@ -329,7 +308,7 @@ struct ExecImpl {
       }
       R.sr &= u16(~(kV | kC));
     } else if constexpr (K == Alu::Divxu) {
-      if (H8_UNLIKELY(s == 0)) {
+      if (EMU_UNLIKELY(s == 0)) {
         // Zero divide: N=V=C=0, Z=1, then exception (PC = next instruction).
         // The zero-divide timing row includes the exception sequence.
         R.sr = u16((R.sr & ~(kN | kV | kC)) | kZ);
@@ -361,7 +340,7 @@ struct ExecImpl {
         }
       }
     }
-    H8_END(c, next, states);
+    EMU_END(c, next, states);
   }
 
   // ---------------------------------------------------------------------------
@@ -462,7 +441,7 @@ struct ExecImpl {
     }
     const Cell* next = seq(ip);
     const unsigned states = ip->cyc + ea_pen<M, SZ>(c, ip);
-    H8_END(c, next, states);
+    EMU_END(c, next, states);
   }
 
   // ---------------------------------------------------------------------------
@@ -475,7 +454,7 @@ struct ExecImpl {
     R.r[rs] = R.r[rd];
     R.r[rd] = t;
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
   static const Cell* h_swap(Cpu& c, const Cell* ip) {
     Cpu::Regs& R = c.regs_;
@@ -486,7 +465,7 @@ struct ExecImpl {
     set_nz<Size::Word>(c, R.r[rd]);
     R.sr &= u16(~kV);
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
   template <bool Signed>
   static const Cell* h_ext(Cpu& c, const Cell* ip) {
@@ -496,7 +475,7 @@ struct ExecImpl {
     set_nz<Size::Word>(c, R.r[rd]);
     R.sr &= u16(~(kV | kC));
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
   template <bool Sub>
   static const Cell* h_decimal(Cpu& c, const Cell* ip) {
@@ -511,7 +490,7 @@ struct ExecImpl {
     if (out) f |= kC;
     R.sr = f;
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
 
   // ---------------------------------------------------------------------------
@@ -530,26 +509,26 @@ struct ExecImpl {
     }
     c.raise(Cpu::kPendDefer);
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
   static const Cell* h_trapa(Cpu& c, const Cell* ip) {
     ++c.insn_count_;
     const u8 vector = u8(Cpu::kVecTrapaBase + (ip->r & 0x0F));
     if (c.trapa_hook_ && !c.trapa_hook_(vector)) {  // swallowed by the host
-      H8_END(c, seq(ip), ip->cyc);
+      EMU_END(c, seq(ip), ip->cyc);
     }
     c.enter_exception(vector, pc_next(c, ip), -1);
     const Cell* next = c.cells_for(c.regs_.cp, c.regs_.pc);
-    H8_END(c, next, ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, next, ip->cyc + stack_pen(c, ip->icnt));
   }
   static const Cell* h_trapvs(Cpu& c, const Cell* ip) {
     ++c.insn_count_;
     if (c.regs_.sr & kV) {
       c.enter_exception(Cpu::kVecTrapVs, pc_next(c, ip), -1);
       const Cell* next = c.cells_for(c.regs_.cp, c.regs_.pc);
-      H8_END(c, next, ip->cyc2 + stack_pen(c, ip->icnt2));
+      EMU_END(c, next, ip->cyc2 + stack_pen(c, ip->icnt2));
     }
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
   static const Cell* h_rte(Cpu& c, const Cell* ip) {
     Cpu::Regs& R = c.regs_;
@@ -559,7 +538,7 @@ struct ExecImpl {
     c.raise(Cpu::kPendDefer);
     ++c.insn_count_;
     const Cell* next = c.cells_for(R.cp, R.pc);
-    H8_END(c, next, ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, next, ip->cyc + stack_pen(c, ip->icnt));
   }
   static const Cell* h_link(Cpu& c, const Cell* ip) {
     Cpu::Regs& R = c.regs_;
@@ -567,24 +546,24 @@ struct ExecImpl {
     R.r[6] = R.r[7];
     R.r[7] = u16(R.r[7] + s16(ip->imm));
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, seq(ip), ip->cyc + stack_pen(c, ip->icnt));
   }
   static const Cell* h_unlk(Cpu& c, const Cell* ip) {
     Cpu::Regs& R = c.regs_;
     R.r[7] = R.r[6];
     R.r[6] = c.pop16();
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, seq(ip), ip->cyc + stack_pen(c, ip->icnt));
   }
   static const Cell* h_sleep(Cpu& c, const Cell* ip) {
     c.sleeping_ = true;
     c.raise(Cpu::kPendSleep);
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
   static const Cell* h_nop(Cpu& c, const Cell* ip) {
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
   static const Cell* h_ldm(Cpu& c, const Cell* ip) {
     // Lowest-numbered register first.  R7 in the list: dummy read, SP still
@@ -597,7 +576,7 @@ struct ExecImpl {
       if (i != 7) R.r[i] = v;
     }
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, seq(ip), ip->cyc + stack_pen(c, ip->icnt));
   }
   static const Cell* h_stm(Cpu& c, const Cell* ip) {
     // Highest-numbered register first.  R7 in the list pushes (SP before) - 2.
@@ -613,7 +592,7 @@ struct ExecImpl {
       }
     }
     ++c.insn_count_;
-    H8_END(c, seq(ip), ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, seq(ip), ip->cyc + stack_pen(c, ip->icnt));
   }
 
   // ---------------------------------------------------------------------------
@@ -624,9 +603,9 @@ struct ExecImpl {
     ++c.insn_count_;
     if (cond_true<CC>(c.regs_.sr)) {
       const u16 target = u16(pc_next(c, ip) + s16(ip->imm));
-      H8_END(c, here(c, target), ip->cyc2);
+      EMU_END(c, here(c, target), ip->cyc2);
     }
-    H8_END(c, seq(ip), ip->cyc);
+    EMU_END(c, seq(ip), ip->cyc);
   }
   template <EaMode M, bool Sub>
   static const Cell* h_jmp(Cpu& c, const Cell* ip) {
@@ -641,20 +620,20 @@ struct ExecImpl {
       states += stack_pen(c, ip->icnt);
     }
     ++c.insn_count_;
-    H8_END(c, here(c, target), states);
+    EMU_END(c, here(c, target), states);
   }
   static const Cell* h_bsr(Cpu& c, const Cell* ip) {
     const u16 ret = pc_next(c, ip);
     c.push16(ret);
     ++c.insn_count_;
-    H8_END(c, here(c, u16(ret + s16(ip->imm))), ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, here(c, u16(ret + s16(ip->imm))), ip->cyc + stack_pen(c, ip->icnt));
   }
   template <bool Dealloc>
   static const Cell* h_rts(Cpu& c, const Cell* ip) {
     const u16 target = c.pop16();
     if constexpr (Dealloc) c.regs_.r[7] = u16(c.regs_.r[7] + s16(ip->imm));
     ++c.insn_count_;
-    H8_END(c, here(c, target), ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, here(c, target), ip->cyc + stack_pen(c, ip->icnt));
   }
   static const Cell* h_scb(Cpu& c, const Cell* ip) {
     Cpu::Regs& R = c.regs_;
@@ -666,11 +645,11 @@ struct ExecImpl {
       default: exit_loop = false; break;
     }
     ++c.insn_count_;
-    if (exit_loop) { H8_END(c, seq(ip), ip->cyc); }
+    if (exit_loop) { EMU_END(c, seq(ip), ip->cyc); }
     R.r[rn] = u16(R.r[rn] - 1);
-    if (R.r[rn] == 0xFFFF) { H8_END(c, seq(ip), ip->cyc + 1u); }  // count = -1: one more state, not taken
+    if (R.r[rn] == 0xFFFF) { EMU_END(c, seq(ip), ip->cyc + 1u); }  // count = -1: one more state, not taken
     const u16 target = u16(pc_next(c, ip) + s16(ip->imm));
-    H8_END(c, here(c, target), ip->cyc2);
+    EMU_END(c, here(c, target), ip->cyc2);
   }
   template <EaMode M, bool Sub>
   static const Cell* h_pjmp(Cpu& c, const Cell* ip) {
@@ -689,7 +668,7 @@ struct ExecImpl {
     R.pc = target;
     ++c.insn_count_;
     const Cell* next = c.cells_for(page, target);
-    H8_END(c, next, states);
+    EMU_END(c, next, states);
   }
   template <bool Dealloc>
   static const Cell* h_prts(Cpu& c, const Cell* ip) {
@@ -699,7 +678,7 @@ struct ExecImpl {
     if constexpr (Dealloc) R.r[7] = u16(R.r[7] + s16(ip->imm));
     ++c.insn_count_;
     const Cell* next = c.cells_for(R.cp, R.pc);
-    H8_END(c, next, ip->cyc + stack_pen(c, ip->icnt));
+    EMU_END(c, next, ip->cyc + stack_pen(c, ip->icnt));
   }
 
   // ---------------------------------------------------------------------------
@@ -710,13 +689,13 @@ struct ExecImpl {
   static const Cell* h_invalid(Cpu& c, const Cell* ip) {
     c.enter_exception(Cpu::kVecInvalidInsn, pc_of(c, ip), -1);
     const Cell* next = c.cells_for(c.regs_.cp, c.regs_.pc);
-    H8_END(c, next, c.exception_states() + stack_pen(c, ip->icnt));
+    EMU_END(c, next, c.exception_states() + stack_pen(c, ip->icnt));
   }
   // Instruction prefetch from a no-execute area (register field / external I/O).
   static const Cell* h_noexec(Cpu& c, const Cell* ip) {
     c.enter_exception(Cpu::kVecAddressError, pc_of(c, ip), -1);
     const Cell* next = c.cells_for(c.regs_.cp, c.regs_.pc);
-    H8_END(c, next, c.exception_states() + stack_pen(c, ip->icnt));
+    EMU_END(c, next, c.exception_states() + stack_pen(c, ip->icnt));
   }
   // Guard cell behind the page (icache.hpp): sequential flow ran past offset
   // H'FFFF.  The 16-bit PC wraps to H'0000 and CP stays, since only PJMP/PJSR/
@@ -725,7 +704,7 @@ struct ExecImpl {
   // has a single page).  Not an instruction: no states, no count.
   static const Cell* wrap(Cpu& c, const Cell* ip) {
     const Cell* next = here(c, pc_of(c, ip));
-    H8_GOTO(c, next);
+    EMU_GOTO(c, next);
   }
 
   // ---------------------------------------------------------------------------
@@ -752,7 +731,7 @@ struct ExecImpl {
       }
     }
     *const_cast<Cell*>(ip) = cell;
-    H8_GOTO(c, ip);
+    EMU_GOTO(c, ip);
   }
 
   struct Static { u8 states, I; };
@@ -978,18 +957,10 @@ struct ExecImpl {
 
 namespace detail {
 const Cell* cell_fill(Cpu& cpu, const Cell* ip) {
-#if H8_HAS_MUSTTAIL
-  [[clang::musttail]] return ExecImpl::fill(cpu, ip);
-#else
-  return ExecImpl::fill(cpu, ip);
-#endif
+  EMU_TAILCALL(ExecImpl::fill(cpu, ip));
 }
 const Cell* cell_wrap(Cpu& cpu, const Cell* ip) {
-#if H8_HAS_MUSTTAIL
-  [[clang::musttail]] return ExecImpl::wrap(cpu, ip);
-#else
-  return ExecImpl::wrap(cpu, ip);
-#endif
+  EMU_TAILCALL(ExecImpl::wrap(cpu, ip));
 }
 }  // namespace detail
 

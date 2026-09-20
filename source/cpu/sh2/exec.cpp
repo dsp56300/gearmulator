@@ -13,18 +13,13 @@
 #include "common/host.hpp"
 #include "cpu/sh2/cpu.hpp"
 
-#include <cstdio>
-#include <cstdlib>
-
 namespace sh2 {
 
 // Whether handlers chain by tail call is a property of the host: common/host.hpp.
 #if EMU_HAS_MUSTTAIL
-#define SH2_HAVE_MUSTTAIL 1
 #define SH2_CHAIN(nx) [[clang::musttail]] return (nx)->fn(cpu, (nx))
 #define SH2_CHAIN_TO(handler, cell) [[clang::musttail]] return (handler)(cpu, (cell))
 #else
-#define SH2_HAVE_MUSTTAIL 0
 #define SH2_CHAIN(nx) return (nx)
 #define SH2_CHAIN_TO(handler, cell) return (handler)(cpu, (cell))
 #endif
@@ -40,7 +35,7 @@ namespace sh2 {
     } else {                                                   \
       cpu.budget_ -= s32(states) + fetch;                      \
       const Cell* nx_ = c + 1;                                 \
-      if (SH2_UNLIKELY(cpu.budget_ <= 0)) return nx_;          \
+      if (EMU_UNLIKELY(cpu.budget_ <= 0)) return nx_;          \
       SH2_CHAIN(nx_);                                          \
     }                                                          \
   } while (0)
@@ -50,7 +45,7 @@ namespace sh2 {
     cpu.budget_ -= s32(states) + fetch;                        \
     ++cpu.insn_count_;                                         \
     const Cell* nx_ = (target);                                \
-    if (SH2_UNLIKELY(cpu.budget_ <= 0)) return nx_;            \
+    if (EMU_UNLIKELY(cpu.budget_ <= 0)) return nx_;            \
     SH2_CHAIN(nx_);                                            \
   } while (0)
 
@@ -91,14 +86,14 @@ struct ExecImpl {
   // The target as a cell: direct when resolved, otherwise through branch_to().
   static const Cell* relative_target(Cpu& cpu, const Cell* c, u32 pc) {
     if (c->flags & kFlagDirect) {
-      if (SH2_UNLIKELY(c->flags & kFlagTargetLine)) cpu.fetch_line_at(pc + u32(c->imm) * 2);
+      if (EMU_UNLIKELY(c->flags & kFlagTargetLine)) cpu.fetch_line_at(pc + u32(c->imm) * 2);
       return c + c->imm;
     }
     return cpu.branch_to(pc + 4 + u32(c->imm));
   }
   static void arm_relative(Cpu& cpu, const Cell* c, u32 pc) {
     if (c->flags & kFlagDirect) {
-      if (SH2_UNLIKELY(c->flags & kFlagTargetLine)) cpu.fetch_line_at(pc + u32(c->imm) * 2);
+      if (EMU_UNLIKELY(c->flags & kFlagTargetLine)) cpu.fetch_line_at(pc + u32(c->imm) * 2);
       cpu.branch_cell_ = c + c->imm;
       cpu.branch_finish_ = &finish_direct<2>;
     } else {
@@ -107,7 +102,7 @@ struct ExecImpl {
     }
   }
   static void arm_fallthrough(Cpu& cpu, const Cell* c, u32 pc) {
-    if (SH2_UNLIKELY(c->flags & kFlagPageEdge)) {
+    if (EMU_UNLIKELY(c->flags & kFlagPageEdge)) {
       cpu.branch_target_ = pc + 4;
       cpu.branch_finish_ = &finish_indirect<1>;
     } else {
@@ -525,10 +520,6 @@ struct ExecImpl {
 };
 
 // Decode the instruction word at `pc` into `c`.
-namespace {
-// instruction, modulo cache drops) on stderr.
-}
-
 void Cpu::fill_cell(Cell* c, u32 pc) {
   const u8 at = bus_.attr(pc);
   *c = Cell{};
@@ -592,11 +583,7 @@ namespace detail {
 
 const Cell* fill(Cpu& cpu, const Cell* c) {
   cpu.fill_cell(const_cast<Cell*>(c), cpu.pc_of(c));
-#if SH2_HAVE_MUSTTAIL
-  [[clang::musttail]] return c->fn(cpu, c);
-#else
-  return c->fn(cpu, c);
-#endif
+  EMU_TAILCALL(c->fn(cpu, c));
 }
 
 // Guard cell after the last instruction of a page: continue in the next page.
