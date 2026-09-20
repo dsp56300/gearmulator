@@ -13,6 +13,11 @@ Framework:
 - [Fix] DSPBridge: When a device did not start on the server, the connection
         hung. The server now refuses the device instead.
 
+Osirus:
+
+- [Imp] The part list now shows per-part MIDI activity indicators, same as
+        OsTIrus.
+
 88emuPlayer:
 
 - [Fix] MIDI: Deliver System DT1 messages to the SC-88, SC-88VL and SC-88Pro
