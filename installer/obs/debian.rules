@@ -9,8 +9,10 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 	dh $@ --buildsystem=cmake
 
 # VST2 builds against the bundled GPL-3.0 FST headers, not Steinberg's SDK.
+# Standalone is on for 88emu, whose products are programs rather than plugins;
+# the synths get a standalone build too, which is not installed.
 override_dh_auto_configure:
-	dh_auto_configure -- -Dgearmulator_BUILD_JUCEPLUGIN=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=OFF
+	dh_auto_configure -- -Dgearmulator_BUILD_JUCEPLUGIN=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON
 
 # One synth alone produced 378 MB of dbgsym, so all of them would add several GB
 # per revision, and OBS disables debuginfo on the RPM side anyway. Drop this
@@ -24,9 +26,11 @@ override_dh_strip:
 override_dh_auto_test:
 	cd obj-$(DEB_HOST_GNU_TYPE) && ctest --output-on-failure --exclude-regex 'virusIntegrationTests|virusRomHashTests'
 
-# With several binary packages the install goes to debian/tmp, and each synth's
-# .install file picks its plugins out of it. The tree's install rules are shaped
-# for the CPack ZIPs, so drop everything but the four plugin directories first.
+# With several binary packages the install goes to debian/tmp, and each package's
+# .install file picks its files out of it. The tree's install rules are shaped
+# for the CPack ZIPs, so drop everything but the four plugin directories and
+# 88emu's two programs first.
 execute_after_dh_auto_install:
-	find debian/tmp/usr -mindepth 1 -maxdepth 1 ! -name lib ! -name share -exec rm -rf {} +
+	find debian/tmp/usr -mindepth 1 -maxdepth 1 ! -name bin ! -name lib ! -name share -exec rm -rf {} +
 	find debian/tmp/usr/lib -mindepth 1 -maxdepth 1 ! -name vst ! -name vst3 ! -name clap ! -name lv2 -exec rm -rf {} +
+	find debian/tmp/usr/bin -mindepth 1 ! -name 88emuPlayer ! -name 88EmuCli -exec rm -rf {} +

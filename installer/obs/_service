@@ -11,7 +11,7 @@
 		<param name="scm">git</param>
 		<param name="url">https://github.com/dsp56300/gearmulator.git</param>
 		<param name="revision">main</param>
-		<param name="version">2.2.19</param>
+		<param name="version">2.2.24</param>
 		<param name="submodules">enable</param>
 		<param name="filename">TheUsualSuspects</param>
 		<param name="exclude">.git</param>

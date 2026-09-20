@@ -54,3 +54,13 @@ Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Roland JP-8000 emulation
  JE-8086 emulates the Roland JP-8000, as VST2, VST3, CLAP and LV2 plugins. It
  needs a firmware ROM image from the hardware, which is not included.
+
+Package: theusualsuspects-88emu
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Roland Sound Canvas emulation
+ 88emu emulates the hardware inside Roland Sound Canvas modules and related PCM
+ sound generators. Unlike the synths it is not a plugin: 88emuPlayer is an
+ application that plays MIDI files and takes MIDI input, and 88EmuCli renders
+ files to WAV offline. Both need ROM images from the hardware, which are not
+ included.

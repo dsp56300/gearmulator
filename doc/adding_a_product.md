@@ -729,10 +729,11 @@ in the repository.
 
 `installer/obs/` is the openSUSE Build Service package `home:theusualsuspects/TheUsualSuspects`.
 It builds public `main` for openSUSE Tumbleweed and Leap, Fedora, Debian, Ubuntu and Arch, on x86_64
-and on aarch64 where OBS offers it, and publishes installable repositories. One build per target
-produces one package per product, `theusualsuspects-<lowercase product>`, holding that product's
-VST2, VST3, CLAP and LV2 plugins. `installer/obs/README.md` has the mechanics, the target list
-and the version bump.
+and on aarch64 where the repository has that architecture enabled, and publishes installable
+repositories. One build per target produces one package per product,
+`theusualsuspects-<lowercase product>`, holding that product's VST2, VST3, CLAP and LV2 plugins,
+or its programs if it is standalone-only like 88emu. `installer/obs/README.md` has the mechanics,
+the target list and the version bump.
 
 A new product is five edits. The package name is lowercase, the paths inside keep the product
 name:
@@ -753,11 +754,12 @@ Traps:
 - Debian package names must be lowercase, while the plugin files keep the product's case. Those
   file names are what `%files`, the `.install` file and `_package_synth` match: a rename breaks
   all three silently.
-- `%install` and `debian.rules` keep only the four plugin directories and delete everything else
-  the tree installs, the test console and the bridge server plugin included. A product that ships
-  more than plugins needs a rule there and in `_package_synth`, not just a `%files` entry.
-- Standalone-only products are not built at all: the OBS build passes
-  `gearmulator_BUILD_JUCEPLUGIN_Standalone=OFF`.
+- `%install` and `debian.rules` keep only the four plugin directories and, for 88emu, the two
+  programs named in their `bin` prune. Everything else the tree installs is deleted, the test
+  console and the bridge server plugin included. A product that ships anything beyond those
+  needs a rule there and in `_package_synth`, not just a `%files` entry.
+- Standalone builds are on, for 88emu's sake, so a standalone-only product ships its programs
+  from `%{_bindir}`. The synths' standalones are built along with them and not installed.
 - Nothing in the OBS project itself is per-product; its repositories are per distribution.
 
 ### 14.6 Changelog, `doc/changelog.txt`

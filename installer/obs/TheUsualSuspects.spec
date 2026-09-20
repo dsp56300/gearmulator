@@ -1,5 +1,5 @@
 Name:           TheUsualSuspects
-Version:        2.2.19
+Version:        2.2.24
 Release:        0
 Summary:        Emulations of classic virtual analog synthesizers
 License:        GPL-3.0-or-later
@@ -81,6 +81,16 @@ Summary:        Roland JP-8000 emulation
 JE-8086 emulates the Roland JP-8000, as VST2, VST3, CLAP and LV2 plugins. It
 needs a firmware ROM image from the hardware, which is not included.
 
+%package -n theusualsuspects-88emu
+Summary:        Roland Sound Canvas emulation
+
+%description -n theusualsuspects-88emu
+88emu emulates the hardware inside Roland Sound Canvas modules and related PCM
+sound generators. Unlike the synths it is not a plugin: 88emuPlayer is an
+application that plays MIDI files and takes MIDI input, and 88EmuCli renders
+files to WAV offline. Both need ROM images from the hardware, which are not
+included.
+
 %prep
 %autosetup -n %{name}-%{version}
 
@@ -89,13 +99,15 @@ needs a firmware ROM image from the hardware, which is not included.
 # and -fno-stack-protector only to Release and defines NDEBUG for every non-Debug
 # build type. VST2 builds against the bundled GPL-3.0 FST headers. No -GNinja:
 # openSUSE's %%cmake_build calls make directly rather than cmake --build.
+# Standalone is on for 88emu, whose products are programs rather than plugins;
+# the synths get a standalone build too, which is not installed.
 %cmake \
     -Dgearmulator_BUILD_JUCEPLUGIN=ON \
     -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON \
     -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON \
     -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON \
     -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON \
-    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=OFF
+    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON
 
 %cmake_build
 
@@ -105,9 +117,10 @@ needs a firmware ROM image from the hardware, which is not included.
 # The tree's install rules are shaped for the CPack ZIPs: a plain install also
 # drops the vendored lunasvg, plutovg and RmlUi libraries and cmake files, the
 # test console, the bridge server plugin and the per-plugin changelogs into the
-# prefix. Keep only the four plugin directories.
-find %{buildroot}%{_prefix} -mindepth 1 -maxdepth 1 ! -name lib ! -name share -exec rm -rf {} +
+# prefix. Keep only the four plugin directories and 88emu's two programs.
+find %{buildroot}%{_prefix} -mindepth 1 -maxdepth 1 ! -name bin ! -name lib ! -name share -exec rm -rf {} +
 find %{buildroot}%{_prefix}/lib -mindepth 1 -maxdepth 1 ! -name vst ! -name vst3 ! -name clap ! -name lv2 -exec rm -rf {} +
+find %{buildroot}%{_bindir} -mindepth 1 ! -name 88emuPlayer ! -name 88EmuCli -exec rm -rf {} +
 
 %check
 # The Virus integration and ROM hash tests need firmware we cannot ship.
@@ -178,5 +191,11 @@ find %{buildroot}%{_prefix}/lib -mindepth 1 -maxdepth 1 ! -name vst ! -name vst3
 %{_prefix}/lib/vst3/JE8086.vst3
 %{_prefix}/lib/clap/JE8086.clap
 %{_prefix}/lib/lv2/JE8086.lv2
+
+%files -n theusualsuspects-88emu
+%license LICENSE.md
+%doc doc/88emu_readme.md
+%{_bindir}/88emuPlayer
+%{_bindir}/88EmuCli
 
 %changelog

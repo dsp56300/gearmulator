@@ -1,3 +1,9 @@
+theusualsuspects (2.2.24) unstable; urgency=low
+
+  * Update to 2.2.24 and add the 88emu package.
+
+ -- The Usual Suspects <dsp56300@protonmail.com>  Sun, 20 Sep 2026 00:00:00 +0000
+
 theusualsuspects (2.2.19) unstable; urgency=low
 
   * Initial package.

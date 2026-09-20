@@ -11,8 +11,9 @@ pkgname=(
   theusualsuspects-xenia
   theusualsuspects-nodalred2x
   theusualsuspects-je8086
+  theusualsuspects-88emu
 )
-pkgver=2.2.19
+pkgver=2.2.24
 pkgrel=1
 pkgdesc='Emulations of classic virtual analog synthesizers'
 arch=('x86_64' 'aarch64')
@@ -30,7 +31,8 @@ _src="TheUsualSuspects-$pkgver"
 
 build() {
   # CMAKE_BUILD_TYPE=None keeps makepkg's flags; base.cmake defines NDEBUG for it. VST2 builds
-  # against the bundled GPL-3.0 FST headers.
+  # against the bundled GPL-3.0 FST headers. Standalone is on for 88emu, whose products are
+  # programs rather than plugins; the synths get a standalone build too, which is not installed.
   local _cmake_args=(
     -DCMAKE_BUILD_TYPE=None
     -DCMAKE_INSTALL_PREFIX=/usr
@@ -39,7 +41,7 @@ build() {
     -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON
     -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON
     -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON
-    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=OFF
+    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON
   )
   cmake -S "$_src" -B build -G Ninja "${_cmake_args[@]}"
   cmake --build build
@@ -90,4 +92,12 @@ package_theusualsuspects-nodalred2x() {
 package_theusualsuspects-je8086() {
   pkgdesc='Roland JP-8000 emulation (VST2, VST3, CLAP, LV2)'
   _package_synth JE8086
+}
+
+package_theusualsuspects-88emu() {
+  pkgdesc='Roland Sound Canvas emulation (88emuPlayer and 88EmuCli)'
+  install -d "$pkgdir/usr/bin"
+  cp -a "$srcdir/stage/usr/bin/88emuPlayer" "$srcdir/stage/usr/bin/88EmuCli" "$pkgdir/usr/bin/"
+  install -Dm644 "$srcdir/$_src/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE.md"
+  install -Dm644 "$srcdir/$_src/doc/88emu_readme.md" "$pkgdir/usr/share/doc/$pkgname/README.md"
 }
