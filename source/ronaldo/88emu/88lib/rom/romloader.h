@@ -38,7 +38,12 @@ namespace emu88Lib
         size_t size() const { return namedSpec ? namedSpec->size : entry->size; }
         bool usedBy(RomDevice _device) const
         {
-            return namedSpec ? namedSpec->device == _device : emu88Lib::usedBy(*entry, _device);
+            if (!namedSpec)
+                return emu88Lib::usedBy(*entry, _device);
+            // Both Pro boards use the same PCM, including custom named chip dumps.
+            const auto isPro = [](RomDevice d) { return d == RomDevice::Sc88Pro || d == RomDevice::VeGsPro; };
+            return namedSpec->device == _device ||
+                (namedSpec->slot == RomSlot::Wave && isPro(namedSpec->device) && isPro(_device));
         }
     };
 

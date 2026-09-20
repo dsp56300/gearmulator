@@ -1,5 +1,15 @@
 Release Notes
 
+2.2.25:
+
+88emuPlayer:
+
+- [Fix] MIDI Player: Loading a MIDI file whose SysEx or Meta event is cut short
+        by the end of the file, or by a track chunk that is shorter than its
+        contents, no longer reads past the data or terminates the player.
+
+- [Fix] ROMs: Make the VEGS-Pro support the SC-88Pro waveroms as well.
+
 2.2.24:
 
 88emuPlayer:

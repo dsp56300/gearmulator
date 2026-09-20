@@ -33,7 +33,22 @@ namespace jucePlayer::midiFile
         if (!data.empty())
             contents.copyTo(data.data(), 0, data.size());
         const bool smf = extension == ".mid" || extension == ".midi";
-        if (!(smf ? synthLib::midi::readSmf(data, _events, _error) : synthLib::midi::readRcp(data, _events, _error)))
+        // A file the decoders cannot make sense of belongs in the caller's error list, not in a
+        // terminate handler: a length or allocation a malformed header asks for reaches the
+        // playlist as a rejected entry, the same as any other unreadable file.
+        bool decoded;
+        try
+        {
+            decoded = smf ? synthLib::midi::readSmf(data, _events, _error)
+                          : synthLib::midi::readRcp(data, _events, _error);
+        }
+        catch (const std::exception& e)
+        {
+            _events.clear();
+            _error = file.getFileName().toStdString() + ": " + e.what();
+            return false;
+        }
+        if (!decoded)
         {
             _error = file.getFileName().toStdString() + ": " + _error;
             return false;

@@ -76,6 +76,11 @@ namespace emu88Lib
     } // namespace
     const FoundRom* RomInventory::find(const RomDevice _device, const RomSlot _slot, const uint8_t _index) const
     {
+        // Prefer this model's explicit filename before its sibling board's aliases.
+        for (const auto& rom : m_roms)
+            if (rom.namedSpec && rom.namedSpec->device == _device && rom.slot() == _slot && rom.index() == _index)
+                return &rom;
+
         for (const auto& rom : m_roms)
             if (rom.namedSpec && rom.slot() == _slot && rom.index() == _index && rom.usedBy(_device))
                 return &rom;
@@ -471,8 +476,7 @@ namespace emu88Lib
                          : "SC-88Pro control ROMs run as the SC-88Pro device.\n\n")
                  << "Waves: use the native A+B+C files above, or decoded SC-8850 waves (32 MiB), "
                     "or decoded SC-8820 waves (16+8 MiB). These are alternatives, not additional required files.\n";
-            if (_device == RomDevice::Sc88Pro)
-                text << "The SC-88Pro board carries the same PCM on five 4 MiB mask ROMs instead, one per XP "
+            text << "The SC-88Pro board carries the same PCM on five 4 MiB mask ROMs instead, one per XP "
                         "chip select, and those are accepted too: CS0 and CS1 supply Wave ROM 1, CS2 and CS3 "
                         "supply Wave ROM 2, and CS4 is Wave ROM 3 itself. The four listed above are derived "
                         "references, hashed by cutting the VE-GSPro images at those boundaries rather than "
