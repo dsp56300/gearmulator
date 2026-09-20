@@ -5,10 +5,13 @@
 // The XP DSP, the LSP and the MT-32 reverb each pair an interpreter - the bit-exact reference -
 // with code generators for the hosts we ship on. Every other host (a 32-bit x86 or ARM, RISC-V,
 // WebAssembly, ...) still has to build and run, on the interpreter alone. The decision is made
-// here, once, so that the three chips agree and a new back end is added in one place:
+// here, once, so that the chips agree and a new back end is added in one place:
 //
 //   1. give it a CHIPS_JIT_<host> macro below,
 //   2. add <chip>_jit_<host>.h next to the existing ones and select it in <chip>_jit.h.
+//
+// The ESP takes its back end from here too but has no interpreter, so it builds on the x86-64
+// and arm64 hosts only.
 //
 // Exactly one CHIPS_JIT_<host> is 1. CHIPS_JIT_WASM is the Emscripten build: the back ends emit
 // WebAssembly with framework/wasmJit and the JavaScript host compiles it, possibly some time
