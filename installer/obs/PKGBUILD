@@ -13,7 +13,7 @@ pkgname=(
   theusualsuspects-je8086
   theusualsuspects-88emu
 )
-pkgver=2.2.24
+pkgver=2.2.25
 pkgrel=1
 pkgdesc='Emulations of classic virtual analog synthesizers'
 arch=('x86_64' 'aarch64')

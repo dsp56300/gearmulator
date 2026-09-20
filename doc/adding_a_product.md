@@ -728,9 +728,9 @@ in the repository.
 ### 14.5 Linux distribution packages (OBS)
 
 `installer/obs/` is the openSUSE Build Service package `home:theusualsuspects/TheUsualSuspects`.
-It builds public `main` for openSUSE Tumbleweed and Leap, Fedora, Debian, Ubuntu and Arch, on x86_64
-and on aarch64 where the repository has that architecture enabled, and publishes installable
-repositories. One build per target produces one package per product,
+It builds the public release tag for openSUSE Tumbleweed and Leap, Fedora, Debian, Ubuntu and
+Arch, on x86_64 and on aarch64 where the repository has that architecture enabled, and publishes
+installable repositories. One build per target produces one package per product,
 `theusualsuspects-<lowercase product>`, holding that product's VST2, VST3, CLAP and LV2 plugins,
 or its programs if it is standalone-only like 88emu. `installer/obs/README.md` has the mechanics,
 the target list and the version bump.
@@ -748,9 +748,9 @@ name:
 
 Traps:
 
-- **Public products only.** OBS clones `main` from the public GitHub repository, so a product
-  that is not public yet neither builds there nor belongs in these files (name gate,
-  restructure_plan.md §9).
+- **Public products only.** OBS clones the release tag from the public GitHub repository, so a
+  product that is not public yet neither builds there nor belongs in these files (name gate,
+  restructure_plan.md §9). It also only appears once a tag carries it.
 - Debian package names must be lowercase, while the plugin files keep the product's case. Those
   file names are what `%files`, the `.install` file and `_package_synth` match: a rename breaks
   all three silently.

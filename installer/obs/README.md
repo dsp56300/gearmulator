@@ -64,8 +64,11 @@ Not covered:
 
 ## Source
 
-`_service` runs `tar_scm` on `main` with submodules, then `recompress` to xz,
-both server-side, so every service run builds the current `main`. `obs_scm` with
+`_service` runs `tar_scm` on the release tag in its `revision` parameter, with
+submodules, then `recompress` to xz, both server-side. Builds are therefore
+reproducible and only change when the tag does: to pick up new work, tag it and
+bump `revision`. Point `revision` at `main` to build the branch head instead,
+which is what testing wants and releases do not. `obs_scm` with
 `tar` does not work here: `tar` exists neither on the OBS source host nor in the
 Debian/Ubuntu build chroots, and `dpkg-source` rejects an uncompressed orig
 tarball. The build itself is offline and fetches nothing.
@@ -75,14 +78,17 @@ tarball. The build itself is offline and fetches nothing.
 `osc` does not run on Windows (it imports `fcntl`); use it from WSL:
 
     osc checkout home:theusualsuspects TheUsualSuspects
-    osc service remoterun home:theusualsuspects TheUsualSuspects   # rebuild from current main
+    osc service remoterun home:theusualsuspects TheUsualSuspects   # re-fetch the sources, rebuild all
     osc results home:theusualsuspects TheUsualSuspects
 
 ## Bumping the version
 
 `project(gearmulator VERSION x.y.z)` in the top-level `CMakeLists.txt` is the
-source of truth. Mirror it in `_service` (`version`), the spec (`Version:`), the
-dsc (`Version:` and `DEBTRANSFORM-TAR:`) and a new `debian.changelog` entry.
+source of truth, and the release tag is named after it. Mirror it in `_service`
+(`revision` and `version`), the spec (`Version:`), the dsc (`Version:` and
+`DEBTRANSFORM-TAR:`), `PKGBUILD` (`pkgver`) and a new `debian.changelog` entry,
+then `osc commit` the package: a version that does not move leaves apt and
+pacman seeing no update, however new the binaries are.
 
 ## Notes
 

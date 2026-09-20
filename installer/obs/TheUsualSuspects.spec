@@ -1,5 +1,5 @@
 Name:           TheUsualSuspects
-Version:        2.2.24
+Version:        2.2.25
 Release:        0
 Summary:        Emulations of classic virtual analog synthesizers
 License:        GPL-3.0-or-later
