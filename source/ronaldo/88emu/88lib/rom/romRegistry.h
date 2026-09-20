@@ -118,6 +118,8 @@ namespace emu88Lib
         {RomDevice::Mt32, RomSlot::Control, 0, 1, 0x10000, 0x8000, true},
         {RomDevice::Sc88Pro, RomSlot::Wave, 0, 3, 0x800000, 0x400000, false},
         {RomDevice::Sc88Pro, RomSlot::Wave, 1, 5, 0x800000, 0x400000, false},
+        {RomDevice::VeGsPro, RomSlot::Wave, 0, 3, 0x800000, 0x400000, false},
+        {RomDevice::VeGsPro, RomSlot::Wave, 1, 5, 0x800000, 0x400000, false},
     };
 
     // The composite this index is the whole image of, if any.
@@ -485,16 +487,16 @@ namespace emu88Lib
         // The same PCM as the five 4 MiB mask ROMs the SC-88Pro board carries instead, one
         // per XP chip select. CS4 is R01233667 unchanged, so the row above already is it;
         // these four are the halves of the two larger parts, in chip-select order.
-        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 3, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 3, 0x400000,
          baseLib::MD5("decc8a499b69e68ee8b121d73410c36b"), "CS0, first half of R01567167, derived reference",
          false},
-        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 4, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 4, 0x400000,
          baseLib::MD5("69933f0a2a3f6f4ab53932f40ba63f74"), "CS1, second half of R01567167, derived reference",
          false},
-        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 5, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 5, 0x400000,
          baseLib::MD5("bda725bd1cf8c3911f906314ca162bed"), "CS2, first half of R01567178, derived reference",
          false},
-        {romDevices(RomDevice::Sc88Pro), RomSlot::Wave, 6, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 6, 0x400000,
          baseLib::MD5("94e94038993600555b738e8ccc24d8b8"), "CS3, second half of R01567178, derived reference",
          false},
 

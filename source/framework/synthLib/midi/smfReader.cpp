@@ -174,25 +174,32 @@ namespace synthLib::midi
                 {
                     const uint8_t type = r.u8();
                     const uint32_t length = r.varLen();
-                    const size_t body = r.pos;
-                    if (type == 0x51 && length >= 3) // set tempo
+                    // Both u8() and varLen() can run past the end of the chunk on a file whose
+                    // track length is short or that was cut off mid-event, leaving r.pos beyond
+                    // trackEnd. Bound the body before anything indexes it: the declared length
+                    // says nothing about how many bytes are actually there, and a body past the
+                    // end makes [body, end) run backwards - which is what threw std::length_error
+                    // out of the track name below.
+                    const size_t body = std::min<size_t>(r.pos, trackEnd);
+                    const size_t bodyEnd = std::min(body + length, trackEnd);
+                    const size_t available = bodyEnd - body;
+                    if (type == 0x51 && available >= 3) // set tempo
                     {
                         const uint32_t tempo =
                             (uint32_t(file[body]) << 16) | (uint32_t(file[body + 1]) << 8) | file[body + 2];
                         if (tempo)
                             raw.push_back({tick, order++, currentPort, tempo, {}, static_cast<uint16_t>(track)});
                     }
-                    else if (type == 0x21 && length >= 1) // midi port
+                    else if (type == 0x21 && available >= 1) // midi port
                     {
                         currentPort = static_cast<uint8_t>(std::min<uint8_t>(file[body], 3));
                         fileMarksPorts = true;
                     }
                     else if (type == 0x03 && trackName.empty()) // track name
                     {
-                        const size_t nameEnd = std::min(body + length, trackEnd);
-                        trackName.assign(file.begin() + body, file.begin() + nameEnd);
+                        trackName.assign(file.begin() + body, file.begin() + bodyEnd);
                     }
-                    r.pos = std::min(body + length, trackEnd);
+                    r.pos = bodyEnd;
                     if (type == 0x2f) // end of track
                         break;
                     continue;
@@ -201,7 +208,8 @@ namespace synthLib::midi
                 if (status == 0xf0 || status == 0xf7) // sysex / escape
                 {
                     const uint32_t length = r.varLen();
-                    const size_t body = r.pos;
+                    // Bounded for the same reason as the meta body above.
+                    const size_t body = std::min<size_t>(r.pos, trackEnd);
                     const size_t end = std::min(body + length, trackEnd);
                     std::vector<uint8_t> bytes;
                     if (status == 0xf0)

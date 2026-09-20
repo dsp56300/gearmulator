@@ -149,8 +149,8 @@ namespace
 		// CS4 has no chip index: nothing joins it, so it is only ever wave C.
 		CHECK(!isCompositeChip(RomDevice::Sc88Pro, RomSlot::Wave, 7));
 		CHECK(!findCompositeWhole(RomDevice::Sc88Pro, RomSlot::Wave, 2));
-		// The VE-GS Pro board carries the three larger parts instead.
-		CHECK(!isCompositeChip(RomDevice::VeGsPro, RomSlot::Wave, 3));
+		// VE-GS Pro also accepts the equivalent five-chip layout.
+		CHECK(isCompositeChip(RomDevice::VeGsPro, RomSlot::Wave, 3));
 	}
 
 	const RomRegistryEntry* rowFor(const RomDevice _device, const RomSlot _slot, const uint8_t _index,
@@ -281,6 +281,60 @@ namespace
 		CHECK(whole == c);
 	}
 
+	void testSharedProWaves()
+	{
+		for (const bool named : {false, true})
+		for (const bool mixed : {false, true})
+		{
+			RomInventory inventory;
+			// Native VE-GS firmware is required even when all waves come from SC-88Pro.
+			CHECK(place(inventory, RomDevice::Sc88Pro, RomSlot::Control, 0, pattern(0x100000, 1), "c.bin"));
+			for (uint8_t index : {2, 3, 4, 5, 6})
+			{
+				if (mixed && index >= 5) continue;
+				const auto data = pattern(0x400000, index);
+				const auto name = "shared" + std::to_string(index) + ".bin";
+				if (!named)
+					CHECK(place(inventory, RomDevice::Sc88Pro, RomSlot::Wave, index, data, name));
+				else
+				{
+					FoundRom rom;
+					for (const auto& spec : g_romFileSpecs)
+						if (spec.device == RomDevice::Sc88Pro && spec.slot == RomSlot::Wave && spec.index == index)
+							rom.namedSpec = &spec;
+					CHECK(rom.namedSpec != nullptr);
+					rom.path = g_tempDir + name;
+					CHECK(baseLib::filesystem::writeFile(rom.path, data));
+					inventory.add(std::move(rom));
+				}
+			}
+			if (mixed)
+				CHECK(place(inventory, RomDevice::VeGsPro, RomSlot::Wave, 1, pattern(0x800000, 5), "w.bin"));
+			CHECK(!inventory.isComplete(RomDevice::VeGsPro));
+			CHECK(place(inventory, RomDevice::VeGsPro, RomSlot::Control, 0, pattern(0x100000, 2), "c2.bin"));
+			CHECK(inventory.isComplete(RomDevice::VeGsPro));
+			CHECK(inventory.missingFiles(RomDevice::VeGsPro).empty());
+			std::vector<uint8_t> wave;
+			CHECK(inventory.read(wave, RomDevice::VeGsPro, RomSlot::Wave, 0));
+			auto expected = pattern(0x400000, 3);
+			const auto high = pattern(0x400000, 4);
+			expected.insert(expected.end(), high.begin(), high.end());
+			CHECK(wave == expected);
+			CHECK(inventory.read(wave, RomDevice::VeGsPro, RomSlot::Wave, 1));
+			expected = pattern(mixed ? 0x800000 : 0x400000, 5);
+			if (!mixed)
+			{
+				const auto cs3 = pattern(0x400000, 6);
+				expected.insert(expected.end(), cs3.begin(), cs3.end());
+			}
+			CHECK(wave == expected);
+			CHECK(inventory.read(wave, RomDevice::VeGsPro, RomSlot::Wave, 2));
+			CHECK(wave == pattern(0x400000, 2));
+		}
+		for (uint8_t i = 2; i <= 6; ++i)
+			baseLib::filesystem::remove(g_tempDir + "shared" + std::to_string(i) + ".bin");
+	}
+
 	// A board is complete with either form of a composite slot, and the chips never count as a
 	// requirement of their own.
 	void testCompletenessIgnoresHalves()
@@ -323,6 +377,7 @@ int main()
 	testInterleavedComposite();
 	testConcatenatedComposite();
 	testSc88ProChipComposite();
+	testSharedProWaves();
 	testCompletenessIgnoresHalves();
 
 	for (const auto* name : {"mt32_a.bin", "mt32_b.bin", "mt32_control.bin", "cm32l_low.bin", "cm32l_high.bin",

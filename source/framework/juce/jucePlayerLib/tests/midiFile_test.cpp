@@ -124,6 +124,69 @@ namespace
         CHECK_EQ(player.entries().size(), 2u);
     }
 
+    struct SmfTrack
+    {
+        std::vector<uint8_t> body;
+        int declaredLength = -1; // -1 states the body's own size
+    };
+
+    // 96 ticks per quarter note, one chunk per track. A chunk length that does not match its body
+    // is how a real file ends up describing a track that is not there.
+    std::vector<uint8_t> smfFixture(const std::vector<SmfTrack>& tracks)
+    {
+        const auto count = static_cast<uint8_t>(tracks.size());
+        std::vector<uint8_t> data = {'M', 'T', 'h', 'd', 0, 0, 0, 6, 0, 1, 0, count, 0, 0x60};
+        for (const auto& track : tracks)
+        {
+            const auto length = track.declaredLength < 0 ? static_cast<uint32_t>(track.body.size())
+                                                         : static_cast<uint32_t>(track.declaredLength);
+            data.insert(data.end(), {'M', 'T', 'r', 'k', static_cast<uint8_t>(length >> 24),
+                                     static_cast<uint8_t>(length >> 16), static_cast<uint8_t>(length >> 8),
+                                     static_cast<uint8_t>(length)});
+            data.insert(data.end(), track.body.begin(), track.body.end());
+        }
+        return data;
+    }
+
+    // A meta or SysEx header that the file, or its track chunk, ends in the middle of. The reader
+    // used to index the body regardless of how much of it was there: the truncated ones read past
+    // the buffer, and a body starting past the chunk end made [body, end) run backwards, which
+    // threw std::length_error out of std::string::assign and terminated the process. Every shape
+    // below has to come back as an answer rather than a crash.
+    void smfTruncatedHeaders()
+    {
+        std::vector<synthLib::midi::Event> decoded;
+        std::string error;
+
+        const auto answered = [&decoded, &error](const std::vector<uint8_t>& _data)
+        {
+            const bool ok = synthLib::midi::readSmf(_data, decoded, error);
+            CHECK(ok == !decoded.empty());
+            CHECK(ok || !error.empty());
+        };
+
+        for (const std::vector<uint8_t>& body : {std::vector<uint8_t>{0x00, 0xff, 0x51, 0x03},        // set tempo
+                                                 std::vector<uint8_t>{0x00, 0xff, 0x21, 0x01},        // midi port
+                                                 std::vector<uint8_t>{0x00, 0xff, 0x03, 0x05},        // track name
+                                                 std::vector<uint8_t>{0x00, 0xf0, 0x05},              // sysex
+                                                 std::vector<uint8_t>{0x00, 0xf7, 0x05}})             // sysex escape
+        {
+            // The chunk claims more than the file holds, so nothing follows the header at all.
+            answered(smfFixture({{body, static_cast<int>(body.size()) + 3}}));
+            // The chunk ends inside the header, so the body would start past the end of the track.
+            answered(smfFixture({{body, 2}}));
+        }
+
+        // A meta whose own length reaches past the end of its chunk keeps the default tempo rather
+        // than reading the bytes of whatever follows the track.
+        const std::vector<uint8_t> notes = {0x00, 0x90, 60, 100, 0x60, 0x80, 60, 0x00, 0x00, 0xff, 0x2f, 0x00};
+        const auto data = smfFixture({{{0x00, 0xff, 0x51, 0x03}}, {notes}});
+        CHECK(synthLib::midi::readSmf(data, decoded, error));
+        CHECK_EQ(decoded.size(), 2u);
+        if (decoded.size() == 2)
+            CHECK(std::abs(decoded.back().seconds - 0.5) < 1e-9); // 120 bpm, not the following chunk's header
+    }
+
     void put16(std::vector<uint8_t>& data, size_t offset, uint16_t value)
     {
         data[offset] = static_cast<uint8_t>(value);
@@ -298,5 +361,6 @@ void checkMidiFiles()
 {
     Fixtures files;
     rcpPlaylist(files);
+    smfTruncatedHeaders();
     g36Playback(files);
 }
