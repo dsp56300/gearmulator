@@ -2,6 +2,17 @@ Release Notes
 
 2.2.23:
 
+Framework:
+
+- [Fix] The patch manager could hang the interface for minutes on folders
+        with tens of thousands of patch files.
+
+- [Fix] DSPBridge: The server took the port of its UDP connection from the
+        TCP port setting.
+
+- [Fix] DSPBridge: When a device did not start on the server, the connection
+        hung. The server now refuses the device instead.
+
 88emuPlayer:
 
 - [Fix] MIDI: Deliver System DT1 messages to the SC-88, SC-88VL and SC-88Pro
