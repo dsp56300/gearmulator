@@ -15,6 +15,7 @@ namespace synthLib
 	{
 	public:
 		using WriteCallback = std::function<void(uint8_t)>;
+		using SysexFilter = std::function<bool(const SysexBuffer&)>;
 
 		MidiRateLimiter(WriteCallback _writeCallback);
 		~MidiRateLimiter() = default;
@@ -40,6 +41,13 @@ namespace synthLib
 		};
 		void setSilence(const Silence _silence) { m_silence = _silence; }
 		void transportDiscontinuity(uint32_t _generation);
+
+		// A SysEx the filter rejects is dropped on write() and never queued.
+		void setSysexFilter(SysexFilter _filter) { m_sysexFilter = std::move(_filter); }
+
+		// Remove queued SysEx matching the predicate, e.g. bulk dumps a newer one supersedes. The
+		// message currently on the wire is not affected. Returns how many were dropped.
+		size_t purgePendingSysex(const std::function<bool(const SMidiEvent&)>& _predicate);
 
 		void processSample();
 
@@ -88,5 +96,6 @@ namespace synthLib
 		uint32_t m_transportGeneration = 0;
 		bool m_currentObsolete = false;
 		Silence m_silence = Silence::AllSoundOff;
+		SysexFilter m_sysexFilter;
 	};
 }

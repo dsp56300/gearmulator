@@ -39,6 +39,8 @@ namespace synthLib
 
 	void MidiRateLimiter::write(SMidiEvent&& _event)
 	{
+		if (!_event.sysex.empty() && m_sysexFilter && !m_sysexFilter(_event.sysex))
+			return;
 
 		if (isTransportBound(_event) && _event.transportGeneration < m_transportGeneration)
 			return;
@@ -47,6 +49,24 @@ namespace synthLib
 			m_pendingSysex.emplace_back(std::move(_event));
 		else
 			m_pendingRealtime.emplace_back(std::move(_event));
+	}
+
+	size_t MidiRateLimiter::purgePendingSysex(const std::function<bool(const SMidiEvent&)>& _predicate)
+	{
+		size_t purged = 0;
+
+		// With the event order preserved, SysEx waits in the realtime queue.
+		for(auto* queue : {&m_pendingSysex, &m_pendingRealtime})
+		{
+			const auto end = std::remove_if(queue->begin(), queue->end(), [&](const SMidiEvent& _event)
+			{
+				return !_event.sysex.empty() && _predicate(_event);
+			});
+			purged += static_cast<size_t>(std::distance(end, queue->end()));
+			queue->erase(end, queue->end());
+		}
+
+		return purged;
 	}
 
 	void MidiRateLimiter::transportDiscontinuity(const uint32_t _generation)
