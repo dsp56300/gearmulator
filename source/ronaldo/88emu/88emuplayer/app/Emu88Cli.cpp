@@ -55,7 +55,12 @@ namespace
             {
                 const auto xml = juce::parseXML(configFile);
                 if (!xml || !xml->hasTagName("PROPERTIES"))
-                    throw std::runtime_error("Invalid XML config file: " + configFile.getFullPathName().toStdString());
+                {
+                    const auto path = configFile.getFullPathName().toStdString();
+                    const auto hint = privacySettingsHint({path});
+                    throw std::runtime_error(hint.empty() ? "Invalid XML config file: " + path
+                                                          : "Cannot read the config file " + path + ".\n\n" + hint);
+                }
                 for (const auto* value : xml->getChildWithTagNameIterator("VALUE"))
                 {
                     const auto name = value->getStringAttribute("name");
@@ -73,7 +78,7 @@ namespace
             configureRomSearchPaths(options);
             if (options.has("list-devices"))
             {
-                listDevices();
+                listDevices(options);
                 return 0;
             }
 
@@ -85,8 +90,12 @@ namespace
             const auto inventory = emu88Lib::RomLoader::scan();
             const auto romDevice = emu88Lib::RomLoader::toRomDevice(model);
             if (!inventory.isComplete(romDevice))
+            {
+                if (const auto error = romFolderAccessError(options); !error.empty())
+                    throw std::runtime_error(error);
                 throw std::runtime_error("Missing ROMs for " + std::string(deviceId(model)) + ":\n" +
                                          inventory.describeRequirements(romDevice));
+            }
             if (const auto warnings = inventory.warnings(romDevice); !warnings.empty())
                 std::cerr << "ROM warning:\n" << warnings;
             if (options.has("pcm-card") && !emu88Lib::hasPcmCardSlot(model))

@@ -3,6 +3,7 @@
 #include "88emuplayer/ui/Emu88EditorLcd.h"
 #include "88emuplayer/ui/Emu88EditorPlaylist.h"
 #include "88emuplayer/ui/Emu88EditorWindows.h"
+#include "88emuplayer/app/Emu88LaunchOptions.h"
 #include "88lib/rom/romloader.h"
 #include "juceRmlUi/rmlMenu.h"
 #include "juceRmlUi/rmlHelper.h"
@@ -131,6 +132,8 @@ namespace emu88Player
 	{
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
 		const auto inventory = emu88Lib::RomLoader::rescan();
+		const auto missing = romFolderAccessError(standaloneLaunch ? *standaloneLaunch : LaunchOptions{}).empty()
+			? " (ROMs missing)" : " (ROM folder not readable)";
 		for(const auto model : emu88Lib::g_deviceMenuOrder)
 		{
 			// A hidden device stays in the menu only while it is the one running.
@@ -141,7 +144,7 @@ namespace emu88Player
 			if(emu88Lib::isGmModuleModel(model) && !available && model != m_processor.deviceModel())
 				continue;
 			const auto label = std::string(emu88Lib::getDeviceProfile(model).displayName) +
-				(available ? "" : " (ROMs missing)");
+				(available ? "" : missing);
 			m_contextMenu->addEntry(label, true, model == m_processor.deviceModel(), [this, model, available]
 			{
 				if(available)
@@ -376,9 +379,11 @@ namespace emu88Player
 
 	void Editor::showStartupNotices()
 	{
+		// The playlist notice lists the restored session's entries that cannot be read.
 		if(m_processor.config().getBoolValue("disclaimerSeen", false))
 		{
 			showRomNotices();
+			showPlaylistNotice();
 			return;
 		}
 
@@ -390,6 +395,7 @@ namespace emu88Player
 				editor->m_processor.config().setValue("disclaimerSeen", true);
 				editor->m_processor.config().saveIfNeeded();
 				editor->showRomNotices();
+				editor->showPlaylistNotice();
 			}
 		});
 	}
@@ -404,11 +410,16 @@ namespace emu88Player
 
 	void Editor::showMissingRomNotice(const emu88Lib::DeviceModel _model)
 	{
-		const auto inventory = emu88Lib::RomLoader::rescan();
-		const auto device = emu88Lib::RomLoader::toRomDevice(_model);
-		const auto message = std::string("ROM folder: ") + m_processor.romFolder() +
-			"\nSubfolders are searched too. Add the missing files, then select the device again.\n\n" +
-			inventory.describeRequirements(device);
+		// In a folder the player cannot look into, every ROM reads as missing. Say that instead.
+		auto message = romFolderAccessError(standaloneLaunch ? *standaloneLaunch : LaunchOptions{});
+		if(message.empty())
+		{
+			const auto inventory = emu88Lib::RomLoader::rescan();
+			const auto device = emu88Lib::RomLoader::toRomDevice(_model);
+			message = std::string("ROM folder: ") + m_processor.romFolder() +
+				"\nSubfolders are searched too. Add the missing files, then select the device again.\n\n" +
+				inventory.describeRequirements(device);
+		}
 		m_romWindow = std::make_unique<RomRequirementsWindow>(*this,
 			emu88Lib::getDeviceProfile(_model).displayName, message, m_processor.romFolder());
 		m_romWindow->setVisible(true);

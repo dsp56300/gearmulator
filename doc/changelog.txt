@@ -1,5 +1,22 @@
 Release Notes
 
+2.2.26:
+
+88emuPlayer:
+
+- [Fix] Playlist: The player no longer quits without a word at startup when a
+        file of the last playlist cannot be read. Such an entry keeps its place,
+        shown in red, and is skipped when playing. Clicking it tries again and
+        says why it fails. Loading a playlist works the same way instead of
+        refusing the whole playlist.
+
+- [Imp] When the player cannot start and was not started from a terminal, it
+        shows the reason in a message box.
+
+- [Imp] ROMs: When macOS does not let the player read its ROM folder, it says
+        so and explains how to allow it, instead of reporting every ROM as
+        missing.
+
 2.2.25:
 
 88emuPlayer:

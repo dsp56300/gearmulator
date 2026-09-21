@@ -1,7 +1,10 @@
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include <algorithm>
+#include <cerrno>
 #include <charconv>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <set>
 #include <stdexcept>
@@ -10,6 +13,14 @@
 #include "88lib/rom/romloader.h"
 #include "baseLib/filesystem.h"
 #include "synthLib/romLoader.h"
+#if JUCE_WINDOWS
+#include <filesystem>
+#include <system_error>
+#else
+#include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 namespace emu88Player
 {
@@ -44,13 +55,68 @@ namespace emu88Player
             "The Usual Suspects/88emuPlayer/";
     }
 
+    juce::File romSearchFolder(const LaunchOptions& options)
+    {
+        return launchFile(options.has("rom-dir") ? options.get("rom-dir") : defaultDataFolder());
+    }
+
     void configureRomSearchPaths(const LaunchOptions& options)
     {
         // Only one folder, searched recursively: --rom-dir, else the player's own data folder.
         // Every file of a ROM's size is hashed on each launch, and searching all of "The Usual
         // Suspects" hashed every other product's ROMs too - seconds before the window appeared.
-        const auto folder = launchFile(options.has("rom-dir") ? options.get("rom-dir") : defaultDataFolder());
-        synthLib::RomLoader::setSearchPath(folder.getFullPathName().toStdString());
+        synthLib::RomLoader::setSearchPath(romSearchFolder(options).getFullPathName().toStdString());
+    }
+
+    std::string romFolderAccessError(const LaunchOptions& options)
+    {
+        const auto folder = romSearchFolder(options).getFullPathName().toStdString();
+        std::string reason;
+#if JUCE_WINDOWS
+        std::error_code error;
+        const std::filesystem::directory_iterator entries(
+            std::filesystem::path(juce::String::fromUTF8(folder.c_str()).toWideCharPointer()), error);
+        if (!error || error == std::errc::no_such_file_or_directory || error == std::errc::not_a_directory)
+            return {};
+        reason = error.message();
+#else
+        if (auto* directory = ::opendir(folder.c_str()))
+        {
+            ::closedir(directory);
+            return {};
+        }
+        // A folder that is not there holds no ROMs, which the requirements list already says.
+        if (errno == ENOENT || errno == ENOTDIR)
+            return {};
+        reason = std::strerror(errno);
+#endif
+        const auto hint = privacySettingsHint({folder});
+        return "Cannot read the ROM folder " + folder + ": " + reason + (hint.empty() ? "" : "\n\n" + hint);
+    }
+
+    bool blockedByPrivacySettings(const std::string& path)
+    {
+#if JUCE_MAC
+        // An ordinary permission problem is EACCES.
+        const auto handle = ::open(path.c_str(), O_RDONLY);
+        if (handle >= 0)
+        {
+            ::close(handle);
+            return false;
+        }
+        return errno == EPERM;
+#else
+        (void)path;
+        return false;
+#endif
+    }
+
+    std::string privacySettingsHint(const std::vector<std::string>& paths)
+    {
+        if (std::none_of(paths.begin(), paths.end(), [](const std::string& path) { return blockedByPrivacySettings(path); }))
+            return {};
+        return "The macOS privacy settings do not let 88emuPlayer read there. Allow it in System Settings > "
+               "Privacy & Security > Files and Folders, or add it to Full Disk Access, then restart 88emuPlayer.";
     }
 
     const char* deviceId(const emu88Lib::DeviceModel model)
@@ -285,8 +351,10 @@ namespace emu88Player
             "Use -- before filenames beginning with '-'. Quote paths containing spaces.\n";
     }
 
-    void listDevices()
+    void listDevices(const LaunchOptions& options)
     {
+        if (const auto error = romFolderAccessError(options); !error.empty())
+            std::cerr << error << '\n';
         for (const auto model : emu88Lib::g_deviceMenuOrder)
             if (emu88Lib::isDeviceListed(model))
                 std::cout << deviceId(model) << "\t" << emu88Lib::getDeviceProfile(model).displayName << "\t"

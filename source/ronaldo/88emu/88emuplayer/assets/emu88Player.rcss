@@ -148,6 +148,8 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .playlistRemove:hover { color: #ffffff; background-color: #9c3028; }
 .playlistEntry:hover { background-color: rgba(255, 111, 15, 45); }
 .playlistEntry.current { color: #ffffff; background-color: rgba(255, 111, 15, 105); }
+/* A file that could not be read: kept in the list, skipped when playing. */
+.playlistEntry.unavailable { color: #b0736b; }
 .playlistEntry:drag { width: 74dp; font-family: Roboto; font-size: 6dp; font-weight: 500; }
 .playlistEntry:drag .playlistRemove { display: none; }
 .playlistEntry:dragover, .playlistEntry:dragover-top { border-top: 1dp #ff6f0f; }

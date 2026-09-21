@@ -39,9 +39,22 @@ namespace emu88Player
     std::vector<uint8_t> loadPcmCard(const juce::File& file);
     // The --pcm-card image, or empty without the option. Throws as above.
     std::vector<uint8_t> loadPcmCard(const LaunchOptions& options);
-    void listDevices();
+    void listDevices(const LaunchOptions& options);
     std::string defaultDataFolder();
+    // The folder searched for ROMs, subfolders included: --rom-dir, else the player's data folder.
+    juce::File romSearchFolder(const LaunchOptions& options);
     void configureRomSearchPaths(const LaunchOptions& options);
+    // Why the ROM search folder cannot be looked into, and what to do about it; empty when it can.
+    // Every ROM would otherwise just read as missing.
+    std::string romFolderAccessError(const LaunchOptions& options);
+
+    // True when the macOS privacy settings, not the file or folder itself, keep the player from reading
+    // path. Documents, Desktop, Downloads and removable or network volumes need the user's permission,
+    // and a process without it is refused with EPERM. Always false on other platforms.
+    bool blockedByPrivacySettings(const std::string& path);
+    // What to do when the macOS privacy settings keep the player from reading any of paths, said once
+    // for all of them; empty when they do not.
+    std::string privacySettingsHint(const std::vector<std::string>& paths);
 
     // Set by the standalone entry point before JUCE creates the processor.
     inline const LaunchOptions* standaloneLaunch = nullptr;

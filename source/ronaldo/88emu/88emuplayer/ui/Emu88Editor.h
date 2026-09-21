@@ -92,6 +92,10 @@ namespace emu88Player
 		void saveRecording(const juce::File& _recording);
 		void refreshPlaylist();
 		void updatePlayerVisuals(const jucePlayer::MidiPlayer::Status& _status);
+		void playPlaylistEntry(size_t _index);
+		void showPlaylistNotice();
+		void showFileErrors(const std::string& _intro, const std::vector<std::string>& _errors,
+		                    const std::vector<std::string>& _paths);
 
 		void openContextMenu(Rml::Event& _event);
 		void openPlaylistContextMenu(Rml::Event& _event);

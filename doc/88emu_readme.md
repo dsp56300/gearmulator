@@ -13,6 +13,8 @@
 
 **macOS may block the first launch.** macOS quarantines programs downloaded from the internet and can refuse to open 88emuPlayer or 88EmuCli the first time, saying it could not verify them. Open **System Settings → Privacy & Security**, scroll down to **Security**, click **Open Anyway** next to the message about the program, and confirm. This is needed once per program; for 88EmuCli, run it once in Terminal first so that the message appears. On macOS 14 and earlier, Control-clicking the app in Finder and choosing **Open** also works.
 
+**macOS may keep the player out of your folders.** Documents, Desktop, Downloads and removable or network volumes need your permission, and the data folder is in Documents. When the player cannot read it, the device selector says the ROM folder is not readable instead of listing missing ROMs, and playlist entries it cannot read are marked. Allow 88emuPlayer in **System Settings → Privacy & Security → Files and Folders**, or add it to **Full Disk Access**, then restart it. Started from a terminal, the player has the terminal's permissions instead of its own.
+
 | OS | Default data folder |
 | --- | --- |
 | Windows | Your Windows Documents folder, then `The Usual Suspects\88emuPlayer` (usually `%USERPROFILE%\Documents\The Usual Suspects\88emuPlayer`) |
@@ -119,6 +121,8 @@ Additional supported layouts:
 Use **Add** to choose multiple files, or drop files onto the playlist. Click an entry to start it, drag rows to reorder them, and use **X** to remove an entry. Right-click the playlist for **Clear Playlist**. Play/Pause controls the current song; Stop silences it and returns to its start.
 
 Songs advance in playlist order. After the last MIDI event, the player allows a four-second release/effects tail, then the configured pause before the next song. The list stops at its end. Transport changes silence old notes, and each new song applies the selected reset policy.
+
+A playlist entry whose file cannot be read keeps its place, shown in red, and playback skips it. That happens when the file was moved or deleted, is on a drive that is not connected, or is in a folder macOS does not let the player read. Click the entry to try again once the file is back; if it still cannot be read, the player says why. Loading a playlist and restoring the last one both keep such entries and list them in a message. A file you add on its own that cannot be read is refused instead.
 
 | Extensions | Format |
 | --- | --- |
@@ -368,7 +372,9 @@ Explicit options override the selected config, followed by built-in defaults.
 
 Positional files and repeated `--playlist` arguments are appended in argument order. Without `--play` they are loaded without starting playback. `--play` starts the first entry after a five-second boot wait; use Fast Boot when you need the firmware fully past its intro first.
 
-The standalone player restores its previous playlist when launched without input files. Playlist changes are saved automatically to `playlist/last-session.m3u8` in the 88emu data folder. Right-click the playlist to load or save an `.m3u`/`.m3u8` playlist; saved playlists use relative paths where possible. The Add button and playlist drop target also accept playlist files and append their entries. Supplying positional files or `--playlist` starts a new playlist and makes it the next restored playlist.
+The standalone player restores its previous playlist when launched without input files. Playlist changes are saved automatically to `playlist/last-session.m3u8` in the 88emu data folder. Right-click the playlist to load or save an `.m3u`/`.m3u8` playlist; saved playlists use relative paths where possible. The Add button and playlist drop target also accept playlist files and append their entries. Supplying positional files or `--playlist` starts a new playlist and makes it the next restored playlist. Unlike entries of a restored playlist, a file named on the command line must be readable, or the player does not start.
+
+When the player cannot start, it prints the reason to stderr. Opened from Finder, Explorer or a desktop launcher, where there is no terminal to read it in, it shows the reason in a message box instead.
 
 | GUI-only option | Meaning |
 | --- | --- |

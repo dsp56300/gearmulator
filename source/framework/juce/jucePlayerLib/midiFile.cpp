@@ -23,8 +23,18 @@ namespace jucePlayer::midiFile
             _error = file.getFileName().toStdString() + ": expected a .mid, .midi, .rcp, .r36, or .g36 file";
             return false;
         }
+        // Opened here rather than through File::loadFileAsData() so the error can say why. A missing
+        // file and one the macOS privacy settings keep the app out of need different fixes.
+        juce::FileInputStream stream(file);
+        if (stream.failedToOpen())
+        {
+            // Windows system messages end in a line break.
+            _error = "Cannot read '" + _path + "': " + stream.getStatus().getErrorMessage().trim().toStdString();
+            return false;
+        }
         juce::MemoryBlock contents;
-        if (!file.loadFileAsData(contents))
+        if (file.isDirectory() ||
+            static_cast<juce::int64>(stream.readIntoMemoryBlock(contents)) != stream.getTotalLength())
         {
             _error = "Cannot read '" + _path + "'";
             return false;
