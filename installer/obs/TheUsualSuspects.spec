@@ -122,6 +122,11 @@ find %{buildroot}%{_prefix} -mindepth 1 -maxdepth 1 ! -name bin ! -name lib ! -n
 find %{buildroot}%{_prefix}/lib -mindepth 1 -maxdepth 1 ! -name vst ! -name vst3 ! -name clap ! -name lv2 -exec rm -rf {} +
 find %{buildroot}%{_bindir} -mindepth 1 ! -name 88emuPlayer ! -name 88EmuCli -exec rm -rf {} +
 
+# Fedora's find-debuginfo only touches files that carry an execute bit, and CMake's
+# install(DIRECTORY) gives the VST3 and LV2 binaries 0644, so half of each synth shipped
+# unstripped: osirus was 200 MB there against 39 MB on Leap, whose brp-strip takes every ELF.
+find %{buildroot}%{_prefix}/lib -name '*.so' ! -perm -0100 -exec chmod 0755 {} +
+
 %check
 # The Virus integration and ROM hash tests need firmware we cannot ship.
 %ctest --exclude-regex 'virusIntegrationTests|virusRomHashTests'

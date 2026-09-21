@@ -98,7 +98,10 @@ pacman seeing no update, however new the binaries are.
   `base.cmake` defines NDEBUG for every non-Debug build.
 - VST2 builds against the bundled GPL-3.0 FST headers.
 - Automatic dbgsym packages are off in `debian.rules`; one synth alone produced
-  378 MB of them. OBS disables debuginfo on the RPM side as well.
+  378 MB of them. Fedora does build debuginfo packages, and its `find-debuginfo`
+  only touches files carrying an execute bit, so `%install` chmods the VST3 and
+  LV2 binaries that CMake's `install(DIRECTORY)` leaves at 0644 — without that
+  they ship unstripped and five times too large.
 - Build times depend on the worker: 25 to 95 minutes per target on x86_64.
 - Vendored libraries are statically linked. That is fine for `home:` projects and
   `multimedia:proaudio`, and only a hurdle for openSUSE:Factory.
