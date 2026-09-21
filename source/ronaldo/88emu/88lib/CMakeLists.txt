@@ -7,6 +7,7 @@ add_library(88lib STATIC)
 set(SOURCES
 	analog/analogOutput.cpp analog/analogOutput.h
 	analog/analogModels.cpp analog/analogModels.h
+	analog/cmVca.h
 	c_interface.cpp c_interface.h
 	deviceModel.cpp deviceModel.h
 	boards/cm32l.cpp boards/cm32l.h

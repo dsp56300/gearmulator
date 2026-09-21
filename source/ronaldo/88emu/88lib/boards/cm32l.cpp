@@ -1,4 +1,5 @@
 #include "88lib/boards/cm32l.h"
+#include "88lib/analog/cmVca.h"
 
 #include <algorithm>
 #include <cmath>
@@ -8,9 +9,6 @@ namespace emu88Lib
 {
 	namespace
 	{
-		// The VCA's control voltage is the CPU's PWM smoothed by R39 82k into C44 0.1uF.
-		constexpr float g_vcaTimeConstant = 82e3f * 0.1e-6f;
-
 		// The reverb return's share of the low-pass summing node, 6.8k / 10k.
 		constexpr float g_reverbReturn = 6.8f / 10.0f;
 	}
@@ -27,6 +25,8 @@ namespace emu88Lib
 		bus.map_rom(0x1000, 0x7000);
 		bus.map_device(0x8000, 0x4000, &m_host);	// bank window
 		bus.map_ram(DirectRamBase, DirectRamSize);
+		m_la32.setPcmRom(roms.wave);
+		m_la32.setIrqCallback([this](const bool level) { m_machine.periph().set_external_interrupt_input(0, level); });
 		m_machine.periph().set_serial_tx_byte_hook([this](const uint8_t value) { m_midiOut.write(value); });
 		reset();
 	}
@@ -43,9 +43,12 @@ namespace emu88Lib
 		// C44 starts discharged, so the board fades up out of silence as the firmware takes
 		// the PWM down - the same soft start the real one makes.
 		m_vcaGain = 0.0f;
+		m_vcaControl = 0.0f;
+		m_analogSample = {};
 		m_midiOut = synthLib::MidiBufferParser(synthLib::MidiEventSource::Device);
 		m_machine.cpu().select_code_bank(0x8000, 0x4000, 0);
 		m_lcd.reset();
+		m_la32.reset();
 		m_reverb.reset();
 		m_midiIn = std::make_unique<synthLib::MidiRateLimiter>(
 			[this](const uint8_t value) { m_machine.periph().receive_serial(value); });
@@ -113,7 +116,7 @@ namespace emu88Lib
 		if(address >= 0x0380 && address <= 0x03ff) return 0;
 		// Byte-wide LA32 addressing. The MT-32 board wires it word-wide and answers
 		// 0C00-0FFF, one register per address pair.
-		if(address >= 0x0c00 && address < 0x0e00) return 0xff;
+		if(address >= 0x0c00 && address < 0x0e00) return m_la32.read(address - 0x0c00);
 		if(address >= 0x8000 && address < 0xc000) return readBank(address - 0x8000);
 		return 0xff;
 	}
@@ -140,7 +143,7 @@ namespace emu88Lib
 		if(address >= 0x0380 && address <= 0x03ff) { flushLcd(value); return; }
 		if(address == 0x0400) { m_reverbTime = value; updateReverbParameters(); return; }
 		if(address == 0x0800) { m_reverbLevel = value; updateReverbParameters(); return; }
-		if(address >= 0x0c00 && address < 0x0e00) { return; }
+		if(address >= 0x0c00 && address < 0x0e00) { m_la32.write(address - 0x0c00, value); return; }
 		if(address >= 0x8000 && address < 0xc000) writeBank(address - 0x8000, value);
 	}
 
@@ -169,17 +172,17 @@ namespace emu88Lib
 
 	float Cm32l::applyVca()
 	{
-		// The 8095 drives the VCA with a PWM whose duty is the attenuation: the firmware takes
-		// it from 0 at master volume 70 up to 255 at volume 0, linearly, and leaves it at 0
-		// above 70 where it scales the partials digitally instead. Over that span the part and
-		// the firmware's ramp together make master volume linear in amplitude, which a control
-		// voltage taken straight as the gain reproduces to a few percent; the M5207L01's own
-		// transfer curve has not been measured.
-		const auto duty = static_cast<float>(m_machine.periph().pwm_duty());
-		const auto target = 1.0f - duty * (1.0f / 255.0f);
-		const auto alpha = 1.0f - std::exp(-1.0f / (static_cast<float>(SampleRate) * g_vcaTimeConstant));
-		m_vcaGain += (target - m_vcaGain) * alpha;
+		// Firmware controls PWM in the lower master-volume range and scales partials
+		// digitally above it. The measured VCA has a small dead zone near mute.
+		m_vcaGain = cmVca::process(m_vcaControl, m_machine.periph().pwm_duty(), cmVca::LaOffsetCounts);
 		return m_vcaGain;
+	}
+
+	std::array<int32_t, 6> Cm32l::dacBuses() const
+	{
+		const auto& bus = m_la32.currentOutput();
+		const auto& wet = m_reverb.state();
+		return {bus[2], bus[6], bus[3], bus[7], wet.outLeft, wet.outRight};
 	}
 
 	Cm32l::SampleFrame Cm32l::renderSample()
@@ -191,19 +194,22 @@ namespace emu88Lib
 		// rather than once per completed sample.
 		for(unsigned slot = 0; slot < 32; ++slot)
 		{
+			m_port0 = static_cast<uint8_t>((m_port0 & ~0x10) | (m_la32.sh3() << 4));
+			m_machine.periph().set_port_input(0, m_port0);
 			// A slot is worth under four states, so one instruction usually covers several
 			// slots: run only once the debt is paid off.
 			m_cpuRemainder += CpuStateRate;
 			if(m_cpuRemainder >= static_cast<int64_t>(La32SlotRate))
 				m_cpuRemainder -= static_cast<int64_t>(
 					m_machine.run(static_cast<uint64_t>(m_cpuRemainder / La32SlotRate))) * La32SlotRate;
+			m_la32.stepSlot();
 		}
 		// The LA32 and the reverb share the digital audio bus. The firmware assigns
 		// reverb-enabled partials to SYN1 (pair 2) and dry-only partials to SYN2 (pair 3).
 		// During the SYN1 slots the same data is latched by both the analogue dry S/H and the
 		// reverb input; the reverb drives its wet L/R samples during the REV slots. The
 		// physical latch sequence is L REV, R REV, L SYN2, L SYN1, R SYN2, R SYN1.
-		const auto buses = std::array<int32_t, 8>{};
+		const auto buses = m_la32.currentOutput();
 		const auto wet = m_reverb.renderFrame({buses[2], buses[6]});
 		// The three channels of a side meet at the summing node of their low-pass, each through
 		// its own resistor: 6.8k for both SYN pairs and 10k for the reverb return, so the wet
@@ -215,6 +221,7 @@ namespace emu88Lib
 		const auto gain = applyVca();
 		const auto left = mix(buses[2], buses[3], wet.first) * gain;
 		const auto right = mix(buses[6], buses[7], wet.second) * gain;
+		m_analogSample = {left, right};
 		// Scale the signed 16-bit DAC words to the shared board interface's 24-bit full scale.
 		const auto scale = [](const float _v)
 		{

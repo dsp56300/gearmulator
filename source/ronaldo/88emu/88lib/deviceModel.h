@@ -156,13 +156,10 @@ namespace emu88Lib
 	// CM-300/SCC-1 firmware runs on. The IDs and enum values stay, so an explicit
 	// --device still selects them.
 	//
-	// The CM-32L and the CM-64 built on it are hidden for the same reason from the
-	// other end: the ROMs are there but the emulation is not finished yet.
 	constexpr bool isDeviceListed(const DeviceModel _model)
 	{
 		return _model != DeviceModel::Sc55St && _model != DeviceModel::Rlp3237 &&
-		       _model != DeviceModel::Cm300 && _model != DeviceModel::Cm32l &&
-		       _model != DeviceModel::Cm64;
+		       _model != DeviceModel::Cm300;
 	}
 
 	// The CM-64 carries two service displays, one per board: the CM-32P's 16x2 above the

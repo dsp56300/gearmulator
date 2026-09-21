@@ -96,6 +96,7 @@ namespace synthLib
     {
     public:
         void add(const BiquadCoefficients& _coefficients);
+        void add(const BiquadCoefficients& _left, const BiquadCoefficients& _right);
         void reset();
         void process(float& _left, float& _right);
 
@@ -112,7 +113,7 @@ namespace synthLib
             double z1 = 0.0, z2 = 0.0;
         };
 
-        std::array<Section, MaxSections> m_sections{};
+        std::array<std::array<Section, MaxSections>, 2> m_sections{};
         size_t m_sectionCount = 0;
         std::array<std::array<State, MaxSections>, 2> m_state{};
     };

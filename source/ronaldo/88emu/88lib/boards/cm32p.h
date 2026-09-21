@@ -41,6 +41,7 @@ namespace emu88Lib
 		const hwLib::Hd44780& lcd() const { return m_serviceLcd; }
 		void reset();
 		SampleFrame renderSample();
+		const std::pair<float, float>& analogSample() const { return m_analogSample; }
 		void addMidiEvent(const synthLib::SMidiEvent& event, uint8_t port = 0);
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& events);
 		void transportDiscontinuity(uint32_t generation);
@@ -67,9 +68,10 @@ namespace emu88Lib
 		synthLib::MidiBufferParser m_midiOut{synthLib::MidiEventSource::Device};
 		uint64_t m_cycleTarget = 0;
 		emu::Scheduler::EventId m_lcdReadyEvent = 0;
-		// The VCA's control voltage, the CPU's PWM smoothed by R63/C89, held as the gain it
-		// produces. The firmware parks it at full and only sweeps it over the power-on fade.
+		// R63/C89-smoothed control. Both boot and MIDI master volume change PWM.
+		float m_vcaControl = 0.0f;
 		float m_vcaGain = 0.0f;
+		std::pair<float, float> m_analogSample{};
 		bool m_valid = false;
 		bool m_cardInserted = false;
 	};

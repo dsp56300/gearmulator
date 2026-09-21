@@ -594,11 +594,24 @@ namespace emu88Lib
 		// there is no chain at all.
 		auto left = word(m_heldFrame.first) * m_boardGain.a;
 		auto right = word(m_heldFrame.second) * m_boardGain.a;
+		// CM renderSample() retains an integer compatibility interface. The DAC words
+		// have already been converted before their analog bus sum and VCA: quantising
+		// again invents low-level distortion and clips a sum of otherwise valid buses.
+		if(m_cm32l || m_cm32p || m_cm64)
+		{
+			const auto& sample = m_cm64 ? m_cm64->la().analogSample()
+				: m_cm32l ? m_cm32l->analogSample() : m_cm32p->analogSample();
+			left = sample.first * (1.0f / 32768.0f) * m_boardGain.a;
+			right = sample.second * (1.0f / 32768.0f) * m_boardGain.a * m_boardGain.rightA;
+		}
 		// The CM-64 is two boards that meet at one mixer, so its halves are summed here rather
 		// than on the board: each passes its own circuit first.
 		if(m_cm64)
-			m_analogOutput.processSplit(left, right, word(m_heldFrameB.first) * m_boardGain.b,
-			                            word(m_heldFrameB.second) * m_boardGain.b);
+		{
+			const auto& pcm = m_cm64->pcm().analogSample();
+			m_analogOutput.processSplit(left, right, pcm.first * (1.0f / 32768.0f) * m_boardGain.b,
+			                            pcm.second * (1.0f / 32768.0f) * m_boardGain.b * m_boardGain.rightB);
+		}
 		else
 			m_analogOutput.process(left, right);
 		if(_outputs[0]) _outputs[0][_index] = left;

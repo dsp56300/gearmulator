@@ -209,12 +209,23 @@ int main()
 	routing.finish();
 	Cm32p routed({routing.bytes, waves});
 	Cm32p::SampleFrame frame{};
+	bool fractionalAnalog = false;
 	// The board fades in: C89 starts discharged, so the VCA needs a few of its 8.2 ms time
 	// constants before the DAC word reaches the output unattenuated.
 	for(unsigned i = 0; i < 8 * 262; ++i)
+	{
 		frame = routed.renderSample();
+		const auto analog = routed.analogSample();
+		fractionalAnalog |= analog.first != static_cast<float>(static_cast<int32_t>(analog.first));
+		CHECK_EQ(static_cast<int32_t>(analog.first)*256, frame.first);
+		CHECK_EQ(analog.second, 0.0f);
+	}
+	CHECK(fractionalAnalog);
 	CHECK(std::abs(frame.first - (0x100000 >> 8) * 256) < (0x100000 >> 8) * 256 / 200);
 	CHECK_EQ(frame.second, 0);
+	routed.reset();
+	CHECK_EQ(routed.analogSample().first,0.0f);
+	CHECK_EQ(routed.analogSample().second,0.0f);
 
 	// A synthetic PCM card: eight tone names where the tone list starts, and a byte at the LP
 	// readback's address. Scrambled in either dump order, it decodes to the same window.

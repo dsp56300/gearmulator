@@ -35,6 +35,11 @@ namespace emu88Lib
 
         // C63 10u into R46 + R48 and R49 to ground, the divider that leaves the board.
         chain.filter.add(highpass1(rcCorner(4.7e3 + 1.5e3 + 6.8e3, 10e-6), _samplerate));
+
+        // Effective bandwidth missing from the ideal-op-amp schematic model. Fitted
+        // on dry saw sections of the CM-64 capture; square and wet paths are holdouts.
+        // This describes the measured unit, not an identified extra RC component.
+        chain.filter.add(lowpass1(16900.0, _samplerate), lowpass1(15150.0, _samplerate));
     }
 
     void configureCm32pReconstruction(synthLib::OutputChain& chain, const double _samplerate)
@@ -44,8 +49,14 @@ namespace emu88Lib
         // PCM56P -> HD14052 demultiplexer -> hold capacitor C51A buffered by IC25a, so each DAC
         // word is held for a whole frame. Then two unity-gain Sallen-Key low-passes (IC30a/b);
         // the first peaks near 14 kHz and makes up most of the hold's droop.
-        chain.filter.add(lowpass2(SallenKey{10e3, 10e3, 5.6e-9, 220e-12}, _samplerate)); // R42A R43A C54A C52A
+        const SallenKey first{10e3, 10e3, 5.6e-9, 220e-12}; // R42A R43A C54A C52A
+        // Effective tolerance fit: +1.82% corner, -2.21% Q. The dry baseband
+        // AND its 32-kHz images constrain this; sax images were held out.
+        chain.filter.add(lowpass2(first.frequency()*1.0182, first.q()*.9779, _samplerate));
         chain.filter.add(lowpass2(SallenKey{10e3, 10e3, 1.8e-9, 1.2e-9}, _samplerate)); // R44A R45A C55A C56A
+        // Independently fitted on PCM organ/strings, with sax held out. Keep this
+        // effective board bandwidth before the LA/PCM summing point.
+        chain.filter.add(lowpass1(14700.0, _samplerate), lowpass1(14100.0, _samplerate));
     }
 
     void configureCmMixerOutput(synthLib::OutputChain& chain, const double _samplerate)
@@ -55,7 +66,7 @@ namespace emu88Lib
         // The VCA stage (IC32 M5207L01, I/V IC34a), the mixer (IC33a) and the line amplifier
         // (IC35a) are flat in band apart from their feedback capacitors. Only the mixer's
         // 22p || 100k matters; 6.8k || 100p and 20k || 22p stay under 0.02 dB below 20 kHz.
-        // The PWM-controlled VCA level is not modelled.
+        // PWM-controlled VCA gain is applied by the board before this path.
         //
         // On a CM-64 this is where the LA board's line output arrives, through a 100k of its
         // own into the same 100k feedback - so both boards are mixed at unity.

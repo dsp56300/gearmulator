@@ -326,7 +326,7 @@ namespace emu88Player
             "  --limiter on|off       Output peak limiter (default off)\n"
             "  --factory-reset on|off Factory reset when the device loads (default on)\n"
             "  --fast-boot on|off     Boot 10 s longer to start past the intro (default off)\n"
-            "  --pcm-card PATH        CM-32P: PCM card image in the card slot (SN-U110 series)\n"
+            "  --pcm-card PATH        CM-32P/CM-64: PCM card image in the card slot (SN-U110 series)\n"
             "  --gain N               Linear output gain (CLI 0..4, GUI 0..2)\n" +
             (cli ? "  --output PATH          Stereo WAV output; existing files are protected\n"
                    "  --bits 16|24|32        16/24-bit PCM or 32-bit float (default 24)\n"

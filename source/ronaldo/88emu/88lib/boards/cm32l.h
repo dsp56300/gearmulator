@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cpu/mcs96/machine.hpp"
+#include "custom_chips/la32/la32.h"
 #include "custom_chips/mt32reverb/mt32reverb.h"
 #include "hardwareLib/sed1200.h"
 #include "synthLib/midiBufferParser.h"
@@ -51,6 +52,12 @@ namespace emu88Lib
 		const hwLib::Sed1200& lcd() const { return m_lcd; }
 		void reset();
 		SampleFrame renderSample();
+		// Post-DAC mix/VCA in DAC-count units. Preserve fractional analog levels:
+		// the hardware output path must not quantise this back to 16 bits.
+		const std::pair<float, float>& analogSample() const { return m_analogSample; }
+		// Read-only diagnostics, before the analog sum and VCA; SYN1 L/R,
+		// SYN2 L/R, REV L/R. Useful for digital regression independent of calibration.
+		std::array<int32_t, 6> dacBuses() const;
 		void setButtons(uint32_t buttons);
 		// One byte of the 8095's on-chip register file, where the firmware keeps its working
 		// state. Only the RAM above the SFRs is reachable, so reading has no side effects.
@@ -91,6 +98,7 @@ namespace emu88Lib
 		std::vector<uint8_t> m_control;
 		mcs96::Machine m_machine{mcs96::Variant::I8x9x};
 		Host m_host{*this};
+		la32Lib::LA32 m_la32;
 		mt32ReverbLib::Mt32Reverb m_reverb;
 		hwLib::Sed1200 m_lcd;
 		std::vector<uint8_t> m_ramHigh;	// bank 11h
@@ -107,9 +115,10 @@ namespace emu88Lib
 		uint8_t m_reverbLevel = 0;
 		uint8_t m_port0 = 0;
 		int64_t m_cpuRemainder = 0;
-		// The VCA's control voltage, the PWM smoothed by R39/C44. Held as the gain it produces
-		// rather than as volts, since the two are the same shape - see applyVca().
+		// R39/C44-smoothed control and the offset-corrected M5207L01 gain.
+		float m_vcaControl = 0.0f;
 		float m_vcaGain = 0.0f;
+		std::pair<float, float> m_analogSample{};
 		bool m_valid = false;
 	};
 }

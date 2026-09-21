@@ -230,16 +230,20 @@ namespace synthLib
 
     void FilterCascade::add(const BiquadCoefficients& _coefficients)
     {
-        assert(m_sectionCount < m_sections.size() && "raise MaxSections");
-        if (m_sectionCount == m_sections.size())
-            return;
+        add(_coefficients, _coefficients);
+    }
 
-        auto& section = m_sections[m_sectionCount++];
-        section.b0 = _coefficients[0];
-        section.b1 = _coefficients[1];
-        section.b2 = _coefficients[2];
-        section.a1 = _coefficients[3];
-        section.a2 = _coefficients[4];
+    void FilterCascade::add(const BiquadCoefficients& _left, const BiquadCoefficients& _right)
+    {
+        assert(m_sectionCount < MaxSections && "raise MaxSections");
+        if (m_sectionCount == MaxSections)
+            return;
+        for (size_t channel = 0; channel < 2; ++channel)
+        {
+            const auto& c = channel == 0 ? _left : _right;
+            m_sections[channel][m_sectionCount] = {c[0], c[1], c[2], c[3], c[4]};
+        }
+        ++m_sectionCount;
     }
 
     void FilterCascade::reset() { m_state = {}; }
@@ -254,7 +258,7 @@ namespace synthLib
 
             for (size_t i = 0; i < m_sectionCount; ++i)
             {
-                const auto& section = m_sections[i];
+                const auto& section = m_sections[channel][i];
                 auto& state = m_state[channel][i];
 
                 const double y = section.b0 * x + state.z1;

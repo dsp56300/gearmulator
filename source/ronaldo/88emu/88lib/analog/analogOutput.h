@@ -64,6 +64,10 @@ namespace emu88Lib
     {
         float a = 1.0f;
         float b = 1.0f;
+        // Relative right-channel trims of the measured unit/capture. The Korg's
+        // own unknown mismatch is not used as an ADC calibration.
+        float rightA = 1.0f;
+        float rightB = 1.0f;
     };
 
     BoardOutputGain getBoardOutputGain(DeviceModel _device);

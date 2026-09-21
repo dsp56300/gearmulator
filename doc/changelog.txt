@@ -4,6 +4,8 @@ Release Notes
 
 88emuPlayer:
 
+- [New] Devices: Added support for the CM-32L and CM-64 (experimental).
+
 - [New] GM2 reset: "Send GM2 Reset" in the context menu, and GM2 as a choice
         for the reset before each song (`--reset gm2` on the command line).
 
