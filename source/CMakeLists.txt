@@ -40,6 +40,10 @@ add_subdirectory(cpu/dsp56300/source)
 
 add_subdirectory(framework/baseLib)
 add_subdirectory(framework/synthLib)
+if(EMSCRIPTEN)
+	# WebAssembly back ends for the JITs: only a JavaScript host can compile at run time.
+	add_subdirectory(framework/wasmJit)
+endif()
 add_subdirectory(framework/tools/synthLibTests)
 add_subdirectory(3rdparty/libresample)
 
