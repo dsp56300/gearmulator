@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "common/host.hpp"
 #include "cpu/sh2/cpu.hpp"
 
 #include <cstdio>
@@ -17,7 +18,8 @@
 
 namespace sh2 {
 
-#if defined(__clang__) && __has_cpp_attribute(clang::musttail)
+// Whether handlers chain by tail call is a property of the host: common/host.hpp.
+#if EMU_HAS_MUSTTAIL
 #define SH2_HAVE_MUSTTAIL 1
 #define SH2_CHAIN(nx) [[clang::musttail]] return (nx)->fn(cpu, (nx))
 #define SH2_CHAIN_TO(handler, cell) [[clang::musttail]] return (handler)(cpu, (cell))

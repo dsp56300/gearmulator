@@ -8,6 +8,7 @@
 // Cells start out pointing at a fill handler that decodes the word on first
 // execution.
 #pragma once
+#include "common/host.hpp"
 #include "cpu/sh2/types.hpp"
 
 namespace sh2 {
@@ -26,6 +27,7 @@ struct Cell {
   s32 slot_imm;    // delayed branch: decoded delay slot
   u8 slot_n, slot_m;
   u8 cyc, slot_cyc;  // base execution states of the instruction / its slot (tables 2.12-2.17)
+  EMU_CELL_POINTER_PAD(2)
 };
 static_assert(sizeof(Cell) == 32);
 

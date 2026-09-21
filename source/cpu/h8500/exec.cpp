@@ -7,15 +7,13 @@
 // no per-instruction decoding or mode dispatch remains at run time.
 #include <bit>
 
+#include "common/host.hpp"
 #include "cpu/h8500/cpu.hpp"
 
 namespace h8500 {
 
-#if defined(__clang__) && __has_cpp_attribute(clang::musttail)
-#define H8_HAS_MUSTTAIL 1
-#else
-#define H8_HAS_MUSTTAIL 0
-#endif
+// Whether handlers chain by tail call is a property of the host: common/host.hpp.
+#define H8_HAS_MUSTTAIL EMU_HAS_MUSTTAIL
 
 #if H8_HAS_MUSTTAIL
 // Charge `states`, then continue with `next` unless the budget ran out (or a
