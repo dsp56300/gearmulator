@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <array>
+#include <string.h>
 
 template <int32_t N> static constexpr int32_t se(int32_t x) { x <<= (32 - N); return x >> (32 - N); }
 
@@ -16,6 +17,14 @@ class ESPCore;
 
 template<int lg2eram_size>
 class ERAM;
+
+// ESP_IRAM_MIRROR: iram/gram are 512-entry buffers addressed as iramPos + mem with NO wrap. This lets
+// the ARM64 JIT rebase the ring pointer once per call and address every slot with an immediate offset.
+// Old-ring physical slot Q lives at Q+256 while Q < iramPos, else at Q; sync() moves the one slot
+// whose home changes when iramPos decrements. Host-side accessors must use the same (unmasked) index.
+#include "esp_jit_types.h"
+#define ESP_IRAM_MIRROR JIT_ARM64
+#define ESP_RAM_BUF_SIZE (ESP_IRAM_MIRROR ? 512 : 256)
 
 #include "esp_opt.hpp"
 
@@ -121,7 +130,7 @@ protected:
 
 template<int lg2eram_size>
 struct SharedState {
-	int32_t gram[256] {};
+	int32_t gram[ESP_RAM_BUF_SIZE] {};
 	uint8_t readback_regs[4] = {0xff, 0xff, 0xff, 0x00};
 	int32_t mulcoeffs[8] = {};
 	ERAM<lg2eram_size> eram;
@@ -144,17 +153,32 @@ public:
 
 	void setup(const uint32_t *_pram, SharedState<lg2eram_size> *_shared) { pram = _pram; shared = _shared; }
 
-	void writeGRAM(int32_t val, uint32_t offset) {shared->gram[(offset + iramPos) & IRAM_MASK] = val;}
-	int32_t readGRAM(uint32_t offset) const {return shared->gram[(offset + iramPos) & IRAM_MASK];}
+	inline uint32_t ramIdx(uint32_t offset) const
+	{
+		return ESP_IRAM_MIRROR ? (offset & IRAM_MASK) + iramPos : (offset + iramPos) & IRAM_MASK;
+	}
 
-	void writeIRAM(int32_t val, uint32_t offset) { iram[(offset + iramPos) & IRAM_MASK] = val; }
-	int32_t readIRAM(uint32_t offset) const {return iram[(offset + iramPos) & IRAM_MASK];}
+	// Called after iramPos has been decremented to newPos (see ESP_IRAM_MIRROR).
+	static inline void mirrorFixup(int32_t* buf, uint32_t newPos)
+	{
+		if (!ESP_IRAM_MIRROR) return;
+		if (newPos == IRAM_MASK) memcpy(&buf[IRAM_SIZE], &buf[0], (IRAM_SIZE - 1) * sizeof(int32_t));
+		else buf[newPos] = buf[newPos + IRAM_SIZE];
+	}
+
+	void writeGRAM(int32_t val, uint32_t offset) {shared->gram[ramIdx(offset)] = val;}
+	int32_t readGRAM(uint32_t offset) const {return shared->gram[ramIdx(offset)];}
+
+	void writeIRAM(int32_t val, uint32_t offset) { iram[ramIdx(offset)] = val; }
+	int32_t readIRAM(uint32_t offset) const {return iram[ramIdx(offset)];}
 
 	void sync() {
 		pc = 0;
 		iramPos = (iramPos - 1) & IRAM_MASK;
+		mirrorFixup(iram, iramPos);
 	}
-	
+	void syncShared() { mirrorFixup(shared->gram, iramPos); }
+
 	void steperam() { if (lg2eram_size) shared->eram.tickCycle((pram[pc] >> 23) & 0x1f, pc); }
 
 	void step() {
@@ -176,7 +200,7 @@ public:
 		uint8_t shift = (0x3567 >> (shiftbits << 2)) & 0xf; // this is shift amount. pick the value 3/5/6/7 using bits 8,9.
 		const uint8_t coef = instr & 0xff;
 
-		const uint32_t mempos = ((uint32_t)mem + iramPos) & IRAM_MASK;
+		const uint32_t mempos = ramIdx(mem);
 		int32_t mulInputA_24 = 0;
 		switch (mem)
 		{
@@ -341,7 +365,7 @@ protected:
 	static constexpr int64_t PRAM_SIZE = 768, IRAM_SIZE = 0x100, IRAM_MASK = IRAM_SIZE - 1;
 	void jumpto(uint16_t newpc) { if (pcjumpat != -1) printf("Oh no! Jump overlap!\n"); pcjumpto = newpc; pcjumpat = pc + 2;}
 
-	int32_t iram[IRAM_SIZE] {}, last_mulInputA_24 {0}, last_mulInputB_24 {0}, skipfield {0};
+	int32_t iram[ESP_RAM_BUF_SIZE] {}, last_mulInputA_24 {0}, last_mulInputB_24 {0}, skipfield {0};
 	bool lastMul30 = false;
 	const uint32_t *pram {nullptr};
 	uint32_t pc = 0, iramPos = 0;
@@ -385,7 +409,7 @@ public:
 	void writePMem32(uint16_t address, uint32_t val, bool _recompile = true) {((uint32_t*)&intmem[0])[address] = val;} // addresses are /4 here
 	uint32_t readHostReg() const {return *(uint32_t *)&shared.readback_regs[0];}
 	void step_cores() { core1.steperam(); core1.step(); core0.step();}
-	void sync_cores() {core0.sync(); core1.sync(); if (lg2eram_size) shared.eram.tickSample();}
+	void sync_cores() {core0.sync(); core1.sync(); core0.syncShared(); if (lg2eram_size) shared.eram.tickSample();}
 
 	uint8_t readuC(uint32_t address) { return shared.readback_regs[address & 3]; }
 
@@ -425,6 +449,8 @@ public:
 			pmem[addr + 1] |= (program_writing_word[2] & 0xf) << 6;
 
 			// opt.genProgram(this);
+			// Full recompute on purpose: a 0x54 program write is recompiled 3 samples later, and this
+			// refresh picks its coef/shift up meanwhile. ~0.06 writes/sample, so a ranged update buys nothing.
 			opt.updateCoef(this);
 		}
 		else if (if_mode == 0x56 && (address & 3) == 3) {
