@@ -162,7 +162,9 @@ endif()
 
 # Virtual MIDI ports require the newer PortMidi API. Its target name differs from
 # Vavra's portmidi-static, so both versions can coexist.
-if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU AND NOT ANDROID AND NOT TARGET portmidi)
+# Only the player library below uses them, so a library-only build (no JUCE) does not pull in the
+# host MIDI stack - which is also what lets 88lib configure for hosts without one (Emscripten).
+if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU AND ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN AND NOT ANDROID AND NOT TARGET portmidi)
 	# Build static even if a parent set BUILD_SHARED_LIBS ON.
 	set(_pm_prev_shared ${BUILD_SHARED_LIBS})
 	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)

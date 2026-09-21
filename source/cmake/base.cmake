@@ -80,7 +80,9 @@ else()
 	message("CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
 	message("CMAKE_HOST_SYSTEM_PROCESSOR: " ${CMAKE_HOST_SYSTEM_PROCESSOR})
 
-	if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES arm AND NOT CMAKE_SYSTEM_PROCESSOR MATCHES aarch64)
+	# x86 only. The Emscripten toolchain reports "x86" as its processor, but -msse there means the
+	# SSE-on-wasm-SIMD emulation and needs -msimd128; an embedder asks for that itself.
+	if(NOT EMSCRIPTEN AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86|x86_64|amd64|AMD64|i[3-6]86)$")
 		string(APPEND CMAKE_CXX_FLAGS " -msse")
 	endif()
 
