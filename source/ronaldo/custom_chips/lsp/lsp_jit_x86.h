@@ -19,6 +19,8 @@ namespace lspLib
 	class LSPJIT
 	{
 	public:
+		static constexpr bool Available = true;
+
 		LSPJIT(const LSPProgram& _program, LSPRuntime& _runtime) : m_program(_program), m_rt(_runtime) {}
 		~LSPJIT() { release(); }
 

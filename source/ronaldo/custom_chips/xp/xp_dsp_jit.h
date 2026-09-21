@@ -37,12 +37,15 @@ namespace xpLib
 	using DspJitRun = void (*)(const DspJitFrame*);
 } // namespace xpLib
 
-#if defined(_M_X64) || defined(__x86_64__) || defined(__x86_64) || defined(__amd64__)
+// The back end of this host (../jitHost.h). Each defines DspJitBackend with the same interface;
+// DspJitBackend::Available tells whether it can produce code at all.
+#include "../jitHost.h"
+#if CHIPS_JIT_X86_64
 #	include "xp_dsp_jit_x86.h"
-#elif defined(__aarch64__) || defined(__ARM_ARCH_8) || defined(_M_ARM64)
+#elif CHIPS_JIT_ARM64
 #	include "xp_dsp_jit_arm64.h"
 #else
-#	error "Unsupported architecture for the XP DSP JIT"
+#	include "xp_dsp_jit_none.h"
 #endif
 
 // Background compilation of frame functions with the CSP/LSP handshake: the frame driver asks for the code
@@ -58,7 +61,9 @@ namespace xpLib
 		{
 			for (FlatProgram* program : {&m_requestA, &m_requestB, &m_workA, &m_workB})
 				program->ops.reserve(dsp::nProgramSlots * 16);
-			m_worker = std::thread([this] { workerLoop(); });
+			// No back end, nothing to compile: no worker, and acquire() never hands out code.
+			if (DspJitBackend::Available)
+				m_worker = std::thread([this] { workerLoop(); });
 		}
 
 		~DspJitDispatcher()
@@ -68,7 +73,8 @@ namespace xpLib
 				m_exit = true;
 			}
 			m_condition.notify_one();
-			m_worker.join();
+			if (m_worker.joinable())
+				m_worker.join();
 		}
 
 		DspJitDispatcher(const DspJitDispatcher&) = delete;
@@ -78,6 +84,8 @@ namespace xpLib
 		// lowered programs the key stands for; a compile is requested when none is in flight for the key.
 		DspJitRun acquire(const uint64_t _key, const FlatProgram& _a, const FlatProgram* _b)
 		{
+			if (!DspJitBackend::Available)
+				return nullptr;
 			pollCompile(_a, _b);
 			if (m_canRun && m_activeKey == _key)
 				return m_backend.run();

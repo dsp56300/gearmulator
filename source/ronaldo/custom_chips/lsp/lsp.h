@@ -39,7 +39,9 @@ namespace lspLib
 		{
 			m_reqCache.resize(ProgramWords);
 			m_workCache.resize(ProgramWords);
-			m_worker = std::thread([this] { workerLoop(); });
+			// No back end, nothing to compile: no worker, and the interpreter runs every pass.
+			if(LSPJIT::Available)
+				m_worker = std::thread([this] { workerLoop(); });
 		}
 
 		~LSPDispatcher()
@@ -240,6 +242,8 @@ namespace lspLib
 			if(m_program->tainted())
 				m_program->cacheProgram();
 			m_canJit = false;
+			if(!LSPJIT::Available)
+				return;
 			++m_kickGen;
 			if(m_compileInFlight)
 			{

@@ -21,6 +21,8 @@ namespace xpLib
 	class DspJitBackend
 	{
 	public:
+		static constexpr bool Available = true;
+
 		DspJitBackend() = default;
 		~DspJitBackend() { release(); }
 		DspJitBackend(const DspJitBackend&) = delete;

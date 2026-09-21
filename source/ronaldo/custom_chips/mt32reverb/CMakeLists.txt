@@ -11,11 +11,14 @@ add_library(mt32ReverbLib STATIC
 	mt32reverb_interpreter.h
 	mt32reverb_jit.h
 	mt32reverb_jit_arm64.h
+	mt32reverb_jit_none.h
 	mt32reverb_jit_x86.h
 )
 set_property(TARGET mt32ReverbLib PROPERTY FOLDER "Ronaldo")
 target_include_directories(mt32ReverbLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-target_link_libraries(mt32ReverbLib PUBLIC asmjit)
+if(CHIPS_JIT_ASMJIT)
+	target_link_libraries(mt32ReverbLib PUBLIC asmjit)
+endif()
 
 if(BUILD_TESTING)
 	add_executable(mt32reverb_test mt32reverb_test.cpp)

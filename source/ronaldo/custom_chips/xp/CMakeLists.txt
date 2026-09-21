@@ -10,8 +10,10 @@ set(SOURCES
 	xp_dsp_ops.h
 	xp_dsp_program.cpp xp_dsp_program.h
 	xp_dsp_naive.cpp
+	../jitHost.h
 	xp_dsp_jit.h
 	xp_dsp_jit_arm64.h
+	xp_dsp_jit_none.h
 	xp_dsp_jit_x86.h
 	xp.cpp xp.h
 	xp_host.cpp
@@ -26,5 +28,8 @@ set_property(TARGET xpLib PROPERTY FOLDER "Ronaldo")
 
 target_include_directories(xpLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
-# The DSP JIT backends (xp_dsp_jit_*.h) are emitted with asmjit.
-target_link_libraries(xpLib PUBLIC asmjit)
+# The native DSP JIT backends (xp_dsp_jit_*.h) are emitted with asmjit; a host without one
+# (../jitHost.h) runs the interpreter and does not need it.
+if(CHIPS_JIT_ASMJIT)
+	target_link_libraries(xpLib PUBLIC asmjit)
+endif()

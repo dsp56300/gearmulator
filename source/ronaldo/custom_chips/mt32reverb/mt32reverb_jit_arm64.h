@@ -19,6 +19,8 @@ namespace mt32ReverbLib
 	class Jit
 	{
 	public:
+		static constexpr bool Available = true;
+
 		using Run = void (*)(State*);
 
 		Jit() = default;

@@ -33,11 +33,10 @@ namespace mt32ReverbLib
 		m_rom = std::move(_rom);
 		m_jit.reset();
 		m_run = nullptr;
-#if MT32REVERB_JIT
+		// A host without a back end compiles nothing and keeps the interpreter (mt32reverb_jit_none.h).
 		auto jit = std::make_unique<Jit>();
 		if (jit->compile(m_rom.data(), m_rom.size()))
 			m_jit = std::move(jit);
-#endif
 		reset();
 		return true;
 	}
@@ -69,9 +68,7 @@ namespace mt32ReverbLib
 
 	void Mt32Reverb::selectProgram()
 	{
-#if MT32REVERB_JIT
 		m_run = m_jit ? m_jit->program(m_romBase / ProgramBytes) : nullptr;
-#endif
 	}
 
 	std::pair<int32_t, int32_t> Mt32Reverb::renderFrame(const std::pair<int32_t, int32_t> _input)
