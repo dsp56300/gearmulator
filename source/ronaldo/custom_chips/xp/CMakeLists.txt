@@ -14,6 +14,7 @@ set(SOURCES
 	xp_dsp_jit.h
 	xp_dsp_jit_arm64.h
 	xp_dsp_jit_none.h
+	xp_dsp_jit_wasm.h
 	xp_dsp_jit_x86.h
 	xp.cpp xp.h
 	xp_host.cpp
@@ -32,4 +33,6 @@ target_include_directories(xpLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURR
 # (../jitHost.h) runs the interpreter and does not need it.
 if(CHIPS_JIT_ASMJIT)
 	target_link_libraries(xpLib PUBLIC asmjit)
+elseif(CHIPS_JIT_WASM)
+	target_link_libraries(xpLib PUBLIC wasmJit)
 endif()

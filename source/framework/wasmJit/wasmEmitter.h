@@ -107,30 +107,54 @@ namespace wasmJit
 		void address(const void* _pointer) { address(reinterpret_cast<uintptr_t>(_pointer)); }
 
 		// ---- memory: [address] -> [value] and [address, value] -> []
+		// `_offset` is added to the address on the stack.
 		void i32Load(const uint32_t _offset = 0) { mem(0x28, 2, _offset); }
-		void i64Load32S(const uint32_t _offset = 0) { mem(0x34, 2, _offset); }
+		void i64Load(const uint32_t _offset = 0) { mem(0x29, 3, _offset); }
 		void i32Load8U(const uint32_t _offset = 0) { mem(0x2d, 0, _offset); }
 		void i32Load16U(const uint32_t _offset = 0) { mem(0x2f, 1, _offset); }
+		void i64Load8U(const uint32_t _offset = 0) { mem(0x31, 0, _offset); }
+		void i64Load16S(const uint32_t _offset = 0) { mem(0x32, 1, _offset); }
+		void i64Load32S(const uint32_t _offset = 0) { mem(0x34, 2, _offset); }
+		void i64Load32U(const uint32_t _offset = 0) { mem(0x35, 2, _offset); }
 		void i32Store(const uint32_t _offset = 0) { mem(0x36, 2, _offset); }
+		void i64Store(const uint32_t _offset = 0) { mem(0x37, 3, _offset); }
+		void i32Store8(const uint32_t _offset = 0) { mem(0x3a, 0, _offset); }
+		void i32Store16(const uint32_t _offset = 0) { mem(0x3b, 1, _offset); }
+		void i64Store8(const uint32_t _offset = 0) { mem(0x3c, 0, _offset); }
+		void i64Store16(const uint32_t _offset = 0) { mem(0x3d, 1, _offset); }
 		void i64Store32(const uint32_t _offset = 0) { mem(0x3e, 2, _offset); }
 
 		// ---- i32
 		void i32Eqz() { op(0x45); }
+		void i32Eq() { op(0x46); }
+		void i32Ne() { op(0x47); }
+		void i32LtS() { op(0x48); }
+		void i32LtU() { op(0x49); }
 		void i32LeS() { op(0x4c); }
+		void i32GeS() { op(0x4e); }
+		void i32GeU() { op(0x4f); }
 		void i32Add() { op(0x6a); }
 		void i32Sub() { op(0x6b); }
+		void i32Mul() { op(0x6c); }
 		void i32And() { op(0x71); }
+		void i32Or() { op(0x72); }
 		void i32Shl() { op(0x74); }
+		void i32ShrU() { op(0x76); }
 
 		// ---- i64
 		void i64Eqz() { op(0x50); }
+		void i64Eq() { op(0x51); }
+		void i64Ne() { op(0x52); }
 		void i64LtS() { op(0x53); }
+		void i64GtS() { op(0x55); }
 		void i64LeS() { op(0x57); }
 		void i64GeS() { op(0x59); }
 		void i64Add() { op(0x7c); }
 		void i64Sub() { op(0x7d); }
 		void i64Mul() { op(0x7e); }
 		void i64And() { op(0x83); }
+		void i64Or() { op(0x84); }
+		void i64Xor() { op(0x85); }
 		void i64Shl() { op(0x86); }
 		void i64ShrS() { op(0x87); }
 		void i64ShrU() { op(0x88); }
@@ -155,6 +179,13 @@ namespace wasmJit
 		Label loop() { return open(0x03); }
 		// [condition(i32)] -> []; runs to the matching end() when the condition is non-zero.
 		Label ifThen() { return open(0x04); }
+
+		// Between ifThen() and its end(): what runs when the condition was zero.
+		void orElse()
+		{
+			assert(!m_open.empty());
+			op(0x05);
+		}
 
 		void end()
 		{

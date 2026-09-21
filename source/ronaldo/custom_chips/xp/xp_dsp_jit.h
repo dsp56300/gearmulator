@@ -38,12 +38,14 @@ namespace xpLib
 } // namespace xpLib
 
 // The back end of this host (../jitHost.h). Each defines DspJitBackend with the same interface;
-// DspJitBackend::Available tells whether it can produce code at all.
+// DspJitBackend::Compile tells the dispatcher how it gets its code compiled, if at all.
 #include "../jitHost.h"
 #if CHIPS_JIT_X86_64
 #	include "xp_dsp_jit_x86.h"
 #elif CHIPS_JIT_ARM64
 #	include "xp_dsp_jit_arm64.h"
+#elif CHIPS_JIT_WASM
+#	include "xp_dsp_jit_wasm.h"
 #else
 #	include "xp_dsp_jit_none.h"
 #endif
@@ -61,8 +63,8 @@ namespace xpLib
 		{
 			for (FlatProgram* program : {&m_requestA, &m_requestB, &m_workA, &m_workB})
 				program->ops.reserve(dsp::nProgramSlots * 16);
-			// No back end, nothing to compile: no worker, and acquire() never hands out code.
-			if (DspJitBackend::Available)
+			// Only a back end whose compile() blocks needs the worker (../jitHost.h).
+			if (DspJitBackend::Compile == chips::JitCompile::Worker)
 				m_worker = std::thread([this] { workerLoop(); });
 		}
 
@@ -87,8 +89,12 @@ namespace xpLib
 			if (!DspJitBackend::Available)
 				return nullptr;
 			pollCompile(_a, _b);
-			if (m_canRun && m_activeKey == _key)
-				return m_backend.run();
+			if (m_activeKey == _key && !m_compileInFlight)
+			{
+				// Compiled, or turned down: a program the back end cannot compile is not tried again
+				// until it changes.
+				return m_canRun ? m_backend.run() : nullptr;
+			}
 			if (m_kickKey != _key || !m_compileInFlight)
 				kick(_key, _a, _b);
 			return nullptr;
@@ -126,8 +132,20 @@ namespace xpLib
 			}
 		}
 
+		// The two functions that talk to the back end are templates only so that the branch for the other
+		// kind of back end (../jitHost.h) is never instantiated.
+		template <typename Backend = DspJitBackend>
 		void issueRequest(const FlatProgram& _a, const FlatProgram* _b)
 		{
+			if constexpr (Backend::Compile == chips::JitCompile::Host)
+			{
+				// The host compiles in its own time; the back end reads the programs only while it emits,
+				// which is before submit() returns.
+				Backend& backend = m_backend;
+				backend.submit(_a, _b);
+				m_requestGenerationIssued = m_kickGeneration;
+				return;
+			}
 			{
 				std::lock_guard<std::mutex> lock(m_mutex);
 				m_requestA = _a;
@@ -156,10 +174,21 @@ namespace xpLib
 			issueRequest(_a, _b);
 		}
 
+		template <typename Backend = DspJitBackend>
 		void pollCompile(const FlatProgram& _a, const FlatProgram* _b)
 		{
 			if (!m_compileInFlight)
 				return;
+			if constexpr (Backend::Compile == chips::JitCompile::Host)
+			{
+				// One compile at a time, so what lands is what was issued last.
+				Backend& backend = m_backend;
+				using State = typename Backend::CompileState;
+				const State state = backend.poll();
+				if (state == State::Pending)
+					return;
+				m_done.store((m_requestGenerationIssued << 1) | (state == State::Ready ? 1u : 0u), std::memory_order_release);
+			}
 			const auto done = m_done.load(std::memory_order_acquire);
 			if ((done >> 1) != m_requestGenerationIssued)
 				return;
