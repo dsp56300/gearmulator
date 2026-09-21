@@ -95,6 +95,29 @@ namespace
 		CHECK_EQ(f.records[0].payload[0], 0x43);
 	}
 
+	void universalMessages()
+	{
+		// GM System On and Master Volume reach the CPU staged, like XG: its handlers read the header
+		// themselves, and the Pro's check the exact length. A bare record is queued unread.
+		Fixture f;
+		f.input({0xf0, 0x7e, 0x7f, 0x09, 0x01, 0xf7}, 1);
+		f.input({0xf0, 0x7f, 0x7f, 0x04, 0x01, 0x00, 0x64, 0xf7});
+		f.input({0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7}); // Identity Request has no handler.
+		CHECK_EQ(f.records.size(), 2u);
+		if(f.records.size() < 2) return;
+		const auto& gm = f.records[0];
+		CHECK_EQ(gm.command, 0xee);
+		CHECK_EQ(gm.channel, 0x90); // Bulk, from IN B.
+		CHECK_EQ(gm.param1, 4);
+		CHECK_EQ(gm.param2, 0x14);
+		CHECK(gm.payload == std::vector<uint8_t>({0x7e, 0x7f, 0x09, 0x01}));
+		const auto& volume = f.records[1];
+		CHECK_EQ(volume.command, 0xef);
+		CHECK_EQ(volume.channel, 0x80);
+		CHECK_EQ(volume.param1, 6);
+		CHECK(volume.payload == std::vector<uint8_t>({0x7f, 0x7f, 0x04, 0x01, 0x00, 0x64}));
+	}
+
 	void channelMessageRxPort()
 	{
 		for(uint8_t part = 0; part < 32; ++part)
@@ -131,6 +154,7 @@ int main()
 	outputRing();
 	delayAndReset();
 	rawRequests();
+	universalMessages();
 	channelMessageRxPort();
 	return finish("sc88_submcu");
 }
