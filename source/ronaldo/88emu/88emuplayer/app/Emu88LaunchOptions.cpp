@@ -143,11 +143,13 @@ namespace emu88Player
             return jucePlayer::MidiPlayer::ResetMode::Off;
         if (name == "gm")
             return jucePlayer::MidiPlayer::ResetMode::Gm;
+        if (name == "gm2")
+            return jucePlayer::MidiPlayer::ResetMode::Gm2;
         if (name == "gs")
             return jucePlayer::MidiPlayer::ResetMode::Gs;
         if (name == "mt32")
             return jucePlayer::MidiPlayer::ResetMode::Mt32;
-        throw std::runtime_error("--reset must be off, gm, gs or mt32 (MT-32 tones on GS devices).");
+        throw std::runtime_error("--reset must be off, gm, gm2, gs or mt32 (MT-32 tones on GS devices).");
     }
 
     juce::File launchFile(const std::string& path)
@@ -318,7 +320,7 @@ namespace emu88Player
             "  --rom-dir PATH         Use only this ROM folder (recursive)\n"
             "  --config PATH          Read this settings file\n"
             "  --device ID            Initial emulated device (default sc88pro)\n"
-            "  --reset off|gm|gs|mt32  Before each song; mt32 selects MT-32 tones on GS\n"
+            "  --reset MODE           Before each song: off, gm, gm2, gs or mt32 (MT-32 tones on GS)\n"
             "  --song-gap-ms N        Automatic song gap, 0..60000 milliseconds (default 1000)\n"
             "  --sample-rate HZ       Output sample rate, 8000..192000\n"
             "  --limiter on|off       Output peak limiter (default off)\n"

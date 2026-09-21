@@ -131,9 +131,11 @@ namespace
             const auto loaded = player.addFiles(options.files);
             if (!loaded.errors.empty())
                 throw std::runtime_error(loaded.errors.front());
+            using ResetMode = jucePlayer::MidiPlayer::ResetMode;
+            const auto savedReset = config.getIntValue("songResetMode", static_cast<int>(ResetMode::Gs));
             const auto reset = options.has("reset") ? parseReset(options.get("reset"))
-                                                    : static_cast<jucePlayer::MidiPlayer::ResetMode>(
-                                                          std::clamp(config.getIntValue("songResetMode", 2), 0, 3));
+                : synthLib::midi::isResetModeValue(savedReset) ? static_cast<ResetMode>(savedReset)
+                                                               : ResetMode::Gs;
             player.setResetMode(reset);
             player.setPortCount(emu88Lib::getDeviceProfile(model).groupCount);
             player.setSongGapMs(static_cast<uint32_t>(

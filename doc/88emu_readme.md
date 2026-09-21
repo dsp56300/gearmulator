@@ -144,12 +144,15 @@ The reset setting prepares the selected device before a playlist song or CLI ren
 | --- | --- | --- |
 | **Off** | Skips the GM/GS mode-reset SysEx. The player still silences old notes and resets channel controllers at a new song. | CM-32P material, externally prepared setups, or files that supply their own initialization. |
 | **GM** | Sends GM System On. The firmware decides how it initializes its GM-compatible mode. | General MIDI arrangements. Early firmware support varies; an original SC-55 revision may not respond like a later GM device. |
+| **GM2** | Sends GM2 System On (`F0 7E 7F 09 03 F7`). The firmware decides how it initializes its GM2 mode. | General MIDI 2 arrangements on a GM2 device such as the SC-8850 or SC-8820. Models older than GM2 do not implement the message. |
 | **GS** (default) | Sends Roland GS Reset to initialize the GS sound map and part/effect settings. | Sound Canvas / GS arrangements and a predictable GS starting state. |
 | **MT-32** | Sends GS Reset, then sets up the SC-55-style MT-32 instrument arrangement for channels 1–10, including banks, programs, pan, level and effects sends. Channels 11–16 retain GS defaults. | Older music using the MT-32 preset arrangement on a GS device. |
 
 **MT-32 here is a GS compatibility arrangement, not MT-32/CM-32L LA synthesis.** It cannot reproduce custom MT-32 timbres or interpret MT-32 patch-upload SysEx as an MT-32 would. It also does not convert the CM-32P into an MT-32.
 
-GM/GS reset gets 100 ms to settle; MT-32 arrangement uses two 100 ms phases. Messages inside the song are sent afterward and can change the mode again. The song-reset option applies when starting songs; it is not an automatic reset for every live MIDI connection.
+GM and GS resets get 200 ms to settle, and GM2 400 ms, because GM2 System On keeps the SC-8850 busy for about 310 ms. The MT-32 arrangement uses two 200 ms phases. Messages inside the song are sent afterward and can change the mode again. The song-reset option applies when starting songs; it is not an automatic reset for every live MIDI connection.
+
+To reset the device at any other time, use **Send GM Reset**, **Send GM2 Reset** or **Send GS Reset** in the context menu. Each sends the same message as the song reset, to every part group.
 
 ### CM-32P and expansion cards
 
@@ -205,7 +208,7 @@ Open **Settings** from the application's context menu. The panel has six pages.
 
 | Page / setting | Purpose |
 | --- | --- |
-| **General — Reset before each song** | Off, GM, GS or MT-32 arrangement; see the reset table. Default GS. |
+| **General — Reset before each song** | Off, GM, GM2, GS or MT-32 arrangement; see the reset table. Default GS. |
 | **General — Pause between songs (ms)** | Extra silence between automatically advanced songs, after the four-second tail. 0–60,000 ms; default 1,000. |
 | **General — Warn on unknown ROM hash on load** | Show warnings when a named ROM does not match the known hashes. |
 | **General — Factory Reset on load** | Initialize battery-backed settings through the firmware where supported. Default on. |
@@ -354,7 +357,7 @@ Explicit options override the selected config, followed by built-in defaults.
 | `--rom-dir PATH` | Search only this folder, recursively. Default: the data folder above. |
 | `--config PATH` | Use this XML settings file. The CLI reads an existing file without saving it. |
 | `--device ID` | Select a model. Default: configured model, otherwise `sc88pro`. An explicitly requested model does not fall back when its ROMs are missing. |
-| `--reset off\|gm\|gs\|mt32` | Song-start reset. Default: configured choice, otherwise GS. |
+| `--reset off\|gm\|gm2\|gs\|mt32` | Song-start reset. Default: configured choice, otherwise GS. |
 | `--song-gap-ms N` | Pause between GUI playlist songs, 0–60,000 ms; default 1,000. Accepted by CLI but has no effect on its single-file render. |
 | `--sample-rate HZ` | Requested output rate, 8,000–192,000 Hz. GUI hardware must support it; CLI uses the saved rate or 44,100 Hz by default. |
 | `--gain N` | Linear gain: 0–2 in GUI, 0–4 in CLI. Default: saved gain or 1. |

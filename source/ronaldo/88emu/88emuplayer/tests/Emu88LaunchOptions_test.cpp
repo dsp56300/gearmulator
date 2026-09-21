@@ -64,7 +64,8 @@ int main()
 		for(const auto model : emu88Lib::g_deviceMenuOrder) check(parseDevice(deviceId(model)) == model, "Device ID roundtrip");
 		check(parseDevice("vegspro") == emu88Lib::DeviceModel::VeGsPro, "VE-GS Pro device ID");
 		check(parseDevice("scc1a") == emu88Lib::DeviceModel::Scc1a, "SCC-1A device ID");
-		for(const auto* reset : {"off", "gm", "gs", "mt32"}) (void)parseReset(reset);
+		for(const auto* reset : {"off", "gm", "gm2", "gs", "mt32"}) (void)parseReset(reset);
+		check(parseReset("gm2") == jucePlayer::MidiPlayer::ResetMode::Gm2, "GM2 reset option");
 		for(const auto* bad : {"NaN", "inf", "-1", "1x", "1.5", "60001", "1e1000"}) rejects({"--help", "--song-gap-ms", bad});
 		for(const auto* bad : {"0", "8000.5", "192001", "44100Hz"}) rejects({"--help", "--sample-rate", bad});
 		rejects({"--reset=GS", "--help"});

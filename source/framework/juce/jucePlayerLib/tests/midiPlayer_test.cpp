@@ -82,8 +82,8 @@ namespace
 
     void resetTiming(const Fixtures& files)
     {
-        for (const auto mode : {MidiPlayer::ResetMode::Off, MidiPlayer::ResetMode::Gm, MidiPlayer::ResetMode::Gs,
-                                MidiPlayer::ResetMode::Mt32})
+        for (const auto mode : {MidiPlayer::ResetMode::Off, MidiPlayer::ResetMode::Gm, MidiPlayer::ResetMode::Gm2,
+                                MidiPlayer::ResetMode::Gs, MidiPlayer::ResetMode::Mt32})
         {
             MidiPlayer player(4, MidiPlayer::ResetMode::Gs);
             CHECK_EQ(player.addFiles(files.paths).added, 3u);
@@ -92,7 +92,9 @@ namespace
             player.play(0);
             // One settle per block, so the song's first note falls at the head of the
             // block after the one that carries the reset. block() runs at 1 kHz.
-            constexpr auto settle = MidiPlayer::kResetSettleMs;
+            const auto settle = MidiPlayer::resetSettleMs(mode);
+            CHECK_EQ(player.preparationSeconds(0),
+                     (settle + (mode == MidiPlayer::ResetMode::Mt32 ? MidiPlayer::kResetSettleMs : 0)) / 1000.0);
             auto events = block(player, settle);
             CHECK(events.front().type == MidiEventType::TransportDiscontinuity);
             CHECK_EQ(
@@ -103,7 +105,16 @@ namespace
                 std::find_if(events.begin(), events.end(), [](const auto& e) { return !e.sysex.empty(); });
             CHECK((reset == events.end()) == (mode == MidiPlayer::ResetMode::Off));
             if (reset != events.end())
-                CHECK_EQ(reset->sysex[1], mode == MidiPlayer::ResetMode::Gm ? 0x7e : 0x41);
+            {
+                using Sysex = std::vector<uint8_t>;
+                const Sysex sent(reset->sysex.begin(), reset->sysex.end());
+                if (mode == MidiPlayer::ResetMode::Gm)
+                    CHECK(sent == Sysex({0xf0, 0x7e, 0x7f, 0x09, 0x01, 0xf7}));
+                else if (mode == MidiPlayer::ResetMode::Gm2)
+                    CHECK(sent == Sysex({0xf0, 0x7e, 0x7f, 0x09, 0x03, 0xf7}));
+                else
+                    CHECK(sent == Sysex({0xf0, 0x41, 0x10, 0x42, 0x12, 0x40, 0x00, 0x7f, 0x00, 0x41, 0xf7}));
+            }
             events = block(player, settle);
             CHECK_EQ(noteCount(events), mode != MidiPlayer::ResetMode::Mt32 ? 1 : 0);
             if (mode == MidiPlayer::ResetMode::Mt32)
@@ -124,6 +135,10 @@ namespace
             player.togglePlayPause();
             events = block(player, 1);
             CHECK(events.front().type == MidiEventType::TransportDiscontinuity);
+
+            // A number from saved settings that names no mode falls back to GS.
+            player.setResetMode(static_cast<MidiPlayer::ResetMode>(99));
+            CHECK(player.resetMode() == MidiPlayer::ResetMode::Gs);
         }
     }
 

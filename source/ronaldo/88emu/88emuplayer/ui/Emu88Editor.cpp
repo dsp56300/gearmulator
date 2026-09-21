@@ -294,6 +294,10 @@ namespace emu88Player
 		{
 			m_processor.sendGmReset();
 		});
+		m_contextMenu->addEntry("Send GM2 Reset", [this]
+		{
+			m_processor.sendGm2Reset();
+		});
 		m_contextMenu->addEntry("Send GS Reset", [this]
 		{
 			m_processor.sendGsReset();

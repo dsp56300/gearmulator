@@ -214,7 +214,8 @@ namespace jucePlayer
 
     void MidiPlayer::setResetMode(const ResetMode _mode)
     {
-        m_resetMode.store(_mode <= ResetMode::Mt32 ? _mode : ResetMode::Gs, std::memory_order_relaxed);
+        m_resetMode.store(synthLib::midi::isResetModeValue(static_cast<int>(_mode)) ? _mode : ResetMode::Gs,
+                          std::memory_order_relaxed);
     }
 
     MidiPlayer::ResetMode MidiPlayer::resetMode() const { return m_resetMode.load(std::memory_order_relaxed); }
@@ -504,7 +505,8 @@ namespace jucePlayer
         synthLib::midi::appendSongReset(_events, m_startResetMode, m_portCount.load(std::memory_order_relaxed),
                                         _offset);
         m_startPhase = StartPhase::Reset;
-        m_waitSamples = static_cast<uint64_t>(std::ceil(kResetSettleMs * m_lastSampleRate / 1000.0));
+        m_waitSamples =
+            static_cast<uint64_t>(std::ceil(resetSettleMs(m_startResetMode) * m_lastSampleRate / 1000.0));
     }
 
     void MidiPlayer::beginOpening(const uint32_t _offset, std::vector<synthLib::SMidiEvent>& _events)
@@ -525,7 +527,8 @@ namespace jucePlayer
         const auto playlist = std::atomic_load_explicit(&m_playlist, std::memory_order_acquire);
         if (!playlist || _index >= playlist->songs.size())
             return 0;
-        return (kResetSettleMs * (resetMode() == ResetMode::Mt32 ? 2 : 1) +
+        const auto mode = resetMode();
+        return (resetSettleMs(mode) + (mode == ResetMode::Mt32 ? kResetSettleMs : 0) +
                 playlist->songs[_index]->openingMs) / 1000.0;
     }
 

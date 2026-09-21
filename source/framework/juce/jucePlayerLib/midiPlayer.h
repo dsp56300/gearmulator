@@ -26,6 +26,13 @@ namespace jucePlayer
         // Let cleanup and reset traffic drain before submitting the song's setup.
         // Cleanup still runs with ResetMode::Off, so it needs the same head start.
         static constexpr uint32_t kResetSettleMs = 200;
+        // GM2 System On keeps the SC-8850 busy for about 310 ms: a note sent after it sounds that
+        // late. The song's opening notes would otherwise arrive meanwhile and bunch up.
+        static constexpr uint32_t kGm2ResetSettleMs = 400;
+        static constexpr uint32_t resetSettleMs(const ResetMode _mode)
+        {
+            return _mode == ResetMode::Gm2 ? kGm2ResetSettleMs : kResetSettleMs;
+        }
         static constexpr uint32_t kMaximumSongGapMs = 60000;
 
         enum class State : uint8_t

@@ -90,6 +90,7 @@ namespace emu88Player
 		bool isPoweredOn() const { return m_device != nullptr; }
 		bool setPower(bool enabled, uint32_t heldButtons = 0);
 		void sendGmReset();
+		void sendGm2Reset();
 		void sendGsReset();
 		void sendAllNotesOff();
 

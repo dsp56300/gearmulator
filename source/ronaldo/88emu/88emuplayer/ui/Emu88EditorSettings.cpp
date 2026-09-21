@@ -255,17 +255,23 @@ namespace emu88Player
 
         if (auto* reset = dynamic_cast<juceRmlUi::ElemComboBox*>(m_settingsRoot->GetElementById("songResetMode")))
         {
-            reset->setOptions({"Off", "GM", "GS", "MT-32 tones (GS)"});
-            reset->setSelectedIndex(static_cast<size_t>(m_processor.midiPlayer().resetMode()), false);
+            // Listed with GM2 next to GM. The saved value is the mode's number, in which GM2 comes last.
+            using ResetMode = jucePlayer::MidiPlayer::ResetMode;
+            static constexpr std::array<ResetMode, 5> modes{ResetMode::Off, ResetMode::Gm, ResetMode::Gm2,
+                                                            ResetMode::Gs, ResetMode::Mt32};
+            reset->setOptions({"Off", "GM", "GM2", "GS", "MT-32 tones (GS)"});
+            const auto current = std::find(modes.begin(), modes.end(), m_processor.midiPlayer().resetMode());
+            reset->setSelectedIndex(static_cast<size_t>(std::distance(modes.begin(), current)), false);
             juceRmlUi::EventListener::Add(
                 reset, Rml::EventId::Change,
                 [this, reset](Rml::Event&)
                 {
                     const auto index = reset->getSelectedIndex();
-                    if (index < 0 || index > static_cast<int>(jucePlayer::MidiPlayer::ResetMode::Mt32))
+                    if (index < 0 || index >= static_cast<int>(modes.size()))
                         return;
-                    m_processor.midiPlayer().setResetMode(static_cast<jucePlayer::MidiPlayer::ResetMode>(index));
-                    m_processor.config().setValue("songResetMode", index);
+                    const auto mode = modes[static_cast<size_t>(index)];
+                    m_processor.midiPlayer().setResetMode(mode);
+                    m_processor.config().setValue("songResetMode", static_cast<int>(mode));
                     m_processor.config().saveIfNeeded();
                 });
         }

@@ -4,6 +4,9 @@ Release Notes
 
 88emuPlayer:
 
+- [New] GM2 reset: "Send GM2 Reset" in the context menu, and GM2 as a choice
+        for the reset before each song (`--reset gm2` on the command line).
+
 - [Fix] Playlist: The player no longer quits without a word at startup when a
         file of the last playlist cannot be read. Such an entry keeps its place,
         shown in red, and is skipped when playing. Clicking it tries again and

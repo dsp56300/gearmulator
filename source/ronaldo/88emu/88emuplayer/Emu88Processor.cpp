@@ -53,8 +53,10 @@ namespace emu88Player
 				m_deviceModel = *fallback;
 		}
 
-		m_midiPlayer.setResetMode(static_cast<jucePlayer::MidiPlayer::ResetMode>(
-			m_config->getIntValue("songResetMode", static_cast<int>(jucePlayer::MidiPlayer::ResetMode::Gs))));
+		using ResetMode = jucePlayer::MidiPlayer::ResetMode;
+		const auto savedReset = m_config->getIntValue("songResetMode", static_cast<int>(ResetMode::Gs));
+		m_midiPlayer.setResetMode(synthLib::midi::isResetModeValue(savedReset) ? static_cast<ResetMode>(savedReset)
+		                                                                        : ResetMode::Gs);
 		m_midiPlayer.setSongGapMs(static_cast<uint32_t>(std::max(0, m_config->getIntValue("songGapMs", 1000))));
 		m_midiPlayer.setPortCount(midiPortCount());
 
@@ -361,6 +363,11 @@ namespace emu88Player
 	void Processor::sendGmReset()
 	{
 		sendSystemExclusive({0xf0, 0x7e, 0x7f, 0x09, 0x01, 0xf7});
+	}
+
+	void Processor::sendGm2Reset()
+	{
+		sendSystemExclusive({0xf0, 0x7e, 0x7f, 0x09, 0x03, 0xf7});
 	}
 
 	void Processor::sendGsReset()
