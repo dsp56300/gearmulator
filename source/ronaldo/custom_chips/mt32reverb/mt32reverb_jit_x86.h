@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../jitHost.h"
 #include <cstddef>
 #include <vector>
 
@@ -17,7 +18,8 @@ namespace mt32ReverbLib
 	class Jit
 	{
 	public:
-		static constexpr bool Available = true;
+		static constexpr chips::JitCompile Compile = chips::JitCompile::Worker;
+		static constexpr bool Available = Compile != chips::JitCompile::None;
 
 		using Run = void (*)(State*);
 

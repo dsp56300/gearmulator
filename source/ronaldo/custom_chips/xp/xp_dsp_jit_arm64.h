@@ -10,6 +10,7 @@
 // interpreter can take over at any frame boundary. The generated code reads only the DspJitFrame it is
 // handed, the two DspState/DspParams pairs it points to and the mixer frames; it never calls out.
 
+#include "../jitHost.h"
 #include <asmjit/asmjit.h>
 #include <asmjit/a64.h>
 
@@ -25,7 +26,8 @@ namespace xpLib
 	class DspJitBackend
 	{
 	public:
-		static constexpr bool Available = true;
+		static constexpr chips::JitCompile Compile = chips::JitCompile::Worker;
+		static constexpr bool Available = Compile != chips::JitCompile::None;
 
 		DspJitBackend() = default;
 		~DspJitBackend() { release(); }

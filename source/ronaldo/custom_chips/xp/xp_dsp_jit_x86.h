@@ -6,6 +6,7 @@
 // the IRAM banks of the first chip stay in registers; what does not fit is reached through memory operands.
 // The multiply captures live in xmm0-2. Constants are immediates.
 
+#include "../jitHost.h"
 #include <asmjit/asmjit.h>
 #include <asmjit/x86.h>
 
@@ -21,7 +22,8 @@ namespace xpLib
 	class DspJitBackend
 	{
 	public:
-		static constexpr bool Available = true;
+		static constexpr chips::JitCompile Compile = chips::JitCompile::Worker;
+		static constexpr bool Available = Compile != chips::JitCompile::None;
 
 		DspJitBackend() = default;
 		~DspJitBackend() { release(); }

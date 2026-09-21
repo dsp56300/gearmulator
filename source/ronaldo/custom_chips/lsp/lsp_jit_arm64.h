@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../jitHost.h"
 #include <cstddef>
 #include <map>
 #include <vector>
@@ -20,7 +21,8 @@ namespace lspLib
 	class LSPJIT
 	{
 	public:
-		static constexpr bool Available = true;
+		static constexpr chips::JitCompile Compile = chips::JitCompile::Worker;
+		static constexpr bool Available = Compile != chips::JitCompile::None;
 
 		LSPJIT(const LSPProgram& _program, LSPRuntime& _runtime) : m_program(_program), m_rt(_runtime) {}
 		~LSPJIT() { release(); }

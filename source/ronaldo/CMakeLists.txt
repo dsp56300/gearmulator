@@ -27,7 +27,16 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU)
 		unset(CMAKE_REQUIRED_INCLUDES)
 	endif()
 	message(STATUS "Custom-chip JIT through asmjit: ${CHIPS_JIT_ASMJIT}")
+	# The WebAssembly back ends (CHIPS_JIT_WASM in jitHost.h) are built on framework/wasmJit,
+	# which exists in Emscripten builds only.
+	if(TARGET wasmJit AND NOT CHIPS_FORCE_NO_JIT)
+		set(CHIPS_JIT_WASM TRUE)
+	else()
+		set(CHIPS_JIT_WASM FALSE)
+	endif()
+	message(STATUS "Custom-chip JIT through wasmJit: ${CHIPS_JIT_WASM}")
 
+	add_subdirectory(custom_chips/lsp)
 	add_subdirectory(custom_chips/xp)
 	add_subdirectory(custom_chips/gp)
 	add_subdirectory(custom_chips/lp)

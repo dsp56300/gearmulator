@@ -34,7 +34,10 @@ source_group("source" FILES ${SOURCES})
 
 set_property(TARGET 88lib PROPERTY FOLDER "Ronaldo/88emu")
 
-target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib gpLib lpLib rccLib mt32ReverbLib asmjit)
+# lspLib is header-only and compiled into the boards; it brings the JIT library of the host.
+target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib lspLib gpLib lpLib rccLib mt32ReverbLib)
+
+target_compile_definitions(88lib PRIVATE EMU88_VERSION_STRING="${CMAKE_PROJECT_VERSION}")
 
 target_include_directories(88lib
 	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../..

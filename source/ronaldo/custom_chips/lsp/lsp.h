@@ -39,8 +39,8 @@ namespace lspLib
 		{
 			m_reqCache.resize(ProgramWords);
 			m_workCache.resize(ProgramWords);
-			// No back end, nothing to compile: no worker, and the interpreter runs every pass.
-			if(LSPJIT::Available)
+			// Only a back end whose compile() blocks needs the worker (../jitHost.h).
+			if(LSPJIT::Compile == chips::JitCompile::Worker)
 				m_worker = std::thread([this] { workerLoop(); });
 		}
 
@@ -224,8 +224,21 @@ namespace lspLib
 			}
 		}
 
+		// The two functions that talk to the back end are templates only so that the branch for
+		// the other kind of back end (../jitHost.h) is never instantiated.
+		template<typename Jit = LSPJIT>
 		void issueRequest()
 		{
+			if constexpr(Jit::Compile == chips::JitCompile::Host)
+			{
+				// The host compiles in its own time; the back end reads the snapshot only
+				// while it emits, which is before submit() returns.
+				Jit& jit = *m_jit;
+				std::memcpy(m_workCache.data(), m_program->instr, sizeof(LSPInstr) * ProgramWords);
+				jit.submit(m_workCache.data());
+				m_reqGenIssued = m_kickGen;
+				return;
+			}
 			{
 				std::lock_guard<std::mutex> lk(m_mx);
 				std::memcpy(m_reqCache.data(), m_program->instr, sizeof(LSPInstr) * ProgramWords);
@@ -255,10 +268,21 @@ namespace lspLib
 		}
 
 		// Adopt a finished compile; only the latest generation flips m_canJit.
+		template<typename Jit = LSPJIT>
 		void pollCompile()
 		{
 			if(!m_compileInFlight)
 				return;
+			if constexpr(Jit::Compile == chips::JitCompile::Host)
+			{
+				// One compile at a time, so what lands is what was issued last.
+				Jit& jit = *m_jit;
+				using State = typename Jit::CompileState;
+				const State state = jit.poll();
+				if(state == State::Pending)
+					return;
+				m_done.store((m_reqGenIssued << 1) | (state == State::Ready ? 1u : 0u), std::memory_order_release);
+			}
 			const uint64_t done = m_done.load(std::memory_order_acquire);
 			if((done >> 1) != m_reqGenIssued)
 				return;
