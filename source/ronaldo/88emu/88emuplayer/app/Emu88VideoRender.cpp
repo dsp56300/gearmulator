@@ -110,7 +110,12 @@ namespace emu88Player
                 std::signal(SIGPIPE, SIG_IGN);
 #endif
 #if JUCE_WINDOWS
-                m_pipe = _popen(_commandLine.c_str(), "wb");
+                // _wpopen executes the command through the Command shell,
+                // effectively equivalent to running cmd.exe /c.
+                // The handling of quotation marks by cmd.exe /c follows
+                // the rules described in the help text (cmd.exe /?).
+                const auto commandForCmd = juce::String('"' + _commandLine + '"');
+                m_pipe = _wpopen(commandForCmd.toWideCharPointer(), L"wb");
 #else
                 m_pipe = popen(_commandLine.c_str(), "w");
 #endif
