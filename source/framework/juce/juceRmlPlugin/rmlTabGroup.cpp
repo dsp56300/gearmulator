@@ -234,6 +234,40 @@ namespace rmlPlugin
 		return juceRmlUi::ElemButton::isToggle(_button);
 	}
 
+	void TabGroup::validateActivePage()
+	{
+		if (isTabVisible(m_activePage))
+			return;
+
+		// A skin can hide a tab depending on the device state, an effect algorithm that
+		// doesn't have that page for example. If that happens to be the active tab the
+		// page area shows nothing at all, so fall back to the first tab that is left.
+		for (size_t i = 0; i < m_buttons.size(); ++i)
+		{
+			if (isTabVisible(i))
+			{
+				setActivePage(i);
+				return;
+			}
+		}
+
+		// no tab is visible at all, the whole tab bar is hidden - leave the active tab alone
+	}
+
+	bool TabGroup::isTabVisible(const size_t _index) const
+	{
+		if (_index >= m_buttons.size())
+			return false;
+
+		for (const auto* button : m_buttons[_index])
+		{
+			if (button->IsVisible())
+				return true;
+		}
+
+		return false;
+	}
+
 	bool TabGroup::selectTabWithElement(const Rml::Element* _element)
 	{
 		for (size_t i = 0; i < m_pages.size(); ++i)

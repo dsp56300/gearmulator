@@ -73,6 +73,12 @@ namespace rmlPlugin
 		return false;
 	}
 
+	void RmlPluginDocument::validateTabGroups() const
+	{
+		for (const auto& [_, tabGroup] : m_tabGroups)
+			tabGroup->validateActivePage();
+	}
+
 	void RmlPluginDocument::processEvent(const Rml::Event& _event)
 	{
 		switch (_event.GetId())

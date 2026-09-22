@@ -22,6 +22,10 @@ namespace rmlPlugin
 		// state - an element that never binds is a control that never works, so
 		// it announces itself rather than lingering silently.
 		bindPendingElements();
+
+		// A tab that a skin condition has hidden must not stay the active one
+		for (const auto& document : m_documents)
+			document->validateTabGroups();
 	})
 	{
 	}

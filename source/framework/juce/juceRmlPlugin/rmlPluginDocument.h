@@ -43,6 +43,8 @@ namespace rmlPlugin
 
 		bool selectTabWithElement(const Rml::Element* _element) const;
 
+		void validateTabGroups() const;
+
 		void processEvent(const Rml::Event& _event);
 
 		bool addControllerLink(Rml::Element* _source, Rml::Element* _target, Rml::Element* _conditionButton);

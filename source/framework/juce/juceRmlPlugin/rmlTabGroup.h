@@ -40,7 +40,11 @@ namespace rmlPlugin
 
 		bool selectTabWithElement(const Rml::Element* _element);
 
+		void validateActivePage();
+
 	private:
+		bool isTabVisible(size_t _index) const;
+
 		void resize(size_t _size);
 
 		void onClick(size_t _index);
