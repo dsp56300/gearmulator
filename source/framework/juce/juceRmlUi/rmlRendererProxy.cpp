@@ -9,6 +9,7 @@
 
 #include "juce_graphics/juce_graphics.h"
 
+#include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/Log.h"
 #include "RmlUi/Core/Variant.h"
 
@@ -462,6 +463,13 @@ namespace juceRmlUi
 
 		if (m_renderer)
 		{
+			// Textures that RmlUi created from a render layer (box-shadow and other effects) cannot be restored by
+			// us, their content only exists inside the current renderer. Have RmlUi drop all cached textures while
+			// that renderer is still alive to release them, they are regenerated on demand afterwards. Without this
+			// the elements using them render nothing at all until something else invalidates them, a window resize
+			// for example.
+			Rml::ReleaseTextures(core_instance, this);
+
 			// old renderer might have functions left that need to be executed, for example to release resources
 
 			{

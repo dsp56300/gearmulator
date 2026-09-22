@@ -1,5 +1,13 @@
 Release Notes
 
+2.2.26:
+
+Framework:
+
+- [Fix] BUG-10393 Parts of the user interface, the input level meters for
+        example, stopped updating after the plugin window was closed and
+        reopened.
+
 2.2.25:
 
 88emuPlayer:
