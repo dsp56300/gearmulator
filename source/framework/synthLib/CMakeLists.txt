@@ -50,7 +50,16 @@ else()
 endif()
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(synthLib PUBLIC resample dsp56kBase baseLib)
+if(EMSCRIPTEN)
+	# Of dsp56kBase, synthLib uses headers and the logger. The rest of that library is threads
+	# and OS glue that does not build for the web, so the one source file is compiled here.
+	get_target_property(DSP56KBASE_DIR dsp56kBase SOURCE_DIR)
+	target_sources(synthLib PRIVATE ${DSP56KBASE_DIR}/logging.cpp)
+	target_link_libraries(synthLib PUBLIC resample baseLib)
+	target_include_directories(synthLib PUBLIC $<TARGET_PROPERTY:dsp56kBase,INTERFACE_INCLUDE_DIRECTORIES>)
+else()
+	target_link_libraries(synthLib PUBLIC resample dsp56kBase baseLib)
+endif()
 
 if(NOT MSVC)
 	target_link_libraries(synthLib PUBLIC dl)

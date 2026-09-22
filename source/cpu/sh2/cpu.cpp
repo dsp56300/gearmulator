@@ -1,8 +1,5 @@
 #include "cpu/sh2/cpu.hpp"
 
-#include <cstdio>
-#include <cstdlib>
-
 #include <algorithm>
 
 namespace sh2 {
@@ -92,9 +89,6 @@ size_t Cpu::cache_pages_allocated() const {
 // ---------------------------------------------------------------------------
 // Exceptions
 
-namespace {
-}
-
 void Cpu::enter_exception(u8 vector, u32 push_pc, int new_mask) {
   ++exc_count_;
   push32(regs_.sr);
@@ -151,9 +145,7 @@ void Cpu::service_pending() {
 
 u64 Cpu::run_slice(s32 slice) {
   reeval_irq();
-  set_budget(slice);
-  slice_len_ = slice;
-  in_slice_ = true;
+  begin_slice(slice);
   if (sleeping_) {
     if (pending_ & wake_mask()) service_pending();
     else budget_ -= slice;
@@ -167,10 +159,7 @@ u64 Cpu::run_slice(s32 slice) {
     regs_.pc = pc_of(ip);
     if (pending_) service_pending();
   }
-  const s64 used = s64(slice_len_) - s64(true_budget());  // slice_len_ shrinks in cut_slice()
-  in_slice_ = false;
-  total_states_ += u64(used);
-  return u64(used);
+  return end_slice();
 }
 
 unsigned Cpu::step() {
@@ -204,10 +193,7 @@ u64 Cpu::run(u64 states) {
       continue;
     }
     used += run_slice(slice);
-    if (cut_) {
-      cut_ = false;
-      break;
-    }
+    if (take_cut()) break;
   }
   return used;
 }

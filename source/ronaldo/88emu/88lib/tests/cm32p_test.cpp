@@ -1,4 +1,5 @@
 #include "88lib/boards/cm32p.h"
+#include "synthLib/midiBufferParser.h"
 #include "common/test_util.hpp"
 
 #include <algorithm>
@@ -185,14 +186,19 @@ int main()
 	note.cancelOnTransportChange = true;
 	midi.addMidiEvent(note);
 	midi.transportDiscontinuity(1);
+	// The cancelled note never reaches the board; the channel it had sounded on is silenced
+	// the way this firmware understands, pedal up and All Notes Off, echoed back with running
+	// status, which the parser hands over as raw data-byte events.
 	const auto cancelled = run(midi);
-	CHECK_EQ(cancelled.size(), 1u);
-	if(cancelled.size() == 1)
+	std::vector<uint8_t> cancelledBytes;
+	for(const auto& event : cancelled)
 	{
-		CHECK_EQ(cancelled[0].a, 0xb0);
-		CHECK_EQ(cancelled[0].b, 120);
-		CHECK_EQ(cancelled[0].c, 0);
+		cancelledBytes.push_back(event.a);
+		const auto length = synthLib::MidiBufferParser::lengthFromStatusByte(event.a);
+		if(length > 1) cancelledBytes.push_back(event.b);
+		if(length > 2) cancelledBytes.push_back(event.c);
 	}
+	CHECK(cancelledBytes == std::vector<uint8_t>({0xb0, 64, 0, 123, 0}));
 	midi.addMidiEvent(note);
 	midi.reset();
 	CHECK(run(midi).empty());
@@ -209,12 +215,23 @@ int main()
 	routing.finish();
 	Cm32p routed({routing.bytes, waves});
 	Cm32p::SampleFrame frame{};
+	bool fractionalAnalog = false;
 	// The board fades in: C89 starts discharged, so the VCA needs a few of its 8.2 ms time
 	// constants before the DAC word reaches the output unattenuated.
 	for(unsigned i = 0; i < 8 * 262; ++i)
+	{
 		frame = routed.renderSample();
+		const auto analog = routed.analogSample();
+		fractionalAnalog |= analog.first != static_cast<float>(static_cast<int32_t>(analog.first));
+		CHECK_EQ(static_cast<int32_t>(analog.first)*256, frame.first);
+		CHECK_EQ(analog.second, 0.0f);
+	}
+	CHECK(fractionalAnalog);
 	CHECK(std::abs(frame.first - (0x100000 >> 8) * 256) < (0x100000 >> 8) * 256 / 200);
 	CHECK_EQ(frame.second, 0);
+	routed.reset();
+	CHECK_EQ(routed.analogSample().first,0.0f);
+	CHECK_EQ(routed.analogSample().second,0.0f);
 
 	// A synthetic PCM card: eight tone names where the tone list starts, and a byte at the LP
 	// readback's address. Scrambled in either dump order, it decodes to the same window.

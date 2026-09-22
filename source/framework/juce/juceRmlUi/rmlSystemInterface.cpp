@@ -18,6 +18,8 @@ namespace juceRmlUi
 
 	double SystemInterface::GetElapsedTime()
 	{
+		if (m_hasTimeOverride)
+			return m_timeOverride;
 		return Rml::SystemInterface::GetElapsedTime();
 	}
 
@@ -50,10 +52,12 @@ namespace juceRmlUi
 			LOG("RML LOG [warning]: " << _message.c_str());
 			break;
 		case Rml::Log::LT_INFO:
-			LOG("RML LOG [info]: " << _message.c_str());
+			if (m_verboseLogging)
+				LOG("RML LOG [info]: " << _message.c_str());
 			break;
 		case Rml::Log::LT_DEBUG:
-			LOG("RML LOG [debug]: " << _message.c_str());
+			if (m_verboseLogging)
+				LOG("RML LOG [debug]: " << _message.c_str());
 			break;
 		case Rml::Log::LT_MAX:
 			LOG("RML LOG [MAX]: " << _message.c_str());

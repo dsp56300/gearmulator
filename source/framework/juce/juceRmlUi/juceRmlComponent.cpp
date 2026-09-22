@@ -122,7 +122,9 @@ namespace juceRmlUi
 
 		m_renderProxy.reset(new RendererProxy(m_coreInstance, m_dataProvider));
 
-		if (_config.forceSoftwareRenderer == SoftwareRendererMode::ForceOn)
+		// An offline render never reaches a window, so there is no GL or Metal surface to draw
+		// into and the software renderer is the only one that can serve it.
+		if (_config.forceSoftwareRenderer == SoftwareRendererMode::ForceOn || _config.offlineRendering)
 		{
 			m_renderInterface.reset(new RendererJuce(m_coreInstance));
 			m_renderType = Renderer::Software;
@@ -988,6 +990,10 @@ namespace juceRmlUi
 
 	void RmlComponent::update()
 	{
+		// Offline frames come from renderOffline() alone, on the caller's clock.
+		if (m_config.offlineRendering)
+			return;
+
 		RmlInterfaces::ScopedAccess access(*this);
 
 		if (m_screenshotState == ScreenshotState::ScreenshotReady)
@@ -1289,6 +1295,57 @@ namespace juceRmlUi
 		}
 	}
 
+	bool RmlComponent::renderOffline(juce::Image& _target, const double _time)
+	{
+		auto* renderer = dynamic_cast<RendererJuce*>(m_renderInterface.get());
+
+		if (!m_config.offlineRendering || !renderer || !m_rmlContext || !_target.isValid())
+			return false;
+
+		RmlInterfaces::ScopedAccess access(*this);
+
+		// Everything RmlUi asks the time for during this frame - animations, transitions, the
+		// frame event a skin may listen for - has to see the frame's own time, not the wall clock.
+		auto& systemInterface = m_rmlInterfaces.getSystemInterface();
+		systemInterface.setTimeOverride(_time);
+
+		{
+			std::scoped_lock lock(m_contextRenderMutex);
+
+			updateRmlContextDimensions();
+
+			evPreUpdate(this);
+
+			dispatchFrameEvent();
+
+			m_rmlContext->Update();
+			m_rmlContext->Render();
+
+			m_renderProxy->finishFrame();
+
+			evPostUpdate(this);
+		}
+
+		{
+			juce::Graphics g(_target);
+			renderer->beginFrame(g, getRenderSize());
+			m_renderProxy->executeRenderFunctions();
+			renderer->endFrame();
+		}
+
+		// Post frame callbacks queue work that the next frame has to see, the same way update()
+		// runs them once the frame is out.
+		std::swap(m_postFrameCallbacks, m_tempPostFrameCallbacks);
+
+		for (const auto& postFrameCallback : m_tempPostFrameCallbacks)
+			postFrameCallback();
+		m_tempPostFrameCallbacks.clear();
+
+		m_time = _time;
+
+		return true;
+	}
+
 	juce::Component* RmlComponent::getComponentAt(const juce::Point<float> _position)
 	{
 		if (auto* elem = m_rmlContext->GetElementAtPoint(Rml::Vector2f(_position.x, _position.y)))
@@ -1478,6 +1535,11 @@ namespace juceRmlUi
 
 	void RmlComponent::startNextFrameTimer()
 	{
+		// Offline frames are produced by renderOffline() on the caller's clock. A timer would
+		// only fire into a message loop that an offline render does not run.
+		if (m_config.offlineRendering)
+			return;
+
 		const auto now = m_rmlInterfaces.getSystemInterface().GetElapsedTime();
 		startTimer(std::max(1, static_cast<int>((m_nextFrameTime - now) * 1000.0f * 0.34f)));
 	}

@@ -131,8 +131,11 @@ install(FILES "${CMAKE_SOURCE_DIR}/doc/changelog_split/changelog_${playerProduct
 # Keep JUCE's wrapper, but own startup configuration before it opens devices.
 target_sources(88emuplayer_Standalone PRIVATE app/Emu88Standalone.cpp)
 target_compile_definitions(88emuplayer PUBLIC JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1)
-add_executable(88EmuCli app/Emu88Cli.cpp app/Emu88LaunchOptions.cpp)
-target_link_libraries(88EmuCli PRIVATE 88lib jucePlayerLib juce_plugin_modules)
+# The CLI's --video mode renders the player's own UI, so it links the plugin's shared code (the
+# processor, the editor and the skin assets) rather than growing a second copy of the front panel.
+add_executable(88EmuCli app/Emu88Cli.cpp app/Emu88LaunchOptions.cpp app/Emu88VideoRender.cpp)
+target_link_libraries(88EmuCli PRIVATE 88emuplayer 88emuplayer_BinaryData 88lib jucePlayerLib juceRmlUi
+	juceUiLib jucePluginData juce_plugin_modules)
 target_compile_definitions(88EmuCli PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_target_properties(88EmuCli PROPERTIES FOLDER "Ronaldo/88emu" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/plugins/$<CONFIG>")
 if(WIN32)

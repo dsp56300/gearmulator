@@ -147,6 +147,12 @@ namespace juceRmlUi
 
 		bool takeScreenshot(const ScreenshotCallback& _callback);
 
+		// Produces one frame synchronously, for a component configured with offlineRendering.
+		// _target is drawn into at its own size, which has to be the component's render size, and
+		// _time is the point on the caller's clock the frame stands for. Returns false if this
+		// component cannot render offline.
+		bool renderOffline(juce::Image& _target, double _time);
+
 		bool supportsPowerOfTwo() const;
 		uint32_t getMaximumTextureSize() const;
 		uint32_t getValidTextureSize(uint32_t _size) const;

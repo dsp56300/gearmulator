@@ -18,6 +18,33 @@ namespace jucePlayer
         std::vector<synthLib::midi::Event> opening;
         uint32_t openingMs = 0;
 
+        // The song in the file at _path. One that cannot be read comes back without events and with
+        // info.error saying why, for a playlist that keeps it in place.
+        static std::shared_ptr<Song> load(const std::string& _path)
+        {
+            auto song = std::make_shared<Song>();
+            const auto file = juce::File::getCurrentWorkingDirectory().getChildFile(_path);
+            song->info.path = file.getFullPathName().toStdString();
+            auto name = file.getFileName();
+#if JUCE_MAC
+            // macOS hands out decomposed names - "e" followed by a combining accent - and
+            // RmlUi draws each combining mark as a glyph of its own. The path stays as is.
+            name = name.convertToPrecomposedUnicode();
+#endif
+            song->info.name = name.toStdString();
+            if (!midiFile::read(_path, song->events, song->info.error))
+            {
+                song->events.clear();
+                // An empty error would pass the entry off as playable.
+                if (song->info.error.empty())
+                    song->info.error = "Cannot read '" + _path + "'";
+                return song;
+            }
+            song->info.durationSeconds = song->events.empty() ? 0.0 : song->events.back().seconds;
+            song->prepareOpening();
+            return song;
+        }
+
         void prepareOpening()
         {
             // Move only time-zero setup preceding the first note on each port/channel.
@@ -65,6 +92,26 @@ namespace jucePlayer
     {
         std::vector<std::shared_ptr<const Song>> songs;
         uint64_t revision = 0;
+
+        AddResult append(const std::vector<std::string>& _paths, const Unreadable _unreadable)
+        {
+            AddResult result;
+            for (const auto& path : _paths)
+            {
+                auto song = Song::load(path);
+                if (song->info.available())
+                    ++result.added;
+                else
+                {
+                    result.errors.push_back(song->info.error);
+                    if (_unreadable == Unreadable::Skip)
+                        continue;
+                    ++result.unavailable;
+                }
+                songs.push_back(std::move(song));
+            }
+            return result;
+        }
     };
 
     namespace
@@ -81,75 +128,42 @@ namespace jucePlayer
         std::atomic_store_explicit(&m_playlist, std::shared_ptr<const Playlist>(playlist), std::memory_order_release);
     }
 
-    MidiPlayer::AddResult MidiPlayer::addFiles(const std::vector<std::string>& _paths)
+    MidiPlayer::AddResult MidiPlayer::addFiles(const std::vector<std::string>& _paths, const Unreadable _unreadable)
     {
-        AddResult result;
-        auto current = std::atomic_load_explicit(&m_playlist, std::memory_order_acquire);
         auto next = std::make_shared<Playlist>();
-        if (current)
+        if (const auto current = std::atomic_load_explicit(&m_playlist, std::memory_order_acquire))
             next->songs = current->songs;
 
-        for (const auto& path : _paths)
-        {
-            auto song = std::make_shared<Song>();
-            std::string error;
-            if (!midiFile::read(path, song->events, error))
-            {
-                result.errors.push_back(std::move(error));
-                continue;
-            }
-
-            const auto file = juce::File::getCurrentWorkingDirectory().getChildFile(path);
-            song->info.path = file.getFullPathName().toStdString();
-            auto name = file.getFileName();
-#if JUCE_MAC
-            // macOS hands out decomposed names - "e" followed by a combining accent - and
-            // RmlUi draws each combining mark as a glyph of its own. The path stays as is.
-            name = name.convertToPrecomposedUnicode();
-#endif
-            song->info.name = name.toStdString();
-            song->info.durationSeconds = song->events.empty() ? 0.0 : song->events.back().seconds;
-            song->prepareOpening();
-            next->songs.push_back(std::move(song));
-            ++result.added;
-        }
-
-        if (result.added)
+        auto result = next->append(_paths, _unreadable);
+        if (result.added || result.unavailable)
             publish(std::move(next));
         return result;
     }
 
     MidiPlayer::AddResult MidiPlayer::replaceFiles(const std::vector<std::string>& _paths)
     {
-        AddResult result;
         auto next = std::make_shared<Playlist>();
-
-        for (const auto& path : _paths)
-        {
-            auto song = std::make_shared<Song>();
-            std::string error;
-            if (!midiFile::read(path, song->events, error))
-            {
-                result.errors.push_back(std::move(error));
-                continue;
-            }
-
-            const auto file = juce::File::getCurrentWorkingDirectory().getChildFile(path);
-            song->info.path = file.getFullPathName().toStdString();
-            auto name = file.getFileName();
-#if JUCE_MAC
-            name = name.convertToPrecomposedUnicode();
-#endif
-            song->info.name = name.toStdString();
-            song->info.durationSeconds = song->events.empty() ? 0.0 : song->events.back().seconds;
-            song->prepareOpening();
-            next->songs.push_back(std::move(song));
-            ++result.added;
-        }
-
-        if (result.errors.empty())
-            publish(std::move(next));
+        auto result = next->append(_paths, Unreadable::Keep);
+        publish(std::move(next));
         return result;
+    }
+
+    std::string MidiPlayer::reload(const size_t _index)
+    {
+        const auto current = std::atomic_load_explicit(&m_playlist, std::memory_order_acquire);
+        if (!current || _index >= current->songs.size() || current->songs[_index]->info.available())
+            return {};
+
+        auto song = Song::load(current->songs[_index]->info.path);
+        auto error = song->info.error;
+        // Also when the file still fails, but for another reason: the entry says why it does now.
+        if (error != current->songs[_index]->info.error)
+        {
+            auto next = std::make_shared<Playlist>(*current);
+            next->songs[_index] = std::move(song);
+            publish(std::move(next));
+        }
+        return error;
     }
 
     bool MidiPlayer::move(const size_t _from, size_t _to)
@@ -200,7 +214,8 @@ namespace jucePlayer
 
     void MidiPlayer::setResetMode(const ResetMode _mode)
     {
-        m_resetMode.store(_mode <= ResetMode::Mt32 ? _mode : ResetMode::Gs, std::memory_order_relaxed);
+        m_resetMode.store(synthLib::midi::isResetModeValue(static_cast<int>(_mode)) ? _mode : ResetMode::Gs,
+                          std::memory_order_relaxed);
     }
 
     MidiPlayer::ResetMode MidiPlayer::resetMode() const { return m_resetMode.load(std::memory_order_relaxed); }
@@ -264,6 +279,10 @@ namespace jucePlayer
         if (!_sampleCount || _sampleRate <= 0.0)
             return;
 
+        // The command before the playlist. A caller that publishes a playlist and then posts a command
+        // for it, as reload() followed by play() does, must not see that command applied to the
+        // list the new one replaced.
+        const auto command = m_command.load(std::memory_order_acquire);
         const auto published = std::atomic_load_explicit(&m_playlist, std::memory_order_acquire);
         if (published != m_audioPlaylist)
         {
@@ -293,7 +312,6 @@ namespace jucePlayer
         }
         m_lastSampleRate = _sampleRate;
 
-        const auto command = m_command.load(std::memory_order_acquire);
         if (command != m_lastCommand || (!_playbackEnabled && m_audioState != State::Stopped))
         {
             m_lastCommand = command;
@@ -322,7 +340,8 @@ namespace jucePlayer
                     break;
                 if (m_startPhase == StartPhase::Gap)
                     beginReset(outputOffset, _events);
-                else if (m_startPhase == StartPhase::Reset && m_startResetMode == ResetMode::Mt32)
+                else if (m_startPhase == StartPhase::Reset && m_startResetMode == ResetMode::Mt32 &&
+                         m_startResetTarget == ResetTarget::GsModule)
                 {
                     synthLib::midi::appendGsMt32Arrangement(_events, m_portCount.load(std::memory_order_relaxed),
                                                             outputOffset);
@@ -387,8 +406,10 @@ namespace jucePlayer
 
             outputOffset += static_cast<uint32_t>(samplesToEnd);
             remaining -= static_cast<uint32_t>(samplesToEnd);
-            const auto nextIndex = m_audioIndex + 1;
-            if (!m_audioPlaylist || nextIndex < 0 || static_cast<size_t>(nextIndex) >= m_audioPlaylist->songs.size())
+            // Checked here, not left to selectSong(): with nothing playable after the finished song it
+            // would return without switching, and this loop would spin on the finished one.
+            const auto nextIndex = playableFrom(static_cast<size_t>(m_audioIndex + 1));
+            if (!m_audioPlaylist || nextIndex >= m_audioPlaylist->songs.size())
             {
                 m_audioState = State::Stopped;
                 discontinuity(outputOffset, _events);
@@ -396,7 +417,7 @@ namespace jucePlayer
                 m_eventIndex = 0;
                 break;
             }
-            selectSong(static_cast<size_t>(nextIndex), true, outputOffset, _events, true);
+            selectSong(nextIndex, true, outputOffset, _events, true);
         }
 
         updatePublishedStatus();
@@ -440,9 +461,21 @@ namespace jucePlayer
         }
     }
 
-    void MidiPlayer::selectSong(const size_t _index, const bool _play, const uint32_t _offset,
+    size_t MidiPlayer::playableFrom(size_t _index) const
+    {
+        if (!m_audioPlaylist)
+            return _index;
+        const auto& songs = m_audioPlaylist->songs;
+        while (_index < songs.size() && !songs[_index]->info.available())
+            ++_index;
+        return _index;
+    }
+
+    void MidiPlayer::selectSong(size_t _index, const bool _play, const uint32_t _offset,
                                 std::vector<synthLib::SMidiEvent>& _events, const bool _automaticAdvance)
     {
+        // Asked for an unavailable entry, start the next one that can be played.
+        _index = playableFrom(_index);
         if (!m_audioPlaylist || _index >= m_audioPlaylist->songs.size())
             return;
         discontinuity(_offset, _events);
@@ -452,6 +485,7 @@ namespace jucePlayer
         m_eventIndex = 0;
         m_audioState = _play ? State::Playing : State::Stopped;
         m_startResetMode = resetMode();
+        m_startResetTarget = resetTarget();
         m_waitSamples =
             _automaticAdvance ? static_cast<uint64_t>(std::ceil(songGapMs() * m_lastSampleRate / 1000.0)) : 0;
         if (m_waitSamples)
@@ -471,9 +505,10 @@ namespace jucePlayer
     void MidiPlayer::beginReset(const uint32_t _offset, std::vector<synthLib::SMidiEvent>& _events)
     {
         synthLib::midi::appendSongReset(_events, m_startResetMode, m_portCount.load(std::memory_order_relaxed),
-                                        _offset);
+                                        _offset, m_startResetTarget);
         m_startPhase = StartPhase::Reset;
-        m_waitSamples = static_cast<uint64_t>(std::ceil(kResetSettleMs * m_lastSampleRate / 1000.0));
+        m_waitSamples =
+            static_cast<uint64_t>(std::ceil(resetSettleMs(m_startResetMode) * m_lastSampleRate / 1000.0));
     }
 
     void MidiPlayer::beginOpening(const uint32_t _offset, std::vector<synthLib::SMidiEvent>& _events)
@@ -494,22 +529,25 @@ namespace jucePlayer
         const auto playlist = std::atomic_load_explicit(&m_playlist, std::memory_order_acquire);
         if (!playlist || _index >= playlist->songs.size())
             return 0;
-        return (kResetSettleMs * (resetMode() == ResetMode::Mt32 ? 2 : 1) +
+        const auto mode = resetMode();
+        const bool arrangement = mode == ResetMode::Mt32 && resetTarget() == ResetTarget::GsModule;
+        return (resetSettleMs(mode) + (arrangement ? kResetSettleMs : 0) +
                 playlist->songs[_index]->openingMs) / 1000.0;
     }
 
     void MidiPlayer::silence(const uint32_t _offset, std::vector<synthLib::SMidiEvent>& _events) const
     {
+        // All Sound Off, then the hold pedal up and All Notes Off for the boards that predate
+        // All Sound Off and would otherwise keep a pedalled note ringing (the MT-32 and CM
+        // boards); the GS modules take the pedal message as nothing worse than redundant.
         for (uint8_t port = 0; port < m_portCount.load(std::memory_order_relaxed); ++port)
             for (uint8_t channel = 0; channel < 16; ++channel)
-            {
-                _events.emplace_back(synthLib::MidiEventSource::Host, static_cast<uint8_t>(0xb0 | channel), 120, 0,
-                                     _offset);
-                _events.back().port = port;
-                _events.emplace_back(synthLib::MidiEventSource::Host, static_cast<uint8_t>(0xb0 | channel), 123, 0,
-                                     _offset);
-                _events.back().port = port;
-            }
+                for (const uint8_t controller : {120, 64, 123})
+                {
+                    _events.emplace_back(synthLib::MidiEventSource::Host, static_cast<uint8_t>(0xb0 | channel),
+                                         controller, 0, _offset);
+                    _events.back().port = port;
+                }
     }
 
     void MidiPlayer::updatePublishedStatus()

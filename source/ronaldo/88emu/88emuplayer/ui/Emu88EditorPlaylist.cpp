@@ -40,8 +40,21 @@ namespace emu88Player
 
 	void Editor::addMidiFiles(const std::vector<std::string>& _files)
 	{
+		// A file added on its own is refused when it cannot be read. A playlist's entries keep their
+		// place instead, as they do when the playlist is loaded.
+		auto& player = m_processor.midiPlayer();
+		const auto previousCount = player.entries().size();
 		std::vector<std::string> midiFiles;
 		std::vector<std::string> errors;
+		bool added = false;
+		bool kept = false;
+		const auto addPending = [&]
+		{
+			const auto result = player.addFiles(midiFiles);
+			added |= result.added != 0;
+			errors.insert(errors.end(), result.errors.begin(), result.errors.end());
+			midiFiles.clear();
+		};
 		for(const auto& file : _files)
 		{
 			if(!playlist::isSupported(file))
@@ -49,26 +62,35 @@ namespace emu88Player
 				midiFiles.push_back(file);
 				continue;
 			}
+			addPending();
 			std::vector<std::string> paths;
 			std::string error;
-			if(playlist::read(juce::File(file), paths, error))
-				midiFiles.insert(midiFiles.end(), paths.begin(), paths.end());
-			else
+			if(!playlist::read(juce::File(file), paths, error))
+			{
 				errors.push_back(std::move(error));
+				continue;
+			}
+			const auto result = player.addFiles(paths, jucePlayer::MidiPlayer::Unreadable::Keep);
+			added |= result.added + result.unavailable != 0;
+			kept |= result.unavailable != 0;
+			errors.insert(errors.end(), result.errors.begin(), result.errors.end());
 		}
+		addPending();
 
-		const auto result = m_processor.midiPlayer().addFiles(midiFiles);
-		if(result.added)
+		if(added)
 			saveDefaultPlaylist();
-		errors.insert(errors.end(), result.errors.begin(), result.errors.end());
 		if(errors.empty())
 			return;
-		std::ostringstream message;
-		message << "Some files could not be added or loaded:";
-		for(const auto& error : errors)
-			message << "\n\n" << error;
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
-			"88emuPlayer - MIDI playlist", message.str());
+		// Adding appends, so the entries this kept are the unavailable ones past the previous end.
+		std::vector<std::string> unavailable;
+		const auto entries = player.entries();
+		for(size_t i = previousCount; i < entries.size(); ++i)
+			if(!entries[i].available())
+				unavailable.push_back(entries[i].path);
+		showFileErrors(kept ? "Some files cannot be read right now. Those from a playlist keep their place and "
+		                      "are skipped when playing; click one to try it again."
+		                    : "Some files could not be added:",
+		               errors, unavailable);
 	}
 
 	void Editor::loadPlaylist()
@@ -99,22 +121,12 @@ namespace emu88Player
 				else
 				{
 					const auto result = editor->m_processor.midiPlayer().replaceFiles(paths);
-					if(result.errors.empty())
-					{
-						editor->m_processor.config().setValue("lastPlaylistFolder",
-							file.getParentDirectory().getFullPathName());
-						editor->m_processor.config().saveIfNeeded();
-						editor->saveDefaultPlaylist();
-					}
-					else
-					{
-						std::ostringstream message;
-						message << "The playlist was not loaded; the current playlist is unchanged:";
-						for(const auto& item : result.errors)
-							message << "\n\n" << item;
-						genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
-							"Load MIDI playlist", message.str(), editor);
-					}
+					editor->m_processor.config().setValue("lastPlaylistFolder",
+						file.getParentDirectory().getFullPathName());
+					editor->m_processor.config().saveIfNeeded();
+					editor->saveDefaultPlaylist();
+					if(!result.errors.empty())
+						editor->showPlaylistNotice();
 				}
 			}
 			editor->m_playlistFileChooser.reset();
@@ -157,6 +169,57 @@ namespace emu88Player
 			}
 			editor->m_playlistFileChooser.reset();
 		});
+	}
+
+	void Editor::playPlaylistEntry(const size_t _index)
+	{
+		// An unavailable entry's file may be back by now. If not, say why instead of starting the
+		// next entry, which is what the player would do with it.
+		auto& player = m_processor.midiPlayer();
+		if(const auto error = player.reload(_index); !error.empty())
+		{
+			const auto entries = player.entries();
+			showFileErrors("This file cannot be read right now:", {error},
+			               _index < entries.size() ? std::vector<std::string>{entries[_index].path}
+			                                       : std::vector<std::string>{});
+			return;
+		}
+		player.play(_index);
+	}
+
+	void Editor::showPlaylistNotice()
+	{
+		std::vector<std::string> errors;
+		std::vector<std::string> paths;
+		for(const auto& entry : m_processor.midiPlayer().entries())
+		{
+			if(entry.available())
+				continue;
+			errors.push_back(entry.error);
+			paths.push_back(entry.path);
+		}
+		if(errors.empty())
+			return;
+		showFileErrors("Some files in the playlist cannot be read right now. They keep their place and are "
+		               "skipped when playing; click one to try it again.",
+		               errors, paths);
+	}
+
+	void Editor::showFileErrors(const std::string& _intro, const std::vector<std::string>& _errors,
+	                            const std::vector<std::string>& _paths)
+	{
+		// A whole playlist on a missing drive would not fit on the screen.
+		constexpr size_t maxListed = 8;
+		std::ostringstream message;
+		message << _intro;
+		for(size_t i = 0; i < std::min(_errors.size(), maxListed); ++i)
+			message << "\n\n" << _errors[i];
+		if(_errors.size() > maxListed)
+			message << "\n\n...and " << _errors.size() - maxListed << " more.";
+		if(const auto hint = privacySettingsHint(_paths); !hint.empty())
+			message << "\n\n" << hint;
+		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+			"88emuPlayer - MIDI playlist", message.str(), this);
 	}
 
 	void Editor::saveDefaultPlaylist()
@@ -296,7 +359,8 @@ namespace emu88Player
 		if(entries.empty())
 			rml << "<div class=\"playlistEmpty\">Drop MIDI files here</div>";
 		for(size_t i = 0; i < entries.size(); ++i)
-			rml << "<div id=\"playlistEntry" << i << "\" class=\"playlistEntry\">"
+			rml << "<div id=\"playlistEntry" << i << "\" class=\"playlistEntry"
+			    << (entries[i].available() ? "" : " unavailable") << "\">"
 			    << "<div class=\"playlistEntryName\">"
 			    << Rml::StringUtilities::EncodeRml(entries[i].name) << "</div>"
 			    << "<button id=\"playlistRemove" << i
@@ -310,7 +374,7 @@ namespace emu88Player
 			if(!row)
 				continue;
 			juceRmlUi::EventListener::Add(row, Rml::EventId::Click,
-				[this, i](Rml::Event&) { m_processor.midiPlayer().play(i); });
+				[this, i](Rml::Event&) { playPlaylistEntry(i); });
 			if(auto* remove = m_playlistEntries->GetOwnerDocument()->GetElementById(
 				"playlistRemove" + std::to_string(i)))
 			{

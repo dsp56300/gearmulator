@@ -1,6 +1,7 @@
 // Slice budgets and pending-condition dispatch for cached threaded-code cores.
 #pragma once
 #include "common/device.hpp"
+#include "common/host.hpp"
 #include "common/sched.hpp"
 #include "common/types.hpp"
 
@@ -10,15 +11,9 @@
 #define EMU_UNLIKELY(x) (x)
 #endif
 
-// Guaranteed tail call where the compiler offers it (clang); elsewhere the run
-// loop dispatches and a handler simply returns the next cell.
-#if defined(__clang__) && __has_cpp_attribute(clang::musttail)
-#define EMU_HAS_MUSTTAIL 1
-#define EMU_TAILCALL(expr) [[clang::musttail]] return (expr)
-#else
-#define EMU_HAS_MUSTTAIL 0
-#define EMU_TAILCALL(expr) return (expr)
-#endif
+// EMU_HAS_MUSTTAIL / EMU_TAILCALL: guaranteed tail calls where the host has them
+// (common/host.hpp); elsewhere the run loop dispatches and a handler simply
+// returns the next cell.
 
 namespace emu {
 

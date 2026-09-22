@@ -5,7 +5,7 @@
 #include "88lib/boards/sc8850.h"
 #include "88lib/boards/sc8820.h"
 #include "88lib/boards/cm32p.h"
-#include "88lib/boards/cm32l.h"
+#include "88lib/boards/laBoard.h"
 #include "88lib/boards/cm64.h"
 #include "88lib/boards/miig5.h"
 #include "88lib/boards/nu10b.h"
@@ -63,13 +63,30 @@ namespace emu88Lib
 				[&](const unsigned _index) { return _lcd.getCgCharacter(_index); });
 		}
 
-		// The CM-32L's SED1200, one strip of 20.
-		void renderCm32lDisplay(Screen& _screen, const hwLib::Sed1200& _lcd)
+		// The LA board's SED1200, one strip of 20: the MT-32's front-panel display, the CM-32L's
+		// service screen.
+		void renderLaDisplay(Screen& _screen, const hwLib::Sed1200& _lcd)
 		{
 			renderCharacterGrid(_screen, 20, 1, _lcd.isDisplayOn(),
 				[&](unsigned, const unsigned _column) { return _lcd.getVisibleCharacter(_column); },
 				[&](const unsigned _index) { return _lcd.getCgCharacter(_index); });
+			_screen.text.assign(1, std::string());
+			for(unsigned column = 0; column < 20; ++column)
+				_screen.text[0] += static_cast<char>(_lcd.getVisibleCharacter(column));
 		}
+
+		// The visible window of an HD44780 as text, line by line.
+		std::vector<std::string> lcdText(const hwLib::Hd44780& _lcd)
+		{
+			std::vector<std::string> lines(_lcd.getVisibleLines());
+			for(unsigned line = 0; line < _lcd.getVisibleLines(); ++line)
+				for(unsigned column = 0; column < _lcd.getVisibleColumns(); ++column)
+					lines[line] += static_cast<char>(_lcd.getVisibleCharacter(line, column));
+			return lines;
+		}
+
+		// The MT-32's VOLUME/VALUE knob moves a 32nd of its travel per detent.
+		constexpr int32_t g_knobStepPerDetent = (LaBoard::KnobMaximum + 1) / 32;
 	}
 
 	HardwareDevice::HardwareDevice(const synthLib::DeviceCreateParams& _params, const BootOptions& _boot,
@@ -103,10 +120,14 @@ namespace emu88Lib
 			m_cm32p = std::make_unique<Cm32p>(RomLoader::findCm32pRomSet(), _pcmCard);
 			break;
 		case DeviceModel::Cm32l:
-			m_cm32l = std::make_unique<Cm32l>(RomLoader::findCm32lRomSet());
+		case DeviceModel::Cm32ln:
+		case DeviceModel::Mt32Old:
+		case DeviceModel::Mt32New:
+			m_la = std::make_unique<LaBoard>(RomLoader::findLaRomSet(toLaModel(m_model)));
 			break;
 		case DeviceModel::Cm64:
-			m_cm64 = std::make_unique<Cm64>(RomLoader::findCm32lRomSet(), RomLoader::findCm32pRomSet(), _pcmCard);
+			m_cm64 = std::make_unique<Cm64>(RomLoader::findLaRomSet(LaModel::Cm32l), RomLoader::findCm32pRomSet(),
+			                                _pcmCard);
 			break;
 		case DeviceModel::Sc8820:
 		{
@@ -205,7 +226,7 @@ namespace emu88Lib
 			else if(m_sc88) m_sc88->setButtons(_boot.initialPanelButtons);
 			else if(m_sc8850) m_sc8850->setButtons(_boot.initialPanelButtons);
 			else if(m_sc55) m_sc55->setButtons(_boot.initialPanelButtons);
-			else if(m_cm32l) m_cm32l->setButtons(_boot.initialPanelButtons);
+			else if(m_la) m_la->setButtons(_boot.initialPanelButtons);
 			else if(m_cm64) m_cm64->setButtons(_boot.initialPanelButtons);
 		}
 
@@ -266,7 +287,7 @@ namespace emu88Lib
 		if(m_sc8850) return static_cast<float>(Sc8850::SampleRate);
 		if(m_sc8820) return static_cast<float>(Sc8820::SampleRate);
 		if(m_cm32p) return static_cast<float>(Cm32p::SampleRate);
-		if(m_cm32l) return static_cast<float>(Cm32l::SampleRate);
+		if(m_la) return static_cast<float>(LaBoard::SampleRate);
 		if(m_cm64) return static_cast<float>(Cm64::SampleRate);
 		if(m_sc55) return static_cast<float>(m_sc55->sampleRate());
 		if(m_nu10b) return static_cast<float>(Nu10b::SampleRate);
@@ -279,8 +300,8 @@ namespace emu88Lib
 		if(m_sc8850) return Sc8850::CpuClockHz;
 		if(m_sc8820) return Sc8820::CpuClockHz;
 		if(m_cm32p) return Cm32p::CpuStateRate * 3;
-		if(m_cm32l) return Cm32l::CpuClock;
-		if(m_cm64) return Cm32l::CpuClock;
+		if(m_la) return LaBoard::CpuClock;
+		if(m_cm64) return LaBoard::CpuClock;
 		if(m_sc55) return m_sc55->cpuClockHz();
 		if(m_nu10b) return Nu10b::CpuClockHz;
 		if(m_miig5) return Miig5::CpuClockHz;
@@ -291,7 +312,7 @@ namespace emu88Lib
 	{
 		return (m_sc88 && m_sc88->isValid()) || (m_sc88Pro && m_sc88Pro->isValid()) ||
 		       (m_sc8850 && m_sc8850->isValid()) || (m_sc8820 && m_sc8820->isValid()) || (m_cm32p && m_cm32p->isValid()) ||
-		       (m_cm32l && m_cm32l->isValid()) || (m_cm64 && m_cm64->isValid()) ||
+		       (m_la && m_la->isValid()) || (m_cm64 && m_cm64->isValid()) ||
 		       (m_sc55 && m_sc55->isValid()) || (m_nu10b && m_nu10b->isValid()) || (m_miig5 && m_miig5->isValid());
 	}
 
@@ -345,8 +366,8 @@ namespace emu88Lib
 			m_sc8820->addMidiEvent(_event, _event.port);
 		else if(m_cm32p)
 			m_cm32p->addMidiEvent(_event, _event.port);
-		else if(m_cm32l)
-			m_cm32l->addMidiEvent(_event, _event.port);
+		else if(m_la)
+			m_la->addMidiEvent(_event, _event.port);
 		else if(m_cm64)
 			m_cm64->addMidiEvent(_event, _event.port);
 		else if(m_sc88)
@@ -406,8 +427,8 @@ namespace emu88Lib
 			m_sc8820->readMidiOut(_midiOut);
 		else if(m_cm32p)
 			m_cm32p->readMidiOut(_midiOut);
-		else if(m_cm32l)
-			m_cm32l->readMidiOut(_midiOut);
+		else if(m_la)
+			m_la->readMidiOut(_midiOut);
 		else if(m_cm64)
 			m_cm64->readMidiOut(_midiOut);
 		else if(m_sc55)
@@ -457,13 +478,17 @@ namespace emu88Lib
 			else if(m_sc88) m_sc88->setButtons(buttons);
 			else if(m_sc8850) m_sc8850->setButtons(buttons);
 			else if(m_sc55) m_sc55->setButtons(buttons);
-			else if(m_cm32l) m_cm32l->setButtons(buttons);
+			else if(m_la) m_la->setButtons(buttons);
 			else if(m_cm64) m_cm64->setButtons(buttons);
 			m_nextPanelCommandSample = m_renderedSamples + g_minimumPanelEdgeSamples;
 		}
 		else if(m_sc8850)
 		{
 			m_sc8850->turnEncoder(static_cast<int8_t>(std::clamp(command.value, -64, 63)));
+		}
+		else if(m_la && hasPanelKnob(m_model))
+		{
+			m_la->turnKnob(std::clamp(command.value, -64, 64) * g_knobStepPerDetent);
 		}
 	}
 
@@ -473,18 +498,13 @@ namespace emu88Lib
 			m_sc55MidiIn->processSample();
 		applyDuePanelCommand();
 		m_heldFrame = {};
-		m_heldFrameB = {};
 		if(m_sc8850) m_heldFrame = m_sc8850->renderSample();
 		else if(m_sc8820) m_heldFrame = m_sc8820->renderSample();
 		else if(m_cm32p) m_heldFrame = m_cm32p->renderSample();
-		else if(m_cm32l) m_heldFrame = m_cm32l->renderSample();
-		else if(m_cm64)
-		{
-			// The LA board's line output and the PCM board's, as they arrive at the mixer.
-			const auto frames = m_cm64->renderFrames();
-			m_heldFrame = frames.la;
-			m_heldFrameB = frames.pcm;
-		}
+		else if(m_la) m_heldFrame = m_la->renderSample();
+		// The CM-64's halves are read through analogSample() by writeOutputSample(); what
+		// renderFrames() returns as integers is the compatibility form nobody here needs.
+		else if(m_cm64) m_cm64->renderFrames();
 		else if(m_sc88Pro) m_heldFrame = m_sc88Pro->renderSample();
 		else if(m_sc88) m_heldFrame = m_sc88->renderSample();
 		else if(m_sc55) m_heldFrame = m_sc55->renderSample();
@@ -503,6 +523,7 @@ namespace emu88Lib
 			first.type = DisplaySnapshot::Type::Character;
 			std::copy(lcd.getDdRam().begin(), lcd.getDdRam().end(), first.ddRam.begin());
 			std::copy(lcd.getCgRam().begin(), lcd.getCgRam().end(), first.cgRam.begin());
+			first.text = lcdText(lcd);
 			first.powered = (!m_sc88Pro || m_sc88Pro->lcdEnabled()) && (!m_sc88 || m_sc88->lcdEnabled()) &&
 			                (!m_sc55 || m_sc55->lcdEnabled());
 			first.displayOn = lcd.isDisplayOn() && first.powered;
@@ -515,19 +536,21 @@ namespace emu88Lib
 		else if(m_cm32p)
 		{
 			renderCm32pDisplay(first, m_cm32p->lcd());
+			first.text = lcdText(m_cm32p->lcd());
 			next.leds = m_cm32p->leds();
 		}
-		else if(m_cm32l)
+		else if(m_la)
 		{
-			renderCm32lDisplay(first, m_cm32l->lcd());
-			next.leds = m_cm32l->leds();
+			renderLaDisplay(first, m_la->lcd());
+			next.leds = m_la->leds();
 		}
 		else if(m_cm64)
 		{
 			// Two boards, two service displays: the PCM half's above the LA half's, as the
 			// bezel has them.
 			renderCm32pDisplay(first, m_cm64->pcm().lcd());
-			renderCm32lDisplay(next.screens[1], m_cm64->la().lcd());
+			first.text = lcdText(m_cm64->pcm().lcd());
+			renderLaDisplay(next.screens[1], m_cm64->la().lcd());
 			next.leds = m_cm64->leds();
 		}
 		else if(m_sc8850)
@@ -570,7 +593,7 @@ namespace emu88Lib
 			if(m_holdPhase == 0)
 			{
 				if(isValid()) renderBoardFrame();
-				else m_heldFrame = m_heldFrameB = {};
+				else m_heldFrame = {};
 				const auto firstOutput = m_midiOut.size();
 				readMidiOutFromBoard(m_midiOut);
 				for(auto j = firstOutput; j < m_midiOut.size(); ++j)
@@ -594,11 +617,25 @@ namespace emu88Lib
 		// there is no chain at all.
 		auto left = word(m_heldFrame.first) * m_boardGain.a;
 		auto right = word(m_heldFrame.second) * m_boardGain.a;
+		// The CM and LA boards' renderSample() retains an integer compatibility interface. The
+		// DAC words have already been converted before their analog bus sum and VCA:
+		// quantising again invents low-level distortion and clips a sum of otherwise valid
+		// buses.
+		if(m_la || m_cm32p || m_cm64)
+		{
+			const auto& sample = m_cm64 ? m_cm64->la().analogSample()
+				: m_la ? m_la->analogSample() : m_cm32p->analogSample();
+			left = sample.first * (1.0f / 32768.0f) * m_boardGain.a;
+			right = sample.second * (1.0f / 32768.0f) * m_boardGain.a * m_boardGain.rightA;
+		}
 		// The CM-64 is two boards that meet at one mixer, so its halves are summed here rather
 		// than on the board: each passes its own circuit first.
 		if(m_cm64)
-			m_analogOutput.processSplit(left, right, word(m_heldFrameB.first) * m_boardGain.b,
-			                            word(m_heldFrameB.second) * m_boardGain.b);
+		{
+			const auto& pcm = m_cm64->pcm().analogSample();
+			m_analogOutput.processSplit(left, right, pcm.first * (1.0f / 32768.0f) * m_boardGain.b,
+			                            pcm.second * (1.0f / 32768.0f) * m_boardGain.b * m_boardGain.rightB);
+		}
 		else
 			m_analogOutput.process(left, right);
 		if(_outputs[0]) _outputs[0][_index] = left;
@@ -614,15 +651,25 @@ namespace emu88Lib
 		if(m_sc88) m_sc88->transportDiscontinuity(m_transportGeneration);
 		if(m_sc8820) m_sc8820->transportDiscontinuity(m_transportGeneration);
 		if(m_cm32p) m_cm32p->transportDiscontinuity(m_transportGeneration);
-		if(m_cm32l) m_cm32l->transportDiscontinuity(m_transportGeneration);
+		if(m_la) m_la->transportDiscontinuity(m_transportGeneration);
 		if(m_cm64) m_cm64->transportDiscontinuity(m_transportGeneration);
 		if(m_nu10b) m_nu10b->transportDiscontinuity(m_transportGeneration);
 		if(m_miig5) m_miig5->transportDiscontinuity(m_transportGeneration);
 		silenceActiveChannels();
 	}
 
+	std::vector<std::pair<uint8_t, uint8_t>> HardwareDevice::silenceControllers(const DeviceModel _model)
+	{
+		// The LA and CM boards' firmware predates All Sound Off and ignores it; their manuals'
+		// way is All Notes Off, which honours a held sustain pedal, so the pedal comes up first.
+		if(isRolandLaFamily(_model))
+			return {{synthLib::MC_SUSTAINPEDAL, 0}, {synthLib::MC_ALLNOTESOFF, 0}};
+		return {{synthLib::MC_ALLSOUNDOFF, 0}};
+	}
+
 	void HardwareDevice::silenceActiveChannels()
 	{
+		const auto controllers = silenceControllers(m_model);
 		for(int port = 3; port >= 0; --port)
 		{
 			for(int channel = 15; channel >= 0; --channel)
@@ -630,11 +677,14 @@ namespace emu88Lib
 				const auto channelBit = static_cast<uint8_t>(port * 16 + channel);
 				if((m_activeChannels & (uint64_t{1} << channelBit)) == 0)
 					continue;
-				synthLib::SMidiEvent event(synthLib::MidiEventSource::Internal,
-					static_cast<uint8_t>(synthLib::M_CONTROLCHANGE | channel), synthLib::MC_ALLSOUNDOFF, 0);
-				event.port = static_cast<uint8_t>(port);
-				event.transportGeneration = m_transportGeneration;
-				sendMidiToBoard(event);
+				for(const auto& [controller, value] : controllers)
+				{
+					synthLib::SMidiEvent event(synthLib::MidiEventSource::Internal,
+						static_cast<uint8_t>(synthLib::M_CONTROLCHANGE | channel), controller, value);
+					event.port = static_cast<uint8_t>(port);
+					event.transportGeneration = m_transportGeneration;
+					sendMidiToBoard(event);
+				}
 			}
 		}
 		m_activeChannels = 0;
@@ -649,10 +699,18 @@ namespace emu88Lib
 			return;
 		const auto channelBit = static_cast<uint8_t>(_event.port * 16 + (_event.a & 0x0f));
 		const auto channelMask = uint64_t{1} << channelBit;
+		if(status == synthLib::M_CONTROLCHANGE && _event.b == synthLib::MC_SUSTAINPEDAL)
+		{
+			if(_event.c >= 64) m_heldChannels |= channelMask; else m_heldChannels &= ~channelMask;
+		}
 		if(status == synthLib::M_NOTEON && _event.c != 0)
 			m_activeChannels |= channelMask;
-		else if(status == synthLib::M_CONTROLCHANGE &&
-		        _event.b == synthLib::MC_ALLSOUNDOFF)
+		else if(status == synthLib::M_CONTROLCHANGE && _event.b == synthLib::MC_ALLSOUNDOFF)
+			m_activeChannels &= ~channelMask;
+		// On the boards without All Sound Off, All Notes Off is the end of a channel's sound
+		// only while its pedal is up.
+		else if(status == synthLib::M_CONTROLCHANGE && _event.b == synthLib::MC_ALLNOTESOFF &&
+		        isRolandLaFamily(m_model) && (m_heldChannels & channelMask) == 0)
 			m_activeChannels &= ~channelMask;
 	}
 }

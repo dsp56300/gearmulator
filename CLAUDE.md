@@ -63,7 +63,7 @@ source/
 ├── axel/         Access
 ├── waldi/        Waldorf — common/, microq/, xt/
 ├── claudia/      Clavia
-└── ronaldo/      Roland — common/, esp/, je8086/
+└── ronaldo/      Roland — common/, custom_chips/, je8086/, 88emu/
 ```
 
 The rule for placing something new: `<maker>/<family>/<target-dir>`, plus
@@ -92,7 +92,7 @@ includes like `../../foo/bar.h` — they break the next time anything moves.
 | JE-8086 | Roland JP-8000 | `ronaldo/je8086/jeLib/` | `ronaldo/je8086/jeJucePlugin/` |
 | DSPBridge | Network bridge | `framework/tools/bridge/` | — |
 
-Shared per-manufacturer code: `waldi/common/wLib/` (microQ + XT), `ronaldo/common/` and `ronaldo/esp/` (Roland).
+Shared per-manufacturer code: `waldi/common/wLib/` (microQ + XT), `ronaldo/common/` and `ronaldo/custom_chips/` (Roland).
 
 **Shared libraries** (all under `source/framework/`):
 - `synthLib/` — Device base class, DAC, resampling, MIDI routing

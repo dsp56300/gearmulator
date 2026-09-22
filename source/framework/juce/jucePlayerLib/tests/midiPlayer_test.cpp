@@ -82,8 +82,8 @@ namespace
 
     void resetTiming(const Fixtures& files)
     {
-        for (const auto mode : {MidiPlayer::ResetMode::Off, MidiPlayer::ResetMode::Gm, MidiPlayer::ResetMode::Gs,
-                                MidiPlayer::ResetMode::Mt32})
+        for (const auto mode : {MidiPlayer::ResetMode::Off, MidiPlayer::ResetMode::Gm, MidiPlayer::ResetMode::Gm2,
+                                MidiPlayer::ResetMode::Gs, MidiPlayer::ResetMode::Mt32})
         {
             MidiPlayer player(4, MidiPlayer::ResetMode::Gs);
             CHECK_EQ(player.addFiles(files.paths).added, 3u);
@@ -92,7 +92,9 @@ namespace
             player.play(0);
             // One settle per block, so the song's first note falls at the head of the
             // block after the one that carries the reset. block() runs at 1 kHz.
-            constexpr auto settle = MidiPlayer::kResetSettleMs;
+            const auto settle = MidiPlayer::resetSettleMs(mode);
+            CHECK_EQ(player.preparationSeconds(0),
+                     (settle + (mode == MidiPlayer::ResetMode::Mt32 ? MidiPlayer::kResetSettleMs : 0)) / 1000.0);
             auto events = block(player, settle);
             CHECK(events.front().type == MidiEventType::TransportDiscontinuity);
             CHECK_EQ(
@@ -103,7 +105,16 @@ namespace
                 std::find_if(events.begin(), events.end(), [](const auto& e) { return !e.sysex.empty(); });
             CHECK((reset == events.end()) == (mode == MidiPlayer::ResetMode::Off));
             if (reset != events.end())
-                CHECK_EQ(reset->sysex[1], mode == MidiPlayer::ResetMode::Gm ? 0x7e : 0x41);
+            {
+                using Sysex = std::vector<uint8_t>;
+                const Sysex sent(reset->sysex.begin(), reset->sysex.end());
+                if (mode == MidiPlayer::ResetMode::Gm)
+                    CHECK(sent == Sysex({0xf0, 0x7e, 0x7f, 0x09, 0x01, 0xf7}));
+                else if (mode == MidiPlayer::ResetMode::Gm2)
+                    CHECK(sent == Sysex({0xf0, 0x7e, 0x7f, 0x09, 0x03, 0xf7}));
+                else
+                    CHECK(sent == Sysex({0xf0, 0x41, 0x10, 0x42, 0x12, 0x40, 0x00, 0x7f, 0x00, 0x41, 0xf7}));
+            }
             events = block(player, settle);
             CHECK_EQ(noteCount(events), mode != MidiPlayer::ResetMode::Mt32 ? 1 : 0);
             if (mode == MidiPlayer::ResetMode::Mt32)
@@ -124,6 +135,10 @@ namespace
             player.togglePlayPause();
             events = block(player, 1);
             CHECK(events.front().type == MidiEventType::TransportDiscontinuity);
+
+            // A number from saved settings that names no mode falls back to GS.
+            player.setResetMode(static_cast<MidiPlayer::ResetMode>(99));
+            CHECK(player.resetMode() == MidiPlayer::ResetMode::Gs);
         }
     }
 
@@ -213,12 +228,19 @@ namespace
         CHECK_EQ(player.addFiles({files.paths[0]}).added, 1u);
         const auto original = player.entries();
 
-        const auto rejected = player.replaceFiles({files.paths[1], "not-a-midi-file.mid"});
-        CHECK_EQ(rejected.added, 1u);
-        CHECK_EQ(rejected.errors.size(), 1u);
-        CHECK(player.entries().size() == original.size());
-        if(player.entries().size() == original.size())
-            CHECK(player.entries()[0].path == original[0].path);
+        // A file that cannot be read keeps its place instead of costing the whole list.
+        const auto partial = player.replaceFiles({files.paths[1], "not-a-midi-file.mid"});
+        CHECK_EQ(partial.added, 1u);
+        CHECK_EQ(partial.unavailable, 1u);
+        CHECK_EQ(partial.errors.size(), 1u);
+        CHECK_EQ(player.entries().size(), 2u);
+        if(player.entries().size() == 2)
+        {
+            CHECK(player.entries()[0].path == files.paths[1]);
+            CHECK(player.entries()[0].available());
+            CHECK(!player.entries()[1].available());
+            CHECK(player.entries()[1].name == "not-a-midi-file.mid");
+        }
 
         const auto replaced = player.replaceFiles({files.paths[1], files.paths[2]});
         CHECK_EQ(replaced.added, 2u);
@@ -229,6 +251,89 @@ namespace
             CHECK(player.entries()[0].path == files.paths[1]);
             CHECK(player.entries()[1].path == files.paths[2]);
         }
+    }
+
+    void unavailableEntries(const Fixtures& files)
+    {
+        const auto missing = files.directory.getChildFile("missing.mid");
+        const auto missingPath = missing.getFullPathName().toStdString();
+        const auto songLength = static_cast<uint32_t>(std::ceil(0.5 * 1000 + MidiPlayer::kResetSettleMs)) + 1;
+        const auto startNote = [](MidiPlayer& _player)
+        {
+            CHECK_EQ(noteCount(block(_player, MidiPlayer::kResetSettleMs)), 0);
+            const auto events = block(_player, 1);
+            const auto note = std::find_if(events.begin(), events.end(), [](const auto& e) { return e.a == 0x90; });
+            return note == events.end() ? -1 : int(note->b);
+        };
+
+        MidiPlayer player(1, MidiPlayer::ResetMode::Off);
+        player.setEndTailMs(0);
+        const auto restored = player.replaceFiles({files.paths[0], missingPath, files.paths[1]});
+        CHECK_EQ(restored.added, 2u);
+        CHECK_EQ(restored.unavailable, 1u);
+        CHECK_EQ(restored.errors.size(), 1u);
+        CHECK(!restored.errors.empty() && restored.errors[0].find("missing.mid") != std::string::npos);
+        auto entries = player.entries();
+        CHECK_EQ(entries.size(), 3u);
+        if (entries.size() == 3)
+        {
+            CHECK(entries[1].path == missingPath);
+            CHECK(entries[1].name == "missing.mid");
+            CHECK(!entries[1].available());
+            CHECK_EQ(entries[1].durationSeconds, 0.0);
+        }
+
+        // Advancing passes over the unavailable entry.
+        player.play(0);
+        CHECK_EQ(noteCount(block(player, songLength)), 1);
+        CHECK_EQ(startNote(player), 61);
+        CHECK_EQ(player.status().currentIndex, 2);
+
+        // So does asking for it.
+        player.play(1);
+        CHECK_EQ(startNote(player), 61);
+        CHECK_EQ(player.status().currentIndex, 2);
+
+        // Nothing playable after the last song ends the list instead of replaying it.
+        CHECK_EQ(player.replaceFiles({files.paths[0], missingPath}).unavailable, 1u);
+        player.play(0);
+        CHECK_EQ(noteCount(block(player, songLength + 1000)), 1);
+        CHECK(player.status().state == MidiPlayer::State::Stopped);
+        CHECK_EQ(player.status().currentIndex, 0);
+
+        // A list with nothing playable starts nothing.
+        MidiPlayer empty(1, MidiPlayer::ResetMode::Off);
+        CHECK_EQ(empty.replaceFiles({missingPath}).added, 0u);
+        empty.play(0);
+        CHECK_EQ(noteCount(block(empty, 1000)), 0);
+        empty.togglePlayPause();
+        CHECK_EQ(noteCount(block(empty, 1000)), 0);
+        CHECK(empty.status().state == MidiPlayer::State::Stopped);
+
+        // Skipping is for restored lists; a file added on purpose is still refused.
+        const auto refused = player.addFiles({missingPath});
+        CHECK_EQ(refused.added + refused.unavailable, 0u);
+        CHECK_EQ(refused.errors.size(), 1u);
+        CHECK_EQ(player.entries().size(), 2u);
+        const auto kept = player.addFiles({missingPath}, MidiPlayer::Unreadable::Keep);
+        CHECK_EQ(kept.unavailable, 1u);
+        CHECK_EQ(player.entries().size(), 3u);
+
+        // Reloading keeps reporting while the file is still gone, then brings the entry back.
+        CHECK(!player.reload(1).empty());
+        CHECK(!player.entries()[1].available());
+        CHECK(player.reload(0).empty());
+        CHECK(player.reload(99).empty());
+        const auto revision = player.playlistRevision();
+        CHECK(juce::File(files.paths[2]).copyFileTo(missing));
+        CHECK(player.reload(1).empty());
+        CHECK(player.playlistRevision() != revision);
+        entries = player.entries();
+        CHECK(entries.size() == 3 && entries[1].available() && !entries[2].available());
+        player.play(1);
+        CHECK_EQ(startNote(player), 62);
+        CHECK_EQ(player.status().currentIndex, 1);
+        (void)missing.deleteFile();
     }
 
     void openingSetup(const Fixtures& files)
@@ -426,6 +531,7 @@ int main()
     gapsAndCancellation(files);
     reorderAndPorts(files);
 	    replacePlaylist(files);
+    unavailableEntries(files);
     openingSetup(files);
     engineGenerations();
     return finish("midiPlayer");

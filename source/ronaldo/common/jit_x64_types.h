@@ -2,7 +2,7 @@
 
 #include <asmjit/x86/x86operand.h>
 
-namespace esp
+namespace rLib
 {
 #ifdef _MSC_VER
 	static constexpr asmjit::x86::Gpq g_funcArgGPs[]     = {asmjit::x86::rcx, asmjit::x86::rdx, asmjit::x86::r8, asmjit::x86::r9};

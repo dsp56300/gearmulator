@@ -47,11 +47,12 @@ namespace
 
 		for (const auto& entry : g_romRegistry)
 		{
-			CHECK(entry.hash.isValid() != entry.sha1.isValid());
-			// SHA-1 matching only ever looks at the file as it lies on disk.
-			CHECK(!entry.sha1.isValid() || !entry.wordSwapped);
+			CHECK_EQ(int(entry.hash.isValid()) + int(entry.sha1.isValid()) + int(entry.sha256.isValid()), 1);
+			// Published-digest matching only ever looks at the file as it lies on disk.
+			CHECK(entry.hash.isValid() || !entry.wordSwapped);
 
-			const auto digest = entry.hash.isValid() ? entry.hash.toString() : entry.sha1.toString();
+			const auto digest = entry.hash.isValid() ? entry.hash.toString()
+			                  : entry.sha1.isValid() ? entry.sha1.toString() : entry.sha256.toString();
 			for (uint8_t device = 0; device < static_cast<uint8_t>(RomDevice::Count); ++device)
 			{
 				if (!usedBy(entry, static_cast<RomDevice>(device)))
@@ -63,23 +64,24 @@ namespace
 		}
 	}
 
-	// A slot may offer its filename at more than one size - the MT-32's two firmware
-	// generations, say - but one name must never stand for two different slots, which is the
-	// mistake a renaming pass invites.
+	// A name may serve several boards - the chips the CM-32L and the MT-32s share - and a
+	// slot may offer it at more than one size, the MT-32's two firmware generations, say. But
+	// one name must never stand for two different slots, which is the mistake a renaming pass
+	// invites, and a board never lists it twice at one size.
 	void testFileSpecNamesAreUnambiguous()
 	{
-		std::map<std::string, std::tuple<RomDevice, RomSlot, uint8_t>> owner;
-		std::set<std::pair<std::string, size_t>> seen;
+		std::map<std::string, std::pair<RomSlot, uint8_t>> owner;
+		std::set<std::tuple<std::string, size_t, RomDevice>> seen;
 
 		for (const auto& spec : g_romFileSpecs)
 		{
-			const std::tuple<RomDevice, RomSlot, uint8_t> slot{spec.device, spec.slot, spec.index};
+			const std::pair<RomSlot, uint8_t> slot{spec.slot, spec.index};
 			const auto [it, inserted] = owner.emplace(spec.filename, slot);
 			if (!inserted && it->second != slot)
 				std::printf("FAIL %s names more than one slot\n", spec.filename), ++test::g_failures;
 			++test::g_checks;
 
-			if (!seen.emplace(spec.filename, spec.size).second)
+			if (!seen.emplace(spec.filename, spec.size, spec.device).second)
 				std::printf("FAIL %s is listed twice at the same size\n", spec.filename), ++test::g_failures;
 			++test::g_checks;
 		}
@@ -202,12 +204,12 @@ namespace
 		const auto b = pattern(half, 0x22);
 
 		RomInventory halves;
-		CHECK(place(halves, RomDevice::Mt32, RomSlot::Control, 1, a, "mt32_a.bin"));
-		CHECK(place(halves, RomDevice::Mt32, RomSlot::Control, 2, b, "mt32_b.bin"));
+		CHECK(place(halves, RomDevice::Mt32Old, RomSlot::Control, 1, a, "mt32_a.bin"));
+		CHECK(place(halves, RomDevice::Mt32Old, RomSlot::Control, 2, b, "mt32_b.bin"));
 
 		std::vector<uint8_t> whole;
-		CHECK(halves.has(RomDevice::Mt32, RomSlot::Control, 0));
-		CHECK(halves.read(whole, RomDevice::Mt32, RomSlot::Control, 0));
+		CHECK(halves.has(RomDevice::Mt32Old, RomSlot::Control, 0));
+		CHECK(halves.read(whole, RomDevice::Mt32Old, RomSlot::Control, 0));
 		CHECK_EQ(whole.size(), half * 2);
 		bool interleaved = whole.size() == half * 2;
 		for (size_t i = 0; interleaved && i < half; ++i)
@@ -216,12 +218,12 @@ namespace
 
 		// And back the other way, from a combined image alone.
 		RomInventory combined;
-		CHECK(place(combined, RomDevice::Mt32, RomSlot::Control, 0, whole, "mt32_control.bin"));
+		CHECK(place(combined, RomDevice::Mt32Old, RomSlot::Control, 0, whole, "mt32_control.bin"));
 		std::vector<uint8_t> chip;
-		CHECK(combined.has(RomDevice::Mt32, RomSlot::Control, 1));
-		CHECK(combined.read(chip, RomDevice::Mt32, RomSlot::Control, 1));
+		CHECK(combined.has(RomDevice::Mt32Old, RomSlot::Control, 1));
+		CHECK(combined.read(chip, RomDevice::Mt32Old, RomSlot::Control, 1));
 		CHECK(chip == a);
-		CHECK(combined.read(chip, RomDevice::Mt32, RomSlot::Control, 2));
+		CHECK(combined.read(chip, RomDevice::Mt32Old, RomSlot::Control, 2));
 		CHECK(chip == b);
 	}
 
@@ -340,27 +342,86 @@ namespace
 	void testCompletenessIgnoresHalves()
 	{
 		RomInventory inventory;
-		CHECK(place(inventory, RomDevice::Mt32, RomSlot::Control, 0, pattern(0x10000, 1), "c.bin"));
-		CHECK(place(inventory, RomDevice::Mt32, RomSlot::Wave, 0, pattern(0x80000, 2), "w.bin"));
-		CHECK(place(inventory, RomDevice::Mt32, RomSlot::Reverb, 0, pattern(0x8000, 3), "r.bin"));
-		CHECK(inventory.isComplete(RomDevice::Mt32));
-		CHECK(inventory.missing(RomDevice::Mt32).empty());
-		CHECK(inventory.missingFiles(RomDevice::Mt32).empty());
+		CHECK(place(inventory, RomDevice::Mt32Old, RomSlot::Control, 0, pattern(0x10000, 1), "c.bin"));
+		CHECK(place(inventory, RomDevice::Mt32Old, RomSlot::Wave, 0, pattern(0x80000, 2), "w.bin"));
+		CHECK(place(inventory, RomDevice::Mt32Old, RomSlot::Reverb, 0, pattern(0x8000, 3), "r.bin"));
+		CHECK(inventory.isComplete(RomDevice::Mt32Old));
+		CHECK(inventory.missing(RomDevice::Mt32Old).empty());
+		CHECK(inventory.missingFiles(RomDevice::Mt32Old).empty());
+		// The new-type board wants its own control ROM and reverb microcode, not the old one's.
+		CHECK(!inventory.isComplete(RomDevice::Mt32New));
 
 		RomInventory fromChips;
-		CHECK(place(fromChips, RomDevice::Mt32, RomSlot::Control, 1, pattern(0x8000, 4), "ca.bin"));
-		CHECK(place(fromChips, RomDevice::Mt32, RomSlot::Control, 2, pattern(0x8000, 5), "cb.bin"));
-		CHECK(place(fromChips, RomDevice::Mt32, RomSlot::Wave, 1, pattern(0x40000, 6), "wa.bin"));
-		CHECK(place(fromChips, RomDevice::Mt32, RomSlot::Wave, 2, pattern(0x40000, 7), "wb.bin"));
-		CHECK(place(fromChips, RomDevice::Mt32, RomSlot::Reverb, 0, pattern(0x8000, 8), "r2.bin"));
-		CHECK(fromChips.isComplete(RomDevice::Mt32));
+		CHECK(place(fromChips, RomDevice::Mt32Old, RomSlot::Control, 1, pattern(0x8000, 4), "ca.bin"));
+		CHECK(place(fromChips, RomDevice::Mt32Old, RomSlot::Control, 2, pattern(0x8000, 5), "cb.bin"));
+		CHECK(place(fromChips, RomDevice::Mt32Old, RomSlot::Wave, 1, pattern(0x40000, 6), "wa.bin"));
+		CHECK(place(fromChips, RomDevice::Mt32Old, RomSlot::Wave, 2, pattern(0x40000, 7), "wb.bin"));
+		CHECK(place(fromChips, RomDevice::Mt32Old, RomSlot::Reverb, 0, pattern(0x8000, 8), "r2.bin"));
+		CHECK(fromChips.isComplete(RomDevice::Mt32Old));
 
-		// The banked 2.x firmware is not made of 1.x EPROMs and cannot be cut into them.
+		// The banked 2.x firmware is not made of 1.x EPROMs and cannot be cut into them; it is
+		// the new-type board's, which the old one does not take.
 		RomInventory banked;
-		CHECK(place(banked, RomDevice::Mt32, RomSlot::Control, 0, pattern(0x20000, 9), "c2.bin"));
-		CHECK(!banked.has(RomDevice::Mt32, RomSlot::Control, 1));
+		CHECK(place(banked, RomDevice::Mt32New, RomSlot::Control, 0, pattern(0x20000, 9), "c2.bin"));
+		CHECK(!banked.has(RomDevice::Mt32New, RomSlot::Control, 1));
+		CHECK(!banked.has(RomDevice::Mt32Old, RomSlot::Control, 0));
 		std::vector<uint8_t> chip;
-		CHECK(!banked.read(chip, RomDevice::Mt32, RomSlot::Control, 1));
+		CHECK(!banked.read(chip, RomDevice::Mt32New, RomSlot::Control, 1));
+	}
+
+	// The SC-55's on-chip ROM and program ROM come in mated pairs: a board is only complete
+	// with both from one revision, and the loader picks the pair rather than the first of each.
+	void testRevisionPairing()
+	{
+		const auto row = [](const RomSlot _slot, const char* _version)
+		{
+			for (const auto& entry : g_romRegistry)
+				if (usedBy(entry, RomDevice::Sc55Mk1) && entry.slot == _slot &&
+				    std::string(entry.version).rfind(_version, 0) == 0)
+					return &entry;
+			return static_cast<const RomRegistryEntry*>(nullptr);
+		};
+		const auto add = [](RomInventory& _inventory, const RomRegistryEntry* _entry, const char* _name)
+		{
+			FoundRom rom;
+			rom.entry = _entry;
+			rom.path = g_tempDir + _name;
+			_inventory.add(std::move(rom));
+		};
+		const auto* internal121 = row(RomSlot::Internal, "1.20/1.21");
+		const auto* program121 = row(RomSlot::Program, "1.21");
+		const auto* program120 = row(RomSlot::Program, "1.20");
+		const auto* internal200 = row(RomSlot::Internal, "2.00");
+		const auto* program200 = row(RomSlot::Program, "2.00");
+		CHECK(internal121 && program121 && program120 && internal200 && program200);
+		if (!internal121 || !program121 || !program120 || !internal200 || !program200)
+			return;
+		CHECK_EQ(internal121->revision, program121->revision);
+		CHECK_EQ(internal121->revision, program120->revision);
+		CHECK_EQ(internal200->revision, program200->revision);
+		CHECK(internal121->revision != internal200->revision);
+
+		// 1.21 on its own on-chip ROM: consistent.
+		RomInventory matched;
+		add(matched, internal121, "i121.bin");
+		add(matched, program121, "p121.bin");
+		CHECK(matched.hasConsistentRevision(RomDevice::Sc55Mk1));
+		CHECK(matched.findRevision(RomDevice::Sc55Mk1, RomSlot::Program, 0, program121->revision) != nullptr);
+		CHECK(matched.findRevision(RomDevice::Sc55Mk1, RomSlot::Program, 0, program200->revision) == nullptr);
+
+		// The 2.00 program with only the 1.21 on-chip ROM: not a board that boots.
+		RomInventory mismatched;
+		add(mismatched, internal121, "i121.bin");
+		add(mismatched, program200, "p200.bin");
+		CHECK(!mismatched.hasConsistentRevision(RomDevice::Sc55Mk1));
+
+		// Every revision in one folder: the preferred pair is there among them.
+		RomInventory all;
+		add(all, internal121, "i121.bin");
+		add(all, program121, "p121.bin");
+		add(all, internal200, "i200.bin");
+		add(all, program200, "p200.bin");
+		CHECK(all.hasConsistentRevision(RomDevice::Sc55Mk1));
 	}
 }
 
@@ -379,6 +440,7 @@ int main()
 	testSc88ProChipComposite();
 	testSharedProWaves();
 	testCompletenessIgnoresHalves();
+	testRevisionPairing();
 
 	for (const auto* name : {"mt32_a.bin", "mt32_b.bin", "mt32_control.bin", "cm32l_low.bin", "cm32l_high.bin",
 	                         "cm32l_wave.bin", "c.bin", "w.bin", "r.bin", "ca.bin", "cb.bin", "wa.bin", "wb.bin",

@@ -227,9 +227,7 @@ u64 Cpu::run_slice(s32 slice) {
   // Pick up direct edits of SR (tests / debuggers) and re-check the IRQ line.
   reeval_trace();
   reeval_irq();
-  set_budget(slice);
-  slice_len_ = slice;
-  in_slice_ = true;
+  begin_slice(slice);
   if (sleeping_) {
     const u64 now = total_states();
     if (!(pending_ & (kPendNmi | kPendIrq))) {
@@ -250,10 +248,7 @@ u64 Cpu::run_slice(s32 slice) {
     regs_.pc = u16(ip - page_cells_);
     if (pending_) service_pending();
   }
-  const s64 used = s64(slice_len_) - s64(true_budget());  // slice_len_ shrinks in cut_slice()
-  in_slice_ = false;
-  total_states_ += u64(used);
-  return u64(used);
+  return end_slice();
 }
 
 unsigned Cpu::step() {
@@ -288,10 +283,7 @@ u64 Cpu::run(u64 states) {
       continue;
     }
     used += run_slice(slice);
-    if (cut_) {
-      cut_ = false;
-      break;
-    }
+    if (take_cut()) break;
   }
   return used;
 }

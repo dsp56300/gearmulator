@@ -24,8 +24,17 @@ namespace emu88Player::playlist
             return false;
         }
 
+        // A playlist that exists but cannot be opened must not pass for an empty one.
+        juce::FileInputStream stream(_file);
+        if (stream.failedToOpen())
+        {
+            _error = "Unable to read playlist " + _file.getFullPathName().toStdString() + ": " +
+                stream.getStatus().getErrorMessage().trim().toStdString();
+            return false;
+        }
+
         const auto base = _file.getParentDirectory();
-        for (const auto& line : juce::StringArray::fromLines(_file.loadFileAsString()))
+        for (const auto& line : juce::StringArray::fromLines(stream.readEntireStreamAsString()))
         {
             const auto path = line.trim();
             if (path.isEmpty() || path.startsWithChar('#'))

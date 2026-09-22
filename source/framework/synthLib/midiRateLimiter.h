@@ -28,6 +28,17 @@ namespace synthLib
 		void write(SMidiEvent&& _event);
 		void setPreserveEventOrder(bool _enabled) { m_preserveEventOrder = _enabled; }
 		void setResetPause(float _seconds) { m_resetPause = _seconds; }
+
+		// How a channel that may still be sounding is silenced on a transport jump. All
+		// Sound Off is the message for it, but Roland's LA and CM boards predate it and
+		// answer only All Notes Off, which leaves a note held by the sustain pedal
+		// ringing, so on those the pedal is lifted first.
+		enum class Silence : uint8_t
+		{
+			AllSoundOff,
+			HoldOffAllNotesOff
+		};
+		void setSilence(const Silence _silence) { m_silence = _silence; }
 		void transportDiscontinuity(uint32_t _generation);
 
 		void processSample();
@@ -66,7 +77,9 @@ namespace synthLib
 		uint32_t m_currentBytesSent = 0;
 		uint8_t m_runningStatus = 0;
 		uint16_t m_activeChannels = 0;
+		uint16_t m_heldChannels = 0;
 		uint32_t m_transportGeneration = 0;
 		bool m_currentObsolete = false;
+		Silence m_silence = Silence::AllSoundOff;
 	};
 }

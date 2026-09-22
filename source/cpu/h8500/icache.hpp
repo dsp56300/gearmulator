@@ -15,6 +15,7 @@
 // which continue at the start of the same page, so `ip + len` needs no
 // page-end check.
 #pragma once
+#include "common/host.hpp"
 #include "cpu/h8500/types.hpp"
 
 namespace h8500 {
@@ -32,6 +33,7 @@ struct Cell {
   u8 x;         // instruction length (bits 2-0) | bit number / SCB condition (bits 7-4)
   u8 icnt;      // I: operand bytes accessed in memory (primary outcome), for the bus-class penalty
   u8 icnt2;     // I for the alternate outcome
+  EMU_CELL_POINTER_PAD(1)
 };
 static_assert(sizeof(Cell) == 16, "Cell must stay 16 bytes: one per guest code byte");
 

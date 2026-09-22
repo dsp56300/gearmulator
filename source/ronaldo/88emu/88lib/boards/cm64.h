@@ -1,7 +1,7 @@
 #pragma once
 
-#include "88lib/boards/cm32l.h"
 #include "88lib/boards/cm32p.h"
+#include "88lib/boards/laBoard.h"
 
 #include <cstdint>
 #include <utility>
@@ -19,16 +19,16 @@ namespace emu88Lib
 	public:
 		using SampleFrame = std::pair<int32_t, int32_t>;
 		// Both halves clock their DACs from their own crystals at the same rate.
-		static_assert(Cm32l::SampleRate == Cm32p::SampleRate);
-		static constexpr uint32_t SampleRate = Cm32l::SampleRate;
+		static_assert(LaBoard::SampleRate == Cm32p::SampleRate);
+		static constexpr uint32_t SampleRate = LaBoard::SampleRate;
 
-		Cm64(const Cm32lRomSet& la, const Cm32pRomSet& pcm, const std::vector<uint8_t>& card = {});
+		Cm64(const LaRomSet& la, const Cm32pRomSet& pcm, const std::vector<uint8_t>& card = {});
 		bool isValid() const { return m_la.isValid() && m_pcm.isValid(); }
 		bool hasCard() const { return m_pcm.hasCard(); }
 		// Bit 0 = MIDI MESSAGE, lit when either half lights its own.
 		uint8_t leds() const { return static_cast<uint8_t>(m_la.leds() | m_pcm.leds()); }
 		// The two service displays, the LA half's 20x1 and the PCM half's 16x2.
-		const Cm32l& la() const { return m_la; }
+		const LaBoard& la() const { return m_la; }
 		const Cm32p& pcm() const { return m_pcm; }
 		// The two boards' line outputs, before they meet. They are summed at the PCM board's
 		// mixer, after each has been through its own reconstruction filter, so anything
@@ -41,16 +41,15 @@ namespace emu88Lib
 
 		void reset();
 		Frames renderFrames();
-		// The same pair already summed, for callers with nowhere to put two.
-		SampleFrame renderSample();
 		void setButtons(uint32_t buttons) { m_la.setButtons(buttons); }
 		void addMidiEvent(const synthLib::SMidiEvent& event, uint8_t port = 0);
-		// Only the LA board's UART reaches the outside world.
+		// Only the LA board's UART reaches the outside world: the CM-32P firmware transmits
+		// nothing, its MIDI implementation has no transmitted-data section at all.
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& events) { m_la.readMidiOut(events); }
 		void transportDiscontinuity(uint32_t generation);
 
 	private:
-		Cm32l m_la;
+		LaBoard m_la;
 		Cm32p m_pcm;
 	};
 }

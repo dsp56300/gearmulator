@@ -1,8 +1,8 @@
-#include <cerrno>
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "88emuplayer/app/Emu88VideoRender.h"
 #include "88lib/hardwareDevice.h"
 #include "88lib/rom/romloader.h"
 #include "juce_audio_formats/juce_audio_formats.h"
@@ -11,36 +11,10 @@
 #if JUCE_WINDOWS
 #include <windows.h>
 #include <shellapi.h>
-#else
-#include <unistd.h>
-#if JUCE_MAC
-#include <sys/stdio.h>
-#endif
 #endif
 
 namespace
 {
-    bool publishWave(const juce::TemporaryFile& temporary, const juce::File& output, const bool overwrite)
-    {
-        if (overwrite)
-            return temporary.overwriteTargetFileWithTemporary();
-#if JUCE_WINDOWS
-        return MoveFileExW(temporary.getFile().getFullPathName().toWideCharPointer(),
-                           output.getFullPathName().toWideCharPointer(), MOVEFILE_WRITE_THROUGH) != 0;
-#else
-        const auto source = temporary.getFile().getFullPathName();
-        const auto destination = output.getFullPathName();
-#if JUCE_MAC
-        if (::renamex_np(source.toRawUTF8(), destination.toRawUTF8(), RENAME_EXCL) == 0)
-            return true;
-        if (errno != ENOTSUP && errno != EINVAL)
-            return false;
-#endif
-        // Linking within the destination directory atomically refuses an existing name.
-        return ::link(source.toRawUTF8(), destination.toRawUTF8()) == 0;
-#endif
-    }
-
     int render(const emu88Player::LaunchOptions& options)
     {
         using namespace emu88Player;
@@ -55,7 +29,12 @@ namespace
             {
                 const auto xml = juce::parseXML(configFile);
                 if (!xml || !xml->hasTagName("PROPERTIES"))
-                    throw std::runtime_error("Invalid XML config file: " + configFile.getFullPathName().toStdString());
+                {
+                    const auto path = configFile.getFullPathName().toStdString();
+                    const auto hint = privacySettingsHint({path});
+                    throw std::runtime_error(hint.empty() ? "Invalid XML config file: " + path
+                                                          : "Cannot read the config file " + path + ".\n\n" + hint);
+                }
                 for (const auto* value : xml->getChildWithTagNameIterator("VALUE"))
                 {
                     const auto name = value->getStringAttribute("name");
@@ -73,7 +52,7 @@ namespace
             configureRomSearchPaths(options);
             if (options.has("list-devices"))
             {
-                listDevices();
+                listDevices(options);
                 return 0;
             }
 
@@ -85,13 +64,17 @@ namespace
             const auto inventory = emu88Lib::RomLoader::scan();
             const auto romDevice = emu88Lib::RomLoader::toRomDevice(model);
             if (!inventory.isComplete(romDevice))
+            {
+                if (const auto error = romFolderAccessError(options); !error.empty())
+                    throw std::runtime_error(error);
                 throw std::runtime_error("Missing ROMs for " + std::string(deviceId(model)) + ":\n" +
                                          inventory.describeRequirements(romDevice));
+            }
             if (const auto warnings = inventory.warnings(romDevice); !warnings.empty())
                 std::cerr << "ROM warning:\n" << warnings;
             if (options.has("pcm-card") && !emu88Lib::hasPcmCardSlot(model))
                 throw std::runtime_error(
-                    "--pcm-card needs a device with a PCM card slot; use --device cm32p.");
+                    "--pcm-card needs --device cm32p or cm64, the boards with a PCM card slot.");
             // --pcm-card, else the card the player keeps in its slot, so a render matches playback. The
             // option has to name a card; a saved one that has gone missing only leaves the slot empty,
             // as it does in the player.
@@ -122,9 +105,11 @@ namespace
             const auto loaded = player.addFiles(options.files);
             if (!loaded.errors.empty())
                 throw std::runtime_error(loaded.errors.front());
+            using ResetMode = jucePlayer::MidiPlayer::ResetMode;
+            const auto savedReset = config.getIntValue("songResetMode", static_cast<int>(ResetMode::Gs));
             const auto reset = options.has("reset") ? parseReset(options.get("reset"))
-                                                    : static_cast<jucePlayer::MidiPlayer::ResetMode>(
-                                                          std::clamp(config.getIntValue("songResetMode", 2), 0, 3));
+                : synthLib::midi::isResetModeValue(savedReset) ? static_cast<ResetMode>(savedReset)
+                                                               : ResetMode::Gs;
             player.setResetMode(reset);
             player.setPortCount(emu88Lib::getDeviceProfile(model).groupCount);
             player.setSongGapMs(static_cast<uint32_t>(
@@ -268,7 +253,7 @@ namespace
             if (!writer->flush())
                 throw std::runtime_error("WAV flush failed.");
             writer.reset();
-            if (!publishWave(temporary, outputFile, options.has("overwrite")))
+            if (!publishFile(temporary, outputFile, options.has("overwrite")))
                 throw std::runtime_error(
                     "Cannot publish completed WAV: destination exists or the filesystem refused publication.");
             if (clipped)
@@ -309,6 +294,18 @@ int main(int argc, char** argv)
         {
             std::cout << emu88Player::LaunchOptions::help(true);
             return 0;
+        }
+        // A video render brings up the whole player, so it needs juce's GUI side running. The WAV
+        // path stays as lean as it was.
+        if (options.has("video") && !options.has("list-devices"))
+        {
+            const juce::ScopedJuceInitialiser_GUI juceInitialiser;
+#if JUCE_MAC
+            // Initialising juce's GUI side makes this a windowed application as far as macOS is
+            // concerned. Nothing here opens a window, so keep it out of the Dock.
+            juce::Process::setDockIconVisible(false);
+#endif
+            return renderVideo(options);
         }
         return render(options);
     }

@@ -219,27 +219,23 @@ namespace emu88Lib
 	void Sc88SubMcu::endOfSysEx(const uint8_t _source, Source& _s)
 	{
 		const auto& sx = _s.sysEx;
-		const uint8_t src = static_cast<uint8_t>(_source << 4);
 
 		if(sx.size() < 3)
 			return;
 
-		// The two universal messages skip the bulk path entirely — each is
-		// reduced to one value and posted as a plain 4-byte record.
+		// The two universal messages travel as raw transfers, like the XG one
+		// below: the CPU's handlers read the staged bytes themselves. They skip
+		// the 7E/7F, check the device ID and sub-IDs and queue the values -
+		// SC-88 00:0E52 (Master Volume) / 00:0E70 (GM), Pro 00:0F10 / 00:0F49,
+		// which also wants the exact length, 6 or 4. A bare record never
+		// reaches them: it is queued as is, and the Pro's task ignores a GM
+		// System On that lacks the 09 its handler would have added.
 		if(sx[1] == 0x7e || sx[1] == 0x7f)
 		{
-			Record u;
 			if(sx[1] == 0x7e && sx.size() >= 5 && sx[3] == 0x09)
-				u.command = OpSysExUniNonRt, u.param1 = sx[4];
+				rawTransfer(_source, OpSysExUniNonRt, sx);
 			else if(sx[1] == 0x7f && sx.size() >= 7 && sx[3] == 0x04 && sx[4] == 0x01)
-				u.command = OpSysExUniRt, u.param1 = sx[6];	// MSB; the LSB is unused
-			else
-				return;
-
-			// Non-bulk: channel bit 7 clear, so the record is taken as is.
-			u.channel   = src;
-			u.wireBytes = static_cast<uint8_t>(std::min<size_t>(sx.size() + 1, 255));
-			m_sink(std::move(u));
+				rawTransfer(_source, OpSysExUniRt, sx);
 			return;
 		}
 

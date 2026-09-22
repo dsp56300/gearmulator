@@ -78,12 +78,16 @@ namespace
 			// IC22a's feedback capacitor; the DC blockers are excluded as everywhere here.
 			circuit = multipleFeedback(s, 1.0 / (1.0 / 6.8e3 + 1.0 / 6.8e3 + 1.0 / 10e3), 6.8e3, 6.8e3, 220e-12, 5.6e-9) *
 				multipleFeedback(s, 10e3, 10e3, 10e3, 220e-12, 5.6e-9) *
-				pole(s, 4.7e3, 100e-12) * pole(s, 15e3, 220e-12);
+				pole(s, 4.7e3, 100e-12) * pole(s, 15e3, 220e-12) * poleAt(s, 16900.0);
 			break;
 		case AnalogModel::Cm32p:
-			circuit = sallenKey(s, 10e3, 10e3, 5.6e-9, 220e-12) * sallenKey(s, 10e3, 10e3, 1.8e-9, 1.2e-9) *
-				pole(s, 100e3, 22e-12) * pole(s, 4.7e3 * 6.8e3 / 11.5e3, 1e-9);
+		{
+			const double corner=1.0182/std::sqrt(10e3*10e3*5.6e-9*220e-12);
+			const double q=.9779*std::sqrt(10e3*10e3*5.6e-9*220e-12)/(220e-12*20e3);
+			circuit = 1.0/(1.0+s/(corner*q)+(s/corner)*(s/corner)) * sallenKey(s, 10e3, 10e3, 1.8e-9, 1.2e-9) *
+				pole(s, 100e3, 22e-12) * pole(s, 4.7e3 * 6.8e3 / 11.5e3, 1e-9) * poleAt(s, 14700.0);
 			break;
+		}
 		case AnalogModel::Sc88:
 			circuit = pole(s, 4.7e3, 100e-12) * pole(s, 22e3, 100e-12) * pole(s, 12e3, 120e-12) * pole(s, 1e3, 390e-12);
 			break;
@@ -122,7 +126,7 @@ namespace
 	}
 
 	// Steady-state level at _probe of a full-scale DAC sine at _tone, held and filtered by the model.
-	double measureGainDb(const AnalogModel _model, const double _tone, const double _probe)
+	double measureGainDb(const AnalogModel _model, const double _tone, const double _probe, const bool _right = false)
 	{
 		const double rate = dacRate(_model);
 		AnalogOutput analog;
@@ -145,7 +149,7 @@ namespace
 				if(frame < settle)
 					continue;
 				const auto t = static_cast<double>((frame - settle) * oversampling + hold) / outputRate;
-				sum += static_cast<double>(left) * std::polar(1.0, -2.0 * g_pi * _probe * t);
+				sum += static_cast<double>(_right ? right : left) * std::polar(1.0, -2.0 * g_pi * _probe * t);
 			}
 		}
 		return 20.0 * std::log10(2.0 * std::abs(sum) / static_cast<double>(measured * oversampling));
@@ -253,6 +257,20 @@ int main()
 	// DAC word widths: the surplus low bits of the 24-bit interface word are dropped, never
 	// rounded, and a 24-bit DAC keeps every bit.
 	CHECK_EQ(getDacBits(DeviceModel::Cm32p), 16);
+	CHECK_EQ(getDacBits(DeviceModel::Cm64), 16);
+	CHECK_EQ(getDacBits(DeviceModel::Cm32l), 16);
+	CHECK_EQ(getDacBits(DeviceModel::Mt32Old), 16);
+	CHECK_EQ(getDacBits(DeviceModel::Mt32New), 16);
+	// The new-type MT-32 board shares the CM-32L's output stage; the old-type board's and the
+	// CM-32LN's have not been read, so Auto leaves them digital.
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Cm32l) == AnalogModel::Cm32l);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Mt32New) == AnalogModel::Cm32l);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Mt32Old) == AnalogModel::None);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Cm32ln) == AnalogModel::None);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Cm64) == AnalogModel::Cm64);
+	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32New).a, getBoardOutputGain(DeviceModel::Cm32l).a);
+	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32Old).a, getBoardOutputGain(DeviceModel::Cm32l).a);
+	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32New).rightA, 1.0f);
 	CHECK_EQ(getDacBits(DeviceModel::Sc55Mk1), 16);
 	CHECK_EQ(getDacBits(DeviceModel::Cm300), 16);
 	CHECK_EQ(getDacBits(DeviceModel::Sc55Mk2), 18);
@@ -276,6 +294,30 @@ int main()
 
 	checkResponse(AnalogModel::Cm32l);
 	checkResponse(AnalogModel::Cm32p);
+	// Independent stereo poles must not accidentally share coefficients or history.
+	for(const auto model : {AnalogModel::Cm32l, AnalogModel::Cm32p})
+	{
+		const double leftCorner = model == AnalogModel::Cm32l ? 16900.0 : 14700.0;
+		const double rightCorner = model == AnalogModel::Cm32l ? 15150.0 : 14100.0;
+		for(const double f : {1000.0, 10000.0, 18000.0})
+		{
+			const double tone = f > 16000 ? 32000-f : f;
+			const auto expected = -10*std::log10((1+std::pow(f/rightCorner,2))/(1+std::pow(f/leftCorner,2)));
+			checkNear("R/L", f, measureGainDb(model,tone,f,true)-measureGainDb(model,tone,f), expected,.02);
+		}
+	}
+	// CM-64 topology: independent LA and PCM paths meet only at the shared mixer.
+	{
+		AnalogOutput both, laOnly, pcmOnly;
+		both.setModel(AnalogModel::Cm64,32000);laOnly.setModel(AnalogModel::Cm64,32000);pcmOnly.setModel(AnalogModel::Cm64,32000);
+		for(unsigned i=0;i<20000;++i)
+		{
+			float la=i<8?.1f:0.f, lr=i<8?-.2f:0.f, pc=i<8?.3f:0.f, pr=i<8?.15f:0.f;
+			float l=la,r=lr,a=la,b=lr,c=0,d=0;
+			both.processSplit(l,r,pc,pr);laOnly.processSplit(a,b,0,0);pcmOnly.processSplit(c,d,pc,pr);
+			CHECK(std::fabs(l-(a+c))<1e-6f);CHECK(std::fabs(r-(b+d))<1e-6f);
+		}
+	}
 	checkResponse(AnalogModel::Sc88);
 	checkResponse(AnalogModel::Sc88Vl);
 	checkResponse(AnalogModel::Sc88Pro);

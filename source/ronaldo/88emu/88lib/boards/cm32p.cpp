@@ -1,4 +1,5 @@
 #include "88lib/boards/cm32p.h"
+#include "88lib/analog/cmVca.h"
 
 #include <algorithm>
 #include <cmath>
@@ -20,10 +21,6 @@ namespace emu88Lib
 		{
 			Perm::descramble(raw, Cm32pRomSet::WaveSize, decoded, Cm32pRomSet::WaveSize);
 		}
-
-		// The VCA's control voltage is the CPU's PWM smoothed by R63 82k into C89 0.1uF, the
-		// same network the CM-32L uses on its own.
-		constexpr float g_vcaTimeConstant = 82e3f * 0.1e-6f;
 
 		// How many of the first eight tone names' characters read as a name. Across 19 cards the
 		// right dump order scores 75-80 of 80 and the wrong one 36 at most.
@@ -112,12 +109,16 @@ namespace emu88Lib
 		m_rcc.reset();
 		// C89 starts discharged, so the board fades up as the firmware takes the PWM down.
 		m_vcaGain = 0.0f;
+		m_vcaControl = 0.0f;
+		m_analogSample = {};
 		m_serviceLcd.reset();
 		m_midiOut = synthLib::MidiBufferParser(synthLib::MidiEventSource::Device);
 		m_midiIn = std::make_unique<synthLib::MidiRateLimiter>([this](uint8_t value) { m_machine.periph().receive_serial(value); });
 		m_midiIn->setSamplerate(SampleRate);
 		m_midiIn->setRateLimit(3125);
 		m_midiIn->setPreserveEventOrder(true);
+		// The firmware knows All Notes Off but not All Sound Off, like the LA boards'.
+		m_midiIn->setSilence(synthLib::MidiRateLimiter::Silence::HoldOffAllNotesOff);
 		m_machine.reset();
 		// Service switches released. The card-detect line is P0.4, the pin that is also analog
 		// input ACH4, and it is high with a card in the slot.
@@ -171,13 +172,8 @@ namespace emu88Lib
 
 	float Cm32p::applyVca()
 	{
-		// The PWM's duty is the attenuation, as on the CM-32L. This firmware parks it at 0 and
-		// only sweeps it while the board powers on, so in normal use the VCA is transparent and
-		// this is the mute ramp; nothing else has been seen to move it.
-		const auto duty = static_cast<float>(m_machine.periph().pwm_duty());
-		const auto target = 1.0f - duty * (1.0f / 255.0f);
-		const auto alpha = 1.0f - std::exp(-1.0f / (static_cast<float>(SampleRate) * g_vcaTimeConstant));
-		m_vcaGain += (target - m_vcaGain) * alpha;
+		// R63 82k / C89 0.1uF smooths the same PWM control used on the LA board.
+		m_vcaGain = cmVca::process(m_vcaControl, m_machine.periph().pwm_duty(), cmVca::PcmOffsetCounts);
 		return m_vcaGain;
 	}
 
@@ -188,11 +184,13 @@ namespace emu88Lib
 		m_cycleTarget += CpuStateRate / SampleRate;
 		if(m_machine.now() < m_cycleTarget) m_machine.run(m_cycleTarget - m_machine.now());
 		const auto output = m_rcc.processFrame(m_lp.renderSample());
-		if(!output) return {};
+		if(!output) { m_analogSample = {}; return {}; }
 		// Slot 2 carries left and slot 0 right: the firmware's test mode plays "PCM OUT L" on
 		// slot 2, and MIDI pan then follows the MT-32's convention (CC10 = 0 is right). Scale the
 		// signed 16-bit DAC words to the shared board interface's 24-bit full scale.
 		const auto gain = applyVca();
+		m_analogSample = {static_cast<float>(output->serialLoadWords[2]) * gain,
+		                  static_cast<float>(output->serialLoadWords[0]) * gain};
 		const auto scale = [gain](const int32_t _word)
 		{
 			return static_cast<int32_t>(static_cast<float>(_word) * gain) * 256;

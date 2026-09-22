@@ -7,11 +7,14 @@
 #include "jucePlayerLib/audioRouting.h"
 #include "jucePlayerLib/midiInputRouting.h"
 #include "jucePlayerLib/portMidiBridge.h"
+#include "juceUiLib/messageBox.h"
 #include "juce_audio_utils/juce_audio_utils.h"
 
 #include "juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h"
 #if JUCE_WINDOWS
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 #include <stdexcept>
 
@@ -233,7 +236,7 @@ namespace emu88Player
                 if (options.has("list-devices"))
                 {
                     configureRomSearchPaths(options);
-                    listDevices();
+                    listDevices(options);
                     quit();
                     return;
                 }
@@ -241,24 +244,28 @@ namespace emu88Player
                     throw std::runtime_error("Virtual MIDI ports are not supported on this platform.");
                 if (options.number("gain", 1) > Processor::kMaximumOutputGain)
                     throw std::runtime_error("GUI --gain range is 0..2.");
-                // Checked here so a bad card is a startup error; the processor loads it for each CM-32P.
+                // Checked here so a bad card is a startup error; the processor loads it for each board with a slot.
                 (void)loadPcmCard(options);
                 auto requestedAudio = prepareSession();
                 auto* processor = openDevices(*requestedAudio);
                 jucePlayer::MidiPlayer::AddResult loaded;
                 if (options.files.empty())
                 {
+                    // The last session's playlist never keeps the player from starting. A file that
+                    // cannot be read now stays in it as an unavailable entry, which the editor reports.
                     std::vector<std::string> paths;
                     std::string error;
                     if (playlist::read(playlist::defaultFile(), paths, error))
                         loaded = processor->midiPlayer().replaceFiles(paths);
+                    else if (playlist::defaultFile().existsAsFile())
+                        std::cerr << error << '\n';
                 }
                 else
-                    loaded = processor->midiPlayer().addFiles(options.files);
-                if (!loaded.errors.empty())
-                    throw std::runtime_error(loaded.errors.front());
-                if (!options.files.empty())
                 {
+                    // Files named on the command line are what this launch is for.
+                    loaded = processor->midiPlayer().addFiles(options.files);
+                    if (!loaded.errors.empty())
+                        throw std::runtime_error(loaded.errors.front());
                     std::string error;
                     if (!playlist::write(playlist::defaultFile(), processor->midiPlayer().entries(), error))
                         std::cerr << error << '\n';
@@ -272,20 +279,22 @@ namespace emu88Player
             {
                 std::cerr << error.what() << '\n';
                 setApplicationReturnValue(2);
-                quit();
+                if (stderrIsVisible())
+                {
+                    quit();
+                    return;
+                }
+                // Opened from Finder or Explorer, nobody reads stderr and the player would just never
+                // appear. Close the devices, which may already be open, while the message is up.
+                closeSession();
+                genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "88emuPlayer",
+                                              std::string("88emuPlayer could not start.\n\n") + error.what(),
+                                              [] { quit(); });
             }
         }
         void shutdown() override
         {
-            stopTimer();
-            if (window)
-                if (auto* processor = dynamic_cast<Processor*>(window->getPluginHolder()->processor.get()))
-                    processor->setRouting(nullptr, nullptr);
-            audioRouting.reset();
-            midiInputRouting.reset();
-            window.reset();
-            standaloneConfig = nullptr;
-            standaloneLaunch = nullptr;
+            closeSession();
             if (startupSucceeded && saveTarget != juce::File() && config)
             {
                 juce::TemporaryFile replacement(saveTarget);
@@ -303,6 +312,32 @@ namespace emu88Player
         void systemRequestedQuit() override { quit(); }
 
     private:
+        // Whether a startup error written to stderr reaches anyone. Launched from Finder, the Dock or a
+        // desktop launcher there is no terminal, and from Explorer no console.
+        static bool stderrIsVisible()
+        {
+#if JUCE_WINDOWS
+            const auto handle = GetStdHandle(STD_ERROR_HANDLE);
+            return GetConsoleWindow() != nullptr || (handle && handle != INVALID_HANDLE_VALUE);
+#else
+            return isatty(STDERR_FILENO) != 0;
+#endif
+        }
+
+        // Routing first: it refers to the window's device manager.
+        void closeSession()
+        {
+            stopTimer();
+            if (window)
+                if (auto* processor = dynamic_cast<Processor*>(window->getPluginHolder()->processor.get()))
+                    processor->setRouting(nullptr, nullptr);
+            audioRouting.reset();
+            midiInputRouting.reset();
+            window.reset();
+            standaloneConfig = nullptr;
+            standaloneLaunch = nullptr;
+        }
+
         std::unique_ptr<juce::XmlElement> prepareSession()
         {
             juce::PropertiesFile::Options storage;
@@ -314,7 +349,12 @@ namespace emu88Player
             else
                 config = std::make_unique<juce::PropertiesFile>(sourceFile, storage);
             if (sourceFile.existsAsFile() && !config->isValidFile())
-                throw std::runtime_error("Invalid config file.");
+            {
+                const auto path = sourceFile.getFullPathName().toStdString();
+                const auto hint = privacySettingsHint({path});
+                throw std::runtime_error(hint.empty() ? "Invalid config file: " + path
+                                                      : "Cannot read the config file " + path + ".\n\n" + hint);
+            }
             if (options.sessionOverrides())
             {
                 if (options.has("save-settings"))
@@ -414,8 +454,12 @@ namespace emu88Player
             else
                 audioRouting->restoreChannels();
             if (options.has("device") && !processor->hasValidRom())
+            {
+                if (const auto error = romFolderAccessError(options); !error.empty())
+                    throw std::runtime_error(error);
                 throw std::runtime_error(emu88Lib::RomLoader::scan().describeRequirements(
                     emu88Lib::RomLoader::toRomDevice(processor->deviceModel())));
+            }
             return processor;
         }
 

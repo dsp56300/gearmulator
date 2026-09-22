@@ -7,10 +7,12 @@ add_library(88lib STATIC)
 set(SOURCES
 	analog/analogOutput.cpp analog/analogOutput.h
 	analog/analogModels.cpp analog/analogModels.h
+	analog/cmVca.h
+	c_interface.cpp c_interface.h
 	deviceModel.cpp deviceModel.h
-	boards/cm32l.cpp boards/cm32l.h
 	boards/cm32p.cpp boards/cm32p.h
 	boards/cm64.cpp boards/cm64.h
+	boards/laBoard.cpp boards/laBoard.h
 	boards/miig5.cpp boards/miig5.h
 	boards/nu10b.cpp boards/nu10b.h
 	hardwareDevice.cpp hardwareDevice.h
@@ -34,13 +36,81 @@ source_group("source" FILES ${SOURCES})
 
 set_property(TARGET 88lib PROPERTY FOLDER "Ronaldo/88emu")
 
-target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib gpLib lpLib rccLib mt32ReverbLib asmjit)
+# lspLib is header-only and compiled into the boards; it brings the JIT library of the host.
+target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib lspLib gpLib lpLib rccLib la32Lib mt32ReverbLib)
+
+target_compile_definitions(88lib PRIVATE EMU88_VERSION_STRING="${CMAKE_PROJECT_VERSION}")
 
 target_include_directories(88lib
 	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../..
 )
 
+# ---- lib88emu: 88lib with everything it links, as one archive
+#
+# What a host written in C, or built with another build system, links against: c_interface.h
+# and this one file (plus the C++ runtime). Not part of ALL:
+#   cmake --build <dir> --target 88emu_bundle
+# The static libraries 88lib depends on are collected from its link interface, so the list
+# follows the targets (asmjit is in it exactly when the host has a JIT back end).
+function(emu88_collect_static_libs _target _out)
+	if(NOT TARGET ${_target} OR ${_target} IN_LIST ${_out})
+		return()
+	endif()
+	get_target_property(_type ${_target} TYPE)
+	if(_type STREQUAL "STATIC_LIBRARY")
+		list(APPEND ${_out} ${_target})
+	endif()
+	if(_type STREQUAL "INTERFACE_LIBRARY")
+		get_target_property(_deps ${_target} INTERFACE_LINK_LIBRARIES)
+	else()
+		get_target_property(_deps ${_target} LINK_LIBRARIES)
+	endif()
+	foreach(_dep IN LISTS _deps)
+		if(_dep AND NOT _dep MATCHES "^\\$<")
+			emu88_collect_static_libs(${_dep} ${_out})
+		endif()
+	endforeach()
+	set(${_out} ${${_out}} PARENT_SCOPE)
+endfunction()
+
+if(NOT MSVC)
+	set(EMU88_BUNDLE_LIBS)
+	emu88_collect_static_libs(88lib EMU88_BUNDLE_LIBS)
+	set(EMU88_BUNDLE ${CMAKE_CURRENT_BINARY_DIR}/lib88emu.a)
+
+	set(_files)
+	set(_mri "create ${EMU88_BUNDLE}\n")
+	foreach(_lib IN LISTS EMU88_BUNDLE_LIBS)
+		list(APPEND _files $<TARGET_FILE:${_lib}>)
+		string(APPEND _mri "addlib $<TARGET_FILE:${_lib}>\n")
+	endforeach()
+	string(APPEND _mri "save\nend\n")
+
+	if(APPLE AND NOT EMSCRIPTEN)
+		# Apple's ar has no MRI scripts; libtool merges archives.
+		set(_bundle_command libtool -static -o ${EMU88_BUNDLE} ${_files})
+	else()
+		file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lib88emu.mri CONTENT "${_mri}")
+		set(_bundle_command sh -c "${CMAKE_AR} -M < ${CMAKE_CURRENT_BINARY_DIR}/lib88emu.mri")
+	endif()
+
+	add_custom_target(88emu_bundle
+		COMMAND ${CMAKE_COMMAND} -E rm -f ${EMU88_BUNDLE}
+		COMMAND ${_bundle_command}
+		DEPENDS ${EMU88_BUNDLE_LIBS}
+		BYPRODUCTS ${EMU88_BUNDLE}
+		COMMENT "Bundling 88lib and its dependencies into lib88emu.a"
+		VERBATIM)
+	set_property(TARGET 88emu_bundle PROPERTY FOLDER "Ronaldo/88emu")
+endif()
+
 if(BUILD_TESTING)
+	add_executable(c_interface_test tests/c_interface_test.cpp)
+	target_link_libraries(c_interface_test PRIVATE 88lib)
+	set_property(TARGET c_interface_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME c_interface COMMAND c_interface_test)
+	set_tests_properties(c_interface PROPERTIES TIMEOUT 120)
+
 	add_executable(hardwareDevice_test tests/hardwareDevice_test.cpp)
 	target_link_libraries(hardwareDevice_test PRIVATE 88lib)
 	if(TARGET jucePlayerLib)

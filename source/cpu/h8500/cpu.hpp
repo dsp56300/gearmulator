@@ -5,8 +5,8 @@
 // everything device specific (memory map, peripherals, interrupt controller)
 // lives outside and talks to the CPU via the Bus and the interrupt interface.
 //
-// Budget / pending fold
-// ---------------------
+// Budget / pending fold (emu::SliceCore)
+// -------------------------------------
 // run_slice(n) executes instructions until at least n states have elapsed.
 // Each handler subtracts its state count from `budget_` and exits when it goes
 // negative.  Anything that needs attention at an instruction boundary (address
@@ -22,16 +22,8 @@
 #include "cpu/h8500/chip.hpp"
 #include "cpu/h8500/decode.hpp"
 #include "cpu/h8500/icache.hpp"
-#include "common/sched.hpp"
+#include "common/core.hpp"
 #include "cpu/h8500/timing.hpp"
-
-#if defined(__GNUC__) || defined(__clang__)
-#define H8_UNLIKELY(x) __builtin_expect(!!(x), 0)
-#define H8_LIKELY(x) __builtin_expect(!!(x), 1)
-#else
-#define H8_UNLIKELY(x) (x)
-#define H8_LIKELY(x) (x)
-#endif
 
 namespace h8500 {
 
@@ -43,7 +35,7 @@ class IrqAckSink {
   virtual void irq_acknowledged(u8 vector) = 0;
 };
 
-class Cpu final : public CodeSink, public emu::Clock {
+class Cpu final : public emu::SliceCore {
  public:
   // Status register (SR) layout.  Bits 15 (T), 10-8 (I2-I0) and 3-0 (N Z V C)
   // are implemented; all other bits read as 0.  The low byte is the CCR.
@@ -94,8 +86,6 @@ class Cpu final : public CodeSink, public emu::Clock {
     kPendSleep = 1u << 5,    // SLEEP executed
     kPendBreak = 1u << 6,    // another bus master (DTC) wants the next instruction boundary
   };
-  static constexpr s32 kForce = 1 << 28;
-  static constexpr s32 kMaxSlice = 1 << 24;
 
   // Approximate states for exception sequences not covered by the instruction
   // tables (interrupt: table 5-4 incl. 2 states priority decision).
@@ -119,9 +109,8 @@ class Cpu final : public CodeSink, public emu::Clock {
   // exception right away instead of after the next instruction.  Used by the
   // machine after scheduler events have run.  Returns states used.
   u64 poll();
-  // At an instruction boundary: the bus was used by another master (DTC data
-  // transfer) for `states`; the CPU waited.
-  void stall(u64 states) { total_states_ += states; }
+  // Asleep there is no instruction boundary to end the slice at.
+  void cut_slice(u64 at) { if (!sleeping_) SliceCore::cut_slice(at); }
 
   // Interrupt controller interface.  `level` 1..7 (compared against I2-I0),
   // 0 = no request.  The request is level-sensitive: the controller must
@@ -148,12 +137,6 @@ class Cpu final : public CodeSink, public emu::Clock {
   Bus& bus() { return bus_; }
   bool max_mode() const { return max_mode_; }
   bool sleeping() const { return sleeping_; }
-  // Elapsed states.  Live while a slice is running (e.g. read by a device
-  // during an MMIO access): resolves to the start of the current instruction.
-  u64 total_states() const {
-    return in_slice_ ? total_states_ + u64(s64(slice_len_) - s64(true_budget())) : total_states_;
-  }
-  u64 now() const override { return total_states(); }
   u8 interrupt_mask() const { return u8((regs_.sr & kMaskBits) >> kMaskShift); }
 
   // Address helpers (page register selection, Table 1-10 notes).
@@ -195,7 +178,7 @@ class Cpu final : public CodeSink, public emu::Clock {
   }
   u32 mem_read16(u32 a) {
     a &= bus_.addr_mask();
-    if (H8_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
+    if (EMU_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
     const u8 at = bus_.attr(a);
     last_attr_ = at;
     return (at & Bus::kRdSlow) ? bus_.slow_read16(a) : Bus::be16(bus_.mem() + a);
@@ -204,14 +187,14 @@ class Cpu final : public CodeSink, public emu::Clock {
     a &= bus_.addr_mask();
     const u8 at = bus_.attr(a);
     last_attr_ = at;
-    if (H8_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write8(a, u8(v)); else bus_.mem()[a] = u8(v);
+    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write8(a, u8(v)); else bus_.mem()[a] = u8(v);
   }
   void mem_write16(u32 a, u32 v) {
     a &= bus_.addr_mask();
-    if (H8_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
+    if (EMU_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
     const u8 at = bus_.attr(a);
     last_attr_ = at;
-    if (H8_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write16(a, u16(v)); else Bus::put_be16(bus_.mem() + a, u16(v));
+    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write16(a, u16(v)); else Bus::put_be16(bus_.mem() + a, u16(v));
   }
   void push16(u16 v) {
     regs_.r[7] = u16(regs_.r[7] - 2);
@@ -229,52 +212,20 @@ class Cpu final : public CodeSink, public emu::Clock {
   const Cell* cells_for(u8 cp, u16 pc) {
     const unsigned page = max_mode_ ? cp : 0;
     Cell* cells = pages_[page].get();
-    if (H8_UNLIKELY(!cells)) cells = alloc_page(page);
+    if (EMU_UNLIKELY(!cells)) cells = alloc_page(page);
     page_cells_ = cells;
     return cells + pc;
   }
   Cell* alloc_page(unsigned page);
   void reset_cells(unsigned page, u32 first, u32 count);
 
-  // --- pending / budget ------------------------------------------------------
-  void raise(u32 bit) {
-    if (!pending_) budget_ -= kForce;
-    pending_ |= bit;
-  }
-  void clear_pending(u32 bit) {
-    if (pending_ & bit) {
-      pending_ &= ~bit;
-      if (!pending_) budget_ += kForce;
-    }
-  }
+  // --- pending ---------------------------------------------------------------
   void reeval_irq() {
     if (irq_level_ && irq_level_ > interrupt_mask()) raise(kPendIrq); else clear_pending(kPendIrq);
   }
   void reeval_trace() {
     if (regs_.sr & kT) raise(kPendTrace); else clear_pending(kPendTrace);
   }
-  void set_budget(s32 states) { budget_ = states - (pending_ ? kForce : 0); }
-  s32 true_budget() const { return budget_ + (pending_ ? kForce : 0); }
-
- public:
-  // End the running slice at absolute state `at` (at the first instruction
-  // boundary at or after it).  The scheduler calls this when an event
-  // scheduled during the slice is due before the slice would have ended, so
-  // a peripheral event caused by a CPU write fires right after that write.
-  void cut_slice(u64 at) {
-    if (!in_slice_ || sleeping_) return;
-    const s64 left = true_budget();
-    const s64 now = s64(total_states_) + (s64(slice_len_) - left);
-    s64 remaining = s64(at) - now;
-    if (remaining < 0) remaining = 0;
-    if (remaining >= left) return;
-    const s32 delta = s32(left - remaining);
-    slice_len_ -= delta;
-    budget_ -= delta;
-    cut_ = true;  // run() returns after this slice so the machine can fire the event
-  }
-
- private:
 
   u64 run_slice(s32 states);
   void service_pending();
@@ -298,11 +249,6 @@ class Cpu final : public CodeSink, public emu::Clock {
   u8 irq_vector_ = 0;
   u8 last_attr_ = 0;   // bus attribute byte of the last operand access (class + wait states)
 
-  s32 budget_ = 0;
-  u32 pending_ = 0;
-  s32 slice_len_ = 0;      // budget the current slice started with
-  bool in_slice_ = false;
-  bool cut_ = false;
   // Interrupt-mask update delay (H8/510 4.8.1 note): a mask written by
   // LDC/ANDC/ORC/XORC/RTE takes effect on the third state after that
   // instruction, so a 2-state successor (NOP) is not enough for an interrupt
@@ -313,7 +259,6 @@ class Cpu final : public CodeSink, public emu::Clock {
   Cell* page_cells_ = nullptr;   // cell array of the current code page
   std::unique_ptr<Cell[]> pages_[256];
 
-  u64 total_states_ = 0;
   u64 insn_count_ = 0;
   u64 exc_count_ = 0;
   u64 fault_count_ = 0;

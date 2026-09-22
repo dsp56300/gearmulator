@@ -27,7 +27,8 @@ namespace emu88Lib
 	//   * Roland DT1: a decoded transfer — opcode = address high byte, payload
 	//     staged in shared RAM with the 4-byte sub-MCU header, split into
 	//     <= 0x7f chunks with 0xE7 continuations (both pointers are 7-bit)
-	//   * universal GM System On / Master Volume: bare records 0xEE / 0xEF
+	//   * universal GM System On / Master Volume: raw transfers 0xEE / 0xEF,
+	//     staged like the XG one; the CPU checks the header itself
 	//   * a DT1 whose checksum does not add up: record 0xE0, which is where
 	//     the firmware's "Check Sum Error" notification comes from
 	//   * RQ1: ignored until the request command mapping is verified

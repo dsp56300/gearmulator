@@ -8,6 +8,37 @@ Framework:
         example, stopped updating after the plugin window was closed and
         reopened.
 
+88emuPlayer:
+
+- [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the
+        player's window - front panel, display, level meters and playlist -
+        alongside its audio. Offline and deterministic like the WAV render, with
+        `--fps`, `--video-scale` and `--video-size` to pick the format. Requires
+        ffmpeg, which is not shipped with the player.
+
+- [New] Devices: Added support for the MT-32, CM-32L and CM-64 (experimental).
+
+- [New] GM2 reset: "Send GM2 Reset" in the context menu, and GM2 as a choice
+        for the reset before each song (`--reset gm2` on the command line).
+
+- [Fix] SC-88VL, SC-88Pro: GM System On was ignored, so a GM reset before a
+        song, from the context menu or from the song itself left every part
+        as the previous song had set it. Universal Master Volume was ignored
+        as well.
+
+- [Fix] Playlist: The player no longer quits without a word at startup when a
+        file of the last playlist cannot be read. Such an entry keeps its place,
+        shown in red, and is skipped when playing. Clicking it tries again and
+        says why it fails. Loading a playlist works the same way instead of
+        refusing the whole playlist.
+
+- [Imp] When the player cannot start and was not started from a terminal, it
+        shows the reason in a message box.
+
+- [Imp] ROMs: When macOS does not let the player read its ROM folder, it says
+        so and explains how to allow it, instead of reporting every ROM as
+        missing.
+
 2.2.25:
 
 88emuPlayer:

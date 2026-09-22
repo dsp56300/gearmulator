@@ -1,7 +1,10 @@
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include <algorithm>
+#include <cerrno>
 #include <charconv>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <set>
 #include <stdexcept>
@@ -10,6 +13,23 @@
 #include "88lib/rom/romloader.h"
 #include "baseLib/filesystem.h"
 #include "synthLib/romLoader.h"
+#if JUCE_WINDOWS
+#include <filesystem>
+#include <system_error>
+#else
+#include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
+
+#if JUCE_WINDOWS
+#include <windows.h>
+#else
+#include <unistd.h>
+#if JUCE_MAC
+#include <sys/stdio.h>
+#endif
+#endif
 
 namespace emu88Player
 {
@@ -44,13 +64,68 @@ namespace emu88Player
             "The Usual Suspects/88emuPlayer/";
     }
 
+    juce::File romSearchFolder(const LaunchOptions& options)
+    {
+        return launchFile(options.has("rom-dir") ? options.get("rom-dir") : defaultDataFolder());
+    }
+
     void configureRomSearchPaths(const LaunchOptions& options)
     {
         // Only one folder, searched recursively: --rom-dir, else the player's own data folder.
         // Every file of a ROM's size is hashed on each launch, and searching all of "The Usual
         // Suspects" hashed every other product's ROMs too - seconds before the window appeared.
-        const auto folder = launchFile(options.has("rom-dir") ? options.get("rom-dir") : defaultDataFolder());
-        synthLib::RomLoader::setSearchPath(folder.getFullPathName().toStdString());
+        synthLib::RomLoader::setSearchPath(romSearchFolder(options).getFullPathName().toStdString());
+    }
+
+    std::string romFolderAccessError(const LaunchOptions& options)
+    {
+        const auto folder = romSearchFolder(options).getFullPathName().toStdString();
+        std::string reason;
+#if JUCE_WINDOWS
+        std::error_code error;
+        const std::filesystem::directory_iterator entries(
+            std::filesystem::path(juce::String::fromUTF8(folder.c_str()).toWideCharPointer()), error);
+        if (!error || error == std::errc::no_such_file_or_directory || error == std::errc::not_a_directory)
+            return {};
+        reason = error.message();
+#else
+        if (auto* directory = ::opendir(folder.c_str()))
+        {
+            ::closedir(directory);
+            return {};
+        }
+        // A folder that is not there holds no ROMs, which the requirements list already says.
+        if (errno == ENOENT || errno == ENOTDIR)
+            return {};
+        reason = std::strerror(errno);
+#endif
+        const auto hint = privacySettingsHint({folder});
+        return "Cannot read the ROM folder " + folder + ": " + reason + (hint.empty() ? "" : "\n\n" + hint);
+    }
+
+    bool blockedByPrivacySettings(const std::string& path)
+    {
+#if JUCE_MAC
+        // An ordinary permission problem is EACCES.
+        const auto handle = ::open(path.c_str(), O_RDONLY);
+        if (handle >= 0)
+        {
+            ::close(handle);
+            return false;
+        }
+        return errno == EPERM;
+#else
+        (void)path;
+        return false;
+#endif
+    }
+
+    std::string privacySettingsHint(const std::vector<std::string>& paths)
+    {
+        if (std::none_of(paths.begin(), paths.end(), [](const std::string& path) { return blockedByPrivacySettings(path); }))
+            return {};
+        return "The macOS privacy settings do not let 88emuPlayer read there. Allow it in System Settings > "
+               "Privacy & Security > Files and Folders, or add it to Full Disk Access, then restart 88emuPlayer.";
     }
 
     const char* deviceId(const emu88Lib::DeviceModel model)
@@ -58,7 +133,7 @@ namespace emu88Player
         static constexpr const char* ids[] = {"sc88",   "sc88vl", "sc88pro", "sc8850",  "sc55mk2", "sc55",
                                               "sc55st", "cm300",  "scb55",   "rlp3237", "sc155",   "sc155mk2",
                                               "xpgs",   "sc8820", "cm32p",   "vegspro", "scc1a",   "cm64",
-                                              "cm32l",  "nu10b",  "miig5"};
+                                              "cm32l",  "nu10b",  "miig5",   "mt32old", "mt32new", "cm32ln"};
         static_assert(std::size(ids) == emu88Lib::g_deviceMenuOrder.size(), "one ID per device model, in enum order");
         return ids[static_cast<size_t>(model)];
     }
@@ -77,16 +152,39 @@ namespace emu88Player
             return jucePlayer::MidiPlayer::ResetMode::Off;
         if (name == "gm")
             return jucePlayer::MidiPlayer::ResetMode::Gm;
+        if (name == "gm2")
+            return jucePlayer::MidiPlayer::ResetMode::Gm2;
         if (name == "gs")
             return jucePlayer::MidiPlayer::ResetMode::Gs;
         if (name == "mt32")
             return jucePlayer::MidiPlayer::ResetMode::Mt32;
-        throw std::runtime_error("--reset must be off, gm, gs or mt32 (MT-32 tones on GS devices).");
+        throw std::runtime_error("--reset must be off, gm, gm2, gs or mt32 (MT-32 tones on GS devices).");
     }
 
     juce::File launchFile(const std::string& path)
     {
         return juce::File::getCurrentWorkingDirectory().getChildFile(juce::String::fromUTF8(path.c_str()));
+    }
+
+    bool publishFile(const juce::TemporaryFile& temporary, const juce::File& output, const bool overwrite)
+    {
+        if (overwrite)
+            return temporary.overwriteTargetFileWithTemporary();
+#if JUCE_WINDOWS
+        return MoveFileExW(temporary.getFile().getFullPathName().toWideCharPointer(),
+                           output.getFullPathName().toWideCharPointer(), MOVEFILE_WRITE_THROUGH) != 0;
+#else
+        const auto source = temporary.getFile().getFullPathName();
+        const auto destination = output.getFullPathName();
+#if JUCE_MAC
+        if (::renamex_np(source.toRawUTF8(), destination.toRawUTF8(), RENAME_EXCL) == 0)
+            return true;
+        if (errno != ENOTSUP && errno != EINVAL)
+            return false;
+#endif
+        // Linking within the destination directory atomically refuses an existing name.
+        return ::link(source.toRawUTF8(), destination.toRawUTF8()) == 0;
+#endif
     }
 
     std::vector<uint8_t> loadPcmCard(const LaunchOptions& options)
@@ -133,7 +231,8 @@ namespace emu88Player
         const std::set<std::string> common{"rom-dir",       "config",      "device",  "reset",
                                            "song-gap-ms",   "sample-rate", "gain",    "limiter",
                                            "factory-reset", "fast-boot",   "pcm-card"};
-        const std::set<std::string> render{"output", "bits", "boot-ms", "tail-ms", "max-seconds"};
+        const std::set<std::string> render{"output",      "bits",  "boot-ms",    "tail-ms", "max-seconds",
+                                           "video",       "fps",   "video-scale", "video-size", "ffmpeg"};
         const std::set<std::string> gui{"audio-backend",     "audio-device", "buffer-size",
                                         "midi-in",           "midi-in-a",    "midi-in-b",
                                         "midi-in-c",         "midi-in-d",    "midi-out",
@@ -208,6 +307,8 @@ namespace emu88Player
                                                               {"boot-ms", {0, 60000}},
                                                               {"tail-ms", {0, 600000}},
                                                               {"max-seconds", {0.001, 86400}},
+                                                              {"fps", {1, 120}},
+                                                              {"video-scale", {25, 400}},
                                                               {"bits", {16, 32}}})
         {
             if (!result.has(key))
@@ -224,7 +325,7 @@ namespace emu88Player
                 end = 0;
             }
             if (end != value.size() || !std::isfinite(n) || n < range.first || n > range.second ||
-                (key != "gain" && key != "max-seconds" && std::floor(n) != n))
+                (key != "gain" && key != "max-seconds" && key != "fps" && std::floor(n) != n))
                 throw std::runtime_error("Invalid value for --" + key + ": " + value);
         }
         if (result.has("bits") && result.get("bits") != "16" && result.get("bits") != "24" &&
@@ -238,29 +339,41 @@ namespace emu88Player
             if (result.has(key) && result.get(key) != "on" && result.get(key) != "off")
                 throw std::runtime_error(std::string("--") + key + " must be on or off.");
         if (cli && !result.has("help") && !result.has("list-devices") &&
-            (result.files.size() != 1 || !result.has("output")))
-            throw std::runtime_error("Supply one MIDI/RCP input and --output WAV; use --help.");
+            (result.files.size() != 1 || !(result.has("output") || result.has("video"))))
+            throw std::runtime_error("Supply one MIDI/RCP input and --output WAV or --video MP4; use --help.");
+        // The video options only mean something for a video, and --bits picks the format of a WAV
+        // that a video render only writes when one was asked for.
+        if (!result.has("video"))
+            for (const auto* key : {"fps", "video-scale", "video-size", "ffmpeg"})
+                if (result.has(key))
+                    throw std::runtime_error(std::string("--") + key + " needs --video.");
         return result;
     }
 
     std::string LaunchOptions::help(const bool cli)
     {
-        return std::string(cli ? "88EmuCli [options] INPUT --output OUTPUT.wav\n"
+        return std::string(cli ? "88EmuCli [options] INPUT --output OUTPUT.wav [--video OUTPUT.mp4]\n"
                                : "88emuPlayer [options] [MIDI/RCP files...]\n") +
             "  --help                 Show this help\n"
             "  --list-devices         List stable device IDs and ROM availability\n"
             "  --rom-dir PATH         Use only this ROM folder (recursive)\n"
             "  --config PATH          Read this settings file\n"
             "  --device ID            Initial emulated device (default sc88pro)\n"
-            "  --reset off|gm|gs|mt32  Before each song; mt32 selects MT-32 tones on GS\n"
+            "  --reset MODE           Before each song: off, gm, gm2, gs or mt32 (MT-32 tones on GS);\n"
+            "                         on the MT-32 and CM boards every mode but off sends their own reset\n"
             "  --song-gap-ms N        Automatic song gap, 0..60000 milliseconds (default 1000)\n"
             "  --sample-rate HZ       Output sample rate, 8000..192000\n"
             "  --limiter on|off       Output peak limiter (default off)\n"
             "  --factory-reset on|off Factory reset when the device loads (default on)\n"
             "  --fast-boot on|off     Boot 10 s longer to start past the intro (default off)\n"
-            "  --pcm-card PATH        CM-32P: PCM card image in the card slot (SN-U110 series)\n"
+            "  --pcm-card PATH        CM-32P/CM-64: PCM card image in the card slot (SN-U110 series)\n"
             "  --gain N               Linear output gain (CLI 0..4, GUI 0..2)\n" +
             (cli ? "  --output PATH          Stereo WAV output; existing files are protected\n"
+                   "  --video PATH           Also render the player UI to this video file (needs ffmpeg)\n"
+                   "  --fps N                Video frame rate, 1..120 (default 30)\n"
+                   "  --video-scale PERCENT  UI size, 25..400 percent of 1040x318 (default 200)\n"
+                   "  --video-size WxH       Scale and pad the video to exactly this size\n"
+                   "  --ffmpeg PATH          The ffmpeg executable (default: ffmpeg on PATH)\n"
                    "  --bits 16|24|32        16/24-bit PCM or 32-bit float (default 24)\n"
                    "  --boot-ms N            Discard boot audio before playback (default 5000)\n"
                    "  --tail-ms N            Release tail after final MIDI event (default 4000)\n"
@@ -285,8 +398,10 @@ namespace emu88Player
             "Use -- before filenames beginning with '-'. Quote paths containing spaces.\n";
     }
 
-    void listDevices()
+    void listDevices(const LaunchOptions& options)
     {
+        if (const auto error = romFolderAccessError(options); !error.empty())
+            std::cerr << error << '\n';
         for (const auto model : emu88Lib::g_deviceMenuOrder)
             if (emu88Lib::isDeviceListed(model))
                 std::cout << deviceId(model) << "\t" << emu88Lib::getDeviceProfile(model).displayName << "\t"

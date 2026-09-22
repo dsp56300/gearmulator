@@ -2,7 +2,8 @@
 
 namespace synthLib::midi
 {
-    void appendSongReset(std::vector<SMidiEvent>& _events, ResetMode mode, uint8_t portCount, uint32_t _offset)
+    void appendSongReset(std::vector<SMidiEvent>& _events, ResetMode mode, uint8_t portCount, uint32_t _offset,
+                         const ResetTarget target)
     {
         for (uint8_t port = 0; port < portCount; ++port)
         {
@@ -21,10 +22,14 @@ namespace synthLib::midi
             event.offset = _offset;
             event.port = port;
             event.cancelOnTransportChange = true;
-            if (mode == ResetMode::Gm)
+            if (target == ResetTarget::RolandLaModule)
+                event.sysex.assign(kRolandLaResetSysex.begin(), kRolandLaResetSysex.end());
+            else if (mode == ResetMode::Gm)
                 event.sysex = {0xf0, 0x7e, 0x7f, 0x09, 0x01, 0xf7};
+            else if (mode == ResetMode::Gm2)
+                event.sysex = {0xf0, 0x7e, 0x7f, 0x09, 0x03, 0xf7};
             else
-                event.sysex = {0xf0, 0x41, 0x10, 0x42, 0x12, 0x40, 0x00, 0x7f, 0x00, 0x41, 0xf7};
+                event.sysex.assign(kGsResetSysex.begin(), kGsResetSysex.end());
         }
     }
 

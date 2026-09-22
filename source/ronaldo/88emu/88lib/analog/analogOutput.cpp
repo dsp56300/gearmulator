@@ -9,26 +9,34 @@ namespace emu88Lib
 {
     namespace
     {
-        // What each CM board's amplifiers do to its level. The low-passes are unity at DC on
-        // both - the Sallen-Keys are followers, the multiple-feedback sections have rf = r1 -
-        // so all of it sits after them, and it is the whole reason the two halves of a CM-64
-        // balance: the PCM board arrives 5.3 dB hotter than the LA board.
+        // What each CM board's amplifiers do to its level, read off the schematics. The
+        // low-passes are unity at DC on both, so all of it sits after them:
         //
-        // It is the board's, not the circuit model's, so getBoardOutputGain() hands it to the
-        // device and it survives the analog emulation being switched off.
-        //
-        //   CM-32P  I/V R47A 6.8k / R46A 2.2k                             = 3.091
-        //           then R48A 100k into the mixer's R49A 100k, at unity.
         //   CM-32L  I/V R63 4.7k / R51 2.2k                               = 2.136
         //           IC22a R57 15k / R56 10k                               x 1.5
         //           output divider R49 6.8k / (R46 4.7k + R48 1.5k + R49)  x 0.523
-        //           then R48C 100k into the same mixer, at unity.         = 1.676
+        //           then R48C 100k into the CM-64's mixer, at unity.      = 1.676
+        //   CM-32P  I/V R47A 6.8k / R46A 2.2k                             = 3.091
+        //           then R48A 100k into the same mixer, at unity.
         //
         // Both feed the same M5207L01 through the same 2.2k, so its transconductance cancels
-        // out of the ratio; taking it as unity is what makes the two absolute figures, and it
-        // is the one number here that is assumed rather than read off the board.
+        // out of the ratio. The CM-64 capture (tools/cm64_calibration) had the PCM half only
+        // 0.33 dB hotter than the LA half for equal DAC words as the emulation then took
+        // them, 5 dB under this estimate - because the LA board's audio bus carries the
+        // LA32's word rotated up one bit (LaBoard::rotateNewBoardBus), which the emulation
+        // was missing. With that wiring in place the measured ratio comes to PCM 6.35 dB
+        // hotter for equal chip words, 1 dB over the resistors alone; the capture is what
+        // is kept, as the difference is in the DAC references and operating points the
+        // schematic reading leaves out. The LA figure is the schematic's and is what the
+        // normalization rests on: a recording at 75% knob cannot establish volts per full
+        // scale. Trims match the measured CM unit directly. The Korg reference's -0.108 dB
+        // R/L is not an independently measured ADC imbalance and is NOT removed.
+        // Fixed-gain line inputs still leave a small unmeasured channel-tolerance
+        // uncertainty; these trims are not a claim about every CM module.
         constexpr double g_cm32lGain = (4.7 / 2.2) * 1.5 * (6.8 / (4.7 + 1.5 + 6.8));
-        constexpr double g_cm32pGain = 6.8 / 2.2;
+        constexpr double g_cm32pGain = g_cm32lGain * 2.0 * 1.0271;
+        constexpr float g_cm32lRight = 0.9793f;
+        constexpr float g_cm32pRight = 1.0011f;
 
         struct ModelInfo
         {
@@ -63,9 +71,13 @@ namespace emu88Lib
         }};
 
         // Boards whose output circuit has been modelled. Auto leaves every other board digital.
-        constexpr std::array<std::pair<DeviceModel, AnalogModel>, 19> g_autoModels{{
+        constexpr std::array<std::pair<DeviceModel, AnalogModel>, 20> g_autoModels{{
             {DeviceModel::Cm32p, AnalogModel::Cm32p},
             {DeviceModel::Cm32l, AnalogModel::Cm32l},
+            // The new-type MT-32 board is the CM-32L's design in the MT-32's case: the same
+            // DAC, VCA and output stage. The old-type board's has not been read yet, and the
+            // CM-32LN's PCM55 stage neither, so Auto leaves those two digital.
+            {DeviceModel::Mt32New, AnalogModel::Cm32l},
             // The CM-64 is both boards at once: each half through its own reconstruction
             // filter, then the CM-32P's mixer and output network, which is where the LA
             // board's line output arrives. AnalogOutput::processSplit() runs the three.
@@ -152,13 +164,20 @@ namespace emu88Lib
         switch (_device)
         {
         case DeviceModel::Cm32l:
-            return {static_cast<float>(g_cm32lGain), 1.0f};
+            return {static_cast<float>(g_cm32lGain), 1.0f, g_cm32lRight};
+        // The new-type MT-32 board has the CM-32L's output stage by design; the trims are one
+        // CM unit's and stay out. The old-type board's stage has not been read, and munt
+        // normalizes the two to the same level, so it takes the same figure for now rather
+        // than the unity of an unread board, which would drop it 4.5 dB under the other MT-32.
+        case DeviceModel::Mt32New:
+        case DeviceModel::Mt32Old:
+            return {static_cast<float>(g_cm32lGain), 1.0f, 1.0f};
         case DeviceModel::Cm32p:
-            return {static_cast<float>(g_cm32pGain), 1.0f};
+            return {static_cast<float>(g_cm32pGain), 1.0f, g_cm32pRight};
         // The LA board's line output is the first path and the PCM board's the second, the
         // order HardwareDevice hands them over in.
         case DeviceModel::Cm64:
-            return {static_cast<float>(g_cm32lGain), static_cast<float>(g_cm32pGain)};
+            return {static_cast<float>(g_cm32lGain), static_cast<float>(g_cm32pGain), g_cm32lRight, g_cm32pRight};
         default:
             return {};
         }
@@ -187,7 +206,11 @@ namespace emu88Lib
         switch (_device)
         {
         case DeviceModel::Cm32l: // PCM54HP
+        case DeviceModel::Mt32Old: // PCM54HP on both MT-32 boards
+        case DeviceModel::Mt32New:
+        case DeviceModel::Cm32ln: // PCM55
         case DeviceModel::Cm32p: // PCM56P
+        case DeviceModel::Cm64: // Both halves use 16-bit DACs, before analog mixing/VCA.
         case DeviceModel::Sc55Mk1: // uPD6376, and the boards that share it
         case DeviceModel::Cm300:
         case DeviceModel::Scc1a:

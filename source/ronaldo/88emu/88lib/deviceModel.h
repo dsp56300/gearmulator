@@ -3,6 +3,9 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <vector>
+
+#include "synthLib/midi/songReset.h"
 
 namespace emu88Lib
 {
@@ -29,12 +32,18 @@ namespace emu88Lib
 		Cm32l,
 		Nu10b,
 		Miig5,
+		Mt32Old,
+		Mt32New,
+		Cm32ln,
 	};
 
 	// Curated presentation order. Enum values remain
 	// stable because they are persisted in plugin settings and project state.
-	inline constexpr std::array<DeviceModel, 21> g_deviceMenuOrder = {
+	inline constexpr std::array<DeviceModel, 24> g_deviceMenuOrder = {
+		DeviceModel::Mt32Old,
+		DeviceModel::Mt32New,
 		DeviceModel::Cm32l,
+		DeviceModel::Cm32ln,
 		DeviceModel::Cm32p,
 		DeviceModel::Cm64,
 		DeviceModel::Sc55Mk1,
@@ -120,12 +129,71 @@ namespace emu88Lib
 		}
 	}
 
-	// The boards wearing the CM bezel: the CM-32L, the CM-32P, and the CM-64 that pairs
-	// that PCM board with a CM-32L. They share artwork and the front-panel lamp; the two
+	// Which of Roland's LA boards a device is, for the boards that are one (the CM-64 is a
+	// CM-32L board with a CM-32P beside it). The MT-32 comes in two boards that need their
+	// own firmware and reverb microcode; the CM-32LN, the CM-500's LA half and the LAPC-N
+	// are a CM-32L on an 80C198 that runs two clocks per state instead of three.
+	enum class LaModel : uint8_t
+	{
+		Mt32Old,
+		Mt32New,
+		Cm32l,
+		Cm32ln,
+	};
+
+	// The devices that are one LA board and nothing else.
+	constexpr bool isLaModel(const DeviceModel _model)
+	{
+		return _model == DeviceModel::Mt32Old || _model == DeviceModel::Mt32New || _model == DeviceModel::Cm32l ||
+		       _model == DeviceModel::Cm32ln;
+	}
+
+	// The LA board inside a device, for isLaModel() devices and the CM-64.
+	constexpr LaModel toLaModel(const DeviceModel _model)
+	{
+		switch(_model)
+		{
+		case DeviceModel::Mt32Old: return LaModel::Mt32Old;
+		case DeviceModel::Mt32New: return LaModel::Mt32New;
+		case DeviceModel::Cm32ln: return LaModel::Cm32ln;
+		default: return LaModel::Cm32l;
+		}
+	}
+
+	// The devices built on Roland's LA and CM boards: the MT-32s, the CM-32L family, the
+	// CM-32P and the CM-64 that pairs the two. They share a MIDI dialect that predates GM:
+	// the GM, GM2 and GS System On messages mean nothing to them, they reset on their own
+	// "all parameters reset" (a data set to address 7F 00 00) instead, and they know
+	// All Notes Off but not All Sound Off.
+	constexpr bool isRolandLaFamily(const DeviceModel _model)
+	{
+		return isLaModel(_model) || _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64;
+	}
+
+	// The boards with the MT-32's VOLUME/VALUE knob, a potentiometer the firmware reads
+	// through the CPU's A/D converter.
+	constexpr bool hasPanelKnob(const DeviceModel _model)
+	{
+		return _model == DeviceModel::Mt32Old || _model == DeviceModel::Mt32New;
+	}
+
+	// The lowest MIDI channel a board answers on from power-on, 0-based: the LA boards put
+	// part 1 on channel 2 (the rhythm part is on 10), the CM-32P's six parts start on 11.
+	// The CM-64 is both at once and starts with its LA half.
+	constexpr uint8_t firstMidiChannel(const DeviceModel _model)
+	{
+		if(_model == DeviceModel::Cm32p)
+			return 10;
+		return isLaModel(_model) || _model == DeviceModel::Cm64 ? 1 : 0;
+	}
+
+	// The boards wearing the CM bezel: the CM-32L and CM-32LN, the CM-32P, and the CM-64 that
+	// pairs that PCM board with a CM-32L. They share artwork and the front-panel lamp; the
 	// halves differ in display geometry, 16x2 on the CM-32P and 20x1 on the CM-32L.
 	constexpr bool isCmModel(const DeviceModel _model)
 	{
-		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64 || _model == DeviceModel::Cm32l;
+		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64 || _model == DeviceModel::Cm32l ||
+		       _model == DeviceModel::Cm32ln;
 	}
 
 	// The boards with a slot for an SN-U110 series PCM card: the CM-32P, and the CM-64
@@ -144,25 +212,20 @@ namespace emu88Lib
 
 	// The CM-32L's display is a service screen the case has no window for: the firmware
 	// drives its SED1200 whether or not one is attached, and those screens are the only way
-	// to read the board's state, so it is shown here the way the CM-32P's is.
+	// to read the board's state, so it is shown here the way the CM-32P's is. On the MT-32
+	// the same display is the front panel's.
 	constexpr bool deviceHasLcd(const DeviceModel model)
 	{
 		return model != DeviceModel::Xpgs && model != DeviceModel::VeGsPro && model != DeviceModel::Sc8820 &&
 		       !isGmModuleModel(model) && (!isSc55Model(model) || getSc55DeviceProfile(model).panel != Sc55Panel::None);
 	}
 
-	// Left out of the device menu and the CLI's device list for now, for want of a
-	// dump: the SC-55st and RLP-3237 program ROMs, and the MCU ROM (R15199774) the
-	// CM-300/SCC-1 firmware runs on. The IDs and enum values stay, so an explicit
-	// --device still selects them.
-	//
-	// The CM-32L and the CM-64 built on it are hidden for the same reason from the
-	// other end: the ROMs are there but the emulation is not finished yet.
-	constexpr bool isDeviceListed(const DeviceModel _model)
+	// Whether a model appears in the device menu and the CLI's device list. Every board is
+	// listed now that the SC-55st, RLP-3237 and CM-300/SCC-1 images are catalogued; the
+	// hook stays for the next board whose dump is still out.
+	constexpr bool isDeviceListed(const DeviceModel)
 	{
-		return _model != DeviceModel::Sc55St && _model != DeviceModel::Rlp3237 &&
-		       _model != DeviceModel::Cm300 && _model != DeviceModel::Cm32l &&
-		       _model != DeviceModel::Cm64;
+		return true;
 	}
 
 	// The CM-64 carries two service displays, one per board: the CM-32P's 16x2 above the
@@ -205,4 +268,9 @@ namespace emu88Lib
 	const DeviceProfile& getDeviceProfile(DeviceModel _model);
 	bool isDeviceModelValue(uint32_t _value);
 	uint32_t deviceModelCount();
+
+	// The reset a device answers to, see synthLib::midi::ResetTarget.
+	synthLib::midi::ResetTarget resetTarget(DeviceModel _model);
+	// The device's own reset message: GS Reset, or the LA and CM boards' all parameters reset.
+	std::vector<uint8_t> deviceResetSysex(DeviceModel _model);
 }

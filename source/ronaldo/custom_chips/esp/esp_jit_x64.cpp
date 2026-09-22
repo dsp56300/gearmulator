@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "esp_jit_x64_types.h"
+#include "common/jit_x64_types.h"
 #include "esp.hpp"
 
 #include "asmjit/x86/x86builder.h"
@@ -11,26 +11,26 @@ namespace esp
 {
 	using namespace asmjit::x86;
 
-	EspJitX64::EspJitX64(Asm& a, const JitInputData& _data) : m_asm(a), m_data(_data), m_pool(a, g_regBasePtr, _data.coreData)
+	EspJitX64::EspJitX64(Asm& a, const JitInputData& _data) : m_asm(a), m_data(_data), m_pool(a, rLib::g_regBasePtr, _data.coreData)
 	{
 	}
 
 	void EspJitX64::jitEnter()
 	{
-		for (const auto& r : g_nonVolatileGPs)
+		for (const auto& r : rLib::g_nonVolatileGPs)
 		{
 			if (r != rsp)
 				m_asm.push(r);
 		}
 
-		m_asm.mov(g_regBasePtr, g_funcArgGPs[3]); // 4th arg is CoreData*
+		m_asm.mov(rLib::g_regBasePtr, rLib::g_funcArgGPs[3]); // 4th arg is CoreData*
 	}
 
 	void EspJitX64::jitExit()
 	{
 		m_pool.clear();
 
-		for (auto it = std::rbegin(g_nonVolatileGPs); it != std::rend(g_nonVolatileGPs); ++it)
+		for (auto it = std::rbegin(rLib::g_nonVolatileGPs); it != std::rend(rLib::g_nonVolatileGPs); ++it)
 		{
 			const auto r = *it;
 			if (r != rsp)
@@ -42,12 +42,12 @@ namespace esp
 
 	void EspJitX64::eramRead(uint32_t _eramMask)
 	{
-		auto eramEffectiveAddr = m_pool.get(m_data.eramEffectiveAddr, Access::ReadWrite);
+		auto eramEffectiveAddr = m_pool.get(m_data.eramEffectiveAddr, rLib::Access::ReadWrite);
 
 		// eramEffectiveAddr = eramEffectiveAddr & ERAM_MASK
 		m_asm.and_(eramEffectiveAddr.r32(), _eramMask); 
 
-		auto eramReadLatch = m_pool.get(m_data.eramReadLatch, Access::Write);
+		auto eramReadLatch = m_pool.get(m_data.eramReadLatch, rLib::Access::Write);
 
 		// load eram[eramEffectiveAddr & ERAM_MASK]
 		m_asm.movsxd(eramReadLatch, eramPtr(eramEffectiveAddr));
@@ -69,11 +69,11 @@ namespace esp
 		// eram[eramEffectiveAddr & ERAM_MASK] = crunch(eramWriteLatchNext);
 
 		// eramEffectiveAddr = eramEffectiveAddr & ERAM_MASK
-		auto eramEffectiveAddr = m_pool.get(m_data.eramEffectiveAddr, Access::ReadWrite);
+		auto eramEffectiveAddr = m_pool.get(m_data.eramEffectiveAddr, rLib::Access::ReadWrite);
 		m_asm.and_(eramEffectiveAddr, _eramMask);
 
 		// load eram ptr
-		auto eramWriteLatchNext = m_pool.get(m_data.eramWriteLatchNext, Access::Read);
+		auto eramWriteLatchNext = m_pool.get(m_data.eramWriteLatchNext, rLib::Access::Read);
 
 		m_asm.mov(eramPtr(eramEffectiveAddr), eramWriteLatchNext.r32());
 	}
@@ -82,22 +82,22 @@ namespace esp
 	{
 		// eramWriteLatchNext = eramWriteLatch;
 		{
-			auto eramWriteLatch = m_pool.get(m_data.eramWriteLatch, Access::Read);
-			auto eramWriteLatchNext = m_pool.get(m_data.eramWriteLatchNext, Access::Write);
+			auto eramWriteLatch = m_pool.get(m_data.eramWriteLatch, rLib::Access::Read);
+			auto eramWriteLatchNext = m_pool.get(m_data.eramWriteLatchNext, rLib::Access::Write);
 			m_asm.mov(eramWriteLatchNext, eramWriteLatch);
 		}
 
 		// eramEffectiveAddr = eramPos + immOffset;
-		auto eramEffectiveAddr = m_pool.get(m_data.eramEffectiveAddr, Access::Write);
+		auto eramEffectiveAddr = m_pool.get(m_data.eramEffectiveAddr, rLib::Access::Write);
 		m_asm.mov(eramEffectiveAddr, immOffset);
 
-		auto eramPos = m_pool.get(m_data.eramPos, Access::Read);
+		auto eramPos = m_pool.get(m_data.eramPos, rLib::Access::Read);
 		m_asm.add(eramEffectiveAddr, eramPos);
 
 		if (shouldUseVarOffset)
 		{
 			// eramEffectiveAddr += eramVarOffset >> 12;
-			auto eramVarOffset = m_pool.get(m_data.eramVarOffset, Access::Read);
+			auto eramVarOffset = m_pool.get(m_data.eramVarOffset, rLib::Access::Read);
 			auto tempA = m_pool.getTemp();
 			m_asm.mov(tempA, eramVarOffset);
 			m_asm.shr(tempA, 12);
@@ -132,7 +132,7 @@ namespace esp
 		{
 			// readAcc = acc[instr.m_access.readReg];
 			{
-				auto acc = m_pool.get(&m_data.coreData->accs[instr.m_access.readReg], Access::Read);
+				auto acc = m_pool.get(&m_data.coreData->accs[instr.m_access.readReg], rLib::Access::Read);
 				m_asm.mov(tempA, acc);
 			}
 
@@ -153,7 +153,7 @@ namespace esp
 
 		if (instr.opType != kDMAC)
 		{
-			auto iramPos = m_pool.get(m_data.iramPos, Access::Read);
+			auto iramPos = m_pool.get(m_data.iramPos, rLib::Access::Read);
 			// const uint32_t mempos = ((uint32_t)instr.mem + iramPos) & IRAM_MASK;
 			m_asm.lea(tempB, ptr(iramPos, static_cast<int32_t>(instr.mem)));	// tempB = instr.mem + iramPos
 			m_asm.and_(tempB, 0xff); // tempB &= 0xff
@@ -187,13 +187,13 @@ namespace esp
 		case kDMAC:
 			{
 				// mulInputA_24 = last_mulInputA_24 >> 7;
-				auto last_mulInputA_24 = m_pool.get(m_data.last_mulInputA_24, Access::Read);
+				auto last_mulInputA_24 = m_pool.get(m_data.last_mulInputA_24, rLib::Access::Read);
 				m_asm.movsxd(mulInA, last_mulInputA_24.r32());
 				m_asm.sar(mulInA, 7);
 				if (lastMul30)
 				{
 					// mulInputB_24 = (last_mulInputB_24 >> 9) & 0x7f;
-					auto last_mulInputB_24 = m_pool.get(m_data.last_mulInputB_24, Access::Read);
+					auto last_mulInputB_24 = m_pool.get(m_data.last_mulInputB_24, rLib::Access::Read);
 					m_asm.movsxd(mulInB, last_mulInputB_24.r32());
 					m_asm.sar(mulInB, 9);
 					m_asm.and_(mulInB, 0x7f);
@@ -247,7 +247,7 @@ namespace esp
 		case kWriteEramVarOffset:
 			{
 				// eram.eramVarOffset = readAcc;
-				auto eramVarOffset = m_pool.get(m_data.eramVarOffset, Access::Write);
+				auto eramVarOffset = m_pool.get(m_data.eramVarOffset, rLib::Access::Write);
 				m_asm.mov(eramVarOffset, tempA);
 			}
 			break;
@@ -262,7 +262,7 @@ namespace esp
 		case kWriteEramWriteLatch:
 			// eram.eramWriteLatch = sat(readAcc);
 			{
-				auto eramWriteLatch = m_pool.get(m_data.eramWriteLatch, Access::Write);
+				auto eramWriteLatch = m_pool.get(m_data.eramWriteLatch, rLib::Access::Write);
 				m_asm.mov(eramWriteLatch, tempA);
 			}
 			break;
@@ -270,12 +270,12 @@ namespace esp
 			{
 				// mulInputA_24 = eram.eramReadLatch;
 				{
-					auto eramReadLatch = m_pool.get(m_data.eramReadLatch, Access::Read);
+					auto eramReadLatch = m_pool.get(m_data.eramReadLatch, rLib::Access::Read);
 					m_asm.movsxd(mulInA, eramReadLatch.r32());
 				}
 
 				// writeIRAM(mulInputA_24, instr.mem | 0xf0);
-				auto iramPos = m_pool.get(m_data.iramPos, Access::Read);
+				auto iramPos = m_pool.get(m_data.iramPos, rLib::Access::Read);
 				m_asm.lea(tempB, ptr(iramPos, static_cast<int32_t>(instr.mem | 0xf0)));// tempB = instr.mem + iramPos
 				m_asm.and_(tempB, 0xff); // tempB &= 0xff
 				m_asm.mov(iramPtr(tempB), mulInA.r32());
@@ -312,7 +312,7 @@ namespace esp
 				if ((instr.coef >> 5) == 6)
 				{
 					// mulInputB_24 = (shared.eram.eramVarOffset << 11) & 0x7fffff;
-					auto eramVarOffset = m_pool.get(m_data.eramVarOffset, Access::Read);
+					auto eramVarOffset = m_pool.get(m_data.eramVarOffset, rLib::Access::Read);
 					m_asm.movsxd(mulInB, eramVarOffset.r32());
 					m_asm.shl(mulInB, 11);
 					m_asm.and_(mulInB, 0x7fffff);
@@ -356,7 +356,7 @@ namespace esp
 
 				// last_mulInputB_24 = mulInputB_24;
 				{
-					auto last_mulInputB_24 = m_pool.get(m_data.last_mulInputB_24, Access::Write);
+					auto last_mulInputB_24 = m_pool.get(m_data.last_mulInputB_24, rLib::Access::Write);
 					m_asm.mov(last_mulInputB_24, mulInB);
 				}
 
@@ -405,7 +405,7 @@ namespace esp
 		{
 			// last_mulInputA_24 = mulInputA_24;
 			{
-				auto last_mulInputA_24 = m_pool.get(m_data.last_mulInputA_24, Access::Write);
+				auto last_mulInputA_24 = m_pool.get(m_data.last_mulInputA_24, rLib::Access::Write);
 				m_asm.mov(last_mulInputA_24, mulInA);
 			}
 
@@ -429,12 +429,12 @@ namespace esp
 			if (!clr)
 			{
 				// result += *srcAcc;
-				auto acc = m_pool.get(&m_data.coreData->accs[srcAcc], Access::Read);
+				auto acc = m_pool.get(&m_data.coreData->accs[srcAcc], rLib::Access::Read);
 				m_asm.add(tempA, acc);
 			}
 
 			{
-				auto acc = m_pool.get(&m_data.coreData->accs[destAcc], Access::Write);
+				auto acc = m_pool.get(&m_data.coreData->accs[destAcc], rLib::Access::Write);
 				// *destAcc = result;
 				m_asm.mov(acc, tempA);
 			}
@@ -442,46 +442,46 @@ namespace esp
 		else
 		{
 			// last_mulInputA_24 = 0;
-			auto last_mulInputA_24 = m_pool.get(m_data.last_mulInputA_24, Access::Write);
+			auto last_mulInputA_24 = m_pool.get(m_data.last_mulInputA_24, rLib::Access::Write);
 			m_asm.xor_(last_mulInputA_24.r32(), last_mulInputA_24.r32());
 		}
 	}
 
 	Mem EspJitX64::iramPtr(const Gpq& offset) const
 	{
-		return ptr(g_regBasePtr, offset, 2, m_pool.getPointerOffset(m_data.iram), 4);
+		return ptr(rLib::g_regBasePtr, offset, 2, m_pool.getPointerOffset(m_data.iram), 4);
 	}
 
 	Mem EspJitX64::eramPtr(const Gpq& offset) const
 	{
-		return ptr(g_regBasePtr, offset, 2, m_pool.getPointerOffset(m_data.coreData->eramPtr), 4);
+		return ptr(rLib::g_regBasePtr, offset, 2, m_pool.getPointerOffset(m_data.coreData->eramPtr), 4);
 	}
 
 	Mem EspJitX64::gramPtr(const Gpq& offset) const
 	{
-		return ptr(g_regBasePtr, offset, 2, m_pool.getPointerOffset(m_data.gram), 4);
+		return ptr(rLib::g_regBasePtr, offset, 2, m_pool.getPointerOffset(m_data.gram), 4);
 	}
 
 	Mem EspJitX64::coefsPtr(const uint32_t index) const
 	{
 		assert(index < std::size(m_data.coreData->coefs));
-		return ptr(g_regBasePtr, m_pool.getPointerOffset(&m_data.coreData->coefs[index]), 1);
+		return ptr(rLib::g_regBasePtr, m_pool.getPointerOffset(&m_data.coreData->coefs[index]), 1);
 	}
 
 	Mem EspJitX64::mulcoefsPtr(const uint32_t index) const
 	{
 		assert(index < std::size(m_data.coreData->mulcoeffs));
-		return ptr(g_regBasePtr, m_pool.getPointerOffset(&m_data.coreData->mulcoeffs[index]), 4);
+		return ptr(rLib::g_regBasePtr, m_pool.getPointerOffset(&m_data.coreData->mulcoeffs[index]), 4);
 	}
 
 	Mem EspJitX64::shiftPtr(const uint32_t index) const
 	{
 		assert(index < std::size(m_data.coreData->shiftAmounts));
-		return ptr(g_regBasePtr, m_pool.getPointerOffset(&m_data.coreData->shiftAmounts[index]), 1);
+		return ptr(rLib::g_regBasePtr, m_pool.getPointerOffset(&m_data.coreData->shiftAmounts[index]), 1);
 	}
 
 	Mem EspJitX64::hostregPtr() const
 	{
-		return ptr(g_regBasePtr, m_pool.getPointerOffset(m_data.coreData->hostRegPtr), 4);
+		return ptr(rLib::g_regBasePtr, m_pool.getPointerOffset(m_data.coreData->hostRegPtr), 4);
 	}
 }

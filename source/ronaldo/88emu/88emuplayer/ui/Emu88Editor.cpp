@@ -3,6 +3,7 @@
 #include "88emuplayer/ui/Emu88EditorLcd.h"
 #include "88emuplayer/ui/Emu88EditorPlaylist.h"
 #include "88emuplayer/ui/Emu88EditorWindows.h"
+#include "88emuplayer/app/Emu88LaunchOptions.h"
 #include "88lib/rom/romloader.h"
 #include "juceRmlUi/rmlMenu.h"
 #include "juceRmlUi/rmlHelper.h"
@@ -18,17 +19,32 @@ namespace emu88Player
 {
 	using namespace editor;
 
-	Editor::Editor(Processor& _processor)
-		: juce::AudioProcessorEditor(_processor), m_processor(_processor), m_interfaces(*this)
+	Editor::Editor(Processor& _processor, const bool _offline)
+		: juce::AudioProcessorEditor(_processor), m_processor(_processor), m_offline(_offline),
+		  m_interfaces(*this)
 	{
-		adoptStandaloneSettings();
-		m_sizeConstrainer.setMinimumSize(g_defaultWidth / 2, g_defaultHeight / 2);
-		m_sizeConstrainer.setMaximumSize(g_defaultWidth * 3, g_defaultHeight * 3);
-		m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(g_defaultWidth) / g_defaultHeight);
-		setResizable(true, true);
-		setConstrainer(&m_sizeConstrainer);
+		// Loading the UI reports every font face it finds. That belongs in a plugin's log, not in
+		// the output of a command line render.
+		if(m_offline)
+			m_interfaces.getSystemInterface().setVerboseLogging(false);
+
+		if(!m_offline)
+		{
+			adoptStandaloneSettings();
+			m_sizeConstrainer.setMinimumSize(g_defaultWidth / 2, g_defaultHeight / 2);
+			m_sizeConstrainer.setMaximumSize(g_defaultWidth * 3, g_defaultHeight * 3);
+			m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(g_defaultWidth) / g_defaultHeight);
+			setResizable(true, true);
+			setConstrainer(&m_sizeConstrainer);
+		}
 
 		loadSkin(readSkinFromConfig());
+
+		// An offline render sizes the editor itself, to the video resolution it was asked for, and
+		// has neither a message loop to run the timer nor a screen to put a notice on.
+		if(m_offline)
+			return;
+
 		setGuiScale(juce::jlimit(50, 300, m_processor.config().getIntValue("scale", 100)));
 		startTimerHz(30);
 
@@ -56,6 +72,7 @@ namespace emu88Player
 	{
 		juceRmlUi::RmlComponentConfig config;
 		config.refreshRateLimitHz = 30;
+		config.offlineRendering = m_offline;
 		config.includeDefaultTemplates = false;
 		// Playlist entries are file names, in whatever script the user's files happen to use.
 		config.systemFallbackFonts = true;
@@ -81,6 +98,9 @@ namespace emu88Player
 			updateButtonVisuals();
 		});
 		wirePanel();
+		// The debugger draws its own toolbar over the skin, which an offline render would put in
+		// every frame of the video.
+		if(!m_offline)
 		{
 			juceRmlUi::RmlInterfaces::ScopedAccess access(*m_rml);
 			m_rml->enableDebugger(m_processor.config().getBoolValue("enableRmlUiDebugger", false));
@@ -114,7 +134,9 @@ namespace emu88Player
 	{
 		if(m_rml)
 			m_rml->setBounds(getLocalBounds());
-		if(m_settingGuiScale || getWidth() <= 0)
+		// An offline render picks the editor's size from the video resolution, which is nothing
+		// the window should remember.
+		if(m_offline || m_settingGuiScale || getWidth() <= 0)
 			return;
 		const auto scale = juce::roundToInt(100.0 * static_cast<double>(getWidth()) / g_defaultWidth);
 		m_processor.config().setValue("scale", scale);
@@ -131,6 +153,8 @@ namespace emu88Player
 	{
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
 		const auto inventory = emu88Lib::RomLoader::rescan();
+		const auto missing = romFolderAccessError(standaloneLaunch ? *standaloneLaunch : LaunchOptions{}).empty()
+			? " (ROMs missing)" : " (ROM folder not readable)";
 		for(const auto model : emu88Lib::g_deviceMenuOrder)
 		{
 			// A hidden device stays in the menu only while it is the one running.
@@ -141,7 +165,7 @@ namespace emu88Player
 			if(emu88Lib::isGmModuleModel(model) && !available && model != m_processor.deviceModel())
 				continue;
 			const auto label = std::string(emu88Lib::getDeviceProfile(model).displayName) +
-				(available ? "" : " (ROMs missing)");
+				(available ? "" : missing);
 			m_contextMenu->addEntry(label, true, model == m_processor.deviceModel(), [this, model, available]
 			{
 				if(available)
@@ -219,7 +243,12 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Sc155: panel = "sc55_panel.png"; break;
 		// Boards without a front panel: artwork with only the player, device selector and volume.
 		case emu88Lib::DeviceModel::Cm32p: panel = "cm32p_panel.png"; break;
-		case emu88Lib::DeviceModel::Cm32l: panel = "cm32l_panel.png"; break;
+		case emu88Lib::DeviceModel::Cm32l:
+		case emu88Lib::DeviceModel::Cm32ln:
+		// The MT-32s borrow the CM-32L's bezel for now: the same display in the same window,
+		// their switches and knob on the keyboard.
+		case emu88Lib::DeviceModel::Mt32Old:
+		case emu88Lib::DeviceModel::Mt32New: panel = "cm32l_panel.png"; break;
 		case emu88Lib::DeviceModel::Cm64: panel = "cm64_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8820: panel = "sc8820_panel.png"; break;
 		case emu88Lib::DeviceModel::Xpgs:
@@ -232,12 +261,14 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Scb55:
 		case emu88Lib::DeviceModel::Rlp3237: panel = "sc55pc_panel.png"; break;
 		}
-		// The boards whose switches the panel filter drops; their artwork has none to show.
-		const bool noPanel = panelButtonsForDevice(_model, ~uint32_t{0}) == 0;
+		// The boards whose artwork shows no switches: the skin's faces are hidden, and what the
+		// LA boards read comes from the keyboard.
+		const bool noPanel = !panelArtworkHasSwitches(_model);
 		if(auto* image = document->GetElementById("hardwarePanel"))
 			image->SetAttribute("src", panel);
 		// The grey panels get darker transport faces.
-		const bool darkTransport = emu88Lib::isCmModel(_model) || _model == emu88Lib::DeviceModel::Sc8850 ||
+		const bool cmBezel = emu88Lib::isCmModel(_model) || emu88Lib::isLaModel(_model);
+		const bool darkTransport = cmBezel || _model == emu88Lib::DeviceModel::Sc8850 ||
 		                           _model == emu88Lib::DeviceModel::Sc8820;
 		for(const auto& [id, name] : {std::pair{"playerPlayGraphic", "player_play"}, std::pair{"playerPauseGraphic", "player_pause"},
 		                              std::pair{"playerStopGraphic", "player_stop"}})
@@ -250,10 +281,11 @@ namespace emu88Player
 			root->SetClass("modelSc88Pro", _model == emu88Lib::DeviceModel::Sc88Pro);
 			root->SetClass("modelSc8850", _model == emu88Lib::DeviceModel::Sc8850);
 			root->SetClass("modelSc55", emu88Lib::isSc55Model(_model) && !noPanel);
-			root->SetClass("modelCm", emu88Lib::isCmModel(_model));
+			root->SetClass("modelCm", cmBezel);
 			// The CM bezels differ in their windows: one 16x2 on the CM-32P, one 20x1 on the
-			// CM-32L, and both on the CM-64.
-			root->SetClass("modelCm32l", _model == emu88Lib::DeviceModel::Cm32l);
+			// CM-32L, and both on the CM-64. The MT-32s wear the CM-32L's for now.
+			root->SetClass("modelCm32l", cmBezel && _model != emu88Lib::DeviceModel::Cm32p &&
+			                             _model != emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelCm64", _model == emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelSc8820", _model == emu88Lib::DeviceModel::Sc8820);
 			root->SetClass("modelNoPanel", noPanel);
@@ -287,14 +319,29 @@ namespace emu88Player
 
 		const auto currentScale = m_processor.config().getIntValue("scale", 100);
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
-		m_contextMenu->addEntry("Send GM Reset", [this]
+		// The MT-32 and CM boards know one reset, their own; the GM and GS ones do nothing there.
+		if(emu88Lib::isRolandLaFamily(m_processor.deviceModel()))
 		{
-			m_processor.sendGmReset();
-		});
-		m_contextMenu->addEntry("Send GS Reset", [this]
+			m_contextMenu->addEntry("Send All Parameters Reset", [this]
+			{
+				m_processor.sendRolandLaReset();
+			});
+		}
+		else
 		{
-			m_processor.sendGsReset();
-		});
+			m_contextMenu->addEntry("Send GM Reset", [this]
+			{
+				m_processor.sendGmReset();
+			});
+			m_contextMenu->addEntry("Send GM2 Reset", [this]
+			{
+				m_processor.sendGm2Reset();
+			});
+			m_contextMenu->addEntry("Send GS Reset", [this]
+			{
+				m_processor.sendGsReset();
+			});
+		}
 		m_contextMenu->addEntry("Send All Notes Off", [this]
 		{
 			m_processor.sendAllNotesOff();
@@ -376,9 +423,11 @@ namespace emu88Player
 
 	void Editor::showStartupNotices()
 	{
+		// The playlist notice lists the restored session's entries that cannot be read.
 		if(m_processor.config().getBoolValue("disclaimerSeen", false))
 		{
 			showRomNotices();
+			showPlaylistNotice();
 			return;
 		}
 
@@ -390,6 +439,7 @@ namespace emu88Player
 				editor->m_processor.config().setValue("disclaimerSeen", true);
 				editor->m_processor.config().saveIfNeeded();
 				editor->showRomNotices();
+				editor->showPlaylistNotice();
 			}
 		});
 	}
@@ -404,11 +454,16 @@ namespace emu88Player
 
 	void Editor::showMissingRomNotice(const emu88Lib::DeviceModel _model)
 	{
-		const auto inventory = emu88Lib::RomLoader::rescan();
-		const auto device = emu88Lib::RomLoader::toRomDevice(_model);
-		const auto message = std::string("ROM folder: ") + m_processor.romFolder() +
-			"\nSubfolders are searched too. Add the missing files, then select the device again.\n\n" +
-			inventory.describeRequirements(device);
+		// In a folder the player cannot look into, every ROM reads as missing. Say that instead.
+		auto message = romFolderAccessError(standaloneLaunch ? *standaloneLaunch : LaunchOptions{});
+		if(message.empty())
+		{
+			const auto inventory = emu88Lib::RomLoader::rescan();
+			const auto device = emu88Lib::RomLoader::toRomDevice(_model);
+			message = std::string("ROM folder: ") + m_processor.romFolder() +
+				"\nSubfolders are searched too. Add the missing files, then select the device again.\n\n" +
+				inventory.describeRequirements(device);
+		}
 		m_romWindow = std::make_unique<RomRequirementsWindow>(*this,
 			emu88Lib::getDeviceProfile(_model).displayName, message, m_processor.romFolder());
 		m_romWindow->setVisible(true);
@@ -425,6 +480,11 @@ namespace emu88Player
 	}
 
 	void Editor::timerCallback()
+	{
+		updateFromDevice();
+	}
+
+	void Editor::updateFromDevice()
 	{
 		if(!m_rml)
 			return;

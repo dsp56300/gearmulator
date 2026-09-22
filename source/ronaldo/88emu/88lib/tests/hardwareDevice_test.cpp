@@ -85,6 +85,22 @@ int main()
 	static_assert(getPowerSwitch(DeviceModel::Sc8820) == PowerSwitch::Supply);
 	static_assert(getPowerSwitch(DeviceModel::Sc8850) == PowerSwitch::Supply);
 	static_assert(getPowerSwitch(DeviceModel::VeGsPro) == PowerSwitch::Supply);
+	// The MT-32 and CM boards switch their supply; the CM-32L family has no switch of its own
+	// in the emulation's sense either.
+	static_assert(getPowerSwitch(DeviceModel::Mt32Old) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::Mt32New) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::Cm32l) == PowerSwitch::Supply);
+	static_assert(getPowerSwitch(DeviceModel::Cm64) == PowerSwitch::Supply);
+	// The boards that share the LA and CM MIDI dialect, and where their parts start.
+	static_assert(isRolandLaFamily(DeviceModel::Mt32Old) && isRolandLaFamily(DeviceModel::Mt32New) &&
+	              isRolandLaFamily(DeviceModel::Cm32l) && isRolandLaFamily(DeviceModel::Cm32ln) &&
+	              isRolandLaFamily(DeviceModel::Cm32p) && isRolandLaFamily(DeviceModel::Cm64));
+	static_assert(!isRolandLaFamily(DeviceModel::Sc55Mk1) && !isRolandLaFamily(DeviceModel::Sc88Pro));
+	static_assert(firstMidiChannel(DeviceModel::Mt32Old) == 1 && firstMidiChannel(DeviceModel::Cm32l) == 1 &&
+	              firstMidiChannel(DeviceModel::Cm64) == 1 && firstMidiChannel(DeviceModel::Cm32p) == 10 &&
+	              firstMidiChannel(DeviceModel::Sc88Pro) == 0);
+	static_assert(toLaModel(DeviceModel::Cm64) == LaModel::Cm32l && toLaModel(DeviceModel::Mt32New) == LaModel::Mt32New);
+	static_assert(hasPanelKnob(DeviceModel::Mt32Old) && !hasPanelKnob(DeviceModel::Cm32l));
 
 	namespace fs = baseLib::filesystem;
 	const auto folder = fs::getCurrentDirectory() + "88emu-transport-" +
@@ -142,8 +158,9 @@ int main()
 	SMidiEvent current(MidiEventSource::Host, 0x90, 64, 100);
 	current.transportGeneration = 1;
 	process(512, {jump, stale, physical, current});
-	// The echo preserves running status. Reassemble the parser's raw data-byte
-	// events; both the board limiter and transport cleanup emit All Sound Off.
+	// The echo preserves running status. Reassemble the parser's raw data-byte events; both
+	// the board limiter and transport cleanup silence the channel, and on the CM-32P, whose
+	// firmware has no All Sound Off, that is the hold pedal up and All Notes Off.
 	std::vector<uint8_t> bytes;
 	for(const auto& event : output)
 	{
@@ -152,14 +169,15 @@ int main()
 		if(length > 1) bytes.push_back(event.b);
 		if(length > 2) bytes.push_back(event.c);
 	}
-	const std::vector<uint8_t> expected{0xb0, 120, 0, 120, 0, 0x90, 63, 100, 64, 100};
+	const std::vector<uint8_t> expected{0xb0, 64, 0, 123, 0, 64, 0, 123, 0, 0x90, 63, 100, 64, 100};
 	CHECK(bytes == expected);
 	process(512, {});
 	CHECK(output.empty()); // The previously queued future note is obsolete too.
 	CHECK_EQ(device.getExtraLatencySamples(), 0u);
 	CHECK(device.displaySnapshot().revision > 0);
 
-	// All Notes Off can leave sustain/release voices sounding when transport jumps.
+	// All Notes Off with the pedal down leaves the sustained notes sounding, so a transport
+	// jump still has to clean the channel up - pedal up first, then the notes.
 	{
 		HardwareDevice board(params, BootOptions{false, false});
 		board.process({}, {}, 512, {
@@ -176,7 +194,7 @@ int main()
 			if(length > 2) bytes.push_back(event.c);
 		}
 		// Both the board's UART queue and HardwareDevice retain their cleanup.
-		CHECK(bytes == std::vector<uint8_t>({0xb0, 120, 0, 120, 0}));
+		CHECK(bytes == std::vector<uint8_t>({0xb0, 64, 0, 123, 0, 64, 0, 123, 0}));
 		board.process({}, {}, 512, {jump}, output);
 		CHECK(output.empty());
 	}

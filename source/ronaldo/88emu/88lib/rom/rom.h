@@ -31,23 +31,34 @@ namespace emu88Lib
         }
     };
 
-    // CM-32L: the 8095's control ROM, the LA32's PCM mask ROM and the Boss
-    // reverb gate array's microcode ROM. The wave image is the two 512 KiB mask
-    // ROMs concatenated in address order, R15449121 followed by R15179945 -
-    // the same file munt reads as CM32L_PCM.ROM.
-    struct Cm32lRomSet
+    // The images of one of Roland's LA boards: the 8095's control ROM, the LA32's PCM mask
+    // ROMs and the Boss reverb gate array's microcode ROM. Which board they belong to sets
+    // their sizes: the CM-32L's wave image is the two 512 KiB mask ROMs concatenated in
+    // address order, R15449121 followed by R15179945 - the same file munt reads as
+    // CM32L_PCM.ROM - where the MT-32 has only the first; the new-type MT-32 board pages a
+    // 128 KiB control ROM where the others take 64 KiB.
+    struct LaRomSet
     {
-        static constexpr size_t ControlSize = 0x10000;
-        static constexpr size_t WaveSize = 0x100000;
         static constexpr size_t ReverbSize = 0x8000;
 
+        LaModel model = LaModel::Cm32l;
         std::vector<uint8_t> control;
         std::vector<uint8_t> wave;
         std::vector<uint8_t> reverb;
 
+        static constexpr size_t controlSize(const LaModel _model)
+        {
+            return _model == LaModel::Mt32New ? 0x20000 : 0x10000;
+        }
+        static constexpr size_t waveSize(const LaModel _model)
+        {
+            return _model == LaModel::Mt32Old || _model == LaModel::Mt32New ? 0x80000 : 0x100000;
+        }
+
         bool isValid() const
         {
-            return control.size() == ControlSize && wave.size() == WaveSize && reverb.size() == ReverbSize;
+            return control.size() == controlSize(model) && wave.size() == waveSize(model) &&
+                   reverb.size() == ReverbSize;
         }
     };
 

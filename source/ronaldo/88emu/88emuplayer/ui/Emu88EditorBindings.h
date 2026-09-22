@@ -1,5 +1,6 @@
 #pragma once
 
+#include "88lib/boards/laBoard.h"
 #include "88lib/boards/sc88types.h"
 #include "88lib/boards/sc88pro.h"
 #include "88lib/boards/sc8850.h"
@@ -121,6 +122,25 @@ namespace emu88Player::editor
 		bind("bt8850Preview", emu88Lib::Sc8850Button::PreviewPush, Key::KI_P, "PREVIEW"),
 	};
 
+	// The MT-32's front panel, and the CM-32L family's switch matrix behind its bezel, which
+	// the firmware reads at power-on for its test and version screens. The skin has no faces
+	// for them, so they are keyboard-only; the keys are MAME's, which some users know.
+	constexpr std::array g_mt32Buttons{
+		bind(nullptr, emu88Lib::Mt32Button::Part1, Key::KI_1, "PART 1"),
+		bind(nullptr, emu88Lib::Mt32Button::Part2, Key::KI_2, "PART 2"),
+		bind(nullptr, emu88Lib::Mt32Button::Part3, Key::KI_3, "PART 3"),
+		bind(nullptr, emu88Lib::Mt32Button::Part4, Key::KI_4, "PART 4"),
+		bind(nullptr, emu88Lib::Mt32Button::Part5, Key::KI_5, "PART 5"),
+		bind(nullptr, emu88Lib::Mt32Button::Rhythm, Key::KI_R, "RHYTHM"),
+		bind(nullptr, emu88Lib::Mt32Button::SoundGroup, Key::KI_G, "SOUND GROUP"),
+		bind(nullptr, emu88Lib::Mt32Button::Sound, Key::KI_S, "SOUND"),
+		bind(nullptr, emu88Lib::Mt32Button::Volume, Key::KI_V, "VOLUME"),
+		bind(nullptr, emu88Lib::Mt32Button::MasterVolume, Key::KI_M, "MASTER VOLUME"),
+	};
+	// The VOLUME/VALUE knob, a 32nd of its travel per press.
+	constexpr Key g_mt32KnobUpKey = Key::KI_UP;
+	constexpr Key g_mt32KnobDownKey = Key::KI_DOWN;
+
 	// The bindings the help dialog has to spell out; RmlUi's identifiers are
 	// contiguous for the letter, digit and function-key runs.
 	inline std::string keyName(const Key _key)
@@ -134,6 +154,8 @@ namespace emu88Player::editor
 		case Key::KI_SPACE:     return "Space";
 		case Key::KI_LEFT:      return "\xe2\x86\x90";	// left arrow
 		case Key::KI_RIGHT:     return "\xe2\x86\x92";	// right arrow
+		case Key::KI_UP:        return "\xe2\x86\x91";	// up arrow
+		case Key::KI_DOWN:      return "\xe2\x86\x93";	// down arrow
 		case Key::KI_OEM_1:     return ";";
 		case Key::KI_OEM_4:     return "[";
 		case Key::KI_OEM_MINUS: return "-";
@@ -172,8 +194,26 @@ namespace emu88Player::editor
 		emu88Lib::buttonBit(emu88Lib::Button::ReverbL) | emu88Lib::buttonBit(emu88Lib::Button::ReverbR) |
 		emu88Lib::buttonBit(emu88Lib::Button::LevelL) | emu88Lib::buttonBit(emu88Lib::Button::LevelR);
 
+	// The LA board's switch matrix: the MT-32's ten switches, which the CM-32L family and the
+	// CM-64's LA half read too, with nothing wired to them but the firmware's power-on chords.
+	constexpr uint32_t g_mt32ButtonMask = []
+	{
+		uint32_t mask = 0;
+		for(const auto& binding : g_mt32Buttons)
+			mask |= uint32_t{1} << binding.button;
+		return mask;
+	}();
+
+	// The boards whose switches reach the firmware through the LA board's matrix.
+	constexpr bool usesLaBoardButtons(const emu88Lib::DeviceModel _model)
+	{
+		return emu88Lib::isLaModel(_model) || _model == emu88Lib::DeviceModel::Cm64;
+	}
+
 	constexpr uint32_t panelButtonsForDevice(const emu88Lib::DeviceModel _model, uint32_t _buttons)
 	{
+		if(usesLaBoardButtons(_model))
+			return _buttons & g_mt32ButtonMask;
 		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro ||
 		   _model == emu88Lib::DeviceModel::Sc8820 || emu88Lib::isCmModel(_model) ||
 		   emu88Lib::isGmModuleModel(_model)) return 0;
@@ -188,10 +228,20 @@ namespace emu88Player::editor
 		return _buttons;
 	}
 
-	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Cm32p, ~uint32_t{0}) == 0 &&
-	              panelButtonsForDevice(emu88Lib::DeviceModel::Cm32l, ~uint32_t{0}) == 0 &&
-	              panelButtonsForDevice(emu88Lib::DeviceModel::Cm64, ~uint32_t{0}) == 0,
-	              "the CM bezels have no switches to press");
+	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Cm32p, ~uint32_t{0}) == 0,
+	              "the CM-32P has no switches to press");
+	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Mt32Old, ~uint32_t{0}) == g_mt32ButtonMask &&
+	              panelButtonsForDevice(emu88Lib::DeviceModel::Cm32l, ~uint32_t{0}) == g_mt32ButtonMask &&
+	              panelButtonsForDevice(emu88Lib::DeviceModel::Cm64, ~uint32_t{0}) == g_mt32ButtonMask,
+	              "the LA boards share the MT-32's switch matrix");
+	static_assert(g_mt32ButtonMask == 0x1f1f, "two groups of five, in the matrix positions the firmware scans");
+
+	// The boards whose artwork shows no switches: the skin's faces are hidden and whatever
+	// the board reads comes from the keyboard.
+	constexpr bool panelArtworkHasSwitches(const emu88Lib::DeviceModel _model)
+	{
+		return !usesLaBoardButtons(_model) && panelButtonsForDevice(_model, ~uint32_t{0}) != 0;
+	}
 
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc88VL,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::Preview)) == 0);
@@ -269,6 +319,24 @@ namespace emu88Player::editor
 		pair(nullptr, ProButton::VibDepthL, ProButton::VibDepthR, "EFX PARAM"),
 		pair(nullptr, ProButton::VibDelayL, ProButton::VibDelayR, "EFX VALUE"),
 
+	};
+
+	using LaButton = emu88Lib::Mt32Button;
+	constexpr std::array g_mt32Help{
+		row ("Part",  LaButton::Part1,  "PART 1"),
+		row (nullptr, LaButton::Part2,  "PART 2"),
+		row (nullptr, LaButton::Part3,  "PART 3"),
+		row (nullptr, LaButton::Part4,  "PART 4"),
+		row (nullptr, LaButton::Part5,  "PART 5"),
+		row (nullptr, LaButton::Rhythm, "RHYTHM"),
+
+		row ("Sound", LaButton::SoundGroup,   "SOUND GROUP"),
+		row (nullptr, LaButton::Sound,        "SOUND"),
+		row (nullptr, LaButton::Volume,       "VOLUME"),
+		row (nullptr, LaButton::MasterVolume, "MASTER VOLUME"),
+
+		chord("Power-on chords", "3 + V", LaButton::Part3, "Test mode (hold while switching on)", false),
+		chord(nullptr, "4 + R + M", LaButton::Part4, "Firmware version (hold while switching on)", false),
 	};
 
 	using WideButton = emu88Lib::Sc8850Button;

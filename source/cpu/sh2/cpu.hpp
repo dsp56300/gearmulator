@@ -26,17 +26,11 @@
 #include <memory>
 #include <vector>
 
-#include "common/sched.hpp"
+#include "common/core.hpp"
 #include "cpu/sh2/bus.hpp"
 #include "cpu/sh2/chip.hpp"
 #include "cpu/sh2/decode.hpp"
 #include "cpu/sh2/icache.hpp"
-
-#if defined(__GNUC__) || defined(__clang__)
-#define SH2_UNLIKELY(x) __builtin_expect(!!(x), 0)
-#else
-#define SH2_UNLIKELY(x) (x)
-#endif
 
 namespace sh2 {
 
@@ -54,7 +48,7 @@ const Cell* fill(Cpu& cpu, const Cell* c);
 const Cell* page_end(Cpu& cpu, const Cell* c);
 }  // namespace detail
 
-class Cpu final : public CodeSink, public emu::Clock {
+class Cpu final : public emu::SliceCore {
  public:
   struct Regs {
     u32 r[16] = {};
@@ -77,8 +71,6 @@ class Cpu final : public CodeSink, public emu::Clock {
   // Exception vectors (table 5.3).
   static constexpr u8 kVecIllegal = 4, kVecSlotIllegal = 6, kVecCpuAddrErr = 9, kVecDmaAddrErr = 10, kVecNmi = 11;
 
-  static constexpr s32 kForce = 1 << 28;
-  static constexpr s32 kMaxSlice = 1 << 24;
   // Exception sequences (table 6.5): 5 + m1 + m2 + m3 from start of processing;
   // interrupt response adds the priority decision (2 states, 3 for IRQ pins;
   // the m terms come out of the stack / vector accesses themselves).
@@ -93,7 +85,8 @@ class Cpu final : public CodeSink, public emu::Clock {
   unsigned step();
   u64 run(u64 states);
   u64 poll();
-  void stall(u64 states) { total_states_ += states; }
+  // Asleep there is no instruction boundary to end the slice at.
+  void cut_slice(u64 at) { if (!sleeping_) SliceCore::cut_slice(at); }
 
   // Interrupt controller interface.  level 1..15 (compared against I3-I0),
   // 0 = no request; `pin` marks an external IRQ (longer response time).
@@ -123,10 +116,6 @@ class Cpu final : public CodeSink, public emu::Clock {
   u8 cache_control() const { return ccr_; }
   void invalidate_cache_tags() { cache_tags_.fill(0); }
 
-  u64 total_states() const {
-    return in_slice_ ? total_states_ + u64(s64(slice_len_) - s64(true_budget())) : total_states_;
-  }
-  u64 now() const override { return total_states(); }
   u8 interrupt_mask() const { return u8((regs_.sr & kIMask) >> kIShift); }
 
   DecodedInsn decode_at(u32 addr) const { return decode(const_cast<Bus&>(bus_).read16(addr)); }
@@ -149,25 +138,25 @@ class Cpu final : public CodeSink, public emu::Clock {
   u32 read8(u32 a) {
     a &= addr_mask_;
     u32 off;
-    if (SH2_UNLIKELY(!bus_.translate(a, off))) return 0xFF;
+    if (EMU_UNLIKELY(!bus_.translate(a, off))) return 0xFF;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 0));
     return (at & Bus::kRdSlow) ? bus_.slow_read8(a, off) : bus_.mem()[off];
   }
   u32 read16(u32 a) {
     a &= addr_mask_;
-    if (SH2_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
+    if (EMU_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
     u32 off;
-    if (SH2_UNLIKELY(!bus_.translate(a, off))) return 0xFFFF;
+    if (EMU_UNLIKELY(!bus_.translate(a, off))) return 0xFFFF;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 1));
     return (at & Bus::kRdSlow) ? bus_.slow_read16(a, off) : Bus::be16(bus_.mem() + off);
   }
   u32 read32(u32 a) {
     a &= addr_mask_;
-    if (SH2_UNLIKELY(a & 3)) { raise(kPendAddrErr); a &= ~3u; }
+    if (EMU_UNLIKELY(a & 3)) { raise(kPendAddrErr); a &= ~3u; }
     u32 off;
-    if (SH2_UNLIKELY(!bus_.translate(a, off))) return 0xFFFFFFFFu;
+    if (EMU_UNLIKELY(!bus_.translate(a, off))) return 0xFFFFFFFFu;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 2));
     return (at & Bus::kRdSlow) ? bus_.slow_read32(a, off) : Bus::be32(bus_.mem() + off);
@@ -175,28 +164,28 @@ class Cpu final : public CodeSink, public emu::Clock {
   void write8(u32 a, u32 v) {
     a &= addr_mask_;
     u32 off;
-    if (SH2_UNLIKELY(!bus_.translate(a, off))) return;
+    if (EMU_UNLIKELY(!bus_.translate(a, off))) return;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 0));
-    if (SH2_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write8(a, off, u8(v)); else bus_.mem()[off] = u8(v);
+    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write8(a, off, u8(v)); else bus_.mem()[off] = u8(v);
   }
   void write16(u32 a, u32 v) {
     a &= addr_mask_;
-    if (SH2_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
+    if (EMU_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
     u32 off;
-    if (SH2_UNLIKELY(!bus_.translate(a, off))) return;
+    if (EMU_UNLIKELY(!bus_.translate(a, off))) return;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 1));
-    if (SH2_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write16(a, off, u16(v)); else Bus::put_be16(bus_.mem() + off, u16(v));
+    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write16(a, off, u16(v)); else Bus::put_be16(bus_.mem() + off, u16(v));
   }
   void write32(u32 a, u32 v) {
     a &= addr_mask_;
-    if (SH2_UNLIKELY(a & 3)) { raise(kPendAddrErr); a &= ~3u; }
+    if (EMU_UNLIKELY(a & 3)) { raise(kPendAddrErr); a &= ~3u; }
     u32 off;
-    if (SH2_UNLIKELY(!bus_.translate(a, off))) return;
+    if (EMU_UNLIKELY(!bus_.translate(a, off))) return;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 2));
-    if (SH2_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write32(a, off, v); else Bus::put_be32(bus_.mem() + off, v);
+    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write32(a, off, v); else Bus::put_be32(bus_.mem() + off, v);
   }
   void push32(u32 v) { regs_.r[15] -= 4; write32(regs_.r[15], v); }
   u32 pop32() { const u32 v = read32(regs_.r[15]); regs_.r[15] += 4; return v; }
@@ -207,7 +196,7 @@ class Cpu final : public CodeSink, public emu::Clock {
   const Cell* cells_for(u32 pc) {
     const u32 page = pc >> kPageShift;
     Cell* cells = pages_[page].get();
-    if (SH2_UNLIKELY(!cells)) cells = alloc_page(page);
+    if (EMU_UNLIKELY(!cells)) cells = alloc_page(page);
     page_cells_ = cells;
     page_pc_ = page << kPageShift;
     return cells + ((pc & (kPageSize - 1)) >> 1);
@@ -216,11 +205,11 @@ class Cpu final : public CodeSink, public emu::Clock {
   // Branch target: odd addresses raise an address error; a target in the
   // second word of an external fetch line pays for that line.
   const Cell* branch_to(u32 pc) {
-    if (SH2_UNLIKELY(pc & 1)) {
+    if (EMU_UNLIKELY(pc & 1)) {
       raise(kPendAddrErr);
       pc &= ~1u;
     }
-    const Cell* cell = SH2_UNLIKELY((pc ^ page_pc_) >> kPageShift) ? cells_for(pc)
+    const Cell* cell = EMU_UNLIKELY((pc ^ page_pc_) >> kPageShift) ? cells_for(pc)
                                                                    : page_cells_ + ((pc & (kPageSize - 1)) >> 1);
     if (pc & 2) fetch_line_at(pc);
     return cell;
@@ -261,41 +250,10 @@ class Cpu final : public CodeSink, public emu::Clock {
     else budget_ -= s32(bus_.fetch_static(cls));
   }
 
-  // --- pending / budget ------------------------------------------------------
-  void raise(u32 bit) {
-    if (!pending_) budget_ -= kForce;
-    pending_ |= bit;
-  }
-  void clear_pending(u32 bit) {
-    if (pending_ & bit) {
-      pending_ &= ~bit;
-      if (!pending_) budget_ += kForce;
-    }
-  }
+  // --- pending ---------------------------------------------------------------
   void reeval_irq() {
     if (irq_level_ && irq_level_ > interrupt_mask()) raise(kPendIrq); else clear_pending(kPendIrq);
   }
-  void set_budget(s32 states) { budget_ = states - (pending_ ? kForce : 0); }
-  s32 true_budget() const { return budget_ + (pending_ ? kForce : 0); }
-
- public:
-  // End the running slice at absolute state `at` (at the first instruction
-  // boundary at or after it).  The scheduler calls this when an event
-  // scheduled during the slice is due before the slice would have ended.
-  void cut_slice(u64 at) {
-    if (!in_slice_ || sleeping_) return;
-    const s64 left = true_budget();
-    const s64 now = s64(total_states_) + (s64(slice_len_) - left);
-    s64 remaining = s64(at) - now;
-    if (remaining < 0) remaining = 0;
-    if (remaining >= left) return;
-    const s32 delta = s32(left - remaining);
-    slice_len_ -= delta;
-    budget_ -= delta;
-    cut_ = true;  // run() returns after this slice so the machine can fire the event
-  }
-
- private:
   u32 wake_mask() const { return standby_ ? kPendNmi : (kPendNmi | kPendIrq | kPendDmaAddrErr); }
 
   u64 run_slice(s32 states);
@@ -312,12 +270,7 @@ class Cpu final : public CodeSink, public emu::Clock {
   bool sleeping_ = false, standby_ = false, standby_request_ = false;
   bool irq_taken_ = false, irq_pin_ = false;
   u8 irq_level_ = 0, irq_vector_ = 0;
-  u32 pending_ = 0;
-  s32 budget_ = 0;
-  s32 slice_len_ = 0;
-  bool in_slice_ = false;
-  bool cut_ = false;
-  u64 total_states_ = 0, insn_count_ = 0, exc_count_ = 0;
+  u64 insn_count_ = 0, exc_count_ = 0;
 
   // delayed branch in flight: decided by the prelude, consumed by the completion
   const Cell* branch_cell_ = nullptr;

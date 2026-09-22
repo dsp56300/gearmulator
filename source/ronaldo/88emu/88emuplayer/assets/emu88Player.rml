@@ -24,7 +24,7 @@
 		<div id="hardwareLcd2" class="lcdSecond"/>
 		<div id="powerOffDisplay2" class="lcdSecond powerOffPanel"/>
 		<knob id="outputVolume" class="volumeKnob"/>
-		<button id="btDeviceSelect" class="hit deviceSelect" title="Select SC-88 device"/>
+		<button id="btDeviceSelect" class="hit deviceSelect" title="Select device"/>
 
 		<!-- Exact bounds from the supplied SVG. The panel PNG contains the button
 		     recesses; these transparent SVGs provide the actual button faces. -->
@@ -97,9 +97,11 @@
 			<knob id="bt8850Value" class="hit sc8850Value" title="VALUE: drag or scroll to turn, click to push (Space)"/>
 		</div>
 
-		<!-- CM-32P / CM-64 bezel: the MIDI MESSAGE lamp left of POWER, which the artwork
-		     paints dark. The firmware holds HSO.3 low for about 45 ms per received message,
-		     long enough for the 30 Hz panel poll to catch it without any extra latching. -->
+		<!-- The CM bezel (CM-32P, CM-32L, CM-64, and the MT-32s until they get their own): the
+		     MIDI MESSAGE lamp left of POWER, which the artwork paints dark. The CM-32P firmware
+		     holds HSO.3 low for about 45 ms per received message and the LA boards' keeps the
+		     0200h latch bit up while MIDI arrives, both long enough for the 30 Hz panel poll to
+		     catch without any extra latching. -->
 		<div class="modelCmBezel">
 			<div id="ledCmMidi" class="panelLed cmMidiLed" style="left: 461dp; top: 116dp;"><img class="ledOnGraphic" src="cm_led_on.png"/></div>
 		</div>

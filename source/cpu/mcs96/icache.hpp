@@ -1,6 +1,7 @@
 // Pre-decoded instruction cells: one 16-byte Cell per guest code byte.
 #pragma once
 #include "common/cells.hpp"
+#include "common/host.hpp"
 #include "cpu/mcs96/types.hpp"
 
 namespace mcs96 {
@@ -18,6 +19,7 @@ struct Cell {
   u8 len;      // instruction length in bytes (prefix included)
   u8 cyc;      // states, operand in the register file (or fixed)
   u8 cyc2;     // states, operand through the memory controller / branch taken / stack external
+  EMU_CELL_POINTER_PAD(1)
 };
 static_assert(sizeof(Cell) == 16, "Cell must stay 16 bytes: one per guest code byte");
 
