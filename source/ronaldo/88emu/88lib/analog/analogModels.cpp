@@ -1,4 +1,5 @@
 #include "88lib/analog/analogModels.h"
+#include "88lib/analog/cmCalibration.h"
 
 namespace emu88Lib
 {
@@ -18,10 +19,14 @@ namespace emu88Lib
         // undo the hold's sinc droop, not to be flat on their own. The CM-32P's pair does the
         // same job with more damping; this board comes out with a few dB of lift left over.
         constexpr auto inputs = 1.0 / (1.0 / 6.8e3 + 1.0 / 6.8e3 + 1.0 / 10e3); // R74 R73 R75
-        chain.filter.add(lowpass2(MultipleFeedback{inputs, 6.8e3, 6.8e3, 220e-12, 5.6e-9},
-                                  _samplerate)); // R86 R67 C75 C83
-        chain.filter.add(lowpass2(MultipleFeedback{10e3, 10e3, 10e3, 220e-12, 5.6e-9},
-                                  _samplerate)); // R69 R61 R60 C66 C67
+        const MultipleFeedback first{inputs, 6.8e3, 6.8e3, 220e-12, 5.6e-9}; // R86 R67 C75 C83
+        const MultipleFeedback second{10e3, 10e3, 10e3, 220e-12, 5.6e-9}; // R69 R61 R60 C66 C67
+        const auto& l = cmCalibration::La[0];
+        const auto& r = cmCalibration::La[1];
+        chain.filter.add(lowpass2(first.frequency()*l.firstFrequency, first.q()*l.firstQ, _samplerate),
+                         lowpass2(first.frequency()*r.firstFrequency, first.q()*r.firstQ, _samplerate));
+        chain.filter.add(lowpass2(second.frequency()*l.secondFrequency, second.q()*l.secondQ, _samplerate),
+                         lowpass2(second.frequency()*r.secondFrequency, second.q()*r.secondQ, _samplerate));
 
         // R51 2.2k into the VCA (IC20 M5207L01), then IC22b turns its current back into a
         // voltage with 4.7k || 100p. The PWM that sets the VCA's level is master volume and is
@@ -36,10 +41,9 @@ namespace emu88Lib
         // C63 10u into R46 + R48 and R49 to ground, the divider that leaves the board.
         chain.filter.add(highpass1(rcCorner(4.7e3 + 1.5e3 + 6.8e3, 10e-6), _samplerate));
 
-        // Effective bandwidth missing from the ideal-op-amp schematic model. Fitted
-        // on dry saw sections of the CM-64 capture; square and wet paths are holdouts.
-        // This describes the measured unit, not an identified extra RC component.
-        chain.filter.add(lowpass1(16900.0, _samplerate), lowpass1(15150.0, _samplerate));
+        // Effective residual bandwidth of the selected reference unit/chain.
+        // This replaces the much darker first-unit fit, not a schematic component.
+        chain.filter.add(lowpass1(l.bandwidthHz, _samplerate), lowpass1(r.bandwidthHz, _samplerate));
     }
 
     void configureCm32pReconstruction(synthLib::OutputChain& chain, const double _samplerate)
@@ -50,13 +54,15 @@ namespace emu88Lib
         // word is held for a whole frame. Then two unity-gain Sallen-Key low-passes (IC30a/b);
         // the first peaks near 14 kHz and makes up most of the hold's droop.
         const SallenKey first{10e3, 10e3, 5.6e-9, 220e-12}; // R42A R43A C54A C52A
-        // Effective tolerance fit: +1.82% corner, -2.21% Q. The dry baseband
-        // AND its 32-kHz images constrain this; sax images were held out.
-        chain.filter.add(lowpass2(first.frequency()*1.0182, first.q()*.9779, _samplerate));
-        chain.filter.add(lowpass2(SallenKey{10e3, 10e3, 1.8e-9, 1.2e-9}, _samplerate)); // R44A R45A C55A C56A
-        // Independently fitted on PCM organ/strings, with sax held out. Keep this
-        // effective board bandwidth before the LA/PCM summing point.
-        chain.filter.add(lowpass1(14700.0, _samplerate), lowpass1(14100.0, _samplerate));
+        const SallenKey second{10e3, 10e3, 1.8e-9, 1.2e-9}; // R44A R45A C55A C56A
+        const auto& l = cmCalibration::Pcm[0];
+        const auto& r = cmCalibration::Pcm[1];
+        chain.filter.add(lowpass2(first.frequency()*l.firstFrequency, first.q()*l.firstQ, _samplerate),
+                         lowpass2(first.frequency()*r.firstFrequency, first.q()*r.firstQ, _samplerate));
+        chain.filter.add(lowpass2(second.frequency()*l.secondFrequency, second.q()*l.secondQ, _samplerate),
+                         lowpass2(second.frequency()*r.secondFrequency, second.q()*r.secondQ, _samplerate));
+        // Dry organ/strings and their images constrain this; sax is held out.
+        chain.filter.add(lowpass1(l.bandwidthHz, _samplerate), lowpass1(r.bandwidthHz, _samplerate));
     }
 
     void configureCmMixerOutput(synthLib::OutputChain& chain, const double _samplerate)

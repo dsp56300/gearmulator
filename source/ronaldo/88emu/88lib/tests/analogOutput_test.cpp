@@ -1,4 +1,5 @@
 #include "88lib/analog/analogOutput.h"
+#include "88lib/analog/cmCalibration.h"
 #include "common/test_util.hpp"
 #include "baseLib/os.h"
 
@@ -66,26 +67,35 @@ namespace
 
 	// Continuous-time reference: the DAC's zero-order hold followed by the modelled sections of
 	// the circuit, without the DC blockers.
-	double referenceGainDb(const AnalogModel _model, const double _frequency)
+	double referenceGainDb(const AnalogModel _model, const double _frequency, const bool _right = false)
 	{
 		const Complex s(0.0, 2.0 * g_pi * _frequency);
 		Complex circuit = 1.0;
 		switch(_model)
 		{
 		case AnalogModel::Cm32l:
+		{
 			// The two multiple-feedback sections; the first is fed by the three sample-and-hold
 			// resistors in parallel, which is what damps it. Then the VCA's I/V amplifier and
 			// IC22a's feedback capacitor; the DC blockers are excluded as everywhere here.
-			circuit = multipleFeedback(s, 1.0 / (1.0 / 6.8e3 + 1.0 / 6.8e3 + 1.0 / 10e3), 6.8e3, 6.8e3, 220e-12, 5.6e-9) *
-				multipleFeedback(s, 10e3, 10e3, 10e3, 220e-12, 5.6e-9) *
-				pole(s, 4.7e3, 100e-12) * pole(s, 15e3, 220e-12) * poleAt(s, 16900.0);
+			const auto& c = cmCalibration::La[_right ? 1 : 0];
+			const double t1 = std::sqrt(6.8e3*6.8e3*220e-12*5.6e-9);
+			const double t2 = std::sqrt(10e3*10e3*220e-12*5.6e-9);
+			const double q1 = t1/(6.8e3*6.8e3*220e-12*(4.0/6.8e3+1.0/10e3))*c.firstQ;
+			const double q2 = t2/(10e3*10e3*220e-12*(3.0/10e3))*c.secondQ;
+			const auto a = s*t1/c.firstFrequency, b = s*t2/c.secondFrequency;
+			circuit = 1.0/(1.0+a/q1+a*a) * 1.0/(1.0+b/q2+b*b) *
+				pole(s, 4.7e3, 100e-12) * pole(s, 15e3, 220e-12) * poleAt(s, c.bandwidthHz);
 			break;
+		}
 		case AnalogModel::Cm32p:
 		{
-			const double corner=1.0182/std::sqrt(10e3*10e3*5.6e-9*220e-12);
-			const double q=.9779*std::sqrt(10e3*10e3*5.6e-9*220e-12)/(220e-12*20e3);
-			circuit = 1.0/(1.0+s/(corner*q)+(s/corner)*(s/corner)) * sallenKey(s, 10e3, 10e3, 1.8e-9, 1.2e-9) *
-				pole(s, 100e3, 22e-12) * pole(s, 4.7e3 * 6.8e3 / 11.5e3, 1e-9) * poleAt(s, 14700.0);
+			const auto& c = cmCalibration::Pcm[_right ? 1 : 0];
+			const double t1 = std::sqrt(10e3*10e3*5.6e-9*220e-12), t2 = std::sqrt(10e3*10e3*1.8e-9*1.2e-9);
+			const double q1 = c.firstQ*t1/(220e-12*20e3), q2 = c.secondQ*t2/(1.2e-9*20e3);
+			const auto a = s*t1/c.firstFrequency, b = s*t2/c.secondFrequency;
+			circuit = 1.0/(1.0+a/q1+a*a) * 1.0/(1.0+b/q2+b*b) *
+				pole(s, 100e3, 22e-12) * pole(s, 4.7e3 * 6.8e3 / 11.5e3, 1e-9) * poleAt(s, c.bandwidthHz);
 			break;
 		}
 		case AnalogModel::Sc88:
@@ -122,7 +132,7 @@ namespace
 		}
 		const double x = g_pi * _frequency / dacRate(_model);
 		const double hold = interpolates(_model) ? 1.0 : std::sin(x) / x;
-		return 20.0 * std::log10(hold * std::abs(circuit));
+		return 20.0 * std::log10(std::abs(hold * circuit));
 	}
 
 	// Steady-state level at _probe of a full-scale DAC sine at _tone, held and filtered by the model.
@@ -294,16 +304,39 @@ int main()
 
 	checkResponse(AnalogModel::Cm32l);
 	checkResponse(AnalogModel::Cm32p);
-	// Independent stereo poles must not accidentally share coefficients or history.
+	// Independent stereo reconstruction sections must not share coefficients/history.
 	for(const auto model : {AnalogModel::Cm32l, AnalogModel::Cm32p})
 	{
-		const double leftCorner = model == AnalogModel::Cm32l ? 16900.0 : 14700.0;
-		const double rightCorner = model == AnalogModel::Cm32l ? 15150.0 : 14100.0;
-		for(const double f : {1000.0, 10000.0, 18000.0})
+		for(const double f : {1000.0, 10000.0, 18000.0, 36000.0, 42000.0})
 		{
-			const double tone = f > 16000 ? 32000-f : f;
-			const auto expected = -10*std::log10((1+std::pow(f/rightCorner,2))/(1+std::pow(f/leftCorner,2)));
+			const double tone = f > 32000 ? f-32000 : (f > 16000 ? 32000-f : f);
+			const auto expected = referenceGainDb(model,f,true)-referenceGainDb(model,f,false);
 			checkNear("R/L", f, measureGainDb(model,tone,f,true)-measureGainDb(model,tone,f), expected,.02);
+		}
+	}
+	// Gains are post-DAC-wiring and do not implement the reversed MIDI pan law.
+	const auto cmGain = getBoardOutputGain(DeviceModel::Cm64);
+	CHECK(std::fabs(cmGain.b/cmGain.a-1.96970f)<1e-5f);
+	CHECK(std::fabs(cmGain.rightA-1.01565f)<1e-6f);
+	CHECK(std::fabs(cmGain.rightB-.99604f)<1e-6f);
+	// The analog stage must preserve output order, regardless of MIDI pan convention.
+	for(const auto model : {AnalogModel::Cm32l, AnalogModel::Cm32p, AnalogModel::Cm64})
+	{
+		for(const bool right : {false, true})
+		{
+			AnalogOutput path;
+			path.setModel(model, 32000);
+			double activeEnergy = 0, silentEnergy = 0;
+			for(unsigned i=0; i<1024; ++i)
+			{
+				float l = i==0 && !right ? .25f : 0.f;
+				float r = i==0 && right ? .25f : 0.f;
+				path.process(l,r);
+				activeEnergy += right ? r*r : l*l;
+				silentEnergy += right ? l*l : r*r;
+			}
+			CHECK(activeEnergy > 1e-8);
+			CHECK(silentEnergy == 0);
 		}
 	}
 	// CM-64 topology: independent LA and PCM paths meet only at the shared mixer.

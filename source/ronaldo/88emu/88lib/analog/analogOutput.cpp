@@ -1,5 +1,6 @@
 #include "88lib/analog/analogOutput.h"
 #include "88lib/analog/analogModels.h"
+#include "88lib/analog/cmCalibration.h"
 
 
 #include <array>
@@ -19,24 +20,10 @@ namespace emu88Lib
         //   CM-32P  I/V R47A 6.8k / R46A 2.2k                             = 3.091
         //           then R48A 100k into the same mixer, at unity.
         //
-        // Both feed the same M5207L01 through the same 2.2k, so its transconductance cancels
-        // out of the ratio. The CM-64 capture (tools/cm64_calibration) had the PCM half only
-        // 0.33 dB hotter than the LA half for equal DAC words as the emulation then took
-        // them, 5 dB under this estimate - because the LA board's audio bus carries the
-        // LA32's word rotated up one bit (LaBoard::rotateNewBoardBus), which the emulation
-        // was missing. With that wiring in place the measured ratio comes to PCM 6.35 dB
-        // hotter for equal chip words, 1 dB over the resistors alone; the capture is what
-        // is kept, as the difference is in the DAC references and operating points the
-        // schematic reading leaves out. The LA figure is the schematic's and is what the
-        // normalization rests on: a recording at 75% knob cannot establish volts per full
-        // scale. Trims match the measured CM unit directly. The Korg reference's -0.108 dB
-        // R/L is not an independently measured ADC imbalance and is NOT removed.
-        // Fixed-gain line inputs still leave a small unmeasured channel-tolerance
-        // uncertainty; these trims are not a claim about every CM module.
         constexpr double g_cm32lGain = (4.7 / 2.2) * 1.5 * (6.8 / (4.7 + 1.5 + 6.8));
-        constexpr double g_cm32pGain = g_cm32lGain * 2.0 * 1.0271;
-        constexpr float g_cm32lRight = 0.9793f;
-        constexpr float g_cm32pRight = 1.0011f;
+        constexpr double g_cm32pGain = g_cm32lGain * cmCalibration::PcmRelativeGain;
+        constexpr float g_cm32lRight = cmCalibration::LaRight;
+        constexpr float g_cm32pRight = cmCalibration::PcmRight;
 
         struct ModelInfo
         {
