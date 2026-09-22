@@ -472,7 +472,7 @@ namespace emu88Player
         if (!folder.isDirectory())
             folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
         // Card dumps carry no agreed extension, so every file is offered.
-        m_pcmCardChooser = std::make_unique<juce::FileChooser>("Select CM-32P PCM card image", folder, "*", true);
+        m_pcmCardChooser = std::make_unique<juce::FileChooser>("Select CM-32P / CM-64 PCM card image", folder, "*", true);
         const juce::WeakReference<Editor> safeThis(this);
         m_pcmCardChooser->launchAsync(juce::FileBrowserComponent::openMode |
                                           juce::FileBrowserComponent::canSelectFiles,
@@ -506,7 +506,7 @@ namespace emu88Player
 
         if (!applied)
         {
-            genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "CM-32P PCM card", error, this);
+            genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "CM-32P / CM-64 PCM card", error, this);
             return;
         }
         // A board reads its card only while booting, so a running one restarts to take the new card.

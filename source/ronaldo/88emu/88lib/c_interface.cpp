@@ -35,6 +35,8 @@ struct emu88_data
 
 	std::unique_ptr<emu88Lib::HardwareDevice> device;
 	unsigned portCount = 1;
+	// The card the next device boots with, see emu88_set_pcm_card().
+	std::vector<uint8_t> pcmCard;
 
 	std::array<synthLib::MidiBufferParser, MaxPorts> parsers{
 		synthLib::MidiBufferParser{synthLib::MidiEventSource::Host}, synthLib::MidiBufferParser{synthLib::MidiEventSource::Host},
@@ -205,6 +207,18 @@ int emu88_is_device_available(const emu88_device_id _device)
 	return toModel(_device, model) && emu88Lib::RomLoader::isDeviceAvailable(model) ? 1 : 0;
 }
 
+int emu88_get_device_first_midi_channel(const emu88_device_id _device)
+{
+	emu88Lib::DeviceModel model;
+	return toModel(_device, model) ? emu88Lib::firstMidiChannel(model) : 0;
+}
+
+int emu88_device_has_pcm_card_slot(const emu88_device_id _device)
+{
+	emu88Lib::DeviceModel model;
+	return toModel(_device, model) && emu88Lib::hasPcmCardSlot(model) ? 1 : 0;
+}
+
 size_t emu88_describe_device_roms(const emu88_device_id _device, char* _buffer, const size_t _bufferSize)
 {
 	std::string text;
@@ -250,6 +264,21 @@ void emu88_set_boot_flags(const emu88_context _context, const unsigned _flags)
 		_context->bootFlags = _flags;
 }
 
+emu88_return_code emu88_set_pcm_card(const emu88_context _context, const uint8_t* _image, const size_t _length)
+{
+	if(!_context || (!_image && _length))
+		return EMU88_RC_INVALID_ARGUMENT;
+	std::vector<uint8_t> card;
+	if(_length)
+	{
+		card.assign(_image, _image + _length);
+		if(!emu88Lib::HardwareDevice::isPcmCardImage(card))
+			return EMU88_RC_INVALID_ARGUMENT;
+	}
+	_context->pcmCard = std::move(card);
+	return EMU88_RC_OK;
+}
+
 void emu88_set_stereo_output_samplerate(const emu88_context _context, const double _samplerate)
 {
 	if(!_context)
@@ -274,7 +303,7 @@ emu88_return_code emu88_open_synth(const emu88_context _context)
 	boot.factoryReset = (_context->bootFlags & EMU88_BOOT_FACTORY_RESET) != 0;
 	boot.fastBoot = (_context->bootFlags & EMU88_BOOT_SKIP_INTRO) != 0;
 
-	auto device = std::make_unique<emu88Lib::HardwareDevice>(params, boot);
+	auto device = std::make_unique<emu88Lib::HardwareDevice>(params, boot, _context->pcmCard);
 	if(!device->isValid())
 		return EMU88_RC_FAILED;
 
@@ -354,6 +383,95 @@ emu88_return_code emu88_parse_stream(const emu88_context _context, const uint8_t
 emu88_return_code emu88_parse_stream_on_port(const emu88_context _context, const unsigned _port, const uint8_t* _stream, const uint32_t _length)
 {
 	return play(_context, _port, _stream, _length);
+}
+
+emu88_return_code emu88_play_device_reset(const emu88_context _context)
+{
+	if(!_context)
+		return EMU88_RC_INVALID_ARGUMENT;
+	if(!_context->device)
+		return EMU88_RC_NOT_OPENED;
+	const auto reset = emu88Lib::deviceResetSysex(_context->model);
+	for(unsigned port = 0; port < _context->portCount; ++port)
+		if(const auto rc = play(_context, port, reset.data(), reset.size()); rc != EMU88_RC_OK)
+			return rc;
+	return EMU88_RC_OK;
+}
+
+emu88_return_code emu88_play_silence(const emu88_context _context)
+{
+	if(!_context)
+		return EMU88_RC_INVALID_ARGUMENT;
+	if(!_context->device)
+		return EMU88_RC_NOT_OPENED;
+	const auto controllers = emu88Lib::HardwareDevice::silenceControllers(_context->model);
+	for(unsigned port = 0; port < _context->portCount; ++port)
+		for(uint8_t channel = 0; channel < 16; ++channel)
+			for(const auto& [controller, value] : controllers)
+			{
+				const uint8_t bytes[3] = {static_cast<uint8_t>(0xb0 | channel), controller, value};
+				if(const auto rc = play(_context, port, bytes, 3); rc != EMU88_RC_OK)
+					return rc;
+			}
+	return EMU88_RC_OK;
+}
+
+// ---- front panel
+
+emu88_return_code emu88_set_panel_buttons(const emu88_context _context, const uint32_t _buttons)
+{
+	if(!_context)
+		return EMU88_RC_INVALID_ARGUMENT;
+	if(!_context->device)
+		return EMU88_RC_NOT_OPENED;
+	_context->device->setPanelButtons(_buttons);
+	return EMU88_RC_OK;
+}
+
+emu88_return_code emu88_turn_panel_encoder(const emu88_context _context, const int _detents)
+{
+	if(!_context)
+		return EMU88_RC_INVALID_ARGUMENT;
+	if(!_context->device)
+		return EMU88_RC_NOT_OPENED;
+	_context->device->turnPanelEncoder(_detents);
+	return EMU88_RC_OK;
+}
+
+uint32_t emu88_get_panel_leds(const emu88_context _context)
+{
+	if(!_context || !_context->device)
+		return 0;
+	return _context->device->displaySnapshot().leds;
+}
+
+size_t emu88_get_display_text(const emu88_context _context, const unsigned _screen, char* _buffer, const size_t _bufferSize)
+{
+	std::string text;
+	if(_context && _context->device && _screen < 2)
+	{
+		const auto snapshot = _context->device->displaySnapshot();
+		for(const auto& line : snapshot.screens[_screen].text)
+		{
+			if(!text.empty())
+				text += '\n';
+			text += line;
+		}
+	}
+	if(_buffer && _bufferSize)
+	{
+		const auto count = std::min(text.size(), _bufferSize - 1);
+		std::memcpy(_buffer, text.data(), count);
+		_buffer[count] = 0;
+	}
+	return text.size();
+}
+
+int emu88_is_display_on(const emu88_context _context, const unsigned _screen)
+{
+	if(!_context || !_context->device || _screen >= 2)
+		return 0;
+	return _context->device->displaySnapshot().screens[_screen].displayOn ? 1 : 0;
 }
 
 // ---- audio

@@ -59,7 +59,8 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .modelSc8850 .lcd { left: 165dp; top: 28dp; width: 175dp; height: 70dp; }
 .modelCm .lcd { left: 162dp; top: 23dp; width: 218dp; height: 41dp; }	/* the whole window; the dots sit inset */
 .modelCm .powerOffDisplay { padding-top: 14dp; }
-/* The CM-32L's own bezel carries a single short window where the CM-32P has its tall one. */
+/* The CM-32L's own bezel carries a single short window where the CM-32P has its tall one; the
+ * MT-32s' 20-character display sits in the same window. */
 .modelCm32l .lcd { left: 162dp; top: 34dp; width: 218dp; height: 20dp; }
 .modelCm32l .powerOffDisplay { padding-top: 4dp; font-size: 11dp; }
 /* The CM-64 keeps the CM-32P window above and adds the CM-32L's below it. Only that bezel
@@ -174,9 +175,9 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .efxLed.green .ledGreenGraphic { display: block; }
 .efxLed.green.red .ledGreenGraphic { display: none; }
 .efxLed.green.red .ledAmberGraphic { display: block; }
-/* The CM bezel, shared by the CM-32P and the CM-64 whose artwork differs only in the name.
- * Only MIDI MESSAGE is driven; POWER is painted on, as is the unlit lamp, so the element
- * only ever paints the lit state. */
+/* The CM bezel, shared by the CM-32P, CM-32L and CM-64 artwork, which differ in their display
+ * windows, and worn by the MT-32s for now. Only MIDI MESSAGE is driven; POWER is painted on,
+ * as is the unlit lamp, so the element only ever paints the lit state. */
 .modelCmBezel { display: none; }
 .modelCm .modelCmBezel { display: block; }
 /* A 3x PNG like the SC-8850 sheet, because lunasvg ignores SVG filters and the source art is

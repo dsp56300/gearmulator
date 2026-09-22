@@ -92,6 +92,11 @@ namespace emu88Player
 		void sendGmReset();
 		void sendGm2Reset();
 		void sendGsReset();
+		// The MT-32 and CM boards' "all parameters reset", the only reset they answer to.
+		void sendRolandLaReset();
+		// The device's own reset, whichever of the above that is.
+		void sendDeviceReset();
+		// Hold pedal up and All Notes Off on every channel: what stops a note on any board.
 		void sendAllNotesOff();
 
 		// Capture audio to a scratch WAV on a writer thread until the user saves it.
@@ -111,9 +116,9 @@ namespace emu88Player
 		emu88Lib::BootOptions bootOptions() const;
 		void setBootOptions(const emu88Lib::BootOptions& _boot);
 
-		// The PCM card in the CM-32P's slot, by the path of its image; empty for no card.
+		// The PCM card in the CM-32P's or CM-64's slot, by the path of its image; empty for no card.
 		std::string pcmCardPath() const;
-		// Loads the card at _path for every CM-32P from the next device load on and remembers
+		// Loads the card at _path for every board with a slot from the next device load on and remembers
 		// the path; an empty one empties the slot. On failure nothing changes and _error says why.
 		bool setPcmCardPath(const std::string& _path, std::string& _error);
 
@@ -129,7 +134,7 @@ namespace emu88Player
 		synthLib::DeviceCreateParams createDeviceParams(emu88Lib::DeviceModel _model) const;
 		bool replaceDevice(emu88Lib::DeviceModel _model, bool _persistModel, uint32_t heldButtons = 0);
 		uint8_t midiPortCount() const;
-		void sendSystemExclusive(std::initializer_list<uint8_t> _bytes);
+		void sendSystemExclusive(const std::vector<uint8_t>& _bytes);
 		void sendMidiEvents(const std::vector<synthLib::SMidiEvent>& _events);
 		void recordBlock(const juce::AudioBuffer<float>& _buffer);
 		void addMidiBuffer(const juce::MidiBuffer& _midi, uint8_t _port, synthLib::MidiEventSource _source);
@@ -146,7 +151,7 @@ namespace emu88Player
 		std::unique_ptr<synthLib::Plugin> m_engine;
 		std::unique_ptr<jucePlayer::PortMidiBridge> m_portMidiBridge;
 		jucePlayer::MidiPlayer m_midiPlayer;
-		// The card in every CM-32P this session loads, see pcmCardPath().
+		// The card in every CM-32P and CM-64 this session loads, see pcmCardPath().
 		std::vector<uint8_t> m_pcmCard;
 		emu88Lib::DeviceModel m_deviceModel = emu88Lib::DeviceModel::Sc88Pro;
 		std::atomic<bool> m_reverseOutputChannels{false};

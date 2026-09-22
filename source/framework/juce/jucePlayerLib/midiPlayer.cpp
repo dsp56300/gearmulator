@@ -340,7 +340,8 @@ namespace jucePlayer
                     break;
                 if (m_startPhase == StartPhase::Gap)
                     beginReset(outputOffset, _events);
-                else if (m_startPhase == StartPhase::Reset && m_startResetMode == ResetMode::Mt32)
+                else if (m_startPhase == StartPhase::Reset && m_startResetMode == ResetMode::Mt32 &&
+                         m_startResetTarget == ResetTarget::GsModule)
                 {
                     synthLib::midi::appendGsMt32Arrangement(_events, m_portCount.load(std::memory_order_relaxed),
                                                             outputOffset);
@@ -484,6 +485,7 @@ namespace jucePlayer
         m_eventIndex = 0;
         m_audioState = _play ? State::Playing : State::Stopped;
         m_startResetMode = resetMode();
+        m_startResetTarget = resetTarget();
         m_waitSamples =
             _automaticAdvance ? static_cast<uint64_t>(std::ceil(songGapMs() * m_lastSampleRate / 1000.0)) : 0;
         if (m_waitSamples)
@@ -503,7 +505,7 @@ namespace jucePlayer
     void MidiPlayer::beginReset(const uint32_t _offset, std::vector<synthLib::SMidiEvent>& _events)
     {
         synthLib::midi::appendSongReset(_events, m_startResetMode, m_portCount.load(std::memory_order_relaxed),
-                                        _offset);
+                                        _offset, m_startResetTarget);
         m_startPhase = StartPhase::Reset;
         m_waitSamples =
             static_cast<uint64_t>(std::ceil(resetSettleMs(m_startResetMode) * m_lastSampleRate / 1000.0));
@@ -528,22 +530,24 @@ namespace jucePlayer
         if (!playlist || _index >= playlist->songs.size())
             return 0;
         const auto mode = resetMode();
-        return (resetSettleMs(mode) + (mode == ResetMode::Mt32 ? kResetSettleMs : 0) +
+        const bool arrangement = mode == ResetMode::Mt32 && resetTarget() == ResetTarget::GsModule;
+        return (resetSettleMs(mode) + (arrangement ? kResetSettleMs : 0) +
                 playlist->songs[_index]->openingMs) / 1000.0;
     }
 
     void MidiPlayer::silence(const uint32_t _offset, std::vector<synthLib::SMidiEvent>& _events) const
     {
+        // All Sound Off, then the hold pedal up and All Notes Off for the boards that predate
+        // All Sound Off and would otherwise keep a pedalled note ringing (the MT-32 and CM
+        // boards); the GS modules take the pedal message as nothing worse than redundant.
         for (uint8_t port = 0; port < m_portCount.load(std::memory_order_relaxed); ++port)
             for (uint8_t channel = 0; channel < 16; ++channel)
-            {
-                _events.emplace_back(synthLib::MidiEventSource::Host, static_cast<uint8_t>(0xb0 | channel), 120, 0,
-                                     _offset);
-                _events.back().port = port;
-                _events.emplace_back(synthLib::MidiEventSource::Host, static_cast<uint8_t>(0xb0 | channel), 123, 0,
-                                     _offset);
-                _events.back().port = port;
-            }
+                for (const uint8_t controller : {120, 64, 123})
+                {
+                    _events.emplace_back(synthLib::MidiEventSource::Host, static_cast<uint8_t>(0xb0 | channel),
+                                         controller, 0, _offset);
+                    _events.back().port = port;
+                }
     }
 
     void MidiPlayer::updatePublishedStatus()

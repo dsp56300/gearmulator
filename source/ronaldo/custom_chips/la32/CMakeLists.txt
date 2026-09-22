@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(la32Lib)
 
+# LA32 partial synthesizer (R15229896 / MB87136A), the MT-32 / CM-32L tone engine. Derived from
+# Nuked-MT32 (nukeykt, GPL-2.0-or-later); the notice is in la32.cpp.
 add_library(la32Lib STATIC la32.cpp la32.h)
 set_property(TARGET la32Lib PROPERTY FOLDER "Ronaldo")
 target_include_directories(la32Lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..)

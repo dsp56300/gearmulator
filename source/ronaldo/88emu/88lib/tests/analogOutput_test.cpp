@@ -258,6 +258,19 @@ int main()
 	// rounded, and a 24-bit DAC keeps every bit.
 	CHECK_EQ(getDacBits(DeviceModel::Cm32p), 16);
 	CHECK_EQ(getDacBits(DeviceModel::Cm64), 16);
+	CHECK_EQ(getDacBits(DeviceModel::Cm32l), 16);
+	CHECK_EQ(getDacBits(DeviceModel::Mt32Old), 16);
+	CHECK_EQ(getDacBits(DeviceModel::Mt32New), 16);
+	// The new-type MT-32 board shares the CM-32L's output stage; the old-type board's and the
+	// CM-32LN's have not been read, so Auto leaves them digital.
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Cm32l) == AnalogModel::Cm32l);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Mt32New) == AnalogModel::Cm32l);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Mt32Old) == AnalogModel::None);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Cm32ln) == AnalogModel::None);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::Cm64) == AnalogModel::Cm64);
+	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32New).a, getBoardOutputGain(DeviceModel::Cm32l).a);
+	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32Old).a, getBoardOutputGain(DeviceModel::Cm32l).a);
+	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32New).rightA, 1.0f);
 	CHECK_EQ(getDacBits(DeviceModel::Sc55Mk1), 16);
 	CHECK_EQ(getDacBits(DeviceModel::Cm300), 16);
 	CHECK_EQ(getDacBits(DeviceModel::Sc55Mk2), 18);

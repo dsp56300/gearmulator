@@ -1,4 +1,5 @@
 #include "88lib/boards/cm32p.h"
+#include "synthLib/midiBufferParser.h"
 #include "common/test_util.hpp"
 
 #include <algorithm>
@@ -185,14 +186,19 @@ int main()
 	note.cancelOnTransportChange = true;
 	midi.addMidiEvent(note);
 	midi.transportDiscontinuity(1);
+	// The cancelled note never reaches the board; the channel it had sounded on is silenced
+	// the way this firmware understands, pedal up and All Notes Off, echoed back with running
+	// status, which the parser hands over as raw data-byte events.
 	const auto cancelled = run(midi);
-	CHECK_EQ(cancelled.size(), 1u);
-	if(cancelled.size() == 1)
+	std::vector<uint8_t> cancelledBytes;
+	for(const auto& event : cancelled)
 	{
-		CHECK_EQ(cancelled[0].a, 0xb0);
-		CHECK_EQ(cancelled[0].b, 120);
-		CHECK_EQ(cancelled[0].c, 0);
+		cancelledBytes.push_back(event.a);
+		const auto length = synthLib::MidiBufferParser::lengthFromStatusByte(event.a);
+		if(length > 1) cancelledBytes.push_back(event.b);
+		if(length > 2) cancelledBytes.push_back(event.c);
 	}
+	CHECK(cancelledBytes == std::vector<uint8_t>({0xb0, 64, 0, 123, 0}));
 	midi.addMidiEvent(note);
 	midi.reset();
 	CHECK(run(midi).empty());

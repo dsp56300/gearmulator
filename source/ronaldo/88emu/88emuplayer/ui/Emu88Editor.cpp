@@ -222,7 +222,12 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Sc155: panel = "sc55_panel.png"; break;
 		// Boards without a front panel: artwork with only the player, device selector and volume.
 		case emu88Lib::DeviceModel::Cm32p: panel = "cm32p_panel.png"; break;
-		case emu88Lib::DeviceModel::Cm32l: panel = "cm32l_panel.png"; break;
+		case emu88Lib::DeviceModel::Cm32l:
+		case emu88Lib::DeviceModel::Cm32ln:
+		// The MT-32s borrow the CM-32L's bezel for now: the same display in the same window,
+		// their switches and knob on the keyboard.
+		case emu88Lib::DeviceModel::Mt32Old:
+		case emu88Lib::DeviceModel::Mt32New: panel = "cm32l_panel.png"; break;
 		case emu88Lib::DeviceModel::Cm64: panel = "cm64_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8820: panel = "sc8820_panel.png"; break;
 		case emu88Lib::DeviceModel::Xpgs:
@@ -235,12 +240,14 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Scb55:
 		case emu88Lib::DeviceModel::Rlp3237: panel = "sc55pc_panel.png"; break;
 		}
-		// The boards whose switches the panel filter drops; their artwork has none to show.
-		const bool noPanel = panelButtonsForDevice(_model, ~uint32_t{0}) == 0;
+		// The boards whose artwork shows no switches: the skin's faces are hidden, and what the
+		// LA boards read comes from the keyboard.
+		const bool noPanel = !panelArtworkHasSwitches(_model);
 		if(auto* image = document->GetElementById("hardwarePanel"))
 			image->SetAttribute("src", panel);
 		// The grey panels get darker transport faces.
-		const bool darkTransport = emu88Lib::isCmModel(_model) || _model == emu88Lib::DeviceModel::Sc8850 ||
+		const bool cmBezel = emu88Lib::isCmModel(_model) || emu88Lib::isLaModel(_model);
+		const bool darkTransport = cmBezel || _model == emu88Lib::DeviceModel::Sc8850 ||
 		                           _model == emu88Lib::DeviceModel::Sc8820;
 		for(const auto& [id, name] : {std::pair{"playerPlayGraphic", "player_play"}, std::pair{"playerPauseGraphic", "player_pause"},
 		                              std::pair{"playerStopGraphic", "player_stop"}})
@@ -253,10 +260,11 @@ namespace emu88Player
 			root->SetClass("modelSc88Pro", _model == emu88Lib::DeviceModel::Sc88Pro);
 			root->SetClass("modelSc8850", _model == emu88Lib::DeviceModel::Sc8850);
 			root->SetClass("modelSc55", emu88Lib::isSc55Model(_model) && !noPanel);
-			root->SetClass("modelCm", emu88Lib::isCmModel(_model));
+			root->SetClass("modelCm", cmBezel);
 			// The CM bezels differ in their windows: one 16x2 on the CM-32P, one 20x1 on the
-			// CM-32L, and both on the CM-64.
-			root->SetClass("modelCm32l", _model == emu88Lib::DeviceModel::Cm32l);
+			// CM-32L, and both on the CM-64. The MT-32s wear the CM-32L's for now.
+			root->SetClass("modelCm32l", cmBezel && _model != emu88Lib::DeviceModel::Cm32p &&
+			                             _model != emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelCm64", _model == emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelSc8820", _model == emu88Lib::DeviceModel::Sc8820);
 			root->SetClass("modelNoPanel", noPanel);
@@ -290,18 +298,29 @@ namespace emu88Player
 
 		const auto currentScale = m_processor.config().getIntValue("scale", 100);
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
-		m_contextMenu->addEntry("Send GM Reset", [this]
+		// The MT-32 and CM boards know one reset, their own; the GM and GS ones do nothing there.
+		if(emu88Lib::isRolandLaFamily(m_processor.deviceModel()))
 		{
-			m_processor.sendGmReset();
-		});
-		m_contextMenu->addEntry("Send GM2 Reset", [this]
+			m_contextMenu->addEntry("Send All Parameters Reset", [this]
+			{
+				m_processor.sendRolandLaReset();
+			});
+		}
+		else
 		{
-			m_processor.sendGm2Reset();
-		});
-		m_contextMenu->addEntry("Send GS Reset", [this]
-		{
-			m_processor.sendGsReset();
-		});
+			m_contextMenu->addEntry("Send GM Reset", [this]
+			{
+				m_processor.sendGmReset();
+			});
+			m_contextMenu->addEntry("Send GM2 Reset", [this]
+			{
+				m_processor.sendGm2Reset();
+			});
+			m_contextMenu->addEntry("Send GS Reset", [this]
+			{
+				m_processor.sendGsReset();
+			});
+		}
 		m_contextMenu->addEntry("Send All Notes Off", [this]
 		{
 			m_processor.sendAllNotesOff();

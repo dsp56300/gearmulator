@@ -55,6 +55,16 @@ namespace emu88Lib
             return false;
         }
 
+        bool anySha256At(const size_t _size)
+        {
+            for (const auto& entry : g_romRegistry)
+            {
+                if (entry.size == _size && !entry.hash.isValid() && entry.sha256.isValid())
+                    return true;
+            }
+            return false;
+        }
+
         // Reuse digests until the file size or modification time changes.
         struct HashCacheEntry
         {
@@ -65,17 +75,21 @@ namespace emu88Lib
             bool hasSwapped = false;
             baseLib::SHA1 sha1;
             bool hasSha1 = false;
+            baseLib::SHA256 sha256;
+            bool hasSha256 = false;
             std::vector<FoundRom> proControlCopies;
         };
 
         // A row is identified by its MD5 where the dump was hashed here, and by its
-        // published SHA-1 where it was catalogued without one. Never by both, so a
-        // revision cannot be recognized under two identities.
+        // published SHA-1 or SHA-256 where it was catalogued without one. Never by more
+        // than one, so a revision cannot be recognized under two identities.
         bool matchesRaw(const RomRegistryEntry& _entry, const HashCacheEntry& _hashes)
         {
             if (_entry.hash.isValid())
                 return _entry.hash == _hashes.raw;
-            return _entry.sha1.isValid() && _hashes.hasSha1 && _entry.sha1 == _hashes.sha1;
+            if (_entry.sha1.isValid())
+                return _hashes.hasSha1 && _entry.sha1 == _hashes.sha1;
+            return _entry.sha256.isValid() && _hashes.hasSha256 && _entry.sha256 == _hashes.sha256;
         }
 
         std::mutex& hashCacheMutex()
@@ -93,7 +107,7 @@ namespace emu88Lib
         // Digests for one candidate, from the cache where possible. Returns
         // false if the file could not be read at its expected size.
         bool hashCandidate(HashCacheEntry& _result, const std::string& _file, const size_t _size,
-                           const bool _wantSwapped, const bool _wantSha1)
+                           const bool _wantSwapped, const bool _wantSha1, const bool _wantSha256)
         {
             const auto modificationTime = baseLib::filesystem::getFileModificationTime(_file);
 
@@ -102,7 +116,7 @@ namespace emu88Lib
                 const auto it = hashCache().find(_file);
                 if (it != hashCache().end() && it->second.size == _size &&
                     it->second.modificationTime == modificationTime && (!_wantSwapped || it->second.hasSwapped) &&
-                    (!_wantSha1 || it->second.hasSha1))
+                    (!_wantSha1 || it->second.hasSha1) && (!_wantSha256 || it->second.hasSha256))
                 {
                     _result = it->second;
                     return true;
@@ -151,6 +165,9 @@ namespace emu88Lib
             _result.hasSha1 = _wantSha1;
             if (_wantSha1)
                 _result.sha1 = baseLib::SHA1(data);
+            _result.hasSha256 = _wantSha256;
+            if (_wantSha256)
+                _result.sha256 = baseLib::SHA256(data);
 
             _result.hasSwapped = _wantSwapped;
             if (_wantSwapped)
@@ -319,7 +336,7 @@ namespace emu88Lib
 
                 HashCacheEntry hashes;
                 if (!hashCandidate(hashes, path, size, spec.normalizeH8Words || anyWordSwappedAt(size),
-                                   anySha1At(size)))
+                                   anySha1At(size), anySha256At(size)))
                     continue;
                 bool knownHash = false;
                 bool needsWordSwap = false;
@@ -344,7 +361,7 @@ namespace emu88Lib
                 continue;
 
             HashCacheEntry hashes;
-            if (!hashCandidate(hashes, path, size, anyWordSwappedAt(size), anySha1At(size)))
+            if (!hashCandidate(hashes, path, size, anyWordSwappedAt(size), anySha1At(size), anySha256At(size)))
                 continue;
             proControlCopies.insert(proControlCopies.end(), hashes.proControlCopies.begin(),
                                     hashes.proControlCopies.end());

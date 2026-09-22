@@ -98,6 +98,53 @@ namespace emu88Lib
         return result;
     }
 
+    const FoundRom* RomInventory::findRevision(const RomDevice _device, const RomSlot _slot, const uint8_t _index,
+                                               const uint8_t _revision) const
+    {
+        const FoundRom* result = nullptr;
+        for (const auto& rom : m_roms)
+        {
+            if (!rom.entry || rom.entry->slot != _slot || rom.entry->index != _index ||
+                rom.entry->revision != _revision || !emu88Lib::usedBy(*rom.entry, _device))
+                continue;
+            if (!result || rom.entry < result->entry)
+                result = &rom;
+        }
+        return result;
+    }
+
+    bool RomInventory::hasConsistentRevision(const RomDevice _device) const
+    {
+        // The slots this board fills from revision-numbered images, and the revisions on
+        // offer for each. A slot with an unnumbered image (a custom named file) pairs with
+        // anything, so it drops out of the check.
+        std::vector<std::pair<RomSlot, uint8_t>> slots;
+        std::set<uint8_t> revisions;
+        for (const auto& rom : m_roms)
+        {
+            if (!rom.entry || !rom.entry->revision || !rom.usedBy(_device))
+                continue;
+            const auto slot = std::make_pair(rom.entry->slot, rom.entry->index);
+            const auto* named = find(_device, rom.entry->slot, rom.entry->index);
+            if (named && named->namedSpec && !named->entry)
+                continue;
+            if (std::find(slots.begin(), slots.end(), slot) == slots.end())
+                slots.push_back(slot);
+            revisions.insert(rom.entry->revision);
+        }
+        if (slots.size() < 2)
+            return true;
+        for (const auto revision : revisions)
+        {
+            bool complete = true;
+            for (const auto& [slot, index] : slots)
+                complete = complete && findRevision(_device, slot, index, revision) != nullptr;
+            if (complete)
+                return true;
+        }
+        return false;
+    }
+
     const FoundRom* RomInventory::findSc88ProWaveSource(const uint8_t _index, size_t& _offset) const
     {
         if (_index > 2)
@@ -244,26 +291,8 @@ namespace emu88Lib
             return true;
         }
 
-        const bool read = found->embedded
-            ? baseLib::filesystem::readFileRegion(_data, found->path, found->fileOffset, found->size())
-            : baseLib::filesystem::readFile(_data, found->path);
-        if (!read || _data.size() != found->size())
-        {
-            _data.clear();
+        if (!read(_data, *found))
             return false;
-        }
-
-        if (found->needsWordSwap)
-            swapWords(_data);
-        else if (found->namedSpec && found->namedSpec->normalizeH8Words && !found->entry)
-            normalizeH8WordOrder(_data);
-        if (found->embedded && (!found->entry || baseLib::MD5(_data) != found->entry->hash))
-        {
-            _data.clear();
-            return false;
-        }
-        if (found->entry && found->entry->xpWaveDump)
-            _data = WaveRom::decodeXpWaveDump(_data);
         if (_device == RomDevice::Sc8850 && _slot == RomSlot::Wave && _data.size() == Sc8850WaveRomSet::Size)
         {
             const auto first = _data.begin() + _index * Sc8850WaveRomSet::ChipSize;
@@ -288,6 +317,31 @@ namespace emu88Lib
         return true;
     }
 
+    bool RomInventory::read(std::vector<uint8_t>& _data, const FoundRom& _rom) const
+    {
+        const bool read = _rom.embedded
+            ? baseLib::filesystem::readFileRegion(_data, _rom.path, _rom.fileOffset, _rom.size())
+            : baseLib::filesystem::readFile(_data, _rom.path);
+        if (!read || _data.size() != _rom.size())
+        {
+            _data.clear();
+            return false;
+        }
+
+        if (_rom.needsWordSwap)
+            swapWords(_data);
+        else if (_rom.namedSpec && _rom.namedSpec->normalizeH8Words && !_rom.entry)
+            normalizeH8WordOrder(_data);
+        if (_rom.embedded && (!_rom.entry || baseLib::MD5(_data) != _rom.entry->hash))
+        {
+            _data.clear();
+            return false;
+        }
+        if (_rom.entry && _rom.entry->xpWaveDump)
+            _data = WaveRom::decodeXpWaveDump(_data);
+        return true;
+    }
+
     bool RomInventory::isComplete(const RomDevice _device) const
     {
         if (_device == RomDevice::Cm64)
@@ -302,7 +356,7 @@ namespace emu88Lib
             if (!has(_device, slot, index))
                 return false;
         }
-        return true;
+        return hasConsistentRevision(_device);
     }
 
     std::vector<const RomRegistryEntry*> RomInventory::missing(const RomDevice _device) const
@@ -430,8 +484,9 @@ namespace emu88Lib
                 {
                     // Whichever digest identifies the row; a revision catalogued from a
                     // published reference has no MD5 to show.
-                    text << (entry.hash.isValid() ? "MD5: " + entry.hash.toString()
-                                                  : "SHA-1: " + entry.sha1.toString())
+                    text << (entry.hash.isValid()   ? "MD5: " + entry.hash.toString()
+                             : entry.sha1.isValid() ? "SHA-1: " + entry.sha1.toString()
+                                                    : "SHA-256: " + entry.sha256.toString())
                          << " — " << entry.version << '\n';
                     known = true;
                 }
@@ -440,22 +495,31 @@ namespace emu88Lib
             text << '\n';
         }
 
-        if (_device == RomDevice::Cm32l)
+        if (_device == RomDevice::Cm32l || _device == RomDevice::Cm32ln)
             text << "Wave alternatives: Wave ROM 1 is the complete 1 MiB PCM image, the file munt reads as "
                     "cm32l_pcm.rom. Wave ROM 2 and 3 are the two 512 KiB mask-ROM dumps it is made of, "
                     "R15449121 and R15179945 - together they supply the same image. Provide either form, "
                     "not both.\n";
-        if (_device == RomDevice::Mt32)
-            text << "Control alternatives: Control ROM 1 is the complete firmware - 64 KiB on a 1.x board, "
-                    "128 KiB on a 2.x one. Control ROM 2 and 3 are the two 32 KiB EPROMs a 1.x board carries "
+        if (_device == RomDevice::Cm32ln)
+            text << "The CM-32LN, the CM-500's LA half and the LAPC-N share this control ROM and take the "
+                    "CM-32L's wave and reverb images.\n";
+        if (_device == RomDevice::Mt32Old)
+            text << "Control alternatives: Control ROM 1 is the complete 64 KiB firmware, the file munt reads "
+                    "as mt32_control.rom. Control ROM 2 and 3 are the two 32 KiB EPROMs the board carries "
                     "instead, IC27 and IC26; they are byte-multiplexed rather than concatenated, and together "
-                    "they supply the 64 KiB image. Provide either form, not both. The 2.x firmware has no "
-                    "two-chip form.\n"
-                    "Wave alternatives: Wave ROM 1 is R15449121, the late board's single PCM mask ROM and the "
-                    "lower half of the CM-32L's image. Wave ROM 2 and 3 are R15179844 and R15179845, the same "
-                    "data as the early board split it.\n"
-                    "Reverb alternatives: R15179857 is the early board's microcode and R15179917 the one the "
-                    "late board and the MT-100 carry in the same position. Either runs.\n";
+                    "they supply the 64 KiB image. Provide either form, not both.\n"
+                    "Wave alternatives: Wave ROM 1 is R15449121, the single PCM mask ROM of the later boards "
+                    "and the lower half of the CM-32L's image. Wave ROM 2 and 3 are R15179844 and R15179845, "
+                    "the same data as the early board split it.\n"
+                    "The reverb microcode is the old board's R15179857; the new board's R15179917 does not "
+                    "run on this board.\n";
+        if (_device == RomDevice::Mt32New)
+            text << "The control ROM is the 128 KiB image of the 2.x firmware; the 1.x firmware needs the "
+                    "old-type board.\n"
+                    "Wave alternatives: Wave ROM 1 is R15449121, the board's single PCM mask ROM and the "
+                    "lower half of the CM-32L's image. Wave ROM 2 and 3 are R15179844 and R15179845, the "
+                    "same data as the early old-type board split it.\n"
+                    "The reverb microcode is R15179917, shared with the CM-32L and the MT-100.\n";
         if (_device == RomDevice::Sc8820)
             text << "Wave alternatives: SCCore.dll / SCCore00.dylib can supply both decoded wave regions. "
                     "The CPU and program ROMs are still required separately. "

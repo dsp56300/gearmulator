@@ -6,11 +6,13 @@
 
 #include "baseLib/md5.h"
 #include "baseLib/sha1.h"
+#include "baseLib/sha256.h"
 
 namespace emu88Lib
 {
     // ---------------------------------------------------------------------
-    // The registry of known SC-55/SC-88 series ROM images
+    // The registry of known ROM images: the SC-55/SC-88 series, the CM and
+    // MT-32 LA boards, and the modules built on their engines
     // ---------------------------------------------------------------------
     //
     // Known dumps are content-addressed, so they can be renamed and still resolve
@@ -46,9 +48,16 @@ namespace emu88Lib
         // inventory answers every question about it by asking those two.
         Cm64,
         Cm32l,
-        Mt32,
+        // The two MT-32 boards. Roland's service notes call them the old and the new type:
+        // the 1.x firmware only runs on the old one and the 2.x firmware only on the new one,
+        // and the two need different reverb microcode, so they are separate boards here.
+        Mt32Old,
+        Mt32New,
         Nu10b,
         Miig5,
+        // The CM-32L's later sibling, shared with the CM-500's LA half and the LAPC-N: the same
+        // ROMs but its own control ROM, on an 80C198 at two clocks per state.
+        Cm32ln,
 
         Count
     };
@@ -114,8 +123,10 @@ namespace emu88Lib
 
     inline constexpr RomCompositeSlot g_romCompositeSlots[] = {
         {RomDevice::Cm32l, RomSlot::Wave, 0, 1, 0x100000, 0x80000, false},
-        {RomDevice::Mt32, RomSlot::Wave, 0, 1, 0x80000, 0x40000, false},
-        {RomDevice::Mt32, RomSlot::Control, 0, 1, 0x10000, 0x8000, true},
+        {RomDevice::Cm32ln, RomSlot::Wave, 0, 1, 0x100000, 0x80000, false},
+        {RomDevice::Mt32Old, RomSlot::Wave, 0, 1, 0x80000, 0x40000, false},
+        {RomDevice::Mt32New, RomSlot::Wave, 0, 1, 0x80000, 0x40000, false},
+        {RomDevice::Mt32Old, RomSlot::Control, 0, 1, 0x10000, 0x8000, true},
         {RomDevice::Sc88Pro, RomSlot::Wave, 0, 3, 0x800000, 0x400000, false},
         {RomDevice::Sc88Pro, RomSlot::Wave, 1, 5, 0x800000, 0x400000, false},
         {RomDevice::VeGsPro, RomSlot::Wave, 0, 3, 0x800000, 0x400000, false},
@@ -173,12 +184,25 @@ namespace emu88Lib
         {RomDevice::Cm32l, RomSlot::Wave, 1, 0x80000, "r15449121.bin", false},
         {RomDevice::Cm32l, RomSlot::Wave, 2, 0x80000, "r15179945.bin", false},
         {RomDevice::Cm32l, RomSlot::Reverb, 0, 0x8000, "cm32l_reverb.bin", false},
-        {RomDevice::Mt32, RomSlot::Control, 0, 0x10000, "mt32_control.bin", false},
-        {RomDevice::Mt32, RomSlot::Control, 0, 0x20000, "mt32_control.bin", false},
-        {RomDevice::Mt32, RomSlot::Wave, 0, 0x80000, "mt32_wave.bin", false},
-        {RomDevice::Mt32, RomSlot::Wave, 1, 0x40000, "r15179844.bin", false},
-        {RomDevice::Mt32, RomSlot::Wave, 2, 0x40000, "r15179845.bin", false},
-        {RomDevice::Mt32, RomSlot::Reverb, 0, 0x8000, "mt32_reverb.bin", false},
+        // The CM-32LN board takes the CM-32L's wave and reverb images under the same names.
+        {RomDevice::Cm32ln, RomSlot::Control, 0, 0x10000, "cm32ln_control.bin", false},
+        {RomDevice::Cm32ln, RomSlot::Wave, 0, 0x100000, "cm32l_wave.bin", false},
+        {RomDevice::Cm32ln, RomSlot::Wave, 1, 0x80000, "r15449121.bin", false},
+        {RomDevice::Cm32ln, RomSlot::Wave, 2, 0x80000, "r15179945.bin", false},
+        {RomDevice::Cm32ln, RomSlot::Reverb, 0, 0x8000, "cm32l_reverb.bin", false},
+        // The two MT-32 boards are told apart by the size of the control ROM: 64 KiB of 1.x
+        // firmware on the old one, 128 KiB of 2.x firmware on the new one. The PCM set is the
+        // same on both; the reverb microcode is not, so a custom image goes by the board.
+        {RomDevice::Mt32Old, RomSlot::Control, 0, 0x10000, "mt32_control.bin", false},
+        {RomDevice::Mt32Old, RomSlot::Wave, 0, 0x80000, "mt32_wave.bin", false},
+        {RomDevice::Mt32Old, RomSlot::Wave, 1, 0x40000, "r15179844.bin", false},
+        {RomDevice::Mt32Old, RomSlot::Wave, 2, 0x40000, "r15179845.bin", false},
+        {RomDevice::Mt32Old, RomSlot::Reverb, 0, 0x8000, "mt32old_reverb.bin", false},
+        {RomDevice::Mt32New, RomSlot::Control, 0, 0x20000, "mt32_control.bin", false},
+        {RomDevice::Mt32New, RomSlot::Wave, 0, 0x80000, "mt32_wave.bin", false},
+        {RomDevice::Mt32New, RomSlot::Wave, 1, 0x40000, "r15179844.bin", false},
+        {RomDevice::Mt32New, RomSlot::Wave, 2, 0x40000, "r15179845.bin", false},
+        {RomDevice::Mt32New, RomSlot::Reverb, 0, 0x8000, "mt32new_reverb.bin", false},
         {RomDevice::Cm32p, RomSlot::Program, 0, 0x10000, "cm32p_program.bin", false},
         {RomDevice::Cm32p, RomSlot::Wave, 0, 0x80000, "cm32p_wave0.bin", false},
         {RomDevice::Cm32p, RomSlot::Wave, 1, 0x80000, "cm32p_wave1.bin", false},
@@ -307,6 +331,14 @@ namespace emu88Lib
         // both. Word swapping is not supported alongside it - no such dump circulates
         // in two orientations.
         baseLib::SHA1 sha1 = {};
+        // The same for a revision known only by the SHA-256.
+        // A row carries exactly one of the three digests.
+        baseLib::SHA256 sha256 = {};
+        // Images that only run together carry the same non-zero number, unique within
+        // their board: the H8/532's on-chip ROM and the program ROM of one SC-55 firmware
+        // revision reference each other, so the loader pairs them by this rather than
+        // taking the first of each slot it finds.
+        uint8_t revision = 0;
     };
 
     // The SC-88 and SC-88VL run different firmware on the same board, and the
@@ -315,114 +347,115 @@ namespace emu88Lib
     // what keeps them apart.
     inline constexpr RomRegistryEntry g_romRegistry[] = {
         // -----------------------------------------------------------------
-        // CM-32L
+        // CM-32L, CM-32LN
         // -----------------------------------------------------------------
-        // Three control ROMs run this board, in preference order: the CM-32L's own 1.02, the
-        // LAPC-I's 1.00, which is the same firmware on an ISA card and boots identically here,
-        // and the CM-32LN's, shared with the CM-500 and LAPC-N. The wave image is R15449121
-        // (the complete MT-32 PCM set) followed by the CM-32L's own extension chip R15179945;
-        // the halves are also accepted separately. The reverb ROM is shared with the MT-100
-        // and RA-50.
+        // Two control ROMs run the CM-32L board, in preference order: its own 1.02 and the
+        // LAPC-I's 1.00, which is the same firmware on an ISA card and boots identically here.
+        // The CM-32LN's, shared with the CM-500 and LAPC-N, is the same board with an 80C198
+        // at two clocks per state, so it is a board of its own below. The wave image is
+        // R15449121 (the complete MT-32 PCM set) followed by the CM-32L's own extension chip
+        // R15179945; the halves are also accepted separately. The reverb microcode R15179917
+        // is the new-type MT-32 board's, shared with the MT-100 and RA-50 as well.
         {romDevices(RomDevice::Cm32l), RomSlot::Control, 0, 0x10000, baseLib::MD5("bfff32b6144c1d706109accb6e6b1113"),
          "1.02", false},
         {romDevices(RomDevice::Cm32l), RomSlot::Control, 0, 0x10000, baseLib::MD5("099552dcbc6a94bb0d2abf1281873fa1"),
          "1.00, LAPC-I", false},
-        {romDevices(RomDevice::Cm32l), RomSlot::Control, 0, 0x10000, {}, "1.00, CM-32LN/CM-500/LAPC-N", false, false,
+        {romDevices(RomDevice::Cm32ln), RomSlot::Control, 0, 0x10000, {}, "1.00, CM-32LN/CM-500/LAPC-N", false, false,
          false, baseLib::SHA1("dc1c5b1b90a4646d00f7daf3679733c7badc7077")},
-        {romDevices(RomDevice::Cm32l), RomSlot::Wave, 0, 0x100000, baseLib::MD5("08cdcfa0ed93e9cb16afa76e6ac5f0a4"),
-         "R15449121+R15179945", false},
-        {romDevices(RomDevice::Cm32l), RomSlot::Reverb, 0, 0x8000, baseLib::MD5("46d3bb96193004181a4db38c0ba92b25"),
-         "R15179917", false},
+        {romDevices(RomDevice::Cm32l, RomDevice::Cm32ln), RomSlot::Wave, 0, 0x100000,
+         baseLib::MD5("08cdcfa0ed93e9cb16afa76e6ac5f0a4"), "R15449121+R15179945", false},
+        {romDevices(RomDevice::Cm32l, RomDevice::Cm32ln, RomDevice::Mt32New), RomSlot::Reverb, 0, 0x8000,
+         baseLib::MD5("46d3bb96193004181a4db38c0ba92b25"), "R15179917", false},
         // The wave chips as separately dumped halves. They are not required when the combined
-        // image above is present; RomInventory::read() joins them when it is not.
-        {romDevices(RomDevice::Cm32l), RomSlot::Wave, 1, 0x80000, baseLib::MD5("89e42e386e82e0cacb4a2704a03706ca"),
-         "R15449121", false},
-        {romDevices(RomDevice::Cm32l), RomSlot::Wave, 2, 0x80000, baseLib::MD5("f7909bed95b04d8dc4cc47970e2bc3e6"),
-         "R15179945", false},
+        // image above is present; RomInventory::read() joins them when it is not. The first is
+        // the complete MT-32 PCM set, which both MT-32 boards take as their whole image below.
+        {romDevices(RomDevice::Cm32l, RomDevice::Cm32ln), RomSlot::Wave, 1, 0x80000,
+         baseLib::MD5("89e42e386e82e0cacb4a2704a03706ca"), "R15449121", false},
+        {romDevices(RomDevice::Cm32l, RomDevice::Cm32ln), RomSlot::Wave, 2, 0x80000,
+         baseLib::MD5("f7909bed95b04d8dc4cc47970e2bc3e6"), "R15179945", false},
 
         // -----------------------------------------------------------------
-        // MT-32
+        // MT-32, old-type board (1.x firmware)
         // -----------------------------------------------------------------
-        // Two generations of board. The 1.x firmware is a pair of 32 KiB EPROMs on a 16-bit
-        // bus, so its combined image is the two byte-multiplexed rather than concatenated;
-        // both forms are accepted. The 2.x board replaced them with a single banked 128 KiB
-        // mask ROM. Blue Ridge and M-9 are third-party 1.x firmwares, the latter built on
-        // 1.07, which it still reports as its version.
-        //
-        // Control ROMs are listed newest-first within each generation. 2.03 is the MT-100's
-        // firmware; that machine is an MT-32 with a sequencer and a Quick Disk drive on the
-        // same main board.
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("5626206284b22c2734f3e9efefcd2675"),
+        // An 8095 on a 16-bit bus: the firmware is a pair of 32 KiB EPROMs, so its combined
+        // image is the two byte-multiplexed rather than concatenated, and both forms are
+        // accepted. Blue Ridge and M-9 are third-party 1.x firmwares, the latter built on
+        // 1.07, which it still reports as its version. Control ROMs are listed newest-first.
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 0, 0x10000, baseLib::MD5("5626206284b22c2734f3e9efefcd2675"),
          "1.07, 10 Oct 87", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("abe0982e4f662f881affa7d8a932c739"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 0, 0x10000, baseLib::MD5("abe0982e4f662f881affa7d8a932c739"),
          "1.06, 31 Aug 87", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("5de47ca37a3712ed32993f865ee9fb5b"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 0, 0x10000, baseLib::MD5("5de47ca37a3712ed32993f865ee9fb5b"),
          "1.05, 06 Aug 87", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("c5233e4594f9b7bc4f773ae6ba5aa87d"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 0, 0x10000, baseLib::MD5("c5233e4594f9b7bc4f773ae6ba5aa87d"),
          "1.04, 14 July 87", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("9513fec4f09a7d327748340ce3a2a59b"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 0, 0x10000, baseLib::MD5("9513fec4f09a7d327748340ce3a2a59b"),
          "Blue Ridge, verX.XX 30 Sep 88", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x10000, baseLib::MD5("b7180ac1be56e740b0f635062c791b5a"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 0, 0x10000, baseLib::MD5("b7180ac1be56e740b0f635062c791b5a"),
          "M-9, ver1.07 10 Oct 87", false},
-        // The 2.x line. Only 2.04 has been hashed here; the other three are catalogued from
-        // munt's published digests.
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x20000, {}, "2.07", false, false, false,
-         baseLib::SHA1("47b52adefedaec475c925e54340e37673c11707c")},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x20000, {}, "2.06", false, false, false,
-         baseLib::SHA1("2869cf4c235d671668cfcb62415e2ce8323ad4ed")},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x20000, baseLib::MD5("615a866337ecb752768ac03ed4ddf85c"),
-         "2.04, 88-11-11", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 0, 0x20000, {}, "2.03, MT-100", false, false, false,
-         baseLib::SHA1("5837064c9df4741a55f7c4d8787ac158dff2d3ce")},
 
-        // The 1.x firmware EPROMs as separately dumped chips: A at IC27 supplies the even
+        // The firmware EPROMs as separately dumped chips: A at IC27 supplies the even
         // addresses, B at IC26 the odd ones. On 1.07 they were also produced as mask ROMs
         // R15449122 and R15449123, but the dumps in circulation are of the socketed parts,
         // so the pair is catalogued by content alone rather than by part number.
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("d241220ed9c171ffcf347413eaf5969b"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 1, 0x8000, baseLib::MD5("d241220ed9c171ffcf347413eaf5969b"),
          "1.07 A, IC27", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("346d6c8ef954c1901822d349dd658aef"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 2, 0x8000, baseLib::MD5("346d6c8ef954c1901822d349dd658aef"),
          "1.07 B, IC26", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("2a2e1a6f83d3bfd5799b1b835b68784f"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 1, 0x8000, baseLib::MD5("2a2e1a6f83d3bfd5799b1b835b68784f"),
          "1.06 A, IC27", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("04d9852b98409301ec59f300f6e3d0e9"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 2, 0x8000, baseLib::MD5("04d9852b98409301ec59f300f6e3d0e9"),
          "1.06 B, IC26", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("0dfb58615f6789f9ba382988d88d2014"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 1, 0x8000, baseLib::MD5("0dfb58615f6789f9ba382988d88d2014"),
          "1.05 A, IC27", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("cd83d3b708887a5822d5155782b922d0"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 2, 0x8000, baseLib::MD5("cd83d3b708887a5822d5155782b922d0"),
          "1.05 B, IC26", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("1eddb73995829e4befecd40b13dfb408"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 1, 0x8000, baseLib::MD5("1eddb73995829e4befecd40b13dfb408"),
          "1.04 A, IC27", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("87546da1c1b9ad1354baea23a28e6981"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 2, 0x8000, baseLib::MD5("87546da1c1b9ad1354baea23a28e6981"),
          "1.04 B, IC26", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("c6c8ba9fef6923e1788b8e5e7308df68"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 1, 0x8000, baseLib::MD5("c6c8ba9fef6923e1788b8e5e7308df68"),
          "Blue Ridge A", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("d5ed9d93730d625df29e910527082a0b"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 2, 0x8000, baseLib::MD5("d5ed9d93730d625df29e910527082a0b"),
          "Blue Ridge B", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 1, 0x8000, baseLib::MD5("4194e653a5ebb2e3217318fc5ea8b9ea"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 1, 0x8000, baseLib::MD5("4194e653a5ebb2e3217318fc5ea8b9ea"),
          "M-9 A, IC27", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Control, 2, 0x8000, baseLib::MD5("65cf18bdf8569abe30892be9e12976d0"),
+        {romDevices(RomDevice::Mt32Old), RomSlot::Control, 2, 0x8000, baseLib::MD5("65cf18bdf8569abe30892be9e12976d0"),
          "M-9 B, IC26", false},
 
-        // The PCM set. The late board carries it as the single mask ROM R15449121, which the
-        // CM-32L reuses as the lower half of its own image; the early board splits the same
-        // data over R15179844 and R15179845.
-        //
-        // Both reverb microcodes belong here, in board order: the early board's R15179857 and
-        // the R15179917 the late board and the MT-100 carry in the same IC13 position, which
-        // the CM-32L then reuses at IC19.
-        {romDevices(RomDevice::Mt32), RomSlot::Wave, 0, 0x80000, baseLib::MD5("89e42e386e82e0cacb4a2704a03706ca"),
-         "R15449121", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Wave, 1, 0x40000, baseLib::MD5("499539a02b726aa43f9a22cf05c48e7b"),
-         "R15179844", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Wave, 2, 0x40000, baseLib::MD5("0d4908e119ddfa6f0283b46bc9fe744d"),
-         "R15179845", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Wave, 0, 0x80000, baseLib::MD5("21efb00e7881f7fa0b6fcdfadd2d33c3"),
-         "BAD_DUMP: R15449121", false, true},
-        {romDevices(RomDevice::Mt32), RomSlot::Reverb, 0, 0x8000, baseLib::MD5("181499301ad745424fee81ad61102588"),
+        // The PCM set, which both MT-32 boards share: the single mask ROM R15449121 the later
+        // boards carry, which is also the lower half of the CM-32L's image, or the same data
+        // as the early old-type board splits it over R15179844 and R15179845.
+        {romDevices(RomDevice::Mt32Old, RomDevice::Mt32New), RomSlot::Wave, 0, 0x80000,
+         baseLib::MD5("89e42e386e82e0cacb4a2704a03706ca"), "R15449121", false},
+        {romDevices(RomDevice::Mt32Old, RomDevice::Mt32New), RomSlot::Wave, 1, 0x40000,
+         baseLib::MD5("499539a02b726aa43f9a22cf05c48e7b"), "R15179844", false},
+        {romDevices(RomDevice::Mt32Old, RomDevice::Mt32New), RomSlot::Wave, 2, 0x40000,
+         baseLib::MD5("0d4908e119ddfa6f0283b46bc9fe744d"), "R15179845", false},
+        {romDevices(RomDevice::Mt32Old, RomDevice::Mt32New), RomSlot::Wave, 0, 0x80000,
+         baseLib::MD5("21efb00e7881f7fa0b6fcdfadd2d33c3"), "BAD_DUMP: R15449121", false, true},
+        // The old board's reverb microcode at IC13. The service notes call it incompatible with
+        // the new board's R15179917, and the 16 KiB EPROM 15449109 some units carry instead has
+        // not been dumped.
+        {romDevices(RomDevice::Mt32Old), RomSlot::Reverb, 0, 0x8000, baseLib::MD5("181499301ad745424fee81ad61102588"),
          "R15179857", false},
-        {romDevices(RomDevice::Mt32), RomSlot::Reverb, 0, 0x8000, baseLib::MD5("46d3bb96193004181a4db38c0ba92b25"),
-         "R15179917", false},
+
+        // -----------------------------------------------------------------
+        // MT-32, new-type board (2.x firmware)
+        // -----------------------------------------------------------------
+        // A P8098 on an 8-bit bus, the firmware in a single banked 128 KiB mask ROM whose upper
+        // half holds the ROM Play demo songs, and the reverb microcode R15179917 it shares with
+        // the CM-32L. Only 2.04 has been hashed here; the other three are catalogued from
+        // munt's published digests. 2.03 is the MT-100's firmware; that machine is an MT-32
+        // with a sequencer and a Quick Disk drive on the same main board.
+        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, {}, "2.07", false, false, false,
+         baseLib::SHA1("47b52adefedaec475c925e54340e37673c11707c")},
+        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, {}, "2.06", false, false, false,
+         baseLib::SHA1("2869cf4c235d671668cfcb62415e2ce8323ad4ed")},
+        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, baseLib::MD5("615a866337ecb752768ac03ed4ddf85c"),
+         "2.04, 88-11-11", false},
+        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, {}, "2.03, MT-100", false, false, false,
+         baseLib::SHA1("5837064c9df4741a55f7c4d8787ac158dff2d3ce")},
 
         {romDevices(RomDevice::Cm32p), RomSlot::Program, 0, 0x10000, baseLib::MD5("ccd61a220f433a62a53b48eb9bb36827"),
          "1.00", false},
@@ -558,22 +591,55 @@ namespace emu88Lib
          baseLib::MD5("4ca058f7db05f51e97bb30a162e9610a"), "H8/532 boot", false},
         {romDevices(RomDevice::Sc55Mk2, RomDevice::Sc155Mk2), RomSlot::Program, 0, 0x80000,
          baseLib::MD5("63b24c7193ce34afefce9cec32ac39f0"), "GS-28 2.00", false},
+        // The six images shingo45endo's sc55mk2-ctf-patcher makes of it, which give the mkII
+        // back the SC-55's "alternate voicings": a variation the module has no tone for falls
+        // back to the capital tone instead of staying silent. The tone mode picks which
+        // fallbacks apply (the SC-55's, strictly the SC-55's, or the mkII's own sub-capitals)
+        // and the drum mode whether drum sets 1-64 (SC-55 v1.21) or 1-48 (v2.00) get them.
         {romDevices(RomDevice::Sc55Mk2), RomSlot::Program, 0, 0x80000, baseLib::MD5("34e5802afd4c12230e775e0c94c4873b"),
-         "GS-28 2.00, SC-55 capital tone fallback / v1 drums", false},
+         "GS-28 2.00, CTF patch: SC-55 tones, SC-55 v1.21 drums", false},
+        {romDevices(RomDevice::Sc55Mk2), RomSlot::Program, 0, 0x80000, baseLib::MD5("c3db7620a8438c48e96f4b343da48943"),
+         "GS-28 2.00, CTF patch: SC-55 tones, SC-55 v2.00 drums", false},
+        {romDevices(RomDevice::Sc55Mk2), RomSlot::Program, 0, 0x80000, baseLib::MD5("08fc3433479b1d60c7070ecec25ac532"),
+         "GS-28 2.00, CTF patch: strict SC-55 tones, SC-55 v1.21 drums", false},
+        {romDevices(RomDevice::Sc55Mk2), RomSlot::Program, 0, 0x80000, baseLib::MD5("40c1447c07aca6f299c7722d09791c56"),
+         "GS-28 2.00, CTF patch: strict SC-55 tones, SC-55 v2.00 drums", false},
+        {romDevices(RomDevice::Sc55Mk2), RomSlot::Program, 0, 0x80000, baseLib::MD5("1bfee46852377ada090dd2b2e76fd6ed"),
+         "GS-28 2.00, CTF patch: SC-55mkII tones, SC-55 v1.21 drums", false},
+        {romDevices(RomDevice::Sc55Mk2), RomSlot::Program, 0, 0x80000, baseLib::MD5("f365d0131fe381c82f99117ca08cc953"),
+         "GS-28 2.00, CTF patch: SC-55mkII tones, SC-55 v2.00 drums", false},
         {romDevices(RomDevice::Sc55Mk2, RomDevice::Sc55St, RomDevice::Scb55, RomDevice::Sc155Mk2), RomSlot::Wave, 0,
          0x200000, baseLib::MD5("30df645acf7f1b621d5f2891ea53e00b"), "PCM 1", false},
         {romDevices(RomDevice::Sc55Mk2, RomDevice::Sc55St, RomDevice::Scb55, RomDevice::Sc155Mk2), RomSlot::Wave, 1,
          0x100000, baseLib::MD5("f86e0433a11707a048a8a79e8d98a3be"), "PCM 2", false},
 
         // -----------------------------------------------------------------
-        // SC-55 (first generation), firmware 1.21
+        // SC-55 (first generation)
         // -----------------------------------------------------------------
         // Unlike the mkII, the original board has a 256 KiB program ROM and
-        // three separate 1 MiB PCM mask ROMs.
+        // three separate 1 MiB PCM mask ROMs. Five firmware revisions circulate, and
+        // each one's H8/532 on-chip ROM belongs with its program ROM: the loader pairs
+        // them by the revision number. 1.21 is the one hashed here and the preferred
+        // one; 1.20 shares its on-chip ROM, and 2.00 runs on the SC-155's. The others
+        // are catalogued from the SHA-256 digests.
         {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, baseLib::MD5("462cb3a2ce9e54f4e54a52f643931ffd"),
-         "1.21, R15199778", false},
+         "1.20/1.21, R15199778", false, false, false, {}, {}, 1},
         {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, baseLib::MD5("6b61186953b50d900e430ae6a996bda7"),
-         "1.21, R15209363", false},
+         "1.21, R15209363", false, false, false, {}, {}, 1},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, {}, "1.20, R15209337", false, false, false, {},
+         baseLib::SHA256("22ce6ca59e6332143b335525e81fab501ea6fccce4b7e2f3bfc2cc8bf6612ff6"), 1},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, {}, "2.00, R15199799", false, false, false, {},
+         baseLib::SHA256("24a65c97cdbaa847d6f59193523ce63c73394b4b693a6517ee79441f2fb8a3ee"), 2},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, {}, "2.00, R15209387", false, false, false, {},
+         baseLib::SHA256("f5dac35d450ab986570a209dff3816eec75cee669e161f54b51224b467dd0bcc"), 2},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, {}, "1.10, R15199736", false, false, false, {},
+         baseLib::SHA256("2fe88ec39f3ef4b1de8cdf74527419467975c47f7aacfcd07605e01d54bd89b5"), 3},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, {}, "1.10, R15209275", false, false, false, {},
+         baseLib::SHA256("ec064d6c4fc70ec990911089d966043cb819fba0e26e6f6afdd0a05e5301b91b"), 3},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, {}, "1.00, R15199748", false, false, false, {},
+         baseLib::SHA256("b4ecf44bc0520322b0d114d397951d3bf92ca6fa51d0d27b2407df58a6be2efe"), 4},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, {}, "1.00, R15449258", false, false, false, {},
+         baseLib::SHA256("014e2e21ea30de7a1e4f1cdea14dd9a719960535e257a9e40e98dbb1a5870226"), 4},
         {romDevices(RomDevice::Sc55Mk1, RomDevice::Sc155), RomSlot::Wave, 0, 0x100000,
          baseLib::MD5("5f40d5297f47358ddea43b8d225874cc"), "R15209276", false},
         {romDevices(RomDevice::Sc55Mk1, RomDevice::Sc155), RomSlot::Wave, 1, 0x100000,
@@ -591,7 +657,10 @@ namespace emu88Lib
         {romDevices(RomDevice::Cm300, RomDevice::Scc1a), RomSlot::Wave, 2, 0x100000,
          baseLib::MD5("f86e0433a11707a048a8a79e8d98a3be"), "R15279808", false},
         // CM-300/SCC-1 firmware 1.20 and 1.10 (they state "GS Standard VER=1.xx").
-        // Both run on MCU ROM R15199774, which has not been dumped here.
+        // Both run on MCU ROM R15199774, which has not been dumped here and is catalogued
+        // from the SHA-256.
+        {romDevices(RomDevice::Cm300), RomSlot::Internal, 0, 0x8000, {}, "R15199774", false, false, false, {},
+         baseLib::SHA256("72ed35481efbf25b3c492b83183655d17a3b266ecb30ffbc6dc977e6a8d261b2")},
         {romDevices(RomDevice::Cm300), RomSlot::Program, 0, 0x40000, baseLib::MD5("437d9575678bdcc30c2f0e1a32765027"),
          "1.20, R15279812", false},
         {romDevices(RomDevice::Cm300), RomSlot::Program, 0, 0x40000, baseLib::MD5("b2c215cdf5325ec84ecde86a5d3d1eb8"),
@@ -605,6 +674,15 @@ namespace emu88Lib
          baseLib::MD5("31883de733ad34858bfd262b8fcf2fb6"), "R15199827", false},
         {romDevices(RomDevice::Scb55), RomSlot::Program, 0, 0x40000, baseLib::MD5("89d8263a413326249c042da8bcd0fda1"),
          "R15279828", false},
+        // The RLP-3237's own program 2.01 and its single 16 Mbit wave ROM, and the SC-55st's
+        // program 1.01: none of the three has been dumped here, so they are catalogued from
+        // the SHA-256 digests.
+        {romDevices(RomDevice::Rlp3237), RomSlot::Program, 0, 0x40000, {}, "2.01, R15209486", false, false, false, {},
+         baseLib::SHA256("e0a3d6d9b05e82374a0d289901273ce560ce1ead86459c75f844158b32d204a9")},
+        {romDevices(RomDevice::Rlp3237), RomSlot::Wave, 0, 0x200000, {}, "R15279824", false, false, false, {},
+         baseLib::SHA256("dae2a8bc0fd3bcaf3f5e3ab6c4c6fd30e2663bf26ca17afe52924874c0afc4e2")},
+        {romDevices(RomDevice::Sc55St), RomSlot::Program, 0, 0x80000, {}, "1.01, R00561413", false, false, false, {},
+         baseLib::SHA256("03517ac0a3b1ad8b69a1a4ee045e0c21da0170027bd1ba1bd3cf72cd017bbe6a")},
         {romDevices(RomDevice::Sc155), RomSlot::Internal, 0, 0x8000, baseLib::MD5("6b74988a79c2a48239809f07a54175b3"),
          "R15199799", false},
         {romDevices(RomDevice::Sc155), RomSlot::Program, 0, 0x40000, baseLib::MD5("5c7c6ab34ef6da079b05a36fd23c9c91"),
@@ -672,8 +750,8 @@ namespace emu88Lib
         }
     }
 
-    // Board name. Kept here rather than taken from DeviceProfile because the
-    // registry covers two boards that have no DeviceModel.
+    // Board name. Kept here rather than taken from DeviceProfile: every board of the
+    // registry is a DeviceModel today, but the two are not the same list by design.
     constexpr const char* toString(const RomDevice _device)
     {
         switch (_device)
@@ -706,8 +784,12 @@ namespace emu88Lib
             return "CM-32P";
         case RomDevice::Cm32l:
             return "CM-32L";
-        case RomDevice::Mt32:
-            return "MT-32";
+        case RomDevice::Mt32Old:
+            return "MT-32 (old board, 1.x)";
+        case RomDevice::Mt32New:
+            return "MT-32 (new board, 2.x)";
+        case RomDevice::Cm32ln:
+            return "CM-32LN";
         case RomDevice::Cm64:
             return "CM-64";
         case RomDevice::Scb55:
@@ -769,8 +851,8 @@ namespace emu88Lib
 
     // Looks a candidate up by content. _wordSwappedOnly restricts the search to
     // rows whose dump is known to circulate byte-swapped, so a normalization is
-    // never invented for a ROM that does not need one. SHA-1-only rows are never
-    // returned: they carry no MD5 to compare against.
+    // never invented for a ROM that does not need one. Rows catalogued by a published
+    // SHA-1 or SHA-256 are never returned: they carry no MD5 to compare against.
     inline const RomRegistryEntry* findRegistryEntry(const size_t _size, const baseLib::MD5& _hash,
                                                      const bool _wordSwappedOnly = false)
     {

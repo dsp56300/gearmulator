@@ -12,6 +12,8 @@
 #include <deque>
 #include <memory>
 #include <mutex>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace emu88Lib
@@ -21,7 +23,7 @@ namespace emu88Lib
 	class Sc8850;
 	class Sc8820;
 	class Cm32p;
-	class Cm32l;
+	class LaBoard;
 	class Cm64;
 	class Sc55Board;
 	class Nu10b;
@@ -55,6 +57,10 @@ namespace emu88Lib
 				std::array<uint8_t, 80> ddRam{};
 				std::array<uint8_t, 64> cgRam{};
 				std::vector<uint8_t> mono;
+				// The visible characters of a character display, one string per line, in the
+				// controller's character set (ASCII for the printable range). Empty on a
+				// graphic display.
+				std::vector<std::string> text;
 				uint16_t width = 0;
 				uint16_t height = 0;
 				bool displayOn = false;
@@ -92,8 +98,14 @@ namespace emu88Lib
 		uint64_t getDspClockHz() const override;
 		DeviceModel model() const { return m_model; }
 		void setPanelButtons(uint32_t _buttons);
+		// The SC-8850's VALUE encoder, or the MT-32's VOLUME/VALUE knob, which a detent turns
+		// by a 32nd of its travel.
 		void turnPanelEncoder(int32_t _detents);
 		DisplaySnapshot displaySnapshot() const;
+		// The messages that silence a sounding channel on this board, as a transport jump
+		// sends them to every active channel: All Sound Off, or hold pedal up and All Notes
+		// Off where the firmware predates All Sound Off. Controller numbers with their values.
+		static std::vector<std::pair<uint8_t, uint8_t>> silenceControllers(DeviceModel _model);
 
 		// Selects the circuit after the DAC. A model with the current oversampling takes over at
 		// once; one that changes it waits for the engine to set the matching rate through
@@ -119,8 +131,8 @@ namespace emu88Lib
 
 		float dacSamplerate() const;
 		void activateAnalogModel(AnalogModel _model);
-		// Renders one DAC frame into m_heldFrame, and into m_heldFrameB where the board has a
-		// second path.
+		// Renders one DAC frame into m_heldFrame. The CM boards hand their fractional analog
+		// samples over beside it, see writeOutputSample().
 		void renderBoardFrame();
 		void writeOutputSample(const synthLib::TAudioOutputs& _outputs, size_t _index);
 		void sendMidiToBoard(const synthLib::SMidiEvent& _event);
@@ -138,7 +150,7 @@ namespace emu88Lib
 		std::unique_ptr<Sc8850> m_sc8850;
 		std::unique_ptr<Sc8820> m_sc8820;
 		std::unique_ptr<Cm32p> m_cm32p;
-		std::unique_ptr<Cm32l> m_cm32l;
+		std::unique_ptr<LaBoard> m_la;
 		std::unique_ptr<Cm64> m_cm64;
 		std::unique_ptr<Sc55Board> m_sc55;
 		std::unique_ptr<Nu10b> m_nu10b;
@@ -161,6 +173,7 @@ namespace emu88Lib
 		uint64_t m_renderedSamples = 0;
 		uint32_t m_transportGeneration = 0;
 		uint64_t m_activeChannels = 0;
+		uint64_t m_heldChannels = 0;
 
 		mutable std::mutex m_displayMutex;
 		DisplaySnapshot m_display;
@@ -171,11 +184,8 @@ namespace emu88Lib
 		BoardOutputGain m_boardGain;
 		AnalogModel m_selectedAnalogModel = AnalogModel::None;
 		uint8_t m_dacBits = synthLib::DacInterfaceBits;
-		// Output samples already produced from the held DAC frame. A board that is two boards
-		// summed keeps the second half in m_heldFrameB, so each can be filtered on its own way
-		// to the mixer; everything else leaves it zero and never looks at it.
+		// Output samples already produced from the held DAC frame.
 		uint32_t m_holdPhase = 0;
 		std::pair<int32_t, int32_t> m_heldFrame{};
-		std::pair<int32_t, int32_t> m_heldFrameB{};
 	};
 }

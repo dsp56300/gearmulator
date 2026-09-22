@@ -95,7 +95,7 @@ package_theusualsuspects-je8086() {
 }
 
 package_theusualsuspects-88emu() {
-  pkgdesc='Roland Sound Canvas emulation (88emuPlayer and 88EmuCli)'
+  pkgdesc='Roland Sound Canvas, MT-32 and CM emulation (88emuPlayer and 88EmuCli)'
   install -d "$pkgdir/usr/bin"
   cp -a "$srcdir/stage/usr/bin/88emuPlayer" "$srcdir/stage/usr/bin/88EmuCli" "$pkgdir/usr/bin/"
   install -Dm644 "$srcdir/$_src/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE.md"

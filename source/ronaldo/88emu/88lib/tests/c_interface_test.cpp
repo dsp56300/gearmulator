@@ -128,9 +128,12 @@ namespace
 			CHECK(emu88_get_device_samplerate(context) > 0);
 			CHECK_EQ(emu88_get_midi_port_count(context), emu88_get_device_midi_port_count(id));
 
+			// On the channel the board answers on from power-on: 1 on most, 2 on the LA boards
+			// (part 1), 11 on the CM-32P.
+			const auto channel = static_cast<uint32_t>(emu88_get_device_first_midi_channel(id));
 			for(int port = 0; port < emu88_get_midi_port_count(context); ++port)
 				for(const uint32_t key : {60u, 64u, 67u})
-					CHECK_EQ(emu88_play_msg_on_port(context, static_cast<unsigned>(port), 0x90u | key << 8 | 100u << 16), EMU88_RC_OK);
+					CHECK_EQ(emu88_play_msg_on_port(context, static_cast<unsigned>(port), (0x90u | channel) | key << 8 | 100u << 16), EMU88_RC_OK);
 
 			std::array<float, 2048> block;
 			float peak = 0.0f;

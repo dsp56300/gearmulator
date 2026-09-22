@@ -124,7 +124,7 @@ namespace emu88Player
         static constexpr const char* ids[] = {"sc88",   "sc88vl", "sc88pro", "sc8850",  "sc55mk2", "sc55",
                                               "sc55st", "cm300",  "scb55",   "rlp3237", "sc155",   "sc155mk2",
                                               "xpgs",   "sc8820", "cm32p",   "vegspro", "scc1a",   "cm64",
-                                              "cm32l",  "nu10b",  "miig5"};
+                                              "cm32l",  "nu10b",  "miig5",   "mt32old", "mt32new", "cm32ln"};
         static_assert(std::size(ids) == emu88Lib::g_deviceMenuOrder.size(), "one ID per device model, in enum order");
         return ids[static_cast<size_t>(model)];
     }
@@ -320,7 +320,8 @@ namespace emu88Player
             "  --rom-dir PATH         Use only this ROM folder (recursive)\n"
             "  --config PATH          Read this settings file\n"
             "  --device ID            Initial emulated device (default sc88pro)\n"
-            "  --reset MODE           Before each song: off, gm, gm2, gs or mt32 (MT-32 tones on GS)\n"
+            "  --reset MODE           Before each song: off, gm, gm2, gs or mt32 (MT-32 tones on GS);\n"
+            "                         on the MT-32 and CM boards every mode but off sends their own reset\n"
             "  --song-gap-ms N        Automatic song gap, 0..60000 milliseconds (default 1000)\n"
             "  --sample-rate HZ       Output sample rate, 8000..192000\n"
             "  --limiter on|off       Output peak limiter (default off)\n"

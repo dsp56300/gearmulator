@@ -176,8 +176,19 @@ namespace emu88Player
 					return;
 				}
 			};
-			if(m_processor.deviceModel() == emu88Lib::DeviceModel::Sc8850)
+			const auto model = m_processor.deviceModel();
+			if(emu88Lib::hasPanelKnob(model) && (key == g_mt32KnobUpKey || key == g_mt32KnobDownKey))
+			{
+				// The knob is a potentiometer: every press moves it a notch and it stays there.
+				if(auto* hardware = m_processor.hardware())
+					hardware->turnPanelEncoder(key == g_mt32KnobUpKey ? 1 : -1);
+				_event.StopPropagation();
+				return;
+			}
+			if(model == emu88Lib::DeviceModel::Sc8850)
 				handleKey(g_sc8850Buttons);
+			else if(usesLaBoardButtons(model))
+				handleKey(g_mt32Buttons);
 			else
 				handleKey(g_sc88Buttons);
 		});
@@ -204,8 +215,11 @@ namespace emu88Player
 					return;
 				}
 			};
-			if(m_processor.deviceModel() == emu88Lib::DeviceModel::Sc8850)
+			const auto model = m_processor.deviceModel();
+			if(model == emu88Lib::DeviceModel::Sc8850)
 				handleKey(g_sc8850Buttons);
+			else if(usesLaBoardButtons(model))
+				handleKey(g_mt32Buttons);
 			else
 				handleKey(g_sc88Buttons);
 		});
@@ -343,6 +357,8 @@ namespace emu88Player
 		};
 		if(_model == emu88Lib::DeviceModel::Sc8850)
 			for(const auto& binding : g_sc8850Buttons) add(binding);
+		else if(usesLaBoardButtons(_model))
+			for(const auto& binding : g_mt32Buttons) add(binding);
 		else
 			for(const auto& binding : g_sc88Buttons) add(binding);
 		for(uint32_t button = 0; button < m_buttonElements.size(); ++button)
@@ -387,7 +403,10 @@ namespace emu88Player
 			break;
 		case emu88Lib::DeviceModel::Cm32p:
 		case emu88Lib::DeviceModel::Cm32l:
+		case emu88Lib::DeviceModel::Cm32ln:
 		case emu88Lib::DeviceModel::Cm64:
+		case emu88Lib::DeviceModel::Mt32Old:
+		case emu88Lib::DeviceModel::Mt32New:
 			// The bezel's only driven lamp, bit 0 of the board's leds(); POWER is painted on.
 			assign({"ledCmMidi"});
 			break;
@@ -428,8 +447,9 @@ namespace emu88Player
 	{
 		const auto model = m_processor.deviceModel();
 		const auto is8850 = model == emu88Lib::DeviceModel::Sc8850;
+		const auto isLa = usesLaBoardButtons(model);
 
-		const auto keyFor = [is8850](const uint8_t _button) -> std::string
+		const auto keyFor = [is8850, isLa](const uint8_t _button) -> std::string
 		{
 			const auto find = [_button](const auto& _table) -> std::string
 			{
@@ -438,7 +458,7 @@ namespace emu88Player
 						return keyName(binding.key);
 				return {};
 			};
-			return is8850 ? find(g_sc8850Buttons) : find(g_sc88Buttons);
+			return is8850 ? find(g_sc8850Buttons) : isLa ? find(g_mt32Buttons) : find(g_sc88Buttons);
 		};
 		const auto populated = [model, is8850](const uint8_t _button)
 		{
@@ -449,6 +469,9 @@ namespace emu88Player
 		KeyboardShortcutGroups groups{{"Power", {{"Q", "Power on / off"}}}};
 		if(emu88Lib::getPowerSwitch(model) == emu88Lib::PowerSwitch::Standby)
 			groups.front().rows = {{"Q", "POWER: standby / on"}, {"Shift + Q", "Power supply off / on"}};
+		if(emu88Lib::hasPanelKnob(model))
+			groups.push_back({"Knob", {{keyName(g_mt32KnobUpKey) + " / " + keyName(g_mt32KnobDownKey),
+			                            "VOLUME / VALUE knob up / down, a 32nd of its travel"}}});
 		const auto walk = [&](const auto& _layout)
 		{
 			// The heading is carried until a row of its group survives: on a
@@ -492,6 +515,8 @@ namespace emu88Player
 		};
 		if(is8850)
 			walk(g_sc8850Help);
+		else if(isLa)
+			walk(g_mt32Help);
 		else
 			walk(g_sc88Help);
 

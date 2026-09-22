@@ -117,6 +117,8 @@ namespace emu88Lib
 		m_midiIn->setSamplerate(SampleRate);
 		m_midiIn->setRateLimit(3125);
 		m_midiIn->setPreserveEventOrder(true);
+		// The firmware knows All Notes Off but not All Sound Off, like the LA boards'.
+		m_midiIn->setSilence(synthLib::MidiRateLimiter::Silence::HoldOffAllNotesOff);
 		m_machine.reset();
 		// Service switches released. The card-detect line is P0.4, the pin that is also analog
 		// input ACH4, and it is high with a card in the slot.

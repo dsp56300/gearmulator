@@ -59,6 +59,7 @@ namespace emu88Player
 		                                                                        : ResetMode::Gs);
 		m_midiPlayer.setSongGapMs(static_cast<uint32_t>(std::max(0, m_config->getIntValue("songGapMs", 1000))));
 		m_midiPlayer.setPortCount(midiPortCount());
+		m_midiPlayer.setResetTarget(emu88Lib::resetTarget(m_deviceModel));
 
 		const auto analogMode = m_config->getIntValue("analogOutputMode",
 			static_cast<int>(emu88Lib::AnalogOutputMode::Off));
@@ -313,6 +314,7 @@ namespace emu88Player
 			m_engine = std::move(replacementEngine);
 			m_deviceModel = _model;
 			m_midiPlayer.setPortCount(midiPortCount());
+			m_midiPlayer.setResetTarget(emu88Lib::resetTarget(_model));
 		}
 		suspendProcessing(false);
 
@@ -346,7 +348,7 @@ namespace emu88Player
 		return std::max<uint8_t>(1, emu88Lib::getDeviceProfile(m_deviceModel).groupCount);
 	}
 
-	void Processor::sendSystemExclusive(const std::initializer_list<uint8_t> _bytes)
+	void Processor::sendSystemExclusive(const std::vector<uint8_t>& _bytes)
 	{
 		const auto portCount = midiPortCount();
 		std::vector<synthLib::SMidiEvent> events;
@@ -372,22 +374,32 @@ namespace emu88Player
 
 	void Processor::sendGsReset()
 	{
-		sendSystemExclusive({0xf0, 0x41, 0x10, 0x42, 0x12, 0x40, 0x00, 0x7f, 0x00, 0x41, 0xf7});
+		sendSystemExclusive({synthLib::midi::kGsResetSysex.begin(), synthLib::midi::kGsResetSysex.end()});
+	}
+
+	void Processor::sendRolandLaReset()
+	{
+		sendSystemExclusive({synthLib::midi::kRolandLaResetSysex.begin(), synthLib::midi::kRolandLaResetSysex.end()});
+	}
+
+	void Processor::sendDeviceReset()
+	{
+		sendSystemExclusive(emu88Lib::deviceResetSysex(m_deviceModel));
 	}
 
 	void Processor::sendAllNotesOff()
 	{
 		const auto portCount = midiPortCount();
 		std::vector<synthLib::SMidiEvent> events;
-		events.reserve(static_cast<size_t>(portCount) * 16);
+		events.reserve(static_cast<size_t>(portCount) * 32);
 		for(uint8_t port = 0; port < portCount; ++port)
 			for(uint8_t channel = 0; channel < 16; ++channel)
-			{
-				auto& event = events.emplace_back(synthLib::MidiEventSource::Host,
-					static_cast<uint8_t>(synthLib::M_CONTROLCHANGE | channel),
-					synthLib::MC_ALLNOTESOFF, 0);
-				event.port = port;
-			}
+				for(const auto controller : {synthLib::MC_SUSTAINPEDAL, synthLib::MC_ALLNOTESOFF})
+				{
+					auto& event = events.emplace_back(synthLib::MidiEventSource::Host,
+						static_cast<uint8_t>(synthLib::M_CONTROLCHANGE | channel), controller, 0);
+					event.port = port;
+				}
 		sendMidiEvents(events);
 	}
 

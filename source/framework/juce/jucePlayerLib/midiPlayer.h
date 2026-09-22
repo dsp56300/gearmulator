@@ -23,6 +23,7 @@ namespace jucePlayer
         static constexpr uint8_t kMaximumPortCount = 16;
 
         using ResetMode = synthLib::midi::ResetMode;
+        using ResetTarget = synthLib::midi::ResetTarget;
         // Let cleanup and reset traffic drain before submitting the song's setup.
         // Cleanup still runs with ResetMode::Off, so it needs the same head start.
         static constexpr uint32_t kResetSettleMs = 200;
@@ -99,6 +100,9 @@ namespace jucePlayer
 
         void setResetMode(ResetMode _mode);
         ResetMode resetMode() const;
+        // What the device being played answers to; the reset modes are spelled out for it.
+        void setResetTarget(ResetTarget _target) { m_resetTarget.store(_target, std::memory_order_relaxed); }
+        ResetTarget resetTarget() const { return m_resetTarget.load(std::memory_order_relaxed); }
         void setSongGapMs(uint32_t _milliseconds);
         uint32_t songGapMs() const;
         void setPortCount(uint8_t _count);
@@ -145,6 +149,7 @@ namespace jucePlayer
         std::shared_ptr<const Playlist> m_playlist;
         std::atomic<uint64_t> m_command{0};
         std::atomic<ResetMode> m_resetMode{ResetMode::Off};
+        std::atomic<ResetTarget> m_resetTarget{ResetTarget::GsModule};
         std::atomic<uint32_t> m_songGapMs{0};
         std::atomic<uint32_t> m_endTailMs{4000};
         std::atomic<uint8_t> m_portCount{1};
@@ -165,6 +170,7 @@ namespace jucePlayer
         };
         StartPhase m_startPhase = StartPhase::Ready;
         ResetMode m_startResetMode = ResetMode::Off;
+        ResetTarget m_startResetTarget = ResetTarget::GsModule;
         uint64_t m_waitSamples = 0;
         std::shared_ptr<const Playlist> m_audioPlaylist;
         std::shared_ptr<const Song> m_audioSong;

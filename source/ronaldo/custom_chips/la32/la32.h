@@ -1,3 +1,9 @@
+/*
+ * la32Lib — the LA32 partial synthesizer (Roland R15229896 / Fujitsu MB87136A).
+ *
+ * Derived from Nuked-MT32's la32.cpp/la32.h, Copyright (C) 2024, 2025 nukeykt,
+ * GPL-2.0-or-later; see la32.cpp for the full notice.
+ */
 #pragma once
 
 #include <array>
@@ -8,7 +14,8 @@
 
 namespace la32Lib
 {
-	// The chip's internal lookup ROMs, evaluated from closed forms; see la32.cpp.
+	// The chip's internal lookup ROMs, tables filled from their closed forms when the first
+	// chip is constructed; see la32.cpp.
 	uint32_t exp(uint32_t _index);	// 0..512
 	uint32_t logsin(uint32_t _index);	// 0..511
 

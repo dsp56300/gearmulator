@@ -79,8 +79,29 @@ namespace emu88Lib
             return RomDevice::Nu10b;
         case DeviceModel::Miig5:
             return RomDevice::Miig5;
+        case DeviceModel::Mt32Old:
+            return RomDevice::Mt32Old;
+        case DeviceModel::Mt32New:
+            return RomDevice::Mt32New;
+        case DeviceModel::Cm32ln:
+            return RomDevice::Cm32ln;
         }
         return RomDevice::Sc88;
+    }
+
+    RomDevice RomLoader::toRomDevice(const LaModel _model)
+    {
+        switch (_model)
+        {
+        case LaModel::Mt32Old:
+            return RomDevice::Mt32Old;
+        case LaModel::Mt32New:
+            return RomDevice::Mt32New;
+        case LaModel::Cm32ln:
+            return RomDevice::Cm32ln;
+        default:
+            return RomDevice::Cm32l;
+        }
     }
 
     Rom RomLoader::findROM(const Model _model)
@@ -141,8 +162,32 @@ namespace emu88Lib
 
         Sc55RomSet result;
         result.model = _model;
-        if (!inventory.read(result.internalRom, device, RomSlot::Internal) ||
-            !inventory.read(result.programRom, device, RomSlot::Program))
+        // The on-chip ROM and the program ROM of one firmware revision belong together. The
+        // first program in registry order whose mate is there decides the revision; images
+        // without a revision number (a custom named file) pair with anything, so the plain
+        // slot lookup stands when either side has none.
+        const auto* internal = inventory.find(device, RomSlot::Internal);
+        const auto* program = inventory.find(device, RomSlot::Program);
+        if (internal && program && internal->entry && program->entry && internal->entry->revision &&
+            program->entry->revision && internal->entry->revision != program->entry->revision)
+        {
+            for (const auto& entry : g_romRegistry)
+            {
+                if (!usedBy(entry, device) || entry.slot != RomSlot::Program || !entry.revision)
+                    continue;
+                const auto* pairedProgram = inventory.findRevision(device, RomSlot::Program, 0, entry.revision);
+                const auto* pairedInternal = inventory.findRevision(device, RomSlot::Internal, 0, entry.revision);
+                if (!pairedProgram || !pairedInternal)
+                    continue;
+                program = pairedProgram;
+                internal = pairedInternal;
+                break;
+            }
+            if (internal->entry->revision != program->entry->revision)
+                return {};
+        }
+        if (!internal || !program || !inventory.read(result.internalRom, *internal) ||
+            !inventory.read(result.programRom, *program))
             return {};
         const auto profile = result.profile();
         for (uint8_t i = 0; i < result.waveRom.size(); ++i)
@@ -164,15 +209,17 @@ namespace emu88Lib
         return result.isValid() ? result : Cm32pRomSet{};
     }
 
-    Cm32lRomSet RomLoader::findCm32lRomSet()
+    LaRomSet RomLoader::findLaRomSet(const LaModel _model)
     {
         const auto inventory = scan();
-        Cm32lRomSet result;
-        if (!inventory.read(result.control, RomDevice::Cm32l, RomSlot::Control) ||
-            !inventory.read(result.wave, RomDevice::Cm32l, RomSlot::Wave) ||
-            !inventory.read(result.reverb, RomDevice::Cm32l, RomSlot::Reverb))
+        const auto device = toRomDevice(_model);
+        LaRomSet result;
+        result.model = _model;
+        if (!inventory.read(result.control, device, RomSlot::Control) ||
+            !inventory.read(result.wave, device, RomSlot::Wave) ||
+            !inventory.read(result.reverb, device, RomSlot::Reverb))
             return {};
-        return result.isValid() ? result : Cm32lRomSet{};
+        return result.isValid() ? result : LaRomSet{};
     }
 
     WaveRom RomLoader::findWaveRom()

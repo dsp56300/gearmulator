@@ -92,8 +92,19 @@ namespace synthLib
 		{
 			if ((channelsToSilence & static_cast<uint16_t>(1u << channel)) == 0)
 				continue;
-			SMidiEvent allSoundOff(MidiEventSource::Internal,
-				static_cast<uint8_t>(M_CONTROLCHANGE | channel), MC_ALLSOUNDOFF, 0);
+			const auto status = static_cast<uint8_t>(M_CONTROLCHANGE | channel);
+			if (m_silence == Silence::HoldOffAllNotesOff)
+			{
+				// Pushed to the front in reverse, so the pedal comes up before the notes go.
+				SMidiEvent allNotesOff(MidiEventSource::Internal, status, MC_ALLNOTESOFF, 0);
+				allNotesOff.transportGeneration = m_transportGeneration;
+				m_pendingRealtime.push_front(std::move(allNotesOff));
+				SMidiEvent holdOff(MidiEventSource::Internal, status, MC_SUSTAINPEDAL, 0);
+				holdOff.transportGeneration = m_transportGeneration;
+				m_pendingRealtime.push_front(std::move(holdOff));
+				continue;
+			}
+			SMidiEvent allSoundOff(MidiEventSource::Internal, status, MC_ALLSOUNDOFF, 0);
 			allSoundOff.transportGeneration = m_transportGeneration;
 			m_pendingRealtime.push_front(std::move(allSoundOff));
 		}
@@ -257,11 +268,21 @@ namespace synthLib
 		{
 			const auto command = event.a & 0xf0;
 			const auto channel = event.a & 0x0f;
+			const auto bit = static_cast<uint16_t>(1u << channel);
+			if (command == M_CONTROLCHANGE && event.b == MC_SUSTAINPEDAL)
+			{
+				if (event.c >= 64) m_heldChannels |= bit; else m_heldChannels &= static_cast<uint16_t>(~bit);
+			}
 			if ((command == M_NOTEON && event.c != 0) ||
 				(command == M_CONTROLCHANGE && event.b == MC_SUSTAINPEDAL && event.c >= 64))
-				m_activeChannels |= static_cast<uint16_t>(1u << channel);
+				m_activeChannels |= bit;
 			else if (command == M_CONTROLCHANGE && event.b == MC_ALLSOUNDOFF)
-				m_activeChannels &= static_cast<uint16_t>(~(1u << channel));
+				m_activeChannels &= static_cast<uint16_t>(~bit);
+			// All Notes Off leaves a pedalled note ringing on the boards that have no All
+			// Sound Off, so it only clears a channel whose pedal is up.
+			else if (command == M_CONTROLCHANGE && event.b == MC_ALLNOTESOFF &&
+				m_silence == Silence::HoldOffAllNotesOff && (m_heldChannels & bit) == 0)
+				m_activeChannels &= static_cast<uint16_t>(~bit);
 		}
 
 		m_currentEvent.reset();

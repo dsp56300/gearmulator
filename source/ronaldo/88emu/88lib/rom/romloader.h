@@ -55,6 +55,9 @@ namespace emu88Lib
     {
     public:
         const FoundRom* find(RomDevice _device, RomSlot _slot, uint8_t _index = 0) const;
+        // The same, restricted to images catalogued with this revision number (see
+        // RomRegistryEntry::revision). Custom named images carry none and never match here.
+        const FoundRom* findRevision(RomDevice _device, RomSlot _slot, uint8_t _index, uint8_t _revision) const;
 
         // Includes SC-88Pro wave chips derivable from recognized SC-8820/8850
         // images. find() itself only reports files physically present.
@@ -65,6 +68,14 @@ namespace emu88Lib
         // Derived Pro waves are returned in native scrambled chip order, with
         // their contents checked against the native Pro registry hashes.
         bool read(std::vector<uint8_t>& _data, RomDevice _device, RomSlot _slot, uint8_t _index = 0) const;
+        // Reads one image found earlier, as it is on disk: no composite joining or derived
+        // sources, which are what the slot-addressed read() adds on top of this.
+        bool read(std::vector<uint8_t>& _data, const FoundRom& _rom) const;
+
+        // Whether the images found for this board that carry a revision number all belong
+        // to one revision, or can be picked so. A board whose on-chip and program ROMs come
+        // from different firmware revisions is not complete, however many files it has.
+        bool hasConsistentRevision(RomDevice _device) const;
 
         // True when every required image was found or can be derived.
         // This is what makes a device selectable: a board with a missing wave
@@ -141,8 +152,10 @@ namespace emu88Lib
         static Sc55RomSet findSc55RomSet(DeviceModel _model);
         static Cm32pRomSet findCm32pRomSet();
 
-        // CM-32L: control ROM, the LA32's PCM image and the Boss reverb microcode.
-        static Cm32lRomSet findCm32lRomSet();
+        // One of the LA boards: control ROM, the LA32's PCM image and the Boss reverb
+        // microcode, at the sizes that board takes.
+        static LaRomSet findLaRomSet(LaModel _model);
+        static RomDevice toRomDevice(LaModel _model);
 
         // The four internal PCM chips, de-scrambled into the XP's flat 8 MiB
         // space.

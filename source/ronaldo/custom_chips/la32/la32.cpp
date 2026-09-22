@@ -1,4 +1,29 @@
-// LA32 chip core, based on the unfinished one by nukeykt
+/*
+ * la32Lib — the LA32 partial synthesizer (Roland R15229896 / Fujitsu MB87136A), the tone
+ * generator of the MT-32, CM-32L, MT-100 and D-110: 32 time-multiplexed partials, each a
+ * square/sawtooth generator with a resonant low-pass or a PCM sample reader, with two envelope
+ * ramps, pan and ring modulation, summed onto four stereo output pairs.
+ *
+ * Derived from Nuked-MT32's la32.cpp, which carries:
+ *
+ * Copyright (C) 2024, 2025 nukeykt
+ *
+ * This file is part of Nuked-MT32.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ *  Thanks:
+ *      John McMaster (https://siliconprawn.org):
+ *          LA32 chip decap
+ */
 
 #include "la32.h"
 
@@ -34,16 +59,63 @@ namespace la32Lib
 		return _logsin ^ 0x3fff;
 	}
 
-	uint32_t logsin(const uint32_t _index)
+	// The two lookup ROMs, evaluated from their closed forms once and kept: a partial slot reads
+	// them several times, 32 slots per frame, and the transcendental functions would otherwise be
+	// where the chip spent its time. The tables are built when the first chip is constructed.
+	static uint32_t logsinClosedForm(const uint32_t _index)
 	{
 		constexpr double pi = 3.14159265358979323846;
 		const double v = std::floor(0.5 - std::log2(std::sin((_index + 0.5) / 1024.0 * pi)) * 1024.0);
 		return static_cast<uint32_t>(std::min(v, 8191.0));
 	}
 
+	// 4096 * 2^(x/512), rounded, so the mantissa carries its leading bit and index 512 yields
+	// the 8192 the interpolation past the last entry runs into.
+	static uint32_t expClosedForm(const uint32_t _index)
+	{
+		return static_cast<uint32_t>(std::floor(4096.0 * std::exp2(_index / 512.0) + 0.5));
+	}
+
+	static const std::array<uint16_t, 512>& logsinTable()
+	{
+		static const auto table = []
+		{
+			std::array<uint16_t, 512> result{};
+			for (uint32_t i = 0; i < result.size(); ++i)
+				result[i] = static_cast<uint16_t>(logsinClosedForm(i));
+			return result;
+		}();
+		return table;
+	}
+
+	static const std::array<uint16_t, 513>& expTable()
+	{
+		static const auto table = []
+		{
+			std::array<uint16_t, 513> result{};
+			for (uint32_t i = 0; i < result.size(); ++i)
+				result[i] = static_cast<uint16_t>(expClosedForm(i));
+			return result;
+		}();
+		return table;
+	}
+
+	uint32_t logsin(const uint32_t _index)
+	{
+		return logsinTable()[_index & 511];
+	}
+
+	uint32_t exp(const uint32_t _index)
+	{
+		return expTable()[_index > 512 ? 512 : _index];
+	}
+
 
 LA32::LA32()
 {
+	// Pay for the lookup tables here rather than on the audio thread's first frame.
+	(void)expTable();
+	(void)logsinTable();
 	reset();
 }
 
@@ -263,13 +335,6 @@ uint16_t LA32::packVoiceRegister(const VoiceRegisters& _regs, const unsigned _re
 static int32_t mul14x8(const int32_t _a, const int32_t _b)
 {
 	return signExtend(static_cast<uint32_t>(_a), 14) * signExtend(static_cast<uint32_t>(_b), 8);
-}
-
-// The exp ROM as the chip interpolates it: 4096 * 2^(x/512), rounded, so the mantissa carries
-// its leading bit and index 512 yields the 8192 the interpolation past the last entry runs into.
-inline uint32_t exp(const uint32_t _index)
-{
-	return static_cast<uint32_t>(std::floor(4096.0 * std::exp2(_index / 512.0) + 0.5));
 }
 
 // 2^(v/4096) scaled by 8, in 26 bits: a 4-bit integer part over a 12-bit fraction, the

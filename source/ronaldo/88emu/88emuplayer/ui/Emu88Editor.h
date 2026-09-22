@@ -144,7 +144,8 @@ namespace emu88Player
 		std::unique_ptr<KeyboardWindow> m_keyboardWindow;
 		std::unique_ptr<RomRequirementsWindow> m_romWindow;
 		std::unique_ptr<HardwareLcd> m_lcd;
-		// The CM-64's second service display; null on every other board.
+		// The skin's second display element, which only the CM-64 shows (its LA half's service
+		// screen); null when the skin has no such element.
 		std::unique_ptr<HardwareLcd> m_lcd2;
 		std::unique_ptr<PlaylistDropTarget> m_playlistDropTarget;
 		std::vector<std::unique_ptr<PlaylistRowDrag>> m_playlistRows;

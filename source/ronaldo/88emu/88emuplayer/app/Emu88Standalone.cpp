@@ -244,7 +244,7 @@ namespace emu88Player
                     throw std::runtime_error("Virtual MIDI ports are not supported on this platform.");
                 if (options.number("gain", 1) > Processor::kMaximumOutputGain)
                     throw std::runtime_error("GUI --gain range is 0..2.");
-                // Checked here so a bad card is a startup error; the processor loads it for each CM-32P.
+                // Checked here so a bad card is a startup error; the processor loads it for each board with a slot.
                 (void)loadPcmCard(options);
                 auto requestedAudio = prepareSession();
                 auto* processor = openDevices(*requestedAudio);
