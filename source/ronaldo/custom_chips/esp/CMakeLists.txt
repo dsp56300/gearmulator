@@ -26,4 +26,4 @@ set_property(TARGET esp PROPERTY FOLDER "Ronaldo")
 
 target_link_libraries(esp PUBLIC asmjit)
 
-target_include_directories(esp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+target_include_directories(esp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..)
