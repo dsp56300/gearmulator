@@ -4,6 +4,12 @@ Release Notes
 
 88emuPlayer:
 
+- [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the
+        player's window - front panel, display, level meters and playlist -
+        alongside its audio. Offline and deterministic like the WAV render, with
+        `--fps`, `--video-scale` and `--video-size` to pick the format. Requires
+        ffmpeg, which is not shipped with the player.
+
 - [New] Devices: Added support for the MT-32, CM-32L and CM-64 (experimental).
 
 - [New] GM2 reset: "Send GM2 Reset" in the context menu, and GM2 as a choice

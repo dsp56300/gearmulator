@@ -100,6 +100,26 @@ int main()
 		rejects({"--device", "--play"}, false);
 		check(LaunchOptions::parse({"--help"}, true).has("help"), "Help without input");
 		check(LaunchOptions::parse({"--list-devices"}, true).has("list-devices"), "Discovery without input");
+		// A video render needs no --output: the audio goes into the video file.
+		{
+			const auto video = LaunchOptions::parse({"--video", "demo.mp4", "--fps=29.97", "--video-scale", "150",
+			                                         "--video-size", "1920x1080", "--ffmpeg", "/opt/ffmpeg",
+			                                         "song.mid"}, true);
+			check(video.get("video") == "demo.mp4", "Video output");
+			check(video.number("fps", 0) == 29.97, "Fractional frame rate");
+			check(video.number("video-scale", 0) == 150, "Video scale");
+			check(video.get("video-size") == "1920x1080", "Video size");
+			check(video.get("ffmpeg") == "/opt/ffmpeg", "ffmpeg path");
+		}
+		check(LaunchOptions::parse({"--video", "demo.mp4", "--output", "demo.wav", "song.mid"}, true).has("output"),
+		      "Video and WAV together");
+		rejects({"song.mid"});
+		rejects({"--video", "demo.mp4", "song.mid"}, false);
+		for(const auto* bad : {"0", "121", "nan", "30fps"}) rejects({"--video=a.mp4", "--fps", bad, "song.mid"});
+		for(const auto* bad : {"24", "401", "100.5"}) rejects({"--video=a.mp4", "--video-scale", bad, "song.mid"});
+		// The video options are meaningless without a video to apply them to.
+		for(const auto* option : {"--fps=30", "--video-scale=100", "--video-size=1920x1080", "--ffmpeg=ffmpeg"})
+			rejects({option, "--output", "a.wav", "song.mid"});
 		std::cout << "Launch option validation passed\n";
 		return 0;
 	}

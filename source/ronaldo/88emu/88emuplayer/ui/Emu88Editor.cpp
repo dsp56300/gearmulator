@@ -19,17 +19,32 @@ namespace emu88Player
 {
 	using namespace editor;
 
-	Editor::Editor(Processor& _processor)
-		: juce::AudioProcessorEditor(_processor), m_processor(_processor), m_interfaces(*this)
+	Editor::Editor(Processor& _processor, const bool _offline)
+		: juce::AudioProcessorEditor(_processor), m_processor(_processor), m_offline(_offline),
+		  m_interfaces(*this)
 	{
-		adoptStandaloneSettings();
-		m_sizeConstrainer.setMinimumSize(g_defaultWidth / 2, g_defaultHeight / 2);
-		m_sizeConstrainer.setMaximumSize(g_defaultWidth * 3, g_defaultHeight * 3);
-		m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(g_defaultWidth) / g_defaultHeight);
-		setResizable(true, true);
-		setConstrainer(&m_sizeConstrainer);
+		// Loading the UI reports every font face it finds. That belongs in a plugin's log, not in
+		// the output of a command line render.
+		if(m_offline)
+			m_interfaces.getSystemInterface().setVerboseLogging(false);
+
+		if(!m_offline)
+		{
+			adoptStandaloneSettings();
+			m_sizeConstrainer.setMinimumSize(g_defaultWidth / 2, g_defaultHeight / 2);
+			m_sizeConstrainer.setMaximumSize(g_defaultWidth * 3, g_defaultHeight * 3);
+			m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(g_defaultWidth) / g_defaultHeight);
+			setResizable(true, true);
+			setConstrainer(&m_sizeConstrainer);
+		}
 
 		loadSkin(readSkinFromConfig());
+
+		// An offline render sizes the editor itself, to the video resolution it was asked for, and
+		// has neither a message loop to run the timer nor a screen to put a notice on.
+		if(m_offline)
+			return;
+
 		setGuiScale(juce::jlimit(50, 300, m_processor.config().getIntValue("scale", 100)));
 		startTimerHz(30);
 
@@ -57,6 +72,7 @@ namespace emu88Player
 	{
 		juceRmlUi::RmlComponentConfig config;
 		config.refreshRateLimitHz = 30;
+		config.offlineRendering = m_offline;
 		config.includeDefaultTemplates = false;
 		// Playlist entries are file names, in whatever script the user's files happen to use.
 		config.systemFallbackFonts = true;
@@ -82,6 +98,9 @@ namespace emu88Player
 			updateButtonVisuals();
 		});
 		wirePanel();
+		// The debugger draws its own toolbar over the skin, which an offline render would put in
+		// every frame of the video.
+		if(!m_offline)
 		{
 			juceRmlUi::RmlInterfaces::ScopedAccess access(*m_rml);
 			m_rml->enableDebugger(m_processor.config().getBoolValue("enableRmlUiDebugger", false));
@@ -115,7 +134,9 @@ namespace emu88Player
 	{
 		if(m_rml)
 			m_rml->setBounds(getLocalBounds());
-		if(m_settingGuiScale || getWidth() <= 0)
+		// An offline render picks the editor's size from the video resolution, which is nothing
+		// the window should remember.
+		if(m_offline || m_settingGuiScale || getWidth() <= 0)
 			return;
 		const auto scale = juce::roundToInt(100.0 * static_cast<double>(getWidth()) / g_defaultWidth);
 		m_processor.config().setValue("scale", scale);
@@ -459,6 +480,11 @@ namespace emu88Player
 	}
 
 	void Editor::timerCallback()
+	{
+		updateFromDevice();
+	}
+
+	void Editor::updateFromDevice()
 	{
 		if(!m_rml)
 			return;

@@ -2,7 +2,7 @@
 
 **88emu** emulates the hardware inside Roland Sound Canvas modules, related PCM sound generators, and the MT-32 and CM-32L family of LA synthesizers. It runs the original firmware on emulated CPUs and sound chips, including the firmware's instrument selection, voice allocation, effects, MIDI handling and front-panel behavior. You supply the ROM images; they are not included.
 
-**88emuPlayer** is the standalone application for playing MIDI files and using those devices from a MIDI keyboard, sequencer or game. **88EmuCli** uses the same emulation to render files to WAV offline, as fast as the computer can run it.
+**88emuPlayer** is the standalone application for playing MIDI files and using those devices from a MIDI keyboard, sequencer or game. **88EmuCli** uses the same emulation to render files to WAV offline, as fast as the computer can run it, or to a demo video showing the player's window as it plays.
 
 ## Getting started and file locations
 
@@ -472,7 +472,8 @@ The CLI is useful for converting MIDI/Recomposer collections, making repeatable 
 
 | CLI-only option | Meaning |
 | --- | --- |
-| `--output PATH` | Required stereo WAV destination; parent directory must exist. Exactly one input is rendered. |
+| `--output PATH` | Stereo WAV destination; parent directory must exist. Exactly one input is rendered. Required unless `--video` is given. |
+| `--video PATH` | Also render the player's window to a video file, with the audio muxed in. Needs ffmpeg. |
 | `--bits 16\|24\|32` | 16/24-bit integer PCM or 32-bit floating point. Default 24. |
 | `--boot-ms N` | Discard this much emulated boot audio before playback, after factory-reset/Fast Boot work. Default 5,000 ms. Increase for firmware needing more startup time. |
 | `--tail-ms N` | Audio after the final MIDI event. Default 4,000 ms; up to 600,000 ms. |
@@ -483,6 +484,28 @@ The CLI is useful for converting MIDI/Recomposer collections, making repeatable 
 The CLI uses **MAME High Quality** resampling and reads the saved analog-output choice. Boot audio is excluded from the WAV; song-reset settling is included. Without the limiter, integer WAV output clips above full scale; 32-bit float preserves overloads. Both report samples above full scale.
 
 Output is written to a temporary file and published only after a successful render. Existing output is protected unless `--overwrite` is supplied. Exit codes are **0** for success, **2** for invalid arguments, **3** for input/config/ROM errors and **4** for rendering/output errors.
+
+### Rendering demo videos
+
+`--video` renders the player's own window alongside the audio, which is what a demo video usually wants: the front panel with its display, level meters and lamps, the playlist and the transport, all moving as the song plays. It is offline like the WAV render, so it does not depend on the computer keeping up in real time.
+
+```sh
+88EmuCli --device sc88pro --video "demo.mp4" --video-size 1920x1080 "song.mid"
+```
+
+| Video option | Meaning |
+| --- | --- |
+| `--video PATH` | The video file. The container follows the extension; `.mp4` and `.mkv` both work. |
+| `--fps N` | Frame rate, 1 to 120, fractional allowed (`29.97`). Default 30, which is what the player's own UI refreshes at. |
+| `--video-scale PERCENT` | How large the window is drawn, 25 to 400 percent of its 1040x318 default. Default 200, giving 2080x636. |
+| `--video-size WxH` | Scale and letterbox the result to exactly this size, for what an upload site expects. |
+| `--ffmpeg PATH` | The ffmpeg executable, when it is not on the path. |
+
+**ffmpeg is required** and is not shipped with the player: install it from your package manager (`brew install ffmpeg`, `apt install ffmpeg`, `winget install ffmpeg`) or from [ffmpeg.org](https://ffmpeg.org). The video is encoded as h264 and the audio as AAC.
+
+Adding `--output` writes the lossless WAV as well, and it is the same audio, sample for sample, that `--output` produces on its own - the frame rate never changes what is rendered. The picture is taken from the board's display as it stands after the audio for that frame, so it needs no synchronisation afterwards. Video renders use the settings saved by the player, including the skin, but never write to them.
+
+The window is drawn in software, without a graphics card or a screen, so this works over SSH and on a build machine. A video takes several times as long as the same render to WAV - drawing and encoding the frames costs more than the emulation does - and `--video-scale` is what moves that number most.
 
 ## Credits and attribution
 

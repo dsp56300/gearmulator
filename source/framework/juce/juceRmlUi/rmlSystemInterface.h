@@ -38,6 +38,17 @@ namespace juceRmlUi
 		// callback to detach.
 		void setCursorChangedCallback(CursorChangedCallback _callback) { m_cursorChangedCallback = std::move(_callback); }
 
+		// Drives RmlUi from a clock the caller owns instead of the wall clock. An offline render
+		// produces its frames as fast as it can, so animations and transitions have to be told
+		// which point in time each frame stands for, or they would all land on the same one.
+		void setTimeOverride(const double _seconds) { m_timeOverride = _seconds; m_hasTimeOverride = true; }
+		void clearTimeOverride() { m_hasTimeOverride = false; }
+
+		// Whether RmlUi's progress reports - every font face it loads, every cursor it asks for -
+		// reach the log. Warnings and errors always do. A command line tool that brings a UI up
+		// only to render it turns this off, so its output is its own.
+		void setVerboseLogging(const bool _verbose) { m_verboseLogging = _verbose; }
+
 		void beginLogRecording();
 		void endLogRecording();
 
@@ -59,5 +70,9 @@ namespace juceRmlUi
 		bool m_recordingLog = false;
 
 		CursorChangedCallback m_cursorChangedCallback;
+
+		double m_timeOverride = 0.0;
+		bool m_hasTimeOverride = false;
+		bool m_verboseLogging = true;
 	};
 }

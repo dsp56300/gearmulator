@@ -1,8 +1,8 @@
-#include <cerrno>
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "88emuplayer/app/Emu88VideoRender.h"
 #include "88lib/hardwareDevice.h"
 #include "88lib/rom/romloader.h"
 #include "juce_audio_formats/juce_audio_formats.h"
@@ -11,36 +11,10 @@
 #if JUCE_WINDOWS
 #include <windows.h>
 #include <shellapi.h>
-#else
-#include <unistd.h>
-#if JUCE_MAC
-#include <sys/stdio.h>
-#endif
 #endif
 
 namespace
 {
-    bool publishWave(const juce::TemporaryFile& temporary, const juce::File& output, const bool overwrite)
-    {
-        if (overwrite)
-            return temporary.overwriteTargetFileWithTemporary();
-#if JUCE_WINDOWS
-        return MoveFileExW(temporary.getFile().getFullPathName().toWideCharPointer(),
-                           output.getFullPathName().toWideCharPointer(), MOVEFILE_WRITE_THROUGH) != 0;
-#else
-        const auto source = temporary.getFile().getFullPathName();
-        const auto destination = output.getFullPathName();
-#if JUCE_MAC
-        if (::renamex_np(source.toRawUTF8(), destination.toRawUTF8(), RENAME_EXCL) == 0)
-            return true;
-        if (errno != ENOTSUP && errno != EINVAL)
-            return false;
-#endif
-        // Linking within the destination directory atomically refuses an existing name.
-        return ::link(source.toRawUTF8(), destination.toRawUTF8()) == 0;
-#endif
-    }
-
     int render(const emu88Player::LaunchOptions& options)
     {
         using namespace emu88Player;
@@ -279,7 +253,7 @@ namespace
             if (!writer->flush())
                 throw std::runtime_error("WAV flush failed.");
             writer.reset();
-            if (!publishWave(temporary, outputFile, options.has("overwrite")))
+            if (!publishFile(temporary, outputFile, options.has("overwrite")))
                 throw std::runtime_error(
                     "Cannot publish completed WAV: destination exists or the filesystem refused publication.");
             if (clipped)
@@ -320,6 +294,18 @@ int main(int argc, char** argv)
         {
             std::cout << emu88Player::LaunchOptions::help(true);
             return 0;
+        }
+        // A video render brings up the whole player, so it needs juce's GUI side running. The WAV
+        // path stays as lean as it was.
+        if (options.has("video") && !options.has("list-devices"))
+        {
+            const juce::ScopedJuceInitialiser_GUI juceInitialiser;
+#if JUCE_MAC
+            // Initialising juce's GUI side makes this a windowed application as far as macOS is
+            // concerned. Nothing here opens a window, so keep it out of the Dock.
+            juce::Process::setDockIconVisible(false);
+#endif
+            return renderVideo(options);
         }
         return render(options);
     }

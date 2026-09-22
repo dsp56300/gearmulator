@@ -22,6 +22,15 @@
 #include <unistd.h>
 #endif
 
+#if JUCE_WINDOWS
+#include <windows.h>
+#else
+#include <unistd.h>
+#if JUCE_MAC
+#include <sys/stdio.h>
+#endif
+#endif
+
 namespace emu88Player
 {
     std::pair<int, int> parseOutputChannels(const std::string& value)
@@ -157,6 +166,27 @@ namespace emu88Player
         return juce::File::getCurrentWorkingDirectory().getChildFile(juce::String::fromUTF8(path.c_str()));
     }
 
+    bool publishFile(const juce::TemporaryFile& temporary, const juce::File& output, const bool overwrite)
+    {
+        if (overwrite)
+            return temporary.overwriteTargetFileWithTemporary();
+#if JUCE_WINDOWS
+        return MoveFileExW(temporary.getFile().getFullPathName().toWideCharPointer(),
+                           output.getFullPathName().toWideCharPointer(), MOVEFILE_WRITE_THROUGH) != 0;
+#else
+        const auto source = temporary.getFile().getFullPathName();
+        const auto destination = output.getFullPathName();
+#if JUCE_MAC
+        if (::renamex_np(source.toRawUTF8(), destination.toRawUTF8(), RENAME_EXCL) == 0)
+            return true;
+        if (errno != ENOTSUP && errno != EINVAL)
+            return false;
+#endif
+        // Linking within the destination directory atomically refuses an existing name.
+        return ::link(source.toRawUTF8(), destination.toRawUTF8()) == 0;
+#endif
+    }
+
     std::vector<uint8_t> loadPcmCard(const LaunchOptions& options)
     {
         if (!options.has("pcm-card"))
@@ -201,7 +231,8 @@ namespace emu88Player
         const std::set<std::string> common{"rom-dir",       "config",      "device",  "reset",
                                            "song-gap-ms",   "sample-rate", "gain",    "limiter",
                                            "factory-reset", "fast-boot",   "pcm-card"};
-        const std::set<std::string> render{"output", "bits", "boot-ms", "tail-ms", "max-seconds"};
+        const std::set<std::string> render{"output",      "bits",  "boot-ms",    "tail-ms", "max-seconds",
+                                           "video",       "fps",   "video-scale", "video-size", "ffmpeg"};
         const std::set<std::string> gui{"audio-backend",     "audio-device", "buffer-size",
                                         "midi-in",           "midi-in-a",    "midi-in-b",
                                         "midi-in-c",         "midi-in-d",    "midi-out",
@@ -276,6 +307,8 @@ namespace emu88Player
                                                               {"boot-ms", {0, 60000}},
                                                               {"tail-ms", {0, 600000}},
                                                               {"max-seconds", {0.001, 86400}},
+                                                              {"fps", {1, 120}},
+                                                              {"video-scale", {25, 400}},
                                                               {"bits", {16, 32}}})
         {
             if (!result.has(key))
@@ -292,7 +325,7 @@ namespace emu88Player
                 end = 0;
             }
             if (end != value.size() || !std::isfinite(n) || n < range.first || n > range.second ||
-                (key != "gain" && key != "max-seconds" && std::floor(n) != n))
+                (key != "gain" && key != "max-seconds" && key != "fps" && std::floor(n) != n))
                 throw std::runtime_error("Invalid value for --" + key + ": " + value);
         }
         if (result.has("bits") && result.get("bits") != "16" && result.get("bits") != "24" &&
@@ -306,14 +339,20 @@ namespace emu88Player
             if (result.has(key) && result.get(key) != "on" && result.get(key) != "off")
                 throw std::runtime_error(std::string("--") + key + " must be on or off.");
         if (cli && !result.has("help") && !result.has("list-devices") &&
-            (result.files.size() != 1 || !result.has("output")))
-            throw std::runtime_error("Supply one MIDI/RCP input and --output WAV; use --help.");
+            (result.files.size() != 1 || !(result.has("output") || result.has("video"))))
+            throw std::runtime_error("Supply one MIDI/RCP input and --output WAV or --video MP4; use --help.");
+        // The video options only mean something for a video, and --bits picks the format of a WAV
+        // that a video render only writes when one was asked for.
+        if (!result.has("video"))
+            for (const auto* key : {"fps", "video-scale", "video-size", "ffmpeg"})
+                if (result.has(key))
+                    throw std::runtime_error(std::string("--") + key + " needs --video.");
         return result;
     }
 
     std::string LaunchOptions::help(const bool cli)
     {
-        return std::string(cli ? "88EmuCli [options] INPUT --output OUTPUT.wav\n"
+        return std::string(cli ? "88EmuCli [options] INPUT --output OUTPUT.wav [--video OUTPUT.mp4]\n"
                                : "88emuPlayer [options] [MIDI/RCP files...]\n") +
             "  --help                 Show this help\n"
             "  --list-devices         List stable device IDs and ROM availability\n"
@@ -330,6 +369,11 @@ namespace emu88Player
             "  --pcm-card PATH        CM-32P/CM-64: PCM card image in the card slot (SN-U110 series)\n"
             "  --gain N               Linear output gain (CLI 0..4, GUI 0..2)\n" +
             (cli ? "  --output PATH          Stereo WAV output; existing files are protected\n"
+                   "  --video PATH           Also render the player UI to this video file (needs ffmpeg)\n"
+                   "  --fps N                Video frame rate, 1..120 (default 30)\n"
+                   "  --video-scale PERCENT  UI size, 25..400 percent of 1040x318 (default 200)\n"
+                   "  --video-size WxH       Scale and pad the video to exactly this size\n"
+                   "  --ffmpeg PATH          The ffmpeg executable (default: ffmpeg on PATH)\n"
                    "  --bits 16|24|32        16/24-bit PCM or 32-bit float (default 24)\n"
                    "  --boot-ms N            Discard boot audio before playback (default 5000)\n"
                    "  --tail-ms N            Release tail after final MIDI event (default 4000)\n"

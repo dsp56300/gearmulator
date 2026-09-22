@@ -42,7 +42,9 @@ namespace emu88Player
 	                     public juce::StandaloneOptionsMenuHandler
 	{
 	public:
-		explicit Editor(Processor& _processor);
+		// An offline editor is never put on a screen: it renders frames on demand for the video
+		// render, so it runs no update timer, opens no dialogs and touches no window state.
+		explicit Editor(Processor& _processor, bool _offline = false);
 		~Editor() override;
 		void resized() override;
 		void parentHierarchyChanged() override;
@@ -50,6 +52,11 @@ namespace emu88Player
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
 		std::vector<std::string> getAllFilenames() override;
 		void showStandaloneOptionsMenu() override;
+
+		// Pulls the board's display, the playlist and the transport into the UI. The timer calls
+		// this while the player runs; an offline render calls it once per video frame instead.
+		void updateFromDevice();
+		juceRmlUi::RmlComponent* rmlComponent() const { return m_rml.get(); }
 
 	private:
 		friend class SettingsWindow;
@@ -135,6 +142,7 @@ namespace emu88Player
 		void updateLeds(uint16_t _leds);
 
 		Processor& m_processor;
+		const bool m_offline;
 		juceRmlUi::RmlInterfaces m_interfaces;
 		std::unique_ptr<juceRmlUi::RmlComponent> m_rml;
 		baseLib::EventListener<juceRmlUi::RmlComponent*> m_onRmlFocusLost;

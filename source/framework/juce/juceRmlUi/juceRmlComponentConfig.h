@@ -32,6 +32,12 @@ namespace juceRmlUi
 		// Leave it off for a UI that only shows its own labels.
 		bool systemFallbackFonts = false;
 
+		// Renders frames only when renderOffline() asks for one: the software renderer is used
+		// whatever the platform offers, no update timer runs, and the on-screen check that stops
+		// a hidden editor from producing frames is skipped. For a component that is never put on
+		// screen at all, such as the offline video render of the 88emu player.
+		bool offlineRendering = false;
+
 		// Registered on top of the above. Editor-driven too: pluginEditor scans the data provider
 		// for per-product tus_settings_<product>.rml pages.
 		std::vector<std::string> additionalTemplateFiles;

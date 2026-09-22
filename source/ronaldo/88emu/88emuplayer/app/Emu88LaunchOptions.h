@@ -35,6 +35,10 @@ namespace emu88Player
     jucePlayer::MidiPlayer::ResetMode parseReset(const std::string& name);
     std::pair<int, int> parseOutputChannels(const std::string& value);
     juce::File launchFile(const std::string& path);
+    // Moves a finished render onto its destination. Without _overwrite this refuses an existing
+    // file in the same step that would replace it, so a file that appeared during the render is
+    // never lost.
+    bool publishFile(const juce::TemporaryFile& temporary, const juce::File& output, bool overwrite);
     // The PCM card image in the file. Throws if the file is missing or not a card.
     std::vector<uint8_t> loadPcmCard(const juce::File& file);
     // The --pcm-card image, or empty without the option. Throws as above.
