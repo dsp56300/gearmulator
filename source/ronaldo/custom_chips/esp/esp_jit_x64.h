@@ -2,7 +2,7 @@
 
 #include "esp_jit.h"
 
-#include "esp_jit_x64_pool.h"
+#include "common/jit_x64_regpool.h"
 
 namespace esp
 {
@@ -34,6 +34,6 @@ namespace esp
 
 		Asm& m_asm;
 		JitInputData m_data;
-		RegPoolX64 m_pool;
+		rLib::RegPoolX64 m_pool;
 	};
 }

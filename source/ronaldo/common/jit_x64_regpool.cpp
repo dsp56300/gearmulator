@@ -1,11 +1,11 @@
-#include "esp_jit_x64_pool.h"
+#include "jit_x64_regpool.h"
 
 #include <cassert>
 #include <stdexcept>
 
-#include "esp_jit_x64_types.h"
+#include "jit_x64_types.h"
 
-namespace esp
+namespace rLib
 {
 	PooledReg::PooledReg(RegPoolX64& _pool, const asmjit::x86::Gpq& reg, void* ptr, const bool _read, const bool _write, uint32_t dataSize)
 		: m_pool(_pool)

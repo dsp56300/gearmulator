@@ -9,7 +9,7 @@
 
 #include "asmjit/x86/x86builder.h"
 
-namespace esp
+namespace rLib
 {
 	enum class Access : uint8_t
 	{
@@ -113,9 +113,9 @@ namespace esp
 		{
 			constexpr auto dataSize = sizeof(T);
 			static_assert(
-				dataSize == 8 || 
+				dataSize == 8 ||
 				dataSize == 4 /*||
-				dataSize == 2 || 
+				dataSize == 2 ||
 				dataSize == 1*/, "unknown data type");
 			return get(_ptr, _read, _write, static_cast<uint32_t>(dataSize));
 		}
@@ -127,7 +127,7 @@ namespace esp
 
 		ScopedPooledReg getTemp();
 
-		Asm& getAsm() { return m_asm; }	
+		Asm& getAsm() { return m_asm; }
 		Reg getBaseReg() const { return m_baseReg; }
 		void* getBasePtr() const { return m_basePtr; }
 
