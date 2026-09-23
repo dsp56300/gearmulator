@@ -5,6 +5,9 @@ namespace synthLib::midi
     void appendSongReset(std::vector<SMidiEvent>& _events, ResetMode mode, uint8_t portCount, uint32_t _offset,
                          const ResetTarget target)
     {
+        // Off leaves the device exactly as the previous song left it, controllers included.
+        if (mode == ResetMode::Off)
+            return;
         for (uint8_t port = 0; port < portCount; ++port)
         {
             // Stop/pause preserves expression. A fresh song must not inherit bends,
@@ -16,8 +19,6 @@ namespace synthLib::midi
                                          synthLib::MC_RESETALLCONTROLLERS, 0, _offset);
                 event.port = port;
             }
-            if (mode == ResetMode::Off)
-                continue;
             auto& event = _events.emplace_back(synthLib::MidiEventSource::Host);
             event.offset = _offset;
             event.port = port;
