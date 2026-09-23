@@ -517,7 +517,7 @@ Thanks to the people whose work made this possible:
   MT-32 ROM catalogue and for the knowledge of the MT-32 family that munt keeps.
 - **mckuhei**, for the help finding many accuracy bugs and verifying the SC-8850 behavior.
 - all the people and composers in the **DTM MIDI Central** community for the beta testing, advice and some incredible test MIDI files.
-- **ValleyBell** for the help with MIDI formats decoding, CM-32P and CM-64 research.
+- **ValleyBell** and **jft** for the help with the CM-32P and CM-64 research/calibration.
 - **MAME / mamedev**, for the original reference implementations of many CPUs and other devices.
 - **superctr**, for the SC-8820 support and the intensive beta testing.
 - **masanaohayashi** and **shingo45endo**, for the Recomposer support.
