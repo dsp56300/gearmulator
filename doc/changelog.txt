@@ -8,6 +8,9 @@ Framework:
         example, stopped updating after the plugin window was closed and
         reopened.
 
+- [Fix] BUG-10407 A parameter that was set to -1 ignored the next change made to
+        it in the editor, only the change after that reached the device.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the

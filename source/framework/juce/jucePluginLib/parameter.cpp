@@ -61,7 +61,7 @@ namespace pluginLib
 			return;
 
 		// ignore initial update
-		if (m_lastValue != -1)
+		if (m_lastValue)
 		{
 			if(m_rateLimit)
 			{

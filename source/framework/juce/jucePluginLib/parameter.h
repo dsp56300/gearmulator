@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <optional>
 #include <set>
 #include <type_traits>
 
@@ -130,7 +131,7 @@ namespace pluginLib
 		const uint8_t m_part;
 		const int m_uniqueId;	// 0 for all unique parameters, > 0 if multiple Parameter instances reference a single synth parameter
 
-		int m_lastValue{-1};
+		std::optional<int> m_lastValue;	// unset until the first value arrives - -1 is a valid value, it cannot mark that
 		Origin m_lastValueOrigin = Origin::Unknown;
 		juce::Value m_value;
 		std::set<Parameter*> m_derivedParameters;
