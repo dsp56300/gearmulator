@@ -127,3 +127,7 @@ Date,Tag,Commit,ROM,Preset,CPU,MIPS,Notes,StdDev,Samples,RunMedians
 2026-08-26,HEAD,54f216436,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Cortex-A76 2.4GHz,420.78,,31.68,82,431.6|420.8|415.1
 2026-08-26,HEAD,54f216436,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Ryzen 9 7950X3D,751.33,,49.93,110,742.7|751.3|772.4
 2026-08-26,HEAD,54f216436,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Cortex-A76 2.4GHz,260.10,,7.69,75,260.1|258.0|260.5
+2026-09-24,HEAD,1f4f3673c,Virus_C_OS_Flash_V6_5.BIN,Impact  MS,Snapdragon X X1-26-100,974.13,single run; first 30 readings skipped; AC power; Balanced plan,4.90,219,974.1
+2026-09-24,HEAD,1f4f3673c,Virus_C_OS_Flash_V6_5.BIN,IndiArp BC,Snapdragon X X1-26-100,595.29,single run; first 30 readings skipped; AC power; Balanced plan,1.98,199,595.3
+2026-09-24,HEAD,1f4f3673c,firmware_51700.bin,factory demo (DSP A),Snapdragon X X1-26-100,354.56,single run; readings until the demo song ended; AC power; Balanced plan,15.50,18,354.6
+2026-09-24,HEAD,1f4f3673c,firmware_51700.bin,factory demo (DSP B),Snapdragon X X1-26-100,358.88,single run; readings until the demo song ended; AC power; Balanced plan,19.18,17,358.9
