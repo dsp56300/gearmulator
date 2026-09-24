@@ -105,6 +105,12 @@ if(NOT MSVC)
 endif()
 
 if(BUILD_TESTING)
+	add_executable(laBoard_test tests/laBoard_test.cpp)
+	target_link_libraries(laBoard_test PRIVATE 88lib)
+	set_property(TARGET laBoard_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME laBoard COMMAND laBoard_test)
+	set_tests_properties(laBoard PROPERTIES TIMEOUT 20)
+
 	add_executable(c_interface_test tests/c_interface_test.cpp)
 	target_link_libraries(c_interface_test PRIVATE 88lib)
 	set_property(TARGET c_interface_test PROPERTY FOLDER "Ronaldo/tests")

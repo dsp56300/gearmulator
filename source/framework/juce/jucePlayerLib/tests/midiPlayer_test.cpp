@@ -99,7 +99,7 @@ namespace
             CHECK(events.front().type == MidiEventType::TransportDiscontinuity);
             CHECK_EQ(
                 std::count_if(events.begin(), events.end(), [](const auto& e) { return e.a == 0xb0 && e.b == 121; }),
-                1);
+                mode == MidiPlayer::ResetMode::Off ? 0 : 1);
             CHECK_EQ(noteCount(events), 0);
             const auto reset =
                 std::find_if(events.begin(), events.end(), [](const auto& e) { return !e.sysex.empty(); });
@@ -215,8 +215,9 @@ namespace
             player.play(i % 3);
             const auto switched = block(player, MidiPlayer::kResetSettleMs + 1);
             CHECK_EQ(noteCount(switched), 1);
+            // Off sends no reset, only the silence that ends the previous song.
             const auto cleanup =
-                std::find_if(switched.begin(), switched.end(), [](const auto& e) { return e.a == 0xb0 && e.b == 121; });
+                std::find_if(switched.begin(), switched.end(), [](const auto& e) { return e.a == 0xb0 && e.b == 120; });
             const auto note = std::find_if(switched.begin(), switched.end(), [](const auto& e) { return e.a == 0x90; });
             CHECK(cleanup < note);
         }

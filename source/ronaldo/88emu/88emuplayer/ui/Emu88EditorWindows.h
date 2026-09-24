@@ -396,7 +396,7 @@ namespace emu88Player
 				_g.drawFittedText("Free software under the GNU General Public License v3,\n"
 				                  "with no warranty. See LICENSE.md for the full terms.",
 				                  l.licence, juce::Justification::centredTop, 2);
-				_g.drawFittedText("Thanks to mamedev, nukeykt, mckuhei, superctr, ValleyBell.",
+				_g.drawFittedText("Thanks to mamedev, nukeykt, mckuhei, superctr, ValleyBell, jft.",
 				                  l.thanks, juce::Justification::centred, 1);
 
 				_g.setColour(juce::Colour(0xffb8bcc4));
