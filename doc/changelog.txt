@@ -17,6 +17,11 @@ Framework:
 - [Fix] BUG-10419 While a knob or slider was dragged, tabs and buttons that the
         mouse passed over lit up as if they were hovered.
 
+OsTIrus:
+
+- [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
+        in OsTIrusFX nor with Input Mode Static or Dynamic in OsTIrus.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the

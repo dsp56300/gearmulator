@@ -87,7 +87,10 @@ namespace virusLib
 
 		uint32_t blockIdx = 0;
 
-		static volatile uint32_t offset = 1;
+		// The OS reads the analog input from RX1 of slot 1, L in the second frame of a sample, R in the first. Until
+		// dsp56300 8ae1681e, a transmitter that the OS switched on while another one was already running (TE0, then
+		// TE1) added a slot to the transmit frame, and the OS picked the input up from slot 0 instead.
+		static volatile uint32_t offset = 5;
 
 		for(uint32_t i=0; i<_frames; ++i)
 		{
