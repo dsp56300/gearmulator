@@ -14,6 +14,9 @@ Framework:
 - [Fix] BUG-10391 macOS: The first click into the plugin window did nothing when the
         window was not active yet, only the second one reached the editor.
 
+- [Fix] BUG-10419 While a knob or slider was dragged, tabs and buttons that the
+        mouse passed over lit up as if they were hovered.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the
