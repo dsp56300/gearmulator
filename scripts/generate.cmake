@@ -28,6 +28,11 @@ endif()
 
 set(args ${args} -B ${gearmulator_BINARY_DIR})
 
+# Visual Studio platform, e.g. ARM64 - which an x64 machine builds too, as a cross build
+if(CMAKE_GENERATOR_PLATFORM)
+	set(args ${args} -A ${CMAKE_GENERATOR_PLATFORM})
+endif()
+
 set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN=${gearmulator_BUILD_JUCEPLUGIN})
 set(args ${args} -Dgearmulator_BUILD_FX_PLUGIN=${gearmulator_BUILD_FX_PLUGIN})
 set(args ${args} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})

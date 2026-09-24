@@ -5,6 +5,7 @@ pipeline {
 		booleanParam(name: 'LinuxARM', defaultValue: true, description: '') 
 		booleanParam(name: 'LinuxX86', defaultValue: true, description: '') 
 		booleanParam(name: 'Win', defaultValue: true, description: '') 
+		booleanParam(name: 'WinARM64', defaultValue: false, description: 'Cross built on the win agent after x64, without integration tests')
 		booleanParam(name: 'Mac', defaultValue: true, description: '')
 		choice(name: 'Branch', choices: ['main', 'dev'], description: '')
 		string(name: 'CustomBranch', defaultValue: '', description: 'Override branch (leave empty to use dropdown)')
@@ -35,6 +36,7 @@ pipeline {
 					if(params.LinuxX86)					currentBuild.displayName += " Lx"
 					if(params.Mac)						currentBuild.displayName += " M"
 					if(params.Win)						currentBuild.displayName += " W"
+					if(params.WinARM64)					currentBuild.displayName += " Wa"
 
 					if(params.FXPlugins)				env.childDisplayName += " FX"
 					if(params.IntegrationTests)			env.childDisplayName += " i"
@@ -68,9 +70,16 @@ pipeline {
 		stage('Parallel Build') {
 			parallel {
 				stage('Windows') {
-					when { expression { return params.Win } }
+					when { expression { return params.Win || params.WinARM64 } }
 					steps {
-						startBuildJob('win')
+						script {
+							if(params.Win)
+								startBuildJob('win')
+							// After x64 on purpose: the ARM64 cross build cannot run the changelogGenerator it builds,
+							// so it relies on the x64 one and the changelogs that build left in the workspace
+							if(params.WinARM64)
+								startBuildJob('win', 'ARM64')
+						}
 					}
 				}
 				stage('Mac') {
@@ -104,18 +113,20 @@ pipeline {
 	}
 }
 
-def startBuildJob(label)
+def startBuildJob(label, platform = '')
 {
 	build job: 'dsp56300_main', parameters:
 	[
 		[$class: 'StringParameterValue', name: 'AgentLabel', value: "${label}"], 
+		[$class: 'StringParameterValue', name: 'Platform', value: platform],
 		[$class: 'StringParameterValue', name: 'Branch', value: env.effectiveBranch], 
 		[$class: 'StringParameterValue', name: 'Synths', value: "${env.synths}"], 
 		[$class: 'StringParameterValue', name: 'DisplayName', value: "${env.childDisplayName}"], 
 		[$class: 'BooleanParameterValue', name: 'Deploy', value: params.Deploy], 
 		[$class: 'BooleanParameterValue', name: 'Upload', value: params.Upload], 
 		[$class: 'BooleanParameterValue', name: 'GitHub', value: params.GitHub], 
-		[$class: 'BooleanParameterValue', name: 'IntegrationTests', value: params.IntegrationTests],
+		// a cross build cannot run what it built
+		[$class: 'BooleanParameterValue', name: 'IntegrationTests', value: params.IntegrationTests && !platform],
 		[$class: 'BooleanParameterValue', name: 'FXPlugins', value: params.FXPlugins],
 		[$class: 'StringParameterValue', name: 'UploadFolder', value: params.UploadFolder], 
 	]

@@ -100,6 +100,11 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|X86|amd64|AMD64|i[3-6]86")
     endif()
 endif()
 
+# sse2neon refuses MSVC's traditional preprocessor
+if(MSVC AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+    set_source_files_properties(rmlRendererJuce.cpp PROPERTIES COMPILE_OPTIONS /Zc:preprocessor)
+endif()
+
 set_property(TARGET juceRmlUi PROPERTY FOLDER "Gearmulator")
 
 target_compile_definitions(juceRmlUi PUBLIC RMLUI_GL3_CUSTOM_LOADER="juce_opengl/juce_opengl.h")

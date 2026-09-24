@@ -16,6 +16,10 @@ The project emphasises **accuracy of emulation over shortcuts** — the goal is 
 # Configure (Windows)
 cmake . -B temp/cmake_vs26 -G "Visual Studio 17 2022"
 
+# Windows ARM64. Works on an x64 machine as a cross build: no LV2, no VST3 moduleinfo.json,
+# tests cannot run. Products go to bin/arm64/plugins instead of bin/plugins.
+cmake . -B temp/cmake_vs26_arm64 -G "Visual Studio 18 2026" -A ARM64
+
 # Build (use Debug for quick compile checks, Release for full optimization)
 cmake --build temp/cmake_vs26 --config Debug -j 4
 cmake --build temp/cmake_vs26 --config Release -j 4

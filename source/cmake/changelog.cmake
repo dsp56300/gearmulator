@@ -13,9 +13,15 @@ add_custom_command(
     COMMENT "Generating per-product changelogs"
 )
 
-add_custom_target(tus_genChangelogs
-	DEPENDS ${TUS_CHANGELOG_DEPENDS_FILE}
-)
+# ponytail: a cross build cannot run the changelogGenerator it builds, so its packages carry whatever an earlier
+# native build left in doc/changelog_split. Build the generator for the host if they must always have them.
+if(TUS_CAN_RUN_BUILT_BINARIES)
+	add_custom_target(tus_genChangelogs
+		DEPENDS ${TUS_CHANGELOG_DEPENDS_FILE}
+	)
+else()
+	add_custom_target(tus_genChangelogs)
+endif()
 
 macro(tus_registerChangelog targetName)
 	add_dependencies(${targetName} tus_genChangelogs)

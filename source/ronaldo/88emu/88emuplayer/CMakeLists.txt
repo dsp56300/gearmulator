@@ -61,7 +61,7 @@ juce_add_plugin(88emuplayer
 	PLUGIN_CODE TscH
 	FORMATS Standalone
 	PRODUCT_NAME "88emuPlayer"
-	PRODUCTS_FOLDER "${CMAKE_SOURCE_DIR}/bin/plugins/$<CONFIG>"
+	PRODUCTS_FOLDER "${TUS_BIN_DIR}/plugins/$<CONFIG>"
 	BUNDLE_ID "com.theusualsuspects.SC88Hardware"
 )
 target_sources(88emuplayer PRIVATE
@@ -137,7 +137,7 @@ add_executable(88EmuCli app/Emu88Cli.cpp app/Emu88LaunchOptions.cpp app/Emu88Vid
 target_link_libraries(88EmuCli PRIVATE 88emuplayer 88emuplayer_BinaryData 88lib jucePlayerLib juceRmlUi
 	juceUiLib jucePluginData juce_plugin_modules)
 target_compile_definitions(88EmuCli PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
-set_target_properties(88EmuCli PROPERTIES FOLDER "Ronaldo/88emu" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/plugins/$<CONFIG>")
+set_target_properties(88EmuCli PROPERTIES FOLDER "Ronaldo/88emu" RUNTIME_OUTPUT_DIRECTORY "${TUS_BIN_DIR}/plugins/$<CONFIG>")
 if(WIN32)
 	target_link_libraries(88EmuCli PRIVATE shell32)
 endif()

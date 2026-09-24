@@ -10,6 +10,7 @@ pipeline {
 	{
 		string(name: 'Branch', defaultValue: "master", description: '')
 		string(name: 'AgentLabel', defaultValue: "git && cmake", description: '')
+		string(name: 'Platform', defaultValue: "", description: 'Visual Studio platform (-A), e.g. ARM64. Empty = the machine\'s own')
 		string(name: 'Synths', defaultValue: "-Dgearmulator_SYNTH_OSIRUS=on", description: '')
 		string(name: 'DisplayName', defaultValue: "?", description: '')
 		string(name: 'UploadFolder', defaultValue: "", description: '')
@@ -23,7 +24,7 @@ pipeline {
 		stage("Checkout") {
 			steps {
 				script {
-					currentBuild.displayName += " - ${params.AgentLabel} - ${params.Branch} - ${params.DisplayName}"
+					currentBuild.displayName += " - ${platformName()} - ${params.Branch} - ${params.DisplayName}"
 					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}\nUpload: ${params.Upload}\nGitHub: ${params.GitHub}"
 				}
 				doCheckout()
@@ -122,7 +123,14 @@ def buildFxPlugins()
 
 def cmakeBuildDir()
 {
-	return "${CMAKE_BUILD_DIR}_${params.Branch.replace('/', '_')}"
+	def dir = "${CMAKE_BUILD_DIR}_${params.Branch.replace('/', '_')}"
+	// a build dir is fixed to one platform
+	return params.Platform ? "${dir}_${params.Platform}" : dir
+}
+
+def platformName()
+{
+	return params.Platform ? "${params.AgentLabel} ${params.Platform}" : params.AgentLabel
 }
 
 def doCheckout()
@@ -160,9 +168,10 @@ def cmakeBuild()
     def buildDir = cmakeBuildDir()
     def synths = getSynths()
     def fx = buildFxPlugins()
+    def platform = params.Platform ? "-DCMAKE_GENERATOR_PLATFORM=${params.Platform}" : ""
 
 	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
-    	genericSh "cmake -Dgearmulator_SOURCE_DIR=../ -Dgearmulator_BINARY_DIR=../${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=on -Dgearmulator_BUILD_FX_PLUGIN=${fx} -DCMAKE_BUILD_TYPE=Release ${synths} -P scripts/generate.cmake"
+    	genericSh "cmake -Dgearmulator_SOURCE_DIR=../ -Dgearmulator_BINARY_DIR=../${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=on -Dgearmulator_BUILD_FX_PLUGIN=${fx} -DCMAKE_BUILD_TYPE=Release ${platform} ${synths} -P scripts/generate.cmake"
 	}
 
 	genericSh "cmake --build ${buildDir} --config Release"
@@ -245,7 +254,7 @@ def notifyDiscord()
 			color: color,
 			fields: [
 				[name: 'Result',   value: result,            inline: true],
-				[name: 'Platform', value: params.AgentLabel, inline: true],
+				[name: 'Platform', value: platformName(), inline: true],
 				[name: 'Duration', value: currentBuild.durationString.replace(' and counting', ''), inline: true],
 				[name: 'Branch',   value: params.Branch,     inline: true],
 				[name: 'Synths',   value: params.Synths,     inline: false]

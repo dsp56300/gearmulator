@@ -1,6 +1,12 @@
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
+
+# Plugins and tools built into the source tree go here, and the build runs some of them (VST3 manifest, LV2 .ttl,
+# changelogs). Both change for a Windows ARM64 build, see below.
+set(TUS_BIN_DIR "${CMAKE_SOURCE_DIR}/bin")
+set(TUS_CAN_RUN_BUILT_BINARIES ON)
+
 if(MSVC)
 	# https://cmake.org/cmake/help/latest/variable/CMAKE_MSVC_RUNTIME_LIBRARY.html#variable:CMAKE_MSVC_RUNTIME_LIBRARY
 	cmake_policy(SET CMP0091 NEW)
@@ -25,8 +31,25 @@ if(MSVC)
 
 	set(ARCHITECTURE ${CMAKE_VS_PLATFORM_NAME})
 
-	if(NOT ${CMAKE_VS_PLATFORM_NAME} STREQUAL "x64")
+	# 32 bit x86 only, x64 has SSE2 anyway and ARM64 does not know the option
+	if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "X86")
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /arch:SSE2")
+	endif()
+
+	if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+		# usually built next to an x64 build of the same tree, whose plugins and tools it would overwrite
+		set(TUS_BIN_DIR "${CMAKE_SOURCE_DIR}/bin/arm64")
+
+		# arm64_neon.h, which <intrin.h> pulls in, otherwise defines short macros such as mvn(src) that rewrite
+		# every asmjit Assembler::mvn() call in the JITs into neon_not()
+		add_compile_definitions(_ARM64_NO_EXTENDED_INTRINSICS)
+
+		# An x64 machine cannot run what this builds. CMake does not call that cross compiling, as the system
+		# name stays the same, so it is up to us to skip the steps that run a freshly built binary.
+		if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "ARM64")
+			set(TUS_CAN_RUN_BUILT_BINARIES OFF)
+			message(WARNING "ARM64 cross build: no LV2, no VST3 moduleinfo.json, no changelog generation, and the tests cannot run here")
+		endif()
 	endif()
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /D_CRT_SECURE_NO_WARNINGS")

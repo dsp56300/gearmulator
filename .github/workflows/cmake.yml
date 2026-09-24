@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-14, windows-2022 ]
+        os: [ ubuntu-latest, macos-14, windows-2022, windows-11-arm ]
         cmake_generator: [ default, Ninja ]
       fail-fast: false
     name:  ${{ matrix.os }} build with ${{ matrix.cmake_generator }} cmake generator
@@ -28,8 +28,10 @@ jobs:
       uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: Set up MSVC compiler
-      if: matrix.os == 'windows-2022'
+      if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{ runner.arch == 'ARM64' && 'arm64' || 'x64' }}
 
     - name: Configure CMake with ${{ matrix.cmake_generator }}
       if: matrix.cmake_generator != 'default'
