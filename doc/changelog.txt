@@ -11,6 +11,9 @@ Framework:
 - [Fix] BUG-10407 A parameter that was set to -1 ignored the next change made to
         it in the editor, only the change after that reached the device.
 
+- [Fix] BUG-10391 macOS: The first click into the plugin window did nothing when the
+        window was not active yet, only the second one reached the editor.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the

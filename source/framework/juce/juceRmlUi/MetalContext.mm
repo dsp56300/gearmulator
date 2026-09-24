@@ -1,10 +1,15 @@
 #ifdef __APPLE__
 
+// for juce::ObjCClass, see MetalViewClass
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+
 #include "MetalContext.h"
 
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
 #import <AppKit/AppKit.h>
+#import <objc/message.h>
+#import <objc/runtime.h>
 
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "juce_gui_extra/juce_gui_extra.h"
@@ -16,6 +21,24 @@
 
 namespace juceRmlUi
 {
+	namespace
+	{
+		// The view that holds the Metal layer sits on top of JUCE's own view. As a plain NSView it received
+		// the mouse events, and it refuses the first click into an inactive window (acceptsFirstMouse: is NO),
+		// so that click only activated the window and never reached the editor. JUCE's views accept it, and
+		// so does JUCE's own OpenGL overlay. This one only displays, so it takes no part in hit-testing at
+		// all: every mouse event goes to JUCE's view underneath. A runtime class, as JUCE registers its own,
+		// so that several plugins in one host do not define the same Objective-C class name.
+		struct MetalViewClass : juce::ObjCClass<NSView>
+		{
+			MetalViewClass() : ObjCClass("TUSMetalView_")
+			{
+				addMethod(@selector(hitTest:), [](id, SEL, NSPoint) -> NSView* { return nil; });
+				registerClass();
+			}
+		};
+	}
+
 	MetalContext::MetalContext()
 	{
 		id<MTLDevice> device = MTLCreateSystemDefaultDevice();
@@ -203,7 +226,8 @@ namespace juceRmlUi
 		layer.opaque = YES;
 
 		// Create an NSView backed by the Metal layer.
-		NSView* metalView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
+		static MetalViewClass metalViewClass;
+		NSView* metalView = [metalViewClass.createInstance() initWithFrame:NSMakeRect(0, 0, 100, 100)];
 		metalView.wantsLayer = YES;
 		metalView.layer = layer;
 
