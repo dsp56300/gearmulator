@@ -109,7 +109,11 @@
 #define VSTCALLBACK
 
  /* t_fstPtrInt: pointer sized int */
-#if defined(_WIN32) && (defined(__x86_64__) || defined (_M_X64))
+/* LOCAL PATCH: upstream tests for x86_64 only, which left Windows ARM64 with a
+ * 32 bit long. Every pointer passed through the dispatcher or the host callback
+ * as an integer, the time info of audioMasterGetTime among them, was truncated
+ * and crashed the plugin. _WIN64 covers x64, ARM64 and ARM64EC. */
+#if defined(_WIN64)
 typedef long long t_fstPtrInt;
 #else
 typedef long t_fstPtrInt;
