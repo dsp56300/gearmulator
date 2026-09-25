@@ -22,6 +22,11 @@ OsTIrus:
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
         in OsTIrusFX nor with Input Mode Static or Dynamic in OsTIrus.
 
+Vavra:
+
+- [Fix] The audio input had its left and right channels swapped, one of them
+        arrived a sample late, and one channel had a glitch every 16 samples.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the
