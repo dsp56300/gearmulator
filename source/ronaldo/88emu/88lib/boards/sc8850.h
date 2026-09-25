@@ -93,7 +93,7 @@ namespace emu88Lib
 		static constexpr uint32_t CpuClockHz = 28224000;
 		static constexpr uint32_t SampleRate = 32000;
 		static constexpr uint32_t StatesPerSample = CpuClockHz / SampleRate; // 882
-		static constexpr uint32_t VoiceControlRate = SampleRate / 256;
+		static constexpr uint32_t VoiceControlRate = SampleRate / 320;
 		static constexpr uint32_t RomPlayControlRate = SampleRate / 32;
 		static constexpr uint32_t ProgramFlashBase = 0x00200000;
 		static constexpr uint32_t WorkRamBase = 0x01000000;

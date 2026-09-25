@@ -44,7 +44,7 @@ namespace emu88Lib
 		constexpr uint32_t g_panelButtonMask = (1u << g_panelButtonCount) - 1u;
 
 		// Gate-array registers 0x1a / 0x1b start the two periodic sources
-		// (10 = voice control at 125 Hz, 11 = ROM Play control at 1 kHz).
+		// (10 = voice control at 100 Hz, 11 = ROM Play control at 1 kHz).
 		constexpr uint8_t g_gateTimerEnable[2] = {0x1a, 0x1b};
 		constexpr uint8_t g_gateTimerSource[2] = {10, 11};
 		constexpr uint64_t g_gateTimerPeriod[2] = {Sc8850::CpuClockHz / Sc8850::VoiceControlRate,
