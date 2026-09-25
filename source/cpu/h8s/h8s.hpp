@@ -1770,7 +1770,7 @@ protected:
 		}
 		if (execute)
 		{
-			int bi=1<<imm,rv=reg8(rn),cc=ccr&1,byte;
+			int bi=1<<imm,rv=reg8(rn)&7,cc=ccr&1,byte;
 			if (!type)
 			{
 				if (inv && c==0x73)	return fail(startpc);
@@ -1856,7 +1856,7 @@ protected:
 		
 		if (execute)
 		{
-			int bi=1<<imm,rv=reg8(rn),cc=ccr&1,byte;
+			int bi=1<<imm,rv=reg8(rn)&7,cc=ccr&1,byte;
 			switch (op)
 			{
 			case 0x7c:
