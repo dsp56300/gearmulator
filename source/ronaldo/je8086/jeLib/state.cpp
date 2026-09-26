@@ -552,11 +552,12 @@ namespace jeLib
 		auto size = std::min(sizeLimit, std::max(_sizeRack, _sizeKeyboard));
 
 		auto numRead = m_tempPerformance.read(event.sysex, addr4, size);
-		// the latest keyboard OS got one additional byte apparently
-		assert(numRead == _sizeRack || numRead == _sizeKeyboard || numRead == (_sizeKeyboard + 1) || numRead == sizeLimit);
 
 		if (!numRead)
 			return false;
+
+		// the latest keyboard OS got one additional byte apparently
+		assert(numRead == _sizeRack || numRead == _sizeKeyboard || numRead == (_sizeKeyboard + 1) || numRead == sizeLimit);
 
 		createFooter(event.sysex);
 
