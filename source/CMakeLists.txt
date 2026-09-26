@@ -193,6 +193,10 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
 	endif()
 endif()
 
+if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
+	add_subdirectory(waldi/common/wFlashTest)
+endif()
+
 # ----------------- all claudias
 
 add_subdirectory(claudia)

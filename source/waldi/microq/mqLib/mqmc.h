@@ -48,6 +48,8 @@ namespace mqLib
 		void dumpROM(const char* _filename) const;
 		void dumpAssembly(uint32_t _first, uint32_t _count);
 
+		const auto& getRomRuntimeData() const { return m_romRuntimeData; }
+
 		uint16_t readImm16(uint32_t _addr) override;
 		uint16_t read16(uint32_t addr) override;
 		uint8_t read8(uint32_t addr) override;
