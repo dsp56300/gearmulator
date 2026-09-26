@@ -14,12 +14,16 @@ namespace xt
 
 	bool Lcd::writeCharacter(const char _c)
 	{
-		if(m_lcdData[m_lcdWritePos] == _c)
-		{
-			++m_lcdWritePos;
+		auto& c = m_lcdData[m_lcdWritePos];
+
+		// Like the display controller, continue at the start of line one after the end of line two. The firmware starts
+		// every refresh at address 0, but a refresh whose address command is lost writes on.
+		if(++m_lcdWritePos == m_lcdData.size())
+			m_lcdWritePos = 0;
+
+		if(c == _c)
 			return false;
-		}
-		m_lcdData[m_lcdWritePos++] = _c;
+		c = _c;
 		return true;
 	}
 
