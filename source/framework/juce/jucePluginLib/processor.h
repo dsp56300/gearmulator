@@ -3,6 +3,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 
 #include "bypassBuffer.h"
@@ -231,6 +232,23 @@ namespace pluginLib
 		bool isAudioCaptureActive() const;
 		uint32_t getAudioCaptureCapacityFrames() const { return static_cast<uint32_t>(m_captureBuffer.getNumSamples()); }
 
+		// ---- Test input (for automated verification of effects and audio inputs, driven by the MCP server) ----
+		struct TestInputResult
+		{
+			bool valid = false;				// the file was read and plays now
+			std::string error;				// why not
+			uint32_t frames = 0;			// length at the host sample rate
+			uint32_t channels = 0;			// of the file
+			double fileSampleRate = 0.0;
+		};
+
+		// Feed a WAV or AIFF file into the audio inputs instead of what the host sends, resampled to the host sample
+		// rate. A mono file feeds every input. Once a file without _loop has ended the inputs stay silent until
+		// stopTestInput gives them back to the host.
+		TestInputResult startTestInput(const std::string& _path, bool _loop);
+		// Returns false if there was no test input
+		bool stopTestInput();
+
 	private:
 #if !SYNTHLIB_DEMO_MODE
 		void setState(const void *_data, size_t _sizeInBytes);
@@ -305,5 +323,17 @@ namespace pluginLib
 		std::atomic<int> m_capturePos{0};
 		std::atomic<int> m_captureMaxFrames{0};
 		std::atomic<bool> m_captureStarted{false};
+
+		// ---- Test input state (see startTestInput). The audio thread takes the current one with std::atomic_load
+		// and never blocks. A replaced one waits in m_testInputPrev, so that the audio thread does not free it ----
+		struct TestInput
+		{
+			juce::AudioBuffer<float> audio;
+			bool loop = false;
+			std::atomic<int> pos{0};
+		};
+		void injectTestInput(juce::AudioBuffer<float>& _buffer, int _numChannels, int _numSamples) const;
+		std::shared_ptr<TestInput> m_testInput;
+		std::shared_ptr<TestInput> m_testInputPrev;
 	};
 }

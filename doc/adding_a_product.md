@@ -947,7 +947,9 @@ Confirm with `get_issue_fields_schema`.
 3. In a host with the MCP server enabled ([mcp_server.md](mcp_server.md)): set a **different**
    value in every part and read each back, load and save presets, check LCD, LED and button round
    trips, do a `get_plugin_state` → reset → `set_plugin_state` round trip, take screenshots at
-   several GUI scales.
+   several GUI scales. With an audio input or an FX variant, play different signals into left and
+   right with `input_play` and check with `record_start` / `record_stop` that each comes out where
+   it belongs.
 4. DAW: save a project, reopen, compare; the same with the FX variant.
 5. DSP bridge: repeat 3 and 4 in remote mode (§7).
 6. CI: Windows, macOS (Xcode, AU validation), Linux x86_64 and aarch64 (path casing), ctest.

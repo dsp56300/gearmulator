@@ -1,6 +1,9 @@
 #include "processor.h"
 
 #include <chrono>
+#include <limits>
+
+#include <juce_audio_formats/juce_audio_formats.h>
 
 #include "dummydevice.h"
 #include "midiLearnManager.h"
@@ -793,6 +796,8 @@ namespace pluginLib
 	    synthLib::TAudioInputs inputs{};
 	    synthLib::TAudioOutputs outputs{};
 
+		injectTestInput(buffer, totalNumInputChannels, numSamples);
+
 		for (int channel = 0; channel < totalNumInputChannels; ++channel)
 			inputs[channel] = buffer.getReadPointer(channel);
 
@@ -1009,6 +1014,94 @@ namespace pluginLib
 
 		m_captureState.store(CaptureState::Idle, std::memory_order_release);
 		return r;
+	}
+
+	Processor::TestInputResult Processor::startTestInput(const std::string& _path, const bool _loop)
+	{
+		TestInputResult r;
+
+		juce::AudioFormatManager formats;
+		formats.registerBasicFormats();
+		const std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(juce::File(_path)));
+		if(!reader)
+		{
+			r.error = "Cannot read " + _path + ", it needs to be a WAV or AIFF file";
+			return r;
+		}
+		if(reader->numChannels == 0 || reader->lengthInSamples <= 0 || reader->lengthInSamples > std::numeric_limits<int>::max())
+		{
+			r.error = "No usable audio in " + _path;
+			return r;
+		}
+
+		const auto channels = static_cast<int>(reader->numChannels);
+		const auto length = static_cast<int>(reader->lengthInSamples);
+		juce::AudioBuffer<float> file(channels, length);
+		reader->read(&file, 0, length, 0, true, true);
+
+		auto input = std::make_shared<TestInput>();
+		input->loop = _loop;
+
+		const double hostRate = getSampleRate();
+		if(hostRate > 0.0 && std::abs(reader->sampleRate - hostRate) > 0.01)
+		{
+			const double ratio = reader->sampleRate / hostRate;	// input samples per output sample
+			const auto frames = static_cast<int>(std::ceil(length / ratio));
+			input->audio.setSize(channels, frames);
+			for(int ch = 0; ch < channels; ++ch)
+			{
+				juce::LagrangeInterpolator resampler;
+				resampler.process(ratio, file.getReadPointer(ch), input->audio.getWritePointer(ch), frames, length, 0);
+			}
+		}
+		else
+		{
+			input->audio = std::move(file);
+		}
+
+		r.valid = true;
+		r.frames = static_cast<uint32_t>(input->audio.getNumSamples());
+		r.channels = static_cast<uint32_t>(channels);
+		r.fileSampleRate = reader->sampleRate;
+
+		m_testInputPrev = std::atomic_exchange(&m_testInput, std::move(input));
+		return r;
+	}
+
+	bool Processor::stopTestInput()
+	{
+		m_testInputPrev = std::atomic_exchange(&m_testInput, std::shared_ptr<TestInput>());
+		return m_testInputPrev != nullptr;
+	}
+
+	void Processor::injectTestInput(juce::AudioBuffer<float>& _buffer, const int _numChannels, const int _numSamples) const
+	{
+		const auto input = std::atomic_load(&m_testInput);
+		if(!input)
+			return;
+
+		const auto& audio = input->audio;
+		const int length = audio.getNumSamples();
+		const int fileChannels = audio.getNumChannels();
+		int pos = input->pos.load(std::memory_order_relaxed);
+
+		for(int i = 0; i < _numSamples; ++i)
+		{
+			if(pos >= length && input->loop)
+				pos = 0;
+			const bool playing = pos < length;
+
+			for(int ch = 0; ch < _numChannels; ++ch)
+			{
+				const int src = fileChannels == 1 ? 0 : ch;
+				_buffer.setSample(ch, i, playing && src < fileChannels ? audio.getSample(src, pos) : 0.0f);
+			}
+
+			if(playing)
+				++pos;
+		}
+
+		input->pos.store(pos, std::memory_order_relaxed);
 	}
 
 	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)

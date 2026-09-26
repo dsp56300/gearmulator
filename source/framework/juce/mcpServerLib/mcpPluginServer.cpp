@@ -186,6 +186,59 @@ namespace mcpServer
 			};
 			m_server.registerTool(std::move(tool));
 		}
+
+		// input_play
+		{
+			ToolDef tool;
+			tool.name = "input_play";
+			tool.description = "Feed an audio file (WAV or AIFF) into the plugin's audio inputs instead of what the host "
+				"sends, to test an effect or a synth's audio input. The file is resampled to the host sample rate; give "
+				"it the host rate for sample-exact tests. A mono file feeds every input. It plays once, after that the "
+				"inputs stay silent until input_stop; with loop it repeats until input_stop. Capture the result with "
+				"record_start / record_stop.";
+			tool.inputSchema.addProperty("path", "string", "The WAV or AIFF file to play.", true);
+			tool.inputSchema.addProperty("loop", "boolean", "Repeat the file until input_stop (default false).", false);
+			tool.handler = [this](const JsonValue& _params) -> JsonValue
+			{
+				const auto path = _params.get("path").getString().toStdString();
+				const bool loop = _params.hasProperty("loop") && _params.get("loop").getBool();
+
+				const auto r = m_processor.startTestInput(path, loop);
+				if(!r.valid)
+					throw std::runtime_error(r.error);
+
+				const double sampleRate = m_processor.getSampleRate();
+				const int inputChannels = m_processor.getTotalNumInputChannels();
+
+				auto result = JsonValue::object();
+				result.set("success", JsonValue::fromBool(true));
+				result.set("frames", JsonValue::fromInt(static_cast<int>(r.frames)));
+				result.set("channels", JsonValue::fromInt(static_cast<int>(r.channels)));
+				result.set("fileSampleRate", JsonValue::fromDouble(r.fileSampleRate));
+				result.set("sampleRate", JsonValue::fromDouble(sampleRate));
+				result.set("durationMs", JsonValue::fromInt(sampleRate > 0.0 ? static_cast<int>(r.frames * 1000.0 / sampleRate) : 0));
+				result.set("inputChannels", JsonValue::fromInt(inputChannels));
+				if(inputChannels == 0)
+					result.set("warning", JsonValue::fromString("The plugin has no audio input channels at the moment, nothing is heard"));
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
+
+		// input_stop
+		{
+			ToolDef tool;
+			tool.name = "input_stop";
+			tool.description = "Stop feeding the file started with input_play and give the audio inputs back to the host.";
+			tool.handler = [this](const JsonValue&) -> JsonValue
+			{
+				auto result = JsonValue::object();
+				result.set("success", JsonValue::fromBool(true));
+				result.set("wasActive", JsonValue::fromBool(m_processor.stopTestInput()));
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
 	}
 
 	void McpPluginServer::registerParameterTools()

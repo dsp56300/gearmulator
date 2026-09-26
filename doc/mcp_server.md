@@ -9,6 +9,7 @@ When a Gearmulator plugin is loaded in a DAW, it starts an MCP server on a local
 - Read and write synthesizer parameters
 - Send MIDI messages (notes, program changes, SysEx)
 - Save and load device state
+- Record the audio output and play audio files into the audio inputs
 - Browse, search, load, save, and rename presets via the patch manager
 - Inspect and interact with the plugin UI (DOM tree, clicks, key presses)
 - Take screenshots of the plugin editor
@@ -324,6 +325,23 @@ Stop the capture and write it to a `.wav` file.
 | `path` | string | no | Output file (default: `gearmulator_capture.wav` in the temp directory) |
 
 Returns `success`, `path`, `started`, `frames`, `channels`, `sampleRate`, `durationMs`, `peak`, `rms` and `silent`, which is true when the peak stays below 0.0001, i.e. the device produced no sound.
+
+#### `input_play`
+
+Feed an audio file into the plugin's audio inputs instead of what the host sends, for example to test an effect or the audio input of a synth. WAV and AIFF files work. The file is resampled to the host sample rate; for sample-exact comparisons, give it the host rate. A mono file feeds every input.
+
+The file plays once, after that the inputs stay silent until `input_stop` gives them back to the host. With `loop` it repeats until `input_stop`. To capture what the plugin makes of it, call `record_start` first, then `input_play`, then `record_stop`.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `path` | string | yes | The WAV or AIFF file |
+| `loop` | boolean | no | Repeat the file until `input_stop` (default: false) |
+
+Returns `success`, `frames` and `durationMs` at the host rate, the file's `channels` and `fileSampleRate`, the host's `sampleRate` and `inputChannels`, the number of audio inputs the plugin has at the moment. With no inputs, `warning` says that nothing is heard.
+
+#### `input_stop`
+
+Stop the file started with `input_play` and give the audio inputs back to the host. Returns `success` and `wasActive`, which is false if no file was set.
 
 ---
 
