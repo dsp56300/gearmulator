@@ -51,6 +51,11 @@ Vavra:
 - [Fix] The audio input had its left and right channels swapped, one of them
         arrived a sample late, and one channel had a glitch every 16 samples.
 
+Xenia:
+
+- [Fix] Storing sounds could, rarely, make the emulation write past the end of
+        its display memory.
+
 NodalRed2x:
 
 - [Fix] BUG-10400 A state that the host saved after loading one, before any
