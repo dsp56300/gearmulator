@@ -63,6 +63,10 @@ namespace
 		static constexpr uint8_t LastProgram = 99;
 		static constexpr uint8_t GlobalTune = static_cast<uint8_t>(mqLib::GlobalParameter::Tuning);
 		static constexpr bool GlobalsInFlash = true;
+		// OS 2.23 retries a store that had to reorganize the memory without rewinding its journal: the retry does not find
+		// the old record, which the reorganization copied just before, and does not invalidate it. Both copies stay valid
+		// and reads find the older one, so that program reads back an older store from then on
+		static constexpr bool StoreAfterReorganization = false;
 
 		static std::unique_ptr<Device> create(const std::vector<uint8_t>& _rom, const std::string& _name)
 		{
@@ -95,6 +99,7 @@ namespace
 		static constexpr uint8_t LastProgram = 127;
 		static constexpr uint8_t GlobalTune = static_cast<uint8_t>(xt::GlobalParameter::MasterTune);
 		static constexpr bool GlobalsInFlash = false;	// a change through MIDI is not written within two minutes
+		static constexpr bool StoreAfterReorganization = true;
 
 		static std::unique_ptr<Device> create(const std::vector<uint8_t>& _rom, const std::string& _name)
 		{
@@ -398,10 +403,9 @@ namespace
 		std::cout << "reboot\n";
 		printChanges(flashChanged, flashRebooted);
 
-		// checked last, so that a failure here does not hide the result of the reboot. The microQ OS 2.23 fails it once
-		// it compacted its journal: from then on a stored single takes effect when the next one arrives, and the last
-		// one never does
-		checkEqual(first, singles.front(), "the last store to program 0 of the first bank");
+		// checked last, so that a failure here does not hide the result of the reboot
+		if(M::StoreAfterReorganization)
+			checkEqual(first, singles.front(), "the last store to program 0 of the first bank");
 		checkEqual(last, singles.back(), "the store to the last program of the last bank");
 	}
 }
