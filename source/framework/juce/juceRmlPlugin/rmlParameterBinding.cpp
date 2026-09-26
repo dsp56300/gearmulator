@@ -162,14 +162,18 @@ namespace rmlPlugin
 			}
 			else
 			{
+				// a value list starts at the lowest value when that is negative, as Parameter::getText reads it
+				const auto offset = std::min(0, range.getStart());
+
 				for(uint32_t i=0; i<valueList.order.size(); ++i)
 				{
-					const auto value = valueList.orderToValue(i);
-					if(value == pluginLib::ValueList::InvalidValue)
+					const auto index = valueList.orderToValue(i);
+					if(index == pluginLib::ValueList::InvalidValue)
 						continue;
+					const auto value = index + offset;
 					if(value < range.getStart() || value > range.getEnd())
 						continue;
-					const auto text = valueList.valueToText(value);
+					const auto text = valueList.valueToText(index);
 					if(text.empty())
 						continue;
 					sortedValues.emplace_back(juceRmlUi::ElemComboBox::Entry{ text, value });
