@@ -13,6 +13,7 @@ set(SOURCES
 	filesystem.cpp filesystem.h
 	hybridcontainer.h
 	logging.cpp logging.h
+	lzo1x.cpp lzo1x.h
 	md5.cpp md5.h
 	os.cpp os.h
 	propertyMap.cpp propertyMap.h
@@ -31,3 +32,10 @@ endif()
 set_property(TARGET baseLib PROPERTY FOLDER "Gearmulator")
 
 target_include_directories(baseLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+if(BUILD_TESTING)
+	add_executable(lzo1x_test lzo1x_test.cpp)
+	target_link_libraries(lzo1x_test PRIVATE baseLib)
+	set_property(TARGET lzo1x_test PROPERTY FOLDER "Tests")
+	add_test(NAME lzo1x COMMAND lzo1x_test)
+endif()
