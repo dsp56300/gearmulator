@@ -4,6 +4,7 @@ project(baseLib)
 add_library(baseLib STATIC)
 
 set(SOURCES
+	adler32.cpp adler32.h
 	binarystream.cpp binarystream.h
 	commandline.cpp commandline.h
 	compilerdefs.h
@@ -17,6 +18,7 @@ set(SOURCES
 	md5.cpp md5.h
 	os.cpp os.h
 	propertyMap.cpp propertyMap.h
+	rc4.cpp rc4.h
 	semaphore.h
 	sha1.cpp sha1.h
 	sha256.cpp sha256.h
@@ -34,8 +36,18 @@ set_property(TARGET baseLib PROPERTY FOLDER "Gearmulator")
 target_include_directories(baseLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 if(BUILD_TESTING)
+	add_executable(adler32_test adler32_test.cpp)
+	target_link_libraries(adler32_test PRIVATE baseLib)
+	set_property(TARGET adler32_test PROPERTY FOLDER "Tests")
+	add_test(NAME adler32 COMMAND adler32_test)
+
 	add_executable(lzo1x_test lzo1x_test.cpp)
 	target_link_libraries(lzo1x_test PRIVATE baseLib)
 	set_property(TARGET lzo1x_test PROPERTY FOLDER "Tests")
 	add_test(NAME lzo1x COMMAND lzo1x_test)
+
+	add_executable(rc4_test rc4_test.cpp)
+	target_link_libraries(rc4_test PRIVATE baseLib)
+	set_property(TARGET rc4_test PROPERTY FOLDER "Tests")
+	add_test(NAME rc4 COMMAND rc4_test)
 endif()
