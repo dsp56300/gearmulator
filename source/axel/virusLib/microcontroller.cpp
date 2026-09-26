@@ -677,6 +677,10 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		return false;
 	};
 
+	// Requests wait for pending preset writes and are answered later via MIDI. getState() cannot wait, it needs the
+	// answer now and a host may save before any audio ran. The edit buffers already hold what is being written
+	const bool canWait = _source != MidiEventSource::Internal;
+
 	switch (cmd)
 	{
 		case DUMP_SINGLE: 
@@ -712,7 +716,7 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		case REQUEST_SINGLE:
 			{
 				const auto bank = fromMidiByte(_data[7]);
-				if(!m_pendingPresetWrites.empty() || bank == BankNumber::EditBuffer && waitingForPresetReceiveConfirmation())
+				if(canWait && (!m_pendingPresetWrites.empty() || bank == BankNumber::EditBuffer && waitingForPresetReceiveConfirmation()))
 					return enqueue();
 				const uint8_t program = _data[8];
 				LOG("Request Single, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
@@ -722,7 +726,7 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		case REQUEST_MULTI:
 			{
 				const auto bank = fromMidiByte(_data[7]);
-				if(!m_pendingPresetWrites.empty() || bank == BankNumber::EditBuffer && waitingForPresetReceiveConfirmation())
+				if(canWait && (!m_pendingPresetWrites.empty() || bank == BankNumber::EditBuffer && waitingForPresetReceiveConfirmation()))
 					return enqueue();
 				const uint8_t program = _data[8];
 				LOG("Request Multi, Bank " << (int)bank << ", program " << (int)program);
@@ -752,12 +756,12 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 			buildGlobalResponses();
 			break;
 		case REQUEST_TOTAL:
-			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+			if(canWait && (!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation()))
 				return enqueue();
 			buildTotalResponse();
 			break;
 		case REQUEST_ARRANGEMENT:
-			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+			if(canWait && (!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation()))
 				return enqueue();
 			buildArrangementResponse();
 			break;
