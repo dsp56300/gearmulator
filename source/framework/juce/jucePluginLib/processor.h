@@ -7,6 +7,7 @@
 
 #include "bypassBuffer.h"
 #include "controller.h"
+#include "hostAudioWorkgroup.h"
 #include "midiLearnTranslator.h"
 #include "midiports.h"
 #include "programChangeRouter.h"
@@ -287,6 +288,7 @@ namespace pluginLib
 		std::string m_programName;
 		std::unique_ptr<MidiLearnTranslator> m_midiLearnTranslator;
 		ProgramChangeRouter m_programChangeRouter;
+		HostAudioWorkgroup m_hostAudioWorkgroup;
 
 		// Host MIDI feedback queue (filled from parameter listeners, drained in processBlock)
 		std::mutex m_hostFeedbackMutex;

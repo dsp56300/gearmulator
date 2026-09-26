@@ -2,6 +2,7 @@
 
 #include "je8086.h"
 
+#include "dsp56kBase/audioworkgroup.h"
 #include "dsp56kBase/threadtools.h"
 
 namespace jeLib
@@ -89,8 +90,12 @@ namespace jeLib
 		dsp56k::ThreadTools::setCurrentThreadName("JE8086");
 		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
 
+		dsp56k::AudioWorkgroup::Member workgroup;
+
 		while (!m_exit)
 		{
+			workgroup.update();
+
 			auto job = m_pendingJobs.pop_front();
 
 			if (m_exit)

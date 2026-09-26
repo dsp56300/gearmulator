@@ -3,6 +3,7 @@
 #include "xtBuildconfig.h"
 #include "synthLib/midiTypes.h"
 
+#include "dsp56kBase/audioworkgroup.h"
 #include "dsp56kBase/threadtools.h"
 
 #include "xtHardware.h"
@@ -23,8 +24,12 @@ namespace xt
 		{
 			dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
 			dsp56k::ThreadTools::setCurrentThreadName("MC68331");
+			dsp56k::AudioWorkgroup::Member workgroup;
 			while(!m_destroy)
+			{
+				workgroup.update();
 				processUcThread();
+			}
 			m_destroy = false;
 			m_hw->ucThreadTerminated();
 		}));

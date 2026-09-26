@@ -14,6 +14,7 @@ set(SOURCES
 	controllermap.cpp controllermap.h
 	dummydevice.cpp dummydevice.h
 	filetype.cpp filetype.h
+	hostAudioWorkgroup.cpp hostAudioWorkgroup.h
 	midiLearnManager.cpp midiLearnManager.h
 	midiLearnMapping.cpp midiLearnMapping.h
 	midiLearnPreset.cpp midiLearnPreset.h
@@ -79,4 +80,8 @@ if(UNIX AND NOT APPLE)
 	set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 	find_package(Threads REQUIRED)
 	target_link_libraries(jucePluginLib PRIVATE Threads::Threads)
+endif()
+
+if(APPLE)
+	target_link_libraries(jucePluginLib PRIVATE "-framework CoreAudio")	# hostAudioWorkgroup.cpp
 endif()
