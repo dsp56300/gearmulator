@@ -114,17 +114,19 @@ namespace pluginLib
 	{
 		switch (_type)
 		{
+		case Type::Invalid: return "Invalid";
 		case Type::ControlChange: return "ControlChange";
 		case Type::PolyPressure: return "PolyPressure";
 		case Type::ChannelPressure: return "ChannelPressure";
 		case Type::PitchBend: return "PitchBend";
 		case Type::NRPN: return "NRPN";
-		default: return "ControlChange";
+		default: return "Invalid";
 		}
 	}
 
 	MidiLearnMapping::Type MidiLearnMapping::stringToType(const std::string& _str)
 	{
+		if (_str == "Invalid") return Type::Invalid;
 		if (_str == "ControlChange") return Type::ControlChange;
 		if (_str == "PolyPressure") return Type::PolyPressure;
 		if (_str == "ChannelPressure") return Type::ChannelPressure;
