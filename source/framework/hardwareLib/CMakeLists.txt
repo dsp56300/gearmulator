@@ -39,6 +39,12 @@ if(BUILD_TESTING)
 	set_property(TARGET sed1335_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 	set_property(TARGET sed1335_test PROPERTY FOLDER "Tests")
 	add_test(NAME sed1335 COMMAND sed1335_test)
+
+	add_executable(am29f_test am29f_test.cpp)
+	target_link_libraries(am29f_test PRIVATE hardwareLib)
+	set_property(TARGET am29f_test PROPERTY EXCLUDE_FROM_ALL FALSE)
+	set_property(TARGET am29f_test PROPERTY FOLDER "Tests")
+	add_test(NAME am29f COMMAND am29f_test)
 endif()
 
 #target_compile_options(hardwareLib PRIVATE -fsanitize=thread)
