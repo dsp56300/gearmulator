@@ -260,6 +260,11 @@ namespace n2x
 			m_multi.fill(0);
 			std::copy(sysex.begin(), sysex.end(), m_multi.begin());
 
+			// A multi dump carries the four singles. Take them over, getState() builds the multi from the singles and
+			// would otherwise save the ones from before, until the firmware sends its edit buffers after audio ran
+			for(uint8_t i=0; i<static_cast<uint8_t>(m_singles.size()); ++i)
+				extractSingleFromMulti(m_singles[i], m_multi, i);
+
 			if (m_midiTranslator)
 			{
 				// As we need support for individual midi channels for the editor to adjus each part separately but

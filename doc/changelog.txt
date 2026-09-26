@@ -22,6 +22,10 @@ Framework:
         so Apple Silicon keeps it on the performance cores together with the
         host's own audio processing.
 
+- [Imp] MCP server: `input_play` feeds an audio file into the audio inputs of
+        the plugin and `input_stop` ends it, to test effects and audio inputs
+        together with `record_start` and `record_stop`.
+
 OsTIrus:
 
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
@@ -31,6 +35,14 @@ Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them
         arrived a sample late, and one channel had a glitch every 16 samples.
+
+NodalRed2x:
+
+- [Fix] BUG-10400 A state that the host saved after loading one, before any
+        audio had been processed, contained the sounds from before the load.
+        Logic Pro does that with projects and plug-in settings, so recalling
+        them later brought back the previous sounds. Settings saved with an
+        older version keep the wrong sounds and need to be saved again.
 
 88emuPlayer:
 
