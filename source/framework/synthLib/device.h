@@ -83,6 +83,8 @@ namespace synthLib
 		virtual bool isValid() const = 0;
 
 #if SYNTHLIB_DEMO_MODE == 0
+		// The plugin calls these with its processing lock held, process() does not run until they return. They must
+		// never wait for anything that only happens while audio is processed, that would deadlock
 		virtual bool getState(std::vector<uint8_t>& _state, StateType _type) = 0;
 		virtual bool setState(const std::vector<uint8_t>& _state, StateType _type) = 0;
 		virtual bool setStateFromUnknownCustomData(const std::vector<uint8_t> &_state) { return false; }

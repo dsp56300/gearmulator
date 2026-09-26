@@ -22,6 +22,11 @@ Framework:
         so Apple Silicon keeps it on the performance cores together with the
         host's own audio processing.
 
+- [Fix] Saving or loading a state while audio was playing could, rarely, crash
+        the plugin or save or restore a damaged state, because the emulation
+        kept processing audio at the same time. The periodic state backup of
+        the DSPBridge server had the same problem.
+
 - [Imp] MCP server: `input_play` feeds an audio file into the audio inputs of
         the plugin and `input_stop` ends it, to test effects and audio inputs
         together with `record_start` and `record_stop`.

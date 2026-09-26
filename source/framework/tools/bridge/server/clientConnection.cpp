@@ -121,6 +121,9 @@ namespace bridgeServer
 
 		const auto numSamples = TcpConnection::handleAudio(const_cast<float* const*>(m_audioInputs.data()), _in);
 
+		// The server's periodic state backup reads the device from its own thread
+		std::scoped_lock lock(m_mutexDeviceState);
+
 		const auto& midiOuts = m_device->bridgeProcess(m_audioInputs, m_audioOutputs, numSamples, m_midiIn);
 
 		for (const auto& midiOut : midiOuts)

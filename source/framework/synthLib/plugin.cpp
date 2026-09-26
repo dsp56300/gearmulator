@@ -181,6 +181,10 @@ namespace synthLib
 #if !SYNTHLIB_DEMO_MODE
 	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type) const
 	{
+		// Hosts save and load on their own thread, usually while audio is running. Without the lock, the device's state
+		// code and process() work on the same data at the same time
+		std::lock_guard lock(m_lock);
+
 		if(!m_device)
 			return false;
 
@@ -192,6 +196,8 @@ namespace synthLib
 
 	bool Plugin::setState(const std::vector<uint8_t>& _state) const
 	{
+		std::lock_guard lock(m_lock);
+
 		if(!m_device)
 			return false;
 
