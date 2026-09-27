@@ -47,6 +47,13 @@ namespace synthLib
 		void setSysexPause(float _seconds);
 		void setSysexPauseLengthThreshold(uint32_t _size);
 
+		// Nothing written is still waiting to go out, for example so that a device reads its state back only once
+		// the MIDI that changes it has arrived
+		bool idle() const
+		{
+			return !m_currentEvent && m_pendingBytes.empty() && m_pendingSysex.empty() && m_pendingRealtime.empty();
+		}
+
 	private:
 		void sendByte();
 		bool popNextEvent();

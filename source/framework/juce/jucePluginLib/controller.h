@@ -88,6 +88,14 @@ namespace pluginLib
 
 		virtual  std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) { return {}; }
 
+		// Drops what the device sent that has not been parsed yet. After a state load, that describes the state
+		// before it and would overwrite the loaded one when it is parsed
+		void discardQueuedMidiMessages()
+		{
+			std::vector<synthLib::SMidiEvent> stale;
+			getMidiMessages(stale);
+		}
+
 	private:
 		void getMidiMessages(std::vector<synthLib::SMidiEvent>&);
 		void processMidiMessages();
