@@ -1,5 +1,7 @@
 #include "lzo1x.h"
 
+#include <cstddef>
+
 namespace baseLib
 {
 	// the control flow of the reference lzo1x_d.ch, with bounds checks
