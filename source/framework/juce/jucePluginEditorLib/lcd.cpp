@@ -125,8 +125,9 @@ namespace jucePluginEditorLib
 
 				const auto t = juce::AffineTransform::translation(tx, ty);
 
+				// HD44780: codes 8-15 show the same eight user defined characters as 0-7
 				const auto c = text[charIdx];
-				const auto& p = m_characterPaths[c];
+				const auto& p = m_characterPaths[c < 16 ? c & 7 : c];
 
 				if (m_charBgColor)
 				{
