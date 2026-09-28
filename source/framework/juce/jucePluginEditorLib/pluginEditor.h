@@ -161,7 +161,8 @@ namespace jucePluginEditorLib
 
 		void registerSettings(std::vector<std::unique_ptr<SettingsPlugin>>& _plugins);
 
-		virtual std::unique_ptr<SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) { return nullptr; }
+		// the default handles a template that has the voice expansion checkbox, see SettingsVoiceExpansion
+		virtual std::unique_ptr<SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root);
 
 		juce::Component* createRmlUiComponent(const std::string& _rmlFile);
 

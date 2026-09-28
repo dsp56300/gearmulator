@@ -9,6 +9,7 @@
 #include "settingsMidi.h"
 #include "settingsMidiLearn.h"
 #include "settingsSkin.h"
+#include "settingsVoiceExpansion.h"
 
 #include "skin.h"
 
@@ -394,6 +395,13 @@ namespace jucePluginEditorLib
 		// created with the RmlUi context, which a part change can precede
 		if(m_pluginDataModel)
 			m_pluginDataModel->set("currentPart", std::to_string(_part));
+	}
+
+	std::unique_ptr<SettingsDeviceSpecific> Editor::createDeviceSpecificSettings(const std::string&, Rml::Element* _root)
+	{
+		if (juceRmlUi::helper::findChild(_root, "btVoiceExpansion", false))
+			return std::make_unique<SettingsVoiceExpansion>(*this, _root);
+		return nullptr;
 	}
 
 	void Editor::showDisclaimer() const

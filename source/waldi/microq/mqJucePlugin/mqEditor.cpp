@@ -9,7 +9,6 @@
 #include "mqPartSelect.h"
 #include "mqPatchManager.h"
 #include "mqLib/mqmiditypes.h"
-#include "mqSettingsDspAudio.h"
 
 #include "mqLib/mqbuildconfig.h"
 
@@ -123,13 +122,6 @@ namespace mqJucePlugin
 
 		if(m_partSelect)
 			m_partSelect->updateUiState();
-	}
-
-	std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> Editor::createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root)
-	{
-		if (_templateName == "tus_settings_dspaudio_Vavra")
-			return std::make_unique<SettingsDspAudio>(*this, _root);
-		return jucePluginEditorLib::Editor::createDeviceSpecificSettings(_templateName, _root);
 	}
 
 	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)

@@ -158,6 +158,11 @@ namespace pluginLib
 
 		bool rebootDevice();
 
+		// An optional voice expansion board of the hardware. It is saved with the plugin state, the device gets it as bit 0
+		// of customData and is created again when it changes
+		bool isVoiceExpansionEnabled() const { return m_voiceExpansion; }
+		void setVoiceExpansion(bool _enabled);
+
 		auto& getMidiPorts() { return m_midiPorts; }
 		auto& getSkinVariables() { return m_skinVariables; }
 		auto& getMidiNotifier() { return m_midiNotifier; }
@@ -290,6 +295,7 @@ namespace pluginLib
 		float m_outputGain = 1.0f;
 		float m_inputGain = 1.0f;
 		uint32_t m_dspClockPercent = 100;
+		bool m_voiceExpansion = false;
 		float m_preferredDeviceSamplerate = 0.0f;
 		synthLib::Resampler::Mode m_resamplerMode = synthLib::Resampler::Mode::MameHq;
 		float m_hostSamplerate = 0.0f;

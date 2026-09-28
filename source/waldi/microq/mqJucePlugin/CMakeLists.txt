@@ -16,7 +16,6 @@ set(SOURCES
 	mqPartSelect.cpp mqPartSelect.h
 	mqPatchManager.cpp mqPatchManager.h
 	mqPatchBrowser.h
-	mqSettingsDspAudio.cpp mqSettingsDspAudio.h
 
 	skins/mqDefault/mqDefault.rml
 	skins/mqDefault/mqDefault.rcss

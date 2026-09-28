@@ -385,7 +385,8 @@ Chain: product processor → `jucePluginEditorLib::Processor` → `pluginLib::Pr
 | `createController()` | pure; `new <ns>::Controller(*this)`. Virus boots the device first because its controller depends on the ROM model |
 | `createEditorState()` | pure, from `jucePluginEditorLib::Processor` |
 | destructor | call `destroyEditorState()`; the base asserts it is gone |
-| `saveChunkData` / `loadChunkData` | optional product chunks (ROM choice, voice expansion); always call the base |
+| `saveChunkData` / `loadChunkData` | optional product chunks (ROM choice); always call the base |
+| voice expansion | handled by the base: `isVoiceExpansionEnabled` / `setVoiceExpansion`, saved in chunk `VEXP`, bit 0 of `customData` for the device, which reboots on a change. A `tus_settings_dspaudio_<Product>.rml` template with a `btVoiceExpansion` checkbox gets it wired by the editor (Vavra's, Xenia's) |
 | `processBpm` | optional |
 | `createPluginFilter()` | the JUCE factory function |
 

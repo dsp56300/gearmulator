@@ -254,6 +254,9 @@ namespace pluginLib
 	{
 		_params.preferredSamplerate = getPreferredDeviceSamplerate();
 		_params.hostSamplerate = getHostSamplerate();
+
+		if (m_voiceExpansion)
+			_params.customData |= 1;
 	}
 
 	bridgeClient::RemoteDevice* Processor::createRemoteDevice()
@@ -325,7 +328,18 @@ namespace pluginLib
 
 		loadChunkData(cr);
 
-		return _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
+		// the chunk is only written while the voice expansion is on, a state without it had it off
+		const auto voiceExpansion = m_voiceExpansion;
+		m_voiceExpansion = false;
+
+		const auto result = _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
+
+		if (!result)
+			m_voiceExpansion = voiceExpansion;
+		else if (m_voiceExpansion != voiceExpansion)
+			rebootDevice();
+
+		return result;
 	}
 
 	void Processor::saveChunkData(baseLib::BinaryStream& s)
@@ -337,6 +351,12 @@ namespace pluginLib
 			s.write(static_cast<int32_t>(m_deviceType));
 			s.write(m_remoteHost);
 			s.write(m_remotePort);
+		}
+
+		if (m_voiceExpansion)
+		{
+			baseLib::ChunkWriter cw(s, "VEXP", 1);
+			s.write<uint8_t>(1);
 		}
 
 		{
@@ -424,6 +444,11 @@ namespace pluginLib
 		_cr.add("PROG", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
 			m_programName = _binaryStream.readString();
+		});
+
+		_cr.add("VEXP", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			m_voiceExpansion = _binaryStream.read<uint8_t>() != 0;
 		});
 
 		_cr.add("REMO", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
@@ -1272,6 +1297,14 @@ namespace pluginLib
 		});
 
 		return m_device.get();
+	}
+
+	void Processor::setVoiceExpansion(const bool _enabled)
+	{
+		if (m_voiceExpansion == _enabled)
+			return;
+		m_voiceExpansion = _enabled;
+		rebootDevice();
 	}
 
 	bool Processor::rebootDevice()

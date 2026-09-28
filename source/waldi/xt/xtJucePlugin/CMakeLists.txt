@@ -32,7 +32,6 @@ set(SOURCES
 	xtPartName.cpp xtPartName.h
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
-	xtSettingsDspAudio.cpp xtSettingsDspAudio.h
 	xtWaveEditor.cpp xtWaveEditor.h
 	xtWaveEditorStyle.cpp xtWaveEditorStyle.h
 

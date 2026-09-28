@@ -30,8 +30,6 @@ namespace mqJucePlugin
 
 		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 
-		std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) override;
-
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;

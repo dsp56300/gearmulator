@@ -1,8 +1,7 @@
-#include "xtSettingsDspAudio.h"
+#include "settingsVoiceExpansion.h"
 
-#include "PluginProcessor.h"
-
-#include "jucePluginEditorLib/pluginEditor.h"
+#include "pluginEditor.h"
+#include "pluginProcessor.h"
 
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlEventListener.h"
@@ -10,11 +9,11 @@
 
 #include "RmlUi/Core/Element.h"
 
-namespace xtJucePlugin
+namespace jucePluginEditorLib
 {
-	SettingsDspAudio::SettingsDspAudio(jucePluginEditorLib::Editor& _editor, Rml::Element* _root)
+	SettingsVoiceExpansion::SettingsVoiceExpansion(Editor& _editor, Rml::Element* _root)
 	{
-		auto& processor = dynamic_cast<AudioPluginAudioProcessor&>(_editor.getProcessor());
+		auto& processor = _editor.getProcessor();
 
 		auto* btRoot = juceRmlUi::helper::findChild(_root, "btVoiceExpansion", false);
 		if (!btRoot)

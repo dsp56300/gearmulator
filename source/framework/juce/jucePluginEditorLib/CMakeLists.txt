@@ -28,6 +28,7 @@ set(SOURCES
 	settingsMidiLearn.cpp settingsMidiLearn.h
 	settingsMidiMatrix.cpp settingsMidiMatrix.h
 	settingsSkin.cpp settingsSkin.h
+	settingsVoiceExpansion.cpp settingsVoiceExpansion.h
 	settingsPlugin.cpp settingsPlugin.h
 	skin.h
 )
