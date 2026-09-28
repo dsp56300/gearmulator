@@ -31,6 +31,9 @@ Framework:
         the plugin and `input_stop` ends it, to test effects and audio inputs
         together with `record_start` and `record_stop`.
 
+- [Fix] Windows: the plugin files reported version 2.2.14 in their file
+        properties no matter which release they were from.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,
