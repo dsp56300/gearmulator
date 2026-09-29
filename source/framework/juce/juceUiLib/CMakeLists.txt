@@ -28,6 +28,10 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(juceUiLib PUBLIC baseLib)
 
+# The module code is in juce_plugin_modules. GNU ld reads each static library once, in order, so it has to come after
+# every library that uses juce. Link only: users of this library do not get the compile definitions of the modules
+target_link_libraries(juceUiLib INTERFACE $<LINK_ONLY:juce_plugin_modules>)
+
 target_include_directories(juceUiLib PUBLIC ${JUCE_MODULES_DIR})
 target_compile_definitions(juceUiLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET juceUiLib PROPERTY FOLDER "Gearmulator")
