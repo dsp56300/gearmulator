@@ -275,7 +275,7 @@
 				<knob id="Osc2Wavetable/FilterEnv>Pitch" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/FilterEnv > Pitch" style="left: 505dp; top: 20dp; width: 98dp; height: 98dp;"/>
 				<knob id="Osc2Wavetable/FilterEnv>FM" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Wavetable/FilterEnv > FM" style="left: 33dp; top: 330dp; width: 98dp; height: 98dp;"/>
 			</div>
-			<combo id="Osc FM Mode" class="jucePos text3" data-model="partCurrent" param="Osc FM Mode" style="left: 863dp; top: 412dp; width: 240dp; height: 45dp; line-height: 45dp;">
+			<combo id="Osc FM Mode" class="jucePos text3" data-class-juceConditionDisabledAlpha50="Osc2_Mode_value == 1" data-model="partCurrent" param="Osc FM Mode" style="left: 863dp; top: 412dp; width: 240dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
 			<combo id="Osc3 Mode" class="jucePos text3" data-model="partCurrent" param="Osc3 Mode" style="left: 55dp; top: 670dp; width: 240dp; height: 45dp; line-height: 45dp;">
