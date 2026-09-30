@@ -31,6 +31,11 @@ Framework:
         the plugin and `input_stop` ends it, to test effects and audio inputs
         together with `record_start` and `record_stop`.
 
+- [Imp] BUG-10220 The Esc key no longer opens the settings page, it is left to
+        the host, which uses it to close the plugin window, for example. Esc
+        still closes the settings page and ends MIDI Learn mode. The settings
+        open from the context menu.
+
 - [Fix] Windows: the plugin files reported version 2.2.14 in their file
         properties no matter which release they were from.
 

@@ -888,14 +888,14 @@ namespace jucePluginEditorLib
 				switch (juceRmlUi::helper::getKeyIdentifier(_event))
 				{
 				case Rml::Input::KI_ESCAPE:
+					// Esc only closes what is open. Otherwise it stays unhandled and goes to the host, which uses it
+					// to close the plugin window, for example
 					if (m_midiLearnModeActive)
-					{
 						setMidiLearnMode(false);
-					}
+					else if (settingsOpened())
+						showSettings(false);
 					else
-					{
-						toggleSettings();
-					}
+						break;
 					_event.StopPropagation();
 					break;
 				default:;
@@ -1309,11 +1309,6 @@ namespace jucePluginEditorLib
 	std::string Editor::getAbsoluteSkinFolder(const std::string& _skinFolder) const
 	{
 		return getAbsoluteSkinFolder(m_processor, _skinFolder);
-	}
-
-	void Editor::toggleSettings()
-	{
-		showSettings(!settingsOpened());
 	}
 
 	void Editor::showSettings(const bool _show)
