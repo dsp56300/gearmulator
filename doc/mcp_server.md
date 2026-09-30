@@ -328,7 +328,7 @@ Returns `success`, `path`, `started`, `frames`, `channels`, `sampleRate`, `durat
 
 #### `input_play`
 
-Feed an audio file into the plugin's audio inputs instead of what the host sends, for example to test an effect or the audio input of a synth. WAV and AIFF files work. The file is resampled to the host sample rate; for sample-exact comparisons, give it the host rate. A mono file feeds every input.
+Feed an audio file into the plugin's audio inputs instead of what the host sends, for example to test an effect or the audio input of a synth. WAV and AIFF files work. The file is converted to the host sample rate while it plays, so it plays at the right speed also when the host starts processing only after this call, or changes its rate later. A file at the host rate plays unchanged, sample for sample: give it that rate for sample-exact comparisons. A mono file feeds every input.
 
 The file plays once, after that the inputs stay silent until `input_stop` gives them back to the host. With `loop` it repeats until `input_stop`. To capture what the plugin makes of it, call `record_start` first, then `input_play`, then `record_stop`.
 
@@ -337,7 +337,7 @@ The file plays once, after that the inputs stay silent until `input_stop` gives 
 | `path` | string | yes | The WAV or AIFF file |
 | `loop` | boolean | no | Repeat the file until `input_stop` (default: false) |
 
-Returns `success`, `frames` and `durationMs` at the host rate, the file's `channels` and `fileSampleRate`, the host's `sampleRate` and `inputChannels`, the number of audio inputs the plugin has at the moment. With no inputs, `warning` says that nothing is heard.
+Returns `success`, the length as `frames` at the host rate and as `durationMs`, the file's `channels` and `fileSampleRate`, the host's `sampleRate` and `inputChannels`, the number of audio inputs the plugin has at the moment. Until the host has started processing, its rate is not known: `sampleRate` and `frames` are 0 and `note` says so. With no inputs, `warning` says that nothing is heard.
 
 #### `input_stop`
 

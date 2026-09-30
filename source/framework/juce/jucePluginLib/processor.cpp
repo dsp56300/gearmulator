@@ -1053,7 +1053,8 @@ namespace pluginLib
 			r.error = "Cannot read " + _path + ", it needs to be a WAV or AIFF file";
 			return r;
 		}
-		if(reader->numChannels == 0 || reader->lengthInSamples <= 0 || reader->lengthInSamples > std::numeric_limits<int>::max())
+		if(reader->numChannels == 0 || reader->lengthInSamples <= 0 || reader->lengthInSamples > std::numeric_limits<int>::max() ||
+			reader->sampleRate <= 0.0)
 		{
 			r.error = "No usable audio in " + _path;
 			return r;
@@ -1061,31 +1062,17 @@ namespace pluginLib
 
 		const auto channels = static_cast<int>(reader->numChannels);
 		const auto length = static_cast<int>(reader->lengthInSamples);
-		juce::AudioBuffer<float> file(channels, length);
-		reader->read(&file, 0, length, 0, true, true);
 
+		// Kept at the rate of the file. The host may not have told its rate yet, so injectTestInput converts
 		auto input = std::make_shared<TestInput>();
+		input->audio.setSize(channels, length);
+		reader->read(&input->audio, 0, length, 0, true, true);
+		input->sampleRate = reader->sampleRate;
 		input->loop = _loop;
-
-		const double hostRate = getSampleRate();
-		if(hostRate > 0.0 && std::abs(reader->sampleRate - hostRate) > 0.01)
-		{
-			const double ratio = reader->sampleRate / hostRate;	// input samples per output sample
-			const auto frames = static_cast<int>(std::ceil(length / ratio));
-			input->audio.setSize(channels, frames);
-			for(int ch = 0; ch < channels; ++ch)
-			{
-				juce::LagrangeInterpolator resampler;
-				resampler.process(ratio, file.getReadPointer(ch), input->audio.getWritePointer(ch), frames, length, 0);
-			}
-		}
-		else
-		{
-			input->audio = std::move(file);
-		}
+		input->resamplers.resize(static_cast<size_t>(channels));
 
 		r.valid = true;
-		r.frames = static_cast<uint32_t>(input->audio.getNumSamples());
+		r.frames = static_cast<uint32_t>(length);
 		r.channels = static_cast<uint32_t>(channels);
 		r.fileSampleRate = reader->sampleRate;
 
@@ -1109,6 +1096,30 @@ namespace pluginLib
 		const int length = audio.getNumSamples();
 		const int fileChannels = audio.getNumChannels();
 		int pos = input->pos.load(std::memory_order_relaxed);
+
+		// Converted while playing, at the rate the host runs at now, not at the one it had when the file was set
+		const double hostRate = getSampleRate();
+		if(hostRate > 0.0 && std::abs(input->sampleRate - hostRate) > 0.01)
+		{
+			const bool playing = pos < length;	// a looping file wraps around inside the resampler
+			const double ratio = input->sampleRate / hostRate;	// file samples per host sample
+			int used = 0;
+
+			for(int ch = 0; ch < _numChannels; ++ch)
+			{
+				if(playing && ch < fileChannels)
+					used = input->resamplers[ch].process(ratio, audio.getReadPointer(ch, pos), _buffer.getWritePointer(ch),
+						_numSamples, length - pos, input->loop ? length : 0);
+				else if(playing && fileChannels == 1)
+					_buffer.copyFrom(ch, 0, _buffer, 0, 0, _numSamples);
+				else
+					_buffer.clear(ch, 0, _numSamples);
+			}
+
+			// When wrapping around, the resampler returns the samples it used modulo the length
+			input->pos.store(input->loop ? (pos + used) % length : pos + used, std::memory_order_relaxed);
+			return;
+		}
 
 		for(int i = 0; i < _numSamples; ++i)
 		{

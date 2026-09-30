@@ -242,14 +242,15 @@ namespace pluginLib
 		{
 			bool valid = false;				// the file was read and plays now
 			std::string error;				// why not
-			uint32_t frames = 0;			// length at the host sample rate
+			uint32_t frames = 0;			// length of the file, at its own rate
 			uint32_t channels = 0;			// of the file
 			double fileSampleRate = 0.0;
 		};
 
-		// Feed a WAV or AIFF file into the audio inputs instead of what the host sends, resampled to the host sample
-		// rate. A mono file feeds every input. Once a file without _loop has ended the inputs stay silent until
-		// stopTestInput gives them back to the host.
+		// Feed a WAV or AIFF file into the audio inputs instead of what the host sends, converted to the host sample
+		// rate while it plays, so that a host that tells its rate only later or changes it gets it right too. A mono
+		// file feeds every input. Once a file without _loop has ended the inputs stay silent until stopTestInput
+		// gives them back to the host.
 		TestInputResult startTestInput(const std::string& _path, bool _loop);
 		// Returns false if there was no test input
 		bool stopTestInput();
@@ -334,9 +335,11 @@ namespace pluginLib
 		// and never blocks. A replaced one waits in m_testInputPrev, so that the audio thread does not free it ----
 		struct TestInput
 		{
-			juce::AudioBuffer<float> audio;
+			juce::AudioBuffer<float> audio;		// the file as it is
+			double sampleRate = 0.0;			// of the file
 			bool loop = false;
-			std::atomic<int> pos{0};
+			std::vector<juce::LagrangeInterpolator> resamplers;	// one per file channel, for a host at another rate
+			std::atomic<int> pos{0};			// in the file
 		};
 		void injectTestInput(juce::AudioBuffer<float>& _buffer, int _numChannels, int _numSamples) const;
 		std::shared_ptr<TestInput> m_testInput;
