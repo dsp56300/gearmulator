@@ -60,6 +60,7 @@ Additional options to select which devices to build:
 | gearmulator_SYNTH_NODALRED2X | Build Nodal Red 2x | on |
 | gearmulator_SYNTH_JE8086 | Build JE-8086 | on |
 | gearmulator_SYNTH_88EMU | Build 88emu | on |
+| gearmulator_COMPONENT_DSPBRIDGE | Build the DSPBridge server and the device plugins it loads | on |
 
 ### Join us on Discord
 

@@ -362,47 +362,50 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	# --------- Server Plugin ---------
 
-	set(serverTarget ${productName}ServerPlugin)
+	# Only when the DSPBridge server is built, it is the one that loads these
+	if(TARGET bridgeServer)
+		set(serverTarget ${productName}ServerPlugin)
 
-	add_library(${serverTarget} SHARED)
+		add_library(${serverTarget} SHARED)
 
-	target_compile_definitions(${serverTarget} PUBLIC 
-		PluginName="${productName}"
-		PluginVersionMajor=${CMAKE_PROJECT_VERSION_MAJOR}
-		PluginVersionMinor=${CMAKE_PROJECT_VERSION_MINOR}
-		PluginVersionPatch=${CMAKE_PROJECT_VERSION_PATCH}
-		Plugin4CC="${plugin4CC}"
-	)
-	target_sources(${serverTarget} PRIVATE serverPlugin.cpp)
-	target_link_libraries(${serverTarget} ${synthLibProject} bridgeClient)
-	set_property(TARGET ${serverTarget} PROPERTY FOLDER ${targetName})
+		target_compile_definitions(${serverTarget} PUBLIC 
+			PluginName="${productName}"
+			PluginVersionMajor=${CMAKE_PROJECT_VERSION_MAJOR}
+			PluginVersionMinor=${CMAKE_PROJECT_VERSION_MINOR}
+			PluginVersionPatch=${CMAKE_PROJECT_VERSION_PATCH}
+			Plugin4CC="${plugin4CC}"
+		)
+		target_sources(${serverTarget} PRIVATE serverPlugin.cpp)
+		target_link_libraries(${serverTarget} ${synthLibProject} bridgeClient)
+		set_property(TARGET ${serverTarget} PROPERTY FOLDER ${targetName})
 
-	# build plugins to the "plugins" dir of the server binary output dir
-	get_target_property(serverOutputDir bridgeServer BINARY_DIR)
+		# build plugins to the "plugins" dir of the server binary output dir
+		get_target_property(serverOutputDir bridgeServer BINARY_DIR)
 
-	if(NOT serverOutputDir)
-		get_target_property(serverOutputDir bridgeServer RUNTIME_OUTPUT_DIRECTORY)
-	endif()
-	
-	if(serverOutputDir)
-		set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${serverOutputDir}/plugins")
-		set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${serverOutputDir}/plugins")
-
-		get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-		
-		if(isMultiConfig)
-			set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG "${serverOutputDir}/Debug/plugins")
-			set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELEASE "${serverOutputDir}/Release/plugins")
-			set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY_DEBUG "${serverOutputDir}/Debug/plugins")
-			set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY_RELEASE "${serverOutputDir}/Release/plugins")
+		if(NOT serverOutputDir)
+			get_target_property(serverOutputDir bridgeServer RUNTIME_OUTPUT_DIRECTORY)
 		endif()
+	
+		if(serverOutputDir)
+			set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${serverOutputDir}/plugins")
+			set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${serverOutputDir}/plugins")
+
+			get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+		
+			if(isMultiConfig)
+				set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG "${serverOutputDir}/Debug/plugins")
+				set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELEASE "${serverOutputDir}/Release/plugins")
+				set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY_DEBUG "${serverOutputDir}/Debug/plugins")
+				set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY_RELEASE "${serverOutputDir}/Release/plugins")
+			endif()
+		endif()
+
+		install(TARGETS ${serverTarget} 
+			RUNTIME DESTINATION plugins/ COMPONENT DSPBridgeServer 
+			LIBRARY DESTINATION plugins/ COMPONENT DSPBridgeServer)
+
+		add_dependencies(ServerPlugins ${serverTarget})
 	endif()
-
-	install(TARGETS ${serverTarget} 
-		RUNTIME DESTINATION plugins/ COMPONENT DSPBridgeServer 
-		LIBRARY DESTINATION plugins/ COMPONENT DSPBridgeServer)
-
-	add_dependencies(ServerPlugins ${serverTarget})
 endmacro()
 
 macro(createJucePluginWithFX targetName productName plugin4CCSynth plugin4CCFX binaryDataProject synthLibProject)

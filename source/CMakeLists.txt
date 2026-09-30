@@ -7,6 +7,7 @@ option(${CMAKE_PROJECT_NAME}_SYNTH_XENIA "Build Xenia" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_NODALRED2X "Build NodalRed2x" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_JE8086 "Build JE-8086" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_88EMU "Build 88Emu" on)
+option(${CMAKE_PROJECT_NAME}_COMPONENT_DSPBRIDGE "Build the DSPBridge server" on)
 
 # ----------------- Add our cmake scripts to IDE
 
