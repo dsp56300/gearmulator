@@ -22,6 +22,7 @@ set(SOURCES
 	lv2PresetExport.cpp lv2PresetExport.h
 	midiBufferParser.cpp midiBufferParser.h
 	midiClock.cpp midiClock.h
+	midiControllerThinner.cpp midiControllerThinner.h
 	midiRateLimiter.cpp midiRateLimiter.h
 	midiRoutingMatrix.cpp midiRoutingMatrix.h
 	midiToSysex.cpp midiToSysex.h
@@ -90,6 +91,11 @@ if(BUILD_TESTING)
 	target_link_libraries(midiRateLimiter_test PRIVATE synthLib)
 	set_property(TARGET midiRateLimiter_test PROPERTY FOLDER "Tests")
 	add_test(NAME midiRateLimiter COMMAND midiRateLimiter_test)
+
+	add_executable(midiControllerThinner_test midiControllerThinner_test.cpp)
+	target_link_libraries(midiControllerThinner_test PRIVATE synthLib)
+	set_property(TARGET midiControllerThinner_test PROPERTY FOLDER "Tests")
+	add_test(NAME midiControllerThinner COMMAND midiControllerThinner_test)
 
 	add_executable(device_test device_test.cpp)
 	target_link_libraries(device_test PRIVATE synthLib)
