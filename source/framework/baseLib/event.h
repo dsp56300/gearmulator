@@ -21,7 +21,9 @@ namespace baseLib
 
 		static constexpr ListenerId InvalidListenerId = ~0;
 
-		Event() = default;
+		// not '= default': clang would then require the retained value to be default constructible right where
+		// the event is declared, which a struct nested in the same class is not yet (MidiNotifier::Note)
+		Event() {}
 
 		// a copy has listeners of its own: removing one from it leaves the original's alone
 		Event(const Event& _source)

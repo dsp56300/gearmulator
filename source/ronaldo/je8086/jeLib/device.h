@@ -7,9 +7,13 @@
 
 #include "synthLib/device.h"
 
+namespace rLib
+{
+	template<typename TBoard> class BoardThread;
+}
+
 namespace jeLib
 {
-	class JeThread;
 	class Je8086;
 }
 
@@ -57,7 +61,7 @@ namespace jeLib
 		void createMasterVolumeMessage(std::vector<synthLib::SMidiEvent>& _messages) const;
 
 		std::unique_ptr<Je8086> m_je8086;
-		std::unique_ptr<JeThread> m_thread;
+		std::unique_ptr<rLib::BoardThread<Je8086>> m_thread;
 
 		std::vector<synthLib::SMidiEvent> m_midiIn;
 		std::vector<synthLib::SMidiEvent> m_midiOut;

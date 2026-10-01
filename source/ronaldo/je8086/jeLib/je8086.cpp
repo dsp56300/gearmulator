@@ -96,6 +96,20 @@ namespace jeLib
 		asics.runForCycles(emu.getCycles() * 1323 / 625); // Convert from uC cycles to DSP steps. (this is (clockrate / 2) / (uc clock = 16000000), simplified)
 	}
 
+	Je8086::SampleFrame Je8086::renderSample()
+	{
+		if (m_sampleReadPos == m_sampleBuffer.size())
+		{
+			m_sampleBuffer.clear();
+			m_sampleReadPos = 0;
+
+			while (m_sampleBuffer.empty())
+				step();
+		}
+
+		return m_sampleBuffer[m_sampleReadPos++];
+	}
+
 	void Je8086::setButton(const devices::SwitchType _type, const bool _pressed)
 	{
 		ports.press(_type, _pressed);

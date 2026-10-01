@@ -1,8 +1,9 @@
 #include "device.h"
 
 #include "je8086.h"
-#include "jeThread.h"
 #include "synthLib/midiToSysex.h"
+
+#include "common/boardThread.h"
 
 namespace
 {
@@ -30,7 +31,7 @@ namespace jeLib
 			m_je8086.reset(new Je8086(_params.romData, ramDataFilename));
 		}
 
-		m_thread.reset(new JeThread(*m_je8086));
+		m_thread.reset(new rLib::BoardThread<Je8086>(*m_je8086, "JE8086"));
 
 		m_paramChangedListener.set(m_sysexRemote.evParamChanged, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
 		{
@@ -158,14 +159,11 @@ namespace jeLib
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _samples)
 	{
-		m_thread->processSamples(static_cast<uint32_t>(_samples), getExtraLatencySamples(), m_midiIn, m_midiOut);
-		m_midiIn.clear();
-
-		auto& sampleBuffer = m_thread->getSampleBuffer();
+		const auto* frames = m_thread->process(static_cast<uint32_t>(_samples), getExtraLatencySamples(), m_midiIn, m_midiOut);
 
 		for (size_t i=0; i<_samples; ++i)
 		{
-			const auto s = sampleBuffer.pop_front();
+			const auto& s = frames[i];
 
 			_outputs[0][i] = dspWordToFloat(s.first) * m_masterVolume;
 			_outputs[1][i] = dspWordToFloat(s.second) * m_masterVolume;

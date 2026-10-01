@@ -22,8 +22,8 @@ namespace jeLib
 		void addMidiEvent(const synthLib::SMidiEvent& _event);
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _events);
 
-		const auto& getSampleBuffer() const { return m_sampleBuffer; }
-		void clearSampleBuffer() { m_sampleBuffer.clear(); }
+		// steps the board until it produced a frame, then returns the frames of a step one at a time
+		SampleFrame renderSample();
 
 		void step();
 
@@ -57,6 +57,7 @@ namespace jeLib
 		synthLib::MidiBufferParser m_midiOutParser;
 		std::vector<synthLib::SMidiEvent> m_midiInEvents;
 		SampleBuffer m_sampleBuffer;
+		size_t m_sampleReadPos = 0;
 		synthLib::MidiRateLimiter m_midiInRateLimiter;
 		std::vector<synthLib::SMidiEvent> m_midiOutEvents;
 	};
