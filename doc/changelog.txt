@@ -99,6 +99,9 @@ NodalRed2x:
         says why it fails. Loading a playlist works the same way instead of
         refusing the whole playlist.
 
+- [Fix] 88EmuCli: `--video` could not start ffmpeg on Windows, and failed
+        with file paths containing non-ASCII characters.
+
 - [New] MIDI Player: Karaoke .kar files can be played, dropped onto the playlist
         and rendered with 88EmuCli like any other MIDI file.
 
