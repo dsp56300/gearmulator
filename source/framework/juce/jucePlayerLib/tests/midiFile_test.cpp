@@ -187,6 +187,50 @@ namespace
             CHECK(std::abs(decoded.back().seconds - 0.5) < 1e-9); // 120 bpm, not the following chunk's header
     }
 
+    // A karaoke file as the KMIDI tools write it: format 1, a header track with the @K/@T tags, a "Words" track of
+    // lyric text events and the music on tracks of its own. Only the music may come out.
+    void karPlayback(const Fixtures& files)
+    {
+        const auto text = [](const uint8_t _type, const std::string& _s)
+        {
+            std::vector<uint8_t> e = {0x00, 0xff, _type, static_cast<uint8_t>(_s.size())};
+            e.insert(e.end(), _s.begin(), _s.end());
+            return e;
+        };
+        const auto cat = [](std::initializer_list<std::vector<uint8_t>> _parts)
+        {
+            std::vector<uint8_t> out;
+            for (const auto& p : _parts)
+                out.insert(out.end(), p.begin(), p.end());
+            return out;
+        };
+        const std::vector<uint8_t> end = {0x00, 0xff, 0x2f, 0x00};
+        const auto header = cat({text(0x01, "@KMIDI KARAOKE FILE"), {0x00, 0xff, 0x51, 0x03, 0x07, 0xa1, 0x20}, end});
+        const auto words = cat({text(0x03, "Words"), text(0x01, "@LENG"), text(0x01, "@TSong"), text(0x01, "\\Hel"),
+                                {0x60, 0xff, 0x01, 0x03, 'l', 'o', '/'}, end});
+        const std::vector<uint8_t> melody = {0x00, 0x90, 60, 100, 0x60, 0x80, 60, 0x00, 0x00, 0xff, 0x2f, 0x00};
+        const auto data = smfFixture({{header}, {words}, {melody}});
+
+        const auto path = files.directory.getChildFile("song.KAR");
+        CHECK(path.replaceWithData(data.data(), data.size()));
+        const auto name = path.getFullPathName().toStdString();
+        CHECK(midiFile::isSupported(name));
+        CHECK(juce::String(midiFile::fileFilter).contains("*.kar"));
+        std::vector<synthLib::midi::Event> decoded;
+        std::string error;
+        CHECK(midiFile::read(name, decoded, error));
+        CHECK_EQ(decoded.size(), 2u);
+        if (decoded.size() == 2)
+        {
+            CHECK_EQ(decoded[0].bytes[0], 0x90);
+            CHECK(std::abs(decoded[0].seconds) < 1e-9);
+            CHECK_EQ(decoded[1].bytes[0], 0x80);
+            CHECK(std::abs(decoded[1].seconds - 0.5) < 1e-9); // 120 bpm from the header track's tempo
+        }
+        MidiPlayer player(4, MidiPlayer::ResetMode::Gs);
+        CHECK_EQ(player.addFiles({name}).added, 1u);
+    }
+
     void put16(std::vector<uint8_t>& data, size_t offset, uint16_t value)
     {
         data[offset] = static_cast<uint8_t>(value);
@@ -362,5 +406,6 @@ void checkMidiFiles()
     Fixtures files;
     rcpPlaylist(files);
     smfTruncatedHeaders();
+    karPlayback(files);
     g36Playback(files);
 }

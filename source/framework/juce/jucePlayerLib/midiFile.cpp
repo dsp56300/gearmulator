@@ -4,12 +4,20 @@
 
 namespace jucePlayer::midiFile
 {
+    namespace
+    {
+        // A karaoke .kar is a Standard MIDI File whose lyrics are text meta events, which the SMF reader skips.
+        bool isSmf(const juce::String& _extension)
+        {
+            return _extension == ".mid" || _extension == ".midi" || _extension == ".kar";
+        }
+    }
+
     bool isSupported(const std::string& _path)
     {
         const auto extension =
             juce::File::getCurrentWorkingDirectory().getChildFile(_path).getFileExtension().toLowerCase();
-        return extension == ".mid" || extension == ".midi" || extension == ".rcp" || extension == ".r36" ||
-            extension == ".g36";
+        return isSmf(extension) || extension == ".rcp" || extension == ".r36" || extension == ".g36";
     }
 
     bool read(const std::string& _path, std::vector<synthLib::midi::Event>& _events, std::string& _error)
@@ -20,7 +28,7 @@ namespace jucePlayer::midiFile
         const auto extension = file.getFileExtension().toLowerCase();
         if (!isSupported(_path))
         {
-            _error = file.getFileName().toStdString() + ": expected a .mid, .midi, .rcp, .r36, or .g36 file";
+            _error = file.getFileName().toStdString() + ": expected a .mid, .midi, .kar, .rcp, .r36, or .g36 file";
             return false;
         }
         // Opened here rather than through File::loadFileAsData() so the error can say why. A missing
@@ -42,7 +50,7 @@ namespace jucePlayer::midiFile
         std::vector<uint8_t> data(contents.getSize());
         if (!data.empty())
             contents.copyTo(data.data(), 0, data.size());
-        const bool smf = extension == ".mid" || extension == ".midi";
+        const bool smf = isSmf(extension);
         // A file the decoders cannot make sense of belongs in the caller's error list, not in a
         // terminate handler: a length or allocation a malformed header asks for reaches the
         // playlist as a rejected entry, the same as any other unreadable file.
