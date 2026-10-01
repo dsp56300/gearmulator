@@ -124,6 +124,60 @@ namespace
         CHECK_EQ(player.entries().size(), 2u);
     }
 
+    // An RCP v2 file of one track on channel 1, 48 ticks per quarter note at 120 bpm.
+    std::vector<uint8_t> rcpFixture(const std::vector<uint8_t>& _events)
+    {
+        std::vector<uint8_t> data(0x586 + 0x2c);
+        const std::string signature = "RCM-PC98V2.0(C)COME ON MUSIC";
+        std::copy(signature.begin(), signature.end(), data.begin());
+        data[0x1c0] = 48;
+        data[0x1c1] = 120;
+        data[0x1c2] = data[0x1c3] = 4;
+        data[0x1e6] = 1;
+        data.insert(data.end(), _events.begin(), _events.end());
+        const auto length = 0x2c + _events.size();
+        data[0x586] = static_cast<uint8_t>(length);
+        data[0x587] = static_cast<uint8_t>(length >> 8);
+        return data;
+    }
+
+    size_t noteOns(const std::vector<synthLib::midi::Event>& _events)
+    {
+        return static_cast<size_t>(std::count_if(_events.begin(), _events.end(),
+            [](const auto& _e) { return (_e.bytes[0] & 0xf0) == 0x90 && _e.bytes[2]; }));
+    }
+
+    // Loop counts are played out, however large: songs repeat an empty measure a hundred times and more to hold a
+    // track back (TROPIC88.RCP loops 160 and 162 times). Only a loop that would add thousands of beats falls back to
+    // two passes, like an infinite one.
+    void rcpLoops()
+    {
+        std::vector<synthLib::midi::Event> decoded;
+        std::string error;
+
+        // Loop start, one note a beat long, loop end x160, then a final note
+        CHECK(synthLib::midi::readRcp(rcpFixture({0xf9, 0, 0, 0, 60, 48, 10, 100, 0xf8, 160, 0, 0,
+                                                  62, 48, 10, 100, 0xfe, 0, 0, 0}), decoded, error));
+        CHECK_EQ(noteOns(decoded), 161u);
+        if (!decoded.empty())
+        {
+            const auto last = std::find_if(decoded.rbegin(), decoded.rend(),
+                [](const auto& _e) { return (_e.bytes[0] & 0xf0) == 0x90 && _e.bytes[2]; });
+            CHECK(std::abs(last->seconds - 80.0) < 1e-6);	// 160 beats at 120 bpm
+        }
+
+        // A count of zero loops forever and plays twice
+        CHECK(synthLib::midi::readRcp(rcpFixture({0xf9, 0, 0, 0, 60, 48, 10, 100, 0xf8, 0, 0, 0,
+                                                  0xfe, 0, 0, 0}), decoded, error));
+        CHECK_EQ(noteOns(decoded), 2u);
+
+        // 255 passes of 16 beats would add 4080 beats: a loop bomb, played twice
+        CHECK(synthLib::midi::readRcp(rcpFixture({0xf9, 0, 0, 0, 60, 192, 10, 100, 60, 192, 10, 100,
+                                                  60, 192, 10, 100, 60, 192, 10, 100, 0xf8, 255, 0, 0,
+                                                  0xfe, 0, 0, 0}), decoded, error));
+        CHECK_EQ(noteOns(decoded), 8u);
+    }
+
     struct SmfTrack
     {
         std::vector<uint8_t> body;
@@ -406,6 +460,7 @@ void checkMidiFiles()
     Fixtures files;
     rcpPlaylist(files);
     smfTruncatedHeaders();
+    rcpLoops();
     karPlayback(files);
     g36Playback(files);
 }

@@ -35,6 +35,10 @@ namespace synthLib::midi::rcp
 {
     constexpr size_t maximumInterpreterSteps = 4000000;
     constexpr int defaultLoopCount = 2;
+    // A loop is played as often as it says unless that would add this many beats: a guard against a count that
+    // was never meant to be played out, the same one rcm2smf applies. Songs use counts in the hundreds to hold a
+    // track back by many empty measures, so the count alone says nothing about whether a loop is a mistake.
+    constexpr std::int64_t loopBombBeats = 4000;
     struct ActiveNote
     {
         bool active = false;
@@ -591,13 +595,13 @@ namespace synthLib::midi::rcp
                     break;
 
                 case 0xf8:
-                    if (!handleLoopEnd(loops, index, event))
+                    if (!handleLoopEnd(loops, index, event, currentTick))
                         return false;
                     break;
 
                 case 0xf9:
                     if (loops.size() < 8)
-                        loops.push_back({index + 1, 0});
+                        loops.push_back({index + 1, 0, currentTick});
                     ++index;
                     break;
 
@@ -656,6 +660,8 @@ namespace synthLib::midi::rcp
         {
             std::size_t startIndex;
             int completedPasses;
+            std::int64_t startTick;
+            int targetPasses = -1;	// decided at the first Loop End, from its count and the first pass's length
         };
 
         static constexpr std::size_t noIndex = std::numeric_limits<std::size_t>::max();
@@ -727,7 +733,8 @@ namespace synthLib::midi::rcp
             return true;
         }
 
-        bool handleLoopEnd(std::vector<LoopFrame>& loops, std::size_t& index, const RcpEvent& event)
+        bool handleLoopEnd(std::vector<LoopFrame>& loops, std::size_t& index, const RcpEvent& event,
+                           const std::int64_t currentTick)
         {
             if (loops.empty())
             {
@@ -738,10 +745,19 @@ namespace synthLib::midi::rcp
             auto& frame = loops.back();
             ++frame.completedPasses;
 
-            const auto requested = static_cast<int>(event.delay);
-            const auto targetPasses =
-                (requested == 0 || (!m_document.isG36 && requested >= 0x7f)) ? defaultLoopCount : requested;
-            if (frame.completedPasses < targetPasses)
+            if (frame.targetPasses < 0)
+            {
+                // A count of zero loops forever.
+                const auto requested = static_cast<int>(event.delay);
+                frame.targetPasses = requested == 0 ? defaultLoopCount : requested;
+
+                const auto passTicks = currentTick - frame.startTick;
+                if (frame.targetPasses > defaultLoopCount && passTicks > 0 &&
+                    passTicks * frame.targetPasses >= loopBombBeats * std::max(1, m_document.timeBase))
+                    frame.targetPasses = defaultLoopCount;
+            }
+
+            if (frame.completedPasses < frame.targetPasses)
             {
                 index = frame.startIndex;
             }

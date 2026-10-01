@@ -102,6 +102,11 @@ NodalRed2x:
 - [Fix] 88EmuCli: `--video` could not start ffmpeg on Windows, and failed
         with file paths containing non-ASCII characters.
 
+- [Fix] MIDI Player: RCP loops repeated 127 times or more were played only
+        twice, so a track that waits out a long intro with a loop started too
+        early. Only a loop that would add thousands of beats is
+        still shortened.
+
 - [New] MIDI Player: Karaoke .kar files can be played, dropped onto the playlist
         and rendered with 88EmuCli like any other MIDI file.
 
