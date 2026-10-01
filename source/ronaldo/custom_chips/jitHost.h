@@ -17,10 +17,10 @@
 // WebAssembly with framework/wasmJit and the JavaScript host compiles it, possibly some time
 // after it was asked to (chips::JitCompile::Host). CHIPS_JIT_NONE selects <chip>_jit_none.h, a back end with
 // the same interface that never produces code: the dispatchers then stay on their interpreters
-// and start no compile thread. CHIPS_FORCE_NO_JIT picks it on any host, which is how the
+// and start no compile thread (jitCompileWorker.h). CHIPS_FORCE_NO_JIT picks it on any host, which is how the
 // interpreter-only configuration is tested without leaving a JIT host.
 //
-// custom_chips/CMakeLists.txt compiles this header to learn whether asmjit is needed at all.
+// source/ronaldo/CMakeLists.txt compiles this header to learn whether asmjit is needed at all.
 
 #define CHIPS_JIT_X86_64 0
 #define CHIPS_JIT_ARM64  0

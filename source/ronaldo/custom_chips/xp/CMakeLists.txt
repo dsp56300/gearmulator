@@ -11,6 +11,7 @@ set(SOURCES
 	xp_dsp_program.cpp xp_dsp_program.h
 	xp_dsp_naive.cpp
 	../jitHost.h
+	../jitCompileWorker.h
 	xp_dsp_jit.h
 	xp_dsp_jit_arm64.h
 	xp_dsp_jit_none.h

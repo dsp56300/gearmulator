@@ -1,7 +1,7 @@
 #pragma once
 
 // The JIT interface shared by the backends and the dispatcher. A compiled frame function executes one whole
-// frame of one chip, or of two lockstep-linked chips, from the lowered programs (xp_dsp_flat.h): it reads and
+// frame of one chip, or of two lockstep-linked chips, from the lowered programs (xp_dsp_program.h): it reads and
 // writes the DspState and DspParams it is handed at run time, never calls out, and switches with the flat
 // interpreter at any frame boundary. The C++ frame driver keeps doing what it does around the interpreter
 // (dspOps::beginFrame / endFrame, the IRAM3 ramps, the serial staging); the function covers everything the
@@ -10,11 +10,9 @@
 #include "xp_dsp_program.h"
 #include "xp_dsp_state.h"
 
-#include <atomic>
-#include <condition_variable>
+#include "../jitCompileWorker.h"
+
 #include <cstdint>
-#include <mutex>
-#include <thread>
 
 namespace xpLib
 {
@@ -50,33 +48,17 @@ namespace xpLib
 #	include "xp_dsp_jit_none.h"
 #endif
 
-// Background compilation of frame functions with the CSP/LSP handshake: the frame driver asks for the code
-// of a program key every frame; while the compiled code does not match, it keeps the flat interpreter and a
-// worker thread compiles from a snapshot. Only the latest requested generation is adopted, kicks during a
-// compile coalesce, and the run pointer is handed out only after a release/acquire handshake.
+// The frame driver asks for the code of a program key every frame; while the compiled code does not match, it
+// keeps the flat interpreter and the program is compiled from a snapshot (../jitCompileWorker.h).
 namespace xpLib
 {
 	class DspJitDispatcher
 	{
 	public:
 		DspJitDispatcher()
+			: m_compiler([this](const Snapshot& _s) { return m_backend.compile(_s.a, _s.hasB ? &_s.b : nullptr); },
+				[this] { return chips::pollHostBackend(m_backend); })
 		{
-			for (FlatProgram* program : {&m_requestA, &m_requestB, &m_workA, &m_workB})
-				program->ops.reserve(dsp::nProgramSlots * 16);
-			// Only a back end whose compile() blocks needs the worker (../jitHost.h).
-			if (DspJitBackend::Compile == chips::JitCompile::Worker)
-				m_worker = std::thread([this] { workerLoop(); });
-		}
-
-		~DspJitDispatcher()
-		{
-			{
-				std::lock_guard<std::mutex> lock(m_mutex);
-				m_exit = true;
-			}
-			m_condition.notify_one();
-			if (m_worker.joinable())
-				m_worker.join();
 		}
 
 		DspJitDispatcher(const DspJitDispatcher&) = delete;
@@ -88,144 +70,56 @@ namespace xpLib
 		{
 			if (!DspJitBackend::Available)
 				return nullptr;
-			pollCompile(_a, _b);
-			if (m_activeKey == _key && !m_compileInFlight)
+			const auto fill = [&](Snapshot& _s) { _s.set(_a, _b); };
+			bool ok = false;
+			if (m_compiler.poll(fill, ok))
+			{
+				m_canRun = ok;
+				m_activeKey = m_kickKey;
+			}
+			if (m_activeKey == _key && !m_compiler.inFlight())
 			{
 				// Compiled, or turned down: a program the back end cannot compile is not tried again
 				// until it changes.
 				return m_canRun ? m_backend.run() : nullptr;
 			}
-			if (m_kickKey != _key || !m_compileInFlight)
-				kick(_key, _a, _b);
+			if (m_kickKey != _key || !m_compiler.inFlight())
+			{
+				m_canRun = false;
+				m_kickKey = _key;
+				m_compiler.kick(fill);
+			}
 			return nullptr;
 		}
 
 	private:
-		void workerLoop()
+		struct Snapshot
 		{
-			std::unique_lock<std::mutex> lock(m_mutex);
-			uint64_t lastGeneration = 0;
-			for (;;)
+			Snapshot()
 			{
-				m_condition.wait(lock, [&] { return m_exit || m_requestGeneration != lastGeneration; });
-				if (m_exit)
-					return;
-				const auto generation = m_requestGeneration;
-				m_workA = m_requestA;
-				m_workHasB = m_requestHasB;
-				if (m_workHasB)
-					m_workB = m_requestB;
-				lock.unlock();
+				a.ops.reserve(dsp::nProgramSlots * 16);
+				b.ops.reserve(dsp::nProgramSlots * 16);
+			}
 
-				bool ok = false;
-				try
-				{
-					ok = m_backend.compile(m_workA, m_workHasB ? &m_workB : nullptr);
-				}
-				catch (...)
-				{
-					ok = false;
-				}
-				lastGeneration = generation;
-				m_done.store((generation << 1) | (ok ? 1u : 0u), std::memory_order_release);
-				lock.lock();
+			void set(const FlatProgram& _a, const FlatProgram* _b)
+			{
+				a = _a;
+				hasB = _b != nullptr;
+				if (_b)
+					b = *_b;
 			}
-		}
 
-		// The two functions that talk to the back end are templates only so that the branch for the other
-		// kind of back end (../jitHost.h) is never instantiated.
-		template <typename Backend = DspJitBackend>
-		void issueRequest(const FlatProgram& _a, const FlatProgram* _b)
-		{
-			if constexpr (Backend::Compile == chips::JitCompile::Host)
-			{
-				// The host compiles in its own time; the back end reads the programs only while it emits,
-				// which is before submit() returns.
-				Backend& backend = m_backend;
-				backend.submit(_a, _b);
-				m_requestGenerationIssued = m_kickGeneration;
-				return;
-			}
-			{
-				std::lock_guard<std::mutex> lock(m_mutex);
-				m_requestA = _a;
-				m_requestHasB = _b != nullptr;
-				if (_b != nullptr)
-					m_requestB = *_b;
-				m_requestGeneration = m_kickGeneration;
-			}
-			m_condition.notify_one();
-			m_requestGenerationIssued = m_kickGeneration;
-		}
-
-		// The program changed: the running code is stale from now on; hand a snapshot to the worker. Kicks
-		// during a compile coalesce into one re-kick with the latest programs.
-		void kick(const uint64_t _key, const FlatProgram& _a, const FlatProgram* _b)
-		{
-			m_canRun = false;
-			m_kickKey = _key;
-			++m_kickGeneration;
-			if (m_compileInFlight)
-			{
-				m_rekickPending = true;
-				return;
-			}
-			m_compileInFlight = true;
-			issueRequest(_a, _b);
-		}
-
-		template <typename Backend = DspJitBackend>
-		void pollCompile(const FlatProgram& _a, const FlatProgram* _b)
-		{
-			if (!m_compileInFlight)
-				return;
-			if constexpr (Backend::Compile == chips::JitCompile::Host)
-			{
-				// One compile at a time, so what lands is what was issued last.
-				Backend& backend = m_backend;
-				using State = typename Backend::CompileState;
-				const State state = backend.poll();
-				if (state == State::Pending)
-					return;
-				m_done.store((m_requestGenerationIssued << 1) | (state == State::Ready ? 1u : 0u), std::memory_order_release);
-			}
-			const auto done = m_done.load(std::memory_order_acquire);
-			if ((done >> 1) != m_requestGenerationIssued)
-				return;
-			if (m_rekickPending)
-			{
-				m_rekickPending = false;
-				issueRequest(_a, _b);
-				return;
-			}
-			if ((done >> 1) == m_kickGeneration)
-			{
-				m_compileInFlight = false;
-				m_canRun = (done & 1) != 0;
-				m_activeKey = m_kickKey;
-			}
-		}
+			FlatProgram a;
+			FlatProgram b;
+			bool hasB = false;
+		};
 
 		DspJitBackend m_backend;
 		bool m_canRun = false;
 		uint64_t m_activeKey = ~uint64_t{0};
 		uint64_t m_kickKey = ~uint64_t{0};
-		uint64_t m_kickGeneration = 0;
-		uint64_t m_requestGenerationIssued = 0;
-		bool m_compileInFlight = false;
-		bool m_rekickPending = false;
 
-		FlatProgram m_requestA;
-		FlatProgram m_requestB;
-		bool m_requestHasB = false;
-		uint64_t m_requestGeneration = 0;
-		FlatProgram m_workA;
-		FlatProgram m_workB;
-		bool m_workHasB = false;
-		std::atomic<uint64_t> m_done{0};
-		std::mutex m_mutex;
-		std::condition_variable m_condition;
-		bool m_exit = false;
-		std::thread m_worker;
+		// Declared after the back end so that it is destroyed, and its thread joined, first.
+		chips::JitCompileWorker<DspJitBackend::Compile, Snapshot> m_compiler;
 	};
 } // namespace xpLib

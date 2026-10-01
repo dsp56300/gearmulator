@@ -1,24 +1,27 @@
 #pragma once
 
-#include <atomic>
-#include <condition_variable>
 #include <cstring>
 #include <memory>
-#include <mutex>
-#include <thread>
 #include <utility>
 #include <vector>
+
+#include "../jitCompileWorker.h"
 
 #include "lsp_interpreter.h"
 #include "lsp_jit.h"
 
 namespace lspLib
 {
-	// Host interface and background JIT compilation, with interpreter fallback.
+	// Host interface; runs the JIT when the current program is compiled (../jitCompileWorker.h) and the
+	// interpreter otherwise.
 	class LSPDispatcher
 	{
 	public:
 		using SampleFrame = std::pair<int32_t, int32_t>;	// left, right
+		struct Snapshot
+		{
+			std::vector<LSPInstr> instr = std::vector<LSPInstr>(ProgramWords);
+		};
 
 		enum HostRegister : uint16_t
 		{
@@ -36,23 +39,9 @@ namespace lspLib
 			: m_runtime(new LSPRuntime())
 			, m_program(new LSPProgram())
 			, m_jit(new LSPJIT(*m_program, *m_runtime))
+			, m_compiler([this](const Snapshot& _s) { return m_jit->compile(_s.instr.data()); },
+				[this] { return chips::pollHostBackend(*m_jit); })
 		{
-			m_reqCache.resize(ProgramWords);
-			m_workCache.resize(ProgramWords);
-			// Only a back end whose compile() blocks needs the worker (../jitHost.h).
-			if(LSPJIT::Compile == chips::JitCompile::Worker)
-				m_worker = std::thread([this] { workerLoop(); });
-		}
-
-		~LSPDispatcher()
-		{
-			{
-				std::lock_guard<std::mutex> lk(m_mx);
-				m_exit = true;
-			}
-			m_cv.notify_one();
-			if(m_worker.joinable())
-				m_worker.join();
 		}
 
 		LSPDispatcher(const LSPDispatcher&) = delete;
@@ -195,108 +184,25 @@ namespace lspLib
 			}
 		}
 
-		// ---- background compile ----
-		// m_canJit / m_compileInFlight / m_kickGen are audio-thread-only; the
-		// request cache and generation are exchanged under m_mx; the worker
-		// compiles from its private copy while the audio thread keeps
-		// patching the live tables and runs the interpreter until the
-		// release/acquire handshake on m_done publishes the fresh code.
-		void workerLoop()
+		void fillSnapshot(Snapshot& _snapshot) const
 		{
-			std::unique_lock<std::mutex> lk(m_mx);
-			uint64_t lastGen = 0;
-			for(;;)
-			{
-				m_cv.wait(lk, [&] { return m_exit || m_reqGen != lastGen; });
-				if(m_exit)
-					return;
-				const uint64_t gen = m_reqGen;
-				std::memcpy(m_workCache.data(), m_reqCache.data(), sizeof(LSPInstr) * ProgramWords);
-				lk.unlock();
-
-				bool ok = false;
-				try { ok = m_jit->compile(m_workCache.data()); }
-				catch(...) { ok = false; }
-				lastGen = gen;
-				m_done.store((gen << 1) | (ok ? 1u : 0u), std::memory_order_release);
-
-				lk.lock();
-			}
+			std::memcpy(_snapshot.instr.data(), m_program->instr, sizeof(LSPInstr) * ProgramWords);
 		}
 
-		// The two functions that talk to the back end are templates only so that the branch for
-		// the other kind of back end (../jitHost.h) is never instantiated.
-		template<typename Jit = LSPJIT>
-		void issueRequest()
-		{
-			if constexpr(Jit::Compile == chips::JitCompile::Host)
-			{
-				// The host compiles in its own time; the back end reads the snapshot only
-				// while it emits, which is before submit() returns.
-				Jit& jit = *m_jit;
-				std::memcpy(m_workCache.data(), m_program->instr, sizeof(LSPInstr) * ProgramWords);
-				jit.submit(m_workCache.data());
-				m_reqGenIssued = m_kickGen;
-				return;
-			}
-			{
-				std::lock_guard<std::mutex> lk(m_mx);
-				std::memcpy(m_reqCache.data(), m_program->instr, sizeof(LSPInstr) * ProgramWords);
-				m_reqGen = m_kickGen;
-			}
-			m_cv.notify_one();
-			m_reqGenIssued = m_kickGen;
-		}
-
-		// The program changed: re-decode now (the deterministic switch) and
-		// hand a snapshot to the worker. Kicks during a compile coalesce.
+		// The program changed: re-decode now (the deterministic switch) and compile it in the background.
 		void kickCompile()
 		{
 			if(m_program->tainted())
 				m_program->cacheProgram();
 			m_canJit = false;
-			if(!LSPJIT::Available)
-				return;
-			++m_kickGen;
-			if(m_compileInFlight)
-			{
-				m_rekickPending = true;
-				return;
-			}
-			m_compileInFlight = true;
-			issueRequest();
+			m_compiler.kick([this](Snapshot& _s) { fillSnapshot(_s); });
 		}
 
-		// Adopt a finished compile; only the latest generation flips m_canJit.
-		template<typename Jit = LSPJIT>
 		void pollCompile()
 		{
-			if(!m_compileInFlight)
-				return;
-			if constexpr(Jit::Compile == chips::JitCompile::Host)
-			{
-				// One compile at a time, so what lands is what was issued last.
-				Jit& jit = *m_jit;
-				using State = typename Jit::CompileState;
-				const State state = jit.poll();
-				if(state == State::Pending)
-					return;
-				m_done.store((m_reqGenIssued << 1) | (state == State::Ready ? 1u : 0u), std::memory_order_release);
-			}
-			const uint64_t done = m_done.load(std::memory_order_acquire);
-			if((done >> 1) != m_reqGenIssued)
-				return;
-			if(m_rekickPending)
-			{
-				m_rekickPending = false;
-				issueRequest();
-				return;
-			}
-			if((done >> 1) == m_kickGen)
-			{
-				m_compileInFlight = false;
-				m_canJit = (done & 1) != 0;
-			}
+			bool ok = false;
+			if(m_compiler.poll([this](Snapshot& _s) { fillSnapshot(_s); }, ok))
+				m_canJit = ok;
 		}
 
 		bool     m_canJit = false;
@@ -309,17 +215,7 @@ namespace lspLib
 		std::unique_ptr<LSPProgram> m_program;
 		std::unique_ptr<LSPJIT>     m_jit;
 
-		std::vector<LSPInstr>   m_reqCache;
-		std::vector<LSPInstr>   m_workCache;
-		uint64_t                m_kickGen = 0;
-		uint64_t                m_reqGenIssued = 0;
-		bool                    m_rekickPending = false;
-		uint64_t                m_reqGen = 0;
-		bool                    m_compileInFlight = false;
-		std::atomic<uint64_t>   m_done { 0 };
-		std::mutex              m_mx;
-		std::condition_variable m_cv;
-		bool                    m_exit = false;
-		std::thread             m_worker;
+		// Declared after the back end so that it is destroyed, and its thread joined, first.
+		chips::JitCompileWorker<LSPJIT::Compile, Snapshot> m_compiler;
 	};
 }
