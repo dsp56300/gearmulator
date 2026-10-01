@@ -282,7 +282,10 @@ namespace xpLib
 		}
 
 		const auto target = _voice.ampDestination_1500 & ~rampAcknowledge;
-		if (pending && curve != 3)
+		// A held ramp leaves its destination pending. The firmware holds the ramp, rewrites current and destination,
+		// then releases it with the new curve; the linear step must come from that final state.
+		const auto held = (_voice.ampRamp_1a00 & rampHold) != 0;
+		if (pending && curve != 3 && !held)
 		{
 			_voice.ampDestination_1500 |= rampAcknowledge;
 			if (curve == 1)
@@ -291,7 +294,7 @@ namespace xpLib
 				return;
 			}
 		}
-		if ((_voice.ampRamp_1a00 & rampHold) != 0 || !tickDue(_voice.ampRamp_1a00, ampCounter))
+		if (held || !tickDue(_voice.ampRamp_1a00, ampCounter))
 			return;
 
 		if (curve == 0)
@@ -408,8 +411,9 @@ namespace xpLib
 		const auto partnerMode =
 			static_cast<unsigned>((_owner.filterConfig_2000 & FilterConfig::pairedSecondModeMask) >> 8);
 		const auto booster = static_cast<unsigned>((_owner.filterConfig_2000 & FilterConfig::boosterMask) >> 6);
-		const auto add16 = [](const int32_t _a, const int32_t _b)
-		{ return saturateSigned16(static_cast<int64_t>(_a) + _b); };
+		// The pair sum stays in the signed-24 signal domain; only the booster and the ring modulator clip to 16 bits.
+		const auto add24 = [](const int32_t _a, const int32_t _b)
+		{ return saturateSigned24(static_cast<int64_t>(_a) + _b); };
 		const auto boost16 = [booster](const int32_t _value)
 		{ return saturateSigned16(static_cast<int64_t>(_value) << booster); };
 		const auto ring = [](const int32_t _modulator, const int32_t _carrier)
@@ -428,27 +432,27 @@ namespace xpLib
 		switch (structure)
 		{
 		case 2:
-			output = filterPartner(filterOwner(add16(applyTva(_owner, _ownerInput), _partnerInput)));
+			output = filterPartner(filterOwner(add24(applyTva(_owner, _ownerInput), _partnerInput)));
 			break;
 		case 3:
-			output = filterPartner(boost16(filterOwner(add16(applyTva(_owner, _ownerInput), _partnerInput))));
+			output = filterPartner(boost16(filterOwner(add24(applyTva(_owner, _ownerInput), _partnerInput))));
 			break;
 		case 4:
-			output = filterPartner(filterOwner(boost16(add16(applyTva(_owner, _ownerInput), _partnerInput))));
+			output = filterPartner(filterOwner(boost16(add24(applyTva(_owner, _ownerInput), _partnerInput))));
 			break;
 		case 5:
 			output = filterPartner(filterOwner(ring(applyTva(_owner, _ownerInput), _partnerInput)));
 			break;
 		case 6:
 			output =
-				filterPartner(filterOwner(add16(ring(applyTva(_owner, _ownerInput), _partnerInput), _partnerInput)));
+				filterPartner(filterOwner(add24(ring(applyTva(_owner, _ownerInput), _partnerInput), _partnerInput)));
 			break;
 		case 7:
 			output = filterPartner(ring(applyTva(_owner, filterOwner(_ownerInput)), _partnerInput));
 			break;
 		case 8:
 			output =
-				filterPartner(add16(ring(applyTva(_owner, filterOwner(_ownerInput)), _partnerInput), _partnerInput));
+				filterPartner(add24(ring(applyTva(_owner, filterOwner(_ownerInput)), _partnerInput), _partnerInput));
 			break;
 		case 9:
 			output = ring(applyTva(_owner, filterOwner(_ownerInput)), filterPartner(_partnerInput));
@@ -456,7 +460,7 @@ namespace xpLib
 		case 10:
 			{
 				const auto filteredPartner = filterPartner(_partnerInput);
-				output = add16(ring(applyTva(_owner, filterOwner(_ownerInput)), filteredPartner), filteredPartner);
+				output = add24(ring(applyTva(_owner, filterOwner(_ownerInput)), filteredPartner), filteredPartner);
 				break;
 			}
 		default:
