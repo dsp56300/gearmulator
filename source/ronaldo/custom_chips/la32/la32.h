@@ -76,7 +76,6 @@ namespace la32Lib
 		std::array<uint32_t, 2> rampCounter{};	// 26 bits each, level in [25:18]
 		uint32_t phase = 0;						// 26 bits; PCM sample position is phase >> 8
 		std::array<bool, 2> pcmEnded{};			// a one-shot read ran past its window and is muted
-		std::array<bool, 2> pcmEventPending{};	// its boundary event still waits for the interrupt latch
 	};
 
 	struct Voice
@@ -136,16 +135,32 @@ namespace la32Lib
 		void setPcmRom(std::vector<uint8_t> _rom);
 		void setPcmRom(const uint8_t* _data, size_t _size);
 		void setRomAddressXor(uint32_t _mask);
+		// The address range the PCM ROM answers on; reads outside it return _openBus (the D-550
+		// maps its 512 KiB ROM at 40000-BFFFF and its pulled-up bus reads FFFF there, a full-scale
+		// negative sample).
+		void setRomWindow(uint32_t _base, uint32_t _size, uint16_t _openBus = 0xffff);
 		void setIrqCallback(IrqCallback _callback);
 
 		uint8_t read(uint32_t _offset) const;
-		void write(uint32_t _offset, uint8_t _data);
+		// A high-byte write commits the word and acknowledges INT: the line drops at cycle
+		// _lineCycle of the current frame (32 and above: the next frame) and the event latch is
+		// free again from _guardCycle on; (0, 0) is immediate. A negative line cycle leaves the
+		// acknowledge to a separate acknowledgeIrq() call by a host that knows the access time.
+		void write(uint32_t _offset, uint8_t _data, int32_t _lineCycle = 0, uint32_t _guardCycle = 0);
+		void acknowledgeIrq(uint32_t _lineCycle = 0, uint32_t _guardCycle = 0);
+		// A write from the CPU while the frame is being stepped slot by slot (the board runs the
+		// CPU for slot k's time before stepSlot() computes slot k): the word is seen from the
+		// next cycle on, except that one written during cycle 31 is not seen by cycle 0 of the
+		// next frame but from cycle 1; INT drops on the next cycle and the event latch stays
+		// taken for three (measured on the D-550 bus).
+		void writeFromBus(uint32_t _offset, uint8_t _data);
+		uint32_t cycle() const { return m_cycle; }
 		void stepSlot();
 		Outputs currentOutput() const;
 		Outputs renderSample();
 
 		uint8_t sh3() const { return static_cast<uint8_t>((m_cycle >> 4) & 1); }
-		bool irqPending() const { return m_irqPending; }
+		bool irqPending() const { return m_irqLine; }
 		const Config& config() const { return m_config; }
 		const Voice& voice(const unsigned _slot) const { return m_voices[_slot & 31]; }
 		const ModulationGroup& modulationGroup(const unsigned _group) const { return m_modulation[_group & 3]; }
@@ -169,13 +184,17 @@ namespace la32Lib
 		int32_t mixWaves(uint32_t _w1, uint32_t _w2, bool _ring);
 		void addToBus(int32_t _value, uint8_t _pan, uint8_t _pair);
 		PcmSample readSample(uint32_t _address, bool _muted) const;
-		void queuePcmEvent(VoiceState& _state);
+		void queuePcmEvent(bool _ended1, bool _ended2);
 		uint8_t readPcm(uint32_t _address) const;
 		void setIrq(bool _state);
+		void commitWord(uint32_t _offset, uint16_t _word);
 
 		std::vector<uint8_t> m_pcmRom;
 		IrqCallback m_irqCallback;
 		uint32_t m_romAddressXor = 0;
+		uint32_t m_romWindowBase = 0;
+		uint32_t m_romWindowSize = 0;		// 0: the ROM mirrors over the whole address space
+		uint16_t m_romOpenBus = 0xffff;
 
 		std::array<Voice, 32> m_voices{};
 		std::array<ModulationGroup, 4> m_modulation{};
@@ -183,12 +202,24 @@ namespace la32Lib
 
 		uint32_t m_cycle = 0;				// the slot being computed, 0-31
 		uint8_t m_lowByteLatch = 0;			// the low byte of the word being written
+		struct PendingWrite
+		{
+			uint32_t offset;
+			uint16_t word;
+			uint8_t slotsToGo;	// stepSlot() calls before the word is seen
+		};
+		std::array<PendingWrite, 8> m_pendingWrites{};
+		size_t m_pendingWriteCount = 0;
 		uint8_t m_inactiveHistory = 0;		// active flags of the last eight slots, bit 0 = current
 		int32_t m_prevOutput = 0;			// the previous slot's output, for ring modulation
 		std::array<uint16_t, 3> m_groupMod{};	// the current group's smoothed r5 words, latched
 		Outputs m_summing{};				// the frame being summed
 		Outputs m_finished{};				// the last completed frame
-		bool m_irqPending = false;
+		bool m_irqLine = false;		// the INT pin
+		bool m_irqPending = false;	// the event latch is taken (stays set a few cycles past the line release)
+		bool m_ackPending = false;	// an acknowledge waits for m_ackCycle
+		uint32_t m_ackCycle = 0;
+		uint32_t m_ackLineCycle = 0;
 		uint8_t m_irqStatus = 0;
 	};
 }

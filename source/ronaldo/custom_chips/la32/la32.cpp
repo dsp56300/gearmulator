@@ -28,6 +28,7 @@
 #include "la32.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <utility>
 
@@ -132,6 +133,11 @@ void LA32::reset()
 	m_summing.fill(0);
 	m_finished.fill(0);
 	m_irqStatus = 0;
+	m_pendingWriteCount = 0;
+	m_ackPending = false;
+	m_ackCycle = 0;
+	m_ackLineCycle = 0;
+	m_irqPending = false;
 	setIrq(false);
 }
 
@@ -155,16 +161,28 @@ void LA32::setIrqCallback(IrqCallback _callback)
 	m_irqCallback = std::move(_callback);
 }
 
+void LA32::setRomWindow(const uint32_t _base, const uint32_t _size, const uint16_t _openBus)
+{
+	m_romWindowBase = _base;
+	m_romWindowSize = _size;
+	m_romOpenBus = _openBus;
+}
+
 uint8_t LA32::readPcm(const uint32_t _address) const
 {
+	if (m_romWindowSize && (_address - m_romWindowBase) >= m_romWindowSize)
+		return static_cast<uint8_t>((_address & 1) ? m_romOpenBus : m_romOpenBus >> 8);
 	if (m_pcmRom.empty())
 		return 0xff;
 	return m_pcmRom[(_address ^ m_romAddressXor) % m_pcmRom.size()];
 }
 
+// Drives the INT line; m_irqPending (the latch guard) is kept by the callers.
 void LA32::setIrq(const bool _state)
 {
-	m_irqPending = _state;
+	if (m_irqLine == _state)
+		return;
+	m_irqLine = _state;
 	if (m_irqCallback)
 		m_irqCallback(_state);
 }
@@ -193,7 +211,7 @@ LA32::Outputs LA32::renderSample()
 // Address bits [8:6] select a register block, [5:1] the slot and [0] the byte half. The low
 // byte is latched, the high byte commits the word and acknowledges the interrupt. Block 7 is
 // the four control bytes, block 6 exists on the bus but stores nothing.
-void LA32::write(const uint32_t _offset, const uint8_t _data)
+void LA32::write(const uint32_t _offset, const uint8_t _data, const int32_t _lineCycle, const uint32_t _guardCycle)
 {
 	if ((_offset & 0x1c0) == 0x1c0)
 	{
@@ -207,17 +225,56 @@ void LA32::write(const uint32_t _offset, const uint8_t _data)
 		return;
 	}
 
+	commitWord(_offset, static_cast<uint16_t>((_data << 8) | m_lowByteLatch));
+
+	if (_lineCycle >= 0)
+		acknowledgeIrq(static_cast<uint32_t>(_lineCycle), _guardCycle);
+}
+
+void LA32::commitWord(const uint32_t _offset, const uint16_t _word)
+{
 	const uint32_t reg = (_offset >> 6) & 7;
 	const uint32_t slot = (_offset >> 1) & 31;
-	const auto word = static_cast<uint16_t>((_data << 8) | m_lowByteLatch);
-
 	if (reg < 5)
-		unpackVoiceRegister(m_voices[slot].regs, reg, word);
+		unpackVoiceRegister(m_voices[slot].regs, reg, _word);
 	else if (reg == 5)
-		writeModulationWord(slot, word);
+		writeModulationWord(slot, _word);
+}
 
-	if (m_irqPending)
+void LA32::writeFromBus(const uint32_t _offset, const uint8_t _data)
+{
+	if ((_offset & 0x1c0) == 0x1c0 || (_offset & 1) == 0)
+	{
+		write(_offset, _data);
+		return;
+	}
+	// The CPU slice for slot k runs before stepSlot() computes slot k: the word must not be seen
+	// by that step but by the next one, or the one after when cycle 31 is being written.
+	const uint8_t slotsToGo = m_cycle == 31 ? 3 : 2;
+	if (m_pendingWriteCount < m_pendingWrites.size())
+		m_pendingWrites[m_pendingWriteCount++] = {_offset, static_cast<uint16_t>((_data << 8) | m_lowByteLatch), slotsToGo};
+	else
+		commitWord(_offset, static_cast<uint16_t>((_data << 8) | m_lowByteLatch));
+	acknowledgeIrq(m_cycle + 1, m_cycle + 3);
+}
+
+// Measured on the D-550 bus: INT drops about 1.3 cycles after the access, and a slot evaluated
+// within about 3.85 cycles of the access still finds the latch taken (the companion of a slot
+// written at cycle 5.1 re-presents its event at cycle 8, one written at cycle 5.2 waits a frame).
+void LA32::acknowledgeIrq(const uint32_t _lineCycle, const uint32_t _guardCycle)
+{
+	if (!m_irqPending)
+		return;
+	if (_lineCycle == 0 && _guardCycle == 0)
+	{
+		m_ackPending = false;
+		m_irqPending = false;
 		setIrq(false);
+		return;
+	}
+	m_ackPending = true;
+	m_ackLineCycle = _lineCycle;
+	m_ackCycle = std::max(_guardCycle, _lineCycle);
 }
 
 uint8_t LA32::read(const uint32_t _offset) const
@@ -335,6 +392,14 @@ uint16_t LA32::packVoiceRegister(const VoiceRegisters& _regs, const unsigned _re
 static int32_t mul14x8(const int32_t _a, const int32_t _b)
 {
 	return signExtend(static_cast<uint32_t>(_a), 14) * signExtend(static_cast<uint32_t>(_b), 8);
+}
+
+// The same multiplier with both operands taken as magnitudes: a 14-bit position times an 8-bit
+// factor (the decay factor reaches 128 in the second segment, which a signed byte cannot hold).
+static uint32_t mul14x8u(const uint32_t _a, const uint32_t _b)
+{
+	assert(_a < (1u << 14) && _b < (1u << 8));
+	return _a * _b;
 }
 
 // 2^(v/4096) scaled by 8, in 26 bits: a 4-bit integer part over a 12-bit fraction, the
@@ -509,17 +574,15 @@ static uint32_t pcmAddress(const uint32_t _ph, const uint32_t _page, const uint3
 	return address;
 }
 
-// The page counter running past a one-shot's window ends the read: it goes silent and its
-// boundary event is queued. Returns whether the read is muted.
-static bool advanceWindow(const uint32_t _ph, const uint32_t _pageMask, const bool _loop, bool& _ended, bool& _eventPending)
+// The page counter running past a one-shot's window ends the read: it goes silent. Returns
+// whether the read is muted.
+static bool advanceWindow(const uint32_t _ph, const uint32_t _pageMask, const bool _loop, bool& _ended)
 {
-	const bool boundary = ((_ph >> 11) & _pageMask) != 0 && !_loop;
-	if (boundary && !_ended)
-	{
+	if (((_ph >> 11) & _pageMask) != 0 && !_loop)
 		_ended = true;
-		_eventPending = true;
-	}
-	return _ended;
+	// Measured on the D-550: the read resumes as soon as the firmware sets the loop bit, and the
+	// muted state is the interrupt condition (it is presented again after every acknowledge).
+	return _ended && !_loop;
 }
 
 struct PcmSample
@@ -544,22 +607,15 @@ PcmSample LA32::readSample(const uint32_t _address, const bool _muted) const
 	return sample;
 }
 
-// Hands one pending PCM boundary event to the interrupt latch when it is free, read 1 first.
-// The status carries the slot number plus one: the address pipeline runs a slot behind.
-void LA32::queuePcmEvent(VoiceState& _state)
+// Presents an ended one-shot read to the interrupt latch when it is free, read 1 first. The
+// status carries the slot number plus one (the address pipeline runs a slot behind), bit 5 for
+// read 2 and bit 6 for every event; ramp events add bit 7 (D-550 host port readings).
+void LA32::queuePcmEvent(const bool _ended1, const bool _ended2)
 {
-	if (m_irqPending || !(_state.pcmEventPending[0] || _state.pcmEventPending[1]))
+	if (m_irqPending || !(_ended1 || _ended2))
 		return;
-	if (_state.pcmEventPending[0])
-	{
-		_state.pcmEventPending[0] = false;
-		m_irqStatus = (m_cycle + 1) & 31;
-	}
-	else
-	{
-		_state.pcmEventPending[1] = false;
-		m_irqStatus = ((m_cycle + 1) & 31) | 0x20;
-	}
+	m_irqStatus = 0x40 | ((m_cycle + 1) & 31) | (_ended1 ? 0 : 0x20);
+	m_irqPending = true;
 	setIrq(true);
 }
 
@@ -634,12 +690,15 @@ int32_t LA32::mixWaves(const uint32_t _w1, const uint32_t _w2, const bool _ring)
 	// The linear values carry five fractional bits; the mixer takes them as 15-bit signed.
 	const int32_t a = signExtend(_w1 >> 5, 15);
 	const int32_t b = signExtend(_w2 >> 5, 15);
-	const int32_t half = (b >> 1) + (a >> 1) + (a & 1);	// the rounded half sum
-
 	if (!_ring)
 	{
-		m_prevOutput = half;
-		return half;
+		// The D-550 bus shows the resonant wave added at full width on top of the halved base
+		// wave: the resonant peak measured on the chip is twice the half sum at every resonance
+		// and decay setting (tools/d50/la32_diff.py, cases resmid/resdec/rescut/respw). A ring
+		// slot multiplies with exactly this output: the DAC-bus ring cases with resonance on the
+		// modulator are bit-exact with it and far off with the half sum.
+		m_prevOutput = (a >> 1) + b + (a & 1);
+		return m_prevOutput;
 	}
 
 	// Ring modulation: the previous slot's output times the sum at full width, which the 8-bit
@@ -649,7 +708,7 @@ int32_t LA32::mixWaves(const uint32_t _w1, const uint32_t _w2, const bool _ring)
 	if (full & 0x2000)
 		high |= 128;
 	const int32_t product = (mul14x8(m_prevOutput, high) >> 6) + (mul14x8(m_prevOutput, full & 127) >> 13);
-	m_prevOutput = half;
+	m_prevOutput = full;	// what a following ring slot would see: not measured, two ring slots in a row do not occur
 	return product;
 }
 
@@ -670,7 +729,7 @@ int32_t LA32::computeVoicePcm(Voice& _voice, const uint32_t (&_tv)[2], const uin
 
 	// Read 1
 	uint32_t mask = pageMask(pcm.wave[0].sizeLog2);
-	const bool muted1 = advanceWindow(ph, mask, pcm.wave[0].loop, state.pcmEnded[0], state.pcmEventPending[0]);
+	const bool muted1 = advanceWindow(ph, mask, pcm.wave[0].loop, state.pcmEnded[0]);
 	const uint32_t address1 = pcmAddress(ph, pcm.page[0], mask);
 
 	// Read 2
@@ -684,22 +743,21 @@ int32_t LA32::computeVoicePcm(Voice& _voice, const uint32_t (&_tv)[2], const uin
 		loop2 = pcm.wave[1].loop;
 		page2 = pcm.page[1];
 	}
-	const bool muted2 = advanceWindow(ph, mask, loop2, state.pcmEnded[1], state.pcmEventPending[1]);
+	const bool muted2 = advanceWindow(ph, mask, loop2, state.pcmEnded[1]);
 
-	// A completed one-shot stays silent even after the firmware sets the loop bit to acknowledge
-	// its boundary; the event waits while another event owns the shared interrupt latch.
-	queuePcmEvent(state);
+	queuePcmEvent(muted1, muted2);
 
 	const uint32_t address2 = pcmAddress(ph, page2, mask);
 
-	// The sample gain has no carry-in, so it sits one step below logMul.
+	// The sample gain add carries in like logMul: measured on the D-550 bus, where the
+	// no-carry form left every PCM sample one LSB high.
 	const PcmSample sample1 = readSample(address1, muted1);
-	const Sum14 level1 = add14(sample1.log, gain1, 0);
+	const Sum14 level1 = add14(sample1.log, gain1, 1);
 	const bool quiet1 = tooQuietForSign(level1) && interpolate;
 	const uint32_t w1 = toLinear(gated(level1), !quiet1 && (_signFlip ^ sample1.negative));
 
 	const PcmSample sample2 = readSample(address2, muted2);
-	const Sum14 level2 = add14(sample2.log, interpolate ? gain1 : gain2, 0);
+	const Sum14 level2 = add14(sample2.log, interpolate ? gain1 : gain2, 1);
 	const bool quiet2 = tooQuietForSign(level2);
 	const uint32_t w2 = toLinear(gated(level2), !quiet2 && (_signFlip ^ sample2.negative));
 
@@ -815,11 +873,18 @@ int32_t LA32::computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_t
 
 	// The resonant peak decays along the cycle: the decay factor selected by the register times
 	// the segment's ramp position, complemented into a log attenuation.
+	// Measured on the D-550: both segments ring from their own start with the same law, the
+	// second one one factor step slower (as Munt also found on MT-32 captures); the factor is a
+	// magnitude, so 128 is a legal value for it.
 	static const uint32_t decayFactors[] = {127, 64, 48, 32, 20, 12, 8, 4};
 	uint32_t decayFactor = decayFactors[synth.resonanceDecay];
 	if (secondSegment)
-		decayFactor ^= 255;
+		++decayFactor;
 
+	// Measured on the D-550: the second segment's position is the complement of the first's
+	// plus one, and the products are taken at 14-bit position width (the first segment's
+	// position doubled to match). Fitted on resonance 16-31 x decay 0-7 x cutoff 40-F4 x pulse
+	// width 00-F0 sweeps, exact apart from the frames before the first target is reached.
 	uint32_t decayPosition = 0;
 	if (secondSegment)
 	{
@@ -829,6 +894,7 @@ int32_t LA32::computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_t
 		const bool overflowed = !(sameSign && !resB.carry18);
 		const bool useUpper = overflowed && (high & 0x800) != 0;
 		decayPosition |= (useUpper ? (resB.sum18 >> 14) & 15 : 0) << 9;
+		decayPosition = (((~decayPosition) & 0x1fff) + 1) << 1;
 	}
 	else
 	{
@@ -836,11 +902,12 @@ int32_t LA32::computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_t
 		const uint32_t high = (resA.productHigh >> 8) & 0xffff;
 		const bool inRange = !(resA.carry18 || (high & 0x800) != 0);
 		decayPosition |= (inRange ? (resA.sum18 >> 14) & 15 : 15) << 9;
+		decayPosition <<= 1;
 	}
 
-	const int32_t decayProduct = mul14x8(decayPosition, decayFactor);
-	const bool decaySmall = (decayProduct >> 15) == 0;
-	const uint32_t decayInverse = negated((static_cast<uint32_t>(decayProduct) >> 1) & 0x3fff, 14);
+	const int32_t decayProduct = static_cast<int32_t>(mul14x8u(decayPosition & 0x3fff, decayFactor));
+	const bool decaySmall = (decayProduct >> 16) == 0;
+	const uint32_t decayInverse = negated(((static_cast<uint32_t>(decayProduct) + 1) >> 2) & 0x3fff, 14);
 	uint32_t decayAttenuation = decayInverse & 0x3ff;
 	if (decaySmall)
 		decayAttenuation |= decayInverse & 0x3c00;
@@ -863,7 +930,7 @@ int32_t LA32::computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_t
 void LA32::addToBus(const int32_t _value, const uint8_t _pan, const uint8_t _pair)
 {
 	const int32_t left = mul14x8(_value, (_pan * 73) >> 2);
-	m_summing[_pair] += left >> 7;
+	m_summing[_pair] += (left + 0x40) >> 7;	// rounded to nearest, as measured on the D-550 bus
 
 	if (_pan == 7)
 		return;
@@ -917,7 +984,11 @@ RampStep LA32::stepRamp(const Ramp& _ramp, uint32_t& _counter, const bool _inact
 
 	const bool reached = !_inactive && !hold && stop;
 
-	uint32_t result = sum & 0xffff;
+	// Measured on the D-550 bus: a ramp held with rate 0 after reaching its target sits exactly
+	// at the target level, so the fraction is cleared when the target is reached. While the
+	// partial is inactive the fraction keeps counting at the current rate: after clearing it, a
+	// partial re-activated N frames later carries exactly N * step (mod 2^16) into its attack.
+	uint32_t result = reached ? 0 : sum & 0xffff;
 	if (!reached && !_inactive)
 		result |= sum & 0x3ff0000;
 	if (_inactive)
@@ -935,6 +1006,31 @@ RampStep LA32::stepRamp(const Ramp& _ramp, uint32_t& _counter, const bool _inact
 
 void LA32::updateSlot()
 {
+	if (m_pendingWriteCount)
+	{
+		size_t kept = 0;
+		for (size_t i = 0; i < m_pendingWriteCount; ++i)
+		{
+			auto& pending = m_pendingWrites[i];
+			if (--pending.slotsToGo == 0)
+				commitWord(pending.offset, pending.word);
+			else
+				m_pendingWrites[kept++] = pending;
+		}
+		m_pendingWriteCount = kept;
+	}
+
+	if (m_ackPending)
+	{
+		if (m_cycle >= m_ackLineCycle)
+			setIrq(false);
+		if (m_cycle >= m_ackCycle)
+		{
+			m_ackPending = false;
+			m_irqPending = false;
+		}
+	}
+
 	updateInactive();
 
 	if (m_cycle == 0)
@@ -956,9 +1052,12 @@ void LA32::updateSlot()
 		const RampStep step = stepRamp(regs.ramp[i], state.rampCounter[i], inactive, inactiveLevel);
 		tv_value[i] = step.level;
 
+		// Level-sensitive: a ramp held at its target by a running rate presents its event again
+		// after every acknowledge (D-550 host port), as does its companion slot while active.
 		if (step.reached && !m_irqPending)
 		{
-			m_irqStatus = 0x80 | m_cycle | (i << 5);
+			m_irqStatus = 0xc0 | m_cycle | (i << 5);
+			m_irqPending = true;
 			setIrq(true);
 		}
 	}
@@ -974,7 +1073,6 @@ void LA32::updateSlot()
 	{
 		phase = 0;
 		state.pcmEnded = {};
-		state.pcmEventPending = {};
 	}
 
 	state.phase = phase & 0x3ffffff;
@@ -1004,6 +1102,11 @@ void LA32::updateSlot()
 	}
 
 	m_cycle = (m_cycle + 1) & 31;
+	if (m_cycle == 0 && m_ackPending && m_ackCycle >= 32)
+	{
+		m_ackCycle -= 32;	// an acknowledge timed into the next frame
+		m_ackLineCycle = m_ackLineCycle >= 32 ? m_ackLineCycle - 32 : 0;
+	}
 }
 
 }
