@@ -1,9 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <functional>
-#include <map>
+#include <memory>
 #include <cassert>
 #include <optional>
+#include <vector>
+
+#include "hybridcontainer.h"
 
 namespace baseLib
 {
@@ -17,29 +21,53 @@ namespace baseLib
 
 		static constexpr ListenerId InvalidListenerId = ~0;
 
+		Event() = default;
+
+		// a copy has listeners of its own: removing one from it leaves the original's alone
+		Event(const Event& _source)
+			: m_hasRetainedValue(_source.m_hasRetainedValue)
+			, m_retainedValue(_source.m_retainedValue)
+		{
+			m_listeners.reserve(_source.m_listeners.size());
+			for (const auto& [id, listener] : _source.m_listeners)
+				m_listeners.emplace_back(id, std::make_shared<Listener>(listener->callback));
+		}
+
+		Event(Event&&) noexcept = default;
+
+		Event& operator = (const Event& _source)
+		{
+			if(&_source != this)
+				*this = Event(_source);
+			return *this;
+		}
+
+		Event& operator = (Event&& _source) noexcept
+		{
+			if(&_source == this)
+				return *this;
+			clear();
+			m_listeners = std::move(_source.m_listeners);
+			m_hasRetainedValue = _source.m_hasRetainedValue;
+			m_retainedValue = std::move(_source.m_retainedValue);
+			return *this;
+		}
+
+		~Event() = default;
+
 		ListenerId addListener(const Callback& _callback)
 		{
-			ListenerId id;
-
-			if(m_listeners.empty())
-			{
-				id = 0;
-			}
-			else
-			{
-				id = m_listeners.rbegin()->first + 1;
-
-				// ReSharper disable once CppUseAssociativeContains - wrong, exists in cpp20+ only
-				while(m_listeners.find(id) != m_listeners.end())
-					++id;
-			}
+			// the listeners are sorted by id, the last one has the highest
+			const ListenerId id = m_listeners.empty() ? 0 : m_listeners.back().first + 1;
 			addListener(id, _callback);
 			return id;
 		}
 
 		void addListener(ListenerId _id, const Callback& _callback)
 		{
-			m_listeners.insert(std::make_pair(_id, _callback));
+			const auto it = lowerBound(_id);
+			if(it == m_listeners.end() || it->first != _id)
+				m_listeners.emplace(it, _id, std::make_shared<Listener>(_callback));
 
 			if(m_hasRetainedValue)
 				std::apply(_callback, m_retainedValue);
@@ -47,27 +75,43 @@ namespace baseLib
 
 		void removeListener(const ListenerId _id)
 		{
-			m_listeners.erase(_id);
+			const auto it = lowerBound(_id);
+			if(it == m_listeners.end() || it->first != _id)
+				return;
+			it->second->removed = true;
+			m_listeners.erase(it);
 		}
 
 		std::optional<Callback> getListener(const ListenerId _id) const
 		{
-			const auto it = m_listeners.find(_id);
-			if(it != m_listeners.end())
-				return it->second;
+			const auto it = lowerBound(_id);
+			if(it != m_listeners.end() && it->first == _id)
+				return it->second->callback;
 			return {};
 		}
 
 		void clear()
 		{
+			for (const auto& it : m_listeners)
+				it.second->removed = true;
 			m_listeners.clear();
 		}
 
 		void invoke(const Ts& ..._args) const
 		{
-			auto listeners = m_listeners; // needs to be copied to allow listeners to remove themselves while being invoked
-			for (const auto& it : listeners)
-				it.second(_args...);
+			// A listener may add and remove listeners while it is called, itself too. The ones to call are held here
+			// meanwhile: one added waits for the next invoke, one removed before its turn is not called, it may be gone
+			// with the object it belongs to
+			HybridContainer<std::shared_ptr<Listener>, 8> listeners;
+			listeners.reserve(m_listeners.size(), true);
+			for (const auto& it : m_listeners)
+				listeners.push_back(it.second);
+
+			for (const auto& listener : listeners)
+			{
+				if (!listener->removed)
+					listener->callback(_args...);
+			}
 		}
 
 		void operator ()(const Ts& ..._args) const
@@ -88,7 +132,32 @@ namespace baseLib
 		}
 
 	private:
-		std::map<ListenerId, Callback> m_listeners;
+		struct Listener
+		{
+			explicit Listener(const Callback& _callback) : callback(_callback) {}
+
+			Callback callback;
+			bool removed = false;
+		};
+
+		using Listeners = std::vector<std::pair<ListenerId, std::shared_ptr<Listener>>>;
+
+		typename Listeners::iterator lowerBound(const ListenerId _id)
+		{
+			return std::lower_bound(m_listeners.begin(), m_listeners.end(), _id, isBefore);
+		}
+
+		typename Listeners::const_iterator lowerBound(const ListenerId _id) const
+		{
+			return std::lower_bound(m_listeners.begin(), m_listeners.end(), _id, isBefore);
+		}
+
+		static bool isBefore(const typename Listeners::value_type& _listener, const ListenerId _id)
+		{
+			return _listener.first < _id;
+		}
+
+		Listeners m_listeners;
 
 		bool m_hasRetainedValue = false;
 		MyTuple m_retainedValue;
