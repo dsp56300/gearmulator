@@ -11,72 +11,17 @@ namespace pluginLib
 {
 	namespace
 	{
-		// Detect whether a printf-style format string expects an integer (%d/%i/%u/%x/%X/%o)
-		// or a floating-point value. Used by the synthesised-value-list path to pick the
-		// right snprintf overload when generating display strings from a format spec.
-		bool formatExpectsInt(const std::string& _format)
-		{
-			bool inSpec = false;
-			for (size_t i = 0; i < _format.size(); ++i)
-			{
-				const char c = _format[i];
-				if (!inSpec)
-				{
-					if (c == '%')
-					{
-						if (i + 1 < _format.size() && _format[i + 1] == '%')
-						{
-							++i;
-							continue;
-						}
-						inSpec = true;
-					}
-					continue;
-				}
-				if (c == 'd' || c == 'i' || c == 'u' || c == 'x' || c == 'X' || c == 'o')
-					return true;
-				if (c == 'f' || c == 'F' || c == 'e' || c == 'E' || c == 'g' || c == 'G' || c == 'a' || c == 'A')
-					return false;
-			}
-			return false;
-		}
-
-		std::string formatValue(const std::string& _format, double _value)
-		{
-			char buffer[64];
-			if (formatExpectsInt(_format))
-				std::snprintf(buffer, sizeof(buffer), _format.c_str(), juce::roundToInt(_value));
-			else
-				std::snprintf(buffer, sizeof(buffer), _format.c_str(), _value);
-			return buffer;
-		}
-
-		// Generate a ValueList for a parameter by formatting each integer value in [_min, _max]
-		// via the printf-style _format after computing display = _scale * value + _offset.
-		// Indexing follows Parameter::getText: list[0] corresponds to value = min(0, _min).
+		// A ValueList for a parameter that formats each integer value in [_min, _max] via the printf-style _format
+		// after computing display = _scale * value + _offset, when asked (parametervaluelist.h).
+		// Indexing follows Parameter::getText: index 0 corresponds to value = min(0, _min).
 		ValueList synthesizeValueList(int _min, int _max, const std::string& _format, double _scale, double _offset)
 		{
 			ValueList vl;
-			const int indexBase = std::min(0, _min);
-			const int listSize = _max - indexBase + 1;
-
-			vl.texts.reserve(listSize);
-			vl.order.reserve(listSize);
-
-			for (int i = 0; i < listSize; ++i)
-			{
-				const int value = i + indexBase;
-				const double display = static_cast<double>(value) * _scale + _offset;
-				vl.texts.push_back(formatValue(_format, display));
-				vl.order.push_back(static_cast<ParamValue>(i));
-			}
-
-			for (uint32_t i = 0; i < vl.texts.size(); ++i)
-			{
-				if (vl.textToValueMap.find(vl.texts[i]) == vl.textToValueMap.end())
-					vl.textToValueMap.insert(std::make_pair(vl.texts[i], i));
-			}
-
+			vl.synthesized.format = _format;
+			vl.synthesized.scale = _scale;
+			vl.synthesized.offset = _offset;
+			vl.synthesized.first = std::min(0, _min);
+			vl.synthesized.count = static_cast<uint32_t>(_max - vl.synthesized.first + 1);
 			return vl;
 		}
 	}
