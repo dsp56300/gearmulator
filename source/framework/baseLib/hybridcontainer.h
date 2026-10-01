@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <type_traits>
 #include <algorithm>
+#include <iterator>
 
 namespace baseLib
 {
@@ -13,6 +14,8 @@ namespace baseLib
 	class HybridContainer
 	{
 		static_assert(MaxFixedSize > 0, "MaxFixedSize must be greater than 0");
+
+		template<typename, size_t> friend class HybridContainer;
 
 	public:
 		using Iterator = T*;
@@ -89,6 +92,7 @@ namespace baseLib
 				if (m_size == 0)
 					throw std::out_of_range("Container is empty");
 				--m_size;
+				release(m_size, m_size + 1);
 				return;
 			}
 
@@ -98,26 +102,16 @@ namespace baseLib
 
 		const T& front() const
 		{
-			if (m_useArray)
-			{
-				if (m_size == 0)
-					throw std::out_of_range("Container is empty");
-				return m_array.front();
-			}
-
-			return m_vector.front();
+			if (m_size == 0)
+				throw std::out_of_range("Container is empty");
+			return *begin();
 		}
 
 		const T& back()	const
 		{
-			if (m_useArray)
-			{
-				if (m_size == 0)
-					throw std::out_of_range("Container is empty");
-				return m_array[m_size - 1];
-			}
-
-			return m_vector.back();
+			if (m_size == 0)
+				throw std::out_of_range("Container is empty");
+			return *(end() - 1);
 		}
 
 		bool empty() const
@@ -132,6 +126,9 @@ namespace baseLib
 
 		void clear()
 		{
+			if (m_useArray)
+				release(0, m_size);
+			m_vector.clear();
 			m_size = 0;
 			m_useArray = true;
 		}
@@ -166,7 +163,11 @@ namespace baseLib
 			_other.swap(m_vector);
 
 			if (m_useArray && m_size)
-				_other.assign(m_array.begin(), m_array.begin() + m_size);
+			{
+				_other.assign(std::make_move_iterator(m_array.begin()),
+					std::make_move_iterator(m_array.begin() + m_size));
+				release(0, m_size);
+			}
 
 			m_useArray = false;
 			m_size = m_vector.size();
@@ -206,13 +207,14 @@ namespace baseLib
 			else
 			{
 				std::copy(_data, _data + _size, m_array.begin());
+				release(_size, m_size);
 			}
 			m_size = _size;
 		}
 
-		template<size_t Size> void assign(const std::array<T, Size>& _data) { assign(_data.begin(), _data.end()); }
-		void assign(const std::vector<T>& _data)                            { assign(_data.begin(), _data.end()); }
-		void assign(const std::initializer_list<T>& _data)                  { assign(_data.begin(), _data.end()); }
+		template<size_t Size> void assign(const std::array<T, Size>& _data) { assign(_data.data(), _data.size()); }
+		void assign(const std::vector<T>& _data)                            { assign(_data.data(), _data.size()); }
+		void assign(const std::initializer_list<T>& _data)                  { assign(_data.begin(), _data.size()); }
 		void assign(ConstIterator _first, ConstIterator _last)              { assign(_first, _last - _first); }
 
 		void erase(const ConstIterator _first, const ConstIterator _last)
@@ -225,7 +227,8 @@ namespace baseLib
 
 			if (m_useArray)
 			{
-				std::copy(_last, end(), begin() + offset);
+				std::copy(_last, ConstIterator(end()), begin() + offset);
+				release(m_size - count, m_size);
 				m_size -= count;
 				return;
 			}
@@ -292,7 +295,7 @@ namespace baseLib
 		
 		void reserve(size_t _size, const bool _switchToVectorIfNeeded = false)
 		{
-			if (_size < MaxFixedSize)
+			if (_size <= MaxFixedSize)
 				return;
 
 			if (m_useArray && !_switchToVectorIfNeeded)
@@ -339,47 +342,43 @@ namespace baseLib
 			if (this == &_source)
 				return *this;
 
-			m_size = _source.m_size;
-			m_useArray = _source.m_useArray;
-
-			if (m_useArray)
-				m_array = _source.m_array;
-			else
-				m_vector = _source.m_vector;
+			assign(_source.data(), _source.size());
 
 			return *this;
 		}
 
+		// leaves the source empty, as the move construction does
 		HybridContainer& operator=(HybridContainer&& _source) noexcept
 		{
 			if (this == &_source)
 				return *this;
 
-			m_size = _source.m_size;
-			m_useArray = _source.m_useArray;
+			clear();
 
-			if (m_useArray)
-				m_array = std::move(_source.m_array);
+			if (_source.m_useArray)
+			{
+				std::move(_source.begin(), _source.end(), m_array.begin());
+			}
 			else
+			{
 				m_vector = std::move(_source.m_vector);
+				m_useArray = false;
+			}
+
+			m_size = _source.m_size;
+			_source.clear();
 
 			return *this;
 		}
 
 		template<size_t OtherFixedSize> HybridContainer& operator=(const HybridContainer<T, OtherFixedSize>& _source)
 		{
+			clear();
 			m_size = _source.size();
-
-			if(_source.empty())
-			{
-				m_useArray = true;
-				return *this;
-			}
 
 			if(m_size <= MaxFixedSize)
 			{
 				std::copy(_source.begin(), _source.end(), m_array.begin());
-				m_useArray = true;
 			}
 			else
 			{
@@ -392,11 +391,11 @@ namespace baseLib
 
 		template<size_t OtherFixedSize> HybridContainer& operator=(HybridContainer<T, OtherFixedSize>&& _source)
 		{
+			clear();
 			m_size = _source.size();
 
 			if(!m_size)
 			{
-				m_useArray = true;
 				_source.clear();
 				return *this;
 			}
@@ -404,7 +403,6 @@ namespace baseLib
 			if(m_size <= MaxFixedSize)
 			{
 				std::move(_source.begin(), _source.end(), m_array.begin());
-				m_useArray = true;
 			}
 			else if(!_source.m_useArray)
 			{
@@ -451,13 +449,15 @@ namespace baseLib
 
 		void resize(size_t _size)
 		{
-			if (_size <= MaxFixedSize)
+			if (m_useArray && _size <= MaxFixedSize)
 			{
 				for (size_t i=m_size; i<_size; ++i)
 					m_array[i] = T();
+				release(_size, m_size);
 				m_size = _size;
 				return;
 			}
+			switchToVector();
 			m_vector.resize(_size);
 			m_size = _size;
 		}
@@ -468,7 +468,19 @@ namespace baseLib
 			if (!m_useArray)
 				return;
 			m_useArray = false;
-			m_vector.assign(m_array.begin(), m_array.begin() + m_size);
+			m_vector.assign(std::make_move_iterator(m_array.begin()),
+				std::make_move_iterator(m_array.begin() + m_size));
+			release(0, m_size);
+		}
+
+		// the array keeps its elements, one it no longer holds lets go of what it owns
+		void release(const size_t _first, const size_t _last)
+		{
+			if constexpr (!std::is_trivially_destructible_v<T>)
+			{
+				for (size_t i=_first; i<_last; ++i)
+					m_array[i] = T();
+			}
 		}
 
 		std::array<T, MaxFixedSize> m_array;
