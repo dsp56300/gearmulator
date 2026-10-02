@@ -112,7 +112,7 @@ namespace emu88Lib
 			        0x40000, {0x100000, 0x100000, 0x100000}, {0, 1, 2}, 0};
 		case DeviceModel::Sc55St:
 			return {Sc55Generation::Mk2, Sc55MidiFrontend::SubMcu, Sc55Panel::None,
-			        0x80000, {0x200000, 0x100000, 0}, {0, 1, 0}, 2};
+			        0x40000, {0x200000, 0x100000, 0}, {0, 1, 0}, 2};
 		case DeviceModel::Sc155Mk2:
 			return {Sc55Generation::Mk2, Sc55MidiFrontend::SubMcu, Sc55Panel::Sc155,
 			        0x80000, {0x200000, 0x100000, 0}, {0, 1, 0}, 0};

@@ -105,7 +105,7 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | CM-64 | the CM-32L's and the CM-32P's sets together | |
 | SC-55 | `sc55mk1_internal.bin` — 32 KiB; `sc55mk1_program.bin` — 256 KiB | `sc55mk1_wave0.bin` — 1 MiB; `sc55mk1_wave1.bin` — 1 MiB; `sc55mk1_wave2.bin` — 1 MiB |
 | SC-55mkII | `sc55mk2_internal.bin` — 32 KiB; `sc55mk2_program.bin` — 512 KiB | `sc55mk2_wave0.bin` — 2 MiB; `sc55mk2_wave1.bin` — 1 MiB |
-| SC-55st | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 512 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
+| SC-55st | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 256 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
 | CM-300 / SCC-1 | `cm300_internal.bin` — 32 KiB; `cm300_program.bin` — 256 KiB | `cm300_wave0.bin` — 1 MiB; `cm300_wave1.bin` — 1 MiB; `cm300_wave2.bin` — 1 MiB |
 | SC-155 | `sc155_internal.bin` — 32 KiB; `sc155_program.bin` — 256 KiB | `sc155_wave0.bin` — 1 MiB; `sc155_wave1.bin` — 1 MiB; `sc155_wave2.bin` — 1 MiB |
 | SC-155mkII | `sc155mk2_internal.bin` — 32 KiB; `sc155mk2_program.bin` — 512 KiB | `sc155mk2_wave0.bin` — 2 MiB; `sc155mk2_wave1.bin` — 1 MiB |
