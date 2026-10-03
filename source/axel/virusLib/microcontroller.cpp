@@ -668,7 +668,7 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		const uint8_t channel = _part == SINGLE ? 0 : _part;
 
 		for (const auto cc : g_pageA)	 _responses.emplace_back(MidiEventSource::Device, M_CONTROLCHANGE + channel, cc, single[cc], 0);
-		for (const auto cc : g_pageB)	 _responses.emplace_back(MidiEventSource::Device, M_POLYPRESSURE, cc, single[cc + 128], 0);
+		for (const auto cc : g_pageB)	 _responses.emplace_back(MidiEventSource::Device, M_POLYPRESSURE + channel, cc, single[cc + 128], 0);
 	};
 
 	auto enqueue = [&]
