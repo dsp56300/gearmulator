@@ -185,6 +185,7 @@ namespace pluginLib
 		try
 		{
 			m_device.reset(createDevice());
+			m_deviceVoiceExpansion = m_voiceExpansion;
 			if(!m_device->isValid())
 				throw synthLib::DeviceException(synthLib::DeviceError::Unknown, "Device initialization failed");
 		}
@@ -334,9 +335,11 @@ namespace pluginLib
 
 		const auto result = _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
 
+		// Compare with the device, not with the setting before the load: REMO creates a remote device while reading,
+		// with the setting read so far. Without a device yet, the one created later gets the setting anyway
 		if (!result)
 			m_voiceExpansion = voiceExpansion;
-		else if (m_voiceExpansion != voiceExpansion)
+		else if (m_plugin && m_voiceExpansion != m_deviceVoiceExpansion)
 			rebootDevice();
 
 		return result;
@@ -344,6 +347,13 @@ namespace pluginLib
 
 	void Processor::saveChunkData(baseLib::BinaryStream& s)
 	{
+		// before REMO: reading REMO creates the remote device, which has to get the voice expansion right away
+		if (m_voiceExpansion)
+		{
+			baseLib::ChunkWriter cw(s, "VEXP", 1);
+			s.write<uint8_t>(1);
+		}
+
 		// it is important that this is stored before other chunks to restore state to the remote properly
 		if (m_deviceType == DeviceType::Remote)
 		{
@@ -351,12 +361,6 @@ namespace pluginLib
 			s.write(static_cast<int32_t>(m_deviceType));
 			s.write(m_remoteHost);
 			s.write(m_remotePort);
-		}
-
-		if (m_voiceExpansion)
-		{
-			baseLib::ChunkWriter cw(s, "VEXP", 1);
-			s.write<uint8_t>(1);
 		}
 
 		{
@@ -651,6 +655,7 @@ namespace pluginLib
 				getPlugin().setDevice(dev);
 				(void)m_device.release();
 				m_device.reset(dev);
+				m_deviceVoiceExpansion = m_voiceExpansion;
 				m_deviceType = _type;
 			}
 		}
@@ -1285,6 +1290,7 @@ namespace pluginLib
 				if(newDevice && newDevice->isValid())
 				{
 					m_device.reset(newDevice);
+					m_deviceVoiceExpansion = m_voiceExpansion;
 					return newDevice;
 				}
 			}
@@ -1342,6 +1348,7 @@ namespace pluginLib
 			plugin.setDevice(device);
 			(void)m_device.release();
 			m_device.reset(device);
+			m_deviceVoiceExpansion = m_voiceExpansion;
 
 			// The same resync a DAW restore performs: the editor is talking to a
 			// device that just came up fresh, so it has to re-read it.

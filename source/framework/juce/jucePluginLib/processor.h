@@ -297,6 +297,7 @@ namespace pluginLib
 		float m_inputGain = 1.0f;
 		uint32_t m_dspClockPercent = 100;
 		bool m_voiceExpansion = false;
+		bool m_deviceVoiceExpansion = false;	// the voice expansion the current device was created with
 		float m_preferredDeviceSamplerate = 0.0f;
 		synthLib::Resampler::Mode m_resamplerMode = synthLib::Resampler::Mode::MameHq;
 		float m_hostSamplerate = 0.0f;
