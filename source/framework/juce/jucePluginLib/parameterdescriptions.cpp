@@ -26,9 +26,10 @@ namespace pluginLib
 		}
 	}
 
-	ParameterDescriptions::ParameterDescriptions(const std::string& _jsonString)
+	ParameterDescriptions::ParameterDescriptions(const std::string& _jsonString,
+		const FormatterFactory& _formatterFactory)
 	{
-		m_errors = loadJson(_jsonString);
+		m_errors = loadJson(_jsonString, _formatterFactory);
 	}
 
 	const MidiPacket* ParameterDescriptions::getMidiPacket(const std::string& _name) const
@@ -80,7 +81,8 @@ namespace pluginLib
 		return &it->second;
 	}
 
-	std::string ParameterDescriptions::loadJson(const std::string& _jsonString)
+	std::string ParameterDescriptions::loadJson(const std::string& _jsonString,
+		const FormatterFactory& _formatterFactory)
 	{
 		// juce' JSON parser doesn't like JSON5-style comments
 		const auto jsonString = removeComments(_jsonString);
@@ -218,16 +220,33 @@ namespace pluginLib
 				continue;
 			}
 
-			// toText accepts two forms:
+			// toText accepts three forms:
 			//   "toText": "name"                                          - look up a named value list
 			//   "toText": {"format": "%.2f s", "scale": 0.01, "offset": 0} - synthesise a list at load time
+			//   "toText": {"formatter": "name", ...}                       - the plugin's code makes the texts
 			const auto toTextVar = readProperty("toText");
 
 			ValueList synthesizedList;
 			const ValueList* selectedList = nullptr;
 			std::string toTextName;
 
-			if (toTextVar.isObject())
+			if (toTextVar.isObject() && toTextVar.getDynamicObject()->hasProperty("formatter"))
+			{
+				const auto formatterName = std::string(toTextVar["formatter"].toString().toUTF8());
+				auto formatter = _formatterFactory ? _formatterFactory(toTextVar, minValue, maxValue) : nullptr;
+
+				if (!formatter)
+				{
+					errors << name << ": no formatter " << formatterName << std::endl;
+					continue;
+				}
+
+				synthesizedList = synthesizeValueList(minValue, maxValue, {}, 1.0, 0.0);
+				synthesizedList.formatter = std::move(formatter);
+				selectedList = &synthesizedList;
+				toTextName = formatterName;
+			}
+			else if (toTextVar.isObject())
 			{
 				auto* obj = toTextVar.getDynamicObject();
 				const auto formatVar = obj->getProperty("format");

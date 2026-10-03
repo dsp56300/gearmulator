@@ -10,6 +10,7 @@ int main()
 	try
 	{
 		testMidiNotifier();
+		testParameterDescriptions();
 		testPatchDb();
 		testSkinVariables();
 

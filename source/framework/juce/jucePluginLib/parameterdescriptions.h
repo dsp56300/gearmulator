@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <memory>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -26,7 +28,12 @@ namespace pluginLib
 	class ParameterDescriptions
 	{
 	public:
-		explicit ParameterDescriptions(const std::string& _jsonString);
+		// The texts of a parameter whose description has "toText": {"formatter": ...}: the plugin's own, made from that
+		// object and the parameter's range. nullptr if the plugin has none for it, which is an error
+		using FormatterFactory = std::function<std::shared_ptr<const ValueFormatter>(const juce::var& _toText, int _min,
+			int _max)>;
+
+		explicit ParameterDescriptions(const std::string& _jsonString, const FormatterFactory& _formatterFactory = {});
 
 		const std::vector<Description>& getDescriptions() const
 		{
@@ -51,7 +58,7 @@ namespace pluginLib
 		const auto& getControllerMap() const { return m_controllerMap; }
 
 	private:
-		std::string loadJson(const std::string& _jsonString);
+		std::string loadJson(const std::string& _jsonString, const FormatterFactory& _formatterFactory);
 
 		std::string parseValueList(const std::string& _key, const juce::var& _values);
 

@@ -57,6 +57,12 @@ namespace pluginLib
 	{
 		if (synthesized.count)
 		{
+			if (formatter)
+			{
+				const auto index = formatter->toValue(_string) - synthesized.first;
+				return static_cast<uint32_t>(std::clamp(index, 0, static_cast<int>(synthesized.count) - 1));
+			}
+
 			// the number at the start of the text, back to the nearest value
 			char* end = nullptr;
 			const auto shown = std::strtod(_string.c_str(), &end);
@@ -77,8 +83,10 @@ namespace pluginLib
 		if (synthesized.count)
 		{
 			const auto index = std::min(_value, synthesized.count - 1);
-			const auto value = static_cast<double>(static_cast<int>(index) + synthesized.first);
-			return formatValue(synthesized.format, value * synthesized.scale + synthesized.offset);
+			const auto value = static_cast<int>(index) + synthesized.first;
+			if (formatter)
+				return formatter->toText(value);
+			return formatValue(synthesized.format, static_cast<double>(value) * synthesized.scale + synthesized.offset);
 		}
 
 		if (_value >= texts.size())

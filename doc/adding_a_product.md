@@ -488,7 +488,7 @@ by plain text search, so never write `//` inside a string.
 
 ### 10.2 Per parameter
 
-`name` (unique), `displayName`, `min`, `max`, `default`, `toText` (value list name), `isPublic`,
+`name` (unique), `displayName`, `min`, `max`, `default`, `toText`, `isPublic`,
 `isDiscrete`, `isBool`, `isBipolar`, `step`, `page` (0-255), `index`, `class` (`Global`,
 `NonPartSensitive`, `MultiOrSingle`, combined with `|`), `version`, `softknobTargetSelect` with
 `softknobTargetList`.
@@ -500,6 +500,15 @@ by plain text search, so never write `//` inside a string.
 - JSON order is the description index. Positional C++ tables must follow it: append, never
   insert.
 - A value list shorter than `max - min + 1` logs an error but keeps the parameter.
+
+`toText` takes three forms:
+
+- a value list's name;
+- `{"format": "%.1f dB", "scale": 0.1, "offset": -12}`: each value shown as `value * scale +
+  offset` through printf;
+- `{"formatter": "...", ...}`: the plugin's code makes the texts. The `FormatterFactory` passed to
+  `pluginLib::Controller` gets the whole object and the parameter's range and returns a
+  `ValueFormatter`. Without a factory, or when it returns none, the description is an error.
 
 ### 10.3 The packet DSL
 

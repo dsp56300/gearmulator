@@ -19,9 +19,10 @@ namespace pluginLib
 		return static_cast<uint8_t>(_p->getUnnormalizedValue());
 	}
 
-	Controller::Controller(Processor& _processor, const std::string& _parameterDescJsonFilename)
+	Controller::Controller(Processor& _processor, const std::string& _parameterDescJsonFilename,
+		const ParameterDescriptions::FormatterFactory& _formatterFactory)
 		: m_processor(_processor)
-		, m_descriptions(loadParameterDescriptions(_parameterDescJsonFilename))
+		, m_descriptions(loadParameterDescriptions(_parameterDescJsonFilename), _formatterFactory)
 		, m_locking(*this)
 		, m_parameterLinks(*this)
 	{
