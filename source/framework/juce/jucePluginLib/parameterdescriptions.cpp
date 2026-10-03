@@ -230,7 +230,7 @@ namespace pluginLib
 			const ValueList* selectedList = nullptr;
 			std::string toTextName;
 
-			if (toTextVar.isObject() && toTextVar.getDynamicObject()->hasProperty("formatter"))
+			if (toTextVar.hasProperty("formatter"))
 			{
 				const auto formatterName = std::string(toTextVar["formatter"].toString().toUTF8());
 				auto formatter = _formatterFactory ? _formatterFactory(toTextVar, minValue, maxValue) : nullptr;
@@ -248,7 +248,17 @@ namespace pluginLib
 			}
 			else if (toTextVar.isObject())
 			{
+				// juce::var reports isObject() for arrays too (VariantType_Array derives from
+				// VariantType_Object), but getDynamicObject() then returns null. Writing
+				// "toText":["A","B"] instead of a named value list used to crash here.
 				auto* obj = toTextVar.getDynamicObject();
+
+				if (!obj)
+				{
+					errors << name << ": toText must be either the name of a value list or an object with a 'format' field, an inline list is not supported" << std::endl;
+					continue;
+				}
+
 				const auto formatVar = obj->getProperty("format");
 
 				if (!formatVar.isString())

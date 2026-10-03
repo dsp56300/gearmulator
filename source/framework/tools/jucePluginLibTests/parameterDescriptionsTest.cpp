@@ -92,4 +92,13 @@ void testParameterDescriptions()
 	TEST_ASSERT(formatter.valueList.textToValue("v-5") == 0);
 
 	// a formatter the plugin does not know is an error, which asserts in a debug build, not tested here
+
+	// an inline toText list is an error, not a crash. Errors assert in a debug build, so only a release build checks it
+#ifdef NDEBUG
+	const pluginLib::ParameterDescriptions inlineList(R"({
+		"parameterdescriptions": [{"name":"Inline", "min":0, "max":1, "toText":["A", "B"]}],
+		"valuelists": {}
+	})");
+	TEST_ASSERT(inlineList.getErrors().find("an inline list is not supported") != std::string::npos);
+#endif
 }
