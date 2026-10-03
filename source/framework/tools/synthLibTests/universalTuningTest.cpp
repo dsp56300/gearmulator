@@ -12,9 +12,9 @@ namespace
 	}
 }
 
-// isUniversalTuningSysex() has no caller yet, so nothing else would notice if these byte
-// offsets drifted. It matches exactly two messages and has to keep ignoring everything else -
-// rejecting the wrong SysEx would silently drop a dump a device needs.
+// The devices that call isUniversalTuningSysex() have no test of their own, so nothing else
+// would notice if these byte offsets drifted. It matches exactly two messages and has to keep
+// ignoring everything else - rejecting the wrong SysEx would silently drop a dump a device needs.
 void testUniversalTuning()
 {
 	// MIDI Tuning Bulk Dump Reply: F0 7E <device> 08 01 <program> <name...> <data...> F7

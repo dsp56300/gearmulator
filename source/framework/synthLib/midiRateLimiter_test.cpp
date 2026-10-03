@@ -165,6 +165,22 @@ namespace
 		expect(bytes, {0xf0, 0x01, 0xf7, 0xf0});
 	}
 
+	// Some hosts send a tuning dump before the first notes. A note cannot overtake a dump that is already on the
+	// wire, so a device that ignores the dump anyway filters it out instead of letting the notes wait for it.
+	void testSysexFilter()
+	{
+		std::vector<uint8_t> bytes;
+		MidiRateLimiter limiter([&](const uint8_t _byte) { bytes.push_back(_byte); });
+		limiter.disableRateLimit();
+		limiter.setSysexFilter([](const SysexBuffer& _sysex) { return !isUniversalTuningSysex(_sysex); });
+
+		limiter.write(sysex({0xf0, 0x7e, 0x7f, 0x08, 0x01, 0x00, 0xf7}));
+		limiter.write(sysex({0xf0, 0x01, 0xf7}));
+		limiter.processSample();
+
+		expect(bytes, {0xf0, 0x01, 0xf7});
+	}
+
 	void testFileSysexCancellation()
 	{
 		for(bool ordered : {false, true})
@@ -240,5 +256,6 @@ int main()
 	testSecondDiscontinuityStillSilences();
 	testRealtimeOvertakesSysex();
 	testSysexPauseExpiresWhileIdle();
+	testSysexFilter();
 	return 0;
 }

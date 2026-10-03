@@ -53,6 +53,11 @@ namespace jeLib
 		m_midiInRateLimiter.setDefaultRateLimit();
 		m_midiInRateLimiter.setSysexPause(0.021f);	// according to manual 20ms pause between sysex patch messages
 		m_midiInRateLimiter.setSysexPauseLengthThreshold(100);
+		m_midiInRateLimiter.setSysexFilter([](const synthLib::SysexBuffer& _sysex)
+		{
+			// the JP-8000 implements neither MTS nor Universal Master Fine Tuning
+			return !synthLib::isUniversalTuningSysex(_sysex);
+		});
 
 		lcd.setChangeCallback([this] { onLcdDdRamChanged(); });
 		lcd.setCgRamChangeCallback([this] { onLcdCgRamChanged(); });
