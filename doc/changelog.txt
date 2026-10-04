@@ -100,6 +100,11 @@ NodalRed2x:
         them later brought back the previous sounds. Settings saved with an
         older version keep the wrong sounds and need to be saved again.
 
+- [Fix] BUG-10446 The emulation ran 0.1 % slower than the hardware, so it
+        played 1.8 cents flat. The Nord Lead 2X runs at 98,304 Hz, not at
+        98,200 Hz. Tuning and everything time-based, LFOs, envelopes and the
+        arpeggiator, now match the hardware.
+
 JE8086:
 
 - [Fix] The first notes could start late when the host sent MIDI tuning data

@@ -35,7 +35,9 @@ namespace n2x
 			auto& clock = m_periphX.getEsaiClock();
 			auto& esai = m_periphX.getEsai();
 
-			clock.setExternalClockFrequency(3'333'333); // schematic claims 1 MHz but we measured 10/3 Mhz
+			// EXTAL of both DSPs is the MC68331's PWMA pin, which outputs its PWM counter clock: system clock / 8 =
+			// 25,165,824 Hz / 8. The schematic labels the net "1MHz"
+			clock.setExternalClockFrequency(3'145'728);
 
 			constexpr auto samplerate = g_samplerate;
 			constexpr auto clockMultiplier = 2;
