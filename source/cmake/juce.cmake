@@ -345,7 +345,11 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_IS_SYNTH ${isSynth})
 	set_target_properties(${targetName} PROPERTIES TUS_PLUGIN_4CC ${plugin4CC})
 
-	if(${isSynth})
+	# Every product we ship gets deployed, synth or effect - deployAll.cmake walks
+	# this list. The one thing that must stay out is the FX companion a synth builds
+	# alongside itself: it ships inside that synth's own folder, not as a product of
+	# its own. Testing isSynth here excluded the standalone effects too.
+	if(NOT TUS_FX_COMPANION)
 		tus_exportTarget(${targetName})
 	endif()
 
@@ -412,6 +416,8 @@ macro(createJucePluginWithFX targetName productName plugin4CCSynth plugin4CCFX b
 	createJucePlugin(${targetName} "${productName}" TRUE "${plugin4CCSynth}" ${binaryDataProject} ${synthLibProject})
 
 	if(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN)
+		set(TUS_FX_COMPANION TRUE)
 		createJucePlugin(${targetName}_FX "${productName}FX" FALSE "${plugin4CCFX}" ${binaryDataProject} ${synthLibProject})
+		unset(TUS_FX_COMPANION)
 	endif()
 endmacro()
