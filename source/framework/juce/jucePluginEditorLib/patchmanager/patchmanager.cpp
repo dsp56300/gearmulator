@@ -698,6 +698,12 @@ namespace jucePluginEditorLib::patchManager
 		if(_migrateFromDir.getFullPathName().isEmpty())
 		{
 			const auto& configOptions = m_editor.getProcessor().getConfigOptions();
+
+			// Without options there is no old patch database. Their default file would point the migration at a
+			// folder outside the product's own, it deletes *.cache files there and takes over *.json and *.syx
+			if(configOptions.applicationName.isEmpty())
+				return DB::startLoaderThread();
+
 			DB::startLoaderThread(configOptions.getDefaultFile().getParentDirectory());
 			return;
 		}
