@@ -1,9 +1,17 @@
 #pragma once
 
-#include <functional>
-#include <h8s/h8s.hpp>
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <tuple>
+#include <unordered_set>
+#include <vector>
 
-#include "custom_chips/esp/esp.hpp"
+#include "common/device.hpp"
+#include "common/sched.hpp"
+#include "cpu/h8300h/machine.hpp"
+
+#include "custom_chips/esp/esp.h"
 
 namespace jeLib
 {
@@ -57,6 +65,7 @@ namespace jeLib
 			kSwitch_DepthSelect
 		};
 
+		// A/D channel = [3: AN line][3: port 6 mux select]; VR n is channel 15 + n
 		enum FaderType : uint8_t
 		{
 			kFader_PitchBend = 0,
@@ -108,203 +117,234 @@ namespace jeLib
 			kFader_PitchEnvD
 		};
 
-		class MultiAsic : public H8SDevice
+		// Words copied from one ESP's output GRAM (0x80 + k) into the next one's input GRAM (k) after every frame.
+		struct GramRoute
 		{
-		public:
-			void setPostSample(const std::function<void(int32_t, int32_t)>& _postSample) { postSample = _postSample; }
-
-			void dump() {
-				asic0.dump("dumps/asic0.bin", "dumps/asic0.txt");
-				asic1.dump("dumps/asic1.bin", "dumps/asic1.txt");
-				asic2.dump("dumps/asic2.bin", "dumps/asic2.txt");
-				asic3.dump("dumps/asic3.bin", "dumps/asic3.txt");
-			}
-
-			uint8_t read(uint32_t _address) override
-			{
-				const int asic = (_address >> 14) & 3; _address &= 0x3fff;
-				if (asic == 0) return asic0.readuC(_address);
-				if (asic == 1) return asic1.readuC(_address);
-				if (asic == 2) return asic2.readuC(_address);
-				return asic3.readuC(_address);
-			}
-
-			void write(uint32_t _address, uint8_t _value) override
-			{
-				const int asic = (_address >> 14) & 3; _address &= 0x3fff;
-				if (asic == 0) asic0.writeuC(_address, _value);
-				else if (asic == 1) asic1.writeuC(_address, _value);
-				else if (asic == 2) asic2.writeuC(_address, _value);
-				else asic3.writeuC(_address, _value);
-			}
-			
-			void runForCycles(uint64_t cycles) {
-				uint64_t diff = cycles + cyclesResidual - lastCycles;
-				lastCycles = cycles;
-
-				uint64_t samples = diff / (768/2);
-				cyclesResidual = diff % (768/2);
-
-				for (int i = 0; i < samples; i++) {
-					// Intepreter version
-					// for (size_t j = 0; j < (768/2); j++) asic0.step_cores();
-					// for (size_t j = 0; j < (768/2); j++) asic1.step_cores();
-					// for (size_t j = 0; j < (768/2); j++) asic2.step_cores();
-					// for (size_t j = 0; j < (768/2); j++) asic3.step_cores();
-
-					// JIT version
-					asic0.opt.genProgramIfDirty();
-					asic1.opt.genProgramIfDirty();
-					asic2.opt.genProgramIfDirty();
-					asic3.opt.genProgramIfDirty();
-
-					asic0.opt.callOptimized(&asic0);
-					asic1.opt.callOptimized(&asic1);
-					asic2.opt.callOptimized(&asic2);
-					asic3.opt.callOptimized(&asic3);
-
-					// Last DSP audio output
-					postSample(asic3.readGRAM(0xe8), asic3.readGRAM(0xec));
-					
-					// DSP->DSP communication
-					for (int k = 0; k <= 0x4; k += 2) asic1.writeGRAM(asic0.readGRAM(0x80 + k), k);
-					for (int k = 0; k <= 0xa; k += 2) asic2.writeGRAM(asic1.readGRAM(0x80 + k), k);
-					for (int k = 0; k <= 0xe; k += 2) asic3.writeGRAM(asic2.readGRAM(0x80 + k), k);
-					asic3.writeGRAM(asic2.readGRAM(0xa0), 0x20);
-					asic3.writeGRAM(asic2.readGRAM(0xa2), 0x22);
-
-					// Advance PCs
-					asic0.sync_cores();
-					asic1.sync_cores();
-					asic2.sync_cores();
-					asic3.sync_cores();
-				}
-			}
-		protected:
-			ESP<17> asic0;
-			ESP<0> asic1, asic2;
-			ESP<19> asic3; // should really be 18, but it works only with 19
-			enum {stepsPerFS = 384};
-			std::function<void(int32_t, int32_t)> postSample;
-			uint64_t lastCycles = 0, cyclesResidual = 0;
-			uint32_t cycles_this_sample {0};
+			uint8_t src, dst, first, last;
 		};
 
-		class Port : public H8SDevice
+		// The ESP ASICs, 0x4000 bytes of host window each, all clocked by the same word clock. Every frame each chip
+		// runs, the last one produces the sample, then the GRAM routes hand data down the chain.
+		template<int... EramBits>
+		class MultiAsic final : public emu::Device
 		{
 		public:
-			Port(std::function<void(Port*)>&& _onLedsChanged = [](Port*){}) : onLedsChanged(std::move(_onLedsChanged)) {releaseAll();}
-			void releaseAll()
+			static constexpr size_t Count = sizeof...(EramBits);
+			static constexpr uint32_t WindowSize = 0x4000;
+			static constexpr uint32_t StepsPerFrame = 384;
+
+			explicit MultiAsic(std::vector<GramRoute> _routes) : m_routes(std::move(_routes))
 			{
-				for (auto& i : data) i = static_cast<int8_t>(0xff);
-			}
-			void flashMode()
-			{
-				press(kSwitch_LFO1Waveform);
-				press(kSwitch_Osc1Waveform);
-				press(kSwitch_Osc2Waveform);
-				press(kSwitch_Sync);
-			}
-			void versionNumber()
-			{
-				press(kSwitch_1);
-				press(kSwitch_3);
-				press(kSwitch_LFO1Waveform);
-			}
-			void enterTestMode()
-			{
-				press(kSwitch_Sync);
-				press(kSwitch_TVF24);
-				press(kSwitch_TVFType);
-			}
-			void press(int which, bool down = true)
-			{
-				int bit = 1 << (which & 7); which >>= 3;
-				if (down) data[which] &= ~bit;
-				else data[which] |= bit;
-			}
-			virtual uint8_t read(uint32_t address) {
-				if (address == 0xffffd4) return portBDDR;
-				char id = (address == 0xffffd3) ? 'A' : 'B';
-				int which = portAstate & 31;
-				return (id=='A') ? portAstate : data[which];
-			}
-			virtual void write(uint32_t address, uint8_t value) {
-				if (address==0xffffd4) {portBDDR = value; return;}
-				char id = (address == 0xffffd3) ? 'A' : 'B';
-				if (id=='A')
+				forEach([](auto& _asic)
 				{
-					if (value & 32) latchA = true;
-					if (!(value & 32) && latchA)
+					_asic.setDintFrameCycles(StepsPerFrame);
+					_asic.setExternalClockPresent(true);
+				});
+			}
+
+			template<typename F> void forEach(F&& _func)
+			{
+				std::apply([&](auto&... _asics) { (_func(_asics), ...); }, m_asics);
+			}
+			template<typename F> void forEach(F&& _func) const
+			{
+				std::apply([&](const auto&... _asics) { (_func(_asics), ...); }, m_asics);
+			}
+
+			template<typename F> void visit(const size_t _index, F&& _func)
+			{
+				size_t i = 0;
+				forEach([&](auto& _asic) { if (i++ == _index) _func(_asic); });
+			}
+
+			void setEspEngine(const esp::Engine _engine) { forEach([_engine](auto& _asic) { _asic.setEngine(_engine); }); }
+
+			auto& first() { return std::get<0>(m_asics); }
+			const auto& first() const { return std::get<0>(m_asics); }
+			const auto& last() const { return std::get<Count - 1>(m_asics); }
+
+			// one bit per chip: its DINT pin
+			uint8_t readDintLines() const
+			{
+				uint8_t result = 0;
+				size_t i = 0;
+				forEach([&](const auto& _asic) { result |= static_cast<uint8_t>((_asic.readDint() & 1) << i++); });
+				return result;
+			}
+
+			uint8_t read8(const uint32_t _address) override
+			{
+				uint8_t result = 0;
+				visit(index(_address), [&](auto& _asic) { result = _asic.hostRead(_address & (WindowSize - 1)); });
+				return result;
+			}
+
+			void write8(const uint32_t _address, const uint8_t _value) override
+			{
+				visit(index(_address), [&](auto& _asic) { _asic.hostWrite(_address & (WindowSize - 1), _value); });
+			}
+
+			// _onFrame(left, right) per produced frame; returns whether any frame ran
+			template<typename F> bool runForCycles(const uint64_t _cycles, F&& _onFrame)
+			{
+				const uint64_t diff = _cycles + m_cyclesResidual - m_lastCycles;
+				m_lastCycles = _cycles;
+
+				const uint64_t frames = diff / StepsPerFrame;
+				m_cyclesResidual = diff % StepsPerFrame;
+
+				for (uint64_t f = 0; f < frames; ++f)
+				{
+					forEach([](auto& _asic) { _asic.runProgram(StepsPerFrame); });
+
+					_onFrame(last().readGRAM(0xe8), last().readGRAM(0xec));
+
+					for (const auto& r : m_routes)
 					{
-						latch = value & 31; latchA = false;
-						bool diff = leds[latch] != portBDR;
-						leds[latch] = portBDR;
-						if (diff) onLedsChanged(this);
+						visit(r.src, [&](auto& _src)
+						{
+							visit(r.dst, [&](auto& _dst)
+							{
+								for (int k = r.first; k <= r.last; k += 2)
+									_dst.writeGRAM(_src.readGRAM(static_cast<uint8_t>(0x80 + k)), static_cast<uint8_t>(k));
+							});
+						});
 					}
-					portAstate = value;
+
+					forEach([](auto& _asic) { _asic.sync(); });
 				}
-				if (id == 'B') portBDR = value;
+				return frames != 0;
 			}
 
-			static int getLedId(const uint32_t _index) {return lits[_index];}
+		private:
+			static size_t index(const uint32_t _address)
+			{
+				return std::min<size_t>((_address >> 14) & 7, Count - 1);
+			}
 
-			bool getLed(const uint32_t _i) const { const int w = getLedId(_i); return (leds[w >> 3] & (1 << (w & 7))); }
-		protected:
-			static int lits[];
-			static const char* const litnames[66];
-			int8 data[32] {}, leds[32] {}; int latch {0};bool latchA {false};
-			int8 portAstate {0}, portBDDR {0}, portBDR;
-			std::function<void(Port*)> onLedsChanged;
-
-			void dumpLEDs() const { for (int i = 0; i < 66; i++) if (getLed(i)) printf("%s, ", litnames[i]); printf("\n"); }
+			std::tuple<esp::Dispatcher<EramBits>...> m_asics;
+			std::vector<GramRoute> m_routes;
+			uint64_t m_lastCycles = 0;
+			uint64_t m_cyclesResidual = 0;
 		};
 
-		class KeyScanner : public H8SDevice
+		// ASIC3 needs 2^19 ERAM words although the board has 2^18: the ESP's high-offset address adjust (0x40000 /
+		// 0xc0000) only survives a 2^19 mask, at 2^18 those taps wrap to zero.
+		using KeyboardAsics = MultiAsic<17, 0, 0, 19>;
+		using RackAsics = MultiAsic<19, 19, 19, 19, 19>;
+
+		// Port A / port B: the switch matrix and LED latches, plus the TPC outputs the ITU drives onto the same pins
+		class Port final : public emu::Device
 		{
 		public:
-			uint8_t read(uint32_t _address) override { return 0; }
-			void write(uint32_t _address, uint8_t _value) override {}
+			explicit Port(uint32_t _rowCount);
+
+			void reset();
+			void releaseAll();
+			void press(uint32_t _which, bool _down = true);
+			void setTpcOutput(uint16_t _value, uint16_t _mask);
+
+			uint8_t read8(uint32_t _address) override;
+			void write8(uint32_t _address, uint8_t _value) override;
+
+		private:
+			const uint32_t m_rowCount;
+			std::array<int8_t, 32> m_switches{};
+			std::array<int8_t, 32> m_leds{};
+			int8_t m_portA = 0;
+			int8_t m_portBDdr = 0;
+			int8_t m_portB = 0;
+			bool m_latchArmed = false;
 		};
 
-		class Faders : public H8SDevice
+		// The H8/3002 A/D converter (ADCSR / ADCR / ADDRA-D) with the multiplexed potentiometers behind it. A conversion
+		// takes 134 or 266 states (ADCSR.CKS), sets ADF and raises ADI; scan mode repeats it.
+		class Faders final : public emu::Device
 		{
 		public:
-			Faders() {for (int i = 0; i < 64; i++) values[i] = 512; values[kFader_BattSense] = 512;}
-			virtual uint8_t read(uint32_t address) {
-				if (address == 0xffffcb) return p6dr;
-				if (address == 0xffffe8) return adcsr;
-				if (address >= 0xffffe0 && address < 0xffffe8)
-				{
-					int off = (address - 0xffffe0) & 7;
-					int which = scanning | ((off << 2) & 0x18);	// [1: AN8-4/3-0][2: 0/3][3: ADC2,1,0] = [3: AN line][3: ADC2,1,0 value]
-					if ((which & 0x38) == 0) which = 0;			// any multiple of 8 is always pitch bend
-					if ((which & 0x38) == 8) which &= 0x3b;		//mod/expdl/battsens, ignores ADC2
-					if ((which & 0x3C) == 40) which = 40;		// osc1ctrl2 mapped across several pins
-					if ((which & 0x3e) == 44) which = 44;		// osc1ctrl1 mapped across several pins
-					if ((which & 0x3e) == 46) which = 46;		// finetune mapped across several pins
+			using ChannelMap = std::array<uint8_t, 64>;
 
-					int val = values[which] & 1023;
-					return (off & 1) ? ((val << 6) & 0xc0) : ((val >> 2) & 0xff);
-				}
-				return 0;
-			}
-			virtual void write(uint32_t address, uint8_t value)
+			Faders(h8300h::Machine& _machine, const ChannelMap& _channels);
+			~Faders() override { cancelConversion(); }
+
+			void reset();
+			uint8_t read8(uint32_t _address) override;
+			void write8(uint32_t _address, uint8_t _value) override;
+			void setFader(int _which, int _value);	// value 0..1023
+
+			static ChannelMap keyboardChannels();
+
+		private:
+			uint64_t duration() const { return (m_adcsr & 8) ? 134 : 266; }
+			void scheduleConversion(uint64_t _start);
+			void cancelConversion();
+			void settleConversion();
+			static void onConversion(void* _self, uint64_t, uint64_t);
+			void updateInterruptRequest();
+
+			h8300h::Machine& m_machine;
+			const ChannelMap m_channels;
+			int8_t m_scanning = 0;
+			int8_t m_port6 = 0;
+			uint8_t m_adcsr = 0;
+			uint8_t m_adcr = 0x7f;
+			bool m_adfRead = false;
+			uint64_t m_conversionStart = 0;
+			emu::Scheduler::EventId m_conversionEvent = 0;
+			std::array<int, 64> m_values{};
+		};
+
+		class KeyScanner final : public emu::Device
+		{
+		public:
+			uint8_t read8(uint32_t) override { return 0; }
+			void write8(uint32_t, uint8_t) override {}
+		};
+
+		// One bus line shared by several small devices, bytes nobody claims go to the fallback
+		class LineMux final : public emu::Device
+		{
+		public:
+			explicit LineMux(emu::Device* _fallback) : m_fallback(_fallback) {}
+			void assign(const uint32_t _address, const uint32_t _length, emu::Device* _device)
 			{
-				if (address == 0xffffcb)	{scanning = ((value & 7)) | (scanning & 32); p6dr = value;}
-				if (address == 0xffffe8)	{scanning = (scanning & 7) | ((value << 3) & 32);adcsr = value;}
+				m_entries.push_back({_address, _length, _device});
 			}
-			void setFader(int which, int value)	// 0<=which<64, value 0->1023!!
+			uint8_t read8(const uint32_t _address) override { return owner(_address)->read8(_address); }
+			void write8(const uint32_t _address, const uint8_t _value) override { owner(_address)->write8(_address, _value); }
+		private:
+			struct Entry { uint32_t address, length; emu::Device* device; };
+			emu::Device* owner(const uint32_t _address) const
 			{
-				// which:
-				// 0 = pitch bend, 8 = mod, 9 = EXPDL, 10 = 0, 11 = BATSENS
-				// n >=16 = VR(n - 15).
-				// e.g. cutoff = VR12, so n = 12 + 15 = 27. See datasheet.
-				values[which] = value;
+				for (const auto& e : m_entries)
+					if (_address >= e.address && _address < e.address + e.length) return e.device;
+				return m_fallback;
 			}
-		protected:
-			int8 scanning {0}, p6dr {0}, adcsr {0};
-			int values[64] {};
+			std::vector<Entry> m_entries;
+			emu::Device* m_fallback;
+		};
+
+		// Everything the board does not decode. Reports each address once.
+		class CatchAllDevice final : public emu::Device
+		{
+		public:
+			uint8_t read8(uint32_t _address) override;
+			void write8(uint32_t _address, uint8_t _value) override;
+		private:
+			void report(const char* _access, uint32_t _address);
+			std::unordered_set<uint32_t> m_reported;
+		};
+
+		// Status byte next to the rack's ASIC windows: one DINT bit per chip
+		template<typename TAsics>
+		class DintStatus final : public emu::Device
+		{
+		public:
+			explicit DintStatus(const TAsics& _asics) : m_asics(_asics) {}
+			uint8_t read8(uint32_t) override { return m_asics.readDintLines(); }
+			void write8(uint32_t, uint8_t) override {}
+		private:
+			const TAsics& m_asics;
 		};
 	}
 }

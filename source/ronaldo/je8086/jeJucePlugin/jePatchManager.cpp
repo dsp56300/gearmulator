@@ -1,5 +1,7 @@
 #include "jePatchManager.h"
 
+#include <cstring>
+
 #include "jeEditor.h"
 #include "jeLcd.h"
 
@@ -136,7 +138,7 @@ namespace jeJucePlugin
 		if (!name)
 			return {};
 
-		// why this is so complicated: Multiple sysex messages are combined in _sysex, but we only want to hash the actual patch data
+		// _sysex holds several messages, hash only their payloads
 		std::vector<uint8_t> temp;
 		temp.reserve(_sysex.size());
 
@@ -403,8 +405,8 @@ namespace jeJucePlugin
 			return false;
 		}
 
-		// patches might be split into multiple sysex messages, try to merge them
-		std::vector<std::map<uint32_t, std::vector<pluginLib::patchDB::Data>>> sameAddressPatches;
+		// a patch may be split into several sysex messages: merge them
+		std::vector<std::vector<pluginLib::patchDB::Data>> patchGroups;
 
 		bool foundTempPerformanceCommon = false;
 
@@ -413,9 +415,7 @@ namespace jeJucePlugin
 			auto addr = jeLib::State::getAddress(d);
 			auto area = jeLib::State::getAddressArea(addr);
 
-			// surprisingly there are indeeed files around that contain edit buffer dumps.
-			// The problem is that we do not know if PatchUpper or PatchLower is part of a performance or individual.
-			// We treat all of them individual if there is no PerformanceCommon dump
+			// edit buffer dumps: PatchUpper / PatchLower belong to a performance only if a PerformanceCommon dump is present
 			if (area == jeLib::AddressArea::PerformanceTemp)
 			{
 				const auto type = static_cast<jeLib::PerformanceData>(addr & static_cast<uint32_t>(jeLib::PerformanceData::BlockMask));
@@ -423,7 +423,6 @@ namespace jeJucePlugin
 				if (type == jeLib::PerformanceData::PerformanceCommon)
 					foundTempPerformanceCommon = true;
 
-				// if there is any performance common dump in there, treat all subsequent dumps as user performance dumps
 				if (foundTempPerformanceCommon)
 				{
 					addr &= ~static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp);
@@ -434,14 +433,11 @@ namespace jeJucePlugin
 				}
 				else if (type == jeLib::PerformanceData::PatchUpper || type == jeLib::PerformanceData::PatchLower)
 				{
-					// otherwise, treat them as user patches at bank 0 program 0
 					addr = static_cast<uint32_t>(jeLib::AddressArea::UserPatch);
 					jeLib::State::setAddress(d, addr);
 					area = jeLib::State::getAddressArea(addr);
 				}
 			}
-
-			// group sysex messages that belong to the same patch
 
 			if (area != jeLib::AddressArea::UserPatch && area != jeLib::AddressArea::UserPerformance)
 			{
@@ -449,45 +445,34 @@ namespace jeJucePlugin
 				continue;
 			}
 
-			uint32_t mask;
+			const auto blockMask = area == jeLib::AddressArea::UserPerformance
+				? static_cast<uint32_t>(jeLib::UserPerformanceArea::BlockMask)
+				: static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
 
-			if (area == jeLib::AddressArea::UserPerformance)
-				mask = static_cast<uint32_t>(jeLib::UserPerformanceArea::BlockMask);
-			else
-				mask = static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
+			// a dump at a block start begins a new patch. Only the offset within the block is looked at, some stored
+			// dumps carry a wrong program number
+			if ((addr & blockMask) == 0)
+				patchGroups.emplace_back();
 
-			if ((addr & mask) == 0)
-				sameAddressPatches.emplace_back(); // new patch/performance, create new map
-
-			mask = ~mask;
-
-			// ignore the key. We messed up patch saving in a previous version that causes some
-			// dumps to point to performance 0 all the time.
-			constexpr uint32_t key = 0;//addr & mask;
-
-			// this can only happen if the dumps are corrupted
-			assert(!sameAddressPatches.empty());
-			if (sameAddressPatches.empty())
+			assert(!patchGroups.empty());
+			if (patchGroups.empty())
 				continue;
 
-			sameAddressPatches.back()[key].emplace_back(std::move(d));
+			patchGroups.back().emplace_back(std::move(d));
 		}
 
-		for (auto& p : sameAddressPatches)
+		for (auto& patches : patchGroups)
 		{
-			for (auto& [key, patches] : p)
+			if (patches.size() == 1)
 			{
-				if (patches.size() == 1)
-				{
-					_results.emplace_back(std::move(patches.front()));
-					continue;
-				}
-
-				auto& e = _results.emplace_back();
-
-				for (auto& p : patches)
-					e.insert(e.end(), p.begin(), p.end());
+				_results.emplace_back(std::move(patches.front()));
+				continue;
 			}
+
+			auto& e = _results.emplace_back();
+
+			for (auto& p : patches)
+				e.insert(e.end(), p.begin(), p.end());
 		}
 
 		return true;

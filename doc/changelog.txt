@@ -77,6 +77,22 @@ NodalRed2x:
 
 JE8086:
 
+- [New] JP-8080 support. It needs a complete 1 MB flash dump of the JP-8080,
+        the firmware in its update .mid files is not enough to boot. Pick it
+        in the ROM dropdown at the bottom of the window, which now switches
+        between all ROMs that were found.
+
+- [New] JP-8080: The audio inputs reach the Voice Modulator and OSC 2 EXT, the
+        left input is INST/LOWER, the right one VOCAL/UPPER. The two EXT IN
+        knobs set their levels, and the Voice Modulator page edits all of its
+        settings.
+
+- [New] JE8086FX, an FX version, to use the Voice Modulator of the JP-8080 on
+        audio tracks.
+
+- [Imp] Considerably lower CPU usage, the emulation of the DSP chips got a lot
+        faster.
+
 - [Fix] The first notes could start late when the host sent MIDI tuning data
         ahead of them, they had to wait until all of it was received. The
         JP-8000 does not support MIDI tuning, the data is now ignored.

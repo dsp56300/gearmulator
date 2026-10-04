@@ -10,6 +10,11 @@
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/patchdb/patch.h"
 
+namespace jeLib
+{
+	class Rom;
+}
+
 namespace jeJucePlugin
 {
 	class AudioPluginAudioProcessor;
@@ -60,7 +65,8 @@ namespace jeJucePlugin
 	private:
 		void parsePerformanceCommon(const pluginLib::SysEx& _sysex);
 		void parsePatch(const pluginLib::SysEx& _sysex, uint8_t _part);
-		void parsePart(const pluginLib::SysEx& _sysex, uint8_t _part) const;
+		// one byte per parameter, the byte's address is the parameter index
+		void parseParameters(const pluginLib::SysEx& _sysex, uint8_t _part, uint8_t _page) const;
 		void parseSystemParameters(const pluginLib::SysEx& _sysex) const;
 
 		void setPatchName(PatchType _type, const std::string& _name);
@@ -71,5 +77,6 @@ namespace jeJucePlugin
 		std::array<std::string, static_cast<size_t>(PatchType::Count)> m_patchNames;
 
 		baseLib::EventListener<uint8_t, uint8_t, pluginLib::ParamValue> m_onParamChanged;
+		baseLib::EventListener<const jeLib::Rom*> m_onRomChanged;
 	};
 }

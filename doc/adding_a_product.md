@@ -161,7 +161,7 @@ move, a deploy folder, a Discord thread and the users' data folders.
 | Target prefix `<x>` | unique: `<x>Lib`, `<x>JucePlugin`, `<x>TestConsole` | CMake |
 
 4CCs on `oss/main`, never reuse: Osirus `TusV` / FX `TusF`, OsTIrus `Ttip` / `Ttif`, Vavra
-`Tmqs` / `Tmqf`, Xenia `Txts` / `Txtf`, NodalRed2x `Tn2x`, JE8086 `Tjpv`, 88emuPlayer `TscH`.
+`Tmqs` / `Tmqf`, Xenia `Txts` / `Txtf`, NodalRed2x `Tn2x`, JE8086 `Tjpv` / `Tjpf`, 88emuPlayer `TscH`.
 Private branches use more; grep `createJucePlugin` on every private remote branch before picking
 one (`git grep createJucePlugin <ref> -- source`).
 
@@ -264,7 +264,7 @@ other event through the `MidiTranslator` into `sendMidi`, then calls `processAud
   `dsp56k::Audio` are single producer, single consumer, with blocking semaphores: the audio
   thread waits for DSP output.
 - Microcontroller/DSP synchronisation to copy: `wLib::Hardware` (`syncUcToDSP`,
-  `ucYieldLoop`), `n2x::Hardware` (semaphore permits per chunk), JE8086's `JeThread` (job queue).
+  `ucYieldLoop`), `n2x::Hardware` (semaphore permits per chunk), `rLib::BoardThread` (JE8086: board rendered ahead on a worker, MIDI scheduled by sample).
 - The destructor must unblock every thread it owns (notify semaphores, push dummy frames or
   jobs), or the host hangs when the plugin is removed.
 - Boot runs in the constructor, during host instantiation, under the processor's device creation

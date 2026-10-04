@@ -7,8 +7,10 @@
 
 #if defined(__GNUC__) || defined(__clang__)
 #define EMU_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#define EMU_LIKELY(x) __builtin_expect(!!(x), 1)
 #else
 #define EMU_UNLIKELY(x) (x)
+#define EMU_LIKELY(x) (x)
 #endif
 
 // EMU_HAS_MUSTTAIL / EMU_TAILCALL: guaranteed tail calls where the host has them

@@ -5,6 +5,7 @@
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
+#include "baseLib/binarystream.h"
 #include "jeLib/device.h"
 #include "jeLib/romloader.h"
 #include "jucePluginLib/processorPropertiesInit.h"
@@ -33,10 +34,8 @@ namespace jeJucePlugin
 			break;
 		}
 
-		// FIXME clear rom list if there is no keyboard rom to prevent that the rack rom is used
 		if (m_selectedRom == std::numeric_limits<size_t>::max())
 		{
-			m_roms.clear();
 			m_selectedRom = 0;
 		}
 
@@ -48,6 +47,8 @@ namespace jeJucePlugin
 	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 	{
 		destroyEditorState();
+		// the controller listens to evRomChanged, which would be gone before the base class destroys the controller
+		destroyController();
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
@@ -59,7 +60,7 @@ namespace jeJucePlugin
 	{
 		const auto& rom = getSelectedRom();
 
-		auto* errorMsg = "A firmware rom (a single 512k .bin file or multiple .mid files) is required, but was not found.";
+		auto* errorMsg = "No firmware found. The JP-8000 needs its flash image (.bin) or the complete set of update .mid files, the JP-8080 a complete 1 MB flash dump (.bin).";
 
 		if (!rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, errorMsg);
@@ -70,24 +71,79 @@ namespace jeJucePlugin
 		params.romName = rom.getName();
 		params.homePath = getDataFolder();
 
-		auto* d = new jeLib::Device(params);
-		if(!d->isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, errorMsg);
-		return d;
+		return new jeLib::Device(params);
 	}
 
 	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
 	{
 		Processor::getRemoteDeviceParams(_params);
 
-		auto rom = jeLib::RomLoader::findROM();
+		const auto& rom = getSelectedRom();
 
 		if (rom.isValid())
 		{
-			auto data = rom.getData();
+			const auto& data = rom.getData();
 			_params.romData.assign(data.begin(), data.end());
 			_params.romName = rom.getName();
 		}
+	}
+
+	bool AudioPluginAudioProcessor::setSelectedRom(const size_t _index)
+	{
+		if (_index >= m_roms.size())
+			return false;
+		if (_index == m_selectedRom)
+			return true;
+
+		const auto previous = m_selectedRom;
+		m_selectedRom = _index;
+
+		// setDeviceType keeps the running device and shows the error if the new one cannot be created
+		const auto* device = m_device.get();
+		setDeviceType(getDeviceType(), true);
+
+		if (m_device.get() == device)
+		{
+			m_selectedRom = previous;
+			return false;
+		}
+
+		evRomChanged.invoke(&getSelectedRom());
+		return true;
+	}
+
+	void AudioPluginAudioProcessor::saveChunkData(baseLib::BinaryStream& s)
+	{
+		const auto& rom = getSelectedRom();
+
+		if (rom.isValid())
+		{
+			baseLib::ChunkWriter cw(s, "ROM ", 1);
+			s.write(static_cast<uint8_t>(rom.getDeviceType()));
+			s.write(rom.getName());
+		}
+
+		Processor::saveChunkData(s);
+	}
+
+	void AudioPluginAudioProcessor::loadChunkData(baseLib::ChunkReader& _cr)
+	{
+		_cr.add("ROM ", 1, [this](baseLib::BinaryStream& _s, unsigned)
+		{
+			const auto type = static_cast<jeLib::DeviceType>(_s.read<uint8_t>());
+			const auto name = _s.readString();
+
+			for (size_t i = 0; i < m_roms.size(); ++i)
+			{
+				if (m_roms[i].getDeviceType() == type && m_roms[i].getName() == name)
+				{
+					setSelectedRom(i);
+					return;
+				}
+			}
+		});
+
+		Processor::loadChunkData(_cr);
 	}
 
 	pluginLib::Controller* AudioPluginAudioProcessor::createController()

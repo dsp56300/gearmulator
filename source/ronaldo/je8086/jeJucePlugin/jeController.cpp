@@ -24,8 +24,7 @@ namespace jeJucePlugin
 
 	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_je.json")
 	{
-		// hacky way to set the Master Volume parameter range and value list as it is often changing
-		// and I am fed up of entering hundreds of values manually every time
+		// Master Volume gets its range and 2401-entry value list here instead of in the json
 		for (const auto& param : getParameterDescriptions().getDescriptions())
 		{
 			if (param.name != "MasterVolume")
@@ -64,6 +63,12 @@ namespace jeJucePlugin
 				parameter->setUnnormalizedValueNotifyingHost(_value, pluginLib::Parameter::Origin::PresetChange);
 		});
 
+		// a new device runs a different firmware, read its state
+		m_onRomChanged.set(_p.evRomChanged, [this](const jeLib::Rom*)
+		{
+			onStateLoaded();
+		});
+
 		auto& params = getExposedParameters();
 		for (const auto & it : params)
 		{
@@ -87,14 +92,12 @@ namespace jeJucePlugin
 
 		if (desc.page == g_paramPagePerformance)
 		{
-			// performance parameter
 			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::PerformanceCommon>(desc.index), _value);
 			sendSysEx(msg);
 			m_state.receive(msg);
 		}
 		else if (desc.page == g_paramPagePart)
 		{
-			// part parameter
 			const auto lowerUpper = _parameter.getPart() > 0 ? jeLib::PerformanceData::PartLower : jeLib::PerformanceData::PartUpper;
 
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Part>(desc.index), _value);
@@ -104,7 +107,6 @@ namespace jeJucePlugin
 		}
 		else if (desc.page == g_paramPagePatch || desc.page == g_paramPagePatch + 1)
 		{
-			// patch parameter
 			const auto index = desc.index | (desc.page * 0x100);
 
 			const auto lowerUpper = _parameter.getPart() > 0 ? jeLib::PerformanceData::PatchLower : jeLib::PerformanceData::PatchUpper;
@@ -116,18 +118,18 @@ namespace jeJucePlugin
 		}
 		else if (desc.page == g_paramPageSystem)
 		{
-			// system parameter
 			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::SystemParameter>(desc.index), _value);
 			sendSysEx(msg);
 			m_state.receive(msg);
 		}
 		else if (desc.page == g_paramPageVoiceMod)
 		{
-			// TODO voice mod parameters
+			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::VoiceModulator>(desc.index), _value);
+			sendSysEx(msg);
+			m_state.receive(msg);
 		}
 		else if (desc.page == g_paramPageCustom)
 		{
-			// custom messages
 			std::vector<synthLib::SMidiEvent> events;
 			jeLib::SysexRemoteControl::sendSysexParameter(events, _parameter.getDescription().page,_parameter.getDescription().index, _value);
 			sendSysEx(events.front().sysex);
@@ -172,7 +174,12 @@ namespace jeJucePlugin
 		case jeLib::AddressArea::PerformanceTemp:
 		case jeLib::AddressArea::UserPerformance:
 			{
-				const auto perfData = static_cast<jeLib::PerformanceData>(addr & 0xffff);
+				auto perfData = static_cast<jeLib::PerformanceData>(addr & 0xffff);
+
+				// the second dump of a rack patch starts at 41 72 / 43 72
+				const auto patchData = static_cast<jeLib::PerformanceData>(addr & 0xfe00);
+				if (patchData == jeLib::PerformanceData::PatchUpper || patchData == jeLib::PerformanceData::PatchLower)
+					perfData = patchData;
 
 				switch (perfData)
 				{
@@ -185,7 +192,10 @@ namespace jeJucePlugin
 					break;
 				case jeLib::PerformanceData::PartUpper:
 				case jeLib::PerformanceData::PartLower:
-					parsePart(_sysex, perfData == jeLib::PerformanceData::PartUpper ? 0 : 1);
+					parseParameters(_sysex, perfData == jeLib::PerformanceData::PartUpper ? 0 : 1, g_paramPagePart);
+					break;
+				case jeLib::PerformanceData::VoiceModulator:
+					parseParameters(_sysex, 0, g_paramPageVoiceMod);
 					break;
 				default:;
 				}
@@ -397,7 +407,9 @@ namespace jeJucePlugin
 	{
 		const auto address = jeLib::State::getAddress(_sysex);
 
-		uint32_t addr = address & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
+		// 7 bits per address byte, but the loop below counts linearly. The second dump of a rack patch starts at 01 72
+		const uint32_t blockOffset = address & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
+		uint32_t addr = ((blockOffset >> 8) << 7) | (blockOffset & 0x7f);
 
 		// might be a partial patch, only set the name if we are at the start
 		if (addr == 0)
@@ -416,6 +428,10 @@ namespace jeJucePlugin
 			const auto parameterType = static_cast<jeLib::Patch>((addr4[2] << 8) + addr4[3]);
 
 			auto params = findSynthParam(_part, addr4[2] + g_paramPagePatch, addr4[3]);
+
+			// the rack patch has a reserved byte in front of its rack-only parameters
+			if(params.empty() && parameterType == jeLib::Patch::Reserved170)
+				continue;
 
 			assert(!params.empty() && "parameter not found");
 
@@ -444,7 +460,7 @@ namespace jeJucePlugin
 		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 	}
 
-	void Controller::parsePart(const pluginLib::SysEx& _sysex, const uint8_t _part) const
+	void Controller::parseParameters(const pluginLib::SysEx& _sysex, const uint8_t _part, const uint8_t _page) const
 	{
 		const auto address = jeLib::State::getAddress(_sysex);
 
@@ -452,7 +468,7 @@ namespace jeJucePlugin
 
 		for (size_t i=g_dataStartIndex; i<_sysex.size() - std::size(jeLib::g_sysexFooter); ++i, ++addr)
 		{
-			const auto params = findSynthParam(_part, g_paramPagePart, static_cast<uint8_t>(addr));
+			const auto params = findSynthParam(_part, _page, static_cast<uint8_t>(addr));
 
 			assert(!params.empty() && "parameter not found");
 
@@ -492,14 +508,14 @@ namespace jeJucePlugin
 
 			switch (parameterType)
 			{
-			case jeLib::SystemParameter::MidiSync:				// Enable sync to external MIDI clock
+			case jeLib::SystemParameter::MidiSync:
 				sendChange(1);
 				break;
-			case jeLib::SystemParameter::RemoteControlChannel:	// Set remote channel to 3
+			case jeLib::SystemParameter::RemoteControlChannel:
 				{
 					auto v = value;
 
-					// set to channel 1 if there is no existing savestate
+					// channel 1 unless a savestate says otherwise
 					if (isNewState)
 					{
 						v = 0;
@@ -523,20 +539,20 @@ namespace jeJucePlugin
 				sendChange(1);
 				break;
 			case jeLib::SystemParameter::TxRxEditMode:
-				sendChange(1);  // MODE2 = all possible CCs enabled
+				sendChange(1);	// MODE2: all CCs
 				break;
 			case jeLib::SystemParameter::TxRxEditSwitch:
-				if (sendChange(1))	// enable edit via CCs
+				if (sendChange(1))
 					isNewState = true;
 				break;
 			case jeLib::SystemParameter::TxRxProgramChangeSwitch:
-				sendChange(0);	// disable program changes, we handle them ourselves
+				sendChange(0);	// the plugin handles program changes
 				break;
 			case jeLib::SystemParameter::KeyboardShift:
-				sendChange(2); // = 0
+				sendChange(2);	// shift 0
 				break;
 			case jeLib::SystemParameter::RemoteKeyboardChannel:
-				sendChange(4); // only relevant for the rack
+				sendChange(4);	// rack only
 				break;
 			default:;
 			}

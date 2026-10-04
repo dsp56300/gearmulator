@@ -102,13 +102,17 @@ endif()
 
 # ----------------- dependencies
 
-if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU)
+if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU OR ${CMAKE_PROJECT_NAME}_SYNTH_JE8086)
 	add_subdirectory(cpu/common)
+endif()
+if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU)
 	add_subdirectory(cpu/h8500)
 	add_subdirectory(cpu/mcs96)
 	add_subdirectory(cpu/sh2)
 endif()
-add_subdirectory(cpu/h8s)
+if(${CMAKE_PROJECT_NAME}_SYNTH_JE8086)
+	add_subdirectory(cpu/h8300h)
+endif()
 add_subdirectory(cpu/mc68k EXCLUDE_FROM_ALL)
 
 # mc68k does not declare an include root of its own, so #include "mc68k/..."

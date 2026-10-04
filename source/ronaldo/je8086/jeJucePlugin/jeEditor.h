@@ -4,6 +4,18 @@
 
 #include "jucePluginLib/patchdb/patch.h"
 
+#include "baseLib/event.h"
+
+namespace jeLib
+{
+	class Rom;
+}
+
+namespace juceRmlUi
+{
+	class ElemComboBox;
+}
+
 namespace jucePluginEditorLib
 {
 	class FocusedParameter;
@@ -46,8 +58,12 @@ namespace jeJucePlugin
 	private:
 		void onBtWrite(Rml::Event& _event) const;
 		bool createWritePatchesMenu(juceRmlUi::Menu& _menu) const;
+		void onRomChanged();
 
 		Controller& m_controller;
+
+		juceRmlUi::ElemComboBox* m_romSelector = nullptr;
+		baseLib::EventListener<const jeLib::Rom*> m_onRomChanged;
 
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 

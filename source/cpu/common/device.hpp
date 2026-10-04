@@ -26,6 +26,9 @@ class CodeSink {
   virtual ~CodeSink() = default;
   virtual void code_line_written(u32 addr) = 0;
   virtual void code_timing_changed() {}
+  // One access class was retimed. A core whose cells only bake in instruction-fetch costs
+  // can drop just the code fetched through that class; the default drops everything.
+  virtual void code_class_timing_changed(unsigned /*cls*/) { code_timing_changed(); }
 };
 
 }  // namespace emu

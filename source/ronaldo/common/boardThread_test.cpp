@@ -73,6 +73,42 @@ namespace
 		std::atomic<bool> m_concurrent{false};
 	};
 
+	// Outputs the input frame it was handed for the sample it renders
+	class EchoBoard
+	{
+	public:
+		using SampleFrame = std::pair<int32_t, int32_t>;
+
+		void setInput(const SampleFrame& _frame) { m_in = _frame; }
+		SampleFrame renderSample() { return m_in; }
+		void addMidiEvent(const synthLib::SMidiEvent&) {}
+		void readMidiOut(std::vector<synthLib::SMidiEvent>&) {}
+
+	private:
+		SampleFrame m_in;
+	};
+
+	// blocks of (count, latency), input frame h is h + 1. Returns what comes out, per host sample
+	std::vector<int32_t> runEcho(const std::vector<std::pair<uint32_t, uint32_t>>& _blocks)
+	{
+		EchoBoard board;
+		std::vector<int32_t> out;
+		rLib::BoardThread<EchoBoard> thread(board, "echo");
+		std::vector<synthLib::SMidiEvent> midiIn, midiOut;
+		std::vector<EchoBoard::SampleFrame> in;
+		int32_t h = 0;
+		for(const auto& [count, latency] : _blocks)
+		{
+			in.clear();
+			for(uint32_t i = 0; i < count; ++i, ++h)
+				in.emplace_back(h + 1, -(h + 1));
+			const auto* frames = thread.process(count, latency, midiIn, midiOut, in.data());
+			for(uint32_t i = 0; i < count; ++i)
+				out.push_back(frames[i].first);
+		}
+		return out;
+	}
+
 	// the per-device threads BoardThread replaced (jeLib::JeThread and the like) with the worker taken out: every job runs inline
 	class Reference
 	{
@@ -353,6 +389,40 @@ int main()
 			blocks.push_back({32, 0, {}});
 		const auto res = runThread(blocks, 20);
 		check(!res.concurrent && res.audio == runReference(blocks).audio, "no concurrent rendering, identical to the reference");
+	}
+
+	std::printf("audio input\n");
+	{
+		for(const uint32_t l : {0u, 1u, 100u, 16384u})
+		{
+			const auto out = runEcho(std::vector<std::pair<uint32_t, uint32_t>>(200, {128, l}));
+			bool ok = true;
+			for(size_t h = 0; ok && h < out.size(); ++h)
+				ok = out[h] == (h >= l ? static_cast<int32_t>(h - l + 1) : 0);
+			char name[128];
+			std::snprintf(name, sizeof(name), "latency %u: input frame h comes out at sample h + L", l);
+			check(ok, name);
+		}
+
+		std::vector<std::pair<uint32_t, uint32_t>> blocks;
+		for(const uint32_t l : {0u, 500u, 100u, 3000u, 0u})
+			for(uint32_t k = 0; k < 100; ++k)
+				blocks.emplace_back(64 + k % 7, l);
+		const auto out = runEcho(blocks);
+		bool increasing = true;
+		int32_t last = 0;
+		for(const auto v : out)
+		{
+			if(!v)
+				continue;
+			increasing &= v > last;
+			last = v;
+		}
+		bool aligned = true;
+		for(size_t h = out.size() - 1000; h < out.size(); ++h)
+			aligned &= out[h] == static_cast<int32_t>(h + 1);
+		check(increasing, "latency changes: no input frame comes out twice or out of order");
+		check(aligned, "latency changes: aligned again at the final latency");
 	}
 
 	finished = true;

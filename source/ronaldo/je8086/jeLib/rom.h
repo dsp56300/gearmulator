@@ -17,7 +17,10 @@ namespace jeLib
 		using Preset = std::vector<Sysex>;
 
 		static constexpr size_t RomSizeKeyboard = 512 * 1024;
-		static constexpr size_t RomSizeRack = (1024-128) * 1024;
+		// the full JP-8080 flash; its first 64k hold the vector table and reset handler
+		static constexpr size_t RomSizeRack = 1024 * 1024;
+		// the JP-8080 firmware body of the update files: has the presets but cannot boot
+		static constexpr size_t RomSizeRackFirmware = (1024 - 128) * 1024;
 
 		Rom() = default;
 		explicit Rom(const std::string& _filename);

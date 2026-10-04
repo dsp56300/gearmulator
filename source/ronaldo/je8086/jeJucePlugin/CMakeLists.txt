@@ -28,4 +28,4 @@ buildSkinHeader()
 
 juce_add_binary_data(jeJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_SKINS})
 
-createJucePlugin(jeJucePlugin "JE8086" TRUE "Tjpv" jeJucePlugin_BinaryData jeLib)
+createJucePluginWithFX(jeJucePlugin "JE8086" "Tjpv" "Tjpf" jeJucePlugin_BinaryData jeLib)

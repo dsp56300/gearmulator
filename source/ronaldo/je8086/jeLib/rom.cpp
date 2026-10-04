@@ -44,9 +44,10 @@ namespace jeLib
 	{
 		switch (m_data.size())
 		{
-		case RomSizeKeyboard:  return DeviceType::Keyboard;
-		case RomSizeRack:      return DeviceType::Rack;
-		default:               return DeviceType::Invalid;
+		case RomSizeKeyboard: return DeviceType::Keyboard;
+		case RomSizeRack:
+		case RomSizeRackFirmware: return DeviceType::Rack;
+		default:              return DeviceType::Invalid;
 		}
 	}
 
@@ -117,7 +118,7 @@ namespace jeLib
 			start += performanceSize;
 		}
 
-		return false;
+		return true;
 	}
 
 	size_t Rom::findKey(const char* _key) const
@@ -204,14 +205,7 @@ namespace jeLib
 
 		uint32_t address = static_cast<uint32_t>(AddressArea::UserPatch);
 
-		if (_index < 64)
-		{
-			address |= static_cast<uint32_t>(UserPatchArea::UserPatch001);
-		}
-		else
-		{
-			address |= static_cast<uint32_t>(UserPatchArea::UserPatch065);
-		}
+		address |= static_cast<uint32_t>(_index < 64 ? UserPatchArea::UserPatch001 : UserPatchArea::UserPatch065);
 
 		_index &= 63;
 
@@ -228,18 +222,6 @@ namespace jeLib
 			return {};
 
 		const auto rack = getDeviceType() == DeviceType::Rack;
-
-		if (rack)
-		{
-			int foo=0;
-		}
-
-		// A performance consists of:
-		// - PerformanceCommon
-		// - Part Upper
-		// - Part Lower
-		// - Patch Upper
-		// - Patch Lower
 
 		uint32_t addressBase = static_cast<uint32_t>(AddressArea::UserPerformance);
 

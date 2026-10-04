@@ -11,8 +11,6 @@
 
 #include "baseLib/filesystem.h"
 
-#include "jeLib/romloader.h"
-
 #include "jucePluginEditorLib/focusedParameter.h"
 #include "jucePluginEditorLib/midiPorts.h"
 #include "jucePluginEditorLib/pluginDataModel.h"
@@ -20,40 +18,67 @@
 
 #include "juceRmlUi/rmlElemComboBox.h"
 
+#include <mutex>
+#include <set>
+
 namespace jeJucePlugin
 {
+	namespace
+	{
+		// guards the ROM change callbacks that are queued to the message thread
+		std::mutex& instancesMutex() { static std::mutex mutex; return mutex; }
+		std::set<Editor*>& instances() { static std::set<Editor*> set; return set; }
+
+		const char* getDeviceModelName(const jeLib::Rom& _rom)
+		{
+			return _rom.getDeviceType() == jeLib::DeviceType::Keyboard ? "keyboard" : "rack";
+		}
+	}
+
 	Editor::Editor(jucePluginEditorLib::Processor& _processor, const jucePluginEditorLib::Skin& _skin)
 		: jucePluginEditorLib::Editor(_processor, _skin)
 		, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	{
+		std::lock_guard lock(instancesMutex());
+		instances().insert(this);
 	}
 	void Editor::create()
 	{
 		jucePluginEditorLib::Editor::create();
 
-		if(auto* romSelector = findChild<juceRmlUi::ElemComboBox>("romselector"))
+		m_romSelector = findChild<juceRmlUi::ElemComboBox>("romselector");
+
+		if(m_romSelector)
 		{
-			const auto roms = jeLib::RomLoader::findROMs();
+			const auto& roms = getJeProcessor().getRoms();
 
 			if (roms.empty())
-			{
-				romSelector->addOption("<No ROM found>");
-			}
-			else
-			{
-				for (const auto & rom : roms)
-				{
-					const auto& name = rom.getName();
-					romSelector->addOption(name);
-				}
-			}
+				m_romSelector->addOption("<No ROM found>");
 
-			romSelector->setValue(static_cast<float>(getJeProcessor().getSelectedRomIndex()));
+			for (const auto& rom : roms)
+				m_romSelector->addOption(rom.getName());
 
-			// FIXME disable rom selection to prevent that a rack rom is used
-//			if (roms.size() < 2)
-				romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
+			m_romSelector->setSelectedIndex(getJeProcessor().getSelectedRomIndex(), false);
+
+			juceRmlUi::EventListener::Add(m_romSelector, Rml::EventId::Change, [this](Rml::Event&)
+			{
+				const auto index = m_romSelector->getSelectedIndex();
+
+				if (index < 0 || !getJeProcessor().setSelectedRom(static_cast<size_t>(index)))
+					m_romSelector->setSelectedIndex(getJeProcessor().getSelectedRomIndex(), false);
+			});
 		}
+
+		// a state restored by the host switches the ROM on the host's thread
+		m_onRomChanged.set(getJeProcessor().evRomChanged, [this](const jeLib::Rom*)
+		{
+			juce::MessageManager::callAsync([this]
+			{
+				std::lock_guard lock(instancesMutex());
+				if (instances().find(this) != instances().end())
+					onRomChanged();
+			});
+		});
 
 		if (auto* lcd = findChild("lcd"))
 			m_lcd.reset(new JeLcd(*this, lcd));
@@ -125,11 +150,16 @@ namespace jeJucePlugin
 	{
 		jucePluginEditorLib::Editor::initPluginDataModel(_model);
 
-		_model.set("deviceModel", getJeProcessor().getSelectedRom().getDeviceType() == jeLib::DeviceType::Keyboard ? "keyboard" : "rack");
+		_model.set("deviceModel", getDeviceModelName(getJeProcessor().getSelectedRom()));
 	}
 
 	Editor::~Editor()
 	{
+		{
+			std::lock_guard lock(instancesMutex());
+			instances().erase(this);
+		}
+
 		m_assign.reset();
 		m_partSelect.reset();
 		m_midiPorts.reset();
@@ -150,6 +180,14 @@ namespace jeJucePlugin
 	AudioPluginAudioProcessor& Editor::getJeProcessor() const
 	{
 		return static_cast<AudioPluginAudioProcessor&>(getProcessor());
+	}
+
+	void Editor::onRomChanged()
+	{
+		getPluginDataModel()->set("deviceModel", getDeviceModelName(getJeProcessor().getSelectedRom()));
+
+		if (m_romSelector)
+			m_romSelector->setSelectedIndex(getJeProcessor().getSelectedRomIndex(), false);
 	}
 
 	void Editor::onBtWrite(Rml::Event& _event) const
