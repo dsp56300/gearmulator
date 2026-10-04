@@ -49,6 +49,9 @@ Osirus/OsTIrus:
         the plugin sent a dump of all its banks to its MIDI output a moment
         later. Settings saved with an older version need to be saved again.
 
+- [Fix] EMU-161 Certain short SysEx messages from the host or a MIDI input could
+        crash the plugin.
+
 OsTIrus:
 
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
