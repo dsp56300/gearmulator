@@ -181,9 +181,9 @@
 			<knob id="Portamento" class="jucePos juceRotary knob1" data-model="partCurrent" param="Portamento Time" style="left: 800.3dp; top: 956.2dp; width: 104dp; height: 104dp;"/>
 			<button id="SubOscTypeSwitch" class="jucePos juceButton toggle-btn-39x102" data-model="partCurrent" valueOff="1" valueOn="0" isToggle="1" param="Suboscillator Shape" style="left: 813.8dp; top: 735.2dp; width: 39dp; height: 102dp;"/>
 			<knob id="Cutoff" class="jucePos juceRotary knob1" data-model="partCurrent" param="Cutoff" style="left: 1167.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
-			<knob id="Reso" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Resonance" style="left: 1291.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
-			<knob id="EnvAmt" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Env Amt" style="left: 1415.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
-			<knob id="Keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter1 Keyfollow" style="left: 1539.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<knob id="Reso1" class="jucePos juceRotary knob1" controllerLinkCondition="LinkEnv" controllerLinkTarget="Reso2" data-model="partCurrent" param="Filter1 Resonance" style="left: 1291.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<knob id="EnvAmt1" class="jucePos juceRotary knob1" controllerLinkCondition="LinkEnv" controllerLinkTarget="EnvAmt2" data-model="partCurrent" param="Filter1 Env Amt" style="left: 1415.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
+			<knob id="Keytrack1" class="jucePos juceRotary knob1" controllerLinkCondition="LinkEnv" controllerLinkTarget="Keytrack2" data-model="partCurrent" param="Filter1 Keyfollow" style="left: 1539.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
 			<knob id="ResVel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Resonance1 Velocity" style="left: 1663.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
 			<knob id="EnvVel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Flt1 EnvAmt Velocity" style="left: 1787.1dp; top: 57.0601dp; width: 104dp; height: 104dp;"/>
 			<combo id="Mode" class="jucePos txt2" data-model="partCurrent" param="Filter1 Mode" style="left: 1151.4dp; top: 244dp; width: 160dp; height: 50dp; line-height: 50dp;">
@@ -192,9 +192,9 @@
 			<button id="EnvPolarity" class="jucePos juceButton env-pol-radio-btns-38x66" data-model="partCurrent" isToggle="1" param="Filter1 Env Polarity" style="left: 1729.1dp; top: 365.26dp; width: 38dp; height: 66dp;"/>
 			<knob id="Cutoff2" class="jucePos juceRotary knob1" data-model="partCurrent" data-class-juceConditionDisabled="Filter2_Cutoff_Link_value == 1" param="Cutoff2" style="left: 1167.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
 			<knob id="Cutoff2" class="jucePos juceRotary knob1" data-model="partCurrent" data-class-juceConditionDisabled="Filter2_Cutoff_Link_value == 0" param="Cutoff2Offset" style="left: 1167.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
-			<knob id="Reso" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Resonance" style="left: 1291.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
-			<knob id="EnvAmt" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Env Amt" style="left: 1415.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
-			<knob id="Keytrack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter2 Keyfollow" style="left: 1539.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="Reso2" class="jucePos juceRotary knob1" controllerLinkCondition="LinkEnv" controllerLinkTarget="Reso1" data-model="partCurrent" param="Filter2 Resonance" style="left: 1291.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="EnvAmt2" class="jucePos juceRotary knob1" controllerLinkCondition="LinkEnv" controllerLinkTarget="EnvAmt1" data-model="partCurrent" param="Filter2 Env Amt" style="left: 1415.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
+			<knob id="Keytrack2" class="jucePos juceRotary knob1" controllerLinkCondition="LinkEnv" controllerLinkTarget="Keytrack1" data-model="partCurrent" param="Filter2 Keyfollow" style="left: 1539.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
 			<knob id="ResVel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Resonance2 Velocity" style="left: 1663.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
 			<knob id="EnvVel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Flt2 EnvAmt Velocity" style="left: 1787.1dp; top: 481.408dp; width: 104dp; height: 104dp;"/>
 			<combo id="Mode" class="jucePos txt2" data-model="partCurrent" param="Filter2 Mode" style="left: 1151.2dp; top: 345dp; width: 160dp; height: 50dp; line-height: 50dp;">
@@ -212,7 +212,7 @@
 				<combotext>Wave 42</combotext>
 			</combo>
 			<button id="LinkCutoff" class="jucePos juceButton chain-btn-36x62" data-model="partCurrent" isToggle="1" param="Filter2 Cutoff Link" style="left: 1099dp; top: 288.5dp; width: 36dp; height: 62dp;"/>
-			<button id="LinkEnv" class="jucePos juceButton chain-btn-36x62" isToggle="1" style="left: 1925.3dp; top: 288.5dp; width: 36dp; height: 62dp;"/>
+			<button id="LinkEnv" class="jucePos juceButton chain-btn-36x62" data-model="partCurrent" isToggle="1" param="Filter Select" valueOn="2" valueOff="0" style="left: 1925.3dp; top: 288.5dp; width: 36dp; height: 62dp;"/>
 			<knob id="Attack" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Attack" style="left: 1162dp; top: 724dp; width: 104dp; height: 104dp;"/>
 			<knob id="Decay" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Decay" style="left: 1318dp; top: 724dp; width: 104dp; height: 104dp;"/>
 			<knob id="SustainLevel" class="jucePos juceRotary knob1" data-model="partCurrent" param="Filter Env Sustain" style="left: 1474dp; top: 724dp; width: 104dp; height: 104dp;"/>

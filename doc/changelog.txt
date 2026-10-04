@@ -63,6 +63,14 @@ Osirus/OsTIrus:
 - [Fix] EMU-161 Certain short SysEx messages from the host or a MIDI input could
         crash the plugin.
 
+Osirus:
+
+- [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter
+        section did nothing. It now selects both filters, as pressing both
+        filter SELECT buttons does on the Virus: Resonance, Env Amount and
+        Keytrack of the two filters move together, and the setting is saved
+        with the patch.
+
 OsTIrus:
 
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
