@@ -264,7 +264,8 @@ namespace mqJucePlugin
 	        case mqLib::SysexCommand::EmuLCD:
 	        case mqLib::SysexCommand::EmuLCDCGRata:
 	        case mqLib::SysexCommand::EmuLEDs:
-	            if(m_frontPanel)
+	            // the device sends its panel frames as Internal, the same command bytes from anywhere else are dropped
+	            if(m_frontPanel && _source == synthLib::MidiEventSource::Internal)
 	                m_frontPanel->processSysex(_msg);
 	            return true;
 	        default:

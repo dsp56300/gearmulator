@@ -369,7 +369,8 @@ namespace xtJucePlugin
 	        case xt::SysexCommand::EmuButtons:
 	        case xt::SysexCommand::EmuLCD:
 	        case xt::SysexCommand::EmuLEDs:
-				if(m_frontPanel)
+				// the device sends its panel frames as Internal, the same command bytes from anywhere else are dropped
+				if(m_frontPanel && _source == synthLib::MidiEventSource::Internal)
 					m_frontPanel->processSysex(_msg);
 	            return true;
 	        default:

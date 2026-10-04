@@ -57,6 +57,12 @@ OsTIrus:
 - [Fix] BUG-10432 TrancyTI skin: FM Mode is greyed out while Oscillator 2 is set
         to HyperSaw, which has no FM, as on the Virus TI.
 
+Vavra/Xenia:
+
+- [Fix] EMU-168 SysEx from the host or a MIDI input could be mistaken for a
+        display or LED update from the emulated device. It then showed up on
+        the display and the LEDs, and a short message could crash the plugin.
+
 Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them
