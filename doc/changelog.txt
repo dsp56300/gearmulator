@@ -39,6 +39,11 @@ Framework:
 - [Fix] Windows: the plugin files reported version 2.2.14 in their file
         properties no matter which release they were from.
 
+- [Imp] EMU-170 DSPBridge: When the plugin searches the network for a server
+        and only finds one with another bridge protocol version, it now says
+        so, and that the server and the plugins need to be updated together,
+        instead of reporting that no server was found.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,
