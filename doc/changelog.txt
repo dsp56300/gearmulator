@@ -63,6 +63,11 @@ Osirus/OsTIrus:
 - [Fix] EMU-161 Certain short SysEx messages from the host or a MIDI input could
         crash the plugin.
 
+- [Fix] BUG-10309 Galaxpel and TrancyTI skins: While filter 1 is in one of the
+        Analog modes, Saturation shows "Analog Overdrive" and cannot be changed,
+        as in Virus Control. In these modes the Virus ignores the saturation
+        type and uses the saturation of its analog filter instead.
+
 Osirus:
 
 - [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter

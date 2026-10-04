@@ -314,9 +314,10 @@
 			<input id="RingModLevel" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Ringmodulator Volume" type="range" style="left: 1572dp; top: 897dp; width: 355dp; height: 63dp;"/>
 		</img>
 		<div id="page_4_filter" class="jucePos" tabgroup="pages" tabpage="3" style="left: 571dp; top: 129dp; width: 1971dp; height: 1026dp; decorator: image(panel_4_filter.png scale-none left top);">
-			<combo id="SaturationCurve" class="jucePos text3" data-model="partCurrent" param="Saturation Curve" style="left: 1010dp; top: 437dp; width: 245dp; height: 45dp; line-height: 45dp;">
+			<combo id="SaturationCurve" class="jucePos text3" data-class-juceConditionDisabled="Filter1_Mode_value > 3" data-model="partCurrent" param="Saturation Curve" style="left: 1010dp; top: 437dp; width: 245dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
+			<div id="SaturationAnalog" class="jucePos text2" data-class-juceConditionDisabled="!(Filter1_Mode_value > 3)" data-model="partCurrent" style="left: 1010dp; top: 437dp; width: 245dp; height: 45dp; line-height: 45dp; padding: 1dp 30dp 2dp 1dp; white-space: nowrap;">Analog Overdrive</div>
 			<combo id="KeytrackBase" class="jucePos text3" data-model="partCurrent" param="Filter Keytrack Base" style="left: 707dp; top: 437dp; width: 245dp; height: 45dp; line-height: 45dp;">
 				<combotext>C3</combotext>
 			</combo>

@@ -205,9 +205,10 @@
 			<combo id="FilterRouting" class="jucePos txt2" data-model="partCurrent" param="Filter Routing" style="left: 1523.2dp; top: 244dp; width: 158dp; height: 50dp; line-height: 50dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<combo id="FilterSaturationCurve" class="jucePos txt2" data-model="partCurrent" param="Saturation Curve" style="left: 1523.2dp; top: 345dp; width: 158dp; height: 50dp; line-height: 50dp;">
+			<combo id="FilterSaturationCurve" class="jucePos txt2" data-class-juceConditionDisabled="Filter1_Mode_value > 3" data-model="partCurrent" param="Saturation Curve" style="left: 1523.2dp; top: 345dp; width: 158dp; height: 50dp; line-height: 50dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
+			<div id="SaturationAnalog" class="jucePos txt2" data-class-juceConditionDisabled="!(Filter1_Mode_value > 3)" data-model="partCurrent" style="left: 1523.2dp; top: 345dp; width: 158dp; height: 50dp; padding: 1dp 30dp 2dp 1dp; font-size: 24dp; line-height: 24dp;">Analog Overdrive</div>
 			<combo id="FilterKeyfollowBase" class="jucePos txt2" data-model="partCurrent" param="Filter Keytrack Base" style="left: 1727dp; top: 248dp; width: 158dp; height: 42dp; line-height: 42dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
