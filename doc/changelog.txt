@@ -81,6 +81,9 @@ JE8086:
         ahead of them, they had to wait until all of it was received. The
         JP-8000 does not support MIDI tuning, the data is now ignored.
 
+- [Fix] EMU-164 Dragging a file onto a part name crashed the plugin. Dropping a
+        file with one patch onto a part name now loads it into that part.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the
