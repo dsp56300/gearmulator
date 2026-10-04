@@ -248,7 +248,7 @@ namespace emu88Lib
         {RomDevice::Sc55Mk1, RomSlot::Wave, 1, 0x100000, "sc55mk1_wave1.bin", false},
         {RomDevice::Sc55Mk1, RomSlot::Wave, 2, 0x100000, "sc55mk1_wave2.bin", false},
         {RomDevice::Sc55St, RomSlot::Internal, 0, 0x8000, "sc55st_internal.bin", false},
-        {RomDevice::Sc55St, RomSlot::Program, 0, 0x80000, "sc55st_program.bin", false},
+        {RomDevice::Sc55St, RomSlot::Program, 0, 0x40000, "sc55st_program.bin", false},
         {RomDevice::Sc55St, RomSlot::Wave, 0, 0x200000, "sc55st_wave0.bin", false},
         {RomDevice::Sc55St, RomSlot::Wave, 1, 0x100000, "sc55st_wave1.bin", false},
         {RomDevice::Cm300, RomSlot::Internal, 0, 0x8000, "cm300_internal.bin", false},
@@ -585,12 +585,14 @@ namespace emu88Lib
         // SC-55mk2
         // -----------------------------------------------------------------
         // The H8/532's on-chip boot ROM, the program ROM and the two raw PCM
-        // mask-ROM dumps the board de-scrambles itself. The program ROM states
-        // the GS spec level ("GS-28 VER=2.00") rather than a firmware revision.
+        // mask-ROM dumps the board de-scrambles itself.
         {romDevices(RomDevice::Sc55Mk2, RomDevice::Sc55St, RomDevice::Sc155Mk2), RomSlot::Internal, 0, 0x8000,
          baseLib::MD5("4ca058f7db05f51e97bb30a162e9610a"), "H8/532 boot", false},
         {romDevices(RomDevice::Sc55Mk2, RomDevice::Sc155Mk2), RomSlot::Program, 0, 0x80000,
-         baseLib::MD5("63b24c7193ce34afefce9cec32ac39f0"), "GS-28 2.00", false},
+         baseLib::MD5("63b24c7193ce34afefce9cec32ac39f0"), "1.01, R00233567", false},
+        // The SC-55st program ROM is 256 KiB, half the size of the SC-55mk2.
+        {romDevices(RomDevice::Sc55St), RomSlot::Program, 0, 0x40000, baseLib::MD5("fe2ba2027fa06dca43f2379f18b24a4d"),
+         "1.00, R00561423", false},
         // The six images shingo45endo's sc55mk2-ctf-patcher makes of it, which give the mkII
         // back the SC-55's "alternate voicings": a variation the module has no tone for falls
         // back to the capital tone instead of staying silent. The tone mode picks which
@@ -674,15 +676,12 @@ namespace emu88Lib
          baseLib::MD5("31883de733ad34858bfd262b8fcf2fb6"), "R15199827", false},
         {romDevices(RomDevice::Scb55), RomSlot::Program, 0, 0x40000, baseLib::MD5("89d8263a413326249c042da8bcd0fda1"),
          "R15279828", false},
-        // The RLP-3237's own program 2.01 and its single 16 Mbit wave ROM, and the SC-55st's
-        // program 1.01: none of the three has been dumped here, so they are catalogued from
-        // the SHA-256 digests.
+        // The RLP-3237's own program 2.01 and its single 16 Mbit wave ROM haven't been
+        // dumped here, so they are catalogued from the SHA-256 digests.
         {romDevices(RomDevice::Rlp3237), RomSlot::Program, 0, 0x40000, {}, "2.01, R15209486", false, false, false, {},
          baseLib::SHA256("e0a3d6d9b05e82374a0d289901273ce560ce1ead86459c75f844158b32d204a9")},
         {romDevices(RomDevice::Rlp3237), RomSlot::Wave, 0, 0x200000, {}, "R15279824", false, false, false, {},
          baseLib::SHA256("dae2a8bc0fd3bcaf3f5e3ab6c4c6fd30e2663bf26ca17afe52924874c0afc4e2")},
-        {romDevices(RomDevice::Sc55St), RomSlot::Program, 0, 0x80000, {}, "1.01, R00561413", false, false, false, {},
-         baseLib::SHA256("03517ac0a3b1ad8b69a1a4ee045e0c21da0170027bd1ba1bd3cf72cd017bbe6a")},
         {romDevices(RomDevice::Sc155), RomSlot::Internal, 0, 0x8000, baseLib::MD5("6b74988a79c2a48239809f07a54175b3"),
          "R15199799", false},
         {romDevices(RomDevice::Sc155), RomSlot::Program, 0, 0x40000, baseLib::MD5("5c7c6ab34ef6da079b05a36fd23c9c91"),
