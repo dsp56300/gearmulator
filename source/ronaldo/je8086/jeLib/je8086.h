@@ -60,5 +60,6 @@ namespace jeLib
 		size_t m_sampleReadPos = 0;
 		synthLib::MidiRateLimiter m_midiInRateLimiter;
 		std::vector<synthLib::SMidiEvent> m_midiOutEvents;
+		SysexRemoteControl m_remote;
 	};
 }

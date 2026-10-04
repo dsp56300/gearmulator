@@ -38,11 +38,6 @@ namespace jeLib
 			onParamChanged(_page, _index, _value);
 		});
 
-		m_buttonChangedListener.set(m_sysexRemote.evButtonChanged, [this](const uint32_t _buttonIndex, const bool _pressed)
-		{
-			m_je8086->setButton(static_cast<devices::SwitchType>(_buttonIndex), _pressed);
-		});
-
 		// inform UI about default master volume
 		createMasterVolumeMessage(m_midiOut);
 	}
@@ -103,8 +98,8 @@ namespace jeLib
 			// is never processed, the state will be lost
 			m_state.receive(e.sysex);
 
-			if (!m_sysexRemote.receive(e.sysex))
-				m_midiIn.emplace_back(e);
+			m_sysexRemote.receive(e.sysex);
+			m_midiIn.emplace_back(e);
 		}
 
 		// if master volume was not part of the state, set it to 1.0f to keep compatibility with older versions that did not store it
@@ -172,8 +167,10 @@ namespace jeLib
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
-		if (!m_sysexRemote.receive(_ev.sysex))
-			m_midiIn.emplace_back(_ev);
+		// the master volume is applied here, everything goes to the board too: it consumes the panel frames on the
+		// emulation thread, see Je8086::addMidiEvent
+		m_sysexRemote.receive(_ev.sysex);
+		m_midiIn.emplace_back(_ev);
 		m_state.receive(_ev);
 		return true;
 	}

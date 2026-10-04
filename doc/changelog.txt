@@ -105,6 +105,10 @@ JE8086:
         Library folder (macOS) and copied *.json and *.syx files from there
         into the Patch Manager folder.
 
+- [Fix] EMU-167 With a plugin latency above zero, a click on a panel button
+        reached the emulation at a random moment instead of in order with the
+        notes played around it.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the
