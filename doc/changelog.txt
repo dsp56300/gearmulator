@@ -44,6 +44,12 @@ Framework:
         so, and that the server and the plugins need to be updated together,
         instead of reporting that no server was found.
 
+- [Fix] BUG-10437 Windows: The "Open skins folder in File Browser" button in the
+        settings crashed the host if the folder could not be created, for
+        example when the path to the Documents folder contains characters such
+        as umlauts. The same applied to exporting a skin and to the "Browse..."
+        button for MIDI Learn presets.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,

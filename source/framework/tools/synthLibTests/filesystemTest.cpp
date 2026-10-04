@@ -22,7 +22,7 @@ namespace
 	void removeDirectory(const std::string& _dir)
 	{
 #ifdef _WIN32
-		_rmdir(_dir.c_str());
+		_wrmdir(baseLib::filesystem::utf8ToWide(_dir).c_str());
 #else
 		rmdir(_dir.c_str());
 #endif
@@ -42,6 +42,49 @@ namespace
 	{
 		const std::vector<uint8_t> data(_count, 'x');
 		baseLib::filesystem::writeFile(_file, data);
+	}
+
+	// createDirectory takes UTF-8 like every path in baseLib::filesystem, and reports a folder it cannot create by
+	// returning false. It runs in click handlers, where an exception would take the host down.
+	void testCreateDirectory()
+	{
+		std::cout << "Testing baseLib::filesystem::createDirectory..." << std::endl;
+
+		const auto root = baseLib::filesystem::validatePath(baseLib::filesystem::getCurrentDirectory()) + "synthLibTests_createDirectory";
+		const auto nonAscii = root + "/J\xC3\xBCrgen";	// "J?rgen", the ? being U+00FC in UTF-8
+		const auto file = root + "/file";
+
+		auto cleanup = [&]()
+		{
+			baseLib::filesystem::remove(file);
+			removeDirectory(nonAscii);
+			removeDirectory(root);
+		};
+
+		cleanup();	// in case a previous run was killed before it got to clean up after itself
+
+		baseLib::filesystem::createDirectory(nonAscii);	// creates the root along with it
+		const bool createdNonAscii = baseLib::filesystem::isDirectory(nonAscii);
+
+		writeBytes(file, 1);
+		bool threw = false;
+		bool createdOverFile = true;
+		try
+		{
+			createdOverFile = baseLib::filesystem::createDirectory(file);
+		}
+		catch (...)
+		{
+			threw = true;
+		}
+
+		cleanup();
+
+		TEST_ASSERT(!threw);
+		TEST_ASSERT(!createdOverFile);
+		TEST_ASSERT(createdNonAscii);
+
+		std::cout << "  createDirectory tests passed" << std::endl;
 	}
 }
 
@@ -92,4 +135,6 @@ void testFilesystem()
 	TEST_ASSERT(sortedNames(from50) == std::vector<std::string>({"notes.txt"}));
 
 	std::cout << "  findFiles tests passed" << std::endl;
+
+	testCreateDirectory();
 }
