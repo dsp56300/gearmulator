@@ -429,7 +429,7 @@ namespace xtJucePlugin
 		    const auto index = (static_cast<uint32_t>(data[pluginLib::MidiDataType::Page]) << 7) + static_cast<uint32_t>(data[pluginLib::MidiDataType::ParameterIndex]);
 		    const auto value = data[pluginLib::MidiDataType::ParameterValue];
 
-		    if(m_globalData[index] != value)
+		    if(index < m_globalData.size() && m_globalData[index] != value)
 		    {
 			    LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
 			    m_globalData[index] = value;

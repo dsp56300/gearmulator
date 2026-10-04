@@ -63,6 +63,10 @@ Vavra/Xenia:
         display or LED update from the emulated device. It then showed up on
         the display and the LEDs, and a short message could crash the plugin.
 
+- [Fix] EMU-213 A SysEx global parameter change with an out-of-range parameter
+        number, from the host or a MIDI input, overwrote memory of the plugin
+        and could crash it.
+
 Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them
