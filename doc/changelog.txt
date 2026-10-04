@@ -88,6 +88,10 @@ Xenia:
 - [Fix] Storing sounds could, rarely, make the emulation write past the end of
         its display memory.
 
+- [Imp] EMU-166 When no ROM is found, the message now says which files are
+        needed: the full ROM as one 256 KB .bin file, or its two halves as two
+        128 KB .bin files.
+
 NodalRed2x:
 
 - [Fix] BUG-10400 A state that the host saved after loading one, before any

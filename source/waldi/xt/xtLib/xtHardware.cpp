@@ -24,7 +24,11 @@ namespace xt
 		, m_midi(m_uc)
 	{
 		if(!m_rom.isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing);
+		{
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing,
+				"A Microwave II/XT ROM is required, but was not found: the full ROM as one 256 KB .bin file, or its two "
+				"halves as two 128 KB .bin files.");
+		}
 
 		if (m_useVoiceExpansion)
 		{
