@@ -71,6 +71,12 @@ OsTIrus:
 - [Fix] BUG-10432 TrancyTI skin: FM Mode is greyed out while Oscillator 2 is set
         to HyperSaw, which has no FM, as on the Virus TI.
 
+- [Fix] BUG-10410 TrancyTI skin: The FILTER LINK button was always off after
+        loading a patch, also for patches that have it on, such as -INIT-, and
+        switching it was not saved with the patch. It now works like FILTER
+        LINK in Virus Control and like both filter SELECT buttons on the
+        hardware.
+
 Vavra/Xenia:
 
 - [Fix] EMU-168 SysEx from the host or a MIDI input could be mistaken for a

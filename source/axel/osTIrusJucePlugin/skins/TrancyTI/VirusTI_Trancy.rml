@@ -325,7 +325,7 @@
 			<button id="LinkCutoff" class="jucePos juceButton button_1" data-model="partCurrent" isToggle="1" param="Filter2 Cutoff Link" style="left: 690dp; top: 345dp; width: 79dp; height: 78dp;">
 				<buttonhittest class="jucePos" style="left: 0dp; top: 0dp; width: 199dp; height: 58dp;"/>
 			</button>
-			<button id="LinkEnv" class="jucePos juceButton button_1" isToggle="1" style="left: 1054dp; top: 345dp; width: 79dp; height: 78dp;">
+			<button id="LinkEnv" class="jucePos juceButton button_1" data-model="partCurrent" isToggle="1" param="Filter Select" valueOn="2" valueOff="0" style="left: 1054dp; top: 345dp; width: 79dp; height: 78dp;">
 				<buttonhittest class="jucePos" style="left: 0dp; top: 0dp; width: 199dp; height: 58dp;"/>
 			</button>
 			<input id="VeloModAmp" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Amp Velocity" type="range" style="left: 1137dp; top: 782dp; width: 355dp; height: 63dp;"/>
