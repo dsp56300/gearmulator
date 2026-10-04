@@ -75,6 +75,9 @@ Vavra:
 - [Fix] The audio input had its left and right channels swapped, one of them
         arrived a sample late, and one channel had a glitch every 16 samples.
 
+- [Fix] EMU-162 The emulation could write memory dumps into the working folder
+        of the host, and crashed the host if it could not write there.
+
 Xenia:
 
 - [Fix] Storing sounds could, rarely, make the emulation write past the end of
