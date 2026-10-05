@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <functional>
 
-#include "dsp56kBase/ringbuffer.h"
 #include "dsp56kEmu/types.h"
 
+#include "synthLib/midiInputQueue.h"
 #include "synthLib/midiTypes.h"
 
 namespace hwLib
@@ -68,7 +68,7 @@ namespace wLib
 		int64_t m_remainingUcCycles = 0;
 		double m_remainingUcCyclesD = 0;
 
-		dsp56k::RingBuffer<synthLib::SMidiEvent, 16384, true> m_midiIn;
+		synthLib::MidiInputQueue m_midiIn;
 		uint32_t m_midiOffsetCounter = 0;
 
 		std::vector<dsp56k::TWord> m_dummyInput;

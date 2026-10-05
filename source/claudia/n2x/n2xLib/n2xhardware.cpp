@@ -98,6 +98,8 @@ namespace n2x
 
 	void Hardware::processAudio(uint32_t _frames, const uint32_t _latency)
 	{
+		m_midiIn.refill();
+
 		getMidi().process(_frames);
 
 		ensureBufferSize(_frames);

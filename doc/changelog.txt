@@ -106,6 +106,11 @@ Vavra/Xenia:
         project came back with the sound from before, for a new instance the
         init sound.
 
+- [Fix] BUG-10440 The plugin hung for good when one audio block brought
+        more than 16384 MIDI events, which a host that sets every parameter
+        when it loads a plugin can send. The events now follow over the next
+        blocks, none is lost.
+
 Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them
@@ -124,6 +129,9 @@ Xenia:
         128 KB .bin files.
 
 NodalRed2x:
+
+- [Fix] BUG-10440 The plugin hung for good when one audio block brought
+        more than 16384 MIDI events, as Vavra and Xenia did.
 
 - [Fix] BUG-10400 A state that the host saved after loading one, before any
         audio had been processed, contained the sounds from before the load.

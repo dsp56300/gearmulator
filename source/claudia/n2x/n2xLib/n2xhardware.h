@@ -5,6 +5,7 @@
 #include "n2xrom.h"
 
 #include "synthLib/audioTypes.h"
+#include "synthLib/midiInputQueue.h"
 #include "synthLib/midiTypes.h"
 
 namespace n2x
@@ -91,7 +92,7 @@ namespace n2x
 		bool m_destroy = false;
 
 		// Midi
-		dsp56k::RingBuffer<synthLib::SMidiEvent, 16384, true> m_midiIn;
+		synthLib::MidiInputQueue m_midiIn;
 		uint32_t m_midiOffsetCounter = 0;
 
 		// DSP slowdown
