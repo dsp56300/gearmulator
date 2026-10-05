@@ -75,6 +75,15 @@ namespace n2x
 				LOG("TX Sysex of size " << midiOut.sysex.size());
 			m_state.receive(midiOut);
 		}
+
+		// Arp Hold is not part of any dump and the firmware does not send it, the editor learns about it from here
+		const auto arpHold = m_state.getArpHoldMask();
+		if(arpHold != m_arpHoldMask)
+		{
+			m_arpHoldMask = arpHold;
+			_midiOut.emplace_back(synthLib::MidiEventSource::Internal);
+			_midiOut.back().sysex = State::createArpHoldSysex(arpHold);
+		}
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)

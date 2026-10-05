@@ -140,6 +140,10 @@ namespace n2x
 
 		bool getKnobState(uint8_t& _result, KnobType _type) const;
 
+		// Arp Hold of slots A-D as bits 0-3, read from the firmware
+		uint8_t getArpHoldMask() const;
+		static synthLib::SysexBuffer createArpHoldSysex(uint8_t _mask);
+
 		static bool isSingleDump(const synthLib::SysexBuffer& _dump);
 		static bool isMultiDump(const synthLib::SysexBuffer& _dump);
 

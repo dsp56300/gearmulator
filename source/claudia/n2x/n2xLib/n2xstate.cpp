@@ -14,6 +14,10 @@ namespace n2x
 	static constexpr uint32_t g_mcuMasterTuneOffset = 0x19F0;
 	static constexpr uint32_t g_mcuDspTuneValueOffset = 0x1A58;
 
+	// Arp Hold flag of slot A, nonzero while held, then one per slot (found by comparing RAM with Arp Hold on and off)
+	static constexpr uint32_t g_mcuArpHoldOffset = 0x348F;
+	static constexpr uint32_t g_mcuSlotStride = 0x306;
+
 	static constexpr uint8_t g_singleDefault[] =
 	{
 		72,		// O2Pitch
@@ -359,6 +363,12 @@ namespace n2x
 				m_hardware->pressShiftCombination(ButtonType::FilterDist);
 			return true;
 		}
+		else if (bank == SysexByte::EmuArpHold)
+		{
+			if(m_hardware)
+				m_hardware->pressShiftCombination(ButtonType::Arp);
+			return true;
+		}
 
 		return false;
 	}
@@ -681,6 +691,31 @@ namespace n2x
 		_buffer[SysexIndex::IdxMsgSpec] = _msgSpec;
 
 		_buffer.back() = 0xf7;
+	}
+
+	uint8_t State::getArpHoldMask() const
+	{
+		if(!m_hardware)
+			return 0;
+
+		auto& uc = m_hardware->getUC();
+		const auto a4 = uc.getAReg(4);
+
+		if(a4 == 0)
+			return 0;
+
+		uint8_t mask = 0;
+		for(uint32_t i=0; i<4; ++i)
+		{
+			if(uc.read8(a4 + g_mcuArpHoldOffset + i * g_mcuSlotStride))
+				mask |= static_cast<uint8_t>(1 << i);
+		}
+		return mask;
+	}
+
+	synthLib::SysexBuffer State::createArpHoldSysex(const uint8_t _mask)
+	{
+		return {0xf0, IdClavia, DefaultDeviceId, IdN2X, EmuArpHoldState, _mask, 0xf7};
 	}
 
 	void State::applyMasterTuneToMCU(const uint8_t _masterTune)

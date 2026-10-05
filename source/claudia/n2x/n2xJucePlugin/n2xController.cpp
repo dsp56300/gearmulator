@@ -75,6 +75,13 @@ namespace n2xJucePlugin
 			return parseMultiDump(_msg);
 		}
 
+		if(_msg.size() > n2x::SysexIndex::IdxMsgSpec && _msg[n2x::SysexIndex::IdxMsgType] == n2x::SysexByte::EmuArpHoldState)
+		{
+			m_arpHoldMask = _msg[n2x::SysexIndex::IdxMsgSpec];
+			onArpHoldChanged(m_arpHoldMask);
+			return true;
+		}
+
 		n2x::KnobType knobType;
 		uint8_t knobValue;
 

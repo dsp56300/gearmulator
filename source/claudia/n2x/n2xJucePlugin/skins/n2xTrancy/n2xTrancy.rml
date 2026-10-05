@@ -255,6 +255,10 @@
 				<button id="Lfo2Dest_LFO2_RANDOM" class="jucePos juceButton button_round" data-model="partCurrent" isToggle="1" param="Lfo2Dest" valueOn="5" style="left: 162dp; top: 193dp; width: 70dp; height: 70dp;">
 					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 200dp; height: 50dp;"/>
 				</button>
+				<img id="ArpHoldLabel" class="jucePos" src="arp_hold.png" style="left: 343dp; top: 63dp; width: 143dp; height: 33dp;"/>
+				<button id="ArpHold" class="jucePos juceButton button_round" isToggle="0" style="left: 324dp; top: 45dp; width: 70dp; height: 70dp;">
+					<buttonhittest class="jucePos" style="left: 0dp; top: 20dp; width: 162dp; height: 50dp;"/>
+				</button>
 			</img>
 			<input id="PerfLfo2SyncA" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="PerfLfo2SyncA" type="range" style="left: 352dp; top: 269dp; width: 140dp; height: 40dp;"/>
 			<button id="ArpEnabled" class="jucePos juceButton button_round" isToggle="1" style="left: 485dp; top: 254dp; width: 70dp; height: 70dp;">

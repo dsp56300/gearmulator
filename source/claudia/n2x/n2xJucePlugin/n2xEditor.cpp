@@ -107,6 +107,30 @@ namespace n2xJucePlugin
 			});
 		}
 
+		m_btArpHold = findChild<juceRmlUi::ElemButton>("ArpHold", false);
+
+		if(m_btArpHold)
+		{
+			// toggles Arp Hold of the selected slot, which is the current part. The button only lights up when the
+			// device reports the new state
+			juceRmlUi::EventListener::Add(m_btArpHold, Rml::EventId::Click, [this](Rml::Event&)
+			{
+				m_controller.requestDump(n2x::SysexByte::EmuArpHold, 0);
+			});
+
+			m_onArpHoldChanged.set(m_controller.onArpHoldChanged, [this](const uint8_t&)
+			{
+				updateArpHold();
+			});
+
+			m_onCurrentPartChangedForArpHold.set(m_controller.onCurrentPartChanged, [this](const uint8_t&)
+			{
+				updateArpHold();
+			});
+
+			updateArpHold();
+		}
+
 		m_onSelectedPatchChanged.set(getPatchManager()->onSelectedPatchChanged, [this](const uint32_t& _part, const pluginLib::patchDB::PatchKey& _patchKey)
 		{
 			onSelectedPatchChanged(static_cast<uint8_t>(_part), _patchKey);
@@ -301,6 +325,11 @@ namespace n2xJucePlugin
 
 		if(const auto patch = source->getPatch(_patchKey))
 			setCurrentPatchName(_part, patch->getName());
+	}
+
+	void Editor::updateArpHold() const
+	{
+		m_btArpHold->setChecked(m_controller.isArpHold(m_controller.getCurrentPart()));
 	}
 
 	void Editor::setProgramMode(const bool _programMode)
