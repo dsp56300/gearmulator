@@ -38,9 +38,17 @@ namespace pluginLib
 		m_targetSelectListener.reset();
 	}
 
+	void SoftKnob::update()
+	{
+		if(findTarget() != m_targetParam)
+			bind();
+		else if(m_targetParam)
+			onTargetValueChanged();
+	}
+
 	void SoftKnob::onTargetChanged()
 	{
-		bind();
+		update();
 	}
 
 	void SoftKnob::onSourceValueChanged() const
@@ -59,26 +67,31 @@ namespace pluginLib
 		m_sourceParam->setUnnormalizedValue(v, Parameter::Origin::Derived);
 	}
 
-	void SoftKnob::bind()
+	Parameter* SoftKnob::findTarget() const
 	{
-		unbind();
-
 		const auto* valueList = m_controller.getParameterDescriptions().getValueList(m_sourceParam->getDescription().softKnobTargetList);
 		if(!valueList)
-			return;
+			return nullptr;
 
 		const auto& targets = valueList->texts;
 
 		const auto targetIndex = m_targetSelect->getUnnormalizedValue();
 
 		if(targetIndex < 0 || targetIndex >= static_cast<int>(targets.size()))
-			return;
+			return nullptr;
 
-		const auto targetName = targets[targetIndex];
+		const auto& targetName = targets[targetIndex];
 		if(targetName.empty())
-			return;
+			return nullptr;
 
-		m_targetParam = m_controller.getParameter(targetName, m_part);
+		return m_controller.getParameter(targetName, m_part);
+	}
+
+	void SoftKnob::bind()
+	{
+		unbind();
+
+		m_targetParam = findTarget();
 		if(!m_targetParam)
 			return;
 

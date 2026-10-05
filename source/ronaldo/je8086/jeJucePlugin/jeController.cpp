@@ -390,7 +390,7 @@ namespace jeJucePlugin
 		if (auto name = jeLib::State::getName(_sysex))
 			setPatchName(PatchType::Performance, *name);
 
-		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+		onPresetParametersChanged();
 	}
 
 	void Controller::parsePatch(const pluginLib::SysEx& _sysex, const uint8_t _part)
@@ -441,7 +441,7 @@ namespace jeJucePlugin
 				param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 		}
 
-		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+		onPresetParametersChanged();
 	}
 
 	void Controller::parsePart(const pluginLib::SysEx& _sysex, const uint8_t _part) const
@@ -465,7 +465,7 @@ namespace jeJucePlugin
 				param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 		}
 
-		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+		onPresetParametersChanged();
 	}
 
 	void Controller::parseSystemParameters(const pluginLib::SysEx& _sysex) const

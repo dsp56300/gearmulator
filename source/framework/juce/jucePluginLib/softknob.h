@@ -27,7 +27,11 @@ namespace pluginLib
 		Parameter* getParameter() const { return m_sourceParam; }
 		Parameter* getTargetParameter() const { return m_targetParam; }
 
+		// follow the current target select value and target value now instead of waiting for their change notifications
+		void update();
+
 	private:
+		Parameter* findTarget() const;
 		void onTargetChanged();
 		void onSourceValueChanged() const;
 		void onTargetValueChanged() const;

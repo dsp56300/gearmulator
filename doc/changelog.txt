@@ -50,6 +50,12 @@ Framework:
         as umlauts. The same applied to exporting a skin and to the "Browse..."
         button for MIDI Learn presets.
 
+- [Fix] BUG-10335 VST3 in Cubase: Loading a patch sometimes changed some of its
+        parameters right after it was loaded, so the patch sounded wrong until
+        it was loaded again. Soft knobs, such as the knobs below the display of
+        Xenia, passed values of the previous patch to the parameters that the
+        new patch assigns to them.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,

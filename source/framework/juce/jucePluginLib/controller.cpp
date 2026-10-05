@@ -289,6 +289,17 @@ namespace pluginLib
 				derivedParam->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
 		}
 
+		onPresetParametersChanged();
+	}
+
+	void Controller::onPresetParametersChanged() const
+	{
+		// Soft knobs follow their targets via asynchronous value notifications, bring them up to date before the host
+		// reads all values. Cubase sends what it read back to the plugin later, a soft knob value read before it
+		// followed the new preset would overwrite its new target with the value of the previous preset (BUG-10335)
+		for (const auto& it : m_softKnobs)
+			it.second->update();
+
 		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 	}
 
