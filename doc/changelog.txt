@@ -154,6 +154,11 @@ JE8086:
         reached the emulation at a random moment instead of in order with the
         notes played around it.
 
+- [Fix] BUG-10307 Dense controller data from the host, automation for example,
+        delayed the notes played along with it by seconds, and the delay kept
+        growing. Controllers are now thinned to what a hardware controller
+        sends, the latest value always arriving, so the notes stay on time.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the

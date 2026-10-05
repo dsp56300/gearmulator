@@ -6,6 +6,7 @@
 #include "jeLcd.h"
 #include "sysexRemoteControl.h"
 #include "synthLib/midiBufferParser.h"
+#include "synthLib/midiControllerThinner.h"
 #include "synthLib/midiRateLimiter.h"
 
 namespace jeLib
@@ -59,6 +60,25 @@ namespace jeLib
 		SampleBuffer m_sampleBuffer;
 		size_t m_sampleReadPos = 0;
 		synthLib::MidiRateLimiter m_midiInRateLimiter;
+
+		// A continuous controller reaches the wire at most this often per channel and
+		// controller: 250 times a second, what a hardware controller sends. A host sends
+		// them as densely as it likes, and the limiter above loses nothing, so a dense
+		// stream simply queues - at 31.25 kbaud a CC costs ~1 ms, and a stream beyond the
+		// wire rate delays every note played meanwhile without bound (BUG-10307). The
+		// divisor is the rate onReceiveSample runs at, the same one the limiter is given.
+		static constexpr uint32_t ControllerIntervalSamples = 88200 / 250;
+
+		// Thins dense controller streams before they reach the rate limiter. Fed in
+		// step(), flushed and clocked in onReceiveSample(). Notes and everything else
+		// pass untouched, and a held value goes out before the next message on its channel.
+		synthLib::MidiControllerThinner m_controllerThinner{ControllerIntervalSamples,
+			[this](const synthLib::SMidiEvent& _ev)
+		{
+			m_midiInRateLimiter.write(synthLib::SMidiEvent(_ev));
+		}};
+		uint32_t m_controllerThinnerClock = 0;
+
 		std::vector<synthLib::SMidiEvent> m_midiOutEvents;
 		SysexRemoteControl m_remote;
 	};

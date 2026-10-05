@@ -98,8 +98,12 @@ namespace jeLib
 
 		if (now > 12776184)// && !((++ctr) & 0x3fff))
 		{
+			// Dense controller streams are thinned on the way in, see
+			// ControllerIntervalSamples - the limiter itself drops nothing, so without
+			// this a host sending faster than the wire backs up without bound and
+			// delays every note behind it.
 			for (auto& m : m_midiInEvents)
-				m_midiInRateLimiter.write(std::move(m));
+				m_controllerThinner.write(m, m_controllerThinnerClock);
 			m_midiInEvents.clear();
 		}
 
@@ -144,6 +148,11 @@ namespace jeLib
 
 	void Je8086::onReceiveSample(int32_t _left, int32_t _right)
 	{
+		// Hand over any controller value held back whose interval has passed, so it
+		// reaches the limiter in time to be drained below.
+		++m_controllerThinnerClock;
+		m_controllerThinner.flush(m_controllerThinnerClock);
+
 		m_midiInRateLimiter.processSample();
 		m_sampleBuffer.emplace_back(_left, _right);
 	}
