@@ -98,6 +98,15 @@ namespace n2xJucePlugin
 			});
 		}
 
+		if(auto* bt = findChild("Panic", false))
+		{
+			juceRmlUi::EventListener::Add(bt, Rml::EventId::Click, [this](Rml::Event&)
+			{
+				// the emulator commands share the format of a dump request
+				m_controller.requestDump(n2x::SysexByte::EmuPanic, 0);
+			});
+		}
+
 		m_onSelectedPatchChanged.set(getPatchManager()->onSelectedPatchChanged, [this](const uint32_t& _part, const pluginLib::patchDB::PatchKey& _patchKey)
 		{
 			onSelectedPatchChanged(static_cast<uint8_t>(_part), _patchKey);

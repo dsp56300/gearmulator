@@ -136,6 +136,12 @@ NodalRed2x:
         98,200 Hz. Tuning and everything time-based, LFOs, envelopes and the
         arpeggiator, now match the hardware.
 
+- [Imp] BUG-10445 BUG-10216 A PANIC button below the page tabs does what
+        SHIFT + DISTORTION does on the hardware: every note stops, also held
+        and sustained ones. The Nord Lead 2X ignores the MIDI messages All
+        Notes Off and All Sound Off, and so does the emulation, so this is
+        the way to stop notes that hang.
+
 JE8086:
 
 - [Fix] The first notes could start late when the host sent MIDI tuning data

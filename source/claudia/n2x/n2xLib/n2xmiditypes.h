@@ -18,6 +18,7 @@ namespace n2x
 		EmuGetPotsPosition = 91,
 		EmuSetPartCC = 92,
 		EmuSetMasterTune = 93,
+		EmuPanic = 94,				// the hardware's Panic, SHIFT + DISTORTION
 	};
 
 	enum SysexIndex

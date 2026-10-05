@@ -141,10 +141,11 @@ namespace n2x
 		const auto id = static_cast<uint32_t>(_button);
 		const auto index = id>>9;
 		const auto mask = id & 0xff;
+		// the firmware reads a pressed button as a cleared bit
 		if(_pressed)
-			m_buttonStates[index] |= mask;
-		else
 			m_buttonStates[index] &= ~mask;
+		else
+			m_buttonStates[index] |= mask;
 	}
 
 	bool FrontPanelCS6::getButtonState(ButtonType _button) const

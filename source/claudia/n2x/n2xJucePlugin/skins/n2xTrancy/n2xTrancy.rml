@@ -81,6 +81,7 @@
 		<button id="button_store" class="jucePos juceButton button_red" isToggle="0" style="left: 560dp; top: 1065dp; width: 99dp; height: 47dp;"/>
 		<button id="PresetNext" class="jucePos juceButton button_black" isToggle="0" style="left: 225dp; top: 910dp; width: 99dp; height: 47dp;"/>
 		<button id="PresetPrev" class="jucePos juceButton button_black" isToggle="0" style="left: 225dp; top: 957dp; width: 99dp; height: 47dp;"/>
+		<button id="Panic" class="jucePos juceButton button_panic" isToggle="0" style="left: 2095dp; top: 990dp; width: 109dp; height: 40dp;"/>
 		<div id="PatchName" class="jucePos juceLabel txt" style="left: 380dp; top: 925dp; width: 150dp; height: 62dp; line-height: 62dp;">666</div>
 		<div id="FocusedParameterValue" class="jucePos juceLabel txt1" style="left: 260dp; top: 1145dp; width: 256.7dp; height: 52dp; line-height: 52dp;">-42</div>
 		<div id="FocusedParameterName" class="jucePos juceLabel txt2" style="left: 40dp; top: 1145dp; width: 600dp; height: 52dp; line-height: 52dp;">Osc</div>

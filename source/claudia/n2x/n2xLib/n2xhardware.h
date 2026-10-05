@@ -38,6 +38,9 @@ namespace n2x
 		bool getButtonState(ButtonType _type) const;
 		void setButtonState(ButtonType _type, bool _pressed);
 
+		// Presses SHIFT, then _button while SHIFT is held, the way the hardware is played. Panic is SHIFT + FilterDist
+		void pressShiftCombination(ButtonType _button);
+
 		uint8_t getKnobPosition(KnobType _knob) const;
 		void setKnobPosition(KnobType _knob, uint8_t _value);
 
@@ -55,6 +58,7 @@ namespace n2x
 		void syncUCtoDSP();
 		void ucThreadFunc();
 		void advanceSamples(uint32_t _samples, uint32_t _latency);
+		void processShiftCombination(uint32_t _frames);
 
 		Rom m_rom;
 		Microcontroller m_uc;
@@ -96,5 +100,10 @@ namespace n2x
 		dsp56k::SpscSemaphoreWithCount m_haltDSPSem;
 
 		bool m_bootFinished = false;
+
+		// SHIFT combination: 0 = idle, then SHIFT is down, the button is down, the button is up again
+		uint32_t m_shiftCombinationStep = 0;
+		uint32_t m_shiftCombinationWait = 0;
+		ButtonType m_shiftCombinationButton = ButtonType::Shift;
 	};
 }

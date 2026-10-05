@@ -13,6 +13,9 @@ namespace n2x
 	static_assert((g_syncEsaiFrameRate & (g_syncEsaiFrameRate - 1)) == 0, "esai frame sync rate must be power of two");
 	static_assert(g_syncHaltDspEsaiThreshold >= g_syncEsaiFrameRate * 2, "esai DSP halt threshold must be greater than two times the sync rate");
 
+	// time between the steps of a SHIFT combination, the firmware has to see each of them
+	constexpr uint32_t g_shiftCombinationStepFrames = g_samplerate * 60 / 1000;
+
 	Rom initRom(const std::vector<uint8_t>& _romData, const std::string& _romName)
 	{
 		if(_romData.empty())
@@ -123,6 +126,7 @@ namespace n2x
 			const auto processCount = std::min(_frames, static_cast<uint32_t>(64));
 			_frames -= processCount;
 
+			processShiftCombination(processCount);
 			advanceSamples(processCount, _latency);
 
 			const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
@@ -361,6 +365,46 @@ namespace n2x
 	void Hardware::setButtonState(const ButtonType _type, const bool _pressed)
 	{
 		m_uc.getFrontPanel().setButtonState(_type, _pressed);
+	}
+
+	void Hardware::pressShiftCombination(const ButtonType _button)
+	{
+		if(m_shiftCombinationStep)
+			return;
+
+		setButtonState(ButtonType::Shift, true);
+
+		m_shiftCombinationButton = _button;
+		m_shiftCombinationStep = 1;
+		m_shiftCombinationWait = g_shiftCombinationStepFrames;
+	}
+
+	void Hardware::processShiftCombination(const uint32_t _frames)
+	{
+		if(!m_shiftCombinationStep)
+			return;
+
+		if(m_shiftCombinationWait > _frames)
+		{
+			m_shiftCombinationWait -= _frames;
+			return;
+		}
+
+		m_shiftCombinationWait = g_shiftCombinationStepFrames;
+
+		switch(m_shiftCombinationStep++)
+		{
+		case 1:
+			setButtonState(m_shiftCombinationButton, true);
+			break;
+		case 2:
+			setButtonState(m_shiftCombinationButton, false);
+			break;
+		default:
+			setButtonState(ButtonType::Shift, false);
+			m_shiftCombinationStep = 0;
+			break;
+		}
 	}
 
 	uint8_t Hardware::getKnobPosition(KnobType _knob) const

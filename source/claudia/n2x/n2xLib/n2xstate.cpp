@@ -353,6 +353,12 @@ namespace n2x
 				return true;
 			}
 		}
+		else if (bank == SysexByte::EmuPanic)
+		{
+			if(m_hardware)
+				m_hardware->pressShiftCombination(ButtonType::FilterDist);
+			return true;
+		}
 
 		return false;
 	}
