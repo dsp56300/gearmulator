@@ -82,6 +82,11 @@ Osirus:
         Keytrack of the two filters move together, and the setting is saved
         with the patch.
 
+- [Fix] BUG-10305 Galaxpel skin: With the filter link on, the Env Amount
+        Velocity and Resonance Velocity knobs of the two filters move together,
+        in the filter section and on the ARP page. Before, only Filter 1's Env
+        Amount Velocity moved Filter 2's.
+
 OsTIrus:
 
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
