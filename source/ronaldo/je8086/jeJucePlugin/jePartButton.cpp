@@ -26,7 +26,8 @@ namespace jeJucePlugin
 
 		const auto* savePatchDesc = jucePluginEditorLib::patchManager::SavePatchDesc::fromDragSource(*_source);
 
-		if (!savePatchDesc->isPartValid())
+		// a file drag, for example, has no patch description, the base accepted it already
+		if (!savePatchDesc || !savePatchDesc->isPartValid())
 			return true;
 
 		return isPerformance() == isPerformance(static_cast<uint8_t>(savePatchDesc->getPart()));

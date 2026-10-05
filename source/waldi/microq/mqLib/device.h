@@ -24,6 +24,7 @@ namespace mqLib
 		bool isValid() const override;
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
+		bool getStateWithPendingMidi(std::vector<uint8_t>& _state, synthLib::StateType _type, const std::vector<synthLib::SMidiEvent>& _pendingMidi) override;
 		uint32_t getChannelCountIn() override;
 		uint32_t getChannelCountOut() override;
 		bool canModifyDspClock() const override { return true; }

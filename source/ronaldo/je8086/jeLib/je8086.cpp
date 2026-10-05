@@ -51,6 +51,11 @@ namespace jeLib
 	, m_midiOutParser(synthLib::MidiEventSource::Device)
 	, m_midiInRateLimiter([this](const uint8_t _byte) { m_machine.periph().receive(0, _byte); })
 	{
+		m_remote.evButtonChanged.addListener([this](const uint32_t _button, const bool _pressed)
+		{
+			setButton(static_cast<devices::SwitchType>(_button), _pressed);
+		});
+
 		auto& bus = m_machine.bus();
 		m_machine.map_rom(0, static_cast<uint32_t>(_romData.size()));
 		bus.load(0, _romData.data(), _romData.size());
@@ -147,6 +152,10 @@ namespace jeLib
 			return;
 		}
 
+		// panel buttons are pressed here, on the emulation thread (BoardThread), in order with the MIDI around them
+		if (m_remote.receive(_event))
+			return;
+
 		m_midiInEvents.push_back(_event);
 	}
 
@@ -210,8 +219,12 @@ namespace jeLib
 	{
 		if (m_machine.now() > MidiInputHoldStates)
 		{
+			// Dense controller streams are thinned on the way in, see
+			// ControllerIntervalSamples - the limiter itself drops nothing, so without
+			// this a host sending faster than the wire backs up without bound and
+			// delays every note behind it.
 			for (auto& m : m_midiInEvents)
-				m_midiInRateLimiter.write(std::move(m));
+				m_controllerThinner.write(m, m_controllerThinnerClock);
 			m_midiInEvents.clear();
 		}
 
@@ -247,6 +260,11 @@ namespace jeLib
 
 	void Je8086::onReceiveSample(const int32_t _left, const int32_t _right)
 	{
+		// Hand over any controller value held back whose interval has passed, so it
+		// reaches the limiter in time to be drained below.
+		++m_controllerThinnerClock;
+		m_controllerThinner.flush(m_controllerThinnerClock);
+
 		m_midiInRateLimiter.processSample();
 		m_sampleBuffer.emplace_back(_left, _right);
 	}

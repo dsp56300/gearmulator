@@ -264,10 +264,15 @@ namespace jucePluginEditorLib
 
 	juce::File Processor::initConfigFile(const juce::PropertiesFile::Options& _o) const
 	{
+		juce::File newFile(getConfigFile(false));
+
+		// Without options there never was an old location. Their default file is a folder outside the product's own,
+		// and on macOS asking for it asserts
+		if(_o.applicationName.isEmpty())
+			return newFile;
+
 		// copy from old location to new if still exists
 		juce::File oldFile(_o.getDefaultFile());
-
-		juce::File newFile(getConfigFile(false));
 
 		if(oldFile.existsAsFile())
 		{

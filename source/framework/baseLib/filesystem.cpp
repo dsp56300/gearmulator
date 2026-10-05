@@ -97,7 +97,17 @@ namespace baseLib::filesystem
 		}
         return mkdir(_dir.c_str(), dirAttribs) == 0;
 #else
-        return std::filesystem::create_directories(_dir);
+		// _dir is UTF-8, which the std::string overload would decode with the ANSI code page. Never throws: this
+		// runs in click handlers, where an exception goes straight into the message loop of the host and kills it
+		try
+		{
+			std::error_code ec;
+			return std::filesystem::create_directories(std::filesystem::u8path(_dir), ec);
+		}
+		catch (const std::exception&)	// u8path, on a string that is not UTF-8
+		{
+			return false;
+		}
 #endif
     }
 

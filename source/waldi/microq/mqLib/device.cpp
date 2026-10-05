@@ -60,6 +60,11 @@ namespace mqLib
 		return m_state.setState(_state, _type);
 	}
 
+	bool Device::getStateWithPendingMidi(std::vector<uint8_t>& _state, const synthLib::StateType _type, const std::vector<synthLib::SMidiEvent>& _pendingMidi)
+	{
+		return wLib::State::getStateWithPendingMidi(m_state, _state, _type, _pendingMidi);
+	}
+
 	uint32_t Device::getChannelCountIn()
 	{
 		return 2;

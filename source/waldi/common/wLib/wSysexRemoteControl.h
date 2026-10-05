@@ -19,6 +19,13 @@ namespace wLib
 		explicit SysexRemoteControl(uint8_t _deviceTypeId);
 		~SysexRemoteControl() override = default;
 
+		// A panel frame as the device sends it: header for this device type, command, exactly _payloadSize bytes, end
+		static bool isPanelFrame(const synthLib::SysexBuffer& _msg, const uint8_t _deviceTypeId, const size_t _payloadSize)
+		{
+			return _msg.size() == HeaderSize + _payloadSize + 1 && _msg.front() == 0xf0 && _msg[1] == IdWaldorf &&
+				_msg[2] == _deviceTypeId && _msg.back() == 0xf7;
+		}
+
 	protected:
 		template<typename CommandType>
 		void createSysexHeader(synthLib::SysexBuffer& _dst, CommandType _cmd) const

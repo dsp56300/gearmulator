@@ -175,12 +175,14 @@ namespace mqLib
 
 	void MqMc::write16(uint32_t addr, uint16_t val)
 	{
+#ifdef _DEBUG
 		// Dump memory if DSP test reaches error state
 		if(addr == 0x384A8)
 		{
 			if(val > 0 && val <= 0xff)
 				dumpMemory((std::string("DSPTest_Error_") + std::to_string(val)).c_str());
 		}
+#endif
 
 		if(addr < g_memorySize)
 		{
@@ -222,12 +224,14 @@ namespace mqLib
 
 	void MqMc::write8(uint32_t addr, uint8_t val)
 	{
+#ifdef _DEBUG
 		// Dump memory if DSP test reaches error state
 		if(addr == 0x384A8)
 		{
 			if(val > 0)
 				dumpMemory((std::string("DSPTest_Error_") + std::to_string(val)).c_str());
 		}
+#endif
 
 		if(addr < g_memorySize)
 		{
@@ -269,6 +273,8 @@ namespace mqLib
 	void MqMc::dumpMemory(const char* _filename) const
 	{
 		FILE* hFile = fopen((std::string(_filename) + ".bin").c_str(), "wb");
+		if(!hFile)
+			return;
 		fwrite(m_memory.data(), 1, m_memory.size(), hFile);
 		fclose(hFile);
 	}
@@ -276,6 +282,8 @@ namespace mqLib
 	void MqMc::dumpROM(const char* _filename) const
 	{
 		FILE* hFile = fopen((std::string(_filename) + ".bin").c_str(), "wb");
+		if(!hFile)
+			return;
 		fwrite(m_romRuntimeData.data(), 1, ROM::size(), hFile);
 		fclose(hFile);
 	}
@@ -302,14 +310,18 @@ namespace mqLib
 
 	void MqMc::onReset()
 	{
+#ifdef _DEBUG
 		dumpMemory("dump_reset");
+#endif
 	}
 
 	uint32_t MqMc::onIllegalInstruction(uint32_t opcode)
 	{
+#ifdef _DEBUG
 		std::stringstream ss;
 		ss << "illegalInstruction_" << MCHEXN(getPC(), 8) << "_op" << MCHEXN(opcode,8);
 		dumpMemory(ss.str().c_str());
+#endif
 
 		return Mc68k::onIllegalInstruction(opcode);
 	}

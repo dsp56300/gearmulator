@@ -25,6 +25,26 @@ namespace bridgeClient
 	static constexpr uint32_t g_udpTimeout = 5;	// seconds
 	static constexpr uint32_t g_tcpTimeout = 5;	// seconds
 
+	// why a server that answered the discovery cannot be used
+	static std::string describeRefusal(const std::string& _host, const bridgeLib::ServerInfo& _si,
+		const bridgeLib::Error& _err)
+	{
+		const std::string found = "Found a DSPBridge server at " + _host + ", but ";
+
+		if(_err.code != bridgeLib::ErrorCode::WrongProtocolVersion)
+			return found + "it cannot host this plugin: " + _err.msg;
+
+		const auto ours = std::to_string(bridgeLib::g_protocolVersion);
+
+		// current servers refuse another protocol version with an error that does not carry their own version, only a
+		// server that answers with its ServerInfo tells it
+		const std::string versions = _si.protocolVersion
+			? "it uses bridge protocol " + std::to_string(_si.protocolVersion) + " and this plugin uses " + ours
+			: "it uses another bridge protocol than this plugin, which uses " + ours;
+
+		return found + versions + ". Update DSPBridgeServer and the plugins together so that both use the same version.";
+	}
+
 	RemoteDevice::RemoteDevice(const synthLib::DeviceCreateParams& _params, bridgeLib::PluginDesc&& _desc, const std::string& _host/* = {}*/, uint32_t _port/* = 0*/) : Device(_params), m_pluginDesc(std::move(_desc))
 	{
 		getDeviceCreateParams().romHash = baseLib::MD5(getDeviceCreateParams().romData);
@@ -221,10 +241,17 @@ namespace bridgeClient
 
 		if(_host.empty() || !_port)
 		{
+			// reported instead of "No server found" if a server answered but none can be used
+			std::string refusal;
+
 			UdpClient udpClient(m_pluginDesc, [&](const std::string& _hostname, const bridgeLib::ServerInfo& _si, const bridgeLib::Error& _err)
 			{
 				if(_err.code != bridgeLib::ErrorCode::Ok)
+				{
+					std::unique_lock lock(m_cvWaitMutex);
+					refusal = describeRefusal(_hostname, _si, _err);
 					return;
+				}
 				{
 					std::unique_lock lock(m_cvWaitMutex);
 					si = _si;
@@ -240,7 +267,7 @@ namespace bridgeClient
 				return si.protocolVersion == bridgeLib::g_protocolVersion;
 			}))
 			{
-				throw synthLib::DeviceException(synthLib::DeviceError::RemoteUdpConnectFailed, "No server found");
+				throw synthLib::DeviceException(synthLib::DeviceError::RemoteUdpConnectFailed, refusal.empty() ? "No server found" : refusal);
 			}
 		}
 		else

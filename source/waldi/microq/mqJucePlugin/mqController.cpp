@@ -264,7 +264,8 @@ namespace mqJucePlugin
 	        case mqLib::SysexCommand::EmuLCD:
 	        case mqLib::SysexCommand::EmuLCDCGRata:
 	        case mqLib::SysexCommand::EmuLEDs:
-	            if(m_frontPanel)
+	            // the device sends its panel frames as Internal, the same command bytes from anywhere else are dropped
+	            if(m_frontPanel && _source == synthLib::MidiEventSource::Internal)
 	                m_frontPanel->processSysex(_msg);
 	            return true;
 	        default:
@@ -319,7 +320,7 @@ namespace mqJucePlugin
 		    const auto index = (static_cast<uint32_t>(data[pluginLib::MidiDataType::Page]) << 7) + static_cast<uint32_t>(data[pluginLib::MidiDataType::ParameterIndex]);
 		    const auto value = data[pluginLib::MidiDataType::ParameterValue];
 
-		    if(m_globalData[index] != value)
+		    if(index < m_globalData.size() && m_globalData[index] != value)
 		    {
 			    LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
 			    m_globalData[index] = value;

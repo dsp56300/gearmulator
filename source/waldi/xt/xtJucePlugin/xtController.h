@@ -143,7 +143,7 @@ namespace xtJucePlugin
 		Patch m_singleEditBuffer;
 		std::array<Patch,8> m_singleEditBuffers;
 		Patch m_multiEditBuffer;
-		std::array<uint8_t, 39> m_globalData{};
+		std::array<uint8_t, 32> m_globalData{};	// the data bytes of a global dump, 39 is the size of the whole dump
 		std::array<uint8_t, 1> m_modeData{};
 		std::array<uint32_t, 8> m_currentSingles{0};
 		uint32_t m_currentSingle = 0;

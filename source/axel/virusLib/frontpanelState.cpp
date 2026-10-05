@@ -7,6 +7,8 @@
 #include "dsp56kEmu/dsp.h"
 #include "dsp56kEmu/peripherals.h"
 
+#include <algorithm>
+
 namespace virusLib
 {
 	static constexpr std::initializer_list<uint8_t> g_midiDumpHeader = {0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, DUMP_EMU_SYNTHSTATE};
@@ -95,7 +97,11 @@ namespace virusLib
 
 	bool FrontpanelState::fromMidiEvent(const synthLib::SysexBuffer& _sysex)
 	{
-		if(_sysex.size() < g_midiDumpHeader.size())
+		// only what toMidiEvent writes: header, MIDI activity in three bytes, the floats, end of sysex
+		if(_sysex.size() != g_midiDumpHeader.size() + 3 + sizeof(m_lfoPhases) + sizeof(m_logo) + sizeof(m_bpm) + 1)
+			return false;
+
+		if(!std::equal(g_midiDumpHeader.begin(), g_midiDumpHeader.end(), _sysex.begin()))
 			return false;
 
 		const auto* s = &_sysex[g_midiDumpHeader.size()];

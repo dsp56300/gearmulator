@@ -88,6 +88,14 @@ namespace synthLib
 		virtual bool getState(std::vector<uint8_t>& _state, StateType _type) = 0;
 		virtual bool setState(const std::vector<uint8_t>& _state, StateType _type) = 0;
 		virtual bool setStateFromUnknownCustomData(const std::vector<uint8_t> &_state) { return false; }
+
+		// Plugin::getState() calls this with the MIDI events that wait for the next process() call. A device that
+		// answers getState() from its own copy of the patches includes the edits among them, so that a host that
+		// saves while it does not process the plugin (a silent track, an inactive slot) does not lose them
+		virtual bool getStateWithPendingMidi(std::vector<uint8_t>& _state, const StateType _type, const std::vector<SMidiEvent>& /*_pendingMidi*/)
+		{
+			return getState(_state, _type);
+		}
 #endif
 
 		virtual uint32_t getChannelCountIn() = 0;

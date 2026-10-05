@@ -8,6 +8,8 @@
 #include "mqLib/device.h"
 #include "mqLib/mqmiditypes.h"
 
+#include "wLib/wSysexRemoteControl.h"
+
 #include "dsp56kBase/fastmath.h"
 #include "juceRmlUi/rmlElemButton.h"
 
@@ -172,9 +174,12 @@ namespace mqJucePlugin
 
 	void FrontPanel::processLCDUpdate(const synthLib::SysexBuffer& _msg) const
 	{
-		const auto* data = &_msg[5];
-
 		std::array<uint8_t, 40> d{};
+
+		if(!wLib::SysexRemoteControl::isPanelFrame(_msg, mqLib::IdMicroQ, d.size()))
+			return;
+
+		const auto* data = &_msg[5];
 
 		for(size_t i=0; i<d.size(); ++i)
 			d[i] = data[i];
@@ -184,9 +189,13 @@ namespace mqJucePlugin
 
 	void FrontPanel::processLCDCGRamUpdate(const synthLib::SysexBuffer& _msg) const
 	{
+		std::array<uint8_t, 64> d{};
+
+		if(!wLib::SysexRemoteControl::isPanelFrame(_msg, mqLib::IdMicroQ, d.size()))
+			return;
+
 		const auto *data = &_msg[5];
 
-		std::array<uint8_t, 64> d{};
 		for (size_t i = 0; i < d.size(); ++i)
 			d[i] = data[i];
 
@@ -195,7 +204,10 @@ namespace mqJucePlugin
 
 	void FrontPanel::processLedUpdate(const synthLib::SysexBuffer& _msg) const
 	{
-		const uint32_t leds = 
+		if(!wLib::SysexRemoteControl::isPanelFrame(_msg, mqLib::IdMicroQ, 4))
+			return;
+
+		const uint32_t leds =
 			(static_cast<uint32_t>(_msg[5]) << 24) |
 			(static_cast<uint32_t>(_msg[6]) << 16) |
 			(static_cast<uint32_t>(_msg[7]) << 8) |

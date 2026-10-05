@@ -179,7 +179,7 @@ namespace synthLib
 	}
 
 #if !SYNTHLIB_DEMO_MODE
-	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type) const
+	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type)
 	{
 		// Hosts save and load on their own thread, usually while audio is running. Without the lock, the device's state
 		// code and process() work on the same data at the same time
@@ -191,7 +191,11 @@ namespace synthLib
 		_state.push_back(g_stateVersion);
 		_state.push_back(_type);
 
-		return m_device->getState(_state, _type);
+		// What the host or the editor sent since the last process() call still waits in the queue, but it is part of
+		// the state already: a host that saves before it processes the plugin again would save without it
+		processMidiInEvents();
+
+		return m_device->getStateWithPendingMidi(_state, _type, m_midiIn);
 	}
 
 	bool Plugin::setState(const std::vector<uint8_t>& _state) const

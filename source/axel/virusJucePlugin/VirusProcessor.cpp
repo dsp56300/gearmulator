@@ -21,8 +21,10 @@ namespace virus
 
 	VirusProcessor::~VirusProcessor()
 	{
-		destroyController();
+		// The editor's patch manager unhooks itself from the controller when it goes, so the editor goes first.
+		// The controller then has to go here, before evRomChanged, which it is subscribed to
 		destroyEditorState();
+		destroyController();
 	}
 
 	//==============================================================================

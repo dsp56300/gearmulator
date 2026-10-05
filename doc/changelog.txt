@@ -39,6 +39,17 @@ Framework:
 - [Fix] Windows: the plugin files reported version 2.2.14 in their file
         properties no matter which release they were from.
 
+- [Imp] EMU-170 DSPBridge: When the plugin searches the network for a server
+        and only finds one with another bridge protocol version, it now says
+        so, and that the server and the plugins need to be updated together,
+        instead of reporting that no server was found.
+
+- [Fix] BUG-10437 Windows: The "Open skins folder in File Browser" button in the
+        settings crashed the host if the folder could not be created, for
+        example when the path to the Documents folder contains characters such
+        as umlauts. The same applied to exporting a skin and to the "Browse..."
+        button for MIDI Learn presets.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,
@@ -49,6 +60,22 @@ Osirus/OsTIrus:
         the plugin sent a dump of all its banks to its MIDI output a moment
         later. Settings saved with an older version need to be saved again.
 
+- [Fix] EMU-161 Certain short SysEx messages from the host or a MIDI input could
+        crash the plugin.
+
+- [Fix] BUG-10309 Galaxpel and TrancyTI skins: While filter 1 is in one of the
+        Analog modes, Saturation shows "Analog Overdrive" and cannot be changed,
+        as in Virus Control. In these modes the Virus ignores the saturation
+        type and uses the saturation of its analog filter instead.
+
+Osirus:
+
+- [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter
+        section did nothing. It now selects both filters, as pressing both
+        filter SELECT buttons does on the Virus: Resonance, Env Amount and
+        Keytrack of the two filters move together, and the setting is saved
+        with the patch.
+
 OsTIrus:
 
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
@@ -57,15 +84,44 @@ OsTIrus:
 - [Fix] BUG-10432 TrancyTI skin: FM Mode is greyed out while Oscillator 2 is set
         to HyperSaw, which has no FM, as on the Virus TI.
 
+- [Fix] BUG-10410 TrancyTI skin: The FILTER LINK button was always off after
+        loading a patch, also for patches that have it on, such as -INIT-, and
+        switching it was not saved with the patch. It now works like FILTER
+        LINK in Virus Control and like both filter SELECT buttons on the
+        hardware.
+
+Vavra/Xenia:
+
+- [Fix] EMU-168 SysEx from the host or a MIDI input could be mistaken for a
+        display or LED update from the emulated device. It then showed up on
+        the display and the LEDs, and a short message could crash the plugin.
+
+- [Fix] EMU-213 A SysEx global parameter change with an out-of-range parameter
+        number, from the host or a MIDI input, overwrote memory of the plugin
+        and could crash it.
+
+- [Fix] BUG-10196 A sound that was loaded or edited while the host did not
+        process the plugin, for example in a Poly Grid FX slot in Bitwig, was
+        not saved with the project until audio had been processed. The
+        project came back with the sound from before, for a new instance the
+        init sound.
+
 Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them
         arrived a sample late, and one channel had a glitch every 16 samples.
 
+- [Fix] EMU-162 The emulation could write memory dumps into the working folder
+        of the host, and crashed the host if it could not write there.
+
 Xenia:
 
 - [Fix] Storing sounds could, rarely, make the emulation write past the end of
         its display memory.
+
+- [Imp] EMU-166 When no ROM is found, the message now says which files are
+        needed: the full ROM as one 256 KB .bin file, or its two halves as two
+        128 KB .bin files.
 
 NodalRed2x:
 
@@ -74,6 +130,11 @@ NodalRed2x:
         Logic Pro does that with projects and plug-in settings, so recalling
         them later brought back the previous sounds. Settings saved with an
         older version keep the wrong sounds and need to be saved again.
+
+- [Fix] BUG-10446 The emulation ran 0.1 % slower than the hardware, so it
+        played 1.8 cents flat. The Nord Lead 2X runs at 98,304 Hz, not at
+        98,200 Hz. Tuning and everything time-based, LFOs, envelopes and the
+        arpeggiator, now match the hardware.
 
 JE8086:
 
@@ -96,6 +157,23 @@ JE8086:
 - [Fix] The first notes could start late when the host sent MIDI tuning data
         ahead of them, they had to wait until all of it was received. The
         JP-8000 does not support MIDI tuning, the data is now ignored.
+
+- [Fix] EMU-164 Dragging a file onto a part name crashed the plugin. Dropping a
+        file with one patch onto a part name now loads it into that part.
+
+- [Fix] EMU-165 The first start, while the Patch Manager had no database yet,
+        deleted *.cache files directly in the AppData folder (Windows) or the
+        Library folder (macOS) and copied *.json and *.syx files from there
+        into the Patch Manager folder.
+
+- [Fix] EMU-167 With a plugin latency above zero, a click on a panel button
+        reached the emulation at a random moment instead of in order with the
+        notes played around it.
+
+- [Fix] BUG-10307 Dense controller data from the host, automation for example,
+        delayed the notes played along with it by seconds, and the delay kept
+        growing. Controllers are now thinned to what a hardware controller
+        sends, the latest value always arriving, so the notes stay on time.
 
 88emuPlayer:
 
