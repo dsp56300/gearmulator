@@ -774,6 +774,8 @@ namespace mqLib
 
 	void State::sendSysex(const std::initializer_list<uint8_t>& _data) const
 	{
+		if (m_offline)
+			return;
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
 		m_mq.sendMidiEvent(e);
@@ -781,6 +783,8 @@ namespace mqLib
 
 	void State::sendSysex(const SysEx& _data) const
 	{
+		if (m_offline)
+			return;
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
 		m_mq.sendMidiEvent(e);

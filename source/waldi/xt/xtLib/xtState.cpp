@@ -238,9 +238,10 @@ namespace xt
 		case SysexCommand::GlobalParameterChange:	return modifyDump(DumpType::Global, _data);
 		case SysexCommand::ModeParameterChange:		return modifyDump(DumpType::Mode, _data);
 
-		case SysexCommand::WaveDumpP:				return m_wavePreview.receiveWave(_data);
-		case SysexCommand::WaveCtlDumpP:			return m_wavePreview.receiveWaveControlTable(_data);
-		case SysexCommand::WavePreviewMode:			return m_wavePreview.receiveWavePreviewMode(_data);
+		// the preview is not part of the state, a copy that builds one must not touch it, see wLib::State::getStateWithPendingMidi()
+		case SysexCommand::WaveDumpP:				return !m_offline && m_wavePreview.receiveWave(_data);
+		case SysexCommand::WaveCtlDumpP:			return !m_offline && m_wavePreview.receiveWaveControlTable(_data);
+		case SysexCommand::WavePreviewMode:			return !m_offline && m_wavePreview.receiveWavePreviewMode(_data);
 
 /*		case SysexCommand::EmuLCD:
 		case SysexCommand::EmuLEDs:
@@ -957,6 +958,8 @@ namespace xt
 
 	void State::sendSysex(const std::initializer_list<uint8_t>& _data) const
 	{
+		if (m_offline)
+			return;
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
 		m_xt.sendMidiEvent(e);
@@ -964,6 +967,8 @@ namespace xt
 
 	void State::sendSysex(const SysEx& _data) const
 	{
+		if (m_offline)
+			return;
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
 		m_xt.sendMidiEvent(e);
@@ -971,6 +976,8 @@ namespace xt
 
 	void State::sendSysex(SysEx&& _data) const
 	{
+		if (m_offline)
+			return;
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = std::move(_data);
 		m_xt.sendMidiEvent(e);

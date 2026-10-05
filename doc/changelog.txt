@@ -100,6 +100,12 @@ Vavra/Xenia:
         number, from the host or a MIDI input, overwrote memory of the plugin
         and could crash it.
 
+- [Fix] BUG-10196 A sound that was loaded or edited while the host did not
+        process the plugin, for example in a Poly Grid FX slot in Bitwig, was
+        not saved with the project until audio had been processed. The
+        project came back with the sound from before, for a new instance the
+        init sound.
+
 Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them
