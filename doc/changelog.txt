@@ -76,6 +76,11 @@ Framework:
 
 Osirus/OsTIrus:
 
+- [Fix] BUG-10425 Controllers and parameter changes that arrived while a patch
+        was being loaded, for example right after a program change, could get
+        lost, in the sound or in the state saved with the project, with or
+        without the Patch Manager.
+
 - [Fix] BUG-10425 A MIDI bank number given to a RAM bank in the Patch Manager
         got lost whenever the RAM banks were received again, after loading a
         project for example.

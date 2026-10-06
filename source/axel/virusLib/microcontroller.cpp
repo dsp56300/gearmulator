@@ -99,7 +99,7 @@ Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool 
 		}
 	}
 
-	m_pendingSysexInput.reserve(64);
+	m_pendingInput.reserve(64);
 }
 
 void Microcontroller::sendInitControlCommands(uint8_t _masterVolume)
@@ -436,6 +436,25 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 
 bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/* = nullptr*/)
 {
+	// The DSP loses a parameter change that reaches it while it still takes a preset, and the preset it sends back
+	// replaces the edit buffer without it. So channel messages wait until the DSP confirmed the preset, in the
+	// order they arrived, like everything behind them (BUG-10425)
+	if(_ev.source != MidiEventSource::Internal && (_ev.a & 0xf0) != 0xf0)
+	{
+		std::lock_guard lock(m_mutex);
+
+		if(!m_pendingInput.empty() || presetWriteInProgress())
+		{
+			m_pendingInput.push_back({_ev, _fpState});
+			return true;
+		}
+	}
+
+	return processMIDI(_ev, _fpState);
+}
+
+bool Microcontroller::processMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState)
+{
 	const uint8_t channel = _ev.a & 0x0f;
 	const uint8_t status = _ev.a & 0xf0;
 
@@ -673,13 +692,19 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 
 	auto enqueue = [&]
 	{
-		m_pendingSysexInput.emplace_back(_source, _data);
+		SMidiEvent ev(_source);
+		ev.sysex = _data;
+		m_pendingInput.push_back({std::move(ev), nullptr});
 		return false;
 	};
 
 	// Requests wait for pending preset writes and are answered later via MIDI. getState() cannot wait, it needs the
 	// answer now and a host may save before any audio ran. The edit buffers already hold what is being written
 	const bool canWait = _source != MidiEventSource::Internal;
+
+	// nothing overtakes MIDI that waits already
+	if(canWait && !m_pendingInput.empty())
+		return enqueue();
 
 	switch (cmd)
 	{
@@ -772,6 +797,10 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		case PAGE_C:
 		case PAGE_D:
 			{
+				// a parameter change waits for the preset like one that comes as a controller
+				if(canWait && presetWriteInProgress())
+					return enqueue();
+
 				const auto page = static_cast<Page>(cmd);
 
 				if(!isPageSupported(page))
@@ -1205,23 +1234,29 @@ void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	std::lock_guard lock(m_mutex);
 	processHdi08Tx(_midiOut);
 
-	if (!m_pendingSysexInput.empty())
+	// what the DSP sent back of the preset it took is the edit buffer, before anything that came after it applies
+	receiveUpgradedPreset();
+
+	if (!m_pendingInput.empty())
 	{
-		uint32_t eraseCount = 0;
+		// taken out of the queue, so that what runs now does not wait behind itself. A preset write it starts stops
+		// the rest, which goes back
+		auto pending = std::move(m_pendingInput);
+		m_pendingInput.clear();
 
-		for (const auto& input : m_pendingSysexInput)
+		size_t count = 0;
+
+		for (; count < pending.size() && !presetWriteInProgress(); ++count)
 		{
-			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
-				break;
+			const auto& input = pending[count];
 
-			sendSysex(input.second, _midiOut, input.first);
-			++eraseCount;
+			if (input.ev.sysex.empty())
+				processMIDI(input.ev, input.fpState);
+			else
+				sendSysex(input.ev.sysex, _midiOut, input.ev.source);
 		}
 
-		if(eraseCount == m_pendingSysexInput.size())
-			m_pendingSysexInput.clear();
-		else if(eraseCount > 0)
-			m_pendingSysexInput.erase(m_pendingSysexInput.begin(), m_pendingSysexInput.begin() + eraseCount);
+		m_pendingInput.insert(m_pendingInput.begin(), std::make_move_iterator(pending.begin() + static_cast<ptrdiff_t>(count)), std::make_move_iterator(pending.end()));
 	}
 
 	if(!m_midiOutput.empty())
@@ -1371,6 +1406,11 @@ bool Microcontroller::waitingForPresetReceiveConfirmation() const
 			return true;
 	}
 	return false;
+}
+
+bool Microcontroller::presetWriteInProgress() const
+{
+	return !m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation();
 }
 
 void Microcontroller::receiveUpgradedPreset()
