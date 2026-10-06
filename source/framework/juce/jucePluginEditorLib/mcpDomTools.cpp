@@ -1175,5 +1175,39 @@ namespace jucePluginEditorLib
 			};
 			_server.registerTool(std::move(tool));
 		}
+
+		// resize_editor
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "resize_editor";
+			tool.description = "Resize the plugin editor window the way a host does when the user drags its border: the "
+				"requested size goes through the editor's size constraints (aspect ratio, minimum, maximum) first. Returns "
+				"the size the editor ended up with.";
+			tool.inputSchema.addIntProperty("width", "Requested width in pixels", true, 1, 16384);
+			tool.inputSchema.addIntProperty("height", "Requested height in pixels", true, 1, 16384);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const int width = _params.get("width").getInt();
+				const int height = _params.get("height").getInt();
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto* window = _processor.getActiveEditor();
+					if (!window)
+						throw std::runtime_error("The editor is not open");
+
+					juce::Rectangle<int> bounds(window->getX(), window->getY(), width, height);
+					if (auto* constrainer = window->getConstrainer())
+						constrainer->checkBounds(bounds, window->getBounds(), {}, false, false, true, true);
+					window->setSize(bounds.getWidth(), bounds.getHeight());
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("width", mcpServer::JsonValue::fromInt(window->getWidth()));
+					result.set("height", mcpServer::JsonValue::fromInt(window->getHeight()));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
 	}
 }

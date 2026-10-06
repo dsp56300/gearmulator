@@ -345,8 +345,15 @@ namespace jucePluginEditorLib
 		cr.read();
 	}
 
-	void Editor::loadChunkData(baseLib::ChunkReader&)
+	void Editor::loadChunkData(baseLib::ChunkReader& _cr)
 	{
+		_cr.add("wnSz", 1, [this](baseLib::BinaryStream& _s, uint32_t/* _version*/)
+		{
+			const auto w = _s.read<int32_t>();
+			const auto h = _s.read<int32_t>();
+			if(auto* state = m_processor.getEditorState())
+				state->restoreFreeWindowSize({w, h});
+		});
 	}
 
 	void Editor::getPerInstanceConfig(std::vector<uint8_t>& _data)
@@ -356,8 +363,16 @@ namespace jucePluginEditorLib
 		s.toVector(_data);
 	}
 
-	void Editor::saveChunkData(baseLib::BinaryStream&)
+	void Editor::saveChunkData(baseLib::BinaryStream& _s)
 	{
+		// the window size of a skin in the free window mode
+		const auto* state = m_processor.getEditorState();
+		if(!state || !state->getFreeWindowSize().isValid())
+			return;
+
+		baseLib::ChunkWriter cw(_s, "wnSz", 1);
+		_s.write<int32_t>(state->getFreeWindowSize().width);
+		_s.write<int32_t>(state->getFreeWindowSize().height);
 	}
 
 	void Editor::setCurrentPart(const uint8_t _part)

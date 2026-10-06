@@ -60,8 +60,9 @@ namespace juceRmlUi
 		baseLib::Event<RmlComponent*> evPostUpdate;
 		// Fired when the component loses keyboard focus, after every key RmlUi still saw as held has been released.
 		baseLib::Event<RmlComponent*> evFocusLost;
-		// Fired asynchronously when the skin gave its <body> a different explicit size at runtime, for example by
-		// toggling a class. getDocumentSize() already returns the new size.
+		// Fired asynchronously, after layout, when the size of the <body> changed: in the fixed window mode when the
+		// skin gave it a different explicit size, for example by toggling a class, and getDocumentSize() already
+		// returns the new size; in the free window mode whenever the window or the zoom changed the room it has.
 		baseLib::Event<RmlComponent*> evDocumentSizeChanged;
 
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
@@ -132,7 +133,18 @@ namespace juceRmlUi
 		// true if the editor is actually on screen, i.e. its window exists, is visible and is not minimized
 		bool isOnScreen() const;
 
+		// The size the window has at a scale of 1: the body size in the fixed window mode, the default size from
+		// the windowWidth and windowHeight attributes of the body in the free one
 		Rml::Vector2i getDocumentSize() const { return m_documentSize; }
+
+		// <body windowMode="free">: the body follows the window instead of the window following the body, so a
+		// larger window means more room. The scale is set from outside instead of derived from the window width.
+		bool isFreeWindowMode() const { return m_freeWindowMode; }
+		void setFreeWindowScale(float _scale);
+		// Window size limits from min-width, min-height, max-width and max-height of the body, in the units of
+		// getDocumentSize(). A limit that is not given is 0 for the minimum and FLT_MAX for the maximum.
+		Rml::Vector2f getMinimumDocumentSize() const { return m_minimumDocumentSize; }
+		Rml::Vector2f getMaximumDocumentSize() const { return m_maximumDocumentSize; }
 
 		void resize(int _width, int _height);
 
@@ -171,6 +183,7 @@ namespace juceRmlUi
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
 		bool updateDocumentSize();
+		bool updateDocumentLimits();
 		void startNextFrameTimer();
 		bool dispatchFrameEvent();
 
@@ -224,6 +237,11 @@ namespace juceRmlUi
 		// from one that only follows the current scale
 		Rml::Vector2f m_documentSizeDp{0,0};
 		float m_documentDpRatio = 1.0f;
+
+		bool m_freeWindowMode = false;
+		float m_freeWindowScale = 1.0f;
+		Rml::Vector2f m_minimumDocumentSize{0, 0};
+		Rml::Vector2f m_maximumDocumentSize{FLT_MAX, FLT_MAX};
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)

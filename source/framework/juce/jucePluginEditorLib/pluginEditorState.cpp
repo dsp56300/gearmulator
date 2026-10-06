@@ -263,6 +263,14 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 	}
 }
 
+void PluginEditorState::restoreFreeWindowSize(const WindowSize& _size)
+{
+	m_freeWindowSize = _size;
+
+	if(evFreeWindowSizeRestored)
+		evFreeWindowSizeRestored();
+}
+
 void PluginEditorState::setGuiScale(const int _scale) const
 {
 	if(evSetGuiScale)

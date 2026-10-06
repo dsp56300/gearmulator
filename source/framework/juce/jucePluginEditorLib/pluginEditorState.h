@@ -31,6 +31,14 @@ namespace juce
 
 namespace jucePluginEditorLib
 {
+	struct WindowSize
+	{
+		int width = 0;
+		int height = 0;
+
+		bool isValid() const { return width > 0 && height > 0; }
+	};
+
 	class Editor;
 	class Processor;
 
@@ -66,6 +74,13 @@ namespace jucePluginEditorLib
 		std::function<void(int)> evSetGuiScale;
 		std::function<void(juce::Component*)> evSkinLoaded;
 		std::function<void()> evSkinSizeChanged;
+		std::function<void()> evFreeWindowSizeRestored;
+
+		// The window size of a skin in the free window mode, per instance and kept with the plugin state. 0 if
+		// there is none yet. restoreFreeWindowSize() is for a size that comes from a state, the window follows it.
+		const WindowSize& getFreeWindowSize() const { return m_freeWindowSize; }
+		void setFreeWindowSize(const WindowSize& _size) { m_freeWindowSize = _size; }
+		void restoreFreeWindowSize(const WindowSize& _size);
 
 		juce::Component* getUiRoot() const;
 
@@ -107,6 +122,7 @@ namespace jucePluginEditorLib
 		float m_rootScale = 1.0f;
 		std::vector<Skin> m_includedSkins;
 		std::vector<uint8_t> m_instanceConfig;
+		WindowSize m_freeWindowSize;
 		std::string m_skinFolderName;
 		std::unique_ptr<bridgeClient::ServerList> m_remoteServerList;
 	};
