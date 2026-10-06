@@ -439,6 +439,8 @@
 			<combo id="InputSelect" class="jucePos txt5" data-model="partCurrent" param="Input Select" style="left: 233dp; top: 574dp; width: 160dp; height: 36dp; line-height: 36dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
+			<img id="MasterTuneBg" class="jucePos" src="master_tune.png" style="left: 536dp; top: 705dp; width: 155dp; height: 147dp;"/>
+			<knob id="MasterTune" class="jucePos juceRotary knob1" data-model="partCurrent" param="Master Tune" style="left: 560dp; top: 707dp; width: 104dp; height: 104dp;"/>
 			<knob id="PureTuning" class="jucePos juceRotary knob1" data-model="partCurrent" param="Pure Tuning" style="left: 725dp; top: 707dp; width: 104dp; height: 104dp;"/>
 			<knob id="ArpGlobalTempo" class="jucePos juceRotary knob1" data-model="partCurrent" param="Clock Tempo" style="left: 916.5dp; top: 78.6001dp; width: 104dp; height: 104dp;"/>
 			<knob id="ArpNoteLength" class="jucePos juceRotary knob1" data-model="partCurrent" param="Arp Note Length" style="left: 1045.2dp; top: 78.6001dp; width: 104dp; height: 104dp;"/>
