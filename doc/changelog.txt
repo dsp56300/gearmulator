@@ -74,6 +74,11 @@ Osirus/OsTIrus:
         as in Virus Control. In these modes the Virus ignores the saturation
         type and uses the saturation of its analog filter instead.
 
+- [Imp] BUG-10194 A MASTER TUNE knob tunes the whole instrument, by up to about
+        half a semitone up or down, and is saved with the project. The Galaxpel
+        skin has it next to PURE TUNING on the ARP | SETTINGS page, the TrancyTI
+        skin next to MASTER VOLUME on the COMMON page.
+
 Osirus:
 
 - [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter
@@ -86,10 +91,6 @@ Osirus:
         Velocity and Resonance Velocity knobs of the two filters move together,
         in the filter section and on the ARP page. Before, only Filter 1's Env
         Amount Velocity moved Filter 2's.
-
-- [Imp] BUG-10194 Galaxpel skin: A MASTER TUNE knob next to PURE TUNING on the
-        ARP | SETTINGS page tunes the whole instrument, by up to about half a
-        semitone up or down. It is saved with the project.
 
 OsTIrus:
 
