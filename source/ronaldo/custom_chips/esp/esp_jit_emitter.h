@@ -4,6 +4,10 @@
 #include "esp_jit.h"
 
 #include <algorithm>
+#include <atomic>
+#include <bitset>
+#include <cstdio>
+#include <cstdlib>
 #include <vector>
 
 #if CHIPS_JIT_ASMJIT
@@ -23,12 +27,14 @@ namespace esp
 	// Lowers the two CoreProgram graphs of a frame to one native function. Everything
 	// here is shared by the back ends; an Isa provides the register file, the primitive
 	// operations and the few lowerings that differ per instruction set (product
-	// formation, block-edge normalization, prologue, epilogue and code validation).
+	// formation, block-edge normalization, the retained multiplicand's register, the
+	// saturation clamp and its cold code, prologue, epilogue and code validation).
 	//
 	// Register numbers are the arm64 map, virtual registers on x86: 19 frame, 20 runtime,
-	// 21 elapsed clocks / cached packed write latch, 22 IRAM, 23 coefficients, 24 core,
-	// 25 ERAM state, 26/27 current accumulators, 28 program words, 29 last multiplicand,
-	// 30 GRAM, 12..17 accumulator history, 0..11 temporaries.
+	// 21 elapsed clocks / cached packed write latch, 22 IRAM (GRAM at a fixed distance),
+	// 23 coefficients (shifts at a fixed distance), 24 core, 25 ERAM state, 26/27 current
+	// accumulators, 28 program words, 29 last multiplicand, 30 packed ERAM codes,
+	// 12..17 accumulator history, 0..11 temporaries.
 	template <class Isa>
 	class JitEmitter : protected Isa
 	{
@@ -37,6 +43,7 @@ namespace esp
 		using L = RuntimeLayout<N>;
 		using E = EramRuntime<N>;
 		using Gp = typename Isa::Gp;
+		using Mem = typename Isa::Mem;
 		using F = CoreProgram::EramStep;
 
 		using Isa::a;
@@ -89,6 +96,150 @@ namespace esp
 		// a compile-time fact of a straight-line block; a DSP write or an edge ends it.
 		bool cacheWritePacked = false, writePackedValid = false;
 		unsigned predicateStack = 0;
+		// Every sample a kernel stores is a 24-bit value, so a slot it stored on every path to a
+		// read needs no sign extension there; the retained multiplicand carries the same fact.
+		// Must-facts over the block graph: a block's entry facts are the meet of its
+		// predecessors' exit facts, the core's entry block starts without any.
+		struct Facts
+		{
+			std::bitset<IRAM_SIZE> iram, gram;
+			bool lastInput = false;
+
+			bool operator==(const Facts& o) const { return iram == o.iram && gram == o.gram && lastInput == o.lastInput; }
+			void meet(const Facts& o)
+			{
+				iram &= o.iram;
+				gram &= o.gram;
+				lastInput &= o.lastInput;
+			}
+			static bool replacesOperand(const Instr& in)
+			{
+				return in.op == Op::GramRead || in.op == Op::StoreSat || in.op == Op::GramStoreAdd ||
+					in.op == Op::StoreRaw || in.op == Op::StoreRect || in.op == Op::StoreFoldPos ||
+					in.op == Op::StoreFoldNeg || (in.op == Op::Mul30 && (uint8_t(in.coef) & 4)) ||
+					(in.control && (in.sub == 6 || in.sub >= 12));
+			}
+			// Whether the operation's product operand is a 24-bit value: the optimizer's own
+			// fact, or one established on the way here.
+			bool operand24(const Instr& in, const CoreProgram::Operation& op) const
+			{
+				if (op.operand24)
+					return true;
+				if (!((!op.dead && op.constantShift < 0) || op.keepInput))
+					return false;
+				if (in.control && in.sub == 6)
+					return lastInput;
+				if (in.control && in.sub >= 12)
+					return true; // the read latch is a 24-bit sample wherever it is set, or zero
+				if (in.op == Op::GramRead)
+					return gram[in.mem];
+				if (replacesOperand(in))
+					return false;
+				if (in.useConstant)
+					return true;
+				return iram[in.mem];
+			}
+			// The operation's stores and its retained multiplicand, after emitArithmetic's writes.
+			void apply(const Instr& in, const CoreProgram::Operation& op, bool operand24)
+			{
+				if (in.op == Op::Nop)
+					return;
+				switch (in.op)
+				{
+				case Op::StoreSat:
+				case Op::StoreRaw:
+				case Op::StoreRect:
+				case Op::StoreFoldPos:
+				case Op::StoreFoldNeg:
+					iram[in.mem] = true;
+					break;
+				case Op::GramStoreReplace:
+				case Op::GramStoreAdd:
+					gram[in.mem] = true;
+					break;
+				case Op::Mul30:
+					if (uint8_t(in.coef) & 4)
+						iram[in.mem] = true;
+					break;
+				case Op::Special:
+					if (in.control && in.sub >= 12)
+						iram[in.mem | 0xf0] = true;
+					break;
+				default:
+					break;
+				}
+				if (op.keepInput)
+					lastInput = operand24;
+			}
+		};
+		Facts facts;					// of the operation being emitted
+		std::vector<Facts> blockFacts;	// at each block's entry, for the core being emitted
+		// Pipeline registers a product wrote in the block need the 30-bit wrap at its edge,
+		// the others arrived wrapped.
+		unsigned blockWritten = 0;
+
+		void computeBlockFacts(unsigned c)
+		{
+			const auto& graph = graphs[c];
+			Facts all;
+			all.iram.set();
+			all.gram.set();
+			all.lastInput = true;
+			blockFacts.assign(graph.blocks.size(), all);
+			blockFacts[graph.owner[0]] = Facts{};
+			bool changed = true;
+			auto propagate = [&](int node, const Facts& f)
+			{
+				if (node < 0)
+					return;
+				auto& target = blockFacts[graph.owner[unsigned(node)]];
+				const Facts before = target;
+				target.meet(f);
+				changed |= !(before == target);
+			};
+			while (changed)
+			{
+				changed = false;
+				for (unsigned bi = 0; bi < graph.blocks.size(); ++bi)
+				{
+					const auto& block = graph.blocks[bi];
+					const auto& first = graph.nodes[block.ops.front().node];
+					// The stall edge leaves before the first operation, with the entry facts.
+					propagate(first.stall, blockFacts[bi]);
+					if (first.idle)
+					{
+						propagate(first.next, blockFacts[bi]);
+						continue;
+					}
+					Facts out = blockFacts[bi];
+					for (const auto& op : block.ops)
+					{
+						const auto& in = program.instruction(c, graph.nodes[op.node].pc);
+						out.apply(in, op, out.operand24(in, op));
+					}
+					const auto& last = graph.nodes[block.ops.back().node];
+					if (last.branch)
+					{
+						propagate(last.taken, out);
+						if (last.conditional)
+							propagate(last.next, out);
+					}
+					else
+						propagate(last.next, out);
+				}
+			}
+		}
+		void beginBlockFacts(unsigned bi)
+		{
+			facts = blockFacts[bi];
+			blockWritten = 0;
+		}
+		// GRAM rides on the IRAM base: both rings share one position (batchedFrameReady), so a
+		// core's GRAM slots sit at a fixed distance from its IRAM slots.
+		Mem gramMem(unsigned c, unsigned slot)
+		{
+			return mem(22, offsetof(R, gram) - (offsetof(R, core) + c * sizeof(CoreRuntime) + offsetof(CoreRuntime, iram)) + slot * 4);
+		}
 
 		JitEmitter(typename Isa::Assembler& _a, const ProgramSnapshot& _program, unsigned _clocks)
 			: Isa(_a), program(_program), clocks(_clocks)
@@ -118,21 +269,12 @@ namespace esp
 				select(w(1), w(10), w(9), Cond::Ge);
 			}
 		}
-		// Register index in w1, coefficient out in w1; w0 is preserved.
+		// Register index in w1, coefficient out in w1; w0 is preserved. The frame's register view
+		// resolves index 7 to register 5 and index 6 to the variable-offset field.
 		void coefficient(int transform)
 		{
-			a.cmp(w(1), 7);
-			a.mov(w(9), 5);
-			select(w(1), w(9), w(1), Cond::Eq);
-			a.cmp(w(1), 6);
-			setCondition(w(11), Cond::Eq);
-			addShifted(x(10), x(20), x(1), 2);
-			load(w(1), mem(10, offsetof(R, mulcoeffs)));
-			load(w(9), mem(20, L::varOffset));
-			shl(w(9), w(9), 11);
-			bitAnd(w(9), w(9), 0x7fffff);
-			a.cmp(w(11), 0);
-			select(w(1), w(9), w(1), Cond::Ne);
+			addShifted(x(10), x(19), x(1), 2);
+			load(w(1), mem(10, offsetof(JitFrame, dmacCoef)));
 			if (transform >= 0)
 			{
 				transformCoefficient(unsigned(transform));
@@ -152,26 +294,30 @@ namespace esp
 		}
 		void fixedCoefficient(unsigned flags)
 		{
-			unsigned index = flags >> 5;
-			if (index == 7)
-				index = 5;
-			if (index == 6)
-			{
-				load(w(1), mem(20, L::varOffset));
-				shl(w(1), w(1), 11);
-				bitAnd(w(1), w(1), 0x7fffff);
-			}
-			else
-				load(w(1), mem(20, L::mulcoeffs + index * 4));
+			load(w(1), mem(19, offsetof(JitFrame, dmacCoef) + (flags >> 5) * 4));
 			transformCoefficient(flags & 0x18);
 		}
+		// A write to a coefficient register or the variable offset also lands in the frame's
+		// register view.
+		void publishDmacCoefficient(unsigned index, unsigned reg)
+		{
+			if (index <= 5)
+				store(w(reg), mem(19, offsetof(JitFrame, dmacCoef) + index * 4));
+			if (index == 5)
+				store(w(reg), mem(19, offsetof(JitFrame, dmacCoef) + 7 * 4));
+		}
+		void publishVarOffsetField(unsigned reg, unsigned scratch)
+		{
+			shl(w(scratch), w(reg), 11);
+			bitAnd(w(scratch), w(scratch), 0x7fffff);
+			store(w(scratch), mem(19, offsetof(JitFrame, dmacCoef) + 6 * 4));
+		}
 
-		// w6 sample -> w7 packed code
+		// w6 sample -> w7 packed code; no caller reads w6 afterwards.
 		void packWriteLatchNative()
 		{
 			if (cacheWritePacked && writePackedValid)
 			{
-				signedBits(w(6), w(6), 0, 24);
 				a.mov(w(7), w(21));
 				return;
 			}
@@ -182,12 +328,10 @@ namespace esp
 				writePackedValid = true;
 			}
 		}
-		// w7 packed code -> w6 signed sample
+		// w7 packed code -> w6 signed sample: the mantissa times 2^(4 + 2 * exponent)
 		void unpackEramNative()
 		{
-			bits(w(8), w(7), 14, 2);
-			shl(w(8), w(8), 1);
-			add(w(8), w(8), 4);
+			Isa::exponentShift(w(8), w(7));
 			signedBits(w(6), w(7), 0, 14);
 			shl(w(6), w(6), w(8));
 		}
@@ -204,29 +348,25 @@ namespace esp
 		void readPackedNative()
 		{
 			bitAnd(w(5), w(5), E::mask);
-			load(x(11), mem(19, offsetof(JitFrame, eramPacked)));
-			loadHalf(w(7), indexed(x(11), x(5), 1));
+			loadHalf(w(7), indexed(x(30), x(5), 1));
 		}
-		// w5 address, w7 packed code
+		// w5 address, w7 packed code: one byte of it lands in the stored code, the other byte
+		// is the stored code's. Packed codes are 16-bit values, so the byte insert leaves the
+		// upper half zero as the masks did.
 		void writePackedNative(bool high)
 		{
 			bitAnd(w(5), w(5), E::mask);
-			load(x(11), mem(19, offsetof(JitFrame, eramPacked)));
-			loadHalf(w(8), indexed(x(11), x(5), 1));
-			bitAnd(w(8), w(8), high ? 0xff : 0xff00);
-			bitAnd(w(7), w(7), high ? 0xff00 : 0xff);
-			bitOr(w(7), w(7), w(8));
-			storeHalf(w(7), indexed(x(11), x(5), 1));
+			loadHalf(w(8), indexed(x(30), x(5), 1));
+			Isa::insertByte(w(7), w(8), !high, w(9));
+			storeHalf(w(7), indexed(x(30), x(5), 1));
 			unpackEramNative();
-			load(x(11), mem(19, offsetof(JitFrame, eramMemory)));
-			store(w(6), indexed(x(11), x(5), 2));
+			store(w(6), indexed(Isa::eramMemory(), x(5), 2));
 		}
 		// w5 address -> w6 value
 		void rawRead()
 		{
 			bitAnd(w(5), w(5), E::mask);
-			load(x(11), mem(19, offsetof(JitFrame, eramMemory)));
-			load(w(6), indexed(x(11), x(5), 2));
+			load(w(6), indexed(Isa::eramMemory(), x(5), 2));
 		}
 		// w5 address, w6 sample
 		void writePhaseNative(bool high, bool currentWriteLatch = false)
@@ -241,24 +381,22 @@ namespace esp
 				return;
 			}
 			bitAnd(w(5), w(5), E::mask);
-			load(x(11), mem(19, offsetof(JitFrame, eramMemory)));
+			const Gp memory = Isa::eramMemory();
 			if (!program.rawSingle())
 			{
-				load(w(7), indexed(x(11), x(5), 2));
+				load(w(7), indexed(memory, x(5), 2));
 				bitAnd(w(7), w(7), high ? 0xfffu : 0xfff000u);
 				bitAnd(w(6), w(6), high ? 0xfff000u : 0xfffu);
 				bitOr(w(6), w(6), w(7));
 			}
 			signedBits(w(6), w(6), 0, 24);
-			store(w(6), indexed(x(11), x(5), 2));
+			store(w(6), indexed(memory, x(5), 2));
 		}
 		// writePackedNext takes the high byte of the packed code in w7
 		void mergeWritePackedNext()
 		{
 			loadHalf(w(8), mem(25, offsetof(E, writePackedNext)));
-			bitAnd(w(8), w(8), 0xff);
-			bitAnd(w(9), w(7), 0xff00);
-			bitOr(w(8), w(8), w(9));
+			Isa::insertByte(w(8), w(7), true, w(9));
 			storeHalf(w(8), mem(25, offsetof(E, writePackedNext)));
 		}
 
@@ -284,16 +422,24 @@ namespace esp
 			}
 			const bool dead = operation->dead;
 			const bool needsOperand = (!dead && operation->constantShift < 0) || operation->keepInput;
-			const bool replacesOperand = in.op == Op::GramRead || in.op == Op::StoreSat || in.op == Op::GramStoreAdd ||
-				in.op == Op::StoreRaw || in.op == Op::StoreRect || in.op == Op::StoreFoldPos ||
-				in.op == Op::StoreFoldNeg || (in.op == Op::Mul30 && (uint8_t(in.coef) & 4)) ||
-				(in.control && (in.sub == 6 || in.sub >= 12));
+			const bool replacesOperand = Facts::replacesOperand(in);
+			const auto& predicate = graphs[c].nodes[operation->node].predicate;
+			const bool gated = (predicate.pos & 1) || (predicate.neg & 1);
+			const bool dmac = in.control && in.sub == 6;
+			// The retained multiplicand takes the operand at its source when nothing rewrites it on
+			// the way, instead of a copy after the fact.
+			const bool direct = operation->keepInput && needsOperand && !gated && in.op != Op::Invert &&
+				(!replacesOperand || in.op == Op::GramRead || dmac);
+			const unsigned operandReg = direct ? 29 : 0;
+			const bool operand24 = facts.operand24(in, *operation);
+			if (direct && !dmac) // DMAC shifts the retained input in place (shiftLastInput)
+				Isa::beginLastInput();
 			if (needsOperand && !replacesOperand)
 			{
 				if (in.useConstant)
-					a.mov(w(0), in.constant);
+					a.mov(w(operandReg), in.constant);
 				else
-					load(w(0), mem(22, in.mem * 4));
+					load(w(operandReg), mem(22, in.mem * 4));
 			}
 			bool specialCoef = false;
 			switch (in.op)
@@ -304,15 +450,15 @@ namespace esp
 				break;
 			case Op::GramRead:
 				if (needsOperand)
-					load(w(0), mem(30, in.mem * 4));
+					load(w(operandReg), gramMem(c, in.mem));
 				break;
 			case Op::GramStoreReplace:
 				loadPipe(in.storeB, 2, true);
-				store(w(2), mem(30, in.mem * 4));
+				store(w(2), gramMem(c, in.mem));
 				break;
 			case Op::GramStoreAdd:
 				loadPipe(in.storeB, 0, true);
-				store(w(0), mem(30, in.mem * 4));
+				store(w(0), gramMem(c, in.mem));
 				break;
 			case Op::Mul30:
 			{
@@ -332,7 +478,7 @@ namespace esp
 				if (!dead)
 				{
 					fixedCoefficient(flags);
-					sar(w(1), w(1), 16);
+					Isa::signedByte(w(1), w(1), 16);
 				}
 				specialCoef = true;
 				break;
@@ -363,7 +509,12 @@ namespace esp
 				case 6:
 				{
 					if (needsOperand)
-						sar(w(0), w(29), 7);
+					{
+						if (direct)
+							Isa::shiftLastInput(7);
+						else
+							sar(w(0), w(29), 7);
+					}
 					if (dead)
 						break;
 					liveWord(pc, 1);
@@ -378,10 +529,15 @@ namespace esp
 					{
 						bits(w(1), w(1), 5, 3);
 						coefficient(state.lastTransform);
-						sar(w(1), w(1), 9);
-						bitAnd(w(1), w(1), 0x7f);
+						bits(w(1), w(1), 9, 7); // a 7-bit coefficient, product-ready as it is
 					}
-					a.bind(plain);
+					if (state.lastMul30 <= 0)
+					{
+						// Without a preceding MUL30 the word's low byte is the coefficient. The join
+						// passes a 7-bit register coefficient through unchanged.
+						a.bind(plain);
+						Isa::signedByte(w(1), w(1), 0);
+					}
 					specialCoef = true;
 					break;
 				}
@@ -390,6 +546,7 @@ namespace esp
 					{
 						loadPipe(in.accB, 2);
 						store(w(2), mem(20, L::varOffset));
+						publishVarOffsetField(2, 3);
 					}
 					break;
 				case 10:
@@ -450,13 +607,12 @@ namespace esp
 			default:
 				break;
 			}
-			const auto& predicate = graphs[c].nodes[operation->node].predicate;
-			if (needsOperand)
+			if (needsOperand && gated)
 			{
 				const bool pos = predicate.pos & 1, neg = predicate.neg & 1;
 				if (pos && neg)
 					a.mov(w(0), 0);
-				else if (pos || neg)
+				else
 				{
 					if (predicate.govern >= 0)
 						loadByte(w(2), predicateMemory(predicate.govern));
@@ -466,10 +622,14 @@ namespace esp
 					selectZero(w(0), w(0), pos ? Cond::Ne : Cond::Eq);
 				}
 			}
-			if (operation->keepInput)
+			if (operation->keepInput && !direct)
 				Isa::setLastInput();
+			facts.apply(in, *operation, operand24);
 			if (!dead)
-				Isa::emitProduct(*operation, in, c, pc, specialCoef);
+			{
+				Isa::emitProduct(*operation, in, pc, specialCoef, operandReg, operand24);
+				blockWritten |= 1u << operation->destination;
+			}
 			emitPredicateSample(c, !dead && !in.accB ? operation->destination : operation->current[0]);
 		}
 
@@ -646,8 +806,8 @@ namespace esp
 			}
 			else if (program.compress)
 			{
-				loadHalf(w(7), mem(25, offsetof(E, readPackedNext)));
-				bitAnd(w(7), w(7), 0xff);
+				// The code's low byte doubled up; its address is the halfword's on both JIT hosts.
+				loadByte(w(7), mem(25, offsetof(E, readPackedNext)));
 				orShifted(w(7), w(7), w(7), 8);
 				setPackedNative(step.readLatchStages & F::Low);
 			}
@@ -685,9 +845,7 @@ namespace esp
 					packWriteLatchNative();
 					mergeWritePackedNext();
 					loadHalf(w(8), mem(25, offsetof(E, readPacked)));
-					bitAnd(w(8), w(8), 0xff);
-					bitAnd(w(7), w(7), 0xff00);
-					bitOr(w(7), w(7), w(8));
+					Isa::insertByte(w(7), w(8), false, w(9));
 					setPackedNative(step.readLatchStages & F::Commit);
 				}
 				else
@@ -819,10 +977,8 @@ namespace esp
 				}
 				if (write || step.before.shortNext || step.earlyHold != 1)
 				{
-					bitAnd(w(7), w(7), 0xff);
 					loadHalf(w(8), mem(25, offsetof(E, readPacked)));
-					bitAnd(w(9), w(8), 0xff00);
-					bitOr(w(7), w(7), w(9));
+					Isa::insertByte(w(7), w(8), true, w(9));
 					if (!write && !step.before.shortNext && step.earlyHold < 0)
 					{
 						// The incoming frame's timing selects a value, never a code path.
@@ -961,6 +1117,7 @@ namespace esp
 				return;
 			loadPipe(in.coefFromB, 0, true);
 			store(w(0), mem(20, L::mulcoeffs + in.coefIndex * 4));
+			publishDmacCoefficient(in.coefIndex, 0);
 		}
 		void savePredicate(unsigned c, const CoreProgram::Predicate& predicate)
 		{
@@ -1059,9 +1216,11 @@ namespace esp
 			if (needsClock)
 				a.mov(w(21), 0);
 			jump(labels[graph.owner[0]]);
+			computeBlockFacts(c);
 			for (unsigned bi = 0; bi < graph.blocks.size(); ++bi)
 			{
 				Isa::beginBlock();
+				beginBlockFacts(bi);
 				const auto& block = graph.blocks[bi];
 				writePackedValid = false;
 				const auto& first = graph.nodes[block.ops.front().node];
@@ -1133,7 +1292,7 @@ namespace esp
 					add(x(0), x(0), idleEram);
 					store(x(0), mem(20, L::cycle));
 				}
-				Isa::normalize(block);
+				Isa::normalize(block, blockWritten);
 				const auto& last = graph.nodes[block.ops.back().node];
 				if (last.branch)
 				{
@@ -1167,6 +1326,9 @@ namespace esp
 					jump(labels[graph.owner[first.stall]]);
 				}
 			}
+			// The exit table of a large graph can span more than a conditional branch reaches:
+			// park the pending cold code first (the last block ended with a jump).
+			Isa::parkColdCode();
 			for (unsigned id = 0; id < graph.nodes.size(); ++id)
 			{
 				const auto& node = graph.nodes[id];
@@ -1201,28 +1363,27 @@ namespace esp
 				arbitration |= node.stall >= 0;
 			if (graphs[0].hasCmp || graphs[1].hasCmp)
 				predicateStack = 16;
-			bool needsGram = false;
 			for (unsigned c = 0; c < 2; ++c)
 				for (const auto& node : graphs[c].nodes)
-				{
 					if (node.sample >= 0)
 						predicateStack = std::max(predicateStack, (unsigned(node.sample) + 16) & ~15u);
-					if (node.idle)
-						continue;
-					const auto& in = program.instruction(c, node.pc);
-					needsGram |= in.requestsGram && (in.op != Op::GramRead || !node.deadMac || node.keepInput);
-				}
 			Isa::prologue(predicateStack);
 			load(x(20), mem(19, offsetof(JitFrame, runtime)));
-			if (needsGram)
-				load(x(30), mem(19, offsetof(JitFrame, gram)));
 			if (N != 0)
+			{
 				Isa::setEramBase(offsetof(R, eram));
+				load(x(30), mem(19, offsetof(JitFrame, eramPacked)));
+				Isa::loadEramMemory(offsetof(JitFrame, eramMemory));
+			}
 			if (arbitration)
 				Isa::clearRequests(offsetof(KernelFrame, requests));
 			emitCore(1);
 			emitCore(0);
 			Isa::epilogue(predicateStack);
+			// Rarely taken paths (the saturation clamps) live past the return, reached and left
+			// by branches, so the hot code keeps its branches not taken.
+			Isa::emitColdCode();
+			Isa::finishFunction();
 		}
 
 	public:
@@ -1235,10 +1396,29 @@ namespace esp
 			code.init(runtime.environment());
 			EmitErrors errors;
 			code.setErrorHandler(&errors);
+			// Diagnostics: with ESP_JIT_DUMP=<directory> in the environment, every kernel's
+			// listing (the allocated code on x86) is written there, numbered in compile order.
+			asmjit::FileLogger logger;
+			FILE* dumpFile = nullptr;
+			if (const char* dir = std::getenv("ESP_JIT_DUMP"))
+			{
+				static std::atomic<unsigned> serial{0};
+				char name[1024];
+				std::snprintf(name, sizeof(name), "%s/kernel_%03u_clocks%u.asm", dir, serial++, clocks);
+				dumpFile = std::fopen(name, "w");
+				if (dumpFile)
+				{
+					logger.setFile(dumpFile);
+					code.setLogger(&logger);
+				}
+			}
 			typename Isa::Assembler assembler(&code);
 			JitEmitter emitter(assembler, program, clocks);
 			emitter.emit();
-			return Isa::finish(runtime, code, assembler, errors.failed);
+			auto fn = Isa::finish(runtime, code, assembler, errors.failed);
+			if (dumpFile)
+				std::fclose(dumpFile);
+			return fn;
 		}
 	};
 }

@@ -60,8 +60,11 @@ namespace esp
 			conditionalBranches = true;
 			irq0SelectCore1 = irq1SelectCore1 = false;
 			++m_structureGeneration;
-			std::memset(m_coef16, 0, sizeof(m_coef16));
-			for (auto& core : m_shiftTable) for (auto& s : core) s = 7;
+			for (auto& tables : m_tables)
+			{
+				std::memset(tables.coef16, 0, sizeof(tables.coef16));
+				std::memset(tables.shift, 7, sizeof(tables.shift));
+			}
 			std::memset(m_eramImm, 0, sizeof(m_eramImm));
 			m_rt->reset();
 			m_rt->eram.configureMemory(configuration[3]);
@@ -147,11 +150,10 @@ namespace esp
 		void writePMem32(uint16_t wordIndex, uint32_t value) { setWord(wordIndex, value); flushSchedule(); }
 		uint8_t readPRAM(size_t byteOffset) const { return uint8_t(wordAt(unsigned(byteOffset >> 2)) >> ((byteOffset & 3) * 8)); }
 		int32_t hostTail(unsigned core) const { return hostTailAddress[core & 1]; }
-		// Live data for compiled engines: coefficient x 2^(7-shift) per word so
-		// every ordinary product is (a * c16) >> 7; the resolved shift; the
-		// 20-bit ERAM immediate assembled from the four words after a command.
-		const int16_t* coefficientTable(unsigned core) const { return m_coef16[core & 1]; }
-		const uint8_t* shiftTable(unsigned core) const { return m_shiftTable[core & 1]; }
+		// Live data for compiled engines: the coefficient and shift of every word (LiveTables)
+		// and the 20-bit ERAM immediate assembled from the four words after a command.
+		const int16_t* coefficientTable(unsigned core) const { return m_tables[core & 1].coef16; }
+		const uint8_t* shiftTable(unsigned core) const { return m_tables[core & 1].shift; }
 		const uint32_t* eramImmediateTable() const { return m_eramImm; }
 		const uint32_t* wordsOf(unsigned core) const { return words[core & 1]; }
 		uint32_t wordAt(unsigned index) const { return words[(index >> 10) & 1][index & 0x3ff]; }
@@ -190,8 +192,7 @@ namespace esp
 		ReceiveInput receiveInput;
 		DintCallback onDint;
 		uint64_t m_structureGeneration = 0;
-		int16_t m_coef16[2][PRAM_WORDS] = {};
-		uint8_t m_shiftTable[2][PRAM_WORDS] = {};
+		LiveTables m_tables[2] = {};
 		uint32_t m_eramImm[PRAM_WORDS] = {};
 		uint64_t m_scheduleHash = 0;
 		unsigned m_scheduleSpacing = 0;
@@ -264,8 +265,8 @@ namespace esp
 			if (core == 1 && pc < PRAM_SIZE && ((before ^ value) & 0x0c000000u)) ++m_structureGeneration;
 			word = value;
 			instr[core][pc].decode(value);
-			m_coef16[core][pc] = coefficient16(instr[core][pc]);
-			m_shiftTable[core][pc] = instr[core][pc].shift;
+			m_tables[core].coef16[pc] = coefficient16(instr[core][pc]);
+			m_tables[core].shift[pc] = instr[core][pc].shift;
 			if (structureOf(before) != structureOf(value)) ++m_structureGeneration;
 			if (core == 1 && ((before ^ value) >> 23))
 			{

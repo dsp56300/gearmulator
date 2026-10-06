@@ -10,20 +10,24 @@
 
 namespace esp
 {
-	// Everything a kernel needs besides the runtime image, filled per call.
+	// Everything a kernel needs besides the runtime image, filled per call. GRAM is reached
+	// from the IRAM base (the rings share one position) and the shifts from the coefficients
+	// (LiveTables), so neither needs a pointer here.
 	struct JitFrame
 	{
 		void* runtime;					// Runtime<lg2eramSize>*
 		int32_t* iram[2];
-		int32_t* gram;
 		int32_t* eramMemory;			// nullptr without ERAM
 		uint16_t* eramPacked;			// compressed-mode shadow codes
-		const int16_t* coef16[2];
-		const uint8_t* shift[2];
+		const int16_t* coef16[2];		// LiveTables::coef16, the shifts follow
 		const uint32_t* eramImm;
 		const uint32_t* words[2];
 		int32_t hostTail[2];
 		uint32_t advanceMemory;			// tail 00/FF (1) or 00/00 (0)
+		// The coefficient register file as a MUL30/DMAC index selects it: registers 0..5, the
+		// variable-offset field at 6, register 5 again at 7 (Interpreter::coefficientValue).
+		// Derived here per call; a kernel keeps its copy current across its own writes.
+		int32_t dmacCoef[8];
 	};
 	struct KernelFrame
 	{
@@ -53,17 +57,20 @@ namespace esp
 		auto& rt = base.runtime();
 		JitFrame f{};
 		f.runtime = &rt;
-		// Ring bases at the frame's position: slot mem is base[mem], no wrap.
+		// Ring bases at the frame's position: slot mem is base[mem], no wrap. Kernels address
+		// GRAM from these too, which batchedFrameReady guarantees by requiring one position.
 		f.iram[0] = rt.core[0].iram + rt.core[0].iramPos; f.iram[1] = rt.core[1].iram + rt.core[1].iramPos;
-		f.gram = rt.gram + rt.core[0].iramPos;
 		f.eramMemory = lg2eramSize ? rt.eram.memory.get() : nullptr;
 		f.eramPacked = lg2eramSize ? rt.eram.packed.get() : nullptr;
 		f.coef16[0] = base.coefficientTable(0); f.coef16[1] = base.coefficientTable(1);
-		f.shift[0] = base.shiftTable(0); f.shift[1] = base.shiftTable(1);
 		f.eramImm = base.eramImmediateTable();
 		f.words[0] = base.wordsOf(0); f.words[1] = base.wordsOf(1);
 		f.hostTail[0] = base.hostTail(0); f.hostTail[1] = base.hostTail(1);
 		f.advanceMemory = !(base.config(1) & 0x40);
+		for (unsigned i = 0; i < 6; ++i)
+			f.dmacCoef[i] = rt.mulcoeffs[i];
+		f.dmacCoef[6] = int32_t((uint32_t(rt.eram.varOffset) << 11) & 0x7fffff);
+		f.dmacCoef[7] = rt.mulcoeffs[5];
 		return f;
 	}
 }

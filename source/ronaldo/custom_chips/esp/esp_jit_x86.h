@@ -24,13 +24,14 @@ namespace esp
 
 		Assembler& a;
 		unsigned currentCore = 0;
-		Gp values[31];
-		Gp entryValues[31];
+		// The arm64 map's 31 registers, plus 31: the ERAM memory base (x86 has the virtual to spare).
+		Gp values[32];
+		Gp entryValues[32];
 		Mem predicates;
 
 		explicit X86Isa(Assembler& _a) : a(_a)
 		{
-			for (unsigned i = 0; i < 31; ++i)
+			for (unsigned i = 0; i < 32; ++i)
 				entryValues[i] = values[i] = a.newUInt64();
 		}
 
@@ -96,8 +97,40 @@ namespace esp
 			move(d, l);
 			a.emit(id, d, r);
 		}
-		template <class T> void add(const Gp& d, const Gp& l, const T& r) { binary(asmjit::x86::Inst::kIdAdd, d, l, r); }
-		template <class T> void sub(const Gp& d, const Gp& l, const T& r) { binary(asmjit::x86::Inst::kIdSub, d, l, r); }
+		// Three-operand forms without a copy where baseline x86-64 has one: LEA adds, IMUL by a
+		// power of two shifts left, and both compute into a fresh destination.
+		template <class T> void add(const Gp& d, const Gp& l, const T& r)
+		{
+			if (d != l)
+			{
+				if constexpr (std::is_same_v<T, Gp>)
+				{
+					if (d != r)
+					{
+						a.lea(d, asmjit::x86::ptr(l.r64(), r.r64()));
+						return;
+					}
+				}
+				else
+				{
+					a.lea(d, asmjit::x86::ptr(l.r64(), int32_t(r)));
+					return;
+				}
+			}
+			binary(asmjit::x86::Inst::kIdAdd, d, l, r);
+		}
+		template <class T> void sub(const Gp& d, const Gp& l, const T& r)
+		{
+			if constexpr (!std::is_same_v<T, Gp>)
+			{
+				if (d != l)
+				{
+					a.lea(d, asmjit::x86::ptr(l.r64(), -int32_t(r)));
+					return;
+				}
+			}
+			binary(asmjit::x86::Inst::kIdSub, d, l, r);
+		}
 		template <class T> void bitAnd(const Gp& d, const Gp& l, const T& r) { binary(asmjit::x86::Inst::kIdAnd, d, l, r); }
 		template <class T> void bitOr(const Gp& d, const Gp& l, const T& r) { binary(asmjit::x86::Inst::kIdOr, d, l, r); }
 		template <class T> void bitXor(const Gp& d, const Gp& l, const T& r) { binary(asmjit::x86::Inst::kIdXor, d, l, r); }
@@ -112,11 +145,18 @@ namespace esp
 		{
 			if constexpr (std::is_same_v<T, Gp>)
 			{
-				// Variable shifts count in CL; the allocator resolves the constraint.
-				auto count = a.newUInt32();
-				a.mov(count, r.r32());
+				// Variable shifts count in CL; the allocator places the count there. Only a
+				// count that is the destination itself needs saving first.
+				if (d == r)
+				{
+					auto count = a.newUInt32();
+					a.mov(count, r.r32());
+					move(d, l);
+					a.emit(id, d, count.r8());
+					return;
+				}
 				move(d, l);
-				a.emit(id, d, count.r8());
+				a.emit(id, d, r.r8());
 			}
 			else
 			{
@@ -125,7 +165,18 @@ namespace esp
 					a.emit(id, d, r);
 			}
 		}
-		template <class T> void shl(const Gp& d, const Gp& l, const T& r) { shift(asmjit::x86::Inst::kIdShl, d, l, r); }
+		template <class T> void shl(const Gp& d, const Gp& l, const T& r)
+		{
+			if constexpr (!std::is_same_v<T, Gp>)
+			{
+				if (d != l && r > 0 && r < 32)
+				{
+					a.imul(d, l, int32_t(1u << r));
+					return;
+				}
+			}
+			shift(asmjit::x86::Inst::kIdShl, d, l, r);
+		}
 		template <class T> void shr(const Gp& d, const Gp& l, const T& r) { shift(asmjit::x86::Inst::kIdShr, d, l, r); }
 		template <class T> void sar(const Gp& d, const Gp& l, const T& r) { shift(asmjit::x86::Inst::kIdSar, d, l, r); }
 		void orShifted(const Gp& d, const Gp& l, const Gp& r, unsigned amount)
@@ -136,6 +187,11 @@ namespace esp
 		}
 		void addShifted(const Gp& d, const Gp& l, const Gp& r, unsigned amount)
 		{
+			if (amount <= 3)
+			{
+				a.lea(d, asmjit::x86::ptr(l.r64(), r.r64(), amount));
+				return;
+			}
 			auto shifted = temporary(d);
 			shl(shifted, r, amount);
 			add(d, l, shifted);
@@ -152,7 +208,7 @@ namespace esp
 		}
 		void signedBits(const Gp& d, const Gp& s, unsigned start, unsigned width)
 		{
-			shl(d, s, 32 - start - width);
+			shl(d, s, 32 - start - width); // an IMUL into d when d is not s
 			a.sar(d, 32 - width);
 		}
 		void bits(const Gp& d, const Gp& s, unsigned start, unsigned width)
@@ -166,6 +222,45 @@ namespace esp
 			a.movsx(rhs, r.r8());
 			a.movsxd(d, l);
 			a.imul(d, rhs);
+		}
+		// The signed byte at bit `start` of s, ready for a product: sign-extended to 64 bits.
+		void signedByte(const Gp& d, const Gp& s, unsigned start)
+		{
+			if (start)
+			{
+				move(d.r32(), s.r32());
+				a.sar(d.r32(), start);
+				a.movsx(d.r64(), d.r8());
+				return;
+			}
+			a.movsx(d.r64(), s.r8());
+		}
+		// d = 4 + 2 * exponent of the packed code s (its bits 15:14).
+		void exponentShift(const Gp& d, const Gp& s)
+		{
+			shr(d, s, 13);
+			a.and_(d, 6);
+			a.lea(d, asmjit::x86::ptr(d.r64(), 4));
+		}
+		// The ERAM sample memory's base lives in a virtual register for the whole kernel.
+		void loadEramMemory(size_t frameOffset)
+		{
+			values[31] = a.newUInt64();
+			load(x(31), mem(19, frameOffset));
+		}
+		Gp eramMemory() { return x(31); }
+		// Byte `high` of d := byte `high` of s; the rest of d stays.
+		void insertByte(const Gp& d, const Gp& s, bool high, const Gp& scratch)
+		{
+			if (!high)
+			{
+				a.mov(d.r8(), s.r8());
+				return;
+			}
+			a.mov(scratch, s);
+			a.and_(scratch, 0xff00);
+			a.and_(d, 0xffff00ffu);
+			a.or_(d, scratch);
 		}
 		void select(const Gp& d, const Gp& yes, const Gp& no, Cond c)
 		{
@@ -251,7 +346,9 @@ namespace esp
 			a.mov(m, 0);
 		}
 
-		// Clamp to signed 24 bits; most samples need no clamping.
+		// Clamp to signed 24 bits; most samples need no clamping. The clamp stays inline: moved
+		// out of line, every clamped virtual register would be live up to the stub and the
+		// allocator would spill around hundreds of function-long ranges.
 		void saturate(unsigned reg)
 		{
 			auto shifted = a.newUInt32();
@@ -263,23 +360,26 @@ namespace esp
 			a.xor_(w(reg), 0x7fffff);
 			a.bind(done);
 		}
-		// w6 signed sample -> w7 packed code (baseline x86-64, no LZCNT)
+		void emitColdCode() {}
+		void parkColdCode() {}
+		void finishFunction() { a.endFunc(); }
+		// w6 signed sample -> w7 packed code (baseline x86-64: BSR, no LZCNT). The exponent is
+		// the magnitude's bit count above 17 in pairs: bsr - 15, clamped at zero, low bit dropped.
 		void packEramNative()
 		{
 			signedBits(w(6), w(6), 0, 24);
 			sar(w(8), w(6), 31);
 			a.xor_(w(8), w(6));
-			a.mov(w(9), 0);
-			for (unsigned threshold : {17u, 19u, 21u})
-			{
-				a.cmp(w(8), 1u << threshold);
-				a.sbb(w(9), -1);
-			}
-			shl(w(8), w(9), 1);
-			a.add(w(8), 4);
+			a.or_(w(8), 1); // BSR of zero is undefined; bit 0 never reaches a threshold
+			a.bsr(w(8), w(8));
+			a.sub(w(8), 15);
+			a.mov(w(9), 0); // MOV preserves the flags of the subtraction.
+			a.cmov(CC::kGE, w(9), w(8));
+			a.and_(w(9), 6);
+			a.lea(w(8), asmjit::x86::ptr(x(9), 4));
 			sar(w(7), w(6), w(8));
 			a.and_(w(7), 0x3fff);
-			a.shl(w(9), 14);
+			a.shl(w(9), 13);
 			a.or_(w(7), w(9));
 		}
 
@@ -299,10 +399,20 @@ namespace esp
 			values[29] = a.newUInt64();
 			a.mov(w(29), w(0));
 		}
+		// The retained multiplicand is about to be written in place (load, constant or shift).
+		void beginLastInput() { values[29] = a.newUInt64(); }
+		void shiftLastInput(unsigned amount)
+		{
+			const auto previous = values[29];
+			values[29] = a.newUInt64();
+			sar(w(29), previous.r32(), amount);
+		}
 
-		// The operand is in w0, the MUL30/DMAC coefficient in w1. The result is named, not
-		// copied into a recycled pipeline register.
-		void emitProduct(const CoreProgram::Operation& op, const Instr& in, unsigned c, unsigned pc, bool specialCoef)
+		// The operand is in w(operandReg), a 24-bit value when operand24; the MUL30/DMAC
+		// coefficient in x1 is sign-extended already. The result is named, not copied into a
+		// recycled pipeline register.
+		void emitProduct(const CoreProgram::Operation& op, const Instr& in, unsigned pc, bool specialCoef,
+			unsigned operandReg, bool operand24)
 		{
 			const auto previous = w(op.current[in.accB]);
 			if (op.constantShift >= 0)
@@ -316,20 +426,23 @@ namespace esp
 			}
 			else
 			{
-				values[2] = values[0];
-				if (op.operand24)
-					a.movsxd(x(2), w(2));
+				if (operandReg == 0)
+				{
+					values[2] = values[0]; // the product consumes the operand register
+					if (operand24)
+						a.movsxd(x(2), w(2));
+				}
 				else
+					a.movsxd(x(2), w(operandReg)); // the retained input stays intact
+				if (!operand24)
 				{
 					a.shl(x(2), 40);
 					a.sar(x(2), 40);
 				}
 				if (specialCoef)
 				{
-					a.movsx(x(1), w(1).r8());
 					a.imul(x(2), x(1));
-					load(x(10), mem(19, offsetof(JitFrame, shift) + c * sizeof(void*)));
-					loadByte(w(3), mem(10, pc));
+					loadByte(w(3), mem(23, offsetof(LiveTables, shift) + pc));
 					sar(x(2), x(2), x(3));
 				}
 				else
@@ -345,8 +458,10 @@ namespace esp
 			values[0] = a.newUInt64(); // the predicate sample must not overwrite the product
 		}
 
-		// Capture every source before assigning the edge registers: an edge can permute them.
-		void normalize(const CoreProgram::Block& block)
+		// Capture every source before assigning the edge registers: an edge can permute them. A
+		// value a product wrote in this block is wrapped to 30 bits; the others arrived wrapped
+		// and are passed through, so an unchanged slot costs nothing.
+		void normalize(const CoreProgram::Block& block, unsigned written)
 		{
 			Gp outputs[8];
 			for (unsigned b = 0; b < 2; ++b)
@@ -354,6 +469,11 @@ namespace esp
 					if (block.liveOut & (1u << (b * 4 + k)))
 					{
 						const unsigned source = k == 3 ? block.current[b] : block.history[b][k];
+						if (!(written & (1u << source)))
+						{
+							outputs[b * 4 + k] = values[source].r32();
+							continue;
+						}
 						outputs[b * 4 + k] = a.newUInt32();
 						signedBits(outputs[b * 4 + k], w(source), 0, 30);
 					}
@@ -380,11 +500,7 @@ namespace esp
 			for (unsigned i = 0; i < FRAME_CLOCKS; i += 8)
 				storeZero(mem(10, i), 8);
 		}
-		void epilogue(unsigned)
-		{
-			a.ret();
-			a.endFunc();
-		}
+		void epilogue(unsigned) { a.ret(); }
 
 		// Rejects calls and jumps to anything but a local label. Instruction nodes are
 		// inspected, not bytes: immediates can contain call opcodes.

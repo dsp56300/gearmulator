@@ -169,6 +169,16 @@ namespace esp
 
 	static_assert(sizeof(Instr) == 20);
 
+	// Live data of one core for compiled engines: the coefficient x 2^(7-shift) per word, so
+	// every ordinary product is (a * c16) >> 7, and the resolved shift. Both are read per
+	// product, so they share one base register: the shift sits at a fixed offset from the
+	// coefficient of the same word.
+	struct LiveTables
+	{
+		int16_t coef16[PRAM_WORDS];
+		uint8_t shift[PRAM_WORDS];
+	};
+
 	static inline bool isBranch(const Instr& in) { return in.control && in.sub <= 3; }
 
 	// The part of a word a compiled engine would bake into code. Ordinary
