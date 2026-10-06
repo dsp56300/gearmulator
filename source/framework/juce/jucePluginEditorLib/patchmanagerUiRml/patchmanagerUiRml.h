@@ -39,7 +39,7 @@ namespace jucePluginEditorLib::patchManagerRml
 			Grid
 		};
 
-		PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, PatchManagerDataModel& _dataModel, const std::initializer_list<patchManager::GroupType>& _groupTypes);
+		PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, PatchManagerDataModel& _dataModel, const std::vector<patchManager::GroupType>& _groupTypes);
 		~PatchManagerUiRml() override;
 
 		// base implementation

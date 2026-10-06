@@ -1,6 +1,7 @@
 #include "n2xPluginProcessor.h"
 
 #include "n2xController.h"
+#include "n2xPatchManager.h"
 #include "n2xPluginEditorState.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
@@ -38,11 +39,14 @@ namespace n2xJucePlugin
 		getController();
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
 		Processor::setLatencyBlocks(latencyBlocks);
+
+		setPatchManager(new PatchManager(*this));
 	}
 
 	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 	{
 		destroyEditorState();
+		destroyPatchManager();
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()

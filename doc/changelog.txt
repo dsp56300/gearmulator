@@ -65,7 +65,25 @@ Framework:
         repeat rate while the key was held, once the plugin window had the
         keyboard focus.
 
+- [Fix] BUG-10425 Program changes for a MIDI bank that has a data source in the
+        Patch Manager loaded their patch late, so controllers sent right after
+        a program change applied to the previous patch. The patch now loads
+        right away, in order with the MIDI around it, and of several program
+        changes in a row only the last one loads. These program changes now
+        also work when the plugin window was never opened, and loading a
+        project shows its patches in the Patch Manager when the project is
+        loaded into a plugin that is already running.
+
 Osirus/OsTIrus:
+
+- [Fix] BUG-10425 Controllers and parameter changes that arrived while a patch
+        was being loaded, for example right after a program change, could get
+        lost, in the sound or in the state saved with the project, with or
+        without the Patch Manager.
+
+- [Fix] BUG-10425 A MIDI bank number given to a RAM bank in the Patch Manager
+        got lost whenever the RAM banks were received again, after loading a
+        project for example.
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,
         or right after the plugin was created, before any audio had been

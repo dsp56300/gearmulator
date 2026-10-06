@@ -105,8 +105,6 @@ namespace jucePluginEditorLib
 
 		bool selectTabWithElement(const Rml::Element* _element) const;
 
-		virtual patchManager::PatchManager* createPatchManager(Rml::Element* _parent) { return nullptr; }
-
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
@@ -122,18 +120,15 @@ namespace jucePluginEditorLib
 
 		Processor& getProcessor() const { return m_processor; }
 
-		void setPatchManager(patchManager::PatchManager* _patchManager);
-
-		patchManager::PatchManager* getPatchManager() const
-		{
-			return m_patchManager.get();
-		}
+		// the processor's, shown by this editor if its skin has a patch manager
+		patchManager::PatchManager* getPatchManager() const;
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data) override;
 		void getPerInstanceConfig(std::vector<uint8_t>& _data) override;
 
 		virtual void saveChunkData(baseLib::BinaryStream& _s);
 		virtual void loadChunkData(baseLib::ChunkReader& _cr);
+
 
 		virtual void setCurrentPart(uint8_t _part);
 
@@ -244,10 +239,8 @@ namespace jucePluginEditorLib
 		std::map<std::string, std::vector<char>> m_fileCache;
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
-		std::unique_ptr<patchManager::PatchManager> m_patchManager;
 		std::unique_ptr<patchManagerRml::PatchManagerDataModel> m_patchManagerDataModel;
 		std::unique_ptr<PluginDataModel> m_pluginDataModel;
-		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
 

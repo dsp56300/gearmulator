@@ -34,7 +34,8 @@ namespace genericVirusUI
 	VirusEditor::VirusEditor(virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
 		Editor(_processorRef, _skin),
 		m_processor(_processorRef),
-		m_romChangedListener(_processorRef.evRomChanged)
+		m_romChangedListener(_processorRef.evRomChanged),
+		m_playModeSetListener(static_cast<virus::Controller&>(_processorRef.getController()).evPlayModeSet)
 	{
 	}
 	void VirusEditor::create()
@@ -184,6 +185,15 @@ namespace genericVirusUI
 		updatePresetName();
 		updatePlayModeButtons();
 
+		// the patch manager switches the play mode when it loads a multi, with or without an editor
+		m_playModeSetListener = [this](const uint8_t _playMode)
+		{
+			if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
+				setPart(0);
+
+			onPlayModeChanged();
+		};
+
 		m_romChangedListener = [this](auto)
 		{
 			updateDeviceModel();
@@ -262,11 +272,6 @@ namespace genericVirusUI
 				// ignore invalid input
 			}
 		});
-	}
-
-	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(Rml::Element* _parent)
-	{
-		return new PatchManager(*this, _parent);
 	}
 
 	std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> VirusEditor::createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root)
@@ -455,22 +460,9 @@ namespace genericVirusUI
 		});
 	}
 
-	void VirusEditor::setPlayMode(uint8_t _playMode)
+	void VirusEditor::setPlayMode(const uint8_t _playMode)
 	{
-		const auto playMode = getController().getParameterIndexByName(virus::g_paramPlayMode);
-
-		auto* param = getController().getParameter(playMode);
-		param->setUnnormalizedValueNotifyingHost(_playMode, pluginLib::Parameter::Origin::Ui);
-
-		// we send this directly here as we request a new arrangement below, we don't want to wait on juce to inform the knob to have changed
-		getController().sendParameterChange(*param, _playMode, pluginLib::Parameter::Origin::Ui);
-
-		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
-			setPart(0);
-
-		onPlayModeChanged();
-
-		getController().requestArrangement();
+		getController().setPlayMode(_playMode);
 	}
 
 	void VirusEditor::savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/)

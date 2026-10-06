@@ -50,8 +50,12 @@ namespace virus
 		auto* parameter = getParameter(paramIdx);
         if(parameter)
 		{
+			m_multiMode = isMultiMode();
+
 			parameter->onValueChanged.addListener([this](pluginLib::Parameter*)
 			{
+				m_multiMode = isMultiMode();
+
 				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
 				requestSingle(0, prg);
                 requestMulti(0, prg);
@@ -330,6 +334,20 @@ namespace virus
     bool Controller::isMultiMode() const
 	{
 		return getParameter(g_paramPlayMode, 0)->getUnnormalizedValue();
+	}
+
+	void Controller::setPlayMode(const uint8_t _playMode)
+	{
+		auto* param = getParameter(getParameterIndexByName(g_paramPlayMode));
+
+		param->setUnnormalizedValueNotifyingHost(_playMode, pluginLib::Parameter::Origin::Ui);
+
+		// we send this directly here as we request a new arrangement below, we don't want to wait on juce to inform the knob to have changed
+		sendParameterChange(*param, _playMode, pluginLib::Parameter::Origin::Ui);
+
+		evPlayModeSet(_playMode);
+
+		requestArrangement();
 	}
 
 	std::string Controller::getCurrentPartPresetName(const uint8_t _part) const
@@ -892,23 +910,39 @@ namespace virus
 		return activatePatch(_sysex, isMultiMode() ? getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE));
     }
 
-    bool Controller::activatePatch(const synthLib::SysexBuffer& _sysex, uint32_t _part)
+    bool Controller::getSingleEditBufferProgram(uint32_t _part, const bool _multiMode, uint8_t& _program)
     {
         if(_part == virusLib::ProgramType::SINGLE)
         {
-            if(isMultiMode())
+            if(_multiMode)
 	            _part = 0;
         }
         else if(_part >= 16)
         {
             return false;
         }
-        else if(!isMultiMode() && _part == 0)
+        else if(!_multiMode && _part == 0)
         {
             _part = virusLib::ProgramType::SINGLE;
         }
 
-        const auto program = static_cast<uint8_t>(_part);
+        _program = static_cast<uint8_t>(_part);
+        return true;
+    }
+
+    void Controller::onSingleActivated(const uint8_t _program)
+    {
+		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), _program);
+
+		setCurrentPartPresetSource(_program == virusLib::ProgramType::SINGLE ? 0 : _program, PresetSource::Browser);
+    }
+
+    bool Controller::activatePatch(const synthLib::SysexBuffer& _sysex, const uint32_t _part)
+    {
+        uint8_t program;
+
+        if(!getSingleEditBufferProgram(_part, isMultiMode(), program))
+            return false;
 
 		// re-pack, force to edit buffer
     	const auto msg = modifySingleDump(_sysex, virusLib::BankNumber::EditBuffer, program);
@@ -918,9 +952,7 @@ namespace virus
 
 		sendSysEx(msg);
 
-		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), program);
-
-		setCurrentPartPresetSource(program == virusLib::ProgramType::SINGLE ? 0 : program, PresetSource::Browser);
+		onSingleActivated(program);
 
 		return true;
     }

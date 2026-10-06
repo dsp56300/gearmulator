@@ -35,7 +35,6 @@ namespace jeJucePlugin
 
 		void initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model) override;
 
-		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 

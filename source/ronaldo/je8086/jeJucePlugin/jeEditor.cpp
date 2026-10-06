@@ -137,11 +137,6 @@ namespace jeJucePlugin
 		m_lcd.reset();
 	}
 
-	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
-	{
-		return new PatchManager(*this, _parent);
-	}
-
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
 	{
 		return {};

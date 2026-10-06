@@ -38,7 +38,6 @@ set(SOURCES_PM
 	patchmanager/patchmanagerui.cpp patchmanager/patchmanagerui.h
 	patchmanager/savepatchdesc.cpp patchmanager/savepatchdesc.h
 	patchmanager/types.cpp patchmanager/types.h
-	patchmanager/state.cpp patchmanager/state.h
 )
 
 set(SOURCES_PM_RML

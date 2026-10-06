@@ -325,6 +325,29 @@ namespace n2xJucePlugin
 		return result;
 	}
 
+	void Controller::setEditBufferHeader(synthLib::SysexBuffer& _dump, const bool _multi, const uint8_t _part)
+	{
+		_dump[n2x::SysexIndex::IdxMsgType] = _multi ? n2x::SysexByte::MultiDumpBankEditBuffer : n2x::SysexByte::SingleDumpBankEditBuffer;
+		_dump[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(_multi ? 0 : _part);
+		_dump[n2x::SysexIndex::IdxDevice] = n2x::DefaultDeviceId;
+	}
+
+	bool Controller::createSingleEditBufferDump(synthLib::SysexBuffer& _result, const synthLib::SysexBuffer& _sysex, const uint8_t _part)
+	{
+		if(!n2x::State::isSingleDump(_sysex))
+			return false;
+
+		auto d = _sysex;
+		setEditBufferHeader(d, false, _part);
+		_result = n2x::State::validateDump(d);
+		return true;
+	}
+
+	void Controller::onSingleSent(const uint8_t _part) const
+	{
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, _part);
+	}
+
 	bool Controller::activatePatch(const synthLib::SysexBuffer& _sysex, const uint32_t _part)
 	{
 		if(_part >= getPartCount())
@@ -340,9 +363,7 @@ namespace n2xJucePlugin
 
 		auto d = _sysex;
 
-		d[n2x::SysexIndex::IdxMsgType] = isSingle ? n2x::SysexByte::SingleDumpBankEditBuffer : n2x::SysexByte::MultiDumpBankEditBuffer;
-		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(isMulti ? 0 : _part);
-		d[n2x::SysexIndex::IdxDevice] = n2x::DefaultDeviceId;
+		setEditBufferHeader(d, isMulti, part);
 
 		auto applyLockedParamsToSingle = [&](n2x::State::SingleDump& _dump, const uint8_t _singlePart)
 		{
@@ -399,7 +420,7 @@ namespace n2xJucePlugin
 
 		if(isSingle)
 		{
-			requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, static_cast<uint8_t>(_part));
+			onSingleSent(part);
 		}
 		else
 		{

@@ -254,7 +254,7 @@ namespace jucePluginEditorLib::patchManagerRml
 
 	void ListModel::sortPatches()
 	{
-		patchManager::PatchManagerUi::sortPatches(m_patches, getSourceType());
+		pluginLib::patchManager::sortPatches(m_patches, getSourceType());
 	}
 
 	bool ListModel::match(const Patch& _patch) const

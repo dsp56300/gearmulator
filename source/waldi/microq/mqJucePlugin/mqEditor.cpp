@@ -111,11 +111,6 @@ namespace mqJucePlugin
 		});
 	}
 
-	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
-	{
-		return new PatchManager(*this, _parent);
-	}
-
 	void Editor::onCurrentPartChanged(const uint8_t _part)
 	{
 		jucePluginEditorLib::Editor::onCurrentPartChanged(_part);

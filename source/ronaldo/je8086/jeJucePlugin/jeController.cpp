@@ -545,8 +545,23 @@ namespace jeJucePlugin
 
 	bool Controller::sendSingle(const pluginLib::SysEx& _sysex, uint32_t _part) const
 	{
-		// patches consist of multiple sysex messages, split them up again
 		synthLib::SysexBufferList sysex;
+
+		if (!createSingleMessages(sysex, _sysex, _part))
+			return false;
+
+		for (const auto& s : sysex)
+			sendSysEx(s);
+
+		sendTempPerformanceRequest();
+
+		return true;
+	}
+
+	bool Controller::createSingleMessages(synthLib::SysexBufferList& _result, const pluginLib::SysEx& _sysex, const uint32_t _part) const
+	{
+		// patches consist of multiple sysex messages, split them up again
+		auto& sysex = _result;
 		synthLib::MidiToSysex::splitMultipleSysex(sysex, _sysex);
 
 		if (sysex.empty())
@@ -567,45 +582,32 @@ namespace jeJucePlugin
 		for (auto& s : sysex)
 		{
 			const auto addr = jeLib::State::getAddress(s);
-			LOG(addr);
 
 			if (isPatch)
 			{
-				auto sendPatch = [&](jeLib::PerformanceData _upperLower)
-				{
-					const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
-					LOG(localAddr);
+				const auto upperLower = _part == 0 ? jeLib::PerformanceData::PatchUpper : jeLib::PerformanceData::PatchLower;
+				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
 
-					const auto a = 
-						static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) | 
-						static_cast<uint32_t>(_upperLower) | 
-						localAddr;
+				const auto a = 
+					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) | 
+					static_cast<uint32_t>(upperLower) | 
+					localAddr;
 
-					jeLib::State::setAddress(s, a);
-					jeLib::State::updateChecksum(s);
-
-					sendSysEx(s);
-				};
-
-				sendPatch(_part == 0 ? jeLib::PerformanceData::PatchUpper : jeLib::PerformanceData::PatchLower);
+				jeLib::State::setAddress(s, a);
 			}
 			else
 			{
 				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::PerformanceData::BlockMask);
-				LOG(localAddr);
 
 				const auto a = 
 					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) |
 					localAddr;
 
 				jeLib::State::setAddress(s, a);
-				jeLib::State::updateChecksum(s);
-
-				sendSysEx(s);
 			}
-		}
 
-		sendTempPerformanceRequest();
+			jeLib::State::updateChecksum(s);
+		}
 
 		return true;
 	}

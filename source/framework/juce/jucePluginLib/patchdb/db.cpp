@@ -308,7 +308,10 @@ namespace pluginLib::patchDB
 			_ds->midiBankNumber = _midiBankNumber;
 		}
 
-		m_dirty.dataSources = true;
+		{
+			std::scoped_lock lock(m_uiMutex);
+			m_dirty.dataSources = true;
+		}
 		runOnLoaderThread([this]{ saveJson(); });
 		return true;
 	}
@@ -320,7 +323,10 @@ namespace pluginLib::patchDB
 			_ds->midiBankNumber = g_invalidMidiBankNumber;
 		}
 
-		m_dirty.dataSources = true;
+		{
+			std::scoped_lock lock(m_uiMutex);
+			m_dirty.dataSources = true;
+		}
 		runOnLoaderThread([this]{ saveJson(); });
 		return true;
 	}
@@ -733,7 +739,7 @@ namespace pluginLib::patchDB
 		lock.unlock();
 
 		if(!changed.empty())
-			saveJson();
+			runOnLoaderThread([this]{ saveJson(); });
 
 		return true;
 	}

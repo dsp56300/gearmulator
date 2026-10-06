@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_set>
 #include <array>
+#include <atomic>
 
 #include "parameterregion.h"
 
@@ -25,6 +26,9 @@ namespace pluginLib
 		std::unordered_set<const Parameter*> getLockedParameters(uint8_t _part) const;
 		bool isParameterLocked(uint8_t _part, const std::string& _name) const;
 
+		// safe to call from any thread, for example the audio thread
+		bool hasLockedRegions(const uint8_t _part) const { return _part < m_lockedRegionCounts.size() && m_lockedRegionCounts[_part] > 0; }
+
 	private:
 		void setParametersLocked(const ParameterRegion& _parameterRegion, uint8_t _part, bool _locked) const;
 
@@ -33,5 +37,6 @@ namespace pluginLib
 		Controller& m_controller;
 
 		std::array<std::set<std::string>,16> m_lockedRegions;
+		std::array<std::atomic<uint32_t>,16> m_lockedRegionCounts{};
 	};
 }

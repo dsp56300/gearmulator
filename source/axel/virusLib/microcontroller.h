@@ -96,7 +96,9 @@ private:
 	bool isPageSupported(Page _page) const;
 	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);
 	bool waitingForPresetReceiveConfirmation() const;
+	bool presetWriteInProgress() const;
 	void receiveUpgradedPreset();
+	bool processMIDI(const synthLib::SMidiEvent& _ev, FrontpanelState* _fpState);
 
 	static bool isValid(const TPreset& _preset);
 
@@ -133,7 +135,14 @@ private:
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
 
-	std::vector<std::pair<synthLib::MidiEventSource, synthLib::SysexBuffer>> m_pendingSysexInput;
+	// MIDI input that waits until the DSP confirmed the presets it was sent, in the order it arrived
+	struct PendingInput
+	{
+		synthLib::SMidiEvent ev;
+		FrontpanelState* fpState = nullptr;
+	};
+
+	std::vector<PendingInput> m_pendingInput;
 	std::vector<synthLib::SMidiEvent> m_midiOutput;
 
 	mutable std::recursive_mutex m_mutex;
