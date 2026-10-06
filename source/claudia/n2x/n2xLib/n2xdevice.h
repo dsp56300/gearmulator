@@ -36,5 +36,6 @@ namespace n2x
 		std::vector<uint8_t> m_midiOutBuffer;
 		synthLib::MidiBufferParser m_midiParser;
 		uint32_t m_numSamplesProcessed = 0;
+		uint8_t m_arpHoldMask = 0xff;	// no valid mask, the first block reports the state
 	};
 }

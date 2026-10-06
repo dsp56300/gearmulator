@@ -21,6 +21,7 @@ namespace n2xJucePlugin
 
 		baseLib::Event<> onProgramChanged;
 		baseLib::Event<n2x::KnobType, uint8_t> onKnobChanged;
+		baseLib::Event<uint8_t> onArpHoldChanged;	// Arp Hold of parts A-D as bits 0-3
 
 		Controller(AudioPluginAudioProcessor&);
 		~Controller() override;
@@ -62,6 +63,8 @@ namespace n2xJucePlugin
 
 		bool getKnobState(uint8_t& _result, n2x::KnobType _type) const;
 
+		bool isArpHold(const uint8_t _part) const { return (m_arpHoldMask >> _part) & 1; }
+
 		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) override;
 
 	private:
@@ -69,5 +72,6 @@ namespace n2xJucePlugin
 
 		n2x::State m_state;
 		baseLib::EventListener<uint8_t> m_currentPartChanged;
+		uint8_t m_arpHoldMask = 0;
 	};
 }

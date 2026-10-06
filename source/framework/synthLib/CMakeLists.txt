@@ -23,6 +23,7 @@ set(SOURCES
 	midiBufferParser.cpp midiBufferParser.h
 	midiClock.cpp midiClock.h
 	midiControllerThinner.cpp midiControllerThinner.h
+	midiInputQueue.h
 	midiRateLimiter.cpp midiRateLimiter.h
 	midiRoutingMatrix.cpp midiRoutingMatrix.h
 	midiToSysex.cpp midiToSysex.h
@@ -96,6 +97,12 @@ if(BUILD_TESTING)
 	target_link_libraries(midiControllerThinner_test PRIVATE synthLib)
 	set_property(TARGET midiControllerThinner_test PROPERTY FOLDER "Tests")
 	add_test(NAME midiControllerThinner COMMAND midiControllerThinner_test)
+
+	add_executable(midiInputQueue_test midiInputQueue_test.cpp)
+	target_link_libraries(midiInputQueue_test PRIVATE synthLib)
+	set_property(TARGET midiInputQueue_test PROPERTY FOLDER "Tests")
+	add_test(NAME midiInputQueue COMMAND midiInputQueue_test)
+	set_tests_properties(midiInputQueue PROPERTIES TIMEOUT 30)
 
 	add_executable(device_test device_test.cpp)
 	target_link_libraries(device_test PRIVATE synthLib)

@@ -80,6 +80,8 @@ namespace wLib
 
 	void Hardware::beginProcessAudio()
 	{
+		m_midiIn.refill();
+
 		m_processAudio.store(true, std::memory_order_release);
 		m_processAudioCv.notify_all();
 	}

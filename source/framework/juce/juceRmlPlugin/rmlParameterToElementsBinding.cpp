@@ -26,7 +26,10 @@ namespace rmlPlugin
 					if (!_param)
 						return;
 
+					// a new range or step makes the elements clamp and snap their value, which is not a user edit
+					IgnoreChangeEvents ignore(*this);
 					setElementsParameterDefaults(_param);
+					updateElementsFromParameter();
 				});
 			}
 		}

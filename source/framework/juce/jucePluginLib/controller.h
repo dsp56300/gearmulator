@@ -140,6 +140,9 @@ namespace pluginLib
 
 		void applyPatchParameters(const MidiPacket::ParamValues& _params, uint8_t _part) const;
 
+		// Call after a preset changed parameter values with Origin::PresetChange, tells the host to read all parameters again
+		void onPresetParametersChanged() const;
+
 		virtual bool isDerivedParameter(Parameter& _derived, Parameter& _base) const { return true; }
 
         struct ParamIndex

@@ -50,6 +50,12 @@ Framework:
         as umlauts. The same applied to exporting a skin and to the "Browse..."
         button for MIDI Learn presets.
 
+- [Fix] BUG-10335 VST3 in Cubase: Loading a patch sometimes changed some of its
+        parameters right after it was loaded, so the patch sounded wrong until
+        it was loaded again. Soft knobs, such as the knobs below the display of
+        Xenia, passed values of the previous patch to the parameters that the
+        new patch assigns to them.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,
@@ -106,6 +112,11 @@ Vavra/Xenia:
         project came back with the sound from before, for a new instance the
         init sound.
 
+- [Fix] BUG-10440 The plugin hung for good when one audio block brought
+        more than 16384 MIDI events, which a host that sets every parameter
+        when it loads a plugin can send. The events now follow over the next
+        blocks, none is lost.
+
 Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them
@@ -125,6 +136,9 @@ Xenia:
 
 NodalRed2x:
 
+- [Fix] BUG-10440 The plugin hung for good when one audio block brought
+        more than 16384 MIDI events, as Vavra and Xenia did.
+
 - [Fix] BUG-10400 A state that the host saved after loading one, before any
         audio had been processed, contained the sounds from before the load.
         Logic Pro does that with projects and plug-in settings, so recalling
@@ -135,6 +149,17 @@ NodalRed2x:
         played 1.8 cents flat. The Nord Lead 2X runs at 98,304 Hz, not at
         98,200 Hz. Tuning and everything time-based, LFOs, envelopes and the
         arpeggiator, now match the hardware.
+
+- [Imp] BUG-10445 BUG-10216 A PANIC button below the page tabs does what
+        SHIFT + DISTORTION does on the hardware: every note stops, also held
+        and sustained ones. The Nord Lead 2X ignores the MIDI messages All
+        Notes Off and All Sound Off, and so does the emulation, so this is
+        the way to stop notes that hang.
+
+- [Imp] BUG-10445 A HOLD button in the arpeggiator section turns Arpeggio
+        Hold of the current part on and off, as SHIFT + ARP does on the
+        hardware, and its LED lights up while it is on. As on the hardware,
+        Hold is not part of a patch and is not saved, and Panic ends it.
 
 JE8086:
 

@@ -11,6 +11,12 @@
 # Invoke with: cmake -Dgearmulator_BINARY_DIR=<buildDir> [-Dgearmulator_SOURCE_DIR=<src>]
 #                    [-DBRANCH=<branch>] [-DUPLOAD=1] -P scripts/deploySymbols.cmake
 # Without UPLOAD it only builds the zip (dry run). Linux produces no symbols, so it is a no-op there.
+#
+# CLEAN=1 deletes what the same scan finds instead of archiving it, and is meant to run BEFORE a
+# build. A CI workspace is shared by every branch and nothing else removes these, so a build that
+# produces one product would otherwise archive and upload the symbols of every product ever built
+# there - a plugin manager build was shipping 5.6 GB of other synths' PDBs (10.5 GB of dSYMs on
+# macOS) for a 7 MB product. Clearing them first makes the archive what this build produced.
 
 if(NOT gearmulator_BINARY_DIR)
 	message(FATAL_ERROR "Binary directory 'gearmulator_BINARY_DIR' not specified")
@@ -19,8 +25,14 @@ endif()
 # make absolute so rclone/glob do not depend on the current working directory
 get_filename_component(gearmulator_BINARY_DIR "${gearmulator_BINARY_DIR}" ABSOLUTE)
 
-# CPACK_PACKAGE_NAME / CPACK_PACKAGE_VERSION / CPACK_SYSTEM_NAME
-include(${gearmulator_BINARY_DIR}/CPackConfig.cmake)
+# CPACK_PACKAGE_NAME / CPACK_PACKAGE_VERSION / CPACK_SYSTEM_NAME. Cleaning runs before a build and
+# needs none of them, and on a workspace that has never been configured the file is not there yet -
+# so only archiving insists on it.
+if(CLEAN)
+	include(${gearmulator_BINARY_DIR}/CPackConfig.cmake OPTIONAL)
+else()
+	include(${gearmulator_BINARY_DIR}/CPackConfig.cmake)
+endif()
 
 # Roots that can hold symbols: the build dir (server/bridge, libraries) and <source>/bin (the shipped
 # plugin products). relBase is their common ancestor so archive paths stay relative and tidy; in CI the
@@ -67,6 +79,15 @@ foreach(root ${scanRoots})
 	endif()
 endforeach()
 list(REMOVE_DUPLICATES symbols)
+
+if(CLEAN)
+	foreach(s ${symbols})
+		file(REMOVE_RECURSE "${s}")
+	endforeach()
+	list(LENGTH symbols symbolCount)
+	message(STATUS "Removed ${symbolCount} symbol file(s)/bundle(s) left over from earlier builds")
+	return()
+endif()
 
 if(NOT symbols)
 	message(STATUS "No Release debug symbols (.dSYM/.pdb) found, nothing to archive")

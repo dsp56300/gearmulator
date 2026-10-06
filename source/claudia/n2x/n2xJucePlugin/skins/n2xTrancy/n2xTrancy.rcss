@@ -68,6 +68,12 @@
 	button_main_hover: 0px 67px 184px 67px;
 	src: button_main.png;
 }
+@spritesheet button_panic
+{
+	button_panic_active: 0px 40px 109px 40px;
+	button_panic_default: 0px 0px 109px 40px;
+	src: button_panic.png;
+}
 @spritesheet button_perf
 {
 	button_perf_active: 0px 67px 184px 67px;
@@ -501,6 +507,14 @@
 .button_main:hover
 {
 	decorator: image(button_main_hover fill);
+}
+.button_panic
+{
+	decorator: image(button_panic_default fill);
+}
+.button_panic:active
+{
+	decorator: image(button_panic_active fill);
 }
 .button_perf
 {

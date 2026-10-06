@@ -65,13 +65,13 @@ namespace n2x
 		FilterDist		= 0x02'40,
 		Osc2Shape		= 0x02'80,
 
-		Distortion		= 0x04'01,
-		Arp				= 0x04'02,
+		Lfo2Dest		= 0x04'01,
+		FilterKeytrack	= 0x04'02,
 		Store			= 0x04'04,
 		ModEnvDest		= 0x04'08,
 		Lfo1Shape		= 0x04'10,
 		Lfo1Dest		= 0x04'20,
-		Lfo2Shape		= 0x04'40,
+		Arp				= 0x04'40,
 		Osc1Shape		= 0x04'80,
 
 		SlotA			= 0x06'01,

@@ -501,7 +501,7 @@ namespace virus
 				sendSysEx(newDump);
 			}
 
-            getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+            onPresetParametersChanged();
 
             if(m_currentPresetSource[ch] != PresetSource::Browser)
             {
@@ -597,7 +597,7 @@ namespace virus
                 param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 			}
 
-			getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+			onPresetParametersChanged();
 
 			if(onMultiReceived)
 				onMultiReceived();

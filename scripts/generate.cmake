@@ -61,3 +61,14 @@ foreach(S IN LISTS products)
 endforeach()
 
 execute_process(COMMAND cmake ${args} COMMAND_ECHO STDOUT WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND_ERROR_IS_FATAL ANY)
+
+# Debug symbols from earlier builds, before this one writes its own. A CI workspace is shared by every
+# branch and symbols are the one output nothing clears, so deploySymbols would otherwise archive and
+# upload every product ever built there - 5.6 GB of PDBs, 10.5 GB of dSYMs, for a build that made one
+# 7 MB product. It belongs here rather than in a job definition: every runner configures through this
+# script, so none of them has to remember to do it.
+execute_process(COMMAND ${CMAKE_COMMAND}
+	-Dgearmulator_BINARY_DIR=${gearmulator_BINARY_DIR}
+	-Dgearmulator_SOURCE_DIR=${gearmulator_SOURCE_DIR}
+	-DCLEAN=1 -P ${CMAKE_CURRENT_LIST_DIR}/deploySymbols.cmake
+	COMMAND_ECHO STDOUT WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND_ERROR_IS_FATAL ANY)

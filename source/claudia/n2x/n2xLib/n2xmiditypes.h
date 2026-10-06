@@ -18,6 +18,9 @@ namespace n2x
 		EmuGetPotsPosition = 91,
 		EmuSetPartCC = 92,
 		EmuSetMasterTune = 93,
+		EmuPanic = 94,				// the hardware's Panic, SHIFT + DISTORTION
+		EmuArpHold = 95,			// toggles Arp Hold of the selected slot, SHIFT + ARP
+		EmuArpHoldState = 96,		// device to editor: Arp Hold of slots A-D as bits 0-3 in the byte after this one
 	};
 
 	enum SysexIndex
