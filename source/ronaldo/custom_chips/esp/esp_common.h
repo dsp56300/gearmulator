@@ -17,7 +17,10 @@
 
 namespace esp
 {
-	template <int32_t N> static constexpr int32_t se(int32_t x) { x <<= (32 - N); return x >> (32 - N); }
+	// Sign-extend the low N bits. The left shift is done unsigned: a signed shift that overflows
+	// is undefined, and an optimizer may then assume it never does and drop the extension
+	// altogether (MSVC /O2 did, breaking every non-canonical operand on Windows).
+	template <int32_t N> static constexpr int32_t se(int32_t x) { return int32_t(uint32_t(x) << (32 - N)) >> (32 - N); }
 
 	static constexpr unsigned PRAM_SIZE = 768;		// executable words per core
 	static constexpr unsigned PRAM_WORDS = 1024;	// host aperture per core (words)
