@@ -60,6 +60,11 @@ Framework:
         most often while they were loaded or removed. Building the LV2 plugin
         crashed for the same reason if a ROM was installed.
 
+- [Fix] BUG-10464 Linux: A note played with the computer keyboard of the host,
+        for example in Bitwig Studio, was triggered again and again at the key
+        repeat rate while the key was held, once the plugin window had the
+        keyboard focus.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,
