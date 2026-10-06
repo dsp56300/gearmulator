@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <functional>
 #include <mutex>
+#include <shared_mutex>
 #include <vector>
 
 #include "synthLib/midiTypes.h"
@@ -55,6 +56,7 @@ namespace pluginLib
 
 		using SendFunc = std::function<void(const synthLib::SMidiEvent&)>;
 
+		// waits for calls into the previous handler that run on other threads, so it can be destroyed afterwards
 		void setHandler(Handler* _handler);
 
 		// for every event that is about to be sent to the device, on whatever thread it arrives
@@ -88,7 +90,9 @@ namespace pluginLib
 
 		std::array<PartState, MaxParts> m_partStates{};
 
-		std::atomic<Handler*> m_handler = nullptr;
+		// held shared while the handler is called, exclusively to replace it
+		std::shared_mutex m_handlerMutex;
+		Handler* m_handler = nullptr;
 
 		std::mutex m_holdMutex;
 		std::atomic<bool> m_holding = false;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -27,6 +28,12 @@ namespace pluginLib::patchManager
 
 		explicit PatchManager(const juce::File& _dataFolder);
 		~PatchManager() override;
+
+		// Stops what calls into the patch manager from other threads and waits for what already runs there: program
+		// changes, and the timer and async updates that run processPending() on the message thread. Call it before
+		// deleting a patch manager: a host may delete the plugin on another thread than the message thread (LV2 on
+		// Linux does), and nothing may reach the derived class while it is destroyed
+		void shutdown();
 
 		void setUi(UiInterface* _ui);
 		UiInterface* getUi() const { return m_ui; }
@@ -172,5 +179,9 @@ namespace pluginLib::patchManager
 
 		std::mutex m_loadedByProgramChangeMutex;
 		std::vector<std::pair<uint32_t, patchDB::PatchPtr>> m_loadedByProgramChange;
+
+		// held while processPending() runs, recursive in case a modal loop runs the timer inside it
+		std::recursive_mutex m_processPendingMutex;
+		std::atomic<bool> m_shutdown = false;
 	};
 }

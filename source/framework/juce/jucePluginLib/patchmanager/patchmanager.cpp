@@ -24,7 +24,18 @@ namespace pluginLib::patchManager
 
 	PatchManager::~PatchManager()
 	{
+		shutdown();
+	}
+
+	void PatchManager::shutdown()
+	{
+		// a processPending() that runs on the message thread right now finishes first, later ones do nothing
+		std::scoped_lock lock(m_processPendingMutex);
+		m_shutdown = true;
+
+		// waits for program changes that call into it on other threads right now
 		disconnectProgramChangeRouter();
+
 		stopTimer();
 		cancelPendingUpdate();
 	}
@@ -51,6 +62,11 @@ namespace pluginLib::patchManager
 
 	void PatchManager::processPending()
 	{
+		std::scoped_lock lock(m_processPendingMutex);
+
+		if (m_shutdown)
+			return;
+
 		uiProcess();
 		processLoadedByProgramChange();
 

@@ -18,6 +18,7 @@ namespace pluginLib
 
 	void ProgramChangeRouter::setHandler(Handler* _handler)
 	{
+		std::unique_lock lock(m_handlerMutex);
 		m_handler = _handler;
 	}
 
@@ -132,7 +133,9 @@ namespace pluginLib
 
 	ProgramChangeRouter::Result ProgramChangeRouter::routeProgramChange(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _replacement)
 	{
-		auto* handler = m_handler.load();
+		std::shared_lock lock(m_handlerMutex);
+
+		auto* handler = m_handler;
 
 		if (!handler)
 			return Result::Forward;
@@ -201,7 +204,9 @@ namespace pluginLib
 		if (_superseded)
 			return true;
 
-		auto* handler = m_handler.load();
+		std::shared_lock lock(m_handlerMutex);
+
+		auto* handler = m_handler;
 
 		if (!handler)
 		{

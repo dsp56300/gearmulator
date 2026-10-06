@@ -214,6 +214,10 @@ namespace jucePluginEditorLib
 
 	void Processor::destroyPatchManager()
 	{
+		// before the derived patch manager is destroyed: the host may delete the plugin on another thread than the
+		// message thread, which may be in the middle of processPending()
+		if(m_patchManager)
+			m_patchManager->shutdown();
 		m_patchManager.reset();
 	}
 

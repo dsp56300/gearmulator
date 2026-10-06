@@ -1,7 +1,9 @@
 #include "jucePluginLibTests.h"
 
+#include <atomic>
 #include <chrono>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <set>
 #include <thread>
@@ -103,6 +105,9 @@ namespace
 
 		bool requestPatchForPart(Data& _data, const uint32_t _part, uint64_t) override
 		{
+			if (onRequestPatchForPart)
+				onRequestPatchForPart();
+
 			const auto it = editBuffers.find(_part);
 			if (it == editBuffers.end())
 				return false;
@@ -142,6 +147,9 @@ namespace
 
 		bool activatePatch(const PatchPtr& _patch, const uint32_t _part) override
 		{
+			if (onActivatePatch)
+				onActivatePatch();
+
 			activated.emplace_back(_patch->getName(), _part);
 
 			if (send)
@@ -153,6 +161,9 @@ namespace
 		// what a program change loads directly, on the thread that received it
 		bool createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const PatchPtr&, const Data& _data, uint32_t) const override
 		{
+			if (onCreateProgramChangeEvents)
+				onCreateProgramChangeEvents();
+
 			if (!fastPath)
 				return false;
 
@@ -177,6 +188,11 @@ namespace
 		std::set<uint32_t> lockedParts;
 		std::map<uint32_t, Data> editBuffers;
 		std::function<void(const synthLib::SMidiEvent&)> send;
+
+		// called first in the virtual functions, from whichever thread calls them
+		std::function<void()> onRequestPatchForPart;
+		std::function<void()> onActivatePatch;
+		std::function<void()> onCreateProgramChangeEvents;
 
 		std::vector<std::pair<std::string, uint32_t>> activated;
 		std::vector<std::pair<std::string, uint32_t>> loadedByProgramChange;
@@ -786,6 +802,98 @@ namespace
 	}
 }
 
+namespace
+{
+	// _whileBlocked runs on another thread and gets _block, which it has to make the patch manager call. shutdown() on
+	// a third thread, as a host that deletes the plugin, has to wait until _block returns
+	bool shutdownWaitsFor(TestPatchManager& _pm, std::function<void()>& _block, const std::function<void()>& _whileBlocked)
+	{
+		std::promise<void> entered;
+		std::promise<void> release;
+		std::shared_future<void> released(release.get_future());
+
+		_block = [&entered, released, first = true]() mutable
+		{
+			if (!first)
+				return;
+			first = false;
+			entered.set_value();
+			released.wait();
+		};
+
+		std::thread messageThread(_whileBlocked);
+		entered.get_future().wait();
+
+		std::atomic<bool> shutDown = false;
+		std::thread hostThread([&] { _pm.shutdown(); shutDown = true; });
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		const bool waited = !shutDown;
+
+		release.set_value();
+		messageThread.join();
+		hostThread.join();
+		_block = {};
+
+		return waited && shutDown;
+	}
+
+	void testShutdown()
+	{
+		std::cout << "Testing shutdown while the message thread is in the patch manager..." << std::endl;
+
+		const auto root = createTestDir();
+		const auto settings = root.getChildFile("settings");
+
+		{
+			// processPending() loads a held program change through the router
+			TestPatchManager pm(settings, {"Bass", "Lead", "Pad"});
+			ProgramChangeRouter router;
+			Device device(router);
+			connect(pm, router, device);
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(pm.setDataSourceMidiBankNumber(pm.getDataSource(TestPatchManager::romBank()), 0));
+			TEST_ASSERT(pm.waitIdle());
+
+			pm.fastPath = false;
+			device.send(programChange(0, 1));
+			TEST_ASSERT(device.received.empty());
+
+			TEST_ASSERT(shutdownWaitsFor(pm, pm.onActivatePatch, [&pm] { pm.processPending(); }));
+			TEST_ASSERT(pm.activated == (std::vector<std::pair<std::string, uint32_t>>{{"Lead", 0}}));
+
+			// afterwards nothing reaches it any more: program changes go to the device, processPending() does nothing
+			device.received.clear();
+			device.send(programChange(0, 2));
+			TEST_ASSERT(device.log() == std::vector<std::string>{std::to_string(0xc0) + "/2"});
+			pm.processPending();
+			TEST_ASSERT(pm.activated.size() == 1);
+		}
+
+		{
+			// processPending() finishes loading the database and asks the product for the patch of each part
+			TestPatchManager pm(settings, {"Bass", "Lead", "Pad"});
+			TEST_ASSERT(shutdownWaitsFor(pm, pm.onRequestPatchForPart, [&pm] { pm.waitIdle(); }));
+		}
+
+		{
+			// a program change on the audio thread, outside of processPending(), is loading a patch directly
+			TestPatchManager pm(settings, {"Bass", "Lead", "Pad"});
+			ProgramChangeRouter router;
+			Device device(router);
+			connect(pm, router, device);
+			TEST_ASSERT(pm.waitIdle());
+
+			TEST_ASSERT(shutdownWaitsFor(pm, pm.onCreateProgramChangeEvents, [&device] { device.send(programChange(0, 2)); }));
+			TEST_ASSERT(device.log() == std::vector<std::string>{"Pad"});
+		}
+
+		root.deleteRecursively();
+
+		std::cout << "  shutdown tests passed" << std::endl;
+	}
+}
+
 void testPatchManager()
 {
 	testLoading();
@@ -793,4 +901,5 @@ void testPatchManager()
 	testTags();
 	testSelection();
 	testProgramChanges();
+	testShutdown();
 }
