@@ -60,6 +60,9 @@ namespace juceRmlUi
 		baseLib::Event<RmlComponent*> evPostUpdate;
 		// Fired when the component loses keyboard focus, after every key RmlUi still saw as held has been released.
 		baseLib::Event<RmlComponent*> evFocusLost;
+		// Fired asynchronously when the skin gave its <body> a different explicit size at runtime, for example by
+		// toggling a class. getDocumentSize() already returns the new size.
+		baseLib::Event<RmlComponent*> evDocumentSizeChanged;
 
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentLoadFailedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
@@ -167,6 +170,7 @@ namespace juceRmlUi
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
+		bool updateDocumentSize();
 		void startNextFrameTimer();
 		bool dispatchFrameEvent();
 
@@ -216,6 +220,10 @@ namespace juceRmlUi
 		bool m_updating = true;
 
 		Rml::Vector2i m_documentSize{0,0};
+		// The body size in dp and the dp ratio m_documentSize was measured at, to tell a size the skin changed
+		// from one that only follows the current scale
+		Rml::Vector2f m_documentSizeDp{0,0};
+		float m_documentDpRatio = 1.0f;
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)

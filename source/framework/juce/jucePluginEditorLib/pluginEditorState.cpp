@@ -214,6 +214,13 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		}
 		writeSkinToConfig(m_currentSkin);
 
+		// the event dies with the editor, which this outlives, so the listener is never removed
+		m_editor->getRmlComponent()->evDocumentSizeChanged.addListener([this](juceRmlUi::RmlComponent*)
+		{
+			if(evSkinSizeChanged)
+				evSkinSizeChanged();
+		});
+
 		if(evSkinLoaded)
 			evSkinLoaded(m_editor->getRmlComponent());
 

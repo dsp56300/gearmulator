@@ -24,6 +24,7 @@
 
 #include "juceUiLib/messageBox.h"
 
+#include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementDocument.h"
@@ -1065,6 +1066,15 @@ namespace juceRmlUi
 
 			m_rmlContext->Update();
 
+			if (updateDocumentSize())
+			{
+				juce::MessageManager::callAsync([safe = juce::Component::SafePointer<RmlComponent>(this)]
+				{
+					if (safe)
+						safe->evDocumentSizeChanged(safe.getComponent());
+				});
+			}
+
 			if (visible)
 			{
 				m_rmlContext->Render();
@@ -1421,6 +1431,8 @@ namespace juceRmlUi
 				{
 					m_documentSize.x = static_cast<int>(s.x);
 					m_documentSize.y = static_cast<int>(s.y);
+					m_documentDpRatio = m_rmlContext->GetDensityIndependentPixelRatio();
+					m_documentSizeDp = s / m_documentDpRatio;
 				}
 				else
 					throw std::runtime_error("RMLUI document '" + m_rootRmlFilename + "' has no valid size, explicit default size needs to be specified on the <body> element.");
@@ -1486,6 +1498,30 @@ namespace juceRmlUi
 			m_rmlContext->SetDensityIndependentPixelRatio(renderScale * m_contentScale);
 			m_rmlContext->SetDimensions({ size.x, size.y });
 		}
+	}
+
+	// A skin can change the size of its <body> at runtime, to fold away part of the editor for example. Only an
+	// explicit size counts: an auto or percentage one follows the context, which follows the window, and reacting
+	// to that would resize the window in response to its own resize.
+	bool RmlComponent::updateDocumentSize()
+	{
+		if (!m_document)
+			return false;
+
+		const auto& values = m_document->GetComputedValues();
+		if (values.width().type != Rml::Style::LengthPercentageAuto::Length || values.height().type != Rml::Style::LengthPercentageAuto::Length)
+			return false;
+
+		const auto sizeDp = m_document->GetBox().GetSize(Rml::BoxArea::Margin) / m_rmlContext->GetDensityIndependentPixelRatio();
+
+		// the box is in px, converting it back to dp is not exact
+		if (std::abs(sizeDp.x - m_documentSizeDp.x) < 0.5f && std::abs(sizeDp.y - m_documentSizeDp.y) < 0.5f)
+			return false;
+
+		m_documentSizeDp = sizeDp;
+		m_documentSize.x = static_cast<int>(std::lround(sizeDp.x * m_documentDpRatio));
+		m_documentSize.y = static_cast<int>(std::lround(sizeDp.y * m_documentDpRatio));
+		return true;
 	}
 
 	// A skin that needs to animate on its own clock - an oscilloscope, a VU meter, anything that

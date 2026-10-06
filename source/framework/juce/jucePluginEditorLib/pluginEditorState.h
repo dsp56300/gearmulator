@@ -65,6 +65,7 @@ namespace jucePluginEditorLib
 
 		std::function<void(int)> evSetGuiScale;
 		std::function<void(juce::Component*)> evSkinLoaded;
+		std::function<void()> evSkinSizeChanged;
 
 		juce::Component* getUiRoot() const;
 

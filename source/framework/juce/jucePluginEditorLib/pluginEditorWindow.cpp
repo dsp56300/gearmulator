@@ -31,12 +31,19 @@ EditorWindow::EditorWindow(juce::AudioProcessor& _p, PluginEditorState& _s, juce
 			setGuiScale(static_cast<float>(_scale));
 	};
 
+	m_state.evSkinSizeChanged = [&]
+	{
+		if(getNumChildComponents() > 0)
+			onSkinSizeChanged();
+	};
+
 	setUiRoot(m_state.getUiRoot());
 }
 
 EditorWindow::~EditorWindow()
 {
 	m_state.evSetGuiScale = [&](int){};
+	m_state.evSkinSizeChanged = [&]{};
 	m_state.evSkinLoaded = [&](juce::Component*){};
 
 	setUiRoot(nullptr);
@@ -55,7 +62,11 @@ void EditorWindow::resized()
 	const auto scaleX = static_cast<float>(w) / static_cast<float>(m_state.getWidth());
 	const auto scaleY = static_cast<float>(h) / static_cast<float>(m_state.getHeight());
 
-	const auto scale = std::min(scaleX, scaleY);
+	// A size that the current scale produces keeps that scale. Taking it from the pixels again would round it, and a
+	// skin that changes its own size would then drift by a pixel each time. Any other size is the user's or the host's.
+	const auto expected = getSizeForSkinScale(m_skinScale);
+	if (std::abs(expected.x - w) > 1 || std::abs(expected.y - h) > 1)
+		m_skinScale = std::min(scaleX, scaleY);
 
 	if (!m_state.resizeEditor(w,h))
 		return;
@@ -65,7 +76,7 @@ void EditorWindow::resized()
 	// and remembering it opened every later window at the minimum.
 	if (!isMinimumSize(w, h))
 	{
-		const auto percent = 100.f * scale / m_state.getRootScale();
+		const auto percent = 100.f * m_skinScale / m_state.getRootScale();
 		m_config.setValue("scale", percent);
 		m_config.saveIfNeeded();
 	}
@@ -117,7 +128,9 @@ void EditorWindow::setGuiScale(const float _percent)
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
 
-	const auto size = getSizeForScale(_percent);
+	m_skinScale = _percent / 100.0f * m_state.getRootScale();
+
+	const auto size = getSizeForSkinScale(m_skinScale);
 
 	setSize(size.x, size.y);
 
@@ -127,10 +140,13 @@ void EditorWindow::setGuiScale(const float _percent)
 
 juce::Point<int> EditorWindow::getSizeForScale(const float _percent) const
 {
-	const auto s = _percent / 100.0f * m_state.getRootScale();
+	return getSizeForSkinScale(_percent / 100.0f * m_state.getRootScale());
+}
 
-	return { static_cast<int>(static_cast<float>(m_state.getWidth()) * s),
-		static_cast<int>(static_cast<float>(m_state.getHeight()) * s) };
+juce::Point<int> EditorWindow::getSizeForSkinScale(const float _scale) const
+{
+	return { static_cast<int>(static_cast<float>(m_state.getWidth()) * _scale),
+		static_cast<int>(static_cast<float>(m_state.getHeight()) * _scale) };
 }
 
 bool EditorWindow::isMinimumSize(const int _width, const int _height) const
@@ -149,11 +165,8 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 	if(!m_state.getWidth() || !m_state.getHeight())
 		return;
 
-	m_sizeConstrainer.setMinimumSize(m_state.getWidth() / 10, m_state.getHeight() / 10);
-	m_sizeConstrainer.setMaximumSize(m_state.getWidth() * 4, m_state.getHeight() * 4);
+	updateSizeConstrainer();
 
-	m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(m_state.getWidth()) / static_cast<double>(m_state.getHeight()));
-	
 	// versions before this one did save the minimum, and a config that holds it would keep every window at the minimum
 	auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
 	const auto size = getSizeForScale(scale);
@@ -167,6 +180,24 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 
 	setResizable(true, true);
 	setConstrainer(&m_sizeConstrainer);
+}
+
+void EditorWindow::updateSizeConstrainer()
+{
+	m_sizeConstrainer.setMinimumSize(m_state.getWidth() / 10, m_state.getHeight() / 10);
+	m_sizeConstrainer.setMaximumSize(m_state.getWidth() * 4, m_state.getHeight() * 4);
+
+	m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(m_state.getWidth()) / static_cast<double>(m_state.getHeight()));
+}
+
+void EditorWindow::onSkinSizeChanged()
+{
+	// the skin changed its own size, to fold part of itself away for example, which keeps the scale
+	updateSizeConstrainer();
+
+	const auto size = getSizeForSkinScale(m_skinScale);
+
+	setSize(size.x, size.y);
 }
 
 void EditorWindow::timerCallback()
