@@ -12,7 +12,6 @@ set(SOURCES
 	jeLcd.cpp jeLcd.h
 	jemiditypes.h
 	jetypes.h
-	rackBootBlock.cpp rackBootBlock.h
 	rom.cpp rom.h
 	romloader.cpp romloader.h
 	state.cpp state.h

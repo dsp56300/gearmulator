@@ -22,7 +22,6 @@ namespace jeLib
 		using MidiData = std::pair<std::string, Data>;
 
 		static Rom loadFromMidiFiles(const std::vector<MidiData>& _files);
-		static Rom makeBootable(Rom&& _rom);
 		static void loadMidiFiles(std::vector<MidiData>& _keyboard, const std::vector<std::string>& _files);
 
 		static Range parseSysexDump(std::vector<uint8_t>& _fullRom, const synthLib::SysexBuffer& _sysex);

@@ -45,8 +45,7 @@ namespace jeLib
 		switch (m_data.size())
 		{
 		case RomSizeKeyboard: return DeviceType::Keyboard;
-		case RomSizeRack:
-		case RomSizeRackFirmware: return DeviceType::Rack;
+		case RomSizeRack:     return DeviceType::Rack;
 		default:              return DeviceType::Invalid;
 		}
 	}

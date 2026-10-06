@@ -1,7 +1,5 @@
 #include "romloader.h"
 
-#include "rackBootBlock.h"
-
 #include "baseLib/filesystem.h"
 
 #include <algorithm>
@@ -60,20 +58,9 @@ namespace jeLib
 		return results;
 	}
 
-	// The generated JP-8080 boot block is experimental: the test console uses it, findROMs() does not
 	Rom RomLoader::loadROM(const std::string& _filename)
 	{
-		return makeBootable(Rom(_filename));
-	}
-
-	Rom RomLoader::makeBootable(Rom&& _rom)
-	{
-		if (_rom.getData().size() != Rom::RomSizeRackFirmware)
-			return std::move(_rom);
-		auto image = createRackBootImage(_rom.getData());
-		if (image.empty())
-			return std::move(_rom);
-		return Rom(image, _rom.getName());
+		return Rom(_filename);
 	}
 
 	Rom RomLoader::loadFromMidiFiles(const std::vector<MidiData>& _files)
@@ -104,7 +91,7 @@ namespace jeLib
 		fullRom.erase(fullRom.begin() + totalRange.second, fullRom.end());
 		fullRom.erase(fullRom.begin(), fullRom.begin() + totalRange.first);
 
-		if (fullRom.size() != Rom::RomSizeKeyboard && fullRom.size() != Rom::RomSizeRackFirmware)
+		if (fullRom.size() != Rom::RomSizeKeyboard)
 			return {};
 
 		using namespace baseLib::filesystem;

@@ -39,8 +39,6 @@ namespace jeLib
 	Device::Device(const synthLib::DeviceCreateParams& _params) : synthLib::Device(_params)
 	{
 		const auto romSize = _params.romData.size();
-		if (romSize == Rom::RomSizeRackFirmware)
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "The JP-8080 needs a complete 1 MB flash dump, the firmware from its update files cannot boot on its own.");
 		if (romSize != Rom::RomSizeKeyboard && romSize != Rom::RomSizeRack)
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Unsupported firmware image. The JP-8000 needs its 512 KB flash, the JP-8080 a complete 1 MB flash dump.");
 
