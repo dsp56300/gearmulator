@@ -56,6 +56,10 @@ Framework:
         Xenia, passed values of the previous patch to the parameters that the
         new patch assigns to them.
 
+- [Fix] BUG-10217 Linux: Products with more than one DSP could crash, rarely,
+        most often while they were loaded or removed. Building the LV2 plugin
+        crashed for the same reason if a ROM was installed.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,
