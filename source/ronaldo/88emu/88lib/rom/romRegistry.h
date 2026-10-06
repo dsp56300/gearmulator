@@ -572,6 +572,8 @@ namespace emu88Lib
         // -----------------------------------------------------------------
         // The first 20 MiB supplies the exact SC-88Pro waves. SC-8850 still
         // requires its native wave image above; the extensions differ.
+        {romDevices(RomDevice::Sc8820), RomSlot::Internal, 0, 0x10000, baseLib::MD5("d1be6db8885cb9e56fe52cd587e9d639"),
+         "R02015367, CPU ROM", false},
         {romDevices(RomDevice::Sc8820), RomSlot::Internal, 0, 0x10000, baseLib::MD5("b03dc0c554fae77bb1782da4ccfadfbd"),
          "BAD_DUMP: reconstructed CPU ROM", false, true},
         {romDevices(RomDevice::Sc8820), RomSlot::Program, 0, 0x200000, baseLib::MD5("79f7d20691ef98b4408592e0e70132d5"),
