@@ -9,16 +9,6 @@
 #include "virusLib/microcontrollerTypes.h"
 #include "virusLib/romfile.h"
 
-namespace juceRmlUi
-{
-	class RmlComponent;
-}
-
-namespace Rml
-{
-	class Element;
-}
-
 namespace virus
 {
 	class Controller;
@@ -27,8 +17,6 @@ namespace virus
 
 namespace genericVirusUI
 {
-	class VirusEditor;
-
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
@@ -40,7 +28,7 @@ namespace genericVirusUI
 			Arrangement,	// 1 Multi + 16 Singles concatenated
 		};
 
-		PatchManager(VirusEditor& _editor, Rml::Element* _root);
+		explicit PatchManager(virus::VirusProcessor& _processor);
 		~PatchManager() override;
 
 		static PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex);
@@ -63,6 +51,10 @@ namespace genericVirusUI
 		// PatchManager impl
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
 
+	protected:
+		bool createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::Data& _data, uint32_t _part) const override;
+		void onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
+
 	private:
 		void addRomPatches();
 		void removeRomPatches();
@@ -83,7 +75,6 @@ namespace genericVirusUI
 		// well above any real single-bank index to avoid collisions.
 		static constexpr uint32_t g_arrangementBank = 0xFFFF0001;
 
-		VirusEditor& m_virusEditor;
 		virus::Controller& m_controller;
 		virus::VirusProcessor& m_processor;
 		std::vector<pluginLib::patchDB::DataSource> m_romDataSources;

@@ -12,6 +12,7 @@ int main()
 		testMidiNotifier();
 		testParameterDescriptions();
 		testPatchDb();
+		testPatchManager();
 		testSkinVariables();
 
 		std::cout << std::endl;

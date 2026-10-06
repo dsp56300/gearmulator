@@ -66,7 +66,6 @@ namespace genericVirusUI
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 		void initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model) override;
 
-		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 
 		std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) override;
 
@@ -114,5 +113,6 @@ namespace genericVirusUI
 		std::unique_ptr<ArpUserPattern> m_arpUserPattern;
 
 		baseLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
+		baseLib::EventListener<uint8_t> m_playModeSetListener;
 	};
 }

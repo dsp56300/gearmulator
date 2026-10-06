@@ -45,8 +45,6 @@ namespace n2xJucePlugin
 
 		void create() override;
 
-		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
-
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 		
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;

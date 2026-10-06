@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "jucePluginLib/controller.h"
 
 #include "baseLib/event.h"
@@ -64,6 +66,13 @@ namespace xtJucePlugin
 
 		bool sendSingle(const synthLib::SysexBuffer& _sysex);
 		bool sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
+
+		// The dump that loads _single, a plain single dump of the Microwave II/XT, into the edit buffer of _part.
+		// Safe to call from any thread
+		bool createSingleEditBufferDump(synthLib::SysexBuffer& _result, const synthLib::SysexBuffer& _single, uint8_t _part, bool _multiMode) const;
+
+		// what sendSingle() does once the single for _part is sent
+		void onSingleSent(uint8_t _part);
 		void sendMulti(const synthLib::SysexBuffer& _sysex);
 
 		bool sendSysEx(MidiPacketType _type) const;
@@ -72,6 +81,9 @@ namespace xtJucePlugin
 
 		bool isMultiMode() const;
 		void setPlayMode(bool _multiMode);
+
+		// the same as isMultiMode(), for threads that must not read the mode data, the audio thread for example
+		bool isMultiModeAnyThread() const { return m_multiMode; }
 
 		// Sending a dump is followed by a request that reads it back, which keeps the editor in
 		// sync with the device. That does not work while several dumps are sent in one go: the
@@ -145,6 +157,7 @@ namespace xtJucePlugin
 		Patch m_multiEditBuffer;
 		std::array<uint8_t, 32> m_globalData{};	// the data bytes of a global dump, 39 is the size of the whole dump
 		std::array<uint8_t, 1> m_modeData{};
+		std::atomic<bool> m_multiMode = false;
 		std::array<uint32_t, 8> m_currentSingles{0};
 		uint32_t m_currentSingle = 0;
 		xtJucePlugin::FrontPanel* m_frontPanel = nullptr;

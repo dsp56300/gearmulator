@@ -137,23 +137,35 @@ namespace xtJucePlugin
 			}
 		}
 
-		data[wLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode);
-		data[wLib::IdxLocation] = isMultiMode() ? _part : 0;
-		data[wLib::IdxDeviceId] = m_deviceId;
+		synthLib::SysexBuffer dump;
 
-		const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
-
-		if (!p->updateChecksums(data))
+		if (!createSingleEditBufferDump(dump, data, _part, isMultiMode()))
 			return false;
 
-		pluginLib::Controller::sendSysEx(data);
+		pluginLib::Controller::sendSysEx(dump);
 
+		onSingleSent(_part);
+
+		return true;
+	}
+
+	bool Controller::createSingleEditBufferDump(synthLib::SysexBuffer& _result, const synthLib::SysexBuffer& _single, const uint8_t _part, const bool _multiMode) const
+	{
+		_result = _single;
+
+		_result[wLib::IdxBuffer] = static_cast<uint8_t>(_multiMode ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode);
+		_result[wLib::IdxLocation] = _multiMode ? _part : 0;
+		_result[wLib::IdxDeviceId] = m_deviceId;
+
+		return getMidiPacket(g_midiPacketNames[SingleDump])->updateChecksums(_result);
+	}
+
+	void Controller::onSingleSent(const uint8_t _part)
+	{
 		sendLockedParameters(_part);
 
 		if(!isBulkTransfer())
 			requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
-
-		return true;
 	}
 
 	void Controller::setBulkTransfer(const bool _bulk)
@@ -404,6 +416,7 @@ namespace xtJucePlugin
 		    const auto lastPlayMode = isMultiMode();
 		    memcpy(m_modeData.data(), &_msg[xt::IdxModeParamFirst], sizeof(m_modeData));
 		    const auto newPlayMode = isMultiMode();
+		    m_multiMode = newPlayMode;
 
 		    if(lastPlayMode != newPlayMode)
 			    onPlayModeChanged(newPlayMode);
@@ -501,6 +514,7 @@ namespace xtJucePlugin
 			return;
 
 		m_modeData[0] = _multiMode ? 1 : 0;
+		m_multiMode = _multiMode;
 
 		sendModeDump();
 

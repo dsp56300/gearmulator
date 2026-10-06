@@ -76,6 +76,8 @@ namespace pluginLib
 		// drawing a keyboard wants to see what was played either way
 		m_midiNotifier.onMidiEvent(_ev);
 
+		auto toDevice = m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device);
+
 		// Process through MIDI Learn translator first
 		if (_ev.source != synthLib::MidiEventSource::Device)
 		{
@@ -85,11 +87,21 @@ namespace pluginLib
 				return;
 			}
 
-			if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+			if (toDevice)
 			{
-				if (m_programChangeRouter.processMidiEvent(_ev))
+				std::vector<synthLib::SMidiEvent> replacement;
+
+				switch (m_programChangeRouter.processMidiEvent(_ev, replacement))
 				{
-					// Program change was handled by patch manager
+				case ProgramChangeRouter::Result::Forward:
+					break;
+				case ProgramChangeRouter::Result::Held:
+					toDevice = false;
+					break;
+				case ProgramChangeRouter::Result::Consumed:
+					// a program change that loads a patch from the patch manager
+					for (const auto& ev : replacement)
+						getPlugin().addMidiEvent(ev);
 					return;
 				}
 			}
@@ -97,7 +109,7 @@ namespace pluginLib
 
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Editor))
 			getController().enqueueMidiMessages({_ev});
-		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+		if (toDevice)
 			getPlugin().addMidiEvent(_ev);
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Physical))
 			m_midiPorts.send(_ev);
@@ -833,6 +845,8 @@ namespace pluginLib
 
 		for (int channel = 0; channel < totalNumOutputChannels; ++channel)
 			outputs[channel] = buffer.getWritePointer(channel);
+
+		m_programChangeRouter.releaseStaleHold([this](const synthLib::SMidiEvent& _ev) { getPlugin().addMidiEvent(_ev); });
 
 		for(const auto metadata : midiMessages)
 		{

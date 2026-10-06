@@ -121,7 +121,7 @@ namespace pluginLib::patchDB
 		{
 			return _a == _b || _a->hash == _b->hash;
 		}
-		virtual void processDirty(const Dirty& _dirty) const = 0;
+		virtual void processDirty(const Dirty& _dirty) = 0;
 
 	protected:
 		virtual void onLoadFinished() {}

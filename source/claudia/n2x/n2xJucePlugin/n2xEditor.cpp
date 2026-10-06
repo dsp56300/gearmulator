@@ -169,11 +169,6 @@ namespace n2xJucePlugin
 		}
 	}
 
-	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
-	{
-		return new PatchManager(*this, _parent);
-	}
-
 	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
 	{
 		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);

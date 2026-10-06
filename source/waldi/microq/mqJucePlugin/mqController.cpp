@@ -71,24 +71,36 @@ namespace mqJucePlugin
 
 	void Controller::sendSingle(const synthLib::SysexBuffer& _sysex, const uint8_t _part)
 	{
-		auto data = _sysex;
+		synthLib::SysexBuffer data;
 
-		data[wLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode);
-		data[wLib::IdxLocation] = isMultiMode() ? _part : 0;
-		data[wLib::IdxDeviceId] = m_deviceId;
-
-		const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
-
-		if (!p->updateChecksums(data))
-		{
-			p = getMidiPacket(g_midiPacketNames[SingleDumpQ]);
-
-			if(!p->updateChecksums(data))
-				return;
-		}
+		if (!createSingleEditBufferDump(data, _sysex, _part, isMultiMode()))
+			return;
 
 		pluginLib::Controller::sendSysEx(data);
 
+		onSingleSent(_part);
+	}
+
+	bool Controller::createSingleEditBufferDump(synthLib::SysexBuffer& _result, const synthLib::SysexBuffer& _sysex, const uint8_t _part, const bool _multiMode) const
+	{
+		_result = _sysex;
+
+		_result[wLib::IdxBuffer] = static_cast<uint8_t>(_multiMode ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode);
+		_result[wLib::IdxLocation] = _multiMode ? _part : 0;
+		_result[wLib::IdxDeviceId] = m_deviceId;
+
+		const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
+
+		if (p->updateChecksums(_result))
+			return true;
+
+		p = getMidiPacket(g_midiPacketNames[SingleDumpQ]);
+
+		return p->updateChecksums(_result);
+	}
+
+	void Controller::onSingleSent(const uint8_t _part)
+	{
 		sendLockedParameters(_part);
 
 		if(!isBulkTransfer())
@@ -295,6 +307,7 @@ namespace mqJucePlugin
 		    const auto lastPlayMode = isMultiMode();
 		    memcpy(m_globalData.data(), &_msg[5], sizeof(m_globalData));
 		    const auto newPlayMode = isMultiMode();
+		    m_multiMode = newPlayMode;
 
 		    if(lastPlayMode != newPlayMode)
 			    onPlayModeChanged(newPlayMode);
@@ -324,6 +337,7 @@ namespace mqJucePlugin
 		    {
 			    LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
 			    m_globalData[index] = value;
+			    m_multiMode = isMultiMode();
 
 			    if (index == static_cast<uint32_t>(mqLib::GlobalParameter::SingleMultiMode))
 				    requestAllPatches();
@@ -536,6 +550,7 @@ namespace mqJucePlugin
 	    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
 
 	    m_globalData[index] = _value;
+	    m_multiMode = isMultiMode();
 
 	    return sendSysEx(GlobalParameterChange, data);
 	}

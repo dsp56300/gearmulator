@@ -37,6 +37,10 @@ namespace jeJucePlugin
 
 		bool sendSingle(const pluginLib::SysEx& _sysex, uint32_t _part) const;
 
+		// The messages that load patch or performance _sysex into the temporary performance, a patch into its upper
+		// (part 0) or lower layer. Safe to call from any thread
+		bool createSingleMessages(synthLib::SysexBufferList& _result, const pluginLib::SysEx& _sysex, uint32_t _part) const;
+
 		void sendTempPerformanceRequest() const;
 		void sendPerformanceRequest(jeLib::AddressArea _area, jeLib::UserPerformanceArea _performance) const;
 		void sendSystemRequest() const;

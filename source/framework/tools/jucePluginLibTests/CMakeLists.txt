@@ -7,6 +7,7 @@ set(SOURCES
 	midiNotifierTest.cpp
 	parameterDescriptionsTest.cpp
 	patchDbTest.cpp
+	patchManagerTest.cpp
 	skinVariablesTest.cpp
 )
 

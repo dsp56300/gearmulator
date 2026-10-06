@@ -1,10 +1,7 @@
 #include "PatchManager.h"
 
-#include "VirusEditor.h"
 #include "VirusController.h"
 #include "VirusProcessor.h"
-
-#include "jucePluginEditorLib/patchmanagerUiRml/patchmanagerUiRml.h"
 
 #include "jucePluginLib/filetype.h"
 #include "jucePluginLib/patchdb/datasource.h"
@@ -26,12 +23,11 @@ namespace virus
 
 namespace genericVirusUI
 {
-	PatchManager::PatchManager(VirusEditor& _editor, Rml::Element* _root)
-		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root)
-		, m_virusEditor(_editor)
-		, m_controller(_editor.getController())
-		, m_processor(_editor.getProcessor())
-		, m_onRomChanged(_editor.getProcessor().evRomChanged)
+	PatchManager::PatchManager(virus::VirusProcessor& _processor)
+		: jucePluginEditorLib::patchManager::PatchManager(_processor)
+		, m_controller(static_cast<virus::Controller&>(_processor.getController()))
+		, m_processor(_processor)
+		, m_onRomChanged(_processor.evRomChanged)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
@@ -59,9 +55,12 @@ namespace genericVirusUI
 
 			if (index < banks.size() && _program == banks[index].size() - 1)
 			{
+				// a refresh keeps the data source, with the MIDI bank number the user gave it
 				const auto ds = createDataSource(index);
-				removeDataSource(ds);
-				addDataSource(ds);
+				if (const auto existing = getDataSource(ds))
+					refreshDataSource(existing);
+				else
+					addDataSource(ds);
 			}
 		};
 
@@ -859,6 +858,35 @@ namespace genericVirusUI
 		return m_controller.activatePatch(_sysex, _part);
 	}
 
+	bool PatchManager::createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr&, const pluginLib::patchDB::Data& _data, const uint32_t _part) const
+	{
+		// a multi or an arrangement switches the play mode, which happens on the message thread
+		if (detectPatchType(_data) != PatchType::Single)
+			return false;
+
+		uint8_t program;
+
+		if (!virus::Controller::getSingleEditBufferProgram(_part, m_controller.isMultiModeAnyThread(), program))
+			return false;
+
+		synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
+		ev.sysex = m_controller.modifySingleDump(_data, virusLib::BankNumber::EditBuffer, program);
+
+		if (ev.sysex.empty())
+			return false;
+
+		_events.push_back(std::move(ev));
+		return true;
+	}
+
+	void PatchManager::onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr&, const uint32_t _part)
+	{
+		uint8_t program;
+
+		if (virus::Controller::getSingleEditBufferProgram(_part, m_controller.isMultiMode(), program))
+			m_controller.onSingleActivated(program);
+	}
+
 	pluginLib::patchDB::Data PatchManager::retargetMultiToEditBuffer(const pluginLib::patchDB::Data& _multi)
 	{
 		// Multi dump: offset 7 = bank, offset 8 = program. The microcontroller
@@ -875,7 +903,7 @@ namespace genericVirusUI
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
 	{
-		m_virusEditor.setPlayMode(virusLib::PlayMode::PlayModeMulti);
+		m_controller.setPlayMode(virusLib::PlayMode::PlayModeMulti);
 		m_controller.sendSysEx(retargetMultiToEditBuffer(_multi));
 		m_controller.requestArrangement();
 		return true;
@@ -889,7 +917,7 @@ namespace genericVirusUI
 		if (msgs.size() != 17 || msgs.front()[6] != virusLib::SysexMessageType::DUMP_MULTI)
 			return false;
 
-		m_virusEditor.setPlayMode(virusLib::PlayMode::PlayModeMulti);
+		m_controller.setPlayMode(virusLib::PlayMode::PlayModeMulti);
 		m_controller.sendSysEx(retargetMultiToEditBuffer(msgs.front()));
 
 		for (uint8_t i = 0; i < 16; ++i)

@@ -2,6 +2,7 @@
 
 #include "PluginEditorState.h"
 #include "xtController.h"
+#include "xtPatchManager.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
@@ -40,11 +41,14 @@ namespace xtJucePlugin
 		getController();
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
 		Processor::setLatencyBlocks(latencyBlocks);
+
+		setPatchManager(new PatchManager(*this));
 	}
 
 	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 	{
 		destroyEditorState();
+		destroyPatchManager();
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()

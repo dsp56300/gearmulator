@@ -2,6 +2,7 @@
 #include "VirusEditorState.h"
 #include "ParameterNames.h"
 #include "VirusController.h"
+#include "PatchManager.h"
 
 #include "baseLib/binarystream.h"
 #include "baseLib/filesystem.h"
@@ -21,9 +22,10 @@ namespace virus
 
 	VirusProcessor::~VirusProcessor()
 	{
-		// The editor's patch manager unhooks itself from the controller when it goes, so the editor goes first.
-		// The controller then has to go here, before evRomChanged, which it is subscribed to
+		// The patch manager unhooks itself from the controller when it goes, so it goes first, after the editor that
+		// shows it. The controller then has to go here, before evRomChanged, which it is subscribed to
 		destroyEditorState();
+		destroyPatchManager();
 		destroyController();
 	}
 
@@ -85,6 +87,8 @@ namespace virus
 		Processor::setLatencyBlocks(latencyBlocks);
 
 		zynthianExportLv2Presets();
+
+		setPatchManager(new genericVirusUI::PatchManager(*this));
 	}
 
 	synthLib::Device* VirusProcessor::createDevice()

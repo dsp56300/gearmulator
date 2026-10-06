@@ -2,10 +2,14 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
+namespace jucePluginEditorLib
+{
+	class Processor;
+}
+
 namespace mqJucePlugin
 {
 	class Controller;
-	class Editor;
 
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
@@ -19,7 +23,7 @@ namespace mqJucePlugin
 			Arrangement
 		};
 
-		PatchManager(Editor& _editor, Rml::Element* _root);
+		explicit PatchManager(jucePluginEditorLib::Processor& _processor);
 		~PatchManager() override;
 
 		// PatchManager overrides
@@ -35,6 +39,10 @@ namespace mqJucePlugin
 
 		static constexpr uint64_t g_userDataArrangement = 1;
 
+	protected:
+		bool createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::Data& _data, uint32_t _part) const override;
+		void onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
+
 	private:
 		static std::string extractName(const pluginLib::patchDB::Data& _sysex, size_t _offset, size_t _length);
 		bool activateSingle(const pluginLib::patchDB::Data& _sysex, uint32_t _part);
@@ -42,7 +50,6 @@ namespace mqJucePlugin
 		bool activateDrum(const pluginLib::patchDB::Data& _drum);
 		bool activateArrangement(const pluginLib::patchDB::Data& _compound);
 
-		Editor& m_editor;
 		Controller& m_controller;
 	};
 }

@@ -81,7 +81,8 @@ namespace jucePluginEditorLib
 		for (const auto& file : m_dragAndDropFiles)
 			file.deleteFile();
 
-		m_patchManager.reset();
+		if (auto* pm = getPatchManager())
+			pm->detachUi();
 		m_rmlPlugin.reset();
 		m_rmlComponent.reset();
 	}
@@ -119,8 +120,11 @@ namespace jucePluginEditorLib
 
 		if (auto* elem = doc->GetElementById("patchmanager"))
 		{
-			juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
-			setPatchManager(createPatchManager(elem));
+			if (auto* pm = getPatchManager())
+			{
+				juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
+				pm->attachUi(*this, elem);
+			}
 		}
 
 		initRootScale(doc->GetAttribute("rootScale", 1.0f));
@@ -319,28 +323,20 @@ namespace jucePluginEditorLib
 		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, title, msg);
 	}
 
-	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
+	patchManager::PatchManager* Editor::getPatchManager() const
 	{
-		m_patchManager.reset(_patchManager);
-
-		if(_patchManager && !m_patchManagerConfig.empty())
-			m_patchManager->setPerInstanceConfig(m_patchManagerConfig);
+		return m_processor.getPatchManager();
 	}
 
 	void Editor::setPerInstanceConfig(const std::vector<uint8_t>& _data)
 	{
 		{
-			// test if its an old version that didn't use chunks yet
+			// an old version that didn't use chunks yet only carried the patch manager state, the processor took that
 			pluginLib::PluginStream oldStream(_data);
 			const auto version = oldStream.read<uint32_t>();
 
 			if(version == 1)
-			{
-				m_patchManagerConfig = _data;
-				if(m_patchManager)
-					m_patchManager->setPerInstanceConfig(_data);
 				return;
-			}
 		}
 
 		baseLib::BinaryStream s(_data);
@@ -349,15 +345,8 @@ namespace jucePluginEditorLib
 		cr.read();
 	}
 
-	void Editor::loadChunkData(baseLib::ChunkReader& _cr)
+	void Editor::loadChunkData(baseLib::ChunkReader&)
 	{
-		_cr.add("pmDt", 2, [this](baseLib::BinaryStream& _s, uint32_t/* _version*/)
-		{
-			m_patchManagerConfig.clear();
-			_s.read(m_patchManagerConfig);
-			if(m_patchManager)
-				m_patchManager->setPerInstanceConfig(m_patchManagerConfig);
-		});
 	}
 
 	void Editor::getPerInstanceConfig(std::vector<uint8_t>& _data)
@@ -367,15 +356,8 @@ namespace jucePluginEditorLib
 		s.toVector(_data);
 	}
 
-	void Editor::saveChunkData(baseLib::BinaryStream& _s)
+	void Editor::saveChunkData(baseLib::BinaryStream&)
 	{
-		if(m_patchManager)
-		{
-			m_patchManagerConfig.clear();
-			m_patchManager->getPerInstanceConfig(m_patchManagerConfig);
-		}
-		baseLib::ChunkWriter cw(_s, "pmDt", 2);
-		_s.write(m_patchManagerConfig);
 	}
 
 	void Editor::setCurrentPart(const uint8_t _part)
@@ -389,8 +371,8 @@ namespace jucePluginEditorLib
 
 	void Editor::onCurrentPartChanged(const uint8_t _part)
 	{
-		if(m_patchManager)
-			m_patchManager->setCurrentPart(_part);
+		if(auto* pm = getPatchManager())
+			pm->setCurrentPart(_part);
 
 		// created with the RmlUi context, which a part change can precede
 		if(m_pluginDataModel)
@@ -430,15 +412,16 @@ namespace jucePluginEditorLib
 	void Editor::copyCurrentPatchToClipboard() const
 	{
 		// copy patch of current part to Clipboard
-		if(!m_patchManager)
+		auto* pm = getPatchManager();
+		if(!pm)
 			return;
 
-		const auto p = m_patchManager->requestPatchForPart(m_patchManager->getCurrentPart());
+		const auto p = pm->requestPatchForPart(pm->getCurrentPart());
 
 		if(!p)
 			return;
 
-		const auto patchAsString = m_patchManager->toString(p, pluginLib::FileType::Empty, pluginLib::ExportType::Clipboard);
+		const auto patchAsString = pm->toString(p, pluginLib::FileType::Empty, pluginLib::ExportType::Clipboard);
 
 		if(!patchAsString.empty())
 			juce::SystemClipboard::copyTextToClipboard(patchAsString);
@@ -446,9 +429,10 @@ namespace jucePluginEditorLib
 
 	bool Editor::replaceCurrentPatchFromClipboard() const
 	{
-		if(!m_patchManager)
+		auto* pm = getPatchManager();
+		if(!pm)
 			return false;
-		return m_patchManager->activatePatchFromClipboard();
+		return pm->activatePatchFromClipboard();
 	}
 
 	void Editor::openMenu(Rml::Event& _event)

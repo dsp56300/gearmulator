@@ -9,4 +9,5 @@
 void testMidiNotifier();
 void testParameterDescriptions();
 void testPatchDb();
+void testPatchManager();
 void testSkinVariables();

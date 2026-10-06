@@ -2,15 +2,19 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
+namespace jucePluginEditorLib
+{
+	class Processor;
+}
+
 namespace n2xJucePlugin
 {
-	class Editor;
 	class Controller;
 
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
-		PatchManager(Editor& _editor, Rml::Element* _root);
+		explicit PatchManager(jucePluginEditorLib::Processor& _processor);
 		~PatchManager() override;
 
 		// PatchManager overrides
@@ -25,8 +29,14 @@ namespace n2xJucePlugin
 		static std::string getPatchName(const pluginLib::patchDB::Data& _sysex, const std::string& _defaultPatchName = {});
 		static bool isValidPatchDump(const pluginLib::patchDB::Data& _sysex);
 
+	protected:
+		pluginLib::patchDB::Data prepareProgramChangeData(const pluginLib::patchDB::PatchPtr& _patch) const override;
+		bool createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::Data& _data, uint32_t _part) const override;
+		void onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
+
 	private:
-		Editor& m_editor;
+		void onPatchActivated(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const;
+
 		Controller& m_controller;
 	};
 }

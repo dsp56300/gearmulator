@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "jucePluginLib/parameterdescriptions.h"
 #include "jucePluginLib/controller.h"
 
@@ -82,6 +84,13 @@ namespace virus
     	bool activatePatch(const synthLib::SysexBuffer& _sysex);
     	bool activatePatch(const synthLib::SysexBuffer& _sysex, uint32_t _part);
 
+    	// The edit buffer a single for _part is loaded into: the single one for part 0 in single mode. False for a
+    	// part that does not exist. Safe to call from any thread
+    	static bool getSingleEditBufferProgram(uint32_t _part, bool _multiMode, uint8_t& _program);
+
+    	// what activatePatch() does once a single is sent to edit buffer _program
+    	void onSingleActivated(uint8_t _program);
+
         static void printMessage(const pluginLib::SysEx &);
 
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
@@ -127,6 +136,15 @@ namespace virus
 	public:
 
     	bool isMultiMode() const;
+
+    	// the same, for threads that must not read parameters, the audio thread for example
+    	bool isMultiModeAnyThread() const { return m_multiMode; }
+
+    	// switches between single and multi mode and requests the arrangement of the new mode
+    	void setPlayMode(uint8_t _playMode);
+
+    	// fired by setPlayMode()
+    	baseLib::Event<uint8_t> evPlayModeSet;
 
     	// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);
@@ -199,5 +217,6 @@ namespace virus
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
 		baseLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
         virusLib::FrontpanelState m_frontpanelState;
+        std::atomic<bool> m_multiMode = false;
     };
 }; // namespace Virus

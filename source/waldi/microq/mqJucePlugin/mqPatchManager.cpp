@@ -1,7 +1,6 @@
 #include "mqPatchManager.h"
 
 #include "mqController.h"
-#include "mqEditor.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 #include "jucePluginLib/filetype.h"
 #include "mqLib/mqstate.h"
@@ -23,10 +22,9 @@ namespace mqJucePlugin
 		jucePluginEditorLib::patchManager::GroupType::DataSources,
 	};
 
-	PatchManager::PatchManager(Editor& _editor, Rml::Element* _root)
-		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, g_groupTypes)
-		, m_editor(_editor)
-		, m_controller(_editor.getMqController())
+	PatchManager::PatchManager(jucePluginEditorLib::Processor& _processor)
+		: jucePluginEditorLib::patchManager::PatchManager(_processor, g_groupTypes)
+		, m_controller(static_cast<Controller&>(_processor.getController()))
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomC, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
@@ -309,7 +307,7 @@ namespace mqJucePlugin
 
 	uint32_t PatchManager::getCurrentPart() const
 	{
-		return m_editor.getProcessor().getController().getCurrentPart();
+		return m_controller.getCurrentPart();
 	}
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
@@ -336,6 +334,26 @@ namespace mqJucePlugin
 	{
 		m_controller.sendSingle(_sysex, static_cast<uint8_t>(_part));
 		return true;
+	}
+
+	bool PatchManager::createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr&, const pluginLib::patchDB::Data& _data, const uint32_t _part) const
+	{
+		// a multi or an arrangement switches the play mode, which happens on the message thread
+		if (detectPatchType(_data) != PatchType::Single || _part >= m_controller.getPartCount())
+			return false;
+
+		synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
+
+		if (!m_controller.createSingleEditBufferDump(ev.sysex, _data, static_cast<uint8_t>(_part), m_controller.isMultiModeAnyThread()))
+			return false;
+
+		_events.push_back(std::move(ev));
+		return true;
+	}
+
+	void PatchManager::onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr&, const uint32_t _part)
+	{
+		m_controller.onSingleSent(static_cast<uint8_t>(_part));
 	}
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
