@@ -116,6 +116,8 @@ add_subdirectory(cpu/mc68k EXCLUDE_FROM_ALL)
 # Hand it the cpu/ root here until the submodule declares it itself.
 target_include_directories(68kEmu PUBLIC ${CMAKE_CURRENT_LIST_DIR}/cpu)
 
+add_subdirectory(cpu/coldfire)
+
 add_subdirectory(framework/hardwareLib EXCLUDE_FROM_ALL)
 add_subdirectory(waldi/common/wLib EXCLUDE_FROM_ALL)
 
