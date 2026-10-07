@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <cfloat>
 
 #include "frameRateLimiter.h"
 #include "juceRmlComponentConfig.h"
