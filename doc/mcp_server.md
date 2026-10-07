@@ -159,7 +159,7 @@ Set a parameter value by name.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | Parameter name |
-| `value` | number | yes | New parameter value |
+| `value` | integer | yes | New parameter value |
 | `part` | integer | no | Part number (default: the current part) |
 
 #### `set_parameters_batch`
@@ -464,8 +464,12 @@ Simulate a mouse drag from one position to another with intermediate move events
 | `button` | string | no | `"left"` (default), `"right"`, or `"middle"` |
 | `steps` | integer | no | Intermediate move steps (default: 10, range: 1-100) |
 | `modifiers` | object | no | `{ctrl, shift, alt, meta}` as booleans |
+| `press` | boolean | no | Press the button at the start (default: true). `false` continues a drag that an earlier call left held |
+| `release` | boolean | no | Release the button at the end (default: true). `false` keeps it held |
 
 \* Either `fromId` or both `fromX` and `fromY` must be provided. Same for destination.
+
+To look at the page in the middle of a drag, for example at the drop targets a skin highlights, call it with `"release": false`, inspect the DOM, then call it again from where it stopped with `"press": false`.
 
 #### `mouse_wheel`
 
@@ -535,7 +539,7 @@ Returns `scale`, plus `width` and `height` while the editor is open.
 
 #### `set_gui_scale`
 
-Set the editor GUI scale. Resizes the open editor immediately and stores the value in the plugin config.
+Set the editor GUI scale. Resizes the open editor immediately and stores the value in the plugin config. In a skin with a free window mode (`<body windowMode="free">`) the scale is a zoom instead: the window keeps its size and the skin gets less or more room in it.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -543,11 +547,22 @@ Set the editor GUI scale. Resizes the open editor immediately and stores the val
 
 Returns `success`, `scale`, plus `width` and `height` while the editor is open.
 
+#### `resize_editor`
+
+Resize the editor window the way a host does when the user drags its border: the requested size goes through the editor's size constraints first (aspect ratio, minimum, maximum), then the editor takes the size that is left. In a skin with a free window mode (`<body windowMode="free">`) the window has no fixed aspect ratio, its limits are the `min-width`, `min-height`, `max-width` and `max-height` of the body, and a larger window gives the skin more room. Use it to test how a skin lays itself out at other window sizes.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `width` | integer | yes | Requested width in pixels (1-16384) |
+| `height` | integer | yes | Requested height in pixels (1-16384) |
+
+Returns `width` and `height`, the size the editor ended up with. Fails with "The editor is not open" while no editor window exists.
+
 ---
 
 ### Patch Manager
 
-These tools interact with the patch manager database for browsing, loading, saving, and renaming presets. They require the plugin editor window to be open.
+These tools interact with the patch manager database for browsing, loading, saving, and renaming presets. They work whether the plugin editor window is open or not: the processor owns the patch manager.
 
 #### `get_current_preset`
 
@@ -816,6 +831,6 @@ Rename the currently loaded preset for a part.
 ## Limitations
 
 - DOM and UI input tools require the plugin editor window to be open. They return a clear error if the window is closed.
-- Patch manager tools require the plugin editor window to be open (the patch manager is initialized with the editor).
+- Patch manager tools work without the plugin editor window: since BUG-10425 the processor owns the patch manager, so it exists from the moment the plugin is created.
 - The discovery file may contain stale entries if a plugin crashes without cleanup. Entries include the process ID (`pid`) so clients can verify liveness.
 - Maximum of 100 simultaneous plugin instances (ports 13710–13809).
