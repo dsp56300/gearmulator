@@ -913,11 +913,15 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
 			tool.inputSchema.addIntProperty("steps", "Number of intermediate move steps (default: 10)", false, 1, 100);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
+			tool.inputSchema.addProperty("press", "boolean", "Press the button at the start (default: true). False continues a drag an earlier call left held", false);
+			tool.inputSchema.addProperty("release", "boolean", "Release the button at the end (default: true). False keeps it held, to look at the page during the drag", false);
 			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int button = parseMouseButton(_params);
 				const int mods = parseModifiers(_params);
 				const int steps = _params.hasProperty("steps") ? _params.get("steps").getInt() : 10;
+				const bool press = !_params.hasProperty("press") || _params.get("press").getBool();
+				const bool release = !_params.hasProperty("release") || _params.get("release").getBool();
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
@@ -960,7 +964,8 @@ namespace jucePluginEditorLib
 
 					// Move to start, press button
 					ui.context->ProcessMouseMove(fromX, fromY, mods);
-					ui.context->ProcessMouseButtonDown(button, mods);
+					if (press)
+						ui.context->ProcessMouseButtonDown(button, mods);
 
 					// Generate intermediate drag moves
 					for (int i = 1; i <= steps; ++i)
@@ -972,7 +977,8 @@ namespace jucePluginEditorLib
 					}
 
 					// Release button
-					ui.context->ProcessMouseButtonUp(button, mods);
+					if (release)
+						ui.context->ProcessMouseButtonUp(button, mods);
 					ui.rmlComp->enqueueUpdate();
 
 					auto result = mcpServer::JsonValue::object();
