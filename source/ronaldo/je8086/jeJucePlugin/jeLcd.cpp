@@ -6,7 +6,7 @@
 #include "jeEditor.h"
 #include "jePluginProcessor.h"
 #include "hardwareLib/lcdfonts.h"
-#include "jeLib/je8086devices.h"
+#include "jeLib/je8080devices.h"
 
 #include "jucePluginLib/version.h"
 #include "juceRmlUi/rmlInplaceEditor.h"
@@ -158,6 +158,11 @@ namespace jeJucePlugin
 
 	void JeLcd::sendPerfPatchToggle(Rml::Event& _event, bool _pressed) const
 	{
-		m_editor.getJeController().sendButton(jeLib::devices::SwitchType::kSwitch_PerformSel, _pressed);
+		// the two models scan their panel keys in different matrices
+		auto& controller = m_editor.getJeController();
+		if (m_editor.getJeProcessor().getSelectedRom().getDeviceType() == jeLib::DeviceType::Rack)
+			controller.sendButton(jeLib::je8080::kSwitch_PerformSel, _pressed);
+		else
+			controller.sendButton(jeLib::devices::kSwitch_PerformSel, _pressed);
 	}
 }

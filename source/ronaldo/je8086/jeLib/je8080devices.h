@@ -8,6 +8,7 @@ namespace jeLib::je8080
 {
 	enum SwitchType : uint8_t
 	{
+		kSwitch_PerformSel = 24,	// PERFORM/PATCH SELECT
 		kSwitch_Bank1 = 32,
 		kSwitch_Number1 = 40,
 		kSwitch_Shift = 52,
