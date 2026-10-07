@@ -116,6 +116,11 @@ Osirus/OsTIrus:
         skin has it next to PURE TUNING on the ARP | SETTINGS page, the TrancyTI
         skin next to MASTER VOLUME on the COMMON page.
 
+- [Fix] BUG-10306 In Single mode, parameter changes that the plugin sent to its
+        MIDI output were addressed to the first part of a Multi instead of the
+        Single, so a hardware Virus controlled by the plugin ignored them.
+        Patch changes and Multi mode were not affected.
+
 Osirus:
 
 - [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter

@@ -36,6 +36,21 @@ namespace virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
+    // the pages of a single, the others hold the multi and the global settings
+    static bool isSinglePage(const uint8_t _page)
+    {
+	    switch (_page)
+	    {
+	    case virusLib::PAGE_A:
+	    case virusLib::PAGE_B:
+	    case virusLib::PAGE_6E:
+	    case virusLib::PAGE_6F:
+		    return true;
+	    default:
+		    return false;
+	    }
+    }
+
     Controller::Controller(VirusProcessor& p, const virusLib::DeviceModel _defaultModel, unsigned char deviceId)
 		: pluginLib::Controller(p, virusLib::isTIFamily(_defaultModel) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json")
 		, m_processor(p)
@@ -789,7 +804,13 @@ namespace virus
     {
         const auto& desc = _parameter.getDescription();
 
-        sendParameterChange(desc.page, _parameter.getPart(), desc.index, static_cast<uint8_t>(_value));
+        // In single mode a Virus applies a parameter of the single only if it is addressed to the single, as a
+        // program change is. The emulation takes part 0 as well, the hardware does not (BUG-10306)
+        auto part = _parameter.getPart();
+        if (part == 0 && !isMultiModeAnyThread() && isSinglePage(desc.page))
+            part = virusLib::SINGLE;
+
+        sendParameterChange(desc.page, part, desc.index, static_cast<uint8_t>(_value));
     }
 
     bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const
