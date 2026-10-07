@@ -24,6 +24,7 @@ set(SOURCES
 	rmlElemListEntry.cpp rmlElemListEntry.h
 	rmlElemSplitter.cpp rmlElemSplitter.h
 	rmlElemStrokes.cpp rmlElemStrokes.h
+	rmlLuaStrokes.cpp rmlLuaStrokes.h
 	rmlElemTree.cpp rmlElemTree.h
 	rmlElemTreeNode.cpp rmlElemTreeNode.h
 	rmlElemValue.cpp rmlElemValue.h

@@ -16,6 +16,7 @@
 #include "rmlElemTreeNode.h"
 #include "rmlInstancers.h"
 #include "rmlLuaCanvas.h"
+#include "rmlLuaStrokes.h"
 #include "rmlSystemFonts.h"
 
 #include "RmlUi/Core/Core.h"
@@ -66,6 +67,7 @@ namespace juceRmlUi
 		Rml::Initialise(m_coreInstance);
 		Rml::Lua::Initialise(m_coreInstance);
 		registerCanvasLua(m_coreInstance.lua_state);
+		registerStrokesLua(m_coreInstance.lua_state);
 
 		Rml::SetSystemInterface(m_coreInstance, &m_systemInterface);
 		Rml::SetFontEngineInterface(m_coreInstance, &m_fontEngineInterface);

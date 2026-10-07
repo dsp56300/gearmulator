@@ -74,6 +74,12 @@ Framework:
         project shows its patches in the Patch Manager when the project is
         loaded into a plugin that is already running.
 
+- [New] Skins can draw lines with a <strokes> element. A skin script gives it
+        its lines with Element.As.Strokes(element):setStrokes(lines), one
+        table of {x, y} points per line, in dp. The properties color,
+        stroke-width, stroke-outline-width and stroke-outline-color style
+        them.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10425 Controllers and parameter changes that arrived while a patch
