@@ -80,6 +80,10 @@ Framework:
         stroke-width, stroke-outline-width and stroke-outline-color style
         them.
 
+- [Fix] Skins: The error message for a wrong argument to a canvas method in a
+        skin script named the argument before it, or "bad self" for the first
+        one.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10425 Controllers and parameter changes that arrived while a patch
