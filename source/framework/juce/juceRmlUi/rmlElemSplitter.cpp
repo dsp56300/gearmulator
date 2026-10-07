@@ -1,6 +1,10 @@
 #include "rmlElemSplitter.h"
 
+#include <algorithm>
+
 #include "rmlHelper.h"
+
+#include "RmlUi/Core/ComputedValues.h"
 
 namespace juceRmlUi
 {
@@ -17,6 +21,7 @@ namespace juceRmlUi
 		if (_event.GetId() == Rml::EventId::Mousedown)
 		{
 			m_lastMousePos = helper::getMousePos(_event);
+			freezeSizes();
 		}
 		else if (_event.GetId() == Rml::EventId::Drag)
 		{
@@ -25,24 +30,61 @@ namespace juceRmlUi
 		}
 	}
 
+	bool ElemSplitter::isVertical() const
+	{
+		// between the children of a column it moves up and down
+		const auto direction = GetParentNode()->GetComputedValues().flex_direction();
+		return direction == Rml::Style::FlexDirection::Column || direction == Rml::Style::FlexDirection::ColumnReverse;
+	}
+
+	void ElemSplitter::freezeSizes()
+	{
+		// The basis of a growing child is not its size, and a basis in dp is not one in px: a drag starts from the
+		// laid out sizes. That does not change the layout, there is no free space left to grow into
+		const auto vertical = isVertical();
+
+		for (int i=0; i<GetParentNode()->GetNumChildren(); ++i)
+		{
+			auto* child = GetParentNode()->GetChild(i);
+
+			if (dynamic_cast<ElemSplitter*>(child))
+				continue;
+
+			const auto& computed = child->GetComputedValues();
+			if (computed.display() == Rml::Style::Display::None)
+				continue;
+
+			const auto area = computed.box_sizing() == Rml::Style::BoxSizing::BorderBox ? Rml::BoxArea::Border : Rml::BoxArea::Content;
+			const auto size = child->GetBox().GetSize(area);
+			helper::changeProperty(child, Rml::PropertyId::FlexBasis, Rml::Property(vertical ? size.y : size.x, Rml::Unit::PX));
+		}
+	}
+
 	void ElemSplitter::processMouseMove(const Rml::Vector2f _mousePos)
 	{
 		auto* prev = GetPreviousSibling();
 		auto* next = GetNextSibling();
 
-		const auto delta = _mousePos.x - m_lastMousePos.x;
+		const auto vertical = isVertical();
 
-		auto setFlexBasis = [](Rml::Element* _elem, float _delta)
+		auto delta = vertical ? _mousePos.y - m_lastMousePos.y : _mousePos.x - m_lastMousePos.x;
+
+		auto getFlexBasis = [](Rml::Element* _elem)
+		{
+			auto* prop = _elem ? _elem->GetProperty(Rml::PropertyId::FlexBasis) : nullptr;
+			return prop ? prop->Get<float>(_elem->GetCoreInstance()) : 0.0f;
+		};
+
+		// neither of the two gets smaller than nothing, the splitter waits for a mouse that went further
+		if (prev)
+			delta = std::max(delta, -getFlexBasis(prev));
+		if (next)
+			delta = std::min(delta, getFlexBasis(next));
+
+		auto setFlexBasis = [&](Rml::Element* _elem, float _delta)
 		{
 			if (_elem)
-			{
-				float w = 0.0f;
-				auto* prop = _elem->GetProperty(Rml::PropertyId::FlexBasis);
-				if (prop)
-					w = prop->Get<float>(_elem->GetCoreInstance());
-				w += _delta;
-				helper::changeProperty(_elem, Rml::PropertyId::FlexBasis, Rml::Property(w, Rml::Unit::PX));
-			}
+				helper::changeProperty(_elem, Rml::PropertyId::FlexBasis, Rml::Property(getFlexBasis(_elem) + _delta, Rml::Unit::PX));
 		};
 
 		for (int i=0; i<GetParentNode()->GetNumChildren(); ++i)
@@ -59,6 +101,9 @@ namespace juceRmlUi
 				setFlexBasis(child, 0);
 		}
 
-		m_lastMousePos = _mousePos;
+		if (vertical)
+			m_lastMousePos.y += delta;
+		else
+			m_lastMousePos.x += delta;
 	}
 }

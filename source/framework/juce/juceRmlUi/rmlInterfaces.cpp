@@ -11,6 +11,7 @@
 #include "rmlElemList.h"
 #include "rmlElemListEntry.h"
 #include "rmlElemSplitter.h"
+#include "rmlElemStrokes.h"
 #include "rmlElemTree.h"
 #include "rmlElemTreeNode.h"
 #include "rmlInstancers.h"
@@ -27,8 +28,8 @@ namespace juceRmlUi
 {
 	namespace
 	{
-		GenericInstancers<ElemButton, ElemCanvas, ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemSplitter, ElemTree, ElemTreeNode> g_instancers
-		                 ("button",   "canvas",   "combo",      "knob",   "list",   "listentry",   "splitter"  , "tree",   "treenode"  );
+		GenericInstancers<ElemButton, ElemCanvas, ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemSplitter, ElemStrokes, ElemTree, ElemTreeNode> g_instancers
+		                 ("button",   "canvas",   "combo",      "knob",   "list",   "listentry",   "splitter"  , "strokes",   "tree",   "treenode"  );
 
 		template<size_t... I>
 		void registerOne(Rml::Factory& _factory, std::index_sequence<I...>)
@@ -91,6 +92,11 @@ namespace juceRmlUi
 		// tree style elements
 		sss.RegisterProperty("indent-margin-left", "0", false).AddParser("length");
 		sss.RegisterProperty("indent-padding-left", "0", false).AddParser("length");
+
+		// strokes
+		sss.RegisterProperty("stroke-width", "2dp", false).AddParser("length");
+		sss.RegisterProperty("stroke-outline-width", "0dp", false).AddParser("length");
+		sss.RegisterProperty("stroke-outline-color", "#000000", false).AddParser("color");
 
 		registerInstancers(*m_coreInstance.factory);
 	}

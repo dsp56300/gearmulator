@@ -259,7 +259,7 @@ treenode:selected {
 	background-color: #666;
 }
 
-/* splitters are draggable vertical elements to adjust the width of two siblings */
+/* splitters are draggable elements between two siblings, in a row they adjust the widths, in a column the heights */
 
 splitter {
 	width: 8dp;
