@@ -84,6 +84,9 @@ Framework:
         skin script named the argument before it, or "bad self" for the first
         one.
 
+- [Fix] DSPBridge: The tcpPort setting of the server had no effect, the server
+        always used port 56362.
+
 Osirus/OsTIrus:
 
 - [Fix] BUG-10425 Controllers and parameter changes that arrived while a patch

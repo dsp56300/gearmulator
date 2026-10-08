@@ -11,8 +11,9 @@ namespace bridgeServer
 		: m_config(_argc, _argv)
 		, m_plugins(m_config)
 		, m_romPool(m_config)
+		, m_udpServer(m_config.portTcp)
 		, m_tcpServer([this](std::unique_ptr<networkLib::TcpStream> _stream){onClientConnected(std::move(_stream));}
-		, bridgeLib::g_tcpServerPort)
+		, static_cast<int>(m_config.portTcp))
 		, m_lastDeviceStateUpdate(std::chrono::system_clock::now())
 	{
 	}
