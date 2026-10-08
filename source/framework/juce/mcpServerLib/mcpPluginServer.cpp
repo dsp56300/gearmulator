@@ -400,6 +400,7 @@ namespace mcpServer
 			ToolDef tool;
 			tool.name = "set_parameters_batch";
 			tool.description = "Set multiple parameters at once. Pass a JSON array of {name, value} objects";
+			tool.inputSchema.addProperty("parameters", "array", "The parameters to set, {name, value} objects", true);
 			tool.inputSchema.addIntProperty("part", "Part number (0-15)", false, 0, 15);
 			tool.handler = [this](const JsonValue& _params) -> JsonValue
 			{
