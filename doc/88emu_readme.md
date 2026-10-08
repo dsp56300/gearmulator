@@ -81,7 +81,7 @@ If you find any, please report it as a bug.
 | XPGS / G-800 | `xpgs` | H8/510 | XP | dual midi input, emulates the sound generator only, not the arranger |
 | SC-88Pro | `sc88pro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input |
 | VE-GS Pro | `vegspro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input, no hardware panel present |
-| SC-8820 | `sc8820` | SH7017 (SH-2) | XP6 + LSP | experimental, uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
+| SC-8820 | `sc8820` | SH7016 (SH-2) | XP6 + LSP | experimental, uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
 | SC-8850 | `sc8850` | SH7016 (SH-2) | 2 × XP6 + LSP | uses high-level sub-mcu emulation in USB mode, 4x midi input |
 | NU-10B | `nu10b` | SH7034 (SH-1) | XP | experimental, runs in GM mode only, no hardware panel or display emulated |
 | MIIG5 | `miig5` | SH7042A (SH-2) | 2 × XP6 | experimental, runs in GM mode only, no hardware panel or display emulated |
