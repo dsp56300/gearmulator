@@ -425,49 +425,43 @@ namespace jucePluginEditorLib::patchManagerRml
 		{
 			menu.addEntry("Add folders...", [this]
 				{
-					m_chooser.reset(new juce::FileChooser("Select Folders"));
-
-					m_chooser->launchAsync(
-						juce::FileBrowserComponent::openMode |
+					genericUI::MessageBox::FileDialogDesc desc;
+					desc.title = "Select Folders";
+					desc.flags = juce::FileBrowserComponent::openMode |
 						juce::FileBrowserComponent::canSelectDirectories |
-						juce::FileBrowserComponent::canSelectMultipleItems
-						, [this](const juce::FileChooser& _fileChooser)
+						juce::FileBrowserComponent::canSelectMultipleItems;
+
+					m_chooser = genericUI::MessageBox::showFileDialog(desc, [this](const std::vector<std::string>& _files)
 						{
-							for (const auto& r : _fileChooser.getResults())
+							for (const auto& result : _files)
 							{
-								const auto result = r.getFullPathName().toStdString();
 								pluginLib::patchDB::DataSource ds;
 								ds.type = pluginLib::patchDB::SourceType::Folder;
 								ds.name = result;
 								ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 								getDB().addDataSource(ds);
 							}
-
-							m_chooser.reset();
 						});
 				});
 
 			menu.addEntry("Add files...", [this]
 				{
-					m_chooser.reset(new juce::FileChooser("Select Files"));
-
-					m_chooser->launchAsync(
-						juce::FileBrowserComponent::openMode |
+					genericUI::MessageBox::FileDialogDesc desc;
+					desc.title = "Select Files";
+					desc.flags = juce::FileBrowserComponent::openMode |
 						juce::FileBrowserComponent::canSelectFiles |
-						juce::FileBrowserComponent::canSelectMultipleItems,
-						[this](const juce::FileChooser& _fileChooser)
+						juce::FileBrowserComponent::canSelectMultipleItems;
+
+					m_chooser = genericUI::MessageBox::showFileDialog(desc, [this](const std::vector<std::string>& _files)
 						{
-							for (const auto& r : _fileChooser.getResults())
+							for (const auto& result : _files)
 							{
-								const auto result = r.getFullPathName().toStdString();
 								pluginLib::patchDB::DataSource ds;
 								ds.type = pluginLib::patchDB::SourceType::File;
 								ds.name = result;
 								ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 								getDB().addDataSource(ds);
 							}
-
-							m_chooser.reset();
 						});
 				});
 		}

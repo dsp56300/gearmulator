@@ -5,6 +5,7 @@
 #include "skin.h"
 
 #include "juceUiLib/editor.h"
+#include "juceUiLib/messageBox.h"
 
 #include "synthLib/buildconfig.h"
 #include "synthLib/midiTypes.h"
@@ -22,7 +23,6 @@
 
 namespace juce
 {
-	class FileChooser;
 	class TemporaryFile;
 	class File;
 }
@@ -238,7 +238,7 @@ namespace jucePluginEditorLib
 
 		std::map<std::string, std::vector<char>> m_fileCache;
 
-		std::unique_ptr<juce::FileChooser> m_fileChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_fileChooser;
 		std::unique_ptr<patchManagerRml::PatchManagerDataModel> m_patchManagerDataModel;
 		std::unique_ptr<PluginDataModel> m_pluginDataModel;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;

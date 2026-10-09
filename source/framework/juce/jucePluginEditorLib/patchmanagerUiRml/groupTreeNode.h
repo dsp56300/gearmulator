@@ -2,10 +2,7 @@
 
 #include "treeNode.h"
 
-namespace juce
-{
-	class FileChooser;
-}
+#include "juceUiLib/messageBox.h"
 
 namespace jucePluginEditorLib::patchManagerRml
 {
@@ -91,6 +88,6 @@ namespace jucePluginEditorLib::patchManagerRml
 		patchManager::GroupType getGroupType() const;
 
 	private:
-		std::unique_ptr<juce::FileChooser> m_chooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_chooser;
 	};
 }

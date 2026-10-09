@@ -678,26 +678,23 @@ namespace xtJucePlugin
 
 		auto path = config.getValue(configKey, {});
 
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Select .syx/.mid to import",
-			path,
-			"*.syx,*.mid,*.midi", true);
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Select .syx/.mid to import";
+		desc.initialPath = path.toStdString();
+		desc.patterns = "*.syx,*.mid,*.midi";
+		desc.flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		const std::function onFileChosen = [this, _callback, configKey](const juce::FileChooser& _chooser)
+		m_fileChooser = genericUI::MessageBox::showFileDialog(desc, [this, _callback, configKey](const std::vector<std::string>& _files)
 		{
-			if (_chooser.getResults().isEmpty())
+			if (_files.empty())
 				return;
 
-			const juce::File result = _chooser.getResult();
+			const juce::File result(_files.front());
 
 			m_editor.getProcessor().getConfig().setValue(configKey, result.getParentDirectory().getFullPathName());
 
 			_callback(result.getFullPathName().toStdString());
-		};
-
-		m_fileChooser->launchAsync(flags, onFileChosen);
+		});
 	}
 
 	void WaveEditor::selectExportFileName(const std::string& _title, const std::string& _extension, const std::function<void(const std::string&)>& _callback)
@@ -708,16 +705,18 @@ namespace xtJucePlugin
 
 		const auto path = config.getValue(configKey, {});
 
-		m_fileChooser = std::make_unique<juce::FileChooser>(_title, path, '*' + _extension, true);
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = _title;
+		desc.initialPath = path.toStdString();
+		desc.patterns = '*' + _extension;
+		desc.flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		auto onFileChosen = [this, _callback, configKey](const juce::FileChooser& _chooser)
+		m_fileChooser = genericUI::MessageBox::showFileDialog(desc, [this, _callback, configKey](const std::vector<std::string>& _files)
 		{
-			if (_chooser.getResults().isEmpty())
+			if (_files.empty())
 				return;
 
-			const auto result = _chooser.getResult();
+			const juce::File result(_files.front());
 			getEditor().getProcessor().getConfig().setValue(configKey, result.getParentDirectory().getFullPathName());
 
 			if (!result.existsAsFile())
@@ -735,8 +734,7 @@ namespace xtJucePlugin
 						}
 					});
 			}
-		};
-		m_fileChooser->launchAsync(flags, onFileChosen);
+		});
 	}
 
 	std::optional<xt::WaveData> WaveEditor::importWaveFile(const std::string& _filename) const

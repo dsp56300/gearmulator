@@ -13,6 +13,7 @@ When a Gearmulator plugin is loaded in a DAW, it starts an MCP server on a local
 - Browse, search, load, save, and rename presets via the patch manager
 - Inspect and interact with the plugin UI (DOM tree, clicks, key presses)
 - Take screenshots of the plugin editor
+- Answer message boxes and file dialogs without windows on the desktop
 - Run automated tests
 
 ### What can you do with it?
@@ -342,6 +343,42 @@ Returns `success`, the length as `frames` at the host rate and as `durationMs`, 
 #### `input_stop`
 
 Stop the file started with `input_play` and give the audio inputs back to the host. Returns `success` and `wasActive`, which is false if no file was set.
+
+---
+
+### Dialogs
+
+Message boxes and file dialogs are native windows: they show on the desktop even when the host window is hidden, and the UI automation tools cannot click them. While dialogs are headless none opens. Each one is recorded instead and stays open until `answer_dialog` closes it, which continues whatever opened it, as a click would. Headless is set for the whole process by `set_headless_dialogs`, or from the start by the environment variable `GEARMULATOR_HEADLESS_DIALOGS=1`, which also covers dialogs that open while the plugin loads. A host without a desktop always is headless.
+
+#### `set_headless_dialogs`
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `enabled` | boolean | yes | True records dialogs, false shows them again |
+
+Returns `headless`, which stays true while the environment variable is set or the host has no desktop.
+
+#### `get_dialogs`
+
+The recorded dialogs, oldest first: the open ones and the last 100 that were closed.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `open_only` | boolean | no | Only the open ones (default: false) |
+
+Returns `headless` and `dialogs`, each with `id`, `type` (`ok`, `yesNo`, `okCancel` or `file`), `open` and `header`. A message box has its `message`, and `button` if its button has a text of its own. A file dialog has `initialPath`, `patterns`, `save`, `folders` and `multiple`. A closed one has its `answer`.
+
+#### `answer_dialog`
+
+Close an open dialog.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `id` | integer | yes | The dialog's id from `get_dialogs` |
+| `result` | string | no | Message box: `ok`, `cancel`, `yes` or `no` (default: `ok`) |
+| `files` | array | no | File dialog: the chosen files or folders as full paths. None cancels it |
+
+Returns `success`. Fails if there is no open dialog of that kind with this id.
 
 ---
 

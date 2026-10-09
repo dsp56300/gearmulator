@@ -18,7 +18,6 @@
 
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/filetype.h"
-#include "jucePluginLib/tools.h"
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlEventListener.h"
@@ -210,25 +209,23 @@ namespace jucePluginEditorLib
 	{
 		const auto path = m_processor.getConfig().getValue("load_path", "");
 
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Choose syx/midi banks to import",
-			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*.syx,*.mid,*.midi,*.vstpreset,*.fxb,*.cpr", true);
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Choose syx/midi banks to import";
+		desc.initialPath = (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory().getFullPathName() : path).toStdString();
+		desc.patterns = "*.syx,*.mid,*.midi,*.vstpreset,*.fxb,*.cpr";
+		desc.flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		const std::function onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		m_fileChooser = genericUI::MessageBox::showFileDialog(desc, [this, _callback](const std::vector<std::string>& _files)
 		{
-			if (_chooser.getResults().isEmpty())
+			if (_files.empty())
 				return;
 
-			const auto result = _chooser.getResult();
+			const juce::File result(_files.front());
 
 			m_processor.getConfig().setValue("load_path", result.getParentDirectory().getFullPathName());
 
 			_callback(result);
-		};
-		m_fileChooser->launchAsync(flags, onFileChosen);
+		});
 	}
 
 	void Editor::savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback)
@@ -236,19 +233,18 @@ namespace jucePluginEditorLib
 #if !SYNTHLIB_DEMO_MODE
 		const auto path = m_processor.getConfig().getValue("save_path", "");
 
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Save preset(s) as " + _fileType.type(),
-			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*." + _fileType.type(), true);
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Save preset(s) as " + _fileType.type();
+		desc.initialPath = (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory().getFullPathName() : path).toStdString();
+		desc.patterns = "*." + _fileType.type();
+		desc.flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		auto onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		m_fileChooser = genericUI::MessageBox::showFileDialog(desc, [this, _callback](const std::vector<std::string>& _files)
 		{
-			if (_chooser.getResults().isEmpty())
+			if (_files.empty())
 				return;
 
-			const auto result = _chooser.getResult();
+			const juce::File result(_files.front());
 			m_processor.getConfig().setValue("save_path", result.getParentDirectory().getFullPathName());
 
 			if (!result.existsAsFile())
@@ -264,8 +260,7 @@ namespace jucePluginEditorLib
 						_callback(result);
 				});
 			}
-		};
-		m_fileChooser->launchAsync(flags, onFileChosen);
+		});
 #else
 		showDemoRestrictionMessageBox();
 #endif
@@ -403,7 +398,7 @@ namespace jucePluginEditorLib
 
 	void Editor::showDisclaimer() const
 	{
-		if(pluginLib::Tools::isHeadless())
+		if(genericUI::MessageBox::isHeadlessHost())
 			return;
 
 		if(!m_processor.getConfig().getBoolValue("disclaimerSeen", false))
@@ -607,7 +602,7 @@ namespace jucePluginEditorLib
 							if(isLinked)
 								links.unlinkRegion(regionId, currentPart, p);
 							else if(links.isRegionLinked(regionId, p, currentPart))
-								juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
+								genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
 							else
 								links.linkRegion(regionId, currentPart, p, true);
 						});
@@ -644,7 +639,7 @@ namespace jucePluginEditorLib
 						if(isLinked)
 							links.remove(sourceParam, destParam);
 						else if(!links.add(sourceParam, destParam, true))
-							juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
+							genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
 					});
 				}
 

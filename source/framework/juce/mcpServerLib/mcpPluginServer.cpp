@@ -13,8 +13,14 @@
 
 #include "networkLib/logging.h"
 
+#include "juceUiLib/messageBox.h"
+
+#include "juce_gui_basics/juce_gui_basics.h"
+
 #ifdef _WIN32
 #include <windows.h>
+// it defines MessageBox, here that is genericUI::MessageBox
+#undef MessageBox
 #else
 #include <unistd.h>
 #endif
@@ -116,6 +122,130 @@ namespace mcpServer
 		registerStateTools();
 		registerDeviceInfoTools();
 		registerAudioTools();
+		registerDialogTools();
+	}
+
+	void McpPluginServer::registerDialogTools()
+	{
+		using MessageBox = genericUI::MessageBox;
+
+		// set_headless_dialogs
+		{
+			ToolDef tool;
+			tool.name = "set_headless_dialogs";
+			tool.description = "Keep message boxes and file dialogs off the desktop. While headless, every one the plugin "
+				"opens is recorded instead (get_dialogs) and waits until answer_dialog closes it, which continues whatever "
+				"opened it. Applies to the whole process. The environment variable GEARMULATOR_HEADLESS_DIALOGS=1 does the "
+				"same from the start, a host without a desktop always is headless.";
+			tool.inputSchema.addProperty("enabled", "boolean", "True: record dialogs, false: show them again", true);
+			tool.handler = [](const JsonValue& _params) -> JsonValue
+			{
+				MessageBox::setHeadless(_params.get("enabled").getBool());
+
+				auto result = JsonValue::object();
+				result.set("headless", JsonValue::fromBool(MessageBox::isHeadless()));
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
+
+		// get_dialogs
+		{
+			ToolDef tool;
+			tool.name = "get_dialogs";
+			tool.description = "The message boxes and file dialogs recorded while headless: the open ones, waiting for "
+				"answer_dialog, and the last ones that were closed, oldest first.";
+			tool.inputSchema.addProperty("open_only", "boolean", "Only the open ones (default false)", false);
+			tool.handler = [](const JsonValue& _params) -> JsonValue
+			{
+				const bool openOnly = _params.hasProperty("open_only") && _params.get("open_only").getBool();
+
+				auto list = JsonValue::array();
+				for(const auto& d : MessageBox::getDialogs())
+				{
+					if(openOnly && !d.open)
+						continue;
+
+					auto e = JsonValue::object();
+					e.set("id", JsonValue::fromInt(static_cast<int>(d.id)));
+					const char* type = "ok";
+					switch(d.type)
+					{
+					case MessageBox::Type::Ok:			type = "ok"; break;
+					case MessageBox::Type::YesNo:		type = "yesNo"; break;
+					case MessageBox::Type::OkCancel:	type = "okCancel"; break;
+					case MessageBox::Type::File:		type = "file"; break;
+					}
+					e.set("type", JsonValue::fromString(type));
+					e.set("open", JsonValue::fromBool(d.open));
+					e.set("header", JsonValue::fromString(juce::String::fromUTF8(d.header.c_str())));
+					if(d.type == MessageBox::Type::File)
+					{
+						e.set("initialPath", JsonValue::fromString(juce::String::fromUTF8(d.file.initialPath.c_str())));
+						e.set("patterns", JsonValue::fromString(juce::String::fromUTF8(d.file.patterns.c_str())));
+						e.set("save", JsonValue::fromBool((d.file.flags & juce::FileBrowserComponent::saveMode) != 0));
+						e.set("folders", JsonValue::fromBool((d.file.flags & juce::FileBrowserComponent::canSelectDirectories) != 0));
+						e.set("multiple", JsonValue::fromBool((d.file.flags & juce::FileBrowserComponent::canSelectMultipleItems) != 0));
+					}
+					else
+					{
+						e.set("message", JsonValue::fromString(juce::String::fromUTF8(d.message.c_str())));
+						if(!d.button.empty())
+							e.set("button", JsonValue::fromString(juce::String::fromUTF8(d.button.c_str())));
+					}
+					if(!d.open)
+						e.set("answer", JsonValue::fromString(juce::String::fromUTF8(d.answer.c_str())));
+					list.append(e);
+				}
+
+				auto result = JsonValue::object();
+				result.set("headless", JsonValue::fromBool(MessageBox::isHeadless()));
+				result.set("dialogs", list);
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
+
+		// answer_dialog
+		{
+			ToolDef tool;
+			tool.name = "answer_dialog";
+			tool.description = "Close an open dialog from get_dialogs as a click would. A message box takes a result "
+				"(ok, cancel, yes, no), a file dialog files: full paths, none cancels it.";
+			tool.inputSchema.addIntProperty("id", "The dialog's id from get_dialogs", true, 1);
+			tool.inputSchema.addEnumProperty("result", "Message box: the button", {"ok", "cancel", "yes", "no"}, false);
+			tool.inputSchema.addProperty("files", "array", "File dialog: the chosen files or folders, full paths", false);
+			tool.handler = [](const JsonValue& _params) -> JsonValue
+			{
+				const auto id = static_cast<uint32_t>(_params.get("id").getInt());
+
+				bool closed = false;
+				if(_params.hasProperty("files"))
+				{
+					std::vector<std::string> files;
+					const auto list = _params.get("files");
+					for(int i = 0; i < list.getArraySize(); ++i)
+						files.push_back(list.getArrayElement(i).getString().toStdString());
+
+					// the callback continues the UI flow that opened the dialog
+					runOnMessageThread([&] { closed = MessageBox::answer(id, files); });
+				}
+				else
+				{
+					const auto r = _params.hasProperty("result") ? _params.get("result").getString() : juce::String("ok");
+					const auto res = r == "no" || r == "cancel" ? MessageBox::Result::No : MessageBox::Result::Yes;
+					runOnMessageThread([&] { closed = MessageBox::answer(id, res); });
+				}
+
+				if(!closed)
+					throw std::runtime_error("No open dialog " + std::to_string(id) + " of that kind, see get_dialogs");
+
+				auto result = JsonValue::object();
+				result.set("success", JsonValue::fromBool(true));
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
 	}
 
 	void McpPluginServer::registerAudioTools()

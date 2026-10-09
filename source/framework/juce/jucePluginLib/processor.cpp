@@ -207,7 +207,7 @@ namespace pluginLib
 
 			// Juce loads the LV2/VST3 versions of the plugin as part of the build process, if we open a message box in this case, the build process gets stuck
 			const auto host = juce::PluginHostType::getHostPath();
-			if(!Tools::isHeadless())
+			if(!genericUI::MessageBox::isHeadlessHost())
 			{
 				std::string msg = e.what();
 
