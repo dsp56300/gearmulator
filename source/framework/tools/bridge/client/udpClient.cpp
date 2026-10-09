@@ -42,18 +42,24 @@ namespace bridgeClient
 				bridgeLib::ServerInfo si;
 				si.read(_binaryStream);
 
-				if(si.protocolVersion == bridgeLib::g_protocolVersion && si.portTcp > 0)
+				bridgeLib::Error e;
+
+				if(si.protocolVersion != bridgeLib::g_protocolVersion)
 				{
-					ok = true;
-					m_callback(_host, si, {});
+					e.code = bridgeLib::ErrorCode::WrongProtocolVersion;
+					e.msg =  "Wrong protocol version";
+				}
+				else if(!si.portTcp)
+				{
+					e.code = bridgeLib::ErrorCode::Unknown;
+					e.msg = "its tcpPort setting is 0";
 				}
 				else
 				{
-					bridgeLib::Error e;
-					e.code = bridgeLib::ErrorCode::WrongProtocolVersion;
-					e.msg =  "Wrong protocol version";
-					m_callback(_host, si, e);
+					ok = true;
 				}
+
+				m_callback(_host, si, e);
 			}
 			else if(_command == bridgeLib::Command::Error)
 			{
