@@ -175,6 +175,20 @@ namespace virus
 			return;
 		}
 
+		// The device sends these when it answers a request of ours, after a state load for example, or echoes a change.
+		// None of them is an edit, a host turns off automation of a parameter reported as edited (EMU-82)
+		const auto fromDevice = _source == synthLib::MidiEventSource::Device;
+		const auto origin = fromDevice ? pluginLib::Parameter::Origin::PresetChange : midiEventSourceToParameterOrigin(_source);
+
+		bool changed = false;
+
+		auto apply = [&](pluginLib::Parameter* _param)
+		{
+			const auto prev = _param->getUnnormalizedValue();
+			_param->setValueFromSynth(value, origin);
+			changed |= _param->getUnnormalizedValue() != prev;
+		};
+
     	if (partParams.empty() && part != 0 && part != virusLib::SINGLE)
 		{
             // ensure it's not global
@@ -193,10 +207,15 @@ namespace virus
 				}
             }
 			for (const auto& param : globalParams)
-				param->setValueFromSynth(value, midiEventSourceToParameterOrigin(_source));
+				apply(param);
 		}
 		for (const auto& param : partParams)
-			param->setValueFromSynth(value, midiEventSourceToParameterOrigin(_source));
+			apply(param);
+
+		// the host reads the values again, it was not notified of the change
+		if (fromDevice && changed)
+			onPresetParametersChanged();
+
 		// TODO:
         /**
          If a

@@ -130,6 +130,11 @@ Osirus/OsTIrus:
         Single, so a hardware Virus controlled by the plugin ignored them.
         Patch changes and Multi mode were not affected.
 
+- [Fix] EMU-82 Loading a project told the host that Master Volume, Master Tune,
+        MIDI Channel and Device ID had been edited. Ableton Live then turned off
+        their automation and switched the track's automation lane to Master
+        Tune.
+
 Osirus:
 
 - [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter
