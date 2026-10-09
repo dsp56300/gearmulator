@@ -236,7 +236,7 @@ namespace xt
 		case SysexCommand::SingleParameterChange:	return modifyDump(DumpType::Single, _data);
 		case SysexCommand::MultiParameterChange:	return modifyDump(DumpType::Multi, _data);
 		case SysexCommand::GlobalParameterChange:	return modifyDump(DumpType::Global, _data);
-		case SysexCommand::ModeParameterChange:		return modifyDump(DumpType::Mode, _data);
+		// no ModeParameterChange: the device ignores it, it switches the mode only with a ModeDump
 
 		// the preview is not part of the state, a copy that builds one must not touch it, see wLib::State::getStateWithPendingMidi()
 		case SysexCommand::WaveDumpP:				return !m_offline && m_wavePreview.receiveWave(_data);
@@ -478,19 +478,6 @@ namespace xt
 		return true;
 	}
 
-	bool State::modifyMode(const SysEx& _data)
-	{
-		auto* p = getModeParameter(_data);
-		if(!p)
-			return false;
-
-		*p = _data[IdxModeParamValue];
-
-		onPlayModeChanged();
-
-		return true;
-	}
-
 	namespace
 	{
 		template<size_t Size>
@@ -498,7 +485,8 @@ namespace xt
 		{
 			const auto& dump = State::Dumps[static_cast<uint32_t>(_type)];
 
-			if(dump.idxParamIndexH >= _data.size() || dump.idxParamIndexL >= _data.size())
+			// the value follows the index bytes
+			if(dump.idxParamValue >= _data.size())
 				return nullptr;
 
 			auto i = dump.firstParamIndex;
@@ -506,7 +494,8 @@ namespace xt
 				i += static_cast<uint32_t>(_data[dump.idxParamIndexH]) << 7;
 			i += static_cast<uint32_t>(_data[dump.idxParamIndexL]);
 
-			if(i > _dump.size())
+			// the dump ends with checksum and F7
+			if(i >= Size - 2)
 				return nullptr;
 			return &_dump[i];
 		}
@@ -526,17 +515,28 @@ namespace xt
 	{
 		const auto& dump = Dumps[static_cast<uint8_t>(DumpType::Multi)];
 
+		if(dump.idxParamValue >= _data.size())
+			return nullptr;
+
 		const auto idxH = _data[dump.idxParamIndexH];
 		const auto idxL = _data[dump.idxParamIndexL];
 //		const auto val = _data[dump.idxParamValue];
 
-		if(idxH == 0x20)
-			return &m_currentMulti[dump.firstParamIndex + idxL];
-
 		constexpr auto inst0 = static_cast<uint8_t>(MultiParameter::Inst0First);
 		constexpr auto inst1 = static_cast<uint8_t>(MultiParameter::Inst1First);
 
+		// 0x20 = a parameter of the multi itself, otherwise one of the instrument idxH
+		if(idxH == 0x20)
+			return idxL < inst0 ? &m_currentMulti[dump.firstParamIndex + idxL] : nullptr;
+
+		if(idxL >= inst1 - inst0)
+			return nullptr;
+
 		const auto idx = dump.firstParamIndex + inst0 + idxH * (inst1 - inst0) + idxL;
+
+		// the dump ends with checksum and F7
+		if(idx >= m_currentMulti.size() - 2)
+			return nullptr;
 
 		return &m_currentMulti[idx];
 	}
@@ -544,11 +544,6 @@ namespace xt
 	uint8_t* State::getGlobalParameter(const SysEx& _data)
 	{
 		return getParameter(m_global, _data, DumpType::Global);
-	}
-
-	uint8_t* State::getModeParameter(const SysEx& _data)
-	{
-		return getParameter(m_mode, _data, DumpType::Mode);
 	}
 
 	bool State::getSingle(Responses& _responses, const SysEx& _data)
@@ -743,7 +738,6 @@ namespace xt
 		case DumpType::Single: res = modifySingle(_data); break;
 		case DumpType::Multi: res = modifyMulti(_data); break;
 		case DumpType::Global: res = modifyGlobal(_data); break;
-		case DumpType::Mode: res = modifyMode(_data); break;
 		default:
 			return false;
 		}

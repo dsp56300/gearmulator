@@ -161,6 +161,10 @@ Vavra/Xenia:
         number, from the host or a MIDI input, overwrote memory of the plugin
         and could crash it.
 
+- [Fix] EMU-234 A SysEx parameter change or parameter request with an
+        out-of-range parameter number, from the host or a MIDI input, could
+        crash the plugin or damage the global settings saved with the project.
+
 - [Fix] BUG-10196 A sound that was loaded or edited while the host did not
         process the plugin, for example in a Poly Grid FX slot in Bitwig, was
         not saved with the project until audio had been processed. The

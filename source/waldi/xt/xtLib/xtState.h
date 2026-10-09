@@ -157,12 +157,10 @@ namespace xt
 		bool modifySingle(const SysEx& _data);
 		bool modifyMulti(const SysEx& _data);
 		bool modifyGlobal(const SysEx& _data);
-		bool modifyMode(const SysEx& _data);
 
 		uint8_t* getSingleParameter(const SysEx& _data);
 		uint8_t* getMultiParameter(const SysEx& _data);
 		uint8_t* getGlobalParameter(const SysEx& _data);
-		uint8_t* getModeParameter(const SysEx& _data);
 
 		bool getSingle(Responses& _responses, const SysEx& _data);
 		Single* getSingle(LocationH _buf, uint8_t _loc);

@@ -413,12 +413,14 @@ namespace mqLib
 		{
 			const auto& dump = State::Dumps[static_cast<uint32_t>(_type)];
 
-			if(dump.idxParamIndexH >= _data.size() || dump.idxParamIndexL >= _data.size())
+			// the value follows both index bytes. A change reads it, in a request it is the F7
+			if(dump.idxParamValue >= _data.size())
 				return nullptr;
 
 			const auto i = dump.firstParamIndex + ((static_cast<uint32_t>(_data[dump.idxParamIndexH]) << 7) | static_cast<uint32_t>(_data[dump.idxParamIndexL]));
 
-			if(i > _dump.size())
+			// the dump ends with checksum and F7
+			if(i >= Size - 2)
 				return nullptr;
 			return &_dump[i];
 		}
