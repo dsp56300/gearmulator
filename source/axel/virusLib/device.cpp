@@ -9,6 +9,7 @@
 #include "synthLib/deviceException.h"
 #include "synthLib/midiToSysex.h"
 
+#include <algorithm>
 #include <cctype>
 #include <cstring>
 
@@ -188,16 +189,26 @@ namespace virusLib
 		_midiOut.push_back(m_frontpanelStateMidiEvent);
 	}
 
-	void Device::processArpeggiators(std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _out,
-		const uint32_t _sampleCount, const float _samplerate, const synthLib::HostTransport& _transport)
+	bool Device::hasArpeggiators() const
 	{
-		if(!m_arpeggiator.isValid())
-			return;
+		return m_arpeggiator.isValid();
+	}
 
-		// The firmware's arpeggiator follows MIDI clock and drifts from the host. Only the plugin calls this, over the
-		// DSP bridge nobody does, and there the firmware keeps its own
+	void Device::processArpeggiators(std::vector<synthLib::SMidiEvent>& _midi, std::vector<synthLib::SMidiEvent>& _out,
+		const uint32_t _sampleCount)
+	{
+		// The firmware's arpeggiator follows MIDI clock and drifts from the host. Once a host tells where it is, the
+		// arpeggio is played here instead. Without one, the test consoles for example, the firmware keeps its own
 		if(!m_firmwareArpeggiatorDisabled)
 		{
+			const auto hasTransport = std::any_of(_midi.begin(), _midi.end(), [](const synthLib::SMidiEvent& _e)
+			{
+				return _e.type == synthLib::MidiEventType::HostTransport;
+			});
+
+			if(!hasTransport)
+				return;
+
 			m_firmwareArpeggiatorDisabled = true;
 			m_mc->disableFirmwareArpeggiator();
 		}
@@ -205,7 +216,7 @@ namespace virusLib
 		std::array<const ROMFile::TPreset*, 16> singles;
 		m_mc->getArpeggiatorSingles(singles);
 
-		m_arpeggiator.process(singles, _midiIn, _out, _sampleCount, _samplerate, _transport);
+		m_arpeggiator.process(singles, _midi, _out, _sampleCount, m_samplerate);
 	}
 
 #if !SYNTHLIB_DEMO_MODE

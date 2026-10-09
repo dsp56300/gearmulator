@@ -32,9 +32,6 @@ namespace virusLib
 
 		void process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
 
-		void processArpeggiators(std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _out,
-			uint32_t _sampleCount, float _samplerate, const synthLib::HostTransport& _transport) override;
-
 #if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
@@ -65,6 +62,9 @@ namespace virusLib
 		void applyDspMemoryPatches() const;
 
 	private:
+		bool hasArpeggiators() const override;
+		void processArpeggiators(std::vector<synthLib::SMidiEvent>& _midi, std::vector<synthLib::SMidiEvent>& _out,
+			uint32_t _sampleCount) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;

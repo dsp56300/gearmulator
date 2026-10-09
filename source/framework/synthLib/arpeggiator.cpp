@@ -55,7 +55,7 @@ namespace synthLib
 	}
 
 	void Arpeggiator::process(std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _out,
-		const uint32_t _sampleCount, const float _samplerate, const HostTransport& _transport)
+		const uint32_t _sampleCount, const float _samplerate)
 	{
 		applySettings(_out);
 
@@ -67,41 +67,14 @@ namespace synthLib
 			return;
 		}
 
-		const bool hostTempo = m_settings.sync && _transport.bpm > 0.0f;
-		const bool synced = hostTempo && _transport.isPlaying && _transport.hasPpqPosition;
-		const double bpm = hostTempo ? _transport.bpm : m_settings.tempo;
-
-		m_quartersPerSample = bpm > 0.0 && _samplerate > 0.0f ? bpm / (60.0 * _samplerate) : 0.0;
-
-		if (synced)
-		{
-			m_blockPos = _transport.ppqPos;
-
-			if (!m_wasSynced || std::fabs(m_blockPos - m_nextBlockPos) > g_discontinuity)
-				m_relocate = true;
-		}
-		else
-		{
-			// Runs on from where the last block ended, synced or not, so that the arpeggio does not stumble when the
-			// host stops
-			m_blockPos = m_nextBlockPos;
-		}
-
-		m_wasSynced = synced;
+		// Runs on from where the last block ended, at the tempo it had, until the host's transport says otherwise. That
+		// also keeps the arpeggio from stumbling when the host stops
+		m_samplerate = _samplerate;
+		m_blockPos = m_nextBlockPos;
+		m_quartersPerSample = _samplerate > 0.0f ? tempo() / (60.0 * _samplerate) : 0.0;
 
 		if (m_relocate && m_running && canStep())
-		{
-			// A step half a sample before the block start rounds to its first sample
-			m_nextStep = firstStepFrom(m_blockPos - 0.5 * m_quartersPerSample);
-
-			// A host that wraps its loop late, at a block start, reports the loop start after the step at the loop end
-			// has played. The two are the same step, playing it again would flam. Half of the step's duration tells
-			// the two cases apart
-			const auto sinceLastStep = static_cast<double>(m_time + stepOffset(m_nextStep, 0)) - m_lastStepTime;
-			const auto duration = stepPos(m_nextStep + 1) - stepPos(m_nextStep);
-			if (sinceLastStep < 0.5 * duration / m_quartersPerSample)
-				++m_nextStep;
-		}
+			relocate(0);
 
 		m_relocate = false;
 
@@ -148,6 +121,46 @@ namespace synthLib
 
 		m_time += _sampleCount;
 		m_nextBlockPos = m_blockPos + _sampleCount * m_quartersPerSample;
+	}
+
+	void Arpeggiator::handleTransport(const HostTransport& _transport, const uint32_t _offset)
+	{
+		const auto pos = m_blockPos + _offset * m_quartersPerSample;
+
+		m_hostBpm = _transport.bpm;
+		const auto rate = m_samplerate > 0.0f ? tempo() / (60.0 * m_samplerate) : 0.0;
+
+		const bool synced = m_settings.sync && m_hostBpm > 0.0f && _transport.isPlaying && _transport.hasPpqPosition;
+
+		// The host's song position wins. When it jumped, the host located or looped, or it just started to play, the
+		// next step is the one the new position wants. Otherwise the arpeggio runs on from where it is
+		const bool jumped = synced && (!m_wasSynced || std::fabs(_transport.ppqPos - pos) > g_discontinuity);
+
+		m_blockPos = (synced ? _transport.ppqPos : pos) - _offset * rate;
+		m_quartersPerSample = rate;
+		m_wasSynced = synced;
+
+		if (jumped && m_running && canStep())
+			relocate(_offset);
+	}
+
+	void Arpeggiator::relocate(const uint32_t _offset)
+	{
+		// A step half a sample before now rounds to now
+		const auto pos = m_blockPos + _offset * m_quartersPerSample;
+		m_nextStep = firstStepFrom(pos - 0.5 * m_quartersPerSample);
+
+		// A host that wraps its loop late reports the loop start after the step at the loop end has played. The two are
+		// the same step, playing it again would flam. Half of the step's duration tells the two cases apart
+		const auto sinceLastStep = static_cast<double>(m_time + stepOffset(m_nextStep, _offset)) - m_lastStepTime;
+		const auto duration = stepPos(m_nextStep + 1) - stepPos(m_nextStep);
+		if (sinceLastStep < 0.5 * duration / m_quartersPerSample)
+			++m_nextStep;
+	}
+
+	double Arpeggiator::tempo() const
+	{
+		return m_settings.sync && m_hostBpm > 0.0f ? m_hostBpm : m_settings.tempo;
 	}
 
 	void Arpeggiator::applySettings(std::vector<SMidiEvent>& _out)
@@ -225,7 +238,7 @@ namespace synthLib
 
 				m_passThrough.reset(it->b);
 			}
-			else if (isAllNotesOff(*it) && (it->a & 0x0f) == m_channel)
+			else if (it->type == MidiEventType::HostTransport || (isAllNotesOff(*it) && (it->a & 0x0f) == m_channel))
 			{
 				m_input.push_back(*it);
 			}
@@ -240,6 +253,12 @@ namespace synthLib
 
 	void Arpeggiator::handleInput(const SMidiEvent& _ev, std::vector<SMidiEvent>& _out, const uint32_t _offset)
 	{
+		if (_ev.type == MidiEventType::HostTransport)
+		{
+			handleTransport(_ev.transport, _offset);
+			return;
+		}
+
 		if (isAllNotesOff(_ev))
 		{
 			stopAll(_out, _offset);

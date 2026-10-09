@@ -103,10 +103,16 @@ namespace
 		for (uint64_t t = 0; t < _samples; t += 512)
 		{
 			std::vector<SMidiEvent> in, out;
+
+			SMidiEvent transport(MidiEventSource::Internal);
+			transport.type = MidiEventType::HostTransport;
+			transport.transport = {ppq, 120.0f, true, true};
+			in.push_back(transport);
+
 			if (t == 0)
 				in.emplace_back(MidiEventSource::Host, M_NOTEON | 3, 60, 90, 0);
 
-			_arp.process(singles, in, out, 512, g_samplerate, {120.0f, ppq, true, true});
+			_arp.process(singles, in, out, 512, g_samplerate);
 
 			for (const auto& e : out)
 			{

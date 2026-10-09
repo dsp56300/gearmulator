@@ -15,8 +15,6 @@
 
 namespace synthLib
 {
-	struct HostTransport;
-
 	struct DeviceCreateParams
 	{
 		float preferredSamplerate = 0.0f;
@@ -41,13 +39,6 @@ namespace synthLib
 		Device& operator = (Device&&) = delete;
 
 		virtual void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
-
-		// Arpeggiates in C++ instead of in the firmware, see synthLib::Arpeggiator. The plugin calls this for every block
-		// at the host's rate, before the MIDI reaches process(): take the notes to arpeggiate out of _midiIn and append
-		// what is played to _out. The DSP bridge server never calls it, so the firmware has to keep its own arpeggiator
-		// until it is called.
-		virtual void processArpeggiators(std::vector<SMidiEvent>& /*_midiIn*/, std::vector<SMidiEvent>& /*_out*/,
-			uint32_t /*_sampleCount*/, float /*_samplerate*/, const HostTransport& /*_transport*/) {}
 
 		void setExtraLatencySamples(uint32_t _size);
 		uint32_t getExtraLatencySamples() const { return m_extraLatency; }
@@ -143,11 +134,27 @@ namespace synthLib
 		// else it is a no-op.
 		virtual void onTransportDiscontinuity(const SMidiEvent& /*_ev*/) {}
 
+		// The host's tempo and song position, see MidiEventType::HostTransport. A marker as well, it never reaches
+		// sendMidi. The DSP bridge client passes it on to the server
+		virtual void onHostTransport(const SMidiEvent& /*_ev*/) {}
+
+		// A device that plays its arpeggiator in C++ instead of in the firmware, see synthLib::Arpeggiator, says so here.
+		// process() then hands it every block's MIDI before the firmware gets any of it: take the notes to arpeggiate out
+		// of _midi and append what is played to _out. The host's transport arrives in _midi as HostTransport events
+		virtual bool hasArpeggiators() const { return false; }
+		virtual void processArpeggiators(std::vector<SMidiEvent>& /*_midi*/, std::vector<SMidiEvent>& /*_out*/,
+			uint32_t /*_sampleCount*/) {}
+
 		void dummyProcess(uint32_t _numSamples);
+
+	private:
+		const std::vector<SMidiEvent>& arpeggiate(const std::vector<SMidiEvent>& _midiIn, size_t _size);
 
 	private:
 		DeviceCreateParams m_createParams;
 		std::vector<SMidiEvent> m_midiIn;
+		std::vector<SMidiEvent> m_arpMidi;
+		std::vector<SMidiEvent> m_arpOut;
 
 		uint32_t m_extraLatency = 0;
 

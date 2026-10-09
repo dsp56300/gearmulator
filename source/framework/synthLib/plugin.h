@@ -16,7 +16,6 @@
 namespace synthLib
 {
 	class Device;
-	struct HostTransport;
 
 	class Plugin
 	{
@@ -75,7 +74,6 @@ namespace synthLib
 
 	private:
 		void processMidiClock(float _bpm, double _ppqPos, bool _isPlaying, size_t _sampleCount);
-		void processArpeggiators(const HostTransport& _transport, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
 		void updateDeviceLatency();
 		// Composes the values the host is told about. The inputs only change while m_lock is
@@ -91,7 +89,6 @@ namespace synthLib
 		dsp56k::RingBuffer<SMidiEvent, 1024, false> m_midiInRingBuffer;
 		std::vector<SMidiEvent> m_midiIn;
 		std::vector<SMidiEvent> m_midiOut;
-		std::vector<SMidiEvent> m_arpOut;
 
 		SMidiEvent m_pendingSysexInput;
 

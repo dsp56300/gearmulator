@@ -259,7 +259,18 @@ namespace synthLib
 	enum class MidiEventType : uint8_t
 	{
 		Midi,
-		TransportDiscontinuity
+		TransportDiscontinuity,
+		HostTransport			// where the host's transport is at this sample, see SMidiEvent::transport
+	};
+
+	// The host's tempo and song position, carried by a MidiEventType::HostTransport event. The plugin sends one at the
+	// start of every block, so it arrives at the device at the right sample through the resampler and the DSP bridge
+	struct HostTransport
+	{
+		double ppqPos = 0.0;
+		float bpm = 0.0f;
+		bool isPlaying = false;
+		bool hasPpqPosition = false;
 	};
 
 	enum class TransportDiscontinuity : uint8_t
@@ -284,6 +295,7 @@ namespace synthLib
 		// Physical / virtual MIDI port the event belongs to (devices with several
 		// MIDI inputs or outputs, e.g. the SC-88 family's IN A/B and USB cables).
 		uint8_t port = 0;
+		HostTransport transport;	// MidiEventType::HostTransport only
 		SMidiEvent(const MidiEventSource _source = MidiEventSource::Unknown, const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const uint32_t _offset = 0)
 			: a(_a), b(_b), c(_c), offset(_offset), source(_source)
 		{
@@ -292,6 +304,7 @@ namespace synthLib
 		SMidiEvent(const SMidiEvent& _e)
 			: a(_e.a), b(_e.b), c(_e.c), sysex(_e.sysex), offset(_e.offset), source(_e.source), type(_e.type)
 			, transportGeneration(_e.transportGeneration), cancelOnTransportChange(_e.cancelOnTransportChange), port(_e.port)
+			, transport(_e.transport)
 		{
 			assert(empty() || source != MidiEventSource::Unknown);
 		}
@@ -299,6 +312,7 @@ namespace synthLib
 		SMidiEvent(SMidiEvent&& _e) noexcept
 			: a(_e.a), b(_e.b), c(_e.c), sysex(std::move(_e.sysex)), offset(_e.offset), source(_e.source), type(_e.type)
 			, transportGeneration(_e.transportGeneration), cancelOnTransportChange(_e.cancelOnTransportChange), port(_e.port)
+			, transport(_e.transport)
 		{
 			assert(empty() || source != MidiEventSource::Unknown);
 		}
@@ -317,6 +331,7 @@ namespace synthLib
 			transportGeneration = _e.transportGeneration;
 			cancelOnTransportChange = _e.cancelOnTransportChange;
 			port = _e.port;
+			transport = _e.transport;
 			assert(empty() || source != MidiEventSource::Unknown);
 			return *this;
 		}
@@ -333,6 +348,7 @@ namespace synthLib
 			transportGeneration = _e.transportGeneration;
 			cancelOnTransportChange = _e.cancelOnTransportChange;
 			port = _e.port;
+			transport = _e.transport;
 			assert(empty() || source != MidiEventSource::Unknown);
 			return *this;
 		}

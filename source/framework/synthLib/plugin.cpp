@@ -1,5 +1,4 @@
 #include "plugin.h"
-#include "arpeggiator.h"
 #include "device.h"
 
 #include <cmath>
@@ -123,9 +122,19 @@ namespace synthLib
 			m_midiIn.insert(m_midiIn.begin(), marker);
 		}
 
+		// Where the host is, for everything in the device that follows it, the arpeggiator for example. It goes first,
+		// after a discontinuity marker, so that the device knows the position before the notes at the block start
+		{
+			SMidiEvent transport(MidiEventSource::Internal);
+			transport.type = MidiEventType::HostTransport;
+			transport.transport = {_ppqPos, _bpm, _isPlaying, _hasPpqPosition};
+			const auto first = discontinuity != TransportDiscontinuity::None ? 1 : 0;
+			stampTransportGeneration(*m_midiIn.insert(m_midiIn.begin() + first, transport));
+		}
+
 		processMidiInEvents();
+
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
-		processArpeggiators({_bpm, _ppqPos, _isPlaying, _hasPpqPosition}, _count);
 
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](const TAudioInputs& _ins, const TAudioOutputs& _outs, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
@@ -271,18 +280,6 @@ namespace synthLib
 	{
 		if (m_midiClockEnabled)
 			m_midiClock.process(_bpm, _ppqPos, _isPlaying, _sampleCount);
-	}
-
-	void Plugin::processArpeggiators(const HostTransport& _transport, const size_t _sampleCount)
-	{
-		// At the host's rate, before the resampler: the transport is exact here, and the resampler moves the notes to
-		// the device's rate like all other events
-		m_arpOut.clear();
-		m_device->processArpeggiators(m_midiIn, m_arpOut, static_cast<uint32_t>(_sampleCount), m_hostSamplerate,
-			_transport);
-
-		for (const auto& ev : m_arpOut)
-			insertMidiEvent(ev);
 	}
 
 	float* Plugin::getDummyBuffer(size_t _minimumSize)

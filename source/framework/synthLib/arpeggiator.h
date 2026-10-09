@@ -9,15 +9,6 @@
 
 namespace synthLib
 {
-	// The host's transport at the start of a block
-	struct HostTransport
-	{
-		float bpm = 0.0f;
-		double ppqPos = 0.0;
-		bool isPlaying = false;
-		bool hasPpqPosition = false;
-	};
-
 	struct ArpStep
 	{
 		bool active = true;				// false makes the step a rest
@@ -79,8 +70,10 @@ namespace synthLib
 		// Processes one block. Takes the notes of its channel out of _midiIn, whose offsets count from the block start,
 		// and appends what it plays to _out, in time order. A note off whose note on reached the device while the
 		// arpeggiator was off stays in _midiIn, so that the device does not keep the note forever.
+		// The host's transport comes as MidiEventType::HostTransport events in _midiIn, they stay there. Between them,
+		// and without any, the arpeggio runs on at the tempo it had last.
 		void process(std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _out, uint32_t _sampleCount,
-			float _samplerate, const HostTransport& _transport);
+			float _samplerate);
 
 	private:
 		struct Note
@@ -100,6 +93,9 @@ namespace synthLib
 		void trackPassThrough(const std::vector<SMidiEvent>& _midiIn);
 		void takeInput(std::vector<SMidiEvent>& _midiIn);
 		void handleInput(const SMidiEvent& _ev, std::vector<SMidiEvent>& _out, uint32_t _offset);
+		void handleTransport(const HostTransport& _transport, uint32_t _offset);
+		void relocate(uint32_t _offset);
+		double tempo() const;
 		void start(uint32_t _offset);
 		void playStep(std::vector<SMidiEvent>& _out, uint32_t _offset);
 		void playNote(std::vector<SMidiEvent>& _out, uint32_t _offset, uint32_t _note, uint8_t _velocity,
@@ -145,6 +141,8 @@ namespace synthLib
 		double m_lastStepTime = -1e18;		// in samples, like m_time
 		bool m_relocate = true;
 		bool m_wasSynced = false;
+		float m_hostBpm = 0.0f;				// the last tempo the host reported, 0 if none
+		float m_samplerate = 0.0f;
 		double m_stepLength = 0.25;			// in quarter notes
 		double m_swing = 0.5;
 		std::vector<double> m_stepStarts;	// where each step of the pattern starts, in steps, and its total length

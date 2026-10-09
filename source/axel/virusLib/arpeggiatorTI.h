@@ -26,9 +26,9 @@ namespace virusLib
 		bool isValid() const { return !m_patterns.empty(); }
 
 		// _singles: per MIDI channel, the patch whose arpeggiator plays there, see Microcontroller::getArpeggiatorSingles
-		void process(const std::array<const ROMFile::TPreset*, 16>& _singles, std::vector<synthLib::SMidiEvent>& _midiIn,
-			std::vector<synthLib::SMidiEvent>& _out, uint32_t _sampleCount, float _samplerate,
-			const synthLib::HostTransport& _transport);
+		// _midi carries the host's transport, see synthLib::Arpeggiator::process
+		void process(const std::array<const ROMFile::TPreset*, 16>& _singles, std::vector<synthLib::SMidiEvent>& _midi,
+			std::vector<synthLib::SMidiEvent>& _out, uint32_t _sampleCount, float _samplerate);
 
 	private:
 		// A pattern step as the firmware keeps it, in arpeggiator steps

@@ -78,8 +78,8 @@ namespace virusLib
 	}
 
 	void ArpeggiatorTI::process(const std::array<const ROMFile::TPreset*, 16>& _singles,
-		std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _out, const uint32_t _sampleCount,
-		const float _samplerate, const synthLib::HostTransport& _transport)
+		std::vector<synthLib::SMidiEvent>& _midi, std::vector<synthLib::SMidiEvent>& _out, const uint32_t _sampleCount,
+		const float _samplerate)
 	{
 		for (uint8_t channel = 0; channel < m_arps.size(); ++channel)
 		{
@@ -92,7 +92,7 @@ namespace virusLib
 				m_arps[channel].setSettings(createSettings(channel, key));
 			}
 
-			m_arps[channel].process(_midiIn, _out, _sampleCount, _samplerate, _transport);
+			m_arps[channel].process(_midi, _out, _sampleCount, _samplerate);
 		}
 	}
 

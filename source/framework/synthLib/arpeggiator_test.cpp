@@ -52,8 +52,17 @@ namespace
 		return s;
 	}
 
-	// Plays the keys in 'input' through the arpeggiator, the way a host does: block by block, with the song position at
-	// every block start
+	SMidiEvent transportEvent(const double _ppq, const float _bpm, const bool _playing, const uint32_t _offset)
+	{
+		SMidiEvent e(MidiEventSource::Internal);
+		e.type = MidiEventType::HostTransport;
+		e.transport = {_ppq, _bpm, _playing, true};
+		e.offset = _offset;
+		return e;
+	}
+
+	// Plays the keys in 'input' through the arpeggiator, the way a device gets them from the plugin: block by block, with
+	// the host's transport at the block start
 	struct Host
 	{
 		Arpeggiator arp;
@@ -62,6 +71,7 @@ namespace
 		double ppq = 0.0;			// at the start of the next block
 		double loopEnd = 0.0;		// loops back to 0 when the position reaches it, at a block start
 		bool loopCarries = true;	// false: the host wraps late, and the overshoot is lost
+		int transportOffset = 0;	// where in the block the transport comes, -1 for no transport at all
 		uint64_t time = 0;
 		std::vector<Event> input;
 		std::vector<Event> played;	// what the arpeggiator plays
@@ -93,12 +103,26 @@ namespace
 						midiIn.emplace_back(MidiEventSource::Host, e.a, e.b, e.c, static_cast<uint32_t>(e.time - time));
 				}
 
-				arp.process(midiIn, out, count, g_samplerate, {bpm, ppq, playing, true});
+				if (transportOffset >= 0 && static_cast<uint32_t>(transportOffset) < count)
+				{
+					const auto at = static_cast<uint32_t>(transportOffset);
+					const auto pos = ppq + (playing ? at * static_cast<double>(bpm) / (60.0 * g_samplerate) : 0.0);
+					auto it = midiIn.begin();
+					while (it != midiIn.end() && it->offset < at)
+						++it;
+					midiIn.insert(it, transportEvent(pos, bpm, playing, at));
+				}
+
+				arp.process(midiIn, out, count, g_samplerate);
 
 				for (const auto& e : out)
 					played.push_back({time + e.offset, e.a, e.b, e.c});
 				for (const auto& e : midiIn)
-					passed.push_back({time + e.offset, e.a, e.b, e.c});
+				{
+					// the transport stays for the device too, but it is no MIDI
+					if (e.type == MidiEventType::Midi)
+						passed.push_back({time + e.offset, e.a, e.b, e.c});
+				}
 
 				if (playing)
 					ppq += count * static_cast<double>(bpm) / (60.0 * g_samplerate);
@@ -468,8 +492,39 @@ namespace
 		}
 	}
 
-	// The plugin runs the device's arpeggiators on the host's transport, and the device gets the arpeggio instead of
-	// the keys
+	void testTransportInsideTheBlock()
+	{
+		// Behind a resampler, the transport arrives somewhere inside a device block, and not in every block. The steps
+		// land on the same samples as when it comes at every block start
+		auto play = [](const uint32_t _blockSize, const int _transportOffset)
+		{
+			Host host(settings(ArpMode::Up));
+			host.transportOffset = _transportOffset;
+			host.input = {on(0, 60), on(0, 64), on(0, 67)};
+			host.run(12 * g_sixteenth, _blockSize);
+			return host.played;
+		};
+
+		const auto reference = play(512, 0);
+		EXPECT(reference.size() == 24);
+		EXPECT(play(1000, 300) == reference);
+		EXPECT(play(7, 3) == reference);
+	}
+
+	void testWithoutTransport()
+	{
+		// No host says where it is: the arpeggio starts with the key and runs at its own tempo, 60 BPM here
+		auto s = settings(ArpMode::Up);
+		s.tempo = 60.0f;
+		Host host(s);
+		host.transportOffset = -1;
+		host.input = {on(1234, 60)};
+		host.run(40000, 512);
+
+		EXPECT(host.noteOnTimes() == std::vector<uint64_t>({1234, 13234, 25234, 37234}));
+	}
+
+	// A device that plays its arpeggiator in C++. Device::process() hands it the MIDI, the firmware gets the arpeggio
 	class ArpDevice final : public Device
 	{
 	public:
@@ -479,6 +534,7 @@ namespace
 		}
 
 		std::vector<Event> m_received;
+		size_t m_transports = 0;
 
 		float getSamplerate() const override { return g_samplerate; }
 		bool isValid() const override { return true; }
@@ -490,13 +546,13 @@ namespace
 		uint32_t getDspClockPercent() const override { return 100; }
 		uint64_t getDspClockHz() const override { return 0; }
 
-		void processArpeggiators(std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _out,
-			const uint32_t _sampleCount, const float _samplerate, const HostTransport& _transport) override
-		{
-			m_arp.process(_midiIn, _out, _sampleCount, _samplerate, _transport);
-		}
-
 	protected:
+		bool hasArpeggiators() const override { return true; }
+		void processArpeggiators(std::vector<SMidiEvent>& _midi, std::vector<SMidiEvent>& _out, const uint32_t _sampleCount) override
+		{
+			m_arp.process(_midi, _out, _sampleCount, getSamplerate());
+		}
+		void onHostTransport(const SMidiEvent&) override { ++m_transports; }
 		void readMidiOut(std::vector<SMidiEvent>&) override {}
 		void processAudio(const TAudioInputs&, const TAudioOutputs&, const size_t _samples) override
 		{
@@ -504,6 +560,8 @@ namespace
 		}
 		bool sendMidi(const SMidiEvent& _ev, std::vector<SMidiEvent>&) override
 		{
+			// a transport here would be pushed into the firmware's MIDI input
+			EXPECT(_ev.type == MidiEventType::Midi);
 			m_received.push_back({m_time + _ev.offset, _ev.a, _ev.b, _ev.c});
 			return true;
 		}
@@ -513,36 +571,81 @@ namespace
 		uint64_t m_time = 0;
 	};
 
-	void testPluginPlaysTheDevicesArpeggiator()
+	void testDeviceRunsItsArpeggiators()
+	{
+		ArpDevice device;
+
+		float buffer[512] = {};
+		float* const ptr = buffer;
+		const TAudioInputs in = {};
+		const TAudioOutputs out = {ptr, ptr};
+		std::vector<SMidiEvent> midiOut;
+
+		double ppq = 0.0;
+		for (int block = 0; block < 24; ++block)
+		{
+			std::vector<SMidiEvent> midi = {transportEvent(ppq, 120.0f, true, 0)};
+			if (block == 0)
+				midi.emplace_back(MidiEventSource::Host, M_NOTEON, 60, 100, 0);
+			device.process(in, out, 512, midi, midiOut);
+			ppq += 512 * 120.0 / (60.0 * g_samplerate);
+		}
+
+		// Every transport reached its hook, none the firmware. Instead of the key, the firmware got the arpeggio
+		EXPECT(device.m_transports == 24);
+		EXPECT(device.m_received == std::vector<Event>({on(0, 60), off(3000, 60), on(6000, 60), off(9000, 60), on(12000, 60)}));
+	}
+
+	// The plugin sends the host's transport with every block, everything else happens in the device
+	std::vector<Event> playThroughPlugin(const float _hostSamplerate, const uint32_t _blockSize, const int _blocks)
 	{
 		ArpDevice device;
 		Plugin plugin(&device, [](auto* _d) { return _d; });
 		plugin.setMidiClockEnabled(false);
-		plugin.setHostSamplerate(g_samplerate, g_samplerate);
-		plugin.setBlockSize(512);
+		plugin.setHostSamplerate(_hostSamplerate, g_samplerate);
+		plugin.setBlockSize(_blockSize);
 
 		plugin.addMidiEvent(SMidiEvent(MidiEventSource::Host, M_NOTEON, 60, 100, 0));
 
-		std::vector<float> left(512), right(512);
+		std::vector<float> left(_blockSize), right(_blockSize);
 		TAudioInputs in{};
 		TAudioOutputs out{};
 		out[0] = left.data();
 		out[1] = right.data();
 
-		// 35 blocks end just before the fourth step
 		double ppq = 0.0;
-		for (int block = 0; block < 35; ++block)
+		for (int block = 0; block < _blocks; ++block)
 		{
-			plugin.process(in, out, 512, 120.0f, ppq, true, true);
-			ppq += 512 * 120.0 / (60.0 * g_samplerate);
+			plugin.process(in, out, _blockSize, 120.0f, ppq, true, true);
+			ppq += _blockSize * 120.0 / (60.0 * _hostSamplerate);
 		}
 
-		// The key itself never reaches the device, only the arpeggio
-		const std::vector<Event> expected =
+		return device.m_received;
+	}
+
+	void testPluginPlaysTheDevicesArpeggiator()
+	{
+		// 35 blocks end just before the fourth step. The key itself never reaches the device, only the arpeggio
+		EXPECT(playThroughPlugin(g_samplerate, 512, 35) == std::vector<Event>(
 		{
 			on(0, 60), off(3000, 60), on(6000, 60), off(9000, 60), on(12000, 60), off(15000, 60)
-		};
-		EXPECT(device.m_received == expected);
+		}));
+
+		// With a host at twice the device's rate, the transport passes the resampler like any MIDI and keeps the steps
+		// a sixteenth apart at the device's rate, within the sample the resampler rounds an event to
+		const auto resampled = playThroughPlugin(g_samplerate * 2, 1024, 70);
+		std::vector<uint64_t> ons;
+		for (const auto& e : resampled)
+		{
+			if ((e.a & 0xf0) == M_NOTEON)
+				ons.push_back(e.time);
+		}
+		EXPECT(ons.size() >= 3);
+		for (size_t i = 1; i < ons.size(); ++i)
+		{
+			const auto distance = static_cast<int64_t>(ons[i] - ons[i - 1]);
+			EXPECT(distance >= 5999 && distance <= 6001);
+		}
 	}
 }
 
@@ -567,6 +670,9 @@ int main()
 	testSwitchingOffEndsNotes();
 	testAllNotesOffStopsTheArpeggio();
 	testLoopWraps();
+	testTransportInsideTheBlock();
+	testWithoutTransport();
+	testDeviceRunsItsArpeggiators();
 	testPluginPlaysTheDevicesArpeggiator();
 
 	std::puts("arpeggiator_test: all passed");
