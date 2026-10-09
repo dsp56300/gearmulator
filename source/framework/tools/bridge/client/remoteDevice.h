@@ -56,6 +56,7 @@ namespace bridgeClient
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
+		void onHostTransport(const synthLib::SMidiEvent& _ev) override;
 
 		bool safeCall(const std::function<bool()>& _func, const std::function<void()>& _onFail = [] {});
 

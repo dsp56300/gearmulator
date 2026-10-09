@@ -91,12 +91,7 @@ namespace bridgeLib
 	void TcpConnection::handleMidi(baseLib::BinaryStream& _in)
 	{
 		synthLib::SMidiEvent& ev = m_midiEvent;
-		_in.read(ev.a);
-		_in.read(ev.b);
-		_in.read(ev.c);
-		_in.read(ev.sysex);
-		_in.read(ev.offset);
-		ev.source = static_cast<synthLib::MidiEventSource>(_in.read<uint8_t>());
+		readMidiEvent(_in, ev);
 		handleMidi(ev);
 	}
 
@@ -214,12 +209,7 @@ namespace bridgeLib
 		std::lock_guard lock(m_sendMutex);
 
 		auto& bs = m_writer.build(Command::Midi);
-		bs.write(_ev.a);
-		bs.write(_ev.b);
-		bs.write(_ev.c);
-		bs.write(_ev.sysex);
-		bs.write(_ev.offset);
-		bs.write<uint8_t>(static_cast<uint8_t>(_ev.source));
+		writeMidiEvent(bs, _ev);
 		sendUnlocked();
 		return true;
 	}

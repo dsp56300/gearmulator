@@ -165,4 +165,9 @@ namespace bridgeLib
 		baseLib::BinaryStream& write(baseLib::BinaryStream& _s) const override;
 		baseLib::BinaryStream& read(baseLib::BinaryStream& _s) override;
 	};
+
+	// A MIDI event as Command::Midi carries it. Its type goes along, so that the host's transport reaches the device on
+	// the server as a marker, as it reaches a local one
+	void writeMidiEvent(baseLib::BinaryStream& _s, const synthLib::SMidiEvent& _ev);
+	void readMidiEvent(baseLib::BinaryStream& _s, synthLib::SMidiEvent& _ev);
 }
