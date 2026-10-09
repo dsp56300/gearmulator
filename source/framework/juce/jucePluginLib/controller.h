@@ -192,7 +192,7 @@ namespace pluginLib
 
     	std::map<ParamIndex, ParameterList> m_synthInternalParams;
 		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
-		std::array<ParameterList, 16> m_paramsByParamType;
+		std::vector<ParameterList> m_paramsByParamType;	// one per part
 		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
 		ParameterLocking m_locking;
 		ParameterLinks m_parameterLinks;

@@ -57,6 +57,10 @@ namespace pluginLib
 		// automation of previous projects break in VST2/AU
 		std::map<int, std::unique_ptr<juce::AudioProcessorParameterGroup>> versionGroups;
 
+		// 16 parts are the natural maximum of a MIDI synth, one per channel
+		m_paramsByParamType.reserve(16);
+		m_paramsByParamType.resize(getPartCount());
+
     	for (uint8_t part = 0; part < getPartCount(); part++)
 		{
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
