@@ -181,6 +181,8 @@ namespace pluginLib
 		std::mutex m_midiMessagesLock;
         std::vector<synthLib::SMidiEvent> m_midiMessages;
 
+		NrpnDecoder m_nrpnDecoder;	// for the NRPN entries of the controller map, see parseControllerMessage
+
 		std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
 
 	protected:

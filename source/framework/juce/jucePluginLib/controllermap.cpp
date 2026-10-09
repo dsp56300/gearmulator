@@ -57,4 +57,39 @@ namespace pluginLib
 			return empty;
 		return itCCList->second;
 	}
+
+	std::optional<NrpnDecoder::Entry> NrpnDecoder::process(const synthLib::SMidiEvent& _ev)
+	{
+		if((_ev.a & 0xf0) != synthLib::M_CONTROLCHANGE)
+			return {};
+
+		auto& c = m_channels[_ev.a & 0x0f];
+
+		switch(_ev.b)
+		{
+		case synthLib::MC_NRPNMSB:
+			c.nrpnMsb = _ev.c;
+			c.selected = c.nrpnMsb != 0x7f || c.nrpnLsb != 0x7f;
+			return {};
+		case synthLib::MC_NRPNLSB:
+			c.nrpnLsb = _ev.c;
+			c.selected = c.nrpnMsb != 0x7f || c.nrpnLsb != 0x7f;
+			return {};
+		case synthLib::MC_RPNMSB:
+		case synthLib::MC_RPNLSB:
+			c.selected = false;
+			return {};
+		case synthLib::MC_DATAENTRYMSB:
+			if(!c.selected)
+				return {};
+			c.dataMsb = _ev.c;
+			return Entry{c.nrpnMsb, c.nrpnLsb, c.dataMsb, {}};
+		case synthLib::MC_DATAENTRYLSB:
+			if(!c.selected)
+				return {};
+			return Entry{c.nrpnMsb, c.nrpnLsb, c.dataMsb, _ev.c};
+		default:
+			return {};
+		}
+	}
 }

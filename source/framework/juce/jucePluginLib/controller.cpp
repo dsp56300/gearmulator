@@ -563,7 +563,10 @@ namespace pluginLib
 	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
 	{
 		const auto& cm = getParameterDescriptions().getControllerMap();
-		const auto paramIndices = cm.getParameters(_e);
+
+		// a data entry for a selected NRPN goes to the parameters of that NRPN, not to those of CC 6 or 38
+		const auto nrpn = m_nrpnDecoder.process(_e);
+		const auto& paramIndices = nrpn ? cm.getParameters(nrpn->nrpnMsb, nrpn->nrpnLsb) : cm.getParameters(_e);
 
 		if(paramIndices.empty())
 			return false;
@@ -581,7 +584,13 @@ namespace pluginLib
 			{
 				auto* param = getParameter(paramIndex, part);
 				assert(param && "parameter not found for control change");
-				param->setValueFromSynth(_e.c, origin);
+
+				if (!nrpn)
+					param->setValueFromSynth(_e.c, origin);
+				else if (param->getDescription().range.getEnd() > 127)
+					param->setValueFromSynth((nrpn->msb << 7) | nrpn->lsb.value_or(0), origin);	// coarse from CC 6 alone
+				else if (!nrpn->lsb)
+					param->setValueFromSynth(nrpn->msb, origin);	// a 7 bit parameter takes the MSB only
 			}
 		}
 
