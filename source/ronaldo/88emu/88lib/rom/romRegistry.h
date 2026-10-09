@@ -208,7 +208,6 @@ namespace emu88Lib
         {RomDevice::Cm32p, RomSlot::Wave, 1, 0x80000, "cm32p_wave1.bin", false},
         {RomDevice::Cm32p, RomSlot::Wave, 2, 0x80000, "cm32p_wave2.bin", false},
         {RomDevice::Sc8820, RomSlot::Internal, 0, 0x10000, "sc8820_internal.bin", false},
-        {RomDevice::Sc8820, RomSlot::Internal, 0, 0x20000, "sc8820_internal.bin", false},
         {RomDevice::Sc8820, RomSlot::Program, 0, 0x200000, "sc8820_program.bin", false},
         {RomDevice::Sc8820, RomSlot::Wave, 0, 0x1000000, "sc8820_wave0.bin", false},
         {RomDevice::Sc8820, RomSlot::Wave, 1, 0x800000, "sc8820_wave1.bin", false},

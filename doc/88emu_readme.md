@@ -117,7 +117,7 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | XPGS / G-800 | `xpgs_control.bin` — 512 KiB | `xpgs_wave0.bin` — 2 MiB; `xpgs_wave1.bin` — 2 MiB; `xpgs_wave2.bin` — 2 MiB; `xpgs_wave3.bin` — 2 MiB; `xpgs_wave4.bin` — 2 MiB |
 | SC-88Pro | `sc88pro_control.bin` — 1 MiB | `sc88pro_wave0.bin` — 8 MiB, **or** `sc88pro_wave_cs0.bin` and `sc88pro_wave_cs1.bin` — 4 MiB each; `sc88pro_wave1.bin` — 8 MiB, **or** `sc88pro_wave_cs2.bin` and `sc88pro_wave_cs3.bin` — 4 MiB each; `sc88pro_wave2.bin` — 4 MiB |
 | VE-GS Pro | `vegspro_control.bin` — 1 MiB | `vegspro_wave0.bin` — 8 MiB; `vegspro_wave1.bin` — 8 MiB; `vegspro_wave2.bin` — 4 MiB |
-| SC-8820 | `sc8820_internal.bin` — 128 KiB, or the supported reconstructed 64 KiB image; `sc8820_program.bin` — 2 MiB | `sc8820_wave0.bin` — 16 MiB; `sc8820_wave1.bin` — 8 MiB |
+| SC-8820 | `sc8820_internal.bin` — 64 KiB; `sc8820_program.bin` — 2 MiB | `sc8820_wave0.bin` — 16 MiB; `sc8820_wave1.bin` — 8 MiB |
 | SC-8850 | `sc8850_internal.bin` — 64 KiB; `sc8850_program.bin` — 1 MiB; `sc8850_data.bin` — 2 MiB | `sc8850_wave.bin` — 32 MiB; **or** `sc8850_wave0.bin` and `sc8850_wave1.bin` — 16 MiB each |
 | NU-10B | `nu10b_internal.bin` — 64 KiB; `nu10b_program.bin` — 1 MiB | `nu10b_wave0.bin` — 2 MiB; `nu10b_wave1.bin` — 2 MiB; `nu10b_wave2.bin` — 2 MiB; `nu10b_wave3.bin` — 2 MiB |
 | MIIG5 | `miig5_internal.bin` — 256 KiB; `miig5_program.bin` — 2 MiB | `miig5_wave.bin` — 32 MiB, already unscrambled |
@@ -225,7 +225,7 @@ The SC-55 and SC-55mkII have different firmware, voice-generation timing and beh
 
 SCB-55, SCC-1A and the other card profiles do not have the module's front-panel controls. XPGS emulates the G-800 GS sound engine, not its arranger. VE-GS Pro uses its own panel-less firmware. “No display” on these devices is expected. SC-88VL lacks the SC-88/Pro Preview button.
 
-**SC-8820 is experimental.** It currently supports a reconstructed **BAD_DUMP** of the internal CPU ROM. It has **not been tested with a correct internal ROM dump**. Matching the registered hash identifies that reconstructed image; it is not evidence of an authentic dump or complete hardware compatibility. Its external program and waves are separate requirements.
+**SC-8820 is experimental.** It currently supports both a correct dump and a reconstructed **BAD_DUMP** of the internal CPU ROM. Its external program and waves are separate requirements.
 
 The SC-88Pro firmware also has an XG compatibility mode. Send XG System On (`F0 43 10 4C 00 00 7E 00 F7`) from the song or your MIDI source. If you enable it externally, choose Reset Off so a song-start GS Reset does not undo it. This is the Roland firmware's compatibility mode; full Yamaha XG voice/effects equivalence is not established.
 
