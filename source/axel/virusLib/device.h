@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arpeggiatorTI.h"
 #include "dspSingle.h"
 #include "frontpanelState.h"
 #include "synthLib/midiTypes.h"
@@ -30,6 +31,9 @@ namespace virusLib
 		bool isValid() const override;
 
 		void process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
+
+		void processArpeggiators(std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _out,
+			uint32_t _sampleCount, float _samplerate, const synthLib::HostTransport& _transport) override;
 
 #if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override;
@@ -77,5 +81,8 @@ namespace virusLib
 		float m_samplerate;
 		FrontpanelState m_frontpanelStateDSP;
 		synthLib::SMidiEvent m_frontpanelStateMidiEvent;
+
+		ArpeggiatorTI m_arpeggiator;
+		bool m_firmwareArpeggiatorDisabled = false;
 	};
 }

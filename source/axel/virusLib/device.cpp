@@ -71,6 +71,10 @@ namespace virusLib
 		dummyProcess(8);
 
 		m_mc->createDefaultState();
+
+		// Virus TI: the arpeggiator is played in C++ once the plugin asks for it, see processArpeggiators()
+		if(m_rom.isTIFamily() && !m_arpeggiator.readPatterns(m_dsp->getMemory()))
+			LOG("Arpeggiator patterns not found in this firmware, the firmware keeps playing its own arpeggiator");
 	}
 
 	Device::~Device()
@@ -182,6 +186,26 @@ namespace virusLib
 
 		m_frontpanelStateDSP.toMidiEvent(m_frontpanelStateMidiEvent);
 		_midiOut.push_back(m_frontpanelStateMidiEvent);
+	}
+
+	void Device::processArpeggiators(std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _out,
+		const uint32_t _sampleCount, const float _samplerate, const synthLib::HostTransport& _transport)
+	{
+		if(!m_arpeggiator.isValid())
+			return;
+
+		// The firmware's arpeggiator follows MIDI clock and drifts from the host. Only the plugin calls this, over the
+		// DSP bridge nobody does, and there the firmware keeps its own
+		if(!m_firmwareArpeggiatorDisabled)
+		{
+			m_firmwareArpeggiatorDisabled = true;
+			m_mc->disableFirmwareArpeggiator();
+		}
+
+		std::array<const ROMFile::TPreset*, 16> singles;
+		m_mc->getArpeggiatorSingles(singles);
+
+		m_arpeggiator.process(singles, _midiIn, _out, _sampleCount, _samplerate, _transport);
 	}
 
 #if !SYNTHLIB_DEMO_MODE

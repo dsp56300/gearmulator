@@ -404,6 +404,52 @@ bool Microcontroller::isPolyPressureForPageBEnabled() const
 	return m_globalSettings[MIDI_CONTROL_HIGH_PAGE] == 1;
 }
 
+void Microcontroller::disableFirmwareArpeggiator()
+{
+	std::lock_guard lock(m_mutex);
+
+	// Switches/Arpeggiator Enable. The firmware applies it to every patch it loads from now on, and it ignores Arp Mode
+	// changes then. Not a global setting of ours: it would end up in the plugin state, and a state loaded over the DSP
+	// bridge, where nothing plays the arpeggio in C++, would silence the arpeggiator
+	writeHostBitsWithWait(0, 1);
+	m_hdi08.writeRX({0xf00020, 0x330110, 0x73401a, 0x00f700});
+
+	// The patches that are loaded already keep their arpeggiator until it is switched off
+	send(PAGE_B, SINGLE, g_arpModeParamTI, 0);
+	for(uint8_t p=0; p<getPartCount(); ++p)
+		send(PAGE_B, p, g_arpModeParamTI, 0);
+}
+
+void Microcontroller::getArpeggiatorSingles(std::array<const TPreset*, 16>& _singles) const
+{
+	std::lock_guard lock(m_mutex);
+
+	_singles.fill(nullptr);
+
+	if(m_globalSettings[PLAY_MODE] == PlayModeSingle)
+	{
+		const auto channel = m_globalSettings[GLOBAL_CHANNEL];
+		if(channel < _singles.size())
+			_singles[channel] = &m_singleEditBuffer;
+		return;
+	}
+
+	// Several parts can listen on one channel, but there is only one arpeggio per channel: the parts share it
+	for(uint8_t p=0; p<getPartCount(); ++p)
+	{
+		if(!(m_multiEditBuffer[MD_PART_STATE + p] & (1 << MD_PART_ENABLE)))
+			continue;
+
+		const auto channel = getPartMidiChannel(p);
+		if(channel >= _singles.size())
+			continue;
+
+		auto& single = _singles[channel];
+		if(!single || ((*single)[128 + g_arpModeStorageTI] == 0 && m_singleEditBuffers[p][128 + g_arpModeStorageTI] != 0))
+			single = &m_singleEditBuffers[p];
+	}
+}
+
 bool Microcontroller::isMultiPartParameter(const uint8_t _param)
 {
 	return (_param >= PART_BANK_SELECT && _param <= PART_OUTPUT_SELECT) || (_param >= PART_ENABLE && _param <= PART_PROG_CHANGE_ENABLE);

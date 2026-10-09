@@ -73,6 +73,13 @@ public:
 	uint8_t getPartMidiChannel(uint8_t _part) const;
 	bool isPolyPressureForPageBEnabled() const;
 
+	// The firmware ignores the patches' arpeggiators from now on, see ArpeggiatorTI. Virus TI only
+	void disableFirmwareArpeggiator();
+
+	// For every MIDI channel, the patch whose arpeggiator plays there, nullptr if none: the single on the global
+	// channel in single mode. In multi mode the lowest enabled part on a channel, or the lowest one with an arpeggiator
+	void getArpeggiatorSingles(std::array<const TPreset*, 16>& _singles) const;
+
 private:
 	static bool isMultiPartParameter(uint8_t _param);
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);

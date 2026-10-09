@@ -4,6 +4,7 @@ project(virusLib)
 add_library(virusLib STATIC)
 
 set(SOURCES
+	arpeggiatorTI.cpp arpeggiatorTI.h
 	demoplayback.cpp demoplayback.h
 	demoplaybackTI.cpp demoplaybackTI.h
 	device.cpp device.h
@@ -37,5 +38,12 @@ if(DSP56300_DEBUGGER)
 endif()
 
 set_property(TARGET virusLib PROPERTY FOLDER "Virus")
+
+if(BUILD_TESTING)
+	add_executable(arpeggiatorTI_test arpeggiatorTI_test.cpp)
+	target_link_libraries(arpeggiatorTI_test PRIVATE virusLib)
+	set_property(TARGET arpeggiatorTI_test PROPERTY FOLDER "Tests")
+	add_test(NAME arpeggiatorTI COMMAND arpeggiatorTI_test)
+endif()
 
 target_include_directories(virusLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

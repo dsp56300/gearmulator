@@ -103,6 +103,12 @@ Osirus:
 
 OsTIrus:
 
+- [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on
+        the host's song position with sample accuracy, also across loops and
+        tempo changes, instead of following MIDI clock. It plays the patterns
+        of the Virus TI firmware that is loaded. Arp>Matrix is not supported
+        by this yet.
+
 - [Fix] A changed Arp Mode was lost when the patch was loaded again, for example
         with the project: the patch played the arpeggiator mode it had before.
 
