@@ -738,6 +738,13 @@ namespace juceRmlUi
 		bool res = false;
 
 		auto juceChar = _key.getTextCharacter();
+
+		// Return types a line break into a text area, RmlUi takes it as the text '\n'. JUCE gives it as '\r'. Not into an
+		// input of one line: that drops it, but deletes its selection first
+		const auto* focus = m_rmlContext->GetFocusElement();
+		if (juceChar == '\r' && focus && focus->GetTagName() == "textarea")
+			juceChar = '\n';
+
 		if (juce::CharacterFunctions::isPrintable(juceChar) || juceChar == '\n')
 		{
 			auto string = juce::String::charToString(juceChar);
