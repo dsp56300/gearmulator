@@ -16,6 +16,7 @@
 namespace synthLib
 {
 	class Device;
+	struct HostTransport;
 
 	class Plugin
 	{
@@ -38,7 +39,7 @@ namespace synthLib
 		uint32_t getLatencyMidiToOutput() const;
 		uint32_t getLatencyInputToOutput() const;
 
-		void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, float _bpm, float _ppqPos,
+		void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, float _bpm, double _ppqPos,
 			bool _isPlaying, bool _hasPpqPosition);
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
@@ -73,7 +74,8 @@ namespace synthLib
 		bool applyPendingDeviceSamplerate();
 
 	private:
-		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
+		void processMidiClock(float _bpm, double _ppqPos, bool _isPlaying, size_t _sampleCount);
+		void processArpeggiators(const HostTransport& _transport, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
 		void updateDeviceLatency();
 		// Composes the values the host is told about. The inputs only change while m_lock is
@@ -82,13 +84,14 @@ namespace synthLib
 		void updateLatencies();
 		void processMidiInEvents();
 		void processMidiInEvent(const SMidiEvent& _ev);
-		TransportDiscontinuity updateTransport(float _bpm, float _ppqPos, bool _isPlaying, bool _hasPpqPosition,
+		TransportDiscontinuity updateTransport(float _bpm, double _ppqPos, bool _isPlaying, bool _hasPpqPosition,
 			size_t _sampleCount);
 		void stampTransportGeneration(SMidiEvent& _event) const;
 
 		dsp56k::RingBuffer<SMidiEvent, 1024, false> m_midiInRingBuffer;
 		std::vector<SMidiEvent> m_midiIn;
 		std::vector<SMidiEvent> m_midiOut;
+		std::vector<SMidiEvent> m_arpOut;
 
 		SMidiEvent m_pendingSysexInput;
 
@@ -123,7 +126,7 @@ namespace synthLib
 		bool m_transportInitialized = false;
 		bool m_lastIsPlaying = false;
 		float m_lastBpm = 0.0f;
-		float m_lastPpqPos = 0.0f;
+		double m_lastPpqPos = 0.0;
 		bool m_lastHasPpqPosition = false;
 		size_t m_lastSampleCount = 0;
 		std::atomic<uint32_t> m_transportGeneration{0};

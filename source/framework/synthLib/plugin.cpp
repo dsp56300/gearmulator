@@ -1,4 +1,5 @@
 #include "plugin.h"
+#include "arpeggiator.h"
 #include "device.h"
 
 #include <cmath>
@@ -77,7 +78,7 @@ namespace synthLib
 	}
 
 	void Plugin::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, const float _bpm,
-		const float _ppqPos, const bool _isPlaying, const bool _hasPpqPosition)
+		const double _ppqPos, const bool _isPlaying, const bool _hasPpqPosition)
 	{
 		baseLib::setFlushDenormalsToZero();
 
@@ -124,6 +125,7 @@ namespace synthLib
 
 		processMidiInEvents();
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
+		processArpeggiators({_bpm, _ppqPos, _isPlaying, _hasPpqPosition}, _count);
 
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](const TAudioInputs& _ins, const TAudioOutputs& _outs, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
@@ -265,10 +267,22 @@ namespace synthLib
 			m_midiClock.restart();
 	}
 
-	void Plugin::processMidiClock(const float _bpm, const float _ppqPos, const bool _isPlaying, const size_t _sampleCount)
+	void Plugin::processMidiClock(const float _bpm, const double _ppqPos, const bool _isPlaying, const size_t _sampleCount)
 	{
 		if (m_midiClockEnabled)
 			m_midiClock.process(_bpm, _ppqPos, _isPlaying, _sampleCount);
+	}
+
+	void Plugin::processArpeggiators(const HostTransport& _transport, const size_t _sampleCount)
+	{
+		// At the host's rate, before the resampler: the transport is exact here, and the resampler moves the notes to
+		// the device's rate like all other events
+		m_arpOut.clear();
+		m_device->processArpeggiators(m_midiIn, m_arpOut, static_cast<uint32_t>(_sampleCount), m_hostSamplerate,
+			_transport);
+
+		for (const auto& ev : m_arpOut)
+			insertMidiEvent(ev);
 	}
 
 	float* Plugin::getDummyBuffer(size_t _minimumSize)
@@ -394,7 +408,7 @@ namespace synthLib
 			_event.transportGeneration = m_transportGeneration.load(std::memory_order_relaxed);
 	}
 
-	TransportDiscontinuity Plugin::updateTransport(const float _bpm, const float _ppqPos, const bool _isPlaying,
+	TransportDiscontinuity Plugin::updateTransport(const float _bpm, const double _ppqPos, const bool _isPlaying,
 		const bool _hasPpqPosition, const size_t _sampleCount)
 	{
 		TransportDiscontinuity result = TransportDiscontinuity::None;
@@ -405,12 +419,12 @@ namespace synthLib
 			else if (_isPlaying && _hasPpqPosition && m_lastHasPpqPosition &&
 				_bpm > 0.0f && m_lastBpm > 0.0f && m_hostSamplerate > 0.0f)
 			{
-				const auto expected = static_cast<double>(m_lastPpqPos) +
+				const auto expected = m_lastPpqPos +
 					static_cast<double>(m_lastSampleCount) * static_cast<double>(m_lastBpm) /
 					(60.0 * static_cast<double>(m_hostSamplerate));
 				// About 5 ms at 120 BPM: wide enough for host float/tempo jitter,
 				// narrow enough to catch seeks, loop wraps and bounce restarts.
-				if (std::fabs(static_cast<double>(_ppqPos) - expected) > 0.01)
+				if (std::fabs(_ppqPos - expected) > 0.01)
 					result = TransportDiscontinuity::Seek;
 			}
 		}

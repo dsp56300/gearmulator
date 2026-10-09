@@ -863,7 +863,7 @@ namespace pluginLib
 		bool isPlaying = true;
 		bool hasPpqPosition = false;
 		float bpm = 0.0f;
-		float ppqPos = 0.0f;
+		double ppqPos = 0.0;
 
 	    if(const auto* playHead = getPlayHead())
 		{
@@ -878,7 +878,7 @@ namespace pluginLib
 				}
 				if(pos->getPpqPosition())
 				{
-					ppqPos = static_cast<float>(*pos->getPpqPosition());
+					ppqPos = *pos->getPpqPosition();
 					hasPpqPosition = true;
 				}
 			}

@@ -15,6 +15,8 @@
 
 namespace synthLib
 {
+	struct HostTransport;
+
 	struct DeviceCreateParams
 	{
 		float preferredSamplerate = 0.0f;
@@ -39,6 +41,13 @@ namespace synthLib
 		Device& operator = (Device&&) = delete;
 
 		virtual void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
+
+		// Arpeggiates in C++ instead of in the firmware, see synthLib::Arpeggiator. The plugin calls this for every block
+		// at the host's rate, before the MIDI reaches process(): take the notes to arpeggiate out of _midiIn and append
+		// what is played to _out. The DSP bridge server never calls it, so the firmware has to keep its own arpeggiator
+		// until it is called.
+		virtual void processArpeggiators(std::vector<SMidiEvent>& /*_midiIn*/, std::vector<SMidiEvent>& /*_out*/,
+			uint32_t /*_sampleCount*/, float /*_samplerate*/, const HostTransport& /*_transport*/) {}
 
 		void setExtraLatencySamples(uint32_t _size);
 		uint32_t getExtraLatencySamples() const { return m_extraLatency; }
