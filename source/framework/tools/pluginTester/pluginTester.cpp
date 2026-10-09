@@ -1,11 +1,85 @@
+#include <algorithm>
+#include <cctype>
 #include <chrono>
 
 #include "fakeAudioDevice.h"
 #include "pluginHost.h"
 #include "logger.h"
+#include "baseLib/binarystream.h"
 #include "baseLib/commandline.h"
 #include "baseLib/filesystem.h"
 #include "baseLib/os.h"
+
+namespace
+{
+	// The host wraps the plugin state per format: VST2 keeps the processor state as it is, the VST3 host and the LV2
+	// plugin store it as MemoryBlock::toBase64Encoding text ("<size>.<chars>") in XML or Turtle. Find it by the
+	// length-prefixed string "DSP56300" that jucePluginLib::Processor writes first
+	std::vector<uint8_t> findProcessorState(const MemoryBlock& _hostState)
+	{
+		static constexpr uint8_t magic[] = {8, 0, 0, 0, 'D', 'S', 'P', '5', '6', '3', '0', '0'};
+
+		auto find = [](const void* _data, const size_t _size) -> std::vector<uint8_t>
+		{
+			const auto* begin = static_cast<const uint8_t*>(_data);
+			const auto* end = begin + _size;
+			const auto* it = std::search(begin, end, std::begin(magic), std::end(magic));
+			return {it, end};
+		};
+
+		if (auto s = find(_hostState.getData(), _hostState.getSize()); !s.empty())
+			return s;
+
+		const auto* data = static_cast<const uint8_t*>(_hostState.getData());
+		const auto size = _hostState.getSize();
+
+		auto isBase64 = [](const uint8_t _c) { return std::isalnum(_c) || _c == '.' || _c == '+'; };
+
+		for (size_t i = 0; i < size; ++i)
+		{
+			if (!std::isdigit(data[i]) || (i > 0 && isBase64(data[i - 1])))
+				continue;
+
+			auto end = i;
+			while (end < size && isBase64(data[end]))
+				++end;
+
+			MemoryBlock decoded;
+			if (decoded.fromBase64Encoding(String(reinterpret_cast<const char*>(data + i), end - i)))
+			{
+				if (auto s = find(decoded.getData(), decoded.getSize()); !s.empty())
+					return s;
+			}
+			i = end;
+		}
+		return {};
+	}
+
+	// size of the device state in the MIDI chunk of a processor state, without the version and type byte that
+	// synthLib::Plugin::getState puts in front. 0 if there is none, as with the DummyDevice of a plugin without ROM
+	size_t getDeviceStateSize(const std::vector<uint8_t>& _processorState)
+	{
+		baseLib::BinaryStream s(_processorState);
+		s.readString();			// magic
+		s.read<uint32_t>();		// version
+
+		std::vector<uint8_t> chunks;
+		s.read(chunks);
+
+		baseLib::BinaryStream cs(chunks);
+		baseLib::ChunkReader cr(cs);
+
+		size_t size = 0;
+		cr.add("MIDI", 1, [&](baseLib::BinaryStream& _s, uint32_t)
+		{
+			std::vector<uint8_t> deviceState;
+			_s.read(deviceState);
+			size = deviceState.size() > 2 ? deviceState.size() - 2 : 0;
+		});
+		cr.read();
+		return size;
+	}
+}
 
 class JuceAppLifetimeObjects
 {
@@ -36,7 +110,21 @@ int main(const int _argc, char* _argv[])
 	{
 		Logger::writeToLog("Error: " + _msg);
 		Logger::writeToLog("Usage:\n"
-			"pluginTester -plugin <pathToPlugin> [-seconds n -blocks n -blocksize n -samplerate x -forever -repeat n]");
+			"pluginTester -plugin <pathToPlugin> [-seconds n -blocks n -blocksize n -samplerate x -forever -repeat n]\n"
+			"             [-loadstate <file> -dumpstate <file> -editor]\n"
+			"\n"
+			"-loadstate  loads a state written by -dumpstate before the blocks are processed\n"
+			"-dumpstate  writes the plugin state after the blocks, the last repeat wins. Fails if it holds no device\n"
+			"            state, which is the case without a ROM or before the firmware booted. The host wraps the\n"
+			"            state per plugin format, compare dumps of one format only\n"
+			"-editor     creates the editor before the blocks and deletes it after them in every repeat, without a\n"
+			"            window\n"
+			"\n"
+			"Before using -dumpstate to prove that a change keeps the state the same:\n"
+			"- install the ROMs, use the same config for the plugin before and after (resampler, skin variables)\n"
+			"  and a build that is not a demo build\n"
+			"- find a block count past the firmware boot of the product: a dump after n blocks must equal one after\n"
+			"  2n blocks, and two runs must agree");
 		return 1;
 	};
 
@@ -134,6 +222,28 @@ int main(const int _argc, char* _argv[])
 
 		audioDevice.start(&pluginHost);
 
+		auto& processor = *pluginHost.getCurrentProcessor();
+
+		if (const auto loadState = cmdLine.get("loadstate"); !loadState.empty())
+		{
+			std::vector<uint8_t> state;
+			if (!baseLib::filesystem::readFile(state, loadState) || state.empty())
+				return error("Failed to read state from " + loadState);
+			processor.setStateInformation(state.data(), static_cast<int>(state.size()));
+			Logger::writeToLog("Loaded state from " + loadState);
+		}
+
+		// declared after the host, so it is deleted before the plugin: a processor must not be deleted while its editor exists
+		std::unique_ptr<AudioProcessorEditor> editor;
+
+		if (cmdLine.contains("editor"))
+		{
+			editor.reset(processor.createEditorIfNeeded());
+			if (!editor)
+				return error("The plugin did not create an editor");
+			Logger::writeToLog("Created editor");
+		}
+
 		const auto forever = cmdLine.contains("forever");
 
 		if (forever)
@@ -214,6 +324,26 @@ int main(const int _argc, char* _argv[])
 
 		(void)snprintf(temp, sizeof(temp), "Progress: %d%% (%d/%d blocks)", 100, blocks, blocks);
 		Logger::writeToLog(temp);
+
+		if (const auto dumpState = cmdLine.get("dumpstate"); !dumpState.empty())
+		{
+			MemoryBlock state;
+			processor.getStateInformation(state);
+
+			const auto processorState = findProcessorState(state);
+			if (processorState.empty())
+				return error("The plugin state holds no state of a gearmulator plugin");
+
+			// without a device state, two dumps would compare equal for the wrong reason
+			const auto deviceStateSize = getDeviceStateSize(processorState);
+			if (!deviceStateSize)
+				return error("The plugin state holds no device state: no ROM, or the firmware did not finish booting yet (process more blocks)");
+
+			if (!baseLib::filesystem::writeFile(dumpState, static_cast<const uint8_t*>(state.getData()), state.getSize()))
+				return error("Failed to write state to " + dumpState);
+
+			Logger::writeToLog("Wrote state to " + String(dumpState) + ", " + String(state.getSize()) + " bytes, device state " + String(deviceStateSize) + " bytes");
+		}
 
 	  } // end repeat loop
 	    return 0;
