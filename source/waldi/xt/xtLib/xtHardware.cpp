@@ -48,11 +48,15 @@ namespace xt
 
 	Hardware::~Hardware()
 	{
+		// Stop every DSP thread before anything they use is destroyed: the ESAI callback writes MIDI into m_midi, which
+		// is destroyed before m_dsps, and with voice expansion the ESSI1 callback of one DSP writes into the next one.
+		// join() terminates the thread first, which also unblocks its audio rings
 		for(const auto& dsp : m_dsps)
 		{
-			dsp->getPeriph().getEssi0().setCallback({});
-			dsp->getPeriph().getEssi1().setCallback({});
+			if(dsp->hasThread())
+				dsp->thread().join();
 		}
+		m_dsps.clear();
 	}
 
 	void Hardware::process()

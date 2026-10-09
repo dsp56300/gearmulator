@@ -199,6 +199,9 @@ Xenia:
         needed: the full ROM as one 256 KB .bin file, or its two halves as two
         128 KB .bin files.
 
+- [Fix] EMU-235 Removing the plugin or closing a project could, rarely, crash
+        the host while the emulation was still busy with MIDI it had received.
+
 NodalRed2x:
 
 - [Fix] BUG-10440 The plugin hung for good when one audio block brought
