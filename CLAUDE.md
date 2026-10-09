@@ -90,7 +90,7 @@ includes like `../../foo/bar.h` — they break the next time anything moves.
 |---|---|---|---|
 | Osirus | Virus A/B/C | `axel/virusLib/` | `axel/osirusJucePlugin/` |
 | OsTIrus | Virus TI/TI2/Snow | `axel/virusLib/` | `axel/osTIrusJucePlugin/` |
-| Vavra | Waldorf microQ | `waldi/microq/mqLib/` | `waldi/microq/mqJucePlugin/` |
+| Vavra | Waldorf microQ | `waldi/common/mqLib/` | `waldi/microq/mqJucePlugin/` |
 | Xenia | Waldorf MW II/XT | `waldi/xt/xtLib/` | `waldi/xt/xtJucePlugin/` |
 | Nodal Red 2x | Nord Lead/Rack 2x | `claudia/n2x/n2xLib/` | `claudia/n2x/n2xJucePlugin/` |
 | JE-8086 | Roland JP-8000 | `ronaldo/je8086/jeLib/` | `ronaldo/je8086/jeJucePlugin/` |

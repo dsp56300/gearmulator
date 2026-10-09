@@ -143,7 +143,7 @@ endif()
 # ----------------- Synth Vavra
 
 if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
-	add_subdirectory(waldi/microq/mqLib EXCLUDE_FROM_ALL)
+	add_subdirectory(waldi/common/mqLib EXCLUDE_FROM_ALL)
 
 	# needed for test console
 	set(CPPTERMINAL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -158,7 +158,7 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
 	set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
 	add_subdirectory(3rdparty/portaudio EXCLUDE_FROM_ALL)
 
-	add_subdirectory(waldi/microq/mqConsoleLib EXCLUDE_FROM_ALL)
+	add_subdirectory(waldi/common/mqConsoleLib EXCLUDE_FROM_ALL)
 	add_subdirectory(waldi/microq/mqTestConsole)
 	add_subdirectory(waldi/microq/mqPerformanceTest)
 
