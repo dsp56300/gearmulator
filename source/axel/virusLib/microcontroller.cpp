@@ -22,6 +22,10 @@ constexpr uint32_t g_sysexPresetFooterSize = 2;	// checksum, f7
 
 constexpr uint32_t g_singleRamBankCount = 2;
 
+// Virus TI, page B
+constexpr uint8_t g_arpModeParamTI = 15;
+constexpr uint8_t g_arpModeStorageTI = 1;
+
 const std::set<uint8_t> g_pageA = {0x05, 0x0A, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D,
                                    0x1E, 0x1F, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D,
                                    0x2E, 0x2F, 0x30, 0x31, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D,
@@ -1273,10 +1277,14 @@ bool Microcontroller::dspHasBooted() const
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
 {
-	if(_part == SINGLE)
-		applyToSingleEditBuffer(m_singleEditBuffer, _page, _param, _value);
-	else
-		applyToSingleEditBuffer(m_singleEditBuffers[_part], _page, _param, _value);
+	auto& single = _part == SINGLE ? m_singleEditBuffer : m_singleEditBuffers[_part];
+
+	applyToSingleEditBuffer(single, _page, _param, _value);
+
+	// The TI takes Arp Mode as parameter 15 of page B, but keeps it in the patch where the A, B and C have it, at
+	// parameter 1, and loads it from there. Without the copy, a changed Arp Mode was gone once the patch was loaded again
+	if(m_rom.isTIFamily() && _page == PAGE_B && _param == g_arpModeParamTI)
+		applyToSingleEditBuffer(single, PAGE_B, g_arpModeStorageTI, _value);
 }
 
 void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value)

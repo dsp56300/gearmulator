@@ -103,6 +103,9 @@ Osirus:
 
 OsTIrus:
 
+- [Fix] A changed Arp Mode was lost when the patch was loaded again, for example
+        with the project: the patch played the arpeggiator mode it had before.
+
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
         in OsTIrusFX nor with Input Mode Static or Dynamic in OsTIrus.
 
