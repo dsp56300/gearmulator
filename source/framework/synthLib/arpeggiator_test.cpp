@@ -259,6 +259,75 @@ namespace
 		EXPECT(host.played == expected);
 	}
 
+	ArpStep step(const float _duration, const float _length = 0.25f)
+	{
+		ArpStep s;
+		s.duration = _duration;
+		s.length = _length;
+		return s;
+	}
+
+	void testStepDurations()
+	{
+		// A ratchet, then a step of one and one of two, four steps in all
+		auto s = settings(ArpMode::Up);
+		s.pattern = {step(0.5f), step(0.5f), step(1.0f), step(2.0f)};
+		Host host(s);
+		host.input = {on(0, 60)};
+		host.run(8 * g_sixteenth, 512);
+
+		EXPECT(host.noteOnTimes() == std::vector<uint64_t>({0, 3000, 6000, 12000, 24000, 27000, 30000, 36000}));
+
+		// Swing moves positions inside a pair of steps too: with 0.75 the first step of a pair takes 1.5 steps and the
+		// second one 0.5, so half a step lands at 0.75 and one and a half at 1.75
+		s.pattern = {step(0.5f)};
+		s.swing = 0.75f;
+		Host swung(s);
+		swung.input = {on(0, 60)};
+		swung.run(4 * g_sixteenth, 512);
+
+		EXPECT(swung.noteOnTimes() == std::vector<uint64_t>({0, 4500, 9000, 10500, 12000, 16500, 21000, 22500}));
+	}
+
+	void testVelocityOffset()
+	{
+		auto velocities = [](const uint8_t _key, const uint8_t _velocity, const int8_t _offset)
+		{
+			auto s = settings(ArpMode::Up);
+			ArpStep st;
+			st.velocity = _velocity;
+			st.velocityOffset = _offset;
+			s.pattern = {st};
+			Host host(s);
+			host.input = {on(0, 60, _key)};
+			host.run(1, 512);
+			return host.noteOns().front().c;
+		};
+
+		EXPECT(velocities(100, 0, -30) == 70);	// the key's velocity, moved
+		EXPECT(velocities(10, 0, -30) == 1);	// never a note off
+		EXPECT(velocities(100, 120, 20) == 127);
+		EXPECT(velocities(100, 50, 0) == 50);
+	}
+
+	void testKeysJoinWhereTheyFit()
+	{
+		// Up has played 64 when 60 and 67 are struck: it goes on above 64, as the Virus TI does, instead of starting
+		// over from the bottom
+		Host host(settings(ArpMode::Up));
+		host.input = {on(0, 64), on(3000, 60), on(3000, 67)};
+		host.run(4 * g_sixteenth, 512);
+		EXPECT(host.notes() == std::vector<uint8_t>({64, 67, 60, 64}));
+
+		// As Played keeps its place in a sequence that has the same note twice: 72 is a key and 60's octave
+		auto s = settings(ArpMode::AsPlayed);
+		s.octaves = 2;
+		Host twice(s);
+		twice.input = {on(0, 60), on(0, 72)};
+		twice.run(6 * g_sixteenth, 512);
+		EXPECT(twice.notes() == std::vector<uint8_t>({60, 72, 72, 84, 60, 72}));
+	}
+
 	void testDivisions()
 	{
 		auto stepTimes = [](const ArpDivision _division)
@@ -486,6 +555,9 @@ int main()
 	testModes();
 	testSwing();
 	testPattern();
+	testStepDurations();
+	testVelocityOffset();
+	testKeysJoinWhereTheyFit();
 	testDivisions();
 	testFreeTempo();
 	testHostStopKeepsTheArpeggioGoing();

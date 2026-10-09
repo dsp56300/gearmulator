@@ -23,7 +23,9 @@ namespace synthLib
 		bool active = true;				// false makes the step a rest
 		uint8_t velocity = 0;			// 0 plays the velocity the key was struck with
 		uint8_t releaseVelocity = 64;	// the note off velocity. 64 is what MIDI defines for a note off without one
-		float length = 0.5f;			// in steps: 1 is legato, above 1 the note overlaps the steps that follow
+		float length = 0.5f;			// in steps: 1 is legato for a step of duration 1, more overlaps what follows
+		float duration = 1.0f;			// in steps, until the next step starts: 0.5 for a ratchet, 2/3 for a triplet
+		int8_t velocityOffset = 0;		// added to the velocity
 	};
 
 	// The length of a step as a fraction of a whole note: 1/16 is {1, 16}, a dotted eighth {3, 16}, an eighth triplet
@@ -56,7 +58,7 @@ namespace synthLib
 		float tempo = 120.0f;			// in BPM, used when not synced, or when the host reports no tempo
 		ArpDivision division;
 		float swing = 0.5f;				// the share of a pair of steps that the first one takes: 0.5 is straight,
-										// 0.75 dotted
+										// 0.75 dotted. Positions inside the pair are stretched and squeezed with it
 		float noteLength = 1.0f;		// scales the length of every step
 		std::vector<ArpStep> pattern;	// played in a loop. Empty plays every step with the defaults of ArpStep
 	};
@@ -106,12 +108,16 @@ namespace synthLib
 		void endNote(std::vector<SMidiEvent>& _out, uint32_t _offset, const PlayingNote& _note) const;
 		void stopAll(std::vector<SMidiEvent>& _out, uint32_t _offset);
 		void buildSequence();
+		const Note* nextNote();
 
-		bool canStep() const { return m_stepLength > 0.0 && m_quartersPerSample > 0.0; }
+		bool canStep() const { return m_stepLength > 0.0 && m_quartersPerSample > 0.0 && m_cycleLength > 0.0; }
 		uint32_t nextNoteOffOffset(uint32_t _from) const;
 		uint32_t stepOffset(int64_t _step, uint32_t _from) const;
+		double nominalPos(int64_t _step) const;
 		double stepPos(int64_t _step) const;
 		int64_t firstStepFrom(double _pos) const;
+		double warp(double _pos) const;
+		double unwarp(double _pos) const;
 
 		bool isOurs(const SMidiEvent& _ev) const;
 
@@ -125,7 +131,10 @@ namespace synthLib
 		std::bitset<128> m_passThrough;		// note ons that reached the device while the arpeggiator was off
 		std::vector<Note> m_sequence;		// the notes in the order the mode plays them, octaves included
 		bool m_sequenceDirty = true;
-		uint32_t m_noteIndex = 0;
+		uint32_t m_noteIndex = 0;			// counts the steps played, Chord takes its octave from it
+		int m_lastNote = -1;				// what the last step played, the next step continues from it
+		size_t m_lastIndex = 0;				// As Played: where m_lastNote is in m_sequence
+		bool m_goingDown = false;			// Up&Down
 		std::minstd_rand m_random;
 
 		std::vector<PlayingNote> m_playing;
@@ -137,7 +146,9 @@ namespace synthLib
 		bool m_relocate = true;
 		bool m_wasSynced = false;
 		double m_stepLength = 0.25;			// in quarter notes
-		double m_swingOffset = 0.0;			// in quarter notes, how much later an odd step starts than without swing
+		double m_swing = 0.5;
+		std::vector<double> m_stepStarts;	// where each step of the pattern starts, in steps, and its total length
+		double m_cycleLength = 1.0;			// of the pattern, in steps
 		double m_blockPos = 0.0;			// the position of the block start, in quarter notes
 		double m_quartersPerSample = 0.0;
 		double m_nextBlockPos = 0.0;

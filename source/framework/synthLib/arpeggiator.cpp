@@ -40,11 +40,12 @@ namespace synthLib
 
 	Arpeggiator::Arpeggiator()
 	{
-		// process() runs on the audio thread, nothing may grow there
+		// process() runs on the audio thread, nothing may grow there. A pattern longer than 256 steps is the exception
 		m_held.reserve(128);
-		m_sequence.reserve(128 * g_maxOctaves * 2);
+		m_sequence.reserve(128 * g_maxOctaves);
 		m_playing.reserve(128);
 		m_input.reserve(128);
+		m_stepStarts.reserve(257);
 	}
 
 	void Arpeggiator::setSettings(const ArpSettings& _settings)
@@ -94,10 +95,11 @@ namespace synthLib
 			m_nextStep = firstStepFrom(m_blockPos - 0.5 * m_quartersPerSample);
 
 			// A host that wraps its loop late, at a block start, reports the loop start after the step at the loop end
-			// has played. The two are the same step, playing it again would flam. Half the shortest step that swing
-			// leaves tells the two cases apart
+			// has played. The two are the same step, playing it again would flam. Half of the step's duration tells
+			// the two cases apart
 			const auto sinceLastStep = static_cast<double>(m_time + stepOffset(m_nextStep, 0)) - m_lastStepTime;
-			if (sinceLastStep < 0.5 * (m_stepLength - m_swingOffset) / m_quartersPerSample)
+			const auto duration = stepPos(m_nextStep + 1) - stepPos(m_nextStep);
+			if (sinceLastStep < 0.5 * duration / m_quartersPerSample)
 				++m_nextStep;
 		}
 
@@ -178,16 +180,21 @@ namespace synthLib
 		}
 
 		const auto& division = m_settings.division;
-		const double stepLength = division.denominator ? 4.0 * division.numerator / division.denominator : 0.0;
-		const double swingOffset = (2.0 * std::clamp(m_settings.swing, 0.5f, 0.95f) - 1.0) * stepLength;
+		m_stepLength = division.denominator ? 4.0 * division.numerator / division.denominator : 0.0;
+		m_swing = std::clamp(m_settings.swing, 0.5f, 0.95f);
 
-		if (stepLength != m_stepLength || swingOffset != m_swingOffset)  // NOLINT(clang-diagnostic-float-equal)
+		// No pattern plays every step with the defaults of ArpStep
+		const auto& pattern = m_settings.pattern;
+		m_stepStarts.assign(1, 0.0);
+		for (size_t i = 0; i < std::max<size_t>(pattern.size(), 1); ++i)
 		{
-			m_stepLength = stepLength;
-			m_swingOffset = swingOffset;
-			m_relocate = true;
+			const auto duration = pattern.empty() ? ArpStep().duration : pattern[i].duration;
+			m_stepStarts.push_back(m_stepStarts.back() + std::max(0.0, static_cast<double>(duration)));
 		}
+		m_cycleLength = m_stepStarts.back();
 
+		// The steps may sit elsewhere now
+		m_relocate = true;
 		m_sequenceDirty = true;
 	}
 
@@ -249,6 +256,8 @@ namespace synthLib
 			{
 				m_held.clear();
 				m_noteIndex = 0;
+				m_lastNote = -1;
+				m_goingDown = false;
 				m_held.push_back({note, _ev.c});
 			}
 			else if (held != m_held.end())
@@ -285,6 +294,8 @@ namespace synthLib
 	{
 		m_running = true;
 		m_noteIndex = 0;
+		m_lastNote = -1;
+		m_goingDown = false;
 
 		if (!canStep())
 			return;
@@ -304,10 +315,12 @@ namespace synthLib
 
 		// A step on this sample plays now. Otherwise, the step the key falls into plays right away if the key is only a
 		// little late for it, and if it is not, the arpeggio starts with the next step
+		const auto prev = stepPos(next - 1);
+
 		if (stepPos(next) - pos < halfSample)
 			m_nextStep = next;
 		else
-			m_nextStep = pos - stepPos(next - 1) <= g_lateStart * m_stepLength ? next - 1 : next;
+			m_nextStep = pos - prev <= g_lateStart * (stepPos(next) - prev) ? next - 1 : next;
 	}
 
 	void Arpeggiator::playStep(std::vector<SMidiEvent>& _out, const uint32_t _offset)
@@ -326,11 +339,16 @@ namespace synthLib
 		if (!step.active)
 			return;
 
-		// The length is a share of the step as swing makes it, not of the nominal one
-		const double quarters = (stepPos(m_nextStep + 1) - stepPos(m_nextStep)) * step.length * m_settings.noteLength;
-		const auto length = static_cast<uint64_t>(std::max(1.0, std::round(quarters / m_quartersPerSample)));
+		// The note ends where the step position plus its length lands once swing has moved both
+		const auto pos = nominalPos(m_nextStep);
+		const auto end = warp(pos + static_cast<double>(step.length) * m_settings.noteLength) * m_stepLength;
+		const auto length = static_cast<uint64_t>(std::max(1.0, std::round((end - stepPos(m_nextStep)) / m_quartersPerSample)));
 
-		auto velocity = [&](const Note& _n) { return step.velocity ? step.velocity : _n.velocity; };
+		auto velocity = [&](const Note& _n)
+		{
+			const int v = (step.velocity ? step.velocity : _n.velocity) + step.velocityOffset;
+			return static_cast<uint8_t>(std::clamp(v, 1, 127));
+		};
 
 		if (m_settings.mode == ArpMode::Chord)
 		{
@@ -339,15 +357,77 @@ namespace synthLib
 			for (const auto& n : m_sequence)
 				playNote(_out, _offset, n.note + transpose, velocity(n), step.releaseVelocity, length);
 		}
-		else
+		else if (const auto* n = nextNote())
 		{
-			const auto size = m_sequence.size();
-			const auto& n = m_sequence[m_settings.mode == ArpMode::Random ? m_random() % size : m_noteIndex % size];
-
-			playNote(_out, _offset, n.note, velocity(n), step.releaseVelocity, length);
+			m_lastNote = n->note;
+			playNote(_out, _offset, n->note, velocity(*n), step.releaseVelocity, length);
 		}
 
 		++m_noteIndex;
+	}
+
+	const Arpeggiator::Note* Arpeggiator::nextNote()
+	{
+		// m_sequence is ascending for all modes but As Played and Down. A mode moves on from the note the last step
+		// played, so that a key struck while the arpeggio runs joins it where it fits instead of shifting it
+		const auto begin = m_sequence.begin();
+		const auto end = m_sequence.end();
+
+		auto higher = [&] { return std::find_if(begin, end, [&](const Note& _n) { return _n.note > m_lastNote; }); };
+		auto lower = [&]
+		{
+			const auto it = std::find_if(m_sequence.rbegin(), m_sequence.rend(), [&](const Note& _n) { return _n.note < m_lastNote; });
+			return it == m_sequence.rend() ? end : std::prev(it.base());
+		};
+
+		switch (m_settings.mode)
+		{
+		case ArpMode::Up:
+			{
+				const auto it = higher();
+				return it != end ? &*it : &m_sequence.front();
+			}
+		case ArpMode::Down:
+			{
+				// descending, see buildSequence
+				const auto it = m_lastNote < 0 ? begin : std::find_if(begin, end, [&](const Note& _n) { return _n.note < m_lastNote; });
+				return it != end ? &*it : &m_sequence.front();
+			}
+		case ArpMode::UpDown:
+			{
+				// The top and the bottom note turn the direction and play once
+				auto it = m_goingDown ? lower() : higher();
+				if (it == end)
+				{
+					m_goingDown = !m_goingDown;
+					it = m_goingDown ? lower() : higher();
+				}
+				return it != end ? &*it : &m_sequence.front();
+			}
+		case ArpMode::AsPlayed:
+			{
+				// The same note can be in the sequence twice, a key and another one's octave. Where the last note was
+				// is kept, and only looked up when the sequence changed under it
+				const auto size = m_sequence.size();
+				if (m_lastNote < 0)
+				{
+					m_lastIndex = 0;
+					return &m_sequence.front();
+				}
+				if (m_lastIndex >= size || m_sequence[m_lastIndex].note != m_lastNote)
+				{
+					const auto it = std::find_if(begin, end, [&](const Note& _n) { return _n.note == m_lastNote; });
+					if (it != end)
+						m_lastIndex = static_cast<size_t>(it - begin);
+				}
+				m_lastIndex = (m_lastIndex + 1) % size;
+				return &m_sequence[m_lastIndex];
+			}
+		case ArpMode::Random:
+			return &m_sequence[m_random() % m_sequence.size()];
+		default:
+			return nullptr;
+		}
 	}
 
 	void Arpeggiator::playNote(std::vector<SMidiEvent>& _out, const uint32_t _offset, const uint32_t _note,
@@ -447,15 +527,7 @@ namespace synthLib
 		}
 
 		if (mode == ArpMode::Down)
-		{
 			std::reverse(m_sequence.begin(), m_sequence.end());
-		}
-		else if (mode == ArpMode::UpDown && m_sequence.size() > 2)
-		{
-			// The way down leaves out the top and the bottom note, they would play twice in a row otherwise
-			for (size_t i = m_sequence.size() - 2; i > 0; --i)
-				m_sequence.push_back(m_sequence[i]);
-		}
 	}
 
 	uint32_t Arpeggiator::nextNoteOffOffset(const uint32_t _from) const
@@ -486,19 +558,53 @@ namespace synthLib
 		return offset >= g_never ? g_never : static_cast<uint32_t>(offset);
 	}
 
+	double Arpeggiator::nominalPos(const int64_t _step) const
+	{
+		// in steps, without swing. Step k is step k mod n of the pattern, in cycle k / n
+		const auto n = static_cast<int64_t>(m_stepStarts.size() - 1);
+		const auto cycle = _step >= 0 ? _step / n : -((-_step + n - 1) / n);
+		return static_cast<double>(cycle) * m_cycleLength + m_stepStarts[static_cast<size_t>(_step - cycle * n)];
+	}
+
 	double Arpeggiator::stepPos(const int64_t _step) const
 	{
-		return static_cast<double>(_step) * m_stepLength + ((_step & 1) ? m_swingOffset : 0.0);
+		return warp(nominalPos(_step)) * m_stepLength;
 	}
 
 	int64_t Arpeggiator::firstStepFrom(const double _pos) const
 	{
-		auto step = static_cast<int64_t>(std::floor(_pos / m_stepLength)) - 1;
+		// Estimate from the pattern, then settle the rounding
+		const auto n = static_cast<int64_t>(m_stepStarts.size() - 1);
+		const auto nominal = unwarp(_pos / m_stepLength);
+		const auto cycle = std::floor(nominal / m_cycleLength);
+		const auto inCycle = nominal - cycle * m_cycleLength;
+		const auto first = std::lower_bound(m_stepStarts.begin(), m_stepStarts.end() - 1, inCycle) - m_stepStarts.begin();
 
+		auto step = static_cast<int64_t>(cycle) * n + first;
+
+		while (stepPos(step - 1) >= _pos)
+			--step;
 		while (stepPos(step) < _pos)
 			++step;
 
 		return step;
+	}
+
+	double Arpeggiator::warp(const double _pos) const
+	{
+		// Swing stretches the first step of every pair and squeezes the second, and everything between them with it
+		const auto pair = 2.0 * std::floor(_pos * 0.5);
+		const auto inPair = _pos - pair;
+		const auto first = 2.0 * m_swing;
+		return pair + (inPair < 1.0 ? inPair * first : first + (inPair - 1.0) * (2.0 - first));
+	}
+
+	double Arpeggiator::unwarp(const double _pos) const
+	{
+		const auto pair = 2.0 * std::floor(_pos * 0.5);
+		const auto inPair = _pos - pair;
+		const auto first = 2.0 * m_swing;
+		return pair + (inPair < first ? inPair / first : 1.0 + (inPair - first) / (2.0 - first));
 	}
 
 	bool Arpeggiator::isOurs(const SMidiEvent& _ev) const
