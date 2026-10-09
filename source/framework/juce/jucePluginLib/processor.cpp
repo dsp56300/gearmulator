@@ -347,11 +347,13 @@ namespace pluginLib
 
 		const auto result = _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
 
-		// Compare with the device, not with the setting before the load: REMO creates a remote device while reading,
-		// with the setting read so far. Without a device yet, the one created later gets the setting anyway
 		if (!result)
 			m_voiceExpansion = voiceExpansion;
-		else if (m_plugin && m_voiceExpansion != m_deviceVoiceExpansion)
+
+		// Compare with the device, not with the setting before the load: REMO creates a remote device while reading,
+		// with the setting read so far, also when a later chunk fails. Without a device yet, the one created later gets
+		// the setting anyway
+		if (m_plugin && m_voiceExpansion != m_deviceVoiceExpansion)
 			rebootDevice();
 
 		return result;
