@@ -94,6 +94,22 @@ namespace jucePluginEditorLib
 			startMcpServer();
 	}
 
+	juce::PropertiesFile::Options Processor::legacyConfigOptions(const char* _appName)
+	{
+		juce::PropertiesFile::Options opts;
+		opts.applicationName = _appName;
+		opts.filenameSuffix = ".settings";
+		opts.folderName = _appName;
+		opts.osxLibrarySubFolder = juce::String("Application Support/") + _appName;
+		return opts;
+	}
+
+	void Processor::finishConstruction()
+	{
+		getController();
+		setLatencyBlocks(static_cast<uint32_t>(m_config.getIntValue("latencyBlocks", static_cast<int>(getDefaultLatencyBlocks()))));
+	}
+
 	Processor::~Processor()
 	{
 		stopMcpServer();

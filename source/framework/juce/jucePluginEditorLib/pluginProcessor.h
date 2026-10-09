@@ -20,6 +20,14 @@ namespace jucePluginEditorLib
 		Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties);
 		~Processor() override;
 
+		// The config file options of a product from before its config moved into the data folder. Only the migration
+		// of that old file reads them (EMU-165), a new product passes {}
+		static juce::PropertiesFile::Options legacyConfigOptions(const char* _appName);
+
+		// TUS_PLUGIN_ENTRY calls this right after construction. createController() is virtual, so the base constructor
+		// cannot create the controller
+		void finishConstruction();
+
 		juce::PropertiesFile::Options& getConfigOptions() { return m_configOptions; }
 		juce::PropertiesFile& getConfig() { return m_config; }
 
@@ -43,6 +51,9 @@ namespace jucePluginEditorLib
 		void setMcpServerEnabled(bool _enabled);
 
 	protected:
+		// the latency in blocks until the user picked another one
+		virtual uint32_t getDefaultLatencyBlocks() { return getPlugin().getLatencyBlocks(); }
+
 		// call from the constructor of the derived class, once the controller exists. Takes ownership
 		void setPatchManager(patchManager::PatchManager* _patchManager);
 

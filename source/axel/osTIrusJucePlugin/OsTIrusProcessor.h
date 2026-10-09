@@ -6,7 +6,6 @@ class OsTIrusProcessor : public virus::VirusProcessor
 {
 public:
     OsTIrusProcessor();
-    ~OsTIrusProcessor() override;
 
 	jucePluginEditorLib::PluginEditorState* createEditorState() override;
 };

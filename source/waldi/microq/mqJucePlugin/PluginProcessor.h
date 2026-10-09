@@ -8,7 +8,6 @@ namespace mqJucePlugin
 	{
 	public:
 	    AudioPluginAudioProcessor();
-	    ~AudioPluginAudioProcessor() override;
 
 	    jucePluginEditorLib::PluginEditorState* createEditorState() override;
 

@@ -1,6 +1,7 @@
 #include "PluginProcessor.h"
 #include "mqEditor.h"
 #include "jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEntry.h"
 #include "skins.h"
 
 #include "mqController.h"
@@ -12,19 +13,6 @@
 
 #include "mqLib/device.h"
 #include "mqLib/romloader.h"
-
-namespace
-{
-	juce::PropertiesFile::Options getOptions()
-	{
-		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300EmulatorVavra";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300EmulatorVavra";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorVavra";
-		return opts;
-	}
-}
 
 namespace mqJucePlugin
 {
@@ -38,19 +26,9 @@ namespace mqJucePlugin
 	                   .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
 	                   .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-		, getOptions(), pluginLib::initProcessorProperties())
+		, legacyConfigOptions("DSP56300EmulatorVavra"), pluginLib::initProcessorProperties())
 	{
-		getController();
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
-
 		setPatchManager(new PatchManager(*this));
-	}
-
-	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
-	{
-		destroyEditorState();
-		destroyPatchManager();
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
@@ -84,7 +62,4 @@ namespace mqJucePlugin
 	}
 }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new mqJucePlugin::AudioPluginAudioProcessor();
-}
+TUS_PLUGIN_ENTRY(mqJucePlugin::AudioPluginAudioProcessor)

@@ -2,6 +2,7 @@
 
 #include "virusJucePlugin/VirusEditor.h"
 #include "jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEntry.h"
 #include "skins.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
@@ -9,19 +10,6 @@
 #include "jucePluginLib/processorPropertiesInit.h"
 
 #include "virusLib/romloader.h"
-
-namespace
-{
-	juce::PropertiesFile::Options getConfigOptions()
-	{
-		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300Emulator_OsTIrus";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300Emulator_OsTIrus";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300Emulator_OsTIrus";
-		return opts;
-	}
-}
 
 //==============================================================================
 OsTIrusProcessor::OsTIrusProcessor() :
@@ -35,15 +23,10 @@ OsTIrusProcessor::OsTIrusProcessor() :
                    .withOutput("USB 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("USB 3", juce::AudioChannelSet::stereo(), true)
 #endif
-	, ::getConfigOptions(), pluginLib::initProcessorProperties()
+	, legacyConfigOptions("DSP56300Emulator_OsTIrus"), pluginLib::initProcessorProperties()
 	, virusLib::DeviceModel::TI2)
 {
 	postConstruct(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::TI2, virusLib::DeviceModel::Snow));
-}
-
-OsTIrusProcessor::~OsTIrusProcessor()
-{
-	destroyEditorState();
 }
 
 jucePluginEditorLib::PluginEditorState* OsTIrusProcessor::createEditorState()
@@ -51,7 +34,4 @@ jucePluginEditorLib::PluginEditorState* OsTIrusProcessor::createEditorState()
 	return new jucePluginEditorLib::PluginEditorStateT<genericVirusUI::VirusEditor, virus::VirusProcessor>(*this, g_includedSkins);
 }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new OsTIrusProcessor();
-}
+TUS_PLUGIN_ENTRY(OsTIrusProcessor)

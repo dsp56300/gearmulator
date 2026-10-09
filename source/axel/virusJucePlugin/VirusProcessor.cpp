@@ -21,10 +21,8 @@ namespace virus
 
 	VirusProcessor::~VirusProcessor()
 	{
-		// The patch manager unhooks itself from the controller when it goes, so it goes first, after the editor that
-		// shows it. The controller then has to go here, before evRomChanged, which it is subscribed to
-		destroyEditorState();
-		destroyPatchManager();
+		// The editor and the patch manager are gone already, see jucePluginEditorLib::FinalProcessor. The controller
+		// has to go here, before evRomChanged, which it is subscribed to
 		destroyController();
 	}
 
@@ -81,9 +79,6 @@ namespace virus
 		evRomChanged.retain(getSelectedRom());
 
 		m_clockTempoParam = getController().getParameterIndexByName(virus::g_paramClockTempo);
-
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
 
 		zynthianExportLv2Presets();
 

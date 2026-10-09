@@ -8,7 +8,6 @@ namespace n2xJucePlugin
 	{
 	public:
 	    AudioPluginAudioProcessor();
-	    ~AudioPluginAudioProcessor() override;
 
 	    jucePluginEditorLib::PluginEditorState* createEditorState() override;
 	    synthLib::Device* createDevice() override;

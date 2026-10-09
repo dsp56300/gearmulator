@@ -4,6 +4,7 @@
 #include "jePatchManager.h"
 #include "jeEditor.h"
 #include "jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEntry.h"
 #include "skins.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
@@ -43,17 +44,7 @@ namespace jeJucePlugin
 			m_selectedRom = 0;
 		}
 
-		getController();
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
-
 		setPatchManager(new PatchManager(*this));
-	}
-
-	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
-	{
-		destroyEditorState();
-		destroyPatchManager();
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
@@ -114,7 +105,4 @@ namespace jeJucePlugin
 	}
 }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new jeJucePlugin::AudioPluginAudioProcessor();
-}
+TUS_PLUGIN_ENTRY(jeJucePlugin::AudioPluginAudioProcessor)

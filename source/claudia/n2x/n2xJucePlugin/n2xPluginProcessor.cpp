@@ -4,6 +4,7 @@
 #include "n2xPatchManager.h"
 #include "n2xEditor.h"
 #include "jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEntry.h"
 #include "skins.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
@@ -15,19 +16,6 @@
 
 #include "synthLib/deviceException.h"
 
-namespace
-{
-	juce::PropertiesFile::Options getOptions()
-	{
-		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300EmulatorNodalRed";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300EmulatorNodalRed";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorNodalRed";
-		return opts;
-	}
-}
-
 namespace n2xJucePlugin
 {
 	class Controller;
@@ -36,19 +24,9 @@ namespace n2xJucePlugin
 	    Processor(BusesProperties()
 	                   .withOutput("Out AB", juce::AudioChannelSet::stereo(), true)
 	                   .withOutput("Out CD", juce::AudioChannelSet::stereo(), true)
-		, getOptions(), pluginLib::initProcessorProperties())
+		, legacyConfigOptions("DSP56300EmulatorNodalRed"), pluginLib::initProcessorProperties())
 	{
-		getController();
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
-
 		setPatchManager(new PatchManager(*this));
-	}
-
-	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
-	{
-		destroyEditorState();
-		destroyPatchManager();
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
@@ -83,7 +61,4 @@ namespace n2xJucePlugin
 	}
 }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new n2xJucePlugin::AudioPluginAudioProcessor();
-}
+TUS_PLUGIN_ENTRY(n2xJucePlugin::AudioPluginAudioProcessor)
