@@ -275,10 +275,10 @@ namespace
 		host.input = {on(0, 60, 80), on(0, 64, 90)};
 		host.run(4 * g_sixteenth, 512);
 
-		// A rest does not use up a note: the step after it plays the next one
+		// A rest takes its note without playing it: the step after it plays the one after
 		const std::vector<Event> expected =
 		{
-			on(0, 60, 100), off(6000, 60, 10), on(12000, 64, 90), off(13500, 64), on(18000, 60, 100)
+			on(0, 60, 100), off(6000, 60, 10), on(12000, 60, 80), off(13500, 60), on(18000, 64, 100)
 		};
 		EXPECT(host.played == expected);
 	}
@@ -399,6 +399,41 @@ namespace
 			EXPECT(times[i] == i * g_sixteenth);
 	}
 
+	void testHostStartBringsTheGrid()
+	{
+		// An arpeggio that started while the host stood still, with the key, goes on on the host's grid once it plays
+		Host host(settings(ArpMode::Up));
+		host.playing = false;
+		host.ppq = 7.3;
+		host.input = {on(1234, 60)};
+		host.run(10000, 512);
+		host.playing = true;
+		host.ppq = 0.0;
+		host.run(30000, 512);
+
+		EXPECT(host.noteOnTimes() == std::vector<uint64_t>({1234, 7234, 16000, 22000, 28000}));
+	}
+
+	void testStartGrid()
+	{
+		// A device whose arpeggio starts on a grid of half a step: a key a third into a step waits for the middle of it
+		auto s = settings(ArpMode::Up);
+		s.startGrid = 0.5f;
+		s.lateStart = 0.5f;
+		Host host(s);
+		host.input = {on(2000, 60), on(32000, 64)};
+		host.run(48000, 512);
+
+		EXPECT(host.noteOnTimes() == std::vector<uint64_t>({3000, 9000, 15000, 21000, 27000, 33000, 39000, 45000}));
+
+		// A quarter of a step late plays at once
+		Host early(s);
+		early.input = {on(1500, 60)};
+		early.run(12000, 512);
+
+		EXPECT(early.noteOnTimes() == std::vector<uint64_t>({1500, 6000}));
+	}
+
 	void testHold()
 	{
 		auto s = settings(ArpMode::Up);
@@ -434,6 +469,100 @@ namespace
 
 		// Two samples late still plays the step. 40% into a step waits for the next one
 		EXPECT(host.noteOns() == std::vector<Event>({on(6002, 60), on(24000, 64)}));
+	}
+
+	void testLateStartIsASetting()
+	{
+		// A device whose firmware plays a key 40% into a step at once. The first note ends where its step would have
+		// ended, the next step is on the grid
+		auto s = settings(ArpMode::Up);
+		s.lateStart = 7.0f / 12.0f;
+		Host host(s);
+		host.input = {on(20400, 64)};
+		host.run(30000, 512);
+
+		EXPECT(host.played == std::vector<Event>({on(20400, 64), off(21000, 64), on(24000, 64), off(27000, 64)}));
+
+		// A device whose firmware plays the key itself then, with its velocity instead of the step's. Down goes on
+		// below it
+		s.lateStartPlaysKey = true;
+		s.mode = ArpMode::Down;
+		ArpStep louder;
+		louder.velocityOffset = 10;
+		s.pattern = {louder};
+		Host key(s);
+		key.input = {on(20400, 67, 90), on(20400, 60, 90)};
+		key.run(36000, 512);
+
+		EXPECT(key.noteOns() == std::vector<Event>({on(20400, 67, 90), on(24000, 60, 100), on(30000, 67, 100)}));
+	}
+
+	void testPatternStartsWithTheArpeggio()
+	{
+		// The first note is the pattern's first step, wherever the song is. The steps stay on its grid
+		auto s = settings(ArpMode::Up);
+		for (const uint8_t v : {10, 20, 30, 40})
+		{
+			ArpStep st;
+			st.velocity = v;
+			s.pattern.push_back(st);
+		}
+		Host host(s);
+		host.input = {on(36000, 60)};
+		host.run(36000 + 3 * g_sixteenth, 512);
+
+		EXPECT(host.noteOns() == std::vector<Event>({on(36000, 60, 10), on(42000, 60, 20), on(48000, 60, 30)}));
+	}
+
+	void testHoldRestarts()
+	{
+		// With hold, a key struck while none are down starts a new set of notes. A device can start the pattern over
+		// with it, as with the first key: here half a step late, so at the next step
+		auto s = settings(ArpMode::Up);
+		s.hold = true;
+		for (const uint8_t v : {10, 20, 30, 40})
+		{
+			ArpStep st;
+			st.velocity = v;
+			s.pattern.push_back(st);
+		}
+
+		auto play = [&](const bool _restarts)
+		{
+			s.holdRestarts = _restarts;
+			Host host(s);
+			host.input = {on(0, 60), off(1000, 60), on(15000, 64)};
+			host.run(30000, 512);
+			return host.noteOns();
+		};
+
+		EXPECT(play(true) == std::vector<Event>({on(0, 60, 10), on(6000, 60, 20), on(12000, 60, 30), on(18000, 64, 10),
+			on(24000, 64, 20)}));
+		EXPECT(play(false) == std::vector<Event>({on(0, 60, 10), on(6000, 60, 20), on(12000, 60, 30), on(18000, 64, 40),
+			on(24000, 64, 10)}));
+
+		// The note that still sounds ends with the key
+		auto cut = settings(ArpMode::Up);
+		cut.hold = true;
+		cut.holdRestarts = true;
+		cut.noteLength = 1.9f;
+		Host host(cut);
+		host.input = {on(0, 60), off(1000, 60), on(14000, 64)};
+		host.run(24000, 512);
+
+		EXPECT(host.played == std::vector<Event>({on(0, 60), off(5700, 60), on(6000, 60), off(11700, 60), on(12000, 60),
+			off(14000, 60), on(18000, 64), off(23700, 64)}));
+	}
+
+	void testAsPlayedFromSecond()
+	{
+		auto s = settings(ArpMode::AsPlayed);
+		s.asPlayedFromSecond = true;
+		Host host(s);
+		host.input = {on(0, 64), on(0, 60), on(0, 67)};	// struck as E, C, G
+		host.run(4 * g_sixteenth, 512);
+
+		EXPECT(host.notes() == std::vector<uint8_t>({60, 67, 64, 60}));
 	}
 
 	void testSwitchingOffEndsNotes()
@@ -664,9 +793,15 @@ int main()
 	testDivisions();
 	testFreeTempo();
 	testHostStopKeepsTheArpeggioGoing();
+	testHostStartBringsTheGrid();
 	testHold();
 	testNotesFromBeforeTheArpeggiatorReachTheDevice();
 	testLateKeys();
+	testLateStartIsASetting();
+	testStartGrid();
+	testPatternStartsWithTheArpeggio();
+	testHoldRestarts();
+	testAsPlayedFromSecond();
 	testSwitchingOffEndsNotes();
 	testAllNotesOffStopsTheArpeggio();
 	testLoopWraps();
