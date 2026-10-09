@@ -24,11 +24,14 @@ namespace synthLib
 
 		void process(const TAudioInputs& _inputs, TAudioOutputs& _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc);
 
+		// The delay the conversion adds, in host samples: from a MIDI event to the output it causes, and what an input
+		// sample takes on top of that on its way through the device. See measureLatencies().
 		uint32_t getOutputLatency() const { return m_outputLatency; }
 		uint32_t getInputLatency() const { return m_inputLatency; }
 
 	private:
 		void recreate();
+		void measureLatencies();
 		void prepareAlternatives();
 		void swapStream(ResamplerInOut& _other);
 		void clearAudioHistory();

@@ -139,7 +139,9 @@ namespace jeLib
 
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
-		return static_cast<uint32_t>(getSamplerate() * 4.5f / 1000.0f); // 4.5 ms
+		// 4.5 ms, set while the Legacy resampler was the only one, minus its 0.5 ms that the plugin did not report then and
+		// reports on its own now (EMU-103)
+		return static_cast<uint32_t>(getSamplerate() * 4.0f / 1000.0f);
 	}
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)

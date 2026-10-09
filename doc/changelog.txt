@@ -4,6 +4,12 @@ Release Notes
 
 Framework:
 
+- [Fix] EMU-103 The latency the plugins report to the host left out the delay
+        of the resampler, so notes came late: by up to 5 ms with Mame HQ, the
+        default, and by less with Legacy. That delay is now measured for each
+        resampler setting and reported, so all settings line up. Osirus and
+        JE8086 keep their timing with Legacy.
+
 - [Fix] BUG-10393 Parts of the user interface, the input level meters for
         example, stopped updating after the plugin window was closed and
         reopened.

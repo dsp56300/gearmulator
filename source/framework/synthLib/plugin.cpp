@@ -132,9 +132,6 @@ namespace synthLib
 		});
 
 		m_midiIn.clear();
-
-		// The resampler grows its latency while it prewarms, which happens right here
-		updateLatencies();
 	}
 
 	void Plugin::getMidiOut(std::vector<SMidiEvent>& _midiOut)

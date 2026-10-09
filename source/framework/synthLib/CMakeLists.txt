@@ -88,6 +88,11 @@ if(BUILD_TESTING)
 	set_property(TARGET dynamicSamplerate_test PROPERTY FOLDER "Tests")
 	add_test(NAME dynamicSamplerate COMMAND dynamicSamplerate_test)
 
+	add_executable(resamplerLatency_test resamplerLatency_test.cpp)
+	target_link_libraries(resamplerLatency_test PRIVATE synthLib)
+	set_property(TARGET resamplerLatency_test PROPERTY FOLDER "Tests")
+	add_test(NAME resamplerLatency COMMAND resamplerLatency_test)
+
 	add_executable(midiRateLimiter_test midiRateLimiter_test.cpp)
 	target_link_libraries(midiRateLimiter_test PRIVATE synthLib)
 	set_property(TARGET midiRateLimiter_test PROPERTY FOLDER "Tests")

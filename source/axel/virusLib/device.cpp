@@ -523,7 +523,10 @@ namespace virusLib
 		if(m_rom.isTIFamily())
 			return latency - 108;	// TI seems to have improved a bit
 
-		return latency;	
+		// The A/B/C runs at 46875 Hz, so this was measured through the Legacy resampler, whose 28 samples of delay the
+		// plugin did not report then and reports on its own now (EMU-103). At 44.1 and 48 kHz the TI family runs at the
+		// host's rate, nothing is resampled there.
+		return latency - 28;
 	}
 
 	uint32_t Device::getInternalLatencyInputToOutput() const
