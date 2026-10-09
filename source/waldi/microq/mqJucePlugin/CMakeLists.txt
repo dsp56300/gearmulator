@@ -10,12 +10,11 @@ set(SOURCES
 	mqEditor.cpp mqEditor.h
 	mqFrontPanel.cpp mqFrontPanel.h
 	mqLcd.cpp mqLcd.h
-	mqLcdBase.cpp mqLcdBase.h
+	mqLcdBase.h
 	mqLcdText.cpp mqLcdText.h
 	mqPartButton.cpp mqPartButton.h
 	mqPartSelect.cpp mqPartSelect.h
 	mqPatchManager.cpp mqPatchManager.h
-	mqPatchBrowser.h
 
 	skins/mqDefault/mqDefault.rml
 	skins/mqDefault/mqDefault.rcss

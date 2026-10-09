@@ -69,7 +69,6 @@ namespace mqLib
 		void terminateThread();
 		void resetState();
 
-		void dumpHdiLog() const;
 		uint32_t getIndex() const { return m_index; }
 
 	private:
@@ -100,11 +99,6 @@ namespace mqLib
 		bool m_receivedMagicEsaiPacket = false;
 		uint32_t m_hdiTransferFailCount = 0;
 		bool m_commandProcessingActive = false;
-
-		// Ring buffer of last 32 UC→DSP HDI08 words for crash diagnostics
-		static constexpr uint32_t g_hdiLogSize = 32;
-		dsp56k::TWord m_hdiUcToDspLog[g_hdiLogSize]{};
-		uint32_t m_hdiUcToDspLogIndex = 0;
 
 		dsp56k::DspBoot m_boot;
 	};

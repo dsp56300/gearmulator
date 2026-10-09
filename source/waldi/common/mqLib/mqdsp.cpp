@@ -225,7 +225,6 @@ namespace mqLib
 		m_receivedMagicEsaiPacket = false;
 		m_hdiHF01 = 0;
 		m_hdiTransferFailCount = 0;
-		m_hdiUcToDspLogIndex = 0;
 	}
 
 	void MqDsp::reset()
@@ -302,22 +301,7 @@ namespace mqLib
 	{
 		m_haveSentTXtoDSP = true;
 
-		// Record in ring buffer for post-mortem analysis
-		m_hdiUcToDspLog[m_hdiUcToDspLogIndex % g_hdiLogSize] = _word;
-		++m_hdiUcToDspLogIndex;
-
 		hdi08().writeRX(&_word, 1);
-	}
-
-	void MqDsp::dumpHdiLog() const
-	{
-		const auto count = std::min(m_hdiUcToDspLogIndex, g_hdiLogSize);
-		LOG("DSP " << m_index << " last " << count << " UC->DSP HDI08 words:");
-		for (uint32_t i = 0; i < count; ++i)
-		{
-			const auto idx = (m_hdiUcToDspLogIndex - count + i) % g_hdiLogSize;
-			LOG("  [" << i << "] " << HEX(m_hdiUcToDspLog[idx]));
-		}
 	}
 
 	void MqDsp::hdiSendIrqToDSP(uint8_t _irq)
