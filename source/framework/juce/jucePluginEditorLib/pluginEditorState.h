@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "client/serverList.h"
@@ -125,5 +126,24 @@ namespace jucePluginEditorLib
 		WindowSize m_freeWindowSize;
 		std::string m_skinFolderName;
 		std::unique_ptr<bridgeClient::ServerList> m_remoteServerList;
+	};
+
+	// The editor state of a product that only needs to create its editor. A product that overrides more, such as
+	// initContextMenu, derives from PluginEditorState instead. TProcessor is the type the editor's constructor takes
+	template<class TEditor, class TProcessor = Processor>
+	class PluginEditorStateT final : public PluginEditorState
+	{
+	public:
+		PluginEditorStateT(TProcessor& _processor, std::vector<Skin> _includedSkins)
+			: PluginEditorState(_processor, _processor.getController(), std::move(_includedSkins))
+		{
+			loadDefaultSkin();
+		}
+
+	private:
+		Editor* createEditor(const Skin& _skin) override
+		{
+			return new TEditor(static_cast<TProcessor&>(m_processor), _skin);
+		}
 	};
 }

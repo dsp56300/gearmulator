@@ -1,6 +1,8 @@
 #include "PluginProcessor.h"
 
-#include "PluginEditorState.h"
+#include "xtEditor.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
+#include "skins.h"
 #include "xtController.h"
 #include "xtPatchManager.h"
 
@@ -53,7 +55,7 @@ namespace xtJucePlugin
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 	{
-		return new PluginEditorState(*this);
+		return new jucePluginEditorLib::PluginEditorStateT<xtJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()

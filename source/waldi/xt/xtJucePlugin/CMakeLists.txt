@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 project(xtJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
-	PluginEditorState.cpp PluginEditorState.h
 	PluginProcessor.cpp PluginProcessor.h
 	weControlTree.cpp weControlTree.h
 	weControlTreeItem.cpp weControlTreeItem.h

@@ -1,5 +1,7 @@
 #include "PluginProcessor.h"
-#include "PluginEditorState.h"
+#include "mqEditor.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
+#include "skins.h"
 
 #include "mqController.h"
 #include "mqPatchManager.h"
@@ -53,7 +55,7 @@ namespace mqJucePlugin
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 	{
-		return new PluginEditorState(*this);
+		return new jucePluginEditorLib::PluginEditorStateT<mqJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()

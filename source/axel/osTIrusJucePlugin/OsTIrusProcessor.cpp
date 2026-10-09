@@ -1,5 +1,8 @@
 #include "OsTIrusProcessor.h"
-#include "OsTIrusEditorState.h"
+
+#include "virusJucePlugin/VirusEditor.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
+#include "skins.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
@@ -45,7 +48,7 @@ OsTIrusProcessor::~OsTIrusProcessor()
 
 jucePluginEditorLib::PluginEditorState* OsTIrusProcessor::createEditorState()
 {
-	return new OsTIrusEditorState(*this, getController());
+	return new jucePluginEditorLib::PluginEditorStateT<genericVirusUI::VirusEditor, virus::VirusProcessor>(*this, g_includedSkins);
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

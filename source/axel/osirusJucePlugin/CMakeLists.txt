@@ -3,8 +3,6 @@ project(osirusJucePlugin VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	parameterDescriptions_C.json
-	OsirusEditorState.cpp
-	OsirusEditorState.h
 	OsirusProcessor.cpp
 	OsirusProcessor.h
 

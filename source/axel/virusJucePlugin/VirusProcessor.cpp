@@ -1,5 +1,4 @@
 #include "VirusProcessor.h"
-#include "VirusEditorState.h"
 #include "ParameterNames.h"
 #include "VirusController.h"
 #include "PatchManager.h"

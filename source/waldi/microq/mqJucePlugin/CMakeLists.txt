@@ -4,7 +4,6 @@ project(jucePlugin VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	parameterDescriptions_mq.json
 
-    PluginEditorState.cpp PluginEditorState.h
     PluginProcessor.cpp PluginProcessor.h
 	mqController.cpp mqController.h
 	mqEditor.cpp mqEditor.h

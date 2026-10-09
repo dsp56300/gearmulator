@@ -2,7 +2,9 @@
 
 #include "jeController.h"
 #include "jePatchManager.h"
-#include "jePluginEditorState.h"
+#include "jeEditor.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
+#include "skins.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
@@ -56,7 +58,7 @@ namespace jeJucePlugin
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 	{
-		return new PluginEditorState(*this);
+		return new jucePluginEditorLib::PluginEditorStateT<jeJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()

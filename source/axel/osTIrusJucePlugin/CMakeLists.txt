@@ -5,8 +5,6 @@ set(SOURCES
 	skins/TrancyTI/VirusTI_Trancy.rml
 	skins/TrancyTI/VirusTI_Trancy.rcss
 	parameterDescriptions_TI.json
-	OsTIrusEditorState.cpp
-	OsTIrusEditorState.h
 	OsTIrusProcessor.cpp
 	OsTIrusProcessor.h
 

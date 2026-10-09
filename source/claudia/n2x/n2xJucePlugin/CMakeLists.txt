@@ -18,7 +18,6 @@ set(SOURCES
 	n2xPartLed.cpp n2xPartLed.h
 	n2xParts.cpp n2xParts.h
 	n2xPatchManager.cpp n2xPatchManager.h
-	n2xPluginEditorState.cpp n2xPluginEditorState.h
 	n2xPluginProcessor.cpp n2xPluginProcessor.h
 	n2xVmMap.cpp n2xVmMap.h
 	parameterDescriptions_n2x.json

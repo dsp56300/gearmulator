@@ -2,7 +2,9 @@
 
 #include "n2xController.h"
 #include "n2xPatchManager.h"
-#include "n2xPluginEditorState.h"
+#include "n2xEditor.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
+#include "skins.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
@@ -51,7 +53,7 @@ namespace n2xJucePlugin
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 	{
-		return new PluginEditorState(*this);
+		return new jucePluginEditorLib::PluginEditorStateT<n2xJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()

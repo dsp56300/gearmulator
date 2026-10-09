@@ -11,7 +11,6 @@ set(SOURCES
 	jePartButton.cpp jePartButton.h
 	jePartSelect.cpp jePartSelect.h
 	jePatchManager.cpp jePatchManager.h
-	jePluginEditorState.cpp jePluginEditorState.h
 	jePluginProcessor.cpp jePluginProcessor.h
 	jeTypes.h
 	parameterDescriptions_je.json
