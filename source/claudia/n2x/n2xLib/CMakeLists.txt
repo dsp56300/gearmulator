@@ -10,7 +10,7 @@ set(SOURCES
 	n2xflash.cpp n2xflash.h
 	n2xfrontpanel.cpp n2xfrontpanel.h
 	n2xhardware.cpp n2xhardware.h
-	n2xhdi08.cpp n2xhdi08.h
+	n2xhdi08.h
 	n2xmc.cpp n2xmc.h
 	n2xmiditypes.h
 	n2xrom.cpp n2xrom.h

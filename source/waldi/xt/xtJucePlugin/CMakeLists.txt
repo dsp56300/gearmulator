@@ -33,7 +33,7 @@ set(SOURCES
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
 	xtWaveEditor.cpp xtWaveEditor.h
-	xtWaveEditorStyle.cpp xtWaveEditorStyle.h
+	xtWaveEditorStyle.h
 
 	parameterDescriptions_xt.json
 

@@ -96,8 +96,6 @@ namespace xt
 
 		static TableId getWavetableFromSingleDump(const SysEx& _single);
 
-		static void createSequencerMultiData(std::vector<uint8_t>& _data);
-
 		static bool parseWaveData(WaveData& _wave, const SysEx& _sysex);
 		static bool parseMw1WaveData(WaveData& _wave, const SysEx& _sysex);
 

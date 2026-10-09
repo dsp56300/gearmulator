@@ -70,20 +70,6 @@ namespace xt
 		response.push_back(0xf7);
 	}
 
-	void SysexRemoteControl::sendSysexRotaries(std::vector<synthLib::SMidiEvent>& _dst) const
-	{
-/*		auto& ev= _dst.emplace_back(synthLib::MidiEventSource::Internal);
-		auto& response = ev.sysex;
-
-		createSysexHeader(response, SysexCommand::EmuRotaries);
-
-		for(uint32_t i=0; i<static_cast<uint32_t>(Buttons::Encoders::Count); ++i)
-		{
-			const auto value = m_mq.getEncoder(static_cast<Buttons::Encoders>(i));
-			response.push_back(value);
-		}
-*/	}
-
 	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const synthLib::SysexBuffer& _input)
 	{
 		if(!validateWaldorfSysex(_input))
@@ -114,22 +100,6 @@ namespace xt
 			{
 				sendSysexLEDs(_output);
 			}
-			return true;
-		case SysexCommand::EmuRotaries:
-			{
-				return false;
-/*				if(_input.size() > 6)
-				{
-					const auto encoder = static_cast<Encoders>(_input[5]);
-					const auto amount = static_cast<int>(_input[6]) - 64;
-					if(amount)
-						m_mq.rotateEncoder(encoder, amount);
-				}
-				else
-				{
-					sendSysexRotaries(_output);
-				}
-*/			}
 			return true;
 		default:
 			return false;

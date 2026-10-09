@@ -5,18 +5,18 @@ add_library(xtLib STATIC)
 
 set(SOURCES
 	xt.cpp xt.h
-	xtButtons.cpp xtButtons.h
+	xtButtons.h
 	xtDevice.cpp xtDevice.h
 	xtDSP.cpp xtDSP.h
 	xtFlash.cpp xtFlash.h
 	xtHardware.cpp xtHardware.h
-	xtId.cpp xtId.h
+	xtId.h
 	xtLcd.cpp xtLcd.h
 	xtLeds.cpp xtLeds.h
 	xtMidi.cpp xtMidi.h
 	xtMidiTypes.h
 	xtPic.cpp xtPic.h
-	xtRom.cpp xtRom.h
+	xtRom.h
 	xtRomLoader.cpp xtRomLoader.h
 	xtRomWaves.cpp xtRomWaves.h
 	xtState.cpp xtState.h

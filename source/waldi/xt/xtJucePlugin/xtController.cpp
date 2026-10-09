@@ -349,7 +349,6 @@ namespace xtJucePlugin
 		patch.name = getSingleName(_params);
 
 		const auto bank = _data.at(pluginLib::MidiDataType::Bank);
-	//	const auto prog = _data.at(pluginLib::MidiDataType::Program);
 
 		if(bank == static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer))
 		{
@@ -620,10 +619,7 @@ namespace xtJucePlugin
 			sendMidiEvent(synthLib::M_CONTROLCHANGE, synthLib::MC_BANKSELECTMSB, m_deviceId);
 	        sendMidiEvent(synthLib::M_CONTROLCHANGE, synthLib::MC_BANKSELECTLSB, static_cast<uint8_t>(xt::LocationH::SingleBankA) + bank);
 	        sendMidiEvent(synthLib::M_PROGRAMCHANGE, static_cast<uint8_t>(single), 0);
-	/*
-			sendGlobalParameterChange(xt::GlobalParameter::InstrumentABankNumber, static_cast<uint8_t>(bank));
-		    sendGlobalParameterChange(xt::GlobalParameter::InstrumentASingleNumber, static_cast<uint8_t>(single));
-	*/  }
+	    }
 	}
 
 	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin)

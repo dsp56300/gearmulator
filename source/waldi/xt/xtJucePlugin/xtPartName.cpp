@@ -28,14 +28,6 @@ namespace xtJucePlugin
 			return false;
 		return PartButton::canDrop(_event, _source);
 	}
-/*
-	void PartName::mouseDrag(const juce::MouseEvent& _event)
-	{
-		if(getPart() > 0 && !m_editor.getXtController().isMultiMode())
-			return;
-		PartButton<TextButton>::mouseDrag(_event);
-	}
-*/
 
 	void PartName::updatePartName() const
 	{

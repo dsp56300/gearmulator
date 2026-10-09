@@ -68,12 +68,4 @@ namespace xtJucePlugin
 
 		jucePluginEditorLib::PartButton::dropFiles(_event, _data, _files);
 	}
-/*
-	void PartButton::mouseDrag(const juce::MouseEvent& _event)
-	{
-		if(getPart() > 0 && !m_editor.getXtController().isMultiMode())
-			return;
-		jucePluginEditorLib::PartButton<DrawableButton>::mouseDrag(_event);
-	}
-*/
 }
