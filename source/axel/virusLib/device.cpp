@@ -255,6 +255,9 @@ namespace virusLib
 			if(!find4CC(readPos, _state, "MIDI"))
 				break;
 
+			// find4CC stops at the tag, the chunk follows it
+			readPos += 4;
+
 			if(readPos >= _state.size())
 				break;
 
@@ -279,21 +282,29 @@ namespace virusLib
 
 			const auto dataLen = nextLen();
 
-			if(dataLen + readPos > _state.size())
-				break;
+			// not a chunk but the text "MIDI" somewhere else in a host project, Cubase and FL Studio have one in front
+			if(readPos > _state.size() || dataLen > _state.size() - readPos)
+				continue;
+
+			const auto chunkEnd = readPos + dataLen;
 
 			const auto controllerAssignmentsLen = nextLen();
 
+			if(readPos > chunkEnd || controllerAssignmentsLen > chunkEnd - readPos)
+				continue;
+
 			readPos += controllerAssignmentsLen;
-			
-			while(readPos < _state.size())
+
+			// records of a length and MIDI data up to the end of the chunk, a length of 0 ends them earlier
+			while(readPos + 4 <= chunkEnd)
 			{
 				const auto midiDataLen = nextLen();
 
-				if(!midiDataLen)
+				if(!midiDataLen || midiDataLen > chunkEnd - readPos)
 					break;
 
-				if((readPos + midiDataLen) > _state.size())
+				// neither SysEx nor a channel message, this is not a chunk
+				if(_state[readPos] != 0xf0 && midiDataLen > 3)
 					break;
 
 				synthLib::SMidiEvent& e = _events.emplace_back();

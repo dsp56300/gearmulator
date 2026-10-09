@@ -135,6 +135,9 @@ Osirus/OsTIrus:
         their automation and switched the track's automation lane to Master
         Tune.
 
+- [Fix] EMU-224 Importing a damaged or modified Virus OS update into the Patch
+        Manager could hang it when a preset name contained an unusual character.
+
 Osirus:
 
 - [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter

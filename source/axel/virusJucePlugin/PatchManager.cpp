@@ -23,6 +23,61 @@ namespace virus
 
 namespace genericVirusUI
 {
+	namespace
+	{
+		// Arrangement detection: scan for a DUMP_MULTI immediately followed by
+		// 16 consecutive DUMP_SINGLE messages and merge each such sequence into
+		// one compound patch. Works for single-arrangement files AND user-bank
+		// files that store multiple patches (and possibly multiple arrangements)
+		// as concatenated sysex messages.
+		bool mergeArrangements(pluginLib::patchDB::DataList& _results)
+		{
+			auto isMulti = [](const pluginLib::patchDB::Data& _d)
+			{
+				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_MULTI;
+			};
+			auto isSingle = [](const pluginLib::patchDB::Data& _d)
+			{
+				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_SINGLE;
+			};
+
+			pluginLib::patchDB::DataList merged;
+			merged.reserve(_results.size());
+
+			for (size_t i = 0; i < _results.size();)
+			{
+				if (isMulti(_results[i]) && i + 16 < _results.size())
+				{
+					bool allSingles = true;
+					for (size_t j = 1; j <= 16; ++j)
+					{
+						if (!isSingle(_results[i + j]))
+						{
+							allSingles = false;
+							break;
+						}
+					}
+
+					if (allSingles)
+					{
+						pluginLib::patchDB::Data compound = _results[i];
+						for (size_t j = 1; j <= 16; ++j)
+							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
+						merged.emplace_back(std::move(compound));
+						i += 17;
+						continue;
+					}
+				}
+				merged.emplace_back(std::move(_results[i]));
+				++i;
+			}
+
+			_results = std::move(merged);
+
+			return !_results.empty();
+		}
+	}
+
 	PatchManager::PatchManager(virus::VirusProcessor& _processor)
 		: jucePluginEditorLib::patchManager::PatchManager(_processor)
 		, m_controller(static_cast<virus::Controller&>(_processor.getController()))
@@ -616,7 +671,7 @@ namespace genericVirusUI
 			}
 
 			if (!_results.empty())
-				return true;
+				return mergeArrangements(_results);
 		}
 
 		if (virusLib::Device::parseVTIBackup(_results, _data))
@@ -676,8 +731,9 @@ namespace genericVirusUI
 								}
 							}
 
+							// the presets are contiguous, an invalid name ends them
 							if(!validName)
-								continue;
+								break;
 
 							addr += 0x100;
 							++index;
@@ -704,56 +760,7 @@ namespace genericVirusUI
 
 		}
 
-		// Arrangement detection: scan for a DUMP_MULTI immediately followed by
-		// 16 consecutive DUMP_SINGLE messages and merge each such sequence into
-		// one compound patch. Works for single-arrangement files AND user-bank
-		// files that store multiple patches (and possibly multiple arrangements)
-		// as concatenated sysex messages.
-		{
-			auto isMulti = [](const pluginLib::patchDB::Data& _d)
-			{
-				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_MULTI;
-			};
-			auto isSingle = [](const pluginLib::patchDB::Data& _d)
-			{
-				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_SINGLE;
-			};
-
-			pluginLib::patchDB::DataList merged;
-			merged.reserve(_results.size());
-
-			for (size_t i = 0; i < _results.size();)
-			{
-				if (isMulti(_results[i]) && i + 16 < _results.size())
-				{
-					bool allSingles = true;
-					for (size_t j = 1; j <= 16; ++j)
-					{
-						if (!isSingle(_results[i + j]))
-						{
-							allSingles = false;
-							break;
-						}
-					}
-
-					if (allSingles)
-					{
-						pluginLib::patchDB::Data compound = _results[i];
-						for (size_t j = 1; j <= 16; ++j)
-							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
-						merged.emplace_back(std::move(compound));
-						i += 17;
-						continue;
-					}
-				}
-				merged.emplace_back(std::move(_results[i]));
-				++i;
-			}
-
-			_results = std::move(merged);
-		}
-
-		return !_results.empty();
+		return mergeArrangements(_results);
 	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)
