@@ -18,6 +18,13 @@ namespace virusLib
 		{0xf40000, 0x7f0000}		// sent after DSP has booted
 	};
 
+	bool Hdi08TxParser::isMidiOutNote(const uint8_t _status)
+	{
+		// The arpeggiator's notes with Midi Arp Send. The firmware also sends every parameter change as a controller,
+		// those came from the plugin and must not come back to it
+		return (_status & 0xe0) == 0x80;
+	}
+
 	bool Hdi08TxParser::append(const dsp56k::TWord _data)
 	{
 //		LOGTX("HDI08 TX: " << HEX(_data));
@@ -62,6 +69,37 @@ namespace virusLib
 				m_state = State::Sysex;
 				m_sysexData.push_back(byte);
 				m_sysexReceiveIndex = 1;
+			}
+			else if(m_mc.getROM().isTIFamily() && !(_data & 0xffff) && (byte & 0x0f) >= 0x8 && (byte & 0x0f) <= 0xe)
+			{
+				// The TI sends its MIDI out as USB MIDI packets, one byte per word: the cable and the kind of message,
+				// then three bytes. Only notes leave the device, see isMidiOutNote()
+				m_state = State::UsbMidi;
+				m_usbMidiHeader = byte;
+				m_usbMidiCount = 0;
+			}
+			else if(!m_mc.getROM().isTIFamily() && (byte < 0x80 ? m_midiStatus != 0 : byte < 0xf0 && !(_data & 0xffff)))
+			{
+				// The A, B and C send their MIDI out as bytes, one per word, with running status. Their own reports in
+				// between leave it. Only notes leave the device, see isMidiOutNote()
+				if(byte >= 0x80)
+				{
+					m_midiStatus = byte;
+					m_midiCount = 0;
+					break;
+				}
+
+				m_midiBytes[m_midiCount++] = byte;
+
+				const auto kind = m_midiStatus & 0xf0;
+				if(m_midiCount < (kind == 0xc0 || kind == 0xd0 ? 1u : 2u))
+					break;
+
+				m_midiCount = 0;
+				if(!isMidiOutNote(m_midiStatus))
+					break;
+				m_midiData.emplace_back(synthLib::MidiEventSource::Device, m_midiStatus, m_midiBytes[0], m_midiBytes[1]);
+				return true;
 			}
 			else
 			{
@@ -206,6 +244,28 @@ namespace virusLib
 				}
 			}
 			break;
+		case State::UsbMidi:
+			{
+				// A status byte that does not match the header, or a data byte that is none, ends it: not a packet
+				const bool valid = m_usbMidiCount ? byte < 0x80 : !(_data & 0xffff) && (byte >> 4) == (m_usbMidiHeader & 0x0f);
+
+				if(!valid)
+				{
+					m_state = State::Default;
+					return append(_data);
+				}
+
+				m_usbMidi[m_usbMidiCount++] = byte;
+
+				if(m_usbMidiCount < m_usbMidi.size())
+					break;
+
+				m_state = State::Default;
+				if(!isMidiOutNote(m_usbMidi[0]))
+					break;
+				m_midiData.emplace_back(synthLib::MidiEventSource::Device, m_usbMidi[0], m_usbMidi[1], m_usbMidi[2]);
+				return true;
+			}
 		case State::StatusReport:
 			m_dspStatus.push_back(_data);
 			if(--m_remainingStatusBytes == 0)

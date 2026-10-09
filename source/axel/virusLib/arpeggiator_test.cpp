@@ -1,6 +1,6 @@
-// ArpeggiatorTI turns Virus TI patches into synthLib::Arpeggiator settings, with the pattern table it reads from the
-// firmware. A small fake firmware stands in for the real one here, which is not available to a test.
-#include "arpeggiatorTI.h"
+// virusLib::Arpeggiator turns Virus patches into synthLib::Arpeggiator settings, with the pattern table it reads from
+// the firmware. A small fake firmware stands in for the real one here, which is not available to a test.
+#include "arpeggiator.h"
 
 #include "dsp56kEmu/memory.h"
 
@@ -19,7 +19,7 @@ namespace
 	{
 		if (_condition)
 			return;
-		std::fprintf(stderr, "arpeggiatorTI_test: check in line %d failed\n", _line);
+		std::fprintf(stderr, "virusArpeggiator_test: check in line %d failed\n", _line);
 		std::abort();
 	}
 
@@ -28,7 +28,7 @@ namespace
 	constexpr float g_samplerate = 48000.0f;
 	constexpr uint64_t g_step = 6000;	// a sixteenth at 120 BPM
 
-	// The parts of a firmware that ArpeggiatorTI looks at: the code that picks a pattern, the table, the steps
+	// The parts of a firmware that virusLib::Arpeggiator looks at: the code that picks a pattern, the table, the steps
 	void writeFirmware(dsp56k::Memory& _memory)
 	{
 		using namespace dsp56k;
@@ -49,11 +49,12 @@ namespace
 			_memory.set(MemArea_X, address++, _velocity << 16);
 		};
 
-		for (TWord p = 1; p < 64; ++p)
+		for (TWord p = 0; p < 64; ++p)
 		{
 			_memory.set(MemArea_X, table + p, address);
 
-			// Pattern 1: half a step at velocity 100, then a whole one at 127. Every other: a quarter step at 100
+			// Pattern 1: half a step at velocity 100, then a whole one at 127. Every other: a quarter step at 100. The TI
+			// does not read 0, the patch has its own
 			if (p == 1)
 			{
 				step(0.5, 1.0, 100);
@@ -92,7 +93,7 @@ namespace
 	Note off(const uint64_t _time) { return {_time, false, 64}; }
 
 	// Holds middle C on channel 4, where the patch plays
-	std::vector<Note> play(ArpeggiatorTI _arp, const ROMFile::TPreset& _patch, const uint64_t _samples)
+	std::vector<Note> play(virusLib::Arpeggiator _arp, const ROMFile::TPreset& _patch, const uint64_t _samples)
 	{
 		std::array<const ROMFile::TPreset*, 16> singles{};
 		singles[3] = &_patch;
@@ -134,16 +135,28 @@ int main()
 	dsp56k::Memory memory(validator, 0x10000);
 	writeFirmware(memory);
 
-	ArpeggiatorTI arp;
-	EXPECT(arp.readPatterns(memory));
+	virusLib::Arpeggiator arp;
+	EXPECT(arp.readPatterns(memory, DeviceModel::TI));
 
 	// The key's velocity is moved by the step's, 100 being no change. The second step is legato
 	EXPECT(play(arp, patch(1), 2 * g_step + 1) == std::vector<Note>({on(0, 90), off(3000), on(6000, 117), off(12000), on(12000, 90)}));
 
-	// Note Length scales every step, but never past the next one
+	// Note Length scales every step, but never past the next one. The firmware rounds to its ticks of 1/192 note: half
+	// a step at 127/64 is 11.9 of the 12 ticks of a step, so 12
 	auto longer = patch(1);
 	longer[128 + 5] = 127;
-	EXPECT(play(arp, longer, 2 * g_step + 1) == std::vector<Note>({on(0, 90), off(5953), on(6000, 117), off(12000), on(12000, 90)}));
+	EXPECT(play(arp, longer, 2 * g_step + 1) == std::vector<Note>({on(0, 90), off(6000), on(6000, 117), off(12000), on(12000, 90)}));
+
+	// The shortest note is one tick, 500 samples here
+	auto shortest = patch(1);
+	shortest[128 + 5] = 0;
+	EXPECT(play(arp, shortest, g_step + 1000) == std::vector<Note>({on(0, 90), off(500), on(6000, 117), off(6500)}));
+
+	// Swing goes into the ticks of every step, a half rounded to even as the firmware does: with 32, a pair of steps is
+	// 13.5 and 10.5 ticks, so 14 and 10
+	auto swing = patch(1);
+	swing[128 + 6] = 32;
+	EXPECT(play(arp, swing, 2 * g_step + 1) == std::vector<Note>({on(0, 90), off(3000), on(7000, 117), off(12000), on(12000, 90)}));
 
 	// The patch's own pattern, four steps of which the first and the third play. The rest after each belongs to it:
 	// the length is a share of two steps
@@ -163,12 +176,31 @@ int main()
 	none[128 + 1] = 0;
 	EXPECT(play(arp, none, g_step).empty());
 
+	// The A, B and C have no pattern of the patch's own: 0 is the first preset one
+	virusLib::Arpeggiator c;
+	EXPECT(c.readPatterns(memory, DeviceModel::C));
+	EXPECT(play(c, patch(0), g_step + 1) == std::vector<Note>({on(0, 90), off(1500), on(6000, 90)}));
+
+	// The A plays pattern 1 whatever the patch says about Pattern, Note Length and Swing, and counts a tick for every
+	// unit of Arp Clock: 1/16 plays eighths
+	virusLib::Arpeggiator a;
+	EXPECT(a.readPatterns(memory, DeviceModel::A));
+	auto eighths = patch(5);
+	eighths[128 + 5] = 0;
+	eighths[128 + 6] = 32;
+	EXPECT(play(a, eighths, 4 * g_step + 1) == std::vector<Note>({on(0, 90), off(6000), on(12000, 117), off(24000), on(24000, 90)}));
+
+	// And it rounds a half tick up: with Arp Clock 3/128 (7) a step is 9 ticks, half of it 4.5, so 5
+	auto nine = eighths;
+	nine[128 + 17] = 7;
+	EXPECT(play(a, nine, 4501) == std::vector<Note>({on(0, 90), off(2500), on(4500, 117)}));
+
 	// No pattern table, no arpeggiator: the firmware has to keep its own
 	dsp56k::Memory empty(validator, 0x10000);
-	ArpeggiatorTI nothing;
-	EXPECT(!nothing.readPatterns(empty));
+	virusLib::Arpeggiator nothing;
+	EXPECT(!nothing.readPatterns(empty, DeviceModel::TI));
 	EXPECT(!nothing.isValid());
 
-	std::puts("arpeggiatorTI_test: all passed");
+	std::puts("virusArpeggiator_test: all passed");
 	return 0;
 }

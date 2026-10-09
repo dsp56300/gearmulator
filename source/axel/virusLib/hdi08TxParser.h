@@ -18,7 +18,8 @@ namespace virusLib
 			Default,
 			Sysex,
 			Preset,
-			StatusReport
+			StatusReport,
+			UsbMidi
 		};
 
 		enum class PatternType
@@ -57,6 +58,16 @@ namespace virusLib
 		synthLib::SysexBuffer m_sysexData;
 		std::vector<uint8_t> m_presetData;
 		std::vector<dsp56k::TWord> m_dspStatus;
+
+		static bool isMidiOutNote(uint8_t _status);
+
+		uint8_t m_usbMidiHeader = 0;
+		std::array<uint8_t, 3> m_usbMidi{};
+		uint32_t m_usbMidiCount = 0;
+
+		uint8_t m_midiStatus = 0;
+		std::array<uint8_t, 2> m_midiBytes{};
+		uint32_t m_midiCount = 0;
 
 		uint32_t m_sysexReceiveIndex = 0;
 		uint32_t m_remainingPresetBytes = 0;

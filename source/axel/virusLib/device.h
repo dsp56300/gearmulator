@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arpeggiatorTI.h"
+#include "arpeggiator.h"
 #include "dspSingle.h"
 #include "frontpanelState.h"
 #include "synthLib/midiTypes.h"
@@ -61,6 +61,9 @@ namespace virusLib
 		static void applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom);
 		void applyDspMemoryPatches() const;
 
+		// With the patterns of the firmware that runs, see virusArpTest
+		const Arpeggiator& getArpeggiator() const { return m_arpeggiator; }
+
 	private:
 		bool hasArpeggiators() const override;
 		void processArpeggiators(std::vector<synthLib::SMidiEvent>& _midi, std::vector<synthLib::SMidiEvent>& _out,
@@ -82,7 +85,7 @@ namespace virusLib
 		FrontpanelState m_frontpanelStateDSP;
 		synthLib::SMidiEvent m_frontpanelStateMidiEvent;
 
-		ArpeggiatorTI m_arpeggiator;
-		bool m_firmwareArpeggiatorDisabled = false;
+		Arpeggiator m_arpeggiator;
+		bool m_cppArpeggiator = false;
 	};
 }

@@ -32,10 +32,11 @@ namespace virusLib
 		static ROMFile findROM(DeviceModel _model = DeviceModel::ABC);
 		static ROMFile findROM(const std::string& _filename, DeviceModel _model = DeviceModel::ABC);
 
+		// A, B or C, from the version in an operating system
+		static DeviceModel detectModel(const std::vector<uint8_t>& _data);
+
 	private:
 		static FileData loadFile(const std::string& _name);
-
-		static DeviceModel detectModel(const std::vector<uint8_t>& _data);
 
 		static std::vector<ROMFile> initializeRoms(const std::vector<std::string>& _files, DeviceModel _model);
 	};

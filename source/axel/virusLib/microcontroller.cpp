@@ -22,9 +22,18 @@ constexpr uint32_t g_sysexPresetFooterSize = 2;	// checksum, f7
 
 constexpr uint32_t g_singleRamBankCount = 2;
 
-// Virus TI, page B
+// Page B: where a patch keeps Arp Mode, and the parameter the A, B and C take it as. The TI takes it as 15
+constexpr uint8_t g_arpMode = 1;
 constexpr uint8_t g_arpModeParamTI = 15;
-constexpr uint8_t g_arpModeStorageTI = 1;
+
+// Virus TI, page D: Switches/Arpeggiator Enable
+constexpr uint8_t g_arpEnableTI = 0x1a;
+
+// Up to Chord. Arp>Matrix (7, TI) modulates instead of playing notes, the firmware keeps playing that
+static bool playsNotes(const uint32_t _arpMode)
+{
+	return _arpMode >= 1 && _arpMode <= 6;
+}
 
 const std::set<uint8_t> g_pageA = {0x05, 0x0A, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D,
                                    0x1E, 0x1F, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D,
@@ -338,7 +347,19 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 	buf[1] = buf[1] | (program << 8);
 	m_hdi08.writeRX(buf, 2);
 
-	m_hdi08.writeRX(presetToDSPWords(preset, isMulti));
+	if(isMulti || !m_cppArpeggiator)
+	{
+		m_hdi08.writeRX(presetToDSPWords(preset, isMulti));
+	}
+	else
+	{
+		// The C++ arpeggiator plays the patch's arpeggio, the firmware must not
+		auto single = preset;
+		single[128 + g_arpMode] = firmwareArpMode(PAGE_B, g_arpMode, single[128 + g_arpMode]);
+		if(m_rom.isTIFamily())
+			single[128 + g_arpModeParamTI] = firmwareArpMode(PAGE_B, g_arpModeParamTI, single[128 + g_arpModeParamTI]);
+		m_hdi08.writeRX(presetToDSPWords(single, false));
+	}
 
 	LOG("Send to DSP: " << (isMulti ? "Multi" : "Single") << " to program " << static_cast<int>(program));
 
@@ -404,20 +425,28 @@ bool Microcontroller::isPolyPressureForPageBEnabled() const
 	return m_globalSettings[MIDI_CONTROL_HIGH_PAGE] == 1;
 }
 
-void Microcontroller::disableFirmwareArpeggiator()
+void Microcontroller::useCppArpeggiator()
 {
 	std::lock_guard lock(m_mutex);
 
-	// Switches/Arpeggiator Enable. The firmware applies it to every patch it loads from now on, and it ignores Arp Mode
-	// changes then. Not a global setting of ours: it would end up in the plugin state, and a state loaded over the DSP
-	// bridge, where nothing plays the arpeggio in C++, would silence the arpeggiator
-	writeHostBitsWithWait(0, 1);
-	m_hdi08.writeRX({0xf00020, 0x330110, 0x73401a, 0x00f700});
+	if(m_cppArpeggiator)
+		return;
 
-	// The patches that are loaded already keep their arpeggiator until it is switched off
-	send(PAGE_B, SINGLE, g_arpModeParamTI, 0);
+	m_cppArpeggiator = true;
+
+	// The patches that are loaded already play their arpeggiator until it is switched off, see send()
+	const auto param = m_rom.isTIFamily() ? g_arpModeParamTI : g_arpMode;
+	send(PAGE_B, SINGLE, param, m_singleEditBuffer[128 + g_arpMode]);
 	for(uint8_t p=0; p<getPartCount(); ++p)
-		send(PAGE_B, p, g_arpModeParamTI, 0);
+		send(PAGE_B, p, param, m_singleEditBuffers[p][128 + g_arpMode]);
+}
+
+uint8_t Microcontroller::firmwareArpMode(const Page _page, const uint8_t _param, const uint8_t _value) const
+{
+	if(!m_cppArpeggiator || _page != PAGE_B || (_param != g_arpMode && (_param != g_arpModeParamTI || !m_rom.isTIFamily())))
+		return _value;
+
+	return playsNotes(_value) ? 0 : _value;
 }
 
 void Microcontroller::getArpeggiatorSingles(std::array<const TPreset*, 16>& _singles) const
@@ -425,6 +454,10 @@ void Microcontroller::getArpeggiatorSingles(std::array<const TPreset*, 16>& _sin
 	std::lock_guard lock(m_mutex);
 
 	_singles.fill(nullptr);
+
+	// The TI's firmware plays no arpeggio with the switch off. Unknown is on, the firmware is started with it on
+	if(m_rom.isTIFamily() && m_globalSettings[g_arpEnableTI] == 0)
+		return;
 
 	if(m_globalSettings[PLAY_MODE] == PlayModeSingle)
 	{
@@ -445,7 +478,7 @@ void Microcontroller::getArpeggiatorSingles(std::array<const TPreset*, 16>& _sin
 			continue;
 
 		auto& single = _singles[channel];
-		if(!single || ((*single)[128 + g_arpModeStorageTI] == 0 && m_singleEditBuffers[p][128 + g_arpModeStorageTI] != 0))
+		if(!single || ((*single)[128 + g_arpMode] == 0 && m_singleEditBuffers[p][128 + g_arpMode] != 0))
 			single = &m_singleEditBuffers[p];
 	}
 }
@@ -476,7 +509,7 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 
 	TWord buf[] = {0xf4f400, 0x0};
 	buf[0] = buf[0] | _page;
-	buf[1] = (_part << 16) | (_param << 8) | _value;
+	buf[1] = (_part << 16) | (_param << 8) | firmwareArpMode(_page, _param, _value);
 	m_hdi08.writeRX(buf, 2);
 
 //	LOG("Send command, page " << (int)_page << ", part " << (int)_part << ", param " << (int)_param << ", value " << (int)_value);
@@ -547,8 +580,19 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/
 		break;
 	}
 
+	// Page B by poly pressure: Arp Mode reaches the firmware switched off when the C++ arpeggiator plays it
+	const auto* ev = &_ev;
+	SMidiEvent arpOff;
+
+	if(status == M_POLYPRESSURE && isPolyPressureForPageBEnabled() && firmwareArpMode(PAGE_B, _ev.b, _ev.c) != _ev.c)
+	{
+		arpOff = _ev;
+		arpOff.c = 0;
+		ev = &arpOff;
+	}
+
 	for (auto& midiQueue : m_midiQueues)
-		midiQueue.add(_ev);
+		midiQueue.add(*ev);
 
 	if(status < 0xf0 && _fpState)
 	{
@@ -1330,7 +1374,7 @@ void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _p
 	// The TI takes Arp Mode as parameter 15 of page B, but keeps it in the patch where the A, B and C have it, at
 	// parameter 1, and loads it from there. Without the copy, a changed Arp Mode was gone once the patch was loaded again
 	if(m_rom.isTIFamily() && _page == PAGE_B && _param == g_arpModeParamTI)
-		applyToSingleEditBuffer(single, PAGE_B, g_arpModeStorageTI, _value);
+		applyToSingleEditBuffer(single, PAGE_B, g_arpMode, _value);
 }
 
 void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value)
@@ -1457,13 +1501,21 @@ void Microcontroller::receiveUpgradedPreset()
 	{
 		copyTo(m_multiEditBuffer);
 	}
-	else if(m_sentPresetProgram == SINGLE)
+	else if(m_sentPresetProgram == SINGLE || m_sentPresetProgram < m_singleEditBuffers.size())
 	{
-		copyTo(m_singleEditBuffer);
-	}
-	else if(m_sentPresetProgram < m_singleEditBuffers.size())
-	{
-		copyTo(m_singleEditBuffers[m_sentPresetProgram]);
+		auto& single = m_sentPresetProgram == SINGLE ? m_singleEditBuffer : m_singleEditBuffers[m_sentPresetProgram];
+
+		// The firmware got the arpeggiator switched off, see sendPreset(). The TI copies page B 1 to 15 when it upgrades
+		const auto arpMode = single[128 + g_arpMode];
+
+		copyTo(single);
+
+		if(firmwareArpMode(PAGE_B, g_arpMode, arpMode) != arpMode)
+		{
+			single[128 + g_arpMode] = arpMode;
+			if(m_rom.isTIFamily())
+				single[128 + g_arpModeParamTI] = arpMode;
+		}
 	}
 }
 
