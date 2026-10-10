@@ -66,6 +66,10 @@ namespace virusLib
 				dummyProcess(8);
 		}
 
+		// play MIDI at the sample it is meant for, as the TI does over USB (EMU-238). Each DSP has a clock of its own,
+		// as we do not connect them
+		m_midiTimestamps = m_rom.isTIFamily() && m_mc->enableMidiTimestamps();
+
 		m_mc->sendInitControlCommands(127);
 
 		dummyProcess(8);
@@ -528,6 +532,10 @@ namespace virusLib
 
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
+		// exact with timestamps, measured from a note-on to the first sample of its voice (EMU-238)
+		if(m_midiTimestamps)
+			return m_rom.getModel() == DeviceModel::Snow ? 256 : 255;
+
 		// Note that this is an average value, midi latency drifts in a range of roughly +/- 61 samples
 		constexpr auto latency = 324;
 

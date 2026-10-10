@@ -53,6 +53,7 @@ public:
 	void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
 	void sendPendingMidiEvents(uint32_t _maxOffset);
 	Hdi08MidiQueue& getMidiQueue(size_t _index) { return m_midiQueues[_index]; }
+	bool enableMidiTimestamps();
 
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);

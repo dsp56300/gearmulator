@@ -74,6 +74,7 @@ namespace virusLib
 		std::unique_ptr<Microcontroller> m_mc;
 
 		uint32_t m_numSamplesProcessed = 0;
+		bool m_midiTimestamps = false;
 		float m_samplerate;
 		FrontpanelState m_frontpanelStateDSP;
 		synthLib::SMidiEvent m_frontpanelStateMidiEvent;

@@ -1272,6 +1272,14 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 		midiQueue.sendPendingMidiEvents(_maxOffset);
 }
 
+bool Microcontroller::enableMidiTimestamps()
+{
+	bool enabled = true;
+	for (auto& midiQueue : m_midiQueues)
+		enabled &= midiQueue.enableTimestamps();
+	return enabled;
+}
+
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
 {
 	return getPresetVersion(_preset[0]);
