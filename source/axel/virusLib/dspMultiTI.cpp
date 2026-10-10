@@ -109,15 +109,15 @@ namespace virusLib
 
 		uint32_t blockIdx = 0;
 
-		// The OS reads the analog input from RX1 of slot 1, L in the second frame of a sample, R in the first. Until
+		// The OS reads the analog input from RX1 of slot 1, L in the first frame of a sample, R in the second. Until
 		// dsp56300 8ae1681e, a transmitter that the OS switched on while another one was already running (TE0, then
 		// TE1) added a slot to the transmit frame, and the OS picked the input up from slot 0 instead.
 		static volatile uint32_t offset = 5;
 
 		for(uint32_t i=0; i<_frames; ++i)
 		{
-			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[0][i]);
-			at(blockIdx + offset                          ) = dsp56k::sample2dsp<T>(_inputs[1][i]);
+			at(blockIdx + offset                          ) = dsp56k::sample2dsp<T>(_inputs[0][i]);
+			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[1][i]);
 
 			blockIdx += g_esai1RxBlockSize;
 		}
@@ -306,23 +306,16 @@ namespace virusLib
 		// Master ESAI_1 input gets the analog input from the slave, inject the interleaved input here
 		_buffers.in.processAudioinput(_dsp.getPeriphY().getEsai(), s, _latency, _inputs);
 
-		// Slave ESAI input gets the analog input in regular fashion
-
-		_dsp2.getPeriphX().getEsai().processAudioInput<T>(1, _latency, [&](size_t _s, dsp56k::Audio::RxFrame& _frame)
+		// Slave ESAI input gets the analog input. The OS pairs the right sample of a frame with the left sample of the
+		// frame after it, so every frame carries the left sample of the sample before
+		_dsp2.getPeriphX().getEsai().processAudioInput<T>(s, _latency, [&](size_t _s, dsp56k::Audio::RxFrame& _frame)
 		{
 			_frame.resize(2);
-			_frame[0][0] = dsp56k::sample2dsp<T>(_inputs[0][0]);
-			_frame[1][0] = dsp56k::sample2dsp<T>(_buffers.m_previousInput);
+			_frame[0][0] = dsp56k::sample2dsp<T>(_s ? _inputs[0][_s-1] : _buffers.m_previousInput);
+			_frame[1][0] = dsp56k::sample2dsp<T>(_inputs[1][_s]);
 		});
 
-		_dsp2.getPeriphX().getEsai().processAudioInput<T>(s - 1, _latency, [&](size_t _s, dsp56k::Audio::RxFrame& _frame)
-		{
-			_frame.resize(2);
-			_frame[0][0] = dsp56k::sample2dsp<T>(_inputs[0][_s]);
-			_frame[1][0] = dsp56k::sample2dsp<T>(_inputs[1][_s+1]);
-		});
-
-		_buffers.m_previousInput = _inputs[1][s-1];
+		_buffers.m_previousInput = _inputs[0][s-1];
 
 		// Slave ESAI_1 does not get the ADC at all but only data from the master, we don't need it here
 		_dsp2.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 2, _latency * 2);
