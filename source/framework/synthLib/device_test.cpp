@@ -7,6 +7,7 @@
 #include "plugin.h"
 #include "baseLib/os.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <vector>
 
@@ -14,7 +15,7 @@ namespace
 {
 	using namespace synthLib;
 
-	class TestDevice final : public Device
+	class TestDevice : public Device
 	{
 	public:
 		TestDevice() : Device(DeviceCreateParams()) {}
@@ -43,6 +44,29 @@ namespace
 		void onTransportDiscontinuity(const SMidiEvent& _ev) override
 		{
 			m_transportEvents.push_back(_ev);
+		}
+	};
+
+	// Has an audio input and a second stereo output. Reads the input, then writes every output.
+	class FeedbackProbe final : public TestDevice
+	{
+	public:
+		bool m_heardOutput = false;
+
+		uint32_t getChannelCountIn() override { return 2; }
+		uint32_t getChannelCountOut() override { return 4; }
+
+	protected:
+		void processAudio(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, const size_t _size) override
+		{
+			for (size_t i = 0; i < _size; ++i)
+			{
+				if (_inputs[0][i] != 0.0f || _inputs[1][i] != 0.0f)
+					m_heardOutput = true;
+			}
+
+			for (size_t c = 0; c < 4; ++c)
+				std::fill_n(_outputs[c], _size, 1.0f);
 		}
 	};
 
@@ -118,6 +142,29 @@ namespace
 		const auto& received = device.m_midiSent.front().sysex;
 		expect(std::vector<uint8_t>(received.begin(), received.end()) == expected);
 	}
+
+	// A host that leaves the input bus and an output bus inactive passes null for both. Plugin stands
+	// in a buffer for each, and the input's has to stay silent: one shared buffer fed whatever the
+	// device wrote to the missing output straight back into its input.
+	void testMissingInputDoesNotHearMissingOutput()
+	{
+		FeedbackProbe device;
+		Plugin plugin(&device, [](auto* _d) { return _d; });
+		plugin.setMidiClockEnabled(false);
+		plugin.setHostSamplerate(44100.0f, 0.0f);
+		plugin.setBlockSize(8);
+
+		float left[8] = {};
+		float right[8] = {};
+		TAudioInputs in{};
+		TAudioOutputs out{};
+		out[0] = left;
+		out[1] = right;
+		for (int block = 0; block < 4; ++block)
+			plugin.process(in, out, 8, 120.0f, 0.0f, false, false);
+
+		expect(!device.m_heardOutput);
+	}
 } // namespace
 
 int main()
@@ -126,5 +173,6 @@ int main()
 
 	testTransportMarkerBypassesSendMidi();
 	testChunkedSysexReachesDeviceOnce();
+	testMissingInputDoesNotHearMissingOutput();
 	return 0;
 }

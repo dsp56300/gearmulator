@@ -85,7 +85,7 @@ namespace synthLib
 		TAudioOutputs outputs(_outputs);
 
 		for(size_t i=0; i<inputs.size(); ++i)
-			inputs[i] = _inputs[i] ? _inputs[i] : getDummyBuffer(_count);
+			inputs[i] = _inputs[i] ? _inputs[i] : getSilence(_count);
 
 		for(size_t i=0; i<outputs.size(); ++i)
 			outputs[i] = _outputs[i] ? _outputs[i] : getDummyBuffer(_count);
@@ -274,6 +274,14 @@ namespace synthLib
 			m_dummyBuffer.resize(_minimumSize);
 
 		return m_dummyBuffer.data();
+	}
+
+	const float* Plugin::getSilence(const size_t _minimumSize)
+	{
+		if(m_silence.size() < _minimumSize)
+			m_silence.resize(_minimumSize, 0.0f);
+
+		return m_silence.data();
 	}
 
 	bool Plugin::applyPendingDeviceSamplerate()

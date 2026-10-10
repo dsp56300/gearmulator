@@ -75,6 +75,7 @@ namespace synthLib
 	private:
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
+		const float* getSilence(size_t _minimumSize);
 		void updateDeviceLatency();
 		// Composes the values the host is told about. The inputs only change while m_lock is
 		// held, so publishing them here lets getLatency*() read without taking it - that read
@@ -99,6 +100,9 @@ namespace synthLib
 		Device* m_device;
 
 		std::vector<float> m_dummyBuffer;
+		// Missing inputs read this one, never m_dummyBuffer: missing outputs write into that, and
+		// sharing it fed the device its own output. Only ever grown, with zeros.
+		std::vector<float> m_silence;
 
 		float m_hostSamplerate = 0.0f;
 		float m_hostSamplerateInv = 0.0f;
