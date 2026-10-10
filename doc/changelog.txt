@@ -177,6 +177,12 @@ OsTIrus:
         1.45 ms late) as through its MIDI port. The MIDI latency is constant
         now and reported exactly to the host.
 
+- [Fix] EMU-240 In Multi mode, a note could get lost when one of the two DSPs
+        was busy. The DSP then hands the note over to the other one, which did
+        not receive it, because the two DSPs did not talk to each other. They
+        now do, as on the hardware, and parts on the second DSP no longer play
+        two samples ahead of the others.
+
 Vavra/Xenia:
 
 - [Fix] EMU-168 SysEx from the host or a MIDI input could be mistaken for a

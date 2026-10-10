@@ -1,5 +1,7 @@
 #include "dspMultiTI.h"
 
+#include "dsp56kBase/logging.h"
+
 namespace virusLib
 {
 	constexpr uint32_t g_esai1TxBlockSize = 6 * 3 * 2;		// 6 = number of TX pins, 3 = number of slots per frame, 2 = double data rate
@@ -11,6 +13,20 @@ namespace virusLib
 	constexpr uint32_t g_magicIntervalSamples = 256;
 
 	static constexpr dsp56k::TWord g_magicNumber	= 0xedc987;
+
+	// ESAI_1 frames have three slots, the OS of one DSP talks to the other one in the second
+	constexpr uint32_t g_esai1Slots = 3;
+	constexpr uint32_t g_controlSlot = 1;
+
+	// A DSP only takes part when the marker of the other one arrives in its ring of 512 frames where it sent its own, so
+	// the way there and back has to take whole rings. On the chip the wire takes no time, but a DSP thread here can only
+	// take a frame that the other one finished, so the master gets what the slave sends as on the chip and the slave
+	// what the master sends one ring later. The master copies the clock of the slave, which stays as on the chip
+	constexpr uint32_t g_controlFramesToSlave = 512;
+	constexpr uint32_t g_controlFramesToMaster = 0;
+
+	// a DSP that waits for the other one runs again once that many frames arrived
+	constexpr uint32_t g_controlWakeFrames = 64;
 	
 	void audioAdd(float& _dst, float _src)
 	{
@@ -45,11 +61,17 @@ namespace virusLib
 
 		_esai.processAudioOutput(data() + g_esai1TxPadding, _frames * 2);
 
-		if(m_blockStart == InvalidOffset)
 		{
+			// The slave moves its ring once it finds the marker of the master (EMU-240), by whole frames, so the marker
+			// stays in the same channel. Only that one counts once the block start is known, the others carry audio
 			for(uint32_t i=g_esai1TxPadding; i<g_esai1TxBlockSize * _frames + g_esai1TxPadding; ++i)
 			{
 				if(at(i) != g_magicNumber)
+					continue;
+
+				constexpr uint32_t frameSize = g_esai1TxBlockSize >> 1;
+
+				if(m_blockStart != InvalidOffset && (i - 0xb + frameSize - m_blockStart) % frameSize)
 					continue;
 
 				// OS writes the magic value to position $b of its internal ring buffer
@@ -110,6 +132,162 @@ namespace virusLib
 
 		getPeriphX().getEsai().writeEmptyAudioIn(2);
 		m_dsp2.getPeriphX().getEsai().writeEmptyAudioIn(2);
+
+		m_toSlave.prefill(g_controlFramesToSlave);
+		m_toMaster.prefill(g_controlFramesToMaster);
+
+		connect(*this, m_toMaster, m_toSlave);
+		connect(m_dsp2, m_toSlave, m_toMaster);
+	}
+
+	DspMultiTI::~DspMultiTI()
+	{
+		// each DSP waits for the other one, both have to stop before either goes away
+		m_toSlave.close();
+		m_toMaster.close();
+
+		stopDSPThread();
+		m_dsp2.stopDSPThread();
+	}
+
+	void DspMultiTI::connect(DspSingle& _dsp, ControlLink& _in, ControlLink& _out)
+	{
+		auto& esai = _dsp.getPeriphX().getEsai();
+		auto& esai1 = _dsp.getPeriphY().getEsai();
+
+		// everything the DSP sends still goes to processAudioTI, the control slot also goes to the other DSP
+		esai1.setWriteTxCallback([&esai1, &_out](uint64_t& _frameIndex, const dsp56k::Audio::TxFrame& _frame)
+		{
+			esai1.getAudioOutputs().push_back(_frame);
+
+			if(_frame.size() > g_controlSlot)
+				_out.push({_frame[g_controlSlot][0], _frame[g_controlSlot][1]});
+			else
+				_out.push({});
+
+			++_frameIndex;
+		});
+
+		// The emulated ESAI raises the receive interrupt of a slot after the transmit ones, the chip before them. In the
+		// last slot the frame interrupt of the OS moves its ring pointer in between, so the OS takes what arrives in a
+		// slot for the slot after it: what the other DSP sent in the control slot has to arrive one slot earlier
+		esai1.setReadRxCallback([&esai1, &_in, &_out](uint64_t& _frameIndex, dsp56k::Audio::RxFrame& _frame)
+		{
+			auto& frames = esai1.getAudioInputs();
+
+			if(frames.empty())
+				_out.producerWaits();
+
+			_frame = frames.pop_front();
+
+			for(auto s = _frame.size(); s < g_esai1Slots; ++s)
+			{
+				_frame.resize(s + 1);
+				_frame[s] = {};
+			}
+
+			if(_in.empty())
+				_out.producerWaits();
+
+			const auto words = _in.pop();
+
+			_frame[g_controlSlot - 1][0] = words[0];
+			_frame[g_controlSlot - 1][1] = words[1];
+
+			++_frameIndex;
+		});
+
+		// the same as the default, but the other DSP must not wait for this one while it waits for audio
+		esai.setReadRxCallback([&esai, &_out](uint64_t& _frameIndex, dsp56k::Audio::RxFrame& _frame)
+		{
+			auto& frames = esai.getAudioInputs();
+
+			if(frames.empty())
+				_out.producerWaits();
+
+			_frame = frames.pop_front();
+			++_frameIndex;
+		});
+	}
+
+	void DspMultiTI::ControlLink::prefill(const uint32_t _count)
+	{
+		for(uint32_t i=0; i<_count; ++i)
+			m_words.push_back({});
+	}
+
+	void DspMultiTI::ControlLink::push(const Words& _words)
+	{
+		// only while the OS of the receiving DSP did not switch its receiver on yet
+		if(m_words.full())
+		{
+			if(!m_overflow)
+				LOG("ESAI_1 control link overflow, the other DSP does not receive");
+			m_overflow = true;
+			return;
+		}
+
+		m_words.push_back(_words);
+		m_producerWaits.store(false, std::memory_order_relaxed);
+
+		// A receiver that waits does not pop, so the link grows by one per push and passes the number of frames that
+		// wake it exactly once. Only that push has to look for it, the others save the fence
+		if(m_words.size() == g_controlWakeFrames)
+			wakeReceiver(g_controlWakeFrames);
+	}
+
+	void DspMultiTI::ControlLink::producerWaits()
+	{
+		m_producerWaits.store(true, std::memory_order_relaxed);
+
+		wakeReceiver(1);
+	}
+
+	void DspMultiTI::ControlLink::wakeReceiver(const size_t _minWords)
+	{
+		// pairs with the fence in pop(): either the receiver sees what was written before, or this sees it waiting
+		std::atomic_thread_fence(std::memory_order_seq_cst);
+
+		if(!m_receiverWaits.load(std::memory_order_relaxed))
+			return;
+
+		std::lock_guard lock(m_mutex);
+
+		if(m_words.size() >= _minWords)
+			m_cv.notify_one();
+	}
+
+	DspMultiTI::ControlLink::Words DspMultiTI::ControlLink::pop()
+	{
+		if(m_words.empty())
+		{
+			std::unique_lock lock(m_mutex);
+
+			m_receiverWaits.store(true, std::memory_order_relaxed);
+			std::atomic_thread_fence(std::memory_order_seq_cst);
+
+			// Waking a thread for every frame costs more than the emulation of the frame. Wait for a few, or for less
+			// when the other DSP is about to wait itself, for audio or for this one
+			m_cv.wait(lock, [this]
+			{
+				const auto size = m_words.size();
+				return m_closed || size >= g_controlWakeFrames || (size && m_producerWaits.load(std::memory_order_relaxed));
+			});
+
+			m_receiverWaits.store(false, std::memory_order_relaxed);
+
+			if(m_words.empty())
+				return {};
+		}
+
+		return m_words.pop_front();
+	}
+
+	void DspMultiTI::ControlLink::close()
+	{
+		std::lock_guard lock(m_mutex);
+		m_closed = true;
+		m_cv.notify_all();
 	}
 
 	template <typename T>
