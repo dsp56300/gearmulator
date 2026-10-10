@@ -52,39 +52,24 @@ namespace jeJucePlugin
 		return new jucePluginEditorLib::PluginEditorStateT<jeJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
-	synthLib::Device* AudioPluginAudioProcessor::createDevice()
+	synthLib::Device* AudioPluginAudioProcessor::newDevice(const synthLib::DeviceCreateParams& _params)
 	{
-		const auto& rom = getSelectedRom();
-
-		auto* errorMsg = "A firmware rom (a single 512k .bin file or multiple .mid files) is required, but was not found.";
-
-		if (!rom.isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, errorMsg);
-
-		synthLib::DeviceCreateParams params;
-
-		params.romData = rom.getData();
-		params.romName = rom.getName();
-		params.homePath = getDataFolder();
-
-		auto* d = new jeLib::Device(params);
-		if(!d->isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, errorMsg);
-		return d;
+		return new jeLib::Device(_params);
 	}
 
 	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
 	{
 		Processor::getRemoteDeviceParams(_params);
 
-		auto rom = jeLib::RomLoader::findROM();
+		// the selected ROM, for a local and a remote device alike
+		const auto& rom = getSelectedRom();
 
-		if (rom.isValid())
-		{
-			auto data = rom.getData();
-			_params.romData.assign(data.begin(), data.end());
-			_params.romName = rom.getName();
-		}
+		if (!rom.isValid())
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (a single 512k .bin file or multiple .mid files) is required, but was not found.");
+
+		const auto& data = rom.getData();
+		_params.romData.assign(data.begin(), data.end());
+		_params.romName = rom.getName();
 	}
 
 	pluginLib::Controller* AudioPluginAudioProcessor::createController()

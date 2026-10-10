@@ -85,11 +85,9 @@ namespace virus
 		setPatchManager(new genericVirusUI::PatchManager(*this));
 	}
 
-	synthLib::Device* VirusProcessor::createDevice()
+	synthLib::Device* VirusProcessor::newDevice(const synthLib::DeviceCreateParams& _params)
 	{
-		synthLib::DeviceCreateParams p;
-		getRemoteDeviceParams(p);
-		return new virusLib::Device(p, true);
+		return new virusLib::Device(_params, true);
 	}
 
 	void VirusProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const

@@ -36,11 +36,9 @@ namespace xtJucePlugin
 		return new jucePluginEditorLib::PluginEditorStateT<xtJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
-	synthLib::Device* AudioPluginAudioProcessor::createDevice()
+	synthLib::Device* AudioPluginAudioProcessor::newDevice(const synthLib::DeviceCreateParams& _params)
 	{
-		synthLib::DeviceCreateParams p;
-		getRemoteDeviceParams(p);
-		return new xt::Device(p);
+		return new xt::Device(_params);
 	}
 
 	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const

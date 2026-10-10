@@ -83,7 +83,10 @@ namespace pluginLib
 
 		ProgramChangeRouter& getProgramChangeRouter() { return m_programChangeRouter; }
 
-		virtual synthLib::Device* createDevice() = 0;
+		// creates the local device from getRemoteDeviceParams(), so that a local and a remote device boot the same ROM
+		virtual synthLib::Device* createDevice();
+		// the product's device class, a distinct name: a third createDevice overload would hide the other two
+		virtual synthLib::Device* newDevice(const synthLib::DeviceCreateParams& _params) = 0;
 		virtual bridgeClient::RemoteDevice* createRemoteDevice(const synthLib::DeviceCreateParams& _params);
 		virtual void getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const;
 		virtual bridgeClient::RemoteDevice* createRemoteDevice();

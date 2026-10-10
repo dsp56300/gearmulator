@@ -279,6 +279,23 @@ namespace pluginLib
 		return createRemoteDevice(params);
 	}
 
+	synthLib::Device* Processor::createDevice()
+	{
+		// a product that has a better text for a missing ROM throws it from getRemoteDeviceParams
+		synthLib::DeviceCreateParams params;
+		getRemoteDeviceParams(params);
+		params.homePath = getDataFolder();
+
+		auto* device = newDevice(params);
+
+		if(!device->isValid())
+		{
+			delete device;
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, getProperties().name + ": no valid firmware ROM found");
+		}
+		return device;
+	}
+
 	synthLib::Device* Processor::createDevice(const DeviceType _type)
 	{
 		switch (_type)

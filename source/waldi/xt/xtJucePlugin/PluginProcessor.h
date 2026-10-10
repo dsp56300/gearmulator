@@ -11,7 +11,7 @@ namespace xtJucePlugin
 
 	    jucePluginEditorLib::PluginEditorState* createEditorState() override;
 
-		synthLib::Device* createDevice() override;
+		synthLib::Device* newDevice(const synthLib::DeviceCreateParams& _params) override;
 		void getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const override;
 
 	    pluginLib::Controller* createController() override;
