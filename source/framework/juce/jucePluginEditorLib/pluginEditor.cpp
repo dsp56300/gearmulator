@@ -2,6 +2,9 @@
 
 #include "pluginProcessor.h"
 
+#include "focusedParameter.h"
+#include "midiPorts.h"
+
 #include "settings.h"
 #include "settingsDspAudio.h"
 #include "settingsDspBridge.h"
@@ -77,6 +80,9 @@ namespace jucePluginEditorLib
 
 		m_overlays.reset();
 
+		m_midiPorts.reset();
+		m_focusedParameter.reset();
+
 		for (const auto& file : m_dragAndDropFiles)
 			file.deleteFile();
 
@@ -137,6 +143,9 @@ namespace jucePluginEditorLib
 					openMenu(_event);
 			}
 		});
+
+		m_focusedParameter.reset(new FocusedParameter(getProcessor().getController(), *this));
+		m_midiPorts.reset(new MidiPorts(*this, getProcessor()));
 
 #if _DEBUG
 		juceRmlUi::EventListener::Add(getRmlRootElement(), Rml::EventId::Keydown, [this](Rml::Event& _event)

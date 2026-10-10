@@ -7,7 +7,6 @@ set(SOURCES
 	n2xController.cpp n2xController.h
 	n2xEditor.cpp n2xEditor.h
 	n2xFileType.cpp n2xFileType.h
-	n2xFocusedParameter.cpp n2xFocusedParameter.h
 	n2xMasterVolume.cpp n2xMasterVolume.h
 	n2xOctLed.cpp n2xOctLed.h
 	n2xOutputMode.cpp n2xOutputMode.h

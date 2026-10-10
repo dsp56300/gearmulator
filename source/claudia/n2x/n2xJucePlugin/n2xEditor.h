@@ -6,8 +6,6 @@
 
 namespace jucePluginEditorLib
 {
-	class MidiPorts;
-	class FocusedParameter;
 	class Processor;
 }
 
@@ -21,7 +19,6 @@ namespace n2xJucePlugin
 	class Part;
 	class OutputMode;
 	class Lfo;
-	class FocusedParameter;
 	class PatchManager;
 	class Controller;
 
@@ -63,12 +60,6 @@ namespace n2xJucePlugin
 			return *m_lcd;
 		}
 
-		FocusedParameter& getFocusedParameter() const
-		{
-			assert(m_focusedParameter);
-			return *m_focusedParameter;
-		}
-
 		VmMap& getVmMap() const
 		{
 			assert(m_vmMap);
@@ -93,7 +84,6 @@ namespace n2xJucePlugin
 		Controller& m_controller;
 
 		std::unique_ptr<Arp> m_arp;
-		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<Lcd> m_lcd;
 		std::array<std::unique_ptr<Lfo>, 2> m_lfos;
 		std::unique_ptr<MasterVolume> m_masterVolume;
@@ -101,7 +91,6 @@ namespace n2xJucePlugin
 		std::unique_ptr<OutputMode> m_outputMode;
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<VmMap> m_vmMap;
-		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 
 		std::array<std::string, 4> m_activePatchNames;
 

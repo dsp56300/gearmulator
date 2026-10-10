@@ -6,13 +6,11 @@
 
 #include "xtArp.h"
 #include "xtController.h"
-#include "xtFocusedParameter.h"
 #include "xtFrontPanel.h"
 #include "xtPatchManager.h"
 #include "xtLib/xtMidiTypes.h"
 #include "xtWaveEditor.h"
 
-#include "jucePluginEditorLib/midiPorts.h"
 
 #include "juceRmlUi/rmlElemButton.h"
 
@@ -27,8 +25,6 @@ namespace xtJucePlugin
 	void Editor::create()
 	{
 		jucePluginEditorLib::Editor::create();
-
-		m_focusedParameter.reset(new FocusedParameter(m_controller, *this));
 
 		m_frontPanel.reset(new FrontPanel(*this, m_controller));
 
@@ -95,8 +91,6 @@ namespace xtJucePlugin
 			waveEditorButtonParent->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
 		}
 
-		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
-
 		m_arp.reset(new Arp(*this));
 	}
 
@@ -134,7 +128,14 @@ namespace xtJucePlugin
 
 	XtLcd* Editor::getLcd() const
 	{
-		return m_frontPanel->getLcd();
+		// null while the base create() runs
+		return m_frontPanel ? m_frontPanel->getLcd() : nullptr;
+	}
+
+	void Editor::onFocusedParameterChanged(const std::string& _name, const std::string& _value)
+	{
+		if (auto* lcd = getLcd())
+			lcd->setCurrentParameter(_name, _value);
 	}
 
 	Parts& Editor::getParts() const

@@ -6,7 +6,6 @@ set(SOURCES
 	jeAssign.cpp jeAssign.h
 	jeController.cpp jeController.h
 	jeEditor.cpp jeEditor.h
-	jeFocusedParameter.cpp jeFocusedParameter.h
 	jeLcd.cpp jeLcd.h
 	jePartButton.cpp jePartButton.h
 	jePartSelect.cpp jePartSelect.h

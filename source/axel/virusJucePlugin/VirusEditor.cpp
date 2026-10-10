@@ -45,11 +45,7 @@ namespace genericVirusUI
 		m_parts.reset(new Parts(*this));
 		m_leds.reset(new Leds(*this, m_processor));
 
-		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
-
 		m_presetName = findChild("PatchName");
-
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), *this));
 
 		m_romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector");
 
@@ -210,8 +206,6 @@ namespace genericVirusUI
 	VirusEditor::~VirusEditor()
 	{
 		m_arpUserPattern.reset();
-
-		m_focusedParameter.reset();
 
 		getController().onProgramChange = nullptr;
 	}

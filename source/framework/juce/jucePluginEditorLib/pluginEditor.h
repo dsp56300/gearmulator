@@ -67,6 +67,8 @@ namespace jucePluginEditorLib
 {
 	class SettingsPlugin;
 	class Settings;
+	class FocusedParameter;
+	class MidiPorts;
 
 	class PluginDataModel;
 
@@ -172,6 +174,14 @@ namespace jucePluginEditorLib
 		void registerDragAndDropFile(const juce::File& _file);
 		void registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile);
 
+		// exist from the end of create() on
+		FocusedParameter* getFocusedParameter() const { return m_focusedParameter.get(); }
+		MidiPorts* getMidiPorts() const { return m_midiPorts.get(); }
+
+		// the parameter that the focused parameter display shows changed, an empty name hides it. Runs once during
+		// create() already, before a product created its own widgets
+		virtual void onFocusedParameterChanged(const std::string& _name, const std::string& _value) {}
+
 		rmlPlugin::RmlPlugin* getRmlPlugin() const { return m_rmlPlugin.get(); }
 		juceRmlUi::RmlComponent* getRmlComponent() const { return m_rmlComponent.get(); }
 		rmlPlugin::RmlParameterBinding* getRmlParameterBinding() const;
@@ -253,6 +263,9 @@ namespace jucePluginEditorLib
 		pluginLib::Parameter* m_midiLearnSelectedParam = nullptr;
 
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
+
+		std::unique_ptr<FocusedParameter> m_focusedParameter;
+		std::unique_ptr<MidiPorts> m_midiPorts;
 
 		std::unique_ptr<Settings> m_settings;
 

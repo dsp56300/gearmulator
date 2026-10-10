@@ -5,7 +5,6 @@
 #include "n2xArp.h"
 #include "n2xController.h"
 #include "n2xFileType.h"
-#include "n2xFocusedParameter.h"
 #include "n2xLcd.h"
 #include "n2xLfo.h"
 #include "n2xMasterVolume.h"
@@ -17,7 +16,6 @@
 #include "n2xVmMap.h"
 #include "baseLib/filesystem.h"
 
-#include "jucePluginEditorLib/midiPorts.h"
 
 #include "jucePluginLib/parameter.h"
 #include "jucePluginLib/pluginVersion.h"
@@ -63,7 +61,6 @@ namespace n2xJucePlugin
 		}
 
 		m_arp.reset(new Arp(*this));
-		m_focusedParameter.reset(new FocusedParameter(*this));
 		m_lcd.reset(new Lcd(*this));
 		for(uint8_t i=0; i<m_lfos.size(); ++i)
 			m_lfos[i].reset(new Lfo(*this, i));
@@ -72,7 +69,6 @@ namespace n2xJucePlugin
 		m_outputMode.reset(new OutputMode(*this));
 		m_parts.reset(new Parts(*this));
 		m_vmMap.reset(new VmMap(*this));
-		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
 		if(auto* bt = findChild("button_store"))
 		{
@@ -179,7 +175,6 @@ namespace n2xJucePlugin
 	Editor::~Editor()
 	{
 		m_arp.reset();
-		m_focusedParameter.reset();
 		m_lcd.reset();
 		for (auto& lfo : m_lfos)
 			lfo.reset();
@@ -188,7 +183,6 @@ namespace n2xJucePlugin
 		m_outputMode.reset();
 		m_parts.reset();
 		m_vmMap.reset();
-		m_midiPorts.reset();
 		m_onSelectedPatchChanged.reset();
 	}
 

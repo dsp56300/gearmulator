@@ -1,8 +1,6 @@
 #pragma once
 
-#include "jucePluginEditorLib/midiPorts.h"
 #include "jucePluginEditorLib/pluginEditor.h"
-#include "jucePluginEditorLib/focusedParameter.h"
 
 #include "baseLib/event.h"
 
@@ -18,11 +16,6 @@ namespace juceRmlUi
 namespace virusLib
 {
 	class ROMFile;
-}
-
-namespace jucePluginEditorLib
-{
-	class FocusedParameter;
 }
 
 namespace pluginLib
@@ -91,7 +84,6 @@ namespace genericVirusUI
 
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Leds> m_leds;
-		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 
 		Rml::Element* m_presetName = nullptr;
 //		PartMouseListener* m_presetNameMouseListener  = nullptr;
@@ -99,8 +91,6 @@ namespace genericVirusUI
 		// When in Multi mode, right-click toggles the patch name display between
 		// the current part's Single name (default) and the Multi name.
 		bool m_showMultiName = false;
-
-		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 
 		juceRmlUi::ElemComboBox* m_romSelector = nullptr;
 

@@ -12,7 +12,6 @@
 
 #include "mqLib/mqbuildconfig.h"
 
-#include "jucePluginEditorLib/focusedParameter.h"
 
 #include "jucePluginLib/filetype.h"
 #include "juceRmlPlugin/rmlTabGroup.h"
@@ -97,8 +96,6 @@ namespace mqJucePlugin
 			juceRmlUi::EventListener::AddClick(m_btPresetNext, [this]			{ onBtPresetNext(); });
 		}
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
-
 		if(findChild("partSelectButton", false))
 			m_partSelect.reset(new mqPartSelect(*this, m_controller));
 
@@ -131,7 +128,6 @@ namespace mqJucePlugin
 		m_controller.onPlayModeChanged.removeListener(PlayModeListenerId);
 
 		m_partSelect.reset();
-		m_focusedParameter.reset();
 		m_frontPanel.reset();
 	}
 

@@ -8,7 +8,6 @@
 
 namespace jucePluginEditorLib
 {
-	class MidiPorts;
 	class Processor;
 }
 
@@ -20,7 +19,6 @@ namespace pluginLib
 namespace xtJucePlugin
 {
 	class WaveEditor;
-	class FocusedParameter;
 	class FrontPanel;
 	class PatchManager;
 	class XtLcd;
@@ -47,6 +45,7 @@ namespace xtJucePlugin
 		Controller& getXtController() const { return m_controller; }
 
 		XtLcd* getLcd() const;
+		void onFocusedParameterChanged(const std::string& _name, const std::string& _value) override;
 		Parts& getParts() const;
 
 		const WaveEditor* getWaveEditor() const { return m_waveEditor; }
@@ -57,10 +56,8 @@ namespace xtJucePlugin
 
 		Controller& m_controller;
 
-		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<FrontPanel> m_frontPanel;
 		std::unique_ptr<Parts> m_parts;
-		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<Arp> m_arp;
 
 		WaveEditor* m_waveEditor = nullptr;

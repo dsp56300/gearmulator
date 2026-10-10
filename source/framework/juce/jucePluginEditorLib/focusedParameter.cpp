@@ -46,8 +46,9 @@ namespace jucePluginEditorLib
 		}
 	}
 
-	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const Editor& _editor)
-		: m_parameterBinding(*_editor.getRmlParameterBinding())
+	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, Editor& _editor)
+		: m_editor(_editor)
+		, m_parameterBinding(*_editor.getRmlParameterBinding())
 		, m_controller(_controller)
 	{
 		m_focusedParameterName = _editor.findChild("FocusedParameterName", false);
@@ -149,6 +150,8 @@ namespace jucePluginEditorLib
 				juceRmlUi::helper::setVisible(m_focusedParameterValue, true);
 			}
 		}
+
+		m_editor.onFocusedParameterChanged(_name, _value);
 	}
 
 	void FocusedParameter::timerCallback()

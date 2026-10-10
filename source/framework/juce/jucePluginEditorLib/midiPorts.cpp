@@ -82,6 +82,10 @@ namespace jucePluginEditorLib
 
 	void MidiPorts::refreshSelection()
 	{
+		// a skin without port selection, do not enumerate the devices for nothing
+		if (!m_midiIn && !m_midiOut)
+			return;
+
 		refreshComboSelection(m_midiIn, juce::MidiInput::getAvailableDevices(), getMidiPorts().getInputId());
 		refreshComboSelection(m_midiOut, juce::MidiOutput::getAvailableDevices(), getMidiPorts().getOutputId());
 	}

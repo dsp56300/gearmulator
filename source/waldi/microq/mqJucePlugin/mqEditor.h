@@ -4,7 +4,6 @@
 
 namespace jucePluginEditorLib
 {
-	class FocusedParameter;
 	class Processor;
 }
 
@@ -57,7 +56,5 @@ namespace mqJucePlugin
 		Rml::Element* m_btSave = nullptr;
 		Rml::Element* m_btPresetPrev = nullptr;
 		Rml::Element* m_btPresetNext = nullptr;
-
-		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 	};
 }

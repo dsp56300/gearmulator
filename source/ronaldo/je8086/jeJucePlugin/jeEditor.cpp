@@ -2,7 +2,6 @@
 
 #include "jeAssign.h"
 #include "jeController.h"
-#include "jeFocusedParameter.h"
 #include "jeLcd.h"
 #include "jePartButton.h"
 #include "jePartSelect.h"
@@ -13,8 +12,6 @@
 
 #include "jeLib/romloader.h"
 
-#include "jucePluginEditorLib/focusedParameter.h"
-#include "jucePluginEditorLib/midiPorts.h"
 #include "jucePluginEditorLib/pluginDataModel.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 
@@ -57,13 +54,6 @@ namespace jeJucePlugin
 
 		if (auto* lcd = findChild("lcd"))
 			m_lcd.reset(new JeLcd(*this, lcd));
-
-		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
-
-		if (m_lcd)
-			m_focusedParameter.reset(new JeFocusedParameter(*this, *m_lcd));
-		else
-			m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
 
 		m_partSelect.reset(new PartSelect(*this));
 
@@ -132,9 +122,14 @@ namespace jeJucePlugin
 	{
 		m_assign.reset();
 		m_partSelect.reset();
-		m_midiPorts.reset();
-		m_focusedParameter.reset();
 		m_lcd.reset();
+	}
+
+	void Editor::onFocusedParameterChanged(const std::string& _name, const std::string& _value)
+	{
+		// null while the base create() runs and in a skin without LCD
+		if (m_lcd)
+			m_lcd->setParameterDisplay(_name, _value);
 	}
 
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const

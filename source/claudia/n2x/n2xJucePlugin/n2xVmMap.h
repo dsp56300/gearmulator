@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "n2xFocusedParameter.h"
+#include "jucePluginEditorLib/focusedParameter.h"
 
 #include "baseLib/event.h"
 
