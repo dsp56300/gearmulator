@@ -406,8 +406,10 @@ namespace virusLib
 	{
 		// search for this string, every ? is a wildcard
 		constexpr auto key = "DigiVrus????vals";
+		const auto presetSize = ROMFile::getSinglePresetSize(DeviceModel::B);
 
-		for (size_t i=0; i<_data.size() - strlen(key); ++i)
+		// only where the key, 32 unknown bytes and a whole preset still fit, a short file holds none
+		for (size_t i=0; i + strlen(key) + 0x20 + presetSize <= _data.size(); ++i)
 		{
 			bool found = true;
 
@@ -426,7 +428,6 @@ namespace virusLib
 			const ptrdiff_t pos = i + strlen(key) + 0x20;	// skip 32 unknown bytes
 
 			constexpr uint8_t programIndex = 0;
-			const auto presetSize = ROMFile::getSinglePresetSize(DeviceModel::B);
 
 			// replace preset name, that is usually just 'Untitled' with the filename
 			auto newPresetName = baseLib::filesystem::stripExtension(_filename);

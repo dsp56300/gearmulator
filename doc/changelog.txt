@@ -98,6 +98,10 @@ Framework:
 
 Osirus/OsTIrus:
 
+- [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
+        into the Patch Manager, crashed the host. It is now refused like any
+        other file that holds no patch.
+
 - [Fix] BUG-10425 Controllers and parameter changes that arrived while a patch
         was being loaded, for example right after a program change, could get
         lost, in the sound or in the state saved with the project, with or
