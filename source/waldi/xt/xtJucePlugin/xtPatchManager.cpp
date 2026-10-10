@@ -35,11 +35,6 @@ namespace xtJucePlugin
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
 	}
 
-	PatchManager::~PatchManager()
-	{
-		stopLoaderThread();
-	}
-
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t _userData)
 	{
 		if (_userData == g_userDataArrangement)
@@ -61,11 +56,6 @@ namespace xtJucePlugin
 		_data = m_controller.createSingleDump(xt::LocationH::SingleBankA, 0, static_cast<uint8_t>(_part));
 		_data = createCombinedDump(_data);
 		return !_data.empty();
-	}
-
-	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program)
-	{
-		return false;
 	}
 
 	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
@@ -254,11 +244,6 @@ namespace xtJucePlugin
 		}
 
 		return _patch->sysex;
-	}
-
-	uint32_t PatchManager::getCurrentPart() const
-	{
-		return m_controller.getCurrentPart();
 	}
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)

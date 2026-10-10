@@ -29,15 +29,21 @@ namespace pluginLib::patchManager
 
 	void PatchManager::shutdown()
 	{
-		// a processPending() that runs on the message thread right now finishes first, later ones do nothing
-		std::scoped_lock lock(m_processPendingMutex);
-		m_shutdown = true;
+		{
+			// a processPending() that runs on the message thread right now finishes first, later ones do nothing
+			std::scoped_lock lock(m_processPendingMutex);
+			m_shutdown = true;
 
-		// waits for program changes that call into it on other threads right now
-		disconnectProgramChangeRouter();
+			// waits for program changes that call into it on other threads right now
+			disconnectProgramChangeRouter();
 
-		stopTimer();
-		cancelPendingUpdate();
+			stopTimer();
+			cancelPendingUpdate();
+		}
+
+		// runs the jobs queued so far first, they call virtuals of the derived class. Outside the lock, so that no job
+		// can wait for it
+		stopLoaderThread();
 	}
 
 	void PatchManager::setUi(UiInterface* _ui)

@@ -32,7 +32,7 @@ namespace pluginLib::patchDB
 
 	DB::~DB()
 	{
-		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor");
+		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor, a patch manager calls it in shutdown()");
 
 		// we can only save the cache if the db is not doing anything in the background
 		const bool loading = !m_loader.empty();

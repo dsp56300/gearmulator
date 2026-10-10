@@ -107,7 +107,8 @@ namespace pluginLib::patchDB
 		virtual bool loadData(DataList& _results, const DataSourceNodePtr& _ds);
 		virtual bool loadData(DataList& _results, const DataSource& _ds);
 
-		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) = 0;
+		// a product with ROM data sources returns their patches
+		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) { return false; }
 		virtual bool loadFile(DataList& _results, const std::string& _file);
 		virtual bool loadLocalStorage(DataList& _results, const DataSource& _ds);
 		virtual bool loadFolder(const DataSourceNodePtr& _folder);

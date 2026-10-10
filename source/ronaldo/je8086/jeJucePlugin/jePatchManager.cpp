@@ -84,11 +84,6 @@ namespace jeJucePlugin
 		}
 	}
 
-	PatchManager::~PatchManager()
-	{
-		stopLoaderThread();
-	}
-
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)
 	{
 		return m_controller.requestPatchForPart(_data, _part, _userData);
@@ -222,11 +217,6 @@ namespace jeJucePlugin
 			result.insert(result.end(), dumps[i].begin(), dumps[i].end());
 		}
 		return result;
-	}
-
-	uint32_t PatchManager::getCurrentPart() const
-	{
-		return m_controller.getCurrentPart();
 	}
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)

@@ -31,11 +31,6 @@ namespace n2xJucePlugin
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 	}
 
-	PatchManager::~PatchManager()
-	{
-		stopLoaderThread();
-	}
-
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)
 	{
 		if(_userData)
@@ -43,11 +38,6 @@ namespace n2xJucePlugin
 		else
 			_data = m_controller.createSingleDump(n2x::SysexByte::SingleDumpBankA, 0, static_cast<uint8_t>(_part));
 		return !_data.empty();
-	}
-
-	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program)
-	{
-		return false;
 	}
 
 	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
@@ -119,11 +109,6 @@ namespace n2xJucePlugin
 		}
 
 		return d;
-	}
-
-	uint32_t PatchManager::getCurrentPart() const
-	{
-		return m_controller.getCurrentPart();
 	}
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)

@@ -30,9 +30,10 @@ namespace pluginLib::patchManager
 		~PatchManager() override;
 
 		// Stops what calls into the patch manager from other threads and waits for what already runs there: program
-		// changes, and the timer and async updates that run processPending() on the message thread. Call it before
-		// deleting a patch manager: a host may delete the plugin on another thread than the message thread (LV2 on
-		// Linux does), and nothing may reach the derived class while it is destroyed
+		// changes, the timer and async updates that run processPending() on the message thread, and the loader thread,
+		// after which adding a data source does nothing. Call it before deleting a patch manager: a host may delete the
+		// plugin on another thread than the message thread (LV2 on Linux does), and nothing may reach the derived class
+		// while it is destroyed
 		void shutdown();
 
 		void setUi(UiInterface* _ui);

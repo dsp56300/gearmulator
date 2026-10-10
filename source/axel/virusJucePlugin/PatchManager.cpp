@@ -145,7 +145,6 @@ namespace genericVirusUI
 
 	PatchManager::~PatchManager()
 	{
-		stopLoaderThread();
 		m_controller.onRomPatchReceived = {};
 	}
 
@@ -786,11 +785,6 @@ namespace genericVirusUI
 
 		_data = m_controller.createSingleDump(static_cast<uint8_t>(_part), virusLib::toMidiByte(virusLib::BankNumber::A), 0);
 		return !_data.empty();
-	}
-
-	uint32_t PatchManager::getCurrentPart() const
-	{
-		return m_controller.getCurrentPart();
 	}
 
 	bool PatchManager::equals(const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b) const

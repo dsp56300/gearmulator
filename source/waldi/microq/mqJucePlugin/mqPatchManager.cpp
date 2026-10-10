@@ -31,11 +31,6 @@ namespace mqJucePlugin
 		startLoaderThread();
 	}
 
-	PatchManager::~PatchManager()
-	{
-		stopLoaderThread();
-	}
-
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part, uint64_t _userData)
 	{
 		if (_userData == g_userDataArrangement)
@@ -57,11 +52,6 @@ namespace mqJucePlugin
 
 		_data = m_controller.createSingleDump(mqLib::MidiBufferNum::SingleBankA, static_cast<mqLib::MidiSoundLocation>(0), _part, _part);
 		return !_data.empty();
-	}
-
-	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program)
-	{
-		return false;
 	}
 
 	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex) const
@@ -303,11 +293,6 @@ namespace mqJucePlugin
 		mqLib::State::updateChecksum(result);
 
 		return result;
-	}
-
-	uint32_t PatchManager::getCurrentPart() const
-	{
-		return m_controller.getCurrentPart();
 	}
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
