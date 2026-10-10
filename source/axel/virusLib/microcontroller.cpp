@@ -1204,7 +1204,7 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 
 void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {
-	m_hdi08.addHDI08(_dsp.getHDI08());
+	m_hdi08.addHDI08(_dsp.getHDI08(), _dsp.getMemory());
 	m_hdi08TxParsers.emplace_back(*this);
 	m_midiQueues.emplace_back(_dsp, m_hdi08.getQueue(m_hdi08.size()-1), _useEsaiBasedMidiTiming, m_rom.isTIFamily(), m_rom.getModel() == DeviceModel::A);
 }
@@ -1278,6 +1278,12 @@ bool Microcontroller::enableMidiTimestamps()
 	for (auto& midiQueue : m_midiQueues)
 		enabled &= midiQueue.enableTimestamps();
 	return enabled;
+}
+
+void Microcontroller::enableHdi08FlowControl()
+{
+	for (size_t i=0; i<m_hdi08.size(); ++i)
+		m_hdi08.getQueue(i).enableFlowControl(m_rom.isTIFamily());
 }
 
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)

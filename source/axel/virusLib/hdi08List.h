@@ -14,7 +14,7 @@ namespace virusLib
 			m_queues.reserve(2);
 		}
 
-		void addHDI08(dsp56k::HDI08& _hdi08);
+		void addHDI08(dsp56k::HDI08& _hdi08, const dsp56k::Memory& _memory);
 		bool rxEmpty() const;
 		void exec();
 		size_t size() const { return m_queues.size(); }

@@ -138,6 +138,10 @@ Osirus/OsTIrus:
 - [Fix] EMU-224 Importing a damaged or modified Virus OS update into the Patch
         Manager could hang it when a preset name contained an unusual character.
 
+- [Fix] EMU-239 MIDI or SysEx that arrived in a burst, for example the
+        controllers a DAW sends when playback starts or many parameter changes
+        at once, could partly get lost or garble the notes behind it.
+
 Osirus:
 
 - [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter

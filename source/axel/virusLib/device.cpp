@@ -70,6 +70,9 @@ namespace virusLib
 		// as we do not connect them
 		m_midiTimestamps = m_rom.isTIFamily() && m_mc->enableMidiTimestamps();
 
+		// the OS loses what does not fit into its input rings, send it only as much as they hold (EMU-239)
+		m_mc->enableHdi08FlowControl();
+
 		m_mc->sendInitControlCommands(127);
 
 		dummyProcess(8);
