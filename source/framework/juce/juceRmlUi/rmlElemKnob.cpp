@@ -103,7 +103,7 @@ namespace juceRmlUi
 		return attrib->Get(_element->GetCoreInstance(), std::string()) == "vertical";
 	}
 
-	void ElemKnob::processMouseWheel(Rml::Element& _element, const Rml::Event& _event)
+	void ElemKnob::processMouseWheel(Rml::Element& _element, Rml::Event& _event)
 	{
 		const auto wheel = helper::getMouseWheelDelta(_event);
 		auto delta = wheel.y;
@@ -115,6 +115,9 @@ namespace juceRmlUi
 
 		if (delta == 0.0f || range <= 0.0f)
 			return;
+
+		// the control takes the wheel, a view around it does not scroll as well
+		_event.StopPropagation();
 
 		const auto step = range > 32 && !helper::getKeyModCommand(_event)
 			? range * delta / 32.0f : (delta > 0.0f ? 1.0f : -1.0f);
@@ -169,7 +172,7 @@ namespace juceRmlUi
 		return _value;
 	}
 
-	void ElemKnob::processMouseWheel(const Rml::Event& _event)
+	void ElemKnob::processMouseWheel(Rml::Event& _event)
 	{
 		processMouseWheel(*this, _event);
 	}

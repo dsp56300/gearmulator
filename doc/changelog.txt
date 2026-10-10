@@ -23,6 +23,9 @@ Framework:
 - [Fix] BUG-10419 While a knob or slider was dragged, tabs and buttons that the
         mouse passed over lit up as if they were hovered.
 
+- [Fix] The mouse wheel over a knob or slider that sits in a scrollable area
+        changed its value and scrolled the area at the same time.
+
 - [Fix] BUG-10380 macOS: audio dropouts at small buffer sizes, which got worse
         with macOS 27. The emulation now joins the audio workgroup of the host,
         so Apple Silicon keeps it on the performance cores together with the

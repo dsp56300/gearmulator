@@ -288,7 +288,7 @@ namespace rmlPlugin
 				});
 
 				// allow to change slider value with mouse wheel
-				juceRmlUi::EventListener::Add(input, Rml::EventId::Mousescroll, [input](const Rml::Event& _event)
+				juceRmlUi::EventListener::Add(input, Rml::EventId::Mousescroll, [input](Rml::Event& _event)
 				{
 					juceRmlUi::ElemKnob::processMouseWheel(*input, _event);
 				});

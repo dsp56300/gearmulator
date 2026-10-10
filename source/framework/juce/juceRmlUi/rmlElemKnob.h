@@ -23,11 +23,11 @@ namespace juceRmlUi
 
 		static bool isReversed(const Rml::Element* _element);
 
-		static void processMouseWheel(Rml::Element& _element, const Rml::Event& _event);
+		static void processMouseWheel(Rml::Element& _element, Rml::Event& _event);
 
 	private:
 		void processMouseMove(const Rml::Event& _event);
-		void processMouseWheel(const Rml::Event& _event);
+		void processMouseWheel(Rml::Event& _event);
 		void processDoubleClick(const Rml::Event& _event);
 
 		float wrapValue(float _value) const;
