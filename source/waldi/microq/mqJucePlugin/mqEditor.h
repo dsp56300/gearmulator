@@ -29,8 +29,6 @@ namespace mqJucePlugin
 
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
-
 		Controller& getMqController() const { return m_controller; }
 
 		mqPartSelect* getPartSelect() const

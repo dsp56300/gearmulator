@@ -42,10 +42,7 @@ namespace n2xJucePlugin
 
 		void create() override;
 
-		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 		
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
-
 		Controller& getN2xController() const { return m_controller; }
 
 //		genericUI::Button<juce::DrawableButton>* createJuceComponent(genericUI::Button<juce::DrawableButton>*, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) override;

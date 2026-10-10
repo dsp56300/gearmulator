@@ -4,7 +4,6 @@
 
 #include "synthLib/deviceTypes.h"
 #include "synthLib/midiTypes.h"
-#include "synthLib/buildconfig.h"
 
 #include <list>
 #include <mutex>
@@ -42,11 +41,9 @@ public:
 	void createDefaultState();
 	void process();
 
-#if !SYNTHLIB_DEMO_MODE
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<synthLib::SMidiEvent>& _events);
-#endif
 
 	void addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming);
 

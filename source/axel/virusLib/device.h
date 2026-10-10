@@ -31,11 +31,9 @@ namespace virusLib
 
 		void process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
 
-#if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setStateFromUnknownCustomData(const std::vector<uint8_t>& _state) override;
-#endif
 		static bool find4CC(uint32_t& _offset, const synthLib::SysexBuffer& _data, const std::string_view& _4cc);
 		static bool parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const synthLib::SysexBuffer& _state);
 		static bool parsePowercorePreset(synthLib::SysexBufferList& _sysexPresets, const synthLib::SysexBuffer& _data);

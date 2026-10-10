@@ -40,8 +40,6 @@ namespace xtJucePlugin
 
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
-
 		Controller& getXtController() const { return m_controller; }
 
 		XtLcd* getLcd() const;

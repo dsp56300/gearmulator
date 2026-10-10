@@ -121,8 +121,7 @@ int main(const int _argc, char* _argv[])
 			"            window\n"
 			"\n"
 			"Before using -dumpstate to prove that a change keeps the state the same:\n"
-			"- install the ROMs, use the same config for the plugin before and after (resampler, skin variables)\n"
-			"  and a build that is not a demo build\n"
+			"- install the ROMs and use the same config for the plugin before and after (resampler, skin variables)\n"
 			"- find a block count past the firmware boot of the product: a dump after n blocks must equal one after\n"
 			"  2n blocks, and two runs must agree");
 		return 1;

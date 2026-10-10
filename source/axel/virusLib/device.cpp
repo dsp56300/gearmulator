@@ -191,7 +191,6 @@ namespace virusLib
 		_midiOut.push_back(m_frontpanelStateMidiEvent);
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	bool Device::getState(std::vector<uint8_t>& _state, const synthLib::StateType _type)
 	{
 		return m_mc->getState(_state, _type);
@@ -222,7 +221,6 @@ namespace virusLib
 
 		return m_mc->setState(messages);
 	}
-#endif
 
 	bool Device::find4CC(uint32_t& _offset, const synthLib::SysexBuffer& _data, const std::string_view& _4cc)
 	{

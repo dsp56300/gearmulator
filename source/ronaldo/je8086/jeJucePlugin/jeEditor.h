@@ -34,8 +34,6 @@ namespace jeJucePlugin
 		void initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model) override;
 
 
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
-
 		Controller& getJeController() const { return m_controller; }
 		AudioPluginAudioProcessor& getJeProcessor() const;
 		const JeLcd* getLcd() const { return m_lcd.get(); }

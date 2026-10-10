@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(synthLib)
 
-set(SYNTHLIB_DEMO_MODE OFF CACHE BOOL "Demo Mode" FORCE)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h)
-
 add_library(synthLib STATIC)
 
 set(SOURCES
@@ -13,7 +9,6 @@ set(SOURCES
 	analog/analogFilter.cpp analog/analogFilter.h
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
-	buildconfig.h buildconfig.h.in
 	dac.cpp dac.h
 	dcFilter.h
 	device.cpp device.h

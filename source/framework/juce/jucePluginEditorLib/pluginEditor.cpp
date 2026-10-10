@@ -171,6 +171,11 @@ namespace jucePluginEditorLib
 #endif
 	}
 
+	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _options)
+	{
+		_options.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
+	}
+
 	void Editor::initPluginDataModel(PluginDataModel& _model)
 	{
 		_model.set("currentPart", std::to_string(getProcessor().getController().getCurrentPart()));
@@ -239,7 +244,6 @@ namespace jucePluginEditorLib
 
 	void Editor::savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback)
 	{
-#if !SYNTHLIB_DEMO_MODE
 		const auto path = m_processor.getConfig().getValue("save_path", "");
 
 		genericUI::MessageBox::FileDialogDesc desc;
@@ -270,12 +274,8 @@ namespace jucePluginEditorLib
 				});
 			}
 		});
-#else
-		showDemoRestrictionMessageBox();
-#endif
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	bool Editor::savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const synthLib::SysexBufferList& _presets)
 	{
 		if (_presets.empty())
@@ -302,7 +302,6 @@ namespace jucePluginEditorLib
 		fclose(hFile);
 		return true;
 	}
-#endif
 
 	std::string Editor::createValidFilename(pluginLib::FileType& _type, const juce::File& _file)
 	{
@@ -319,12 +318,6 @@ namespace jucePluginEditorLib
 		else
 			file += "." + _type.type();
 		return file;
-	}
-
-	void Editor::showDemoRestrictionMessageBox() const
-	{
-		const auto &[title, msg] = getDemoRestrictionText();
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, title, msg);
 	}
 
 	patchManager::PatchManager* Editor::getPatchManager() const

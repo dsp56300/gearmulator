@@ -131,17 +131,6 @@ namespace mqJucePlugin
 		m_frontPanel.reset();
 	}
 
-	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
-	{
-		return {"Vavra",
-			"Vavra runs in demo mode\n"
-			"\n"
-			"The following features are disabled:\n"
-			"- Saving/Exporting Presets\n"
-			"- Plugin state is not preserved"
-		};
-	}
-
 	void Editor::savePreset(const pluginLib::FileType& _type)
 	{
 		jucePluginEditorLib::Editor::savePreset(_type, [&](const juce::File& _file)
@@ -204,9 +193,7 @@ namespace mqJucePlugin
 		auto addEntry = [&](juceRmlUi::Menu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
 			juceRmlUi::Menu subMenu;
-
-			subMenu.addEntry(".syx", [_callback]() {_callback(pluginLib::FileType::Syx); });
-			subMenu.addEntry(".mid", [_callback]() {_callback(pluginLib::FileType::Mid); });
+			createExportFileTypeMenu(subMenu, _callback);
 
 			_menu.addSubMenu(_name, std::move(subMenu));
 		};

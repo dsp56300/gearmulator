@@ -165,13 +165,6 @@ namespace n2xJucePlugin
 		}
 	}
 
-	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
-	{
-		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);
-
-		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
-	}
-
 	Editor::~Editor()
 	{
 		m_arp.reset();
@@ -184,11 +177,6 @@ namespace n2xJucePlugin
 		m_parts.reset();
 		m_vmMap.reset();
 		m_onSelectedPatchChanged.reset();
-	}
-
-	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
-	{
-		return {};
 	}
 
 	std::string Editor::getCurrentPatchName() const

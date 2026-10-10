@@ -7,7 +7,6 @@
 #include "juceUiLib/editor.h"
 #include "juceUiLib/messageBox.h"
 
-#include "synthLib/buildconfig.h"
 #include "synthLib/midiTypes.h"
 
 #include "baseLib/event.h"
@@ -100,7 +99,7 @@ namespace jucePluginEditorLib
 		
 		virtual void create();
 
-		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) {}
+		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _options);
 		virtual void initPluginDataModel(PluginDataModel& _model);
 
 		static void setEnabled(Rml::Element* _element, bool _enabled);
@@ -111,14 +110,8 @@ namespace jucePluginEditorLib
 
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
 		void savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback);
-#if !SYNTHLIB_DEMO_MODE
 		static bool savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const synthLib::SysexBufferList& _presets);
-#endif
 		static std::string createValidFilename(pluginLib::FileType& _type, const juce::File& _file);
-
-		virtual std::pair<std::string, std::string> getDemoRestrictionText() const = 0;
-
-		void showDemoRestrictionMessageBox() const;
 
 		Processor& getProcessor() const { return m_processor; }
 

@@ -111,19 +111,6 @@ namespace xtJucePlugin
 		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);
 
 		_skinConverterOptions.includeStyles.push_back("xt-waveeditor-defaults.rcss");
-
-		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
-	}
-
-	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
-	{
-		return {"Xenia",
-			"Xenia runs in demo mode\n"
-			"\n"
-			"The following features are disabled:\n"
-			"- Saving/Exporting Presets\n"
-			"- Plugin state is not preserved"
-		};
 	}
 
 	XtLcd* Editor::getLcd() const

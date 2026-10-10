@@ -240,9 +240,6 @@ namespace jucePluginEditorLib::patchManagerRml
 				}
 			}
 
-#if SYNTHLIB_DEMO_MODE
-			pm.getEditor().showDemoRestrictionMessageBox();
-#else
 
 			const auto& source = getList().getDatasource();
 			if(!source)
@@ -257,7 +254,6 @@ namespace jucePluginEditorLib::patchManagerRml
 					getList().getDB().setSelectedPatch(part, _patches.front());
 				});
 			});
-#endif
 		}
 	}
 

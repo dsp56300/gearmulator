@@ -19,14 +19,12 @@ namespace synthLib
 		return m_bridgeMidiOut;
 	}
 
-#if SYNTHLIB_DEMO_MODE == 0
 	const std::vector<uint8_t>& Device::bridgeGetState(const StateType _type)
 	{
 		m_bridgeState.clear();
 		getState(m_bridgeState, _type);
 		return m_bridgeState;
 	}
-#endif
 
 	const std::vector<float>& Device::bridgeGetSupportedSamplerates()
 	{

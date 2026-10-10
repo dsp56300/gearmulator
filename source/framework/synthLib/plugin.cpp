@@ -175,7 +175,6 @@ namespace synthLib
 		updateDeviceLatency();
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type)
 	{
 		// Hosts save and load on their own thread, usually while audio is running. Without the lock, the device's state
@@ -220,7 +219,6 @@ namespace synthLib
 
 		return m_device->setState(state, stateType);
 	}
-#endif
 	void Plugin::insertMidiEvent(const SMidiEvent& _ev)
 	{
 		// Find the slot before inserting: stampTransportGeneration() only writes

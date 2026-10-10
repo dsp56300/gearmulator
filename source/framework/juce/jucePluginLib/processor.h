@@ -259,9 +259,7 @@ namespace pluginLib
 		bool stopTestInput();
 
 	private:
-#if !SYNTHLIB_DEMO_MODE
 		void setState(const void *_data, size_t _sizeInBytes);
-#endif
 
 	    //==============================================================================
 		int getNumPrograms() override;

@@ -52,8 +52,6 @@ namespace genericVirusUI
 		virus::Controller& getController() const;
 		virus::VirusProcessor& getProcessor() const { return m_processor; }
 
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
-
 		const auto& getLeds() const { return m_leds; }
 
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;

@@ -6,7 +6,6 @@
 
 #include "midiTypes.h"
 #include "resamplerInOut.h"
-#include "buildconfig.h"
 
 #include "dsp56kBase/ringbuffer.h"
 
@@ -46,10 +45,8 @@ namespace synthLib
 
 		void setDevice(Device* _device);
 
-#if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, StateType _type);
 		bool setState(const std::vector<uint8_t>& _state) const;
-#endif
 		void insertMidiEvent(const SMidiEvent& _ev);
 
 		bool setLatencyBlocks(uint32_t _latencyBlocks);

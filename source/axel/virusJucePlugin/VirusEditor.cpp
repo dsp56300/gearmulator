@@ -215,15 +215,6 @@ namespace genericVirusUI
 		return static_cast<virus::Controller&>(m_processor.getController());
 	}
 
-	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const
-	{
-		return {
-				m_processor.getProperties().name + " - Demo Mode",
-				m_processor.getProperties().name + " runs in demo mode, the following restrictions apply:\n"
-				"\n"
-				"* The plugin state is not preserved\n"
-				"* Preset saving is disabled"};
-	}
 	/*
 	juce::Component* VirusEditor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
 	{
@@ -242,7 +233,6 @@ namespace genericVirusUI
 		Editor::initSkinConverterOptions(_skinConverterOptions);
 
 		_skinConverterOptions.idReplacements.insert({"page_presets", "container-patchmanager"});
-		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
 		_skinConverterOptions.idReplacements.insert({"page_2_browser", "container-patchmanager"});
 	}
 
@@ -392,9 +382,7 @@ namespace genericVirusUI
 		auto addEntry = [&](juceRmlUi::Menu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
 			juceRmlUi::Menu subMenu;
-
-			subMenu.addEntry(".syx", [_callback](){_callback(pluginLib::FileType::Syx); });
-			subMenu.addEntry(".mid", [_callback](){_callback(pluginLib::FileType::Mid); });
+			createExportFileTypeMenu(subMenu, _callback);
 
 			_menu.addSubMenu(_name, std::move(subMenu));
 		};
@@ -471,9 +459,6 @@ namespace genericVirusUI
 
 	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/) const
 	{
-#if SYNTHLIB_DEMO_MODE
-		return false;
-#else
 		synthLib::SysexBufferList messages;
 		
 		switch (_saveType)
@@ -519,7 +504,6 @@ namespace genericVirusUI
 		}
 
 		return Editor::savePresets(_fileType, _pathName, messages);
-#endif
 	}
 
 	void VirusEditor::setPart(const size_t _part)

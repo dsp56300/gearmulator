@@ -8,7 +8,6 @@
 #include "deviceTypes.h"
 
 #include "midiTypes.h"
-#include "buildconfig.h"
 #include "midiTranslator.h"
 
 #include "baseLib/md5.h"
@@ -82,7 +81,6 @@ namespace synthLib
 
 		virtual bool isValid() const = 0;
 
-#if SYNTHLIB_DEMO_MODE == 0
 		// The plugin calls these with its processing lock held, process() does not run until they return. They must
 		// never wait for anything that only happens while audio is processed, that would deadlock
 		virtual bool getState(std::vector<uint8_t>& _state, StateType _type) = 0;
@@ -96,7 +94,6 @@ namespace synthLib
 		{
 			return getState(_state, _type);
 		}
-#endif
 
 		virtual uint32_t getChannelCountIn() = 0;
 		virtual uint32_t getChannelCountOut() = 0;
@@ -115,9 +112,7 @@ namespace synthLib
 		// They are virtual so that the server runs the code of the library that created the device. Never make them
 		// final: the compiler could then call the server's own copy of them.
 		virtual const std::vector<SMidiEvent>& bridgeProcess(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn);
-#if SYNTHLIB_DEMO_MODE == 0
 		virtual const std::vector<uint8_t>& bridgeGetState(StateType _type);
-#endif
 		virtual const std::vector<float>& bridgeGetSupportedSamplerates();
 		virtual const std::vector<float>& bridgeGetPreferredSamplerates();
 

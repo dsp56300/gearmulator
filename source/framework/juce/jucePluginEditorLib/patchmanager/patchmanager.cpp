@@ -221,10 +221,6 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManager::exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const pluginLib::FileType& _fileType) const
 	{
-#if SYNTHLIB_DEMO_MODE
-		if (m_editor)
-			m_editor->showDemoRestrictionMessageBox();
-#else
 		pluginLib::FileType type = _fileType;
 		const auto name = Editor::createValidFilename(type, _file);
 
@@ -254,7 +250,6 @@ namespace jucePluginEditorLib::patchManager
 
 		if(!Editor::savePresets(type, name, patchData))
 			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
-#endif
 	}
 
 	bool PatchManager::exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const pluginLib::FileType& _fileType) const

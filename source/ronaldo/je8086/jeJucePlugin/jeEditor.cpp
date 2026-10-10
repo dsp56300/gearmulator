@@ -132,11 +132,6 @@ namespace jeJucePlugin
 			m_lcd->setParameterDisplay(_name, _value);
 	}
 
-	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
-	{
-		return {};
-	}
-
 	AudioPluginAudioProcessor& Editor::getJeProcessor() const
 	{
 		return static_cast<AudioPluginAudioProcessor&>(getProcessor());
