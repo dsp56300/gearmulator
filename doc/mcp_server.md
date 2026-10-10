@@ -75,6 +75,8 @@ This file contains an array of running instances:
 
 Use this file to find which port to connect to. `pid` is the host process id. `sessionId` is the value of the environment variable `CLAUDE_CODE_SESSION_ID` of the host process, or empty; it lets a Claude Code session pick the instance it launched itself.
 
+The `port` of an entry is always the port its server bound. Before using an entry, check that `/health` on that port reports the entry's `pid`: an entry left behind by a crashed instance can name a port that another process holds by now. Servers built before the health check reported a `pid` answer without one. Instances update the file under a lock that all processes share, so instances starting at the same time do not lose each other's entries. The environment variable `GEARMULATOR_MCP_DISCOVERY_FILE` points the server at another file, for example for a test.
+
 ### Transport
 
 The server uses HTTP with Server-Sent Events (SSE):
@@ -83,7 +85,7 @@ The server uses HTTP with Server-Sent Events (SSE):
 |---|---|---|
 | `/sse` | GET | SSE stream for receiving server events |
 | `/message`, `/mcp`, `/sse` | POST | Send JSON-RPC 2.0 requests |
-| `/`, `/health` | GET | Health check (returns server info) |
+| `/`, `/health` | GET | Health check: server name, version, protocol and `pid`, the host process id |
 
 ### Protocol
 
@@ -869,6 +871,6 @@ Rename the currently loaded preset for a part.
 
 - DOM and UI input tools require the plugin editor window to be open. They return a clear error if the window is closed.
 - Patch manager tools work without the plugin editor window: since BUG-10425 the processor owns the patch manager, so it exists from the moment the plugin is created.
-- The discovery file may contain stale entries if a plugin crashes without cleanup. Entries include the process ID (`pid`) so clients can verify liveness.
+- The discovery file may contain stale entries if a plugin crashes without cleanup. Entries include the process ID (`pid`), so a client can check it against the `pid` that `/health` reports on the entry's port.
 - Maximum of 100 simultaneous plugin instances (ports 13710–13809).
 - Only reachable from the same machine. To drive a plugin on another computer, run the client there or forward the port (for example `ssh -L 13710:127.0.0.1:13710 host`).
