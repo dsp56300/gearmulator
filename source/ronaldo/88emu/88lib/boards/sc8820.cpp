@@ -8,18 +8,14 @@ namespace emu88Lib
 		std::vector<uint8_t> wave0, std::vector<uint8_t> wave1)
 		: m_waves{std::move(wave0), std::move(wave1)}
 	{
-		if((cpuRom.size() != CpuRomSize && cpuRom.size() != ReconstructedCpuRomSize) ||
+		if(cpuRom.size() != CpuRomSize ||
 			programRom.size() != ProgramRomSize ||
 			m_waves[0].size() != 0x1000000 || m_waves[1].size() != 0x800000)
 			return;
 
 		using Bus = sh2::Bus;
 		auto& bus = m_machine.bus();
-		// The SH7017 maps 128 KiB of internal flash. Leave the unknown upper half
-		// erased when loading the reconstructed 64 KiB image.
-		std::vector<uint8_t> internal(CpuRomSize, 0xff);
-		std::copy(cpuRom.begin(), cpuRom.end(), internal.begin());
-		bus.load(0, internal.data(), internal.size());
+		bus.load(0, cpuRom.data(), cpuRom.size());
 		bus.map_rom(0x00d00000, ProgramRomSize, Bus::kClsCs3);
 		bus.load(0x00d00000, programRom.data(), programRom.size());
 		bus.map_ram(0x01000000, 0x80000, Bus::kClsDram);
