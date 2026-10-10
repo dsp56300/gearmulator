@@ -42,7 +42,7 @@ The server starts immediately when enabled and stops when disabled. The setting 
 
 ### Connecting
 
-The server listens on **port 13710** by default. If multiple plugin instances are loaded, each one increments the port automatically (13710, 13711, 13712, ...).
+The server listens on **127.0.0.1, port 13710** by default, so only programs on the same machine can reach it. If multiple plugin instances are loaded, each one increments the port automatically (13710, 13711, 13712, ...).
 
 #### Discovery File
 
@@ -871,3 +871,4 @@ Rename the currently loaded preset for a part.
 - Patch manager tools work without the plugin editor window: since BUG-10425 the processor owns the patch manager, so it exists from the moment the plugin is created.
 - The discovery file may contain stale entries if a plugin crashes without cleanup. Entries include the process ID (`pid`) so clients can verify liveness.
 - Maximum of 100 simultaneous plugin instances (ports 13710–13809).
+- Only reachable from the same machine. To drive a plugin on another computer, run the client there or forward the port (for example `ssh -L 13710:127.0.0.1:13710 host`).

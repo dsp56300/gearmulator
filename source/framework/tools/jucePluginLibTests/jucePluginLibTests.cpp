@@ -13,6 +13,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		testMcpDiscovery();
+		testMcpPorts();
 		testMidiNotifier();
 		testParameterDescriptions();
 		testPatchDb();

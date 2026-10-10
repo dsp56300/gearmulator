@@ -5,6 +5,7 @@ project(jucePluginLibTests VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	jucePluginLibTests.cpp
 	mcpDiscoveryTest.cpp
+	mcpPortTest.cpp
 	midiNotifierTest.cpp
 	parameterDescriptionsTest.cpp
 	patchDbTest.cpp
