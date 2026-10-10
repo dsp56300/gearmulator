@@ -4,6 +4,7 @@ project(jucePluginLibTests VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	jucePluginLibTests.cpp
+	mcpDiscoveryTest.cpp
 	midiNotifierTest.cpp
 	parameterDescriptionsTest.cpp
 	patchDbTest.cpp
@@ -28,7 +29,7 @@ target_compile_definitions(jucePluginLibTests PRIVATE
 target_sources(jucePluginLibTests PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(jucePluginLibTests PUBLIC jucePluginLib juce::juce_core juce::juce_graphics)
+target_link_libraries(jucePluginLibTests PUBLIC jucePluginLib mcpServerLib juce::juce_core juce::juce_graphics)
 
 add_test(NAME jucePluginLibTests COMMAND jucePluginLibTests)
 set_tests_properties(jucePluginLibTests PROPERTIES LABELS "UnitTest")

@@ -3,12 +3,16 @@
 
 #include <iostream>
 
-int main()
+int main(int argc, char* argv[])
 {
 	baseLib::disableErrorDialogs();
 
+	if (const auto result = mcpDiscoveryChild(argc, argv); result >= 0)
+		return result;
+
 	try
 	{
+		testMcpDiscovery();
 		testMidiNotifier();
 		testParameterDescriptions();
 		testPatchDb();

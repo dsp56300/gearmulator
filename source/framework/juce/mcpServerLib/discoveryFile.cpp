@@ -29,33 +29,52 @@ namespace mcpServer
 
 	std::string DiscoveryFile::getDiscoveryFilePath()
 	{
+		// lets a test work on a file of its own instead of the one every running instance shares
+		const auto path = juce::SystemStats::getEnvironmentVariable("GEARMULATOR_MCP_DISCOVERY_FILE", {});
+		if (path.isNotEmpty())
+			return path.toStdString();
+
 		const auto homeDir = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
 		return homeDir.getChildFile(".gearmulator_mcp.json").getFullPathName().toStdString();
 	}
 
 	void DiscoveryFile::registerInstance(const DiscoveryEntry& _entry)
 	{
-		std::lock_guard lock(s_mutex);
+		modifyInstances([&](std::vector<DiscoveryEntry>& _instances)
+		{
+			// Remove any stale entry on the same port. Only the port a server actually bound is ever
+			// registered, so nobody else holds it: an entry naming it is left over from a process that
+			// died without unregistering.
+			_instances.erase(std::remove_if(_instances.begin(), _instances.end(),
+				[&](const DiscoveryEntry& e) { return e.port == _entry.port; }), _instances.end());
 
-		auto instances = readInstances();
-
-		// Remove any stale entry on the same port
-		instances.erase(std::remove_if(instances.begin(), instances.end(),
-			[&](const DiscoveryEntry& e) { return e.port == _entry.port; }), instances.end());
-
-		instances.push_back(_entry);
-
-		writeInstances(instances);
+			_instances.push_back(_entry);
+		});
 	}
 
 	void DiscoveryFile::unregisterInstance(const int _port)
 	{
+		modifyInstances([&](std::vector<DiscoveryEntry>& _instances)
+		{
+			_instances.erase(std::remove_if(_instances.begin(), _instances.end(),
+				[&](const DiscoveryEntry& e) { return e.port == _port; }), _instances.end());
+		});
+	}
+
+	void DiscoveryFile::modifyInstances(const std::function<void(std::vector<DiscoveryEntry>&)>& _modify)
+	{
+		// s_mutex orders the threads of this process, the file lock the processes: every plugin host and the
+		// Plugin Manager rewrite the same file, and two of them reading it at once would each write back a
+		// list without the other's entry. Released when it goes out of scope, and by the OS if we die.
 		std::lock_guard lock(s_mutex);
 
-		auto instances = readInstances();
-		instances.erase(std::remove_if(instances.begin(), instances.end(),
-			[&](const DiscoveryEntry& e) { return e.port == _port; }), instances.end());
+		// A holder that hangs (stopped in a debugger) must not hang a plugin constructor: after the timeout
+		// the file is written unlocked, as it was before the lock existed.
+		juce::InterProcessLock fileLock("gearmulator_mcp_discovery");
+		fileLock.enter(5000);
 
+		auto instances = readInstances();
+		_modify(instances);
 		writeInstances(instances);
 	}
 
