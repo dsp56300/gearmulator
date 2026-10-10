@@ -22,10 +22,12 @@ def log(msg):
 
 
 def health(port):
-	"""Server name if an MCP server answers on that port, else None (weeds out stale entries)."""
+	"""(server name, pid) if an MCP server answers on that port, else None (weeds out stale entries).
+	The pid is None for a server built before it reported one."""
 	try:
 		with urllib.request.urlopen("http://127.0.0.1:%d/" % port, timeout=2) as r:
-			return json.load(r).get("server") or "?"
+			body = json.load(r)
+			return body.get("server") or "?", body.get("pid")
 	except Exception:
 		return None
 
@@ -48,7 +50,9 @@ def resolve():
 		mine = [e for e in entries if not e.get("sessionId")]
 
 	live = [(e, health(e.get("port", 0))) for e in mine]
-	live = [(e, name) for e, name in live if name]
+	# the port must be held by the process that registered it: an entry naming a port that another
+	# process holds would send this session's tool calls into somebody else's instance
+	live = [(e, h[0]) for e, h in live if h and h[1] in (None, e.get("pid"))]
 
 	if len(live) != 1:
 		log("session %s: need exactly one running instance, found %d %s" % (
@@ -106,14 +110,17 @@ def selftest():
 
 	entries = []
 	alive = set()
-	health = lambda port: "srv%d" % port if port in alive else None
+	owners = {}
+	health = lambda port: ("srv%d" % port, owners.get(port)) if port in alive else None
 	fd, DISCOVERY = tempfile.mkstemp(suffix=".json")
 	os.close(fd)
 
-	def check(expect, session, listed, running, what):
+	def check(expect, session, listed, running, what, pids={}):
 		entries[:] = listed
 		alive.clear()
 		alive.update(running)
+		owners.clear()
+		owners.update(pids)
 		with open(DISCOVERY, "w", encoding="utf-8") as f:
 			json.dump(entries, f)
 		os.environ["CLAUDE_CODE_SESSION_ID"] = session
@@ -132,6 +139,8 @@ def selftest():
 	check(None, "A", [a], set(), "refuses a stale entry whose port is dead")
 	check(url(13710), "A", [a, dict(a, port=13799)], {13710}, "skips our own stale entry")
 	check(None, "", [a, b], {13710, 13711}, "refuses when the client set no session id")
+	check(url(13711), "B", [a, b], {13710, 13711}, "accepts the pid that holds the port", {13710: 1, 13711: 2})
+	check(None, "B", [dict(b, port=13710)], {13710}, "refuses a port another process holds", {13710: 1})
 
 	os.remove(DISCOVERY)
 	print("selftest ok")
