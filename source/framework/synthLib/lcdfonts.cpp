@@ -3,7 +3,7 @@
 
 #include <array>
 
-namespace hwLib
+namespace synthLib
 {
 	constexpr uint8_t g_fontTable0[] =
 	{

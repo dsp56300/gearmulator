@@ -5,7 +5,6 @@
 #include "jeController.h"
 #include "jeEditor.h"
 #include "jePluginProcessor.h"
-#include "hardwareLib/lcdfonts.h"
 #include "jeLib/je8086devices.h"
 
 #include "jucePluginLib/version.h"
@@ -83,11 +82,6 @@ namespace jeJucePlugin
 			_event.StopPropagation();
 			renamePerformance();
 		});
-	}
-
-	const uint8_t* JeLcd::getCharacterData(uint8_t _character) const
-	{
-		return hwLib::getCharacterData(_character);
 	}
 
 	bool JeLcd::isPatchMode() const

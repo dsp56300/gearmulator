@@ -9,7 +9,7 @@ set(SOURCES
 	i2cFlash.cpp i2cFlash.h
 	hd44780.cpp hd44780.h
 	lcd.cpp lcd.h
-	lcdfonts.cpp lcdfonts.h
+	lcdfonts.h
 	sciMidi.cpp sciMidi.h
 	sed1200.cpp sed1200.h
 	sed1335.cpp sed1335.h

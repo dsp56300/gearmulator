@@ -18,7 +18,6 @@ namespace jeJucePlugin
 	public:
 		explicit JeLcd(Editor& _editor, Rml::Element* _parent);
 
-		const uint8_t* getCharacterData(uint8_t _character) const override;
 		bool getOverrideText(std::vector<std::string>& _lines) override;
 
 		void setText(const std::array<char, 40>& _data);

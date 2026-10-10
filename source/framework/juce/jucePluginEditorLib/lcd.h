@@ -107,7 +107,7 @@ namespace jucePluginEditorLib
 
 		virtual bool getOverrideText(std::vector<std::string>& _lines) { return false; }
 		virtual bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines);
-		virtual const uint8_t* getCharacterData(uint8_t _character) const = 0;
+		virtual const uint8_t* getCharacterData(uint8_t _character) const;
 
 		void timerCallback(int _timerId) override;
 

@@ -4,6 +4,8 @@
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 
+#include "synthLib/lcdfonts.h"
+
 // LCD simulation
 
 namespace
@@ -287,6 +289,11 @@ namespace jucePluginEditorLib
 			memcpy(_lines[i].data(), strLines[i].c_str(), std::min(strLines[i].size(), static_cast<size_t>(m_numCharsX)));
 
 		return true;
+	}
+
+	const uint8_t* Lcd::getCharacterData(const uint8_t _character) const
+	{
+		return synthLib::getCharacterData(_character);
 	}
 
 	void Lcd::timerCallback(const int _timerId)
