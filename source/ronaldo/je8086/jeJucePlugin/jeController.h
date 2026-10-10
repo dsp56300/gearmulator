@@ -29,6 +29,12 @@ namespace jeJucePlugin
 			return 2;
 		}
 
+		// the performance write button is part 2
+		bool isPartEnabled(const uint8_t _part) const override
+		{
+			return _part <= static_cast<uint8_t>(JePart::Performance);
+		}
+
 		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 		void sendParameterChange(jeLib::SystemParameter _parameter, int _value) const;
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;

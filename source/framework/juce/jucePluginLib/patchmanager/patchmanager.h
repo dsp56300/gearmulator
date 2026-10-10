@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -35,6 +36,10 @@ namespace pluginLib::patchManager
 		// plugin on another thread than the message thread (LV2 on Linux does), and nothing may reach the derived class
 		// while it is destroyed
 		void shutdown();
+
+		// Runs _func with _patchManager unless that was shut down or deleted in the meantime, and holds off its shutdown()
+		// until _func returns. For callbacks that may arrive after the plugin is gone, the answer to a message box for example
+		static bool runIfAlive(PatchManager* _patchManager, const std::function<void(PatchManager&)>& _func);
 
 		void setUi(UiInterface* _ui);
 		UiInterface* getUi() const { return m_ui; }
@@ -77,6 +82,8 @@ namespace pluginLib::patchManager
 
 		virtual bool activatePatch(const patchDB::PatchPtr& _patch, uint32_t _part) = 0;
 		virtual bool activatePatch(const std::string& _filename, uint32_t _part);
+		// a patch loaded from a file instead of chosen in the database: checks the part and clears the database selection
+		bool activatePatchFromFile(const patchDB::PatchPtr& _patch, uint32_t _part);
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data);
 		void getPerInstanceConfig(std::vector<uint8_t>& _data) const;

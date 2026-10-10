@@ -787,6 +787,24 @@ namespace genericVirusUI
 		return !_data.empty();
 	}
 
+	std::string PatchManager::verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t) const
+	{
+		switch (detectPatchType(_patch->sysex))
+		{
+		case PatchType::Arrangement:
+			return "The dropped file contains an Arrangement patch. Loading it will "
+				"replace the full device state: the Multi setup and all 16 Single "
+				"patches in the parts will be overwritten.\n\nDo you want to load it?";
+		case PatchType::Multi:
+			return "The dropped file contains a Multi patch. Loading it will replace "
+				"the Multi setup (part volumes, MIDI channels, FX routing, etc.) "
+				"but the Single patches currently loaded in the parts will be kept."
+				"\n\nDo you want to load it?";
+		default:
+			return {};
+		}
+	}
+
 	bool PatchManager::equals(const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b) const
 	{
 		pluginLib::MidiPacket::Data dataA, dataB;

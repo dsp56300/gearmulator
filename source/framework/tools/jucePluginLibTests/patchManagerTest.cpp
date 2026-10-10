@@ -888,6 +888,23 @@ namespace
 			TEST_ASSERT(device.log() == std::vector<std::string>{"Pad"});
 		}
 
+		{
+			// a callback that arrives late, the answer to a message box: shutdown() waits for one that runs, later ones
+			// do not reach the patch manager
+			TestPatchManager pm(settings, {"Bass", "Lead", "Pad"});
+			TEST_ASSERT(pm.waitIdle());
+
+			std::function<void()> block;
+			TEST_ASSERT(shutdownWaitsFor(pm, block, [&pm, &block]
+			{
+				TEST_ASSERT(TestPatchManager::runIfAlive(&pm, [&block](pluginLib::patchManager::PatchManager&) { block(); }));
+			}));
+
+			bool ran = false;
+			TEST_ASSERT(!TestPatchManager::runIfAlive(&pm, [&ran](pluginLib::patchManager::PatchManager&) { ran = true; }));
+			TEST_ASSERT(!ran);
+		}
+
 		root.deleteRecursively();
 
 		std::cout << "  shutdown tests passed" << std::endl;

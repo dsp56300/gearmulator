@@ -76,6 +76,10 @@ namespace jucePluginEditorLib::patchManager
 		uint32_t getCurrentPart() const override;
 		uint32_t getPartCount() const override;
 
+		// The question to ask before _patch, dropped onto the part button of _part, is loaded. A patch that replaces more
+		// than that part, a multi for example, is loaded on part 0 once the user agreed. Empty: loaded on _part, no question
+		virtual std::string verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const { return {}; }
+
 	protected:
 		void startLoaderThread(const juce::File& _migrateFromDir = {}) override;
 

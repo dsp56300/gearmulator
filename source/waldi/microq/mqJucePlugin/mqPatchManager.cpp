@@ -295,6 +295,24 @@ namespace mqJucePlugin
 		return result;
 	}
 
+	std::string PatchManager::verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t) const
+	{
+		switch (detectPatchType(_patch->sysex))
+		{
+		case PatchType::Arrangement:
+			return "The dropped file contains an Arrangement patch. Loading it will "
+				"replace the full device state: the Multi setup and all Single "
+				"patches in the parts will be overwritten.\n\nDo you want to load it?";
+		case PatchType::Multi:
+			return "The dropped file contains a Multi patch. Loading it will replace "
+				"the Multi setup (part volumes, MIDI channels, FX, etc.) but the "
+				"Single patches currently loaded in the parts will be kept."
+				"\n\nDo you want to load it?";
+		default:
+			return {};
+		}
+	}
+
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
 	{
 		const auto sysex = applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware);

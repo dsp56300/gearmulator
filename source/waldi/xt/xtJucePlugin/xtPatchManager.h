@@ -35,6 +35,8 @@ namespace xtJucePlugin
 
 		PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex) const;
 
+		std::string verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const override;
+
 		static constexpr uint64_t g_userDataArrangement = 1;
 
 	protected:

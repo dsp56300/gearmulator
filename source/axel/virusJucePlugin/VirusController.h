@@ -136,6 +136,7 @@ namespace virus
 	public:
 
     	bool isMultiMode() const;
+    	bool isPartEnabled(const uint8_t _part) const override { return _part == 0 || isMultiMode(); }
 
     	// the same, for threads that must not read parameters, the audio thread for example
     	bool isMultiModeAnyThread() const { return m_multiMode; }

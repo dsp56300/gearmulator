@@ -81,6 +81,7 @@ namespace xtJucePlugin
 
 		bool isMultiMode() const;
 		void setPlayMode(bool _multiMode);
+		bool isPartEnabled(const uint8_t _part) const override { return _part == 0 || isMultiMode(); }
 
 		// the same as isMultiMode(), for threads that must not read the mode data, the audio thread for example
 		bool isMultiModeAnyThread() const { return m_multiMode; }

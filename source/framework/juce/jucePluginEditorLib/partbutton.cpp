@@ -11,6 +11,7 @@
 #include "juceRmlUi/rmlListEntry.h"
 #include "juceRmlUi/rmlMenu.h"
 
+#include "jucePluginLib/controller.h"
 #include "jucePluginLib/filetype.h"
 
 #include "patchmanager/patchmanager.h"
@@ -107,6 +108,9 @@ namespace jucePluginEditorLib
 
 	bool PartButton::canDrop(const Rml::Event& _event, const DragSource* _source)
 	{
+		if(!m_editor.getProcessor().getController().isPartEnabled(getPart()))
+			return false;
+
 		const auto* savePatchDesc = patchManager::SavePatchDesc::fromDragSource(*_source);
 
 		if(savePatchDesc)
@@ -163,7 +167,29 @@ namespace jucePluginEditorLib
 		if(!pm)
 			return DragTarget::dropFiles(_event, _data, _files);
 
-		if(!pm->activatePatch(_files.front(), getPart()))
+		const auto patches = pm->loadPatchesFromFiles(std::vector<std::string>{_files.front()});
+
+		if(!patches.empty())
+		{
+			if(const auto question = pm->verifyDropOntoPart(patches.front(), getPart()); !question.empty())
+			{
+				genericUI::MessageBox::showYesNo(genericUI::MessageBox::Icon::Question, m_editor.getProcessor().getProperties().name, question,
+					[pm, patch = patches.front()](const genericUI::MessageBox::Result _result)
+				{
+					if(_result != genericUI::MessageBox::Result::Yes)
+						return;
+
+					// the plugin may have been deleted while the box was open
+					pluginLib::patchManager::PatchManager::runIfAlive(pm, [&patch](pluginLib::patchManager::PatchManager& _pm)
+					{
+						_pm.activatePatch(patch, 0);
+					});
+				});
+				return;
+			}
+		}
+
+		if(patches.empty() || !pm->activatePatchFromFile(patches.front(), getPart()))
 		{
 			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, 
 				m_editor.getProcessor().getProperties().name, 

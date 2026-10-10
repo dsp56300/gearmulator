@@ -49,6 +49,7 @@ namespace genericVirusUI
 
 		// PatchManager impl
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
+		std::string verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const override;
 
 	protected:
 		bool createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::Data& _data, uint32_t _part) const override;

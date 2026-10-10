@@ -1,5 +1,7 @@
 #include "patchmanager.h"
 
+#include <set>
+
 #include "uiInterface.h"
 
 #include "baseLib/filesystem.h"
@@ -14,10 +16,28 @@ namespace pluginLib::patchManager
 	namespace
 	{
 		constexpr uint32_t g_programsPerBank = 128;
+
+		// the patch managers that are not shut down yet, see runIfAlive()
+		std::mutex& getInstancesMutex()
+		{
+			static std::mutex m;
+			return m;
+		}
+
+		std::set<PatchManager*>& getInstances()
+		{
+			static std::set<PatchManager*> s;
+			return s;
+		}
 	}
 
 	PatchManager::PatchManager(const juce::File& _dataFolder) : DB(_dataFolder), m_state(*this)
 	{
+		{
+			std::scoped_lock lock(getInstancesMutex());
+			getInstances().insert(this);
+		}
+
 		if (juce::MessageManager::getInstanceWithoutCreating())
 			startTimer(200);
 	}
@@ -29,6 +49,12 @@ namespace pluginLib::patchManager
 
 	void PatchManager::shutdown()
 	{
+		{
+			// a runIfAlive() callback that runs right now finishes first, later ones do nothing
+			std::scoped_lock lock(getInstancesMutex());
+			getInstances().erase(this);
+		}
+
 		{
 			// a processPending() that runs on the message thread right now finishes first, later ones do nothing
 			std::scoped_lock lock(m_processPendingMutex);
@@ -44,6 +70,15 @@ namespace pluginLib::patchManager
 		// runs the jobs queued so far first, they call virtuals of the derived class. Outside the lock, so that no job
 		// can wait for it
 		stopLoaderThread();
+	}
+
+	bool PatchManager::runIfAlive(PatchManager* _patchManager, const std::function<void(PatchManager&)>& _func)
+	{
+		std::scoped_lock lock(getInstancesMutex());
+		if (getInstances().find(_patchManager) == getInstances().end())
+			return false;
+		_func(*_patchManager);
+		return true;
 	}
 
 	void PatchManager::setUi(UiInterface* _ui)
@@ -320,17 +355,17 @@ namespace pluginLib::patchManager
 
 	bool PatchManager::activatePatch(const std::string& _filename, const uint32_t _part)
 	{
+		const auto patches = loadPatchesFromFiles(std::vector<std::string>{_filename});
+
+		return !patches.empty() && activatePatchFromFile(patches.front(), _part);
+	}
+
+	bool PatchManager::activatePatchFromFile(const patchDB::PatchPtr& _patch, const uint32_t _part)
+	{
 		if(_part >= m_state.getPartCount() || _part >= getPartCount())
 			return false;
 
-		const auto patches = loadPatchesFromFiles(std::vector<std::string>{_filename});
-
-		if(patches.empty())
-			return false;
-
-		const auto& patch = patches.front();
-
-		if(!activatePatch(patch, _part))
+		if(!activatePatch(_patch, _part))
 			return false;
 
 		if(getCurrentPart() == _part)

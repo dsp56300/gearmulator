@@ -66,6 +66,8 @@ namespace pluginLib
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		virtual bool setCurrentPart(uint8_t _part);
 		virtual uint8_t getPartCount() const { return 16; }
+		// whether a part takes a patch right now, dropped on its part button for example
+		virtual bool isPartEnabled(const uint8_t _part) const { return _part < getPartCount(); }
 
 		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
 		virtual bool parseControllerMessage(const synthLib::SMidiEvent&);
