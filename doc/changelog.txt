@@ -168,6 +168,11 @@ Osirus/OsTIrus:
         controllers a DAW sends when playback starts or many parameter changes
         at once, could partly get lost or garble the notes behind it.
 
+- [Fix] EMU-207 The ROM selector kept showing the previous ROM after loading a
+        project that uses another one. Switching the ROM reset the DSP clock
+        to 100%. A ROM that failed to start stayed selected and was saved with
+        the project while the previous one kept running.
+
 Osirus:
 
 - [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter

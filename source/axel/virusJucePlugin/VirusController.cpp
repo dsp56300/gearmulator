@@ -56,7 +56,7 @@ namespace virus
 		, m_processor(p)
 		, m_defaultModel(_defaultModel)
 		, m_deviceId(deviceId)
-		, m_onRomChanged(p.evRomChanged)
+		, m_onRomChanged(p.evFirmwareChanged)
     {
      	registerParams(p);
 
@@ -89,7 +89,7 @@ namespace virus
 		}
 		else
 		{
-			m_onRomChanged = [this](const virusLib::ROMFile*)
+			m_onRomChanged = [this](uint32_t)
 			{
 				requestRomBanks();
 			};

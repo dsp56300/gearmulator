@@ -1,5 +1,6 @@
 #pragma once
 
+#include "jucePluginEditorLib/firmwareSelector.h"
 #include "jucePluginEditorLib/pluginEditor.h"
 
 #include "baseLib/event.h"
@@ -90,7 +91,7 @@ namespace genericVirusUI
 		// the current part's Single name (default) and the Multi name.
 		bool m_showMultiName = false;
 
-		juceRmlUi::ElemComboBox* m_romSelector = nullptr;
+		std::unique_ptr<jucePluginEditorLib::FirmwareSelector> m_romSelector;
 
 		juceRmlUi::ElemButton* m_playModeSingle = nullptr;
 		juceRmlUi::ElemButton* m_playModeMulti = nullptr;
@@ -100,7 +101,7 @@ namespace genericVirusUI
 
 		std::unique_ptr<ArpUserPattern> m_arpUserPattern;
 
-		baseLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
+		baseLib::EventListener<uint32_t> m_romChangedListener;
 		baseLib::EventListener<uint8_t> m_playModeSetListener;
 	};
 }

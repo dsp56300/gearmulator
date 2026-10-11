@@ -82,7 +82,7 @@ namespace genericVirusUI
 		: jucePluginEditorLib::patchManager::PatchManager(_processor)
 		, m_controller(static_cast<virus::Controller&>(_processor.getController()))
 		, m_processor(_processor)
-		, m_onRomChanged(_processor.evRomChanged)
+		, m_onRomChanged(_processor.evFirmwareChanged)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
@@ -136,7 +136,7 @@ namespace genericVirusUI
 		else
 		{
 			// Initial ROM patches are added by the retained event, subsequent changes refresh
-			m_onRomChanged = [this](const virusLib::ROMFile*)
+			m_onRomChanged = [this](uint32_t)
 			{
 				addRomPatches();
 			};

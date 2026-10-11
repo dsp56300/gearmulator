@@ -78,6 +78,6 @@ namespace genericVirusUI
 		virus::Controller& m_controller;
 		virus::VirusProcessor& m_processor;
 		std::vector<pluginLib::patchDB::DataSource> m_romDataSources;
-		baseLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
+		baseLib::EventListener<uint32_t> m_onRomChanged;
 	};
 }

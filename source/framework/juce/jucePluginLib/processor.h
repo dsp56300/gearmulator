@@ -3,8 +3,12 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <mutex>
+#include <optional>
+#include <string>
+#include <vector>
 
 #include "bypassBuffer.h"
 #include "controller.h"
@@ -14,6 +18,8 @@
 #include "programChangeRouter.h"
 #include "midiNotifier.h"
 #include "skinVariables.h"
+
+#include "baseLib/event.h"
 
 #include "bridgeLib/types.h"
 
@@ -166,6 +172,28 @@ namespace pluginLib
 		bool isVoiceExpansionEnabled() const { return m_voiceExpansion; }
 		void setVoiceExpansion(bool _enabled);
 
+		// A product that runs one of several firmware images (ROMs, applications) lists them once with setFirmwareImages
+		// and reads getFirmwareIndex() when it creates its device. The choice is saved in a chunk with the product's own
+		// id, version and payload, before REMO and the device state, so that a state switches the firmware first.
+		// Selecting another image creates the device again; if that fails, the running one stays selected
+		struct FirmwareChunk
+		{
+			char id[5];		// four characters, "ROM "
+			uint32_t version = 1;
+			std::function<void(baseLib::BinaryStream&, uint32_t _index)> write;
+			// the index of the image the payload names, none if there is no such image
+			std::function<std::optional<uint32_t>(baseLib::BinaryStream&, uint32_t _version)> find;
+		};
+
+		void setFirmwareImages(std::vector<std::string> _names, FirmwareChunk _chunk);
+		const std::vector<std::string>& getFirmwareNames() const { return m_firmwareNames; }
+		uint32_t getFirmwareIndex() const { return m_firmwareIndex; }
+		bool selectFirmware(uint32_t _index);
+
+		// retained, a listener gets the current index when it is added. A state loaded by the host invokes it on the
+		// host's thread
+		baseLib::Event<uint32_t> evFirmwareChanged;
+
 		auto& getMidiPorts() { return m_midiPorts; }
 		auto& getSkinVariables() { return m_skinVariables; }
 		auto& getMidiNotifier() { return m_midiNotifier; }
@@ -299,6 +327,9 @@ namespace pluginLib
 		uint32_t m_dspClockPercent = 100;
 		bool m_voiceExpansion = false;
 		bool m_deviceVoiceExpansion = false;	// the voice expansion the current device was created with
+		std::vector<std::string> m_firmwareNames;
+		FirmwareChunk m_firmwareChunk{};
+		uint32_t m_firmwareIndex = 0;
 		float m_preferredDeviceSamplerate = 0.0f;
 		synthLib::Resampler::Mode m_resamplerMode = synthLib::Resampler::Mode::MameHq;
 		float m_hostSamplerate = 0.0f;

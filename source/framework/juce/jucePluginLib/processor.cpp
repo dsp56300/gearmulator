@@ -389,6 +389,14 @@ namespace pluginLib
 			s.write<uint8_t>(1);
 		}
 
+		// after VEXP, which only sets the flag, and before REMO: reading it creates the device of that firmware, which
+		// gets the voice expansion right away and is the one REMO and the device state go to
+		if (m_firmwareIndex < m_firmwareNames.size())
+		{
+			baseLib::ChunkWriter cw(s, m_firmwareChunk.id, m_firmwareChunk.version);
+			m_firmwareChunk.write(s, m_firmwareIndex);
+		}
+
 		// it is important that this is stored before other chunks to restore state to the remote properly
 		if (m_deviceType == DeviceType::Remote)
 		{
@@ -489,6 +497,16 @@ namespace pluginLib
 		{
 			m_voiceExpansion = _binaryStream.read<uint8_t>() != 0;
 		});
+
+		// a state that names an image that is not there keeps the running one
+		if (m_firmwareChunk.find)
+		{
+			_cr.add(m_firmwareChunk.id, m_firmwareChunk.version, [this](baseLib::BinaryStream& _binaryStream, const uint32_t _version)
+			{
+				if (const auto index = m_firmwareChunk.find(_binaryStream, _version))
+					selectFirmware(*index);
+			});
+		}
 
 		_cr.add("REMO", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
@@ -1350,6 +1368,35 @@ namespace pluginLib
 			return;
 		m_voiceExpansion = _enabled;
 		rebootDevice();
+	}
+
+	void Processor::setFirmwareImages(std::vector<std::string> _names, FirmwareChunk _chunk)
+	{
+		m_firmwareNames = std::move(_names);
+		m_firmwareChunk = std::move(_chunk);
+		m_firmwareIndex = 0;
+		evFirmwareChanged.retain(m_firmwareIndex);
+	}
+
+	bool Processor::selectFirmware(const uint32_t _index)
+	{
+		if (_index >= m_firmwareNames.size())
+			return false;
+		if (_index == m_firmwareIndex)
+			return true;
+
+		const auto previous = m_firmwareIndex;
+		m_firmwareIndex = _index;
+
+		// without a device yet, the one created later runs this image
+		if (m_plugin && !rebootDevice())
+		{
+			m_firmwareIndex = previous;
+			return false;
+		}
+
+		evFirmwareChanged.retain(m_firmwareIndex);
+		return true;
 	}
 
 	bool Processor::rebootDevice()

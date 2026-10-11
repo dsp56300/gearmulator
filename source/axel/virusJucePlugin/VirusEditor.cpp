@@ -34,7 +34,7 @@ namespace genericVirusUI
 	VirusEditor::VirusEditor(virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
 		Editor(_processorRef, _skin),
 		m_processor(_processorRef),
-		m_romChangedListener(_processorRef.evRomChanged),
+		m_romChangedListener(_processorRef.evFirmwareChanged),
 		m_playModeSetListener(static_cast<virus::Controller&>(_processorRef.getController()).evPlayModeSet)
 	{
 	}
@@ -47,7 +47,7 @@ namespace genericVirusUI
 
 		m_presetName = findChild("PatchName");
 
-		m_romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector");
+		m_romSelector = std::make_unique<jucePluginEditorLib::FirmwareSelector>(*this, findChild<juceRmlUi::ElemComboBox>("RomSelector"));
 
 		m_playModeSingle = findChild<juceRmlUi::ElemButton>("PlayModeSingle", false);
 		m_playModeMulti = findChild<juceRmlUi::ElemButton>("PlayModeMulti", false);
@@ -61,36 +61,6 @@ namespace genericVirusUI
 		{
 			m_playModeToggle = findChild<juceRmlUi::ElemButton>("PlayModeToggle");
 			juceRmlUi::EventListener::AddClick(m_playModeToggle, [this] { setPlayMode(m_playModeToggle->isChecked() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); });
-		}
-
-		if(m_romSelector)
-		{
-			const auto roms = m_processor.getRoms();
-
-			if(roms.empty())
-			{
-				m_romSelector->addOption("<No ROM found>");
-			}
-			else
-			{
-				int id = 1;
-
-				for (const auto& rom : roms)
-				{
-					const auto name = juce::File(rom.getFilename()).getFileNameWithoutExtension();
-					m_romSelector->addOption(name.toStdString() + " (" + rom.getModelName() + ')');
-				}
-			}
-
-			m_romSelector->setSelectedIndex(static_cast<int>(m_processor.getSelectedRomIndex()), false);
-
-			juceRmlUi::EventListener::Add(m_romSelector, Rml::EventId::Change, [this](Rml::Event&)
-			{
-				const auto oldIndex = m_processor.getSelectedRomIndex();
-				const auto newIndex = m_romSelector->getSelectedIndex();
-				if(!m_processor.setSelectedRom(newIndex))
-					m_romSelector->setSelectedIndex(static_cast<int>(oldIndex));
-			});
 		}
 
 		getController().onProgramChange = [this](int _part)

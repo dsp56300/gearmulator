@@ -205,7 +205,7 @@ namespace virus
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
-		baseLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
+		baseLib::EventListener<uint32_t> m_onRomChanged;
         virusLib::FrontpanelState m_frontpanelState;
         std::atomic<bool> m_multiMode = false;
     };

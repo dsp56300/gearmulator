@@ -30,9 +30,9 @@ namespace virus
 
 	    const virusLib::ROMFile* getSelectedRom() const
 		{
-	        if(m_selectedRom >= m_roms.size())
+	        if(getFirmwareIndex() >= m_roms.size())
 	            return {};
-	        return &m_roms[m_selectedRom];
+	        return &m_roms[getFirmwareIndex()];
 		}
 
 	    virusLib::DeviceModel getModel() const
@@ -42,9 +42,6 @@ namespace virus
 	    }
 
 	    const auto& getRoms() const { return m_roms; }
-
-	    bool setSelectedRom(uint32_t _index);
-	    uint32_t getSelectedRomIndex() const { return m_selectedRom; }
 
 	    uint32_t getPartCount() const
 	    {
@@ -62,9 +59,6 @@ namespace virus
 
 	    pluginLib::Controller* createController() override;
 
-	    void saveChunkData(baseLib::BinaryStream& s) override;
-	    void loadChunkData(baseLib::ChunkReader& _cr) override;
-
 		void zynthianExportLv2Presets() const;
 		void exportLv2Presets(const virusLib::ROMFile& _rom, const std::string& _rootPath) const;
 
@@ -73,11 +67,9 @@ namespace virus
 
 		std::vector<virusLib::ROMFile>      m_roms;
 	    const virusLib::DeviceModel			m_defaultModel;
-	    uint32_t                            m_selectedRom = 0;
 
 		uint32_t							m_clockTempoParam = 0xffffffff;
 
-	public:
-	    baseLib::Event<const virusLib::ROMFile*> evRomChanged;
+		baseLib::EventListener<uint32_t>	m_onFirmwareChanged;
 	};
 }
