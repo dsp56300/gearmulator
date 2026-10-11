@@ -103,8 +103,8 @@ namespace emu88Lib
     // known hashes remain the filename-independent fallback.
     //
     // Raw images are selected by size; oversized Pro EPROM dumps are checked for
-    // valid 1 MiB copies, and DLL/dylib containers are searched for embedded wave
-    // headers. Subfolders are searched too.
+    // valid 1 MiB copies, mirrored dumps for the image they repeat, and DLL/dylib
+    // containers are searched for embedded wave headers. Subfolders are searched too.
     class RomLoader : synthLib::RomLoader
     {
     public:

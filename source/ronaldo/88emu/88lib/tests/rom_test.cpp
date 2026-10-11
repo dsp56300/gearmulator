@@ -166,6 +166,24 @@ namespace
 		return nullptr;
 	}
 
+	// A mirrored slot's image has to be a registered row with an MD5 to match the copy
+	// against, the dump has to hold whole copies of it, and no row or filename may already
+	// claim the dump size for that slot.
+	void testMirroredSlotsMatchRegistry()
+	{
+		for (const auto& mirrored : g_romMirroredSlots)
+		{
+			CHECK(mirrored.dumpSize > mirrored.imageSize);
+			CHECK_EQ(mirrored.dumpSize % mirrored.imageSize, size_t(0));
+			const auto* image = rowFor(mirrored.device, mirrored.slot, mirrored.index, mirrored.imageSize);
+			CHECK(image && image->hash.isValid());
+			CHECK(!rowFor(mirrored.device, mirrored.slot, mirrored.index, mirrored.dumpSize));
+			for (const auto& spec : g_romFileSpecs)
+				CHECK(spec.device != mirrored.device || spec.slot != mirrored.slot || spec.index != mirrored.index ||
+				      spec.size != mirrored.dumpSize);
+		}
+	}
+
 	std::string g_tempDir;
 
 	// An inventory does not need the scanner: it is a list of files and the rows they were
@@ -435,6 +453,7 @@ int main()
 	testFileSpecNamesAreUnambiguous();
 	testCompositeSlotsMatchRegistry();
 	testSc88ProChipsTileTheWaveSet();
+	testMirroredSlotsMatchRegistry();
 	testInterleavedComposite();
 	testConcatenatedComposite();
 	testSc88ProChipComposite();

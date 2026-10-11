@@ -314,6 +314,12 @@ JE8086:
         so and explains how to allow it, instead of reporting every ROM as
         missing.
 
+- [Imp] SC-8820: The original dump of the CPU's internal ROM, R02015367, is
+        recognized and used in place of the reconstructed one, which still
+        works. The CPU is now emulated as the SH7016 it is, so the internal
+        ROM is 64 KiB. A 128 KiB dump that holds it twice is recognized too;
+        any other 128 KiB sc8820_internal.bin is no longer accepted.
+
 2.2.25:
 
 88emuPlayer:
