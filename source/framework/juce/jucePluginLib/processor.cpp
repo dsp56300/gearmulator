@@ -178,6 +178,10 @@ namespace pluginLib
 				// (setStateInformation) will override this if present.
 				loadDefaultMidiLearnPreset();
 			}
+
+			// the controller reads the state of the device once, here instead of in each product's constructor
+			if (m_controller)
+				m_controller->onStateLoaded();
 		}
 
 	    return *m_controller;
@@ -1333,7 +1337,8 @@ namespace pluginLib
 
 		juce::MessageManager::callAsync([this]
 		{
-			getController().onStateLoaded();
+			if (hasController())
+				getController().onStateLoaded();
 		});
 
 		return m_device.get();

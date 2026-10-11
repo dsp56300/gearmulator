@@ -82,9 +82,6 @@ namespace virus
 			});
 		}
 
-		requestTotal();
-		requestArrangement();
-
 		// ABC models have different factory presets depending on the used ROM, but for the TI we have all presets from all models loaded anyway so no need to replace them at runtime
 		if(isTIFamily(m_processor.getModel()))
 		{

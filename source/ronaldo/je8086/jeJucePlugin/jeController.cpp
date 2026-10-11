@@ -70,7 +70,6 @@ namespace jeJucePlugin
 			for (auto& p : it.second)
 				p->setRateLimitMilliseconds(1000 / 25);	// limit to 25 changes per second as the midi bandwidth is quite limited on this device
 		}
-		Controller::onStateLoaded();
 	}
 
 	Controller::~Controller() = default;

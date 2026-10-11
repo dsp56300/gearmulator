@@ -46,10 +46,6 @@ namespace mqJucePlugin
 	{
 	    registerParams(p);
 
-	//  sendSysEx(RequestAllSingles);
-		sendSysEx(RequestGlobal);
-	//  sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
-
 		onPlayModeChanged.addListener(0, [this](bool multiMode)
 		{
 			if(!isBulkTransfer())
@@ -147,6 +143,8 @@ namespace mqJucePlugin
 
 	void Controller::onStateLoaded()
 	{
+		// the global dump tells the play mode, its answer requests all patches
+		sendSysEx(RequestGlobal);
 	}
 
 	std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const

@@ -42,8 +42,6 @@ namespace n2xJucePlugin
 		    return juce::String(temp);
 	    });
 
-		Controller::onStateLoaded();
-
 		m_currentPartChanged.set(onCurrentPartChanged, [this](const uint8_t& _part)
 		{
 			setMultiParameter(n2x::SelectedChannel, _part);

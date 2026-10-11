@@ -66,9 +66,6 @@ namespace xtJucePlugin
 	{
 	    registerParams(p);
 
-		sendSysEx(RequestGlobal);
-		sendSysEx(RequestMode);
-
 		onPlayModeChanged.addListener([this](bool multiMode)
 		{
 			if(!isBulkTransfer())
