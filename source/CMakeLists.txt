@@ -123,22 +123,7 @@ add_subdirectory(waldi/common/wLib EXCLUDE_FROM_ALL)
 
 # ----------------- Synths Osirus/OsTIrus
 
-if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS OR ${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
-	add_subdirectory(axel/virusLib EXCLUDE_FROM_ALL)
-	add_subdirectory(axel/virusConsoleLib EXCLUDE_FROM_ALL)
-	add_subdirectory(axel/virusTestConsole)
-	add_subdirectory(axel/virusIntegrationTest)
-	add_subdirectory(axel/virusRomHashTest)
-	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
-		add_subdirectory(axel/virusJucePlugin EXCLUDE_FROM_ALL)
-		if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS)
-			add_subdirectory(axel/osirusJucePlugin)
-		endif()
-		if(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
-			add_subdirectory(axel/osTIrusJucePlugin)
-		endif()
-	endif()
-endif()
+add_subdirectory(axel)
 
 # ----------------- Synth Vavra
 
@@ -187,18 +172,8 @@ endif()
 
 # ----------------- Synth Xenia
 
-if(${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
-	add_subdirectory(waldi/xt/xtLib EXCLUDE_FROM_ALL)
-	add_subdirectory(waldi/xt/xtTestConsole)
-
-	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
-		add_subdirectory(waldi/xt/xtJucePlugin)
-	endif()
-endif()
-
-if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
-	add_subdirectory(waldi/common/wFlashTest)
-endif()
+# wFlashTest in there needs the Vavra libraries added above
+add_subdirectory(waldi)
 
 # ----------------- all claudias
 
