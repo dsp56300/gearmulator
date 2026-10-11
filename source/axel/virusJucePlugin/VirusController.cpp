@@ -250,119 +250,32 @@ namespace virus
 
     std::string Controller::getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const
     {
-        return getPresetName("SingleName", _values);
+        return getParamString("SingleName%u", kNameLength, _values);
     }
 
     std::string Controller::getSinglePresetName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
     {
-        return getPresetName("SingleName", _values);
+        return getParamString("SingleName%u", kNameLength, _values);
     }
 
     std::string Controller::getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const
     {
-        return getPresetName("MultiName", _values);
+        return getParamString("MultiName%u", kNameLength, _values);
     }
-
-    std::string Controller::getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::ParamValues& _values) const
-    {
-        std::string name;
-        for(uint32_t i=0; i<kNameLength; ++i)
-        {
-	        const std::string paramName = _paramNamePrefix + std::to_string(i);
-            const auto idx = getParameterIndexByName(paramName);
-            if(idx == InvalidParameterIndex)
-                break;
-
-            const auto it = _values.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
-            if(it == _values.end())
-                break;
-
-            name += static_cast<char>(it->second);
-        }
-        return name;
-    }
-
-    std::string Controller::getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::AnyPartParamValues& _values) const
-    {
-        std::string name;
-        for(uint32_t i=0; i<kNameLength; ++i)
-        {
-	        const std::string paramName = _paramNamePrefix + std::to_string(i);
-            const auto idx = getParameterIndexByName(paramName);
-            if(idx == InvalidParameterIndex)
-                break;
-
-            const auto it = _values[idx];
-            if(!it)
-                break;
-
-            name += static_cast<char>(*it);
-        }
-        return name;
-    }
-
-	std::string Controller::getPresetNameFromParameters(const std::string& _paramNamePrefix, const uint8_t _part) const
-	{
-		std::string name;
-		for (int i = 0; i < kNameLength; ++i)
-		{
-			const std::string paramName = _paramNamePrefix + std::to_string(i);
-			const auto idx = getParameterIndexByName(paramName);
-			if (idx == InvalidParameterIndex)
-				break;
-
-			const auto* param = getParameter(idx, _part);
-			if (!param)
-				break;
-
-			name += static_cast<char>(param->getUnnormalizedValue());
-		}
-		return name;
-	}
-
-	void Controller::setPresetNameOnParameters(const std::string& _paramNamePrefix, const uint8_t _part, const juce::String& _name) const
-	{
-		for (int i = 0; i < kNameLength; ++i)
-		{
-			const std::string paramName = _paramNamePrefix + std::to_string(i);
-			const auto idx = getParameterIndexByName(paramName);
-			if (idx == InvalidParameterIndex)
-				break;
-
-			auto* param = getParameter(idx, _part);
-			if (!param)
-				break;
-
-			param->getValueObject().setValue(static_cast<uint8_t>(i >= _name.length() ? ' ' : _name[i]));
-		}
-	}
 
 	void Controller::setSinglePresetName(const uint8_t _part, const juce::String& _name) const
 	{
-		setPresetNameOnParameters("SingleName", _part, _name);
-	}
-
-	void Controller::setSinglePresetName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _name) const
-	{
-		for (uint32_t i = 0; i < kNameLength; ++i)
-		{
-			const std::string paramName = "SingleName" + std::to_string(i);
-			const auto idx = getParameterIndexByName(paramName);
-			if (idx == InvalidParameterIndex)
-				break;
-
-			_values[idx] = (i < _name.size()) ? _name[i] : ' ';
-		}
+		setParamString("SingleName%u", kNameLength, _part, _name.toStdString(), ' ');
 	}
 
 	std::string Controller::getMultiPresetName() const
 	{
-		return getPresetNameFromParameters("MultiName", 0);
+		return getParamString("MultiName%u", kNameLength, 0);
 	}
 
 	void Controller::setMultiPresetName(const juce::String& _name) const
 	{
-		setPresetNameOnParameters("MultiName", 0, _name);
+		setParamString("MultiName%u", kNameLength, 0, _name.toStdString(), ' ');
 	}
 
     bool Controller::isMultiMode() const
@@ -386,7 +299,7 @@ namespace virus
 
 	std::string Controller::getCurrentPartPresetName(const uint8_t _part) const
 	{
-		return getPresetNameFromParameters("SingleName", _part);
+		return getParamString("SingleName%u", kNameLength, _part);
 	}
 
 	void Controller::setCurrentPartPreset(uint8_t _part, const virusLib::BankNumber _bank, uint8_t _prg)

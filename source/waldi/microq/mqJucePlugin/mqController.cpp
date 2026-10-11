@@ -151,63 +151,17 @@ namespace mqJucePlugin
 
 	std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const
 	{
-	    std::string name;
-	    for(uint32_t i=0; i<16; ++i)
-	    {
-	        char paramName[16];
-	        sprintf(paramName, "Name%02u", i);
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        const auto it = _values.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
-	        if(it == _values.end())
-	            break;
-
-	        name += static_cast<char>(it->second);
-	    }
-	    return name;
+	    return getParamString("Name%02u", 16, _values);
 	}
 
 	std::string Controller::getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
 	{
-	    return getString(_values, "Name", 16);
+	    return getParamString("Name%02u", 16, _values);
 	}
 
 	std::string Controller::getCategory(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
 	{
-	    return getString(_values, "Category", 4);
-	}
-
-	std::string Controller::getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix,	const size_t _len) const
-	{
-	    std::string name;
-	    for(uint32_t i=0; i<_len; ++i)
-	    {
-	        char paramName[64];
-	        snprintf(paramName, sizeof(paramName), "%s%02u", _prefix.c_str(), i);
-
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        const auto it = _values[idx];
-	        if(!it)
-	            break;
-
-	        name += static_cast<char>(*it);
-	    }
-	    return name;
-	}
-
-	bool Controller::setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const
-	{
-	    return setString(_values, "Name", 16, _value);
-	}
-
-	bool Controller::setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const
-	{
-	    return setString(_values, "Category", 4, _value);
+	    return getParamString("Category%02u", 4, _values);
 	}
 
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)
@@ -434,22 +388,6 @@ namespace mqJucePlugin
 		if(parseMidiPacket(SingleDump, _data, _paramValues, _sysex))
 			return true;
 		return parseMidiPacket(SingleDumpQ, _data, _paramValues, _sysex);
-	}
-
-	bool Controller::setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const
-	{
-	    for(uint32_t i=0; i<_len && i <_value.size(); ++i)
-	    {
-	        char paramName[64];
-	        snprintf(paramName, sizeof(paramName), "%s%02u", _prefix.c_str(), i);
-
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        _values[idx] = static_cast<uint8_t>(_value[i]);
-	    }
-	    return true;
 	}
 
 	const std::string& Controller::getPatchName(const uint8_t _part) const

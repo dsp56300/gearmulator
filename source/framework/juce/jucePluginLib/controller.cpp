@@ -406,6 +406,85 @@ namespace pluginLib
 		return m_descriptions.getIndexByName(index, _name) ? index : InvalidParameterIndex;
 	}
 
+	namespace
+	{
+		std::string getParamStringName(const char* _format, const uint32_t _index)
+		{
+			char name[64];
+			(void)snprintf(name, sizeof(name), _format, static_cast<unsigned int>(_index));
+			return name;
+		}
+
+		// _getValue(parameterIndex) returns the value of that parameter, if there is one
+		template<typename TGetValue>
+		std::string readParamString(const Controller& _controller, const char* _format, const uint32_t _length, const TGetValue& _getValue)
+		{
+			std::string result;
+
+			for (uint32_t i = 0; i < _length; ++i)
+			{
+				const auto index = _controller.getParameterIndexByName(getParamStringName(_format, i));
+				if (index == Controller::InvalidParameterIndex)
+					break;
+
+				const std::optional<ParamValue> value = _getValue(index);
+				if (!value)
+					break;
+
+				result += static_cast<char>(*value);
+			}
+			return result;
+		}
+	}
+
+	std::string Controller::getParamString(const char* _format, const uint32_t _length, const MidiPacket::ParamValues& _values) const
+	{
+		return readParamString(*this, _format, _length, [&](const uint32_t _index) -> std::optional<ParamValue>
+		{
+			const auto it = _values.find(std::make_pair(MidiPacket::AnyPart, _index));
+			if (it == _values.end())
+				return {};
+			return it->second;
+		});
+	}
+
+	std::string Controller::getParamString(const char* _format, const uint32_t _length, const MidiPacket::AnyPartParamValues& _values) const
+	{
+		return readParamString(*this, _format, _length, [&](const uint32_t _index) -> std::optional<ParamValue>
+		{
+			if (_index >= _values.size())
+				return {};
+			return _values[_index];
+		});
+	}
+
+	std::string Controller::getParamString(const char* _format, const uint32_t _length, const uint8_t _part) const
+	{
+		return readParamString(*this, _format, _length, [&](const uint32_t _index) -> std::optional<ParamValue>
+		{
+			const auto* p = getParameter(_index, _part);
+			if (!p)
+				return {};
+			return p->getUnnormalizedValue();
+		});
+	}
+
+	void Controller::setParamString(const char* _format, const uint32_t _length, const uint8_t _part, const std::string& _string, const char _pad) const
+	{
+		for (uint32_t i = 0; i < _length; ++i)
+		{
+			const auto index = getParameterIndexByName(getParamStringName(_format, i));
+			if (index == InvalidParameterIndex)
+				break;
+
+			auto* p = getParameter(index, _part);
+			if (!p)
+				break;
+
+			p->getValueObject().setValue(static_cast<uint8_t>(i < _string.size() ? _string[i] : _pad));
+		}
+	}
+
 	bool Controller::setParameters(const std::map<std::string, ParamValue>& _values, const uint8_t _part, const Parameter::Origin _changedBy) const
 	{
 		bool res = false;

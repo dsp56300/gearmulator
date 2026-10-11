@@ -46,6 +46,14 @@ namespace pluginLib
 
 		bool setParameters(const std::map<std::string, ParamValue>& _values, uint8_t _part, Parameter::Origin _changedBy) const;
 
+		// A text stored with one parameter per character, a patch name for example. _format names the parameter of each
+		// character ("Name%02u", "SingleName%u"). Reading stops at the first parameter that does not exist or has no value
+		std::string getParamString(const char* _format, uint32_t _length, const MidiPacket::ParamValues& _values) const;
+		std::string getParamString(const char* _format, uint32_t _length, const MidiPacket::AnyPartParamValues& _values) const;
+		std::string getParamString(const char* _format, uint32_t _length, uint8_t _part) const;
+		// writes _string to the parameters of _part, fills the rest of _length with _pad, without notifying the host
+		void setParamString(const char* _format, uint32_t _length, uint8_t _part, const std::string& _string, char _pad) const;
+
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 
 		bool createNamedParamValues(MidiPacket::NamedParamValues& _params, const std::string& _packetName, uint8_t _part) const;

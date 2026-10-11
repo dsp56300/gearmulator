@@ -105,10 +105,6 @@ namespace xtJucePlugin
 		std::string getSingleName(uint8_t _part) const;
 		std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
 		std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
-		std::string getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len) const;
-
-		bool setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
-		bool setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const;
 
 		void setFrontPanel(xtJucePlugin::FrontPanel* _frontPanel);
 		void setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor);

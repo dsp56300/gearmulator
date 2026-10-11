@@ -97,8 +97,6 @@ namespace virus
         std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
         std::string getSinglePresetName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
         std::string getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
-        std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::ParamValues& _values) const;
-        std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 
     	const Singles& getSinglePresets() const
         {
@@ -121,19 +119,10 @@ namespace virus
     	}
 
 		void setSinglePresetName(uint8_t _part, const juce::String& _name) const;
-        void setSinglePresetName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _name) const;
 
 		std::string getMultiPresetName() const;
 		void setMultiPresetName(const juce::String& _name) const;
 
-	private:
-		// Read/write a patch name directly from/to Parameter objects (live state).
-		// _paramNamePrefix is either "SingleName" or "MultiName"; _part = 0 for Multi
-		// since there's only one multi edit buffer.
-		std::string getPresetNameFromParameters(const std::string& _paramNamePrefix, uint8_t _part) const;
-		void setPresetNameOnParameters(const std::string& _paramNamePrefix, uint8_t _part, const juce::String& _name) const;
-
-	public:
 
     	bool isMultiMode() const;
     	bool isPartEnabled(const uint8_t _part) const override { return _part == 0 || isMultiMode(); }

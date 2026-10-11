@@ -97,11 +97,6 @@ namespace mqJucePlugin
 		std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
 	    std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 	    std::string getCategory(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
-	    std::string getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len) const;
-
-	    bool setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
-	    bool setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
-	    bool setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const;
 
 		const std::string& getPatchName(uint8_t _part) const;
 
