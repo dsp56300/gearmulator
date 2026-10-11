@@ -440,22 +440,7 @@ namespace n2xJucePlugin
 		if(_derived.getParameterIndex() != _base.getParameterIndex())
 			return false;
 
-		const auto& packetName = midiPacketName(MidiPacketType::SingleDump);
-		const auto* packet = getMidiPacket(packetName);
-
-		if (!packet)
-		{
-			LOG("Failed to find midi packet " << packetName);
-			return true;
-		}
-		
-		const auto* defA = packet->getDefinitionByParameterName(_derived.getDescription().name);
-		const auto* defB = packet->getDefinitionByParameterName(_base.getDescription().name);
-
-		if (!defA || !defB)
-			return true;
-
-		return defA->doMasksOverlap(*defB);
+		return isDerivedParameterInPacket(midiPacketName(MidiPacketType::SingleDump), _derived, _base);
 	}
 
 	std::string Controller::getSingleName(const uint8_t _part) const

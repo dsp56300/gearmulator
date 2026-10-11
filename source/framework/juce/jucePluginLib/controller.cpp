@@ -296,6 +296,25 @@ namespace pluginLib
 		onPresetParametersChanged();
 	}
 
+	bool Controller::isDerivedParameterInPacket(const std::string& _packetName, const Parameter& _derived, const Parameter& _base) const
+	{
+		const auto* packet = getMidiPacket(_packetName);
+
+		if (!packet)
+		{
+			LOG("Failed to find midi packet " << _packetName);
+			return true;
+		}
+
+		const auto* defA = packet->getDefinitionByParameterName(_derived.getDescription().name);
+		const auto* defB = packet->getDefinitionByParameterName(_base.getDescription().name);
+
+		if (!defA || !defB)
+			return true;
+
+		return defA->doMasksOverlap(*defB);
+	}
+
 	void Controller::onPresetParametersChanged() const
 	{
 		// Soft knobs follow their targets via asynchronous value notifications, bring them up to date before the host

@@ -154,6 +154,9 @@ namespace pluginLib
 		void onPresetParametersChanged() const;
 
 		virtual bool isDerivedParameter(Parameter& _derived, Parameter& _base) const { return true; }
+		// for an isDerivedParameter() of parameters that share bytes of a dump: derived if their masks in _packetName
+		// overlap. True if the packet or one of the two definitions is missing
+		bool isDerivedParameterInPacket(const std::string& _packetName, const Parameter& _derived, const Parameter& _base) const;
 
         struct ParamIndex
         {

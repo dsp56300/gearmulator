@@ -519,22 +519,7 @@ namespace mqJucePlugin
 		if(_derived.getDescription().page >= 100)
 			return false;
 
-		const auto& packetName = g_midiPacketNames[SingleDump];
-		const auto* packet = getMidiPacket(packetName);
-
-		if (!packet)
-		{
-			LOG("Failed to find midi packet " << packetName);
-			return true;
-		}
-		
-		const auto* defA = packet->getDefinitionByParameterName(_derived.getDescription().name);
-		const auto* defB = packet->getDefinitionByParameterName(_base.getDescription().name);
-
-		if (!defA || !defB)
-			return true;
-
-		return defA->doMasksOverlap(*defB);
+		return isDerivedParameterInPacket(g_midiPacketNames[SingleDump], _derived, _base);
 	}
 
 	std::vector<uint8_t> Controller::getPartsForMidiChannel(uint8_t _channel)
