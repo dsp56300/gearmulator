@@ -77,6 +77,8 @@ namespace synthLib
 		processAudio(_inputs, _outputs, _size);
 
 		readMidiOut(_midiOut);
+
+		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
 	void Device::setExtraLatencySamples(const uint32_t _size)

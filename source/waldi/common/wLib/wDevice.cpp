@@ -31,10 +31,4 @@ namespace wLib
 			return false;
 		return c->getSpeedInHz();
 	}
-
-	void Device::process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
-	{
-		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
-		m_numSamplesProcessed += static_cast<uint32_t>(_size);
-	}
 }

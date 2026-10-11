@@ -133,11 +133,16 @@ namespace synthLib
 
 		void dummyProcess(uint32_t _numSamples);
 
+		// For firmware that schedules incoming MIDI by sample: makes the offset of an event in the current block an
+		// absolute position, the samples processed before this block plus the extra latency
+		void stampOffset(SMidiEvent& _ev) const { _ev.offset += m_numSamplesProcessed + m_extraLatency; }
+
 	private:
 		DeviceCreateParams m_createParams;
 		std::vector<SMidiEvent> m_midiIn;
 
 		uint32_t m_extraLatency = 0;
+		uint32_t m_numSamplesProcessed = 0;
 
 		MidiTranslator m_midiTranslator;
 		std::vector<SMidiEvent> m_translatorOut;

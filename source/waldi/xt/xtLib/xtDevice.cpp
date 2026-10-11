@@ -125,7 +125,7 @@ namespace xt
 		if(_ev.sysex.empty())
 		{
 			auto e = _ev;
-			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
+			stampOffset(e);
 			m_xt.sendMidiEvent(e);
 		}
 		else

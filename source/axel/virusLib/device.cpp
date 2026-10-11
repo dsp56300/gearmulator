@@ -185,8 +185,6 @@ namespace virusLib
 			m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 1, 1);	// TIMER 2 = ADO = LFO 2/3 LED
 		}
 
-		m_numSamplesProcessed += static_cast<uint32_t>(_size);
-
 		m_frontpanelStateDSP.toMidiEvent(m_frontpanelStateMidiEvent);
 		_midiOut.push_back(m_frontpanelStateMidiEvent);
 	}
@@ -596,7 +594,7 @@ namespace virusLib
 		{
 //			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
 			auto ev = _ev;
-			ev.offset += m_numSamplesProcessed + getExtraLatencySamples();
+			stampOffset(ev);
 			return m_mc->sendMIDI(ev, &m_frontpanelStateDSP);
 		}
 

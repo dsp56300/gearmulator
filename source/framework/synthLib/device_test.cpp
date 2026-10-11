@@ -70,6 +70,19 @@ namespace
 		}
 	};
 
+	// Stamps every event the way a device with a sample scheduling firmware does
+	class StampingDevice final : public TestDevice
+	{
+	protected:
+		bool sendMidi(const SMidiEvent& _ev, std::vector<SMidiEvent>&) override
+		{
+			auto e = _ev;
+			stampOffset(e);
+			m_midiSent.push_back(e);
+			return true;
+		}
+	};
+
 	void expect(const bool _condition)
 	{
 		if (!_condition)
@@ -103,6 +116,27 @@ namespace
 		expect(device.m_midiSent.size() == 1);
 		expect(device.m_midiSent.front().type == MidiEventType::Midi);
 		expect(device.m_midiSent.front().a == 0x90);
+	}
+
+	// The stamp is the offset in the block plus the samples of all blocks before it plus the extra latency
+	void testStampOffsetCountsProcessedSamples()
+	{
+		StampingDevice device;
+		device.setExtraLatencySamples(10);
+
+		std::vector<SMidiEvent> midiOut;
+		float buffer[8] = {};
+		float* const ptr = buffer;
+		const TAudioInputs in = {ptr, ptr, nullptr, nullptr};
+		const TAudioOutputs out = {ptr, ptr};
+
+		for (uint32_t block = 0; block < 3; ++block)
+			device.process(in, out, 8, {SMidiEvent(MidiEventSource::Host, 0x90, 0x40, 0x7f, 3)}, midiOut);
+
+		expect(device.m_midiSent.size() == 3);
+		expect(device.m_midiSent[0].offset == 3 + 0 + 10);
+		expect(device.m_midiSent[1].offset == 3 + 8 + 10);
+		expect(device.m_midiSent[2].offset == 3 + 16 + 10);
 	}
 
 	// Hardware can deliver one dump in several chunks. Plugin reassembles them, and the device has to
@@ -172,6 +206,7 @@ int main()
 	baseLib::disableErrorDialogs();
 
 	testTransportMarkerBypassesSendMidi();
+	testStampOffsetCountsProcessedSamples();
 	testChunkedSysexReachesDeviceOnce();
 	testMissingInputDoesNotHearMissingOutput();
 	return 0;
