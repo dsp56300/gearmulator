@@ -1,3 +1,5 @@
+add_subdirectory(libresample)
+
 # disable freetype deps, not really needed
 set(FT_DISABLE_ZLIB TRUE)
 set(FT_DISABLE_BZIP2 TRUE)
@@ -43,3 +45,34 @@ target_include_directories(rmlui_core PUBLIC
 	${CMAKE_CURRENT_LIST_DIR}/RmlUi/Include
 	${CMAKE_CURRENT_LIST_DIR}/RmlUi/Source
 	)
+
+# network bridge
+add_subdirectory(ptypes EXCLUDE_FROM_ALL)
+
+# Host audio and MIDI for the test consoles and the player library. Excluded from ALL, they are built only for a
+# target that links them; a WebAssembly build has no host to talk to
+if(NOT EMSCRIPTEN)
+	set(CPPTERMINAL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+	set(CPPTERMINAL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+	set(CPPTERMINAL_ENABLE_TESING OFF CACHE BOOL "" FORCE)
+	add_subdirectory(cpp-terminal EXCLUDE_FROM_ALL)
+
+	if(NOT ANDROID)
+		add_subdirectory(portmidi EXCLUDE_FROM_ALL)
+	endif()
+
+	set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
+	add_subdirectory(portaudio EXCLUDE_FROM_ALL)
+
+	# Virtual MIDI ports require the newer PortMidi API. Its target name differs from
+	# Vavra's portmidi-static, so both versions can coexist.
+	# Only the player library uses them, so a library-only build (no JUCE) does not pull in the
+	# host MIDI stack.
+	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN AND NOT ANDROID AND NOT TARGET portmidi)
+		# Build static even if a parent set BUILD_SHARED_LIBS ON.
+		set(_pm_prev_shared ${BUILD_SHARED_LIBS})
+		set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+		add_subdirectory(portmidi-latest EXCLUDE_FROM_ALL)
+		set(BUILD_SHARED_LIBS ${_pm_prev_shared} CACHE BOOL "" FORCE)
+	endif()
+endif()

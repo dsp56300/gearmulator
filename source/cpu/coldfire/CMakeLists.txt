@@ -18,8 +18,12 @@ source_group("source" FILES ${SOURCES})
 target_include_directories(coldfire PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set_property(TARGET coldfire PROPERTY FOLDER "cpu")
 
-# differential test against Musashi's 68020 plus ColdFire specifics
-add_executable(coldfireTest coldfireTest.cpp)
-target_link_libraries(coldfireTest PRIVATE coldfire 68kEmu)
-set_property(TARGET coldfireTest PROPERTY FOLDER "cpu")
-add_test(NAME coldfireTest COMMAND coldfireTest)
+# differential test against Musashi's 68020 plus ColdFire specifics. Only builds with a product that uses the core
+# set COLDFIRE_TESTS, nothing else builds it
+if(BUILD_TESTING AND COLDFIRE_TESTS)
+	add_executable(coldfireTest coldfireTest.cpp)
+	target_link_libraries(coldfireTest PRIVATE coldfire 68kEmu)
+	set_property(TARGET coldfireTest PROPERTY FOLDER "cpu")
+	set_property(TARGET coldfireTest PROPERTY EXCLUDE_FROM_ALL FALSE)
+	add_test(NAME coldfireTest COMMAND coldfireTest)
+endif()
