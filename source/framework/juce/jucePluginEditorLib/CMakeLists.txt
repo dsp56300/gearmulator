@@ -9,6 +9,7 @@ set(SOURCES
 	lcd.cpp lcd.h
 	led.cpp led.h
 	midiPorts.cpp midiPorts.h
+	parameterDrivenLed.cpp parameterDrivenLed.h
 	parameterOverlay.cpp parameterOverlay.h
 	parameterOverlays.cpp parameterOverlays.h
 	partbutton.cpp partbutton.h

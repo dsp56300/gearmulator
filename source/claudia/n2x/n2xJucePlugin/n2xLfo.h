@@ -1,6 +1,14 @@
 #pragma once
 
-#include "n2xParameterDrivenLed.h"
+#include <cstdint>
+#include <string>
+
+#include "jucePluginLib/parameterlistener.h"
+
+namespace Rml
+{
+	class Element;
+}
 
 namespace juce
 {
@@ -9,6 +17,8 @@ namespace juce
 
 namespace n2xJucePlugin
 {
+	class Editor;
+
 	class Lfo
 	{
 	public:

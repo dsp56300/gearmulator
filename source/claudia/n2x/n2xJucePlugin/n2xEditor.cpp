@@ -2,13 +2,11 @@
 
 #include <juceRmlPlugin/skinConverter/skinConverterOptions.h>
 
-#include "n2xArp.h"
 #include "n2xController.h"
 #include "n2xFileType.h"
 #include "n2xLcd.h"
 #include "n2xLfo.h"
 #include "n2xMasterVolume.h"
-#include "n2xOctLed.h"
 #include "n2xOutputMode.h"
 #include "n2xParts.h"
 #include "n2xPatchManager.h"
@@ -16,6 +14,8 @@
 #include "n2xVmMap.h"
 #include "baseLib/filesystem.h"
 
+
+#include "jucePluginEditorLib/parameterDrivenLed.h"
 
 #include "jucePluginLib/parameter.h"
 #include "jucePluginLib/pluginVersion.h"
@@ -60,12 +60,38 @@ namespace n2xJucePlugin
 			romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
 		}
 
-		m_arp.reset(new Arp(*this));
+		using Led = jucePluginEditorLib::ParameterDrivenLed;
+
+		// the arpeggiator is LFO 2 with a destination other than 3, 4 and 7
+		m_arp.reset(new Led(*this, "ArpEnabled", "Lfo2Dest", Led::CurrentPart, [](const pluginLib::Parameter& _p)
+		{
+			const auto v = _p.getUnnormalizedValue();
+			return v != 3 && v != 4 && v != 7;
+		},
+		[](pluginLib::Parameter& _p, const bool _checked)
+		{
+			_p.setUnnormalizedValueNotifyingHost(_checked ? 0 : 3, pluginLib::Parameter::Origin::Ui);
+		}));
+
 		m_lcd.reset(new Lcd(*this));
 		for(uint8_t i=0; i<m_lfos.size(); ++i)
 			m_lfos[i].reset(new Lfo(*this, i));
 		m_masterVolume.reset(new MasterVolume(*this));
-		m_octLed.reset(new OctLed(*this));
+
+		// lit while oscillator 2 is tuned in whole octaves, a click rounds it to the nearest one
+		m_octLed.reset(new Led(*this, "O2Pitch_LED", "O2Pitch", Led::CurrentPart, [](const pluginLib::Parameter& _p)
+		{
+			const auto v = _p.getUnnormalizedValue();
+			return v / 12 * 12 == v;
+		},
+		[](pluginLib::Parameter& _p, bool)
+		{
+			const auto v = _p.getUnnormalizedValue();
+			const auto newV = (v + 6) / 12 * 12;
+			if(newV != v)
+				_p.setUnnormalizedValueNotifyingHost(newV, pluginLib::Parameter::Origin::Ui);
+		}));
+
 		m_outputMode.reset(new OutputMode(*this));
 		m_parts.reset(new Parts(*this));
 		m_vmMap.reset(new VmMap(*this));
