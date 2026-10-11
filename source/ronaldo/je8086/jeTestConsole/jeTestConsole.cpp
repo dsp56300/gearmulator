@@ -1,12 +1,10 @@
-#include <chrono>
 #include <algorithm>
 #include <iostream>
 
-#include "dsp56kEmu/audio.h"
 #include "jeLib/device.h"
 #include "jeLib/je8086.h"
 #include "jeLib/romloader.h"
-#include "synthLib/wavWriter.h"
+#include "synthLib/consoleTools.h"
 
 using namespace jeLib;
 
@@ -42,31 +40,13 @@ int main(int _argc, char* _argv[])
 
 		std::cout << "Boot done, starting factory demo playback...\n";
 
-		// prepare audio buffers
-		std::array<std::vector<float>, 2> outBuffers;
-
-		synthLib::TAudioInputs inputs;
-		synthLib::TAudioOutputs outputs;
-
-		constexpr size_t blocksize = 128;
-
-		for (size_t i=0; i<outBuffers.size(); ++i)
-		{
-			outBuffers[i].resize(blocksize);
-			outputs[i] = outBuffers[i].data();
-		}
-
-		std::vector<synthLib::SMidiEvent> midiIn;
-		std::vector<synthLib::SMidiEvent> midiOut;
-
-		uint64_t sampleCounter = 0;
+		constexpr uint32_t blockSize = 128;
+		synthLib::DeviceRunner runner(device, blockSize);
 
 		bool bootFinished = false;
 		bool demoRunning = false;
 
-		synthLib::FrontPanelTransport frontPanel;
-
-		frontPanel.evLcdText.addListener([&](uint32_t, uint32_t, const std::vector<uint8_t>& _lcdContent)
+		runner.getFrontPanel().evLcdText.addListener([&](uint32_t, uint32_t, const std::vector<uint8_t>& _lcdContent)
 		{
 			char lcdString[41]{0};
 
@@ -99,59 +79,18 @@ int main(int _argc, char* _argv[])
 			}
 		});
 
-
 		while (!demoRunning)
-		{
-			device.process(inputs, outputs, blocksize, midiIn, midiOut);
+			runner.process();
 
-			for (const auto& e : midiOut)
-				frontPanel.receive(e.sysex);
-			midiOut.clear();
-		}
+		synthLib::StereoWavSink wav("je8086_out.wav", samplerate);
+		synthLib::RealtimeMeter meter(samplerate);
 
-		synthLib::AsyncWriter writer("je8086_out.wav", samplerate);
-
-		auto t0 = std::chrono::high_resolution_clock::now();
-		auto tLast = t0;
-		uint64_t totalProcessedSamples = 0;
-		uint32_t intervalProcessedSamples = 0;
+		runner.setWavSink(&wav);
 
 		while (true)
 		{
-			device.process(inputs, outputs, blocksize, midiIn, midiOut);
-
-			for (const auto& e : midiOut)
-				frontPanel.receive(e.sysex);
-			midiOut.clear();
-
-			sampleCounter += blocksize;
-
-			writer.append([&outBuffers, blocksize](std::vector<dsp56k::TWord>& _dst)
-			{
-				_dst.reserve(_dst.size() + blocksize * 2);
-
-				for (size_t i=0; i<blocksize; ++i)
-				{
-					_dst.push_back(dsp56k::sample2dsp(outBuffers[0][i]));
-					_dst.push_back(dsp56k::sample2dsp(outBuffers[1][i]));
-				}
-			});
-
-			totalProcessedSamples += blocksize;
-			intervalProcessedSamples += blocksize;
-
-			if(intervalProcessedSamples >= samplerate)
-			{
-				auto tNow = std::chrono::high_resolution_clock::now();
-				std::chrono::duration<double> elapsed = tNow - tLast;
-				tLast = tNow;
-				double intervalRealTimePercent = 100.0f * static_cast<double>(intervalProcessedSamples) / (elapsed.count() * params.hostSamplerate);
-				double realTimePercent = 100.0f * static_cast<double>(totalProcessedSamples) / (std::chrono::duration<double>(tNow - t0).count() * params.hostSamplerate);
-				std::cout << "Recorded " << (totalProcessedSamples / samplerate) << " sec"
-						  << ", last interval speed " << static_cast<int>(intervalRealTimePercent) << "%, "
-						  << "total average " << static_cast<int>(realTimePercent) << "%\n";
-				intervalProcessedSamples -= samplerate;
-			}
+			runner.process();
+			meter.add(blockSize);
 		}
 	}
 	catch (std::exception& e)

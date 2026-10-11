@@ -1,4 +1,4 @@
-#include "synthLib/wavWriter.h"
+#include "synthLib/consoleTools.h"
 
 #include "xtLib/xtUc.h"
 #include "xtLib/xtHardware.h"
@@ -13,10 +13,8 @@ int main()
 	const std::unique_ptr uc(std::make_unique<xt::Xt>(std::vector<uint8_t>(), std::string()));
 
 	constexpr uint32_t blockSize = 64;
-	std::vector<dsp56k::TWord> stereoOutput;
-	stereoOutput.resize(blockSize<<1);
 
-	synthLib::AsyncWriter writer("xtEmu_Output.wav", 40000, false);
+	synthLib::StereoWavSink wav("xtEmu_Output.wav", 40000);
 
 	constexpr uint32_t period = 0x10000;
 
@@ -33,17 +31,7 @@ int main()
 			uc->process(blockSize);
 
 			auto& outs = uc->getAudioOutputs();
-
-			for(size_t i=0; i<blockSize; ++i)
-			{
-				stereoOutput[(i<<1)  ] = outs[0][i];
-				stereoOutput[(i<<1)+1] = outs[1][i];
-			}
-
-			writer.append([&](std::vector<dsp56k::TWord>& _wavOut)
-			{
-				_wavOut.insert(_wavOut.end(), stereoOutput.begin(), stereoOutput.end());
-			});
+			wav.write(outs[0].data(), outs[1].data(), blockSize);
 
 			total += blockSize;
 		}

@@ -3,6 +3,7 @@
 // to sendMidi: devices push an event's bytes straight into their emulated UART,
 // and a lone 0x00 there completes the firmware's running-status message, which
 // on at least one device turned every "play" into a Program Change.
+#include "consoleTools.h"
 #include "device.h"
 #include "plugin.h"
 #include "baseLib/os.h"
@@ -80,6 +81,17 @@ namespace
 		}
 	};
 
+	// Sends its LCD as a front panel frame after every block
+	class PanelDevice final : public TestDevice
+	{
+	protected:
+		void readMidiOut(std::vector<SMidiEvent>& _midiOut) override
+		{
+			const uint8_t cells[] = {'H', 'i'};
+			fp::sendLcdText(_midiOut, 2, 1, cells);
+		}
+	};
+
 	void expect(const bool _condition)
 	{
 		if (!_condition)
@@ -134,6 +146,24 @@ namespace
 		expect(device.m_midiSent[0].offset == 3 + 0 + 10);
 		expect(device.m_midiSent[1].offset == 3 + 8 + 10);
 		expect(device.m_midiSent[2].offset == 3 + 16 + 10);
+	}
+
+	// A console's runner hands the device its MIDI with the next block and decodes what the device sends back
+	void testDeviceRunner()
+	{
+		PanelDevice device;
+		DeviceRunner runner(device, 16);
+
+		std::vector<uint8_t> lcd;
+		runner.getFrontPanel().evLcdText.addListener([&](uint32_t, uint32_t, const std::vector<uint8_t>& _cells) { lcd = _cells; });
+
+		runner.addMidi(SMidiEvent(MidiEventSource::Host, 0x90, 0x40, 0x7f));
+		runner.process();
+		runner.process();
+
+		expect(device.m_midiSent.size() == 1);
+		expect(runner.getFramesProcessed() == 32);
+		expect(lcd == std::vector<uint8_t>{'H', 'i'});
 	}
 
 	// Hardware can deliver one dump in several chunks. Plugin reassembles them, and the device has to
@@ -204,6 +234,7 @@ int main()
 
 	testTransportMarkerBypassesSendMidi();
 	testStampOffsetCountsProcessedSamples();
+	testDeviceRunner();
 	testChunkedSysexReachesDeviceOnce();
 	testMissingInputDoesNotHearMissingOutput();
 	return 0;

@@ -9,6 +9,7 @@ set(SOURCES
 	analog/analogFilter.cpp analog/analogFilter.h
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
+	consoleTools.cpp consoleTools.h
 	dac.cpp dac.h
 	dcFilter.h
 	device.cpp device.h
