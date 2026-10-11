@@ -24,7 +24,8 @@ namespace emu88Lib
 	//
 	// What the record shapes reproduce, all read out of the H8 ISR:
 	//   * channel voice: opcode = (status >> 4) - 7, params = the data bytes
-	//   * Roland DT1: a decoded transfer — opcode = address high byte, payload
+	//   * Roland DT1: a decoded transfer — opcode = address high byte, or 0x20
+	//     for the blocks below 0x10, payload
 	//     staged in shared RAM with the 4-byte sub-MCU header, split into
 	//     <= 0x7f chunks with 0xE7 continuations (both pointers are 7-bit)
 	//   * universal GM System On / Master Volume: raw transfers 0xEE / 0xEF,

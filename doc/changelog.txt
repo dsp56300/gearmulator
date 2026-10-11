@@ -384,6 +384,10 @@ JE8086:
         MIDI port, as some sequencers saved MT-32 music, stayed silent. Every
         port now reaches the board's one MIDI IN, as on the Sound Canvas.
 
+- [Fix] SC-88, SC-88Pro: SysEx parameters in the 08 and 0C address blocks were
+        ignored, among them F0 41 10 42 12 0C 20 04 01 4F F7, which switches
+        the SC-88Pro into its SC-88 mode the way SELECT+ALL does.
+
 2.2.25:
 
 88emuPlayer:

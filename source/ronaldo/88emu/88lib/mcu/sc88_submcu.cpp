@@ -326,12 +326,16 @@ namespace emu88Lib
 		uint8_t command = _sysEx[DT1AddrOffset];	// address high byte
 		uint8_t source = src;
 
-		// System parameters use the 0x20 mailbox family. Command 0 would
-		// enter the display-only branch and discard them. Keep the staged
-		// address intact: the firmware parameter parser handles 00 00 7F
-		// (mode) and 00 01 00..1F (per-part input assignment) itself.
-		// SC-88: 00:18DE -> 00:3640; Pro: 00:1C4A -> 00:5106.
-		if(command == 0)
+		// The blocks below 0x10 use the 0x20 mailbox family. Below 0x20 the
+		// CPU's bulk task takes only its display records, 0x10 and 0x12, and
+		// drops any other opcode (SC-88 00:188F, Pro 00:1BF7); from 0x20 up it
+		// hands the staged address to the parameter parser (SC-88 00:18DE ->
+		// 00:3640, Pro 00:1C4A -> 00:5106), which handles those blocks itself:
+		// 00 system - 00 00 7F (mode) and 00 01 00..1F (per-part input
+		// assignment) - and 08 and 0C. On the Pro 0C 20 04 is the SC-88 mode
+		// that SELECT+ALL toggles (00:5517, table 01:49EC, handler 00:559D).
+		// Keep the staged address intact.
+		if(command < 0x10)
 			command = 0x20;
 
 		// The main firmware routes patch/drum parameters to the A or B part
