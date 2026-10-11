@@ -53,6 +53,12 @@ Framework:
         so, and that the server and the plugins need to be updated together,
         instead of reporting that no server was found.
 
+- [Imp] DSPBridge: The interface between the plugins and DSPBridgeServer changed
+        in this version, and with it the bridge protocol version: update
+        DSPBridgeServer together with the plugins. A server of 2.2.25 does not
+        load plugins of this version, which would have crashed it, and this
+        server does not load plugins of 2.2.25 or older.
+
 - [Fix] BUG-10437 Windows: The "Open skins folder in File Browser" button in the
         settings crashed the host if the folder could not be created, for
         example when the path to the Documents folder contains characters such

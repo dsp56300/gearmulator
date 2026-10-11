@@ -25,6 +25,8 @@ namespace synthLib
 		std::string homePath;
 	};
 
+	// The DSPBridge server calls the virtual functions of devices that plugin libraries created: changing any of them
+	// needs a new bridgeLib::g_protocolVersion, see there
 	class Device
 	{
 	public:
