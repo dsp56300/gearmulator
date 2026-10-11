@@ -2,38 +2,18 @@
 
 #include "wSysexRemoteControl.h"
 
-#include "dsp56kEmu/esaiclock.h"
-
 namespace wLib
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params, SysexRemoteControl& _sysexRemote)
-		: synthLib::Device(_params)
+		: DspClockDevice(_params)
 		, m_sysexRemote(_sysexRemote)
 	{
 	}
 
-	bool Device::setDspClockPercent(const uint32_t _percent)
+	void Device::getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const
 	{
-		auto* c = getDspEsxiClock();
-		if(!c)
-			return false;
-		return c->setSpeedPercent(_percent);
-	}
-
-	uint32_t Device::getDspClockPercent() const
-	{
-		const auto* c = getDspEsxiClock();
-		if(!c)
-			return 0;
-		return c->getSpeedPercent();
-	}
-
-	uint64_t Device::getDspClockHz() const
-	{
-		const auto* c = getDspEsxiClock();
-		if(!c)
-			return false;
-		return c->getSpeedInHz();
+		if(auto* c = getDspEsxiClock())
+			_clocks.push_back(c);
 	}
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)

@@ -14,6 +14,7 @@ set(SOURCES
 	device.cpp device.h
 	deviceException.cpp deviceException.h
 	deviceTypes.h
+	dspClockDevice.h
 	lcdfonts.cpp lcdfonts.h
 	lv2PresetExport.cpp lv2PresetExport.h
 	midiBufferParser.cpp midiBufferParser.h

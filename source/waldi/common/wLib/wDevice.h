@@ -2,28 +2,23 @@
 
 #include "wState.h"
 
-#include "synthLib/device.h"
+#include "dsp56kEmu/esaiclock.h"
 
-namespace dsp56k
-{
-	class EsxiClock;
-}
+#include "synthLib/dspClockDevice.h"
 
 namespace wLib
 {
 	class SysexRemoteControl;
 
-	class Device : public synthLib::Device
+	class Device : public synthLib::DspClockDevice<dsp56k::EsxiClock>
 	{
 	public:
 		// _sysexRemote may be a member of the product that is constructed after this, it is not used before process()
 		Device(const synthLib::DeviceCreateParams& _params, SysexRemoteControl& _sysexRemote);
-		bool setDspClockPercent(uint32_t _percent) override;
-		uint32_t getDspClockPercent() const override;
-		uint64_t getDspClockHz() const override;
 
 	protected:
 		virtual dsp56k::EsxiClock* getDspEsxiClock() const = 0;
+		void getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const override;
 
 		// the product's synth: the MIDI bytes its firmware sent, MIDI for its firmware, and its state mirror
 		virtual void receiveMidiBytes(std::vector<uint8_t>& _bytes) = 0;

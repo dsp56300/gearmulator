@@ -19,7 +19,7 @@
 namespace virusLib
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params, const bool _createDebugger/* = false*/)
-		: synthLib::Device(_params)
+		: DspClockDevice(_params)
 		, m_rom(_params.romData, _params.romName, static_cast<DeviceModel>(_params.customData))
 		, m_samplerate(getDeviceSamplerate(_params.preferredSamplerate, _params.hostSamplerate))
 	{
@@ -711,27 +711,12 @@ namespace virusLib
 //		applyDspMemoryPatches(_dspA, _dspB, _rom);
 	}
 
-	bool Device::setDspClockPercent(const uint32_t _percent)
+	void Device::getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const
 	{
-		if(!m_dsp)
-			return false;
-
-		bool res = m_dsp->getEsxiClock().setSpeedPercent(_percent);
-
+		if(m_dsp)
+			_clocks.push_back(&m_dsp->getEsxiClock());
 		if(m_dsp2)
-			res &= m_dsp2->getEsxiClock().setSpeedPercent(_percent);
-
-		return res;
-	}
-
-	uint32_t Device::getDspClockPercent() const
-	{
-		return !m_dsp ? 0 : m_dsp->getEsxiClock().getSpeedPercent();
-	}
-
-	uint64_t Device::getDspClockHz() const
-	{
-		return !m_dsp ? 0 : m_dsp->getEsxiClock().getSpeedInHz();
+			_clocks.push_back(&m_dsp2->getEsxiClock());
 	}
 
 	void Device::applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom)

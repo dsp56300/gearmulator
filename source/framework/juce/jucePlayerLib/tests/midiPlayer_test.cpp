@@ -464,9 +464,6 @@ namespace
         bool setState(const std::vector<uint8_t>&, StateType) override { return false; }
         uint32_t getChannelCountIn() override { return 0; }
         uint32_t getChannelCountOut() override { return 2; }
-        bool setDspClockPercent(uint32_t) override { return false; }
-        uint32_t getDspClockPercent() const override { return 100; }
-        uint64_t getDspClockHz() const override { return 0; }
 
     protected:
         void onTransportDiscontinuity(const SMidiEvent& e) override { received.push_back(e); }

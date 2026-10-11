@@ -35,8 +35,6 @@ namespace jeLib
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		uint32_t getChannelCountIn() override;
 		uint32_t getChannelCountOut() override;
-		bool setDspClockPercent(uint32_t _percent) override;
-		uint32_t getDspClockPercent() const override;
 		uint64_t getDspClockHz() const override;
 
 		uint32_t getInternalLatencyMidiToOutput() const override;

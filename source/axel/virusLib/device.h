@@ -3,7 +3,7 @@
 #include "dspSingle.h"
 #include "frontpanelState.h"
 #include "synthLib/midiTypes.h"
-#include "synthLib/device.h"
+#include "synthLib/dspClockDevice.h"
 
 #include "romfile.h"
 #include "microcontroller.h"
@@ -16,7 +16,7 @@ namespace synthLib
 
 namespace virusLib
 {
-	class Device final : public synthLib::Device
+	class Device final : public synthLib::DspClockDevice<dsp56k::EsxiClock>
 	{
 	public:
 		Device(const synthLib::DeviceCreateParams& _params, bool _createDebugger = false);
@@ -50,9 +50,6 @@ namespace virusLib
 		static std::thread bootDSP(DspSingle& _dsp, const ROMFile& _rom, bool _createDebugger);
 		static void bootDSPs(DspSingle* _dspA, DspSingle* _dspB, const ROMFile& _rom, bool _createDebugger);
 		
-		bool setDspClockPercent(uint32_t _percent) override;
-		uint32_t getDspClockPercent() const override;
-		uint64_t getDspClockHz() const override;
 		bool canModifyDspClock() const override { return true; }
 
 		static void applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom);
@@ -62,6 +59,7 @@ namespace virusLib
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
+		void getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const override;
 		void onAudioWritten();
 		static void configureDSP(DspSingle& _dsp, const ROMFile& _rom, float _samplerate);
 

@@ -122,16 +122,6 @@ namespace jeLib
 		return 2;
 	}
 
-	bool Device::setDspClockPercent(uint32_t _percent)
-	{
-		return false;
-	}
-
-	uint32_t Device::getDspClockPercent() const
-	{
-		return 100;
-	}
-
 	uint64_t Device::getDspClockHz() const
 	{
 		return 88'000'000;

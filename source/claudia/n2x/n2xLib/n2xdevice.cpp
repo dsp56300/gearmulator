@@ -6,7 +6,7 @@
 namespace n2x
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params)
-		: synthLib::Device(_params)
+		: DspClockDevice(_params)
 		, m_hardware(_params.romData, _params.romName)
 		, m_state(&m_hardware, &getMidiTranslator())
 	{
@@ -42,21 +42,11 @@ namespace n2x
 		return 4;
 	}
 
-	bool Device::setDspClockPercent(const uint32_t _percent)
+	void Device::getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const
 	{
-		bool res = m_hardware.getDSPA().getPeriph().getEsaiClock().setSpeedPercent(_percent);
-		res &= m_hardware.getDSPB().getPeriph().getEsaiClock().setSpeedPercent(_percent);
-		return res;
-	}
-
-	uint32_t Device::getDspClockPercent() const
-	{
-		return const_cast<Hardware&>(m_hardware).getDSPA().getPeriph().getEsaiClock().getSpeedPercent();
-	}
-
-	uint64_t Device::getDspClockHz() const
-	{
-		return const_cast<Hardware&>(m_hardware).getDSPA().getPeriph().getEsaiClock().getSpeedInHz();
+		auto& hw = const_cast<Hardware&>(m_hardware);
+		_clocks.push_back(&hw.getDSPA().getPeriph().getEsaiClock());
+		_clocks.push_back(&hw.getDSPB().getPeriph().getEsaiClock());
 	}
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)

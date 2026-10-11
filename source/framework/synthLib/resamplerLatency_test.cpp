@@ -24,8 +24,6 @@ namespace
 		bool setState(const std::vector<uint8_t>&, synthLib::StateType) override { return true; }
 		uint32_t getChannelCountIn() override { return 2; }
 		uint32_t getChannelCountOut() override { return 2; }
-		bool setDspClockPercent(uint32_t) override { return false; }
-		uint32_t getDspClockPercent() const override { return 100; }
 		uint64_t getDspClockHz() const override { return 1; }
 
 	protected:

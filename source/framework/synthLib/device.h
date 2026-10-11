@@ -101,9 +101,10 @@ namespace synthLib
 		virtual uint32_t getChannelCountIn() = 0;
 		virtual uint32_t getChannelCountOut() = 0;
 
-		virtual bool setDspClockPercent(uint32_t _percent = 100) = 0;
-		virtual uint32_t getDspClockPercent() const = 0;
-		virtual uint64_t getDspClockHz() const = 0;
+		// a device without a DSP clock to change keeps these, see DspClockDevice for one with DSP56300s
+		virtual bool setDspClockPercent(uint32_t /*_percent*/ = 100) { return false; }
+		virtual uint32_t getDspClockPercent() const { return 100; }
+		virtual uint64_t getDspClockHz() const { return 0; }
 		virtual bool canModifyDspClock() const { return false; }
 
 		auto& getMidiTranslator() { return m_midiTranslator; }
