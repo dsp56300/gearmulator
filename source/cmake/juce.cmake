@@ -161,7 +161,24 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		LV2URI "http://theusualsuspects.lv2/${productName}"
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} serverPlugin.cpp)
+	# The DSPBridge entry point: generated from a device header and class passed as two optional trailing arguments,
+	# else the product's own serverPlugin.cpp. With neither the product has no entry point and no server plugin
+	if(${ARGC} GREATER 7)
+		set(tusServerPluginSource ${JUCE_CMAKE_DIR}/serverPlugin.cpp)
+		set(tusServerPluginDefinitions TUS_DEVICE_HEADER="${ARGV6}" TUS_DEVICE_CLASS=${ARGV7})
+	elseif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/serverPlugin.cpp)
+		set(tusServerPluginSource ${CMAKE_CURRENT_SOURCE_DIR}/serverPlugin.cpp)
+		set(tusServerPluginDefinitions "")
+	else()
+		set(tusServerPluginSource "")
+		set(tusServerPluginDefinitions "")
+	endif()
+
+	target_sources(${targetName} PRIVATE ${SOURCES} ${tusServerPluginSource})
+	if(tusServerPluginDefinitions)
+		# per directory: the FX variant and the server plugin are created in the same one and get the same
+		set_source_files_properties(${tusServerPluginSource} PROPERTIES COMPILE_DEFINITIONS "${tusServerPluginDefinitions}")
+	endif()
 
 	# skins.h, see buildSkinHeader()
 	target_include_directories(${targetName} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -169,7 +186,9 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	# serverPlugin.cpp lands in the shared code library, and nothing in the plugin calls the bridge entry points it
 	# exports, so the linker leaves it out of every plugin binary. Pull it in: the DSPBridge server can then load a regular
 	# plugin of the same version, not only the server plugin built next to it.
-	if(MSVC)
+	if(NOT tusServerPluginSource)
+		# nothing to pull in, a forced undefined symbol would fail the link
+	elseif(MSVC)
 		target_link_options(${targetName} INTERFACE /INCLUDE:bridgeDeviceCreate)
 	elseif(APPLE)
 		target_link_options(${targetName} INTERFACE -Wl,-u,_bridgeDeviceCreate)
@@ -370,7 +389,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	# --------- Server Plugin ---------
 
 	# Only when the DSPBridge server is built, it is the one that loads these
-	if(TARGET bridgeServer)
+	if(TARGET bridgeServer AND tusServerPluginSource)
 		set(serverTarget ${productName}ServerPlugin)
 
 		add_library(${serverTarget} SHARED)
@@ -382,7 +401,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			PluginVersionPatch=${CMAKE_PROJECT_VERSION_PATCH}
 			Plugin4CC="${plugin4CC}"
 		)
-		target_sources(${serverTarget} PRIVATE serverPlugin.cpp)
+		target_sources(${serverTarget} PRIVATE ${tusServerPluginSource})
 		target_link_libraries(${serverTarget} ${synthLibProject} bridgeClient)
 		set_property(TARGET ${serverTarget} PROPERTY FOLDER ${targetName})
 
@@ -416,11 +435,11 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 endmacro()
 
 macro(createJucePluginWithFX targetName productName plugin4CCSynth plugin4CCFX binaryDataProject synthLibProject)
-	createJucePlugin(${targetName} "${productName}" TRUE "${plugin4CCSynth}" ${binaryDataProject} ${synthLibProject})
+	createJucePlugin(${targetName} "${productName}" TRUE "${plugin4CCSynth}" ${binaryDataProject} ${synthLibProject} ${ARGN})
 
 	if(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN)
 		set(TUS_FX_COMPANION TRUE)
-		createJucePlugin(${targetName}_FX "${productName}FX" FALSE "${plugin4CCFX}" ${binaryDataProject} ${synthLibProject})
+		createJucePlugin(${targetName}_FX "${productName}FX" FALSE "${plugin4CCFX}" ${binaryDataProject} ${synthLibProject} ${ARGN})
 		unset(TUS_FX_COMPANION)
 	endif()
 endmacro()

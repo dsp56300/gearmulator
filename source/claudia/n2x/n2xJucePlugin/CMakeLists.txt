@@ -34,4 +34,4 @@ buildSkinHeader()
 
 juce_add_binary_data(n2xJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_SKINS})
 
-createJucePlugin(n2xJucePlugin "NodalRed2x" TRUE "Tn2x" n2xJucePlugin_BinaryData n2xLib)
+createJucePlugin(n2xJucePlugin "NodalRed2x" TRUE "Tn2x" n2xJucePlugin_BinaryData n2xLib n2xLib/n2xdevice.h n2x::Device)

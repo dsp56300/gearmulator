@@ -50,7 +50,7 @@ buildSkinHeader()
 
 juce_add_binary_data(xtJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_SKINS})
 
-createJucePluginWithFX(xtJucePlugin "Xenia" "Txts" "Txtf" xtJucePlugin_BinaryData xtLib)
+createJucePluginWithFX(xtJucePlugin "Xenia" "Txts" "Txtf" xtJucePlugin_BinaryData xtLib xtLib/xtDevice.h xt::Device)
 
 target_link_libraries(xtJucePlugin PRIVATE juce::juce_dsp)
 
