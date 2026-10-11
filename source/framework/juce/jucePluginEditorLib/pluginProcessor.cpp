@@ -89,9 +89,6 @@ namespace jucePluginEditorLib
 
 		if (resamplerMode >= 0 && resamplerMode < static_cast<int>(synthLib::Resampler::Mode::Count))
 			setResamplerMode(static_cast<synthLib::Resampler::Mode>(resamplerMode));
-
-		if (m_config.getBoolValue("enableMcpServer", false) && !isJuceHelperProcess())
-			startMcpServer();
 	}
 
 	juce::PropertiesFile::Options Processor::legacyConfigOptions(const char* _appName)
@@ -108,6 +105,11 @@ namespace jucePluginEditorLib
 	{
 		getController();
 		setLatencyBlocks(static_cast<uint32_t>(m_config.getIntValue("latencyBlocks", static_cast<int>(getDefaultLatencyBlocks()))));
+
+		// Last: a client calls tools on the server thread as soon as the discovery file lists this instance. Started
+		// in the base constructor, a set_plugin_state ran while the product constructor still created the controller
+		if (m_config.getBoolValue("enableMcpServer", false) && !isJuceHelperProcess())
+			startMcpServer();
 	}
 
 	Processor::~Processor()

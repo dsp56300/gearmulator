@@ -43,6 +43,12 @@ Framework:
 - [Imp] MCP server: `read_lcd` returns the text and the LEDs of the display of
         the emulated device, also while the plugin window is closed.
 
+- [Fix] MCP server: A request sent as soon as a plugin appeared in the discovery
+        file could hang or crash the host, because the server started before
+        the plugin was fully loaded. A request that came in while the plugin
+        was removed could crash the host, too. The server now starts once
+        loading is done and stops before anything else is removed.
+
 - [Imp] BUG-10220 The Esc key no longer opens the settings page, it is left to
         the host, which uses it to close the plugin window, for example. Esc
         still closes the settings page and ends MIDI Learn mode. The settings

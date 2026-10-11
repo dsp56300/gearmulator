@@ -25,7 +25,7 @@ namespace jucePluginEditorLib
 		static juce::PropertiesFile::Options legacyConfigOptions(const char* _appName);
 
 		// TUS_PLUGIN_ENTRY calls this right after construction. createController() is virtual, so the base constructor
-		// cannot create the controller
+		// cannot create the controller. Starts the MCP server, which must not run tools on a half constructed processor
 		void finishConstruction();
 
 		juce::PropertiesFile::Options& getConfigOptions() { return m_configOptions; }
