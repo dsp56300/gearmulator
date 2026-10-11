@@ -187,7 +187,8 @@ int main()
 	}
 
 	// MIDI arrives on the 8095's serial port. Echo it back through a register so the test can
-	// see the byte the firmware would have read, and check the port filter drops other ports.
+	// see the byte the firmware would have read. Nothing arrives before a note is sent, and a
+	// note from a song's second port arrives too: the board has one MIDI IN.
 	{
 		Program p;
 		p.emit({0xb1, 0x5a, 0x30});					// a sentinel the arriving byte replaces
@@ -195,8 +196,8 @@ int main()
 		p.emit({0xb0, 0x07, 0x30});					// read SBUF
 		p.finish();
 		LaBoard board(romSet(p));
-		const synthLib::SMidiEvent note(synthLib::MidiEventSource::Host, 0x90, 60, 100);
-		board.addMidiEvent(note, 1);
+		synthLib::SMidiEvent note(synthLib::MidiEventSource::Host, 0x90, 60, 100);
+		note.port = 1;
 		run(board);
 		CHECK_EQ(board.registerByte(0x30), 0x5a);
 		board.addMidiEvent(note);

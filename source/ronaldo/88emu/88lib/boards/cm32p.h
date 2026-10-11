@@ -42,7 +42,8 @@ namespace emu88Lib
 		void reset();
 		SampleFrame renderSample();
 		const std::pair<float, float>& analogSample() const { return m_analogSample; }
-		void addMidiEvent(const synthLib::SMidiEvent& event, uint8_t port = 0);
+		// The board's one MIDI IN, which every port a song addresses arrives at.
+		void addMidiEvent(const synthLib::SMidiEvent& event);
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& events);
 		void transportDiscontinuity(uint32_t generation);
 

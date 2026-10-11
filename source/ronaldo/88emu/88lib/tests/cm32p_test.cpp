@@ -171,8 +171,9 @@ int main()
 	echo.emit({0xb0, 0x11, 0x20, 0x36, 0x20, 0xfa, 0xb0, 7, 7, 0x27, 0xf5});
 	Cm32p midi({echo.bytes, waves});
 	synthLib::SMidiEvent note(synthLib::MidiEventSource::Host, 0x90, 60, 100);
-	midi.addMidiEvent(note, 1);
 	CHECK(run(midi).empty());
+	// One MIDI IN: a note from a song's second port arrives like any other.
+	note.port = 1;
 	midi.addMidiEvent(note);
 	const auto echoed = run(midi);
 	CHECK_EQ(echoed.size(), 1u);

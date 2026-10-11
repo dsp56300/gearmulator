@@ -320,6 +320,10 @@ JE8086:
         ROM is 64 KiB. A 128 KiB dump that holds it twice is recognized too;
         any other 128 KiB sc8820_internal.bin is no longer accepted.
 
+- [Fix] MT-32, CM-32L, CM-32P, CM-64: A song whose tracks are on its second
+        MIDI port, as some sequencers saved MT-32 music, stayed silent. Every
+        port now reaches the board's one MIDI IN, as on the Sound Canvas.
+
 2.2.25:
 
 88emuPlayer:
