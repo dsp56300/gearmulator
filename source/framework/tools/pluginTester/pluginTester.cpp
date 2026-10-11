@@ -111,7 +111,7 @@ int main(const int _argc, char* _argv[])
 		Logger::writeToLog("Error: " + _msg);
 		Logger::writeToLog("Usage:\n"
 			"pluginTester -plugin <pathToPlugin> [-seconds n -blocks n -blocksize n -samplerate x -forever -repeat n]\n"
-			"             [-loadstate <file> -dumpstate <file> -editor]\n"
+			"             [-loadstate <file> -dumpstate <file> -editor -notes <seconds> -wav <file>]\n"
 			"\n"
 			"-loadstate  loads a state written by -dumpstate before the blocks are processed\n"
 			"-dumpstate  writes the plugin state after the blocks, the last repeat wins. Fails if it holds no device\n"
@@ -119,6 +119,8 @@ int main(const int _argc, char* _argv[])
 			"            state per plugin format, compare dumps of one format only\n"
 			"-editor     creates the editor before the blocks and deletes it after them in every repeat, without a\n"
 			"            window\n"
+			"-notes      plays middle C every <seconds>, released half way to the next one, at exact sample positions\n"
+			"-wav        writes the first two outputs to a 32 bit float WAV file\n"
 			"\n"
 			"Before using -dumpstate to prove that a change keeps the state the same:\n"
 			"- install the ROMs and use the same config for the plugin before and after (resampler, skin variables)\n"
@@ -303,13 +305,54 @@ int main(const int _argc, char* _argv[])
 				blocks = 1;
 		}
 
+		// -notes and -wav process the blocks here, not through the audio device: its player stamps MIDI by the wall
+		// clock, a timing test needs it at exact sample positions
+		const auto notePeriod = static_cast<int64_t>(cmdLine.getFloat("notes", 0.0f) * samplerate);
+		const auto wavFile = cmdLine.get("wav");
+		const auto direct = notePeriod > 0 || !wavFile.empty();
+
+		AudioBuffer<float> buffer(static_cast<int>(std::max(numIns, numOuts)), blocksize);
+		AudioBuffer<float> recording(2, wavFile.empty() ? 0 : blocks * blocksize);
+		MidiBuffer midi;
+
+		auto processBlock = [&](const int _block)
+		{
+			if (!direct)
+			{
+				audioDevice.processAudio();
+				return;
+			}
+
+			buffer.clear();
+			midi.clear();
+
+			const auto blockStart = static_cast<int64_t>(_block) * blocksize;
+
+			for (int i = 0; notePeriod > 0 && i < blocksize; ++i)
+			{
+				const auto pos = blockStart + i;
+				if (pos > 0 && pos % notePeriod == 0)
+					midi.addEvent(MidiMessage::noteOn(1, 60, static_cast<uint8>(100)), i);
+				else if (pos > notePeriod && pos % notePeriod == notePeriod / 2)
+					midi.addEvent(MidiMessage::noteOff(1, 60), i);
+			}
+
+			{
+				const ScopedLock lock(processor.getCallbackLock());
+				processor.processBlock(buffer, midi);
+			}
+
+			for (int c = 0; c < recording.getNumChannels() && recording.getNumSamples(); ++c)
+				recording.copyFrom(c, static_cast<int>(blockStart), buffer, std::min(c, buffer.getNumChannels() - 1), 0, blocksize);
+		};
+
 		int lastPercent = -1;
 
 		char temp[64];
 
 		for (int i=0; i<blocks; ++i)
 		{
-			audioDevice.processAudio();
+			processBlock(i);
 
 			const auto percent = i * 100 / blocks;
 
@@ -323,6 +366,23 @@ int main(const int _argc, char* _argv[])
 
 		(void)snprintf(temp, sizeof(temp), "Progress: %d%% (%d/%d blocks)", 100, blocks, blocks);
 		Logger::writeToLog(temp);
+
+		if (!wavFile.empty())
+		{
+			File file(wavFile);
+			file.deleteFile();
+
+			auto stream = std::make_unique<FileOutputStream>(file);
+			WavAudioFormat wav;
+			std::unique_ptr<AudioFormatWriter> writer(wav.createWriterFor(stream.get(), samplerate, 2, 32, {}, 0));
+			if (!writer)
+				return error("Failed to create " + wavFile);
+			stream.release();	// owned by the writer now
+
+			if (!writer->writeFromAudioSampleBuffer(recording, 0, recording.getNumSamples()))
+				return error("Failed to write " + wavFile);
+			Logger::writeToLog("Wrote " + String(wavFile));
+		}
 
 		if (const auto dumpState = cmdLine.get("dumpstate"); !dumpState.empty())
 		{
