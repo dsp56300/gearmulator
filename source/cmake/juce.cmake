@@ -163,6 +163,9 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	target_sources(${targetName} PRIVATE ${SOURCES} serverPlugin.cpp)
 
+	# skins.h, see buildSkinHeader()
+	target_include_directories(${targetName} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 	# serverPlugin.cpp lands in the shared code library, and nothing in the plugin calls the bridge entry points it
 	# exports, so the linker leaves it out of every plugin binary. Pull it in: the DSPBridge server can then load a regular
 	# plugin of the same version, not only the server plugin built next to it.
