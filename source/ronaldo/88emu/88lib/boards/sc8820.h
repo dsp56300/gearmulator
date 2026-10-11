@@ -15,14 +15,13 @@
 
 namespace emu88Lib
 {
-	// SC-8820 mainboard. The currently available CPU image is reconstructed,
-	// not an original dump. The USB interface exposes part groups A and B.
+	// SC-8820 mainboard. The CPU is an SH7016: R02015367 is its 64 KiB on-chip
+	// mask ROM. The USB interface exposes part groups A and B.
 	class Sc8820
 	{
 	public:
 		using SampleFrame = std::pair<int32_t, int32_t>;
-		static constexpr uint32_t CpuRomSize = 0x20000;
-		static constexpr uint32_t ReconstructedCpuRomSize = 0x10000;
+		static constexpr uint32_t CpuRomSize = 0x10000;
 		static constexpr uint32_t ProgramRomSize = 0x200000;
 		static constexpr uint32_t SampleRate = 32000;
 		static constexpr uint32_t CpuClockHz = 28224000;
@@ -67,7 +66,7 @@ namespace emu88Lib
 
 		void updateLamps();
 
-		sh2::Machine m_machine{sh2::ChipModel::SH7017, 2};
+		sh2::Machine m_machine{sh2::ChipModel::SH7016, 2};
 		std::array<std::vector<uint8_t>, 2> m_waves;
 		xpLib::XP m_xp;
 		lspLib::LSPDispatcher m_lsp;

@@ -28,9 +28,24 @@ namespace emu88Lib
                 std::set<size_t> result;
                 for (const auto& entry : g_romRegistry)
                     result.insert(entry.size);
+                for (const auto& mirrored : g_romMirroredSlots)
+                    result.insert(mirrored.dumpSize);
                 return result;
             }();
             return sizes;
+        }
+
+        // Whether _data is one block of _size repeated end to end, at least twice.
+        bool isRepeated(const std::vector<uint8_t>& _data, const size_t _size)
+        {
+            if (_data.size() <= _size || _data.size() % _size)
+                return false;
+            for (size_t offset = _size; offset < _data.size(); offset += _size)
+            {
+                if (!std::equal(_data.begin(), _data.begin() + _size, _data.begin() + offset))
+                    return false;
+            }
+            return true;
         }
 
         bool anyWordSwappedAt(const size_t _size)
@@ -77,7 +92,9 @@ namespace emu88Lib
             bool hasSha1 = false;
             baseLib::SHA256 sha256;
             bool hasSha256 = false;
-            std::vector<FoundRom> proControlCopies;
+            // Known images inside the file: Pro control ROMs in an oversized EPROM read, and the
+            // image a mirrored dump repeats.
+            std::vector<FoundRom> embeddedCopies;
         };
 
         // A row is identified by its MD5 where the dump was hashed here, and by its
@@ -130,7 +147,7 @@ namespace emu88Lib
             _result.size = _size;
             _result.modificationTime = modificationTime;
             _result.raw = baseLib::MD5(data);
-            _result.proControlCopies.clear();
+            _result.embeddedCopies.clear();
             // Oversized EPROM reads can contain damaged mirrors followed by
             // intact copies. Examine every 1 MiB bank in 2/4 MiB dumps; never
             // assume the first copy (or a filename-specific offset) is correct.
@@ -155,9 +172,27 @@ namespace emu88Lib
                             rom.needsWordSwap = swapped;
                             rom.fileOffset = offset;
                             rom.embedded = true;
-                            _result.proControlCopies.push_back(std::move(rom));
+                            _result.embeddedCopies.push_back(std::move(rom));
                         }
                     }
+                }
+            }
+            for (const auto& mirrored : g_romMirroredSlots)
+            {
+                if (_size != mirrored.dumpSize || !isRepeated(data, mirrored.imageSize))
+                    continue;
+                const baseLib::MD5 copy(data.data(), static_cast<uint32_t>(mirrored.imageSize));
+                for (const auto& entry : g_romRegistry)
+                {
+                    if (!usedBy(entry, mirrored.device) || entry.slot != mirrored.slot ||
+                        entry.index != mirrored.index || entry.size != mirrored.imageSize ||
+                        !entry.hash.isValid() || entry.hash != copy)
+                        continue;
+                    FoundRom rom;
+                    rom.entry = &entry;
+                    rom.path = _file;
+                    rom.embedded = true;
+                    _result.embeddedCopies.push_back(std::move(rom));
                 }
             }
             // Before any swapping: a published digest always describes the file as it
@@ -320,7 +355,7 @@ namespace emu88Lib
         std::sort(files.begin(), files.end(), [](const auto& _a, const auto& _b) { return _a.path < _b.path; });
 
         std::set<const RomRegistryEntry*> taken;
-        std::vector<FoundRom> proControlCopies;
+        std::vector<FoundRom> embeddedCopies;
 
         // Named, correctly sized images are authoritative for their model. This
         // pass deliberately runs before content addressing so a custom build can
@@ -363,8 +398,7 @@ namespace emu88Lib
             HashCacheEntry hashes;
             if (!hashCandidate(hashes, path, size, anyWordSwappedAt(size), anySha1At(size), anySha256At(size)))
                 continue;
-            proControlCopies.insert(proControlCopies.end(), hashes.proControlCopies.begin(),
-                                    hashes.proControlCopies.end());
+            embeddedCopies.insert(embeddedCopies.end(), hashes.embeddedCopies.begin(), hashes.embeddedCopies.end());
 
             // One image may serve different slots on different devices.
             for (const auto& entry : g_romRegistry)
@@ -385,7 +419,8 @@ namespace emu88Lib
                 inventory.add(std::move(rom));
             }
         }
-        for (auto& rom : proControlCopies)
+        // After the standalone dumps, which win when both hold the same image.
+        for (auto& rom : embeddedCopies)
             if (taken.insert(rom.entry).second)
                 inventory.add(std::move(rom));
 

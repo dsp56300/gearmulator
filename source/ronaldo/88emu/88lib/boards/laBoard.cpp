@@ -312,9 +312,9 @@ namespace emu88Lib
 		return {scale(left), scale(right)};
 	}
 
-	void LaBoard::addMidiEvent(const synthLib::SMidiEvent& event, const uint8_t port)
+	void LaBoard::addMidiEvent(const synthLib::SMidiEvent& event)
 	{
-		if(m_midiIn && port == 0) m_midiIn->write(synthLib::SMidiEvent(event));
+		if(m_midiIn) m_midiIn->write(synthLib::SMidiEvent(event));
 	}
 
 	void LaBoard::readMidiOut(std::vector<synthLib::SMidiEvent>& events)

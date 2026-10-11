@@ -198,9 +198,9 @@ namespace emu88Lib
 		return {scale(output->serialLoadWords[2]), scale(output->serialLoadWords[0])};
 	}
 
-	void Cm32p::addMidiEvent(const synthLib::SMidiEvent& event, uint8_t port)
+	void Cm32p::addMidiEvent(const synthLib::SMidiEvent& event)
 	{
-		if(m_midiIn && port == 0) m_midiIn->write(synthLib::SMidiEvent(event));
+		if(m_midiIn) m_midiIn->write(synthLib::SMidiEvent(event));
 	}
 
 	void Cm32p::readMidiOut(std::vector<synthLib::SMidiEvent>& events)

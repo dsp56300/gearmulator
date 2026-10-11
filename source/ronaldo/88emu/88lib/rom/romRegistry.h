@@ -83,7 +83,7 @@ namespace emu88Lib
         // one mask ROM.
         Control,
         // On-chip boot ROM, kept separate from the external program ROM
-        // (SC-55mk2 H8/532, SC-8850 SH7016).
+        // (SC-55mk2 H8/532, SC-8820 and SC-8850 SH7016).
         Internal,
         // External executable flash.
         Program,
@@ -164,6 +164,23 @@ namespace emu88Lib
         return findCompositeChip(_device, _slot, _index) != nullptr;
     }
 
+    // An image that also circulates as a read of a larger range, which holds the chip once per
+    // copy: the SC-8820's 64 KiB CPU ROM read as 128 KiB. A dump of dumpSize whose copies are
+    // all the same is recognized as the image of imageSize that one copy is, by its hash. It
+    // is an alternative to that image, never an additional requirement.
+    struct RomMirroredSlot
+    {
+        RomDevice device;
+        RomSlot slot;
+        uint8_t index;
+        size_t imageSize;
+        size_t dumpSize;
+    };
+
+    inline constexpr RomMirroredSlot g_romMirroredSlots[] = {
+        {RomDevice::Sc8820, RomSlot::Internal, 0, 0x10000, 0x20000},
+    };
+
     // Required filenames are intentionally independent of the known hashes
     // below. A correctly sized file with one of these basenames is allowed to
     // boot even when its contents are custom; a known hash is only required for
@@ -208,7 +225,6 @@ namespace emu88Lib
         {RomDevice::Cm32p, RomSlot::Wave, 1, 0x80000, "cm32p_wave1.bin", false},
         {RomDevice::Cm32p, RomSlot::Wave, 2, 0x80000, "cm32p_wave2.bin", false},
         {RomDevice::Sc8820, RomSlot::Internal, 0, 0x10000, "sc8820_internal.bin", false},
-        {RomDevice::Sc8820, RomSlot::Internal, 0, 0x20000, "sc8820_internal.bin", false},
         {RomDevice::Sc8820, RomSlot::Program, 0, 0x200000, "sc8820_program.bin", false},
         {RomDevice::Sc8820, RomSlot::Wave, 0, 0x1000000, "sc8820_wave0.bin", false},
         {RomDevice::Sc8820, RomSlot::Wave, 1, 0x800000, "sc8820_wave1.bin", false},
@@ -572,6 +588,9 @@ namespace emu88Lib
         // -----------------------------------------------------------------
         // The first 20 MiB supplies the exact SC-88Pro waves. SC-8850 still
         // requires its native wave image above; the extensions differ.
+        // R02015367 is the SH7016's on-chip ROM. The reconstruction made before
+        // it was dumped still boots; listed second, the dump wins when both are
+        // present.
         {romDevices(RomDevice::Sc8820), RomSlot::Internal, 0, 0x10000, baseLib::MD5("d1be6db8885cb9e56fe52cd587e9d639"),
          "SH7016 boot", false},
         {romDevices(RomDevice::Sc8820), RomSlot::Internal, 0, 0x10000, baseLib::MD5("b03dc0c554fae77bb1782da4ccfadfbd"),

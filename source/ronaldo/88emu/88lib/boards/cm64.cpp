@@ -21,12 +21,12 @@ namespace emu88Lib
 		return {m_la.renderSample(), m_pcm.renderSample()};
 	}
 
-	void Cm64::addMidiEvent(const synthLib::SMidiEvent& event, const uint8_t port)
+	void Cm64::addMidiEvent(const synthLib::SMidiEvent& event)
 	{
 		// The DIN feeds both opto-isolators, so neither half sees the other's channels filtered
 		// out - the firmware on each decides what it answers to.
-		m_la.addMidiEvent(event, port);
-		m_pcm.addMidiEvent(event, port);
+		m_la.addMidiEvent(event);
+		m_pcm.addMidiEvent(event);
 	}
 
 	void Cm64::transportDiscontinuity(const uint32_t generation)

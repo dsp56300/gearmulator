@@ -42,7 +42,7 @@ namespace emu88Lib
 		void reset();
 		Frames renderFrames();
 		void setButtons(uint32_t buttons) { m_la.setButtons(buttons); }
-		void addMidiEvent(const synthLib::SMidiEvent& event, uint8_t port = 0);
+		void addMidiEvent(const synthLib::SMidiEvent& event);
 		// Only the LA board's UART reaches the outside world: the CM-32P firmware transmits
 		// nothing, its MIDI implementation has no transmitted-data section at all.
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& events) { m_la.readMidiOut(events); }
