@@ -125,12 +125,7 @@ namespace mqLib
 		case SysexCommand::GlobalParameterRequest:	return requestDumpParameter(DumpType::Global, _responses, _data);
 		case SysexCommand::ModeParameterRequest:	return requestDumpParameter(DumpType::Mode, _responses, _data);
 
-/*		case SysexCommand::EmuLCD:
-		case SysexCommand::EmuLEDs:
-		case SysexCommand::EmuButtons:
-		case SysexCommand::EmuRotaries:
-			return false;
-*/		default:
+		default:
 			return false;
 		}
 	}

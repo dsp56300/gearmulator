@@ -8,11 +8,29 @@
 namespace mqLib
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params)
-		: wLib::Device(_params, m_sysexRemote)
+		: wLib::Device(_params)
 		, m_mq(BootMode::Default, _params.romData, _params.romName, (_params.customData & 1) != 0)
 		, m_state(m_mq)
-		, m_sysexRemote(m_mq)
 	{
+		m_frontPanel.evButton.addListener([this](const uint32_t _index, const bool _pressed)
+		{
+			if(_index < static_cast<uint32_t>(Buttons::ButtonType::Count))
+				m_mq.setButton(static_cast<Buttons::ButtonType>(_index), _pressed);
+		});
+
+		m_frontPanel.evEncoder.addListener([this](const uint32_t _index, const int32_t _delta)
+		{
+			if(_index < static_cast<uint32_t>(Buttons::Encoders::Count) && _delta)
+				m_mq.rotateEncoder(static_cast<Buttons::Encoders>(_index), _delta);
+		});
+
+		m_frontPanel.evRequestState.addListener([this](uint8_t)
+		{
+			sendLcd(m_customSysexOut);
+			sendLcdCgRam(m_customSysexOut);
+			sendLeds(m_customSysexOut);
+		});
+
 		// we need to hit the play button to resume boot if the used rom is an OS update. mQ will complain about an uninitialized ROM area in this case
 		m_mq.setButton(Buttons::ButtonType::Play, true);
 		while(!m_mq.isBootCompleted())
@@ -84,7 +102,41 @@ namespace mqLib
 
 		const auto dirty = static_cast<uint32_t>(m_mq.getDirtyFlags());
 
-		m_sysexRemote.handleDirtyFlags(m_customSysexOut, dirty);
+		if(dirty & static_cast<uint32_t>(MicroQ::DirtyFlags::Lcd))
+			sendLcd(m_customSysexOut);
+		if(dirty & static_cast<uint32_t>(MicroQ::DirtyFlags::LcdCgRam))
+			sendLcdCgRam(m_customSysexOut);
+		if(dirty & static_cast<uint32_t>(MicroQ::DirtyFlags::Leds))
+			sendLeds(m_customSysexOut);
+	}
+
+	void Device::sendLcd(std::vector<synthLib::SMidiEvent>& _dst)
+	{
+		std::array<char, 40> lcd{};
+		m_mq.readLCD(lcd);
+		synthLib::fp::sendLcdText(_dst, 20, 2, reinterpret_cast<const uint8_t*>(lcd.data()));
+	}
+
+	void Device::sendLcdCgRam(std::vector<synthLib::SMidiEvent>& _dst)
+	{
+		std::array<uint8_t, synthLib::fp::g_cgRamSize> cgRam{};
+		std::array<uint8_t, 8> character{};
+
+		for(uint32_t c=0; c<8; ++c)
+		{
+			m_mq.readCustomLCDCharacter(character, c);
+			std::copy(character.begin(), character.end(), cgRam.begin() + c * 8);
+		}
+
+		synthLib::fp::sendLcdCgRam(_dst, cgRam);
+	}
+
+	void Device::sendLeds(std::vector<synthLib::SMidiEvent>& _dst)
+	{
+		std::vector<bool> leds(static_cast<uint32_t>(Leds::Led::Count));
+		for(size_t i=0; i<leds.size(); ++i)
+			leds[i] = m_mq.getLedState(static_cast<Leds::Led>(i));
+		synthLib::fp::sendLedMask(_dst, leds);
 	}
 
 	dsp56k::EsxiClock* Device::getDspEsxiClock() const

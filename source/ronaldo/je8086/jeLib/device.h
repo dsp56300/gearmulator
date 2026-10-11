@@ -3,9 +3,9 @@
 #include <memory>
 
 #include "state.h"
-#include "sysexRemoteControl.h"
 
 #include "synthLib/device.h"
+#include "synthLib/frontPanelSysex.h"
 
 namespace rLib
 {
@@ -65,7 +65,7 @@ namespace jeLib
 		std::vector<synthLib::SMidiEvent> m_midiOut;
 
 		State m_state;
-		SysexRemoteControl m_sysexRemote;
+		synthLib::FrontPanelTransport m_frontPanel;
 
 		baseLib::EventListener<uint8_t, uint8_t, int32_t> m_paramChangedListener;
 

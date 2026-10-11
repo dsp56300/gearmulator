@@ -6,6 +6,7 @@
 
 namespace jucePluginEditorLib
 {
+	class FrontPanel;
 	class Processor;
 }
 
@@ -48,6 +49,7 @@ namespace jeJucePlugin
 		std::array<std::string, 4> m_activePatchNames;
 
 		std::unique_ptr<JeLcd> m_lcd;
+		std::unique_ptr<jucePluginEditorLib::FrontPanel> m_frontPanel;
 		std::unique_ptr<PartSelect> m_partSelect;
 		std::unique_ptr<JeAssign> m_assign;
 

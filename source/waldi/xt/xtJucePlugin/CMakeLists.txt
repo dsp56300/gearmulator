@@ -24,7 +24,6 @@ set(SOURCES
 	xtArp.cpp xtArp.h
 	xtController.cpp xtController.h
 	xtEditor.cpp xtEditor.h
-	xtFrontPanel.cpp xtFrontPanel.h
 	xtLcd.cpp xtLcd.h
 	xtPartButton.cpp xtPartButton.h
 	xtPartName.cpp xtPartName.h

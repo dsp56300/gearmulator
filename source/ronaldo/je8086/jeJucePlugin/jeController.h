@@ -5,8 +5,6 @@
 #include "jeLib/jemiditypes.h"
 #include "jeLib/state.h"
 
-#include "jeLib/sysexRemoteControl.h"
-
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/patchdb/patch.h"
 
@@ -51,8 +49,6 @@ namespace jeJucePlugin
 		void sendPerformanceRequest(jeLib::AddressArea _area, jeLib::UserPerformanceArea _performance) const;
 		void sendSystemRequest() const;
 
-		jeLib::SysexRemoteControl& getSysexRemote() { return m_sysexRemote; }
-
 		bool isUpperSelected() const;
 		bool isLowerSelected() const;
 		bool isBothSelected() const;
@@ -75,11 +71,10 @@ namespace jeJucePlugin
 
 		void setPatchName(PatchType _type, const std::string& _name);
 
-		jeLib::SysexRemoteControl m_sysexRemote;
 		jeLib::State m_state;
 
 		std::array<std::string, static_cast<size_t>(PatchType::Count)> m_patchNames;
 
-		baseLib::EventListener<uint8_t, uint8_t, pluginLib::ParamValue> m_onParamChanged;
+		baseLib::EventListener<uint8_t, uint8_t, int32_t> m_onParamChanged;
 	};
 }

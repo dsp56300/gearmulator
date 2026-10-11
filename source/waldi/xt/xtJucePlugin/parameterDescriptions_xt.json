@@ -2023,42 +2023,6 @@
 			{"type": "null"},
 			{"type": "byte", "value": "f7"}
 		],
-		"emuRequestLcd": [
-			{"type": "byte", "value": "f0"},
-			{"type": "byte", "value": "3e"},
-			{"type": "byte", "value": "0e"},
-			{"type": "deviceid"},
-			{"type": "byte", "value": "60"},
-			{"type": "byte", "value": "f7"}
-		],
-		"emuRequestLeds": [
-			{"type": "byte", "value": "f0"},
-			{"type": "byte", "value": "3e"},
-			{"type": "byte", "value": "0e"},
-			{"type": "deviceid"},
-			{"type": "byte", "value": "61"},
-			{"type": "byte", "value": "f7"}
-		],
-		"emuSendButton": [
-			{"type": "byte", "value": "f0"},
-			{"type": "byte", "value": "3e"},
-			{"type": "byte", "value": "0e"},
-			{"type": "deviceid"},
-			{"type": "byte", "value": "62"},
-			{"type": "paramindex"},
-			{"type": "paramvalue"},
-			{"type": "byte", "value": "f7"}
-		],
-		"emuSendRotary": [
-			{"type": "byte", "value": "f0"},
-			{"type": "byte", "value": "3e"},
-			{"type": "byte", "value": "0e"},
-			{"type": "deviceid"},
-			{"type": "byte", "value": "63"},
-			{"type": "paramindex"},
-			{"type": "paramvalue"},
-			{"type": "byte", "value": "f7"}
-		],
 		"requestWave": [
 			{"type": "byte", "value": "f0"},
 			{"type": "byte", "value": "3e"},

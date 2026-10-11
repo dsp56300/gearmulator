@@ -794,7 +794,26 @@ namespace pluginLib
 	    getMidiMessages(events);
 
 	    for (const auto& e : events)
+		{
+			// front panel frames never reach the product's parser. A host or a MIDI port can send them too, those are
+			// not what the device shows
+			if (synthLib::fp::isFrontPanel(e.sysex))
+			{
+				if (e.source == synthLib::MidiEventSource::Internal)
+					m_frontPanel.receive(e.sysex);
+				continue;
+			}
 		    parseMidiMessage(e);
+		}
+	}
+
+	void Controller::sendFrontPanel(std::vector<synthLib::SMidiEvent>&& _events) const
+	{
+		for (auto& e : _events)
+		{
+			e.source = synthLib::MidiEventSource::Editor;
+			sendMidiEvent(e);
+		}
 	}
 
 	std::string Controller::loadParameterDescriptions(const std::string& _filename) const

@@ -12,6 +12,8 @@
 
 #include "jeLib/romloader.h"
 
+#include "jucePluginEditorLib/frontPanel.h"
+
 #include "jucePluginEditorLib/pluginDataModel.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 
@@ -54,6 +56,21 @@ namespace jeJucePlugin
 
 		if (auto* lcd = findChild("lcd"))
 			m_lcd.reset(new JeLcd(*this, lcd));
+
+		jucePluginEditorLib::FrontPanel::Binding binding;
+		binding.lcdCols = 20;
+		binding.lcdRows = 2;
+		binding.lcdSink = [this](const std::vector<uint8_t>& _cells)
+		{
+			if (m_lcd)
+				m_lcd->setDeviceText(_cells);
+		};
+		binding.cgRamSink = [this](const std::array<uint8_t, 64>& _cgRam)
+		{
+			if (m_lcd)
+				m_lcd->setCgRam(_cgRam);
+		};
+		m_frontPanel.reset(new jucePluginEditorLib::FrontPanel(*this, std::move(binding)));
 
 		m_partSelect.reset(new PartSelect(*this));
 
@@ -122,6 +139,7 @@ namespace jeJucePlugin
 	{
 		m_assign.reset();
 		m_partSelect.reset();
+		m_frontPanel.reset();
 		m_lcd.reset();
 	}
 

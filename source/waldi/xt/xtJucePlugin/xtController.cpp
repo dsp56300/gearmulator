@@ -8,7 +8,6 @@
 
 #include "dsp56kBase/logging.h"
 
-#include "xtFrontPanel.h"
 #include "xtWaveEditor.h"
 
 namespace
@@ -29,10 +28,6 @@ namespace
 	    "multidump",
 	    "globaldump",
 	    "modedump",
-	    "emuRequestLcd",
-	    "emuRequestLeds",
-	    "emuSendButton",
-	    "emuSendRotary",
 	    "requestWave",
 	    "waveDump",
 		"requestTable",
@@ -313,23 +308,6 @@ namespace xtJucePlugin
 
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source)
 	{
-	    if(_msg.size() >= 5)
-	    {
-		    switch (const auto cmd = static_cast<xt::SysexCommand>(_msg[4]))
-	        {
-	        case xt::SysexCommand::EmuRotaries:
-	        case xt::SysexCommand::EmuButtons:
-	        case xt::SysexCommand::EmuLCD:
-	        case xt::SysexCommand::EmuLEDs:
-				// the device sends its panel frames as Internal, the same command bytes from anywhere else are dropped
-				if(m_frontPanel && _source == synthLib::MidiEventSource::Internal)
-					m_frontPanel->processSysex(_msg);
-	            return true;
-	        default:
-	            break;
-	        }
-	    }
-
 		LOG("Got sysex of size " << _msg.size());
 
 		std::string name;
@@ -506,11 +484,6 @@ namespace xtJucePlugin
 	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const synthLib::SysexBuffer& _sysex) const
 	{
 		return parseMidiPacket(SingleDump, _data, _paramValues, _sysex);
-	}
-
-	void Controller::setFrontPanel(xtJucePlugin::FrontPanel* _frontPanel)
-	{
-		m_frontPanel = _frontPanel;
 	}
 
 	void Controller::setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor)

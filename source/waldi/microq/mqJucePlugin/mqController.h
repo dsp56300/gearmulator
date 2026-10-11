@@ -10,8 +10,6 @@
 
 namespace mqJucePlugin
 {
-	class FrontPanel;
-
 	class AudioPluginAudioProcessor;
 
 	class Controller : public pluginLib::Controller
@@ -34,10 +32,6 @@ namespace mqJucePlugin
 	        SingleDumpQ,
 			MultiDump,
 	        GlobalDump,
-	        EmuRequestLcd,
-	        EmuRequestLeds,
-	        EmuSendButton,
-	        EmuSendRotary,
 
 	        Count
 	    };
@@ -54,7 +48,6 @@ namespace mqJucePlugin
 	    Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 		~Controller() override;
 
-	    void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
 
@@ -136,7 +129,6 @@ namespace mqJucePlugin
 		Patch m_multiEditBuffer;
 	    std::array<uint8_t, 200> m_globalData{};
 	    std::atomic<bool> m_multiMode = false;
-	    mqJucePlugin::FrontPanel* m_frontPanel = nullptr;
 	    std::array<uint32_t, 16> m_currentSingles{0};
 	    uint32_t m_currentSingle = 0;
 	};

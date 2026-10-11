@@ -5,6 +5,7 @@
 #include "parameterlocking.h"
 #include "softknob.h"
 
+#include "synthLib/frontPanelSysex.h"
 #include "synthLib/midiTypes.h"
 
 #include <string>
@@ -136,6 +137,12 @@ namespace pluginLib
 
 		Processor& getProcessor() const { return m_processor; }
 
+		// The device's front panel frames (synthLib::fp), decoded on the message thread. Only those the device sent
+		// (source Internal) are decoded, every other one is dropped
+		synthLib::FrontPanelTransport& getFrontPanel() { return m_frontPanel; }
+		// sends frames made by the synthLib::fp encoders to the device
+		void sendFrontPanel(std::vector<synthLib::SMidiEvent>&& _events) const;
+
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid, const Parameter::PartFormatter& _partFormatter);
 		void registerParams(juce::AudioProcessor& _processor, Parameter::PartFormatter _partFormatter = nullptr);
@@ -197,6 +204,8 @@ namespace pluginLib
 		NrpnDecoder m_nrpnDecoder;	// for the NRPN entries of the controller map, see parseControllerMessage
 
 		std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
+
+		synthLib::FrontPanelTransport m_frontPanel;
 
 	protected:
 		// tries to find synth param in both internal and host

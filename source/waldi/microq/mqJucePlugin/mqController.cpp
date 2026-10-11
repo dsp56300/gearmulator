@@ -3,7 +3,6 @@
 #include <fstream>
 
 #include "mqEditor.h"
-#include "mqFrontPanel.h"
 #include "PluginProcessor.h"
 
 #include "mqLib/mqstate.h"
@@ -29,10 +28,6 @@ namespace mqJucePlugin
 	    "singledump_Q",
 	    "multidump",
 	    "globaldump",
-	    "emuRequestLcd",
-	    "emuRequestLeds",
-	    "emuSendButton",
-	    "emuSendRotary"
 	};
 
 	static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
@@ -54,11 +49,6 @@ namespace mqJucePlugin
 	}
 
 	Controller::~Controller() = default;
-
-	void Controller::setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel)
-	{
-	    m_frontPanel = _frontPanel;
-	}
 
 	void Controller::sendSingle(const synthLib::SysexBuffer& _sysex)
 	{
@@ -218,25 +208,6 @@ namespace mqJucePlugin
 
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source)
 	{
-	    if(_msg.size() >= 5)
-	    {
-	        const auto cmd = static_cast<mqLib::SysexCommand>(_msg[4]);
-	        switch (cmd)
-	        {
-	        case mqLib::SysexCommand::EmuRotaries:
-	        case mqLib::SysexCommand::EmuButtons:
-	        case mqLib::SysexCommand::EmuLCD:
-	        case mqLib::SysexCommand::EmuLCDCGRata:
-	        case mqLib::SysexCommand::EmuLEDs:
-	            // the device sends its panel frames as Internal, the same command bytes from anywhere else are dropped
-	            if(m_frontPanel && _source == synthLib::MidiEventSource::Internal)
-	                m_frontPanel->processSysex(_msg);
-	            return true;
-	        default:
-	            break;
-	        }
-	    }
-
 		LOG("Got sysex of size " << _msg.size());
 
 		std::string name;

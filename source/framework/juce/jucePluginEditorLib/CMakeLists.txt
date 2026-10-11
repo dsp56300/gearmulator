@@ -4,6 +4,7 @@ project(jucePluginEditorLib VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	focusedParameter.cpp focusedParameter.h
 	focusedParameterTooltip.cpp focusedParameterTooltip.h
+	frontPanel.cpp frontPanel.h
 	lcd.cpp lcd.h
 	led.cpp led.h
 	midiPorts.cpp midiPorts.h

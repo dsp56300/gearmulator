@@ -6,11 +6,13 @@
 
 #include "xtArp.h"
 #include "xtController.h"
-#include "xtFrontPanel.h"
+#include "xtLcd.h"
 #include "xtPatchManager.h"
 #include "xtLib/xtMidiTypes.h"
 #include "xtWaveEditor.h"
 
+
+#include "jucePluginEditorLib/frontPanel.h"
 
 #include "juceRmlUi/rmlElemButton.h"
 
@@ -26,7 +28,22 @@ namespace xtJucePlugin
 	{
 		jucePluginEditorLib::Editor::create();
 
-		m_frontPanel.reset(new FrontPanel(*this, m_controller));
+		if (auto* lcdArea = findChild("lcdArea", false))
+			m_lcd.reset(new XtLcd(lcdArea, m_controller));
+
+		jucePluginEditorLib::FrontPanel::Binding binding;
+		binding.lcdCols = 40;
+		binding.lcdRows = 2;
+		binding.lcdSink = [this](const std::vector<uint8_t>& _cells)
+		{
+			std::array<uint8_t, 80> text{};
+			std::copy_n(_cells.begin(), text.size(), text.begin());
+			if (m_lcd)
+				m_lcd->setText(text);
+		};
+		binding.leds = {"midiLed"};	// the device has more LEDs (xt::LedType), the skins show this one
+
+		m_frontPanel.reset(new jucePluginEditorLib::FrontPanel(*this, std::move(binding)));
 
 		m_parts.reset(new Parts(*this));
 
@@ -48,7 +65,8 @@ namespace xtJucePlugin
 		m_playModeChangeListener = [this, updateMultiButton](const bool& _isMultiMode)
 		{
 			updateMultiButton(_isMultiMode);
-			m_frontPanel->getLcd()->refresh();
+			if (m_lcd)
+				m_lcd->refresh();
 
 			if(!_isMultiMode)
 				m_parts->selectPart(0);
@@ -104,6 +122,7 @@ namespace xtJucePlugin
 		}
 		getXtController().setWaveEditor(nullptr);
 		m_frontPanel.reset();
+		m_lcd.reset();
 	}
 
 	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
@@ -116,7 +135,7 @@ namespace xtJucePlugin
 	XtLcd* Editor::getLcd() const
 	{
 		// null while the base create() runs
-		return m_frontPanel ? m_frontPanel->getLcd() : nullptr;
+		return m_lcd.get();
 	}
 
 	void Editor::onFocusedParameterChanged(const std::string& _name, const std::string& _value)
@@ -138,8 +157,8 @@ namespace xtJucePlugin
 		if(m_parts)
 			m_parts->updateUi();
 
-		if(m_frontPanel)
-			m_frontPanel->getLcd()->refresh();
+		if(m_lcd)
+			m_lcd->refresh();
 	}
 
 	void Editor::changeWave(const int _step) const

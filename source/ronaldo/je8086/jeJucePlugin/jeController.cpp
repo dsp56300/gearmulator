@@ -56,7 +56,7 @@ namespace jeJucePlugin
 			return juce::String(temp);
 		});
 
-		m_onParamChanged.set(m_sysexRemote.evParamChanged, [this](const uint8_t _page, const uint8_t _index, const pluginLib::ParamValue& _value)
+		m_onParamChanged.set(getFrontPanel().evParam, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
 		{
 			auto parameters = findSynthParam(0, _page, _index);
 
@@ -126,10 +126,10 @@ namespace jeJucePlugin
 		}
 		else if (desc.page == g_paramPageCustom)
 		{
-			// custom messages
+			// emulator parameters, the master volume
 			std::vector<synthLib::SMidiEvent> events;
-			jeLib::SysexRemoteControl::sendSysexParameter(events, _parameter.getDescription().page,_parameter.getDescription().index, _value);
-			sendSysEx(events.front().sysex);
+			synthLib::fp::sendParam(events, desc.page, desc.index, _value);
+			sendFrontPanel(std::move(events));
 		}
 		else
 		{
@@ -158,9 +158,6 @@ namespace jeJucePlugin
 
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _sysex, synthLib::MidiEventSource _source)
 	{
-		if (m_sysexRemote.receive(_sysex))
-			return true;
-
 		m_state.receive(_sysex);
 
 		const auto addr = jeLib::State::getAddress(_sysex);
@@ -344,10 +341,9 @@ namespace jeJucePlugin
 
 	void Controller::sendButton(const uint32_t _button, const bool _pressed) const
 	{
-		std::vector<synthLib::SMidiEvent> results;
-		jeLib::SysexRemoteControl::sendSysexButton(results, _button, _pressed);
-		for (auto& ev : results)
-			sendSysEx(ev.sysex);
+		std::vector<synthLib::SMidiEvent> events;
+		synthLib::fp::sendButton(events, _button, _pressed);
+		sendFrontPanel(std::move(events));
 	}
 
 	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex)

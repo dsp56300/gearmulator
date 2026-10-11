@@ -243,12 +243,7 @@ namespace xt
 		case SysexCommand::WaveCtlDumpP:			return !m_offline && m_wavePreview.receiveWaveControlTable(_data);
 		case SysexCommand::WavePreviewMode:			return !m_offline && m_wavePreview.receiveWavePreviewMode(_data);
 
-/*		case SysexCommand::EmuLCD:
-		case SysexCommand::EmuLEDs:
-		case SysexCommand::EmuButtons:
-		case SysexCommand::EmuRotaries:
-			return false;
-*/		default:
+		default:
 			return false;
 		}
 	}

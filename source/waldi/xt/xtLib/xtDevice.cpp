@@ -1,6 +1,8 @@
 #include "xtDevice.h"
 
+#include "xtButtons.h"
 #include "xtHardware.h"
+#include "xtLeds.h"
 
 namespace mqLib
 {
@@ -10,10 +12,22 @@ namespace mqLib
 namespace xt
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params)
-		: wLib::Device(_params, m_sysexRemote)
+		: wLib::Device(_params)
 		, m_xt(_params.romData, _params.romName, (_params.customData & 1) != 0)
-		, m_wavePreview(m_xt), m_state(m_xt, m_wavePreview), m_sysexRemote(m_xt)
+		, m_wavePreview(m_xt), m_state(m_xt, m_wavePreview)
 	{
+		m_frontPanel.evButton.addListener([this](const uint32_t _index, const bool _pressed)
+		{
+			if(_index < static_cast<uint32_t>(ButtonType::Count))
+				m_xt.getHardware()->getUC().setButton(static_cast<ButtonType>(_index), _pressed);
+		});
+
+		m_frontPanel.evRequestState.addListener([this](uint8_t)
+		{
+			sendLcd(m_customSysexOut);
+			sendLeds(m_customSysexOut);
+		});
+
 		while(!m_xt.isBootCompleted())
 			m_xt.process(8);
 
@@ -68,7 +82,25 @@ namespace xt
 
 		const auto dirty = static_cast<uint32_t>(m_xt.getDirtyFlags());
 
-		m_sysexRemote.handleDirtyFlags(m_customSysexOut, dirty);
+		if(dirty & static_cast<uint32_t>(Xt::DirtyFlags::Lcd))
+			sendLcd(m_customSysexOut);
+		if(dirty & static_cast<uint32_t>(Xt::DirtyFlags::Leds))
+			sendLeds(m_customSysexOut);
+	}
+
+	void Device::sendLcd(std::vector<synthLib::SMidiEvent>& _dst) const
+	{
+		std::array<char, 80> lcd{};
+		m_xt.readLCD(lcd);
+		synthLib::fp::sendLcdText(_dst, 40, 2, reinterpret_cast<const uint8_t*>(lcd.data()));
+	}
+
+	void Device::sendLeds(std::vector<synthLib::SMidiEvent>& _dst) const
+	{
+		std::vector<bool> leds(static_cast<uint32_t>(LedType::Count));
+		for(size_t i=0; i<leds.size(); ++i)
+			leds[i] = m_xt.getLedState(static_cast<LedType>(i));
+		synthLib::fp::sendLedMask(_dst, leds);
 	}
 
 	dsp56k::EsxiClock* Device::getDspEsxiClock() const

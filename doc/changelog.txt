@@ -40,6 +40,9 @@ Framework:
         the plugin and `input_stop` ends it, to test effects and audio inputs
         together with `record_start` and `record_stop`.
 
+- [Imp] MCP server: `read_lcd` returns the text and the LEDs of the display of
+        the emulated device, also while the plugin window is closed.
+
 - [Imp] BUG-10220 The Esc key no longer opens the settings page, it is left to
         the host, which uses it to close the plugin window, for example. Esc
         still closes the settings page and ends MIDI Learn mode. The settings
@@ -241,6 +244,9 @@ Vavra:
 - [Fix] EMU-162 The emulation could write memory dumps into the working folder
         of the host, and crashed the host if it could not write there.
 
+- [Fix] The first turn of an encoder of the front panel skin moved the value by
+        several steps at once.
+
 Xenia:
 
 - [Fix] Storing sounds could, rarely, make the emulation write past the end of
@@ -297,6 +303,10 @@ JE8086:
 - [Fix] EMU-167 With a plugin latency above zero, a click on a panel button
         reached the emulation at a random moment instead of in order with the
         notes played around it.
+
+- [Imp] The master volume is saved in a new format. Projects of older versions
+        load as before, a project saved with this version opens in an older
+        version with the master volume at 100%.
 
 - [Fix] BUG-10307 Dense controller data from the host, automation for example,
         delayed the notes played along with it by seconds, and the delay kept

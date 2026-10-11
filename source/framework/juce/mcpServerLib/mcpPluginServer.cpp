@@ -908,6 +908,79 @@ namespace mcpServer
 			m_server.registerTool(std::move(tool));
 		}
 
+		// read_lcd
+		{
+			ToolDef tool;
+			tool.name = "read_lcd";
+			tool.description = "Read the device's LCD and LEDs as its front panel last reported them: columns, rows, raw cells (8-15 are the custom CGRAM characters, shown as '?' in text), one text line per row, and the LED states. Works with the editor closed. Products without a front panel report available=false";
+			tool.handler = [this](const JsonValue&) -> JsonValue
+			{
+				bool hasLcd = false, hasLeds = false;
+				uint32_t cols = 0, rows = 0;
+				std::vector<uint8_t> cells;
+				std::vector<bool> leds;
+
+				runOnMessageThread([&]
+				{
+					if (!m_processor.hasController())
+						return;
+					auto& panel = m_processor.getController().getFrontPanel();
+
+					// the events are retained, a listener gets the current state at once
+					const baseLib::EventListener<uint32_t, uint32_t, std::vector<uint8_t>> lcd(panel.evLcdText,
+						[&](const uint32_t _cols, const uint32_t _rows, const std::vector<uint8_t>& _cells)
+					{
+						hasLcd = true;
+						cols = _cols;
+						rows = _rows;
+						cells = _cells;
+					});
+					const baseLib::EventListener<std::vector<bool>> ledMask(panel.evLedMask, [&](const std::vector<bool>& _leds)
+					{
+						hasLeds = true;
+						leds = _leds;
+					});
+				});
+
+				auto result = JsonValue::object();
+				result.set("available", JsonValue::fromBool(hasLcd || hasLeds));
+
+				if (hasLcd)
+				{
+					result.set("cols", JsonValue::fromInt(static_cast<int>(cols)));
+					result.set("rows", JsonValue::fromInt(static_cast<int>(rows)));
+
+					auto raw = JsonValue::array();
+					for (const auto c : cells)
+						raw.append(JsonValue::fromInt(c));
+					result.set("cells", raw);
+
+					auto lines = JsonValue::array();
+					for (uint32_t r = 0; r < rows; ++r)
+					{
+						std::string line;
+						for (uint32_t c = 0; c < cols && r * cols + c < cells.size(); ++c)
+						{
+							const auto ch = cells[r * cols + c];
+							line += ch >= 0x20 && ch < 0x7f ? static_cast<char>(ch) : '?';
+						}
+						lines.append(JsonValue::fromString(line));
+					}
+					result.set("text", lines);
+				}
+
+				if (hasLeds)
+				{
+					auto list = JsonValue::array();
+					for (const bool on : leds)
+						list.append(JsonValue::fromBool(on));
+					result.set("leds", list);
+				}
+				return result;
+			};
+			m_server.registerTool(std::move(tool));
+		}
+
 		// get_plugin_info
 		{
 			ToolDef tool;

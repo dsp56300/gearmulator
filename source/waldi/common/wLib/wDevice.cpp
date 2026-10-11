@@ -1,12 +1,8 @@
 #include "wDevice.h"
 
-#include "wSysexRemoteControl.h"
-
 namespace wLib
 {
-	Device::Device(const synthLib::DeviceCreateParams& _params, SysexRemoteControl& _sysexRemote)
-		: DspClockDevice(_params)
-		, m_sysexRemote(_sysexRemote)
+	Device::Device(const synthLib::DeviceCreateParams& _params) : DspClockDevice(_params)
 	{
 	}
 
@@ -47,7 +43,7 @@ namespace wLib
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
-		if (!_ev.sysex.empty() && m_sysexRemote.receive(m_customSysexOut, _ev.sysex))
+		if (m_frontPanel.receive(_ev.sysex))
 			return true;
 
 		Responses responses;

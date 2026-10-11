@@ -8,6 +8,7 @@
 
 namespace jucePluginEditorLib
 {
+	class FrontPanel;
 	class Processor;
 }
 
@@ -19,7 +20,6 @@ namespace pluginLib
 namespace xtJucePlugin
 {
 	class WaveEditor;
-	class FrontPanel;
 	class PatchManager;
 	class XtLcd;
 	class Controller;
@@ -54,7 +54,8 @@ namespace xtJucePlugin
 
 		Controller& m_controller;
 
-		std::unique_ptr<FrontPanel> m_frontPanel;
+		std::unique_ptr<XtLcd> m_lcd;
+		std::unique_ptr<jucePluginEditorLib::FrontPanel> m_frontPanel;
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Arp> m_arp;
 

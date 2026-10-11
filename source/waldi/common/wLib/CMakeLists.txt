@@ -9,7 +9,6 @@ set(SOURCES
 	wDsp.cpp wDsp.h
 	wHardware.cpp wHardware.h
 	wMidiTypes.h
-	wSysexRemoteControl.cpp wSysexRemoteControl.h
 	wRom.cpp wRom.h
 	wState.h
 )

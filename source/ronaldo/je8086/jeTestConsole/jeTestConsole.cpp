@@ -1,4 +1,5 @@
 #include <chrono>
+#include <algorithm>
 #include <iostream>
 
 #include "dsp56kEmu/audio.h"
@@ -63,13 +64,13 @@ int main(int _argc, char* _argv[])
 		bool bootFinished = false;
 		bool demoRunning = false;
 
-		SysexRemoteControl sysexRemote;
+		synthLib::FrontPanelTransport frontPanel;
 
-		sysexRemote.evLcdDdDataChanged.addListener([&](const std::array<char, 40>& _lcdContent)
+		frontPanel.evLcdText.addListener([&](uint32_t, uint32_t, const std::vector<uint8_t>& _lcdContent)
 		{
 			char lcdString[41]{0};
 
-			for (size_t i=0; i<_lcdContent.size(); ++i)
+			for (size_t i=0; i<std::min<size_t>(_lcdContent.size(), 40); ++i)
 				lcdString[i] = _lcdContent[i] >= ' ' ? static_cast<char>(_lcdContent[i]) : ' ';
 
 			std::string s(lcdString);
@@ -104,7 +105,7 @@ int main(int _argc, char* _argv[])
 			device.process(inputs, outputs, blocksize, midiIn, midiOut);
 
 			for (const auto& e : midiOut)
-				sysexRemote.receive(e);
+				frontPanel.receive(e.sysex);
 			midiOut.clear();
 		}
 
@@ -120,7 +121,7 @@ int main(int _argc, char* _argv[])
 			device.process(inputs, outputs, blocksize, midiIn, midiOut);
 
 			for (const auto& e : midiOut)
-				sysexRemote.receive(e);
+				frontPanel.receive(e.sysex);
 			midiOut.clear();
 
 			sampleCounter += blocksize;

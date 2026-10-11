@@ -288,6 +288,14 @@ No parameters required.
 
 Returns `valid`, `hostSamplerate`, `dspClockPercent`, `dspClockHz`, `canModifyDspClock`, `outputGain`, `currentPart`, `partCount`.
 
+#### `read_lcd`
+
+Read the device's display and LEDs as the device last reported them. Works with the editor closed. Products without a front panel report `available: false`.
+
+No parameters required.
+
+Returns `available`; for a display `cols`, `rows`, `cells` (the `cols` x `rows` raw character codes, 8-15 are the custom characters of the display's character RAM) and `text` (one string per row, characters outside printable ASCII shown as `?`); for LEDs `leds`, one boolean per LED in the device's order.
+
 #### `get_plugin_info`
 
 Get plugin information: name, vendor, 4CC identifier, MIDI capabilities, MCP server port, and host process id.

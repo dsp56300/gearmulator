@@ -5,16 +5,14 @@
 #include "dsp56kEmu/esaiclock.h"
 
 #include "synthLib/dspClockDevice.h"
+#include "synthLib/frontPanelSysex.h"
 
 namespace wLib
 {
-	class SysexRemoteControl;
-
 	class Device : public synthLib::DspClockDevice<dsp56k::EsxiClock>
 	{
 	public:
-		// _sysexRemote may be a member of the product that is constructed after this, it is not used before process()
-		Device(const synthLib::DeviceCreateParams& _params, SysexRemoteControl& _sysexRemote);
+		explicit Device(const synthLib::DeviceCreateParams& _params);
 
 	protected:
 		virtual dsp56k::EsxiClock* getDspEsxiClock() const = 0;
@@ -28,9 +26,9 @@ namespace wLib
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 
+		// front panel frames from the editor, before the state cache or the firmware see them. The product handles
+		// its events, its answers and the frames it sends go to m_customSysexOut, ahead of the firmware's output
+		synthLib::FrontPanelTransport		m_frontPanel;
 		std::vector<synthLib::SMidiEvent>	m_customSysexOut;
-
-	private:
-		SysexRemoteControl&					m_sysexRemote;
 	};
 }

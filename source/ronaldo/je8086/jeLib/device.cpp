@@ -33,7 +33,7 @@ namespace jeLib
 
 		m_thread.reset(new rLib::BoardThread<Je8086>(*m_je8086, "JE8086"));
 
-		m_paramChangedListener.set(m_sysexRemote.evParamChanged, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
+		m_paramChangedListener.set(m_frontPanel.evParam, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
 		{
 			onParamChanged(_page, _index, _value);
 		});
@@ -91,6 +91,16 @@ namespace jeLib
 
 		for (auto& message : messages)
 		{
+			// up to 2.2.26 the master volume was F0 7D 05 <page:2> <index:2> <value:8> F7, the front panel Param frame
+			// has the same payload
+			if (message.size() == 16 && message[0] == 0xf0 && message[1] == 0x7d && message[2] == 0x05)
+			{
+				synthLib::SysexBuffer tagged(std::begin(synthLib::fp::g_header), std::end(synthLib::fp::g_header));
+				tagged.push_back(static_cast<uint8_t>(synthLib::fp::Type::Param));
+				tagged.insert(tagged.end(), message.begin() + 3, message.end());
+				message = std::move(tagged);
+			}
+
 			synthLib::SMidiEvent e(synthLib::MidiEventSource::Host);
 			e.sysex = std::move(message);
 
@@ -98,7 +108,7 @@ namespace jeLib
 			// is never processed, the state will be lost
 			m_state.receive(e.sysex);
 
-			m_sysexRemote.receive(e.sysex);
+			m_frontPanel.receive(e.sysex);
 			m_midiIn.emplace_back(e);
 		}
 
@@ -161,7 +171,7 @@ namespace jeLib
 	{
 		// the master volume is applied here, everything goes to the board too: it consumes the panel frames on the
 		// emulation thread, see Je8086::addMidiEvent
-		m_sysexRemote.receive(_ev.sysex);
+		m_frontPanel.receive(_ev.sysex);
 		m_midiIn.emplace_back(_ev);
 		m_state.receive(_ev);
 		return true;
@@ -174,6 +184,6 @@ namespace jeLib
 
 	void Device::createMasterVolumeMessage(std::vector<synthLib::SMidiEvent>& _messages) const
 	{
-		SysexRemoteControl::sendSysexParameter(_messages, g_paramPageMasterVolume, g_paramIndexMasterVolume, static_cast<int32_t>(m_masterVolume * 100.0f));
+		synthLib::fp::sendParam(_messages, g_paramPageMasterVolume, g_paramIndexMasterVolume, static_cast<int32_t>(m_masterVolume * 100.0f));
 	}
 }

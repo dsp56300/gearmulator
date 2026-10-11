@@ -21,12 +21,6 @@ namespace mqLib
 		DrumRequest	  = 0x02, DrumDump   = 0x12, DrumParameterChange   = 0x22, DrumParameterRequest   = 0x32,
 		GlobalRequest = 0x04, GlobalDump = 0x14, GlobalParameterChange = 0x24, GlobalParameterRequest = 0x34,
 		ModeRequest   = 0x07, ModeDump   = 0x17, ModeParameterChange   = 0x27, ModeParameterRequest   = 0x37,
-
-		EmuLCD = 0x50,
-		EmuLEDs = 0x51,
-		EmuButtons = 0x52,
-		EmuRotaries = 0x53,
-		EmuLCDCGRata = 0x54
 	};
 
 	enum class MidiBufferNum : uint8_t

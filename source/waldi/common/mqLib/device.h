@@ -2,7 +2,6 @@
 
 #include "microq.h"
 #include "mqstate.h"
-#include "mqsysexremotecontrol.h"
 
 #include "wLib/wDevice.h"
 
@@ -39,8 +38,11 @@ namespace mqLib
 		bool stateReceive(wLib::Responses& _responses, const synthLib::SMidiEvent& _ev, const wLib::State::Origin _origin) override { return m_state.receive(_responses, _ev, _origin); }
 
 	private:
+		void sendLcd(std::vector<synthLib::SMidiEvent>& _dst);
+		void sendLcdCgRam(std::vector<synthLib::SMidiEvent>& _dst);
+		void sendLeds(std::vector<synthLib::SMidiEvent>& _dst);
+
 		MicroQ						m_mq;
 		State						m_state;
-		SysexRemoteControl			m_sysexRemote;
 	};
 }

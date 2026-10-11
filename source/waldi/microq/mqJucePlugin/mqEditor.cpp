@@ -31,7 +31,7 @@ namespace mqJucePlugin
 	{
 		jucePluginEditorLib::Editor::create();
 
-		m_frontPanel.reset(new FrontPanel(*this, m_controller));
+		m_frontPanel.reset(new FrontPanel(*this));
 
 		auto disableButton = [](Rml::Element* _comp)
 		{

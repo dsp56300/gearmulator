@@ -17,7 +17,6 @@ namespace xt
 namespace xtJucePlugin
 {
 	class WaveEditor;
-	class FrontPanel;
 
 	class AudioPluginAudioProcessor;
 
@@ -40,10 +39,6 @@ namespace xtJucePlugin
 			MultiDump,
 			GlobalDump,
 			ModeDump,
-	        EmuRequestLcd,
-	        EmuRequestLeds,
-	        EmuSendButton,
-	        EmuSendRotary,
 			RequestWave,
 			WaveDump,
 			RequestTable,
@@ -106,7 +101,6 @@ namespace xtJucePlugin
 		std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
 		std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 
-		void setFrontPanel(xtJucePlugin::FrontPanel* _frontPanel);
 		void setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor);
 
 		bool requestWave(uint32_t _number) const;
@@ -157,7 +151,6 @@ namespace xtJucePlugin
 		std::atomic<bool> m_multiMode = false;
 		std::array<uint32_t, 8> m_currentSingles{0};
 		uint32_t m_currentSingle = 0;
-		xtJucePlugin::FrontPanel* m_frontPanel = nullptr;
 		xtJucePlugin::WaveEditor* m_waveEditor = nullptr;
 		std::set<xt::TableId> m_requestWavesForTables;
 	};
