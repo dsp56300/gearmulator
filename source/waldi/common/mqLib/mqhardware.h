@@ -44,11 +44,6 @@ namespace mqLib
 
 		void ensureBufferSize(uint32_t _frames);
 
-		void ucThreadTerminated()
-		{
-			resumeDSP();
-		}
-
 		void setBootMode(BootMode _mode);
 
 		bool isValid() const { return m_rom.isValid(); }

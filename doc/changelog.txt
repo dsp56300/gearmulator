@@ -247,6 +247,10 @@ Vavra/Xenia:
         when it loads a plugin can send. The events now follow over the next
         blocks, none is lost.
 
+- [Fix] When the computer was busy, notes and MIDI clock could reach the
+        emulated synthesizer up to several hundred milliseconds late, notes
+        could get lost, and LFOs synced to MIDI clock ran at the wrong speed.
+
 Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them

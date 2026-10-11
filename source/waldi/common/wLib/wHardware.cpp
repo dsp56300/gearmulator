@@ -47,8 +47,18 @@ namespace wLib
 
 		resumeDSP();
 
+		// The DSP waits for a UC that falls behind, see dspHeldByGrant, but not for one that waits for it. Set once the
+		// loop waits: its condition is mostly met at once, and then nothing is locked
+		bool waits = false;
+
 		while(_continue() && !m_terminateUcThread)
 		{
+			if(!waits)
+			{
+				waits = true;
+				setUcWaitsForDsp(true);
+			}
+
 			// Spin while the audio thread is actively processing a buffer -
 			// latency here is critical because the audio callback is blocked
 			// on DSP output and any UC sleep delays DSP progress.
@@ -68,6 +78,9 @@ namespace wLib
 			}
 		}
 
+		if(waits)
+			setUcWaitsForDsp(false);
+
 		if(dspHalted)
 			haltDSP();
 	}
@@ -75,7 +88,66 @@ namespace wLib
 	void Hardware::requestUcTermination()
 	{
 		m_terminateUcThread = true;
+		{
+			std::lock_guard lock(m_haltDSPmutex);
+			m_ucGranting = false;
+		}
+		m_haltDSPcv.notify_all();
 		m_processAudioCv.notify_all();
+	}
+
+	void Hardware::ucThreadTerminated()
+	{
+		{
+			std::lock_guard lock(m_haltDSPmutex);
+			m_haltDSP = false;
+			m_ucGranting = false;
+		}
+		m_haltDSPcv.notify_all();
+	}
+
+	void Hardware::grantFrame(const uint32_t _frame)
+	{
+		m_ucGrantedFrame = _frame;
+
+		// the first grant turns the limit on, under the mutex so that it cannot undo requestUcTermination
+		if(!m_ucGranting)
+		{
+			std::lock_guard lock(m_haltDSPmutex);
+			m_ucGranting = !m_terminateUcThread;
+		}
+
+		wakeDspIfWaiting();
+	}
+
+	void Hardware::setUcWaitsForDsp(const bool _wait)
+	{
+		m_ucWaitsForDsp = _wait;
+		if(_wait)
+			wakeDspIfWaiting();
+	}
+
+	void Hardware::wakeDspIfWaiting()
+	{
+		// The DSP sets m_dspWaitsForUc before its last check, the UC stores what it changed before it reads the flag:
+		// one of the two sees the other, so the UC takes the mutex only when the DSP waits. Taking it keeps the notify
+		// from falling between the DSP's check and its wait. A DSP that the UC halts waits for resumeDSP instead
+		if(!m_dspWaitsForUc || m_haltDSP)
+			return;
+		{
+			std::lock_guard lock(m_haltDSPmutex);
+		}
+		m_haltDSPcv.notify_one();
+	}
+
+	bool Hardware::dspHeldByGrant() const
+	{
+		return m_ucGranting && !m_ucWaitsForDsp && m_esaiFrameIndex - m_ucGrantedFrame > g_syncHaltDspEsaiThreshold;
+	}
+
+	bool Hardware::dspMayRun() const
+	{
+		return !m_haltDSP && !dspHeldByGrant();
 	}
 
 	void Hardware::beginProcessAudio()
@@ -125,7 +197,23 @@ namespace wLib
 		}
 
 		std::unique_lock uLock(m_haltDSPmutex);
-		m_haltDSPcv.wait(uLock, [&]{ return m_haltDSP == false; });
+
+		if(dspMayRun())
+			return;
+
+		// the UC may wait for a frame while the DSP is about to wait for the UC: wake it, under its mutex so that the
+		// wakeup cannot fall between its check and its wait
+		uLock.unlock();
+		{
+			std::lock_guard lock(m_esaiFrameAddedMutex);
+		}
+		m_esaiFrameAddedCv.notify_one();
+		uLock.lock();
+
+		// set before the check in wait(), see wakeDspIfWaiting
+		m_dspWaitsForUc = true;
+		m_haltDSPcv.wait(uLock, [&]{ return dspMayRun(); });
+		m_dspWaitsForUc = false;
 	}
 
 	void Hardware::syncUcToDSP()
@@ -174,6 +262,8 @@ namespace wLib
 		}
 
 		m_lastEsaiFrameIndex = esaiFrameIndex;
+
+		grantFrame(esaiFrameIndex);
 	}
 
 	void Hardware::processMidiInput()

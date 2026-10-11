@@ -42,11 +42,6 @@ namespace xt
 
 		void ensureBufferSize(uint32_t _frames);
 
-		void ucThreadTerminated()
-		{
-			resumeDSP();
-		}
-
 		bool isValid() const { return m_rom.isValid(); }
 
 		bool isBootCompleted() const { return m_bootCompleted; }

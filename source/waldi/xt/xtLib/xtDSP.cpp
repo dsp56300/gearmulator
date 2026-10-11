@@ -175,9 +175,15 @@ namespace xt
 		m_haveSentTXtoDSP = true;
 //		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word));
 
-		// this can happen during "Reorganising Memory", DSP must resume to process incoming data
+		// this can happen during "Reorganising Memory", the DSP must run to read incoming data, neither halted nor
+		// waiting for the UC
 		if (hdi08().dataRXFull())
-			m_hardware.resumeDSP();
+		{
+			m_hardware.ucYieldLoop([&]()
+			{
+				return hdi08().dataRXFull();
+			});
+		}
 		hdi08().writeRX(&_word, 1);
 	}
 
