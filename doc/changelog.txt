@@ -101,6 +101,11 @@ Framework:
         mouse that takes the wheel itself keeps it. The GUI Scale menu offers
         400% now, as the settings do.
 
+- [Fix] Ctrl+V in a text field, the patch name for example, could replace the
+        current patch with one copied to the clipboard. Ctrl+C and Ctrl+V copy
+        and paste the whole patch only when nothing under the mouse or with the
+        focus takes them itself.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported

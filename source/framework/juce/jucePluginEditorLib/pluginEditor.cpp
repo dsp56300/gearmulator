@@ -43,6 +43,7 @@
 #include "patchmanager/savepatchdesc.h"
 #include "patchmanagerUiRml/patchmanagerDataModel.h"
 
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
@@ -862,24 +863,34 @@ namespace jucePluginEditorLib
 
 		auto* doc = comp->getDocument();
 
+		// Ctrl+C and Ctrl+V copy the current patch and replace it. On the root of the context, behind every document, so
+		// that what has the focus or is under the mouse takes them first: a text field, a view that copies its own items
+		auto* root = comp->getContext()->GetRootElement();
+		juceRmlUi::EventListener::Add(root, Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
+				return;
+			const auto* target = _event.GetTargetElement();
+			if (target && (target->GetTagName() == "input" || target->GetTagName() == "textarea"))
+				return;
+
+			switch (juceRmlUi::helper::getKeyIdentifier(_event))
+			{
+			case Rml::Input::KI_C:
+				copyCurrentPatchToClipboard();
+				_event.StopPropagation();
+				break;
+			case Rml::Input::KI_V:
+				replaceCurrentPatchFromClipboard();
+				_event.StopPropagation();
+				break;
+			default:;
+			}
+		});
+
 		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](Rml::Event& _event)
 		{
-			if (juceRmlUi::helper::getKeyModCommand(_event))
-			{
-				switch (juceRmlUi::helper::getKeyIdentifier(_event))
-				{
-				case Rml::Input::KI_C:
-					copyCurrentPatchToClipboard();
-					_event.StopPropagation();
-					break;
-				case Rml::Input::KI_V:
-					replaceCurrentPatchFromClipboard();
-					_event.StopPropagation();
-					break;
-				default:;
-				}
-			}
-			else
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
 			{
 				switch (juceRmlUi::helper::getKeyIdentifier(_event))
 				{
