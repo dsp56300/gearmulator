@@ -10,7 +10,7 @@ namespace mqLib
 namespace xt
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params)
-		: wLib::Device(_params)
+		: wLib::Device(_params, m_sysexRemote)
 		, m_xt(_params.romData, _params.romName, (_params.customData & 1) != 0)
 		, m_wavePreview(m_xt), m_state(m_xt, m_wavePreview), m_sysexRemote(m_xt)
 	{
@@ -58,33 +58,6 @@ namespace xt
 		return 4;
 	}
 
-	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
-	{
-		m_xt.receiveMidi(m_midiOutBuffer);
-		m_midiOutParser.write(m_midiOutBuffer);
-		m_midiOutParser.getEvents(_midiOut);
-		m_midiOutBuffer.clear();
-
-		wLib::Responses responses;
-
-		for (const auto& midiOut : _midiOut)
-		{
-			m_state.receive(responses, midiOut, State::Origin::Device);
-
-			for (auto& response : responses)
-			{
-				auto& r = _midiOut.emplace_back(synthLib::MidiEventSource::Device);
-				std::swap(response, r.sysex);
-			}
-		}
-
-		if(!m_customSysexOut.empty())
-		{
-			_midiOut.insert(_midiOut.begin(), m_customSysexOut.begin(), m_customSysexOut.end());
-			m_customSysexOut.clear();
-		}
-	}
-
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
 	{
 		m_state.process(static_cast<uint32_t>(_samples));
@@ -96,43 +69,6 @@ namespace xt
 		const auto dirty = static_cast<uint32_t>(m_xt.getDirtyFlags());
 
 		m_sysexRemote.handleDirtyFlags(m_customSysexOut, dirty);
-	}
-
-	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
-	{
-		const auto& sysex = _ev.sysex;
-
-		if (!sysex.empty())
-		{
-			if (m_sysexRemote.receive(m_customSysexOut, sysex))
-				return true;
-		}
-
-		Responses responses;
-
-		const auto res = m_state.receive(responses, _ev, State::Origin::External);
-
-		for (auto& response : responses)
-		{
-			auto& r = _response.emplace_back(synthLib::MidiEventSource::Device);
-			std::swap(response, r.sysex);
-		}
-
-		// do not forward to device if our cache was able to reply. It might have sent something to the device already on its own if a cache miss occured
-		if(res)
-			return true;
-
-		if(_ev.sysex.empty())
-		{
-			auto e = _ev;
-			stampOffset(e);
-			m_xt.sendMidiEvent(e);
-		}
-		else
-		{
-			m_xt.sendMidiEvent(_ev);
-		}
-		return true;
 	}
 
 	dsp56k::EsxiClock* Device::getDspEsxiClock() const

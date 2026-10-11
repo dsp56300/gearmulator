@@ -31,12 +31,6 @@ namespace xt
 	class State : public wLib::State
 	{
 	public:
-		enum class Origin
-		{
-			Device,
-			External
-		};
-
 		enum class DumpType
 		{
 			Single,

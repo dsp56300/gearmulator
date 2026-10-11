@@ -4,7 +4,6 @@
 #include "n2xstate.h"
 
 #include "synthLib/device.h"
-#include "synthLib/midiBufferParser.h"
 
 namespace n2x
 {
@@ -33,8 +32,6 @@ namespace n2x
 	private:
 		Hardware m_hardware;
 		State m_state;
-		std::vector<uint8_t> m_midiOutBuffer;
-		synthLib::MidiBufferParser m_midiParser;
 		uint8_t m_arpHoldMask = 0xff;	// no valid mask, the first block reports the state
 	};
 }

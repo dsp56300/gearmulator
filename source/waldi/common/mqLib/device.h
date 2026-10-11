@@ -30,11 +30,13 @@ namespace mqLib
 		bool canModifyDspClock() const override { return true; }
 
 	protected:
-		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
-		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 
 		dsp56k::EsxiClock* getDspEsxiClock() const override;
+
+		void receiveMidiBytes(std::vector<uint8_t>& _bytes) override { m_mq.receiveMidi(_bytes); }
+		void sendMidiToSynth(const synthLib::SMidiEvent& _ev) override { m_mq.sendMidiEvent(_ev); }
+		bool stateReceive(wLib::Responses& _responses, const synthLib::SMidiEvent& _ev, const wLib::State::Origin _origin) override { return m_state.receive(_responses, _ev, _origin); }
 
 	private:
 		MicroQ						m_mq;

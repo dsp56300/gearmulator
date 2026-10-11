@@ -81,6 +81,13 @@ namespace synthLib
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
+	void Device::parseMidiOutBytes(std::vector<SMidiEvent>& _midiOut)
+	{
+		m_midiOutParser.write(m_midiOutBytes);
+		m_midiOutBytes.clear();
+		m_midiOutParser.getEvents(_midiOut);
+	}
+
 	void Device::setExtraLatencySamples(const uint32_t _size)
 	{
 		constexpr uint32_t maxLatency = 16384;  // must match Audio::RingBufferSize / 2 in dsp56kEmu

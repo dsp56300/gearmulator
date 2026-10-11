@@ -9,7 +9,6 @@ namespace n2x
 		: synthLib::Device(_params)
 		, m_hardware(_params.romData, _params.romName)
 		, m_state(&m_hardware, &getMidiTranslator())
-		, m_midiParser(synthLib::MidiEventSource::Device)
 	{
 	}
 
@@ -62,10 +61,8 @@ namespace n2x
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		m_hardware.getMidi().read(m_midiOutBuffer);
-		m_midiParser.write(m_midiOutBuffer);
-		m_midiOutBuffer.clear();
-		m_midiParser.getEvents(_midiOut);
+		m_hardware.getMidi().read(m_midiOutBytes);
+		parseMidiOutBytes(_midiOut);
 
 		for (const auto& midiOut : _midiOut)
 		{

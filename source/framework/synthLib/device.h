@@ -7,6 +7,7 @@
 #include "audioTypes.h"
 #include "deviceTypes.h"
 
+#include "midiBufferParser.h"
 #include "midiTypes.h"
 #include "midiTranslator.h"
 
@@ -137,12 +138,20 @@ namespace synthLib
 		// absolute position, the samples processed before this block plus the extra latency
 		void stampOffset(SMidiEvent& _ev) const { _ev.offset += m_numSamplesProcessed + m_extraLatency; }
 
+		// For firmware that sends MIDI as bytes: the product puts what its UART sent into m_midiOutBytes, this turns
+		// them into events with source Device, appended to _midiOut, and empties the buffer
+		void parseMidiOutBytes(std::vector<SMidiEvent>& _midiOut);
+
+		std::vector<uint8_t> m_midiOutBytes;
+
 	private:
 		DeviceCreateParams m_createParams;
 		std::vector<SMidiEvent> m_midiIn;
 
 		uint32_t m_extraLatency = 0;
 		uint32_t m_numSamplesProcessed = 0;
+
+		MidiBufferParser m_midiOutParser{MidiEventSource::Device};
 
 		MidiTranslator m_midiTranslator;
 		std::vector<SMidiEvent> m_translatorOut;
