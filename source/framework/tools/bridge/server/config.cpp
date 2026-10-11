@@ -10,7 +10,6 @@ namespace bridgeServer
 {
 	Config::Config(int _argc, char** _argv)
 		: portTcp(bridgeLib::g_tcpServerPort)
-		, portUdp(bridgeLib::g_udpServerPort)
 		, deviceStateRefreshMinutes(3)
 		, pluginsPath(getDefaultDataPath() + "plugins/")
 		, romsPath(getDefaultDataPath() + "roms/")
@@ -27,7 +26,7 @@ namespace bridgeServer
 		config.add(commandLine, true);
 
 		portTcp = config.getInt("tcpPort", static_cast<int>(portTcp));
-		portUdp = config.getInt("udpPort", static_cast<int>(portUdp));
+		// no udpPort: the clients broadcast to the fixed discovery port, a server elsewhere would never be found
 		deviceStateRefreshMinutes = config.getInt("deviceStateRefreshMinutes", static_cast<int>(deviceStateRefreshMinutes));
 		pluginsPath = config.get("pluginsPath", pluginsPath);
 		romsPath = config.get("romsPath", romsPath);

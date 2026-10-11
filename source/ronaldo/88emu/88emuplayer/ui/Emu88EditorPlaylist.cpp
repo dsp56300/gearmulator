@@ -19,21 +19,19 @@ namespace emu88Player
 	void Editor::chooseMidiFiles()
 	{
 		const auto filter = std::string(jucePlayer::midiFile::fileFilter) + ";" + playlist::fileFilter;
-		m_playlistChooser = std::make_unique<juce::FileChooser>(
-			"Add MIDI/RCP files or playlists", juce::File{}, filter, true);
-		const auto flags = juce::FileBrowserComponent::openMode |
-		                   juce::FileBrowserComponent::canSelectFiles |
-		                   juce::FileBrowserComponent::canSelectMultipleItems;
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Add MIDI/RCP files or playlists";
+		desc.patterns = filter;
+		desc.flags = juce::FileBrowserComponent::openMode |
+		             juce::FileBrowserComponent::canSelectFiles |
+		             juce::FileBrowserComponent::canSelectMultipleItems;
 		const juce::WeakReference<Editor> safeThis(this);
-		m_playlistChooser->launchAsync(flags, [safeThis](const juce::FileChooser& _chooser)
+		m_playlistChooser = genericUI::MessageBox::showFileDialog(desc, [safeThis](const std::vector<std::string>& _files)
 		{
 			auto* editor = safeThis.get();
 			if(!editor)
 				return;
-			std::vector<std::string> paths;
-			for(const auto& file : _chooser.getResults())
-				paths.push_back(file.getFullPathName().toStdString());
-			editor->addMidiFiles(paths);
+			editor->addMidiFiles(_files);
 			editor->m_playlistChooser.reset();
 		});
 	}
@@ -100,17 +98,19 @@ namespace emu88Player
 		                                      : juce::File::getSpecialLocation(juce::File::userMusicDirectory);
 		if(!folder.isDirectory())
 			folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
-		m_playlistFileChooser = std::make_unique<juce::FileChooser>(
-			"Load MIDI playlist", folder, playlist::fileFilter, true);
-		const auto flags = juce::FileBrowserComponent::openMode |
-		                   juce::FileBrowserComponent::canSelectFiles;
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Load MIDI playlist";
+		desc.initialPath = folder.getFullPathName().toStdString();
+		desc.patterns = playlist::fileFilter;
+		desc.flags = juce::FileBrowserComponent::openMode |
+		             juce::FileBrowserComponent::canSelectFiles;
 		const juce::WeakReference<Editor> safeThis(this);
-		m_playlistFileChooser->launchAsync(flags, [safeThis](const juce::FileChooser& _chooser)
+		m_playlistFileChooser = genericUI::MessageBox::showFileDialog(desc, [safeThis](const std::vector<std::string>& _files)
 		{
 			auto* editor = safeThis.get();
 			if(!editor)
 				return;
-			const auto file = _chooser.getResult();
+			const auto file = _files.empty() ? juce::File() : juce::File(_files.front());
 			if(file != juce::File())
 			{
 				std::vector<std::string> paths;
@@ -140,18 +140,20 @@ namespace emu88Player
 		                                      : juce::File::getSpecialLocation(juce::File::userMusicDirectory);
 		if(!folder.isDirectory())
 			folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
-		m_playlistFileChooser = std::make_unique<juce::FileChooser>(
-			"Save MIDI playlist", folder.getChildFile("playlist.m3u8"), playlist::fileFilter, true);
-		const auto flags = juce::FileBrowserComponent::saveMode |
-			                   juce::FileBrowserComponent::canSelectFiles |
-			                   juce::FileBrowserComponent::warnAboutOverwriting;
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Save MIDI playlist";
+		desc.initialPath = folder.getChildFile("playlist.m3u8").getFullPathName().toStdString();
+		desc.patterns = playlist::fileFilter;
+		desc.flags = juce::FileBrowserComponent::saveMode |
+		             juce::FileBrowserComponent::canSelectFiles |
+		             juce::FileBrowserComponent::warnAboutOverwriting;
 		const juce::WeakReference<Editor> safeThis(this);
-		m_playlistFileChooser->launchAsync(flags, [safeThis](const juce::FileChooser& _chooser)
+		m_playlistFileChooser = genericUI::MessageBox::showFileDialog(desc, [safeThis](const std::vector<std::string>& _files)
 		{
 			auto* editor = safeThis.get();
 			if(!editor)
 				return;
-			auto file = _chooser.getResult();
+			auto file = _files.empty() ? juce::File() : juce::File(_files.front());
 			if(file != juce::File())
 			{
 				if(!file.hasFileExtension("m3u") && !file.hasFileExtension("m3u8"))
@@ -303,16 +305,18 @@ namespace emu88Player
 		if(!folder.isDirectory())
 			folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
 
-		m_recordingChooser = std::make_unique<juce::FileChooser>(
-			"Save recording", folder.getChildFile(_recording.getFileName()), "*.wav", true);
-		const auto flags = juce::FileBrowserComponent::saveMode |
-		                   juce::FileBrowserComponent::canSelectFiles |
-		                   juce::FileBrowserComponent::warnAboutOverwriting;
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Save recording";
+		desc.initialPath = folder.getChildFile(_recording.getFileName()).getFullPathName().toStdString();
+		desc.patterns = "*.wav";
+		desc.flags = juce::FileBrowserComponent::saveMode |
+		             juce::FileBrowserComponent::canSelectFiles |
+		             juce::FileBrowserComponent::warnAboutOverwriting;
 		const juce::WeakReference<Editor> safeThis(this);
-		m_recordingChooser->launchAsync(flags, [safeThis, _recording](const juce::FileChooser& _chooser)
+		m_recordingChooser = genericUI::MessageBox::showFileDialog(desc, [safeThis, _recording](const std::vector<std::string>& _files)
 		{
 			auto* editor = safeThis.get();
-			auto target = _chooser.getResult();
+			auto target = _files.empty() ? juce::File() : juce::File(_files.front());
 
 			if(target == juce::File())
 			{

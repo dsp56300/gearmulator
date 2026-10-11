@@ -202,6 +202,32 @@ namespace
         return data;
     }
 
+    void smfRolandPartNames()
+    {
+        const auto track = [](const std::string& name, const uint8_t note)
+        {
+            std::vector<uint8_t> body = {0x00, 0xff, 0x03, static_cast<uint8_t>(name.size())};
+            body.insert(body.end(), name.begin(), name.end());
+            const std::vector<uint8_t> events = {0x00, 0x90, note, 100, 0x60, 0x80, note, 0,
+                                                 0x00, 0xff, 0x2f, 0x00};
+            body.insert(body.end(), events.begin(), events.end());
+            return body;
+        };
+
+        std::vector<synthLib::midi::Event> decoded;
+        std::string error;
+        CHECK(synthLib::midi::readSmf(smfFixture({{track("A01-Piccolo", 60)}, {track("B03-EnglishHr", 62)}}),
+                                      decoded, error));
+        CHECK_EQ(decoded.size(), 4u);
+        if (decoded.size() == 4)
+        {
+            CHECK_EQ(decoded[0].port, 0);
+            CHECK_EQ(decoded[1].port, 1);
+            CHECK_EQ(decoded[2].port, 0);
+            CHECK_EQ(decoded[3].port, 1);
+        }
+    }
+
     // A meta or SysEx header that the file, or its track chunk, ends in the middle of. The reader
     // used to index the body regardless of how much of it was there: the truncated ones read past
     // the buffer, and a body starting past the chunk end made [body, end) run backwards, which
@@ -459,6 +485,7 @@ void checkMidiFiles()
 {
     Fixtures files;
     rcpPlaylist(files);
+    smfRolandPartNames();
     smfTruncatedHeaders();
     rcpLoops();
     karPlayback(files);

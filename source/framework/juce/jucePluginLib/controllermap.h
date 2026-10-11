@@ -1,6 +1,8 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -37,5 +39,32 @@ namespace pluginLib
 
 	private:
 		std::unordered_map<MessageType, TwoWayMap> m_mapsPerMessageType;
+	};
+
+	// Follows the NRPN that a channel selects with CC 99/98 and reports the data entries for it, CC 6 (MSB) and
+	// CC 38 (LSB). Selecting an RPN (CC 101/100) or the null NRPN 127/127 ends it
+	class NrpnDecoder
+	{
+	public:
+		struct Entry
+		{
+			uint8_t nrpnMsb;
+			uint8_t nrpnLsb;
+			uint8_t msb;
+			std::optional<uint8_t> lsb;	// set for a CC 38, it refines the MSB of the CC 6 before it
+		};
+
+		std::optional<Entry> process(const synthLib::SMidiEvent& _ev);
+
+	private:
+		struct Channel
+		{
+			uint8_t nrpnMsb = 0x7f;
+			uint8_t nrpnLsb = 0x7f;
+			bool selected = false;
+			uint8_t dataMsb = 0;
+		};
+
+		std::array<Channel, 16> m_channels;
 	};
 }

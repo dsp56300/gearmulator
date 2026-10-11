@@ -34,6 +34,7 @@ namespace virusLib
 		dsp56k::Memory& getMemory() const {return *m_memory; }
 
 		void startDSPThread(bool _createDebugger);
+		void stopDSPThread();
 
 		virtual void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples, uint32_t _latency);
 		virtual void processAudio(const synthLib::TAudioInputsInt& _inputs, const synthLib::TAudioOutputsInt& _outputs, size_t _samples, uint32_t _latency);

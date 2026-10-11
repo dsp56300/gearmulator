@@ -85,7 +85,7 @@ namespace synthLib
 		TAudioOutputs outputs(_outputs);
 
 		for(size_t i=0; i<inputs.size(); ++i)
-			inputs[i] = _inputs[i] ? _inputs[i] : getDummyBuffer(_count);
+			inputs[i] = _inputs[i] ? _inputs[i] : getSilence(_count);
 
 		for(size_t i=0; i<outputs.size(); ++i)
 			outputs[i] = _outputs[i] ? _outputs[i] : getDummyBuffer(_count);
@@ -132,9 +132,6 @@ namespace synthLib
 		});
 
 		m_midiIn.clear();
-
-		// The resampler grows its latency while it prewarms, which happens right here
-		updateLatencies();
 	}
 
 	void Plugin::getMidiOut(std::vector<SMidiEvent>& _midiOut)
@@ -178,7 +175,6 @@ namespace synthLib
 		updateDeviceLatency();
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type)
 	{
 		// Hosts save and load on their own thread, usually while audio is running. Without the lock, the device's state
@@ -223,7 +219,6 @@ namespace synthLib
 
 		return m_device->setState(state, stateType);
 	}
-#endif
 	void Plugin::insertMidiEvent(const SMidiEvent& _ev)
 	{
 		// Find the slot before inserting: stampTransportGeneration() only writes
@@ -277,6 +272,14 @@ namespace synthLib
 			m_dummyBuffer.resize(_minimumSize);
 
 		return m_dummyBuffer.data();
+	}
+
+	const float* Plugin::getSilence(const size_t _minimumSize)
+	{
+		if(m_silence.size() < _minimumSize)
+			m_silence.resize(_minimumSize, 0.0f);
+
+		return m_silence.data();
 	}
 
 	bool Plugin::applyPendingDeviceSamplerate()

@@ -3,6 +3,12 @@
 #include "networkLib/exception.h"
 #include "networkLib/logging.h"
 
+#ifdef _WIN32
+#include <process.h>
+#else
+#include <unistd.h>
+#endif
+
 namespace mcpServer
 {
 	McpServer::McpServer(const int _port) : m_port(_port)
@@ -108,6 +114,12 @@ namespace mcpServer
 			body.set("server", JsonValue::fromString(m_serverName));
 			body.set("version", JsonValue::fromString(m_serverVersion));
 			body.set("protocol", JsonValue::fromString(g_mcpProtocolVersion));
+			// lets a client check that the process listening here is the one its discovery entry names
+#ifdef _WIN32
+			body.set("pid", JsonValue::fromInt(_getpid()));
+#else
+			body.set("pid", JsonValue::fromInt(static_cast<int>(getpid())));
+#endif
 			response.setJsonBody(body.toJsonString());
 			return response;
 		}

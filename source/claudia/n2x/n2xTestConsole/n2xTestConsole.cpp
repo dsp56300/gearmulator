@@ -2,7 +2,7 @@
 
 #include "n2xLib/n2xhardware.h"
 
-#include "synthLib/wavWriter.h"
+#include "synthLib/consoleTools.h"
 
 static constexpr bool g_factoryDemo = true;
 
@@ -27,10 +27,9 @@ int main()
 
 	constexpr uint32_t blockSize = 64;
 
-	std::vector<dsp56k::TWord> stereoOutput;
-	stereoOutput.resize(blockSize<<1);
+	std::vector<dsp56k::TWord> left(blockSize), right(blockSize);
 
-	synthLib::AsyncWriter writer("n2xEmu_out.wav", n2x::g_samplerate, false);
+	synthLib::StereoWavSink wav("n2xEmu_out.wav", n2x::g_samplerate);
 
 	uint32_t totalSamples = 0;
 
@@ -65,13 +64,10 @@ int main()
 
 		for(size_t i=0; i<blockSize; ++i)
 		{
-			stereoOutput[(i<<1)  ] = outs[0][i] + outs[2][i];
-			stereoOutput[(i<<1)+1] = outs[1][i] + outs[3][i];
+			left[i] = outs[0][i] + outs[2][i];
+			right[i] = outs[1][i] + outs[3][i];
 		}
 
-		writer.append([&](std::vector<dsp56k::TWord>& _wavOut)
-		{
-			_wavOut.insert(_wavOut.end(), stereoOutput.begin(), stereoOutput.end());
-		});
+		wav.write(left.data(), right.data(), blockSize);
 	}
 }

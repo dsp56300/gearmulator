@@ -59,7 +59,7 @@ namespace jeLib
 
 		m_thread.reset(new rLib::BoardThread<Je8086>(*m_je8086, "JE8086"));
 
-		m_paramChangedListener.set(m_sysexRemote.evParamChanged, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
+		m_paramChangedListener.set(m_frontPanel.evParam, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
 		{
 			onParamChanged(_page, _index, _value);
 		});
@@ -118,6 +118,16 @@ namespace jeLib
 
 		for (auto& message : messages)
 		{
+			// up to 2.2.26 the master volume was F0 7D 05 <page:2> <index:2> <value:8> F7, the front panel Param frame
+			// has the same payload
+			if (message.size() == 16 && message[0] == 0xf0 && message[1] == 0x7d && message[2] == 0x05)
+			{
+				synthLib::SysexBuffer tagged(std::begin(synthLib::fp::g_header), std::end(synthLib::fp::g_header));
+				tagged.push_back(static_cast<uint8_t>(synthLib::fp::Type::Param));
+				tagged.insert(tagged.end(), message.begin() + 3, message.end());
+				message = std::move(tagged);
+			}
+
 			synthLib::SMidiEvent e(synthLib::MidiEventSource::Host);
 			e.sysex = std::move(message);
 
@@ -125,7 +135,7 @@ namespace jeLib
 			// is never processed, the state will be lost
 			m_state.receive(e.sysex);
 
-			m_sysexRemote.receive(e.sysex);
+			m_frontPanel.receive(e.sysex);
 			m_midiIn.emplace_back(e);
 		}
 
@@ -156,16 +166,6 @@ namespace jeLib
 		return 2;
 	}
 
-	bool Device::setDspClockPercent(uint32_t _percent)
-	{
-		return false;
-	}
-
-	uint32_t Device::getDspClockPercent() const
-	{
-		return 100;
-	}
-
 	uint64_t Device::getDspClockHz() const
 	{
 		return 88'000'000;
@@ -173,7 +173,9 @@ namespace jeLib
 
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
-		return static_cast<uint32_t>(getSamplerate() * 4.5f / 1000.0f); // 4.5 ms
+		// 4.5 ms, set while the Legacy resampler was the only one, minus its 0.5 ms that the plugin did not report then and
+		// reports on its own now (EMU-103)
+		return static_cast<uint32_t>(getSamplerate() * 4.0f / 1000.0f);
 	}
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
@@ -227,7 +229,7 @@ namespace jeLib
 	{
 		// the master volume is applied here, everything goes to the board too: it consumes the panel frames on the
 		// emulation thread, see Je8086::addMidiEvent
-		m_sysexRemote.receive(_ev.sysex);
+		m_frontPanel.receive(_ev.sysex);
 		m_midiIn.emplace_back(_ev);
 		m_state.receive(_ev);
 		return true;
@@ -243,9 +245,9 @@ namespace jeLib
 
 	void Device::createCustomParameterMessages(std::vector<synthLib::SMidiEvent>& _messages) const
 	{
-		SysexRemoteControl::sendSysexParameter(_messages, g_paramPageCustom, g_paramIndexMasterVolume, static_cast<int32_t>(m_masterVolume * 100.0f));
+		synthLib::fp::sendParam(_messages, g_paramPageCustom, g_paramIndexMasterVolume, static_cast<int32_t>(m_masterVolume * 100.0f));
 
 		for (size_t i=0; i<m_inputLevel.size(); ++i)
-			SysexRemoteControl::sendSysexParameter(_messages, g_paramPageCustom, static_cast<uint8_t>(g_paramIndexInputLevel + i), m_inputLevel[i]);
+			synthLib::fp::sendParam(_messages, g_paramPageCustom, static_cast<uint8_t>(g_paramIndexInputLevel + i), m_inputLevel[i]);
 	}
 }

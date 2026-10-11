@@ -8,10 +8,7 @@
 
 #include "juceRmlUi/rmlMenu.h"
 
-namespace juce
-{
-	class FileChooser;
-}
+#include "juceUiLib/messageBox.h"
 
 namespace Rml
 {
@@ -119,7 +116,7 @@ namespace xtJucePlugin
 		xt::TableId m_selectedTable;
 		xt::WaveId m_selectedWave;
 
-		std::unique_ptr<juce::FileChooser> m_fileChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_fileChooser;
 
 		baseLib::EventListener<juceRmlUi::RmlComponent*> m_onUpdate;
 	};

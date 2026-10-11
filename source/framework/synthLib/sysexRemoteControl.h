@@ -6,6 +6,8 @@
 
 namespace synthLib
 {
+	// Deprecated: emulator-only messages use the front panel format, see frontPanelSysex.h. Kept until the device
+	// branches that still derive from it have moved
 	class SysexRemoteControl
 	{
 	public:

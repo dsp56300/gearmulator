@@ -2,6 +2,9 @@
 
 #include "pluginProcessor.h"
 
+#include "focusedParameter.h"
+#include "midiPorts.h"
+
 #include "settings.h"
 #include "settingsDspAudio.h"
 #include "settingsDspBridge.h"
@@ -18,7 +21,6 @@
 
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/filetype.h"
-#include "jucePluginLib/tools.h"
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlEventListener.h"
@@ -41,6 +43,7 @@
 #include "patchmanager/savepatchdesc.h"
 #include "patchmanagerUiRml/patchmanagerDataModel.h"
 
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
@@ -78,10 +81,14 @@ namespace jucePluginEditorLib
 
 		m_overlays.reset();
 
+		m_midiPorts.reset();
+		m_focusedParameter.reset();
+
 		for (const auto& file : m_dragAndDropFiles)
 			file.deleteFile();
 
-		m_patchManager.reset();
+		if (auto* pm = getPatchManager())
+			pm->detachUi();
 		m_rmlPlugin.reset();
 		m_rmlComponent.reset();
 	}
@@ -119,8 +126,11 @@ namespace jucePluginEditorLib
 
 		if (auto* elem = doc->GetElementById("patchmanager"))
 		{
-			juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
-			setPatchManager(createPatchManager(elem));
+			if (auto* pm = getPatchManager())
+			{
+				juceRmlUi::RmlInterfaces::ScopedAccess sa(*m_rmlComponent);
+				pm->attachUi(*this, elem);
+			}
 		}
 
 		initRootScale(doc->GetAttribute("rootScale", 1.0f));
@@ -134,6 +144,9 @@ namespace jucePluginEditorLib
 					openMenu(_event);
 			}
 		});
+
+		m_focusedParameter.reset(new FocusedParameter(getProcessor().getController(), *this));
+		m_midiPorts.reset(new MidiPorts(*this, getProcessor()));
 
 #if _DEBUG
 		juceRmlUi::EventListener::Add(getRmlRootElement(), Rml::EventId::Keydown, [this](Rml::Event& _event)
@@ -157,6 +170,11 @@ namespace jucePluginEditorLib
 			}
 		});
 #endif
+	}
+
+	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _options)
+	{
+		_options.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
 	}
 
 	void Editor::initPluginDataModel(PluginDataModel& _model)
@@ -206,45 +224,41 @@ namespace jucePluginEditorLib
 	{
 		const auto path = m_processor.getConfig().getValue("load_path", "");
 
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Choose syx/midi banks to import",
-			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*.syx,*.mid,*.midi,*.vstpreset,*.fxb,*.cpr", true);
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Choose syx/midi banks to import";
+		desc.initialPath = (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory().getFullPathName() : path).toStdString();
+		desc.patterns = "*.syx,*.mid,*.midi,*.vstpreset,*.fxb,*.cpr";
+		desc.flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		const std::function onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		m_fileChooser = genericUI::MessageBox::showFileDialog(desc, [this, _callback](const std::vector<std::string>& _files)
 		{
-			if (_chooser.getResults().isEmpty())
+			if (_files.empty())
 				return;
 
-			const auto result = _chooser.getResult();
+			const juce::File result(_files.front());
 
 			m_processor.getConfig().setValue("load_path", result.getParentDirectory().getFullPathName());
 
 			_callback(result);
-		};
-		m_fileChooser->launchAsync(flags, onFileChosen);
+		});
 	}
 
 	void Editor::savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback)
 	{
-#if !SYNTHLIB_DEMO_MODE
 		const auto path = m_processor.getConfig().getValue("save_path", "");
 
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Save preset(s) as " + _fileType.type(),
-			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*." + _fileType.type(), true);
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Save preset(s) as " + _fileType.type();
+		desc.initialPath = (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory().getFullPathName() : path).toStdString();
+		desc.patterns = "*." + _fileType.type();
+		desc.flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		auto onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		m_fileChooser = genericUI::MessageBox::showFileDialog(desc, [this, _callback](const std::vector<std::string>& _files)
 		{
-			if (_chooser.getResults().isEmpty())
+			if (_files.empty())
 				return;
 
-			const auto result = _chooser.getResult();
+			const juce::File result(_files.front());
 			m_processor.getConfig().setValue("save_path", result.getParentDirectory().getFullPathName());
 
 			if (!result.existsAsFile())
@@ -260,14 +274,9 @@ namespace jucePluginEditorLib
 						_callback(result);
 				});
 			}
-		};
-		m_fileChooser->launchAsync(flags, onFileChosen);
-#else
-		showDemoRestrictionMessageBox();
-#endif
+		});
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	bool Editor::savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const synthLib::SysexBufferList& _presets)
 	{
 		if (_presets.empty())
@@ -294,7 +303,6 @@ namespace jucePluginEditorLib
 		fclose(hFile);
 		return true;
 	}
-#endif
 
 	std::string Editor::createValidFilename(pluginLib::FileType& _type, const juce::File& _file)
 	{
@@ -313,34 +321,20 @@ namespace jucePluginEditorLib
 		return file;
 	}
 
-	void Editor::showDemoRestrictionMessageBox() const
+	patchManager::PatchManager* Editor::getPatchManager() const
 	{
-		const auto &[title, msg] = getDemoRestrictionText();
-		genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, title, msg);
-	}
-
-	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
-	{
-		m_patchManager.reset(_patchManager);
-
-		if(_patchManager && !m_patchManagerConfig.empty())
-			m_patchManager->setPerInstanceConfig(m_patchManagerConfig);
+		return m_processor.getPatchManager();
 	}
 
 	void Editor::setPerInstanceConfig(const std::vector<uint8_t>& _data)
 	{
 		{
-			// test if its an old version that didn't use chunks yet
+			// an old version that didn't use chunks yet only carried the patch manager state, the processor took that
 			pluginLib::PluginStream oldStream(_data);
 			const auto version = oldStream.read<uint32_t>();
 
 			if(version == 1)
-			{
-				m_patchManagerConfig = _data;
-				if(m_patchManager)
-					m_patchManager->setPerInstanceConfig(_data);
 				return;
-			}
 		}
 
 		baseLib::BinaryStream s(_data);
@@ -351,12 +345,12 @@ namespace jucePluginEditorLib
 
 	void Editor::loadChunkData(baseLib::ChunkReader& _cr)
 	{
-		_cr.add("pmDt", 2, [this](baseLib::BinaryStream& _s, uint32_t/* _version*/)
+		_cr.add("wnSz", 1, [this](baseLib::BinaryStream& _s, uint32_t/* _version*/)
 		{
-			m_patchManagerConfig.clear();
-			_s.read(m_patchManagerConfig);
-			if(m_patchManager)
-				m_patchManager->setPerInstanceConfig(m_patchManagerConfig);
+			const auto w = _s.read<int32_t>();
+			const auto h = _s.read<int32_t>();
+			if(auto* state = m_processor.getEditorState())
+				state->restoreFreeWindowSize({w, h});
 		});
 	}
 
@@ -369,13 +363,14 @@ namespace jucePluginEditorLib
 
 	void Editor::saveChunkData(baseLib::BinaryStream& _s)
 	{
-		if(m_patchManager)
-		{
-			m_patchManagerConfig.clear();
-			m_patchManager->getPerInstanceConfig(m_patchManagerConfig);
-		}
-		baseLib::ChunkWriter cw(_s, "pmDt", 2);
-		_s.write(m_patchManagerConfig);
+		// the window size of a skin in the free window mode
+		const auto* state = m_processor.getEditorState();
+		if(!state || !state->getFreeWindowSize().isValid())
+			return;
+
+		baseLib::ChunkWriter cw(_s, "wnSz", 1);
+		_s.write<int32_t>(state->getFreeWindowSize().width);
+		_s.write<int32_t>(state->getFreeWindowSize().height);
 	}
 
 	void Editor::setCurrentPart(const uint8_t _part)
@@ -389,8 +384,8 @@ namespace jucePluginEditorLib
 
 	void Editor::onCurrentPartChanged(const uint8_t _part)
 	{
-		if(m_patchManager)
-			m_patchManager->setCurrentPart(_part);
+		if(auto* pm = getPatchManager())
+			pm->setCurrentPart(_part);
 
 		// created with the RmlUi context, which a part change can precede
 		if(m_pluginDataModel)
@@ -406,7 +401,7 @@ namespace jucePluginEditorLib
 
 	void Editor::showDisclaimer() const
 	{
-		if(pluginLib::Tools::isHeadless())
+		if(genericUI::MessageBox::isHeadlessHost())
 			return;
 
 		if(!m_processor.getConfig().getBoolValue("disclaimerSeen", false))
@@ -430,15 +425,16 @@ namespace jucePluginEditorLib
 	void Editor::copyCurrentPatchToClipboard() const
 	{
 		// copy patch of current part to Clipboard
-		if(!m_patchManager)
+		auto* pm = getPatchManager();
+		if(!pm)
 			return;
 
-		const auto p = m_patchManager->requestPatchForPart(m_patchManager->getCurrentPart());
+		const auto p = pm->requestPatchForPart(pm->getCurrentPart());
 
 		if(!p)
 			return;
 
-		const auto patchAsString = m_patchManager->toString(p, pluginLib::FileType::Empty, pluginLib::ExportType::Clipboard);
+		const auto patchAsString = pm->toString(p, pluginLib::FileType::Empty, pluginLib::ExportType::Clipboard);
 
 		if(!patchAsString.empty())
 			juce::SystemClipboard::copyTextToClipboard(patchAsString);
@@ -446,9 +442,10 @@ namespace jucePluginEditorLib
 
 	bool Editor::replaceCurrentPatchFromClipboard() const
 	{
-		if(!m_patchManager)
+		auto* pm = getPatchManager();
+		if(!pm)
 			return false;
-		return m_patchManager->activatePatchFromClipboard();
+		return pm->activatePatchFromClipboard();
 	}
 
 	void Editor::openMenu(Rml::Event& _event)
@@ -608,7 +605,7 @@ namespace jucePluginEditorLib
 							if(isLinked)
 								links.unlinkRegion(regionId, currentPart, p);
 							else if(links.isRegionLinked(regionId, p, currentPart))
-								juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
+								genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
 							else
 								links.linkRegion(regionId, currentPart, p, true);
 						});
@@ -645,7 +642,7 @@ namespace jucePluginEditorLib
 						if(isLinked)
 							links.remove(sourceParam, destParam);
 						else if(!links.add(sourceParam, destParam, true))
-							juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
+							genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Parameter Link", "Cannot create link: a link in the opposite direction already exists.\nRemove the existing link first.");
 					});
 				}
 
@@ -866,24 +863,34 @@ namespace jucePluginEditorLib
 
 		auto* doc = comp->getDocument();
 
+		// Ctrl+C and Ctrl+V copy the current patch and replace it. On the root of the context, behind every document, so
+		// that what has the focus or is under the mouse takes them first: a text field, a view that copies its own items
+		auto* root = comp->getContext()->GetRootElement();
+		juceRmlUi::EventListener::Add(root, Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
+				return;
+			const auto* target = _event.GetTargetElement();
+			if (target && (target->GetTagName() == "input" || target->GetTagName() == "textarea"))
+				return;
+
+			switch (juceRmlUi::helper::getKeyIdentifier(_event))
+			{
+			case Rml::Input::KI_C:
+				copyCurrentPatchToClipboard();
+				_event.StopPropagation();
+				break;
+			case Rml::Input::KI_V:
+				replaceCurrentPatchFromClipboard();
+				_event.StopPropagation();
+				break;
+			default:;
+			}
+		});
+
 		juceRmlUi::EventListener::Add(doc, Rml::EventId::Keydown, [this](Rml::Event& _event)
 		{
-			if (juceRmlUi::helper::getKeyModCommand(_event))
-			{
-				switch (juceRmlUi::helper::getKeyIdentifier(_event))
-				{
-				case Rml::Input::KI_C:
-					copyCurrentPatchToClipboard();
-					_event.StopPropagation();
-					break;
-				case Rml::Input::KI_V:
-					replaceCurrentPatchFromClipboard();
-					_event.StopPropagation();
-					break;
-				default:;
-				}
-			}
-			else
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
 			{
 				switch (juceRmlUi::helper::getKeyIdentifier(_event))
 				{

@@ -8,7 +8,6 @@
 
 #include "dsp56kBase/logging.h"
 
-#include "xtFrontPanel.h"
 #include "xtWaveEditor.h"
 
 namespace
@@ -29,10 +28,6 @@ namespace
 	    "multidump",
 	    "globaldump",
 	    "modedump",
-	    "emuRequestLcd",
-	    "emuRequestLeds",
-	    "emuSendButton",
-	    "emuSendRotary",
 	    "requestWave",
 	    "waveDump",
 		"requestTable",
@@ -65,9 +60,6 @@ namespace xtJucePlugin
 	Controller::Controller(AudioPluginAudioProcessor& p, const unsigned char _deviceId) : pluginLib::Controller(p, "parameterDescriptions_xt.json"), m_deviceId(_deviceId)
 	{
 	    registerParams(p);
-
-		sendSysEx(RequestGlobal);
-		sendSysEx(RequestMode);
 
 		onPlayModeChanged.addListener([this](bool multiMode)
 		{
@@ -137,23 +129,35 @@ namespace xtJucePlugin
 			}
 		}
 
-		data[wLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode);
-		data[wLib::IdxLocation] = isMultiMode() ? _part : 0;
-		data[wLib::IdxDeviceId] = m_deviceId;
+		synthLib::SysexBuffer dump;
 
-		const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
-
-		if (!p->updateChecksums(data))
+		if (!createSingleEditBufferDump(dump, data, _part, isMultiMode()))
 			return false;
 
-		pluginLib::Controller::sendSysEx(data);
+		pluginLib::Controller::sendSysEx(dump);
 
+		onSingleSent(_part);
+
+		return true;
+	}
+
+	bool Controller::createSingleEditBufferDump(synthLib::SysexBuffer& _result, const synthLib::SysexBuffer& _single, const uint8_t _part, const bool _multiMode) const
+	{
+		_result = _single;
+
+		_result[wLib::IdxBuffer] = static_cast<uint8_t>(_multiMode ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode);
+		_result[wLib::IdxLocation] = _multiMode ? _part : 0;
+		_result[wLib::IdxDeviceId] = m_deviceId;
+
+		return getMidiPacket(g_midiPacketNames[SingleDump])->updateChecksums(_result);
+	}
+
+	void Controller::onSingleSent(const uint8_t _part)
+	{
 		sendLockedParameters(_part);
 
 		if(!isBulkTransfer())
 			requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
-
-		return true;
 	}
 
 	void Controller::setBulkTransfer(const bool _bulk)
@@ -215,73 +219,17 @@ namespace xtJucePlugin
 
 	std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const
 	{
-	    std::string name;
-	    for(uint32_t i=0; i<16; ++i)
-	    {
-	        char paramName[16];
-	        (void)snprintf(paramName, sizeof(paramName), "Name%02u", i);
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        const auto it = _values.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
-	        if(it == _values.end())
-	            break;
-
-	        name += static_cast<char>(it->second);
-	    }
-	    return name;
+	    return getParamString("Name%02u", 16, _values);
 	}
 
 	std::string Controller::getSingleName(const uint8_t _part) const
 	{
-	    std::string name;
-	    for(uint32_t i=0; i<16; ++i)
-	    {
-	        char paramName[16];
-	        (void)snprintf(paramName, sizeof(paramName), "Name%02u", i);
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-			const auto* p = getParameter(idx, _part);
-	        if(!p)
-	            break;
-
-	        name += static_cast<char>(p->getUnnormalizedValue());
-	    }
-	    return name;
+	    return getParamString("Name%02u", 16, _part);
 	}
 
 	std::string Controller::getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
 	{
-	    return getString(_values, "Name", 16);
-	}
-
-	std::string Controller::getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix,	const size_t _len) const
-	{
-	    std::string name;
-	    for(uint32_t i=0; i<_len; ++i)
-	    {
-	        char paramName[64];
-	        (void)snprintf(paramName, sizeof(paramName), "%s%02u", _prefix.c_str(), i);
-
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        const auto it = _values[idx];
-	        if(!it)
-	            break;
-
-	        name += static_cast<char>(*it);
-	    }
-	    return name;
-	}
-
-	bool Controller::setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const
-	{
-	    return setString(_values, "Name", 16, _value);
+	    return getParamString("Name%02u", 16, _values);
 	}
 
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)
@@ -337,7 +285,6 @@ namespace xtJucePlugin
 		patch.name = getSingleName(_params);
 
 		const auto bank = _data.at(pluginLib::MidiDataType::Bank);
-	//	const auto prog = _data.at(pluginLib::MidiDataType::Program);
 
 		if(bank == static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer))
 		{
@@ -361,23 +308,6 @@ namespace xtJucePlugin
 
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source)
 	{
-	    if(_msg.size() >= 5)
-	    {
-		    switch (const auto cmd = static_cast<xt::SysexCommand>(_msg[4]))
-	        {
-	        case xt::SysexCommand::EmuRotaries:
-	        case xt::SysexCommand::EmuButtons:
-	        case xt::SysexCommand::EmuLCD:
-	        case xt::SysexCommand::EmuLEDs:
-				// the device sends its panel frames as Internal, the same command bytes from anywhere else are dropped
-				if(m_frontPanel && _source == synthLib::MidiEventSource::Internal)
-					m_frontPanel->processSysex(_msg);
-	            return true;
-	        default:
-	            break;
-	        }
-	    }
-
 		LOG("Got sysex of size " << _msg.size());
 
 		std::string name;
@@ -404,6 +334,7 @@ namespace xtJucePlugin
 		    const auto lastPlayMode = isMultiMode();
 		    memcpy(m_modeData.data(), &_msg[xt::IdxModeParamFirst], sizeof(m_modeData));
 		    const auto newPlayMode = isMultiMode();
+		    m_multiMode = newPlayMode;
 
 		    if(lastPlayMode != newPlayMode)
 			    onPlayModeChanged(newPlayMode);
@@ -501,6 +432,7 @@ namespace xtJucePlugin
 			return;
 
 		m_modeData[0] = _multiMode ? 1 : 0;
+		m_multiMode = _multiMode;
 
 		sendModeDump();
 
@@ -554,27 +486,6 @@ namespace xtJucePlugin
 		return parseMidiPacket(SingleDump, _data, _paramValues, _sysex);
 	}
 
-	bool Controller::setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const
-	{
-	    for(uint32_t i=0; i<_len && i <_value.size(); ++i)
-	    {
-	        char paramName[64];
-	        (void)snprintf(paramName, sizeof(paramName), "%s%02u", _prefix.c_str(), i);
-
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        _values[idx] = static_cast<uint8_t>(_value[i]);
-	    }
-	    return true;
-	}
-
-	void Controller::setFrontPanel(xtJucePlugin::FrontPanel* _frontPanel)
-	{
-		m_frontPanel = _frontPanel;
-	}
-
 	void Controller::setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor)
 	{
 		m_waveEditor = _waveEditor;
@@ -606,10 +517,7 @@ namespace xtJucePlugin
 			sendMidiEvent(synthLib::M_CONTROLCHANGE, synthLib::MC_BANKSELECTMSB, m_deviceId);
 	        sendMidiEvent(synthLib::M_CONTROLCHANGE, synthLib::MC_BANKSELECTLSB, static_cast<uint8_t>(xt::LocationH::SingleBankA) + bank);
 	        sendMidiEvent(synthLib::M_PROGRAMCHANGE, static_cast<uint8_t>(single), 0);
-	/*
-			sendGlobalParameterChange(xt::GlobalParameter::InstrumentABankNumber, static_cast<uint8_t>(bank));
-		    sendGlobalParameterChange(xt::GlobalParameter::InstrumentASingleNumber, static_cast<uint8_t>(single));
-	*/  }
+	    }
 	}
 
 	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin)
@@ -758,25 +666,12 @@ namespace xtJucePlugin
 
 	bool Controller::isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const
 	{
-		if(_derived.getDescription().page >= 100)
+		// multi, global, soft knob and controller parameters are not in the single dump, and a parameter
+		// missing there counts as derived. They are never derived
+		if(_derived.getDescription().page >= g_pageMulti)
 			return false;
 
-		const auto& packetName = g_midiPacketNames[SingleDump];
-		const auto* packet = getMidiPacket(packetName);
-
-		if (!packet)
-		{
-			LOG("Failed to find midi packet " << packetName);
-			return true;
-		}
-		
-		const auto* defA = packet->getDefinitionByParameterName(_derived.getDescription().name);
-		const auto* defB = packet->getDefinitionByParameterName(_base.getDescription().name);
-
-		if (!defA || !defB)
-			return true;
-
-		return defA->doMasksOverlap(*defB);
+		return isDerivedParameterInPacket(g_midiPacketNames[SingleDump], _derived, _base);
 	}
 
 	void Controller::requestAllPatches() const

@@ -17,18 +17,16 @@
 
 namespace jeJucePlugin
 {
-	PatchManager::PatchManager(Editor& _editor, Rml::Element* _rootElement)
-	: jucePluginEditorLib::patchManager::PatchManager(_editor, _rootElement, DefaultGroupTypes)
-	, m_editor(_editor)
-	, m_processor(_editor.getProcessor())
-	, m_controller(_editor.getJeController())
+	PatchManager::PatchManager(AudioPluginAudioProcessor& _processor)
+	: jucePluginEditorLib::patchManager::PatchManager(_processor, DefaultGroupTypes)
+	, m_controller(static_cast<Controller&>(_processor.getController()))
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 
 		PatchManager::startLoaderThread();
 
-		const auto& roms = _editor.getJeProcessor().getRoms();
+		const auto& roms = _processor.getRoms();
 
 		// add each device type only once
 		std::set<jeLib::DeviceType> knownDeviceTypes;
@@ -86,11 +84,6 @@ namespace jeJucePlugin
 				addRomBank("Rack - Performance P4:11 - P4:88");
 			}
 		}
-	}
-
-	PatchManager::~PatchManager()
-	{
-		stopLoaderThread();
 	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)
@@ -228,16 +221,44 @@ namespace jeJucePlugin
 		return result;
 	}
 
-	uint32_t PatchManager::getCurrentPart() const
-	{
-		return m_controller.getCurrentPart();
-	}
-
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
 	{
 		if (!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), _part))
 			return false;
 
+		onPatchSent(_patch, _part);
+
+		return true;
+	}
+
+	bool PatchManager::createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr&, const pluginLib::patchDB::Data& _data, const uint32_t _part) const
+	{
+		if (_part >= m_controller.getPartCount())
+			return false;
+
+		synthLib::SysexBufferList messages;
+
+		if (!m_controller.createSingleMessages(messages, _data, _part))
+			return false;
+
+		for (auto& message : messages)
+		{
+			synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
+			ev.sysex = std::move(message);
+			_events.push_back(std::move(ev));
+		}
+
+		return true;
+	}
+
+	void PatchManager::onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
+	{
+		m_controller.sendTempPerformanceRequest();
+		onPatchSent(_patch, _part);
+	}
+
+	void PatchManager::onPatchSent(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
+	{
 		m_controller.sendLockedParameters(static_cast<uint8_t>(_part));
 
 		const auto area = jeLib::State::getAddressArea(_patch->sysex);
@@ -256,7 +277,9 @@ namespace jeJucePlugin
 		{
 			// loading a single patch while in patch display mode: switch to single key mode
 			// to prevent the other layer from remaining active ("hanging" presets)
-			if (auto* lcd = m_editor.getLcd())
+			const auto* editor = dynamic_cast<Editor*>(getEditor());
+
+			if (auto* lcd = editor ? editor->getLcd() : nullptr)
 			{
 				if (lcd->isPatchMode())
 				{
@@ -266,8 +289,6 @@ namespace jeJucePlugin
 				}
 			}
 		}
-
-		return true;
 	}
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename)

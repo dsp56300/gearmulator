@@ -1,8 +1,7 @@
 #pragma once
 
-#include "jucePluginEditorLib/midiPorts.h"
+#include "jucePluginEditorLib/firmwareSelector.h"
 #include "jucePluginEditorLib/pluginEditor.h"
-#include "jucePluginEditorLib/focusedParameter.h"
 
 #include "baseLib/event.h"
 
@@ -18,11 +17,6 @@ namespace juceRmlUi
 namespace virusLib
 {
 	class ROMFile;
-}
-
-namespace jucePluginEditorLib
-{
-	class FocusedParameter;
 }
 
 namespace pluginLib
@@ -59,14 +53,11 @@ namespace genericVirusUI
 		virus::Controller& getController() const;
 		virus::VirusProcessor& getProcessor() const { return m_processor; }
 
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
-
 		const auto& getLeds() const { return m_leds; }
 
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 		void initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model) override;
 
-		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
 
 		std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root) override;
 
@@ -92,7 +83,6 @@ namespace genericVirusUI
 
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Leds> m_leds;
-		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 
 		Rml::Element* m_presetName = nullptr;
 //		PartMouseListener* m_presetNameMouseListener  = nullptr;
@@ -101,9 +91,7 @@ namespace genericVirusUI
 		// the current part's Single name (default) and the Multi name.
 		bool m_showMultiName = false;
 
-		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
-
-		juceRmlUi::ElemComboBox* m_romSelector = nullptr;
+		std::unique_ptr<jucePluginEditorLib::FirmwareSelector> m_romSelector;
 
 		juceRmlUi::ElemButton* m_playModeSingle = nullptr;
 		juceRmlUi::ElemButton* m_playModeMulti = nullptr;
@@ -113,6 +101,7 @@ namespace genericVirusUI
 
 		std::unique_ptr<ArpUserPattern> m_arpUserPattern;
 
-		baseLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
+		baseLib::EventListener<uint32_t> m_romChangedListener;
+		baseLib::EventListener<uint8_t> m_playModeSetListener;
 	};
 }

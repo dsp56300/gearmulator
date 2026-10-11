@@ -4,7 +4,6 @@
 
 namespace jucePluginEditorLib
 {
-	class FocusedParameter;
 	class Processor;
 }
 
@@ -28,11 +27,7 @@ namespace mqJucePlugin
 
 		void create() override;
 
-		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
-
 		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
-
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 		Controller& getMqController() const { return m_controller; }
 
@@ -59,7 +54,5 @@ namespace mqJucePlugin
 		Rml::Element* m_btSave = nullptr;
 		Rml::Element* m_btPresetPrev = nullptr;
 		Rml::Element* m_btPresetNext = nullptr;
-
-		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 	};
 }

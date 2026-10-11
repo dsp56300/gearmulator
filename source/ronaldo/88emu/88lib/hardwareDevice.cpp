@@ -365,11 +365,11 @@ namespace emu88Lib
 		else if(m_sc8820)
 			m_sc8820->addMidiEvent(_event, _event.port);
 		else if(m_cm32p)
-			m_cm32p->addMidiEvent(_event, _event.port);
+			m_cm32p->addMidiEvent(_event);
 		else if(m_la)
-			m_la->addMidiEvent(_event, _event.port);
+			m_la->addMidiEvent(_event);
 		else if(m_cm64)
-			m_cm64->addMidiEvent(_event, _event.port);
+			m_cm64->addMidiEvent(_event);
 		else if(m_sc88)
 			m_sc88->addMidiEvent(_event, _event.port);
 		else if(m_sc55MidiIn)

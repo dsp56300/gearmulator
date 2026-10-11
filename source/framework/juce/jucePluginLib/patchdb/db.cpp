@@ -32,7 +32,7 @@ namespace pluginLib::patchDB
 
 	DB::~DB()
 	{
-		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor");
+		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor, a patch manager calls it in shutdown()");
 
 		// we can only save the cache if the db is not doing anything in the background
 		const bool loading = !m_loader.empty();
@@ -308,7 +308,10 @@ namespace pluginLib::patchDB
 			_ds->midiBankNumber = _midiBankNumber;
 		}
 
-		m_dirty.dataSources = true;
+		{
+			std::scoped_lock lock(m_uiMutex);
+			m_dirty.dataSources = true;
+		}
 		runOnLoaderThread([this]{ saveJson(); });
 		return true;
 	}
@@ -320,7 +323,10 @@ namespace pluginLib::patchDB
 			_ds->midiBankNumber = g_invalidMidiBankNumber;
 		}
 
-		m_dirty.dataSources = true;
+		{
+			std::scoped_lock lock(m_uiMutex);
+			m_dirty.dataSources = true;
+		}
 		runOnLoaderThread([this]{ saveJson(); });
 		return true;
 	}
@@ -733,7 +739,7 @@ namespace pluginLib::patchDB
 		lock.unlock();
 
 		if(!changed.empty())
-			saveJson();
+			runOnLoaderThread([this]{ saveJson(); });
 
 		return true;
 	}

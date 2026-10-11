@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -9,6 +10,7 @@
 #include "jeLib/device.h"
 #include "jeLib/je8086.h"
 #include "jeLib/romloader.h"
+#include "synthLib/frontPanelSysex.h"
 #include "synthLib/wavWriter.h"
 #include "baseLib/filesystem.h"
 
@@ -201,13 +203,13 @@ int main(int _argc, char* _argv[])
 		bool demoRunning = false;
 		unsigned currentSong = 0, completedLoops = 0;
 
-		SysexRemoteControl sysexRemote;
+		synthLib::FrontPanelTransport frontPanel;
 
-		sysexRemote.evLcdDdDataChanged.addListener([&](const std::array<char, 40>& _lcdContent)
+		frontPanel.evLcdText.addListener([&](uint32_t, uint32_t, const std::vector<uint8_t>& _lcdContent)
 		{
 			char lcdString[41]{0};
 
-			for (size_t i=0; i<_lcdContent.size(); ++i)
+			for (size_t i=0; i<std::min<size_t>(_lcdContent.size(), 40); ++i)
 				lcdString[i] = _lcdContent[i] >= ' ' ? static_cast<char>(_lcdContent[i]) : ' ';
 
 			std::string s(lcdString);
@@ -267,7 +269,7 @@ int main(int _argc, char* _argv[])
 			device.process(inputs, outputs, blocksize, midiIn, midiOut);
 
 			for (const auto& e : midiOut)
-				sysexRemote.receive(e);
+				frontPanel.receive(e.sysex);
 			midiOut.clear();
 			startupSamples += blocksize;
 			if (startupSamples > samplerate * 30)
@@ -291,7 +293,7 @@ int main(int _argc, char* _argv[])
 				for (unsigned n = 0; n < samplerate / 5; n += blocksize)
 				{
 					device.process(inputs, outputs, blocksize, midiIn, midiOut);
-					for (const auto& e : midiOut) sysexRemote.receive(e);
+					for (const auto& e : midiOut) frontPanel.receive(e.sysex);
 					midiOut.clear();
 				}
 			};
@@ -318,7 +320,7 @@ int main(int _argc, char* _argv[])
 			device.process(inputs, outputs, blocksize, midiIn, midiOut);
 
 			for (const auto& e : midiOut)
-				sysexRemote.receive(e);
+				frontPanel.receive(e.sysex);
 			midiOut.clear();
 
 			sampleCounter += blocksize;

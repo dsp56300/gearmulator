@@ -5,6 +5,7 @@
 #include "parameterlocking.h"
 #include "softknob.h"
 
+#include "synthLib/frontPanelSysex.h"
 #include "synthLib/midiTypes.h"
 
 #include <string>
@@ -46,6 +47,14 @@ namespace pluginLib
 
 		bool setParameters(const std::map<std::string, ParamValue>& _values, uint8_t _part, Parameter::Origin _changedBy) const;
 
+		// A text stored with one parameter per character, a patch name for example. _format names the parameter of each
+		// character ("Name%02u", "SingleName%u"). Reading stops at the first parameter that does not exist or has no value
+		std::string getParamString(const char* _format, uint32_t _length, const MidiPacket::ParamValues& _values) const;
+		std::string getParamString(const char* _format, uint32_t _length, const MidiPacket::AnyPartParamValues& _values) const;
+		std::string getParamString(const char* _format, uint32_t _length, uint8_t _part) const;
+		// writes _string to the parameters of _part, fills the rest of _length with _pad, without notifying the host
+		void setParamString(const char* _format, uint32_t _length, uint8_t _part, const std::string& _string, char _pad) const;
+
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 
 		bool createNamedParamValues(MidiPacket::NamedParamValues& _params, const std::string& _packetName, uint8_t _part) const;
@@ -66,6 +75,8 @@ namespace pluginLib
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		virtual bool setCurrentPart(uint8_t _part);
 		virtual uint8_t getPartCount() const { return 16; }
+		// whether a part takes a patch right now, dropped on its part button for example
+		virtual bool isPartEnabled(const uint8_t _part) const { return _part < getPartCount(); }
 
 		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
 		virtual bool parseControllerMessage(const synthLib::SMidiEvent&);
@@ -126,6 +137,12 @@ namespace pluginLib
 
 		Processor& getProcessor() const { return m_processor; }
 
+		// The device's front panel frames (synthLib::fp), decoded on the message thread. Only those the device sent
+		// (source Internal) are decoded, every other one is dropped
+		synthLib::FrontPanelTransport& getFrontPanel() { return m_frontPanel; }
+		// sends frames made by the synthLib::fp encoders to the device
+		void sendFrontPanel(std::vector<synthLib::SMidiEvent>&& _events) const;
+
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid, const Parameter::PartFormatter& _partFormatter);
 		void registerParams(juce::AudioProcessor& _processor, Parameter::PartFormatter _partFormatter = nullptr);
@@ -144,6 +161,9 @@ namespace pluginLib
 		void onPresetParametersChanged() const;
 
 		virtual bool isDerivedParameter(Parameter& _derived, Parameter& _base) const { return true; }
+		// for an isDerivedParameter() of parameters that share bytes of a dump: derived if their masks in _packetName
+		// overlap. True if the packet or one of the two definitions is missing
+		bool isDerivedParameterInPacket(const std::string& _packetName, const Parameter& _derived, const Parameter& _base) const;
 
         struct ParamIndex
         {
@@ -181,7 +201,11 @@ namespace pluginLib
 		std::mutex m_midiMessagesLock;
         std::vector<synthLib::SMidiEvent> m_midiMessages;
 
+		NrpnDecoder m_nrpnDecoder;	// for the NRPN entries of the controller map, see parseControllerMessage
+
 		std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
+
+		synthLib::FrontPanelTransport m_frontPanel;
 
 	protected:
 		// tries to find synth param in both internal and host
@@ -190,7 +214,7 @@ namespace pluginLib
 
     	std::map<ParamIndex, ParameterList> m_synthInternalParams;
 		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
-		std::array<ParameterList, 16> m_paramsByParamType;
+		std::vector<ParameterList> m_paramsByParamType;	// one per part
 		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
 		ParameterLocking m_locking;
 		ParameterLinks m_parameterLinks;

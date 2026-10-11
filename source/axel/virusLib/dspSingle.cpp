@@ -54,7 +54,7 @@ namespace virusLib
 
 	DspSingle::~DspSingle()
 	{
-		m_dspThread.reset();
+		stopDSPThread();
 
 		if(m_dsp)
 		{
@@ -64,6 +64,11 @@ namespace virusLib
 			m_dsp = nullptr;
 			m_memory = nullptr;
 		}
+	}
+
+	void DspSingle::stopDSPThread()
+	{
+		m_dspThread.reset();
 	}
 
 	void DspSingle::startDSPThread(const bool _createDebugger)

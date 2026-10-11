@@ -124,7 +124,7 @@ namespace
 		bool loadRomData(DataList&, uint32_t, uint32_t) override { return false; }
 		PatchPtr initializePatch(Data&&, const std::string&) override { return {}; }
 		Data applyModifications(const PatchPtr&, const pluginLib::FileType&, pluginLib::ExportType) const override { return {}; }
-		void processDirty(const Dirty&) const override {}
+		void processDirty(const Dirty&) override {}
 	};
 
 	void testFolderFindsSubfolders()
@@ -210,7 +210,7 @@ namespace
 		}
 
 		Data applyModifications(const PatchPtr&, const pluginLib::FileType&, pluginLib::ExportType) const override { return {}; }
-		void processDirty(const Dirty&) const override {}
+		void processDirty(const Dirty&) override {}
 
 	private:
 		const DataList m_presets;

@@ -76,6 +76,8 @@ namespace pluginLib
 		// drawing a keyboard wants to see what was played either way
 		m_midiNotifier.onMidiEvent(_ev);
 
+		auto toDevice = m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device);
+
 		// Process through MIDI Learn translator first
 		if (_ev.source != synthLib::MidiEventSource::Device)
 		{
@@ -85,11 +87,21 @@ namespace pluginLib
 				return;
 			}
 
-			if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+			if (toDevice)
 			{
-				if (m_programChangeRouter.processMidiEvent(_ev))
+				std::vector<synthLib::SMidiEvent> replacement;
+
+				switch (m_programChangeRouter.processMidiEvent(_ev, replacement))
 				{
-					// Program change was handled by patch manager
+				case ProgramChangeRouter::Result::Forward:
+					break;
+				case ProgramChangeRouter::Result::Held:
+					toDevice = false;
+					break;
+				case ProgramChangeRouter::Result::Consumed:
+					// a program change that loads a patch from the patch manager
+					for (const auto& ev : replacement)
+						getPlugin().addMidiEvent(ev);
 					return;
 				}
 			}
@@ -97,7 +109,7 @@ namespace pluginLib
 
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Editor))
 			getController().enqueueMidiMessages({_ev});
-		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+		if (toDevice)
 			getPlugin().addMidiEvent(_ev);
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Physical))
 			m_midiPorts.send(_ev);
@@ -166,6 +178,10 @@ namespace pluginLib
 				// (setStateInformation) will override this if present.
 				loadDefaultMidiLearnPreset();
 			}
+
+			// the controller reads the state of the device once, here instead of in each product's constructor
+			if (m_controller)
+				m_controller->onStateLoaded();
 		}
 
 	    return *m_controller;
@@ -195,7 +211,7 @@ namespace pluginLib
 
 			// Juce loads the LV2/VST3 versions of the plugin as part of the build process, if we open a message box in this case, the build process gets stuck
 			const auto host = juce::PluginHostType::getHostPath();
-			if(!Tools::isHeadless())
+			if(!genericUI::MessageBox::isHeadlessHost())
 			{
 				std::string msg = e.what();
 
@@ -267,6 +283,23 @@ namespace pluginLib
 		return createRemoteDevice(params);
 	}
 
+	synthLib::Device* Processor::createDevice()
+	{
+		// a product that has a better text for a missing ROM throws it from getRemoteDeviceParams
+		synthLib::DeviceCreateParams params;
+		getRemoteDeviceParams(params);
+		params.homePath = getDataFolder();
+
+		auto* device = newDevice(params);
+
+		if(!device->isValid())
+		{
+			delete device;
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, getProperties().name + ": no valid firmware ROM found");
+		}
+		return device;
+	}
+
 	synthLib::Device* Processor::createDevice(const DeviceType _type)
 	{
 		switch (_type)
@@ -335,11 +368,13 @@ namespace pluginLib
 
 		const auto result = _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
 
-		// Compare with the device, not with the setting before the load: REMO creates a remote device while reading,
-		// with the setting read so far. Without a device yet, the one created later gets the setting anyway
 		if (!result)
 			m_voiceExpansion = voiceExpansion;
-		else if (m_plugin && m_voiceExpansion != m_deviceVoiceExpansion)
+
+		// Compare with the device, not with the setting before the load: REMO creates a remote device while reading,
+		// with the setting read so far, also when a later chunk fails. Without a device yet, the one created later gets
+		// the setting anyway
+		if (m_plugin && m_voiceExpansion != m_deviceVoiceExpansion)
 			rebootDevice();
 
 		return result;
@@ -352,6 +387,14 @@ namespace pluginLib
 		{
 			baseLib::ChunkWriter cw(s, "VEXP", 1);
 			s.write<uint8_t>(1);
+		}
+
+		// after VEXP, which only sets the flag, and before REMO: reading it creates the device of that firmware, which
+		// gets the voice expansion right away and is the one REMO and the device state go to
+		if (m_firmwareIndex < m_firmwareNames.size())
+		{
+			baseLib::ChunkWriter cw(s, m_firmwareChunk.id, m_firmwareChunk.version);
+			m_firmwareChunk.write(s, m_firmwareIndex);
 		}
 
 		// it is important that this is stored before other chunks to restore state to the remote properly
@@ -454,6 +497,16 @@ namespace pluginLib
 		{
 			m_voiceExpansion = _binaryStream.read<uint8_t>() != 0;
 		});
+
+		// a state that names an image that is not there keeps the running one
+		if (m_firmwareChunk.find)
+		{
+			_cr.add(m_firmwareChunk.id, m_firmwareChunk.version, [this](baseLib::BinaryStream& _binaryStream, const uint32_t _version)
+			{
+				if (const auto index = m_firmwareChunk.find(_binaryStream, _version))
+					selectFirmware(*index);
+			});
+		}
 
 		_cr.add("REMO", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
@@ -739,7 +792,6 @@ namespace pluginLib
 	    // You should use this method to store your parameters in the memory block.
 	    // You could do that either as raw data, or use the XML or ValueTree classes
 	    // as intermediaries to make it easy to save and load complex data.
-#if !SYNTHLIB_DEMO_MODE
 		PluginStream ss;
 		ss.write(g_saveMagic);
 		ss.write(g_saveVersion);
@@ -751,32 +803,25 @@ namespace pluginLib
 		ss.toVector(buf);
 
 		destData.append(buf.data(), buf.size());
-#endif
 	}
 
 	void Processor::setStateInformation (const void* _data, const int _sizeInBytes)
 	{
-#if !SYNTHLIB_DEMO_MODE
 		// You should use this method to restore your parameters from this memory block,
 	    // whose contents will have been created by the getStateInformation() call.
 		setState(_data, _sizeInBytes);
-#endif
 	}
 
 	void Processor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
 	{
-#if !SYNTHLIB_DEMO_MODE
 		std::vector<uint8_t> state;
 		getPlugin().getState(state, synthLib::StateTypeCurrentProgram);
 		destData.append(state.data(), state.size());
-#endif
 	}
 
 	void Processor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
 	{
-#if !SYNTHLIB_DEMO_MODE
 		setState(data, sizeInBytes);
-#endif
 	}
 		
 	const juce::String Processor::getName() const
@@ -833,6 +878,8 @@ namespace pluginLib
 
 		for (int channel = 0; channel < totalNumOutputChannels; ++channel)
 			outputs[channel] = buffer.getWritePointer(channel);
+
+		m_programChangeRouter.releaseStaleHold([this](const synthLib::SMidiEvent& _ev) { getPlugin().addMidiEvent(_ev); });
 
 		for(const auto metadata : midiMessages)
 		{
@@ -1176,7 +1223,6 @@ namespace pluginLib
 //		AudioProcessor::processBlockBypassed(_buffer, _midiMessages);
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	void Processor::setState(const void* _data, const size_t _sizeInBytes)
 	{
 		if(_sizeInBytes < 1)
@@ -1237,7 +1283,6 @@ namespace pluginLib
 		if (hasController())
 			getController().onStateLoaded();
 	}
-#endif
 
 	//==============================================================================
 
@@ -1310,7 +1355,8 @@ namespace pluginLib
 
 		juce::MessageManager::callAsync([this]
 		{
-			getController().onStateLoaded();
+			if (hasController())
+				getController().onStateLoaded();
 		});
 
 		return m_device.get();
@@ -1322,6 +1368,35 @@ namespace pluginLib
 			return;
 		m_voiceExpansion = _enabled;
 		rebootDevice();
+	}
+
+	void Processor::setFirmwareImages(std::vector<std::string> _names, FirmwareChunk _chunk)
+	{
+		m_firmwareNames = std::move(_names);
+		m_firmwareChunk = std::move(_chunk);
+		m_firmwareIndex = 0;
+		evFirmwareChanged.retain(m_firmwareIndex);
+	}
+
+	bool Processor::selectFirmware(const uint32_t _index)
+	{
+		if (_index >= m_firmwareNames.size())
+			return false;
+		if (_index == m_firmwareIndex)
+			return true;
+
+		const auto previous = m_firmwareIndex;
+		m_firmwareIndex = _index;
+
+		// without a device yet, the one created later runs this image
+		if (m_plugin && !rebootDevice())
+		{
+			m_firmwareIndex = previous;
+			return false;
+		}
+
+		evFirmwareChanged.retain(m_firmwareIndex);
+		return true;
 	}
 
 	bool Processor::rebootDevice()

@@ -6,12 +6,10 @@ set(SOURCES
 	jeAssign.cpp jeAssign.h
 	jeController.cpp jeController.h
 	jeEditor.cpp jeEditor.h
-	jeFocusedParameter.cpp jeFocusedParameter.h
 	jeLcd.cpp jeLcd.h
 	jePartButton.cpp jePartButton.h
 	jePartSelect.cpp jePartSelect.h
 	jePatchManager.cpp jePatchManager.h
-	jePluginEditorState.cpp jePluginEditorState.h
 	jePluginProcessor.cpp jePluginProcessor.h
 	jeTypes.h
 	parameterDescriptions_je.json
@@ -28,4 +26,4 @@ buildSkinHeader()
 
 juce_add_binary_data(jeJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_SKINS})
 
-createJucePluginWithFX(jeJucePlugin "JE8086" "Tjpv" "Tjpf" jeJucePlugin_BinaryData jeLib)
+createJucePluginWithFX(jeJucePlugin "JE8086" "Tjpv" "Tjpf" jeJucePlugin_BinaryData jeLib jeLib/device.h jeLib::Device)

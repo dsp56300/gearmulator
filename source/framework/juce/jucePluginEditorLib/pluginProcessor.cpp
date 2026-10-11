@@ -3,6 +3,8 @@
 #include "pluginEditorState.h"
 #include "pluginEditorWindow.h"
 
+#include "patchmanager/patchmanager.h"
+
 #include "baseLib/binarystream.h"
 
 #include "synthLib/os.h"
@@ -87,7 +89,25 @@ namespace jucePluginEditorLib
 
 		if (resamplerMode >= 0 && resamplerMode < static_cast<int>(synthLib::Resampler::Mode::Count))
 			setResamplerMode(static_cast<synthLib::Resampler::Mode>(resamplerMode));
+	}
 
+	juce::PropertiesFile::Options Processor::legacyConfigOptions(const char* _appName)
+	{
+		juce::PropertiesFile::Options opts;
+		opts.applicationName = _appName;
+		opts.filenameSuffix = ".settings";
+		opts.folderName = _appName;
+		opts.osxLibrarySubFolder = juce::String("Application Support/") + _appName;
+		return opts;
+	}
+
+	void Processor::finishConstruction()
+	{
+		getController();
+		setLatencyBlocks(static_cast<uint32_t>(m_config.getIntValue("latencyBlocks", static_cast<int>(getDefaultLatencyBlocks()))));
+
+		// Last: a client calls tools on the server thread as soon as the discovery file lists this instance. Started
+		// in the base constructor, a set_plugin_state ran while the product constructor still created the controller
 		if (m_config.getBoolValue("enableMcpServer", false) && !isJuceHelperProcess())
 			startMcpServer();
 	}
@@ -96,6 +116,7 @@ namespace jucePluginEditorLib
 	{
 		stopMcpServer();
 		assert(!m_editorState && "call destroyEditorState in destructor of derived class");
+		assert(!m_patchManager && "call destroyPatchManager in destructor of derived class");
 	}
 
 	void Processor::loadGlobalSkinVariables()
@@ -204,6 +225,20 @@ namespace jucePluginEditorLib
 		m_editorState.reset();
 	}
 
+	void Processor::setPatchManager(patchManager::PatchManager* _patchManager)
+	{
+		m_patchManager.reset(_patchManager);
+	}
+
+	void Processor::destroyPatchManager()
+	{
+		// before the derived patch manager is destroyed: the host may delete the plugin on another thread than the
+		// message thread, which may be in the middle of processPending()
+		if(m_patchManager)
+			m_patchManager->shutdown();
+		m_patchManager.reset();
+	}
+
 	void Processor::saveChunkData(baseLib::BinaryStream& s)
 	{
 		pluginLib::Processor::saveChunkData(s);
@@ -220,6 +255,15 @@ namespace jucePluginEditorLib
 			s.write(m_editorStateData);
 		}
 
+		if(m_patchManager)
+		{
+			std::vector<uint8_t> patchManagerData;
+			m_patchManager->getPerInstanceConfig(patchManagerData);
+
+			baseLib::ChunkWriter cw(s, "PMST", 1);
+			s.write(patchManagerData);
+		}
+
 		getController().saveChunkData(s);
 	}
 
@@ -227,7 +271,10 @@ namespace jucePluginEditorLib
 	{
 		// if there is no chunk in the data, but the data is not empty, it's an old non-Vavra chunk that only carries the editor state
 		if(!pluginLib::Processor::loadCustomData(_sourceBuffer))
+		{
 			m_editorStateData = _sourceBuffer;
+			migratePatchManagerState(m_editorStateData);
+		}
 
 		if(m_editorState)
 			m_editorState->setPerInstanceConfig(m_editorStateData);
@@ -242,9 +289,44 @@ namespace jucePluginEditorLib
 		_cr.add("EDST", 1, [this](baseLib::BinaryStream& _binaryStream, unsigned _version)
 		{
 			_binaryStream.read(m_editorStateData);
+			migratePatchManagerState(m_editorStateData);
+		});
+
+		// saved after EDST, so it wins over a patch manager state migrated from there
+		_cr.add("PMST", 1, [this](baseLib::BinaryStream& _binaryStream, unsigned _version)
+		{
+			std::vector<uint8_t> patchManagerData;
+			_binaryStream.read(patchManagerData);
+			if(m_patchManager)
+				m_patchManager->setPerInstanceConfig(patchManagerData);
 		});
 
 		getController().loadChunkData(_cr);
+	}
+
+	void Processor::migratePatchManagerState(const std::vector<uint8_t>& _editorStateData) const
+	{
+		// the editor state carried the patch manager state before the processor owned the patch manager
+		if(!m_patchManager || _editorStateData.size() < sizeof(uint32_t))
+			return;
+
+		// an old version that didn't use chunks yet
+		baseLib::BinaryStream oldStream(_editorStateData);
+		if(oldStream.read<uint32_t>() == 1)
+		{
+			m_patchManager->setPerInstanceConfig(_editorStateData);
+			return;
+		}
+
+		baseLib::BinaryStream s(_editorStateData);
+		baseLib::ChunkReader cr(s);
+		cr.add("pmDt", 2, [this](baseLib::BinaryStream& _s, uint32_t/* _version*/)
+		{
+			std::vector<uint8_t> data;
+			_s.read(data);
+			m_patchManager->setPerInstanceConfig(data);
+		});
+		cr.read();
 	}
 
 	void Processor::savePluginLoadPath()

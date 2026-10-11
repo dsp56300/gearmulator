@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
+#include "synthLib/lcdfonts.h"
 
 namespace hwLib
 {
-	const uint8_t* getCharacterData(uint8_t _character);
+	using synthLib::getCharacterData;
 }

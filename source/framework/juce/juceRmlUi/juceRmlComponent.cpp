@@ -24,6 +24,7 @@
 
 #include "juceUiLib/messageBox.h"
 
+#include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementDocument.h"
@@ -737,6 +738,13 @@ namespace juceRmlUi
 		bool res = false;
 
 		auto juceChar = _key.getTextCharacter();
+
+		// Return types a line break into a text area, RmlUi takes it as the text '\n'. JUCE gives it as '\r'. Not into an
+		// input of one line: that drops it, but deletes its selection first
+		const auto* focus = m_rmlContext->GetFocusElement();
+		if (juceChar == '\r' && focus && focus->GetTagName() == "textarea")
+			juceChar = '\n';
+
 		if (juce::CharacterFunctions::isPrintable(juceChar) || juceChar == '\n')
 		{
 			auto string = juce::String::charToString(juceChar);
@@ -1064,6 +1072,15 @@ namespace juceRmlUi
 				m_lastFrameEventTime = 0.0;	// an editor that is not on screen animates nothing, do not report the gap as one frame
 
 			m_rmlContext->Update();
+
+			if (updateDocumentSize())
+			{
+				juce::MessageManager::callAsync([safe = juce::Component::SafePointer<RmlComponent>(this)]
+				{
+					if (safe)
+						safe->evDocumentSizeChanged(safe.getComponent());
+				});
+			}
 
 			if (visible)
 			{
@@ -1415,13 +1432,24 @@ namespace juceRmlUi
 			{
 				m_document->SetAttribute("rmlComponent", static_cast<void*>(this));
 
-				const Rml::Vector2f s = m_document->GetBox().GetSize(Rml::BoxArea::Margin);
+				m_documentDpRatio = m_rmlContext->GetDensityIndependentPixelRatio();
+				m_freeWindowMode = m_document->GetAttribute<Rml::String>("windowMode", "") == "free";
+
+				// in the free window mode the body follows the window, its size says nothing yet
+				const Rml::Vector2f s = m_freeWindowMode
+					? Rml::Vector2f(m_document->GetAttribute("windowWidth", 0.0f), m_document->GetAttribute("windowHeight", 0.0f)) * m_documentDpRatio
+					: m_document->GetBox().GetSize(Rml::BoxArea::Margin);
 
 				if (s.x > 0 && s.y > 0)
 				{
 					m_documentSize.x = static_cast<int>(s.x);
 					m_documentSize.y = static_cast<int>(s.y);
+					m_documentSizeDp = s / m_documentDpRatio;
+					if (m_freeWindowMode)
+						updateDocumentLimits();
 				}
+				else if (m_freeWindowMode)
+					throw std::runtime_error("RMLUI document '" + m_rootRmlFilename + "' uses windowMode=\"free\", its default size needs to be specified in dp with the windowWidth and windowHeight attributes of the <body> element.");
 				else
 					throw std::runtime_error("RMLUI document '" + m_rootRmlFilename + "' has no valid size, explicit default size needs to be specified on the <body> element.");
 				m_document->Show();
@@ -1478,14 +1506,99 @@ namespace juceRmlUi
 
 		const auto size = getRenderSize();
 
-		const float renderScale = static_cast<float>(size.x) / static_cast<float>(m_documentSize.x);// * getRenderingScale();
+		// the free window mode ends up with the ratio the fixed one has at the same scale, where the window width is the scale
+		const float renderScale = m_freeWindowMode
+			? m_freeWindowScale * getOpenGLRenderingScale()
+			: static_cast<float>(size.x) / static_cast<float>(m_documentSize.x);
 
 		if (contextDims.x != size.x || contextDims.y != size.y || m_currentRenderScale != renderScale)
 		{
+			// RmlUi reports a new window size to the document as a resize event, but not a new dp ratio, which in the
+			// free window mode changes the room the document has just the same
+			const bool zoomed = m_freeWindowMode && m_currentRenderScale != renderScale && contextDims.x == size.x && contextDims.y == size.y;
+
 			m_currentRenderScale = renderScale;
 			m_rmlContext->SetDensityIndependentPixelRatio(renderScale * m_contentScale);
 			m_rmlContext->SetDimensions({ size.x, size.y });
+
+			if (zoomed && m_document)
+				m_document->DispatchEvent(Rml::EventId::Resize, Rml::Dictionary());
 		}
+	}
+
+	void RmlComponent::setFreeWindowScale(const float _scale)
+	{
+		if (m_freeWindowScale == _scale)
+			return;
+		m_freeWindowScale = _scale;
+		enqueueUpdate();
+	}
+
+	namespace
+	{
+		// px at the current dp ratio to the units of the document size, a percentage counts as not given
+		float toDocumentUnits(const Rml::Style::LengthPercentage& _value, const float _unset, const float _pxToDocument)
+		{
+			if (_value.type != Rml::Style::LengthPercentage::Length || _value.value >= FLT_MAX)
+				return _unset;
+			return _value.value * _pxToDocument;
+		}
+	}
+
+	// Computed values are px at the dp ratio they were computed with, which is the current one only after a layout, so
+	// this runs then and the result is kept for whoever asks later
+	bool RmlComponent::updateDocumentLimits()
+	{
+		const auto& v = m_document->GetComputedValues();
+		const auto f = m_documentDpRatio / m_rmlContext->GetDensityIndependentPixelRatio();
+
+		const Rml::Vector2f minSize{ toDocumentUnits(v.min_width(), 0.0f, f), toDocumentUnits(v.min_height(), 0.0f, f) };
+		const Rml::Vector2f maxSize{ toDocumentUnits(v.max_width(), FLT_MAX, f), toDocumentUnits(v.max_height(), FLT_MAX, f) };
+
+		auto differs = [](const float _a, const float _b)
+		{
+			return (_a >= FLT_MAX) != (_b >= FLT_MAX) || std::abs(_a - _b) >= 0.5f;
+		};
+
+		if (!differs(minSize.x, m_minimumDocumentSize.x) && !differs(minSize.y, m_minimumDocumentSize.y) &&
+			!differs(maxSize.x, m_maximumDocumentSize.x) && !differs(maxSize.y, m_maximumDocumentSize.y))
+			return false;
+
+		m_minimumDocumentSize = minSize;
+		m_maximumDocumentSize = maxSize;
+		return true;
+	}
+
+	// A skin can change the size of its <body> at runtime, to fold away part of the editor for example. Only an
+	// explicit size counts: an auto or percentage one follows the context, which follows the window, and reacting
+	// to that would resize the window in response to its own resize.
+	// In the free window mode the body follows the window on purpose, and a new size is the room the skin has, which
+	// changes with the window and with the zoom. The window then only clamps itself to the limits of the body.
+	bool RmlComponent::updateDocumentSize()
+	{
+		if (!m_document)
+			return false;
+
+		const bool limitsChanged = m_freeWindowMode && updateDocumentLimits();
+
+		const auto& values = m_document->GetComputedValues();
+		if (!m_freeWindowMode && (values.width().type != Rml::Style::LengthPercentageAuto::Length || values.height().type != Rml::Style::LengthPercentageAuto::Length))
+			return false;
+
+		const auto sizeDp = m_document->GetBox().GetSize(Rml::BoxArea::Margin) / m_rmlContext->GetDensityIndependentPixelRatio();
+
+		// the box is in px, converting it back to dp is not exact
+		if (std::abs(sizeDp.x - m_documentSizeDp.x) < 0.5f && std::abs(sizeDp.y - m_documentSizeDp.y) < 0.5f)
+			return limitsChanged;
+
+		m_documentSizeDp = sizeDp;
+
+		if (m_freeWindowMode)
+			return true;
+
+		m_documentSize.x = static_cast<int>(std::lround(sizeDp.x * m_documentDpRatio));
+		m_documentSize.y = static_cast<int>(std::lround(sizeDp.y * m_documentDpRatio));
+		return true;
 	}
 
 	// A skin that needs to animate on its own clock - an oscilloscope, a VU meter, anything that

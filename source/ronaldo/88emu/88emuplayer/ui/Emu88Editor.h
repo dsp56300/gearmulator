@@ -7,6 +7,8 @@
 #include "juceRmlUi/rmlDataProvider.h"
 #include "juceRmlUi/rmlInterfaces.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "juce_audio_plugin_client/Standalone/juce_StandaloneOptionsMenuHandler.h"
 #include "juce_audio_processors/juce_audio_processors.h"
 
@@ -157,10 +159,10 @@ namespace emu88Player
 		std::unique_ptr<HardwareLcd> m_lcd2;
 		std::unique_ptr<PlaylistDropTarget> m_playlistDropTarget;
 		std::vector<std::unique_ptr<PlaylistRowDrag>> m_playlistRows;
-		std::unique_ptr<juce::FileChooser> m_playlistChooser;
-		std::unique_ptr<juce::FileChooser> m_playlistFileChooser;
-		std::unique_ptr<juce::FileChooser> m_recordingChooser;
-		std::unique_ptr<juce::FileChooser> m_pcmCardChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_playlistChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_playlistFileChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_recordingChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_pcmCardChooser;
 		std::unique_ptr<TitleBarButton> m_recordButton;
 		Skin m_skin;
 		std::map<std::string, std::vector<char>> m_fileCache;

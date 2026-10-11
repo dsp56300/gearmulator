@@ -2,6 +2,7 @@
 
 #include "jsonHelpers.h"
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <mutex>
@@ -28,6 +29,8 @@ namespace mcpServer
 		static std::vector<DiscoveryEntry> readInstances();
 
 	private:
+		static void modifyInstances(const std::function<void(std::vector<DiscoveryEntry>&)>& _modify);
+
 		static std::mutex s_mutex;
 	};
 }

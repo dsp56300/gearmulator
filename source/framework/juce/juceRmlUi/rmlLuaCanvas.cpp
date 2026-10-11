@@ -99,9 +99,32 @@ namespace Rml
 
 			juce::Graphics* gfx(const CanvasContext* _c) { return _c ? _c->graphics() : nullptr; }
 
+			// The thunk removes self, but Lua still sees a method call and leaves self out when it numbers a bad
+			// argument: luaL_check*(L, 1) would blame self, and every other check would name the argument before. So
+			// report the index one up, the right number for ctx:f(...) and for ctx.f(ctx, ...) alike, and take the
+			// type from where the value is
+			int typeError(lua_State* L, const int _index, const int _type)
+			{
+				const auto* message = lua_pushfstring(L, "%s expected, got %s", lua_typename(L, _type),
+					luaL_typename(L, _index));
+				return luaL_argerror(L, _index + 1, message);
+			}
+
 			float numberArg(lua_State* L, const int _index)
 			{
-				return static_cast<float>(luaL_checknumber(L, _index));
+				int isNumber = 0;
+				const auto value = lua_tonumberx(L, _index, &isNumber);
+				if (!isNumber)
+					typeError(L, _index, LUA_TNUMBER);
+				return static_cast<float>(value);
+			}
+
+			const char* stringArg(lua_State* L, const int _index)
+			{
+				const auto* text = lua_tostring(L, _index);
+				if (!text)
+					typeError(L, _index, LUA_TSTRING);
+				return text;
 			}
 
 			// HTML5 rectangles may have a negative width or height
@@ -316,7 +339,7 @@ namespace Rml
 		int CanvasGradientaddColorStop(lua_State* L, CanvasGradient* gradient)
 		{
 			const auto offset = numberArg(L, 1);
-			const auto* text = luaL_checkstring(L, 2);
+			const auto* text = stringArg(L, 2);
 
 			// HTML5 throws for both
 			if (!(offset >= 0.0f && offset <= 1.0f))
@@ -446,8 +469,8 @@ namespace Rml
 		{
 			if (!c)
 				return 0;
-			const auto x = static_cast<float>(luaL_checknumber(L, 1));
-			const auto y = static_cast<float>(luaL_checknumber(L, 2));
+			const auto x = numberArg(L, 1);
+			const auto y = numberArg(L, 2);
 			c->path().startNewSubPath(x, y);
 			c->pathStarted() = true;
 			return 0;
@@ -457,8 +480,8 @@ namespace Rml
 		{
 			if (!c)
 				return 0;
-			const auto x = static_cast<float>(luaL_checknumber(L, 1));
-			const auto y = static_cast<float>(luaL_checknumber(L, 2));
+			const auto x = numberArg(L, 1);
+			const auto y = numberArg(L, 2);
 			if (!c->pathStarted())
 				c->path().startNewSubPath(x, y);	// HTML5: lineTo with no current point acts as moveTo
 			else
@@ -471,10 +494,10 @@ namespace Rml
 		{
 			if (!c)
 				return 0;
-			const auto x = static_cast<float>(luaL_checknumber(L, 1));
-			const auto y = static_cast<float>(luaL_checknumber(L, 2));
-			const auto w = static_cast<float>(luaL_checknumber(L, 3));
-			const auto h = static_cast<float>(luaL_checknumber(L, 4));
+			const auto x = numberArg(L, 1);
+			const auto y = numberArg(L, 2);
+			const auto w = numberArg(L, 3);
+			const auto h = numberArg(L, 4);
 			c->path().addRectangle(juce::Rectangle<float>(x, y, w, h));
 			c->pathStarted() = true;
 			return 0;
@@ -484,11 +507,11 @@ namespace Rml
 		{
 			if (!c)
 				return 0;
-			const auto x = static_cast<float>(luaL_checknumber(L, 1));
-			const auto y = static_cast<float>(luaL_checknumber(L, 2));
-			const auto r = static_cast<float>(luaL_checknumber(L, 3));
-			const auto a0 = static_cast<float>(luaL_checknumber(L, 4));
-			const auto a1 = static_cast<float>(luaL_checknumber(L, 5));
+			const auto x = numberArg(L, 1);
+			const auto y = numberArg(L, 2);
+			const auto r = numberArg(L, 3);
+			const auto a0 = numberArg(L, 4);
+			const auto a1 = numberArg(L, 5);
 			const bool ccw = lua_gettop(L) >= 6 && lua_toboolean(L, 6) != 0;
 			addArc(c, x, y, r, r, 0.0f, a0, a1, ccw);
 			return 0;
@@ -498,13 +521,13 @@ namespace Rml
 		{
 			if (!c)
 				return 0;
-			const auto x = static_cast<float>(luaL_checknumber(L, 1));
-			const auto y = static_cast<float>(luaL_checknumber(L, 2));
-			const auto rx = static_cast<float>(luaL_checknumber(L, 3));
-			const auto ry = static_cast<float>(luaL_checknumber(L, 4));
-			const auto rot = static_cast<float>(luaL_checknumber(L, 5));
-			const auto a0 = static_cast<float>(luaL_checknumber(L, 6));
-			const auto a1 = static_cast<float>(luaL_checknumber(L, 7));
+			const auto x = numberArg(L, 1);
+			const auto y = numberArg(L, 2);
+			const auto rx = numberArg(L, 3);
+			const auto ry = numberArg(L, 4);
+			const auto rot = numberArg(L, 5);
+			const auto a0 = numberArg(L, 6);
+			const auto a1 = numberArg(L, 7);
 			const bool ccw = lua_gettop(L) >= 8 && lua_toboolean(L, 8) != 0;
 			addArc(c, x, y, rx, ry, rot, a0, a1, ccw);
 			return 0;
@@ -729,7 +752,8 @@ namespace Rml
 		int CanvassetPaintFunction(lua_State* L, Canvas* canvas)
 		{
 			RMLUI_CHECK_OBJ(canvas);
-			luaL_checktype(L, 1, LUA_TFUNCTION);
+			if (!lua_isfunction(L, 1))
+				return typeError(L, 1, LUA_TFUNCTION);
 
 			lua_pushvalue(L, 1);
 			const int ref = luaL_ref(L, LUA_REGISTRYINDEX);

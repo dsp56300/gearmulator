@@ -273,13 +273,9 @@ namespace jucePluginEditorLib::patchManagerRml
 		}
 		else
 		{
-#if SYNTHLIB_DEMO_MODE
-			getPatchManager().getEditor().showDemoRestrictionMessageBox();
-#else
 			const int part = _data ? _data->getPart() : -1;
 
 			getDB().copyPatchesToLocalStorage(m_dataSource, _patches, part);
-#endif
 		}		
 	}
 }

@@ -2,9 +2,9 @@
 
 namespace virusLib
 {
-	void Hdi08List::addHDI08(dsp56k::HDI08& _hdi08)
+	void Hdi08List::addHDI08(dsp56k::HDI08& _hdi08, const dsp56k::Memory& _memory)
 	{
-		m_queues.emplace_back(_hdi08);
+		m_queues.emplace_back(_hdi08, _memory);
 	}
 
 	bool Hdi08List::rxEmpty() const

@@ -1,6 +1,8 @@
 #include "xtDevice.h"
 
+#include "xtButtons.h"
 #include "xtHardware.h"
+#include "xtLeds.h"
 
 namespace mqLib
 {
@@ -12,8 +14,20 @@ namespace xt
 	Device::Device(const synthLib::DeviceCreateParams& _params)
 		: wLib::Device(_params)
 		, m_xt(_params.romData, _params.romName, (_params.customData & 1) != 0)
-		, m_wavePreview(m_xt), m_state(m_xt, m_wavePreview), m_sysexRemote(m_xt)
+		, m_wavePreview(m_xt), m_state(m_xt, m_wavePreview)
 	{
+		m_frontPanel.evButton.addListener([this](const uint32_t _index, const bool _pressed)
+		{
+			if(_index < static_cast<uint32_t>(ButtonType::Count))
+				m_xt.getHardware()->getUC().setButton(static_cast<ButtonType>(_index), _pressed);
+		});
+
+		m_frontPanel.evRequestState.addListener([this](uint8_t)
+		{
+			sendLcd(m_customSysexOut);
+			sendLeds(m_customSysexOut);
+		});
+
 		while(!m_xt.isBootCompleted())
 			m_xt.process(8);
 
@@ -58,33 +72,6 @@ namespace xt
 		return 4;
 	}
 
-	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
-	{
-		m_xt.receiveMidi(m_midiOutBuffer);
-		m_midiOutParser.write(m_midiOutBuffer);
-		m_midiOutParser.getEvents(_midiOut);
-		m_midiOutBuffer.clear();
-
-		wLib::Responses responses;
-
-		for (const auto& midiOut : _midiOut)
-		{
-			m_state.receive(responses, midiOut, State::Origin::Device);
-
-			for (auto& response : responses)
-			{
-				auto& r = _midiOut.emplace_back(synthLib::MidiEventSource::Device);
-				std::swap(response, r.sysex);
-			}
-		}
-
-		if(!m_customSysexOut.empty())
-		{
-			_midiOut.insert(_midiOut.begin(), m_customSysexOut.begin(), m_customSysexOut.end());
-			m_customSysexOut.clear();
-		}
-	}
-
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
 	{
 		m_state.process(static_cast<uint32_t>(_samples));
@@ -95,44 +82,25 @@ namespace xt
 
 		const auto dirty = static_cast<uint32_t>(m_xt.getDirtyFlags());
 
-		m_sysexRemote.handleDirtyFlags(m_customSysexOut, dirty);
+		if(dirty & static_cast<uint32_t>(Xt::DirtyFlags::Lcd))
+			sendLcd(m_customSysexOut);
+		if(dirty & static_cast<uint32_t>(Xt::DirtyFlags::Leds))
+			sendLeds(m_customSysexOut);
 	}
 
-	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
+	void Device::sendLcd(std::vector<synthLib::SMidiEvent>& _dst) const
 	{
-		const auto& sysex = _ev.sysex;
+		std::array<char, 80> lcd{};
+		m_xt.readLCD(lcd);
+		synthLib::fp::sendLcdText(_dst, 40, 2, reinterpret_cast<const uint8_t*>(lcd.data()));
+	}
 
-		if (!sysex.empty())
-		{
-			if (m_sysexRemote.receive(m_customSysexOut, sysex))
-				return true;
-		}
-
-		Responses responses;
-
-		const auto res = m_state.receive(responses, _ev, State::Origin::External);
-
-		for (auto& response : responses)
-		{
-			auto& r = _response.emplace_back(synthLib::MidiEventSource::Device);
-			std::swap(response, r.sysex);
-		}
-
-		// do not forward to device if our cache was able to reply. It might have sent something to the device already on its own if a cache miss occured
-		if(res)
-			return true;
-
-		if(_ev.sysex.empty())
-		{
-			auto e = _ev;
-			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
-			m_xt.sendMidiEvent(e);
-		}
-		else
-		{
-			m_xt.sendMidiEvent(_ev);
-		}
-		return true;
+	void Device::sendLeds(std::vector<synthLib::SMidiEvent>& _dst) const
+	{
+		std::vector<bool> leds(static_cast<uint32_t>(LedType::Count));
+		for(size_t i=0; i<leds.size(); ++i)
+			leds[i] = m_xt.getLedState(static_cast<LedType>(i));
+		synthLib::fp::sendLedMask(_dst, leds);
 	}
 
 	dsp56k::EsxiClock* Device::getDspEsxiClock() const

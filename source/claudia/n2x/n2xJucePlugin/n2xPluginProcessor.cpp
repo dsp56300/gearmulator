@@ -1,7 +1,11 @@
 #include "n2xPluginProcessor.h"
 
 #include "n2xController.h"
-#include "n2xPluginEditorState.h"
+#include "n2xPatchManager.h"
+#include "n2xEditor.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEntry.h"
+#include "skins.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
@@ -9,21 +13,6 @@
 
 #include "n2xLib/n2xdevice.h"
 #include "n2xLib/n2xromloader.h"
-
-#include "synthLib/deviceException.h"
-
-namespace
-{
-	juce::PropertiesFile::Options getOptions()
-	{
-		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300EmulatorNodalRed";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300EmulatorNodalRed";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorNodalRed";
-		return opts;
-	}
-}
 
 namespace n2xJucePlugin
 {
@@ -33,29 +22,19 @@ namespace n2xJucePlugin
 	    Processor(BusesProperties()
 	                   .withOutput("Out AB", juce::AudioChannelSet::stereo(), true)
 	                   .withOutput("Out CD", juce::AudioChannelSet::stereo(), true)
-		, getOptions(), pluginLib::initProcessorProperties())
+		, legacyConfigOptions("DSP56300EmulatorNodalRed"), pluginLib::initProcessorProperties())
 	{
-		getController();
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
-	}
-
-	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
-	{
-		destroyEditorState();
+		setPatchManager(new PatchManager(*this));
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 	{
-		return new PluginEditorState(*this);
+		return new jucePluginEditorLib::PluginEditorStateT<n2xJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
-	synthLib::Device* AudioPluginAudioProcessor::createDevice()
+	synthLib::Device* AudioPluginAudioProcessor::newDevice(const synthLib::DeviceCreateParams& _params)
 	{
-		auto* d = new n2x::Device({});
-		if(!d->isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (512k .bin) is required, but was not found.");
-		return d;
+		return new n2x::Device(_params);
 	}
 
 	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
@@ -77,7 +56,4 @@ namespace n2xJucePlugin
 	}
 }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new n2xJucePlugin::AudioPluginAudioProcessor();
-}
+TUS_PLUGIN_ENTRY(n2xJucePlugin::AudioPluginAudioProcessor)

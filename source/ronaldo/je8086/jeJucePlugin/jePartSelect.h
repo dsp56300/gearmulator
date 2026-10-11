@@ -1,9 +1,26 @@
 #pragma once
 
 #include <array>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include "jeFocusedParameter.h"
 #include "jeTypes.h"
+
+#include "baseLib/event.h"
+
+#include "jucePluginLib/parameterlistener.h"
+
+namespace Rml
+{
+	class Element;
+	class Event;
+}
+
+namespace pluginLib
+{
+	class Parameter;
+}
 
 namespace jucePluginEditorLib
 {

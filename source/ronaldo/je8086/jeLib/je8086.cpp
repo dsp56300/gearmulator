@@ -51,9 +51,16 @@ namespace jeLib
 	, m_midiOutParser(synthLib::MidiEventSource::Device)
 	, m_midiInRateLimiter([this](const uint8_t _byte) { m_machine.periph().receive(0, _byte); })
 	{
-		m_remote.evButtonChanged.addListener([this](const uint32_t _button, const bool _pressed)
+		m_frontPanel.evButton.addListener([this](const uint32_t _button, const bool _pressed)
 		{
 			setButton(static_cast<devices::SwitchType>(_button), _pressed);
+		});
+
+		// the editor asks for the panel when it opens
+		m_frontPanel.evRequestState.addListener([this](uint8_t)
+		{
+			sendLcdText();
+			sendLcdCgRam();
 		});
 
 		auto& bus = m_machine.bus();
@@ -133,9 +140,21 @@ namespace jeLib
 			if (m_lcd.getContentGeneration() == m_lcdGeneration)
 				return;
 			m_lcdGeneration = m_lcd.getContentGeneration();
-			SysexRemoteControl::sendSysexLcdDdRam(m_midiOutEvents, m_lcd);
+			sendLcdText();
 		});
-		m_lcd.setCgRamChangeCallback([this] { SysexRemoteControl::sendSysexLcdCgRam(m_midiOutEvents, m_lcd); });
+		m_lcd.setCgRamChangeCallback([this] { sendLcdCgRam(); });
+	}
+
+	void Je8086::sendLcdText()
+	{
+		std::array<char, 40> cells{};
+		m_lcd.copyVisibleDdRam(cells.data());
+		synthLib::fp::sendLcdText(m_midiOutEvents, 20, 2, reinterpret_cast<const uint8_t*>(cells.data()));
+	}
+
+	void Je8086::sendLcdCgRam()
+	{
+		synthLib::fp::sendLcdCgRam(m_midiOutEvents, m_lcd.getCgRam());
 	}
 
 	std::vector<uint8_t> Je8086::createFactoryRam(const std::vector<uint8_t>& _romData)
@@ -153,7 +172,7 @@ namespace jeLib
 		}
 
 		// panel buttons are pressed here, on the emulation thread (BoardThread), in order with the MIDI around them
-		if (m_remote.receive(_event))
+		if (m_frontPanel.receive(_event.sysex))
 			return;
 
 		m_midiInEvents.push_back(_event);

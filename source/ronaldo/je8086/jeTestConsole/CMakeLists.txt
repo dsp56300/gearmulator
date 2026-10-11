@@ -11,14 +11,8 @@ set(SOURCES
 target_sources(JE8086TestConsole PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-createMacSetupScript("JE8086TestConsole")
-
 target_link_libraries(JE8086TestConsole PUBLIC jeLib)
 
-install(TARGETS JE8086TestConsole DESTINATION . COMPONENT JE8086TestConsole)
-
-if(APPLE)
-	installMacSetupScript(. JE8086TestConsole)
-endif()
+tus_installConsole(JE8086TestConsole COMPONENT JE8086TestConsole)
 
 set_property(TARGET JE8086TestConsole PROPERTY FOLDER "JE8086")

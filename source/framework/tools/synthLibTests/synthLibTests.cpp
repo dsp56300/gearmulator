@@ -10,6 +10,7 @@ int main()
 	try
 	{
 		testFilesystem();
+		testFrontPanel();
 		testMidiToSysex();
 		testShortMessage();
 		testUniversalTuning();

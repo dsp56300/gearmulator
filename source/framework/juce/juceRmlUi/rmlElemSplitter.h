@@ -13,6 +13,8 @@ namespace juceRmlUi
 		void ProcessEvent(Rml::Event& _event) override;
 
 	private:
+		bool isVertical() const;
+		void freezeSizes();
 		void processMouseMove(Rml::Vector2f _mousePos);
 
 		Rml::Vector2f m_lastMousePos;

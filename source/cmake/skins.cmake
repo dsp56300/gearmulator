@@ -39,6 +39,10 @@ macro(addSkin productName skinName skinFolder skinRootFile)
 	string(JOIN ", " SKIN_CPP_ENTRIES ${SKIN_CPP_ENTRIES} "{\"${skinName}\", \"${skinRootFile}\", \"\", {${SKIN_FILENAMES}}}")
 endmacro()
 
+# Writes skins.h into the build tree, createJucePlugin puts that folder on the include path
 macro(buildSkinHeader)
-	configure_file(${SkinsHeaderDir}/skins.h.in ${CMAKE_CURRENT_SOURCE_DIR}/skins.h)
+	configure_file(${SkinsHeaderDir}/skins.h.in ${CMAKE_CURRENT_BINARY_DIR}/skins.h)
+
+	# older builds wrote it next to the sources, and #include "skins.h" finds that stale copy first
+	file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/skins.h)
 endmacro()

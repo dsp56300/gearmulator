@@ -1,7 +1,11 @@
 #include "PluginProcessor.h"
-#include "PluginEditorState.h"
+#include "mqEditor.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEntry.h"
+#include "skins.h"
 
 #include "mqController.h"
+#include "mqPatchManager.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
@@ -9,19 +13,6 @@
 
 #include "mqLib/device.h"
 #include "mqLib/romloader.h"
-
-namespace
-{
-	juce::PropertiesFile::Options getOptions()
-	{
-		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300EmulatorVavra";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300EmulatorVavra";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorVavra";
-		return opts;
-	}
-}
 
 namespace mqJucePlugin
 {
@@ -35,28 +26,19 @@ namespace mqJucePlugin
 	                   .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
 	                   .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-		, getOptions(), pluginLib::initProcessorProperties())
+		, legacyConfigOptions("DSP56300EmulatorVavra"), pluginLib::initProcessorProperties())
 	{
-		getController();
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
-	}
-
-	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
-	{
-		destroyEditorState();
+		setPatchManager(new PatchManager(*this));
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 	{
-		return new PluginEditorState(*this);
+		return new jucePluginEditorLib::PluginEditorStateT<mqJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
-	synthLib::Device* AudioPluginAudioProcessor::createDevice()
+	synthLib::Device* AudioPluginAudioProcessor::newDevice(const synthLib::DeviceCreateParams& _params)
 	{
-		synthLib::DeviceCreateParams p;
-		getRemoteDeviceParams(p);
-		return new mqLib::Device(p);
+		return new mqLib::Device(_params);
 	}
 
 	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
@@ -78,7 +60,4 @@ namespace mqJucePlugin
 	}
 }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new mqJucePlugin::AudioPluginAudioProcessor();
-}
+TUS_PLUGIN_ENTRY(mqJucePlugin::AudioPluginAudioProcessor)

@@ -4,6 +4,12 @@ Release Notes
 
 Framework:
 
+- [Fix] EMU-103 The latency the plugins report to the host left out the delay
+        of the resampler, so notes came late: by up to 5 ms with Mame HQ, the
+        default, and by less with Legacy. That delay is now measured for each
+        resampler setting and reported, so all settings line up. Osirus and
+        JE8086 keep their timing with Legacy.
+
 - [Fix] BUG-10393 Parts of the user interface, the input level meters for
         example, stopped updating after the plugin window was closed and
         reopened.
@@ -16,6 +22,9 @@ Framework:
 
 - [Fix] BUG-10419 While a knob or slider was dragged, tabs and buttons that the
         mouse passed over lit up as if they were hovered.
+
+- [Fix] The mouse wheel over a knob or slider that sits in a scrollable area
+        changed its value and scrolled the area at the same time.
 
 - [Fix] BUG-10380 macOS: audio dropouts at small buffer sizes, which got worse
         with macOS 27. The emulation now joins the audio workgroup of the host,
@@ -31,6 +40,15 @@ Framework:
         the plugin and `input_stop` ends it, to test effects and audio inputs
         together with `record_start` and `record_stop`.
 
+- [Imp] MCP server: `read_lcd` returns the text and the LEDs of the display of
+        the emulated device, also while the plugin window is closed.
+
+- [Fix] MCP server: A request sent as soon as a plugin appeared in the discovery
+        file could hang or crash the host, because the server started before
+        the plugin was fully loaded. A request that came in while the plugin
+        was removed could crash the host, too. The server now starts once
+        loading is done and stops before anything else is removed.
+
 - [Imp] BUG-10220 The Esc key no longer opens the settings page, it is left to
         the host, which uses it to close the plugin window, for example. Esc
         still closes the settings page and ends MIDI Learn mode. The settings
@@ -44,6 +62,12 @@ Framework:
         so, and that the server and the plugins need to be updated together,
         instead of reporting that no server was found.
 
+- [Imp] DSPBridge: The interface between the plugins and DSPBridgeServer changed
+        in this version, and with it the bridge protocol version: update
+        DSPBridgeServer together with the plugins. A server of 2.2.25 does not
+        load plugins of this version, which would have crashed it, and this
+        server does not load plugins of 2.2.25 or older.
+
 - [Fix] BUG-10437 Windows: The "Open skins folder in File Browser" button in the
         settings crashed the host if the folder could not be created, for
         example when the path to the Documents folder contains characters such
@@ -56,7 +80,61 @@ Framework:
         Xenia, passed values of the previous patch to the parameters that the
         new patch assigns to them.
 
+- [Fix] BUG-10217 Linux: Products with more than one DSP could crash, rarely,
+        most often while they were loaded or removed. Building the LV2 plugin
+        crashed for the same reason if a ROM was installed.
+
+- [Fix] BUG-10464 Linux: A note played with the computer keyboard of the host,
+        for example in Bitwig Studio, was triggered again and again at the key
+        repeat rate while the key was held, once the plugin window had the
+        keyboard focus.
+
+- [Fix] BUG-10425 Program changes for a MIDI bank that has a data source in the
+        Patch Manager loaded their patch late, so controllers sent right after
+        a program change applied to the previous patch. The patch now loads
+        right away, in order with the MIDI around it, and of several program
+        changes in a row only the last one loads. These program changes now
+        also work when the plugin window was never opened, and loading a
+        project shows its patches in the Patch Manager when the project is
+        loaded into a plugin that is already running.
+
+- [New] Skins can draw lines with a <strokes> element. A skin script gives it
+        its lines with Element.As.Strokes(element):setStrokes(lines), one
+        table of {x, y} points per line, in dp. The properties color,
+        stroke-width, stroke-outline-width and stroke-outline-color style
+        them.
+
+- [Fix] Skins: The error message for a wrong argument to a canvas method in a
+        skin script named the argument before it, or "bad self" for the first
+        one.
+
+- [Fix] DSPBridge: The tcpPort setting of the server had no effect, the server
+        always used port 56362.
+
+- [Imp] Ctrl and the mouse wheel, or Ctrl and + and -, change the GUI scale
+        in the steps of the GUI Scale menu, Cmd on macOS. A control under the
+        mouse that takes the wheel itself keeps it. The GUI Scale menu offers
+        400% now, as the settings do.
+
+- [Fix] Ctrl+V in a text field, the patch name for example, could replace the
+        current patch with one copied to the clipboard. Ctrl+C and Ctrl+V copy
+        and paste the whole patch only when nothing under the mouse or with the
+        focus takes them itself.
+
 Osirus/OsTIrus:
+
+- [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
+        into the Patch Manager, crashed the host. It is now refused like any
+        other file that holds no patch.
+
+- [Fix] BUG-10425 Controllers and parameter changes that arrived while a patch
+        was being loaded, for example right after a program change, could get
+        lost, in the sound or in the state saved with the project, with or
+        without the Patch Manager.
+
+- [Fix] BUG-10425 A MIDI bank number given to a RAM bank in the Patch Manager
+        got lost whenever the RAM banks were received again, after loading a
+        project for example.
 
 - [Fix] BUG-10215 BUG-10225 A state that the host saved right after loading one,
         or right after the plugin was created, before any audio had been
@@ -74,6 +152,33 @@ Osirus/OsTIrus:
         as in Virus Control. In these modes the Virus ignores the saturation
         type and uses the saturation of its analog filter instead.
 
+- [Imp] BUG-10194 A MASTER TUNE knob tunes the whole instrument, by up to about
+        half a semitone up or down, and is saved with the project. The Galaxpel
+        skin has it next to PURE TUNING on the ARP | SETTINGS page, the TrancyTI
+        skin next to MASTER VOLUME on the COMMON page.
+
+- [Fix] BUG-10306 In Single mode, parameter changes that the plugin sent to its
+        MIDI output were addressed to the first part of a Multi instead of the
+        Single, so a hardware Virus controlled by the plugin ignored them.
+        Patch changes and Multi mode were not affected.
+
+- [Fix] EMU-82 Loading a project told the host that Master Volume, Master Tune,
+        MIDI Channel and Device ID had been edited. Ableton Live then turned off
+        their automation and switched the track's automation lane to Master
+        Tune.
+
+- [Fix] EMU-224 Importing a damaged or modified Virus OS update into the Patch
+        Manager could hang it when a preset name contained an unusual character.
+
+- [Fix] EMU-239 MIDI or SysEx that arrived in a burst, for example the
+        controllers a DAW sends when playback starts or many parameter changes
+        at once, could partly get lost or garble the notes behind it.
+
+- [Fix] EMU-207 The ROM selector kept showing the previous ROM after loading a
+        project that uses another one. Switching the ROM reset the DSP clock
+        to 100%. A ROM that failed to start stayed selected and was saved with
+        the project while the previous one kept running.
+
 Osirus:
 
 - [Fix] BUG-10410 Galaxpel skin: The link button on the right of the filter
@@ -81,6 +186,11 @@ Osirus:
         filter SELECT buttons does on the Virus: Resonance, Env Amount and
         Keytrack of the two filters move together, and the setting is saved
         with the patch.
+
+- [Fix] BUG-10305 Galaxpel skin: With the filter link on, the Env Amount
+        Velocity and Resonance Velocity knobs of the two filters move together,
+        in the filter section and on the ARP page. Before, only Filter 1's Env
+        Amount Velocity moved Filter 2's.
 
 OsTIrus:
 
@@ -96,6 +206,22 @@ OsTIrus:
         LINK in Virus Control and like both filter SELECT buttons on the
         hardware.
 
+- [Imp] EMU-238 Notes play exactly at the sample the host sends them for, as on
+        a Virus TI connected via USB, instead of on a grid of 64 samples (up to
+        1.45 ms late) as through its MIDI port. The MIDI latency is constant
+        now and reported exactly to the host.
+
+- [Fix] EMU-240 In Multi mode, a note could get lost when one of the two DSPs
+        was busy. The DSP then hands the note over to the other one, which did
+        not receive it, because the two DSPs did not talk to each other. They
+        now do, as on the hardware, and parts on the second DSP no longer play
+        two samples ahead of the others.
+
+- [Fix] EMU-244 The audio input had left and right swapped in single mode, in
+        OsTIrusFX and for parts 1, 3, 5 and so on of a multi. Parts 2, 4, 6
+        and so on got one wrong input sample at the start of every block the
+        host processes.
+
 Vavra/Xenia:
 
 - [Fix] EMU-168 SysEx from the host or a MIDI input could be mistaken for a
@@ -105,6 +231,10 @@ Vavra/Xenia:
 - [Fix] EMU-213 A SysEx global parameter change with an out-of-range parameter
         number, from the host or a MIDI input, overwrote memory of the plugin
         and could crash it.
+
+- [Fix] EMU-234 A SysEx parameter change or parameter request with an
+        out-of-range parameter number, from the host or a MIDI input, could
+        crash the plugin or damage the global settings saved with the project.
 
 - [Fix] BUG-10196 A sound that was loaded or edited while the host did not
         process the plugin, for example in a Poly Grid FX slot in Bitwig, was
@@ -125,6 +255,9 @@ Vavra:
 - [Fix] EMU-162 The emulation could write memory dumps into the working folder
         of the host, and crashed the host if it could not write there.
 
+- [Fix] The first turn of an encoder of the front panel skin moved the value by
+        several steps at once.
+
 Xenia:
 
 - [Fix] Storing sounds could, rarely, make the emulation write past the end of
@@ -133,6 +266,9 @@ Xenia:
 - [Imp] EMU-166 When no ROM is found, the message now says which files are
         needed: the full ROM as one 256 KB .bin file, or its two halves as two
         128 KB .bin files.
+
+- [Fix] EMU-235 Removing the plugin or closing a project could, rarely, crash
+        the host while the emulation was still busy with MIDI it had received.
 
 NodalRed2x:
 
@@ -195,10 +331,18 @@ JE8086:
         reached the emulation at a random moment instead of in order with the
         notes played around it.
 
+- [Imp] The master volume is saved in a new format. Projects of older versions
+        load as before, a project saved with this version opens in an older
+        version with the master volume at 100%.
+
 - [Fix] BUG-10307 Dense controller data from the host, automation for example,
         delayed the notes played along with it by seconds, and the delay kept
         growing. Controllers are now thinned to what a hardware controller
         sends, the latest value always arriving, so the notes stay on time.
+
+- [Fix] EMU-178 With the DSPBridge, the server ran the first ROM found instead of
+        the keyboard ROM the plugin uses itself, so a rack ROM could run
+        remotely while the plugin expected a keyboard.
 
 88emuPlayer:
 
@@ -241,6 +385,16 @@ JE8086:
 - [Imp] ROMs: When macOS does not let the player read its ROM folder, it says
         so and explains how to allow it, instead of reporting every ROM as
         missing.
+
+- [Imp] SC-8820: The original dump of the CPU's internal ROM, R02015367, is
+        recognized and used in place of the reconstructed one, which still
+        works. The CPU is now emulated as the SH7016 it is, so the internal
+        ROM is 64 KiB. A 128 KiB dump that holds it twice is recognized too;
+        any other 128 KiB sc8820_internal.bin is no longer accepted.
+
+- [Fix] MT-32, CM-32L, CM-32P, CM-64: A song whose tracks are on its second
+        MIDI port, as some sequencers saved MT-32 music, stayed silent. Every
+        port now reaches the board's one MIDI IN, as on the Sound Canvas.
 
 2.2.25:
 

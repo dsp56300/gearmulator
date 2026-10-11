@@ -2,6 +2,7 @@
 
 #include <array>
 #include <algorithm>
+#include <cmath>
 
 #include "dsp56kBase/fastmath.h"
 #include "dsp56kBase/logging.h"
@@ -157,34 +158,98 @@ namespace synthLib
 		m_scaledInputSize = 0;
 		m_input.resize(0);
 		m_scaledInput.resize(0);
+
+		// The measurement is the prewarm too: the resamplers fill their filters before the first real block
+		measureLatencies();
+		clearAudioHistory();
+	}
+
+	namespace
+	{
+		// Position of the largest sample, refined by a parabola through it and its neighbours
+		double findPeak(const std::vector<float>& _x)
+		{
+			size_t peak = 0;
+			for(size_t i = 1; i < _x.size(); ++i)
+				if(std::fabs(_x[i]) > std::fabs(_x[peak]))
+					peak = i;
+
+			if(peak == 0 || peak + 1 >= _x.size())
+				return static_cast<double>(peak);
+
+			const double a = _x[peak - 1], b = _x[peak], c = _x[peak + 1];
+			const double d = a - 2.0 * b + c;
+			return static_cast<double>(peak) + (d != 0.0 ? 0.5 * (a - c) / d : 0.0);
+		}
+	}
+
+	// Measured on the new stream itself rather than derived from the conversion settings: the device is replaced by one
+	// that emits a click at the sample a MIDI event reaches it at, then by one that passes its input through. That
+	// covers what each conversion mode does on its own terms, including how far it runs the device ahead of the host
+	// to fill its filter, which shifts the device's timeline against the host's.
+	void ResamplerInOut::measureLatencies()
+	{
 		m_inputLatency = 0;
 		m_outputLatency = 0;
 
-		// prewarm to calculate latency
-		std::array<std::vector<float>, 12> data;
+		if(m_samplerateDevice == m_samplerateHost || !m_channelCountOut)
+			return;
 
+		constexpr uint32_t blockSize = 64;
+		constexpr uint32_t settleBlocks = 8;
+		// 20 ms after the event, about three times the longest delay of the filters (Mame HQ, input to output)
+		const auto blockCount = settleBlocks + static_cast<uint32_t>(m_samplerateHost * 0.02f) / blockSize;
+
+		std::vector<float> in(blockSize, 0.0f), silence(blockSize, 0.0f), out(blockSize, 0.0f), scratch(blockSize, 0.0f);
 		TAudioInputs ins;
 		TAudioOutputs outs;
+		ins.fill(silence.data());
+		outs.fill(scratch.data());
+		ins[0] = in.data();
+		outs[0] = out.data();
 
-		for(size_t i=0; i<data.size(); ++i)
-			data[i].resize(512, 0);
+		// events already queued for the device wait until the stream is measured
+		TMidiVec queued;
+		queued.swap(m_midiIn);
 
-		for(size_t i=0; i<ins.size(); ++i)
-			ins[i] = i >= data.size() ? nullptr : &data[i][0];
-
-		for(size_t i=0; i<outs.size(); ++i)
-			outs[i] = i >= data.size() ? nullptr : &data[i][0];
-
-		TMidiVec midiIn, midiOut;
-		midiIn.swap(m_midiIn);
-		process(ins, outs, TMidiVec(), midiOut, static_cast<uint32_t>(data[0].size()),
-			[&](const TAudioInputs&, const TAudioOutputs& _outs, size_t _count, const TMidiVec&, TMidiVec&)
+		const auto measure = [&](const bool _viaInput)
 		{
-			for(uint32_t channel = 0; channel < m_channelCountOut; ++channel)
-				std::fill_n(_outs[channel], _count, 0.0f);
-		});
-		midiIn.swap(m_midiIn);
-		clearAudioHistory();
+			std::vector<float> recorded;
+			TMidiVec midiIn, midiOut;
+
+			for(uint32_t b = 0; b < blockCount; ++b)
+			{
+				const bool now = b == settleBlocks;
+				in[0] = now && _viaInput ? 1.0f : 0.0f;
+				midiIn.clear();
+				if(now && !_viaInput)
+					midiIn.emplace_back(MidiEventSource::Internal, M_NOTEON, 0, 127);
+
+				process(ins, outs, midiIn, midiOut, blockSize, [&](const TAudioInputs& _ins, const TAudioOutputs& _outs, const size_t _count, const TMidiVec& _midi, TMidiVec&)
+				{
+					for(uint32_t channel = 0; channel < m_channelCountOut; ++channel)
+						std::fill_n(_outs[channel], _count, 0.0f);
+
+					if(_viaInput)
+						std::copy_n(_ins[0], _count, _outs[0]);
+					else
+						for(const auto& e : _midi)
+							_outs[0][e.offset] = 1.0f;
+				});
+				recorded.insert(recorded.end(), out.begin(), out.end());
+			}
+			return findPeak(recorded) - static_cast<double>(settleBlocks * blockSize);
+		};
+
+		const auto midiToOutput = round_int(static_cast<float>(measure(false)));
+		m_outputLatency = static_cast<uint32_t>(std::max(0, midiToOutput));
+
+		if(m_channelCountIn)
+			m_inputLatency = static_cast<uint32_t>(std::max(0, round_int(static_cast<float>(measure(true))) - midiToOutput));
+
+		queued.swap(m_midiIn);
+
+		LOG("Resampler latency " << m_outputLatency << " samples MIDI to output, input " << m_inputLatency << " samples more");
 	}
 
 	void ResamplerInOut::appendScaledMidiEvents(TMidiVec& _dst, const TMidiVec& _src, const float _scale)
@@ -289,12 +354,6 @@ namespace synthLib
 
 				m_input.remove(count);
 			}
-
-			m_inputLatency += static_cast<uint32_t>(offset);
-			if(offset)
-			{
-				LOG("Resampler input latency " << m_inputLatency << " samples");
-			}
 		};
 
 		auto feedOutput = [&](const TAudioOutputs& _outs, const uint32_t _numProcessedSamples)
@@ -315,8 +374,6 @@ namespace synthLib
 					const auto diff = _numProcessedSamples - m_scaledInputSize;
 					m_scaledInput.insertZeroes(diff);
 					m_scaledInputSize += diff;
-					m_outputLatency += static_cast<uint32_t>(diff);
-					LOG("Resampler output latency " << m_outputLatency << " samples");
 				}
 				m_scaledInput.fillPointers(inputs);
 			}

@@ -8,7 +8,7 @@
 #include "je8086devices.h"
 #include "je8080devices.h"
 #include "jeLcd.h"
-#include "sysexRemoteControl.h"
+#include "synthLib/frontPanelSysex.h"
 #include "synthLib/midiBufferParser.h"
 #include "synthLib/midiControllerThinner.h"
 #include "synthLib/midiRateLimiter.h"
@@ -65,6 +65,9 @@ namespace jeLib
 	private:
 		void onReceiveMidiByte(uint8_t _byte);
 		void onReceiveSample(int32_t _left, int32_t _right);
+		// the visible 2 x 20 LCD cells and the CGRAM to the editor
+		void sendLcdText();
+		void sendLcdCgRam();
 		void runDsps();
 		std::vector<uint8_t> runFactoryReset();
 
@@ -116,6 +119,6 @@ namespace jeLib
 		uint32_t m_controllerThinnerClock = 0;
 
 		std::vector<synthLib::SMidiEvent> m_midiOutEvents;
-		SysexRemoteControl m_remote;
+		synthLib::FrontPanelTransport m_frontPanel;
 	};
 }

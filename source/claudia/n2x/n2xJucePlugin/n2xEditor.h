@@ -6,8 +6,7 @@
 
 namespace jucePluginEditorLib
 {
-	class MidiPorts;
-	class FocusedParameter;
+	class ParameterDrivenLed;
 	class Processor;
 }
 
@@ -21,14 +20,11 @@ namespace n2xJucePlugin
 	class Part;
 	class OutputMode;
 	class Lfo;
-	class FocusedParameter;
 	class PatchManager;
 	class Controller;
 
-	class Arp;
 	class Lcd;
 	class MasterVolume;
-	class OctLed;
 	class Parts;
 	class VmMap;
 
@@ -45,12 +41,7 @@ namespace n2xJucePlugin
 
 		void create() override;
 
-		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
-
-		void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) override;
 		
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
-
 		Controller& getN2xController() const { return m_controller; }
 
 //		genericUI::Button<juce::DrawableButton>* createJuceComponent(genericUI::Button<juce::DrawableButton>*, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) override;
@@ -63,12 +54,6 @@ namespace n2xJucePlugin
 		{
 			assert(m_lcd);
 			return *m_lcd;
-		}
-
-		FocusedParameter& getFocusedParameter() const
-		{
-			assert(m_focusedParameter);
-			return *m_focusedParameter;
 		}
 
 		VmMap& getVmMap() const
@@ -94,16 +79,14 @@ namespace n2xJucePlugin
 
 		Controller& m_controller;
 
-		std::unique_ptr<Arp> m_arp;
-		std::unique_ptr<FocusedParameter> m_focusedParameter;
+		std::unique_ptr<jucePluginEditorLib::ParameterDrivenLed> m_arp;
 		std::unique_ptr<Lcd> m_lcd;
 		std::array<std::unique_ptr<Lfo>, 2> m_lfos;
 		std::unique_ptr<MasterVolume> m_masterVolume;
-		std::unique_ptr<OctLed> m_octLed;
+		std::unique_ptr<jucePluginEditorLib::ParameterDrivenLed> m_octLed;
 		std::unique_ptr<OutputMode> m_outputMode;
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<VmMap> m_vmMap;
-		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 
 		std::array<std::string, 4> m_activePatchNames;
 

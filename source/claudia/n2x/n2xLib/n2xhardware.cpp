@@ -1,12 +1,24 @@
 #include "n2xhardware.h"
 
+#include <algorithm>
+
 #include "n2xromloader.h"
 #include "dsp56kBase/audioworkgroup.h"
 #include "dsp56kBase/threadtools.h"
+#include "dsp56kEmu/utils.h"
 #include "synthLib/deviceException.h"
 
 namespace n2x
 {
+	namespace
+	{
+		// a word of a transmitted frame as a signed 24 bit value, zero if the frame has no such slot
+		int32_t txWord(const dsp56k::Audio::TxFrame& _frame, const uint32_t _slot, const uint32_t _transmitter)
+		{
+			return _slot < _frame.size() ? dsp56k::signextend<int32_t, 24>(static_cast<int32_t>(_frame[_slot][_transmitter])) : 0;
+		}
+	}
+
 	constexpr uint32_t g_syncEsaiFrameRate = 16;
 	constexpr uint32_t g_syncHaltDspEsaiThreshold = 32;
 
@@ -32,13 +44,11 @@ namespace n2x
 		, m_dspA(*this, m_uc.getHdi08A(), 0)
 		, m_dspB(*this, m_uc.getHdi08B(), 1)
 		, m_samplerateInv(1.0 / g_samplerate)
-		, m_semDspAtoB(2)
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "No firmware found, expected firmware .bin with a size of " + std::to_string(Rom::MySize) + " bytes");
 
-		m_dspA.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackA(); });
-		m_dspB.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackB(); });
+		initMixer();
 
 		m_ucThread.reset(new std::thread([this]
 		{
@@ -57,6 +67,9 @@ namespace n2x
 		while(m_destroy)
 			processAudio(8,64);
 
+		// a DSP that waits for the other one to catch up returns
+		m_mixer.terminate();
+
 		m_dspA.terminate();
 		m_dspB.terminate();
 
@@ -65,16 +78,10 @@ namespace n2x
 
 		while(!m_dspA.getDSPThread().runThread() || !m_dspB.getDSPThread().runThread())
 		{
-			// DSP A waits for space to push to DSP B
-			m_semDspAtoB.notify();
-
-			if(m_dspB.getPeriph().getEsai().getAudioInputs().full())
-				m_dspB.getPeriph().getEsai().getAudioInputs().pop_front();
-
-			// DSP B waits for ESAI rate limiting and for DSP A to provide audio data
+			// DSP B waits for ESAI rate limiting, a completed frame for room in the mixed output
 			m_haltDSPSem.notify(999999);
-			if(m_dspA.getPeriph().getEsai().getAudioOutputs().empty())
-				m_dspA.getPeriph().getEsai().getAudioOutputs().push_back({});
+			if(!m_mixedOutput.empty())
+				m_mixedOutput.pop_front();
 		}
 
 		m_ucThread->join();
@@ -104,24 +111,7 @@ namespace n2x
 
 		ensureBufferSize(_frames);
 
-		dsp56k::TWord* outputs[12]{nullptr};
-		// slot 0 is the left channel: FST of DSP B is the LRCK of both DACs, which take the left sample while it is high
-		outputs[0] = &m_audioOutputs[0].front();
-		outputs[1] = &m_audioOutputs[1].front();
-		outputs[2] = &m_audioOutputs[2].front();
-		outputs[3] = &m_audioOutputs[3].front();
-		outputs[4] = m_dummyOutput.data();
-		outputs[5] = m_dummyOutput.data();
-		outputs[6] = m_dummyOutput.data();
-		outputs[7] = m_dummyOutput.data();
-		outputs[8] = m_dummyOutput.data();
-		outputs[9] = m_dummyOutput.data();
-		outputs[10] = m_dummyOutput.data();
-		outputs[11] = m_dummyOutput.data();
-
-		auto& esaiB = m_dspB.getPeriph().getEsai();
-
-//		LOG("B out " << esaiB.getAudioOutputs().size() << ", A out " << esaiA.getAudioOutputs().size() << ", B in " << esaiB.getAudioInputs().size());
+		uint32_t offset = 0;
 
 		while (_frames)
 		{
@@ -133,7 +123,7 @@ namespace n2x
 
 			const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
 
-			if(esaiB.getAudioOutputs().size() < requiredSize)
+			if(m_mixedOutput.size() < requiredSize)
 			{
 				// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
 
@@ -141,20 +131,22 @@ namespace n2x
 				m_requestedFrames = requiredSize;
 				m_requestedFramesAvailableCv.wait(uLock, [&]()
 				{
-					if(esaiB.getAudioOutputs().size() < requiredSize)
+					if(m_mixedOutput.size() < requiredSize)
 						return false;
 					m_requestedFrames = 0;
 					return true;
 				});
 			}
 
-			// read output of DSP B to regular audio output
-			esaiB.processAudioOutputInterleaved(outputs, processCount);
+			for(uint32_t i=0; i<processCount; ++i)
+			{
+				const auto frame = m_mixedOutput.pop_front();
 
-			outputs[0] += processCount;
-			outputs[1] += processCount;
-			outputs[2] += processCount;
-			outputs[3] += processCount;
+				for(size_t c=0; c<frame.size(); ++c)
+					m_audioOutputs[c][offset + i] = frame[c];
+			}
+
+			offset += processCount;
 		}
 	}
 	
@@ -184,34 +176,77 @@ namespace n2x
 
 	void Hardware::ensureBufferSize(const uint32_t _frames)
 	{
-		if(m_dummyInput.size() >= _frames)
+		if(m_audioOutputs[0].size() >= _frames)
 			return;
-
-		m_dummyInput.resize(_frames, 0);
-		m_dummyOutput.resize(_frames, 0);
 
 		for (auto& audioOutput : m_audioOutputs)
 			audioOutput.resize(_frames, 0);
-
-		m_dspAtoBBuffer.resize(_frames * 4);
 	}
 
-	void Hardware::onEsaiCallbackA()
+	void Hardware::initMixer()
 	{
-		// forward DSP A output to DSP B input
-		const auto out = m_dspA.getPeriph().getEsai().getAudioOutputs().pop_front();
+		// both lanes before the first frame, see SharedAudioReducer::addProducer
+		m_mixerLaneA = m_mixer.addProducer();
+		m_mixerLaneB = m_mixer.addProducer();
 
-		dsp56k::Audio::RxFrame in;
-		in.resize(out.size());
+		m_mixer.setCompletionCallback([this](uint64_t, const MixFrame& _frame)
+		{
+			onMixedFrame(_frame);
+		});
 
-		in[0] = dsp56k::Audio::RxSlot{out[0][0]};
-		in[1] = dsp56k::Audio::RxSlot{out[1][0]};
-		in[2] = dsp56k::Audio::RxSlot{out[2][0]};
-		in[3] = dsp56k::Audio::RxSlot{out[3][0]};
+		// DSP B outputs a frame of DSP A four frames later: two frames wait in its ESAI input, two in its firmware
+		for(uint32_t i=0; i<4; ++i)
+			m_mixer.addFrame(m_mixerLaneA, {});
 
-		m_dspB.getPeriph().getEsai().getAudioInputs().push_back(in);
+		m_dspA.getPeriph().getEsai().setWriteTxCallback([this](uint64_t& _frameIndex, const dsp56k::Audio::TxFrame& _frame)
+		{
+			++_frameIndex;
 
-		m_semDspAtoB.wait();
+			// DSP B puts the slots 2, 1, 0 and 3 of DSP A on its outputs 0 to 3
+			m_mixer.addFrame(m_mixerLaneA, {txWord(_frame, 2, 0), txWord(_frame, 1, 0), txWord(_frame, 0, 0), txWord(_frame, 3, 0)});
+		});
+
+		m_dspB.getPeriph().getEsai().setReadRxCallback([](uint64_t& _frameIndex, dsp56k::Audio::RxFrame& _frame)
+		{
+			++_frameIndex;
+
+			_frame.resize(4);
+			for(uint32_t i=0; i<4; ++i)
+				_frame[i].fill(0);
+		});
+
+		m_dspB.getPeriph().getEsai().setWriteTxCallback([this](uint64_t& _frameIndex, const dsp56k::Audio::TxFrame& _frame)
+		{
+			++_frameIndex;
+
+			// slot 0 is the left channel: FST of DSP B is the LRCK of both DACs, which take the left sample while it is high
+			m_mixer.addFrame(m_mixerLaneB, {txWord(_frame, 0, 0), txWord(_frame, 1, 0), txWord(_frame, 0, 1), txWord(_frame, 1, 1)});
+
+			onEsaiCallbackB();
+		});
+	}
+
+	void Hardware::onMixedFrame(const MixFrame& _frame)
+	{
+		// DSP B saturates the sum
+		std::array<dsp56k::TWord, 4> out;
+
+		for(size_t i=0; i<out.size(); ++i)
+			out[i] = static_cast<dsp56k::TWord>(std::clamp(_frame[i], -0x800000, 0x7fffff)) & 0xffffff;
+
+		m_mixedOutput.push_back(out);
+
+		m_requestedFramesAvailableMutex.lock();
+
+		if(m_requestedFrames && m_mixedOutput.size() >= m_requestedFrames)
+		{
+			m_requestedFramesAvailableMutex.unlock();
+			m_requestedFramesAvailableCv.notify_one();
+		}
+		else
+		{
+			m_requestedFramesAvailableMutex.unlock();
+		}
 	}
 
 	void Hardware::processMidiInput()
@@ -232,26 +267,12 @@ namespace n2x
 
 	void Hardware::onEsaiCallbackB()
 	{
-		m_semDspAtoB.notify();
-
 		++m_esaiFrameIndex;
 
 		processMidiInput();
 
 		if((m_esaiFrameIndex & (g_syncEsaiFrameRate-1)) == 0)
 			m_esaiFrameAddedCv.notify_one();
-
-		m_requestedFramesAvailableMutex.lock();
-
-		if(m_requestedFrames && m_dspB.getPeriph().getEsai().getAudioOutputs().size() >= m_requestedFrames)
-		{
-			m_requestedFramesAvailableMutex.unlock();
-			m_requestedFramesAvailableCv.notify_one();
-		}
-		else
-		{
-			m_requestedFramesAvailableMutex.unlock();
-		}
 
 		m_haltDSPSem.wait(1);
 	}

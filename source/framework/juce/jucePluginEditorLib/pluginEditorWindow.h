@@ -2,6 +2,11 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+namespace juceRmlUi
+{
+	class RmlComponent;
+}
+
 namespace jucePluginEditorLib
 {
 	class PluginEditorState;
@@ -22,8 +27,16 @@ namespace jucePluginEditorLib
 	private:
 		void setGuiScale(float _percent);
 		void setUiRoot(juce::Component* _component);
+		void updateSizeConstrainer();
+		void onSkinSizeChanged();
+
+		juceRmlUi::RmlComponent* getRmlComponent() const;
+		bool isFreeWindowMode() const;
+		juce::Point<int> constrainSize(const juce::Point<int>& _size) const;
+		void setSizeIfDifferent(const juce::Point<int>& _size);
 
 		juce::Point<int> getSizeForScale(float _percent) const;
+		juce::Point<int> getSizeForSkinScale(float _scale) const;
 		bool isMinimumSize(int _width, int _height) const;
 
 		void timerCallback() override;
@@ -33,6 +46,9 @@ namespace jucePluginEditorLib
 		juce::PropertiesFile& m_config;
 
 	    juce::ComponentBoundsConstrainer m_sizeConstrainer;
+		// editor pixels per skin pixel, which is the GUI scale in percent times the skin's root scale. In the free
+		// window mode it is the zoom and does not depend on the window size.
+		float m_skinScale = 0.0f;
 
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditorWindow)
 	};

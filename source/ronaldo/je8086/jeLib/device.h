@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "state.h"
-#include "sysexRemoteControl.h"
 
 #include "synthLib/device.h"
+#include "synthLib/frontPanelSysex.h"
 
 namespace rLib
 {
@@ -38,8 +38,6 @@ namespace jeLib
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		uint32_t getChannelCountIn() override;
 		uint32_t getChannelCountOut() override;
-		bool setDspClockPercent(uint32_t _percent) override;
-		uint32_t getDspClockPercent() const override;
 		uint64_t getDspClockHz() const override;
 
 		uint32_t getInternalLatencyMidiToOutput() const override;
@@ -71,7 +69,7 @@ namespace jeLib
 		std::vector<synthLib::SMidiEvent> m_midiOut;
 
 		State m_state;
-		SysexRemoteControl m_sysexRemote;
+		synthLib::FrontPanelTransport m_frontPanel;
 
 		baseLib::EventListener<uint8_t, uint8_t, int32_t> m_paramChangedListener;
 

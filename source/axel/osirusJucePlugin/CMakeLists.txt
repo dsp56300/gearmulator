@@ -3,8 +3,6 @@ project(osirusJucePlugin VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	parameterDescriptions_C.json
-	OsirusEditorState.cpp
-	OsirusEditorState.h
 	OsirusProcessor.cpp
 	OsirusProcessor.h
 
@@ -22,4 +20,4 @@ buildSkinHeader()
 
 juce_add_binary_data(osirusJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_SKINS})
 
-createJucePluginWithFX(osirusJucePlugin "Osirus" "TusV" "TusF" osirusJucePlugin_BinaryData virusJucePlugin)
+createJucePluginWithFX(osirusJucePlugin "Osirus" "TusV" "TusF" osirusJucePlugin_BinaryData virusJucePlugin virusLib/device.h virusLib::Device)

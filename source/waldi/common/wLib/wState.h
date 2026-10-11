@@ -18,6 +18,13 @@ namespace wLib
 	class State
 	{
 	public:
+		// who sent a message: the device's firmware or anyone else (host, editor)
+		enum class Origin
+		{
+			Device,
+			External
+		};
+
 		// Saves the state as it will be once the next process() call has applied the edits that wait for it, see
 		// synthLib::Device::getStateWithPendingMidi(). They go to a copy that sends nothing to the device, which gets
 		// them from that call

@@ -14,5 +14,4 @@ public:
 	void setCgRam(std::array<uint8_t, 64>& _data) override;
 
 	bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines) override;
-	const uint8_t* getCharacterData(uint8_t _character) const override;
 };

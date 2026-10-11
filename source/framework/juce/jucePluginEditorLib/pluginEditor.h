@@ -5,8 +5,8 @@
 #include "skin.h"
 
 #include "juceUiLib/editor.h"
+#include "juceUiLib/messageBox.h"
 
-#include "synthLib/buildconfig.h"
 #include "synthLib/midiTypes.h"
 
 #include "baseLib/event.h"
@@ -22,7 +22,6 @@
 
 namespace juce
 {
-	class FileChooser;
 	class TemporaryFile;
 	class File;
 }
@@ -67,6 +66,8 @@ namespace jucePluginEditorLib
 {
 	class SettingsPlugin;
 	class Settings;
+	class FocusedParameter;
+	class MidiPorts;
 
 	class PluginDataModel;
 
@@ -98,42 +99,31 @@ namespace jucePluginEditorLib
 		
 		virtual void create();
 
-		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions&) {}
+		virtual void initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _options);
 		virtual void initPluginDataModel(PluginDataModel& _model);
 
 		static void setEnabled(Rml::Element* _element, bool _enabled);
 
 		bool selectTabWithElement(const Rml::Element* _element) const;
 
-		virtual patchManager::PatchManager* createPatchManager(Rml::Element* _parent) { return nullptr; }
-
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
 		void savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback);
-#if !SYNTHLIB_DEMO_MODE
 		static bool savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const synthLib::SysexBufferList& _presets);
-#endif
 		static std::string createValidFilename(pluginLib::FileType& _type, const juce::File& _file);
-
-		virtual std::pair<std::string, std::string> getDemoRestrictionText() const = 0;
-
-		void showDemoRestrictionMessageBox() const;
 
 		Processor& getProcessor() const { return m_processor; }
 
-		void setPatchManager(patchManager::PatchManager* _patchManager);
-
-		patchManager::PatchManager* getPatchManager() const
-		{
-			return m_patchManager.get();
-		}
+		// the processor's, shown by this editor if its skin has a patch manager
+		patchManager::PatchManager* getPatchManager() const;
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data) override;
 		void getPerInstanceConfig(std::vector<uint8_t>& _data) override;
 
 		virtual void saveChunkData(baseLib::BinaryStream& _s);
 		virtual void loadChunkData(baseLib::ChunkReader& _cr);
+
 
 		virtual void setCurrentPart(uint8_t _part);
 
@@ -176,6 +166,14 @@ namespace jucePluginEditorLib
 
 		void registerDragAndDropFile(const juce::File& _file);
 		void registerDragAndDropTempFile(std::shared_ptr<juce::TemporaryFile>&& _tempFile);
+
+		// exist from the end of create() on
+		FocusedParameter* getFocusedParameter() const { return m_focusedParameter.get(); }
+		MidiPorts* getMidiPorts() const { return m_midiPorts.get(); }
+
+		// the parameter that the focused parameter display shows changed, an empty name hides it. Runs once during
+		// create() already, before a product created its own widgets
+		virtual void onFocusedParameterChanged(const std::string& _name, const std::string& _value) {}
 
 		rmlPlugin::RmlPlugin* getRmlPlugin() const { return m_rmlPlugin.get(); }
 		juceRmlUi::RmlComponent* getRmlComponent() const { return m_rmlComponent.get(); }
@@ -243,11 +241,9 @@ namespace jucePluginEditorLib
 
 		std::map<std::string, std::vector<char>> m_fileCache;
 
-		std::unique_ptr<juce::FileChooser> m_fileChooser;
-		std::unique_ptr<patchManager::PatchManager> m_patchManager;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_fileChooser;
 		std::unique_ptr<patchManagerRml::PatchManagerDataModel> m_patchManagerDataModel;
 		std::unique_ptr<PluginDataModel> m_pluginDataModel;
-		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
 
@@ -260,6 +256,9 @@ namespace jucePluginEditorLib
 		pluginLib::Parameter* m_midiLearnSelectedParam = nullptr;
 
 		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
+
+		std::unique_ptr<FocusedParameter> m_focusedParameter;
+		std::unique_ptr<MidiPorts> m_midiPorts;
 
 		std::unique_ptr<Settings> m_settings;
 

@@ -16,20 +16,9 @@ namespace jucePluginEditorLib
 {
 	namespace
 	{
-		Editor* getEditor(Processor& _processor)
-		{
-			auto* editorState = _processor.getEditorState();
-			if (!editorState)
-				return nullptr;
-			return editorState->getEditor();
-		}
-
 		patchManager::PatchManager* getPatchManager(Processor& _processor)
 		{
-			auto* editor = getEditor(_processor);
-			if (!editor)
-				return nullptr;
-			return editor->getPatchManager();
+			return _processor.getPatchManager();
 		}
 
 		template<typename F>
@@ -146,7 +135,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					const auto& state = pm->getState();
 					const auto patchKey = state.getPatch(static_cast<uint32_t>(part));
@@ -209,7 +198,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					std::vector<pluginLib::patchDB::DataSourceNodePtr> dataSources;
 					pm->getDataSources(dataSources);
@@ -254,7 +243,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					pluginLib::patchDB::SearchRequest req;
 
@@ -351,7 +340,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					auto search = pm->getSearch(handle);
 					if (!search)
@@ -422,7 +411,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					auto search = pm->getSearch(handle);
 					if (!search)
@@ -472,7 +461,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					pluginLib::patchDB::SearchRequest req;
 
@@ -554,7 +543,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					const bool success = dir > 0
 						? pm->selectNextPreset(static_cast<uint32_t>(part))
@@ -610,7 +599,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					const auto currentPatch = pm->requestPatchForPart(static_cast<uint32_t>(part));
 					if (!currentPatch)
@@ -697,7 +686,7 @@ namespace jucePluginEditorLib
 				{
 					auto* pm = getPatchManager(_processor);
 					if (!pm)
-						throw std::runtime_error("Patch manager not available (editor may not be open)");
+						throw std::runtime_error("Patch manager not available");
 
 					const auto& state = pm->getState();
 					const auto patchKey = state.getPatch(static_cast<uint32_t>(part));

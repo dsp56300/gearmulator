@@ -23,8 +23,6 @@ set(SOURCES
 	VirusController.h
 	VirusEditor.cpp
 	VirusEditor.h
-	VirusEditorState.cpp
-	VirusEditorState.h
 	VirusProcessor.cpp
 	VirusProcessor.h
 )

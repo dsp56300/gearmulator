@@ -9,7 +9,6 @@ set(SOURCES
 	storage.cpp storage.h
 	romDescramble.h
 	rolandSysex.h
-	sysexRemoteControl.cpp sysexRemoteControl.h
 	jit_x64_types.h
 	jit_x64_regpool.h
 	jit_x64_regpool.cpp
@@ -20,7 +19,7 @@ source_group("source" FILES ${SOURCES})
 
 set_property(TARGET rLib PROPERTY FOLDER "Ronaldo")
 
-target_link_libraries(rLib PUBLIC asmjit synthLib hardwareLib dsp56kBase)
+target_link_libraries(rLib PUBLIC asmjit synthLib dsp56kBase)
 
 target_include_directories(rLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
