@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <functional>
 #include <memory>
 #include <string>
@@ -32,6 +33,9 @@ namespace juce
 
 namespace jucePluginEditorLib
 {
+	// the GUI scales in percent the settings and the context menu offer, and Ctrl with the wheel or + and - steps through
+	constexpr std::array<int, 12> g_guiScales{50, 65, 75, 85, 100, 125, 150, 175, 200, 250, 300, 400};
+
 	struct WindowSize
 	{
 		int width = 0;
@@ -118,6 +122,9 @@ namespace jucePluginEditorLib
 	private:
 		void setGuiScale(int _scale) const;
 
+		// the next GUI scale up for _steps > 0, the next down for _steps < 0
+		void zoomGui(int _steps) const;
+
 		std::unique_ptr<Editor> m_editor;
 		Skin m_currentSkin;
 		float m_rootScale = 1.0f;
@@ -126,6 +133,9 @@ namespace jucePluginEditorLib
 		WindowSize m_freeWindowSize;
 		std::string m_skinFolderName;
 		std::unique_ptr<bridgeClient::ServerList> m_remoteServerList;
+
+		// the wheel with Ctrl, a step of the GUI scale for each notch of it
+		float m_zoomWheel = 0.0f;
 	};
 
 	// The editor state of a product that only needs to create its editor. A product that overrides more, such as

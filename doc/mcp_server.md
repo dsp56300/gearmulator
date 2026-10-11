@@ -543,6 +543,7 @@ Simulate a key press, release, or full press+release.
 | Digits | `0` through `9` |
 | Navigation | `left`, `right`, `up`, `down`, `home`, `end`, `pageup`, `pagedown` |
 | Editing | `backspace`, `delete`, `insert`, `tab`, `space`, `return` / `enter`, `escape` / `esc` |
+| Symbols | `plus` / `+`, `minus` / `-` |
 | Function | `f1` through `f12` |
 
 #### `send_text`

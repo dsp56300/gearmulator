@@ -242,6 +242,8 @@ namespace jucePluginEditorLib
 			if (_name == "end")      return Rml::Input::KI_END;
 			if (_name == "pageup")   return Rml::Input::KI_PRIOR;
 			if (_name == "pagedown") return Rml::Input::KI_NEXT;
+			if (_name == "plus" || _name == "+")  return Rml::Input::KI_OEM_PLUS;
+			if (_name == "minus" || _name == "-") return Rml::Input::KI_OEM_MINUS;
 
 			// F-keys
 			if (_name == "f1")  return Rml::Input::KI_F1;
@@ -1052,7 +1054,7 @@ namespace jucePluginEditorLib
 		{
 			mcpServer::ToolDef tool;
 			tool.name = "send_key";
-			tool.description = "Simulate a key press, release, or press+release. Supported key names: a-z, 0-9, space, return/enter, escape/esc, backspace, delete, insert, tab, left, right, up, down, home, end, pageup, pagedown, f1-f12.";
+			tool.description = "Simulate a key press, release, or press+release. Supported key names: a-z, 0-9, space, return/enter, escape/esc, backspace, delete, insert, tab, left, right, up, down, home, end, pageup, pagedown, plus/+, minus/-, f1-f12.";
 			tool.inputSchema.addProperty("key", "string", "Key name (e.g. 'space', 'return', 'a', 'f1', 'up')", true);
 			tool.inputSchema.addEnumProperty("action", "Key action (default: 'press' = down+up)", {"press", "down", "up"}, false);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);

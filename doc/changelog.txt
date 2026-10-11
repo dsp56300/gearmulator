@@ -96,6 +96,11 @@ Framework:
 - [Fix] DSPBridge: The tcpPort setting of the server had no effect, the server
         always used port 56362.
 
+- [Imp] Ctrl and the mouse wheel, or Ctrl and + and -, change the GUI scale
+        in the steps of the GUI Scale menu, Cmd on macOS. A control under the
+        mouse that takes the wheel itself keeps it. The GUI Scale menu offers
+        400% now, as the settings do.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
