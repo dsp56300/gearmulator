@@ -696,7 +696,9 @@ namespace xtJucePlugin
 
 	bool Controller::isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const
 	{
-		if(_derived.getDescription().page >= 100)
+		// multi, global, soft knob and controller parameters are not in the single dump, and a parameter
+		// missing there counts as derived. They are never derived
+		if(_derived.getDescription().page >= g_pageMulti)
 			return false;
 
 		return isDerivedParameterInPacket(g_midiPacketNames[SingleDump], _derived, _base);
