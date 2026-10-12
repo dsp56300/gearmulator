@@ -2,10 +2,9 @@
 
 #include <atomic>
 
-#include "dsp56kBase/ringbuffer.h"
-
 #include "dsp56kEmu/types.h"
 
+#include "synthLib/midiInputQueue.h"
 #include "synthLib/midiTypes.h"
 
 namespace dsp56k
@@ -39,6 +38,9 @@ namespace virusLib
 
 		void add(const synthLib::SMidiEvent& ev);
 
+		// moves events that did not fit into the queue to the DSP into it as far as it has room, by the thread that adds
+		void refill();
+
 		void onAudioWritten();
 
 		// TI family, call once the OS runs: send every event with the sample at which the OS is to play it
@@ -55,7 +57,8 @@ namespace virusLib
 		bool m_isTI;
 		bool m_needsMidiHeartbeat;
 
-		dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
+		// written before a block, read by the DSP thread. Events that do not fit wait instead of overwriting unread ones
+		synthLib::MidiInputQueue m_pendingMidiEvents;
 
 		uint32_t m_numSamplesWritten = 0;
 		uint32_t m_lastMidiSample = 0;

@@ -68,8 +68,6 @@ namespace virus
 		std::vector<virusLib::ROMFile>      m_roms;
 	    const virusLib::DeviceModel			m_defaultModel;
 
-		uint32_t							m_clockTempoParam = 0xffffffff;
-
 		baseLib::EventListener<uint32_t>	m_onFirmwareChanged;
 	};
 }

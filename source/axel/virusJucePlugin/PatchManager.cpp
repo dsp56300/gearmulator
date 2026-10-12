@@ -110,6 +110,7 @@ namespace genericVirusUI
 
 			if (index < banks.size() && _program == banks[index].size() - 1)
 			{
+				updateRamBank(index);
 				// a refresh keeps the data source, with the MIDI bank number the user gave it
 				const auto ds = createDataSource(index);
 				if (const auto existing = getDataSource(ds))
@@ -125,7 +126,10 @@ namespace genericVirusUI
 			for (uint32_t i = 0; i < 2 && i < banks.size(); ++i)
 			{
 				if (!banks[i][0].data.empty())
+				{
+					updateRamBank(i);
 					addDataSource(createDataSource(i));
+				}
 			}
 		}
 
@@ -163,32 +167,52 @@ namespace genericVirusUI
 
 	bool PatchManager::loadRamBankData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
-		const auto& singles = m_controller.getSinglePresets();
-
-		if (_bank >= singles.size())
+		if (_bank >= m_ramBanks.size())
 			return false;
 
-		const auto& bank = singles[_bank];
+		std::lock_guard lock(m_ramBanksMutex);
+
+		const auto& bank = m_ramBanks[_bank];
 
 		if (_program != pluginLib::patchDB::g_invalidProgram)
 		{
 			if (_program >= bank.size())
 				return false;
 			const auto& s = bank[_program];
-			if (s.data.empty())
+			if (s.empty())
 				return false;
-			_results.push_back(s.data);
+			_results.push_back(s);
 		}
 		else
 		{
 			_results.reserve(bank.size());
 			for (const auto& patch : bank)
 			{
-				if (!patch.data.empty())
-					_results.push_back(patch.data);
+				if (!patch.empty())
+					_results.push_back(patch);
 			}
 		}
 		return !_results.empty();
+	}
+
+	void PatchManager::updateRamBank(const uint32_t _bank)
+	{
+		if (_bank >= m_ramBanks.size())
+			return;
+
+		const auto& singles = m_controller.getSinglePresets();
+
+		std::vector<pluginLib::patchDB::Data> bank;
+
+		if (_bank < singles.size())
+		{
+			bank.reserve(singles[_bank].size());
+			for (const auto& patch : singles[_bank])
+				bank.push_back(patch.data);
+		}
+
+		std::lock_guard lock(m_ramBanksMutex);
+		m_ramBanks[_bank] = std::move(bank);
 	}
 
 	bool PatchManager::loadRomBankData(pluginLib::patchDB::DataList& _results, const uint32_t _romBank, const uint32_t _program)

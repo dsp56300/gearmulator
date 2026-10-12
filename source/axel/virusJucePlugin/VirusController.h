@@ -11,11 +11,13 @@
 #include "virusLib/microcontrollerTypes.h"
 #include "virusLib/romfile.h"
 
+#include <atomic>
+
 namespace virus
 {
 	class VirusProcessor;
 
-    class Controller : public pluginLib::Controller
+    class Controller : public pluginLib::Controller, juce::AsyncUpdater
     {
     public:
 		baseLib::Event<virusLib::FrontpanelState> onFrontPanelStateChanged;
@@ -184,7 +186,12 @@ namespace virus
 
 		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) override;
 
+		// audio thread: the host tempo in units of the Clock Tempo parameter, which follows it on the message thread
+		void setHostClockTempo(int _value);
+
     private:
+		void handleAsyncUpdate() override;
+
         Singles m_singles;
         SinglePatch m_singleEditBuffer;                     // single mode
         std::array<SinglePatch, 16> m_singleEditBuffers;    // multi mode
@@ -208,5 +215,10 @@ namespace virus
 		baseLib::EventListener<uint32_t> m_onRomChanged;
         virusLib::FrontpanelState m_frontpanelState;
         std::atomic<bool> m_multiMode = false;
+
+		pluginLib::Parameter* m_clockTempo = nullptr;
+		std::atomic<int> m_hostClockTempo{-1};			// -1 = the host did not tell a tempo yet
+		std::atomic<int> m_clockTempoValue{-1};			// the value of m_clockTempo, for the audio thread
+		baseLib::EventListener<pluginLib::Parameter*> m_onClockTempoChanged;
     };
 }; // namespace Virus

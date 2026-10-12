@@ -8,6 +8,8 @@
 #include "romfile.h"
 #include "microcontroller.h"
 
+#include <atomic>
+
 namespace synthLib
 {
 	struct DspMemoryPatch;
@@ -51,6 +53,8 @@ namespace virusLib
 		static void bootDSPs(DspSingle* _dspA, DspSingle* _dspB, const ROMFile& _rom, bool _createDebugger);
 		
 		bool canModifyDspClock() const override { return true; }
+		bool setDspClockPercent(uint32_t _percent) override;
+		uint32_t getDspClockPercent() const override;
 
 		static void applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom);
 		void applyDspMemoryPatches() const;
@@ -62,6 +66,7 @@ namespace virusLib
 		void getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const override;
 		void onAudioWritten();
 		static void configureDSP(DspSingle& _dsp, const ROMFile& _rom, float _samplerate);
+		static void configureClock(DspSingle& _dsp, const ROMFile& _rom, float _samplerate);
 
 		const ROMFile m_rom;
 
@@ -71,6 +76,7 @@ namespace virusLib
 
 		bool m_midiTimestamps = false;
 		float m_samplerate;
+		std::atomic<uint32_t> m_dspClockPercent;	// the clock itself changes later, on the DSP thread
 		FrontpanelState m_frontpanelStateDSP;
 		synthLib::SMidiEvent m_frontpanelStateMidiEvent;
 	};

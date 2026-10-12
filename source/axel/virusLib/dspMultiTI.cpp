@@ -142,11 +142,16 @@ namespace virusLib
 
 	DspMultiTI::~DspMultiTI()
 	{
+		stopDSPThread();
+	}
+
+	void DspMultiTI::stopDSPThread()
+	{
 		// each DSP waits for the other one, both have to stop before either goes away
 		m_toSlave.close();
 		m_toMaster.close();
 
-		stopDSPThread();
+		DspSingle::stopDSPThread();
 		m_dsp2.stopDSPThread();
 	}
 

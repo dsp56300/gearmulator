@@ -12,6 +12,14 @@ namespace genericVirusUI
 {
 	PartButton::PartButton(Rml::Element* _button, VirusEditor& _editor) : jucePluginEditorLib::PartButton(_button, _editor), m_editor(_editor)
 	{
+		std::lock_guard lock(getInstancesMutex());
+		getInstances().insert(this);
+	}
+
+	PartButton::~PartButton()
+	{
+		std::lock_guard lock(getInstancesMutex());
+		getInstances().erase(this);
 	}
 
 	void PartButton::onClick(Rml::Event& _e)
@@ -27,12 +35,12 @@ namespace genericVirusUI
 	void PartButton::selectPreset(const Rml::Event& _event, uint8_t _part) const
 	{
 		auto eventMousePos = juceRmlUi::helper::getMousePos(_event);
-		auto* eventTargetElem = _event.GetTargetElement();
 
 		pluginLib::patchDB::SearchRequest req;
 		req.sourceType = pluginLib::patchDB::SourceType::Rom;
 
-		m_editor.getPatchManager()->search(std::move(req), [this, eventMousePos, eventTargetElem](const pluginLib::patchDB::Search& _search)
+		// called on the loader thread, this button and its element may be gone by the time the message thread runs the menu
+		m_editor.getPatchManager()->search(std::move(req), [this, eventMousePos](const pluginLib::patchDB::Search& _search)
 		{
 			std::map<std::string, std::vector<pluginLib::patchDB::PatchPtr>> patches;
 
@@ -55,8 +63,11 @@ namespace genericVirusUI
 				});
 			}
 
-			juce::MessageManager::callAsync([this, patches = std::move(patches), eventMousePos, eventTargetElem]
+			juce::MessageManager::callAsync([this, patches = std::move(patches), eventMousePos]
 			{
+				if(!isAlive(this))
+					return;
+
 				const auto currentPatch = m_editor.getPatchManager()->getState().getPatch(getPart());
 
 				juceRmlUi::Menu selector;
@@ -70,14 +81,35 @@ namespace genericVirusUI
 						const bool checked = pluginLib::patchDB::PatchKey(*patch) == currentPatch;
 		                p.addEntry(presetName, true, checked, [this, patch]
 		                {
+							if(!isAlive(this))
+								return;
 							if(m_editor.getPatchManager()->activatePatch(patch, getPart()))
 								m_editor.getPatchManager()->setSelectedPatch(getPart(), patch);
 		                });
 					}
 		            selector.addSubMenu(it.first, std::move(p));
 				}
-				selector.runModal(eventTargetElem, eventMousePos, 16);
+				// the button, not the target of the click: setButtonText() replaces the elements inside of it
+				selector.runModal(getElement(), eventMousePos, 16);
 			});
 		});
+	}
+
+	std::mutex& PartButton::getInstancesMutex()
+	{
+		static std::mutex mutex;
+		return mutex;
+	}
+
+	std::set<const PartButton*>& PartButton::getInstances()
+	{
+		static std::set<const PartButton*> instances;
+		return instances;
+	}
+
+	bool PartButton::isAlive(const PartButton* _button)
+	{
+		std::lock_guard lock(getInstancesMutex());
+		return getInstances().find(_button) != getInstances().end();
 	}
 }
