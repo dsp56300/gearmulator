@@ -38,14 +38,18 @@ int mcpDiscoveryChild(const int _argc, char* _argv[])
 
 	const int index = std::stoi(_argv[2]);
 
+	// the exit code is the number of registrations that ran without the lock
+	int unlocked = 0;
+
 	for (int i = 0; i < g_entriesPerProcess; ++i)
 	{
 		mcpServer::DiscoveryEntry entry;
 		entry.pluginName = "child" + std::to_string(index);
 		entry.port = index * 1000 + i;
-		mcpServer::DiscoveryFile::registerInstance(entry);
+		if (!mcpServer::DiscoveryFile::registerInstance(entry))
+			++unlocked;
 	}
-	return 0;
+	return unlocked;
 }
 
 void testMcpDiscovery()
@@ -65,21 +69,26 @@ void testMcpDiscovery()
 		TEST_ASSERT(children.back()->start(juce::StringArray{exe, g_childArg, juce::String(i)}, 0));
 	}
 
+	uint32_t unlocked = 0;
+
 	for (const auto& child : children)
 	{
 		TEST_ASSERT(child->waitForProcessToFinish(60000));
-		TEST_ASSERT(child->getExitCode() == 0);
+		unlocked += child->getExitCode();
 	}
 
 	const auto instances = mcpServer::DiscoveryFile::readInstances();
 
 	setFileVar("");
 	file.deleteFile();
+	juce::File(file.getFullPathName() + ".lock").deleteFile();
 
 	std::set<int> ports;
 	for (const auto& e : instances)
 		ports.insert(e.port);
 
-	std::cout << "  " << ports.size() << " of " << g_processCount * g_entriesPerProcess << " entries" << std::endl;
+	std::cout << "  " << ports.size() << " of " << g_processCount * g_entriesPerProcess << " entries, "
+		<< unlocked << " registrations without the lock" << std::endl;
+	TEST_ASSERT(unlocked == 0);
 	TEST_ASSERT(ports.size() == static_cast<size_t>(g_processCount * g_entriesPerProcess));
 }
