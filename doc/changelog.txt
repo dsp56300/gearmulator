@@ -349,6 +349,10 @@ JE8086:
         rarely. At startup the Patch Manager could also read its list of ROM
         banks while it was still being filled.
 
+- [Fix] The performances of a rack ROM read one byte past their common block as
+        its last parameter, the vocal upper input jack, which could leave it at
+        a random value.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the
