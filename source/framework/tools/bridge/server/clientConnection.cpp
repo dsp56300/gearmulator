@@ -29,6 +29,9 @@ namespace bridgeServer
 		}
 
 		m_midiIn.reserve(1024);
+
+		// last, the thread dispatches to us and fills our members as soon as the client's first command is in
+		start();
 	}
 
 	ClientConnection::~ClientConnection()
@@ -137,10 +140,11 @@ namespace bridgeServer
 
 	void ClientConnection::sendDeviceState(const synthLib::StateType _type)
 	{
+		std::scoped_lock lock(m_mutexDeviceState);
+
 		if(!m_device)
 			return;
 
-		std::scoped_lock lock(m_mutexDeviceState);
 		auto& state = getDeviceState();
 		state.type = _type;
 
@@ -178,6 +182,12 @@ namespace bridgeServer
 		TcpConnection::handleDeviceState(_in);
 	}
 
+	bridgeLib::DeviceState ClientConnection::getLastDeviceState()
+	{
+		std::scoped_lock lock(m_mutexDeviceState);
+		return getDeviceState();
+	}
+
 	void ClientConnection::handleException(const networkLib::NetException& _e)
 	{
 		exit(true);
@@ -192,6 +202,7 @@ namespace bridgeServer
 			return;
 		}
 
+		std::scoped_lock lock(m_mutexDeviceState);
 		m_device->setSamplerate(_params.samplerate);
 		sendDeviceInfo();
 	}
@@ -204,6 +215,7 @@ namespace bridgeServer
 			return;
 		}
 
+		std::scoped_lock lock(m_mutexDeviceState);
 		m_device->setDspClockPercent(_params.percent);
 		sendDeviceInfo();
 	}
@@ -216,6 +228,7 @@ namespace bridgeServer
 			return;
 		}
 
+		std::scoped_lock lock(m_mutexDeviceState);
 		m_device->setStateFromUnknownCustomData(_params.data);
 		sendDeviceInfo();
 	}
@@ -249,9 +262,9 @@ namespace bridgeServer
 		baseLib::filesystem::createDirectory(m_deviceCreateParams.homePath + "roms/");
 
 		std::string error;
-		m_device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc, error);
+		auto* device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc, error);
 
-		if(!m_device)
+		if(!device)
 		{
 			errorClose(bridgeLib::ErrorCode::FailedToCreateDevice, error);
 			return;
@@ -262,6 +275,10 @@ namespace bridgeServer
 
 		// recover a previously lost connection if possible
 		const auto cachedDeviceState = m_server.getCachedDeviceState(d.sessionId);
+
+		std::scoped_lock lock(m_mutexDeviceState);
+
+		m_device = device;
 
 		if(cachedDeviceState.isValid())
 		{

@@ -10,6 +10,7 @@ namespace networkLib
 	{
 	public:
 		TcpClient(std::string _host, uint32_t _port, OnConnectedFunc _onConnected);
+		~TcpClient() override;
 	protected:
 		void threadFunc() override;
 	private:

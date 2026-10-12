@@ -61,6 +61,7 @@ namespace bridgeClient
 
 	float RemoteDevice::getSamplerate() const
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		return m_deviceDesc.samplerate;
 	}
 
@@ -79,8 +80,7 @@ namespace bridgeClient
 			// if there is no valid connection anymore attempt to grab the latest state that was sent
 			if(!m_connection)
 				return;
-			auto& state = static_cast<bridgeLib::TcpConnection*>(m_connection.get())->getDeviceState();
-			_state.insert(_state.end(), state.state.begin(), state.state.end());
+			m_connection->getLastDeviceState(_state);
 		});
 	}
 
@@ -93,11 +93,13 @@ namespace bridgeClient
 
 	uint32_t RemoteDevice::getChannelCountIn()
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		return m_deviceDesc.inChannels;
 	}
 
 	uint32_t RemoteDevice::getChannelCountOut()
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		return m_deviceDesc.outChannels;
 	}
 
@@ -112,31 +114,37 @@ namespace bridgeClient
 
 	uint32_t RemoteDevice::getDspClockPercent() const
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		return m_deviceDesc.dspClockPercent;
 	}
 
 	uint64_t RemoteDevice::getDspClockHz() const
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		return m_deviceDesc.dspClockHz;
 	}
 
 	uint32_t RemoteDevice::getInternalLatencyInputToOutput() const
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		return m_deviceDesc.latencyInToOut;
 	}
 
 	uint32_t RemoteDevice::getInternalLatencyMidiToOutput() const
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		return m_deviceDesc.latencyMidiToOut;
 	}
 
 	void RemoteDevice::getPreferredSamplerates(std::vector<float>& _dst) const
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		_dst = m_deviceDesc.preferredSamplerates;
 	}
 
 	void RemoteDevice::getSupportedSamplerates(std::vector<float>& _dst) const
 	{
+		std::lock_guard lock(m_cvWaitMutex);
 		_dst = m_deviceDesc.supportedSamplerates;
 	}
 

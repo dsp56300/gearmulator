@@ -33,6 +33,9 @@ namespace bridgeServer
 
 		const auto& getPluginDesc() const { return m_pluginDesc; }
 
+		// a copy, as our thread may still receive a state while the server looks at it
+		bridgeLib::DeviceState getLastDeviceState();
+
 	private:
 		void sendDeviceInfo();
 		void createDevice();
@@ -57,6 +60,8 @@ namespace bridgeServer
 
 		bool m_romRequested = false;
 
+		// Guards m_device, the device itself and TcpConnection::getDeviceState(). A device expects one call at a
+		// time, and the server's periodic state backup calls it from the main thread while our thread runs it.
 		std::mutex m_mutexDeviceState;
 	};
 }

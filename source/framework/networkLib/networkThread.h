@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <memory>
 #include <thread>
 
@@ -22,6 +23,6 @@ namespace networkLib
 
 	private:
 		std::unique_ptr<std::thread> m_thread;
-		bool m_exit = false;
+		std::atomic<bool> m_exit{false};	// set by stop() on another thread
 	};
 }

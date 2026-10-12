@@ -3,6 +3,7 @@
 #include <ptypes/pinet.h>
 
 #include "bridgeLib/types.h"
+#include "networkLib/exception.h"
 #include "networkLib/logging.h"
 
 namespace bridgeServer
@@ -11,10 +12,10 @@ namespace bridgeServer
 		: m_config(_argc, _argv)
 		, m_plugins(m_config)
 		, m_romPool(m_config)
+		, m_lastDeviceStateUpdate(std::chrono::system_clock::now())
 		, m_udpServer(m_config.portTcp)
 		, m_tcpServer([this](std::unique_ptr<networkLib::TcpStream> _stream){onClientConnected(std::move(_stream));}
 		, static_cast<int>(m_config.portTcp))
-		, m_lastDeviceStateUpdate(std::chrono::system_clock::now())
 	{
 	}
 
@@ -22,7 +23,8 @@ namespace bridgeServer
 	{
 		exit(true);
 		m_cvWait.notify_one();
-		m_clients.clear();
+
+		// The clients go with the members, after the TCP server stopped adding new ones
 	}
 
 	void Server::run()
@@ -58,6 +60,9 @@ namespace bridgeServer
 
 	bridgeLib::DeviceState Server::getCachedDeviceState(const bridgeLib::SessionId& _id)
 	{
+		// called by a client's thread
+		std::scoped_lock lock(m_mutexCachedDeviceStates);
+
 		const auto it = m_cachedDeviceStates.find(_id);
 
 		if(it == m_cachedDeviceStates.end())
@@ -80,10 +85,14 @@ namespace bridgeServer
 			const auto& c = *it;
 			if(!c->isValid())
 			{
-				const auto& deviceState = c->getDeviceState();
+				// its thread may still be running until the client is destroyed below
+				const auto deviceState = c->getLastDeviceState();
 
 				if(deviceState.isValid())
+				{
+					std::scoped_lock lockCache(m_mutexCachedDeviceStates);
 					m_cachedDeviceStates[c->getPluginDesc().sessionId] = deviceState;
+				}
 
 				it = m_clients.erase(it);
 				LOGNET(networkLib::LogLevel::Info, "Client removed, now " << m_clients.size() << " clients left");
@@ -109,6 +118,18 @@ namespace bridgeServer
 		m_lastDeviceStateUpdate = now;
 
 		for (const auto& c : m_clients)
-			c->sendDeviceState(synthLib::StateTypeGlobal);
+		{
+			// A client can lose its connection at any time, its own thread handles that. Here, it must not end
+			// run(), which would restart the server and drop all other clients.
+			try
+			{
+				if(c->isValid())
+					c->sendDeviceState(synthLib::StateTypeGlobal);
+			}
+			catch(const networkLib::NetException& e)
+			{
+				LOGNET(networkLib::LogLevel::Warning, "Failed to send device state backup: " << e.what());
+			}
+		}
 	}
 }

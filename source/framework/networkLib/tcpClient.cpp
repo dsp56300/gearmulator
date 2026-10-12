@@ -15,6 +15,13 @@ namespace networkLib
 		start();
 	}
 
+	TcpClient::~TcpClient()
+	{
+		// Join the worker thread before the members go. It may still be connecting and then calls the callback,
+		// which TcpConnection's destructor destroys before NetworkThread's destructor would stop() the thread.
+		stop();
+	}
+
 	void TcpClient::threadFunc()
 	{
 		auto* stream = new ptypes::ipstream(m_host.c_str(), static_cast<int>(m_port));
