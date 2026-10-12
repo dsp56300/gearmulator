@@ -344,6 +344,11 @@ JE8086:
         the keyboard ROM the plugin uses itself, so a rack ROM could run
         remotely while the plugin expected a keyboard.
 
+- [Fix] Host automation and the device's replies could change the plugin's copy
+        of the current sound at the same time, which could crash the plugin,
+        rarely. At startup the Patch Manager could also read its list of ROM
+        banks while it was still being filled.
+
 88emuPlayer:
 
 - [New] 88EmuCli: `--video` renders a song to an h264/AAC video showing the

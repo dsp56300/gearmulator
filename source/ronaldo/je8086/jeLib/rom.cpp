@@ -232,7 +232,9 @@ namespace jeLib
 		// we always use the keyboard part size, as the last byte of the rack doesn't seem to be serialized (garbage in there)
 		constexpr auto partSize = static_cast<size_t>(Part::DataLengthKeyboard);
 
-		auto performanceCommon = createPreset<PerformanceCommon>(addressBase, _presetData, 0, performanceCommonSize);
+		// the byte behind the rack's common block is not its last parameter (vocal upper input jack, 0/1), it holds
+		// anything from 00 to a3. As for the parts, parse the keyboard length
+		auto performanceCommon = createPreset<PerformanceCommon>(addressBase, _presetData, 0, static_cast<size_t>(PerformanceCommon::DataLengthKeyboard));
 
 		auto off = performanceCommonSize - 3; /* three times 14 bit data which is 8 bit in rom */
 
