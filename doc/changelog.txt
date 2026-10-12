@@ -392,6 +392,10 @@ JE8086:
         ignored, among them F0 41 10 42 12 0C 20 04 01 4F F7, which switches
         the SC-88Pro into its SC-88 mode the way SELECT+ALL does.
 
+- [Fix] SC-88 family, SC-8820, SC-8850, NU-10B, MIIG5: A few calculations in
+        the XP sound chip relied on behaviour that C++ leaves undefined, which
+        an optimising compiler is free to break. The sound does not change.
+
 2.2.25:
 
 88emuPlayer:

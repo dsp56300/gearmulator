@@ -215,7 +215,7 @@ namespace xpLib
 		if (function == 0)
 			return 0;
 		if (function <= 12)
-			return static_cast<int32_t>(dspOps::signExtend(_cram & 0x3fff, 14) << g_coefficientShifts[_cram >> 14]);
+			return static_cast<int32_t>(dspOps::cramCoefficient(_cram));
 		if (function == 13)
 		{
 			// Bit 15 shifts the unsigned 15-bit field into the guard bits; without it the field is sign-extended
