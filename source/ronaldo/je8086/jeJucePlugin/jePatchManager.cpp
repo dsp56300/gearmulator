@@ -22,14 +22,15 @@ namespace jeJucePlugin
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 
-		PatchManager::startLoaderThread();
-
 		const auto& roms = _processor.getRoms();
 
 		// add each device type only once
 		std::set<jeLib::DeviceType> knownDeviceTypes;
 
 		uint32_t bankIndex = 0;
+
+		// The loader thread reads m_presetsPerBank (loadRomData), so the table is complete before it starts
+		std::vector<pluginLib::patchDB::DataSource> romBanks;
 
 		for (const auto& rom : roms)
 		{
@@ -48,7 +49,7 @@ namespace jeJucePlugin
 			for (auto p : presets)
 				m_presetsPerBank.emplace_back(std::move(p));
 
-			auto addRomBank = [this, &bankIndex](const std::string& _name)
+			auto addRomBank = [&romBanks, &bankIndex](const std::string& _name)
 			{
 				pluginLib::patchDB::DataSource ds;
 				ds.type = pluginLib::patchDB::SourceType::Rom;
@@ -56,7 +57,7 @@ namespace jeJucePlugin
 				ds.name = _name;
 				ds.midiBankNumber = bankIndex;
 				++bankIndex;
-				addDataSource(ds);
+				romBanks.push_back(std::move(ds));
 			};
 
 			if (presets.size() == 3)
@@ -82,6 +83,11 @@ namespace jeJucePlugin
 				addRomBank("Rack - Performance P4:11 - P4:88");
 			}
 		}
+
+		PatchManager::startLoaderThread();
+
+		for (const auto& ds : romBanks)
+			addDataSource(ds);
 	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)

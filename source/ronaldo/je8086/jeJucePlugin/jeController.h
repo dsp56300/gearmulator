@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "jeLcd.h"
 #include "jeTypes.h"
 #include "jeLib/jemiditypes.h"
@@ -71,6 +73,11 @@ namespace jeJucePlugin
 
 		void setPatchName(PatchType _type, const std::string& _name);
 
+		void receiveState(const synthLib::SysexBuffer& _sysex);
+
+		// sendParameterChange writes the mirror on whatever thread the host automates from, the
+		// device's replies and the patch manager use it on the message thread
+		mutable std::mutex m_stateMutex;
 		jeLib::State m_state;
 
 		std::array<std::string, static_cast<size_t>(PatchType::Count)> m_patchNames;
