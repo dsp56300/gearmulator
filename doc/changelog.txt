@@ -141,6 +141,14 @@ Framework:
 - [Fix] MIDI that an emulated device sent with running status, as the CM-32P
         does, came out as single stray bytes after its first message.
 
+- [Fix] Instruments that receive MIDI at the speed of a hardware MIDI cable,
+        JE8086 and the 88emu boards for example, often lost the first note of a
+        loop in the host, or cut it off right after it started. A host that
+        does not end its audio block at the loop end reports the jump back only
+        with the next block, so the first notes of the new pass were taken for
+        leftovers of the old one and silenced with them. The loop the host
+        reports now places the jump on the sample it happens at.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported

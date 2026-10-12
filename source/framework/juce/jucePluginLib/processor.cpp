@@ -910,7 +910,8 @@ namespace pluginLib
 		bool isPlaying = true;
 		bool hasPpqPosition = false;
 		float bpm = 0.0f;
-		float ppqPos = 0.0f;
+		double ppqPos = 0.0;
+		synthLib::HostLoop loop;
 
 	    if(const auto* playHead = getPlayHead())
 		{
@@ -925,13 +926,19 @@ namespace pluginLib
 				}
 				if(pos->getPpqPosition())
 				{
-					ppqPos = static_cast<float>(*pos->getPpqPosition());
+					ppqPos = *pos->getPpqPosition();
 					hasPpqPosition = true;
+				}
+				if(const auto points = pos->getLoopPoints())
+				{
+					loop.active = pos->getIsLooping();
+					loop.ppqStart = points->ppqStart;
+					loop.ppqEnd = points->ppqEnd;
 				}
 			}
 		}
 
-		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying, hasPpqPosition);
+		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying, hasPpqPosition, loop);
 
 		// Both checks are plain atomic loads, cheap enough per block. The work they stand for
 		// belongs to the message thread, see handleAsyncUpdate().

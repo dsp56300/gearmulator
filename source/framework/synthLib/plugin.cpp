@@ -1,6 +1,7 @@
 #include "plugin.h"
 #include "device.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "baseLib/os.h"
@@ -77,7 +78,7 @@ namespace synthLib
 	}
 
 	void Plugin::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, const float _bpm,
-		const float _ppqPos, const bool _isPlaying, const bool _hasPpqPosition)
+		const double _ppqPos, const bool _isPlaying, const bool _hasPpqPosition, const HostLoop& _loop)
 	{
 		baseLib::setFlushDenormalsToZero();
 
@@ -123,7 +124,8 @@ namespace synthLib
 		}
 
 		processMidiInEvents();
-		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
+		insertLoopWraps(_bpm, _ppqPos, _isPlaying, _hasPpqPosition, _count, _loop);
+		processMidiClock(_bpm, static_cast<float>(_ppqPos), _isPlaying, _count);
 
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](const TAudioInputs& _ins, const TAudioOutputs& _outs, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
@@ -409,7 +411,7 @@ namespace synthLib
 			_event.transportGeneration = m_transportGeneration.load(std::memory_order_relaxed);
 	}
 
-	TransportDiscontinuity Plugin::updateTransport(const float _bpm, const float _ppqPos, const bool _isPlaying,
+	TransportDiscontinuity Plugin::updateTransport(const float _bpm, const double _ppqPos, const bool _isPlaying,
 		const bool _hasPpqPosition, const size_t _sampleCount)
 	{
 		TransportDiscontinuity result = TransportDiscontinuity::None;
@@ -420,12 +422,15 @@ namespace synthLib
 			else if (_isPlaying && _hasPpqPosition && m_lastHasPpqPosition &&
 				_bpm > 0.0f && m_lastBpm > 0.0f && m_hostSamplerate > 0.0f)
 			{
-				const auto expected = static_cast<double>(m_lastPpqPos) +
+				const auto advanced = m_lastPpqPos +
 					static_cast<double>(m_lastSampleCount) * static_cast<double>(m_lastBpm) /
 					(60.0 * static_cast<double>(m_hostSamplerate));
+				// A wrap already placed in the last block is not a jump. Should the host not have taken it after
+				// all, a second marker would only cut the notes again, so a straight run passes as well.
+				const auto wrapped = advanced - m_loopWrapPpq;
 				// About 5 ms at 120 BPM: wide enough for host float/tempo jitter,
 				// narrow enough to catch seeks, loop wraps and bounce restarts.
-				if (std::fabs(static_cast<double>(_ppqPos) - expected) > 0.01)
+				if (std::fabs(_ppqPos - wrapped) > 0.01 && std::fabs(_ppqPos - advanced) > 0.01)
 					result = TransportDiscontinuity::Seek;
 			}
 		}
@@ -436,7 +441,55 @@ namespace synthLib
 		m_lastPpqPos = _ppqPos;
 		m_lastHasPpqPosition = _hasPpqPosition;
 		m_lastSampleCount = _sampleCount;
+		m_loopWrapPpq = 0.0;
 		return result;
+	}
+
+	void Plugin::insertLoopWraps(const float _bpm, const double _ppqPos, const bool _isPlaying,
+		const bool _hasPpqPosition, const size_t _sampleCount, const HostLoop& _loop)
+	{
+		const auto length = _loop.ppqEnd - _loop.ppqStart;
+
+		if (!_loop.active || !_isPlaying || !_hasPpqPosition || _bpm <= 0.0f || m_hostSamplerate <= 0.0f || length <= 0.0)
+			return;
+
+		// Only a position inside the loop goes back at its end. The tolerance is the one updateTransport() allows
+		if (_ppqPos < _loop.ppqStart - 0.01 || _ppqPos >= _loop.ppqEnd)
+			return;
+
+		const auto samplesPerQuarter = 60.0 * static_cast<double>(m_hostSamplerate) / static_cast<double>(_bpm);
+		const auto loopSamples = length * samplesPerQuarter;
+
+		// A loop shorter than a sample cannot be told apart from standing still
+		if (loopSamples < 1.0)
+			return;
+
+		// A wrap on the last sample or later is the next block's start, updateTransport() catches it there
+		for (auto wrapAt = (_loop.ppqEnd - _ppqPos) * samplesPerQuarter; wrapAt < static_cast<double>(_sampleCount); wrapAt += loopSamples)
+		{
+			// The host puts the first event of the new pass on the wrap sample rounded either way. One sample early
+			// keeps it behind the marker, while all an event of the old pass there can be is the note-off at its end
+			const auto offset = std::max(0, static_cast<int>(std::lround(wrapAt)) - 1);
+
+			SMidiEvent marker(MidiEventSource::Internal);
+			marker.type = MidiEventType::TransportDiscontinuity;
+			marker.transportGeneration = m_transportGeneration.fetch_add(1, std::memory_order_relaxed) + 1;
+			marker.offset = offset;
+
+			for (auto& event : m_midiIn)
+			{
+				if (event.offset >= offset && event.type != MidiEventType::TransportDiscontinuity)
+					stampTransportGeneration(event);
+			}
+
+			const auto it = std::find_if(m_midiIn.begin(), m_midiIn.end(), [offset](const SMidiEvent& _event)
+			{
+				return _event.offset >= offset && _event.type != MidiEventType::TransportDiscontinuity;
+			});
+			m_midiIn.insert(it, marker);
+
+			m_loopWrapPpq += length;
+		}
 	}
 
 	void Plugin::setBlockSize(const uint32_t _blockSize)

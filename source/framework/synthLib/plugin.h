@@ -16,6 +16,16 @@ namespace synthLib
 {
 	class Device;
 
+	// The loop the host plays, in quarter notes. A host that does not end its block at the loop end reports the
+	// jump back only with the next block, by then the first events of the new pass are already queued as part of
+	// the old one. Knowing the loop, Plugin::process() puts the jump on the sample it happens at.
+	struct HostLoop
+	{
+		bool active = false;
+		double ppqStart = 0.0;
+		double ppqEnd = 0.0;
+	};
+
 	class Plugin
 	{
 	public:
@@ -37,8 +47,8 @@ namespace synthLib
 		uint32_t getLatencyMidiToOutput() const;
 		uint32_t getLatencyInputToOutput() const;
 
-		void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, float _bpm, float _ppqPos,
-			bool _isPlaying, bool _hasPpqPosition);
+		void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, float _bpm, double _ppqPos,
+			bool _isPlaying, bool _hasPpqPosition, const HostLoop& _loop = {});
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
 		bool isValid() const;
@@ -80,8 +90,10 @@ namespace synthLib
 		void updateLatencies();
 		void processMidiInEvents();
 		void processMidiInEvent(const SMidiEvent& _ev);
-		TransportDiscontinuity updateTransport(float _bpm, float _ppqPos, bool _isPlaying, bool _hasPpqPosition,
+		TransportDiscontinuity updateTransport(float _bpm, double _ppqPos, bool _isPlaying, bool _hasPpqPosition,
 			size_t _sampleCount);
+		void insertLoopWraps(float _bpm, double _ppqPos, bool _isPlaying, bool _hasPpqPosition, size_t _sampleCount,
+			const HostLoop& _loop);
 		void stampTransportGeneration(SMidiEvent& _event) const;
 
 		dsp56k::RingBuffer<SMidiEvent, 1024, false> m_midiInRingBuffer;
@@ -127,9 +139,12 @@ namespace synthLib
 		bool m_transportInitialized = false;
 		bool m_lastIsPlaying = false;
 		float m_lastBpm = 0.0f;
-		float m_lastPpqPos = 0.0f;
+		double m_lastPpqPos = 0.0;
 		bool m_lastHasPpqPosition = false;
 		size_t m_lastSampleCount = 0;
+		// How far the loop wraps placed in the last block moved the position back, in quarter notes. The next
+		// block starts that much earlier than a straight run would, and that is not a jump of its own.
+		double m_loopWrapPpq = 0.0;
 		std::atomic<uint32_t> m_transportGeneration{0};
 	};
 }
