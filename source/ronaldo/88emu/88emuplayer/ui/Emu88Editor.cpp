@@ -3,7 +3,9 @@
 #include "88emuplayer/ui/Emu88EditorLcd.h"
 #include "88emuplayer/ui/Emu88EditorPlaylist.h"
 #include "88emuplayer/ui/Emu88EditorWindows.h"
+#include "88emuplayer/ui/Emu88PartEditor.h"
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "88lib/gs/partState.h"
 #include "88lib/rom/romloader.h"
 #include "juceRmlUi/rmlMenu.h"
 #include "juceRmlUi/rmlHelper.h"
@@ -65,6 +67,7 @@ namespace emu88Player
 		sendButtons();
 		m_settingsRoot = nullptr;
 		m_settingsWindow.reset();
+		m_partEditorWindow.reset();
 		destroyRmlUi();
 	}
 
@@ -328,6 +331,19 @@ namespace emu88Player
 
 		const auto currentScale = m_processor.config().getIntValue("scale", 100);
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
+		if(emu88Lib::gs::isPartEditorModel(m_processor.deviceModel()))
+		{
+			m_contextMenu->addEntry("Part Editor", [this]
+			{
+				const juce::WeakReference<Editor> safeThis(this);
+				juce::MessageManager::callAsync([safeThis]
+				{
+					if(auto* editor = safeThis.get())
+						editor->showPartEditor(true);
+				});
+			});
+			m_contextMenu->addSeparator();
+		}
 		// The MT-32 and CM boards know one reset, their own; the GM and GS ones do nothing there.
 		if(emu88Lib::isRolandLaFamily(m_processor.deviceModel()))
 		{

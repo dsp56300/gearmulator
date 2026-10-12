@@ -424,8 +424,8 @@ JE8086:
 - [New] MIDI Player: Karaoke .kar files can be played, dropped onto the playlist
         and rendered with 88EmuCli like any other MIDI file.
 
-- [Imp] MIDI Player: When the player cannot start and was not started from a terminal, it
-        shows the reason in a message box.
+- [Imp] MIDI Player: When the player cannot start and was not started from a
+        terminal, it shows the reason in a message box.
 
 - [Imp] ROMs: When macOS does not let the player read its ROM folder, it says
         so and explains how to allow it, instead of reporting every ROM as
@@ -467,6 +467,16 @@ JE8086:
 - [Fix] SC-88, SC-88VL, SC-88Pro: A data request (RQ1) was never answered.
         The firmware now answers it as on the hardware, for a request that
         starts at a parameter, up to 137 bytes, on either MIDI IN.
+
+- [New] Part Editor, in the context menu of the SC-55 to SC-8850 and the
+        boards that run their programs. A mixer with the volume, pan, solo
+        and mute of every part, and a page per part to pick its instrument,
+        variation and tone map, or its drum set, from the lists in the
+        board's own ROMs, with a filter. A right-click on a part tab makes it
+        a normal or a drum part. Edits reach the board as they are made, and
+        the window follows what songs and live input set on the parts. Send
+        writes the parts to the board, Receive reads them back from it. Mute
+        is the board's own, the one its MUTE button sets.
 
 2.2.25:
 

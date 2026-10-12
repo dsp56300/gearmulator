@@ -7,6 +7,8 @@ set(HARDWARE_ASSETS
 	assets/emu88PlayerSettings.rml
 	assets/emu88PlayerSettingsWindow.rml
 	assets/emu88PlayerSettings.rcss
+	assets/emu88PartEditor.rml
+	assets/emu88PartEditor.rcss
 	${HARDWARE_SKIN_DIR}/sc88_panel.png
 	${HARDWARE_SKIN_DIR}/sc88vl_panel.png
 	${HARDWARE_SKIN_DIR}/sc88pro_panel.png
@@ -75,6 +77,7 @@ target_sources(88emuplayer PRIVATE
 	ui/Emu88EditorPanel.cpp
 	ui/Emu88EditorSkin.cpp
 	ui/Emu88EditorWindows.cpp
+	ui/Emu88PartEditor.cpp ui/Emu88PartEditor.h
 	ui/Emu88EditorPlaylist.h
 	ui/Emu88EditorLcd.h
 	ui/Emu88EditorWindows.h

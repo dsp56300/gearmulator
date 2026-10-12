@@ -1,0 +1,519 @@
+/* The window has a fixed size, and the pages and lists are sized out of it: a list that leaves its height to the
+   flex layout grows with its entries and never scrolls. 560 = top bar 42 + page 494 + status bar 24. */
+body {
+	width: 880dp;
+	height: 560dp;
+	background-color: #252b30;
+	color: #dce2e6;
+	font-family: Roboto;
+	font-size: 13dp;
+	font-weight: 400;
+	overflow: hidden;
+}
+
+/* RmlUi has no stylesheet of its own: an element left without a display is inline, and an inline scroll container
+   paints its background over the block children it scrolls. */
+div {
+	display: block;
+}
+
+.peRoot {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* Mixer, the group switch, the part tabs, then the transfers on the right. */
+.peTopBar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 6dp;
+	box-sizing: border-box;
+	height: 42dp;
+	padding: 0dp 10dp;
+	background-color: #1c2226;
+	border-bottom: 1dp #3b444b;
+}
+
+.peTab, .peGroup, .pePartTab, .peMap {
+	display: block;
+	box-sizing: border-box;
+	height: 26dp;
+	border: 1dp #414b52;
+	border-radius: 3dp;
+	background-color: #2b3237;
+	color: #b8c0c5;
+	font-size: 11dp;
+	line-height: 24dp;
+	text-align: center;
+	cursor: pointer;
+}
+
+.peTab:hover, .peGroup:hover, .pePartTab:hover, .peMap:hover {
+	background-color: #343d43;
+	color: #ffffff;
+}
+
+.peTab:checked, .peGroup:checked, .pePartTab:checked, .peMap:checked {
+	background-color: #52616a;
+	border-color: #68747d;
+	color: #ffffff;
+}
+
+.peTabMixer {
+	width: 58dp;
+}
+
+/* The groups as one segmented control: flush, sharing single dividers - each segment draws its left edge and the
+   last one also closes the right - and rounded on the outside only. */
+.peGroups {
+	display: flex;
+	flex-direction: row;
+	margin-left: 6dp;
+}
+
+.peGroup {
+	width: 24dp;
+	border-width: 1dp 0dp 1dp 1dp;
+	border-radius: 0dp;
+	font-weight: 600;
+}
+
+.peGroup:first-child {
+	border-radius: 3dp 0dp 0dp 3dp;
+}
+
+.peGroup:last-child {
+	border-right-width: 1dp;
+	border-radius: 0dp 3dp 3dp 0dp;
+}
+
+/* Sixteen tabs share what the group switch and the buttons leave. */
+.pePartTabs {
+	display: flex;
+	flex-direction: row;
+	flex: 1 1 auto;
+	gap: 2dp;
+	margin-left: 6dp;
+}
+
+.pePartTab {
+	flex: 1 1 0dp;
+	min-width: 18dp;
+}
+
+/* A drum part's tab says so. */
+.pePartTab.drum {
+	color: #e8a35c;
+}
+
+.peActions {
+	display: flex;
+	flex-direction: row;
+	gap: 4dp;
+	margin-left: 8dp;
+}
+
+.peAction {
+	display: block;
+	box-sizing: border-box;
+	height: 26dp;
+	padding: 0dp 8dp;
+	border: 1dp #515c64;
+	border-radius: 3dp;
+	background-color: #333c42;
+	color: #e4e8ea;
+	font-size: 11dp;
+	line-height: 24dp;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.peAction:hover {
+	background-color: #3d484f;
+	border-color: #68747d;
+}
+
+.peAction:disabled {
+	opacity: 0.4;
+	cursor: auto;
+}
+
+.pePage {
+	display: block;
+	box-sizing: border-box;
+	height: 494dp;
+	padding: 10dp 12dp;
+	overflow: hidden;
+}
+
+/* ---- Mixer: one row per part, every group, scrolled. 474 = header 22 + rows 452. The header columns have the
+   rows' widths, and the rows always show their scrollbar so that the two line up. */
+
+.peMixerHeader, .peMixRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10dp;
+}
+
+.peMixerHeader {
+	height: 22dp;
+	padding: 0dp 18dp 0dp 10dp;
+	color: #88949c;
+	font-size: 10dp;
+	font-weight: 600;
+}
+
+.peMixHeadSoloMute { flex: 0 0 40dp; width: 40dp; }
+.peMixHeadName { display: flex; flex-direction: row; flex: 1 1 auto; gap: 10dp; }
+.peMixHeadPart { flex: 0 0 34dp; width: 34dp; }
+.peMixHeadTone { flex: 1 1 auto; }
+.peMixHeadVolume { flex: 0 0 238dp; width: 238dp; }
+.peMixHeadPan { flex: 0 0 138dp; width: 138dp; margin-left: 28dp; }
+
+.peMixerRows {
+	box-sizing: border-box;
+	height: 452dp;
+	padding: 3dp;
+	border: 1dp #414b52;
+	border-radius: 3dp;
+	background-color: #20262a;
+	overflow-y: scroll;
+}
+
+.peMixGroupHeading {
+	display: block;
+	height: 22dp;
+	padding: 0dp 6dp;
+	color: #aeb8be;
+	font-size: 11dp;
+	font-weight: 600;
+	line-height: 22dp;
+}
+
+.peMixRow {
+	height: 26dp;
+	padding: 0dp 6dp;
+	border-radius: 2dp;
+	color: #c9d0d4;
+	font-size: 11dp;
+}
+
+.peMixRow:hover {
+	background-color: #2a3237;
+}
+
+.peMixSoloMute {
+	display: flex;
+	flex-direction: row;
+	flex: 0 0 40dp;
+	width: 40dp;
+	gap: 2dp;
+}
+
+.peMixSolo, .peMixMute {
+	display: block;
+	box-sizing: border-box;
+	width: 19dp;
+	height: 18dp;
+	border: 1dp #515c64;
+	border-radius: 2dp;
+	background-color: #2b3237;
+	color: #8e9aa2;
+	font-size: 10dp;
+	font-weight: 600;
+	line-height: 16dp;
+	text-align: center;
+	cursor: pointer;
+}
+
+.peMixSolo:hover, .peMixMute:hover {
+	background-color: #343d43;
+	color: #ffffff;
+}
+
+.peMixSolo:checked {
+	background-color: #d4b02a;
+	border-color: #e8c84a;
+	color: #17181c;
+}
+
+.peMixMute:checked {
+	background-color: #c0453a;
+	border-color: #d8655a;
+	color: #ffffff;
+}
+
+/* Part number and instrument are one target: either opens the part */
+.peMixName {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: 1 1 auto;
+	gap: 10dp;
+	height: 100%;
+	cursor: pointer;
+}
+
+.peMixPart {
+	flex: 0 0 34dp;
+	width: 34dp;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.peMixTone {
+	flex: 1 1 auto;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.peMixName:hover .peMixPart, .peMixName:hover .peMixTone {
+	color: #e8a35c;
+}
+
+.peMixRow.drum .peMixTone {
+	color: #e8a35c;
+}
+
+/* A part the mute or the solo silences */
+.peMixRow.silenced .peMixPart, .peMixRow.silenced .peMixTone, .peMixRow.silenced .peMixValue {
+	color: #66737c;
+}
+
+.peMixVolume, .peMixPan {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8dp;
+}
+
+.peMixVolume {
+	flex: 0 0 238dp;
+	width: 238dp;
+}
+
+.peMixPan {
+	flex: 0 0 138dp;
+	width: 138dp;
+	margin-left: 28dp;
+}
+
+.peMixValue {
+	flex: 0 0 30dp;
+	width: 30dp;
+	color: #aeb8be;
+	text-align: right;
+}
+
+.peMixPan .peMixValue {
+	flex: 0 0 34dp;
+	width: 34dp;
+}
+
+input.peSlider {
+	flex: 1 1 auto;
+	height: 14dp;
+}
+
+input.peSlider slidertrack {
+	margin-top: 5dp;
+	height: 4dp;
+	border-radius: 2dp;
+	background-color: #3b444b;
+}
+
+input.peSlider sliderbar {
+	width: 10dp;
+	height: 14dp;
+	border-radius: 3dp;
+	background-color: #8e9aa2;
+}
+
+input.peSlider sliderbar:hover, input.peSlider sliderbar:active {
+	background-color: #ffffff;
+}
+
+input.peSlider sliderarrowdec, input.peSlider sliderarrowinc {
+	width: 0dp;
+	height: 0dp;
+}
+
+/* ---- Part: the tone map and the filter, then one list of the instruments, each with its variations under it.
+   474 = header 30 + map row 26 + 8 + label 20 + list 390. */
+
+.pePartHeader {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	gap: 12dp;
+	height: 30dp;
+}
+
+.pePartTitle {
+	color: #f3f5f6;
+	font-size: 19dp;
+	font-weight: 600;
+}
+
+.pePartInfo {
+	color: #aeb8be;
+	font-size: 12dp;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.peMapRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 26dp;
+	margin-bottom: 8dp;
+	gap: 12dp;
+}
+
+.peMaps {
+	display: flex;
+	flex-direction: row;
+	flex: 1 1 auto;
+	gap: 4dp;
+}
+
+.peMap {
+	padding: 0dp 10dp;
+}
+
+.peFilter {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: 0 0 auto;
+	gap: 6dp;
+}
+
+.peFilterLabel {
+	color: #88949c;
+	font-size: 11dp;
+}
+
+.peFilterInput {
+	width: 200dp;
+	height: 24dp;
+	box-sizing: border-box;
+	padding: 4dp 6dp;
+	border: 1dp #515c64;
+	border-radius: 3dp;
+	background-color: #1f2529;
+	color: #eef1f2;
+	font-size: 12dp;
+}
+
+.peListLabel {
+	display: block;
+	height: 20dp;
+	color: #88949c;
+	font-size: 10dp;
+	font-weight: 600;
+}
+
+.peList {
+	box-sizing: border-box;
+	height: 390dp;
+	padding: 3dp;
+	border: 1dp #414b52;
+	border-radius: 3dp;
+	background-color: #20262a;
+	overflow-y: auto;
+}
+
+/* A whole row is one target */
+.peItem {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	height: 20dp;
+	padding: 0dp 6dp;
+	border-radius: 2dp;
+	color: #c9d0d4;
+	font-size: 12dp;
+	line-height: 20dp;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+.peItem:hover {
+	background-color: #2e373d;
+}
+
+/* The instrument whose variation the part plays */
+.peItem.current {
+	color: #ffffff;
+}
+
+.peItem.selected {
+	background-color: #52616a;
+	color: #ffffff;
+}
+
+.peItem.selected:hover {
+	background-color: #5d6e78;
+}
+
+.peItem.context {
+	color: #77838b;
+}
+
+/* Variations sit under their instrument */
+.peVariation {
+	padding-left: 36dp;
+}
+
+.peItemNumber {
+	display: inline-block;
+	width: 30dp;
+	color: #88949c;
+}
+
+.peItem.selected .peItemNumber {
+	color: #dce2e6;
+}
+
+.peListEmpty {
+	display: block;
+	padding: 4dp 6dp;
+	color: #77838b;
+	font-size: 11dp;
+}
+
+.peStatusBar {
+	box-sizing: border-box;
+	height: 24dp;
+	padding: 0dp 12dp;
+	background-color: #1c2226;
+	border-top: 1dp #3b444b;
+}
+
+.peStatus {
+	color: #8e9aa2;
+	font-size: 11dp;
+	line-height: 23dp;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.peStatus.error {
+	color: #e8a35c;
+}
+
+scrollbarvertical {
+	width: 8dp;
+}
+
+scrollbarvertical sliderbar {
+	min-height: 12dp;
+	border-radius: 4dp;
+	background-color: #59656d;
+}
