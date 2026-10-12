@@ -31,6 +31,14 @@ namespace synthLib
 		prepareAlternatives();
 	}
 
+	void ResamplerInOut::clearMidi()
+	{
+		m_midiIn.clear();
+		m_midiOut.clear();
+		m_processedMidiIn.clear();
+		for (auto& alternative : m_alternatives) alternative->clearMidi();
+	}
+
 	void ResamplerInOut::setDeviceSamplerate(float _samplerate)
 	{
 		if(m_samplerateDevice == _samplerate)

@@ -194,7 +194,7 @@ namespace xpLib
 			// tested seed and rate when it is selected.
 			if (low == 0x0200)
 				continue;
-			const auto exactTarget = dspOps::signExtend(low, 10) << 6;
+			const auto exactTarget = dspOps::signExtend(low, 10) * 64;
 			const auto direction = exactTarget - current;
 			if (direction == 0)
 				continue;

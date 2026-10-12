@@ -46,7 +46,7 @@ namespace synthLib
 		void setDevice(Device* _device);
 
 		bool getState(std::vector<uint8_t>& _state, StateType _type);
-		bool setState(const std::vector<uint8_t>& _state) const;
+		bool setState(const std::vector<uint8_t>& _state);
 		void insertMidiEvent(const SMidiEvent& _ev);
 
 		bool setLatencyBlocks(uint32_t _latencyBlocks);
@@ -92,7 +92,10 @@ namespace synthLib
 
 		ResamplerInOut m_resampler;
 		mutable std::recursive_mutex m_lock;
-		mutable std::mutex m_lockAddMidiEvent;
+		// addMidiEvent() takes m_lock while holding this one, so nothing may wait for this one while holding m_lock:
+		// whoever needs both takes them in one std::scoped_lock. Recursive because setDevice() does that and then
+		// calls setState(), which takes both again.
+		mutable std::recursive_mutex m_lockAddMidiEvent;
 
 		Device* m_device;
 

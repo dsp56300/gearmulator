@@ -48,6 +48,9 @@ namespace jucePluginEditorLib
 		void onBind(pluginLib::Parameter* _parameter, Rml::Element* _element);
 		void onUnbind(pluginLib::Parameter* _parameter, Rml::Element* _element);
 
+		// RmlUi destroyed one of our overlay elements, forget it without touching it
+		void onOverlayElementDestroyed(const Rml::Element* _element);
+
 		void refresh()
 		{
 			updateOverlays();
@@ -72,6 +75,8 @@ namespace jucePluginEditorLib
 		};
 
 		void toggleOverlay(Type _type, bool _enable, float _opacity = 1.0f);
+		void removeOverlayElement(Type _type);
+		void removeAllOverlayElements();
 
 		void updateOverlays();
 		void setParameter(pluginLib::Parameter* _parameter);

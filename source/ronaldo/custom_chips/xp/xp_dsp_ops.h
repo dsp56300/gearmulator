@@ -45,14 +45,14 @@ namespace xpLib::dspOps
 	{
 		auto result = signExtend(_cram & 0x7fff, 15);
 		if ((_cram & 0x8000) != 0)
-			result <<= 13;
+			result *= int64_t{1} << 13;
 		return result;
 	}
 
 	inline int64_t cramCoefficient(const uint16_t _cram)
 	{
 		static constexpr std::array<unsigned, 4> shifts = {0, 1, 2, 4};
-		return signExtend(_cram & 0x3fff, 14) << shifts[_cram >> 14];
+		return signExtend(_cram & 0x3fff, 14) * (int64_t{1} << shifts[_cram >> 14]);
 	}
 
 	inline int64_t multiplyCram(const int64_t _input, const uint16_t _cram)

@@ -157,6 +157,11 @@ void Adc::write8(u32 addr, u8 v) {
     const u8 next = u8((v & 0x7F) | (adcsr_ & v & kAdf));
     adcsr_ = next;
     const bool running = (adcsr_ & kAdst) != 0;
+    // Rewriting the channel field mid-scan (SCAN/CH changed with ADST still set) moves the
+    // scan to the newly selected group. The conversion in flight finishes; the scan carries
+    // on from the group's first channel, so `channel_` never sits outside first..last.
+    if (running && was_running && (channel_ < first_channel() || channel_ > last_channel()))
+      channel_ = u8(first_channel());
     if (running && !was_running) {
       channel_ = u8(first_channel());
       start(now);

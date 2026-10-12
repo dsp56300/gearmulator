@@ -125,6 +125,8 @@ namespace juceRmlUi
 		void itemDragExit(const SourceDetails& _dragSourceDetails) override;
 		void itemDropped(const SourceDetails& _dragSourceDetails) override;
 		bool shouldDropFilesWhenDraggedExternally(const SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) override;
+		void dragOperationEnded(const SourceDetails& _sourceDetails) override;
+		void releaseLostMouseButtons(const juce::MouseEvent& _event);
 
 		// Files dropped on this component that no element in the document wanted. The component
 		// is interested in every file drag, so there is nothing above it that JUCE would ask next.
@@ -234,6 +236,10 @@ namespace juceRmlUi
 		DocumentCreatedCallback m_onDocumentCreated;
 
 		RmlDrag m_drag;
+
+		// The buttons the context was told are down, a bit per Rml mouse button. A release can get lost on the way
+		// (a host that activates its window during the click, a drag session of the system), see releaseLostMouseButtons
+		uint32_t m_pressedMouseButtons = 0;
 		juce::ModifierKeys m_currentModifierKeys;
 
 		bool m_updating = true;

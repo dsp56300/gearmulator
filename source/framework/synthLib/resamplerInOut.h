@@ -21,6 +21,8 @@ namespace synthLib
 		void setHostSamplerate(float _samplerate);
 		void setSamplerates(float _hostSamplerate, float _deviceSamplerate);
 		void prepareDeviceSamplerates(const std::vector<float>& _samplerates);
+		// Drops every queued MIDI event, including those waiting at a resampled timestamp or in a rate alternative.
+		void clearMidi();
 
 		void process(const TAudioInputs& _inputs, TAudioOutputs& _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc);
 

@@ -61,9 +61,11 @@ namespace juceRmlUi
 		void itemDragEnter(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
 		void itemDragExit(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
 		void itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
-		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) const;
+		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles);
 
 		void processOutOfBoundsDrag(juce::Point<int> _pos);
+		// true if it released the mouse button the context still considered held
+		bool dragOperationEnded();
 
 	private:
 		void startDrag(int _x, int _y, const juce::StringArray& _files);
@@ -78,5 +80,6 @@ namespace juceRmlUi
 		JuceDraggable* m_juceDraggable = nullptr;
 		UnhandledFilesCallback m_onUnhandledFiles;
 		bool m_lastDropHandled = false;
+		bool m_externalDragStarted = false;
 	};
 }
