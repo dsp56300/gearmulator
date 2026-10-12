@@ -249,7 +249,7 @@ namespace genericUI
 		// So we use this instead. These tools cause crashes if you attempt to
 		// open a message box. LV2 even opens the editor, even on a headless
 		// build machine, whatever that is good for
-		return host.contains("juce_vst3_helper") || host.contains("juce_lv2_helper");
+		return host.contains("juce_vst3_helper") || host.contains("juce_lv2_helper") || host.contains("juce_au_helper");
 	}
 
 	std::vector<MessageBox::Dialog> MessageBox::getDialogs()
