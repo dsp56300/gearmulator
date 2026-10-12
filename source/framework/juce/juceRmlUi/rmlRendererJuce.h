@@ -53,6 +53,7 @@ namespace juceRmlUi
 
 		Rml::TextureHandle LoadTexture(Rml::Vector2i& _textureDimensions, const Rml::String& _source) override;
 		Rml::TextureHandle GenerateTexture(Rml::Span<const uint8_t> _source, Rml::Vector2i _sourceDimensions) override;
+		bool UpdateTexture(Rml::TextureHandle _texture, Rml::Span<const uint8_t> _source, Rml::Vector2i _sourceDimensions) override;
 		void ReleaseTexture(Rml::TextureHandle _texture) override;
 
 		Rml::LayerHandle PushLayer() override;

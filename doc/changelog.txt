@@ -125,6 +125,11 @@ Framework:
         skin now, also in those that had none so far: Osirus, OsTIrus, JE8086 and
         the Vavra front panel. It can be turned off in the Skins settings.
 
+- [Imp] EMU-85 Displays and other canvases, skin canvases included, update their
+        texture in place when their content changes, instead of creating a new
+        one each time. That saves memory traffic and graphics driver work while
+        a display changes, with OpenGL, Metal and the software renderer.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
