@@ -306,6 +306,9 @@ NodalRed2x:
         hardware, and its LED lights up while it is on. As on the hardware,
         Hold is not part of a patch and is not saved, and Panic ends it.
 
+- [Imp] EMU-61 Lower CPU load: the two DSPs of the emulation now run side by
+        side instead of one waiting for the other's output.
+
 JE8086:
 
 - [Fix] The first notes could start late when the host sent MIDI tuning data
