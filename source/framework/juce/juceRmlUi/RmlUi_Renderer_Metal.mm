@@ -1579,7 +1579,9 @@ Rml::TextureHandle RenderInterface_Metal::LoadTexture(Rml::Vector2i& _textureDim
 	return GenerateTexture({image_dest, image_size}, _textureDimensions);
 }
 
-// Blits the data into the texture through a staging buffer and waits for the GPU
+// Blits the data into the texture through a staging buffer, without waiting for the GPU. The command buffer
+// retains the staging buffer and the texture, and the queue runs it before the frame that draws the texture,
+// which is committed later. Hazard tracking orders the blit after earlier frames still reading the texture.
 static bool UploadTexture(id<MTLDevice> _device, id<MTLCommandQueue> _queue, id<MTLTexture> _texture, Rml::Span<const Rml::byte> _sourceData,
 	Rml::Vector2i _sourceDimensions)
 {
@@ -1602,7 +1604,6 @@ static bool UploadTexture(id<MTLDevice> _device, id<MTLCommandQueue> _queue, id<
 	   destinationOrigin:MTLOriginMake(0, 0, 0)];
 	[blit endEncoding];
 	[cmdBuf commit];
-	[cmdBuf waitUntilCompleted];
 	[staging release];
 	return true;
 }
