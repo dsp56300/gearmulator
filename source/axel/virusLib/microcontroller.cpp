@@ -1118,6 +1118,10 @@ void Microcontroller::process()
 
 	std::lock_guard lock(m_mutex);
 
+	// read what the DSPs send while they run, not only after a block: a DSP whose HDI08 output is full stops until it is
+	// read, while the audio thread waits for its audio. The echoes of a burst of parameter changes filled it in one block
+	processHdi08Tx(m_dspMidiOutput);
+
 	if(m_loadingState || m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
 		return;
 
@@ -1240,7 +1244,9 @@ void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEve
 void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 {
 	std::lock_guard lock(m_mutex);
-	processHdi08Tx(_midiOut);
+	processHdi08Tx(m_dspMidiOutput);
+	_midiOut.insert(_midiOut.end(), m_dspMidiOutput.begin(), m_dspMidiOutput.end());
+	m_dspMidiOutput.clear();
 
 	// what the DSP sent back of the preset it took is the edit buffer, before anything that came after it applies
 	receiveUpgradedPreset();
@@ -1320,6 +1326,8 @@ uint8_t Microcontroller::calcChecksum(const synthLib::SysexBuffer& _data, const 
 
 bool Microcontroller::dspHasBooted() const
 {
+	std::lock_guard lock(m_mutex);
+
 	for (const auto &p : m_hdi08TxParsers)
 	{
 		if(!p.hasDspBooted())
