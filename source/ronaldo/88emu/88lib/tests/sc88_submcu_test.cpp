@@ -85,14 +85,53 @@ namespace
 	void rawRequests()
 	{
 		Fixture f;
-		f.input({0xf0, 0x41, 0x10, 0x42, 0x11, 0x0c, 0, 0, 0, 0, 0, 0x74, 0xf7}, 1);
-		CHECK(f.records.empty()); // RQ1 must never be applied as parameter data
 		f.input({0xf0, 0x43, 0x10, 0x4c, 0, 0, 0x7e, 0, 0xf7});
 		CHECK_EQ(f.records.size(), 1u);
 		if(f.records.empty()) return;
 		CHECK_EQ(f.records[0].command, 0xec);
 		CHECK_EQ(f.records[0].param1, 7);
 		CHECK_EQ(f.records[0].payload[0], 0x43);
+	}
+
+	// RQ1 goes to the CPU as a request: bit 7 of the staged length, so it is never applied as
+	// parameter data. The opcode and the channel nibble name the address the way the firmware's
+	// transmitter reads them back, and the staged bytes keep the 41 <dev> 42 11 header.
+	void requests()
+	{
+		Fixture f;
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x11, 0x40, 0x11, 0x19, 0, 0, 1, 0x15, 0xf7}, 1);
+		CHECK_EQ(f.records.size(), 1u);
+		if(f.records.empty()) return;
+		const auto& level = f.records[0];
+		CHECK_EQ(level.command, 0x61);
+		CHECK_EQ(level.channel, 0x91); // Bulk, from IN B, middle address nibble 1.
+		CHECK_EQ(level.param1, 0x8b);
+		CHECK_EQ(level.param2, 0x14);
+		CHECK(level.payload == std::vector<uint8_t>({0x41, 0x10, 0x42, 0x11, 0x40, 0x11, 0x19, 0, 0, 1, 0x15}));
+
+		// Module B keeps its own opcode: the CPU picks the module, not the sub-MCU.
+		f.records.clear();
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x11, 0x50, 0x00, 0x04, 0, 0, 1, 0x2b, 0xf7});
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x11, 0x41, 0x02, 0x3c, 0, 0, 1, 0x00, 0xf7});
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x11, 0x0c, 0, 0, 0, 0, 0, 0x74, 0xf7}, 1);
+		CHECK_EQ(f.records.size(), 3u);
+		if(f.records.size() < 3) return;
+		CHECK_EQ(f.records[0].command, 0x70);
+		CHECK_EQ(f.records[0].channel, 0x80);
+		CHECK_EQ(f.records[1].command, 0x80);
+		CHECK_EQ(f.records[1].channel, 0x82);
+		CHECK_EQ(f.records[2].command, 0x30);
+		CHECK_EQ(f.records[2].channel, 0x90);
+
+		// A bad checksum is reported like a DT1's; a short request and an unknown block are dropped.
+		f.records.clear();
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x11, 0x40, 0x11, 0x19, 0, 0, 1, 0x16, 0xf7});
+		CHECK_EQ(f.records.size(), 1u);
+		if(!f.records.empty()) CHECK_EQ(f.records[0].command, 0xe0);
+		f.records.clear();
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x11, 0x40, 0x11, 0x19, 1, 0x15, 0xf7});
+		f.input({0xf0, 0x41, 0x10, 0x42, 0x11, 0x30, 0, 0, 0, 0, 1, 0x4f, 0xf7});
+		CHECK(f.records.empty());
 	}
 
 	void universalMessages()
@@ -177,6 +216,7 @@ int main()
 	outputRing();
 	delayAndReset();
 	rawRequests();
+	requests();
 	universalMessages();
 	channelMessageRxPort();
 	lowBlocks();

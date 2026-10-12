@@ -432,6 +432,10 @@ JE8086:
         set the zero flag the way the real chip does, from the result of
         each word, rather than as the manual describes it.
 
+- [Fix] SC-88, SC-88VL, SC-88Pro: A data request (RQ1) was never answered.
+        The firmware now answers it as on the hardware, for a request that
+        starts at a parameter, up to 137 bytes, on either MIDI IN.
+
 2.2.25:
 
 88emuPlayer:

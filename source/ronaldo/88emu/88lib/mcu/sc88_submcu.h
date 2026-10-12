@@ -32,7 +32,10 @@ namespace emu88Lib
 	//     staged like the XG one; the CPU checks the header itself
 	//   * a DT1 whose checksum does not add up: record 0xE0, which is where
 	//     the firmware's "Check Sum Error" notification comes from
-	//   * RQ1: ignored until the request command mapping is verified
+	//   * Roland RQ1: a bulk record flagged as a request by bit 7 of its
+	//     length, staged with its header; the opcode and the channel nibble
+	//     name the address the way the firmware's transmitter reads them back,
+	//     and the CPU sends the DT1 answer itself
 	//   * Yamaha XG parameter changes: raw header under opcode 0xEC
 	class Sc88SubMcu
 	{
@@ -94,6 +97,7 @@ namespace emu88Lib
 		void endOfSysEx(uint8_t _source, Source& _s);
 		void rawTransfer(uint8_t _source, uint8_t _command, const std::vector<uint8_t>& _sysEx);
 		void decodedTransfer(uint8_t _source, const std::vector<uint8_t>& _sysEx);
+		void request(uint8_t _source, const std::vector<uint8_t>& _sysEx);
 
 		struct OutputPacket
 		{
