@@ -6,6 +6,8 @@
 
 #include "baseLib/event.h"
 
+#include "weData.h"
+
 #include "xtLib/xtId.h"
 
 namespace xt
@@ -16,8 +18,6 @@ namespace xt
 
 namespace xtJucePlugin
 {
-	class WaveEditor;
-
 	class AudioPluginAudioProcessor;
 
 	class Controller : public pluginLib::Controller
@@ -101,7 +101,10 @@ namespace xtJucePlugin
 		std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
 		std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 
-		void setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor);
+		// the user waves and tables, and the ROM ones the wave editor has seen. Owned here and not by the wave editor, so a patch
+		// saved or loaded without the plugin window has them too (EMU-226)
+		WaveEditorData& getWaveData() { return m_waveData; }
+		const WaveEditorData& getWaveData() const { return m_waveData; }
 
 		bool requestWave(uint32_t _number) const;
 		bool requestTable(uint32_t _number) const;
@@ -151,7 +154,7 @@ namespace xtJucePlugin
 		std::atomic<bool> m_multiMode = false;
 		std::array<uint32_t, 8> m_currentSingles{0};
 		uint32_t m_currentSingle = 0;
-		xtJucePlugin::WaveEditor* m_waveEditor = nullptr;
+		WaveEditorData m_waveData;
 		std::set<xt::TableId> m_requestWavesForTables;
 	};
 }

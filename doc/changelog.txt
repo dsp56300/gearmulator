@@ -303,6 +303,10 @@ Xenia:
 - [Fix] EMU-235 Removing the plugin or closing a project could, rarely, crash
         the host while the emulation was still busy with MIDI it had received.
 
+- [Fix] EMU-226 Without the plugin window open, a patch with its own user
+        wavetable and user waves loaded without them, for example through a
+        program change, and one saved to the Patch Manager lost them.
+
 NodalRed2x:
 
 - [Fix] BUG-10440 The plugin hung for good when one audio block brought

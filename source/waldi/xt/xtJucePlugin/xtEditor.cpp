@@ -99,10 +99,7 @@ namespace xtJucePlugin
 
 		if (auto* waveEditorParent = findChild("waveEditorContainer"))
 		{
-			const auto dir = getProcessor().getDataFolder(false) + "wavetables/";
-
-			m_waveEditor = new WaveEditor(*this, waveEditorParent, juce::File(dir));
-			getXtController().setWaveEditor(m_waveEditor);
+			m_waveEditor = new WaveEditor(*this, waveEditorParent);
 		}
 		else if (auto* waveEditorButtonParent = findChild("waveEditorButtonParent"))
 		{
@@ -120,7 +117,6 @@ namespace xtJucePlugin
 			delete m_waveEditor;
 			m_waveEditor = nullptr;
 		}
-		getXtController().setWaveEditor(nullptr);
 		m_frontPanel.reset();
 		m_lcd.reset();
 	}
