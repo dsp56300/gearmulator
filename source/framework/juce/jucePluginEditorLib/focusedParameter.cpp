@@ -1,6 +1,7 @@
 #include "focusedParameter.h"
 
 #include "pluginEditor.h"
+#include "pluginProcessor.h"
 
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/parameter.h"
@@ -71,6 +72,7 @@ namespace jucePluginEditorLib
 		}
 
 		m_tooltip.reset(new FocusedParameterTooltip(tooltip));
+		m_tooltipEnabled = !_editor.getProcessor().getConfig().getBoolValue("disableTooltips", false);
 
 		updateControlLabel(nullptr, Priority::None);
 
@@ -165,6 +167,14 @@ namespace jucePluginEditorLib
 		m_editor.onFocusedParameterChanged(_name, _value);
 	}
 
+	void FocusedParameter::setTooltipEnabled(const bool _enabled)
+	{
+		m_tooltipEnabled = _enabled;
+
+		if (!_enabled)
+			m_tooltip->setVisible(false);
+	}
+
 	void FocusedParameter::timerCallback()
 	{
 		updateControlLabel(nullptr, Priority::High);
@@ -222,7 +232,8 @@ namespace jucePluginEditorLib
 
 		updateParameter(_param->getDescription().displayName, value);
 
-		m_tooltip->initialize(_elem, value);
+		if (m_tooltipEnabled)
+			m_tooltip->initialize(_elem, value);
 
 		m_currentPriority = _priority;
 	}

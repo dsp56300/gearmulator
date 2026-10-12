@@ -123,7 +123,7 @@ Framework:
 
 - [Imp] EMU-78 A tooltip shows the value of the control under the mouse in every
         skin now, also in those that had none so far: Osirus, OsTIrus, JE8086 and
-        the Vavra front panel.
+        the Vavra front panel. It can be turned off in the Skins settings.
 
 Osirus/OsTIrus:
 
