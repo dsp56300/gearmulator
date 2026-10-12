@@ -101,7 +101,7 @@ namespace juceRmlUi
 	{
 	}
 
-	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) const
+	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles)
 	{
 		if (!m_juceDraggable || !m_juceDraggable->data || !m_juceDraggable->data->canExportAsFiles())
 			return false;
@@ -116,6 +116,24 @@ namespace juceRmlUi
 			_files.add(juce::String(file));
 
 		_canMoveFiles = false;
+		m_externalDragStarted = true;
+		return true;
+	}
+
+	bool RmlDrag::dragOperationEnded()
+	{
+		// The operating system's drag session that takes over from here swallows the mouse-up, the context would keep
+		// dragging the element forever. Release it; the drop happens outside, where no element can take it.
+		if (!m_externalDragStarted)
+			return false;
+		m_externalDragStarted = false;
+
+		auto* context = m_component.getContext();
+		context->ProcessMouseLeave();
+		context->ProcessMouseButtonUp(0, 0);
+
+		m_rmlDragSource = nullptr;
+		m_juceDraggable = nullptr;
 		return true;
 	}
 
