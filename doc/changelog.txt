@@ -121,6 +121,10 @@ Framework:
         and paste the whole patch only when nothing under the mouse or with the
         focus takes them itself.
 
+- [Fix] The lock, link and MIDI Learn icons of a control could stay behind on
+        the skin after the control was removed or its page rebuilt, and
+        clicking such an icon could crash the plugin.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
