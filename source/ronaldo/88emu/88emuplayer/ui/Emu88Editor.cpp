@@ -333,19 +333,17 @@ namespace emu88Player
 
 		const auto currentScale = m_processor.config().getIntValue("scale", 100);
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
-		if(emu88Lib::gs::isPartEditorModel(m_processor.deviceModel()))
+		// Always listed, so that it is found; greyed out on the boards it does not know
+		m_contextMenu->addEntry("Part Editor", emu88Lib::gs::isPartEditorModel(m_processor.deviceModel()), false, [this]
 		{
-			m_contextMenu->addEntry("Part Editor", [this]
+			const juce::WeakReference<Editor> safeThis(this);
+			juce::MessageManager::callAsync([safeThis]
 			{
-				const juce::WeakReference<Editor> safeThis(this);
-				juce::MessageManager::callAsync([safeThis]
-				{
-					if(auto* editor = safeThis.get())
-						editor->showPartEditor(true);
-				});
+				if(auto* editor = safeThis.get())
+					editor->showPartEditor(true);
 			});
-			m_contextMenu->addSeparator();
-		}
+		});
+		m_contextMenu->addSeparator();
 		// The MT-32 and CM boards know one reset, their own; the GM and GS ones do nothing there.
 		if(emu88Lib::isRolandLaFamily(m_processor.deviceModel()))
 		{

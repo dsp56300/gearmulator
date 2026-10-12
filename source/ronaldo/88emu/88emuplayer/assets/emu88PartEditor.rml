@@ -6,7 +6,7 @@
 <body>
 	<div id="partEditorRoot" class="peRoot">
 		<div class="peTopBar">
-			<button id="peTabMixer" class="peTab peTabMixer">Mixer</button>
+			<button id="peTabMixer" class="peTab peTabMixer"><svg class="peTabIcon" src="part_editor_mixer.svg"/>Mixer</button>
 			<div id="peGroups" class="peGroups"/>
 			<div id="pePartTabs" class="pePartTabs"/>
 			<div class="peActions">

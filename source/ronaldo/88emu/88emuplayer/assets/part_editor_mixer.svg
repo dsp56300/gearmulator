@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64">
+	<!-- Three faders, white: the part editor tints it with image-color -->
+	<g fill="#ffffff">
+		<rect x="2.4" y="1" width="1.2" height="14" rx="0.6"/>
+		<rect x="7.4" y="1" width="1.2" height="14" rx="0.6"/>
+		<rect x="12.4" y="1" width="1.2" height="14" rx="0.6"/>
+		<rect x="0.5" y="9" width="5" height="3" rx="1"/>
+		<rect x="5.5" y="3.5" width="5" height="3" rx="1"/>
+		<rect x="10.5" y="7" width="5" height="3" rx="1"/>
+	</g>
+</svg>

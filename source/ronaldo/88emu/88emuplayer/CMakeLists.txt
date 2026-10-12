@@ -9,6 +9,7 @@ set(HARDWARE_ASSETS
 	assets/emu88PlayerSettings.rcss
 	assets/emu88PartEditor.rml
 	assets/emu88PartEditor.rcss
+	assets/part_editor_mixer.svg
 	${HARDWARE_SKIN_DIR}/sc88_panel.png
 	${HARDWARE_SKIN_DIR}/sc88vl_panel.png
 	${HARDWARE_SKIN_DIR}/sc88pro_panel.png

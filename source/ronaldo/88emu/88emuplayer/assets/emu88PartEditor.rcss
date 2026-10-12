@@ -62,7 +62,20 @@ div {
 }
 
 .peTabMixer {
-	width: 58dp;
+	width: 72dp;
+}
+
+/* White in the file, tinted here to follow the tab's text */
+.peTabIcon {
+	width: 12dp;
+	height: 12dp;
+	margin: -2dp 5dp 0dp 0dp;
+	vertical-align: middle;
+	image-color: #b8c0c5;
+}
+
+.peTab:hover .peTabIcon, .peTab:checked .peTabIcon {
+	image-color: #ffffff;
 }
 
 /* The groups as one segmented control: flush, sharing single dividers - each segment draws its left edge and the
