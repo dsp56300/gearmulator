@@ -29,9 +29,9 @@
 
 namespace xtJucePlugin
 {
-	WaveEditor::WaveEditor(Editor& _editor, Rml::Element* _parent, const juce::File& _cacheDir) : m_editor(_editor), m_parent(_parent), m_data(_editor.getXtController(), _cacheDir.getFullPathName().toStdString())
+	WaveEditor::WaveEditor(Editor& _editor, Rml::Element* _parent) : m_editor(_editor), m_parent(_parent), m_data(_editor.getXtController().getWaveData())
 	{
-		m_data.onWaveChanged.addListener([this](const xt::WaveId& _waveIndex)
+		m_onWaveChanged.set(m_data.onWaveChanged, [this](const xt::WaveId& _waveIndex)
 		{
 			if(_waveIndex != m_selectedWave)
 				return;
@@ -158,15 +158,6 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const synthLib::SysexBuffer& _msg)
-	{
-		m_data.onReceiveWave(_msg);
-	}
-
-	void WaveEditor::onReceiveTable(const pluginLib::MidiPacket::Data& _data, const synthLib::SysexBuffer& _msg)
-	{
-		m_data.onReceiveTable(_msg);
-	}
 
 	void WaveEditor::setSelectedTable(xt::TableId _index)
 	{

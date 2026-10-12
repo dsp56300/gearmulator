@@ -8,8 +8,6 @@
 
 #include "dsp56kBase/logging.h"
 
-#include "xtWaveEditor.h"
-
 namespace
 {
 	constexpr const char* g_midiPacketNames[] =
@@ -58,6 +56,7 @@ namespace
 namespace xtJucePlugin
 {
 	Controller::Controller(AudioPluginAudioProcessor& p, const unsigned char _deviceId) : pluginLib::Controller(p, "parameterDescriptions_xt.json"), m_deviceId(_deviceId)
+		, m_waveData(*this, p.getDataFolder(false) + "wavetables/")
 	{
 	    registerParams(p);
 
@@ -113,16 +112,13 @@ namespace xtJucePlugin
 			{
 				const auto& single = splitResults.front();
 
-				if(m_waveEditor)
-				{
-					const auto& table = splitResults[1];
-					m_waveEditor->getData().onReceiveTable(table, true);
+				const auto& table = splitResults[1];
+				m_waveData.onReceiveTable(table, true);
 
-					for(size_t i=2; i<splitResults.size(); ++i)
-					{
-						const auto& wave = splitResults[i];
-						m_waveEditor->getData().onReceiveWave(wave, true);
-					}
+				for(size_t i=2; i<splitResults.size(); ++i)
+				{
+					const auto& wave = splitResults[i];
+					m_waveData.onReceiveWave(wave, true);
 				}
 
 				data = single;
@@ -263,8 +259,7 @@ namespace xtJucePlugin
 		else
 			return;
 
-		// if the single that was received contains a user table, request it from the device as it might not match what we have in the editor
-		if (m_waveEditor)
+		// if the single that was received contains a user table, request it from the device as it might not match what we have
 		{
 			const auto tableId = xt::TableId(xt::State::getWavetableFromSingleDump(patch.data));
 
@@ -368,13 +363,11 @@ namespace xtJucePlugin
 	    }
 		else if(name == midiPacketName(WaveDump))
 		{
-			if(m_waveEditor)
-				m_waveEditor->onReceiveWave(data, _msg);
+			m_waveData.onReceiveWave(_msg);
 		}
 		else if(name == midiPacketName(TableDump))
 		{
-			if(m_waveEditor)
-				m_waveEditor->onReceiveTable(data, _msg);
+			m_waveData.onReceiveTable(_msg);
 
 			const auto tableId = xt::TableId(static_cast<uint16_t>(_msg[xt::SysexIndex::IdxWaveIndexH] << 7 | _msg[xt::SysexIndex::IdxWaveIndexL]));
 
@@ -484,11 +477,6 @@ namespace xtJucePlugin
 	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const synthLib::SysexBuffer& _sysex) const
 	{
 		return parseMidiPacket(SingleDump, _data, _paramValues, _sysex);
-	}
-
-	void Controller::setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor)
-	{
-		m_waveEditor = _waveEditor;
 	}
 
 	void Controller::selectPreset(const int _offset)
