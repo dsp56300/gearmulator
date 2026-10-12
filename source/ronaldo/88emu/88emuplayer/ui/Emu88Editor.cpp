@@ -256,11 +256,11 @@ namespace emu88Player
 		// Boards without a front panel: artwork with only the player, device selector and volume.
 		case emu88Lib::DeviceModel::Cm32p: panel = "cm32p_panel.png"; break;
 		case emu88Lib::DeviceModel::Cm32l:
-		case emu88Lib::DeviceModel::Cm32ln:
-		// The MT-32s borrow the CM-32L's bezel for now: the same display in the same window,
-		// their switches and knob on the keyboard.
+		case emu88Lib::DeviceModel::Cm32ln: panel = "cm32l_panel.png"; break;
+		// The MT-32s have the CM-32L's bezel in their own dark colour: the same display in the
+		// same window, their switches and knob on the keyboard.
 		case emu88Lib::DeviceModel::Mt32Old:
-		case emu88Lib::DeviceModel::Mt32New: panel = "cm32l_panel.png"; break;
+		case emu88Lib::DeviceModel::Mt32New: panel = "mt32_panel.png"; break;
 		case emu88Lib::DeviceModel::Cm64: panel = "cm64_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8820: panel = "sc8820_panel.png"; break;
 		case emu88Lib::DeviceModel::Xpgs:
@@ -278,9 +278,10 @@ namespace emu88Player
 		const bool noPanel = !panelArtworkHasSwitches(_model);
 		if(auto* image = document->GetElementById("hardwarePanel"))
 			image->SetAttribute("src", panel);
-		// The grey panels get darker transport faces.
+		// The grey panels get darker transport faces; the MT-32's dark one keeps the light ones.
 		const bool cmBezel = emu88Lib::isCmModel(_model) || emu88Lib::isLaModel(_model);
-		const bool darkTransport = cmBezel || _model == emu88Lib::DeviceModel::Sc8850 ||
+		const bool mt32 = _model == emu88Lib::DeviceModel::Mt32Old || _model == emu88Lib::DeviceModel::Mt32New;
+		const bool darkTransport = (cmBezel && !mt32) || _model == emu88Lib::DeviceModel::Sc8850 ||
 		                           _model == emu88Lib::DeviceModel::Sc8820;
 		for(const auto& [id, name] : {std::pair{"playerPlayGraphic", "player_play"}, std::pair{"playerPauseGraphic", "player_pause"},
 		                              std::pair{"playerStopGraphic", "player_stop"}})
@@ -295,10 +296,11 @@ namespace emu88Player
 			root->SetClass("modelSc55", emu88Lib::isSc55Model(_model) && !noPanel);
 			root->SetClass("modelCm", cmBezel);
 			// The CM bezels differ in their windows: one 16x2 on the CM-32P, one 20x1 on the
-			// CM-32L, and both on the CM-64. The MT-32s wear the CM-32L's for now.
+			// CM-32L, and both on the CM-64. The MT-32s' has the CM-32L's window.
 			root->SetClass("modelCm32l", cmBezel && _model != emu88Lib::DeviceModel::Cm32p &&
 			                             _model != emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelCm64", _model == emu88Lib::DeviceModel::Cm64);
+			root->SetClass("modelMt32", mt32);
 			root->SetClass("modelSc8820", _model == emu88Lib::DeviceModel::Sc8820);
 			root->SetClass("modelNoPanel", noPanel);
 			root->SetClass("modelNoDisplay", !emu88Lib::deviceHasLcd(_model));

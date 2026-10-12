@@ -32,6 +32,27 @@
 
 /* The VALUE encoder is endless: four knurl phases repeat every four detents,
  * so 33 frame names (one per encoder value, 32 == 0) map onto four images. */
+/* The CM bezels' own volume knob, 31 frames like the default one. */
+@spritesheet cmVolumeKnob
+{
+	cmknob_000: 0px 0px 128px 128px; cmknob_001: 0px 128px 128px 128px;
+	cmknob_002: 0px 256px 128px 128px; cmknob_003: 0px 384px 128px 128px;
+	cmknob_004: 0px 512px 128px 128px; cmknob_005: 0px 640px 128px 128px;
+	cmknob_006: 0px 768px 128px 128px; cmknob_007: 0px 896px 128px 128px;
+	cmknob_008: 0px 1024px 128px 128px; cmknob_009: 0px 1152px 128px 128px;
+	cmknob_010: 0px 1280px 128px 128px; cmknob_011: 0px 1408px 128px 128px;
+	cmknob_012: 0px 1536px 128px 128px; cmknob_013: 0px 1664px 128px 128px;
+	cmknob_014: 0px 1792px 128px 128px; cmknob_015: 0px 1920px 128px 128px;
+	cmknob_016: 0px 2048px 128px 128px; cmknob_017: 0px 2176px 128px 128px;
+	cmknob_018: 0px 2304px 128px 128px; cmknob_019: 0px 2432px 128px 128px;
+	cmknob_020: 0px 2560px 128px 128px; cmknob_021: 0px 2688px 128px 128px;
+	cmknob_022: 0px 2816px 128px 128px; cmknob_023: 0px 2944px 128px 128px;
+	cmknob_024: 0px 3072px 128px 128px; cmknob_025: 0px 3200px 128px 128px;
+	cmknob_026: 0px 3328px 128px 128px; cmknob_027: 0px 3456px 128px 128px;
+	cmknob_028: 0px 3584px 128px 128px; cmknob_029: 0px 3712px 128px 128px;
+	cmknob_030: 0px 3840px 128px 128px; src: cm_volume_knob.png;
+}
+
 @spritesheet sc8850ValueKnob
 {
 	value_000: 0px 0px 128px 128px; value_001: 0px 128px 128px 128px;
@@ -74,6 +95,8 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .powerOff.modelCm64 #powerOffDisplay2 { display: block; }
 .modelSc8820 .lcd { left: 164dp; top: 28dp; width: 180dp; height: 71dp; }
 .volumeKnob { position: absolute; left: 112dp; top: 24dp; width: 28dp; height: 28dp; frames: 31; spriteprefix: knob_; decorator: image(knob_030 contain); cursor: pointer; }
+.modelCm .volumeKnob { spriteprefix: cmknob_; decorator: image(cmknob_030 contain); }
+.modelMt32 .volumeKnob { spriteprefix: knob_; decorator: image(knob_030 contain); }	/* the MT-32's black knob */
 .deviceSelect { left: 25dp; top: 160dp; width: 120dp; height: 24dp; }
 .deviceSelect:hover { box-shadow: none; }
 .modelCm .deviceSelect { width: 131dp; }	/* the longer CMEmu32P name ends at 152dp */
@@ -176,7 +199,7 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .efxLed.green.red .ledGreenGraphic { display: none; }
 .efxLed.green.red .ledAmberGraphic { display: block; }
 /* The CM bezel, shared by the CM-32P, CM-32L and CM-64 artwork, which differ in their display
- * windows, and worn by the MT-32s for now. Only MIDI MESSAGE is driven; POWER is painted on,
+ * windows, and by the MT-32s' dark one. Only MIDI MESSAGE is driven; POWER is painted on,
  * as is the unlit lamp, so the element only ever paints the lit state. */
 .modelCmBezel { display: none; }
 .modelCm .modelCmBezel { display: block; }

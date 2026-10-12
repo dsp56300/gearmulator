@@ -478,6 +478,10 @@ JE8086:
         writes the parts to the board, Receive reads them back from it. Mute
         is the board's own, the one its MUTE button sets.
 
+- [Imp] CM-32L, CM-32LN, CM-32P, CM-64: A volume knob that matches the bezel.
+
+- [Imp] MT-32: Its own dark artwork instead of the CM-32L's.
+
 2.2.25:
 
 88emuPlayer:

@@ -19,6 +19,7 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/cm32p_panel.png
 	${HARDWARE_SKIN_DIR}/cm32l_panel.png
 	${HARDWARE_SKIN_DIR}/cm64_panel.png
+	${HARDWARE_SKIN_DIR}/mt32_panel.png
 	${HARDWARE_SKIN_DIR}/sc88exp_panel.png
 	${HARDWARE_SKIN_DIR}/sc55pc_panel.png
 	${HARDWARE_SKIN_DIR}/sc8850_assets.png
@@ -45,6 +46,7 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/efx_led_amber.svg
 	${HARDWARE_SKIN_DIR}/cm_led_on.png
 	${HARDWARE_SKIN_DIR}/knob.png
+	${HARDWARE_SKIN_DIR}/cm_volume_knob.png
 	${HARDWARE_SKIN_DIR}/value_knob.png
 )
 juce_add_binary_data(88emuplayer_BinaryData SOURCES ${HARDWARE_ASSETS})
