@@ -73,10 +73,32 @@ namespace juceRmlUi
 
 	void RmlDrag::filesDropped(const juce::StringArray& _files, int _x, int _y)
 	{
-		if (!m_draggable)
+		auto handled = false;
+
+		// No draggable means the drag never started inside the document, so no element can have
+		// taken it - the files still have to go somewhere, which is the whole point below.
+		if (m_draggable)
+		{
+			// This is what makes RmlUi deliver the drop: the fake draggable is released over
+			// whatever is under the cursor, and a drag target there - a wave slot, a patch list -
+			// takes it.
+			m_component.getContext()->ProcessMouseButtonUp(0,0);
+
+			handled = m_juceDragSource && m_juceDragSource->isHandled();
+
+			stopDrag();
+		}
+
+		if (handled || !m_onUnhandledFiles)
 			return;
-		m_component.getContext()->ProcessMouseButtonUp(0,0);
-		stopDrag();
+
+		std::vector<std::string> files;
+		files.reserve(_files.size());
+
+		for (const auto& file : _files)
+			files.emplace_back(file.toStdString());
+
+		m_onUnhandledFiles(files);
 	}
 
 	// ReSharper disable once CppMemberFunctionMayBeStatic

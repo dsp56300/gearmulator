@@ -1,5 +1,9 @@
 #pragma once
 
+#include <functional>
+#include <string>
+#include <vector>
+
 #include "rmlDragSource.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -38,6 +42,13 @@ namespace juceRmlUi
 
 		void onDocumentLoaded();
 
+		// Files dropped on the component that no element in the document took. Without this they
+		// are dropped on the floor, because the component says yes to every file drag so that an
+		// element may have it - which also means JUCE never offers the drop to anything above.
+		using UnhandledFilesCallback = std::function<void(const std::vector<std::string>&)>;
+
+		void setUnhandledFilesCallback(UnhandledFilesCallback _callback) { m_onUnhandledFiles = std::move(_callback); }
+
 		bool isInterestedInFileDrag(const juce::StringArray& _files);
 		void fileDragEnter(const juce::StringArray& _files, int _x, int _y);
 		void fileDragMove(const juce::StringArray& _files, int _x, int _y) const;
@@ -62,5 +73,6 @@ namespace juceRmlUi
 		std::unique_ptr<DragSource> m_juceDragSource;
 		DragSource* m_rmlDragSource = nullptr;
 		JuceDraggable* m_juceDraggable = nullptr;
+		UnhandledFilesCallback m_onUnhandledFiles;
 	};
 }

@@ -126,6 +126,10 @@ namespace juceRmlUi
 		void itemDropped(const SourceDetails& _dragSourceDetails) override;
 		bool shouldDropFilesWhenDraggedExternally(const SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) override;
 
+		// Files dropped on this component that no element in the document wanted. The component
+		// is interested in every file drag, so there is nothing above it that JUCE would ask next.
+		void setUnhandledFilesCallback(RmlDrag::UnhandledFilesCallback _callback) { m_drag.setUnhandledFilesCallback(std::move(_callback)); }
+
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		juce::Point<int> toRmlPosition(int _x, int _y) const;
 
