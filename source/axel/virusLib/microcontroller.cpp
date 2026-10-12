@@ -139,8 +139,8 @@ void Microcontroller::sendInitControlCommands(uint8_t _masterVolume)
 			0xF00020, 0x330110, 0x734034, 0x7fF77f, // Logo Groove = $7f
 			0xF00020, 0x330110, 0x734035, 0x40F740, // Random Patch Generator Depth = $40
 			0xF00020, 0x330110, 0x734036, 0x0CF70C, // Random Patch Generator Amount = $54
-			0xF00020, 0x330110, 0x73403B, 0x01F701, // USB Output Midi Data Cable Number = 1
-			0xF00020, 0x330110, 0x73403C, 0x01F701, // USB Output Panel Data Cable Number = 1
+			0xF00020, 0x330110, 0x73403B, USB_CABLE_MIDI_DATA << 16 | 0xF700 | USB_CABLE_MIDI_DATA,		// USB Output Midi Data Cable Number
+			0xF00020, 0x330110, 0x73403C, USB_CABLE_PANEL_DATA << 16 | 0xF700 | USB_CABLE_PANEL_DATA,	// USB Output Panel Data Cable Number
 			0xF00020, 0x330110, 0x73403E, 0x40F740, // Keyboard Param Velocity Curve = $40
 			0xF00020, 0x330110, 0x734040, 0x01F701, // Keyboard Param Local On = On
 			0xF00020, 0x330110, 0x734041, 0x00F700, // Keyboard Param Channel Mode = 0
@@ -836,6 +836,13 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 					}
 				}
 
+				// the TX parser tells MIDI output from echoed parameter changes by these, see USB_CABLE_PANEL_DATA
+				if(m_rom.isTIFamily() && page == globalSettingsPage() && (param == MIDI_DATA_CABLE || param == PANEL_DATA_CABLE))
+				{
+					LOG("Ignoring a change of USB cable " << static_cast<int>(param) << " to " << static_cast<int>(value));
+					return true;
+				}
+
 				if(!m_rom.isTIFamily() && page == PAGE_A && m_globalSettings[PLAY_MODE] != PlayModeSingle)
 				{
 					applyToMultiEditBuffer(page, part, param, value);
@@ -1218,9 +1225,12 @@ void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEve
 		{
 			if(parser.append(hdi08.readTX()))
 			{
-				const auto midi = parser.getMidiData();
-				if(i == 0)
-					_midiEvents.insert(_midiEvents.end(), midi.begin(), midi.end());
+				// all DSPs echo the same parameter changes, but each plays its own parts (notes of the arpeggiator)
+				for(const auto& e : parser.getMidiData())
+				{
+					if(i == 0 || e.sysex.empty())
+						_midiEvents.push_back(e);
+				}
 				parser.clearMidiData();
 			}
 		}

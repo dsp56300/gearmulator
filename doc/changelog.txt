@@ -222,6 +222,11 @@ OsTIrus:
         and so on got one wrong input sample at the start of every block the
         host processes.
 
+- [Imp] MIDI the DSP sends other than SysEx, the notes of the arpeggiator with
+        MIDI Arpeggiator Send on for example, reaches the MIDI output now, also
+        for parts on the second DSP. It was dropped before. Parameter changes
+        echoed as controllers stay internal, as with Virus Control.
+
 Vavra/Xenia:
 
 - [Fix] EMU-168 SysEx from the host or a MIDI input could be mistaken for a

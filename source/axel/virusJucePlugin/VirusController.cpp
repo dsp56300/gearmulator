@@ -571,6 +571,12 @@ namespace virus
 		const uint8_t status = _e.a & 0xf0;
     	const uint8_t channel = _e.a & 0x0f;
 
+		// Controllers and program changes from the device are its MIDI output (arpeggiator, Keyb to MIDI of a TI) or
+		// answer a controller dump request, never an edit. Taken as one, an echo stops host automation (EMU-82), and the
+		// controller number points to an unrelated parameter, CC 0 to the patch version
+		if(_e.source == synthLib::MidiEventSource::Device && status != synthLib::M_POLYPRESSURE)
+			return false;
+
 		uint8_t page;
 
 		if (status == synthLib::M_CONTROLCHANGE)

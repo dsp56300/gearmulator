@@ -67,6 +67,9 @@ namespace virusLib
 		UNK35 = 53,
 		UNK36 = 54,
 
+		MIDI_DATA_CABLE = 59,
+		PANEL_DATA_CABLE = 60,
+
 		// Multi parts
 		PART_ENABLE = 72,
 		PART_MIDI_VOLUME_ENABLE = 73,
@@ -175,6 +178,11 @@ namespace virusLib
 	};
 
 	static constexpr uint8_t OMNI_DEVICE_ID = 0x10;
+
+	// USB MIDI cables that a TI puts into the header of each packet it sends, the init commands set them as Virus Control
+	// does. MIDI data is the MIDI output (arpeggiator notes, ...), panel data the parameter changes echoed for an editor
+	static constexpr uint8_t USB_CABLE_MIDI_DATA = 1;
+	static constexpr uint8_t USB_CABLE_PANEL_DATA = 2;
 
 	enum class BankNumber : uint8_t
 	{
