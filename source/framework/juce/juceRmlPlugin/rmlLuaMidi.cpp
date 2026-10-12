@@ -1,7 +1,11 @@
 #include "rmlLuaMidi.h"
 
+#include <vector>
+
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/processor.h"
+
+#include "juceRmlUi/rmlInterfaces.h"
 
 #include "RmlUi/Core/Log.h"
 #include "RmlUi/Lua/IncludeLua.h"
@@ -52,9 +56,10 @@ namespace rmlPlugin
 		}
 	}
 
-	LuaMidiListeners::LuaMidiListeners(lua_State* _luaState, pluginLib::MidiNotifier& _notifier)
+	LuaMidiListeners::LuaMidiListeners(lua_State* _luaState, pluginLib::MidiNotifier& _notifier, juceRmlUi::RmlInterfaces& _rmlInterfaces)
 	: m_luaState(_luaState)
 	, m_notifier(_notifier)
+	, m_rmlInterfaces(_rmlInterfaces)
 	, m_listenerId(pluginLib::MidiNotifier::ListenerId())
 	{
 		m_listenerId = m_notifier.addNoteListener([this](const Note& _note)
@@ -102,12 +107,29 @@ namespace rmlPlugin
 
 	void LuaMidiListeners::onNote(const Note& _note) const
 	{
+		// a callback may add or remove listeners, so walk a copy of the ids and look each one up again
+		std::vector<int> ids;
+
 		for (const auto& [id, e] : m_entries)
 		{
-			if (e.wantNoteOn != _note.on)
+			if (e.wantNoteOn == _note.on)
+				ids.push_back(id);
+		}
+
+		if (ids.empty())
+			return;
+
+		// the callbacks are free to change the DOM, which the render thread walks
+		juceRmlUi::RmlInterfaces::ScopedAccess access(m_rmlInterfaces);
+
+		for (const auto id : ids)
+		{
+			const auto it = m_entries.find(id);
+
+			if (it == m_entries.end())
 				continue;
 
-			lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, e.luaFuncRef);
+			lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, it->second.luaFuncRef);
 
 			lua_pushinteger(m_luaState, _note.note);
 
@@ -131,9 +153,12 @@ namespace rmlPlugin
 		}
 	}
 
-	void registerLuaMidi(lua_State* _L, pluginLib::Controller& _controller)
+	void registerLuaMidi(lua_State* _L, pluginLib::Controller& _controller, juceRmlUi::RmlInterfaces& _rmlInterfaces)
 	{
-		lua_pushlightuserdata(_L, new LuaMidiListeners(_L, _controller.getProcessor().getMidiNotifier()));
+		// a registration that was never undone would keep its note listener past the end of the Lua state
+		unregisterLuaMidi(_L);
+
+		lua_pushlightuserdata(_L, new LuaMidiListeners(_L, _controller.getProcessor().getMidiNotifier(), _rmlInterfaces));
 		lua_setfield(_L, LUA_REGISTRYINDEX, MIDI_LISTENERS_REGISTRY_KEY);
 
 		static const luaL_Reg funcs[] = {

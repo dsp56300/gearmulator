@@ -3,6 +3,8 @@
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/parameter.h"
 
+#include "juceRmlUi/rmlInterfaces.h"
+
 #include "RmlUi/Core/Log.h"
 #include "RmlUi/Lua/IncludeLua.h"
 #include "RmlUi/Lua/Interpreter.h"
@@ -205,17 +207,10 @@ namespace rmlPlugin
 
 	// --- LuaParameterListeners ---
 
-	static void invokeParamCallback(lua_State* _L, int _funcRef, int _value, const std::string& _text)
-	{
-		lua_rawgeti(_L, LUA_REGISTRYINDEX, _funcRef);
-		lua_pushinteger(_L, _value);
-		lua_pushstring(_L, _text.c_str());
-		Rml::Lua::Interpreter::ExecuteCall(_L, 2, 0);
-	}
-
-	LuaParameterListeners::LuaParameterListeners(lua_State* _L, pluginLib::Controller& _controller)
+	LuaParameterListeners::LuaParameterListeners(lua_State* _L, pluginLib::Controller& _controller, juceRmlUi::RmlInterfaces& _rmlInterfaces)
 		: m_luaState(_L)
 		, m_controller(_controller)
+		, m_rmlInterfaces(_rmlInterfaces)
 		, m_lastPart(_controller.getCurrentPart())
 	{
 		m_currentPartListener.set(_controller.onCurrentPartChanged, [this](const uint8_t& _part)
@@ -241,19 +236,12 @@ namespace rmlPlugin
 		entry.luaFuncRef = _luaFuncRef;
 		entry.paramName = _name;
 		entry.isCurrentPart = _isCurrentPart;
-		auto* L = m_luaState;
 
 		auto [it, _] = m_paramListeners.emplace(id, std::move(entry));
 
-		it->second.listener.set(param, [L, _luaFuncRef](pluginLib::Parameter* _p)
+		it->second.listener.set(param, [this, id](const pluginLib::Parameter* _p)
 		{
-			const int value = _p->getUnnormalizedValue();
-			const auto text = _p->getCurrentValueAsText().toStdString();
-
-			juce::MessageManager::callAsync([L, _luaFuncRef, value, text]()
-			{
-				invokeParamCallback(L, _luaFuncRef, value, text);
-			});
+			postParamCallback(id, *_p);
 		});
 
 		return id;
@@ -263,23 +251,14 @@ namespace rmlPlugin
 	{
 		const int id = m_nextId++;
 
-		auto* L = m_luaState;
-
 		PartChangedEntry entry;
 		entry.luaFuncRef = _luaFuncRef;
-		entry.listener.set(m_controller.onCurrentPartChanged, [L, _luaFuncRef](const uint8_t& _part)
+		entry.listener.set(m_controller.onCurrentPartChanged, [this, id](const uint8_t& _part)
 		{
-			juce::MessageManager::callAsync([L, _luaFuncRef, _part]()
+			juce::MessageManager::callAsync([this, alive = std::weak_ptr(m_alive), id, part = _part]
 			{
-				lua_rawgeti(L, LUA_REGISTRYINDEX, _luaFuncRef);
-				lua_pushinteger(L, _part);
-				if (lua_pcall(L, 1, 0, 0) != LUA_OK)
-				{
-					const char* err = lua_tostring(L, -1);
-					if (err)
-						Rml::Log::Message(Rml::Log::LT_WARNING, "Lua part changed callback error: %s", err);
-					lua_pop(L, 1);
-				}
+				if (!alive.expired())
+					invokePartChangedCallback(id, part);
 			});
 		});
 
@@ -333,44 +312,81 @@ namespace rmlPlugin
 			if (!param)
 				continue;
 
-			const int funcRef = entry.luaFuncRef;
-			auto* L = m_luaState;
-
-			entry.listener.set(param, [L, funcRef](pluginLib::Parameter* _p)
+			entry.listener.set(param, [this, id = id](const pluginLib::Parameter* _p)
 			{
-				const int value = _p->getUnnormalizedValue();
-				const auto text = _p->getCurrentValueAsText().toStdString();
-
-				juce::MessageManager::callAsync([L, funcRef, value, text]()
-				{
-					invokeParamCallback(L, funcRef, value, text);
-				});
+				postParamCallback(id, *_p);
 			});
 
 			// Fire callback if the value differs between old and new part
 			auto* oldParam = m_controller.getParameter(entry.paramName, oldPart);
 			if (!oldParam || oldParam->getUnnormalizedValue() != param->getUnnormalizedValue())
-			{
-				const int value = param->getUnnormalizedValue();
-				const auto text = param->getCurrentValueAsText().toStdString();
-				juce::MessageManager::callAsync([L, funcRef, value, text]()
-				{
-					invokeParamCallback(L, funcRef, value, text);
-				});
-			}
+				postParamCallback(id, *param);
+		}
+	}
+
+	void LuaParameterListeners::postParamCallback(const int _id, const pluginLib::Parameter& _param) const
+	{
+		const int value = _param.getUnnormalizedValue();
+		auto text = _param.getCurrentValueAsText().toStdString();
+
+		juce::MessageManager::callAsync([this, alive = std::weak_ptr(m_alive), _id, value, text = std::move(text)]
+		{
+			if (!alive.expired())
+				invokeParamCallback(_id, value, text);
+		});
+	}
+
+	void LuaParameterListeners::invokeParamCallback(const int _id, const int _value, const std::string& _text) const
+	{
+		// the listener may have been removed while the call was queued, its reference is gone then
+		const auto it = m_paramListeners.find(_id);
+		if (it == m_paramListeners.end())
+			return;
+
+		// the callback is free to change the DOM, which the render thread walks
+		juceRmlUi::RmlInterfaces::ScopedAccess access(m_rmlInterfaces);
+
+		lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, it->second.luaFuncRef);
+		lua_pushinteger(m_luaState, _value);
+		lua_pushstring(m_luaState, _text.c_str());
+		Rml::Lua::Interpreter::ExecuteCall(m_luaState, 2, 0);
+	}
+
+	void LuaParameterListeners::invokePartChangedCallback(const int _id, const uint8_t _part) const
+	{
+		const auto it = m_partChangedListeners.find(_id);
+		if (it == m_partChangedListeners.end())
+			return;
+
+		juceRmlUi::RmlInterfaces::ScopedAccess access(m_rmlInterfaces);
+
+		auto* L = m_luaState;
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, it->second.luaFuncRef);
+		lua_pushinteger(L, _part);
+		if (lua_pcall(L, 1, 0, 0) != LUA_OK)
+		{
+			const char* err = lua_tostring(L, -1);
+			if (err)
+				Rml::Log::Message(Rml::Log::LT_WARNING, "Lua part changed callback error: %s", err);
+			lua_pop(L, 1);
 		}
 	}
 
 	// --- Registration ---
 
-	void registerLuaParameters(lua_State* _L, pluginLib::Controller& _controller)
+	void registerLuaParameters(lua_State* _L, pluginLib::Controller& _controller, juceRmlUi::RmlInterfaces& _rmlInterfaces)
 	{
+		// A registration that was never undone would keep its listeners, and the callbacks they post, past the
+		// end of the Lua state
+		unregisterLuaParameters(_L);
+
 		// Store controller in registry
 		lua_pushlightuserdata(_L, &_controller);
 		lua_setfield(_L, LUA_REGISTRYINDEX, CONTROLLER_REGISTRY_KEY);
 
 		// Create and store listeners manager
-		auto* listeners = new LuaParameterListeners(_L, _controller);
+		auto* listeners = new LuaParameterListeners(_L, _controller, _rmlInterfaces);
 		lua_pushlightuserdata(_L, listeners);
 		lua_setfield(_L, LUA_REGISTRYINDEX, LISTENERS_REGISTRY_KEY);
 
