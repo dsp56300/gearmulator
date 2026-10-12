@@ -21,6 +21,7 @@ namespace synthLib
 		{
 			flushSysex();
 			m_sysex = true;
+			m_runningStatus = 0;
 			m_sysexBuffer.push_back(d);
 			return;
 		}
@@ -48,7 +49,29 @@ namespace synthLib
 		}
 
 		if(m_pendingEventLen == 0)
+		{
+			if(d < 0x80)
+			{
+				// Running status: a data byte without a status byte of its own continues the last channel message.
+				// Without one to continue it is not part of any message.
+				if(m_runningStatus == 0)
+					return;
+				m_pendingEvent.a = m_runningStatus;
+				m_pendingEvent.b = d;
+				m_pendingEventLen = 2;
+				if(lengthFromStatusByte(m_runningStatus) == m_pendingEventLen)
+					flushEvent();
+				return;
+			}
+
+			// Channel messages set the running status, system common messages clear it, realtime leaves it alone
+			if(d <= 0xef)
+				m_runningStatus = d;
+			else if(d <= 0xf7)
+				m_runningStatus = 0;
+
 			m_pendingEvent.a = d;
+		}
 		else if(m_pendingEventLen == 1)
 			m_pendingEvent.b = d;
 		else if(m_pendingEventLen == 2)

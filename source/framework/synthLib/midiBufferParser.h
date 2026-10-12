@@ -48,6 +48,7 @@ namespace synthLib
 		SysexBuffer m_sysexBuffer;
 		synthLib::SMidiEvent m_pendingEvent;
 		uint32_t m_pendingEventLen = 0;
+		uint8_t m_runningStatus = 0;
 		bool m_sysex = false;
 	};
 }

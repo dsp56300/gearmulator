@@ -158,7 +158,7 @@ int main()
 	SMidiEvent current(MidiEventSource::Host, 0x90, 64, 100);
 	current.transportGeneration = 1;
 	process(512, {jump, stale, physical, current});
-	// The echo preserves running status. Reassemble the parser's raw data-byte events; both
+	// The echo uses running status, which the parser expands into complete messages; both
 	// the board limiter and transport cleanup silence the channel, and on the CM-32P, whose
 	// firmware has no All Sound Off, that is the hold pedal up and All Notes Off.
 	std::vector<uint8_t> bytes;
@@ -169,7 +169,8 @@ int main()
 		if(length > 1) bytes.push_back(event.b);
 		if(length > 2) bytes.push_back(event.c);
 	}
-	const std::vector<uint8_t> expected{0xb0, 64, 0, 123, 0, 64, 0, 123, 0, 0x90, 63, 100, 64, 100};
+	const std::vector<uint8_t> expected{0xb0, 64, 0, 0xb0, 123, 0, 0xb0, 64, 0, 0xb0, 123, 0,
+	                                    0x90, 63, 100, 0x90, 64, 100};
 	CHECK(bytes == expected);
 	process(512, {});
 	CHECK(output.empty()); // The previously queued future note is obsolete too.
@@ -194,7 +195,7 @@ int main()
 			if(length > 2) bytes.push_back(event.c);
 		}
 		// Both the board's UART queue and HardwareDevice retain their cleanup.
-		CHECK(bytes == std::vector<uint8_t>({0xb0, 64, 0, 123, 0, 64, 0, 123, 0}));
+		CHECK(bytes == std::vector<uint8_t>({0xb0, 64, 0, 0xb0, 123, 0, 0xb0, 64, 0, 0xb0, 123, 0}));
 		board.process({}, {}, 512, {jump}, output);
 		CHECK(output.empty());
 	}

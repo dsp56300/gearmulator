@@ -129,6 +129,9 @@ Framework:
         edits from the editor or the host were still on their way to the
         emulation could apply those edits on top of the loaded sound.
 
+- [Fix] MIDI that an emulated device sent with running status, as the CM-32P
+        does, came out as single stray bytes after its first message.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
