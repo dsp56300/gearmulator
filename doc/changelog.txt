@@ -400,6 +400,10 @@ JE8086:
         converter to another group of inputs while a scan was running, the
         converter could stop reporting conversions.
 
+- [Fix] MT-32, CM-32L, CM-32P, CM-64: The CPU's add and subtract with carry
+        set the zero flag the way the real chip does, from the result of
+        each word, rather than as the manual describes it.
+
 2.2.25:
 
 88emuPlayer:
