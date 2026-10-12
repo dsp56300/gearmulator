@@ -115,12 +115,13 @@ namespace emu88Player
 		m_playlistEntries = nullptr;
 		m_playerPlayGraphic = nullptr;
 		m_playerPauseGraphic = nullptr;
-		m_lcd.reset();
-		m_lcd2.reset();
 		m_buttonElements.fill(nullptr);
 		m_leds.fill(nullptr);
 		m_onRmlFocusLost.reset();
 		m_rml.reset();
+		// The LCDs paint their canvases from the render thread, which runs until the component is gone.
+		m_lcd.reset();
+		m_lcd2.reset();
 		m_fileCache.clear();
 	}
 
@@ -198,20 +199,28 @@ namespace emu88Player
 			m_powerKeyDown = false;
 			sendButtons();
 		}
-		updateButtonVisuals();
+		// Not every caller is inside an RmlUi event. The render thread reads the document and the LCDs, so
+		// they change under the access lock - which is not held across the device boot in between.
+		{
+			juceRmlUi::RmlInterfaces::ScopedAccess access(m_interfaces);
+			updateButtonVisuals();
+		}
 		const auto held = m_pointerButtons | m_keyboardButtons;
 		const bool valid = _powerOn
 			? m_processor.setPower(true, panelButtonsForDevice(_model, held))
 			: (_restart ? m_processor.restartDevice() : m_processor.setDeviceModel(_model));
 		m_sentButtons = _powerOn ? held : 0;
 		m_displayRevision = 0;
-		updateDeviceSkin(_model);
-		updatePowerVisuals();
-		if(m_lcd)
-			m_lcd->reset(_model);
-		if(m_lcd2)
-			m_lcd2->reset(_model, 1);
-		updateLeds(0);
+		{
+			juceRmlUi::RmlInterfaces::ScopedAccess access(m_interfaces);
+			updateDeviceSkin(_model);
+			updatePowerVisuals();
+			if(m_lcd)
+				m_lcd->reset(_model);
+			if(m_lcd2)
+				m_lcd2->reset(_model, 1);
+			updateLeds(0);
+		}
 		// The analogue output setting names the circuit Auto picks for the current board, and the
 		// MIDI page dims the part groups it lacks.
 		if(m_settingsRoot)
