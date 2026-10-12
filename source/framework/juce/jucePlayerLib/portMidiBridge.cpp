@@ -7,6 +7,7 @@
 
 #include "synthLib/midiBufferParser.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <memory>
 #include <utility>
@@ -20,10 +21,13 @@ namespace jucePlayer
         std::multiset<std::pair<std::string, uint8_t>> g_names;
         std::string portSuffix(size_t port) { return " " + std::string(1, static_cast<char>('A' + port)); }
 
+        // PortMidi's time base for the input timestamps: it converts CoreMIDI's to it
+        PmTimestamp timeMs(void*) { return static_cast<PmTimestamp>(juce::Time::getMillisecondCounter()); }
+
         class VirtualMidiPort
         {
         public:
-            explicit VirtualMidiPort(const size_t _port, const std::string& _name)
+            VirtualMidiPort(const size_t _port, const std::string& _name, const bool _withOutput)
             {
                 std::lock_guard lock(s_mutex);
                 if (s_users == 0 && Pm_Initialize() != pmNoError)
@@ -33,8 +37,9 @@ namespace jucePlayer
                 const auto inputName = _name + " MIDI IN" + portSuffix(_port);
                 const auto outputName = _name + " MIDI OUT" + portSuffix(_port);
                 m_virtualIn = Pm_CreateVirtualInput(inputName.c_str(), nullptr, nullptr);
-                m_virtualOut = Pm_CreateVirtualOutput(outputName.c_str(), nullptr, nullptr);
-                if (m_virtualIn >= 0 && Pm_OpenInput(&m_in, m_virtualIn, nullptr, 1024, nullptr, nullptr) != pmNoError)
+                if (_withOutput)
+                    m_virtualOut = Pm_CreateVirtualOutput(outputName.c_str(), nullptr, nullptr);
+                if (m_virtualIn >= 0 && Pm_OpenInput(&m_in, m_virtualIn, nullptr, 1024, timeMs, nullptr) != pmNoError)
                     m_in = nullptr;
                 if (m_virtualOut >= 0 &&
                     Pm_OpenOutput(&m_out, m_virtualOut, nullptr, 1024, nullptr, nullptr, 0) != pmNoError)
@@ -59,7 +64,8 @@ namespace jucePlayer
             VirtualMidiPort(const VirtualMidiPort&) = delete;
             VirtualMidiPort& operator=(const VirtualMidiPort&) = delete;
 
-            template <typename Callback> void pollIn(Callback&& _callback)
+            // _onRead after the bytes of every PortMidi event, with its timestamp
+            template <typename Callback, typename ReadCallback> void pollIn(Callback&& _callback, ReadCallback&& _onRead)
             {
                 if (!m_in)
                     return;
@@ -69,6 +75,7 @@ namespace jucePlayer
                     if (Pm_Read(m_in, &event, 1) <= 0)
                         return;
                     emitMessageBytes(event.message, _callback);
+                    _onRead(event.timestamp);
                 }
             }
 
@@ -171,8 +178,17 @@ namespace jucePlayer
     } // namespace
 
     PortMidiBridge::PortMidiBridge(MidiInputCallback _midiInputCallback, std::string _name, const uint8_t _portCount) :
+        PortMidiBridge([callback = std::move(_midiInputCallback)](synthLib::SMidiEvent _event, double)
+        {
+            callback(std::move(_event));
+        }, std::move(_name), _portCount, true)
+    {
+    }
+
+    PortMidiBridge::PortMidiBridge(TimedMidiInputCallback _midiInputCallback, std::string _name, const uint8_t _portCount,
+                                   const bool _withOutputs) :
         juce::Thread(_name + " MIDI"), m_midiInputCallback(std::move(_midiInputCallback)), m_name(std::move(_name)),
-        m_portCount(_portCount)
+        m_portCount(_portCount), m_withOutputs(_withOutputs)
     {
         if (m_portCount == 0 || m_portCount > 16)
             throw std::invalid_argument("Virtual MIDI needs 1..16 ports");
@@ -244,7 +260,7 @@ namespace jucePlayer
                     for (size_t i = 0; i < ports.size(); ++i)
                     {
                         parsers.emplace_back(synthLib::MidiEventSource::Physical);
-                        ports[i] = std::make_unique<VirtualMidiPort>(i, m_name);
+                        ports[i] = std::make_unique<VirtualMidiPort>(i, m_name, m_withOutputs);
                     }
                     portsOpen = true;
                 }
@@ -260,14 +276,19 @@ namespace jucePlayer
 
             for (size_t port = 0; port < ports.size(); ++port)
             {
-                ports[port]->pollIn([&parsers, port](const uint8_t _byte) { parsers[port].write(_byte); });
-                events.clear();
-                parsers[port].getEvents(events);
-                for (auto& event : events)
-                {
-                    event.port = static_cast<uint8_t>(port);
-                    m_midiInputCallback(std::move(event));
-                }
+                ports[port]->pollIn([&parsers, port](const uint8_t _byte) { parsers[port].write(_byte); },
+                    [&](const PmTimestamp _time)
+                    {
+                        events.clear();
+                        parsers[port].getEvents(events);
+                        const auto ahead = static_cast<uint32_t>(_time) - static_cast<uint32_t>(timeMs(nullptr));
+                        const auto lead = std::max(0, static_cast<int32_t>(ahead));
+                        for (auto& event : events)
+                        {
+                            event.port = static_cast<uint8_t>(port);
+                            m_midiInputCallback(std::move(event), static_cast<double>(lead));
+                        }
+                    });
             }
 
             while (!m_output.empty())
