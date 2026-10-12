@@ -150,7 +150,9 @@ namespace synthLib
 		if(!_device)
 			return;
 
-		std::lock_guard lock(m_lock);
+		// Both locks at once, like setState() below takes them: holding m_lock alone here, setState() would wait for
+		// m_lockAddMidiEvent while addMidiEvent() holds that one and waits for m_lock
+		std::scoped_lock lock(m_lock, m_lockAddMidiEvent);
 
 		std::vector<uint8_t> deviceState;
 		getState(deviceState, StateTypeGlobal);
@@ -194,9 +196,9 @@ namespace synthLib
 		return m_device->getStateWithPendingMidi(_state, _type, m_midiIn);
 	}
 
-	bool Plugin::setState(const std::vector<uint8_t>& _state) const
+	bool Plugin::setState(const std::vector<uint8_t>& _state)
 	{
-		std::lock_guard lock(m_lock);
+		std::scoped_lock lock(m_lock, m_lockAddMidiEvent);
 
 		if(!m_device)
 			return false;
@@ -217,7 +219,17 @@ namespace synthLib
 		auto state = _state;
 		state.erase(state.begin(), state.begin() + 2);
 
-		return m_device->setState(state, stateType);
+		const auto restored = m_device->setState(state, stateType);
+		if (restored)
+		{
+			// Pending events belong to the previous state. New input waits for restore.
+			m_midiInRingBuffer.clear();
+			m_midiIn.clear();
+			m_midiOut.clear();
+			m_pendingSysexInput = {};
+			m_resampler.clearMidi();
+		}
+		return restored;
 	}
 	void Plugin::insertMidiEvent(const SMidiEvent& _ev)
 	{

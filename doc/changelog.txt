@@ -125,6 +125,10 @@ Framework:
         the skin after the control was removed or its page rebuilt, and
         clicking such an icon could crash the plugin.
 
+- [Fix] Loading a state, a project or a preset of the host for example, while
+        edits from the editor or the host were still on their way to the
+        emulation could apply those edits on top of the loaded sound.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
