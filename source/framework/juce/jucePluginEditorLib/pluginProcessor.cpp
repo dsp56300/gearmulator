@@ -207,8 +207,12 @@ namespace jucePluginEditorLib
 		return window;
 	}
 
+	// FinalProcessor's destructor calls this first after the MCP server is off, so this is where teardown begins: the
+	// MIDI inputs stop calling in before the editor, the patch manager, the controller and the device go away
 	void Processor::destroyEditorState()
 	{
+		stopMcpServer();
+		shutdown();
 		m_editorState.reset();
 	}
 

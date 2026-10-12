@@ -36,6 +36,12 @@ namespace synthLib
 		m_midiInRingBuffer.push_back(_ev);
 	}
 
+	bool Plugin::setDspClockPercent(const uint32_t _percent)
+	{
+		std::lock_guard lock(m_lock);
+		return m_device && m_device->setDspClockPercent(_percent);
+	}
+
 	bool Plugin::setPreferredDeviceSamplerate(const float _samplerate)
 	{
 		std::lock_guard lock(m_lock);
@@ -95,10 +101,16 @@ namespace synthLib
 
 		if(!m_device->isValid())
 		{
-			m_device = m_callbackDeviceInvalid(m_device);
+			if(!m_deviceInvalidReported)
+			{
+				m_deviceInvalidReported = true;
+				if(m_callbackDeviceInvalid)
+					m_callbackDeviceInvalid(m_device);
+			}
 
-			if(!m_device || !m_device->isValid())
-				return;
+			for(auto* output : outputs)
+				std::fill_n(output, _count, 0.0f);
+			return;
 		}
 
 		// Firmware can change the device clock during a patch/state change. Switching the
@@ -138,6 +150,8 @@ namespace synthLib
 
 	void Plugin::getMidiOut(std::vector<SMidiEvent>& _midiOut)
 	{
+		// setState() clears it on the host's thread
+		std::lock_guard lock(m_lock);
 		std::swap(_midiOut, m_midiOut);
 		m_midiOut.clear();
 	}
@@ -162,6 +176,7 @@ namespace synthLib
 		delete m_device;
 
 		m_device = _device;
+		m_deviceInvalidReported = false;
 
 		m_device->setSamplerate(m_deviceSamplerate);
 		if(!deviceState.empty())

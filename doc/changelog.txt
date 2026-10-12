@@ -149,6 +149,19 @@ Framework:
         leftovers of the old one and silenced with them. The loop the host
         reports now places the jump on the sample it happens at.
 
+- [Fix] When the connection to the DSPBridge server was lost, the plugin
+        reconnected, or switched to local processing, on the host's audio
+        thread, so the host's audio stalled until that was done. It happens in
+        the background now, and the plugin stays silent until then.
+
+- [Fix] MIDI Learn, the MIDI output and parameter changes could get in each
+        other's way across the host's audio and MIDI threads. That could crash
+        the plugin, rarely, for example when a mapping was learned or a project
+        was loaded while MIDI was arriving, or when the plugin was removed.
+
+- [Imp] A MIDI output port that sends slower than the plugin feeds it no longer
+        holds up the audio. Messages that do not fit into its queue are dropped.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported

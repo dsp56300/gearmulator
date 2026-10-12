@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <limits>
+#include <thread>
 
 #include <juce_audio_formats/juce_audio_formats.h>
 
@@ -62,14 +63,40 @@ namespace pluginLib
 
 	Processor::~Processor()
 	{
-		m_midiPorts.close();
+		shutdown();
 		destroyController();
 		m_plugin.reset();
 		m_device.reset();
 	}
 
+	void Processor::shutdown()
+	{
+		if (m_shutdown.exchange(true))
+			return;
+
+		// a JUCE MIDI input thread would otherwise keep calling in
+		m_midiPorts.close();
+
+		// whoever got past the flag before it was raised is still running, the teardown that follows must wait for it
+		while (m_midiInputCalls.load() != 0)
+			std::this_thread::yield();
+
+		m_alive.reset();
+	}
+
 	void Processor::addMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
+		// Both counter and flag are sequentially consistent: either shutdown() sees this call, or this call sees the flag
+		m_midiInputCalls.fetch_add(1);
+		struct Leave
+		{
+			std::atomic<uint32_t>& calls;
+			~Leave() { calls.fetch_sub(1); }
+		} leave{m_midiInputCalls};
+
+		if (m_shutdown)
+			return;
+
 		audioCaptureCheckArm(_ev);
 
 		// before midi learn or the program change router get a chance to swallow the event: a skin
@@ -164,7 +191,7 @@ namespace pluginLib
 				m_midiLearnTranslator = std::make_unique<MidiLearnTranslator>(*m_controller, m_controller->getParameterDescriptions().getControllerMap());
 				
 				// Setup MIDI feedback callback
-				m_midiLearnTranslator->onSendMidiOutput = [this](const synthLib::MidiEventSource _target, const synthLib::SMidiEvent& _event)
+				m_midiLearnTranslator->setOnSendMidiOutput([this](const synthLib::MidiEventSource _target, const synthLib::SMidiEvent& _event)
 				{
 					if (_target == synthLib::MidiEventSource::Editor && _event.source != synthLib::MidiEventSource::Editor)
 						getController().enqueueMidiMessages({_event});
@@ -172,7 +199,7 @@ namespace pluginLib
 						m_midiPorts.send(_event);
 					else if (_target == synthLib::MidiEventSource::Host && _event.source != synthLib::MidiEventSource::Host)
 						addHostMidiFeedback(_event);
-				};
+				});
 
 				// Load default MIDI learn preset from disk. DAW state restore
 				// (setStateInformation) will override this if present.
@@ -228,13 +255,15 @@ namespace pluginLib
 					msg += "\n\n" + std::string("[Debug] Host ") + host.toStdString() + "\n\n";
 #endif
 				}
-				juce::Timer::callAfterDelay(2000, [this, msg]
+				juce::Timer::callAfterDelay(2000, [alive = std::weak_ptr(m_alive), romFolder = getPublicRomFolder(), msg]
 				{
+					if (alive.expired())
+						return;
 					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 						"Device Initialization failed", msg, 
-						[this]
+						[romFolder]
 						{
-							const auto path = juce::File(getPublicRomFolder());
+							const auto path = juce::File(romFolder);
 							(void)path.createDirectory();
 							path.revealToUser();
 						}
@@ -252,7 +281,7 @@ namespace pluginLib
 
 		m_plugin.reset(new synthLib::Plugin(m_device.get(), [this](synthLib::Device* _device)
 		{
-			return onDeviceInvalid(_device);
+			onDeviceInvalid(_device);
 		}));
 
 		m_plugin->setResamplerMode(m_resamplerMode);
@@ -416,8 +445,8 @@ namespace pluginLib
 		{
 			baseLib::ChunkWriter cw(s, "GAIN", 1);
 			s.write<uint32_t>(1);	// version
-			s.write(m_inputGain);
-			s.write(m_outputGain);
+			s.write(m_inputGain.load());
+			s.write(m_outputGain.load());
 		}
 
 		if(m_dspClockPercent != 100)
@@ -538,7 +567,9 @@ namespace pluginLib
 	{
 		if(!m_device)
 			return false;
-		if(!m_device->setDspClockPercent(_percent))
+		// under the processing lock: a remote device's request must not overlap the audio thread's, and a local
+		// one must not change its clock in the middle of a block
+		if(!getPlugin().setDspClockPercent(_percent))
 			return false;
 		m_dspClockPercent = _percent;
 		return true;
@@ -1331,9 +1362,24 @@ namespace pluginLib
 		return 0.0f;
 	}
 
-	synthLib::Device* Processor::onDeviceInvalid(synthLib::Device* _device)
+	void Processor::onDeviceInvalid(synthLib::Device* _device)
 	{
-		if(dynamic_cast<bridgeClient::RemoteDevice*>(_device))
+		// The audio thread must neither wait for a reconnect nor boot a device, and setDevice() takes the locks that
+		// process() holds. The device is replaced on the message thread, the plugin outputs silence until then
+		juce::MessageManager::callAsync([this, alive = std::weak_ptr(m_alive), _device]
+		{
+			if (!alive.expired())
+				replaceInvalidDevice(_device);
+		});
+	}
+
+	void Processor::replaceInvalidDevice(const synthLib::Device* _device)
+	{
+		// replaced already, by a reboot or a device type switch that was queued before
+		if (getPlugin().getDevice() != _device)
+			return;
+
+		if(dynamic_cast<const bridgeClient::RemoteDevice*>(_device))
 		{
 			try
 			{
@@ -1341,32 +1387,29 @@ namespace pluginLib
 				auto* newDevice = createRemoteDevice();
 				if(newDevice && newDevice->isValid())
 				{
+					getPlugin().setDevice(newDevice);
+					(void)m_device.release();
 					m_device.reset(newDevice);
 					m_deviceVoiceExpansion = m_voiceExpansion;
-					return newDevice;
+					if (hasController())
+						getController().onStateLoaded();
+					return;
 				}
+				delete newDevice;
 			}
 			catch (synthLib::DeviceException& e)
 			{
-				juce::MessageManager::callAsync([e]
-				{
-					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
-						"Device creation failed:",
-						std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
-						e.what() + "\n\n");
-				});
+				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+					"Device creation failed:",
+					std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
+					e.what() + "\n\n");
 			}
 		}
 
-		setDeviceType(DeviceType::Local);
+		setDeviceType(DeviceType::Local, true);
 
-		juce::MessageManager::callAsync([this]
-		{
-			if (hasController())
-				getController().onStateLoaded();
-		});
-
-		return m_device.get();
+		if (hasController())
+			getController().onStateLoaded();
 	}
 
 	void Processor::setVoiceExpansion(const bool _enabled)

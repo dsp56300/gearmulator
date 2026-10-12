@@ -60,6 +60,7 @@ namespace baseLib
 namespace pluginLib
 {
 	class FileType;
+	struct MidiLearnMapping;
 }
 
 namespace jucePluginEditorLib
@@ -251,6 +252,9 @@ namespace jucePluginEditorLib
 
 		juceRmlUi::RmlInterfaces m_rmlInterfaces;
 		std::unique_ptr<juceRmlUi::RmlComponent> m_rmlComponent;
+
+		// message thread, the translator reports a learned mapping on the MIDI thread and it is passed on
+		void onMidiLearnMappingLearned(pluginLib::MidiLearnMapping _mapping);
 
 		bool m_midiLearnModeActive = false;
 		pluginLib::Parameter* m_midiLearnSelectedParam = nullptr;

@@ -91,6 +91,23 @@ namespace pluginLib
 
 	bool MidiPorts::setMidiOutput(const juce::String& _out)
 	{
+		m_outputOpen = false;
+
+		{
+			// send dummy to wakeup thread. Only if there is one: the dummy is an empty SysEx, which would wait in the
+			// queue and go out to the next port opened
+			std::lock_guard lock(m_mutexProducers);
+			if (m_threadOutput)
+				m_midiOutMessages.push_back(juce::MidiMessage());
+		}
+
+		// the sender uses the port without the lock, it has to be gone before the port is
+		if (m_threadOutput)
+		{
+			m_threadOutput->join();
+			m_threadOutput.reset();
+		}
+
 		{
 			std::lock_guard lock(m_mutexOutput);
 			if (m_midiOutput != nullptr)
@@ -99,15 +116,13 @@ namespace pluginLib
 					m_midiOutput->stopBackgroundThread();
 			}
 			m_midiOutput = nullptr;
-
-			// send dummy to wakeup thread
-			m_midiOutMessages.push_back(juce::MidiMessage());
 		}
 
-		if (m_threadOutput)
 		{
-			m_threadOutput->join();
-			m_threadOutput.reset();
+			// a send that got past the open check while the port closed must not go out to the next one
+			std::lock_guard lock(m_mutexProducers);
+			while (!m_midiOutMessages.empty())
+				m_midiOutMessages.pop_front();
 		}
 
 		if(_out.isEmpty())
@@ -120,6 +135,7 @@ namespace pluginLib
 		{
 			m_midiOutput->startBackgroundThread();
 			m_threadOutput.reset(new std::thread([this] { senderThread(); }));
+			m_outputOpen = true;
 			return true;
 		}
 		return false;
@@ -160,19 +176,16 @@ namespace pluginLib
 	{
 		dsp56k::ThreadTools::setCurrentThreadName("MIdiOutputSender");
 
+		// setMidiOutput() changes the port only while this thread is not running, so it is used without the lock: a
+		// SysEx can take a while on the wire, and whoever wants the lock meanwhile would wait for it
+		auto* out = m_midiOutput.get();
+
 		while (true)
 		{
 			auto msg = m_midiOutMessages.pop_front();
 
-			std::lock_guard lock(m_mutexOutput);
-
-			auto* out = m_midiOutput.get();
-			if (!out)
-			{
-				while (!m_midiOutMessages.empty())
-					m_midiOutMessages.pop_front();
+			if (!m_outputOpen)
 				break;
-			}
 
 			out->sendMessageNow(msg);
 		}

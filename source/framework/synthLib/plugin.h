@@ -29,7 +29,10 @@ namespace synthLib
 	class Plugin
 	{
 	public:
-		using CallbackDeviceInvalid = std::function<Device*(Device*)>;
+		// Called on the audio thread, once per device, when the device stops being valid (a remote device lost its
+		// connection, for example). Replacing it takes a network round trip or a boot, so the callback only arranges
+		// for that elsewhere and hands the new device in through setDevice(); meanwhile process() outputs silence.
+		using CallbackDeviceInvalid = std::function<void(Device*)>;
 
 		Plugin(Device* _device, CallbackDeviceInvalid _callbackDeviceInvalid);
 
@@ -54,6 +57,10 @@ namespace synthLib
 		bool isValid() const;
 
 		void setDevice(Device* _device);
+		Device* getDevice() const { return m_device; }
+
+		// The device's clock is set with the processing lock held, so that it never changes in the middle of process()
+		bool setDspClockPercent(uint32_t _percent);
 
 		bool getState(std::vector<uint8_t>& _state, StateType _type);
 		bool setState(const std::vector<uint8_t>& _state);
@@ -135,6 +142,7 @@ namespace synthLib
 		float m_deviceSamplerate = 0.0f;
 		std::atomic<float> m_pendingDeviceSamplerate{0.0f};
 		CallbackDeviceInvalid m_callbackDeviceInvalid;
+		bool m_deviceInvalidReported = false;
 
 		bool m_transportInitialized = false;
 		bool m_lastIsPlaying = false;
