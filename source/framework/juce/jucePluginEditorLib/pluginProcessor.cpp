@@ -9,6 +9,8 @@
 
 #include "synthLib/os.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include <cstring>
 
 #include "mcpServerLib/mcpPluginServer.h"
@@ -32,23 +34,6 @@ namespace jucePluginEditorLib
 			// https://discourse.zynthian.org/t/deadlock-when-attempting-to-log-to-stdout/10169
 		}
 #endif
-
-		// True when the plugin DLL is hosted by a JUCE build-time helper
-		// (juce_vst3_helper / juce_lv2_helper / juce_au_helper). Those exes
-		// load the plugin only to enumerate metadata; they do not run an audio
-		// host and have no use for the MCP server. Starting it there is pure
-		// overhead and was provoking a port-13710 race that crashed n2x builds.
-		bool isJuceHelperProcess()
-		{
-			// hostApplicationPath, not currentExecutableFile: inside a plugin the latter is the module JUCE
-			// itself lives in - our own .dll/.so - so the comparison below could never match and every helper
-			// went on starting a server. hostApplicationPath is the process, which is what we are asking about.
-			const auto exeName = juce::File::getSpecialLocation(
-				juce::File::hostApplicationPath).getFileNameWithoutExtension().toLowerCase();
-			return exeName.contains("juce_vst3_helper")
-				|| exeName.contains("juce_lv2_helper")
-				|| exeName.contains("juce_au_helper");
-		}
 
 		std::string getPluginFormatName(const juce::AudioProcessor::WrapperType _wrapperType, const std::string& _moduleFilePath)
 		{
@@ -107,8 +92,10 @@ namespace jucePluginEditorLib
 		setLatencyBlocks(static_cast<uint32_t>(m_config.getIntValue("latencyBlocks", static_cast<int>(getDefaultLatencyBlocks()))));
 
 		// Last: a client calls tools on the server thread as soon as the discovery file lists this instance. Started
-		// in the base constructor, a set_plugin_state ran while the product constructor still created the controller
-		if (m_config.getBoolValue("enableMcpServer", false) && !isJuceHelperProcess())
+		// in the base constructor, a set_plugin_state ran while the product constructor still created the controller.
+		// Not in the JUCE build helpers: they load the plugin only to read its properties, and two of them building in
+		// parallel raced for port 13710, the loser crashed the build
+		if (m_config.getBoolValue("enableMcpServer", false) && !genericUI::MessageBox::isHeadlessHost())
 			startMcpServer();
 	}
 

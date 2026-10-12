@@ -189,7 +189,7 @@ int main()
 	midi.transportDiscontinuity(1);
 	// The cancelled note never reaches the board; the channel it had sounded on is silenced
 	// the way this firmware understands, pedal up and All Notes Off, echoed back with running
-	// status, which the parser expands into complete messages.
+	// status, which the parser hands over as complete messages.
 	const auto cancelled = run(midi);
 	std::vector<uint8_t> cancelledBytes;
 	for(const auto& event : cancelled)

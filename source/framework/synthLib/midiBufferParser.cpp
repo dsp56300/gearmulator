@@ -22,6 +22,7 @@ namespace synthLib
 			flushSysex();
 			m_sysex = true;
 			m_runningStatus = 0;
+			m_pendingEventLen = 0;
 			m_sysexBuffer.push_back(d);
 			return;
 		}
@@ -48,27 +49,37 @@ namespace synthLib
 			flushSysex();	// aborted sysex
 		}
 
+		if(d >= 0xf8)
+		{
+			// system realtime may appear anywhere, even inside a message, and leaves it intact
+			m_midiEvents.emplace_back(m_pendingEvent.source, d);
+			return;
+		}
+
+		if(d >= 0x80)
+			m_pendingEventLen = 0;	// a status byte ends an incomplete message
+
 		if(m_pendingEventLen == 0)
 		{
 			if(d < 0x80)
 			{
-				// Running status: a data byte without a status byte of its own continues the last channel message.
-				// Without one to continue it is not part of any message.
+				// Running status: re-use the last channel status byte
 				if(m_runningStatus == 0)
 					return;
 				m_pendingEvent.a = m_runningStatus;
 				m_pendingEvent.b = d;
 				m_pendingEventLen = 2;
+
 				if(lengthFromStatusByte(m_runningStatus) == m_pendingEventLen)
 					flushEvent();
 				return;
 			}
 
-			// Channel messages set the running status, system common messages clear it, realtime leaves it alone
-			if(d <= 0xef)
-				m_runningStatus = d;
-			else if(d <= 0xf7)
-				m_runningStatus = 0;
+			// Update running status
+			if(d <= 0xEF)
+				m_runningStatus = d;		// channel messages set running status
+			else
+				m_runningStatus = 0;		// system common clears running status
 
 			m_pendingEvent.a = d;
 		}

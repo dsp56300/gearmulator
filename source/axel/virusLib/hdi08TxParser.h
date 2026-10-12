@@ -51,6 +51,11 @@ namespace virusLib
 		void getPresetData(std::vector<uint8_t>& _data);
 
 	private:
+		bool beginPreset(dsp56k::TWord _data);
+		bool appendUsbMidi(dsp56k::TWord _data);
+		bool processUsbMidiPacket();
+		bool finishSysex();
+
 		Microcontroller& m_mc;
 
 		std::vector<synthLib::SMidiEvent> m_midiData;
@@ -58,11 +63,14 @@ namespace virusLib
 		std::vector<uint8_t> m_presetData;
 		std::vector<dsp56k::TWord> m_dspStatus;
 
-		uint32_t m_sysexReceiveIndex = 0;
 		uint32_t m_remainingPresetBytes = 0;
 		uint32_t m_remainingStatusBytes = 0;
 
+		std::array<uint8_t, 4> m_usbPacket{};
+		uint32_t m_usbPacketSize = 0;
+
 		State m_state = State::Default;
+		State m_stateAfterPreset = State::Default;
 
 		std::vector<PatternType> m_matchedPatterns;
 		std::vector<dsp56k::TWord> m_nonPatternWords;

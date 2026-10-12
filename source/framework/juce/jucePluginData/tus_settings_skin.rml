@@ -27,7 +27,13 @@
 		<settingsspacer1/>
 		<button id="btOpenFolder" class="button" style="display: inline-block;">Open skins folder in File Browser</button>
 		<settingsspacer1/>
-		
+
+		<div id="btDisableTooltips" class="settings-checkboxwithlabel">
+			<button id="button" class="settings-checkbox"/>
+			<label>Disable parameter value tooltips</label>
+		</div>
+		<settingsspacer1/>
+
 		<h1>Developer Options</h1>
 		<settingsspacer1/>
 

@@ -121,6 +121,15 @@ Framework:
         and paste the whole patch only when nothing under the mouse or with the
         focus takes them itself.
 
+- [Imp] EMU-78 A tooltip shows the value of the control under the mouse in every
+        skin now, also in those that had none so far: Osirus, OsTIrus, JE8086 and
+        the Vavra front panel. It can be turned off in the Skins settings.
+
+- [Imp] EMU-85 Displays and other canvases, skin canvases included, update their
+        texture in place when their content changes, instead of creating a new
+        one each time. That saves memory traffic and graphics driver work while
+        a display changes, with OpenGL, Metal and the software renderer.
+
 - [Fix] The lock, link and MIDI Learn icons of a control could stay behind on
         the skin after the control was removed or its page rebuilt, and
         clicking such an icon could crash the plugin.
@@ -203,6 +212,10 @@ Osirus:
         in the filter section and on the ARP page. Before, only Filter 1's Env
         Amount Velocity moved Filter 2's.
 
+- [Fix] EMU-228 Switching to another ROM lost the MIDI bank numbers given to the
+        ROM banks in the Patch Manager. Each ROM now keeps its own, also when
+        switching back and after reloading.
+
 OsTIrus:
 
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
@@ -232,6 +245,11 @@ OsTIrus:
         OsTIrusFX and for parts 1, 3, 5 and so on of a multi. Parts 2, 4, 6
         and so on got one wrong input sample at the start of every block the
         host processes.
+
+- [Imp] MIDI the DSP sends other than SysEx, the notes of the arpeggiator with
+        MIDI Arpeggiator Send on for example, reaches the MIDI output now, also
+        for parts on the second DSP. It was dropped before. Parameter changes
+        echoed as controllers stay internal, as with Virus Control.
 
 Vavra/Xenia:
 
@@ -311,6 +329,9 @@ NodalRed2x:
         Hold of the current part on and off, as SHIFT + ARP does on the
         hardware, and its LED lights up while it is on. As on the hardware,
         Hold is not part of a patch and is not saved, and Panic ends it.
+
+- [Imp] EMU-61 Lower CPU load: the two DSPs of the emulation now run side by
+        side instead of one waiting for the other's output.
 
 JE8086:
 

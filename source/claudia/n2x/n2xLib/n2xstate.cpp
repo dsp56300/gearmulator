@@ -346,6 +346,11 @@ namespace n2x
 			e.source = _ev.source;
 			e.offset = _ev.offset;
 			changeSingleParameter(part, e);
+
+			// the firmware gets the CC itself, not this sysex around it. It read the CC in the sysex only because a
+			// status byte ends a sysex (EMU-102)
+			send(e);
+			return true;
 		}
 		else if (bank == SysexByte::EmuSetMasterTune)
 		{
