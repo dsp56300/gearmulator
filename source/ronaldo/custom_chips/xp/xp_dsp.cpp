@@ -26,11 +26,16 @@ namespace xpLib
 		}
 	}
 
-	Dsp::Dsp() = default;
+	// Each dispatcher starts a compile worker thread, so both are made here rather than on first use, which
+	// would be on the audio thread.
+	Dsp::Dsp() : m_jit(std::make_unique<DspJitDispatcher>()), m_link(std::make_unique<DspJitDispatcher>())
+	{
+	}
 
 	Dsp::Dsp(const Dsp& _other)
 		: m_program(_other.m_program), m_state(_other.m_state), m_params(_other.m_params), m_flat(_other.m_flat),
-		  m_generation(_other.m_generation), m_programTainted(_other.m_programTainted)
+		  m_generation(_other.m_generation), m_programTainted(_other.m_programTainted),
+		  m_jit(std::make_unique<DspJitDispatcher>()), m_link(std::make_unique<DspJitDispatcher>())
 	{
 	}
 
@@ -60,10 +65,6 @@ namespace xpLib
 
 	DspJitDispatcher& Dsp::jit()
 	{
-		if (!m_jit)
-		{
-			m_jit = std::make_unique<DspJitDispatcher>();
-		}
 		return *m_jit;
 	}
 
@@ -326,12 +327,10 @@ namespace xpLib
 	{
 		if (_a.m_linkPartner != &_b)
 		{
-			_a.m_link.reset();
+			// Code compiled for another partner must not run. Replacing the dispatcher would join its worker
+			// thread here, on the audio thread.
+			_a.m_link->invalidate();
 			_a.m_linkPartner = &_b;
-		}
-		if (!_a.m_link)
-		{
-			_a.m_link = std::make_unique<DspJitDispatcher>();
 		}
 		DspJitRun run = nullptr;
 		if (_aRequest.executeProgram && _bRequest.executeProgram)
