@@ -73,7 +73,7 @@ namespace juceRmlUi
 
 	void RmlDrag::filesDropped(const juce::StringArray& _files, int _x, int _y)
 	{
-		auto handled = false;
+		m_lastDropHandled = false;
 
 		// No draggable means the drag never started inside the document, so no element can have
 		// taken it - the files still have to go somewhere, which is the whole point below.
@@ -84,12 +84,12 @@ namespace juceRmlUi
 			// takes it.
 			m_component.getContext()->ProcessMouseButtonUp(0,0);
 
-			handled = m_juceDragSource && m_juceDragSource->isHandled();
+			m_lastDropHandled = m_juceDragSource && m_juceDragSource->isHandled();
 
 			stopDrag();
 		}
 
-		if (handled || !m_onUnhandledFiles)
+		if (m_lastDropHandled || !m_onUnhandledFiles)
 			return;
 
 		std::vector<std::string> files;

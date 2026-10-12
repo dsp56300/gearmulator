@@ -995,6 +995,105 @@ namespace jucePluginEditorLib
 			_server.registerTool(std::move(tool));
 		}
 
+		// drop_files - files dragged in from the desktop
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "drop_files";
+			tool.description = "Drop files onto the editor as if they were dragged in from the desktop. The editor gets the file drag enter, move and drop the operating system would send, so a drag target at that point (a part button, the patch manager, ...) takes the files, and files no element takes reach the editor's handler for those. Target by 'id', 'selector' + 'index', or 'x' + 'y'. Returns whether an element took the files.";
+			tool.inputSchema.addProperty("files", "array", "Full paths of the files to drop", true);
+			tool.inputSchema.addProperty("id", "string", "Element ID to drop on (uses its center)", false);
+			tool.inputSchema.addProperty("selector", "string", "CSS selector of the element to drop on (uses its center). Several skins repeat ids, select those by class and index", false);
+			tool.inputSchema.addIntProperty("index", "Which match of 'selector' (default: 0)", false, 0);
+			tool.inputSchema.addIntProperty("x", "X coordinate in document space", false);
+			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", false);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				juce::StringArray files;
+				const auto list = _params.get("files");
+				for (int i = 0; i < list.getArraySize(); ++i)
+					files.add(list.getArrayElement(i).getString());
+
+				if (files.isEmpty())
+					throw std::runtime_error("'files' must name at least one file");
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+
+					auto result = mcpServer::JsonValue::object();
+
+					int x, y, compX, compY;
+
+					{
+						juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+						Rml::Element* elem = nullptr;
+
+						if (_params.hasProperty("id"))
+						{
+							const auto id = _params.get("id").getString().toStdString();
+							elem = ui.document->GetElementById(id);
+							if (!elem)
+								throw std::runtime_error("Element not found: " + id);
+						}
+						else if (_params.hasProperty("selector"))
+						{
+							const auto selector = _params.get("selector").getString().toStdString();
+							const int index = _params.hasProperty("index") ? _params.get("index").getInt() : 0;
+							Rml::ElementList elements;
+							ui.document->QuerySelectorAll(elements, selector);
+							if (index >= static_cast<int>(elements.size()))
+								throw std::runtime_error("Selector " + selector + " has " + std::to_string(elements.size()) + " matches, no index " + std::to_string(index));
+							elem = elements[index];
+						}
+
+						if (elem)
+						{
+							std::tie(x, y) = getElementCenter(elem);
+						}
+						else if (_params.hasProperty("x") && _params.hasProperty("y"))
+						{
+							x = _params.get("x").getInt();
+							y = _params.get("y").getInt();
+						}
+						else
+						{
+							throw std::runtime_error("Either 'id', 'selector' or both 'x' and 'y' must be provided");
+						}
+
+						// what is under the point before the drop adds its own element there
+						if (auto* hit = ui.context->GetElementAtPoint({static_cast<float>(x), static_cast<float>(y)}))
+						{
+							auto at = mcpServer::JsonValue::object();
+							at.set("tag", mcpServer::JsonValue::fromString(hit->GetTagName()));
+							if (!hit->GetId().empty())
+								at.set("id", mcpServer::JsonValue::fromString(hit->GetId()));
+							result.set("elementAtPoint", std::move(at));
+						}
+
+						// the operating system sends component coordinates, the document is laid out in context pixels
+						const auto width = ui.rmlComp->getWidth();
+						const auto scale = width > 0 ? static_cast<float>(ui.context->GetDimensions().x) / static_cast<float>(width) : 1.0f;
+						compX = juce::roundToInt(static_cast<float>(x) / scale);
+						compY = juce::roundToInt(static_cast<float>(y) / scale);
+					}
+
+					// these take the RmlUi lock themselves
+					ui.rmlComp->fileDragEnter(files, compX, compY);
+					ui.rmlComp->fileDragMove(files, compX, compY);
+					ui.rmlComp->filesDropped(files, compX, compY);
+					ui.rmlComp->enqueueUpdate();
+
+					result.set("success", mcpServer::JsonValue::fromBool(true));
+					result.set("handled", mcpServer::JsonValue::fromBool(ui.rmlComp->wasLastFileDropHandled()));
+					result.set("x", mcpServer::JsonValue::fromInt(x));
+					result.set("y", mcpServer::JsonValue::fromInt(y));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
 		// mouse_wheel - inject scroll wheel events
 		{
 			mcpServer::ToolDef tool;

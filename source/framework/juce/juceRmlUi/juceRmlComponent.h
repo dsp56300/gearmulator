@@ -129,6 +129,7 @@ namespace juceRmlUi
 		// Files dropped on this component that no element in the document wanted. The component
 		// is interested in every file drag, so there is nothing above it that JUCE would ask next.
 		void setUnhandledFilesCallback(RmlDrag::UnhandledFilesCallback _callback) { m_drag.setUnhandledFilesCallback(std::move(_callback)); }
+		bool wasLastFileDropHandled() const noexcept { return m_drag.wasLastDropHandled(); }
 
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		juce::Point<int> toRmlPosition(int _x, int _y) const;

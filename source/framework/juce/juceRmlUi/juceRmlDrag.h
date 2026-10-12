@@ -49,6 +49,9 @@ namespace juceRmlUi
 
 		void setUnhandledFilesCallback(UnhandledFilesCallback _callback) { m_onUnhandledFiles = std::move(_callback); }
 
+		// Whether an element took the files of the last drop, for tools that drop files themselves
+		bool wasLastDropHandled() const noexcept { return m_lastDropHandled; }
+
 		bool isInterestedInFileDrag(const juce::StringArray& _files);
 		void fileDragEnter(const juce::StringArray& _files, int _x, int _y);
 		void fileDragMove(const juce::StringArray& _files, int _x, int _y) const;
@@ -74,5 +77,6 @@ namespace juceRmlUi
 		DragSource* m_rmlDragSource = nullptr;
 		JuceDraggable* m_juceDraggable = nullptr;
 		UnhandledFilesCallback m_onUnhandledFiles;
+		bool m_lastDropHandled = false;
 	};
 }
