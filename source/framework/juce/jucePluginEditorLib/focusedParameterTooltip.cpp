@@ -71,8 +71,9 @@ namespace jucePluginEditorLib
 
 			// clamp height to not exceed height of whole document
 			const auto docHeight = m_label->GetOwnerDocument()->GetClientHeight();
-			if (y + m_label->GetBox().GetSize().y > docHeight)
-				m_label->SetProperty(Rml::PropertyId::Top, Rml::Property(docHeight - m_label->GetBox().GetSize().y, Rml::Unit::PX));
+			const auto height = m_label->GetBox().GetSize(Rml::BoxArea::Margin).y;
+			if (y + height > docHeight)
+				m_label->SetProperty(Rml::PropertyId::Top, Rml::Property(docHeight - height, Rml::Unit::PX));
 
 			juceRmlUi::helper::setVisible(m_label, true);
 		}

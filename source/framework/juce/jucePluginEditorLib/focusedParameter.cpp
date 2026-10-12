@@ -59,7 +59,18 @@ namespace jucePluginEditorLib
 		if (m_focusedParameterValue)
 			juceRmlUi::helper::setVisible(m_focusedParameterValue, false);
 
-		m_tooltip.reset(new FocusedParameterTooltip(_editor.findChild("FocusedParameterTooltip", false)));
+		// a skin may declare its own tooltip, all others get the default one styled by tus_default.rcss
+		auto* tooltip = _editor.findChild("FocusedParameterTooltip", false);
+
+		if (!tooltip)
+		{
+			auto* doc = _editor.getDocument();
+			auto elem = doc->CreateElement("div");
+			elem->SetClass("tus-tooltip", true);
+			tooltip = doc->AppendChild(std::move(elem));
+		}
+
+		m_tooltip.reset(new FocusedParameterTooltip(tooltip));
 
 		updateControlLabel(nullptr, Priority::None);
 
