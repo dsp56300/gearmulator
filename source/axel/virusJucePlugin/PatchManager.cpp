@@ -1010,6 +1010,9 @@ namespace genericVirusUI
 		ds.bank = _controllerBank;
 		ds.name = m_controller.getBankName(_controllerBank);
 		ds.midiBankNumber = _controllerBank;
+		// the RAM banks (0 and 1) belong to the device, the others to the ROM: their MIDI bank numbers are kept per ROM
+		if (_controllerBank >= 2)
+			ds.romName = m_processor.getRomName();
 		return ds;
 	}
 
@@ -1020,6 +1023,7 @@ namespace genericVirusUI
 		ds.bank = g_arrangementBank;
 		ds.name = "ROM Arrangements";
 		ds.midiBankNumber = g_arrangementBank;
+		ds.romName = m_processor.getRomName();
 		return ds;
 	}
 

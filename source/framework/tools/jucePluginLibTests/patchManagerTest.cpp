@@ -781,12 +781,12 @@ namespace
 			device.send(cutoff);
 			TEST_ASSERT(device.log() == (std::vector<std::string>{"Lead", cutoffLog}));
 
-			// one that is removed and added again is a new data source: once it has a MIDI bank, its patches load too
+			// a ROM bank that is removed and registered again, as when the ROM is switched away and back, gets its MIDI
+			// bank back, and its patches load as before (EMU-228)
 			pm.removeDataSource(TestPatchManager::romBank());
 			pm.addDataSource(TestPatchManager::romBank());
 			TEST_ASSERT(pm.waitIdle());
-			TEST_ASSERT(pm.setDataSourceMidiBankNumber(pm.getDataSource(TestPatchManager::romBank()), 0));
-			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(pm.getDataSource(TestPatchManager::romBank())->midiBankNumber == 0);
 
 			device.received.clear();
 			device.send(programChange(0, 2));
@@ -911,6 +911,88 @@ namespace
 	}
 }
 
+namespace
+{
+	// EMU-228: a MIDI bank number belongs to the bank of one ROM. Switching the ROM removes the banks of one ROM and
+	// registers those of the other, which have the same names
+	void testRomMidiBanks()
+	{
+		std::cout << "Testing the MIDI banks of ROM banks, per ROM..." << std::endl;
+
+		const auto root = createTestDir();
+		const auto settings = root.getChildFile("settings");
+
+		const auto switchTo = [](TestPatchManager& _pm, const std::string& _rom)
+		{
+			auto bank = TestPatchManager::romBank();
+			bank.romName = _rom;
+
+			_pm.removeDataSource(TestPatchManager::romBank());
+			_pm.addDataSource(bank);
+			TEST_ASSERT(_pm.waitIdle());
+
+			const auto ds = _pm.getDataSource(TestPatchManager::romBank());
+			TEST_ASSERT(ds && ds->romName == _rom);
+			return ds;
+		};
+
+		{
+			TestPatchManager pm(settings, {"Bass", "Lead", "Pad"});
+			TEST_ASSERT(pm.waitIdle());
+
+			TEST_ASSERT(pm.setDataSourceMidiBankNumber(switchTo(pm, "B"), 7));
+			TEST_ASSERT(pm.waitIdle());
+
+			// the same bank of another ROM does not get the number of ROM B
+			TEST_ASSERT(switchTo(pm, "C")->midiBankNumber == g_invalidMidiBankNumber);
+			TEST_ASSERT(pm.setDataSourceMidiBankNumber(pm.getDataSource(TestPatchManager::romBank()), 9));
+			TEST_ASSERT(pm.waitIdle());
+
+			// each ROM gets its own back
+			TEST_ASSERT(switchTo(pm, "B")->midiBankNumber == 7);
+			TEST_ASSERT(switchTo(pm, "C")->midiBankNumber == 9);
+		}
+
+		{
+			// both are still there after a restart, the one of the ROM that was not loaded too
+			TestPatchManager pm(settings, {"Bass", "Lead", "Pad"});
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(switchTo(pm, "B")->midiBankNumber == 7);
+			TEST_ASSERT(switchTo(pm, "C")->midiBankNumber == 9);
+
+			// a number that another data source got while the ROM was not loaded stays with that one
+			switchTo(pm, "B");
+			auto other = TestPatchManager::romBank();
+			other.name = "Other ROM";
+			pm.addDataSource(other);
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(pm.setDataSourceMidiBankNumber(pm.getDataSource(other), 9));
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(switchTo(pm, "C")->midiBankNumber == g_invalidMidiBankNumber);
+			TEST_ASSERT(pm.getDataSource(other)->midiBankNumber == 9);
+		}
+
+		// a number saved without a ROM, as before EMU-228, goes to the first ROM that registers the bank
+		const auto legacy = root.getChildFile("legacy");
+		{
+			TestPatchManager pm(legacy, {"Bass", "Lead", "Pad"});
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(pm.setDataSourceMidiBankNumber(pm.getDataSource(TestPatchManager::romBank()), 4));
+			TEST_ASSERT(pm.waitIdle());
+		}
+		{
+			TestPatchManager pm(legacy, {"Bass", "Lead", "Pad"});
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(pm.getDataSource(TestPatchManager::romBank())->midiBankNumber == 4);
+			TEST_ASSERT(switchTo(pm, "D")->midiBankNumber == 4);
+		}
+
+		root.deleteRecursively();
+
+		std::cout << "  ROM MIDI bank tests passed" << std::endl;
+	}
+}
+
 void testPatchManager()
 {
 	testLoading();
@@ -919,4 +1001,5 @@ void testPatchManager()
 	testSelection();
 	testProgramChanges();
 	testShutdown();
+	testRomMidiBanks();
 }
