@@ -396,6 +396,10 @@ JE8086:
         the XP sound chip relied on behaviour that C++ leaves undefined, which
         an optimising compiler is free to break. The sound does not change.
 
+- [Fix] SC-55 and SC-88 families: When the firmware switched the CPU's A/D
+        converter to another group of inputs while a scan was running, the
+        converter could stop reporting conversions.
+
 2.2.25:
 
 88emuPlayer:
