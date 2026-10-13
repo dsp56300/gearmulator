@@ -237,6 +237,9 @@ Osirus:
         ROM banks in the Patch Manager. Each ROM now keeps its own, also when
         switching back and after reloading.
 
+- [Fix] A new instance without a loaded project or patch played no sound until
+        a patch was loaded or a parameter changed.
+
 OsTIrus:
 
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither

@@ -354,6 +354,11 @@ void Microcontroller::sendControlCommand(const ControlCommand _command, const ui
 
 void Microcontroller::setSamplerate(const float _samplerate)
 {
+	// The TI's command. The A, B and C run at the fixed 46875 Hz of their crystal and take it as a page D change of the
+	// single, after which the single in the DSP no longer plays a note until one of its parameters changes
+	if(!m_rom.isTIFamily())
+		return;
+
 	const auto sr = static_cast<int>(std::floor(_samplerate + 0.5f));
 	
 	/*
