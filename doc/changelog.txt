@@ -487,7 +487,8 @@ JE8086:
         double-click on a slider or a setting's name brings it back to its
         default. The tabs show the 32 parts of a board with two part groups,
         A1 to B16; the SC-8850 switches them between groups A and B and groups
-        C and D. A right-click on a part tab makes it a normal or a drum part.
+        C and D. A part's tab and mixer row light up while MIDI for it comes
+        in. A right-click on a part tab makes it a normal or a drum part.
         Edits reach the board as they are made, and the window follows what
         songs and live input set, SysEx, controllers, RPN and NRPN alike. Its
         menu sends the parts and effects to the board and receives them back

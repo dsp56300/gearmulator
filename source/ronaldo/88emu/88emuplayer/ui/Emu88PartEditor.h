@@ -13,6 +13,7 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
+#include <array>
 #include <memory>
 #include <string>
 #include <vector>
@@ -43,6 +44,10 @@ namespace emu88Player
 
 	private:
 		static constexpr int g_mixerPage = -1;
+		// The lights of the parts that receive MIDI look every second timer tick, and a part stays lit for two looks
+		// after its last message: at most 15 redraws a second for them, whatever plays
+		static constexpr uint8_t g_activityInterval = 2;
+		static constexpr uint8_t g_activityLooks = 2;
 
 		struct MixerRow
 		{
@@ -54,6 +59,7 @@ namespace emu88Player
 			Rml::ElementFormControlInput* pan = nullptr;
 			Rml::Element* volumeValue = nullptr;
 			Rml::Element* panValue = nullptr;
+			Rml::Element* light = nullptr;
 		};
 
 		// A parameter of gs::globalParams() or gs::partParams(): a slider with its value, or a choice
@@ -74,6 +80,12 @@ namespace emu88Player
 		void buildMixer();
 		void buildGroupAndPartTabs();
 		void labelPartTabs();
+		// Lights up the tabs and mixer rows of the parts that received MIDI since the last look, a bit per part, and
+		// lets the others go out: whether a light changed
+		bool updateActivity(uint64_t _parts);
+		void refreshActivity();
+		// The board keeps the activity only while the window shows: whether a light went out
+		bool enableActivity(bool _enabled);
 		void buildControls();
 		// The rows of the insertion effect type's parameters, for the type the setup has
 		void buildEfxControls();
@@ -208,6 +220,12 @@ namespace emu88Player
 		std::vector<std::string> m_mapNames;
 		std::vector<Rml::Element*> m_groupTabs;
 		std::vector<Rml::Element*> m_partTabs;
+		// The lights of the tabs shown
+		std::vector<Rml::Element*> m_partLights;
+		// Per part, the looks it stays lit
+		std::array<uint8_t, 64> m_activity{};
+		bool m_activityEnabled = false;
+		uint8_t m_activityTick = 0;
 		// A slider being dragged: refresh leaves it where the mouse has it
 		Rml::Element* m_dragging = nullptr;
 		bool m_updatingUi = false;

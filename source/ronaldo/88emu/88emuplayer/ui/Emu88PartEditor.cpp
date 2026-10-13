@@ -275,6 +275,7 @@ namespace emu88Player
 	PartEditorWindow::~PartEditorWindow()
 	{
 		stopTimer();
+		enableActivity(false);
 		// A solo lasts as long as the window: the parts it muted play again
 		m_soloed = 0;
 		applySolo();
@@ -296,6 +297,8 @@ namespace emu88Player
 		m_pending.clear();
 		m_listKey.clear();
 		m_soloed = m_soloMuted = 0;
+		m_activity.fill(0);
+		m_activityTick = 0;
 		juceRmlUi::RmlInterfaces::ScopedAccess access(*m_rml);
 		build();
 		m_rml->enqueueUpdate();
@@ -451,7 +454,10 @@ namespace emu88Player
 		{
 			auto* tab = parts->GetElementById("pePartTab" + std::to_string(t));
 			m_partTabs.push_back(tab);
-			juceRmlUi::EventListener::AddClick(tab, [this, t] { selectPart(m_bank * size_t{gs::g_partsPerGroup} + t); });
+			juceRmlUi::EventListener::AddClick(tab, [this, t]
+			{
+				selectPart(m_bank * size_t{gs::g_partsPerGroup} + t);
+			});
 			juceRmlUi::EventListener::Add(tab, Rml::EventId::Mousedown, [this, t](Rml::Event& _event)
 			{
 				if(!juceRmlUi::helper::isContextMenu(_event))
@@ -467,14 +473,70 @@ namespace emu88Player
 
 	void PartEditorWindow::labelPartTabs()
 	{
+		m_partLights.assign(m_partTabs.size(), nullptr);
 		for(size_t t = 0; t < m_partTabs.size(); ++t)
 		{
 			if(!m_partTabs[t])
 				continue;
 			const auto group = static_cast<uint8_t>(m_bank + t / gs::g_partsPerGroup);
 			const auto number = std::to_string(t % gs::g_partsPerGroup + 1);
-			m_partTabs[t]->SetInnerRML(m_groupCount > 1 ? groupLetter(group) + number : number);
+			// The light that MIDI for the part turns on, over the whole tab
+			const auto label = m_groupCount > 1 ? groupLetter(group) + number : number;
+			m_partTabs[t]->SetInnerRML("<div class=\"pePartLight\"/>" + label);
+			m_partLights[t] = m_partTabs[t]->GetFirstChild();
 		}
+	}
+
+	bool PartEditorWindow::updateActivity(const uint64_t _parts)
+	{
+		bool changed = false;
+		for(size_t i = 0; i < m_activity.size(); ++i)
+		{
+			auto& looks = m_activity[i];
+			const bool lit = looks > 0;
+			if((_parts >> i) & 1)
+				looks = g_activityLooks;
+			else if(looks)
+				--looks;
+			changed |= lit != (looks > 0);
+		}
+		if(changed)
+			refreshActivity();
+		return changed;
+	}
+
+	void PartEditorWindow::refreshActivity()
+	{
+		// A light only switches its visibility, which needs no layout, and its class is its own, so that nothing
+		// else is styled again
+		const auto light = [this](Rml::Element* _light, const size_t _part)
+		{
+			if(_light && _part < m_activity.size())
+				_light->SetClass("on", m_activity[_part] > 0);
+		};
+		for(size_t t = 0; t < m_partLights.size(); ++t)
+			light(m_partLights[t], static_cast<size_t>(m_bank) * gs::g_partsPerGroup + t);
+		// The mixer's rows when it shows, the page switch catches up with them
+		if(m_page != g_mixerPage)
+			return;
+		for(size_t i = 0; i < m_mixerRows.size(); ++i)
+			light(m_mixerRows[i].light, i);
+	}
+
+	bool PartEditorWindow::enableActivity(const bool _enabled)
+	{
+		if(_enabled == m_activityEnabled)
+			return false;
+		m_activityEnabled = _enabled;
+		m_processor.setPartActivityEnabled(_enabled);
+		const bool lit = std::any_of(m_activity.begin(), m_activity.end(), [](const uint8_t _looks)
+		{
+			return _looks > 0;
+		});
+		m_activity.fill(0);
+		if(lit)
+			refreshActivity();
+		return lit;
 	}
 
 	std::string PartEditorWindow::toneName(const size_t _part) const
@@ -530,6 +592,7 @@ namespace emu88Player
 				rml << "<div class=\"peMixGroupHeading\">Part group "
 				    << groupLetter(static_cast<uint8_t>(i / gs::g_partsPerGroup)) << "</div>";
 			rml << "<div id=\"peMix" << i << "\" class=\"peMixRow\">"
+			    << "<div id=\"peMixLight" << i << "\" class=\"peMixLight\"/>"
 			    << "<div class=\"peMixSoloMute\"><button id=\"peSolo" << i << "\" class=\"peMixSolo\" title=\"Solo\">S</button>"
 			    << "<button id=\"peMute" << i << "\" class=\"peMixMute\" title=\"Mute\">M</button></div>"
 			    << "<div id=\"peMixName" << i << "\" class=\"peMixName\" title=\"Edit this part\">"
@@ -553,6 +616,7 @@ namespace emu88Player
 			row.solo = document->GetElementById("peSolo" + id);
 			row.mute = document->GetElementById("peMute" + id);
 			row.tone = document->GetElementById("peMixTone" + id);
+			row.light = document->GetElementById("peMixLight" + id);
 			row.volume = dynamic_cast<Rml::ElementFormControlInput*>(document->GetElementById("peVol" + id));
 			row.pan = dynamic_cast<Rml::ElementFormControlInput*>(document->GetElementById("pePan" + id));
 			row.volumeValue = document->GetElementById("peVolValue" + id);
@@ -1211,6 +1275,7 @@ namespace emu88Player
 			if(tab->GetAttribute<Rml::String>("title", "") != title)
 				tab->SetAttribute("title", title);
 		}
+		refreshActivity();
 	}
 
 	void PartEditorWindow::refreshMixer()
@@ -1920,6 +1985,16 @@ namespace emu88Player
 			}
 			refresh();
 			changed = true;
+		}
+
+		// The parts that play light up, but only while there is a window to see it in, and at a lower rate than the
+		// rest: it is nothing the board needs
+		const bool shown = isVisible() && !isMinimised();
+		changed |= enableActivity(shown);
+		if(shown && ++m_activityTick >= g_activityInterval)
+		{
+			m_activityTick = 0;
+			changed |= updateActivity(m_processor.takePartActivity());
 		}
 
 		if(changed)

@@ -107,6 +107,10 @@ namespace emu88Player
 		// What the board's parts are set to, as far as the MIDI it received tells: live input, the song player and
 		// the part editor's edits all go through it, see emu88Lib::gs::PartStateTracker.
 		const emu88Lib::gs::PartStateTracker& partState() const { return m_partState; }
+		// The parts that received a channel message since the last call, a bit per part, for the part editor; kept
+		// only while it is enabled, see emu88Lib::gs::PartStateTracker::setActivityEnabled()
+		void setPartActivityEnabled(const bool _enabled) { m_partState.setActivityEnabled(_enabled); }
+		uint64_t takePartActivity() { return m_partState.takeActivity(); }
 		// The board's tones and drum sets, read from its ROMs when it was loaded; null for a board the part editor
 		// does not know or whose ROMs it could not read, toneCatalogError() says which.
 		const std::shared_ptr<const emu88Lib::gs::ToneCatalog>& toneCatalog() const { return m_toneCatalog; }

@@ -146,6 +146,7 @@ div {
 }
 
 .pePartTab {
+	position: relative;
 	flex: 1 1 0dp;
 	min-width: 24dp;
 }
@@ -162,6 +163,33 @@ div {
 /* The second group stands apart from the first */
 .pePartTab.groupStart {
 	margin-left: 6dp;
+}
+
+/* MIDI for a part lights up its tab and its mixer row a little. A light is an element of its own over the whole of
+   either, which tints whatever state they show. It switches its visibility only, no layout, and has no transition:
+   a fade would redraw the window at its full rate after every note. */
+.pePartLight, .peMixLight {
+	position: absolute;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	left: 0dp;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.pePartLight {
+	border-radius: 4dp 4dp 0dp 0dp;
+	background-color: #9fd2ff29;
+}
+
+.peMixLight {
+	border-radius: 3dp;
+	background-color: #9fd2ff1c;
+}
+
+.pePartLight.on, .peMixLight.on {
+	visibility: visible;
 }
 
 /* A drum part's tab says so. */
@@ -379,6 +407,7 @@ div {
 }
 
 .peMixRow {
+	position: relative;
 	height: 28dp;
 	padding: 0dp 6dp;
 	border-radius: 3dp;
