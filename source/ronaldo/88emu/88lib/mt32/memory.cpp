@@ -721,6 +721,23 @@ namespace emu88Lib::mt32
 		return changed;
 	}
 
+	void Memory::addPreset(const TimbreSource _source, const std::array<uint8_t, g_timbreSize>& _data)
+	{
+		if(!m_hasLa || _source.group == 2)
+			return;
+		m_presets[presetKey(_source)] = _data;
+		for(size_t p = 0; p < g_laTimbreParts; ++p)
+		{
+			if(!(m_timbreSources[p] == _source))
+				continue;
+			for(size_t i = 0; i < g_timbreSize; ++i)
+			{
+				if(!known(Area::TimbreTemp, p, i))
+					set(Area::TimbreTemp, p, i, _data[i]);
+			}
+		}
+	}
+
 	void Memory::learnPreset(const size_t _part)
 	{
 		const auto source = m_timbreSources[_part];

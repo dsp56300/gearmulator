@@ -19,8 +19,8 @@ set(SOURCES
 	gs/toneCatalogSc55.cpp gs/toneCatalogSc88.cpp gs/toneCatalogSc8850.cpp
 	mt32/memory.cpp mt32/memory.h
 	mt32/mt32.cpp mt32/mt32.h
-	mt32/names.cpp mt32/names.h
 	mt32/params.cpp mt32/params.h
+	mt32/presets.cpp mt32/presets.h
 	mt32/stateTracker.cpp mt32/stateTracker.h
 	partActivity.cpp partActivity.h
 	boards/cm32p.cpp boards/cm32p.h
@@ -177,11 +177,12 @@ if(BUILD_TESTING)
 	add_test(NAME mt32Firmware COMMAND mt32Firmware_test)
 	set_tests_properties(mt32Firmware PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
 
-	add_executable(mt32Names_test tests/mt32Names_test.cpp)
-	target_link_libraries(mt32Names_test PRIVATE 88lib)
-	set_property(TARGET mt32Names_test PROPERTY FOLDER "Ronaldo/tests")
-	add_test(NAME mt32Names COMMAND mt32Names_test)
-	set_tests_properties(mt32Names PROPERTIES TIMEOUT 20)
+	# With the LA boards' ROMs, as argument or in EMU88_MT32_TEST_ROM_DIR, also the preset timbres against the boards
+	add_executable(mt32Presets_test tests/mt32Presets_test.cpp)
+	target_link_libraries(mt32Presets_test PRIVATE 88lib)
+	set_property(TARGET mt32Presets_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME mt32Presets COMMAND mt32Presets_test)
+	set_tests_properties(mt32Presets PROPERTIES TIMEOUT 20)
 
 	add_executable(sc8850_submcu_test tests/sc8850_submcu_test.cpp)
 	target_link_libraries(sc8850_submcu_test PRIVATE 88lib)

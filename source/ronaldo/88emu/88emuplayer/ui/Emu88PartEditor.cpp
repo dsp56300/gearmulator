@@ -13,11 +13,13 @@
 #include "juceRmlUi/rmlDragData.h"
 #include "juceRmlUi/rmlDragSource.h"
 #include "juceRmlUi/rmlElemComboBox.h"
+#include "juceRmlUi/rmlElemStrokes.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlMenu.h"
 #include "juceRmlUi/rmlPressSwallower.h"
 
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/ScrollTypes.h"
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
@@ -38,6 +40,15 @@ namespace emu88Player
 
 	namespace
 	{
+		// A flag that is set for as long as the scope lasts
+		struct ScopedFlag
+		{
+			explicit ScopedFlag(bool& _flag) : flag(_flag), was(_flag) { flag = true; }
+			~ScopedFlag() { flag = was; }
+			bool& flag;
+			bool was;
+		};
+
 		std::string number(const int _value, const int _digits = 3)
 		{
 			char buf[16];
@@ -316,6 +327,7 @@ namespace emu88Player
 
 	void PartEditorWindow::build()
 	{
+		const ScopedFlag buildNow(m_laBuildNow);
 		m_model = m_processor.deviceModel();
 		const bool supported = gs::isPartEditorModel(m_model);
 		m_laDialect = emu88Lib::mt32::isMt32Model(m_model);
@@ -334,7 +346,7 @@ namespace emu88Player
 		{
 			m_laMemory = m_processor.laState().memory(m_laRevision);
 			m_laDefaults = emu88Lib::mt32::Memory(m_model);
-			m_laNames = m_processor.laNames();
+			m_laPresets = m_processor.laPresets();
 			if(m_laMemory.hasLa())
 			{
 				for(uint8_t p = 0; p < emu88Lib::mt32::g_laParts; ++p)
@@ -378,10 +390,10 @@ namespace emu88Player
 		}
 		selectPage(supported || m_laDialect ? m_page : g_mixerPage);
 
-		const auto& laNamesError = m_processor.laNamesError();
+		const auto& laPresetsError = m_processor.laPresetsError();
 		if(m_laDialect)
-			showStatus(laNamesError.empty() ? std::string() : "Timbre and tone names unavailable: " + laNamesError,
-			           !laNamesError.empty());
+			showStatus(laPresetsError.empty() ? std::string()
+			           : "Preset timbres and tones unavailable: " + laPresetsError, !laPresetsError.empty());
 		else if(!supported)
 			showStatus("The part editor works with the Sound Canvas boards, from the SC-55 to the SC-8850, and with "
 			           "the MT-32, CM-32L, CM-32P and CM-64.", true);
@@ -432,21 +444,38 @@ namespace emu88Player
 			juceRmlUi::EventListener::Add(m_mapSelect, Rml::EventId::Change, [this](Rml::Event&)
 			{
 				const auto index = m_mapSelect->getSelectedIndex();
-				// On the MT-32 dialect's boards it picks what the list shows: the patches, or the timbres or tones
+				// The MT-32 dialect's boards have no tone maps
 				if(m_laDialect)
-				{
-					if(m_updatingUi || index < 0 || m_page == g_mixerPage)
-						return;
-					m_laListPatches = index == 0;
-					m_listKey.clear();
-					refreshPart();
 					return;
-				}
 				if(m_updatingUi || !m_catalog || index < 0 || static_cast<size_t>(index) >= m_catalog->maps.size() ||
 				   m_page == g_mixerPage)
 					return;
 				selectToneMap(selectedPart(), m_catalog->maps[static_cast<size_t>(index)].number);
 			});
+		}
+
+		// Up and down browse a part's list while it, or the filter, has the focus; the note plays while the key is down
+		const auto browse = [this](Rml::Event& _event)
+		{
+			const auto key = juceRmlUi::helper::getKeyIdentifier(_event);
+			if(key != Rml::Input::KI_UP && key != Rml::Input::KI_DOWN)
+				return;
+			_event.StopPropagation();
+			moveListSelection(key == Rml::Input::KI_UP ? -1 : 1);
+		};
+		const auto release = [this](Rml::Event& _event)
+		{
+			const auto key = juceRmlUi::helper::getKeyIdentifier(_event);
+			if(key == Rml::Input::KI_UP || key == Rml::Input::KI_DOWN)
+				stopAudition();
+		};
+		for(const char* id : {"peTones", "peFilter"})
+		{
+			if(auto* element = m_root->GetElementById(id))
+			{
+				juceRmlUi::EventListener::Add(element, Rml::EventId::Keydown, browse);
+				juceRmlUi::EventListener::Add(element, Rml::EventId::Keyup, release);
+			}
 		}
 
 		if(auto* filter = dynamic_cast<Rml::ElementFormControlInput*>(m_root->GetElementById("peFilter")))
@@ -467,6 +496,7 @@ namespace emu88Player
 		juceRmlUi::EventListener::Add(m_root, Rml::EventId::Mouseup, [this](Rml::Event&)
 		{
 			m_dragging = nullptr;
+			m_laNumberDrag.active = false;
 			stopAudition();
 			// A setting the board did not take goes back to what it has
 			if(m_laDialect)
@@ -883,6 +913,51 @@ namespace emu88Player
 
 		// The CM-32P's internal tones; a patch selecting one past them plays nothing
 		constexpr uint8_t g_pcmInternalTones = 84;
+
+		// Where a partial's parameters start in a timbre
+		uint16_t laPartialBase(const uint8_t _partial)
+		{
+			return static_cast<uint16_t>(emu88Lib::mt32::g_timbreCommonSize + _partial * emu88Lib::mt32::g_partialSize);
+		}
+
+		// The pace of the timer, which sends the MT-32 dialect's SysEx with the room the boards need
+		constexpr uint32_t g_tickMicroseconds = 1000000 / 30;
+	}
+
+	namespace
+	{
+		// A list to pick from where the list has every value, else a slider with its value
+		bool isLaChoice(const emu88Lib::mt32::Param& _param, const emu88Lib::mt32::LaFirmware _firmware)
+		{
+			using emu88Lib::mt32::ParamText;
+			switch(_param.text)
+			{
+			case ParamText::Number:
+			case ParamText::Signed:
+			case ParamText::PanLa:
+			case ParamText::PanPcm:
+			case ParamText::MasterTune:
+			case ParamText::BiasLevelTva:
+				return false;
+			default:
+				break;
+			}
+			const auto max = emu88Lib::mt32::maxValue(_param, _firmware);
+			return emu88Lib::mt32::valueList(_param, _firmware).size() == max + 1u;
+		}
+
+		// The boards' pans run from the right: their sliders the other way round
+		bool isLaPan(const emu88Lib::mt32::Param& _param)
+		{
+			return _param.text == emu88Lib::mt32::ParamText::PanLa || _param.text == emu88Lib::mt32::ParamText::PanPcm;
+		}
+
+		std::string laControlId(const emu88Lib::mt32::Area _area, const size_t _entry, const uint16_t _base,
+			const size_t _param)
+		{
+			return "la" + std::to_string(static_cast<int>(_area)) + "_" + std::to_string(_entry) + "_" +
+			       std::to_string(_base) + "_" + std::to_string(_param);
+		}
 	}
 
 	std::string PartEditorWindow::laTimbreName(const uint8_t _group, const uint8_t _number) const
@@ -899,30 +974,17 @@ namespace emu88Player
 			const auto* data = m_laMemory.entry(Area::TimbreMemory, _number);
 			return data ? laName(data) : std::string();
 		}
-		return m_laNames ? m_laNames->timbre(_group, _number) : std::string();
+		return m_laPresets ? m_laPresets->timbre(_group, _number) : std::string();
 	}
 
 	std::string PartEditorWindow::laToneName(const uint8_t _media, const uint8_t _number) const
 	{
-		if(m_laNames)
+		if(m_laPresets)
 		{
-			if(const auto& tone = m_laNames->pcmTone(_media, _number); !tone.empty())
+			if(const auto& tone = m_laPresets->pcmTone(_media, _number); !tone.empty())
 				return tone;
 		}
 		return (_media ? "Card tone " : "Tone ") + std::to_string(_number + 1);
-	}
-
-	std::string PartEditorWindow::laPatchName(const emu88Lib::mt32::Board _board, const uint8_t _patch) const
-	{
-		using namespace emu88Lib::mt32;
-		// A patch is named after what it plays
-		if(_board == Board::Pcm)
-			return laToneName(m_laMemory.value(Area::PcmPatchMemory, _patch, 0),
-				m_laMemory.value(Area::PcmPatchMemory, _patch, 1));
-		const auto group = m_laMemory.value(Area::PatchMemory, _patch, 0);
-		const auto number = m_laMemory.value(Area::PatchMemory, _patch, 1);
-		const auto name = laTimbreName(group, number);
-		return name.empty() ? laTimbreCode(group, number) : name;
 	}
 
 	std::string PartEditorWindow::laPartName(const LaPart& _part) const
@@ -934,8 +996,8 @@ namespace emu88Player
 		if(_part.part == g_rhythmPart)
 			return "Rhythm";
 
-		// The timbre temp has the name of what the part plays, where a SysEx may have changed it; a preset's only once
-		// a data request read it. Otherwise the timbre it was copied from: the timbre memory, or a preset in the ROM.
+		// The timbre temp has the name of what the part plays, where a SysEx may have changed it. Otherwise the timbre
+		// it was copied from: the timbre memory, or a preset in the ROM.
 		bool known = true;
 		for(size_t i = 0; i < 10; ++i)
 			known &= m_laMemory.known(Area::TimbreTemp, _part.part, i);
@@ -960,56 +1022,349 @@ namespace emu88Player
 		setLaValue(address, _data);
 	}
 
+	PartEditorWindow::LaTimbre PartEditorWindow::laEditedTimbre() const
+	{
+		using namespace emu88Lib::mt32;
+		const auto index = selectedPart();
+		if(index >= m_laParts.size() || m_laParts[index].board != Board::La)
+			return {};
+		if(!isLaRhythm(index))
+			return {Area::TimbreTemp, m_laParts[index].part, true};
+		// A rhythm key plays its timbre straight from the timbre memory or the ROM: the memory's can be edited
+		const auto timbre = m_laMemory.value(Area::RhythmSetup, m_laRhythmKey, 0);
+		if(timbre < 64)
+			return {Area::TimbreMemory, timbre, true};
+		return {};
+	}
+
+	uint8_t PartEditorWindow::laDefault(const emu88Lib::mt32::Area _area, const size_t _entry,
+		const uint16_t _offset) const
+	{
+		using namespace emu88Lib::mt32;
+		// A timbre temp goes back to the timbre it was copied from
+		if(_area == Area::TimbreTemp)
+		{
+			const auto source = m_laMemory.timbreSource(_entry);
+			if(source.group == 2)
+				return m_laMemory.value(Area::TimbreMemory, source.number, _offset);
+			if(const auto* preset = m_laPresets ? m_laPresets->timbreData(source.group, source.number) : nullptr)
+				return (*preset)[_offset];
+			return m_laMemory.value(_area, _entry, _offset);
+		}
+		return m_laDefaults.value(_area, _entry, _offset);
+	}
+
+	bool PartEditorWindow::laPartialIsPcm(const LaTimbre& _timbre, const uint8_t _partial) const
+	{
+		using namespace emu88Lib::mt32;
+		if(!_timbre.valid || _partial >= 4)
+			return false;
+		// Structure 1 & 2 at 0A, 3 & 4 at 0B
+		const auto value = m_laMemory.value(_timbre.area, _timbre.entry, 0x0a + _partial / 2u);
+		return structure(value).pcm[_partial % 2];
+	}
+
+	uint8_t PartEditorWindow::laStructureWith(const LaTimbre& _timbre, const uint8_t _partial, const bool _pcm) const
+	{
+		using namespace emu88Lib::mt32;
+		const auto current = m_laMemory.value(_timbre.area, _timbre.entry, 0x0a + _partial / 2u);
+		auto s = structure(current);
+		s.pcm[_partial % 2] = _pcm;
+		// A stereo pair is of one kind, and the plain mix has no synth first partial with a PCM second: the other
+		// partial follows, as the board allows no more
+		uint8_t value = current;
+		if(structureValue(s.mix, s.pcm[0], s.pcm[1], value))
+			return value;
+		s.pcm[1 - _partial % 2] = _pcm;
+		if(structureValue(s.mix, s.pcm[0], s.pcm[1], value))
+			return value;
+		return current;
+	}
+
+	std::string PartEditorWindow::laParamRow(const emu88Lib::mt32::Area _area, const size_t _entry,
+		const emu88Lib::mt32::Block _block, const uint16_t _base, const char* _id, const LaInput _input,
+		const char* _label, const bool _applies) const
+	{
+		using namespace emu88Lib::mt32;
+		const auto index = findParamById(_block, _id);
+		if(index < 0)
+			return {};
+		const auto& p = params(_block)[static_cast<size_t>(index)];
+		const auto firmware = m_laMemory.firmware();
+		const auto id = laControlId(_area, _entry, _base, static_cast<size_t>(index));
+		const std::string label = _label ? _label : p.label;
+		const auto input = _input != LaInput::Auto ? _input
+		                 : isLaChoice(p, firmware) ? LaInput::Choice : LaInput::Slider;
+
+		std::string rml;
+		if(input == LaInput::Segments)
+		{
+			rml = "<div class=\"peRow\"><div id=\"peLbl" + id + "\" class=\"peRowLabel\" "
+			      "title=\"Double-click for the default\">" + encode(label) + "</div><div id=\"peCtl" + id +
+			      "\" class=\"peSegments\">";
+			const auto values = valueList(p, firmware);
+			for(size_t v = 0; v < values.size(); ++v)
+			{
+				rml += "<button id=\"peSeg" + id + "_" + std::to_string(v) + "\" class=\"peSegment\" value=\"" +
+				       std::to_string(v) + "\">" + encode(values[v]) + "</button>";
+			}
+			rml += "</div></div>";
+		}
+		else
+		{
+			const auto note = p.text == ParamText::AssignMode
+				? std::string("Single: a note played again ends the one sounding. Multi: they sound together. Last or "
+				              "first: which notes keep their partials when they run out.")
+				: std::string();
+			rml = controlRow(id, label, input == LaInput::Choice, 0, maxValue(p, firmware), false, note);
+		}
+		// A setting that does not apply to what plays: greyed, not taken away
+		if(!_applies)
+			rml.replace(0, std::string("<div class=\"peRow").size(), "<div class=\"peRow na");
+		return rml;
+	}
+
+	std::string PartEditorWindow::laNumberGrid(const emu88Lib::mt32::Area _area, const size_t _entry,
+		const uint16_t _base, const char* _label, const std::vector<std::pair<const char*, const char*>>& _cells) const
+	{
+		using namespace emu88Lib::mt32;
+		std::string rml = "<div class=\"peNumGrid\"><div class=\"peNumLabel\">" + encode(_label) + "</div>";
+		for(const auto& [paramId, head] : _cells)
+		{
+			const auto index = findParamById(Block::Partial, paramId);
+			if(index < 0)
+				continue;
+			const auto& p = params(Block::Partial)[static_cast<size_t>(index)];
+			rml += "<div class=\"peNumCell\"><div class=\"peNumHead\">" + encode(head) + "</div><div id=\"peCtl" +
+			       laControlId(_area, _entry, _base, static_cast<size_t>(index)) + "\" class=\"peNum\" title=\"" +
+			       encode(std::string(p.section) + " " + p.label) +
+			       ": drag or scroll, double-click for the default\"/></div>";
+		}
+		return rml + "</div>";
+	}
+
 	void PartEditorWindow::buildLaPartControls()
 	{
 		using namespace emu88Lib::mt32;
 		m_laPartControls.clear();
 		m_laKeySelect = nullptr;
 		m_laKeyNames.clear();
+		m_laNameInput = nullptr;
+		m_laMuteButtons = {};
+		m_laPlayChecks = {};
+		m_laTabs = {};
+		m_laTypeButtons = {};
+		m_laShapeButtons = {};
+		m_laBankButtons = {};
+		m_laEnvelopeLines = {};
+		m_laEnvelopeGrids = {};
+		m_laNumberDrag.active = false;
 		auto* container = m_root->GetElementById("pePartControls");
 		const auto index = selectedPart();
 		if(!container || index >= m_laParts.size())
 			return;
 		const auto& part = m_laParts[index];
+		const bool old = m_laMemory.firmware() == LaFirmware::Old;
 
-		const auto section = [](const std::string& _title, const std::string& _rows)
+		const auto section = [](const std::string& _title, const std::string& _rows, const std::string& _note = {},
+			const std::string& _class = {})
 		{
 			if(_rows.empty())
 				return std::string();
-			return "<div class=\"peSection\"><div class=\"peSectionTitle\">" + encode(_title) + "</div>" + _rows +
-			       "</div>";
+			std::string rml = "<div class=\"peSection " + _class + "\"><div class=\"peSectionTitle\"";
+			if(!_note.empty())
+				rml += " title=\"" + encode(_note) + "\"";
+			return rml + ">" + encode(_title) + "</div>" + _rows + "</div>";
 		};
-		std::string left, right;
-		if(isLaRhythm(index))
+		const auto columns = [](const std::vector<std::string>& _columns, const char* _class)
 		{
-			// Its level; the rest of its patch temp it does not play. Each key has its settings, the list its timbre.
-			left = section("Part", laControlRows(Area::PatchTemp, part.part, "Part", {}, {"OutputLevel"}));
-			const std::string key = "<div class=\"peRow\"><div class=\"peRowLabel\">Key</div>"
-			                        "<combo id=\"peLaKey\" class=\"peCombo\" popup=\"window\"><combotext/></combo>"
-			                        "</div>";
-			right = section("Rhythm Key", key + laControlRows(Area::RhythmSetup, m_laRhythmKey, "Rhythm", {"Timbre"}));
+			std::string rml = std::string("<div class=\"peColumns ") + _class + "\">";
+			for(const auto& c : _columns)
+				rml += "<div class=\"peColumn\">" + c + "</div>";
+			return rml + "</div>";
+		};
+		// A row of buttons that is not a parameter of its own
+		const auto buttons = [](const char* _label, const char* _id, const std::vector<const char*>& _texts,
+			const bool _applies, const char* _title = "")
+		{
+			std::string rml = std::string("<div class=\"peRow") + (_applies ? "" : " na") + "\" title=\"" + _title +
+			                  "\"><div class=\"peRowLabel\">" + _label + "</div><div class=\"peSegments\">";
+			for(size_t i = 0; i < _texts.size(); ++i)
+				rml += "<button id=\"" + std::string(_id) + std::to_string(i) + "\" class=\"peSegment\">" + _texts[i] +
+				       "</button>";
+			return rml + "</div></div>";
+		};
+
+		if(part.board == Board::Pcm)
+		{
+			// The CM-32P's tones are its ROM's: the patch temp is all there is to edit, and fits
+			const auto rows = [&](const char* _section, const std::vector<std::string>& _skip = {})
+			{
+				return section(_section, laControlRows(Area::PcmPatchTemp, part.part, Block::PcmPatchTemp, 0, _section,
+					_skip));
+			};
+			container->SetInnerRML(columns({rows("Patch", {"ToneMedia", "ToneNumber"}),
+				rows("Envelope") + rows("LFO") + rows("Part")}, ""));
+			wireLaControls(container, Area::PcmPatchTemp, part.part, Block::PcmPatchTemp, 0, m_laPartControls);
+			return;
 		}
-		else if(part.board == Board::La)
+
+		const auto timbre = laEditedTimbre();
+		if(!timbre.valid)
+			m_laTab = 0;
+		const auto pt = [&](const char* _id, const LaInput _input = LaInput::Auto)
 		{
-			// The timbre is the list's
-			left = section("Patch",
-				laControlRows(Area::PatchTemp, part.part, "Patch", {"TimbreGroup", "TimbreNumber"}));
-			right = section("Part", laControlRows(Area::PatchTemp, part.part, "Part"));
+			return laParamRow(Area::PatchTemp, part.part, Block::PatchTemp, 0, _id, _input);
+		};
+
+		// Tabs: the common settings, then the four partials, each with its switch and its kind
+		std::string rml;
+		if(timbre.valid)
+		{
+			rml += "<div class=\"pePartialBar\"><button id=\"peLaTab0\" class=\"pePartial\">Common</button>";
+			for(int p = 0; p < 4; ++p)
+			{
+				rml += "<button id=\"peLaTab" + std::to_string(p + 1) + "\" class=\"pePartial\"><div id=\"peLaPlay" +
+				       std::to_string(p) + "\" class=\"peTabCheck\" title=\"Whether the partial plays\"/>Partial " +
+				       std::to_string(p + 1) + "<span class=\"peKind\">" +
+				       (laPartialIsPcm(timbre, static_cast<uint8_t>(p)) ? "PCM" : "Synth") + "</span></button>";
+			}
+			rml += "</div>";
+		}
+
+		if(m_laTab == 0)
+		{
+			// The part's settings, or the rhythm part's and its key's, beside the timbre's own
+			std::string left;
+			if(isLaRhythm(index))
+			{
+				// Its level; the rest of its patch temp it does not play. Each key has its settings, the list its
+				// timbre.
+				const std::string key = "<div class=\"peRow\"><div class=\"peRowLabel\">Key</div>"
+				                        "<combo id=\"peLaKey\" class=\"peCombo\" popup=\"window\"><combotext/></combo>"
+				                        "</div>";
+				left = section("Part", pt("OutputLevel")) + section("Rhythm Key", key +
+					laParamRow(Area::RhythmSetup, m_laRhythmKey, Block::RhythmKey, 0, "OutputLevel") +
+					laParamRow(Area::RhythmSetup, m_laRhythmKey, Block::RhythmKey, 0, "Pan") +
+					laParamRow(Area::RhythmSetup, m_laRhythmKey, Block::RhythmKey, 0, "ReverbSwitch"));
+			}
+			else
+			{
+				// The timbre is the list's. The MT-32 1.x takes it again at any write to the patch temp.
+				left = section("Part", pt("KeyShift") + pt("FineTune") + pt("BenderRange") + pt("AssignMode") +
+					pt("ReverbSwitch", LaInput::Segments) + pt("OutputLevel") + pt("Pan"), old ? "On the MT-32 1.x a "
+					"change here loads the timbre again, which undoes changes to it." : "");
+			}
+
+			std::string right;
+			if(!timbre.valid)
+			{
+				right = section("Timbre", "<div class=\"peNotice\">The key plays a rhythm timbre of the ROM, which "
+					"cannot be changed. One of the memory timbres, i01 to i64, can.</div>");
+			}
+			else
+			{
+				std::string rows;
+				if(!m_laMemory.entryKnown(timbre.area, timbre.entry))
+				{
+					rows += "<div class=\"peNotice\">The device has not told all of this timbre yet."
+					        "<button id=\"peLaRead\" class=\"peNoticeButton\">Read it from the device</button></div>";
+				}
+				rows += "<div class=\"peRow\"><div class=\"peRowLabel\">Name</div>"
+				        "<input id=\"peLaName\" class=\"peNameInput\" type=\"text\" maxlength=\"10\"/></div>";
+				const auto common = [&](const char* _id, const LaInput _input, const char* _label)
+				{
+					return laParamRow(timbre.area, timbre.entry, Block::TimbreCommon, 0, _id, _input, _label);
+				};
+				rows += common("Structure12", LaInput::Choice, "Partials 1 & 2") +
+				        common("Structure34", LaInput::Choice, "Partials 3 & 4") +
+				        common("EnvMode", LaInput::Segments, "Envelopes");
+				rows += "<div class=\"peRow\"><div class=\"peRowLabel\" title=\"The partials that play\">Partials</div>"
+				        "<div class=\"peMutes\">";
+				for(int p = 0; p < 4; ++p)
+				{
+					rows += "<button id=\"peLaMute" + std::to_string(p) + "\" class=\"peMute\" title=\"" +
+					        (laPartialIsPcm(timbre, static_cast<uint8_t>(p)) ? "PCM sample" : "Synth wave") + "\">" +
+					        std::to_string(p + 1) + (laPartialIsPcm(timbre, static_cast<uint8_t>(p)) ? " P" : " S") +
+					        "</button>";
+				}
+				rows += "</div></div><div class=\"peHint\">S a synth wave, P a PCM sample, R the ring modulator: "
+				        "it multiplies the two partials of a pair.</div>";
+				right = section(timbre.area == Area::TimbreMemory
+					? "Memory Timbre " + laTimbreCode(2, static_cast<uint8_t>(timbre.entry)) : std::string("Timbre"),
+					rows, timbre.area == Area::TimbreMemory ? "A timbre of the memory: every key and part that plays "
+					"it plays it as changed here" : "");
+			}
+			rml += columns({left, right}, "");
 		}
 		else
 		{
-			left = section("Patch", laControlRows(Area::PcmPatchTemp, part.part, "Patch", {"ToneMedia", "ToneNumber"}));
-			right = section("Envelope", laControlRows(Area::PcmPatchTemp, part.part, "Envelope")) +
-			        section("LFO", laControlRows(Area::PcmPatchTemp, part.part, "LFO")) +
-			        section("Part", laControlRows(Area::PcmPatchTemp, part.part, "Part"));
-		}
-		container->SetInnerRML("<div class=\"peColumns\"><div class=\"peColumn\">" + left +
-			"</div><div class=\"peColumn\">" + right + "</div></div>");
+			// One partial: what it plays at the top, then its three envelopes with their graphs, side by side
+			const auto partial = static_cast<uint8_t>(m_laTab - 1);
+			const auto base = laPartialBase(partial);
+			const bool pcm = laPartialIsPcm(timbre, partial);
+			const auto row = [&](const char* _id, const LaInput _input = LaInput::Auto, const char* _label = nullptr,
+				const bool _applies = true)
+			{
+				return laParamRow(timbre.area, timbre.entry, Block::Partial, base, _id, _input, _label, _applies);
+			};
+			const auto grid = [&](const char* _label, const std::vector<std::pair<const char*, const char*>>& _cells)
+			{
+				return laNumberGrid(timbre.area, timbre.entry, base, _label, _cells);
+			};
+			const auto graph = [](const int _i)
+			{
+				const auto n = std::to_string(_i);
+				return "<div class=\"peEnvGraph\"><strokes id=\"peEnvGrid" + n + "\" class=\"peEnvGrid\"/>"
+				       "<strokes id=\"peEnvLine" + n + "\" class=\"peEnvLine\"/></div>";
+			};
 
+			// The waveform byte holds the synth wave's shape in bit 0 and the PCM bank in bit 1; the CM-32L has the
+			// second bank, the MT-32 1.x none
+			const auto wave = buttons("Kind", "peLaType", {"Synth", "PCM"}, true,
+				"Sets the structure of the pair: the other partial may follow, see Common") +
+				(pcm ? row("PcmWave", LaInput::Choice) : buttons("Waveform", "peLaShape", {"Square", "Saw"}, true)) +
+				buttons("PCM Bank", "peLaBank", {"1", "2"}, pcm && !old, "The CM-32L's second bank of samples") +
+				row("PulseWidth", LaInput::Slider, nullptr, !pcm) + row("PwVeloSens", LaInput::Slider, nullptr, !pcm);
+			const auto pitch = row("PitchCoarse", LaInput::Slider, "Coarse") +
+				row("PitchFine", LaInput::Slider, "Fine") + row("PitchKeyfollow", LaInput::Choice, "Keyfollow") +
+				row("BenderSwitch", LaInput::Segments, "Bender");
+			const auto lfo = row("LfoRate") + row("LfoDepth") + row("LfoModSens");
+			rml += columns({section("Wave", wave), section("Pitch", pitch), section("Pitch LFO", lfo)}, "three");
+
+			const auto penv = graph(0) +
+				grid("Time", {{"PenvTime1", "1"}, {"PenvTime2", "2"}, {"PenvTime3", "3"}, {"PenvTime4", "4"}}) +
+				grid("Level", {{"PenvLevel0", "0"}, {"PenvLevel1", "1"}, {"PenvLevel2", "2"}, {"PenvSustain", "S"},
+					{"PenvEnd", "E"}}) +
+				row("PenvDepth") + row("PenvVeloSens") + row("PenvTimeKeyf");
+			const auto tvf = graph(1) +
+				grid("Time", {{"TvfTime1", "1"}, {"TvfTime2", "2"}, {"TvfTime3", "3"}, {"TvfTime4", "4"},
+					{"TvfTime5", "5"}}) +
+				grid("Level", {{"TvfLevel1", "1"}, {"TvfLevel2", "2"}, {"TvfLevel3", "3"}, {"TvfSustain", "S"}}) +
+				row("TvfCutoff") + row("TvfResonance") + row("TvfKeyfollow", LaInput::Choice) +
+				row("TvfBiasPoint", LaInput::Slider) + row("TvfBiasLevel") + row("TvfEnvDepth") +
+				row("TvfEnvVeloSens") + row("TvfEnvDepthKeyf") + row("TvfEnvTimeKeyf");
+			const auto tva = graph(2) +
+				grid("Time", {{"TvaTime1", "1"}, {"TvaTime2", "2"}, {"TvaTime3", "3"}, {"TvaTime4", "4"},
+					{"TvaTime5", "5"}}) +
+				grid("Level", {{"TvaLevel1", "1"}, {"TvaLevel2", "2"}, {"TvaLevel3", "3"}, {"TvaSustain", "S"}}) +
+				row("TvaLevel") + row("TvaVeloSens") + row("TvaBiasPoint1", LaInput::Slider) + row("TvaBiasLevel1") +
+				row("TvaBiasPoint2", LaInput::Slider) + row("TvaBiasLevel2") + row("TvaEnvTimeKeyf") +
+				row("TvaEnvTimeVelo");
+			// A PCM partial has no filter
+			rml += columns({section("Pitch Envelope", penv),
+				section("Filter", tvf, pcm ? "A PCM partial has no filter" : "", pcm ? "na" : ""),
+				section("Amplifier", tva)}, "three");
+		}
+
+		const auto mute = timbre.valid ? m_laMemory.value(timbre.area, timbre.entry, 0x0c) : 0;
+		const bool off = m_laTab > 0 && !(mute >> (m_laTab - 1) & 1);
+		container->SetInnerRML("<div class=\"peLaPage" + std::string(off ? " off" : "") + "\">" + rml + "</div>");
+
+		wireLaControls(container, Area::PatchTemp, part.part, Block::PatchTemp, 0, m_laPartControls);
 		if(isLaRhythm(index))
 		{
-			wireLaControls(container, Area::PatchTemp, part.part, m_laPartControls);
-			wireLaControls(container, Area::RhythmSetup, m_laRhythmKey, m_laPartControls);
+			wireLaControls(container, Area::RhythmSetup, m_laRhythmKey, Block::RhythmKey, 0, m_laPartControls);
 			m_laKeySelect = dynamic_cast<juceRmlUi::ElemComboBox*>(container->GetElementById("peLaKey"));
 			if(m_laKeySelect)
 			{
@@ -1024,11 +1379,243 @@ namespace emu88Player
 				});
 			}
 		}
-		else
+		if(!timbre.valid)
+			return;
+
+		wireLaControls(container, timbre.area, timbre.entry, Block::TimbreCommon, 0, m_laPartControls);
+		if(m_laTab > 0)
 		{
-			wireLaControls(container, part.board == Board::La ? Area::PatchTemp : Area::PcmPatchTemp, part.part,
-				m_laPartControls);
+			wireLaControls(container, timbre.area, timbre.entry, Block::Partial,
+				laPartialBase(static_cast<uint8_t>(m_laTab - 1)), m_laPartControls);
 		}
+
+		addClick(container->GetElementById("peLaRead"), [this, timbre]
+		{
+			laReceive({{emu88Lib::mt32::address({timbre.area, static_cast<uint16_t>(timbre.entry), 0}),
+				static_cast<uint32_t>(g_timbreSize)}});
+		});
+
+		// The name, written as the board keeps it: ten characters, filled with spaces
+		m_laNameInput = dynamic_cast<Rml::ElementFormControlInput*>(container->GetElementById("peLaName"));
+		if(m_laNameInput)
+		{
+			juceRmlUi::EventListener::Add(m_laNameInput, Rml::EventId::Change, [this, timbre](Rml::Event&)
+			{
+				if(m_updatingUi)
+					return;
+				auto name = m_laNameInput->GetValue();
+				name.resize(10, ' ');
+				std::vector<uint8_t> data;
+				for(const auto c : name)
+					data.push_back(static_cast<uint8_t>(c >= 0x20 && c < 0x7f ? c : ' '));
+				writeLa(timbre.area, timbre.entry, 0, data);
+			});
+		}
+
+		// The partials' switches, here and in the tabs
+		const auto muteParam = findParamById(Block::TimbreCommon, "PartialMute");
+		const auto toggle = [this, timbre, muteParam](const uint8_t _p)
+		{
+			if(muteParam < 0)
+				return;
+			const auto mute = m_laMemory.value(timbre.area, timbre.entry, 0x0c);
+			setLaParam(timbre.area, timbre.entry, Block::TimbreCommon, 0, static_cast<size_t>(muteParam),
+				static_cast<uint8_t>(mute ^ (1u << _p)));
+			m_laControlsKey.clear();
+			refreshPart();
+		};
+		for(uint8_t p = 0; p < 4; ++p)
+		{
+			m_laMuteButtons[p] = container->GetElementById("peLaMute" + std::to_string(p));
+			addClick(m_laMuteButtons[p], [toggle, p] { toggle(p); });
+			m_laPlayChecks[p] = container->GetElementById("peLaPlay" + std::to_string(p));
+			if(m_laPlayChecks[p])
+			{
+				juceRmlUi::EventListener::Add(m_laPlayChecks[p], Rml::EventId::Click, [toggle, p](Rml::Event& _event)
+				{
+					_event.StopPropagation();
+					toggle(p);
+				});
+			}
+		}
+		for(uint8_t t = 0; t < 5; ++t)
+		{
+			m_laTabs[t] = container->GetElementById("peLaTab" + std::to_string(t));
+			addClick(m_laTabs[t], [this, t]
+			{
+				m_laTab = t;
+				m_laControlsKey.clear();
+				refreshPart();
+			});
+		}
+
+		if(m_laTab == 0)
+			return;
+		const auto partial = static_cast<uint8_t>(m_laTab - 1);
+		const auto waveParam = findParamById(Block::Partial, "Waveform");
+		const auto waveOffset = static_cast<uint16_t>(laPartialBase(partial) + 0x04);
+		// The kind sets the pair's structure; the shape and the bank share the waveform byte
+		const auto setWave = [this, timbre, partial, waveParam, waveOffset](const uint8_t _mask, const uint8_t _bits)
+		{
+			if(waveParam < 0)
+				return;
+			const auto current = m_laMemory.value(timbre.area, timbre.entry, waveOffset);
+			setLaParam(timbre.area, timbre.entry, Block::Partial, laPartialBase(partial),
+				static_cast<size_t>(waveParam), static_cast<uint8_t>((current & ~_mask) | _bits));
+		};
+		for(uint8_t i = 0; i < 2; ++i)
+		{
+			m_laTypeButtons[i] = container->GetElementById("peLaType" + std::to_string(i));
+			addClick(m_laTypeButtons[i], [this, timbre, partial, i]
+			{
+				const auto structureParam = findParamById(Block::TimbreCommon,
+					partial < 2 ? "Structure12" : "Structure34");
+				if(structureParam < 0)
+					return;
+				setLaParam(timbre.area, timbre.entry, Block::TimbreCommon, 0, static_cast<size_t>(structureParam),
+					laStructureWith(timbre, partial, i == 1));
+				m_laControlsKey.clear();
+				refreshPart();
+			});
+			m_laShapeButtons[i] = container->GetElementById("peLaShape" + std::to_string(i));
+			addClick(m_laShapeButtons[i], [setWave, i] { setWave(0x01, i); });
+			m_laBankButtons[i] = container->GetElementById("peLaBank" + std::to_string(i));
+			addClick(m_laBankButtons[i], [setWave, i] { setWave(0x02, static_cast<uint8_t>(i << 1)); });
+		}
+		for(int e = 0; e < 3; ++e)
+		{
+			m_laEnvelopeLines[e] = container->GetElementById("peEnvLine" + std::to_string(e));
+			m_laEnvelopeGrids[e] = container->GetElementById("peEnvGrid" + std::to_string(e));
+		}
+	}
+
+	void PartEditorWindow::dragLaNumber(const float _y)
+	{
+		if(!m_laNumberDrag.active)
+			return;
+		// Three dp a step, up to more
+		const auto& c = m_laNumberDrag.control;
+		const auto ratio = m_root->GetContext() ? m_root->GetContext()->GetDensityIndependentPixelRatio() : 1.0f;
+		const auto steps = static_cast<int>((m_laNumberDrag.startY - _y) / (3.0f * ratio));
+		const auto value = std::clamp(m_laNumberDrag.startValue + steps, 0, m_laNumberDrag.max);
+		setLaParam(c.area, c.entry, c.block, c.base, c.param, static_cast<uint8_t>(value));
+	}
+
+	void PartEditorWindow::refreshLaTimbreEditor()
+	{
+		const auto timbre = laEditedTimbre();
+		if(!timbre.valid)
+			return;
+		m_updatingUi = true;
+		// Not under the cursor of someone typing
+		if(m_laNameInput && !m_laNameInput->IsPseudoClassSet("focus"))
+		{
+			const auto* data = m_laMemory.entry(timbre.area, timbre.entry);
+			const auto name = data ? laName(data) : std::string();
+			if(m_laNameInput->GetValue() != name)
+				m_laNameInput->SetValue(name);
+		}
+		const auto mute = m_laMemory.value(timbre.area, timbre.entry, 0x0c);
+		for(size_t p = 0; p < 4; ++p)
+		{
+			const bool plays = (mute >> p & 1) != 0;
+			if(m_laMuteButtons[p])
+				m_laMuteButtons[p]->SetPseudoClass("checked", plays);
+			if(m_laPlayChecks[p])
+				m_laPlayChecks[p]->SetPseudoClass("checked", plays);
+			if(m_laTabs[p + 1])
+				m_laTabs[p + 1]->SetClass("muted", !plays);
+		}
+		for(size_t t = 0; t < m_laTabs.size(); ++t)
+		{
+			if(m_laTabs[t])
+				m_laTabs[t]->SetPseudoClass("checked", t == m_laTab);
+		}
+		if(m_laTab > 0)
+		{
+			const auto partial = static_cast<uint8_t>(m_laTab - 1);
+			const bool pcm = laPartialIsPcm(timbre, partial);
+			const auto wave = m_laMemory.value(timbre.area, timbre.entry, laPartialBase(partial) + 0x04u);
+			for(uint8_t i = 0; i < 2; ++i)
+			{
+				if(m_laTypeButtons[i])
+					m_laTypeButtons[i]->SetPseudoClass("checked", pcm == (i == 1));
+				if(m_laShapeButtons[i])
+					m_laShapeButtons[i]->SetPseudoClass("checked", (wave & 1) == i);
+				if(m_laBankButtons[i])
+					m_laBankButtons[i]->SetPseudoClass("checked", (wave >> 1 & 1) == i);
+			}
+		}
+		m_updatingUi = false;
+		refreshLaEnvelopes();
+	}
+
+	void PartEditorWindow::refreshLaEnvelopes()
+	{
+		using Points = juceRmlUi::ElemStrokes::Points;
+		const auto timbre = laEditedTimbre();
+		if(!timbre.valid || m_laTab == 0)
+			return;
+		const auto base = laPartialBase(static_cast<uint8_t>(m_laTab - 1));
+		const auto at = [&](const size_t _offset)
+		{
+			return static_cast<float>(m_laMemory.value(timbre.area, timbre.entry, base + _offset));
+		};
+
+		// Fixed in the style sheet, in dp
+		constexpr float w = 216.0f, h = 60.0f, pad = 3.0f;
+		// The times as they are, a time of 0 straight up or down, on a scale that fits them, but no wider than one of
+		// a hundred to the whole: short envelopes look short. The sustain takes a fifth of the width.
+		const auto draw = [&](const int _graph, const float _start, const std::vector<std::pair<float, float>>& _attack,
+			const std::pair<float, float>& _release, const bool _signed)
+		{
+			const auto y = [&](const float _level)
+			{
+				return _signed ? h * 0.5f - (_level - 50.0f) / 50.0f * (h * 0.5f - pad)
+				               : h - pad - _level / 100.0f * (h - 2 * pad);
+			};
+			float total = _release.first;
+			for(const auto& [time, level] : _attack)
+				total += time;
+			const auto unit = (w - 2 * pad) * 0.8f / std::max(total, 100.0f);
+			Points line{{pad, y(_start)}};
+			// A point where the last one is adds nothing
+			const auto add = [&](const float _x, const float _y)
+			{
+				if(line.back().x != _x || line.back().y != _y)
+					line.push_back({_x, _y});
+			};
+			float x = pad;
+			for(const auto& [time, level] : _attack)
+			{
+				x += time * unit;
+				add(x, y(level));
+			}
+			// The sustain, until the key is let go
+			x += (w - 2 * pad) * 0.2f;
+			const auto keyOff = x;
+			add(x, line.back().y);
+			x += _release.first * unit;
+			add(x, y(_release.second));
+			// What is left of the width after it: nothing
+			add(w - pad, line.back().y);
+
+			if(auto* strokes = dynamic_cast<juceRmlUi::ElemStrokes*>(m_laEnvelopeLines[_graph]))
+				strokes->setStrokes({line});
+			if(auto* strokes = dynamic_cast<juceRmlUi::ElemStrokes*>(m_laEnvelopeGrids[_graph]))
+				strokes->setStrokes({{{pad, y(_signed ? 50.0f : 0.0f)}, {w - pad, y(_signed ? 50.0f : 0.0f)}},
+					{{keyOff, pad}, {keyOff, h - pad}}});
+		};
+
+		// The pitch envelope from level 0 through 1 and 2 to the sustain, and after the key to the end level, all
+		// around the pitch played. The filter and the amplifier from nothing through three levels to the sustain, and
+		// back to nothing.
+		draw(0, at(0x0f), {{at(0x0b), at(0x10)}, {at(0x0c), at(0x11)}, {at(0x0d), at(0x12)}}, {at(0x0e), at(0x13)},
+			true);
+		draw(1, 0.0f, {{at(0x20), at(0x25)}, {at(0x21), at(0x26)}, {at(0x22), at(0x27)}, {at(0x23), at(0x28)}},
+			{at(0x24), 0.0f}, false);
+		draw(2, 0.0f, {{at(0x31), at(0x36)}, {at(0x32), at(0x37)}, {at(0x33), at(0x38)}, {at(0x34), at(0x39)}},
+			{at(0x35), 0.0f}, false);
 	}
 
 	std::vector<PartEditorWindow::LaListRow> PartEditorWindow::laListRows() const
@@ -1070,11 +1657,6 @@ namespace emu88Player
 				add(0, n, laTimbreCode(2, n), name.empty() ? "-" : name);
 			}
 		}
-		else if(m_laListPatches)
-		{
-			for(uint8_t p = 0; p < 128; ++p)
-				add(0, p, number(p + 1), laPatchName(part.board, p));
-		}
 		else if(part.board == Board::La)
 		{
 			static constexpr const char* g_groups[] = {"Group a", "Group b", "Group i, memory", "Group r, rhythm"};
@@ -1100,8 +1682,8 @@ namespace emu88Player
 			heading("Card");
 			for(uint8_t n = 0; n < 128; ++n)
 			{
-				if(m_laNames && !m_laNames->pcmTone(1, n).empty())
-					add(1, n, number(n + 1), m_laNames->pcmTone(1, n));
+				if(m_laPresets && !m_laPresets->pcmTone(1, n).empty())
+					add(1, n, number(n + 1), m_laPresets->pcmTone(1, n));
 			}
 		}
 		if(!rows.empty() && rows.back().heading)
@@ -1112,33 +1694,13 @@ namespace emu88Player
 	std::pair<uint8_t, uint8_t> PartEditorWindow::laListSelection() const
 	{
 		using namespace emu88Lib::mt32;
-		constexpr std::pair<uint8_t, uint8_t> none{0xff, 0xff};
 		const auto index = selectedPart();
 		if(index >= m_laParts.size())
-			return none;
+			return {0xff, 0xff};
 		const auto& part = m_laParts[index];
-		const bool la = part.board == Board::La;
-
 		if(isLaRhythm(index))
 			return {0, m_laMemory.value(Area::RhythmSetup, m_laRhythmKey, 0)};
-		if(m_laListPatches)
-		{
-			// The first patch that the part's patch temp has the bytes of: what a program change to it left there.
-			// The LA board's byte 07 is a dummy.
-			const auto memory = la ? Area::PatchMemory : Area::PcmPatchMemory;
-			const auto temp = la ? Area::PatchTemp : Area::PcmPatchTemp;
-			const size_t count = la ? 7 : g_pcmPatchMemorySize;
-			for(uint8_t p = 0; p < 128; ++p)
-			{
-				bool same = true;
-				for(size_t i = 0; i < count && same; ++i)
-					same = m_laMemory.value(memory, p, i) == m_laMemory.value(temp, part.part, i);
-				if(same)
-					return {0, p};
-			}
-			return none;
-		}
-		if(la)
+		if(part.board == Board::La)
 		{
 			const auto source = m_laMemory.timbreSource(part.part);
 			return {source.group, source.number};
@@ -1153,29 +1715,13 @@ namespace emu88Player
 		if(_row.heading || index >= m_laParts.size())
 			return;
 		const auto& part = m_laParts[index];
-		const bool la = part.board == Board::La;
-		const auto temp = la ? Area::PatchTemp : Area::PcmPatchTemp;
 
 		if(isLaRhythm(index))
-		{
 			writeLa(Area::RhythmSetup, m_laRhythmKey, 0, {_row.number});
-		}
-		else if(m_laListPatches)
-		{
-			// The patch's bytes over the part's patch temp, as a program change copies them, but for this part alone
-			// and for a part that receives no channel too
-			const auto memory = la ? Area::PatchMemory : Area::PcmPatchMemory;
-			const size_t count = la ? 7 : g_pcmPatchMemorySize;
-			std::vector<uint8_t> data;
-			for(size_t i = 0; i < count; ++i)
-				data.push_back(m_laMemory.value(memory, _row.number, i));
-			writeLa(temp, part.part, 0, data);
-		}
 		else
-		{
 			// The timbre group and number, or the tone media and number, which the board takes the timbre or tone by
-			writeLa(temp, part.part, 0, {_row.group, _row.number});
-		}
+			writeLa(part.board == Board::La ? Area::PatchTemp : Area::PcmPatchTemp, part.part, 0,
+				{_row.group, _row.number});
 		flushPending();
 		refresh();
 	}
@@ -1221,6 +1767,20 @@ namespace emu88Player
 		return board + "Part " + std::to_string(part.part + 1);
 	}
 
+	std::vector<uint8_t> PartEditorWindow::laRhythmMemoryTimbres() const
+	{
+		using namespace emu88Lib::mt32;
+		std::vector<uint8_t> timbres;
+		for(size_t k = 0; k < m_laMemory.entryCount(Area::RhythmSetup); ++k)
+		{
+			const auto timbre = m_laMemory.value(Area::RhythmSetup, k, 0);
+			if(timbre < 64 && std::find(timbres.begin(), timbres.end(), timbre) == timbres.end())
+				timbres.push_back(timbre);
+		}
+		std::sort(timbres.begin(), timbres.end());
+		return timbres;
+	}
+
 	std::vector<emu88Lib::mt32::Message> PartEditorWindow::laPartMessages(const size_t _row) const
 	{
 		using namespace emu88Lib::mt32;
@@ -1250,7 +1810,7 @@ namespace emu88Player
 		}
 		else if(isLaRhythm(_row))
 		{
-			// Its level, and every key
+			// Its level, every key, and the memory timbres they play, as far as they are known
 			write(Area::PatchTemp, part.part, 8, {m_laMemory.value(Area::PatchTemp, part.part, 8)});
 			const auto keys = m_laMemory.entryCount(Area::RhythmSetup);
 			std::vector<uint8_t> data;
@@ -1260,11 +1820,16 @@ namespace emu88Player
 					data.push_back(m_laMemory.value(Area::RhythmSetup, k, i));
 			}
 			write(Area::RhythmSetup, 0, 0, data);
+			for(const auto timbre : laRhythmMemoryTimbres())
+			{
+				if(m_laMemory.entryKnown(Area::TimbreMemory, timbre))
+					write(Area::TimbreMemory, timbre, 0, entryBytes(Area::TimbreMemory, timbre, 0, g_timbreSize));
+			}
 		}
 		else
 		{
 			// The patch temp, which takes the timbre again, then the timbre as the part has it, which a SysEx may
-			// have changed: when it is known. A preset that is not comes back when the patch selects it.
+			// have changed: when it is known
 			write(Area::PatchTemp, part.part, 0, entryBytes(Area::PatchTemp, part.part, 0, 10));
 			if(m_laMemory.entryKnown(Area::TimbreTemp, part.part))
 				write(Area::TimbreTemp, part.part, 0, entryBytes(Area::TimbreTemp, part.part, 0, g_timbreSize));
@@ -1290,18 +1855,20 @@ namespace emu88Player
 		return messages;
 	}
 
-	uint32_t PartEditorWindow::laPause(const emu88Lib::mt32::Message& _message, bool& _pcmPatchMemorySeen)
+	uint32_t PartEditorWindow::laPause(const emu88Lib::mt32::Message& _message, bool& _pcmPatchMemorySeen) const
 	{
 		using namespace emu88Lib::mt32;
 		constexpr uint32_t restorePause = g_restoreResetDelayMs * 1000 * 5 / 2;
-		// The wire time, 320 us a byte, and room for the firmware to take it: the MT-32 1.x drops SysEx that come
-		// too close
-		const auto pause = static_cast<uint32_t>(40000 + _message.size() * 320);
+		// The time on the wire and room for the firmware to take the message, 40 ms and a millisecond a byte, and
+		// four times that for the MT-32 1.x, which loses SysEx that come closer; mt32Firmware_test paces its traffic
+		// the same
+		const auto old = m_laMemory.firmware() == LaFirmware::Old;
+		const auto pause = static_cast<uint32_t>((40000 + _message.size() * 1344) * (old ? 4 : 1));
 		Dt1 dt1;
 		if(!parseDt1(_message.data(), _message.size(), dt1))
 			return pause;
 		if((dt1.address >> 16) == (g_allParametersReset >> 16))
-			return restorePause;
+			return std::max(pause, restorePause);
 		if(!_pcmPatchMemorySeen && locate(Board::Pcm, dt1.address, LaFirmware::New).area == Area::PcmPatchMemory)
 		{
 			_pcmPatchMemorySeen = true;
@@ -1310,17 +1877,21 @@ namespace emu88Player
 		return pause;
 	}
 
+	uint32_t PartEditorWindow::laPauseTicks(const emu88Lib::mt32::Message& _message, bool& _pcmPatchMemorySeen) const
+	{
+		return (laPause(_message, _pcmPatchMemorySeen) + g_tickMicroseconds - 1) / g_tickMicroseconds;
+	}
+
 	void PartEditorWindow::laSend(std::vector<emu88Lib::mt32::Message> _messages, const std::string& _done)
 	{
 		if(laSending() || _messages.empty())
 			return;
 		flushPending();
-		constexpr uint32_t tick = 1000000 / 30;
 		bool pcmPatchMemory = false;
 		for(auto& message : _messages)
 		{
-			const auto pause = laPause(message, pcmPatchMemory);
-			m_laSendQueue.push_back({std::move(message), (pause + tick - 1) / tick});
+			const auto ticks = laPauseTicks(message, pcmPatchMemory);
+			m_laSendQueue.push_back({std::move(message), ticks});
 		}
 		m_laSendTotal = m_laSendQueue.size();
 		m_laSendWait = 0;
@@ -1336,17 +1907,21 @@ namespace emu88Player
 		if(_row >= m_laParts.size() || m_laParts[_row].board != Board::La)
 			return ranges;
 		const auto part = m_laParts[_row].part;
-		ranges.emplace_back(emu88Lib::mt32::address({Area::PatchTemp, part, 0}),
-			static_cast<uint32_t>(g_patchTempSize));
+		const auto add = [&](const Area _area, const size_t _entry, const size_t _size)
+		{
+			ranges.emplace_back(emu88Lib::mt32::address({_area, static_cast<uint16_t>(_entry), 0}),
+				static_cast<uint32_t>(_size));
+		};
+		add(Area::PatchTemp, part, g_patchTempSize);
 		if(isLaRhythm(_row))
 		{
-			ranges.emplace_back(emu88Lib::mt32::address({Area::RhythmSetup, 0, 0}),
-				static_cast<uint32_t>(m_laMemory.entryCount(Area::RhythmSetup) * g_rhythmKeySize));
+			add(Area::RhythmSetup, 0, m_laMemory.entryCount(Area::RhythmSetup) * g_rhythmKeySize);
+			for(const auto timbre : laRhythmMemoryTimbres())
+				add(Area::TimbreMemory, timbre, g_timbreSize);
 		}
 		else
 		{
-			ranges.emplace_back(emu88Lib::mt32::address({Area::TimbreTemp, part, 0}),
-				static_cast<uint32_t>(g_timbreSize));
+			add(Area::TimbreTemp, part, g_timbreSize);
 		}
 		return ranges;
 	}
@@ -1358,7 +1933,7 @@ namespace emu88Player
 		if(!m_laMemory.hasLa())
 			return ranges;
 		// Every area of the LA board. A timbre is one request each: the timbre memory spaces them 256 apart, and the
-		// board leaves a request for all eight timbre temps at once unanswered.
+		// board takes its time over a long answer, which one request per timbre keeps within its timeout.
 		for(const auto area : {Area::LaSystem, Area::PatchTemp, Area::RhythmSetup, Area::TimbreTemp, Area::PatchMemory,
 		                       Area::TimbreMemory})
 		{
@@ -1444,6 +2019,58 @@ namespace emu88Player
 		startAudition(static_cast<uint8_t>(_part / gs::g_partsPerGroup), p.rxChannel, p.isDrumPart() ? 38 : 60);
 	}
 
+	void PartEditorWindow::moveListSelection(const int _delta)
+	{
+		if(m_page == g_mixerPage)
+			return;
+		const auto step = [&](const int _current, const int _count, const auto& _skip)
+		{
+			// From the row played, or from an end
+			auto next = _current < 0 ? (_delta > 0 ? -1 : _count) : _current;
+			do
+				next += _delta;
+			while(next >= 0 && next < _count && _skip(next));
+			return next >= 0 && next < _count ? next : -1;
+		};
+		const auto index = selectedPart();
+
+		if(m_laDialect)
+		{
+			const auto [group, number] = laListSelection();
+			int current = -1;
+			for(size_t r = 0; r < m_laListRows.size() && current < 0; ++r)
+			{
+				const auto& row = m_laListRows[r];
+				if(!row.heading && row.group == group && row.number == number)
+					current = static_cast<int>(r);
+			}
+			const auto next = step(current, static_cast<int>(m_laListRows.size()),
+				[&](const int _r) { return m_laListRows[static_cast<size_t>(_r)].heading; });
+			if(next < 0)
+				return;
+			selectLaListRow(m_laListRows[static_cast<size_t>(next)]);
+			auditionPart(index);
+			return;
+		}
+
+		if(index >= m_setup.parts.size())
+			return;
+		const auto& p = m_setup.parts[index];
+		int current = -1;
+		for(size_t r = 0; r < m_listRows.size() && current < 0; ++r)
+		{
+			const auto& row = m_listRows[r];
+			if(row.program == p.program && (p.isDrumPart() || row.bankMsb == p.bankMsb))
+				current = static_cast<int>(r);
+		}
+		const auto next = step(current, static_cast<int>(m_listRows.size()), [](int) { return false; });
+		if(next < 0)
+			return;
+		const auto& row = m_listRows[static_cast<size_t>(next)];
+		selectTone(index, p.isDrumPart() ? 0 : row.bankMsb, row.program);
+		auditionPart(index);
+	}
+
 	void PartEditorWindow::refreshLaPart()
 	{
 		using namespace emu88Lib::mt32;
@@ -1453,7 +2080,6 @@ namespace emu88Player
 		const auto& part = m_laParts[index];
 		const bool la = part.board == Board::La;
 		const bool rhythm = isLaRhythm(index);
-		const bool both = m_laMemory.hasLa() && m_laMemory.hasPcm();
 
 		setText(m_root->GetElementById("pePartTitle"), laPartTitle(index));
 		const auto channel = la ? m_laMemory.laReceiveChannel(part.part) : m_laMemory.pcmChannel(part.part);
@@ -1462,15 +2088,41 @@ namespace emu88Player
 			info += " - " + laPartName(part);
 		setText(m_root->GetElementById("pePartInfo"), info);
 
-		// The controls are the part's, and on the rhythm part the key's
+		// The controls are the part's, the timbre's and the partial's shown, on the rhythm part the key's. A timbre
+		// the device has told since gets its controls again, without the notice.
 		const auto keys = m_laMemory.entryCount(Area::RhythmSetup);
 		if(m_laRhythmKey >= keys)
 			m_laRhythmKey = 0;
-		const auto controlsKey = std::to_string(index) + (rhythm ? "/" + std::to_string(m_laRhythmKey) : std::string());
-		if(controlsKey != m_laControlsKey)
+		const auto timbre = laEditedTimbre();
+		std::ostringstream controlsKey;
+		controlsKey << index << '/' << (rhythm ? m_laRhythmKey : 0) << '/' << int(m_laTab) << '/'
+		            << int(timbre.valid) << int(timbre.area) << '/' << timbre.entry << '/'
+		            << (timbre.valid && m_laMemory.entryKnown(timbre.area, timbre.entry));
+		// What the page shows with them: the partials' kinds and switches, the PCM bank
+		if(timbre.valid)
 		{
-			m_laControlsKey = controlsKey;
-			buildLaPartControls();
+			controlsKey << '/' << int(m_laMemory.value(timbre.area, timbre.entry, 0x0a)) << '/'
+			            << int(m_laMemory.value(timbre.area, timbre.entry, 0x0b)) << '/'
+			            << int(m_laMemory.value(timbre.area, timbre.entry, 0x0c));
+			if(m_laTab > 0)
+			{
+				const auto wave = laPartialBase(static_cast<uint8_t>(m_laTab - 1)) + 0x04u;
+				controlsKey << '/' << int(m_laMemory.value(timbre.area, timbre.entry, wave));
+			}
+		}
+		if(controlsKey.str() != m_laControlsKey)
+		{
+			// Not under the click that changed it: the page goes and comes again from the timer
+			if(m_laBuildNow)
+			{
+				m_laControlsKey = controlsKey.str();
+				m_laRebuildPending = false;
+				buildLaPartControls();
+			}
+			else
+			{
+				m_laRebuildPending = true;
+			}
 		}
 		if(m_laKeySelect)
 		{
@@ -1478,10 +2130,10 @@ namespace emu88Player
 			std::vector<std::string> names;
 			for(size_t k = 0; k < keys; ++k)
 			{
-				const auto timbre = m_laMemory.value(Area::RhythmSetup, k, 0);
-				const auto name = laTimbreName(timbre < 64 ? 2 : 3, timbre & 63);
+				const auto value = m_laMemory.value(Area::RhythmSetup, k, 0);
+				const auto name = laTimbreName(value < 64 ? 2 : 3, value & 63);
 				const auto note = noteName(static_cast<uint8_t>(g_firstRhythmKey + k));
-				names.push_back(note + "  " + (name.empty() ? "-" : name));
+				names.push_back(note + "  " + (name.empty() ? laTimbreCode(value < 64 ? 2 : 3, value & 63) : name));
 			}
 			m_updatingUi = true;
 			if(names != m_laKeyNames)
@@ -1494,33 +2146,17 @@ namespace emu88Player
 			m_updatingUi = false;
 		}
 		refreshLaControls(m_laPartControls);
+		refreshLaTimbreEditor();
 
-		// What the list shows: the patches, or the timbres or tones. The rhythm part's keys play timbres only.
+		// The list has what the part can play: timbres or tones
 		if(m_mapSelect)
-		{
-			juceRmlUi::helper::setVisible(m_mapSelect, !rhythm);
-			if(!rhythm)
-			{
-				const std::vector<std::string> names = {"Patches", la ? "Timbres" : "Tones"};
-				m_updatingUi = true;
-				if(names != m_mapNames)
-				{
-					m_mapSelect->setOptions(names);
-					m_mapNames = names;
-				}
-				const int selected = m_laListPatches ? 0 : 1;
-				if(m_mapSelect->getSelectedIndex() != selected)
-					m_mapSelect->setSelectedIndex(static_cast<size_t>(selected), false);
-				m_updatingUi = false;
-			}
-		}
-		setText(m_root->GetElementById("peListLabel"),
-			rhythm ? "Timbre of the key" : m_laListPatches ? "Patch" : la ? "Timbre" : "Tone");
+			juceRmlUi::helper::setVisible(m_mapSelect, false);
+		setText(m_root->GetElementById("peListLabel"), rhythm ? "Timbre of the key" : la ? "Timbre" : "Tone");
 
-		// The list is built again when what it shows changes: the part, the mode, the filter, the names
+		// The list is built again when what it shows changes: the part, the filter, the names
 		auto rows = laListRows();
 		std::ostringstream key;
-		key << index << '/' << m_laListPatches << '/' << m_filter << '/';
+		key << index << '/' << m_filter << '/';
 		for(const auto& row : rows)
 			key << row.heading << int(row.group) << ':' << int(row.number) << row.label << '=' << row.name << '|';
 		if(key.str() != m_listKey)
@@ -1578,6 +2214,31 @@ namespace emu88Player
 		m_pending.push_back({0, _address, _data, true});
 	}
 
+	void PartEditorWindow::sendNextLaValue()
+	{
+		// One at a time, each with the room the board needs after it: an edit dragged along a slider or typed into a
+		// name goes out as fast as the board takes it, its last value at the end
+		if(m_laFlushWait)
+		{
+			--m_laFlushWait;
+			return;
+		}
+		if(m_pending.empty())
+			return;
+		const auto value = m_pending.front();
+		m_pending.erase(m_pending.begin());
+		const auto message = value.mt32 ? emu88Lib::mt32::dt1(value.address, value.data)
+		                                : gs::dt1(value.address, value.data);
+		synthLib::SMidiEvent event(synthLib::MidiEventSource::Host);
+		event.sysex.assign(message.begin(), message.end());
+		event.port = value.port;
+		m_processor.sendMidiEvents({event});
+		bool pcmPatchMemory = true;
+		m_laFlushWait = laPauseTicks(message, pcmPatchMemory);
+		if(m_laFlushWait)
+			--m_laFlushWait;
+	}
+
 	void PartEditorWindow::updateLaListeners()
 	{
 		// One MIDI IN: the processor takes every message as port A's
@@ -1585,7 +2246,7 @@ namespace emu88Player
 		for(size_t i = 0; i < m_laParts.size() && i < 64; ++i)
 		{
 			const auto& part = m_laParts[i];
-			const auto channel = part.board == emu88Lib::mt32::Board::La ? m_laMemory.laChannel(part.part)
+			const auto channel = part.board == emu88Lib::mt32::Board::La ? m_laMemory.laReceiveChannel(part.part)
 			                                                             : m_laMemory.pcmChannel(part.part);
 			if(channel < 16)
 				listeners[channel] |= uint64_t{1} << i;
@@ -1593,45 +2254,12 @@ namespace emu88Player
 		m_processor.setLaPartListeners(listeners);
 	}
 
-	namespace
-	{
-		// A list to pick from where the list has every value, else a slider with its value
-		bool isLaChoice(const emu88Lib::mt32::Param& _param, const emu88Lib::mt32::LaFirmware _firmware)
-		{
-			using emu88Lib::mt32::ParamText;
-			switch(_param.text)
-			{
-			case ParamText::Number:
-			case ParamText::Signed:
-			case ParamText::PanLa:
-			case ParamText::PanPcm:
-			case ParamText::MasterTune:
-				return false;
-			default:
-				break;
-			}
-			const auto max = emu88Lib::mt32::maxValue(_param, _firmware);
-			return emu88Lib::mt32::valueList(_param, _firmware).size() == max + 1u;
-		}
-
-		// The boards' pans run from the right: their sliders the other way round
-		bool isLaPan(const emu88Lib::mt32::Param& _param)
-		{
-			return _param.text == emu88Lib::mt32::ParamText::PanLa || _param.text == emu88Lib::mt32::ParamText::PanPcm;
-		}
-
-		std::string laControlId(const emu88Lib::mt32::Area _area, const size_t _entry, const size_t _param)
-		{
-			return "la" + std::to_string(static_cast<int>(_area)) + "_" + std::to_string(_entry) + "_" +
-			       std::to_string(_param);
-		}
-	}
-
 	std::string PartEditorWindow::laControlRows(const emu88Lib::mt32::Area _area, const size_t _entry,
-		const std::string& _section, const std::vector<std::string>& _skip, const std::vector<std::string>& _only) const
+		const emu88Lib::mt32::Block _block, const uint16_t _base, const std::string& _section,
+		const std::vector<std::string>& _skip, const std::vector<std::string>& _only) const
 	{
 		using namespace emu88Lib::mt32;
-		const auto& list = params(blockOf(_area));
+		const auto& list = params(_block);
 		std::ostringstream rml;
 		for(size_t i = 0; i < list.size(); ++i)
 		{
@@ -1641,7 +2269,7 @@ namespace emu88Player
 				continue;
 			// A firmware bug: the CM-32P's check after a write to its system area clears these
 			const bool cleared = _area == Area::PcmSystem && p.offset > 4 && p.offset < 4 + g_pcmParts;
-			rml << controlRow(laControlId(_area, _entry, i), p.label, isLaChoice(p, m_laMemory.firmware()), 0,
+			rml << controlRow(laControlId(_area, _entry, _base, i), p.label, isLaChoice(p, m_laMemory.firmware()), 0,
 				maxValue(p, m_laMemory.firmware()), false,
 				cleared ? "The CM-32P clears this at any write to its system area, of whatever setting." : "");
 		}
@@ -1649,38 +2277,52 @@ namespace emu88Player
 	}
 
 	void PartEditorWindow::wireLaControls(Rml::Element* _container, const emu88Lib::mt32::Area _area,
-		const size_t _entry, std::vector<LaControl>& _controls)
+		const size_t _entry, const emu88Lib::mt32::Block _block, const uint16_t _base,
+		std::vector<LaControl>& _controls)
 	{
 		using namespace emu88Lib::mt32;
-		const auto& list = params(blockOf(_area));
+		const auto& list = params(_block);
 		const auto firmware = m_laMemory.firmware();
 		for(size_t i = 0; i < list.size(); ++i)
 		{
-			const auto id = laControlId(_area, _entry, i);
+			const auto id = laControlId(_area, _entry, _base, i);
 			auto* element = _container->GetElementById("peCtl" + id);
 			if(!element)
 				continue;
 			const auto& param = list[i];
-			LaControl control{_area, _entry, i};
+			const auto offset = static_cast<uint16_t>(_base + param.offset);
+			LaControl control{_area, _entry, _block, _base, i};
 			control.slider = dynamic_cast<Rml::ElementFormControlInput*>(element);
 			control.combo = dynamic_cast<juceRmlUi::ElemComboBox*>(element);
 			control.value = _container->GetElementById("peVal" + id);
 
-			const auto reset = [this, _area, _entry, i, &param]
+			const auto reset = [this, _area, _entry, _block, _base, i, offset]
 			{
 				m_dragging = nullptr;
-				setLaParam(_area, _entry, i, m_laDefaults.value(_area, _entry, param.offset));
+				setLaParam(_area, _entry, _block, _base, i, laDefault(_area, _entry, offset));
 			};
 			if(auto* combo = control.combo)
 			{
+				// A structure by what it does, a PCM wave by its sample in the partial's bank
 				std::vector<std::pair<uint16_t, std::string>> choices;
 				for(const auto& text : valueList(param, firmware))
-					choices.emplace_back(static_cast<uint16_t>(choices.size()), text);
+				{
+					const auto v = static_cast<uint8_t>(choices.size());
+					if(param.text == ParamText::Structure)
+						choices.emplace_back(v, std::to_string(v + 1) + "   " +
+							structureName(v, param.offset == 0x0a ? 1 : 3));
+					else if(param.text == ParamText::PcmWave)
+						choices.emplace_back(v, number(v + 1) + "  " +
+							pcmWaveName(m_laMemory.value(_area, _entry, _base + 0x04u) >> 1 & 1, v));
+					else
+						choices.emplace_back(v, text);
+				}
 				combo->setEntries(comboEntries(choices));
-				juceRmlUi::EventListener::Add(combo, Rml::EventId::Change, [this, combo, _area, _entry, i](Rml::Event&)
+				juceRmlUi::EventListener::Add(combo, Rml::EventId::Change,
+					[this, combo, _area, _entry, _block, _base, i](Rml::Event&)
 				{
 					if(!m_updatingUi)
-						setLaParam(_area, _entry, i, static_cast<uint8_t>(combo->getValue()));
+						setLaParam(_area, _entry, _block, _base, i, static_cast<uint8_t>(combo->getValue()));
 				});
 			}
 			else if(auto* slider = control.slider)
@@ -1691,17 +2333,67 @@ namespace emu88Player
 				});
 				const auto max = static_cast<int>(maxValue(param, firmware));
 				juceRmlUi::EventListener::Add(slider, Rml::EventId::Change,
-					[this, slider, _area, _entry, i, max, &param, valueText = control.value](Rml::Event&)
+					[this, slider, _area, _entry, _block, _base, i, offset, max, &param, valueText = control.value](
+						Rml::Event&)
 				{
 					if(m_updatingUi)
 						return;
 					const auto position = std::clamp(std::atoi(slider->GetValue().c_str()), 0, max);
 					const auto value = static_cast<uint8_t>(isLaPan(param) ? max - position : position);
-					setLaParam(_area, _entry, i, value);
+					setLaParam(_area, _entry, _block, _base, i, value);
 					// What the board kept: the partial reserves have rules
-					setText(valueText, formatValue(param, m_laMemory.value(_area, _entry, param.offset)));
+					setText(valueText, formatValue(param, m_laMemory.value(_area, _entry, offset)));
 				});
 				juceRmlUi::EventListener::Add(slider, Rml::EventId::Dblclick, [reset](Rml::Event&) { reset(); });
+			}
+			else if(element->IsClassSet("peSegments"))
+			{
+				// A button a value
+				for(int c = 0; c < element->GetNumChildren(); ++c)
+				{
+					auto* button = element->GetChild(c);
+					const auto v = static_cast<uint8_t>(button->GetAttribute<int>("value", c));
+					control.segments.emplace_back(button, v);
+					addClick(button, [this, _area, _entry, _block, _base, i, v]
+					{
+						setLaParam(_area, _entry, _block, _base, i, v);
+					});
+				}
+			}
+			else if(element->IsClassSet("peNum"))
+			{
+				// A number dragged up and down, scrolled, or double-clicked back to its default
+				control.number = element;
+				const auto max = static_cast<int>(maxValue(param, firmware));
+				// A drag of RmlUi's own: it ends wherever the button comes up, outside the window too
+				juceRmlUi::EventListener::Add(element, Rml::EventId::Dragstart,
+					[this, control, offset, max](Rml::Event& _event)
+				{
+					m_laNumberDrag = {true, control, juceRmlUi::helper::getMousePos(_event).y,
+						m_laMemory.value(control.area, control.entry, offset), max};
+					m_dragging = control.number;
+				});
+				juceRmlUi::EventListener::Add(element, Rml::EventId::Drag, [this](Rml::Event& _event)
+				{
+					dragLaNumber(juceRmlUi::helper::getMousePos(_event).y);
+				});
+				juceRmlUi::EventListener::Add(element, Rml::EventId::Dragend, [this](Rml::Event&)
+				{
+					m_laNumberDrag.active = false;
+					m_dragging = nullptr;
+				});
+				juceRmlUi::EventListener::Add(element, Rml::EventId::Mousescroll,
+					[this, _area, _entry, _block, _base, i, offset, max](Rml::Event& _event)
+				{
+					const auto delta = _event.GetParameter<float>("wheel_delta_y", 0.0f);
+					if(delta == 0.0f)
+						return;
+					_event.StopPropagation();
+					const auto current = static_cast<int>(m_laMemory.value(_area, _entry, offset));
+					const auto value = std::clamp(current + (delta < 0 ? 1 : -1), 0, max);
+					setLaParam(_area, _entry, _block, _base, i, static_cast<uint8_t>(value));
+				});
+				juceRmlUi::EventListener::Add(element, Rml::EventId::Dblclick, [reset](Rml::Event&) { reset(); });
 			}
 			if(auto* label = _container->GetElementById("peLbl" + id))
 				juceRmlUi::EventListener::Add(label, Rml::EventId::Dblclick, [reset](Rml::Event&) { reset(); });
@@ -1738,7 +2430,7 @@ namespace emu88Player
 			}
 			for(const auto& section : sections)
 			{
-				const auto rows = laControlRows(area, 0, section);
+				const auto rows = laControlRows(area, 0, blockOf(area), 0, section);
 				if(!rows.empty())
 					rml << "<div class=\"peSection\"><div class=\"peSectionTitle\">" << encode(section) << "</div>"
 					    << rows << "</div>";
@@ -1746,7 +2438,7 @@ namespace emu88Player
 		}
 		globals->SetInnerRML(rml.str());
 		for(const auto& [area, title] : boards)
-			wireLaControls(globals, area, 0, m_laControls);
+			wireLaControls(globals, area, 0, blockOf(area), 0, m_laControls);
 	}
 
 	void PartEditorWindow::refreshLaControls(std::vector<LaControl>& _controls)
@@ -1755,10 +2447,24 @@ namespace emu88Player
 		m_updatingUi = true;
 		for(const auto& control : _controls)
 		{
-			const auto& param = params(blockOf(control.area))[control.param];
-			const auto value = m_laMemory.value(control.area, control.entry, param.offset);
-			if(control.combo)
+			const auto& param = params(control.block)[control.param];
+			const auto offset = static_cast<size_t>(control.base + param.offset);
+			const auto value = m_laMemory.value(control.area, control.entry, offset);
+			// A byte the device has not told yet
+			const bool known = m_laMemory.known(control.area, control.entry, offset);
+			if(control.number)
 			{
+				control.number->SetClass("unknown", !known);
+				setText(control.number, known ? formatValue(param, value) : std::string("?"));
+			}
+			else if(!control.segments.empty())
+			{
+				for(const auto& [button, v] : control.segments)
+					button->SetPseudoClass("checked", known && v == value);
+			}
+			else if(control.combo)
+			{
+				control.combo->SetClass("unknown", !known);
 				if(static_cast<int>(control.combo->getValue()) != value)
 					control.combo->setValue(value, false);
 			}
@@ -1766,24 +2472,26 @@ namespace emu88Player
 			{
 				const auto max = maxValue(param, m_laMemory.firmware());
 				const auto text = std::to_string(isLaPan(param) ? max - std::min(value, max) : value);
+				control.slider->SetClass("unknown", !known);
 				if(control.slider->GetValue() != text)
 					control.slider->SetValue(text);
-				setText(control.value, formatValue(param, value));
+				setText(control.value, known ? formatValue(param, value) : std::string("?"));
 			}
 		}
 		m_updatingUi = false;
 	}
 
-	void PartEditorWindow::setLaParam(const emu88Lib::mt32::Area _area, const size_t _entry, const size_t _param,
-		const uint8_t _value)
+	void PartEditorWindow::setLaParam(const emu88Lib::mt32::Area _area, const size_t _entry,
+		const emu88Lib::mt32::Block _block, const uint16_t _base, const size_t _param, const uint8_t _value)
 	{
 		using namespace emu88Lib::mt32;
-		const auto& param = params(blockOf(_area))[_param];
-		if(m_laMemory.value(_area, _entry, param.offset) == _value)
+		const auto& param = params(_block)[_param];
+		const auto at = static_cast<uint16_t>(_base + param.offset);
+		if(m_laMemory.value(_area, _entry, at) == _value && m_laMemory.known(_area, _entry, at))
 			return;
 
 		// The partial reserves go together: the old LA firmware takes them only all nine at once
-		auto offset = static_cast<uint16_t>(param.offset);
+		auto offset = at;
 		std::vector<uint8_t> data = {_value};
 		const size_t reserves = _area == Area::LaSystem ? g_laParts : _area == Area::PcmSystem ? g_pcmParts : 0;
 		if(reserves && param.offset >= 4 && param.offset < 4 + reserves)
@@ -2470,6 +3178,7 @@ namespace emu88Player
 
 	void PartEditorWindow::selectPage(const int _page)
 	{
+		const ScopedFlag buildNow(m_laBuildNow);
 		stopAudition();
 		const int pages = m_laDialect ? static_cast<int>(m_laParts.size()) : m_groupCount ? gs::g_partsPerGroup : 0;
 		m_page = pages ? std::clamp(_page, g_mixerPage, pages - 1) : g_mixerPage;
@@ -3222,9 +3931,29 @@ namespace emu88Player
 			return;
 		}
 
-		flushPending();
+		const ScopedFlag buildNow(m_laBuildNow);
 
+		// The MT-32 dialect's boards lose SysEx that come too close together: their edits go out one at a time
+		if(m_laDialect)
+			sendNextLaValue();
+		else
+			flushPending();
+
+		// A slider or a number still held for a button that is up: let go
+		if((m_dragging || m_laNumberDrag.active) && !juce::ModifierKeys::currentModifiers.isAnyMouseButtonDown())
+		{
+			m_dragging = nullptr;
+			m_laNumberDrag.active = false;
+		}
+
+		// A part page that changed under a click of its own comes again now
 		bool changed = false;
+		if(m_laRebuildPending)
+		{
+			refresh();
+			changed = true;
+		}
+
 		if(m_receiving)
 		{
 			const auto status = m_processor.dataRequestStatus();

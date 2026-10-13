@@ -22,10 +22,12 @@ namespace emu88Lib::mt32
 		}
 	}
 
-	void StateTracker::setModel(const DeviceModel _model)
+	void StateTracker::setModel(const DeviceModel _model, const Presets& _presets)
 	{
 		std::lock_guard lock(m_mutex);
 		m_memory = Memory(_model);
+		for(const auto& [source, data] : _presets)
+			m_memory.addPreset(source, data);
 		changed();
 	}
 

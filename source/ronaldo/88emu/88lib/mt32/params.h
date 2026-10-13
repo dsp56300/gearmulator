@@ -36,7 +36,7 @@ namespace emu88Lib::mt32
 		Name,			// ASCII
 		TimbreGroup,	// a, b, i (memory), r (rhythm)
 		TimbreNumber,	// 1-64
-		AssignMode,		// POLY 1-4
+		AssignMode,		// POLY 1-4: single or multi assign, priority to the last or the first note
 		ReverbMode,		// Room, Hall, Plate, Tap Delay
 		MasterTune,		// Hz
 		PanLa,			// 0-14, R7 .. L7: the LA board's pan runs from the right
@@ -89,4 +89,24 @@ namespace emu88Lib::mt32
 	std::vector<std::string> valueList(const Param& _param, LaFirmware _firmware = LaFirmware::New);
 	std::string formatValue(const Param& _param, uint8_t _value);
 	std::string noteName(uint8_t _note);
+
+	// A timbre's structures, 0-12 as the board keeps them, shown 1-13: what each makes of a pair of partials, 1 & 2
+	// or 3 & 4. A partial plays a synth wave or a PCM sample, and the two are mixed, ring modulated with the first
+	// added, ring modulated alone, or sent left and right. The plain mix has no synth first partial with a PCM second,
+	// and a stereo pair is of one kind.
+	enum class StructureMix : uint8_t { Mix, RingAndFirst, Ring, Stereo };
+	struct Structure
+	{
+		bool pcm[2];
+		StructureMix mix;
+	};
+	Structure structure(uint8_t _value);
+	// The value for a mix of two partials of these kinds; false when there is none
+	bool structureValue(StructureMix _mix, bool _firstPcm, bool _secondPcm, uint8_t& _value);
+	// "(P1 + S2 -> R) + P1": S a synth partial, P a PCM one, R the ring modulator. _firstPartial is 1 or 3.
+	std::string structureName(uint8_t _value, int _firstPartial);
+
+	// A PCM partial's sample by its PCM Wave, 0-127, in its waveform's bank: bank 0 the MT-32's, bank 1 the CM-32L's
+	// own, which the MT-32 1.x does not have. The names are MT32edit4v's.
+	const char* pcmWaveName(uint8_t _bank, uint8_t _wave);
 }

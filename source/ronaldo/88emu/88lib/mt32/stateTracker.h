@@ -7,6 +7,8 @@
 #include <atomic>
 #include <cstdint>
 #include <mutex>
+#include <array>
+#include <utility>
 #include <vector>
 
 namespace emu88Lib::mt32
@@ -18,8 +20,10 @@ namespace emu88Lib::mt32
 	class StateTracker
 	{
 	public:
-		// Forgets everything and starts over with the board's power-on state
-		void setModel(DeviceModel _model);
+		// Forgets everything and starts over with the board's power-on state. Presets known from elsewhere than the
+		// board's answers, the control ROM say, are known from the start; see Memory::addPreset().
+		using Presets = std::vector<std::pair<TimbreSource, std::array<uint8_t, g_timbreSize>>>;
+		void setModel(DeviceModel _model, const Presets& _presets = {});
 		DeviceModel model() const;
 		void reset();
 

@@ -9,7 +9,7 @@
 
 #include "88lib/hardwareDevice.h"
 #include "88lib/gs/partState.h"
-#include "88lib/mt32/names.h"
+#include "88lib/mt32/presets.h"
 #include "88lib/mt32/stateTracker.h"
 
 #include "synthLib/plugin.h"
@@ -123,10 +123,10 @@ namespace emu88Player
 		{
 			m_laActivity.setListeners(_listeners);
 		}
-		// Their preset timbres' and tones' names, read from their ROMs when the board was loaded; null for another
-		// board, laNamesError() says what is missing
-		const std::shared_ptr<const emu88Lib::mt32::NameCatalog>& laNames() const { return m_laNames; }
-		const std::string& laNamesError() const { return m_laNamesError; }
+		// Their preset timbres and tones' names, read from their ROMs when the board was loaded; null for another
+		// board, laPresetsError() says what is missing. The copy in laState() knows the presets from the start.
+		const std::shared_ptr<const emu88Lib::mt32::PresetCatalog>& laPresets() const { return m_laPresets; }
+		const std::string& laPresetsError() const { return m_laPresetsError; }
 		// The board's tones and drum sets, read from its ROMs when it was loaded; null for a board the part editor
 		// does not know or whose ROMs it could not read, toneCatalogError() says which.
 		const std::shared_ptr<const emu88Lib::gs::ToneCatalog>& toneCatalog() const { return m_toneCatalog; }
@@ -237,8 +237,8 @@ namespace emu88Player
 		emu88Lib::PartActivity m_laActivity;
 		// Whether the board speaks the MT-32 dialect, so that its MIDI goes to m_laState. Set under the callback lock.
 		bool m_laDialect = false;
-		std::shared_ptr<const emu88Lib::mt32::NameCatalog> m_laNames;
-		std::string m_laNamesError;
+		std::shared_ptr<const emu88Lib::mt32::PresetCatalog> m_laPresets;
+		std::string m_laPresetsError;
 		std::shared_ptr<const emu88Lib::gs::ToneCatalog> m_toneCatalog;
 		std::string m_toneCatalogError;
 		// Changes under the callback lock whenever the board does, so that a data request run notices.

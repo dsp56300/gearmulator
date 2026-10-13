@@ -29,6 +29,13 @@ namespace emu88Player
 				return {};
 			return emu88Lib::gs::loadToneCatalog(_model, _error);
 		}
+
+		// The preset timbres that the copy of the MT-32 dialect's boards knows from the start
+		emu88Lib::mt32::StateTracker::Presets presetTimbres(
+			const std::shared_ptr<const emu88Lib::mt32::PresetCatalog>& _presets)
+		{
+			return _presets ? _presets->allTimbres() : emu88Lib::mt32::StateTracker::Presets{};
+		}
 	}
 
 	Processor::Processor()
@@ -99,9 +106,9 @@ namespace emu88Player
 		m_toneCatalog = loadToneCatalog(m_deviceModel, m_toneCatalogError);
 		m_partState.setModel(m_deviceModel, m_toneCatalog);
 		m_laDialect = emu88Lib::mt32::isMt32Model(m_deviceModel);
+		m_laPresets = emu88Lib::mt32::loadPresetCatalog(m_deviceModel, m_pcmCard, m_laPresetsError);
 		if(m_laDialect)
-			m_laState.setModel(m_deviceModel);
-		m_laNames = emu88Lib::mt32::loadNameCatalog(m_deviceModel, m_pcmCard, m_laNamesError);
+			m_laState.setModel(m_deviceModel, presetTimbres(m_laPresets));
 		// The boards are sound modules, not sequencers: the host clock the
 		// engine would otherwise generate is just traffic on their MIDI in.
 		m_engine->setMidiClockEnabled(false);
@@ -323,8 +330,9 @@ namespace emu88Player
 		replacementEngine->setResamplerMode(resamplerMode());
 		std::string catalogError;
 		auto catalog = loadToneCatalog(_model, catalogError);
-		std::string laNamesError;
-		auto laNames = emu88Lib::mt32::loadNameCatalog(_model, m_pcmCard, laNamesError);
+		std::string laPresetsError;
+		auto laPresets = emu88Lib::mt32::loadPresetCatalog(_model, m_pcmCard, laPresetsError);
+		const auto laPresetTimbres = presetTimbres(laPresets);
 
 		m_midiPlayer.stop();
 		suspendProcessing(true);
@@ -341,15 +349,15 @@ namespace emu88Player
 			m_partState.setModel(_model, catalog);
 			m_laDialect = emu88Lib::mt32::isMt32Model(_model);
 			if(m_laDialect)
-				m_laState.setModel(_model);
+				m_laState.setModel(_model, laPresetTimbres);
 			m_midiPlayer.setPortCount(midiPortCount());
 			m_midiPlayer.setResetTarget(emu88Lib::resetTarget(_model));
 		}
 		suspendProcessing(false);
 		m_toneCatalog = std::move(catalog);
 		m_toneCatalogError = std::move(catalogError);
-		m_laNames = std::move(laNames);
-		m_laNamesError = std::move(laNamesError);
+		m_laPresets = std::move(laPresets);
+		m_laPresetsError = std::move(laPresetsError);
 
 		// The engine only borrows its device, so destroy it before the board it
 		// references. Do this after resuming callbacks to keep teardown off the

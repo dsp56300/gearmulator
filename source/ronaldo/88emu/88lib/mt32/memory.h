@@ -83,6 +83,9 @@ namespace emu88Lib::mt32
 
 		// A preset timbre's data, as an answer showed it; null when not seen
 		const std::array<uint8_t, g_timbreSize>* preset(TimbreSource _source) const;
+		// A preset timbre known from elsewhere than an answer, the control ROM say (see PresetCatalog): known from
+		// now on as if an answer had shown it, over a reset too, and filled in where a part plays it
+		void addPreset(TimbreSource _source, const std::array<uint8_t, g_timbreSize>& _data);
 
 	private:
 		struct AreaData

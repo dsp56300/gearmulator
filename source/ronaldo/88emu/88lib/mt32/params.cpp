@@ -312,7 +312,10 @@ namespace emu88Lib::mt32
 		{
 		case ParamText::OffOn: return {"Off", "On"};
 		case ParamText::TimbreGroup: return {"a", "b", "i", "r"};
-		case ParamText::AssignMode: return {"POLY 1", "POLY 2", "POLY 3", "POLY 4"};
+		// Single: a note played again ends the one sounding, multi: they sound together. Last or first: which notes
+		// keep their partials when they run out.
+		case ParamText::AssignMode:
+			return {"POLY 1: single, last", "POLY 2: single, first", "POLY 3: multi, last", "POLY 4: multi, first"};
 		case ParamText::ReverbMode: return {"Room", "Hall", "Plate", "Tap Delay"};
 		case ParamText::EnvMode: return {"Normal", "No Sustain"};
 		case ParamText::ToneMedia: return {"Internal", "Card"};
@@ -398,5 +401,114 @@ namespace emu88Lib::mt32
 			return _value < list.size() ? list[_value] : std::to_string(_value);
 		}
 		}
+	}
+
+	namespace
+	{
+		// By value: whether the first and the second partial play PCM, and their mix. The MT-32 manual draws them; Munt
+		// and MT32edit4v have the same table.
+		constexpr Structure g_structures[13] = {
+			{{false, false}, StructureMix::Mix},		// 1 S1 + S2
+			{{false, false}, StructureMix::RingAndFirst},
+			{{true, false}, StructureMix::Mix},
+			{{true, false}, StructureMix::RingAndFirst},
+			{{false, true}, StructureMix::RingAndFirst},
+			{{true, true}, StructureMix::Mix},
+			{{true, true}, StructureMix::RingAndFirst},
+			{{false, false}, StructureMix::Stereo},
+			{{true, true}, StructureMix::Stereo},
+			{{false, false}, StructureMix::Ring},
+			{{true, false}, StructureMix::Ring},
+			{{false, true}, StructureMix::Ring},
+			{{true, true}, StructureMix::Ring},		// 13 (P1 + P2) -> R
+		};
+	}
+
+	Structure structure(const uint8_t _value)
+	{
+		return g_structures[_value < 13 ? _value : 0];
+	}
+
+	bool structureValue(const StructureMix _mix, const bool _firstPcm, const bool _secondPcm, uint8_t& _value)
+	{
+		for(uint8_t v = 0; v < 13; ++v)
+		{
+			const auto& s = g_structures[v];
+			if(s.mix == _mix && s.pcm[0] == _firstPcm && s.pcm[1] == _secondPcm)
+			{
+				_value = v;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	std::string structureName(const uint8_t _value, const int _firstPartial)
+	{
+		const auto s = structure(_value);
+		const auto a = std::string(s.pcm[0] ? "P" : "S") + std::to_string(_firstPartial);
+		const auto b = std::string(s.pcm[1] ? "P" : "S") + std::to_string(_firstPartial + 1);
+		switch(s.mix)
+		{
+		case StructureMix::RingAndFirst: return "(" + a + " + " + b + " \u2192 R) + " + a;
+		case StructureMix::Ring: return "(" + a + " + " + b + ") \u2192 R";
+		case StructureMix::Stereo: return a + " left, " + b + " right";
+		default: return a + " + " + b;
+		}
+	}
+
+	namespace
+	{
+		constexpr const char* g_pcmWaves[2][128] = {{
+			"Ac. Bass Drum", "Ac. Snare Drum", "El. Snare Drum", "Electric Tom", "Closed Hihat", "Open Hihat",
+			"Crash Cymbal", "Crash Cymbal (loop)", "Ride cymbal", "Rim Shot", "Hand Clap", "Muted Conga", "Conga",
+			"Bongo", "Cowbell", "Tambourine", "Agogo Bell", "Claves", "Timbale", "Cabasa", "Keypress", "Perc Organ",
+			"Trombone", "Trumpet", "Breath Noise (loop)", "Clarinet", "Flute", "Pan Pipes", "Shakuhachi", "Alto Sax",
+			"Baritone Sax", "Marimba", "Glockenspiel", "Xylophone", "Tubular Bells", "Fingered Bass", "Slap Bass",
+			"Picked Bass (loop)", "Acoustic Bass", "Nylon Guitar", "Steel Guitar", "Pizzicato", "Harp",
+			"Harpsichord (loop)", "Bow string", "Violin", "Timpani", "Orchestra Hit", "Flute", "Organ (loop)",
+			"Bowed Glass (loop)", "Telephone", "Bowed Glass", "Reverse Cymbal", "Ac. Bass Drum #",
+			"Ac. Snare Drum #", "El. Snare Drum #", "Ac. Tom #", "Closed Hihat #", "Open Hihat #", "Crash Cymbal #",
+			"Crash Cymbal (loop) #", "Ride Cymbal #", "Rim shot #", "Hand clap #", "Mute Conga #", "Conga #",
+			"Bongo #", "Cowbell #", "Tambourine #", "Agogo #", "Claves #", "Timbale #", "Cabasa #",
+			"Bass Drum (loop)", "Snare (loop)", "Acoustic Tom (loop)", "Electric Tom (loop)", "Hihat (loop)",
+			"Crash Cymbal (loop)", "Ride cymbal (loop)", "Ride cymbal 2 (loop)", "Rim (loop)", "Hand clap (loop)",
+			"Bongo (loop)", "Conga (loop)", "Muted conga (loop)", "Cowbell (loop)", "Tambourine (loop)",
+			"Agogo (loop)", "Woodblock (loop)", "Timbales (loop)", "Maracas (loop)", "Sticks (loop)",
+			"Perc Organ (loop)", "Trombone (loop)", "Trumpet (loop)", "Clarinet (loop)", "Piccolo (loop)",
+			"Pan Pipe (loop)", "Breath Noise (loop)", "Alto Sax (loop)", "Baritone Sax (loop)", "Xylophone (loop)",
+			"Glockenspiel (loop)", "Marimba (loop)", "Tubular Bells (loop)", "Fingered Bass (loop)",
+			"Slap Bass (loop)", "Acoustic Bass (loop)", "Nylon Guitar (loop)", "Steel Guitar (loop)",
+			"Pizzicato (loop)", "Harp (loop)", "Bowed string (loop)", "String Ensemble (loop)", "Timpani (loop)",
+			"Orchestra Hit (loop)", "Flute (loop)", "Perc. loop 1", "Perc. loop 2", "Orch&Perc loop",
+			"Wind&Perc loop", "Guitar & Bass loop", "Orchestra loop", "Perc. loop 3", "Bass & Perc. loop",
+			"Bass & Snare loop",
+		}, {
+			"Laugh #", "Applause #", "Windchime #", "Crash #", "Train #", "Wind #", "Bird #", "Stream #",
+			"Door Creak #", "Scream #", "Punch #", "Footsteps #", "Door Slam #", "Car Start #", "Aircraft #",
+			"Gun Shot #", "Horse #", "Thunder #", "Bubble #", "Heartbeat #", "Engine #", "Tire Screech #", "Siren #",
+			"Helicopter #", "Dog Bark #", "Car Pass #", "Male Voice #", "Machine Gun #", "Starship #",
+			"Laugh (Loop) #", "Applause (Loop) #", "Windchime (Loop) #", "Crash (Loop) #", "Train (Loop) #",
+			"Wind (Loop) #", "Bird (Loop) #", "Stream (Loop) #", "Door Creak (Loop) #", "Scream (Loop) #",
+			"Punch (Loop) #", "Footsteps (Loop) #", "Door Slam (Loop) #", "Car Start (Loop) #", "Aircraft (Loop) #",
+			"Gun Shot (Loop) #", "Horse (Loop) #", "Thunder (Loop) #", "Bubble (Loop) #", "Heartbeat (Loop) #",
+			"Engine (Loop) #", "Tire Screech (Loop) #", "Siren (Loop) #", "Helicopter (Loop) #", "Dog Bark (Loop) #",
+			"Car Pass (Loop) #", "Male Voice (Loop) #", "Machine Gun (Loop) #", "Starship (Loop) #", "Jam-1 (Loop)",
+			"Jam-2 (Loop)", "Jam-3 (Loop)", "Jam-4 (Loop)", "Jam-5 (Loop)", "Jam-6 (Loop)", "Jam-7 (Loop)",
+			"Jam-8 (Loop)", "Jam-9 (Loop)", "Jam-10 (Loop)", "Jam-11 (Loop)", "Jam-12 (Loop)", "Jam-13 (Loop)",
+			"Jam-14 (Loop)", "Jam-15 (Loop)", "Jam-16 (Loop)", "Jam-17 (Loop)", "Jam-18 (Loop)", "Jam-19 (Loop)",
+			"Jam-20 (Loop)", "Jam-21 (Loop)", "Jam-22 (Loop)", "Jam-23 (Loop)", "Jam-24 (Loop)", "Jam-25 (Loop)",
+			"Jam-26 (Loop)", "Jam-27 (Loop)", "Jam-28 (Loop)", "Jam-29 (Loop)", "Jam-30 (Loop)", "Jam-31 (Loop)",
+			"Jam-32 (Loop)", "Jam-33 (Loop)", "Jam-34 (Loop)", "Jam-35 (Loop)", "Jam-36 (Loop)", "Jam-37 (Loop)",
+			"Jam-38 (Loop)", "Jam-39 (Loop)", "Jam-40 (Loop)", "Shot-1", "Shot-2", "Shot-3", "Shot-4", "Shot-5",
+			"Shot-6", "Shot-7", "Shot-8", "Shot-9", "Shot-10", "Shot-11", "Shot-12", "Shot-13", "Shot-14", "Shot-15",
+			"Shot-16", "Shot-17", "Shot-18", "Shot-19", "Shot-20", "Shot-21", "Shot-22", "Shot-23", "Shot-24",
+			"Shot-25", "Shot-26", "Alto Sax", "Shakuhachi", "Marimba", "Dog Bark",
+		}};
+	}
+
+	const char* pcmWaveName(const uint8_t _bank, const uint8_t _wave)
+	{
+		return g_pcmWaves[_bank & 1][_wave & 0x7f];
 	}
 }
