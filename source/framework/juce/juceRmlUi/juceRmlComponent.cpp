@@ -7,6 +7,7 @@
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
+#include "rmlPopupWindow.h"
 #include "rmlRendererJuce.h"
 
 #include "RmlUi_Renderer_GL2.h"
@@ -575,6 +576,15 @@ namespace juceRmlUi
 
 	void RmlComponent::mouseDown(const juce::MouseEvent& _event)
 	{
+		// A press here while a list of another window is up only closes it, as with a native menu; juce dismisses
+		// the list and hands the press on. A context-menu press goes through, so that it can open the next menu
+		// where it was made. In this window's own list juce holds the press back itself.
+		if (popupWindow::isOpen() && !_event.mods.isPopupMenu())
+		{
+			m_pressSwallowed = true;
+			return;
+		}
+
 		Component::mouseDown(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 
@@ -586,6 +596,12 @@ namespace juceRmlUi
 
 	void RmlComponent::mouseUp(const juce::MouseEvent& _event)
 	{
+		if (m_pressSwallowed)
+		{
+			m_pressSwallowed = false;
+			return;
+		}
+
 		Component::mouseUp(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 		const auto button = static_cast<int>(helper::toRmlMouseButton(_event));
@@ -642,6 +658,9 @@ namespace juceRmlUi
 
 	void RmlComponent::mouseDrag(const juce::MouseEvent& _event)
 	{
+		if (m_pressSwallowed)
+			return;
+
 		Component::mouseDrag(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 
