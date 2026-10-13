@@ -1,10 +1,7 @@
 #include "PatchManager.h"
 
-#include "VirusEditor.h"
 #include "VirusController.h"
 #include "VirusProcessor.h"
-
-#include "jucePluginEditorLib/patchmanagerUiRml/patchmanagerUiRml.h"
 
 #include "jucePluginLib/filetype.h"
 #include "jucePluginLib/patchdb/datasource.h"
@@ -26,12 +23,66 @@ namespace virus
 
 namespace genericVirusUI
 {
-	PatchManager::PatchManager(VirusEditor& _editor, Rml::Element* _root)
-		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root)
-		, m_virusEditor(_editor)
-		, m_controller(_editor.getController())
-		, m_processor(_editor.getProcessor())
-		, m_onRomChanged(_editor.getProcessor().evRomChanged)
+	namespace
+	{
+		// Arrangement detection: scan for a DUMP_MULTI immediately followed by
+		// 16 consecutive DUMP_SINGLE messages and merge each such sequence into
+		// one compound patch. Works for single-arrangement files AND user-bank
+		// files that store multiple patches (and possibly multiple arrangements)
+		// as concatenated sysex messages.
+		bool mergeArrangements(pluginLib::patchDB::DataList& _results)
+		{
+			auto isMulti = [](const pluginLib::patchDB::Data& _d)
+			{
+				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_MULTI;
+			};
+			auto isSingle = [](const pluginLib::patchDB::Data& _d)
+			{
+				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_SINGLE;
+			};
+
+			pluginLib::patchDB::DataList merged;
+			merged.reserve(_results.size());
+
+			for (size_t i = 0; i < _results.size();)
+			{
+				if (isMulti(_results[i]) && i + 16 < _results.size())
+				{
+					bool allSingles = true;
+					for (size_t j = 1; j <= 16; ++j)
+					{
+						if (!isSingle(_results[i + j]))
+						{
+							allSingles = false;
+							break;
+						}
+					}
+
+					if (allSingles)
+					{
+						pluginLib::patchDB::Data compound = _results[i];
+						for (size_t j = 1; j <= 16; ++j)
+							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
+						merged.emplace_back(std::move(compound));
+						i += 17;
+						continue;
+					}
+				}
+				merged.emplace_back(std::move(_results[i]));
+				++i;
+			}
+
+			_results = std::move(merged);
+
+			return !_results.empty();
+		}
+	}
+
+	PatchManager::PatchManager(virus::VirusProcessor& _processor)
+		: jucePluginEditorLib::patchManager::PatchManager(_processor)
+		, m_controller(static_cast<virus::Controller&>(_processor.getController()))
+		, m_processor(_processor)
+		, m_onRomChanged(_processor.evFirmwareChanged)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
@@ -59,9 +110,13 @@ namespace genericVirusUI
 
 			if (index < banks.size() && _program == banks[index].size() - 1)
 			{
+				updateRamBank(index);
+				// a refresh keeps the data source, with the MIDI bank number the user gave it
 				const auto ds = createDataSource(index);
-				removeDataSource(ds);
-				addDataSource(ds);
+				if (const auto existing = getDataSource(ds))
+					refreshDataSource(existing);
+				else
+					addDataSource(ds);
 			}
 		};
 
@@ -71,7 +126,10 @@ namespace genericVirusUI
 			for (uint32_t i = 0; i < 2 && i < banks.size(); ++i)
 			{
 				if (!banks[i][0].data.empty())
+				{
+					updateRamBank(i);
 					addDataSource(createDataSource(i));
+				}
 			}
 		}
 
@@ -82,7 +140,7 @@ namespace genericVirusUI
 		else
 		{
 			// Initial ROM patches are added by the retained event, subsequent changes refresh
-			m_onRomChanged = [this](const virusLib::ROMFile*)
+			m_onRomChanged = [this](uint32_t)
 			{
 				addRomPatches();
 			};
@@ -91,7 +149,6 @@ namespace genericVirusUI
 
 	PatchManager::~PatchManager()
 	{
-		stopLoaderThread();
 		m_controller.onRomPatchReceived = {};
 	}
 
@@ -110,32 +167,52 @@ namespace genericVirusUI
 
 	bool PatchManager::loadRamBankData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
-		const auto& singles = m_controller.getSinglePresets();
-
-		if (_bank >= singles.size())
+		if (_bank >= m_ramBanks.size())
 			return false;
 
-		const auto& bank = singles[_bank];
+		std::lock_guard lock(m_ramBanksMutex);
+
+		const auto& bank = m_ramBanks[_bank];
 
 		if (_program != pluginLib::patchDB::g_invalidProgram)
 		{
 			if (_program >= bank.size())
 				return false;
 			const auto& s = bank[_program];
-			if (s.data.empty())
+			if (s.empty())
 				return false;
-			_results.push_back(s.data);
+			_results.push_back(s);
 		}
 		else
 		{
 			_results.reserve(bank.size());
 			for (const auto& patch : bank)
 			{
-				if (!patch.data.empty())
-					_results.push_back(patch.data);
+				if (!patch.empty())
+					_results.push_back(patch);
 			}
 		}
 		return !_results.empty();
+	}
+
+	void PatchManager::updateRamBank(const uint32_t _bank)
+	{
+		if (_bank >= m_ramBanks.size())
+			return;
+
+		const auto& singles = m_controller.getSinglePresets();
+
+		std::vector<pluginLib::patchDB::Data> bank;
+
+		if (_bank < singles.size())
+		{
+			bank.reserve(singles[_bank].size());
+			for (const auto& patch : singles[_bank])
+				bank.push_back(patch.data);
+		}
+
+		std::lock_guard lock(m_ramBanksMutex);
+		m_ramBanks[_bank] = std::move(bank);
 	}
 
 	bool PatchManager::loadRomBankData(pluginLib::patchDB::DataList& _results, const uint32_t _romBank, const uint32_t _program)
@@ -617,7 +694,7 @@ namespace genericVirusUI
 			}
 
 			if (!_results.empty())
-				return true;
+				return mergeArrangements(_results);
 		}
 
 		if (virusLib::Device::parseVTIBackup(_results, _data))
@@ -677,8 +754,9 @@ namespace genericVirusUI
 								}
 							}
 
+							// the presets are contiguous, an invalid name ends them
 							if(!validName)
-								continue;
+								break;
 
 							addr += 0x100;
 							++index;
@@ -705,56 +783,7 @@ namespace genericVirusUI
 
 		}
 
-		// Arrangement detection: scan for a DUMP_MULTI immediately followed by
-		// 16 consecutive DUMP_SINGLE messages and merge each such sequence into
-		// one compound patch. Works for single-arrangement files AND user-bank
-		// files that store multiple patches (and possibly multiple arrangements)
-		// as concatenated sysex messages.
-		{
-			auto isMulti = [](const pluginLib::patchDB::Data& _d)
-			{
-				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_MULTI;
-			};
-			auto isSingle = [](const pluginLib::patchDB::Data& _d)
-			{
-				return _d.size() >= 10 && _d[6] == virusLib::SysexMessageType::DUMP_SINGLE;
-			};
-
-			pluginLib::patchDB::DataList merged;
-			merged.reserve(_results.size());
-
-			for (size_t i = 0; i < _results.size();)
-			{
-				if (isMulti(_results[i]) && i + 16 < _results.size())
-				{
-					bool allSingles = true;
-					for (size_t j = 1; j <= 16; ++j)
-					{
-						if (!isSingle(_results[i + j]))
-						{
-							allSingles = false;
-							break;
-						}
-					}
-
-					if (allSingles)
-					{
-						pluginLib::patchDB::Data compound = _results[i];
-						for (size_t j = 1; j <= 16; ++j)
-							compound.insert(compound.end(), _results[i + j].begin(), _results[i + j].end());
-						merged.emplace_back(std::move(compound));
-						i += 17;
-						continue;
-					}
-				}
-				merged.emplace_back(std::move(_results[i]));
-				++i;
-			}
-
-			_results = std::move(merged);
-		}
-
-		return !_results.empty();
+		return mergeArrangements(_results);
 	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, const uint64_t _userData)
@@ -782,9 +811,22 @@ namespace genericVirusUI
 		return !_data.empty();
 	}
 
-	uint32_t PatchManager::getCurrentPart() const
+	std::string PatchManager::verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t) const
 	{
-		return m_controller.getCurrentPart();
+		switch (detectPatchType(_patch->sysex))
+		{
+		case PatchType::Arrangement:
+			return "The dropped file contains an Arrangement patch. Loading it will "
+				"replace the full device state: the Multi setup and all 16 Single "
+				"patches in the parts will be overwritten.\n\nDo you want to load it?";
+		case PatchType::Multi:
+			return "The dropped file contains a Multi patch. Loading it will replace "
+				"the Multi setup (part volumes, MIDI channels, FX routing, etc.) "
+				"but the Single patches currently loaded in the parts will be kept."
+				"\n\nDo you want to load it?";
+		default:
+			return {};
+		}
 	}
 
 	bool PatchManager::equals(const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b) const
@@ -859,6 +901,35 @@ namespace genericVirusUI
 		return m_controller.activatePatch(_sysex, _part);
 	}
 
+	bool PatchManager::createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr&, const pluginLib::patchDB::Data& _data, const uint32_t _part) const
+	{
+		// a multi or an arrangement switches the play mode, which happens on the message thread
+		if (detectPatchType(_data) != PatchType::Single)
+			return false;
+
+		uint8_t program;
+
+		if (!virus::Controller::getSingleEditBufferProgram(_part, m_controller.isMultiModeAnyThread(), program))
+			return false;
+
+		synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
+		ev.sysex = m_controller.modifySingleDump(_data, virusLib::BankNumber::EditBuffer, program);
+
+		if (ev.sysex.empty())
+			return false;
+
+		_events.push_back(std::move(ev));
+		return true;
+	}
+
+	void PatchManager::onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr&, const uint32_t _part)
+	{
+		uint8_t program;
+
+		if (virus::Controller::getSingleEditBufferProgram(_part, m_controller.isMultiMode(), program))
+			m_controller.onSingleActivated(program);
+	}
+
 	pluginLib::patchDB::Data PatchManager::retargetMultiToEditBuffer(const pluginLib::patchDB::Data& _multi)
 	{
 		// Multi dump: offset 7 = bank, offset 8 = program. The microcontroller
@@ -875,7 +946,7 @@ namespace genericVirusUI
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)
 	{
-		m_virusEditor.setPlayMode(virusLib::PlayMode::PlayModeMulti);
+		m_controller.setPlayMode(virusLib::PlayMode::PlayModeMulti);
 		m_controller.sendSysEx(retargetMultiToEditBuffer(_multi));
 		m_controller.requestArrangement();
 		return true;
@@ -889,7 +960,7 @@ namespace genericVirusUI
 		if (msgs.size() != 17 || msgs.front()[6] != virusLib::SysexMessageType::DUMP_MULTI)
 			return false;
 
-		m_virusEditor.setPlayMode(virusLib::PlayMode::PlayModeMulti);
+		m_controller.setPlayMode(virusLib::PlayMode::PlayModeMulti);
 		m_controller.sendSysEx(retargetMultiToEditBuffer(msgs.front()));
 
 		for (uint8_t i = 0; i < 16; ++i)
@@ -963,6 +1034,9 @@ namespace genericVirusUI
 		ds.bank = _controllerBank;
 		ds.name = m_controller.getBankName(_controllerBank);
 		ds.midiBankNumber = _controllerBank;
+		// the RAM banks (0 and 1) belong to the device, the others to the ROM: their MIDI bank numbers are kept per ROM
+		if (_controllerBank >= 2)
+			ds.romName = m_processor.getRomName();
 		return ds;
 	}
 
@@ -973,6 +1047,7 @@ namespace genericVirusUI
 		ds.bank = g_arrangementBank;
 		ds.name = "ROM Arrangements";
 		ds.midiBankNumber = g_arrangementBank;
+		ds.romName = m_processor.getRomName();
 		return ds;
 	}
 

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "synthLib/wavWriter.h"
+#include "synthLib/consoleTools.h"
 
 #include "mqLib/microq.h"
 #include "mqLib/mqhardware.h"
@@ -60,10 +60,9 @@ int main(int _argc, char* _argv[])
 	dsp56k::ThreadTools::setCurrentThreadName("main");
 
 	// WAV writer for main stereo output
-	synthLib::AsyncWriter writer("mqOutput.wav", 44100, false);
+	synthLib::StereoWavSink wav("mqOutput.wav", 44100);
 
 	constexpr uint32_t blockSize = 64;
-	std::vector<dsp56k::TWord> stereoBuf(blockSize * 2);
 
 	bool waitingForBoot = true;
 	bool waitingForInitSound = false;
@@ -206,17 +205,7 @@ int main(int _argc, char* _argv[])
 		if(counter == 0)
 		{
 			auto& outs = mq.getAudioOutputs();
-
-			for(size_t i=0; i<blockSize; ++i)
-			{
-				stereoBuf[(i<<1)  ] = outs[0][i];
-				stereoBuf[(i<<1)+1] = outs[1][i];
-			}
-
-			writer.append([&stereoBuf](std::vector<dsp56k::TWord>& _wavOut)
-			{
-				_wavOut.insert(_wavOut.end(), stereoBuf.begin(), stereoBuf.end());
-			});
+			wav.write(outs[0].data(), outs[1].data(), blockSize);
 		}
 	}
 

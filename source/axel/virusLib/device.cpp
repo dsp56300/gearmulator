@@ -20,7 +20,7 @@
 namespace virusLib
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params, const bool _createDebugger/* = false*/)
-		: synthLib::Device(_params)
+		: DspClockDevice(_params)
 		, m_rom(_params.romData, _params.romName, static_cast<DeviceModel>(_params.customData))
 		, m_samplerate(getDeviceSamplerate(_params.preferredSamplerate, _params.hostSamplerate))
 	{
@@ -29,6 +29,8 @@ namespace virusLib
 		DspSingle* dsp1;
 		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
 		m_dsp.reset(dsp1);
+
+		m_dspClockPercent = m_dsp->getEsxiClock().getSpeedPercent();
 
 		m_dsp->getAudio().setCallback([this](dsp56k::Audio*)
 		{
@@ -67,6 +69,13 @@ namespace virusLib
 				dummyProcess(8);
 		}
 
+		// play MIDI at the sample it is meant for, as the TI does over USB (EMU-238). Each DSP has a clock of its own,
+		// as we do not connect them
+		m_midiTimestamps = m_rom.isTIFamily() && m_mc->enableMidiTimestamps();
+
+		// the OS loses what does not fit into its input rings, send it only as much as they hold (EMU-239)
+		m_mc->enableHdi08FlowControl();
+
 		m_mc->sendInitControlCommands(127);
 
 		dummyProcess(8);
@@ -80,7 +89,12 @@ namespace virusLib
 
 	Device::~Device()
 	{
-		m_dsp->getAudio().setCallback(nullptr);
+		// The audio callbacks of the DSP threads use the microcontroller. Replacing a callback does not wait for one
+		// that is running, so the threads have to stop before it goes
+		m_dsp->stopDSPThread();
+		if(m_dsp2)
+			m_dsp2->stopDSPThread();
+
 		m_mc.reset();
 		m_dsp.reset();
 	}
@@ -135,10 +149,22 @@ namespace virusLib
 		if(!synthLib::Device::setSamplerate(_samplerate))
 			return false;
 		m_samplerate = _samplerate;
-		configureDSP(*m_dsp, m_rom, m_samplerate);
+
+		// The JIT configuration does not depend on the samplerate, the clock does, and the DSP threads use it while they
+		// run. The firmware learns about the new samplerate after DSP A got its clock
+		m_dsp->runOnDspThread([this, _samplerate]
+		{
+			configureClock(*m_dsp, m_rom, _samplerate);
+			m_mc->setSamplerate(_samplerate);
+		});
+
 		if(m_dsp2)
-			configureDSP(*m_dsp2, m_rom, m_samplerate);
-		m_mc->setSamplerate(_samplerate);
+		{
+			m_dsp2->runOnDspThread([this, _samplerate]
+			{
+				configureClock(*m_dsp2, m_rom, _samplerate);
+			});
+		}
 		return true;
 	}
 
@@ -183,8 +209,6 @@ namespace virusLib
 			m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 1, 1);	// TIMER 2 = ADO = LFO 2/3 LED
 		}
 
-		m_numSamplesProcessed += static_cast<uint32_t>(_size);
-
 		m_frontpanelStateDSP.toMidiEvent(m_frontpanelStateMidiEvent);
 		_midiOut.push_back(m_frontpanelStateMidiEvent);
 	}
@@ -219,7 +243,6 @@ namespace virusLib
 		m_arpeggiator.process(singles, _midi, _out, _sampleCount, m_samplerate);
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	bool Device::getState(std::vector<uint8_t>& _state, const synthLib::StateType _type)
 	{
 		return m_mc->getState(_state, _type);
@@ -250,7 +273,6 @@ namespace virusLib
 
 		return m_mc->setState(messages);
 	}
-#endif
 
 	bool Device::find4CC(uint32_t& _offset, const synthLib::SysexBuffer& _data, const std::string_view& _4cc)
 	{
@@ -290,6 +312,9 @@ namespace virusLib
 			if(!find4CC(readPos, _state, "MIDI"))
 				break;
 
+			// find4CC stops at the tag, the chunk follows it
+			readPos += 4;
+
 			if(readPos >= _state.size())
 				break;
 
@@ -314,21 +339,29 @@ namespace virusLib
 
 			const auto dataLen = nextLen();
 
-			if(dataLen + readPos > _state.size())
-				break;
+			// not a chunk but the text "MIDI" somewhere else in a host project, Cubase and FL Studio have one in front
+			if(readPos > _state.size() || dataLen > _state.size() - readPos)
+				continue;
+
+			const auto chunkEnd = readPos + dataLen;
 
 			const auto controllerAssignmentsLen = nextLen();
 
+			if(readPos > chunkEnd || controllerAssignmentsLen > chunkEnd - readPos)
+				continue;
+
 			readPos += controllerAssignmentsLen;
-			
-			while(readPos < _state.size())
+
+			// records of a length and MIDI data up to the end of the chunk, a length of 0 ends them earlier
+			while(readPos + 4 <= chunkEnd)
 			{
 				const auto midiDataLen = nextLen();
 
-				if(!midiDataLen)
+				if(!midiDataLen || midiDataLen > chunkEnd - readPos)
 					break;
 
-				if((readPos + midiDataLen) > _state.size())
+				// neither SysEx nor a channel message, this is not a chunk
+				if(_state[readPos] != 0xf0 && midiDataLen > 3)
 					break;
 
 				synthLib::SMidiEvent& e = _events.emplace_back();
@@ -425,8 +458,10 @@ namespace virusLib
 	{
 		// search for this string, every ? is a wildcard
 		constexpr auto key = "DigiVrus????vals";
+		const auto presetSize = ROMFile::getSinglePresetSize(DeviceModel::B);
 
-		for (size_t i=0; i<_data.size() - strlen(key); ++i)
+		// only where the key, 32 unknown bytes and a whole preset still fit, a short file holds none
+		for (size_t i=0; i + strlen(key) + 0x20 + presetSize <= _data.size(); ++i)
 		{
 			bool found = true;
 
@@ -445,7 +480,6 @@ namespace virusLib
 			const ptrdiff_t pos = i + strlen(key) + 0x20;	// skip 32 unknown bytes
 
 			constexpr uint8_t programIndex = 0;
-			const auto presetSize = ROMFile::getSinglePresetSize(DeviceModel::B);
 
 			// replace preset name, that is usually just 'Untitled' with the filename
 			auto newPresetName = baseLib::filesystem::stripExtension(_filename);
@@ -552,13 +586,20 @@ namespace virusLib
 
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
+		// exact with timestamps, measured from a note-on to the first sample of its voice (EMU-238)
+		if(m_midiTimestamps)
+			return m_rom.getModel() == DeviceModel::Snow ? 256 : 255;
+
 		// Note that this is an average value, midi latency drifts in a range of roughly +/- 61 samples
 		constexpr auto latency = 324;
 
 		if(m_rom.isTIFamily())
 			return latency - 108;	// TI seems to have improved a bit
 
-		return latency;	
+		// The A/B/C runs at 46875 Hz, so this was measured through the Legacy resampler, whose 28 samples of delay the
+		// plugin did not report then and reports on its own now (EMU-103). At 44.1 and 48 kHz the TI family runs at the
+		// host's rate, nothing is resampled there.
+		return latency - 28;
 	}
 
 	uint32_t Device::getInternalLatencyInputToOutput() const
@@ -607,7 +648,7 @@ namespace virusLib
 		{
 //			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
 			auto ev = _ev;
-			ev.offset += m_numSamplesProcessed + getExtraLatencySamples();
+			stampOffset(ev);
 			return m_mc->sendMIDI(ev, &m_frontpanelStateDSP);
 		}
 
@@ -634,9 +675,13 @@ namespace virusLib
 		auto inputs(_inputs);
 		auto outputs(_outputs);
 
+		m_mc->refillMidiQueues();
+
 		while(_samples > maxBlockSize)
 		{
 			m_dsp->processAudio(inputs, outputs, maxBlockSize, getExtraLatencySamples());
+
+			m_mc->refillMidiQueues();
 
 			_samples -= maxBlockSize;
 
@@ -664,28 +709,15 @@ namespace virusLib
 
 	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom, const float _samplerate)
 	{
+		configureClock(_dsp, _rom, _samplerate);
+
 		auto& jit = _dsp.getJIT();
 		auto conf = jit.getConfig();
 
 		if(_rom.isTIFamily())
 		{
-			auto& clock = _dsp.getPeriphX().getEsaiClock();
-
-			const auto sr = static_cast<int>(_samplerate);
-
-			clock.setExternalClockFrequency(std::min(sr, 48000) * 256);
-
-			if(_rom.getModel() != DeviceModel::Snow)
-			{
-				clock.setSamplerate(sr * 3);
-				clock.setEsaiDivider(&_dsp.getPeriphY().getEsai(), 0);
-				clock.setEsaiDivider(&_dsp.getPeriphX().getEsai(), 2);
-			}
-
 			conf.aguSupportBitreverse = true;
 			conf.maxDoIterations = 32;
-
-			clock.setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 		}
 		else
 		{
@@ -700,6 +732,27 @@ namespace virusLib
 		}
 
 		jit.setConfig(conf);
+	}
+
+	void Device::configureClock(DspSingle& _dsp, const ROMFile& _rom, const float _samplerate)
+	{
+		if(!_rom.isTIFamily())
+			return;
+
+		auto& clock = _dsp.getPeriphX().getEsaiClock();
+
+		const auto sr = static_cast<int>(_samplerate);
+
+		clock.setExternalClockFrequency(std::min(sr, 48000) * 256);
+
+		if(_rom.getModel() != DeviceModel::Snow)
+		{
+			clock.setSamplerate(sr * 3);
+			clock.setEsaiDivider(&_dsp.getPeriphY().getEsai(), 0);
+			clock.setEsaiDivider(&_dsp.getPeriphX().getEsai(), 2);
+		}
+
+		clock.setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 	}
 
 	std::thread Device::bootDSP(DspSingle& _dsp, const ROMFile& _rom, const bool _createDebugger)
@@ -724,27 +777,41 @@ namespace virusLib
 //		applyDspMemoryPatches(_dspA, _dspB, _rom);
 	}
 
+	void Device::getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const
+	{
+		if(m_dsp)
+			_clocks.push_back(&m_dsp->getEsxiClock());
+		if(m_dsp2)
+			_clocks.push_back(&m_dsp2->getEsxiClock());
+	}
+
 	bool Device::setDspClockPercent(const uint32_t _percent)
 	{
-		if(!m_dsp)
+		if(!m_dsp || !_percent)
 			return false;
 
-		bool res = m_dsp->getEsxiClock().setSpeedPercent(_percent);
+		m_dspClockPercent = _percent;
+
+		// the DSP threads use the clock while they run, each one changes its own
+		m_dsp->runOnDspThread([dsp = m_dsp.get(), _percent]
+		{
+			dsp->getEsxiClock().setSpeedPercent(_percent);
+		});
 
 		if(m_dsp2)
-			res &= m_dsp2->getEsxiClock().setSpeedPercent(_percent);
+		{
+			m_dsp2->runOnDspThread([dsp = m_dsp2, _percent]
+			{
+				dsp->getEsxiClock().setSpeedPercent(_percent);
+			});
+		}
 
-		return res;
+		return true;
 	}
 
 	uint32_t Device::getDspClockPercent() const
 	{
-		return !m_dsp ? 0 : m_dsp->getEsxiClock().getSpeedPercent();
-	}
-
-	uint64_t Device::getDspClockHz() const
-	{
-		return !m_dsp ? 0 : m_dsp->getEsxiClock().getSpeedInHz();
+		return !m_dsp ? 100 : m_dspClockPercent.load();
 	}
 
 	void Device::applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom)

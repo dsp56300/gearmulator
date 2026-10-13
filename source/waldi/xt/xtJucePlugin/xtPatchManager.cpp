@@ -1,8 +1,6 @@
 #include "xtPatchManager.h"
 
 #include "xtController.h"
-#include "xtEditor.h"
-#include "xtWaveEditor.h"
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 
@@ -24,21 +22,15 @@ namespace xtJucePlugin
 		jucePluginEditorLib::patchManager::GroupType::DataSources,
 	};
 
-	PatchManager::PatchManager(Editor& _editor, Rml::Element* _root)
-		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, g_groupTypes)
-		, m_editor(_editor)
-		, m_controller(_editor.getXtController())
+	PatchManager::PatchManager(jucePluginEditorLib::Processor& _processor)
+		: jucePluginEditorLib::patchManager::PatchManager(_processor, g_groupTypes)
+		, m_controller(static_cast<Controller&>(_processor.getController()))
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "MW Model");
 		jucePluginEditorLib::patchManager::PatchManager::startLoaderThread();
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 		setTagTypeName(pluginLib::patchDB::TagType::CustomC, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
-	}
-
-	PatchManager::~PatchManager()
-	{
-		stopLoaderThread();
 	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t _userData)
@@ -62,11 +54,6 @@ namespace xtJucePlugin
 		_data = m_controller.createSingleDump(xt::LocationH::SingleBankA, 0, static_cast<uint8_t>(_part));
 		_data = createCombinedDump(_data);
 		return !_data.empty();
-	}
-
-	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program)
-	{
-		return false;
 	}
 
 	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
@@ -257,9 +244,22 @@ namespace xtJucePlugin
 		return _patch->sysex;
 	}
 
-	uint32_t PatchManager::getCurrentPart() const
+	std::string PatchManager::verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t) const
 	{
-		return m_editor.getProcessor().getController().getCurrentPart();
+		switch (detectPatchType(_patch->sysex))
+		{
+		case PatchType::Arrangement:
+			return "The dropped file contains an Arrangement patch. Loading it will "
+				"replace the full device state: the Multi setup and all Single "
+				"patches in the parts will be overwritten.\n\nDo you want to load it?";
+		case PatchType::Multi:
+			return "The dropped file contains a Multi patch. Loading it will replace "
+				"the Multi setup (part volumes, MIDI channels, FX, etc.) but the "
+				"Single patches currently loaded in the parts will be kept."
+				"\n\nDo you want to load it?";
+		default:
+			return {};
+		}
 	}
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
@@ -405,17 +405,14 @@ namespace xtJucePlugin
 	pluginLib::patchDB::Data PatchManager::createCombinedDump(const pluginLib::patchDB::Data& _data) const
 	{
 		// combine single dump with user wave table and user waves if applicable
-		if(auto* waveEditor = m_editor.getWaveEditor())
+		std::vector<xt::SysEx> results;
+		m_controller.getWaveData().getWaveDataForSingle(results, _data);
+		if(!results.empty())
 		{
-			std::vector<xt::SysEx> results;
-			waveEditor->getData().getWaveDataForSingle(results, _data);
-			if(!results.empty())
-			{
-				results.insert(results.begin(), _data);
-				auto result = xt::State::createCombinedPatch(results);
-				if(!result.empty())
-					return result;
-			}
+			results.insert(results.begin(), _data);
+			auto result = xt::State::createCombinedPatch(results);
+			if(!result.empty())
+				return result;
 		}
 		return _data;
 	}
@@ -573,15 +570,37 @@ namespace xtJucePlugin
 
 	bool PatchManager::activateSingle(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
 	{
-		if(!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), static_cast<uint8_t>(_part)))
+		if(!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), static_cast<uint8_t>(_part)) && getEditor())
 		{
 			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
-				m_editor.getProcessor().getProperties().name + " - Unable to load patch",
+				getProcessor().getProperties().name + " - Unable to load patch",
 				"MW1 patches can only be loaded to the first part.\n"
 				"\n"
 				"If you want to load a MW1 patch to another part, first convert it by loading it to part 1, then save the loaded patch to a user bank.");
 		}
 		return true;
+	}
+
+	bool PatchManager::createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr&, const pluginLib::patchDB::Data& _data, const uint32_t _part) const
+	{
+		// A plain single only. A Microwave I single loads into the current part, one with its own waves sends them
+		// through the controller's wave data, and a multi or an arrangement switches the play mode: those load on the
+		// message thread
+		if (_data.size() != std::tuple_size_v<xt::State::Single> || detectPatchType(_data) != PatchType::Single || _part >= m_controller.getPartCount())
+			return false;
+
+		synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
+
+		if (!m_controller.createSingleEditBufferDump(ev.sysex, _data, static_cast<uint8_t>(_part), m_controller.isMultiModeAnyThread()))
+			return false;
+
+		_events.push_back(std::move(ev));
+		return true;
+	}
+
+	void PatchManager::onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr&, const uint32_t _part)
+	{
+		m_controller.onSingleSent(static_cast<uint8_t>(_part));
 	}
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)

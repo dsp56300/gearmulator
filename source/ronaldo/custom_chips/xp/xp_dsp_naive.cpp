@@ -168,7 +168,7 @@ namespace xpLib::dspNaive
 						factor -= 0x8000;
 				}
 				static constexpr std::array<unsigned, 4> shifts = {0, 1, 2, 4};
-				const auto numerator = (_multiplyInput * factor) << shifts[_cram >> 14];
+				const auto numerator = (_multiplyInput * factor) * (int64_t{1} << shifts[_cram >> 14]);
 				_nextMultiply = saturate(numerator / 32768, 29);
 				_nextNegativeFraction = multiplyNegativeFraction(numerator, 15);
 				_multiplyIssued = true;
@@ -239,7 +239,7 @@ namespace xpLib::dspNaive
 				result = signExtend(result, 24);
 				break;
 			case 3:
-				result = (result << 1) | (((result >> 23) ^ (result >> 6) ^ (result >> 1)) & 1);
+				result = (result * 2) | (((result >> 23) ^ (result >> 6) ^ (result >> 1)) & 1);
 				break;
 			case 4:
 				result &= 0x00ffffff;

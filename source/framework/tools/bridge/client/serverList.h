@@ -44,9 +44,11 @@ namespace bridgeClient
 	private:
 		void onServerFound(const std::string& _host, const bridgeLib::ServerInfo& _serverInfo, const bridgeLib::Error& _error);
 
-		UdpClient m_udpClient;
-
 		mutable std::mutex m_entriesMutex;
 		std::set<Entry> m_entries;
+
+		// Last: its thread calls onServerFound() from its constructor on until its destructor, so it has to start
+		// after the entries exist and stop before they are gone
+		UdpClient m_udpClient;
 	};
 }

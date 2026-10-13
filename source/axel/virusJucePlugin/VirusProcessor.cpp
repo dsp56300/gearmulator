@@ -1,7 +1,6 @@
 #include "VirusProcessor.h"
-#include "VirusEditorState.h"
-#include "ParameterNames.h"
 #include "VirusController.h"
+#include "PatchManager.h"
 
 #include "baseLib/binarystream.h"
 #include "baseLib/filesystem.h"
@@ -21,9 +20,8 @@ namespace virus
 
 	VirusProcessor::~VirusProcessor()
 	{
-		// The editor's patch manager unhooks itself from the controller when it goes, so the editor goes first.
-		// The controller then has to go here, before evRomChanged, which it is subscribed to
-		destroyEditorState();
+		// The editor and the patch manager are gone already, see jucePluginEditorLib::FinalProcessor. The controller
+		// has to go here, before the ROMs it reads
 		destroyController();
 	}
 
@@ -33,65 +31,56 @@ namespace virus
 	{
 		// clamp to virus range, 63-190
 		const auto bpmValue = juce::jmin(127, juce::jmax(0, static_cast<int>(_bpm)-63));
-		const auto clockParam = getController().getParameter(m_clockTempoParam, 0);
 
-		if (clockParam == nullptr || clockParam->getUnnormalizedValue() == bpmValue)
-			return;
-
-		clockParam->setUnnormalizedValue(bpmValue, pluginLib::Parameter::Origin::HostAutomation);
-	}
-
-	bool VirusProcessor::setSelectedRom(const uint32_t _index)
-	{
-		if(_index >= m_roms.size())
-			return false;
-		if(_index == m_selectedRom)
-			return true;
-		m_selectedRom = _index;
-
-		try
-		{
-			synthLib::Device* device = pluginLib::Processor::createDevice(getDeviceType());
-			getPlugin().setDevice(device);
-			(void)m_device.release();
-			m_device.reset(device);
-
-			evRomChanged.retain(getSelectedRom());
-
-			zynthianExportLv2Presets();
-
-			return true;
-		}
-		catch(const synthLib::DeviceException& e)
-		{
-			genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
-				"Device creation failed:",
-				std::string("Failed to create device:\n\n") + 
-				e.what() + "\n\n"
-				"Will continue using old ROM");
-			return false;
-		}
+		// this is the audio thread, the controller sets the parameter on the message thread
+		static_cast<Controller&>(getController()).setHostClockTempo(bpmValue);
 	}
 
 	void VirusProcessor::postConstruct(std::vector<virusLib::ROMFile>&& _roms)
 	{
 		m_roms = std::move(_roms);
 
-		evRomChanged.retain(getSelectedRom());
+		std::vector<std::string> names;
+		for (const auto& rom : m_roms)
+			names.push_back(juce::File(rom.getFilename()).getFileNameWithoutExtension().toStdString() + " (" + rom.getModelName() + ')');
 
-		m_clockTempoParam = getController().getParameterIndexByName(virus::g_paramClockTempo);
+		// "ROM " version 1 had no model, it was always A/B/C
+		setFirmwareImages(std::move(names), {"ROM ", 2,
+			[this](baseLib::BinaryStream& _s, const uint32_t _index)
+			{
+				const auto& rom = m_roms[_index];
+				_s.write<uint8_t>(static_cast<uint8_t>(rom.getModel()));
+				_s.write(baseLib::filesystem::getFilenameWithoutPath(rom.getFilename()));
+			},
+			[this](baseLib::BinaryStream& _s, const uint32_t _version) -> std::optional<uint32_t>
+			{
+				const auto model = _version > 1 ? static_cast<virusLib::DeviceModel>(_s.read<uint8_t>()) : virusLib::DeviceModel::ABC;
+				const auto romName = _s.readString();
 
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
+				// of two ROMs with that name, the one found last, as before
+				std::optional<uint32_t> found;
+				for(uint32_t i=0; i<static_cast<uint32_t>(m_roms.size()); ++i)
+				{
+					if(m_roms[i].getModel() == model && baseLib::filesystem::getFilenameWithoutPath(m_roms[i].getFilename()) == romName)
+						found = i;
+				}
+				return found;
+			}});
 
-		zynthianExportLv2Presets();
+		// processBpm() uses the controller on the audio thread, it has to exist before audio runs
+		getController();
+
+		m_onFirmwareChanged.set(evFirmwareChanged, [this](uint32_t)
+		{
+			zynthianExportLv2Presets();
+		});
+
+		setPatchManager(new genericVirusUI::PatchManager(*this));
 	}
 
-	synthLib::Device* VirusProcessor::createDevice()
+	synthLib::Device* VirusProcessor::newDevice(const synthLib::DeviceCreateParams& _params)
 	{
-		synthLib::DeviceCreateParams p;
-		getRemoteDeviceParams(p);
-		return new virusLib::Device(p, true);
+		return new virusLib::Device(_params, true);
 	}
 
 	void VirusProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
@@ -118,42 +107,6 @@ namespace virus
 		getPlugin();
 
 		return new virus::Controller(*this, m_defaultModel);
-	}
-
-	void VirusProcessor::saveChunkData(baseLib::BinaryStream& s)
-	{
-		auto* rom = getSelectedRom();
-		if(rom)
-		{
-			baseLib::ChunkWriter cw(s, "ROM ", 2);
-			const auto romName = baseLib::filesystem::getFilenameWithoutPath(rom->getFilename());
-			s.write<uint8_t>(static_cast<uint8_t>(rom->getModel()));
-			s.write(romName);
-		}
-		Processor::saveChunkData(s);
-	}
-
-	void VirusProcessor::loadChunkData(baseLib::ChunkReader& _cr)
-	{
-		_cr.add("ROM ", 2, [this](baseLib::BinaryStream& _binaryStream, unsigned _version)
-		{
-			auto model = virusLib::DeviceModel::ABC;
-
-			if(_version > 1)
-				model = static_cast<virusLib::DeviceModel>(_binaryStream.read<uint8_t>());
-
-			const auto romName = _binaryStream.readString();
-
-			const auto& roms = getRoms();
-			for(uint32_t i=0; i<static_cast<uint32_t>(roms.size()); ++i)
-			{
-				const auto& rom = roms[i];
-				if(rom.getModel() == model && baseLib::filesystem::getFilenameWithoutPath(rom.getFilename()) == romName)
-					setSelectedRom(i);
-			}
-		});
-
-		Processor::loadChunkData(_cr);
 	}
 
 	void VirusProcessor::zynthianExportLv2Presets() const

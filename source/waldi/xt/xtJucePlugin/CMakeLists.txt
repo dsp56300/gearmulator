@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 project(xtJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
-	PluginEditorState.cpp PluginEditorState.h
 	PluginProcessor.cpp PluginProcessor.h
 	weControlTree.cpp weControlTree.h
 	weControlTreeItem.cpp weControlTreeItem.h
@@ -25,15 +24,13 @@ set(SOURCES
 	xtArp.cpp xtArp.h
 	xtController.cpp xtController.h
 	xtEditor.cpp xtEditor.h
-	xtFrontPanel.cpp xtFrontPanel.h
-	xtFocusedParameter.cpp xtFocusedParameter.h
 	xtLcd.cpp xtLcd.h
 	xtPartButton.cpp xtPartButton.h
 	xtPartName.cpp xtPartName.h
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
 	xtWaveEditor.cpp xtWaveEditor.h
-	xtWaveEditorStyle.cpp xtWaveEditorStyle.h
+	xtWaveEditorStyle.h
 
 	parameterDescriptions_xt.json
 
@@ -52,7 +49,7 @@ buildSkinHeader()
 
 juce_add_binary_data(xtJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_SKINS})
 
-createJucePluginWithFX(xtJucePlugin "Xenia" "Txts" "Txtf" xtJucePlugin_BinaryData xtLib)
+createJucePluginWithFX(xtJucePlugin "Xenia" "Txts" "Txtf" xtJucePlugin_BinaryData xtLib xtLib/xtDevice.h xt::Device)
 
 target_link_libraries(xtJucePlugin PRIVATE juce::juce_dsp)
 

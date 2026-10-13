@@ -5,8 +5,6 @@ set(SOURCES
 	skins/TrancyTI/VirusTI_Trancy.rml
 	skins/TrancyTI/VirusTI_Trancy.rcss
 	parameterDescriptions_TI.json
-	OsTIrusEditorState.cpp
-	OsTIrusEditorState.h
 	OsTIrusProcessor.cpp
 	OsTIrusProcessor.h
 
@@ -30,4 +28,4 @@ buildSkinHeader()
 
 juce_add_binary_data(osTIrusJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_SKINS})
 
-createJucePluginWithFX(osTIrusJucePlugin "OsTIrus" "Ttip" "Ttif" osTIrusJucePlugin_BinaryData virusJucePlugin)
+createJucePluginWithFX(osTIrusJucePlugin "OsTIrus" "Ttip" "Ttif" osTIrusJucePlugin_BinaryData virusJucePlugin virusLib/device.h virusLib::Device)

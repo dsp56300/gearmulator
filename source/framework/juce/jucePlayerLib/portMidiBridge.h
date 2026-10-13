@@ -16,8 +16,13 @@ namespace jucePlayer
     {
     public:
         using MidiInputCallback = std::function<void(synthLib::SMidiEvent)>;
+        // With how far ahead of now the sender timestamped the event, in milliseconds: CoreMIDI senders may schedule
+        // ahead, and a receiver that passes the event on keeps their timing by waiting that long. 0 when it is due now.
+        using TimedMidiInputCallback = std::function<void(synthLib::SMidiEvent, double _leadMs)>;
 
         explicit PortMidiBridge(MidiInputCallback _midiInputCallback, std::string _name, uint8_t _portCount);
+        // _withOutputs false creates the "MIDI IN" ports only
+        PortMidiBridge(TimedMidiInputCallback _midiInputCallback, std::string _name, uint8_t _portCount, bool _withOutputs);
         ~PortMidiBridge() override;
 
         static bool isOwnVirtualPortName(const juce::String& _name);
@@ -39,9 +44,10 @@ namespace jucePlayer
     private:
         void run() override;
 
-        MidiInputCallback m_midiInputCallback;
+        TimedMidiInputCallback m_midiInputCallback;
         const std::string m_name;
         const uint8_t m_portCount;
+        const bool m_withOutputs;
         std::atomic<bool> m_enabled{false};
         dsp56k::RingBuffer<synthLib::SMidiEvent, 4096, false> m_output;
 

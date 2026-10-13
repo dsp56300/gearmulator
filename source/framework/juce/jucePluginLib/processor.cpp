@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <limits>
+#include <thread>
 
 #include <juce_audio_formats/juce_audio_formats.h>
 
@@ -62,19 +63,47 @@ namespace pluginLib
 
 	Processor::~Processor()
 	{
-		m_midiPorts.close();
+		shutdown();
 		destroyController();
 		m_plugin.reset();
 		m_device.reset();
 	}
 
+	void Processor::shutdown()
+	{
+		if (m_shutdown.exchange(true))
+			return;
+
+		// a JUCE MIDI input thread would otherwise keep calling in
+		m_midiPorts.close();
+
+		// whoever got past the flag before it was raised is still running, the teardown that follows must wait for it
+		while (m_midiInputCalls.load() != 0)
+			std::this_thread::yield();
+
+		m_alive.reset();
+	}
+
 	void Processor::addMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
+		// Both counter and flag are sequentially consistent: either shutdown() sees this call, or this call sees the flag
+		m_midiInputCalls.fetch_add(1);
+		struct Leave
+		{
+			std::atomic<uint32_t>& calls;
+			~Leave() { calls.fetch_sub(1); }
+		} leave{m_midiInputCalls};
+
+		if (m_shutdown)
+			return;
+
 		audioCaptureCheckArm(_ev);
 
 		// before midi learn or the program change router get a chance to swallow the event: a skin
 		// drawing a keyboard wants to see what was played either way
 		m_midiNotifier.onMidiEvent(_ev);
+
+		auto toDevice = m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device);
 
 		// Process through MIDI Learn translator first
 		if (_ev.source != synthLib::MidiEventSource::Device)
@@ -85,11 +114,21 @@ namespace pluginLib
 				return;
 			}
 
-			if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+			if (toDevice)
 			{
-				if (m_programChangeRouter.processMidiEvent(_ev))
+				std::vector<synthLib::SMidiEvent> replacement;
+
+				switch (m_programChangeRouter.processMidiEvent(_ev, replacement))
 				{
-					// Program change was handled by patch manager
+				case ProgramChangeRouter::Result::Forward:
+					break;
+				case ProgramChangeRouter::Result::Held:
+					toDevice = false;
+					break;
+				case ProgramChangeRouter::Result::Consumed:
+					// a program change that loads a patch from the patch manager
+					for (const auto& ev : replacement)
+						getPlugin().addMidiEvent(ev);
 					return;
 				}
 			}
@@ -97,7 +136,7 @@ namespace pluginLib
 
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Editor))
 			getController().enqueueMidiMessages({_ev});
-		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+		if (toDevice)
 			getPlugin().addMidiEvent(_ev);
 		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Physical))
 			m_midiPorts.send(_ev);
@@ -152,7 +191,7 @@ namespace pluginLib
 				m_midiLearnTranslator = std::make_unique<MidiLearnTranslator>(*m_controller, m_controller->getParameterDescriptions().getControllerMap());
 				
 				// Setup MIDI feedback callback
-				m_midiLearnTranslator->onSendMidiOutput = [this](const synthLib::MidiEventSource _target, const synthLib::SMidiEvent& _event)
+				m_midiLearnTranslator->setOnSendMidiOutput([this](const synthLib::MidiEventSource _target, const synthLib::SMidiEvent& _event)
 				{
 					if (_target == synthLib::MidiEventSource::Editor && _event.source != synthLib::MidiEventSource::Editor)
 						getController().enqueueMidiMessages({_event});
@@ -160,12 +199,16 @@ namespace pluginLib
 						m_midiPorts.send(_event);
 					else if (_target == synthLib::MidiEventSource::Host && _event.source != synthLib::MidiEventSource::Host)
 						addHostMidiFeedback(_event);
-				};
+				});
 
 				// Load default MIDI learn preset from disk. DAW state restore
 				// (setStateInformation) will override this if present.
 				loadDefaultMidiLearnPreset();
 			}
+
+			// the controller reads the state of the device once, here instead of in each product's constructor
+			if (m_controller)
+				m_controller->onStateLoaded();
 		}
 
 	    return *m_controller;
@@ -195,7 +238,7 @@ namespace pluginLib
 
 			// Juce loads the LV2/VST3 versions of the plugin as part of the build process, if we open a message box in this case, the build process gets stuck
 			const auto host = juce::PluginHostType::getHostPath();
-			if(!Tools::isHeadless())
+			if(!genericUI::MessageBox::isHeadlessHost())
 			{
 				std::string msg = e.what();
 
@@ -212,13 +255,15 @@ namespace pluginLib
 					msg += "\n\n" + std::string("[Debug] Host ") + host.toStdString() + "\n\n";
 #endif
 				}
-				juce::Timer::callAfterDelay(2000, [this, msg]
+				juce::Timer::callAfterDelay(2000, [alive = std::weak_ptr(m_alive), romFolder = getPublicRomFolder(), msg]
 				{
+					if (alive.expired())
+						return;
 					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
 						"Device Initialization failed", msg, 
-						[this]
+						[romFolder]
 						{
-							const auto path = juce::File(getPublicRomFolder());
+							const auto path = juce::File(romFolder);
 							(void)path.createDirectory();
 							path.revealToUser();
 						}
@@ -236,7 +281,7 @@ namespace pluginLib
 
 		m_plugin.reset(new synthLib::Plugin(m_device.get(), [this](synthLib::Device* _device)
 		{
-			return onDeviceInvalid(_device);
+			onDeviceInvalid(_device);
 		}));
 
 		m_plugin->setResamplerMode(m_resamplerMode);
@@ -265,6 +310,23 @@ namespace pluginLib
 		synthLib::DeviceCreateParams params;
 		getRemoteDeviceParams(params);
 		return createRemoteDevice(params);
+	}
+
+	synthLib::Device* Processor::createDevice()
+	{
+		// a product that has a better text for a missing ROM throws it from getRemoteDeviceParams
+		synthLib::DeviceCreateParams params;
+		getRemoteDeviceParams(params);
+		params.homePath = getDataFolder();
+
+		auto* device = newDevice(params);
+
+		if(!device->isValid())
+		{
+			delete device;
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, getProperties().name + ": no valid firmware ROM found");
+		}
+		return device;
 	}
 
 	synthLib::Device* Processor::createDevice(const DeviceType _type)
@@ -335,11 +397,13 @@ namespace pluginLib
 
 		const auto result = _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
 
-		// Compare with the device, not with the setting before the load: REMO creates a remote device while reading,
-		// with the setting read so far. Without a device yet, the one created later gets the setting anyway
 		if (!result)
 			m_voiceExpansion = voiceExpansion;
-		else if (m_plugin && m_voiceExpansion != m_deviceVoiceExpansion)
+
+		// Compare with the device, not with the setting before the load: REMO creates a remote device while reading,
+		// with the setting read so far, also when a later chunk fails. Without a device yet, the one created later gets
+		// the setting anyway
+		if (m_plugin && m_voiceExpansion != m_deviceVoiceExpansion)
 			rebootDevice();
 
 		return result;
@@ -352,6 +416,14 @@ namespace pluginLib
 		{
 			baseLib::ChunkWriter cw(s, "VEXP", 1);
 			s.write<uint8_t>(1);
+		}
+
+		// after VEXP, which only sets the flag, and before REMO: reading it creates the device of that firmware, which
+		// gets the voice expansion right away and is the one REMO and the device state go to
+		if (m_firmwareIndex < m_firmwareNames.size())
+		{
+			baseLib::ChunkWriter cw(s, m_firmwareChunk.id, m_firmwareChunk.version);
+			m_firmwareChunk.write(s, m_firmwareIndex);
 		}
 
 		// it is important that this is stored before other chunks to restore state to the remote properly
@@ -373,8 +445,8 @@ namespace pluginLib
 		{
 			baseLib::ChunkWriter cw(s, "GAIN", 1);
 			s.write<uint32_t>(1);	// version
-			s.write(m_inputGain);
-			s.write(m_outputGain);
+			s.write(m_inputGain.load());
+			s.write(m_outputGain.load());
 		}
 
 		if(m_dspClockPercent != 100)
@@ -455,6 +527,16 @@ namespace pluginLib
 			m_voiceExpansion = _binaryStream.read<uint8_t>() != 0;
 		});
 
+		// a state that names an image that is not there keeps the running one
+		if (m_firmwareChunk.find)
+		{
+			_cr.add(m_firmwareChunk.id, m_firmwareChunk.version, [this](baseLib::BinaryStream& _binaryStream, const uint32_t _version)
+			{
+				if (const auto index = m_firmwareChunk.find(_binaryStream, _version))
+					selectFirmware(*index);
+			});
+		}
+
 		_cr.add("REMO", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
 			const auto type = static_cast<DeviceType>(_binaryStream.read<int32_t>());
@@ -485,7 +567,9 @@ namespace pluginLib
 	{
 		if(!m_device)
 			return false;
-		if(!m_device->setDspClockPercent(_percent))
+		// under the processing lock: a remote device's request must not overlap the audio thread's, and a local
+		// one must not change its clock in the middle of a block
+		if(!getPlugin().setDspClockPercent(_percent))
 			return false;
 		m_dspClockPercent = _percent;
 		return true;
@@ -739,7 +823,6 @@ namespace pluginLib
 	    // You should use this method to store your parameters in the memory block.
 	    // You could do that either as raw data, or use the XML or ValueTree classes
 	    // as intermediaries to make it easy to save and load complex data.
-#if !SYNTHLIB_DEMO_MODE
 		PluginStream ss;
 		ss.write(g_saveMagic);
 		ss.write(g_saveVersion);
@@ -751,32 +834,25 @@ namespace pluginLib
 		ss.toVector(buf);
 
 		destData.append(buf.data(), buf.size());
-#endif
 	}
 
 	void Processor::setStateInformation (const void* _data, const int _sizeInBytes)
 	{
-#if !SYNTHLIB_DEMO_MODE
 		// You should use this method to restore your parameters from this memory block,
 	    // whose contents will have been created by the getStateInformation() call.
 		setState(_data, _sizeInBytes);
-#endif
 	}
 
 	void Processor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
 	{
-#if !SYNTHLIB_DEMO_MODE
 		std::vector<uint8_t> state;
 		getPlugin().getState(state, synthLib::StateTypeCurrentProgram);
 		destData.append(state.data(), state.size());
-#endif
 	}
 
 	void Processor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
 	{
-#if !SYNTHLIB_DEMO_MODE
 		setState(data, sizeInBytes);
-#endif
 	}
 		
 	const juce::String Processor::getName() const
@@ -834,6 +910,8 @@ namespace pluginLib
 		for (int channel = 0; channel < totalNumOutputChannels; ++channel)
 			outputs[channel] = buffer.getWritePointer(channel);
 
+		m_programChangeRouter.releaseStaleHold([this](const synthLib::SMidiEvent& _ev) { getPlugin().addMidiEvent(_ev); });
+
 		for(const auto metadata : midiMessages)
 		{
 			const auto message = metadata.getMessage();
@@ -864,6 +942,7 @@ namespace pluginLib
 		bool hasPpqPosition = false;
 		float bpm = 0.0f;
 		double ppqPos = 0.0;
+		synthLib::HostLoop loop;
 
 	    if(const auto* playHead = getPlayHead())
 		{
@@ -881,10 +960,16 @@ namespace pluginLib
 					ppqPos = *pos->getPpqPosition();
 					hasPpqPosition = true;
 				}
+				if(const auto points = pos->getLoopPoints())
+				{
+					loop.active = pos->getIsLooping();
+					loop.ppqStart = points->ppqStart;
+					loop.ppqEnd = points->ppqEnd;
+				}
 			}
 		}
 
-		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying, hasPpqPosition);
+		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying, hasPpqPosition, loop);
 
 		// Both checks are plain atomic loads, cheap enough per block. The work they stand for
 		// belongs to the message thread, see handleAsyncUpdate().
@@ -1176,7 +1261,6 @@ namespace pluginLib
 //		AudioProcessor::processBlockBypassed(_buffer, _midiMessages);
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	void Processor::setState(const void* _data, const size_t _sizeInBytes)
 	{
 		if(_sizeInBytes < 1)
@@ -1237,7 +1321,6 @@ namespace pluginLib
 		if (hasController())
 			getController().onStateLoaded();
 	}
-#endif
 
 	//==============================================================================
 
@@ -1279,9 +1362,24 @@ namespace pluginLib
 		return 0.0f;
 	}
 
-	synthLib::Device* Processor::onDeviceInvalid(synthLib::Device* _device)
+	void Processor::onDeviceInvalid(synthLib::Device* _device)
 	{
-		if(dynamic_cast<bridgeClient::RemoteDevice*>(_device))
+		// The audio thread must neither wait for a reconnect nor boot a device, and setDevice() takes the locks that
+		// process() holds. The device is replaced on the message thread, the plugin outputs silence until then
+		juce::MessageManager::callAsync([this, alive = std::weak_ptr(m_alive), _device]
+		{
+			if (!alive.expired())
+				replaceInvalidDevice(_device);
+		});
+	}
+
+	void Processor::replaceInvalidDevice(const synthLib::Device* _device)
+	{
+		// replaced already, by a reboot or a device type switch that was queued before
+		if (getPlugin().getDevice() != _device)
+			return;
+
+		if(dynamic_cast<const bridgeClient::RemoteDevice*>(_device))
 		{
 			try
 			{
@@ -1289,31 +1387,29 @@ namespace pluginLib
 				auto* newDevice = createRemoteDevice();
 				if(newDevice && newDevice->isValid())
 				{
+					getPlugin().setDevice(newDevice);
+					(void)m_device.release();
 					m_device.reset(newDevice);
 					m_deviceVoiceExpansion = m_voiceExpansion;
-					return newDevice;
+					if (hasController())
+						getController().onStateLoaded();
+					return;
 				}
+				delete newDevice;
 			}
 			catch (synthLib::DeviceException& e)
 			{
-				juce::MessageManager::callAsync([e]
-				{
-					genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
-						"Device creation failed:",
-						std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
-						e.what() + "\n\n");
-				});
+				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning,
+					"Device creation failed:",
+					std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
+					e.what() + "\n\n");
 			}
 		}
 
-		setDeviceType(DeviceType::Local);
+		setDeviceType(DeviceType::Local, true);
 
-		juce::MessageManager::callAsync([this]
-		{
+		if (hasController())
 			getController().onStateLoaded();
-		});
-
-		return m_device.get();
 	}
 
 	void Processor::setVoiceExpansion(const bool _enabled)
@@ -1322,6 +1418,35 @@ namespace pluginLib
 			return;
 		m_voiceExpansion = _enabled;
 		rebootDevice();
+	}
+
+	void Processor::setFirmwareImages(std::vector<std::string> _names, FirmwareChunk _chunk)
+	{
+		m_firmwareNames = std::move(_names);
+		m_firmwareChunk = std::move(_chunk);
+		m_firmwareIndex = 0;
+		evFirmwareChanged.retain(m_firmwareIndex);
+	}
+
+	bool Processor::selectFirmware(const uint32_t _index)
+	{
+		if (_index >= m_firmwareNames.size())
+			return false;
+		if (_index == m_firmwareIndex)
+			return true;
+
+		const auto previous = m_firmwareIndex;
+		m_firmwareIndex = _index;
+
+		// without a device yet, the one created later runs this image
+		if (m_plugin && !rebootDevice())
+		{
+			m_firmwareIndex = previous;
+			return false;
+		}
+
+		evFirmwareChanged.retain(m_firmwareIndex);
+		return true;
 	}
 
 	bool Processor::rebootDevice()

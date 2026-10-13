@@ -7,8 +7,14 @@
 
 namespace bridgeServer
 {
-	UdpServer::UdpServer() : networkLib::UdpServer(bridgeLib::g_udpServerPort)
+	UdpServer::UdpServer(const uint32_t _portTcp) : networkLib::UdpServer(bridgeLib::g_udpServerPort), m_portTcp(_portTcp)
 	{
+		start();
+	}
+
+	UdpServer::~UdpServer()
+	{
+		stop();
 	}
 
 	std::vector<uint8_t> UdpServer::validateRequest(const std::vector<uint8_t>& _request)
@@ -55,7 +61,7 @@ namespace bridgeServer
 		{
 			bridgeLib::ServerInfo si;
 			si.protocolVersion = bridgeLib::g_protocolVersion;
-			si.portTcp = bridgeLib::g_tcpServerPort;
+			si.portTcp = m_portTcp;
 			si.portUdp = bridgeLib::g_udpServerPort;
 			si.write(w.build(bridgeLib::Command::ServerInfo));
 		}

@@ -4,7 +4,6 @@
 
 #include "synthLib/deviceTypes.h"
 #include "synthLib/midiTypes.h"
-#include "synthLib/buildconfig.h"
 
 #include <list>
 #include <mutex>
@@ -42,17 +41,18 @@ public:
 	void createDefaultState();
 	void process();
 
-#if !SYNTHLIB_DEMO_MODE
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<synthLib::SMidiEvent>& _events);
-#endif
 
 	void addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming);
 
 	void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
 	void sendPendingMidiEvents(uint32_t _maxOffset);
+	void refillMidiQueues();	// audio thread, before each block, see Hdi08MidiQueue::refill
 	Hdi08MidiQueue& getMidiQueue(size_t _index) { return m_midiQueues[_index]; }
+	bool enableMidiTimestamps();
+	void enableHdi08FlowControl();
 
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
@@ -105,7 +105,9 @@ private:
 	bool isPageSupported(Page _page) const;
 	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);
 	bool waitingForPresetReceiveConfirmation() const;
+	bool presetWriteInProgress() const;
 	void receiveUpgradedPreset();
+	bool processMIDI(const synthLib::SMidiEvent& _ev, FrontpanelState* _fpState);
 
 	static bool isValid(const TPreset& _preset);
 
@@ -142,9 +144,20 @@ private:
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
 
-	std::vector<std::pair<synthLib::MidiEventSource, synthLib::SysexBuffer>> m_pendingSysexInput;
-	std::vector<synthLib::SMidiEvent> m_midiOutput;
+	// MIDI input that waits until the DSP confirmed the presets it was sent, in the order it arrived
+	struct PendingInput
+	{
+		synthLib::SMidiEvent ev;
+		FrontpanelState* fpState = nullptr;
+	};
 
+	std::vector<PendingInput> m_pendingInput;
+	std::vector<synthLib::SMidiEvent> m_midiOutput;
+	std::vector<synthLib::SMidiEvent> m_dspMidiOutput;	// what the DSPs sent since readMidiOut
+
+	// The audio thread sends MIDI, the DSP thread sends pending presets in process() and the host saves and loads the
+	// state from a third one. Guards the presets, the global settings, the pending writes and inputs, the TX parsers
+	// and the writing side of the MIDI queues, and m_loadingState
 	mutable std::recursive_mutex m_mutex;
 	bool m_loadingState = false;
 	bool m_cppArpeggiator = false;

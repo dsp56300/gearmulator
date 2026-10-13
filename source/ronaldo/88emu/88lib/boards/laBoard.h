@@ -105,7 +105,8 @@ namespace emu88Lib
 			return address >= mcs96::kRegisterRamBase
 				? m_machine.cpu().register_ram()[address - mcs96::kRegisterRamBase] : 0;
 		}
-		void addMidiEvent(const synthLib::SMidiEvent& event, uint8_t port = 0);
+		// The board's one MIDI IN, which every port a song addresses arrives at.
+		void addMidiEvent(const synthLib::SMidiEvent& event);
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& events);
 		void transportDiscontinuity(uint32_t generation);
 

@@ -5,7 +5,6 @@
 #include "jeController.h"
 #include "jeEditor.h"
 #include "jePluginProcessor.h"
-#include "hardwareLib/lcdfonts.h"
 #include "jeLib/je8086devices.h"
 
 #include "jucePluginLib/version.h"
@@ -16,8 +15,6 @@ namespace jeJucePlugin
 {
 	JeLcd::JeLcd(Editor& _editor, Rml::Element* _parent) : Lcd(_parent, 16, 2), m_editor(_editor)
 	{
-		auto& sr = _editor.getJeController().getSysexRemote();
-
 		if (!_editor.getJeProcessor().getSelectedRom().isValid())
 		{
 			setText({
@@ -53,31 +50,6 @@ namespace jeJucePlugin
 			});
 		}
 
-		m_onLcdCgDataChanged.set(sr.evLcdCgDataChanged, [this](const std::array<uint8_t, 64>& _data)
-		{
-			setCgRam(_data);
-		});
-
-		m_onLcdDdDataChanged.set(sr.evLcdDdDataChanged, [this](const std::array<char, 40>& _data)
-		{
-			setText(_data);
-
-			if (!m_btPerfPatch)
-				return;
-
-			// this is not stored anywhere so we have to parse the LCD text
-			if (m_btPerfPatch->isChecked())
-			{
-				if (strncmp(_data.data(), "PERFORM", 7) == 0)
-					m_btPerfPatch->setChecked(false);
-			}
-			else
-			{
-				if (strncmp(_data.data(), "PATCH", 5) == 0)
-					m_btPerfPatch->setChecked(true);
-			}
-		});
-
 		juceRmlUi::EventListener::Add(getElement(), Rml::EventId::Dblclick, [this](Rml::Event& _event)
 		{
 			_event.StopPropagation();
@@ -85,9 +57,28 @@ namespace jeJucePlugin
 		});
 	}
 
-	const uint8_t* JeLcd::getCharacterData(uint8_t _character) const
+	void JeLcd::setDeviceText(const std::vector<uint8_t>& _cells)
 	{
-		return hwLib::getCharacterData(_character);
+		std::array<char, 40> data{};
+		for (size_t i=0; i<std::min(data.size(), _cells.size()); ++i)
+			data[i] = static_cast<char>(_cells[i]);
+
+		setText(data);
+
+		if (!m_btPerfPatch)
+			return;
+
+		// this is not stored anywhere so we have to parse the LCD text
+		if (m_btPerfPatch->isChecked())
+		{
+			if (strncmp(data.data(), "PERFORM", 7) == 0)
+				m_btPerfPatch->setChecked(false);
+		}
+		else
+		{
+			if (strncmp(data.data(), "PATCH", 5) == 0)
+				m_btPerfPatch->setChecked(true);
+		}
 	}
 
 	bool JeLcd::isPatchMode() const

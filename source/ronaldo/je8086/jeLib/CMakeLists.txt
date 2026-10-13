@@ -7,15 +7,13 @@ add_library(jeLib STATIC)
 set(SOURCES
 	device.cpp device.h
 	je8086.cpp je8086.h
-	je8086devices.cpp je8086devices.h
+	je8086devices.h
 	jeLcd.cpp jeLcd.h
 	jemiditypes.h
 	jetypes.h
-	patch.cpp patch.h
 	rom.cpp rom.h
 	romloader.cpp romloader.h
 	state.cpp state.h
-	sysexRemoteControl.cpp sysexRemoteControl.h
 )
 
 target_sources(jeLib PRIVATE ${SOURCES})

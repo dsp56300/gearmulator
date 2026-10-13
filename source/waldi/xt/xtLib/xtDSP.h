@@ -50,6 +50,7 @@ namespace xt
 		void hdiSendIrqToDSP(uint8_t _irq);
 
 		dsp56k::DSPThread& thread() { return *m_thread; }
+		bool hasThread() const { return m_thread != nullptr; }
 		bool haveSentTXToDSP() const { return m_haveSentTXtoDSP; }
 		void onDspBooted();
 

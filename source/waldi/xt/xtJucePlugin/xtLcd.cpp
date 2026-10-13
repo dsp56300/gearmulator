@@ -4,8 +4,6 @@
 
 #include "jucePluginLib/pluginVersion.h"
 
-#include "hardwareLib/lcdfonts.h"
-
 namespace
 {
 	constexpr char g_defaultTextSingle[] =
@@ -80,11 +78,6 @@ namespace xtJucePlugin
 		};
 
 		return true;
-	}
-
-	const uint8_t* XtLcd::getCharacterData(const uint8_t _character) const
-	{
-		return hwLib::getCharacterData(_character);
 	}
 
 	void XtLcd::setCurrentParameter(const std::string& _name, const std::string& _value)

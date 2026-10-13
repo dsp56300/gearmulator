@@ -27,6 +27,7 @@
  */
 
 #include "RmlUi_Renderer_GL2.h"
+#include "RmlUi_Renderer_GL3.h"
 #include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/FileInterface.h>
 #include <RmlUi/Core/Log.h>
@@ -368,6 +369,11 @@ Rml::TextureHandle RenderInterface_GL2::GenerateTexture(Rml::Span<const Rml::byt
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return texture_id;
+}
+
+bool RenderInterface_GL2::UpdateTexture(Rml::TextureHandle texture_handle, Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions)
+{
+	return RmlGL3::UpdateTexture(texture_handle, source, source_dimensions);
 }
 
 void RenderInterface_GL2::ReleaseTexture(Rml::TextureHandle texture_handle)

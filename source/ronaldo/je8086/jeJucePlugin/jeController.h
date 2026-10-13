@@ -1,11 +1,11 @@
 #pragma once
 
+#include <mutex>
+
 #include "jeLcd.h"
 #include "jeTypes.h"
 #include "jeLib/jemiditypes.h"
 #include "jeLib/state.h"
-
-#include "jeLib/sysexRemoteControl.h"
 
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/patchdb/patch.h"
@@ -29,6 +29,12 @@ namespace jeJucePlugin
 			return 2;
 		}
 
+		// the performance write button is part 2
+		bool isPartEnabled(const uint8_t _part) const override
+		{
+			return _part <= static_cast<uint8_t>(JePart::Performance);
+		}
+
 		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value, pluginLib::Parameter::Origin _origin) override;
 		void sendParameterChange(jeLib::SystemParameter _parameter, int _value) const;
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
@@ -37,11 +43,13 @@ namespace jeJucePlugin
 
 		bool sendSingle(const pluginLib::SysEx& _sysex, uint32_t _part) const;
 
+		// The messages that load patch or performance _sysex into the temporary performance, a patch into its upper
+		// (part 0) or lower layer. Safe to call from any thread
+		bool createSingleMessages(synthLib::SysexBufferList& _result, const pluginLib::SysEx& _sysex, uint32_t _part) const;
+
 		void sendTempPerformanceRequest() const;
 		void sendPerformanceRequest(jeLib::AddressArea _area, jeLib::UserPerformanceArea _performance) const;
 		void sendSystemRequest() const;
-
-		jeLib::SysexRemoteControl& getSysexRemote() { return m_sysexRemote; }
 
 		bool isUpperSelected() const;
 		bool isLowerSelected() const;
@@ -65,11 +73,15 @@ namespace jeJucePlugin
 
 		void setPatchName(PatchType _type, const std::string& _name);
 
-		jeLib::SysexRemoteControl m_sysexRemote;
+		void receiveState(const synthLib::SysexBuffer& _sysex);
+
+		// sendParameterChange writes the mirror on whatever thread the host automates from, the
+		// device's replies and the patch manager use it on the message thread
+		mutable std::mutex m_stateMutex;
 		jeLib::State m_state;
 
 		std::array<std::string, static_cast<size_t>(PatchType::Count)> m_patchNames;
 
-		baseLib::EventListener<uint8_t, uint8_t, pluginLib::ParamValue> m_onParamChanged;
+		baseLib::EventListener<uint8_t, uint8_t, int32_t> m_onParamChanged;
 	};
 }

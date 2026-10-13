@@ -56,7 +56,7 @@ namespace jeJucePlugin
 			return juce::String(temp);
 		});
 
-		m_onParamChanged.set(m_sysexRemote.evParamChanged, [this](const uint8_t _page, const uint8_t _index, const pluginLib::ParamValue& _value)
+		m_onParamChanged.set(getFrontPanel().evParam, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
 		{
 			auto parameters = findSynthParam(0, _page, _index);
 
@@ -70,7 +70,6 @@ namespace jeJucePlugin
 			for (auto& p : it.second)
 				p->setRateLimitMilliseconds(1000 / 25);	// limit to 25 changes per second as the midi bandwidth is quite limited on this device
 		}
-		Controller::onStateLoaded();
 	}
 
 	Controller::~Controller() = default;
@@ -90,7 +89,7 @@ namespace jeJucePlugin
 			// performance parameter
 			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::PerformanceCommon>(desc.index), _value);
 			sendSysEx(msg);
-			m_state.receive(msg);
+			receiveState(msg);
 		}
 		else if (desc.page == g_paramPagePart)
 		{
@@ -100,7 +99,7 @@ namespace jeJucePlugin
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Part>(desc.index), _value);
 
 			sendSysEx(msg);
-			m_state.receive(msg);
+			receiveState(msg);
 		}
 		else if (desc.page == g_paramPagePatch || desc.page == g_paramPagePatch + 1)
 		{
@@ -112,14 +111,14 @@ namespace jeJucePlugin
 			const auto msg = jeLib::State::createParameterChange(lowerUpper, static_cast<jeLib::Patch>(index), _value);
 
 			sendSysEx(msg);
-			m_state.receive(msg);
+			receiveState(msg);
 		}
 		else if (desc.page == g_paramPageSystem)
 		{
 			// system parameter
 			const auto msg = jeLib::State::createParameterChange(static_cast<jeLib::SystemParameter>(desc.index), _value);
 			sendSysEx(msg);
-			m_state.receive(msg);
+			receiveState(msg);
 		}
 		else if (desc.page == g_paramPageVoiceMod)
 		{
@@ -127,10 +126,10 @@ namespace jeJucePlugin
 		}
 		else if (desc.page == g_paramPageCustom)
 		{
-			// custom messages
+			// emulator parameters, the master volume
 			std::vector<synthLib::SMidiEvent> events;
-			jeLib::SysexRemoteControl::sendSysexParameter(events, _parameter.getDescription().page,_parameter.getDescription().index, _value);
-			sendSysEx(events.front().sysex);
+			synthLib::fp::sendParam(events, desc.page, desc.index, _value);
+			sendFrontPanel(std::move(events));
 		}
 		else
 		{
@@ -159,10 +158,7 @@ namespace jeJucePlugin
 
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _sysex, synthLib::MidiEventSource _source)
 	{
-		if (m_sysexRemote.receive(_sysex))
-			return true;
-
-		m_state.receive(_sysex);
+		receiveState(_sysex);
 
 		const auto addr = jeLib::State::getAddress(_sysex);
 		const auto area = jeLib::State::getAddressArea(addr);
@@ -266,19 +262,23 @@ namespace jeJucePlugin
 
 		const auto isPerformance = _userData == 2 || part == JePart::Performance;
 
-		if (_userData == 2)
 		{
-			m_state.createTempPerformanceDumps(results);
-		}
-		else
-		{
-			switch (part)
-			{
-			case JePart::PatchUpper: m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchUpper); break;
-			case JePart::PatchLower: m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchLower); break;
-			case JePart::Performance: m_state.createTempPerformanceDumps(results); break;
+			std::lock_guard lock(m_stateMutex);
 
-			default: return false;
+			if (_userData == 2)
+			{
+				m_state.createTempPerformanceDumps(results);
+			}
+			else
+			{
+				switch (part)
+				{
+				case JePart::PatchUpper: m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchUpper); break;
+				case JePart::PatchLower: m_state.createTempPerformanceDumps(results, jeLib::PerformanceData::PatchLower); break;
+				case JePart::Performance: m_state.createTempPerformanceDumps(results); break;
+
+				default: return false;
+				}
 			}
 		}
 
@@ -318,8 +318,11 @@ namespace jeJucePlugin
 		{
 			std::vector<synthLib::SMidiEvent> dumps;
 
-			if (!m_state.createTempPerformanceDumps(dumps, jeLib::PerformanceData::PerformanceCommon))
-				return false;
+			{
+				std::lock_guard lock(m_stateMutex);
+				if (!m_state.createTempPerformanceDumps(dumps, jeLib::PerformanceData::PerformanceCommon))
+					return false;
+			}
 
 			// we only need the first dump as its the only one containing the name
 			auto& sysex = dumps.front();
@@ -345,10 +348,9 @@ namespace jeJucePlugin
 
 	void Controller::sendButton(const uint32_t _button, const bool _pressed) const
 	{
-		std::vector<synthLib::SMidiEvent> results;
-		jeLib::SysexRemoteControl::sendSysexButton(results, _button, _pressed);
-		for (auto& ev : results)
-			sendSysEx(ev.sysex);
+		std::vector<synthLib::SMidiEvent> events;
+		synthLib::fp::sendButton(events, _button, _pressed);
+		sendFrontPanel(std::move(events));
 	}
 
 	void Controller::parsePerformanceCommon(const pluginLib::SysEx& _sysex)
@@ -545,8 +547,23 @@ namespace jeJucePlugin
 
 	bool Controller::sendSingle(const pluginLib::SysEx& _sysex, uint32_t _part) const
 	{
-		// patches consist of multiple sysex messages, split them up again
 		synthLib::SysexBufferList sysex;
+
+		if (!createSingleMessages(sysex, _sysex, _part))
+			return false;
+
+		for (const auto& s : sysex)
+			sendSysEx(s);
+
+		sendTempPerformanceRequest();
+
+		return true;
+	}
+
+	bool Controller::createSingleMessages(synthLib::SysexBufferList& _result, const pluginLib::SysEx& _sysex, const uint32_t _part) const
+	{
+		// patches consist of multiple sysex messages, split them up again
+		auto& sysex = _result;
 		synthLib::MidiToSysex::splitMultipleSysex(sysex, _sysex);
 
 		if (sysex.empty())
@@ -567,45 +584,32 @@ namespace jeJucePlugin
 		for (auto& s : sysex)
 		{
 			const auto addr = jeLib::State::getAddress(s);
-			LOG(addr);
 
 			if (isPatch)
 			{
-				auto sendPatch = [&](jeLib::PerformanceData _upperLower)
-				{
-					const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
-					LOG(localAddr);
+				const auto upperLower = _part == 0 ? jeLib::PerformanceData::PatchUpper : jeLib::PerformanceData::PatchLower;
+				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPatchArea::BlockMask);
 
-					const auto a = 
-						static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) | 
-						static_cast<uint32_t>(_upperLower) | 
-						localAddr;
+				const auto a = 
+					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) | 
+					static_cast<uint32_t>(upperLower) | 
+					localAddr;
 
-					jeLib::State::setAddress(s, a);
-					jeLib::State::updateChecksum(s);
-
-					sendSysEx(s);
-				};
-
-				sendPatch(_part == 0 ? jeLib::PerformanceData::PatchUpper : jeLib::PerformanceData::PatchLower);
+				jeLib::State::setAddress(s, a);
 			}
 			else
 			{
 				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::PerformanceData::BlockMask);
-				LOG(localAddr);
 
 				const auto a = 
 					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) |
 					localAddr;
 
 				jeLib::State::setAddress(s, a);
-				jeLib::State::updateChecksum(s);
-
-				sendSysEx(s);
 			}
-		}
 
-		sendTempPerformanceRequest();
+			jeLib::State::updateChecksum(s);
+		}
 
 		return true;
 	}
@@ -623,6 +627,12 @@ namespace jeJucePlugin
 	void Controller::sendSystemRequest() const
 	{
 		sendSysEx(jeLib::State::createSystemRequest());
+	}
+
+	void Controller::receiveState(const synthLib::SysexBuffer& _sysex)
+	{
+		std::lock_guard lock(m_stateMutex);
+		m_state.receive(_sysex);
 	}
 
 	void Controller::setPatchName(PatchType _type, const std::string& _name)

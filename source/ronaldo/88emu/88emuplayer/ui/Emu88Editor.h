@@ -7,6 +7,8 @@
 #include "juceRmlUi/rmlDataProvider.h"
 #include "juceRmlUi/rmlInterfaces.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "juce_audio_plugin_client/Standalone/juce_StandaloneOptionsMenuHandler.h"
 #include "juce_audio_processors/juce_audio_processors.h"
 
@@ -26,6 +28,7 @@ namespace emu88Player
 	class AboutWindow;
 	class KeyboardWindow;
 	class RomRequirementsWindow;
+	class PartEditorWindow;
 
 	// One line of the keyboard help: the key or key pair, and the panel legend.
 	struct KeyboardShortcut { std::string keys, label; };
@@ -57,6 +60,9 @@ namespace emu88Player
 		// this while the player runs; an offline render calls it once per video frame instead.
 		void updateFromDevice();
 		juceRmlUi::RmlComponent* rmlComponent() const { return m_rml.get(); }
+
+		// Opens the part editor window, or brings it to the front; false closes it.
+		void showPartEditor(bool _show);
 
 	private:
 		friend class SettingsWindow;
@@ -151,16 +157,17 @@ namespace emu88Player
 		std::unique_ptr<AboutWindow> m_aboutWindow;
 		std::unique_ptr<KeyboardWindow> m_keyboardWindow;
 		std::unique_ptr<RomRequirementsWindow> m_romWindow;
+		std::unique_ptr<PartEditorWindow> m_partEditorWindow;
 		std::unique_ptr<HardwareLcd> m_lcd;
 		// The skin's second display element, which only the CM-64 shows (its LA half's service
 		// screen); null when the skin has no such element.
 		std::unique_ptr<HardwareLcd> m_lcd2;
 		std::unique_ptr<PlaylistDropTarget> m_playlistDropTarget;
 		std::vector<std::unique_ptr<PlaylistRowDrag>> m_playlistRows;
-		std::unique_ptr<juce::FileChooser> m_playlistChooser;
-		std::unique_ptr<juce::FileChooser> m_playlistFileChooser;
-		std::unique_ptr<juce::FileChooser> m_recordingChooser;
-		std::unique_ptr<juce::FileChooser> m_pcmCardChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_playlistChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_playlistFileChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_recordingChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_pcmCardChooser;
 		std::unique_ptr<TitleBarButton> m_recordButton;
 		Skin m_skin;
 		std::map<std::string, std::vector<char>> m_fileCache;

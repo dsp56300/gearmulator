@@ -1,6 +1,7 @@
 #include "plugin.h"
 #include "device.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "baseLib/os.h"
@@ -33,6 +34,12 @@ namespace synthLib
 			processMidiInEvent(m_midiInRingBuffer.pop_front());
 		}
 		m_midiInRingBuffer.push_back(_ev);
+	}
+
+	bool Plugin::setDspClockPercent(const uint32_t _percent)
+	{
+		std::lock_guard lock(m_lock);
+		return m_device && m_device->setDspClockPercent(_percent);
 	}
 
 	bool Plugin::setPreferredDeviceSamplerate(const float _samplerate)
@@ -77,7 +84,7 @@ namespace synthLib
 	}
 
 	void Plugin::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, const float _bpm,
-		const double _ppqPos, const bool _isPlaying, const bool _hasPpqPosition)
+		const double _ppqPos, const bool _isPlaying, const bool _hasPpqPosition, const HostLoop& _loop)
 	{
 		baseLib::setFlushDenormalsToZero();
 
@@ -85,7 +92,7 @@ namespace synthLib
 		TAudioOutputs outputs(_outputs);
 
 		for(size_t i=0; i<inputs.size(); ++i)
-			inputs[i] = _inputs[i] ? _inputs[i] : getDummyBuffer(_count);
+			inputs[i] = _inputs[i] ? _inputs[i] : getSilence(_count);
 
 		for(size_t i=0; i<outputs.size(); ++i)
 			outputs[i] = _outputs[i] ? _outputs[i] : getDummyBuffer(_count);
@@ -94,10 +101,16 @@ namespace synthLib
 
 		if(!m_device->isValid())
 		{
-			m_device = m_callbackDeviceInvalid(m_device);
+			if(!m_deviceInvalidReported)
+			{
+				m_deviceInvalidReported = true;
+				if(m_callbackDeviceInvalid)
+					m_callbackDeviceInvalid(m_device);
+			}
 
-			if(!m_device || !m_device->isValid())
-				return;
+			for(auto* output : outputs)
+				std::fill_n(output, _count, 0.0f);
+			return;
 		}
 
 		// Firmware can change the device clock during a patch/state change. Switching the
@@ -133,7 +146,7 @@ namespace synthLib
 		}
 
 		processMidiInEvents();
-
+		insertLoopWraps(_bpm, _ppqPos, _isPlaying, _hasPpqPosition, _count, _loop);
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
 
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
@@ -143,13 +156,12 @@ namespace synthLib
 		});
 
 		m_midiIn.clear();
-
-		// The resampler grows its latency while it prewarms, which happens right here
-		updateLatencies();
 	}
 
 	void Plugin::getMidiOut(std::vector<SMidiEvent>& _midiOut)
 	{
+		// setState() clears it on the host's thread
+		std::lock_guard lock(m_lock);
 		std::swap(_midiOut, m_midiOut);
 		m_midiOut.clear();
 	}
@@ -164,7 +176,9 @@ namespace synthLib
 		if(!_device)
 			return;
 
-		std::lock_guard lock(m_lock);
+		// Both locks at once, like setState() below takes them: holding m_lock alone here, setState() would wait for
+		// m_lockAddMidiEvent while addMidiEvent() holds that one and waits for m_lock
+		std::scoped_lock lock(m_lock, m_lockAddMidiEvent);
 
 		std::vector<uint8_t> deviceState;
 		getState(deviceState, StateTypeGlobal);
@@ -172,6 +186,7 @@ namespace synthLib
 		delete m_device;
 
 		m_device = _device;
+		m_deviceInvalidReported = false;
 
 		m_device->setSamplerate(m_deviceSamplerate);
 		if(!deviceState.empty())
@@ -189,7 +204,6 @@ namespace synthLib
 		updateDeviceLatency();
 	}
 
-#if !SYNTHLIB_DEMO_MODE
 	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type)
 	{
 		// Hosts save and load on their own thread, usually while audio is running. Without the lock, the device's state
@@ -209,9 +223,9 @@ namespace synthLib
 		return m_device->getStateWithPendingMidi(_state, _type, m_midiIn);
 	}
 
-	bool Plugin::setState(const std::vector<uint8_t>& _state) const
+	bool Plugin::setState(const std::vector<uint8_t>& _state)
 	{
-		std::lock_guard lock(m_lock);
+		std::scoped_lock lock(m_lock, m_lockAddMidiEvent);
 
 		if(!m_device)
 			return false;
@@ -232,9 +246,18 @@ namespace synthLib
 		auto state = _state;
 		state.erase(state.begin(), state.begin() + 2);
 
-		return m_device->setState(state, stateType);
+		const auto restored = m_device->setState(state, stateType);
+		if (restored)
+		{
+			// Pending events belong to the previous state. New input waits for restore.
+			m_midiInRingBuffer.clear();
+			m_midiIn.clear();
+			m_midiOut.clear();
+			m_pendingSysexInput = {};
+			m_resampler.clearMidi();
+		}
+		return restored;
 	}
-#endif
 	void Plugin::insertMidiEvent(const SMidiEvent& _ev)
 	{
 		// Find the slot before inserting: stampTransportGeneration() only writes
@@ -288,6 +311,14 @@ namespace synthLib
 			m_dummyBuffer.resize(_minimumSize);
 
 		return m_dummyBuffer.data();
+	}
+
+	const float* Plugin::getSilence(const size_t _minimumSize)
+	{
+		if(m_silence.size() < _minimumSize)
+			m_silence.resize(_minimumSize, 0.0f);
+
+		return m_silence.data();
 	}
 
 	bool Plugin::applyPendingDeviceSamplerate()
@@ -416,12 +447,15 @@ namespace synthLib
 			else if (_isPlaying && _hasPpqPosition && m_lastHasPpqPosition &&
 				_bpm > 0.0f && m_lastBpm > 0.0f && m_hostSamplerate > 0.0f)
 			{
-				const auto expected = m_lastPpqPos +
+				const auto advanced = m_lastPpqPos +
 					static_cast<double>(m_lastSampleCount) * static_cast<double>(m_lastBpm) /
 					(60.0 * static_cast<double>(m_hostSamplerate));
+				// A wrap already placed in the last block is not a jump. Should the host not have taken it after
+				// all, a second marker would only cut the notes again, so a straight run passes as well.
+				const auto wrapped = advanced - m_loopWrapPpq;
 				// About 5 ms at 120 BPM: wide enough for host float/tempo jitter,
 				// narrow enough to catch seeks, loop wraps and bounce restarts.
-				if (std::fabs(_ppqPos - expected) > 0.01)
+				if (std::fabs(_ppqPos - wrapped) > 0.01 && std::fabs(_ppqPos - advanced) > 0.01)
 					result = TransportDiscontinuity::Seek;
 			}
 		}
@@ -432,7 +466,64 @@ namespace synthLib
 		m_lastPpqPos = _ppqPos;
 		m_lastHasPpqPosition = _hasPpqPosition;
 		m_lastSampleCount = _sampleCount;
+		m_loopWrapPpq = 0.0;
 		return result;
+	}
+
+	void Plugin::insertLoopWraps(const float _bpm, const double _ppqPos, const bool _isPlaying,
+		const bool _hasPpqPosition, const size_t _sampleCount, const HostLoop& _loop)
+	{
+		const auto length = _loop.ppqEnd - _loop.ppqStart;
+
+		if (!_loop.active || !_isPlaying || !_hasPpqPosition || _bpm <= 0.0f || m_hostSamplerate <= 0.0f || length <= 0.0)
+			return;
+
+		// Only a position inside the loop goes back at its end. The tolerance is the one updateTransport() allows
+		if (_ppqPos < _loop.ppqStart - 0.01 || _ppqPos >= _loop.ppqEnd)
+			return;
+
+		const auto samplesPerQuarter = 60.0 * static_cast<double>(m_hostSamplerate) / static_cast<double>(_bpm);
+		const auto loopSamples = length * samplesPerQuarter;
+
+		// A loop shorter than a sample cannot be told apart from standing still
+		if (loopSamples < 1.0)
+			return;
+
+		// A wrap on the last sample or later is the next block's start, updateTransport() catches it there
+		for (auto wrapAt = (_loop.ppqEnd - _ppqPos) * samplesPerQuarter; wrapAt < static_cast<double>(_sampleCount); wrapAt += loopSamples)
+		{
+			// The host puts the first event of the new pass on the wrap sample rounded either way. One sample early
+			// keeps it behind the marker, while all an event of the old pass there can be is the note-off at its end
+			const auto offset = std::max(0, static_cast<int>(std::lround(wrapAt)) - 1);
+
+			SMidiEvent marker(MidiEventSource::Internal);
+			marker.type = MidiEventType::TransportDiscontinuity;
+			marker.transportGeneration = m_transportGeneration.fetch_add(1, std::memory_order_relaxed) + 1;
+			marker.offset = offset;
+
+			for (auto& event : m_midiIn)
+			{
+				if (event.offset >= offset && event.type != MidiEventType::TransportDiscontinuity)
+					stampTransportGeneration(event);
+			}
+
+			const auto it = std::find_if(m_midiIn.begin(), m_midiIn.end(), [offset](const SMidiEvent& _event)
+			{
+				return _event.offset >= offset && _event.type != MidiEventType::TransportDiscontinuity;
+			});
+			const auto markerIt = m_midiIn.insert(it, marker);
+
+			// Where the host is from there on, the start of the loop, so that the arpeggiator follows the wrap on its
+			// sample and not with the next block
+			SMidiEvent transport(MidiEventSource::Internal);
+			transport.type = MidiEventType::HostTransport;
+			transport.transport = {_loop.ppqStart - (wrapAt - offset) / samplesPerQuarter, _bpm, true, true};
+			transport.offset = offset;
+			stampTransportGeneration(transport);
+			m_midiIn.insert(markerIt + 1, transport);
+
+			m_loopWrapPpq += length;
+		}
 	}
 
 	void Plugin::setBlockSize(const uint32_t _blockSize)

@@ -112,7 +112,7 @@ Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool 
 		}
 	}
 
-	m_pendingSysexInput.reserve(64);
+	m_pendingInput.reserve(64);
 }
 
 void Microcontroller::sendInitControlCommands(uint8_t _masterVolume)
@@ -152,8 +152,8 @@ void Microcontroller::sendInitControlCommands(uint8_t _masterVolume)
 			0xF00020, 0x330110, 0x734034, 0x7fF77f, // Logo Groove = $7f
 			0xF00020, 0x330110, 0x734035, 0x40F740, // Random Patch Generator Depth = $40
 			0xF00020, 0x330110, 0x734036, 0x0CF70C, // Random Patch Generator Amount = $54
-			0xF00020, 0x330110, 0x73403B, 0x01F701, // USB Output Midi Data Cable Number = 1
-			0xF00020, 0x330110, 0x73403C, 0x01F701, // USB Output Panel Data Cable Number = 1
+			0xF00020, 0x330110, 0x73403B, USB_CABLE_MIDI_DATA << 16 | 0xF700 | USB_CABLE_MIDI_DATA,		// USB Output Midi Data Cable Number
+			0xF00020, 0x330110, 0x73403C, USB_CABLE_PANEL_DATA << 16 | 0xF700 | USB_CABLE_PANEL_DATA,	// USB Output Panel Data Cable Number
 			0xF00020, 0x330110, 0x73403E, 0x40F740, // Keyboard Param Velocity Curve = $40
 			0xF00020, 0x330110, 0x734040, 0x01F701, // Keyboard Param Local On = On
 			0xF00020, 0x330110, 0x734041, 0x00F700, // Keyboard Param Channel Mode = 0
@@ -379,6 +379,11 @@ void Microcontroller::sendControlCommand(const ControlCommand _command, const ui
 
 void Microcontroller::setSamplerate(const float _samplerate)
 {
+	// The TI's command. The A, B and C run at the fixed 46875 Hz of their crystal and take it as a page D change of the
+	// single, after which the single in the DSP no longer plays a note until one of its parameters changes
+	if(!m_rom.isTIFamily())
+		return;
+
 	const auto sr = static_cast<int>(std::floor(_samplerate + 0.5f));
 	
 	/*
@@ -519,6 +524,26 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 
 bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/* = nullptr*/)
 {
+	// the audio thread sends MIDI, the DSP thread writes the edit buffers in process()
+	std::lock_guard lock(m_mutex);
+
+	// The DSP loses a parameter change that reaches it while it still takes a preset, and the preset it sends back
+	// replaces the edit buffer without it. So channel messages wait until the DSP confirmed the preset, in the
+	// order they arrived, like everything behind them (BUG-10425)
+	if(_ev.source != MidiEventSource::Internal && (_ev.a & 0xf0) != 0xf0)
+	{
+		if(!m_pendingInput.empty() || presetWriteInProgress())
+		{
+			m_pendingInput.push_back({_ev, _fpState});
+			return true;
+		}
+	}
+
+	return processMIDI(_ev, _fpState);
+}
+
+bool Microcontroller::processMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState)
+{
 	const uint8_t channel = _ev.a & 0x0f;
 	const uint8_t status = _ev.a & 0xf0;
 
@@ -610,6 +635,8 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 {
 	if (_data.size() < 7)
 		return true;	// invalid sysex or not directed to us
+
+	std::lock_guard lock(m_mutex);
 
 	const auto manufacturerA = _data[1];
 	const auto manufacturerB = _data[2];
@@ -767,13 +794,19 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 
 	auto enqueue = [&]
 	{
-		m_pendingSysexInput.emplace_back(_source, _data);
+		SMidiEvent ev(_source);
+		ev.sysex = _data;
+		m_pendingInput.push_back({std::move(ev), nullptr});
 		return false;
 	};
 
 	// Requests wait for pending preset writes and are answered later via MIDI. getState() cannot wait, it needs the
 	// answer now and a host may save before any audio ran. The edit buffers already hold what is being written
 	const bool canWait = _source != MidiEventSource::Internal;
+
+	// nothing overtakes MIDI that waits already
+	if(canWait && !m_pendingInput.empty())
+		return enqueue();
 
 	switch (cmd)
 	{
@@ -866,6 +899,10 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 		case PAGE_C:
 		case PAGE_D:
 			{
+				// a parameter change waits for the preset like one that comes as a controller
+				if(canWait && presetWriteInProgress())
+					return enqueue();
+
 				const auto page = static_cast<Page>(cmd);
 
 				if(!isPageSupported(page))
@@ -899,6 +936,13 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 					default:
 						return true;
 					}
+				}
+
+				// the TX parser tells MIDI output from echoed parameter changes by these, see USB_CABLE_PANEL_DATA
+				if(m_rom.isTIFamily() && page == globalSettingsPage() && (param == MIDI_DATA_CABLE || param == PANEL_DATA_CABLE))
+				{
+					LOG("Ignoring a change of USB cable " << static_cast<int>(param) << " to " << static_cast<int>(value));
+					return true;
 				}
 
 				if(!m_rom.isTIFamily() && page == PAGE_A && m_globalSettings[PLAY_MODE] != PlayModeSingle)
@@ -1011,6 +1055,8 @@ bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _re
 
 bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data)
 {
+	std::lock_guard lock(m_mutex);
+
 	_data[0] = 0;
 
 	if (_bank == BankNumber::EditBuffer)
@@ -1032,6 +1078,8 @@ bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& 
 
 bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data)
 {
+	std::lock_guard lock(m_mutex);
+
 	if (_bank == BankNumber::EditBuffer)
 	{
 		receiveUpgradedPreset();
@@ -1051,6 +1099,8 @@ bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset&
 
 bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data)
 {
+	std::lock_guard lock(m_mutex);
+
 	if (_bank != BankNumber::EditBuffer) 
 	{
 		const auto bank = toArrayIndex(_bank);
@@ -1077,6 +1127,8 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 
 bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data)
 {
+	std::lock_guard lock(m_mutex);
+
 	if(_bank == BankNumber::A && _program < m_multis.size())
 	{
 		m_multis[_program] = _data;
@@ -1176,6 +1228,10 @@ void Microcontroller::process()
 
 	std::lock_guard lock(m_mutex);
 
+	// read what the DSPs send while they run, not only after a block: a DSP whose HDI08 output is full stops until it is
+	// read, while the audio thread waits for its audio. The echoes of a burst of parameter changes filled it in one block
+	processHdi08Tx(m_dspMidiOutput);
+
 	if(m_loadingState || m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
 		return;
 
@@ -1187,9 +1243,11 @@ void Microcontroller::process()
 	sendPreset(preset.program, preset.data, preset.isMulti);
 }
 
-#if !SYNTHLIB_DEMO_MODE
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
 {
+	// held for both requests, the DSP thread must not change the edit buffers in between
+	std::lock_guard lock(m_mutex);
+
 	const auto deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
 
 	std::vector<SMidiEvent> responses;
@@ -1243,6 +1301,9 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 	if(_events.empty())
 		return false;
 
+	// held for the whole load, process() on the DSP thread must not send presets while it runs
+	std::lock_guard lock(m_mutex);
+
 	// delay all preset loads until everything is loaded
 	m_loadingState = true;
 
@@ -1265,11 +1326,10 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 
 	return true;
 }
-#endif
 
 void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {
-	m_hdi08.addHDI08(_dsp.getHDI08());
+	m_hdi08.addHDI08(_dsp.getHDI08(), _dsp.getMemory());
 	m_hdi08TxParsers.emplace_back(*this);
 	m_midiQueues.emplace_back(_dsp, m_hdi08.getQueue(m_hdi08.size()-1), _useEsaiBasedMidiTiming, m_rom.isTIFamily(), m_rom.getModel() == DeviceModel::A);
 }
@@ -1285,9 +1345,12 @@ void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEve
 		{
 			if(parser.append(hdi08.readTX()))
 			{
-				const auto midi = parser.getMidiData();
-				if(i == 0)
-					_midiEvents.insert(_midiEvents.end(), midi.begin(), midi.end());
+				// all DSPs echo the same parameter changes, but each plays its own parts (notes of the arpeggiator)
+				for(const auto& e : parser.getMidiData())
+				{
+					if(i == 0 || e.sysex.empty())
+						_midiEvents.push_back(e);
+				}
 				parser.clearMidiData();
 			}
 		}
@@ -1297,25 +1360,33 @@ void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEve
 void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 {
 	std::lock_guard lock(m_mutex);
-	processHdi08Tx(_midiOut);
+	processHdi08Tx(m_dspMidiOutput);
+	_midiOut.insert(_midiOut.end(), m_dspMidiOutput.begin(), m_dspMidiOutput.end());
+	m_dspMidiOutput.clear();
 
-	if (!m_pendingSysexInput.empty())
+	// what the DSP sent back of the preset it took is the edit buffer, before anything that came after it applies
+	receiveUpgradedPreset();
+
+	if (!m_pendingInput.empty())
 	{
-		uint32_t eraseCount = 0;
+		// taken out of the queue, so that what runs now does not wait behind itself. A preset write it starts stops
+		// the rest, which goes back
+		auto pending = std::move(m_pendingInput);
+		m_pendingInput.clear();
 
-		for (const auto& input : m_pendingSysexInput)
+		size_t count = 0;
+
+		for (; count < pending.size() && !presetWriteInProgress(); ++count)
 		{
-			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
-				break;
+			const auto& input = pending[count];
 
-			sendSysex(input.second, _midiOut, input.first);
-			++eraseCount;
+			if (input.ev.sysex.empty())
+				processMIDI(input.ev, input.fpState);
+			else
+				sendSysex(input.ev.sysex, _midiOut, input.ev.source);
 		}
 
-		if(eraseCount == m_pendingSysexInput.size())
-			m_pendingSysexInput.clear();
-		else if(eraseCount > 0)
-			m_pendingSysexInput.erase(m_pendingSysexInput.begin(), m_pendingSysexInput.begin() + eraseCount);
+		m_pendingInput.insert(m_pendingInput.begin(), std::make_move_iterator(pending.begin() + static_cast<ptrdiff_t>(count)), std::make_move_iterator(pending.end()));
 	}
 
 	if(!m_midiOutput.empty())
@@ -1329,6 +1400,28 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 {
 	for (auto& midiQueue : m_midiQueues)
 		midiQueue.sendPendingMidiEvents(_maxOffset);
+}
+
+bool Microcontroller::enableMidiTimestamps()
+{
+	bool enabled = true;
+	for (auto& midiQueue : m_midiQueues)
+		enabled &= midiQueue.enableTimestamps();
+	return enabled;
+}
+
+void Microcontroller::enableHdi08FlowControl()
+{
+	for (size_t i=0; i<m_hdi08.size(); ++i)
+		m_hdi08.getQueue(i).enableFlowControl(m_rom.isTIFamily());
+}
+
+void Microcontroller::refillMidiQueues()
+{
+	std::lock_guard lock(m_mutex);
+
+	for (auto& midiQueue : m_midiQueues)
+		midiQueue.refill();
 }
 
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
@@ -1357,6 +1450,8 @@ uint8_t Microcontroller::calcChecksum(const synthLib::SysexBuffer& _data, const 
 
 bool Microcontroller::dspHasBooted() const
 {
+	std::lock_guard lock(m_mutex);
+
 	for (const auto &p : m_hdi08TxParsers)
 	{
 		if(!p.hasDspBooted())
@@ -1469,6 +1564,11 @@ bool Microcontroller::waitingForPresetReceiveConfirmation() const
 			return true;
 	}
 	return false;
+}
+
+bool Microcontroller::presetWriteInProgress() const
+{
+	return !m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation();
 }
 
 void Microcontroller::receiveUpgradedPreset()

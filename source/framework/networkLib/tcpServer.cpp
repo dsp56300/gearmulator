@@ -4,11 +4,48 @@
 
 #include "ptypes/pinet.h"
 
+#ifndef _WIN32
+#include <netinet/in.h>
+#endif
+
 #include <stdexcept>
 
 namespace networkLib
 {
-	TcpServer::TcpServer(OnConnectedFunc _onConnected, const int _tcpPort)
+	namespace
+	{
+		// Binds 0.0.0.0 without ever listening, so it accepts nothing and raises no firewall prompt. A loopback
+		// server holds one on its port: on Windows and macOS a 127.0.0.1 listener and a 0.0.0.0 one can share a
+		// port, so without it a loopback server and an older build listening on all interfaces would both own it
+		class PortReservation : public ptypes::ipstmserver
+		{
+		public:
+			void reserve(const int _port)
+			{
+				bindall(_port);
+				open();
+			}
+
+		protected:
+			void dobind(ptypes::ipbindinfo* _b) override
+			{
+#ifndef _WIN32
+				// as ptypes does for its listeners: a restart must not fail on connections still in TIME_WAIT
+				int one = 1;
+				::setsockopt(_b->handle, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<ptypes::sockval_t>(&one), sizeof(one));
+#endif
+				sockaddr_in sa{};
+				sa.sin_family = AF_INET;
+				sa.sin_port = htons(static_cast<ptypes::ushort>(_b->get_port()));
+				sa.sin_addr.s_addr = _b->get_ip();
+
+				if (::bind(_b->handle, reinterpret_cast<sockaddr*>(&sa), sizeof(sa)) != 0)
+					error(*_b, ptypes::usockerrno(), "Couldn't bind address");
+			}
+		};
+	}
+
+	TcpServer::TcpServer(OnConnectedFunc _onConnected, const int _tcpPort, const bool _loopbackOnly)
 		: TcpConnection(std::move(_onConnected))
 		, m_port(_tcpPort)
 		, m_listener(std::make_unique<ptypes::ipstmserver>())
@@ -24,7 +61,19 @@ namespace networkLib
 		// McpServer::start's port-retry loop) only have to handle std::exception.
 		try
 		{
-			m_listener->bindall(m_port);
+			if (_loopbackOnly)
+			{
+				// before the listener: Linux lets the reservation join a port only while nothing listens on it
+				auto reservation = std::make_unique<PortReservation>();
+				reservation->reserve(m_port);
+				m_portReservation = std::move(reservation);
+
+				m_listener->bind(ptypes::ipaddress(127, 0, 0, 1), m_port);
+			}
+			else
+			{
+				m_listener->bindall(m_port);
+			}
 			// poll() with a 0 timeout triggers the lazy open()/bind() in
 			// ipsvbase. open() itself is protected, so this is the cheapest
 			// public call that forces the actual bind() to run now.

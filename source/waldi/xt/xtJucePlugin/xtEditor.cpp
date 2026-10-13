@@ -6,13 +6,13 @@
 
 #include "xtArp.h"
 #include "xtController.h"
-#include "xtFocusedParameter.h"
-#include "xtFrontPanel.h"
+#include "xtLcd.h"
 #include "xtPatchManager.h"
 #include "xtLib/xtMidiTypes.h"
 #include "xtWaveEditor.h"
 
-#include "jucePluginEditorLib/midiPorts.h"
+
+#include "jucePluginEditorLib/frontPanel.h"
 
 #include "juceRmlUi/rmlElemButton.h"
 
@@ -28,9 +28,22 @@ namespace xtJucePlugin
 	{
 		jucePluginEditorLib::Editor::create();
 
-		m_focusedParameter.reset(new FocusedParameter(m_controller, *this));
+		if (auto* lcdArea = findChild("lcdArea", false))
+			m_lcd.reset(new XtLcd(lcdArea, m_controller));
 
-		m_frontPanel.reset(new FrontPanel(*this, m_controller));
+		jucePluginEditorLib::FrontPanel::Binding binding;
+		binding.lcdCols = 40;
+		binding.lcdRows = 2;
+		binding.lcdSink = [this](const std::vector<uint8_t>& _cells)
+		{
+			std::array<uint8_t, 80> text{};
+			std::copy_n(_cells.begin(), text.size(), text.begin());
+			if (m_lcd)
+				m_lcd->setText(text);
+		};
+		binding.leds = {"midiLed"};	// the device has more LEDs (xt::LedType), the skins show this one
+
+		m_frontPanel.reset(new jucePluginEditorLib::FrontPanel(*this, std::move(binding)));
 
 		m_parts.reset(new Parts(*this));
 
@@ -52,7 +65,8 @@ namespace xtJucePlugin
 		m_playModeChangeListener = [this, updateMultiButton](const bool& _isMultiMode)
 		{
 			updateMultiButton(_isMultiMode);
-			m_frontPanel->getLcd()->refresh();
+			if (m_lcd)
+				m_lcd->refresh();
 
 			if(!_isMultiMode)
 				m_parts->selectPart(0);
@@ -85,17 +99,12 @@ namespace xtJucePlugin
 
 		if (auto* waveEditorParent = findChild("waveEditorContainer"))
 		{
-			const auto dir = getProcessor().getDataFolder(false) + "wavetables/";
-
-			m_waveEditor = new WaveEditor(*this, waveEditorParent, juce::File(dir));
-			getXtController().setWaveEditor(m_waveEditor);
+			m_waveEditor = new WaveEditor(*this, waveEditorParent);
 		}
 		else if (auto* waveEditorButtonParent = findChild("waveEditorButtonParent"))
 		{
 			waveEditorButtonParent->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
 		}
-
-		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
 		m_arp.reset(new Arp(*this));
 	}
@@ -108,13 +117,8 @@ namespace xtJucePlugin
 			delete m_waveEditor;
 			m_waveEditor = nullptr;
 		}
-		getXtController().setWaveEditor(nullptr);
 		m_frontPanel.reset();
-	}
-
-	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
-	{
-		return new PatchManager(*this, _parent);
+		m_lcd.reset();
 	}
 
 	void Editor::initSkinConverterOptions(rmlPlugin::skinConverter::SkinConverterOptions& _skinConverterOptions)
@@ -122,24 +126,18 @@ namespace xtJucePlugin
 		jucePluginEditorLib::Editor::initSkinConverterOptions(_skinConverterOptions);
 
 		_skinConverterOptions.includeStyles.push_back("xt-waveeditor-defaults.rcss");
-
-		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
-	}
-
-	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
-	{
-		return {"Xenia",
-			"Xenia runs in demo mode\n"
-			"\n"
-			"The following features are disabled:\n"
-			"- Saving/Exporting Presets\n"
-			"- Plugin state is not preserved"
-		};
 	}
 
 	XtLcd* Editor::getLcd() const
 	{
-		return m_frontPanel->getLcd();
+		// null while the base create() runs
+		return m_lcd.get();
+	}
+
+	void Editor::onFocusedParameterChanged(const std::string& _name, const std::string& _value)
+	{
+		if (auto* lcd = getLcd())
+			lcd->setCurrentParameter(_name, _value);
 	}
 
 	Parts& Editor::getParts() const
@@ -155,8 +153,8 @@ namespace xtJucePlugin
 		if(m_parts)
 			m_parts->updateUi();
 
-		if(m_frontPanel)
-			m_frontPanel->getLcd()->refresh();
+		if(m_lcd)
+			m_lcd->refresh();
 	}
 
 	void Editor::changeWave(const int _step) const

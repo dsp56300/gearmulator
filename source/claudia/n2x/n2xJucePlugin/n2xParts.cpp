@@ -3,6 +3,10 @@
 #include "n2xController.h"
 #include "n2xEditor.h"
 
+#include "jucePluginLib/parameter.h"
+
+#include "RmlUi/Core/Element.h"
+
 namespace n2xJucePlugin
 {
 	Parts::Parts(Editor& _editor): m_editor(_editor)
@@ -12,10 +16,20 @@ namespace n2xJucePlugin
 		m_parts[2] = std::make_unique<Part>(_editor.findChild("PerfSlotActiveC"), _editor);
 		m_parts[3] = std::make_unique<Part>(_editor.findChild("PerfSlotActiveD"), _editor);
 
-		m_partLeds[0].reset(new PartLed(_editor, 0));
-		m_partLeds[1].reset(new PartLed(_editor, 1));
-		m_partLeds[2].reset(new PartLed(_editor, 2));
-		m_partLeds[3].reset(new PartLed(_editor, 3));
+		// lit for MIDI channel values 0-15, dimmed for 1-15
+		for(uint8_t i=0; i<static_cast<uint8_t>(m_partLeds.size()); ++i)
+		{
+			const auto name = std::string("PerfMidiChannel") + static_cast<char>('A' + i);
+
+			m_partLeds[i].reset(new jucePluginEditorLib::ParameterDrivenLed(_editor, name, name, 0, [](const pluginLib::Parameter& _p)
+			{
+				return _p.getUnnormalizedValue() <= 15;
+			}, {}, [](Rml::Element& _led, const pluginLib::Parameter& _p)
+			{
+				const auto ch = _p.getUnnormalizedValue();
+				_led.SetProperty(Rml::PropertyId::Opacity, Rml::Property(ch > 0 && ch <= 15 ? 0.5f : 1.0f, Rml::Unit::NUMBER));
+			}));
+		}
 
 		for(uint8_t p=0; p<static_cast<uint8_t>(m_parts.size()); ++p)
 			m_parts[p]->initalize(p);

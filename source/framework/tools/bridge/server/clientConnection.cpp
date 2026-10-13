@@ -3,6 +3,7 @@
 #include "server.h"
 #include "bridgeLib/error.h"
 #include "networkLib/logging.h"
+#include "baseLib/filesystem.h"
 
 namespace bridgeServer
 {
@@ -28,6 +29,9 @@ namespace bridgeServer
 		}
 
 		m_midiIn.reserve(1024);
+
+		// last, the thread dispatches to us and fills our members as soon as the client's first command is in
+		start();
 	}
 
 	ClientConnection::~ClientConnection()
@@ -136,10 +140,11 @@ namespace bridgeServer
 
 	void ClientConnection::sendDeviceState(const synthLib::StateType _type)
 	{
+		std::scoped_lock lock(m_mutexDeviceState);
+
 		if(!m_device)
 			return;
 
-		std::scoped_lock lock(m_mutexDeviceState);
 		auto& state = getDeviceState();
 		state.type = _type;
 
@@ -177,6 +182,12 @@ namespace bridgeServer
 		TcpConnection::handleDeviceState(_in);
 	}
 
+	bridgeLib::DeviceState ClientConnection::getLastDeviceState()
+	{
+		std::scoped_lock lock(m_mutexDeviceState);
+		return getDeviceState();
+	}
+
 	void ClientConnection::handleException(const networkLib::NetException& _e)
 	{
 		exit(true);
@@ -191,6 +202,7 @@ namespace bridgeServer
 			return;
 		}
 
+		std::scoped_lock lock(m_mutexDeviceState);
 		m_device->setSamplerate(_params.samplerate);
 		sendDeviceInfo();
 	}
@@ -203,6 +215,7 @@ namespace bridgeServer
 			return;
 		}
 
+		std::scoped_lock lock(m_mutexDeviceState);
 		m_device->setDspClockPercent(_params.percent);
 		sendDeviceInfo();
 	}
@@ -215,6 +228,7 @@ namespace bridgeServer
 			return;
 		}
 
+		std::scoped_lock lock(m_mutexDeviceState);
 		m_device->setStateFromUnknownCustomData(_params.data);
 		sendDeviceInfo();
 	}
@@ -242,10 +256,15 @@ namespace bridgeServer
 		if(m_pluginDesc.pluginVersion == 0 || m_deviceCreateParams.romData.empty())
 			return;
 
-		std::string error;
-		m_device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc, error);
+		// a folder of its own on this machine, as a local device has the plugin's data folder. Not inside the ROM folder,
+		// the pool loads every file there (EMU-100: JE8086 keeps its RAM in roms/ram_dump.bin of it)
+		m_deviceCreateParams.homePath = m_server.getConfig().devicesPath + m_pluginDesc.pluginName + '/';
+		baseLib::filesystem::createDirectory(m_deviceCreateParams.homePath + "roms/");
 
-		if(!m_device)
+		std::string error;
+		auto* device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc, error);
+
+		if(!device)
 		{
 			errorClose(bridgeLib::ErrorCode::FailedToCreateDevice, error);
 			return;
@@ -256,6 +275,10 @@ namespace bridgeServer
 
 		// recover a previously lost connection if possible
 		const auto cachedDeviceState = m_server.getCachedDeviceState(d.sessionId);
+
+		std::scoped_lock lock(m_mutexDeviceState);
+
+		m_device = device;
 
 		if(cachedDeviceState.isValid())
 		{

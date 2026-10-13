@@ -107,7 +107,8 @@ namespace pluginLib::patchDB
 		virtual bool loadData(DataList& _results, const DataSourceNodePtr& _ds);
 		virtual bool loadData(DataList& _results, const DataSource& _ds);
 
-		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) = 0;
+		// a product with ROM data sources returns their patches
+		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) { return false; }
 		virtual bool loadFile(DataList& _results, const std::string& _file);
 		virtual bool loadLocalStorage(DataList& _results, const DataSource& _ds);
 		virtual bool loadFolder(const DataSourceNodePtr& _folder);
@@ -121,7 +122,7 @@ namespace pluginLib::patchDB
 		{
 			return _a == _b || _a->hash == _b->hash;
 		}
-		virtual void processDirty(const Dirty& _dirty) const = 0;
+		virtual void processDirty(const Dirty& _dirty) = 0;
 
 	protected:
 		virtual void onLoadFinished() {}
@@ -209,7 +210,9 @@ namespace pluginLib::patchDB
 		bool m_loading = true;
 		bool m_cacheDirty = false;
 
-		// pending MIDI bank assignments from JSON, applied when datasources become available
-		std::map<DataSource, uint32_t> m_pendingMidiBankAssignments;
+		// MIDI bank assignments waiting for their datasource, by datasource and its ROM: from the JSON, and those of ROM
+		// banks that went away, the banks of another ROM for example. Applied when the datasource is added
+		using MidiBankKey = std::pair<DataSource, std::string>;
+		std::map<MidiBankKey, uint32_t> m_pendingMidiBankAssignments;
 	};
 }

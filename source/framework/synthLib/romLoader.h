@@ -15,6 +15,20 @@ namespace synthLib
 		static std::vector<std::string> findFiles(const std::string& _extension, size_t _minSize, size_t _maxSize);
 		static std::vector<std::string> findFiles(const std::string& _path, const std::string& _extension, size_t _minSize, size_t _maxSize);
 
+		// The first file of findFiles() that makes a valid TRom (constructed from the path, has isValid()), or TRom{}.
+		// Keeps the order of findFiles(): the hash of the chosen ROM is part of the plugin state
+		template<typename TRom>
+		static TRom findFirstValid(const std::string& _extension, const size_t _minSize, const size_t _maxSize)
+		{
+			for (const auto& file : findFiles(_extension, _minSize, _maxSize))
+			{
+				TRom rom(file);
+				if(rom.isValid())
+					return rom;
+			}
+			return {};
+		}
+
 		// As findFiles, but each search path is descended into, and each result
 		// carries the size that was looked up on the way. Use where ROMs are
 		// identified by content rather than by name and location, so a user can

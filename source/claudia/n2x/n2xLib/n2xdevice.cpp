@@ -6,10 +6,9 @@
 namespace n2x
 {
 	Device::Device(const synthLib::DeviceCreateParams& _params)
-		: synthLib::Device(_params)
+		: DspClockDevice(_params)
 		, m_hardware(_params.romData, _params.romName)
 		, m_state(&m_hardware, &getMidiTranslator())
-		, m_midiParser(synthLib::MidiEventSource::Device)
 	{
 	}
 
@@ -43,29 +42,17 @@ namespace n2x
 		return 4;
 	}
 
-	bool Device::setDspClockPercent(const uint32_t _percent)
+	void Device::getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const
 	{
-		bool res = m_hardware.getDSPA().getPeriph().getEsaiClock().setSpeedPercent(_percent);
-		res &= m_hardware.getDSPB().getPeriph().getEsaiClock().setSpeedPercent(_percent);
-		return res;
-	}
-
-	uint32_t Device::getDspClockPercent() const
-	{
-		return const_cast<Hardware&>(m_hardware).getDSPA().getPeriph().getEsaiClock().getSpeedPercent();
-	}
-
-	uint64_t Device::getDspClockHz() const
-	{
-		return const_cast<Hardware&>(m_hardware).getDSPA().getPeriph().getEsaiClock().getSpeedInHz();
+		auto& hw = const_cast<Hardware&>(m_hardware);
+		_clocks.push_back(&hw.getDSPA().getPeriph().getEsaiClock());
+		_clocks.push_back(&hw.getDSPB().getPeriph().getEsaiClock());
 	}
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		m_hardware.getMidi().read(m_midiOutBuffer);
-		m_midiParser.write(m_midiOutBuffer);
-		m_midiOutBuffer.clear();
-		m_midiParser.getEvents(_midiOut);
+		m_hardware.getMidi().read(m_midiOutBytes);
+		parseMidiOutBytes(_midiOut);
 
 		for (const auto& midiOut : _midiOut)
 		{
@@ -89,9 +76,6 @@ namespace n2x
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
 	{
 		m_hardware.processAudio(_outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());
-		m_numSamplesProcessed += static_cast<uint32_t>(_samples);
-
-//		m_hardware.setButtonState(ButtonType::OscSync, (m_numSamplesProcessed & 65535) > 2048);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
@@ -104,7 +88,7 @@ namespace n2x
 
 			m_state.receive(_response, _ev);
 			auto e = _ev;
-			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
+			stampOffset(e);
 			m_hardware.sendMidi(e);
 		}
 		else

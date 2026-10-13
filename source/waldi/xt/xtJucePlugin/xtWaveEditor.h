@@ -8,10 +8,7 @@
 
 #include "juceRmlUi/rmlMenu.h"
 
-namespace juce
-{
-	class FileChooser;
-}
+#include "juceUiLib/messageBox.h"
 
 namespace Rml
 {
@@ -31,7 +28,7 @@ namespace xtJucePlugin
 	class WaveEditor
 	{
 	public:
-		explicit WaveEditor(Editor& _editor, Rml::Element* _parent, const juce::File& _cacheDir);
+		explicit WaveEditor(Editor& _editor, Rml::Element* _parent);
 		WaveEditor() = delete;
 		WaveEditor(const WaveEditor&) = delete;
 		WaveEditor(WaveEditor&&) = delete;
@@ -43,8 +40,6 @@ namespace xtJucePlugin
 		void initialize();
 		void destroy();
 
-		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const synthLib::SysexBuffer& _msg);
-		void onReceiveTable(const pluginLib::MidiPacket::Data& _data, const synthLib::SysexBuffer& _msg);
 
 		const WaveEditorData& getData() const { return m_data; }
 		WaveEditorData& getData() { return m_data; }
@@ -111,7 +106,7 @@ namespace xtJucePlugin
 		std::unique_ptr<GraphPhase> m_graphPhase;
 		std::unique_ptr<GraphTime> m_graphTime;
 
-		WaveEditorData m_data;
+		WaveEditorData& m_data;	// owned by the controller
 		GraphData m_graphData;
 
 		bool m_wasVisible = false;
@@ -119,8 +114,9 @@ namespace xtJucePlugin
 		xt::TableId m_selectedTable;
 		xt::WaveId m_selectedWave;
 
-		std::unique_ptr<juce::FileChooser> m_fileChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_fileChooser;
 
 		baseLib::EventListener<juceRmlUi::RmlComponent*> m_onUpdate;
+		baseLib::EventListener<xt::WaveId> m_onWaveChanged;
 	};
 }

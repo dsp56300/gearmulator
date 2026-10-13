@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <cfloat>
 
 #include "frameRateLimiter.h"
 #include "juceRmlComponentConfig.h"
@@ -60,6 +61,10 @@ namespace juceRmlUi
 		baseLib::Event<RmlComponent*> evPostUpdate;
 		// Fired when the component loses keyboard focus, after every key RmlUi still saw as held has been released.
 		baseLib::Event<RmlComponent*> evFocusLost;
+		// Fired asynchronously, after layout, when the size of the <body> changed: in the fixed window mode when the
+		// skin gave it a different explicit size, for example by toggling a class, and getDocumentSize() already
+		// returns the new size; in the free window mode whenever the window or the zoom changed the room it has.
+		baseLib::Event<RmlComponent*> evDocumentSizeChanged;
 
 		using ContextCreatedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
 		using DocumentLoadFailedCallback = std::function<void(RmlComponent&, Rml::Context&)>;
@@ -120,6 +125,13 @@ namespace juceRmlUi
 		void itemDragExit(const SourceDetails& _dragSourceDetails) override;
 		void itemDropped(const SourceDetails& _dragSourceDetails) override;
 		bool shouldDropFilesWhenDraggedExternally(const SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) override;
+		void dragOperationEnded(const SourceDetails& _sourceDetails) override;
+		void releaseLostMouseButtons(const juce::MouseEvent& _event);
+
+		// Files dropped on this component that no element in the document wanted. The component
+		// is interested in every file drag, so there is nothing above it that JUCE would ask next.
+		void setUnhandledFilesCallback(RmlDrag::UnhandledFilesCallback _callback) { m_drag.setUnhandledFilesCallback(std::move(_callback)); }
+		bool wasLastFileDropHandled() const noexcept { return m_drag.wasLastDropHandled(); }
 
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		juce::Point<int> toRmlPosition(int _x, int _y) const;
@@ -129,7 +141,18 @@ namespace juceRmlUi
 		// true if the editor is actually on screen, i.e. its window exists, is visible and is not minimized
 		bool isOnScreen() const;
 
+		// The size the window has at a scale of 1: the body size in the fixed window mode, the default size from
+		// the windowWidth and windowHeight attributes of the body in the free one
 		Rml::Vector2i getDocumentSize() const { return m_documentSize; }
+
+		// <body windowMode="free">: the body follows the window instead of the window following the body, so a
+		// larger window means more room. The scale is set from outside instead of derived from the window width.
+		bool isFreeWindowMode() const { return m_freeWindowMode; }
+		void setFreeWindowScale(float _scale);
+		// Window size limits from min-width, min-height, max-width and max-height of the body, in the units of
+		// getDocumentSize(). A limit that is not given is 0 for the minimum and FLT_MAX for the maximum.
+		Rml::Vector2f getMinimumDocumentSize() const { return m_minimumDocumentSize; }
+		Rml::Vector2f getMaximumDocumentSize() const { return m_maximumDocumentSize; }
 
 		void resize(int _width, int _height);
 
@@ -167,6 +190,8 @@ namespace juceRmlUi
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
 		void destroyRmlContext();
 		void updateRmlContextDimensions();
+		bool updateDocumentSize();
+		bool updateDocumentLimits();
 		void startNextFrameTimer();
 		bool dispatchFrameEvent();
 
@@ -211,11 +236,24 @@ namespace juceRmlUi
 		DocumentCreatedCallback m_onDocumentCreated;
 
 		RmlDrag m_drag;
+
+		// The buttons the context was told are down, a bit per Rml mouse button. A release can get lost on the way
+		// (a host that activates its window during the click, a drag session of the system), see releaseLostMouseButtons
+		uint32_t m_pressedMouseButtons = 0;
 		juce::ModifierKeys m_currentModifierKeys;
 
 		bool m_updating = true;
 
 		Rml::Vector2i m_documentSize{0,0};
+		// The body size in dp and the dp ratio m_documentSize was measured at, to tell a size the skin changed
+		// from one that only follows the current scale
+		Rml::Vector2f m_documentSizeDp{0,0};
+		float m_documentDpRatio = 1.0f;
+
+		bool m_freeWindowMode = false;
+		float m_freeWindowScale = 1.0f;
+		Rml::Vector2f m_minimumDocumentSize{0, 0};
+		Rml::Vector2f m_maximumDocumentSize{FLT_MAX, FLT_MAX};
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)

@@ -58,9 +58,9 @@ namespace bridgeLib
 
 	struct ServerInfo : CommandStruct
 	{
-		uint32_t protocolVersion;
-		uint32_t portUdp;
-		uint32_t portTcp;
+		uint32_t protocolVersion = 0;
+		uint32_t portUdp = 0;
+		uint32_t portTcp = 0;
 
 		baseLib::BinaryStream& write(baseLib::BinaryStream& _s) const override;
 		baseLib::BinaryStream& read(baseLib::BinaryStream& _s) override;

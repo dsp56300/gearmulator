@@ -1,7 +1,11 @@
 #include "PluginProcessor.h"
 
-#include "PluginEditorState.h"
+#include "xtEditor.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEntry.h"
+#include "skins.h"
 #include "xtController.h"
+#include "xtPatchManager.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
@@ -13,19 +17,6 @@
 
 class Controller;
 
-namespace
-{
-	juce::PropertiesFile::Options getOptions()
-	{
-		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300EmulatorXenia";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300EmulatorXenia";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorXenia";
-		return opts;
-	}
-}
-
 namespace xtJucePlugin
 {
 	AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
@@ -35,28 +26,19 @@ namespace xtJucePlugin
 #if JucePlugin_IsSynth
 	                   .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
 #endif
-		, getOptions(), pluginLib::initProcessorProperties())
+		, legacyConfigOptions("DSP56300EmulatorXenia"), pluginLib::initProcessorProperties())
 	{
-		getController();
-		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-		Processor::setLatencyBlocks(latencyBlocks);
-	}
-
-	AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
-	{
-		destroyEditorState();
+		setPatchManager(new PatchManager(*this));
 	}
 
 	jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 	{
-		return new PluginEditorState(*this);
+		return new jucePluginEditorLib::PluginEditorStateT<xtJucePlugin::Editor>(*this, g_includedSkins);
 	}
 
-	synthLib::Device* AudioPluginAudioProcessor::createDevice()
+	synthLib::Device* AudioPluginAudioProcessor::newDevice(const synthLib::DeviceCreateParams& _params)
 	{
-		synthLib::DeviceCreateParams p;
-		getRemoteDeviceParams(p);
-		return new xt::Device(p);
+		return new xt::Device(_params);
 	}
 
 	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
@@ -78,7 +60,4 @@ namespace xtJucePlugin
 	}
 }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new xtJucePlugin::AudioPluginAudioProcessor();
-}
+TUS_PLUGIN_ENTRY(xtJucePlugin::AudioPluginAudioProcessor)

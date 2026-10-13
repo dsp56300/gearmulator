@@ -55,7 +55,8 @@ namespace synthLib::midi
             uint16_t track = 0; // only needed to re-port a file that marked none
         };
 
-        // Recognize PartA/PartB as inputs A/B when the file has no port metadata.
+        // Recognize track-name conventions as inputs A/B when the file has no port metadata.
+        // PartA/PartB and A01-/B01- prefixes are both used by real files.
         // The letter must stand alone: "Part Bass" is not an input marker.
         inline int portFromTrackName(const std::string& _name)
         {
@@ -70,6 +71,12 @@ namespace synthLib::midi
             const auto begin = name.find_first_not_of(" \t");
             if (begin == std::string::npos)
                 return -1;
+
+            if (begin + 4 <= name.size() && (name[begin] == 'a' || name[begin] == 'b') &&
+                name[begin + 1] >= '0' && name[begin + 1] <= '9' && name[begin + 2] >= '0' &&
+                name[begin + 2] <= '9' && name[begin + 3] == '-')
+                return name[begin] == 'b' ? 1 : 0;
+
             if (name.compare(begin, 4, "part") != 0 && name.compare(begin, 4, "port") != 0)
                 return -1;
 

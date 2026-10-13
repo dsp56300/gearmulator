@@ -1579,6 +1579,35 @@ Rml::TextureHandle RenderInterface_Metal::LoadTexture(Rml::Vector2i& _textureDim
 	return GenerateTexture({image_dest, image_size}, _textureDimensions);
 }
 
+// Blits the data into the texture through a staging buffer, without waiting for the GPU. The command buffer
+// retains the staging buffer and the texture, and the queue runs it before the frame that draws the texture,
+// which is committed later. Hazard tracking orders the blit after earlier frames still reading the texture.
+static bool UploadTexture(id<MTLDevice> _device, id<MTLCommandQueue> _queue, id<MTLTexture> _texture, Rml::Span<const Rml::byte> _sourceData,
+	Rml::Vector2i _sourceDimensions)
+{
+	// Upload via staging buffer → blit encoder (GPU-side copy)
+	const NSUInteger bytesPerRow = _sourceDimensions.x * 4;
+	const NSUInteger totalBytes = bytesPerRow * _sourceDimensions.y;
+	id<MTLBuffer> staging = [_device newBufferWithBytes:_sourceData.data() length:totalBytes options:MTLResourceStorageModeShared];
+	if (!staging) return false;
+
+	id<MTLCommandBuffer> cmdBuf = [_queue commandBuffer];
+	id<MTLBlitCommandEncoder> blit = [cmdBuf blitCommandEncoder];
+	[blit copyFromBuffer:staging
+			sourceOffset:0
+	   sourceBytesPerRow:bytesPerRow
+	 sourceBytesPerImage:0
+			  sourceSize:MTLSizeMake(_sourceDimensions.x, _sourceDimensions.y, 1)
+			   toTexture:_texture
+		destinationSlice:0
+		destinationLevel:0
+	   destinationOrigin:MTLOriginMake(0, 0, 0)];
+	[blit endEncoding];
+	[cmdBuf commit];
+	[staging release];
+	return true;
+}
+
 Rml::TextureHandle RenderInterface_Metal::GenerateTexture(Rml::Span<const Rml::byte> _sourceData, Rml::Vector2i _sourceDimensions)
 {
 	// Use Private storage + staging buffer blit for reliable GPU texture upload.
@@ -1593,31 +1622,19 @@ Rml::TextureHandle RenderInterface_Metal::GenerateTexture(Rml::Span<const Rml::b
 	id<MTLTexture> texture = [m_impl->device newTextureWithDescriptor:texDesc];
 	if (!texture) return {};
 
-	// Upload via staging buffer → blit encoder (GPU-side copy)
-	const NSUInteger bytesPerRow = _sourceDimensions.x * 4;
-	const NSUInteger totalBytes = bytesPerRow * _sourceDimensions.y;
-	id<MTLBuffer> staging = [m_impl->device newBufferWithBytes:_sourceData.data()
-														length:totalBytes
-													   options:MTLResourceStorageModeShared];
-
-	id<MTLCommandBuffer> cmdBuf = [m_impl->commandQueue commandBuffer];
-	id<MTLBlitCommandEncoder> blit = [cmdBuf blitCommandEncoder];
-	[blit copyFromBuffer:staging
-			sourceOffset:0
-	   sourceBytesPerRow:bytesPerRow
-	 sourceBytesPerImage:0
-			  sourceSize:MTLSizeMake(_sourceDimensions.x, _sourceDimensions.y, 1)
-			   toTexture:texture
-		destinationSlice:0
-		destinationLevel:0
-	   destinationOrigin:MTLOriginMake(0, 0, 0)];
-	[blit endEncoding];
-	[cmdBuf commit];
-	[cmdBuf waitUntilCompleted];
-	[staging release];
+	UploadTexture(m_impl->device, m_impl->commandQueue, texture, _sourceData, _sourceDimensions);
 
 	// Caller must release via ReleaseTexture
 	return reinterpret_cast<Rml::TextureHandle>((void*)texture); // +1 retained from new*
+}
+
+bool RenderInterface_Metal::UpdateTexture(Rml::TextureHandle _textureHandle, Rml::Span<const Rml::byte> _sourceData, Rml::Vector2i _sourceDimensions)
+{
+	// RGBA only, the format GenerateTexture creates
+	if (_sourceData.size() != 4 * size_t(_sourceDimensions.x) * size_t(_sourceDimensions.y))
+		return false;
+
+	return UploadTexture(m_impl->device, m_impl->commandQueue, (id<MTLTexture>)(void*)_textureHandle, _sourceData, _sourceDimensions);
 }
 
 void RenderInterface_Metal::ReleaseTexture(Rml::TextureHandle _textureHandle)

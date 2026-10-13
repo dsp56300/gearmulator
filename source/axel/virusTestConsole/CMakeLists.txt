@@ -13,32 +13,19 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(virusTestConsole PUBLIC virusConsoleLib)
 
-createMacSetupScript("virusTestConsole")
+# start scripts that play a ROM preset
+if(MSVC)
+	set(deployDir ${CMAKE_SOURCE_DIR}/deploy/win/)
+else()
+	set(deployDir ${CMAKE_SOURCE_DIR}/deploy/linux/)
+endif()
 
 if(${gearmulator_SYNTH_OSIRUS})
-	install(TARGETS virusTestConsole DESTINATION . COMPONENT OsirusTestConsole)
-
-	if(MSVC)
-		install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/win/ DESTINATION . COMPONENT OsirusTestConsole)
-	else()
-		install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/linux/ DESTINATION . COMPONENT OsirusTestConsole)
-	endif()
-	if(APPLE)
-		installMacSetupScript(. OsirusTestConsole)
-	endif()
+	tus_installConsole(virusTestConsole COMPONENT OsirusTestConsole EXTRA_DIR ${deployDir})
 endif()
 
 if(${gearmulator_SYNTH_OSTIRUS})
-	install(TARGETS virusTestConsole DESTINATION . COMPONENT OsTIrusTestConsole)
-
-	if(MSVC)
-		install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/win/ DESTINATION . COMPONENT OsTIrusTestConsole)
-	else()
-		install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/linux/ DESTINATION . COMPONENT OsTIrusTestConsole)
-	endif()
-	if(APPLE)
-		installMacSetupScript(. OsTIrusTestConsole)
-	endif()
+	tus_installConsole(virusTestConsole COMPONENT OsTIrusTestConsole EXTRA_DIR ${deployDir})
 endif()
 
 set_property(TARGET virusTestConsole PROPERTY FOLDER "Virus")

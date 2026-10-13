@@ -118,23 +118,32 @@ namespace juceRmlUi
 
 	void ElemCanvas::generateTexture()
 	{
-		if (RenderManager* rm = GetRenderManager())
-		{
-			if (m_texture)
-				m_texture.Release();
-
-			if (m_textureSize.x > 0 && m_textureSize.y > 0)
-			{
-				m_texture = rm->MakeCallbackTexture([this](const CallbackTextureInterface& _callbackTextureInterface) -> bool
-				{
-					m_imageBuffer.resize(m_textureSize.x * m_textureSize.y * 4); // RGBA format
-					m_repaintCallback(m_imageBuffer);
-					_callbackTextureInterface.GenerateTexture(Span<const byte>(m_imageBuffer), m_textureSize);
-					return true;
-				});
-			}
-		}
 		m_textureDirty = false;
+
+		RenderManager* rm = GetRenderManager();
+		if (!rm)
+			return;
+
+		if (m_textureSize.x <= 0 || m_textureSize.y <= 0)
+		{
+			m_texture.Release();
+			return;
+		}
+
+		m_imageBuffer.resize(m_textureSize.x * m_textureSize.y * 4); // RGBA format
+		m_repaintCallback(m_imageBuffer);
+
+		// Same size as before: replace the contents of the existing texture instead of creating a new one
+		if (m_texture.Update(m_imageBuffer, m_textureSize))
+			return;
+
+		m_texture.Release();
+
+		// Also called again after a renderer switch dropped the texture, it then uploads the last painted image
+		m_texture = rm->MakeCallbackTexture([this](const CallbackTextureInterface& _callbackTextureInterface)
+		{
+			return _callbackTextureInterface.GenerateTexture(m_imageBuffer, m_textureSize);
+		});
 	}
 
 	void ElemCanvas::OnRender()

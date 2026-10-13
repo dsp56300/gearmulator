@@ -103,6 +103,12 @@ namespace
 		return _case.midiClock ? std::max(g_tolerance, static_cast<int64_t>(tickSamples(_case.patch))) : g_tolerance;
 	}
 
+	// Where comparing starts: for a case that is steady only then, after two cycles of three notes, four steps each
+	int64_t compareFrom(const Case& _case)
+	{
+		return _case.steady ? static_cast<int64_t>(8 * stepSamples(_case.patch)) : 0;
+	}
+
 	bool isRandom(const Case& _case)
 	{
 		return _case.patch[g_arpMode] == 5;
@@ -393,13 +399,14 @@ namespace
 	int64_t findShift(const Case& _case, const std::vector<Note>& _fw, const std::vector<Note>& _cpp)
 	{
 		const auto step = stepSamples(_case.patch);
+		const auto from = compareFrom(_case);
 
 		auto afterFirst = [&](const std::vector<Note>& _v)
 		{
 			std::vector<Note> r;
 			for (const auto& n : _v)
 			{
-				if (n.on && static_cast<double>(n.time) > _v.front().time + step * 0.25)
+				if (n.on && static_cast<double>(n.time) > _v.front().time + step * 0.25 && n.time >= from)
 					r.push_back(n);
 			}
 			return r;
@@ -555,8 +562,7 @@ namespace
 
 		Result r;
 
-		// Two cycles of three notes, four steps each, for a case that is steady only then
-		const auto from = _case.steady ? static_cast<int64_t>(8 * step) : 0;
+		const auto from = compareFrom(_case);
 
 		auto window = [&](const int64_t _t, const int64_t _margin)
 		{

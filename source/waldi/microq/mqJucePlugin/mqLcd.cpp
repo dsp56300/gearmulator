@@ -1,7 +1,5 @@
 #include "mqLcd.h"
 
-#include "hardwareLib/lcdfonts.h"
-
 #include "jucePluginLib/pluginVersion.h"
 
 MqLcd::MqLcd(Rml::Element* _parent) : Lcd(_parent, 20, 2)
@@ -33,9 +31,4 @@ bool MqLcd::getOverrideText(std::vector<std::vector<uint8_t>>& _lines)
 	};
 
 	return true;
-}
-
-const uint8_t* MqLcd::getCharacterData(uint8_t _character) const
-{
-	return hwLib::getCharacterData(_character);
 }

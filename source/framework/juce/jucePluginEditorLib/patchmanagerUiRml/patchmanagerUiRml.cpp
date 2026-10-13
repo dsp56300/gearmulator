@@ -15,7 +15,7 @@
 
 namespace jucePluginEditorLib::patchManagerRml
 {
-	PatchManagerUiRml::PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, PatchManagerDataModel& _dataModel, const std::initializer_list<patchManager::GroupType>& _groupTypes)
+	PatchManagerUiRml::PatchManagerUiRml(Editor& _editor, patchManager::PatchManager& _db, juceRmlUi::RmlComponent& _comp, Rml::Element* _root, PatchManagerDataModel& _dataModel, const std::vector<patchManager::GroupType>& _groupTypes)
 		: PatchManagerUi(_editor, _db)
 		, m_rmlComponent(_comp)
 		, m_dataModel(_dataModel)

@@ -4,9 +4,13 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
+namespace jucePluginEditorLib
+{
+	class Processor;
+}
+
 namespace xtJucePlugin
 {
-	class Editor;
 	class Controller;
 
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
@@ -20,21 +24,24 @@ namespace xtJucePlugin
 			Arrangement
 		};
 
-		PatchManager(Editor& _editor, Rml::Element* _root);
-		~PatchManager() override;
+		explicit PatchManager(jucePluginEditorLib::Processor& _processor);
 
 		// PatchManager overrides
 		bool requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part, uint64_t _userData) override;
-		bool loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program) override;
 		pluginLib::patchDB::PatchPtr initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName) override;
 		pluginLib::patchDB::Data applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const override;
-		uint32_t getCurrentPart() const override;
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
 		bool parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data, const std::string& _filename) override;
 
 		PatchType detectPatchType(const pluginLib::patchDB::Data& _sysex) const;
 
+		std::string verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) const override;
+
 		static constexpr uint64_t g_userDataArrangement = 1;
+
+	protected:
+		bool createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::Data& _data, uint32_t _part) const override;
+		void onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
 
 	private:
 		static std::string extractMultiName(const pluginLib::patchDB::Data& _sysex);
@@ -45,7 +52,6 @@ namespace xtJucePlugin
 		void createCombinedDumps(std::vector<pluginLib::patchDB::Data>& _messages);
 		void getWaveDataForSingle(std::vector<pluginLib::patchDB::Data>& _results, const pluginLib::patchDB::Data& _single) const;
 
-		Editor& m_editor;
 		Controller& m_controller;
 
 		std::vector<pluginLib::patchDB::Data> m_singles;

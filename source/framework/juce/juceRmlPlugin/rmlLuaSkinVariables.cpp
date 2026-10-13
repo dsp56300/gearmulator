@@ -3,6 +3,8 @@
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/processor.h"
 
+#include "juceRmlUi/rmlInterfaces.h"
+
 #include "RmlUi/Core/Log.h"
 #include "RmlUi/Lua/IncludeLua.h"
 
@@ -153,9 +155,10 @@ namespace rmlPlugin
 		}
 	}
 
-	LuaSkinVariableListeners::LuaSkinVariableListeners(lua_State* _luaState, pluginLib::SkinVariables& _variables)
+	LuaSkinVariableListeners::LuaSkinVariableListeners(lua_State* _luaState, pluginLib::SkinVariables& _variables, juceRmlUi::RmlInterfaces& _rmlInterfaces)
 	: m_luaState(_luaState)
 	, m_variables(_variables)
+	, m_rmlInterfaces(_rmlInterfaces)
 	{
 		m_listener.set(m_variables.evChanged, [this](const std::string& _name, const Scope _scope)
 		{
@@ -203,55 +206,97 @@ namespace rmlPlugin
 
 	void LuaSkinVariableListeners::onChanged(const std::string& _name, const Scope _scope) const
 	{
+		Change change;
+		change.name = _name;
+		change.scope = _scope;
+
+		// the values are read here rather than in the callback, so that each callback reports the change it
+		// stands for. An entry without a scope sees what a plain get() would answer, instance winning over global
+		if (const auto* v = m_variables.get(_name, _scope))
+			change.valueInScope = *v;
+		if (const auto* v = m_variables.get(_name))
+			change.value = *v;
+
+		// On the message thread the entries are picked now, so that one registered after the change does not
+		// hear of it. A state restore changes the variables on whichever thread the host restores on, and the
+		// entries belong to the message thread, so they are picked once the callback runs there.
+		std::optional<std::vector<int>> ids;
+
+		if (juce::MessageManager::existsAndIsCurrentThread())
+			ids = findEntries(change);
+
+		juce::MessageManager::callAsync([this, alive = std::weak_ptr(m_alive), change = std::move(change), ids = std::move(ids)]
+		{
+			if (alive.expired())
+				return;
+
+			for (const auto id : ids ? *ids : findEntries(change))
+				invoke(id, change);
+		});
+	}
+
+	std::vector<int> LuaSkinVariableListeners::findEntries(const Change& _change) const
+	{
+		std::vector<int> ids;
+
 		for (const auto& [id, e] : m_entries)
 		{
-			if (e.name != _name)
+			if (e.name != _change.name)
 				continue;
 
 			// no scope given at registration means "whichever scope it changed in"
-			if (e.hasScope && e.scope != _scope)
+			if (e.hasScope && e.scope != _change.scope)
 				continue;
 
-			// the value is read again in the callback rather than captured, so a listener without a
-			// scope reports what a plain get() would answer, instance winning over global
-			const auto* v = e.hasScope ? m_variables.get(_name, _scope) : m_variables.get(_name);
+			ids.push_back(id);
+		}
 
-			auto* L = m_luaState;
-			const int funcRef = e.luaFuncRef;
-			const bool isGlobal = _scope == Scope::Global;
+		return ids;
+	}
 
-			Value value = v ? *v : Value(int64_t(0));
-			const bool hasValue = v != nullptr;
+	void LuaSkinVariableListeners::invoke(const int _id, const Change& _change) const
+	{
+		// removed while the call was queued, or by an earlier callback for the same change
+		const auto it = m_entries.find(_id);
+		if (it == m_entries.end())
+			return;
 
-			juce::MessageManager::callAsync([L, funcRef, value, hasValue, isGlobal]
-			{
-				lua_rawgeti(L, LUA_REGISTRYINDEX, funcRef);
+		const auto& value = it->second.hasScope ? _change.valueInScope : _change.value;
 
-				if (hasValue)
-					pushValue(L, value);
-				else
-					lua_pushnil(L);
+		// the callback is free to change the DOM, which the render thread walks
+		juceRmlUi::RmlInterfaces::ScopedAccess access(m_rmlInterfaces);
 
-				lua_pushstring(L, isGlobal ? "global" : "instance");
+		auto* L = m_luaState;
 
-				if (lua_pcall(L, 2, 0, 0) != LUA_OK)
-				{
-					if (const char* err = lua_tostring(L, -1))
-						Rml::Log::Message(Rml::Log::LT_WARNING, "Lua skinvars callback error: %s", err);
-					lua_pop(L, 1);
-				}
-			});
+		lua_rawgeti(L, LUA_REGISTRYINDEX, it->second.luaFuncRef);
+
+		if (value)
+			pushValue(L, *value);
+		else
+			lua_pushnil(L);
+
+		lua_pushstring(L, _change.scope == Scope::Global ? "global" : "instance");
+
+		if (lua_pcall(L, 2, 0, 0) != LUA_OK)
+		{
+			if (const char* err = lua_tostring(L, -1))
+				Rml::Log::Message(Rml::Log::LT_WARNING, "Lua skinvars callback error: %s", err);
+			lua_pop(L, 1);
 		}
 	}
 
-	void registerLuaSkinVariables(lua_State* _L, pluginLib::Controller& _controller)
+	void registerLuaSkinVariables(lua_State* _L, pluginLib::Controller& _controller, juceRmlUi::RmlInterfaces& _rmlInterfaces)
 	{
+		// a registration that was never undone would keep its listeners, and the callbacks they post, past the
+		// end of the Lua state
+		unregisterLuaSkinVariables(_L);
+
 		auto& variables = _controller.getProcessor().getSkinVariables();
 
 		lua_pushlightuserdata(_L, &variables);
 		lua_setfield(_L, LUA_REGISTRYINDEX, VARIABLES_REGISTRY_KEY);
 
-		lua_pushlightuserdata(_L, new LuaSkinVariableListeners(_L, variables));
+		lua_pushlightuserdata(_L, new LuaSkinVariableListeners(_L, variables, _rmlInterfaces));
 		lua_setfield(_L, LUA_REGISTRYINDEX, VAR_LISTENERS_REGISTRY_KEY);
 
 		static const luaL_Reg funcs[] = {

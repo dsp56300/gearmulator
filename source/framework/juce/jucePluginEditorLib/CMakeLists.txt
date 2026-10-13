@@ -2,11 +2,14 @@ cmake_minimum_required(VERSION 3.15)
 project(jucePluginEditorLib VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	firmwareSelector.cpp firmwareSelector.h
 	focusedParameter.cpp focusedParameter.h
 	focusedParameterTooltip.cpp focusedParameterTooltip.h
+	frontPanel.cpp frontPanel.h
 	lcd.cpp lcd.h
 	led.cpp led.h
 	midiPorts.cpp midiPorts.h
+	parameterDrivenLed.cpp parameterDrivenLed.h
 	parameterOverlay.cpp parameterOverlay.h
 	parameterOverlays.cpp parameterOverlays.h
 	partbutton.cpp partbutton.h
@@ -15,6 +18,7 @@ set(SOURCES
 	pluginEditorWindow.cpp pluginEditorWindow.h
 	pluginEditorState.cpp pluginEditorState.h
 	pluginProcessor.cpp pluginProcessor.h
+	pluginEntry.h
 	mcpDomTools.cpp mcpDomTools.h
 	mcpPatchManagerTools.cpp mcpPatchManagerTools.h
 	settings.cpp settings.h
@@ -38,7 +42,6 @@ set(SOURCES_PM
 	patchmanager/patchmanagerui.cpp patchmanager/patchmanagerui.h
 	patchmanager/savepatchdesc.cpp patchmanager/savepatchdesc.h
 	patchmanager/types.cpp patchmanager/types.h
-	patchmanager/state.cpp patchmanager/state.h
 )
 
 set(SOURCES_PM_RML

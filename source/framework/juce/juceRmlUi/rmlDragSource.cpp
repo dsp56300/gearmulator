@@ -38,6 +38,7 @@ namespace juceRmlUi
 
 	void DragSource::onDragStart(const Rml::Event& _event)
 	{
+		m_handled = false;
 		m_dragData = createDragData();
 
 		if (!m_dragData)

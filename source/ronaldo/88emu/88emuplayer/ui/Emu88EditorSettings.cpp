@@ -472,16 +472,19 @@ namespace emu88Player
         if (!folder.isDirectory())
             folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
         // Card dumps carry no agreed extension, so every file is offered.
-        m_pcmCardChooser = std::make_unique<juce::FileChooser>("Select CM-32P / CM-64 PCM card image", folder, "*", true);
+        genericUI::MessageBox::FileDialogDesc desc;
+        desc.title = "Select CM-32P / CM-64 PCM card image";
+        desc.initialPath = folder.getFullPathName().toStdString();
+        desc.patterns = "*";
+        desc.flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
         const juce::WeakReference<Editor> safeThis(this);
-        m_pcmCardChooser->launchAsync(juce::FileBrowserComponent::openMode |
-                                          juce::FileBrowserComponent::canSelectFiles,
-                                      [safeThis](const juce::FileChooser& _chooser)
+        m_pcmCardChooser = genericUI::MessageBox::showFileDialog(desc,
+                                      [safeThis](const std::vector<std::string>& _files)
                                       {
                                           auto* editor = safeThis.get();
                                           if (!editor)
                                               return;
-                                          const auto file = _chooser.getResult();
+                                          const auto file = _files.empty() ? juce::File() : juce::File(_files.front());
                                           if (file != juce::File())
                                               editor->applyPcmCardPath(file.getFullPathName().toStdString());
                                           editor->m_pcmCardChooser.reset();

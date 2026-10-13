@@ -15,9 +15,15 @@ namespace jeLib
 		if (_romData.empty())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "ROM data is empty");
 
-		m_remote.evButtonChanged.addListener([this](const uint32_t _button, const bool _pressed)
+		m_frontPanel.evButton.addListener([this](const uint32_t _button, const bool _pressed)
 		{
 			setButton(static_cast<devices::SwitchType>(_button), _pressed);
+		});
+
+		m_frontPanel.evRequestState.addListener([this](uint8_t)
+		{
+			onLcdDdRamChanged();
+			onLcdCgRamChanged();
 		});
 
 		std::vector<unsigned char> ram;
@@ -71,7 +77,7 @@ namespace jeLib
 	void Je8086::addMidiEvent(const synthLib::SMidiEvent& _event)
 	{
 		// panel buttons are pressed here, on the emulation thread (BoardThread), in order with the MIDI around them
-		if (m_remote.receive(_event))
+		if (m_frontPanel.receive(_event.sysex))
 			return;
 
 		m_midiInEvents.push_back(_event);
@@ -159,12 +165,12 @@ namespace jeLib
 
 	void Je8086::onLcdDdRamChanged()
 	{
-		SysexRemoteControl::sendSysexLcdDdRam(m_midiOutEvents, lcd);
+		synthLib::fp::sendLcdText(m_midiOutEvents, 20, 2, reinterpret_cast<const uint8_t*>(lcd.getDdRam().data()));
 	}
 
 	void Je8086::onLcdCgRamChanged()
 	{
-		SysexRemoteControl::sendSysexLcdCgRam(m_midiOutEvents, lcd);
+		synthLib::fp::sendLcdCgRam(m_midiOutEvents, lcd.getCgRam());
 	}
 
 	void Je8086::runfactoryreset(const std::string& _ramDataFilename)

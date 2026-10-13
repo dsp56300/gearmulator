@@ -57,6 +57,10 @@ namespace pluginLib
 		// automation of previous projects break in VST2/AU
 		std::map<int, std::unique_ptr<juce::AudioProcessorParameterGroup>> versionGroups;
 
+		// 16 parts are the natural maximum of a MIDI synth, one per channel
+		m_paramsByParamType.reserve(16);
+		m_paramsByParamType.resize(getPartCount());
+
     	for (uint8_t part = 0; part < getPartCount(); part++)
 		{
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
@@ -292,6 +296,25 @@ namespace pluginLib
 		onPresetParametersChanged();
 	}
 
+	bool Controller::isDerivedParameterInPacket(const std::string& _packetName, const Parameter& _derived, const Parameter& _base) const
+	{
+		const auto* packet = getMidiPacket(_packetName);
+
+		if (!packet)
+		{
+			LOG("Failed to find midi packet " << _packetName);
+			return true;
+		}
+
+		const auto* defA = packet->getDefinitionByParameterName(_derived.getDescription().name);
+		const auto* defB = packet->getDefinitionByParameterName(_base.getDescription().name);
+
+		if (!defA || !defB)
+			return true;
+
+		return defA->doMasksOverlap(*defB);
+	}
+
 	void Controller::onPresetParametersChanged() const
 	{
 		// Soft knobs follow their targets via asynchronous value notifications, bring them up to date before the host
@@ -361,8 +384,7 @@ namespace pluginLib
 
         for (const auto& p : lockedParameters)
         {
-	        const auto v = p->getUnnormalizedValue();
-	        sendParameterChange(*p, static_cast<uint8_t>(v), _origin);
+	        sendParameterChange(*p, p->getUnnormalizedValue(), _origin);
         }
 	}
 
@@ -400,6 +422,85 @@ namespace pluginLib
 	{
 		uint32_t index;
 		return m_descriptions.getIndexByName(index, _name) ? index : InvalidParameterIndex;
+	}
+
+	namespace
+	{
+		std::string getParamStringName(const char* _format, const uint32_t _index)
+		{
+			char name[64];
+			(void)snprintf(name, sizeof(name), _format, static_cast<unsigned int>(_index));
+			return name;
+		}
+
+		// _getValue(parameterIndex) returns the value of that parameter, if there is one
+		template<typename TGetValue>
+		std::string readParamString(const Controller& _controller, const char* _format, const uint32_t _length, const TGetValue& _getValue)
+		{
+			std::string result;
+
+			for (uint32_t i = 0; i < _length; ++i)
+			{
+				const auto index = _controller.getParameterIndexByName(getParamStringName(_format, i));
+				if (index == Controller::InvalidParameterIndex)
+					break;
+
+				const std::optional<ParamValue> value = _getValue(index);
+				if (!value)
+					break;
+
+				result += static_cast<char>(*value);
+			}
+			return result;
+		}
+	}
+
+	std::string Controller::getParamString(const char* _format, const uint32_t _length, const MidiPacket::ParamValues& _values) const
+	{
+		return readParamString(*this, _format, _length, [&](const uint32_t _index) -> std::optional<ParamValue>
+		{
+			const auto it = _values.find(std::make_pair(MidiPacket::AnyPart, _index));
+			if (it == _values.end())
+				return {};
+			return it->second;
+		});
+	}
+
+	std::string Controller::getParamString(const char* _format, const uint32_t _length, const MidiPacket::AnyPartParamValues& _values) const
+	{
+		return readParamString(*this, _format, _length, [&](const uint32_t _index) -> std::optional<ParamValue>
+		{
+			if (_index >= _values.size())
+				return {};
+			return _values[_index];
+		});
+	}
+
+	std::string Controller::getParamString(const char* _format, const uint32_t _length, const uint8_t _part) const
+	{
+		return readParamString(*this, _format, _length, [&](const uint32_t _index) -> std::optional<ParamValue>
+		{
+			const auto* p = getParameter(_index, _part);
+			if (!p)
+				return {};
+			return p->getUnnormalizedValue();
+		});
+	}
+
+	void Controller::setParamString(const char* _format, const uint32_t _length, const uint8_t _part, const std::string& _string, const char _pad) const
+	{
+		for (uint32_t i = 0; i < _length; ++i)
+		{
+			const auto index = getParameterIndexByName(getParamStringName(_format, i));
+			if (index == InvalidParameterIndex)
+				break;
+
+			auto* p = getParameter(index, _part);
+			if (!p)
+				break;
+
+			p->getValueObject().setValue(static_cast<uint8_t>(i < _string.size() ? _string[i] : _pad));
+		}
 	}
 
 	bool Controller::setParameters(const std::map<std::string, ParamValue>& _values, const uint8_t _part, const Parameter::Origin _changedBy) const
@@ -563,7 +664,10 @@ namespace pluginLib
 	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
 	{
 		const auto& cm = getParameterDescriptions().getControllerMap();
-		const auto paramIndices = cm.getParameters(_e);
+
+		// a data entry for a selected NRPN goes to the parameters of that NRPN, not to those of CC 6 or 38
+		const auto nrpn = m_nrpnDecoder.process(_e);
+		const auto& paramIndices = nrpn ? cm.getParameters(nrpn->nrpnMsb, nrpn->nrpnLsb) : cm.getParameters(_e);
 
 		if(paramIndices.empty())
 			return false;
@@ -581,7 +685,13 @@ namespace pluginLib
 			{
 				auto* param = getParameter(paramIndex, part);
 				assert(param && "parameter not found for control change");
-				param->setValueFromSynth(_e.c, origin);
+
+				if (!nrpn)
+					param->setValueFromSynth(_e.c, origin);
+				else if (param->getDescription().range.getEnd() > 127)
+					param->setValueFromSynth((nrpn->msb << 7) | nrpn->lsb.value_or(0), origin);	// coarse from CC 6 alone
+				else if (!nrpn->lsb)
+					param->setValueFromSynth(nrpn->msb, origin);	// a 7 bit parameter takes the MSB only
 			}
 		}
 
@@ -683,7 +793,26 @@ namespace pluginLib
 	    getMidiMessages(events);
 
 	    for (const auto& e : events)
+		{
+			// front panel frames never reach the product's parser. A host or a MIDI port can send them too, those are
+			// not what the device shows
+			if (synthLib::fp::isFrontPanel(e.sysex))
+			{
+				if (e.source == synthLib::MidiEventSource::Internal)
+					m_frontPanel.receive(e.sysex);
+				continue;
+			}
 		    parseMidiMessage(e);
+		}
+	}
+
+	void Controller::sendFrontPanel(std::vector<synthLib::SMidiEvent>&& _events) const
+	{
+		for (auto& e : _events)
+		{
+			e.source = synthLib::MidiEventSource::Editor;
+			sendMidiEvent(e);
+		}
 	}
 
 	std::string Controller::loadParameterDescriptions(const std::string& _filename) const

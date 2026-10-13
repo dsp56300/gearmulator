@@ -8,6 +8,11 @@
 
 struct lua_State;
 
+namespace juceRmlUi
+{
+	struct RmlInterfaces;
+}
+
 namespace pluginLib
 {
 	class Controller;
@@ -20,7 +25,7 @@ namespace rmlPlugin
 	class LuaMidiListeners
 	{
 	public:
-		LuaMidiListeners(lua_State* _luaState, pluginLib::MidiNotifier& _notifier);
+		LuaMidiListeners(lua_State* _luaState, pluginLib::MidiNotifier& _notifier, juceRmlUi::RmlInterfaces& _rmlInterfaces);
 		~LuaMidiListeners();
 
 		LuaMidiListeners(const LuaMidiListeners&) = delete;
@@ -41,11 +46,12 @@ namespace rmlPlugin
 
 		lua_State* m_luaState;
 		pluginLib::MidiNotifier& m_notifier;
+		juceRmlUi::RmlInterfaces& m_rmlInterfaces;
 		pluginLib::MidiNotifier::ListenerId m_listenerId;
 		std::map<int, Entry> m_entries;
 		int m_nextId = 1;
 	};
 
-	void registerLuaMidi(lua_State* _L, pluginLib::Controller& _controller);
+	void registerLuaMidi(lua_State* _L, pluginLib::Controller& _controller, juceRmlUi::RmlInterfaces& _rmlInterfaces);
 	void unregisterLuaMidi(lua_State* _L);
 }

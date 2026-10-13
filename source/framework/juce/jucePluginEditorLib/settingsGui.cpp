@@ -9,8 +9,6 @@
 
 namespace jucePluginEditorLib
 {
-	static constexpr std::initializer_list<int> g_scales = {50, 65, 75, 85, 100, 125, 150, 175, 200, 250, 300, 400};
-
 	void SettingsGui::createUi(Rml::Element* _root)
 	{
 		createToggleButton(_root, "btForceSoftwareRendering", "forceSoftwareRenderer", [this](bool)
@@ -25,7 +23,7 @@ namespace jucePluginEditorLib
 		// GUI Scale buttons
 		const auto currentScale = getCurrentScale();
 
-		for (const auto scale : g_scales)
+		for (const auto scale : g_guiScales)
 		{
 			const auto buttonId = "btScale" + std::to_string(scale);
 			auto* buttonContainer = juceRmlUi::helper::findChild(_root, buttonId);

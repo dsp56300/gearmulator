@@ -42,9 +42,12 @@ struct ExecImpl {
     const u32 sum = left + right + carry;
     const u32 result = sum & mask;
     const bool overflow = ((~(left ^ right) & (left ^ result)) & msb) != 0;
-    u16 psw = u16(c.regs_.psw & ~(with_carry ? (kN | kC | kV) : (kN | kC | kV | kZ)));
-    if (!with_carry && result == 0) psw |= kZ;
-    else if (with_carry && result != 0) psw &= u16(~kZ);
+    // ADDC and SUBC set Z from this word's result, like ADD and SUB. The Intel manual documents
+    // a sticky Z that they can only clear, but measured on a real 8097 board the coefficients
+    // its stock firmware sends over a serial link match the per-word Z in 158 of 158 cases,
+    // while the sticky Z gets 21 of them wrong.
+    u16 psw = u16(c.regs_.psw & ~(kN | kC | kV | kZ));
+    if (result == 0) psw |= kZ;
     if (((result & msb) != 0) != overflow) psw |= kN;
     if (overflow) psw |= kV | kVt;
     if (sum & carry_bit) psw |= kC;
@@ -58,9 +61,8 @@ struct ExecImpl {
     const u32 difference = left - right - borrow;
     const u32 result = difference & mask;
     const bool overflow = (((left ^ right) & (left ^ result)) & msb) != 0;
-    u16 psw = u16(c.regs_.psw & ~(with_carry ? (kN | kC | kV) : (kN | kC | kV | kZ)));
-    if (!with_carry && result == 0) psw |= kZ;
-    else if (with_carry && result != 0) psw &= u16(~kZ);
+    u16 psw = u16(c.regs_.psw & ~(kN | kC | kV | kZ));  // Z per word, see add()
+    if (result == 0) psw |= kZ;
     if (((result & msb) != 0) != overflow) psw |= kN;
     if (overflow) psw |= kV | kVt;
     if ((difference & carry_bit) == 0) psw |= kC;

@@ -177,7 +177,7 @@ namespace n2xJucePlugin
 
 		_param.paramVm->setUnnormalizedValue(value, pluginLib::Parameter::Origin::Ui);
 
-		m_editor.getFocusedParameter().updateByElement(_param.compVm);
+		m_editor.getFocusedParameter()->updateByElement(_param.compVm);
 	}
 
 	void VmMap::onBaseParamChanged(const VmParam& _vmParam, pluginLib::Parameter*)

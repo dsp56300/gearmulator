@@ -1,5 +1,6 @@
 #include "db.h"
 
+#include <algorithm>
 #include <cassert>
 
 #include "datasource.h"
@@ -23,6 +24,19 @@ namespace pluginLib::patchDB
 
 	static constexpr bool g_cacheEnabled = true;
 
+	namespace
+	{
+		// the key of a datasource's MIDI bank assignment: its identity, without its patches, and its ROM
+		std::pair<DataSource, std::string> midiBankKey(const DataSource& _ds)
+		{
+			DataSource key;
+			key.type = _ds.type;
+			key.name = _ds.name;
+			key.bank = _ds.bank;
+			return {key, _ds.romName};
+		}
+	}
+
 	DB::DB(juce::File _dir)
 	: m_settingsDir(std::move(_dir))
 	, m_loader("PatchLoader", false, dsp56k::ThreadPriority::Lowest)
@@ -32,7 +46,7 @@ namespace pluginLib::patchDB
 
 	DB::~DB()
 	{
-		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor");
+		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor, a patch manager calls it in shutdown()");
 
 		// we can only save the cache if the db is not doing anything in the background
 		const bool loading = !m_loader.empty();
@@ -170,6 +184,10 @@ namespace pluginLib::patchDB
 			{
 				removedPatches.insert(removedPatches.end(), removed->patches.begin(), removed->patches.end());
 				m_dataSources.erase(*removed);
+
+				// the plugin registers a ROM bank again when its ROM is loaded again, it gets its MIDI bank back then
+				if (removed->type == SourceType::Rom && removed->midiBankNumber != g_invalidMidiBankNumber)
+					m_pendingMidiBankAssignments[midiBankKey(*removed)] = removed->midiBankNumber;
 			}
 
 			lockDs.unlock();
@@ -308,7 +326,10 @@ namespace pluginLib::patchDB
 			_ds->midiBankNumber = _midiBankNumber;
 		}
 
-		m_dirty.dataSources = true;
+		{
+			std::scoped_lock lock(m_uiMutex);
+			m_dirty.dataSources = true;
+		}
 		runOnLoaderThread([this]{ saveJson(); });
 		return true;
 	}
@@ -320,7 +341,10 @@ namespace pluginLib::patchDB
 			_ds->midiBankNumber = g_invalidMidiBankNumber;
 		}
 
-		m_dirty.dataSources = true;
+		{
+			std::scoped_lock lock(m_uiMutex);
+			m_dirty.dataSources = true;
+		}
 		runOnLoaderThread([this]{ saveJson(); });
 		return true;
 	}
@@ -733,7 +757,7 @@ namespace pluginLib::patchDB
 		lock.unlock();
 
 		if(!changed.empty())
-			saveJson();
+			runOnLoaderThread([this]{ saveJson(); });
 
 		return true;
 	}
@@ -1013,11 +1037,24 @@ namespace pluginLib::patchDB
 
 			m_dataSources.insert({ *ds, ds });
 
-			// apply pending MIDI bank assignment if one exists
-			const auto itPending = m_pendingMidiBankAssignments.find(*ds);
+			// apply a pending MIDI bank assignment: the one of this bank of this ROM, else one saved before assignments
+			// knew their ROM, which goes to the first ROM that has the bank
+			const auto key = midiBankKey(*ds);
+			auto itPending = m_pendingMidiBankAssignments.find(key);
+			if(itPending == m_pendingMidiBankAssignments.end() && !ds->romName.empty())
+				itPending = m_pendingMidiBankAssignments.find({key.first, {}});
+
 			if(itPending != m_pendingMidiBankAssignments.end())
 			{
-				ds->midiBankNumber = itPending->second;
+				// a number that another datasource got in the meantime stays with that one
+				const auto taken = std::any_of(m_dataSources.begin(), m_dataSources.end(), [&](const auto& _it)
+				{
+					return _it.second != ds && _it.second->midiBankNumber == itPending->second;
+				});
+
+				if(!taken)
+					ds->midiBankNumber = itPending->second;
+
 				m_pendingMidiBankAssignments.erase(itPending);
 			}
 
@@ -1544,14 +1581,17 @@ namespace pluginLib::patchDB
 				key.name = var["name"].toString().toStdString();
 				key.bank = static_cast<uint32_t>(static_cast<int>(var["bank"]));
 
+				// empty in entries saved before assignments knew their ROM
+				const auto rom = var["rom"].toString().toStdString();
+
 				const auto midiBankNumber = static_cast<uint32_t>(static_cast<int>(var["midiBankNumber"]));
 
 				// try to apply immediately if datasource already exists
 				const auto it = m_dataSources.find(key);
-				if(it != m_dataSources.end())
+				if(it != m_dataSources.end() && (rom.empty() || rom == it->second->romName))
 					it->second->midiBankNumber = midiBankNumber;
 				else
-					m_pendingMidiBankAssignments.insert({key, midiBankNumber});
+					m_pendingMidiBankAssignments.insert({{key, rom}, midiBankNumber});
 			}
 		}
 
@@ -1707,12 +1747,14 @@ namespace pluginLib::patchDB
 			// datasource, such as the ROM banks of a ROM that is not loaded right now
 			juce::Array<juce::var> bankAssignments;
 
-			const auto addBankAssignment = [&bankAssignments](const DataSource& _ds, const uint32_t _midiBankNumber)
+			const auto addBankAssignment = [&bankAssignments](const DataSource& _ds, const std::string& _rom, const uint32_t _midiBankNumber)
 			{
 				auto* o = new juce::DynamicObject();
 				o->setProperty("type", juce::String(toString(_ds.type)));
 				o->setProperty("name", juce::String(_ds.name));
 				o->setProperty("bank", static_cast<int>(_ds.bank));
+				if (!_rom.empty())
+					o->setProperty("rom", juce::String(_rom));
 				o->setProperty("midiBankNumber", static_cast<int>(_midiBankNumber));
 				bankAssignments.add(o);
 			};
@@ -1721,11 +1763,11 @@ namespace pluginLib::patchDB
 			{
 				const auto& dataSource = it.second;
 				if (dataSource->midiBankNumber != g_invalidMidiBankNumber)
-					addBankAssignment(*dataSource, dataSource->midiBankNumber);
+					addBankAssignment(*dataSource, dataSource->romName, dataSource->midiBankNumber);
 			}
 
-			for (const auto& [dataSource, midiBankNumber] : m_pendingMidiBankAssignments)
-				addBankAssignment(dataSource, midiBankNumber);
+			for (const auto& [key, midiBankNumber] : m_pendingMidiBankAssignments)
+				addBankAssignment(key.first, key.second, midiBankNumber);
 
 			json->setProperty("midiBankAssignments", bankAssignments);
 
@@ -2158,13 +2200,7 @@ namespace pluginLib::patchDB
 				ds->patches.clear();
 
 				if (ds->midiBankNumber != g_invalidMidiBankNumber)
-				{
-					DataSource key;
-					key.type = ds->type;
-					key.name = ds->name;
-					key.bank = ds->bank;
-					m_pendingMidiBankAssignments.insert({key, ds->midiBankNumber});
-				}
+					m_pendingMidiBankAssignments.insert({midiBankKey(*ds), ds->midiBankNumber});
 			}
 
 			for (const auto& it: resultDataSources)
@@ -2210,11 +2246,12 @@ namespace pluginLib::patchDB
 				// a MIDI bank number still waiting for its ROM bank is kept as that bank without presets, which loadCache
 				// turns back into a waiting one. Only for ROM banks, loadCache restores any other datasource as it is
 				std::vector<DataSource> waitingRomBanks;
-				for (const auto& [dataSource, midiBankNumber] : m_pendingMidiBankAssignments)
+				for (const auto& [key, midiBankNumber] : m_pendingMidiBankAssignments)
 				{
-					if (dataSource.type != SourceType::Rom)
+					if (key.first.type != SourceType::Rom)
 						continue;
-					waitingRomBanks.push_back(dataSource);
+					waitingRomBanks.push_back(key.first);
+					waitingRomBanks.back().romName = key.second;
 					waitingRomBanks.back().midiBankNumber = midiBankNumber;
 				}
 

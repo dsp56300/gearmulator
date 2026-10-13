@@ -8,6 +8,10 @@
 
 #include "synthLib/audioTypes.h"
 
+#include <atomic>
+#include <functional>
+#include <mutex>
+
 namespace dsp56k
 {
 	class Jit;
@@ -34,6 +38,11 @@ namespace virusLib
 		dsp56k::Memory& getMemory() const {return *m_memory; }
 
 		void startDSPThread(bool _createDebugger);
+		virtual void stopDSPThread();
+
+		// Runs _func on the DSP thread, between two batches of instructions, or right away if the thread does not run.
+		// For what the DSP thread uses while it runs and must not be changed from another thread, the ESAI clock for example
+		void runOnDspThread(std::function<void()>&& _func);
 
 		virtual void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples, uint32_t _latency);
 		virtual void processAudio(const synthLib::TAudioInputsInt& _inputs, const synthLib::TAudioOutputsInt& _outputs, size_t _samples, uint32_t _latency);
@@ -58,6 +67,8 @@ namespace virusLib
 		std::vector<float> m_dummyBufferOutF;
 
 	private:
+		void runPendingDspThreadFuncs();
+
 		const std::string m_name;
 		std::vector<uint8_t> m_buffer;
 
@@ -76,6 +87,10 @@ namespace virusLib
 		dsp56k::Jit* m_jit = nullptr;
 
 		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
+
+		std::mutex m_dspThreadFuncsMutex;
+		std::vector<std::function<void()>> m_dspThreadFuncs;
+		std::atomic<bool> m_hasDspThreadFuncs{false};
 
 		std::vector<dsp56k::TWord> m_commandStream;
 		uint32_t m_commandStreamReadIndex = 0;

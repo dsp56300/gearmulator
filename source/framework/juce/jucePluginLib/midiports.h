@@ -1,6 +1,9 @@
 #pragma once
 
+#include <atomic>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 #include "dsp56kBase/ringbuffer.h"
 
@@ -54,16 +57,12 @@ namespace pluginLib
 
 		void send(juce::MidiMessage&& _message)
 		{
-			if(!isMidiOutValid())
-				return;
-			m_midiOutMessages.push_back(std::move(_message));
+			push(std::move(_message));
 		}
 
 		void send(const juce::MidiMessage& _message)
 		{
-			if (!isMidiOutValid())
-				return;
-			m_midiOutMessages.push_back(_message);
+			push(juce::MidiMessage(_message));
 		}
 
 		void send(const synthLib::SMidiEvent& _message)
@@ -75,16 +74,27 @@ namespace pluginLib
 
 		static juce::MidiMessage toJuceMidiMessage(const synthLib::SMidiEvent& _e);
 
-		bool isMidiOutValid()
+		bool isMidiOutValid() const
 		{
-			std::lock_guard lock(m_mutexOutput);
-			return m_midiOutput != nullptr;
+			return m_outputOpen;
 		}
 
 	private:
 	    void handleIncomingMidiMessage(juce::MidiInput* _source, const juce::MidiMessage& _message) override;
 
 		void senderThread();
+
+		// The audio thread, the editor and MIDI learn feedback all send. A full queue drops the message rather than
+		// stall the audio thread behind a port that sends slower than it is fed
+		void push(juce::MidiMessage&& _message)
+		{
+			if (!m_outputOpen)
+				return;
+			std::lock_guard lock(m_mutexProducers);
+			if (m_midiOutMessages.full())
+				return;
+			m_midiOutMessages.push_back(std::move(_message));
+		}
 
 		Processor& m_processor;
 
@@ -93,7 +103,11 @@ namespace pluginLib
 		std::unique_ptr<juce::AudioDeviceManager> m_deviceManager;
 
 		dsp56k::RingBuffer<juce::MidiMessage, 128, true> m_midiOutMessages;
+		// the ring takes one producer at a time
+		std::mutex m_mutexProducers;
+		// guards m_midiOutput for everyone but the sender thread, which only runs while the port stays as it is
 		std::mutex m_mutexOutput;
+		std::atomic<bool> m_outputOpen{false};
 		std::unique_ptr<std::thread> m_threadOutput;
 	};
 }

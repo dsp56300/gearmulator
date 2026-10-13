@@ -34,7 +34,8 @@ namespace genericVirusUI
 	VirusEditor::VirusEditor(virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
 		Editor(_processorRef, _skin),
 		m_processor(_processorRef),
-		m_romChangedListener(_processorRef.evRomChanged)
+		m_romChangedListener(_processorRef.evFirmwareChanged),
+		m_playModeSetListener(static_cast<virus::Controller&>(_processorRef.getController()).evPlayModeSet)
 	{
 	}
 	void VirusEditor::create()
@@ -44,13 +45,9 @@ namespace genericVirusUI
 		m_parts.reset(new Parts(*this));
 		m_leds.reset(new Leds(*this, m_processor));
 
-		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
-
 		m_presetName = findChild("PatchName");
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), *this));
-
-		m_romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector");
+		m_romSelector = std::make_unique<jucePluginEditorLib::FirmwareSelector>(*this, findChild<juceRmlUi::ElemComboBox>("RomSelector"));
 
 		m_playModeSingle = findChild<juceRmlUi::ElemButton>("PlayModeSingle", false);
 		m_playModeMulti = findChild<juceRmlUi::ElemButton>("PlayModeMulti", false);
@@ -64,36 +61,6 @@ namespace genericVirusUI
 		{
 			m_playModeToggle = findChild<juceRmlUi::ElemButton>("PlayModeToggle");
 			juceRmlUi::EventListener::AddClick(m_playModeToggle, [this] { setPlayMode(m_playModeToggle->isChecked() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); });
-		}
-
-		if(m_romSelector)
-		{
-			const auto roms = m_processor.getRoms();
-
-			if(roms.empty())
-			{
-				m_romSelector->addOption("<No ROM found>");
-			}
-			else
-			{
-				int id = 1;
-
-				for (const auto& rom : roms)
-				{
-					const auto name = juce::File(rom.getFilename()).getFileNameWithoutExtension();
-					m_romSelector->addOption(name.toStdString() + " (" + rom.getModelName() + ')');
-				}
-			}
-
-			m_romSelector->setSelectedIndex(static_cast<int>(m_processor.getSelectedRomIndex()), false);
-
-			juceRmlUi::EventListener::Add(m_romSelector, Rml::EventId::Change, [this](Rml::Event&)
-			{
-				const auto oldIndex = m_processor.getSelectedRomIndex();
-				const auto newIndex = m_romSelector->getSelectedIndex();
-				if(!m_processor.setSelectedRom(newIndex))
-					m_romSelector->setSelectedIndex(static_cast<int>(oldIndex));
-			});
 		}
 
 		getController().onProgramChange = [this](int _part)
@@ -184,6 +151,15 @@ namespace genericVirusUI
 		updatePresetName();
 		updatePlayModeButtons();
 
+		// the patch manager switches the play mode when it loads a multi, with or without an editor
+		m_playModeSetListener = [this](const uint8_t _playMode)
+		{
+			if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
+				setPart(0);
+
+			onPlayModeChanged();
+		};
+
 		m_romChangedListener = [this](auto)
 		{
 			updateDeviceModel();
@@ -201,8 +177,6 @@ namespace genericVirusUI
 	{
 		m_arpUserPattern.reset();
 
-		m_focusedParameter.reset();
-
 		getController().onProgramChange = nullptr;
 	}
 
@@ -211,15 +185,6 @@ namespace genericVirusUI
 		return static_cast<virus::Controller&>(m_processor.getController());
 	}
 
-	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const
-	{
-		return {
-				m_processor.getProperties().name + " - Demo Mode",
-				m_processor.getProperties().name + " runs in demo mode, the following restrictions apply:\n"
-				"\n"
-				"* The plugin state is not preserved\n"
-				"* Preset saving is disabled"};
-	}
 	/*
 	juce::Component* VirusEditor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
 	{
@@ -238,7 +203,6 @@ namespace genericVirusUI
 		Editor::initSkinConverterOptions(_skinConverterOptions);
 
 		_skinConverterOptions.idReplacements.insert({"page_presets", "container-patchmanager"});
-		_skinConverterOptions.idReplacements.insert({"ContainerPatchManager", "container-patchmanager"});
 		_skinConverterOptions.idReplacements.insert({"page_2_browser", "container-patchmanager"});
 	}
 
@@ -262,11 +226,6 @@ namespace genericVirusUI
 				// ignore invalid input
 			}
 		});
-	}
-
-	jucePluginEditorLib::patchManager::PatchManager* VirusEditor::createPatchManager(Rml::Element* _parent)
-	{
-		return new PatchManager(*this, _parent);
 	}
 
 	std::unique_ptr<jucePluginEditorLib::SettingsDeviceSpecific> VirusEditor::createDeviceSpecificSettings(const std::string& _templateName, Rml::Element* _root)
@@ -393,9 +352,7 @@ namespace genericVirusUI
 		auto addEntry = [&](juceRmlUi::Menu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
 			juceRmlUi::Menu subMenu;
-
-			subMenu.addEntry(".syx", [_callback](){_callback(pluginLib::FileType::Syx); });
-			subMenu.addEntry(".mid", [_callback](){_callback(pluginLib::FileType::Mid); });
+			createExportFileTypeMenu(subMenu, _callback);
 
 			_menu.addSubMenu(_name, std::move(subMenu));
 		};
@@ -455,22 +412,9 @@ namespace genericVirusUI
 		});
 	}
 
-	void VirusEditor::setPlayMode(uint8_t _playMode)
+	void VirusEditor::setPlayMode(const uint8_t _playMode)
 	{
-		const auto playMode = getController().getParameterIndexByName(virus::g_paramPlayMode);
-
-		auto* param = getController().getParameter(playMode);
-		param->setUnnormalizedValueNotifyingHost(_playMode, pluginLib::Parameter::Origin::Ui);
-
-		// we send this directly here as we request a new arrangement below, we don't want to wait on juce to inform the knob to have changed
-		getController().sendParameterChange(*param, _playMode, pluginLib::Parameter::Origin::Ui);
-
-		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
-			setPart(0);
-
-		onPlayModeChanged();
-
-		getController().requestArrangement();
+		getController().setPlayMode(_playMode);
 	}
 
 	void VirusEditor::savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/)
@@ -485,9 +429,6 @@ namespace genericVirusUI
 
 	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/) const
 	{
-#if SYNTHLIB_DEMO_MODE
-		return false;
-#else
 		synthLib::SysexBufferList messages;
 		
 		switch (_saveType)
@@ -533,7 +474,6 @@ namespace genericVirusUI
 		}
 
 		return Editor::savePresets(_fileType, _pathName, messages);
-#endif
 	}
 
 	void VirusEditor::setPart(const size_t _part)

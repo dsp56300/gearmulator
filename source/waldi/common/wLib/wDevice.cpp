@@ -1,40 +1,76 @@
 #include "wDevice.h"
 
-#include "dsp56kEmu/esaiclock.h"
-
 namespace wLib
 {
-	Device::Device(const synthLib::DeviceCreateParams& _params): synthLib::Device(_params), m_midiOutParser(synthLib::MidiEventSource::Device)
+	Device::Device(const synthLib::DeviceCreateParams& _params) : DspClockDevice(_params)
 	{
 	}
 
-	bool Device::setDspClockPercent(const uint32_t _percent)
+	void Device::getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const
 	{
-		auto* c = getDspEsxiClock();
-		if(!c)
-			return false;
-		return c->setSpeedPercent(_percent);
+		if(auto* c = getDspEsxiClock())
+			_clocks.push_back(c);
 	}
 
-	uint32_t Device::getDspClockPercent() const
+	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		const auto* c = getDspEsxiClock();
-		if(!c)
-			return 0;
-		return c->getSpeedPercent();
+		receiveMidiBytes(m_midiOutBytes);
+		parseMidiOutBytes(_midiOut);
+
+		// By index up to the current end: the responses are appended to the same vector, which can reallocate
+		Responses responses;
+
+		const auto count = _midiOut.size();
+
+		for (size_t i = 0; i < count; ++i)
+		{
+			responses.clear();
+			stateReceive(responses, _midiOut[i], State::Origin::Device);
+
+			for (auto& response : responses)
+			{
+				auto& r = _midiOut.emplace_back(synthLib::MidiEventSource::Device);
+				std::swap(response, r.sysex);
+			}
+		}
+
+		if(!m_customSysexOut.empty())
+		{
+			_midiOut.insert(_midiOut.begin(), m_customSysexOut.begin(), m_customSysexOut.end());
+			m_customSysexOut.clear();
+		}
 	}
 
-	uint64_t Device::getDspClockHz() const
+	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
-		const auto* c = getDspEsxiClock();
-		if(!c)
-			return false;
-		return c->getSpeedInHz();
-	}
+		if (m_frontPanel.receive(_ev.sysex))
+			return true;
 
-	void Device::process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
-	{
-		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
-		m_numSamplesProcessed += static_cast<uint32_t>(_size);
+		Responses responses;
+
+		const auto res = stateReceive(responses, _ev, State::Origin::External);
+
+		for (auto& response : responses)
+		{
+			auto& r = _response.emplace_back(synthLib::MidiEventSource::Device);
+			std::swap(response, r.sysex);
+		}
+
+		// do not forward to device if our cache was able to reply. It might have sent something to the device already on its own if a cache miss occured
+		if(res)
+			return true;
+
+		if(_ev.sysex.empty())
+		{
+			auto e = _ev;
+			stampOffset(e);
+			sendMidiToSynth(e);
+		}
+		else
+		{
+			sendMidiToSynth(_ev);
+		}
+
+		return true;
 	}
 }

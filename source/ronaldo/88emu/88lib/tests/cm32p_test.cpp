@@ -171,8 +171,9 @@ int main()
 	echo.emit({0xb0, 0x11, 0x20, 0x36, 0x20, 0xfa, 0xb0, 7, 7, 0x27, 0xf5});
 	Cm32p midi({echo.bytes, waves});
 	synthLib::SMidiEvent note(synthLib::MidiEventSource::Host, 0x90, 60, 100);
-	midi.addMidiEvent(note, 1);
 	CHECK(run(midi).empty());
+	// One MIDI IN: a note from a song's second port arrives like any other.
+	note.port = 1;
 	midi.addMidiEvent(note);
 	const auto echoed = run(midi);
 	CHECK_EQ(echoed.size(), 1u);
@@ -188,7 +189,7 @@ int main()
 	midi.transportDiscontinuity(1);
 	// The cancelled note never reaches the board; the channel it had sounded on is silenced
 	// the way this firmware understands, pedal up and All Notes Off, echoed back with running
-	// status, which the parser hands over as raw data-byte events.
+	// status, which the parser hands over as complete messages.
 	const auto cancelled = run(midi);
 	std::vector<uint8_t> cancelledBytes;
 	for(const auto& event : cancelled)
@@ -198,7 +199,7 @@ int main()
 		if(length > 1) cancelledBytes.push_back(event.b);
 		if(length > 2) cancelledBytes.push_back(event.c);
 	}
-	CHECK(cancelledBytes == std::vector<uint8_t>({0xb0, 64, 0, 123, 0}));
+	CHECK(cancelledBytes == std::vector<uint8_t>({0xb0, 64, 0, 0xb0, 123, 0}));
 	midi.addMidiEvent(note);
 	midi.reset();
 	CHECK(run(midi).empty());

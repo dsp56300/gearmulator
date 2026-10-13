@@ -53,6 +53,7 @@ public:
 
 	Rml::TextureHandle LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source) override;
 	Rml::TextureHandle GenerateTexture(Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions) override;
+	bool UpdateTexture(Rml::TextureHandle texture_handle, Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions) override;
 	void ReleaseTexture(Rml::TextureHandle texture_handle) override;
 
 	void EnableScissorRegion(bool enable) override;

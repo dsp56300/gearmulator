@@ -33,12 +33,6 @@ namespace xt
 		WaveCtlRequestP	  = 0x0a, WaveCtlDumpP  = 0x1a, WaveCtlParameterChangeP  = 0x2a, WaveCtlStoreP  = 0x3a, WaveCtlRecallP  = 0x4a, WaveCtlCompareP  = 0x5a,
 
 		WavePreviewMode = WaveStoreP,
-
-		// emu remote control support
-		EmuLCD = 0x60,
-		EmuLEDs = 0x61,
-		EmuButtons = 0x62,
-		EmuRotaries = 0x63
 	};
 
 	enum class LocationH : uint8_t

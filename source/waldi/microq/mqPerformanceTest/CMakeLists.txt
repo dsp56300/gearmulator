@@ -11,14 +11,8 @@ set(SOURCES
 target_sources(mqPerformanceTest PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-createMacSetupScript("mqPerformanceTest")
-
 target_link_libraries(mqPerformanceTest PUBLIC mqConsoleLib)
 
-install(TARGETS mqPerformanceTest DESTINATION . COMPONENT VavraPerformanceTest)
-
-if(APPLE)
-	installMacSetupScript(. VavraPerformanceTest)
-endif()
+tus_installConsole(mqPerformanceTest COMPONENT VavraPerformanceTest)
 
 set_property(TARGET mqPerformanceTest PROPERTY FOLDER "Vavra")

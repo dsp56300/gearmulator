@@ -1,5 +1,7 @@
 #include "pluginEditorState.h"
 
+#include <algorithm>
+
 #include "pluginEditor.h"
 #include "pluginProcessor.h"
 
@@ -13,7 +15,9 @@
 #include "dsp56kBase/logging.h"
 
 #include "juceRmlUi/juceRmlComponent.h"
+#include "juceRmlUi/rmlHelper.h"
 
+#include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/ElementDocument.h"
 
 namespace
@@ -214,6 +218,13 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		}
 		writeSkinToConfig(m_currentSkin);
 
+		// the event dies with the editor, which this outlives, so the listener is never removed
+		m_editor->getRmlComponent()->evDocumentSizeChanged.addListener([this](juceRmlUi::RmlComponent*)
+		{
+			if(evSkinSizeChanged)
+				evSkinSizeChanged();
+		});
+
 		if(evSkinLoaded)
 			evSkinLoaded(m_editor->getRmlComponent());
 
@@ -239,6 +250,42 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 			}
 		});
 
+		// Ctrl and the wheel or Ctrl and + and - zoom the GUI. On the root of the context, behind every document, so that
+		// whatever the mouse is over or has the focus takes them first: a knob the wheel, a view its own zoom
+		auto* root = m_editor->getRmlComponent()->getContext()->GetRootElement();
+
+		juceRmlUi::EventListener::Add(root, Rml::EventId::Keydown, [this](Rml::Event& _event)
+		{
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
+				return;
+
+			const auto key = juceRmlUi::helper::getKeyIdentifier(_event);
+			if (key == Rml::Input::KI_OEM_PLUS || key == Rml::Input::KI_ADD)
+				zoomGui(1);
+			else if (key == Rml::Input::KI_OEM_MINUS || key == Rml::Input::KI_SUBTRACT)
+				zoomGui(-1);
+			else
+				return;
+			_event.StopPropagation();
+		});
+
+		juceRmlUi::EventListener::Add(root, Rml::EventId::Mousescroll, [this](Rml::Event& _event)
+		{
+			if (!juceRmlUi::helper::getKeyModCommand(_event))
+				return;
+
+			// RmlUi scrolls nothing then. Down zooms out, a notch is a step, a trackpad adds up to one
+			_event.StopPropagation();
+			const auto delta = juceRmlUi::helper::getMouseWheelDelta(_event).y;
+			if (delta * m_zoomWheel > 0.0f)
+				m_zoomWheel = 0.0f;
+			m_zoomWheel -= delta;
+			for (; m_zoomWheel >= 1.0f; m_zoomWheel -= 1.0f)
+				zoomGui(1);
+			for (; m_zoomWheel <= -1.0f; m_zoomWheel += 1.0f)
+				zoomGui(-1);
+		});
+
 		return true;
 	}
 	catch(const std::runtime_error& _err)
@@ -256,10 +303,36 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 	}
 }
 
+void PluginEditorState::restoreFreeWindowSize(const WindowSize& _size)
+{
+	m_freeWindowSize = _size;
+
+	if(evFreeWindowSizeRestored)
+		evFreeWindowSizeRestored();
+}
+
 void PluginEditorState::setGuiScale(const int _scale) const
 {
 	if(evSetGuiScale)
 		evSetGuiScale(_scale);
+}
+
+void PluginEditorState::zoomGui(const int _steps) const
+{
+	// a scale between two of them, a window resized by hand, goes to the next one in that direction
+	const auto scale = juce::roundToInt(m_processor.getConfig().getDoubleValue("scale", 100));
+	if (_steps > 0)
+	{
+		const auto it = std::upper_bound(g_guiScales.begin(), g_guiScales.end(), scale);
+		if (it != g_guiScales.end())
+			setGuiScale(*it);
+	}
+	else if (_steps < 0)
+	{
+		const auto it = std::lower_bound(g_guiScales.begin(), g_guiScales.end(), scale);
+		if (it != g_guiScales.begin())
+			setGuiScale(*std::prev(it));
+	}
 }
 
 std::string PluginEditorState::exportSkinToFolder(const Skin& _skin, const std::string& _folder) const
@@ -339,17 +412,8 @@ void PluginEditorState::openMenu(const Rml::Event& _event)
 	juceRmlUi::Menu menu;
 
 	juceRmlUi::Menu scaleMenu;
-	scaleMenu.addEntry("50%", scale == 50, [this] { setGuiScale(50); });
-	scaleMenu.addEntry("65%", scale == 65, [this] { setGuiScale(65); });
-	scaleMenu.addEntry("75%", scale == 75, [this] { setGuiScale(75); });
-	scaleMenu.addEntry("85%", scale == 85, [this] { setGuiScale(85); });
-	scaleMenu.addEntry("100%", scale == 100, [this] { setGuiScale(100); });
-	scaleMenu.addEntry("125%", scale == 125, [this] { setGuiScale(125); });
-	scaleMenu.addEntry("150%", scale == 150, [this] { setGuiScale(150); });
-	scaleMenu.addEntry("175%", scale == 175, [this] { setGuiScale(175); });
-	scaleMenu.addEntry("200%", scale == 200, [this] { setGuiScale(200); });
-	scaleMenu.addEntry("250%", scale == 250, [this] { setGuiScale(250); });
-	scaleMenu.addEntry("300%", scale == 300, [this] { setGuiScale(300); });
+	for (const auto s : g_guiScales)
+		scaleMenu.addEntry(std::to_string(s) + "%", scale == s, [this, s] { setGuiScale(s); });
 
 	menu.addSubMenu("GUI Scale", std::move(scaleMenu));
 

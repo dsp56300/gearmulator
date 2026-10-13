@@ -725,8 +725,10 @@ namespace
 		EXPECT(device.m_received == std::vector<Event>({on(0, 60), off(3000, 60), on(6000, 60), off(9000, 60), on(12000, 60)}));
 	}
 
-	// The plugin sends the host's transport with every block, everything else happens in the device
-	std::vector<Event> playThroughPlugin(const float _hostSamplerate, const uint32_t _blockSize, const int _blocks)
+	// The plugin sends the host's transport with every block, everything else happens in the device. _loopEnd: the host
+	// loops from 0 to there, in quarter notes, 0 for no loop
+	std::vector<Event> playThroughPlugin(const float _hostSamplerate, const uint32_t _blockSize, const int _blocks,
+		const double _loopEnd = 0.0)
 	{
 		ArpDevice device;
 		Plugin plugin(&device, [](auto* _d) { return _d; });
@@ -742,11 +744,17 @@ namespace
 		out[0] = left.data();
 		out[1] = right.data();
 
+		HostLoop loop;
+		loop.active = _loopEnd > 0.0;
+		loop.ppqEnd = _loopEnd;
+
 		double ppq = 0.0;
 		for (int block = 0; block < _blocks; ++block)
 		{
-			plugin.process(in, out, _blockSize, 120.0f, ppq, true, true);
+			plugin.process(in, out, _blockSize, 120.0f, ppq, true, true, loop);
 			ppq += _blockSize * 120.0 / (60.0 * _hostSamplerate);
+			if (loop.active && ppq >= _loopEnd)
+				ppq -= _loopEnd;
 		}
 
 		return device.m_received;
@@ -775,6 +783,14 @@ namespace
 			const auto distance = static_cast<int64_t>(ons[i] - ons[i - 1]);
 			EXPECT(distance >= 5999 && distance <= 6001);
 		}
+
+		// A host loop of 0.9 quarters wraps at sample 21600, inside a block: the arpeggio starts over there, on the
+		// sample, not with the next block
+		EXPECT(playThroughPlugin(g_samplerate, 4096, 8, 0.9) == std::vector<Event>(
+		{
+			on(0, 60), off(3000, 60), on(6000, 60), off(9000, 60), on(12000, 60), off(15000, 60), on(18000, 60),
+			off(21000, 60), on(21600, 60), off(24600, 60), on(27600, 60), off(30600, 60)
+		}));
 	}
 }
 

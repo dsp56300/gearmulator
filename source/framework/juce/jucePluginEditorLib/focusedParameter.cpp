@@ -1,6 +1,7 @@
 #include "focusedParameter.h"
 
 #include "pluginEditor.h"
+#include "pluginProcessor.h"
 
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/parameter.h"
@@ -46,8 +47,9 @@ namespace jucePluginEditorLib
 		}
 	}
 
-	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const Editor& _editor)
-		: m_parameterBinding(*_editor.getRmlParameterBinding())
+	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, Editor& _editor)
+		: m_editor(_editor)
+		, m_parameterBinding(*_editor.getRmlParameterBinding())
 		, m_controller(_controller)
 	{
 		m_focusedParameterName = _editor.findChild("FocusedParameterName", false);
@@ -58,7 +60,19 @@ namespace jucePluginEditorLib
 		if (m_focusedParameterValue)
 			juceRmlUi::helper::setVisible(m_focusedParameterValue, false);
 
-		m_tooltip.reset(new FocusedParameterTooltip(_editor.findChild("FocusedParameterTooltip", false)));
+		// a skin may declare its own tooltip, all others get the default one styled by tus_default.rcss
+		auto* tooltip = _editor.findChild("FocusedParameterTooltip", false);
+
+		if (!tooltip)
+		{
+			auto* doc = _editor.getDocument();
+			auto elem = doc->CreateElement("div");
+			elem->SetClass("tus-tooltip", true);
+			tooltip = doc->AppendChild(std::move(elem));
+		}
+
+		m_tooltip.reset(new FocusedParameterTooltip(tooltip));
+		m_tooltipEnabled = !_editor.getProcessor().getConfig().getBoolValue("disableTooltips", false);
 
 		updateControlLabel(nullptr, Priority::None);
 
@@ -149,6 +163,16 @@ namespace jucePluginEditorLib
 				juceRmlUi::helper::setVisible(m_focusedParameterValue, true);
 			}
 		}
+
+		m_editor.onFocusedParameterChanged(_name, _value);
+	}
+
+	void FocusedParameter::setTooltipEnabled(const bool _enabled)
+	{
+		m_tooltipEnabled = _enabled;
+
+		if (!_enabled)
+			m_tooltip->setVisible(false);
 	}
 
 	void FocusedParameter::timerCallback()
@@ -208,7 +232,8 @@ namespace jucePluginEditorLib
 
 		updateParameter(_param->getDescription().displayName, value);
 
-		m_tooltip->initialize(_elem, value);
+		if (m_tooltipEnabled)
+			m_tooltip->initialize(_elem, value);
 
 		m_currentPriority = _priority;
 	}

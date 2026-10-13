@@ -1,30 +1,34 @@
 #pragma once
 
-#include "synthLib/device.h"
-#include "synthLib/midiBufferParser.h"
+#include "wState.h"
 
-namespace dsp56k
-{
-	class EsxiClock;
-}
+#include "dsp56kEmu/esaiclock.h"
+
+#include "synthLib/dspClockDevice.h"
+#include "synthLib/frontPanelSysex.h"
 
 namespace wLib
 {
-	class Device : public synthLib::Device
+	class Device : public synthLib::DspClockDevice<dsp56k::EsxiClock>
 	{
 	public:
 		explicit Device(const synthLib::DeviceCreateParams& _params);
-		bool setDspClockPercent(uint32_t _percent) override;
-		uint32_t getDspClockPercent() const override;
-		uint64_t getDspClockHz() const override;
 
 	protected:
 		virtual dsp56k::EsxiClock* getDspEsxiClock() const = 0;
-		void process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
+		void getDspClocks(std::vector<dsp56k::EsxiClock*>& _clocks) const override;
 
-		std::vector<uint8_t>				m_midiOutBuffer;
-		synthLib::MidiBufferParser			m_midiOutParser;
+		// the product's synth: the MIDI bytes its firmware sent, MIDI for its firmware, and its state mirror
+		virtual void receiveMidiBytes(std::vector<uint8_t>& _bytes) = 0;
+		virtual void sendMidiToSynth(const synthLib::SMidiEvent& _ev) = 0;
+		virtual bool stateReceive(Responses& _responses, const synthLib::SMidiEvent& _ev, State::Origin _origin) = 0;
+
+		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
+		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
+
+		// front panel frames from the editor, before the state cache or the firmware see them. The product handles
+		// its events, its answers and the frames it sends go to m_customSysexOut, ahead of the firmware's output
+		synthLib::FrontPanelTransport		m_frontPanel;
 		std::vector<synthLib::SMidiEvent>	m_customSysexOut;
-		uint32_t							m_numSamplesProcessed = 0;
 	};
 }

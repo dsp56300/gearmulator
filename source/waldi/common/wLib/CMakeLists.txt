@@ -9,10 +9,8 @@ set(SOURCES
 	wDsp.cpp wDsp.h
 	wHardware.cpp wHardware.h
 	wMidiTypes.h
-	wSysexRemoteControl.cpp wSysexRemoteControl.h
-	wPlugin.cpp wPlugin.h
 	wRom.cpp wRom.h
-	wState.cpp wState.h
+	wState.h
 )
 
 target_sources(wLib PRIVATE ${SOURCES})

@@ -229,11 +229,6 @@ namespace jeLib
 
 		const auto rack = getDeviceType() == DeviceType::Rack;
 
-		if (rack)
-		{
-			int foo=0;
-		}
-
 		// A performance consists of:
 		// - PerformanceCommon
 		// - Part Upper

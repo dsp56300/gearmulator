@@ -2,6 +2,9 @@
 
 #include "jucePluginEditorLib/partbutton.h"
 
+#include <mutex>
+#include <set>
+
 namespace genericVirusUI
 {
 	class VirusEditor;
@@ -10,16 +13,17 @@ namespace genericVirusUI
 	{
 	public:
 		explicit PartButton(Rml::Element* _button, VirusEditor& _editor);
-
-		bool canDrop(const Rml::Event& _event, const juceRmlUi::DragSource* _source) override;
-
-		void dropFiles(const Rml::Event& _event, const juceRmlUi::FileDragData* _data, const std::vector<std::string>& _files) override;
+		~PartButton() override;
 
 		void onClick(Rml::Event& _e) override;
 		void setButtonText(const std::string& _text);
 
 	private:
 		void selectPreset(const Rml::Event& _event, uint8_t _part) const;
+
+		static std::mutex& getInstancesMutex();
+		static std::set<const PartButton*>& getInstances();
+		static bool isAlive(const PartButton* _button);
 
 		VirusEditor& m_editor;
 	};

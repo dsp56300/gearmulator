@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "jucePluginLib/controller.h"
 
 #include "mqLib/mqmiditypes.h"
@@ -8,8 +10,6 @@
 
 namespace mqJucePlugin
 {
-	class FrontPanel;
-
 	class AudioPluginAudioProcessor;
 
 	class Controller : public pluginLib::Controller
@@ -32,10 +32,6 @@ namespace mqJucePlugin
 	        SingleDumpQ,
 			MultiDump,
 	        GlobalDump,
-	        EmuRequestLcd,
-	        EmuRequestLeds,
-	        EmuSendButton,
-	        EmuSendRotary,
 
 	        Count
 	    };
@@ -52,9 +48,14 @@ namespace mqJucePlugin
 	    Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 		~Controller() override;
 
-	    void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex);
 	    void sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
+
+	    // The dump that loads single _sysex into the edit buffer of _part. Safe to call from any thread
+	    bool createSingleEditBufferDump(synthLib::SysexBuffer& _result, const synthLib::SysexBuffer& _sysex, uint8_t _part, bool _multiMode) const;
+
+	    // what sendSingle() does once the single for _part is sent
+	    void onSingleSent(uint8_t _part);
 		void sendMulti(const synthLib::SysexBuffer& _sysex);
 		void sendDrum(const synthLib::SysexBuffer& _sysex);
 
@@ -63,6 +64,9 @@ namespace mqJucePlugin
 
 	    bool isMultiMode() const;
 	    void setPlayMode(bool _multiMode);
+
+	    // the same as isMultiMode(), for threads that must not read the global data, the audio thread for example
+	    bool isMultiModeAnyThread() const { return m_multiMode; }
 
 	    // Sending a dump is followed by a request that reads it back, which keeps the editor in
 	    // sync with the device. That does not work while several dumps are sent in one go: the
@@ -86,11 +90,6 @@ namespace mqJucePlugin
 		std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
 	    std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 	    std::string getCategory(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
-	    std::string getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len) const;
-
-	    bool setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
-	    bool setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
-	    bool setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const;
 
 		const std::string& getPatchName(uint8_t _part) const;
 
@@ -129,7 +128,7 @@ namespace mqJucePlugin
 	    std::array<Patch,16> m_singleEditBuffers;
 		Patch m_multiEditBuffer;
 	    std::array<uint8_t, 200> m_globalData{};
-	    mqJucePlugin::FrontPanel* m_frontPanel = nullptr;
+	    std::atomic<bool> m_multiMode = false;
 	    std::array<uint32_t, 16> m_currentSingles{0};
 	    uint32_t m_currentSingle = 0;
 	};

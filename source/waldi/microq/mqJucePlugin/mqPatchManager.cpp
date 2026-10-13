@@ -1,7 +1,6 @@
 #include "mqPatchManager.h"
 
 #include "mqController.h"
-#include "mqEditor.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 #include "jucePluginLib/filetype.h"
 #include "mqLib/mqstate.h"
@@ -23,19 +22,13 @@ namespace mqJucePlugin
 		jucePluginEditorLib::patchManager::GroupType::DataSources,
 	};
 
-	PatchManager::PatchManager(Editor& _editor, Rml::Element* _root)
-		: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, g_groupTypes)
-		, m_editor(_editor)
-		, m_controller(_editor.getMqController())
+	PatchManager::PatchManager(jucePluginEditorLib::Processor& _processor)
+		: jucePluginEditorLib::patchManager::PatchManager(_processor, g_groupTypes)
+		, m_controller(static_cast<Controller&>(_processor.getController()))
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomC, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomC);
 		startLoaderThread();
-	}
-
-	PatchManager::~PatchManager()
-	{
-		stopLoaderThread();
 	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part, uint64_t _userData)
@@ -59,11 +52,6 @@ namespace mqJucePlugin
 
 		_data = m_controller.createSingleDump(mqLib::MidiBufferNum::SingleBankA, static_cast<mqLib::MidiSoundLocation>(0), _part, _part);
 		return !_data.empty();
-	}
-
-	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program)
-	{
-		return false;
 	}
 
 	PatchManager::PatchType PatchManager::detectPatchType(const pluginLib::patchDB::Data& _sysex) const
@@ -307,9 +295,22 @@ namespace mqJucePlugin
 		return result;
 	}
 
-	uint32_t PatchManager::getCurrentPart() const
+	std::string PatchManager::verifyDropOntoPart(const pluginLib::patchDB::PatchPtr& _patch, uint32_t) const
 	{
-		return m_editor.getProcessor().getController().getCurrentPart();
+		switch (detectPatchType(_patch->sysex))
+		{
+		case PatchType::Arrangement:
+			return "The dropped file contains an Arrangement patch. Loading it will "
+				"replace the full device state: the Multi setup and all Single "
+				"patches in the parts will be overwritten.\n\nDo you want to load it?";
+		case PatchType::Multi:
+			return "The dropped file contains a Multi patch. Loading it will replace "
+				"the Multi setup (part volumes, MIDI channels, FX, etc.) but the "
+				"Single patches currently loaded in the parts will be kept."
+				"\n\nDo you want to load it?";
+		default:
+			return {};
+		}
 	}
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
@@ -336,6 +337,26 @@ namespace mqJucePlugin
 	{
 		m_controller.sendSingle(_sysex, static_cast<uint8_t>(_part));
 		return true;
+	}
+
+	bool PatchManager::createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr&, const pluginLib::patchDB::Data& _data, const uint32_t _part) const
+	{
+		// a multi or an arrangement switches the play mode, which happens on the message thread
+		if (detectPatchType(_data) != PatchType::Single || _part >= m_controller.getPartCount())
+			return false;
+
+		synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
+
+		if (!m_controller.createSingleEditBufferDump(ev.sysex, _data, static_cast<uint8_t>(_part), m_controller.isMultiModeAnyThread()))
+			return false;
+
+		_events.push_back(std::move(ev));
+		return true;
+	}
+
+	void PatchManager::onProgramChangeLoaded(const pluginLib::patchDB::PatchPtr&, const uint32_t _part)
+	{
+		m_controller.onSingleSent(static_cast<uint8_t>(_part));
 	}
 
 	bool PatchManager::activateMulti(const pluginLib::patchDB::Data& _multi)

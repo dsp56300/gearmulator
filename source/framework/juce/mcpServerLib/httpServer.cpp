@@ -14,12 +14,14 @@ namespace mcpServer
 		: m_port(_port)
 		, m_handler(std::move(_handler))
 	{
+		// loopback only: the tools can load files and end the process, nothing for other machines to reach,
+		// and a loopback listener raises no firewall prompt
 		m_tcpServer = std::make_unique<networkLib::TcpServer>([this](std::unique_ptr<networkLib::TcpStream> _stream)
 		{
 			onClientConnected(std::move(_stream));
-		}, _port);
+		}, _port, true);
 
-		LOGNET(networkLib::LogLevel::Info, "MCP HTTP server started on port " << _port);
+		LOGNET(networkLib::LogLevel::Info, "MCP HTTP server started on 127.0.0.1:" << _port);
 	}
 
 	HttpServer::~HttpServer()

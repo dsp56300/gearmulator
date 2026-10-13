@@ -415,7 +415,7 @@ namespace xpLib
 		const auto add24 = [](const int32_t _a, const int32_t _b)
 		{ return saturateSigned24(static_cast<int64_t>(_a) + _b); };
 		const auto boost16 = [booster](const int32_t _value)
-		{ return saturateSigned16(static_cast<int64_t>(_value) << booster); };
+		{ return saturateSigned16(static_cast<int64_t>(_value) * (int64_t{1} << booster)); };
 		const auto ring = [](const int32_t _modulator, const int32_t _carrier)
 		{
 			// The modulator alone is clipped to signed Q15.  The carrier keeps the filter's signed 24-bit domain;

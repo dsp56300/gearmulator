@@ -6,12 +6,24 @@
 #include "baseLib/binarystream.h"
 
 #include <juce_data_structures/juce_data_structures.h>
+#include <juce_events/juce_events.h>
 
 namespace pluginLib
 {
+	namespace
+	{
+		// without a message manager, in a test, the caller is as good as the message thread
+		bool isMessageThread()
+		{
+			const auto* mm = juce::MessageManager::getInstanceWithoutCreating();
+			return !mm || mm->isThisTheMessageThread();
+		}
+	}
+
 	MidiLearnTranslator::MidiLearnTranslator(Controller& _controller, const ControllerMap& _controllerMap)
 		: m_controller(_controller)
 		, m_controllerMap(_controllerMap)
+		, m_activePreset(std::make_shared<const MidiLearnPreset>())
 	{
 	}
 
@@ -21,6 +33,37 @@ namespace pluginLib
 	}
 
 	void MidiLearnTranslator::setPreset(const MidiLearnPreset& _preset)
+	{
+		// a copy first: the settings page passes the message thread copy itself
+		auto preset = std::make_shared<const MidiLearnPreset>(_preset);
+
+		{
+			std::lock_guard lock(m_mutex);
+			m_activePreset = preset;
+		}
+
+		if (isMessageThread())
+		{
+			applyPreset(*preset);
+			return;
+		}
+
+		// a state restore on the host's thread
+		juce::MessageManager::callAsync([this, alive = std::weak_ptr(m_alive), preset]
+		{
+			if (alive.expired())
+				return;
+			{
+				// a later preset has replaced this one, its own call applies it
+				std::lock_guard lock(m_mutex);
+				if (m_activePreset != preset)
+					return;
+			}
+			applyPreset(*preset);
+		});
+	}
+
+	void MidiLearnTranslator::applyPreset(const MidiLearnPreset& _preset)
 	{
 		// Unsubscribe from old parameters
 		unsubscribeFromParameters();
@@ -59,8 +102,9 @@ namespace pluginLib
 		// Subscribe to new parameters for feedback
 		subscribeToParameters();
 
-		if (onPresetChanged)
-			onPresetChanged();
+		std::lock_guard lock(m_callbackMutex);
+		if (m_onPresetChanged)
+			m_onPresetChanged();
 	}
 
 	bool MidiLearnTranslator::processMidiInput(const synthLib::SMidiEvent& _event)
@@ -70,16 +114,35 @@ namespace pluginLib
 		if (!(m_learnInputSources & sourceBit))
 			return false; // Not consumed - source is disabled for MIDI Learn
 
-		// If we're in learning mode, handle learning instead of normal processing
-		if (m_isLearning)
+		std::shared_ptr<const MidiLearnPreset> preset;
+		std::optional<MidiLearnMapping> learned;
+		size_t progress = 0;
+		bool learning;
+
 		{
-			handleLearning(_event);
+			std::lock_guard lock(m_mutex);
+			learning = m_isLearning;
+			if (learning)
+				progress = handleLearning(_event, learned);
+			else
+				preset = m_activePreset;
+		}
+
+		// If we're in learning mode, handle learning instead of normal processing
+		if (learning)
+		{
+			// outside m_mutex, a callback may well start or cancel learning
+			std::lock_guard lock(m_callbackMutex);
+			if (progress && m_onLearningProgress)
+				m_onLearningProgress(progress, kRequiredUniqueValues);
+			if (learned && m_onMappingLearned)
+				m_onMappingLearned(*learned);
 			return true; // Consumed
 		}
 
 		// Try to find a learned mapping for this MIDI event FIRST
 		// Learned mappings override default controller mappings
-		const auto* mapping = m_preset.findMapping(_event);
+		const auto* mapping = preset->findMapping(_event);
 		if (mapping)
 		{
 			// Found a learned mapping - apply it and consume the event
@@ -99,6 +162,7 @@ namespace pluginLib
 
 	void MidiLearnTranslator::startLearning(const std::string& _paramName)
 	{
+		std::lock_guard lock(m_mutex);
 		m_isLearning = true;
 		m_learningParamName = _paramName;
 		m_learningValues.clear();
@@ -109,9 +173,45 @@ namespace pluginLib
 
 	void MidiLearnTranslator::cancelLearning()
 	{
+		std::lock_guard lock(m_mutex);
+		resetLearningState();
+	}
+
+	void MidiLearnTranslator::resetLearningState()
+	{
 		m_isLearning = false;
 		m_learningParamName.clear();
 		m_learningValues.clear();
+	}
+
+	std::string MidiLearnTranslator::getLearningParamName() const
+	{
+		std::lock_guard lock(m_mutex);
+		return m_learningParamName;
+	}
+
+	void MidiLearnTranslator::setOnMappingLearned(MappingLearnedCallback _callback)
+	{
+		std::lock_guard lock(m_callbackMutex);
+		m_onMappingLearned = std::move(_callback);
+	}
+
+	void MidiLearnTranslator::setOnLearningProgress(LearningProgressCallback _callback)
+	{
+		std::lock_guard lock(m_callbackMutex);
+		m_onLearningProgress = std::move(_callback);
+	}
+
+	void MidiLearnTranslator::setOnSendMidiOutput(SendMidiOutputCallback _callback)
+	{
+		std::lock_guard lock(m_callbackMutex);
+		m_onSendMidiOutput = std::move(_callback);
+	}
+
+	void MidiLearnTranslator::setOnPresetChanged(PresetChangedCallback _callback)
+	{
+		std::lock_guard lock(m_callbackMutex);
+		m_onPresetChanged = std::move(_callback);
 	}
 
 	bool MidiLearnTranslator::isDefaultControllerMapping(const synthLib::SMidiEvent& _event) const
@@ -220,7 +320,7 @@ namespace pluginLib
 		}
 	}
 
-	void MidiLearnTranslator::handleLearning(const synthLib::SMidiEvent& _event)
+	size_t MidiLearnTranslator::handleLearning(const synthLib::SMidiEvent& _event, std::optional<MidiLearnMapping>& _learned)
 	{
 		const auto statusByte = static_cast<synthLib::MidiStatusByte>(_event.a & 0xf0);
 
@@ -229,7 +329,7 @@ namespace pluginLib
 		    statusByte != synthLib::M_POLYPRESSURE &&
 		    statusByte != synthLib::M_AFTERTOUCH &&
 		    statusByte != synthLib::M_PITCHBEND)
-			return;
+			return 0;
 
 		const auto channel = MidiLearnMapping::getChannel(_event);
 		const auto controller = MidiLearnMapping::getController(_event);
@@ -244,19 +344,17 @@ namespace pluginLib
 			m_learningValues.push_back(value);
 
 			// Notify progress
-			if (onLearningProgress)
-				onLearningProgress(1, kRequiredUniqueValues);
-			return;
+			return 1;
 		}
 
 		// Subsequent events: must be same type and channel
 		if (statusByte != m_learningType || channel != m_learningChannel)
-			return;
+			return 0;
 
 		// For CC and PolyPressure, must also be same controller number
 		if ((statusByte == synthLib::M_CONTROLCHANGE || statusByte == synthLib::M_POLYPRESSURE) &&
 		    controller != m_learningController)
-			return;
+			return 0;
 
 		// Only add if it's a unique value
 		if (std::find(m_learningValues.begin(), m_learningValues.end(), value) == m_learningValues.end())
@@ -267,13 +365,9 @@ namespace pluginLib
 		// Count unique values
 		const size_t uniqueCount = m_learningValues.size();
 
-		// Notify progress
-		if (onLearningProgress)
-			onLearningProgress(uniqueCount, kRequiredUniqueValues);
-
 		// Wait for enough unique values (forces user to rotate in both directions)
 		if (uniqueCount < kRequiredUniqueValues)
-			return;
+			return uniqueCount;
 
 		// We have enough unique values, create the mapping
 		MidiLearnMapping newMapping;
@@ -289,10 +383,10 @@ namespace pluginLib
 			newMapping.mode = MidiLearnMapping::Mode::Absolute;
 
 		// No conflict or reassigning controller from another parameter - notify success and exit learning mode
-		cancelLearning();
+		resetLearningState();
 
-		if (onMappingLearned)
-			onMappingLearned(newMapping);
+		_learned = std::move(newMapping);
+		return uniqueCount;
 	}
 
 	MidiLearnMapping::Mode MidiLearnTranslator::detectMode(const std::vector<uint8_t>& _values) const
@@ -380,21 +474,15 @@ namespace pluginLib
 					onParameterChanged(paramName, _param->getValue(), origin);
 				});
 
-			m_paramListenerIds.push_back(listenerId);
+			m_paramListenerIds.emplace_back(param, listenerId);
 		}
 	}
 
 	void MidiLearnTranslator::unsubscribeFromParameters()
 	{
-		const auto& mappings = m_preset.getMappings();
-		
 		// Remove listeners
-		for (size_t i = 0; i < m_paramListenerIds.size() && i < mappings.size(); ++i)
-		{
-			auto* param = m_controller.getParameter(mappings[i].paramName, 0);
-			if (param)
-				param->onValueChanged.removeListener(m_paramListenerIds[i]);
-		}
+		for (const auto& [param, listenerId] : m_paramListenerIds)
+			param->onValueChanged.removeListener(listenerId);
 
 		m_paramListenerIds.clear();
 	}
@@ -414,20 +502,21 @@ namespace pluginLib
 			const auto feedbackEvent = createFeedbackEvent(*mapping, _normalizedValue, source);
 
 			// Send to each enabled feedback target
-			if (!onSendMidiOutput)
+			std::lock_guard lock(m_callbackMutex);
+			if (!m_onSendMidiOutput)
 				continue;
 
 			if (mapping->isFeedbackEnabled(synthLib::MidiEventSource::Device))
-				onSendMidiOutput(synthLib::MidiEventSource::Device, feedbackEvent);
+				m_onSendMidiOutput(synthLib::MidiEventSource::Device, feedbackEvent);
 
 			if (mapping->isFeedbackEnabled(synthLib::MidiEventSource::Editor))
-				onSendMidiOutput(synthLib::MidiEventSource::Editor, feedbackEvent);
+				m_onSendMidiOutput(synthLib::MidiEventSource::Editor, feedbackEvent);
 
 			if (mapping->isFeedbackEnabled(synthLib::MidiEventSource::Host))
-				onSendMidiOutput(synthLib::MidiEventSource::Host, feedbackEvent);
+				m_onSendMidiOutput(synthLib::MidiEventSource::Host, feedbackEvent);
 
 			if (mapping->isFeedbackEnabled(synthLib::MidiEventSource::Physical))
-				onSendMidiOutput(synthLib::MidiEventSource::Physical, feedbackEvent);
+				m_onSendMidiOutput(synthLib::MidiEventSource::Physical, feedbackEvent);
 		}
 	}
 
@@ -481,13 +570,18 @@ namespace pluginLib
 	{
 		baseLib::ChunkWriter cw(_stream, "MDLN", 2);
 
-		// Serialize preset to JSON
-		const auto json = m_preset.toJson();
+		// Serialize preset to JSON. The host saves on a thread of its choice, the message thread copy is not for it
+		std::shared_ptr<const MidiLearnPreset> preset;
+		{
+			std::lock_guard lock(m_mutex);
+			preset = m_activePreset;
+		}
+		const auto json = preset->toJson();
 		const auto jsonString = juce::JSON::toString(json);
 		_stream.write(jsonString.toStdString());
 		
 		// Save learn input sources
-		_stream.write(m_learnInputSources);
+		_stream.write(m_learnInputSources.load());
 	}
 
 	void MidiLearnTranslator::loadChunkData(baseLib::ChunkReader& _cr)
@@ -514,7 +608,9 @@ namespace pluginLib
 			if (_version >= 2)
 			{
 				// Load learn input sources
-				_stream.read(m_learnInputSources);
+				uint8_t sources = 0;
+				_stream.read(sources);
+				m_learnInputSources = sources;
 			}
 		});
 	}

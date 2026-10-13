@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <set>
 
 #include "jucePluginLib/parameterlistener.h"
@@ -75,5 +76,8 @@ namespace rmlPlugin
 		uint32_t m_ignoreChangeEvents = 0;
 
 		baseLib::EventListener<pluginLib::Parameter*> m_onSoftKnobTargetChanged;
+
+		// a change that arrives off the message thread is posted to it, and must not run once we are gone
+		std::shared_ptr<bool> m_alive = std::make_shared<bool>(true);
 	};
 }

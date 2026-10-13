@@ -242,6 +242,8 @@ namespace jucePluginEditorLib
 			if (_name == "end")      return Rml::Input::KI_END;
 			if (_name == "pageup")   return Rml::Input::KI_PRIOR;
 			if (_name == "pagedown") return Rml::Input::KI_NEXT;
+			if (_name == "plus" || _name == "+")  return Rml::Input::KI_OEM_PLUS;
+			if (_name == "minus" || _name == "-") return Rml::Input::KI_OEM_MINUS;
 
 			// F-keys
 			if (_name == "f1")  return Rml::Input::KI_F1;
@@ -913,11 +915,15 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
 			tool.inputSchema.addIntProperty("steps", "Number of intermediate move steps (default: 10)", false, 1, 100);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
+			tool.inputSchema.addProperty("press", "boolean", "Press the button at the start (default: true). False continues a drag an earlier call left held", false);
+			tool.inputSchema.addProperty("release", "boolean", "Release the button at the end (default: true). False keeps it held, to look at the page during the drag", false);
 			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int button = parseMouseButton(_params);
 				const int mods = parseModifiers(_params);
 				const int steps = _params.hasProperty("steps") ? _params.get("steps").getInt() : 10;
+				const bool press = !_params.hasProperty("press") || _params.get("press").getBool();
+				const bool release = !_params.hasProperty("release") || _params.get("release").getBool();
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
@@ -960,7 +966,8 @@ namespace jucePluginEditorLib
 
 					// Move to start, press button
 					ui.context->ProcessMouseMove(fromX, fromY, mods);
-					ui.context->ProcessMouseButtonDown(button, mods);
+					if (press)
+						ui.context->ProcessMouseButtonDown(button, mods);
 
 					// Generate intermediate drag moves
 					for (int i = 1; i <= steps; ++i)
@@ -972,7 +979,8 @@ namespace jucePluginEditorLib
 					}
 
 					// Release button
-					ui.context->ProcessMouseButtonUp(button, mods);
+					if (release)
+						ui.context->ProcessMouseButtonUp(button, mods);
 					ui.rmlComp->enqueueUpdate();
 
 					auto result = mcpServer::JsonValue::object();
@@ -981,6 +989,105 @@ namespace jucePluginEditorLib
 					result.set("fromY", mcpServer::JsonValue::fromInt(fromY));
 					result.set("toX", mcpServer::JsonValue::fromInt(toX));
 					result.set("toY", mcpServer::JsonValue::fromInt(toY));
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// drop_files - files dragged in from the desktop
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "drop_files";
+			tool.description = "Drop files onto the editor as if they were dragged in from the desktop. The editor gets the file drag enter, move and drop the operating system would send, so a drag target at that point (a part button, the patch manager, ...) takes the files, and files no element takes reach the editor's handler for those. Target by 'id', 'selector' + 'index', or 'x' + 'y'. Returns whether an element took the files.";
+			tool.inputSchema.addProperty("files", "array", "Full paths of the files to drop", true);
+			tool.inputSchema.addProperty("id", "string", "Element ID to drop on (uses its center)", false);
+			tool.inputSchema.addProperty("selector", "string", "CSS selector of the element to drop on (uses its center). Several skins repeat ids, select those by class and index", false);
+			tool.inputSchema.addIntProperty("index", "Which match of 'selector' (default: 0)", false, 0);
+			tool.inputSchema.addIntProperty("x", "X coordinate in document space", false);
+			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", false);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				juce::StringArray files;
+				const auto list = _params.get("files");
+				for (int i = 0; i < list.getArraySize(); ++i)
+					files.add(list.getArrayElement(i).getString());
+
+				if (files.isEmpty())
+					throw std::runtime_error("'files' must name at least one file");
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto ui = RmlUiAccess::acquire(_processor);
+
+					auto result = mcpServer::JsonValue::object();
+
+					int x, y, compX, compY;
+
+					{
+						juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
+
+						Rml::Element* elem = nullptr;
+
+						if (_params.hasProperty("id"))
+						{
+							const auto id = _params.get("id").getString().toStdString();
+							elem = ui.document->GetElementById(id);
+							if (!elem)
+								throw std::runtime_error("Element not found: " + id);
+						}
+						else if (_params.hasProperty("selector"))
+						{
+							const auto selector = _params.get("selector").getString().toStdString();
+							const int index = _params.hasProperty("index") ? _params.get("index").getInt() : 0;
+							Rml::ElementList elements;
+							ui.document->QuerySelectorAll(elements, selector);
+							if (index >= static_cast<int>(elements.size()))
+								throw std::runtime_error("Selector " + selector + " has " + std::to_string(elements.size()) + " matches, no index " + std::to_string(index));
+							elem = elements[index];
+						}
+
+						if (elem)
+						{
+							std::tie(x, y) = getElementCenter(elem);
+						}
+						else if (_params.hasProperty("x") && _params.hasProperty("y"))
+						{
+							x = _params.get("x").getInt();
+							y = _params.get("y").getInt();
+						}
+						else
+						{
+							throw std::runtime_error("Either 'id', 'selector' or both 'x' and 'y' must be provided");
+						}
+
+						// what is under the point before the drop adds its own element there
+						if (auto* hit = ui.context->GetElementAtPoint({static_cast<float>(x), static_cast<float>(y)}))
+						{
+							auto at = mcpServer::JsonValue::object();
+							at.set("tag", mcpServer::JsonValue::fromString(hit->GetTagName()));
+							if (!hit->GetId().empty())
+								at.set("id", mcpServer::JsonValue::fromString(hit->GetId()));
+							result.set("elementAtPoint", std::move(at));
+						}
+
+						// the operating system sends component coordinates, the document is laid out in context pixels
+						const auto width = ui.rmlComp->getWidth();
+						const auto scale = width > 0 ? static_cast<float>(ui.context->GetDimensions().x) / static_cast<float>(width) : 1.0f;
+						compX = juce::roundToInt(static_cast<float>(x) / scale);
+						compY = juce::roundToInt(static_cast<float>(y) / scale);
+					}
+
+					// these take the RmlUi lock themselves
+					ui.rmlComp->fileDragEnter(files, compX, compY);
+					ui.rmlComp->fileDragMove(files, compX, compY);
+					ui.rmlComp->filesDropped(files, compX, compY);
+					ui.rmlComp->enqueueUpdate();
+
+					result.set("success", mcpServer::JsonValue::fromBool(true));
+					result.set("handled", mcpServer::JsonValue::fromBool(ui.rmlComp->wasLastFileDropHandled()));
+					result.set("x", mcpServer::JsonValue::fromInt(x));
+					result.set("y", mcpServer::JsonValue::fromInt(y));
 					return result;
 				});
 			};
@@ -1046,7 +1153,7 @@ namespace jucePluginEditorLib
 		{
 			mcpServer::ToolDef tool;
 			tool.name = "send_key";
-			tool.description = "Simulate a key press, release, or press+release. Supported key names: a-z, 0-9, space, return/enter, escape/esc, backspace, delete, insert, tab, left, right, up, down, home, end, pageup, pagedown, f1-f12.";
+			tool.description = "Simulate a key press, release, or press+release. Supported key names: a-z, 0-9, space, return/enter, escape/esc, backspace, delete, insert, tab, left, right, up, down, home, end, pageup, pagedown, plus/+, minus/-, f1-f12.";
 			tool.inputSchema.addProperty("key", "string", "Key name (e.g. 'space', 'return', 'a', 'f1', 'up')", true);
 			tool.inputSchema.addEnumProperty("action", "Key action (default: 'press' = down+up)", {"press", "down", "up"}, false);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
@@ -1170,6 +1277,40 @@ namespace jucePluginEditorLib
 							result.set("height", mcpServer::JsonValue::fromInt(rmlComp->getHeight()));
 						}
 					}
+					return result;
+				});
+			};
+			_server.registerTool(std::move(tool));
+		}
+
+		// resize_editor
+		{
+			mcpServer::ToolDef tool;
+			tool.name = "resize_editor";
+			tool.description = "Resize the plugin editor window the way a host does when the user drags its border: the "
+				"requested size goes through the editor's size constraints (aspect ratio, minimum, maximum) first. Returns "
+				"the size the editor ended up with.";
+			tool.inputSchema.addIntProperty("width", "Requested width in pixels", true, 1, 16384);
+			tool.inputSchema.addIntProperty("height", "Requested height in pixels", true, 1, 16384);
+			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			{
+				const int width = _params.get("width").getInt();
+				const int height = _params.get("height").getInt();
+
+				return runOnMessageThread([&]() -> mcpServer::JsonValue
+				{
+					auto* window = _processor.getActiveEditor();
+					if (!window)
+						throw std::runtime_error("The editor is not open");
+
+					juce::Rectangle<int> bounds(window->getX(), window->getY(), width, height);
+					if (auto* constrainer = window->getConstrainer())
+						constrainer->checkBounds(bounds, window->getBounds(), {}, false, false, true, true);
+					window->setSize(bounds.getWidth(), bounds.getHeight());
+
+					auto result = mcpServer::JsonValue::object();
+					result.set("width", mcpServer::JsonValue::fromInt(window->getWidth()));
+					result.set("height", mcpServer::JsonValue::fromInt(window->getHeight()));
 					return result;
 				});
 			};

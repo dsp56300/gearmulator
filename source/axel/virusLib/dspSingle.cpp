@@ -54,7 +54,7 @@ namespace virusLib
 
 	DspSingle::~DspSingle()
 	{
-		m_dspThread.reset();
+		stopDSPThread();
 
 		if(m_dsp)
 		{
@@ -66,6 +66,11 @@ namespace virusLib
 		}
 	}
 
+	void DspSingle::stopDSPThread()
+	{
+		m_dspThread.reset();
+	}
+
 	void DspSingle::startDSPThread(const bool _createDebugger)
 	{
 #if DSP56300_DEBUGGER
@@ -74,12 +79,45 @@ namespace virusLib
 		const auto debugger = std::shared_ptr<dsp56k::DebuggerInterface>();
 #endif
 
-		m_dspThread.reset(new dsp56k::DSPThread(*m_dsp, m_name.empty() ? nullptr : m_name.c_str(), debugger));
+		// the callback is called after every batch of instructions, it can only be installed before the thread starts
+		m_dspThread.reset(new dsp56k::DSPThread(*m_dsp, m_name.empty() ? nullptr : m_name.c_str(), debugger, dsp56k::ThreadPriority::Highest, [this](uint32_t)
+		{
+			runPendingDspThreadFuncs();
+		}));
 
 #ifdef ZYNTHIAN
 		m_dspThread->setLogToDebug(false);
 		m_dspThread->setLogToStdout(false);
 #endif
+	}
+
+	void DspSingle::runOnDspThread(std::function<void()>&& _func)
+	{
+		if(!m_dspThread)
+		{
+			_func();
+			return;
+		}
+
+		std::lock_guard lock(m_dspThreadFuncsMutex);
+		m_dspThreadFuncs.emplace_back(std::move(_func));
+		m_hasDspThreadFuncs.store(true, std::memory_order_release);
+	}
+
+	void DspSingle::runPendingDspThreadFuncs()
+	{
+		if(!m_hasDspThreadFuncs.load(std::memory_order_acquire))
+			return;
+
+		std::vector<std::function<void()>> funcs;
+		{
+			std::lock_guard lock(m_dspThreadFuncsMutex);
+			std::swap(funcs, m_dspThreadFuncs);
+			m_hasDspThreadFuncs.store(false, std::memory_order_relaxed);
+		}
+
+		for (const auto& func : funcs)
+			func();
 	}
 
 	template<typename T> void processAudio(DspSingle& _dsp, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, uint32_t _latency, std::vector<T>& _dummyIn, std::vector<T>& _dummyOut)

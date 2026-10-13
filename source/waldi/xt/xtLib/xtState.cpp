@@ -236,19 +236,14 @@ namespace xt
 		case SysexCommand::SingleParameterChange:	return modifyDump(DumpType::Single, _data);
 		case SysexCommand::MultiParameterChange:	return modifyDump(DumpType::Multi, _data);
 		case SysexCommand::GlobalParameterChange:	return modifyDump(DumpType::Global, _data);
-		case SysexCommand::ModeParameterChange:		return modifyDump(DumpType::Mode, _data);
+		// no ModeParameterChange: the device ignores it, it switches the mode only with a ModeDump
 
 		// the preview is not part of the state, a copy that builds one must not touch it, see wLib::State::getStateWithPendingMidi()
 		case SysexCommand::WaveDumpP:				return !m_offline && m_wavePreview.receiveWave(_data);
 		case SysexCommand::WaveCtlDumpP:			return !m_offline && m_wavePreview.receiveWaveControlTable(_data);
 		case SysexCommand::WavePreviewMode:			return !m_offline && m_wavePreview.receiveWavePreviewMode(_data);
 
-/*		case SysexCommand::EmuLCD:
-		case SysexCommand::EmuLEDs:
-		case SysexCommand::EmuButtons:
-		case SysexCommand::EmuRotaries:
-			return false;
-*/		default:
+		default:
 			return false;
 		}
 	}
@@ -478,19 +473,6 @@ namespace xt
 		return true;
 	}
 
-	bool State::modifyMode(const SysEx& _data)
-	{
-		auto* p = getModeParameter(_data);
-		if(!p)
-			return false;
-
-		*p = _data[IdxModeParamValue];
-
-		onPlayModeChanged();
-
-		return true;
-	}
-
 	namespace
 	{
 		template<size_t Size>
@@ -498,7 +480,8 @@ namespace xt
 		{
 			const auto& dump = State::Dumps[static_cast<uint32_t>(_type)];
 
-			if(dump.idxParamIndexH >= _data.size() || dump.idxParamIndexL >= _data.size())
+			// the value follows the index bytes
+			if(dump.idxParamValue >= _data.size())
 				return nullptr;
 
 			auto i = dump.firstParamIndex;
@@ -506,7 +489,8 @@ namespace xt
 				i += static_cast<uint32_t>(_data[dump.idxParamIndexH]) << 7;
 			i += static_cast<uint32_t>(_data[dump.idxParamIndexL]);
 
-			if(i > _dump.size())
+			// the dump ends with checksum and F7
+			if(i >= Size - 2)
 				return nullptr;
 			return &_dump[i];
 		}
@@ -526,17 +510,28 @@ namespace xt
 	{
 		const auto& dump = Dumps[static_cast<uint8_t>(DumpType::Multi)];
 
+		if(dump.idxParamValue >= _data.size())
+			return nullptr;
+
 		const auto idxH = _data[dump.idxParamIndexH];
 		const auto idxL = _data[dump.idxParamIndexL];
 //		const auto val = _data[dump.idxParamValue];
 
-		if(idxH == 0x20)
-			return &m_currentMulti[dump.firstParamIndex + idxL];
-
 		constexpr auto inst0 = static_cast<uint8_t>(MultiParameter::Inst0First);
 		constexpr auto inst1 = static_cast<uint8_t>(MultiParameter::Inst1First);
 
+		// 0x20 = a parameter of the multi itself, otherwise one of the instrument idxH
+		if(idxH == 0x20)
+			return idxL < inst0 ? &m_currentMulti[dump.firstParamIndex + idxL] : nullptr;
+
+		if(idxL >= inst1 - inst0)
+			return nullptr;
+
 		const auto idx = dump.firstParamIndex + inst0 + idxH * (inst1 - inst0) + idxL;
+
+		// the dump ends with checksum and F7
+		if(idx >= m_currentMulti.size() - 2)
+			return nullptr;
 
 		return &m_currentMulti[idx];
 	}
@@ -544,11 +539,6 @@ namespace xt
 	uint8_t* State::getGlobalParameter(const SysEx& _data)
 	{
 		return getParameter(m_global, _data, DumpType::Global);
-	}
-
-	uint8_t* State::getModeParameter(const SysEx& _data)
-	{
-		return getParameter(m_mode, _data, DumpType::Mode);
 	}
 
 	bool State::getSingle(Responses& _responses, const SysEx& _data)
@@ -743,7 +733,6 @@ namespace xt
 		case DumpType::Single: res = modifySingle(_data); break;
 		case DumpType::Multi: res = modifyMulti(_data); break;
 		case DumpType::Global: res = modifyGlobal(_data); break;
-		case DumpType::Mode: res = modifyMode(_data); break;
 		default:
 			return false;
 		}
@@ -981,61 +970,6 @@ namespace xt
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = std::move(_data);
 		m_xt.sendMidiEvent(e);
-	}
-
-	void State::createSequencerMultiData(std::vector<uint8_t>& _data)
-	{
-		assert(false);
-		/*
-		static_assert(
-			(static_cast<uint32_t>(MultiParameter::Inst15) - static_cast<uint32_t>(MultiParameter::Inst0)) ==
-			(static_cast<uint32_t>(MultiParameter::Inst1) - static_cast<uint32_t>(MultiParameter::Inst0)) * 15,
-			"we need a consecutive offset");
-
-		_data.assign(static_cast<uint32_t>(xt::MultiParameter::Count), 0);
-
-		constexpr char name[] = "From TUS with <3";
-		static_assert(std::size(name) == 17, "wrong name length");
-		memcpy(&_data[static_cast<uint32_t>(MultiParameter::Name00)], name, sizeof(name) - 1);
-
-		auto setParam = [&](MultiParameter _param, const uint8_t _value)
-		{
-			_data[static_cast<uint32_t>(_param)] = _value;
-		};
-
-		auto setInstParam = [&](const uint8_t _instIndex, const MultiParameter _param, const uint8_t _value)
-		{
-			auto index = static_cast<uint32_t>(MultiParameter::Inst0) + (static_cast<uint32_t>(MultiParameter::Inst1) - static_cast<uint32_t>(MultiParameter::Inst0)) * _instIndex;
-			index += static_cast<uint32_t>(_param) - static_cast<uint32_t>(MultiParameter::Inst0);
-			_data[index] = _value;
-		};
-
-		setParam(MultiParameter::Volume, 127);						// max volume
-
-		setParam(MultiParameter::ControlW, 121);					// global
-		setParam(MultiParameter::ControlX, 121);					// global
-		setParam(MultiParameter::ControlY, 121);					// global
-		setParam(MultiParameter::ControlZ, 121);					// global
-
-		for (uint8_t i = 0; i < 16; ++i)
-		{
-			setInstParam(i, MultiParameter::Inst0SoundBank, 0);	    // bank A
-			setInstParam(i, MultiParameter::Inst0SoundNumber, i);	// sound number i
-			setInstParam(i, MultiParameter::Inst0MidiChannel, 2+i);	// midi channel i
-			setInstParam(i, MultiParameter::Inst0Volume, 127);		// max volume
-			setInstParam(i, MultiParameter::Inst0Transpose, 64);	// no transpose
-			setInstParam(i, MultiParameter::Inst0Detune, 64);		// no detune
-			setInstParam(i, MultiParameter::Inst0Output, 0);		// main out
-			setInstParam(i, MultiParameter::Inst0Flags, 3);			// RX = Local+MIDI / TX = off / Engine = Play
-			setInstParam(i, MultiParameter::Inst0Pan, 64);			// center
-			setInstParam(i, MultiParameter::Inst0Pattern, 0);		// no pattern
-			setInstParam(i, MultiParameter::Inst0VeloLow, 1);		// full velocity range
-			setInstParam(i, MultiParameter::Inst0VeloHigh, 127);
-			setInstParam(i, MultiParameter::Inst0KeyLow, 0);		// full key range
-			setInstParam(i, MultiParameter::Inst0KeyHigh, 127);
-			setInstParam(i, MultiParameter::Inst0MidiRxFlags, 63);	// enable Pitchbend, Modwheel, Aftertouch, Sustain, Button 1/2, Program Change
-		}
-		*/
 	}
 
 	namespace

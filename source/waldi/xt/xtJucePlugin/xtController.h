@@ -1,8 +1,12 @@
 #pragma once
 
+#include <atomic>
+
 #include "jucePluginLib/controller.h"
 
 #include "baseLib/event.h"
+
+#include "weData.h"
 
 #include "xtLib/xtId.h"
 
@@ -14,9 +18,6 @@ namespace xt
 
 namespace xtJucePlugin
 {
-	class WaveEditor;
-	class FrontPanel;
-
 	class AudioPluginAudioProcessor;
 
 	class Controller : public pluginLib::Controller
@@ -38,10 +39,6 @@ namespace xtJucePlugin
 			MultiDump,
 			GlobalDump,
 			ModeDump,
-	        EmuRequestLcd,
-	        EmuRequestLeds,
-	        EmuSendButton,
-	        EmuSendRotary,
 			RequestWave,
 			WaveDump,
 			RequestTable,
@@ -64,6 +61,13 @@ namespace xtJucePlugin
 
 		bool sendSingle(const synthLib::SysexBuffer& _sysex);
 		bool sendSingle(const synthLib::SysexBuffer& _sysex, uint8_t _part);
+
+		// The dump that loads _single, a plain single dump of the Microwave II/XT, into the edit buffer of _part.
+		// Safe to call from any thread
+		bool createSingleEditBufferDump(synthLib::SysexBuffer& _result, const synthLib::SysexBuffer& _single, uint8_t _part, bool _multiMode) const;
+
+		// what sendSingle() does once the single for _part is sent
+		void onSingleSent(uint8_t _part);
 		void sendMulti(const synthLib::SysexBuffer& _sysex);
 
 		bool sendSysEx(MidiPacketType _type) const;
@@ -72,6 +76,10 @@ namespace xtJucePlugin
 
 		bool isMultiMode() const;
 		void setPlayMode(bool _multiMode);
+		bool isPartEnabled(const uint8_t _part) const override { return _part == 0 || isMultiMode(); }
+
+		// the same as isMultiMode(), for threads that must not read the mode data, the audio thread for example
+		bool isMultiModeAnyThread() const { return m_multiMode; }
 
 		// Sending a dump is followed by a request that reads it back, which keeps the editor in
 		// sync with the device. That does not work while several dumps are sent in one go: the
@@ -92,13 +100,11 @@ namespace xtJucePlugin
 		std::string getSingleName(uint8_t _part) const;
 		std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
 		std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
-		std::string getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len) const;
 
-		bool setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
-		bool setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const;
-
-		void setFrontPanel(xtJucePlugin::FrontPanel* _frontPanel);
-		void setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor);
+		// the user waves and tables, and the ROM ones the wave editor has seen. Owned here and not by the wave editor, so a patch
+		// saved or loaded without the plugin window has them too (EMU-226)
+		WaveEditorData& getWaveData() { return m_waveData; }
+		const WaveEditorData& getWaveData() const { return m_waveData; }
 
 		bool requestWave(uint32_t _number) const;
 		bool requestTable(uint32_t _number) const;
@@ -145,10 +151,10 @@ namespace xtJucePlugin
 		Patch m_multiEditBuffer;
 		std::array<uint8_t, 32> m_globalData{};	// the data bytes of a global dump, 39 is the size of the whole dump
 		std::array<uint8_t, 1> m_modeData{};
+		std::atomic<bool> m_multiMode = false;
 		std::array<uint32_t, 8> m_currentSingles{0};
 		uint32_t m_currentSingle = 0;
-		xtJucePlugin::FrontPanel* m_frontPanel = nullptr;
-		xtJucePlugin::WaveEditor* m_waveEditor = nullptr;
+		WaveEditorData m_waveData;
 		std::set<xt::TableId> m_requestWavesForTables;
 	};
 }

@@ -12,7 +12,6 @@
 
 #include "mqLib/mqbuildconfig.h"
 
-#include "jucePluginEditorLib/focusedParameter.h"
 
 #include "jucePluginLib/filetype.h"
 #include "juceRmlPlugin/rmlTabGroup.h"
@@ -32,7 +31,7 @@ namespace mqJucePlugin
 	{
 		jucePluginEditorLib::Editor::create();
 
-		m_frontPanel.reset(new FrontPanel(*this, m_controller));
+		m_frontPanel.reset(new FrontPanel(*this));
 
 		auto disableButton = [](Rml::Element* _comp)
 		{
@@ -97,8 +96,6 @@ namespace mqJucePlugin
 			juceRmlUi::EventListener::AddClick(m_btPresetNext, [this]			{ onBtPresetNext(); });
 		}
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
-
 		if(findChild("partSelectButton", false))
 			m_partSelect.reset(new mqPartSelect(*this, m_controller));
 
@@ -109,11 +106,6 @@ namespace mqJucePlugin
 			if(m_partSelect)
 				m_partSelect->onPlayModeChanged();
 		});
-	}
-
-	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
-	{
-		return new PatchManager(*this, _parent);
 	}
 
 	void Editor::onCurrentPartChanged(const uint8_t _part)
@@ -136,19 +128,7 @@ namespace mqJucePlugin
 		m_controller.onPlayModeChanged.removeListener(PlayModeListenerId);
 
 		m_partSelect.reset();
-		m_focusedParameter.reset();
 		m_frontPanel.reset();
-	}
-
-	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
-	{
-		return {"Vavra",
-			"Vavra runs in demo mode\n"
-			"\n"
-			"The following features are disabled:\n"
-			"- Saving/Exporting Presets\n"
-			"- Plugin state is not preserved"
-		};
 	}
 
 	void Editor::savePreset(const pluginLib::FileType& _type)
@@ -213,9 +193,7 @@ namespace mqJucePlugin
 		auto addEntry = [&](juceRmlUi::Menu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
 			juceRmlUi::Menu subMenu;
-
-			subMenu.addEntry(".syx", [_callback]() {_callback(pluginLib::FileType::Syx); });
-			subMenu.addEntry(".mid", [_callback]() {_callback(pluginLib::FileType::Mid); });
+			createExportFileTypeMenu(subMenu, _callback);
 
 			_menu.addSubMenu(_name, std::move(subMenu));
 		};

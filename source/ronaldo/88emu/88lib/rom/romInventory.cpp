@@ -523,7 +523,8 @@ namespace emu88Lib
         if (_device == RomDevice::Sc8820)
             text << "Wave alternatives: SCCore.dll / SCCore00.dylib can supply both decoded wave regions. "
                     "The CPU and program ROMs are still required separately. "
-                    "The registered CPU image is a reconstructed BAD_DUMP, not an original dump.\n";
+                    "The CPU ROM is R02015367, 64 KiB, also recognized in a 128 KiB dump that holds it twice; "
+                    "the earlier reconstructed BAD_DUMP of it is still accepted.\n";
         if (_device == RomDevice::Sc8850)
             text << "Wave alternatives: the 32 MiB SC8850WaveROMUnscrambled.bin supplies both banks. "
                     "Otherwise provide two distinct 16 MiB banks, decoded or in a recognized XP dump layout. "

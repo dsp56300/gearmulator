@@ -6,8 +6,7 @@
 
 namespace jucePluginEditorLib
 {
-	class FocusedParameter;
-	class MidiPorts;
+	class FrontPanel;
 	class Processor;
 }
 
@@ -35,13 +34,11 @@ namespace jeJucePlugin
 
 		void initPluginDataModel(jucePluginEditorLib::PluginDataModel& _model) override;
 
-		jucePluginEditorLib::patchManager::PatchManager* createPatchManager(Rml::Element* _parent) override;
-
-		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 		Controller& getJeController() const { return m_controller; }
 		AudioPluginAudioProcessor& getJeProcessor() const;
 		const JeLcd* getLcd() const { return m_lcd.get(); }
+		void onFocusedParameterChanged(const std::string& _name, const std::string& _value) override;
 
 	private:
 		void onBtWrite(Rml::Event& _event) const;
@@ -49,12 +46,10 @@ namespace jeJucePlugin
 
 		Controller& m_controller;
 
-		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
-
 		std::array<std::string, 4> m_activePatchNames;
 
 		std::unique_ptr<JeLcd> m_lcd;
-		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
+		std::unique_ptr<jucePluginEditorLib::FrontPanel> m_frontPanel;
 		std::unique_ptr<PartSelect> m_partSelect;
 		std::unique_ptr<JeAssign> m_assign;
 

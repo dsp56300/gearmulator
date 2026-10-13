@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "jucePluginLib/parameterdescriptions.h"
 #include "jucePluginLib/controller.h"
 
@@ -9,11 +11,13 @@
 #include "virusLib/microcontrollerTypes.h"
 #include "virusLib/romfile.h"
 
+#include <atomic>
+
 namespace virus
 {
 	class VirusProcessor;
 
-    class Controller : public pluginLib::Controller
+    class Controller : public pluginLib::Controller, juce::AsyncUpdater
     {
     public:
 		baseLib::Event<virusLib::FrontpanelState> onFrontPanelStateChanged;
@@ -82,14 +86,19 @@ namespace virus
     	bool activatePatch(const synthLib::SysexBuffer& _sysex);
     	bool activatePatch(const synthLib::SysexBuffer& _sysex, uint32_t _part);
 
+    	// The edit buffer a single for _part is loaded into: the single one for part 0 in single mode. False for a
+    	// part that does not exist. Safe to call from any thread
+    	static bool getSingleEditBufferProgram(uint32_t _part, bool _multiMode, uint8_t& _program);
+
+    	// what activatePatch() does once a single is sent to edit buffer _program
+    	void onSingleActivated(uint8_t _program);
+
         static void printMessage(const pluginLib::SysEx &);
 
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
         std::string getSinglePresetName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
         std::string getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
-        std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::ParamValues& _values) const;
-        std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 
     	const Singles& getSinglePresets() const
         {
@@ -112,21 +121,22 @@ namespace virus
     	}
 
 		void setSinglePresetName(uint8_t _part, const juce::String& _name) const;
-        void setSinglePresetName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _name) const;
 
 		std::string getMultiPresetName() const;
 		void setMultiPresetName(const juce::String& _name) const;
 
-	private:
-		// Read/write a patch name directly from/to Parameter objects (live state).
-		// _paramNamePrefix is either "SingleName" or "MultiName"; _part = 0 for Multi
-		// since there's only one multi edit buffer.
-		std::string getPresetNameFromParameters(const std::string& _paramNamePrefix, uint8_t _part) const;
-		void setPresetNameOnParameters(const std::string& _paramNamePrefix, uint8_t _part, const juce::String& _name) const;
-
-	public:
 
     	bool isMultiMode() const;
+    	bool isPartEnabled(const uint8_t _part) const override { return _part == 0 || isMultiMode(); }
+
+    	// the same, for threads that must not read parameters, the audio thread for example
+    	bool isMultiModeAnyThread() const { return m_multiMode; }
+
+    	// switches between single and multi mode and requests the arrangement of the new mode
+    	void setPlayMode(uint8_t _playMode);
+
+    	// fired by setPlayMode()
+    	baseLib::Event<uint8_t> evPlayModeSet;
 
     	// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);
@@ -176,7 +186,12 @@ namespace virus
 
 		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) override;
 
+		// audio thread: the host tempo in units of the Clock Tempo parameter, which follows it on the message thread
+		void setHostClockTempo(int _value);
+
     private:
+		void handleAsyncUpdate() override;
+
         Singles m_singles;
         SinglePatch m_singleEditBuffer;                     // single mode
         std::array<SinglePatch, 16> m_singleEditBuffers;    // multi mode
@@ -197,7 +212,13 @@ namespace virus
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
-		baseLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
+		baseLib::EventListener<uint32_t> m_onRomChanged;
         virusLib::FrontpanelState m_frontpanelState;
+        std::atomic<bool> m_multiMode = false;
+
+		pluginLib::Parameter* m_clockTempo = nullptr;
+		std::atomic<int> m_hostClockTempo{-1};			// -1 = the host did not tell a tempo yet
+		std::atomic<int> m_clockTempoValue{-1};			// the value of m_clockTempo, for the audio thread
+		baseLib::EventListener<pluginLib::Parameter*> m_onClockTempoChanged;
     };
 }; // namespace Virus

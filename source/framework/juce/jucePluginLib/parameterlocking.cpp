@@ -25,6 +25,7 @@ namespace pluginLib
 			return false;
 
 		lockedRegions.insert(_id);
+		m_lockedRegionCounts[_part] = static_cast<uint32_t>(lockedRegions.size());
 
 		setParametersLocked(it->second, _part, true);
 
@@ -37,6 +38,8 @@ namespace pluginLib
 
 		if(!lockedRegions.erase(_id))
 			return false;
+
+		m_lockedRegionCounts[_part] = static_cast<uint32_t>(lockedRegions.size());
 
 		auto& regions = m_controller.getParameterDescriptions().getRegions();
 

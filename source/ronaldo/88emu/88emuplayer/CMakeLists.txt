@@ -7,6 +7,9 @@ set(HARDWARE_ASSETS
 	assets/emu88PlayerSettings.rml
 	assets/emu88PlayerSettingsWindow.rml
 	assets/emu88PlayerSettings.rcss
+	assets/emu88PartEditor.rml
+	assets/emu88PartEditor.rcss
+	assets/part_editor_mixer.svg
 	${HARDWARE_SKIN_DIR}/sc88_panel.png
 	${HARDWARE_SKIN_DIR}/sc88vl_panel.png
 	${HARDWARE_SKIN_DIR}/sc88pro_panel.png
@@ -17,6 +20,7 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/cm32p_panel.png
 	${HARDWARE_SKIN_DIR}/cm32l_panel.png
 	${HARDWARE_SKIN_DIR}/cm64_panel.png
+	${HARDWARE_SKIN_DIR}/mt32_panel.png
 	${HARDWARE_SKIN_DIR}/sc88exp_panel.png
 	${HARDWARE_SKIN_DIR}/sc55pc_panel.png
 	${HARDWARE_SKIN_DIR}/sc8850_assets.png
@@ -43,6 +47,7 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/efx_led_amber.svg
 	${HARDWARE_SKIN_DIR}/cm_led_on.png
 	${HARDWARE_SKIN_DIR}/knob.png
+	${HARDWARE_SKIN_DIR}/cm_volume_knob.png
 	${HARDWARE_SKIN_DIR}/value_knob.png
 )
 juce_add_binary_data(88emuplayer_BinaryData SOURCES ${HARDWARE_ASSETS})
@@ -75,6 +80,7 @@ target_sources(88emuplayer PRIVATE
 	ui/Emu88EditorPanel.cpp
 	ui/Emu88EditorSkin.cpp
 	ui/Emu88EditorWindows.cpp
+	ui/Emu88PartEditor.cpp ui/Emu88PartEditor.h
 	ui/Emu88EditorPlaylist.h
 	ui/Emu88EditorLcd.h
 	ui/Emu88EditorWindows.h

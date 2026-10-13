@@ -8,6 +8,8 @@
 #include "synthLib/midiInputQueue.h"
 #include "synthLib/midiTypes.h"
 
+#include "dsp56kBase/sharedaudioreducer.h"
+
 namespace n2x
 {
 	class Hardware
@@ -52,8 +54,21 @@ namespace n2x
 		const std::string& getRomFilename() const { return m_rom.getFilename(); }
 
 	private:
+		// The four DAC words of a frame, sign extended
+		using MixFrame = std::array<int32_t, 4>;
+
+		struct MixReduce
+		{
+			void operator()(MixFrame& _dst, const MixFrame& _src) const
+			{
+				for(size_t i=0; i<_dst.size(); ++i)
+					_dst[i] += _src[i];
+			}
+		};
+
 		void ensureBufferSize(uint32_t _frames);
-		void onEsaiCallbackA();
+		void initMixer();
+		void onMixedFrame(const MixFrame& _frame);
 		void processMidiInput();
 		void onEsaiCallbackB();
 		void syncUCtoDSP();
@@ -66,9 +81,14 @@ namespace n2x
 		DSP m_dspA;
 		DSP m_dspB;
 
-		std::vector<dsp56k::TWord> m_dummyInput;
-		std::vector<dsp56k::TWord> m_dummyOutput;
-		std::vector<dsp56k::TWord> m_dspAtoBBuffer;
+		// On the hardware, DSP B receives the four slots of DSP A and passes them unchanged to its outputs. Here both
+		// DSPs run side by side, DSP B gets silence, and their frames are added and saturated as DSP B does it. Each
+		// DSP may run at most MixerCapacity frames ahead of the other (EMU-61)
+		static constexpr uint32_t MixerCapacity = 16;
+		dsp56k::SharedAudioReducer<MixFrame, MixerCapacity, 2, MixReduce> m_mixer;
+		uint32_t m_mixerLaneA = 0;
+		uint32_t m_mixerLaneB = 0;
+		dsp56k::RingBuffer<std::array<dsp56k::TWord, 4>, dsp56k::Audio::RingBufferSize, true, false> m_mixedOutput;
 
 		AudioOutputs m_audioOutputs;
 
@@ -84,9 +104,6 @@ namespace n2x
 		dsp56k::ConditionVariable m_requestedFramesAvailableCv;
 		size_t m_requestedFrames = 0;
 		bool m_dspHalted = false;
-		dsp56k::SpscSemaphore m_semDspAtoB;
-
-		dsp56k::RingBuffer<dsp56k::Audio::RxFrame, 4, true> m_dspAtoBbuf;
 
 		std::unique_ptr<std::thread> m_ucThread;
 		bool m_destroy = false;

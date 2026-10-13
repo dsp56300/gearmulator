@@ -2,7 +2,6 @@
 
 #include "xt.h"
 #include "xtState.h"
-#include "xtSysexRemoteControl.h"
 #include "xtWavePreview.h"
 #include "wLib/wDevice.h"
 
@@ -29,16 +28,19 @@ namespace xt
 		bool canModifyDspClock() const override { return true; }
 
 	protected:
-		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
-		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 
 		dsp56k::EsxiClock* getDspEsxiClock() const override;
+
+		void receiveMidiBytes(std::vector<uint8_t>& _bytes) override { m_xt.receiveMidi(_bytes); }
+		void sendMidiToSynth(const synthLib::SMidiEvent& _ev) override { m_xt.sendMidiEvent(_ev); }
+		bool stateReceive(wLib::Responses& _responses, const synthLib::SMidiEvent& _ev, const wLib::State::Origin _origin) override { return m_state.receive(_responses, _ev, _origin); }
 	private:
+		void sendLcd(std::vector<synthLib::SMidiEvent>& _dst) const;
+		void sendLeds(std::vector<synthLib::SMidiEvent>& _dst) const;
 
 		Xt m_xt;
 		WavePreview m_wavePreview;
 		State m_state;
-		SysexRemoteControl m_sysexRemote;
 	};
 }

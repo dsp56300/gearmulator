@@ -2,7 +2,6 @@
 
 #include "jeAssign.h"
 #include "jeController.h"
-#include "jeFocusedParameter.h"
 #include "jeLcd.h"
 #include "jePartButton.h"
 #include "jePartSelect.h"
@@ -13,8 +12,8 @@
 
 #include "jeLib/romloader.h"
 
-#include "jucePluginEditorLib/focusedParameter.h"
-#include "jucePluginEditorLib/midiPorts.h"
+#include "jucePluginEditorLib/frontPanel.h"
+
 #include "jucePluginEditorLib/pluginDataModel.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
 
@@ -58,12 +57,20 @@ namespace jeJucePlugin
 		if (auto* lcd = findChild("lcd"))
 			m_lcd.reset(new JeLcd(*this, lcd));
 
-		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
-
-		if (m_lcd)
-			m_focusedParameter.reset(new JeFocusedParameter(*this, *m_lcd));
-		else
-			m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, *this));
+		jucePluginEditorLib::FrontPanel::Binding binding;
+		binding.lcdCols = 20;
+		binding.lcdRows = 2;
+		binding.lcdSink = [this](const std::vector<uint8_t>& _cells)
+		{
+			if (m_lcd)
+				m_lcd->setDeviceText(_cells);
+		};
+		binding.cgRamSink = [this](const std::array<uint8_t, 64>& _cgRam)
+		{
+			if (m_lcd)
+				m_lcd->setCgRam(_cgRam);
+		};
+		m_frontPanel.reset(new jucePluginEditorLib::FrontPanel(*this, std::move(binding)));
 
 		m_partSelect.reset(new PartSelect(*this));
 
@@ -132,19 +139,15 @@ namespace jeJucePlugin
 	{
 		m_assign.reset();
 		m_partSelect.reset();
-		m_midiPorts.reset();
-		m_focusedParameter.reset();
+		m_frontPanel.reset();
 		m_lcd.reset();
 	}
 
-	jucePluginEditorLib::patchManager::PatchManager* Editor::createPatchManager(Rml::Element* _parent)
+	void Editor::onFocusedParameterChanged(const std::string& _name, const std::string& _value)
 	{
-		return new PatchManager(*this, _parent);
-	}
-
-	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
-	{
-		return {};
+		// null while the base create() runs and in a skin without LCD
+		if (m_lcd)
+			m_lcd->setParameterDisplay(_name, _value);
 	}
 
 	AudioPluginAudioProcessor& Editor::getJeProcessor() const

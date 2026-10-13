@@ -12,8 +12,6 @@ namespace bridgeLib
 	{
 		m_audioTransferBuffer.reserve(16384);
 		m_audioReceiveBuffer.reserve(16384);
-
-		start();
 	}
 
 	TcpConnection::~TcpConnection()

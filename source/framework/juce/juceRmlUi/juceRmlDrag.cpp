@@ -73,10 +73,32 @@ namespace juceRmlUi
 
 	void RmlDrag::filesDropped(const juce::StringArray& _files, int _x, int _y)
 	{
-		if (!m_draggable)
+		m_lastDropHandled = false;
+
+		// No draggable means the drag never started inside the document, so no element can have
+		// taken it - the files still have to go somewhere, which is the whole point below.
+		if (m_draggable)
+		{
+			// This is what makes RmlUi deliver the drop: the fake draggable is released over
+			// whatever is under the cursor, and a drag target there - a wave slot, a patch list -
+			// takes it.
+			m_component.getContext()->ProcessMouseButtonUp(0,0);
+
+			m_lastDropHandled = m_juceDragSource && m_juceDragSource->isHandled();
+
+			stopDrag();
+		}
+
+		if (m_lastDropHandled || !m_onUnhandledFiles)
 			return;
-		m_component.getContext()->ProcessMouseButtonUp(0,0);
-		stopDrag();
+
+		std::vector<std::string> files;
+		files.reserve(_files.size());
+
+		for (const auto& file : _files)
+			files.emplace_back(file.toStdString());
+
+		m_onUnhandledFiles(files);
 	}
 
 	// ReSharper disable once CppMemberFunctionMayBeStatic
@@ -101,7 +123,7 @@ namespace juceRmlUi
 	{
 	}
 
-	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) const
+	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles)
 	{
 		if (!m_juceDraggable || !m_juceDraggable->data || !m_juceDraggable->data->canExportAsFiles())
 			return false;
@@ -116,6 +138,24 @@ namespace juceRmlUi
 			_files.add(juce::String(file));
 
 		_canMoveFiles = false;
+		m_externalDragStarted = true;
+		return true;
+	}
+
+	bool RmlDrag::dragOperationEnded()
+	{
+		// The operating system's drag session that takes over from here swallows the mouse-up, the context would keep
+		// dragging the element forever. Release it; the drop happens outside, where no element can take it.
+		if (!m_externalDragStarted)
+			return false;
+		m_externalDragStarted = false;
+
+		auto* context = m_component.getContext();
+		context->ProcessMouseLeave();
+		context->ProcessMouseButtonUp(0, 0);
+
+		m_rmlDragSource = nullptr;
+		m_juceDraggable = nullptr;
 		return true;
 	}
 

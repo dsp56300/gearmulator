@@ -22,7 +22,7 @@ namespace
 
 int main()
 {
-	MidiInputQueue queue;
+	static MidiInputQueue queue;	// about 1 MB, too big for the stack of a main thread on Windows
 	uint32_t next = 0;
 
 	// the reader side, checks that the events arrive in the order they were written

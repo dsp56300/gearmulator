@@ -3,7 +3,6 @@
 #include <fstream>
 
 #include "mqEditor.h"
-#include "mqFrontPanel.h"
 #include "PluginProcessor.h"
 
 #include "mqLib/mqstate.h"
@@ -29,10 +28,6 @@ namespace mqJucePlugin
 	    "singledump_Q",
 	    "multidump",
 	    "globaldump",
-	    "emuRequestLcd",
-	    "emuRequestLeds",
-	    "emuSendButton",
-	    "emuSendRotary"
 	};
 
 	static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
@@ -46,10 +41,6 @@ namespace mqJucePlugin
 	{
 	    registerParams(p);
 
-	//  sendSysEx(RequestAllSingles);
-		sendSysEx(RequestGlobal);
-	//  sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
-
 		onPlayModeChanged.addListener(0, [this](bool multiMode)
 		{
 			if(!isBulkTransfer())
@@ -59,11 +50,6 @@ namespace mqJucePlugin
 
 	Controller::~Controller() = default;
 
-	void Controller::setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel)
-	{
-	    m_frontPanel = _frontPanel;
-	}
-
 	void Controller::sendSingle(const synthLib::SysexBuffer& _sysex)
 	{
 		sendSingle(_sysex, getCurrentPart());
@@ -71,24 +57,36 @@ namespace mqJucePlugin
 
 	void Controller::sendSingle(const synthLib::SysexBuffer& _sysex, const uint8_t _part)
 	{
-		auto data = _sysex;
+		synthLib::SysexBuffer data;
 
-		data[wLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode);
-		data[wLib::IdxLocation] = isMultiMode() ? _part : 0;
-		data[wLib::IdxDeviceId] = m_deviceId;
-
-		const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
-
-		if (!p->updateChecksums(data))
-		{
-			p = getMidiPacket(g_midiPacketNames[SingleDumpQ]);
-
-			if(!p->updateChecksums(data))
-				return;
-		}
+		if (!createSingleEditBufferDump(data, _sysex, _part, isMultiMode()))
+			return;
 
 		pluginLib::Controller::sendSysEx(data);
 
+		onSingleSent(_part);
+	}
+
+	bool Controller::createSingleEditBufferDump(synthLib::SysexBuffer& _result, const synthLib::SysexBuffer& _sysex, const uint8_t _part, const bool _multiMode) const
+	{
+		_result = _sysex;
+
+		_result[wLib::IdxBuffer] = static_cast<uint8_t>(_multiMode ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode);
+		_result[wLib::IdxLocation] = _multiMode ? _part : 0;
+		_result[wLib::IdxDeviceId] = m_deviceId;
+
+		const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
+
+		if (p->updateChecksums(_result))
+			return true;
+
+		p = getMidiPacket(g_midiPacketNames[SingleDumpQ]);
+
+		return p->updateChecksums(_result);
+	}
+
+	void Controller::onSingleSent(const uint8_t _part)
+	{
 		sendLockedParameters(_part);
 
 		if(!isBulkTransfer())
@@ -135,67 +133,23 @@ namespace mqJucePlugin
 
 	void Controller::onStateLoaded()
 	{
+		// the global dump tells the play mode, its answer requests all patches
+		sendSysEx(RequestGlobal);
 	}
 
 	std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const
 	{
-	    std::string name;
-	    for(uint32_t i=0; i<16; ++i)
-	    {
-	        char paramName[16];
-	        sprintf(paramName, "Name%02u", i);
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        const auto it = _values.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
-	        if(it == _values.end())
-	            break;
-
-	        name += static_cast<char>(it->second);
-	    }
-	    return name;
+	    return getParamString("Name%02u", 16, _values);
 	}
 
 	std::string Controller::getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
 	{
-	    return getString(_values, "Name", 16);
+	    return getParamString("Name%02u", 16, _values);
 	}
 
 	std::string Controller::getCategory(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
 	{
-	    return getString(_values, "Category", 4);
-	}
-
-	std::string Controller::getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix,	const size_t _len) const
-	{
-	    std::string name;
-	    for(uint32_t i=0; i<_len; ++i)
-	    {
-	        char paramName[64];
-	        snprintf(paramName, sizeof(paramName), "%s%02u", _prefix.c_str(), i);
-
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        const auto it = _values[idx];
-	        if(!it)
-	            break;
-
-	        name += static_cast<char>(*it);
-	    }
-	    return name;
-	}
-
-	bool Controller::setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const
-	{
-	    return setString(_values, "Name", 16, _value);
-	}
-
-	bool Controller::setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const
-	{
-	    return setString(_values, "Category", 4, _value);
+	    return getParamString("Category%02u", 4, _values);
 	}
 
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)
@@ -254,25 +208,6 @@ namespace mqJucePlugin
 
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source)
 	{
-	    if(_msg.size() >= 5)
-	    {
-	        const auto cmd = static_cast<mqLib::SysexCommand>(_msg[4]);
-	        switch (cmd)
-	        {
-	        case mqLib::SysexCommand::EmuRotaries:
-	        case mqLib::SysexCommand::EmuButtons:
-	        case mqLib::SysexCommand::EmuLCD:
-	        case mqLib::SysexCommand::EmuLCDCGRata:
-	        case mqLib::SysexCommand::EmuLEDs:
-	            // the device sends its panel frames as Internal, the same command bytes from anywhere else are dropped
-	            if(m_frontPanel && _source == synthLib::MidiEventSource::Internal)
-	                m_frontPanel->processSysex(_msg);
-	            return true;
-	        default:
-	            break;
-	        }
-	    }
-
 		LOG("Got sysex of size " << _msg.size());
 
 		std::string name;
@@ -295,6 +230,7 @@ namespace mqJucePlugin
 		    const auto lastPlayMode = isMultiMode();
 		    memcpy(m_globalData.data(), &_msg[5], sizeof(m_globalData));
 		    const auto newPlayMode = isMultiMode();
+		    m_multiMode = newPlayMode;
 
 		    if(lastPlayMode != newPlayMode)
 			    onPlayModeChanged(newPlayMode);
@@ -324,6 +260,7 @@ namespace mqJucePlugin
 		    {
 			    LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
 			    m_globalData[index] = value;
+			    m_multiMode = isMultiMode();
 
 			    if (index == static_cast<uint32_t>(mqLib::GlobalParameter::SingleMultiMode))
 				    requestAllPatches();
@@ -420,22 +357,6 @@ namespace mqJucePlugin
 		if(parseMidiPacket(SingleDump, _data, _paramValues, _sysex))
 			return true;
 		return parseMidiPacket(SingleDumpQ, _data, _paramValues, _sysex);
-	}
-
-	bool Controller::setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const
-	{
-	    for(uint32_t i=0; i<_len && i <_value.size(); ++i)
-	    {
-	        char paramName[64];
-	        snprintf(paramName, sizeof(paramName), "%s%02u", _prefix.c_str(), i);
-
-	        const auto idx = getParameterIndexByName(paramName);
-	        if(idx == InvalidParameterIndex)
-	            break;
-
-	        _values[idx] = static_cast<uint8_t>(_value[i]);
-	    }
-	    return true;
 	}
 
 	const std::string& Controller::getPatchName(const uint8_t _part) const
@@ -536,6 +457,7 @@ namespace mqJucePlugin
 	    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
 
 	    m_globalData[index] = _value;
+	    m_multiMode = isMultiMode();
 
 	    return sendSysEx(GlobalParameterChange, data);
 	}
@@ -566,22 +488,7 @@ namespace mqJucePlugin
 		if(_derived.getDescription().page >= 100)
 			return false;
 
-		const auto& packetName = g_midiPacketNames[SingleDump];
-		const auto* packet = getMidiPacket(packetName);
-
-		if (!packet)
-		{
-			LOG("Failed to find midi packet " << packetName);
-			return true;
-		}
-		
-		const auto* defA = packet->getDefinitionByParameterName(_derived.getDescription().name);
-		const auto* defB = packet->getDefinitionByParameterName(_base.getDescription().name);
-
-		if (!defA || !defB)
-			return true;
-
-		return defA->doMasksOverlap(*defB);
+		return isDerivedParameterInPacket(g_midiPacketNames[SingleDump], _derived, _base);
 	}
 
 	std::vector<uint8_t> Controller::getPartsForMidiChannel(uint8_t _channel)

@@ -36,12 +36,14 @@ namespace jucePluginEditorLib
 			High
 		};
 
-		FocusedParameter(const pluginLib::Controller& _controller, const Editor& _editor);
+		FocusedParameter(const pluginLib::Controller& _controller, Editor& _editor);
 		~FocusedParameter() override;
 
 		void updateByElement(const Rml::Element* _element);
 
-		virtual void updateParameter(const std::string& _name, const std::string& _value);
+		void updateParameter(const std::string& _name, const std::string& _value);
+
+		void setTooltipEnabled(bool _enabled);
 
 	private:
 		void timerCallback() override;
@@ -54,6 +56,7 @@ namespace jucePluginEditorLib
 
 		const pluginLib::Parameter* resolveSoftKnob(const pluginLib::Parameter* _sourceParam) const;
 
+		Editor& m_editor;
 		const rmlPlugin::RmlParameterBinding& m_parameterBinding;
 		const pluginLib::Controller& m_controller;
 
@@ -61,6 +64,7 @@ namespace jucePluginEditorLib
 		Rml::Element* m_focusedParameterValue = nullptr;
 
 		std::unique_ptr<FocusedParameterTooltip> m_tooltip;
+		bool m_tooltipEnabled = true;
 
 		std::map<pluginLib::Parameter*, pluginLib::ParameterListener> m_boundParameters;
 		Priority m_currentPriority = Priority::None;

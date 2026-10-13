@@ -16,7 +16,8 @@ namespace networkLib
 	public:
 		// Throws on bind failure so callers (e.g. McpServer::start's port-retry
 		// loop) can detect a port collision and try the next port.
-		TcpServer(OnConnectedFunc _onConnected, int _tcpPort);
+		// _loopbackOnly: accept connections from this machine only (127.0.0.1)
+		TcpServer(OnConnectedFunc _onConnected, int _tcpPort, bool _loopbackOnly = false);
 		~TcpServer() override;
 	protected:
 		void threadFunc() override;
@@ -24,5 +25,6 @@ namespace networkLib
 	private:
 		const int m_port;
 		std::unique_ptr<ptypes::ipstmserver> m_listener;
+		std::unique_ptr<ptypes::ipstmserver> m_portReservation;
 	};
 }
