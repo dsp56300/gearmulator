@@ -467,6 +467,10 @@ JE8086:
         powered on or off, and right after the VALUE knob was pushed on the
         SC-8850, because the window was changed while it was being drawn.
 
+- [Fix] Linux: The player could crash after a device switch while the audio
+        or MIDI settings were open: the settings page that was replaced
+        stayed registered with the window for its redraws.
+
 - [Fix] SC-88, SC-88VL, SC-88Pro: A data request (RQ1) was never answered.
         The firmware now answers it as on the hardware, for a request that
         starts at a parameter, up to 137 bytes, on either MIDI IN.
