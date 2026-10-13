@@ -250,6 +250,14 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		set_property(TARGET ${targetName}_CLAP PROPERTY FOLDER ${targetName})
 		add_dependencies(${targetName}_All ${targetName}_CLAP)
 		add_dependencies(PluginFormat_CLAP ${targetName}_CLAP)
+
+		# The CLAP target is built by clap-juce-extensions rather than by JUCE, so it misses the
+		# version resource JUCE links into every format of its own. Without it the .clap file has no
+		# version at all - Explorer shows none, and nothing can tell which build it is. It is the
+		# same resource the other formats get.
+		if(WIN32 AND TARGET ${targetName}_rc_lib)
+			target_link_libraries(${targetName}_CLAP PRIVATE ${targetName}_rc_lib)
+		endif()
 	endif()
 
 	# On Linux, JUCE clears the default "lib" prefix for VST3/AAX but not for the
