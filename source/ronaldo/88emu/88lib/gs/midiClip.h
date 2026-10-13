@@ -30,6 +30,8 @@ namespace emu88Lib::gs
 
 		// A message, with the room it needs after it
 		void add(std::vector<uint8_t> _message);
+		// A message with the room after it given, in microseconds: for the boards whose needs the above does not know
+		void add(std::vector<uint8_t> _message, uint32_t _spacing);
 
 		bool empty() const { return m_events.empty(); }
 		const std::vector<Event>& events() const { return m_events; }

@@ -47,6 +47,12 @@ namespace emu88Lib
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& events);
 		void transportDiscontinuity(uint32_t generation);
 
+		static constexpr uint16_t RamBase = 0x2100, RamSize = 0x1f00;
+		// A byte of the external RAM, where the firmware keeps the memory the MIDI implementation describes:
+		// for instance the system area at 23C4, the patch temps at 2344 and the patch memory at 2B5A. The board
+		// answers no data requests, so this is the only way to read it. For tests and debugging.
+		uint8_t ramByte(const uint16_t address) { return *m_machine.bus().ptr(address); }
+
 	private:
 		struct Host final : emu::DeviceLE
 		{

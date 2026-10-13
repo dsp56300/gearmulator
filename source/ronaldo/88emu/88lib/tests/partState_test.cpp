@@ -640,6 +640,46 @@ namespace
 		CHECK_EQ(smf[smf.size() - 3], 0xff);
 		CHECK_EQ(smf[smf.size() - 2], 0x2f);
 	}
+
+	// Which parts the channel messages go to, for the part tabs to light up
+	void activity()
+	{
+		PartStateTracker tracker;
+		tracker.setModel(DeviceModel::Sc88Pro);
+
+		// Nothing is kept while nothing shows it
+		tracker.process(channel(0, 0x90, 60, 100));
+		CHECK_EQ(tracker.takeActivity(), 0u);
+		tracker.setActivityEnabled(true);
+
+		// A note on channel 1 of port B reaches part B1; once taken it is gone
+		tracker.process(channel(1, 0x90, 60, 100));
+		CHECK_EQ(tracker.takeActivity(), uint64_t{1} << 16);
+		CHECK_EQ(tracker.takeActivity(), 0u);
+
+		// Every part on the channel, whatever the message
+		tracker.process(sysex(0, dt1(partAddress(3, PartParam::RxChannel), 0)));
+		tracker.process(channel(0, 0xe0, 0, 0x40));
+		CHECK_EQ(tracker.takeActivity(), (uint64_t{1} << 0) | (uint64_t{1} << 3));
+
+		// A part switched off hears nothing, and a channel without parts lights none
+		tracker.process(sysex(0, dt1(partAddress(0, PartParam::RxChannel), 0x10)));
+		tracker.process(sysex(0, dt1(partAddress(3, PartParam::RxChannel), 0x10)));
+		tracker.process(channel(0, 0x90, 60, 100));
+		tracker.process(channel(0, 0xf8, 0));
+		CHECK_EQ(tracker.takeActivity(), 0u);
+
+		// The SC-8850's port D
+		tracker.setModel(DeviceModel::Sc8850);
+		tracker.process(channel(3, 0x99, 36, 100));
+		CHECK_EQ(tracker.takeActivity(), uint64_t{1} << (48 + 9));
+
+		// Switched off, what came in is gone and nothing more is kept
+		tracker.process(channel(0, 0x90, 60, 100));
+		tracker.setActivityEnabled(false);
+		tracker.process(channel(0, 0x90, 60, 100));
+		CHECK_EQ(tracker.takeActivity(), 0u);
+	}
 }
 
 int main()
@@ -653,5 +693,6 @@ int main()
 	params();
 	insertionEffect();
 	midiClip();
+	activity();
 	return finish("partState");
 }

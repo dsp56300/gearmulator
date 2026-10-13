@@ -146,6 +146,7 @@ div {
 }
 
 .pePartTab {
+	position: relative;
 	flex: 1 1 0dp;
 	min-width: 24dp;
 }
@@ -162,6 +163,33 @@ div {
 /* The second group stands apart from the first */
 .pePartTab.groupStart {
 	margin-left: 6dp;
+}
+
+/* MIDI for a part lights up its tab and its mixer row a little. A light is an element of its own over the whole of
+   either, which tints whatever state they show. It switches its visibility only, no layout, and has no transition:
+   a fade would redraw the window at its full rate after every note. */
+.pePartLight, .peMixLight {
+	position: absolute;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	left: 0dp;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.pePartLight {
+	border-radius: 4dp 4dp 0dp 0dp;
+	background-color: #9fd2ff29;
+}
+
+.peMixLight {
+	border-radius: 3dp;
+	background-color: #9fd2ff1c;
+}
+
+.pePartLight.on, .peMixLight.on {
+	visibility: visible;
 }
 
 /* A drum part's tab says so. */
@@ -379,6 +407,7 @@ div {
 }
 
 .peMixRow {
+	position: relative;
 	height: 28dp;
 	padding: 0dp 6dp;
 	border-radius: 3dp;
@@ -439,6 +468,10 @@ div {
 	flex: 1 1 auto;
 	gap: 10dp;
 	height: 100%;
+}
+
+/* A name that opens its part's page */
+.peMixName.editable {
 	cursor: pointer;
 }
 
@@ -455,7 +488,7 @@ div {
 	white-space: nowrap;
 }
 
-.peMixName:hover .peMixPart, .peMixName:hover .peMixTone {
+.peMixName.editable:hover .peMixPart, .peMixName.editable:hover .peMixTone {
 	color: #e8a35c;
 }
 
@@ -491,6 +524,13 @@ div {
 	width: 32dp;
 	color: #aeb8be;
 	text-align: right;
+}
+
+/* What a row shows instead of a control it does not have */
+.peMixNote {
+	flex: 1 1 auto;
+	color: #66737c;
+	font-size: 12dp;
 }
 
 .peMixPan .peMixValue {
@@ -818,4 +858,379 @@ scrollbarvertical sliderbar {
 	min-height: 12dp;
 	border-radius: 4dp;
 	background-color: #59656d;
+}
+
+/* The boards of the MT-32 dialect: without solo and mute, which they have no switch for */
+.laDialect .peMixHeadSoloMute {
+	display: none;
+}
+
+/* The CM-64's two boards in the side pane, each above its sections, the second well apart from the first */
+.peBoardTitle {
+	height: 30dp;
+	margin-top: 4dp;
+	color: #ffffff;
+	font-size: 14dp;
+	font-weight: 600;
+	line-height: 30dp;
+}
+
+.peBoardTitle.next {
+	margin-top: 22dp;
+	padding-top: 12dp;
+	border-top: 1dp #4a555c;
+}
+
+/* A group of the list: the timbre groups, the internal tones and the card's */
+.peListHeading {
+	display: block;
+	height: 24dp;
+	margin-top: 6dp;
+	padding: 0dp 6dp;
+	color: #aeb8be;
+	font-size: 12dp;
+	font-weight: 600;
+	line-height: 24dp;
+}
+
+/* The check of a setting in the actions panel */
+.peCheck {
+	width: 11dp;
+	height: 11dp;
+	margin: 6dp 0dp 0dp 5dp;
+	border: 1dp #8a969e;
+	border-radius: 2dp;
+}
+
+.peCheck.on {
+	border-color: #e8a35c;
+	background-color: #e8a35c;
+}
+
+/* ---- The LA board's timbre editor: the part's and the timbre's settings in two columns, then a partial's in three,
+   the wave generator with the pitch envelope and LFO, the filter and the amplifier */
+
+.peColumns.three {
+	gap: 12dp;
+	margin-top: 2dp;
+}
+
+.peColumns.three .peRow {
+	gap: 6dp;
+	height: 22dp;
+	padding: 0dp 2dp;
+}
+
+.peColumns.three .peRowLabel {
+	flex: 0 0 108dp;
+	width: 108dp;
+	font-size: 12dp;
+}
+
+.peColumns.three .peRowValue {
+	flex: 0 0 34dp;
+	width: 34dp;
+	font-size: 12dp;
+}
+
+/* The common settings and the four partials, one shown at a time; one that does not play is dimmed */
+.pePartialBar {
+	display: flex;
+	flex-direction: row;
+	gap: 2dp;
+	margin: 4dp 0dp 8dp 0dp;
+	border-bottom: 1dp #3b444b;
+}
+
+.pePartial {
+	display: block;
+	flex: 1 1 0dp;
+	box-sizing: border-box;
+	height: 28dp;
+	margin-bottom: -1dp;
+	border: 1dp #3b444b;
+	border-radius: 4dp 4dp 0dp 0dp;
+	background-color: #222a2e;
+	color: #aab3b9;
+	font-size: 13dp;
+	line-height: 26dp;
+	text-align: center;
+	cursor: pointer;
+}
+
+.pePartial:hover {
+	background-color: #2c353a;
+	color: #ffffff;
+}
+
+.pePartial:checked {
+	border-color: #59656d;
+	border-bottom-color: #20262a;
+	background-color: #20262a;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.pePartial.muted {
+	color: #5d6971;
+}
+
+/* Which partials play, a switch each */
+.peMutes {
+	display: flex;
+	flex-direction: row;
+	gap: 4dp;
+}
+
+.peMute {
+	display: block;
+	box-sizing: border-box;
+	width: 30dp;
+	height: 20dp;
+	border: 1dp #515c64;
+	border-radius: 3dp;
+	background-color: #2b3237;
+	color: #8e9aa2;
+	font-size: 12dp;
+	line-height: 18dp;
+	text-align: center;
+	cursor: pointer;
+}
+
+.peMute:hover {
+	border-color: #68747d;
+}
+
+.peMute:checked {
+	border-color: #e8a35c;
+	background-color: #e8a35c;
+	color: #1c2226;
+	font-weight: 600;
+}
+
+input.peNameInput {
+	flex: 1 1 0dp;
+	width: 10dp;
+	height: 22dp;
+	box-sizing: border-box;
+	padding: 2dp 6dp;
+	border: 1dp #515c64;
+	border-radius: 3dp;
+	background-color: #1f2529;
+	color: #eef1f2;
+	font-size: 13dp;
+}
+
+input.peNameInput:focus {
+	border-color: #e8a35c;
+}
+
+/* What the editor cannot show or change, and why */
+.peNotice {
+	display: block;
+	margin: 2dp 0dp 6dp 0dp;
+	padding: 6dp 8dp;
+	border: 1dp #4a555c;
+	border-radius: 4dp;
+	color: #c9d0d4;
+	font-size: 12dp;
+}
+
+.peNoticeButton {
+	display: block;
+	margin-top: 6dp;
+	padding: 3dp 8dp;
+	border: 1dp #68747d;
+	border-radius: 3dp;
+	background-color: #333c42;
+	color: #ffffff;
+	font-size: 12dp;
+	text-align: center;
+	cursor: pointer;
+}
+
+.peNoticeButton:hover {
+	background-color: #3d484f;
+}
+
+/* A setting the device has not told yet */
+input.peSlider.unknown sliderbar {
+	background-color: #4a555c;
+}
+
+combo.unknown {
+	color: #66737c;
+}
+
+/* A partial's tab: its switch, its name, its kind */
+.peTabCheck {
+	display: inline-block;
+	width: 10dp;
+	height: 10dp;
+	margin: 0dp 6dp 0dp 0dp;
+	border: 1dp #8a969e;
+	border-radius: 2dp;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.peTabCheck:checked {
+	border-color: #e8a35c;
+	background-color: #e8a35c;
+}
+
+.peKind {
+	margin-left: 6dp;
+	color: #77838b;
+	font-size: 11dp;
+}
+
+/* A partial that does not play, all of it: dimmed, still there to change */
+.peLaPage.off .peColumns {
+	opacity: 0.55;
+}
+
+/* A setting that does not apply to what the partial plays */
+.peRow.na, .peSection.na .peRow, .peSection.na .peNumGrid, .peSection.na .peEnvGraph {
+	opacity: 0.3;
+	pointer-events: none;
+}
+
+.peSection.na .peSectionTitle {
+	color: #77838b;
+}
+
+.peHint {
+	display: block;
+	margin-top: 6dp;
+	padding: 0dp 4dp;
+	color: #77838b;
+	font-size: 11dp;
+}
+
+/* Buttons a value each */
+.peSegments {
+	display: flex;
+	flex-direction: row;
+	flex: 1 1 auto;
+	gap: 0dp;
+}
+
+.peSegment {
+	display: block;
+	flex: 1 1 0dp;
+	box-sizing: border-box;
+	height: 20dp;
+	border: 1dp #515c64;
+	border-width: 1dp 0dp 1dp 1dp;
+	background-color: #2b3237;
+	color: #b8c0c5;
+	font-size: 12dp;
+	line-height: 18dp;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+.peSegment:first-child {
+	border-radius: 3dp 0dp 0dp 3dp;
+}
+
+.peSegment:last-child {
+	border-right-width: 1dp;
+	border-radius: 0dp 3dp 3dp 0dp;
+}
+
+.peSegment:hover {
+	background-color: #343d43;
+	color: #ffffff;
+}
+
+.peSegment:checked {
+	border-color: #68747d;
+	background-color: #52616a;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+/* An envelope: its graph, its times and levels as numbers to drag, then its other settings */
+.peEnvGraph {
+	position: relative;
+	width: 216dp;
+	height: 60dp;
+	margin: 2dp 0dp 4dp 0dp;
+	border: 1dp #343d43;
+	border-radius: 3dp;
+	background-color: #1a1f22;
+}
+
+strokes.peEnvGrid, strokes.peEnvLine {
+	position: absolute;
+	top: 0dp;
+	left: 0dp;
+	width: 216dp;
+	height: 60dp;
+}
+
+strokes.peEnvGrid {
+	color: #3b444b;
+	stroke-width: 1dp;
+}
+
+strokes.peEnvLine {
+	color: #e8a35c;
+	stroke-width: 1.6dp;
+}
+
+.peNumGrid {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	gap: 3dp;
+	height: 34dp;
+	padding: 0dp 2dp;
+}
+
+.peNumLabel {
+	flex: 0 0 38dp;
+	width: 38dp;
+	height: 20dp;
+	color: #c9d0d4;
+	font-size: 12dp;
+	line-height: 20dp;
+}
+
+.peNumCell {
+	flex: 0 0 32dp;
+	width: 32dp;
+}
+
+.peNumHead {
+	height: 13dp;
+	color: #77838b;
+	font-size: 10dp;
+	text-align: center;
+}
+
+.peNum {
+	box-sizing: border-box;
+	height: 20dp;
+	border: 1dp #515c64;
+	border-radius: 3dp;
+	background-color: #1f2529;
+	color: #eef1f2;
+	font-size: 12dp;
+	line-height: 18dp;
+	text-align: center;
+	cursor: ns-resize;
+	drag: drag;
+}
+
+.peNum:hover {
+	border-color: #8e9aa2;
+}
+
+.peNum.unknown {
+	color: #66737c;
 }

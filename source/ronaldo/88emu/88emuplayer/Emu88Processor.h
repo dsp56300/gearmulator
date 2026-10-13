@@ -9,6 +9,8 @@
 
 #include "88lib/hardwareDevice.h"
 #include "88lib/gs/partState.h"
+#include "88lib/mt32/presets.h"
+#include "88lib/mt32/stateTracker.h"
 
 #include "synthLib/plugin.h"
 #include "synthLib/resampler.h"
@@ -107,18 +109,39 @@ namespace emu88Player
 		// What the board's parts are set to, as far as the MIDI it received tells: live input, the song player and
 		// the part editor's edits all go through it, see emu88Lib::gs::PartStateTracker.
 		const emu88Lib::gs::PartStateTracker& partState() const { return m_partState; }
+		// The parts that received a channel message since the last call, a bit per part, for the part editor; kept
+		// only while it is enabled, see emu88Lib::PartActivity
+		void setPartActivityEnabled(bool _enabled);
+		uint64_t takePartActivity() { return m_partState.takeActivity() | m_laActivity.take(); }
+
+		// The same for the boards that speak the MT-32 dialect, the MT-32, CM-32L, CM-32P and CM-64: their memory as
+		// far as the MIDI they received tells, see emu88Lib::mt32::StateTracker
+		const emu88Lib::mt32::StateTracker& laState() const { return m_laState; }
+		// Their parts by channel for the activity, a bit per part as the part editor numbers them: the part editor
+		// keeps it from the memory it shows, where the channels are
+		void setLaPartListeners(const emu88Lib::PartActivity::Listeners& _listeners)
+		{
+			m_laActivity.setListeners(_listeners);
+		}
+		// Their preset timbres and tones' names, read from their ROMs when the board was loaded; null for another
+		// board, laPresetsError() says what is missing. The copy in laState() knows the presets from the start.
+		const std::shared_ptr<const emu88Lib::mt32::PresetCatalog>& laPresets() const { return m_laPresets; }
+		const std::string& laPresetsError() const { return m_laPresetsError; }
 		// The board's tones and drum sets, read from its ROMs when it was loaded; null for a board the part editor
 		// does not know or whose ROMs it could not read, toneCatalogError() says which.
 		const std::shared_ptr<const emu88Lib::gs::ToneCatalog>& toneCatalog() const { return m_toneCatalog; }
 		const std::string& toneCatalogError() const { return m_toneCatalogError; }
 
 		// A data request (RQ1) for the board, on the port of the part group it asks about, and the address its
-		// answer comes back with.
+		// answer comes back with. The LA boards answer a long one in pieces of 256 bytes, the last of which ends
+		// size bytes after the address; they need the time to send them.
 		struct DataRequest
 		{
 			std::vector<uint8_t> sysex;
 			uint8_t port = 0;
 			uint32_t address = 0;
+			uint32_t size = 0;
+			double timeoutSeconds = 0.1;
 		};
 
 		struct DataRequestStatus
@@ -131,8 +154,9 @@ namespace emu88Player
 		};
 
 		// Sends the requests one at a time and runs the board ahead of the audio, as fast as it goes, until it
-		// answered each or let it pass; the answers update partState(). The run has a thread of its own, and while
-		// it lasts the player is silent and the song holds. False if one is in progress or there is no board.
+		// answered each or let it pass; the answers update partState(), or laState() on the boards of the MT-32
+		// dialect. The run has a thread of its own, and while it lasts the player is silent and the song holds.
+		// False if one is in progress or there is no board.
 		bool startDataRequests(std::vector<DataRequest> _requests);
 		DataRequestStatus dataRequestStatus() const;
 
@@ -209,6 +233,12 @@ namespace emu88Player
 		juce::MidiBuffer m_liveMidiBlock;
 
 		emu88Lib::gs::PartStateTracker m_partState;
+		emu88Lib::mt32::StateTracker m_laState;
+		emu88Lib::PartActivity m_laActivity;
+		// Whether the board speaks the MT-32 dialect, so that its MIDI goes to m_laState. Set under the callback lock.
+		bool m_laDialect = false;
+		std::shared_ptr<const emu88Lib::mt32::PresetCatalog> m_laPresets;
+		std::string m_laPresetsError;
 		std::shared_ptr<const emu88Lib::gs::ToneCatalog> m_toneCatalog;
 		std::string m_toneCatalogError;
 		// Changes under the callback lock whenever the board does, so that a data request run notices.

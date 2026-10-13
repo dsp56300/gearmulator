@@ -266,6 +266,7 @@ namespace emu88Lib::gs
 		// Most of what a song sends are notes; those pass without taking the lock
 		if(_event.sysex.empty())
 		{
+			m_activity.process(_event.a, _event.port);
 			const uint8_t type = _event.a & 0xf0;
 			if(!(type == 0xb0 && isTrackedController(_event.b)) && type != 0xc0)
 				return;
@@ -890,6 +891,29 @@ namespace emu88Lib::gs
 
 	void PartStateTracker::changed()
 	{
+		if(m_activity.enabled())
+			updateListeners();
 		m_revision.fetch_add(1, std::memory_order_acq_rel);
+	}
+
+	void PartStateTracker::setActivityEnabled(const bool _enabled)
+	{
+		std::lock_guard lock(m_mutex);
+		if(_enabled)
+			updateListeners();
+		m_activity.setEnabled(_enabled);
+	}
+
+	void PartStateTracker::updateListeners()
+	{
+		// A part hears the channel it is set to on its own group's port
+		PartActivity::Listeners listeners{};
+		for(size_t i = 0; i < m_setup.parts.size() && i < PartActivity::g_maxPorts * g_partsPerGroup; ++i)
+		{
+			const auto channel = m_setup.parts[i].rxChannel;
+			if(channel < 16)
+				listeners[i / g_partsPerGroup * 16 + channel] |= uint64_t{1} << i;
+		}
+		m_activity.setListeners(listeners);
 	}
 }

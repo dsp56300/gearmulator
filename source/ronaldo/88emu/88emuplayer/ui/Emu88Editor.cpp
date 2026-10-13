@@ -5,7 +5,6 @@
 #include "88emuplayer/ui/Emu88EditorWindows.h"
 #include "88emuplayer/ui/Emu88PartEditor.h"
 #include "88emuplayer/app/Emu88LaunchOptions.h"
-#include "88lib/gs/partState.h"
 #include "88lib/rom/romloader.h"
 #include "juceRmlUi/rmlMenu.h"
 #include "juceRmlUi/rmlHelper.h"
@@ -334,7 +333,7 @@ namespace emu88Player
 		const auto currentScale = m_processor.config().getIntValue("scale", 100);
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
 		// Always listed, so that it is found; greyed out on the boards it does not know
-		m_contextMenu->addEntry("Part Editor", emu88Lib::gs::isPartEditorModel(m_processor.deviceModel()), false, [this]
+		m_contextMenu->addEntry("Part Editor", hasPartEditor(m_processor.deviceModel()), false, [this]
 		{
 			const juce::WeakReference<Editor> safeThis(this);
 			juce::MessageManager::callAsync([safeThis]

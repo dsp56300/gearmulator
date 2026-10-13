@@ -22,7 +22,7 @@
 					<div class="peMixHeadSoloMute"/>
 					<div class="peMixHeadName">
 						<div class="peMixHeadPart">Part</div>
-						<div class="peMixHeadTone">Instrument</div>
+						<div id="peMixHeadTone" class="peMixHeadTone">Instrument</div>
 					</div>
 					<div class="peMixHeadVolume">Volume</div>
 					<div class="peMixHeadPan">Pan</div>
@@ -30,7 +30,7 @@
 				<div id="peMixerRows" class="peMixerRows"/>
 			</div>
 			<div class="peSidePane">
-				<div class="pePaneTitle">System and Effects</div>
+				<div id="pePaneTitle" class="pePaneTitle">System and Effects</div>
 				<div id="peGlobals" class="peControls peGlobals"/>
 			</div>
 		</div>
