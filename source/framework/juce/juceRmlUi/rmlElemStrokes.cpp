@@ -30,11 +30,17 @@ namespace juceRmlUi
 
 			for(size_t i=0; i<_points.size(); ++i)
 			{
-				// the direction at a point: the average of the segments that meet there
+				// the direction at a point: the average of the segments that meet there, or at the tip of a line that
+				// goes back the way it came, the one it came along
 				const auto& prev = _points[i ? i - 1 : 0];
 				const auto& next = _points[i + 1 < _points.size() ? i + 1 : i];
 				auto d = (next - prev) * _scale;
-				const auto len = std::sqrt(d.x * d.x + d.y * d.y);
+				auto len = std::sqrt(d.x * d.x + d.y * d.y);
+				if(len <= 0.0f)
+				{
+					d = (_points[i] - prev) * _scale;
+					len = std::sqrt(d.x * d.x + d.y * d.y);
+				}
 				d = len > 0.0f ? d / len : Rml::Vector2f(1.0f, 0.0f);
 				const Rml::Vector2f n(-d.y, d.x);
 
