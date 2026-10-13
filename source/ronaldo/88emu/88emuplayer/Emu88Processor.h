@@ -8,6 +8,7 @@
 #include "jucePlayerLib/portMidiBridge.h"
 
 #include "88lib/hardwareDevice.h"
+#include "88lib/gs/partState.h"
 
 #include "synthLib/plugin.h"
 #include "synthLib/resampler.h"
@@ -23,8 +24,10 @@
 #include <cstdint>
 #include <initializer_list>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace emu88Player
@@ -98,6 +101,40 @@ namespace emu88Player
 		void sendDeviceReset();
 		// Hold pedal up and All Notes Off on every channel: what stops a note on any board.
 		void sendAllNotesOff();
+		// Hands MIDI to the board, each event on its own port.
+		void sendMidiEvents(const std::vector<synthLib::SMidiEvent>& _events);
+
+		// What the board's parts are set to, as far as the MIDI it received tells: live input, the song player and
+		// the part editor's edits all go through it, see emu88Lib::gs::PartStateTracker.
+		const emu88Lib::gs::PartStateTracker& partState() const { return m_partState; }
+		// The board's tones and drum sets, read from its ROMs when it was loaded; null for a board the part editor
+		// does not know or whose ROMs it could not read, toneCatalogError() says which.
+		const std::shared_ptr<const emu88Lib::gs::ToneCatalog>& toneCatalog() const { return m_toneCatalog; }
+		const std::string& toneCatalogError() const { return m_toneCatalogError; }
+
+		// A data request (RQ1) for the board, on the port of the part group it asks about, and the address its
+		// answer comes back with.
+		struct DataRequest
+		{
+			std::vector<uint8_t> sysex;
+			uint8_t port = 0;
+			uint32_t address = 0;
+		};
+
+		struct DataRequestStatus
+		{
+			bool running = false;
+			size_t total = 0;
+			size_t done = 0;
+			size_t answered = 0;
+			std::string error;
+		};
+
+		// Sends the requests one at a time and runs the board ahead of the audio, as fast as it goes, until it
+		// answered each or let it pass; the answers update partState(). The run has a thread of its own, and while
+		// it lasts the player is silent and the song holds. False if one is in progress or there is no board.
+		bool startDataRequests(std::vector<DataRequest> _requests);
+		DataRequestStatus dataRequestStatus() const;
 
 		// Capture audio to a scratch WAV on a writer thread until the user saves it.
 		bool isRecording() const { return m_recording.load(std::memory_order_relaxed); }
@@ -135,7 +172,11 @@ namespace emu88Player
 		bool replaceDevice(emu88Lib::DeviceModel _model, bool _persistModel, uint32_t heldButtons = 0);
 		uint8_t midiPortCount() const;
 		void sendSystemExclusive(const std::vector<uint8_t>& _bytes);
-		void sendMidiEvents(const std::vector<synthLib::SMidiEvent>& _events);
+		// Every message for the board goes through here, under the callback lock, so that the part state sees it.
+		void deliverMidi(const synthLib::SMidiEvent& _event);
+		void runDataRequests(const std::vector<DataRequest>& _requests, uint32_t _generation);
+
+		void finishDataRequests(const std::string& _error);
 		void recordBlock(const juce::AudioBuffer<float>& _buffer);
 		void addMidiBuffer(const juce::MidiBuffer& _midi, uint8_t _port, synthLib::MidiEventSource _source);
 		// Drains the live-input collectors for one block, passing them on only if _deliver.
@@ -166,6 +207,18 @@ namespace emu88Player
 		// by processBlock(), so live input keeps its timing within the block.
 		std::array<juce::MidiMessageCollector, 4> m_liveMidi;
 		juce::MidiBuffer m_liveMidiBlock;
+
+		emu88Lib::gs::PartStateTracker m_partState;
+		std::shared_ptr<const emu88Lib::gs::ToneCatalog> m_toneCatalog;
+		std::string m_toneCatalogError;
+		// Changes under the callback lock whenever the board does, so that a data request run notices.
+		uint32_t m_deviceGeneration = 0;
+		std::thread m_dataRequestThread;
+		// Set and cleared under the callback lock: processBlock() leaves the board to the run while it is set.
+		std::atomic<bool> m_dataRequestsRunning{false};
+		std::atomic<bool> m_dataRequestsAbort{false};
+		mutable std::mutex m_dataRequestMutex;
+		DataRequestStatus m_dataRequestStatus;
 
 		// Touched by the audio callback, so every change is made under
 		// getCallbackLock(). m_recording only mirrors m_recorder for the editor.

@@ -92,6 +92,15 @@ namespace xpLib
 			return nullptr;
 		}
 
+		// Forget which key the compiled code stands for, so that the next acquire() compiles anew whatever
+		// key it brings. A compile in flight is coalesced with that one, the worker thread keeps running.
+		void invalidate()
+		{
+			m_canRun = false;
+			m_activeKey = ~uint64_t{0};
+			m_kickKey = ~uint64_t{0};
+		}
+
 	private:
 		struct Snapshot
 		{

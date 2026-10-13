@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <limits>
 #include <optional>
 #include <set>
 #include <type_traits>
@@ -131,14 +132,18 @@ namespace pluginLib
 		const uint8_t m_part;
 		const int m_uniqueId;	// 0 for all unique parameters, > 0 if multiple Parameter instances reference a single synth parameter
 
-		std::optional<int> m_lastValue;	// unset until the first value arrives - -1 is a valid value, it cannot mark that
-		Origin m_lastValueOrigin = Origin::Unknown;
+		// Host automation and MIDI learn change a parameter on the audio thread or a MIDI thread, the editor and synth
+		// dumps on the message thread, so the bookkeeping of the last change is atomic.
+		// unset until the first value arrives - -1 is a valid value, it cannot mark that
+		static constexpr int64_t NoValue = std::numeric_limits<int64_t>::min();
+		std::atomic<int64_t> m_lastValue{NoValue};
+		std::atomic<Origin> m_lastValueOrigin{Origin::Unknown};
 		juce::Value m_value;
 		std::set<Parameter*> m_derivedParameters;
 		bool m_changingDerivedValues = false;
 
 		uint32_t m_rateLimit = 0;		// milliseconds
-		uint64_t m_lastSendTime = 0;
+		std::atomic<uint64_t> m_lastSendTime{0};
 
 		// Pending rate-limited change, updated from the audio thread and
 		// consumed by the message-thread timer callback. Encoded as an 8-byte

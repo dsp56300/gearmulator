@@ -10,6 +10,12 @@ set(SOURCES
 	analog/cmVca.h
 	c_interface.cpp c_interface.h
 	deviceModel.cpp deviceModel.h
+	gs/efx.cpp gs/efx.h gs/efxData.inc
+	gs/gs.cpp gs/gs.h
+	gs/params.cpp gs/params.h
+	gs/partState.cpp gs/partState.h
+	gs/toneCatalog.cpp gs/toneCatalog.h
+	gs/toneCatalogSc55.cpp gs/toneCatalogSc88.cpp gs/toneCatalogSc8850.cpp
 	boards/cm32p.cpp boards/cm32p.h
 	boards/cm64.cpp boards/cm64.h
 	boards/laBoard.cpp boards/laBoard.h
@@ -132,6 +138,12 @@ if(BUILD_TESTING)
 	set_property(TARGET analogOutput_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME analogOutput COMMAND analogOutput_test)
 	set_tests_properties(analogOutput PROPERTIES TIMEOUT 20)
+
+	add_executable(partState_test tests/partState_test.cpp)
+	target_link_libraries(partState_test PRIVATE 88lib)
+	set_property(TARGET partState_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME partState COMMAND partState_test)
+	set_tests_properties(partState PROPERTIES TIMEOUT 20)
 
 	add_executable(rom_test tests/rom_test.cpp)
 	target_link_libraries(rom_test PRIVATE 88lib)

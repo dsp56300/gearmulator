@@ -121,15 +121,22 @@ namespace emu88Player
 					return;
 				constexpr auto valuePush = static_cast<uint32_t>(emu88Lib::Sc8850Button::ValuePush);
 				const juce::WeakReference<Editor> safeThis(this);
+				// Outside the event, so the button visuals change under the access lock themselves.
 				juce::Timer::callAfterDelay(1, [safeThis]
 				{
 					if(auto* editor = safeThis.get())
+					{
+						juceRmlUi::RmlInterfaces::ScopedAccess access(editor->m_interfaces);
 						editor->setPointerButton(valuePush, true);
+					}
 				});
 				juce::Timer::callAfterDelay(1 + kValuePushPulseMs, [safeThis]
 				{
 					if(auto* editor = safeThis.get())
+					{
+						juceRmlUi::RmlInterfaces::ScopedAccess access(editor->m_interfaces);
 						editor->setPointerButton(valuePush, false);
+					}
 				});
 			});
 		}

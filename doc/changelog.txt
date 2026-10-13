@@ -141,6 +141,27 @@ Framework:
 - [Fix] MIDI that an emulated device sent with running status, as the CM-32P
         does, came out as single stray bytes after its first message.
 
+- [Fix] Instruments that receive MIDI at the speed of a hardware MIDI cable,
+        JE8086 and the 88emu boards for example, often lost the first note of a
+        loop in the host, or cut it off right after it started. A host that
+        does not end its audio block at the loop end reports the jump back only
+        with the next block, so the first notes of the new pass were taken for
+        leftovers of the old one and silenced with them. The loop the host
+        reports now places the jump on the sample it happens at.
+
+- [Fix] When the connection to the DSPBridge server was lost, the plugin
+        reconnected, or switched to local processing, on the host's audio
+        thread, so the host's audio stalled until that was done. It happens in
+        the background now, and the plugin stays silent until then.
+
+- [Fix] MIDI Learn, the MIDI output and parameter changes could get in each
+        other's way across the host's audio and MIDI threads. That could crash
+        the plugin, rarely, for example when a mapping was learned or a project
+        was loaded while MIDI was arriving, or when the plugin was removed.
+
+- [Imp] A MIDI output port that sends slower than the plugin feeds it no longer
+        holds up the audio. Messages that do not fit into its queue are dropped.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
@@ -403,8 +424,8 @@ JE8086:
 - [New] MIDI Player: Karaoke .kar files can be played, dropped onto the playlist
         and rendered with 88EmuCli like any other MIDI file.
 
-- [Imp] MIDI Player: When the player cannot start and was not started from a terminal, it
-        shows the reason in a message box.
+- [Imp] MIDI Player: When the player cannot start and was not started from a
+        terminal, it shows the reason in a message box.
 
 - [Imp] ROMs: When macOS does not let the player read its ROM folder, it says
         so and explains how to allow it, instead of reporting every ROM as
@@ -436,9 +457,36 @@ JE8086:
         set the zero flag the way the real chip does, from the result of
         each word, rather than as the manual describes it.
 
+- [Fix] SC-8850, MIIG5: Linking the two XP sound chips could make the audio
+        thread wait for a compile worker thread to stop.
+
+- [Fix] The player could crash, rarely, when the device was switched or
+        powered on or off, and right after the VALUE knob was pushed on the
+        SC-8850, because the window was changed while it was being drawn.
+
 - [Fix] SC-88, SC-88VL, SC-88Pro: A data request (RQ1) was never answered.
         The firmware now answers it as on the hardware, for a request that
         starts at a parameter, up to 137 bytes, on either MIDI IN.
+
+- [New] Part Editor, in the context menu of the SC-55 to SC-8850 and the
+        boards that run their programs. A mixer with the volume, pan, solo
+        and mute of every part beside the system, reverb, chorus, delay,
+        equalizer and insertion effect settings, and a page per part with
+        its mixer, pitch, tone modify, setup and scale tuning settings
+        beside its instrument, variation and tone map, or its drum set,
+        picked from the lists in the board's own ROMs, with a filter. Each
+        board shows the settings it has; the insertion effect shows the
+        parameters of the type selected. A double-click on a slider or a
+        setting's name brings it back to its default. A right-click on a
+        part tab makes it a normal or a drum part. Edits reach the board as
+        they are made, and the window follows what songs and live input
+        set, SysEx, controllers, RPN and NRPN alike. Send writes the parts
+        and effects to the board, Receive reads them back from it. Mute is
+        the board's own, the one its MUTE button sets.
+
+- [Imp] CM-32L, CM-32LN, CM-32P, CM-64: A volume knob that matches the bezel.
+
+- [Imp] MT-32: Its own dark artwork instead of the CM-32L's.
 
 2.2.25:
 

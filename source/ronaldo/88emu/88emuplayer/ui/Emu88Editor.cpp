@@ -3,7 +3,9 @@
 #include "88emuplayer/ui/Emu88EditorLcd.h"
 #include "88emuplayer/ui/Emu88EditorPlaylist.h"
 #include "88emuplayer/ui/Emu88EditorWindows.h"
+#include "88emuplayer/ui/Emu88PartEditor.h"
 #include "88emuplayer/app/Emu88LaunchOptions.h"
+#include "88lib/gs/partState.h"
 #include "88lib/rom/romloader.h"
 #include "juceRmlUi/rmlMenu.h"
 #include "juceRmlUi/rmlHelper.h"
@@ -65,6 +67,7 @@ namespace emu88Player
 		sendButtons();
 		m_settingsRoot = nullptr;
 		m_settingsWindow.reset();
+		m_partEditorWindow.reset();
 		destroyRmlUi();
 	}
 
@@ -115,12 +118,13 @@ namespace emu88Player
 		m_playlistEntries = nullptr;
 		m_playerPlayGraphic = nullptr;
 		m_playerPauseGraphic = nullptr;
-		m_lcd.reset();
-		m_lcd2.reset();
 		m_buttonElements.fill(nullptr);
 		m_leds.fill(nullptr);
 		m_onRmlFocusLost.reset();
 		m_rml.reset();
+		// The LCDs paint their canvases from the render thread, which runs until the component is gone.
+		m_lcd.reset();
+		m_lcd2.reset();
 		m_fileCache.clear();
 	}
 
@@ -198,20 +202,28 @@ namespace emu88Player
 			m_powerKeyDown = false;
 			sendButtons();
 		}
-		updateButtonVisuals();
+		// Not every caller is inside an RmlUi event. The render thread reads the document and the LCDs, so
+		// they change under the access lock - which is not held across the device boot in between.
+		{
+			juceRmlUi::RmlInterfaces::ScopedAccess access(m_interfaces);
+			updateButtonVisuals();
+		}
 		const auto held = m_pointerButtons | m_keyboardButtons;
 		const bool valid = _powerOn
 			? m_processor.setPower(true, panelButtonsForDevice(_model, held))
 			: (_restart ? m_processor.restartDevice() : m_processor.setDeviceModel(_model));
 		m_sentButtons = _powerOn ? held : 0;
 		m_displayRevision = 0;
-		updateDeviceSkin(_model);
-		updatePowerVisuals();
-		if(m_lcd)
-			m_lcd->reset(_model);
-		if(m_lcd2)
-			m_lcd2->reset(_model, 1);
-		updateLeds(0);
+		{
+			juceRmlUi::RmlInterfaces::ScopedAccess access(m_interfaces);
+			updateDeviceSkin(_model);
+			updatePowerVisuals();
+			if(m_lcd)
+				m_lcd->reset(_model);
+			if(m_lcd2)
+				m_lcd2->reset(_model, 1);
+			updateLeds(0);
+		}
 		// The analogue output setting names the circuit Auto picks for the current board, and the
 		// MIDI page dims the part groups it lacks.
 		if(m_settingsRoot)
@@ -244,11 +256,11 @@ namespace emu88Player
 		// Boards without a front panel: artwork with only the player, device selector and volume.
 		case emu88Lib::DeviceModel::Cm32p: panel = "cm32p_panel.png"; break;
 		case emu88Lib::DeviceModel::Cm32l:
-		case emu88Lib::DeviceModel::Cm32ln:
-		// The MT-32s borrow the CM-32L's bezel for now: the same display in the same window,
-		// their switches and knob on the keyboard.
+		case emu88Lib::DeviceModel::Cm32ln: panel = "cm32l_panel.png"; break;
+		// The MT-32s have the CM-32L's bezel in their own dark colour: the same display in the
+		// same window, their switches and knob on the keyboard.
 		case emu88Lib::DeviceModel::Mt32Old:
-		case emu88Lib::DeviceModel::Mt32New: panel = "cm32l_panel.png"; break;
+		case emu88Lib::DeviceModel::Mt32New: panel = "mt32_panel.png"; break;
 		case emu88Lib::DeviceModel::Cm64: panel = "cm64_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8820: panel = "sc8820_panel.png"; break;
 		case emu88Lib::DeviceModel::Xpgs:
@@ -266,9 +278,10 @@ namespace emu88Player
 		const bool noPanel = !panelArtworkHasSwitches(_model);
 		if(auto* image = document->GetElementById("hardwarePanel"))
 			image->SetAttribute("src", panel);
-		// The grey panels get darker transport faces.
+		// The grey panels get darker transport faces; the MT-32's dark one keeps the light ones.
 		const bool cmBezel = emu88Lib::isCmModel(_model) || emu88Lib::isLaModel(_model);
-		const bool darkTransport = cmBezel || _model == emu88Lib::DeviceModel::Sc8850 ||
+		const bool mt32 = _model == emu88Lib::DeviceModel::Mt32Old || _model == emu88Lib::DeviceModel::Mt32New;
+		const bool darkTransport = (cmBezel && !mt32) || _model == emu88Lib::DeviceModel::Sc8850 ||
 		                           _model == emu88Lib::DeviceModel::Sc8820;
 		for(const auto& [id, name] : {std::pair{"playerPlayGraphic", "player_play"}, std::pair{"playerPauseGraphic", "player_pause"},
 		                              std::pair{"playerStopGraphic", "player_stop"}})
@@ -283,10 +296,11 @@ namespace emu88Player
 			root->SetClass("modelSc55", emu88Lib::isSc55Model(_model) && !noPanel);
 			root->SetClass("modelCm", cmBezel);
 			// The CM bezels differ in their windows: one 16x2 on the CM-32P, one 20x1 on the
-			// CM-32L, and both on the CM-64. The MT-32s wear the CM-32L's for now.
+			// CM-32L, and both on the CM-64. The MT-32s' has the CM-32L's window.
 			root->SetClass("modelCm32l", cmBezel && _model != emu88Lib::DeviceModel::Cm32p &&
 			                             _model != emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelCm64", _model == emu88Lib::DeviceModel::Cm64);
+			root->SetClass("modelMt32", mt32);
 			root->SetClass("modelSc8820", _model == emu88Lib::DeviceModel::Sc8820);
 			root->SetClass("modelNoPanel", noPanel);
 			root->SetClass("modelNoDisplay", !emu88Lib::deviceHasLcd(_model));
@@ -319,6 +333,17 @@ namespace emu88Player
 
 		const auto currentScale = m_processor.config().getIntValue("scale", 100);
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
+		// Always listed, so that it is found; greyed out on the boards it does not know
+		m_contextMenu->addEntry("Part Editor", emu88Lib::gs::isPartEditorModel(m_processor.deviceModel()), false, [this]
+		{
+			const juce::WeakReference<Editor> safeThis(this);
+			juce::MessageManager::callAsync([safeThis]
+			{
+				if(auto* editor = safeThis.get())
+					editor->showPartEditor(true);
+			});
+		});
+		m_contextMenu->addSeparator();
 		// The MT-32 and CM boards know one reset, their own; the GM and GS ones do nothing there.
 		if(emu88Lib::isRolandLaFamily(m_processor.deviceModel()))
 		{

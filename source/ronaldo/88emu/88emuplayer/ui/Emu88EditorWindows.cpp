@@ -1,6 +1,7 @@
 #include "88emuplayer/ui/Emu88Editor.h"
 #include "88emuplayer/ui/Emu88EditorBindings.h"
 #include "88emuplayer/ui/Emu88EditorWindows.h"
+#include "88emuplayer/ui/Emu88PartEditor.h"
 
 namespace emu88Player
 {
@@ -27,6 +28,33 @@ namespace emu88Player
 		}
 		m_aboutWindow = std::make_unique<AboutWindow>(*this, m_processor.getName().toStdString());
 		m_aboutWindow->setVisible(true);
+	}
+
+	void Editor::showPartEditor(const bool _show)
+	{
+		if(!_show)
+		{
+			if(!m_partEditorWindow)
+				return;
+			// The window may be closing from one of its own handlers, so it goes once they returned
+			m_partEditorWindow->setVisible(false);
+			const juce::WeakReference<Editor> safeThis(this);
+			juce::MessageManager::callAsync([safeThis]
+			{
+				if(auto* editor = safeThis.get())
+					if(editor->m_partEditorWindow && !editor->m_partEditorWindow->isVisible())
+						editor->m_partEditorWindow.reset();
+			});
+			return;
+		}
+		if(m_partEditorWindow)
+		{
+			m_partEditorWindow->setVisible(true);
+			m_partEditorWindow->toFront(true);
+			return;
+		}
+		m_partEditorWindow = std::make_unique<PartEditorWindow>(*this, m_processor);
+		m_partEditorWindow->setVisible(true);
 	}
 
 	void RomRequirementsWindow::closeButtonPressed()

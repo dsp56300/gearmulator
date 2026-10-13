@@ -4,6 +4,7 @@
 #include "88emuplayer/ui/Emu88Editor.h"
 #include "jucePlayerLib/portMidiBridge.h"
 
+#include "88lib/gs/gs.h"
 #include "88lib/rom/romloader.h"
 
 #include "baseLib/filesystem.h"
@@ -20,6 +21,14 @@ namespace emu88Player
 		constexpr auto g_fastBootKey = "fastBoot";
 		constexpr auto g_pcmCardPathKey = "pcmCardPath";
 
+		std::shared_ptr<const emu88Lib::gs::ToneCatalog> loadToneCatalog(const emu88Lib::DeviceModel _model,
+			std::string& _error)
+		{
+			_error.clear();
+			if(!emu88Lib::gs::isPartEditorModel(_model))
+				return {};
+			return emu88Lib::gs::loadToneCatalog(_model, _error);
+		}
 	}
 
 	Processor::Processor()
@@ -87,6 +96,8 @@ namespace emu88Player
 		// includes the model's oversampling.
 		m_device->setAnalogOutputMode(m_analogOutputMode);
 		m_engine = std::make_unique<synthLib::Plugin>(m_device.get(), [](synthLib::Device*) { return nullptr; });
+		m_toneCatalog = loadToneCatalog(m_deviceModel, m_toneCatalogError);
+		m_partState.setModel(m_deviceModel, m_toneCatalog);
 		// The boards are sound modules, not sequencers: the host clock the
 		// engine would otherwise generate is just traffic on their MIDI in.
 		m_engine->setMidiClockEnabled(false);
@@ -114,8 +125,9 @@ namespace emu88Player
 			m_portMidiBridge = std::make_unique<jucePlayer::PortMidiBridge>([this](synthLib::SMidiEvent _event)
 			{
 				const juce::ScopedLock lock(getCallbackLock());
-				if(m_engine && _event.port < midiPortCount())
-					m_engine->addMidiEvent(_event);
+				// A data request run has the board to itself; what arrives meanwhile is dropped, as the live inputs'
+				if(m_engine && _event.port < midiPortCount() && !m_dataRequestsRunning.load(std::memory_order_acquire))
+					deliverMidi(_event);
 			}, m_config->getValue("virtualPortName", "88emu").toStdString(), 4);
 			m_portMidiBridge->setEnabled(portMidiEnabled);
 		}
@@ -123,6 +135,9 @@ namespace emu88Player
 
 	Processor::~Processor()
 	{
+		m_dataRequestsAbort.store(true, std::memory_order_release);
+		if(m_dataRequestThread.joinable())
+			m_dataRequestThread.join();
 		// A take that was never saved is scratch data, so it goes with the app.
 		stopRecording().deleteFile();
 		m_portMidiBridge.reset();
@@ -273,6 +288,7 @@ namespace emu88Player
 			m_midiPlayer.processBlock(discarded, 1, std::max(1.0, getSampleRate()), false);
 			previousEngine = std::move(m_engine);
 			previousDevice = std::move(m_device);
+			++m_deviceGeneration;
 		}
 		previousEngine.reset();
 		previousDevice.reset();
@@ -301,6 +317,8 @@ namespace emu88Player
 		if(getBlockSize() > 0)
 			replacementEngine->setBlockSize(static_cast<uint32_t>(getBlockSize()));
 		replacementEngine->setResamplerMode(resamplerMode());
+		std::string catalogError;
+		auto catalog = loadToneCatalog(_model, catalogError);
 
 		m_midiPlayer.stop();
 		suspendProcessing(true);
@@ -313,10 +331,14 @@ namespace emu88Player
 			m_device = std::move(replacementDevice);
 			m_engine = std::move(replacementEngine);
 			m_deviceModel = _model;
+			++m_deviceGeneration;
+			m_partState.setModel(_model, catalog);
 			m_midiPlayer.setPortCount(midiPortCount());
 			m_midiPlayer.setResetTarget(emu88Lib::resetTarget(_model));
 		}
 		suspendProcessing(false);
+		m_toneCatalog = std::move(catalog);
+		m_toneCatalogError = std::move(catalogError);
 
 		// The engine only borrows its device, so destroy it before the board it
 		// references. Do this after resuming callbacks to keep teardown off the
@@ -338,7 +360,13 @@ namespace emu88Player
 		if(!m_engine || !m_device || !m_device->isValid())
 			return;
 		for(const auto& event : _events)
-			m_engine->addMidiEvent(event);
+			deliverMidi(event);
+	}
+
+	void Processor::deliverMidi(const synthLib::SMidiEvent& _event)
+	{
+		m_engine->addMidiEvent(_event);
+		m_partState.process(_event);
 	}
 
 	uint8_t Processor::midiPortCount() const
@@ -508,7 +536,7 @@ namespace emu88Player
 	void Processor::addMidiBuffer(const juce::MidiBuffer& _midi, const uint8_t _port, const synthLib::MidiEventSource _source)
 	{
 		jucePlayer::forEachMidiEvent(_midi, _port, _source,
-			[this](synthLib::SMidiEvent event) { m_engine->addMidiEvent(event); });
+			[this](synthLib::SMidiEvent event) { deliverMidi(event); });
 	}
 
 	void Processor::takeLiveMidi(const int _samples, const bool _deliver)
@@ -543,6 +571,15 @@ namespace emu88Player
 			return;
 		}
 
+		// A data request run has the board: silence, live input dropped and the song held where it is.
+		if(m_dataRequestsRunning.load(std::memory_order_acquire))
+		{
+			_midi.clear();
+			takeLiveMidi(_buffer.getNumSamples(), false);
+			recordBlock(_buffer);
+			return;
+		}
+
 		// The standalone detaches the player's merged input, so this is empty there; inputs arrive
 		// through jucePlayer::MidiInputRouting, per part group.
 		addMidiBuffer(_midi, 0, synthLib::MidiEventSource::Host);
@@ -553,7 +590,7 @@ namespace emu88Player
 		m_midiPlayer.processBlock(playerEvents, static_cast<uint32_t>(_buffer.getNumSamples()),
 		                          getSampleRate());
 		for(auto& event : playerEvents)
-			m_engine->addMidiEvent(event);
+			deliverMidi(event);
 
 		// This standalone has no audio inputs.
 		synthLib::TAudioInputs inputs{};
@@ -693,6 +730,134 @@ namespace emu88Player
 			_out.insert(_out.end(), m_recordBlock.begin(), m_recordBlock.end());
 		});
 		m_recordedFrames += static_cast<uint64_t>(frames);
+	}
+
+	bool Processor::startDataRequests(std::vector<DataRequest> _requests)
+	{
+		if(m_dataRequestsRunning.load(std::memory_order_acquire) || _requests.empty())
+			return false;
+		// The previous run has finished, it only has to be collected.
+		if(m_dataRequestThread.joinable())
+			m_dataRequestThread.join();
+
+		uint32_t generation;
+		{
+			const juce::ScopedLock lock(getCallbackLock());
+			if(!m_engine || !m_device || !m_device->isValid())
+				return false;
+			generation = m_deviceGeneration;
+			{
+				std::lock_guard statusLock(m_dataRequestMutex);
+				m_dataRequestStatus = {};
+				m_dataRequestStatus.running = true;
+				m_dataRequestStatus.total = _requests.size();
+			}
+			m_dataRequestsAbort.store(false, std::memory_order_release);
+			m_dataRequestsRunning.store(true, std::memory_order_release);
+		}
+		m_dataRequestThread = std::thread([this, requests = std::move(_requests), generation]
+		{
+			runDataRequests(requests, generation);
+		});
+		return true;
+	}
+
+	Processor::DataRequestStatus Processor::dataRequestStatus() const
+	{
+		std::lock_guard lock(m_dataRequestMutex);
+		return m_dataRequestStatus;
+	}
+
+	void Processor::runDataRequests(const std::vector<DataRequest>& _requests, const uint32_t _generation)
+	{
+		// How long the board may take to answer. In emulation the SC-55s answer a parameter within 9 ms, the
+		// SC-8820 within 6 and the SC-8850 within 2; one that has nothing at an address says nothing at all.
+		constexpr double timeoutSeconds = 0.1;
+		// A board that answers none of the first few does not answer data requests at all.
+		constexpr size_t giveUpAfter = 4;
+
+		const auto sampleRate = getSampleRate();
+		const auto blockSize = static_cast<size_t>(std::max(32, getBlockSize()));
+		if(sampleRate <= 0.0)
+		{
+			finishDataRequests("The audio device is not running.");
+			return;
+		}
+
+		std::vector<synthLib::SMidiEvent> midiOut;
+		for(size_t i = 0; i < _requests.size(); ++i)
+		{
+			const auto& request = _requests[i];
+			bool answered = false;
+			double elapsed = 0.0;
+			bool first = true;
+			while(!answered && elapsed < timeoutSeconds)
+			{
+				if(m_dataRequestsAbort.load(std::memory_order_acquire))
+				{
+					finishDataRequests("Cancelled.");
+					return;
+				}
+				midiOut.clear();
+				{
+					const juce::ScopedLock lock(getCallbackLock());
+					if(_generation != m_deviceGeneration || !m_engine)
+					{
+						finishDataRequests("The device changed.");
+						return;
+					}
+					if(first)
+					{
+						// A request changes nothing on the board, so it bypasses the part state.
+						synthLib::SMidiEvent event(synthLib::MidiEventSource::Host);
+						event.sysex.assign(request.sysex.begin(), request.sysex.end());
+						event.port = request.port;
+						m_engine->addMidiEvent(event);
+						first = false;
+					}
+					m_engine->process({}, {}, blockSize, 120.0f, 0.0f, false, false);
+					m_engine->getMidiOut(midiOut);
+				}
+				for(const auto& event : midiOut)
+				{
+					if(event.sysex.empty())
+						continue;
+					// A board with one MIDI OUT answers every port's request there, so the address is what tells.
+					emu88Lib::gs::Dt1 dt1;
+					if(emu88Lib::gs::parseDt1(event.sysex.data(), event.sysex.size(), dt1) &&
+					   dt1.address == request.address)
+						answered = true;
+					m_partState.processReply(event, request.port);
+				}
+				elapsed += static_cast<double>(blockSize) / sampleRate;
+			}
+
+			size_t answeredCount;
+			{
+				std::lock_guard lock(m_dataRequestMutex);
+				++m_dataRequestStatus.done;
+				if(answered)
+					++m_dataRequestStatus.answered;
+				answeredCount = m_dataRequestStatus.answered;
+			}
+			if(!answeredCount && i + 1 >= giveUpAfter)
+			{
+				finishDataRequests("The device does not answer data requests.");
+				return;
+			}
+		}
+		finishDataRequests({});
+	}
+
+	void Processor::finishDataRequests(const std::string& _error)
+	{
+		{
+			std::lock_guard lock(m_dataRequestMutex);
+			m_dataRequestStatus.running = false;
+			m_dataRequestStatus.error = _error;
+		}
+		const juce::ScopedLock lock(getCallbackLock());
+		m_dataRequestsRunning.store(false, std::memory_order_release);
 	}
 
 	juce::AudioProcessorEditor* Processor::createEditor()
