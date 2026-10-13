@@ -21,7 +21,11 @@ namespace emu88Player::editor
 	// away. Expressed in dp because element offsets come back in rendered
 	// pixels, which move with the GUI scale.
 	constexpr float g_keyboardRowToleranceDp = 8.0f;
-	constexpr int g_aboutHeight = 242;
+	// The picture on top of the about window, about.png: a render brought down to 300 by 215 pixels and 16 colours with
+	// a pattern dither and the LCD orange kept in the palette, as an about box of the nineties had it
+	constexpr int g_aboutImageWidth = 300;
+	constexpr int g_aboutImageHeight = 215;
+	constexpr int g_aboutHeight = 242 + g_aboutImageHeight + 12;
 	constexpr int g_settingsWidth = 690;
 	constexpr int g_settingsHeight = 410;
 	// The part editor's body size in emu88PartEditor.rcss

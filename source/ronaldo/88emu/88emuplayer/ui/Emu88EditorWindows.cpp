@@ -77,6 +77,20 @@ namespace emu88Player
 		});
 	}
 
+	juce::Image AboutWindow::loadImage(Editor& _owner)
+	{
+		try
+		{
+			uint32_t size = 0;
+			const auto* data = _owner.getResourceByFilename("about.png", size);
+			return juce::ImageCache::getFromMemory(data, static_cast<int>(size));
+		}
+		catch(const std::exception&)
+		{
+			return {};
+		}
+	}
+
 	void AboutWindow::closeButtonPressed()
 	{
 		const juce::WeakReference<Editor> safeThis(&m_owner);

@@ -485,6 +485,7 @@ Thanks to the people whose work made this possible:
 - **masanaohayashi** and **shingo45endo**, for the Recomposer support.
 - **hackyourlife**, for the performance improvements in the descrambling algorithm.
 - **InfoSecDJ** and **John McMaster**, for the incredibly high quality die shots.
+- GSAE-inspired CGI Render in About by **PurpBatBoi**.
 
 ## License and legal
 
