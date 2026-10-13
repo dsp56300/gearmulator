@@ -121,6 +121,47 @@ Framework:
         and paste the whole patch only when nothing under the mouse or with the
         focus takes them itself.
 
+- [Imp] EMU-78 A tooltip shows the value of the control under the mouse in every
+        skin now, also in those that had none so far: Osirus, OsTIrus, JE8086 and
+        the Vavra front panel. It can be turned off in the Skins settings.
+
+- [Imp] EMU-85 Displays and other canvases, skin canvases included, update their
+        texture in place when their content changes, instead of creating a new
+        one each time. That saves memory traffic and graphics driver work while
+        a display changes, with OpenGL, Metal and the software renderer.
+
+- [Fix] The lock, link and MIDI Learn icons of a control could stay behind on
+        the skin after the control was removed or its page rebuilt, and
+        clicking such an icon could crash the plugin.
+
+- [Fix] Loading a state, a project or a preset of the host for example, while
+        edits from the editor or the host were still on their way to the
+        emulation could apply those edits on top of the loaded sound.
+
+- [Fix] MIDI that an emulated device sent with running status, as the CM-32P
+        does, came out as single stray bytes after its first message.
+
+- [Fix] Instruments that receive MIDI at the speed of a hardware MIDI cable,
+        JE8086 and the 88emu boards for example, often lost the first note of a
+        loop in the host, or cut it off right after it started. A host that
+        does not end its audio block at the loop end reports the jump back only
+        with the next block, so the first notes of the new pass were taken for
+        leftovers of the old one and silenced with them. The loop the host
+        reports now places the jump on the sample it happens at.
+
+- [Fix] When the connection to the DSPBridge server was lost, the plugin
+        reconnected, or switched to local processing, on the host's audio
+        thread, so the host's audio stalled until that was done. It happens in
+        the background now, and the plugin stays silent until then.
+
+- [Fix] MIDI Learn, the MIDI output and parameter changes could get in each
+        other's way across the host's audio and MIDI threads. That could crash
+        the plugin, rarely, for example when a mapping was learned or a project
+        was loaded while MIDI was arriving, or when the plugin was removed.
+
+- [Imp] A MIDI output port that sends slower than the plugin feeds it no longer
+        holds up the audio. Messages that do not fit into its queue are dropped.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
@@ -192,6 +233,10 @@ Osirus:
         in the filter section and on the ARP page. Before, only Filter 1's Env
         Amount Velocity moved Filter 2's.
 
+- [Fix] EMU-228 Switching to another ROM lost the MIDI bank numbers given to the
+        ROM banks in the Patch Manager. Each ROM now keeps its own, also when
+        switching back and after reloading.
+
 OsTIrus:
 
 - [Fix] BUG-10420 Audio fed into the input did not come through anymore, neither
@@ -222,6 +267,11 @@ OsTIrus:
         and so on got one wrong input sample at the start of every block the
         host processes.
 
+- [Imp] MIDI the DSP sends other than SysEx, the notes of the arpeggiator with
+        MIDI Arpeggiator Send on for example, reaches the MIDI output now, also
+        for parts on the second DSP. It was dropped before. Parameter changes
+        echoed as controllers stay internal, as with Virus Control.
+
 Vavra/Xenia:
 
 - [Fix] EMU-168 SysEx from the host or a MIDI input could be mistaken for a
@@ -247,6 +297,10 @@ Vavra/Xenia:
         when it loads a plugin can send. The events now follow over the next
         blocks, none is lost.
 
+- [Fix] When the computer was busy, notes and MIDI clock could reach the
+        emulated synthesizer up to several hundred milliseconds late, notes
+        could get lost, and LFOs synced to MIDI clock ran at the wrong speed.
+
 Vavra:
 
 - [Fix] The audio input had its left and right channels swapped, one of them
@@ -269,6 +323,10 @@ Xenia:
 
 - [Fix] EMU-235 Removing the plugin or closing a project could, rarely, crash
         the host while the emulation was still busy with MIDI it had received.
+
+- [Fix] EMU-226 Without the plugin window open, a patch with its own user
+        wavetable and user waves loaded without them, for example through a
+        program change, and one saved to the Patch Manager lost them.
 
 NodalRed2x:
 
@@ -296,6 +354,9 @@ NodalRed2x:
         Hold of the current part on and off, as SHIFT + ARP does on the
         hardware, and its LED lights up while it is on. As on the hardware,
         Hold is not part of a patch and is not saved, and Panic ends it.
+
+- [Imp] EMU-61 Lower CPU load: the two DSPs of the emulation now run side by
+        side instead of one waiting for the other's output.
 
 JE8086:
 
@@ -388,8 +449,8 @@ JE8086:
 - [New] MIDI Player: Karaoke .kar files can be played, dropped onto the playlist
         and rendered with 88EmuCli like any other MIDI file.
 
-- [Imp] MIDI Player: When the player cannot start and was not started from a terminal, it
-        shows the reason in a message box.
+- [Imp] MIDI Player: When the player cannot start and was not started from a
+        terminal, it shows the reason in a message box.
 
 - [Imp] ROMs: When macOS does not let the player read its ROM folder, it says
         so and explains how to allow it, instead of reporting every ROM as
@@ -404,6 +465,53 @@ JE8086:
 - [Fix] MT-32, CM-32L, CM-32P, CM-64: A song whose tracks are on its second
         MIDI port, as some sequencers saved MT-32 music, stayed silent. Every
         port now reaches the board's one MIDI IN, as on the Sound Canvas.
+
+- [Fix] SC-88, SC-88Pro: SysEx parameters in the 08 and 0C address blocks were
+        ignored, among them F0 41 10 42 12 0C 20 04 01 4F F7, which switches
+        the SC-88Pro into its SC-88 mode the way SELECT+ALL does.
+
+- [Fix] SC-88 family, SC-8820, SC-8850, NU-10B, MIIG5: A few calculations in
+        the XP sound chip relied on behaviour that C++ leaves undefined, which
+        an optimising compiler is free to break. The sound does not change.
+
+- [Fix] SC-55 and SC-88 families: When the firmware switched the CPU's A/D
+        converter to another group of inputs while a scan was running, the
+        converter could stop reporting conversions.
+
+- [Fix] MT-32, CM-32L, CM-32P, CM-64: The CPU's add and subtract with carry
+        set the zero flag the way the real chip does, from the result of
+        each word, rather than as the manual describes it.
+
+- [Fix] SC-8850, MIIG5: Linking the two XP sound chips could make the audio
+        thread wait for a compile worker thread to stop.
+
+- [Fix] The player could crash, rarely, when the device was switched or
+        powered on or off, and right after the VALUE knob was pushed on the
+        SC-8850, because the window was changed while it was being drawn.
+
+- [Fix] SC-88, SC-88VL, SC-88Pro: A data request (RQ1) was never answered.
+        The firmware now answers it as on the hardware, for a request that
+        starts at a parameter, up to 137 bytes, on either MIDI IN.
+
+- [New] Part Editor, in the context menu of the SC-55 to SC-8850 and the
+        boards that run their programs. A mixer with the volume, pan, solo
+        and mute of every part beside the system, reverb, chorus, delay,
+        equalizer and insertion effect settings, and a page per part with
+        its mixer, pitch, tone modify, setup and scale tuning settings
+        beside its instrument, variation and tone map, or its drum set,
+        picked from the lists in the board's own ROMs, with a filter. Each
+        board shows the settings it has; the insertion effect shows the
+        parameters of the type selected. A double-click on a slider or a
+        setting's name brings it back to its default. A right-click on a
+        part tab makes it a normal or a drum part. Edits reach the board as
+        they are made, and the window follows what songs and live input
+        set, SysEx, controllers, RPN and NRPN alike. Send writes the parts
+        and effects to the board, Receive reads them back from it. Mute is
+        the board's own, the one its MUTE button sets.
+
+- [Imp] CM-32L, CM-32LN, CM-32P, CM-64: A volume knob that matches the bezel.
+
+- [Imp] MT-32: Its own dark artwork instead of the CM-32L's.
 
 2.2.25:
 

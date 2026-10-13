@@ -75,7 +75,7 @@ namespace jucePluginEditorLib
 	Editor::~Editor()
 	{
 		if (auto* translator = m_processor.getMidiLearnTranslator())
-			translator->onPresetChanged = nullptr;
+			translator->setOnPresetChanged(nullptr);
 
 		setMidiLearnMode(false);
 
@@ -921,14 +921,14 @@ namespace jucePluginEditorLib
 
 		if (auto* translator = m_processor.getMidiLearnTranslator())
 		{
-			translator->onPresetChanged = [this]()
+			translator->setOnPresetChanged([safeThis = juce::WeakReference<Editor>(this)]()
 			{
-				juce::MessageManager::callAsync([this]
+				juce::MessageManager::callAsync([safeThis]
 				{
-					if (m_overlays)
-						m_overlays->refreshMidiLearnOverlays();
+					if (auto* editor = safeThis.get(); editor && editor->m_overlays)
+						editor->m_overlays->refreshMidiLearnOverlays();
 				});
-			};
+			});
 		}
 
 		m_pluginDataModel.reset(new PluginDataModel(*this, _context, [this](PluginDataModel& _model)
@@ -1019,130 +1019,135 @@ namespace jucePluginEditorLib
 			// clear all callbacks
 			if (translator)
 			{
-				translator->onLearningProgress = nullptr;
-				translator->onMappingLearned = nullptr;
+				translator->setOnLearningProgress(nullptr);
+				translator->setOnMappingLearned(nullptr);
 			}
 		}
 		else
 		{
 			if (translator)
 			{
-				translator->onMappingLearned = [this](pluginLib::MidiLearnMapping _mapping)
+				// learning ends on whatever thread the MIDI came in on, the preset and the overlays are message thread business
+				translator->setOnMappingLearned([safeThis = juce::WeakReference<Editor>(this)](const pluginLib::MidiLearnMapping& _mapping)
 				{
-					auto* t = m_processor.getMidiLearnTranslator();
-					if (!t)
-						return;
-
-					auto preset = t->getPreset();
-					const auto& existingMappings = preset.getMappings();
-
-					// Determine if we can use AllChannels/AutoPart or must keep specific values.
-					// Only upgrade to All/Auto if no existing mapping for the same CC uses specific values.
-					const auto isSameSource = [&_mapping](const pluginLib::MidiLearnMapping& _m)
+					juce::MessageManager::callAsync([safeThis, mapping = _mapping]
 					{
-						return _m.type == _mapping.type &&
-							(_m.type == pluginLib::MidiLearnMapping::Type::ChannelPressure ||
-							 _m.type == pluginLib::MidiLearnMapping::Type::PitchBend ||
-							 _m.controller == _mapping.controller);
-					};
-
-					const bool hasChannelSpecificCC = std::any_of(existingMappings.begin(), existingMappings.end(),
-						[&](const pluginLib::MidiLearnMapping& _m)
-						{
-							return isSameSource(_m) &&
-								_m.channel != pluginLib::MidiLearnMapping::AllChannels;
-						});
-
-					const bool hasPartSpecificParam = std::any_of(existingMappings.begin(), existingMappings.end(),
-						[&_mapping](const pluginLib::MidiLearnMapping& _m)
-						{
-							return _m.paramName == _mapping.paramName &&
-								_m.part != pluginLib::MidiLearnMapping::AutoPart;
-						});
-
-					// Upgrade to AllChannels only if no existing CC mapping uses a specific channel
-					if (!hasChannelSpecificCC)
-						_mapping.channel = pluginLib::MidiLearnMapping::AllChannels;
-
-					// Upgrade to AutoPart only if no existing param mapping uses a specific part
-					if (!hasPartSpecificParam)
-						_mapping.part = pluginLib::MidiLearnMapping::AutoPart;
-					else if (m_midiLearnSelectedParam)
-						_mapping.part = m_midiLearnSelectedParam->getPart();
-
-					auto& m = preset.getMappings();
-					m.erase(std::remove_if(m.begin(), m.end(),
-						[&_mapping](const pluginLib::MidiLearnMapping& _m)
-						{
-							// Check if same parameter — only remove if parts collide
-							if (_m.paramName == _mapping.paramName)
-							{
-								// New is AutoPart → replaces all part variants
-								if (_mapping.part == pluginLib::MidiLearnMapping::AutoPart)
-									return true;
-								// Existing is AutoPart → gets replaced by specific part
-								if (_m.part == pluginLib::MidiLearnMapping::AutoPart)
-									return true;
-								// Both specific → only collide if same part
-								if (_m.part == _mapping.part)
-									return true;
-							}
-
-							// Check if same MIDI source (type + controller + channel collision)
-							const bool sameSource = _m.type == _mapping.type &&
-								(_m.type == pluginLib::MidiLearnMapping::Type::ChannelPressure ||
-								 _m.type == pluginLib::MidiLearnMapping::Type::PitchBend ||
-								 _m.controller == _mapping.controller);
-
-							if (!sameSource)
-								return false;
-
-							// New mapping is AllChannels → remove all channel variants
-							if (_mapping.channel == pluginLib::MidiLearnMapping::AllChannels)
-								return true;
-
-							// Existing mapping is AllChannels → conflicts with any specific channel
-							if (_m.channel == pluginLib::MidiLearnMapping::AllChannels)
-								return true;
-
-							// Both are specific channels → only collide if same channel
-							return _m.channel == _mapping.channel;
-						}), m.end());
-
-					// Inherit feedback targets from preset default
-					_mapping.feedbackTargets = preset.getDefaultFeedbackTargets();
-
-					preset.addMapping(_mapping);
-					t->setPreset(preset);
-
-					// Dispatch overlay update to message thread - this callback fires from audio/MIDI thread
-					// and RmlUi DOM manipulation is not thread-safe
-					auto* selectedParam = m_midiLearnSelectedParam;
-					m_midiLearnSelectedParam = nullptr;
-
-					juce::MessageManager::callAsync([this, selectedParam]
-					{
-						if (m_overlays)
-						{
-							m_overlays->forEachOverlayForParameter(selectedParam, [](ParameterOverlay& _overlay)
-							{
-								_overlay.setMidiLearnListening(false);
-							});
-
-							// Refresh all overlays in case a CC was reassigned from another parameter
-							m_overlays->refreshMidiLearnOverlays();
-						}
-
-						m_processor.saveDefaultMidiLearnPreset();
+						if (auto* editor = safeThis.get())
+							editor->onMidiLearnMappingLearned(mapping);
 					});
-				};
+				});
 
-				translator->onLearningProgress = nullptr;
+				translator->setOnLearningProgress(nullptr);
 			}
 		}
 
 		if (m_overlays)
 			m_overlays->setMidiLearnMode(_enable);
+	}
+
+	void Editor::onMidiLearnMappingLearned(pluginLib::MidiLearnMapping _mapping)
+	{
+		auto* t = m_processor.getMidiLearnTranslator();
+		if (!t)
+			return;
+
+		auto preset = t->getPreset();
+		const auto& existingMappings = preset.getMappings();
+
+		// Determine if we can use AllChannels/AutoPart or must keep specific values.
+		// Only upgrade to All/Auto if no existing mapping for the same CC uses specific values.
+		const auto isSameSource = [&_mapping](const pluginLib::MidiLearnMapping& _m)
+		{
+			return _m.type == _mapping.type &&
+				(_m.type == pluginLib::MidiLearnMapping::Type::ChannelPressure ||
+				 _m.type == pluginLib::MidiLearnMapping::Type::PitchBend ||
+				 _m.controller == _mapping.controller);
+		};
+
+		const bool hasChannelSpecificCC = std::any_of(existingMappings.begin(), existingMappings.end(),
+			[&](const pluginLib::MidiLearnMapping& _m)
+			{
+				return isSameSource(_m) &&
+					_m.channel != pluginLib::MidiLearnMapping::AllChannels;
+			});
+
+		const bool hasPartSpecificParam = std::any_of(existingMappings.begin(), existingMappings.end(),
+			[&_mapping](const pluginLib::MidiLearnMapping& _m)
+			{
+				return _m.paramName == _mapping.paramName &&
+					_m.part != pluginLib::MidiLearnMapping::AutoPart;
+			});
+
+		// Upgrade to AllChannels only if no existing CC mapping uses a specific channel
+		if (!hasChannelSpecificCC)
+			_mapping.channel = pluginLib::MidiLearnMapping::AllChannels;
+
+		// Upgrade to AutoPart only if no existing param mapping uses a specific part
+		if (!hasPartSpecificParam)
+			_mapping.part = pluginLib::MidiLearnMapping::AutoPart;
+		else if (m_midiLearnSelectedParam)
+			_mapping.part = m_midiLearnSelectedParam->getPart();
+
+		auto& m = preset.getMappings();
+		m.erase(std::remove_if(m.begin(), m.end(),
+			[&_mapping](const pluginLib::MidiLearnMapping& _m)
+			{
+				// Check if same parameter — only remove if parts collide
+				if (_m.paramName == _mapping.paramName)
+				{
+					// New is AutoPart → replaces all part variants
+					if (_mapping.part == pluginLib::MidiLearnMapping::AutoPart)
+						return true;
+					// Existing is AutoPart → gets replaced by specific part
+					if (_m.part == pluginLib::MidiLearnMapping::AutoPart)
+						return true;
+					// Both specific → only collide if same part
+					if (_m.part == _mapping.part)
+						return true;
+				}
+
+				// Check if same MIDI source (type + controller + channel collision)
+				const bool sameSource = _m.type == _mapping.type &&
+					(_m.type == pluginLib::MidiLearnMapping::Type::ChannelPressure ||
+					 _m.type == pluginLib::MidiLearnMapping::Type::PitchBend ||
+					 _m.controller == _mapping.controller);
+
+				if (!sameSource)
+					return false;
+
+				// New mapping is AllChannels → remove all channel variants
+				if (_mapping.channel == pluginLib::MidiLearnMapping::AllChannels)
+					return true;
+
+				// Existing mapping is AllChannels → conflicts with any specific channel
+				if (_m.channel == pluginLib::MidiLearnMapping::AllChannels)
+					return true;
+
+				// Both are specific channels → only collide if same channel
+				return _m.channel == _mapping.channel;
+			}), m.end());
+
+		// Inherit feedback targets from preset default
+		_mapping.feedbackTargets = preset.getDefaultFeedbackTargets();
+
+		preset.addMapping(_mapping);
+		t->setPreset(preset);
+
+		auto* selectedParam = m_midiLearnSelectedParam;
+		m_midiLearnSelectedParam = nullptr;
+
+		if (m_overlays)
+		{
+			m_overlays->forEachOverlayForParameter(selectedParam, [](ParameterOverlay& _overlay)
+			{
+				_overlay.setMidiLearnListening(false);
+			});
+
+			// Refresh all overlays in case a CC was reassigned from another parameter
+			m_overlays->refreshMidiLearnOverlays();
+		}
+
+		m_processor.saveDefaultMidiLearnPreset();
 	}
 
 	std::vector<Rml::Element*> Editor::findChildreByParam(const std::string& _param, uint8_t _part,	const size_t _expectedCount, bool _visibleOnly) const

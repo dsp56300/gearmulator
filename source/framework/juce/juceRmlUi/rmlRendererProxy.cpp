@@ -143,6 +143,22 @@ namespace juceRmlUi
 		return dummyHandle;
 	}
 
+	bool RendererProxy::UpdateTexture(const Rml::TextureHandle _texture, const Rml::Span<const unsigned char> _source, Rml::Vector2i _sourceDimensions)
+	{
+		// Deferred like everything else, so the result of the real renderer cannot be returned. All our renderers
+		// implement it. The restore function of the texture keeps its initial contents, which is fine: setRenderer()
+		// has RmlUi release all textures before it switches, and they are generated again from their current contents.
+		addRenderFunction([this, _texture, source = copySpan(_source), _sourceDimensions]
+		{
+			if (const auto realTexture = getRealHandle<HandleTexture>(_texture))
+			{
+				[[maybe_unused]] const auto updated = m_renderer->UpdateTexture(realTexture, source, _sourceDimensions);
+				assert(updated && "renderer failed to update a texture in place");
+			}
+		});
+		return true;
+	}
+
 	void RendererProxy::ReleaseTexture(Rml::TextureHandle _texture)
 	{
 		addRenderFunction([this, _texture]

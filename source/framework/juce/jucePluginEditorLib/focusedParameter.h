@@ -43,6 +43,8 @@ namespace jucePluginEditorLib
 
 		void updateParameter(const std::string& _name, const std::string& _value);
 
+		void setTooltipEnabled(bool _enabled);
+
 	private:
 		void timerCallback() override;
 
@@ -62,6 +64,7 @@ namespace jucePluginEditorLib
 		Rml::Element* m_focusedParameterValue = nullptr;
 
 		std::unique_ptr<FocusedParameterTooltip> m_tooltip;
+		bool m_tooltipEnabled = true;
 
 		std::map<pluginLib::Parameter*, pluginLib::ParameterListener> m_boundParameters;
 		Priority m_currentPriority = Priority::None;

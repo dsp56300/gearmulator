@@ -143,6 +143,7 @@ private:
 
 	std::vector<PendingInput> m_pendingInput;
 	std::vector<synthLib::SMidiEvent> m_midiOutput;
+	std::vector<synthLib::SMidiEvent> m_dspMidiOutput;	// what the DSPs sent since readMidiOut
 
 	mutable std::recursive_mutex m_mutex;
 	bool m_loadingState = false;

@@ -1331,6 +1331,11 @@ Rml::TextureHandle RenderInterface_GL3::GenerateTexture(Rml::Span<const Rml::byt
 	return (Rml::TextureHandle)texture_id;
 }
 
+bool RenderInterface_GL3::UpdateTexture(Rml::TextureHandle texture_handle, Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions)
+{
+	return RmlGL3::UpdateTexture(texture_handle, source, source_dimensions);
+}
+
 void RenderInterface_GL3::DrawFullscreenQuad()
 {
 	RenderGeometry(fullscreen_quad_geometry, {}, RenderInterface_GL3::TexturePostprocess);
@@ -2208,6 +2213,24 @@ bool RmlGL3::Initialize(Rml::String* out_message)
 		*out_message = Rml::CreateString("Loaded OpenGL %d.%d.", GLAD_VERSION_MAJOR(gl_version), GLAD_VERSION_MINOR(gl_version));
 #endif
 
+	return true;
+}
+
+bool RmlGL3::UpdateTexture(Rml::TextureHandle texture_handle, Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions)
+{
+	// RGBA only, the format of textures that get new contents at the same size
+	if (source.size() != 4 * size_t(source_dimensions.x) * size_t(source_dimensions.y))
+		return false;
+
+	glBindTexture(GL_TEXTURE_2D, (GLuint)texture_handle);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, source_dimensions.x, source_dimensions.y, GL_RGBA, GL_UNSIGNED_BYTE, source.data());
+
+	// The mipmaps were generated from the old contents when the texture was created
+	if (glGenerateMipmap)
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 	return true;
 }
 

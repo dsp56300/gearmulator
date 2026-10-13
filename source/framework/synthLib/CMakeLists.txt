@@ -97,6 +97,11 @@ if(BUILD_TESTING)
 	set_property(TARGET midiRateLimiter_test PROPERTY FOLDER "Tests")
 	add_test(NAME midiRateLimiter COMMAND midiRateLimiter_test)
 
+	add_executable(midiBufferParser_test midiBufferParser_test.cpp)
+	target_link_libraries(midiBufferParser_test PRIVATE synthLib)
+	set_property(TARGET midiBufferParser_test PROPERTY FOLDER "Tests")
+	add_test(NAME midiBufferParser COMMAND midiBufferParser_test)
+
 	add_executable(midiControllerThinner_test midiControllerThinner_test.cpp)
 	target_link_libraries(midiControllerThinner_test PRIVATE synthLib)
 	set_property(TARGET midiControllerThinner_test PROPERTY FOLDER "Tests")

@@ -359,6 +359,23 @@ knob {
 	border-bottom: 2px #f00;
 }
 
+/* parameter value tooltip for skins that do not declare their own FocusedParameterTooltip.
+   left, top and width are set from code */
+
+.tus-tooltip {
+	position: absolute;
+	z-index: 1000;
+	margin-top: 0.5em;
+	height: 1.6em;
+	line-height: 1.6em;
+	text-align: center;
+	white-space: nowrap;
+	color: #fff;
+	background-color: rgba(24,31,34,230);
+	border: 1dp rgb(172,176,179);
+	border-radius: 0.2em;
+}
+
 /* parameter overlays */
 
 .tus-parameteroverlay {

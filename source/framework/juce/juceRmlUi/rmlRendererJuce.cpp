@@ -768,6 +768,86 @@ namespace juceRmlUi
 				dst = dstEnd;
 			}
 		}
+
+		// copy RGBA or RGB data into an image, padded for the blitters
+		bool fillTexture(Image& _img, const Rml::Span<const uint8_t> _source, const Rml::Vector2i _sourceDimensions)
+		{
+			const auto srcH = _sourceDimensions.y;
+			const auto srcW = _sourceDimensions.x;
+
+			_img.width = srcW;
+			_img.paddedWidth = Image::padWidth(srcW);
+			_img.height = srcH;
+
+			const auto dstW = Image::padWidth(srcW);
+			const auto dstH = Image::padHeight(srcH);
+
+			const size_t pixelCountSrc = srcW * srcH;
+			const size_t pixelCountDst = dstW * dstH;
+
+			size_t srcIndex = 0;
+
+			_img.data.resize(pixelCountDst * 4, 0x80);
+
+			if (_source.size() == 4 * pixelCountSrc)
+			{
+				_img.hasAlpha = true;
+
+				for (int y=0; y<srcH; ++y)
+				{
+					auto dstIndex = (y * dstW) << 2;
+
+					for (int x = 0; x < srcW; ++x)
+					{
+						_img.data[dstIndex++] = _source[srcIndex++];
+						_img.data[dstIndex++] = _source[srcIndex++];
+						_img.data[dstIndex++] = _source[srcIndex++];
+						_img.data[dstIndex++] = _source[srcIndex++];
+					}
+				}
+			}
+			else if (_source.size() == 3 * pixelCountSrc)
+			{
+				_img.hasAlpha = false;
+
+				for (int y=0; y<srcH; ++y)
+				{
+					auto dstIndex = (y * dstW) << 2;
+
+					for (int x = 0; x < srcW; ++x)
+					{
+						_img.data[dstIndex++] = _source[srcIndex++];
+						_img.data[dstIndex++] = _source[srcIndex++];
+						_img.data[dstIndex++] = _source[srcIndex++];
+						_img.data[dstIndex++] = 0xff;
+					}
+				}
+			}
+			else
+			{
+				return false;
+			}
+
+			// pad remaining rows/columns with neighbor pixels
+			for (int y = srcH; y < dstH; ++y)
+			{
+				auto* src = _img.getBytePointer(0, srcH - 1);
+				auto* dst = _img.getBytePointer(0, y);
+				memcpy(dst, src, dstW * 4);
+			}
+
+			for (int x=srcW; x<dstW; ++x)
+			{
+				for (int y=0; y<dstH; ++y)
+				{
+					auto* src = _img.getBytePointer(srcW - 1, y);
+					auto* dst = _img.getBytePointer(x, y);
+					memcpy(dst, src, 4);
+				}
+			}
+
+			return true;
+		}
 	}
 
 	RendererJuce::RendererJuce(Rml::CoreInstance& _coreInstance) : RenderInterface(_coreInstance)
@@ -1151,82 +1231,23 @@ namespace juceRmlUi
 		if (!img)
 			img = new Image();
 
-		const auto srcH = _sourceDimensions.y;
-		const auto srcW = _sourceDimensions.x;
-
-		img->width = srcW;
-		img->paddedWidth = Image::padWidth(srcW);
-		img->height = srcH;
-
-		const auto dstW = Image::padWidth(srcW);
-		const auto dstH = Image::padHeight(srcH);
-
-		const size_t pixelCountSrc = srcW * srcH;
-		const size_t pixelCountDst = dstW * dstH;
-
-		size_t srcIndex = 0;
-
-		img->data.resize(pixelCountDst * 4, 0x80);
-
-		if (_source.size() == 4 * pixelCountSrc)
-		{
-			img->hasAlpha = true;
-
-			for (int y=0; y<srcH; ++y)
-			{
-				auto dstIndex = (y * dstW) << 2;
-
-				for (int x = 0; x < srcW; ++x)
-				{
-					img->data[dstIndex++] = _source[srcIndex++];
-					img->data[dstIndex++] = _source[srcIndex++];
-					img->data[dstIndex++] = _source[srcIndex++];
-					img->data[dstIndex++] = _source[srcIndex++];
-				}
-			}
-		}
-		else if (_source.size() == 3 * pixelCountSrc)
-		{
-			img->hasAlpha = false;
-
-			for (int y=0; y<srcH; ++y)
-			{
-				auto dstIndex = (y * dstW) << 2;
-
-				for (int x = 0; x < srcW; ++x)
-				{
-					img->data[dstIndex++] = _source[srcIndex++];
-					img->data[dstIndex++] = _source[srcIndex++];
-					img->data[dstIndex++] = _source[srcIndex++];
-					img->data[dstIndex++] = 0xff;
-				}
-			}
-		}
-		else
-		{
+		if (!fillTexture(*img, _source, _sourceDimensions))
 			assert(false && "unknown image format");
-			return reinterpret_cast<Rml::TextureHandle>(img);
-		}
-
-		// pad remaining rows/columns with neighbor pixels
-		for (int y = srcH; y < dstH; ++y)
-		{
-			auto* src = img->getBytePointer(0, srcH - 1);
-			auto* dst = img->getBytePointer(0, y);
-			memcpy(dst, src, dstW * 4);
-		}
-
-		for (int x=srcW; x<dstW; ++x)
-		{
-			for (int y=0; y<dstH; ++y)
-			{
-				auto* src = img->getBytePointer(srcW - 1, y);
-				auto* dst = img->getBytePointer(x, y);
-				memcpy(dst, src, 4);
-			}
-		}
 
 		return reinterpret_cast<Rml::TextureHandle>(img);
+	}
+
+	bool RendererJuce::UpdateTexture(const Rml::TextureHandle _texture, const Rml::Span<const uint8_t> _source, const Rml::Vector2i _sourceDimensions)
+	{
+		auto* img = reinterpret_cast<Image*>(_texture);
+
+		if (!img || img->width != _sourceDimensions.x || img->height != _sourceDimensions.y)
+			return false;
+
+		// mips are derived from the old contents
+		img->clearMip();
+
+		return fillTexture(*img, _source, _sourceDimensions);
 	}
 
 	void RendererJuce::ReleaseTexture(const Rml::TextureHandle _texture)

@@ -150,6 +150,9 @@ namespace juceRmlUi
 
 		auto* fileDragData = dynamic_cast<const FileDragData*>(data);
 
+		// Before dispatching, not after: a handler is free to tear this target down.
+		m_currentDragSource->setHandled();
+
 		if (fileDragData && !fileDragData->files.empty())
 			dropFiles(_event, fileDragData, fileDragData->files);
 		else

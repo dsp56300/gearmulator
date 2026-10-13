@@ -2,6 +2,7 @@
 
 #include <set>
 
+#include "focusedParameter.h"
 #include "pluginEditor.h"
 #include "pluginEditorState.h"
 #include "pluginProcessor.h"
@@ -26,6 +27,12 @@ namespace jucePluginEditorLib
 	}
 	void SettingsSkin::createUi(Rml::Element* _root)
 	{
+		createToggleButton(_root, "btDisableTooltips", "disableTooltips", [this](bool _disable)
+		{
+			if (auto* fp = m_processor.getEditorState()->getEditor()->getFocusedParameter())
+				fp->setTooltipEnabled(!_disable);
+		});
+
 		createToggleButton(_root, "btReloadViaF5", "reloadSkinViaF5", [this](bool){});
 
 		createToggleButton(_root, "btEnableRmlUiDebugger", "enableRmlUiDebugger", [this](bool _enable)

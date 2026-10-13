@@ -210,7 +210,9 @@ namespace pluginLib::patchDB
 		bool m_loading = true;
 		bool m_cacheDirty = false;
 
-		// pending MIDI bank assignments from JSON, applied when datasources become available
-		std::map<DataSource, uint32_t> m_pendingMidiBankAssignments;
+		// MIDI bank assignments waiting for their datasource, by datasource and its ROM: from the JSON, and those of ROM
+		// banks that went away, the banks of another ROM for example. Applied when the datasource is added
+		using MidiBankKey = std::pair<DataSource, std::string>;
+		std::map<MidiBankKey, uint32_t> m_pendingMidiBankAssignments;
 	};
 }

@@ -1,8 +1,6 @@
 #include "xtPatchManager.h"
 
 #include "xtController.h"
-#include "xtEditor.h"
-#include "xtWaveEditor.h"
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 
@@ -406,21 +404,15 @@ namespace xtJucePlugin
 
 	pluginLib::patchDB::Data PatchManager::createCombinedDump(const pluginLib::patchDB::Data& _data) const
 	{
-		// combine single dump with user wave table and user waves if applicable. They live in the wave editor, so
-		// without an editor a patch is saved without them
-		const auto* editor = dynamic_cast<Editor*>(getEditor());
-
-		if(auto* waveEditor = editor ? editor->getWaveEditor() : nullptr)
+		// combine single dump with user wave table and user waves if applicable
+		std::vector<xt::SysEx> results;
+		m_controller.getWaveData().getWaveDataForSingle(results, _data);
+		if(!results.empty())
 		{
-			std::vector<xt::SysEx> results;
-			waveEditor->getData().getWaveDataForSingle(results, _data);
-			if(!results.empty())
-			{
-				results.insert(results.begin(), _data);
-				auto result = xt::State::createCombinedPatch(results);
-				if(!result.empty())
-					return result;
-			}
+			results.insert(results.begin(), _data);
+			auto result = xt::State::createCombinedPatch(results);
+			if(!result.empty())
+				return result;
 		}
 		return _data;
 	}
@@ -592,7 +584,8 @@ namespace xtJucePlugin
 	bool PatchManager::createProgramChangeEvents(std::vector<synthLib::SMidiEvent>& _events, const pluginLib::patchDB::PatchPtr&, const pluginLib::patchDB::Data& _data, const uint32_t _part) const
 	{
 		// A plain single only. A Microwave I single loads into the current part, one with its own waves sends them
-		// through the wave editor, and a multi or an arrangement switches the play mode: those load on the message thread
+		// through the controller's wave data, and a multi or an arrangement switches the play mode: those load on the
+		// message thread
 		if (_data.size() != std::tuple_size_v<xt::State::Single> || detectPatchType(_data) != PatchType::Single || _part >= m_controller.getPartCount())
 			return false;
 

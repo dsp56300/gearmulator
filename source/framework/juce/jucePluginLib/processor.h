@@ -145,6 +145,10 @@ namespace pluginLib
 		
 		float getOutputGain() const { return m_outputGain; }
 		void setOutputGain(const float _gain) { m_outputGain = _gain; }
+
+		// Teardown starts here: no MIDI reaches the translator, the controller or the device afterwards, and calls
+		// that are in progress have returned. Idempotent; destroyEditorState() and the destructor call it.
+		void shutdown();
 		
 		bool setDspClockPercent(uint32_t _percent = 100);
 		uint32_t getDspClockPercent() const;
@@ -305,7 +309,8 @@ namespace pluginLib
 
 		synthLib::DeviceError getDeviceError() const { return m_deviceError; }
 
-		synthLib::Device* onDeviceInvalid(synthLib::Device* _device);
+		// audio thread, see synthLib::Plugin::CallbackDeviceInvalid
+		void onDeviceInvalid(synthLib::Device* _device);
 
 	protected:
 		synthLib::DeviceError m_deviceError = synthLib::DeviceError::None;
@@ -320,10 +325,11 @@ namespace pluginLib
 
 	private:
 		void addHostMidiFeedback(const synthLib::SMidiEvent& _event);
+		void replaceInvalidDevice(const synthLib::Device* _device);
 
 		const Properties m_properties;
-		float m_outputGain = 1.0f;
-		float m_inputGain = 1.0f;
+		std::atomic<float> m_outputGain{1.0f};
+		std::atomic<float> m_inputGain{1.0f};
 		uint32_t m_dspClockPercent = 100;
 		bool m_voiceExpansion = false;
 		bool m_deviceVoiceExpansion = false;	// the voice expansion the current device was created with
@@ -341,12 +347,20 @@ namespace pluginLib
 		std::string m_remoteHost;
 		uint32_t m_remotePort = 0;
 		bridgeLib::SessionId m_remoteSessionId;
-		uint32_t m_reportedLatency = 0;
+		std::atomic<uint32_t> m_reportedLatency{0};
 		synthLib::MidiRoutingMatrix m_midiRoutingMatrix;
 		std::string m_programName;
 		std::unique_ptr<MidiLearnTranslator> m_midiLearnTranslator;
 		ProgramChangeRouter m_programChangeRouter;
 		HostAudioWorkgroup m_hostAudioWorkgroup;
+
+		// addMidiEvent() runs on the audio thread, MIDI port threads and the MCP server, and it calls itself through
+		// MIDI learn. shutdown() raises the flag and waits for the count to drop to zero
+		std::atomic<bool> m_shutdown{false};
+		std::atomic<uint32_t> m_midiInputCalls{0};
+
+		// lambdas posted to the message thread hold a weak reference to it, it goes away in shutdown()
+		std::shared_ptr<bool> m_alive = std::make_shared<bool>(true);
 
 		// Host MIDI feedback queue (filled from parameter listeners, drained in processBlock)
 		std::mutex m_hostFeedbackMutex;

@@ -3,6 +3,7 @@
 #include "server.h"
 #include "bridgeLib/error.h"
 #include "networkLib/logging.h"
+#include "baseLib/filesystem.h"
 
 namespace bridgeServer
 {
@@ -241,6 +242,11 @@ namespace bridgeServer
 	{
 		if(m_pluginDesc.pluginVersion == 0 || m_deviceCreateParams.romData.empty())
 			return;
+
+		// a folder of its own on this machine, as a local device has the plugin's data folder. Not inside the ROM folder,
+		// the pool loads every file there (EMU-100: JE8086 keeps its RAM in roms/ram_dump.bin of it)
+		m_deviceCreateParams.homePath = m_server.getConfig().devicesPath + m_pluginDesc.pluginName + '/';
+		baseLib::filesystem::createDirectory(m_deviceCreateParams.homePath + "roms/");
 
 		std::string error;
 		m_device = m_server.getPlugins().createDevice(m_deviceCreateParams, m_pluginDesc, error);

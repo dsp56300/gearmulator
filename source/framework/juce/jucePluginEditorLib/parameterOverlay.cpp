@@ -61,6 +61,12 @@ namespace jucePluginEditorLib
 	{
 		m_component->RemoveEventListener(Rml::EventId::Show, this);
 		m_component->RemoveEventListener(Rml::EventId::Hide, this);
+
+		// the overlay elements are siblings/descendants of the offset parent,
+		// not children of the component: if the component goes away they
+		// would stay behind as orphaned icons
+		removeAllOverlayElements();
+
 		setParameter(nullptr);
 	}
 
@@ -72,6 +78,18 @@ namespace jucePluginEditorLib
 	void ParameterOverlay::onUnbind(pluginLib::Parameter* _parameter, Rml::Element*)
 	{
 		setParameter(nullptr);
+	}
+
+	void ParameterOverlay::onOverlayElementDestroyed(const Rml::Element* _element)
+	{
+		for (auto it = m_overlayElements.begin(); it != m_overlayElements.end(); ++it)
+		{
+			if (it->second != _element)
+				continue;
+			// element is being destroyed by RmlUi, it detaches our listeners itself
+			m_overlayElements.erase(it);
+			return;
+		}
 	}
 
 	void ParameterOverlay::toggleOverlay(Type _type, const bool _enable, float _opacity/* = 1.0f*/)
@@ -108,23 +126,40 @@ namespace jucePluginEditorLib
 			}
 
 			m_overlayElements.insert({ _type, elem });
+			m_overlays.registerOverlayElement(elem, this);
 		}
 		else
 		{
-			auto it = m_overlayElements.find(_type);
-			if(it == m_overlayElements.end())
-				return;
-			auto* overlay = it->second;
-
-			if (_type == Type::MidiLearn)
-			{
-				overlay->RemoveEventListener(Rml::EventId::Click, this);
-				overlay->RemoveEventListener(Rml::EventId::Mousedown, this);
-			}
-
-			m_overlayElements.erase(it);
-			overlay->GetParentNode()->RemoveChild(overlay);
+			removeOverlayElement(_type);
 		}
+	}
+
+	void ParameterOverlay::removeOverlayElement(const Type _type)
+	{
+		const auto it = m_overlayElements.find(_type);
+		if(it == m_overlayElements.end())
+			return;
+		auto* overlay = it->second;
+
+		if (_type == Type::MidiLearn)
+		{
+			overlay->RemoveEventListener(Rml::EventId::Click, this);
+			overlay->RemoveEventListener(Rml::EventId::Mousedown, this);
+		}
+
+		// unregister first: removing the child destroys the element, which
+		// reports back through ParameterOverlays::onElementDestroyed
+		m_overlays.unregisterOverlayElement(overlay);
+		m_overlayElements.erase(it);
+
+		if (auto* parent = overlay->GetParentNode())
+			parent->RemoveChild(overlay);
+	}
+
+	void ParameterOverlay::removeAllOverlayElements()
+	{
+		while (!m_overlayElements.empty())
+			removeOverlayElement(m_overlayElements.begin()->first);
 	}
 
 	void ParameterOverlay::updateOverlays()

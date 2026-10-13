@@ -518,6 +518,29 @@ Simulate a mouse drag from one position to another with intermediate move events
 
 To look at the page in the middle of a drag, for example at the drop targets a skin highlights, call it with `"release": false`, inspect the DOM, then call it again from where it stopped with `"press": false`.
 
+#### `drop_files`
+
+Drop files onto the editor as if they were dragged in from the desktop. The editor gets the file drag enter, move and drop that the operating system would send, at the given point. A drag target there takes the files, for example a part button (loads a patch) or the patch manager (imports). Files that no element takes go to the editor's handler for unhandled files, if it has one. `mouse_drag` only covers drags inside the UI.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `files` | array | yes | Full paths of the files to drop |
+| `id` | string | no* | Element ID to drop on (its center) |
+| `selector` | string | no* | CSS selector of the element to drop on (its center). Some skins repeat ids, for example `partSelectButton`; select those by class and `index` |
+| `index` | integer | no | Which match of `selector` (default: 0) |
+| `x` | integer | no* | X coordinate in document space |
+| `y` | integer | no* | Y coordinate in document space |
+
+\* One of `id`, `selector`, or both `x` and `y` must be provided.
+
+Returns:
+
+- `handled`: whether an element took the files.
+- `x`, `y`: the drop point in document space.
+- `elementAtPoint`: the element under that point before the drop, as `tag` and `id`.
+
+A drop that asks a question, such as whether to load a Multi, records it when headless dialogs are on; read it with `get_dialogs`.
+
 #### `mouse_wheel`
 
 Simulate mouse wheel scrolling.

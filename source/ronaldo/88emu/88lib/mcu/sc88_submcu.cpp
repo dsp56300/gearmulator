@@ -19,6 +19,51 @@ namespace emu88Lib
 		// corresponding wire size can only be discarded, so the buffer is
 		// bounded — the real MCU's RAM is a few hundred bytes total.
 		constexpr size_t MaxSysExBytes = 0x100;
+
+		// The firmware's own name for a parameter address: an opcode family per
+		// address block, OR the high nibble of the middle address byte, with
+		// the low nibble in the channel bits. Its transmitter turns an opcode
+		// back into the block with a table (SC-88 01:04BA, SC-88VL 01:04C2,
+		// Pro 01:0680) - this is that table inverted. The Pro firmware adds
+		// 22-27, 2A and 2B, and its ISR maps a raw 2x transfer (opcode 0xEA)
+		// onto the same opcodes (table 00:0B8E, RQ1 at 00:0E62). The 24-27
+		// blocks take an opcode each, B1-B4, and it ORs the nibble into those
+		// all the same.
+		uint8_t addressOpcode(const uint8_t _block, const uint8_t _middle)
+		{
+			uint8_t family;
+			switch(_block)
+			{
+			case 0x00: family = 0x20; break;	// system
+			case 0x08: family = 0x28; break;
+			case 0x0c: family = 0x30; break;
+			case 0x0f: family = 0x38; break;
+			case 0x10: family = 0x10; break;	// display
+			case 0x18: family = 0x18; break;
+			case 0x20: family = 0x40; break;	// user tone / drum
+			case 0x21: family = 0x50; break;
+			case 0x22: family = 0xa0; break;
+			case 0x23: family = 0xb0; break;
+			case 0x24: family = 0xb1; break;
+			case 0x25: family = 0xb2; break;
+			case 0x26: family = 0xb3; break;
+			case 0x27: family = 0xb4; break;
+			case 0x28: family = 0x48; break;
+			case 0x29: family = 0x58; break;
+			case 0x2a: family = 0xa8; break;
+			case 0x2b: family = 0xb8; break;
+			case 0x40: family = 0x60; break;	// patch A
+			case 0x41: family = 0x80; break;	// drum setup A
+			case 0x48: family = 0x68; break;	// bulk
+			case 0x49: family = 0x88; break;
+			case 0x50: family = 0x70; break;	// patch B
+			case 0x51: family = 0x90; break;	// drum setup B
+			case 0x58: family = 0x78; break;
+			case 0x59: family = 0x98; break;
+			default: return 0;
+			}
+			return static_cast<uint8_t>(family | (_middle >> 4));
+		}
 	}
 
 	Sc88SubMcu::Sc88SubMcu(Sink _sink, const uint16_t _stageOffset, const uint16_t _stageCapacity)
@@ -263,13 +308,79 @@ namespace emu88Lib
 		if(sx[3] != 0x42 && !displayModel)
 			return;
 
-		// RQ1 needs its own decoded command mapping. In particular the Pro's
-		// 0C bulk requests cannot use the DT1 address opcode without losing
-		// the request, so leave them unhandled until that mapping is verified.
+		if(sx[4] == 0x11)
+		{
+			if(sx[3] == 0x42)
+				request(_source, sx);
+			return;
+		}
 		if(sx[4] != 0x12)
 			return;
 
 		decodedTransfer(_source, sx);
+	}
+
+	// A Roland RQ1, F0 41 <dev> 42 11 <a1> <a2> <a3> <s1> <s2> <s3> <sum>.
+	// The answer is entirely the CPU's: the sub-MCU names the parameter and
+	// stages the request, and the firmware reads the value and queues the DT1
+	// to the transmit ring itself.
+	//
+	// The record is a bulk one with bit 7 of the length set, which the ISR
+	// takes as a request (SC-88 00:0d32, Pro 00:0d70). That path reads the
+	// low address byte and the size from the staged bytes, which keep the
+	// 41 <dev> 42 11 header in front:
+	//   00:0df3  ADD.B   #H'06,R3      ; staged[6]: a3
+	//   00:0df9  MOV.B   @R3+,R1
+	//   00:0dfb  MOV.B   @R3+,R6       ; staged[7]: s1, 2 and up dropped
+	//   00:0dfd  MOV.W   @R3,R4        ; staged[8..9]: s2 s3
+	// and queues opcode / channel / 0x80 | a3 / size as an ordinary record,
+	// with the size in a second word from 0x100 up (00:0e21). The opcode and
+	// the channel nibble have to name a1 and a2, the way the firmware's own
+	// transmitter reads them back to address the reply.
+	//
+	// The CPU looks the opcode up in its request table (SC-88 00:1663, table
+	// 01:0D4C; Pro 00:18B4, table 01:10C4); the bulk blocks are answered by
+	// the transmitter instead. Sizes 1 to 0x89 are answered, from the first
+	// byte of a parameter on, in whole parameters; the CPU ignores the rest,
+	// so the sub-MCU checks neither sizes nor parameter boundaries. The A/B
+	// module is the CPU's choice too: 40 and 50 share a table entry, the
+	// consumer picks the module from the opcode and the input source
+	// (00:15ce) and the transmitter turns the reply address back for IN B
+	// (00:11ac).
+	void Sc88SubMcu::request(const uint8_t _source, const std::vector<uint8_t>& _sysEx)
+	{
+		constexpr size_t RQ1Size = 12;	// F0 through the checksum
+		constexpr size_t AddrOffset = 5;
+		if(_sysEx.size() != RQ1Size)
+			return;
+
+		uint8_t sum = 0;
+		for(size_t i = AddrOffset; i < _sysEx.size(); ++i)
+			sum = static_cast<uint8_t>(sum + _sysEx[i]);
+		if((sum & 0x7f) != 0)
+		{
+			Record e;
+			e.command   = OpSysExError;
+			e.channel   = static_cast<uint8_t>(_source << 4);
+			e.param1    = 3;	// Check Sum Error, as for a DT1
+			e.wireBytes = static_cast<uint8_t>(RQ1Size + 1);
+			m_sink(std::move(e));
+			return;
+		}
+
+		const uint8_t middle = _sysEx[AddrOffset + 1];
+		const uint8_t command = addressOpcode(_sysEx[AddrOffset], middle);
+		if(!command)
+			return;
+
+		Record r;
+		r.command   = command;
+		r.channel   = static_cast<uint8_t>(0x80 | (_source << 4) | (middle & 0x0f));
+		r.param1    = static_cast<uint8_t>(0x80 | (RQ1Size - 1));
+		r.param2    = static_cast<uint8_t>(m_stageOffset);
+		r.payload.assign(_sysEx.begin() + 1, _sysEx.end());
+		r.wireBytes = static_cast<uint8_t>(RQ1Size + 1);	// and the F7
+		m_sink(std::move(r));
 	}
 
 	void Sc88SubMcu::rawTransfer(const uint8_t _source, const uint8_t _command,
@@ -326,12 +437,16 @@ namespace emu88Lib
 		uint8_t command = _sysEx[DT1AddrOffset];	// address high byte
 		uint8_t source = src;
 
-		// System parameters use the 0x20 mailbox family. Command 0 would
-		// enter the display-only branch and discard them. Keep the staged
-		// address intact: the firmware parameter parser handles 00 00 7F
-		// (mode) and 00 01 00..1F (per-part input assignment) itself.
-		// SC-88: 00:18DE -> 00:3640; Pro: 00:1C4A -> 00:5106.
-		if(command == 0)
+		// The blocks below 0x10 use the 0x20 mailbox family. Below 0x20 the
+		// CPU's bulk task takes only its display records, 0x10 and 0x12, and
+		// drops any other opcode (SC-88 00:188F, Pro 00:1BF7); from 0x20 up it
+		// hands the staged address to the parameter parser (SC-88 00:18DE ->
+		// 00:3640, Pro 00:1C4A -> 00:5106), which handles those blocks itself:
+		// 00 system - 00 00 7F (mode) and 00 01 00..1F (per-part input
+		// assignment) - and 08 and 0C. On the Pro 0C 20 04 is the SC-88 mode
+		// that SELECT+ALL toggles (00:5517, table 01:49EC, handler 00:559D).
+		// Keep the staged address intact.
+		if(command < 0x10)
 			command = 0x20;
 
 		// The main firmware routes patch/drum parameters to the A or B part
@@ -365,7 +480,7 @@ namespace emu88Lib
 		// param1 and param2 are both only SEVEN bits wide:
 		//   00:0d00  TST.B  R3          ; param2 bit 7 -> a different path
 		//   00:0d02  BMI.W  0x0dd2
-		//   00:0d32  BCLR.B #7, R2      ; param1 bit 7 -> continuation chunk
+		//   00:0d32  BCLR.B #7, R2      ; param1 bit 7 -> an RQ1, see request()
 		//   00:0d34  BNE.W  0x0df3
 		// so a transfer of more than 0x7f staged bytes has to be split, and
 		// every chunk has to sit at the same low offset in the shared RAM. The

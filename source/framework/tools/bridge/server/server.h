@@ -29,6 +29,7 @@ namespace bridgeServer
 
 		auto& getPlugins() { return m_plugins; }
 		auto& getRomPool() { return m_romPool; }
+		const Config& getConfig() const { return m_config; }
 
 		bridgeLib::DeviceState getCachedDeviceState(const bridgeLib::SessionId& _id);
 

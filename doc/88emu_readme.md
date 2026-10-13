@@ -49,9 +49,8 @@ To actually generate the sound in the emulator we implement low-level emulation 
   Developed by TUS from high-level silicon analysis and single-sample-step black box probing. Uses JIT (x86_64 and aarch64) for faster DSP processing.
 - LSP (MB87837): 24 bit programmable DSP with 384 steps per sample. Developed by TUS from black box probing.
   Uses JIT (x86_64 and aarch64) for faster DSP processing.
-- LA32 (R15229896 / MB87136A): the 32-partial "Linear Arithmetic" synthesizer of the MT-32 and CM-32L, with its square/sawtooth
-  generators, resonant filter, PCM sample reader, envelope ramps and ring modulation. Derived from [NukeYKT](https://github.com/nukeykt/Nuked-MT32)'s
-  core, improved and hardware-verified by TUS.
+- LA32 (MB87136A): 32 voices LA chip with saw/square resonant PD generator, linear interpolated PCM sample player, envelope ramps and ring modulation.
+  Derived from [NukeYKT](https://github.com/nukeykt/Nuked-MT32)'s core, improved and hardware-verified by TUS.
 - Boss reverb gate array (HG61H20R36F): the MT-32 and CM-32L's fixed-sequence reverb, running the original microcode ROM.
   Derived from Sergey V. Mikayev's emulator; uses JIT (x86_64 and aarch64).
 
@@ -62,11 +61,11 @@ If you find any, please report it as a bug.
 | Device | CLI ID | Main CPU | Sound chips | Notes |
 | --- | --- | --- | --- | --- |
 | MT-32, old board (1.x firmware) | `mt32old` | C8095-90 | LA32 + Boss reverb | experimental |
-| MT-32, new board (2.x firmware) | `mt32new` | P8098 | LA32 + Boss reverb | experimental, also runs the MT-100's firmware |
-| CM-32L | `cm32l` | P8098 | LA32 + Boss reverb | experimental; responds to MIDI channels 2–10, the LAPC-I firmware runs here too |
-| CM-32LN | `cm32ln` | 80C198 | LA32 + Boss reverb | experimental |
-| CM-32P | `cm32p` | P8098 | LP + RCC | experimental support; responds to MIDI channels 11–16 |
-| CM-64 | `cm64` | P8098 ×2 | LA32 + Boss reverb + LP + RCC | experimental; a CM-32L and a CM-32P in one case, channels 2–10 and 11–16 |
+| MT-32, new board (2.x firmware) | `mt32new` | P8098 | LA32 + Boss reverb | also runs the MT-100's firmware |
+| CM-32L | `cm32l` | P8098 | LA32 + Boss reverb | responds to MIDI channels 2–10, the LAPC-I firmware runs here too |
+| CM-32LN | `cm32ln` | 80C198 | LA32 + Boss reverb |  |
+| CM-32P | `cm32p` | P8098 | LP + RCC | responds to MIDI channels 11–16 |
+| CM-64 | `cm64` | P8098 ×2 | LA32 + Boss reverb + LP + RCC | a CM-32L and a CM-32P in one case, channels 2–10 and 11–16 |
 | SC-55 | `sc55` | H8/532 | GP  | |
 | SC-55mkII | `sc55mk2` | H8/532 | GP4 | uses high-level sub-mcu emulation |
 | SC-55st | `sc55st` | H8/532 | GP4 | uses high-level sub-mcu emulation, no hardware panel present |
@@ -81,10 +80,10 @@ If you find any, please report it as a bug.
 | XPGS / G-800 | `xpgs` | H8/510 | XP | dual midi input, emulates the sound generator only, not the arranger |
 | SC-88Pro | `sc88pro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input |
 | VE-GS Pro | `vegspro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input, no hardware panel present |
-| SC-8820 | `sc8820` | SH7016 (SH-2) | XP6 + LSP | experimental, uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
+| SC-8820 | `sc8820` | SH7016 (SH-2) | XP6 + LSP | uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
 | SC-8850 | `sc8850` | SH7016 (SH-2) | 2 × XP6 + LSP | uses high-level sub-mcu emulation in USB mode, 4x midi input |
-| NU-10B | `nu10b` | SH7034 (SH-1) | XP | experimental, runs in GM mode only, no hardware panel or display emulated |
-| MIIG5 | `miig5` | SH7042A (SH-2) | 2 × XP6 | experimental, runs in GM mode only, no hardware panel or display emulated |
+| NU-10B | `nu10b` | SH7034 (SH-1) | XP | runs in GM mode only, no hardware panel or display emulated |
+| MIIG5 | `miig5` | SH7042A (SH-2) | 2 × XP6 | runs in GM mode only, no hardware panel or display emulated |
 
 
 ## ROM loading
@@ -97,21 +96,16 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 
 | Device | CPU / program / data ROMs | Wave ROMs |
 | --- | --- | --- |
-| MT-32, old board | `mt32_control.bin` — 64 KiB (firmware 1.04–1.07, Blue Ridge, M-9), **or** the two 32 KiB EPROMs `r15449122.bin` (IC27) and `r15449123.bin` (IC26) under any name that the known hashes recognize; `mt32old_reverb.bin` — 32 KiB (R15179857, the old board's reverb microcode) | `mt32_wave.bin` — 512 KiB (R15449121), **or** `r15179844.bin` and `r15179845.bin` — 256 KiB each |
-| MT-32, new board | `mt32_control.bin` — 128 KiB (firmware 2.03–2.07); `mt32new_reverb.bin` — 32 KiB (R15179917, shared with the CM-32L) | as above |
-| CM-32L | `cm32l_control.bin` — 64 KiB (CM-32L 1.02 or LAPC-I 1.00); `cm32l_reverb.bin` — 32 KiB (R15179917) | `cm32l_wave.bin` — 1 MiB, **or** `r15449121.bin` and `r15179945.bin` — 512 KiB each |
-| CM-32LN | `cm32ln_control.bin` — 64 KiB (CM-32LN / CM-500 / LAPC-N 1.00); `cm32l_reverb.bin` — 32 KiB | the CM-32L's |
 | CM-32P | `cm32p_program.bin` — 64 KiB | `cm32p_wave0.bin` — 512 KiB; `cm32p_wave1.bin` — 512 KiB; `cm32p_wave2.bin` — 512 KiB |
-| CM-64 | the CM-32L's and the CM-32P's sets together | |
 | SC-55 | `sc55mk1_internal.bin` — 32 KiB; `sc55mk1_program.bin` — 256 KiB | `sc55mk1_wave0.bin` — 1 MiB; `sc55mk1_wave1.bin` — 1 MiB; `sc55mk1_wave2.bin` — 1 MiB |
 | SC-55mkII | `sc55mk2_internal.bin` — 32 KiB; `sc55mk2_program.bin` — 512 KiB | `sc55mk2_wave0.bin` — 2 MiB; `sc55mk2_wave1.bin` — 1 MiB |
-| SC-55st | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 256 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
-| CM-300 / SCC-1 | `cm300_internal.bin` — 32 KiB; `cm300_program.bin` — 256 KiB | `cm300_wave0.bin` — 1 MiB; `cm300_wave1.bin` — 1 MiB; `cm300_wave2.bin` — 1 MiB |
+| SC-55ST (`--device` only) | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 512 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
+| CM-300 / SCC-1 (`--device` only) | `cm300_internal.bin` — 32 KiB; `cm300_program.bin` — 256 KiB | `cm300_wave0.bin` — 1 MiB; `cm300_wave1.bin` — 1 MiB; `cm300_wave2.bin` — 1 MiB |
 | SC-155 | `sc155_internal.bin` — 32 KiB; `sc155_program.bin` — 256 KiB | `sc155_wave0.bin` — 1 MiB; `sc155_wave1.bin` — 1 MiB; `sc155_wave2.bin` — 1 MiB |
 | SC-155mkII | `sc155mk2_internal.bin` — 32 KiB; `sc155mk2_program.bin` — 512 KiB | `sc155mk2_wave0.bin` — 2 MiB; `sc155mk2_wave1.bin` — 1 MiB |
 | SCC-1A | `scc1a_internal.bin` — 32 KiB; `scc1a_program.bin` — 256 KiB | `scc1a_wave0.bin` — 1 MiB; `scc1a_wave1.bin` — 1 MiB; `scc1a_wave2.bin` — 1 MiB |
 | SCB-55 | `scb55_internal.bin` — 32 KiB; `scb55_program.bin` — 256 KiB | `scb55_wave0.bin` — 2 MiB; `scb55_wave1.bin` — 1 MiB |
-| RLP-3237 | `rlp3237_internal.bin` — 32 KiB; `rlp3237_program.bin` — 256 KiB | `rlp3237_wave0.bin` — 2 MiB |
+| RLP-3237 (`--device` only) | `rlp3237_internal.bin` — 32 KiB; `rlp3237_program.bin` — 256 KiB | `rlp3237_wave0.bin` — 2 MiB |
 | SC-88 | `sc88_control.bin` — 512 KiB | `sc88_wave0.bin` — 2 MiB; `sc88_wave1.bin` — 2 MiB; `sc88_wave2.bin` — 2 MiB; `sc88_wave3.bin` — 2 MiB |
 | SC-88VL | `sc88vl_control.bin` — 512 KiB | `sc88vl_wave0.bin` — 2 MiB; `sc88vl_wave1.bin` — 2 MiB; `sc88vl_wave2.bin` — 2 MiB; `sc88vl_wave3.bin` — 2 MiB |
 | XPGS / G-800 | `xpgs_control.bin` — 512 KiB | `xpgs_wave0.bin` — 2 MiB; `xpgs_wave1.bin` — 2 MiB; `xpgs_wave2.bin` — 2 MiB; `xpgs_wave3.bin` — 2 MiB; `xpgs_wave4.bin` — 2 MiB |
@@ -126,10 +120,6 @@ SC-88Pro and VE-GS Pro may also use the compatible donor waves described below. 
 
 Additional supported layouts:
 
-- The old MT-32 board's firmware sits in two EPROMs on a 16-bit bus, IC27 holding the even bytes and IC26 the odd ones. The 64 KiB `mt32_control.bin` is the two interleaved, which is how munt's `MT32_CONTROL.ROM` and the `mt32_control.rom` of the usual dump sets already come; a pair of 32 KiB chip dumps is joined the same way. The new board's 128 KiB firmware exists only as one image; the two boards do not run each other's firmware, and each needs its own reverb microcode.
-- The MT-32 PCM set is the single 512 KiB mask ROM R15449121 (munt's `MT32_PCM.ROM`) or the two 256 KiB chips of the earliest boards; the CM-32L's 1 MiB image (munt's `CM32L_PCM.ROM`) is that same ROM followed by R15179945, and both halves are accepted separately. Files named by the registry's part numbers, `r15449121.bin` and so on, serve every board that carries the chip.
-- The SC-55's on-chip ROM and its program ROM belong to one firmware revision (1.00, 1.10, 1.20/1.21, 2.00) and are loaded as a pair: with several revisions in the folder the newest complete pair is used, and a program ROM whose on-chip ROM is missing does not make the board available.
-- The six program ROMs produced by [sc55mk2-ctf-patcher](https://github.com/shingo45endo/sc55mk2-ctf-patcher) are recognized as SC-55mkII firmware: they restore the SC-55's capital tone fallback for variations the mkII leaves silent, with the SC-55's, strictly the SC-55's or the mkII's own tone list, and the SC-55 v1.21 or v2.00 drum set ranges.
 - Recognized H8 control ROMs can be loaded in CPU byte order or the supported word-swapped dump order. Recognized 1 MiB Pro control images embedded in repeated 2/4 MiB dumps are also accepted.
 - The SC-88Pro board carries its PCM on five 4 MiB mask ROMs, one per chip select, instead of the three larger VE-GS Pro parts that `sc88pro_wave0.bin` to `sc88pro_wave2.bin` hold. Dumps of the five are also accepted: CS0 and CS1 together replace `sc88pro_wave0.bin`, CS2 and CS3 replace `sc88pro_wave1.bin`, and CS4 is identical to `sc88pro_wave2.bin`. The hashes registered for CS0–CS3 were derived by splitting the VE-GS Pro images, not taken from dumps of SC-88Pro chips.
 - SC-88Pro and VE-GS Pro can obtain their waves from recognized decoded SC-8850 or SC-8820 wave images. Their own control ROM is still required.
@@ -143,8 +133,6 @@ Additional supported layouts:
 Use **Add** to choose multiple files, or drop files onto the playlist. Click an entry to start it, drag rows to reorder them, and use **X** to remove an entry. Right-click the playlist for **Clear Playlist**. Play/Pause controls the current song; Stop silences it and returns to its start.
 
 Songs advance in playlist order. After the last MIDI event, the player allows a four-second release/effects tail, then the configured pause before the next song. The list stops at its end. Transport changes silence old notes, and each new song applies the selected reset policy.
-
-A playlist entry whose file cannot be read keeps its place, shown in red, and playback skips it. That happens when the file was moved or deleted, is on a drive that is not connected, or is in a folder macOS does not let the player read. Click the entry to try again once the file is back; if it still cannot be read, the player says why. Loading a playlist and restoring the last one both keep such entries and list them in a message. A file you add on its own that cannot be read is refused instead.
 
 | Extensions | Format |
 | --- | --- |
@@ -170,32 +158,14 @@ The reset setting prepares the selected device before a playlist song or CLI ren
 | **GS** (default) | Sends Roland GS Reset to initialize the GS sound map and part/effect settings. | Sound Canvas / GS arrangements and a predictable GS starting state. |
 | **MT-32** | Sends GS Reset, then sets up the SC-55-style MT-32 instrument arrangement for channels 1–10, including banks, programs, pan, level and effects sends. Channels 11–16 retain GS defaults. | Older music using the MT-32 preset arrangement on a GS device. |
 
-**MT-32 here is a GS compatibility arrangement for the Sound Canvas family, not LA synthesis.** On a GS device it cannot reproduce custom MT-32 timbres or interpret MT-32 patch-upload SysEx as an MT-32 would; for that, select one of the MT-32 or CM-32L devices, which run the real firmware.
-
-**The MT-32, CM-32L, CM-32LN, CM-32P and CM-64 predate GM.** Their firmware ignores GM, GM2 and GS System On, and knows one reset of its own, the "all parameters reset" data set to address `7F 00 00` (`F0 41 10 16 12 7F 00 00 00 01 F7`). On those devices every mode but **Off** sends that message instead, and the MT-32 arrangement step is skipped since the device is the real thing. The reset takes the module back to its power-on state: factory timbres, patches and system settings; the SysEx of the song that follows loads what it needs.
-
-GM and GS resets get 200 ms to settle, and GM2 400 ms, because GM2 System On keeps the SC-8850 busy for about 310 ms. The MT-32 arrangement uses two 200 ms phases. Messages inside the song are sent afterward and can change the mode again. The song-reset option applies when starting songs; it is not an automatic reset for every live MIDI connection.
-
-To reset the device at any other time, use **Send GM Reset**, **Send GM2 Reset** or **Send GS Reset** in the context menu. Each sends the same message as the song reset, to every part group. On the MT-32 and CM devices the menu offers **Send All Parameters Reset** instead. **Send All Notes Off** lifts the hold pedal and sends All Notes Off on every channel, which is what stops a note on every board: the LA and CM firmware has no All Sound Off.
 
 ### MT-32 and CM-32L: the LA boards
-
-The MT-32 (1987) and the CM-32L (1989) are Roland's LA synthesizers, "Linear Arithmetic": 32 partials of square/sawtooth waves through a fake resonant filter (phase distortion), or PCM samples, mixed per timbre, with a stereo digital reverb. The CM-32L is the MT-32's board with 33 extra PCM sounds ("sound effects" for games), in a case without the display, the switches and the knob; the LAPC-I is a CM-32L on an ISA card and runs the same firmware. 88emu runs the original 8095/8098 firmware on the emulated LA32, reverb gate array and display controller.
-
-**Two MT-32 boards.** Roland built the MT-32 on two different main boards, which the service notes call the old and the new type, and they are two devices here because they take different ROMs and sound different:
-
-- **MT-32 old board (`mt32old`)** runs the 1.x firmware (1.04 to 1.07, and the third-party Blue Ridge and M-9 firmwares) from two EPROMs, with the reverb microcode R15179857. Its 8095 sits on a 16-bit bus, the LA32 is addressed word-wide and the DAC is wired one bit up from the audio bus with bit 14 dropped: the board has no volume VCA, master volume is scaled digitally, and its reverb return is mixed at unity.
-- **MT-32 new board (`mt32new`)** runs the 2.x firmware (2.03 to 2.07) from a single banked 128 KiB ROM, whose upper half carries the ROM Play demo songs, with the reverb microcode R15179917. It is the CM-32L's design in the MT-32's case: the same 8098, the same PWM-driven VCA, and the LA32's output arrives on the audio bus rotated up one bit - a sound is twice what the chip computed and folds back past three quarters of full scale, the overdrive the MT-32 is known for. The MT-100 is this board with a sequencer, and its firmware 2.03 runs here.
-
-The two firmware generations are not interchangeable: 1.x only boots on the old board and 2.x only on the new one, and each board needs its own reverb microcode. The 2.x firmware and the CM-32L's differ from 1.x in details munt documents as its "quirks" - pitch and envelope overflow behaviour, the ring modulator, the pan law, the key shift, the display; here they are simply what the firmware does on the emulated board.
 
 **MIDI.** From power-on, the eight parts answer on **channels 2–9** and the rhythm part on **channel 10**; channel 1 is silent until a SysEx or the panel reassigns a part. Send to **group A, channel 2** for part 1. The pan convention is reversed relative to GM (CC10 = 0 is right, 127 is left), All Sound Off (CC120) is not recognized - the player uses hold pedal up plus All Notes Off instead when it stops or seeks - and the only reset is the all parameters reset described above. The boards' own MIDI OUT carries their SysEx replies (data requests, handshaking); the CM-32P half of a CM-64 transmits nothing.
 
 **Front panel.** The MT-32's 20-character display and MIDI MESSAGE lamp are shown in the CM-32L bezel for now, and its ten switches and the VOLUME/VALUE knob are on the keyboard; see the shortcuts below. The knob is a potentiometer read by the CPU's A/D converter, so it stays where it was turned. The CM-32L's own firmware drives the same display and scans the same switches although its case has neither: the player shows the display as a service screen, and the MT-32 keys reach its switch matrix too. That is how the firmware's hidden screens are entered on every LA board: hold **3 + V** (PART 3 + VOLUME) while switching the power on for the test mode, or **4 + R + M** (PART 4 + RHYTHM + MASTER VOLUME) for the firmware version.
 
 **Level.** The LA boards' line output is louder than the digital Sound Canvas boards' for the same DAC word, as their output stages are modelled from the schematic (see the analog section), and the new board's bus rotation doubles the LA32's word on top of that. Loud passages can exceed full scale; use the player's volume control or the limiter.
-
-**CM-32LN.** The CM-32LN, the CM-500's LA half and the LAPC-N run a later control ROM on an 80C198, which takes two clocks per state where the 8095 and 8098 take three; the vibrato of those units is known to run faster for it. The device is catalogued (from munt's published digest) and emulated with the faster CPU, but no dump has been available to us to test it.
 
 ### CM-32P, CM-64 and expansion cards
 
@@ -219,13 +189,11 @@ The CM-32P is a PCM sound module related to the PCM half of the CM-64 and Roland
 
 The song must select card tones using MIDI Program Change values starting at **64 / 0x40** (often displayed as program **65** in software that numbers programs from 1). Those tones are silent when no card is inserted.
 
-### SC-55 family, expansion boards and SC-8820
+### Sound Canvas family and expansion boards
 
 The SC-55 and SC-55mkII have different firmware, voice-generation timing and behavior for unsupported instrument banks. Selecting an SC-55 map on a later device changes its sound map; it does not turn the later hardware into an original SC-55. Use the actual SC-55 model when those differences matter. The optional pre-patched mkII ROM described above supplies capital-tone fallback for otherwise missing variations.
 
 SCB-55, SCC-1A and the other card profiles do not have the module's front-panel controls. XPGS emulates the G-800 GS sound engine, not its arranger. VE-GS Pro uses its own panel-less firmware. “No display” on these devices is expected. SC-88VL lacks the SC-88/Pro Preview button.
-
-**SC-8820 is experimental.** Its CPU's internal ROM is recognized from the original dump, R02015367, also when it was read as 128 KiB and holds the ROM twice. The reconstructed **BAD_DUMP** of that ROM, which was all there was before, still works and is reported as such; when both are present, the original dump is used. The external program and waves are separate requirements.
 
 The SC-88Pro firmware also has an XG compatibility mode. Send XG System On (`F0 43 10 4C 00 00 7E 00 F7`) from the song or your MIDI source. If you enable it externally, choose Reset Off so a song-start GS Reset does not undo it. This is the Roland firmware's compatibility mode; full Yamaha XG voice/effects equivalence is not established.
 
@@ -233,17 +201,13 @@ The SC-88Pro firmware also has an XG compatibility mode. Send XG System On (`F0 
 
 Real hardware expects initialized battery-backed SRAM. A newly created emulated board starts with blank memory, like a unit with a depleted backup battery. Firmware can then start with odd part assignments, levels or incomplete user/system settings. For example, the SC-155 can start with part 1 as drums on channel 10, and the SC-155mkII on part 8 at level 84. A per-song GM/GS reset does not initialize every battery-backed setting.
 
-**Factory Reset on load**, enabled by default, runs the firmware's full factory-initialization procedure on SC-55, SC-55mkII, SC-155, SC-155mkII, SC-88, SC-88VL, SC-88Pro and SC-8850, then power-cycles the initialized board. Leave this enabled for ordinary playback. The other profiles currently have no equivalent automated procedure; the MT-32 and CM boards initialize their own memory at power-on and need none.
+**Factory Reset on load**, enabled by default, runs the firmware's full factory-initialization procedure on SC-55, SC-55mkII, SC-155, SC-155mkII, SC-88, SC-88VL, SC-88Pro and SC-8850, then power-cycles the initialized board. Leave this enabled for ordinary playback. The other profiles currently have no equivalent automated procedure.
 
 **Fast Boot (skip intro)**, off by default, runs another ten seconds of emulated time before exposing the device for use. It skips waiting through the firmware's intro in real time, but takes extra computation during loading. It is independent of factory initialization. Both settings apply at the next device selection, power-on or Restart.
 
 **Restart Device** stops playback, rescans ROMs and constructs a fresh device. It clears SRAM and all runtime hardware state, including edits, controller state, voices and effects buffers, then applies the startup settings above. It retains the playlist and application settings and does not rewrite the ROM files. Use it for a clean start or after changing ROMs.
 
 **Q** is the front-panel POWER switch, and it behaves as the selected model's switch does. On SC-55, SC-55mkII, SC-155, SC-155mkII and SC-88VL, POWER is a key the firmware reads, not a supply switch. The unit stays powered, and a press puts it into its standby mode. In standby the display and lamps are dark, the sound is silenced, and incoming MIDI is ignored. The next press wakes it. The emulation keeps running through standby, as the hardware does, and playback is not stopped.
-
-SC-88, SC-88Pro, SC-8820 and SC-8850 use power on/off, as do SC-55st, the MT-32s and the CM boards; the SC-55 standby behavior does not apply to every model carrying the SC-55 name.
-
-On models without standby, and with **Shift+Q** on the five standby models, the switch cuts the power supply. Power-off stops playback and discards incoming MIDI; an active WAV recording continues with silence. Power-on starts a fresh board using the startup settings, except that held panel buttons bypass automatic Factory Reset and Fast Boot for that boot. Volatile device state is not preserved across power-off.
 
 ## Settings
 
@@ -436,9 +400,7 @@ Explicit options override the selected config, followed by built-in defaults.
 
 Positional files and repeated `--playlist` arguments are appended in argument order. Without `--play` they are loaded without starting playback. `--play` starts the first entry after a five-second boot wait; use Fast Boot when you need the firmware fully past its intro first.
 
-The standalone player restores its previous playlist when launched without input files. Playlist changes are saved automatically to `playlist/last-session.m3u8` in the 88emu data folder. Right-click the playlist to load or save an `.m3u`/`.m3u8` playlist; saved playlists use relative paths where possible. The Add button and playlist drop target also accept playlist files and append their entries. Supplying positional files or `--playlist` starts a new playlist and makes it the next restored playlist. Unlike entries of a restored playlist, a file named on the command line must be readable, or the player does not start.
-
-When the player cannot start, it prints the reason to stderr. Opened from Finder, Explorer or a desktop launcher, where there is no terminal to read it in, it shows the reason in a message box instead.
+The standalone player restores its previous playlist when launched without input files. Playlist changes are saved automatically to `playlist/last-session.m3u8` in the 88emu data folder. Right-click the playlist to load or save an `.m3u`/`.m3u8` playlist; saved playlists use relative paths where possible. The Add button and playlist drop target also accept playlist files and append their entries. Supplying positional files or `--playlist` starts a new playlist and makes it the next restored playlist.
 
 | GUI-only option | Meaning |
 | --- | --- |

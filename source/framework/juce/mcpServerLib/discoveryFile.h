@@ -24,12 +24,13 @@ namespace mcpServer
 	public:
 		static std::string getDiscoveryFilePath();
 
-		static void registerInstance(const DiscoveryEntry& _entry);
+		// false if the file had to be written without holding the lock
+		static bool registerInstance(const DiscoveryEntry& _entry);
 		static void unregisterInstance(int _port);
 		static std::vector<DiscoveryEntry> readInstances();
 
 	private:
-		static void modifyInstances(const std::function<void(std::vector<DiscoveryEntry>&)>& _modify);
+		static bool modifyInstances(const std::function<void(std::vector<DiscoveryEntry>&)>& _modify);
 
 		static std::mutex s_mutex;
 	};

@@ -1,0 +1,66 @@
+<rml>
+<head>
+	<link type="text/rcss" href="tus_default.rcss"/>
+	<link type="text/rcss" href="emu88PartEditor.rcss"/>
+</head>
+<body>
+	<div id="partEditorRoot" class="peRoot">
+		<div class="peTopBar">
+			<button id="peTabMixer" class="peTab peTabMixer"><svg class="peTabIcon" src="part_editor_mixer.svg"/>Mixer</button>
+			<div class="peSeparator"/>
+			<div id="peGroups" class="peGroups"/>
+			<div id="pePartTabs" class="pePartTabs"/>
+			<div class="peActions">
+				<button id="peSendPart" class="peAction" title="Send this part's settings to the device">Send Part</button>
+				<button id="peReceivePart" class="peAction" title="Read this part's settings from the device">Receive Part</button>
+				<button id="peSendAll" class="peAction" title="Send every part's settings and the effects to the device">Send All</button>
+				<button id="peReceiveAll" class="peAction" title="Read every part's settings and the effects from the device">Receive All</button>
+			</div>
+		</div>
+
+		<div id="pePageMixer" class="pePage">
+			<div class="peMainPane">
+				<div class="peMixerHeader">
+					<div class="peMixHeadSoloMute"/>
+					<div class="peMixHeadName">
+						<div class="peMixHeadPart">Part</div>
+						<div class="peMixHeadTone">Instrument</div>
+					</div>
+					<div class="peMixHeadVolume">Volume</div>
+					<div class="peMixHeadPan">Pan</div>
+				</div>
+				<div id="peMixerRows" class="peMixerRows"/>
+			</div>
+			<div class="peSidePane">
+				<div class="pePaneTitle">System and Effects</div>
+				<div id="peGlobals" class="peControls peGlobals"/>
+			</div>
+		</div>
+
+		<div id="pePagePart" class="pePage" style="display: none;">
+			<div class="peMainPane">
+				<div class="pePartHeader">
+					<div id="pePartTitle" class="pePartTitle">Part</div>
+					<div id="pePartInfo" class="pePartInfo"/>
+				</div>
+				<div id="pePartControls" class="peControls pePartControls"/>
+			</div>
+			<div class="peSidePane">
+				<div class="peMapRow">
+					<combo id="peMapSelect" class="peMapSelect" popup="window" title="The tone map the part plays from"><combotext/></combo>
+					<div class="peFilter">
+						<div class="peFilterLabel">Filter</div>
+						<input id="peFilter" class="peFilterInput" type="text" maxlength="24"/>
+					</div>
+				</div>
+				<div id="peListLabel" class="peListLabel">Instrument</div>
+				<div id="peTones" class="peList"/>
+			</div>
+		</div>
+
+		<div class="peStatusBar">
+			<div id="peStatus" class="peStatus"/>
+		</div>
+	</div>
+</body>
+</rml>

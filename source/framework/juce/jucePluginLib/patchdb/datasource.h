@@ -21,6 +21,9 @@ namespace pluginLib::patchDB
 		uint32_t bank = g_invalidBank;
 //		uint32_t program = g_invalidProgram;
 		uint32_t midiBankNumber = g_invalidMidiBankNumber;	// user-assigned MIDI bank for program change routing
+		// ROM banks: the ROM they come from. Not part of the identity, the same bank of two ROMs is one data source, but
+		// its MIDI bank number belongs to the bank of one ROM (EMU-228)
+		std::string romName;
 		Timestamp timestamp;
 		std::set<PatchPtr> patches;
 

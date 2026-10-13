@@ -578,7 +578,9 @@ namespace juceRmlUi
 		Component::mouseDown(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 
-		m_rmlContext->ProcessMouseButtonDown(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
+		const auto button = static_cast<int>(helper::toRmlMouseButton(_event));
+		m_pressedMouseButtons |= 1u << button;
+		m_rmlContext->ProcessMouseButtonDown(button, toRmlModifiers(_event));
 		enqueueUpdate();
 	}
 
@@ -586,7 +588,9 @@ namespace juceRmlUi
 	{
 		Component::mouseUp(_event);
 		RmlInterfaces::ScopedAccess access(*this);
-		m_rmlContext->ProcessMouseButtonUp(static_cast<int>(helper::toRmlMouseButton(_event)), toRmlModifiers(_event));
+		const auto button = static_cast<int>(helper::toRmlMouseButton(_event));
+		m_pressedMouseButtons &= ~(1u << button);
+		m_rmlContext->ProcessMouseButtonUp(button, toRmlModifiers(_event));
 
 		if (!m_rmlContext->GetHoverElement())
 		{
@@ -609,10 +613,27 @@ namespace juceRmlUi
 		enqueueUpdate();
 	}
 
+	// The mouse moves with no button down, but the context still holds a press: its release never arrived. Without
+	// one the context keeps the press, and the next move drags whatever was clicked and never lets go of it.
+	void RmlComponent::releaseLostMouseButtons(const juce::MouseEvent& _event)
+	{
+		if (!m_pressedMouseButtons || _event.mods.isAnyMouseButtonDown())
+			return;
+
+		for (int button = 0; button < 32; ++button)
+		{
+			if (m_pressedMouseButtons & (1u << button))
+				m_rmlContext->ProcessMouseButtonUp(button, toRmlModifiers(_event));
+		}
+		m_pressedMouseButtons = 0;
+	}
+
 	void RmlComponent::mouseMove(const juce::MouseEvent& _event)
 	{
 		Component::mouseMove(_event);
 		RmlInterfaces::ScopedAccess access(*this);
+
+		releaseLostMouseButtons(_event);
 
 		const auto pos = toRmlPosition(_event);
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
@@ -649,6 +670,8 @@ namespace juceRmlUi
 	{
 		Component::mouseEnter(_event);
 		RmlInterfaces::ScopedAccess access(*this);
+
+		releaseLostMouseButtons(_event);
 
 		const auto pos = toRmlPosition(_event);
 		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
@@ -1766,5 +1789,14 @@ namespace juceRmlUi
 	bool RmlComponent::shouldDropFilesWhenDraggedExternally(const SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles)
 	{
 		return m_drag.shouldDropFilesWhenDraggedExternally(_sourceDetails, _files, _canMoveFiles);
+	}
+
+	void RmlComponent::dragOperationEnded(const SourceDetails& _sourceDetails)
+	{
+		DragAndDropContainer::dragOperationEnded(_sourceDetails);
+		RmlInterfaces::ScopedAccess access(*this);
+		if (m_drag.dragOperationEnded())
+			m_pressedMouseButtons = 0;
+		enqueueUpdate();
 	}
 }

@@ -384,8 +384,7 @@ namespace pluginLib
 
         for (const auto& p : lockedParameters)
         {
-	        const auto v = p->getUnnormalizedValue();
-	        sendParameterChange(*p, static_cast<uint8_t>(v), _origin);
+	        sendParameterChange(*p, p->getUnnormalizedValue(), _origin);
         }
 	}
 
