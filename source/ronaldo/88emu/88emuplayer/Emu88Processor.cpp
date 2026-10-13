@@ -98,6 +98,10 @@ namespace emu88Player
 		m_engine = std::make_unique<synthLib::Plugin>(m_device.get(), [](synthLib::Device*) { return nullptr; });
 		m_toneCatalog = loadToneCatalog(m_deviceModel, m_toneCatalogError);
 		m_partState.setModel(m_deviceModel, m_toneCatalog);
+		m_laDialect = emu88Lib::mt32::isMt32Model(m_deviceModel);
+		if(m_laDialect)
+			m_laState.setModel(m_deviceModel);
+		m_laNames = emu88Lib::mt32::loadNameCatalog(m_deviceModel, m_pcmCard, m_laNamesError);
 		// The boards are sound modules, not sequencers: the host clock the
 		// engine would otherwise generate is just traffic on their MIDI in.
 		m_engine->setMidiClockEnabled(false);
@@ -319,6 +323,8 @@ namespace emu88Player
 		replacementEngine->setResamplerMode(resamplerMode());
 		std::string catalogError;
 		auto catalog = loadToneCatalog(_model, catalogError);
+		std::string laNamesError;
+		auto laNames = emu88Lib::mt32::loadNameCatalog(_model, m_pcmCard, laNamesError);
 
 		m_midiPlayer.stop();
 		suspendProcessing(true);
@@ -333,12 +339,17 @@ namespace emu88Player
 			m_deviceModel = _model;
 			++m_deviceGeneration;
 			m_partState.setModel(_model, catalog);
+			m_laDialect = emu88Lib::mt32::isMt32Model(_model);
+			if(m_laDialect)
+				m_laState.setModel(_model);
 			m_midiPlayer.setPortCount(midiPortCount());
 			m_midiPlayer.setResetTarget(emu88Lib::resetTarget(_model));
 		}
 		suspendProcessing(false);
 		m_toneCatalog = std::move(catalog);
 		m_toneCatalogError = std::move(catalogError);
+		m_laNames = std::move(laNames);
+		m_laNamesError = std::move(laNamesError);
 
 		// The engine only borrows its device, so destroy it before the board it
 		// references. Do this after resuming callbacks to keep teardown off the
@@ -367,6 +378,19 @@ namespace emu88Player
 	{
 		m_engine->addMidiEvent(_event);
 		m_partState.process(_event);
+		if(m_laDialect)
+		{
+			m_laState.process(_event);
+			// The boards have one MIDI IN, which every port reaches
+			if(_event.sysex.empty())
+				m_laActivity.process(_event.a, 0);
+		}
+	}
+
+	void Processor::setPartActivityEnabled(const bool _enabled)
+	{
+		m_partState.setActivityEnabled(_enabled);
+		m_laActivity.setEnabled(_enabled);
 	}
 
 	uint8_t Processor::midiPortCount() const
@@ -791,7 +815,7 @@ namespace emu88Player
 			bool answered = false;
 			double elapsed = 0.0;
 			bool first = true;
-			while(!answered && elapsed < timeoutSeconds)
+			while(!answered && elapsed < std::max(timeoutSeconds, request.timeoutSeconds))
 			{
 				if(m_dataRequestsAbort.load(std::memory_order_acquire))
 				{
@@ -822,6 +846,17 @@ namespace emu88Player
 				{
 					if(event.sysex.empty())
 						continue;
+					if(m_laDialect)
+					{
+						// The piece that ends where the request does is the last
+						emu88Lib::mt32::Dt1 dt1;
+						if(emu88Lib::mt32::parseDt1(event.sysex.data(), event.sysex.size(), dt1) &&
+						   emu88Lib::mt32::toLinear(dt1.address) + dt1.size >=
+						   emu88Lib::mt32::toLinear(request.address) + std::max<uint32_t>(1, request.size))
+							answered = true;
+						m_laState.processReply(event);
+						continue;
+					}
 					// A board with one MIDI OUT answers every port's request there, so the address is what tells.
 					emu88Lib::gs::Dt1 dt1;
 					if(emu88Lib::gs::parseDt1(event.sysex.data(), event.sysex.size(), dt1) &&

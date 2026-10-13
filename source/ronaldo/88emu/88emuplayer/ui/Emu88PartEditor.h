@@ -4,6 +4,8 @@
 #include "88lib/gs/params.h"
 #include "88lib/gs/partState.h"
 #include "88lib/gs/toneCatalog.h"
+#include "88lib/mt32/memory.h"
+#include "88lib/mt32/names.h"
 
 #include "juceRmlUi/rmlInterfaces.h"
 
@@ -14,8 +16,10 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include <array>
+#include <deque>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Rml { class Element; class ElementFormControlInput; class Event; }
@@ -26,11 +30,19 @@ namespace emu88Player
 	class Editor;
 	class Processor;
 
+	// Whether a board has the part editor: the Sound Canvases and the boards that run their programs, and the boards
+	// of the MT-32 dialect, which have the mixer only
+	bool hasPartEditor(emu88Lib::DeviceModel _model);
+
 	// The part editor: a mixer page with every part's volume and pan beside the system and effect parameters, and a
 	// page per part with its parameters beside the instrument and variation, picked from the tone lists in the
 	// board's own ROMs. Edits go to the board as they are made; what the window shows is the processor's part state,
 	// which follows every message the board receives, so a song or a live input moves the controls too. Send writes
 	// the whole state to the board, Receive reads it back with data requests.
+	//
+	// The boards of the MT-32 dialect, the MT-32, CM-32L, CM-32P and CM-64, show the parts of their LA board and of
+	// their PCM board, from the processor's copy of their memory, named from their ROMs: the mixer beside the system
+	// areas, and a page per part with its patch temp beside the patches, timbres or tones it can play.
 	class PartEditorWindow final : public juce::DocumentWindow, juce::Timer
 	{
 	public:
@@ -143,8 +155,104 @@ namespace emu88Player
 		// What a double-click goes back to: the value after a GS Reset, or what the insertion effect type sets
 		uint16_t defaultValue(bool _global, size_t _param, const emu88Lib::gs::EfxParam* _efx) const;
 		void resetControl(bool _global, size_t _param, const emu88Lib::gs::EfxParam* _efx);
-		// A mixer slider moved, or reset
-		void setMixerValue(size_t _part, bool _volume, uint8_t _value);
+		// A mixer slider moved, or reset. A row is a part: of a group on the Sound Canvases, of the LA or the PCM
+		// board on the MT-32 dialect's boards, see m_laParts. Values are the board's.
+		void setMixerValue(size_t _row, bool _volume, uint8_t _value);
+		uint8_t mixerValue(size_t _row, bool _volume) const;
+		uint8_t mixerDefault(size_t _row, bool _volume) const;
+		uint8_t mixerMax(size_t _row, bool _volume) const;
+		// A value as its slider has it: the LA and PCM boards' pan runs from the right
+		uint8_t mixerSlider(size_t _row, bool _volume, uint8_t _value) const;
+		std::string mixerText(size_t _row, bool _volume, uint8_t _value) const;
+		std::string mixerLabel(size_t _row) const;
+		// The heading before a row that starts a group of parts, empty for none
+		std::string mixerHeading(size_t _row) const;
+
+		// A part of the MT-32 dialect's boards: the LA board's parts 1-8 and its rhythm part, the CM-32P's parts 1-6
+		struct LaPart
+		{
+			emu88Lib::mt32::Board board;
+			uint8_t part;
+		};
+		// Where a part's volume or pan is
+		emu88Lib::mt32::Location laMixerLocation(const LaPart& _part, bool _volume) const;
+		bool isLaRhythm(size_t _row) const;
+		// The timbre or tone a part plays
+		std::string laPartName(const LaPart& _part) const;
+		// A DT1 for the board, queued with the edits
+		void setLaValue(uint32_t _address, const std::vector<uint8_t>& _data);
+		// Bytes for the board's memory: into the copy shown at once, and queued for the board
+		void writeLa(emu88Lib::mt32::Area _area, size_t _entry, uint16_t _offset, const std::vector<uint8_t>& _data);
+
+		// A setting of the LA board's or the PCM board's memory: of a system area, of a part's patch temp, or of one
+		// of the rhythm part's keys. The system areas fill the side pane on those boards, the others a part's page.
+		struct LaControl
+		{
+			emu88Lib::mt32::Area area;
+			size_t entry;
+			// The area's parameter list, see emu88Lib::mt32::params()
+			size_t param;
+			Rml::ElementFormControlInput* slider = nullptr;
+			juceRmlUi::ElemComboBox* combo = nullptr;
+			Rml::Element* value = nullptr;
+		};
+		// The rows of an entry's parameters in a section, without the parameters in _skip, or only those in _only, and
+		// the controls in them wired up once they are in the document
+		std::string laControlRows(emu88Lib::mt32::Area _area, size_t _entry, const std::string& _section,
+			const std::vector<std::string>& _skip = {}, const std::vector<std::string>& _only = {}) const;
+		void wireLaControls(Rml::Element* _container, emu88Lib::mt32::Area _area, size_t _entry,
+			std::vector<LaControl>& _controls);
+		void buildLaControls();
+		void refreshLaControls(std::vector<LaControl>& _controls);
+		void setLaParam(emu88Lib::mt32::Area _area, size_t _entry, size_t _param, uint8_t _value);
+
+		// A part's page: its patch temp's settings, or the rhythm part's level and keys, beside the list of what it
+		// can play
+		void buildLaPartControls();
+		void refreshLaPart();
+		// What the list offers, and the selection in it
+		struct LaListRow
+		{
+			bool heading = false;
+			uint8_t group = 0;		// timbre group, tone media; for a patch or a rhythm timbre 0
+			uint8_t number = 0;
+			std::string label;
+			std::string name;
+		};
+		std::vector<LaListRow> laListRows() const;
+		// The group and number of the row that is what the part plays, 0xff for none
+		std::pair<uint8_t, uint8_t> laListSelection() const;
+		void selectLaListRow(const LaListRow& _row);
+		void applyLaListSelection();
+		// A timbre by group and number, a rhythm key's timbre by its value, a patch or a tone, by name
+		std::string laTimbreName(uint8_t _group, uint8_t _number) const;
+		std::string laPatchName(emu88Lib::mt32::Board _board, uint8_t _patch) const;
+		std::string laToneName(uint8_t _media, uint8_t _number) const;
+		// "Part 1", "Rhythm Part", on the CM-64 "LA Part 1" and "PCM Part 1"
+		std::string laPartTitle(size_t _row) const;
+
+		// The MT-32 dialect's transfers: a part's settings, the system areas, everything as a restore, which starts
+		// with an all parameters reset. The boards need a moment after that reset, the CM-32P another after its
+		// first patch memory write, and the MT-32 1.x some room between messages, so they go out paced, from the
+		// timer, and a MIDI file lays them out the same way.
+		std::vector<emu88Lib::mt32::Message> laPartMessages(size_t _row) const;
+		std::vector<emu88Lib::mt32::Message> laSystemMessages() const;
+		// The room a board needs after a message, in microseconds
+		static uint32_t laPause(const emu88Lib::mt32::Message& _message, bool& _pcmPatchMemorySeen);
+		void laSend(std::vector<emu88Lib::mt32::Message> _messages, const std::string& _done);
+		bool laSending() const { return !m_laSendQueue.empty(); }
+		// Data requests for the LA board, which answers them; the CM-32P answers none
+		std::vector<std::pair<uint32_t, uint32_t>> laPartRanges(size_t _row) const;
+		std::vector<std::pair<uint32_t, uint32_t>> laAllRanges() const;
+		void laReceive(const std::vector<std::pair<uint32_t, uint32_t>>& _ranges);
+
+		// Audition: a note on the part a list item was picked for, held while the mouse button is. The rhythm
+		// part's is the key shown, a GS drum part's a snare.
+		void startAudition(uint8_t _port, uint8_t _channel, uint8_t _note);
+		void stopAudition();
+		void auditionPart(size_t _part);
+		// The parts by channel for the processor's activity, from the memory shown
+		void updateLaListeners();
 		// The controller, RPN or NRPN that sets a part parameter, on the part's channel: it reaches every part on
 		// that channel. False when the part receives no channel or the parameter has none.
 		bool channelMessages(size_t _part, size_t _param, uint16_t _value,
@@ -172,6 +280,46 @@ namespace emu88Player
 		std::string m_catalogError;
 		emu88Lib::gs::Setup m_setup;
 		uint64_t m_revision = 0;
+
+		// The MT-32 dialect's boards: their memory as the processor follows it, and as a reset leaves it, which a
+		// double-click goes back to. They have no switch for solo and mute. A page is one of m_laParts.
+		bool m_laDialect = false;
+		std::vector<LaPart> m_laParts;
+		emu88Lib::mt32::Memory m_laMemory;
+		emu88Lib::mt32::Memory m_laDefaults;
+		uint64_t m_laRevision = 0;
+		std::shared_ptr<const emu88Lib::mt32::NameCatalog> m_laNames;
+		std::vector<LaControl> m_laControls;
+		std::vector<LaControl> m_laPartControls;
+		// What a part's controls were built for: the part, and the rhythm key shown
+		std::string m_laControlsKey;
+		size_t m_laRhythmKey = 0;
+		// The list shows the patches, or the timbres or tones
+		bool m_laListPatches = true;
+		std::vector<LaListRow> m_laListRows;
+		std::vector<Rml::Element*> m_laListElements;
+		struct LaQueued
+		{
+			emu88Lib::mt32::Message message;
+			uint32_t pauseTicks;
+		};
+		std::deque<LaQueued> m_laSendQueue;
+		uint32_t m_laSendWait = 0;
+		size_t m_laSendTotal = 0;
+		std::string m_laSendDone;
+
+		// Whether picking from a list plays a note, from the config, and the note playing
+		bool m_audition = true;
+		struct AuditionNote
+		{
+			bool active = false;
+			uint8_t port = 0;
+			uint8_t channel = 0;
+			uint8_t note = 0;
+		};
+		AuditionNote m_auditionNote;
+		std::vector<std::string> m_laKeyNames;
+		juceRmlUi::ElemComboBox* m_laKeySelect = nullptr;
 
 		int m_page = g_mixerPage;
 		// The part to go back to from the mixer
@@ -236,6 +384,8 @@ namespace emu88Player
 			uint8_t port;
 			uint32_t address;
 			std::vector<uint8_t> data;
+			// A DT1 of the MT-32 dialect rather than of GS
+			bool mt32 = false;
 		};
 		std::vector<PendingValue> m_pending;
 

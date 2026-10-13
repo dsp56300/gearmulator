@@ -17,6 +17,12 @@ set(SOURCES
 	gs/partState.cpp gs/partState.h
 	gs/toneCatalog.cpp gs/toneCatalog.h
 	gs/toneCatalogSc55.cpp gs/toneCatalogSc88.cpp gs/toneCatalogSc8850.cpp
+	mt32/memory.cpp mt32/memory.h
+	mt32/mt32.cpp mt32/mt32.h
+	mt32/names.cpp mt32/names.h
+	mt32/params.cpp mt32/params.h
+	mt32/stateTracker.cpp mt32/stateTracker.h
+	partActivity.cpp partActivity.h
 	boards/cm32p.cpp boards/cm32p.h
 	boards/cm64.cpp boards/cm64.h
 	boards/laBoard.cpp boards/laBoard.h
@@ -157,6 +163,25 @@ if(BUILD_TESTING)
 	set_property(TARGET cm32p_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME cm32p COMMAND cm32p_test)
 	set_tests_properties(cm32p PROPERTIES TIMEOUT 20)
+
+	add_executable(mt32Memory_test tests/mt32Memory_test.cpp)
+	target_link_libraries(mt32Memory_test PRIVATE 88lib)
+	set_property(TARGET mt32Memory_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME mt32Memory COMMAND mt32Memory_test)
+	set_tests_properties(mt32Memory PROPERTIES TIMEOUT 20)
+
+	# Needs the MT-32, CM-32L and CM-32P ROMs: a folder as argument or in EMU88_MT32_TEST_ROM_DIR, else skipped
+	add_executable(mt32Firmware_test tests/mt32Firmware_test.cpp)
+	target_link_libraries(mt32Firmware_test PRIVATE 88lib)
+	set_property(TARGET mt32Firmware_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME mt32Firmware COMMAND mt32Firmware_test)
+	set_tests_properties(mt32Firmware PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
+
+	add_executable(mt32Names_test tests/mt32Names_test.cpp)
+	target_link_libraries(mt32Names_test PRIVATE 88lib)
+	set_property(TARGET mt32Names_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME mt32Names COMMAND mt32Names_test)
+	set_tests_properties(mt32Names PROPERTIES TIMEOUT 20)
 
 	add_executable(sc8850_submcu_test tests/sc8850_submcu_test.cpp)
 	target_link_libraries(sc8850_submcu_test PRIVATE 88lib)

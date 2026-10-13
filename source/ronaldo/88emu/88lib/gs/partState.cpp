@@ -266,7 +266,7 @@ namespace emu88Lib::gs
 		// Most of what a song sends are notes; those pass without taking the lock
 		if(_event.sysex.empty())
 		{
-			addActivity(_event.a, _event.port);
+			m_activity.process(_event.a, _event.port);
 			const uint8_t type = _event.a & 0xf0;
 			if(!(type == 0xb0 && isTrackedController(_event.b)) && type != 0xc0)
 				return;
@@ -891,7 +891,7 @@ namespace emu88Lib::gs
 
 	void PartStateTracker::changed()
 	{
-		if(m_activityEnabled.load(std::memory_order_relaxed))
+		if(m_activity.enabled())
 			updateListeners();
 		m_revision.fetch_add(1, std::memory_order_acq_rel);
 	}
@@ -901,34 +901,19 @@ namespace emu88Lib::gs
 		std::lock_guard lock(m_mutex);
 		if(_enabled)
 			updateListeners();
-		m_activityEnabled.store(_enabled, std::memory_order_relaxed);
-		m_activity.store(0, std::memory_order_relaxed);
+		m_activity.setEnabled(_enabled);
 	}
 
 	void PartStateTracker::updateListeners()
 	{
-		std::array<uint16_t, g_maxPorts * 16> listeners{};
-		for(size_t i = 0; i < m_setup.parts.size() && i < g_maxPorts * g_partsPerGroup; ++i)
+		// A part hears the channel it is set to on its own group's port
+		PartActivity::Listeners listeners{};
+		for(size_t i = 0; i < m_setup.parts.size() && i < PartActivity::g_maxPorts * g_partsPerGroup; ++i)
 		{
 			const auto channel = m_setup.parts[i].rxChannel;
 			if(channel < 16)
-				listeners[i / g_partsPerGroup * 16 + channel] |= static_cast<uint16_t>(1u << (i % g_partsPerGroup));
+				listeners[i / g_partsPerGroup * 16 + channel] |= uint64_t{1} << i;
 		}
-		for(size_t i = 0; i < listeners.size(); ++i)
-			m_listeners[i].store(listeners[i], std::memory_order_relaxed);
-	}
-
-	void PartStateTracker::addActivity(const uint8_t _status, const uint8_t _port)
-	{
-		if(!m_activityEnabled.load(std::memory_order_relaxed))
-			return;
-		if(_status < 0x80 || _status >= 0xf0 || _port >= g_maxPorts)
-			return;
-		const auto listeners = m_listeners[static_cast<size_t>(_port) * 16 + (_status & 0x0f)].load(
-			std::memory_order_relaxed);
-		const auto parts = static_cast<uint64_t>(listeners) << (_port * g_partsPerGroup);
-		// Seen already: most notes leave it at a load
-		if(parts && (m_activity.load(std::memory_order_relaxed) & parts) != parts)
-			m_activity.fetch_or(parts, std::memory_order_relaxed);
+		m_activity.setListeners(listeners);
 	}
 }

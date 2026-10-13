@@ -62,8 +62,15 @@ namespace emu88Lib::gs
 		if(_message.empty())
 			return;
 		const auto spacing = isResetMessage(_message) ? g_resetSpacing : isSysex(_message) ? g_sysexSpacing : g_shortSpacing;
+		add(std::move(_message), spacing);
+	}
+
+	void MidiClip::add(std::vector<uint8_t> _message, const uint32_t _spacing)
+	{
+		if(_message.empty())
+			return;
 		m_events.push_back({m_cursor, std::move(_message)});
-		m_cursor += spacing;
+		m_cursor += _spacing;
 	}
 
 	std::vector<uint8_t> MidiClip::toSmf(const std::string& _name) const

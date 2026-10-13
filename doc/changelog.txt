@@ -494,7 +494,26 @@ JE8086:
         menu sends the parts and effects to the board and receives them back
         from it, and saves the part, the system and effects, or the whole
         setup as a MIDI file, whose grip drags it onto a track of a host. Mute
-        is the board's own, the one its MUTE button sets.
+        is the board's own, the one its MUTE button sets. Picking an
+        instrument, a variation or a drum set plays a note on the part while
+        the mouse button is down; the menu turns that off.
+
+- [New] MT-32, CM-32L, CM-32LN, CM-32P, CM-64: The Part Editor. A mixer with
+        the volume and pan of every part and the timbre or tone it plays,
+        named from the board's own ROMs: the LA board's eight parts and its
+        rhythm part, the CM-32P's six parts, and on the CM-64 both, in two
+        groups. Beside it the system settings: master tune and volume, reverb
+        mode, time and level, and each part's MIDI channel and partial
+        reserve, for the CM-64's two boards each. A page per part with its
+        patch settings beside the list of the patches, or of the timbres or
+        tones, to pick what it plays from, with a filter; the rhythm part's
+        page has each key's timbre, level, pan and reverb. Picking from the
+        list plays a note on the part while the mouse button is down. The menu
+        sends a part or everything to the board, paced for it, receives them
+        back from the LA board, which answers data requests, and saves them as
+        a MIDI file. A part's tab and row light up while MIDI for it comes in.
+        The boards have no solo or mute; the rhythm part plays each key with
+        its own pan.
 
 - [Imp] CM-32L, CM-32LN, CM-32P, CM-64: A volume knob that matches the bezel.
 

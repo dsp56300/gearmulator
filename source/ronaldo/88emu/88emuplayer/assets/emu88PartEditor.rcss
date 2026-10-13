@@ -468,6 +468,10 @@ div {
 	flex: 1 1 auto;
 	gap: 10dp;
 	height: 100%;
+}
+
+/* A name that opens its part's page */
+.peMixName.editable {
 	cursor: pointer;
 }
 
@@ -484,7 +488,7 @@ div {
 	white-space: nowrap;
 }
 
-.peMixName:hover .peMixPart, .peMixName:hover .peMixTone {
+.peMixName.editable:hover .peMixPart, .peMixName.editable:hover .peMixTone {
 	color: #e8a35c;
 }
 
@@ -520,6 +524,13 @@ div {
 	width: 32dp;
 	color: #aeb8be;
 	text-align: right;
+}
+
+/* What a row shows instead of a control it does not have */
+.peMixNote {
+	flex: 1 1 auto;
+	color: #66737c;
+	font-size: 12dp;
 }
 
 .peMixPan .peMixValue {
@@ -847,4 +858,51 @@ scrollbarvertical sliderbar {
 	min-height: 12dp;
 	border-radius: 4dp;
 	background-color: #59656d;
+}
+
+/* The boards of the MT-32 dialect: without solo and mute, which they have no switch for */
+.laDialect .peMixHeadSoloMute {
+	display: none;
+}
+
+/* The CM-64's two boards in the side pane, each above its sections, the second well apart from the first */
+.peBoardTitle {
+	height: 30dp;
+	margin-top: 4dp;
+	color: #ffffff;
+	font-size: 14dp;
+	font-weight: 600;
+	line-height: 30dp;
+}
+
+.peBoardTitle.next {
+	margin-top: 22dp;
+	padding-top: 12dp;
+	border-top: 1dp #4a555c;
+}
+
+/* A group of the list: the timbre groups, the internal tones and the card's */
+.peListHeading {
+	display: block;
+	height: 24dp;
+	margin-top: 6dp;
+	padding: 0dp 6dp;
+	color: #aeb8be;
+	font-size: 12dp;
+	font-weight: 600;
+	line-height: 24dp;
+}
+
+/* The check of a setting in the actions panel */
+.peCheck {
+	width: 11dp;
+	height: 11dp;
+	margin: 6dp 0dp 0dp 5dp;
+	border: 1dp #8a969e;
+	border-radius: 2dp;
+}
+
+.peCheck.on {
+	border-color: #e8a35c;
+	background-color: #e8a35c;
 }

@@ -2,7 +2,7 @@
 #include "88emuplayer/ui/Emu88EditorBindings.h"
 #include "88emuplayer/ui/Emu88EditorLcd.h"
 #include "88emuplayer/ui/Emu88EditorPlaylist.h"
-#include "88lib/gs/partState.h"
+#include "88emuplayer/ui/Emu88PartEditor.h"
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemKnob.h"
 #include "juceRmlUi/rmlElemValue.h"
@@ -84,7 +84,7 @@ namespace emu88Player
 		// to the panel, so the document checks where it was.
 		juceRmlUi::EventListener::Add(document, Rml::EventId::Dblclick, [this](Rml::Event& _event)
 		{
-			if(!emu88Lib::gs::isPartEditorModel(m_processor.deviceModel()) || !m_rml)
+			if(!hasPartEditor(m_processor.deviceModel()) || !m_rml)
 				return;
 			auto* lcd = m_rml->getDocument()->GetElementById("hardwareLcd");
 			if(!lcd || !lcd->IsVisible() || !lcd->IsPointWithinElement(juceRmlUi::helper::getMousePos(_event)))
