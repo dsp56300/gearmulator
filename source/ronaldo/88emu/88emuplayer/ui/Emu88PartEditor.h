@@ -7,6 +7,8 @@
 
 #include "juceRmlUi/rmlInterfaces.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "synthLib/midiTypes.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -16,7 +18,7 @@
 #include <vector>
 
 namespace Rml { class Element; class ElementFormControlInput; class Event; }
-namespace juceRmlUi { class ElemComboBox; class Menu; class RmlComponent; }
+namespace juceRmlUi { class DragSource; class ElemComboBox; class Menu; class RmlComponent; }
 
 namespace emu88Player
 {
@@ -71,6 +73,7 @@ namespace emu88Player
 		void build();
 		void buildMixer();
 		void buildGroupAndPartTabs();
+		void labelPartTabs();
 		void buildControls();
 		// The rows of the insertion effect type's parameters, for the type the setup has
 		void buildEfxControls();
@@ -79,10 +82,24 @@ namespace emu88Player
 		void wireActions();
 
 		void selectPage(int _page);
-		void selectGroup(uint8_t _group);
+		// The SC-8850's switch of the tab strip between part groups A and B and groups C and D
+		void selectBank(uint8_t _bank);
 		void selectPart(size_t _part);
 		size_t selectedPart() const;
-		void openPartMenu(int _page, Rml::Event& _event);
+		void openPartMenu(size_t _part, Rml::Event& _event);
+
+		// What a MIDI file holds: the part shown, the system and effects, or everything after a GS Reset
+		enum class Export : uint8_t { Part, Globals, All };
+
+		// Send and receive, for the part shown and for all of them, and the MIDI files, to save or drag to a host
+		void openActionsPanel();
+		void closeActionsPanel();
+		bool isActionsPanelOpen() const;
+		void saveMidiFile(Export _export);
+		std::string exportName(Export _export) const;
+		std::vector<uint8_t> createMidiFile(Export _export) const;
+		// Written to the temporary folder for a drag; empty when it could not be
+		std::string writeExportFile(Export _export) const;
 		void setPartType(size_t _part, uint8_t _useForRhythm);
 		void toggleSolo(size_t _part);
 		void toggleMute(size_t _part);
@@ -126,6 +143,10 @@ namespace emu88Player
 		// else. False when the part receives no channel.
 		bool programChange(size_t _part, std::vector<synthLib::SMidiEvent>& _events) const;
 
+		// The messages that set parts, and the system and effects, to what the setup has: one group per setting, whose
+		// messages belong together, an RPN with its data entry
+		using MessageGroups = std::vector<std::vector<synthLib::SMidiEvent>>;
+		MessageGroups setupMessages(size_t _first, size_t _count, bool _withGlobals) const;
 		void sendParts(size_t _first, size_t _count, bool _withGlobals);
 		void receiveParts(size_t _first, size_t _count, bool _withGlobals);
 
@@ -141,9 +162,12 @@ namespace emu88Player
 		uint64_t m_revision = 0;
 
 		int m_page = g_mixerPage;
-		// The part page to go back to from the mixer
-		int m_lastPartPage = 0;
+		// The part to go back to from the mixer
+		size_t m_lastPart = 0;
+		// The part shown: its group, and m_page its place in the group
 		uint8_t m_group = 0;
+		// The two part groups the tabs show, by the first, 0 or 2: the SC-8850 has four
+		uint8_t m_bank = 0;
 		uint8_t m_groupCount = 1;
 		// What the list shows: names that contain it, any case
 		std::string m_filter;
@@ -164,6 +188,9 @@ namespace emu88Player
 		uint64_t m_soloed = 0;
 		uint64_t m_soloMuted = 0;
 		std::shared_ptr<juceRmlUi::Menu> m_menu;
+		// The grips of the MIDI files in the actions panel
+		std::vector<std::unique_ptr<juceRmlUi::DragSource>> m_exportSources;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_fileDialog;
 
 		// What the lists were built from, so that a refresh only rebuilds them when that changes
 		std::string m_listKey;

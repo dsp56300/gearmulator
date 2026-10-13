@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64">
+	<!-- Six dots to take hold of, white: the part editor tints it with image-color -->
+	<g fill="#ffffff">
+		<circle cx="5.5" cy="3" r="1.5"/>
+		<circle cx="10.5" cy="3" r="1.5"/>
+		<circle cx="5.5" cy="8" r="1.5"/>
+		<circle cx="10.5" cy="8" r="1.5"/>
+		<circle cx="5.5" cy="13" r="1.5"/>
+		<circle cx="10.5" cy="13" r="1.5"/>
+	</g>
+</svg>

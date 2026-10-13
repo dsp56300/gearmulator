@@ -5,13 +5,17 @@
 #include "88emuplayer/ui/Emu88EditorBindings.h"
 
 #include "88lib/gs/gs.h"
+#include "88lib/gs/midiClip.h"
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/juceRmlComponentConfig.h"
+#include "juceRmlUi/rmlDragData.h"
+#include "juceRmlUi/rmlDragSource.h"
 #include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlMenu.h"
+#include "juceRmlUi/rmlPressSwallower.h"
 
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/ScrollTypes.h"
@@ -23,6 +27,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iterator>
+#include <optional>
 #include <sstream>
 
 namespace emu88Player
@@ -148,6 +153,74 @@ namespace emu88Player
 			return entries;
 		}
 
+		// A MIDI file that a grip of the actions panel hands to the host it is dragged to, written when the drag leaves
+		// the window
+		struct ExportDragData final : juceRmlUi::DragData
+		{
+			std::function<std::string()> write;
+
+			bool canExportAsFiles() const override { return true; }
+
+			bool getFilesForExport(std::vector<std::string>& _files, bool& _filesAreTemporary) override
+			{
+				const auto file = write ? write() : std::string();
+				if(file.empty())
+					return false;
+				_files.push_back(file);
+				_filesAreTemporary = true;
+				return true;
+			}
+		};
+
+		class ExportDragSource final : public juceRmlUi::DragSource
+		{
+		public:
+			ExportDragSource(Rml::Element* _element, std::function<std::string()> _write)
+				: DragSource(_element), m_write(std::move(_write))
+			{
+			}
+
+			std::unique_ptr<juceRmlUi::DragData> createDragData() override
+			{
+				auto data = std::make_unique<ExportDragData>();
+				data->write = m_write;
+				return data;
+			}
+
+		private:
+			std::function<std::string()> m_write;
+		};
+
+		// A group of messages as a single track has it, which plays on one port, A: part group B by its 50 addresses,
+		// which reach it from there. What only port B's channels reach - a part's expression and bend range, the
+		// SC-8850's map program change - and the SC-8850's part groups C and D are out of its reach: none for those.
+		std::optional<std::vector<synthLib::SMidiEvent>> forPortA(std::vector<synthLib::SMidiEvent> _group)
+		{
+			for(auto& e : _group)
+			{
+				if(e.port == 0)
+					continue;
+				gs::Dt1 dt1;
+				if(e.port > 1 || !gs::parseDt1(e.sysex.data(), e.sysex.size(), dt1) || dt1.address >> 16 != 0x40)
+					return {};
+				const auto message = gs::dt1(0x500000 | (dt1.address & 0xffff), std::vector<uint8_t>(dt1.data, dt1.data + dt1.size));
+				e.sysex.assign(message.begin(), message.end());
+				e.port = 0;
+			}
+			return _group;
+		}
+
+		// An event as the bytes on the wire: a program change and a channel pressure take one data byte
+		std::vector<uint8_t> messageBytes(const synthLib::SMidiEvent& _event)
+		{
+			if(!_event.sysex.empty())
+				return {_event.sysex.begin(), _event.sysex.end()};
+			const auto type = _event.a & 0xf0;
+			if(type == 0xc0 || type == 0xd0)
+				return {_event.a, _event.b};
+			return {_event.a, _event.b, _event.c};
+		}
+
 		std::vector<std::pair<uint16_t, std::string>> efxChoices(const gs::EfxParam& _param)
 		{
 			std::vector<std::pair<uint16_t, std::string>> choices;
@@ -235,6 +308,8 @@ namespace emu88Player
 		m_groupCount = supported ? std::max<uint8_t>(1, emu88Lib::getDeviceProfile(m_model).groupCount) : 0;
 		m_group = std::min<uint8_t>(m_group, std::max<uint8_t>(1, m_groupCount) - 1);
 		m_setup = m_processor.partState().setup(m_revision);
+		if(m_lastPart >= m_setup.parts.size())
+			m_lastPart = 0;
 
 		m_catalog = m_processor.toneCatalog();
 		m_catalogError = m_processor.toneCatalogError();
@@ -259,26 +334,36 @@ namespace emu88Player
 	{
 		juceRmlUi::EventListener::AddClick(m_root->GetElementById("peTabMixer"), [this] { selectPage(g_mixerPage); });
 
-		juceRmlUi::EventListener::AddClick(m_root->GetElementById("peSendPart"), [this]
+		if(auto* menu = m_root->GetElementById("peActionsMenu"))
 		{
-			if(isActionEnabled(m_root->GetElementById("peSendPart")))
-				sendParts(selectedPart(), 1, false);
-		});
-		juceRmlUi::EventListener::AddClick(m_root->GetElementById("peReceivePart"), [this]
+			juceRmlUi::EventListener::AddClick(menu, [this, menu]
+			{
+				if(isActionsPanelOpen())
+					closeActionsPanel();
+				else if(isActionEnabled(menu))
+					openActionsPanel();
+			});
+		}
+		// A press anywhere else closes the panel, and is for the panel only, as with a menu: what is under the
+		// pointer does not get it. A context-menu press goes through, so that it can open its menu.
+		juceRmlUi::EventListener::Add(m_root->GetOwnerDocument(), Rml::EventId::Mousedown, [this](Rml::Event& _event)
 		{
-			if(isActionEnabled(m_root->GetElementById("peReceivePart")))
-				receiveParts(selectedPart(), 1, false);
-		});
-		juceRmlUi::EventListener::AddClick(m_root->GetElementById("peSendAll"), [this]
-		{
-			if(isActionEnabled(m_root->GetElementById("peSendAll")))
-				sendParts(0, m_setup.parts.size(), true);
-		});
-		juceRmlUi::EventListener::AddClick(m_root->GetElementById("peReceiveAll"), [this]
-		{
-			if(isActionEnabled(m_root->GetElementById("peReceiveAll")))
-				receiveParts(0, m_setup.parts.size(), true);
-		});
+			if(!isActionsPanelOpen())
+				return;
+			const auto* panel = m_root->GetElementById("peActionsPanel");
+			const auto* button = m_root->GetElementById("peActionsMenu");
+			for(const auto* e = _event.GetTargetElement(); e; e = e->GetParentNode())
+			{
+				if(e == panel || e == button)
+					return;
+			}
+			if(!juceRmlUi::helper::isContextMenu(_event))
+			{
+				_event.StopPropagation();
+				juceRmlUi::swallowRestOfPress(m_root->GetOwnerDocument());
+			}
+			closeActionsPanel();
+		}, true);
 
 		m_mapSelect = dynamic_cast<juceRmlUi::ElemComboBox*>(m_root->GetElementById("peMapSelect"));
 		if(m_mapSelect)
@@ -315,7 +400,10 @@ namespace emu88Player
 			if(juceRmlUi::helper::getKeyIdentifier(_event) == Rml::Input::KI_ESCAPE)
 			{
 				_event.StopPropagation();
-				m_owner.showPartEditor(false);
+				if(isActionsPanelOpen())
+					closeActionsPanel();
+				else
+					m_owner.showPartEditor(false);
 			}
 		});
 	}
@@ -330,41 +418,62 @@ namespace emu88Player
 		if(!groups || !parts)
 			return;
 
+		// Two part groups at a time, A1-A16 and B1-B16; the SC-8850 switches between those and its C and D
 		std::ostringstream rml;
-		if(m_groupCount > 1)
+		for(uint8_t b = 0; m_groupCount > 2 && b * 2 < m_groupCount; ++b)
 		{
-			for(uint8_t g = 0; g < m_groupCount; ++g)
-				rml << "<button id=\"peGroup" << int(g) << "\" class=\"peGroup\" title=\"Part group " << groupLetter(g)
-				    << "\">" << groupLetter(g) << "</button>";
+			const auto first = groupLetter(static_cast<uint8_t>(b * 2));
+			const auto second = groupLetter(static_cast<uint8_t>(b * 2 + 1));
+			rml << "<button id=\"peBank" << int(b) << "\" class=\"peGroup\" title=\"Part groups " << first << " and "
+			    << second << "\">" << first << "/" << second << "</button>";
 		}
 		groups->SetInnerRML(rml.str());
+		juceRmlUi::helper::setVisible(groups, m_groupCount > 2);
 
+		// The tabs stay, the switch relabels them: a tab is a place in the strip, its part depends on m_bank
+		const auto shown = static_cast<size_t>(std::min<uint8_t>(2, m_groupCount)) * gs::g_partsPerGroup;
 		rml.str({});
-		if(m_groupCount)
+		for(size_t t = 0; t < shown; ++t)
 		{
-			for(int p = 0; p < gs::g_partsPerGroup; ++p)
-				rml << "<button id=\"pePartTab" << p << "\" class=\"pePartTab\">" << (p + 1) << "</button>";
+			rml << "<button id=\"pePartTab" << t << "\" class=\"pePartTab"
+			    << (t == gs::g_partsPerGroup ? " groupStart" : "") << "\"/>";
 		}
 		parts->SetInnerRML(rml.str());
+		parts->SetClass("twoGroups", shown > gs::g_partsPerGroup);
 
-		for(uint8_t g = 0; g < m_groupCount && m_groupCount > 1; ++g)
+		for(uint8_t b = 0; m_groupCount > 2 && b * 2 < m_groupCount; ++b)
 		{
-			auto* tab = groups->GetElementById("peGroup" + std::to_string(g));
+			auto* tab = groups->GetElementById("peBank" + std::to_string(b));
 			m_groupTabs.push_back(tab);
-			juceRmlUi::EventListener::AddClick(tab, [this, g] { selectGroup(g); });
+			juceRmlUi::EventListener::AddClick(tab, [this, b] { selectBank(static_cast<uint8_t>(b * 2)); });
 		}
-		for(int p = 0; p < gs::g_partsPerGroup && m_groupCount; ++p)
+		for(size_t t = 0; t < shown; ++t)
 		{
-			auto* tab = parts->GetElementById("pePartTab" + std::to_string(p));
+			auto* tab = parts->GetElementById("pePartTab" + std::to_string(t));
 			m_partTabs.push_back(tab);
-			juceRmlUi::EventListener::AddClick(tab, [this, p] { selectPage(p); });
-			juceRmlUi::EventListener::Add(tab, Rml::EventId::Mousedown, [this, p](Rml::Event& _event)
+			juceRmlUi::EventListener::AddClick(tab, [this, t] { selectPart(m_bank * size_t{gs::g_partsPerGroup} + t); });
+			juceRmlUi::EventListener::Add(tab, Rml::EventId::Mousedown, [this, t](Rml::Event& _event)
 			{
 				if(!juceRmlUi::helper::isContextMenu(_event))
 					return;
 				_event.StopPropagation();
-				openPartMenu(p, _event);
+				openPartMenu(m_bank * size_t{gs::g_partsPerGroup} + t, _event);
 			});
+		}
+
+		m_bank = m_groupCount > 2 ? static_cast<uint8_t>(m_group / 2 * 2) : 0;
+		labelPartTabs();
+	}
+
+	void PartEditorWindow::labelPartTabs()
+	{
+		for(size_t t = 0; t < m_partTabs.size(); ++t)
+		{
+			if(!m_partTabs[t])
+				continue;
+			const auto group = static_cast<uint8_t>(m_bank + t / gs::g_partsPerGroup);
+			const auto number = std::to_string(t % gs::g_partsPerGroup + 1);
+			m_partTabs[t]->SetInnerRML(m_groupCount > 1 ? groupLetter(group) + number : number);
 		}
 	}
 
@@ -763,9 +872,9 @@ namespace emu88Player
 			flushPending();
 	}
 
-	void PartEditorWindow::openPartMenu(const int _page, Rml::Event& _event)
+	void PartEditorWindow::openPartMenu(const size_t _part, Rml::Event& _event)
 	{
-		const auto index = static_cast<size_t>(m_group) * gs::g_partsPerGroup + static_cast<size_t>(_page);
+		const auto index = _part;
 		if(index >= m_setup.parts.size())
 			return;
 		const auto current = m_setup.parts[index].useForRhythm;
@@ -781,6 +890,239 @@ namespace emu88Player
 			target->GetBox().GetSize(Rml::BoxArea::Border));
 	}
 
+	void PartEditorWindow::openActionsPanel()
+	{
+		auto* panel = m_root->GetElementById("peActionsPanel");
+		if(!panel)
+			return;
+
+		const bool supported = m_groupCount > 0;
+		const bool idle = supported && !m_receiving;
+		const bool answers = gs::answersDataRequests(m_model);
+		const bool onPart = m_page != g_mixerPage;
+
+		// The part a page shows, by name: on the mixer there is none
+		std::string name = "Part";
+		if(onPart)
+		{
+			const auto part = static_cast<int>(selectedPart() % gs::g_partsPerGroup) + 1;
+			name += m_groupCount > 1 ? " " + groupLetter(m_group) + number(part, 2) : " " + std::to_string(part);
+		}
+
+		// A MIDI file is one track, which reaches part groups A and B only
+		const bool reachable = selectedPart() / gs::g_partsPerGroup < 2;
+		const std::string single = "A MIDI file is one track, for port A: it reaches part groups A and B only.";
+
+		struct Row
+		{
+			const char* id;
+			std::string text;
+			bool enabled;
+			std::function<void()> action;
+			bool exported = false;
+			Export file = Export::Part;
+			std::string title = {};
+		};
+		const Row rows[] = {
+			{"peActSendPart", "Send " + name, idle && onPart, [this] { sendParts(selectedPart(), 1, false); }},
+			{"peActReceivePart", "Receive " + name, idle && onPart && answers,
+				[this] { receiveParts(selectedPart(), 1, false); }},
+			{nullptr, {}, false, {}},
+			{"peActSendAll", "Send All", idle, [this] { sendParts(0, m_setup.parts.size(), true); }},
+			{"peActReceiveAll", "Receive All", idle && answers, [this] { receiveParts(0, m_setup.parts.size(), true); }},
+			{nullptr, {}, false, {}},
+			{"peActSavePart", "Save " + name + " as MIDI...", supported && onPart && reachable,
+				[this] { saveMidiFile(Export::Part); }, true, Export::Part, onPart && !reachable ? single : std::string()},
+			{"peActSaveGlobals", "Save System and Effects as MIDI...", supported,
+				[this] { saveMidiFile(Export::Globals); }, true, Export::Globals},
+			{"peActSaveAll", "Save All as MIDI...", supported, [this] { saveMidiFile(Export::All); }, true, Export::All,
+				m_groupCount > 2 ? single : std::string()},
+		};
+
+		// The grips go with the rows they belong to
+		m_exportSources.clear();
+		std::ostringstream rml;
+		for(const auto& row : rows)
+		{
+			if(!row.id)
+			{
+				rml << "<div class=\"peActionsSeparator\"/>";
+				continue;
+			}
+			rml << "<div id=\"" << row.id << "\" class=\"peActionsRow" << (row.enabled ? "" : " disabled") << "\"";
+			if(!row.title.empty())
+				rml << " title=\"" << encode(row.title) << "\"";
+			rml << ">";
+			if(row.exported)
+			{
+				rml << "<div id=\"" << row.id << "Grip\" class=\"peGrip\" title=\"Drag to a MIDI track of your host\">"
+				    << "<svg class=\"peGripIcon\" src=\"part_editor_grip.svg\"/></div>";
+			}
+			else
+			{
+				rml << "<div class=\"peGripSpace\"/>";
+			}
+			rml << "<div class=\"peActionsLabel\">" << encode(row.text) << "</div></div>";
+		}
+		panel->SetInnerRML(rml.str());
+
+		for(const auto& row : rows)
+		{
+			if(!row.id || !row.enabled)
+				continue;
+			auto* element = panel->GetElementById(row.id);
+			auto* label = element ? element->GetLastChild() : nullptr;
+			// A save row is clicked on its label, its grip is dragged
+			addClick(row.exported ? label : element, [this, action = row.action]
+			{
+				closeActionsPanel();
+				action();
+			});
+			if(auto* grip = row.exported ? panel->GetElementById(std::string(row.id) + "Grip") : nullptr)
+			{
+				m_exportSources.push_back(std::make_unique<ExportDragSource>(grip, [this, file = row.file]
+				{
+					return writeExportFile(file);
+				}));
+			}
+		}
+		juceRmlUi::helper::setVisible(panel, true);
+		if(auto* button = m_root->GetElementById("peActionsMenu"))
+			button->SetPseudoClass("checked", true);
+	}
+
+	void PartEditorWindow::closeActionsPanel()
+	{
+		juceRmlUi::helper::setVisible(m_root->GetElementById("peActionsPanel"), false);
+		if(auto* button = m_root->GetElementById("peActionsMenu"))
+			button->SetPseudoClass("checked", false);
+	}
+
+	bool PartEditorWindow::isActionsPanelOpen() const
+	{
+		const auto* panel = m_root ? m_root->GetElementById("peActionsPanel") : nullptr;
+		return panel && panel->IsVisible();
+	}
+
+	std::string PartEditorWindow::exportName(const Export _export) const
+	{
+		const std::string device = emu88Lib::getDeviceProfile(m_model).displayName;
+		switch(_export)
+		{
+		case Export::Part:
+			{
+				const auto part = static_cast<int>(selectedPart() % gs::g_partsPerGroup) + 1;
+				return device + " Part " + (m_groupCount > 1 ? groupLetter(m_group) + number(part, 2) : std::to_string(part));
+			}
+		case Export::Globals:
+			return device + " System and Effects";
+		default:
+			return device + " Setup";
+		}
+	}
+
+	std::vector<uint8_t> PartEditorWindow::createMidiFile(const Export _export) const
+	{
+		gs::MidiClip clip;
+		const auto add = [&](const std::vector<synthLib::SMidiEvent>& _group)
+		{
+			for(const auto& e : _group)
+				clip.add(messageBytes(e));
+		};
+
+		switch(_export)
+		{
+		case Export::Part:
+			for(auto& group : setupMessages(selectedPart(), 1, false))
+			{
+				if(const auto single = forPortA(std::move(group)))
+					add(*single);
+			}
+			break;
+		case Export::Globals:
+			for(const auto& group : setupMessages(0, 0, true))
+				add(group);
+			break;
+		case Export::All:
+			{
+				// A GS Reset, then what differs from it: a copy of the part state follows the file as the board would,
+				// and a setting that changes nothing there stays out
+				synthLib::SMidiEvent reset(synthLib::MidiEventSource::Host);
+				const auto message = gs::dt1(gs::g_gsReset, 0x00);
+				reset.sysex.assign(message.begin(), message.end());
+				gs::PartStateTracker board;
+				board.setModel(m_model, m_catalog);
+				board.process(reset);
+				add({reset});
+				for(auto& group : setupMessages(0, m_setup.parts.size(), true))
+				{
+					const auto single = forPortA(std::move(group));
+					if(!single)
+						continue;
+					const auto revision = board.revision();
+					for(const auto& e : *single)
+						board.process(e);
+					if(board.revision() != revision)
+						add(*single);
+				}
+				break;
+			}
+		}
+		return clip.toSmf(exportName(_export));
+	}
+
+	std::string PartEditorWindow::writeExportFile(const Export _export) const
+	{
+		const auto folder = juce::File::getSpecialLocation(juce::File::tempDirectory).getChildFile("88emuPlayer MIDI");
+		if(!folder.createDirectory())
+			return {};
+		const auto file = folder.getChildFile(juce::File::createLegalFileName(exportName(_export)) + ".mid");
+		const auto data = createMidiFile(_export);
+		if(!file.replaceWithData(data.data(), data.size()))
+			return {};
+		return file.getFullPathName().toStdString();
+	}
+
+	void PartEditorWindow::saveMidiFile(const Export _export)
+	{
+		const auto name = exportName(_export);
+		const auto lastFolder = m_processor.config().getValue("partEditorMidiFolder");
+		auto folder = lastFolder.isNotEmpty() ? juce::File(lastFolder)
+		                                      : juce::File::getSpecialLocation(juce::File::userMusicDirectory);
+		if(!folder.isDirectory())
+			folder = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
+
+		genericUI::MessageBox::FileDialogDesc desc;
+		desc.title = "Save " + name + " as MIDI";
+		desc.initialPath = folder.getChildFile(juce::File::createLegalFileName(name) + ".mid").getFullPathName().toStdString();
+		desc.patterns = "*.mid";
+		desc.flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles |
+		             juce::FileBrowserComponent::warnAboutOverwriting;
+
+		// What the window shows now. The dialog goes with the window, and its callback with it.
+		m_fileDialog = genericUI::MessageBox::showFileDialog(desc,
+			[this, name, data = createMidiFile(_export)](const std::vector<std::string>& _files)
+		{
+			auto file = _files.empty() ? juce::File() : juce::File(_files.front());
+			if(file != juce::File())
+			{
+				if(!file.hasFileExtension("mid") && !file.hasFileExtension("midi"))
+					file = file.withFileExtension("mid");
+				const bool written = file.replaceWithData(data.data(), data.size());
+				if(written)
+				{
+					m_processor.config().setValue("partEditorMidiFolder", file.getParentDirectory().getFullPathName());
+					m_processor.config().saveIfNeeded();
+				}
+				juceRmlUi::RmlInterfaces::ScopedAccess access(*m_rml);
+				showStatus(written ? "Saved " + name + " to " + file.getFileName().toStdString() + "."
+				                   : "Could not write " + file.getFullPathName().toStdString() + ".", !written);
+				m_rml->enqueueUpdate();
+			}
+			m_fileDialog.reset();
+		});
+	}
+
 	void PartEditorWindow::setPartType(const size_t _part, const uint8_t _useForRhythm)
 	{
 		// Runs from the menu's own window: the board gets it now, the timer shows what comes back
@@ -791,19 +1133,17 @@ namespace emu88Player
 		flushPending();
 	}
 
-	void PartEditorWindow::selectGroup(const uint8_t _group)
+	void PartEditorWindow::selectBank(const uint8_t _bank)
 	{
-		if(_group >= m_groupCount)
+		if(_bank >= m_groupCount)
 			return;
-		m_group = _group;
-		m_listKey.clear();
-		// The groups are part pages too: from the mixer one goes back to the part it last showed
-		if(m_page == g_mixerPage)
-		{
-			selectPage(m_lastPartPage);
-			return;
-		}
-		refresh();
+		// The switch picks parts too: the one in the same place of the other groups, or from the mixer the part it
+		// last showed there
+		const auto lastGroup = static_cast<uint8_t>(m_lastPart / gs::g_partsPerGroup);
+		const auto group = m_page == g_mixerPage && lastGroup / 2 * 2 == _bank
+			? lastGroup : static_cast<uint8_t>(_bank + m_group % 2);
+		const auto place = m_page == g_mixerPage ? m_lastPart % gs::g_partsPerGroup : static_cast<size_t>(m_page);
+		selectPart(static_cast<size_t>(group) * gs::g_partsPerGroup + place);
 	}
 
 	void PartEditorWindow::selectPart(const size_t _part)
@@ -811,6 +1151,12 @@ namespace emu88Player
 		if(_part >= m_setup.parts.size())
 			return;
 		m_group = static_cast<uint8_t>(_part / gs::g_partsPerGroup);
+		// The tabs show the part's two groups
+		if(m_groupCount > 2 && m_group / 2 * 2 != m_bank)
+		{
+			m_bank = static_cast<uint8_t>(m_group / 2 * 2);
+			labelPartTabs();
+		}
 		selectPage(static_cast<int>(_part % gs::g_partsPerGroup));
 	}
 
@@ -818,7 +1164,7 @@ namespace emu88Player
 	{
 		m_page = m_groupCount ? std::clamp(_page, g_mixerPage, gs::g_partsPerGroup - 1) : g_mixerPage;
 		if(m_page != g_mixerPage)
-			m_lastPartPage = m_page;
+			m_lastPart = selectedPart();
 		m_listKey.clear();
 
 		const bool mixer = m_page == g_mixerPage;
@@ -846,19 +1192,19 @@ namespace emu88Player
 	{
 		if(auto* mixer = m_root->GetElementById("peTabMixer"))
 			mixer->SetPseudoClass("checked", m_page == g_mixerPage);
-		// One selection across the mixer, the groups and the parts, as radio buttons
-		for(size_t g = 0; g < m_groupTabs.size(); ++g)
+		// One selection across the mixer, the group switch and the parts, as radio buttons
+		for(size_t b = 0; b < m_groupTabs.size(); ++b)
 		{
-			if(m_groupTabs[g])
-				m_groupTabs[g]->SetPseudoClass("checked", m_page != g_mixerPage && g == m_group);
+			if(m_groupTabs[b])
+				m_groupTabs[b]->SetPseudoClass("checked", m_page != g_mixerPage && b == m_group / 2u);
 		}
 		for(size_t p = 0; p < m_partTabs.size(); ++p)
 		{
 			auto* tab = m_partTabs[p];
 			if(!tab)
 				continue;
-			tab->SetPseudoClass("checked", static_cast<int>(p) == m_page);
-			const auto index = static_cast<size_t>(m_group) * gs::g_partsPerGroup + p;
+			const auto index = static_cast<size_t>(m_bank) * gs::g_partsPerGroup + p;
+			tab->SetPseudoClass("checked", m_page != g_mixerPage && index == selectedPart());
 			const bool drum = index < m_setup.parts.size() && m_setup.parts[index].isDrumPart();
 			tab->SetClass("drum", drum);
 			const auto title = toneName(index);
@@ -1137,26 +1483,15 @@ namespace emu88Player
 
 	void PartEditorWindow::refreshActions()
 	{
+		// What the menu offers is worked out when it opens
 		const bool supported = m_groupCount > 0;
-		const bool idle = supported && !m_receiving;
-		const bool answers = gs::answersDataRequests(m_model);
-		setActionEnabled(m_root->GetElementById("peSendPart"), idle && m_page != g_mixerPage);
-		setActionEnabled(m_root->GetElementById("peReceivePart"), idle && answers && m_page != g_mixerPage);
-		setActionEnabled(m_root->GetElementById("peSendAll"), idle);
-		setActionEnabled(m_root->GetElementById("peReceiveAll"), idle && answers);
-
-		const std::pair<const char*, const char*> receives[] = {
-			{"peReceivePart", "Read this part's settings from the device"},
-			{"peReceiveAll", "Read every part's settings and the effects from the device"},
-		};
-		for(const auto& [id, tip] : receives)
-		{
-			auto* button = m_root->GetElementById(id);
-			const std::string title = !supported
-				|| answers ? tip : "The device has no MIDI output to answer data requests with";
-			if(button && button->GetAttribute<Rml::String>("title", "") != title)
-				button->SetAttribute("title", title);
-		}
+		auto* menu = m_root->GetElementById("peActionsMenu");
+		setActionEnabled(menu, supported);
+		const std::string title = !supported || gs::answersDataRequests(m_model)
+			? "Send the settings to the device, or receive them from it"
+			: "Send the settings to the device. It has no MIDI output to answer data requests with.";
+		if(menu && menu->GetAttribute<Rml::String>("title", "") != title)
+			menu->SetAttribute("title", title);
 	}
 
 	void PartEditorWindow::showStatus(const std::string& _text, const bool _error)
@@ -1380,16 +1715,21 @@ namespace emu88Player
 		return true;
 	}
 
-	void PartEditorWindow::sendParts(const size_t _first, const size_t _count, const bool _withGlobals)
+	PartEditorWindow::MessageGroups PartEditorWindow::setupMessages(const size_t _first, const size_t _count,
+		const bool _withGlobals) const
 	{
-		flushPending();
 		const bool maps = gs::hasToneMaps(m_model);
-		std::vector<synthLib::SMidiEvent> events;
+		MessageGroups groups;
 		const auto add = [&](const uint8_t _port, const gs::Message& _message)
 		{
-			auto& event = events.emplace_back(synthLib::MidiEventSource::Host);
+			auto& event = groups.emplace_back().emplace_back(synthLib::MidiEventSource::Host);
 			event.sysex.assign(_message.begin(), _message.end());
 			event.port = _port;
+		};
+		const auto addChannel = [&](std::vector<synthLib::SMidiEvent>&& _events)
+		{
+			if(!_events.empty())
+				groups.push_back(std::move(_events));
 		};
 
 		// The system and effects on the first port, in the table's order: a macro before what it sets
@@ -1433,9 +1773,13 @@ namespace emu88Player
 				if(param.field != gs::PartField::None || !gs::isAvailable(param, m_model))
 					continue;
 				if(gs::hasAddress(param, m_model))
+				{
 					add(port, gs::dt1(gs::partParamAddress(part, param), partData(param, p, p.value(v))));
-				else
-					channelMessages(i, v, p.value(v), events);
+					continue;
+				}
+				std::vector<synthLib::SMidiEvent> events;
+				channelMessages(i, v, p.value(v), events);
+				addChannel(std::move(events));
 			}
 
 			// The SC-8850 applies the map with a program change only, which reaches every part on the channel; the
@@ -1446,10 +1790,21 @@ namespace emu88Player
 				const auto sharers = std::count_if(m_setup.parts.begin() + static_cast<ptrdiff_t>(first),
 					m_setup.parts.begin() + static_cast<ptrdiff_t>(first + gs::g_partsPerGroup),
 					[&](const gs::Part& _other) { return _other.rxChannel == p.rxChannel; });
+				std::vector<synthLib::SMidiEvent> events;
 				if(sharers == 1)
 					programChange(i, events);
+				addChannel(std::move(events));
 			}
 		}
+		return groups;
+	}
+
+	void PartEditorWindow::sendParts(const size_t _first, const size_t _count, const bool _withGlobals)
+	{
+		flushPending();
+		std::vector<synthLib::SMidiEvent> events;
+		for(auto& group : setupMessages(_first, _count, _withGlobals))
+			events.insert(events.end(), group.begin(), group.end());
 		m_processor.sendMidiEvents(events);
 		showStatus(_count == 1 ? "Sent the part to the device." : "Sent every part and the effects to the device.");
 	}

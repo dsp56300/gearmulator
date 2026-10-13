@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64">
+	<!-- Three bars, white: the part editor tints it with image-color -->
+	<g fill="#ffffff">
+		<rect x="1.5" y="2.5" width="13" height="1.8" rx="0.9"/>
+		<rect x="1.5" y="7.1" width="13" height="1.8" rx="0.9"/>
+		<rect x="1.5" y="11.7" width="13" height="1.8" rx="0.9"/>
+	</g>
+</svg>

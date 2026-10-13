@@ -12,6 +12,7 @@ set(SOURCES
 	deviceModel.cpp deviceModel.h
 	gs/efx.cpp gs/efx.h gs/efxData.inc
 	gs/gs.cpp gs/gs.h
+	gs/midiClip.cpp gs/midiClip.h
 	gs/params.cpp gs/params.h
 	gs/partState.cpp gs/partState.h
 	gs/toneCatalog.cpp gs/toneCatalog.h

@@ -20,12 +20,13 @@ div {
 
 .peRoot {
 	display: block;
+	position: relative;
 	width: 100%;
 	height: 100%;
 }
 
-/* Mixer, the group switch, the part tabs, then the transfers on the right. The tabs stand on the bar's bottom
-   edge, over its border, and the selected one opens into the page below. */
+/* Mixer, the SC-8850's group switch, the part tabs, then the menu of the transfers on the right. The tabs stand on the bar's
+   bottom edge, over its border, and the selected one opens into the page below. */
 .peTopBar {
 	display: flex;
 	flex-direction: row;
@@ -66,7 +67,7 @@ div {
 }
 
 .peTabMixer {
-	width: 96dp;
+	width: 88dp;
 }
 
 /* White in the file, tinted here to follow the tab's text */
@@ -82,16 +83,16 @@ div {
 	image-color: #ffffff;
 }
 
-/* Between the mixer and the part groups. It, the groups and the transfers line up with the tab labels. */
+/* Between the mixer and the parts. It, the group switch and the menu button line up with the tab labels. */
 .peSeparator {
 	align-self: flex-end;
 	width: 1dp;
 	height: 24dp;
-	margin: 0dp 12dp 4dp 12dp;
+	margin: 0dp 10dp 4dp 10dp;
 	background-color: #4a555c;
 }
 
-/* The groups as one segmented control: flush, sharing single dividers - each segment draws its left edge and the
+/* The SC-8850's pairs of part groups as one segmented control: flush, sharing single dividers - each segment draws its left edge and the
    last one also closes the right - and rounded on the outside only. */
 .peGroups {
 	display: flex;
@@ -103,7 +104,7 @@ div {
 .peGroup {
 	display: block;
 	box-sizing: border-box;
-	width: 28dp;
+	width: 38dp;
 	height: 28dp;
 	border: 1dp #414b52;
 	border-width: 1dp 0dp 1dp 1dp;
@@ -136,7 +137,7 @@ div {
 	color: #ffffff;
 }
 
-/* Sixteen tabs share what the group switch and the buttons leave. */
+/* Sixteen tabs, or the 32 of two part groups, share what the group switch and the buttons leave. */
 .pePartTabs {
 	display: flex;
 	flex-direction: row;
@@ -149,42 +150,156 @@ div {
 	min-width: 24dp;
 }
 
+.pePartTabs.twoGroups {
+	gap: 1dp;
+}
+
+.pePartTabs.twoGroups .pePartTab {
+	min-width: 0dp;
+	font-size: 12dp;
+}
+
+/* The second group stands apart from the first */
+.pePartTab.groupStart {
+	margin-left: 6dp;
+}
+
 /* A drum part's tab says so. */
 .pePartTab.drum {
 	color: #e8a35c;
 }
 
-.peActions {
-	display: flex;
-	flex-direction: row;
-	align-self: flex-end;
-	gap: 4dp;
-	margin: 0dp 0dp 2dp 12dp;
-}
-
-.peAction {
+.peActionsMenu {
 	display: block;
+	align-self: flex-end;
 	box-sizing: border-box;
+	width: 34dp;
 	height: 28dp;
-	padding: 0dp 10dp;
+	margin: 0dp 0dp 2dp 12dp;
 	border: 1dp #515c64;
 	border-radius: 4dp;
 	background-color: #333c42;
-	color: #e4e8ea;
-	font-size: 13dp;
-	line-height: 26dp;
-	white-space: nowrap;
+	text-align: center;
 	cursor: pointer;
 }
 
-.peAction:hover {
+.peActionsMenu:hover {
 	background-color: #3d484f;
 	border-color: #68747d;
 }
 
-.peAction:disabled {
+.peActionsMenu:checked {
+	background-color: #52616a;
+	border-color: #68747d;
+}
+
+.peActionsMenu:disabled {
 	opacity: 0.4;
 	cursor: auto;
+}
+
+/* The panel the menu button opens, below its right end */
+.peActionsPanel {
+	position: absolute;
+	top: 43dp;
+	right: 12dp;
+	z-index: 20;
+	box-sizing: border-box;
+	width: 300dp;
+	padding: 4dp 0dp;
+	border: 1dp #59656d;
+	border-radius: 5dp;
+	background-color: #2b3237;
+}
+
+.peActionsRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 6dp;
+	height: 30dp;
+	padding: 0dp 12dp 0dp 6dp;
+	color: #e4e8ea;
+	font-size: 13dp;
+	cursor: pointer;
+}
+
+.peActionsRow:hover {
+	background-color: #3d484f;
+}
+
+.peActionsRow.disabled {
+	color: #6b767d;
+	cursor: auto;
+}
+
+.peActionsRow.disabled:hover {
+	background-color: #2b3237;
+}
+
+.peActionsLabel {
+	flex: 1 1 auto;
+	height: 30dp;
+	line-height: 30dp;
+	white-space: nowrap;
+}
+
+/* A MIDI file's grip: dragged out of the window, it drops the file on a host's track */
+.peGrip, .peGripSpace {
+	flex: 0 0 22dp;
+	width: 22dp;
+	height: 22dp;
+}
+
+.peGrip {
+	border-radius: 3dp;
+	text-align: center;
+	cursor: move;
+	drag: clone;
+}
+
+.peGrip:hover {
+	background-color: #52616a;
+}
+
+.peActionsRow.disabled .peGrip {
+	drag: none;
+	cursor: auto;
+	opacity: 0.4;
+}
+
+.peActionsRow.disabled .peGrip:hover {
+	background-color: #2b3237;
+}
+
+/* White in the file, tinted here */
+.peGripIcon {
+	width: 14dp;
+	height: 14dp;
+	margin-top: 4dp;
+	image-color: #aab3b9;
+}
+
+.peGrip:hover .peGripIcon {
+	image-color: #ffffff;
+}
+
+.peActionsSeparator {
+	height: 1dp;
+	margin: 4dp 8dp;
+	background-color: #414b52;
+}
+
+/* White in the file, tinted here */
+.peActionsIcon {
+	width: 16dp;
+	height: 16dp;
+	margin-top: 5dp;
+	image-color: #dce2e6;
+}
+
+.peActionsMenu:hover .peActionsIcon {
+	image-color: #ffffff;
 }
 
 /* Two panes side by side: two thirds on the left, the third on the right */

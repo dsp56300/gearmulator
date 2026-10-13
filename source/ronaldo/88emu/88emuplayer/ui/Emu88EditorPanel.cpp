@@ -2,6 +2,7 @@
 #include "88emuplayer/ui/Emu88EditorBindings.h"
 #include "88emuplayer/ui/Emu88EditorLcd.h"
 #include "88emuplayer/ui/Emu88EditorPlaylist.h"
+#include "88lib/gs/partState.h"
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemKnob.h"
 #include "juceRmlUi/rmlElemValue.h"
@@ -77,6 +78,24 @@ namespace emu88Player
 				return;
 			_event.StopPropagation();
 			openContextMenu(_event);
+		});
+
+		// A double-click on a Sound Canvas's display opens the part editor. The display lets the pointer through
+		// to the panel, so the document checks where it was.
+		juceRmlUi::EventListener::Add(document, Rml::EventId::Dblclick, [this](Rml::Event& _event)
+		{
+			if(!emu88Lib::gs::isPartEditorModel(m_processor.deviceModel()) || !m_rml)
+				return;
+			auto* lcd = m_rml->getDocument()->GetElementById("hardwareLcd");
+			if(!lcd || !lcd->IsVisible() || !lcd->IsPointWithinElement(juceRmlUi::helper::getMousePos(_event)))
+				return;
+			_event.StopPropagation();
+			const juce::WeakReference<Editor> safeThis(this);
+			juce::MessageManager::callAsync([safeThis]
+			{
+				if(auto* editor = safeThis.get())
+					editor->showPartEditor(true);
+			});
 		});
 
 		const auto wireButton = [this, document](const ButtonBinding& _binding)
