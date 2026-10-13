@@ -10,7 +10,9 @@ set(SOURCES
 	analog/cmVca.h
 	c_interface.cpp c_interface.h
 	deviceModel.cpp deviceModel.h
+	gs/efx.cpp gs/efx.h gs/efxData.inc
 	gs/gs.cpp gs/gs.h
+	gs/params.cpp gs/params.h
 	gs/partState.cpp gs/partState.h
 	gs/toneCatalog.cpp gs/toneCatalog.h
 	gs/toneCatalogSc55.cpp gs/toneCatalogSc88.cpp gs/toneCatalogSc8850.cpp

@@ -1,5 +1,7 @@
 // The GS message helpers and the part state the part editor shows. No ROMs.
+#include "88lib/gs/efx.h"
 #include "88lib/gs/gs.h"
+#include "88lib/gs/params.h"
 #include "88lib/gs/partState.h"
 #include "88lib/gs/toneCatalog.h"
 #include "cpu/common/test_util.hpp"
@@ -150,7 +152,7 @@ namespace
 		tracker.process(channel(0, 0xc2, 4));
 		CHECK_EQ(tracker.setup().effectiveToneMap(2), 1);
 		tracker.process(sysex(0, dt1(g_masterVolume, 90)));
-		CHECK_EQ(tracker.setup().masterVolume, 90);
+		CHECK_EQ(tracker.setup().global("MasterVolume"), 90);
 
 		// A reply to a request on port B is about group B
 		tracker.processReply(sysex(0, dt1(partAddress(0, PartParam::Pan), 1)), 1);
@@ -167,15 +169,18 @@ namespace
 		CHECK_EQ(s.parts[5].useForRhythm, 2);
 		CHECK_EQ(s.parts[5].program, 0);
 		CHECK_EQ(s.parts[5].bankMsb, 0);
-		tracker.process(sysex(0, dt1(partAddress(5, PartParam::UseForRhythm), 3)));
+		// The SC-8850 ignores a kind above 3, and takes 3 as drum map 1
+		tracker.process(sysex(0, dt1(partAddress(5, PartParam::UseForRhythm), 4)));
 		CHECK_EQ(tracker.setup().parts[5].useForRhythm, 2);
+		tracker.process(sysex(0, dt1(partAddress(5, PartParam::UseForRhythm), 3)));
+		CHECK_EQ(tracker.setup().parts[5].useForRhythm, 1);
 
 		// GS Reset, GM System On: back to the defaults
 		tracker.process(sysex(0, dt1(g_gsReset, 0x00)));
 		s = tracker.setup();
 		CHECK_EQ(s.parts[2].program, 0);
 		CHECK_EQ(s.parts[0].rxChannel, 0);
-		CHECK_EQ(s.masterVolume, 127);
+		CHECK_EQ(s.global("MasterVolume"), 127);
 		tracker.process(sysex(0, dt1(partAddress(3, PartParam::Level), 1)));
 		tracker.process(sysex(0, {0xf0, 0x7e, 0x7f, 0x09, 0x01, 0xf7}));
 		CHECK_EQ(tracker.setup().parts[3].level, 100);
@@ -317,6 +322,279 @@ namespace
 	}
 }
 
+namespace
+{
+	uint16_t partValue(const PartStateTracker& _tracker, const size_t _part, const char* _id)
+	{
+		return _tracker.setup().parts[_part].value(static_cast<size_t>(findPartParamById(_id)));
+	}
+
+	Message nrpn(const uint8_t _lsb, const uint8_t _value)
+	{
+		return {0xb0, 99, 1, 0xb0, 98, _lsb, 0xb0, 6, _value};
+	}
+
+	void controllers(PartStateTracker& _tracker, const uint8_t _port, const Message& _bytes)
+	{
+		for(size_t i = 0; i + 2 < _bytes.size(); i += 3)
+			_tracker.process(channel(_port, _bytes[i], _bytes[i + 1], _bytes[i + 2]));
+	}
+
+	// What the emulated firmware made of these, read back with data requests
+	void params()
+	{
+		CHECK(globalParams().size() <= g_maxGlobalParams);
+		CHECK(partParams().size() <= g_maxPartParams);
+		for(const auto* id : {"MasterVolume", "MasterTune", "Expression", "FineTune", "MonoPoly", "PartMode", "RxRpn",
+			"RxNrpn"})
+			CHECK(findGlobalParamById(id) >= 0 || findPartParamById(id) >= 0);
+		CHECK_EQ(formatValue(partParams()[static_cast<size_t>(findPartParamById("KeyRangeLow"))], 60),
+			std::string("C4"));
+		CHECK_EQ(formatValue(globalParams()[static_cast<size_t>(findGlobalParamById("MasterTune"))], 1024),
+			std::string("+0.0 ct"));
+
+		PartStateTracker tracker;
+		tracker.setModel(DeviceModel::Sc88Pro);
+		// The SC-88Pro comes up with NRPN off, a GS Reset turns it on
+		CHECK_EQ(partValue(tracker, 0, "RxNrpn"), 0);
+		tracker.process(sysex(0, dt1(g_gsReset, 0x00)));
+		CHECK_EQ(partValue(tracker, 0, "RxNrpn"), 1);
+		auto s = tracker.setup();
+		CHECK_EQ(s.global("ReverbMacro"), 4);
+		CHECK_EQ(s.global("ChorusDepth"), 19);
+		CHECK_EQ(partValue(tracker, 0, "ReverbSend"), 40);
+		CHECK_EQ(partValue(tracker, 0, "Expression"), 127);
+
+		// The controllers that set part parameters
+		controllers(tracker, 0, {0xb0, 91, 11, 0xb0, 93, 12, 0xb0, 94, 13, 0xb0, 11, 90, 0xb0, 126, 1});
+		CHECK_EQ(partValue(tracker, 0, "ReverbSend"), 11);
+		CHECK_EQ(partValue(tracker, 0, "ChorusSend"), 12);
+		CHECK_EQ(partValue(tracker, 0, "DelaySend"), 13);
+		CHECK_EQ(partValue(tracker, 0, "Expression"), 90);
+		CHECK_EQ(partValue(tracker, 0, "MonoPoly"), 0);
+		controllers(tracker, 0, {0xb0, 127, 5, 0xb0, 121, 1});
+		CHECK_EQ(partValue(tracker, 0, "MonoPoly"), 0);
+		CHECK_EQ(partValue(tracker, 0, "Expression"), 90);
+		controllers(tracker, 0, {0xb0, 127, 0, 0xb0, 121, 0, 0xb0, 126, 17});
+		CHECK_EQ(partValue(tracker, 0, "MonoPoly"), 1);
+		CHECK_EQ(partValue(tracker, 0, "Expression"), 127);
+
+		// NRPN and RPN: a data entry goes to the kind selected last; Reset All Controllers selects neither
+		controllers(tracker, 0, nrpn(0x20, 0x7f));
+		CHECK_EQ(partValue(tracker, 0, "Cutoff"), 0x7f);
+		controllers(tracker, 0, {0xb0, 101, 0, 0xb0, 100, 1, 0xb0, 6, 0x44, 0xb0, 38, 0x21});
+		CHECK_EQ(partValue(tracker, 0, "FineTune"), 0x44);
+		CHECK_EQ(tracker.setup().parts[0].fineTuneLsb, 0x21);
+		CHECK_EQ(partValue(tracker, 0, "Cutoff"), 0x7f);
+		controllers(tracker, 0, {0xb0, 6, 0x45});
+		CHECK_EQ(tracker.setup().parts[0].fineTuneLsb, 0x21);
+		controllers(tracker, 0, {0xb0, 99, 1, 0xb0, 6, 0x32});
+		CHECK_EQ(partValue(tracker, 0, "Cutoff"), 0x32);
+		controllers(tracker, 0, {0xb0, 121, 0, 0xb0, 6, 0x50});
+		CHECK_EQ(partValue(tracker, 0, "Cutoff"), 0x32);
+		controllers(tracker, 0, {0xb0, 101, 0, 0xb0, 100, 0, 0xb0, 6, 30});
+		CHECK_EQ(partValue(tracker, 0, "BendRange"), 24);
+		// The selection is the part's: one that moves to another channel has none
+		controllers(tracker, 0, {0xb5, 99, 1, 0xb5, 98, 0x21});
+		tracker.process(sysex(0, dt1(partAddress(3, PartParam::RxChannel), 5)));
+		controllers(tracker, 0, {0xb5, 6, 0x30});
+		CHECK_EQ(partValue(tracker, 3, "Resonance"), 64);
+		CHECK_EQ(partValue(tracker, 5, "Resonance"), 0x30);
+
+		// The fine tune takes both its bytes, or nothing
+		tracker.process(sysex(0, dt1(0x40112a, 0x50)));
+		CHECK_EQ(partValue(tracker, 0, "FineTune"), 0x45);
+		tracker.process(sysex(0, dt1(0x40112a, {0x46, 0x22})));
+		CHECK_EQ(partValue(tracker, 0, "FineTune"), 0x46);
+		CHECK_EQ(tracker.setup().parts[0].fineTuneLsb, 0x22);
+
+		// Out of range: clamped, a switch on, the insertion effect assign ignored
+		tracker.process(sysex(0, dt1(0x401116, 0x7f)));
+		tracker.process(sysex(0, dt1(0x401102, 0x7f)));
+		tracker.process(sysex(0, dt1(0x401113, 0)));
+		tracker.process(sysex(0, dt1(0x401113, 5)));
+		tracker.process(sysex(0, dt1(0x404122, 5)));
+		tracker.process(sysex(0, dt1(0x400150, 0x7f)));
+		CHECK_EQ(partValue(tracker, 0, "KeyShift"), 88);
+		CHECK_EQ(partValue(tracker, 0, "RxChannel"), 16);
+		CHECK_EQ(partValue(tracker, 0, "MonoPoly"), 1);
+		CHECK_EQ(partValue(tracker, 0, "EfxAssign"), 0);
+		CHECK_EQ(tracker.setup().global("DelayMacro"), 9);
+		tracker.process(sysex(0, dt1(partAddress(1, PartParam::UseForRhythm), 0x7f)));
+		CHECK_EQ(tracker.setup().parts[1].useForRhythm, 2);
+
+		// A macro sets its effect and clears its sends; what comes after it in the message stays
+		tracker.process(sysex(0, dt1(0x400137, 30)));
+		tracker.process(sysex(0, dt1(0x40013f, 30)));
+		tracker.process(sysex(0, dt1(0x400130, {6, 6, 0, 64, 32, 50})));
+		s = tracker.setup();
+		CHECK_EQ(s.global("ReverbTime"), 32);
+		CHECK_EQ(s.global("ReverbDelayFeedback"), 50);
+		CHECK_EQ(s.global("ReverbPreDelay"), 0);
+		CHECK_EQ(s.global("ChorusToReverb"), 30);
+		tracker.process(sysex(0, dt1(0x400138, 5)));
+		s = tracker.setup();
+		CHECK_EQ(s.global("ChorusFeedback"), 112);
+		CHECK_EQ(s.global("ChorusToReverb"), 0);
+
+		// The master tune takes its four nibbles together, within 24 and 2024
+		tracker.process(sysex(0, dt1(g_masterTune, {0, 0, 0, 0})));
+		CHECK_EQ(tracker.setup().global("MasterTune"), 24);
+		tracker.process(sysex(0, dt1(g_masterTune + 1, {5, 5, 5, 100})));
+		s = tracker.setup();
+		CHECK_EQ(s.global("MasterTune"), 24);
+		CHECK_EQ(s.global("MasterVolume"), 100);
+
+		// The SC-88 family takes the effects on port A only
+		tracker.process(sysex(1, dt1(0x400133, 10)));
+		CHECK_EQ(tracker.setup().global("ReverbLevel"), 64);
+
+		// GM System On turns NRPN off
+		tracker.process(sysex(0, {0xf0, 0x7e, 0x7f, 0x09, 0x01, 0xf7}));
+		controllers(tracker, 0, nrpn(0x08, 0x50));
+		CHECK_EQ(partValue(tracker, 0, "RxNrpn"), 0);
+		CHECK_EQ(partValue(tracker, 0, "VibratoRate"), 64);
+
+		// The SC-8850: NRPN on from power-on, effects from any port, values out of range ignored, a new coarse fine
+		// tune drops the fine step
+		tracker.setModel(DeviceModel::Sc8850);
+		CHECK_EQ(partValue(tracker, 0, "RxNrpn"), 1);
+		tracker.process(sysex(1, dt1(0x400133, 10)));
+		CHECK_EQ(tracker.setup().global("ReverbLevel"), 10);
+		tracker.process(sysex(0, dt1(0x500133, 11)));
+		tracker.process(sysex(0, dt1(0x400150, 0x7f)));
+		tracker.process(sysex(0, dt1(0x400152, 0x7f)));
+		tracker.process(sysex(0, dt1(0x400131, 0x7f)));
+		tracker.process(sysex(0, dt1(partAddress(1, PartParam::UseForRhythm), 0x7f)));
+		s = tracker.setup();
+		CHECK_EQ(s.global("ReverbLevel"), 11);
+		CHECK_EQ(s.global("DelayMacro"), 0);
+		CHECK_EQ(s.global("DelayTimeCenter"), 97);
+		CHECK_EQ(s.global("ReverbCharacter"), 4);
+		CHECK_EQ(s.parts[1].useForRhythm, 0);
+		controllers(tracker, 0, {0xb0, 101, 0, 0xb0, 100, 1, 0xb0, 6, 0x44, 0xb0, 38, 0x21, 0xb0, 6, 0x45});
+		CHECK_EQ(tracker.setup().parts[0].fineTuneLsb, 0);
+		// ... and a data entry LSB brings the last coarse step back, through a reset and with the selection it keeps
+		tracker.process(sysex(0, dt1(0x40112a, {0x41, 0x26})));
+		tracker.process(sysex(0, dt1(g_gsReset, 0x00)));
+		controllers(tracker, 0, {0xb0, 38, 0x27});
+		CHECK_EQ(partValue(tracker, 0, "FineTune"), 0x45);
+		CHECK_EQ(tracker.setup().parts[0].fineTuneLsb, 0x27);
+		// The selection is the channel's: a part that moves there takes it up
+		controllers(tracker, 0, {0xb5, 99, 1, 0xb5, 98, 0x21});
+		tracker.process(sysex(0, dt1(partAddress(3, PartParam::RxChannel), 5)));
+		controllers(tracker, 0, {0xb5, 6, 0x31});
+		CHECK_EQ(partValue(tracker, 3, "Resonance"), 0x31);
+		CHECK_EQ(partValue(tracker, 5, "Resonance"), 0x31);
+		// An NRPN MSB of 7F leaves the RPN selected
+		controllers(tracker, 0, {0xb0, 101, 0, 0xb0, 100, 1, 0xb0, 99, 0x7f, 0xb0, 6, 0x20});
+		CHECK_EQ(partValue(tracker, 0, "FineTune"), 0x20);
+		// The chorus send to delay only from a message that starts there; part mode 3 is drum map 1
+		tracker.process(sysex(0, dt1(0x40013f, {0x15, 0x16})));
+		tracker.process(sysex(0, dt1(partAddress(2, PartParam::UseForRhythm), 3)));
+		s = tracker.setup();
+		CHECK_EQ(s.global("ChorusToReverb"), 0x15);
+		CHECK_EQ(s.global("ChorusToDelay"), 0);
+		CHECK_EQ(s.parts[2].useForRhythm, 1);
+
+		// The SC-55mkII keeps the tone modify within the GS range; the first SC-55 programs the cutoff below its
+		// centre, keep NRPN on after GM System On and do not know the universal master volume
+		tracker.setModel(DeviceModel::Sc55Mk2);
+		tracker.process(sysex(0, dt1(g_gsReset, 0x00)));
+		controllers(tracker, 0, nrpn(0x20, 0x7f));
+		controllers(tracker, 0, {0xb0, 94, 50});
+		CHECK_EQ(partValue(tracker, 0, "Cutoff"), 0x72);
+		CHECK_EQ(partValue(tracker, 0, "DelaySend"), 0);
+		tracker.setModel(DeviceModel::Sc55Mk1);
+		controllers(tracker, 0, nrpn(0x20, 0x7f));
+		CHECK_EQ(partValue(tracker, 0, "Cutoff"), 0x50);
+		tracker.process(sysex(0, {0xf0, 0x7e, 0x7f, 0x09, 0x01, 0xf7}));
+		controllers(tracker, 0, nrpn(0x08, 0x00));
+		CHECK_EQ(partValue(tracker, 0, "VibratoRate"), 0x0e);
+		tracker.process(sysex(0, {0xf0, 0x7f, 0x7f, 0x04, 0x01, 0x00, 0x33, 0xf7}));
+		CHECK_EQ(tracker.setup().global("MasterVolume"), 127);
+		tracker.process(sysex(1, dt1(0x400133, 10)));
+		CHECK_EQ(tracker.setup().global("ReverbLevel"), 10);
+	}
+}
+
+namespace
+{
+	// What the emulated SC-88Pro and SC-8850 did with the insertion effect
+	void insertionEffect()
+	{
+		PartStateTracker tracker;
+		tracker.setModel(DeviceModel::Sc88Pro);
+		auto s = tracker.setup();
+		CHECK_EQ(s.global("EfxType"), 0);
+		CHECK_EQ(s.global("EfxParam20"), 127);
+		CHECK_EQ(s.global("EfxToReverb"), 40);
+		CHECK_EQ(s.global("EfxDepth1"), 64);
+		CHECK_EQ(s.global("EfxToEq"), 1);
+		CHECK_EQ(std::string(findEfxType(0x0111).name), std::string("Distortion"));
+		CHECK_EQ(findEfxType(0x0105).id, 0);
+
+		// A type takes both bytes, and sets its parameters and the sends
+		tracker.process(sysex(0, dt1(0x400317, 99)));
+		tracker.process(sysex(0, dt1(0x40031b, 7)));
+		tracker.process(sysex(0, dt1(g_efxTypeAddress, 0x01)));
+		CHECK_EQ(tracker.setup().global("EfxType"), 0);
+		tracker.process(sysex(0, dt1(g_efxTypeAddress, {0x01, 0x11})));
+		s = tracker.setup();
+		CHECK_EQ(s.global("EfxType"), 0x0111);
+		CHECK_EQ(s.global("EfxParam1"), 76);
+		CHECK_EQ(s.global("EfxParam2"), 3);
+		CHECK_EQ(s.global("EfxParam18"), 56);
+		CHECK_EQ(s.global("EfxParam20"), 84);
+		CHECK_EQ(s.global("EfxToReverb"), 40);
+		CHECK_EQ(s.global("EfxSource1"), 7);
+
+		// The SC-88Pro: a checked parameter ignores a value out of its range, an unchecked one takes it, one the type
+		// does not have takes nothing; any port, and 50 from port A
+		tracker.process(sysex(0, dt1(0x400304, 33)));
+		tracker.process(sysex(1, dt1(0x400303, 33)));
+		tracker.process(sysex(0, dt1(0x400308, 33)));
+		tracker.process(sysex(0, dt1(0x500313, 0)));
+		tracker.process(sysex(0, dt1(0x40031b, 96)));
+		s = tracker.setup();
+		CHECK_EQ(s.global("EfxParam2"), 3);
+		CHECK_EQ(s.global("EfxParam1"), 33);
+		CHECK_EQ(s.global("EfxParam6"), 0);
+		CHECK_EQ(s.global("EfxParam17"), 0);
+		CHECK_EQ(s.global("EfxSource1"), 7);
+
+		// The same type again starts the parameters over; an unknown one is Thru
+		tracker.process(sysex(0, dt1(g_efxTypeAddress, {0x01, 0x11})));
+		CHECK_EQ(tracker.setup().global("EfxParam1"), 76);
+		tracker.process(sysex(0, dt1(g_efxTypeAddress, {0x01, 0x05})));
+		CHECK_EQ(tracker.setup().global("EfxType"), 0);
+
+		// A reply is what the board has
+		tracker.processReply(sysex(0, dt1(g_efxTypeAddress, {0x01, 0x20})), 0);
+		s = tracker.setup();
+		CHECK_EQ(s.global("EfxType"), 0x0120);
+		CHECK_EQ(s.global("EfxParam20"), 127);
+
+		// The SC-8850 checks nothing, and drops a message that starts at the type's LSB
+		tracker.setModel(DeviceModel::Sc8850);
+		tracker.process(sysex(0, dt1(g_efxTypeAddress, {0x01, 0x11})));
+		tracker.process(sysex(0, dt1(0x400304, 33)));
+		tracker.process(sysex(0, dt1(0x400308, 33)));
+		tracker.process(sysex(0, dt1(0x40031b, 127)));
+		tracker.process(sysex(0, dt1(0x400301, {0x20, 0x00, 0x31})));
+		s = tracker.setup();
+		CHECK_EQ(s.global("EfxParam2"), 33);
+		CHECK_EQ(s.global("EfxParam6"), 33);
+		CHECK_EQ(s.global("EfxSource1"), 127);
+		CHECK_EQ(s.global("EfxType"), 0x0111);
+		CHECK_EQ(s.global("EfxParam1"), 76);
+
+		// GS Reset: Thru
+		tracker.process(sysex(0, dt1(g_gsReset, 0x00)));
+		CHECK_EQ(tracker.setup().global("EfxType"), 0);
+	}
+}
+
 int main()
 {
 	messages();
@@ -325,5 +603,7 @@ int main()
 	sysexMessages();
 	catalog();
 	rules();
+	params();
+	insertionEffect();
 	return finish("partState");
 }

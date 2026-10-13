@@ -1,12 +1,13 @@
 /* The window has a fixed size, and the pages and lists are sized out of it: a list that leaves its height to the
-   flex layout grows with its entries and never scrolls. 560 = top bar 42 + page 494 + status bar 24. */
+   flex layout grows with its entries and never scrolls. 720 = top bar 46 + page 648 + status bar 26; a page is
+   1096 x 624 inside its padding, 722 for the main pane, 12 between, 362 for the side pane. */
 body {
-	width: 880dp;
-	height: 560dp;
+	width: 1120dp;
+	height: 720dp;
 	background-color: #252b30;
 	color: #dce2e6;
 	font-family: Roboto;
-	font-size: 13dp;
+	font-size: 14dp;
 	font-weight: 400;
 	overflow: hidden;
 }
@@ -23,59 +24,71 @@ div {
 	height: 100%;
 }
 
-/* Mixer, the group switch, the part tabs, then the transfers on the right. */
+/* Mixer, the group switch, the part tabs, then the transfers on the right. The tabs stand on the bar's bottom
+   edge, over its border, and the selected one opens into the page below. */
 .peTopBar {
 	display: flex;
 	flex-direction: row;
-	align-items: center;
-	gap: 6dp;
+	align-items: flex-end;
 	box-sizing: border-box;
-	height: 42dp;
-	padding: 0dp 10dp;
+	height: 46dp;
+	padding: 0dp 12dp;
 	background-color: #1c2226;
 	border-bottom: 1dp #3b444b;
 }
 
-.peTab, .peGroup, .pePartTab, .peMap {
+.peTab, .pePartTab {
 	display: block;
 	box-sizing: border-box;
-	height: 26dp;
-	border: 1dp #414b52;
-	border-radius: 3dp;
-	background-color: #2b3237;
-	color: #b8c0c5;
-	font-size: 11dp;
-	line-height: 24dp;
+	height: 34dp;
+	margin-bottom: -1dp;
+	border: 1dp #3b444b;
+	border-radius: 5dp 5dp 0dp 0dp;
+	background-color: #222a2e;
+	color: #aab3b9;
+	font-size: 13dp;
+	line-height: 32dp;
 	text-align: center;
 	cursor: pointer;
 }
 
-.peTab:hover, .peGroup:hover, .pePartTab:hover, .peMap:hover {
-	background-color: #343d43;
+.peTab:hover, .pePartTab:hover {
+	background-color: #2c353a;
 	color: #ffffff;
 }
 
-.peTab:checked, .peGroup:checked, .pePartTab:checked, .peMap:checked {
-	background-color: #52616a;
-	border-color: #68747d;
+.peTab:checked, .pePartTab:checked {
+	border-color: #59656d;
+	border-bottom-color: #252b30;
+	background-color: #252b30;
 	color: #ffffff;
+	font-weight: 600;
 }
 
 .peTabMixer {
-	width: 72dp;
+	width: 96dp;
 }
 
 /* White in the file, tinted here to follow the tab's text */
 .peTabIcon {
-	width: 12dp;
-	height: 12dp;
-	margin: -2dp 5dp 0dp 0dp;
+	width: 13dp;
+	height: 13dp;
+	margin: -2dp 6dp 0dp 0dp;
 	vertical-align: middle;
-	image-color: #b8c0c5;
+	image-color: #aab3b9;
 }
 
 .peTab:hover .peTabIcon, .peTab:checked .peTabIcon {
 	image-color: #ffffff;
+}
+
+/* Between the mixer and the part groups. It, the groups and the transfers line up with the tab labels. */
+.peSeparator {
+	align-self: flex-end;
+	width: 1dp;
+	height: 24dp;
+	margin: 0dp 12dp 4dp 12dp;
+	background-color: #4a555c;
 }
 
 /* The groups as one segmented control: flush, sharing single dividers - each segment draws its left edge and the
@@ -83,23 +96,44 @@ div {
 .peGroups {
 	display: flex;
 	flex-direction: row;
-	margin-left: 6dp;
+	align-self: flex-end;
+	margin: 0dp 10dp 2dp 0dp;
 }
 
 .peGroup {
-	width: 24dp;
+	display: block;
+	box-sizing: border-box;
+	width: 28dp;
+	height: 28dp;
+	border: 1dp #414b52;
 	border-width: 1dp 0dp 1dp 1dp;
-	border-radius: 0dp;
+	background-color: #2b3237;
+	color: #b8c0c5;
+	font-size: 13dp;
 	font-weight: 600;
+	line-height: 26dp;
+	text-align: center;
+	cursor: pointer;
 }
 
 .peGroup:first-child {
-	border-radius: 3dp 0dp 0dp 3dp;
+	border-radius: 4dp 0dp 0dp 4dp;
 }
 
 .peGroup:last-child {
 	border-right-width: 1dp;
-	border-radius: 0dp 3dp 3dp 0dp;
+	border-radius: 0dp 4dp 4dp 0dp;
+}
+
+.peGroup:hover {
+	background-color: #343d43;
+	color: #ffffff;
+}
+
+.peGroup:checked {
+	background-color: #52616a;
+	border-color: #68747d;
+	color: #ffffff;
 }
 
 /* Sixteen tabs share what the group switch and the buttons leave. */
@@ -108,12 +142,11 @@ div {
 	flex-direction: row;
 	flex: 1 1 auto;
 	gap: 2dp;
-	margin-left: 6dp;
 }
 
 .pePartTab {
 	flex: 1 1 0dp;
-	min-width: 18dp;
+	min-width: 24dp;
 }
 
 /* A drum part's tab says so. */
@@ -124,21 +157,22 @@ div {
 .peActions {
 	display: flex;
 	flex-direction: row;
+	align-self: flex-end;
 	gap: 4dp;
-	margin-left: 8dp;
+	margin: 0dp 0dp 2dp 12dp;
 }
 
 .peAction {
 	display: block;
 	box-sizing: border-box;
-	height: 26dp;
-	padding: 0dp 8dp;
+	height: 28dp;
+	padding: 0dp 10dp;
 	border: 1dp #515c64;
-	border-radius: 3dp;
+	border-radius: 4dp;
 	background-color: #333c42;
 	color: #e4e8ea;
-	font-size: 11dp;
-	line-height: 24dp;
+	font-size: 13dp;
+	line-height: 26dp;
 	white-space: nowrap;
 	cursor: pointer;
 }
@@ -153,15 +187,38 @@ div {
 	cursor: auto;
 }
 
+/* Two panes side by side: two thirds on the left, the third on the right */
 .pePage {
-	display: block;
+	display: flex;
+	flex-direction: row;
+	gap: 12dp;
 	box-sizing: border-box;
-	height: 494dp;
-	padding: 10dp 12dp;
+	height: 648dp;
+	padding: 12dp;
 	overflow: hidden;
 }
 
-/* ---- Mixer: one row per part, every group, scrolled. 474 = header 22 + rows 452. The header columns have the
+.peMainPane {
+	flex: 0 0 722dp;
+	width: 722dp;
+	height: 624dp;
+}
+
+.peSidePane {
+	flex: 0 0 362dp;
+	width: 362dp;
+	height: 624dp;
+}
+
+.pePaneTitle {
+	height: 26dp;
+	color: #88949c;
+	font-size: 12dp;
+	font-weight: 600;
+	line-height: 22dp;
+}
+
+/* ---- Mixer: one row per part, every group, scrolled. 624 = header 26 + rows 598. The header columns have the
    rows' widths, and the rows always show their scrollbar so that the two line up. */
 
 .peMixerHeader, .peMixRow {
@@ -172,46 +229,46 @@ div {
 }
 
 .peMixerHeader {
-	height: 22dp;
-	padding: 0dp 18dp 0dp 10dp;
+	height: 26dp;
+	padding: 0dp 20dp 0dp 10dp;
 	color: #88949c;
-	font-size: 10dp;
+	font-size: 12dp;
 	font-weight: 600;
 }
 
-.peMixHeadSoloMute { flex: 0 0 40dp; width: 40dp; }
+.peMixHeadSoloMute { flex: 0 0 46dp; width: 46dp; }
 .peMixHeadName { display: flex; flex-direction: row; flex: 1 1 auto; gap: 10dp; }
-.peMixHeadPart { flex: 0 0 34dp; width: 34dp; }
+.peMixHeadPart { flex: 0 0 38dp; width: 38dp; }
 .peMixHeadTone { flex: 1 1 auto; }
-.peMixHeadVolume { flex: 0 0 238dp; width: 238dp; }
-.peMixHeadPan { flex: 0 0 138dp; width: 138dp; margin-left: 28dp; }
+.peMixHeadVolume { flex: 0 0 220dp; width: 220dp; }
+.peMixHeadPan { flex: 0 0 150dp; width: 150dp; margin-left: 24dp; }
 
 .peMixerRows {
 	box-sizing: border-box;
-	height: 452dp;
+	height: 598dp;
 	padding: 3dp;
 	border: 1dp #414b52;
-	border-radius: 3dp;
+	border-radius: 4dp;
 	background-color: #20262a;
 	overflow-y: scroll;
 }
 
 .peMixGroupHeading {
 	display: block;
-	height: 22dp;
+	height: 26dp;
 	padding: 0dp 6dp;
 	color: #aeb8be;
-	font-size: 11dp;
+	font-size: 13dp;
 	font-weight: 600;
-	line-height: 22dp;
+	line-height: 26dp;
 }
 
 .peMixRow {
-	height: 26dp;
+	height: 28dp;
 	padding: 0dp 6dp;
-	border-radius: 2dp;
+	border-radius: 3dp;
 	color: #c9d0d4;
-	font-size: 11dp;
+	font-size: 13dp;
 }
 
 .peMixRow:hover {
@@ -221,23 +278,23 @@ div {
 .peMixSoloMute {
 	display: flex;
 	flex-direction: row;
-	flex: 0 0 40dp;
-	width: 40dp;
-	gap: 2dp;
+	flex: 0 0 46dp;
+	width: 46dp;
+	gap: 4dp;
 }
 
 .peMixSolo, .peMixMute {
 	display: block;
 	box-sizing: border-box;
-	width: 19dp;
-	height: 18dp;
+	width: 21dp;
+	height: 20dp;
 	border: 1dp #515c64;
-	border-radius: 2dp;
+	border-radius: 3dp;
 	background-color: #2b3237;
 	color: #8e9aa2;
-	font-size: 10dp;
+	font-size: 11dp;
 	font-weight: 600;
-	line-height: 16dp;
+	line-height: 18dp;
 	text-align: center;
 	cursor: pointer;
 }
@@ -271,8 +328,8 @@ div {
 }
 
 .peMixPart {
-	flex: 0 0 34dp;
-	width: 34dp;
+	flex: 0 0 38dp;
+	width: 38dp;
 	color: #ffffff;
 	font-weight: 600;
 }
@@ -304,35 +361,35 @@ div {
 }
 
 .peMixVolume {
-	flex: 0 0 238dp;
-	width: 238dp;
+	flex: 0 0 220dp;
+	width: 220dp;
 }
 
 .peMixPan {
-	flex: 0 0 138dp;
-	width: 138dp;
-	margin-left: 28dp;
+	flex: 0 0 150dp;
+	width: 150dp;
+	margin-left: 24dp;
 }
 
 .peMixValue {
-	flex: 0 0 30dp;
-	width: 30dp;
+	flex: 0 0 32dp;
+	width: 32dp;
 	color: #aeb8be;
 	text-align: right;
 }
 
 .peMixPan .peMixValue {
-	flex: 0 0 34dp;
-	width: 34dp;
+	flex: 0 0 38dp;
+	width: 38dp;
 }
 
 input.peSlider {
 	flex: 1 1 auto;
-	height: 14dp;
+	height: 16dp;
 }
 
 input.peSlider slidertrack {
-	margin-top: 5dp;
+	margin-top: 6dp;
 	height: 4dp;
 	border-radius: 2dp;
 	background-color: #3b444b;
@@ -340,7 +397,7 @@ input.peSlider slidertrack {
 
 input.peSlider sliderbar {
 	width: 10dp;
-	height: 14dp;
+	height: 16dp;
 	border-radius: 3dp;
 	background-color: #8e9aa2;
 }
@@ -354,26 +411,144 @@ input.peSlider sliderarrowdec, input.peSlider sliderarrowinc {
 	height: 0dp;
 }
 
-/* ---- Part: the tone map and the filter, then one list of the instruments, each with its variations under it.
-   474 = header 30 + map row 26 + 8 + label 20 + list 390. */
+/* ---- Parameters: sections of rows, a label, then a slider with its value or a choice. The part's in two
+   columns, the system and effects in one. */
+
+.peControls {
+	box-sizing: border-box;
+	padding: 2dp 8dp 6dp 8dp;
+	border: 1dp #414b52;
+	border-radius: 4dp;
+	background-color: #20262a;
+	overflow-y: auto;
+}
+
+.peGlobals {
+	height: 598dp;
+}
+
+.pePartControls {
+	height: 588dp;
+}
+
+.peColumns {
+	display: flex;
+	flex-direction: row;
+	gap: 18dp;
+}
+
+.peColumn {
+	flex: 1 1 0dp;
+}
+
+/* 24 a row: the part page's left column, three sections and twenty rows, fits without scrolling */
+.peSection {
+	margin-bottom: 4dp;
+}
+
+.peSectionTitle {
+	height: 26dp;
+	margin-bottom: 2dp;
+	border-bottom: 1dp #343d43;
+	color: #e8a35c;
+	font-size: 13dp;
+	font-weight: 600;
+	line-height: 26dp;
+}
+
+.peRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8dp;
+	height: 24dp;
+	padding: 0dp 4dp;
+	border-radius: 3dp;
+}
+
+.peRow:hover {
+	background-color: #262e33;
+}
+
+.peRowLabel {
+	flex: 0 0 118dp;
+	width: 118dp;
+	color: #c9d0d4;
+	font-size: 13dp;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.peRowValue {
+	flex: 0 0 64dp;
+	width: 64dp;
+	color: #aeb8be;
+	font-size: 13dp;
+	text-align: right;
+	white-space: nowrap;
+}
+
+/* A parameter only a channel message sets: the data requests cannot read it back */
+.peRow.channelOnly .peRowLabel {
+	color: #9aa5ac;
+	font-style: italic;
+}
+
+combo.peCombo, combo.peMapSelect {
+	display: block;
+	box-sizing: border-box;
+	padding: 0dp 24dp 0dp 8dp;
+	border: 1dp #515c64;
+	border-radius: 4dp;
+	background-color: #2b3237;
+	color: #e4e8ea;
+	font-size: 13dp;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+	decorator: image(arrow_drop_down.png contain right);
+}
+
+combo.peCombo {
+	flex: 1 1 auto;
+	width: auto;
+	height: 22dp;
+	line-height: 20dp;
+}
+
+combo.peCombo:hover, combo.peMapSelect:hover {
+	background-color: #343d43;
+	border-color: #68747d;
+}
+
+combo.peMapSelect combotext, combo.peCombo combotext {
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+/* ---- Part: the title and what the part is, the parameters; on the right the tone map and the filter, then one
+   list of the instruments, each with its variations under it. 624 = header 36 + controls 588, and on the right
+   map row 30 + 8 + label 22 + list 564. */
 
 .pePartHeader {
 	display: flex;
 	flex-direction: row;
 	align-items: baseline;
 	gap: 12dp;
-	height: 30dp;
+	height: 36dp;
 }
 
 .pePartTitle {
 	color: #f3f5f6;
-	font-size: 19dp;
+	font-size: 21dp;
 	font-weight: 600;
 }
 
 .pePartInfo {
 	color: #aeb8be;
-	font-size: 12dp;
+	font-size: 13dp;
 	white-space: nowrap;
 	overflow: hidden;
 }
@@ -382,61 +557,60 @@ input.peSlider sliderarrowdec, input.peSlider sliderarrowinc {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	height: 26dp;
+	height: 30dp;
 	margin-bottom: 8dp;
-	gap: 12dp;
+	gap: 10dp;
 }
 
-.peMaps {
-	display: flex;
-	flex-direction: row;
-	flex: 1 1 auto;
-	gap: 4dp;
-}
-
-.peMap {
-	padding: 0dp 10dp;
+/* The map and the filter share the row; a board with one map leaves it to the filter */
+combo.peMapSelect {
+	flex: 1 1 0dp;
+	width: 10dp;
+	height: 28dp;
+	line-height: 26dp;
 }
 
 .peFilter {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	flex: 0 0 auto;
+	flex: 1 1 0dp;
+	width: 10dp;
 	gap: 6dp;
 }
 
 .peFilterLabel {
 	color: #88949c;
-	font-size: 11dp;
+	font-size: 13dp;
 }
 
-.peFilterInput {
-	width: 200dp;
-	height: 24dp;
+input.peFilterInput {
+	flex: 1 1 0dp;
+	width: 10dp;
+	height: 28dp;
 	box-sizing: border-box;
-	padding: 4dp 6dp;
+	padding: 5dp 7dp;
 	border: 1dp #515c64;
-	border-radius: 3dp;
+	border-radius: 4dp;
 	background-color: #1f2529;
 	color: #eef1f2;
-	font-size: 12dp;
+	font-size: 13dp;
 }
 
 .peListLabel {
 	display: block;
-	height: 20dp;
+	height: 22dp;
 	color: #88949c;
-	font-size: 10dp;
+	font-size: 12dp;
 	font-weight: 600;
 }
 
 .peList {
 	box-sizing: border-box;
-	height: 390dp;
+	height: 564dp;
 	padding: 3dp;
 	border: 1dp #414b52;
-	border-radius: 3dp;
+	border-radius: 4dp;
 	background-color: #20262a;
 	overflow-y: auto;
 }
@@ -446,12 +620,12 @@ input.peSlider sliderarrowdec, input.peSlider sliderarrowinc {
 	display: block;
 	width: 100%;
 	box-sizing: border-box;
-	height: 20dp;
+	height: 23dp;
 	padding: 0dp 6dp;
-	border-radius: 2dp;
+	border-radius: 3dp;
 	color: #c9d0d4;
-	font-size: 12dp;
-	line-height: 20dp;
+	font-size: 13dp;
+	line-height: 23dp;
 	white-space: nowrap;
 	overflow: hidden;
 	cursor: pointer;
@@ -481,12 +655,12 @@ input.peSlider sliderarrowdec, input.peSlider sliderarrowinc {
 
 /* Variations sit under their instrument */
 .peVariation {
-	padding-left: 36dp;
+	padding-left: 38dp;
 }
 
 .peItemNumber {
 	display: inline-block;
-	width: 30dp;
+	width: 34dp;
 	color: #88949c;
 }
 
@@ -498,12 +672,12 @@ input.peSlider sliderarrowdec, input.peSlider sliderarrowinc {
 	display: block;
 	padding: 4dp 6dp;
 	color: #77838b;
-	font-size: 11dp;
+	font-size: 13dp;
 }
 
 .peStatusBar {
 	box-sizing: border-box;
-	height: 24dp;
+	height: 26dp;
 	padding: 0dp 12dp;
 	background-color: #1c2226;
 	border-top: 1dp #3b444b;
@@ -511,8 +685,8 @@ input.peSlider sliderarrowdec, input.peSlider sliderarrowinc {
 
 .peStatus {
 	color: #8e9aa2;
-	font-size: 11dp;
-	line-height: 23dp;
+	font-size: 12dp;
+	line-height: 25dp;
 	white-space: nowrap;
 	overflow: hidden;
 }

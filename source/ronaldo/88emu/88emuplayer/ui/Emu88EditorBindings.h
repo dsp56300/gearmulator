@@ -25,8 +25,8 @@ namespace emu88Player::editor
 	constexpr int g_settingsWidth = 690;
 	constexpr int g_settingsHeight = 410;
 	// The part editor's body size in emu88PartEditor.rcss
-	constexpr int g_partEditorWidth = 880;
-	constexpr int g_partEditorHeight = 560;
+	constexpr int g_partEditorWidth = 1120;
+	constexpr int g_partEditorHeight = 720;
 	constexpr int g_volumeMinimum = 0;
 	// The standalone shell puts its own Options button at (8, 6, 60, h-8);
 	// the recorder button follows it along the same baseline.

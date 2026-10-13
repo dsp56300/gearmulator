@@ -8,6 +8,7 @@
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/juceRmlComponentConfig.h"
+#include "juceRmlUi/rmlElemComboBox.h"
 #include "juceRmlUi/rmlEventListener.h"
 #include "juceRmlUi/rmlHelper.h"
 #include "juceRmlUi/rmlMenu.h"
@@ -20,6 +21,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <cstring>
+#include <iterator>
 #include <sstream>
 
 namespace emu88Player
@@ -88,6 +91,77 @@ namespace emu88Player
 		bool isSc8850(const emu88Lib::DeviceModel _model)
 		{
 			return _model == emu88Lib::DeviceModel::Sc8850 || _model == emu88Lib::DeviceModel::Sc8820;
+		}
+
+		// The part page's sections in two columns: the mixer, pitch and setup on the left
+		int sectionColumn(const char* _section)
+		{
+			return std::strcmp(_section, "Tone Modify") == 0 || std::strcmp(_section, "Scale Tuning") == 0 ? 1 : 0;
+		}
+
+		// A global parameter's data set: the master tune is four nibbles, the insertion effect type MSB and LSB
+		std::vector<uint8_t> globalData(const gs::Param& _param, const uint16_t _value)
+		{
+			if(_param.size == 4)
+			{
+				return {static_cast<uint8_t>(_value >> 12 & 0x0f), static_cast<uint8_t>(_value >> 8 & 0x0f),
+					static_cast<uint8_t>(_value >> 4 & 0x0f), static_cast<uint8_t>(_value & 0x0f)};
+			}
+			if(_param.size == 2)
+				return {static_cast<uint8_t>(_value >> 8 & 0x7f), static_cast<uint8_t>(_value & 0x7f)};
+			return {static_cast<uint8_t>(_value)};
+		}
+
+		std::string controlId(const bool _global, const size_t _param)
+		{
+			return std::string(_global ? "g" : "p") + std::to_string(_param);
+		}
+
+		// A row of the parameters: the label, then a choice, or a slider with its value
+		std::string controlRow(const std::string& _id, const std::string& _label, const bool _choice, const int _min,
+			const int _max, const bool _channelOnly)
+		{
+			std::ostringstream rml;
+			rml << "<div class=\"peRow" << (_channelOnly ? " channelOnly" : "") << "\"";
+			if(_channelOnly)
+				rml << " title=\"Set with a channel message, on the part's MIDI channel. "
+				       "The device cannot be asked for it.\"";
+			rml << "><div id=\"peLbl" << _id << "\" class=\"peRowLabel\" title=\"Double-click for the default\">"
+			    << encode(_label) << "</div>";
+			if(_choice)
+				rml << "<combo id=\"peCtl" << _id << "\" class=\"peCombo\" popup=\"window\"><combotext/></combo>";
+			else
+				rml << "<input id=\"peCtl" << _id << "\" class=\"peSlider\" type=\"range\" min=\"" << _min
+					<< "\" max=\"" << _max
+				    << "\" step=\"1\" value=\"" << _min << "\"/><div id=\"peVal" << _id << "\" class=\"peRowValue\"/>";
+			rml << "</div>";
+			return rml.str();
+		}
+
+		std::vector<juceRmlUi::ElemComboBox::Entry> comboEntries(const std::vector<std::pair<uint16_t,
+			std::string>>& _choices)
+		{
+			std::vector<juceRmlUi::ElemComboBox::Entry> entries;
+			for(const auto& [value, text] : _choices)
+				entries.push_back({text, value});
+			return entries;
+		}
+
+		std::vector<std::pair<uint16_t, std::string>> efxChoices(const gs::EfxParam& _param)
+		{
+			std::vector<std::pair<uint16_t, std::string>> choices;
+			const auto list = gs::efxValueList(_param);
+			for(size_t i = 0; i < list.size(); ++i)
+				choices.emplace_back(static_cast<uint16_t>(_param.min + i), list[i]);
+			return choices;
+		}
+
+		// A part parameter's data set: the fine tune comes with its LSB
+		std::vector<uint8_t> partData(const gs::Param& _param, const gs::Part& _part, const uint16_t _value)
+		{
+			if(_param.size == 2)
+				return {static_cast<uint8_t>(_value), _part.fineTuneLsb};
+			return {static_cast<uint8_t>(_value)};
 		}
 	}
 
@@ -160,11 +234,13 @@ namespace emu88Player
 
 		m_catalog = m_processor.toneCatalog();
 		m_catalogError = m_processor.toneCatalogError();
+		m_defaults = gs::createDefaultSetup(m_model);
 
 		setName(juce::String(emu88Lib::getDeviceProfile(m_model).displayName) + " Part Editor");
 
 		buildGroupAndPartTabs();
 		buildMixer();
+		buildControls();
 		selectPage(supported ? m_page : g_mixerPage);
 
 		if(!supported)
@@ -199,6 +275,19 @@ namespace emu88Player
 			if(isActionEnabled(m_root->GetElementById("peReceiveAll")))
 				receiveParts(0, m_setup.parts.size(), true);
 		});
+
+		m_mapSelect = dynamic_cast<juceRmlUi::ElemComboBox*>(m_root->GetElementById("peMapSelect"));
+		if(m_mapSelect)
+		{
+			juceRmlUi::EventListener::Add(m_mapSelect, Rml::EventId::Change, [this](Rml::Event&)
+			{
+				const auto index = m_mapSelect->getSelectedIndex();
+				if(m_updatingUi || !m_catalog || index < 0 || static_cast<size_t>(index) >= m_catalog->maps.size() ||
+				   m_page == g_mixerPage)
+					return;
+				selectToneMap(selectedPart(), m_catalog->maps[static_cast<size_t>(index)].number);
+			});
+		}
 
 		if(auto* filter = dynamic_cast<Rml::ElementFormControlInput*>(m_root->GetElementById("peFilter")))
 		{
@@ -371,23 +460,247 @@ namespace emu88Player
 				});
 				juceRmlUi::EventListener::Add(slider, Rml::EventId::Change, [this, i, slider, isVolume](Rml::Event&)
 				{
-					if(m_updatingUi || i >= m_setup.parts.size())
+					if(!m_updatingUi)
+						setMixerValue(i, isVolume,
+							static_cast<uint8_t>(std::clamp(std::atoi(slider->GetValue().c_str()), 0, 127)));
+				});
+				juceRmlUi::EventListener::Add(slider, Rml::EventId::Dblclick, [this, i, isVolume](Rml::Event&)
+				{
+					if(i >= m_defaults.parts.size())
 						return;
-					const auto value = static_cast<uint8_t>(std::clamp(std::atoi(slider->GetValue().c_str()), 0, 127));
-					auto& p = m_setup.parts[i];
-					auto& current = isVolume ? p.level : p.pan;
-					if(current == value)
-						return;
-					// Shown at once; the board's echo through the part state confirms it a moment later
-					current = value;
-					const auto part = static_cast<uint8_t>(i % gs::g_partsPerGroup);
-					setPartValue(i, gs::partAddress(part, isVolume ? gs::PartParam::Level : gs::PartParam::Pan), {value});
-					const auto& r = m_mixerRows[i];
-					setText(isVolume ? r.volumeValue : r.panValue, isVolume ? std::to_string(value) : panText(value));
+					m_dragging = nullptr;
+					const auto& defaults = m_defaults.parts[i];
+					setMixerValue(i, isVolume, isVolume ? defaults.level : defaults.pan);
+					refreshMixer();
 				});
 			}
 			m_mixerRows.push_back(row);
 		}
+	}
+
+	void PartEditorWindow::buildControls()
+	{
+		m_globalControls.clear();
+		m_partControls.clear();
+		m_efxControls.clear();
+		m_efxShownType = -1;
+		auto* globals = m_root->GetElementById("peGlobals");
+		auto* parts = m_root->GetElementById("pePartControls");
+		if(!globals || !parts)
+			return;
+
+		const bool supported = m_groupCount > 0;
+
+		// The parameters the board has, by section, in the table's order. The insertion effect's twenty go below its
+		// type, in rows of their own that follow the type.
+		const auto sections = [&](const std::vector<gs::Param>& _params, const bool _global, const int _column)
+		{
+			std::ostringstream rml;
+			const char* section = nullptr;
+			for(size_t i = 0; i < _params.size(); ++i)
+			{
+				const auto& p = _params[i];
+				if(!supported || !gs::isAvailable(p, m_model) || p.text == gs::ParamText::EfxParam ||
+				   (_column >= 0 && sectionColumn(p.section) != _column))
+					continue;
+				if(!section || std::strcmp(section, p.section) != 0)
+				{
+					if(section)
+						rml << "</div>";
+					section = p.section;
+					rml << "<div class=\"peSection\"><div class=\"peSectionTitle\">" << encode(p.section) << "</div>";
+				}
+				const auto [min, max] = gs::valueRange(p, m_model);
+				rml << controlRow(controlId(_global, i), p.label, !gs::valueChoices(p).empty(), min, max,
+					!gs::hasAddress(p, m_model));
+				if(p.text == gs::ParamText::EfxType)
+					rml << "<div id=\"peEfxParams\" class=\"peEfxParams\"/>";
+			}
+			if(section)
+				rml << "</div>";
+			return rml.str();
+		};
+
+		globals->SetInnerRML(sections(gs::globalParams(), true, -1));
+		parts->SetInnerRML("<div class=\"peColumns\"><div class=\"peColumn\">" + sections(gs::partParams(), false, 0) +
+			"</div><div class=\"peColumn\">" + sections(gs::partParams(), false, 1) + "</div></div>");
+
+		for(size_t i = 0; i < gs::globalParams().size(); ++i)
+		{
+			if(globals->GetElementById("peCtl" + controlId(true, i)))
+				m_globalControls.push_back(makeControl(globals, true, i, nullptr));
+		}
+		for(size_t i = 0; i < gs::partParams().size(); ++i)
+		{
+			if(parts->GetElementById("peCtl" + controlId(false, i)))
+				m_partControls.push_back(makeControl(parts, false, i, nullptr));
+		}
+		buildEfxControls();
+	}
+
+	void PartEditorWindow::buildEfxControls()
+	{
+		m_efxControls.clear();
+		auto* container = m_root->GetElementById("peEfxParams");
+		const auto typeParam = gs::findGlobalParamById("EfxType");
+		const auto firstParam = gs::findGlobalParamById("EfxParam1");
+		if(!container || typeParam < 0 || firstParam < 0)
+		{
+			m_efxShownType = -1;
+			return;
+		}
+		const auto typeId = m_setup.globals[static_cast<size_t>(typeParam)];
+		m_efxShownType = typeId;
+		const auto& type = gs::findEfxType(typeId);
+		const auto params = gs::efxParams(type);
+
+		std::ostringstream rml;
+		for(const auto* p : params)
+		{
+			rml << controlRow(controlId(true, static_cast<size_t>(firstParam) + p->index), p->name,
+				!gs::efxValueList(*p).empty(), p->min, p->max, false);
+		}
+		container->SetInnerRML(rml.str());
+		for(const auto* p : params)
+			m_efxControls.push_back(makeControl(container, true, static_cast<size_t>(firstParam) + p->index, p));
+	}
+
+	PartEditorWindow::Control PartEditorWindow::makeControl(Rml::Element* _container, const bool _global,
+		const size_t _param, const gs::EfxParam* _efx)
+	{
+		const auto id = controlId(_global, _param);
+		auto* element = _container->GetElementById("peCtl" + id);
+		Control control;
+		control.global = _global;
+		control.param = _param;
+		control.efx = _efx;
+		control.slider = dynamic_cast<Rml::ElementFormControlInput*>(element);
+		control.combo = dynamic_cast<juceRmlUi::ElemComboBox*>(element);
+		control.value = _container->GetElementById("peVal" + id);
+
+		const auto apply = [this, _global, _param](const uint16_t _value)
+		{
+			if(_global)
+				setGlobalParam(_param, _value);
+			else if(m_page != g_mixerPage)
+				setPartParam(selectedPart(), _param, _value);
+		};
+		const auto& param = _global ? gs::globalParams()[_param] : gs::partParams()[_param];
+
+		if(auto* combo = control.combo)
+		{
+			combo->setEntries(comboEntries(_efx ? efxChoices(*_efx) : gs::valueChoices(param)));
+			juceRmlUi::EventListener::Add(combo, Rml::EventId::Change, [this, combo, apply](Rml::Event&)
+			{
+				if(!m_updatingUi)
+					apply(static_cast<uint16_t>(combo->getValue()));
+			});
+		}
+		else if(auto* slider = control.slider)
+		{
+			juceRmlUi::EventListener::Add(slider, Rml::EventId::Mousedown, [this, slider](Rml::Event&)
+			{
+				m_dragging = slider;
+			});
+			const auto range = _efx ? std::pair<uint16_t, uint16_t>(_efx->min, _efx->max) : gs::valueRange(param,
+				m_model);
+			juceRmlUi::EventListener::Add(slider, Rml::EventId::Change,
+				[this, slider, apply, &param, _efx, range, valueText = control.value](Rml::Event&)
+			{
+				if(m_updatingUi)
+					return;
+				const auto value = static_cast<uint16_t>(std::clamp(std::atoi(slider->GetValue().c_str()),
+					static_cast<int>(range.first), static_cast<int>(range.second)));
+				apply(value);
+				setText(valueText, _efx ? gs::formatEfxValue(*_efx,
+					static_cast<uint8_t>(value)) : gs::formatValue(param, value));
+			});
+			juceRmlUi::EventListener::Add(slider, Rml::EventId::Dblclick, [this, _global, _param, _efx](Rml::Event&)
+			{
+				resetControl(_global, _param, _efx);
+			});
+		}
+		// The label resets any control: a choice opens its list with the first click
+		if(auto* label = _container->GetElementById("peLbl" + id))
+		{
+			juceRmlUi::EventListener::Add(label, Rml::EventId::Dblclick, [this, _global, _param, _efx](Rml::Event&)
+			{
+				resetControl(_global, _param, _efx);
+			});
+		}
+		return control;
+	}
+
+	void PartEditorWindow::refreshControls(std::vector<Control>& _controls, const gs::Part* _part)
+	{
+		m_updatingUi = true;
+		for(const auto& control : _controls)
+		{
+			if(!control.global && !_part)
+				continue;
+			const auto& param = control.global ? gs::globalParams()[control.param] : gs::partParams()[control.param];
+			const uint16_t value = control.global ? m_setup.globals[control.param] : _part->value(control.param);
+			if(control.combo)
+			{
+				if(static_cast<int>(control.combo->getValue()) != value)
+					control.combo->setValue(value, false);
+			}
+			else if(control.slider && control.slider != m_dragging)
+			{
+				const auto text = std::to_string(value);
+				if(control.slider->GetValue() != text)
+					control.slider->SetValue(text);
+				setText(control.value, control.efx ? gs::formatEfxValue(*control.efx, static_cast<uint8_t>(value))
+				                                   : gs::formatValue(param, value));
+			}
+		}
+		m_updatingUi = false;
+	}
+
+	uint16_t PartEditorWindow::defaultValue(const bool _global, const size_t _param, const gs::EfxParam* _efx) const
+	{
+		if(_efx)
+		{
+			const auto typeParam = gs::findGlobalParamById("EfxType");
+			const auto type = typeParam >= 0 ? m_setup.globals[static_cast<size_t>(typeParam)] : uint16_t(0);
+			return gs::findEfxType(type).defaults[_efx->index];
+		}
+		if(_global)
+			return m_defaults.globals[_param];
+		const auto part = selectedPart();
+		return part < m_defaults.parts.size() ? m_defaults.parts[part].value(_param) : gs::partParams()[_param].def;
+	}
+
+	void PartEditorWindow::resetControl(const bool _global, const size_t _param, const gs::EfxParam* _efx)
+	{
+		const auto value = defaultValue(_global, _param, _efx);
+		m_dragging = nullptr;
+		if(_global)
+		{
+			setGlobalParam(_param, value);
+			refreshMixer();
+		}
+		else if(m_page != g_mixerPage)
+		{
+			setPartParam(selectedPart(), _param, value);
+		}
+		refresh();
+	}
+
+	void PartEditorWindow::setMixerValue(const size_t _part, const bool _volume, const uint8_t _value)
+	{
+		if(_part >= m_setup.parts.size())
+			return;
+		auto& p = m_setup.parts[_part];
+		auto& current = _volume ? p.level : p.pan;
+		if(current == _value)
+			return;
+		// Shown at once; the board's echo through the part state confirms it a moment later
+		current = _value;
+		const auto part = static_cast<uint8_t>(_part % gs::g_partsPerGroup);
+		setPartValue(_part, gs::partAddress(part, _volume ? gs::PartParam::Level : gs::PartParam::Pan), {_value});
+		const auto& row = m_mixerRows[_part];
+		setText(_volume ? row.volumeValue : row.panValue, _volume ? std::to_string(_value) : panText(_value));
 	}
 
 	void PartEditorWindow::setRxNoteMessage(const size_t _part, const bool _on)
@@ -583,6 +896,11 @@ namespace emu88Player
 			}
 		}
 		m_updatingUi = false;
+		refreshControls(m_globalControls, nullptr);
+		const auto typeParam = gs::findGlobalParamById("EfxType");
+		if(typeParam >= 0 && m_setup.globals[static_cast<size_t>(typeParam)] != m_efxShownType)
+			buildEfxControls();
+		refreshControls(m_efxControls, nullptr);
 	}
 
 	void PartEditorWindow::refreshPart()
@@ -621,6 +939,38 @@ namespace emu88Player
 			buildToneLists();
 		}
 		applyListSelection();
+		refreshMapSelect();
+		refreshControls(m_partControls, &p);
+	}
+
+	void PartEditorWindow::refreshMapSelect()
+	{
+		if(!m_mapSelect)
+			return;
+		const auto index = selectedPart();
+		const bool show = m_catalog && gs::hasToneMaps(m_model) && m_catalog->maps.size() > 1
+			&& index < m_setup.parts.size();
+		juceRmlUi::helper::setVisible(m_mapSelect, show);
+		if(!show)
+			return;
+
+		std::vector<std::string> names;
+		for(const auto& map : m_catalog->maps)
+			names.push_back(map.name);
+		m_updatingUi = true;
+		if(names != m_mapNames)
+		{
+			m_mapSelect->setOptions(names);
+			m_mapNames = names;
+		}
+		const auto* map = m_catalog->findMap(m_setup.effectiveToneMap(index));
+		if(map)
+		{
+			const auto selected = static_cast<int>(map - m_catalog->maps.data());
+			if(m_mapSelect->getSelectedIndex() != selected)
+				m_mapSelect->setSelectedIndex(static_cast<size_t>(selected), false);
+		}
+		m_updatingUi = false;
 	}
 
 	bool PartEditorWindow::matchesFilter(const std::string& _name) const
@@ -637,29 +987,7 @@ namespace emu88Player
 		const auto mapNumber = m_setup.effectiveToneMap(index);
 		const auto* map = m_catalog ? m_catalog->findMap(mapNumber) : nullptr;
 
-		// The maps, for a board with more than one
-		auto* maps = m_root->GetElementById("peMaps");
 		std::ostringstream rml;
-		const bool showMaps = m_catalog && gs::hasToneMaps(m_model) && m_catalog->maps.size() > 1;
-		if(showMaps)
-		{
-			for(size_t m = 0; m < m_catalog->maps.size(); ++m)
-				rml << "<button id=\"peMap" << m << "\" class=\"peMap\">" << encode(m_catalog->maps[m].name) << "</button>";
-		}
-		maps->SetInnerRML(rml.str());
-		if(showMaps)
-		{
-			for(size_t m = 0; m < m_catalog->maps.size(); ++m)
-			{
-				auto* button = maps->GetElementById("peMap" + std::to_string(m));
-				const auto number = m_catalog->maps[m].number;
-				if(!button)
-					continue;
-				button->SetPseudoClass("checked", map == &m_catalog->maps[m]);
-				addClick(button, [this, index, number] { selectToneMap(index, number); });
-			}
-		}
-
 		auto* list = m_root->GetElementById("peTones");
 		m_listRows.clear();
 		m_listSelection.clear();
@@ -675,7 +1003,6 @@ namespace emu88Player
 		};
 		const auto noMatch = [&] { rml << "<div class=\"peListEmpty\">Nothing matches the filter</div>"; };
 
-		rml.str({});
 		if(p.isDrumPart())
 		{
 			setText(m_root->GetElementById("peListLabel"), "Drum Set");
@@ -805,10 +1132,24 @@ namespace emu88Player
 	{
 		const bool supported = m_groupCount > 0;
 		const bool idle = supported && !m_receiving;
+		const bool answers = gs::answersDataRequests(m_model);
 		setActionEnabled(m_root->GetElementById("peSendPart"), idle && m_page != g_mixerPage);
-		setActionEnabled(m_root->GetElementById("peReceivePart"), idle && m_page != g_mixerPage);
+		setActionEnabled(m_root->GetElementById("peReceivePart"), idle && answers && m_page != g_mixerPage);
 		setActionEnabled(m_root->GetElementById("peSendAll"), idle);
-		setActionEnabled(m_root->GetElementById("peReceiveAll"), idle);
+		setActionEnabled(m_root->GetElementById("peReceiveAll"), idle && answers);
+
+		const std::pair<const char*, const char*> receives[] = {
+			{"peReceivePart", "Read this part's settings from the device"},
+			{"peReceiveAll", "Read every part's settings and the effects from the device"},
+		};
+		for(const auto& [id, tip] : receives)
+		{
+			auto* button = m_root->GetElementById(id);
+			const std::string title = !supported
+				|| answers ? tip : "The device has no MIDI output to answer data requests with";
+			if(button && button->GetAttribute<Rml::String>("title", "") != title)
+				button->SetAttribute("title", title);
+		}
 	}
 
 	void PartEditorWindow::showStatus(const std::string& _text, const bool _error)
@@ -822,14 +1163,122 @@ namespace emu88Player
 		}
 	}
 
-	void PartEditorWindow::setPartValue(const size_t _part, const uint32_t _address, const std::vector<uint8_t>& _data)
+	void PartEditorWindow::setValue(const uint8_t _port, const uint32_t _address, const std::vector<uint8_t>& _data)
 	{
-		const auto port = static_cast<uint8_t>(_part / gs::g_partsPerGroup);
 		m_pending.erase(std::remove_if(m_pending.begin(), m_pending.end(), [&](const PendingValue& _v)
 		{
-			return _v.port == port && _v.address == _address;
+			return _v.port == _port && _v.address == _address;
 		}), m_pending.end());
-		m_pending.push_back({port, _address, _data});
+		m_pending.push_back({_port, _address, _data});
+	}
+
+	void PartEditorWindow::setPartValue(const size_t _part, const uint32_t _address, const std::vector<uint8_t>& _data)
+	{
+		setValue(static_cast<uint8_t>(_part / gs::g_partsPerGroup), _address, _data);
+	}
+
+	void PartEditorWindow::setGlobalParam(const size_t _param, const uint16_t _value)
+	{
+		const auto& params = gs::globalParams();
+		if(_param >= params.size() || m_setup.globals[_param] == _value)
+			return;
+		const auto& param = params[_param];
+		m_setup.globals[_param] = _value;
+		// The system and effect parameters go to the first port: the SC-88s take them there only
+		setValue(0, param.address, globalData(param, _value));
+
+		// A macro sets the rest of its effect, an insertion effect type its parameters and sends: shown at once
+		auto preset = gs::macroPreset(param.address, static_cast<uint8_t>(_value));
+		if(param.text == gs::ParamText::EfxType)
+		{
+			const auto& type = gs::findEfxType(_value);
+			for(uint32_t i = 0; i < gs::g_efxParamCount; ++i)
+				preset.emplace_back(gs::g_efxParamAddress + i, type.defaults[i]);
+			for(uint32_t i = 0; i < std::size(gs::g_efxSendDefaults); ++i)
+				preset.emplace_back(0x400317 + i, gs::g_efxSendDefaults[i]);
+		}
+		for(const auto& [address, value] : preset)
+		{
+			const auto i = gs::findGlobalParam(address);
+			if(i >= 0)
+				m_setup.globals[static_cast<size_t>(i)] = value;
+		}
+		if(!preset.empty())
+			refreshMixer();
+	}
+
+	void PartEditorWindow::setPartParam(const size_t _part, const size_t _param, const uint16_t _value)
+	{
+		const auto& params = gs::partParams();
+		if(_part >= m_setup.parts.size() || _param >= params.size())
+			return;
+		auto& part = m_setup.parts[_part];
+		const auto& param = params[_param];
+		if(part.value(_param) == _value)
+			return;
+		if(param.field == gs::PartField::UseForRhythm)
+		{
+			setPartType(_part, static_cast<uint8_t>(_value));
+			return;
+		}
+
+		if(gs::hasAddress(param, m_model))
+		{
+			// Shown at once; the board's echo through the part state confirms it a moment later
+			part.setValue(_param, _value);
+			const auto block = static_cast<uint8_t>(_part % gs::g_partsPerGroup);
+			setPartValue(_part, gs::partParamAddress(block, param), partData(param, part, _value));
+			return;
+		}
+		// A part that receives no channel cannot be reached this way: the control goes back
+		std::vector<synthLib::SMidiEvent> events;
+		if(!channelMessages(_part, _param, _value, events))
+		{
+			refreshControls(m_partControls, &part);
+			return;
+		}
+		part.setValue(_param, _value);
+		flushPending();
+		m_processor.sendMidiEvents(events);
+	}
+
+	bool PartEditorWindow::channelMessages(const size_t _part, const size_t _param, const uint16_t _value,
+		std::vector<synthLib::SMidiEvent>& _events) const
+	{
+		const auto& part = m_setup.parts[_part];
+		const auto& param = gs::partParams()[_param];
+		if(part.rxChannel >= 16)
+			return false;
+		const auto port = static_cast<uint8_t>(_part / gs::g_partsPerGroup);
+		const auto cc = [&](const uint8_t _cc, const uint8_t _v)
+		{
+			auto& event = _events.emplace_back(synthLib::MidiEventSource::Host,
+				static_cast<uint8_t>(synthLib::M_CONTROLCHANGE | part.rxChannel), _cc, _v);
+			event.port = port;
+		};
+		const auto value = static_cast<uint8_t>(_value);
+		if(param.cc != 0xff)
+		{
+			cc(param.cc, value);
+			return true;
+		}
+		if(param.rpn == 0xff && param.nrpnMsb == 0xff)
+			return false;
+		if(param.rpn != 0xff)
+		{
+			cc(101, 0);
+			cc(100, param.rpn);
+		}
+		else
+		{
+			cc(99, param.nrpnMsb);
+			cc(98, param.nrpnLsb);
+		}
+		cc(6, value);
+		// Nothing selected after it, so that a stray data entry changes nothing
+		cc(101, 127);
+		cc(100, 127);
+		return true;
 	}
 
 	void PartEditorWindow::flushPending()
@@ -924,7 +1373,7 @@ namespace emu88Player
 		return true;
 	}
 
-	void PartEditorWindow::sendParts(const size_t _first, const size_t _count, const bool _withMasterVolume)
+	void PartEditorWindow::sendParts(const size_t _first, const size_t _count, const bool _withGlobals)
 	{
 		flushPending();
 		const bool maps = gs::hasToneMaps(m_model);
@@ -936,8 +1385,16 @@ namespace emu88Player
 			event.port = _port;
 		};
 
-		if(_withMasterVolume)
-			add(0, gs::dt1(gs::g_masterVolume, m_setup.masterVolume));
+		// The system and effects on the first port, in the table's order: a macro before what it sets
+		if(_withGlobals)
+		{
+			const auto& globals = gs::globalParams();
+			for(size_t i = 0; i < globals.size(); ++i)
+			{
+				if(gs::hasAddress(globals[i], m_model))
+					add(0, gs::dt1(globals[i].address, globalData(globals[i], m_setup.globals[i])));
+			}
+		}
 
 		for(size_t i = _first; i < _first + _count && i < m_setup.parts.size(); ++i)
 		{
@@ -961,6 +1418,19 @@ namespace emu88Player
 			add(port, gs::dt1(gs::partAddress(part, gs::PartParam::Level), p.level));
 			add(port, gs::dt1(gs::partAddress(part, gs::PartParam::Pan), p.pan));
 
+			// The other parameters; those without an address as channel messages
+			const auto& params = gs::partParams();
+			for(size_t v = 0; v < params.size(); ++v)
+			{
+				const auto& param = params[v];
+				if(param.field != gs::PartField::None || !gs::isAvailable(param, m_model))
+					continue;
+				if(gs::hasAddress(param, m_model))
+					add(port, gs::dt1(gs::partParamAddress(part, param), partData(param, p, p.value(v))));
+				else
+					channelMessages(i, v, p.value(v), events);
+			}
+
 			// The SC-8850 applies the map with a program change only, which reaches every part on the channel; the
 			// parts that have their channel to themselves get one
 			if(isSc8850(m_model))
@@ -974,10 +1444,10 @@ namespace emu88Player
 			}
 		}
 		m_processor.sendMidiEvents(events);
-		showStatus(_count == 1 ? "Sent the part to the device." : "Sent every part to the device.");
+		showStatus(_count == 1 ? "Sent the part to the device." : "Sent every part and the effects to the device.");
 	}
 
-	void PartEditorWindow::receiveParts(const size_t _first, const size_t _count, const bool _withMasterVolume)
+	void PartEditorWindow::receiveParts(const size_t _first, const size_t _count, const bool _withGlobals)
 	{
 		flushPending();
 		const bool maps = gs::hasToneMaps(m_model);
@@ -992,8 +1462,14 @@ namespace emu88Player
 			requests.push_back(std::move(request));
 		};
 
-		if(_withMasterVolume)
-			add(0, gs::g_masterVolume, 1);
+		if(_withGlobals)
+		{
+			for(const auto& param : gs::globalParams())
+			{
+				if(gs::hasAddress(param, m_model))
+					add(0, param.address, param.size);
+			}
+		}
 
 		// One request per parameter: the SC-55s answer nothing that is not exactly one
 		for(size_t i = _first; i < _first + _count && i < m_setup.parts.size(); ++i)
@@ -1011,6 +1487,11 @@ namespace emu88Player
 			{
 				add(port, gs::partAddress(part, gs::PartMapParam::ToneMap), 1);
 				add(port, gs::partAddress(part, gs::PartMapParam::ToneMap0), 1);
+			}
+			for(const auto& param : gs::partParams())
+			{
+				if(param.field == gs::PartField::None && gs::hasAddress(param, m_model))
+					add(port, gs::partParamAddress(part, param), param.size);
 			}
 		}
 

@@ -470,13 +470,19 @@ JE8086:
 
 - [New] Part Editor, in the context menu of the SC-55 to SC-8850 and the
         boards that run their programs. A mixer with the volume, pan, solo
-        and mute of every part, and a page per part to pick its instrument,
-        variation and tone map, or its drum set, from the lists in the
-        board's own ROMs, with a filter. A right-click on a part tab makes it
-        a normal or a drum part. Edits reach the board as they are made, and
-        the window follows what songs and live input set on the parts. Send
-        writes the parts to the board, Receive reads them back from it. Mute
-        is the board's own, the one its MUTE button sets.
+        and mute of every part beside the system, reverb, chorus, delay,
+        equalizer and insertion effect settings, and a page per part with
+        its mixer, pitch, tone modify, setup and scale tuning settings
+        beside its instrument, variation and tone map, or its drum set,
+        picked from the lists in the board's own ROMs, with a filter. Each
+        board shows the settings it has; the insertion effect shows the
+        parameters of the type selected. A double-click on a slider or a
+        setting's name brings it back to its default. A right-click on a
+        part tab makes it a normal or a drum part. Edits reach the board as
+        they are made, and the window follows what songs and live input
+        set, SysEx, controllers, RPN and NRPN alike. Send writes the parts
+        and effects to the board, Receive reads them back from it. Mute is
+        the board's own, the one its MUTE button sets.
 
 - [Imp] CM-32L, CM-32LN, CM-32P, CM-64: A volume knob that matches the bezel.
 
