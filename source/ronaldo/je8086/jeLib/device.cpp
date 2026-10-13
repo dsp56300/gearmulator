@@ -1,9 +1,17 @@
 #include "device.h"
 
 #include "je8086.h"
+#include "rom.h"
+#include "synthLib/deviceException.h"
 #include "synthLib/midiToSysex.h"
 
+#include "baseLib/filesystem.h"
+#include "dsp56kBase/logging.h"
+
 #include "common/boardThread.h"
+
+#include <algorithm>
+#include <cmath>
 
 namespace
 {
@@ -13,23 +21,41 @@ namespace
 		const auto signExtended = static_cast<int32_t>(_d << 8) >> 8;
 		return static_cast<float>(signExtended) * scale;
 	}
+
+	// the PCM3001 converts 16 bits, left-justified in the ESP's 24-bit word
+	inline int32_t floatToAdcWord(const float _v)
+	{
+		const auto s = static_cast<int32_t>(std::lround(std::clamp(_v, -1.0f, 32767.0f / 32768.0f) * 32768.0f));
+		return s * 256;
+	}
 }
 
 namespace jeLib
 {
-	constexpr uint8_t g_paramPageMasterVolume = 6;
+	constexpr uint8_t g_paramPageCustom = 6;
 	constexpr uint8_t g_paramIndexMasterVolume = 0;
+	constexpr uint8_t g_paramIndexInputLevel = 1;	// INST/LOWER, VOCAL/UPPER at 2
 
 	Device::Device(const synthLib::DeviceCreateParams& _params) : synthLib::Device(_params)
 	{
-		const auto ramDataFilename = _params.homePath.empty() ? "ram_dump.bin" : _params.homePath + "/roms/ram_dump.bin";
-		m_je8086.reset(new Je8086(_params.romData, ramDataFilename));
+		const auto romSize = _params.romData.size();
+		if (romSize != Rom::RomSizeKeyboard && romSize != Rom::RomSizeRack)
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Unsupported firmware image. The JP-8000 needs its 512 KB flash, the JP-8080 a complete 1 MB flash dump.");
 
-		if (m_je8086->hasDoneFactoryReset())
+		const auto ramName = romSize == Rom::RomSizeRack ? "ram_dump_8080.bin" : "ram_dump.bin";
+		const auto ramDataFilename = _params.homePath.empty() ? ramName : _params.homePath + "/roms/" + ramName;
+
+		std::vector<uint8_t> ram;
+		baseLib::filesystem::readFile(ram, ramDataFilename);
+
+		if (ram.size() != Je8086::RamSize)
 		{
-			m_je8086.reset();
-			m_je8086.reset(new Je8086(_params.romData, ramDataFilename));
+			ram = Je8086::createFactoryRam(_params.romData);
+			if (!baseLib::filesystem::writeFile(ramDataFilename, ram))
+				LOG("Failed to write " << ramDataFilename);
 		}
+
+		m_je8086.reset(new Je8086(_params.romData, ram));
 
 		m_thread.reset(new rLib::BoardThread<Je8086>(*m_je8086, "JE8086"));
 
@@ -38,8 +64,8 @@ namespace jeLib
 			onParamChanged(_page, _index, _value);
 		});
 
-		// inform UI about default master volume
-		createMasterVolumeMessage(m_midiOut);
+		// inform UI about default master volume and input levels
+		createCustomParameterMessages(m_midiOut);
 	}
 
 	Device::~Device()
@@ -55,7 +81,7 @@ namespace jeLib
 
 	bool Device::isValid() const
 	{
-		return true;
+		return m_je8086 != nullptr;
 	}
 
 	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
@@ -65,7 +91,7 @@ namespace jeLib
 		if (!m_state.createSystemDump(results.emplace_back(synthLib::MidiEventSource::Device)))
 			results.pop_back();
 
-		createMasterVolumeMessage(results);
+		createCustomParameterMessages(results);
 
 		if (!m_state.createTempPerformanceDumps(results))
 			return false;
@@ -88,6 +114,7 @@ namespace jeLib
 			return false;
 
 		m_masterVolume = -1.0f;
+		m_inputLevel = {-1, -1};
 
 		for (auto& message : messages)
 		{
@@ -116,8 +143,15 @@ namespace jeLib
 		if (m_masterVolume < 0)
 			m_masterVolume = 1.0f;
 
-		// feed master volume to the UI directly because there is no request message for it
-		createMasterVolumeMessage(m_midiOut);
+		// neither were the input levels
+		for (auto& level : m_inputLevel)
+		{
+			if (level < 0)
+				level = 64;
+		}
+
+		// feed master volume and input levels to the UI directly because there is no request message for them
+		createCustomParameterMessages(m_midiOut);
 
 		return true;
 	}
@@ -156,7 +190,26 @@ namespace jeLib
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _samples)
 	{
-		const auto* frames = m_thread->process(static_cast<uint32_t>(_samples), getExtraLatencySamples(), m_midiIn, m_midiOut);
+		// the JP-8080's A/D converter: left INST/LOWER, right VOCAL/UPPER
+		const std::pair<int32_t, int32_t>* input = nullptr;
+
+		if (m_je8086->isRack())
+		{
+			const float gainL = static_cast<float>(m_inputLevel[0]) / 64.0f;
+			const float gainR = static_cast<float>(m_inputLevel[1]) / 64.0f;
+
+			m_input.resize(_samples);
+
+			for (size_t i=0; i<_samples; ++i)
+			{
+				m_input[i].first = _inputs[0] ? floatToAdcWord(_inputs[0][i] * gainL) : 0;
+				m_input[i].second = _inputs[1] ? floatToAdcWord(_inputs[1][i] * gainR) : 0;
+			}
+
+			input = m_input.data();
+		}
+
+		const auto* frames = m_thread->process(static_cast<uint32_t>(_samples), getExtraLatencySamples(), m_midiIn, m_midiOut, input);
 
 		for (size_t i=0; i<_samples; ++i)
 		{
@@ -165,6 +218,11 @@ namespace jeLib
 			_outputs[0][i] = dspWordToFloat(s.first) * m_masterVolume;
 			_outputs[1][i] = dspWordToFloat(s.second) * m_masterVolume;
 		}
+	}
+
+	void Device::onTransportDiscontinuity(const synthLib::SMidiEvent& _ev)
+	{
+		m_midiIn.emplace_back(_ev);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
@@ -177,13 +235,19 @@ namespace jeLib
 		return true;
 	}
 
-	void Device::onParamChanged(uint8_t/* _page*/, uint8_t/* _index*/, const int32_t _value)
+	void Device::onParamChanged(uint8_t/* _page*/, const uint8_t _index, const int32_t _value)
 	{
-		m_masterVolume = static_cast<float>(_value) * 0.01f;
+		if (_index == g_paramIndexMasterVolume)
+			m_masterVolume = static_cast<float>(_value) * 0.01f;
+		else if (_index >= g_paramIndexInputLevel && _index < g_paramIndexInputLevel + m_inputLevel.size())
+			m_inputLevel[_index - g_paramIndexInputLevel] = _value;
 	}
 
-	void Device::createMasterVolumeMessage(std::vector<synthLib::SMidiEvent>& _messages) const
+	void Device::createCustomParameterMessages(std::vector<synthLib::SMidiEvent>& _messages) const
 	{
-		synthLib::fp::sendParam(_messages, g_paramPageMasterVolume, g_paramIndexMasterVolume, static_cast<int32_t>(m_masterVolume * 100.0f));
+		synthLib::fp::sendParam(_messages, g_paramPageCustom, g_paramIndexMasterVolume, static_cast<int32_t>(m_masterVolume * 100.0f));
+
+		for (size_t i=0; i<m_inputLevel.size(); ++i)
+			synthLib::fp::sendParam(_messages, g_paramPageCustom, static_cast<uint8_t>(g_paramIndexInputLevel + i), m_inputLevel[i]);
 	}
 }

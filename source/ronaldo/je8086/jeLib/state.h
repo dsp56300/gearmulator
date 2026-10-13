@@ -5,7 +5,6 @@
 #include <optional>
 #include <vector>
 #include <string>
-#include <map>
 
 #include "jemiditypes.h"
 #include "common/storage.h"
@@ -48,8 +47,6 @@ namespace jeLib
 		static Dump& createFooter(Dump& _dump);
 
 		static rLib::Storage::Address4 toAddress(uint32_t _addr);
-		static UserPatchArea userPatchArea(uint32_t _index);
-		static UserPerformanceArea userPerformanceArea(uint32_t _index);
 
 		static rLib::Storage::Address4 toAddress(PerformanceData _performanceData, Patch _param);
 		static rLib::Storage::Address4 toAddress(PerformanceData _performanceData, Part _param);
@@ -65,6 +62,7 @@ namespace jeLib
 		static Dump createParameterChange(PerformanceData _performanceData, Patch _param, int _paramValue);
 		static Dump createParameterChange(PerformanceData _performanceData, Part _param, int _paramValue);
 		static Dump createParameterChange(PerformanceCommon _param, int _paramValue);
+		static Dump createParameterChange(VoiceModulator _param, int _paramValue);
 		static Dump createParameterChange(SystemParameter _param, int _paramValue);
 
 		static Dump createPerformanceRequest(AddressArea _area, UserPerformanceArea _performanceArea);
@@ -82,6 +80,5 @@ namespace jeLib
 	private:
 		rLib::Storage m_tempPerformance;
 		rLib::Storage m_system;
-		std::map<uint32_t, Dump> m_stateDumps;
 	};
 }

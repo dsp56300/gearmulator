@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Gearmulator is a low-level IC emulator that recreates classic virtual analog synthesizers (Access Virus, Waldorf microQ/XT, Clavia Nord Lead 2x, Roland JP-8000) by emulating original DSP56300, MC68K and H8S processors and running authentic firmware ROMs as audio plugins (FST, VST3, AU, CLAP, LV2).
+Gearmulator is a low-level IC emulator that recreates classic virtual analog synthesizers (Access Virus, Waldorf microQ/XT, Clavia Nord Lead 2x, Roland JP-8000/JP-8080) by emulating original DSP56300, MC68K and H8/300H processors and running authentic firmware ROMs as audio plugins (FST, VST3, AU, CLAP, LV2).
 
 The project emphasises **accuracy of emulation over shortcuts** — the goal is to run original firmware bit-identically to hardware.
 
@@ -58,7 +58,7 @@ codenames to stay clear of trademarks (`ronaldo` = Roland, and so on).
 source/
 ├── cmake/        build glue: juce.cmake, skins.cmake, base.cmake, xcodeversion.cmake, …
 ├── 3rdparty/     everything not written by us — see source/3rdparty/README.md
-├── cpu/          processor cores: dsp56300, mc68k, h8s
+├── cpu/          processor cores: dsp56300, mc68k, h8300h (+ common/ bus, scheduler)
 ├── framework/    synth-agnostic code
 │   ├── baseLib/ synthLib/ hardwareLib/ networkLib/
 │   ├── juce/     jucePluginLib, jucePluginEditorLib, juceRmlUi, juceRmlPlugin,
@@ -83,7 +83,7 @@ includes like `../../foo/bar.h` — they break the next time anything moves.
 
 ## Architecture
 
-**Emulation stack:** DSP56300 emulator (`source/cpu/dsp56300/`, JIT via asmjit; peripherals ESAI and HDI08) + MC68K emulator (`source/cpu/mc68k/`, Musashi) + H8S core (`source/cpu/h8s/`). Each synth has a device library that loads firmware ROMs, initializes processor memory, and handles MIDI/audio via HDI08.
+**Emulation stack:** DSP56300 emulator (`source/cpu/dsp56300/`, JIT via asmjit; peripherals ESAI and HDI08) + MC68K emulator (`source/cpu/mc68k/`, Musashi) + H8/300H core (`source/cpu/h8300h/`, on the `source/cpu/common/` bus and scheduler). Each synth has a device library that loads firmware ROMs, initializes processor memory, and handles MIDI/audio via HDI08.
 
 **Per-synth pattern:**
 | Emulator | Hardware | Device Lib | Plugin Dir |
@@ -93,7 +93,7 @@ includes like `../../foo/bar.h` — they break the next time anything moves.
 | Vavra | Waldorf microQ | `waldi/common/mqLib/` | `waldi/microq/mqJucePlugin/` |
 | Xenia | Waldorf MW II/XT | `waldi/xt/xtLib/` | `waldi/xt/xtJucePlugin/` |
 | Nodal Red 2x | Nord Lead/Rack 2x | `claudia/n2x/n2xLib/` | `claudia/n2x/n2xJucePlugin/` |
-| JE-8086 | Roland JP-8000 | `ronaldo/je8086/jeLib/` | `ronaldo/je8086/jeJucePlugin/` |
+| JE-8086 | Roland JP-8000 / JP-8080 | `ronaldo/je8086/jeLib/` | `ronaldo/je8086/jeJucePlugin/` |
 | DSPBridge | Network bridge | `framework/tools/bridge/` | — |
 
 Shared per-manufacturer code: `waldi/common/wLib/` (microQ + XT), `ronaldo/common/` and `ronaldo/custom_chips/` (Roland).

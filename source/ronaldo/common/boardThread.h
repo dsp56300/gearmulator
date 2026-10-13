@@ -7,6 +7,7 @@
 #include <iterator>
 #include <mutex>
 #include <thread>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -18,19 +19,28 @@
 namespace rLib
 {
 	// Runs a board on a worker thread. TBoard provides SampleFrame renderSample(), addMidiEvent(const SMidiEvent&)
-	// and readMidiOut(std::vector<SMidiEvent>&).
+	// and readMidiOut(std::vector<SMidiEvent>&). A board with audio input also provides setInput(const SampleFrame&),
+	// called with its input frame before every renderSample().
 	//
-	// Latency is added by letting the board run ahead of the host, MIDI is scheduled that many samples later so it
-	// lands on the same board sample for any latency. Without latency and with the worker idle, the calling thread
-	// renders the board itself.
+	// Latency is added by letting the board run ahead of the host, MIDI and audio input are scheduled that many samples
+	// later so they land on the same board sample for any latency. Without latency and with the worker idle, the
+	// calling thread renders the board itself.
 	template<typename TBoard>
 	class BoardThread
 	{
 	public:
 		using SampleFrame = std::pair<int32_t, int32_t>;
 
+	private:
+		template<typename T, typename = void> struct HasInput : std::false_type {};
+		template<typename T> struct HasInput<T, std::void_t<decltype(std::declval<T&>().setInput(SampleFrame{}))>> : std::true_type {};
+		static constexpr bool BoardHasInput = HasInput<TBoard>::value;
+
+	public:
 		BoardThread(TBoard& _board, const char* _threadName) : m_board(_board), m_threadName(_threadName), m_ring(RingSize)
 		{
+			if constexpr (BoardHasInput)
+				m_inputRing.resize(RingSize);
 			m_thread = std::thread([this] { threadFunc(); });
 		}
 
@@ -47,8 +57,9 @@ namespace rLib
 		BoardThread(const BoardThread&) = delete;
 		BoardThread& operator=(const BoardThread&) = delete;
 
-		// Returns _count frames, valid until the next call. MIDI output of the board is appended to _midiOut
-		const SampleFrame* process(const uint32_t _count, const uint32_t _requiredLatency, std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
+		// Returns _count frames, valid until the next call. MIDI output of the board is appended to _midiOut.
+		// _input, if not null, holds _count frames of audio input for a board that takes it
+		const SampleFrame* process(const uint32_t _count, const uint32_t _requiredLatency, std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut, const SampleFrame* _input = nullptr)
 		{
 			// an event due before its job starts is applied at the job start, behind the ones already pending
 			const uint64_t jobStart = m_scheduledSamples;
@@ -59,6 +70,21 @@ namespace rLib
 				m_newMidi.emplace_back(std::max(offset, jobStart), std::move(e));
 			}
 			_midiIn.clear();
+
+			// Input frames go to the board samples they are due at. They all lie in this job, which nothing renders
+			// yet; a frame due before the job start belongs to a latency that was just removed and is dropped
+			if constexpr (BoardHasInput)
+			{
+				if (_input)
+				{
+					for (uint32_t i = 0; i < _count; ++i)
+					{
+						const uint64_t at = m_inSampleOffset + i + _requiredLatency;
+						if (at >= jobStart)
+							m_inputRing[at & RingMask] = _input[i];
+					}
+				}
+			}
 
 			m_inSampleOffset += _count;
 
@@ -225,6 +251,10 @@ namespace rLib
 				while (midiRead < m_pendingMidi.size() && m_pendingMidi[midiRead].first <= m_processed)
 					m_board.addMidiEvent(m_pendingMidi[midiRead++].second);
 
+				// cleared once used, a sample whose input never came gets silence
+				if constexpr (BoardHasInput)
+					m_board.setInput(std::exchange(m_inputRing[m_processed & RingMask], SampleFrame{}));
+
 				_dst[i] = m_board.renderSample();
 				++m_processed;
 
@@ -270,5 +300,9 @@ namespace rLib
 		std::vector<SampleFrame> m_ring;
 		uint64_t m_ringWrite = 0;
 		uint64_t m_ringRead = 0;
+
+		// audio input by board sample: the audio thread fills a job's samples before requesting it, the renderer reads
+		// and clears samples of jobs requested earlier
+		std::vector<SampleFrame> m_inputRing;
 	};
 }

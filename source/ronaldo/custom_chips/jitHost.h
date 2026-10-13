@@ -10,8 +10,7 @@
 //   1. give it a CHIPS_JIT_<host> macro below,
 //   2. add <chip>_jit_<host>.h next to the existing ones and select it in <chip>_jit.h.
 //
-// The ESP takes its back end from here too but has no interpreter, so it builds on the x86-64
-// and arm64 hosts only.
+// The ESP has asmjit back ends only (esp/esp_jit_backend.h); elsewhere it runs its interpreter.
 //
 // Exactly one CHIPS_JIT_<host> is 1. CHIPS_JIT_WASM is the Emscripten build: the back ends emit
 // WebAssembly with framework/wasmJit and the JavaScript host compiles it, possibly some time

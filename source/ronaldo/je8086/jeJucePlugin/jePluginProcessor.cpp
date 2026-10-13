@@ -9,6 +9,7 @@
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
+#include "baseLib/binarystream.h"
 #include "jeLib/device.h"
 #include "jeLib/romloader.h"
 #include "jucePluginLib/processorPropertiesInit.h"
@@ -25,24 +26,35 @@ namespace jeJucePlugin
 	                   .withInput("Input", juce::AudioChannelSet::stereo(), true)
 		, {}, pluginLib::initProcessorProperties())
 	{
+		// findROMs() lists the JP-8000 images first, so the default, index 0, is the keyboard whenever there is one
 		m_roms = jeLib::RomLoader::findROMs();
 
-		// default to keyboard for now
-		m_selectedRom = std::numeric_limits<size_t>::max();
-		for (size_t i=0; i<m_roms.size(); ++i)
-		{
-			if (m_roms[i].getDeviceType() != jeLib::DeviceType::Keyboard)
-				continue;
-			m_selectedRom = i;
-			break;
-		}
+		std::vector<std::string> names;
+		names.reserve(m_roms.size());
+		for (const auto& rom : m_roms)
+			names.push_back(rom.getName());
 
-		// FIXME clear rom list if there is no keyboard rom to prevent that the rack rom is used
-		if (m_selectedRom == std::numeric_limits<size_t>::max())
+		// "ROM " v1: the device type, then the name. Of several images that match, the first one wins
+		FirmwareChunk chunk{"ROM ", 1};
+		chunk.write = [this](baseLib::BinaryStream& _s, const uint32_t _index)
 		{
-			m_roms.clear();
-			m_selectedRom = 0;
-		}
+			const auto& rom = m_roms[_index];
+			_s.write(static_cast<uint8_t>(rom.getDeviceType()));
+			_s.write(rom.getName());
+		};
+		chunk.find = [this](baseLib::BinaryStream& _s, uint32_t) -> std::optional<uint32_t>
+		{
+			const auto type = static_cast<jeLib::DeviceType>(_s.read<uint8_t>());
+			const auto name = _s.readString();
+
+			for (uint32_t i = 0; i < m_roms.size(); ++i)
+			{
+				if (m_roms[i].getDeviceType() == type && m_roms[i].getName() == name)
+					return i;
+			}
+			return {};
+		};
+		setFirmwareImages(std::move(names), std::move(chunk));
 
 		setPatchManager(new PatchManager(*this));
 	}
@@ -65,7 +77,7 @@ namespace jeJucePlugin
 		const auto& rom = getSelectedRom();
 
 		if (!rom.isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (a single 512k .bin file or multiple .mid files) is required, but was not found.");
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "No firmware found. The JP-8000 needs its flash image (.bin) or the complete set of update .mid files, the JP-8080 a complete 1 MB flash dump (.bin).");
 
 		const auto& data = rom.getData();
 		_params.romData.assign(data.begin(), data.end());
@@ -79,14 +91,12 @@ namespace jeJucePlugin
 
 	const jeLib::Rom& AudioPluginAudioProcessor::getSelectedRom() const
 	{
-		if (m_roms.empty())
+		if (getFirmwareIndex() >= m_roms.size())
 		{
 			static jeLib::Rom emptyRom;
 			return emptyRom;
 		}
-		if (getSelectedRomIndex() >= m_roms.size())
-			return m_roms.back();
-		return m_roms[m_selectedRom];
+		return m_roms[getFirmwareIndex()];
 	}
 }
 

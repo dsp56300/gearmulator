@@ -4,8 +4,11 @@
 
 #include "jucePluginLib/patchdb/patch.h"
 
+#include "baseLib/event.h"
+
 namespace jucePluginEditorLib
 {
+	class FirmwareSelector;
 	class FrontPanel;
 	class Processor;
 }
@@ -43,8 +46,12 @@ namespace jeJucePlugin
 	private:
 		void onBtWrite(Rml::Event& _event) const;
 		bool createWritePatchesMenu(juceRmlUi::Menu& _menu) const;
+		void onFirmwareChanged();
 
 		Controller& m_controller;
+
+		std::unique_ptr<jucePluginEditorLib::FirmwareSelector> m_firmwareSelector;
+		baseLib::EventListener<uint32_t> m_onFirmwareChanged;
 
 		std::array<std::string, 4> m_activePatchNames;
 

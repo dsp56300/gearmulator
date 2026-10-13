@@ -1,17 +1,16 @@
 #pragma once
 
-#include <h8s/h8s.hpp>
-
-#include "hardwareLib/lcd.h"
+#include "common/device.hpp"
+#include "hardwareLib/hd44780.h"
 
 namespace jeLib
 {
-	class Lcd : public H8SDevice, public hwLib::LCD
+	class Lcd : public emu::Device, public hwLib::Hd44780
 	{
 	public:
 		Lcd();
 
-		void write(uint32_t _addr, uint8_t _val) override;
-		uint8_t read(uint32_t _addr) override;
+		void write8(uint32_t _addr, uint8_t _val) override;
+		uint8_t read8(uint32_t _addr) override;
 	};
 }

@@ -485,12 +485,12 @@
 			
 			<!-- ext input -->
 			<div data-class-juceConditionDisabled="deviceModel!='rack'" data-model="plugin" class="abs" style="left: 1740dp; top:304dp;">
-				<knob class="abs knob" style="left: 133dp; top: 59dp;"></knob>
+				<knob class="abs knob" param="InputLevelInstLower" style="left: 133dp; top: 59dp;"></knob>
 				<button class="ledBlue" style="left: 153dp; top: -7dp;"/>
-				<knob class="abs knob" style="left: 456dp; top: 59dp;"></knob>
+				<knob class="abs knob" param="InputLevelVocalUpper" style="left: 456dp; top: 59dp;"></knob>
 				<button class="ledBlue" style="left: 478dp; top: -7dp;"/>
-				<button class="ledRed2" style="top: 54dp; width: 115dp; left: 604dp"/>
-				<button class="ledRed2" style="top: 94dp; width: 115dp; left: 604dp"/>
+				<button class="ledRed2" param="VocalUpperInputJackFrontRear" valueOn="0" isToggle="1" style="top: 54dp; width: 115dp; left: 604dp"/>
+				<button class="ledRed2" param="VocalUpperInputJackFrontRear" valueOn="1" isToggle="1" style="top: 94dp; width: 115dp; left: 604dp"/>
 			</div>	
 			
 			<!-- Dynamic -->
@@ -554,11 +554,7 @@
 			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 346dp; top: 198dp;"/>
 			<img id="shadow" class="jucePos" src="tab_rack_shadow.png" style="left: 521dp; top: 198dp;"/>
 		
-			<div data-class-juceConditionDisabled="!(VoiceModulatorSwitch_value == 0)" data-model="part0" class="abs">
-				<button tabbutton="0" tabgroup="main" class="abs btTabRack btTabMainRack" style="left: 157dp; top: 183dp;"/>			
-			</div>			
-			<div id="NoMainWithModVoice" data-class-juceConditionDisabled="!(VoiceModulatorSwitch_value == 1)" data-model="part0" class="jucePos" style="left: 157dp; top: 183dp; width: 198dp; height: 91dp; opacity: 0.5; decorator: image(tab_main_rack_off scale-none left top);">			
-			</div>			
+			<button tabbutton="0" tabgroup="main" class="abs btTabRack btTabMainRack" style="left: 157dp; top: 183dp;"/>
 			
 			<button tabbutton="1" tabgroup="main" class="abs btTabRack btTabPatchManagerRack" style="left: 332dp; top: 183dp;"/>	
 			<button tabbutton="2" tabgroup="main" class="abs btTabRack btTabVoiceModRack" style="left: 507dp; top: 183dp;"/>				
