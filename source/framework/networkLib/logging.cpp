@@ -1,6 +1,7 @@
 #include "logging.h"
 
 #include <iostream>
+#include <mutex>
 
 #include <cstdint>
 
@@ -18,6 +19,10 @@ namespace networkLib
 
 	void logStdOut(LogLevel _level, const char* _func, int _line, const std::string& _message)
 	{
+		// every connection logs from its own thread, one line at a time
+		static std::mutex mutex;
+		std::lock_guard lock(mutex);
+
 		std::cout << g_logLevelNames[static_cast<uint32_t>(_level)] << ": " << _func << '@' << _line << ": " << _message << '\n';
 	}
 

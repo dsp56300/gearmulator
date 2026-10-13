@@ -119,15 +119,16 @@ namespace emu88Player
 
 		// A row of the parameters: the label, then a choice, or a slider with its value
 		std::string controlRow(const std::string& _id, const std::string& _label, const bool _choice, const int _min,
-			const int _max, const bool _channelOnly)
+			const int _max, const bool _channelOnly, const std::string& _note = {})
 		{
 			std::ostringstream rml;
 			rml << "<div class=\"peRow" << (_channelOnly ? " channelOnly" : "") << "\"";
 			if(_channelOnly)
 				rml << " title=\"Set with a channel message, on the part's MIDI channel. "
 				       "The device cannot be asked for it.\"";
-			rml << "><div id=\"peLbl" << _id << "\" class=\"peRowLabel\" title=\"Double-click for the default\">"
-			    << encode(_label) << "</div>";
+			rml << "><div id=\"peLbl" << _id << "\" class=\"peRowLabel\" title=\""
+			    << encode(_note.empty() ? "Double-click for the default" : _note + " Double-click for the default.")
+			    << "\">" << encode(_label) << "</div>";
 			if(_choice)
 				rml << "<combo id=\"peCtl" << _id << "\" class=\"peCombo\" popup=\"window\"><combotext/></combo>";
 			else
@@ -204,6 +205,9 @@ namespace emu88Player
 		// A solo lasts as long as the window: the parts it muted play again
 		m_soloed = 0;
 		applySolo();
+		// The content goes while it is still in the window, see SettingsWindow::reloadContent()
+		m_root = nullptr;
+		m_rml.reset();
 		clearContentComponent();
 	}
 
@@ -511,8 +515,11 @@ namespace emu88Player
 					rml << "<div class=\"peSection\"><div class=\"peSectionTitle\">" << encode(p.section) << "</div>";
 				}
 				const auto [min, max] = gs::valueRange(p, m_model);
+				// The SC-55 and SC-155 store a cutoff of +16 at most, whatever they are sent
+				const auto note = p.nrpnMsb == 1 && max < 0x72
+					? "This board takes up to " + gs::formatValue(p, max) + " only." : std::string();
 				rml << controlRow(controlId(_global, i), p.label, !gs::valueChoices(p).empty(), min, max,
-					!gs::hasAddress(p, m_model));
+					!gs::hasAddress(p, m_model), note);
 				if(p.text == gs::ParamText::EfxType)
 					rml << "<div id=\"peEfxParams\" class=\"peEfxParams\"/>";
 			}

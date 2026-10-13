@@ -4,6 +4,11 @@
 
 #include "RmlUi/Core/Plugin.h"
 
+namespace juceRmlUi
+{
+	struct RmlInterfaces;
+}
+
 namespace rmlPlugin
 {
 	class RmlPluginDocument;
@@ -53,6 +58,9 @@ namespace rmlPlugin
 
 		Rml::CoreInstance& m_coreInstance;
 		pluginLib::Controller& m_controller;
+
+		// known once a context exists. Tearing the bindings down changes the DOM, which needs the access lock
+		juceRmlUi::RmlInterfaces* m_rmlInterfaces = nullptr;
 
 		std::map<Rml::Context*, std::unique_ptr<RmlPluginContext>> m_contexts;
 

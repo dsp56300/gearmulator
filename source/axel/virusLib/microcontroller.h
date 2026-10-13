@@ -49,6 +49,7 @@ public:
 
 	void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
 	void sendPendingMidiEvents(uint32_t _maxOffset);
+	void refillMidiQueues();	// audio thread, before each block, see Hdi08MidiQueue::refill
 	Hdi08MidiQueue& getMidiQueue(size_t _index) { return m_midiQueues[_index]; }
 	bool enableMidiTimestamps();
 	void enableHdi08FlowControl();
@@ -145,6 +146,9 @@ private:
 	std::vector<synthLib::SMidiEvent> m_midiOutput;
 	std::vector<synthLib::SMidiEvent> m_dspMidiOutput;	// what the DSPs sent since readMidiOut
 
+	// The audio thread sends MIDI, the DSP thread sends pending presets in process() and the host saves and loads the
+	// state from a third one. Guards the presets, the global settings, the pending writes and inputs, the TX parsers
+	// and the writing side of the MIDI queues, and m_loadingState
 	mutable std::recursive_mutex m_mutex;
 	bool m_loadingState = false;
 };

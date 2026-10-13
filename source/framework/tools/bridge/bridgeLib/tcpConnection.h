@@ -28,6 +28,8 @@ namespace bridgeLib
 	class TcpConnection : CommandReader, protected networkLib::NetworkThread
 	{
 	public:
+		// The network thread dispatches to the derived class and fills its members, so the derived class calls
+		// start() at the end of its constructor and shutdown() first thing in its destructor
 		TcpConnection(std::unique_ptr<networkLib::TcpStream>&& _stream);
 		~TcpConnection() override;
 

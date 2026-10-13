@@ -354,6 +354,11 @@ void Microcontroller::sendControlCommand(const ControlCommand _command, const ui
 
 void Microcontroller::setSamplerate(const float _samplerate)
 {
+	// The TI's command. The A, B and C run at the fixed 46875 Hz of their crystal and take it as a page D change of the
+	// single, after which the single in the DSP no longer plays a note until one of its parameters changes
+	if(!m_rom.isTIFamily())
+		return;
+
 	const auto sr = static_cast<int>(std::floor(_samplerate + 0.5f));
 	
 	/*
@@ -436,13 +441,14 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 
 bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/* = nullptr*/)
 {
+	// the audio thread sends MIDI, the DSP thread writes the edit buffers in process()
+	std::lock_guard lock(m_mutex);
+
 	// The DSP loses a parameter change that reaches it while it still takes a preset, and the preset it sends back
 	// replaces the edit buffer without it. So channel messages wait until the DSP confirmed the preset, in the
 	// order they arrived, like everything behind them (BUG-10425)
 	if(_ev.source != MidiEventSource::Internal && (_ev.a & 0xf0) != 0xf0)
 	{
-		std::lock_guard lock(m_mutex);
-
 		if(!m_pendingInput.empty() || presetWriteInProgress())
 		{
 			m_pendingInput.push_back({_ev, _fpState});
@@ -535,6 +541,8 @@ bool Microcontroller::sendSysex(const synthLib::SysexBuffer& _data, std::vector<
 {
 	if (_data.size() < 7)
 		return true;	// invalid sysex or not directed to us
+
+	std::lock_guard lock(m_mutex);
 
 	const auto manufacturerA = _data[1];
 	const auto manufacturerB = _data[2];
@@ -953,6 +961,8 @@ bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _re
 
 bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data)
 {
+	std::lock_guard lock(m_mutex);
+
 	_data[0] = 0;
 
 	if (_bank == BankNumber::EditBuffer)
@@ -974,6 +984,8 @@ bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& 
 
 bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data)
 {
+	std::lock_guard lock(m_mutex);
+
 	if (_bank == BankNumber::EditBuffer)
 	{
 		receiveUpgradedPreset();
@@ -993,6 +1005,8 @@ bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset&
 
 bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data)
 {
+	std::lock_guard lock(m_mutex);
+
 	if (_bank != BankNumber::EditBuffer) 
 	{
 		const auto bank = toArrayIndex(_bank);
@@ -1019,6 +1033,8 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 
 bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data)
 {
+	std::lock_guard lock(m_mutex);
+
 	if(_bank == BankNumber::A && _program < m_multis.size())
 	{
 		m_multis[_program] = _data;
@@ -1135,6 +1151,9 @@ void Microcontroller::process()
 
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
 {
+	// held for both requests, the DSP thread must not change the edit buffers in between
+	std::lock_guard lock(m_mutex);
+
 	const auto deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
 
 	std::vector<SMidiEvent> responses;
@@ -1187,6 +1206,9 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 {
 	if(_events.empty())
 		return false;
+
+	// held for the whole load, process() on the DSP thread must not send presets while it runs
+	std::lock_guard lock(m_mutex);
 
 	// delay all preset loads until everything is loaded
 	m_loadingState = true;
@@ -1298,6 +1320,14 @@ void Microcontroller::enableHdi08FlowControl()
 {
 	for (size_t i=0; i<m_hdi08.size(); ++i)
 		m_hdi08.getQueue(i).enableFlowControl(m_rom.isTIFamily());
+}
+
+void Microcontroller::refillMidiQueues()
+{
+	std::lock_guard lock(m_mutex);
+
+	for (auto& midiQueue : m_midiQueues)
+		midiQueue.refill();
 }
 
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)

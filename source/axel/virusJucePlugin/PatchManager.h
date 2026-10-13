@@ -9,6 +9,9 @@
 #include "virusLib/microcontrollerTypes.h"
 #include "virusLib/romfile.h"
 
+#include <array>
+#include <mutex>
+
 namespace virus
 {
 	class Controller;
@@ -59,6 +62,7 @@ namespace genericVirusUI
 		void addRomPatches();
 		void removeRomPatches();
 		bool loadRamBankData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program);
+		void updateRamBank(uint32_t _bank);
 		bool loadRomBankData(pluginLib::patchDB::DataList& _results, uint32_t _romBank, uint32_t _program);
 		bool loadRomArrangements(pluginLib::patchDB::DataList& _results, uint32_t _program);
 		pluginLib::patchDB::DataSource createDataSource(uint32_t _controllerBank) const;
@@ -79,5 +83,10 @@ namespace genericVirusUI
 		virus::VirusProcessor& m_processor;
 		std::vector<pluginLib::patchDB::DataSource> m_romDataSources;
 		baseLib::EventListener<uint32_t> m_onRomChanged;
+
+		// The loader thread reads the RAM banks from this copy. The banks of the controller change on the message
+		// thread, which copies a bank here when it is complete
+		std::mutex m_ramBanksMutex;
+		std::array<std::vector<pluginLib::patchDB::Data>, 2> m_ramBanks;
 	};
 }

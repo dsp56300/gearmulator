@@ -11,6 +11,7 @@ namespace bridgeServer
 	public:
 		// discovery listens on the fixed UDP port the clients broadcast to, and reports the TCP port to connect to
 		explicit UdpServer(uint32_t _portTcp);
+		~UdpServer();
 
 		std::vector<uint8_t> validateRequest(const std::vector<uint8_t>& _request) override;
 

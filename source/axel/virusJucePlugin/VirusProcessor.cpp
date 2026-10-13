@@ -1,5 +1,4 @@
 #include "VirusProcessor.h"
-#include "ParameterNames.h"
 #include "VirusController.h"
 #include "PatchManager.h"
 
@@ -32,12 +31,9 @@ namespace virus
 	{
 		// clamp to virus range, 63-190
 		const auto bpmValue = juce::jmin(127, juce::jmax(0, static_cast<int>(_bpm)-63));
-		const auto clockParam = getController().getParameter(m_clockTempoParam, 0);
 
-		if (clockParam == nullptr || clockParam->getUnnormalizedValue() == bpmValue)
-			return;
-
-		clockParam->setUnnormalizedValue(bpmValue, pluginLib::Parameter::Origin::HostAutomation);
+		// this is the audio thread, the controller sets the parameter on the message thread
+		static_cast<Controller&>(getController()).setHostClockTempo(bpmValue);
 	}
 
 	void VirusProcessor::postConstruct(std::vector<virusLib::ROMFile>&& _roms)
@@ -71,7 +67,8 @@ namespace virus
 				return found;
 			}});
 
-		m_clockTempoParam = getController().getParameterIndexByName(virus::g_paramClockTempo);
+		// processBpm() uses the controller on the audio thread, it has to exist before audio runs
+		getController();
 
 		m_onFirmwareChanged.set(evFirmwareChanged, [this](uint32_t)
 		{

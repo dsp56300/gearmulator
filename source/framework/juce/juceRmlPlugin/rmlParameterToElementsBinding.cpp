@@ -4,6 +4,7 @@
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemKnob.h"
+#include "juceRmlUi/rmlInterfaces.h"
 
 #include "juce_events/juce_events.h"
 
@@ -25,6 +26,8 @@ namespace rmlPlugin
 				{
 					if (!_param)
 						return;
+
+					juceRmlUi::RmlInterfaces::ScopedAccess access(m_binding.getRmlComponent());
 
 					// a new range or step makes the elements clamp and snap their value, which is not a user edit
 					IgnoreChangeEvents ignore(*this);
@@ -92,15 +95,20 @@ namespace rmlPlugin
 		}
 		else
 		{
-			juce::MessageManager::callAsync([this]()
+			juce::MessageManager::callAsync([this, alive = std::weak_ptr(m_alive)]()
 			{
-				updateElementsFromParameter();
+				if (!alive.expired())
+					updateElementsFromParameter();
 			});
 		}
 	}
 
 	void ParameterToElementsBinding::updateElementsFromParameter()
 	{
+		// a parameter change comes from the message loop without the access lock, and the render thread walks these
+		// elements. RmlUi's own change events already hold it, the lock is recursive
+		juceRmlUi::RmlInterfaces::ScopedAccess access(m_binding.getRmlComponent());
+
 		IgnoreChangeEvents ignore(*this);
 
 		for (auto* element : m_elements)

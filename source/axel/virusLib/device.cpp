@@ -29,6 +29,8 @@ namespace virusLib
 		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
 		m_dsp.reset(dsp1);
 
+		m_dspClockPercent = m_dsp->getEsxiClock().getSpeedPercent();
+
 		m_dsp->getAudio().setCallback([this](dsp56k::Audio*)
 		{
 			onAudioWritten();
@@ -82,7 +84,12 @@ namespace virusLib
 
 	Device::~Device()
 	{
-		m_dsp->getAudio().setCallback(nullptr);
+		// The audio callbacks of the DSP threads use the microcontroller. Replacing a callback does not wait for one
+		// that is running, so the threads have to stop before it goes
+		m_dsp->stopDSPThread();
+		if(m_dsp2)
+			m_dsp2->stopDSPThread();
+
 		m_mc.reset();
 		m_dsp.reset();
 	}
@@ -137,10 +144,22 @@ namespace virusLib
 		if(!synthLib::Device::setSamplerate(_samplerate))
 			return false;
 		m_samplerate = _samplerate;
-		configureDSP(*m_dsp, m_rom, m_samplerate);
+
+		// The JIT configuration does not depend on the samplerate, the clock does, and the DSP threads use it while they
+		// run. The firmware learns about the new samplerate after DSP A got its clock
+		m_dsp->runOnDspThread([this, _samplerate]
+		{
+			configureClock(*m_dsp, m_rom, _samplerate);
+			m_mc->setSamplerate(_samplerate);
+		});
+
 		if(m_dsp2)
-			configureDSP(*m_dsp2, m_rom, m_samplerate);
-		m_mc->setSamplerate(_samplerate);
+		{
+			m_dsp2->runOnDspThread([this, _samplerate]
+			{
+				configureClock(*m_dsp2, m_rom, _samplerate);
+			});
+		}
 		return true;
 	}
 
@@ -621,9 +640,13 @@ namespace virusLib
 		auto inputs(_inputs);
 		auto outputs(_outputs);
 
+		m_mc->refillMidiQueues();
+
 		while(_samples > maxBlockSize)
 		{
 			m_dsp->processAudio(inputs, outputs, maxBlockSize, getExtraLatencySamples());
+
+			m_mc->refillMidiQueues();
 
 			_samples -= maxBlockSize;
 
@@ -651,28 +674,15 @@ namespace virusLib
 
 	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom, const float _samplerate)
 	{
+		configureClock(_dsp, _rom, _samplerate);
+
 		auto& jit = _dsp.getJIT();
 		auto conf = jit.getConfig();
 
 		if(_rom.isTIFamily())
 		{
-			auto& clock = _dsp.getPeriphX().getEsaiClock();
-
-			const auto sr = static_cast<int>(_samplerate);
-
-			clock.setExternalClockFrequency(std::min(sr, 48000) * 256);
-
-			if(_rom.getModel() != DeviceModel::Snow)
-			{
-				clock.setSamplerate(sr * 3);
-				clock.setEsaiDivider(&_dsp.getPeriphY().getEsai(), 0);
-				clock.setEsaiDivider(&_dsp.getPeriphX().getEsai(), 2);
-			}
-
 			conf.aguSupportBitreverse = true;
 			conf.maxDoIterations = 32;
-
-			clock.setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 		}
 		else
 		{
@@ -687,6 +697,27 @@ namespace virusLib
 		}
 
 		jit.setConfig(conf);
+	}
+
+	void Device::configureClock(DspSingle& _dsp, const ROMFile& _rom, const float _samplerate)
+	{
+		if(!_rom.isTIFamily())
+			return;
+
+		auto& clock = _dsp.getPeriphX().getEsaiClock();
+
+		const auto sr = static_cast<int>(_samplerate);
+
+		clock.setExternalClockFrequency(std::min(sr, 48000) * 256);
+
+		if(_rom.getModel() != DeviceModel::Snow)
+		{
+			clock.setSamplerate(sr * 3);
+			clock.setEsaiDivider(&_dsp.getPeriphY().getEsai(), 0);
+			clock.setEsaiDivider(&_dsp.getPeriphX().getEsai(), 2);
+		}
+
+		clock.setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 	}
 
 	std::thread Device::bootDSP(DspSingle& _dsp, const ROMFile& _rom, const bool _createDebugger)
@@ -717,6 +748,35 @@ namespace virusLib
 			_clocks.push_back(&m_dsp->getEsxiClock());
 		if(m_dsp2)
 			_clocks.push_back(&m_dsp2->getEsxiClock());
+	}
+
+	bool Device::setDspClockPercent(const uint32_t _percent)
+	{
+		if(!m_dsp || !_percent)
+			return false;
+
+		m_dspClockPercent = _percent;
+
+		// the DSP threads use the clock while they run, each one changes its own
+		m_dsp->runOnDspThread([dsp = m_dsp.get(), _percent]
+		{
+			dsp->getEsxiClock().setSpeedPercent(_percent);
+		});
+
+		if(m_dsp2)
+		{
+			m_dsp2->runOnDspThread([dsp = m_dsp2, _percent]
+			{
+				dsp->getEsxiClock().setSpeedPercent(_percent);
+			});
+		}
+
+		return true;
+	}
+
+	uint32_t Device::getDspClockPercent() const
+	{
+		return !m_dsp ? 100 : m_dspClockPercent.load();
 	}
 
 	void Device::applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom)

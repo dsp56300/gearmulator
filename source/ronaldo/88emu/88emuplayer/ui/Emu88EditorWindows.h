@@ -457,8 +457,10 @@ namespace emu88Player
 
 		void reloadContent()
 		{
-			clearContentComponent();
+			// The old content goes while it is still in the window. Taken out first, its GL context would detach
+			// without a peer, and on Linux stay registered with the window's: the next expose event calls into it.
 			m_rml.reset();
+			clearContentComponent();
 			juceRmlUi::RmlComponentConfig config;
 			config.refreshRateLimitHz = 30;
 			config.includeDefaultTemplates = false;
@@ -479,6 +481,8 @@ namespace emu88Player
 
 		~SettingsWindow() override
 		{
+			// In the window still, as in reloadContent()
+			m_rml.reset();
 			clearContentComponent();
 		}
 

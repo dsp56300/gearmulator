@@ -779,7 +779,20 @@ namespace juceRmlUi
 
 		if (key != Rml::Input::KI_UNKNOWN)
 		{
-			if (consumed(m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key))))
+			auto modifiers = toRmlModifiers(_key);
+
+#if JUCE_MAC
+			// RmlUi's text fields only know Ctrl for select all, copy, cut and paste. On a Mac those are
+			// Cmd, so Cmd is passed as Ctrl too for just these four - not for every key, or Cmd+Left
+			// would jump a word instead of to the start of the line.
+			if (_key.getModifiers().isCommandDown() &&
+				(key == Rml::Input::KI_A || key == Rml::Input::KI_C || key == Rml::Input::KI_X || key == Rml::Input::KI_V))
+			{
+				modifiers |= Rml::Input::KeyModifier::KM_CTRL;
+			}
+#endif
+
+			if (consumed(m_rmlContext->ProcessKeyDown(key, modifiers)))
 				res = true;
 		}
 		if (res)

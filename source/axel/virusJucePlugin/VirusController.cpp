@@ -82,6 +82,17 @@ namespace virus
 			});
 		}
 
+		m_clockTempo = getParameter(g_paramClockTempo, 0);
+		if(m_clockTempo)
+		{
+			m_clockTempoValue = m_clockTempo->getUnnormalizedValue();
+
+			m_onClockTempoChanged.set(m_clockTempo->onValueChanged, [this](const pluginLib::Parameter* _param)
+			{
+				m_clockTempoValue = _param->getUnnormalizedValue();
+			});
+		}
+
 		// ABC models have different factory presets depending on the used ROM, but for the TI we have all presets from all models loaded anyway so no need to replace them at runtime
 		if(isTIFamily(m_processor.getModel()))
 		{
@@ -97,6 +108,27 @@ namespace virus
 	}
 
     Controller::~Controller() = default;
+
+	void Controller::setHostClockTempo(const int _value)
+	{
+		// The parameter must not be touched here. Whenever it differs from the host tempo, as long as the host tells
+		// one, the message thread sets it to the host tempo again
+		m_hostClockTempo.store(_value, std::memory_order_relaxed);
+
+		if(m_clockTempoValue.load(std::memory_order_relaxed) != _value)
+			triggerAsyncUpdate();
+	}
+
+	void Controller::handleAsyncUpdate()
+	{
+		const auto value = m_hostClockTempo.load(std::memory_order_relaxed);
+
+		if(!m_clockTempo || value < 0 || m_clockTempo->getUnnormalizedValue() == value)
+			return;
+
+		m_clockTempo->setUnnormalizedValue(value, pluginLib::Parameter::Origin::HostAutomation);
+		m_clockTempoValue = m_clockTempo->getUnnormalizedValue();
+	}
 
     bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source)
 	{

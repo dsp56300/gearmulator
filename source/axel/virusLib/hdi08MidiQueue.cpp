@@ -52,6 +52,11 @@ namespace virusLib
 		m_pendingMidiEvents.push_back(ev);
 	}
 
+	void Hdi08MidiQueue::refill()
+	{
+		m_pendingMidiEvents.refill();
+	}
+
 	void Hdi08MidiQueue::sendMidiToDSP(uint8_t _a, const uint8_t _b, const uint8_t _c)
 	{
 		m_lastMidiSample = m_numSamplesWritten;

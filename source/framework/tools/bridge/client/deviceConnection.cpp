@@ -15,6 +15,9 @@ namespace bridgeClient
 
 		// do not send rom data now but only if the server asks for it
 		sendDeviceCreateParams(false);
+
+		// the server answers once the thread runs, which dispatches to us and needs our members
+		start();
 	}
 
 	DeviceConnection::~DeviceConnection()
@@ -54,6 +57,20 @@ namespace bridgeClient
 
 	void DeviceConnection::handleException(const networkLib::NetException& _e)
 	{
+		// Nothing arrives any more, so nobody waits for audio or a reply until the timeout. Taking each mutex
+		// once makes sure that a waiter either sees the flag or already waits when it is notified.
+		m_connectionLost = true;
+
+		{
+			std::lock_guard lock(m_audioMutex);
+		}
+		m_audioCv.notify_all();
+
+		{
+			std::lock_guard lock(m_replyMutex);
+		}
+		m_replyCv.notify_all();
+
 		m_device.onDisconnect();
 	}
 
@@ -70,7 +87,7 @@ namespace bridgeClient
 	{
 		m_audioBuffers.writeInput(_inputs, _size);
 
-		std::unique_lock lock(m_cvWaitMutex);
+		std::unique_lock lock(m_audioMutex);
 
 		const auto haveEnoughOutput = m_audioBuffers.getOutputSize() >= _size;
 
@@ -78,44 +95,47 @@ namespace bridgeClient
 
 		const auto sendSize = m_audioBuffers.getInputSize();
 
-		if(haveEnoughOutput)
+		// Not with the lock held: the write may block until the server reads, the server may wait for us to read
+		// its output, and our network thread needs the lock to take it.
+		lock.unlock();
+
+		assert(haveEnoughOutput || sendSize > 0);
+
+		if(sendSize > 0)
+			sendAudio(m_audioBuffers, m_device.getChannelCountIn(), sendSize);
+
+		lock.lock();
+
+		m_audioCv.wait_for(lock, std::chrono::seconds(g_replyTimeoutSecs), [this, _size]
+		{
+			return m_connectionLost || m_audioBuffers.getOutputSize() >= _size;
+		});
+
+		if(m_audioBuffers.getOutputSize() < _size)
 		{
 			lock.unlock();
 
-			if(sendSize > 0)
-				sendAudio(m_audioBuffers, m_device.getChannelCountIn(), sendSize);
-			m_audioBuffers.readOutput(_outputs, _size);
-		}
-		else
-		{
-			assert(sendSize > 0);
-			sendAudio(m_audioBuffers, m_device.getChannelCountIn(), sendSize);
-
-			m_cvWait.wait_for(lock, std::chrono::seconds(g_replyTimeoutSecs), [this, _size]
-			{
-				return m_audioBuffers.getOutputSize() >= _size;
-			});
-
-			if(m_audioBuffers.getOutputSize() < _size)
+			if(!m_connectionLost)
 			{
 				LOG("Receive timeout, closing connection");
 				close();
-				return false;
 			}
-
-			m_audioBuffers.readOutput(_outputs, _size);
+			return false;
 		}
+
+		// With the lock held, the network thread adds to the output size while we take from it
+		m_audioBuffers.readOutput(_outputs, _size);
 		return true;
 	}
 
 	void DeviceConnection::handleAudio(baseLib::BinaryStream& _in)
 	{
 		{
-			std::unique_lock lock(m_cvWaitMutex);
+			std::lock_guard lock(m_audioMutex);
 			TcpConnection::handleAudio(m_audioBuffers, _in);
 		}
 
-		m_cvWait.notify_one();
+		m_audioCv.notify_all();
 	}
 
 	void DeviceConnection::handleMidi(const synthLib::SMidiEvent& _e)
@@ -138,17 +158,35 @@ namespace bridgeClient
 			bridgeLib::RequestDeviceState s;
 			s.type = _type;
 			send(bridgeLib::Command::RequestDeviceState, s);
-		}, [&](baseLib::BinaryStream& _in)
+		}, [&](baseLib::BinaryStream&)
 		{
-			const auto& s = TcpConnection::getDeviceState().state;
-			_state.insert(_state.end(), s.begin(), s.end());
+			// runs in handleDeviceState(), which holds m_deviceStateMutex
+			const auto& s = TcpConnection::getDeviceState();
+
+			// the server also sends the global state on its own, as a backup
+			if(s.type != _type)
+				return false;
+
+			_state.insert(_state.end(), s.state.begin(), s.state.end());
+			return true;
 		}, bridgeLib::Command::DeviceState);
 	}
 
 	void DeviceConnection::handleDeviceState(baseLib::BinaryStream& _in)
 	{
+		// held across the reply too, it copies what was just received
+		std::lock_guard lock(m_deviceStateMutex);
+
 		TcpConnection::handleDeviceState(_in);
 		onReply(bridgeLib::Command::DeviceState, _in);
+	}
+
+	void DeviceConnection::getLastDeviceState(std::vector<uint8_t>& _state)
+	{
+		std::lock_guard lock(m_deviceStateMutex);
+
+		const auto& s = TcpConnection::getDeviceState().state;
+		_state.insert(_state.end(), s.begin(), s.end());
 	}
 
 	bool DeviceConnection::setDeviceState(const std::vector<uint8_t>& _state, const synthLib::StateType _type)
@@ -156,15 +194,22 @@ namespace bridgeClient
 		if(_state.empty())
 			return false;
 
-		auto& s = TcpConnection::getDeviceState();
+		bridgeLib::DeviceState s;
 		s.state = _state;
 		s.type = _type;
+
+		{
+			// remembered for getLastDeviceState(), sent from our own copy as the network thread may receive into it
+			std::lock_guard lock(m_deviceStateMutex);
+			TcpConnection::getDeviceState() = s;
+		}
 
 		sendAwaitReply([&]
 		{
 			send(bridgeLib::Command::DeviceState, s);
 		}, [](baseLib::BinaryStream&)
 		{
+			return true;
 		}, bridgeLib::Command::DeviceInfo);
 		return true;
 	}
@@ -176,8 +221,9 @@ namespace bridgeClient
 			bridgeLib::SetSamplerate sr;
 			sr.samplerate = _samplerate;
 			send(bridgeLib::Command::SetSamplerate, sr);
-		}, [&](baseLib::BinaryStream&)
+		}, [](baseLib::BinaryStream&)
 		{
+			return true;
 		}, bridgeLib::Command::DeviceInfo);
 	}
 
@@ -188,8 +234,9 @@ namespace bridgeClient
 			bridgeLib::SetUnknownCustomData d;
 			d.data = _state;
 			send(bridgeLib::Command::SetUnknownCustomData, d);
-		}, [&](baseLib::BinaryStream&)
+		}, [](baseLib::BinaryStream&)
 		{
+			return true;
 		}, bridgeLib::Command::DeviceInfo);
 	}
 
@@ -200,57 +247,87 @@ namespace bridgeClient
 			bridgeLib::SetDspClockPercent p;
 			p.percent = _percent;
 			send(bridgeLib::Command::SetDspClockPercent, p);
-		}, [&](baseLib::BinaryStream&)
+		}, [](baseLib::BinaryStream&)
 		{
+			return true;
 		}, bridgeLib::Command::DeviceInfo);
 	}
 
 	void DeviceConnection::onReply(const bridgeLib::Command _command, baseLib::BinaryStream& _in)
 	{
-		std::unique_lock lock(m_cvWaitMutex);
+		std::unique_lock lock(m_replyMutex);
 
-		if(!m_replyFunc || _command != m_replyCommand)
+		// Once only: a second message of the same kind before the caller woke up is not its reply
+		if(!m_replyFunc || m_replyReceived || _command != m_replyCommand)
 			return;
 
 		// Run it while holding the lock. sendAwaitReply only clears m_replyFunc under the same lock, so
 		// whatever the callback refers to is still alive for as long as we are in here.
-		m_replyFunc(_in);
+		if(!m_replyFunc(_in))
+			return;
+
 		m_replyReceived = true;
 
 		lock.unlock();
-		m_cvWait.notify_one();
+		m_replyCv.notify_all();
 	}
 
-	bool DeviceConnection::sendAwaitReply(const std::function<void()>& _send, const std::function<void(baseLib::BinaryStream&)>& _reply, const bridgeLib::Command _replyCommand)
+	bool DeviceConnection::sendAwaitReply(const std::function<void()>& _send, const std::function<bool(baseLib::BinaryStream&)>& _reply, const bridgeLib::Command _replyCommand)
 	{
-		{
-			std::unique_lock lock(m_cvWaitMutex);
-			m_replyFunc = _reply;
-			m_replyCommand = _replyCommand;
-			m_replyReceived = false;
-		}
+		// One request at a time, see m_requestMutex. A caller that overlaps another waits here: replacing the
+		// other's reply callback would make both of them time out and close the connection.
+		std::lock_guard requestLock(m_requestMutex);
 
-		_send();
+		// A request before this one may have timed out and closed the connection, its reply would never come
+		if(m_connectionLost || !isValid())
+			return false;
 
-		std::unique_lock lock(m_cvWaitMutex);
-
-		const auto received = m_cvWait.wait_for(lock, std::chrono::seconds(g_replyTimeoutSecs), [this]
-		{
-			return m_replyReceived;
-		});
+		std::unique_lock lock(m_replyMutex);
+		m_replyFunc = _reply;
+		m_replyCommand = _replyCommand;
+		m_replyReceived = false;
+		lock.unlock();
 
 		// Disarm before returning: a reply that arrives after this point must not run a callback that
 		// refers to our caller's stack any more.
-		m_replyFunc = nullptr;
-		m_replyCommand = bridgeLib::Command::Invalid;
+		const auto disarm = [this]
+		{
+			m_replyFunc = nullptr;
+			m_replyCommand = bridgeLib::Command::Invalid;
+		};
+
+		try
+		{
+			_send();
+		}
+		catch(...)
+		{
+			lock.lock();
+			disarm();
+			throw;
+		}
+
+		lock.lock();
+
+		m_replyCv.wait_for(lock, std::chrono::seconds(g_replyTimeoutSecs), [this]
+		{
+			return m_replyReceived || m_connectionLost;
+		});
+
+		const auto received = m_replyReceived;
+
+		disarm();
+
+		lock.unlock();
 
 		if(received)
 			return true;
 
-		lock.unlock();
-
-		LOG("Receive timeout, closing connection");
-		close();
+		if(!m_connectionLost)
+		{
+			LOG("Receive timeout, closing connection");
+			close();
+		}
 		return false;
 	}
 }

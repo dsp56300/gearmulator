@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <memory>
@@ -62,12 +63,17 @@ namespace bridgeClient
 		void createConnection(const std::string& _host, uint32_t _port);
 
 		bridgeLib::PluginDesc m_pluginDesc;
-		bridgeLib::DeviceDesc m_deviceDesc;
-		std::unique_ptr<DeviceConnection> m_connection;
 
-		std::mutex m_cvWaitMutex;
+		mutable std::mutex m_cvWaitMutex;
 		std::condition_variable m_cvWait;
-		bool m_valid = false;
-		std::string m_serverError;	// why the server refused to create the device, guarded by m_cvWaitMutex
+		std::atomic<bool> m_valid{false};	// cleared by whichever thread notices the connection is gone
+
+		// Guarded by m_cvWaitMutex. The network thread replaces the desc whenever the server sends device info,
+		// which it does after each request, while the audio and message threads read it.
+		bridgeLib::DeviceDesc m_deviceDesc;
+		std::string m_serverError;	// why the server refused to create the device
+
+		// Last, so that it goes first if the constructor throws: its network thread calls back into the members above
+		std::unique_ptr<DeviceConnection> m_connection;
 	};
 }
