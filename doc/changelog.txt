@@ -162,6 +162,13 @@ Framework:
 - [Imp] A MIDI output port that sends slower than the plugin feeds it no longer
         holds up the audio. Messages that do not fit into its queue are dropped.
 
+- [Fix] BUG-10481 A plugin closed while its patch manager was still loading,
+        which a host also does while it scans plugins, could save a patch
+        manager cache without the user's banks and data sources. From then on
+        the patch manager showed them empty, until the file
+        patchmanagerdb.cache was deleted. A cache that is broken this way still
+        has to be deleted once.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
