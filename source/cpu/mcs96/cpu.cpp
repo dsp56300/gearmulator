@@ -88,7 +88,9 @@ void Cpu::sleep(bool power_down) {
 }
 
 DecodedInsn Cpu::decode_at(u16 addr) const {
+  fetching_ = true;
   const DecodedInsn d = decode([&](unsigned i) { return bus_.read8(u16(addr + i)); }, variant_);
+  fetching_ = false;
   return d;
 }
 
@@ -96,6 +98,13 @@ DecodedInsn Cpu::decode_at(u16 addr) const {
 // Instruction cache storage
 
 void Cpu::invalidate_all() { cells_.invalidate_all(); }
+
+void Cpu::invalidate_all_banks() {
+  cells_.invalidate_all();
+  cells_.drop_swapped_banks();
+  if (in_slice_) raise(kPendRefetch);
+  else page_pc_ = kNoPage;
+}
 
 
 void Cpu::invalidate_range(u32 addr, u32 len) {

@@ -35,17 +35,19 @@ namespace emu88Lib
 		Mt32Old,
 		Mt32New,
 		Cm32ln,
+		Mv30,
 	};
 
 	// Curated presentation order. Enum values remain
 	// stable because they are persisted in plugin settings and project state.
-	inline constexpr std::array<DeviceModel, 24> g_deviceMenuOrder = {
+	inline constexpr std::array<DeviceModel, 25> g_deviceMenuOrder = {
 		DeviceModel::Mt32Old,
 		DeviceModel::Mt32New,
 		DeviceModel::Cm32l,
 		DeviceModel::Cm32ln,
 		DeviceModel::Cm32p,
 		DeviceModel::Cm64,
+		DeviceModel::Mv30,
 		DeviceModel::Sc55Mk1,
 		DeviceModel::Sc55Mk2,
 		DeviceModel::Sc55St,
@@ -196,11 +198,11 @@ namespace emu88Lib
 		       _model == DeviceModel::Cm32ln;
 	}
 
-	// The boards with a slot for an SN-U110 series PCM card: the CM-32P, and the CM-64
-	// built on it.
+	// The boards with a slot for an SN-U110 series PCM card: the CM-32P, the CM-64 built on
+	// it, and the MV-30, whose card A slot takes the same cards (its card B slot is not offered).
 	constexpr bool hasPcmCardSlot(const DeviceModel _model)
 	{
-		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64;
+		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64 || _model == DeviceModel::Mv30;
 	}
 
 	// Modules that run in their GM mode and nothing else: construction sets them up, and they

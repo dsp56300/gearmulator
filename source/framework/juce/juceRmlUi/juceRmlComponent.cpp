@@ -872,18 +872,28 @@ namespace juceRmlUi
 			return;
 
 		const bool shiftChanged = _modifiers.isShiftDown() != m_currentModifierKeys.isShiftDown();
+		const bool ctrlChanged = _modifiers.isCtrlDown() != m_currentModifierKeys.isCtrlDown();
 		m_currentModifierKeys = _modifiers;
 
 		RmlInterfaces::ScopedAccess access(*this);
 
-		// Generate a key event to carry the modifier change. JUCE reports Shift only this way, never as
-		// a key press, and can't tell the left key from the right, so a Shift change goes out as the
-		// left Shift key, which a listener can bind like any other.
-		const auto key = shiftChanged ? Rml::Input::KI_LSHIFT : Rml::Input::KI_UNKNOWN;
-		if (shiftChanged ? _modifiers.isShiftDown() : changes > 0)
-			m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_modifiers));
-		else
-			m_rmlContext->ProcessKeyUp(key, toRmlModifiers(_modifiers));
+		// Generate a key event to carry the modifier change. JUCE reports Shift and Ctrl only this way,
+		// never as a key press, and can't tell the left key from the right, so a change goes out as the
+		// left key, which a listener can bind like any other. Ctrl is the Control key on macOS too, not
+		// Command.
+		const auto send = [&](const Rml::Input::KeyIdentifier _key, const bool _down)
+		{
+			if (_down)
+				m_rmlContext->ProcessKeyDown(_key, toRmlModifiers(_modifiers));
+			else
+				m_rmlContext->ProcessKeyUp(_key, toRmlModifiers(_modifiers));
+		};
+		if (shiftChanged)
+			send(Rml::Input::KI_LSHIFT, _modifiers.isShiftDown());
+		if (ctrlChanged)
+			send(Rml::Input::KI_LCONTROL, _modifiers.isCtrlDown());
+		if (!shiftChanged && !ctrlChanged)
+			send(Rml::Input::KI_UNKNOWN, changes > 0);
 		enqueueUpdate();
 	}
 

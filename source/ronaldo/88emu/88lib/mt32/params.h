@@ -38,7 +38,8 @@ namespace emu88Lib::mt32
 		TimbreNumber,	// 1-64
 		AssignMode,		// POLY 1-4: single or multi assign, priority to the last or the first note
 		ReverbMode,		// Room, Hall, Plate, Tap Delay
-		MasterTune,		// Hz
+		MasterTuneLa,	// Hz, 440 at 64, 25/32 cent a step
+		MasterTunePcm,	// Hz, 442 at 64, a cent a step: the PCM board's has nothing in common with the LA board's
 		PanLa,			// 0-14, R7 .. L7: the LA board's pan runs from the right
 		PanPcm,			// 0-127, right to left too
 		MidiChannel,	// 1-16, OFF

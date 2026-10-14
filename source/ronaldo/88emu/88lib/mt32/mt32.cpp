@@ -14,7 +14,9 @@ namespace emu88Lib::mt32
 
 	bool hasPcmBoard(const DeviceModel _model)
 	{
-		return hasPcmCardSlot(_model);
+		// The CM-32P's board. Not every board with a PCM card slot: the MV-30 takes the same cards but speaks
+		// nothing of this dialect.
+		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64;
 	}
 
 	bool isMt32Model(const DeviceModel _model)

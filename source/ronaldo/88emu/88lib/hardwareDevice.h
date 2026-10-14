@@ -1,6 +1,7 @@
 #pragma once
 
 #include "88lib/analog/analogOutput.h"
+#include "88lib/boards/mv30types.h"
 #include "88lib/deviceModel.h"
 
 #include "synthLib/device.h"
@@ -28,6 +29,7 @@ namespace emu88Lib
 	class Sc55Board;
 	class Nu10b;
 	class Miig5;
+	class Mv30;
 
 	// Offline work the device does at construction, before anyone can hear or see it.
 	struct BootOptions
@@ -77,8 +79,8 @@ namespace emu88Lib
 			uint64_t revision = 0;
 		};
 
-		// _pcmCard is a raw card image for a board with a PCM card slot (the CM-32P, and the
-		// CM-64's PCM half); empty leaves the slot empty.
+		// _pcmCard is a raw card image for a board with a PCM card slot (the CM-32P, the CM-64's
+		// PCM half, the MV-30's card A); empty leaves the slot empty.
 		explicit HardwareDevice(const synthLib::DeviceCreateParams& _params, const BootOptions& _boot = {},
 		                        const std::vector<uint8_t>& _pcmCard = {});
 		// Whether the CM-32P can read _image as a PCM card.
@@ -96,10 +98,16 @@ namespace emu88Lib
 		uint64_t getDspClockHz() const override;
 		DeviceModel model() const { return m_model; }
 		void setPanelButtons(uint32_t _buttons);
+		// The MV-30's front panel: its switches, bit n = Mv30Button n, more than setPanelButtons() carries, and
+		// the footswitch
+		void setMv30Panel(uint64_t _buttons, bool _footswitch);
 		// The SC-8850's VALUE encoder, or the MT-32's VOLUME/VALUE knob, which a detent turns
 		// by a 32nd of its travel.
 		void turnPanelEncoder(int32_t _detents);
 		DisplaySnapshot displaySnapshot() const;
+		// The MV-30's part settings and timbre names, see Mv30Parts; invalid on any other board. The revision moves
+		// when they change.
+		Mv30Parts mv30Parts(uint64_t& _revision) const;
 		// The messages that silence a sounding channel on this board, as a transport jump
 		// sends them to every active channel: All Sound Off, or hold pedal up and All Notes
 		// Off where the firmware predates All Sound Off. Controller numbers with their values.
@@ -120,11 +128,13 @@ namespace emu88Lib
 		              std::vector<synthLib::SMidiEvent>&) override;
 
 	private:
-		enum class PanelCommandType : uint8_t { Buttons, Encoder };
+		enum class PanelCommandType : uint8_t { Buttons, Encoder, Mv30Panel };
 		struct PanelCommand
 		{
 			PanelCommandType type = PanelCommandType::Buttons;
 			int32_t value = 0;
+			// Mv30Panel: the switches, and value the footswitch
+			uint64_t wide = 0;
 		};
 
 		float dacSamplerate() const;
@@ -153,6 +163,7 @@ namespace emu88Lib
 		std::unique_ptr<Sc55Board> m_sc55;
 		std::unique_ptr<Nu10b> m_nu10b;
 		std::unique_ptr<Miig5> m_miig5;
+		std::unique_ptr<Mv30> m_mv30;
 		std::unique_ptr<synthLib::MidiRateLimiter> m_sc55MidiIn;
 		std::array<synthLib::MidiBufferParser, 2> m_sc88ProMidiOut{
 			synthLib::MidiBufferParser{synthLib::MidiEventSource::Device},
@@ -175,6 +186,10 @@ namespace emu88Lib
 
 		mutable std::mutex m_displayMutex;
 		DisplaySnapshot m_display;
+		Mv30Parts m_mv30Parts;
+		uint64_t m_mv30PartsRevision = 0;
+		// Read on the audio thread, compared with what was published
+		Mv30Parts m_mv30PartsScratch;
 
 		AnalogOutput m_analogOutput;
 		// The board's own output amplifiers, applied whatever the analog setting is: switching

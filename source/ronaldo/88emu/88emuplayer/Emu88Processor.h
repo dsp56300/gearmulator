@@ -118,7 +118,7 @@ namespace emu88Player
 		// far as the MIDI they received tells, see emu88Lib::mt32::StateTracker
 		const emu88Lib::mt32::StateTracker& laState() const { return m_laState; }
 		// Their parts by channel for the activity, a bit per part as the part editor numbers them: the part editor
-		// keeps it from the memory it shows, where the channels are
+		// keeps it from the memory it shows, where the channels are. The MV-30's too.
 		void setLaPartListeners(const emu88Lib::PartActivity::Listeners& _listeners)
 		{
 			m_laActivity.setListeners(_listeners);
@@ -237,6 +237,9 @@ namespace emu88Player
 		emu88Lib::PartActivity m_laActivity;
 		// Whether the board speaks the MT-32 dialect, so that its MIDI goes to m_laState. Set under the callback lock.
 		bool m_laDialect = false;
+		// Whether the part activity comes from m_laActivity's listeners: the MT-32 dialect's boards and the MV-30,
+		// which have one MIDI IN and parts whose channels the part editor knows
+		bool m_listenerActivity = false;
 		std::shared_ptr<const emu88Lib::mt32::PresetCatalog> m_laPresets;
 		std::string m_laPresetsError;
 		std::shared_ptr<const emu88Lib::gs::ToneCatalog> m_toneCatalog;

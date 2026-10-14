@@ -4,6 +4,7 @@
 #include "88emuplayer/ui/Emu88Editor.h"
 #include "88emuplayer/ui/Emu88EditorBindings.h"
 
+#include "88lib/hardwareDevice.h"
 #include "88lib/gs/gs.h"
 #include "88lib/gs/midiClip.h"
 #include "88lib/mt32/params.h"
@@ -98,6 +99,9 @@ namespace emu88Player
 				[](const unsigned char _c) { return static_cast<char>(std::tolower(_c)); });
 			return _text;
 		}
+
+		// The MV-30's part editor before its operating system is up
+		constexpr const char* g_mv30Waiting = "Waiting for the MV-30's operating system.";
 
 		void addClick(Rml::Element* _element, const std::function<void()>& _callback)
 		{
@@ -253,7 +257,8 @@ namespace emu88Player
 
 	bool hasPartEditor(const emu88Lib::DeviceModel _model)
 	{
-		return gs::isPartEditorModel(_model) || emu88Lib::mt32::isMt32Model(_model);
+		return gs::isPartEditorModel(_model) || emu88Lib::mt32::isMt32Model(_model) ||
+		       _model == emu88Lib::DeviceModel::Mv30;
 	}
 
 	PartEditorWindow::PartEditorWindow(Editor& _owner, Processor& _processor)
@@ -331,6 +336,7 @@ namespace emu88Player
 		m_model = m_processor.deviceModel();
 		const bool supported = gs::isPartEditorModel(m_model);
 		m_laDialect = emu88Lib::mt32::isMt32Model(m_model);
+		m_mv30Dialect = m_model == emu88Lib::DeviceModel::Mv30;
 		m_groupCount = supported ? std::max<uint8_t>(1, emu88Lib::getDeviceProfile(m_model).groupCount) : 0;
 		m_group = std::min<uint8_t>(m_group, std::max<uint8_t>(1, m_groupCount) - 1);
 		m_setup = m_processor.partState().setup(m_revision);
@@ -359,13 +365,21 @@ namespace emu88Player
 			}
 			updateLaListeners();
 		}
+		if(m_mv30Dialect)
+		{
+			m_mv30Revision = 0;
+			m_mv30 = {};
+			readMv30();
+			updateMv30Listeners();
+		}
 		// The MT-32 dialect's boards have a mixer only, as wide as the window
 		m_root->SetClass("laDialect", m_laDialect);
+		m_root->SetClass("mv30Dialect", m_mv30Dialect);
 
 		setName(juce::String(emu88Lib::getDeviceProfile(m_model).displayName) + " Part Editor");
 
 		if(auto* title = m_root->GetElementById("pePaneTitle"))
-			title->SetInnerRML(m_laDialect ? "System" : "System and Effects");
+			title->SetInnerRML(m_mv30Dialect ? "Song" : m_laDialect ? "System" : "System and Effects");
 
 		buildGroupAndPartTabs();
 		buildMixer();
@@ -376,22 +390,37 @@ namespace emu88Player
 		m_laKeySelect = nullptr;
 		m_laKeyNames.clear();
 		m_mapNames.clear();
-		if(m_laDialect)
+		if(m_laDialect || m_mv30Dialect)
 		{
 			m_partControls.clear();
 			m_globalControls.clear();
 			m_efxControls.clear();
 			m_efxShownType = -1;
-			buildLaControls();
+			if(m_laDialect)
+				buildLaControls();
 		}
 		else
 		{
 			buildControls();
 		}
-		selectPage(supported || m_laDialect ? m_page : g_mixerPage);
+		if(m_mv30Dialect)
+		{
+			// What the MV-30 keeps to its front panel, in the side pane the effects have elsewhere
+			if(auto* globals = m_root->GetElementById("peGlobals"))
+				globals->SetInnerRML(
+					"<div class=\"peSideNote\">The MV-30 takes no SysEx: its sound section answers channel messages "
+					"only. MIDI reaches each part's <b>timbre</b> (program change), <b>level</b> (CC7) and "
+					"<b>pan</b> (CC10), which this editor sends on the part's channel.</div>"
+					"<div class=\"peSideNote\">The timbres themselves, the rhythm timbre, the parts' output "
+					"assign, receive channel and voice reserve, the chorus and reverb and the timbre bank are set "
+					"on the MV-30's front panel and saved with the song.</div>");
+		}
+		selectPage(supported || m_laDialect || m_mv30Dialect ? m_page : g_mixerPage);
 
 		const auto& laPresetsError = m_processor.laPresetsError();
-		if(m_laDialect)
+		if(m_mv30Dialect)
+			showStatus(m_mv30.valid ? std::string() : g_mv30Waiting, !m_mv30.valid);
+		else if(m_laDialect)
 			showStatus(laPresetsError.empty() ? std::string()
 			           : "Preset timbres and tones unavailable: " + laPresetsError, !laPresetsError.empty());
 		else if(!supported)
@@ -543,10 +572,12 @@ namespace emu88Player
 
 		// The tabs stay, the switch relabels them: a tab is a place in the strip, its part depends on m_bank. The
 		// MT-32 dialect's boards have a tab per part of m_laParts, the CM-64's PCM parts apart from its LA ones.
-		const auto shown = m_laDialect ? m_laParts.size()
-		                               : static_cast<size_t>(std::min<uint8_t>(2, m_groupCount)) * gs::g_partsPerGroup;
+		const auto shown = m_mv30Dialect ? size_t{emu88Lib::Mv30Parts::PartCount}
+			: m_laDialect ? m_laParts.size()
+			: static_cast<size_t>(std::min<uint8_t>(2, m_groupCount)) * gs::g_partsPerGroup;
 		const bool bothBoards = m_laMemory.hasLa() && m_laMemory.hasPcm();
-		const size_t groupStart = !m_laDialect ? gs::g_partsPerGroup : bothBoards ? emu88Lib::mt32::g_laParts : 0;
+		const size_t groupStart = m_mv30Dialect ? 0
+			: !m_laDialect ? gs::g_partsPerGroup : bothBoards ? emu88Lib::mt32::g_laParts : 0;
 		rml.str({});
 		for(size_t t = 0; t < shown; ++t)
 		{
@@ -594,7 +625,9 @@ namespace emu88Player
 			const auto number = std::to_string(t % gs::g_partsPerGroup + 1);
 			// The light that MIDI for the part turns on, over the whole tab
 			auto label = m_groupCount > 1 ? groupLetter(group) + number : number;
-			if(m_laDialect)
+			if(m_mv30Dialect)
+				label = std::to_string(t + 1);
+			else if(m_laDialect)
 			{
 				// The CM-64 says which board a part is on
 				const auto& part = m_laParts[t];
@@ -702,7 +735,8 @@ namespace emu88Player
 		{
 			const bool la = m_laDialect && m_laMemory.hasLa();
 			const bool pcm = m_laDialect && m_laMemory.hasPcm();
-			heading->SetInnerRML(!m_laDialect ? "Instrument" : la && pcm ? "Timbre or Tone" : la ? "Timbre" : "Tone");
+			heading->SetInnerRML(m_mv30Dialect ? "Timbre" : !m_laDialect ? "Instrument"
+				: la && pcm ? "Timbre or Tone" : la ? "Timbre" : "Tone");
 		}
 
 		const auto slider = [this](const char* _id, const size_t _row, const bool _volume)
@@ -714,7 +748,8 @@ namespace emu88Player
 			return rml.str();
 		};
 
-		const auto count = m_laDialect ? m_laParts.size() : m_setup.parts.size();
+		const auto count = m_mv30Dialect ? size_t{emu88Lib::Mv30Parts::PartCount}
+			: m_laDialect ? m_laParts.size() : m_setup.parts.size();
 		std::ostringstream rml;
 		for(size_t i = 0; i < count; ++i)
 		{
@@ -722,8 +757,12 @@ namespace emu88Player
 				rml << "<div class=\"peMixGroupHeading\">" << heading << "</div>";
 			rml << "<div id=\"peMix" << i << "\" class=\"peMixRow\">"
 			    << "<div id=\"peMixLight" << i << "\" class=\"peMixLight\"/>";
-			// The MT-32 dialect's boards have no switch for them, and no part pages
-			if(!m_laDialect)
+			// The MT-32 dialect's boards have no switch for them, and no part pages; the MV-30 no switch either
+			if(m_mv30Dialect)
+			{
+				rml << "<div id=\"peMixName" << i << "\" class=\"peMixName editable\" title=\"Edit this part\">";
+			}
+			else if(!m_laDialect)
 			{
 				rml << "<div class=\"peMixSoloMute\">"
 				    << "<button id=\"peSolo" << i << "\" class=\"peMixSolo\" title=\"Solo\">S</button>"
@@ -805,6 +844,8 @@ namespace emu88Player
 
 	std::string PartEditorWindow::mixerLabel(const size_t _row) const
 	{
+		if(m_mv30Dialect)
+			return std::to_string(_row + 1);
 		if(m_laDialect)
 			return isLaRhythm(_row) ? "R" : std::to_string(m_laParts[_row].part + 1);
 		const auto part = static_cast<int>(_row % gs::g_partsPerGroup) + 1;
@@ -814,6 +855,8 @@ namespace emu88Player
 
 	std::string PartEditorWindow::mixerHeading(const size_t _row) const
 	{
+		if(m_mv30Dialect)
+			return {};
 		if(m_laDialect)
 		{
 			// The CM-64's two boards
@@ -837,6 +880,12 @@ namespace emu88Player
 
 	uint8_t PartEditorWindow::mixerValue(const size_t _row, const bool _volume) const
 	{
+		// The MV-30's pan steps 7L-R7 as 0-14
+		if(m_mv30Dialect)
+		{
+			const auto& part = m_mv30.parts[std::min<size_t>(_row, emu88Lib::Mv30Parts::PartCount - 1)];
+			return _volume ? part.level : static_cast<uint8_t>(std::clamp<int>(part.pan + 7, 0, 14));
+		}
 		if(m_laDialect)
 		{
 			const auto location = laMixerLocation(m_laParts[_row], _volume);
@@ -848,6 +897,9 @@ namespace emu88Player
 
 	uint8_t PartEditorWindow::mixerDefault(const size_t _row, const bool _volume) const
 	{
+		// A new song's: full level, the centre
+		if(m_mv30Dialect)
+			return _volume ? 127 : 7;
 		if(m_laDialect)
 		{
 			const auto location = laMixerLocation(m_laParts[_row], _volume);
@@ -861,7 +913,9 @@ namespace emu88Player
 
 	uint8_t PartEditorWindow::mixerMax(const size_t _row, const bool _volume) const
 	{
-		// The LA and PCM boards' levels go to 100, their pans to 14 and 127
+		// The LA and PCM boards' levels go to 100, their pans to 14 and 127; the MV-30's pan has 15 steps
+		if(m_mv30Dialect)
+			return _volume ? 127 : 14;
 		if(!m_laDialect)
 			return 127;
 		if(_volume)
@@ -871,7 +925,7 @@ namespace emu88Player
 
 	uint8_t PartEditorWindow::mixerSlider(const size_t _row, const bool _volume, const uint8_t _value) const
 	{
-		if(!m_laDialect || _volume)
+		if(!m_laDialect || _volume || m_mv30Dialect)
 			return _value;
 		const auto max = mixerMax(_row, false);
 		return static_cast<uint8_t>(max - std::min(_value, max));
@@ -881,6 +935,12 @@ namespace emu88Player
 	{
 		if(_volume)
 			return std::to_string(_value);
+		// As the MV-30 shows it: 7L to 1L, the centre, R1 to R7
+		if(m_mv30Dialect)
+		{
+			const int pan = int(_value) - 7;
+			return pan < 0 ? std::to_string(-pan) + "L" : pan > 0 ? "R" + std::to_string(pan) : std::string(">-<");
+		}
 		if(!m_laDialect)
 			return panText(_value);
 		using namespace emu88Lib::mt32;
@@ -936,7 +996,8 @@ namespace emu88Player
 			case ParamText::Signed:
 			case ParamText::PanLa:
 			case ParamText::PanPcm:
-			case ParamText::MasterTune:
+			case ParamText::MasterTuneLa:
+			case ParamText::MasterTunePcm:
 			case ParamText::BiasLevelTva:
 				return false;
 			default:
@@ -2001,6 +2062,15 @@ namespace emu88Player
 	void PartEditorWindow::auditionPart(const size_t _part)
 	{
 		using namespace emu88Lib::mt32;
+		if(m_mv30Dialect)
+		{
+			if(_part >= emu88Lib::Mv30Parts::PartCount)
+				return;
+			const auto& part = m_mv30.parts[_part];
+			// The rhythm timbre's snare, any other's middle C
+			startAudition(0, part.channel, part.timbre == emu88Lib::Mv30Parts::RhythmTimbre ? 38 : 60);
+			return;
+		}
 		if(m_laDialect)
 		{
 			if(_part >= m_laParts.size())
@@ -2033,6 +2103,25 @@ namespace emu88Player
 			return next >= 0 && next < _count ? next : -1;
 		};
 		const auto index = selectedPart();
+
+		if(m_mv30Dialect)
+		{
+			if(index >= emu88Lib::Mv30Parts::PartCount)
+				return;
+			const auto timbre = m_mv30.parts[index].timbre;
+			int current = -1;
+			for(size_t r = 0; r < m_mv30ListTimbres.size() && current < 0; ++r)
+			{
+				if(m_mv30ListTimbres[r] == timbre)
+					current = static_cast<int>(r);
+			}
+			const auto next = step(current, static_cast<int>(m_mv30ListTimbres.size()), [](int) { return false; });
+			if(next < 0)
+				return;
+			selectMv30Timbre(m_mv30ListTimbres[static_cast<size_t>(next)]);
+			auditionPart(index);
+			return;
+		}
 
 		if(m_laDialect)
 		{
@@ -2069,6 +2158,185 @@ namespace emu88Player
 		const auto& row = m_listRows[static_cast<size_t>(next)];
 		selectTone(index, p.isDrumPart() ? 0 : row.bankMsb, row.program);
 		auditionPart(index);
+	}
+
+	bool PartEditorWindow::readMv30()
+	{
+		const auto* hardware = m_processor.hardware();
+		if(!hardware)
+			return false;
+		uint64_t revision = 0;
+		auto parts = hardware->mv30Parts(revision);
+		if(revision == m_mv30Revision)
+			return false;
+		m_mv30Revision = revision;
+		m_mv30 = std::move(parts);
+		return true;
+	}
+
+	void PartEditorWindow::updateMv30Listeners()
+	{
+		// One MIDI IN, as on the MT-32 dialect's boards
+		emu88Lib::PartActivity::Listeners listeners{};
+		for(size_t i = 0; i < emu88Lib::Mv30Parts::PartCount; ++i)
+		{
+			if(m_mv30.valid && m_mv30.parts[i].channel < 16)
+				listeners[m_mv30.parts[i].channel] |= uint64_t{1} << i;
+		}
+		m_processor.setLaPartListeners(listeners);
+	}
+
+	std::string PartEditorWindow::mv30TimbreName(const uint8_t _timbre) const
+	{
+		if(_timbre >= emu88Lib::Mv30Parts::TimbreCount)
+			return {};
+		const auto& raw = m_mv30.timbreNames[_timbre];
+		std::string name;
+		for(const char c : raw)
+			name += c >= 0x20 && c < 0x7f ? c : ' ';
+		const auto end = name.find_last_not_of(' ');
+		return end == std::string::npos ? std::string() : name.substr(0, end + 1);
+	}
+
+	std::string PartEditorWindow::mv30PartName(const size_t _part) const
+	{
+		if(!m_mv30.valid || _part >= emu88Lib::Mv30Parts::PartCount)
+			return {};
+		const auto timbre = m_mv30.parts[_part].timbre;
+		if(timbre == emu88Lib::Mv30Parts::RhythmTimbre)
+			return "Rhythm";
+		return std::to_string(timbre + 1) + " " + mv30TimbreName(timbre);
+	}
+
+	void PartEditorWindow::sendMv30Controller(const size_t _part, const uint8_t _controller, const uint8_t _value)
+	{
+		if(_part >= emu88Lib::Mv30Parts::PartCount || m_mv30.parts[_part].channel >= 16)
+			return;
+		m_processor.sendMidiEvents({synthLib::SMidiEvent(synthLib::MidiEventSource::Host,
+			static_cast<uint8_t>(synthLib::M_CONTROLCHANGE | m_mv30.parts[_part].channel), _controller, _value)});
+	}
+
+	void PartEditorWindow::selectMv30Timbre(const uint8_t _timbre)
+	{
+		const auto index = selectedPart();
+		if(index >= emu88Lib::Mv30Parts::PartCount || _timbre >= emu88Lib::Mv30Parts::TimbreCount)
+			return;
+		auto& part = m_mv30.parts[index];
+		if(part.channel >= 16)
+			return;
+		part.timbre = _timbre;
+		m_processor.sendMidiEvents({synthLib::SMidiEvent(synthLib::MidiEventSource::Host,
+			static_cast<uint8_t>(synthLib::M_PROGRAMCHANGE | part.channel), _timbre)});
+		refresh();
+	}
+
+	void PartEditorWindow::refreshMv30Part()
+	{
+		const auto index = selectedPart();
+		if(index >= emu88Lib::Mv30Parts::PartCount)
+			return;
+		const auto& part = m_mv30.parts[index];
+		const bool rhythm = part.timbre == emu88Lib::Mv30Parts::RhythmTimbre;
+		static constexpr const char* outputs[] = {"Dry", "Rev", "Cho", "Dir1", "Dir2"};
+
+		setText(m_root->GetElementById("pePartTitle"), "Part " + std::to_string(index + 1));
+		std::string info = !m_mv30.valid ? std::string()
+			: part.channel < 16 ? "MIDI channel " + std::to_string(part.channel + 1) : std::string("Receives no channel");
+		if(m_mv30.valid)
+			info += " - " + mv30PartName(index);
+		setText(m_root->GetElementById("pePartInfo"), info);
+
+		// The part's other settings, which only the front panel sets
+		if(auto* controls = m_root->GetElementById("pePartControls"))
+		{
+			std::ostringstream rml;
+			if(m_mv30.valid)
+			{
+				rml << "<div class=\"peSideNote\">Output <b>" << (part.output < 5 ? outputs[part.output] : "?")
+				    << "</b>, voice reserve <b>" << int(part.voiceReserve) << "</b>, receive channel <b>"
+				    << (part.channel < 16 ? std::to_string(part.channel + 1) : std::string("-")) << "</b>.</div>";
+				if(rhythm)
+					rml << "<div class=\"peSideNote\">The part plays the rhythm timbre, which only the front panel "
+					       "selects: a timbre picked here replaces it.</div>";
+				if(part.channel >= 16)
+					rml << "<div class=\"peSideNote\">The part receives no MIDI channel, so nothing here reaches it."
+					       "</div>";
+			}
+			const auto text = rml.str();
+			if(controls->GetInnerRML() != text)
+				controls->SetInnerRML(text);
+		}
+
+		if(m_mapSelect)
+			juceRmlUi::helper::setVisible(m_mapSelect, false);
+		setText(m_root->GetElementById("peListLabel"), "Timbre");
+
+		// The list is built again when what it shows changes: the part, the filter, the names
+		std::ostringstream key;
+		key << index << '/' << m_filter << '/' << m_mv30.valid;
+		for(const auto& name : m_mv30.timbreNames)
+			key.write(name.data(), static_cast<std::streamsize>(name.size()));
+		if(key.str() != m_listKey)
+		{
+			m_listKey = key.str();
+			m_listSelection.clear();
+			m_mv30ListTimbres.clear();
+			m_mv30ListElements.clear();
+			std::ostringstream rml;
+			for(uint8_t t = 0; m_mv30.valid && t < emu88Lib::Mv30Parts::TimbreCount; ++t)
+			{
+				const auto name = mv30TimbreName(t);
+				if(!matchesFilter(name))
+					continue;
+				rml << "<div id=\"peMv" << int(t) << "\" class=\"peItem\"><span class=\"peItemNumber\">" << int(t + 1)
+				    << "</span>" << encode(name) << "</div>";
+				m_mv30ListTimbres.push_back(t);
+			}
+			if(m_mv30ListTimbres.empty())
+				rml << "<div class=\"peListEmpty\">" << (m_mv30.valid ? "Nothing matches the filter" : "") << "</div>";
+			if(auto* list = m_root->GetElementById("peTones"))
+			{
+				list->SetInnerRML(rml.str());
+				// From the top, unless the selection scrolls it
+				list->SetScrollTop(0.0f);
+				for(const auto t : m_mv30ListTimbres)
+				{
+					auto* element = list->GetElementById("peMv" + std::to_string(t));
+					m_mv30ListElements.push_back(element);
+					if(element)
+						juceRmlUi::EventListener::Add(element, Rml::EventId::Mousedown, [this, t](Rml::Event& _event)
+						{
+							if(_event.GetParameter<int>("button", 0) != 0)
+								return;
+							selectMv30Timbre(t);
+							auditionPart(selectedPart());
+						});
+				}
+			}
+		}
+
+		// The row of the timbre played, none for the rhythm timbre
+		const auto selection = std::to_string(part.timbre);
+		if(selection == m_listSelection)
+			return;
+		m_listSelection = selection;
+		Rml::Element* selected = nullptr;
+		for(size_t r = 0; r < m_mv30ListTimbres.size() && r < m_mv30ListElements.size(); ++r)
+		{
+			auto* element = m_mv30ListElements[r];
+			if(!element)
+				continue;
+			const bool isSelected = m_mv30ListTimbres[r] == part.timbre;
+			element->SetClass("selected", isSelected);
+			if(isSelected)
+				selected = element;
+		}
+		if(selected)
+		{
+			selected->GetOwnerDocument()->UpdateDocument();
+			selected->ScrollIntoView(Rml::ScrollIntoViewOptions(Rml::ScrollAlignment::Nearest,
+				Rml::ScrollAlignment::Nearest, Rml::ScrollBehavior::Instant, Rml::ScrollParentage::Closest));
+		}
 	}
 
 	void PartEditorWindow::refreshLaPart()
@@ -2725,7 +2993,17 @@ namespace emu88Player
 		if(_row >= m_mixerRows.size() || mixerValue(_row, _volume) == _value)
 			return;
 		// Shown at once; the board's echo through the processor's copy confirms it a moment later
-		if(m_laDialect)
+		if(m_mv30Dialect)
+		{
+			auto& part = m_mv30.parts[_row];
+			if(_volume)
+				part.level = _value;
+			else
+				part.pan = static_cast<int8_t>(int(_value) - 7);
+			sendMv30Controller(_row, _volume ? 7 : 10,
+				_volume ? _value : emu88Lib::Mv30Parts::panController(part.pan));
+		}
+		else if(m_laDialect)
 		{
 			const auto address = emu88Lib::mt32::address(laMixerLocation(m_laParts[_row], _volume));
 			const auto message = emu88Lib::mt32::dt1(address, std::vector<uint8_t>{_value});
@@ -3157,10 +3435,10 @@ namespace emu88Player
 
 	void PartEditorWindow::selectPart(const size_t _part)
 	{
-		// The MT-32 dialect's boards have a page per part, in one row
-		if(m_laDialect)
+		// The MT-32 dialect's boards and the MV-30 have a page per part, in one row
+		if(m_laDialect || m_mv30Dialect)
 		{
-			if(_part < m_laParts.size())
+			if(_part < (m_mv30Dialect ? size_t{emu88Lib::Mv30Parts::PartCount} : m_laParts.size()))
 				selectPage(static_cast<int>(_part));
 			return;
 		}
@@ -3180,7 +3458,8 @@ namespace emu88Player
 	{
 		const ScopedFlag buildNow(m_laBuildNow);
 		stopAudition();
-		const int pages = m_laDialect ? static_cast<int>(m_laParts.size()) : m_groupCount ? gs::g_partsPerGroup : 0;
+		const int pages = m_mv30Dialect ? int{emu88Lib::Mv30Parts::PartCount}
+			: m_laDialect ? static_cast<int>(m_laParts.size()) : m_groupCount ? gs::g_partsPerGroup : 0;
 		m_page = pages ? std::clamp(_page, g_mixerPage, pages - 1) : g_mixerPage;
 		if(m_page != g_mixerPage)
 			m_lastPart = selectedPart();
@@ -3224,10 +3503,13 @@ namespace emu88Player
 				continue;
 			const auto index = static_cast<size_t>(m_bank) * gs::g_partsPerGroup + p;
 			tab->SetPseudoClass("checked", m_page != g_mixerPage && index == selectedPart());
-			const bool drum = m_laDialect ? isLaRhythm(index)
+			const bool drum = m_mv30Dialect ? index < emu88Lib::Mv30Parts::PartCount &&
+			                                  m_mv30.parts[index].timbre == emu88Lib::Mv30Parts::RhythmTimbre
+			                : m_laDialect ? isLaRhythm(index)
 			                              : index < m_setup.parts.size() && m_setup.parts[index].isDrumPart();
 			tab->SetClass("drum", drum);
-			const auto title = m_laDialect ? laPartName(m_laParts[index]) : toneName(index);
+			const auto title = m_mv30Dialect ? mv30PartName(index)
+			                 : m_laDialect ? laPartName(m_laParts[index]) : toneName(index);
 			if(tab->GetAttribute<Rml::String>("title", "") != title)
 				tab->SetAttribute("title", title);
 		}
@@ -3237,11 +3519,23 @@ namespace emu88Player
 	void PartEditorWindow::refreshMixer()
 	{
 		m_updatingUi = true;
-		const auto count = m_laDialect ? m_laParts.size() : m_setup.parts.size();
+		const auto count = m_mv30Dialect ? size_t{emu88Lib::Mv30Parts::PartCount}
+			: m_laDialect ? m_laParts.size() : m_setup.parts.size();
 		for(size_t i = 0; i < m_mixerRows.size() && i < count; ++i)
 		{
 			const auto& row = m_mixerRows[i];
-			if(m_laDialect)
+			if(m_mv30Dialect)
+			{
+				const auto& part = m_mv30.parts[i];
+				if(row.row)
+				{
+					row.row->SetClass("drum", part.timbre == emu88Lib::Mv30Parts::RhythmTimbre);
+					// A part that receives no channel cannot be reached by MIDI
+					row.row->SetClass("silenced", part.channel >= 16);
+				}
+				setText(row.tone, mv30PartName(i));
+			}
+			else if(m_laDialect)
 			{
 				if(row.row)
 					row.row->SetClass("drum", isLaRhythm(i));
@@ -3277,6 +3571,8 @@ namespace emu88Player
 			}
 		}
 		m_updatingUi = false;
+		if(m_mv30Dialect)
+			return;
 		if(m_laDialect)
 		{
 			refreshLaControls(m_laControls);
@@ -3291,6 +3587,11 @@ namespace emu88Player
 
 	void PartEditorWindow::refreshPart()
 	{
+		if(m_mv30Dialect)
+		{
+			refreshMv30Part();
+			return;
+		}
 		if(m_laDialect)
 		{
 			refreshLaPart();
@@ -3538,7 +3839,9 @@ namespace emu88Player
 		auto* menu = m_root->GetElementById("peActionsMenu");
 		setActionEnabled(menu, supported);
 		const bool answers = m_laDialect ? m_laMemory.hasLa() : gs::answersDataRequests(m_model);
-		const std::string title = !supported || answers
+		const std::string title = m_mv30Dialect
+			? "The MV-30 takes no SysEx: there are no settings to send to it or receive from it"
+			: !supported || answers
 			? "Send the settings to the device, receive them from it, or save them as MIDI"
 			: "Send the settings to the device, or save them as MIDI. It answers no data requests.";
 		if(menu && menu->GetAttribute<Rml::String>("title", "") != title)
@@ -4022,6 +4325,18 @@ namespace emu88Player
 						std::to_string(m_laSendTotal) + "...");
 				}
 			}
+			changed = true;
+		}
+
+		// The MV-30's settings as its RAM has them now, which the internal sequencer and the front panel change too
+		if(m_mv30Dialect && readMv30())
+		{
+			updateMv30Listeners();
+			if(!m_mv30.valid)
+				showStatus(g_mv30Waiting, true);
+			else if(m_status == g_mv30Waiting)
+				showStatus({});
+			refresh();
 			changed = true;
 		}
 

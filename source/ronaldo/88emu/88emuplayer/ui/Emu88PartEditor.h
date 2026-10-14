@@ -1,5 +1,6 @@
 #pragma once
 
+#include "88lib/boards/mv30types.h"
 #include "88lib/gs/efx.h"
 #include "88lib/gs/params.h"
 #include "88lib/gs/partState.h"
@@ -31,8 +32,8 @@ namespace emu88Player
 	class Editor;
 	class Processor;
 
-	// Whether a board has the part editor: the Sound Canvases and the boards that run their programs, and the boards
-	// of the MT-32 dialect, which have the mixer only
+	// Whether a board has the part editor: the Sound Canvases and the boards that run their programs, the boards of
+	// the MT-32 dialect, and the MV-30
 	bool hasPartEditor(emu88Lib::DeviceModel _model);
 
 	// The part editor: a mixer page with every part's volume and pan beside the system and effect parameters, and a
@@ -45,6 +46,10 @@ namespace emu88Player
 	// their PCM board, from the processor's copy of their memory, named from their ROMs: the mixer beside the system
 	// areas, and a page per part with its patch temp, an LA part's timbre with its four partials too, beside the
 	// timbres or tones it can play.
+	//
+	// The MV-30 takes no SysEx at all, so its editor is what MIDI reaches: the mixer sets the parts' levels and pans
+	// with CC7 and CC10, and a part's page picks its timbre with a program change, from the song's 128 timbres. What
+	// the window shows is read off the board's RAM, so the internal sequencer and the front panel move it too.
 	class PartEditorWindow final : public juce::DocumentWindow, juce::Timer
 	{
 	public:
@@ -242,6 +247,17 @@ namespace emu88Player
 		void refreshLaEnvelopes();
 		// Up and down in a part's list: the instrument, variation, timbre or tone before or after the one played
 		void moveListSelection(int _delta);
+
+		// The MV-30: the part settings and timbre names read off the board, newer than m_mv30Revision
+		bool readMv30();
+		void updateMv30Listeners();
+		std::string mv30TimbreName(uint8_t _timbre) const;
+		// "12 Strings 1", or "Rhythm" for the rhythm timbre
+		std::string mv30PartName(size_t _part) const;
+		void refreshMv30Part();
+		// A program change on the part's channel; the part's timbre is set at once, the board's RAM confirms it
+		void selectMv30Timbre(uint8_t _timbre);
+		void sendMv30Controller(size_t _part, uint8_t _controller, uint8_t _value);
 		// The memory timbres the rhythm keys play
 		std::vector<uint8_t> laRhythmMemoryTimbres() const;
 		// The next edit queued for the board, once the last one had its room
@@ -343,6 +359,13 @@ namespace emu88Player
 			uint32_t pauseTicks;
 		};
 		std::deque<LaQueued> m_laSendQueue;
+
+		bool m_mv30Dialect = false;
+		emu88Lib::Mv30Parts m_mv30;
+		uint64_t m_mv30Revision = 0;
+		// A part page's list: the timbres shown, and their rows
+		std::vector<uint8_t> m_mv30ListTimbres;
+		std::vector<Rml::Element*> m_mv30ListElements;
 		uint32_t m_laSendWait = 0;
 		size_t m_laSendTotal = 0;
 		std::string m_laSendDone;

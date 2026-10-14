@@ -92,6 +92,8 @@ class Peripherals final : public SfrBlock {
   u8 hso_output() const { return u8(ios0_ & 0x3F); }
   unsigned hsi_fifo_count() const { return hsi_count_; }
   bool serial_tx_active() const { return serial_tx_active_; }
+  // SP_CON's REN: on the KB a frame that arrives while it is clear is lost (see receive_serial()).
+  bool serial_receive_enabled() const { return (serial_control_ & 0x08) != 0; }
   bool serial_tx_line() const { return serial_tx_line_; }
   bool watchdog_enabled() const { return watchdog_enabled_; }
   void set_serial_tx_line_hook(LineHook h) { serial_tx_line_hook_ = std::move(h); }

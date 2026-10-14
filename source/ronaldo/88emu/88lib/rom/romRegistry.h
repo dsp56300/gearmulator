@@ -58,6 +58,9 @@ namespace emu88Lib
         // The CM-32L's later sibling, shared with the CM-500's LA half and the LAPC-N: the same
         // ROMs but its own control ROM, on an 80C198 at two clocks per state.
         Cm32ln,
+        // A 16 KiB boot ROM that loads the operating system off the system disk, which is
+        // therefore part of the set. Wave ROMs A-C are the CM-32P's three.
+        Mv30,
 
         Count
     };
@@ -94,6 +97,11 @@ namespace emu88Lib
         // Microcode for a fixed-function DSP: the CM-32L's Boss reverb gate
         // array steps through it once per sample.
         Reverb,
+        // A floppy image the boot ROM loads the operating system from (MV-30): a
+        // raw sector dump, read like a ROM and never written.
+        Disk,
+        // An LCD controller's external character generator ROM.
+        Font,
 
         Count
     };
@@ -224,6 +232,17 @@ namespace emu88Lib
         {RomDevice::Cm32p, RomSlot::Wave, 0, 0x80000, "cm32p_wave0.bin", false},
         {RomDevice::Cm32p, RomSlot::Wave, 1, 0x80000, "cm32p_wave1.bin", false},
         {RomDevice::Cm32p, RomSlot::Wave, 2, 0x80000, "cm32p_wave2.bin", false},
+        // Wave ROMs A to F, as MAME names them roland_d70_waverom-a.bin to -f.bin; A to C are the
+        // CM-32P's three. The system disk is the raw 80 x 2 x 9 x 512 sector image.
+        {RomDevice::Mv30, RomSlot::Program, 0, 0x4000, "mv30_boot.bin", false},
+        {RomDevice::Mv30, RomSlot::Wave, 0, 0x80000, "mv30_wave_a.bin", false},
+        {RomDevice::Mv30, RomSlot::Wave, 1, 0x80000, "mv30_wave_b.bin", false},
+        {RomDevice::Mv30, RomSlot::Wave, 2, 0x80000, "mv30_wave_c.bin", false},
+        {RomDevice::Mv30, RomSlot::Wave, 3, 0x80000, "mv30_wave_d.bin", false},
+        {RomDevice::Mv30, RomSlot::Wave, 4, 0x80000, "mv30_wave_e.bin", false},
+        {RomDevice::Mv30, RomSlot::Wave, 5, 0x80000, "mv30_wave_f.bin", false},
+        {RomDevice::Mv30, RomSlot::Font, 0, 0x400, "mv30_lcd_font.bin", false},
+        {RomDevice::Mv30, RomSlot::Disk, 0, 0xb4000, "mv30_system.img", false},
         {RomDevice::Sc8820, RomSlot::Internal, 0, 0x10000, "sc8820_internal.bin", false},
         {RomDevice::Sc8820, RomSlot::Program, 0, 0x200000, "sc8820_program.bin", false},
         {RomDevice::Sc8820, RomSlot::Wave, 0, 0x1000000, "sc8820_wave0.bin", false},
@@ -475,12 +494,34 @@ namespace emu88Lib
 
         {romDevices(RomDevice::Cm32p), RomSlot::Program, 0, 0x10000, baseLib::MD5("ccd61a220f433a62a53b48eb9bb36827"),
          "1.00", false},
-        {romDevices(RomDevice::Cm32p), RomSlot::Wave, 0, 0x80000, baseLib::MD5("21efdc888020fe99303ef34265349021"),
-         "R15179970", false},
-        {romDevices(RomDevice::Cm32p), RomSlot::Wave, 1, 0x80000, baseLib::MD5("69e39536391fe79250f67cd3c7794217"),
-         "R15179971", false},
-        {romDevices(RomDevice::Cm32p), RomSlot::Wave, 2, 0x80000, baseLib::MD5("512bee180e2390b896484adb01f1d215"),
-         "R15179972", false},
+        // The MV-30 carries these three as its wave ROMs A to C, at the same indices.
+        {romDevices(RomDevice::Cm32p, RomDevice::Mv30), RomSlot::Wave, 0, 0x80000,
+         baseLib::MD5("21efdc888020fe99303ef34265349021"), "R15179970", false},
+        {romDevices(RomDevice::Cm32p, RomDevice::Mv30), RomSlot::Wave, 1, 0x80000,
+         baseLib::MD5("69e39536391fe79250f67cd3c7794217"), "R15179971", false},
+        {romDevices(RomDevice::Cm32p, RomDevice::Mv30), RomSlot::Wave, 2, 0x80000,
+         baseLib::MD5("512bee180e2390b896484adb01f1d215"), "R15179972", false},
+
+        // -----------------------------------------------------------------
+        // MV-30
+        // -----------------------------------------------------------------
+        // The boot ROM, the three wave ROMs it adds to the CM-32P's, the LCD module's T6963C
+        // character generator and the system disks. Both disk versions label themselves
+        // "MV-30 System Disk Ver.1.0"; the versions are the ones they circulate under.
+        {romDevices(RomDevice::Mv30), RomSlot::Program, 0, 0x4000, baseLib::MD5("d49350c3b4e63a890c7719c0ada10fa5"),
+         "boot 1.03", false},
+        {romDevices(RomDevice::Mv30), RomSlot::Wave, 3, 0x80000, baseLib::MD5("29a74bbbca5a25e6071ff7de3df78341"),
+         "D", false},
+        {romDevices(RomDevice::Mv30), RomSlot::Wave, 4, 0x80000, baseLib::MD5("53da9e576c406a68d22791f2e59bd3b2"),
+         "E", false},
+        {romDevices(RomDevice::Mv30), RomSlot::Wave, 5, 0x80000, baseLib::MD5("b308e81824827691a53037fb15fee317"),
+         "F", false},
+        {romDevices(RomDevice::Mv30), RomSlot::Font, 0, 0x400, baseLib::MD5("732a497464f8f69ccd480dbf61ff0a03"),
+         "T6963C CG ROM 0101", false},
+        {romDevices(RomDevice::Mv30), RomSlot::Disk, 0, 0xb4000, baseLib::MD5("b6c7e3ae2abdd31720c61f07bc9f71b6"),
+         "1.091", false},
+        {romDevices(RomDevice::Mv30), RomSlot::Disk, 0, 0xb4000, baseLib::MD5("bea309a1fefa5ca4a43a3bf9417516db"),
+         "1.08", false},
 
         // -----------------------------------------------------------------
         // SC-88 / SC-88VL
@@ -765,6 +806,10 @@ namespace emu88Lib
             return "Wave ROM";
         case RomSlot::Reverb:
             return "Reverb ROM";
+        case RomSlot::Disk:
+            return "System Disk";
+        case RomSlot::Font:
+            return "Character ROM";
         default:
             return "ROM";
         }
@@ -824,6 +869,8 @@ namespace emu88Lib
             return "NU-10B";
         case RomDevice::Miig5:
             return "MIIG5";
+        case RomDevice::Mv30:
+            return "MV-30";
         default:
             return "unknown";
         }

@@ -100,6 +100,11 @@ namespace
 		const auto& system = params(Block::LaSystem);
 		CHECK_EQ(formatValue(system[0], 64), std::string("440.0 Hz"));
 		CHECK_EQ(formatValue(system[0], 0), std::string("427.5 Hz"));
+		CHECK_EQ(formatValue(system[0], 127), std::string("452.7 Hz"));
+		const auto& pcmSystem = params(Block::PcmSystem);
+		CHECK_EQ(formatValue(pcmSystem[0], 64), std::string("442.0 Hz"));
+		CHECK_EQ(formatValue(pcmSystem[0], 0), std::string("426.0 Hz"));
+		CHECK_EQ(formatValue(pcmSystem[0], 127), std::string("458.4 Hz"));
 		CHECK_EQ(formatValue(params(Block::RhythmKey)[0], 0x40), std::string("r01"));
 	}
 

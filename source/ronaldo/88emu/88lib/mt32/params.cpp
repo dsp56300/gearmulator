@@ -23,7 +23,7 @@ namespace emu88Lib::mt32
 		std::vector<Param> createLaSystem()
 		{
 			std::vector<Param> v = {
-				p("MasterTune", "System", "Master Tune", 0x00, 127, ParamText::MasterTune),
+				p("MasterTune", "System", "Master Tune", 0x00, 127, ParamText::MasterTuneLa),
 				p("ReverbMode", "Reverb", "Mode", 0x01, 3, ParamText::ReverbMode),
 				p("ReverbTime", "Reverb", "Time", 0x02, 7),
 				p("ReverbLevel", "Reverb", "Level", 0x03, 7),
@@ -157,7 +157,7 @@ namespace emu88Lib::mt32
 		std::vector<Param> createPcmSystem()
 		{
 			std::vector<Param> v = {
-				p("MasterTune", "System", "Master Tune", 0x00, 127, ParamText::MasterTune),
+				p("MasterTune", "System", "Master Tune", 0x00, 127, ParamText::MasterTunePcm),
 				p("ReverbMode", "Reverb", "Mode", 0x01, 3, ParamText::ReverbMode),
 				p("ReverbTime", "Reverb", "Time", 0x02, 7),
 				p("ReverbLevel", "Reverb", "Level", 0x03, 7),
@@ -361,10 +361,16 @@ namespace emu88Lib::mt32
 		case ParamText::PcmWave:
 		case ParamText::ToneNumber:
 			return std::to_string(_value + 1);
-		case ParamText::MasterTune:
-			// One semitone over 128 steps, 440 Hz at 64. The CM-32L's manual gives 427.5-452.6 Hz, which this is;
-			// the MT-32's and the CM-32P's quote 432.1-457.6, unmeasured here.
+		case ParamText::MasterTuneLa:
+			// One semitone over 128 steps, 440 Hz at 64: 427.5-452.7 Hz, as the emulated MT-32s and CM-32L play it. The
+			// CM-32L's and the CM-64's manuals print 452.6 for the top, a typo for 452.69; the MT-32's quotes
+			// 432.1-457.6.
 			snprintf(buf, sizeof(buf), "%.1f Hz", 440.0 * std::pow(2.0, (static_cast<int>(_value) - 64) / 1536.0));
+			return buf;
+		case ParamText::MasterTunePcm:
+			// A cent a step, 442 Hz at 64: 426.0-458.4 Hz, as the emulated CM-32P plays it. Its manual quotes the
+			// MT-32's 432.1-457.6, which it is not.
+			snprintf(buf, sizeof(buf), "%.1f Hz", 442.0 * std::pow(2.0, (static_cast<int>(_value) - 64) / 1200.0));
 			return buf;
 		case ParamText::PanLa:
 		{
