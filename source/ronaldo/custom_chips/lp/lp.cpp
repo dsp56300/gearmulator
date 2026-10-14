@@ -147,9 +147,10 @@ namespace lpLib
 			case 0x06:
 				{
 					const uint16_t value = read16(m_registers, 6);
-					const bool changed = parameterWord(m_selected, 3) != value;
 					setParameterWord(m_selected, 3, value);
-					if (runtime.enabled && changed) runtime.envelopeActive = true;
+					// Each commit starts a segment, including identical rate/target words
+					// in consecutive release stages. Rate 00 holds without completion.
+					runtime.envelopeActive = runtime.enabled && (value & 0xff) != 0;
 				}
 				break;
 			case 0x08: setParameterWord(m_selected, 4, read16(m_registers, 8)); break;
@@ -276,9 +277,9 @@ namespace lpLib
 
 			const int32_t target = envelopeLevel(envelopeTarget);
 			const int32_t increment = envelopeIncrement(envelopeRate);
-			if (envelopeRate == 0xff)
+			if (envelopeRate == 0 || envelopeRate == 0xff)
 			{
-				volume = target;
+				if (envelopeRate == 0xff) volume = target;
 				runtime.envelopeActive = false;
 			}
 			const bool increasing = volume < target;
@@ -294,7 +295,7 @@ namespace lpLib
 					runtime.envelopeActive = false;
 					signalEnvelopeComplete(static_cast<uint8_t>(i));
 				}
-				else runtime.envelopeActive = true;
+				else runtime.envelopeActive = envelopeRate != 0;
 			}
 			else
 			{

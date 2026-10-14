@@ -69,10 +69,76 @@ namespace
 		result |= uint32_t(_lp.read(3) & 3) << 24;
 		return result;
 	}
+
+	void testEnvelopeCommits()
+	{
+		const std::vector<uint8_t> rom(16, 0);
+		lpLib::LP lp(rom);
+		writeCurrentVolume(lp, 0, lpLib::LP::envelopeLevel(0x70));
+		lp.write(0x07, 0x70);
+		lp.write(0x06, 0x81);
+		lp.write(0x11, 0x01);
+		lp.renderSample();
+		require(lp.interruptActive() && lp.read(0) == 0, "initial zero-distance completion");
+
+		// Only a low-byte commit starts a segment. Repeating the same word must
+		// complete again, as the MV-30 uses consecutive identical release stages.
+		lp.write(0x07, 0x70);
+		lp.renderSample();
+		require(!lp.interruptActive(), "high-byte staging must not rearm an envelope");
+		lp.write(0x06, 0x81);
+		lp.renderSample();
+		require(lp.interruptActive(), "identical low-byte commit must rearm an envelope");
+		require(lp.read(0) == 0 && !lp.interruptActive(), "repeated segment must complete exactly once");
+		lp.write(0x07, 0x70);
+		lp.write(0x06, 0x81);
+		lp.renderSample();
+		require(lp.interruptActive() && lp.read(0) == 0, "identical full-word commit must rearm an envelope");
+
+		lp.write(0x11, 0);
+		lp.write(0x06, 0x81);
+		lp.renderSample();
+		require(!lp.interruptActive(), "disabled voice must not complete a committed segment");
+
+		// A zero-rate segment holds even when its target equals the accumulator.
+		// Enabling a voice or rewriting the hold must not queue a completion IRQ.
+		for (const uint8_t target : {0x70, 0x80, 0x90})
+		{
+			lp.reset();
+			const uint32_t held = static_cast<uint32_t>(lpLib::LP::envelopeLevel(0x80));
+			writeCurrentVolume(lp, 0, held);
+			lp.write(0x07, target);
+			lp.write(0x06, 0);
+			lp.write(0x11, 0x01);
+			for (unsigned sample = 0; sample < 16; ++sample)
+			{
+				lp.renderSample();
+				require(readCurrentVolume(lp, 0) == held, "zero rate must hold the current volume");
+				require(!lp.interruptActive() && lp.queuedInterrupts() == 0,
+					"zero rate must not generate a completion IRQ");
+				lp.write(0x07, 0x80);
+				lp.write(0x06, 0);
+			}
+		}
+
+		// FF still loads immediately without completion, including repeated words.
+		for (unsigned commit = 0; commit < 2; ++commit)
+		{
+			lp.write(0x07, 0xf0);
+			lp.write(0x06, 0xff);
+			lp.renderSample();
+			require(readCurrentVolume(lp, 0) == static_cast<uint32_t>(lpLib::LP::envelopeLevel(0xf0)),
+				"repeated FF commit must load the target immediately");
+			require(!lp.interruptActive() && lp.queuedInterrupts() == 0,
+				"repeated FF commit must not generate a completion IRQ");
+		}
+	}
 }
 
 int main()
 {
+	testEnvelopeCommits();
+
 	// These hashes cover every entry of the chip measured envelope curves. The
 	// implementation obtains them from shift/mantissa logic, not stored data.
 	require(curveHash(lpLib::LP::envelopeLevel) == 0x6a7dd43deb9e4f83ull,

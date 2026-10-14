@@ -336,8 +336,9 @@ namespace emu88Player
 		class Content final : public juce::Component
 		{
 		public:
-			Content(std::string _product)
+			Content(std::string _product, juce::Image _image)
 				: m_product(std::move(_product))
+				, m_image(std::move(_image))
 				, m_website("dsp56300.wordpress.com", juce::URL(g_websiteUrl))
 				, m_donate(g_donateUrl, juce::URL(g_donateUrl))
 			{
@@ -354,13 +355,16 @@ namespace emu88Player
 			// and the two links cannot drift apart.
 			struct Layout
 			{
-				juce::Rectangle<int> title, version, licence, thanks;
+				juce::Rectangle<int> image, title, version, licence, thanks;
 				juce::Rectangle<int> vendor, website, donateLabel, donate;
 			};
 
 			static Layout layoutOf(juce::Rectangle<int> _area)
 			{
 				Layout l;
+				l.image   = _area.removeFromTop(g_aboutImageHeight).withSizeKeepingCentre(g_aboutImageWidth,
+					g_aboutImageHeight);
+				_area.removeFromTop(12);
 				l.title   = _area.removeFromTop(30);
 				l.version = _area.removeFromTop(20);
 				_area.removeFromTop(12);
@@ -380,6 +384,13 @@ namespace emu88Player
 			{
 				_g.fillAll(juce::Colour(0xff17181c));
 				const auto l = layoutOf(getLocalBounds().reduced(16));
+
+				// Its pixels as they are, however large the screen draws them
+				if(m_image.isValid())
+				{
+					_g.setImageResamplingQuality(juce::Graphics::lowResamplingQuality);
+					_g.drawImage(m_image, l.image.toFloat());
+				}
 
 				_g.setColour(juce::Colours::white);
 				_g.setFont(juce::Font(22.0f, juce::Font::bold));
@@ -414,6 +425,7 @@ namespace emu88Player
 
 		private:
 			const std::string m_product;
+			const juce::Image m_image;
 			juce::HyperlinkButton m_website;
 			juce::HyperlinkButton m_donate;
 		};
@@ -421,7 +433,7 @@ namespace emu88Player
 		AboutWindow(Editor& _owner, std::string _product)
 			: juce::DocumentWindow("About " + juce::String(_product), juce::Colour(0xff17181c),
 			                       juce::DocumentWindow::closeButton),
-			  m_owner(_owner), m_content(std::move(_product))
+			  m_owner(_owner), m_content(std::move(_product), loadImage(_owner))
 		{
 			setUsingNativeTitleBar(true);
 			setResizable(false, false);
@@ -433,6 +445,9 @@ namespace emu88Player
 		{
 			clearContentComponent();
 		}
+
+		// The picture from the player's resources, a skin's if it has one; none when it is missing
+		static juce::Image loadImage(Editor& _owner);
 
 		void closeButtonPressed() override;
 

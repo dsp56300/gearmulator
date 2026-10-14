@@ -12,6 +12,7 @@ set(HARDWARE_ASSETS
 	assets/part_editor_mixer.svg
 	assets/part_editor_menu.svg
 	assets/part_editor_grip.svg
+	assets/about.png
 	${HARDWARE_SKIN_DIR}/sc88_panel.png
 	${HARDWARE_SKIN_DIR}/sc88vl_panel.png
 	${HARDWARE_SKIN_DIR}/sc88pro_panel.png
