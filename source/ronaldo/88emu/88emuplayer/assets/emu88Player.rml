@@ -105,5 +105,26 @@
 		<div class="modelCmBezel">
 			<div id="ledCmMidi" class="panelLed cmMidiLed" style="left: 461dp; top: 116dp;"><img class="ledOnGraphic" src="cm_led_on.png"/></div>
 		</div>
+
+		<!-- The MV-30 Studio M: the switches the skin has faces for, each over its well in mv30_panel.png. The faces are
+		     cut from the artwork export with the buttons (mv30_assets.png, at 3x); positions from its SVG. -->
+		<div class="modelMv30Panel">
+			<button id="btMv30Shift" class="hit mv30Key" style="left: 100dp; top: 106dp;" title="SHIFT (Shift)"><div class="mv30Face mv30_shift"/></button>
+			<button id="btMv30F1" class="hit mv30Key" style="left: 160dp; top: 106dp;" title="F1"><div class="mv30Face mv30_f1"/></button>
+			<button id="btMv30F2" class="hit mv30Key" style="left: 220dp; top: 106dp;" title="F2"><div class="mv30Face mv30_f2"/></button>
+			<button id="btMv30F3" class="hit mv30Key" style="left: 280dp; top: 106dp;" title="F3"><div class="mv30Face mv30_f3"/></button>
+			<button id="btMv30F4" class="hit mv30Key" style="left: 340dp; top: 106dp;" title="F4"><div class="mv30Face mv30_f4"/></button>
+			<button id="btMv30F5" class="hit mv30Key" style="left: 400dp; top: 106dp;" title="F5"><div class="mv30Face mv30_f5"/></button>
+			<button id="btMv30Exit" class="hit mv30Key" style="left: 461dp; top: 106dp;" title="EXIT (Esc)"><div class="mv30Face mv30_exit"/></button>
+			<button id="btMv30Play" class="hit mv30Key" style="left: 533dp; top: 23dp;" title="PLAY"><div class="mv30Face mv30_play"/></button>
+			<button id="btMv30TimbreEdit" class="hit mv30Key" style="left: 533dp; top: 43dp;" title="TIMBRE EDIT"><div class="mv30Face mv30_timbre"/></button>
+			<button id="btMv30System" class="hit mv30Key" style="left: 533dp; top: 63dp;" title="SYSTEM (S)"><div class="mv30Face mv30_system"/></button>
+			<button id="btMv30Inc" class="hit mv30Small" style="left: 495dp; top: 74dp;" title="VALUE + (Page Up, =)"><div class="mv30Face mv30_plus"/></button>
+			<button id="btMv30Dec" class="hit mv30Small" style="left: 465dp; top: 74dp;" title="VALUE - (Page Down, -)"><div class="mv30Face mv30_minus"/></button>
+			<button id="btMv30Up" class="hit mv30Arrow" style="left: 478.667dp; top: 23dp; width: 18.667dp; height: 10dp;" title="Cursor up (Up arrow)"><div class="mv30Face mv30_up"/></button>
+			<button id="btMv30Left" class="hit mv30Arrow" style="left: 467dp; top: 35.333dp; width: 10dp; height: 18.333dp;" title="Cursor left (Left arrow)"><div class="mv30Face mv30_left"/></button>
+			<button id="btMv30Right" class="hit mv30Arrow" style="left: 499dp; top: 35.333dp; width: 10dp; height: 18.333dp;" title="Cursor right (Right arrow)"><div class="mv30Face mv30_right"/></button>
+			<button id="btMv30Down" class="hit mv30Arrow" style="left: 478.667dp; top: 55dp; width: 18.667dp; height: 10dp;" title="Cursor down (Down arrow)"><div class="mv30Face mv30_down"/></button>
+		</div>
 	</body>
 </rml>

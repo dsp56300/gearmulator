@@ -63,6 +63,10 @@ namespace emu88Player
 		m_pointerButtons = 0;
 		m_keyboardButtons = 0;
 		m_powerKeyDown = false;
+		m_mv30Buttons = m_mv30PointerButtons = 0;
+		m_mv30Repeat = 0;
+		m_mv30DialKeys = 0;
+		m_mv30Footswitch = false;
 		sendButtons();
 		m_settingsRoot = nullptr;
 		m_settingsWindow.reset();
@@ -96,6 +100,10 @@ namespace emu88Player
 			m_pointerButtons = 0;
 			m_keyboardButtons = 0;
 			m_powerKeyDown = false;
+			m_mv30Buttons = m_mv30PointerButtons = 0;
+			m_mv30Repeat = 0;
+			m_mv30DialKeys = 0;
+			m_mv30Footswitch = false;
 			sendButtons();
 			updateButtonVisuals();
 		});
@@ -199,6 +207,10 @@ namespace emu88Player
 		{
 			m_pointerButtons = m_keyboardButtons = 0;
 			m_powerKeyDown = false;
+			m_mv30Buttons = m_mv30PointerButtons = 0;
+			m_mv30Repeat = 0;
+			m_mv30DialKeys = 0;
+			m_mv30Footswitch = false;
 			sendButtons();
 		}
 		// Not every caller is inside an RmlUi event. The render thread reads the document and the LCDs, so
@@ -266,6 +278,7 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::VeGsPro:
 		case emu88Lib::DeviceModel::Nu10b:
 		case emu88Lib::DeviceModel::Miig5: panel = "sc88exp_panel.png"; break;
+		case emu88Lib::DeviceModel::Mv30: panel = "mv30_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc55St:
 		case emu88Lib::DeviceModel::Cm300:
 		case emu88Lib::DeviceModel::Scc1a:
@@ -301,6 +314,7 @@ namespace emu88Player
 			root->SetClass("modelCm64", _model == emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelMt32", mt32);
 			root->SetClass("modelSc8820", _model == emu88Lib::DeviceModel::Sc8820);
+			root->SetClass("modelMv30", _model == emu88Lib::DeviceModel::Mv30);
 			root->SetClass("modelNoPanel", noPanel);
 			root->SetClass("modelNoDisplay", !emu88Lib::deviceHasLcd(_model));
 		}
@@ -512,6 +526,10 @@ namespace emu88Player
 	{
 		if(!m_rml)
 			return;
+		// The MV-30's VALUE + or - held on the skin: after 400 ms it repeats, 15 detents a second
+		if(m_mv30Repeat && ++m_mv30RepeatTicks > 12 && (m_mv30RepeatTicks & 1))
+			if(auto* hardware = m_processor.hardware())
+				hardware->turnPanelEncoder(m_mv30Repeat);
 		auto* hardware = m_processor.hardware();
 		const auto playlistRevision = m_processor.midiPlayer().playlistRevision();
 		const auto playerStatus = m_processor.midiPlayer().status();

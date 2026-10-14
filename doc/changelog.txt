@@ -495,6 +495,13 @@ JE8086:
 
 - [Imp] MT-32: Its own dark artwork instead of the CM-32L's.
 
+- [New] Devices: Added the MV-30 (experimental). Its operating system loads
+        from the system disk image, which is part of the ROM set (system
+        disks 1.08 and 1.091); the player runs that boot at full speed while
+        the device loads. Card slot A takes the same PCM cards as the
+        CM-32P. Writing to the disk, the metronome, the tape sync and the
+        analog output stage are not emulated yet.
+
 2.2.25:
 
 88emuPlayer:

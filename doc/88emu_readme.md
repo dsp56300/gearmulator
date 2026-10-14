@@ -1,6 +1,6 @@
 # 88emuPlayer
 
-**88emu** emulates the hardware inside Roland Sound Canvas modules, related PCM sound generators, and the MT-32 and CM-32L family of LA synthesizers. It runs the original firmware on emulated CPUs and sound chips, including the firmware's instrument selection, voice allocation, effects, MIDI handling and front-panel behavior. You supply the ROM images; they are not included.
+**88emu** emulates the hardware inside Roland Sound Canvas modules, related PCM sound generators, the MT-32 and CM-32L family of LA synthesizers, and the MV-30 Studio M. It runs the original firmware on emulated CPUs and sound chips, including the firmware's instrument selection, voice allocation, effects, MIDI handling and front-panel behavior. You supply the ROM images; they are not included.
 
 **88emuPlayer** is the standalone application for playing MIDI files and using those devices from a MIDI keyboard, sequencer or game. **88EmuCli** uses the same emulation to render files to WAV offline, as fast as the computer can run it, or to a demo video showing the player's window as it plays.
 
@@ -35,7 +35,7 @@ ROMs are rescanned on device selection and **Restart Device**. After adding miss
 
 ## Emulated hardware and devices
 
-The main CPUs execute the original device firmware as accurately as possible. 88Emu implements low-level high-performance emulators for the following CPUs: Hitachi **H8/500** (H8/532 and H8/510), Hitachi **SH-1** / **SH-2** and Intel **MCS-96**. We do not use JIT for those, but we achieve decent performance thanks to an event-loop driven peripherals implementation and an efficient instruction cache that pre-bakes the opcode handlers as function pointers.
+The main CPUs execute the original device firmware as accurately as possible. 88Emu implements low-level high-performance emulators for the following CPUs: Hitachi **H8/500** (H8/532 and H8/510), Hitachi **SH-1** / **SH-2** and Intel **MCS-96** (8095/8098 and 80C196KB). We do not use JIT for those, but we achieve decent performance thanks to an event-loop driven peripherals implementation and an efficient instruction cache that pre-bakes the opcode handlers as function pointers.
 
 To actually generate the sound in the emulator we implement low-level emulation of different custom sound chips:
 
@@ -47,6 +47,8 @@ To actually generate the sound in the emulator we implement low-level emulation 
 - XP (MBCS30109/MB87B105), XP3 (TC170C200AF-005) and XP6 (TC203C180AF-002): 64 voices DPCM sample player with 4 point interpolation, 5 programmable ramps,
   multi mode filter with ring mod/booster/structures, mixer with 4 busses, fully programmable DSP with 256 steps per sample.
   Developed by TUS from high-level silicon analysis and single-sample-step black box probing. Uses JIT (x86_64 and aarch64) for faster DSP processing.
+- TVF (MB87424): 32 voices state-variable filter (low, high and band pass) with resonance, an amplifier per voice, and the structure and ring
+  modulation routing between paired voices. Developed by TUS from silicon analysis.
 - LSP (MB87837): 24 bit programmable DSP with 384 steps per sample. Developed by TUS from black box probing.
   Uses JIT (x86_64 and aarch64) for faster DSP processing.
 - LA32 (MB87136A): 32 voices LA chip with saw/square resonant PD generator, linear interpolated PCM sample player, envelope ramps and ring modulation.
@@ -66,6 +68,7 @@ If you find any, please report it as a bug.
 | CM-32LN | `cm32ln` | 80C198 | LA32 + Boss reverb |  |
 | CM-32P | `cm32p` | P8098 | LP + RCC | responds to MIDI channels 11–16 |
 | CM-64 | `cm64` | P8098 ×2 | LA32 + Boss reverb + LP + RCC | a CM-32L and a CM-32P in one case, channels 2–10 and 11–16 |
+| MV-30 | `mv30` | 80C196KB | LP + TVF + RCC | experimental, boots its operating system from the system disk image, parts on channels 1–7 and 10 |
 | SC-55 | `sc55` | H8/532 | GP  | |
 | SC-55mkII | `sc55mk2` | H8/532 | GP4 | uses high-level sub-mcu emulation |
 | SC-55st | `sc55st` | H8/532 | GP4 | uses high-level sub-mcu emulation, no hardware panel present |
@@ -97,6 +100,7 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | Device | CPU / program / data ROMs | Wave ROMs |
 | --- | --- | --- |
 | CM-32P | `cm32p_program.bin` — 64 KiB | `cm32p_wave0.bin` — 512 KiB; `cm32p_wave1.bin` — 512 KiB; `cm32p_wave2.bin` — 512 KiB |
+| MV-30 | `mv30_boot.bin` — 16 KiB; `mv30_lcd_font.bin` — 1 KiB, the LCD's character ROM; `mv30_system.img` — 720 KiB, the system disk | `mv30_wave_a.bin` to `mv30_wave_f.bin` — 512 KiB each; A to C are the CM-32P's three |
 | SC-55 | `sc55mk1_internal.bin` — 32 KiB; `sc55mk1_program.bin` — 256 KiB | `sc55mk1_wave0.bin` — 1 MiB; `sc55mk1_wave1.bin` — 1 MiB; `sc55mk1_wave2.bin` — 1 MiB |
 | SC-55mkII | `sc55mk2_internal.bin` — 32 KiB; `sc55mk2_program.bin` — 512 KiB | `sc55mk2_wave0.bin` — 2 MiB; `sc55mk2_wave1.bin` — 1 MiB |
 | SC-55ST (`--device` only) | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 512 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
@@ -189,6 +193,16 @@ The CM-32P is a PCM sound module related to the PCM half of the CM-64 and Roland
 
 The song must select card tones using MIDI Program Change values starting at **64 / 0x40** (often displayed as program **65** in software that numbers programs from 1). Those tones are silent when no card is inserted.
 
+### MV-30 Studio M
+
+The MV-30 is a sequencer with a sound module built in. Its sound section is LP, TVF and RCC with six wave ROMs, three of them the CM-32P's. Its operating system is not in ROM: the boot ROM loads it from the system disk, so the disk image is part of the ROM set. The player runs that boot at full speed while the device loads, which takes a couple of seconds, and keeps the disk in the drive, read only. Disk images of system disks 1.08 and 1.091 are recognized; both call themselves "MV-30 System Disk Ver.1.0" on screen.
+
+- From power-on, parts 1–7 receive on **MIDI channels 1–7** and part 8, the rhythm part, on **channel 10**.
+- The sound section takes **no SysEx**: the MV-30 only records SysEx into songs and sends it out again. The GM, GM2 and GS resets mean nothing to it; choose Reset Off. MIDI reaches each part's timbre (program change, timbres 1–128 of the song's timbre bank; bank select is ignored), level (CC7) and pan (CC10), and the usual performance controllers. The timbres themselves, the rhythm timbre, the effects and the parts' other settings are made on its front panel.
+- The **Part Editor** shows the parts as the MV-30 has them, read from its memory, so the internal sequencer and the front panel move it too. The mixer sets each part's level and pan, and a part's page picks its timbre from the song's 128.
+- The front panel's SHIFT, F1–F5, EXIT, PLAY, TIMBRE EDIT, SYSTEM, cursor keys and VALUE + / − are on the skin, the other switches are reachable with keyboard chorcuts.
+- Its card slot A takes the same SN-U110 series cards as the CM-32P, chosen with the same setting and `--pcm-card`; slot B is not available yet.
+
 ### Sound Canvas family and expansion boards
 
 The SC-55 and SC-55mkII have different firmware, voice-generation timing and behavior for unsupported instrument banks. Selecting an SC-55 map on a later device changes its sound map; it does not turn the later hardware into an original SC-55. Use the actual SC-55 model when those differences matter. The optional pre-patched mkII ROM described above supplies capital-tone fallback for otherwise missing variations.
@@ -220,7 +234,7 @@ Open **Settings** from the application's context menu. The panel has six pages.
 | **General — Warn on unknown ROM hash on load** | Show warnings when a named ROM does not match the known hashes. |
 | **General — Factory Reset on load** | Initialize battery-backed settings through the firmware where supported. Default on. |
 | **General — Fast Boot (skip intro)** | Advance the board through its startup screens during loading. Default off. |
-| **General — CM-32P / CM-64 PCM card** | The SN-U110 series card image in the slot of those two devices, or none. Saved; a changed card takes effect at the next device load, which the setting offers. |
+| **General — CM-32P / CM-64 / MV-30 PCM card** | The SN-U110 series card image in the slot of those devices (slot A on the MV-30), or none. Saved; a changed card takes effect at the next device load, which the setting offers. |
 | **Skins** | Activate a skin, export the embedded skin, or open the skins folder. |
 | **Interface — Force software rendering** | Draw the interface on the CPU instead of the graphics card (Metal on macOS, OpenGL on Windows and Linux). Useful for incompatible graphics hardware or drivers; can increase CPU use. This changes graphics rendering, not audio emulation. |
 | **Interface — Window scale** | Scale the interface from 50% to 300%. |
@@ -280,7 +294,7 @@ The figures below are **calculated circuit responses**, not measurements of phys
 | SC-8850 | AK4324, 24-bit / 32 kHz | −0.7 dB | −2.2 dB | Below −80 dB from 17.5 kHz | Interpolating DAC suppresses images; analog low-pass near 16 kHz. |
 | SC-8820 | PCM1716, 24-bit / 32 kHz | −0.8 dB | −2.4 dB | Below −80 dB from 17.5 kHz | Interpolating DAC with a similar, slightly more damped output filter. |
 
-**Auto mappings:** each named module uses its own circuit; XPGS uses G-800, VE-GS Pro uses SC-88Pro, and SCC-1A uses SCC-1. CM-300/SCC-1 uses the SC-55 module circuit by default; select **SCC-1** manually for the card. SC-155 uses the SC-55 circuit; SC-155mkII, SC-55st, SCB-55 and RLP-3237 use the SC-55mkII circuit. The MT-32 new board uses the CM-32L circuit, its own design; the MT-32 old board and the CM-32LN have not had their output stages read yet and stay digital under Auto. The CM-64 circuit only makes sense on the CM-64, where the two halves are filtered apart; picked for another board it applies the mixer and output stage alone.
+**Auto mappings:** each named module uses its own circuit; XPGS uses G-800, VE-GS Pro uses SC-88Pro, and SCC-1A uses SCC-1. CM-300/SCC-1 uses the SC-55 module circuit by default; select **SCC-1** manually for the card. SC-155 uses the SC-55 circuit; SC-155mkII, SC-55st, SCB-55 and RLP-3237 use the SC-55mkII circuit. The MT-32 new board uses the CM-32L circuit, its own design; the MT-32 old board, the CM-32LN and the MV-30 have not had their output stages read yet and stay digital under Auto. The CM-64 circuit only makes sense on the CM-64, where the two halves are filtered apart; picked for another board it applies the mixer and output stage alone.
 
 ## Hardware buttons and keyboard shortcuts
 
@@ -354,6 +368,19 @@ The MT-32's front panel has no faces in the skin yet, so its switches are keyboa
 
 To enter the firmware's test mode, press **Q** to switch the power off, hold **3 + V** (PART 3 + VOLUME), then press **Q** to switch it on and keep holding until the screen changes. **4 + R + M** (PART 4 + RHYTHM + MASTER VOLUME) at power-on shows the firmware version instead. The CM-32P has no switches at all.
 
+### MV-30
+
+| Keys | Hardware buttons |
+| --- | --- |
+| `P`, `T`, `S`, `D` | PATTERN EDIT, TRACK EDIT, SYSTEM, DISK |
+| `F1`–`F5` | F1–F5 |
+| `↑` `↓` `←` `→`, `Return`, `Esc`, `Tab` | Cursor, ENTER, EXIT, JUMP |
+| `0`–`9`, `Insert`, `Delete`, `Shift` | Numeric keys, INS, DEL, SHIFT |
+| `-` / `=` | Value dial, a detent per press |
+| `Page Down` / `Page Up` | VALUE − / +, repeating while held |
+| `Space` | START/STOP |
+| `Ctrl` | Footswitch, while held |
+
 ## Skins
 
 88emuPlayer uses our **RmlUi** framework: RML markup for layout, RCSS styles, images/SVGs and shared custom controls. The [TUS skinning guide](https://theusualsuspects.io/docs/rmlui-skinning) describes the framework, its controls, styles and debugging tools. The player's hardware/playlist bindings are specific to 88emuPlayer; a skin for another TUS product needs adaptation.
@@ -389,7 +416,7 @@ Explicit options override the selected config, followed by built-in defaults.
 | `--limiter on\|off` | Output sample-peak limiter. Default: saved setting or off. |
 | `--factory-reset on\|off` | Factory initialization when loading a supported board. Default: saved setting or on. |
 | `--fast-boot on\|off` | Run ten extra seconds of boot time before use. Default: saved setting or off. |
-| `--pcm-card PATH` | CM-32P / CM-64 PCM card image for the card slot, up to 512 KiB; see the card instructions above. The player keeps it for the session without changing the saved choice. |
+| `--pcm-card PATH` | CM-32P / CM-64 / MV-30 PCM card image for the card slot, up to 512 KiB; see the card instructions above. The player keeps it for the session without changing the saved choice. |
 
 ### Launching the player
 

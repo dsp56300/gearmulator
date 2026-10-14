@@ -129,6 +129,16 @@ class Cpu final : public emu::SliceCore {
   }
   void code_line_written(u32 addr) override;
   void code_timing_changed() override {}
+  // True while decode_at() is reading instruction bytes off the bus.  A board
+  // whose gate array banks instruction fetches and data accesses through
+  // separate map registers consults this from its bus device to pick the
+  // map; every other board can ignore it.
+  bool fetching() const { return fetching_; }
+  // Drop every decoded cell, in the banks in place AND in the banks a code
+  // window has swapped out.  invalidate_all() only reaches the former, which
+  // is enough while a bank's backing store cannot change behind its back;
+  // a board that pages RAM through its code windows needs this one.
+  void invalidate_all_banks();
 
   u64 illegal_instructions() const { return illegal_count_; }
 
@@ -177,6 +187,7 @@ class Cpu final : public emu::SliceCore {
   bool holdoff_ = false;  // the next boundary executes an instruction regardless of requests
   bool idle_ = false;
   bool power_down_ = false;
+  mutable bool fetching_ = false;  // inside decode_at(): bus reads are instruction bytes
   u64 illegal_count_ = 0;
 
   static constexpr u32 kNoPage = 0xFFFFFFFFu;  // page_pc_ value matching no address

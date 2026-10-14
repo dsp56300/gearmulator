@@ -198,6 +198,7 @@ namespace emu88Lib
         case DeviceModel::Cm32ln: // PCM55
         case DeviceModel::Cm32p: // PCM56P
         case DeviceModel::Cm64: // Both halves use 16-bit DACs, before analog mixing/VCA.
+        case DeviceModel::Mv30: // The RCC's 16-bit words into one multiplexed DAC
         case DeviceModel::Sc55Mk1: // uPD6376, and the boards that share it
         case DeviceModel::Cm300:
         case DeviceModel::Scc1a:

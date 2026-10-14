@@ -151,6 +151,8 @@ namespace emu88Lib
         // ROM required by the selected board revision.
         static Sc55RomSet findSc55RomSet(DeviceModel _model);
         static Cm32pRomSet findCm32pRomSet();
+        // The MV-30: boot ROM, wave ROMs A-F, the LCD's character ROM and the system disk.
+        static Mv30RomSet findMv30RomSet();
 
         // One of the LA boards: control ROM, the LA32's PCM image and the Boss reverb
         // microcode, at the sizes that board takes.

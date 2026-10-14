@@ -92,6 +92,8 @@ namespace emu88Player
 		void destroyRmlUi();
 		void wirePanel();
 		void pressPowerKey(bool _supply);
+		// A key for the MV-30's panel going down or up (an Rml::Input::KeyIdentifier): whether it is one
+		bool handleMv30Key(int _key, bool _down);
 		void togglePower();
 		void updatePowerVisuals();
 		void chooseMidiFiles();
@@ -128,6 +130,7 @@ namespace emu88Player
 		void showAbout();
 		void showKeyboard();
 		KeyboardShortcutGroups buildKeyboardGroups();
+		static KeyboardShortcutGroups buildMv30KeyboardGroups();
 		void initialiseSettings(const char* _pageId, const char* _buttonId);
 		void selectSettingsPage(const char* _pageId, const char* _buttonId);
 		void populateSkinSettings();
@@ -182,6 +185,21 @@ namespace emu88Player
 		uint32_t m_pointerButtons = 0;
 		uint32_t m_keyboardButtons = 0;
 		bool m_powerKeyDown = false;
+		// The MV-30's switches held on the keyboard, bit n = Mv30Button n, and its footswitch, and what was sent
+		uint64_t m_mv30Buttons = 0;
+		// Held with the mouse on the skin's faces
+		uint64_t m_mv30PointerButtons = 0;
+		bool m_mv30Footswitch = false;
+		// The skin's faces and their switches, and its VALUE + and -: the detent a held one repeats, the timer
+		// ticks it has been held, and the dial keys down (bit 0 down, bit 1 up)
+		std::vector<std::pair<Rml::Element*, uint64_t>> m_mv30Elements;
+		Rml::Element* m_mv30IncElement = nullptr;
+		Rml::Element* m_mv30DecElement = nullptr;
+		int m_mv30Repeat = 0;
+		uint32_t m_mv30RepeatTicks = 0;
+		uint8_t m_mv30DialKeys = 0;
+		uint64_t m_mv30SentButtons = 0;
+		bool m_mv30SentFootswitch = false;
 		uint32_t m_sentButtons = 0;
 		uint64_t m_displayRevision = 0;
 		uint64_t m_playlistRevision = ~uint64_t{0};

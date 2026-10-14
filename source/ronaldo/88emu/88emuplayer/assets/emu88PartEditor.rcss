@@ -860,9 +860,23 @@ scrollbarvertical sliderbar {
 	background-color: #59656d;
 }
 
-/* The boards of the MT-32 dialect: without solo and mute, which they have no switch for */
-.laDialect .peMixHeadSoloMute {
+/* The boards of the MT-32 dialect and the MV-30: without solo and mute, which they have no switch for */
+.laDialect .peMixHeadSoloMute,
+.mv30Dialect .peMixHeadSoloMute {
 	display: none;
+}
+
+/* Text in place of controls: what the MV-30 keeps to its front panel */
+.peSideNote {
+	display: block;
+	padding: 6dp 8dp;
+	color: #aeb8be;
+	font-size: 13dp;
+	line-height: 19dp;
+}
+
+.peSideNote b {
+	color: #dce2e6;
 }
 
 /* The CM-64's two boards in the side pane, each above its sections, the second well apart from the first */

@@ -106,6 +106,7 @@ namespace emu88Player
 		m_toneCatalog = loadToneCatalog(m_deviceModel, m_toneCatalogError);
 		m_partState.setModel(m_deviceModel, m_toneCatalog);
 		m_laDialect = emu88Lib::mt32::isMt32Model(m_deviceModel);
+		m_listenerActivity = m_laDialect || m_deviceModel == emu88Lib::DeviceModel::Mv30;
 		m_laPresets = emu88Lib::mt32::loadPresetCatalog(m_deviceModel, m_pcmCard, m_laPresetsError);
 		if(m_laDialect)
 			m_laState.setModel(m_deviceModel, presetTimbres(m_laPresets));
@@ -348,6 +349,7 @@ namespace emu88Player
 			++m_deviceGeneration;
 			m_partState.setModel(_model, catalog);
 			m_laDialect = emu88Lib::mt32::isMt32Model(_model);
+			m_listenerActivity = m_laDialect || _model == emu88Lib::DeviceModel::Mv30;
 			if(m_laDialect)
 				m_laState.setModel(_model, laPresetTimbres);
 			m_midiPlayer.setPortCount(midiPortCount());
@@ -387,12 +389,10 @@ namespace emu88Player
 		m_engine->addMidiEvent(_event);
 		m_partState.process(_event);
 		if(m_laDialect)
-		{
 			m_laState.process(_event);
-			// The boards have one MIDI IN, which every port reaches
-			if(_event.sysex.empty())
-				m_laActivity.process(_event.a, 0);
-		}
+		// The boards have one MIDI IN, which every port reaches
+		if(m_listenerActivity && _event.sysex.empty())
+			m_laActivity.process(_event.a, 0);
 	}
 
 	void Processor::setPartActivityEnabled(const bool _enabled)

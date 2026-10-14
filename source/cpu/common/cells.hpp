@@ -56,6 +56,12 @@ class CellPages {
   void invalidate_all() {
     for (auto& p : pages_) if (p) std::fill_n(p.get(), kCellsPerPage, blank_);
   }
+  // Release the cells of every bank that is not currently in place.  The
+  // windows and their current keys survive, so a later select_bank() simply
+  // decodes the returning bank afresh.
+  void drop_swapped_banks() {
+    for (auto& w : windows_) w.banks.clear();
+  }
   // Drop cells covering [addr, addr+len); `back` is the number of granules an
   // instruction may start before `addr` and still extend into the range.
   void invalidate_range(u32 addr, u32 len, u32 back) {

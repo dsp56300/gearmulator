@@ -500,6 +500,10 @@ namespace emu88Lib
                     "cm32l_pcm.rom. Wave ROM 2 and 3 are the two 512 KiB mask-ROM dumps it is made of, "
                     "R15449121 and R15179945 - together they supply the same image. Provide either form, "
                     "not both.\n";
+        if (_device == RomDevice::Mv30)
+            text << "Wave ROMs A to C are the CM-32P's three. The system disk is a raw 720 KiB image of "
+                    "an MV-30 System Disk (80 cylinders, 2 sides, 9 sectors of 512 bytes): the boot ROM "
+                    "loads the operating system from it at power-on, and it is never written.\n";
         if (_device == RomDevice::Cm32ln)
             text << "The CM-32LN, the CM-500's LA half and the LAPC-N share this control ROM and take the "
                     "CM-32L's wave and reverb images.\n";

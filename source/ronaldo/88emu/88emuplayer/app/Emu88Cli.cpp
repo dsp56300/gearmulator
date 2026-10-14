@@ -74,7 +74,7 @@ namespace
                 std::cerr << "ROM warning:\n" << warnings;
             if (options.has("pcm-card") && !emu88Lib::hasPcmCardSlot(model))
                 throw std::runtime_error(
-                    "--pcm-card needs --device cm32p or cm64, the boards with a PCM card slot.");
+                    "--pcm-card needs --device cm32p, cm64 or mv30, the boards with a PCM card slot.");
             // --pcm-card, else the card the player keeps in its slot, so a render matches playback. The
             // option has to name a card; a saved one that has gone missing only leaves the slot empty,
             // as it does in the player.

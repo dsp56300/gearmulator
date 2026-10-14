@@ -31,6 +31,34 @@ namespace emu88Lib
         }
     };
 
+    // The MV-30's images. The board runs nothing out of ROM but its 16 KiB boot loader: the
+    // operating system is on the system disk, which the boot ROM reads into RAM through the
+    // floppy controller, so the disk image is part of the set like any mask ROM. The six wave
+    // ROMs are the D-70's, as dumped (scrambled); A to C are the CM-32P's three.
+    struct Mv30RomSet
+    {
+        static constexpr size_t BootSize = 0x4000;
+        static constexpr size_t WaveSize = 0x80000;
+        static constexpr size_t CgRomSize = 0x400;
+        static constexpr size_t SystemDiskSize = 80 * 2 * 9 * 512;
+        // Wave ROMs A to F, by their dump names.
+        using WaveRoms = std::array<std::vector<uint8_t>, 6>;
+        std::vector<uint8_t> boot;
+        WaveRoms waves;
+        // The LCD module's T6963C character generator. Without it the built-in font is used.
+        std::vector<uint8_t> cgRom;
+        std::vector<uint8_t> systemDisk;
+        bool isValid() const
+        {
+            if (boot.size() != BootSize || systemDisk.size() != SystemDiskSize)
+                return false;
+            for (const auto& wave : waves)
+                if (wave.size() != WaveSize)
+                    return false;
+            return true;
+        }
+    };
+
     // The images of one of Roland's LA boards: the 8095's control ROM, the LA32's PCM mask
     // ROMs and the Boss reverb gate array's microcode ROM. Which board they belong to sets
     // their sizes: the CM-32L's wave image is the two 512 KiB mask ROMs concatenated in
