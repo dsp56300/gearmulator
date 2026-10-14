@@ -936,7 +936,8 @@ namespace emu88Player
 			case ParamText::Signed:
 			case ParamText::PanLa:
 			case ParamText::PanPcm:
-			case ParamText::MasterTune:
+			case ParamText::MasterTuneLa:
+			case ParamText::MasterTunePcm:
 			case ParamText::BiasLevelTva:
 				return false;
 			default:
