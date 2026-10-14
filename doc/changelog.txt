@@ -169,6 +169,12 @@ Framework:
         patchmanagerdb.cache was deleted. A cache that is broken this way still
         has to be deleted once.
 
+- [Fix] Text in a style that the font of a skin does not have, italic for
+        example, was not drawn at all. In a skin whose font has no italic
+        face, the counts in the patch manager, the "Search..." hints of the
+        search fields and the headlines of the settings pages were missing.
+        Such text now uses the closest face the font has.
+
 Osirus/OsTIrus:
 
 - [Fix] EMU-243 A file of less than 16 bytes, dropped onto a part or imported
