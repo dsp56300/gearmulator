@@ -350,6 +350,13 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	if(USE_Standalone AND TARGET ${targetName}_Standalone)
 		add_dependencies(PluginFormat_Standalone ${targetName}_Standalone)
+
+		# Without this the Standalone package held nothing but the changelog every format gets, so the
+		# program was never shipped at all.
+		install(TARGETS ${targetName}_Standalone DESTINATION . COMPONENT ${productName}-Standalone)
+		if(APPLE)
+			installMacSetupScript(. ${productName}-Standalone)
+		endif()
 	endif()
 
 	if(USE_VST2)
