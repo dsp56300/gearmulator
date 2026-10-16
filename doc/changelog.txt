@@ -1,5 +1,12 @@
 Release Notes
 
+2.2.27:
+
+JE8086:
+
+- [Fix] MIDI was received and sent at half the speed of the hardware, so dense
+        MIDI, a chord or a fast controller movement for example, arrived late.
+
 2.2.26:
 
 Framework:

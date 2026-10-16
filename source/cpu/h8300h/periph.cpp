@@ -684,11 +684,14 @@ void Peripherals::sci_reset(unsigned ch) {
   sci_update_levels(ch);
 }
 
+// A bit takes 32 x 4^n x (N + 1) states asynchronous, 4 x 4^n x (N + 1) clocked synchronous: the manual's
+// N = phi / (64 x 2^(2n-1) x B) - 1 and N = phi / (8 x 2^(2n-1) x B) - 1, n = SMR.CKS, N = BRR.  MIDI at 16 MHz is
+// n = 0, N = 15.
 u32 Peripherals::sci_frame_states(const Sci& s) const {
   const u8 smr = s.data[0];
-  if (smr & 0x80) return u32(8u << (2 * (smr & 3))) * (u32(s.data[1]) + 1) * 8;
+  if (smr & 0x80) return u32(4u << (2 * (smr & 3))) * (u32(s.data[1]) + 1) * 8;
   const u32 bits = 1 + ((smr & 0x40) ? 7 : 8) + ((smr & 0x20) ? 1 : 0) + ((smr & 8) ? 2 : 1);
-  const u32 divider = 64u << (2 * (smr & 3));
+  const u32 divider = 32u << (2 * (smr & 3));
   return divider * (u32(s.data[1]) + 1) * bits;
 }
 

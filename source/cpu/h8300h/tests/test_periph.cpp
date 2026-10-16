@@ -87,13 +87,13 @@ void test_sci_tx_rx() {
   std::vector<u8> sent;
   s.m.periph().set_tx_hook(0, [&](u8 b) { sent.push_back(b); });
   s.reg(kSmr0, 0x00);   // async, 8N1, phi
-  s.reg(kBrr0, 31);     // 64 * 32 * 10 bits = 20480 states per frame
+  s.reg(kBrr0, 15);     // 32 * 16 * 10 bits = 5120 states per frame: MIDI, 31250 baud at 16 MHz
   s.reg(kScr0, 0x30);   // TE RE
   CHECK(s.reg(kSsr0) & 0x80);  // TDRE
   s.reg(kTdr0, 0x5A);
   s.reg(kSsr0, u8(s.reg(kSsr0) & ~0x80));  // clear TDRE: starts the shift
   CHECK(!(s.reg(kSsr0) & 0x80) || true);
-  s.m.run(20000);
+  s.m.run(5000);
   CHECK(sent.empty());
   s.m.run(1000);
   CHECK_EQ(sent.size(), 1u);
@@ -101,7 +101,7 @@ void test_sci_tx_rx() {
   CHECK(s.reg(kSsr0) & 0x04);  // TEND
   // Receive: a byte arrives one frame after it is offered.
   s.m.periph().receive(0, 0xA5);
-  s.m.run(20000);
+  s.m.run(5000);
   CHECK(!(s.reg(kSsr0) & 0x40));
   s.m.run(1000);
   CHECK(s.reg(kSsr0) & 0x40);  // RDRF
@@ -113,7 +113,7 @@ void test_sci_tx_rx() {
   s.reg(kSsr0, u8(s.reg(kSsr0) & ~0x40));
   s.reg(kScr0, 0x70);  // RIE TE RE
   s.m.periph().receive(0, 0x3C);
-  s.m.run(21000);
+  s.m.run(6000);
   CHECK_EQ(s.m.cpu().reg8(10), 0x3C);
   CHECK(!(s.reg(kSsr0) & 0x40));
 }
