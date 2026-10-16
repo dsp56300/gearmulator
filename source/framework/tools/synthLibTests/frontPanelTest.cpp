@@ -77,6 +77,39 @@ namespace
 		TEST_ASSERT(received == cg);
 	}
 
+	void testLcdBitmap()
+	{
+		// 10 x 3: a row is two bytes, the last six bits unused. Bytes >= 0x80 go through pack7
+		std::vector<uint8_t> pixels(fp::bitmapStride(10) * 3);
+		for(size_t i = 0; i < pixels.size(); ++i)
+			pixels[i] = static_cast<uint8_t>(i * 37 + 0x81);
+
+		std::vector<SMidiEvent> out;
+		fp::sendLcdBitmap(out, 10, 3, pixels.data());
+		TEST_ASSERT(out.size() == 1 && fp::isFrontPanel(out[0].sysex) && isSevenBitClean(out[0].sysex));
+
+		FrontPanelTransport t;
+		uint32_t width = 0, height = 0;
+		std::vector<uint8_t> received;
+		t.evLcdBitmap.addListener([&](const uint32_t _w, const uint32_t _h, const std::vector<uint8_t>& _p) { width = _w; height = _h; received = _p; });
+
+		// a byte short: consumed, not understood
+		auto truncated = out[0].sysex;
+		truncated.erase(truncated.end() - 2);
+		TEST_ASSERT(t.receive(truncated));
+		TEST_ASSERT(received.empty());
+
+		TEST_ASSERT(t.receive(out[0].sysex));
+		TEST_ASSERT(width == 10 && height == 3 && received == pixels);
+
+		// 128 x 64 does not fit a 7-bit byte
+		std::vector<uint8_t> big(fp::bitmapStride(128) * 64, 0xa5);
+		out.clear();
+		fp::sendLcdBitmap(out, 128, 64, big.data());
+		TEST_ASSERT(t.receive(out[0].sysex));
+		TEST_ASSERT(width == 128 && height == 64 && received == big);
+	}
+
 	void testLeds()
 	{
 		FrontPanelTransport t;
@@ -179,6 +212,7 @@ void testFrontPanel()
 
 	testLcdText();
 	testCgRam();
+	testLcdBitmap();
 	testLeds();
 	testInput();
 	testRejects();

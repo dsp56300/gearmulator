@@ -912,12 +912,12 @@ namespace mcpServer
 		{
 			ToolDef tool;
 			tool.name = "read_lcd";
-			tool.description = "Read the device's LCD and LEDs as its front panel last reported them: columns, rows, raw cells (8-15 are the custom CGRAM characters, shown as '?' in text), one text line per row, and the LED states. Works with the editor closed. Products without a front panel report available=false";
+			tool.description = "Read the device's LCD and LEDs as its front panel last reported them: columns, rows, raw cells (8-15 are the custom CGRAM characters, shown as '?' in text), one text line per row, and the LED states. A graphic LCD comes as width, height and one line per pixel row, '#' = on. Works with the editor closed. Products without a front panel report available=false";
 			tool.handler = [this](const JsonValue&) -> JsonValue
 			{
-				bool hasLcd = false, hasLeds = false;
-				uint32_t cols = 0, rows = 0;
-				std::vector<uint8_t> cells;
+				bool hasLcd = false, hasLeds = false, hasBitmap = false;
+				uint32_t cols = 0, rows = 0, width = 0, height = 0;
+				std::vector<uint8_t> cells, pixels;
 				std::vector<bool> leds;
 
 				runOnMessageThread([&]
@@ -935,6 +935,14 @@ namespace mcpServer
 						rows = _rows;
 						cells = _cells;
 					});
+					const baseLib::EventListener<uint32_t, uint32_t, std::vector<uint8_t>> bitmap(panel.evLcdBitmap,
+						[&](const uint32_t _width, const uint32_t _height, const std::vector<uint8_t>& _pixels)
+					{
+						hasBitmap = true;
+						width = _width;
+						height = _height;
+						pixels = _pixels;
+					});
 					const baseLib::EventListener<std::vector<bool>> ledMask(panel.evLedMask, [&](const std::vector<bool>& _leds)
 					{
 						hasLeds = true;
@@ -943,7 +951,23 @@ namespace mcpServer
 				});
 
 				auto result = JsonValue::object();
-				result.set("available", JsonValue::fromBool(hasLcd || hasLeds));
+				result.set("available", JsonValue::fromBool(hasLcd || hasLeds || hasBitmap));
+
+				if (hasBitmap)
+				{
+					const auto stride = synthLib::fp::bitmapStride(width);
+					auto lines = JsonValue::array();
+					for (uint32_t y = 0; y < height; ++y)
+					{
+						std::string line;
+						for (uint32_t x = 0; x < width; ++x)
+							line += (pixels[y * stride + x / 8] >> (7 - x % 8)) & 1 ? '#' : '.';
+						lines.append(JsonValue::fromString(line));
+					}
+					result.set("width", JsonValue::fromInt(static_cast<int>(width)));
+					result.set("height", JsonValue::fromInt(static_cast<int>(height)));
+					result.set("bitmap", lines);
+				}
 
 				if (hasLcd)
 				{

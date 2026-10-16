@@ -38,6 +38,9 @@ namespace jucePluginEditorLib
 			std::function<void(const std::vector<uint8_t>&)> lcdSink;
 			std::function<void(const std::array<uint8_t, synthLib::fp::g_cgRamSize>&)> cgRamSink;
 
+			// a graphic LCD, see synthLib::fp::Type::LcdBitmap: width, height, pixels
+			std::function<void(uint32_t, uint32_t, const std::vector<uint8_t>&)> lcdBitmapSink;
+
 			std::vector<std::string> leds;
 			std::vector<std::string> buttons;	// press and release, toggles send their state when changed
 			std::vector<std::string> encoders;	// endless knobs, ids of other elements are skipped
@@ -62,6 +65,7 @@ namespace jucePluginEditorLib
 
 		baseLib::EventListener<uint32_t, uint32_t, std::vector<uint8_t>> m_onLcdText;
 		baseLib::EventListener<std::array<uint8_t, synthLib::fp::g_cgRamSize>> m_onLcdCgRam;
+		baseLib::EventListener<uint32_t, uint32_t, std::vector<uint8_t>> m_onLcdBitmap;
 		baseLib::EventListener<std::vector<bool>> m_onLedMask;
 	};
 }

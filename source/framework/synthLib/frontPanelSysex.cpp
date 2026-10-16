@@ -90,6 +90,15 @@ namespace synthLib
 			end(s);
 		}
 
+		void sendLcdBitmap(std::vector<SMidiEvent>& _dst, const uint32_t _width, const uint32_t _height, const uint8_t* _pixels)
+		{
+			auto& s = begin(_dst, Type::LcdBitmap);
+			pushNibbles(s, _width, 4);
+			pushNibbles(s, _height, 4);
+			pack7(s, _pixels, bitmapStride(_width) * _height);
+			end(s);
+		}
+
 		void sendLedMask(std::vector<SMidiEvent>& _dst, const std::vector<bool>& _leds)
 		{
 			auto& s = begin(_dst, Type::LedMask);
@@ -172,6 +181,20 @@ namespace synthLib
 				std::array<uint8_t, fp::g_cgRamSize> cg{};
 				std::copy_n(p, cg.size(), cg.begin());
 				evLcdCgRam.retain(cg);
+			}
+			return true;
+		case fp::Type::LcdBitmap:
+			{
+				if(size < 8)
+					return true;
+				const auto width = static_cast<uint32_t>(fp::readNibbles(p, 4));
+				const auto height = static_cast<uint32_t>(fp::readNibbles(p + 4, 4));
+				const size_t count = fp::bitmapStride(width) * height;
+				if(size != 8 + fp::packedSize(count))
+					return true;
+				std::vector<uint8_t> pixels;
+				fp::unpack7(pixels, p + 8, count);
+				evLcdBitmap.retain(width, height, std::move(pixels));
 			}
 			return true;
 		case fp::Type::LedMask:

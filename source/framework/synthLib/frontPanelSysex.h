@@ -32,11 +32,12 @@ namespace synthLib
 			Encoder			= 0x05,	// index, delta + 64
 			Param			= 0x06,	// page as 2 nibbles, index as 2 nibbles, int32 value as 8 nibbles
 			RequestState	= 0x07,	// mask, 0 = everything: the device answers with its LCD, CGRAM and LEDs
+			LcdBitmap		= 0x0a,	// a graphic LCD: width and height as 4 nibbles each, then the rows packed with pack7.
+									// A row has bitmapStride(width) bytes, pixel x is bit 7 - x % 8 of byte x / 8, 1 = on
 
 			// reserved, implemented by the first product that needs them
 			Pot				= 0x08,	// index, value hi7, value lo7
 			LcdCursor		= 0x09,
-			LcdBitmap		= 0x0a,
 			Buttons			= 0x0b,	// all buttons as a bitmap
 			LedLevels		= 0x0c,
 
@@ -58,6 +59,9 @@ namespace synthLib
 		// _count bytes from exactly packedSize(_count) bytes at _src
 		void unpack7(std::vector<uint8_t>& _dst, const uint8_t* _src, size_t _count);
 
+		// bytes per row of an LcdBitmap
+		constexpr size_t bitmapStride(const uint32_t _width) { return (_width + 7) / 8; }
+
 		// _count nibbles of _value, most significant first
 		void pushNibbles(SysexBuffer& _dst, uint64_t _value, uint32_t _count);
 		uint64_t readNibbles(const uint8_t* _src, uint32_t _count);
@@ -65,6 +69,8 @@ namespace synthLib
 		// Each appends one frame with source Internal. Editors send theirs through pluginLib::Controller::sendFrontPanel
 		void sendLcdText(std::vector<SMidiEvent>& _dst, uint32_t _cols, uint32_t _rows, const uint8_t* _cells);
 		void sendLcdCgRam(std::vector<SMidiEvent>& _dst, const std::array<uint8_t, g_cgRamSize>& _cgRam);
+		// _pixels: _height rows of bitmapStride(_width) bytes
+		void sendLcdBitmap(std::vector<SMidiEvent>& _dst, uint32_t _width, uint32_t _height, const uint8_t* _pixels);
 		void sendLedMask(std::vector<SMidiEvent>& _dst, const std::vector<bool>& _leds);
 		void sendButton(std::vector<SMidiEvent>& _dst, uint32_t _index, bool _pressed);
 		void sendEncoder(std::vector<SMidiEvent>& _dst, uint32_t _index, int32_t _delta);
@@ -72,7 +78,7 @@ namespace synthLib
 		void sendRequestState(std::vector<SMidiEvent>& _dst, uint8_t _mask = 0);
 	}
 
-	// Decodes front panel frames into events. LcdText, LcdCgRam and LedMask are retained, a listener added later gets
+	// Decodes front panel frames into events. LcdText, LcdCgRam, LcdBitmap and LedMask are retained, a listener added later gets
 	// the current state at once. A device owns one and calls receive() before anything else sees the sysex, the editor
 	// side owns one in pluginLib::Controller
 	class FrontPanelTransport
@@ -80,6 +86,7 @@ namespace synthLib
 	public:
 		baseLib::Event<uint32_t, uint32_t, std::vector<uint8_t>> evLcdText;	// cols, rows, cells
 		baseLib::Event<std::array<uint8_t, fp::g_cgRamSize>> evLcdCgRam;
+		baseLib::Event<uint32_t, uint32_t, std::vector<uint8_t>> evLcdBitmap;	// width, height, pixels as in the frame
 		baseLib::Event<std::vector<bool>> evLedMask;
 		baseLib::Event<uint32_t, bool> evButton;							// index, pressed
 		baseLib::Event<uint32_t, int32_t> evEncoder;						// index, delta

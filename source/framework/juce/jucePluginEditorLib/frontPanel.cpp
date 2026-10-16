@@ -61,6 +61,14 @@ namespace jucePluginEditorLib
 					b->setChecked(false);
 					send(false);
 				});
+				// released outside of the button: the device must not keep it held
+				juceRmlUi::EventListener::Add(b, Rml::EventId::Mouseout, [b, send](Rml::Event&)
+				{
+					if (!b->isChecked())
+						return;
+					b->setChecked(false);
+					send(false);
+				});
 			}
 		}
 
@@ -101,6 +109,12 @@ namespace jucePluginEditorLib
 		{
 			if (m_binding.cgRamSink)
 				m_binding.cgRamSink(_cgRam);
+		});
+
+		m_onLcdBitmap.set(transport.evLcdBitmap, [this](const uint32_t _width, const uint32_t _height, const std::vector<uint8_t>& _pixels)
+		{
+			if (m_binding.lcdBitmapSink)
+				m_binding.lcdBitmapSink(_width, _height, _pixels);
 		});
 
 		m_onLedMask.set(transport.evLedMask, [this](const std::vector<bool>& _leds)
