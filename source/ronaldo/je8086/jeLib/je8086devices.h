@@ -9,6 +9,7 @@
 
 #include "common/device.hpp"
 #include "common/sched.hpp"
+#include "cpu/h8300h/adc.hpp"
 #include "cpu/h8300h/machine.hpp"
 
 #include "custom_chips/esp/esp.h"
@@ -257,15 +258,14 @@ namespace jeLib
 			bool m_latchArmed = false;
 		};
 
-		// The H8/3002 A/D converter (ADCSR / ADCR / ADDRA-D) with the multiplexed potentiometers behind it. A conversion
-		// takes 134 or 266 states (ADCSR.CKS), sets ADF and raises ADI; scan mode repeats it.
+		// The multiplexed potentiometers behind the H8/3002 A/D converter: port 6 selects the mux input, the converter
+		// (ADCSR / ADCR / ADDRA-D) reads them
 		class Faders final : public emu::Device
 		{
 		public:
 			using ChannelMap = std::array<uint8_t, 64>;
 
 			Faders(h8300h::Machine& _machine, const ChannelMap& _channels);
-			~Faders() override { cancelConversion(); }
 
 			void reset();
 			uint8_t read8(uint32_t _address) override;
@@ -275,23 +275,10 @@ namespace jeLib
 			static ChannelMap keyboardChannels();
 
 		private:
-			uint64_t duration() const { return (m_adcsr & 8) ? 134 : 266; }
-			void scheduleConversion(uint64_t _start);
-			void cancelConversion();
-			void settleConversion();
-			static void onConversion(void* _self, uint64_t, uint64_t);
-			void updateInterruptRequest();
-
-			h8300h::Machine& m_machine;
 			const ChannelMap m_channels;
-			int8_t m_scanning = 0;
 			int8_t m_port6 = 0;
-			uint8_t m_adcsr = 0;
-			uint8_t m_adcr = 0x7f;
-			bool m_adfRead = false;
-			uint64_t m_conversionStart = 0;
-			emu::Scheduler::EventId m_conversionEvent = 0;
 			std::array<int, 64> m_values{};
+			h8300h::Adc m_adc;
 		};
 
 		class KeyScanner final : public emu::Device
