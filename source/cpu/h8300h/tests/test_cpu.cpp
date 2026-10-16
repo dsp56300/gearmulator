@@ -334,6 +334,209 @@ void test_bus_retime_and_ram_tail() {
   CHECK_EQ(s.cpu().reg16(2), 0x1234);
 }
 
+// --- H8S/2000 ---------------------------------------------------------------------------------
+// A bare bus and an H8S core with one interrupt source behind a controller in
+// interrupt control mode 2.
+struct H8s {
+  struct Intc final : IntcBlock {
+    bool pending = false;
+    u8 lvl = 5;
+    bool arbitrate(unsigned& which, u8 exr) const override {
+      if (!pending || lvl <= (exr & kExrMask)) return false;  // mode 2: EXR's mask, CCR.I plays no part
+      which = kVector;
+      return true;
+    }
+    void acknowledge(unsigned) override { pending = false; }
+    bool standby_wake(u8) const override { return false; }
+    u8 syscr() const override { return 0x21; }
+    void enter_software_standby() override {}
+    unsigned control_mode() const override { return 2; }
+    u8 level(unsigned) const override { return lvl; }
+  };
+  static constexpr unsigned kVector = 64;
+  Bus bus;
+  Cpu cpu{bus, true};
+  Intc intc;
+  H8s() {
+    bus.map_ram(0, 0x400000);
+    u8* v = bus.mem();
+    v[0] = 0; v[1] = u8(kCode >> 16); v[2] = u8(kCode >> 8); v[3] = u8(kCode);
+    cpu.set_intc(&intc);
+    cpu.reset();
+    cpu.set_sp(kRam + 0x1000);
+  }
+  void code(std::initializer_list<u8> bytes, u32 at = kCode) {
+    u32 a = at;
+    for (u8 b : bytes) bus.mem()[a++] = b;
+    cpu.invalidate_range(at, u32(bytes.size()));
+  }
+  void steps(unsigned n) { for (unsigned i = 0; i < n; ++i) cpu.step(); }
+  u8 flags() const { return cpu.ccr() & 0x2F; }
+};
+
+void test_h8s_shifts() {
+  H8s s;
+  s.code({
+      0xF8, 0x81,  // MOV.B #81,R0L
+      0x10, 0x48,  // SHLL.B #2,R0L     -> 04, C from the second step: 0
+      0x79, 0x01, 0x40, 0x00,  // MOV.W #4000,R1
+      0x10, 0xD1,  // SHAL.W #2,R1      -> 0000, Z C, V: the sign changed in the first step
+      0x7A, 0x02, 0x80, 0x00, 0x00, 0x03,  // MOV.L #80000003,ER2
+      0x11, 0xF2,  // SHAR.L #2,ER2     -> E0000000, N C
+      0xFB, 0x40,  // MOV.B #40,R3L
+      0x12, 0x4B,  // ROTXL.B #2,R3L    C in = 1: 81 (C 0), then 02 (C 1)
+  });
+  s.steps(2);
+  CHECK_EQ(s.cpu.reg8(8), 0x04);
+  CHECK_EQ(s.flags(), 0);
+  s.steps(2);
+  CHECK_EQ(s.cpu.reg16(1), 0);
+  CHECK_EQ(s.flags(), kCcrZ | kCcrC | kCcrV);
+  s.steps(2);
+  CHECK_EQ(s.cpu.er(2), 0xE0000000u);
+  CHECK_EQ(s.flags(), kCcrN | kCcrC);
+  s.steps(2);
+  CHECK_EQ(s.cpu.reg8(11), 0x02);
+  CHECK_EQ(s.flags(), kCcrC);
+  // without `h8s` the two-bit forms are undefined
+  CHECK(!decode([](unsigned i) { return u8(i == 0 ? 0x10 : 0x48); }).valid());
+  CHECK(decode([](unsigned i) { return u8(i == 0 ? 0x10 : 0x48); }, true).valid());
+}
+
+void test_h8s_ldm_stm_tas() {
+  H8s s;
+  const u32 sp = s.cpu.sp();
+  s.cpu.set_er(0, 0x11111111);
+  s.cpu.set_er(1, 0x22222222);
+  s.cpu.set_er(6, kRam + 0x200);
+  s.bus.mem()[kRam + 0x200] = 0x05;
+  s.code({
+      0x01, 0x10, 0x6D, 0xF0,  // STM.L (ER0-ER1),@-SP
+      0x01, 0x10, 0x6D, 0x75,  // LDM.L @SP+,(ER4-ER5)
+      0x01, 0xE0, 0x7B, 0x6C,  // TAS @ER6
+  });
+  s.steps(1);
+  CHECK_EQ(s.cpu.sp(), sp - 8);
+  CHECK_EQ(s.bus.read32(sp - 4), 0x11111111u);  // the first register goes first, to the higher address
+  CHECK_EQ(s.bus.read32(sp - 8), 0x22222222u);
+  s.steps(1);
+  CHECK_EQ(s.cpu.sp(), sp);
+  CHECK_EQ(s.cpu.er(4), 0x11111111u);
+  CHECK_EQ(s.cpu.er(5), 0x22222222u);
+  s.cpu.set_ccr(kCcrI | kCcrN | kCcrV | kCcrZ);
+  s.steps(1);
+  CHECK_EQ(s.bus.mem()[kRam + 0x200], 0x85);
+  CHECK_EQ(s.flags(), 0);  // tested before bit 7 was set
+}
+
+void test_h8s_exr() {
+  H8s s;
+  CHECK_EQ(s.cpu.exr(), 0x7F);
+  s.code({
+      0x01, 0x41, 0x07, 0x02,  // LDC #02,EXR
+      0x02, 0x10,              // STC EXR,R0H
+      0x01, 0x41, 0x04, 0x80,  // ORC #80,EXR
+      0x01, 0x41, 0x06, 0x7F,  // ANDC #7F,EXR
+      0x01, 0x41, 0x05, 0x01,  // XORC #01,EXR
+      0x01, 0x41, 0x6D, 0xF0,  // STC.W EXR,@-SP
+      0x01, 0x41, 0x07, 0x00,  // LDC #00,EXR
+      0x01, 0x41, 0x6D, 0x70,  // LDC.W @SP+,EXR
+      0x03, 0x10,              // LDC R0H,EXR
+  });
+  s.steps(1);
+  CHECK_EQ(s.cpu.exr(), 0x7A);  // bits 6-3 read 1
+  s.steps(1);
+  CHECK_EQ(s.cpu.reg8(0), 0x7A);
+  s.steps(1);
+  CHECK_EQ(s.cpu.exr(), 0xFA);
+  s.steps(1);
+  CHECK_EQ(s.cpu.exr(), 0x7A);
+  s.steps(1);
+  CHECK_EQ(s.cpu.exr(), 0x7B);
+  s.steps(3);
+  CHECK_EQ(s.cpu.exr(), 0x7B);
+  s.steps(1);
+  CHECK_EQ(s.cpu.exr(), 0x7A);
+}
+
+void test_h8s_mode2_interrupt() {
+  H8s s;
+  const u32 handler = 0x001200, sp = s.cpu.sp();
+  u8* v = s.bus.mem() + H8s::kVector * 4;
+  v[0] = 0; v[1] = u8(handler >> 16); v[2] = u8(handler >> 8); v[3] = u8(handler);
+  s.code({
+      0x01, 0x41, 0x07, 0x05,  // LDC #05,EXR    (a level 5 request is masked)
+      0x00, 0x00,              // NOP
+      0x01, 0x41, 0x07, 0x04,  // LDC #04,EXR    (now it is not; the next instruction still runs)
+      0x00, 0x00,              // NOP
+      0x00, 0x00,              // NOP
+  });
+  s.code({0x00, 0x00, 0x56, 0x70}, handler);  // NOP, RTE
+  s.intc.pending = true;
+  CHECK_EQ(s.cpu.ccr() & kCcrI, kCcrI);  // CCR.I is set from reset and must not mask in mode 2
+  s.steps(1);
+  CHECK_EQ(s.cpu.pc(), kCode + 4);
+  s.steps(2);
+  CHECK_EQ(s.cpu.pc(), kCode + 10);
+  s.steps(1);
+  CHECK_EQ(s.cpu.pc(), kCode + 12);
+  s.steps(1);  // the entry and the handler's NOP
+  CHECK_EQ(s.cpu.pc(), handler + 2);
+  CHECK_EQ(s.cpu.sp(), sp - 6);
+  CHECK_EQ(s.bus.read16(sp - 6), 0x7C00);              // EXR, as a word, at the lowest address
+  CHECK_EQ(s.bus.read32(sp - 4) & kAddrMask, kCode + 12);
+  CHECK_EQ(s.cpu.exr(), 0x7D);                          // the mask raised to the accepted level
+  s.steps(1);  // RTE
+  CHECK_EQ(s.cpu.pc(), kCode + 12);
+  CHECK_EQ(s.cpu.sp(), sp);
+  CHECK_EQ(s.cpu.exr(), 0x7C);
+  // TRAPA in mode 2 pushes EXR too but leaves the mask alone
+  v = s.bus.mem() + 9 * 4;
+  v[0] = 0; v[1] = u8(handler >> 16); v[2] = u8(handler >> 8); v[3] = u8(handler);
+  s.code({0x57, 0x10}, kCode + 12);  // TRAPA #1
+  s.steps(1);
+  CHECK_EQ(s.cpu.pc(), handler);
+  CHECK_EQ(s.cpu.sp(), sp - 6);
+  CHECK_EQ(s.bus.read16(sp - 6), 0x7C00);
+  CHECK_EQ(s.cpu.exr(), 0x7C);
+}
+
+// Bit stores to memory: BST / BIST to an absolute address take the bit number, not the number as a mask, and a bit
+// number from a register uses only its low three bits (firmware passes whole LED numbers there).
+void test_h8s_bit_stores() {
+  H8s s;
+  s.bus.map_ram(0xFFFF00, 0x100);
+  u8* m = s.bus.mem();
+  m[0xFFFF40] = 0x00; m[0xFFFF41] = 0xFF; m[0xFFFF42] = 0x00; m[0xFFFF43] = 0xFF;
+  s.code({
+      0x04, 0x01,                          // ORC #1,CCR
+      0x7F, 0x40, 0x67, 0x20,              // BST #2,@H'FFFF40
+      0x7F, 0x41, 0x67, 0xA0,              // BIST #2,@H'FFFF41
+      0xF8, 0x09,                          // MOV.B #9,R0L
+      0x7A, 0x01, 0x00, 0xFF, 0xFF, 0x42,  // MOV.L #H'FFFF42,ER1
+      0x7D, 0x10, 0x60, 0x80,              // BSET R0L,@ER1
+      0x7F, 0x43, 0x62, 0x80,              // BCLR R0L,@H'FFFF43
+  });
+  s.steps(7);
+  CHECK_EQ(m[0xFFFF40], 0x04);
+  CHECK_EQ(m[0xFFFF41], 0xFB);
+  CHECK_EQ(m[0xFFFF42], 0x02);  // bit 9 is bit 1
+  CHECK_EQ(m[0xFFFF43], 0xFD);
+}
+
+void test_h8s_disassembly() {
+  H8s s;
+  s.code({0x01, 0x10, 0x6D, 0x75, 0x01, 0x30, 0x6D, 0xF0, 0x01, 0xE0, 0x7B, 0x6C, 0x10, 0x48, 0x01, 0x41,
+          0x07, 0x02, 0x02, 0x10, 0x01, 0x41, 0x6D, 0xF0});
+  CHECK_EQ(disassemble(s.cpu.decode_at(kCode)), "LDM.L @SP+,(ER4-ER5)");
+  CHECK_EQ(disassemble(s.cpu.decode_at(kCode + 4)), "STM.L (ER0-ER3),@-SP");
+  CHECK_EQ(disassemble(s.cpu.decode_at(kCode + 8)), "TAS @ER6");
+  CHECK_EQ(disassemble(s.cpu.decode_at(kCode + 12)), "SHLL.B #2,R0L");
+  CHECK_EQ(disassemble(s.cpu.decode_at(kCode + 14)), "LDC #H'02,EXR");
+  CHECK_EQ(disassemble(s.cpu.decode_at(kCode + 18)), "STC EXR,R0H");
+  CHECK_EQ(disassemble(s.cpu.decode_at(kCode + 20)), "STC EXR,@-ER7");
+}
+
 }  // namespace
 
 int main() {
@@ -348,5 +551,11 @@ int main() {
   test_timing();
   test_disassembly();
   test_sleep_and_interrupt();
+  test_h8s_shifts();
+  test_h8s_ldm_stm_tas();
+  test_h8s_exr();
+  test_h8s_mode2_interrupt();
+  test_h8s_disassembly();
+  test_h8s_bit_stores();
   return test::finish("h8300h_test_cpu");
 }

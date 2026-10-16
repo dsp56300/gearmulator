@@ -29,7 +29,7 @@ foreach(t h8dasm h8cfg)
 endforeach()
 
 if(BUILD_TESTING)
-	foreach(t cpu periph)
+	foreach(t cpu periph periph2320)
 		add_executable(h8300h_test_${t} tests/test_${t}.cpp)
 		set_property(TARGET h8300h_test_${t} PROPERTY FOLDER "cpu/tests")
 		target_link_libraries(h8300h_test_${t} PRIVATE h8300h)

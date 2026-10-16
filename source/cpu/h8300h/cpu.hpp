@@ -28,13 +28,19 @@ class IntcBlock {
  public:
   virtual ~IntcBlock() = default;
   // The request to take at the next boundary, given the CCR: NMI first, then
-  // the highest of the acceptable maskable ones.
+  // the highest of the acceptable maskable ones.  In the H8S's interrupt
+  // control mode 2 the EXR comes instead of the CCR: its mask decides, the
+  // CCR's I bit plays no part.
   virtual bool arbitrate(unsigned& which, u8 ccr) const = 0;
   virtual void acknowledge(unsigned which) = 0;
-  // A request that ends software standby (NMI, IRQ0-IRQ2).
+  // A request that ends software standby (NMI, IRQ0-IRQ2); CCR or EXR as above.
   virtual bool standby_wake(u8 ccr) const = 0;
   virtual u8 syscr() const = 0;
   virtual void enter_software_standby() = 0;
+  // H8S only: the interrupt control mode (0 or 2), and in mode 2 the priority level of a request, which the
+  // accepted interrupt raises EXR's mask to.  The H8/300H has neither.
+  virtual unsigned control_mode() const { return 0; }
+  virtual u8 level(unsigned /*which*/) const { return 0; }
 };
 
 class Cpu final : public emu::SliceCore {
@@ -46,7 +52,8 @@ class Cpu final : public emu::SliceCore {
   static constexpr u32 kPendFault = 1u << 4;     // undefined instruction: the core stops advancing
   static constexpr u32 kPendReset = 1u << 5;     // a reset is due at the next boundary (watchdog)
 
-  Cpu(Bus& bus);
+  // `h8s`: an H8S/2000 core, with EXR, interrupt control mode 2 and the H8S instructions (decode.hpp).
+  explicit Cpu(Bus& bus, bool h8s = false);
   ~Cpu() override;
 
   // Hardware reset: PC from vector 0, CCR = I set, registers cleared.
@@ -70,6 +77,9 @@ class Cpu final : public emu::SliceCore {
   u32 current_pc() const { return in_slice_ && cur_ip_ ? pc_of(cur_ip_) : pc_; }
   u8 ccr() const { return ccr_; }
   void set_ccr(u8 v) { ccr_ = v; reeval_irq(); }
+  bool h8s() const { return h8s_; }
+  u8 exr() const { return exr_; }
+  void set_exr(u8 v) { exr_ = u8(v | kExrReserved); reeval_irq(); }
   u32 er(unsigned n) const { return er_[n & 7]; }
   void set_er(unsigned n, u32 v) { er_[n & 7] = v; }
   // Byte registers: 0-7 = R0H-R7H, 8-15 = R0L-R7L.  Word: 0-7 = R0-R7, 8-15 = E0-E7.
@@ -149,9 +159,12 @@ class Cpu final : public emu::SliceCore {
   u32 pc_of(const Cell* ip) const { return (page_pc_ + u32(ip - page_cells_) * 2) & kAddrMask; }
 
   // --- exceptions ---------------------------------------------------------------------
-  // Vectored entry: push PC with the CCR, mask, load the vector.  Returns
-  // the states used (the stack and vector accesses plus the internal ones).
+  // Vectored entry: push PC with the CCR (and EXR in interrupt control mode
+  // 2), mask, load the vector.  Returns the states used (the stack and
+  // vector accesses plus the internal ones).
   u32 enter_exception(unsigned vector);
+  bool mode2() const { return h8s_ && intc_ && intc_->control_mode() == 2; }
+  u8 mask_reg() const { return mode2() ? exr_ : ccr_; }  // what the interrupt controller masks with
   bool take_interrupt();
   void hold_off() { holdoff_ = true; raise(kPendHoldoff); }
 
@@ -159,10 +172,12 @@ class Cpu final : public emu::SliceCore {
 
   Bus& bus_;
   IntcBlock* intc_ = nullptr;
+  const bool h8s_;
 
   u32 er_[8] = {};
   u32 pc_ = 0;
   u8 ccr_ = 0x80;
+  u8 exr_ = 0x7F;
   u32 acc_ = 0;           // dynamic states of the instruction in flight
   bool holdoff_ = false;  // the next boundary executes an instruction regardless of requests
   bool sleeping_ = false;

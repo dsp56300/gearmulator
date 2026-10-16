@@ -22,6 +22,9 @@ constexpr u32 kAddrMask = 0xFFFFFF;
 // CCR bits.
 constexpr u8 kCcrC = 0x01, kCcrV = 0x02, kCcrZ = 0x04, kCcrN = 0x08, kCcrU = 0x10, kCcrH = 0x20, kCcrUi = 0x40, kCcrI = 0x80;
 
+// EXR, H8S only: the trace bit, the interrupt mask of interrupt control mode 2, and bits 6-3 that always read 1.
+constexpr u8 kExrT = 0x80, kExrMask = 0x07, kExrReserved = 0x78;
+
 // Exception / interrupt vector numbers (vector table at 0, four bytes each).
 enum Vector : u8 {
   kVecReset = 0,

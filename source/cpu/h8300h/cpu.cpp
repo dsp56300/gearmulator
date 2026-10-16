@@ -20,7 +20,7 @@ Cell cross_cell() {
 }
 }  // namespace
 
-Cpu::Cpu(Bus& bus) : bus_(bus), cells_(24, blank_cell(), kGuardCells, cross_cell()) {
+Cpu::Cpu(Bus& bus, bool h8s) : bus_(bus), h8s_(h8s), cells_(24, blank_cell(), kGuardCells, cross_cell()) {
   bus_.set_code_sink(this);
 }
 
@@ -29,6 +29,7 @@ Cpu::~Cpu() { bus_.set_code_sink(nullptr); }
 void Cpu::reset() {
   std::memset(er_, 0, sizeof er_);
   ccr_ = kCcrI;
+  exr_ = 0x7F;  // H8S: T clear, the mask at 7
   acc_ = 0;
   holdoff_ = false;
   sleeping_ = standby_ = false;
@@ -46,7 +47,7 @@ void Cpu::reset() {
 
 DecodedInsn Cpu::decode_at(u32 addr) const {
   const u8* mem = bus_.mem();
-  return decode([mem, addr](unsigned i) { return mem[(addr + i) & kAddrMask]; });
+  return decode([mem, addr](unsigned i) { return mem[(addr + i) & kAddrMask]; }, h8s_);
 }
 
 // Manual 7.2: internal RAM two states per word, the register field three
@@ -101,8 +102,11 @@ void Cpu::code_line_written(u32 addr) {
 u32 Cpu::enter_exception(unsigned vector) {
   const u32 before = acc_;
   push32((pc_ & kAddrMask) | (u32(ccr_) << 24));
+  // H8S manual figure 4.4: mode 2 adds EXR, as a word with an ignored lower byte; table 4.4: I is set in both
+  // modes, T cleared in mode 2, and the H8S has no UE that would leave UI alone
+  if (mode2()) { push16(u16(exr_) << 8); exr_ = u8(exr_ & ~kExrT); }
   ccr_ |= kCcrI;
-  if (intc_ && !(intc_->syscr() & 0x08)) ccr_ |= kCcrUi;
+  if (!h8s_ && intc_ && !(intc_->syscr() & 0x08)) ccr_ |= kCcrUi;
   pc_ = rd32(vector * 4) & kAddrMask;
   sleeping_ = standby_ = false;
   clear_pending(kPendSleep);
@@ -113,16 +117,19 @@ u32 Cpu::enter_exception(unsigned vector) {
 
 void Cpu::reeval_irq() {
   unsigned which;
-  if (intc_ && intc_->arbitrate(which, ccr_)) raise(kPendIrq);
+  if (intc_ && intc_->arbitrate(which, mask_reg())) raise(kPendIrq);
   else clear_pending(kPendIrq);
 }
 
 bool Cpu::take_interrupt() {
   unsigned which;
-  if (!intc_ || !intc_->arbitrate(which, ccr_)) return false;
+  if (!intc_ || !intc_->arbitrate(which, mask_reg())) return false;
   irq_taken_ = true;
   intc_->acknowledge(which);
+  const bool raise_mask = mode2();
   budget_ -= s32(enter_exception(which));
+  // mode 2 (H8S manual 5.4.3): the mask rises to the level of the accepted interrupt
+  if (raise_mask) exr_ = u8((exr_ & ~kExrMask) | (intc_->level(which) & kExrMask));
   reeval_irq();
   return true;
 }
@@ -155,7 +162,7 @@ u64 Cpu::run_slice(s32 slice) {
   }
   if (EMU_UNLIKELY(sleeping_ || standby_)) {
     unsigned which;
-    const bool wake = intc_ && (standby_ ? intc_->standby_wake(ccr_) : intc_->arbitrate(which, ccr_));
+    const bool wake = intc_ && (standby_ ? intc_->standby_wake(mask_reg()) : intc_->arbitrate(which, mask_reg()));
     if (!wake || holdoff_) {
       holdoff_ = false;
       budget_ -= std::max(slice, 1);
@@ -194,7 +201,7 @@ unsigned Cpu::step() {
   irq_taken_ = false;
   if (sleeping_ || standby_ || faulted_) {
     unsigned which;
-    const bool wake = !faulted_ && intc_ && (standby_ ? intc_->standby_wake(ccr_) : intc_->arbitrate(which, ccr_));
+    const bool wake = !faulted_ && intc_ && (standby_ ? intc_->standby_wake(mask_reg()) : intc_->arbitrate(which, mask_reg()));
     if (!wake) {
       total_states_ += 1;
       return 1;

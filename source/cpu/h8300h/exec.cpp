@@ -338,94 +338,112 @@ struct ExecImpl {
     set(c, kCcrN, (v & msb<S>()) != 0);
     set(c, kCcrZ, v == 0);
   }
-  template <unsigned S> H(h_shal) {
+  // N = 1 or, on the H8S, 2 bits: the same step twice.  C is the last bit shifted out; for SHAL, V says whether
+  // the sign changed in any step, which for two bits is whether the top three bits differ.
+  template <unsigned S, unsigned N = 1> H(h_shal) {
     BEGIN;
     const unsigned rd = ip->r & 15;
     u32 v = rreg<S>(c, rd);
-    constexpr unsigned bits = S * 8;
-    const bool old_sign = (v & msb<S>()) != 0;
-    set(c, kCcrC, (v & (1u << (bits - 1))) != 0);
-    v = (v << 1) & mask<S>();
-    const bool new_sign = (v & msb<S>()) != 0;
-    set(c, kCcrV, old_sign != new_sign);
+    bool ov = false;
+    for (unsigned i = 0; i < N; ++i) {
+      const bool old_sign = (v & msb<S>()) != 0;
+      set(c, kCcrC, old_sign);
+      v = (v << 1) & mask<S>();
+      ov |= old_sign != ((v & msb<S>()) != 0);
+    }
+    set(c, kCcrV, ov);
     set(c, kCcrZ, v == 0);
-    set(c, kCcrN, new_sign);
+    set(c, kCcrN, (v & msb<S>()) != 0);
     wreg<S>(c, rd, v);
     NEXT;
   }
-  template <unsigned S> H(h_shll) {
+  template <unsigned S, unsigned N = 1> H(h_shll) {
     BEGIN;
     const unsigned rd = ip->r & 15;
     u32 v = rreg<S>(c, rd);
-    set(c, kCcrC, (v & (1u << (S * 8 - 1))) != 0);
-    v <<= 1;
+    for (unsigned i = 0; i < N; ++i) {
+      set(c, kCcrC, (v & (1u << (S * 8 - 1))) != 0);
+      v = (v << 1) & mask<S>();
+    }
     flags_masked<S>(c, v);
     wreg<S>(c, rd, v & mask<S>());
     NEXT;
   }
-  template <unsigned S> H(h_shar) {
+  template <unsigned S, unsigned N = 1> H(h_shar) {
     BEGIN;
     const unsigned rd = ip->r & 15;
     s32 v = sext<S>(rreg<S>(c, rd));
-    set(c, kCcrC, (v & 1) != 0);
-    v >>= 1;
+    for (unsigned i = 0; i < N; ++i) {
+      set(c, kCcrC, (v & 1) != 0);
+      v >>= 1;
+    }
     set(c, kCcrV, false);
     set(c, kCcrN, v < 0);
     set(c, kCcrZ, v == 0);
     wreg<S>(c, rd, u32(v) & mask<S>());
     NEXT;
   }
-  template <unsigned S> H(h_shlr) {
+  template <unsigned S, unsigned N = 1> H(h_shlr) {
     BEGIN;
     const unsigned rd = ip->r & 15;
     u32 v = rreg<S>(c, rd);
-    set(c, kCcrC, (v & 1) != 0);
-    v >>= 1;
+    for (unsigned i = 0; i < N; ++i) {
+      set(c, kCcrC, (v & 1) != 0);
+      v >>= 1;
+    }
     flags_masked<S>(c, v);
     wreg<S>(c, rd, v & mask<S>());
     NEXT;
   }
-  template <unsigned S> H(h_rotl) {
+  template <unsigned S, unsigned N = 1> H(h_rotl) {
     BEGIN;
     const unsigned rd = ip->r & 15;
     u32 v = rreg<S>(c, rd);
-    const u32 t = v >> (S * 8 - 1);
-    v = (v << 1) | t;
-    set(c, kCcrC, (t & 1) != 0);
+    for (unsigned i = 0; i < N; ++i) {
+      const u32 t = (v >> (S * 8 - 1)) & 1;
+      v = ((v << 1) | t) & mask<S>();
+      set(c, kCcrC, t != 0);
+    }
     flags_masked<S>(c, v);
     wreg<S>(c, rd, v & mask<S>());
     NEXT;
   }
-  template <unsigned S> H(h_rotxl) {
+  template <unsigned S, unsigned N = 1> H(h_rotxl) {
     BEGIN;
     const unsigned rd = ip->r & 15;
     u32 v = rreg<S>(c, rd);
-    const u32 nc = (v >> (S * 8 - 1)) & 1;
-    v = (v << 1) | (cf(c) ? 1u : 0u);
-    set(c, kCcrC, nc != 0);
+    for (unsigned i = 0; i < N; ++i) {
+      const u32 nc = (v >> (S * 8 - 1)) & 1;
+      v = ((v << 1) | (cf(c) ? 1u : 0u)) & mask<S>();
+      set(c, kCcrC, nc != 0);
+    }
     flags_masked<S>(c, v);
     wreg<S>(c, rd, v & mask<S>());
     NEXT;
   }
-  template <unsigned S> H(h_rotr) {
+  template <unsigned S, unsigned N = 1> H(h_rotr) {
     BEGIN;
     const unsigned rd = ip->r & 15;
     u32 v = rreg<S>(c, rd);
-    const u32 t = v & 1;
-    v = (v >> 1) | (t << (S * 8 - 1));
-    set(c, kCcrC, t != 0);
+    for (unsigned i = 0; i < N; ++i) {
+      const u32 t = v & 1;
+      v = (v >> 1) | (t << (S * 8 - 1));
+      set(c, kCcrC, t != 0);
+    }
     flags_masked<S>(c, v);
     wreg<S>(c, rd, v & mask<S>());
     NEXT;
   }
-  template <unsigned S> H(h_rotxr) {
+  template <unsigned S, unsigned N = 1> H(h_rotxr) {
     BEGIN;
     const unsigned rd = ip->r & 15;
     u32 v = rreg<S>(c, rd);
-    const u32 r = v & 1;
-    v >>= 1;
-    if (cf(c)) v |= 1u << (S * 8 - 1);
-    set(c, kCcrC, r != 0);
+    for (unsigned i = 0; i < N; ++i) {
+      const u32 r = v & 1;
+      v >>= 1;
+      if (cf(c)) v |= 1u << (S * 8 - 1);
+      set(c, kCcrC, r != 0);
+    }
     flags_masked<S>(c, v);
     wreg<S>(c, rd, v & mask<S>());
     NEXT;
@@ -514,6 +532,7 @@ struct ExecImpl {
   H(h_rts) { BEGIN; END(branch(c, ip, c.pop32())); }
   H(h_rte) {
     BEGIN;
+    if (c.mode2()) c.exr_ = u8((c.pop16() >> 8) | kExrReserved);
     const u32 p = c.pop32();
     c.ccr_ = u8(p >> 24);
     c.hold_off();
@@ -528,34 +547,62 @@ struct ExecImpl {
     END(c.cell_at(c.pc_));
   }
 
-  // --- CCR -----------------------------------------------------------------------------------
-  static void load_ccr(Cpu& c, u8 v) { c.ccr_ = v; c.hold_off(); c.reeval_irq(); }
-  H(h_ldc_imm) { BEGIN; load_ccr(c, u8(ip->imm)); NEXT; }
-  H(h_ldc_reg) { BEGIN; load_ccr(c, r8(c, ip->r & 15)); NEXT; }
-  H(h_stc_reg) { BEGIN; w8(c, ip->r & 15, c.ccr_); NEXT; }
-  H(h_andc) { BEGIN; load_ccr(c, u8(c.ccr_ & ip->imm)); NEXT; }
-  H(h_orc) { BEGIN; load_ccr(c, u8(c.ccr_ | ip->imm)); NEXT; }
-  H(h_xorc) { BEGIN; load_ccr(c, u8(c.ccr_ ^ ip->imm)); NEXT; }
-  // LDC/STC memory forms read / write a word; the CCR is its low byte.
-  H(h_ldc_abs) { BEGIN; load_ccr(c, u8(c.rd16(ip->imm))); NEXT; }
-  H(h_stc_abs) { BEGIN; c.wr16(ip->imm, c.ccr_); NEXT; }
-  H(h_ldc_ind) { BEGIN; load_ccr(c, u8(c.rd16(r32(c, ip->r >> 4)))); NEXT; }
-  H(h_stc_ind) { BEGIN; c.wr16(r32(c, ip->r >> 4), c.ccr_); NEXT; }
-  H(h_ldc_disp) { BEGIN; load_ccr(c, u8(c.rd16(r32(c, ip->r >> 4) + ip->imm))); NEXT; }
-  H(h_stc_disp) { BEGIN; c.wr16(r32(c, ip->r >> 4) + ip->imm, c.ccr_); NEXT; }
-  H(h_ldc_post) {
+  // --- CCR, and EXR on the H8S ------------------------------------------------------------
+  // Loading either holds interrupts off for one instruction (the mask may have changed).
+  template <bool Exr> static u8 cr(const Cpu& c) { return Exr ? c.exr_ : c.ccr_; }
+  template <bool Exr> static void load_cr(Cpu& c, u8 v) {
+    if constexpr (Exr) c.exr_ = u8(v | kExrReserved); else c.ccr_ = v;
+    c.hold_off();
+    c.reeval_irq();
+  }
+  template <bool Exr> H(h_ldc_imm) { BEGIN; load_cr<Exr>(c, u8(ip->imm)); NEXT; }
+  template <bool Exr> H(h_ldc_reg) { BEGIN; load_cr<Exr>(c, r8(c, ip->r & 15)); NEXT; }
+  template <bool Exr> H(h_stc_reg) { BEGIN; w8(c, ip->r & 15, cr<Exr>(c)); NEXT; }
+  template <bool Exr> H(h_andc) { BEGIN; load_cr<Exr>(c, u8(cr<Exr>(c) & ip->imm)); NEXT; }
+  template <bool Exr> H(h_orc) { BEGIN; load_cr<Exr>(c, u8(cr<Exr>(c) | ip->imm)); NEXT; }
+  template <bool Exr> H(h_xorc) { BEGIN; load_cr<Exr>(c, u8(cr<Exr>(c) ^ ip->imm)); NEXT; }
+  // LDC/STC memory forms read / write a word; the register is its low byte.
+  template <bool Exr> H(h_ldc_abs) { BEGIN; load_cr<Exr>(c, u8(c.rd16(ip->imm))); NEXT; }
+  template <bool Exr> H(h_stc_abs) { BEGIN; c.wr16(ip->imm, cr<Exr>(c)); NEXT; }
+  template <bool Exr> H(h_ldc_ind) { BEGIN; load_cr<Exr>(c, u8(c.rd16(r32(c, ip->r >> 4)))); NEXT; }
+  template <bool Exr> H(h_stc_ind) { BEGIN; c.wr16(r32(c, ip->r >> 4), cr<Exr>(c)); NEXT; }
+  template <bool Exr> H(h_ldc_disp) { BEGIN; load_cr<Exr>(c, u8(c.rd16(r32(c, ip->r >> 4) + ip->imm))); NEXT; }
+  template <bool Exr> H(h_stc_disp) { BEGIN; c.wr16(r32(c, ip->r >> 4) + ip->imm, cr<Exr>(c)); NEXT; }
+  template <bool Exr> H(h_ldc_post) {
     BEGIN;
     const unsigned r = ip->r >> 4;
     const u8 v = u8(c.rd16(r32(c, r)));
     w32(c, r, r32(c, r) + 2);
-    load_ccr(c, v);
+    load_cr<Exr>(c, v);
     NEXT;
   }
-  H(h_stc_pre) {
+  template <bool Exr> H(h_stc_pre) {
     BEGIN;
     const unsigned r = ip->r >> 4;
     w32(c, r, r32(c, r) - 2);
-    c.wr16(r32(c, r), c.ccr_);
+    c.wr16(r32(c, r), cr<Exr>(c));
+    NEXT;
+  }
+
+  // --- H8S: LDM / STM, TAS ---------------------------------------------------------------------
+  // STM pushes the first register first, so the last ends up on top; LDM pops them back in reverse.
+  H(h_stm) {
+    BEGIN;
+    for (unsigned i = 0; i < ip->x; ++i) c.push32(c.er_[(ip->r + i) & 7]);
+    NEXT;
+  }
+  H(h_ldm) {
+    BEGIN;
+    for (unsigned i = ip->x; i-- > 0;) c.er_[(ip->r + i) & 7] = c.pop32();
+    NEXT;
+  }
+  // Test the byte (N, Z, V cleared), then set its bit 7.
+  H(h_tas) {
+    BEGIN;
+    const u32 a = r32(c, ip->r & 7);
+    const u8 v = c.rd8(a);
+    flags_val<1>(c, v);
+    c.wr8(a, u8(v | 0x80));
     NEXT;
   }
 
@@ -618,6 +665,8 @@ struct ExecImpl {
 #define SIZED(fn, s) ((s) == 1 ? &fn<1> : (s) == 2 ? &fn<2> : &fn<4>)
 #define SIZED_STORE(fn, s, st) ((st) ? SIZED_S(fn, s, true) : SIZED_S(fn, s, false))
 #define SIZED_S(fn, s, st) ((s) == 1 ? &fn<1, st> : (s) == 2 ? &fn<2, st> : &fn<4, st>)
+#define SIZED_N(fn, s, n) ((s) == 1 ? &fn<1, n> : (s) == 2 ? &fn<2, n> : &fn<4, n>)
+#define CR(fn) (d.x ? &fn<true> : &fn<false>)
   template <Alu K> static Handler alu_rr(u8 s) { return s == 1 ? &h_alu_rr<K, 1> : s == 2 ? &h_alu_rr<K, 2> : &h_alu_rr<K, 4>; }
   template <Alu K> static Handler alu_imm(u8 s) { return s == 1 ? &h_alu_imm<K, 1> : s == 2 ? &h_alu_imm<K, 2> : &h_alu_imm<K, 4>; }
 
@@ -670,14 +719,14 @@ struct ExecImpl {
       case Op::Not: return SIZED(h_not, s);
       case Op::Extu: return s == 2 ? &h_extu<2> : &h_extu<4>;
       case Op::Exts: return s == 2 ? &h_exts<2> : &h_exts<4>;
-      case Op::Shal: return SIZED(h_shal, s);
-      case Op::Shar: return SIZED(h_shar, s);
-      case Op::Shll: return SIZED(h_shll, s);
-      case Op::Shlr: return SIZED(h_shlr, s);
-      case Op::Rotl: return SIZED(h_rotl, s);
-      case Op::Rotr: return SIZED(h_rotr, s);
-      case Op::Rotxl: return SIZED(h_rotxl, s);
-      case Op::Rotxr: return SIZED(h_rotxr, s);
+      case Op::Shal: return d.imm == 2 ? SIZED_N(h_shal, s, 2) : SIZED(h_shal, s);
+      case Op::Shar: return d.imm == 2 ? SIZED_N(h_shar, s, 2) : SIZED(h_shar, s);
+      case Op::Shll: return d.imm == 2 ? SIZED_N(h_shll, s, 2) : SIZED(h_shll, s);
+      case Op::Shlr: return d.imm == 2 ? SIZED_N(h_shlr, s, 2) : SIZED(h_shlr, s);
+      case Op::Rotl: return d.imm == 2 ? SIZED_N(h_rotl, s, 2) : SIZED(h_rotl, s);
+      case Op::Rotr: return d.imm == 2 ? SIZED_N(h_rotr, s, 2) : SIZED(h_rotr, s);
+      case Op::Rotxl: return d.imm == 2 ? SIZED_N(h_rotxl, s, 2) : SIZED(h_rotxl, s);
+      case Op::Rotxr: return d.imm == 2 ? SIZED_N(h_rotxr, s, 2) : SIZED(h_rotxr, s);
       case Op::BitReg: return &h_bit_reg;
       case Op::BitInd: return &h_bit_ind;
       case Op::BitAbs: return &h_bit_abs;
@@ -693,20 +742,23 @@ struct ExecImpl {
       case Op::Rts: return &h_rts;
       case Op::Rte: return &h_rte;
       case Op::Trapa: return &h_trapa;
-      case Op::LdcImm: return &h_ldc_imm;
-      case Op::LdcReg: return &h_ldc_reg;
-      case Op::StcReg: return &h_stc_reg;
-      case Op::LdcAbs16: case Op::LdcAbs24: return &h_ldc_abs;
-      case Op::StcAbs16: case Op::StcAbs24: return &h_stc_abs;
-      case Op::LdcInd: return &h_ldc_ind;
-      case Op::StcInd: return &h_stc_ind;
-      case Op::LdcDisp16: case Op::LdcDisp24: return &h_ldc_disp;
-      case Op::StcDisp16: case Op::StcDisp24: return &h_stc_disp;
-      case Op::LdcPost: return &h_ldc_post;
-      case Op::StcPre: return &h_stc_pre;
-      case Op::Andc: return &h_andc;
-      case Op::Orc: return &h_orc;
-      case Op::Xorc: return &h_xorc;
+      case Op::LdcImm: return CR(h_ldc_imm);
+      case Op::LdcReg: return CR(h_ldc_reg);
+      case Op::StcReg: return CR(h_stc_reg);
+      case Op::LdcAbs16: case Op::LdcAbs24: return CR(h_ldc_abs);
+      case Op::StcAbs16: case Op::StcAbs24: return CR(h_stc_abs);
+      case Op::LdcInd: return CR(h_ldc_ind);
+      case Op::StcInd: return CR(h_stc_ind);
+      case Op::LdcDisp16: case Op::LdcDisp24: return CR(h_ldc_disp);
+      case Op::StcDisp16: case Op::StcDisp24: return CR(h_stc_disp);
+      case Op::LdcPost: return CR(h_ldc_post);
+      case Op::StcPre: return CR(h_stc_pre);
+      case Op::Andc: return CR(h_andc);
+      case Op::Orc: return CR(h_orc);
+      case Op::Xorc: return CR(h_xorc);
+      case Op::Ldm: return &h_ldm;
+      case Op::Stm: return &h_stm;
+      case Op::Tas: return &h_tas;
       case Op::Daa: return &h_daa;
       case Op::Das: return &h_das;
       case Op::Eepmov: return s == 2 ? &h_eepmov<2> : &h_eepmov<1>;
@@ -715,6 +767,8 @@ struct ExecImpl {
   }
 #undef SIZED
 #undef SIZED_S
+#undef SIZED_N
+#undef CR
 #undef SIZED_STORE
 
   // Internal-operation states (manual 7.3, the "I" column) beyond fetches and
@@ -722,6 +776,7 @@ struct ExecImpl {
   static u32 internal_states(const DecodedInsn& d) {
     switch (d.op) {
       case Op::MovPost: case Op::LdcPost: case Op::StcPre: return 2;
+      case Op::Ldm: case Op::Stm: return 1;
       case Op::Mulxu: case Op::Mulxs: case Op::Divxu: case Op::Divxs: return d.x == 2 ? 12 : 20;
       case Op::Rts: case Op::Rte: case Op::Bsr16: case Op::Bcc16: case Op::JmpAbs: case Op::JmpInd8: case Op::JsrAbs: return 2;
       default: return 0;

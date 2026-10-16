@@ -67,6 +67,8 @@ std::string mem_pair(const DecodedInsn& d, const std::string& mem) {
 
 std::string disassemble(const DecodedInsn& d, u32 pc_next) {
   auto rel = [&](u32 disp) { return hex((pc_next + disp) & kAddrMask, 6); };
+  const std::string count = d.imm == 2 ? "#2," : "";                // two-bit shifts and rotates (H8S)
+  const std::string cr = d.x == 1 ? "EXR" : "CCR";                // the control register forms (EXR on the H8S)
   switch (d.op) {
     case Op::Invalid: return ".DATA.W ???";
     case Op::Nop: return "NOP";
@@ -108,14 +110,14 @@ std::string disassemble(const DecodedInsn& d, u32 pc_next) {
     case Op::Not: return std::string("NOT") + suffix(d.x) + " " + reg(d.rd, d.x);
     case Op::Extu: return std::string("EXTU") + suffix(d.x) + " " + reg(d.rd, d.x);
     case Op::Exts: return std::string("EXTS") + suffix(d.x) + " " + reg(d.rd, d.x);
-    case Op::Shal: return std::string("SHAL") + suffix(d.x) + " " + reg(d.rd, d.x);
-    case Op::Shar: return std::string("SHAR") + suffix(d.x) + " " + reg(d.rd, d.x);
-    case Op::Shll: return std::string("SHLL") + suffix(d.x) + " " + reg(d.rd, d.x);
-    case Op::Shlr: return std::string("SHLR") + suffix(d.x) + " " + reg(d.rd, d.x);
-    case Op::Rotl: return std::string("ROTL") + suffix(d.x) + " " + reg(d.rd, d.x);
-    case Op::Rotr: return std::string("ROTR") + suffix(d.x) + " " + reg(d.rd, d.x);
-    case Op::Rotxl: return std::string("ROTXL") + suffix(d.x) + " " + reg(d.rd, d.x);
-    case Op::Rotxr: return std::string("ROTXR") + suffix(d.x) + " " + reg(d.rd, d.x);
+    case Op::Shal: return std::string("SHAL") + suffix(d.x) + " " + count + reg(d.rd, d.x);
+    case Op::Shar: return std::string("SHAR") + suffix(d.x) + " " + count + reg(d.rd, d.x);
+    case Op::Shll: return std::string("SHLL") + suffix(d.x) + " " + count + reg(d.rd, d.x);
+    case Op::Shlr: return std::string("SHLR") + suffix(d.x) + " " + count + reg(d.rd, d.x);
+    case Op::Rotl: return std::string("ROTL") + suffix(d.x) + " " + count + reg(d.rd, d.x);
+    case Op::Rotr: return std::string("ROTR") + suffix(d.x) + " " + count + reg(d.rd, d.x);
+    case Op::Rotxl: return std::string("ROTXL") + suffix(d.x) + " " + count + reg(d.rd, d.x);
+    case Op::Rotxr: return std::string("ROTXR") + suffix(d.x) + " " + count + reg(d.rd, d.x);
     case Op::BitReg: case Op::BitInd: case Op::BitAbs: {
       const BitKind k = BitKind(d.x & 15);
       const std::string bit = (d.x & 0x80) ? reg(d.rs, 1) : "#" + std::to_string((d.x >> 4) & 7);
@@ -138,25 +140,28 @@ std::string disassemble(const DecodedInsn& d, u32 pc_next) {
     case Op::Rts: return "RTS";
     case Op::Rte: return "RTE";
     case Op::Trapa: return "TRAPA #" + std::to_string(d.imm & 3);
-    case Op::LdcImm: return "LDC #" + hex(d.imm & 0xFF, 2) + ",CCR";
-    case Op::LdcReg: return "LDC " + reg(d.rd, 1) + ",CCR";
-    case Op::StcReg: return "STC CCR," + reg(d.rd, 1);
-    case Op::LdcAbs16: case Op::LdcAbs24: return "LDC " + abs_of(d) + ",CCR";
-    case Op::StcAbs16: case Op::StcAbs24: return "STC CCR," + abs_of(d);
-    case Op::LdcInd: return "LDC @" + er(d.rs) + ",CCR";
-    case Op::StcInd: return "STC CCR,@" + er(d.rs);
-    case Op::LdcDisp16: return "LDC @(" + signed_hex(s32(d.imm), 4) + ":16," + er(d.rs) + "),CCR";
-    case Op::StcDisp16: return "STC CCR,@(" + signed_hex(s32(d.imm), 4) + ":16," + er(d.rs) + ")";
-    case Op::LdcDisp24: return "LDC @(" + hex(d.imm, 8) + ":24," + er(d.rs) + "),CCR";
-    case Op::StcDisp24: return "STC CCR,@(" + hex(d.imm, 8) + ":24," + er(d.rs) + ")";
-    case Op::LdcPost: return "LDC @" + er(d.rs) + "+,CCR";
-    case Op::StcPre: return "STC CCR,@-" + er(d.rs);
-    case Op::Andc: return "ANDC #" + hex(d.imm & 0xFF, 2) + ",CCR";
-    case Op::Orc: return "ORC #" + hex(d.imm & 0xFF, 2) + ",CCR";
-    case Op::Xorc: return "XORC #" + hex(d.imm & 0xFF, 2) + ",CCR";
+    case Op::LdcImm: return "LDC #" + hex(d.imm & 0xFF, 2) + "," + cr;
+    case Op::LdcReg: return "LDC " + reg(d.rd, 1) + "," + cr;
+    case Op::StcReg: return "STC " + cr + "," + reg(d.rd, 1);
+    case Op::LdcAbs16: case Op::LdcAbs24: return "LDC " + abs_of(d) + "," + cr;
+    case Op::StcAbs16: case Op::StcAbs24: return "STC " + cr + "," + abs_of(d);
+    case Op::LdcInd: return "LDC @" + er(d.rs) + "," + cr;
+    case Op::StcInd: return "STC " + cr + ",@" + er(d.rs);
+    case Op::LdcDisp16: return "LDC @(" + signed_hex(s32(d.imm), 4) + ":16," + er(d.rs) + ")," + cr;
+    case Op::StcDisp16: return "STC " + cr + ",@(" + signed_hex(s32(d.imm), 4) + ":16," + er(d.rs) + ")";
+    case Op::LdcDisp24: return "LDC @(" + hex(d.imm, 8) + ":24," + er(d.rs) + ")," + cr;
+    case Op::StcDisp24: return "STC " + cr + ",@(" + hex(d.imm, 8) + ":24," + er(d.rs) + ")";
+    case Op::LdcPost: return "LDC @" + er(d.rs) + "+," + cr;
+    case Op::StcPre: return "STC " + cr + ",@-" + er(d.rs);
+    case Op::Andc: return "ANDC #" + hex(d.imm & 0xFF, 2) + "," + cr;
+    case Op::Orc: return "ORC #" + hex(d.imm & 0xFF, 2) + "," + cr;
+    case Op::Xorc: return "XORC #" + hex(d.imm & 0xFF, 2) + "," + cr;
     case Op::Daa: return "DAA " + reg(d.rd, 1);
     case Op::Das: return "DAS " + reg(d.rd, 1);
     case Op::Eepmov: return d.x == 1 ? "EEPMOV.B" : "EEPMOV.W";
+    case Op::Ldm: return "LDM.L @SP+,(" + er(d.rd) + "-" + er(d.rd + d.x - 1) + ")";
+    case Op::Stm: return "STM.L (" + er(d.rd) + "-" + er(d.rd + d.x - 1) + "),@-SP";
+    case Op::Tas: return "TAS @" + er(d.rd);
   }
   return "?";
 }

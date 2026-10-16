@@ -1,8 +1,9 @@
 // H8/300H instruction decoder: one DecodedInsn per instruction, shared by the
 // cache fill (exec.cpp) and the disassembler.  The accepted encodings and
 // their lengths follow the H8/300H programming manual for everything the
-// firmware in this tree can meet; H8S-only forms (LDM/STM, TAS, MAC,
-// two-bit shifts) decode as invalid.
+// firmware in this tree can meet.  The H8S/2000 forms (LDM/STM, TAS, EXR,
+// two-bit shifts) are accepted only with `h8s` set and decode as invalid
+// otherwise; MAC (H8S/2600) is not implemented.
 #pragma once
 #include "cpu/h8300h/types.hpp"
 
@@ -29,8 +30,11 @@ enum class Op : u8 {
   JmpEr, JmpAbs, JmpInd8, JsrEr, JsrAbs, JsrInd8, Bsr8, Bsr16, Rts, Rte, Trapa,
   // CCR
   LdcImm, LdcReg, StcReg, LdcAbs16, LdcAbs24, StcAbs16, StcAbs24, LdcInd, StcInd, LdcDisp16, StcDisp16,
-  LdcDisp24, StcDisp24, LdcPost, StcPre, Andc, Orc, Xorc,
+  LdcDisp24, StcDisp24, LdcPost, StcPre, Andc, Orc, Xorc,  // x = 1: EXR instead of CCR (H8S)
   Daa, Das, Eepmov,  // x = 1 / 2
+  // H8S/2000: x = number of registers, rd = the first one
+  Ldm, Stm,
+  Tas,               // rd = ERd
 };
 
 // Bit-manipulation kinds (BSET family): the low nibble of x.
@@ -84,9 +88,10 @@ inline bool bit_op(DecodedInsn& d, u8 c, u8 dd, bool writes) {
 }
 
 
-// `fetch(i)` returns code byte i relative to the instruction start.
+// `fetch(i)` returns code byte i relative to the instruction start.  `h8s`
+// accepts the H8S/2000 instructions as well.
 template <class Fetch>
-DecodedInsn decode(Fetch fetch) {
+DecodedInsn decode(Fetch fetch, bool h8s = false) {
   DecodedInsn d;
   auto fail = [&] { d.op = Op::Invalid; return d; };
   auto set = [&](Op op, u8 len) { d.op = op; d.len = len; };
@@ -132,9 +137,29 @@ DecodedInsn decode(Fetch fetch) {
               }
               return fail();
             }
-            case 4: {  // LDC/STC memory forms (01 40 ...)
-              if (b1 != 0x40) return fail();
+            case 1: case 2: case 3: {  // H8S: STM/LDM (01 10/20/30 6D ...), two to four long registers
+              if (!h8s || (b1 & 15)) return fail();
               const u8 c = fetch(2), dd = fetch(3);
+              if (c != 0x6D || (dd & 0x78) != 0x70) return fail();
+              const unsigned more = b1 >> 4, ern = dd & 7;  // the store names its first register, the load its last
+              d.store = (dd & 0x80) != 0;
+              if (d.store ? ern + more > 7 : ern < more) return fail();
+              d.rd = u8(d.store ? ern : ern - more);
+              d.x = u8(more + 1);
+              set(d.store ? Op::Stm : Op::Ldm, 4);
+              return d;
+            }
+            case 4: {  // LDC/STC memory forms (01 40 ...), and on the H8S their EXR forms (01 41 ...)
+              const bool exr = h8s && b1 == 0x41;
+              if (b1 != 0x40 && !exr) return fail();
+              const u8 c = fetch(2), dd = fetch(3);
+              if (exr && c >= 4 && c <= 7) {  // ORC / XORC / ANDC / LDC #xx:8,EXR
+                static constexpr Op ops[4] = {Op::Orc, Op::Xorc, Op::Andc, Op::LdcImm};
+                d.imm = dd; d.x = 1;
+                set(ops[c - 4], 4);
+                return d;
+              }
+              d.x = exr ? 1 : 0;
               if (c == 0x6B) {
                 if (dd & 0x5F) return fail();
                 d.store = (dd & 0x80) != 0;
@@ -176,6 +201,14 @@ DecodedInsn decode(Fetch fetch) {
               if ((c & 15) == 3) { if (d.rd & 8) return fail(); d.x = 4; set(Op::Divxs, 4); return d; }
               return fail();
             }
+            case 14: {  // H8S: 01 E0 7B dC: TAS @ERd
+              if (!h8s || b1 != 0xE0) return fail();
+              const u8 c = fetch(2), dd = fetch(3);
+              if (c != 0x7B || (dd & 0x8F) != 0x0C) return fail();
+              d.rd = (dd >> 4) & 7;
+              set(Op::Tas, 4);
+              return d;
+            }
             case 15: {  // 01 F0 64/65/66: OR/XOR/AND.L
               if (b1 & 15) return fail();
               const u8 c = fetch(2), dd = fetch(3);
@@ -192,8 +225,13 @@ DecodedInsn decode(Fetch fetch) {
             default: return fail();
           }
         }
-        case 2: if (b1 & 0xF0) return fail(); d.rd = b1; set(Op::StcReg, 2); return d;
-        case 3: if (b1 & 0xF0) return fail(); d.rd = b1; set(Op::LdcReg, 2); return d;
+        case 2: case 3: {  // STC CCR,Rd / LDC Rs,CCR; 02 1d / 03 1s are the EXR forms of the H8S
+          const bool exr = h8s && (b1 & 0xF0) == 0x10;
+          if ((b1 & 0xF0) && !exr) return fail();
+          d.rd = b1 & 15; d.x = exr ? 1 : 0;
+          set(lo == 2 ? Op::StcReg : Op::LdcReg, 2);
+          return d;
+        }
         case 4: d.imm = b1; set(Op::Orc, 2); return d;
         case 5: d.imm = b1; set(Op::Xorc, 2); return d;
         case 6: d.imm = b1; set(Op::Andc, 2); return d;
@@ -229,7 +267,8 @@ DecodedInsn decode(Fetch fetch) {
         case 0: case 1: case 2: case 3: {  // shifts and rotates
           const u8 top = (b1 >> 4) & 7;
           if (top == 2 || top == 6) return fail();
-          if (b1 & 0x40) return fail();  // two-bit shifts are H8S
+          if ((b1 & 0x40) && !h8s) return fail();  // two-bit shifts are H8S
+          if (b1 & 0x40) d.imm = 2;              // the shift count; one bit otherwise
           d.x = u8(((b1 >> 4) & 3) + 1);   // 1, 2, 4 (3 cannot occur)
           if (d.x == 3) d.x = 4;
           d.rd = b1 & 15;
