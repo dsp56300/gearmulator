@@ -1,5 +1,13 @@
 Release Notes
 
+2.2.27:
+
+88emuPlayer:
+
+- [Imp] Settings: "Hide devices without ROMs" leaves the boards whose ROMs are
+        missing out of the device menu. Off by default. Every board stays
+        listed while no ROM set is complete at all.
+
 2.2.26:
 
 Framework:

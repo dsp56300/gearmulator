@@ -404,8 +404,7 @@ namespace emu88Player
         if (const auto error = romFolderAccessError(options); !error.empty())
             std::cerr << error << '\n';
         for (const auto model : emu88Lib::g_deviceMenuOrder)
-            if (emu88Lib::isDeviceListed(model))
-                std::cout << deviceId(model) << "\t" << emu88Lib::getDeviceProfile(model).displayName << "\t"
-                          << (emu88Lib::RomLoader::isDeviceAvailable(model) ? "available" : "missing ROMs") << '\n';
+            std::cout << deviceId(model) << "\t" << emu88Lib::getDeviceProfile(model).displayName << "\t"
+                      << (emu88Lib::RomLoader::isDeviceAvailable(model) ? "available" : "missing ROMs") << '\n';
     }
 } // namespace emu88Player

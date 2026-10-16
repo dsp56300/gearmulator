@@ -305,6 +305,14 @@ namespace emu88Player
                        m_processor.config().saveIfNeeded();
                    });
 
+        // Read by the device menu each time it opens.
+        wireToggle("btHideDevicesWithoutRoms", m_processor.config().getBoolValue("hideDevicesWithoutRoms", false),
+                   [this](const bool _enabled)
+                   {
+                       m_processor.config().setValue("hideDevicesWithoutRoms", _enabled);
+                       m_processor.config().saveIfNeeded();
+                   });
+
         // Both are taken up by the next device load, Power on or Restart.
         wireToggle("btFactoryResetOnLoad", m_processor.bootOptions().factoryReset,
                    [this](const bool _enabled)

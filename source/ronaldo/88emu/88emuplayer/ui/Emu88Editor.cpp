@@ -166,14 +166,19 @@ namespace emu88Player
 		const auto inventory = emu88Lib::RomLoader::rescan();
 		const auto missing = romFolderAccessError(standaloneLaunch ? *standaloneLaunch : LaunchOptions{}).empty()
 			? " (ROMs missing)" : " (ROM folder not readable)";
+		const auto isAvailable = [&inventory](const emu88Lib::DeviceModel _model)
+		{
+			return inventory.isComplete(emu88Lib::RomLoader::toRomDevice(_model));
+		};
+		// Without a single complete board there is nothing to choose from, so every device
+		// stays listed to show what ROMs could be added.
+		const auto hideUnavailable = m_processor.config().getBoolValue("hideDevicesWithoutRoms", false) &&
+			std::any_of(emu88Lib::g_deviceMenuOrder.begin(), emu88Lib::g_deviceMenuOrder.end(), isAvailable);
 		for(const auto model : emu88Lib::g_deviceMenuOrder)
 		{
-			// A hidden device stays in the menu only while it is the one running.
-			if(!emu88Lib::isDeviceListed(model) && model != m_processor.deviceModel())
-				continue;
-			const auto available = inventory.isComplete(emu88Lib::RomLoader::toRomDevice(model));
-			// The GM modules are offered only once their ROMs are there.
-			if(emu88Lib::isGmModuleModel(model) && !available && model != m_processor.deviceModel())
+			const auto available = isAvailable(model);
+			// The running device stays listed, whatever its ROMs.
+			if(hideUnavailable && !available && model != m_processor.deviceModel())
 				continue;
 			const auto label = std::string(emu88Lib::getDeviceProfile(model).displayName) +
 				(available ? "" : missing);

@@ -222,14 +222,6 @@ namespace emu88Lib
 		       !isGmModuleModel(model) && (!isSc55Model(model) || getSc55DeviceProfile(model).panel != Sc55Panel::None);
 	}
 
-	// Whether a model appears in the device menu and the CLI's device list. Every board is
-	// listed now that the SC-55st, RLP-3237 and CM-300/SCC-1 images are catalogued; the
-	// hook stays for the next board whose dump is still out.
-	constexpr bool isDeviceListed(const DeviceModel)
-	{
-		return true;
-	}
-
 	// The CM-64 carries two service displays, one per board: the CM-32P's 16x2 above the
 	// CM-32L's 20x1. Every other device drives one at most.
 	constexpr bool deviceHasSecondLcd(const DeviceModel _model)

@@ -25,7 +25,10 @@
 					<div class="hardwareField"><label>Pause between songs (ms)</label><input id="songGapMs" type="text" maxlength="5"/></div>
 				</div>
 				<div class="hardwareSettingsSectionLabel">ROM loading</div>
-				<div id="btWarnRomHashMismatch" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Warn on unknown ROM hash on load</label></div>
+				<div class="hardwareChoiceList">
+					<div id="btWarnRomHashMismatch" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Warn on unknown ROM hash on load</label></div>
+					<div id="btHideDevicesWithoutRoms" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Hide devices without ROMs</label></div>
+				</div>
 				<div class="hardwareSettingsSectionLabel">Device startup</div>
 				<div class="hardwareChoiceList">
 					<div id="btFactoryResetOnLoad" class="hardwareChoice hardwareWideChoice"><button id="button" class="settings-checkbox"/><label>Factory Reset on load</label></div>
