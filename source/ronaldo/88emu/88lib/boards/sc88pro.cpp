@@ -42,12 +42,13 @@ namespace emu88Lib
 		, m_subMcu([this](Sc88SubMcu::Record&& _r) { m_midiInQueue.emplace_back(std::move(_r)); },
 		           SmSysExStage, SmCommand - SmSysExStage)
 	{
-		if(m_rom.size() != RomSize)
+		if(m_rom.size() != RomSize && m_rom.size() != Sk88ProRomSize)
 		{
-			std::fprintf(stderr, "Sc88Pro: firmware must be %u bytes, got %zu\n",
-			             RomSize, m_rom.size());
+			std::fprintf(stderr, "Sc88Pro: firmware must be %u or %u bytes, got %zu\n",
+			             RomSize, Sk88ProRomSize, m_rom.size());
 			return;
 		}
+		m_sk88Pro = m_rom.size() == Sk88ProRomSize;
 
 		// Configure the existing xp core from the board: the Pro exposes
 		// five consecutive 4 MiB CS windows (A0/A1, B0/B1, C). Keep this
@@ -172,7 +173,7 @@ namespace emu88Lib
 			while(_samples-- > 0)
 				renderSample();
 		};
-		const auto bit = [](const Sc88ProButton _button)
+		const auto bit = [](const auto _button)
 		{
 			return uint32_t{1} << static_cast<uint8_t>(_button);
 		};
@@ -186,6 +187,31 @@ namespace emu88Lib
 		m_lspEnabled = false;
 
 		run(kBootWait);
+
+		if(m_sk88Pro)
+		{
+			// The SK-88Pro asks "Init All, Sure?" for SHIFT and PART left, and ALL
+			// runs it. It boots on the native map afterwards, so the SC-88Pro's map
+			// clearing below has nothing to do here.
+			setButtons(bit(Sk88ProButton::Shift));
+			run(kModifierLead);
+			setButtons(bit(Sk88ProButton::Shift) | bit(Sk88ProButton::PartL));
+			run(kChordHold);
+			setButtons(bit(Sk88ProButton::Shift));
+			run(kModifierLead);
+			setButtons(0);
+			run(kKeyGap);
+
+			setButtons(bit(Sk88ProButton::All));
+			run(kExecuteHold);
+			setButtons(0);
+			run(kExecuteSettle);
+
+			m_xpEnabled = xpEnabled;
+			m_lspEnabled = lspEnabled;
+			powerCycle();
+			return;
+		}
 
 		setButtons(bit(Sc88ProButton::Select));
 		run(kModifierLead);
@@ -248,7 +274,7 @@ namespace emu88Lib
 
 		uint8_t v = 0xff;
 		if(page <= PageRomLast)
-			v = m_rom[_addr & (RomSize - 1)];		// mirrored every 1 MiB
+			v = m_rom[_addr & (m_rom.size() - 1)];		// mirrored every image size
 		else if(page >= PageSramFirst && page <= PageSramLast)
 			v = m_sram[off];
 		else if(page == PageXp)
@@ -322,7 +348,9 @@ namespace emu88Lib
 		}
 		// The retained standby routine at 0D:8480 drops P6DR bit 0 and 0C:5A0C raises it.
 		// The Pro's physical POWER switch is on the mains side, outside the panel matrix.
-		else if(_addr == 0xfe8b)
+		// The SK-88Pro writes the low nibble as a four-bit value (12:5051) and selects
+		// its ADC multiplexer with bits 6 and 7, so bit 0 is no display supply there.
+		else if(_addr == 0xfe8b && !m_sk88Pro)
 			m_lcdEnabled = (_val & 1) != 0;
 	}
 
@@ -385,6 +413,12 @@ namespace emu88Lib
 
 	uint16_t Sc88Pro::leds() const
 	{
+		// The SK-88Pro drives ALL, MUTE, SC-55 MAP and SC-88 MAP on LDD4-7, active high,
+		// and never enables the SC-88Pro's lamp supply. Measured by watching the port
+		// while pressing each key. Its other lamps are not known yet.
+		if(m_sk88Pro)
+			return static_cast<uint16_t>(m_leds >> 4);
+
 		// LDS0 drives the common anode supply through Q3; LDS1 drives the red cathode through Q4.
 		if(m_ledControl & 1)
 			return 0;
@@ -566,16 +600,18 @@ namespace emu88Lib
 	{
 		auto& bus = m_machine.bus();
 
-		// Mask ROM, 1 MiB. Pages 0x00-0x0F are the image itself and every page
-		// the firmware fetches from, so they go into the bus image; page 0
+		// Mask ROM, 1 MiB, or the SK-88Pro's 2 MiB image. Its pages (0x00-0x0F,
+		// 0x00-0x1F) are the image itself and every page the firmware fetches
+		// from, so they go into the bus image; page 0
 		// stops at the register field, which the chip decodes on-chip. The
 		// higher mirrors up to page 0x7F are data only and reach the board's
 		// page decode.
 		bus.map_rom(0x00000, 0xfe80, h8500::BusClass::W16_S2);
 		bus.load(0x00000, m_rom.data(), 0xfe80);
-		bus.map_rom(0x10000, RomSize - 0x10000, h8500::BusClass::W16_S2);
-		bus.load(0x10000, m_rom.data() + 0x10000, RomSize - 0x10000);
-		bus.map_device(0x100000, 0x800000 - 0x100000, &m_boardBus, h8500::BusClass::W16_S2);
+		const auto romSize = static_cast<uint32_t>(m_rom.size());
+		bus.map_rom(0x10000, romSize - 0x10000, h8500::BusClass::W16_S2);
+		bus.load(0x10000, m_rom.data() + 0x10000, romSize - 0x10000);
+		bus.map_device(romSize, 0x800000 - romSize, &m_boardBus, h8500::BusClass::W16_S2);
 
 		bus.map_device(0xc00000, 0x090000, &m_boardBus, h8500::BusClass::W16_S2);	// SRAM (C0-C7) + XP (C8)
 		bus.map_device(0xe00000, 0x080000, &m_boardBus, h8500::BusClass::W16_S3);	// sub-MCU
@@ -594,10 +630,13 @@ namespace emu88Lib
 			portWrite(0xfe80u + g_portDrOffset[_port], _dr);
 		});
 
-		// Only channel 0 is wired, to the battery sense.
-		m_machine.adc().set_sampler([](const unsigned _channel) -> uint16_t
+		// Only the battery sense is wired: channel 0 on the SC-88Pro, channel 2 on the
+		// SK-88Pro, whose firmware shows "Battery Low" at power-on when it reads nothing
+		// there. Its other channels are keyboard controls and read as at rest.
+		const unsigned batteryChannel = m_sk88Pro ? 2 : 0;
+		m_machine.adc().set_sampler([batteryChannel](const unsigned _channel) -> uint16_t
 		{
-			return _channel == 0 ? g_analogBattery : uint16_t(0);
+			return _channel == batteryChannel ? g_analogBattery : uint16_t(0);
 		});
 
 		m_machine.sci(0).set_tx_sink([this](const uint8_t _byte, uint64_t) { uartTransmit(_byte); });

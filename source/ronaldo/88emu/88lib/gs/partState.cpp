@@ -15,6 +15,7 @@ namespace emu88Lib::gs
 		case DeviceModel::Sc88:
 		case DeviceModel::Sc88VL:
 		case DeviceModel::Sc88Pro:
+		case DeviceModel::Sk88Pro:
 		case DeviceModel::Sc8850:
 		case DeviceModel::Sc8820:
 		case DeviceModel::Xpgs:
@@ -67,6 +68,7 @@ namespace emu88Lib::gs
 			case DeviceModel::Xpgs:
 				return 2;
 			case DeviceModel::Sc88Pro:
+			case DeviceModel::Sk88Pro:
 			case DeviceModel::VeGsPro:
 				return 3;
 			case DeviceModel::Sc8850:
@@ -116,6 +118,7 @@ namespace emu88Lib::gs
 			case DeviceModel::Sc88VL:
 			case DeviceModel::Xpgs:
 			case DeviceModel::Sc88Pro:
+			case DeviceModel::Sk88Pro:
 			case DeviceModel::VeGsPro:
 				return true;
 			default:
@@ -142,6 +145,7 @@ namespace emu88Lib::gs
 			switch(_model)
 			{
 			case DeviceModel::Sc88Pro:
+			case DeviceModel::Sk88Pro:
 			case DeviceModel::VeGsPro:
 			case DeviceModel::Sc8850:
 			case DeviceModel::Sc8820:
@@ -328,7 +332,8 @@ namespace emu88Lib::gs
 		}
 		// The SC-88Pro's SysEx tone number obeys Rx Bank Select. On the SC-88 family the bank it brings stays in the
 		// CC#0 latch, whatever comes of it; the SC-8850 leaves the latch alone.
-		const bool proGeneration = m_model == DeviceModel::Sc88Pro || m_model == DeviceModel::VeGsPro;
+		const bool proGeneration = m_model == DeviceModel::Sc88Pro || m_model == DeviceModel::VeGsPro ||
+			m_model == DeviceModel::Sk88Pro;
 		const uint8_t bankMsb = _sysex && proGeneration && !_part.rxBankSelect ? 0 : _bankMsb;
 		if(_sysex && !sc8850)
 			_part.pendingBankMsb = bankMsb;
@@ -607,8 +612,8 @@ namespace emu88Lib::gs
 					// back on the bank its CC#0 latch holds
 					p->useForRhythm = static_cast<uint8_t>(kind);
 					p->program = 0;
-					p->bankMsb = !kind && (m_model == DeviceModel::Sc88Pro
-						|| m_model == DeviceModel::VeGsPro) ? p->pendingBankMsb : 0;
+					p->bankMsb = !kind && (m_model == DeviceModel::Sc88Pro || m_model == DeviceModel::VeGsPro
+						|| m_model == DeviceModel::Sk88Pro) ? p->pendingBankMsb : 0;
 				}
 				break;
 			case PartParam::RxBankSelect: if(hasRxBankSelect(m_model)) p->rxBankSelect = _value; break;

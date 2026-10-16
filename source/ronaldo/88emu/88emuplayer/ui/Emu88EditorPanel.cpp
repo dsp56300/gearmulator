@@ -113,7 +113,30 @@ namespace emu88Player
 					});
 			}
 		};
-		for(const auto& binding : g_sc88Buttons) wireButton(binding);
+		// The SK-88Pro shows the SC-88Pro's faces at its own matrix positions, so those faces
+		// look their switch up in the table of the board running when clicked.
+		for(const auto& binding : g_sc88Buttons)
+		{
+			auto* element = document->GetElementById(binding.element);
+			if(!element)
+				continue;
+			const std::string id = binding.element;
+			const auto proButton = static_cast<uint32_t>(binding.button);
+			juceRmlUi::EventListener::Add(element, Rml::EventId::Mousedown,
+				[this, id, proButton](Rml::Event& _event)
+				{
+					if(juceRmlUi::helper::isContextMenu(_event))
+						return;
+					if(m_processor.deviceModel() != emu88Lib::DeviceModel::Sk88Pro)
+					{
+						setPointerButton(proButton, true);
+						return;
+					}
+					for(const auto& sk : g_sk88Buttons)
+						if(sk.element && id == sk.element)
+							setPointerButton(static_cast<uint32_t>(sk.button), true);
+				});
+		}
 		for(const auto& binding : g_sc8850Buttons) wireButton(binding);
 		// The MV-30's faces hold their switch while the button is down, past the 32 the other panels have
 		for(const auto& binding : g_mv30Buttons)
@@ -254,6 +277,8 @@ namespace emu88Player
 				handleKey(g_sc8850Buttons);
 			else if(usesLaBoardButtons(model))
 				handleKey(g_mt32Buttons);
+			else if(model == emu88Lib::DeviceModel::Sk88Pro)
+				handleKey(g_sk88Buttons);
 			else
 				handleKey(g_sc88Buttons);
 		});
@@ -291,6 +316,8 @@ namespace emu88Player
 				handleKey(g_sc8850Buttons);
 			else if(usesLaBoardButtons(model))
 				handleKey(g_mt32Buttons);
+			else if(model == emu88Lib::DeviceModel::Sk88Pro)
+				handleKey(g_sk88Buttons);
 			else
 				handleKey(g_sc88Buttons);
 		});
@@ -474,6 +501,14 @@ namespace emu88Player
 			for(const auto& binding : g_sc8850Buttons) add(binding);
 		else if(usesLaBoardButtons(_model))
 			for(const auto& binding : g_mt32Buttons) add(binding);
+		else if(_model == emu88Lib::DeviceModel::Sk88Pro)
+		{
+			// The SC-88Pro faces the SK-88Pro has no switch for stay on the artwork, disabled.
+			for(const auto& binding : g_sc88Buttons)
+				if(auto* element = document->GetElementById(binding.element))
+					element->SetAttribute("disabled", "");
+			for(const auto& binding : g_sk88Buttons) add(binding);
+		}
 		else if(_model != emu88Lib::DeviceModel::Mv30)
 			for(const auto& binding : g_sc88Buttons) add(binding);
 		m_mv30Elements.clear();
@@ -621,8 +656,9 @@ namespace emu88Player
 		const auto model = m_processor.deviceModel();
 		const auto is8850 = model == emu88Lib::DeviceModel::Sc8850;
 		const auto isLa = usesLaBoardButtons(model);
+		const auto isSk = model == emu88Lib::DeviceModel::Sk88Pro;
 
-		const auto keyFor = [is8850, isLa](const uint8_t _button) -> std::string
+		const auto keyFor = [is8850, isLa, isSk](const uint8_t _button) -> std::string
 		{
 			const auto find = [_button](const auto& _table) -> std::string
 			{
@@ -631,7 +667,8 @@ namespace emu88Player
 						return keyName(binding.key);
 				return {};
 			};
-			return is8850 ? find(g_sc8850Buttons) : isLa ? find(g_mt32Buttons) : find(g_sc88Buttons);
+			return is8850 ? find(g_sc8850Buttons) : isLa ? find(g_mt32Buttons)
+			     : isSk ? find(g_sk88Buttons) : find(g_sc88Buttons);
 		};
 		const auto populated = [model, is8850](const uint8_t _button)
 		{
@@ -693,6 +730,8 @@ namespace emu88Player
 			walk(g_sc8850Help);
 		else if(isLa)
 			walk(g_mt32Help);
+		else if(isSk)
+			walk(g_sk88Help);
 		else
 			walk(g_sc88Help);
 

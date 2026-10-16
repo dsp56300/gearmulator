@@ -36,11 +36,12 @@ namespace emu88Lib
 		Mt32New,
 		Cm32ln,
 		Mv30,
+		Sk88Pro,
 	};
 
 	// Curated presentation order. Enum values remain
 	// stable because they are persisted in plugin settings and project state.
-	inline constexpr std::array<DeviceModel, 25> g_deviceMenuOrder = {
+	inline constexpr std::array<DeviceModel, 26> g_deviceMenuOrder = {
 		DeviceModel::Mt32Old,
 		DeviceModel::Mt32New,
 		DeviceModel::Cm32l,
@@ -61,6 +62,7 @@ namespace emu88Lib
 		DeviceModel::Sc88VL,
 		DeviceModel::Xpgs,
 		DeviceModel::Sc88Pro,
+		DeviceModel::Sk88Pro,
 		DeviceModel::VeGsPro,
 		DeviceModel::Sc8820,
 		DeviceModel::Sc8850,

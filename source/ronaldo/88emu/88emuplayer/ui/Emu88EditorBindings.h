@@ -106,6 +106,41 @@ namespace emu88Player::editor
 		bind("btVibDelayR", emu88Lib::Sc88ProButton::VibDelayR, Key::KI_N, "VIB DELAY / EFX VALUE right"),
 	};
 
+	// The SK-88Pro on the SC-88Pro's artwork: the faces it shares with the Pro by function, its
+	// own switches on keys alone (they have no face here). PREVIEW and the VIB rockers it lacks.
+	constexpr std::array g_sk88Buttons{
+		bind("btAll", emu88Lib::Sk88ProButton::All, Key::KI_W, "ALL"),
+		bind("btMute", emu88Lib::Sk88ProButton::Mute, Key::KI_E, "MUTE"),
+		bind("btSc55Map", emu88Lib::Sk88ProButton::Sc55Map, Key::KI_1, "SC-55 MAP"),
+		bind("btSc88Map", emu88Lib::Sk88ProButton::Sc88Map, Key::KI_2, "SC-88 MAP"),
+		bind("btUserInst", emu88Lib::Sk88ProButton::UserInst, Key::KI_3, "USER INST"),
+		bind("btSelect", emu88Lib::Sk88ProButton::Select, Key::KI_4, "SELECT"),
+		bind("btPartL", emu88Lib::Sk88ProButton::PartL, Key::KI_R, "PART left"),
+		bind("btPartR", emu88Lib::Sk88ProButton::PartR, Key::KI_T, "PART right"),
+		bind("btInstL", emu88Lib::Sk88ProButton::InstL, Key::KI_Y, "INSTRUMENT left"),
+		bind("btInstR", emu88Lib::Sk88ProButton::InstR, Key::KI_U, "INSTRUMENT right"),
+		bind("btKeyShiftL", emu88Lib::Sk88ProButton::KeyShiftL, Key::KI_I, "KEY SHIFT left"),
+		bind("btKeyShiftR", emu88Lib::Sk88ProButton::KeyShiftR, Key::KI_O, "KEY SHIFT right"),
+		bind("btLevelL", emu88Lib::Sk88ProButton::LevelL, Key::KI_P, "LEVEL left"),
+		bind("btLevelR", emu88Lib::Sk88ProButton::LevelR, Key::KI_OEM_4, "LEVEL right"),
+		bind("btMidiChL", emu88Lib::Sk88ProButton::MidiChL, Key::KI_A, "MIDI CH left"),
+		bind("btMidiChR", emu88Lib::Sk88ProButton::MidiChR, Key::KI_S, "MIDI CH right"),
+		bind("btPanL", emu88Lib::Sk88ProButton::PanL, Key::KI_D, "PAN left"),
+		bind("btPanR", emu88Lib::Sk88ProButton::PanR, Key::KI_F, "PAN right"),
+		bind("btReverbL", emu88Lib::Sk88ProButton::ReverbL, Key::KI_G, "REVERB left"),
+		bind("btReverbR", emu88Lib::Sk88ProButton::ReverbR, Key::KI_H, "REVERB right"),
+		bind("btChorusL", emu88Lib::Sk88ProButton::ChorusL, Key::KI_J, "CHORUS left"),
+		bind("btChorusR", emu88Lib::Sk88ProButton::ChorusR, Key::KI_K, "CHORUS right"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Edit, Key::KI_Z, "EDIT"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Util, Key::KI_X, "UTIL"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Drum, Key::KI_C, "DRUM"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Function, Key::KI_V, "FUNCTION"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Local, Key::KI_B, "LOCAL"),
+		bind(nullptr, emu88Lib::Sk88ProButton::OctL, Key::KI_N, "OCTAVE down"),
+		bind(nullptr, emu88Lib::Sk88ProButton::OctR, Key::KI_M, "OCTAVE up"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Shift, Key::KI_LSHIFT, "SHIFT"),
+	};
+
 	constexpr std::array g_sc8850Buttons{
 		bind("bt8850Edit", emu88Lib::Sc8850Button::Edit, Key::KI_E, "EDIT"),
 		bind("bt8850PartL", emu88Lib::Sc8850Button::PartLeft, Key::KI_LEFT, "PART left"),
@@ -235,6 +270,11 @@ namespace emu88Player::editor
 		return uint32_t{1} << static_cast<uint8_t>(_button);
 	}
 
+	constexpr uint32_t proButtonBit(const emu88Lib::Sk88ProButton _button)
+	{
+		return uint32_t{1} << static_cast<uint8_t>(_button);
+	}
+
 	// The front-panel POWER switch where the firmware reads it (see emu88Lib::PowerSwitch): one
 	// matrix position, shared by the SC-55/SC-155 panels and SC-88VL. Q holds it on standby models.
 	constexpr uint8_t g_powerSwitchButton = static_cast<uint8_t>(emu88Lib::Sc88ProButton::Power);
@@ -279,6 +319,10 @@ namespace emu88Player::editor
 		constexpr auto preview = proButtonBit(emu88Lib::Sc88ProButton::Preview);
 		if(_model == emu88Lib::DeviceModel::Sc88Pro)
 			return _buttons & ~proButtonBit(emu88Lib::Sc88ProButton::Power);
+		// The SK-88Pro's buttons are its own matrix positions, see g_sk88Buttons.
+		if(_model == emu88Lib::DeviceModel::Sk88Pro)
+			return _buttons & ~(proButtonBit(emu88Lib::Sk88ProButton::Unused28) |
+			                    proButtonBit(emu88Lib::Sk88ProButton::Unused29));
 		if(_model == emu88Lib::DeviceModel::Sc88VL)
 			return _buttons & ~preview;
 		if(emu88Lib::isSc55Model(_model))
@@ -313,6 +357,11 @@ namespace emu88Player::editor
 	              proButtonBit(emu88Lib::Sc88ProButton::InstAll));
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc55Mk1,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::Sc55Map)) == 0);
+	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sk88Pro,
+	                                    proButtonBit(emu88Lib::Sk88ProButton::Edit) |
+	                                    proButtonBit(emu88Lib::Sk88ProButton::Unused28)) ==
+	              proButtonBit(emu88Lib::Sk88ProButton::Edit),
+	              "the SK-88Pro's position 0 is EDIT; 28 and 29 are empty");
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::VeGsPro,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::InstAll)) == 0);
 	// How the keyboard dialog is laid out. Hardcoded rather than read back
@@ -378,6 +427,35 @@ namespace emu88Player::editor
 		pair(nullptr, ProButton::VibDepthL, ProButton::VibDepthR, "EFX PARAM"),
 		pair(nullptr, ProButton::VibDelayL, ProButton::VibDelayR, "EFX VALUE"),
 
+	};
+
+	using SkButton = emu88Lib::Sk88ProButton;
+	constexpr std::array g_sk88Help{
+		row ("Mode",  SkButton::All,     "ALL"),
+		row (nullptr, SkButton::Mute,    "MUTE"),
+		row (nullptr, SkButton::Sc55Map, "SC-55 MAP"),
+		row (nullptr, SkButton::Sc88Map, "SC-88 MAP"),
+		row (nullptr, SkButton::Drum,    "DRUM"),
+
+		pair("Parameters", SkButton::PartL,  SkButton::PartR,     "PART"),
+		pair(nullptr, SkButton::InstL,      SkButton::InstR,      "INSTRUMENT"),
+		pair(nullptr, SkButton::LevelL,     SkButton::LevelR,     "LEVEL"),
+		pair(nullptr, SkButton::PanL,       SkButton::PanR,       "PAN"),
+		pair(nullptr, SkButton::ReverbL,    SkButton::ReverbR,    "REVERB"),
+		pair(nullptr, SkButton::ChorusL,    SkButton::ChorusR,    "CHORUS"),
+		pair(nullptr, SkButton::KeyShiftL,  SkButton::KeyShiftR,  "KEY SHIFT"),
+		pair(nullptr, SkButton::MidiChL,    SkButton::MidiChR,    "MIDI CH"),
+
+		row ("Edit",  SkButton::Edit,     "EDIT"),
+		row (nullptr, SkButton::Util,     "UTIL"),
+		row (nullptr, SkButton::UserInst, "USER INST"),
+		row (nullptr, SkButton::Select,   "SELECT"),
+		row (nullptr, SkButton::Shift,    "SHIFT"),
+		chord(nullptr, "Shift + R, then W", SkButton::Shift, "Init All (SHIFT + PART left, then ALL)", false),
+
+		row ("Keyboard", SkButton::Function, "FUNCTION"),
+		row (nullptr, SkButton::Local,    "LOCAL"),
+		pair(nullptr, SkButton::OctL,     SkButton::OctR,     "OCTAVE"),
 	};
 
 	using LaButton = emu88Lib::Mt32Button;

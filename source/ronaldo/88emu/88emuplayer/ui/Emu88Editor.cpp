@@ -263,7 +263,9 @@ namespace emu88Player
 		{
 		case emu88Lib::DeviceModel::Sc88: panel = "sc88_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc88VL: panel = "sc88vl_panel.png"; break;
-		case emu88Lib::DeviceModel::Sc88Pro: panel = "sc88pro_panel.png"; break;
+		// No SK-88Pro artwork: it shows the SC-88Pro's, the faces both have at its own switches.
+		case emu88Lib::DeviceModel::Sc88Pro:
+		case emu88Lib::DeviceModel::Sk88Pro: panel = "sc88pro_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8850: panel = "sc8850_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc55Mk2:
 		case emu88Lib::DeviceModel::Sc155Mk2: panel = "sc55mk2_panel.png"; break;
@@ -324,7 +326,8 @@ namespace emu88Player
 			root->SetClass("modelNoDisplay", !emu88Lib::deviceHasLcd(_model));
 		}
 		if(auto* mapOrEq = document->GetElementById("btSc88Map"))
-			mapOrEq->SetAttribute("title", _model == emu88Lib::DeviceModel::Sc88Pro ? "SC-88 MAP (2)" : "EQ (2)");
+			mapOrEq->SetAttribute("title", _model == emu88Lib::DeviceModel::Sc88Pro ||
+			                               _model == emu88Lib::DeviceModel::Sk88Pro ? "SC-88 MAP (2)" : "EQ (2)");
 		refreshButtonElements(_model);
 		// Drop the previous model's lit LEDs before the element list moves on.
 		updateLeds(0);

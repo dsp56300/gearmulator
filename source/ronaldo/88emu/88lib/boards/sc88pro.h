@@ -69,6 +69,56 @@ namespace emu88Lib
 		Count       = 32,
 	};
 
+	// SK-88Pro front-panel matrix: the same sub-MCU scan, four columns of eight,
+	// laid out anew. The firmware names every position in its switch test (the
+	// table after the SC-88Pro's, 13:E6A0 in the CPU-order image), and pressing
+	// each one alone does what that name says. SHIFT is the modifier the SC-88Pro
+	// does not have: SHIFT with a parameter arrow opens the utility prompts (Init
+	// All on PART left, Init GM on PART right, Init GS / CM-64 on the INSTRUMENT
+	// arrows, Set Mode on KEY SHIFT, Copy/Clear/Exchange on LEVEL and PAN).
+	// Positions 28 and 29 carry the SC-88Pro's "xx 15 xx"/"xx 23 xx" placeholder
+	// names and do nothing.
+	enum class Sk88ProButton : uint8_t
+	{
+		Edit        = 0,
+		Util        = 1,
+		Drum        = 2,
+		Shift       = 3,
+		All         = 4,
+		Mute        = 5,
+		Sc55Map     = 6,
+		Sc88Map     = 7,
+
+		PartR       = 8,
+		LevelR      = 9,
+		ReverbR     = 10,
+		KeyShiftR   = 11,
+		PartL       = 12,
+		LevelL      = 13,
+		ReverbL     = 14,
+		KeyShiftL   = 15,
+
+		InstR       = 16,
+		PanR        = 17,
+		ChorusR     = 18,
+		MidiChR     = 19,
+		InstL       = 20,
+		PanL        = 21,
+		ChorusL     = 22,
+		MidiChL     = 23,
+
+		OctR        = 24,
+		OctL        = 25,
+		Local       = 26,
+		Function    = 27,
+		Unused28    = 28,
+		Unused29    = 29,
+		UserInst    = 30,
+		Select      = 31,
+
+		Count       = 32,
+	};
+
 	// =====================================================================
 	// Sc88Pro — the SC-88 Pro / VE-GS Pro board
 	// =====================================================================
@@ -80,7 +130,8 @@ namespace emu88Lib
 	//
 	// Memory map, from the firmware itself:
 	//
-	//   pages 0x00-0x7F   ROM, 1 MiB mirrored (addr & 0xFFFFF). The page-0
+	//   pages 0x00-0x7F   ROM, 1 MiB mirrored (addr & 0xFFFFF); the SK-88Pro's
+	//                     2 MiB image mirrored the same way. The page-0
 	//                     SRAM overlay the SC-88 has is GONE, which is why the
 	//                     reset vector can be 00:8D1A.
 	//   pages 0xC0-0xC7   SRAM
@@ -92,6 +143,9 @@ namespace emu88Lib
 	// Three control ROMs run on it: the SC-88Pro's own 1.02 ("SC-88ProVL
 	// BOARD"), an "SC-GS" rev A '96 with the same panel code, and the headless
 	// VE-GS Pro's "SC-GS" rev B '97, which the player offers as its own device.
+	// The SK-88Pro keyboard runs on it too, from the 2 MiB image
+	// buildSk88ProImage() makes, with its own panel matrix (Sk88ProButton); its
+	// keyboard and controllers are not wired.
 	class Sc88Pro
 	{
 	public:
@@ -105,6 +159,7 @@ namespace emu88Lib
 		using Lsp = lspLib::LSPDispatcher;
 
 		static constexpr uint32_t RomSize  = 0x100000;	// 1 MiB
+		static constexpr uint32_t Sk88ProRomSize = 0x200000;
 		static constexpr uint32_t SramSize = 0x10000;
 		static constexpr uint32_t WaveRomSize = 20 * 1024 * 1024;
 		// P5DR is not an unconnected input on the SC-88Pro. The service schematic
@@ -185,9 +240,15 @@ namespace emu88Lib
 		// Bytes the firmware has transmitted, per SCI channel.
 		const std::vector<uint8_t>& serialOut(uint8_t _ch) const { return m_serialOut[_ch & 1]; }
 
-		void setButtons(const uint32_t _b) { m_buttons = _b & ~(uint32_t{1} << static_cast<uint8_t>(Sc88ProButton::Power)); }
+		// Matrix positions as the sub-MCU scans them: Sc88ProButton on the SC-88Pro, Sk88ProButton on
+		// the SK-88Pro. The Pro's position 0 is not populated; the SK's is EDIT.
+		void setButtons(const uint32_t _b)
+		{
+			m_buttons = m_sk88Pro ? _b : _b & ~(uint32_t{1} << static_cast<uint8_t>(Sc88ProButton::Power));
+		}
 		uint32_t buttons() const { return m_buttons; }
 		// Bits 0-7 are LDD0-7 (bit 7 is green); bit 8 is the red User Inst LED.
+		// The SK-88Pro's lamps are reported in the same order, as far as it has them.
 		uint16_t leds() const;
 
 		Lcd&       lcd()       { return m_lcd; }
@@ -293,6 +354,8 @@ namespace emu88Lib
 		bool     m_lspReturnEnabled = false;
 
 		bool m_serialMidi = false;
+		// Told apart by its image size. Its panel matrix is Sk88ProButton.
+		bool m_sk88Pro = false;
 		std::array<std::vector<uint8_t>, 2> m_serialOut;
 
 	};

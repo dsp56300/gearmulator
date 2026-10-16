@@ -4,6 +4,8 @@ Release Notes
 
 88emuPlayer:
 
+- [New] Devices: Added support for the SK-88Pro.
+
 - [Imp] Settings: "Hide devices without ROMs" leaves the boards whose ROMs are
         missing out of the device menu. Off by default. Every board stays
         listed while no ROM set is complete at all.

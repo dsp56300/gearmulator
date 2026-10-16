@@ -134,7 +134,7 @@ namespace emu88Player
                                               "sc55st", "cm300",  "scb55",   "rlp3237", "sc155",   "sc155mk2",
                                               "xpgs",   "sc8820", "cm32p",   "vegspro", "scc1a",   "cm64",
                                               "cm32l",  "nu10b",  "miig5",   "mt32old", "mt32new", "cm32ln",
-                                              "mv30"};
+                                              "mv30",   "sk88pro"};
         static_assert(std::size(ids) == emu88Lib::g_deviceMenuOrder.size(), "one ID per device model, in enum order");
         return ids[static_cast<size_t>(model)];
     }
