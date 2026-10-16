@@ -2,6 +2,11 @@ Release Notes
 
 2.2.27:
 
+Framework:
+
+- [Imp] BUG-10482 Page Up, Page Down, Home and End move the selection in lists
+        and trees, such as the patch manager and the Xenia wave editor.
+
 JE8086:
 
 - [Fix] MIDI was received and sent at half the speed of the hardware, so dense

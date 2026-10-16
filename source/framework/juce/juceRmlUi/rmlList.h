@@ -63,7 +63,8 @@ namespace juceRmlUi
 		bool getMultiselect() const { return m_allowMultiselect; }
 		void setMultiselect(const bool _enabled) { m_allowMultiselect = _enabled; }
 
-		size_t handleNavigationKey(Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, uint32_t _gridItemsPerColumn);
+		// _itemsPerPage: how far page up and page down move the selection
+		size_t handleNavigationKey(Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, uint32_t _gridItemsPerColumn, uint32_t _itemsPerPage);
 		bool selectRangeViaShiftKey(size_t _index);
 		bool setSelectedIndices(const std::vector<size_t>& _indices, bool _notify = true);
 		bool deselectAll(bool _notify = true);

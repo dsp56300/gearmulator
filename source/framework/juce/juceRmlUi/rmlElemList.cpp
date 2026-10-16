@@ -49,7 +49,7 @@ namespace juceRmlUi
 				ScrollIntoViewOptions options;
 				options.vertical = ScrollAlignment::Nearest;
 				options.horizontal = ScrollAlignment::Nearest;
-				options.behavior = ScrollBehavior::Smooth;
+				options.behavior = m_scrollSmooth ? ScrollBehavior::Smooth : ScrollBehavior::Instant;
 				options.parentage = ScrollParentage::Closest;
 				m_scrollDummy->ScrollIntoView(options);
 			}
@@ -92,7 +92,7 @@ namespace juceRmlUi
 		}
 	}
 
-	bool ElemList::scrollIntoView(const size_t _index)
+	bool ElemList::scrollIntoView(const size_t _index, const bool _smooth/* = true*/)
 	{
 		if (_index == List::InvalidIndex || !m_scrollDummy)
 			return false;
@@ -122,6 +122,7 @@ namespace juceRmlUi
 		m_scrollDummy->SetProperty(PropertyId::Height, Property(elemSize.y, Unit::PX));
 
 		m_scrollTargetDirty = 2;
+		m_scrollSmooth = _smooth;
 
 		return true;
 	}
@@ -626,12 +627,15 @@ namespace juceRmlUi
 		const auto ctrl = helper::getKeyModCommand(_event);
 		const auto shift = helper::getKeyModShift(_event);
 
-		auto lastSelected = m_list.handleNavigationKey(key, ctrl, shift, getLayoutType() == LayoutType::Grid ? getItemsPerColumn() : 0);
+		auto lastSelected = m_list.handleNavigationKey(key, ctrl, shift, getLayoutType() == LayoutType::Grid ? getItemsPerColumn() : 0, getItemsPerPage());
 
 		if (lastSelected != List::InvalidIndex)
 			_event.StopPropagation();
 
-		return scrollIntoView(lastSelected);
+		// home, end and the page keys jump, a smooth scroll over thousands of entries would take seconds
+		const auto smooth = key == Rml::Input::KI_UP || key == Rml::Input::KI_DOWN || key == Rml::Input::KI_LEFT || key == Rml::Input::KI_RIGHT;
+
+		return scrollIntoView(lastSelected, smooth);
 	}
 
 	ElemList::LayoutType ElemList::getLayoutType()
@@ -686,5 +690,19 @@ namespace juceRmlUi
 		const int itemsPerColumn = static_cast<int>(size.y / elementSize.y);
 
 		return itemsPerColumn;
+	}
+
+	uint32_t ElemList::getItemsPerPage()
+	{
+		const auto perColumn = getItemsPerColumn();
+
+		if (getLayoutType() != LayoutType::Grid)
+			return perColumn;
+
+		// a grid scrolls horizontally, a page is the columns that are visible at once
+		const auto width = GetBox().GetSize(BoxArea::Content).x;
+		const auto elementWidth = updateElementSize().x;
+
+		return elementWidth > 0 ? perColumn * static_cast<uint32_t>(width / elementWidth) : perColumn;
 	}
 }
