@@ -47,8 +47,12 @@ namespace jucePluginEditorLib
 #endif
 		// The path each format was loaded from used to be written into the config for the plugin
 		// manager to read, which it never did - it looks on disk instead. A key left behind would
-		// only get staler, so it is swept out when one is found.
-		for (const auto& key : m_config.getAllProperties().getAllKeys())
+		// only get staler, so it is swept out when one is found. getAllKeys() hands out a reference
+		// to the live array that removeValue() erases from, which would leave the loop reading past
+		// its end, so the sweep runs over a copy of the keys.
+		const auto keys = m_config.getAllProperties().getAllKeys();
+
+		for (const auto& key : keys)
 		{
 			if (key.startsWith("pluginPath_"))
 				m_config.removeValue(key);
