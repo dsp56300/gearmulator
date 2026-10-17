@@ -11,7 +11,7 @@ set(SOURCES
 target_sources(changelogGenerator PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(changelogGenerator PUBLIC baseLib)
+target_link_libraries(changelogGenerator PUBLIC baseLib changelogLib)
 	
 set (outputDir "${TUS_BIN_DIR}/tools")
 

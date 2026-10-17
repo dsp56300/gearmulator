@@ -67,7 +67,6 @@ namespace jucePluginEditorLib
 		void migratePatchManagerState(const std::vector<uint8_t>& _editorStateData) const;
 
 		juce::File initConfigFile(const juce::PropertiesFile::Options& _o) const;
-		void savePluginLoadPath();
 		void startMcpServer();
 		void stopMcpServer();
 

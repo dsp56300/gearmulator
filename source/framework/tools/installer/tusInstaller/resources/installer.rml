@@ -1,0 +1,295 @@
+<rml>
+<head>
+	<title>TUS Plugin Manager</title>
+	<link type="text/rcss" href="installer.rcss"/>
+</head>
+<body id="body">
+	<div id="header">
+		<span id="app-title">Plugin Manager</span>
+		<span id="app-version"></span>
+		<span class="header-spacer"></span>
+		<span id="website-link" class="header-link">theusualsuspects.io</span>
+		<span class="header-spacer"></span>
+		<button id="refresh-button" class="header-button"><svg class="btn-icon" src="icon_refresh.svg"/>Refresh</button>
+		<button id="preferences-button" class="header-button"><svg class="btn-icon" src="icon_settings.svg"/>Preferences</button>
+		<button id="donator-login" class="header-button"><svg class="btn-icon" src="icon_login.svg"/>Donator login</button>
+	</div>
+
+	<div id="status-bar">
+		<span id="status-text">Loading plugin catalog...</span>
+		<span id="status-busy"></span>
+		<span class="header-spacer"></span>
+		<!-- Only there when a newer build of this program is in the catalog. What it says is the
+		     version it would fetch, so C++ fills it in. -->
+		<button id="self-update" class="self-update hidden"></button>
+	</div>
+
+	<!-- One chip per format the catalog offers here. Ticking one ticks that format on every plugin
+	     below, which is what the Install buttons act on. Filled in C++ from the catalog. -->
+	<div id="format-toggles">
+		<span id="format-toggles-label">Install formats:</span>
+		<!-- The chips go here, from C++. -->
+		<span class="header-spacer"></span>
+		<!-- Ticks or unticks every format on every row. What it says is what pressing it does, so it
+		     offers to select until everything already is. -->
+		<button id="select-all" class="select-all">Select all</button>
+		<!-- The same two things the All column of a row does, done to every plugin at once. Each
+		     says how much it would do, and does nothing when that is nothing. -->
+		<button id="install-selected" class="bulk-button">Install selected</button>
+		<button id="upgrade-all" class="bulk-button">Upgrade all</button>
+	</div>
+
+	<div id="plugin-list">
+		<!-- Template entry. Cloned in C++ for each plugin from the catalog. -->
+		<div id="plugin-entry-template" class="plugin-entry">
+			<!-- A box of a fixed size with the picture fitted inside it, rather than the picture
+			     stretched to the box: the artwork is not all one shape, and the rows have to line
+			     up whatever shape it is. -->
+			<div class="plugin-thumbnail">
+				<img class="thumbnail-image" src="placeholder.png"/>
+			</div>
+			<div class="plugin-info">
+				<!-- What we call it, with the effect chip beside it. The chip is a product of its own
+				     in the archives and is not in the row at all for a plugin that has none; ticking it
+				     makes every column below about the two of them: what is installed, what the button
+				     offers, and what it then fetches. -->
+				<div class="plugin-title">
+					<div class="plugin-name">Plugin Name</div>
+					<span class="fx-toggle format-label">FX</span>
+				</div>
+				<!-- What the hardware is, always on its own line. Beside the name it fitted on some rows
+				     and not on others, and a row that looks unlike the one above it reads worse than a
+				     row one line taller. -->
+				<div class="plugin-description">Description text</div>
+				<!-- Starts out of the layout and is put back by setStatus when there is something to say. -->
+				<div class="plugin-status hidden"></div>
+				<!-- Under the line that says what is being downloaded, rather than out among the
+				     buttons: that keeps the row as short as the columns beside it. -->
+				<div class="plugin-progress">
+					<progress class="progress-bar" direction="right" value="0" max="100"/>
+					<button class="cancel-button" title="Cancel">&#xD7;</button>
+				</div>
+			</div>
+			<div class="plugin-actions">
+				<!-- One fixed-width column per format, plus the All column, from the templates
+				     below. Filled in C++. -->
+				<div class="plugin-formats">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- One format of one plugin on a list row: what it is, which version is installed, which one is
+	     on offer, and the two buttons that act on it. Cloned in C++ for every format any plugin here
+	     offers, so that the columns of every row line up - including the empty ones, for a plugin
+	     that does not come in that format.
+
+	     It lives outside the list because the list is emptied on every refresh. -->
+	<div id="format-column-template" class="format-col">
+		<!-- Both state icons are here and the stylesheet shows the one that applies, so which icon
+		     means what stays out of the C++. The name is written once, when the row is built - it is
+		     what the column is for and never changes afterwards. All on one line, because the
+		     whitespace between the tags would otherwise collapse to a space inside the chip. -->
+		<span class="format-label checked"><span class="format-name">VST3</span><svg class="state-icon current" src="icon_check.svg"/><svg class="state-icon outdated" src="icon_update.svg"/></span>
+		<span class="format-installed">-</span>
+		<span class="version-select">0.0.0</span>
+		<span class="format-buttons">
+			<button class="format-action"/>
+			<button class="format-remove" title="Uninstall"><svg class="btn-icon" src="icon_remove.svg"/></button>
+		</span>
+	</div>
+
+	<!-- The last column of a row: the same three things done to every format at once. What is on
+	     offer is what applies - there is no downgrading a whole row, and nothing to uninstall until
+	     something is installed. The empty version line keeps the buttons on the same line as the
+	     ones in the columns to its left. -->
+	<div id="format-all-template" class="format-col all">
+		<span class="format-label all-label">All</span>
+		<span class="format-installed all-summary">-</span>
+		<span class="version-select all-spacer">-</span>
+		<span class="format-buttons">
+			<button class="format-action install all-install" title="Install the ticked formats"><svg class="btn-icon" src="icon_install.svg"/></button>
+			<button class="format-action upgrade all-upgrade" title="Upgrade the ticked formats"><svg class="btn-icon" src="icon_upgrade.svg"/></button>
+			<button class="format-remove all-remove" title="Uninstall the ticked formats"><svg class="btn-icon" src="icon_remove.svg"/></button>
+		</span>
+	</div>
+
+	<!-- One plugin in detail: what is offered for it, and where each format is installed. Opened by
+	     clicking a row, and shown in place of the list. -->
+	<div id="detail-page" class="page">
+		<div class="page-header">
+			<button id="detail-back" class="header-button">Back</button>
+			<span id="detail-name" class="page-title">Plugin</span>
+			<span class="header-spacer"></span>
+			<span id="detail-status"></span>
+			<button id="detail-changelog" class="header-button">Changelog</button>
+			<button id="detail-remove-all" class="header-button danger"><svg class="btn-icon" src="icon_remove.svg"/>Uninstall all</button>
+		</div>
+		<div id="detail-top">
+			<div id="detail-thumbnail">
+				<img class="thumbnail-image" src="placeholder.png"/>
+			</div>
+			<div id="detail-text">
+				<div id="detail-description"></div>
+				<div id="detail-meta"></div>
+				<!-- The effect build, which is a product of its own in the archives and goes into the
+				     same folder as the plugin. Named after it in C++, and not in the row at all for a
+				     plugin that has none. Ticking it makes every row below about the two of them. -->
+				<span id="detail-fx-toggle" class="fx-toggle format-label">FX</span>
+			</div>
+		</div>
+		<div id="detail-formats">
+			<div class="detail-row detail-head">
+				<span class="detail-cell detail-format">Format</span>
+				<span class="detail-cell detail-version">Newest</span>
+				<span class="detail-cell detail-state">Installed</span>
+				<span class="detail-cell detail-fx-state">FX</span>
+				<span class="detail-cell detail-location">Location for this plugin, empty for the one in Preferences</span>
+			</div>
+			<!-- Cloned in C++ for each format the catalog offers here. -->
+			<div id="detail-row-template" class="detail-row">
+				<span class="detail-cell detail-format">VST3</span>
+				<span class="detail-cell detail-version">0.0.0</span>
+				<span class="detail-cell detail-state">no</span>
+				<span class="detail-cell detail-fx-state">no</span>
+				<input class="detail-path" type="text"/>
+				<button class="detail-browse dialog-button" title="Choose a location"><svg class="btn-icon" src="icon_folder.svg"/></button>
+				<button class="detail-install dialog-button primary">Install</button>
+				<button class="detail-remove dialog-button danger" title="Uninstall"><svg class="btn-icon" src="icon_remove.svg"/></button>
+			</div>
+		</div>
+		<!-- What the product keeps for itself: its settings, its patches, its skins and its ROMs,
+		     none of which installing or removing a plugin touches. That is also why losing it is
+		     the one thing this program cannot put right afterwards, so it can be put in a zip. -->
+		<div id="detail-data">
+			<div class="detail-row detail-head">
+				<span class="detail-cell detail-data-label">This product's data folder</span>
+				<span class="detail-cell detail-version" id="detail-data-size"></span>
+				<span class="header-spacer"></span>
+				<button id="detail-backup" class="dialog-button primary">Back up now</button>
+			</div>
+			<!-- What is in that folder and what is not, filled in with the real path in C++. The
+			     difference matters: patches are usually kept somewhere else entirely. -->
+			<div id="detail-data-note" class="detail-note"></div>
+			<!-- Cloned in C++ once per backup there is. -->
+			<div id="detail-backup-template" class="detail-row">
+				<span class="detail-cell detail-data-label detail-backup-when">date</span>
+				<span class="detail-cell detail-version detail-backup-size">size</span>
+				<span class="header-spacer"></span>
+				<button class="detail-backup-reveal dialog-button"><svg class="btn-icon" src="icon_folder.svg"/></button>
+				<button class="detail-backup-restore dialog-button">Restore</button>
+				<button class="detail-backup-delete dialog-button danger" title="Delete this backup"><svg class="btn-icon" src="icon_remove.svg"/></button>
+			</div>
+			<!-- The rows go in here rather than straight into the section, so that adding anything
+			     else above them does not change what clearing the list has to remove. -->
+			<div id="detail-backup-list"></div>
+		</div>
+	</div>
+
+	<!-- One product's changelog, opened from its page: the versions down the left, newest first,
+	     and what changed in the one picked on the right - the product's own changes apart from the
+	     framework every product got. Both halves are filled in C++. -->
+	<div id="changelog-page" class="page">
+		<div class="page-header">
+			<button id="changelog-back" class="header-button">Back</button>
+			<span id="changelog-name" class="page-title">Changelog</span>
+			<span class="header-spacer"></span>
+			<span id="changelog-status"></span>
+			<!-- The version on show, to paste somewhere else: as the plain text the changelog is
+			     written in, or as Markdown for a chat or a forum post. -->
+			<button id="changelog-copy-text" class="header-button">Copy as text</button>
+			<button id="changelog-copy-markdown" class="header-button">Copy as Markdown</button>
+		</div>
+		<div id="changelog-body">
+			<div id="changelog-versions"></div>
+			<div id="changelog-text"></div>
+		</div>
+	</div>
+
+	<!-- Where each format is installed. One location per format, used by this program and by the
+	     headless one alike. -->
+	<div id="preferences-page" class="page">
+		<div class="page-header">
+			<button id="preferences-back" class="header-button">Back</button>
+			<span class="page-title">Preferences</span>
+		</div>
+		<div id="preferences-intro">Where each format is installed. A location that does not exist yet is created by the first install.</div>
+		<div id="preference-list">
+			<!-- Cloned in C++ for each format. -->
+			<div id="preference-row-template" class="preference-row">
+				<span class="preference-format">VST3</span>
+				<input class="preference-path" type="text"/>
+				<button class="preference-browse dialog-button"><svg class="btn-icon" src="icon_folder.svg"/>Browse</button>
+				<button class="preference-default dialog-button">Default</button>
+				<span class="preference-note"></span>
+			</div>
+		</div>
+
+		<!-- Installs this program made that are no longer where their format goes. Pointing a
+		     format somewhere else leaves the copy that was there on disk, where every host that
+		     scans that folder still loads it. Hidden while there are none, which is the usual
+		     case. -->
+		<div id="stray-installs">
+			<div id="stray-installs-title">Still installed where they no longer belong</div>
+			<div id="stray-installs-intro">A location was changed after these were installed. They are still on disk and hosts that scan those folders still load them.</div>
+			<div id="stray-install-list">
+				<div id="stray-install-template" class="stray-install-row">
+					<span class="stray-install-name">Plugin VST3</span>
+					<span class="stray-install-path">folder</span>
+					<button class="stray-install-remove dialog-button danger">Remove</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- The one login that is not per plugin: it opens every internal build at once, so it is a
+		     button rather than a list. A build that was not told where the internal channel is has
+		     no use for it, and then this is not here at all. -->
+		<div id="team-login-section">
+			<div id="team-login-title">Team login</div>
+			<button id="team-login" class="dialog-button primary">Log in</button>
+		</div>
+
+		<!-- The folders a donator login is stored for. A plugin that is not published is only known
+		     by its folder, so this is also the list of what those logins bring in. -->
+		<div id="donator-logins">
+			<div id="donator-logins-title">Donator logins</div>
+			<div id="donator-login-list">
+				<div id="donator-login-template" class="donator-login-row">
+					<span class="donator-login-name">folder</span>
+					<button class="donator-login-remove dialog-button danger">Remove</button>
+				</div>
+			</div>
+			<button id="donator-login-add" class="dialog-button primary">Add a donator login</button>
+		</div>
+	</div>
+
+	<!-- Login prompt for the internal and donator channels. Last in the body so it covers the list. -->
+	<div id="login-overlay">
+		<div id="login-panel">
+			<div id="login-title">Login</div>
+			<div class="login-label login-folder-only">The folder this login is for, as it was given out with it</div>
+			<!-- Still typeable: a plugin that is not published is in no product list, and then its
+			     folder on the server is all there is to go on. The button offers the ones we do know. -->
+			<input id="login-folder" type="text" class="login-folder-only"/>
+			<div class="login-label">User name</div>
+			<input id="login-user" type="text"/>
+			<!-- A donator password is copied out of a Discord post and a folder name is typed beside
+			     it, so a rejected login is two questions rather than one. The eye answers the first.
+			     It sits on the label's line rather than in or beside the field: the field must stay a
+			     plain child of the panel - see the note in the stylesheet. -->
+			<div class="login-label login-password-label">Password<button id="login-reveal" class="login-reveal" title="Show password"><svg class="btn-icon" src="icon_eye.svg"/></button></div>
+			<input id="login-password" type="password"/>
+			<!-- The same field in plain text. Two of them rather than one whose type changes: changing
+			     the type of an input builds a new text widget, and a text widget built after the
+			     document has been laid out draws its text at the top left of the window instead of
+			     inside itself. Both of these are here from the start and only one is shown. -->
+			<input id="login-password-shown" type="text" class="hidden"/>
+			<div id="login-error"></div>
+			<div class="login-buttons">
+				<button id="login-cancel" class="dialog-button">Cancel</button>
+				<button id="login-submit" class="dialog-button primary">Log in</button>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

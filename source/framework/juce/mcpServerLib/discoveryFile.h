@@ -9,6 +9,8 @@
 
 namespace mcpServer
 {
+	class McpServer;
+
 	struct DiscoveryEntry
 	{
 		std::string pluginName;
@@ -26,6 +28,13 @@ namespace mcpServer
 
 		// false if the file had to be written without holding the lock
 		static bool registerInstance(const DiscoveryEntry& _entry);
+
+		// Registers the running process: fills in the pid and the client session that owns it, which
+		// is how a client picks its own instance out of the file. Used by every server we host.
+		// The port is taken from the started server, never from a caller: McpServer::start() moves on
+		// to the next free port when the requested one is taken, and an entry with the requested port
+		// would point clients at another process and evict that process's own entry.
+		static void registerThisProcess(const std::string& _name, const std::string& _fourCC, const McpServer& _server);
 		static void unregisterInstance(int _port);
 		static std::vector<DiscoveryEntry> readInstances();
 

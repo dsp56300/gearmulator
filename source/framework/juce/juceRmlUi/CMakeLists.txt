@@ -44,6 +44,7 @@ set(SOURCES
 	rmlShaders.h
 	rmlSystemFonts.cpp rmlSystemFonts.h
 	rmlSystemInterface.cpp rmlSystemInterface.h
+	rmlTooltips.cpp rmlTooltips.h
 	rmlTree.cpp rmlTree.h
 	rmlTreeNode.cpp rmlTreeNode.h
 

@@ -108,7 +108,8 @@ included.
     -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON \
     -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON \
     -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON \
-    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON
+    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON \
+    -Dgearmulator_BUILD_INSTALLER=OFF
 
 %cmake_build
 

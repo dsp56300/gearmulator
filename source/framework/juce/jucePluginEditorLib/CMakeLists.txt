@@ -19,7 +19,8 @@ set(SOURCES
 	pluginEditorState.cpp pluginEditorState.h
 	pluginProcessor.cpp pluginProcessor.h
 	pluginEntry.h
-	mcpDomTools.cpp mcpDomTools.h
+	mcpEditorTools.cpp mcpEditorTools.h
+	mcpPluginServer.cpp mcpPluginServer.h
 	mcpPatchManagerTools.cpp mcpPatchManagerTools.h
 	settings.cpp settings.h
 	settingsCategories.cpp settingsCategories.h

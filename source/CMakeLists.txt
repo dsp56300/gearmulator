@@ -80,3 +80,10 @@ add_subdirectory(axel)
 add_subdirectory(waldi)
 add_subdirectory(claudia)
 add_subdirectory(ronaldo)
+
+# ----------------- Installer
+
+option(${CMAKE_PROJECT_NAME}_BUILD_INSTALLER "Build TUS Plugin Manager" on)
+if(${CMAKE_PROJECT_NAME}_BUILD_INSTALLER AND ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
+	add_subdirectory(framework/tools/installer)
+endif()

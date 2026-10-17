@@ -23,4 +23,10 @@ if(UPLOAD_REMOTE)
 		requireAccessControl("dsp56300_upload:builds" "${FOLDER}")
 	endif()
 	copyArtefacts("dsp56300_upload:builds" "${FOLDER}" "${FILTER}")
+
+	# Next to the builds, which is where the Plugin Manager reads it from - see findChangelog in
+	# deployAll.cmake. Replaced on every upload, so it always matches the newest build in the folder.
+	if(CHANGELOG)
+		copyChangelog("dsp56300_upload:builds" "${FOLDER}" "${CHANGELOG}")
+	endif()
 endif()

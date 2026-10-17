@@ -1535,6 +1535,7 @@ namespace juceRmlUi
 				ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
 				for (const auto& log : logs)
 					ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
+				LOG(ss.str());
 				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Error loading RMLUI document", ss.str(), this);
 			}
 		}

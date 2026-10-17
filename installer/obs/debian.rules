@@ -12,7 +12,7 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 # Standalone is on for 88emu, whose products are programs rather than plugins;
 # the synths get a standalone build too, which is not installed.
 override_dh_auto_configure:
-	dh_auto_configure -- -Dgearmulator_BUILD_JUCEPLUGIN=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON
+	dh_auto_configure -- -Dgearmulator_BUILD_JUCEPLUGIN=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON -Dgearmulator_BUILD_INSTALLER=OFF
 
 # One synth alone produced 378 MB of dbgsym, so all of them would add several GB
 # per revision, and OBS disables debuginfo on the RPM side anyway. Drop this

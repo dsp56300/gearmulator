@@ -1,5 +1,7 @@
 #include "discoveryFile.h"
 
+#include "mcpServer.h"
+
 #include "networkLib/logging.h"
 
 #include "juce_core/juce_core.h"
@@ -12,6 +14,8 @@
 #include <sys/file.h>
 #include <unistd.h>
 #endif
+
+#include <cstdlib>
 
 namespace mcpServer
 {
@@ -143,6 +147,30 @@ namespace mcpServer
 
 			_instances.push_back(_entry);
 		});
+	}
+
+	void DiscoveryFile::registerThisProcess(const std::string& _name, const std::string& _fourCC, const McpServer& _server)
+	{
+		DiscoveryEntry entry;
+
+		entry.pluginName = _name;
+		entry.plugin4CC = _fourCC;
+		entry.port = _server.getPort();
+		entry.pid = static_cast<int>(
+#ifdef _WIN32
+			GetCurrentProcessId()
+#else
+			getpid()
+#endif
+		);
+
+		// Set by the client for every process it spawns, so the host of whatever we run in inherits
+		// it. Lets a client pick its own instance out of the discovery file instead of guessing a
+		// port. See scripts/mcpBridge.py
+		if (const auto* sessionId = std::getenv("CLAUDE_CODE_SESSION_ID"))
+			entry.sessionId = sessionId;
+
+		registerInstance(entry);
 	}
 
 	void DiscoveryFile::unregisterInstance(const int _port)

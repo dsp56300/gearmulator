@@ -1,11 +1,7 @@
 #include "mcpDomTools.h"
 
-#include "pluginEditor.h"
-#include "pluginEditorState.h"
-#include "pluginProcessor.h"
-
-#include "mcpServerLib/mcpServer.h"
-#include "mcpServerLib/mcpTool.h"
+#include "mcpServer.h"
+#include "mcpTool.h"
 
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlInterfaces.h"
@@ -20,7 +16,7 @@
 #include <future>
 #include <thread>
 
-namespace jucePluginEditorLib
+namespace mcpServer
 {
 	namespace
 	{
@@ -179,14 +175,6 @@ namespace jucePluginEditorLib
 			return future.get();
 		}
 
-		Editor* getEditor(Processor& _processor)
-		{
-			auto* editorState = _processor.getEditorState();
-			if (!editorState)
-				return nullptr;
-			return editorState->getEditor();
-		}
-
 		int parseMouseButton(const mcpServer::JsonValue& _params)
 		{
 			if (!_params.isObject() || !_params.hasProperty("button"))
@@ -273,24 +261,20 @@ namespace jucePluginEditorLib
 
 		struct RmlUiAccess
 		{
-			Editor* editor = nullptr;
 			juceRmlUi::RmlComponent* rmlComp = nullptr;
 			Rml::Context* context = nullptr;
 			Rml::ElementDocument* document = nullptr;
 
-			static RmlUiAccess acquire(Processor& _processor)
+			static RmlUiAccess acquire(const RmlComponentAccessor& _getComponent)
 			{
 				RmlUiAccess a;
-				a.editor = getEditor(_processor);
-				if (!a.editor)
-					throw std::runtime_error("Plugin editor is not open. Open the plugin window first.");
-				a.rmlComp = a.editor->getRmlComponent();
+				a.rmlComp = _getComponent ? _getComponent() : nullptr;
 				if (!a.rmlComp)
-					throw std::runtime_error("RmlUI component not available");
+					throw std::runtime_error("The window is not open. Open it first.");
 				a.context = a.rmlComp->getContext();
 				if (!a.context)
 					throw std::runtime_error("RmlUI context not available");
-				a.document = a.editor->getDocument();
+				a.document = a.rmlComp->getDocument();
 				if (!a.document)
 					throw std::runtime_error("No RmlUI document loaded");
 				return a;
@@ -298,7 +282,7 @@ namespace jucePluginEditorLib
 		};
 	}
 
-	void registerDomTools(mcpServer::McpServer& _server, Processor& _processor)
+	void registerDomTools(McpServer& _server, RmlComponentAccessor _getComponent)
 	{
 		// get_dom_tree
 		{
@@ -307,7 +291,7 @@ namespace jucePluginEditorLib
 			tool.description = "Get the RmlUI document DOM tree as JSON. Requires the plugin editor window to be open.";
 			tool.inputSchema.addIntProperty("maxDepth", "Maximum tree depth to traverse (default: 5)", false, 1, 50);
 			tool.inputSchema.addProperty("rootId", "string", "Optional element ID to use as root (default: document root)", false);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int maxDepth = _params.isObject() && _params.hasProperty("maxDepth")
 					? _params.get("maxDepth").getInt() : 5;
@@ -316,17 +300,13 @@ namespace jucePluginEditorLib
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto* editor = getEditor(_processor);
-					if (!editor)
-						throw std::runtime_error("Plugin editor is not open. Open the plugin window first.");
-
-					auto* rmlComp = editor->getRmlComponent();
+					auto* rmlComp = _getComponent ? _getComponent() : nullptr;
 					if (!rmlComp)
-						throw std::runtime_error("RmlUI component not available");
+						throw std::runtime_error("The window is not open. Open it first.");
 
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*rmlComp);
 
-					Rml::Element* root = editor->getDocument();
+					Rml::Element* root = rmlComp->getDocument();
 					if (!root)
 						throw std::runtime_error("No RmlUI document loaded");
 
@@ -349,23 +329,19 @@ namespace jucePluginEditorLib
 			tool.name = "get_element";
 			tool.description = "Get detailed information about a specific element by ID";
 			tool.inputSchema.addProperty("id", "string", "Element ID to look up", true);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const auto id = _params.get("id").getString().toStdString();
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto* editor = getEditor(_processor);
-					if (!editor)
-						throw std::runtime_error("Plugin editor is not open");
-
-					auto* rmlComp = editor->getRmlComponent();
+					auto* rmlComp = _getComponent ? _getComponent() : nullptr;
 					if (!rmlComp)
-						throw std::runtime_error("RmlUI component not available");
+						throw std::runtime_error("The window is not open. Open it first.");
 
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*rmlComp);
 
-					auto* doc = editor->getDocument();
+					auto* doc = rmlComp->getDocument();
 					if (!doc)
 						throw std::runtime_error("No RmlUI document loaded");
 
@@ -437,7 +413,7 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addProperty("tag", "string", "Tag name to search for (e.g. 'div', 'button', 'select')", false);
 			tool.inputSchema.addProperty("selector", "string", "CSS selector (e.g. '.menuitem', 'div.active', '#panel > div')", false);
 			tool.inputSchema.addIntProperty("limit", "Maximum number of results (default: 50)", false, 1, 500);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const auto tag = _params.hasProperty("tag") ? _params.get("tag").getString().toStdString() : std::string();
 				const auto selector = _params.hasProperty("selector") ? _params.get("selector").getString().toStdString() : std::string();
@@ -448,17 +424,13 @@ namespace jucePluginEditorLib
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto* editor = getEditor(_processor);
-					if (!editor)
-						throw std::runtime_error("Plugin editor is not open");
-
-					auto* rmlComp = editor->getRmlComponent();
+					auto* rmlComp = _getComponent ? _getComponent() : nullptr;
 					if (!rmlComp)
-						throw std::runtime_error("RmlUI component not available");
+						throw std::runtime_error("The window is not open. Open it first.");
 
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*rmlComp);
 
-					auto* doc = editor->getDocument();
+					auto* doc = rmlComp->getDocument();
 					if (!doc)
 						throw std::runtime_error("No RmlUI document loaded");
 
@@ -557,7 +529,7 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addIntProperty("clickCount", "Number of clicks (default: 1, use 2 for double-click)", false, 1, 3);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
 			tool.inputSchema.addIntProperty("holdMs", "How long to keep the button down between press and release, in milliseconds (default: 80). Needed so emulated firmware that scans a key matrix sees the press; 0 presses and releases back to back.", false, 0, 5000);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const auto id = _params.hasProperty("id") ? _params.get("id").getString().toStdString() : std::string();
 				const auto selector = _params.hasProperty("selector") ? _params.get("selector").getString().toStdString() : std::string();
@@ -581,7 +553,7 @@ namespace jucePluginEditorLib
 				{
 					return runOnMessageThread([&]() -> mcpServer::JsonValue
 					{
-						auto ui = RmlUiAccess::acquire(_processor);
+						auto ui = RmlUiAccess::acquire(_getComponent);
 						juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 						Rml::Element* elem = nullptr;
@@ -628,7 +600,7 @@ namespace jucePluginEditorLib
 				{
 					runOnMessageThread([&]
 					{
-						auto ui = RmlUiAccess::acquire(_processor);
+						auto ui = RmlUiAccess::acquire(_getComponent);
 						juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 						ui.context->ProcessMouseButtonUp(button, mods);
 						ui.rmlComp->enqueueUpdate();
@@ -658,7 +630,7 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addProperty("id", "string", "Element ID", true);
 			tool.inputSchema.addProperty("attribute", "string", "Attribute name", true);
 			tool.inputSchema.addProperty("value", "string", "Attribute value", true);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const auto id = _params.get("id").getString().toStdString();
 				const auto attribute = _params.get("attribute").getString().toStdString();
@@ -666,17 +638,13 @@ namespace jucePluginEditorLib
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto* editor = getEditor(_processor);
-					if (!editor)
-						throw std::runtime_error("Plugin editor is not open");
-
-					auto* rmlComp = editor->getRmlComponent();
+					auto* rmlComp = _getComponent ? _getComponent() : nullptr;
 					if (!rmlComp)
-						throw std::runtime_error("RmlUI component not available");
+						throw std::runtime_error("The window is not open. Open it first.");
 
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*rmlComp);
 
-					auto* doc = editor->getDocument();
+					auto* doc = rmlComp->getDocument();
 					if (!doc)
 						throw std::runtime_error("No RmlUI document loaded");
 
@@ -703,13 +671,13 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addIntProperty("x", "X coordinate in document space", false);
 			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", false);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int mods = parseModifiers(_params);
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 					int x, y;
@@ -751,14 +719,14 @@ namespace jucePluginEditorLib
 			tool.description = "Hit-test: find the topmost element at a given point in document space. Returns the element's tag, id, classes, attributes, and its ancestor chain up to the document root.";
 			tool.inputSchema.addIntProperty("x", "X coordinate in document space", true);
 			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", true);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int x = _params.get("x").getInt();
 				const int y = _params.get("y").getInt();
 
 				return runOnMessageThread([&, x, y]() -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 					auto* elem = ui.context->GetElementAtPoint(Rml::Vector2f(static_cast<float>(x), static_cast<float>(y)));
@@ -813,7 +781,7 @@ namespace jucePluginEditorLib
 			mcpServer::ToolDef tool;
 			tool.name = "screenshot";
 			tool.description = "Capture a screenshot of the plugin editor UI. Saves as PNG to a temp file and returns the path. Use the Read tool to view the image.";
-			tool.handler = [&_processor](const mcpServer::JsonValue&) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue&) -> mcpServer::JsonValue
 			{
 				const auto tempDir = juce::File::getSpecialLocation(juce::File::SpecialLocationType::tempDirectory);
 				const auto file = tempDir.getChildFile("gearmulator_screenshot.png");
@@ -821,9 +789,9 @@ namespace jucePluginEditorLib
 				auto done = std::make_shared<std::atomic<bool>>(false);
 				auto success = std::make_shared<std::atomic<bool>>(false);
 
-				juce::MessageManager::callAsync([&_processor, path, done, success]()
+				juce::MessageManager::callAsync([_getComponent, path, done, success]()
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 					if(!ui.rmlComp)
 					{
 						*done = true;
@@ -870,7 +838,7 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addProperty("button", "string", "Mouse button: 'left' (default), 'right', or 'middle'", false);
 			tool.inputSchema.addIntProperty("clickCount", "Number of clicks (default: 1, use 2 for double-click)", false, 1, 3);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int x = _params.get("x").getInt();
 				const int y = _params.get("y").getInt();
@@ -880,7 +848,7 @@ namespace jucePluginEditorLib
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 					ui.context->ProcessMouseMove(x, y, mods);
@@ -917,7 +885,7 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
 			tool.inputSchema.addProperty("press", "boolean", "Press the button at the start (default: true). False continues a drag an earlier call left held", false);
 			tool.inputSchema.addProperty("release", "boolean", "Release the button at the end (default: true). False keeps it held, to look at the page during the drag", false);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int button = parseMouseButton(_params);
 				const int mods = parseModifiers(_params);
@@ -927,7 +895,7 @@ namespace jucePluginEditorLib
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 					int fromX, fromY, toX, toY;
@@ -1006,7 +974,7 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addIntProperty("index", "Which match of 'selector' (default: 0)", false, 0);
 			tool.inputSchema.addIntProperty("x", "X coordinate in document space", false);
 			tool.inputSchema.addIntProperty("y", "Y coordinate in document space", false);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				juce::StringArray files;
 				const auto list = _params.get("files");
@@ -1018,7 +986,7 @@ namespace jucePluginEditorLib
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 
 					auto result = mcpServer::JsonValue::object();
 
@@ -1105,7 +1073,7 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addProperty("deltaX", "number", "Horizontal scroll delta (default: 0)", false);
 			tool.inputSchema.addProperty("deltaY", "number", "Vertical scroll delta (default: 0)", false);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const int mods = parseModifiers(_params);
 				const auto deltaX = _params.hasProperty("deltaX") ? static_cast<float>(_params.get("deltaX").getDouble()) : 0.0f;
@@ -1113,7 +1081,7 @@ namespace jucePluginEditorLib
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 					int x, y;
@@ -1157,7 +1125,7 @@ namespace jucePluginEditorLib
 			tool.inputSchema.addProperty("key", "string", "Key name (e.g. 'space', 'return', 'a', 'f1', 'up')", true);
 			tool.inputSchema.addEnumProperty("action", "Key action (default: 'press' = down+up)", {"press", "down", "up"}, false);
 			tool.inputSchema.addProperty("modifiers", "object", "Modifier keys: {ctrl, shift, alt, meta} as booleans", false);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const auto keyName = _params.get("key").getString().toStdString();
 				const auto action = _params.hasProperty("action") ? _params.get("action").getString().toStdString() : std::string("press");
@@ -1169,7 +1137,7 @@ namespace jucePluginEditorLib
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 					if (action == "down" || action == "press")
@@ -1194,13 +1162,13 @@ namespace jucePluginEditorLib
 			tool.name = "send_text";
 			tool.description = "Inject text input into the focused element, character by character. Use this for typing into text fields and inputs.";
 			tool.inputSchema.addProperty("text", "string", "Text to inject", true);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
+			tool.handler = [_getComponent](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
 			{
 				const auto text = _params.get("text").getString().toStdString();
 
 				return runOnMessageThread([&]() -> mcpServer::JsonValue
 				{
-					auto ui = RmlUiAccess::acquire(_processor);
+					auto ui = RmlUiAccess::acquire(_getComponent);
 					juceRmlUi::RmlInterfaces::ScopedAccess access(*ui.rmlComp);
 
 					ui.context->ProcessTextInput(text);
@@ -1215,106 +1183,5 @@ namespace jucePluginEditorLib
 			_server.registerTool(std::move(tool));
 		}
 
-		// get_gui_scale
-		{
-			mcpServer::ToolDef tool;
-			tool.name = "get_gui_scale";
-			tool.description = "Get the editor GUI scale as a percentage (100 = the skin's native size) plus the current "
-				"rendered editor size in pixels. Pair with set_gui_scale to check how the skin's automatic layout reflows.";
-			tool.handler = [&_processor](const mcpServer::JsonValue&) -> mcpServer::JsonValue
-			{
-				return runOnMessageThread([&]() -> mcpServer::JsonValue
-				{
-					const int scale = juce::roundToInt(_processor.getConfig().getDoubleValue("scale", 100));
-
-					auto result = mcpServer::JsonValue::object();
-					result.set("scale", mcpServer::JsonValue::fromInt(scale));
-
-					if (auto* editor = getEditor(_processor))
-					{
-						if (auto* rmlComp = editor->getRmlComponent())
-						{
-							result.set("width", mcpServer::JsonValue::fromInt(rmlComp->getWidth()));
-							result.set("height", mcpServer::JsonValue::fromInt(rmlComp->getHeight()));
-						}
-					}
-					return result;
-				});
-			};
-			_server.registerTool(std::move(tool));
-		}
-
-		// set_gui_scale
-		{
-			mcpServer::ToolDef tool;
-			tool.name = "set_gui_scale";
-			tool.description = "Set the editor GUI scale as a percentage (e.g. 100, 150, 200). Resizes the editor live and "
-				"persists the choice to the plugin config. Handy for checking how the skin reflows/wraps at different sizes.";
-			tool.inputSchema.addIntProperty("scale", "Scale percentage (25-400)", true, 25, 400);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
-			{
-				const int scale = _params.get("scale").getInt();
-
-				return runOnMessageThread([&]() -> mcpServer::JsonValue
-				{
-					auto* editorState = _processor.getEditorState();
-					if (!editorState)
-						throw std::runtime_error("Editor state not available");
-
-					_processor.getConfig().setValue("scale", juce::var(scale));
-					if (editorState->evSetGuiScale)
-						editorState->evSetGuiScale(scale);
-
-					auto result = mcpServer::JsonValue::object();
-					result.set("success", mcpServer::JsonValue::fromBool(true));
-					result.set("scale", mcpServer::JsonValue::fromInt(scale));
-
-					if (auto* editor = editorState->getEditor())
-					{
-						if (auto* rmlComp = editor->getRmlComponent())
-						{
-							result.set("width", mcpServer::JsonValue::fromInt(rmlComp->getWidth()));
-							result.set("height", mcpServer::JsonValue::fromInt(rmlComp->getHeight()));
-						}
-					}
-					return result;
-				});
-			};
-			_server.registerTool(std::move(tool));
-		}
-
-		// resize_editor
-		{
-			mcpServer::ToolDef tool;
-			tool.name = "resize_editor";
-			tool.description = "Resize the plugin editor window the way a host does when the user drags its border: the "
-				"requested size goes through the editor's size constraints (aspect ratio, minimum, maximum) first. Returns "
-				"the size the editor ended up with.";
-			tool.inputSchema.addIntProperty("width", "Requested width in pixels", true, 1, 16384);
-			tool.inputSchema.addIntProperty("height", "Requested height in pixels", true, 1, 16384);
-			tool.handler = [&_processor](const mcpServer::JsonValue& _params) -> mcpServer::JsonValue
-			{
-				const int width = _params.get("width").getInt();
-				const int height = _params.get("height").getInt();
-
-				return runOnMessageThread([&]() -> mcpServer::JsonValue
-				{
-					auto* window = _processor.getActiveEditor();
-					if (!window)
-						throw std::runtime_error("The editor is not open");
-
-					juce::Rectangle<int> bounds(window->getX(), window->getY(), width, height);
-					if (auto* constrainer = window->getConstrainer())
-						constrainer->checkBounds(bounds, window->getBounds(), {}, false, false, true, true);
-					window->setSize(bounds.getWidth(), bounds.getHeight());
-
-					auto result = mcpServer::JsonValue::object();
-					result.set("width", mcpServer::JsonValue::fromInt(window->getWidth()));
-					result.set("height", mcpServer::JsonValue::fromInt(window->getHeight()));
-					return result;
-				});
-			};
-			_server.registerTool(std::move(tool));
-		}
 	}
 }

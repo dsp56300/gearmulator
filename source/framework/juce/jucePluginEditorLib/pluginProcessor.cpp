@@ -1,5 +1,6 @@
 #include "pluginProcessor.h"
 
+#include "pluginEditor.h"
 #include "pluginEditorState.h"
 #include "pluginEditorWindow.h"
 
@@ -7,14 +8,13 @@
 
 #include "baseLib/binarystream.h"
 
-#include "synthLib/os.h"
-
 #include "juceUiLib/messageBox.h"
 
 #include <cstring>
 
-#include "mcpServerLib/mcpPluginServer.h"
-#include "mcpDomTools.h"
+#include "mcpPluginServer.h"
+#include "mcpEditorTools.h"
+#include "mcpServerLib/mcpDomTools.h"
 #include "mcpPatchManagerTools.h"
 #include "networkLib/logging.h"
 
@@ -35,25 +35,6 @@ namespace jucePluginEditorLib
 		}
 #endif
 
-		std::string getPluginFormatName(const juce::AudioProcessor::WrapperType _wrapperType, const std::string& _moduleFilePath)
-		{
-			switch (_wrapperType)
-			{
-			case juce::AudioProcessor::wrapperType_VST:         return "vst2";
-			case juce::AudioProcessor::wrapperType_VST3:        return "vst3";
-			case juce::AudioProcessor::wrapperType_AudioUnit:   return "au";
-			case juce::AudioProcessor::wrapperType_AudioUnitv3: return "auv3";
-			case juce::AudioProcessor::wrapperType_LV2:         return "lv2";
-			case juce::AudioProcessor::wrapperType_Standalone:  return "standalone";
-			case juce::AudioProcessor::wrapperType_AAX:         return "aax";
-			case juce::AudioProcessor::wrapperType_Undefined:
-			default:
-				// CLAP reports as wrapperType_Undefined, detect from module file path
-				if (_moduleFilePath.find(".clap") != std::string::npos)
-					return "clap";
-				return {};
-			}
-		}
 	}
 
 	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties)
@@ -64,7 +45,14 @@ namespace jucePluginEditorLib
 #ifdef ZYNTHIAN
 		Logging::setLogFunc(&noLoggingFunc);
 #endif
-		savePluginLoadPath();
+		// The path each format was loaded from used to be written into the config for the plugin
+		// manager to read, which it never did - it looks on disk instead. A key left behind would
+		// only get staler, so it is swept out when one is found.
+		for (const auto& key : m_config.getAllProperties().getAllKeys())
+		{
+			if (key.startsWith("pluginPath_"))
+				m_config.removeValue(key);
+		}
 
 		loadGlobalSkinVariables();
 
@@ -320,21 +308,6 @@ namespace jucePluginEditorLib
 		cr.read();
 	}
 
-	void Processor::savePluginLoadPath()
-	{
-		const auto moduleFilePath = synthLib::getModuleFilePath();
-		if (moduleFilePath.empty())
-			return;
-
-		const auto format = getPluginFormatName(wrapperType, moduleFilePath);
-		if (format.empty())
-			return;
-
-		const auto key = "pluginPath_" + format;
-		getConfig().setValue(juce::String(key), juce::String(moduleFilePath));
-		getConfig().saveIfNeeded();
-	}
-
 	juce::File Processor::initConfigFile(const juce::PropertiesFile::Options& _o) const
 	{
 		juce::File newFile(getConfigFile(false));
@@ -366,7 +339,15 @@ namespace jucePluginEditorLib
 		try
 		{
 			m_mcpServer = std::make_unique<mcpServer::McpPluginServer>(*this);
-			registerDomTools(m_mcpServer->getServer(), *this);
+			// The DOM tools work on whatever component holds the document, which here is the editor -
+			// and it may be closed and opened again while the server keeps running.
+			mcpServer::registerDomTools(m_mcpServer->getServer(), [this]() -> juceRmlUi::RmlComponent*
+			{
+				auto* editorState = getEditorState();
+				auto* editor = editorState ? editorState->getEditor() : nullptr;
+				return editor ? editor->getRmlComponent() : nullptr;
+			});
+			registerEditorTools(m_mcpServer->getServer(), *this);
 			registerPatchManagerTools(m_mcpServer->getServer(), *this);
 			if (m_mcpServer->start())
 			{

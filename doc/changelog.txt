@@ -20,6 +20,38 @@ JE8086:
         missing out of the device menu. Off by default. Every board stays
         listed while no ROM set is complete at all.
 
+Plugin Manager:
+
+- [Fix] Installing a download that holds nothing to install, as the Standalone
+        builds did, said it worked while nothing was installed. It fails and says
+        so now.
+
+- [Fix] A long run of installs no longer fails halfway when the server asks it to
+        slow down. It waits as long as the server says, or up to two minutes, and
+        carries on. A download that stops half way is tried once more.
+
+- [Imp] Fewer requests to the server on every refresh and every install.
+
+- [Fix] Donator builds come from a new server,
+        builds.theusualsuspects.io. The old one stopped answering after a long run of
+        downloads, so a run of installs failed halfway. Links to donator folders from
+        older download posts still work when pasted as a login.
+
+- [Imp] EMU-248 Nothing is ticked on a first start, so a first "Install selected"
+        no longer installs every format of every product. What you tick is still
+        remembered. "Upgrade all" upgrades everything installed that has an
+        update, ticked or not.
+
+- [Fix] EMU-249 The window opens inside the part of the screen the taskbar leaves
+        free, instead of reaching behind it on smaller screens.
+
+- [New] EMU-250 Products with an update are listed first, under "Updates
+        available", and go back to their category once they are upgraded.
+
+- [Imp] EMU-251 The button that updates the Plugin Manager itself says that it is
+        the Plugin Manager, and says when what is on offer is a newer build of the
+        same version.
+
 2.2.26:
 
 Framework:
@@ -559,6 +591,98 @@ JE8086:
         the device loads. Card slot A takes the same PCM cards as the
         CM-32P. Writing to the disk, the metronome, the tape sync and the
         analog output stage are not emulated yet.
+
+Plugin Manager:
+
+- [New] A program that installs and updates the plugins for you, so that keeping
+        them current no longer means downloading archives and unpacking them into
+        the right folders by hand. It lists every product with a column per plugin
+        format, showing which version is installed and offering every version you
+        could have instead - one format at a time, a whole product at once, or
+        everything on the page. The effect builds come with the plugin they belong
+        to when you ask for them.
+
+- [New] Plugins that are already installed are found where they are, not only in the
+        folder this program would put them in: the places each format is normally
+        kept are searched too, which on macOS is the system Library and on Linux
+        the /usr tree. A first start offers an upgrade of the build you have rather
+        than a download of the one you are already running, and that upgrade
+        replaces the copy it found instead of leaving a second one behind in
+        another folder a host scans.
+
+- [Fix] A plugin unpacked by hand in a format that does not say its version, such
+        as a CLAP on Windows, was only ever offered a reinstall. It is offered an
+        upgrade now when its file is clearly older than the build on offer.
+
+- [Fix] A Plugin Manager unpacked by hand, which the first install always is, was
+        never offered a newer build of its own version. It is now when its file is
+        clearly older than that build.
+
+- [Fix] Installing a plugin whose own name ends in FX left an empty folder in
+        Documents/The Usual Suspects, named after the rest of its name. Only an
+        effect build of a plugin shares that plugin's folder now.
+
+- [Fix] macOS: installing over a plugin that was already there could stop the host
+        from loading it at all - in Logic the plugin simply disappeared from the list.
+        A plugin on macOS is a sealed bundle, and the update was leaving a file in it
+        that the signature does not cover, which is enough for the system to refuse
+        the whole plugin. The bundle is now put in place exactly as it was built, and
+        a ROM you had kept inside it is moved to the product's roms folder in
+        Documents, where the plugin looks for it anyway.
+
+- [Fix] Plugins kept in a folder of their own inside the plugin folder - a
+        VST3\The Usual Suspects\ and the like - are found now. They read as not
+        installed before, so every one of them was offered as a download, and an
+        install put a second copy in the folder above. The search goes all the way
+        down, and an upgrade lands on the copy it found.
+
+- [Fix] The stored logins are no longer sitting in the settings file for anyone to read.
+        The file was written with the usual permissions, which on macOS and Linux means
+        every account on the machine could read it, and the passwords were in it as
+        typed. It is now readable by you alone and the passwords are scrambled in it.
+        A file from an older version is read as it is and tidied up the next time a
+        login is saved, so nothing has to be entered again.
+
+- [Fix] The window no longer stops responding for a minute or more after it opens.
+        Finding out which version of an installed LV2 plugin is on disk read a
+        file of up to 17 MB one byte at a time, for every plugin, on the thread
+        that draws the window. It now opens straight away.
+
+- [Fix] A donator folder can be given as the link from the download post, not only
+        as its name. Pasting the link used to build a web address that could not
+        work, so the login was refused.
+
+- [Fix] tuspm: adding a donator login with "tuspm login donators" also stored it as
+        the team login, replacing the one that was there.
+
+- [Fix] Removing plugins from a folder that needs administrator rights asks for them
+        once. It used to ask for every file it removed - the plugin and the changelog
+        beside it, in every format, for the plugin and for its effect build.
+
+- [Fix] Declining the administrator prompt during an update no longer counts as an
+        update that worked. The new version was written down as installed while the
+        old one was still on disk, so the update was never offered again.
+
+- [New] A donator login adds the builds for the products you support to the list.
+
+- [New] tuspm, the same program without a window, for a script or a build machine.
+
+- [New] EMU-153 BUG-10468 The changelog of every product is in the Plugin Manager:
+        Changelog on a product's page lists every released version, and for the one
+        picked shows what changed in the product apart from what changed for every
+        product. A version can be copied as text or as Markdown, and
+        "tuspm changelog" writes it to a file. Donator builds bring the changelog of
+        their own build, so it is there before it is public.
+
+- [New] A product can bring files besides its plugins - presets, skins and the like -
+        which are put into its folder in Documents when it is installed. A file that
+        is there already is only replaced when a newer one is published, so changes
+        made to it are kept.
+
+- [New] A product you have no use for can be taken out of the list: right-click it
+        and choose Hide. Right-click anywhere in the list to bring back everything
+        that is hidden. How many are is written next to the number of plugins, so a
+        short list never looks like a list with something missing from it.
 
 2.2.25:
 

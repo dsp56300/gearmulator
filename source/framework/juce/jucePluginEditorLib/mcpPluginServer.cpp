@@ -1,6 +1,6 @@
 #include "mcpPluginServer.h"
 
-#include "discoveryFile.h"
+#include "mcpServerLib/discoveryFile.h"
 
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/parameter.h"
@@ -74,24 +74,8 @@ namespace mcpServer
 		if (!m_server.start())
 			return false;
 
-		// Register in discovery file
 		const auto& props = m_processor.getProperties();
-		DiscoveryEntry entry;
-		entry.pluginName = props.name;
-		entry.plugin4CC = props.plugin4CC;
-		entry.port = m_server.getPort();
-		entry.pid = static_cast<int>(
-#ifdef _WIN32
-			GetCurrentProcessId()
-#else
-			getpid()
-#endif
-		);
-		// Set by the client for every process it spawns, so the plugin's host inherits it. Lets a client
-		// pick its own instance out of the discovery file instead of guessing a port. See scripts/mcpBridge.py
-		if (const auto* sessionId = std::getenv("CLAUDE_CODE_SESSION_ID"))
-			entry.sessionId = sessionId;
-		DiscoveryFile::registerInstance(entry);
+		DiscoveryFile::registerThisProcess(props.name, props.plugin4CC, m_server);
 
 		return true;
 	}
