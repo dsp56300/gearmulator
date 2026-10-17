@@ -59,10 +59,14 @@ struct Insn {
       // The 64-bit accumulator clamped to 48 bits, two's complement: MACH
       // keeps the sign extension (H'FFFF8000 / H'00007FFF).
       const s64 acc = s64((u64(r.mach) << 32) | r.macl);
-      s64 sum;
       constexpr s64 kMax = (s64(1) << 47) - 1, kMin = -(s64(1) << 47);
-      if (__builtin_add_overflow(acc, product, &sum)) sum = acc < 0 ? kMin : kMax;
-      else sum = std::min(std::max(sum, kMin), kMax);
+      // unsigned arithmetic wraps by definition, so the sum is formed there and the
+      // signed overflow is read off the sign bits: both operands disagreeing with
+      // the result means the add carried out of the signed range
+      const s64 wrapped = s64(u64(acc) + u64(product));
+      s64 sum;
+      if (((acc ^ wrapped) & (product ^ wrapped)) < 0) sum = acc < 0 ? kMin : kMax;
+      else sum = std::min(std::max(wrapped, kMin), kMax);
       r.mach = u32(u64(sum) >> 32);
       r.macl = u32(sum);
     }
@@ -242,8 +246,19 @@ struct Insn {
       r[n] = u32(ans);
     }
 
+    // MSVC counts every else-if of a chain as another nested block and gives up at
+    // 128 of them (C1061), so the chain continues in a second function.
+    else execLogicAndControl<O>(cpu, n, m, uimm);
+  }
+
+  // The second half of exec()'s chain: logic, shifts and the system control moves.
+  template <Op O>
+  static void execLogicAndControl(Cpu& cpu, unsigned n, unsigned m, u32 uimm) {
+    u32* const r = cpu.regs_.r;
+    u32& sr = cpu.regs_.sr;
+
     // ---- logic ----------------------------------------------------------------
-    else if constexpr (O == Op::And) r[n] &= r[m];
+    if constexpr (O == Op::And) r[n] &= r[m];
     else if constexpr (O == Op::AndI) r[0] &= uimm;
     else if constexpr (O == Op::AndB) { const u32 a = cpu.regs_.gbr + r[0]; cpu.write8(a, cpu.read8(a) & uimm); }
     else if constexpr (O == Op::Not) r[n] = ~r[m];
