@@ -99,6 +99,7 @@ namespace juceRmlUi
 		sss.RegisterProperty("stroke-width", "2dp", false).AddParser("length");
 		sss.RegisterProperty("stroke-outline-width", "0dp", false).AddParser("length");
 		sss.RegisterProperty("stroke-outline-color", "#000000", false).AddParser("color");
+		sss.RegisterProperty("stroke-image", "", false).AddParser("string");
 
 		registerInstancers(*m_coreInstance.factory);
 	}

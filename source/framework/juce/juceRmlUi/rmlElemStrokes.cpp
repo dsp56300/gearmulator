@@ -16,7 +16,8 @@ namespace juceRmlUi
 		constexpr float g_feather = 1.0f;
 
 		// One strip along the points, _width wide without the soft edges. Four vertices per point: the soft edge, the
-		// line, the line, the soft edge
+		// line, the line, the soft edge. A texture lies across it, its top along the side to the left of the way the line
+		// goes, its bottom along the other
 		void addStrip(Rml::Mesh& _mesh, const ElemStrokes::Points& _points, const float _scale, const float _width, const Rml::Colourb _colour, const float _opacity)
 		{
 			if(_points.size() < 2 || _width <= 0.0f)
@@ -46,10 +47,10 @@ namespace juceRmlUi
 
 				const auto p = _points[i] * _scale;
 
-				_mesh.vertices.push_back({p + n * (half + g_feather), clear, {}});
-				_mesh.vertices.push_back({p + n * half, solid, {}});
-				_mesh.vertices.push_back({p - n * half, solid, {}});
-				_mesh.vertices.push_back({p - n * (half + g_feather), clear, {}});
+				_mesh.vertices.push_back({p + n * (half + g_feather), clear, {0.5f, 0.0f}});
+				_mesh.vertices.push_back({p + n * half, solid, {0.5f, 0.0f}});
+				_mesh.vertices.push_back({p - n * half, solid, {0.5f, 1.0f}});
+				_mesh.vertices.push_back({p - n * (half + g_feather), clear, {0.5f, 1.0f}});
 			}
 
 			for(size_t i=0; i+1<_points.size(); ++i)
@@ -85,7 +86,7 @@ namespace juceRmlUi
 		if(m_dirty)
 			generateGeometry();
 
-		m_geometry.Render(GetAbsoluteOffset(Rml::BoxArea::Border));
+		m_geometry.Render(GetAbsoluteOffset(Rml::BoxArea::Border), m_texture);
 	}
 
 	void ElemStrokes::OnPropertyChange(const Rml::PropertyIdSet& _changedProperties)
@@ -125,6 +126,15 @@ namespace juceRmlUi
 		const auto& computed = GetComputedValues();
 		const auto colour = computed.color();
 		const auto opacity = computed.opacity();
+
+		// relative to the style sheet that names it, as an image decorator
+		const auto* imageProperty = GetProperty("stroke-image");
+		const auto image = imageProperty ? imageProperty->Get<Rml::String>(GetCoreInstance()) : Rml::String();
+		if(image != m_textureSource)
+		{
+			m_textureSource = image;
+			m_texture = image.empty() ? Rml::Texture() : rm->LoadTexture(image, imageProperty->source ? imageProperty->source->path : Rml::String());
+		}
 
 		const auto* outlineProperty = GetProperty("stroke-outline-color");
 		const auto outlineColour = outlineProperty ? outlineProperty->Get<Rml::Colourb>(GetCoreInstance()) : Rml::Colourb(0, 0, 0, 255);

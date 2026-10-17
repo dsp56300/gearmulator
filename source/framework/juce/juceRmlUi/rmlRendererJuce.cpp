@@ -1075,7 +1075,7 @@ namespace juceRmlUi
 
 	void RendererJuce::RenderGeometry(Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture)
 	{
-		if (!m_renderTarget)
+		if (!m_renderTarget || (m_clipMaskEnabled && m_clipMaskInverse))
 			return;
 
 		auto* p = reinterpret_cast<Geometry*>(_geometry);
@@ -1185,20 +1185,26 @@ namespace juceRmlUi
 			}
 		}
 
-		// Render triangles (only solid color for now, no texture support)
+		// Render triangles in one colour, that of their first vertex. A textured one takes it times the texel at its centre,
+		// a texture across a strokes element's line shades it
 		for (const auto& tri : p->triangles)
 		{
-			if (img)
-				continue; // Skip textured triangles for now
-
 			// Apply translation to triangle vertices
 			const auto p0 = Rml::Vector2i(roundToInt(tri.p[0].x + _translation.x), roundToInt(tri.p[0].y + _translation.y));
 			const auto p1 = Rml::Vector2i(roundToInt(tri.p[1].x + _translation.x), roundToInt(tri.p[1].y + _translation.y));
 			const auto p2 = Rml::Vector2i(roundToInt(tri.p[2].x + _translation.x), roundToInt(tri.p[2].y + _translation.y));
 
-			// Use first vertex color
 			const auto& color = tri.color[0];
-			const Colorb col { color.red, color.green, color.blue, color.alpha };
+			Colorb col { color.red, color.green, color.blue, color.alpha };
+
+			if (img)
+			{
+				const auto uv = (tri.uv[0] + tri.uv[1] + tri.uv[2]) / 3.0f;
+				const auto x = std::clamp(static_cast<int>(uv.x * static_cast<float>(img->width)), 0, img->width - 1);
+				const auto y = std::clamp(static_cast<int>(uv.y * static_cast<float>(img->height)), 0, img->height - 1);
+				const auto& t = *img->getColorPointer(static_cast<size_t>(x), static_cast<size_t>(y));
+				col = { static_cast<uint8_t>(col.r * t.r / 255), static_cast<uint8_t>(col.g * t.g / 255), static_cast<uint8_t>(col.b * t.b / 255), static_cast<uint8_t>(col.a * t.a / 255) };
+			}
 
 			// Render the triangle
 			if (col.a < 255)
@@ -1443,6 +1449,20 @@ namespace juceRmlUi
 			const Rml::Rectanglei rtBounds = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0, 0), Rml::Vector2i(m_renderTarget->width, m_renderTarget->height));
 			m_scissorRegion = m_scissorRegion.Intersect(rtBounds);
 		}
+	}
+
+	// There is no mask buffer. What a mask keeps inside a shape (the rounded corners of overflow: hidden) is drawn
+	// unclipped, what it keeps outside of one is not drawn at all: that is a box shadow, unclipped it would cover the
+	// element that casts it
+	void RendererJuce::EnableClipMask(const bool _enable)
+	{
+		m_clipMaskEnabled = _enable;
+	}
+
+	void RendererJuce::RenderToClipMask(const Rml::ClipMaskOperation _operation, Rml::CompiledGeometryHandle, Rml::Vector2f)
+	{
+		if (_operation != Rml::ClipMaskOperation::Intersect)
+			m_clipMaskInverse = _operation == Rml::ClipMaskOperation::SetInverse;
 	}
 
 	void RendererJuce::SetTransform(const Rml::Matrix4f* transform)
