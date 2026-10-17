@@ -64,26 +64,34 @@ class CellPages {
   }
   // Drop cells covering [addr, addr+len); `back` is the number of granules an
   // instruction may start before `addr` and still extend into the range.
+  // The arithmetic is 64-bit: a range in the top page of a 32-bit space ends
+  // at the end of the address space, not at 0.
   void invalidate_range(u32 addr, u32 len, u32 back) {
     // Instructions starting in the previous page may extend into the range.
-    if (back && index_in_page(addr) < back && addr >= back) invalidate_range(addr - back, back, 0);
-    const u32 end = addr + len;
-    u32 a = addr;
-    while (a < end) {
-      const u32 pb = page_base(a);
+    const u32 back_bytes = back << GranuleShift;
+    if (back && index_in_page(addr) < back && addr >= back_bytes) invalidate_range(addr - back_bytes, back_bytes, 0);
+    const u64 end = u64(addr) + len;
+    for (u64 a = addr; a < end;) {
+      const u32 pb = page_base(u32(a));
       Cell* cells = pages_[a >> PageShift].get();
-      const u32 chunk = std::min<u32>(end - a, pb + kPageSize - a);
+      const u32 chunk = u32(std::min<u64>(end - a, u64(pb) + kPageSize - a));
       if (cells) {
-        u32 first = index_in_page(a);
+        u32 first = index_in_page(u32(a));
         const u32 count = (chunk + (1u << GranuleShift) - 1) >> GranuleShift;
         const u32 b = std::min<u32>(first, back);
         first -= b;
         std::fill_n(cells + first, std::min<u32>(count + b, kCellsPerPage - first), blank_);
       }
-      a = pb + kPageSize;
+      a = u64(pb) + kPageSize;
     }
   }
   const Cell& blank() const { return blank_; }
+  // Pages holding cells right now (the banks not in place are not counted).
+  size_t allocated_pages() const {
+    size_t n = 0;
+    for (const auto& p : pages_) n += p ? 1 : 0;
+    return n;
+  }
 
   // Put bank `key` in place in the window [base, base+size) (page-aligned;
   // windows must not overlap).  The first call for a window adopts the cells

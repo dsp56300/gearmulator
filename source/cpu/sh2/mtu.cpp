@@ -254,11 +254,50 @@ void Mtu::step_external(unsigned c, bool up, u64 at) {
   if (transition(c, up, false, at) && synced(c)) propagate_sync_clear(c, at);
 }
 
+// A channel that counts up to its own compare-match clear and does nothing
+// else on the way - no output, no A/D trigger, no buffer transfer, no
+// synchronous clear, no cascade - is in the same state every TGR + 1 ticks:
+// a period only sets flags, and the second one sets nothing new.  Replaying
+// such periods one by one is what made a firmware's 10-tick free-running
+// timer cost millions of transitions per second, so the whole periods before
+// `now` (or before the first special somebody can observe, whichever comes
+// first) are skipped here: the tick moves on, the count stays, and the flags
+// the first period would have set are set.
+void Mtu::fast_forward(unsigned c, u64 now) {
+  if (!internal_clock(c) || synced(c) || mode(c) != kModeNormal) return;
+  if (c == 2 && cascaded(1) && running(1)) return;
+  const int cs = clear_source(c);
+  if (cs < 0 || !is_compare(c, unsigned(cs))) return;
+  Channel& ch = ch_[c];
+  const u16 top = ch.tgr[cs];
+  if (ch.tcnt > top || (ch.tmdr & (kBfa | kBfb))) return;
+  // Every compare register at or below the clear value matches once a period.
+  u8 flags = 0;
+  for (unsigned x = 0; x < ntgr(c); ++x) {
+    if (!is_compare(c, x) || ch.tgr[x] > top) continue;
+    if (io(c, x) & 3) return;                              // an output moves
+    if (x == 0 && (ch.tier & kTtge) && adc_sink_) return;  // the A/D converter is triggered
+    flags |= u8(1u << x);
+  }
+  const u64 limit = std::min(now, next_interesting_time(c));
+  const u64 end = tick_of(c, limit);
+  if (end <= ch.tick) return;
+  // Periods whose specials all fall before `end`: the special that ends
+  // period j is at most tick + (j + 1) * period.
+  const u64 period = u64(top) + 1;
+  const u64 periods = (end - ch.tick - 1) / period;
+  if (!periods) return;
+  ch.tick += periods * period;
+  ch.tsr |= flags;
+  ch.up = true;
+}
+
 // Bring every channel up to date with time `now`, replaying the specials of
 // all channels in time order so that cross-channel effects (synchronous
 // clear, cascade) land on counters that are exactly at the right state.
 void Mtu::sync(u64 now) {
   if (now <= now_) return;
+  for (unsigned c = 0; c < channels_; ++c) fast_forward(c, now);
   for (;;) {
     u64 next[kMaxChannels];
     u64 t = kNever;
