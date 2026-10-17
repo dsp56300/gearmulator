@@ -34,6 +34,9 @@ namespace synthLib
 		uint32_t process(AudioBuffer& _output, size_t _outputOffset, uint32_t _numChannels, uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc)
 		{
 			TAudioOutputs buffers;
+			// the resampler writes _numSamples from _outputOffset on, and prewarming asks for more
+			// than the caller sized the buffer for: grow it here, where both numbers are known
+			_output.ensureSize(_outputOffset + _numSamples);
 			_output.fillPointers(buffers, _outputOffset);
 			return process(buffers, _numChannels, _numSamples, _allowLessOutput, _processFunc);
 		}
