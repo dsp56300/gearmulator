@@ -12,6 +12,14 @@ JE8086:
 - [Fix] MIDI was received and sent at half the speed of the hardware, so dense
         MIDI, a chord or a fast controller movement for example, arrived late.
 
+88emuPlayer:
+
+- [New] Devices: Added support for the SK-88Pro.
+
+- [Imp] Settings: "Hide devices without ROMs" leaves the boards whose ROMs are
+        missing out of the device menu. Off by default. Every board stays
+        listed while no ROM set is complete at all.
+
 2.2.26:
 
 Framework:

@@ -40,8 +40,11 @@ namespace emu88Lib
         {
             if (!namedSpec)
                 return emu88Lib::usedBy(*entry, _device);
-            // Both Pro boards use the same PCM, including custom named chip dumps.
-            const auto isPro = [](RomDevice d) { return d == RomDevice::Sc88Pro || d == RomDevice::VeGsPro; };
+            // The Pro boards use the same PCM, including custom named chip dumps.
+            const auto isPro = [](RomDevice d)
+            {
+                return d == RomDevice::Sc88Pro || d == RomDevice::VeGsPro || d == RomDevice::Sk88Pro;
+            };
             return namedSpec->device == _device ||
                 (namedSpec->slot == RomSlot::Wave && isPro(namedSpec->device) && isPro(_device));
         }
@@ -140,6 +143,7 @@ namespace emu88Lib
 
         // The SC-88Pro board's set. The VE-GS Pro is the same board with its own
         // control ROM and the same waves, so _device picks whose control ROM is read.
+        // For the SK-88Pro the firmware is the image buildSk88ProImage() makes.
         static Sc88ProRomSet findSc88ProRomSet(RomDevice _device = RomDevice::Sc88Pro);
 
         // SC-8850 uses the SH7016's 64 KiB internal ROM, a 1 MiB CS0

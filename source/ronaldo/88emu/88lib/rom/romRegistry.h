@@ -61,6 +61,10 @@ namespace emu88Lib
         // A 16 KiB boot ROM that loads the operating system off the system disk, which is
         // therefore part of the set. Wave ROMs A-C are the CM-32P's three.
         Mv30,
+        // The SK-88Pro keyboard: the SC-88Pro engine with its program split over an EPROM
+        // (Program) and an undumped parameter mask ROM, whose contents the SC-88Pro control
+        // ROM carries at the same addresses (Control). Wave ROMs are the SC-88Pro's.
+        Sk88Pro,
 
         Count
     };
@@ -139,6 +143,8 @@ namespace emu88Lib
         {RomDevice::Sc88Pro, RomSlot::Wave, 1, 5, 0x800000, 0x400000, false},
         {RomDevice::VeGsPro, RomSlot::Wave, 0, 3, 0x800000, 0x400000, false},
         {RomDevice::VeGsPro, RomSlot::Wave, 1, 5, 0x800000, 0x400000, false},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 0, 3, 0x800000, 0x400000, false},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 1, 5, 0x800000, 0x400000, false},
     };
 
     // The composite this index is the whole image of, if any.
@@ -267,6 +273,16 @@ namespace emu88Lib
         {RomDevice::VeGsPro, RomSlot::Wave, 0, 0x800000, "vegspro_wave0.bin", false},
         {RomDevice::VeGsPro, RomSlot::Wave, 1, 0x800000, "vegspro_wave1.bin", false},
         {RomDevice::VeGsPro, RomSlot::Wave, 2, 0x400000, "vegspro_wave2.bin", false},
+        // The SK-88Pro takes the SC-88Pro's control and wave images under their names.
+        {RomDevice::Sk88Pro, RomSlot::Program, 0, 0x80000, "sk88pro_program.bin", true},
+        {RomDevice::Sk88Pro, RomSlot::Control, 0, 0x100000, "sc88pro_control.bin", true},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 0, 0x800000, "sc88pro_wave0.bin", false},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 1, 0x800000, "sc88pro_wave1.bin", false},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 2, 0x400000, "sc88pro_wave2.bin", false},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 3, 0x400000, "sc88pro_wave_cs0.bin", false},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 4, 0x400000, "sc88pro_wave_cs1.bin", false},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 5, 0x400000, "sc88pro_wave_cs2.bin", false},
+        {RomDevice::Sk88Pro, RomSlot::Wave, 6, 0x400000, "sc88pro_wave_cs3.bin", false},
         {RomDevice::Sc8850, RomSlot::Internal, 0, 0x10000, "sc8850_internal.bin", false},
         {RomDevice::Sc8850, RomSlot::Program, 0, 0x100000, "sc8850_program.bin", false},
         {RomDevice::Sc8850, RomSlot::Data, 0, 0x200000, "sc8850_data.bin", false},
@@ -562,31 +578,32 @@ namespace emu88Lib
         // LCD code and takes MIDI through the sub-MCU.
         //
         // Its three wave ROMs are the VE-GSPro sample set, by part number,
-        // shared with the VE-GS Pro below.
-        {romDevices(RomDevice::Sc88Pro), RomSlot::Control, 0, 0x100000,
+        // shared with the VE-GS Pro below. The 1.02 ROM also stands in for the
+        // SK-88Pro's parameter mask ROM, see there.
+        {romDevices(RomDevice::Sc88Pro, RomDevice::Sk88Pro), RomSlot::Control, 0, 0x100000,
          baseLib::MD5("9d4c2f123b4451d8ee75c3b982760f28"), "1.02", true},
         {romDevices(RomDevice::Sc88Pro), RomSlot::Control, 0, 0x100000,
          baseLib::MD5("784b3ea762b5f96cabdceb33d121d5e4"), "SC-GS A '96", true},
-        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 0, 0x800000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro, RomDevice::Sk88Pro), RomSlot::Wave, 0, 0x800000,
          baseLib::MD5("bd33b20bb5e8f51e436e141f81a75c14"), "R01567167, XP-GS 1.01", false},
-        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 1, 0x800000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro, RomDevice::Sk88Pro), RomSlot::Wave, 1, 0x800000,
          baseLib::MD5("125ea2056dc208f04a141b3dcdffdb1b"), "R01567178, SC-GS 1.00", false},
-        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 2, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro, RomDevice::Sk88Pro), RomSlot::Wave, 2, 0x400000,
          baseLib::MD5("48c3887c9a2a574b907242640fa0a320"), "R01233667, SC-GS 1.00", false},
 
         // The same PCM as the five 4 MiB mask ROMs the SC-88Pro board carries instead, one
         // per XP chip select. CS4 is R01233667 unchanged, so the row above already is it;
         // these four are the halves of the two larger parts, in chip-select order.
-        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 3, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro, RomDevice::Sk88Pro), RomSlot::Wave, 3, 0x400000,
          baseLib::MD5("decc8a499b69e68ee8b121d73410c36b"), "CS0, first half of R01567167, derived reference",
          false},
-        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 4, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro, RomDevice::Sk88Pro), RomSlot::Wave, 4, 0x400000,
          baseLib::MD5("69933f0a2a3f6f4ab53932f40ba63f74"), "CS1, second half of R01567167, derived reference",
          false},
-        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 5, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro, RomDevice::Sk88Pro), RomSlot::Wave, 5, 0x400000,
          baseLib::MD5("bda725bd1cf8c3911f906314ca162bed"), "CS2, first half of R01567178, derived reference",
          false},
-        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro), RomSlot::Wave, 6, 0x400000,
+        {romDevices(RomDevice::Sc88Pro, RomDevice::VeGsPro, RomDevice::Sk88Pro), RomSlot::Wave, 6, 0x400000,
          baseLib::MD5("94e94038993600555b738e8ccc24d8b8"), "CS3, second half of R01567178, derived reference",
          false},
 
@@ -600,6 +617,18 @@ namespace emu88Lib
         // (MD5 24e1d55fc9e1b03c135994e5ea8589fa).
         {romDevices(RomDevice::VeGsPro), RomSlot::Control, 0, 0x100000,
          baseLib::MD5("f836d9491075c28c1c0587d4876cec65"), "R01780078, SC-GS B '97", true},
+
+        // -----------------------------------------------------------------
+        // SK-88Pro
+        // -----------------------------------------------------------------
+        // The keyboard's program EPROM (MBM27C4096, "Ver1.01" '97): the SC-88Pro's
+        // low 128 KiB and its code bank, moved from 0C0000 to 120000, plus the
+        // keyboard's own code and tables. The tone and drum parameters at
+        // 020000-0BFFFF live in a separate mask ROM that has not been dumped;
+        // the SC-88Pro 1.02 control ROM supplies them (every tone and kit plays
+        // as on the SC-88Pro). Dumped word-swapped; the hash is CPU order.
+        {romDevices(RomDevice::Sk88Pro), RomSlot::Program, 0, 0x80000,
+         baseLib::MD5("b55b02cfcd6b971cc8c4ee10bce50019"), "1.01", true},
 
         // -----------------------------------------------------------------
         // SC-8850
@@ -871,6 +900,8 @@ namespace emu88Lib
             return "MIIG5";
         case RomDevice::Mv30:
             return "MV-30";
+        case RomDevice::Sk88Pro:
+            return "SK-88Pro";
         default:
             return "unknown";
         }

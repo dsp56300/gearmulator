@@ -195,7 +195,7 @@ namespace emu88Player
 
 	bool Processor::isModelAvailable(const emu88Lib::DeviceModel _model)
 	{
-		return emu88Lib::isDeviceListed(_model) && emu88Lib::RomLoader::isDeviceAvailable(_model);
+		return emu88Lib::RomLoader::isDeviceAvailable(_model);
 	}
 
 	std::optional<emu88Lib::DeviceModel> Processor::firstAvailableModel()

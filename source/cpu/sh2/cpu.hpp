@@ -6,6 +6,10 @@
 // boundary condition (address error, interrupt, deferral after an
 // interrupt-disabling instruction, sleep) forces it negative once.
 //
+// The instruction set, the cell layout and the effects of the ordinary
+// instructions are the SH family's (cpu/sh/); this core adds the SH-2's
+// exception model, its branches and its timing.
+//
 // SH-2 specifics:
 //   * Delayed branches execute the following instruction (the delay slot)
 //     before jumping.  The branch cell carries the slot's decoding: its
@@ -23,10 +27,9 @@
 //   * The PC visible to instructions is the instruction address + 4.
 #pragma once
 #include <array>
-#include <memory>
-#include <vector>
 
 #include "common/core.hpp"
+#include "cpu/sh/insn.hpp"
 #include "cpu/sh2/bus.hpp"
 #include "cpu/sh2/chip.hpp"
 #include "cpu/sh2/decode.hpp"
@@ -55,9 +58,12 @@ class Cpu final : public emu::SliceCore {
     u32 sr = 0xF0, gbr = 0, vbr = 0, mach = 0, macl = 0, pr = 0, pc = 0;
   };
 
+  // MAC.L saturates as the SH7014 manual's pseudo-code writes it.
+  static constexpr sh::MacLSaturation kMacLSaturation = sh::MacLSaturation::ManualPseudoCode;
+
   // SR bits.
-  static constexpr u32 kT = 1u << 0, kS = 1u << 1, kQ = 1u << 8, kM = 1u << 9;
-  static constexpr u32 kIShift = 4, kIMask = 0xF0;
+  static constexpr u32 kT = sh::kSrT, kS = sh::kSrS, kQ = sh::kSrQ, kM = sh::kSrM;
+  static constexpr u32 kIShift = sh::kSrIShift, kIMask = sh::kSrIMask;
   static constexpr u32 kSrMask = 0x3F3;
 
   // Pending-condition bits.
@@ -131,6 +137,7 @@ class Cpu final : public emu::SliceCore {
 
  private:
   friend struct ExecImpl;
+  friend struct sh::Insn<Cpu>;
   friend const Cell* detail::fill(Cpu&, const Cell*);
   friend const Cell* detail::page_end(Cpu&, const Cell*);
 
@@ -150,7 +157,7 @@ class Cpu final : public emu::SliceCore {
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return 0xFFFF;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 1));
-    return (at & Bus::kRdSlow) ? bus_.slow_read16(a, off) : Bus::be16(bus_.mem() + off);
+    return (at & Bus::kRdSlow) ? bus_.slow_read16(a, off) : Bus::get16(bus_.mem() + off);
   }
   u32 read32(u32 a) {
     a &= addr_mask_;
@@ -159,7 +166,7 @@ class Cpu final : public emu::SliceCore {
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return 0xFFFFFFFFu;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 2));
-    return (at & Bus::kRdSlow) ? bus_.slow_read32(a, off) : Bus::be32(bus_.mem() + off);
+    return (at & Bus::kRdSlow) ? bus_.slow_read32(a, off) : Bus::get32(bus_.mem() + off);
   }
   void write8(u32 a, u32 v) {
     a &= addr_mask_;
@@ -176,7 +183,7 @@ class Cpu final : public emu::SliceCore {
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 1));
-    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write16(a, off, u16(v)); else Bus::put_be16(bus_.mem() + off, u16(v));
+    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write16(a, off, u16(v)); else Bus::put16(bus_.mem() + off, u16(v));
   }
   void write32(u32 a, u32 v) {
     a &= addr_mask_;
@@ -185,7 +192,7 @@ class Cpu final : public emu::SliceCore {
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return;
     const u8 at = bus_.attr_off(off);
     budget_ -= s32(bus_.penalty(at, 2));
-    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write32(a, off, v); else Bus::put_be32(bus_.mem() + off, v);
+    if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write32(a, off, v); else Bus::put32(bus_.mem() + off, v);
   }
   void push32(u32 v) { regs_.r[15] -= 4; write32(regs_.r[15], v); }
   u32 pop32() { const u32 v = read32(regs_.r[15]); regs_.r[15] += 4; return v; }
@@ -194,12 +201,9 @@ class Cpu final : public emu::SliceCore {
   // Cell of the instruction at `pc`, allocating its page on first use and
   // making that page current (pc_of() works for cells of the current page).
   const Cell* cells_for(u32 pc) {
-    const u32 page = pc >> kPageShift;
-    Cell* cells = pages_[page].get();
-    if (EMU_UNLIKELY(!cells)) cells = alloc_page(page);
-    page_cells_ = cells;
-    page_pc_ = page << kPageShift;
-    return cells + ((pc & (kPageSize - 1)) >> 1);
+    page_cells_ = cells_.page(pc);
+    page_pc_ = CellPages::page_base(pc);
+    return page_cells_ + CellPages::index_in_page(pc);
   }
   u32 pc_of(const Cell* c) const { return page_pc_ + u32(c - page_cells_) * 2; }
   // Branch target: odd addresses raise an address error; a target in the
@@ -214,8 +218,6 @@ class Cpu final : public emu::SliceCore {
     if (pc & 2) fetch_line_at(pc);
     return cell;
   }
-  Cell* alloc_page(u32 page);
-  void reset_cells(u32 page, u32 first, u32 count);
   void fill_cell(Cell* c, u32 pc);
   bool cache_covers(u32 pc) const {
     const unsigned area = pc < 0x01000000u ? ((pc >> 22) & 3) : 4;
@@ -284,7 +286,7 @@ class Cpu final : public emu::SliceCore {
   std::array<u16, 256> cache_tags_{};
 
   // decoded cells: one page of 32768 cells (+1 guard) per 64 KB of code
-  std::vector<std::unique_ptr<Cell[]>> pages_;
+  CellPages cells_;
   Cell* page_cells_ = nullptr;
   u32 page_pc_ = 0;
 };

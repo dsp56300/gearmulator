@@ -105,9 +105,11 @@ namespace emu88Lib
 		{
 		case DeviceModel::Sc88Pro:
 		case DeviceModel::VeGsPro:
+		case DeviceModel::Sk88Pro:
 		{
 			// The VE-GS Pro is the SC-88Pro board without its panel sub-MCU; the
-			// board finds that out from the control ROM's vector table.
+			// board finds that out from the control ROM's vector table. The
+			// SK-88Pro's image is twice the size, which is how it is told apart.
 			auto roms = RomLoader::findSc88ProRomSet(RomLoader::toRomDevice(m_model));
 			if(!roms.isValid()) break;
 			std::vector<uint8_t> waves;

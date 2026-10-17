@@ -36,11 +36,12 @@ namespace emu88Lib
 		Mt32New,
 		Cm32ln,
 		Mv30,
+		Sk88Pro,
 	};
 
 	// Curated presentation order. Enum values remain
 	// stable because they are persisted in plugin settings and project state.
-	inline constexpr std::array<DeviceModel, 25> g_deviceMenuOrder = {
+	inline constexpr std::array<DeviceModel, 26> g_deviceMenuOrder = {
 		DeviceModel::Mt32Old,
 		DeviceModel::Mt32New,
 		DeviceModel::Cm32l,
@@ -61,6 +62,7 @@ namespace emu88Lib
 		DeviceModel::Sc88VL,
 		DeviceModel::Xpgs,
 		DeviceModel::Sc88Pro,
+		DeviceModel::Sk88Pro,
 		DeviceModel::VeGsPro,
 		DeviceModel::Sc8820,
 		DeviceModel::Sc8850,
@@ -220,14 +222,6 @@ namespace emu88Lib
 	{
 		return model != DeviceModel::Xpgs && model != DeviceModel::VeGsPro && model != DeviceModel::Sc8820 &&
 		       !isGmModuleModel(model) && (!isSc55Model(model) || getSc55DeviceProfile(model).panel != Sc55Panel::None);
-	}
-
-	// Whether a model appears in the device menu and the CLI's device list. Every board is
-	// listed now that the SC-55st, RLP-3237 and CM-300/SCC-1 images are catalogued; the
-	// hook stays for the next board whose dump is still out.
-	constexpr bool isDeviceListed(const DeviceModel)
-	{
-		return true;
 	}
 
 	// The CM-64 carries two service displays, one per board: the CM-32P's 16x2 above the

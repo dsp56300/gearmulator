@@ -82,6 +82,7 @@ If you find any, please report it as a bug.
 | SC-88VL | `sc88vl` | H8/510 | XP | uses high-level sub-mcu emulation, dual midi input |
 | XPGS / G-800 | `xpgs` | H8/510 | XP | dual midi input, emulates the sound generator only, not the arranger |
 | SC-88Pro | `sc88pro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input |
+| SK-88Pro | `sk88pro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, keyboard and sliders not emulated |
 | VE-GS Pro | `vegspro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input, no hardware panel present |
 | SC-8820 | `sc8820` | SH7016 (SH-2) | XP6 + LSP | uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
 | SC-8850 | `sc8850` | SH7016 (SH-2) | 2 × XP6 + LSP | uses high-level sub-mcu emulation in USB mode, 4x midi input |
@@ -114,22 +115,24 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | SC-88VL | `sc88vl_control.bin` — 512 KiB | `sc88vl_wave0.bin` — 2 MiB; `sc88vl_wave1.bin` — 2 MiB; `sc88vl_wave2.bin` — 2 MiB; `sc88vl_wave3.bin` — 2 MiB |
 | XPGS / G-800 | `xpgs_control.bin` — 512 KiB | `xpgs_wave0.bin` — 2 MiB; `xpgs_wave1.bin` — 2 MiB; `xpgs_wave2.bin` — 2 MiB; `xpgs_wave3.bin` — 2 MiB; `xpgs_wave4.bin` — 2 MiB |
 | SC-88Pro | `sc88pro_control.bin` — 1 MiB | `sc88pro_wave0.bin` — 8 MiB, **or** `sc88pro_wave_cs0.bin` and `sc88pro_wave_cs1.bin` — 4 MiB each; `sc88pro_wave1.bin` — 8 MiB, **or** `sc88pro_wave_cs2.bin` and `sc88pro_wave_cs3.bin` — 4 MiB each; `sc88pro_wave2.bin` — 4 MiB |
+| SK-88Pro | `sk88pro_program.bin` — 512 KiB; `sc88pro_control.bin` — 1 MiB, the SC-88Pro's | the SC-88Pro's, under its names |
 | VE-GS Pro | `vegspro_control.bin` — 1 MiB | `vegspro_wave0.bin` — 8 MiB; `vegspro_wave1.bin` — 8 MiB; `vegspro_wave2.bin` — 4 MiB |
 | SC-8820 | `sc8820_internal.bin` — 64 KiB; `sc8820_program.bin` — 2 MiB | `sc8820_wave0.bin` — 16 MiB; `sc8820_wave1.bin` — 8 MiB |
 | SC-8850 | `sc8850_internal.bin` — 64 KiB; `sc8850_program.bin` — 1 MiB; `sc8850_data.bin` — 2 MiB | `sc8850_wave.bin` — 32 MiB; **or** `sc8850_wave0.bin` and `sc8850_wave1.bin` — 16 MiB each |
 | NU-10B | `nu10b_internal.bin` — 64 KiB; `nu10b_program.bin` — 1 MiB | `nu10b_wave0.bin` — 2 MiB; `nu10b_wave1.bin` — 2 MiB; `nu10b_wave2.bin` — 2 MiB; `nu10b_wave3.bin` — 2 MiB |
 | MIIG5 | `miig5_internal.bin` — 256 KiB; `miig5_program.bin` — 2 MiB | `miig5_wave.bin` — 32 MiB, already unscrambled |
 
-SC-88Pro and VE-GS Pro may also use the compatible donor waves described below. The standardized names select a device and layout; they do not change the required byte order or contents.
+SC-88Pro, SK-88Pro and VE-GS Pro may also use the compatible donor waves described below. The standardized names select a device and layout; they do not change the required byte order or contents.
 
 Additional supported layouts:
 
 - Recognized H8 control ROMs can be loaded in CPU byte order or the supported word-swapped dump order. Recognized 1 MiB Pro control images embedded in repeated 2/4 MiB dumps are also accepted.
 - The SC-88Pro board carries its PCM on five 4 MiB mask ROMs, one per chip select, instead of the three larger VE-GS Pro parts that `sc88pro_wave0.bin` to `sc88pro_wave2.bin` hold. Dumps of the five are also accepted: CS0 and CS1 together replace `sc88pro_wave0.bin`, CS2 and CS3 replace `sc88pro_wave1.bin`, and CS4 is identical to `sc88pro_wave2.bin`. The hashes registered for CS0–CS3 were derived by splitting the VE-GS Pro images, not taken from dumps of SC-88Pro chips.
-- SC-88Pro and VE-GS Pro can obtain their waves from recognized decoded SC-8850 or SC-8820 wave images. Their own control ROM is still required.
+- SC-88Pro, SK-88Pro and VE-GS Pro can obtain their waves from recognized decoded SC-8850 or SC-8820 wave images. Their own control ROM is still required.
 - Recognized `SCCore.dll` / `SCCore00.dylib` containers can supply the SC-8820 wave regions and compatible Pro waves. They are scanned as data, never executed. They do not supply CPU firmware. For SC-8850 they supply **bank A only**; you still need its distinct bank B.
 - SC-8850 also accepts recognized raw XP wave layouts.
 - The patched [sc55mk2-ctf-patcher](https://github.com/shingo45endo/sc55mk2-ctf-patcher) SC-55mkII GS-28 2.00 ROM patched is supported.
+- The SK-88Pro's program EPROM (1.01) holds only part of its firmware: the tone and drum-set data are in a mask ROM that has not been dumped. The SC-88Pro 1.02 control ROM carries the same data at the same addresses and is used in its place, so the SK-88Pro needs both. The SC-GS image below does not stand in for it.
 - SC-88Pro also accepts a second recognized control ROM from an SC-GS board, which identifies itself as "SC-GS A '96" rather than by a version number. If both it and the 1.02 firmware are found, 1.02 is used unless the SC-GS image is the one named `sc88pro_control.bin`.
 
 ## Playlist and MIDI playback
@@ -163,7 +166,7 @@ The reset setting prepares the selected device before a playlist song or CLI ren
 | **MT-32** | Sends GS Reset, then sets up the SC-55-style MT-32 instrument arrangement for channels 1–10, including banks, programs, pan, level and effects sends. Channels 11–16 retain GS defaults. | Older music using the MT-32 preset arrangement on a GS device. |
 
 
-### MT-32 and CM-32L: the LA boards
+### MT-32 and CM-32L
 
 **MIDI.** From power-on, the eight parts answer on **channels 2–9** and the rhythm part on **channel 10**; channel 1 is silent until a SysEx or the panel reassigns a part. Send to **group A, channel 2** for part 1. The pan convention is reversed relative to GM (CC10 = 0 is right, 127 is left), All Sound Off (CC120) is not recognized - the player uses hold pedal up plus All Notes Off instead when it stops or seeks - and the only reset is the all parameters reset described above. The boards' own MIDI OUT carries their SysEx replies (data requests, handshaking); the CM-32P half of a CM-64 transmits nothing.
 
@@ -175,11 +178,9 @@ The reset setting prepares the selected device before a playlist song or CLI ren
 
 The CM-32P is a PCM sound module related to the PCM half of the CM-64 and Roland's U-series sample instruments. It complements the LA sound generator found in an MT-32/CM-32L; it is neither that LA synthesizer nor a General MIDI Sound Canvas. Its instrument map is different. The CM-64 is a CM-32L and a CM-32P in one case: both boards run their own firmware, share the MIDI IN and the volume knob, and their outputs meet at the PCM board's mixer, so it answers on **channels 2–10 (LA) and 11–16 (PCM)** at once and shows both boards' service displays.
 
-- At startup the CM-32P's six parts receive on **MIDI channels 11–16**. Send to **group A, channel 11** for the first part; a keyboard sending on channel 1 will normally produce no sound.
+- At startup the CM-32P's six parts receive on **MIDI channels 11–16**. Send to **group A, channel 11** for the first part. A keyboard sending on channel 1 will normally produce no sound.
 - The GM, GM2 and GS resets mean nothing to it; every song-reset mode but Off sends the all parameters reset, and a GM or GS song does not get remapped into General MIDI.
 - Its pan convention is reversed relative to GM: CC10 = 0 favors right, and 127 favors left. Like the LA boards it has no All Sound Off.
-- The player exposes the board's service LCD, although the original module has no normal front-panel display. Display behavior is firmware-dependent; service-mode LCD timing remains under investigation.
-- The emulation is experimental. Booting and playing notes do not establish complete physical audio/effects fidelity.
 
 **Expansion cards.** The CM-32P and the CM-64 have a slot for the SN-U110 series PCM cards. Choose a card image (up to 512 KiB, in either of the two dump byte orders, which the loader tells apart from the card's tone list) in **Settings → General → CM-32P / CM-64 PCM card**; the choice is saved and the card is in the slot whenever one of the two devices loads, including after a device switch, Power on or Restart. `--pcm-card PATH` selects a card for one launch in both programs, without changing the saved one.
 
@@ -197,11 +198,8 @@ The song must select card tones using MIDI Program Change values starting at **6
 
 The MV-30 is a sequencer with a sound module built in. Its sound section is LP, TVF and RCC with six wave ROMs, three of them the CM-32P's. Its operating system is not in ROM: the boot ROM loads it from the system disk, so the disk image is part of the ROM set. The player runs that boot at full speed while the device loads, which takes a couple of seconds, and keeps the disk in the drive, read only. Disk images of system disks 1.08 and 1.091 are recognized; both call themselves "MV-30 System Disk Ver.1.0" on screen.
 
-- From power-on, parts 1–7 receive on **MIDI channels 1–7** and part 8, the rhythm part, on **channel 10**.
-- The sound section takes **no SysEx**: the MV-30 only records SysEx into songs and sends it out again. The GM, GM2 and GS resets mean nothing to it; choose Reset Off. MIDI reaches each part's timbre (program change, timbres 1–128 of the song's timbre bank; bank select is ignored), level (CC7) and pan (CC10), and the usual performance controllers. The timbres themselves, the rhythm timbre, the effects and the parts' other settings are made on its front panel.
-- The **Part Editor** shows the parts as the MV-30 has them, read from its memory, so the internal sequencer and the front panel move it too. The mixer sets each part's level and pan, and a part's page picks its timbre from the song's 128.
-- The front panel's SHIFT, F1–F5, EXIT, PLAY, TIMBRE EDIT, SYSTEM, cursor keys and VALUE + / − are on the skin, the other switches are reachable with keyboard chorcuts.
-- Its card slot A takes the same SN-U110 series cards as the CM-32P, chosen with the same setting and `--pcm-card`; slot B is not available yet.
+The front panel's SHIFT, F1–F5, EXIT, PLAY, TIMBRE EDIT, SYSTEM, cursor keys and VALUE + / − are on the skin, the other switches are reachable with keyboard chorcuts.
+Its card slot A takes the same SN-U110 series cards as the CM-32P, chosen with the same setting and `--pcm-card`. Slot B is not available yet.
 
 ### Sound Canvas family and expansion boards
 
@@ -209,13 +207,13 @@ The SC-55 and SC-55mkII have different firmware, voice-generation timing and beh
 
 SCB-55, SCC-1A and the other card profiles do not have the module's front-panel controls. XPGS emulates the G-800 GS sound engine, not its arranger. VE-GS Pro uses its own panel-less firmware. “No display” on these devices is expected. SC-88VL lacks the SC-88/Pro Preview button.
 
-The SC-88Pro firmware also has an XG compatibility mode. Send XG System On (`F0 43 10 4C 00 00 7E 00 F7`) from the song or your MIDI source. If you enable it externally, choose Reset Off so a song-start GS Reset does not undo it. This is the Roland firmware's compatibility mode; full Yamaha XG voice/effects equivalence is not established.
+The SC-88Pro firmware also has an XG compatibility mode. Send XG System On (`F0 43 10 4C 00 00 7E 00 F7`) from the song or your MIDI source. If you enable it externally, choose Reset Off so a song-start GS Reset does not undo it.
 
 ### Factory initialization, Fast Boot and Restart
 
 Real hardware expects initialized battery-backed SRAM. A newly created emulated board starts with blank memory, like a unit with a depleted backup battery. Firmware can then start with odd part assignments, levels or incomplete user/system settings. For example, the SC-155 can start with part 1 as drums on channel 10, and the SC-155mkII on part 8 at level 84. A per-song GM/GS reset does not initialize every battery-backed setting.
 
-**Factory Reset on load**, enabled by default, runs the firmware's full factory-initialization procedure on SC-55, SC-55mkII, SC-155, SC-155mkII, SC-88, SC-88VL, SC-88Pro and SC-8850, then power-cycles the initialized board. Leave this enabled for ordinary playback. The other profiles currently have no equivalent automated procedure.
+**Factory Reset on load**, enabled by default, runs the firmware's full factory-initialization procedure on SC-55, SC-55mkII, SC-155, SC-155mkII, SC-88, SC-88VL, SC-88Pro, SK-88Pro and SC-8850, then power-cycles the initialized board. Leave this enabled for ordinary playback. The other profiles currently have no equivalent automated procedure.
 
 **Fast Boot (skip intro)**, off by default, runs another ten seconds of emulated time before exposing the device for use. It skips waiting through the firmware's intro in real time, but takes extra computation during loading. It is independent of factory initialization. Both settings apply at the next device selection, power-on or Restart.
 

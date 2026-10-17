@@ -63,6 +63,7 @@ int main()
 		check(!LaunchOptions::parse({"--config", "custom.xml"}, false).sessionOverrides(), "Config selection alone");
 		for(const auto model : emu88Lib::g_deviceMenuOrder) check(parseDevice(deviceId(model)) == model, "Device ID roundtrip");
 		check(parseDevice("vegspro") == emu88Lib::DeviceModel::VeGsPro, "VE-GS Pro device ID");
+		check(parseDevice("sk88pro") == emu88Lib::DeviceModel::Sk88Pro, "SK-88Pro device ID");
 		check(parseDevice("scc1a") == emu88Lib::DeviceModel::Scc1a, "SCC-1A device ID");
 		for(const auto* reset : {"off", "gm", "gm2", "gs", "mt32"}) (void)parseReset(reset);
 		check(parseReset("gm2") == jucePlayer::MidiPlayer::ResetMode::Gm2, "GM2 reset option");

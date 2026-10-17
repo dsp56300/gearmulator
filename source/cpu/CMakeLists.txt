@@ -24,7 +24,9 @@ endif()
 if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU)
 	add_subdirectory(h8500 EXCLUDE_FROM_ALL)
 	add_subdirectory(mcs96 EXCLUDE_FROM_ALL)
+	add_subdirectory(sh EXCLUDE_FROM_ALL)
 	add_subdirectory(sh2 EXCLUDE_FROM_ALL)
+	add_subdirectory(sh3 EXCLUDE_FROM_ALL)
 endif()
 
 # the JE8086's H8/3002

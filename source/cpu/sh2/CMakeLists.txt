@@ -9,7 +9,7 @@ source_group("source" FILES ${SOURCES})
 set_property(TARGET sh2 PROPERTY FOLDER "cpu")
 
 target_compile_features(sh2 PUBLIC cxx_std_20)
-target_link_libraries(sh2 PUBLIC emucommon)
+target_link_libraries(sh2 PUBLIC shcore emucommon)
 
 if(BUILD_TESTING)
 	foreach(t sh2_adc sh2_bsc sh2_cmt sh2_cpu sh2_dmac sh2_intc sh2_mtu sh2_ports sh2_sci sh2_wdt sh7034 sh7042 )

@@ -5,15 +5,18 @@ add_library(hardwareLib STATIC)
 
 set(SOURCES
 	am29f.cpp am29f.h
+	cs8420.cpp cs8420.h
 	floppyImage.cpp floppyImage.h
 	i2c.cpp i2c.h
 	i2cFlash.cpp i2cFlash.h
 	hd44780.cpp hd44780.h
 	lcd.cpp lcd.h
 	lcdfonts.h
+	lh28fbj.cpp lh28fbj.h
 	sciMidi.cpp sciMidi.h
 	sed1200.cpp sed1200.h
 	sed1335.cpp sed1335.h
+	st7565.cpp st7565.h
 	t6963c.cpp t6963c.h
 	tc160g22af.h
 	upd765.cpp upd765.h
