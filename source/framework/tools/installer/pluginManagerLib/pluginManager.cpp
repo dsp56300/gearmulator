@@ -531,6 +531,13 @@ namespace pluginManager
 		if (_asset.channel == Channel::Public)
 			return {};
 
+		// A donator login opens a folder, and the build's own address says which one. The product it
+		// is named after can have a slug of its own: a test console is a product of its own in the
+		// team's list, but its builds sit in the folder of its plugin, whose login is the only one
+		// that opens them.
+		if (_asset.channel == Channel::Donators && _asset.url.find("/builds/") != std::string::npos)
+			return m_credentials.get(_asset.channel, _asset.url.substr(0, _asset.url.rfind('/') + 1));
+
 		const auto* product = m_catalog.findOwningProduct(_asset.product);
 
 		return m_credentials.get(_asset.channel, product ? product->slug : std::string());

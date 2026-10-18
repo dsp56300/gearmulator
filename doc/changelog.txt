@@ -25,6 +25,12 @@ OsTIrus:
 - [Fix] A changed Arp Mode was lost when the patch was loaded again, for example
         with the project: the patch played the arpeggiator mode it had before.
 
+Plugin Manager:
+
+- [Fix] With the team login, installing a test console from a donators folder
+        failed with "HTTP 401": it asked for a donator login of the test console
+        itself instead of the one of the folder its builds are in.
+
 2.2.27:
 
 Framework:

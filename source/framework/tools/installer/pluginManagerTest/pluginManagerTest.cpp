@@ -1692,6 +1692,34 @@ namespace
 		TEST_ASSERT(!pm.credentialsFor(*published).valid());
 	}
 
+	// A test console is a product of its own in the team's list, with no folder of its own, while its
+	// donator builds sit in the folder of its plugin. That folder's login is the one that downloads
+	// them: asking for the console's own login sent none, and the server answered 401.
+	void testDonatorCredentialsFollowTheFolder()
+	{
+		const Fixture fixture;
+
+		auto pm = makeManager(true);
+
+		std::string error;
+		TEST_ASSERT(pm.refresh(error));
+
+		pm.setCredentials(Channel::Donators, "synth-1000", {"donator", "secret"});
+
+		Asset console;
+		TEST_ASSERT(parseAssetName("TheUsualSuspects-Synth-1000TestConsole-2.2.19-win64.zip", console));
+		console.channel = Channel::Donators;
+		console.url = "https://server.test/builds/synth-1000/donators/TheUsualSuspects-Synth-1000TestConsole-2.2.19-win64.zip";
+
+		const auto* owner = pm.getCatalog().findOwningProduct(console.product);
+		TEST_ASSERT(owner && owner->product == "Synth-1000TestConsole");
+		TEST_ASSERT(pm.credentialsFor(console).user == "donator");
+
+		// The same build in another product's folder gets that folder's login, here none.
+		console.url = "https://server.test/builds/prototype-9/donators/TheUsualSuspects-Synth-1000TestConsole-2.2.19-win64.zip";
+		TEST_ASSERT(!pm.credentialsFor(console).valid());
+	}
+
 	// A catalog may arrive compressed, because the request offers to take it that way. What came
 	// back is told apart by what it is, so a server that ignores the offer is read just the same.
 	void testCompressedBodiesAreRead()
@@ -3772,6 +3800,7 @@ int main()
 		testAThumbnailLoginGoesOnlyToOurServer();
 		testRefreshSurvivesAMissingSource();
 		testCredentialsFollowTheOwningProduct();
+		testDonatorCredentialsFollowTheFolder();
 		testEffectBuildsFollowTheirPlugin();
 		testCompressedBodiesAreRead();
 		testDownloadWritesTheFile();
