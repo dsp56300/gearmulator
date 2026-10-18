@@ -33,6 +33,6 @@ if(BUILD_TESTING)
 	# The compile handshake shared by every custom-chip JIT dispatcher; lspLib only lends it the include root.
 	add_executable(jitCompileWorkerTest ../jitCompileWorker_test.cpp)
 	target_link_libraries(jitCompileWorkerTest PRIVATE lspLib)
-	set_property(TARGET jitCompileWorkerTest PROPERTY FOLDER "Ronaldo/Tests")
+	set_property(TARGET jitCompileWorkerTest PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME jitCompileWorkerTest COMMAND jitCompileWorkerTest)
 endif()

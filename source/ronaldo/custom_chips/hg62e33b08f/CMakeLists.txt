@@ -11,6 +11,6 @@ target_include_directories(hg62e33b08fLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../
 if(BUILD_TESTING)
 	add_executable(hg62e33b08f_test hg62e33b08f_test.cpp)
 	target_link_libraries(hg62e33b08f_test PRIVATE hg62e33b08fLib)
-	set_property(TARGET hg62e33b08f_test PROPERTY FOLDER "Ronaldo/Tests")
+	set_property(TARGET hg62e33b08f_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME hg62e33b08f_test COMMAND hg62e33b08f_test)
 endif()
