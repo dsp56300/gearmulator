@@ -7,6 +7,7 @@ file(TOUCH_NOCREATE ${CMAKE_CURRENT_LIST_DIR}/version.h.in)
 file(TOUCH_NOCREATE ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h.in)
 
 set(SOURCES
+	audioLevels.cpp audioLevels.h
 	bypassBuffer.cpp bypassBuffer.h
 	createVersionDateTime.cmake
 	clipboard.cpp clipboard.h

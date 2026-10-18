@@ -979,6 +979,7 @@ namespace pluginLib
 		applyOutputGain(outputs, numSamples);
 
 		captureAudioBlock(buffer, numSamples);
+		m_outputLevels.process(buffer, getTotalNumOutputChannels(), numSamples, getSampleRate());
 
 		m_midiOut.clear();
 		getPlugin().getMidiOut(m_midiOut);

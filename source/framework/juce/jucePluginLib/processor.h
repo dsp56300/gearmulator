@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "audioLevels.h"
 #include "bypassBuffer.h"
 #include "controller.h"
 #include "hostAudioWorkgroup.h"
@@ -272,6 +273,9 @@ namespace pluginLib
 		bool isAudioCaptureActive() const;
 		uint32_t getAudioCaptureCapacityFrames() const { return static_cast<uint32_t>(m_captureBuffer.getNumSamples()); }
 
+		// levels of the output channels, for meters in skins
+		AudioLevels& getOutputLevels() { return m_outputLevels; }
+
 		// ---- Test input (for automated verification of effects and audio inputs, driven by the MCP server) ----
 		struct TestInputResult
 		{
@@ -377,6 +381,8 @@ namespace pluginLib
 		std::atomic<int> m_capturePos{0};
 		std::atomic<int> m_captureMaxFrames{0};
 		std::atomic<bool> m_captureStarted{false};
+
+		AudioLevels m_outputLevels;
 
 		// ---- Test input state (see startTestInput). The audio thread takes the current one with std::atomic_load
 		// and never blocks. A replaced one waits in m_testInputPrev, so that the audio thread does not free it ----

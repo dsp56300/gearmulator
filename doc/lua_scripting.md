@@ -39,6 +39,7 @@ Add a `<script>` block in your RML file's `<head>` section:
 | `document` | ElementDocument | The current RML document. Available in `<script>` blocks and event handlers. |
 | `params` | table | Parameter API for reading/writing synth parameters and subscribing to changes. |
 | `midi` | table | Live note on/off events. |
+| `audio` | table | Levels of the output channels, for meters. |
 | `Log` | table | RmlUi logging. Use `Log.Message(Log.logtype.info, "message")`. |
 | `rmlui` | table | RmlUi core API (contexts, font loading, etc.). |
 
@@ -226,6 +227,35 @@ can touch the DOM directly. A skin that registers no note callbacks costs nothin
 Only note on and note off are reported. Control changes, pitch bend and aftertouch are not,
 because a mod wheel or an automation lane produces them by the thousand and a skin cannot keep
 up with that on the UI thread.
+
+## Output Levels (`audio`)
+
+Levels of the plugin's output channels, for meters:
+
+```lua
+local count = audio.getOutputCount()        -- number of output channels, 0 before audio was processed
+local peak, rms = audio.getOutputLevel(0)   -- channel 0, the first output's left channel
+```
+
+Both levels are linear, 1.0 is full scale (`20 * math.log(peak, 10)` gives dBFS). The peak holds
+the highest sample and then falls by 20 dB in 1.5 seconds; the RMS is averaged over about 300 ms.
+A channel that does not exist returns `nil`. Channels count from 0 across all outputs, two per
+stereo output, so a part routed to its own output is metered there.
+
+Read them from a frame event, which runs once per rendered frame:
+
+```lua
+function onFrame(event)
+  local peak, rms = audio.getOutputLevel(0)
+  if peak then
+    document:GetElementById("meterL").style.width = tostring(math.floor(peak * 300)) .. "dp"
+  end
+end
+```
+
+Levels are only measured while a skin reads them: the first `getOutputLevel` call turns the
+measurement on, so the levels start to move with the next audio block. A skin that never calls it
+costs nothing on the audio thread.
 
 ## Skin Variables (`skinvars`)
 

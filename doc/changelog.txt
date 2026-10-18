@@ -8,6 +8,9 @@ Framework:
         when a lock changes: params.getRegions, isRegionLocked, setRegionLocked
         and onRegionLockChanged.
 
+- [Imp] BUG-10320 Skins can show level meters: audio.getOutputLevel returns the
+        peak and RMS level of every output channel to Lua.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on
