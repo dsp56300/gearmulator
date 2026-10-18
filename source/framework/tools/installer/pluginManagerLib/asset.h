@@ -94,4 +94,12 @@ namespace pluginManager
 	// plugin stayed in that group after an upgrade and its effect build was never upgraded (BUG-10488).
 	// Removing goes by the chip alone, so nothing is taken away that was not asked for.
 	bool includesFxBuild(bool _offered, bool _wanted, bool _installed);
+
+	// Whether the button of a column fetches one of the parts it covers - the plugin or its effect
+	// build - given what that part needs (_part) and what the column offers for the two (_column). A
+	// column that offers an install, upgrade or downgrade fetches the parts that need it and leaves the
+	// current one alone: downloading a plugin that is up to date again, only because its effect build
+	// was behind, was a reinstall nobody asked for (BUG-10486). A column that offers a reinstall, which
+	// means everything in it is current, reinstalls all of it, because that is what its button says.
+	bool fetchesPart(InstallAction _part, InstallAction _column);
 }

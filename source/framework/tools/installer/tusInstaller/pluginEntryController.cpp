@@ -731,17 +731,16 @@ namespace pluginManager
 		if (m_installer.isRunning() || _formats.empty())
 			return;
 
-		// Worth doing at all: a column asked for on its own is fetched whatever state it is in,
-		// because that is what pressing its button means, but the buttons that walk everything must
-		// not fetch a plugin again only because its effect build was missing.
+		// Worth doing at all. A column goes by what its button offers - see fetchesPart - and the
+		// buttons that walk everything only fetch what is missing or behind.
 		const auto worthDoing = [&](const std::string& _product, const bool _installed, const std::string& _version,
 		                            const FormatRow& _row)
 		{
-			if (!_skipUpToDate)
-				return true;
-
 			const auto action = m_pluginManager.installAction(_product, _row.format, _installed, _version,
 				_row.selectedVersion());
+
+			if (!_skipUpToDate)
+				return fetchesPart(action, actionFor(_row));
 
 			return action == InstallAction::Install || action == InstallAction::Upgrade;
 		};

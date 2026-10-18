@@ -402,20 +402,33 @@ namespace pluginManager
 			});
 	}
 
-	// The button in one row, whatever its word says: all three of them install the newest version
-	// over whatever is on the disk - and, while the chip is ticked, the effect build after it.
+	// The button in one row, whatever its word says: all three of them install the newest version of
+	// the plugin and, where it is part of the row, of its effect build after it - each of them only if
+	// the button is about it.
 	void DetailPage::onInstall(const size_t _index)
 	{
 		if (!m_installTask || m_installTask->isRunning())
 			return;
 
 		m_pending.clear();
-		m_pending.push_back({_index, false});
+
+		const auto& row = m_rows[_index];
+		const auto column = actionFor(row);
+
+		// Only what the row's button is about - see fetchesPart.
+		if (fetchesPart(m_pluginManager->installAction(m_product.product, row.format, row.installed,
+			row.installedVersion, row.newest), column))
+		{
+			m_pending.push_back({_index, false});
+		}
 
 		// After the plugin rather than beside it: both go into the same folder, and one archive
 		// unpacking over the other is how a half-written build ends up there.
-		if (fxIncluded(m_rows[_index]))
+		if (fxIncluded(row) && fetchesPart(m_pluginManager->installAction(m_fxProduct, row.format,
+			row.fxInstalled, row.fxInstalledVersion, row.newest), column))
+		{
 			m_pending.push_back({_index, true});
+		}
 
 		installNext();
 	}

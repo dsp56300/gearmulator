@@ -168,6 +168,11 @@ namespace pluginManager
 		return _offered && (_wanted || _installed);
 	}
 
+	bool fetchesPart(const InstallAction _part, const InstallAction _column)
+	{
+		return _column == InstallAction::Reinstall || _part != InstallAction::Reinstall;
+	}
+
 	InstallAction combineInstallActions(const InstallAction _plugin, const InstallAction _fx)
 	{
 		for (const auto action : {InstallAction::Install, InstallAction::Upgrade, InstallAction::Downgrade})

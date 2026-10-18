@@ -231,6 +231,30 @@ namespace
 		TEST_ASSERT(combineInstallActions(IA::Reinstall, IA::Reinstall) == IA::Reinstall);
 	}
 
+	// Which parts of a column its button fetches (BUG-10486).
+	void testAColumnFetchesOnlyWhatNeedsIt()
+	{
+		using IA = InstallAction;
+
+		// The plugin current, its effect build behind: the column offers the upgrade, and the upgrade
+		// fetches the effect build only. It fetched the plugin again as well.
+		TEST_ASSERT(!fetchesPart(IA::Reinstall, IA::Upgrade));
+		TEST_ASSERT(fetchesPart(IA::Upgrade, IA::Upgrade));
+
+		// The same for one that is missing, and for an older version that was picked.
+		TEST_ASSERT(!fetchesPart(IA::Reinstall, IA::Install));
+		TEST_ASSERT(fetchesPart(IA::Install, IA::Install));
+		TEST_ASSERT(!fetchesPart(IA::Reinstall, IA::Downgrade));
+		TEST_ASSERT(fetchesPart(IA::Downgrade, IA::Downgrade));
+
+		// A part that needs something other than what the column offers is still fetched: the column
+		// shows only the more pressing of the two.
+		TEST_ASSERT(fetchesPart(IA::Downgrade, IA::Upgrade));
+
+		// Everything current: the column offers a reinstall, and its button reinstalls all of it.
+		TEST_ASSERT(fetchesPart(IA::Reinstall, IA::Reinstall));
+	}
+
 	// Whether a column's install or upgrade takes the effect build along (BUG-10488).
 	void testEffectBuildIsIncludedWhenAskedForOrInstalled()
 	{
@@ -2955,6 +2979,10 @@ namespace
 			TEST_ASSERT(includesFxBuild(true, false, fxInstalled));
 			TEST_ASSERT(combineInstallActions(plugin, fx) == InstallAction::Upgrade);
 
+			// And that upgrade fetches the effect build alone, not the plugin that is current (BUG-10486).
+			TEST_ASSERT(!fetchesPart(plugin, combineInstallActions(plugin, fx)));
+			TEST_ASSERT(fetchesPart(fx, combineInstallActions(plugin, fx)));
+
 			// And once that upgrade has run, the row has nothing left to offer.
 			pm.recordInstall(installed("Prototype-9FX", "2.2.19"), {"Prototype-9FX.vst3"});
 
@@ -3963,6 +3991,7 @@ int main()
 		testInstallActions();
 		testPairedInstallActions();
 		testEffectBuildIsIncludedWhenAskedForOrInstalled();
+		testAColumnFetchesOnlyWhatNeedsIt();
 		testDirectoryIndex();
 		testDirectoryIndexDoesNotDuplicate();
 		testEmptyDirectoryIndex();

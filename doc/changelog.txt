@@ -61,6 +61,11 @@ Plugin Manager:
 - [Imp] BUG-10488 The FX chip is labelled "FX version" and is drawn in the
         accent colour when it is ticked.
 
+- [Fix] BUG-10486 Upgrading a product whose effect version was behind while the
+        plugin was up to date downloaded the plugin again as well. Only what is
+        missing or behind is downloaded now, from a column's button and from
+        "Install selected" and "Upgrade all" alike.
+
 2.2.27:
 
 Framework:
