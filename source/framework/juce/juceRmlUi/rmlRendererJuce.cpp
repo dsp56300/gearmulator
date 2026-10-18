@@ -967,25 +967,37 @@ namespace juceRmlUi
 					const auto& v2 = _vertices[quadIndices[2]];
 					const auto& v3 = _vertices[quadIndices[3]];
 
-					// Validate that the 4 vertices form an axis-aligned quad
-					// There should be exactly 2 unique X values and 2 unique Y values
-					std::array<float, 4> xVals = {v0.position.x, v1.position.x, v2.position.x, v3.position.x};
-					std::array<float, 4> yVals = {v0.position.y, v1.position.y, v2.position.y, v3.position.y};
-					
-					std::sort(xVals.begin(), xVals.end());
-					std::sort(yVals.begin(), yVals.end());
-					
+					// Validate that the 4 vertices form an axis-aligned quad: each one sits at a different
+					// corner of their bounding box. Matching sorted x and y values alone is not enough,
+					// a short thin diagonal line passes that test and would be filled as its bounding box
+					const Rml::Vector2f quadPosMin(
+						std::min({ v0.position.x, v1.position.x, v2.position.x, v3.position.x }),
+						std::min({ v0.position.y, v1.position.y, v2.position.y, v3.position.y })
+					);
+
+					const Rml::Vector2f quadPosMax(
+						std::max({ v0.position.x, v1.position.x, v2.position.x, v3.position.x }),
+						std::max({ v0.position.y, v1.position.y, v2.position.y, v3.position.y })
+					);
+
+					const Rml::Vector2f quadPosCenter = (quadPosMin + quadPosMax) * 0.5f;
+
 					constexpr float epsilon = 1.0f;
-					const bool validQuadX = (std::abs(xVals[0] - xVals[1]) < epsilon) && (std::abs(xVals[2] - xVals[3]) < epsilon);
-					const bool validQuadY = (std::abs(yVals[0] - yVals[1]) < epsilon) && (std::abs(yVals[2] - yVals[3]) < epsilon);
-					
-					if (!validQuadX || !validQuadY)
-						continue;
+					uint32_t corners = 0;
 
-					const Rml::Vector2f quadPosMin(xVals[0], yVals[0]);
-					const Rml::Vector2f quadPosMax(xVals[3], yVals[3]);
+					for (const auto* v : { &v0, &v1, &v2, &v3 })
+					{
+						const bool right = v->position.x > quadPosCenter.x;
+						const bool bottom = v->position.y > quadPosCenter.y;
 
-					if (quadPosMax.x <= quadPosMin.x || quadPosMax.y <= quadPosMin.y)
+						if (std::abs(v->position.x - (right ? quadPosMax.x : quadPosMin.x)) >= epsilon ||
+							std::abs(v->position.y - (bottom ? quadPosMax.y : quadPosMin.y)) >= epsilon)
+							break;
+
+						corners |= 1u << (static_cast<uint32_t>(right) | (static_cast<uint32_t>(bottom) << 1));
+					}
+
+					if (corners != 0xf)
 						continue;
 
 					const Rml::Vector2f quadUvMin(
