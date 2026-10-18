@@ -1,3 +1,9 @@
+theusualsuspects (2.2.27) unstable; urgency=low
+
+  * Update to 2.2.27.
+
+ -- The Usual Suspects <dsp56300@protonmail.com>  Sat, 17 Oct 2026 00:00:00 +0000
+
 theusualsuspects (2.2.25) unstable; urgency=low
 
   * Update to 2.2.25, built from the release tag instead of main.
