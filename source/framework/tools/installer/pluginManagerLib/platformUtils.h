@@ -91,5 +91,15 @@ namespace pluginManager
 		// every format is a bundle and answers, on Linux nothing does. InstalledPlugins is what knows
 		// the rest.
 		static std::string getInstalledVersion(const std::string& _pluginId, PluginFormat _format, const std::string& _dir);
+
+		// Who made what is at _path, when that is somebody other than us - empty when it is ours or
+		// nothing says. Another maker's plugin can carry the very name one of ours installs under, and
+		// an install over one deleted it. Nothing is replaced, removed or taken out of a file this
+		// answers for.
+		//
+		// The bundle identifier on macOS, the company in the version resource on Windows; both are
+		// left empty by some of our builds (a CLAP has no version resource), which is why only a
+		// name that is there and is not ours counts. An ELF names nobody, so on Linux this is empty.
+		static std::string otherMaker(const std::string& _path);
 	};
 }

@@ -511,6 +511,21 @@ namespace pluginManager
 			return false;
 		}
 
+		// Before anything is written: a plugin of somebody else's that has the name of ours is not
+		// ours to replace, and copying out of it is what filled a roms folder with its insides.
+		for (const auto& name : _files)
+		{
+			const auto existing = juce::File(juce::String(_targetDir)).getChildFile(juce::String(name)).getFullPathName().toStdString();
+			const auto maker = PlatformUtils::otherMaker(existing);
+
+			if (maker.empty())
+				continue;
+
+			_error = existing + " is a plugin of the same name by somebody else (" + maker + "), so it was left as it is."
+				"\n\nInstall this one into a folder of its own: the location field on its page takes one.";
+			return false;
+		}
+
 		// Before anything is written, and as this user whichever way the copy is going to be made.
 		rescueUserFiles(root, juce::File(juce::String(_targetDir)),
 			juce::File(juce::String(PlatformUtils::romFolder(_dataProduct))));

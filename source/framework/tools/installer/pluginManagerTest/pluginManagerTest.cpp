@@ -2334,6 +2334,98 @@ namespace
 		root.deleteRecursively();
 	}
 
+	// Another maker's plugin can have the name one of ours installs under, and installing ours
+	// deleted it and copied its insides into the roms folder. It is not replaced, not taken apart, not counted as an install of ours and not
+	// uninstalled - while ours, under the same kind of name, is still replaced as before.
+	void testAnotherMakersPluginOfTheSameNameIsLeftAlone()
+	{
+#if JUCE_MAC || JUCE_WINDOWS
+		const auto root = juce::File::getSpecialLocation(juce::File::tempDirectory)
+			.getChildFile("tus_pm_test_other_maker");
+
+		root.deleteRecursively();
+		TEST_ASSERT(root.createDirectory().wasOk());
+
+		setDataFolder(root.getChildFile("data").getFullPathName().toStdString());
+
+		const auto target = root.getChildFile("plugins");
+		TEST_ASSERT(target.createDirectory().wasOk());
+
+		const auto name = juce::String(PlatformUtils::pluginFileName("Thing", PluginFormat::VST3));
+		const auto foreign = target.getChildFile(name);
+		const auto ours = target.getChildFile(PlatformUtils::pluginFileName("Ours", PluginFormat::VST3));
+
+#if JUCE_MAC
+		// A bundle as every format is one here, identified by its Info.plist. JUCE's own default,
+		// written with the spaces of the company name, is ours as much as the one we set.
+		const auto makeBundle = [](const juce::File& _bundle, const juce::String& _id)
+		{
+			TEST_ASSERT(_bundle.getChildFile("Contents/Resources").createDirectory().wasOk());
+			TEST_ASSERT(_bundle.getChildFile("Contents/Info.plist").replaceWithText(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+				"<plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>" + _id +
+				"</string><key>CFBundleShortVersionString</key><string>1.7.0</string></dict></plist>"));
+			TEST_ASSERT(_bundle.getChildFile("Contents/Resources/LogoNormal.png").replaceWithText("theirs"));
+		};
+
+		makeBundle(foreign, "com.example.Thing");
+		makeBundle(ours, "com.The Usual Suspects.Ours");
+#else
+		// A system library says who made it in its version resource, and it is not us. Ours, a file
+		// with no version resource at all, is like every CLAP we build.
+		TEST_ASSERT(juce::File::getSpecialLocation(juce::File::windowsSystemDirectory)
+			.getChildFile("kernel32.dll").copyFileTo(foreign));
+		TEST_ASSERT(ours.replaceWithText("old"));
+#endif
+
+		const auto foreignSize = foreign.isDirectory() ? 0 : foreign.getSize();
+
+		TEST_ASSERT(!PlatformUtils::otherMaker(foreign.getFullPathName().toStdString()).empty());
+		TEST_ASSERT(PlatformUtils::otherMaker(ours.getFullPathName().toStdString()).empty());
+
+		// Not an install of ours, so no version and nothing to upgrade.
+		TEST_ASSERT(InstalledPlugins(false).installedFile("Thing", PluginFormat::VST3, target.getFullPathName().toStdString()).empty());
+		TEST_ASSERT(!InstalledPlugins(false).installedFile("Ours", PluginFormat::VST3, target.getFullPathName().toStdString()).empty());
+
+		const auto build = root.getChildFile("build");
+		TEST_ASSERT(build.createDirectory().wasOk());
+		TEST_ASSERT(build.getChildFile(name).replaceWithText("ours"));
+
+		const auto zip = root.getChildFile("build.zip");
+		makeZip(build, zip);
+
+		std::string error;
+		std::vector<std::string> files;
+
+		TEST_ASSERT(!ZipExtractor::install(zip.getFullPathName().toStdString(), target.getFullPathName().toStdString(),
+			name.toStdString(), "Thing", false, files, error));
+		TEST_ASSERT(error.find("somebody else") != std::string::npos);
+
+		// Untouched, and nothing of it carried anywhere.
+		TEST_ASSERT(foreign.isDirectory() ? foreign.getChildFile("Contents/Resources/LogoNormal.png").existsAsFile()
+		                                  : foreign.getSize() == foreignSize);
+		TEST_ASSERT(!juce::File(juce::String(PlatformUtils::romFolder("Thing"))).exists());
+
+		TEST_ASSERT(!PluginInstaller::uninstall("Thing", "Thing", PluginFormat::VST3, target.getFullPathName().toStdString(), {}, error));
+		TEST_ASSERT(foreign.exists());
+
+		// Ours is replaced as it always was.
+		const auto oursBuild = root.getChildFile("oursBuild");
+		TEST_ASSERT(oursBuild.createDirectory().wasOk());
+		TEST_ASSERT(oursBuild.getChildFile(ours.getFileName()).replaceWithText("new"));
+
+		const auto oursZip = root.getChildFile("ours.zip");
+		makeZip(oursBuild, oursZip);
+
+		TEST_ASSERT(ZipExtractor::install(oursZip.getFullPathName().toStdString(), target.getFullPathName().toStdString(),
+			ours.getFileName().toStdString(), "Ours", false, files, error));
+		TEST_ASSERT(ours.existsAsFile() && ours.loadFileAsString() == "new");
+
+		setDataFolder({});
+		root.deleteRecursively();
+#endif
+	}
+
 	// Installing over a plugin takes a ROM out of the bundle and puts it in the folder the plugin
 	// reads. Carrying it into the new bundle would keep it, but keep it somewhere the next update
 	// endangers all over again - so the update is the moment it gets moved for good.
@@ -4128,6 +4220,7 @@ int main()
 		testTheTeamLoginFlagSurvivesBeingWrittenBack();
 		testBackupAndRestoreOfADataFolder();
 		testBackupsGoWhereTheyArePointed();
+		testAnotherMakersPluginOfTheSameNameIsLeftAlone();
 		testAnUpdateMovesTheRomOutOfTheBundle();
 		testUninstallKeepsTheRomItFinds();
 		testAnUpdateIsOnlyOfferedForANewerBuild();

@@ -31,7 +31,8 @@ namespace pluginManager
 		// anyway, and nothing in this program ever deletes from it.
 		void migrateRoms(const juce::File& _plugin, const std::string& _product)
 		{
-			if (!_plugin.isDirectory())
+			// Somebody else's plugin under the same name: nothing in there was put there for ours.
+			if (!_plugin.isDirectory() || !PlatformUtils::otherMaker(_plugin.getFullPathName().toStdString()).empty())
 				return;
 
 			const auto roms = juce::File(juce::String(PlatformUtils::romFolder(_product)));
@@ -255,6 +256,13 @@ namespace pluginManager
 		if (path.empty())
 		{
 			_message = _product + " " + PlatformUtils::formatToString(_format) + " is not installed here.";
+			return false;
+		}
+
+		// Found by its name alone, and the name is not ours alone.
+		if (const auto maker = PlatformUtils::otherMaker(path); !maker.empty())
+		{
+			_message = path + " is a plugin of the same name by somebody else (" + maker + "), so it was left as it is.";
 			return false;
 		}
 

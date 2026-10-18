@@ -74,6 +74,12 @@ Plugin Manager:
         for example to a folder that Dropbox, OneDrive, iCloud Drive or Google
         Drive synchronises, which keeps the backups off the computer as well.
 
+- [Fix] Another maker's plugin with the same file name as one of ours was
+        deleted when ours was installed over it, and its contents were copied
+        into our roms folder. It is now left alone: it does not show as
+        installed, an install into the same folder stops and says so, and an
+        uninstall does not remove it.
+
 2.2.27:
 
 Framework:

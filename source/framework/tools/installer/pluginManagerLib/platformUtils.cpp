@@ -424,7 +424,7 @@ namespace pluginManager
 			return {};
 		}
 
-		std::string versionResourceOf(const juce::File& _file)
+		std::vector<char> versionInfoOf(const juce::File& _file)
 		{
 			if (!_file.existsAsFile())
 				return {};
@@ -440,6 +440,16 @@ namespace pluginManager
 			std::vector<char> data(size);
 
 			if (!GetFileVersionInfoW(path.toWideCharPointer(), handle, size, data.data()))
+				return {};
+
+			return data;
+		}
+
+		std::string versionResourceOf(const juce::File& _file)
+		{
+			auto data = versionInfoOf(_file);
+
+			if (data.empty())
 				return {};
 
 			VS_FIXEDFILEINFO* info = nullptr;
@@ -458,10 +468,40 @@ namespace pluginManager
 
 			return std::to_string(major) + '.' + std::to_string(minor) + '.' + std::to_string(patch);
 		}
+
+		// From the string table this time, which is per language: the first one the resource lists.
+		std::string companyOf(const juce::File& _file)
+		{
+			auto data = versionInfoOf(_file);
+
+			if (data.empty())
+				return {};
+
+			struct Translation { WORD language; WORD codePage; };
+
+			Translation* translations = nullptr;
+			UINT length = 0;
+
+			if (!VerQueryValueW(data.data(), L"\\VarFileInfo\\Translation", reinterpret_cast<void**>(&translations), &length) ||
+				!translations || length < sizeof(Translation))
+			{
+				return {};
+			}
+
+			wchar_t key[64];
+			swprintf(key, 64, L"\\StringFileInfo\\%04x%04x\\CompanyName", translations->language, translations->codePage);
+
+			wchar_t* company = nullptr;
+
+			if (!VerQueryValueW(data.data(), key, reinterpret_cast<void**>(&company), &length) || !company || !length)
+				return {};
+
+			return juce::String(company).trim().toStdString();
+		}
 #elif JUCE_MAC
 		// Every plugin format is a bundle here, so the version is in its Info.plist. Read through
 		// CFBundle rather than as XML: Xcode writes those plists in the binary format.
-		std::string bundleVersionOf(const juce::File& _bundle)
+		std::string bundleStringOf(const juce::File& _bundle, const CFStringRef _key)
 		{
 			if (!_bundle.isDirectory())
 				return {};
@@ -487,13 +527,13 @@ namespace pluginManager
 
 			std::string result;
 
-			// The short string is the one that reads like a version; CFBundleVersion is the build.
-			if (const auto* value = static_cast<CFStringRef>(
-				CFBundleGetValueForInfoDictionaryKey(bundle, CFSTR("CFBundleShortVersionString"))))
-			{
-				char buffer[64] = {};
+			const auto* value = CFBundleGetValueForInfoDictionaryKey(bundle, _key);
 
-				if (CFStringGetCString(value, buffer, sizeof(buffer), kCFStringEncodingUTF8))
+			if (value && CFGetTypeID(value) == CFStringGetTypeID())
+			{
+				char buffer[256] = {};
+
+				if (CFStringGetCString(static_cast<CFStringRef>(value), buffer, sizeof(buffer), kCFStringEncodingUTF8))
 					result = buffer;
 			}
 
@@ -525,10 +565,36 @@ namespace pluginManager
 #if JUCE_WINDOWS
 		return versionResourceOf(binaryOf(installed));
 #elif JUCE_MAC
-		return bundleVersionOf(installed);
+		// The short string is the one that reads like a version; CFBundleVersion is the build.
+		return bundleStringOf(installed, CFSTR("CFBundleShortVersionString"));
 #else
 		// An ELF carries nothing to read, so for everything but an LV2 a plugin this program did not
 		// install is of an unknown version here.
+		return {};
+#endif
+	}
+
+	std::string PlatformUtils::otherMaker(const std::string& _path)
+	{
+		const auto file = juce::File(juce::String(_path));
+
+		if (!file.exists())
+			return {};
+
+#if JUCE_MAC
+		const auto id = bundleStringOf(file, CFSTR("CFBundleIdentifier"));
+
+		// Builds from before BUNDLE_ID was set carry JUCE's default, the company name as it is
+		// written: "com.The Usual Suspects.<target>". Compared without what is not a letter, a digit
+		// or a dot, so that one and ours are the same name.
+		const auto normalised = juce::String(id).toLowerCase().retainCharacters("abcdefghijklmnopqrstuvwxyz0123456789.");
+
+		return id.empty() || normalised.startsWith("com.theusualsuspects.") ? std::string() : id;
+#elif JUCE_WINDOWS
+		const auto company = companyOf(binaryOf(file));
+
+		return company.empty() || juce::String(company).equalsIgnoreCase("The Usual Suspects") ? std::string() : company;
+#else
 		return {};
 #endif
 	}

@@ -88,7 +88,8 @@ namespace pluginManager
 		// would have is all there is to go on.
 		const auto path = PlatformUtils::installedFilePath(_product, _format, _dir);
 
-		if (path.empty() || !juce::File(juce::String(path)).exists())
+		// ...and the name may be somebody else's plugin, which is no install of ours.
+		if (path.empty() || !juce::File(juce::String(path)).exists() || !PlatformUtils::otherMaker(path).empty())
 			return {};
 
 		return path;
