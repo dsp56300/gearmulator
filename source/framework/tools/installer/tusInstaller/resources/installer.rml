@@ -55,7 +55,7 @@
 				     offers, and what it then fetches. -->
 				<div class="plugin-title">
 					<div class="plugin-name">Plugin Name</div>
-					<span class="fx-toggle format-label">FX</span>
+					<span class="fx-toggle format-label">FX version</span>
 				</div>
 				<!-- What the hardware is, always on its own line. Beside the name it fitted on some rows
 				     and not on others, and a row that looks unlike the one above it reads worse than a

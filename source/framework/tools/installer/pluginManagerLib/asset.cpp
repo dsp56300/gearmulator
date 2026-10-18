@@ -163,6 +163,11 @@ namespace pluginManager
 		return 0;
 	}
 
+	bool includesFxBuild(const bool _offered, const bool _wanted, const bool _installed)
+	{
+		return _offered && (_wanted || _installed);
+	}
+
 	InstallAction combineInstallActions(const InstallAction _plugin, const InstallAction _fx)
 	{
 		for (const auto action : {InstallAction::Install, InstallAction::Upgrade, InstallAction::Downgrade})

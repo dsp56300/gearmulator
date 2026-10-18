@@ -12,6 +12,8 @@
 
 #include <JuceHeader.h>
 
+#include <algorithm>
+
 namespace pluginManager
 {
 	namespace
@@ -155,8 +157,23 @@ namespace pluginManager
 		}
 
 		m_fxToggle->SetClass("checked", m_fxSelected);
+		const auto& name = m_product.name.empty() ? m_product.product : m_product.name;
+
+		m_fxToggle->SetAttribute("title", "Also install " + m_fxProduct + ", the effect version. One that is "
+			"installed is always updated together with " + name + ".");
 
 		claimClick(m_fxToggle, [this](Rml::Event&) { setFxSelected(!m_fxSelected); });
+	}
+
+	// Filled while an effect build is on the disk, as a format chip is: whether it is there and whether
+	// it is ticked are two different things, and the chip is the only place the row says the former.
+	void PluginEntryController::updateFxToggle()
+	{
+		if (!m_fxToggle)
+			return;
+
+		m_fxToggle->SetClass("installed", std::any_of(m_formats.begin(), m_formats.end(),
+			[](const FormatRow& _row) { return _row.fxInstalled; }));
 	}
 
 	void PluginEntryController::setFxSelected(const bool _selected)
@@ -191,12 +208,17 @@ namespace pluginManager
 			PlatformUtils::getCurrentOS(), PlatformUtils::getCurrentArch()) != nullptr;
 	}
 
+	bool PluginEntryController::fxIncluded(const FormatRow& _row) const
+	{
+		return includesFxBuild(hasFxBuild(_row), wantsFx(), _row.fxInstalled);
+	}
+
 	InstallAction PluginEntryController::actionFor(const FormatRow& _row) const
 	{
 		const auto plugin = m_pluginManager.installAction(m_product.product, _row.format, _row.installed,
 			_row.installedVersion, _row.selectedVersion());
 
-		if (!wantsFx() || !hasFxBuild(_row))
+		if (!fxIncluded(_row))
 			return plugin;
 
 		const auto fx = m_pluginManager.installAction(m_fxProduct, _row.format, _row.fxInstalled,
@@ -575,6 +597,8 @@ namespace pluginManager
 	// with nothing to act on stays visible but dim: the column keeps its shape down the whole list.
 	void PluginEntryController::updateAllColumn()
 	{
+		updateFxToggle();
+
 		if (!m_allSummary)
 			return;
 
@@ -731,7 +755,7 @@ namespace pluginManager
 			if (worthDoing(m_product.product, row.installed, row.installedVersion, row))
 				jobs.push_back({index, false});
 
-			if (wantsFx() && hasFxBuild(row) && worthDoing(m_fxProduct, row.fxInstalled, row.fxInstalledVersion, row))
+			if (fxIncluded(row) && worthDoing(m_fxProduct, row.fxInstalled, row.fxInstalledVersion, row))
 				jobs.push_back({index, true});
 		}
 

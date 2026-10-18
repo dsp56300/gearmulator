@@ -138,6 +138,11 @@ namespace pluginManager
 		bool wantsFx() const { return !m_fxProduct.empty() && m_fxSelected; }
 		bool hasFxBuild(const FormatRow& _row) const;
 
+		// Whether a column's install and upgrade take the effect build along: while the chip is
+		// ticked, and whenever it is installed - see includesFxBuild.
+		bool fxIncluded(const FormatRow& _row) const;
+		void updateFxToggle();
+
 		// What the button in a column offers, which is about the plugin and, while the FX chip is
 		// ticked, about its effect build as well.
 		InstallAction actionFor(const FormatRow& _row) const;

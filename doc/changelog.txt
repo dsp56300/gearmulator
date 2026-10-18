@@ -40,6 +40,16 @@ Plugin Manager:
         installed beside the standalone of its plugin, and that is where it is
         found now.
 
+- [Fix] BUG-10488 An installed effect version, such as OsirusFX, was only
+        upgraded while its FX chip was ticked, although "Updates available"
+        counted it: the product stayed in that group after an upgrade. An
+        installed effect version is now always upgraded together with its
+        plugin. The chip only decides whether one that is not installed yet
+        is installed.
+
+- [Imp] BUG-10488 The FX chip is labelled "FX version" and is drawn in the
+        accent colour when it is ticked.
+
 2.2.27:
 
 Framework:

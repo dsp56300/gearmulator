@@ -346,7 +346,7 @@ namespace pluginManager
 		const auto plugin = m_pluginManager->installAction(m_product.product, _row.format, _row.installed,
 			_row.installedVersion, _row.newest);
 
-		if (!wantsFx() || !_row.fxOffered)
+		if (!fxIncluded(_row))
 			return plugin;
 
 		return combineInstallActions(plugin, m_pluginManager->installAction(m_fxProduct, _row.format, _row.fxInstalled,
@@ -357,6 +357,13 @@ namespace pluginManager
 	{
 		for (auto& row : m_rows)
 			refreshRow(row);
+
+		// Filled while an effect build is on the disk, as in the list.
+		if (m_fxToggle)
+		{
+			m_fxToggle->SetClass("installed", std::any_of(m_rows.begin(), m_rows.end(),
+				[](const FormatRow& _row) { return _row.fxInstalled; }));
+		}
 	}
 
 	void DetailPage::setPath(FormatRow& _row, const std::string& _path)
@@ -407,7 +414,7 @@ namespace pluginManager
 
 		// After the plugin rather than beside it: both go into the same folder, and one archive
 		// unpacking over the other is how a half-written build ends up there.
-		if (wantsFx() && m_rows[_index].fxOffered)
+		if (fxIncluded(m_rows[_index]))
 			m_pending.push_back({_index, true});
 
 		installNext();

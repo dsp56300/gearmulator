@@ -1952,4 +1952,17 @@ scrollbarhorizontal sliderbar {
 	color: #9ac348;
 }
 
+/* The FX chip ticked, in the accent rather than a lighter grey: grey on grey left it looking the same
+   ticked or not, and nobody could tell whether the effect builds were part of what the buttons do
+   (BUG-10488). After the format chip rules, which it would otherwise lose to. */
+.fx-toggle.checked {
+	color: #b5e853;
+	border-color: #b5e853;
+	decorator: vertical-gradient( #2a3318 #1e2412 );
+}
 
+.fx-toggle.checked.installed {
+	color: #d4f28c;
+	border-color: #b5e853;
+	decorator: vertical-gradient( #3d4a22 #2c3618 );
+}

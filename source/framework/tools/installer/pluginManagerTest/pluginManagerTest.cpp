@@ -231,6 +231,26 @@ namespace
 		TEST_ASSERT(combineInstallActions(IA::Reinstall, IA::Reinstall) == IA::Reinstall);
 	}
 
+	// Whether a column's install or upgrade takes the effect build along (BUG-10488).
+	void testEffectBuildIsIncludedWhenAskedForOrInstalled()
+	{
+		// Asked for with the FX chip, whether it is installed yet or not.
+		TEST_ASSERT(includesFxBuild(true, true, false));
+		TEST_ASSERT(includesFxBuild(true, true, true));
+
+		// Not asked for but installed: kept in step with its plugin. Going by the chip alone, an
+		// installed effect build was never upgraded while "Updates available" counted it.
+		TEST_ASSERT(includesFxBuild(true, false, true));
+
+		// Neither: an install of the plugin does not bring an effect build nobody asked for.
+		TEST_ASSERT(!includesFxBuild(true, false, false));
+
+		// No effect build of that version to fetch, whatever else is true.
+		TEST_ASSERT(!includesFxBuild(false, true, true));
+		TEST_ASSERT(!includesFxBuild(false, true, false));
+		TEST_ASSERT(!includesFxBuild(false, false, true));
+	}
+
 	// A trimmed but faithful copy of what the server actually returns for a channel folder: it is
 	// a generated listing, so the build links sit among a parent folder link, column sort links
 	// and asset references.
@@ -2847,6 +2867,104 @@ namespace
 		PlatformUtils::setSettingsFolder({});
 	}
 
+	// The case behind most of the questions about effect builds (BUG-10488): the plugin is up to date and
+	// its effect build is not, with the FX chip off, which is how it starts. "Updates available" counts
+	// the effect build, so the column has to offer the upgrade that takes it along - it offered a
+	// reinstall, the row never left that group, and the effect build was never upgraded.
+	void testAnInstalledEffectBuildKeepsUpWithItsPlugin()
+	{
+		const Fixture fixture;
+
+		// The builds of this platform, which is the one every answer below is about.
+		const std::string platform =
+#if JUCE_WINDOWS
+			"win64";
+#elif JUCE_MAC
+			"MacOS";
+#elif defined(__aarch64__)
+			"Linux_aarch64";
+#else
+			"Linux_x86_64";
+#endif
+
+		const auto link = [&](const std::string& _product)
+		{
+			const auto name = "TheUsualSuspects-" + _product + "-VST3-2.2.19-" + platform + ".zip";
+			return "<a href=\"/builds/prototype-9/internal/" + name + "\">x</a>";
+		};
+
+		fixture.write("builds/prototype-9/internal/index.html", link("Prototype-9") + link("Prototype-9FX"));
+
+		const auto plugins = fixture.dir.getChildFile("vst3");
+		TEST_ASSERT(plugins.createDirectory().wasOk());
+
+		PlatformUtils::setSettingsFolder(fixture.dir.getChildFile("settings").getFullPathName().toStdString());
+
+		const auto installed = [&](const std::string& _product, const std::string& _version)
+		{
+			Asset build;
+			build.product = _product;
+			build.format = "VST3";
+			build.version = _version;
+			return build;
+		};
+
+		// The plugin at the newest version, its effect build one behind.
+		{
+			InstalledPlugins records;
+
+			for (const auto& [product, version] : {std::make_pair(std::string("Prototype-9"), std::string("2.2.19")),
+			                                       std::make_pair(std::string("Prototype-9FX"), std::string("2.2.18"))})
+			{
+				TEST_ASSERT(plugins.getChildFile(juce::String(product + ".vst3")).replaceWithText("plugin"));
+				records.set(installed(product, version), plugins.getFullPathName().toStdString(), {product + ".vst3"});
+			}
+
+			records.save();
+		}
+
+		{
+			// Reading the settings - the test's own folder - is what brings in the records above.
+			PluginManager pm(true);
+			pm.setCredentials(Channel::Internal, {}, {"team", "secret"});
+
+			std::string error;
+			TEST_ASSERT(pm.refresh(error));
+
+			pm.getInstallPaths().set(PluginFormat::VST3, plugins.getFullPathName().toStdString());
+
+			TEST_ASSERT(pm.getCatalog().fxProductOf("Prototype-9") == "Prototype-9FX");
+			TEST_ASSERT(pm.hasUpdate("Prototype-9"));
+
+			// What the column is made of, with the chip off.
+			const auto actionOf = [&](const std::string& _product)
+			{
+				return pm.installAction(_product, "VST3", true, pm.getInstalledVersion(_product, "VST3"), "2.2.19");
+			};
+
+			const auto plugin = actionOf("Prototype-9");
+			const auto fx = actionOf("Prototype-9FX");
+
+			TEST_ASSERT(plugin == InstallAction::Reinstall);
+			TEST_ASSERT(fx == InstallAction::Upgrade);
+
+			// Installed, so it is part of the column although nobody ticked it, and the column offers
+			// what the group it sits in says: an upgrade.
+			const auto fxInstalled = pm.isInstalled("Prototype-9FX", "VST3");
+			TEST_ASSERT(fxInstalled);
+			TEST_ASSERT(includesFxBuild(true, false, fxInstalled));
+			TEST_ASSERT(combineInstallActions(plugin, fx) == InstallAction::Upgrade);
+
+			// And once that upgrade has run, the row has nothing left to offer.
+			pm.recordInstall(installed("Prototype-9FX", "2.2.19"), {"Prototype-9FX.vst3"});
+
+			TEST_ASSERT(!pm.hasUpdate("Prototype-9"));
+			TEST_ASSERT(actionOf("Prototype-9FX") == InstallAction::Reinstall);
+		}
+
+		PlatformUtils::setSettingsFolder({});
+	}
+
 	void testUninstallTakesWhatTheArchiveBrought()
 	{
 		const auto dir = juce::File::getSpecialLocation(juce::File::tempDirectory)
@@ -3844,6 +3962,7 @@ int main()
 		testVersionOrdering();
 		testInstallActions();
 		testPairedInstallActions();
+		testEffectBuildIsIncludedWhenAskedForOrInstalled();
 		testDirectoryIndex();
 		testDirectoryIndexDoesNotDuplicate();
 		testEmptyDirectoryIndex();
@@ -3897,6 +4016,7 @@ int main()
 		testUninstallRemovesWhatWasInstalled();
 		testAProgramKeepsTheNameItWasBuiltUnder();
 		testAnEffectProgramIsFoundBesideItsPlugin();
+		testAnInstalledEffectBuildKeepsUpWithItsPlugin();
 		testUninstallTakesWhatTheArchiveBrought();
 		testAnInstallLeftBehindIsStillFound();
 		testAnInstalledBuildIsFoundWhereverItIs();

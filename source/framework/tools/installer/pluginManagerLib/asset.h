@@ -86,4 +86,12 @@ namespace pluginManager
 	// not still offers to fetch it. Something missing comes before something behind, and a
 	// reinstall is what is left when there is nothing either of them needs.
 	InstallAction combineInstallActions(InstallAction _plugin, InstallAction _fx);
+
+	// Whether installing or upgrading a format of a plugin takes its effect build along: there has to
+	// be one, and either it was asked for - the FX chip - or it is installed already. An installed
+	// effect build is kept in step with its plugin, asked for or not. Going by the chip alone, which is
+	// off until somebody turns it on, left it out of date while "Updates available" counted it: the
+	// plugin stayed in that group after an upgrade and its effect build was never upgraded (BUG-10488).
+	// Removing goes by the chip alone, so nothing is taken away that was not asked for.
+	bool includesFxBuild(bool _offered, bool _wanted, bool _installed);
 }

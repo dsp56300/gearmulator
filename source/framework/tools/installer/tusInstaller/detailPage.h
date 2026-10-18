@@ -86,6 +86,13 @@ namespace pluginManager
 		// the chip has to be ticked.
 		bool wantsFx() const { return !m_fxProduct.empty() && m_fxSelected; }
 
+		// Whether a row's install and upgrade take the effect build along: while the chip is ticked,
+		// and whenever it is installed, as in the list (BUG-10488).
+		bool fxIncluded(const FormatRow& _row) const
+		{
+			return includesFxBuild(_row.fxOffered, wantsFx(), _row.fxInstalled);
+		}
+
 		// What the button in a row offers, which is about the plugin and, while the chip is ticked,
 		// about its effect build as well.
 		InstallAction actionFor(const FormatRow& _row) const;
