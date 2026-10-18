@@ -25,6 +25,17 @@ OsTIrus:
 - [Fix] A changed Arp Mode was lost when the patch was loaded again, for example
         with the project: the patch played the arpeggiator mode it had before.
 
+JE8086:
+
+- [Fix] BUG-10508 The Remote KBD CH of the JP-8080 had no effect: Split, Dual,
+        the arpeggiator and RPS could not be played via MIDI. The JP-8080 has a
+        second MIDI input, REMOTE KBD IN, and the plugin sent everything to MIDI
+        IN. MIDI on the Remote KBD CH (EDIT, MIDI) now arrives at REMOTE KBD IN
+        and plays the JP-8080 like its own controls, as the Remote Ctrl CH does
+        on the JP-8000. With ALL, the factory setting, that is every channel;
+        set a single channel to play the Upper and Lower parts on their own MIDI
+        channels.
+
 Plugin Manager:
 
 - [Fix] With the team login, installing a test console from a donators folder
