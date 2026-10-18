@@ -216,6 +216,15 @@ namespace bridgeClient
 		});
 	}
 
+	void RemoteDevice::onHostTransport(const synthLib::SMidiEvent& _ev)
+	{
+		// The device on the server follows the host with it, its arpeggiator for example
+		safeCall([&]
+		{
+			return m_connection->send(_ev);
+		});
+	}
+
 	bool RemoteDevice::safeCall(const std::function<bool()>& _func, const std::function<void()>& _onFail/* = [] {}*/)
 	{
 		if(!isValid())

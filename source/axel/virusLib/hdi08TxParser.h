@@ -63,6 +63,11 @@ namespace virusLib
 		std::vector<uint8_t> m_presetData;
 		std::vector<dsp56k::TWord> m_dspStatus;
 
+		// The A, B and C: MIDI out with running status
+		uint8_t m_midiStatus = 0;
+		std::array<uint8_t, 2> m_midiBytes{};
+		uint32_t m_midiCount = 0;
+
 		uint32_t m_remainingPresetBytes = 0;
 		uint32_t m_remainingStatusBytes = 0;
 

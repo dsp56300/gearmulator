@@ -4,6 +4,8 @@
 
 #include "baseLib/binarystream.h"
 
+#include "synthLib/midiTypes.h"
+
 namespace bridgeLib
 {
 	std::string commandToString(const Command _command)
@@ -183,5 +185,46 @@ namespace bridgeLib
 	{
 		_s.read(percent);
 		return _s;
+	}
+
+	void writeMidiEvent(baseLib::BinaryStream& _s, const synthLib::SMidiEvent& _ev)
+	{
+		_s.write(_ev.a);
+		_s.write(_ev.b);
+		_s.write(_ev.c);
+		_s.write(_ev.sysex);
+		_s.write(_ev.offset);
+		_s.write(static_cast<uint8_t>(_ev.source));
+		_s.write(static_cast<uint8_t>(_ev.type));
+
+		if(_ev.type == synthLib::MidiEventType::HostTransport)
+		{
+			_s.write(_ev.transport.ppqPos);
+			_s.write(_ev.transport.bpm);
+			_s.write(static_cast<uint8_t>(_ev.transport.isPlaying));
+			_s.write(static_cast<uint8_t>(_ev.transport.hasPpqPosition));
+		}
+	}
+
+	void readMidiEvent(baseLib::BinaryStream& _s, synthLib::SMidiEvent& _ev)
+	{
+		_s.read(_ev.a);
+		_s.read(_ev.b);
+		_s.read(_ev.c);
+		_s.read(_ev.sysex);
+		_s.read(_ev.offset);
+		_ev.source = static_cast<synthLib::MidiEventSource>(_s.read<uint8_t>());
+		_ev.type = static_cast<synthLib::MidiEventType>(_s.read<uint8_t>());
+
+		// The receiver reuses one event, nothing of the last one may stay
+		_ev.transport = {};
+
+		if(_ev.type == synthLib::MidiEventType::HostTransport)
+		{
+			_s.read(_ev.transport.ppqPos);
+			_s.read(_ev.transport.bpm);
+			_ev.transport.isPlaying = _s.read<uint8_t>() != 0;
+			_ev.transport.hasPpqPosition = _s.read<uint8_t>() != 0;
+		}
 	}
 }

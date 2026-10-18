@@ -7,6 +7,7 @@ set(SOURCES
 	midi/songReset.h midi/songReset.cpp
 	midi/midiFile.h midi/smfReader.cpp midi/rcpDecoder.cpp midi/rcpInternal.h midi/rcpTrack.cpp midi/rcpTempo.cpp
 	analog/analogFilter.cpp analog/analogFilter.h
+	arpeggiator.cpp arpeggiator.h
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
 	consoleTools.cpp consoleTools.h
@@ -77,6 +78,11 @@ set_property(TARGET synthLib PROPERTY FOLDER "Gearmulator")
 target_include_directories(synthLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 if(BUILD_TESTING)
+	add_executable(arpeggiator_test arpeggiator_test.cpp)
+	target_link_libraries(arpeggiator_test PRIVATE synthLib)
+	set_property(TARGET arpeggiator_test PROPERTY FOLDER "Tests")
+	add_test(NAME arpeggiator COMMAND arpeggiator_test)
+
 	add_executable(dcFilter_test dcFilter_test.cpp)
 	target_link_libraries(dcFilter_test PRIVATE synthLib)
 	set_property(TARGET dcFilter_test PROPERTY FOLDER "Tests")

@@ -87,7 +87,7 @@ namespace synthLib
 		bool applyPendingDeviceSamplerate();
 
 	private:
-		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
+		void processMidiClock(float _bpm, double _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
 		const float* getSilence(size_t _minimumSize);
 		void updateDeviceLatency();

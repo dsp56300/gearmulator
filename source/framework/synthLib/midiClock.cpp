@@ -18,7 +18,7 @@ namespace synthLib
 {
 	static constexpr double ClockTicksPerQuarter = 24.0;
 
-	void MidiClock::process(const float _bpm, const float _ppqPos, const bool _isPlaying, const size_t _sampleCount)
+	void MidiClock::process(const float _bpm, const double _ppqPos, const bool _isPlaying, const size_t _sampleCount)
 	{
 		if(_bpm < 1.0f)
 			return;
@@ -63,7 +63,7 @@ namespace synthLib
 		stop();
 	}
 
-	void MidiClock::start(const float _ppqPos)
+	void MidiClock::start(const double _ppqPos)
 	{
 		const double ppqPos = _ppqPos;
 		const auto quarterPos = (ppqPos - std::floor(ppqPos + 1.0));

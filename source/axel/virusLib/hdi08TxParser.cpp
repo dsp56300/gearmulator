@@ -51,6 +51,30 @@ namespace virusLib
 				m_state = State::Sysex;
 				m_sysexData.push_back(byte);
 			}
+			else if(byte < 0x80 ? m_midiStatus != 0 : byte < 0xf0 && !(_data & 0xffff))
+			{
+				// MIDI out, one byte per word, with running status. Reports of the OS in between leave it. Only notes
+				// leave the device, the arpeggiator's with Midi Arp Send: unlike the TI, which keeps them on a cable of
+				// their own, the A, B and C send the parameter changes they get as controllers on the same port
+				if(byte >= 0x80)
+				{
+					m_midiStatus = byte;
+					m_midiCount = 0;
+					break;
+				}
+
+				m_midiBytes[m_midiCount++] = byte;
+
+				const auto kind = m_midiStatus & 0xf0;
+				if(m_midiCount < (kind == 0xc0 || kind == 0xd0 ? 1u : 2u))
+					break;
+
+				m_midiCount = 0;
+				if(kind != synthLib::M_NOTEON && kind != synthLib::M_NOTEOFF)
+					break;
+				m_midiData.emplace_back(synthLib::MidiEventSource::Device, m_midiStatus, m_midiBytes[0], m_midiBytes[1]);
+				return true;
+			}
 			else
 			{
 				size_t i=0;
