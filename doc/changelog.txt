@@ -2,6 +2,12 @@ Release Notes
 
 2.2.28:
 
+Framework:
+
+- [Imp] BUG-10435 Skins can read and change the Lock Regions in Lua and are told
+        when a lock changes: params.getRegions, isRegionLocked, setRegionLocked
+        and onRegionLockChanged.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

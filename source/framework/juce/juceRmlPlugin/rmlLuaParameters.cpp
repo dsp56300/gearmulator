@@ -205,6 +205,86 @@ namespace rmlPlugin
 		return 1;
 	}
 
+	// the id of a region given by its id or by its name, the name is what the Lock Regions menu shows
+	static const std::string& resolveRegion(lua_State* _L, const int _argIndex, const pluginLib::Controller& _controller)
+	{
+		const char* idOrName = luaL_checkstring(_L, _argIndex);
+		const auto& regions = _controller.getParameterDescriptions().getRegions();
+
+		if (const auto it = regions.find(idOrName); it != regions.end())
+			return it->first;
+
+		for (const auto& [id, region] : regions)
+		{
+			if (region.getName() == idOrName)
+				return id;
+		}
+
+		luaL_error(_L, "Region '%s' not found", idOrName);
+		static const std::string none;
+		return none;
+	}
+
+	// params.getRegions() -> array of table{id, name}, sorted by id like the Lock Regions menu
+	static int luaParamsGetRegions(lua_State* _L)
+	{
+		std::map<std::string, const pluginLib::ParameterRegion*> regions;
+		for (const auto& [id, region] : getController(_L).getParameterDescriptions().getRegions())
+			regions.insert({id, &region});
+
+		lua_createtable(_L, static_cast<int>(regions.size()), 0);
+		int i = 1;
+		for (const auto& [id, region] : regions)
+		{
+			lua_createtable(_L, 0, 2);
+			lua_pushstring(_L, id.c_str());
+			lua_setfield(_L, -2, "id");
+			lua_pushstring(_L, region->getName().c_str());
+			lua_setfield(_L, -2, "name");
+			lua_rawseti(_L, -2, i++);
+		}
+		return 1;
+	}
+
+	// params.isRegionLocked(region [, part_or_current]) -> bool
+	static int luaParamsIsRegionLocked(lua_State* _L)
+	{
+		auto& controller = getController(_L);
+		const auto& id = resolveRegion(_L, 1, controller);
+		const auto part = resolveOptionalPart(_L, 2, controller);
+
+		lua_pushboolean(_L, controller.getParameterLocking().isRegionLocked(part, id));
+		return 1;
+	}
+
+	// params.setRegionLocked(region, locked [, part_or_current])
+	static int luaParamsSetRegionLocked(lua_State* _L)
+	{
+		auto& controller = getController(_L);
+		const auto& id = resolveRegion(_L, 1, controller);
+		luaL_checktype(_L, 2, LUA_TBOOLEAN);
+		const bool locked = lua_toboolean(_L, 2);
+		const auto part = resolveOptionalPart(_L, 3, controller);
+
+		auto& locking = controller.getParameterLocking();
+		if (locked)
+			locking.lockRegion(part, id);
+		else
+			locking.unlockRegion(part, id);
+		return 0;
+	}
+
+	// params.onRegionLockChanged(func) -> id, func(regionId, locked, part) for every part, from the menu, Lua or else
+	static int luaParamsOnRegionLockChanged(lua_State* _L)
+	{
+		luaL_checktype(_L, 1, LUA_TFUNCTION);
+		lua_pushvalue(_L, 1);
+		const int funcRef = luaL_ref(_L, LUA_REGISTRYINDEX);
+
+		lua_pushinteger(_L, getListeners(_L).addRegionLockListener(funcRef));
+		return 1;
+	}
+
 	// --- LuaParameterListeners ---
 
 	LuaParameterListeners::LuaParameterListeners(lua_State* _L, pluginLib::Controller& _controller, juceRmlUi::RmlInterfaces& _rmlInterfaces)
@@ -266,6 +346,25 @@ namespace rmlPlugin
 		return id;
 	}
 
+	int LuaParameterListeners::addRegionLockListener(const int _luaFuncRef)
+	{
+		const int id = m_nextId++;
+
+		auto& entry = m_regionLockListeners[id];
+		entry.luaFuncRef = _luaFuncRef;
+		entry.listener.set(m_controller.getParameterLocking().evRegionLockChanged, [this, id](const uint8_t& _part, const std::string& _region, const bool& _locked)
+		{
+			// posted like the other callbacks: a callback that locks or unlocks must not run into itself
+			juce::MessageManager::callAsync([this, alive = std::weak_ptr(m_alive), id, part = _part, region = _region, locked = _locked]
+			{
+				if (!alive.expired())
+					invokeRegionLockCallback(id, region, locked, part);
+			});
+		});
+
+		return id;
+	}
+
 	void LuaParameterListeners::removeListener(int _id)
 	{
 		{
@@ -283,6 +382,15 @@ namespace rmlPlugin
 			{
 				luaL_unref(m_luaState, LUA_REGISTRYINDEX, it->second.luaFuncRef);
 				m_partChangedListeners.erase(it);
+				return;
+			}
+		}
+		{
+			auto it = m_regionLockListeners.find(_id);
+			if (it != m_regionLockListeners.end())
+			{
+				luaL_unref(m_luaState, LUA_REGISTRYINDEX, it->second.luaFuncRef);
+				m_regionLockListeners.erase(it);
 			}
 		}
 	}
@@ -296,6 +404,10 @@ namespace rmlPlugin
 		for (auto& [id, entry] : m_partChangedListeners)
 			luaL_unref(m_luaState, LUA_REGISTRYINDEX, entry.luaFuncRef);
 		m_partChangedListeners.clear();
+
+		for (auto& [id, entry] : m_regionLockListeners)
+			luaL_unref(m_luaState, LUA_REGISTRYINDEX, entry.luaFuncRef);
+		m_regionLockListeners.clear();
 	}
 
 	void LuaParameterListeners::rebindCurrentPartListeners(uint8_t _newPart)
@@ -373,6 +485,21 @@ namespace rmlPlugin
 		}
 	}
 
+	void LuaParameterListeners::invokeRegionLockCallback(const int _id, const std::string& _region, const bool _locked, const uint8_t _part) const
+	{
+		const auto it = m_regionLockListeners.find(_id);
+		if (it == m_regionLockListeners.end())
+			return;
+
+		juceRmlUi::RmlInterfaces::ScopedAccess access(m_rmlInterfaces);
+
+		lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, it->second.luaFuncRef);
+		lua_pushstring(m_luaState, _region.c_str());
+		lua_pushboolean(m_luaState, _locked);
+		lua_pushinteger(m_luaState, _part);
+		Rml::Lua::Interpreter::ExecuteCall(m_luaState, 3, 0);
+	}
+
 	// --- Registration ---
 
 	void registerLuaParameters(lua_State* _L, pluginLib::Controller& _controller, juceRmlUi::RmlInterfaces& _rmlInterfaces)
@@ -400,6 +527,10 @@ namespace rmlPlugin
 			{"removeListener", luaParamsRemoveListener},
 			{"getCurrentPart", luaParamsGetCurrentPart},
 			{"onPartChanged", luaParamsOnPartChanged},
+			{"getRegions", luaParamsGetRegions},
+			{"isRegionLocked", luaParamsIsRegionLocked},
+			{"setRegionLocked", luaParamsSetRegionLocked},
+			{"onRegionLockChanged", luaParamsOnRegionLockChanged},
 			{nullptr, nullptr}
 		};
 

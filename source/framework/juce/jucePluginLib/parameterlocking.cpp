@@ -29,6 +29,8 @@ namespace pluginLib
 
 		setParametersLocked(it->second, _part, true);
 
+		evRegionLockChanged(_part, _id, true);
+
 		return true;
 	}
 
@@ -51,6 +53,8 @@ namespace pluginLib
 		lockedRegions.erase(_id);
 
 		setParametersLocked(it->second, _part, false);
+
+		evRegionLockChanged(_part, _id, false);
 
 		return true;
 	}

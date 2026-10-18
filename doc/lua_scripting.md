@@ -118,6 +118,35 @@ local id = params.onPartChanged(function(newPart)
 end)
 ```
 
+### Lock Regions
+
+The regions of the right-click menu's "Lock Regions" submenu. A locked region keeps its values when
+a patch is loaded into its part.
+
+```lua
+-- All regions, sorted by id like the menu: { {id = "oscA", name = "Oscillator 1"}, ... }
+for _, region in ipairs(params.getRegions()) do
+  Log.Message(Log.logtype.info, region.id .. " = " .. region.name)
+end
+
+-- Query and change a lock; the region is given by its id or by its name as the menu shows it
+local locked = params.isRegionLocked("oscA")        -- current part
+local locked = params.isRegionLocked("Filters", 3)  -- part 3
+params.setRegionLocked("oscA", true)                -- current part
+params.setRegionLocked("Oscillator 1", false, 3)
+
+-- Get told whenever a lock changes, from the menu, from a script or from anywhere else
+local id = params.onRegionLockChanged(function(regionId, locked, part)
+  -- regionId: the region's id even if it was locked by name
+  -- part:     0-based, for every part, not only the current one
+end)
+params.removeListener(id)
+```
+
+A region that is not known raises a Lua error. Some regions combine others, such as `filters`:
+locking it locks the parameters of its subregions, but `isRegionLocked("filterA")` stays false,
+the same way the menu shows it.
+
 ## Frame Events (Animation)
 
 Anything that has to keep moving on its own - an oscilloscope, a VU meter, a scrolling

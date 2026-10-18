@@ -8,6 +8,8 @@
 
 #include "parameterregion.h"
 
+#include "baseLib/event.h"
+
 namespace pluginLib
 {
 	class Parameter;
@@ -17,6 +19,9 @@ namespace pluginLib
 	{
 	public:
 		explicit ParameterLocking(Controller& _controller);
+
+		// part, region id, locked. On the thread that locks or unlocks, the message thread so far
+		baseLib::Event<uint8_t, std::string, bool> evRegionLockChanged;
 
 		bool lockRegion(uint8_t _part, const std::string& _id);
 		bool unlockRegion(uint8_t _part, const std::string& _id);
