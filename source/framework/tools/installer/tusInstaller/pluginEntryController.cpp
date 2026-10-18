@@ -616,6 +616,11 @@ namespace pluginManager
 				++installed;
 		}
 
+		// Nothing ticked, nothing for "Install selected" to do here: the name says so, so that a row
+		// that will be left out is told apart from the others at a glance (BUG-10487).
+		if (m_nameElem)
+			m_nameElem->SetClass("unselected", selected == 0);
+
 		m_allSummary->SetInnerRML(std::to_string(installed) + " of " + std::to_string(selected));
 		m_allSummary->SetClass("current", installed > 0 && installed == selected);
 

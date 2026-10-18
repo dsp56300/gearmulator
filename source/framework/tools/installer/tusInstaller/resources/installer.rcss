@@ -438,6 +438,11 @@ scrollbarhorizontal sliderbar {
 	color: #b5e853;
 }
 
+/* No format of this row ticked, so "Install selected" leaves it out (BUG-10487). */
+.plugin-name.unselected {
+	color: #7a7a7a;
+}
+
 /* Gives way first, and wraps rather than being cut: half a sentence says less than the same
    sentence on two lines, and the row is as tall as the format columns beside it either way. */
 .plugin-description {

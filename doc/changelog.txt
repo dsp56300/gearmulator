@@ -66,6 +66,10 @@ Plugin Manager:
         missing or behind is downloaded now, from a column's button and from
         "Install selected" and "Upgrade all" alike.
 
+- [Imp] BUG-10487 The name of a product with none of its formats ticked is shown
+        in grey, so it is easy to see which products "Install selected" leaves
+        out.
+
 2.2.27:
 
 Framework:
