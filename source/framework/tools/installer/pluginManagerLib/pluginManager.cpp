@@ -365,20 +365,46 @@ namespace pluginManager
 		std::string text;
 
 		// A folder without one is an older build, or a product the login does not open there: the next
-		// place is asked rather than the answer being that there is none.
+		// place is asked rather than the answer being that there is none. With both logins both folders
+		// are asked and the newer changelog wins, internal on a tie: a build can go to donators without
+		// going to internal first, and the internal folder then still holds the changelog of an older one.
 		if (!_request.slug.empty())
 		{
+			// The deploy writes the newest version first, as "Version 2.2.28".
+			const auto newestVersion = [](const std::string& _text) -> uint64_t
+			{
+				const auto at = _text.find("Version ");
+				if (at == std::string::npos)
+					return 0;
+				const auto end = _text.find_first_of("\r\n", at);
+				const auto length = end == std::string::npos ? std::string::npos : end - at - 8;
+				return changelogLib::Changelog::versionToInt(_text.substr(at + 8, length));
+			};
+
+			uint64_t newest = 0;
+
 			for (const auto& [channel, login] : {std::make_pair(Channel::Internal, _request.internal),
 			                                     std::make_pair(Channel::Donators, _request.donators)})
 			{
 				if (!login.valid())
 					continue;
 
-				std::string error;
+				std::string folderText, error;
 
-				if (CatalogSource::fetchChangelog(_request.slug, channel, login, text, error))
-					return parsed(text);
+				if (!CatalogSource::fetchChangelog(_request.slug, channel, login, folderText, error))
+					continue;
+
+				const auto version = newestVersion(folderText);
+
+				if (text.empty() || version > newest)
+				{
+					text = std::move(folderText);
+					newest = version;
+				}
 			}
+
+			if (!text.empty())
+				return parsed(text);
 		}
 
 		if (!_request.published)

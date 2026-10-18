@@ -31,6 +31,10 @@ Plugin Manager:
         failed with "HTTP 401": it asked for a donator login of the test console
         itself instead of the one of the folder its builds are in.
 
+- [Fix] With the team login, a product whose newest build went to donators only
+        showed the changelog of the older internal build. The newer of the two is
+        shown now.
+
 2.2.27:
 
 Framework:

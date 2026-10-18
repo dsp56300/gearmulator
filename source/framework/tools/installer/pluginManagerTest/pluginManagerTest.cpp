@@ -816,6 +816,28 @@ namespace
 			TEST_ASSERT(versionsOf(pm, "Prototype-9").empty());
 			TEST_ASSERT(error.find("Prototype 9") != std::string::npos);
 		}
+
+		// A build can go straight to donators. With both logins the newer of the two changelogs is
+		// shown: the internal one won because it was asked first, and a version only in donators never
+		// showed up for the team.
+		fixture.write("builds/synth-1000/donators/index.html", "");
+		fixture.write("builds/synth-1000/donators/changelog.txt",
+			"Version 2.2.20\n\nSynth-1000:\n\n- [Fix] Donator fix\n\nVersion 2.2.19\n\nSynth-1000:\n\n- [Fix] Team fix\n");
+
+		const auto withBothLogins = [&]()
+		{
+			auto pm = makeManager(true);
+			pm.setCredentials(Channel::Donators, "synth-1000", {"donator", "secret"});
+			TEST_ASSERT(pm.refresh(error));
+			return versionsOf(pm, "Synth-1000");
+		};
+
+		TEST_ASSERT((withBothLogins() == std::vector<std::string>{"2.2.20", "2.2.19"}));
+
+		// And an older one in donators does not hide the newer internal one.
+		fixture.write("builds/synth-1000/donators/changelog.txt", "Version 2.2.18\n\nSynth-1000:\n\n- [Fix] Old fix\n");
+
+		TEST_ASSERT(withBothLogins() == std::vector<std::string>{"2.2.19"});
 	}
 
 	// Files a product brings besides its builds, listed section by section in its products.json and put
