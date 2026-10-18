@@ -46,6 +46,10 @@ namespace synthLib
 		bool hold = false;				// notes stay when their keys are released, until a key is struck with none down
 		bool holdRestarts = false;		// that key starts the pattern over, as a first key does, and ends the notes
 										// that still sound
+		bool releaseGoesOn = false;		// all keys up without hold, the arpeggio runs on to the next point of the start
+										// grid and stops there if no key is down. A key struck before keeps it going,
+										// the pattern goes on with it. Without, it stops at once and the next key
+										// starts it over
 		bool sync = true;				// steps sit on the host's song position while it plays, and keep its tempo
 										// while it is stopped. The pattern starts over with the arpeggio
 		float startGrid = 1.0f;			// the arpeggio starts on a grid of this share of a step
@@ -106,6 +110,7 @@ namespace synthLib
 		void relocate(uint32_t _offset);
 		double tempo() const;
 		void start(uint32_t _offset);
+		void checkStop();
 		void playStep(std::vector<SMidiEvent>& _out, uint32_t _offset);
 		void playNote(std::vector<SMidiEvent>& _out, uint32_t _offset, uint32_t _note, uint8_t _velocity,
 			uint8_t _releaseVelocity, uint64_t _length);
@@ -119,6 +124,7 @@ namespace synthLib
 		bool canStep() const { return m_stepLength > 0.0 && m_quartersPerSample > 0.0 && m_cycleLength > 0.0; }
 		uint32_t nextNoteOffOffset(uint32_t _from) const;
 		uint32_t stepOffset(int64_t _step, uint32_t _from) const;
+		uint32_t posOffset(double _pos, uint32_t _from) const;
 		double nominalPos(int64_t _step) const;
 		double stepPos(int64_t _step) const;
 		int64_t firstStepFrom(double _pos) const;
@@ -151,6 +157,8 @@ namespace synthLib
 		uint64_t m_time = 0;				// in samples, counted over all blocks
 
 		bool m_running = false;
+		bool m_stopPending = false;			// all keys went up, the arpeggio stops at m_stopAt if none is down then
+		double m_stopAt = 0.0;				// in quarter notes like m_blockPos
 		Note m_startKey{};					// the key that started the arpeggio
 		int64_t m_nextStep = 0;
 		double m_lastStepTime = -1e18;		// in samples, like m_time

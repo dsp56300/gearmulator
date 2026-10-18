@@ -554,6 +554,45 @@ namespace
 			off(14000, 60), on(18000, 64), off(23700, 64)}));
 	}
 
+	void testRelease()
+	{
+		// All keys up at 15000, another key struck at _again. A device decides whether the arpeggio stops at once, or
+		// runs on to its next step at 18000
+		auto play = [](const bool _goesOn, const uint64_t _again)
+		{
+			auto s = settings(ArpMode::Up);
+			s.releaseGoesOn = _goesOn;
+			for (const uint8_t v : {10, 20, 30, 40})
+			{
+				ArpStep st;
+				st.velocity = v;
+				s.pattern.push_back(st);
+			}
+			Host host(s);
+			host.input = {on(0, 60), off(15000, 60), on(_again, 64)};
+			host.run(30000, 512);
+			return host.noteOns();
+		};
+
+		const std::vector<Event> first = {on(0, 60, 10), on(6000, 60, 20), on(12000, 60, 30)};
+		auto with = [&](const std::vector<Event>& _rest)
+		{
+			auto v = first;
+			v.insert(v.end(), _rest.begin(), _rest.end());
+			return v;
+		};
+
+		// It stops at once and starts over, or goes on with the pattern
+		EXPECT(play(false, 16000) == with({on(18000, 64, 10), on(24000, 64, 20)}));
+		EXPECT(play(true, 16000) == with({on(18000, 64, 40), on(24000, 64, 10)}));
+
+		// The same key at once keeps it going as well
+		EXPECT(play(true, 15000) == with({on(18000, 64, 40), on(24000, 64, 10)}));
+
+		// After that step the arpeggio has stopped, the key starts it over: a sixth of a step late plays at once
+		EXPECT(play(true, 19000) == with({on(19000, 64, 10), on(24000, 64, 20)}));
+	}
+
 	void testAsPlayedFromSecond()
 	{
 		auto s = settings(ArpMode::AsPlayed);
@@ -817,6 +856,7 @@ int main()
 	testStartGrid();
 	testPatternStartsWithTheArpeggio();
 	testHoldRestarts();
+	testRelease();
 	testAsPlayedFromSecond();
 	testSwitchingOffEndsNotes();
 	testAllNotesOffStopsTheArpeggio();

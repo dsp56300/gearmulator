@@ -711,7 +711,7 @@ namespace
 		Case& add(const std::string& _name, const ROMFile::TPreset& _patch, std::vector<Key> _keys, const double _steps,
 			const bool _midiClock = false)
 		{
-			std::sort(_keys.begin(), _keys.end(), [](const Key& _a, const Key& _b) { return _a.time < _b.time; });
+			std::stable_sort(_keys.begin(), _keys.end(), [](const Key& _a, const Key& _b) { return _a.time < _b.time; });
 			Case c;
 			c.name = _name;
 			c.patch = _patch;
@@ -724,6 +724,7 @@ namespace
 				if (b > 127)
 				{
 					std::printf("case '%s' has a patch byte above 127\n", _name.c_str());
+					std::fflush(stdout);
 					std::abort();
 				}
 			}
@@ -775,13 +776,15 @@ namespace
 		}
 
 		// The patch's own pattern, TI only. Per step: length (of 128), velocity, and bit 0 to play it
-		auto user = [&](const std::string& _name, const int _count, const auto& _step, const uint8_t _velocity = 100)
+		auto user = [&](const std::string& _name, const int _count, const auto& _step, const uint8_t _velocity = 100,
+			const uint8_t _clock = 4)
 		{
 			if (!g_ti)
 				return;
 
 			auto s = _cases.base();
 			s[g_arpPattern] = 0;
+			s[g_arpClock] = _clock;
 			s[g_userPatternLength] = static_cast<uint8_t>(_count - 1);
 			for (int i = 0; i < 32; ++i)
 			{
@@ -807,6 +810,14 @@ namespace
 		user("user, first step a rest, key velocity 127", 8, [](int i) { return std::array<int, 3>{100, 90, i != 0}; }, 127);
 		user("user, a step without velocity", 8, [](int i) { return std::array<int, 3>{64, i == 3 ? 0 : 100, 1}; });
 		user("user, a step without velocity, key velocity 127", 8, [](int i) { return std::array<int, 3>{64, i == 3 ? 0 : 100, 1}; }, 127);
+
+		// The pattern almost every factory patch has: 32 steps, every second one off
+		user("user, factory default", 32, [](int i) { return std::array<int, 3>{64, 100, i % 2 == 0}; });
+		user("user, factory default, clock 5", 32, [](int i) { return std::array<int, 3>{64, 100, i % 2 == 0}; }, 100, 5);
+
+		// The patch's own pattern with other Arp Clocks
+		for (const int clock : {2, 3, 5, 6, 9, 13, 16})
+			user(name("user, 8 steps, clock %d", clock), 8, [](int i) { return std::array<int, 3>{(20 + i * 12) & 127, 100 - (i % 8) * 5, i != 2}; }, 100, static_cast<uint8_t>(clock));
 
 		// Modes and octave ranges, keys struck E, C, G
 		const char* modes[] = {"", "Up", "Down", "Up&Down", "As Played", "Random", "Chord"};
@@ -852,6 +863,21 @@ namespace
 			if (g_ti)
 				_cases.add(std::string(modes[mode]) + ", hold", s, keys, 34);
 			_cases.add(std::string(modes[mode]) + ", hold, MIDI clock", s, keys, 34, true);
+		}
+
+		// All keys up, and a key struck again a moment later, without hold: before the next step the A, B and C go on,
+		// after it they start over, the TI always starts over. With MIDI clock: on their own clock the A, B and C start
+		// that clock over with a new arpeggio. The keys go up between the points of the A's half step grid, and come
+		// again away from them, where the firmware's clock that runs early or late would decide
+		for (const int gapSixths : {0, 1, 2, 4, 8})
+		{
+			auto s = _cases.base();
+			s[g_arpPattern] = 2;
+			const auto step = stepSamples(s);
+			const auto up = static_cast<uint64_t>(step * 5.4);
+			const auto again = up + static_cast<uint64_t>(step * gapSixths / 6.0);
+			_cases.add(name("key struck again %d/6 of a step after all keys up, MIDI clock", gapSixths), s,
+				{{0, 60, 100}, {up, 60, 0}, {again, 64, 100}}, 20, true);
 		}
 
 		// Keys late for a step, with MIDI clock: up to half a step late plays at once. The firmware's clock lags MIDI
@@ -1105,6 +1131,14 @@ int main(const int _argc, char* _argv[])
 			for (auto& n : cpp)
 				n.time += shift;
 			grid = std::fmod(static_cast<double>(shift), stepSamples(c.patch));
+		}
+		else if (c.midiClock)
+		{
+			// The case starts on a step of MIDI clock, which the firmware's clock follows a little early or late
+			const auto step = stepSamples(c.patch);
+			const double onClock = 0.0;
+			grid = std::fmod(static_cast<double>(findShift(c, fw, playCpp(arp, c, &onClock))) + step, step);
+			cpp = playCpp(arp, c, &grid);
 		}
 		else
 		{

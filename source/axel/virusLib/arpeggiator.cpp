@@ -145,13 +145,16 @@ namespace virusLib
 
 		// With MIDI clock, a key struck up to half a step late still plays at once, on the A, B and C the key itself.
 		// The A starts on the grid of the others' steps, half of its own. As Played starts with the second note. The
-		// A, B and C start over when hold gets a new set of keys, the TI goes on. See virusArpTest
+		// A, B and C start over when hold gets a new set of keys, the TI goes on. All keys up, the A, B and C run on to
+		// the next point of that grid, a key struck before keeps the arpeggio going. The TI stops at once. See
+		// virusArpTest
 		const bool ti = isTIFamily(m_model);
 		settings.startGrid = a ? 0.5f : 1.0f;
 		settings.lateStart = 0.5f;
 		settings.lateStartPlaysKey = !ti;
 		settings.asPlayedFromSecond = true;
 		settings.holdRestarts = !ti;
+		settings.releaseGoesOn = !ti;
 
 		// The A has no Pattern, Note Length and Swing in its patches, it plays pattern 1 as it is
 		if (a)

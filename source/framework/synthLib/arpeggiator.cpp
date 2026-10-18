@@ -86,16 +86,17 @@ namespace synthLib
 			const uint32_t tInput = input < m_input.size() ? std::max(t, m_input[input].offset) : g_never;
 			const uint32_t tOff = nextNoteOffOffset(t);
 			const uint32_t tStep = m_running && canStep() ? stepOffset(m_nextStep, t) : g_never;
+			const uint32_t tStop = m_stopPending ? posOffset(m_stopAt, t) : g_never;
 
-			const uint32_t tNext = std::min({tInput, tOff, tStep});
+			const uint32_t tNext = std::min({tInput, tOff, tStep, tStop});
 
 			if (tNext >= _sampleCount)
 				break;
 
 			t = tNext;
 
-			// At the same sample, notes end before new ones begin, and keys are taken before the step that may play
-			// them
+			// At the same sample, notes end before new ones begin, and keys are taken before the arpeggio may stop
+			// and before the step that may play them
 			if (tOff == t)
 			{
 				endNotes(_out, t);
@@ -103,6 +104,10 @@ namespace synthLib
 			else if (tInput == t)
 			{
 				handleInput(m_input[input++], _out, t);
+			}
+			else if (tStop == t)
+			{
+				checkStop();
 			}
 			else
 			{
@@ -148,6 +153,17 @@ namespace synthLib
 
 	void Arpeggiator::relocate(const uint32_t _offset)
 	{
+		// Where the arpeggio would have stopped is gone with the old position
+		if (m_stopPending)
+		{
+			m_stopPending = false;
+			if (m_held.empty())
+			{
+				m_running = false;
+				return;
+			}
+		}
+
 		// A step half a sample before now rounds to now
 		const auto pos = m_blockPos + _offset * m_quartersPerSample;
 		m_nextStep = firstStepFrom(pos - 0.5 * m_quartersPerSample);
@@ -323,6 +339,26 @@ namespace synthLib
 		m_sequenceDirty = true;
 
 		// Notes that play now play to their end
+		if (!m_held.empty())
+			return;
+
+		if (!m_settings.releaseGoesOn || !canStep())
+		{
+			m_running = false;
+			return;
+		}
+
+		// The arpeggio runs on to the next point of its start grid, a point on this sample is that point
+		const double pos = m_blockPos + _offset * m_quartersPerSample;
+		const double spacing = m_stepLength * m_settings.startGrid;
+		m_stopAt = m_origin + std::ceil((pos - m_origin - 0.5 * m_quartersPerSample) / spacing) * spacing;
+		m_stopPending = true;
+	}
+
+	void Arpeggiator::checkStop()
+	{
+		// A key struck since all went up keeps the arpeggio going
+		m_stopPending = false;
 		if (m_held.empty())
 			m_running = false;
 	}
@@ -335,6 +371,7 @@ namespace synthLib
 		m_goingDown = false;
 		m_nextStep = 0;
 		m_chordEnd = 0;	// a key joins a chord of this arpeggio
+		m_stopPending = false;
 
 		if (!canStep())
 			return;
@@ -565,6 +602,7 @@ namespace synthLib
 		m_keysDown.reset();
 		m_sequenceDirty = true;
 		m_running = false;
+		m_stopPending = false;
 	}
 
 	void Arpeggiator::buildSequence()
@@ -646,9 +684,14 @@ namespace synthLib
 
 	uint32_t Arpeggiator::stepOffset(const int64_t _step, const uint32_t _from) const
 	{
+		return posOffset(stepPos(_step), _from);
+	}
+
+	uint32_t Arpeggiator::posOffset(const double _pos, const uint32_t _from) const
+	{
 		// Rounded to the nearest sample. A step between two blocks rounds into one of them, and the other one finds it
 		// played or not yet due
-		const double offset = std::floor((stepPos(_step) - m_blockPos) / m_quartersPerSample + 0.5);
+		const double offset = std::floor((_pos - m_blockPos) / m_quartersPerSample + 0.5);
 
 		if (offset <= _from)
 			return _from;
