@@ -26,7 +26,8 @@ namespace pluginManager
 		using ProgressCallback = std::function<void(float _progress)>;
 		using CompletionCallback = std::function<void(bool _success, const std::string& _message)>;
 
-		// Documents/The Usual Suspects/PluginManager/backups/, beside this program's own config.
+		// Documents/The Usual Suspects/PluginManager/backups/, beside this program's own config,
+		// unless Preferences point somewhere else: see InstallPaths::getBackupFolder.
 		static std::string folder();
 
 		// _file comes back holding what was written. Fails when the product has nothing in its data

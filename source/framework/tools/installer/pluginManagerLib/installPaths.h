@@ -54,6 +54,17 @@ namespace pluginManager
 		bool hasTeamLogin() const { return m_teamLogin; }
 		void setTeamLogin(const bool _enabled) { m_teamLogin = _enabled; }
 
+		// Where backups go: under the settings folder unless pointed somewhere else. A folder a
+		// cloud service synchronises is the point of moving it, and it takes the backups off this
+		// machine without this program knowing anything about the service. Backups already made
+		// stay where they were made.
+		std::string getBackupFolder() const { return m_backupFolder.empty() ? getDefaultBackupFolder() : m_backupFolder; }
+		static std::string getDefaultBackupFolder();
+		bool isCustomBackupFolder() const { return !m_backupFolder.empty(); }
+
+		// An empty path, or the default, puts it back to the default.
+		void setBackupFolder(const std::string& _path);
+
 		// Rows the user has taken out of the list. By product id rather than by name, because the
 		// name is what a product gets renamed to and the id is what everything else here uses.
 		// Nothing is uninstalled by hiding it: a hidden product that is installed stays installed,
@@ -86,6 +97,8 @@ namespace pluginManager
 		std::map<std::string, std::string> m_productPaths;	// the products that differ from their format
 
 		bool m_teamLogin = false;
+
+		std::string m_backupFolder;							// empty while it is the default
 
 		std::string m_selfListed;							// the listing date of the build this program is
 		int64_t m_selfModified = 0;							// and its Last-Modified, in UTC seconds

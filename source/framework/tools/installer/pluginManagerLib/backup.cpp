@@ -1,5 +1,6 @@
 #include "backup.h"
 
+#include "installPaths.h"
 #include "log.h"
 #include "platformUtils.h"
 #include "zipExtractor.h"
@@ -41,9 +42,10 @@ namespace pluginManager
 
 	std::string Backup::folder()
 	{
-		// Under the settings folder rather than beside it, so --settings takes the backups with it:
-		// a test, or a second instance pointed somewhere else, must not write into the real one.
-		return baseLib::filesystem::validatePath(PlatformUtils::settingsFolder() + "backups/");
+		// Read from the file on every call rather than handed in, so the headless program and the
+		// window agree on it without either telling the other. It is a small file and none of
+		// the callers is in a loop.
+		return baseLib::filesystem::validatePath(InstallPaths().getBackupFolder());
 	}
 
 	juce::int64 Backup::sizeOf(const std::string& _product)

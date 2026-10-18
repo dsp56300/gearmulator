@@ -2264,6 +2264,76 @@ namespace
 		root.deleteRecursively();
 	}
 
+	// The backup folder can be pointed somewhere else - a folder a cloud service synchronises is
+	// the reason to - and everything that makes, lists or deletes a backup follows it, the headless
+	// program included, because it is read from the settings file rather than handed around.
+	void testBackupsGoWhereTheyArePointed()
+	{
+		const auto root = juce::File::getSpecialLocation(juce::File::tempDirectory)
+			.getChildFile("tus_pm_test_backup_folder");
+
+		root.deleteRecursively();
+		TEST_ASSERT(root.createDirectory().wasOk());
+
+		const auto data = root.getChildFile("data");
+		setDataFolder(data.getFullPathName().toStdString());
+		PlatformUtils::setSettingsFolder(root.getChildFile("settings").getFullPathName().toStdString());
+
+		const auto product = data.getChildFile("The Usual Suspects/Thing");
+		TEST_ASSERT(product.getChildFile("config").createDirectory().wasOk());
+		TEST_ASSERT(product.getChildFile("config/Thing.xml").replaceWithText("settings"));
+
+		const auto defaultFolder = juce::File(juce::String(InstallPaths::getDefaultBackupFolder()));
+		const auto cloud = root.getChildFile("Dropbox/TUS backups");
+
+		std::string error;
+		std::string atDefault;
+		TEST_ASSERT(Backup::create("Thing", atDefault, error));
+		TEST_ASSERT(juce::File(juce::String(atDefault)).isAChildOf(defaultFolder));
+
+		{
+			InstallPaths paths;
+			TEST_ASSERT(!paths.isCustomBackupFolder());
+			paths.setBackupFolder(cloud.getFullPathName().toStdString());
+			paths.save();
+		}
+
+		// Kept across a reload, and in use from then on. The one made before stays where it was
+		// made, which is also why it is not listed: it is not in the folder backups are in.
+		TEST_ASSERT(InstallPaths().isCustomBackupFolder());
+		TEST_ASSERT(juce::File(juce::String(Backup::folder())) == cloud);
+		TEST_ASSERT(Backup::list("Thing").empty());
+
+		std::string inCloud;
+		TEST_ASSERT(Backup::create("Thing", inCloud, error));
+		TEST_ASSERT(juce::File(juce::String(inCloud)).isAChildOf(cloud));
+		TEST_ASSERT(Backup::list("Thing").size() == 1);
+		TEST_ASSERT(juce::File(juce::String(atDefault)).existsAsFile());
+
+		// Deleting follows it too: out of the new folder yes, out of the old one no longer.
+		TEST_ASSERT(!Backup::remove(atDefault, error));
+		TEST_ASSERT(Backup::remove(inCloud, error));
+		TEST_ASSERT(Backup::list("Thing").empty());
+
+		// The default, set by hand or by emptying the field, is not remembered as a choice.
+		{
+			InstallPaths paths;
+			paths.setBackupFolder(InstallPaths::getDefaultBackupFolder());
+			TEST_ASSERT(!paths.isCustomBackupFolder());
+			paths.setBackupFolder(cloud.getFullPathName().toStdString());
+			paths.setBackupFolder({});
+			TEST_ASSERT(!paths.isCustomBackupFolder());
+			paths.save();
+		}
+
+		TEST_ASSERT(juce::File(juce::String(Backup::folder())) == defaultFolder);
+		TEST_ASSERT(Backup::list("Thing").size() == 1);
+
+		PlatformUtils::setSettingsFolder({});
+		setDataFolder({});
+		root.deleteRecursively();
+	}
+
 	// Installing over a plugin takes a ROM out of the bundle and puts it in the folder the plugin
 	// reads. Carrying it into the new bundle would keep it, but keep it somewhere the next update
 	// endangers all over again - so the update is the moment it gets moved for good.
@@ -4057,6 +4127,7 @@ int main()
 		testAnUpdateKeepsWhatTheUserPutInTheBundle();
 		testTheTeamLoginFlagSurvivesBeingWrittenBack();
 		testBackupAndRestoreOfADataFolder();
+		testBackupsGoWhereTheyArePointed();
 		testAnUpdateMovesTheRomOutOfTheBundle();
 		testUninstallKeepsTheRomItFinds();
 		testAnUpdateIsOnlyOfferedForANewerBuild();

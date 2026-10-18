@@ -1,5 +1,7 @@
 #include "installPaths.h"
 
+#include "baseLib/filesystem.h"
+
 #include "juce_core/juce_core.h"
 
 namespace pluginManager
@@ -73,6 +75,21 @@ namespace pluginManager
 			m_productPaths[key] = _path;
 	}
 
+	std::string InstallPaths::getDefaultBackupFolder()
+	{
+		// Under the settings folder rather than beside it, so --settings takes the backups with it:
+		// a test, or a second instance pointed somewhere else, must not write into the real one.
+		return baseLib::filesystem::validatePath(PlatformUtils::settingsFolder() + "backups/");
+	}
+
+	void InstallPaths::setBackupFolder(const std::string& _path)
+	{
+		if (_path.empty() || _path == getDefaultBackupFolder())
+			m_backupFolder.clear();
+		else
+			m_backupFolder = _path;
+	}
+
 	void InstallPaths::setSelfBuild(std::string _listed, const int64_t _modified)
 	{
 		m_selfListed = std::move(_listed);
@@ -117,6 +134,7 @@ namespace pluginManager
 		m_productPaths.clear();
 		m_otherSettings.clear();
 		m_teamLogin = false;
+		m_backupFolder.clear();
 		m_hidden.clear();
 		m_collapsed.clear();
 		m_selfListed.clear();
@@ -151,6 +169,12 @@ namespace pluginManager
 			if (e->hasTagName("teamLogin"))
 			{
 				m_teamLogin = e->getIntAttribute("enabled", 1) != 0;
+				continue;
+			}
+
+			if (e->hasTagName("backupFolder"))
+			{
+				setBackupFolder(e->getStringAttribute("path").toStdString());
 				continue;
 			}
 
@@ -217,6 +241,12 @@ namespace pluginManager
 		{
 			auto* e = xml.createNewChildElement("teamLogin");
 			e->setAttribute("enabled", 1);
+		}
+
+		if (!m_backupFolder.empty())
+		{
+			auto* e = xml.createNewChildElement("backupFolder");
+			e->setAttribute("path", juce::String(m_backupFolder));
 		}
 
 		if (!m_selfListed.empty() || m_selfModified)

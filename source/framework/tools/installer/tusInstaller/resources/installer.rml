@@ -241,6 +241,14 @@
 			</div>
 		</div>
 
+		<!-- Where backups go. Pointing it into a folder a cloud service synchronises is how a backup
+		     leaves this computer: this program does not talk to any such service itself. -->
+		<div id="backup-folder-section">
+			<div id="backup-folder-title">Backups</div>
+			<div id="backup-folder-intro">Where backups are kept. A folder that Dropbox, OneDrive, iCloud Drive or Google Drive synchronises keeps them off this computer as well. Backups made before a change stay in the folder they were made in.</div>
+			<div id="backup-folder-list"></div>
+		</div>
+
 		<!-- The one login that is not per plugin: it opens every internal build at once, so it is a
 		     button rather than a list. A build that was not told where the internal channel is has
 		     no use for it, and then this is not here at all. -->

@@ -34,11 +34,14 @@ namespace pluginManager
 			});
 		}
 
-		if (!m_list)
-			return;
+		if (m_list)
+		{
+			for (const auto format : InstallPaths::getFormats())
+				addRow(format, *m_list);
+		}
 
-		for (const auto format : InstallPaths::getFormats())
-			addRow(format);
+		if (auto* backups = _doc.GetElementById("backup-folder-list"))
+			addRow(PluginFormat::Count, *backups);
 	}
 
 	void PreferencesPage::setHandlers(std::function<void()> _onAddDonatorLogin, std::function<void()> _onRefresh)
@@ -52,14 +55,14 @@ namespace pluginManager
 		*m_alive = false;
 	}
 
-	void PreferencesPage::addRow(const PluginFormat _format)
+	void PreferencesPage::addRow(const PluginFormat _format, Rml::Element& _parent)
 	{
 		auto* templateRow = m_doc.GetElementById("preference-row-template");
 
 		if (!templateRow)
 			return;
 
-		auto* element = m_list->AppendChild(m_doc.CreateElement("div"));
+		auto* element = _parent.AppendChild(m_doc.CreateElement("div"));
 
 		if (!element)
 			return;
@@ -68,7 +71,7 @@ namespace pluginManager
 		element->SetInnerRML(templateRow->GetInnerRML());
 
 		if (auto* name = element->QuerySelector(".preference-format"))
-			name->SetInnerRML(Rml::StringUtilities::EncodeRml(PlatformUtils::formatToString(_format)));
+			name->SetInnerRML(_format == PluginFormat::Count ? "Folder" : Rml::StringUtilities::EncodeRml(PlatformUtils::formatToString(_format)));
 
 		Row row;
 		row.format = _format;
@@ -84,7 +87,7 @@ namespace pluginManager
 			juceRmlUi::EventListener::Add(row.path, Rml::EventId::Change, [this, index](Rml::Event&)
 			{
 				auto& r = m_rows[index];
-				m_pluginManager.getInstallPaths().set(r.format, r.path->GetValue());
+				storePath(r, r.path->GetValue());
 				updateNote(r);
 				buildStrayInstalls();
 			});
@@ -99,7 +102,8 @@ namespace pluginManager
 		{
 			juceRmlUi::EventListener::Add(defaultButton, Rml::EventId::Click, [this, index](Rml::Event&)
 			{
-				setPath(index, InstallPaths::getDefault(m_rows[index].format));
+				// Empty is the default for every row, and the field is then filled with what that is.
+				setPath(index, {});
 				save();
 			});
 		}
@@ -112,7 +116,7 @@ namespace pluginManager
 		for (auto& row : m_rows)
 		{
 			if (row.path)
-				row.path->SetValue(m_pluginManager.getInstallPaths().get(row.format));
+				row.path->SetValue(pathOf(row));
 
 			updateNote(row);
 		}
@@ -245,13 +249,35 @@ namespace pluginManager
 	{
 		auto& row = m_rows[_index];
 
-		m_pluginManager.getInstallPaths().set(row.format, _path);
+		storePath(row, _path);
 
 		if (row.path)
-			row.path->SetValue(m_pluginManager.getInstallPaths().get(row.format));
+			row.path->SetValue(pathOf(row));
 
 		updateNote(row);
 		buildStrayInstalls();
+	}
+
+	std::string PreferencesPage::pathOf(const Row& _row) const
+	{
+		const auto& paths = m_pluginManager.getInstallPaths();
+		return _row.format == PluginFormat::Count ? paths.getBackupFolder() : paths.get(_row.format);
+	}
+
+	bool PreferencesPage::isCustom(const Row& _row) const
+	{
+		const auto& paths = m_pluginManager.getInstallPaths();
+		return _row.format == PluginFormat::Count ? paths.isCustomBackupFolder() : paths.isCustom(_row.format);
+	}
+
+	void PreferencesPage::storePath(const Row& _row, const std::string& _path) const
+	{
+		auto& paths = m_pluginManager.getInstallPaths();
+
+		if (_row.format == PluginFormat::Count)
+			paths.setBackupFolder(_path);
+		else
+			paths.set(_row.format, _path);
 	}
 
 	void PreferencesPage::updateNote(const Row& _row) const
@@ -259,13 +285,13 @@ namespace pluginManager
 		if (!_row.note)
 			return;
 
-		const auto path = m_pluginManager.getInstallPaths().get(_row.format);
+		const auto path = pathOf(_row);
 
 		// Every format has somewhere to go now, so an empty path is one somebody emptied on purpose.
 		const char* note = path.empty()
 			? "not installed until a location is set"
 			: (juce::File(juce::String(path)).isDirectory()
-				? (m_pluginManager.getInstallPaths().isCustom(_row.format) ? "" : "default")
+				? (isCustom(_row) ? "" : "default")
 				: "will be created");
 
 		_row.note->SetInnerRML(note);
@@ -275,10 +301,11 @@ namespace pluginManager
 	{
 		auto& row = m_rows[_index];
 
-		const auto current = juce::File(juce::String(m_pluginManager.getInstallPaths().get(row.format)));
+		const auto current = juce::File(juce::String(pathOf(row)));
 
-		m_chooser = std::make_unique<juce::FileChooser>(
-			"Install location for " + juce::String(PlatformUtils::formatToString(row.format)), current);
+		m_chooser = std::make_unique<juce::FileChooser>(row.format == PluginFormat::Count
+			? juce::String("Backup folder")
+			: "Install location for " + juce::String(PlatformUtils::formatToString(row.format)), current);
 
 		m_chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories,
 			[this, _index, alive = m_alive](const juce::FileChooser& _chooser)

@@ -70,6 +70,10 @@ Plugin Manager:
         in grey, so it is easy to see which products "Install selected" leaves
         out.
 
+- [Imp] BUG-10485 The folder backups are kept in can be changed in Preferences,
+        for example to a folder that Dropbox, OneDrive, iCloud Drive or Google
+        Drive synchronises, which keeps the backups off the computer as well.
+
 2.2.27:
 
 Framework:

@@ -1279,7 +1279,7 @@ scrollbarhorizontal sliderbar {
 
 /* ---------------------------------------------------------------- preferences */
 
-#preferences-intro {
+#preferences-intro, #backup-folder-intro {
 	display: block;
 	font-size: 12dp;
 	color: #999;
@@ -1328,6 +1328,16 @@ scrollbarhorizontal sliderbar {
 	display: inline-block;
 	margin-left: 6dp;
 	vertical-align: middle;
+}
+
+/* Not padded like the sections further down, so its row lines up with the format rows above. */
+#backup-folder-section {
+	display: block;
+	margin-top: 24dp;
+}
+
+#backup-folder-title {
+	padding: 0 4dp;
 }
 
 .preference-note {
@@ -1527,7 +1537,7 @@ scrollbarhorizontal sliderbar {
 	padding: 4dp;
 }
 
-#donator-logins-title {
+#donator-logins-title, #backup-folder-title {
 	display: block;
 	font-size: 13dp;
 	font-weight: bold;
