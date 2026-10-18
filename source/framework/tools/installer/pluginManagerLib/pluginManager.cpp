@@ -851,6 +851,17 @@ namespace pluginManager
 		if (!configured.empty())
 			roots.push_back(configured);
 
+		// The program of an effect build goes beside the plugin's own when that is installed - see
+		// pathFor - which is the plugin's folder, not one named after the effect build. Looked for only
+		// in the latter, every such program read as not installed (BUG-10493).
+		if (_format == PluginFormat::Standalone)
+		{
+			const auto ownerFolder = configuredPathFor(owningProduct(_product), _format);
+
+			if (!ownerFolder.empty() && ownerFolder != configured)
+				roots.push_back(ownerFolder);
+		}
+
 		for (const auto& dir : PlatformUtils::getSearchPaths(_format))
 		{
 			if (dir != configured)

@@ -35,6 +35,11 @@ Plugin Manager:
         showed the changelog of the older internal build. The newer of the two is
         shown now.
 
+- [Fix] BUG-10493 The standalone of an effect version, such as OsirusFX, showed
+        as not installed after every install and was offered again. It is
+        installed beside the standalone of its plugin, and that is where it is
+        found now.
+
 2.2.27:
 
 Framework:

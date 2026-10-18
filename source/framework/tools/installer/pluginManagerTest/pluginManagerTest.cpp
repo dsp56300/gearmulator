@@ -2792,6 +2792,61 @@ namespace
 		dir.deleteRecursively();
 	}
 
+	// The program of an effect build is installed beside the plugin's own when that is installed, so
+	// that folder is where it has to be looked for too. It was looked for only in a folder named after
+	// itself, and every effect standalone installed next to its plugin read as not installed, offering
+	// Install again after every install (BUG-10493).
+	void testAnEffectProgramIsFoundBesideItsPlugin()
+	{
+		const Fixture fixture;
+
+		const auto programs = fixture.dir.getChildFile("programs");
+		const auto pluginFolder = programs.getChildFile("Synth-1000");
+		TEST_ASSERT(pluginFolder.createDirectory().wasOk());
+
+		PlatformUtils::setSettingsFolder(fixture.dir.getChildFile("settings").getFullPathName().toStdString());
+
+		// What an install into the default location leaves, from the reporter's installed.json: the
+		// effect build's program in the plugin's folder, not in one named after itself. The default
+		// location is the user's own Applications folder, which a test does not write to, so the state
+		// is set up rather than installed.
+		{
+			InstalledPlugins records;
+
+			for (const std::string product : {"Synth-1000", "Synth-1000FX"})
+			{
+				Asset program;
+				program.product = product;
+				program.format = "Standalone";
+				program.version = "2.2.19";
+
+				const auto name = product + ".app";
+				TEST_ASSERT(pluginFolder.getChildFile(juce::String(name)).replaceWithText("program"));
+
+				records.set(program, pluginFolder.getFullPathName().toStdString(), {name});
+			}
+
+			records.save();
+		}
+
+		{
+			// Reading the settings - the test's own folder - is what brings in the records above.
+			PluginManager pm(true);
+			pm.setCredentials(Channel::Internal, {}, {"team", "secret"});
+
+			std::string error;
+			TEST_ASSERT(pm.refresh(error));
+
+			pm.getInstallPaths().set(PluginFormat::Standalone, programs.getFullPathName().toStdString());
+
+			TEST_ASSERT(pm.isInstalled("Synth-1000", "Standalone"));
+			TEST_ASSERT(pm.isInstalled("Synth-1000FX", "Standalone"));
+			TEST_ASSERT(pm.getInstalledVersion("Synth-1000FX", "Standalone") == "2.2.19");
+		}
+
+		PlatformUtils::setSettingsFolder({});
+	}
+
 	void testUninstallTakesWhatTheArchiveBrought()
 	{
 		const auto dir = juce::File::getSpecialLocation(juce::File::tempDirectory)
@@ -3841,6 +3896,7 @@ int main()
 		testPerProductPathsWin();
 		testUninstallRemovesWhatWasInstalled();
 		testAProgramKeepsTheNameItWasBuiltUnder();
+		testAnEffectProgramIsFoundBesideItsPlugin();
 		testUninstallTakesWhatTheArchiveBrought();
 		testAnInstallLeftBehindIsStillFound();
 		testAnInstalledBuildIsFoundWhereverItIs();
