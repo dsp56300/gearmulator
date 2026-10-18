@@ -13,7 +13,7 @@ pkgname=(
   theusualsuspects-je8086
   theusualsuspects-88emu
 )
-pkgver=2.2.25
+pkgver=2.2.27
 pkgrel=1
 pkgdesc='Emulations of classic virtual analog synthesizers'
 arch=('x86_64' 'aarch64')
@@ -42,6 +42,7 @@ build() {
     -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON
     -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON
     -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON
+    -Dgearmulator_BUILD_INSTALLER=OFF
   )
   cmake -S "$_src" -B build -G Ninja "${_cmake_args[@]}"
   cmake --build build

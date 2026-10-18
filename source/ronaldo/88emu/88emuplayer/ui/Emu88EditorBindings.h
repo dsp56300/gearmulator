@@ -1,6 +1,7 @@
 #pragma once
 
 #include "88lib/boards/laBoard.h"
+#include "88lib/boards/mv30types.h"
 #include "88lib/boards/sc88types.h"
 #include "88lib/boards/sc88pro.h"
 #include "88lib/boards/sc8850.h"
@@ -21,7 +22,11 @@ namespace emu88Player::editor
 	// away. Expressed in dp because element offsets come back in rendered
 	// pixels, which move with the GUI scale.
 	constexpr float g_keyboardRowToleranceDp = 8.0f;
-	constexpr int g_aboutHeight = 242;
+	// The picture on top of the about window, about.png: a render brought down to 300 by 215 pixels and 16 colours with
+	// a pattern dither and the LCD orange kept in the palette, as an about box of the nineties had it
+	constexpr int g_aboutImageWidth = 300;
+	constexpr int g_aboutImageHeight = 215;
+	constexpr int g_aboutHeight = 242 + g_aboutImageHeight + 12;
 	constexpr int g_settingsWidth = 690;
 	constexpr int g_settingsHeight = 410;
 	// The part editor's body size in emu88PartEditor.rcss
@@ -101,6 +106,41 @@ namespace emu88Player::editor
 		bind("btVibDelayR", emu88Lib::Sc88ProButton::VibDelayR, Key::KI_N, "VIB DELAY / EFX VALUE right"),
 	};
 
+	// The SK-88Pro on the SC-88Pro's artwork: the faces it shares with the Pro by function, its
+	// own switches on keys alone (they have no face here). PREVIEW and the VIB rockers it lacks.
+	constexpr std::array g_sk88Buttons{
+		bind("btAll", emu88Lib::Sk88ProButton::All, Key::KI_W, "ALL"),
+		bind("btMute", emu88Lib::Sk88ProButton::Mute, Key::KI_E, "MUTE"),
+		bind("btSc55Map", emu88Lib::Sk88ProButton::Sc55Map, Key::KI_1, "SC-55 MAP"),
+		bind("btSc88Map", emu88Lib::Sk88ProButton::Sc88Map, Key::KI_2, "SC-88 MAP"),
+		bind("btUserInst", emu88Lib::Sk88ProButton::UserInst, Key::KI_3, "USER INST"),
+		bind("btSelect", emu88Lib::Sk88ProButton::Select, Key::KI_4, "SELECT"),
+		bind("btPartL", emu88Lib::Sk88ProButton::PartL, Key::KI_R, "PART left"),
+		bind("btPartR", emu88Lib::Sk88ProButton::PartR, Key::KI_T, "PART right"),
+		bind("btInstL", emu88Lib::Sk88ProButton::InstL, Key::KI_Y, "INSTRUMENT left"),
+		bind("btInstR", emu88Lib::Sk88ProButton::InstR, Key::KI_U, "INSTRUMENT right"),
+		bind("btKeyShiftL", emu88Lib::Sk88ProButton::KeyShiftL, Key::KI_I, "KEY SHIFT left"),
+		bind("btKeyShiftR", emu88Lib::Sk88ProButton::KeyShiftR, Key::KI_O, "KEY SHIFT right"),
+		bind("btLevelL", emu88Lib::Sk88ProButton::LevelL, Key::KI_P, "LEVEL left"),
+		bind("btLevelR", emu88Lib::Sk88ProButton::LevelR, Key::KI_OEM_4, "LEVEL right"),
+		bind("btMidiChL", emu88Lib::Sk88ProButton::MidiChL, Key::KI_A, "MIDI CH left"),
+		bind("btMidiChR", emu88Lib::Sk88ProButton::MidiChR, Key::KI_S, "MIDI CH right"),
+		bind("btPanL", emu88Lib::Sk88ProButton::PanL, Key::KI_D, "PAN left"),
+		bind("btPanR", emu88Lib::Sk88ProButton::PanR, Key::KI_F, "PAN right"),
+		bind("btReverbL", emu88Lib::Sk88ProButton::ReverbL, Key::KI_G, "REVERB left"),
+		bind("btReverbR", emu88Lib::Sk88ProButton::ReverbR, Key::KI_H, "REVERB right"),
+		bind("btChorusL", emu88Lib::Sk88ProButton::ChorusL, Key::KI_J, "CHORUS left"),
+		bind("btChorusR", emu88Lib::Sk88ProButton::ChorusR, Key::KI_K, "CHORUS right"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Edit, Key::KI_Z, "EDIT"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Util, Key::KI_X, "UTIL"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Drum, Key::KI_C, "DRUM"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Function, Key::KI_V, "FUNCTION"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Local, Key::KI_B, "LOCAL"),
+		bind(nullptr, emu88Lib::Sk88ProButton::OctL, Key::KI_N, "OCTAVE down"),
+		bind(nullptr, emu88Lib::Sk88ProButton::OctR, Key::KI_M, "OCTAVE up"),
+		bind(nullptr, emu88Lib::Sk88ProButton::Shift, Key::KI_LSHIFT, "SHIFT"),
+	};
+
 	constexpr std::array g_sc8850Buttons{
 		bind("bt8850Edit", emu88Lib::Sc8850Button::Edit, Key::KI_E, "EDIT"),
 		bind("bt8850PartL", emu88Lib::Sc8850Button::PartLeft, Key::KI_LEFT, "PART left"),
@@ -144,6 +184,51 @@ namespace emu88Player::editor
 	constexpr Key g_mt32KnobUpKey = Key::KI_UP;
 	constexpr Key g_mt32KnobDownKey = Key::KI_DOWN;
 
+	// The MV-30's front panel: MAME's keys for it (roland_mv30.cpp), the switches it binds a key to, and the faces the
+	// skin has, some of which MAME has no key for. The value dial turns a detent per press of either pair, and per
+	// click of the skin's + and -; the footswitch is held with Ctrl.
+	using Mv30Button = emu88Lib::Mv30Button;
+	constexpr std::array g_mv30Buttons{
+		bind(nullptr, Mv30Button::PatternEdit, Key::KI_P, "PATTERN EDIT"),
+		bind(nullptr, Mv30Button::TrackEdit, Key::KI_T, "TRACK EDIT"),
+		bind("btMv30System", Mv30Button::System, Key::KI_S, "SYSTEM"),
+		bind(nullptr, Mv30Button::Disk, Key::KI_D, "DISK"),
+		bind("btMv30F1", Mv30Button::F1, Key::KI_F1, "F1"),
+		bind("btMv30F2", Mv30Button::F2, Key::KI_F2, "F2"),
+		bind("btMv30F3", Mv30Button::F3, Key::KI_F3, "F3"),
+		bind("btMv30F4", Mv30Button::F4, Key::KI_F4, "F4"),
+		bind("btMv30F5", Mv30Button::F5, Key::KI_F5, "F5"),
+		bind("btMv30Up", Mv30Button::Up, Key::KI_UP, "Cursor up"),
+		bind("btMv30Down", Mv30Button::Down, Key::KI_DOWN, "Cursor down"),
+		bind("btMv30Left", Mv30Button::Left, Key::KI_LEFT, "Cursor left"),
+		bind("btMv30Right", Mv30Button::Right, Key::KI_RIGHT, "Cursor right"),
+		bind(nullptr, Mv30Button::Enter, Key::KI_RETURN, "ENTER"),
+		bind("btMv30Exit", Mv30Button::Exit, Key::KI_ESCAPE, "EXIT"),
+		bind(nullptr, Mv30Button::Jump, Key::KI_TAB, "JUMP"),
+		bind("btMv30Shift", Mv30Button::Shift, Key::KI_LSHIFT, "SHIFT"),
+		bind(nullptr, Mv30Button::Insert, Key::KI_INSERT, "INS"),
+		bind(nullptr, Mv30Button::Delete, Key::KI_DELETE, "DEL"),
+		bind(nullptr, Mv30Button::Num0, Key::KI_0, "0"),
+		bind(nullptr, Mv30Button::Num1, Key::KI_1, "1"),
+		bind(nullptr, Mv30Button::Num2, Key::KI_2, "2"),
+		bind(nullptr, Mv30Button::Num3, Key::KI_3, "3"),
+		bind(nullptr, Mv30Button::Num4, Key::KI_4, "4"),
+		bind(nullptr, Mv30Button::Num5, Key::KI_5, "5"),
+		bind(nullptr, Mv30Button::Num6, Key::KI_6, "6"),
+		bind(nullptr, Mv30Button::Num7, Key::KI_7, "7"),
+		bind(nullptr, Mv30Button::Num8, Key::KI_8, "8"),
+		bind(nullptr, Mv30Button::Num9, Key::KI_9, "9"),
+		bind(nullptr, Mv30Button::StartStop, Key::KI_SPACE, "START/STOP"),
+		// Faces on the skin that MAME has no key for
+		bind("btMv30Play", Mv30Button::Play, Key::KI_UNKNOWN, "PLAY"),
+		bind("btMv30TimbreEdit", Mv30Button::TimbreEdit, Key::KI_UNKNOWN, "TIMBRE EDIT"),
+	};
+	constexpr Key g_mv30DialDownKey = Key::KI_OEM_MINUS;
+	constexpr Key g_mv30DialUpKey = Key::KI_OEM_PLUS;
+	constexpr Key g_mv30ValueDownKey = Key::KI_NEXT;
+	constexpr Key g_mv30ValueUpKey = Key::KI_PRIOR;
+	constexpr Key g_mv30FootswitchKey = Key::KI_LCONTROL;
+
 	// The bindings the help dialog has to spell out; RmlUi's identifiers are
 	// contiguous for the letter, digit and function-key runs.
 	inline std::string keyName(const Key _key)
@@ -154,6 +239,12 @@ namespace emu88Player::editor
 		case Key::KI_BACK:      return "Backspace";
 		case Key::KI_RETURN:    return "Return";
 		case Key::KI_LSHIFT:    return "Shift";
+		case Key::KI_LCONTROL:  return "Ctrl";
+		case Key::KI_ESCAPE:    return "Esc";
+		case Key::KI_INSERT:    return "Insert";
+		case Key::KI_DELETE:    return "Delete";
+		case Key::KI_PRIOR:     return "Page Up";
+		case Key::KI_NEXT:      return "Page Down";
 		case Key::KI_SPACE:     return "Space";
 		case Key::KI_LEFT:      return "\xe2\x86\x90";	// left arrow
 		case Key::KI_RIGHT:     return "\xe2\x86\x92";	// right arrow
@@ -169,12 +260,17 @@ namespace emu88Player::editor
 			return std::string(1, static_cast<char>('A' + (_key - Key::KI_A)));
 		if(_key >= Key::KI_0 && _key <= Key::KI_9)
 			return std::string(1, static_cast<char>('0' + (_key - Key::KI_0)));
-		if(_key >= Key::KI_F1 && _key <= Key::KI_F4)
+		if(_key >= Key::KI_F1 && _key <= Key::KI_F5)
 			return "F" + std::to_string(1 + (_key - Key::KI_F1));
 		return {};
 	}
 
 	constexpr uint32_t proButtonBit(const emu88Lib::Sc88ProButton _button)
+	{
+		return uint32_t{1} << static_cast<uint8_t>(_button);
+	}
+
+	constexpr uint32_t proButtonBit(const emu88Lib::Sk88ProButton _button)
 	{
 		return uint32_t{1} << static_cast<uint8_t>(_button);
 	}
@@ -219,10 +315,14 @@ namespace emu88Player::editor
 			return _buttons & g_mt32ButtonMask;
 		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro ||
 		   _model == emu88Lib::DeviceModel::Sc8820 || emu88Lib::isCmModel(_model) ||
-		   emu88Lib::isGmModuleModel(_model)) return 0;
+		   emu88Lib::isGmModuleModel(_model) || _model == emu88Lib::DeviceModel::Mv30) return 0;
 		constexpr auto preview = proButtonBit(emu88Lib::Sc88ProButton::Preview);
 		if(_model == emu88Lib::DeviceModel::Sc88Pro)
 			return _buttons & ~proButtonBit(emu88Lib::Sc88ProButton::Power);
+		// The SK-88Pro's buttons are its own matrix positions, see g_sk88Buttons.
+		if(_model == emu88Lib::DeviceModel::Sk88Pro)
+			return _buttons & ~(proButtonBit(emu88Lib::Sk88ProButton::Unused28) |
+			                    proButtonBit(emu88Lib::Sk88ProButton::Unused29));
 		if(_model == emu88Lib::DeviceModel::Sc88VL)
 			return _buttons & ~preview;
 		if(emu88Lib::isSc55Model(_model))
@@ -257,6 +357,11 @@ namespace emu88Player::editor
 	              proButtonBit(emu88Lib::Sc88ProButton::InstAll));
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc55Mk1,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::Sc55Map)) == 0);
+	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sk88Pro,
+	                                    proButtonBit(emu88Lib::Sk88ProButton::Edit) |
+	                                    proButtonBit(emu88Lib::Sk88ProButton::Unused28)) ==
+	              proButtonBit(emu88Lib::Sk88ProButton::Edit),
+	              "the SK-88Pro's position 0 is EDIT; 28 and 29 are empty");
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::VeGsPro,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::InstAll)) == 0);
 	// How the keyboard dialog is laid out. Hardcoded rather than read back
@@ -322,6 +427,35 @@ namespace emu88Player::editor
 		pair(nullptr, ProButton::VibDepthL, ProButton::VibDepthR, "EFX PARAM"),
 		pair(nullptr, ProButton::VibDelayL, ProButton::VibDelayR, "EFX VALUE"),
 
+	};
+
+	using SkButton = emu88Lib::Sk88ProButton;
+	constexpr std::array g_sk88Help{
+		row ("Mode",  SkButton::All,     "ALL"),
+		row (nullptr, SkButton::Mute,    "MUTE"),
+		row (nullptr, SkButton::Sc55Map, "SC-55 MAP"),
+		row (nullptr, SkButton::Sc88Map, "SC-88 MAP"),
+		row (nullptr, SkButton::Drum,    "DRUM"),
+
+		pair("Parameters", SkButton::PartL,  SkButton::PartR,     "PART"),
+		pair(nullptr, SkButton::InstL,      SkButton::InstR,      "INSTRUMENT"),
+		pair(nullptr, SkButton::LevelL,     SkButton::LevelR,     "LEVEL"),
+		pair(nullptr, SkButton::PanL,       SkButton::PanR,       "PAN"),
+		pair(nullptr, SkButton::ReverbL,    SkButton::ReverbR,    "REVERB"),
+		pair(nullptr, SkButton::ChorusL,    SkButton::ChorusR,    "CHORUS"),
+		pair(nullptr, SkButton::KeyShiftL,  SkButton::KeyShiftR,  "KEY SHIFT"),
+		pair(nullptr, SkButton::MidiChL,    SkButton::MidiChR,    "MIDI CH"),
+
+		row ("Edit",  SkButton::Edit,     "EDIT"),
+		row (nullptr, SkButton::Util,     "UTIL"),
+		row (nullptr, SkButton::UserInst, "USER INST"),
+		row (nullptr, SkButton::Select,   "SELECT"),
+		row (nullptr, SkButton::Shift,    "SHIFT"),
+		chord(nullptr, "Shift + R, then W", SkButton::Shift, "Init All (SHIFT + PART left, then ALL)", false),
+
+		row ("Keyboard", SkButton::Function, "FUNCTION"),
+		row (nullptr, SkButton::Local,    "LOCAL"),
+		pair(nullptr, SkButton::OctL,     SkButton::OctR,     "OCTAVE"),
 	};
 
 	using LaButton = emu88Lib::Mt32Button;

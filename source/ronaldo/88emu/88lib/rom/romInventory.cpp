@@ -22,11 +22,11 @@ namespace emu88Lib
                 std::swap(_data[i], _data[i + 1]);
         }
 
-        // The SC-88Pro and the VE-GS Pro are one board with different control ROMs:
-        // they share the wave set, its SC-8820/8850 donors and the oversized dumps.
+        // The SC-88Pro, the VE-GS Pro and the SK-88Pro are one board with different control
+        // ROMs: they share the wave set, its SC-8820/8850 donors and the oversized dumps.
         constexpr bool usesProBoard(const RomDevice _device)
         {
-            return _device == RomDevice::Sc88Pro || _device == RomDevice::VeGsPro;
+            return _device == RomDevice::Sc88Pro || _device == RomDevice::VeGsPro || _device == RomDevice::Sk88Pro;
         }
 
         // Inverse of WaveRom::unscramble. Pro ROM sets contain physical chip data,
@@ -500,6 +500,10 @@ namespace emu88Lib
                     "cm32l_pcm.rom. Wave ROM 2 and 3 are the two 512 KiB mask-ROM dumps it is made of, "
                     "R15449121 and R15179945 - together they supply the same image. Provide either form, "
                     "not both.\n";
+        if (_device == RomDevice::Mv30)
+            text << "Wave ROMs A to C are the CM-32P's three. The system disk is a raw 720 KiB image of "
+                    "an MV-30 System Disk (80 cylinders, 2 sides, 9 sectors of 512 bytes): the boot ROM "
+                    "loads the operating system from it at power-on, and it is never written.\n";
         if (_device == RomDevice::Cm32ln)
             text << "The CM-32LN, the CM-500's LA half and the LAPC-N share this control ROM and take the "
                     "CM-32L's wave and reverb images.\n";
@@ -538,7 +542,11 @@ namespace emu88Lib
                     "Recognized 1 MiB copies in 2/4 MiB repeated dumps are also accepted. "
                  << (_device == RomDevice::Sc88Pro
                          ? "The VE-GS Pro's headless program ROM (R01780078) runs as its own device.\n\n"
-                         : "SC-88Pro control ROMs run as the SC-88Pro device.\n\n")
+                         : _device == RomDevice::VeGsPro
+                         ? "SC-88Pro control ROMs run as the SC-88Pro device.\n\n"
+                         : "The SK-88Pro's parameter mask ROM has not been dumped. The SC-88Pro 1.02 control "
+                           "ROM carries the same tone data and stands in for it, next to the SK-88Pro's own "
+                           "program EPROM.\n\n")
                  << "Waves: use the native A+B+C files above, or decoded SC-8850 waves (32 MiB), "
                     "or decoded SC-8820 waves (16+8 MiB). These are alternatives, not additional required files.\n";
             text << "The SC-88Pro board carries the same PCM on five 4 MiB mask ROMs instead, one per XP "

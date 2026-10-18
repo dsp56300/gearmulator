@@ -30,6 +30,29 @@
 	src: sc8850_assets.png;
 }
 
+/* The MV-30's switch faces, cut out of the artwork export with the buttons against the empty panel: the faces
+ * only, the dark wells behind them stay in mv30_panel.png. 3x pixels, like the SC-8850 sheet. */
+@spritesheet mv30Assets
+{
+	mv30_shift: 0px 0px 162px 42px;
+	mv30_f1: 0px 45px 162px 42px;
+	mv30_f2: 0px 90px 162px 42px;
+	mv30_f3: 0px 135px 162px 42px;
+	mv30_f4: 0px 180px 162px 42px;
+	mv30_f5: 0px 225px 162px 42px;
+	mv30_exit: 0px 270px 162px 42px;
+	mv30_play: 0px 315px 162px 42px;
+	mv30_timbre: 0px 360px 162px 42px;
+	mv30_system: 0px 405px 162px 42px;
+	mv30_plus: 0px 450px 48px 42px;
+	mv30_minus: 0px 495px 48px 42px;
+	mv30_left: 0px 540px 30px 55px;
+	mv30_up: 0px 598px 56px 30px;
+	mv30_right: 0px 631px 30px 55px;
+	mv30_down: 0px 689px 56px 30px;
+	src: mv30_assets.png;
+}
+
 /* The VALUE encoder is endless: four knurl phases repeat every four detents,
  * so 33 frame names (one per encoder value, 32 == 0) map onto four images. */
 /* The CM bezels' own volume knob, 31 frames like the default one. */
@@ -94,6 +117,7 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .powerOff #hardwareLcd2 { visibility: hidden; }
 .powerOff.modelCm64 #powerOffDisplay2 { display: block; }
 .modelSc8820 .lcd { left: 164dp; top: 28dp; width: 180dp; height: 71dp; }
+.modelMv30 .lcd { left: 162dp; top: 23dp; width: 291dp; height: 78dp; }	/* the artwork's LCD area; the dots sit inset */
 .volumeKnob { position: absolute; left: 112dp; top: 24dp; width: 28dp; height: 28dp; frames: 31; spriteprefix: knob_; decorator: image(knob_030 contain); cursor: pointer; }
 .modelCm .volumeKnob { spriteprefix: cmknob_; decorator: image(cmknob_030 contain); }
 .modelMt32 .volumeKnob { spriteprefix: knob_; decorator: image(knob_030 contain); }	/* the MT-32's black knob */
@@ -207,6 +231,34 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
  * nothing but a blurred layer - as an SVG the glow vanished. The 9 x 6 lamp is inset by 6dp on
  * every side, the margin its blur needs, so the box sits at 461,116 to put the lamp at 467,122. */
 .cmMidiLed { width: 21dp; height: 18dp; }
+
+/* The MV-30: its faces over the wells the panel carries. A press darkens the face, as on the SC-88; the hit box itself
+ * stays clear, since the arrows' boxes are larger than their triangles. */
+.modelMv30Panel { display: none; }
+.modelMv30 .modelMv30Panel { display: block; }
+.mv30Key { width: 54dp; height: 14dp; border-radius: 0.3dp; }
+.mv30Small { width: 16dp; height: 14dp; border-radius: 0.3dp; }
+.mv30Arrow:hover { box-shadow: none; }
+.mv30Key:active, .mv30Key.pressed, .mv30Small:active, .mv30Small.pressed, .mv30Arrow:active, .mv30Arrow.pressed {
+	background-color: transparent; box-shadow: none; }
+.mv30Face { position: absolute; left: 0dp; top: 0dp; width: 100%; height: 100%; pointer-events: none; }
+.hit:active .mv30Face, .hit.pressed .mv30Face { image-color: #bbb; }
+.mv30_shift { decorator: image(mv30_shift); }
+.mv30_f1 { decorator: image(mv30_f1); }
+.mv30_f2 { decorator: image(mv30_f2); }
+.mv30_f3 { decorator: image(mv30_f3); }
+.mv30_f4 { decorator: image(mv30_f4); }
+.mv30_f5 { decorator: image(mv30_f5); }
+.mv30_exit { decorator: image(mv30_exit); }
+.mv30_play { decorator: image(mv30_play); }
+.mv30_timbre { decorator: image(mv30_timbre); }
+.mv30_system { decorator: image(mv30_system); }
+.mv30_plus { decorator: image(mv30_plus); }
+.mv30_minus { decorator: image(mv30_minus); }
+.mv30_left { decorator: image(mv30_left); }
+.mv30_up { decorator: image(mv30_up); }
+.mv30_right { decorator: image(mv30_right); }
+.mv30_down { decorator: image(mv30_down); }
 
 /* Keep menus compact despite the panel document's 1.7 root scale. */
 .menubox { font-size: 8dp; padding: 2dp; gap: 1dp; }

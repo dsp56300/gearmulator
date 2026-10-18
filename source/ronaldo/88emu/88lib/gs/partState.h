@@ -1,6 +1,7 @@
 #pragma once
 
 #include "88lib/deviceModel.h"
+#include "88lib/partActivity.h"
 #include "88lib/gs/params.h"
 #include "88lib/gs/toneCatalog.h"
 
@@ -105,6 +106,11 @@ namespace emu88Lib::gs
 
 		// Changes with every change of the setup
 		uint64_t revision() const { return m_revision.load(std::memory_order_acquire); }
+		// The parts that a channel message went to since the last call, a bit per part: what lights up the parts
+		// that play. Kept only while enabled, for as long as something shows it; otherwise a channel message pays a
+		// load for it. Without the lock.
+		void setActivityEnabled(bool _enabled);
+		uint64_t takeActivity() { return m_activity.take(); }
 		Setup setup() const;
 		Setup setup(uint64_t& _revision) const;
 
@@ -157,6 +163,7 @@ namespace emu88Lib::gs
 		enum class Reset : uint8_t { PowerOn, GsReset, GmSystemOn };
 		void resetLocked(Reset _reset);
 		void changed();
+		void updateListeners();
 
 		mutable std::mutex m_mutex;
 		DeviceModel m_model = DeviceModel::Sc88Pro;
@@ -165,6 +172,8 @@ namespace emu88Lib::gs
 		// Per part, or on the SC-8850 per port and channel, 16 per group either way
 		std::vector<RpnSelection> m_selections;
 		std::atomic<uint64_t> m_revision{1};
+		// Its table of the parts on each port and channel is kept with the setup while it is enabled
+		PartActivity m_activity;
 		// A GS Reset arrived since power-on: the SCC-1A's GM System On turns NRPN on from then on
 		bool m_gsResetSeen = false;
 	};

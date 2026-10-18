@@ -7,6 +7,7 @@
 #include "juceRmlComponent.h"
 #include "rmlHelper.h"
 #include "rmlPopupWindow.h"
+#include "rmlPressSwallower.h"
 
 #include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/Context.h"
@@ -359,6 +360,16 @@ namespace juceRmlUi
 				
 				if (isChildOfThis(target))
 					return;
+
+				// A context-menu press goes through, so that it can open the next menu where it was made.
+				if (!helper::isContextMenu(_event))
+				{
+					_event.StopPropagation();
+
+					if (auto* document = m_document.get())
+						swallowRestOfPress(document);
+				}
+
 				close();
 			}
 			break;

@@ -110,7 +110,14 @@ namespace juceRmlUi
 			if (m_node->isSelected())
 			{
 				const auto keyIdentifier = helper::getKeyIdentifier(_event);
-				if (m_node->handleNavigationKey(keyIdentifier))
+
+				// a page is the rows that the tree shows at once, all rows are as high as this one
+				uint32_t nodesPerPage = 1;
+				const auto rowHeight = GetBox().GetSize(Rml::BoxArea::Margin).y;
+				if (m_tree && rowHeight > 0)
+					nodesPerPage = static_cast<uint32_t>(m_tree->GetClientHeight() / rowHeight);
+
+				if (m_node->handleNavigationKey(keyIdentifier, nodesPerPage))
 					_event.StopPropagation();
 			}
 			break;

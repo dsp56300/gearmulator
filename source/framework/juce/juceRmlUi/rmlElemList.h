@@ -40,7 +40,7 @@ namespace juceRmlUi
 			return m_list;
 		}
 
-		bool scrollIntoView(size_t _index);
+		bool scrollIntoView(size_t _index, bool _smooth = true);
 
 	private:
 		void initialize();
@@ -62,6 +62,7 @@ namespace juceRmlUi
 		bool onKeypress(Rml::Event& _event);
 
 		uint32_t getItemsPerColumn();
+		uint32_t getItemsPerPage();
 
 		LayoutType getLayoutType();
 
@@ -90,6 +91,7 @@ namespace juceRmlUi
 		Rml::Element* m_scrollDummy = nullptr;
 
 		uint32_t m_scrollTargetDirty = 0;
+		bool m_scrollSmooth = true;
 
 		bool m_redirectingMouseScroll = false;
 

@@ -22,6 +22,7 @@ pipeline {
 		booleanParam(name: 'SynthNodalRed2x', defaultValue: true, description: '')
 		booleanParam(name: 'SynthJe8086', defaultValue: true, description: '')
 		booleanParam(name: 'DSPBridge', defaultValue: true, description: '')
+		booleanParam(name: 'PluginManager', defaultValue: true, description: '')
 	}
 	stages {
 		stage('Prepare') {
@@ -51,6 +52,7 @@ pipeline {
 					if(params.SynthNodalRed2x)          env.childDisplayName += " Sn2x"
 					if(params.SynthJe8086)              env.childDisplayName += " Sje"
 					if(params.DSPBridge)	    	    env.childDisplayName += " Net"
+					if(params.PluginManager)            env.childDisplayName += " PM"
 
 					currentBuild.displayName += "${env.childDisplayName}"
 					
@@ -61,7 +63,8 @@ pipeline {
                         " -Dgearmulator_SYNTH_XENIA=" + (params.SynthXenia ? "on" : "off") +
                         " -Dgearmulator_SYNTH_NODALRED2X=" + (params.SynthNodalRed2x ? "on" : "off") +
                         " -Dgearmulator_SYNTH_JE8086=" + (params.SynthJe8086 ? "on" : "off") +
-                        " -Dgearmulator_COMPONENT_DSPBRIDGE=" + (params.DSPBridge ? "on" : "off")
+                        " -Dgearmulator_COMPONENT_DSPBRIDGE=" + (params.DSPBridge ? "on" : "off") +
+                        " -Dgearmulator_BUILD_INSTALLER=" + (params.PluginManager ? "on" : "off")
 
 					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
 				}

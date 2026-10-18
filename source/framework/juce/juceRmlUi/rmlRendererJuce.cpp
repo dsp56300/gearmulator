@@ -967,25 +967,37 @@ namespace juceRmlUi
 					const auto& v2 = _vertices[quadIndices[2]];
 					const auto& v3 = _vertices[quadIndices[3]];
 
-					// Validate that the 4 vertices form an axis-aligned quad
-					// There should be exactly 2 unique X values and 2 unique Y values
-					std::array<float, 4> xVals = {v0.position.x, v1.position.x, v2.position.x, v3.position.x};
-					std::array<float, 4> yVals = {v0.position.y, v1.position.y, v2.position.y, v3.position.y};
-					
-					std::sort(xVals.begin(), xVals.end());
-					std::sort(yVals.begin(), yVals.end());
-					
+					// Validate that the 4 vertices form an axis-aligned quad: each one sits at a different
+					// corner of their bounding box. Matching sorted x and y values alone is not enough,
+					// a short thin diagonal line passes that test and would be filled as its bounding box
+					const Rml::Vector2f quadPosMin(
+						std::min({ v0.position.x, v1.position.x, v2.position.x, v3.position.x }),
+						std::min({ v0.position.y, v1.position.y, v2.position.y, v3.position.y })
+					);
+
+					const Rml::Vector2f quadPosMax(
+						std::max({ v0.position.x, v1.position.x, v2.position.x, v3.position.x }),
+						std::max({ v0.position.y, v1.position.y, v2.position.y, v3.position.y })
+					);
+
+					const Rml::Vector2f quadPosCenter = (quadPosMin + quadPosMax) * 0.5f;
+
 					constexpr float epsilon = 1.0f;
-					const bool validQuadX = (std::abs(xVals[0] - xVals[1]) < epsilon) && (std::abs(xVals[2] - xVals[3]) < epsilon);
-					const bool validQuadY = (std::abs(yVals[0] - yVals[1]) < epsilon) && (std::abs(yVals[2] - yVals[3]) < epsilon);
-					
-					if (!validQuadX || !validQuadY)
-						continue;
+					uint32_t corners = 0;
 
-					const Rml::Vector2f quadPosMin(xVals[0], yVals[0]);
-					const Rml::Vector2f quadPosMax(xVals[3], yVals[3]);
+					for (const auto* v : { &v0, &v1, &v2, &v3 })
+					{
+						const bool right = v->position.x > quadPosCenter.x;
+						const bool bottom = v->position.y > quadPosCenter.y;
 
-					if (quadPosMax.x <= quadPosMin.x || quadPosMax.y <= quadPosMin.y)
+						if (std::abs(v->position.x - (right ? quadPosMax.x : quadPosMin.x)) >= epsilon ||
+							std::abs(v->position.y - (bottom ? quadPosMax.y : quadPosMin.y)) >= epsilon)
+							break;
+
+						corners |= 1u << (static_cast<uint32_t>(right) | (static_cast<uint32_t>(bottom) << 1));
+					}
+
+					if (corners != 0xf)
 						continue;
 
 					const Rml::Vector2f quadUvMin(
@@ -1075,7 +1087,7 @@ namespace juceRmlUi
 
 	void RendererJuce::RenderGeometry(Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture)
 	{
-		if (!m_renderTarget)
+		if (!m_renderTarget || (m_clipMaskEnabled && m_clipMaskInverse))
 			return;
 
 		auto* p = reinterpret_cast<Geometry*>(_geometry);
@@ -1185,20 +1197,26 @@ namespace juceRmlUi
 			}
 		}
 
-		// Render triangles (only solid color for now, no texture support)
+		// Render triangles in one colour, that of their first vertex. A textured one takes it times the texel at its centre,
+		// a texture across a strokes element's line shades it
 		for (const auto& tri : p->triangles)
 		{
-			if (img)
-				continue; // Skip textured triangles for now
-
 			// Apply translation to triangle vertices
 			const auto p0 = Rml::Vector2i(roundToInt(tri.p[0].x + _translation.x), roundToInt(tri.p[0].y + _translation.y));
 			const auto p1 = Rml::Vector2i(roundToInt(tri.p[1].x + _translation.x), roundToInt(tri.p[1].y + _translation.y));
 			const auto p2 = Rml::Vector2i(roundToInt(tri.p[2].x + _translation.x), roundToInt(tri.p[2].y + _translation.y));
 
-			// Use first vertex color
 			const auto& color = tri.color[0];
-			const Colorb col { color.red, color.green, color.blue, color.alpha };
+			Colorb col { color.red, color.green, color.blue, color.alpha };
+
+			if (img)
+			{
+				const auto uv = (tri.uv[0] + tri.uv[1] + tri.uv[2]) / 3.0f;
+				const auto x = std::clamp(static_cast<int>(uv.x * static_cast<float>(img->width)), 0, img->width - 1);
+				const auto y = std::clamp(static_cast<int>(uv.y * static_cast<float>(img->height)), 0, img->height - 1);
+				const auto& t = *img->getColorPointer(static_cast<size_t>(x), static_cast<size_t>(y));
+				col = { static_cast<uint8_t>(col.r * t.r / 255), static_cast<uint8_t>(col.g * t.g / 255), static_cast<uint8_t>(col.b * t.b / 255), static_cast<uint8_t>(col.a * t.a / 255) };
+			}
 
 			// Render the triangle
 			if (col.a < 255)
@@ -1443,6 +1461,20 @@ namespace juceRmlUi
 			const Rml::Rectanglei rtBounds = Rml::Rectanglei::FromPositionSize(Rml::Vector2i(0, 0), Rml::Vector2i(m_renderTarget->width, m_renderTarget->height));
 			m_scissorRegion = m_scissorRegion.Intersect(rtBounds);
 		}
+	}
+
+	// There is no mask buffer. What a mask keeps inside a shape (the rounded corners of overflow: hidden) is drawn
+	// unclipped, what it keeps outside of one is not drawn at all: that is a box shadow, unclipped it would cover the
+	// element that casts it
+	void RendererJuce::EnableClipMask(const bool _enable)
+	{
+		m_clipMaskEnabled = _enable;
+	}
+
+	void RendererJuce::RenderToClipMask(const Rml::ClipMaskOperation _operation, Rml::CompiledGeometryHandle, Rml::Vector2f)
+	{
+		if (_operation != Rml::ClipMaskOperation::Intersect)
+			m_clipMaskInverse = _operation == Rml::ClipMaskOperation::SetInverse;
 	}
 
 	void RendererJuce::SetTransform(const Rml::Matrix4f* transform)

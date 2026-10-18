@@ -10,13 +10,11 @@
 			<div class="peSeparator"/>
 			<div id="peGroups" class="peGroups"/>
 			<div id="pePartTabs" class="pePartTabs"/>
-			<div class="peActions">
-				<button id="peSendPart" class="peAction" title="Send this part's settings to the device">Send Part</button>
-				<button id="peReceivePart" class="peAction" title="Read this part's settings from the device">Receive Part</button>
-				<button id="peSendAll" class="peAction" title="Send every part's settings and the effects to the device">Send All</button>
-				<button id="peReceiveAll" class="peAction" title="Read every part's settings and the effects from the device">Receive All</button>
-			</div>
+			<button id="peActionsMenu" class="peActionsMenu" title="Send the settings to the device, receive them from it, or save them as MIDI"><svg class="peActionsIcon" src="part_editor_menu.svg"/></button>
 		</div>
+
+		<!-- The actions button's panel, over the pages: send, receive, and the MIDI files to save or drag to a host -->
+		<div id="peActionsPanel" class="peActionsPanel" style="display: none;"/>
 
 		<div id="pePageMixer" class="pePage">
 			<div class="peMainPane">
@@ -24,7 +22,7 @@
 					<div class="peMixHeadSoloMute"/>
 					<div class="peMixHeadName">
 						<div class="peMixHeadPart">Part</div>
-						<div class="peMixHeadTone">Instrument</div>
+						<div id="peMixHeadTone" class="peMixHeadTone">Instrument</div>
 					</div>
 					<div class="peMixHeadVolume">Volume</div>
 					<div class="peMixHeadPan">Pan</div>
@@ -32,7 +30,7 @@
 				<div id="peMixerRows" class="peMixerRows"/>
 			</div>
 			<div class="peSidePane">
-				<div class="pePaneTitle">System and Effects</div>
+				<div id="pePaneTitle" class="pePaneTitle">System and Effects</div>
 				<div id="peGlobals" class="peControls peGlobals"/>
 			</div>
 		</div>

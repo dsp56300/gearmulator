@@ -1,5 +1,57 @@
 Release Notes
 
+2.2.27:
+
+Framework:
+
+- [Imp] BUG-10482 Page Up, Page Down, Home and End move the selection in lists
+        and trees, such as the patch manager and the Xenia wave editor.
+
+JE8086:
+
+- [Fix] MIDI was received and sent at half the speed of the hardware, so dense
+        MIDI, a chord or a fast controller movement for example, arrived late.
+
+88emuPlayer:
+
+- [New] Devices: Added support for the SK-88Pro.
+
+- [Imp] Settings: "Hide devices without ROMs" leaves the boards whose ROMs are
+        missing out of the device menu. Off by default. Every board stays
+        listed while no ROM set is complete at all.
+
+Plugin Manager:
+
+- [Fix] Installing a download that holds nothing to install, as the Standalone
+        builds did, said it worked while nothing was installed. It fails and says
+        so now.
+
+- [Fix] A long run of installs no longer fails halfway when the server asks it to
+        slow down. It waits as long as the server says, or up to two minutes, and
+        carries on. A download that stops half way is tried once more.
+
+- [Imp] Fewer requests to the server on every refresh and every install.
+
+- [Fix] Donator builds come from a new server,
+        builds.theusualsuspects.io. The old one stopped answering after a long run of
+        downloads, so a run of installs failed halfway. Links to donator folders from
+        older download posts still work when pasted as a login.
+
+- [Imp] EMU-248 Nothing is ticked on a first start, so a first "Install selected"
+        no longer installs every format of every product. What you tick is still
+        remembered. "Upgrade all" upgrades everything installed that has an
+        update, ticked or not.
+
+- [Fix] EMU-249 The window opens inside the part of the screen the taskbar leaves
+        free, instead of reaching behind it on smaller screens.
+
+- [New] EMU-250 Products with an update are listed first, under "Updates
+        available", and go back to their category once they are upgraded.
+
+- [Imp] EMU-251 The button that updates the Plugin Manager itself says that it is
+        the Plugin Manager, and says when what is on offer is a newer build of the
+        same version.
+
 2.2.26:
 
 Framework:
@@ -161,6 +213,19 @@ Framework:
 
 - [Imp] A MIDI output port that sends slower than the plugin feeds it no longer
         holds up the audio. Messages that do not fit into its queue are dropped.
+
+- [Fix] BUG-10481 A plugin closed while its patch manager was still loading,
+        which a host also does while it scans plugins, could save a patch
+        manager cache without the user's banks and data sources. From then on
+        the patch manager showed them empty, until the file
+        patchmanagerdb.cache was deleted. A cache that is broken this way still
+        has to be deleted once.
+
+- [Fix] Text in a style that the font of a skin does not have, italic for
+        example, was not drawn at all. In a skin whose font has no italic
+        face, the counts in the patch manager, the "Search..." hints of the
+        search fields and the headlines of the settings pages were missing.
+        Such text now uses the closest face the font has.
 
 Osirus/OsTIrus:
 
@@ -373,6 +438,22 @@ NodalRed2x:
 
 JE8086:
 
+- [New] JP-8080 support. It needs a complete 1 MB flash dump of the JP-8080,
+        the firmware in its update .mid files is not enough to boot. Pick it
+        in the ROM dropdown at the bottom of the window, which now switches
+        between all ROMs that were found.
+
+- [New] JP-8080: The audio inputs reach the Voice Modulator and OSC 2 EXT, the
+        left input is INST/LOWER, the right one VOCAL/UPPER. The two EXT IN
+        knobs set their levels, and the Voice Modulator page edits all of its
+        settings.
+
+- [New] JE8086FX, an FX version, to use the Voice Modulator of the JP-8080 on
+        audio tracks.
+
+- [Imp] Considerably lower CPU usage, the emulation of the DSP chips got a lot
+        faster.
+
 - [Fix] The first notes could start late when the host sent MIDI tuning data
         ahead of them, they had to wait until all of it was received. The
         JP-8000 does not support MIDI tuning, the data is now ignored.
@@ -401,6 +482,15 @@ JE8086:
 - [Fix] EMU-178 With the DSPBridge, the server ran the first ROM found instead of
         the keyboard ROM the plugin uses itself, so a rack ROM could run
         remotely while the plugin expected a keyboard.
+
+- [Fix] Host automation and the device's replies could change the plugin's copy
+        of the current sound at the same time, which could crash the plugin,
+        rarely. At startup the Patch Manager could also read its list of ROM
+        banks while it was still being filled.
+
+- [Fix] The performances of a rack ROM read one byte past their common block as
+        its last parameter, the vocal upper input jack, which could leave it at
+        a random value.
 
 88emuPlayer:
 
@@ -477,29 +567,132 @@ JE8086:
         powered on or off, and right after the VALUE knob was pushed on the
         SC-8850, because the window was changed while it was being drawn.
 
+- [Fix] Linux: The player could crash after a device switch while the audio
+        or MIDI settings were open: the settings page that was replaced
+        stayed registered with the window for its redraws.
+
 - [Fix] SC-88, SC-88VL, SC-88Pro: A data request (RQ1) was never answered.
         The firmware now answers it as on the hardware, for a request that
         starts at a parameter, up to 137 bytes, on either MIDI IN.
 
-- [New] Part Editor, in the context menu of the SC-55 to SC-8850 and the
-        boards that run their programs. A mixer with the volume, pan, solo
-        and mute of every part beside the system, reverb, chorus, delay,
-        equalizer and insertion effect settings, and a page per part with
-        its mixer, pitch, tone modify, setup and scale tuning settings
-        beside its instrument, variation and tone map, or its drum set,
-        picked from the lists in the board's own ROMs, with a filter. Each
-        board shows the settings it has; the insertion effect shows the
-        parameters of the type selected. A double-click on a slider or a
-        setting's name brings it back to its default. A right-click on a
-        part tab makes it a normal or a drum part. Edits reach the board as
-        they are made, and the window follows what songs and live input
-        set, SysEx, controllers, RPN and NRPN alike. Send writes the parts
-        and effects to the board, Receive reads them back from it. Mute is
-        the board's own, the one its MUTE button sets.
+- [New] Part Editor, from the context menu or with a double-click on the
+        display, for the Sound Canvases from the SC-55 to the SC-8850, the
+        boards that run their programs, and the MT-32, CM-32L, CM-32LN, CM-32P
+        and CM-64. A mixer with every part's volume, pan and sound, with solo
+        and mute on the Sound Canvases, beside the system and effect settings,
+        and a page per part with its settings beside the instruments, drum
+        sets, timbres or tones to pick from, named from the board's own ROMs.
+        Picking one plays a note on the part while the mouse button is down.
+        On the LA boards a part's page also edits its timbre, partial by
+        partial, with the envelopes drawn, and the rhythm part's page each
+        key. Edits reach the board as they are made, and the window follows
+        what songs and live input set; a part lights up while MIDI for it
+        comes in. Its menu sends the parts or everything to the board,
+        receives them back from a board that answers data requests, and saves
+        them as a MIDI file that drags onto a track of a host.
 
 - [Imp] CM-32L, CM-32LN, CM-32P, CM-64: A volume knob that matches the bezel.
 
 - [Imp] MT-32: Its own dark artwork instead of the CM-32L's.
+
+- [New] Devices: Added the MV-30 (experimental). Its operating system loads
+        from the system disk image, which is part of the ROM set (system
+        disks 1.08 and 1.091); the player runs that boot at full speed while
+        the device loads. Card slot A takes the same PCM cards as the
+        CM-32P. Writing to the disk, the metronome, the tape sync and the
+        analog output stage are not emulated yet.
+
+Plugin Manager:
+
+- [New] A program that installs and updates the plugins for you, so that keeping
+        them current no longer means downloading archives and unpacking them into
+        the right folders by hand. It lists every product with a column per plugin
+        format, showing which version is installed and offering every version you
+        could have instead - one format at a time, a whole product at once, or
+        everything on the page. The effect builds come with the plugin they belong
+        to when you ask for them.
+
+- [New] Plugins that are already installed are found where they are, not only in the
+        folder this program would put them in: the places each format is normally
+        kept are searched too, which on macOS is the system Library and on Linux
+        the /usr tree. A first start offers an upgrade of the build you have rather
+        than a download of the one you are already running, and that upgrade
+        replaces the copy it found instead of leaving a second one behind in
+        another folder a host scans.
+
+- [Fix] A plugin unpacked by hand in a format that does not say its version, such
+        as a CLAP on Windows, was only ever offered a reinstall. It is offered an
+        upgrade now when its file is clearly older than the build on offer.
+
+- [Fix] A Plugin Manager unpacked by hand, which the first install always is, was
+        never offered a newer build of its own version. It is now when its file is
+        clearly older than that build.
+
+- [Fix] Installing a plugin whose own name ends in FX left an empty folder in
+        Documents/The Usual Suspects, named after the rest of its name. Only an
+        effect build of a plugin shares that plugin's folder now.
+
+- [Fix] macOS: installing over a plugin that was already there could stop the host
+        from loading it at all - in Logic the plugin simply disappeared from the list.
+        A plugin on macOS is a sealed bundle, and the update was leaving a file in it
+        that the signature does not cover, which is enough for the system to refuse
+        the whole plugin. The bundle is now put in place exactly as it was built, and
+        a ROM you had kept inside it is moved to the product's roms folder in
+        Documents, where the plugin looks for it anyway.
+
+- [Fix] Plugins kept in a folder of their own inside the plugin folder - a
+        VST3\The Usual Suspects\ and the like - are found now. They read as not
+        installed before, so every one of them was offered as a download, and an
+        install put a second copy in the folder above. The search goes all the way
+        down, and an upgrade lands on the copy it found.
+
+- [Fix] The stored logins are no longer sitting in the settings file for anyone to read.
+        The file was written with the usual permissions, which on macOS and Linux means
+        every account on the machine could read it, and the passwords were in it as
+        typed. It is now readable by you alone and the passwords are scrambled in it.
+        A file from an older version is read as it is and tidied up the next time a
+        login is saved, so nothing has to be entered again.
+
+- [Fix] The window no longer stops responding for a minute or more after it opens.
+        Finding out which version of an installed LV2 plugin is on disk read a
+        file of up to 17 MB one byte at a time, for every plugin, on the thread
+        that draws the window. It now opens straight away.
+
+- [Fix] A donator folder can be given as the link from the download post, not only
+        as its name. Pasting the link used to build a web address that could not
+        work, so the login was refused.
+
+- [Fix] tuspm: adding a donator login with "tuspm login donators" also stored it as
+        the team login, replacing the one that was there.
+
+- [Fix] Removing plugins from a folder that needs administrator rights asks for them
+        once. It used to ask for every file it removed - the plugin and the changelog
+        beside it, in every format, for the plugin and for its effect build.
+
+- [Fix] Declining the administrator prompt during an update no longer counts as an
+        update that worked. The new version was written down as installed while the
+        old one was still on disk, so the update was never offered again.
+
+- [New] A donator login adds the builds for the products you support to the list.
+
+- [New] tuspm, the same program without a window, for a script or a build machine.
+
+- [New] EMU-153 BUG-10468 The changelog of every product is in the Plugin Manager:
+        Changelog on a product's page lists every released version, and for the one
+        picked shows what changed in the product apart from what changed for every
+        product. A version can be copied as text or as Markdown, and
+        "tuspm changelog" writes it to a file. Donator builds bring the changelog of
+        their own build, so it is there before it is public.
+
+- [New] A product can bring files besides its plugins - presets, skins and the like -
+        which are put into its folder in Documents when it is installed. A file that
+        is there already is only replaced when a newer one is published, so changes
+        made to it are kept.
+
+- [New] A product you have no use for can be taken out of the list: right-click it
+        and choose Hide. Right-click anywhere in the list to bring back everything
+        that is hidden. How many are is written next to the number of plugins, so a
+        short list never looks like a list with something missing from it.
 
 2.2.25:
 

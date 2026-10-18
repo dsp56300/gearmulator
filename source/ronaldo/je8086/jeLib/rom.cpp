@@ -44,9 +44,9 @@ namespace jeLib
 	{
 		switch (m_data.size())
 		{
-		case RomSizeKeyboard:  return DeviceType::Keyboard;
-		case RomSizeRack:      return DeviceType::Rack;
-		default:               return DeviceType::Invalid;
+		case RomSizeKeyboard: return DeviceType::Keyboard;
+		case RomSizeRack:     return DeviceType::Rack;
+		default:              return DeviceType::Invalid;
 		}
 	}
 
@@ -117,7 +117,7 @@ namespace jeLib
 			start += performanceSize;
 		}
 
-		return false;
+		return true;
 	}
 
 	size_t Rom::findKey(const char* _key) const
@@ -204,14 +204,7 @@ namespace jeLib
 
 		uint32_t address = static_cast<uint32_t>(AddressArea::UserPatch);
 
-		if (_index < 64)
-		{
-			address |= static_cast<uint32_t>(UserPatchArea::UserPatch001);
-		}
-		else
-		{
-			address |= static_cast<uint32_t>(UserPatchArea::UserPatch065);
-		}
+		address |= static_cast<uint32_t>(_index < 64 ? UserPatchArea::UserPatch001 : UserPatchArea::UserPatch065);
 
 		_index &= 63;
 
@@ -229,13 +222,6 @@ namespace jeLib
 
 		const auto rack = getDeviceType() == DeviceType::Rack;
 
-		// A performance consists of:
-		// - PerformanceCommon
-		// - Part Upper
-		// - Part Lower
-		// - Patch Upper
-		// - Patch Lower
-
 		uint32_t addressBase = static_cast<uint32_t>(AddressArea::UserPerformance);
 
 		addressBase |= static_cast<uint32_t>(UserPerformanceArea::UserPerformance01);
@@ -246,7 +232,9 @@ namespace jeLib
 		// we always use the keyboard part size, as the last byte of the rack doesn't seem to be serialized (garbage in there)
 		constexpr auto partSize = static_cast<size_t>(Part::DataLengthKeyboard);
 
-		auto performanceCommon = createPreset<PerformanceCommon>(addressBase, _presetData, 0, performanceCommonSize);
+		// the byte behind the rack's common block is not its last parameter (vocal upper input jack, 0/1), it holds
+		// anything from 00 to a3. As for the parts, parse the keyboard length
+		auto performanceCommon = createPreset<PerformanceCommon>(addressBase, _presetData, 0, static_cast<size_t>(PerformanceCommon::DataLengthKeyboard));
 
 		auto off = performanceCommonSize - 3; /* three times 14 bit data which is 8 bit in rom */
 

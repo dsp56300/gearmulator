@@ -48,6 +48,17 @@ macro(copyArtefacts TARGET FOLDER FILEFILTER)
 
 endmacro()
 
+# One file, under the name the Plugin Manager asks for whatever it is called here.
+macro(copyChangelog TARGET FOLDER FILE)
+	string(REGEX REPLACE "/+$" "" CHANGELOG_FOLDER "${FOLDER}")
+	set(RCLONE_RESULT 0)
+	execute_process(COMMAND rclone -v --config ${RCLONE_CONF} copyto "${FILE}" "${TARGET}/${CHANGELOG_FOLDER}/changelog.txt"
+		COMMAND_ECHO STDOUT RESULT_VARIABLE RCLONE_RESULT)
+	if(RCLONE_RESULT)
+		message(FATAL_ERROR "Failed to upload the changelog: " ${RCLONE_RESULT})
+	endif()
+endmacro()
+
 macro(copyDataFrom FROM TO)
 	execute_process(COMMAND rclone --config "${RCLONE_CONF}" sync "dsp56300:${FROM}" "${TO}" COMMAND_ECHO STDOUT RESULT_VARIABLE RCLONE_RESULT)
 	if(RCLONE_RESULT)

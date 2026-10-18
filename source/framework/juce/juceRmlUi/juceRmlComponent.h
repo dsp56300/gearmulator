@@ -240,6 +240,8 @@ namespace juceRmlUi
 		// The buttons the context was told are down, a bit per Rml mouse button. A release can get lost on the way
 		// (a host that activates its window during the click, a drag session of the system), see releaseLostMouseButtons
 		uint32_t m_pressedMouseButtons = 0;
+		// The press that closed a list of another window, which goes no further, see mouseDown()
+		bool m_pressSwallowed = false;
 		juce::ModifierKeys m_currentModifierKeys;
 
 		bool m_updating = true;

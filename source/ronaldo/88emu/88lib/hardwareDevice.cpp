@@ -8,6 +8,7 @@
 #include "88lib/boards/laBoard.h"
 #include "88lib/boards/cm64.h"
 #include "88lib/boards/miig5.h"
+#include "88lib/boards/mv30.h"
 #include "88lib/boards/nu10b.h"
 #include "hardwareLib/lcdfonts.h"
 #include "88lib/boards/sc55Board.h"
@@ -104,9 +105,11 @@ namespace emu88Lib
 		{
 		case DeviceModel::Sc88Pro:
 		case DeviceModel::VeGsPro:
+		case DeviceModel::Sk88Pro:
 		{
 			// The VE-GS Pro is the SC-88Pro board without its panel sub-MCU; the
-			// board finds that out from the control ROM's vector table.
+			// board finds that out from the control ROM's vector table. The
+			// SK-88Pro's image is twice the size, which is how it is told apart.
 			auto roms = RomLoader::findSc88ProRomSet(RomLoader::toRomDevice(m_model));
 			if(!roms.isValid()) break;
 			std::vector<uint8_t> waves;
@@ -129,6 +132,14 @@ namespace emu88Lib
 			m_cm64 = std::make_unique<Cm64>(RomLoader::findLaRomSet(LaModel::Cm32l), RomLoader::findCm32pRomSet(),
 			                                _pcmCard);
 			break;
+		case DeviceModel::Mv30:
+		{
+			// Boots from its system disk at construction, see Mv30::bootOffline().
+			const auto roms = RomLoader::findMv30RomSet();
+			if(!roms.isValid()) break;
+			m_mv30 = std::make_unique<Mv30>(roms, _pcmCard);
+			break;
+		}
 		case DeviceModel::Sc8820:
 		{
 			const auto inventory = RomLoader::scan();
@@ -292,6 +303,7 @@ namespace emu88Lib
 		if(m_sc55) return static_cast<float>(m_sc55->sampleRate());
 		if(m_nu10b) return static_cast<float>(Nu10b::SampleRate);
 		if(m_miig5) return static_cast<float>(Miig5::SampleRate);
+		if(m_mv30) return static_cast<float>(Mv30::SampleRate);
 		return static_cast<float>(g_sampleRate);
 	}
 
@@ -305,6 +317,7 @@ namespace emu88Lib
 		if(m_sc55) return m_sc55->cpuClockHz();
 		if(m_nu10b) return Nu10b::CpuClockHz;
 		if(m_miig5) return Miig5::CpuClockHz;
+		if(m_mv30) return Mv30::CpuClock;
 		return g_cpuClockHz;
 	}
 
@@ -313,7 +326,8 @@ namespace emu88Lib
 		return (m_sc88 && m_sc88->isValid()) || (m_sc88Pro && m_sc88Pro->isValid()) ||
 		       (m_sc8850 && m_sc8850->isValid()) || (m_sc8820 && m_sc8820->isValid()) || (m_cm32p && m_cm32p->isValid()) ||
 		       (m_la && m_la->isValid()) || (m_cm64 && m_cm64->isValid()) ||
-		       (m_sc55 && m_sc55->isValid()) || (m_nu10b && m_nu10b->isValid()) || (m_miig5 && m_miig5->isValid());
+		       (m_sc55 && m_sc55->isValid()) || (m_nu10b && m_nu10b->isValid()) || (m_miig5 && m_miig5->isValid()) ||
+		       (m_mv30 && m_mv30->isValid());
 	}
 
 	void HardwareDevice::setPanelButtons(const uint32_t _buttons)
@@ -324,6 +338,16 @@ namespace emu88Lib
 		   m_pendingPanelCommands.back().value == static_cast<int32_t>(_buttons))
 			return;
 		m_pendingPanelCommands.push_back({PanelCommandType::Buttons, static_cast<int32_t>(_buttons)});
+	}
+
+	void HardwareDevice::setMv30Panel(const uint64_t _buttons, const bool _footswitch)
+	{
+		std::lock_guard lock(m_panelMutex);
+		const PanelCommand command{PanelCommandType::Mv30Panel, _footswitch ? 1 : 0, _buttons};
+		if(!m_pendingPanelCommands.empty() && m_pendingPanelCommands.back().type == command.type &&
+		   m_pendingPanelCommands.back().value == command.value && m_pendingPanelCommands.back().wide == command.wide)
+			return;
+		m_pendingPanelCommands.push_back(command);
 	}
 
 	void HardwareDevice::turnPanelEncoder(const int32_t _detents)
@@ -338,6 +362,13 @@ namespace emu88Lib
 	{
 		std::lock_guard lock(m_displayMutex);
 		return m_display;
+	}
+
+	Mv30Parts HardwareDevice::mv30Parts(uint64_t& _revision) const
+	{
+		std::lock_guard lock(m_displayMutex);
+		_revision = m_mv30PartsRevision;
+		return m_mv30Parts;
 	}
 
 	bool HardwareDevice::sendMidi(const synthLib::SMidiEvent& _event,
@@ -378,6 +409,8 @@ namespace emu88Lib
 			m_nu10b->addMidiEvent(_event);
 		else if(m_miig5)
 			m_miig5->addMidiEvent(_event);
+		else if(m_mv30)
+			m_mv30->addMidiEvent(_event);
 		else
 			return;
 	}
@@ -451,6 +484,8 @@ namespace emu88Lib
 			m_nu10b->readMidiOut(_midiOut);
 		else if(m_miig5)
 			m_miig5->readMidiOut(_midiOut);
+		else if(m_mv30)
+			m_mv30->readMidiOut(_midiOut);
 	}
 
 	void HardwareDevice::collectPanelCommands()
@@ -482,6 +517,16 @@ namespace emu88Lib
 			else if(m_cm64) m_cm64->setButtons(buttons);
 			m_nextPanelCommandSample = m_renderedSamples + g_minimumPanelEdgeSamples;
 		}
+		else if(command.type == PanelCommandType::Mv30Panel)
+		{
+			if(m_mv30)
+			{
+				m_mv30->setButtons(command.wide);
+				m_mv30->setFootswitch(command.value != 0);
+			}
+			// The panel gate array scans every millisecond: an edge has to last longer than that
+			m_nextPanelCommandSample = m_renderedSamples + g_minimumPanelEdgeSamples;
+		}
 		else if(m_sc8850)
 		{
 			m_sc8850->turnEncoder(static_cast<int8_t>(std::clamp(command.value, -64, 63)));
@@ -489,6 +534,10 @@ namespace emu88Lib
 		else if(m_la && hasPanelKnob(m_model))
 		{
 			m_la->turnKnob(std::clamp(command.value, -64, 64) * g_knobStepPerDetent);
+		}
+		else if(m_mv30)
+		{
+			m_mv30->turnDial(command.value);
 		}
 	}
 
@@ -510,6 +559,7 @@ namespace emu88Lib
 		else if(m_sc55) m_heldFrame = m_sc55->renderSample();
 		else if(m_nu10b) m_heldFrame = m_nu10b->renderSample();
 		else if(m_miig5) m_heldFrame = m_miig5->renderSample();
+		else if(m_mv30) m_heldFrame = m_mv30->renderSample();
 		++m_renderedSamples;
 	}
 
@@ -562,11 +612,28 @@ namespace emu88Lib
 			next.leds = m_sc8850->leds();
 			m_sc8850->lcd().renderMono(first.mono);
 		}
+		else if(m_mv30)
+		{
+			// The 240 x 64 T6963C module. Mode bits 2/3 turn text and graphics on.
+			const auto& lcd = m_mv30->lcd();
+			first.type = DisplaySnapshot::Type::Graphic;
+			first.width = static_cast<uint16_t>(lcd.width());
+			first.height = static_cast<uint16_t>(lcd.height());
+			first.displayOn = (lcd.displayMode() & 0x0c) != 0;
+			lcd.renderMono(first.mono);
+		}
+		if(m_mv30)
+			m_mv30->readParts(m_mv30PartsScratch);
 		std::unique_lock lock(m_displayMutex, std::try_to_lock);
 		if(!lock.owns_lock())
 			return; // The UI can keep its previous snapshot if it is busy.
 		next.revision = m_display.revision + 1;
 		m_display = std::move(next);
+		if(m_mv30 && m_mv30PartsScratch != m_mv30Parts)
+		{
+			m_mv30Parts = m_mv30PartsScratch;
+			++m_mv30PartsRevision;
+		}
 	}
 
 	void HardwareDevice::processAudio(const synthLib::TAudioInputs&,
@@ -655,6 +722,7 @@ namespace emu88Lib
 		if(m_cm64) m_cm64->transportDiscontinuity(m_transportGeneration);
 		if(m_nu10b) m_nu10b->transportDiscontinuity(m_transportGeneration);
 		if(m_miig5) m_miig5->transportDiscontinuity(m_transportGeneration);
+		if(m_mv30) m_mv30->transportDiscontinuity(m_transportGeneration);
 		silenceActiveChannels();
 	}
 
@@ -664,6 +732,10 @@ namespace emu88Lib
 		// way is All Notes Off, which honours a held sustain pedal, so the pedal comes up first.
 		if(isRolandLaFamily(_model))
 			return {{synthLib::MC_SUSTAINPEDAL, 0}, {synthLib::MC_ALLNOTESOFF, 0}};
+		// The MV-30's MIDI implementation has not been checked for All Sound Off: send that and
+		// the LA boards' way both.
+		if(_model == DeviceModel::Mv30)
+			return {{synthLib::MC_SUSTAINPEDAL, 0}, {synthLib::MC_ALLNOTESOFF, 0}, {synthLib::MC_ALLSOUNDOFF, 0}};
 		return {{synthLib::MC_ALLSOUNDOFF, 0}};
 	}
 

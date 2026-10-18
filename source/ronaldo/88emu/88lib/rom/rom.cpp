@@ -55,6 +55,22 @@ namespace emu88Lib
             std::swap(_data[i], _data[i + 1]);
     }
 
+    std::vector<uint8_t> buildSk88ProImage(const std::vector<uint8_t>& _program,
+                                           const std::vector<uint8_t>& _sc88ProControl)
+    {
+        constexpr size_t programSize = 0x80000;
+        constexpr size_t lowCodeSize = 0x20000;
+        constexpr size_t programMirror = 0x100000;
+        if (_program.size() != programSize || _sc88ProControl.size() != Sc88ProRomSet::FirmwareSize)
+            return {};
+
+        std::vector<uint8_t> image(Sc88ProRomSet::Sk88ProFirmwareSize, 0xff);
+        std::copy(_program.begin(), _program.begin() + lowCodeSize, image.begin());
+        std::copy(_sc88ProControl.begin() + lowCodeSize, _sc88ProControl.end(), image.begin() + lowCodeSize);
+        std::copy(_program.begin(), _program.end(), image.begin() + programMirror);
+        return image;
+    }
+
     void Rom::normalize()
     {
         normalizeH8WordOrder(m_data);

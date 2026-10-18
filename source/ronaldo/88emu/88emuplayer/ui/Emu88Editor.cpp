@@ -5,7 +5,6 @@
 #include "88emuplayer/ui/Emu88EditorWindows.h"
 #include "88emuplayer/ui/Emu88PartEditor.h"
 #include "88emuplayer/app/Emu88LaunchOptions.h"
-#include "88lib/gs/partState.h"
 #include "88lib/rom/romloader.h"
 #include "juceRmlUi/rmlMenu.h"
 #include "juceRmlUi/rmlHelper.h"
@@ -64,6 +63,10 @@ namespace emu88Player
 		m_pointerButtons = 0;
 		m_keyboardButtons = 0;
 		m_powerKeyDown = false;
+		m_mv30Buttons = m_mv30PointerButtons = 0;
+		m_mv30Repeat = 0;
+		m_mv30DialKeys = 0;
+		m_mv30Footswitch = false;
 		sendButtons();
 		m_settingsRoot = nullptr;
 		m_settingsWindow.reset();
@@ -97,6 +100,10 @@ namespace emu88Player
 			m_pointerButtons = 0;
 			m_keyboardButtons = 0;
 			m_powerKeyDown = false;
+			m_mv30Buttons = m_mv30PointerButtons = 0;
+			m_mv30Repeat = 0;
+			m_mv30DialKeys = 0;
+			m_mv30Footswitch = false;
 			sendButtons();
 			updateButtonVisuals();
 		});
@@ -159,14 +166,19 @@ namespace emu88Player
 		const auto inventory = emu88Lib::RomLoader::rescan();
 		const auto missing = romFolderAccessError(standaloneLaunch ? *standaloneLaunch : LaunchOptions{}).empty()
 			? " (ROMs missing)" : " (ROM folder not readable)";
+		const auto isAvailable = [&inventory](const emu88Lib::DeviceModel _model)
+		{
+			return inventory.isComplete(emu88Lib::RomLoader::toRomDevice(_model));
+		};
+		// Without a single complete board there is nothing to choose from, so every device
+		// stays listed to show what ROMs could be added.
+		const auto hideUnavailable = m_processor.config().getBoolValue("hideDevicesWithoutRoms", false) &&
+			std::any_of(emu88Lib::g_deviceMenuOrder.begin(), emu88Lib::g_deviceMenuOrder.end(), isAvailable);
 		for(const auto model : emu88Lib::g_deviceMenuOrder)
 		{
-			// A hidden device stays in the menu only while it is the one running.
-			if(!emu88Lib::isDeviceListed(model) && model != m_processor.deviceModel())
-				continue;
-			const auto available = inventory.isComplete(emu88Lib::RomLoader::toRomDevice(model));
-			// The GM modules are offered only once their ROMs are there.
-			if(emu88Lib::isGmModuleModel(model) && !available && model != m_processor.deviceModel())
+			const auto available = isAvailable(model);
+			// The running device stays listed, whatever its ROMs.
+			if(hideUnavailable && !available && model != m_processor.deviceModel())
 				continue;
 			const auto label = std::string(emu88Lib::getDeviceProfile(model).displayName) +
 				(available ? "" : missing);
@@ -200,6 +212,10 @@ namespace emu88Player
 		{
 			m_pointerButtons = m_keyboardButtons = 0;
 			m_powerKeyDown = false;
+			m_mv30Buttons = m_mv30PointerButtons = 0;
+			m_mv30Repeat = 0;
+			m_mv30DialKeys = 0;
+			m_mv30Footswitch = false;
 			sendButtons();
 		}
 		// Not every caller is inside an RmlUi event. The render thread reads the document and the LCDs, so
@@ -247,7 +263,9 @@ namespace emu88Player
 		{
 		case emu88Lib::DeviceModel::Sc88: panel = "sc88_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc88VL: panel = "sc88vl_panel.png"; break;
-		case emu88Lib::DeviceModel::Sc88Pro: panel = "sc88pro_panel.png"; break;
+		// No SK-88Pro artwork: it shows the SC-88Pro's, the faces both have at its own switches.
+		case emu88Lib::DeviceModel::Sc88Pro:
+		case emu88Lib::DeviceModel::Sk88Pro: panel = "sc88pro_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8850: panel = "sc8850_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc55Mk2:
 		case emu88Lib::DeviceModel::Sc155Mk2: panel = "sc55mk2_panel.png"; break;
@@ -267,6 +285,7 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::VeGsPro:
 		case emu88Lib::DeviceModel::Nu10b:
 		case emu88Lib::DeviceModel::Miig5: panel = "sc88exp_panel.png"; break;
+		case emu88Lib::DeviceModel::Mv30: panel = "mv30_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc55St:
 		case emu88Lib::DeviceModel::Cm300:
 		case emu88Lib::DeviceModel::Scc1a:
@@ -302,11 +321,13 @@ namespace emu88Player
 			root->SetClass("modelCm64", _model == emu88Lib::DeviceModel::Cm64);
 			root->SetClass("modelMt32", mt32);
 			root->SetClass("modelSc8820", _model == emu88Lib::DeviceModel::Sc8820);
+			root->SetClass("modelMv30", _model == emu88Lib::DeviceModel::Mv30);
 			root->SetClass("modelNoPanel", noPanel);
 			root->SetClass("modelNoDisplay", !emu88Lib::deviceHasLcd(_model));
 		}
 		if(auto* mapOrEq = document->GetElementById("btSc88Map"))
-			mapOrEq->SetAttribute("title", _model == emu88Lib::DeviceModel::Sc88Pro ? "SC-88 MAP (2)" : "EQ (2)");
+			mapOrEq->SetAttribute("title", _model == emu88Lib::DeviceModel::Sc88Pro ||
+			                               _model == emu88Lib::DeviceModel::Sk88Pro ? "SC-88 MAP (2)" : "EQ (2)");
 		refreshButtonElements(_model);
 		// Drop the previous model's lit LEDs before the element list moves on.
 		updateLeds(0);
@@ -334,7 +355,7 @@ namespace emu88Player
 		const auto currentScale = m_processor.config().getIntValue("scale", 100);
 		m_contextMenu = std::make_shared<juceRmlUi::Menu>();
 		// Always listed, so that it is found; greyed out on the boards it does not know
-		m_contextMenu->addEntry("Part Editor", emu88Lib::gs::isPartEditorModel(m_processor.deviceModel()), false, [this]
+		m_contextMenu->addEntry("Part Editor", hasPartEditor(m_processor.deviceModel()), false, [this]
 		{
 			const juce::WeakReference<Editor> safeThis(this);
 			juce::MessageManager::callAsync([safeThis]
@@ -513,6 +534,10 @@ namespace emu88Player
 	{
 		if(!m_rml)
 			return;
+		// The MV-30's VALUE + or - held on the skin: after 400 ms it repeats, 15 detents a second
+		if(m_mv30Repeat && ++m_mv30RepeatTicks > 12 && (m_mv30RepeatTicks & 1))
+			if(auto* hardware = m_processor.hardware())
+				hardware->turnPanelEncoder(m_mv30Repeat);
 		auto* hardware = m_processor.hardware();
 		const auto playlistRevision = m_processor.midiPlayer().playlistRevision();
 		const auto playerStatus = m_processor.midiPlayer().status();

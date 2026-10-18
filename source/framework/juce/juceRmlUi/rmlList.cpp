@@ -101,12 +101,44 @@ namespace juceRmlUi
 		return changed;
 	}
 
-	size_t List::handleNavigationKey(const Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, const uint32_t _gridItemsPerColumn)
+	size_t List::handleNavigationKey(const Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, const uint32_t _gridItemsPerColumn, const uint32_t _itemsPerPage)
 	{
 		using namespace Rml::Input;
 
+		// home, end, page up and page down select the entry they lead to, with shift up to it
+		auto selectTo = [&](const size_t _index)
+		{
+			if (_shift && !getSelectedEntries().empty())
+				selectRangeViaShiftKey(_index);
+			else
+				setSelected(_index, true, false);
+			return _index;
+		};
+
+		const size_t page = std::max<uint32_t>(_itemsPerPage, 1);
+
 		switch (_key)
 		{
+			case KI_HOME:
+				return empty() ? InvalidIndex : selectTo(0);
+			case KI_END:
+				return empty() ? InvalidIndex : selectTo(size() - 1);
+			case KI_PRIOR:
+				{
+					if (empty())
+						return InvalidIndex;
+					const auto entries = getSelectedEntries();
+					const auto current = entries.empty() ? 0 : entries.front()->getIndex();
+					return selectTo(current > page ? current - page : 0);
+				}
+			case KI_NEXT:
+				{
+					if (empty())
+						return InvalidIndex;
+					const auto entries = getSelectedEntries();
+					const auto target = entries.empty() ? page - 1 : entries.back()->getIndex() + page;
+					return selectTo(std::min(target, size() - 1));
+				}
 			case KI_UP:
 				{
 					const auto entries = getSelectedEntries();

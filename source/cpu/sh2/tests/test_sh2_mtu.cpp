@@ -618,6 +618,51 @@ void test_adc_trigger_and_tior_initial_output() {
   CHECK(!s.mtu.output(0, 1));
 }
 
+// A compare-match-clear timer nobody observes free-runs by arithmetic: the
+// count is right however far the clock has moved, the flags of the first
+// period are set, and no scheduler event is spent on it.  The MTU is driven
+// by its own clock here so the distance can be one no replay could cover.
+void test_free_running_fast_forward() {
+  struct FakeClock final : emu::Clock {
+    u64 t = 0;
+    u64 now() const override { return t; }
+  } clock;
+  System s;
+  Mtu mtu(s.m.sched(), clock, s.m.intc());
+  mtu.write16(kC0 + Mtu::kTgrA, 9);     // 10-tick period
+  mtu.write16(kC0 + Mtu::kTgrB, 4);     // matches within the period, no output function
+  mtu.write8(kC0 + Mtu::kTcr, 0x20);    // CCLR = TGRA, phi/1
+  mtu.write8(Mtu::kTstr, 0x01);
+  CHECK_EQ(s.m.sched().next_time(), emu::Scheduler::kNever);
+  clock.t = 1234567891ull;
+  CHECK_EQ(mtu.tcnt(0), u16(1234567891ull % 10));
+  CHECK_EQ(mtu.read8(kC0 + Mtu::kTsr) & 0x0F, Mtu::kTgfa | Mtu::kTgfb);  // read as 1: arms the clear
+  CHECK(!s.m.intc().request(IrqSrc::Tgi0a));
+  clock.t += 7;
+  CHECK_EQ(mtu.tcnt(0), u16((1234567891ull + 7) % 10));
+  // An enabled interrupt whose flag is clear ends the skipping at its match:
+  // the request appears exactly when it should, not a period late or early.
+  mtu.write8(kC0 + Mtu::kTsr, 0x00);    // TGFA / TGFB were read as 1: cleared
+  mtu.write8(kC0 + Mtu::kTier, 0x41);   // TGIEA
+  const u64 to_match = 10 - (clock.t % 10);
+  clock.t += to_match - 1;
+  CHECK_EQ(mtu.tcnt(0), 9u);
+  CHECK(!s.m.intc().request(IrqSrc::Tgi0a));
+  clock.t += 1;
+  CHECK_EQ(mtu.tcnt(0), 0u);
+  CHECK(s.m.intc().request(IrqSrc::Tgi0a));
+  // With the flag set the periods are unobservable again and skip freely.
+  clock.t += 1000000007ull;
+  CHECK_EQ(mtu.tcnt(0), u16((1000000007ull) % 10));
+  // A count above the clear value (a TCNT write) wraps the long way first.
+  mtu.write8(kC0 + Mtu::kTier, 0x40);
+  mtu.write16(kC0 + Mtu::kTcnt, 0xFFF0);
+  clock.t += 20;
+  CHECK_EQ(mtu.tcnt(0), 4u);  // 0xFFF0 + 20 wraps at 0x10000 to 4
+  clock.t += 100;
+  CHECK_EQ(mtu.tcnt(0), 4u);  // and from there every 10 ticks is a period
+}
+
 }  // namespace
 
 int main() {
@@ -635,5 +680,6 @@ int main() {
   test_flag_clearing_protocol();
   test_cascade();
   test_adc_trigger_and_tior_initial_output();
+  test_free_running_fast_forward();
   return test::finish("test_sh2_mtu");
 }

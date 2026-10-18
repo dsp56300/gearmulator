@@ -133,7 +133,8 @@ namespace emu88Player
         static constexpr const char* ids[] = {"sc88",   "sc88vl", "sc88pro", "sc8850",  "sc55mk2", "sc55",
                                               "sc55st", "cm300",  "scb55",   "rlp3237", "sc155",   "sc155mk2",
                                               "xpgs",   "sc8820", "cm32p",   "vegspro", "scc1a",   "cm64",
-                                              "cm32l",  "nu10b",  "miig5",   "mt32old", "mt32new", "cm32ln"};
+                                              "cm32l",  "nu10b",  "miig5",   "mt32old", "mt32new", "cm32ln",
+                                              "mv30",   "sk88pro"};
         static_assert(std::size(ids) == emu88Lib::g_deviceMenuOrder.size(), "one ID per device model, in enum order");
         return ids[static_cast<size_t>(model)];
     }
@@ -366,7 +367,7 @@ namespace emu88Player
             "  --limiter on|off       Output peak limiter (default off)\n"
             "  --factory-reset on|off Factory reset when the device loads (default on)\n"
             "  --fast-boot on|off     Boot 10 s longer to start past the intro (default off)\n"
-            "  --pcm-card PATH        CM-32P/CM-64: PCM card image in the card slot (SN-U110 series)\n"
+            "  --pcm-card PATH        CM-32P/CM-64/MV-30: PCM card image in the card slot (SN-U110 series)\n"
             "  --gain N               Linear output gain (CLI 0..4, GUI 0..2)\n" +
             (cli ? "  --output PATH          Stereo WAV output; existing files are protected\n"
                    "  --video PATH           Also render the player UI to this video file (needs ffmpeg)\n"
@@ -403,8 +404,7 @@ namespace emu88Player
         if (const auto error = romFolderAccessError(options); !error.empty())
             std::cerr << error << '\n';
         for (const auto model : emu88Lib::g_deviceMenuOrder)
-            if (emu88Lib::isDeviceListed(model))
-                std::cout << deviceId(model) << "\t" << emu88Lib::getDeviceProfile(model).displayName << "\t"
-                          << (emu88Lib::RomLoader::isDeviceAvailable(model) ? "available" : "missing ROMs") << '\n';
+            std::cout << deviceId(model) << "\t" << emu88Lib::getDeviceProfile(model).displayName << "\t"
+                      << (emu88Lib::RomLoader::isDeviceAvailable(model) ? "available" : "missing ROMs") << '\n';
     }
 } // namespace emu88Player

@@ -2,6 +2,7 @@
 #include "88emuplayer/ui/Emu88EditorBindings.h"
 #include "88emuplayer/ui/Emu88EditorLcd.h"
 #include "88emuplayer/ui/Emu88EditorPlaylist.h"
+#include "88emuplayer/ui/Emu88PartEditor.h"
 #include "juceRmlUi/juceRmlComponent.h"
 #include "juceRmlUi/rmlElemKnob.h"
 #include "juceRmlUi/rmlElemValue.h"
@@ -79,6 +80,24 @@ namespace emu88Player
 			openContextMenu(_event);
 		});
 
+		// A double-click on a Sound Canvas's display opens the part editor. The display lets the pointer through
+		// to the panel, so the document checks where it was.
+		juceRmlUi::EventListener::Add(document, Rml::EventId::Dblclick, [this](Rml::Event& _event)
+		{
+			if(!hasPartEditor(m_processor.deviceModel()) || !m_rml)
+				return;
+			auto* lcd = m_rml->getDocument()->GetElementById("hardwareLcd");
+			if(!lcd || !lcd->IsVisible() || !lcd->IsPointWithinElement(juceRmlUi::helper::getMousePos(_event)))
+				return;
+			_event.StopPropagation();
+			const juce::WeakReference<Editor> safeThis(this);
+			juce::MessageManager::callAsync([safeThis]
+			{
+				if(auto* editor = safeThis.get())
+					editor->showPartEditor(true);
+			});
+		});
+
 		const auto wireButton = [this, document](const ButtonBinding& _binding)
 		{
 			if(!_binding.element || std::string_view(_binding.element) == "bt8850Value")
@@ -94,8 +113,61 @@ namespace emu88Player
 					});
 			}
 		};
-		for(const auto& binding : g_sc88Buttons) wireButton(binding);
+		// The SK-88Pro shows the SC-88Pro's faces at its own matrix positions, so those faces
+		// look their switch up in the table of the board running when clicked.
+		for(const auto& binding : g_sc88Buttons)
+		{
+			auto* element = document->GetElementById(binding.element);
+			if(!element)
+				continue;
+			const std::string id = binding.element;
+			const auto proButton = static_cast<uint32_t>(binding.button);
+			juceRmlUi::EventListener::Add(element, Rml::EventId::Mousedown,
+				[this, id, proButton](Rml::Event& _event)
+				{
+					if(juceRmlUi::helper::isContextMenu(_event))
+						return;
+					if(m_processor.deviceModel() != emu88Lib::DeviceModel::Sk88Pro)
+					{
+						setPointerButton(proButton, true);
+						return;
+					}
+					for(const auto& sk : g_sk88Buttons)
+						if(sk.element && id == sk.element)
+							setPointerButton(static_cast<uint32_t>(sk.button), true);
+				});
+		}
 		for(const auto& binding : g_sc8850Buttons) wireButton(binding);
+		// The MV-30's faces hold their switch while the button is down, past the 32 the other panels have
+		for(const auto& binding : g_mv30Buttons)
+		{
+			auto* element = binding.element ? document->GetElementById(binding.element) : nullptr;
+			if(!element)
+				continue;
+			const auto bit = uint64_t{1} << binding.button;
+			juceRmlUi::EventListener::Add(element, Rml::EventId::Mousedown, [this, bit](Rml::Event& _event)
+			{
+				if(juceRmlUi::helper::isContextMenu(_event))
+					return;
+				m_mv30PointerButtons |= bit;
+				sendButtons();
+				updateButtonVisuals();
+			});
+		}
+		for(const auto& [id, detent] : {std::pair{"btMv30Inc", 1}, std::pair{"btMv30Dec", -1}})
+		{
+			if(auto* element = document->GetElementById(id))
+				juceRmlUi::EventListener::Add(element, Rml::EventId::Mousedown, [this, detent = detent](Rml::Event& _event)
+				{
+					if(juceRmlUi::helper::isContextMenu(_event))
+						return;
+					if(auto* hardware = m_processor.hardware())
+						hardware->turnPanelEncoder(detent);
+					m_mv30Repeat = detent;
+					m_mv30RepeatTicks = 0;
+					updateButtonVisuals();
+				});
+		}
 		if(auto* value = document->GetElementById("bt8850Value"))
 		{
 			// Push + turn is the firmware's coarse mode: with ENCSW held every
@@ -144,12 +216,21 @@ namespace emu88Player
 		juceRmlUi::EventListener::Add(document, Rml::EventId::Mouseup, [this](Rml::Event&)
 		{
 			m_pointerButtons = 0;
+			m_mv30PointerButtons = 0;
+			m_mv30Repeat = 0;
 			sendButtons();
 			updateButtonVisuals();
 		});
 		juceRmlUi::EventListener::Add(document, Rml::EventId::Keydown, [this](Rml::Event& _event)
 		{
 			const auto key = juceRmlUi::helper::getKeyIdentifier(_event);
+			// The MV-30 has a key for every switch MAME binds one to, and Q is none of them: it has no power key
+			if(m_processor.deviceModel() == emu88Lib::DeviceModel::Mv30)
+			{
+				if(handleMv30Key(key, true))
+					_event.StopPropagation();
+				return;
+			}
 			if(key == Rml::Input::KI_Q && !juceRmlUi::helper::getKeyModCtrl(_event) &&
 			   !juceRmlUi::helper::getKeyModCommand(_event) && !juceRmlUi::helper::getKeyModAlt(_event))
 			{
@@ -196,12 +277,20 @@ namespace emu88Player
 				handleKey(g_sc8850Buttons);
 			else if(usesLaBoardButtons(model))
 				handleKey(g_mt32Buttons);
+			else if(model == emu88Lib::DeviceModel::Sk88Pro)
+				handleKey(g_sk88Buttons);
 			else
 				handleKey(g_sc88Buttons);
 		});
 		juceRmlUi::EventListener::Add(document, Rml::EventId::Keyup, [this](Rml::Event& _event)
 		{
 			const auto key = juceRmlUi::helper::getKeyIdentifier(_event);
+			if(m_processor.deviceModel() == emu88Lib::DeviceModel::Mv30)
+			{
+				if(handleMv30Key(key, false))
+					_event.StopPropagation();
+				return;
+			}
 			if(key == Rml::Input::KI_Q)
 			{
 				m_powerKeyDown = false;
@@ -227,6 +316,8 @@ namespace emu88Player
 				handleKey(g_sc8850Buttons);
 			else if(usesLaBoardButtons(model))
 				handleKey(g_mt32Buttons);
+			else if(model == emu88Lib::DeviceModel::Sk88Pro)
+				handleKey(g_sk88Buttons);
 			else
 				handleKey(g_sc88Buttons);
 		});
@@ -280,6 +371,41 @@ namespace emu88Player
 				});
 		}
 		refreshLedElements(m_processor.deviceModel());
+	}
+
+	bool Editor::handleMv30Key(const int _key, const bool _down)
+	{
+		// The value dial and MAME's VALUE -/+ keys: a detent per press, and per repeat of a key held
+		if(_key == g_mv30DialDownKey || _key == g_mv30DialUpKey || _key == g_mv30ValueDownKey ||
+		   _key == g_mv30ValueUpKey)
+		{
+			const bool up = _key == g_mv30DialUpKey || _key == g_mv30ValueUpKey;
+			if(_down)
+				if(auto* hardware = m_processor.hardware())
+					hardware->turnPanelEncoder(up ? 1 : -1);
+			// The skin's + or - shows the press
+			const uint8_t bit = up ? 2 : 1;
+			m_mv30DialKeys = _down ? m_mv30DialKeys | bit : m_mv30DialKeys & ~bit;
+			updateButtonVisuals();
+			return true;
+		}
+		if(_key == g_mv30FootswitchKey)
+		{
+			m_mv30Footswitch = _down;
+			sendButtons();
+			return true;
+		}
+		for(const auto& binding : g_mv30Buttons)
+		{
+			if(binding.key != _key || binding.key == Rml::Input::KI_UNKNOWN)
+				continue;
+			const auto bit = uint64_t{1} << binding.button;
+			m_mv30Buttons = _down ? m_mv30Buttons | bit : m_mv30Buttons & ~bit;
+			sendButtons();
+			updateButtonVisuals();
+			return true;
+		}
+		return false;
 	}
 
 	void Editor::pressPowerKey(const bool _supply)
@@ -343,6 +469,15 @@ namespace emu88Player
 
 	void Editor::sendButtons()
 	{
+		const auto mv30Buttons = m_mv30Buttons | m_mv30PointerButtons;
+		if(m_processor.deviceModel() == emu88Lib::DeviceModel::Mv30 &&
+		   (mv30Buttons != m_mv30SentButtons || m_mv30Footswitch != m_mv30SentFootswitch))
+		{
+			m_mv30SentButtons = mv30Buttons;
+			m_mv30SentFootswitch = m_mv30Footswitch;
+			if(auto* hardware = m_processor.hardware())
+				hardware->setMv30Panel(mv30Buttons, m_mv30Footswitch);
+		}
 		const auto buttons = m_pointerButtons | m_keyboardButtons;
 		if(buttons == m_sentButtons)
 			return;
@@ -366,8 +501,26 @@ namespace emu88Player
 			for(const auto& binding : g_sc8850Buttons) add(binding);
 		else if(usesLaBoardButtons(_model))
 			for(const auto& binding : g_mt32Buttons) add(binding);
-		else
+		else if(_model == emu88Lib::DeviceModel::Sk88Pro)
+		{
+			// The SC-88Pro faces the SK-88Pro has no switch for stay on the artwork, disabled.
+			for(const auto& binding : g_sc88Buttons)
+				if(auto* element = document->GetElementById(binding.element))
+					element->SetAttribute("disabled", "");
+			for(const auto& binding : g_sk88Buttons) add(binding);
+		}
+		else if(_model != emu88Lib::DeviceModel::Mv30)
 			for(const auto& binding : g_sc88Buttons) add(binding);
+		m_mv30Elements.clear();
+		m_mv30IncElement = m_mv30DecElement = nullptr;
+		if(_model == emu88Lib::DeviceModel::Mv30)
+		{
+			for(const auto& binding : g_mv30Buttons)
+				if(auto* element = binding.element ? document->GetElementById(binding.element) : nullptr)
+					m_mv30Elements.emplace_back(element, uint64_t{1} << binding.button);
+			m_mv30IncElement = document->GetElementById("btMv30Inc");
+			m_mv30DecElement = document->GetElementById("btMv30Dec");
+		}
 		for(uint32_t button = 0; button < m_buttonElements.size(); ++button)
 			if(auto* element = m_buttonElements[button])
 			{
@@ -427,6 +580,13 @@ namespace emu88Player
 
 	void Editor::updateButtonVisuals()
 	{
+		const auto mv30Buttons = m_mv30Buttons | m_mv30PointerButtons;
+		for(const auto& [element, bit] : m_mv30Elements)
+			element->SetClass("pressed", (mv30Buttons & bit) != 0);
+		if(m_mv30IncElement)
+			m_mv30IncElement->SetClass("pressed", m_mv30Repeat > 0 || (m_mv30DialKeys & 2));
+		if(m_mv30DecElement)
+			m_mv30DecElement->SetClass("pressed", m_mv30Repeat < 0 || (m_mv30DialKeys & 1));
 		const auto buttons = m_pointerButtons | m_keyboardButtons;
 		for(uint32_t button = 0; button < m_buttonElements.size(); ++button)
 			if(m_buttonElements[button])
@@ -450,13 +610,55 @@ namespace emu88Player
 		}
 	}
 
+	KeyboardShortcutGroups Editor::buildMv30KeyboardGroups()
+	{
+		// The keys MAME has for the panel, in the panel's sections; the switches it has none for are not listed
+		const auto key = [](const Mv30Button _button)
+		{
+			for(const auto& binding : g_mv30Buttons)
+				if(binding.button == static_cast<uint8_t>(_button))
+					return keyName(binding.key);
+			return std::string();
+		};
+		const auto rows = [&](const std::initializer_list<Mv30Button> _buttons)
+		{
+			std::vector<KeyboardShortcut> result;
+			for(const auto button : _buttons)
+				for(const auto& binding : g_mv30Buttons)
+					if(binding.button == static_cast<uint8_t>(button) && binding.key != Rml::Input::KI_UNKNOWN)
+						result.push_back({keyName(binding.key), binding.label});
+			return result;
+		};
+		KeyboardShortcutGroups groups;
+		groups.push_back({"Modes", rows({Mv30Button::PatternEdit, Mv30Button::TrackEdit, Mv30Button::System,
+		                                 Mv30Button::Disk})});
+		groups.push_back({"Function", rows({Mv30Button::F1, Mv30Button::F2, Mv30Button::F3, Mv30Button::F4,
+		                                    Mv30Button::F5})});
+		auto cursor = std::vector<KeyboardShortcut>{{key(Mv30Button::Up) + " / " + key(Mv30Button::Down) + " / " +
+			key(Mv30Button::Left) + " / " + key(Mv30Button::Right), "Cursor"}};
+		for(auto& row : rows({Mv30Button::Enter, Mv30Button::Exit, Mv30Button::Jump}))
+			cursor.push_back(std::move(row));
+		groups.push_back({"Cursor", std::move(cursor)});
+		auto value = std::vector<KeyboardShortcut>{
+			{keyName(g_mv30DialDownKey) + " / " + keyName(g_mv30DialUpKey), "Value dial, a detent"},
+			{keyName(g_mv30ValueDownKey) + " / " + keyName(g_mv30ValueUpKey), "VALUE - / +, held repeats"},
+			{key(Mv30Button::Num0) + " - " + key(Mv30Button::Num9), "Numeric keys"}};
+		for(auto& row : rows({Mv30Button::Insert, Mv30Button::Delete, Mv30Button::Shift}))
+			value.push_back(std::move(row));
+		groups.push_back({"Value", std::move(value)});
+		groups.push_back({"Sequencer", rows({Mv30Button::StartStop})});
+		groups.push_back({"Footswitch", {{keyName(g_mv30FootswitchKey), "Footswitch, held"}}});
+		return groups;
+	}
+
 	KeyboardShortcutGroups Editor::buildKeyboardGroups()
 	{
 		const auto model = m_processor.deviceModel();
 		const auto is8850 = model == emu88Lib::DeviceModel::Sc8850;
 		const auto isLa = usesLaBoardButtons(model);
+		const auto isSk = model == emu88Lib::DeviceModel::Sk88Pro;
 
-		const auto keyFor = [is8850, isLa](const uint8_t _button) -> std::string
+		const auto keyFor = [is8850, isLa, isSk](const uint8_t _button) -> std::string
 		{
 			const auto find = [_button](const auto& _table) -> std::string
 			{
@@ -465,13 +667,17 @@ namespace emu88Player
 						return keyName(binding.key);
 				return {};
 			};
-			return is8850 ? find(g_sc8850Buttons) : isLa ? find(g_mt32Buttons) : find(g_sc88Buttons);
+			return is8850 ? find(g_sc8850Buttons) : isLa ? find(g_mt32Buttons)
+			     : isSk ? find(g_sk88Buttons) : find(g_sc88Buttons);
 		};
 		const auto populated = [model, is8850](const uint8_t _button)
 		{
 			const auto bit = uint32_t{1} << _button;
 			return is8850 ? bit != 0 : panelButtonsForDevice(model, bit) != 0;
 		};
+
+		if(model == emu88Lib::DeviceModel::Mv30)
+			return buildMv30KeyboardGroups();
 
 		KeyboardShortcutGroups groups{{"Power", {{"Q", "Power on / off"}}}};
 		if(emu88Lib::getPowerSwitch(model) == emu88Lib::PowerSwitch::Standby)
@@ -524,6 +730,8 @@ namespace emu88Player
 			walk(g_sc8850Help);
 		else if(isLa)
 			walk(g_mt32Help);
+		else if(isSk)
+			walk(g_sk88Help);
 		else
 			walk(g_sc88Help);
 

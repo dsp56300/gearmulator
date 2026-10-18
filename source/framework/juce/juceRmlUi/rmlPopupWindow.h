@@ -23,5 +23,10 @@ namespace juceRmlUi
 		// component has gone away.
 		void show(juce::PopupMenu& _menu, RmlComponent& _component, const Rml::Vector2f& _position,
 		          const Rml::Vector2f& _size, std::function<void(int)> _onResult);
+
+		// Whether a list is up, or has just been dismissed and not yet answered. A press that reaches a component
+		// meanwhile is one that closed the list: juce hands on a press in another window than the one the list
+		// belongs to. Message thread only.
+		bool isOpen();
 	}
 }

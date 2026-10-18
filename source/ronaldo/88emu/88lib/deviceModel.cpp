@@ -7,7 +7,7 @@ namespace emu88Lib
 {
 	namespace
 	{
-		constexpr std::array<DeviceProfile, 24> g_profiles = {{
+		constexpr std::array<DeviceProfile, 26> g_profiles = {{
 			{"SC-88", 2}, {"SC-88VL", 2}, {"SC-88Pro", 2}, {"SC-8850", 4},
 			{"SC-55mkII", 1}, {"SC-55", 1},
 			{"SC-55st", 1}, {"CM-300 / SCC-1", 1}, {"SCB-55", 1}, {"RLP-3237", 1},
@@ -15,6 +15,7 @@ namespace emu88Lib
 			{"VE-GS Pro", 2}, {"SCC-1A", 1}, {"CM-64", 1}, {"CM-32L", 1},
 			{"NU-10B (GM mode)", 1}, {"MIIG5 (GM mode)", 1},
 			{"MT-32 1.x (experimental)", 1}, {"MT-32 2.x", 1}, {"CM-32LN (experimental)", 1},
+			{"MV-30 (experimental)", 1}, {"SK-88Pro", 2},
 		}};
 	}
 

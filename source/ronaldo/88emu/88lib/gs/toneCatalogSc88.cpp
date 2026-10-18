@@ -66,7 +66,7 @@ namespace emu88Lib::gs
 		std::string& _error)
 	{
 		const Image img{_control};
-		const bool pro = _model == DeviceModel::Sc88Pro || _model == DeviceModel::VeGsPro;
+		const bool pro = _model == DeviceModel::Sc88Pro || _model == DeviceModel::VeGsPro || _model == DeviceModel::Sk88Pro;
 
 		if(_control.size() < 0x30000 || (pro && (img.u8(0x2fff0) != 0xff || img.u8(0x2fff1) == 0xff)))
 		{

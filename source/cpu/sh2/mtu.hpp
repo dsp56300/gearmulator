@@ -160,6 +160,7 @@ class Mtu final : public Device {
 
   // --- counter model --------------------------------------------------------------
   void sync(u64 now);
+  void fast_forward(unsigned c, u64 now);
   u64 ticks_to_next_special(unsigned c) const;
   u64 next_special_time(unsigned c) const;
   // Apply the count clock that moves TCNT off its current value; true if the

@@ -1,0 +1,1955 @@
+/* TUS Plugin Manager — Stylesheet
+   Palette follows theusualsuspects.io (jekyll-theme-hacker):
+   ground #151515, accent #b5e853, text #eaeaea, link #63c0f5, error #ac4142 */
+
+/* The offsets match what the plugin documents get from tus_default.rcss, which this app does not
+   load. Without them the version menu - placed at the mouse position - did not show up at all. */
+/* The width is fixed and scaled to the window, which is what makes the whole interface grow when
+   the window is widened. The HEIGHT follows the window, so that a long list scrolls inside the
+   list instead of running off the bottom of a canvas that is taller than the window.
+
+   The body stays a BLOCK. Making it a flex column also works out to the right sizes for the
+   header, the status bar and the list - but the rows inside the list then collapse to 34dp wide
+   in this RmlUi build, whatever flex-shrink or width they are given. What fills the space under
+   the header is positioned instead, which lays out in one pass and does not. */
+body {
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+	font-family: Roboto;
+	font-size: 14dp;
+	color: #d2d2d2;
+	width: 900dp;
+	height: 100%;
+	overflow: hidden;
+	decorator: vertical-gradient( #1c1c1c #131313 );
+}
+
+/* What fills the window under the header and the status bar. The offsets are their height, which
+   only changes if their padding or font size does. The list starts below the format toggles, the
+   pages take the whole area instead. */
+#format-toggles {
+	position: absolute;
+	top: 91dp;
+	right: 0px;
+	left: 0px;
+	height: 35dp;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: 8dp;
+	padding: 0dp 24dp;
+	decorator: vertical-gradient( #1b1b1b #171717 );
+	border-bottom: 1dp #272727;
+}
+
+#format-toggles.hidden {
+	display: none;
+}
+
+#format-toggles-label {
+	font-size: 11dp;
+	color: #7e7e7e;
+}
+
+/* Install selected and Upgrade all, at the right end of the same bar the format chips are in: they
+   are what those chips decide the scope of. Dim when there is nothing for them to do, like the
+   buttons in the All column of a row. */
+.bulk-button {
+	flex: 0 0 auto;
+	margin-left: 8dp;
+	padding: 3dp 10dp;
+	font-size: 11dp;
+	white-space: nowrap;
+	opacity: 0.5;
+}
+
+.bulk-button.ready {
+	color: #b5e853;
+	border-color: #b5e853;
+	background-color: #1b2410;
+	opacity: 1;
+	cursor: pointer;
+}
+
+.bulk-button.ready:hover {
+	background-color: #26330f;
+}
+
+/* What it would upgrade is what the amber in a row means. */
+#upgrade-all.ready {
+	color: #d7a13b;
+	border-color: #d7a13b;
+	background-color: #2a2110;
+}
+
+#upgrade-all.ready:hover {
+	background-color: #3a2c12;
+}
+
+/* Each one spelled out rather than sharing a rule with the others: two rules of equal specificity
+   tie, and which one wins is not worth relying on. */
+#plugin-list {
+	position: absolute;
+	top: 126dp;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+}
+
+.page {
+	position: absolute;
+	top: 91dp;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+}
+
+/* Scrollbars. Not optional: a scrollbar with no width takes the whole width of what it scrolls,
+   which leaves the rows a few dp and looks like a broken layout rather than a missing style. The
+   plugin skins get this from tus_default.rcss, which this app does not load. */
+scrollbarvertical {
+	width: 10dp;
+}
+
+scrollbarhorizontal {
+	height: 10dp;
+}
+
+scrollbarvertical slidertrack, scrollbarhorizontal slidertrack {
+	background-color: #101010;
+}
+
+scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
+	background-color: #333333;
+	border-radius: 5dp;
+}
+
+scrollbarvertical sliderbar:hover, scrollbarhorizontal sliderbar:hover {
+	background-color: #b5e853;
+}
+
+scrollbarvertical sliderbar {
+	min-height: 24dp;
+}
+
+scrollbarhorizontal sliderbar {
+	min-width: 24dp;
+}
+
+/* Header, lit from behind the way a panel in a rack is: the plate is grey, the seam along the
+   bottom of it carries the accent, and what sits under the seam catches a little of it before
+   the page goes back to grey. The light reaches no further than the status line. */
+#header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16dp 24dp;
+	border-bottom: 1dp #47612a;
+	decorator: vertical-gradient( #272727 #1b1b1b );
+}
+
+#app-title {
+	font-size: 20dp;
+	font-weight: bold;
+	color: #b5e853;
+}
+
+#app-version {
+	font-size: 12dp;
+	color: #707070;
+	/* Both sides: the spacer that used to hold the link away from this collapses to nothing once
+	   the header is full, and then the two of them run into one another. */
+	margin: 0dp 8dp;
+}
+
+/* None of these gives way: the spacers below are what absorb a narrow window, and the title
+   after them. Left to themselves these shrink instead, and a squeezed header breaks its labels
+   across two lines - which is what a fifth button turned "Donator login" into. */
+#app-version, .header-link, .header-button {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
+
+/* Everything else in the header holds its width; the title is the one thing that gives. A
+   button pushed past the edge cannot be pressed, and the window's own title bar is already
+   saying these words - so when the row runs out of room, this is what loses some. */
+#app-title {
+	flex: 0 1 auto;
+	min-width: 0dp;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+/* In the status bar rather than the header. The header is a row of things that cannot give way -
+   every button is sized by its own text - and the title is the only one that can, so putting this
+   up there took the title's width and cut it off. The status bar carries one short sentence and
+   has the rest of the line spare.
+
+   Green, because unlike everything else in the window it is not always on offer. */
+#status-bar .self-update {
+	flex: 0 0 auto;
+	padding: 3dp 10dp;
+	font-size: 12dp;
+	white-space: nowrap;
+	cursor: pointer;
+	decorator: vertical-gradient( #2c3a24 #1f2a19 );
+	border: 1dp #4a7c3f;
+	border-radius: 3dp;
+	color: #9fd98f;
+}
+
+#status-bar .self-update:hover {
+	decorator: vertical-gradient( #38492c #273520 );
+	border-color: #6fae5e;
+	color: #c7f0ba;
+}
+
+/* There is no .hidden rule of its own in here - every one of them names the element it hides -
+   so without this the button is an empty bordered box in the corner whenever there is nothing
+   to update to. */
+#status-bar .self-update.hidden {
+	display: none;
+}
+
+/* Ticks or unticks every format on every row. Drawn like a format chip but deliberately not one:
+   the chips are rebuilt from the catalog, and anything carrying that class in here is thrown away
+   first. */
+.select-all {
+	flex: 0 0 auto;
+	display: inline-block;
+	margin-right: 8dp;
+	padding: 2dp 6dp;
+	font-size: 11dp;
+	white-space: nowrap;
+	cursor: pointer;
+	decorator: vertical-gradient( #242424 #1a1a1a );
+	border: 1dp #333333;
+	border-radius: 3dp;
+	color: #8e8e8e;
+}
+
+.select-all:hover {
+	border-color: #5a5a5a;
+	color: #c4c4c4;
+}
+
+/* Two of them, so what sits between them ends up in the middle and the buttons stay on the right. */
+.header-spacer {
+	flex: 1 1 auto;
+}
+
+.header-link {
+	font-size: 12dp;
+	color: #63c0f5;
+	cursor: pointer;
+}
+
+.header-link:hover {
+	color: #b5e853;
+}
+
+/* Status bar */
+/* Flex, like the header: a plain block only takes the width of its text here, which leaves the
+   bar as a small box on the left instead of a strip across the window. */
+#status-bar {
+	display: flex;
+	align-items: center;
+	padding: 8dp 24dp;
+	border-bottom: 1dp #272727;
+	decorator: vertical-gradient( #262d1d #181818 );
+}
+
+#status-text {
+	font-size: 12dp;
+	color: #9b9b9b;
+}
+
+/* Fetching the catalog takes seconds and used to happen in silence, with only a line of grey text
+   to say so. This slides while it runs. */
+@keyframes busy-slide {
+	0%   { transform: translateX(0px); }
+	100% { transform: translateX(160px); }
+}
+
+#status-busy {
+	display: none;
+	width: 40dp;
+	height: 3dp;
+	margin-left: 16dp;
+	border-radius: 2dp;
+	background-color: #b5e853;
+}
+
+#status-bar.busy #status-busy {
+	display: inline-block;
+	animation: 0.9s quadratic-in-out infinite alternate busy-slide;
+}
+
+#status-bar.busy #status-text {
+	color: #b5e853;
+}
+
+/* Plugin list. Takes whatever height is left and scrolls, however many products there are. */
+#plugin-list {
+	display: flex;
+	flex-direction: column;
+	padding: 12dp;
+	gap: 8dp;
+	overflow-y: auto;
+}
+
+/* Template is hidden */
+#plugin-entry-template {
+	display: none;
+}
+
+/* The heading over each group of rows: what sort of product they are. Set in the accent colour like
+   the changelog's section titles, and a little away from the rows of the group above it. A click
+   folds the group up; the caret points down while it is open and to the right while it is not, the
+   way the version chip's does, and the count says how much is folded away. */
+.plugin-category {
+	flex-shrink: 0;
+	display: block;
+	margin-top: 6dp;
+	padding: 2dp 4dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #b5e853;
+	border-bottom: 1dp #333333;
+	cursor: pointer;
+}
+
+.plugin-category:hover {
+	color: #d4f598;
+}
+
+.category-caret {
+	display: inline-block;
+	width: 5dp;
+	height: 5dp;
+	margin-right: 8dp;
+	vertical-align: 3dp;
+	border-right: 2dp #b5e853;
+	border-bottom: 2dp #b5e853;
+	transform: rotate(45deg);
+}
+
+.plugin-category.collapsed .category-caret {
+	vertical-align: 1dp;
+	transform: rotate(-45deg);
+}
+
+.category-count {
+	margin-left: 8dp;
+	font-weight: normal;
+	color: #7e7e7e;
+}
+
+.plugin-entry.folded {
+	display: none;
+}
+
+/* Individual plugin entry. The row opens the detail page; the chips and buttons on it keep
+   their own clicks. It does not shrink: a list with more rows than fit scrolls instead of
+   squashing them. */
+.plugin-entry {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 6dp 16dp;
+	border-top: 1dp #2f2f2f;
+	border-bottom: 1dp #141414;
+	border-radius: 4dp;
+	gap: 16dp;
+	cursor: pointer;
+	decorator: vertical-gradient( #242424 #1b1b1b );
+}
+
+/* A line along the top and the bottom and none down the sides: it is the height of a row that
+   needs saying, now that they are short enough to sit close together, and a box drawn round
+   every one of six rows is six boxes to look past. Light above and dark below, so the row reads
+   as catching the light rather than as being outlined. Hovering lifts it. */
+.plugin-entry:hover {
+	decorator: vertical-gradient( #30302f #232323 );
+}
+
+/* Thumbnail. Never shrunk: a row with a long status line beside it would otherwise squeeze the
+   image into a sliver. The frame is the same size on every row whatever shape the art is, and
+   the picture is inset far enough inside it never to reach the corners: rounding the picture
+   itself would mean clipping it to the curve, and that goes through the clip-mask calls the
+   JUCE software renderer does not implement. A mount around it does the same job anywhere. */
+.plugin-thumbnail {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 64dp;
+	height: 48dp;
+	padding: 4dp;
+	decorator: vertical-gradient( #202020 #161616 );
+	border: 1dp #343434;
+	border-radius: 6dp;
+}
+
+/* Only the maxima are given, so the layout keeps the aspect the file has and fits it to
+   whichever side runs out first - a wide screenshot ends up with a band above and below it
+   rather than squashed into a shape it never had. */
+.thumbnail-image {
+	max-width: 54dp;
+	max-height: 38dp;
+}
+
+/* Plugin info */
+/* Takes whatever the chips and the button do not need, and gives way when they need more: the
+   formats must never wrap, the description may. */
+.plugin-info {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	gap: 4dp;
+	min-width: 0dp;
+}
+
+/* The two names side by side, and the baselines lined up rather than the boxes: one is half as
+   big as the other, and centring them would leave the smaller sitting high.
+
+   Side by side only while they fit. How much room there is depends on how many formats the
+   columns to the right are laying out - five here, six on a Mac, which is where this first ran
+   out - so the second name drops onto a line of its own rather than being cut off. */
+.plugin-title {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 2dp 10dp;
+	min-width: 0dp;
+}
+
+.plugin-name {
+	flex: 0 0 auto;
+	font-size: 16dp;
+	font-weight: bold;
+	color: #b5e853;
+}
+
+/* Gives way first, and wraps rather than being cut: half a sentence says less than the same
+   sentence on two lines, and the row is as tall as the format columns beside it either way. */
+.plugin-description {
+	min-width: 0dp;
+	font-size: 12dp;
+	color: #9b9b9b;
+}
+
+.plugin-version {
+	font-size: 11dp;
+	color: #666;
+}
+
+/* Plugin actions (right side). Sized by what it holds and never shrunk, so the formats keep their
+   single line whatever is left for the text beside them.
+
+   A row, with the button that installs everything ticked beside the columns rather than under them:
+   stacked, the row was twice as tall as anything in it. */
+.plugin-actions {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: 0 0 auto;
+	gap: 12dp;
+	min-width: 200dp;
+}
+
+/* Status line under the description while installing. It keeps its line whether or not there is
+   anything to say, so that a row does not grow when an install starts. */
+.plugin-status.hidden {
+	display: none;
+}
+
+.plugin-status {
+	/* No line held open for it. The row is as tall as the format columns beside it either way,
+	   so an empty one only pushed the name above the middle of the picture. */
+	min-height: 0dp;
+	font-size: 11dp;
+	color: #63c0f5;
+}
+
+/* The version chip sits next to its format chip in the same wrapping row. It must not be
+   wrapped in a flex box of its own - see the note on .plugin-formats below. */
+.version-select {
+	font-size: 11dp;
+	color: #eaeaea;
+	padding: 2dp 6dp;
+	background-color: #1c1c1c;
+	border: 1dp #333333;
+	border-radius: 2dp;
+	cursor: pointer;
+}
+
+.version-select:hover {
+	border-color: #b5e853;
+	color: #b5e853;
+}
+
+/* Format columns.
+
+   Blocks, not flex: every column is the same width whatever it holds, so the formats of one plugin
+   sit under the formats of the next. A flex row sizes each chip to its own text, which is what used
+   to make the columns wander from row to row.
+
+   Keep it out of flex altogether. Nesting a flex box in this container collapses the layout of the
+   whole document in this RmlUi build, header included. Inline-block columns lay out in one pass and
+   do not. */
+.plugin-formats {
+	display: block;
+	white-space: nowrap;
+}
+
+#format-column-template, #format-all-template {
+	display: none;
+}
+
+/* The fixed width. Everything inside is centred in it, and a plugin that does not come in this
+   format leaves the column empty rather than moving the ones after it. */
+.format-col {
+	display: inline-block;
+	width: 74dp;
+	margin-right: 6dp;
+	vertical-align: top;
+	text-align: center;
+}
+
+.format-label, .version-select {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
+
+.format-label {
+	font-size: 11dp;
+	color: #8e8e8e;
+	padding: 2dp 6dp;
+	border: 1dp #333333;
+	border-radius: 3dp;
+	decorator: vertical-gradient( #242424 #1a1a1a );
+}
+
+/* The effect build, offered where there is one. Drawn as a format chip because that is what it
+   behaves like - ticked or not - but it sits with the name rather than in the columns, since it
+   is about the whole row rather than about one format. */
+.fx-toggle {
+	/* .plugin-info is a flex column, whose children are stretched to its width unless they say
+	   otherwise. A chip is as wide as the word in it. */
+	align-self: flex-start;
+	margin-top: 2dp;
+}
+
+.format-label.checked {
+	color: #d6d6d6;
+	border-color: #747474;
+	decorator: vertical-gradient( #282828 #1e1e1e );
+}
+
+/* Already on disk: the chip is filled rather than outlined. The two states are separate - the fill
+   says what is installed, the border says what the Install button will act on - so a chip can be
+   filled and unticked, or outlined and ticked.
+
+   Nothing is drawn inside the chip any more: what is installed is written under it, in a column
+   whose width does not depend on it. */
+/* On disk but not ticked: filled, but darker - it is not what the button is about to do. */
+.format-label.installed {
+	color: #b4b4b4;
+	border-color: #464646;
+	font-weight: bold;
+	decorator: vertical-gradient( #353535 #272727 );
+}
+
+/* On disk and ticked: the brightest of the four, which is as far up as grey goes. */
+.format-label.checked.installed {
+	color: #ededed;
+	border-color: #929292;
+	decorator: vertical-gradient( #4f4f4f #3a3a3a );
+}
+
+/* Installed, but older than what is on offer. The one coloured chip of the four, and the only
+   colour in the whole column now that the rest of them are grey - which is the point, since it
+   is the one state worth picking out of a list of six rows. */
+.format-label.installed.outdated {
+	color: #d7a13b;
+	border-color: #5e4a1d;
+	decorator: vertical-gradient( #3e3114 #2b220d );
+}
+
+.format-label.checked.installed.outdated {
+	color: #f3dcae;
+	border-color: #e8b24a;
+	decorator: vertical-gradient( #6b5320 #46340f );
+}
+
+/* Beside the name in the chip: a tick when the newest version is installed, an arrow when a newer
+   one is waiting. Coloured on their own, so they read on every one of the four chip states.
+
+   Both are in the template and hidden by default; the state classes the controller sets decide
+   which one is shown. A chip that is installed but cannot say which version it is has neither
+   class, so it gets no icon - which is the point of a separate "current" rather than reading it
+   as "installed and not outdated". */
+.format-label .state-icon {
+	display: none;
+	width: 10dp;
+	height: 10dp;
+	margin-left: 3dp;
+	vertical-align: -1dp;
+}
+
+.format-label.current .state-icon.current {
+	display: inline-block;
+	image-color: #b5e853;
+}
+
+.format-label.outdated .state-icon.outdated {
+	display: inline-block;
+	image-color: #e8b24a;
+}
+
+/* ---------------------------------------------------------------- what is in a format column
+
+   Four lines: the format, the version that is installed, the version that would be installed, and
+   the buttons. Each one a block, so the column is as wide as it was told to be and no wider. */
+.format-col .format-label {
+	display: block;
+	overflow: hidden;
+}
+
+.format-col .version-select {
+	display: block;
+	margin-top: 3dp;
+	font-size: 10dp;
+	padding: 2dp 2dp;
+	overflow: hidden;
+}
+
+/* What is on the disk now. Grey when nothing is, and amber when it is behind what is on offer -
+   the same amber the chip above it uses. */
+/* The chip above it is already filled when something is installed, and coloured when what is
+   installed is behind, so in a format column this line only repeats it. The All column keeps it,
+   because the count there is the one thing nothing else says. */
+.format-installed {
+	display: none;
+	margin-top: 3dp;
+	font-size: 10dp;
+	color: #555;
+}
+
+.format-col.all .format-installed {
+	display: block;
+}
+
+/* The same scale as the chip above it: grey for what is on the disk and current, amber for
+   what is on the disk and behind. */
+.format-installed.current {
+	color: #a8a8a8;
+}
+
+.format-installed.outdated {
+	color: #d7a13b;
+}
+
+/* The dropdown is a chip of text, which does not look like one without this. */
+.version-caret {
+	display: inline-block;
+	width: 3dp;
+	height: 3dp;
+	margin-left: 4dp;
+	vertical-align: 2dp;
+	border-right: 1dp #777777;
+	border-bottom: 1dp #777777;
+	transform: rotate(45deg);
+}
+
+.version-select:hover .version-caret {
+	border-right-color: #b5e853;
+	border-bottom-color: #b5e853;
+}
+
+.format-buttons {
+	display: block;
+	margin-top: 4dp;
+}
+
+/* ---------------------------------------------------------------- the All column
+
+   Wider than a format column, because it carries three buttons rather than two, and set apart from
+   them: it is a summary of the row, not another format. */
+.format-col.all {
+	width: 88dp;
+	margin-left: 10dp;
+	border-left: 1dp #2a2a2a;
+	padding-left: 8dp;
+}
+
+.all-label {
+	color: #9b9b9b;
+	border-color: #333333;
+	font-weight: bold;
+	decorator: vertical-gradient( #242424 #1a1a1a );
+	border: 1dp #333333;
+}
+
+/* Keeps the buttons of this column on the line of the buttons beside it, without saying anything -
+   there is no one version for a whole row. */
+/* The All column had a blank line here to push its buttons level with the three in the others.
+   Those are three again now that the line below their chips is gone, so this would make a fourth.
+
+   Both of the element's classes, because .version-select sets display as well and carries the
+   same weight: one class against one class is settled by whichever is written last. */
+.version-select.all-spacer {
+	display: none;
+}
+
+/* An action with nothing to act on stays in place rather than moving the other two around. */
+.format-col.all .format-action, .format-col.all .format-remove {
+	opacity: 0.25;
+	margin: 0dp 1dp;
+}
+
+.format-col.all .format-action.ready, .format-col.all .format-remove.ready {
+	opacity: 1;
+}
+
+/* Small, because what they do is said by the icon on them rather than by a word. Both are the
+   same size whatever is drawn on them, so the column keeps its height, and the icon is
+   centred on the box rather than on the baseline of text that is not there - that left every
+   one of them a couple of pixels high, by an amount that looked different per drawing. */
+.format-action, .format-remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 22dp;
+	height: 20dp;
+	margin: 0dp 2dp;
+	padding: 0dp;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+/* Nothing is installed, so there is nothing to throw away. */
+.format-col .format-remove {
+	opacity: 0.25;
+}
+
+.format-col.is-installed .format-remove {
+	opacity: 1;
+}
+
+.format-remove:hover {
+	background-color: #2a1414;
+	border-color: #ac4142;
+}
+
+/* Buttons */
+.plugin-buttons {
+	display: flex;
+	flex-direction: row;
+	gap: 8dp;
+}
+
+.install-button {
+	padding: 6dp 20dp;
+	font-size: 13dp;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.install-button:hover {
+	background-color: #26330f;
+}
+
+.install-button:active {
+	background-color: #b5e853;
+	color: #151515;
+}
+
+.install-button.installed {
+	background-color: #151515;
+	color: #666;
+	border-color: #333333;
+	font-weight: normal;
+}
+
+.install-button.installed:hover {
+	background-color: #1a1a1a;
+	color: #999;
+	border-color: #555555;
+}
+
+/* Takes its space only while something is being downloaded. A line held open for what is not
+   happening is most of what a row this short is trying to avoid, and when it does appear the row
+   grows by the little the format columns beside it do not already cover. */
+.plugin-progress {
+	display: none;
+	flex-direction: row;
+	align-items: center;
+	gap: 8dp;
+	width: 200dp;
+
+	/* Never wider than the column it is in. That column gives way to the format columns beside
+	   it, and with six formats - a Mac, where AU is one of them - it ends up narrower than this.
+	   A fixed width then put the bar and the cancel button on top of the buttons next door. */
+	max-width: 100%;
+}
+
+.plugin-progress.active {
+	display: flex;
+}
+
+.progress-bar {
+	flex: 1;
+	height: 8dp;
+	background-color: #1c1c1c;
+	border: 1dp #333333;
+	border-radius: 2dp;
+}
+
+.progress-bar fill {
+	background-color: #b5e853;
+	border-radius: 2dp;
+}
+
+.cancel-button {
+	/* The bar gives way, not the button: a cancel too narrow to hit is worse than a short bar. */
+	flex: 0 0 auto;
+	padding: 4dp 8dp;
+	background-color: #151515;
+	color: #ac4142;
+	font-size: 12dp;
+	border: 1dp #ac4142;
+	border-radius: 2dp;
+	cursor: pointer;
+}
+
+.cancel-button:hover {
+	background-color: #2a1414;
+}
+
+/* ---------------------------------------------------------------- pages
+
+   The list, the detail page and the preferences share the window: one is shown at a time by
+   adding the "open" class. Only the list has a class of its own to hide it, because it is the
+   one the document starts on. */
+#plugin-list.hidden {
+	display: none;
+}
+
+.page {
+	display: none;
+	flex-direction: column;
+	padding: 12dp;
+	gap: 8dp;
+	overflow-y: auto;
+}
+
+.page.open {
+	display: flex;
+}
+
+.page-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 12dp;
+}
+
+.page-title {
+	font-size: 18dp;
+	font-weight: bold;
+	color: #b5e853;
+}
+
+/* ---------------------------------------------------------------- plugin detail */
+
+#detail-top {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 16dp;
+	padding: 8dp 4dp;
+}
+
+#detail-thumbnail {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	box-sizing: border-box;
+	width: 160dp;
+	height: 120dp;
+	padding: 6dp;
+	decorator: vertical-gradient( #202020 #161616 );
+	border: 1dp #343434;
+	border-radius: 8dp;
+}
+
+#detail-thumbnail .thumbnail-image {
+	max-width: 146dp;
+	max-height: 106dp;
+}
+
+#detail-text {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	gap: 8dp;
+}
+
+#detail-description {
+	display: block;
+	font-size: 13dp;
+	color: #aaa;
+}
+
+#detail-meta {
+	display: block;
+	font-size: 11dp;
+	color: #666;
+}
+
+/* Rows of cells rather than a nested flex box per row: a flex box inside a flex box collapses the
+   layout of the whole document in this RmlUi build. Widths live on the cells. */
+#detail-formats {
+	display: block;
+	margin-top: 8dp;
+}
+
+#detail-row-template, #detail-backup-template {
+	display: none;
+}
+
+/* Set apart from the formats above it: that half is about files this program can fetch again,
+   this half is about files it cannot. */
+#detail-data {
+	display: block;
+	margin-top: 18dp;
+}
+
+.detail-data-label {
+	width: 230dp;
+	color: #b5e853;
+}
+
+/* While a backup or a restore is running. Zipping a few hundred megabytes takes long enough
+   that the buttons have to say so, rather than looking ready and doing nothing. */
+#detail-data .dialog-button.disabled, #detail-data .dialog-button.disabled:hover {
+	color: #555;
+	background-color: #262626;
+	border-color: #333333;
+}
+
+/* The three in a backup row: an icon, a word, an icon. The same 6dp the buttons in a format row
+   use, plus room above and below - two rows of them were sitting flush against each other, and
+   the row height is set by the buttons rather than by the text beside them. */
+.detail-backup-reveal, .detail-backup-restore, .detail-backup-delete {
+	display: inline-block;
+	margin: 1dp 0dp 1dp 6dp;
+	vertical-align: middle;
+}
+
+/* Icon only, so padded for an icon and not for a word - the same reasoning, and the same
+   numbers, as .dialog-button.detail-browse. Without naming .dialog-button here its word padding
+   wins and leaves a small icon sitting in a wide slab. */
+.dialog-button.detail-backup-reveal, .dialog-button.detail-backup-delete {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	/* The 5dp is .dialog-button's own, kept so these finish the same height as the word button
+	   beside them; only the 16dp meant for a word is narrowed. */
+	padding: 5dp 8dp;
+}
+
+/* What the backup covers, said once in full rather than guessed at from a short label. */
+.detail-note {
+	display: block;
+	padding: 6dp 4dp 2dp 4dp;
+	font-size: 11dp;
+	color: #7e7e7e;
+}
+
+/* Nothing to restore yet reads as a sentence rather than an empty space under a heading. */
+#detail-data .detail-empty {
+	display: block;
+	padding: 8dp 4dp;
+	font-size: 12dp;
+	color: #666;
+}
+
+.detail-row {
+	display: block;
+	padding: 5dp 4dp;
+	border-bottom: 1dp #1c1c1c;
+}
+
+.detail-head {
+	color: #7e7e7e;
+	font-size: 11dp;
+	border-bottom: 1dp #333333;
+}
+
+.detail-cell {
+	display: inline-block;
+	font-size: 12dp;
+	vertical-align: middle;
+}
+
+.detail-format {
+	width: 70dp;
+	color: #b5e853;
+}
+
+.detail-version {
+	width: 130dp;
+	color: #c4c4c4;
+}
+
+.detail-state {
+	width: 70dp;
+	color: #666;
+}
+
+/* On the disk and current. Grey, like the chip the list uses for the same thing - the colour
+   below is reserved for the state worth noticing. */
+.detail-state.yes, .detail-fx-state.yes {
+	color: #a8a8a8;
+}
+
+.detail-state.outdated, .detail-fx-state.outdated {
+	color: #d7a13b;
+}
+
+/* The effect build, which only some plugins have: the column is in the markup either way and
+   the page says whether this one has it. Both the table and the cell are named so that this
+   beats the "display: inline-block" every .detail-cell carries - a tie would leave it to the
+   order the two rules happen to be in. */
+.detail-fx-state {
+	display: none;
+	width: 70dp;
+	color: #666;
+}
+
+#detail-formats.has-fx .detail-fx-state {
+	display: inline-block;
+}
+
+/* Not in the row at all for a plugin the archives hold no effect build for. */
+#detail-fx-toggle.hidden {
+	display: none;
+}
+
+/* Only the heading uses this; the rows have an input in its place. */
+.detail-location {
+	color: #666;
+	font-size: 11dp;
+}
+
+/* Where this one product's build of this format goes. Empty means "wherever the format goes",
+   which is what Preferences sets. */
+.detail-path {
+	display: inline-block;
+	width: 250dp;
+	padding: 3dp 5dp;
+	font-size: 11dp;
+	color: #999;
+	background-color: #151515;
+	border: 1dp #2a2a2a;
+	border-radius: 2dp;
+	vertical-align: middle;
+}
+
+.detail-path:focus {
+	border-color: #b5e853;
+	color: #eaeaea;
+}
+
+.detail-browse, .detail-install, .detail-remove {
+	display: inline-block;
+	margin-left: 6dp;
+	vertical-align: middle;
+}
+
+/* Both of these are dialog buttons, and a dialog button is padded for a word. These hold an
+   icon instead, so they say so where it counts: .dialog-button is further down the file and
+   carries the same weight, so naming it here is what makes the padding below stick. Without
+   that the trash can was left no room at all, and an SVG asked for at no width renders
+   nothing - silently, outside a debug build. */
+.dialog-button.detail-browse {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3dp 8dp;
+}
+
+.detail-install {
+	width: 78dp;
+	padding: 3dp 0dp;
+	text-align: center;
+}
+
+/* Something newer is on offer: the same amber the list marks an outdated format with. */
+.detail-install.upgrade {
+	color: #151515;
+	background-color: #d7a13b;
+	border-color: #d7a13b;
+}
+
+/* Deletes what is installed. Red like the cancel button, and only interesting when there is
+   something to delete. */
+.dialog-button.danger {
+	color: #ac4142;
+	border-color: #6b2b2b;
+}
+
+.dialog-button.danger:hover {
+	color: #eaeaea;
+	background-color: #2a1414;
+	border-color: #ac4142;
+}
+
+/* The same size as the one in a format column, so that one trash can fits both. */
+.dialog-button.detail-remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 22dp;
+	height: 20dp;
+	padding: 0dp;
+}
+
+/* A row that has nothing installed has nothing to delete. */
+.detail-row .detail-remove {
+	opacity: 0.35;
+}
+
+.detail-row.is-installed .detail-remove {
+	opacity: 1;
+}
+
+#detail-status {
+	font-size: 11dp;
+	color: #63c0f5;
+}
+
+/* ---------------------------------------------------------------- changelog */
+
+/* Positioned rather than laid out with flex: the page is a flex column already, and a flex box
+   inside it collapses the layout of the whole document in this RmlUi build - see #detail-formats.
+   The top is the height of the page header. Each half scrolls on its own, so the list of versions
+   stays where it is while a long one is read. */
+#changelog-body {
+	position: absolute;
+	top: 54dp;
+	right: 12dp;
+	bottom: 12dp;
+	left: 12dp;
+}
+
+#changelog-versions {
+	position: absolute;
+	top: 0dp;
+	bottom: 0dp;
+	left: 0dp;
+	width: 96dp;
+	overflow-y: auto;
+	border-right: 1dp #272727;
+}
+
+.changelog-version {
+	display: block;
+	padding: 5dp 10dp;
+	font-size: 12dp;
+	color: #8e8e8e;
+	cursor: pointer;
+}
+
+.changelog-version:hover {
+	color: #eaeaea;
+	background-color: #1f1f1f;
+}
+
+.changelog-version.selected {
+	color: #b5e853;
+	background-color: #1b2410;
+}
+
+#changelog-text {
+	position: absolute;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	left: 108dp;
+	overflow-y: auto;
+	padding-right: 8dp;
+}
+
+#changelog-status {
+	font-size: 11dp;
+	color: #63c0f5;
+}
+
+.changelog-version-title {
+	display: block;
+	font-size: 16dp;
+	font-weight: bold;
+	color: #eaeaea;
+	padding-bottom: 4dp;
+}
+
+.changelog-section-title {
+	display: block;
+	margin-top: 12dp;
+	padding: 4dp 0dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #b5e853;
+	border-bottom: 1dp #333333;
+}
+
+/* Every product got these, so they are set back from the product's own. */
+.changelog-section-title.changelog-global {
+	color: #7e7e7e;
+}
+
+.changelog-subsection {
+	display: block;
+	margin-top: 8dp;
+	font-size: 11dp;
+	color: #7e7e7e;
+}
+
+.changelog-none {
+	display: block;
+	padding: 6dp 0dp;
+	font-size: 12dp;
+	color: #666;
+}
+
+/* The tag hangs in the margin, so a long entry wraps under its own text rather than under it. */
+.changelog-entry {
+	display: block;
+	position: relative;
+	padding: 4dp 0dp 4dp 42dp;
+	font-size: 12dp;
+	color: #d2d2d2;
+}
+
+.changelog-tag {
+	position: absolute;
+	top: 5dp;
+	left: 0dp;
+	width: 34dp;
+	font-size: 10dp;
+	text-align: center;
+	color: #8e8e8e;
+	border: 1dp #333333;
+	border-radius: 3dp;
+}
+
+.changelog-tag.tag-fix {
+	color: #d7a13b;
+	border-color: #5a4418;
+}
+
+.changelog-tag.tag-new {
+	color: #b5e853;
+	border-color: #4a5e22;
+}
+
+.changelog-tag.tag-imp {
+	color: #63c0f5;
+	border-color: #24506a;
+}
+
+/* ---------------------------------------------------------------- preferences */
+
+#preferences-intro {
+	display: block;
+	font-size: 12dp;
+	color: #999;
+	padding: 4dp;
+}
+
+#preference-list {
+	display: block;
+}
+
+#preference-row-template {
+	display: none;
+}
+
+.preference-row {
+	display: block;
+	padding: 6dp 4dp;
+	border-bottom: 1dp #1c1c1c;
+}
+
+.preference-format {
+	display: inline-block;
+	width: 90dp;
+	font-size: 12dp;
+	color: #b5e853;
+	vertical-align: middle;
+}
+
+.preference-path {
+	display: inline-block;
+	width: 430dp;
+	padding: 4dp 6dp;
+	font-size: 12dp;
+	color: #eaeaea;
+	background-color: #151515;
+	border: 1dp #333333;
+	border-radius: 2dp;
+	vertical-align: middle;
+}
+
+.preference-path:focus {
+	border-color: #b5e853;
+}
+
+.preference-browse, .preference-default {
+	display: inline-block;
+	margin-left: 6dp;
+	vertical-align: middle;
+}
+
+.preference-note {
+	display: inline-block;
+	margin-left: 8dp;
+	font-size: 11dp;
+	color: #666;
+	vertical-align: middle;
+}
+
+/* Popup menu (the version picker). Styled here because this app opts out of the shared plugin
+   templates, which is where the menu styling normally comes from. */
+.menubox {
+	display: flex;
+	flex-direction: row;
+	position: absolute;
+	z-index: 100;
+	padding: 4dp;
+	gap: 4dp;
+	border: 1dp #4b4b4b;
+	border-radius: 2dp;
+	decorator: vertical-gradient( #252525 #191919 );
+}
+
+.menucolumn {
+	display: flex;
+	flex-direction: column;
+	gap: 1dp;
+}
+
+.menuitem {
+	/* Explicit: divs default to inline here, so without this every entry runs onto one line. */
+	display: block;
+	color: #eaeaea;
+	font-size: 12dp;
+	padding: 4dp 14dp;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.menuitem:hover, .menuitem:active {
+	color: #e3f4c4;
+	decorator: vertical-gradient( #3a5320 #2b3f18 );
+}
+
+/* The installed/selected version. No check.png is embedded here, so it is marked with the
+   accent colour instead of a tick decorator. */
+.menuitem:checked {
+	color: #b5e853;
+	font-weight: bold;
+}
+
+.menuitem:disabled {
+	color: #666;
+}
+
+.menuitem:separator {
+	height: 1dp;
+	padding: 0dp;
+	margin: 4dp 0dp;
+	background-color: #333333;
+}
+
+/* The title of an icon button, placed under it by juceRmlUi::Tooltips. Drawn like the menus, and
+   above them. */
+.tooltip {
+	display: block;
+	position: absolute;
+	z-index: 200;
+	pointer-events: none;
+	padding: 3dp 8dp;
+	font-size: 11dp;
+	color: #eaeaea;
+	white-space: nowrap;
+	border: 1dp #4b4b4b;
+	border-radius: 2dp;
+	decorator: vertical-gradient( #252525 #191919 );
+}
+
+/* While a catalog is on its way: nothing to press, and it says so rather than looking pressable
+   and doing nothing. */
+.header-button.busy {
+	color: #555;
+	border-color: #333333;
+	cursor: arrow;
+}
+
+/* Team login and Preferences, in the header. Outlined like the install button. */
+.header-button {
+	margin-left: 10dp;
+	padding: 4dp 12dp;
+	font-size: 12dp;
+	cursor: pointer;
+}
+
+.header-button:hover {
+	background-color: #1b2410;
+}
+
+.header-button.busy:hover {
+	background-color: #151515;
+}
+
+/* What a changed location left behind, listed in Preferences above the logins. */
+#stray-installs {
+	display: block;
+	margin-top: 24dp;
+	padding: 4dp;
+}
+
+/* Nothing left behind is the usual case, and an empty heading would only ask what it means. */
+#stray-installs.hidden {
+	display: none;
+}
+
+#stray-installs-title {
+	display: block;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #e8b24a;
+	margin-bottom: 4dp;
+}
+
+#stray-installs-intro {
+	display: block;
+	font-size: 12dp;
+	color: #999;
+	margin-bottom: 4dp;
+}
+
+#stray-install-list {
+	display: block;
+}
+
+#stray-install-template {
+	display: none;
+}
+
+/* A row of its own rather than the inline one the donator logins use: a path is as long as it
+   is, and inline it ran straight through the button beside it. */
+.stray-install-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 6dp;
+	padding: 4dp 0dp;
+}
+
+.stray-install-name {
+	flex: 0 0 150dp;
+	font-size: 12dp;
+	color: #b5e853;
+}
+
+/* The folder is what the row is about, so it takes whatever the other two leave - and is cut
+   off rather than drawn over them when even that is not enough. */
+.stray-install-path {
+	flex: 1 1 auto;
+	min-width: 0dp;
+	overflow: hidden;
+	font-size: 12dp;
+	color: #eaeaea;
+}
+
+.stray-install-remove {
+	flex: 0 0 auto;
+}
+
+/* One login rather than a list of them, so a heading and the button that works it. */
+#team-login-section {
+	display: block;
+	margin-top: 24dp;
+	padding: 4dp;
+}
+
+/* Not for this user, so not in the window. */
+#team-login-section.hidden {
+	display: none;
+}
+
+#team-login-title {
+	display: block;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #b5e853;
+	margin-bottom: 4dp;
+}
+
+#team-login {
+	display: inline-block;
+}
+
+/* The folders a donator login is stored for, listed in Preferences. */
+#donator-logins {
+	display: block;
+	margin-top: 24dp;
+	padding: 4dp;
+}
+
+#donator-logins-title {
+	display: block;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #b5e853;
+	margin-bottom: 4dp;
+}
+
+#donator-login-list {
+	display: block;
+}
+
+#donator-login-template {
+	display: none;
+}
+
+.donator-login-row {
+	display: block;
+	padding: 4dp 0dp;
+}
+
+.donator-login-name {
+	display: inline-block;
+	width: 300dp;
+	font-size: 12dp;
+	color: #eaeaea;
+	vertical-align: middle;
+}
+
+.donator-login-remove {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+#donator-login-add {
+	display: inline-block;
+	margin-top: 10dp;
+}
+
+/* The login prompt: one overlay for every channel, shown by adding the "open" class. */
+#login-overlay {
+	display: none;
+	position: fixed;
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+	z-index: 50;
+	background-color: rgba(0,0,0,180);
+}
+
+#login-overlay.open {
+	display: block;
+}
+
+#login-panel {
+	display: block;
+	position: absolute;
+	top: 120dp;
+	left: 50%;
+	width: 320dp;
+	margin-left: -160dp;
+	padding: 16dp 20dp;
+	border: 1dp #3b3b3b;
+	border-radius: 2dp;
+	decorator: vertical-gradient( #272727 #1b1b1b );
+}
+
+/* Divs are not block by default in this app, so every stacked part of the prompt says so. */
+#login-title {
+	display: block;
+	font-size: 16dp;
+	font-weight: bold;
+	color: #b5e853;
+	margin-bottom: 8dp;
+}
+
+.login-label {
+	display: block;
+	font-size: 11dp;
+	color: #999;
+	margin-top: 10dp;
+	margin-bottom: 3dp;
+}
+
+/* The folder a donator login is for, which the team login has no use for. Selected through the
+   panel rather than on its own, because "#login-panel input" below is what it is competing with:
+   an id and an element beat a plain class, so a bare .login-folder-only hid the label and left
+   the input sitting there, unexplained, in the team dialog. This outranks that rule, and the one
+   underneath it outranks this. */
+#login-panel .login-folder-only {
+	display: none;
+}
+
+#login-panel.with-folder .login-folder-only {
+	display: block;
+}
+
+/* The eye that shows the password rides on the label above the field.
+
+   It is NOT in or beside the field, and that is not a preference: a text input draws its text at
+   the top left of the WINDOW rather than inside itself as soon as an ancestor of it is a flex
+   container or is positioned. Both were tried. The field stays a plain block child of the panel
+   and only the label carries anything. */
+.login-password-label {
+	margin-bottom: 5dp;
+}
+
+/* Whichever of the two password fields is not in use. Both the panel and the class are named so
+   that this outranks "#login-panel input", which lays every one of them out as a block. */
+#login-panel input.hidden {
+	display: none;
+}
+
+/* Drawn like the icon-only buttons in a row, and lit while it is doing something - which is the
+   only place the state shows, since the field itself is the other place. */
+.login-reveal {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	vertical-align: middle;
+	margin-left: 8dp;
+	box-sizing: border-box;
+	width: 22dp;
+	height: 17dp;
+	padding: 0dp;
+	cursor: pointer;
+	decorator: vertical-gradient( #242424 #1a1a1a );
+	border: 1dp #333333;
+	border-radius: 3dp;
+}
+
+.login-reveal:hover {
+	border-color: #5a5a5a;
+}
+
+.login-reveal .btn-icon {
+	width: 12dp;
+	height: 12dp;
+	vertical-align: 0dp;
+	image-color: #8e8e8e;
+}
+
+.login-reveal:hover .btn-icon {
+	image-color: #c4c4c4;
+}
+
+.login-reveal.checked {
+	border-color: #7fa83c;
+}
+
+.login-reveal.checked .btn-icon {
+	image-color: #b5e853;
+}
+
+#login-panel input {
+	display: block;
+	width: 300dp;
+	padding: 4dp 6dp;
+	font-size: 13dp;
+	color: #eaeaea;
+	background-color: #151515;
+	border: 1dp #333333;
+	border-radius: 2dp;
+}
+
+#login-panel input:focus {
+	border-color: #b5e853;
+}
+
+#login-error {
+	display: block;
+	min-height: 16dp;
+	margin-top: 10dp;
+	font-size: 12dp;
+	color: #ac4142;
+}
+
+.login-buttons {
+	display: flex;
+	flex-direction: row;
+	gap: 8dp;
+	margin-top: 12dp;
+}
+
+.dialog-button {
+	padding: 5dp 16dp;
+	font-size: 12dp;
+	cursor: pointer;
+}
+
+.dialog-button:hover {
+	color: #eaeaea;
+	border-color: #555555;
+}
+
+.dialog-button.primary {
+	color: #b5e853;
+	border-color: #b5e853;
+	background-color: #1b2410;
+}
+
+/* Three classes on purpose: equal-specificity ties go to the EARLIER rule in this RmlUi build,
+   so a two-class .busy rule would lose to .primary above. */
+.dialog-button.primary.busy {
+	color: #666;
+	border-color: #333333;
+	background-color: #151515;
+}
+
+/* ================================================================ how anything pressable looks
+
+   Every button in the program, in one place: the rules above say where a button sits and how big
+   it is, these say what it looks like. Gradients rather than flat fills, light at the top, and a
+   hover that brightens rather than inverts.
+
+   vertical-gradient rather than linear-gradient on purpose. The former is vertex-coloured
+   geometry and draws on any renderer; the latter goes through CompileShader, which the JUCE
+   software renderer does not implement, and would have left these blank wherever OpenGL is not
+   available. */
+
+.header-button, .dialog-button, .bulk-button, .install-button, .detail-install, .detail-browse,
+.preference-browse, .preference-default, .format-action {
+	decorator: vertical-gradient( #2c2c2c #1f1f1f );
+	border: 1dp #3b3b3b;
+	border-radius: 3dp;
+	color: #c4c4c4;
+}
+
+.header-button:hover, .dialog-button:hover, .bulk-button:hover, .detail-browse:hover,
+.preference-browse:hover, .preference-default:hover {
+	decorator: vertical-gradient( #363636 #272727 );
+	border-color: #5a5a5a;
+	color: #e0e0e0;
+}
+
+/* The ones that do the thing the page is for. Lifted from the download buttons on
+   theusualsuspects.io, so that the program and the site look like one product. */
+.dialog-button.primary, .install-button, .detail-install, .bulk-button.ready, #upgrade-all.ready {
+	decorator: vertical-gradient( #3a5320 #243a12 );
+	border: 1dp #6d9a2c;
+	color: #dbefc0;
+}
+
+.dialog-button.primary:hover, .install-button:hover, .detail-install:hover,
+.bulk-button.ready:hover, #upgrade-all.ready:hover {
+	decorator: vertical-gradient( #4a6a29 #2e4a17 );
+	border-color: #b5e853;
+	color: #eef8dc;
+}
+
+/* Something newer is on offer, which is not the same answer as "it is not installed". */
+.detail-install.upgrade, #upgrade-all.ready {
+	decorator: vertical-gradient( #473718 #2c220e );
+	border-color: #7e6527;
+	color: #e2c488;
+}
+
+.detail-install.upgrade:hover, #upgrade-all.ready:hover {
+	decorator: vertical-gradient( #5a4620 #3a2d12 );
+	border-color: #d7a13b;
+	color: #f2dcb0;
+}
+
+/* The same version again, in the blue the icon in the list uses for it: not the green of
+   something arriving, and not the amber of something being replaced. */
+.detail-install.reinstall {
+	decorator: vertical-gradient( #25333d #192329 );
+	border-color: #3a5a6d;
+	color: #a8cfe2;
+}
+
+.detail-install.reinstall:hover {
+	decorator: vertical-gradient( #2e4454 #1d2f3a );
+	border-color: #63c0f5;
+	color: #d6ecf8;
+}
+
+/* Throwing something away: the grey every other button has, with red mixed into it, rather
+   than a red button. There is one of these on every row and three on some, and a column of
+   red reads as a warning about the row rather than as something to press. The colour comes up
+   under the pointer, which is when it is about to matter. */
+.dialog-button.danger, .header-button.danger, .detail-remove, .format-remove,
+.stray-install-remove, .donator-login-remove {
+	decorator: vertical-gradient( #372727 #241b1b );
+	border: 1dp #543e3e;
+	color: #c3a5a4;
+}
+
+.dialog-button.danger:hover, .header-button.danger:hover, .detail-remove:hover,
+.format-remove:hover, .stray-install-remove:hover, .donator-login-remove:hover {
+	decorator: vertical-gradient( #552927 #371a19 );
+	border-color: #ac4142;
+	color: #f0cecd;
+}
+
+/* Nothing to remove: still there, plainly not for pressing. */
+.format-remove.disabled, .format-remove.disabled:hover {
+	decorator: vertical-gradient( #24242400 #1a1a1a00 );
+	border-color: #2b2b2b;
+}
+
+/* Typed into rather than pressed: the gradient runs the other way, so the field reads as a dent
+   rather than as a button. */
+#login-panel input, .detail-path, .preference-path, .version-select {
+	decorator: vertical-gradient( #131313 #1a1a1a );
+	border: 1dp #343434;
+	color: #d0d0d0;
+}
+
+
+/* ================================================================ icons
+
+   One white SVG per action, tinted here. image-color multiplies the image, so the same file is
+   the grey one on a neutral button, the green one on a primary and the red one on a trash, and it
+   follows whatever state the button is in without a second file.
+
+   Not mask-image, although that is what the website uses: masking goes through the clip-mask
+   calls, which the JUCE software renderer does not implement either.
+
+   They are <svg> elements rather than <img>: the SVG plugin registers an element of its own, and
+   an <img> pointed at an .svg fails to load. */
+
+.btn-icon {
+	display: inline-block;
+	width: 14dp;
+	height: 14dp;
+	vertical-align: -2dp;
+	image-color: #c4c4c4;
+}
+
+/* Beside a word rather than instead of one. */
+.header-button .btn-icon, .dialog-button .btn-icon, .preference-browse .btn-icon {
+	margin-right: 5dp;
+}
+
+/* On its own in a square button, where there is no word to sit beside and the box does the
+   centring, so the nudge the baseline needed is not wanted. */
+.format-action .btn-icon, .format-remove .btn-icon, .detail-remove .btn-icon,
+.detail-browse .btn-icon {
+	margin-right: 0dp;
+	width: 15dp;
+	height: 15dp;
+	vertical-align: middle;
+}
+
+.header-button:hover .btn-icon, .dialog-button:hover .btn-icon {
+	image-color: #e0e0e0;
+}
+
+/* The shape says which of the four things the button would do; the colour says what kind of
+   thing that is. Green brings something that is not there, amber replaces it with a newer one,
+   blue puts the same one back, and red, further down, takes it away. */
+.format-action .btn-icon {
+	image-color: #9ac348;
+}
+
+.format-action:hover {
+	decorator: vertical-gradient( #3a5320 #243a12 );
+	border-color: #6d9a2c;
+}
+
+.format-action:hover .btn-icon {
+	image-color: #dbefc0;
+}
+
+.format-action.install {
+	border-color: #4e7a22;
+}
+
+/* The same version again: nothing arrives and nothing goes, which is neither of the answers
+   either side of it. */
+.format-action.reinstall {
+	border-color: #2f4a5c;
+}
+
+.format-action.reinstall .btn-icon {
+	image-color: #63a0c0;
+}
+
+.format-action.reinstall:hover {
+	decorator: vertical-gradient( #22384a #16252f );
+	border-color: #63c0f5;
+}
+
+.format-action.reinstall:hover .btn-icon {
+	image-color: #c8e6f8;
+}
+
+.format-action.upgrade, .format-action.downgrade {
+	border-color: #5e4a1d;
+}
+
+.format-action.upgrade .btn-icon, .format-action.downgrade .btn-icon {
+	image-color: #d7a13b;
+}
+
+.format-action.upgrade:hover, .format-action.downgrade:hover {
+	decorator: vertical-gradient( #473718 #2c220e );
+	border-color: #d7a13b;
+}
+
+.format-action.upgrade:hover .btn-icon, .format-action.downgrade:hover .btn-icon {
+	image-color: #f2dcb0;
+}
+
+.format-remove .btn-icon, .detail-remove .btn-icon, .header-button.danger .btn-icon {
+	image-color: #a98180;
+}
+
+.format-remove:hover .btn-icon, .detail-remove:hover .btn-icon,
+.header-button.danger:hover .btn-icon {
+	image-color: #f0cecd;
+}
+
+.format-remove.disabled .btn-icon, .format-remove.disabled:hover .btn-icon {
+	image-color: #4f4f4f;
+}
+
+
+/* ================================================================ the rest of the surfaces */
+
+.detail-row, .preference-row, .stray-install-row, .donator-login-row {
+	border-bottom: 1dp #252525;
+}
+
+.detail-format, .preference-format {
+	color: #9ac348;
+}
+
+

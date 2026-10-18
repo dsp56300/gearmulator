@@ -1,6 +1,7 @@
 // The GS message helpers and the part state the part editor shows. No ROMs.
 #include "88lib/gs/efx.h"
 #include "88lib/gs/gs.h"
+#include "88lib/gs/midiClip.h"
 #include "88lib/gs/params.h"
 #include "88lib/gs/partState.h"
 #include "88lib/gs/toneCatalog.h"
@@ -595,6 +596,92 @@ namespace
 	}
 }
 
+namespace
+{
+	uint32_t readBigEndian(const std::vector<uint8_t>& _data, const size_t _offset, const size_t _bytes)
+	{
+		uint32_t v = 0;
+		for(size_t i = 0; i < _bytes; ++i)
+			v = v << 8 | _data[_offset + i];
+		return v;
+	}
+
+	// A setup as a Standard MIDI File: format 1 with one track, which Logic does not split by channel
+	void midiClip()
+	{
+		MidiClip clip;
+		clip.add(dt1(g_gsReset, 0x00));
+		clip.add(dt1(partAddress(0, PartParam::Level), 90));
+		clip.add({0xb0, 11, 100});
+		clip.add({0xc0, 5});
+		CHECK(isResetMessage(dt1(g_gsReset, 0x00)));
+		CHECK(!isResetMessage(dt1(partAddress(0, PartParam::Level), 90)));
+		CHECK_EQ(clip.events()[1].time, MidiClip::g_resetSpacing);
+		CHECK_EQ(clip.events()[2].time, MidiClip::g_resetSpacing + MidiClip::g_sysexSpacing);
+
+		const auto smf = clip.toSmf("Setup");
+		CHECK_EQ(readBigEndian(smf, 0, 4), 0x4d546864u);	// MThd
+		CHECK_EQ(readBigEndian(smf, 8, 2), 1u);
+		CHECK_EQ(readBigEndian(smf, 10, 2), 1u);
+		CHECK_EQ(readBigEndian(smf, 12, 2), 480u);
+		CHECK_EQ(readBigEndian(smf, 14, 4), 0x4d54726bu);	// MTrk
+		CHECK_EQ(readBigEndian(smf, 18, 4) + 22, smf.size());
+		// The name, then the reset at tick 0 as F0 <length of the rest>
+		CHECK_EQ(smf[22], 0x00);
+		CHECK_EQ(smf[23], 0xff);
+		CHECK_EQ(smf[24], 0x03);
+		CHECK_EQ(smf[25], 5);
+		CHECK_EQ(smf[31], 0x00);
+		CHECK_EQ(smf[32], 0xf0);
+		CHECK_EQ(smf[33], 10);
+		// The program change with its one data byte, then the end of the track on the bar line
+		CHECK_EQ(smf[smf.size() - 7], 0xc0);
+		CHECK_EQ(smf[smf.size() - 6], 5);
+		CHECK_EQ(smf[smf.size() - 3], 0xff);
+		CHECK_EQ(smf[smf.size() - 2], 0x2f);
+	}
+
+	// Which parts the channel messages go to, for the part tabs to light up
+	void activity()
+	{
+		PartStateTracker tracker;
+		tracker.setModel(DeviceModel::Sc88Pro);
+
+		// Nothing is kept while nothing shows it
+		tracker.process(channel(0, 0x90, 60, 100));
+		CHECK_EQ(tracker.takeActivity(), 0u);
+		tracker.setActivityEnabled(true);
+
+		// A note on channel 1 of port B reaches part B1; once taken it is gone
+		tracker.process(channel(1, 0x90, 60, 100));
+		CHECK_EQ(tracker.takeActivity(), uint64_t{1} << 16);
+		CHECK_EQ(tracker.takeActivity(), 0u);
+
+		// Every part on the channel, whatever the message
+		tracker.process(sysex(0, dt1(partAddress(3, PartParam::RxChannel), 0)));
+		tracker.process(channel(0, 0xe0, 0, 0x40));
+		CHECK_EQ(tracker.takeActivity(), (uint64_t{1} << 0) | (uint64_t{1} << 3));
+
+		// A part switched off hears nothing, and a channel without parts lights none
+		tracker.process(sysex(0, dt1(partAddress(0, PartParam::RxChannel), 0x10)));
+		tracker.process(sysex(0, dt1(partAddress(3, PartParam::RxChannel), 0x10)));
+		tracker.process(channel(0, 0x90, 60, 100));
+		tracker.process(channel(0, 0xf8, 0));
+		CHECK_EQ(tracker.takeActivity(), 0u);
+
+		// The SC-8850's port D
+		tracker.setModel(DeviceModel::Sc8850);
+		tracker.process(channel(3, 0x99, 36, 100));
+		CHECK_EQ(tracker.takeActivity(), uint64_t{1} << (48 + 9));
+
+		// Switched off, what came in is gone and nothing more is kept
+		tracker.process(channel(0, 0x90, 60, 100));
+		tracker.setActivityEnabled(false);
+		tracker.process(channel(0, 0x90, 60, 100));
+		CHECK_EQ(tracker.takeActivity(), 0u);
+	}
+}
+
 int main()
 {
 	messages();
@@ -605,5 +692,7 @@ int main()
 	rules();
 	params();
 	insertionEffect();
+	midiClip();
+	activity();
 	return finish("partState");
 }

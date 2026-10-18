@@ -7,7 +7,8 @@ add_library(jeLib STATIC)
 set(SOURCES
 	device.cpp device.h
 	je8086.cpp je8086.h
-	je8086devices.h
+	je8086devices.cpp je8086devices.h
+	je8080devices.h
 	jeLcd.cpp jeLcd.h
 	jemiditypes.h
 	jetypes.h
@@ -21,9 +22,6 @@ source_group("source" FILES ${SOURCES})
 
 set_property(TARGET jeLib PROPERTY FOLDER "JE8086")
 
-target_link_libraries(jeLib PUBLIC synthLib hardwareLib rLib esp h8s)
+target_link_libraries(jeLib PUBLIC synthLib hardwareLib rLib esp h8300h)
 
 target_include_directories(jeLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
-
-#target_compile_options(jeLib PRIVATE -fsanitize=thread)
-#target_link_options(jeLib PUBLIC -fsanitize=thread)

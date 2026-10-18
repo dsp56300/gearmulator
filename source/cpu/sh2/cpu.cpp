@@ -4,8 +4,21 @@
 
 namespace sh2 {
 
+namespace {
+Cell blank_cell() {
+  Cell c{};
+  c.fn = &detail::fill;
+  return c;
+}
+Cell guard_cell() {
+  Cell c{};
+  c.fn = &detail::page_end;
+  return c;
+}
+}  // namespace
+
 Cpu::Cpu(Bus& bus, const ChipConfig& cfg)
-    : bus_(bus), cfg_(cfg), addr_mask_(cfg.addr_mask), pages_(1u << (32 - kPageShift)) {
+    : bus_(bus), cfg_(cfg), addr_mask_(cfg.addr_mask), cells_(32, blank_cell(), 1, guard_cell()) {
   bus_.set_code_sink(this);
 }
 
@@ -39,52 +52,18 @@ void Cpu::set_cache_control(u8 ccr) {
 // ---------------------------------------------------------------------------
 // Cells
 
-Cell* Cpu::alloc_page(u32 page) {
-  pages_[page].reset(new Cell[kCellsPerPage + 1]);
-  reset_cells(page, 0, kCellsPerPage);
-  Cell& guard = pages_[page][kCellsPerPage];
-  guard = Cell{};
-  guard.fn = &detail::page_end;
-  return pages_[page].get();
-}
+void Cpu::invalidate_all() { cells_.invalidate_all(); }
 
-void Cpu::reset_cells(u32 page, u32 first, u32 count) {
-  Cell* cells = pages_[page].get();
-  if (!cells) return;
-  Cell blank{};
-  blank.fn = &detail::fill;
-  const u32 end = std::min<u32>(first + count, kCellsPerPage);
-  for (u32 i = first; i < end; ++i) cells[i] = blank;
-}
-
-void Cpu::invalidate_all() {
-  for (u32 p = 0; p < pages_.size(); ++p) reset_cells(p, 0, kCellsPerPage);
-}
-
-void Cpu::invalidate_range(u32 addr, u32 len) {
-  // A delayed branch carries its slot's decoding: drop the word before too.
-  if (addr >= 2) {
-    addr -= 2;
-    len += 2;
-  }
-  const u32 first_page = addr >> kPageShift, last_page = (addr + len - 1) >> kPageShift;
-  for (u32 p = first_page; p <= last_page; ++p) {
-    const u32 lo = p == first_page ? (addr & (kPageSize - 1)) >> 1 : 0;
-    const u32 hi = p == last_page ? ((addr + len - 1) & (kPageSize - 1)) >> 1 : kCellsPerPage - 1;
-    reset_cells(p, lo, hi - lo + 1);
-  }
-}
+// A delayed branch carries its slot's decoding: the word before the range
+// drops too.
+void Cpu::invalidate_range(u32 addr, u32 len) { cells_.invalidate_range(addr, len, 1); }
 
 void Cpu::code_line_written(u32 addr) {
   invalidate_range(addr & ~(Bus::kLineSize - 1), Bus::kLineSize);
   bus_.unmark_code(addr);
 }
 
-size_t Cpu::cache_pages_allocated() const {
-  size_t n = 0;
-  for (const auto& p : pages_) n += p ? 1 : 0;
-  return n;
-}
+size_t Cpu::cache_pages_allocated() const { return cells_.allocated_pages(); }
 
 // ---------------------------------------------------------------------------
 // Exceptions

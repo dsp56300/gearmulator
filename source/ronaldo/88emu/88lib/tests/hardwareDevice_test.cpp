@@ -1,5 +1,6 @@
 #include "88lib/hardwareDevice.h"
 #include "88lib/boards/sc88pro.h"
+#include "88lib/mt32/mt32.h"
 #include "88lib/rom/romloader.h"
 #include "common/test_util.hpp"
 
@@ -20,6 +21,11 @@ int main()
 
 	using namespace emu88Lib;
 	using namespace synthLib;
+	// The MV-30 takes the CM-32P's PCM cards but is not a board of the MT-32 dialect: the part editor and the
+	// processor would run that dialect's state beside its own
+	CHECK(hasPcmCardSlot(DeviceModel::Mv30));
+	CHECK(!mt32::isMt32Model(DeviceModel::Mv30) && !mt32::hasPcmBoard(DeviceModel::Mv30));
+	CHECK(mt32::hasPcmBoard(DeviceModel::Cm32p) && mt32::hasPcmBoard(DeviceModel::Cm64));
 	// SC-88Pro switch-board wiring: common supply, eight cathodes and a separate red cathode.
 	{
 		struct PanelBoard : Sc88Pro

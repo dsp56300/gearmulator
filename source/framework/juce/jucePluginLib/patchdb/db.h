@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <map>
 #include <list>
@@ -185,6 +186,9 @@ namespace pluginLib::patchDB
 
 		// loader
 		JobQueue m_loader;
+		// stopping the loader drops the jobs queued behind its stop, the data is complete only if every job ran
+		std::atomic<uint32_t> m_loaderJobsQueued{0};
+		std::atomic<uint32_t> m_loaderJobsDone{0};
 
 		// ui
 		std::mutex m_uiMutex;

@@ -7,6 +7,7 @@
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
+#include "rmlPopupWindow.h"
 #include "rmlRendererJuce.h"
 
 #include "RmlUi_Renderer_GL2.h"
@@ -575,6 +576,15 @@ namespace juceRmlUi
 
 	void RmlComponent::mouseDown(const juce::MouseEvent& _event)
 	{
+		// A press here while a list of another window is up only closes it, as with a native menu; juce dismisses
+		// the list and hands the press on. A context-menu press goes through, so that it can open the next menu
+		// where it was made. In this window's own list juce holds the press back itself.
+		if (popupWindow::isOpen() && !_event.mods.isPopupMenu())
+		{
+			m_pressSwallowed = true;
+			return;
+		}
+
 		Component::mouseDown(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 
@@ -586,6 +596,12 @@ namespace juceRmlUi
 
 	void RmlComponent::mouseUp(const juce::MouseEvent& _event)
 	{
+		if (m_pressSwallowed)
+		{
+			m_pressSwallowed = false;
+			return;
+		}
+
 		Component::mouseUp(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 		const auto button = static_cast<int>(helper::toRmlMouseButton(_event));
@@ -642,6 +658,9 @@ namespace juceRmlUi
 
 	void RmlComponent::mouseDrag(const juce::MouseEvent& _event)
 	{
+		if (m_pressSwallowed)
+			return;
+
 		Component::mouseDrag(_event);
 		RmlInterfaces::ScopedAccess access(*this);
 
@@ -779,7 +798,20 @@ namespace juceRmlUi
 
 		if (key != Rml::Input::KI_UNKNOWN)
 		{
-			if (consumed(m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key))))
+			auto modifiers = toRmlModifiers(_key);
+
+#if JUCE_MAC
+			// RmlUi's text fields only know Ctrl for select all, copy, cut and paste. On a Mac those are
+			// Cmd, so Cmd is passed as Ctrl too for just these four - not for every key, or Cmd+Left
+			// would jump a word instead of to the start of the line.
+			if (_key.getModifiers().isCommandDown() &&
+				(key == Rml::Input::KI_A || key == Rml::Input::KI_C || key == Rml::Input::KI_X || key == Rml::Input::KI_V))
+			{
+				modifiers |= Rml::Input::KeyModifier::KM_CTRL;
+			}
+#endif
+
+			if (consumed(m_rmlContext->ProcessKeyDown(key, modifiers)))
 				res = true;
 		}
 		if (res)
@@ -840,18 +872,28 @@ namespace juceRmlUi
 			return;
 
 		const bool shiftChanged = _modifiers.isShiftDown() != m_currentModifierKeys.isShiftDown();
+		const bool ctrlChanged = _modifiers.isCtrlDown() != m_currentModifierKeys.isCtrlDown();
 		m_currentModifierKeys = _modifiers;
 
 		RmlInterfaces::ScopedAccess access(*this);
 
-		// Generate a key event to carry the modifier change. JUCE reports Shift only this way, never as
-		// a key press, and can't tell the left key from the right, so a Shift change goes out as the
-		// left Shift key, which a listener can bind like any other.
-		const auto key = shiftChanged ? Rml::Input::KI_LSHIFT : Rml::Input::KI_UNKNOWN;
-		if (shiftChanged ? _modifiers.isShiftDown() : changes > 0)
-			m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_modifiers));
-		else
-			m_rmlContext->ProcessKeyUp(key, toRmlModifiers(_modifiers));
+		// Generate a key event to carry the modifier change. JUCE reports Shift and Ctrl only this way,
+		// never as a key press, and can't tell the left key from the right, so a change goes out as the
+		// left key, which a listener can bind like any other. Ctrl is the Control key on macOS too, not
+		// Command.
+		const auto send = [&](const Rml::Input::KeyIdentifier _key, const bool _down)
+		{
+			if (_down)
+				m_rmlContext->ProcessKeyDown(_key, toRmlModifiers(_modifiers));
+			else
+				m_rmlContext->ProcessKeyUp(_key, toRmlModifiers(_modifiers));
+		};
+		if (shiftChanged)
+			send(Rml::Input::KI_LSHIFT, _modifiers.isShiftDown());
+		if (ctrlChanged)
+			send(Rml::Input::KI_LCONTROL, _modifiers.isCtrlDown());
+		if (!shiftChanged && !ctrlChanged)
+			send(Rml::Input::KI_UNKNOWN, changes > 0);
 		enqueueUpdate();
 	}
 
@@ -1493,6 +1535,7 @@ namespace juceRmlUi
 				ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
 				for (const auto& log : logs)
 					ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
+				LOG(ss.str());
 				genericUI::MessageBox::showOk(genericUI::MessageBox::Icon::Warning, "Error loading RMLUI document", ss.str(), this);
 			}
 		}

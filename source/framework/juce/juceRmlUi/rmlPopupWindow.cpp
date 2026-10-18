@@ -29,6 +29,9 @@ namespace juceRmlUi::popupWindow
 			}
 		};
 
+		// The lists up, or dismissed and not yet answered. Message thread only.
+		int g_openCount = 0;
+
 		// One instance serves every open popup and goes away with the last one - deliberately,
 		// rather than a plain function-local static, which would be destroyed after juce has
 		// already shut down.
@@ -75,8 +78,10 @@ namespace juceRmlUi::popupWindow
 			.withDeletionCheck(_component);
 
 		juce::Component::SafePointer<RmlComponent> component(&_component);
+		++g_openCount;
 		_menu.showMenuAsync(options, [component, lookAndFeel, onResult = std::move(_onResult)](const int _result)
 		{
+			--g_openCount;
 			if (_result <= 0 || !component || !onResult)
 				return;
 			RmlInterfaces::ScopedAccess access(*component);
@@ -84,5 +89,10 @@ namespace juceRmlUi::popupWindow
 			if (component)
 				component->enqueueUpdate();
 		});
+	}
+
+	bool isOpen()
+	{
+		return g_openCount > 0;
 	}
 }

@@ -3,10 +3,11 @@
 #include "baseLib/filesystem.h"
 
 #include <algorithm>
+#include <set>
 
 #include "state.h"
 
-#include "baseLib/binarystream.h"
+#include "baseLib/md5.h"
 
 #include "synthLib/midiToSysex.h"
 
@@ -14,14 +15,10 @@
 
 namespace jeLib
 {
+	// The eight JP-8000 update SMFs hold its whole flash. The JP-8080 ones, some of the same size, only hold a firmware
+	// body that cannot boot, the JP-8080 needs a complete 1 MB flash dump
 	static constexpr size_t g_fileSizeKeyboardMidi = 79372;
-	static constexpr size_t g_fileSizeRackMidi = 79373;	// 14 files total, first 8 have the same size as keyboard
-
 	static constexpr std::initializer_list<const char*> g_keyboardChecksums = {"49F8", "12E3", "A146", "E6EB", "5455", "672D", "C131", "F294"};
-	static constexpr std::initializer_list<const char*> g_rackChecksums = {"EE52", "33A0", "E3CD", "11F1", "C8D9", "A0F8", "E7DB", "61D8", "18FF", "CFFC", "658A", "0DDA", "A88C", "CCAB"};
-
-	static constexpr size_t g_fileCountKeyboardMidi = std::size(g_keyboardChecksums);
-	static constexpr size_t g_fileCountRackMidi = std::size(g_rackChecksums);
 
 	Rom RomLoader::findROM()
 	{
@@ -34,41 +31,36 @@ namespace jeLib
 	std::vector<Rom> RomLoader::findROMs()
 	{
 		std::vector<Rom> results;
+		std::set<baseLib::MD5> found;
 
-		auto append = [&results](Rom&& _r)
+		auto append = [&](Rom&& _r)
 		{
-			if (_r.isValid())
+			if (_r.isValid() && found.insert(baseLib::MD5(_r.getData())).second)
 				results.emplace_back(std::move(_r));
 		};
 
-		auto files = synthLib::RomLoader::findFiles(".mid", g_fileSizeKeyboardMidi, g_fileSizeKeyboardMidi);
+		std::vector<MidiData> keyboardMidi;
+		loadMidiFiles(keyboardMidi, synthLib::RomLoader::findFiles(".mid", g_fileSizeKeyboardMidi, g_fileSizeKeyboardMidi));
+		if (keyboardMidi.size() == std::size(g_keyboardChecksums))
+			append(loadFromMidiFiles(keyboardMidi));
 
-		if (files.size() >= g_fileCountKeyboardMidi)
+		auto appendFiles = [&](const size_t _size)
 		{
-			auto filesRack = synthLib::RomLoader::findFiles(".mid", g_fileSizeRackMidi, g_fileSizeRackMidi);
+			auto files = synthLib::RomLoader::findFilesRecursive(".bin", _size, _size);
+			std::sort(files.begin(), files.end(), [](const auto& _a, const auto& _b) { return _a.path < _b.path; });
+			for (const auto& f : files)
+				append(Rom(f.path));
+		};
 
-			files.insert(files.end(), filesRack.begin(), filesRack.end());
+		appendFiles(Rom::RomSizeKeyboard);
+		appendFiles(Rom::RomSizeRack);
 
-			std::vector<MidiData> fileDatasKeyboard;
-			std::vector<MidiData> fileDatasRack;
-
-			loadFromMidiFiles(fileDatasKeyboard, fileDatasRack, files);
-
-			if (fileDatasKeyboard.size() == g_fileCountKeyboardMidi)
-				append(loadFromMidiFiles(fileDatasKeyboard));
-
-			if (fileDatasRack.size() == g_fileCountRackMidi)
-				append(loadFromMidiFiles(fileDatasRack));
-		}
-
-		files = synthLib::RomLoader::findFiles(".bin", Rom::RomSizeKeyboard, Rom::RomSizeKeyboard);
-		for (const auto& f : files)
-			append(Rom(f));
-
-		files = synthLib::RomLoader::findFiles(".bin", Rom::RomSizeRack, Rom::RomSizeRack);
-		for (const auto& f : files)
-			append(Rom(f));
 		return results;
+	}
+
+	Rom RomLoader::loadROM(const std::string& _filename)
+	{
+		return Rom(_filename);
 	}
 
 	Rom RomLoader::loadFromMidiFiles(const std::vector<MidiData>& _files)
@@ -99,12 +91,9 @@ namespace jeLib
 		fullRom.erase(fullRom.begin() + totalRange.second, fullRom.end());
 		fullRom.erase(fullRom.begin(), fullRom.begin() + totalRange.first);
 
-//		baseLib::filesystem::writeFile("D:\\je8086_rom.bin", fullRom);
-
-		if (fullRom.size() != Rom::RomSizeKeyboard && fullRom.size() != Rom::RomSizeRack)
+		if (fullRom.size() != Rom::RomSizeKeyboard)
 			return {};
 
-		// come up with a useful name
 		using namespace baseLib::filesystem;
 
 		std::vector<std::string> sortedFiles;
@@ -124,16 +113,16 @@ namespace jeLib
 		return Rom(fullRom, name);
 	}
 
-	void RomLoader::loadFromMidiFiles(std::vector<MidiData>& _filesKeyboard, std::vector<MidiData>& _filesRack, const std::vector<std::string>& _files)
+	void RomLoader::loadMidiFiles(std::vector<MidiData>& _keyboard, const std::vector<std::string>& _files)
 	{
+		std::set<std::string> checksums;
+
 		for (const auto& file : _files)
 		{
 			std::vector<uint8_t> data;
 			if (!baseLib::filesystem::readFile(data, file))
 				continue;
 
-			// check if for keyboard or rack via checksum
-			// find string "CHECK SUM = " in the file
 			constexpr char key[] = "CHECK SUM = ";
 			constexpr size_t keySize = std::size(key) - 1;
 			auto it = std::search(data.begin(), data.end(), key, key + keySize);
@@ -144,32 +133,10 @@ namespace jeLib
 			while (it != data.end() && checksum.size() < 4)
 				checksum.push_back(static_cast<char>(*it++));
 
-			if (checksum.size() != 4)
+			if (!checksums.insert(checksum).second)
 				continue;
-
-			bool found = false;
-
-			for (const char* cs : g_keyboardChecksums)
-			{
-				if (checksum == cs)
-				{
-					_filesKeyboard.emplace_back(file, std::move(data));
-					found = true;
-					break;
-				}
-			}
-
-			if (found)
-				continue;
-
-			for (const char* cs : g_rackChecksums)
-			{
-				if (checksum == cs)
-				{
-					_filesRack.emplace_back(file, std::move(data));  // NOLINT(bugprone-use-after-move)
-					break;
-				}
-			}
+			if (std::find(g_keyboardChecksums.begin(), g_keyboardChecksums.end(), checksum) != g_keyboardChecksums.end())
+				_keyboard.emplace_back(file, std::move(data));
 		}
 	}
 
@@ -179,9 +146,6 @@ namespace jeLib
 
 		try
 		{
-			baseLib::BinaryStream f;
-			f.write(_sysex);
-
 			const auto addr4 = State::getAddress4(_sysex);
 
 			if (!rLib::Storage::isValid(addr4))

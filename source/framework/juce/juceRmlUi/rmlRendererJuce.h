@@ -64,6 +64,9 @@ namespace juceRmlUi
 		void EnableScissorRegion(bool _enable) override;
 		void SetScissorRegion(Rml::Rectanglei _region) override;
 
+		void EnableClipMask(bool _enable) override;
+		void RenderToClipMask(Rml::ClipMaskOperation _operation, Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation) override;
+
 		void SetTransform(const Rml::Matrix4f* transform) override;
 
 		static constexpr bool isX64() { return IS_X64; }
@@ -76,6 +79,9 @@ namespace juceRmlUi
 
 		bool m_scissorEnabled = false;
 		Rml::Rectanglei m_scissorRegion;
+
+		bool m_clipMaskEnabled = false;
+		bool m_clipMaskInverse = false;		// the mask keeps what is outside of a shape
 
 		juce::Graphics* m_graphics = nullptr;
 

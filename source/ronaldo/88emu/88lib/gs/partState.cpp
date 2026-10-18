@@ -15,6 +15,7 @@ namespace emu88Lib::gs
 		case DeviceModel::Sc88:
 		case DeviceModel::Sc88VL:
 		case DeviceModel::Sc88Pro:
+		case DeviceModel::Sk88Pro:
 		case DeviceModel::Sc8850:
 		case DeviceModel::Sc8820:
 		case DeviceModel::Xpgs:
@@ -67,6 +68,7 @@ namespace emu88Lib::gs
 			case DeviceModel::Xpgs:
 				return 2;
 			case DeviceModel::Sc88Pro:
+			case DeviceModel::Sk88Pro:
 			case DeviceModel::VeGsPro:
 				return 3;
 			case DeviceModel::Sc8850:
@@ -116,6 +118,7 @@ namespace emu88Lib::gs
 			case DeviceModel::Sc88VL:
 			case DeviceModel::Xpgs:
 			case DeviceModel::Sc88Pro:
+			case DeviceModel::Sk88Pro:
 			case DeviceModel::VeGsPro:
 				return true;
 			default:
@@ -142,6 +145,7 @@ namespace emu88Lib::gs
 			switch(_model)
 			{
 			case DeviceModel::Sc88Pro:
+			case DeviceModel::Sk88Pro:
 			case DeviceModel::VeGsPro:
 			case DeviceModel::Sc8850:
 			case DeviceModel::Sc8820:
@@ -266,6 +270,7 @@ namespace emu88Lib::gs
 		// Most of what a song sends are notes; those pass without taking the lock
 		if(_event.sysex.empty())
 		{
+			m_activity.process(_event.a, _event.port);
 			const uint8_t type = _event.a & 0xf0;
 			if(!(type == 0xb0 && isTrackedController(_event.b)) && type != 0xc0)
 				return;
@@ -327,7 +332,8 @@ namespace emu88Lib::gs
 		}
 		// The SC-88Pro's SysEx tone number obeys Rx Bank Select. On the SC-88 family the bank it brings stays in the
 		// CC#0 latch, whatever comes of it; the SC-8850 leaves the latch alone.
-		const bool proGeneration = m_model == DeviceModel::Sc88Pro || m_model == DeviceModel::VeGsPro;
+		const bool proGeneration = m_model == DeviceModel::Sc88Pro || m_model == DeviceModel::VeGsPro ||
+			m_model == DeviceModel::Sk88Pro;
 		const uint8_t bankMsb = _sysex && proGeneration && !_part.rxBankSelect ? 0 : _bankMsb;
 		if(_sysex && !sc8850)
 			_part.pendingBankMsb = bankMsb;
@@ -606,8 +612,8 @@ namespace emu88Lib::gs
 					// back on the bank its CC#0 latch holds
 					p->useForRhythm = static_cast<uint8_t>(kind);
 					p->program = 0;
-					p->bankMsb = !kind && (m_model == DeviceModel::Sc88Pro
-						|| m_model == DeviceModel::VeGsPro) ? p->pendingBankMsb : 0;
+					p->bankMsb = !kind && (m_model == DeviceModel::Sc88Pro || m_model == DeviceModel::VeGsPro
+						|| m_model == DeviceModel::Sk88Pro) ? p->pendingBankMsb : 0;
 				}
 				break;
 			case PartParam::RxBankSelect: if(hasRxBankSelect(m_model)) p->rxBankSelect = _value; break;
@@ -890,6 +896,29 @@ namespace emu88Lib::gs
 
 	void PartStateTracker::changed()
 	{
+		if(m_activity.enabled())
+			updateListeners();
 		m_revision.fetch_add(1, std::memory_order_acq_rel);
+	}
+
+	void PartStateTracker::setActivityEnabled(const bool _enabled)
+	{
+		std::lock_guard lock(m_mutex);
+		if(_enabled)
+			updateListeners();
+		m_activity.setEnabled(_enabled);
+	}
+
+	void PartStateTracker::updateListeners()
+	{
+		// A part hears the channel it is set to on its own group's port
+		PartActivity::Listeners listeners{};
+		for(size_t i = 0; i < m_setup.parts.size() && i < PartActivity::g_maxPorts * g_partsPerGroup; ++i)
+		{
+			const auto channel = m_setup.parts[i].rxChannel;
+			if(channel < 16)
+				listeners[i / g_partsPerGroup * 16 + channel] |= uint64_t{1} << i;
+		}
+		m_activity.setListeners(listeners);
 	}
 }

@@ -355,6 +355,42 @@ namespace
 			baseLib::filesystem::remove(g_tempDir + "shared" + std::to_string(i) + ".bin");
 	}
 
+	// The SK-88Pro needs its program EPROM and an SC-88Pro control ROM for the parameter data,
+	// and the image it boots puts the EPROM at 000000 and again at 100000, around that data.
+	void testSk88ProSet()
+	{
+		RomInventory inventory;
+		// The VE-GS Pro's control ROM carries no SC-88Pro parameter data the SK-88Pro can use.
+		CHECK(place(inventory, RomDevice::VeGsPro, RomSlot::Control, 0, pattern(0x100000, 2), "c2.bin"));
+		CHECK(place(inventory, RomDevice::Sk88Pro, RomSlot::Wave, 0, pattern(0x800000, 3), "w.bin"));
+		CHECK(place(inventory, RomDevice::Sk88Pro, RomSlot::Wave, 1, pattern(0x800000, 5), "wa.bin"));
+		CHECK(place(inventory, RomDevice::Sk88Pro, RomSlot::Wave, 2, pattern(0x400000, 6), "wb.bin"));
+		const auto program = pattern(0x80000, 0x31);
+		CHECK(place(inventory, RomDevice::Sk88Pro, RomSlot::Program, 0, program, "sk.bin"));
+		CHECK(!inventory.isComplete(RomDevice::Sk88Pro));
+
+		const auto control = pattern(0x100000, 0x47);
+		CHECK(place(inventory, RomDevice::Sc88Pro, RomSlot::Control, 0, control, "c.bin"));
+		CHECK(inventory.isComplete(RomDevice::Sk88Pro));
+		CHECK(inventory.missingFiles(RomDevice::Sk88Pro).empty());
+
+		std::vector<uint8_t> readProgram, readControl;
+		CHECK(inventory.read(readProgram, RomDevice::Sk88Pro, RomSlot::Program));
+		CHECK(inventory.read(readControl, RomDevice::Sk88Pro, RomSlot::Control));
+		CHECK(readProgram == program);
+		CHECK(readControl == control);
+
+		const auto image = buildSk88ProImage(readProgram, readControl);
+		CHECK_EQ(image.size(), Sc88ProRomSet::Sk88ProFirmwareSize);
+		if (image.size() != Sc88ProRomSet::Sk88ProFirmwareSize)
+			return;
+		CHECK(std::equal(program.begin(), program.begin() + 0x20000, image.begin()));
+		CHECK(std::equal(control.begin() + 0x20000, control.end(), image.begin() + 0x20000));
+		CHECK(std::equal(program.begin(), program.end(), image.begin() + 0x100000));
+		CHECK(std::all_of(image.begin() + 0x180000, image.end(), [](const uint8_t _b) { return _b == 0xff; }));
+		CHECK(buildSk88ProImage(control, readProgram).empty());
+	}
+
 	// A board is complete with either form of a composite slot, and the chips never count as a
 	// requirement of their own.
 	void testCompletenessIgnoresHalves()
@@ -458,12 +494,13 @@ int main()
 	testConcatenatedComposite();
 	testSc88ProChipComposite();
 	testSharedProWaves();
+	testSk88ProSet();
 	testCompletenessIgnoresHalves();
 	testRevisionPairing();
 
 	for (const auto* name : {"mt32_a.bin", "mt32_b.bin", "mt32_control.bin", "cm32l_low.bin", "cm32l_high.bin",
 	                         "cm32l_wave.bin", "c.bin", "w.bin", "r.bin", "ca.bin", "cb.bin", "wa.bin", "wb.bin",
-	                         "r2.bin", "c2.bin", "cs0.bin", "cs1.bin", "cs4.bin"})
+	                         "r2.bin", "c2.bin", "cs0.bin", "cs1.bin", "cs4.bin", "sk.bin"})
 		baseLib::filesystem::remove(g_tempDir + name);
 	// Best effort: leaving an empty directory behind is harmless where this cannot remove one.
 	if (!g_tempDir.empty())

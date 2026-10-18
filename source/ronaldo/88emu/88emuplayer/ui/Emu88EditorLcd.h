@@ -118,6 +118,11 @@ namespace emu88Player
 		// is how the two read side by side on the CM-64 bezel that carries both.
 		static constexpr GraphicStyle kCm32lStyle{0xff51be03u, 0xff00b578u, 0xff000000u, 8, 6, 6, 9, 1000, 92, 20, 10,
 		                                          218, 20};
+		// The MV-30's 240 x 64 module in its skin's LCD area, 291 x 78 dp with the CM windows' inner shadows: a grey-green
+		// glass with dark dots. Unlit dots are the glass itself, so the dot area shows no edge against the margin. Solid
+		// dots on a 5 px pitch fill 282 x 75 dp of the window, inset by 4.5 dp and 1.4 dp.
+		static constexpr GraphicStyle kMv30Style{0xff9fb486u, 0xff9fb486u, 0xff22292bu, 5, 5, 0, 0, 1238, 332, 19, 6,
+		                                         291, 78};
 
 		// What each panel is drawn as: its dot grid, and the style that paints it. A zero width
 		// is the SC-88 family's character panel, which sc88panel renders instead.
@@ -144,6 +149,7 @@ namespace emu88Player
 			// The LA boards' SED1200, in the CM-32L's window - the MT-32s' front-panel display too.
 			if(emu88Lib::isLaModel(_model)) return kCm32lPanel;
 			if(_model == DeviceModel::Sc8850) return {kSc8850Style, 160, 64};
+			if(_model == DeviceModel::Mv30) return {kMv30Style, 240, 64};
 			return kNoGraphic;
 		}
 

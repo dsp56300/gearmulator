@@ -133,6 +133,7 @@ namespace emu88Lib::gs
 		case DeviceModel::Sc88:
 		case DeviceModel::Sc88VL:
 		case DeviceModel::Sc88Pro:
+		case DeviceModel::Sk88Pro:
 		case DeviceModel::Xpgs:
 		case DeviceModel::VeGsPro:
 			{

@@ -8,6 +8,7 @@ set(SOURCES
 	boardThread.h
 	storage.cpp storage.h
 	romDescramble.h
+	rolandSysex.h
 	jit_x64_types.h
 	jit_x64_regpool.h
 	jit_x64_regpool.cpp

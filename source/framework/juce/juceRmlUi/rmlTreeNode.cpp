@@ -1,5 +1,7 @@
 #include "rmlTreeNode.h"
 
+#include <algorithm>
+
 #include "rmlElemTree.h"
 #include "rmlTree.h"
 
@@ -255,12 +257,44 @@ namespace juceRmlUi
 		return true;
 	}
 
-	bool TreeNode::handleNavigationKey(const Rml::Input::KeyIdentifier _key)
+	bool TreeNode::handleNavigationKey(const Rml::Input::KeyIdentifier _key, const uint32_t _nodesPerPage)
 	{
 		using namespace Rml::Input;
 
 		switch (_key)
 		{
+		case KI_HOME:
+			{
+				const auto first = m_tree.getRoot()->getChild(0);
+				if (first)
+					return first->setSelected(true);
+			}
+			break;
+		case KI_END:
+			{
+				// the last visible node: the last child of each opened node, down from the root
+				auto last = m_tree.getRoot();
+				while (!last->empty() && (last->isRoot() || last->isOpened()))
+					last = last->getChild(last->size() - 1);
+				if (!last->isRoot())
+					return last->setSelected(true);
+			}
+			break;
+		case KI_PRIOR:
+		case KI_NEXT:
+			{
+				auto node = shared_from_this();
+				for (uint32_t i = 0; i < std::max<uint32_t>(_nodesPerPage, 1); ++i)
+				{
+					auto n = _key == KI_PRIOR ? node->getPreviousNode(true) : node->getNextNode(true);
+					if (!n || n->isRoot())
+						break;
+					node = n;
+				}
+				if (node.get() != this)
+					return node->setSelected(true);
+			}
+			break;
 		case KI_RIGHT:
 			{
 				if (!empty() && isClosed())

@@ -48,12 +48,14 @@ namespace pluginLib::patchDB
 	{
 		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor, a patch manager calls it in shutdown()");
 
-		// we can only save the cache if the db is not doing anything in the background
-		const bool loading = !m_loader.empty();
-
 		stopLoaderThread();
 
-		if(!loading && m_cacheDirty && g_cacheEnabled)
+		// Only data that is complete goes into the cache. Stopping the loader drops the jobs queued behind its stop, such
+		// as the data sources a load from the json queued: a cache saved then lacks them, and the next start would take
+		// it as complete (BUG-10481). The loader is stopped already, so it is empty either way
+		const bool complete = m_loaderJobsDone == m_loaderJobsQueued;
+
+		if(complete && m_cacheDirty && g_cacheEnabled)
 			saveCache();
 	}
 
@@ -969,9 +971,12 @@ namespace pluginLib::patchDB
 
 	void DB::runOnLoaderThread(std::function<void()>&& _func)
 	{
+		++m_loaderJobsQueued;
+
 		m_loader.add([this, f = std::move(_func)]
 		{
 			f();
+			++m_loaderJobsDone;
 		});
 	}
 

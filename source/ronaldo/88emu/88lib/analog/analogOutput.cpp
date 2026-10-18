@@ -58,7 +58,7 @@ namespace emu88Lib
         }};
 
         // Boards whose output circuit has been modelled. Auto leaves every other board digital.
-        constexpr std::array<std::pair<DeviceModel, AnalogModel>, 20> g_autoModels{{
+        constexpr std::array<std::pair<DeviceModel, AnalogModel>, 21> g_autoModels{{
             {DeviceModel::Cm32p, AnalogModel::Cm32p},
             {DeviceModel::Cm32l, AnalogModel::Cm32l},
             // The new-type MT-32 board is the CM-32L's design in the MT-32's case: the same
@@ -81,6 +81,7 @@ namespace emu88Lib
             {DeviceModel::Sc8850, AnalogModel::Sc8850},
             {DeviceModel::Sc8820, AnalogModel::Sc8820},
             {DeviceModel::VeGsPro, AnalogModel::Sc88Pro}, // same output board as the SC-88Pro
+            {DeviceModel::Sk88Pro, AnalogModel::Sc88Pro}, // assumed: the SC-88Pro engine, output not read
             // The mkII generation: only the SC-55mkII board itself has been read.
             {DeviceModel::Sc55Mk2, AnalogModel::Sc55Mk2},
             {DeviceModel::Sc55St, AnalogModel::Sc55Mk2},
@@ -198,6 +199,7 @@ namespace emu88Lib
         case DeviceModel::Cm32ln: // PCM55
         case DeviceModel::Cm32p: // PCM56P
         case DeviceModel::Cm64: // Both halves use 16-bit DACs, before analog mixing/VCA.
+        case DeviceModel::Mv30: // The RCC's 16-bit words into one multiplexed DAC
         case DeviceModel::Sc55Mk1: // uPD6376, and the boards that share it
         case DeviceModel::Cm300:
         case DeviceModel::Scc1a:

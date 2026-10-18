@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 #include <limits>
@@ -87,7 +88,8 @@ namespace juceRmlUi
 		bool isSelected() const { return m_isSelected; }
 		bool setSelected(bool _selected, bool _allowMultiselect = false);
 
-		bool handleNavigationKey(Rml::Input::KeyIdentifier _key);
+		// _nodesPerPage: how far page up and page down move the selection
+		bool handleNavigationKey(Rml::Input::KeyIdentifier _key, uint32_t _nodesPerPage);
 
 		Tree& getTree() const { return m_tree; }
 

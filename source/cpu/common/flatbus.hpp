@@ -76,6 +76,24 @@ class FlatBus {
   void map_ram(u32 base, u32 size, u8 cls = 0) { map(base, size, Line::Ram, nullptr, cls); }
   void map_rom(u32 base, u32 size, u8 cls = 0) { map(base, size, Line::Rom, nullptr, cls); }
   void map_device(u32 base, u32 size, Device* dev, u8 cls = 0) { map(base, size, Line::Dev, dev, cls); }
+  // ROM whose reads come straight from memory but whose writes reach `dev`
+  // (a flash chip's command interface, a write-side hook on a RAM image).
+  void map_rom_device(u32 base, u32 size, Device* dev, u8 cls = 0) { map(base, size, Line::RomDev, dev, cls); }
+  // Snapshot / restore of one line's mapping, for a device that overlays a
+  // range temporarily (a relocatable register block) and must hand the
+  // underlying mapping back when it moves.
+  struct LineState {
+    typename Line::Kind kind = Line::Unmapped;
+    Device* dev = nullptr;
+    u8 attr = 0;
+  };
+  LineState save_line(u32 a) const { return {line(a).kind, line(a).dev, attr_[a >> kLineShift]}; }
+  void restore_line(u32 a, const LineState& s) {
+    line(a).kind = s.kind;
+    line(a).dev = s.dev;
+    attr_[a >> kLineShift] = s.attr;
+  }
+
   // Return a range to the unmapped state (reads open bus, writes dropped).
   void unmap(u32 base, u32 size) { map(base, size, Line::Unmapped, nullptr, kClsUnmapped); }
   // Attributes of space nothing is mapped at: `dev` answers reads and writes
@@ -107,7 +125,7 @@ class FlatBus {
     AccessClass& k = classes_[idx & kClassMask];
     if (k == c) return;
     k = c;
-    if (sink_) sink_->code_timing_changed();
+    if (sink_) sink_->code_class_timing_changed(idx & kClassMask);
   }
   const AccessClass& access_class(unsigned idx) const { return classes_[idx & kClassMask]; }
   const AccessClass& access_class_of(u8 attr) const { return classes_[attr & kClassMask]; }

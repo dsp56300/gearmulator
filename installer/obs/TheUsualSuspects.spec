@@ -1,5 +1,5 @@
 Name:           TheUsualSuspects
-Version:        2.2.25
+Version:        2.2.27
 Release:        0
 Summary:        Emulations of classic virtual analog synthesizers
 License:        GPL-3.0-or-later
@@ -108,7 +108,8 @@ included.
     -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON \
     -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON \
     -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON \
-    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON
+    -Dgearmulator_BUILD_JUCEPLUGIN_Standalone=ON \
+    -Dgearmulator_BUILD_INSTALLER=OFF
 
 %cmake_build
 

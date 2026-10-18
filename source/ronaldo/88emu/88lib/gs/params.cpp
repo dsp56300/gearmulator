@@ -16,6 +16,7 @@ namespace emu88Lib::gs
 		case DeviceModel::Xpgs:
 			return Generation::Sc88;
 		case DeviceModel::Sc88Pro:
+		case DeviceModel::Sk88Pro:
 		case DeviceModel::VeGsPro:
 			return Generation::Sc88Pro;
 		case DeviceModel::Sc8850:

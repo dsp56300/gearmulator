@@ -12,14 +12,22 @@ set(SOURCES
 	deviceModel.cpp deviceModel.h
 	gs/efx.cpp gs/efx.h gs/efxData.inc
 	gs/gs.cpp gs/gs.h
+	gs/midiClip.cpp gs/midiClip.h
 	gs/params.cpp gs/params.h
 	gs/partState.cpp gs/partState.h
 	gs/toneCatalog.cpp gs/toneCatalog.h
 	gs/toneCatalogSc55.cpp gs/toneCatalogSc88.cpp gs/toneCatalogSc8850.cpp
+	mt32/memory.cpp mt32/memory.h
+	mt32/mt32.cpp mt32/mt32.h
+	mt32/params.cpp mt32/params.h
+	mt32/presets.cpp mt32/presets.h
+	mt32/stateTracker.cpp mt32/stateTracker.h
+	partActivity.cpp partActivity.h
 	boards/cm32p.cpp boards/cm32p.h
 	boards/cm64.cpp boards/cm64.h
 	boards/laBoard.cpp boards/laBoard.h
 	boards/miig5.cpp boards/miig5.h
+	boards/mv30.cpp boards/mv30.h boards/mv30types.h
 	boards/nu10b.cpp boards/nu10b.h
 	hardwareDevice.cpp hardwareDevice.h
 	rom/rom.cpp rom/rom.h
@@ -43,7 +51,7 @@ source_group("source" FILES ${SOURCES})
 set_property(TARGET 88lib PROPERTY FOLDER "Ronaldo/88emu")
 
 # lspLib is header-only and compiled into the boards; it brings the JIT library of the host.
-target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib lspLib gpLib lpLib rccLib la32Lib mt32ReverbLib)
+target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib lspLib gpLib lpLib rccLib tvfLib hg62e33b08fLib la32Lib mt32ReverbLib)
 
 target_compile_definitions(88lib PRIVATE EMU88_VERSION_STRING="${CMAKE_PROJECT_VERSION}")
 
@@ -156,6 +164,32 @@ if(BUILD_TESTING)
 	set_property(TARGET cm32p_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME cm32p COMMAND cm32p_test)
 	set_tests_properties(cm32p PROPERTIES TIMEOUT 20)
+
+	add_executable(mv30_test tests/mv30_test.cpp)
+	target_link_libraries(mv30_test PRIVATE 88lib)
+	set_property(TARGET mv30_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME mv30 COMMAND mv30_test)
+	set_tests_properties(mv30 PROPERTIES TIMEOUT 60)
+
+	add_executable(mt32Memory_test tests/mt32Memory_test.cpp)
+	target_link_libraries(mt32Memory_test PRIVATE 88lib)
+	set_property(TARGET mt32Memory_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME mt32Memory COMMAND mt32Memory_test)
+	set_tests_properties(mt32Memory PROPERTIES TIMEOUT 20)
+
+	# Needs the MT-32, CM-32L and CM-32P ROMs: a folder as argument or in EMU88_MT32_TEST_ROM_DIR, else skipped
+	add_executable(mt32Firmware_test tests/mt32Firmware_test.cpp)
+	target_link_libraries(mt32Firmware_test PRIVATE 88lib)
+	set_property(TARGET mt32Firmware_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME mt32Firmware COMMAND mt32Firmware_test)
+	set_tests_properties(mt32Firmware PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
+
+	# With the LA boards' ROMs, as argument or in EMU88_MT32_TEST_ROM_DIR, also the preset timbres against the boards
+	add_executable(mt32Presets_test tests/mt32Presets_test.cpp)
+	target_link_libraries(mt32Presets_test PRIVATE 88lib)
+	set_property(TARGET mt32Presets_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME mt32Presets COMMAND mt32Presets_test)
+	set_tests_properties(mt32Presets PROPERTIES TIMEOUT 20)
 
 	add_executable(sc8850_submcu_test tests/sc8850_submcu_test.cpp)
 	target_link_libraries(sc8850_submcu_test PRIVATE 88lib)

@@ -10,6 +10,9 @@ set(HARDWARE_ASSETS
 	assets/emu88PartEditor.rml
 	assets/emu88PartEditor.rcss
 	assets/part_editor_mixer.svg
+	assets/part_editor_menu.svg
+	assets/part_editor_grip.svg
+	assets/about.png
 	${HARDWARE_SKIN_DIR}/sc88_panel.png
 	${HARDWARE_SKIN_DIR}/sc88vl_panel.png
 	${HARDWARE_SKIN_DIR}/sc88pro_panel.png
@@ -23,6 +26,8 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/mt32_panel.png
 	${HARDWARE_SKIN_DIR}/sc88exp_panel.png
 	${HARDWARE_SKIN_DIR}/sc55pc_panel.png
+	${HARDWARE_SKIN_DIR}/mv30_panel.png
+	${HARDWARE_SKIN_DIR}/mv30_assets.png
 	${HARDWARE_SKIN_DIR}/sc8850_assets.png
 	${HARDWARE_SKIN_DIR}/button_all.svg
 	${HARDWARE_SKIN_DIR}/button_left.svg
