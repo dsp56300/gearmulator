@@ -26,9 +26,10 @@ namespace bridgeLib
 	// devices itself; check server/ when that changes), or for making a pure virtual function non-pure.
 	// At most one bump per release: the first change after a release bumps, later ones before the next release ride on it.
 	//
-	// 1'00'05 since 2.2.26: synthLib::Device::getStateWithPendingMidi; hasArpeggiators, processArpeggiators and
-	//          onHostTransport of synthLib::Device, the host's transport in SMidiEvent and in Command::Midi
-	static constexpr uint32_t g_protocolVersion = 1'00'05;
+	// 1'00'05 since 2.2.26: synthLib::Device::getStateWithPendingMidi
+	// 1'00'06 since 2.2.28: hasArpeggiators, processArpeggiators and onHostTransport of synthLib::Device, the host's
+	//          transport in SMidiEvent and in Command::Midi
+	static constexpr uint32_t g_protocolVersion = 1'00'06;
 
 	using SessionId = uint64_t;
 
