@@ -36,6 +36,11 @@ JE8086:
         set a single channel to play the Upper and Lower parts on their own MIDI
         channels.
 
+NodalRed2x:
+
+- [Fix] BUG-10509 With enough voices playing, the voices of the second DSP cut in
+        and out on the left channel.
+
 Plugin Manager:
 
 - [Fix] With the team login, installing a test console from a donators folder

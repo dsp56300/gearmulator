@@ -202,8 +202,11 @@ namespace n2x
 		{
 			++_frameIndex;
 
-			// DSP B puts the slots 2, 1, 0 and 3 of DSP A on its outputs 0 to 3
-			m_mixer.addFrame(m_mixerLaneA, {txWord(_frame, 2, 0), txWord(_frame, 1, 0), txWord(_frame, 0, 0), txWord(_frame, 3, 0)});
+			// DSP B puts the slots 2, 1, 0 and 3 of the frame it receives on its outputs 0 to 3, and that frame is DSP A's a
+			// slot later: slots 1, 0, 3 and 2 of A. A arms the DMA channel for its four words right after it saw its frame
+			// sync and starts with the word for slot 1. B takes that word as the one of its slot 2 (BUG-10509: while the
+			// ESAI clock came late, A's first word missed slot 1 by chance, and when it was on time the outputs moved)
+			m_mixer.addFrame(m_mixerLaneA, {txWord(_frame, 1, 0), txWord(_frame, 0, 0), txWord(_frame, 3, 0), txWord(_frame, 2, 0)});
 		});
 
 		m_dspB.getPeriph().getEsai().setReadRxCallback([](uint64_t& _frameIndex, dsp56k::Audio::RxFrame& _frame)
