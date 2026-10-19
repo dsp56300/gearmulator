@@ -28,6 +28,8 @@ set_property(TARGET bridgeLib PROPERTY FOLDER "Bridge")
 if(BUILD_TESTING)
 	add_executable(bridgeLib_test bridgeLib_test.cpp)
 	target_link_libraries(bridgeLib_test PRIVATE bridgeLib)
+	# This directory is pulled in with EXCLUDE_FROM_ALL, which would keep the test from being built
+	set_property(TARGET bridgeLib_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 	set_property(TARGET bridgeLib_test PROPERTY FOLDER "Tests")
 	add_test(NAME bridgeLib COMMAND bridgeLib_test)
 endif()
