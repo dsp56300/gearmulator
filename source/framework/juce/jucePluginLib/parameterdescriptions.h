@@ -33,7 +33,11 @@ namespace pluginLib
 		using FormatterFactory = std::function<std::shared_ptr<const ValueFormatter>(const juce::var& _toText, int _min,
 			int _max)>;
 
-		explicit ParameterDescriptions(const std::string& _jsonString, const FormatterFactory& _formatterFactory = {});
+		// _variant names an entry of the json's "variants": what one model of a product has that another has not. Its
+		// "parameterdescriptions" give the "name" of a description and the properties that change, its "valuelists"
+		// replace the lists of the same name, before the descriptions are read
+		explicit ParameterDescriptions(const std::string& _jsonString, const FormatterFactory& _formatterFactory = {},
+			const std::string& _variant = {});
 
 		const std::vector<Description>& getDescriptions() const
 		{
@@ -58,7 +62,8 @@ namespace pluginLib
 		const auto& getControllerMap() const { return m_controllerMap; }
 
 	private:
-		std::string loadJson(const std::string& _jsonString, const FormatterFactory& _formatterFactory);
+		std::string loadJson(const std::string& _jsonString, const FormatterFactory& _formatterFactory, const std::string& _variant);
+		static std::string applyVariant(const juce::var& _json, const std::string& _variant);
 
 		std::string parseValueList(const std::string& _key, const juce::var& _values);
 

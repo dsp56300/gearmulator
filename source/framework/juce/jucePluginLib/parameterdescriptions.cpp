@@ -27,9 +27,9 @@ namespace pluginLib
 	}
 
 	ParameterDescriptions::ParameterDescriptions(const std::string& _jsonString,
-		const FormatterFactory& _formatterFactory)
+		const FormatterFactory& _formatterFactory, const std::string& _variant)
 	{
-		m_errors = loadJson(_jsonString, _formatterFactory);
+		m_errors = loadJson(_jsonString, _formatterFactory, _variant);
 	}
 
 	const MidiPacket* ParameterDescriptions::getMidiPacket(const std::string& _name) const
@@ -81,8 +81,60 @@ namespace pluginLib
 		return &it->second;
 	}
 
+	std::string ParameterDescriptions::applyVariant(const juce::var& _json, const std::string& _variant)
+	{
+		const auto& variant = _json["variants"][juce::Identifier(juce::String(_variant))];
+
+		if (!variant.isObject())
+			return "variant " + _variant + " is not defined";
+
+		if (const auto* lists = variant["valuelists"].getDynamicObject())
+		{
+			auto* target = _json["valuelists"].getDynamicObject();
+
+			if (!target)
+				return "value lists are not defined";
+
+			for (const auto& list : lists->getProperties())
+				target->setProperty(list.name, list.value);
+		}
+
+		if (const auto* changes = variant["parameterdescriptions"].getArray())
+		{
+			const auto* descs = _json["parameterdescriptions"].getArray();
+
+			if (!descs)
+				return "Parameter descriptions are empty";
+
+			for (const auto& change : *changes)
+			{
+				const auto* properties = change.getDynamicObject();
+				const auto name = change["name"].toString();
+				bool found = false;
+
+				for (const auto& desc : *descs)
+				{
+					auto* d = desc.getDynamicObject();
+
+					if (!d || !properties || desc["name"].toString() != name)
+						continue;
+
+					for (const auto& property : properties->getProperties())
+						d->setProperty(property.name, property.value);
+
+					found = true;
+				}
+
+				if (!found)
+					return "variant " + _variant + " changes parameter " + name.toStdString() + ", which does not exist";
+			}
+		}
+
+		return {};
+	}
+
 	std::string ParameterDescriptions::loadJson(const std::string& _jsonString,
-		const FormatterFactory& _formatterFactory)
+		const FormatterFactory& _formatterFactory, const std::string& _variant)
 	{
 		// juce' JSON parser doesn't like JSON5-style comments
 		const auto jsonString = removeComments(_jsonString);
@@ -93,6 +145,14 @@ namespace pluginLib
 
 		if (error.failed())
 			return std::string("Failed to parse JSON: ") + std::string(error.getErrorMessage().toUTF8());
+
+		if (!_variant.empty())
+		{
+			const auto variantError = applyVariant(json, _variant);
+
+			if (!variantError.empty())
+				return variantError;
+		}
 
 		const auto paramDescDefaults = json["parameterdescriptiondefaults"].getDynamicObject();
 		const auto defaultProperties = paramDescDefaults ? paramDescDefaults->getProperties() : juce::NamedValueSet();

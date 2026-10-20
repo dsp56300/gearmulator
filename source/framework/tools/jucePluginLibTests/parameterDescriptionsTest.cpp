@@ -129,6 +129,26 @@ void testParameterDescriptions()
 	cc(0, synthLib::MC_NRPNLSB, 0x7f);
 	TEST_ASSERT(!cc(0, synthLib::MC_DATAENTRYMSB, 1));
 
+	// a variant changes single properties of a description and replaces value lists: what one model has more
+	constexpr auto variantJson = R"({
+		"parameterdescriptiondefaults":
+		{
+			"isPublic":true, "isBipolar":false, "isBool":false, "isDiscrete":true, "class":"", "step":0
+		},
+		"parameterdescriptions": [{"page":0, "index":0, "name":"Type", "min":0, "max":1, "toText":"types"}],
+		"valuelists": {"types": ["A", "B"]},
+		"variants": {"plus": {"parameterdescriptions": [{"name":"Type", "max":2}], "valuelists": {"types": ["A", "B", "C"]}}}
+	})";
+	const pluginLib::ParameterDescriptions base(variantJson);
+	TEST_ASSERT(base.isValid());
+	TEST_ASSERT(find(base, "Type").range.getEnd() == 1);
+	TEST_ASSERT(find(base, "Type").valueList.texts.size() == 2);
+
+	const pluginLib::ParameterDescriptions plus(variantJson, {}, "plus");
+	TEST_ASSERT(plus.isValid());
+	TEST_ASSERT(find(plus, "Type").range.getEnd() == 2);
+	TEST_ASSERT(find(plus, "Type").valueList.valueToText(2) == "C");
+
 	// a formatter the plugin does not know is an error, which asserts in a debug build, not tested here
 
 	// an inline toText list is an error, not a crash. Errors assert in a debug build, so only a release build checks it
@@ -138,5 +158,8 @@ void testParameterDescriptions()
 		"valuelists": {}
 	})");
 	TEST_ASSERT(inlineList.getErrors().find("an inline list is not supported") != std::string::npos);
+
+	// so is a variant that is not there
+	TEST_ASSERT(pluginLib::ParameterDescriptions(variantJson, {}, "none").getErrors() == "variant none is not defined");
 #endif
 }

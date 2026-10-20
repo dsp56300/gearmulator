@@ -30,9 +30,10 @@ namespace pluginLib
 
 		baseLib::Event<uint8_t> onCurrentPartChanged;
 
-		// _formatterFactory makes the texts of the parameters whose description has "toText": {"formatter": ...}
+		// _formatterFactory makes the texts of the parameters whose description has "toText": {"formatter": ...},
+		// _parameterDescVariant picks one of the json's "variants", see ParameterDescriptions
 		explicit Controller(Processor& _processor, const std::string& _parameterDescJsonFilename,
-			const ParameterDescriptions::FormatterFactory& _formatterFactory = {});
+			const ParameterDescriptions::FormatterFactory& _formatterFactory = {}, const std::string& _parameterDescVariant = {});
 		~Controller() override;
 
 		virtual void sendParameterChange(const Parameter& _parameter, ParamValue _value, pluginLib::Parameter::Origin _origin) = 0;

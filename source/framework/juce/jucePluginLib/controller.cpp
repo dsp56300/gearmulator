@@ -20,9 +20,9 @@ namespace pluginLib
 	}
 
 	Controller::Controller(Processor& _processor, const std::string& _parameterDescJsonFilename,
-		const ParameterDescriptions::FormatterFactory& _formatterFactory)
+		const ParameterDescriptions::FormatterFactory& _formatterFactory, const std::string& _parameterDescVariant)
 		: m_processor(_processor)
-		, m_descriptions(loadParameterDescriptions(_parameterDescJsonFilename), _formatterFactory)
+		, m_descriptions(loadParameterDescriptions(_parameterDescJsonFilename), _formatterFactory, _parameterDescVariant)
 		, m_locking(*this)
 		, m_parameterLinks(*this)
 	{
