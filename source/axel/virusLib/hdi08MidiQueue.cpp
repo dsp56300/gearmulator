@@ -41,7 +41,7 @@ namespace virusLib
 		{
 			const auto& ev = m_pendingMidiEvents.front();
 
-			sendMidiToDSP(ev.a, ev.b, ev.c);
+			sendMidiToDSP(ev.a, ev.b, ev.c, ev.lead);
 
 			m_pendingMidiEvents.pop_front();
 		}	
@@ -57,7 +57,7 @@ namespace virusLib
 		m_pendingMidiEvents.refill();
 	}
 
-	void Hdi08MidiQueue::sendMidiToDSP(uint8_t _a, const uint8_t _b, const uint8_t _c)
+	void Hdi08MidiQueue::sendMidiToDSP(uint8_t _a, const uint8_t _b, const uint8_t _c, const uint16_t _lead)
 	{
 		m_lastMidiSample = m_numSamplesWritten;
 
@@ -77,14 +77,19 @@ namespace virusLib
 		// the current one at the latest, that block starts at m_dspTime + m_dspTimeStep, so this time is never late
 		// and every event plays with the same latency (EMU-238).
 		// The OS keeps a timestamp for the events behind it, so the events of one frame share one: the OS reads its
-		// input once per block from a ring of 128 words, which holds a burst of 41 events then, 42 without timestamps
-		if(m_dspTimeStep && m_lastTimestampFrame != m_numSamplesWritten)
+		// input once per block from a ring of 128 words, which holds a burst of 41 events then, 42 without timestamps.
+		// An event with a lead, of the C++ arpeggiator, gets a time that much later, and one of its own
+		if(m_dspTimeStep)
 		{
-			const auto t = (m_dspTime + m_dspTimeStep + m_numSamplesWritten - m_dspTimeFrame) & 0x3fff;
-			sendMIDItoDSP(0xf5);
-			sendMIDItoDSP(t & 0x7f);
-			sendMIDItoDSP(t >> 7);
-			m_lastTimestampFrame = m_numSamplesWritten;
+			const auto t = (m_dspTime + m_dspTimeStep + m_numSamplesWritten - m_dspTimeFrame + _lead) & 0x3fff;
+			if(m_lastTimestampFrame != m_numSamplesWritten || t != m_lastTimestamp)
+			{
+				sendMIDItoDSP(0xf5);
+				sendMIDItoDSP(t & 0x7f);
+				sendMIDItoDSP(t >> 7);
+				m_lastTimestampFrame = m_numSamplesWritten;
+				m_lastTimestamp = t;
+			}
 		}
 
 		const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(_a);
@@ -110,7 +115,7 @@ namespace virusLib
 		// the firmware ignores otherwise. A host that sends MIDI clock keeps the watchdog fed by
 		// itself, one that does not loses every held note a second after the last MIDI byte.
 		if(m_needsMidiHeartbeat && m_numSamplesWritten - m_lastMidiSample >= g_midiHeartbeatSamples)
-			sendMidiToDSP(synthLib::M_ACTIVESENSING, 0, 0);
+			sendMidiToDSP(synthLib::M_ACTIVESENSING, 0, 0, 0);
 	}
 
 	bool Hdi08MidiQueue::enableTimestamps()

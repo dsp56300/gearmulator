@@ -295,6 +295,9 @@ namespace synthLib
 		// Physical / virtual MIDI port the event belongs to (devices with several
 		// MIDI inputs or outputs, e.g. the SC-88 family's IN A/B and USB cables).
 		uint8_t port = 0;
+		// Samples after offset at which the event is to sound. It reaches the device that much early, for a device that
+		// plays what it gets at its time, see ArpSettings::lead. 0 for everything else
+		uint16_t lead = 0;
 		HostTransport transport;	// MidiEventType::HostTransport only
 		SMidiEvent(const MidiEventSource _source = MidiEventSource::Unknown, const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const uint32_t _offset = 0)
 			: a(_a), b(_b), c(_c), offset(_offset), source(_source)
@@ -304,7 +307,7 @@ namespace synthLib
 		SMidiEvent(const SMidiEvent& _e)
 			: a(_e.a), b(_e.b), c(_e.c), sysex(_e.sysex), offset(_e.offset), source(_e.source), type(_e.type)
 			, transportGeneration(_e.transportGeneration), cancelOnTransportChange(_e.cancelOnTransportChange), port(_e.port)
-			, transport(_e.transport)
+			, lead(_e.lead), transport(_e.transport)
 		{
 			assert(empty() || source != MidiEventSource::Unknown);
 		}
@@ -312,7 +315,7 @@ namespace synthLib
 		SMidiEvent(SMidiEvent&& _e) noexcept
 			: a(_e.a), b(_e.b), c(_e.c), sysex(std::move(_e.sysex)), offset(_e.offset), source(_e.source), type(_e.type)
 			, transportGeneration(_e.transportGeneration), cancelOnTransportChange(_e.cancelOnTransportChange), port(_e.port)
-			, transport(_e.transport)
+			, lead(_e.lead), transport(_e.transport)
 		{
 			assert(empty() || source != MidiEventSource::Unknown);
 		}
@@ -331,6 +334,7 @@ namespace synthLib
 			transportGeneration = _e.transportGeneration;
 			cancelOnTransportChange = _e.cancelOnTransportChange;
 			port = _e.port;
+			lead = _e.lead;
 			transport = _e.transport;
 			assert(empty() || source != MidiEventSource::Unknown);
 			return *this;
@@ -348,6 +352,7 @@ namespace synthLib
 			transportGeneration = _e.transportGeneration;
 			cancelOnTransportChange = _e.cancelOnTransportChange;
 			port = _e.port;
+			lead = _e.lead;
 			transport = _e.transport;
 			assert(empty() || source != MidiEventSource::Unknown);
 			return *this;

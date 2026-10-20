@@ -47,7 +47,8 @@ namespace virusLib
 		bool enableTimestamps();
 
 	private:
-		void sendMidiToDSP(uint8_t _a, uint8_t _b, uint8_t _c);
+		// _lead: the event sounds that many samples after now, see synthLib::SMidiEvent::lead
+		void sendMidiToDSP(uint8_t _a, uint8_t _b, uint8_t _c, uint16_t _lead);
 		void updateDspTime();
 
 		Hdi08Queue& m_output;
@@ -68,5 +69,6 @@ namespace virusLib
 		uint32_t m_dspTimeStep = 0;						// samples per OS block, 0 while unknown
 		uint32_t m_dspTimeFrame = 0;					// frame at which the counter took its value, 0 = not seen yet
 		uint32_t m_lastTimestampFrame = 0;				// frame of the last timestamp sent
+		uint32_t m_lastTimestamp = 0;					// and the timestamp
 	};
 }

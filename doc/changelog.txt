@@ -25,6 +25,12 @@ OsTIrus:
 - [Fix] A changed Arp Mode was lost when the patch was loaded again, for example
         with the project: the patch played the arpeggiator mode it had before.
 
+- [Imp] BUG-10510 The arpeggiator plays its notes ahead, as the Virus TI's own
+        arpeggiator does, so that they keep time with a patch that keeps a DSP
+        busy: the TI hands notes to its second DSP then. Notes played by the
+        host, such as an arpeggio of a piano roll, come late on that DSP, as on
+        the hardware.
+
 JE8086:
 
 - [Fix] BUG-10508 The Remote KBD CH of the JP-8080 had no effect: Split, Dual,

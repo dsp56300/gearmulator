@@ -32,6 +32,10 @@ namespace virusLib
 		void process(const std::array<const ROMFile::TPreset*, 16>& _singles, std::vector<synthLib::SMidiEvent>& _midi,
 			std::vector<synthLib::SMidiEvent>& _out, uint32_t _sampleCount, float _samplerate);
 
+		// For a firmware that plays MIDI at its timestamp, the TI family: the arpeggio is played up to _lead samples
+		// ahead of when it sounds, as the firmware plays its own, see synthLib::ArpSettings::lead
+		void setLead(uint16_t _lead);
+
 	private:
 		// A pattern step as the firmware keeps it: length and the distance to the next step in 8.16 fixed point, in
 		// steps of Arp Clock
@@ -53,6 +57,7 @@ namespace virusLib
 
 		std::vector<std::vector<Event>> m_patterns;		// [0] stays empty on the TI, the patch has it
 		DeviceModel m_model = DeviceModel::Invalid;
+		uint16_t m_lead = 0;
 		std::array<synthLib::Arpeggiator, 16> m_arps;	// one per MIDI channel
 		std::array<Key, 16> m_keys{};
 		std::array<bool, 16> m_keyValid{};

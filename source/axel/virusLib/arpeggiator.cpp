@@ -98,6 +98,12 @@ namespace virusLib
 		}
 	}
 
+	void Arpeggiator::setLead(const uint16_t _lead)
+	{
+		m_lead = _lead;
+		m_keyValid.fill(false);
+	}
+
 	Arpeggiator::Key Arpeggiator::createKey(const ROMFile::TPreset* _single)
 	{
 		Key key{};
@@ -124,6 +130,12 @@ namespace virusLib
 
 		ArpSettings settings;
 		settings.channel = _channel;
+
+		// The TI's firmware plays its arpeggio ahead and lets every note sound at its time. A busy DSP hands notes to
+		// the other one, which still gets them in time then, where it gets MIDI notes too late (BUG-10510). The lead
+		// grows by 16 samples per tick of 1/192 note while the arpeggio runs, see P:$05148c in OS 5.1.7
+		settings.lead = m_lead;
+		settings.leadGrowth = 16.0f * 48.0f;
 
 		// Off, Up, Down, Up&Down, As Played, Random and Chord are in the order of ArpMode. Arp>Matrix (7) modulates
 		// instead of playing notes, which this cannot do

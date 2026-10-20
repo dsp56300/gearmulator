@@ -6,6 +6,8 @@
 
 #include "baseLib/os.h"
 
+#include <algorithm>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -75,6 +77,8 @@ namespace
 		uint64_t time = 0;
 		std::vector<Event> input;
 		std::vector<Event> played;	// what the arpeggiator plays
+		std::vector<Event> due;		// the same, where it is to sound: its lead later, see ArpSettings::lead
+		std::vector<uint16_t> leads;
 		std::vector<Event> passed;	// what it leaves for the device
 
 		explicit Host(const ArpSettings& _settings)
@@ -116,7 +120,11 @@ namespace
 				arp.process(midiIn, out, count, g_samplerate);
 
 				for (const auto& e : out)
+				{
 					played.push_back({time + e.offset, e.a, e.b, e.c});
+					due.push_back({time + e.offset + e.lead, e.a, e.b, e.c});
+					leads.push_back(e.lead);
+				}
 				for (const auto& e : midiIn)
 				{
 					// the transport stays for the device too, but it is no MIDI
@@ -692,6 +700,182 @@ namespace
 		EXPECT(host.noteOnTimes() == std::vector<uint64_t>({1234, 13234, 25234, 37234}));
 	}
 
+	ArpSettings withLead(ArpSettings _s)
+	{
+		// as the Virus TI plays it: up to 896 samples ahead, 16 samples more per tick of 1/192 note
+		_s.lead = 896;
+		_s.leadGrowth = 16.0f * 48.0f;
+		return _s;
+	}
+
+	void testLeadKeepsEverySample()
+	{
+		// Played ahead, every note still sounds on the sample it sounds on without a lead, and ends there, whatever the
+		// block size. Here the keys stay down, they reach the arpeggio later with a lead
+		auto s = settings(ArpMode::UpDown);
+		s.octaves = 2;
+		s.swing = 0.6f;
+		s.noteLength = 1.5f;
+		const std::vector<Event> keys = {on(100, 60), on(100, 64), on(100, 67)};
+
+		Host reference(s);
+		reference.input = keys;
+		reference.run(100000, 512);
+		EXPECT(reference.played.size() > 30);
+
+		for (const uint32_t blockSize : {1u, 7u, 64u, 333u, 512u, 4096u})
+		{
+			Host host(withLead(s));
+			host.input = keys;
+			host.run(100000, blockSize);
+
+			// played ahead, so it has more by then
+			EXPECT(host.due.size() >= reference.played.size());
+			EXPECT(std::equal(reference.played.begin(), reference.played.end(), host.due.begin()));
+		}
+	}
+
+	void testLeadStartsWithTheKey()
+	{
+		// The first note plays with its key, then the lead grows to its maximum: 896 samples after 896 / 768 quarter
+		// notes, 28000 samples at 120 BPM
+		Host host(withLead(settings(ArpMode::Up)));
+		host.input = {on(1000, 60), on(1000, 64)};
+		host.run(60000, 512);
+
+		EXPECT(!host.leads.empty() && host.leads.front() == 0);
+		EXPECT(host.leads.back() == 896);
+		for (size_t i = 1; i < host.leads.size(); ++i)
+			EXPECT(host.leads[i] >= host.leads[i - 1]);
+
+		// Every step is a note on and its note off. The seventh, at 36000, went out 896 samples before it sounds
+		EXPECT(host.played[12] == on(36000 - 896, 60));
+		EXPECT(host.due[12] == on(36000, 60));
+	}
+
+	void testLeadKeepsTheOrder()
+	{
+		// Whatever the keys do, what goes out for a note goes out in the order it is to sound in, at any block size: the
+		// device gets the note off before the note on of the same note after it
+		auto s = settings(ArpMode::Up);
+		s.hold = true;
+		s.noteLength = 1.9f;
+		for (const uint32_t blockSize : {1u, 64u, 512u, 4096u})
+		{
+			Host host(withLead(s));
+			host.input = {on(0, 60), off(9000, 60), on(30000, 64), on(30500, 60), off(31000, 64), off(31000, 60),
+				on(31400, 67), {70000, M_CONTROLCHANGE, MC_ALLNOTESOFF, 0}, on(70300, 60)};
+			host.run(100000, blockSize);
+
+			EXPECT(host.due.size() > 10);
+			std::array<uint64_t, 128> last{};
+			for (size_t i = 0; i < host.due.size(); ++i)
+			{
+				if (i)
+					EXPECT(host.played[i].time >= host.played[i - 1].time);
+				EXPECT(host.due[i].time >= last[host.due[i].b]);
+				last[host.due[i].b] = host.due[i].time;
+			}
+		}
+	}
+
+	void testLeadStartsOver()
+	{
+		// Without the host's position the arpeggio starts with its key. All keys up at 40000, the arpeggio stops, the
+		// last note ends at 41700, and the lead starts from 0 again. A key at 50000 plays at once. The same key at 41000
+		// waits for that note off, which went out already: the device gets them in that order
+		auto play = [](const uint64_t _again)
+		{
+			auto s = withLead(settings(ArpMode::Up));
+			s.noteLength = 1.9f;
+			Host host(s);
+			host.transportOffset = -1;
+			host.input = {on(0, 60), off(40000, 60), on(_again, 60)};
+			host.run(_again + 20000, 512);
+			return host;
+		};
+
+		auto restart = [](const Host& _host, const uint64_t _from)
+		{
+			for (size_t i = 0; i < _host.due.size(); ++i)
+			{
+				if (_host.due[i].time >= _from && (_host.due[i].a & 0xf0) == M_NOTEON)
+					return i;
+			}
+			return _host.due.size();
+		};
+
+		const auto later = play(50000);
+		const auto l = restart(later, 40000);
+		EXPECT(l < later.due.size() && later.due[l] == on(50000, 60) && later.leads[l] == 0);
+
+		const auto soon = play(41000);
+		const auto s = restart(soon, 40000);
+		EXPECT(s < soon.due.size() && soon.due[s] == on(41700, 60) && soon.leads[s] == 700);
+		EXPECT(soon.due[s - 1] == off(41700, 60));
+	}
+
+	void testLeadReactsWhenTheKeyComes()
+	{
+		// Played ahead, a key changes the steps after the lead, but what it does at once sounds when the key came, as
+		// without a lead: a key that starts the arpeggio over a little late for a step, and one that joins a chord
+		auto compare = [](const ArpSettings& _s, const std::vector<Event>& _keys, const uint64_t _length)
+		{
+			Host reference(_s);
+			reference.input = _keys;
+			reference.run(_length, 512);
+
+			for (const uint32_t blockSize : {1u, 64u, 512u, 4096u})
+			{
+				Host host(withLead(_s));
+				host.input = _keys;
+				host.run(_length, blockSize);
+
+				EXPECT(host.due.size() >= reference.played.size());
+				EXPECT(std::equal(reference.played.begin(), reference.played.end(), host.due.begin()));
+			}
+			return reference.played;
+		};
+
+		// All keys up and another one struck at 55000, a sixth of a step after the step at 54000: it plays at once
+		const auto restart = compare(settings(ArpMode::Up), {on(0, 60), off(55000, 60), on(55000, 64)}, 80000);
+		EXPECT(std::find(restart.begin(), restart.end(), on(55000, 64)) != restart.end());
+
+		// Chord with hold: a new key joins the chord that sounds, until it ends
+		auto chord = settings(ArpMode::Chord);
+		chord.hold = true;
+		const auto joins = compare(chord, {on(0, 60), on(0, 64), off(26000, 60), off(26000, 64), on(73800, 62),
+			on(80000, 65)}, 100000);
+		EXPECT(std::find(joins.begin(), joins.end(), on(73800, 62)) != joins.end());
+		EXPECT(std::find(joins.begin(), joins.end(), on(80000, 65)) != joins.end());
+	}
+
+	void testLeadKeysComeLater()
+	{
+		// Played ahead, the arpeggio gets a key the lead later: struck 500 samples before a step, the key joins the step
+		// after that one. As the Virus TI's own arpeggiator does it
+		auto s = settings(ArpMode::Up);
+		Host without(s);
+		without.input = {on(0, 60), on(53500, 64)};
+		without.run(70000, 512);
+		Host with(withLead(s));
+		with.input = without.input;
+		with.run(70000, 512);
+
+		auto noteAt = [](const std::vector<Event>& _events, const uint64_t _time)
+		{
+			const auto it = std::find_if(_events.begin(), _events.end(), [&](const Event& _e)
+			{
+				return _e.time == _time && (_e.a & 0xf0) == M_NOTEON;
+			});
+			return it != _events.end() ? it->b : uint8_t(0);
+		};
+
+		EXPECT(noteAt(without.played, 54000) == 64);
+		EXPECT(noteAt(with.due, 54000) == 60);
+		EXPECT(noteAt(with.due, 60000) == 64);
+	}
+
 	// A device that plays its arpeggiator in C++. Device::process() hands it the MIDI, the firmware gets the arpeggio
 	class ArpDevice final : public Device
 	{
@@ -863,6 +1047,12 @@ int main()
 	testLoopWraps();
 	testTransportInsideTheBlock();
 	testWithoutTransport();
+	testLeadKeepsEverySample();
+	testLeadStartsWithTheKey();
+	testLeadKeepsTheOrder();
+	testLeadStartsOver();
+	testLeadReactsWhenTheKeyComes();
+	testLeadKeysComeLater();
 	testDeviceRunsItsArpeggiators();
 	testPluginPlaysTheDevicesArpeggiator();
 

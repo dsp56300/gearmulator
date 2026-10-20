@@ -85,6 +85,12 @@ namespace virusLib
 		// The arpeggiator is played in C++ once the plugin asks for it, see processArpeggiators()
 		if(!m_arpeggiator.readPatterns(m_dsp->getMemory(), m_rom.getModel()))
 			LOG("Arpeggiator patterns not found in this firmware, the firmware keeps playing its own arpeggiator");
+
+		// The TI family OS plays an event at its timestamp up to 1023 samples ahead (x:$5586c in OS 5.1.7, it may
+		// take less, and holds what is further ahead back until it is within), ours is up to 127 ahead already. The
+		// C++ arpeggiator plays its notes as far ahead as that leaves, as the firmware plays its own (BUG-10510)
+		if(m_midiTimestamps)
+			m_arpeggiator.setLead(0x3ff - 127);
 	}
 
 	Device::~Device()

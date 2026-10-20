@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <bitset>
 #include <cstdint>
 #include <random>
@@ -65,6 +66,13 @@ namespace synthLib
 										// 0.75 dotted. Positions inside the pair are stretched and squeezed with it
 		float noteLength = 1.0f;		// scales the length of every step
 		std::vector<ArpStep> pattern;	// played in a loop. Empty plays every step with the defaults of ArpStep
+		// For a device that plays an event at the time its SMidiEvent::lead says, the Virus TI with its MIDI
+		// timestamps: the arpeggio is played up to this many samples ahead of when it sounds, as the TI's firmware
+		// plays its own. A note the device hands on, to a DSP of its own for example, then still arrives in time. The
+		// first note plays with its key, the lead grows by leadGrowth samples per quarter note while the arpeggio runs.
+		// Keys, and where the host's transport goes, reach the arpeggio that much later
+		uint16_t lead = 0;
+		float leadGrowth = 0.0f;
 	};
 
 	// Arpeggiates in C++ for devices whose firmware arpeggiator cannot follow the host exactly: the firmware only sees
@@ -102,6 +110,7 @@ namespace synthLib
 			uint64_t offTime;
 		};
 
+		uint32_t beginBlock(uint32_t _sampleCount);
 		void applySettings(std::vector<SMidiEvent>& _out);
 		void trackPassThrough(const std::vector<SMidiEvent>& _midiIn);
 		void takeInput(std::vector<SMidiEvent>& _midiIn);
@@ -112,11 +121,13 @@ namespace synthLib
 		void start(uint32_t _offset);
 		void checkStop();
 		void playStep(std::vector<SMidiEvent>& _out, uint32_t _offset);
-		void playNote(std::vector<SMidiEvent>& _out, uint32_t _offset, uint32_t _note, uint8_t _velocity,
+		void playNote(std::vector<SMidiEvent>& _out, uint32_t _offset, uint64_t _due, uint32_t _note, uint8_t _velocity,
 			uint8_t _releaseVelocity, uint64_t _length);
 		void joinChord(std::vector<SMidiEvent>& _out, uint32_t _offset, uint8_t _note, uint8_t _velocity);
 		void endNotes(std::vector<SMidiEvent>& _out, uint32_t _offset);
-		void endNote(std::vector<SMidiEvent>& _out, uint32_t _offset, const PlayingNote& _note) const;
+		void endNote(std::vector<SMidiEvent>& _out, uint32_t _offset, const PlayingNote& _note, uint64_t _due);
+		uint64_t emit(std::vector<SMidiEvent>& _out, uint8_t _status, uint8_t _note, uint8_t _velocity, uint32_t _offset,
+			uint64_t _due);
 		void stopAll(std::vector<SMidiEvent>& _out, uint32_t _offset);
 		void buildSequence();
 		const Note* nextNote();
@@ -151,10 +162,22 @@ namespace synthLib
 		std::minstd_rand m_random;
 
 		std::vector<PlayingNote> m_playing;
-		ArpStep m_chordStep;				// Chord: the step that sounds, until m_chordEnd, a key struck joins it
-		int m_chordTranspose = 0;
-		uint64_t m_chordEnd = 0;
-		uint64_t m_time = 0;				// in samples, counted over all blocks
+		struct Chord
+		{
+			uint64_t start = 0;				// like m_time, where it sounds
+			uint64_t end = 0;
+			ArpStep step;
+			int transpose = 0;
+		};
+		Chord m_chord;						// Chord: the step played last, a key struck while it sounds joins it
+		Chord m_previousChord;				// the one before, which may sound still when a key comes, see joinChord()
+		uint64_t m_time = 0;				// in samples, counted over all blocks, on the arpeggio's timeline: the
+											// blocks plus the lead, see beginBlock()
+		uint16_t m_lead = 0;				// how far that timeline runs ahead of the block
+		double m_leadGrowth = 0.0;			// what the lead grew by that is not a whole sample yet
+		uint16_t m_gap = 0;					// in this block the timeline starts that far before the lead
+		uint16_t m_windowLead = 0;			// the lead where the timeline of this block starts
+		std::array<uint64_t, 128> m_lastDueOf{};	// like m_time: where what was played last for a note sounds
 
 		bool m_running = false;
 		bool m_stopPending = false;			// all keys went up, the arpeggio stops at m_stopAt if none is down then

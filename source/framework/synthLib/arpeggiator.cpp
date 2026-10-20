@@ -55,12 +55,15 @@ namespace synthLib
 	void Arpeggiator::process(std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _out,
 		const uint32_t _sampleCount, const float _samplerate)
 	{
+		// What the arpeggio does in this block, on its own timeline, see beginBlock()
+		const auto length = beginBlock(_sampleCount);
+
 		applySettings(_out);
 
 		if (m_settings.mode == ArpMode::Off)
 		{
 			trackPassThrough(_midiIn);
-			m_time += _sampleCount;
+			m_time += length;
 			m_wasSynced = false;
 			return;
 		}
@@ -83,14 +86,15 @@ namespace synthLib
 
 		while (true)
 		{
-			const uint32_t tInput = input < m_input.size() ? std::max(t, m_input[input].offset) : g_never;
+			// What comes from the host reaches the arpeggio the lead later, where the block's lead starts
+			const uint32_t tInput = input < m_input.size() ? std::max(t, m_input[input].offset + m_gap) : g_never;
 			const uint32_t tOff = nextNoteOffOffset(t);
 			const uint32_t tStep = m_running && canStep() ? stepOffset(m_nextStep, t) : g_never;
 			const uint32_t tStop = m_stopPending ? posOffset(m_stopAt, t) : g_never;
 
 			const uint32_t tNext = std::min({tInput, tOff, tStep, tStop});
 
-			if (tNext >= _sampleCount)
+			if (tNext >= length)
 				break;
 
 			t = tNext;
@@ -120,10 +124,47 @@ namespace synthLib
 		// Events at or past the end of the block still change which keys are held. The next block plays the steps
 		// they start
 		for (; input < m_input.size(); ++input)
-			handleInput(m_input[input], _out, _sampleCount ? _sampleCount - 1 : 0);
+			handleInput(m_input[input], _out, length ? length - 1 : 0);
 
-		m_time += _sampleCount;
-		m_nextBlockPos = m_blockPos + _sampleCount * m_quartersPerSample;
+		m_time += length;
+		m_nextBlockPos = m_blockPos + length * m_quartersPerSample;
+	}
+
+	uint32_t Arpeggiator::beginBlock(const uint32_t _sampleCount)
+	{
+		// The arpeggio has a timeline of its own, which runs m_lead ahead of the blocks: what it plays at a sample of it
+		// goes out that much earlier, and says so in SMidiEvent::lead. A device that does not schedule gets a lead of 0,
+		// and the timeline is the blocks
+		const auto previous = m_lead;
+
+		if (m_running || !m_playing.empty())
+		{
+			// The longer the arpeggio runs, the further ahead it is played. The timeline moves on by more than the block
+			// then, what is due in the stretch between the two leads goes to the block start
+			if (m_running && m_lead < m_settings.lead)
+			{
+				m_leadGrowth += static_cast<double>(m_settings.leadGrowth) * _sampleCount * m_quartersPerSample;
+				const auto grow = static_cast<uint16_t>(std::min<double>(std::floor(m_leadGrowth), m_settings.lead - m_lead));
+				m_leadGrowth -= grow;
+				m_lead = static_cast<uint16_t>(m_lead + grow);
+			}
+
+			m_windowLead = previous;
+			m_gap = static_cast<uint16_t>(m_lead - previous);
+			return _sampleCount + m_gap;
+		}
+
+		// Nothing plays: the lead starts from 0 again with the next arpeggio, and the timeline goes back to the blocks.
+		// What goes out from then on still sounds after what went out before for the same note, see emit()
+		m_time -= previous;
+		m_lastStepTime -= previous;
+		m_nextBlockPos -= previous * m_quartersPerSample;
+
+		m_lead = 0;
+		m_leadGrowth = 0.0;
+		m_windowLead = 0;
+		m_gap = 0;
+		return _sampleCount;
 	}
 
 	void Arpeggiator::handleTransport(const HostTransport& _transport, const uint32_t _offset)
@@ -135,15 +176,18 @@ namespace synthLib
 
 		const bool synced = m_settings.sync && m_hostBpm > 0.0f && _transport.isPlaying && _transport.hasPpqPosition;
 
+		// Where the host is now, on the arpeggio's timeline, which runs the lead ahead of it
+		const auto hostPos = _transport.ppqPos + m_lead * rate;
+
 		// The host's song position wins. When it jumped, the host located or looped, or it just started to play, the
 		// next step is the one the new position wants. Otherwise the arpeggio runs on from where it is
-		const bool jumped = synced && (!m_wasSynced || std::fabs(_transport.ppqPos - pos) > g_discontinuity);
+		const bool jumped = synced && (!m_wasSynced || std::fabs(hostPos - pos) > g_discontinuity);
 
 		// A host that starts to play brings its grid. An arpeggio that ran without it goes on on that grid
 		if (synced && !m_wasSynced)
 			m_origin = 0.0;
 
-		m_blockPos = (synced ? _transport.ppqPos : pos) - _offset * rate;
+		m_blockPos = (synced ? hostPos : pos) - _offset * rate;
 		m_quartersPerSample = rate;
 		m_wasSynced = synced;
 
@@ -316,7 +360,7 @@ namespace synthLib
 			if (restart)
 			{
 				for (const auto& n : m_playing)
-					endNote(_out, _offset, n);
+					endNote(_out, _offset, n, m_time + _offset);
 				m_playing.clear();
 			}
 
@@ -370,14 +414,16 @@ namespace synthLib
 		m_lastNote = -1;
 		m_goingDown = false;
 		m_nextStep = 0;
-		m_chordEnd = 0;	// a key joins a chord of this arpeggio
+		m_chord = {};	// a key joins a chord of this arpeggio
+		m_previousChord = {};
 		m_stopPending = false;
 
 		if (!canStep())
 			return;
 
-		// The pattern starts over. Without the host's song position it starts with the key
-		const double pos = m_blockPos + _offset * m_quartersPerSample;
+		// The pattern starts over. Without the host's song position it starts with the key. Played ahead, the arpeggio
+		// gets the key the lead later, the key came the lead before
+		const double pos = m_blockPos + (static_cast<double>(_offset) - m_lead) * m_quartersPerSample;
 
 		if (!m_wasSynced)
 		{
@@ -415,7 +461,12 @@ namespace synthLib
 		const auto stepStart = stepPos(m_nextStep);
 		const auto now = m_blockPos + _offset * m_quartersPerSample;
 		const bool late = stepStart < now - 0.5 * m_quartersPerSample;
-		const auto from = late ? now : stepStart;
+
+		// Played ahead, a step late for the arpeggio is in time still if it sounds after now on the host's timeline, the
+		// lead before, and sounds where it is. One that started the arpeggio a little after the key sounds with the key
+		const auto soonest = now - m_lead * m_quartersPerSample;
+		const auto from = late ? std::max(stepStart, soonest) : stepStart;
+		const auto due = m_time + _offset - static_cast<uint64_t>(std::max<int64_t>(0, std::llround((now - from) / m_quartersPerSample)));
 		const auto length = static_cast<uint64_t>(std::max(1.0, std::round((end - from) / m_quartersPerSample)));
 
 		auto velocity = [&](const Note& _n)
@@ -429,7 +480,7 @@ namespace synthLib
 		{
 			m_lastNote = m_startKey.note;
 			if (step.active)
-				playNote(_out, _offset, m_startKey.note, m_startKey.velocity, step.releaseVelocity, length);
+				playNote(_out, _offset, due, m_startKey.note, m_startKey.velocity, step.releaseVelocity, length);
 			++m_noteIndex;
 			return;
 		}
@@ -442,18 +493,17 @@ namespace synthLib
 			for (const auto& n : m_sequence)
 			{
 				if (step.active)
-					playNote(_out, _offset, n.note + transpose, velocity(n), step.releaseVelocity, length);
+					playNote(_out, _offset, due, n.note + transpose, velocity(n), step.releaseVelocity, length);
 			}
 
-			m_chordStep = step;
-			m_chordTranspose = transpose;
-			m_chordEnd = m_time + _offset + length;
+			m_previousChord = m_chord;
+			m_chord = {due, due + length, step, static_cast<int>(transpose)};
 		}
 		else if (const auto* n = nextNote())
 		{
 			m_lastNote = n->note;
 			if (step.active)
-				playNote(_out, _offset, n->note, velocity(*n), step.releaseVelocity, length);
+				playNote(_out, _offset, due, n->note, velocity(*n), step.releaseVelocity, length);
 		}
 
 		++m_noteIndex;
@@ -524,8 +574,8 @@ namespace synthLib
 		}
 	}
 
-	void Arpeggiator::playNote(std::vector<SMidiEvent>& _out, const uint32_t _offset, const uint32_t _note,
-		const uint8_t _velocity, const uint8_t _releaseVelocity, const uint64_t _length)
+	void Arpeggiator::playNote(std::vector<SMidiEvent>& _out, const uint32_t _offset, const uint64_t _due,
+		const uint32_t _note, const uint8_t _velocity, const uint8_t _releaseVelocity, const uint64_t _length)
 	{
 		if (_note > 127)
 			return;
@@ -539,33 +589,36 @@ namespace synthLib
 
 		if (playing != m_playing.end())
 		{
-			endNote(_out, _offset, *playing);
+			endNote(_out, _offset, *playing, _due);
 			m_playing.erase(playing);
 		}
 
 		const auto note = static_cast<uint8_t>(_note);
 		const auto status = static_cast<uint8_t>(M_NOTEON | m_channel);
 
-		_out.emplace_back(MidiEventSource::Internal, status, note, std::min<uint8_t>(_velocity, 127), _offset);
-		m_playing.push_back({note, _releaseVelocity, m_time + _offset + _length});
+		// A note that has to wait for what went out for it already ends where it ends all the same, after it began
+		const auto due = emit(_out, status, note, std::min<uint8_t>(_velocity, 127), _offset, _due);
+		m_playing.push_back({note, _releaseVelocity, std::max(_due + _length, due + 1)});
 	}
 
 	void Arpeggiator::joinChord(std::vector<SMidiEvent>& _out, const uint32_t _offset, const uint8_t _note,
 		const uint8_t _velocity)
 	{
-		// A key struck while a step of the chord sounds sounds with it, until the step ends
-		const auto now = m_time + _offset;
-		const auto note = _note + m_chordTranspose;
+		// A key struck while a step of the chord sounds sounds with it, until the step ends. Played ahead, the arpeggio
+		// gets the key the lead later: the key came the lead before, and the chord played last may not sound yet then
+		const auto now = m_time + _offset - m_lead;
+		const auto& chord = m_chord.start <= now ? m_chord : m_previousChord;
+		const auto note = _note + chord.transpose;
 
-		if (!m_chordStep.active || m_chordEnd <= now || note > 127)
+		if (!chord.step.active || chord.end <= now || note > 127)
 			return;
 
 		if (std::any_of(m_playing.begin(), m_playing.end(), [&](const PlayingNote& _p) { return _p.note == note; }))
 			return;
 
-		const int v = (m_chordStep.velocity ? m_chordStep.velocity : _velocity) + m_chordStep.velocityOffset;
-		playNote(_out, _offset, note, static_cast<uint8_t>(std::clamp(v, 1, 127)), m_chordStep.releaseVelocity,
-			m_chordEnd - now);
+		const int v = (chord.step.velocity ? chord.step.velocity : _velocity) + chord.step.velocityOffset;
+		playNote(_out, _offset, now, note, static_cast<uint8_t>(std::clamp(v, 1, 127)), chord.step.releaseVelocity,
+			chord.end - now);
 	}
 
 	void Arpeggiator::endNotes(std::vector<SMidiEvent>& _out, const uint32_t _offset)
@@ -577,7 +630,7 @@ namespace synthLib
 		for (auto it = m_playing.begin(); it != m_playing.end(); ++it)
 		{
 			if (it->offTime <= now)
-				endNote(_out, _offset, *it);
+				endNote(_out, _offset, *it, it->offTime);
 			else
 				*keep++ = *it;
 		}
@@ -585,17 +638,36 @@ namespace synthLib
 		m_playing.erase(keep, m_playing.end());
 	}
 
-	void Arpeggiator::endNote(std::vector<SMidiEvent>& _out, const uint32_t _offset, const PlayingNote& _note) const
+	void Arpeggiator::endNote(std::vector<SMidiEvent>& _out, const uint32_t _offset, const PlayingNote& _note,
+		const uint64_t _due)
 	{
 		const auto status = static_cast<uint8_t>(M_NOTEOFF | m_channel);
 		const auto velocity = std::min<uint8_t>(_note.releaseVelocity, 127);
-		_out.emplace_back(MidiEventSource::Internal, status, _note.note, velocity, _offset);
+		emit(_out, status, _note.note, velocity, _offset, _due);
+	}
+
+	uint64_t Arpeggiator::emit(std::vector<SMidiEvent>& _out, const uint8_t _status, const uint8_t _note,
+		const uint8_t _velocity, const uint32_t _offset, uint64_t _due)
+	{
+		// _offset counts on the arpeggio's timeline. The block holds it from m_gap on, what is due before goes to the
+		// block start with a lead that much shorter
+		const auto offset = _offset > m_gap ? _offset - m_gap : 0;
+		const auto sent = m_time - m_windowLead + offset;
+
+		// _due, like m_time, is where it is to sound: not before it goes out, and not before what went out for the same
+		// note already. A note off that reaches the device after the early note on of the same note would end that one
+		_due = std::max({_due, sent, m_lastDueOf[_note]});
+		m_lastDueOf[_note] = _due;
+
+		auto& e = _out.emplace_back(MidiEventSource::Internal, _status, _note, _velocity, offset);
+		e.lead = static_cast<uint16_t>(_due - sent);
+		return _due;
 	}
 
 	void Arpeggiator::stopAll(std::vector<SMidiEvent>& _out, const uint32_t _offset)
 	{
 		for (const auto& n : m_playing)
-			endNote(_out, _offset, n);
+			endNote(_out, _offset, n, m_time + _offset);
 
 		m_playing.clear();
 		m_held.clear();

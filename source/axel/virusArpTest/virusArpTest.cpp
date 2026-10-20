@@ -332,8 +332,9 @@ namespace
 
 			arp.process(singles, in, out, g_blockSize, g_samplerate);
 
+			// a note played ahead sounds at its lead, see synthLib::ArpSettings::lead
 			for (const auto& e : out)
-				addNote(notes, e, static_cast<int64_t>(t + e.offset));
+				addNote(notes, e, static_cast<int64_t>(t + e.offset + e.lead));
 		}
 
 		// The firmware ends no note sooner than a block of its clock after it began, 64 samples
