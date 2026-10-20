@@ -463,7 +463,12 @@ namespace pluginLib::patchDB
 		for (const auto& func : uiFuncs)
 			func();
 
-		if(isLoading() && !m_loader.pending())
+		// Loaded once every job queued for the loader ran, the running one included (pending() missed it), and not
+		// before startLoaderThread(): the timer runs from the construction on, in a Linux plugin on a message thread of
+		// its own, while the product's patch manager constructor still boots the device (BUG-10514). Done is read
+		// first, a job queues the jobs it adds before it counts as done
+		const auto done = m_loaderJobsDone.load();
+		if(isLoading() && done && done == m_loaderJobsQueued.load())
 		{
 			m_loading = false;
 			onLoadFinished();
@@ -915,8 +920,8 @@ namespace pluginLib::patchDB
 
 	void DB::startLoaderThread(const juce::File& _migrateFromDir/* = {}*/)
 	{
-		m_loader.start();
-
+		// queued before the start: jobs queued earlier must not all be done before this one is queued, uiProcess()
+		// would take that for the end of the load
 		runOnLoaderThread([this, _migrateFromDir]
 		{
 			if(!g_cacheEnabled || !loadCache())
@@ -962,6 +967,8 @@ namespace pluginLib::patchDB
 				}
 			}
 		});
+
+		m_loader.start();
 	}
 
 	void DB::stopLoaderThread()

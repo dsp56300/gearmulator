@@ -50,11 +50,18 @@ namespace
 	class TestPatchManager final : public pluginLib::patchManager::PatchManager
 	{
 	public:
-		TestPatchManager(const juce::File& _dir, const std::vector<std::string>& _romPatches) : PatchManager(_dir)
+		TestPatchManager(const juce::File& _dir, const std::vector<std::string>& _romPatches, const bool _start = true) : PatchManager(_dir)
 		{
 			for (const auto& name : _romPatches)
 				m_rom.push_back(patchDump(name));
 
+			if (_start)
+				start();
+		}
+
+		// what the constructor of a product's patch manager does last
+		void start()
+		{
 			startLoaderThread();
 			addDataSource(romBank());
 		}
@@ -305,6 +312,25 @@ namespace
 			const auto folderDs = pm.getDataSource(f);
 			TEST_ASSERT(folderDs);
 			TEST_ASSERT(searchResultNames(pm, searchDataSource(pm, folderDs)).size() == 3);
+		}
+
+		// The timer runs from the construction on, in a Linux plugin on a message thread of its own while the product's
+		// constructor still runs. Before that started the loader, nothing is loaded: requestPatchForPart() of a product
+		// would use members its constructor has not set yet (BUG-10514)
+		{
+			TestPatchManager pm(settings, {"Bass", "Lead", "Pad"}, false);
+
+			uint32_t requests = 0;
+			pm.onRequestPatchForPart = [&requests] { ++requests; };
+
+			for (int i = 0; i < 3; ++i)
+				pm.processPending();
+
+			TEST_ASSERT(pm.isLoading() && !requests);
+
+			pm.start();
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(requests > 0);
 		}
 
 		root.deleteRecursively();
