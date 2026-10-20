@@ -76,6 +76,7 @@ namespace mqLib
 		void hdiTransferUCtoDSP(dsp56k::TWord _word);
 		uint8_t hdiUcReadIsr(uint8_t _isr);
 		void waitDspRxEmpty();
+		void waitBatchProcessed();
 		void setBootCallbacks();
 		void setRuntimeCallbacks();
 
@@ -98,7 +99,8 @@ namespace mqLib
 
 		bool m_receivedMagicEsaiPacket = false;
 		uint32_t m_hdiTransferFailCount = 0;
-		bool m_commandProcessingActive = false;
+		bool m_commandProcessingActive = false;	// the DSP got BatchComplete, see waitBatchProcessed
+		dsp56k::TWord m_batchFlagAddr = 0;			// Y address of the flag its main loop sets when done with the batch
 
 		dsp56k::DspBoot m_boot;
 	};

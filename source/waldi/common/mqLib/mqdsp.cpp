@@ -188,6 +188,9 @@ namespace mqLib
 		// Reset HDI08 transfer counter so VE identity patch fires correctly on next boot
 		m_hdiDspToUcCount = 0;
 
+		// a batch the old program had pending is gone with it, nothing waits for it, see waitBatchProcessed
+		m_commandProcessingActive = false;
+
 		// Drain stale HDI08 TX data from previous boot cycle
 		while (hdi08().hasTX())
 			hdi08().readTX();
@@ -299,6 +302,8 @@ namespace mqLib
 
 	void MqDsp::hdiTransferUCtoDSP(dsp56k::TWord _word)
 	{
+		waitBatchProcessed();
+
 		m_haveSentTXtoDSP = true;
 
 		hdi08().writeRX(&_word, 1);
@@ -311,25 +316,8 @@ namespace mqLib
 
 		const auto cmd = static_cast<HostCommand>(_irq);
 
-		// Before BatchStart, ensure the previous batch's command processing
-		// is done.  Firmware protocol for Y:$6:
-		//   BatchComplete: move n6,y:$6  => Y:$6 = N6 (bit 0 = 0 = pending)
-		//   Main loop processes commands, then: bset #0,y:$6 => bit 0 = 1 = done
-		// BatchStart clobbers R6 (fast interrupt, no save/restore).
-		// If the command processor still has R6 at a non-standard offset,
-		// subsequent HRDF writes go to wrong addresses.
-		// On real hardware the MC68K is slow enough that processing always
-		// finishes between batches.  Here we wait only before BatchStart
-		// (not after BatchComplete) so the UC can do other work (LCD, MIDI,
-		// other IRQs) in parallel with DSP command processing.
-		if (cmd == HostCommand::BatchStart && m_commandProcessingActive)
-		{
-			m_hardware.ucYieldLoop([&]()
-			{
-				return (m_memory.get(dsp56k::MemArea_Y, 6) & 1) == 0;
-			});
-			m_commandProcessingActive = false;
-		}
+		// the batch that BatchComplete handed over must be processed before anything else arrives, see there
+		waitBatchProcessed();
 
 		// $92 is the firmware's timeout/abort path: the UC sends it when it
 		// thinks the DSP is too slow to set HF2=1.  In emulation the DSP is
@@ -360,8 +348,13 @@ namespace mqLib
 			return dsp().hasPendingExternalInterrupts();
 		});
 
+		// BatchComplete ends with `move n6,y:aa`, aa is the flag of its main loop, see waitBatchProcessed
 		if (cmd == HostCommand::BatchComplete)
-			m_commandProcessingActive = true;
+		{
+			const auto op = m_memory.get(dsp56k::MemArea_P, static_cast<dsp56k::TWord>(HostCommand::BatchComplete) + 1);
+			m_commandProcessingActive = (op & 0xffc0ff) == 0x7e0000;
+			m_batchFlagAddr = (op >> 8) & 0x3f;
+		}
 
 		hdiTransferDSPtoUC();
 	}
@@ -380,6 +373,40 @@ namespace mqLib
 		m_hardware.ucYieldLoop([&]()
 		{
 			return (hdi08().hasRXData() && hdi08().rxInterruptEnabled()) || dsp().hasPendingExternalInterrupts();
+		});
+	}
+
+	/*	A DSP receives a batch of commands into a buffer at n6, the receive interrupt writes every word to (r6)+.
+		BatchComplete ($82) points r6 back to the start of the buffer and marks the batch pending: `move n6,y:aa`
+		clears bit 0 of a flag, Y:$6 on the microQ. The main loop parses the batch later, from its wait for the next
+		audio block, and sets bit 0 again when it is done.
+
+		Whatever the UC sends in between overwrites the head of the batch: the next BatchStart, a host command that
+		resets r6, the data words of the next command. The DSP then parses a data word as a command, writes into the
+		wrong records and jumps to a data value; the JIT dispatcher ran off the end of P memory and called a null entry,
+		or the stack overflowed. That ended most playbacks with voice expansion under load.
+
+		On hardware the DSP is so much faster than the UC that the main loop has long taken the batch. Here its thread
+		may not even have run since. Everything that goes to the DSP after BatchComplete therefore waits until the batch
+		is done; not BatchComplete itself, the UC goes on with the other DSPs meanwhile.
+
+		BatchComplete has to be taken first, until then bit 0 still says done from the batch before: it waits among
+		the pending interrupts, and while the DSP runs it the processing mode is FastInterrupt. Asked in this order,
+		like hasPendingInterrupts.
+	*/
+	void MqDsp::waitBatchProcessed()
+	{
+		if(!m_commandProcessingActive)
+			return;
+
+		m_commandProcessingActive = false;
+
+		constexpr auto batchComplete = static_cast<dsp56k::TWord>(HostCommand::BatchComplete);
+
+		m_hardware.ucYieldLoop([&]()
+		{
+			return dsp().hasPendingInterrupt(batchComplete) || dsp().getProcessingMode() == dsp56k::DSP::FastInterrupt
+				|| (m_memory.get(dsp56k::MemArea_Y, m_batchFlagAddr) & 1) == 0;
 		});
 	}
 
