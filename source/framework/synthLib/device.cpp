@@ -4,6 +4,7 @@
 
 #include "dsp56kBase/logging.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace synthLib
@@ -170,8 +171,6 @@ namespace synthLib
 			return preferred.front();
 
 		// find the lowest possible samplerate that is higher than the host samplerate
-		const std::set<float> samplerates(preferred.begin(), preferred.end());
-
 		for (const float sr : preferred)
 		{
 			if(sr >= _hostSamplerate)
@@ -179,6 +178,6 @@ namespace synthLib
 		}
 
 		// if all supported device samplerates are lower than the host samplerate, use the maximum that the device supports
-		return *samplerates.rbegin();
+		return *std::max_element(preferred.begin(), preferred.end());
 	}
 }
