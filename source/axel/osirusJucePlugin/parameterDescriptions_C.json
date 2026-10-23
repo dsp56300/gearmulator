@@ -159,7 +159,7 @@
  		{"page":113, "index":14, "name":"B_Undefined14", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":113, "index":15, "name":"B_Undefined15", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":113, "class":"MultiOrSingle|NonPartSensitive", "index":16, "name":"Clock Tempo", "min":0, "max":127, "toText":"bpm", "isPublic":true, "isDiscrete":false, "isBool":false},
- 		{"page":113, "index":17, "name":"Arp Clock", "min":0, "max":17, "toText":"musicDivision", "isPublic":true, "isDiscrete":true, "isBool":false},
+ 		{"page":113, "index":17, "name":"Arp Clock", "min":0, "max":17, "toText":"arpClock", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":113, "index":18, "name":"Lfo1 Clock", "min":0, "max":21, "toText":"musicDivision", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":113, "index":19, "name":"Lfo2 Clock", "min":0, "max":21, "toText":"musicDivision", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":113, "class":"MultiOrSingle|NonPartSensitive", "index":20, "name":"Delay Clock", "min":0, "max":16, "toText":"musicDivision", "isPublic":true, "isDiscrete":true, "isBool":false},
@@ -790,6 +790,10 @@
 		"musicDivision":
 		[
 			"Off",	"1/64",	"1/32",	"1/16",	"1/8",	"1/4",	"1/2",	"3/64",	"3/32",	"3/16",	"3/8",	"1/24",	"1/12",	"1/6",	"1/3",	"2/3",	"3/4",	"1/1",	"2/1",	"4/1",	"8/1",	"16/1"
+		],
+		"arpClock":
+		[
+			"",	"1/128",	"1/64",	"1/32",	"1/16",	"1/8",	"1/4",	"3/128",	"3/64",	"3/32",	"3/16",	"1/48",	"1/24",	"1/12",	"1/6",	"1/3",	"3/8",	"1/2"
 		],
 		"phaserMode":
 		[
