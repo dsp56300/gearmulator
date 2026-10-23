@@ -13,6 +13,7 @@ namespace jucePluginEditorLib
 namespace juceRmlUi
 {
 	class ElemButton;
+	class ElemComboBox;
 }
 
 namespace n2xJucePlugin
@@ -76,6 +77,7 @@ namespace n2xJucePlugin
 		void onSelectedPatchChanged(uint8_t _part, const pluginLib::patchDB::PatchKey& _patchKey);
 		void setProgramMode(bool _programMode);
 		void updateArpHold() const;
+		void updateRomName() const;
 
 		Controller& m_controller;
 
@@ -100,5 +102,8 @@ namespace n2xJucePlugin
 		juceRmlUi::ElemButton* m_btArpHold = nullptr;
 		baseLib::EventListener<uint8_t> m_onArpHoldChanged;
 		baseLib::EventListener<uint8_t> m_onCurrentPartChangedForArpHold;
+
+		juceRmlUi::ElemComboBox* m_romSelector = nullptr;
+		baseLib::EventListener<uint32_t> m_onFirmwareChanged;
 	};
 }

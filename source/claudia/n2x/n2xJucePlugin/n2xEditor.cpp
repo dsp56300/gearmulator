@@ -21,6 +21,7 @@
 #include "jucePluginLib/pluginVersion.h"
 #include "juceRmlUi/rmlElemButton.h"
 #include "juceRmlUi/rmlElemComboBox.h"
+#include "juceRmlUi/rmlInterfaces.h"
 
 #include "n2xLib/n2xdevice.h"
 #include "n2xLib/n2xromloader.h"
@@ -43,21 +44,16 @@ namespace n2xJucePlugin
 			versionNumber->SetInnerRML(Rml::StringUtilities::EncodeRml(pluginLib::Version::getVersionString()));
 		}
 
-		if(auto* romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector"))
+		if((m_romSelector = findChild<juceRmlUi::ElemComboBox>("RomSelector")))
 		{
-			const auto rom = n2x::RomLoader::findROM();
+			m_romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
+			updateRomName();
 
-			if(rom.isValid())
+			// Reboot Device finds a ROM that was copied into the ROM folder after the plugin was loaded
+			m_onFirmwareChanged.set(getProcessor().evFirmwareChanged, [this](uint32_t)
 			{
-				const auto name = baseLib::filesystem::getFilenameWithoutPath(rom.getFilename());
-				romSelector->addOption(name);
-			}
-			else
-			{
-				romSelector->addOption("<No ROM found>");
-			}
-			romSelector->setValue(0);
-			romSelector->SetProperty(Rml::PropertyId::PointerEvents, Rml::Style::PointerEvents::None);
+				updateRomName();
+			});
 		}
 
 		using Led = jucePluginEditorLib::ParameterDrivenLed;
@@ -333,6 +329,15 @@ namespace n2xJucePlugin
 	void Editor::updateArpHold() const
 	{
 		m_btArpHold->setChecked(m_controller.isArpHold(m_controller.getCurrentPart()));
+	}
+
+	void Editor::updateRomName() const
+	{
+		const juceRmlUi::RmlInterfaces::ScopedAccess access(*getRmlComponent());
+
+		const auto rom = n2x::RomLoader::findROM();
+		m_romSelector->setOptions({rom.isValid() ? baseLib::filesystem::getFilenameWithoutPath(rom.getFilename()) : "<No ROM found>"});
+		m_romSelector->setSelectedIndex(0, false);
 	}
 
 	void Editor::setProgramMode(const bool _programMode)

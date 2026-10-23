@@ -1457,7 +1457,8 @@ namespace pluginLib
 
 		const auto rebooted = rebootDevice();
 
-		if (!names.empty())
+		// a product without a list of images looks its firmware up on each reboot, it may be another one now
+		if (!names.empty() || m_firmwareNames.empty())
 			evFirmwareChanged.retain(m_firmwareIndex);
 
 		return rebooted;

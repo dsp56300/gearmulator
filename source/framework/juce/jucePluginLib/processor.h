@@ -201,7 +201,7 @@ namespace pluginLib
 
 		// retained, a listener gets the current index when it is added. A state loaded by the host invokes it on the
 		// host's thread. Also invoked when rescanFirmwareAndReboot() found new images: without one before, the selected
-		// image is a new one
+		// image is a new one. For a product without a list of images, invoked after each rescanFirmwareAndReboot()
 		baseLib::Event<uint32_t> evFirmwareChanged;
 
 		auto& getMidiPorts() { return m_midiPorts; }
