@@ -20,73 +20,84 @@ namespace jeJucePlugin
 	PatchManager::PatchManager(AudioPluginAudioProcessor& _processor)
 	: jucePluginEditorLib::patchManager::PatchManager(_processor, DefaultGroupTypes)
 	, m_controller(static_cast<Controller&>(_processor.getController()))
+	, m_processor(_processor)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Type");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 
-		const auto& roms = _processor.getRoms();
+		PatchManager::startLoaderThread();
 
-		// add each device type only once
-		std::set<jeLib::DeviceType> knownDeviceTypes;
+		// retained, adds the banks of the ROMs found so far right away. A reboot appends the ROMs it found, a state loaded
+		// by the host selects another one on the host's thread
+		m_onFirmwareChanged.set(_processor.evFirmwareChanged, [this](uint32_t)
+		{
+			addRomBanks();
+		});
+	}
 
-		uint32_t bankIndex = 0;
-
-		// The loader thread reads m_presetsPerBank (loadRomData), so the table is complete before it starts
+	void PatchManager::addRomBanks()
+	{
 		std::vector<pluginLib::patchDB::DataSource> romBanks;
 
-		for (const auto& rom : roms)
 		{
-			if (!rom.isValid())
-				continue;
+			// the loader thread reads m_presetsPerBank (loadRomData)
+			const std::lock_guard lock(m_romBanksMutex);
 
-			if (!knownDeviceTypes.insert(rom.getDeviceType()).second)
-				continue;
+			auto bankIndex = static_cast<uint32_t>(m_presetsPerBank.size());
 
-			std::vector<std::vector<jeLib::Rom::Preset>> presets;
-			rom.getPresets(presets);
-
-			if (presets.empty())
-				continue;
-
-			for (auto p : presets)
-				m_presetsPerBank.emplace_back(std::move(p));
-
-			auto addRomBank = [&romBanks, &bankIndex](const std::string& _name)
+			for (const auto* rom : m_processor.getRoms())
 			{
-				pluginLib::patchDB::DataSource ds;
-				ds.type = pluginLib::patchDB::SourceType::Rom;
-				ds.bank = bankIndex;
-				ds.name = _name;
-				ds.midiBankNumber = bankIndex;
-				++bankIndex;
-				romBanks.push_back(std::move(ds));
-			};
+				if (!rom->isValid())
+					continue;
 
-			if (presets.size() == 3)
-			{
-				// keyboard: two banks of patches, one bank of performances
-				addRomBank("Keyboard - Patch P:A11 - P:A88");
-				addRomBank("Keyboard - Patch P:B11 - P:B88");
-				addRomBank("Keyboard - Performance P:11 - P:88");
-			}
-			else
-			{
-				addRomBank("Rack - Patch P1:A11 - P1:A88");
-				addRomBank("Rack - Patch P1:B11 - P1:B88");
-				addRomBank("Rack - Patch P2:A11 - P2:A88");
-				addRomBank("Rack - Patch P2:B11 - P2:B88");
-				addRomBank("Rack - Patch P3:A11 - P3:A88");
-				addRomBank("Rack - Patch P3:B11 - P3:B88");
-				addRomBank("Rack - Patch P4:A11 - P4:A88");
-				addRomBank("Rack - Patch P4:B11 - P4:B88");
-				addRomBank("Rack - Performance P1:11 - P1:88");
-				addRomBank("Rack - Performance P2:11 - P2:88");
-				addRomBank("Rack - Performance P3:11 - P3:88");
-				addRomBank("Rack - Performance P4:11 - P4:88");
+				// add each device type only once
+				if (!m_romDeviceTypes.insert(rom->getDeviceType()).second)
+					continue;
+
+				std::vector<std::vector<jeLib::Rom::Preset>> presets;
+				rom->getPresets(presets);
+
+				if (presets.empty())
+					continue;
+
+				for (auto p : presets)
+					m_presetsPerBank.emplace_back(std::move(p));
+
+				auto addRomBank = [&romBanks, &bankIndex](const std::string& _name)
+				{
+					pluginLib::patchDB::DataSource ds;
+					ds.type = pluginLib::patchDB::SourceType::Rom;
+					ds.bank = bankIndex;
+					ds.name = _name;
+					ds.midiBankNumber = bankIndex;
+					++bankIndex;
+					romBanks.push_back(std::move(ds));
+				};
+
+				if (presets.size() == 3)
+				{
+					// keyboard: two banks of patches, one bank of performances
+					addRomBank("Keyboard - Patch P:A11 - P:A88");
+					addRomBank("Keyboard - Patch P:B11 - P:B88");
+					addRomBank("Keyboard - Performance P:11 - P:88");
+				}
+				else
+				{
+					addRomBank("Rack - Patch P1:A11 - P1:A88");
+					addRomBank("Rack - Patch P1:B11 - P1:B88");
+					addRomBank("Rack - Patch P2:A11 - P2:A88");
+					addRomBank("Rack - Patch P2:B11 - P2:B88");
+					addRomBank("Rack - Patch P3:A11 - P3:A88");
+					addRomBank("Rack - Patch P3:B11 - P3:B88");
+					addRomBank("Rack - Patch P4:A11 - P4:A88");
+					addRomBank("Rack - Patch P4:B11 - P4:B88");
+					addRomBank("Rack - Performance P1:11 - P1:88");
+					addRomBank("Rack - Performance P2:11 - P2:88");
+					addRomBank("Rack - Performance P3:11 - P3:88");
+					addRomBank("Rack - Performance P4:11 - P4:88");
+				}
 			}
 		}
-
-		PatchManager::startLoaderThread();
 
 		for (const auto& ds : romBanks)
 			addDataSource(ds);
@@ -99,6 +110,8 @@ namespace jeJucePlugin
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, uint32_t _program)
 	{
+		const std::lock_guard lock(m_romBanksMutex);
+
 		if (_bank >= m_presetsPerBank.size())
 			return false;
 

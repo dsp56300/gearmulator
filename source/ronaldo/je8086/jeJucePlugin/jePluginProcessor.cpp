@@ -1,5 +1,7 @@
 #include "jePluginProcessor.h"
 
+#include <algorithm>
+
 #include "jeController.h"
 #include "jePatchManager.h"
 #include "jeEditor.h"
@@ -26,19 +28,12 @@ namespace jeJucePlugin
 	                   .withInput("Input", juce::AudioChannelSet::stereo(), true)
 		, {}, pluginLib::initProcessorProperties())
 	{
-		// findROMs() lists the JP-8000 images first, so the default, index 0, is the keyboard whenever there is one
-		m_roms = jeLib::RomLoader::findROMs();
-
-		std::vector<std::string> names;
-		names.reserve(m_roms.size());
-		for (const auto& rom : m_roms)
-			names.push_back(rom.getName());
-
 		// "ROM " v1: the device type, then the name. Of several images that match, the first one wins
 		FirmwareChunk chunk{"ROM ", 1};
 		chunk.write = [this](baseLib::BinaryStream& _s, const uint32_t _index)
 		{
-			const auto& rom = m_roms[_index];
+			const std::lock_guard lock(m_romsMutex);
+			const auto& rom = *m_roms[_index];
 			_s.write(static_cast<uint8_t>(rom.getDeviceType()));
 			_s.write(rom.getName());
 		};
@@ -47,14 +42,16 @@ namespace jeJucePlugin
 			const auto type = static_cast<jeLib::DeviceType>(_s.read<uint8_t>());
 			const auto name = _s.readString();
 
+			const std::lock_guard lock(m_romsMutex);
 			for (uint32_t i = 0; i < m_roms.size(); ++i)
 			{
-				if (m_roms[i].getDeviceType() == type && m_roms[i].getName() == name)
+				if (m_roms[i]->getDeviceType() == type && m_roms[i]->getName() == name)
 					return i;
 			}
 			return {};
 		};
-		setFirmwareImages(std::move(names), std::move(chunk));
+		// findROMs() lists the JP-8000 images first, so the default, index 0, is the keyboard whenever there is one
+		setFirmwareImages(findNewFirmwareImages(), std::move(chunk));
 
 		setPatchManager(new PatchManager(*this));
 	}
@@ -91,12 +88,45 @@ namespace jeJucePlugin
 
 	const jeLib::Rom& AudioPluginAudioProcessor::getSelectedRom() const
 	{
+		const std::lock_guard lock(m_romsMutex);
 		if (getFirmwareIndex() >= m_roms.size())
 		{
 			static jeLib::Rom emptyRom;
 			return emptyRom;
 		}
-		return m_roms[getFirmwareIndex()];
+		return *m_roms[getFirmwareIndex()];
+	}
+
+	std::vector<const jeLib::Rom*> AudioPluginAudioProcessor::getRoms() const
+	{
+		const std::lock_guard lock(m_romsMutex);
+		std::vector<const jeLib::Rom*> roms;
+		for (const auto& rom : m_roms)
+			roms.push_back(rom.get());
+		return roms;
+	}
+
+	std::vector<std::string> AudioPluginAudioProcessor::findNewFirmwareImages()
+	{
+		std::vector<std::string> names;
+
+		for (auto& rom : jeLib::RomLoader::findROMs())
+		{
+			// an image is its content, as for findROMs()
+			const auto listed = std::any_of(m_roms.begin(), m_roms.end(), [&rom](const auto& _listed)
+			{
+				return _listed->getData() == rom.getData();
+			});
+
+			if (listed)
+				continue;
+
+			names.push_back(rom.getName());
+
+			const std::lock_guard lock(m_romsMutex);
+			m_roms.push_back(std::make_unique<const jeLib::Rom>(std::move(rom)));
+		}
+		return names;
 	}
 }
 

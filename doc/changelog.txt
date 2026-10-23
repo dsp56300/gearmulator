@@ -15,6 +15,10 @@ Framework:
         was installed, for example the VST3 versions of Nodal Red 2x, Vavra and
         Xenia.
 
+- [Fix] EMU-277 "Reboot Device" in the MIDI settings now finds a ROM that was
+        copied into the ROM folder after the plugin was loaded, the plugin no
+        longer has to be loaded again. The selected ROM stays selected.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

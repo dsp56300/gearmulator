@@ -1,6 +1,11 @@
 #pragma once
 
+#include <mutex>
+#include <set>
+
 #include "jeLib/rom.h"
+
+#include "baseLib/event.h"
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
@@ -40,7 +45,16 @@ namespace jeJucePlugin
 		// what follows sending _patch to _part
 		void onPatchSent(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part);
 
+		// the banks of each device type that a ROM is listed for, a type that is there already adds nothing
+		void addRomBanks();
+
 		Controller& m_controller;
+		AudioPluginAudioProcessor& m_processor;
+
+		std::mutex m_romBanksMutex;
 		std::vector<std::vector<jeLib::Rom::Preset>> m_presetsPerBank;
+		std::set<jeLib::DeviceType> m_romDeviceTypes;
+
+		baseLib::EventListener<uint32_t> m_onFirmwareChanged;
 	};
 }

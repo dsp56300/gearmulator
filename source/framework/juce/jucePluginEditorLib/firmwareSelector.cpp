@@ -12,18 +12,14 @@ namespace jucePluginEditorLib
 	FirmwareSelector::FirmwareSelector(Editor& _editor, juceRmlUi::ElemComboBox* _comboBox, const std::string& _emptyText)
 		: m_editor(_editor)
 		, m_comboBox(_comboBox)
+		, m_emptyText(_emptyText)
 	{
 		if (!m_comboBox)
 			return;
 
 		auto& processor = m_editor.getProcessor();
-		const auto& names = processor.getFirmwareNames();
 
-		if (names.empty())
-			m_comboBox->addOption(_emptyText);
-
-		for (const auto& name : names)
-			m_comboBox->addOption(name);
+		update();
 
 		juceRmlUi::EventListener::Add(m_comboBox, Rml::EventId::Change, [this, &processor](Rml::Event&)
 		{
@@ -53,6 +49,11 @@ namespace jucePluginEditorLib
 	void FirmwareSelector::update() const
 	{
 		const juceRmlUi::RmlInterfaces::ScopedAccess access(*m_editor.getRmlComponent());
+
+		// the list grows when a reboot finds new images
+		const auto& names = m_editor.getProcessor().getFirmwareNames();
+		m_comboBox->setOptions(names.empty() ? std::vector<std::string>{m_emptyText} : names);
+
 		m_comboBox->setSelectedIndex(m_editor.getProcessor().getFirmwareIndex(), false);
 	}
 }

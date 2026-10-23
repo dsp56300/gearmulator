@@ -23,7 +23,7 @@ OsirusProcessor::OsirusProcessor() :
 	, legacyConfigOptions("DSP56300 Emulator"), pluginLib::initProcessorProperties()
 	, virusLib::DeviceModel::ABC)
 {
-	postConstruct(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::ABC));
+	postConstruct([] { return virusLib::ROMLoader::findROMs(virusLib::DeviceModel::ABC); });
 }
 
 jucePluginEditorLib::PluginEditorState* OsirusProcessor::createEditorState()

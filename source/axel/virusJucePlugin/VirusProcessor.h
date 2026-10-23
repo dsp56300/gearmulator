@@ -1,5 +1,9 @@
 #pragma once
 
+#include <functional>
+#include <memory>
+#include <mutex>
+
 #include "synthLib/plugin.h"
 #include "virusLib/device.h"
 
@@ -30,9 +34,7 @@ namespace virus
 
 	    const virusLib::ROMFile* getSelectedRom() const
 		{
-	        if(getFirmwareIndex() >= m_roms.size())
-	            return {};
-	        return &m_roms[getFirmwareIndex()];
+	        return getRom(getFirmwareIndex());
 		}
 
 	    virusLib::DeviceModel getModel() const
@@ -41,19 +43,21 @@ namespace virus
 			return rom ? rom->getModel() : virusLib::DeviceModel::Invalid;
 	    }
 
-	    const auto& getRoms() const { return m_roms; }
-
 	    uint32_t getPartCount() const
 	    {
 		    return getModel() == virusLib::DeviceModel::Snow ? 4 : 16;
 	    }
 
 	protected:
-	    void postConstruct(std::vector<virusLib::ROMFile>&& _roms);
+	    // _findRoms is called again by a reboot that the user asks for
+	    void postConstruct(std::function<std::vector<virusLib::ROMFile>()> _findRoms);
 
 	    // _____________
 		//
 	private:
+		const virusLib::ROMFile* getRom(uint32_t _index) const;
+		std::vector<std::string> findNewFirmwareImages() override;
+
 	    synthLib::Device* newDevice(const synthLib::DeviceCreateParams& _params) override;
 		void getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const override;
 
@@ -65,7 +69,11 @@ namespace virus
 	    //==============================================================================
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VirusProcessor)
 
-		std::vector<virusLib::ROMFile>      m_roms;
+		std::function<std::vector<virusLib::ROMFile>()> m_findRoms;
+		// Append only, each ROM in an allocation of its own: the loader thread of the patch manager and the audio thread
+		// use the selected one while a reboot appends the ROMs it found
+		std::vector<std::unique_ptr<const virusLib::ROMFile>> m_roms;
+		mutable std::mutex					m_romsMutex;
 	    const virusLib::DeviceModel			m_defaultModel;
 
 		baseLib::EventListener<uint32_t>	m_onFirmwareChanged;

@@ -26,7 +26,7 @@ OsTIrusProcessor::OsTIrusProcessor() :
 	, legacyConfigOptions("DSP56300Emulator_OsTIrus"), pluginLib::initProcessorProperties()
 	, virusLib::DeviceModel::TI2)
 {
-	postConstruct(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::TI2, virusLib::DeviceModel::Snow));
+	postConstruct([] { return virusLib::ROMLoader::findROMs(virusLib::DeviceModel::TI2, virusLib::DeviceModel::Snow); });
 }
 
 jucePluginEditorLib::PluginEditorState* OsTIrusProcessor::createEditorState()

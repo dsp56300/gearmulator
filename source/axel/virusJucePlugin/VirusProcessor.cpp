@@ -2,6 +2,8 @@
 #include "VirusController.h"
 #include "PatchManager.h"
 
+#include <algorithm>
+
 #include "baseLib/binarystream.h"
 #include "baseLib/filesystem.h"
 
@@ -36,21 +38,17 @@ namespace virus
 		static_cast<Controller&>(getController()).setHostClockTempo(bpmValue);
 	}
 
-	void VirusProcessor::postConstruct(std::vector<virusLib::ROMFile>&& _roms)
+	void VirusProcessor::postConstruct(std::function<std::vector<virusLib::ROMFile>()> _findRoms)
 	{
-		m_roms = std::move(_roms);
-
-		std::vector<std::string> names;
-		for (const auto& rom : m_roms)
-			names.push_back(juce::File(rom.getFilename()).getFileNameWithoutExtension().toStdString() + " (" + rom.getModelName() + ')');
+		m_findRoms = std::move(_findRoms);
 
 		// "ROM " version 1 had no model, it was always A/B/C
-		setFirmwareImages(std::move(names), {"ROM ", 2,
+		setFirmwareImages(findNewFirmwareImages(), {"ROM ", 2,
 			[this](baseLib::BinaryStream& _s, const uint32_t _index)
 			{
-				const auto& rom = m_roms[_index];
-				_s.write<uint8_t>(static_cast<uint8_t>(rom.getModel()));
-				_s.write(baseLib::filesystem::getFilenameWithoutPath(rom.getFilename()));
+				const auto* rom = getRom(_index);
+				_s.write<uint8_t>(static_cast<uint8_t>(rom->getModel()));
+				_s.write(baseLib::filesystem::getFilenameWithoutPath(rom->getFilename()));
 			},
 			[this](baseLib::BinaryStream& _s, const uint32_t _version) -> std::optional<uint32_t>
 			{
@@ -58,10 +56,11 @@ namespace virus
 				const auto romName = _s.readString();
 
 				// of two ROMs with that name, the one found last, as before
+				const std::lock_guard lock(m_romsMutex);
 				std::optional<uint32_t> found;
 				for(uint32_t i=0; i<static_cast<uint32_t>(m_roms.size()); ++i)
 				{
-					if(m_roms[i].getModel() == model && baseLib::filesystem::getFilenameWithoutPath(m_roms[i].getFilename()) == romName)
+					if(m_roms[i]->getModel() == model && baseLib::filesystem::getFilenameWithoutPath(m_roms[i]->getFilename()) == romName)
 						found = i;
 				}
 				return found;
@@ -76,6 +75,35 @@ namespace virus
 		});
 
 		setPatchManager(new genericVirusUI::PatchManager(*this));
+	}
+
+	const virusLib::ROMFile* VirusProcessor::getRom(const uint32_t _index) const
+	{
+		const std::lock_guard lock(m_romsMutex);
+		return _index < m_roms.size() ? m_roms[_index].get() : nullptr;
+	}
+
+	std::vector<std::string> VirusProcessor::findNewFirmwareImages()
+	{
+		std::vector<std::string> names;
+
+		for (auto& rom : m_findRoms())
+		{
+			// the same file as the same model, a TI firmware is listed once per model
+			const auto listed = std::any_of(m_roms.begin(), m_roms.end(), [&rom](const auto& _listed)
+			{
+				return _listed->getModel() == rom.getModel() && _listed->getFilename() == rom.getFilename();
+			});
+
+			if (listed)
+				continue;
+
+			names.push_back(juce::File(rom.getFilename()).getFileNameWithoutExtension().toStdString() + " (" + rom.getModelName() + ')');
+
+			const std::lock_guard lock(m_romsMutex);
+			m_roms.push_back(std::make_unique<const virusLib::ROMFile>(std::move(rom)));
+		}
+		return names;
 	}
 
 	synthLib::Device* VirusProcessor::newDevice(const synthLib::DeviceCreateParams& _params)

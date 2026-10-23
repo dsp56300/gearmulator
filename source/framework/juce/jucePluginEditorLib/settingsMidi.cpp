@@ -108,7 +108,7 @@ namespace jucePluginEditorLib
 
 	void SettingsMidi::panicRebootDevice() const
 	{
-		m_processor.rebootDevice();
+		m_processor.rescanFirmwareAndReboot();
 	}
 
 	void SettingsMidi::createMatrix(Rml::Element* _root, synthLib::MidiRoutingMatrix::EventType _type, const char* _name)

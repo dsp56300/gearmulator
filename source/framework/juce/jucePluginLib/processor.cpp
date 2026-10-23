@@ -250,7 +250,7 @@ namespace pluginLib
 					msg += "The firmware file needs to be copied to\n";
 					msg += baseLib::filesystem::validatePath(getPublicRomFolder()) + "\n";
 					msg += "\n";
-					msg += "The target folder will be opened once you click OK. Copy the firmware to this folder and reload the plugin.";
+					msg += "The target folder will be opened once you click OK. Copy the firmware to this folder, then click \"Reboot Device\" in the MIDI settings or reload the plugin.";
 #ifdef _DEBUG
 					msg += "\n\n" + std::string("[Debug] Host ") + host.toStdString() + "\n\n";
 #endif
@@ -1448,6 +1448,19 @@ namespace pluginLib
 
 		evFirmwareChanged.retain(m_firmwareIndex);
 		return true;
+	}
+
+	bool Processor::rescanFirmwareAndReboot()
+	{
+		auto names = findNewFirmwareImages();
+		m_firmwareNames.insert(m_firmwareNames.end(), std::make_move_iterator(names.begin()), std::make_move_iterator(names.end()));
+
+		const auto rebooted = rebootDevice();
+
+		if (!names.empty())
+			evFirmwareChanged.retain(m_firmwareIndex);
+
+		return rebooted;
 	}
 
 	bool Processor::rebootDevice()

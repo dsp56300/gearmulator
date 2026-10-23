@@ -27,6 +27,7 @@ namespace jucePluginEditorLib
 
 		Editor& m_editor;
 		juceRmlUi::ElemComboBox* const m_comboBox;
+		const std::string m_emptyText;
 		const std::shared_ptr<bool> m_alive = std::make_shared<bool>(true);
 		baseLib::EventListener<uint32_t> m_onFirmwareChanged;
 	};
