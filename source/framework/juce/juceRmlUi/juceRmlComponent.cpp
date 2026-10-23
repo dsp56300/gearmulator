@@ -1817,6 +1817,12 @@ namespace juceRmlUi
 		m_drag.itemDragEnter(_dragSourceDetails);
 	}
 
+	void RmlComponent::itemDragMove(const SourceDetails& _dragSourceDetails)
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		m_drag.itemDragMove(_dragSourceDetails);
+	}
+
 	void RmlComponent::itemDragExit(const SourceDetails& _dragSourceDetails)
 	{
 		RmlInterfaces::ScopedAccess access(*this);

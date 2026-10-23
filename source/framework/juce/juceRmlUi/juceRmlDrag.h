@@ -58,7 +58,11 @@ namespace juceRmlUi
 		void fileDragExit(const juce::StringArray& _files);
 		void filesDropped(const juce::StringArray& _files, int _x, int _y);
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
+		// A drag of another component of this process, another instance of the plugin for example. One that exports files
+		// comes in as a drag of these files: two windows of the plugin are JUCE windows both, JUCE does not let the drag
+		// leave as one of files while the mouse is on one of them
 		void itemDragEnter(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
+		void itemDragMove(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const;
 		void itemDragExit(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
 		void itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
 		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles);
@@ -81,5 +85,6 @@ namespace juceRmlUi
 		UnhandledFilesCallback m_onUnhandledFiles;
 		bool m_lastDropHandled = false;
 		bool m_externalDragStarted = false;
+		juce::StringArray m_foreignFiles;	// of a drag that another component started, see itemDragEnter
 	};
 }

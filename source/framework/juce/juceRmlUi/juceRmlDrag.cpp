@@ -108,19 +108,45 @@ namespace juceRmlUi
 		return true;
 	}
 
-	// ReSharper disable once CppMemberFunctionMayBeStatic
 	void RmlDrag::itemDragEnter(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
+		// not a drag of this component, which stays one of elements
+		const auto* draggable = dynamic_cast<JuceDraggable*>(_dragSourceDetails.description.getObject());
+		if (!draggable || draggable == m_juceDraggable || !draggable->data || !draggable->data->canExportAsFiles())
+			return;
+
+		std::vector<std::string> files;
+		bool temporary = false;
+		draggable->data->getFilesForExport(files, temporary);
+		m_foreignFiles.clear();
+		for (const auto& file : files)
+			m_foreignFiles.add(juce::String(file));
+
+		if (!m_foreignFiles.isEmpty())
+			fileDragEnter(m_foreignFiles, _dragSourceDetails.localPosition.x, _dragSourceDetails.localPosition.y);
 	}
 
-	// ReSharper disable once CppMemberFunctionMayBeStatic
-	void RmlDrag::itemDragExit(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
+	void RmlDrag::itemDragMove(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const
 	{
+		if (!m_foreignFiles.isEmpty())
+			fileDragMove(m_foreignFiles, _dragSourceDetails.localPosition.x, _dragSourceDetails.localPosition.y);
 	}
 
-	// ReSharper disable once CppMemberFunctionMayBeStatic
+	void RmlDrag::itemDragExit(const juce::DragAndDropTarget::SourceDetails&)
+	{
+		if (m_foreignFiles.isEmpty())
+			return;
+		fileDragExit(m_foreignFiles);
+		m_foreignFiles.clear();
+	}
+
 	void RmlDrag::itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
+		if (m_foreignFiles.isEmpty())
+			return;
+		const auto files = m_foreignFiles;
+		m_foreignFiles.clear();
+		filesDropped(files, _dragSourceDetails.localPosition.x, _dragSourceDetails.localPosition.y);
 	}
 
 	bool RmlDrag::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles)
@@ -175,7 +201,8 @@ namespace juceRmlUi
 
 		m_juceDraggable = new JuceDraggable();
 		m_juceDraggable->data = dd;
-		m_component.startDragging(m_juceDraggable, &m_component);
+		// to the windows of other instances too, see itemDragEnter
+		m_component.startDragging(m_juceDraggable, &m_component, juce::ScaledImage(), true);
 	}
 
 	void RmlDrag::startDrag(int _x, int _y, const juce::StringArray& _files)

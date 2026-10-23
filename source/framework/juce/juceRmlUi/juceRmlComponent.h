@@ -122,6 +122,7 @@ namespace juceRmlUi
 		void filesDropped(const juce::StringArray& _files, int _x, int _y) override;
 		bool isInterestedInDragSource(const SourceDetails& _dragSourceDetails) override;
 		void itemDragEnter(const SourceDetails& _dragSourceDetails) override;
+		void itemDragMove(const SourceDetails& _dragSourceDetails) override;
 		void itemDragExit(const SourceDetails& _dragSourceDetails) override;
 		void itemDropped(const SourceDetails& _dragSourceDetails) override;
 		bool shouldDropFilesWhenDraggedExternally(const SourceDetails& _sourceDetails, juce::StringArray& _files, bool& _canMoveFiles) override;
