@@ -28,6 +28,10 @@ Osirus/OsTIrus:
         on a DSPBridge server. Arp>Matrix on the Virus TI still follows MIDI
         clock.
 
+- [Fix] #285 In single mode, MIDI Learn mappings with automatic part selection
+        and the MIDI Learn indicators only worked on MIDI channel 1. They now
+        follow the MIDI channel set in the Virus' global settings.
+
 Osirus:
 
 - [Fix] #49 The Arp Clock selection showed the values of the LFO clock: it
