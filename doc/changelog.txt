@@ -32,6 +32,11 @@ Osirus/OsTIrus:
         and the MIDI Learn indicators only worked on MIDI channel 1. They now
         follow the MIDI channel set in the Virus' global settings.
 
+- [Fix] #290 A controller dump requested via sysex sent the poly pressure
+        parameters (page B) of every part on the first MIDI channel, so a
+        receiver applied them to part 1. They now go out on the channel of the
+        part, as the control changes (page A) do.
+
 Osirus:
 
 - [Fix] #49 The Arp Clock selection showed the values of the LFO clock: it
