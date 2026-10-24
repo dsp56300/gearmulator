@@ -1015,6 +1015,138 @@
 	knob_mid_127: 686px 588px 98px 98px;
 	src: knob_mid_page0.png;
 }
+@spritesheet knob_mid_bipolar_page0
+{
+	knob_mid_bipolar_000: 0px 0px 98px 98px;
+	knob_mid_bipolar_001: 98px 0px 98px 98px;
+	knob_mid_bipolar_002: 196px 0px 98px 98px;
+	knob_mid_bipolar_003: 294px 0px 98px 98px;
+	knob_mid_bipolar_004: 392px 0px 98px 98px;
+	knob_mid_bipolar_005: 490px 0px 98px 98px;
+	knob_mid_bipolar_006: 588px 0px 98px 98px;
+	knob_mid_bipolar_007: 686px 0px 98px 98px;
+	knob_mid_bipolar_008: 784px 0px 98px 98px;
+	knob_mid_bipolar_009: 882px 0px 98px 98px;
+	knob_mid_bipolar_010: 980px 0px 98px 98px;
+	knob_mid_bipolar_011: 1078px 0px 98px 98px;
+	knob_mid_bipolar_012: 1176px 0px 98px 98px;
+	knob_mid_bipolar_013: 1274px 0px 98px 98px;
+	knob_mid_bipolar_014: 1372px 0px 98px 98px;
+	knob_mid_bipolar_015: 1470px 0px 98px 98px;
+	knob_mid_bipolar_016: 1568px 0px 98px 98px;
+	knob_mid_bipolar_017: 1666px 0px 98px 98px;
+	knob_mid_bipolar_018: 1764px 0px 98px 98px;
+	knob_mid_bipolar_019: 1862px 0px 98px 98px;
+	knob_mid_bipolar_020: 0px 98px 98px 98px;
+	knob_mid_bipolar_021: 98px 98px 98px 98px;
+	knob_mid_bipolar_022: 196px 98px 98px 98px;
+	knob_mid_bipolar_023: 294px 98px 98px 98px;
+	knob_mid_bipolar_024: 392px 98px 98px 98px;
+	knob_mid_bipolar_025: 490px 98px 98px 98px;
+	knob_mid_bipolar_026: 588px 98px 98px 98px;
+	knob_mid_bipolar_027: 686px 98px 98px 98px;
+	knob_mid_bipolar_028: 784px 98px 98px 98px;
+	knob_mid_bipolar_029: 882px 98px 98px 98px;
+	knob_mid_bipolar_030: 980px 98px 98px 98px;
+	knob_mid_bipolar_031: 1078px 98px 98px 98px;
+	knob_mid_bipolar_032: 1176px 98px 98px 98px;
+	knob_mid_bipolar_033: 1274px 98px 98px 98px;
+	knob_mid_bipolar_034: 1372px 98px 98px 98px;
+	knob_mid_bipolar_035: 1470px 98px 98px 98px;
+	knob_mid_bipolar_036: 1568px 98px 98px 98px;
+	knob_mid_bipolar_037: 1666px 98px 98px 98px;
+	knob_mid_bipolar_038: 1764px 98px 98px 98px;
+	knob_mid_bipolar_039: 1862px 98px 98px 98px;
+	knob_mid_bipolar_040: 0px 196px 98px 98px;
+	knob_mid_bipolar_041: 98px 196px 98px 98px;
+	knob_mid_bipolar_042: 196px 196px 98px 98px;
+	knob_mid_bipolar_043: 294px 196px 98px 98px;
+	knob_mid_bipolar_044: 392px 196px 98px 98px;
+	knob_mid_bipolar_045: 490px 196px 98px 98px;
+	knob_mid_bipolar_046: 588px 196px 98px 98px;
+	knob_mid_bipolar_047: 686px 196px 98px 98px;
+	knob_mid_bipolar_048: 784px 196px 98px 98px;
+	knob_mid_bipolar_049: 882px 196px 98px 98px;
+	knob_mid_bipolar_050: 980px 196px 98px 98px;
+	knob_mid_bipolar_051: 1078px 196px 98px 98px;
+	knob_mid_bipolar_052: 1176px 196px 98px 98px;
+	knob_mid_bipolar_053: 1274px 196px 98px 98px;
+	knob_mid_bipolar_054: 1372px 196px 98px 98px;
+	knob_mid_bipolar_055: 1470px 196px 98px 98px;
+	knob_mid_bipolar_056: 1568px 196px 98px 98px;
+	knob_mid_bipolar_057: 1666px 196px 98px 98px;
+	knob_mid_bipolar_058: 1764px 196px 98px 98px;
+	knob_mid_bipolar_059: 1862px 196px 98px 98px;
+	knob_mid_bipolar_060: 0px 294px 98px 98px;
+	knob_mid_bipolar_061: 98px 294px 98px 98px;
+	knob_mid_bipolar_062: 196px 294px 98px 98px;
+	knob_mid_bipolar_063: 294px 294px 98px 98px;
+	knob_mid_bipolar_064: 392px 294px 98px 98px;
+	knob_mid_bipolar_065: 490px 294px 98px 98px;
+	knob_mid_bipolar_066: 588px 294px 98px 98px;
+	knob_mid_bipolar_067: 686px 294px 98px 98px;
+	knob_mid_bipolar_068: 784px 294px 98px 98px;
+	knob_mid_bipolar_069: 882px 294px 98px 98px;
+	knob_mid_bipolar_070: 980px 294px 98px 98px;
+	knob_mid_bipolar_071: 1078px 294px 98px 98px;
+	knob_mid_bipolar_072: 1176px 294px 98px 98px;
+	knob_mid_bipolar_073: 1274px 294px 98px 98px;
+	knob_mid_bipolar_074: 1372px 294px 98px 98px;
+	knob_mid_bipolar_075: 1470px 294px 98px 98px;
+	knob_mid_bipolar_076: 1568px 294px 98px 98px;
+	knob_mid_bipolar_077: 1666px 294px 98px 98px;
+	knob_mid_bipolar_078: 1764px 294px 98px 98px;
+	knob_mid_bipolar_079: 1862px 294px 98px 98px;
+	knob_mid_bipolar_080: 0px 392px 98px 98px;
+	knob_mid_bipolar_081: 98px 392px 98px 98px;
+	knob_mid_bipolar_082: 196px 392px 98px 98px;
+	knob_mid_bipolar_083: 294px 392px 98px 98px;
+	knob_mid_bipolar_084: 392px 392px 98px 98px;
+	knob_mid_bipolar_085: 490px 392px 98px 98px;
+	knob_mid_bipolar_086: 588px 392px 98px 98px;
+	knob_mid_bipolar_087: 686px 392px 98px 98px;
+	knob_mid_bipolar_088: 784px 392px 98px 98px;
+	knob_mid_bipolar_089: 882px 392px 98px 98px;
+	knob_mid_bipolar_090: 980px 392px 98px 98px;
+	knob_mid_bipolar_091: 1078px 392px 98px 98px;
+	knob_mid_bipolar_092: 1176px 392px 98px 98px;
+	knob_mid_bipolar_093: 1274px 392px 98px 98px;
+	knob_mid_bipolar_094: 1372px 392px 98px 98px;
+	knob_mid_bipolar_095: 1470px 392px 98px 98px;
+	knob_mid_bipolar_096: 1568px 392px 98px 98px;
+	knob_mid_bipolar_097: 1666px 392px 98px 98px;
+	knob_mid_bipolar_098: 1764px 392px 98px 98px;
+	knob_mid_bipolar_099: 1862px 392px 98px 98px;
+	knob_mid_bipolar_100: 0px 490px 98px 98px;
+	knob_mid_bipolar_101: 98px 490px 98px 98px;
+	knob_mid_bipolar_102: 196px 490px 98px 98px;
+	knob_mid_bipolar_103: 294px 490px 98px 98px;
+	knob_mid_bipolar_104: 392px 490px 98px 98px;
+	knob_mid_bipolar_105: 490px 490px 98px 98px;
+	knob_mid_bipolar_106: 588px 490px 98px 98px;
+	knob_mid_bipolar_107: 686px 490px 98px 98px;
+	knob_mid_bipolar_108: 784px 490px 98px 98px;
+	knob_mid_bipolar_109: 882px 490px 98px 98px;
+	knob_mid_bipolar_110: 980px 490px 98px 98px;
+	knob_mid_bipolar_111: 1078px 490px 98px 98px;
+	knob_mid_bipolar_112: 1176px 490px 98px 98px;
+	knob_mid_bipolar_113: 1274px 490px 98px 98px;
+	knob_mid_bipolar_114: 1372px 490px 98px 98px;
+	knob_mid_bipolar_115: 1470px 490px 98px 98px;
+	knob_mid_bipolar_116: 1568px 490px 98px 98px;
+	knob_mid_bipolar_117: 1666px 490px 98px 98px;
+	knob_mid_bipolar_118: 1764px 490px 98px 98px;
+	knob_mid_bipolar_119: 1862px 490px 98px 98px;
+	knob_mid_bipolar_120: 0px 588px 98px 98px;
+	knob_mid_bipolar_121: 98px 588px 98px 98px;
+	knob_mid_bipolar_122: 196px 588px 98px 98px;
+	knob_mid_bipolar_123: 294px 588px 98px 98px;
+	knob_mid_bipolar_124: 392px 588px 98px 98px;
+	knob_mid_bipolar_125: 490px 588px 98px 98px;
+	knob_mid_bipolar_126: 588px 588px 98px 98px;
+	knob_mid_bipolar_127: 686px 588px 98px 98px;
+	src: knob_mid_bipolar_page0.png;
+}
 @spritesheet knob_small_page0
 {
 	knob_small_000: 0px 0px 70px 70px;
@@ -2837,6 +2969,11 @@
 {
 	frames: 128;
 	spriteprefix: knob_mid_;
+}
+.knob3bipolar
+{
+	frames: 128;
+	spriteprefix: knob_mid_bipolar_;
 }
 .list, .grid, .pm-infopanel
 {

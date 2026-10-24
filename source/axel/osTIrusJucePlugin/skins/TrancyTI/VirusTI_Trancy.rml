@@ -165,7 +165,7 @@
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="PulseWidth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Pulsewidth" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
-				<knob id="Shape" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Shape" style="left: 498dp; top: 187dp; width: 98dp; height: 98dp;"/>
+				<knob id="Shape" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc1 Shape" style="left: 498dp; top: 187dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerOsc1ModeHyperSaw" class="jucePos" data-class-juceConditionDisabled="!(Osc1_Mode_value == 1)" data-model="partCurrent" style="left: 21dp; top: 41dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_hypersaw.png scale-none left top);">
 				<div id="Osc1HyperSawDetuneSpreadText" class="jucePos juceLabel text4" data-model="partCurrent" param="Osc1 HyperSaw/DetuneSpread" style="left: 150dp; top: 168dp; width: 80dp; height: 45dp; line-height: 45dp;">{{Osc1_HyperSaw_DetuneSpread_text}}</div>
@@ -212,7 +212,7 @@
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="PulseWidth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Pulsewidth" style="left: 24dp; top: 187dp; width: 98dp; height: 98dp;"/>
-				<knob id="Shape" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Shape" style="left: 498dp; top: 187dp; width: 98dp; height: 98dp;"/>
+				<knob id="Shape" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc2 Shape" style="left: 498dp; top: 187dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerOsc2ModeHyperSaw" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 1)" data-model="partCurrent" style="left: 1317dp; top: 44dp; width: 651dp; height: 621dp; decorator: image(panel_3_osc_hypersaw.png scale-none left top);">
 				<div id="Osc2HyperSawDetuneSpreadText" class="jucePos juceLabel text4" data-model="partCurrent" param="Osc2 HyperSaw/DetuneSpread" style="left: 150dp; top: 168dp; width: 80dp; height: 45dp; line-height: 45dp;">{{Osc2_HyperSaw_DetuneSpread_text}}</div>
@@ -262,8 +262,8 @@
 			</combo>
 			<div id="ContainerOsc2Mode" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 0)" data-model="partCurrent" style="left: 664dp; top: 56dp; width: 643dp; height: 476dp; decorator: image(dummy.png scale-none left top);">
 				<knob id="Osc2 FM Amount" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 FM Amount" style="left: 506dp; top: 330dp; width: 98dp; height: 98dp;"/>
-				<knob id="Osc2 Filt Env Amt" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Filt Env Amt" style="left: 505dp; top: 20dp; width: 98dp; height: 98dp;"/>
-				<knob id="FM Filt Env Amt" class="jucePos juceRotary knob3" data-model="partCurrent" param="FM Filt Env Amt" style="left: 33dp; top: 330dp; width: 98dp; height: 98dp;"/>
+				<knob id="Osc2 Filt Env Amt" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc2 Filt Env Amt" style="left: 505dp; top: 20dp; width: 98dp; height: 98dp;"/>
+				<knob id="FM Filt Env Amt" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="FM Filt Env Amt" style="left: 33dp; top: 330dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerOsc2HyperSaw" class="jucePos" data-class-juceConditionDisabled="!(Osc2_Mode_value == 1)" data-model="partCurrent" style="left: 664dp; top: 56dp; width: 643dp; height: 476dp; decorator: image(dummy.png scale-none left top);">
 				<knob id="Osc2 HyperSaw/CrossOscSyncFreq" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 HyperSaw/CrossOscSyncFreq" style="left: 506dp; top: 330dp; width: 98dp; height: 98dp;"/>
@@ -288,24 +288,24 @@
 				<buttonhittest class="jucePos" style="left: 0dp; top: 0dp; width: 199dp; height: 58dp;"/>
 			</button>
 			<button id="Subosc Shape" class="jucePos juceButton button_sub" data-model="partCurrent" isToggle="1" param="Suboscillator Shape" style="left: 49dp; top: 388dp; width: 98dp; height: 96dp;"/>
-			<knob id="Semitone" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Semitone" style="left: 208dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="Keyfollow" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Keyfollow" style="left: 366dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="Semitone" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Semitone" style="left: 1503dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="Keyfollow" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Keyfollow" style="left: 1661dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="Semitone" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc1 Semitone" style="left: 208dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="Keyfollow" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc1 Keyfollow" style="left: 366dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="Semitone" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc2 Semitone" style="left: 1503dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="Keyfollow" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc2 Keyfollow" style="left: 1661dp; top: 386dp; width: 98dp; height: 98dp;"/>
 			<knob id="Osc2 Detune" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Detune" style="left: 1345dp; top: 386dp; width: 98dp; height: 98dp;"/>
 			<knob id="PhaseInit" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc Init Phase" style="left: 697dp; top: 76dp; width: 98dp; height: 98dp;"/>
 			<knob id="Portamento" class="jucePos juceRotary knob3" data-model="partCurrent" param="Portamento Time" style="left: 1013dp; top: 76dp; width: 98dp; height: 98dp;"/>
-			<knob id="Semitone" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc3 Semitone" style="left: 364dp; top: 645dp; width: 98dp; height: 98dp;"/>
+			<knob id="Semitone" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc3 Semitone" style="left: 364dp; top: 645dp; width: 98dp; height: 98dp;"/>
 			<knob id="Detune" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc3 Detune" style="left: 522dp; top: 645dp; width: 98dp; height: 98dp;"/>
 			<knob id="UnisonDetune" class="jucePos juceRotary knob3" data-model="partCurrent" param="Unison Detune" style="left: 364dp; top: 882dp; width: 98dp; height: 98dp;"/>
 			<knob id="UnisonPanSpread" class="jucePos juceRotary knob3" data-model="partCurrent" param="Unison Pan Spread" style="left: 522dp; top: 882dp; width: 98dp; height: 98dp;"/>
 			<knob id="UnisonPhase" class="jucePos juceRotary knob3" data-model="partCurrent" param="Unison Lfo Phase" style="left: 680dp; top: 882dp; width: 98dp; height: 98dp;"/>
-			<knob id="NoiseColor" class="jucePos juceRotary knob3" data-model="partCurrent" param="Noise Color" style="left: 904dp; top: 645dp; width: 98dp; height: 98dp;"/>
+			<knob id="NoiseColor" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Noise Color" style="left: 904dp; top: 645dp; width: 98dp; height: 98dp;"/>
 			<knob id="Punch" class="jucePos juceRotary knob3" data-model="partCurrent" param="Punch Intensity" style="left: 904dp; top: 882dp; width: 98dp; height: 98dp;"/>
-			<knob id="VeloModOsc1Shape" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc1 Shape Velocity" style="left: 524dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="VeloModOsc2Shape" class="jucePos juceRotary knob3" data-model="partCurrent" param="Osc2 Shape Velocity" style="left: 1819dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="VeloModPW" class="jucePos juceRotary knob3" data-model="partCurrent" param="PulseWidth Velocity" style="left: 855dp; top: 76dp; width: 98dp; height: 98dp;"/>
-			<knob id="VeloModFMAmount" class="jucePos juceRotary knob3" data-model="partCurrent" param="Fm Amount Velocity" style="left: 938dp; top: 250dp; width: 98dp; height: 98dp;"/>
+			<knob id="VeloModOsc1Shape" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc1 Shape Velocity" style="left: 524dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="VeloModOsc2Shape" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Osc2 Shape Velocity" style="left: 1819dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="VeloModPW" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="PulseWidth Velocity" style="left: 855dp; top: 76dp; width: 98dp; height: 98dp;"/>
+			<knob id="VeloModFMAmount" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Fm Amount Velocity" style="left: 938dp; top: 250dp; width: 98dp; height: 98dp;"/>
 			<input id="OscBalance" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Osc Balance" type="range" style="left: 1137dp; top: 660dp; width: 355dp; height: 63dp;"/>
 			<input id="OscLevel" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Osc Mainvolume" type="range" style="left: 1572dp; top: 660dp; width: 355dp; height: 63dp;"/>
 			<input id="Osc3Level" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Osc3 Volume" type="range" style="left: 1137dp; top: 783dp; width: 355dp; height: 63dp;"/>
@@ -375,33 +375,33 @@
 			<div id="FilterRouting_par_img" class="jucePos" data-class-juceConditionDisabled="!(Filter_Routing_value == 2)" data-model="partCurrent" style="left: 820dp; top: 222dp; width: 502dp; height: 111dp; decorator: image(filter_mode_routing_par.png scale-none left top);"/>
 			<div id="FilterRouting_split_img" class="jucePos" data-class-juceConditionDisabled="!(Filter_Routing_value == 3)" data-model="partCurrent" style="left: 735dp; top: 222dp; width: 502dp; height: 111dp; decorator: image(filter_mode_routing_split.png scale-none left top);"/>
 			<knob id="EnvAmount1" class="jucePos juceRotary knob3" controllerLinkCondition="LinkEnv" controllerLinkTarget="EnvAmount2" data-model="partCurrent" param="Filter1 Env Amt" style="left: 50dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="Keyfollow1" class="jucePos juceRotary knob3" controllerLinkCondition="LinkEnv" controllerLinkTarget="Keyfollow2" data-model="partCurrent" param="Filter1 Keyfollow" style="left: 524dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="ResVelo1" class="jucePos juceRotary knob3" data-model="partCurrent" param="Resonance1 Velocity" style="left: 366dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="EnvVelo1" class="jucePos juceRotary knob3" data-model="partCurrent" param="Flt1 EnvAmt Velocity" style="left: 208dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="Keyfollow1" class="jucePos juceRotary knob3bipolar" controllerLinkCondition="LinkEnv" controllerLinkTarget="Keyfollow2" data-model="partCurrent" param="Filter1 Keyfollow" style="left: 524dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="ResVelo1" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Resonance1 Velocity" style="left: 366dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="EnvVelo1" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Flt1 EnvAmt Velocity" style="left: 208dp; top: 386dp; width: 98dp; height: 98dp;"/>
 			<knob id="EnvAmount2" class="jucePos juceRotary knob3" controllerLinkCondition="LinkEnv" controllerLinkTarget="EnvAmount1" data-model="partCurrent" param="Filter2 Env Amt" style="left: 1345dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="Keyfollow2" class="jucePos juceRotary knob3" controllerLinkCondition="LinkEnv" controllerLinkTarget="Keyfollow1" data-model="partCurrent" param="Filter2 Keyfollow" style="left: 1819dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="ResVelo2" class="jucePos juceRotary knob3" data-model="partCurrent" param="Resonance2 Velocity" style="left: 1661dp; top: 386dp; width: 98dp; height: 98dp;"/>
-			<knob id="EnvVelo2" class="jucePos juceRotary knob3" data-model="partCurrent" param="Flt2 EnvAmt Velocity" style="left: 1503dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="Keyfollow2" class="jucePos juceRotary knob3bipolar" controllerLinkCondition="LinkEnv" controllerLinkTarget="Keyfollow1" data-model="partCurrent" param="Filter2 Keyfollow" style="left: 1819dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="ResVelo2" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Resonance2 Velocity" style="left: 1661dp; top: 386dp; width: 98dp; height: 98dp;"/>
+			<knob id="EnvVelo2" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Flt2 EnvAmt Velocity" style="left: 1503dp; top: 386dp; width: 98dp; height: 98dp;"/>
 			<input id="FilterBalance" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Filter Balance" type="range" style="left: 685dp; top: 52dp; width: 593dp; height: 63dp;"/>
 			<img id="4_filter_env_filter" class="jucePos" src="panel_4_filter_env_filter.png" tabgroup="envelopeSelect" tabpage="0" style="left: 0dp; top: 572dp; ">
 				<knob id="Attack" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Env Attack" style="left: 50dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Decay" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Env Decay" style="left: 208dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Sustain" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Env Sustain" style="left: 366dp; top: 72dp; width: 98dp; height: 98dp;"/>
-				<knob id="Time" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Env Sustain Time" style="left: 524dp; top: 72dp; width: 98dp; height: 98dp;"/>
+				<knob id="Time" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Filter Env Sustain Time" style="left: 524dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Release" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Env Release" style="left: 682dp; top: 72dp; width: 98dp; height: 98dp;"/>
 			</img>
 			<img id="4_filter_env_3" class="jucePos" src="panel_4_filter_env_3.png" tabgroup="envelopeSelect" tabpage="1" style="left: 0dp; top: 572dp;">
 				<knob id="Attack" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 3/Attack" style="left: 50dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Decay" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 3/Decay" style="left: 208dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Sustain" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 3/Sustain" style="left: 366dp; top: 72dp; width: 98dp; height: 98dp;"/>
-				<knob id="Time" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 3/Sustain Time" style="left: 524dp; top: 72dp; width: 98dp; height: 98dp;"/>
+				<knob id="Time" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Envelope 3/Sustain Time" style="left: 524dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Release" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 3/Release" style="left: 682dp; top: 72dp; width: 98dp; height: 98dp;"/>
 			</img>
 			<img id="4_filter_env_4" class="jucePos" src="panel_4_filter_env_4.png" tabgroup="envelopeSelect" tabpage="2" style="left: 0dp; top: 572dp;">
 				<knob id="Attack" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 4/Attack" style="left: 50dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Decay" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 4/Decay" style="left: 208dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Sustain" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 4/Sustain" style="left: 366dp; top: 72dp; width: 98dp; height: 98dp;"/>
-				<knob id="Time" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 4/Sustain Time" style="left: 524dp; top: 72dp; width: 98dp; height: 98dp;"/>
+				<knob id="Time" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Envelope 4/Sustain Time" style="left: 524dp; top: 72dp; width: 98dp; height: 98dp;"/>
 				<knob id="Release" class="jucePos juceRotary knob3" data-model="partCurrent" param="Envelope 4/Release" style="left: 682dp; top: 72dp; width: 98dp; height: 98dp;"/>
 			</img>
 			<button id="button_env_filter" class="jucePos juceButton button_1" isToggle="1" tabbutton="0" tabgroup="envelopeSelect" style="left: 825dp; top: 606dp; width: 79dp; height: 78dp;">
@@ -416,7 +416,7 @@
 			<knob id="Attack" class="jucePos juceRotary knob3" data-model="partCurrent" param="Amp Env Attack" style="left: 50dp; top: 881dp; width: 98dp; height: 98dp;"/>
 			<knob id="Decay" class="jucePos juceRotary knob3" data-model="partCurrent" param="Amp Env Decay" style="left: 208dp; top: 881dp; width: 98dp; height: 98dp;"/>
 			<knob id="Sustain" class="jucePos juceRotary knob3" data-model="partCurrent" param="Amp Env Sustain" style="left: 366dp; top: 881dp; width: 98dp; height: 98dp;"/>
-			<knob id="Time" class="jucePos juceRotary knob3" data-model="partCurrent" param="Amp Env Sustain Time" style="left: 524dp; top: 881dp; width: 98dp; height: 98dp;"/>
+			<knob id="Time" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Amp Env Sustain Time" style="left: 524dp; top: 881dp; width: 98dp; height: 98dp;"/>
 			<knob id="Release" class="jucePos juceRotary knob3" data-model="partCurrent" param="Amp Env Release" style="left: 682dp; top: 881dp; width: 98dp; height: 98dp;"/>
 		</div>
 		<div id="page_5_lfo" class="jucePos" tabgroup="pages" tabpage="4" style="left: 571dp; top: 129dp; width: 1971dp; height: 1026dp; decorator: image(panel_5_lfo.png scale-none left top);">
@@ -442,12 +442,12 @@
 			<knob id="LfoKeyfollow" class="jucePos juceRotary knob3" data-model="partCurrent" param="Lfo1 Keyfollow" style="left: 242dp; top: 85dp; width: 98dp; height: 98dp;"/>
 			<knob id="LfoKeytrigger" class="jucePos juceRotary knob3" data-model="partCurrent" param="Lfo1 Keytrigger" style="left: 400dp; top: 85dp; width: 98dp; height: 98dp;"/>
 			<input id="LfoSymmetry" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Lfo1 Symmetry" type="range" style="left: 64dp; top: 263dp; width: 355dp; height: 63dp;"/>
-			<knob id="LfoOsc1Pitch" class="jucePos juceRotary knob3" controllerLinkCondition="LfoOscPitchLink" controllerLinkTarget="LfoOsc2Pitch" data-model="partCurrent" param="Osc1 Lfo1 Amount" style="left: 1169dp; top: 75dp; width: 98dp; height: 98dp;"/>
-			<knob id="LfoOsc2Pitch" class="jucePos juceRotary knob3" controllerLinkCondition="LfoOscPitchLink" controllerLinkTarget="LfoOsc1Pitch" data-model="partCurrent" param="Osc2 Lfo1 Amount" style="left: 1327dp; top: 75dp; width: 98dp; height: 98dp;"/>
-			<knob id="LfoPW12" class="jucePos juceRotary knob3" data-model="partCurrent" param="PW Lfo1 Amount" style="left: 1485dp; top: 75dp; width: 98dp; height: 98dp;"/>
-			<knob id="LfoReso12" class="jucePos juceRotary knob3" data-model="partCurrent" param="Reso Lfo1 Amount" style="left: 1643dp; top: 75dp; width: 98dp; height: 98dp;"/>
-			<knob id="LfoFilterGain" class="jucePos juceRotary knob3" data-model="partCurrent" param="FiltGain Lfo1 Amount" style="left: 1801dp; top: 75dp; width: 98dp; height: 98dp;"/>
-			<knob id="LfoAssignAmount" class="jucePos juceRotary knob3" data-model="partCurrent" param="LFO1 Assign Amount" style="left: 1387dp; top: 224dp; width: 98dp; height: 98dp;"/>
+			<knob id="LfoOsc1Pitch" class="jucePos juceRotary knob3bipolar" controllerLinkCondition="LfoOscPitchLink" controllerLinkTarget="LfoOsc2Pitch" data-model="partCurrent" param="Osc1 Lfo1 Amount" style="left: 1169dp; top: 75dp; width: 98dp; height: 98dp;"/>
+			<knob id="LfoOsc2Pitch" class="jucePos juceRotary knob3bipolar" controllerLinkCondition="LfoOscPitchLink" controllerLinkTarget="LfoOsc1Pitch" data-model="partCurrent" param="Osc2 Lfo1 Amount" style="left: 1327dp; top: 75dp; width: 98dp; height: 98dp;"/>
+			<knob id="LfoPW12" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="PW Lfo1 Amount" style="left: 1485dp; top: 75dp; width: 98dp; height: 98dp;"/>
+			<knob id="LfoReso12" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Reso Lfo1 Amount" style="left: 1643dp; top: 75dp; width: 98dp; height: 98dp;"/>
+			<knob id="LfoFilterGain" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="FiltGain Lfo1 Amount" style="left: 1801dp; top: 75dp; width: 98dp; height: 98dp;"/>
+			<knob id="LfoAssignAmount" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="LFO1 Assign Amount" style="left: 1387dp; top: 224dp; width: 98dp; height: 98dp;"/>
 			<div id="Lfo2RateText" class="jucePos juceLabel text4" data-model="partCurrent" param="Lfo2 Rate" style="left: 68dp; top: 510dp; width: 80dp; height: 45dp; line-height: 45dp;">{{Lfo2_Rate_text}}</div>
 			<knob id="Lfo2Rate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo2 Rate" style="left: 19dp; top: 442dp; width: 180dp; height: 180dp;"/>
 			<combo id="Lfo2Clock" class="jucePos text3" data-model="partCurrent" param="Lfo2 Clock" style="left: 732dp; top: 665dp; width: 245dp; height: 45dp; line-height: 45dp;">
@@ -467,12 +467,12 @@
 			<knob id="Lfo2Keyfollow" class="jucePos juceRotary knob3" data-model="partCurrent" param="Lfo2 Keyfollow" style="left: 242dp; top: 480dp; width: 98dp; height: 98dp;"/>
 			<knob id="Lfo2Keytrigger" class="jucePos juceRotary knob3" data-model="partCurrent" param="Lfo2 Keytrigger" style="left: 400dp; top: 480dp; width: 98dp; height: 98dp;"/>
 			<input id="Lfo2Symmetry" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Lfo2 Symmetry" type="range" style="left: 64dp; top: 656dp; width: 355dp; height: 63dp;"/>
-			<knob id="Lfo2Flt1Cutoff" class="jucePos juceRotary knob3" controllerLinkCondition="Lfo2CutoffLink" controllerLinkTarget="Lfo2Flt2Cutoff" data-model="partCurrent" param="Cutoff1 Lfo2 Amount" style="left: 1169dp; top: 470dp; width: 98dp; height: 98dp;"/>
-			<knob id="Lfo2Flt2Cutoff" class="jucePos juceRotary knob3" controllerLinkCondition="Lfo2CutoffLink" controllerLinkTarget="Lfo2Flt1Cutoff" data-model="partCurrent" param="Cutoff2 Lfo2 Amount" style="left: 1327dp; top: 470dp; width: 98dp; height: 98dp;"/>
-			<knob id="Lfo2PW12" class="jucePos juceRotary knob3" data-model="partCurrent" param="Shape Lfo2 Amount" style="left: 1485dp; top: 470dp; width: 98dp; height: 98dp;"/>
-			<knob id="Lfo2Reso12" class="jucePos juceRotary knob3" data-model="partCurrent" param="Pan Lfo2 Amount" style="left: 1643dp; top: 470dp; width: 98dp; height: 98dp;"/>
-			<knob id="Lfo2FilterGain" class="jucePos juceRotary knob3" data-model="partCurrent" param="FM Lfo2 Amount" style="left: 1801dp; top: 470dp; width: 98dp; height: 98dp;"/>
-			<knob id="Lfo2AssignAmount" class="jucePos juceRotary knob3" data-model="partCurrent" param="LFO2 Assign Amount" style="left: 1387dp; top: 617dp; width: 98dp; height: 98dp;"/>
+			<knob id="Lfo2Flt1Cutoff" class="jucePos juceRotary knob3bipolar" controllerLinkCondition="Lfo2CutoffLink" controllerLinkTarget="Lfo2Flt2Cutoff" data-model="partCurrent" param="Cutoff1 Lfo2 Amount" style="left: 1169dp; top: 470dp; width: 98dp; height: 98dp;"/>
+			<knob id="Lfo2Flt2Cutoff" class="jucePos juceRotary knob3bipolar" controllerLinkCondition="Lfo2CutoffLink" controllerLinkTarget="Lfo2Flt1Cutoff" data-model="partCurrent" param="Cutoff2 Lfo2 Amount" style="left: 1327dp; top: 470dp; width: 98dp; height: 98dp;"/>
+			<knob id="Lfo2PW12" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Shape Lfo2 Amount" style="left: 1485dp; top: 470dp; width: 98dp; height: 98dp;"/>
+			<knob id="Lfo2Reso12" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Pan Lfo2 Amount" style="left: 1643dp; top: 470dp; width: 98dp; height: 98dp;"/>
+			<knob id="Lfo2FilterGain" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="FM Lfo2 Amount" style="left: 1801dp; top: 470dp; width: 98dp; height: 98dp;"/>
+			<knob id="Lfo2AssignAmount" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="LFO2 Assign Amount" style="left: 1387dp; top: 617dp; width: 98dp; height: 98dp;"/>
 			<div id="Lfo3RateText" class="jucePos juceLabel text4" data-model="partCurrent" param="Lfo3 Rate" style="left: 68dp; top: 905dp; width: 80dp; height: 45dp; line-height: 45dp;">{{Lfo3_Rate_text}}</div>
 			<knob id="Lfo3Rate" class="jucePos juceRotary knob1" data-model="partCurrent" param="Lfo3 Rate" style="left: 19dp; top: 837dp; width: 180dp; height: 180dp;"/>
 			<combo id="Lfo3Clock" class="jucePos text3" data-model="partCurrent" param="Lfo3 Clock" style="left: 983dp; top: 892dp; width: 245dp; height: 45dp; line-height: 45dp;">
@@ -793,7 +793,7 @@
 				<button id="ArpHold" class="jucePos juceButton button_1" data-model="partCurrent" isToggle="1" param="Arp Hold Enable" style="left: 1786dp; top: 93dp; width: 79dp; height: 78dp;">
 					<buttonhittest class="jucePos" style="left: 0dp; top: 0dp; width: 139dp; height: 58dp;"/>
 				</button>
-				<knob id="ArpNoteLength" class="jucePos juceRotary knob3" data-model="partCurrent" param="Arp Note Length" style="left: 1400dp; top: 82dp; width: 98dp; height: 98dp;"/>
+				<knob id="ArpNoteLength" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Arp Note Length" style="left: 1400dp; top: 82dp; width: 98dp; height: 98dp;"/>
 				<knob id="ArpNoteSwing" class="jucePos juceRotary knob3" data-model="partCurrent" param="Arp Swing" style="left: 1558dp; top: 82dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<combo id="ArpMode" class="jucePos text3" data-model="partCurrent" param="Arp Mode" style="left: 69dp; top: 108dp; width: 350dp; height: 45dp; line-height: 45dp;">
@@ -813,7 +813,7 @@
 			<div id="ContainerChorusClassic" class="jucePos" data-class-juceConditionDisabled="!(Chorus_Type_value == 1)" data-model="partCurrent" style="left: 698dp; top: 0dp; width: 1267dp; height: 237dp; decorator: image(panel_8_fx1_chorus_classic.png scale-none left top);">
 				<knob id="ChorusMix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Chorus Mix" style="left: 50dp; top: 87dp; width: 98dp; height: 98dp;"/>
 				<knob id="ChorusDelayTime" class="jucePos juceRotary knob3" data-model="partCurrent" param="Chorus Delay" style="left: 485dp; top: 87dp; width: 98dp; height: 98dp;"/>
-				<knob id="ChorusFeedback" class="jucePos juceRotary knob3" data-model="partCurrent" param="Chorus Feedback" style="left: 643dp; top: 87dp; width: 98dp; height: 98dp;"/>
+				<knob id="ChorusFeedback" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Chorus Feedback" style="left: 643dp; top: 87dp; width: 98dp; height: 98dp;"/>
 				
 				<button id="ChorusShapeSine" class="jucePos juceButton button_shape_sine"     data-model="partCurrent" isToggle="1" param="Chorus Lfo Shape" valueOn="0" style="left: 764dp; top: 88dp; width: 55dp; height: 46dp;"/>
 				<button id="ChorusShapeTri" class="jucePos juceButton button_shape_tri"       data-model="partCurrent" isToggle="1" param="Chorus Lfo Shape" valueOn="1" style="left: 764dp; top: 133dp; width: 55dp; height: 46dp;"/>
@@ -848,7 +848,7 @@
 			</div>
 			<div id="ContainerChorusRotarySpeaker" class="jucePos" data-class-juceConditionDisabled="!(Chorus_Type_value == 6)" data-model="partCurrent" style="left: 698dp; top: 0dp; width: 1267dp; height: 237dp; decorator: image(panel_8_fx1_chorus_rotary_speaker.png scale-none left top);">
 				<knob id="ChorusMix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Chorus/Mix2" style="left: 50dp; top: 87dp; width: 98dp; height: 98dp;"/>
-				<knob id="Chorus/LowHighBalance" class="jucePos juceRotary knob3" data-model="partCurrent" param="Chorus/LowHigh Bal" style="left: 801dp; top: 87dp; width: 98dp; height: 98dp;"/>
+				<knob id="Chorus/LowHighBalance" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Chorus/LowHigh Bal" style="left: 801dp; top: 87dp; width: 98dp; height: 98dp;"/>
 				<knob id="Chorus/MicAngle" class="jucePos juceRotary knob3" data-model="partCurrent" param="Chorus/Mic Angle" style="left: 959dp; top: 87dp; width: 98dp; height: 98dp;"/>
 				<knob id="ChorusDepth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Chorus/Distance" style="left: 1117dp; top: 87dp; width: 98dp; height: 98dp;"/>
 				<input id="Chorus/Speed" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Chorus/Speed" type="range" style="left: 510dp; top: 103dp; width: 260dp; height: 63dp;"/>
@@ -859,15 +859,15 @@
 			<div id="ContainerFilterbankOff" class="jucePos" data-class-juceConditionDisabled="!(Filter_Bank_Type_value == 0)" data-model="partCurrent" style="left: 698dp; top: 525dp; width: 1267dp; height: 237dp; decorator: image(panel_8_fx1_filterbank_off.png scale-none left top);"/>
 			<div id="ContainerFilterbankRingModulator" class="jucePos" data-class-juceConditionDisabled="!(Filter_Bank_Type_value == 1)" data-model="partCurrent" style="left: 698dp; top: 525dp; width: 1267dp; height: 237dp; decorator: image(panel_8_fx1_filterbank_ringmodulator.png scale-none left top);">
 				<knob id="FilterBank/Mix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Mix" style="left: 50dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="FilterBank/Frequency" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Frequency" style="left: 506dp; top: 85dp; width: 98dp; height: 98dp;"/>
+				<knob id="FilterBank/Frequency" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Filter Bank/Frequency" style="left: 506dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="FilterBank/Stereo Phase" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Stereo Phase" style="left: 664dp; top: 85dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerFilterbankFrequencyShift" class="jucePos" data-class-juceConditionDisabled="!(Filter_Bank_Type_value == 2)" data-model="partCurrent" style="left: 698dp; top: 525dp; width: 1267dp; height: 237dp; decorator: image(panel_8_fx1_filterbank_frequency_shift.png scale-none left top);">
 				<knob id="FilterBank/Mix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Mix" style="left: 50dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="FilterBank/Frequency" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Frequency" style="left: 506dp; top: 85dp; width: 98dp; height: 98dp;"/>
+				<knob id="FilterBank/Frequency" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Filter Bank/Frequency" style="left: 506dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="FilterBank/Stereo Phase" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Stereo Phase" style="left: 664dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="FilterBank/ShapeL" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Shape L" style="left: 822dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="FilterBank/ShapeR" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Shape R" style="left: 980dp; top: 85dp; width: 98dp; height: 98dp;"/>
+				<knob id="FilterBank/ShapeL" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Filter Bank/Shape L" style="left: 822dp; top: 85dp; width: 98dp; height: 98dp;"/>
+				<knob id="FilterBank/ShapeR" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Filter Bank/Shape R" style="left: 980dp; top: 85dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerFilterbankVowelFilter" class="jucePos" data-class-juceConditionDisabled="!(Filter_Bank_Type_value == 3)" data-model="partCurrent" style="left: 698dp; top: 525dp; width: 1267dp; height: 237dp; decorator: image(panel_8_fx1_filterbank_vowel_filter.png scale-none left top);">
 				<knob id="FilterBank/Mix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Mix" style="left: 50dp; top: 85dp; width: 98dp; height: 98dp;"/>
@@ -883,13 +883,13 @@
 			</div>
 			<div id="ContainerFilterbank1PolXfade" class="jucePos" data-class-juceConditionDisabled="!((Filter_Bank_Type_value >= 5 && Filter_Bank_Type_value <= 8))" data-model="partCurrent" style="left: 698dp; top: 525dp; width: 1267dp; height: 237dp; decorator: image(panel_8_fx1_filterbank_pole_xfade.png scale-none left top);">
 				<knob id="FilterBank/Mix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Mix" style="left: 50dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="FilterBank/Frequency" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Frequency" style="left: 506dp; top: 85dp; width: 98dp; height: 98dp;"/>
+				<knob id="FilterBank/Frequency" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Filter Bank/Frequency" style="left: 506dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="FilterBank/StereoPhase" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Resonance" style="left: 664dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="FilterBank/FilterType" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Filter Type" style="left: 822dp; top: 85dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerFilterbankVariSlopes" class="jucePos" data-class-juceConditionDisabled="!((Filter_Bank_Type_value >= 9 && Filter_Bank_Type_value <= 11))" data-model="partCurrent" style="left: 698dp; top: 525dp; width: 1267dp; height: 237dp; decorator: image(panel_8_fx1_filterbank_vari_slopes.png scale-none left top);">
 				<knob id="FilterBank/Mix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Mix" style="left: 50dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="FilterBank/Frequency" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Frequency" style="left: 506dp; top: 85dp; width: 98dp; height: 98dp;"/>
+				<knob id="FilterBank/Frequency" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Filter Bank/Frequency" style="left: 506dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="FilterBank/StereoPhase" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Resonance" style="left: 664dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="FilterBank/Poles" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Poles" style="left: 822dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="FilterBank/Slope" class="jucePos juceRotary knob3" data-model="partCurrent" param="Filter Bank/Slope" style="left: 980dp; top: 85dp; width: 98dp; height: 98dp;"/>
@@ -903,7 +903,7 @@
 					<combotext>Wave 42</combotext>
 				</combo>
 				<knob id="PhaerFrequency" class="jucePos juceRotary knob3" data-model="partCurrent" param="Phaser Frequency" style="left: 484dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="PhaerFeedback" class="jucePos juceRotary knob3" data-model="partCurrent" param="Phaser Feedback" style="left: 642dp; top: 85dp; width: 98dp; height: 98dp;"/>
+				<knob id="PhaerFeedback" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Phaser Feedback" style="left: 642dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="PhaserSpread" class="jucePos juceRotary knob3" data-model="partCurrent" param="Phaser Spread" style="left: 800dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="PhaserRate" class="jucePos juceRotary knob3" data-model="partCurrent" param="Phaser Rate" style="left: 958dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="PhaserDepth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Phaser Depth" style="left: 1116dp; top: 85dp; width: 98dp; height: 98dp;"/>
@@ -931,13 +931,13 @@
 			<img id="ContainerDistortion5_tone64" class="jucePos" data-class-juceConditionDisabled="!(Distortion_Curve_value == 20 || Distortion_Curve_value == 24)" data-model="partCurrent" src="panel_8_fx1_5.png" style="left: 303dp; top: 262dp; width: 373dp; height: 500dp;">
 				<knob id="DistortionIntens" class="jucePos juceRotary knob3" data-model="partCurrent" param="Distortion Intensity" style="left: 218dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="PatchDistortion/Mix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Patch Distortion/Mix" style="left: 60dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="PatchDistortion/Tone64" class="jucePos juceRotary knob3" data-model="partCurrent" param="Patch Distortion/Tone64" style="left: 60dp; top: 253dp; width: 98dp; height: 98dp;"/>
+				<knob id="PatchDistortion/Tone64" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Patch Distortion/Tone64" style="left: 60dp; top: 253dp; width: 98dp; height: 98dp;"/>
 				<knob id="PatchDistortion/High Cut" class="jucePos juceRotary knob3" data-model="partCurrent" param="Patch Distortion/High Cut" style="left: 218dp; top: 253dp; width: 98dp; height: 98dp;"/>
 			</img>
 			<img id="ContainerDistortion5_tone127" class="jucePos" data-class-juceConditionDisabled="!((Distortion_Curve_value >= 22 && Distortion_Curve_value <= 23) || Distortion_Curve_value == 26)" data-model="partCurrent" src="panel_8_fx1_5.png" style="left: 303dp; top: 262dp; width: 373dp; height: 500dp;">
 				<knob id="DistortionIntens" class="jucePos juceRotary knob3" data-model="partCurrent" param="Distortion Intensity" style="left: 218dp; top: 85dp; width: 98dp; height: 98dp;"/>
 				<knob id="PatchDistortion/Mix" class="jucePos juceRotary knob3" data-model="partCurrent" param="Patch Distortion/Mix" style="left: 60dp; top: 85dp; width: 98dp; height: 98dp;"/>
-				<knob id="PatchDistortion/Tone127" class="jucePos juceRotary knob3" data-model="partCurrent" param="Patch Distortion/Tone127" style="left: 60dp; top: 253dp; width: 98dp; height: 98dp;"/>
+				<knob id="PatchDistortion/Tone127" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Patch Distortion/Tone127" style="left: 60dp; top: 253dp; width: 98dp; height: 98dp;"/>
 				<knob id="PatchDistortion/High Cut" class="jucePos juceRotary knob3" data-model="partCurrent" param="Patch Distortion/High Cut" style="left: 218dp; top: 253dp; width: 98dp; height: 98dp;"/>
 			</img>
 			<img id="ContainerDistortion5_noTone" class="jucePos" data-class-juceConditionDisabled="!(Distortion_Curve_value == 21 || Distortion_Curve_value == 25)" data-model="partCurrent" src="panel_8_fx1_6.png" style="left: 303dp; top: 262dp; width: 373dp; height: 500dp;">
@@ -958,12 +958,12 @@
 				<combotext>Wave 42</combotext>
 			</combo>
 			<img id="ContainerPhaser" class="jucePos" src="panel_8_fx1_Equalizer.png" style="left: 699dp; top: 788dp; width: 1268dp; height: 237dp;">
-				<knob id="EqLowGain" class="jucePos juceRotary knob3" data-model="partCurrent" param="LowEQ Gain" style="left: 49dp; top: 90dp; width: 98dp; height: 98dp;"/>
+				<knob id="EqLowGain" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="LowEQ Gain" style="left: 49dp; top: 90dp; width: 98dp; height: 98dp;"/>
 				<knob id="EqLowFreq" class="jucePos juceRotary knob3" data-model="partCurrent" param="LowEQ Frequency" style="left: 207dp; top: 90dp; width: 98dp; height: 98dp;"/>
-				<knob id="EqMidGain" class="jucePos juceRotary knob3" data-model="partCurrent" param="MidEQ Gain" style="left: 428dp; top: 90dp; width: 98dp; height: 98dp;"/>
+				<knob id="EqMidGain" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="MidEQ Gain" style="left: 428dp; top: 90dp; width: 98dp; height: 98dp;"/>
 				<knob id="EqMidFreq" class="jucePos juceRotary knob3" data-model="partCurrent" param="MidEQ Frequency" style="left: 586dp; top: 90dp; width: 98dp; height: 98dp;"/>
 				<knob id="EqMidQ" class="jucePos juceRotary knob3" data-model="partCurrent" param="MidEQ Q-Factor" style="left: 744dp; top: 90dp; width: 98dp; height: 98dp;"/>
-				<knob id="EqHighGain" class="jucePos juceRotary knob3" data-model="partCurrent" param="HighEQ Gain" style="left: 952dp; top: 90dp; width: 98dp; height: 98dp;"/>
+				<knob id="EqHighGain" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="HighEQ Gain" style="left: 952dp; top: 90dp; width: 98dp; height: 98dp;"/>
 				<knob id="EqHighFreq" class="jucePos juceRotary knob3" data-model="partCurrent" param="HighEQ Frequency" style="left: 1110dp; top: 90dp; width: 98dp; height: 98dp;"/>
 			</img>
 			<img id="ContainerInputModeOff" class="jucePos" data-class-juceConditionDisabled="!(Input_Mode_value == 0)" data-model="partCurrent" src="panel_8_fx1_Input_Off.png" style="left: 0dp; top: 261dp; width: 280dp; height: 500dp;"/>
@@ -988,13 +988,13 @@
 				<input id="VocSpectralBalance" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Vocoder/Spectral Balance" type="range" style="left: 414dp; top: 209dp; width: 285dp; height: 63dp;"/>
 				<knob id="VocAttack" class="jucePos juceRotary knob3" data-model="partCurrent" param="Vocoder/Attack" style="left: 765dp; top: 68dp; width: 98dp; height: 98dp;"/>
 				<knob id="VocRelease" class="jucePos juceRotary knob3" data-model="partCurrent" param="Vocoder/Release" style="left: 764dp; top: 203dp; width: 98dp; height: 98dp;"/>
-				<knob id="VocCenterFreq" class="jucePos juceRotary knob3" data-model="partCurrent" param="Vocoder/Carrier Center Frequency" style="left: 966dp; top: 132dp; width: 98dp; height: 98dp;"/>
+				<knob id="VocCenterFreq" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Vocoder/Carrier Center Frequency" style="left: 966dp; top: 132dp; width: 98dp; height: 98dp;"/>
 				<knob id="VocCarrSpread" class="jucePos juceRotary knob3" controllerLinkCondition="VocoderLink" controllerLinkTarget="VocModSpread" data-model="partCurrent" param="Carrier Frequency Spread" style="left: 1125dp; top: 132dp; width: 98dp; height: 98dp;"/>
 				<knob id="VocCarrQ" class="jucePos juceRotary knob3" controllerLinkCondition="VocoderLink" controllerLinkTarget="VocModQ" data-model="partCurrent" param="Vocoder/Carrier Q Factor" style="left: 1282dp; top: 132dp; width: 98dp; height: 98dp;"/>
 				<button id="VocoderLink" class="jucePos juceButton button_1" data-model="partCurrent" isToggle="1" param="Vocoder Link" style="left: 1396dp; top: 204dp; width: 79dp; height: 78dp;"/>
 				<knob id="VocModQ" class="jucePos juceRotary knob3" controllerLinkCondition="VocoderLink" controllerLinkTarget="VocCarrQ" data-model="partCurrent" param="Vocoder/Modulator Q Factor" style="left: 1484dp; top: 132dp; width: 98dp; height: 98dp;"/>
 				<knob id="VocModSpread" class="jucePos juceRotary knob3" controllerLinkCondition="VocoderLink" controllerLinkTarget="VocCarrSpread" data-model="partCurrent" param="Vocoder/Modulator Frequency Spread" style="left: 1642dp; top: 132dp; width: 98dp; height: 98dp;"/>
-				<knob id="VocModOffset" class="jucePos juceRotary knob3" data-model="partCurrent" param="Vocoder/Modulator Frequency Offset" style="left: 1800dp; top: 132dp; width: 98dp; height: 98dp;"/>
+				<knob id="VocModOffset" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Vocoder/Modulator Frequency Offset" style="left: 1800dp; top: 132dp; width: 98dp; height: 98dp;"/>
 			</div>
 			<div id="ContainerVocoderOff" class="jucePos" data-class-juceConditionDisabled="!(Vocoder_Mode_value == 0)" data-model="partCurrent" style="left: 0dp; top: 699dp; width: 1966dp; height: 332dp; decorator: image(panel_9_fx2_vocoder_off.png scale-none left top);"/>
 			<combo id="VocoderMode" class="jucePos text3" data-model="partCurrent" param="Vocoder Mode" style="left: 78dp; top: 789dp; width: 275dp; height: 52dp; line-height: 52dp;">
@@ -1027,7 +1027,7 @@
 				<knob id="DelayTime" class="jucePos juceRotary knob3" data-model="partCurrent" param="Delay Time" style="left: 846dp; top: 135dp; width: 98dp; height: 98dp;"/>
 				<img id="DelayTimeDisabled" class="jucePos" data-class-juceConditionDisabled="!((Delay_Clock_value >= 1 && Delay_Clock_value <= 16))" data-model="partCurrent" src="button_disable_white.png" style="left: 846dp; top: 97dp; width: 138dp; height: 137dp;"/>
 				<knob id="DelayFeedback" class="jucePos juceRotary knob3" data-model="partCurrent" param="Delay Feedback" style="left: 1004dp; top: 135dp; width: 98dp; height: 98dp;"/>
-				<knob id="DelayColor" class="jucePos juceRotary knob3" data-model="partCurrent" param="Delay Color" style="left: 1171dp; top: 135dp; width: 98dp; height: 98dp;"/>
+				<knob id="DelayColor" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Delay Color" style="left: 1171dp; top: 135dp; width: 98dp; height: 98dp;"/>
 				<knob id="DelayRate" class="jucePos juceRotary knob3" data-model="partCurrent" param="Dly Rate / Rev Decay" style="left: 1329dp; top: 135dp; width: 98dp; height: 98dp;"/>
 				<knob id="DelayDepth" class="jucePos juceRotary knob3" data-model="partCurrent" param="Dly Depth " style="left: 1487dp; top: 135dp; width: 98dp; height: 98dp;"/>
 						
@@ -1055,7 +1055,7 @@
 			<div id="ContainerReverbPredelayDisable" class="jucePos" data-class-juceConditionDisabled="!((Reverb_Clock_value >= 1 && Reverb_Clock_value <= 16))" data-model="partCurrent" style="left: 1328dp; top: 442dp; width: 138dp; height: 137dp; decorator: image(button_disable.png scale-none left top);"/>
 			<knob id="ReverbDecayTime" class="jucePos juceRotary knob3" data-model="partCurrent" param="Reverb Time" style="left: 846dp; top: 480dp; width: 98dp; height: 98dp;"/>
 			<knob id="ReverbDamping" class="jucePos juceRotary knob3" data-model="partCurrent" param="Reverb Damping" style="left: 1004dp; top: 480dp; width: 98dp; height: 98dp;"/>
-			<knob id="ReverbColor" class="jucePos juceRotary knob3" data-model="partCurrent" param="Reverb Color" style="left: 1171dp; top: 480dp; width: 98dp; height: 98dp;"/>
+			<knob id="ReverbColor" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Reverb Color" style="left: 1171dp; top: 480dp; width: 98dp; height: 98dp;"/>
 			<combo id="ReverbClock" class="jucePos text3" data-model="partCurrent" param="Reverb Clock" style="left: 1639dp; top: 503dp; width: 270dp; height: 52dp; line-height: 52dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
@@ -1071,8 +1071,8 @@
 			<knob id="ReverbSend" class="jucePos juceRotary knob1" data-model="partCurrent" param="Reverb Send" style="left: 24dp; top: 422dp; width: 220dp; height: 220dp;"/>
 		</div>
 		<div id="page_common" class="jucePos" tabgroup="pages" tabpage="9" style="left: 571dp; top: 129dp; width: 1971dp; height: 1026dp; decorator: image(panel_10_common.png scale-none left top);">
-			<knob id="Transpose" class="jucePos juceRotary knob3" data-model="partCurrent" param="Transpose" style="left: 49dp; top: 76dp; width: 98dp; height: 98dp;"/>
-			<knob id="PartDetune" class="jucePos juceRotary knob3" data-model="partCurrent" param="Part Detune" style="left: 207dp; top: 76dp; width: 98dp; height: 98dp;"/>
+			<knob id="Transpose" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Transpose" style="left: 49dp; top: 76dp; width: 98dp; height: 98dp;"/>
+			<knob id="PartDetune" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Part Detune" style="left: 207dp; top: 76dp; width: 98dp; height: 98dp;"/>
 			<combo id="SmoothMode" class="jucePos text3" data-model="partCurrent" param="Control Smooth Mode" style="left: 353dp; top: 101dp; width: 275dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
@@ -1081,12 +1081,12 @@
 			</combo>
 			<input id="OutputBalance" class="jucePos sliderH juceSlider juceSliderH" data-model="partCurrent" param="Balance" type="range" style="left: 1053dp; top: 92dp; width: 353dp; height: 63dp;"/>
 			<knob id="Master Volume" class="jucePos juceRotary knob3" data-model="partCurrent" param="Master Volume" style="left: 1075dp; top: 595dp; width: 98dp; height: 98dp;"/>
-			<knob id="MasterTune" class="jucePos juceRotary knob3" data-model="partCurrent" param="Master Tune" style="left: 1261dp; top: 595dp; width: 98dp; height: 98dp;"/>
+			<knob id="MasterTune" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Master Tune" style="left: 1261dp; top: 595dp; width: 98dp; height: 98dp;"/>
 			<combo id="SecondaryOutput" class="jucePos text3" data-model="partCurrent" param="Part Output Select" style="left: 1509dp; top: 101dp; width: 275dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
-			<knob id="BendDown" class="jucePos juceRotary knob3" data-model="partCurrent" param="Bender Range Down" style="left: 49dp; top: 338dp; width: 98dp; height: 98dp;"/>
-			<knob id="BendUp" class="jucePos juceRotary knob3" data-model="partCurrent" param="Bender Range Up" style="left: 207dp; top: 338dp; width: 98dp; height: 98dp;"/>
+			<knob id="BendDown" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Bender Range Down" style="left: 49dp; top: 338dp; width: 98dp; height: 98dp;"/>
+			<knob id="BendUp" class="jucePos juceRotary knob3bipolar" data-model="partCurrent" param="Bender Range Up" style="left: 207dp; top: 338dp; width: 98dp; height: 98dp;"/>
 			<combo id="BendScale" class="jucePos text3" data-model="partCurrent" param="Bender Scale" style="left: 514dp; top: 360dp; width: 375dp; height: 45dp; line-height: 45dp;">
 				<combotext>Wave 42</combotext>
 			</combo>
@@ -1125,13 +1125,13 @@
 			<div id="MultiPart0" class="jucePos multiStripe" data-model="part0" style="left: 20dp; top: 45dp; width: 115dp; height: 960dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">1</div>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-				<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-				<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-				<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-				<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 				<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1148,13 +1148,13 @@
 			<div id="MultiPart1" class="jucePos multiStripe multiStripeAlt" data-model="part1" style="left: 141dp; top: 45dp; width: 114dp; height: 960dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 114dp; height: 34dp; line-height: 34dp;">2</div>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 114dp; height: 22dp; line-height: 22dp;">Volume</div>
-				<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 114dp; height: 22dp; line-height: 22dp;">Pan</div>
-				<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 114dp; height: 22dp; line-height: 22dp;">Transpose</div>
-				<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 114dp; height: 22dp; line-height: 22dp;">Detune</div>
-				<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 114dp; height: 22dp; line-height: 22dp;">Low Key</div>
 				<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 114dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1171,13 +1171,13 @@
 			<div id="MultiPart2" class="jucePos multiStripe" data-model="part2" style="left: 261dp; top: 45dp; width: 115dp; height: 960dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">3</div>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-				<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-				<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-				<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-				<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 				<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1194,13 +1194,13 @@
 			<div id="MultiPart3" class="jucePos multiStripe multiStripeAlt" data-model="part3" style="left: 382dp; top: 45dp; width: 115dp; height: 960dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">4</div>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-				<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-				<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-				<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-				<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+				<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 				<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1218,13 +1218,13 @@
 				<div id="MultiPart4" class="jucePos multiStripe" data-model="part4" style="left: 0dp; top: 45dp; width: 114dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 114dp; height: 34dp; line-height: 34dp;">5</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 114dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 114dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 114dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 114dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 114dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 114dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1241,13 +1241,13 @@
 				<div id="MultiPart5" class="jucePos multiStripe multiStripeAlt" data-model="part5" style="left: 120dp; top: 45dp; width: 115dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">6</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1264,13 +1264,13 @@
 				<div id="MultiPart6" class="jucePos multiStripe" data-model="part6" style="left: 241dp; top: 45dp; width: 115dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">7</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1287,13 +1287,13 @@
 				<div id="MultiPart7" class="jucePos multiStripe multiStripeAlt" data-model="part7" style="left: 362dp; top: 45dp; width: 115dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">8</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1310,13 +1310,13 @@
 				<div id="MultiPart8" class="jucePos multiStripe" data-model="part8" style="left: 483dp; top: 45dp; width: 114dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 114dp; height: 34dp; line-height: 34dp;">9</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 114dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 114dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 114dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 114dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 114dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 114dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1333,13 +1333,13 @@
 				<div id="MultiPart9" class="jucePos multiStripe multiStripeAlt" data-model="part9" style="left: 603dp; top: 45dp; width: 115dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">10</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1356,13 +1356,13 @@
 				<div id="MultiPart10" class="jucePos multiStripe" data-model="part10" style="left: 724dp; top: 45dp; width: 115dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">11</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1379,13 +1379,13 @@
 				<div id="MultiPart11" class="jucePos multiStripe multiStripeAlt" data-model="part11" style="left: 845dp; top: 45dp; width: 114dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 114dp; height: 34dp; line-height: 34dp;">12</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 114dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 114dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 114dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 114dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 114dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 114dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1402,13 +1402,13 @@
 				<div id="MultiPart12" class="jucePos multiStripe" data-model="part12" style="left: 965dp; top: 45dp; width: 115dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">13</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1425,13 +1425,13 @@
 				<div id="MultiPart13" class="jucePos multiStripe multiStripeAlt" data-model="part13" style="left: 1086dp; top: 45dp; width: 115dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">14</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1448,13 +1448,13 @@
 				<div id="MultiPart14" class="jucePos multiStripe" data-model="part14" style="left: 1207dp; top: 45dp; width: 114dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 114dp; height: 34dp; line-height: 34dp;">15</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 114dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 114dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 114dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 114dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 114dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 114dp; height: 22dp; line-height: 22dp;">High Key</div>
@@ -1471,13 +1471,13 @@
 				<div id="MultiPart15" class="jucePos multiStripe multiStripeAlt" data-model="part15" style="left: 1327dp; top: 45dp; width: 115dp; height: 960dp;">
 					<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 0dp; width: 115dp; height: 34dp; line-height: 34dp;">16</div>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 39dp; width: 115dp; height: 22dp; line-height: 22dp;">Volume</div>
-					<knob class="jucePos juceRotary knob3" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Volume" style="left: 8dp; top: 61dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 164dp; width: 115dp; height: 22dp; line-height: 22dp;">Pan</div>
-					<knob class="jucePos juceRotary knob3" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Panorama" style="left: 8dp; top: 186dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 289dp; width: 115dp; height: 22dp; line-height: 22dp;">Transpose</div>
-					<knob class="jucePos juceRotary knob3" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Transpose" style="left: 8dp; top: 311dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 414dp; width: 115dp; height: 22dp; line-height: 22dp;">Detune</div>
-					<knob class="jucePos juceRotary knob3" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
+					<knob class="jucePos juceRotary knob3bipolar" param="Part Detune" style="left: 8dp; top: 436dp; width: 98dp; height: 98dp;"/>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 539dp; width: 115dp; height: 22dp; line-height: 22dp;">Low Key</div>
 					<combo class="jucePos txtMultiCombo combo_multi" param="Part Low Key" style="left: 2dp; top: 561dp; width: 110dp; height: 36dp; line-height: 36dp;"><combotext>-</combotext></combo>
 					<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 602dp; width: 115dp; height: 22dp; line-height: 22dp;">High Key</div>

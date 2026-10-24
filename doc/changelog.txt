@@ -55,6 +55,10 @@ OsTIrus:
         host, such as an arpeggio of a piano roll, come late on that DSP, as on
         the hardware.
 
+- [Imp] #216 TrancyTI skin: knobs of bipolar parameters, such as Key Follow,
+        the LFO amounts or Panorama, light their value ring from the centre to
+        either side instead of from the left end.
+
 Vavra:
 
 - [Fix] With voice expansion turned on, playback could crash the plugin when the
