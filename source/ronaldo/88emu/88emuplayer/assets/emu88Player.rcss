@@ -127,6 +127,9 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 .model8850 { display: none; }
 .modelSc8850 .modelLegacy { display: none; }
 .modelSc8850 .model8850 { display: block; }
+.model880 { display: none; }
+.modelSc880 .modelLegacy { display: none; }
+.modelSc880 .model880 { display: block; }
 .modelSc88VL .modelExtended { display: none; }
 .modelSc88VL .modelPreview { display: none; }
 /* SC-55 family: the SC-88 layout minus the map/EQ, PREVIEW and USER INST/VIB rows.
@@ -180,6 +183,12 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
 /* speed 224 = 7 logical pixels of drag per detent, the the panel feel. */
 .sc8850Value { left: 517dp; top: 17dp; width: 76dp; height: 76dp; border-radius: 38dp; frames: 33; spriteprefix: value_; decorator: image(value_000 contain); speed: 224; }
 .sc8850Value:active, .sc8850Value.pressed { image-color: #bbb; }
+.sc880Key { width: 18dp; height: 8dp; border-radius: 1dp; }
+.sc880Key .buttonOnGraphic { left: 0dp; top: 0dp; width: 100%; height: 100%; }
+.sc880LampKey.on .buttonGraphic { display: none; }
+.sc880LampKey.on .buttonOnGraphic { display: block; }
+.sc880Value { frames: 33; spriteprefix: value_; decorator: image(value_000 contain); speed: 224; }
+.sc880Value:active, .sc880Value.pressed { image-color: #bbb; }
 
 .playlist { position: absolute; left: 18dp; top: 24dp; width: 78dp; height: 74dp; box-sizing: border-box; overflow-y: auto; overflow-x: hidden; font-family: Roboto; font-size: 6dp; color: #d9d9d9; }
 /* The entry container stretches over the whole playlist, so leaving it

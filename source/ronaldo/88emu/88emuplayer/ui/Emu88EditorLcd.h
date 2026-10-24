@@ -124,6 +124,11 @@ namespace emu88Player
 		static constexpr GraphicStyle kMv30Style{0xff9fb486u, 0xff9fb486u, 0xff22292bu, 5, 5, 0, 0, 1238, 332, 19, 6,
 		                                         291, 78};
 
+		// The SC-880's 136 x 34 dots: dark blue on its pale blue backlit glass, in the 209 x 76 dp window. The texture
+		// has the window's shape so the glass fills it, with the dots on a 6 px pitch centred.
+		static constexpr GraphicStyle kSc880Style{0xff7cc8f0u, 0xff6fbbe6u, 0xff0b2340u, 6, 5, 0, 0, 880, 320, 32, 58, 0,
+		                                          0};
+
 		// What each panel is drawn as: its dot grid, and the style that paints it. A zero width
 		// is the SC-88 family's character panel, which sc88panel renders instead.
 		struct ScreenGeometry
@@ -150,6 +155,7 @@ namespace emu88Player
 			if(emu88Lib::isLaModel(_model)) return kCm32lPanel;
 			if(_model == DeviceModel::Sc8850) return {kSc8850Style, 160, 64};
 			if(_model == DeviceModel::Mv30) return {kMv30Style, 240, 64};
+			if(_model == DeviceModel::Sc880) return {kSc880Style, 136, 34};
 			return kNoGraphic;
 		}
 

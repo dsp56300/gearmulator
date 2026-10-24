@@ -43,6 +43,7 @@ set(SOURCES
 	boards/sc88types.h
 	mcu/sc88_submcu.cpp mcu/sc88_submcu.h
 	boards/sc88pro.cpp boards/sc88pro.h
+	boards/sc880Lcd.cpp boards/sc880Lcd.h
 )
 
 target_sources(88lib PRIVATE ${SOURCES})

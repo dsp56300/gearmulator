@@ -124,6 +124,10 @@ Plugin Manager:
         installed, an install into the same folder stops and says so, and an
         uninstall does not remove it.
 
+88emuPlayer:
+
+- [New] Devices: Added support for the SC-880.
+
 2.2.27:
 
 Framework:

@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "88lib/boards/sc880Lcd.h"
 #include "88lib/boards/sc88types.h"
 #include "88lib/mcu/sc88_submcu.h"
 
@@ -119,6 +120,51 @@ namespace emu88Lib
 		Count       = 32,
 	};
 
+	// SC-880 front-panel matrix: the same 4x8 sub-MCU scan, its columns selected active
+	// low. The names are the firmware's switch test table (11:CEB4 in the image), in
+	// position order; every position not listed is "xx nn xx" there. The four cursor
+	// keys carry LCD arrow glyphs in that table and were told apart by pressing them on
+	// a paged screen. The dial is two switches, its quadrature phases, plus its push.
+	enum class Sc880Button : uint8_t
+	{
+		Write       = 0,
+		Enter       = 1,
+		Info        = 2,
+		Exit        = 3,
+		DialInc     = 4,	// "ENC_INC"; pressed alone it steps the value up
+		Preview     = 6,
+		DialPush    = 7,	// "ENC"
+		Tone        = 8,
+		System      = 9,
+		Rhythm      = 10,
+		Utility     = 11,
+		DialDec     = 12,	// "ENC_DEC"; pressed alone it steps the value down
+		Perf        = 16,
+		Mfx         = 17,
+		Patch       = 18,
+		Edit        = 19,
+		Right       = 20,
+		PartL       = 24,
+		Left        = 25,
+		Up          = 26,
+		Down        = 27,
+		PartR       = 28,
+
+		Count       = 32,
+	};
+
+	// The SC-880's lamps as Sc88Pro::leds() reports them. Bits 0-7 are gate array C100
+	// (active high), lit for the mode in force; WRITE and INFO are C101 bits 0 and 1
+	// (active low), and INFO also flickers with incoming MIDI. Told apart by the test
+	// mode's LED test (T-4), which steps through them in this order: PERFORM to RHYTHM,
+	// WRITE, INFO, then M-FX to UTILITY.
+	enum class Sc880Led : uint8_t
+	{
+		Utility = 0, System = 1, Edit = 2, Mfx = 3,
+		Perform = 4, Patch = 5, Tone = 6, Rhythm = 7,
+		Write = 8, Info = 9,
+	};
+
 	// =====================================================================
 	// Sc88Pro — the SC-88 Pro / VE-GS Pro board
 	// =====================================================================
@@ -134,7 +180,8 @@ namespace emu88Lib
 	//                     2 MiB image mirrored the same way. The page-0
 	//                     SRAM overlay the SC-88 has is GONE, which is why the
 	//                     reset vector can be 00:8D1A.
-	//   pages 0xC0-0xC7   SRAM
+	//   pages 0xC0-0xC7   SRAM, 64 KiB mirrored; the SC-880's 256 KiB fills
+	//                     C0-C3 and is mirrored once
 	//   page  0xC8        XP tone generator
 	//   pages 0xE0-0xE7   MIDI sub-MCU — the SC-88's register set, moved
 	//   page  0xEF        gate array — the SC-88's registers, moved
@@ -145,10 +192,16 @@ namespace emu88Lib
 	// VE-GS Pro's "SC-GS" rev B '97, which the player offers as its own device.
 	// The SK-88Pro keyboard runs on it too, from the 2 MiB image
 	// buildSk88ProImage() makes, with its own panel matrix (Sk88ProButton); its
-	// keyboard and controllers are not wired.
+	// keyboard and controllers are not wired. So does the SC-880, from its own
+	// 2 MiB control ROM ("GS-64 VER=3.00 SC-880"), with four times the SRAM, a
+	// dot-matrix display on the gate array's LCD port (Sc880Lcd) and its own
+	// panel matrix (Sc880Button).
 	class Sc88Pro
 	{
 	public:
+		// The product the board is built into. The SK-88Pro and the SC-880 both run
+		// 2 MiB images, so the image size cannot tell them apart.
+		enum class Variant : uint8_t { Sc88Pro, Sk88Pro, Sc880 };
 
 		// External interrupt pins as this board wires them. The gate array
 		// shares IRQ0 through its own status register; the XP is one line over.
@@ -160,7 +213,11 @@ namespace emu88Lib
 
 		static constexpr uint32_t RomSize  = 0x100000;	// 1 MiB
 		static constexpr uint32_t Sk88ProRomSize = 0x200000;
+		static constexpr uint32_t Sc880RomSize = 0x200000;
 		static constexpr uint32_t SramSize = 0x10000;
+		// The SC-880 firmware addresses SRAM pages C0-C3: it stages the XP's
+		// parameter blocks in C1 before copying them to the chip (01:5315).
+		static constexpr uint32_t Sc880SramSize = 0x40000;
 		static constexpr uint32_t WaveRomSize = 20 * 1024 * 1024;
 		// P5DR is not an unconnected input on the SC-88Pro. The service schematic
 		// hardwires P5.7..P5.0 to 0,0,1,0,1,1,0,1 respectively.
@@ -214,7 +271,8 @@ namespace emu88Lib
 
 		explicit Sc88Pro(std::vector<uint8_t> _firmware,
 		                 const std::vector<uint8_t>& _waveRom = {},
-		                 bool _factoryReset = true);
+		                 bool _factoryReset = true,
+		                 Variant _variant = Variant::Sc88Pro);
 
 		// The Pro's descriptor bank bytes run 00..43. Bits 4-6 select one of
 		// five 4 MiB windows and bits 0-1 select a 1 MiB quarter, exposing the
@@ -241,18 +299,27 @@ namespace emu88Lib
 		const std::vector<uint8_t>& serialOut(uint8_t _ch) const { return m_serialOut[_ch & 1]; }
 
 		// Matrix positions as the sub-MCU scans them: Sc88ProButton on the SC-88Pro, Sk88ProButton on
-		// the SK-88Pro. The Pro's position 0 is not populated; the SK's is EDIT.
+		// the SK-88Pro, Sc880Button on the SC-880. The Pro's position 0 is not populated; the SK's is
+		// EDIT and the SC-880's WRITE.
 		void setButtons(const uint32_t _b)
 		{
-			m_buttons = m_sk88Pro ? _b : _b & ~(uint32_t{1} << static_cast<uint8_t>(Sc88ProButton::Power));
+			m_buttons = m_variant != Variant::Sc88Pro ? _b : _b & ~(uint32_t{1} << static_cast<uint8_t>(Sc88ProButton::Power));
 		}
 		uint32_t buttons() const { return m_buttons; }
+		// The SC-880's VALUE dial. It is two contacts in the matrix, and the firmware takes
+		// every closing of ENC_INC as a step up and of ENC_DEC as a step down, not a quadrature
+		// pair: each detent is a pulse on one of them, long enough for the panel scan to see.
+		void turnDial(int32_t _detents);
 		// Bits 0-7 are LDD0-7 (bit 7 is green); bit 8 is the red User Inst LED.
 		// The SK-88Pro's lamps are reported in the same order, as far as it has them.
+		// The SC-880's are not mapped yet and read as dark.
 		uint16_t leds() const;
 
+		// The character module of every board but the SC-880, which has graphicLcd() instead.
 		Lcd&       lcd()       { return m_lcd; }
 		const Lcd& lcd() const { return m_lcd; }
+		bool hasGraphicLcd() const { return m_variant == Variant::Sc880; }
+		const Sc880Lcd& graphicLcd() const { return m_graphicLcd; }
 		// P6DR bit 0, manipulated by the firmware's retained standby handler. The Pro's
 		// physical POWER switch cuts the mains supply and cannot invoke that handler.
 		bool lcdEnabled() const { return m_lcdEnabled; }
@@ -280,6 +347,11 @@ namespace emu88Lib
 		// Set up the bus map and the chip's host hooks. Runs once, from the
 		// constructor.
 		void    wireChip();
+		// SRAM repeats every SRAM size across pages C0-C7.
+		uint32_t sramOffset(const uint32_t _addr) const
+		{
+			return (_addr - (uint32_t{PageSramFirst} << 16)) & static_cast<uint32_t>(m_sram.size() - 1);
+		}
 		uint8_t subMcuRead (uint16_t _addr);
 		void    subMcuWrite(uint16_t _addr, uint8_t _val);
 		uint8_t gateArrayRead (uint16_t _addr);
@@ -306,11 +378,12 @@ namespace emu88Lib
 		BoardBus       m_boardBus {*this};
 
 		std::vector<uint8_t> m_rom;
-		std::vector<uint8_t> m_sram = std::vector<uint8_t>(SramSize, 0);
+		std::vector<uint8_t> m_sram;
 		std::vector<uint8_t> m_waveRom;
 
 		xpLib::XP m_xp;
 		Lcd m_lcd;
+		Sc880Lcd m_graphicLcd;
 		bool m_lcdEnabled = true;
 		bool m_valid = false;
 
@@ -321,6 +394,10 @@ namespace emu88Lib
 		// ---- front panel ----
 		uint32_t m_buttons = 0;
 		uint8_t  m_scanColumn = 0;
+		void     stepDial();
+		int32_t  m_dialPending = 0;
+		uint32_t m_dialContact = 0;		// the matrix bit the dial holds closed
+		uint32_t m_dialCountdown = 0;	// samples left in the current pulse or gap
 
 		// ---- gate array ----
 		std::array<bool, 4> m_gaInt{};
@@ -354,8 +431,7 @@ namespace emu88Lib
 		bool     m_lspReturnEnabled = false;
 
 		bool m_serialMidi = false;
-		// Told apart by its image size. Its panel matrix is Sk88ProButton.
-		bool m_sk88Pro = false;
+		Variant m_variant;
 		std::array<std::vector<uint8_t>, 2> m_serialOut;
 
 	};

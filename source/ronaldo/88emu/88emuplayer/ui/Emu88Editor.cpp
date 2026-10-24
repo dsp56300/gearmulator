@@ -281,6 +281,7 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Mt32New: panel = "mt32_panel.png"; break;
 		case emu88Lib::DeviceModel::Cm64: panel = "cm64_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc8820: panel = "sc8820_panel.png"; break;
+		case emu88Lib::DeviceModel::Sc880: panel = "sc880_panel.png"; break;
 		case emu88Lib::DeviceModel::Xpgs:
 		case emu88Lib::DeviceModel::VeGsPro:
 		case emu88Lib::DeviceModel::Nu10b:
@@ -312,6 +313,7 @@ namespace emu88Player
 			root->SetClass("modelSc88VL", _model == emu88Lib::DeviceModel::Sc88VL);
 			root->SetClass("modelSc88Pro", _model == emu88Lib::DeviceModel::Sc88Pro);
 			root->SetClass("modelSc8850", _model == emu88Lib::DeviceModel::Sc8850);
+			root->SetClass("modelSc880", _model == emu88Lib::DeviceModel::Sc880);
 			root->SetClass("modelSc55", emu88Lib::isSc55Model(_model) && !noPanel);
 			root->SetClass("modelCm", cmBezel);
 			// The CM bezels differ in their windows: one 16x2 on the CM-32P, one 20x1 on the

@@ -92,7 +92,9 @@ enum
 	/* The MV-30 Studio M's sound section, booted from its system disk. */
 	EMU88_DEVICE_MV30 = 24,
 	/* The SK-88Pro keyboard's sound section, from MIDI. Needs the SC-88Pro 1.02 control ROM too. */
-	EMU88_DEVICE_SK88PRO = 25
+	EMU88_DEVICE_SK88PRO = 25,
+	/* The SC-880. Its waves are the SC-88Pro's. */
+	EMU88_DEVICE_SC880 = 26
 	/* Enumerate them in presentation order with emu88_get_device_count() / emu88_get_device_id(). */
 };
 

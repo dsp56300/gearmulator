@@ -141,6 +141,42 @@ namespace emu88Player::editor
 		bind(nullptr, emu88Lib::Sk88ProButton::Shift, Key::KI_LSHIFT, "SHIFT"),
 	};
 
+	// The SC-880's faces on sc880_panel.png, in the firmware's matrix positions (Sc880Button). The
+	// dial's push and turn come from the bt880Value knob; its keys hold the dial's contacts, a step
+	// a press.
+	constexpr std::array g_sc880Buttons{
+		bind("bt880Perf", emu88Lib::Sc880Button::Perf, Key::KI_P, "PERFORM"),
+		bind("bt880Patch", emu88Lib::Sc880Button::Patch, Key::KI_H, "PATCH"),
+		bind("bt880Tone", emu88Lib::Sc880Button::Tone, Key::KI_T, "TONE"),
+		bind("bt880Rhythm", emu88Lib::Sc880Button::Rhythm, Key::KI_R, "RHYTHM"),
+		bind("bt880Mfx", emu88Lib::Sc880Button::Mfx, Key::KI_X, "M-FX"),
+		bind("bt880System", emu88Lib::Sc880Button::System, Key::KI_S, "SYSTEM"),
+		bind("bt880Utility", emu88Lib::Sc880Button::Utility, Key::KI_U, "UTILITY"),
+		bind("bt880Edit", emu88Lib::Sc880Button::Edit, Key::KI_E, "EDIT"),
+		bind("bt880Info", emu88Lib::Sc880Button::Info, Key::KI_I, "INFO"),
+		bind("bt880Write", emu88Lib::Sc880Button::Write, Key::KI_W, "WRITE"),
+		bind("bt880Preview", emu88Lib::Sc880Button::Preview, Key::KI_TAB, "PHRASE PREVIEW"),
+		bind("bt880Enter", emu88Lib::Sc880Button::Enter, Key::KI_RETURN, "ENTER"),
+		bind("bt880Exit", emu88Lib::Sc880Button::Exit, Key::KI_BACK, "EXIT"),
+		bind("bt880PartL", emu88Lib::Sc880Button::PartL, Key::KI_OEM_COMMA, "PART left"),
+		bind("bt880PartR", emu88Lib::Sc880Button::PartR, Key::KI_OEM_PERIOD, "PART right"),
+		bind("bt880Left", emu88Lib::Sc880Button::Left, Key::KI_LEFT, "Cursor left"),
+		bind("bt880Right", emu88Lib::Sc880Button::Right, Key::KI_RIGHT, "Cursor right"),
+		bind("bt880Up", emu88Lib::Sc880Button::Up, Key::KI_UP, "Cursor up"),
+		bind("bt880Down", emu88Lib::Sc880Button::Down, Key::KI_DOWN, "Cursor down"),
+		bind(nullptr, emu88Lib::Sc880Button::DialDec, Key::KI_OEM_MINUS, "VALUE dial down"),
+		bind(nullptr, emu88Lib::Sc880Button::DialInc, Key::KI_OEM_PLUS, "VALUE dial up"),
+		bind(nullptr, emu88Lib::Sc880Button::DialPush, Key::KI_SPACE, "VALUE dial push"),
+	};
+
+	constexpr uint32_t g_sc880ButtonMask = []
+	{
+		uint32_t mask = 0;
+		for(const auto& binding : g_sc880Buttons)
+			mask |= uint32_t{1} << binding.button;
+		return mask;
+	}();
+
 	constexpr std::array g_sc8850Buttons{
 		bind("bt8850Edit", emu88Lib::Sc8850Button::Edit, Key::KI_E, "EDIT"),
 		bind("bt8850PartL", emu88Lib::Sc8850Button::PartLeft, Key::KI_LEFT, "PART left"),
@@ -252,6 +288,8 @@ namespace emu88Player::editor
 		case Key::KI_DOWN:      return "\xe2\x86\x93";	// down arrow
 		case Key::KI_OEM_1:     return ";";
 		case Key::KI_OEM_4:     return "[";
+		case Key::KI_OEM_COMMA: return ",";
+		case Key::KI_OEM_PERIOD: return ".";
 		case Key::KI_OEM_MINUS: return "-";
 		case Key::KI_OEM_PLUS:  return "=/+";
 		default: break;
@@ -323,6 +361,8 @@ namespace emu88Player::editor
 		if(_model == emu88Lib::DeviceModel::Sk88Pro)
 			return _buttons & ~(proButtonBit(emu88Lib::Sk88ProButton::Unused28) |
 			                    proButtonBit(emu88Lib::Sk88ProButton::Unused29));
+		if(_model == emu88Lib::DeviceModel::Sc880)
+			return _buttons & g_sc880ButtonMask;
 		if(_model == emu88Lib::DeviceModel::Sc88VL)
 			return _buttons & ~preview;
 		if(emu88Lib::isSc55Model(_model))
@@ -362,6 +402,8 @@ namespace emu88Player::editor
 	                                    proButtonBit(emu88Lib::Sk88ProButton::Unused28)) ==
 	              proButtonBit(emu88Lib::Sk88ProButton::Edit),
 	              "the SK-88Pro's position 0 is EDIT; 28 and 29 are empty");
+	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::Sc880, ~uint32_t{0}) == g_sc880ButtonMask,
+	              "the SC-880's switches are at the positions its firmware names");
 	static_assert(panelButtonsForDevice(emu88Lib::DeviceModel::VeGsPro,
 	                                    proButtonBit(emu88Lib::Sc88ProButton::InstAll)) == 0);
 	// How the keyboard dialog is laid out. Hardcoded rather than read back
@@ -456,6 +498,33 @@ namespace emu88Player::editor
 		row ("Keyboard", SkButton::Function, "FUNCTION"),
 		row (nullptr, SkButton::Local,    "LOCAL"),
 		pair(nullptr, SkButton::OctL,     SkButton::OctR,     "OCTAVE"),
+	};
+
+	using Sc880Button = emu88Lib::Sc880Button;
+	constexpr std::array g_sc880Help{
+		row ("Mode",  Sc880Button::Perf,    "PERF"),
+		row (nullptr, Sc880Button::Patch,   "PATCH"),
+		row (nullptr, Sc880Button::Tone,    "TONE"),
+		row (nullptr, Sc880Button::Rhythm,  "RHYTHM"),
+		row (nullptr, Sc880Button::Mfx,     "M-FX"),
+		row (nullptr, Sc880Button::System,  "SYSTEM"),
+		row (nullptr, Sc880Button::Utility, "UTILITY"),
+
+		pair("Cursor", Sc880Button::Left, Sc880Button::Right, "Cursor left / right (pages)"),
+		pair(nullptr, Sc880Button::Up,    Sc880Button::Down,  "Cursor up / down"),
+		pair(nullptr, Sc880Button::PartL, Sc880Button::PartR, "PART"),
+		pair(nullptr, Sc880Button::DialDec, Sc880Button::DialInc, "VALUE dial"),
+		row (nullptr, Sc880Button::DialPush, "VALUE dial push"),
+		row (nullptr, Sc880Button::Enter,   "ENTER"),
+		row (nullptr, Sc880Button::Exit,    "EXIT"),
+
+		row ("Edit",  Sc880Button::Edit,    "EDIT"),
+		row (nullptr, Sc880Button::Write,   "WRITE"),
+		row (nullptr, Sc880Button::Info,    "INFO"),
+		row (nullptr, Sc880Button::Preview, "PHRASE PREVIEW"),
+		chord("Power-on chords", "W + Backspace + S", Sc880Button::Write,
+		      "Test mode (hold while switching on); the cursor keys step through the tests, "
+		      "Down held with Right skips one", false),
 	};
 
 	using LaButton = emu88Lib::Mt32Button;

@@ -83,6 +83,7 @@ If you find any, please report it as a bug.
 | XPGS / G-800 | `xpgs` | H8/510 | XP | dual midi input, emulates the sound generator only, not the arranger |
 | SC-88Pro | `sc88pro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input |
 | SK-88Pro | `sk88pro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, keyboard and sliders not emulated |
+| SC-880 | `sc880` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation |
 | VE-GS Pro | `vegspro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input, no hardware panel present |
 | SC-8820 | `sc8820` | SH7016 (SH-2) | XP6 + LSP | uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
 | SC-8850 | `sc8850` | SH7016 (SH-2) | 2 × XP6 + LSP | uses high-level sub-mcu emulation in USB mode, 4x midi input |
@@ -116,19 +117,20 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | XPGS / G-800 | `xpgs_control.bin` — 512 KiB | `xpgs_wave0.bin` — 2 MiB; `xpgs_wave1.bin` — 2 MiB; `xpgs_wave2.bin` — 2 MiB; `xpgs_wave3.bin` — 2 MiB; `xpgs_wave4.bin` — 2 MiB |
 | SC-88Pro | `sc88pro_control.bin` — 1 MiB | `sc88pro_wave0.bin` — 8 MiB, **or** `sc88pro_wave_cs0.bin` and `sc88pro_wave_cs1.bin` — 4 MiB each; `sc88pro_wave1.bin` — 8 MiB, **or** `sc88pro_wave_cs2.bin` and `sc88pro_wave_cs3.bin` — 4 MiB each; `sc88pro_wave2.bin` — 4 MiB |
 | SK-88Pro | `sk88pro_program.bin` — 512 KiB; `sc88pro_control.bin` — 1 MiB, the SC-88Pro's | the SC-88Pro's, under its names |
+| SC-880 | `sc880_control.bin` — 2 MiB | the SC-88Pro's, under its names |
 | VE-GS Pro | `vegspro_control.bin` — 1 MiB | `vegspro_wave0.bin` — 8 MiB; `vegspro_wave1.bin` — 8 MiB; `vegspro_wave2.bin` — 4 MiB |
 | SC-8820 | `sc8820_internal.bin` — 64 KiB; `sc8820_program.bin` — 2 MiB | `sc8820_wave0.bin` — 16 MiB; `sc8820_wave1.bin` — 8 MiB |
 | SC-8850 | `sc8850_internal.bin` — 64 KiB; `sc8850_program.bin` — 1 MiB; `sc8850_data.bin` — 2 MiB | `sc8850_wave.bin` — 32 MiB; **or** `sc8850_wave0.bin` and `sc8850_wave1.bin` — 16 MiB each |
 | NU-10B | `nu10b_internal.bin` — 64 KiB; `nu10b_program.bin` — 1 MiB | `nu10b_wave0.bin` — 2 MiB; `nu10b_wave1.bin` — 2 MiB; `nu10b_wave2.bin` — 2 MiB; `nu10b_wave3.bin` — 2 MiB |
 | MIIG5 | `miig5_internal.bin` — 256 KiB; `miig5_program.bin` — 2 MiB | `miig5_wave.bin` — 32 MiB, already unscrambled |
 
-SC-88Pro, SK-88Pro and VE-GS Pro may also use the compatible donor waves described below. The standardized names select a device and layout; they do not change the required byte order or contents.
+SC-88Pro, SK-88Pro, SC-880 and VE-GS Pro may also use the compatible donor waves described below. The standardized names select a device and layout; they do not change the required byte order or contents.
 
 Additional supported layouts:
 
 - Recognized H8 control ROMs can be loaded in CPU byte order or the supported word-swapped dump order. Recognized 1 MiB Pro control images embedded in repeated 2/4 MiB dumps are also accepted.
 - The SC-88Pro board carries its PCM on five 4 MiB mask ROMs, one per chip select, instead of the three larger VE-GS Pro parts that `sc88pro_wave0.bin` to `sc88pro_wave2.bin` hold. Dumps of the five are also accepted: CS0 and CS1 together replace `sc88pro_wave0.bin`, CS2 and CS3 replace `sc88pro_wave1.bin`, and CS4 is identical to `sc88pro_wave2.bin`. The hashes registered for CS0–CS3 were derived by splitting the VE-GS Pro images, not taken from dumps of SC-88Pro chips.
-- SC-88Pro, SK-88Pro and VE-GS Pro can obtain their waves from recognized decoded SC-8850 or SC-8820 wave images. Their own control ROM is still required.
+- SC-88Pro, SK-88Pro, SC-880 and VE-GS Pro can obtain their waves from recognized decoded SC-8850 or SC-8820 wave images. Their own control ROM is still required.
 - Recognized `SCCore.dll` / `SCCore00.dylib` containers can supply the SC-8820 wave regions and compatible Pro waves. They are scanned as data, never executed. They do not supply CPU firmware. For SC-8850 they supply **bank A only**; you still need its distinct bank B.
 - SC-8850 also accepts recognized raw XP wave layouts.
 - The patched [sc55mk2-ctf-patcher](https://github.com/shingo45endo/sc55mk2-ctf-patcher) SC-55mkII GS-28 2.00 ROM patched is supported.
@@ -213,7 +215,7 @@ The SC-88Pro firmware also has an XG compatibility mode. Send XG System On (`F0 
 
 Real hardware expects initialized battery-backed SRAM. A newly created emulated board starts with blank memory, like a unit with a depleted backup battery. Firmware can then start with odd part assignments, levels or incomplete user/system settings. For example, the SC-155 can start with part 1 as drums on channel 10, and the SC-155mkII on part 8 at level 84. A per-song GM/GS reset does not initialize every battery-backed setting.
 
-**Factory Reset on load**, enabled by default, runs the firmware's full factory-initialization procedure on SC-55, SC-55mkII, SC-155, SC-155mkII, SC-88, SC-88VL, SC-88Pro, SK-88Pro and SC-8850, then power-cycles the initialized board. Leave this enabled for ordinary playback. The other profiles currently have no equivalent automated procedure.
+**Factory Reset on load**, enabled by default, runs the firmware's full factory-initialization procedure on SC-55, SC-55mkII, SC-155, SC-155mkII, SC-88, SC-88VL, SC-88Pro, SK-88Pro, SC-880 and SC-8850, then power-cycles the initialized board. Leave this enabled for ordinary playback. The other profiles currently have no equivalent automated procedure.
 
 **Fast Boot (skip intro)**, off by default, runs another ten seconds of emulated time before exposing the device for use. It skips waiting through the firmware's intro in real time, but takes extra computation during loading. It is independent of factory initialization. Both settings apply at the next device selection, power-on or Restart.
 

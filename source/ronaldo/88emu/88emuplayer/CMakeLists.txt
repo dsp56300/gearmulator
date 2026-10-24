@@ -17,6 +17,7 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/sc88vl_panel.png
 	${HARDWARE_SKIN_DIR}/sc88pro_panel.png
 	${HARDWARE_SKIN_DIR}/sc8850_panel.png
+	${HARDWARE_SKIN_DIR}/sc880_panel.png
 	${HARDWARE_SKIN_DIR}/sc55_panel.png
 	${HARDWARE_SKIN_DIR}/sc55mk2_panel.png
 	${HARDWARE_SKIN_DIR}/sc8820_panel.png
@@ -37,6 +38,8 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/button_part_left.svg
 	${HARDWARE_SKIN_DIR}/button_part_right.svg
 	${HARDWARE_SKIN_DIR}/button_plain.svg
+	${HARDWARE_SKIN_DIR}/sc880_key.svg
+	${HARDWARE_SKIN_DIR}/sc880_key_lit.svg
 	${HARDWARE_SKIN_DIR}/preview.svg
 	${HARDWARE_SKIN_DIR}/player_play.svg
 	${HARDWARE_SKIN_DIR}/player_pause.svg

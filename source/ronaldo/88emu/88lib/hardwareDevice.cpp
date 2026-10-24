@@ -106,17 +106,20 @@ namespace emu88Lib
 		case DeviceModel::Sc88Pro:
 		case DeviceModel::VeGsPro:
 		case DeviceModel::Sk88Pro:
+		case DeviceModel::Sc880:
 		{
 			// The VE-GS Pro is the SC-88Pro board without its panel sub-MCU; the
-			// board finds that out from the control ROM's vector table. The
-			// SK-88Pro's image is twice the size, which is how it is told apart.
+			// board finds that out from the control ROM's vector table.
 			auto roms = RomLoader::findSc88ProRomSet(RomLoader::toRomDevice(m_model));
 			if(!roms.isValid()) break;
 			std::vector<uint8_t> waves;
 			waves.reserve(Sc88ProRomSet::WaveSize);
 			for(const auto* chip : {&roms.waveA, &roms.waveB, &roms.waveC})
 				waves.insert(waves.end(), chip->begin(), chip->end());
-			m_sc88Pro = std::make_unique<Sc88Pro>(std::move(roms.firmware), waves, factoryReset);
+			const auto variant = m_model == DeviceModel::Sk88Pro ? Sc88Pro::Variant::Sk88Pro
+				: m_model == DeviceModel::Sc880                  ? Sc88Pro::Variant::Sc880
+				                                                 : Sc88Pro::Variant::Sc88Pro;
+			m_sc88Pro = std::make_unique<Sc88Pro>(std::move(roms.firmware), waves, factoryReset, variant);
 			break;
 		}
 		case DeviceModel::Cm32p:
@@ -531,6 +534,10 @@ namespace emu88Lib
 		{
 			m_sc8850->turnEncoder(static_cast<int8_t>(std::clamp(command.value, -64, 63)));
 		}
+		else if(m_sc88Pro)
+		{
+			m_sc88Pro->turnDial(std::clamp(command.value, -64, 64));
+		}
 		else if(m_la && hasPanelKnob(m_model))
 		{
 			m_la->turnKnob(std::clamp(command.value, -64, 64) * g_knobStepPerDetent);
@@ -567,7 +574,18 @@ namespace emu88Lib
 	{
 		DisplaySnapshot next;
 		auto& first = next.screens[0];
-		if(deviceHasLcd(m_model) && (m_sc88Pro || m_sc88 || (m_sc55 && m_sc55->hasDisplay())))
+		if(m_sc88Pro && m_sc88Pro->hasGraphicLcd())
+		{
+			// The SC-880's 136 x 34 dot matrix; it has no character controller to hand over.
+			const auto& lcd = m_sc88Pro->graphicLcd();
+			first.type = DisplaySnapshot::Type::Graphic;
+			first.width = static_cast<uint16_t>(Sc880Lcd::Width);
+			first.height = static_cast<uint16_t>(Sc880Lcd::Height);
+			first.displayOn = lcd.isDisplayOn();
+			lcd.renderMono(first.mono);
+			next.leds = m_sc88Pro->leds();
+		}
+		else if(deviceHasLcd(m_model) && (m_sc88Pro || m_sc88 || (m_sc55 && m_sc55->hasDisplay())))
 		{
 			const auto& lcd = m_sc88Pro ? m_sc88Pro->lcd() : m_sc88 ? m_sc88->lcd() : m_sc55->lcd();
 			first.type = DisplaySnapshot::Type::Character;

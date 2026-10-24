@@ -57,6 +57,8 @@ namespace emu88Lib
             return RomDevice::VeGsPro;
         case DeviceModel::Sk88Pro:
             return RomDevice::Sk88Pro;
+        case DeviceModel::Sc880:
+            return RomDevice::Sc880;
         case DeviceModel::Sc8850:
             return RomDevice::Sc8850;
         case DeviceModel::Sc55Mk2:
@@ -120,7 +122,8 @@ namespace emu88Lib
     {
         const auto inventory = scan();
         const bool sk88Pro = _device == RomDevice::Sk88Pro;
-        if ((_device != RomDevice::Sc88Pro && _device != RomDevice::VeGsPro && !sk88Pro) ||
+        if ((_device != RomDevice::Sc88Pro && _device != RomDevice::VeGsPro && _device != RomDevice::Sc880 &&
+             !sk88Pro) ||
             !inventory.isComplete(_device))
             return {};
 

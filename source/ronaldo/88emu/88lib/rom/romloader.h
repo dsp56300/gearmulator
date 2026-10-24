@@ -143,7 +143,8 @@ namespace emu88Lib
 
         // The SC-88Pro board's set. The VE-GS Pro is the same board with its own
         // control ROM and the same waves, so _device picks whose control ROM is read.
-        // For the SK-88Pro the firmware is the image buildSk88ProImage() makes.
+        // For the SK-88Pro the firmware is the image buildSk88ProImage() makes; the SC-880
+        // runs its own control ROM on the same waves.
         static Sc88ProRomSet findSc88ProRomSet(RomDevice _device = RomDevice::Sc88Pro);
 
         // SC-8850 uses the SH7016's 64 KiB internal ROM, a 1 MiB CS0

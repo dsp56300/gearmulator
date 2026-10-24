@@ -102,6 +102,7 @@ namespace emu88Lib
         static constexpr size_t FirmwareSize = 0x100000;
         // The SK-88Pro's firmware as the CPU sees it, see buildSk88ProImage().
         static constexpr size_t Sk88ProFirmwareSize = 0x200000;
+        static constexpr size_t Sc880FirmwareSize = 0x200000;
         static constexpr size_t WaveASize = 0x800000;
         static constexpr size_t WaveBSize = 0x800000;
         static constexpr size_t WaveCSize = 0x400000;
@@ -115,7 +116,8 @@ namespace emu88Lib
 
         bool isValid() const
         {
-            return (firmware.size() == FirmwareSize || firmware.size() == Sk88ProFirmwareSize) &&
+            return (firmware.size() == FirmwareSize || firmware.size() == Sk88ProFirmwareSize ||
+                    firmware.size() == Sc880FirmwareSize) &&
                 waveA.size() == WaveASize && waveB.size() == WaveBSize &&
                 waveC.size() == WaveCSize;
         }

@@ -97,6 +97,33 @@
 			<knob id="bt8850Value" class="hit sc8850Value" title="VALUE: drag or scroll to turn, click to push (Space)"/>
 		</div>
 
+		<!-- SC-880: the faces over the wells sc880_panel.png paints, in the unit's arrangement (the
+		     test mode's switch test draws it). The ten keys with a lamp swap to a lit face from the
+		     gate array's lamp ports. PHRASE PREVIEW is the unit's VOLUME knob pushed; here it is a
+		     button under the player's volume knob. -->
+		<div class="model880">
+			<button id="bt880PartL" class="hit sc880Key" style="left: 381dp; top: 30dp;" title="PART left (,)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
+			<button id="bt880PartR" class="hit sc880Key" style="left: 425dp; top: 30dp;" title="PART right (.)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
+			<button id="bt880Up" class="hit sc880Key" style="left: 403dp; top: 48dp;" title="Cursor up (Up arrow)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
+			<button id="bt880Left" class="hit sc880Key" style="left: 381dp; top: 62dp;" title="Cursor left (Left arrow)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
+			<button id="bt880Down" class="hit sc880Key" style="left: 403dp; top: 62dp;" title="Cursor down (Down arrow)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
+			<button id="bt880Right" class="hit sc880Key" style="left: 425dp; top: 62dp;" title="Cursor right (Right arrow)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
+			<button id="bt880Perf" class="hit sc880Key sc880LampKey" style="left: 497dp; top: 30dp;" title="PERFORM (P)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Patch" class="hit sc880Key sc880LampKey" style="left: 523dp; top: 30dp;" title="PATCH (H)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Tone" class="hit sc880Key sc880LampKey" style="left: 549dp; top: 30dp;" title="TONE (T)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Rhythm" class="hit sc880Key sc880LampKey" style="left: 575dp; top: 30dp;" title="RHYTHM (R)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Mfx" class="hit sc880Key sc880LampKey" style="left: 497dp; top: 50dp;" title="M-FX (X)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Edit" class="hit sc880Key sc880LampKey" style="left: 523dp; top: 50dp;" title="EDIT (E)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880System" class="hit sc880Key sc880LampKey" style="left: 549dp; top: 50dp;" title="SYSTEM (S)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Utility" class="hit sc880Key sc880LampKey" style="left: 575dp; top: 50dp;" title="UTILITY (U)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Write" class="hit sc880Key sc880LampKey" style="left: 549dp; top: 72dp;" title="WRITE (W)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Info" class="hit sc880Key sc880LampKey" style="left: 575dp; top: 72dp;" title="INFO (I)"><svg class="buttonGraphic" src="sc880_key.svg"/><svg class="buttonOnGraphic" src="sc880_key_lit.svg"/></button>
+			<button id="bt880Enter" class="hit sc880Key" style="left: 549dp; top: 92dp;" title="ENTER (Return)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
+			<button id="bt880Exit" class="hit sc880Key" style="left: 575dp; top: 92dp;" title="EXIT (Backspace)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
+			<button id="bt880Preview" class="hit preview" style="left: 116dp; top: 74dp;" title="PHRASE PREVIEW (Tab)"><svg class="buttonGraphic" src="preview.svg"/></button>
+			<knob id="bt880Value" class="hit sc880Value" style="left: 444dp; top: 32dp; width: 44dp; height: 44dp; border-radius: 22dp;" title="VALUE: drag or scroll to turn, click to push (Space)"/>
+		</div>
+
 		<!-- The CM bezel (CM-32P, CM-32L, CM-64, and the MT-32s' dark one): the
 		     MIDI MESSAGE lamp left of POWER, which the artwork paints dark. The CM-32P firmware
 		     holds HSO.3 low for about 45 ms per received message and the LA boards' keeps the

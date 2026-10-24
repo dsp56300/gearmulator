@@ -391,6 +391,30 @@ namespace
 		CHECK(buildSk88ProImage(control, readProgram).empty());
 	}
 
+	// The SC-880 runs its own 2 MiB control ROM on the SC-88Pro's waves; neither board takes the
+	// other's control ROM.
+	void testSc880Set()
+	{
+		RomInventory inventory;
+		CHECK(place(inventory, RomDevice::Sc880, RomSlot::Wave, 0, pattern(0x800000, 3), "w.bin"));
+		CHECK(place(inventory, RomDevice::Sc880, RomSlot::Wave, 1, pattern(0x800000, 5), "wa.bin"));
+		CHECK(place(inventory, RomDevice::Sc880, RomSlot::Wave, 2, pattern(0x400000, 6), "wb.bin"));
+		CHECK(place(inventory, RomDevice::Sc88Pro, RomSlot::Control, 0, pattern(0x100000, 0x47), "c.bin"));
+		CHECK(inventory.isComplete(RomDevice::Sc88Pro));
+		CHECK(!inventory.isComplete(RomDevice::Sc880));
+
+		const auto control = pattern(Sc88ProRomSet::Sc880FirmwareSize, 0x58);
+		CHECK(place(inventory, RomDevice::Sc880, RomSlot::Control, 0, control, "c880.bin"));
+		CHECK(inventory.isComplete(RomDevice::Sc880));
+		CHECK(inventory.missingFiles(RomDevice::Sc880).empty());
+
+		std::vector<uint8_t> read;
+		CHECK(inventory.read(read, RomDevice::Sc880, RomSlot::Control));
+		CHECK(read == control);
+		CHECK(inventory.read(read, RomDevice::Sc88Pro, RomSlot::Control));
+		CHECK_EQ(read.size(), Sc88ProRomSet::FirmwareSize);
+	}
+
 	// A board is complete with either form of a composite slot, and the chips never count as a
 	// requirement of their own.
 	void testCompletenessIgnoresHalves()
@@ -495,6 +519,7 @@ int main()
 	testSc88ProChipComposite();
 	testSharedProWaves();
 	testSk88ProSet();
+	testSc880Set();
 	testCompletenessIgnoresHalves();
 	testRevisionPairing();
 

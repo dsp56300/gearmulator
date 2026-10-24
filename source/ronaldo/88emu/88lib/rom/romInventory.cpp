@@ -22,11 +22,12 @@ namespace emu88Lib
                 std::swap(_data[i], _data[i + 1]);
         }
 
-        // The SC-88Pro, the VE-GS Pro and the SK-88Pro are one board with different control
-        // ROMs: they share the wave set, its SC-8820/8850 donors and the oversized dumps.
+        // The SC-88Pro, the VE-GS Pro, the SK-88Pro and the SC-880 are one board with different
+        // control ROMs: they share the wave set, its SC-8820/8850 donors and the oversized dumps.
         constexpr bool usesProBoard(const RomDevice _device)
         {
-            return _device == RomDevice::Sc88Pro || _device == RomDevice::VeGsPro || _device == RomDevice::Sk88Pro;
+            return _device == RomDevice::Sc88Pro || _device == RomDevice::VeGsPro || _device == RomDevice::Sk88Pro ||
+                   _device == RomDevice::Sc880;
         }
 
         // Inverse of WaveRom::unscramble. Pro ROM sets contain physical chip data,
@@ -544,6 +545,8 @@ namespace emu88Lib
                          ? "The VE-GS Pro's headless program ROM (R01780078) runs as its own device.\n\n"
                          : _device == RomDevice::VeGsPro
                          ? "SC-88Pro control ROMs run as the SC-88Pro device.\n\n"
+                         : _device == RomDevice::Sc880
+                         ? "The SC-880's own wave ROMs have not been dumped; it plays the SC-88Pro's.\n\n"
                          : "The SK-88Pro's parameter mask ROM has not been dumped. The SC-88Pro 1.02 control "
                            "ROM carries the same tone data and stands in for it, next to the SK-88Pro's own "
                            "program EPROM.\n\n")
