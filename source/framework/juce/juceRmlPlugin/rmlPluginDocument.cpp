@@ -26,6 +26,61 @@ namespace rmlPlugin
 		Rml::EventId::Dblclick,
 	};
 
+	namespace
+	{
+		bool isVertical(Rml::Element* _slider)
+		{
+			const auto* attrib = _slider->GetAttribute("orientation");
+			return attrib && attrib->Get(_slider->GetCoreInstance(), std::string()) == "vertical";
+		}
+
+		bool hasKeyModifier(const Rml::Event& _event)
+		{
+			return (juceRmlUi::helper::getKeyModifiers(_event) & (Rml::Input::KM_CTRL | Rml::Input::KM_SHIFT | Rml::Input::KM_ALT | Rml::Input::KM_META)) != 0;
+		}
+
+		// a press on the track puts the center of the thumb at the mouse, like the native RmlUi slider. A press on the
+		// thumb keeps the value
+		void jumpToMouse(pluginLib::Parameter& _param, Rml::Element* _slider, const Rml::Vector2f& _mousePos)
+		{
+			auto* track = juceRmlUi::helper::findChildByTag(_slider, "slidertrack", false, true);
+			auto* bar = juceRmlUi::helper::findChildByTag(_slider, "sliderbar", false, true);
+
+			if (!track || !bar)
+				return;
+
+			const auto vertical = isVertical(_slider);
+			const auto axis = [vertical](const Rml::Vector2f& _v) { return vertical ? _v.y : _v.x; };
+
+			const auto mouse = axis(_mousePos);
+			const auto barStart = axis(bar->GetAbsoluteOffset(Rml::BoxArea::Border));
+			const auto barSize = axis(bar->GetBox().GetSize(Rml::BoxArea::Border));
+
+			if (mouse >= barStart && mouse < barStart + barSize)
+				return;
+
+			const auto length = juceRmlUi::helper::getSliderTraversableLength(_slider, vertical);
+
+			if (length <= 0.0f)
+				return;
+
+			const auto edge = bar->GetBox().GetEdge(Rml::BoxArea::Margin, vertical ? Rml::BoxEdge::Top : Rml::BoxEdge::Left);
+			const auto origin = axis(track->GetAbsoluteOffset()) + edge;
+
+			auto pos = std::clamp((mouse - barSize * 0.5f - origin) / length, 0.0f, 1.0f);
+
+			// vertical sliders have their maximum at the top
+			if (vertical)
+				pos = 1.0f - pos;
+
+			const auto& range = _param.getDescription().range;
+			const auto value = range.getStart() + static_cast<int>(std::round(pos * static_cast<float>(range.getEnd() - range.getStart())));
+
+			if (value != _param.getUnnormalizedValue())
+				_param.setUnnormalizedValueNotifyingHost(value, pluginLib::Parameter::Origin::Ui);
+		}
+	}
+
 	class DocumentListener : public Rml::EventListener
 	{
 	public:
@@ -120,14 +175,12 @@ namespace rmlPlugin
 					m_lastMousePos = mousePos;
 				}
 
-				bool isVertical = false;
-				if (const auto* attrib = m_dragTargetSlider->GetAttribute("orientation"))
-					isVertical = attrib->Get(m_dragTargetSlider->GetCoreInstance(), std::string()) == "vertical";
+				const auto vertical = isVertical(m_dragTargetSlider.get());
 
 				const auto mouseDelta = mousePos - m_lastMousePos;
-				const auto delta = isVertical ? -mouseDelta.y : mouseDelta.x;
+				const auto delta = vertical ? -mouseDelta.y : mouseDelta.x;
 
-				const auto sliderSize = juceRmlUi::helper::getSliderTraversableLength(m_dragTargetSlider.get(), isVertical);
+				const auto sliderSize = juceRmlUi::helper::getSliderTraversableLength(m_dragTargetSlider.get(), vertical);
 
 				if (sliderSize <= 0.0f)
 					break;
@@ -311,10 +364,16 @@ namespace rmlPlugin
 						auto* parameter = binding.getParameterForElement(input);
 						if (parameter)
 						{
+							const auto mousePos = juceRmlUi::helper::getMousePos(_event);
+
+							// with a modifier, the drag starts from the current value wherever it is pressed
+							if (juceRmlUi::helper::getMouseButton(_event) == juceRmlUi::MouseButton::Left && !hasKeyModifier(_event))
+								jumpToMouse(*parameter, input, mousePos);
+
 							m_dragStartValue = parameter->getUnnormalizedValue();
 							m_modAnchorValue = m_dragStartValue;
 							m_dragTargetSlider = input->GetObserverPtr(input->GetCoreInstance());
-							m_lastMousePos = juceRmlUi::helper::getMousePos(_event);
+							m_lastMousePos = mousePos;
 							m_lastMod = getModifierScale(_event, input);
 						}
 					}, true);

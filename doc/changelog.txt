@@ -15,6 +15,10 @@ Framework:
         being told where they are: a folder named "patches" in the plugin's
         folder in Documents/The Usual Suspects is added as a data source.
 
+- [Imp] BUG-10195 Clicking a slider's track moves the slider there again, a drag
+        continues from there. Dragging the slider's knob, or holding Shift, Ctrl
+        or Alt while clicking, still changes the value from where it is.
+
 - [Fix] BUG-10514 Linux: a plugin could crash while it was loaded when its ROM
         was installed, for example the VST3 versions of Nodal Red 2x, Vavra and
         Xenia.
