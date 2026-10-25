@@ -23,6 +23,10 @@ Framework:
         copied into the ROM folder after the plugin was loaded, the plugin no
         longer has to be loaded again. The selected ROM stays selected.
 
+- [Fix] #278 Closing the editor while the Patch Manager was still searching left
+        that search registered for good. Every later bank load or patch change
+        had to scan it, so the CPU load grew a bit with every such close.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

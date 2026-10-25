@@ -50,6 +50,7 @@ namespace jucePluginEditorLib::patchManagerRml
 		using Patches = std::vector<Patch>;
 
 		explicit ListModel(PatchManagerUiRml& _pm, juceRmlUi::ElemList* _list);
+		~ListModel();
 
 		PatchManagerUiRml& getPatchManager() const;
 		patchManager::PatchManager& getDB() const;

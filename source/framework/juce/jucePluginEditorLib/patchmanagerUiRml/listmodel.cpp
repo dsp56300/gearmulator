@@ -49,6 +49,12 @@ namespace jucePluginEditorLib::patchManagerRml
 		});
 	}
 
+	ListModel::~ListModel()
+	{
+		// a search that is still running would keep going for a list that no longer exists
+		cancelSearch();
+	}
+
 	PatchManagerUiRml& ListModel::getPatchManager() const
 	{
 		return m_patchManager;
