@@ -158,8 +158,10 @@ namespace pluginManager
 		if (needsRights && !ElevatedTask::isSupported())
 			return false;
 
+		// A name nothing else has: /tmp is shared, and a file left there under the same name by another
+		// user cannot be replaced by this one.
 		const auto tempZip = juce::File::getSpecialLocation(juce::File::tempDirectory)
-			.getChildFile(_asset.product + "_" + _asset.format + "_" + _asset.version + ".zip")
+			.getNonexistentChildFile(_asset.product + "_" + _asset.format + "_" + _asset.version, ".zip", false)
 			.getFullPathName().toStdString();
 
 		*_cancel = false;

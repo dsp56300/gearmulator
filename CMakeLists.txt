@@ -79,6 +79,12 @@ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://dsp56300.wordpress.com")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
 set(CPACK_RPM_PACKAGE_AUTOREQ "yes")
+
+# Without the symbol version in what is required of libcurl. Built on Debian or Ubuntu, the plugin
+# manager links a libcurl whose symbols are versioned CURL_OPENSSL_4, rpm writes that version into the
+# requirement, and the libcurl of Fedora has none - so the package would not install there, although
+# the program runs with it (BUG-10507). The requirement of libcurl.so.4 itself stays.
+set(CPACK_RPM_SPEC_MORE_DEFINE "%global __requires_exclude ^libcurl[.]so[.]4[(]CURL_")
 set(CPACK_RPM_PACKAGE_URL ${CPACK_DEBIAN_PACKAGE_HOMEPAGE})
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 

@@ -165,6 +165,14 @@ Plugin Manager:
         are, rather than into the user's own in ~/Library. Plugins installed
         there before are still found and are upgraded where they are.
 
+- [Fix] BUG-10507 Linux: the rpm package could not be installed on distributions
+        whose libcurl does not version its symbols, such as Fedora: it required
+        libcurl.so.4(CURL_OPENSSL_4).
+
+- [Fix] BUG-10507 A download that could not be written, to a full disk for
+        example, was reported as a damaged archive. It now says that it could
+        not be written, and why.
+
 88emuPlayer:
 
 - [New] Devices: Added support for the SC-880.

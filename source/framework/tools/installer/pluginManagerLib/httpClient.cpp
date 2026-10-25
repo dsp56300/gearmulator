@@ -390,6 +390,18 @@ namespace pluginManager
 			juce::int64 bytesRead = 0;
 			int lastReportedPercent = -1;
 
+			// Said as the system says it. Not checked, a full disk - /tmp is in memory on Fedora - went on
+			// to report the archive as damaged, which sends everybody looking in the wrong place (BUG-10507).
+			const auto writeFailed = [&]
+			{
+				_error = "Could not write " + tempFile.getFullPathName().toStdString() + ": " +
+					outStream->getStatus().getErrorMessage().toStdString();
+				outStream.reset();
+				tempFile.deleteFile();
+				Log::write("Download " + _url + ": " + _error);
+				return false;
+			};
+
 			while (!stream->isExhausted())
 			{
 				if (_cancel && *_cancel)
@@ -405,7 +417,9 @@ namespace pluginManager
 				if (numRead <= 0)
 					break;
 
-				outStream->write(buffer, static_cast<size_t>(numRead));
+				if (!outStream->write(buffer, static_cast<size_t>(numRead)))
+					return writeFailed();
+
 				bytesRead += numRead;
 
 				if (!_onProgress)
@@ -424,6 +438,12 @@ namespace pluginManager
 				lastReportedPercent = percent;
 				_onProgress(progress);
 			}
+
+			// What is still in the stream's buffer fails here, not in write().
+			outStream->flush();
+
+			if (outStream->getStatus().failed())
+				return writeFailed();
 
 			outStream.reset();
 
