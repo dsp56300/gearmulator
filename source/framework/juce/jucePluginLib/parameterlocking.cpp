@@ -4,6 +4,8 @@
 
 #include "controller.h"
 
+#include "baseLib/binarystream.h"
+
 namespace pluginLib
 {
 	ParameterLocking::ParameterLocking(Controller& _controller) : m_controller(_controller)
@@ -124,6 +126,60 @@ namespace pluginLib
 				return true;
 		}
 		return false;
+	}
+
+	void ParameterLocking::saveChunkData(baseLib::BinaryStream& _s) const
+	{
+		// written without locks too: loading a state unlocks what it does not lock
+		baseLib::ChunkWriter cw(_s, "PLCK", 1);
+
+		uint32_t count = 0;
+		for (const auto& regions : m_lockedRegions)
+			count += static_cast<uint32_t>(regions.size());
+
+		_s.write(count);
+
+		for(uint8_t part=0; part<m_lockedRegions.size(); ++part)
+		{
+			for (const auto& id : m_lockedRegions[part])
+			{
+				_s.write(part);
+				_s.write(id);
+			}
+		}
+	}
+
+	void ParameterLocking::loadChunkData(baseLib::ChunkReader& _cr)
+	{
+		_cr.add("PLCK", 1, [this](baseLib::BinaryStream& _s, uint32_t/* _version*/)
+		{
+			std::array<std::set<std::string>,16> regions;
+
+			const auto count = _s.read<uint32_t>();
+
+			for(uint32_t i=0; i<count; ++i)
+			{
+				const auto part = _s.read<uint8_t>();
+				auto id = _s.readString();
+				if(part < regions.size())
+					regions[part].insert(std::move(id));
+			}
+
+			for(uint8_t part=0; part<regions.size(); ++part)
+			{
+				// a copy, unlocking erases from it
+				const auto locked = m_lockedRegions[part];
+
+				for (const auto& id : locked)
+				{
+					if(regions[part].find(id) == regions[part].end())
+						unlockRegion(part, id);
+				}
+
+				for (const auto& id : regions[part])
+					lockRegion(part, id);
+			}
+		});
 	}
 
 	void ParameterLocking::setParametersLocked(const ParameterRegion& _parameterRegion, const uint8_t _part, const bool _locked) const

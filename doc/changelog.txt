@@ -54,6 +54,10 @@ Framework:
 - [Fix] BUG-10441 A skin that uses CSS filters no longer floods the log with
         "Could not compile filter" on renderers without filter support.
 
+- [Fix] BUG-10180 Lock Regions are saved with the project and locked again when
+        it is loaded. A project saved by an earlier version loads with nothing
+        locked, as before.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on
@@ -84,6 +88,9 @@ Osirus/OsTIrus:
         the project was loaded or the play mode was changed. Its Note Steal
         setting and its MIDI Volume, Hold Pedal, Keyb To Midi and Program
         Change switches went back the same way.
+
+- [Fix] BUG-10180 With regions locked, loading a project or a host preset kept
+        values from before the load in the parts that had locked regions.
 
 Osirus:
 

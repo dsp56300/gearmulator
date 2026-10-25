@@ -508,7 +508,11 @@ namespace virus
 
 			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
 
-            const auto locked = m_locking.getLockedParameterNames(ch);
+			const auto isStateSync = m_pendingStateSyncs[ch] > 0;
+			if(isStateSync)
+				--m_pendingStateSyncs[ch];
+
+            const auto locked = isStateSync ? std::unordered_set<std::string>() : m_locking.getLockedParameterNames(ch);
 
 			// if there are locked parameters and the current values in the received preset do not match
 			// the values of the parameters that are locked, create a new preset that contains all
@@ -713,6 +717,10 @@ namespace virus
     {
 		requestTotal();
 		requestArrangement();
+
+		// the arrangement comes with one edit buffer single per part, in either play mode
+		for (auto& s : m_pendingStateSyncs)
+			++s;
 	}
 
     uint8_t Controller::getPartCount() const

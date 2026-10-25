@@ -214,6 +214,9 @@ namespace virus
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
+		// per part, the edit buffer singles still to come that answer onStateLoaded. They carry a restored state, which
+		// the values that locked parameters had before must not overwrite
+		uint8_t m_pendingStateSyncs[16]{};
 		baseLib::EventListener<uint32_t> m_onRomChanged;
         virusLib::FrontpanelState m_frontpanelState;
 		// LFO 1-3 and the logo for skins, linear, negative for an LED this model does not drive. Written with the

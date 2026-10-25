@@ -732,11 +732,13 @@ namespace pluginLib
 	void Controller::loadChunkData(baseLib::ChunkReader& _cr)
 	{
 		m_parameterLinks.loadChunkData(_cr);
+		m_locking.loadChunkData(_cr);
 	}
 
 	void Controller::saveChunkData(baseLib::BinaryStream& _s) const
 	{
 		m_parameterLinks.saveChunkData(_s);
+		m_locking.saveChunkData(_s);
 	}
 
 	Parameter::Origin Controller::midiEventSourceToParameterOrigin(const synthLib::MidiEventSource _source)
