@@ -1,13 +1,29 @@
 #include "focusedParameterTooltip.h"
 
+#include "juceRmlUi/rmlElemKnob.h"
 #include "juceRmlUi/rmlHelper.h"
 
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/ElementUtilities.h"
+#include "RmlUi/Core/Elements/ElementFormControlInput.h"
 
 namespace jucePluginEditorLib
 {
+	namespace
+	{
+		// Only knobs and sliders get a tooltip, as with the JUCE skins (juce::Slider only). A button or a combo box
+		// shows its value itself, and its box can be much larger than what it draws, which put the tooltip next to
+		// other controls (BUG-10382)
+		bool hasTooltip(const Rml::Element* _component)
+		{
+			if (dynamic_cast<const juceRmlUi::ElemKnob*>(_component))
+				return true;
+			const auto* input = dynamic_cast<const Rml::ElementFormControlInput*>(_component);
+			return input && input->GetAttribute("type", std::string()) == "range";
+		}
+	}
+
 	FocusedParameterTooltip::FocusedParameterTooltip(Rml::Element* _label) : m_label(_label)
 	{
 		setVisible(false);
@@ -44,7 +60,7 @@ namespace jucePluginEditorLib
 		if(!isValid())
 			return;
 
-		if(_component->IsVisible(true))
+		if(hasTooltip(_component) && _component->IsVisible(true))
 		{
 			auto* comp = const_cast<Rml::Element*>(_component);
 

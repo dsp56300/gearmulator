@@ -33,6 +33,10 @@ Framework:
         that search registered for good. Every later bank load or patch change
         had to scan it, so the CPU load grew a bit with every such close.
 
+- [Fix] BUG-10382 The value tooltip also appeared for buttons, often away from
+        the button and over other controls. It is shown for knobs and sliders
+        only again.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on
