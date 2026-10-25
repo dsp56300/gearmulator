@@ -610,7 +610,9 @@ namespace jeJucePlugin
 			}
 			else
 			{
-				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::PerformanceData::BlockMask);
+				// the whole offset in the performance: a rack patch is dumped in two messages, the second one starts in
+				// the middle of a block (41 72, 43 72)
+				const auto localAddr = static_cast<uint32_t>(addr) & static_cast<uint32_t>(jeLib::UserPerformanceArea::BlockMask);
 
 				const auto a = 
 					static_cast<uint32_t>(jeLib::AddressArea::PerformanceTemp) |

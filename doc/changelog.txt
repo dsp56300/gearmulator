@@ -94,6 +94,17 @@ JE8086:
         set a single channel to play the Upper and Lower parts on their own MIDI
         channels.
 
+- [Fix] BUG-10528 A JP-8080 performance loaded from a file, such as a bulk dump
+        of the hardware, left Unison, Unison Detune, Patch Gain, Voice Modulator
+        Send and External Trigger of its patches as they were, and set three
+        Control depths of the amp (LFO 1, LFO 2, Attack) to wrong values
+        instead.
+
+- [Fix] BUG-10528 INC and DEC did nothing after the plugin was loaded, until a
+        patch was picked in the browser. With nothing picked there, they now
+        press INC and DEC of the synth (VALUE UP and DOWN of the JP-8000), and
+        the editor shows what the synth plays afterwards.
+
 NodalRed2x:
 
 - [Fix] BUG-10509 With enough voices playing, the voices of the second DSP cut in

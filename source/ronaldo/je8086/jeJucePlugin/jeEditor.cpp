@@ -10,6 +10,8 @@
 
 #include "baseLib/filesystem.h"
 
+#include "jeLib/je8080devices.h"
+
 #include "jucePluginEditorLib/firmwareSelector.h"
 #include "jucePluginEditorLib/frontPanel.h"
 #include "jucePluginEditorLib/pluginDataModel.h"
@@ -94,15 +96,16 @@ namespace jeJucePlugin
 
 		m_assign.reset(new JeAssign(*this));
 
-		addClick("btDec", [this](Rml::Event&)
+		for (const auto inc : {false, true})
 		{
-			getPatchManager()->selectPrevPreset(getPatchManager()->getCurrentPart());
-		});
+			auto* bt = findChild(inc ? "btInc" : "btDec", false);
+			if (!bt)
+				continue;
 
-		addClick("btInc", [this](Rml::Event&)
-		{
-			getPatchManager()->selectNextPreset(getPatchManager()->getCurrentPart());
-		});
+			juceRmlUi::EventListener::Add(bt, Rml::EventId::Mousedown, [this, inc](Rml::Event&) { onStepPressed(inc); });
+			juceRmlUi::EventListener::Add(bt, Rml::EventId::Mouseup, [this](Rml::Event&) { onStepReleased(); });
+			juceRmlUi::EventListener::Add(bt, Rml::EventId::Mouseout, [this](Rml::Event&) { onStepReleased(); });
+		}
 
 		addClick("btEdit", [this](Rml::Event& _event)
 		{
@@ -169,6 +172,44 @@ namespace jeJucePlugin
 	void Editor::onFirmwareChanged()
 	{
 		getPluginDataModel()->set("deviceModel", getDeviceModelName(getJeProcessor().getSelectedRom()));
+	}
+
+	void Editor::onStepPressed(const bool _inc)
+	{
+		auto* pm = getPatchManager();
+		const auto part = pm->getCurrentPart();
+
+		if (pm->getState().isValid(part))
+		{
+			if (_inc)
+				pm->selectNextPreset(part);
+			else
+				pm->selectPrevPreset(part);
+			return;
+		}
+
+		onStepReleased();
+
+		// the two models scan their panel keys in different matrices
+		if (getJeProcessor().getSelectedRom().getDeviceType() == jeLib::DeviceType::Rack)
+			m_heldStepButton = _inc ? jeLib::je8080::kSwitch_Inc : jeLib::je8080::kSwitch_Dec;
+		else
+			m_heldStepButton = _inc ? jeLib::devices::kSwitch_ValueUp : jeLib::devices::kSwitch_ValueDown;
+
+		m_controller.sendButton(*m_heldStepButton, true);
+	}
+
+	void Editor::onStepReleased()
+	{
+		if (!m_heldStepButton)
+			return;
+
+		m_controller.sendButton(*m_heldStepButton, false);
+		m_heldStepButton.reset();
+
+		// the synth stepped while the button was down, the editor reads back what it plays now
+		m_controller.sendSystemRequest();
+		m_controller.sendTempPerformanceRequest();
 	}
 
 	void Editor::onBtWrite(Rml::Event& _event) const

@@ -11,6 +11,8 @@ namespace jeLib::je8080
 		kSwitch_PerformSel = 24,	// PERFORM/PATCH SELECT
 		kSwitch_Bank1 = 32,
 		kSwitch_Number1 = 40,
+		kSwitch_Dec = 48,
+		kSwitch_Inc = 49,
 		kSwitch_Shift = 52,
 		kSwitch_Exit = 53
 	};

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "jucePluginEditorLib/pluginEditor.h"
 
 #include "jucePluginLib/patchdb/patch.h"
@@ -48,7 +50,14 @@ namespace jeJucePlugin
 		bool createWritePatchesMenu(juceRmlUi::Menu& _menu) const;
 		void onFirmwareChanged();
 
+		// INC/DEC step through the browser list of the current part. With nothing picked there they press the synth's
+		// own INC/DEC and read back what it plays once they are released
+		void onStepPressed(bool _inc);
+		void onStepReleased();
+
 		Controller& m_controller;
+
+		std::optional<uint32_t> m_heldStepButton;	// the synth's INC/DEC while the editor's is held
 
 		std::unique_ptr<jucePluginEditorLib::FirmwareSelector> m_firmwareSelector;
 		baseLib::EventListener<uint32_t> m_onFirmwareChanged;
