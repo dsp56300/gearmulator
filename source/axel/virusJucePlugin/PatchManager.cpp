@@ -1,5 +1,7 @@
 #include "PatchManager.h"
 
+#include <algorithm>
+
 #include "VirusController.h"
 #include "VirusProcessor.h"
 
@@ -25,6 +27,56 @@ namespace genericVirusUI
 {
 	namespace
 	{
+		// The firmware upgrades a single of an older version when it is sent to it and keeps the upgraded one in its edit
+		// buffer: the version and the values below change, those of a version 6 single are set to fixed defaults. Measured
+		// on the A, B and C firmwares with all of their ROM singles. The values of the older versions are partly
+		// converted, and fewer singles of them were measured. The TI firmware converts most of pages 6E and 6F of its
+		// singles of versions 8 and 9 and changes six values of pages A and B.
+		constexpr uint8_t g_upgradedFromVersion6B[] = {45, 46, 51, 52, 93, 94, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+			126};
+
+		constexpr uint8_t g_upgradedFromOlderA[] = {4, 11, 21, 38, 39, 71, 83, 104, 109, 112, 119};
+		constexpr uint8_t g_upgradedFromOlderB[] = {2, 5, 17, 20, 25, 42, 43, 44, 45, 46, 51, 52, 58, 62, 79, 80, 81, 82, 83,
+			84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 103, 104, 105, 106, 107, 108, 109, 110, 111, 123,
+			124, 126};
+
+		constexpr uint8_t g_upgradedTiA[] = {50, 103, 104};
+		constexpr uint8_t g_upgradedTiB[] = {0, 15, 127};
+
+		template<size_t N> bool contains(const uint8_t (&_values)[N], const uint8_t _value)
+		{
+			return std::find(std::begin(_values), std::end(_values), _value) != std::end(_values);
+		}
+
+		// whether the firmware may change this value when it upgrades a single of version _olderVersion
+		bool isChangedByUpgrade(const uint8_t _page, const uint8_t _index, const uint8_t _olderVersion)
+		{
+			if (_olderVersion >= virusLib::PresetVersion::D2)
+				return false;
+
+			if (_olderVersion >= virusLib::PresetVersion::D)
+			{
+				switch (_page)
+				{
+				case virusLib::PAGE_A:	return contains(g_upgradedTiA, _index);
+				case virusLib::PAGE_B:	return contains(g_upgradedTiB, _index);
+				case virusLib::PAGE_6E:
+				case virusLib::PAGE_6F:	return true;
+				default:				return false;
+				}
+			}
+
+			if (_olderVersion >= virusLib::PresetVersion::C)
+				return false;
+
+			if (_olderVersion >= virusLib::PresetVersion::B)
+				return _page == virusLib::PAGE_B && contains(g_upgradedFromVersion6B, _index);
+
+			if (_page == virusLib::PAGE_A)
+				return contains(g_upgradedFromOlderA, _index);
+			return _page == virusLib::PAGE_B && contains(g_upgradedFromOlderB, _index);
+		}
+
 		// Arrangement detection: scan for a DUMP_MULTI immediately followed by
 		// 16 consecutive DUMP_SINGLE messages and merge each such sequence into
 		// one compound patch. Works for single-arrangement files AND user-bank
@@ -840,8 +892,31 @@ namespace genericVirusUI
 		if(parameterValuesA.size() != parameterValuesB.size())
 			return false;
 
+		// a single read back from the device is the upgraded one if the stored one is older: compare what both versions have
+		const auto idxVersion = m_controller.getParameterIndexByName("Version");
+		bool versionsDiffer = false;
+		uint8_t olderVersion = 0;
+		if (idxVersion < parameterValuesA.size() && parameterValuesA[idxVersion] && parameterValuesB[idxVersion])
+		{
+			const auto vA = *parameterValuesA[idxVersion];
+			const auto vB = *parameterValuesB[idxVersion];
+			versionsDiffer = vA != vB;
+			olderVersion = std::min(vA, vB);
+		}
+
 		for(uint32_t i=0; i<parameterValuesA.size(); ++i)
 		{
+			if (versionsDiffer)
+			{
+				if (i == idxVersion)
+					continue;
+				if (const auto* p = m_controller.getParameter(i))
+				{
+					if (isChangedByUpgrade(p->getDescription().page, p->getDescription().index, olderVersion))
+						continue;
+				}
+			}
+
 			const auto& itA = parameterValuesA[i];
 			const auto& itB = parameterValuesB[i];
 

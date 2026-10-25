@@ -538,8 +538,9 @@ namespace virus
                 m_currentBank[ch] = virusLib::BankNumber::EditBuffer;
             }
 
+			// the part, not the program number: in single mode that is virusLib::SINGLE, which is no part
 			if (onProgramChange)
-				onProgramChange(patch.progNumber);
+				onProgramChange(ch);
 		}
 		else
 		{

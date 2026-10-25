@@ -45,6 +45,11 @@ Osirus/OsTIrus:
         receiver applied them to part 1. They now go out on the channel of the
         part, as the control changes (page A) do.
 
+- [Fix] #264 When the host loads a project or a preset of its own, for example
+        an NKS preset in Komplete Kontrol, the Patch Manager now selects the
+        patch that the plugin plays. It kept the patch that was selected before,
+        or selected a wrong one.
+
 Osirus:
 
 - [Fix] #49 The Arp Clock selection showed the values of the LFO clock: it
