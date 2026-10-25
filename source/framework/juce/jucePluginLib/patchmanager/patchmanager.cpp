@@ -467,12 +467,15 @@ namespace pluginLib::patchManager
 	{
 		if(isLoading())
 			return;
-		return;
 		patchDB::Data data;
 		if(!requestPatchForPart(data, _part, 0))
 			return;
 		const auto patch = createPatch(std::move(data), {});
 		if(!patch)
+			return;
+		// the device plays what is selected already, for example the copy in a user bank that the user picked: keep
+		// it, the search of updateStateAsync() would prefer the ROM copy of the same patch
+		if(m_state.isValid(_part) && m_state.getPatch(_part).hash == patch->hash)
 			return;
 		updateStateAsync(_part, patch);
 	}

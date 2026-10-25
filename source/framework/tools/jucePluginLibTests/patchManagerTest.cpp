@@ -684,6 +684,56 @@ namespace
 		std::cout << "  content search tests passed" << std::endl;
 	}
 
+	void testDeviceProgramChanged()
+	{
+		std::cout << "Testing the selection following what the device plays..." << std::endl;
+
+		const auto root = createTestDir();
+
+		{
+			TestPatchManager pm(root.getChildFile("settings"), {"Bass", "Lead", "Pad"});
+			TEST_ASSERT(pm.waitIdle());
+
+			const auto rom = pm.getDataSource(TestPatchManager::romBank());
+
+			// the device got a patch from elsewhere, a host restoring a state or a program change on the hardware
+			pm.editBuffers[1] = patchDump("Lead");
+			pm.onProgramChanged(1);
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(pm.getState().getPatch(1) == PatchKey(*pm.findPatch(rom, "Lead")));
+
+			// following the device does not send anything back to it
+			TEST_ASSERT(pm.activated.empty());
+
+			// a patch that is in no data source, an edited one for example, leaves the selection alone
+			pm.editBuffers[1] = patchDump("Edited");
+			pm.onProgramChanged(1);
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(pm.getState().getPatch(1) == PatchKey(*pm.findPatch(rom, "Lead")));
+
+			// the device plays the copy in a user bank that the user selected: the selection stays on that copy,
+			// it does not jump to the ROM patch with the same data
+			const auto bank = createUserBank(pm, "My Bank");
+			TEST_ASSERT(bank);
+			pm.copyPatchesTo(bank, {pm.findPatch(rom, "Pad")});
+			TEST_ASSERT(pm.waitIdle());
+			const auto copy = pm.findPatch(bank, "Pad");
+			TEST_ASSERT(copy);
+			TEST_ASSERT(pm.setSelectedPatch(1, copy, searchDataSource(pm, bank)));
+			pm.activated.clear();
+
+			pm.editBuffers[1] = patchDump("Pad");
+			pm.onProgramChanged(1);
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(pm.getState().getPatch(1) == PatchKey(*copy));
+			TEST_ASSERT(pm.activated.empty());
+		}
+
+		root.deleteRecursively();
+
+		std::cout << "  device program change tests passed" << std::endl;
+	}
+
 	void testProgramChanges()
 	{
 		std::cout << "Testing program changes that load patches..." << std::endl;
@@ -1064,6 +1114,7 @@ void testPatchManager()
 	testTags();
 	testSelection();
 	testContentSearch();
+	testDeviceProgramChanged();
 	testProgramChanges();
 	testShutdown();
 	testRomMidiBanks();
