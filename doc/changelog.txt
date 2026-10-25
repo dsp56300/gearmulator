@@ -51,6 +51,9 @@ Framework:
 - [Fix] BUG-10441 With the software renderer, an element with a CSS filter was
         not drawn at all, for example a big rotary of a skin that brightens it.
 
+- [Fix] BUG-10441 A skin that uses CSS filters no longer floods the log with
+        "Could not compile filter" on renderers without filter support.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

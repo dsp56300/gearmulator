@@ -333,8 +333,11 @@ namespace juceRmlUi
 
 	Rml::CompiledFilterHandle RendererProxy::CompileFilter(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
+		// A renderer without filters gets a handle with nothing behind it: CompositeLayers drops it, so the element is
+		// drawn without the effect. RmlUi takes an empty handle for an error and logs it again whenever the element's
+		// effects are rebuilt, on every press or knob change of a skin that uses filter (BUG-10441)
 		if (!canFilter())
-			return {};
+			return createDummyHandle();
 
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction(dummyHandle, [this, dummyHandle, name = _name, parameters = _parameters]
