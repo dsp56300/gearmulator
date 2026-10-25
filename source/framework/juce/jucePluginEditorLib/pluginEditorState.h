@@ -120,6 +120,8 @@ namespace jucePluginEditorLib
 		Processor& m_processor;
 
 	private:
+		void destroyEditor();
+
 		void setGuiScale(int _scale) const;
 
 		// the next GUI scale up for _steps > 0, the next down for _steps < 0

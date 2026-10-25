@@ -22,6 +22,9 @@ Framework:
 - [Fix] BUG-10518 The standalone versions crashed right after they were started,
         on Windows without showing a window.
 
+- [Fix] BUG-10530 Changing the skin could crash the plugin, more often with the
+        RmlUi debugger turned on.
+
 - [Fix] EMU-277 "Reboot Device" in the MIDI settings now finds a ROM that was
         copied into the ROM folder after the plugin was loaded, the plugin no
         longer has to be loaded again. The selected ROM stays selected.

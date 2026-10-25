@@ -169,6 +169,10 @@ namespace juceRmlUi
 
 		void enableDebugger(bool _enable);
 
+		// Stops the render thread of the GL or Metal context, for an owner that takes the element tree apart before
+		// it destroys this component. Joins that thread, so nothing may hold the access lock: a frame waits for it
+		void stopRendering();
+
 		bool takeScreenshot(const ScreenshotCallback& _callback);
 
 		// Produces one frame synchronously, for a component configured with offlineRendering.

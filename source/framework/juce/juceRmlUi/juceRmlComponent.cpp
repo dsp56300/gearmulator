@@ -223,19 +223,26 @@ namespace juceRmlUi
 		// SystemInterface may outlive this component if it's shared.
 		m_rmlInterfaces.getSystemInterface().setCursorChangedCallback({});
 
-#ifdef RMLUI_METAL_RENDERER
-		if (m_metalContext)
-			m_metalContext->detach();
-#endif
+		// before the debugger takes its documents out of the tree that the render thread walks
+		stopRendering();
+
 		m_renderProxy->setRenderer(nullptr, g_renderConfigSoftware);
 
 		enableDebugger(false);
 
-		if (m_openGLContext)
-			m_openGLContext->detach();
 		destroyRmlContext();
 
 		deleteAllChildren();
+	}
+
+	void RmlComponent::stopRendering()
+	{
+#ifdef RMLUI_METAL_RENDERER
+		if (m_metalContext)
+			m_metalContext->detach();
+#endif
+		if (m_openGLContext)
+			m_openGLContext->detach();
 	}
 
 	void RmlComponent::newOpenGLContextCreated()
