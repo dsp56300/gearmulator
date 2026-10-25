@@ -11,6 +11,10 @@ Framework:
 - [Imp] BUG-10320 Skins can show level meters: audio.getOutputLevel returns the
         peak and RMS level of every output channel to Lua.
 
+- [Imp] The patch manager shows the patches that come with a release without
+        being told where they are: a folder named "patches" in the plugin's
+        folder in Documents/The Usual Suspects is added as a data source.
+
 - [Fix] BUG-10514 Linux: a plugin could crash while it was loaded when its ROM
         was installed, for example the VST3 versions of Nodal Red 2x, Vavra and
         Xenia.

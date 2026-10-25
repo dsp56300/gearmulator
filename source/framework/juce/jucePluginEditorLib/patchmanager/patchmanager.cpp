@@ -318,19 +318,34 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManager::startLoaderThread(const juce::File& _migrateFromDir/* = {}*/)
 	{
-		if(_migrateFromDir.getFullPathName().isEmpty())
+		auto migrateFromDir = _migrateFromDir;
+
+		if(migrateFromDir.getFullPathName().isEmpty())
 		{
 			const auto& configOptions = m_processor.getConfigOptions();
 
 			// Without options there is no old patch database. Their default file would point the migration at a
 			// folder outside the product's own, it deletes *.cache files there and takes over *.json and *.syx
-			if(configOptions.applicationName.isEmpty())
-				return DB::startLoaderThread();
-
-			DB::startLoaderThread(configOptions.getDefaultFile().getParentDirectory());
-			return;
+			if(!configOptions.applicationName.isEmpty())
+				migrateFromDir = configOptions.getDefaultFile().getParentDirectory();
 		}
-		DB::startLoaderThread(_migrateFromDir);
+
+		DB::startLoaderThread(migrateFromDir);
+
+		// The patches that come with a release, the Plugin Manager installs them there. Added on every start as if the
+		// user had added the folder, the same path too, so one the user added already stays one data source. Adding it
+		// again scans the folder, which finds the files an update brought. A file that an update replaced keeps its old
+		// patches from the cache until the folder is refreshed, as in any other folder
+		const auto patches = juce::File(m_processor.getDataFolder(false)).getChildFile("patches");
+
+		if(!patches.isDirectory())
+			return;
+
+		pluginLib::patchDB::DataSource ds;
+		ds.type = pluginLib::patchDB::SourceType::Folder;
+		ds.name = patches.getFullPathName().toStdString();
+		ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+		addDataSource(ds, false);
 	}
 
 	std::vector<pluginLib::patchDB::PatchPtr> PatchManager::getPatchesFromString(const std::string& _text)
