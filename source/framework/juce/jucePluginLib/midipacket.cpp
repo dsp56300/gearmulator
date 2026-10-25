@@ -35,7 +35,7 @@ namespace pluginLib
 				m_hasParameters = true;
 			}
 
-			const auto masked = d.packValue(0xff);
+			const auto masked = d.packValue(d.paramMask);
 
 			if((usedMask & masked) || !isNewParam)
 			{
@@ -142,7 +142,7 @@ namespace pluginLib
 
 		_parameterValues.reserve(_src.size());
 
-		return parse(_data, [&](ParamIndex _paramIndex, uint8_t _value)
+		return parse(_data, [&](ParamIndex _paramIndex, ParamValue _value)
 		{
 			const auto idx = _paramIndex.second;
 			if(_parameterValues.size() <= idx)
@@ -155,7 +155,7 @@ namespace pluginLib
 	{
 		_parameterValues.reserve(_src.size() << 1);
 
-		return parse(_data, [&](ParamIndex _paramIndex, uint8_t _value)
+		return parse(_data, [&](ParamIndex _paramIndex, ParamValue _value)
 		{
 			const auto itExisting = _parameterValues.find(_paramIndex);
 			if(itExisting != _parameterValues.end())
@@ -408,6 +408,6 @@ namespace pluginLib
 		for(uint32_t c = _d.checksumFirstIndex; c <= _d.checksumLastIndex; ++c)
 			checksum += _src[c];
 
-		return checksum & 0x7f;
+		return (_d.checksumNegate ? -checksum : checksum) & 0x7f;
 	}
 }

@@ -149,6 +149,37 @@ void testParameterDescriptions()
 	TEST_ASSERT(find(plus, "Type").range.getEnd() == 2);
 	TEST_ASSERT(find(plus, "Type").valueList.valueToText(2) == "C");
 
+	// a value wider than a byte, 7 bits per byte, and a checksum that makes the sum zero (Yamaha)
+	constexpr auto packetJson = R"({
+		"parameterdescriptiondefaults":
+		{
+			"isPublic":true, "isBipolar":false, "isBool":false, "isDiscrete":false, "class":"", "step":0
+		},
+		"parameterdescriptions": [{"page":0, "index":0, "name":"Wide", "min":0, "max":16383, "toText":{"format":"%d"}}],
+		"valuelists": {},
+		"midipackets": {"dump": [
+			{"type":"byte", "value":"f0"},
+			{"type":"param", "name":"Wide", "shiftL":7, "mask":"3f80"},
+			{"type":"param", "name":"Wide", "mask":"7f"},
+			{"type":"checksum", "first":1, "last":2, "init":0, "negate":true},
+			{"type":"byte", "value":"f7"}
+		]}
+	})";
+	const pluginLib::ParameterDescriptions packetDescs(packetJson);
+	TEST_ASSERT(packetDescs.isValid());
+	const auto* packet = packetDescs.getMidiPacket("dump");
+	TEST_ASSERT(packet && packet->size() == 5);
+
+	pluginLib::MidiPacket::Sysex sysex;
+	TEST_ASSERT(packet->create(sysex, {}, {{{pluginLib::MidiPacket::AnyPart, "Wide"}, 6599}}));
+	TEST_ASSERT(sysex[1] == (6599 >> 7) && sysex[2] == (6599 & 0x7f));
+	TEST_ASSERT(((sysex[1] + sysex[2] + sysex[3]) & 0x7f) == 0);
+
+	pluginLib::MidiPacket::Data data;
+	pluginLib::MidiPacket::ParamValues values;
+	TEST_ASSERT(packet->parse(data, values, packetDescs, sysex, false));
+	TEST_ASSERT(values.size() == 1 && values.begin()->second == 6599);
+
 	// a formatter the plugin does not know is an error, which asserts in a debug build, not tested here
 
 	// an inline toText list is an error, not a crash. Errors assert in a debug build, so only a release build checks it

@@ -691,12 +691,12 @@ namespace pluginLib
 				if(hasMask)
 				{
 					const int mask = strtol(entry["mask"].toString().toStdString().c_str(), nullptr, 16);
-					if(mask < 0 || mask > 0xff)
+					if(mask < 0 || mask > 0xffff)
 					{
-						_errors << "mask needs to be between 00 and ff but got " << std::hex << mask << std::endl;
+						_errors << "mask needs to be between 00 and ffff but got " << std::hex << mask << std::endl;
 						return;
 					}
-					byte.paramMask = static_cast<uint8_t>(mask);
+					byte.paramMask = static_cast<uint16_t>(mask);
 				}
 
 				if(hasRightShift)
@@ -750,6 +750,7 @@ namespace pluginLib
 				byte.checksumFirstIndex = first;
 				byte.checksumLastIndex = last;
 				byte.checksumInitValue = static_cast<uint8_t>(init);
+				byte.checksumNegate = static_cast<bool>(entry["negate"]);
 			}
 			else if(type == "bank")				byte.type = MidiDataType::Bank;
 			else if(type == "program")			byte.type = MidiDataType::Program;

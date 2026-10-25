@@ -45,7 +45,7 @@ namespace pluginLib
 			uint8_t byte = 0;
 
 			std::string paramName;
-			uint8_t paramMask = 0xff;
+			uint16_t paramMask = 0xff;		// wider than a byte for one byte of a multi byte value, 3f80 + shiftL 7 = bits 7-13
 			uint8_t paramShiftRight = 0;	// right shift for unpacking from midi, left for packing
 			uint8_t paramShiftLeft = 0;		// left shift for unpacking from midi, right for packing
 			uint8_t paramPart = AnyPart;
@@ -53,6 +53,7 @@ namespace pluginLib
 			uint32_t checksumFirstIndex = 0;
 			uint32_t checksumLastIndex = 0;
 			uint8_t checksumInitValue = 0;
+			bool checksumNegate = false;	// the checksum makes the sum zero (Yamaha, Roland)
 
 			uint8_t packValue(const ParamValue _unmasked) const
 			{
@@ -66,7 +67,7 @@ namespace pluginLib
 
 			bool doMasksOverlap(const MidiDataDefinition& _d) const
 			{
-				return (packValue(0xff) & _d.packValue(0xff)) != 0;
+				return (packValue(paramMask) & _d.packValue(_d.paramMask)) != 0;
 			}
 		};
 
