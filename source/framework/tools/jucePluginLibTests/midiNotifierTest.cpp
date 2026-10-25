@@ -81,10 +81,61 @@ namespace
 
 		std::cout << "  listener tests passed" << std::endl;
 	}
+
+	void testPitchBendAndPressure()
+	{
+		std::cout << "Testing pitch bend and channel pressure..." << std::endl;
+
+		MidiNotifier n;
+
+		auto send = [&n](const uint8_t _a, const uint8_t _b, const uint8_t _c, const synthLib::MidiEventSource _source = synthLib::MidiEventSource::Host)
+		{
+			n.onMidiEvent(synthLib::SMidiEvent(_source, _a, _b, _c));
+		};
+
+		TEST_ASSERT(n.getPitchBend(1) == 0);
+		TEST_ASSERT(n.getChannelPressure(16) == 0);
+
+		send(0xe0, 0x00, 0x40);			// centre
+		TEST_ASSERT(n.getPitchBend(1) == 0);
+		send(0xe0, 0x7f, 0x7f);			// LSB first, MSB second
+		TEST_ASSERT(n.getPitchBend(1) == 8191);
+		send(0xe0, 0x00, 0x00);
+		TEST_ASSERT(n.getPitchBend(1) == -8192);
+		send(0xef, 0x01, 0x40);
+		TEST_ASSERT(n.getPitchBend(16) == 1);
+		TEST_ASSERT(n.getPitchBend(1) == -8192);	// channels are kept apart
+
+		send(0xd2, 99, 0);
+		TEST_ASSERT(n.getChannelPressure(3) == 99);
+		TEST_ASSERT(n.getChannelPressure(4) == 0);
+
+		// poly pressure is per note, not the channel pressure
+		send(0xa2, 60, 10);
+		TEST_ASSERT(n.getChannelPressure(3) == 99);
+
+		// Reset All Controllers resets both, on its own channel only
+		send(0xb2, 121, 0);
+		TEST_ASSERT(n.getChannelPressure(3) == 0);
+		send(0xb0, 121, 0);
+		TEST_ASSERT(n.getPitchBend(1) == 0);
+		TEST_ASSERT(n.getPitchBend(16) == 1);
+
+		// what the device sends out does not count, only what it receives
+		send(0xe0, 0x00, 0x00, synthLib::MidiEventSource::Device);
+		send(0xd0, 50, 0, synthLib::MidiEventSource::Device);
+		TEST_ASSERT(n.getPitchBend(1) == 0);
+		TEST_ASSERT(n.getChannelPressure(1) == 0);
+		send(0xe0, 0x00, 0x00, synthLib::MidiEventSource::Physical);
+		TEST_ASSERT(n.getPitchBend(1) == -8192);
+
+		std::cout << "  pitch bend and channel pressure tests passed" << std::endl;
+	}
 }
 
 void testMidiNotifier()
 {
 	testNoteDecoding();
 	testListenerCounting();
+	testPitchBendAndPressure();
 }

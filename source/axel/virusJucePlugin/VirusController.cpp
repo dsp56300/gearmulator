@@ -140,6 +140,24 @@ namespace virus
 		{
 			if(!m_frontpanelState.fromMidiEvent(_msg))
 				return false;
+
+			// The same LEDs as the Leds class draws, without its brightness curve. The A/B/C drive LFO 1 and 2, the
+			// TI all three and the logo, the Snow only its logo, with the tempo
+			const auto model = m_processor.getModel();
+			const auto ti = virusLib::isTIFamily(model);
+			const auto snow = model == virusLib::DeviceModel::Snow;
+			const auto& fp = m_frontpanelState;
+
+			auto setLed = [this](const size_t _index, const bool _driven, const float _phase)
+			{
+				m_ledBrightness[_index].store(_driven ? 1.0f - std::clamp(_phase, 0.0f, 1.0f) : -1.0f, std::memory_order_relaxed);
+			};
+
+			setLed(0, !snow, fp.m_lfoPhases[0]);
+			setLed(1, !snow, fp.m_lfoPhases[1]);
+			setLed(2, ti && !snow, fp.m_lfoPhases[2]);
+			setLed(3, ti, snow ? fp.m_bpm : fp.m_logo);
+
 			onFrontPanelStateChanged(m_frontpanelState);
 			return true;
 		}
@@ -445,6 +463,21 @@ namespace virus
 				parts.push_back(0);
 		}
 		return parts;
+	}
+
+	bool Controller::getLedBrightness(const std::string& _name, float& _brightness) const
+	{
+		static constexpr const char* g_ledNames[] = {"lfo1", "lfo2", "lfo3", "logo"};
+
+		for(size_t i=0; i<std::size(g_ledNames); ++i)
+		{
+			if(_name != g_ledNames[i])
+				continue;
+
+			_brightness = m_ledBrightness[i].load(std::memory_order_relaxed);
+			return _brightness >= 0.0f;
+		}
+		return false;
 	}
 
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)

@@ -11,6 +11,9 @@ Framework:
 - [Imp] BUG-10320 Skins can show level meters: audio.getOutputLevel returns the
         peak and RMS level of every output channel to Lua.
 
+- [Imp] BUG-10341 Skins can read the current pitch bend and channel pressure of
+        every MIDI channel in Lua: midi.getPitchBend and getChannelPressure.
+
 - [Imp] The patch manager shows the patches that come with a release without
         being told where they are: a folder named "patches" in the plugin's
         folder in Documents/The Usual Suspects is added as a data source.
@@ -53,6 +56,9 @@ Osirus/OsTIrus:
         firmware that is loaded plays, pattern by pattern and note by note, also
         on a DSPBridge server. Arp>Matrix on the Virus TI still follows MIDI
         clock.
+
+- [Imp] BUG-10341 Skins can read the front panel LEDs in Lua: leds.get returns
+        the brightness of the LFO LEDs and, on the Virus TI, of the logo.
 
 - [Fix] #285 In single mode, MIDI Learn mappings with automatic part selection
         and the MIDI Learn indicators only worked on MIDI channel 1. They now

@@ -35,6 +35,8 @@ namespace rmlPlugin
 		bool remove(int _id);
 		void removeAll();
 
+		const pluginLib::MidiNotifier& getNotifier() const { return m_notifier; }
+
 	private:
 		struct Entry
 		{

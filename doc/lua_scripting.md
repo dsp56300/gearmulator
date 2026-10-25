@@ -38,8 +38,9 @@ Add a `<script>` block in your RML file's `<head>` section:
 |--------|------|-------------|
 | `document` | ElementDocument | The current RML document. Available in `<script>` blocks and event handlers. |
 | `params` | table | Parameter API for reading/writing synth parameters and subscribing to changes. |
-| `midi` | table | Live note on/off events. |
+| `midi` | table | Live note on/off events, the current pitch bend and channel pressure. |
 | `audio` | table | Levels of the output channels, for meters. |
+| `leds` | table | Front panel LEDs of the emulated device. |
 | `Log` | table | RmlUi logging. Use `Log.Message(Log.logtype.info, "message")`. |
 | `rmlui` | table | RmlUi core API (contexts, font loading, etc.). |
 
@@ -227,6 +228,54 @@ can touch the DOM directly. A skin that registers no note callbacks costs nothin
 Only note on and note off are reported. Control changes, pitch bend and aftertouch are not,
 because a mod wheel or an automation lane produces them by the thousand and a skin cannot keep
 up with that on the UI thread.
+
+### Pitch Bend and Channel Pressure
+
+Pitch bend and channel pressure are not reported either, but their current value can be read at
+any time, typically from a frame event:
+
+```lua
+function onFrame(event)
+  local bend = midi.getPitchBend(1)              -- channel 1: -8192 to 8191, 0 is the centre
+  local pressure = midi.getChannelPressure(1)    -- channel 1: 0-127
+
+  document:GetElementById("wheel").style.top = tostring(100 - bend / 8192 * 80) .. "dp"
+end
+```
+
+Both hold the last value received on that channel, from the host, a connected controller or the
+plugin's own editor, the same sources the note callbacks see. A Reset All Controllers message
+(controller 121) returns both to 0. Channels count from 1 to 16; any other channel returns `nil`.
+
+They are kept per MIDI channel, not per part. To follow a part, read the MIDI channel it listens
+on from its parameters. Poly pressure (per note) is not tracked. Reading them is cheap enough to
+do every frame.
+
+## Front Panel LEDs (`leds`)
+
+The LEDs of the emulated device, as the firmware drives them:
+
+```lua
+function onFrame(event)
+  local lfo1 = leds.get("lfo1")   -- 0 is off, 1 fully lit, nil if the device has no such LED
+  if lfo1 then
+    document:GetElementById("myLed").style.opacity = tostring(lfo1 ^ 0.2)
+  end
+end
+```
+
+The value is linear, the share of time the LED is lit. The LEDs the plugin draws itself show
+`value ^ 0.2`, which looks closer to the hardware; raise to that power to match them.
+
+| Product | LEDs |
+|---------|------|
+| Osirus | `lfo1`, `lfo2` (the LFO 2/3 LED) |
+| OsTIrus, Virus TI / TI2 | `lfo1`, `lfo2`, `lfo3`, `logo` |
+| OsTIrus, Virus TI Snow | `logo` (it pulses with the tempo) |
+
+An LFO LED follows the LFO's waveform and rate, which makes it a cheap way to animate something in
+time with an LFO. The value is updated once per audio block. Products not listed have no LEDs
+here yet and return `nil` for every name.
 
 ## Output Levels (`audio`)
 

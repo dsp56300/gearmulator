@@ -54,6 +54,32 @@ namespace rmlPlugin
 			getMidiListeners(_L).remove(static_cast<int>(luaL_checkinteger(_L, 1)));
 			return 0;
 		}
+
+		int pushChannelValue(lua_State* _L, int (pluginLib::MidiNotifier::*_get)(uint8_t) const)
+		{
+			const auto channel = luaL_checkinteger(_L, 1);
+
+			if (channel < 1 || channel > 16)
+			{
+				lua_pushnil(_L);
+				return 1;
+			}
+
+			lua_pushinteger(_L, (getMidiListeners(_L).getNotifier().*_get)(static_cast<uint8_t>(channel)));
+			return 1;
+		}
+
+		// midi.getPitchBend(channel) -> -8192 to 8191, 0 is the centre. Nil for a channel outside 1-16
+		int luaMidiGetPitchBend(lua_State* _L)
+		{
+			return pushChannelValue(_L, &pluginLib::MidiNotifier::getPitchBend);
+		}
+
+		// midi.getChannelPressure(channel) -> 0-127. Nil for a channel outside 1-16
+		int luaMidiGetChannelPressure(lua_State* _L)
+		{
+			return pushChannelValue(_L, &pluginLib::MidiNotifier::getChannelPressure);
+		}
 	}
 
 	LuaMidiListeners::LuaMidiListeners(lua_State* _luaState, pluginLib::MidiNotifier& _notifier, juceRmlUi::RmlInterfaces& _rmlInterfaces)
@@ -165,6 +191,8 @@ namespace rmlPlugin
 			{"onNoteOn", luaMidiOnNoteOn},
 			{"onNoteOff", luaMidiOnNoteOff},
 			{"removeListener", luaMidiRemoveListener},
+			{"getPitchBend", luaMidiGetPitchBend},
+			{"getChannelPressure", luaMidiGetChannelPressure},
 			{nullptr, nullptr}
 		};
 

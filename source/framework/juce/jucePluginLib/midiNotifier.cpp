@@ -41,6 +41,32 @@ namespace pluginLib
 
 	void MidiNotifier::onMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
+		// what the device sends out is not what it receives: the JP-8080 passes a bend from channel 16 on to its MIDI out
+		// on channel 1
+		if (_ev.source != synthLib::MidiEventSource::Device)
+		{
+			const auto ch = _ev.a & 0x0f;
+
+			switch (_ev.a & 0xf0)
+			{
+			case synthLib::M_PITCHBEND:
+				m_pitchBend[ch].store(static_cast<int16_t>(((_ev.c & 0x7f) << 7 | (_ev.b & 0x7f)) - 8192), std::memory_order_relaxed);
+				return;
+			case synthLib::M_AFTERTOUCH:
+				m_channelPressure[ch].store(_ev.b & 0x7f, std::memory_order_relaxed);
+				return;
+			case synthLib::M_CONTROLCHANGE:
+				if (_ev.b == synthLib::MC_RESETALLCONTROLLERS)
+				{
+					m_pitchBend[ch].store(0, std::memory_order_relaxed);
+					m_channelPressure[ch].store(0, std::memory_order_relaxed);
+				}
+				return;
+			default:
+				break;
+			}
+		}
+
 		if (m_noteListenerCount.load(std::memory_order_relaxed) == 0)
 			return;
 

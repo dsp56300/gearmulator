@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 
@@ -18,6 +19,9 @@ namespace pluginLib
 	//
 	// Nothing is dispatched while nobody listens, which is the normal case: a skin that does not ask
 	// for notes costs one atomic read per event.
+	//
+	// Pitch bend and channel pressure are not dispatched at all, a wheel produces them by the
+	// thousand. The last value of each channel is kept instead, for a skin to read when it draws.
 	class MidiNotifier
 	{
 	public:
@@ -49,7 +53,16 @@ namespace pluginLib
 		ListenerId addNoteListener(const baseLib::Event<Note>::Callback& _callback);
 		void removeNoteListener(ListenerId _id);
 
+		// Any thread, the channel counts from 1 like Note::channel. Pitch bend -8192 to 8191, 0 is the centre,
+		// pressure 0-127. Reset All Controllers returns both to zero, as it does on the synth. Only what the device
+		// receives counts, not what it sends
+		int getPitchBend(const uint8_t _channel) const { return m_pitchBend[(_channel - 1) & 0x0f].load(std::memory_order_relaxed); }
+		int getChannelPressure(const uint8_t _channel) const { return m_channelPressure[(_channel - 1) & 0x0f].load(std::memory_order_relaxed); }
+
 	private:
 		std::atomic<uint32_t> m_noteListenerCount{0};
+
+		std::array<std::atomic<int16_t>, 16> m_pitchBend{};
+		std::array<std::atomic<uint8_t>, 16> m_channelPressure{};
 	};
 }
