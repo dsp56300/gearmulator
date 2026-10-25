@@ -144,6 +144,8 @@ namespace pluginLib::patchDB
 		bool internalRemoveTag(TagType _type, const Tag& _tag);
 
 		bool executeSearch(Search& _search);
+		// whether _patch is a match for a search by the content of _requestPatch
+		bool matchesPatchContent(const PatchPtr& _requestPatch, const PatchPtr& _patch) const;
 		void updateSearches(const std::vector<PatchPtr>& _patches);
 		bool removePatchesFromSearches(const std::vector<PatchPtr>& _keys);
 

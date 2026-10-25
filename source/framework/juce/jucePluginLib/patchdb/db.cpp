@@ -1259,14 +1259,8 @@ namespace pluginLib::patchDB
 			{
 				for (const auto& patch : ds->patches)
 				{
-					if(patch->hash == reqPatch->hash)
+					if(matchesPatchContent(reqPatch, patch))
 						results.insert(patch);
-					else if(patch->sysex.size() == reqPatch->sysex.size() && patch->getName() == reqPatch->getName())
-					{
-						// if patches are not 100% identical, they might still be the same patch as unknown/unused data in dumps might have different values
-						if(equals(patch, reqPatch))
-							results.insert(patch);
-					}
 				}
 			}
 
@@ -1354,6 +1348,15 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
+	bool DB::matchesPatchContent(const PatchPtr& _requestPatch, const PatchPtr& _patch) const
+	{
+		if(_patch->hash == _requestPatch->hash)
+			return true;
+
+		// if patches are not 100% identical, they might still be the same patch as unknown/unused data in dumps might have different values
+		return _patch->sysex.size() == _requestPatch->sysex.size() && _patch->getName() == _requestPatch->getName() && equals(_patch, _requestPatch);
+	}
+
 	void DB::updateSearches(const std::vector<PatchPtr>& _patches)
 	{
 		std::shared_lock lockSearches(m_searchesMutex);
@@ -1369,7 +1372,9 @@ namespace pluginLib::patchDB
 
 			for (const auto& patch : _patches)
 			{
-				const auto match = search->request.match(*patch);
+				// a search by content matches by content here too, SearchRequest::match() does not look at it
+				const auto& reqPatch = search->request.patch;
+				const auto match = reqPatch ? matchesPatchContent(reqPatch, patch) : search->request.match(*patch);
 
 				bool countChanged;
 

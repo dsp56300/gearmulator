@@ -646,6 +646,44 @@ namespace
 		_pm.send = [&_device](const synthLib::SMidiEvent& _ev) { _device.send(_ev); };
 	}
 
+	void testContentSearch()
+	{
+		std::cout << "Testing a search by patch content while patches are added..." << std::endl;
+
+		const auto root = createTestDir();
+
+		{
+			TestPatchManager pm(root.getChildFile("settings"), {"Bass", "Lead", "Pad"});
+			TEST_ASSERT(pm.waitIdle());
+
+			const auto rom = pm.getDataSource(TestPatchManager::romBank());
+
+			SearchRequest request;
+			request.patch = pm.findPatch(rom, "Lead");
+			const auto handle = pm.search(std::move(request));
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(searchResultNames(pm, handle) == std::set<std::string>{"Lead"});
+
+			// patches added to the database, as when a bank is refreshed, only join it if they have that content
+			const auto bank = createUserBank(pm, "My Bank");
+			TEST_ASSERT(bank);
+			pm.copyPatchesTo(bank, {pm.findPatch(rom, "Bass"), pm.findPatch(rom, "Lead"), pm.findPatch(rom, "Pad")});
+			TEST_ASSERT(pm.waitIdle());
+			TEST_ASSERT(bank->patches.size() == 3);
+
+			const auto s = pm.getSearch(handle);
+			TEST_ASSERT(s);
+			std::shared_lock lock(s->resultsMutex);
+			TEST_ASSERT(s->results.size() == 2);
+			TEST_ASSERT(s->results.count(pm.findPatch(rom, "Lead")) == 1);
+			TEST_ASSERT(s->results.count(pm.findPatch(bank, "Lead")) == 1);
+		}
+
+		root.deleteRecursively();
+
+		std::cout << "  content search tests passed" << std::endl;
+	}
+
 	void testProgramChanges()
 	{
 		std::cout << "Testing program changes that load patches..." << std::endl;
@@ -1025,6 +1063,7 @@ void testPatchManager()
 	testUserBanks();
 	testTags();
 	testSelection();
+	testContentSearch();
 	testProgramChanges();
 	testShutdown();
 	testRomMidiBanks();
