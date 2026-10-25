@@ -878,8 +878,12 @@ namespace pluginLib
 	void Processor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 	{
 	    juce::ScopedNoDenormals noDenormals;
-	    const auto totalNumInputChannels  = getTotalNumInputChannels();
-	    const auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+		// The buffer can have fewer channels than the buses: a standalone that cannot match the bus layout of a product
+		// plays it with the channels of the audio device (BUG-10518). The plugin plays the inputs missing here as silence
+		// and writes the outputs missing here into a dummy buffer
+	    const auto totalNumInputChannels  = std::min(getTotalNumInputChannels(), buffer.getNumChannels());
+	    const auto totalNumOutputChannels = std::min(getTotalNumOutputChannels(), buffer.getNumChannels());
 
 	    const int numSamples = buffer.getNumSamples();
 

@@ -19,6 +19,9 @@ Framework:
         was installed, for example the VST3 versions of Nodal Red 2x, Vavra and
         Xenia.
 
+- [Fix] BUG-10518 The standalone versions crashed right after they were started,
+        on Windows without showing a window.
+
 - [Fix] EMU-277 "Reboot Device" in the MIDI settings now finds a ROM that was
         copied into the ROM folder after the plugin was loaded, the plugin no
         longer has to be loaded again. The selected ROM stays selected.
