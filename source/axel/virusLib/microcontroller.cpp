@@ -26,8 +26,10 @@ constexpr uint32_t g_singleRamBankCount = 2;
 constexpr uint8_t g_arpMode = 1;
 constexpr uint8_t g_arpModeParamTI = 15;
 
-// Virus TI, page D: Switches/Arpeggiator Enable
+// Virus TI, page D: Switches/EQ Enable, Arpeggiator Enable, Delay Enable, Reverb Enable
+constexpr uint8_t g_eqEnableTI = 0x19;
 constexpr uint8_t g_arpEnableTI = 0x1a;
+constexpr uint8_t g_reverbEnableTI = 0x1c;
 
 // Up to Chord. Arp>Matrix (7, TI) modulates instead of playing notes, the firmware keeps playing that
 static bool playsNotes(const uint32_t _arpMode)
@@ -189,6 +191,11 @@ void Microcontroller::sendInitControlCommands(uint8_t _masterVolume)
 		};
 
 		m_hdi08.writeRX(initCodeDS);
+
+		// The init code switches EQ, Arpeggiator, Delay and Reverb on. Known as global settings, the editor shows them
+		// and a state saves them
+		for(auto param = g_eqEnableTI; param <= g_reverbEnableTI; ++param)
+			m_globalSettings[param] = 1;
 
 #if 0
 		constexpr uint8_t prts = 0x4f;
@@ -460,7 +467,7 @@ void Microcontroller::getArpeggiatorSingles(std::array<const TPreset*, 16>& _sin
 
 	_singles.fill(nullptr);
 
-	// The TI's firmware plays no arpeggio with the switch off. Unknown is on, the firmware is started with it on
+	// The TI's firmware plays no arpeggio with the switch off
 	if(m_rom.isTIFamily() && m_globalSettings[g_arpEnableTI] == 0)
 		return;
 

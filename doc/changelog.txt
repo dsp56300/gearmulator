@@ -72,6 +72,12 @@ OsTIrus:
         the LFO amounts or Panorama, light their value ring from the centre to
         either side instead of from the left end.
 
+- [Imp] BUG-10519 EQ, Arpeggiator, Delay and Reverb Enable, the global
+        switches, are host parameters now, for automation and for skins. They
+        showed "Disabled" while they were on, and a project did not save them.
+        As in the firmware, switching Delay or Reverb off takes effect with the
+        next patch, switching on at once.
+
 Vavra:
 
 - [Fix] With voice expansion turned on, playback could crash the plugin when the
