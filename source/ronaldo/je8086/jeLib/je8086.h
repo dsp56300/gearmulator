@@ -67,6 +67,8 @@ namespace jeLib
 		void onReceiveSample(int32_t _left, int32_t _right);
 		// to the input the event arrives at on the hardware, see m_remoteKeyboardRateLimiter
 		void writeMidiIn(const synthLib::SMidiEvent& _ev);
+		// drops what waits for the part of the temp performance that _sysex replaces as a whole
+		void purgeSuperseded(const synthLib::SysexBuffer& _sysex);
 		// the visible 2 x 20 LCD cells and the CGRAM to the editor
 		void sendLcdText();
 		void sendLcdCgRam();

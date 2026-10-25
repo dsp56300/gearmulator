@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "rom.h"
+#include "state.h"
 
 #include "synthLib/deviceException.h"
 
@@ -300,8 +301,45 @@ namespace jeLib
 		m_sampleBuffer.emplace_back(_left, _right);
 	}
 
+	void Je8086::purgeSuperseded(const synthLib::SysexBuffer& _sysex)
+	{
+		// A whole performance or patch replaces what still waits for the temp performance, and the requests to read it
+		// back. Otherwise browsing through presets queues every one of them at MIDI speed and the synth follows seconds
+		// later (BUG-10208)
+		constexpr size_t frameSize = 12;	// header, command, address, checksum, EOX
+
+		if (_sysex.size() <= frameSize || _sysex[5] != static_cast<uint8_t>(SysexByte::CommandIdDataSet1) ||
+			State::getAddressArea(_sysex) != AddressArea::PerformanceTemp)
+			return;
+
+		const auto offset = State::getAddress(_sysex) & 0xffff;
+		const auto size = _sysex.size() - frameSize;
+
+		uint32_t block;	// the temp performance block it replaces, 0 = all of it
+
+		if (offset == static_cast<uint32_t>(PerformanceData::PerformanceCommon) && size >= static_cast<size_t>(PerformanceCommon::DataLengthKeyboard))
+			block = 0;
+		else if ((offset == static_cast<uint32_t>(PerformanceData::PatchUpper) || offset == static_cast<uint32_t>(PerformanceData::PatchLower)) &&
+			size >= static_cast<size_t>(Patch::DataLengthKeyboard))
+			block = offset;
+		else
+			return;
+
+		m_midiInRateLimiter.purgePendingSysex([block](const synthLib::SMidiEvent& _queued)
+		{
+			if (State::getAddressArea(_queued.sysex) != AddressArea::PerformanceTemp)
+				return false;
+
+			// a rack patch continues in a second dump at 01 72
+			return block == 0 || (State::getAddress(_queued.sysex) & 0xfe00) == block;
+		});
+	}
+
 	void Je8086::writeMidiIn(const synthLib::SMidiEvent& _ev)
 	{
+		if (!_ev.sysex.empty())
+			purgeSuperseded(_ev.sysex);
+
 		if (!m_isRack || !_ev.sysex.empty())
 		{
 			m_midiInRateLimiter.write(synthLib::SMidiEvent(_ev));

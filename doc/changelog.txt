@@ -158,6 +158,11 @@ JE8086:
         press INC and DEC of the synth (VALUE UP and DOWN of the JP-8000), and
         the editor shows what the synth plays afterwards.
 
+- [Fix] BUG-10208 Clicking quickly through performances or patches sent every one
+        of them to the synth at MIDI speed, so it followed seconds later and its
+        display and PERFORM/PATCH SELECT did not react meanwhile. A performance
+        or patch that a newer click replaces is no longer sent.
+
 NodalRed2x:
 
 - [Fix] BUG-10509 With enough voices playing, the voices of the second DSP cut in
