@@ -5,8 +5,92 @@
 		<link type="text/rcss" href="tus_default.rcss"/>
 		<link type="text/rcss" href="tus_juceskin.rcss"/>
 		<link type="text/rcss" href="VirusC_Galaxpel.rcss"/>
+		<script>
+			-- Mute is the Virus' own per part switch, Part Enable: a part that is off releases its notes and takes no
+			-- new ones. A solo switches off the parts it leaves out and switches them on again when the last solo
+			-- ends. Skin variables keep the solo, so it outlives the editor and is saved with the project.
+			local partCount = 16
+			local soloed = 0		-- a bit per soloed part
+			local soloMuted = 0		-- a bit per part the solo switched off
+			local muteButtons = {}
+			local soloButtons = {}
+
+			local function isEnabled(_part)
+				return params.get("Part Enable", _part) ~= 0
+			end
+
+			local function updateButtons()
+				for p = 0, partCount - 1 do
+					local bit = 1 << p
+					-- the user did not mute a part the solo switched off
+					muteButtons[p]:SetAttribute("value", (not isEnabled(p) and (soloMuted & bit) == 0) and 1 or 0)
+					soloButtons[p]:SetAttribute("value", (soloed & bit) ~= 0 and 1 or 0)
+				end
+			end
+
+			local function applySolo()
+				for p = 0, partCount - 1 do
+					local bit = 1 << p
+					local leftOut = soloed ~= 0 and (soloed & bit) == 0
+					if leftOut and (soloMuted & bit) == 0 and isEnabled(p) then
+						params.set("Part Enable", 0, p)
+						soloMuted = soloMuted | bit
+					elseif not leftOut and (soloMuted & bit) ~= 0 then
+						params.set("Part Enable", 1, p)
+						soloMuted = soloMuted & ~bit
+					end
+				end
+				skinvars.set("soloParts", soloed)
+				skinvars.set("soloMutedParts", soloMuted)
+				updateButtons()
+			end
+
+			-- A multi load or a mode change switches parts on again, the solo switches off the ones it leaves out
+			local function reconcile()
+				for p = 0, partCount - 1 do
+					if isEnabled(p) then
+						soloMuted = soloMuted & ~(1 << p)
+					end
+				end
+				applySolo()
+			end
+
+			-- A project load brings its own solo
+			local function loadSolo()
+				soloed = skinvars.get("soloParts", "instance") or 0
+				soloMuted = skinvars.get("soloMutedParts", "instance") or 0
+				reconcile()
+			end
+
+			function toggleSolo(_part)
+				soloed = soloed ~ (1 << _part)
+				applySolo()
+			end
+
+			function toggleMute(_part)
+				local bit = 1 << _part
+				-- A part the solo switched off becomes muted by the user, it stays off when the solo ends
+				if (soloMuted & bit) ~= 0 then
+					soloMuted = soloMuted & ~bit
+				else
+					params.set("Part Enable", isEnabled(_part) and 0 or 1, _part)
+				end
+				applySolo()
+			end
+
+			function initMuteSolo()
+				for p = 0, partCount - 1 do
+					muteButtons[p] = document:GetElementById("PartMute" .. p)
+					soloButtons[p] = document:GetElementById("PartSolo" .. p)
+					params.onChange("Part Enable", reconcile, p)
+				end
+				skinvars.onChange("soloParts", loadSolo, "instance")
+				skinvars.onChange("soloMutedParts", loadSolo, "instance")
+				loadSolo()
+			end
+		</script>
 	</head>
-	<body id="Root" debugger="0" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2754dp; height: 1600dp;">
+	<body id="Root" debugger="0" onload="initMuteSolo()" rootScale="0.500000" style="left: 0dp; top: 0dp; width: 2754dp; height: 1600dp;">
 		<img id="bg" class="jucePos" src="main_bg.png" style="left: 0dp; top: 0dp; width: 2754dp; height: 1600dp;"/>
 		<button id="PlayModeSingle" class="jucePos juceButton sngl-btn49x260" isToggle="1" style="left: 151dp; top: 272dp; width: 260dp; height: 49dp;"/>
 		<button id="PlayModeMulti" class="jucePos juceButton mlt-btn49x260" isToggle="1" style="left: 416dp; top: 272dp; width: 260dp; height: 49dp;"/>
@@ -531,8 +615,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute0" class="jucePos juceButton btn2-52x36" onclick="toggleMute(0)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo0" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(0)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart1" class="jucePos multiStripe" data-model="part1" style="left: 124dp; top: 0dp; width: 117dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">2</div>
@@ -554,8 +640,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute1" class="jucePos juceButton btn2-52x36" onclick="toggleMute(1)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo1" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(1)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart2" class="jucePos multiStripe" data-model="part2" style="left: 247dp; top: 0dp; width: 118dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">3</div>
@@ -577,8 +665,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute2" class="jucePos juceButton btn2-52x36" onclick="toggleMute(2)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo2" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(2)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart3" class="jucePos multiStripe" data-model="part3" style="left: 371dp; top: 0dp; width: 117dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">4</div>
@@ -600,8 +690,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute3" class="jucePos juceButton btn2-52x36" onclick="toggleMute(3)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo3" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(3)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart4" class="jucePos multiStripe" data-model="part4" style="left: 494dp; top: 0dp; width: 118dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">5</div>
@@ -623,8 +715,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute4" class="jucePos juceButton btn2-52x36" onclick="toggleMute(4)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo4" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(4)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart5" class="jucePos multiStripe" data-model="part5" style="left: 618dp; top: 0dp; width: 117dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">6</div>
@@ -646,8 +740,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute5" class="jucePos juceButton btn2-52x36" onclick="toggleMute(5)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo5" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(5)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart6" class="jucePos multiStripe" data-model="part6" style="left: 741dp; top: 0dp; width: 118dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">7</div>
@@ -669,8 +765,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute6" class="jucePos juceButton btn2-52x36" onclick="toggleMute(6)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo6" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(6)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart7" class="jucePos multiStripe" data-model="part7" style="left: 865dp; top: 0dp; width: 117dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">8</div>
@@ -692,8 +790,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute7" class="jucePos juceButton btn2-52x36" onclick="toggleMute(7)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo7" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(7)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart8" class="jucePos multiStripe" data-model="part8" style="left: 988dp; top: 0dp; width: 118dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">9</div>
@@ -715,8 +815,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute8" class="jucePos juceButton btn2-52x36" onclick="toggleMute(8)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo8" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(8)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart9" class="jucePos multiStripe" data-model="part9" style="left: 1112dp; top: 0dp; width: 117dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">10</div>
@@ -738,8 +840,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute9" class="jucePos juceButton btn2-52x36" onclick="toggleMute(9)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo9" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(9)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart10" class="jucePos multiStripe" data-model="part10" style="left: 1235dp; top: 0dp; width: 118dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">11</div>
@@ -761,8 +865,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute10" class="jucePos juceButton btn2-52x36" onclick="toggleMute(10)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo10" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(10)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart11" class="jucePos multiStripe" data-model="part11" style="left: 1359dp; top: 0dp; width: 117dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">12</div>
@@ -784,8 +890,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute11" class="jucePos juceButton btn2-52x36" onclick="toggleMute(11)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo11" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(11)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart12" class="jucePos multiStripe" data-model="part12" style="left: 1482dp; top: 0dp; width: 118dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">13</div>
@@ -807,8 +915,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute12" class="jucePos juceButton btn2-52x36" onclick="toggleMute(12)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo12" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(12)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart13" class="jucePos multiStripe" data-model="part13" style="left: 1606dp; top: 0dp; width: 117dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">14</div>
@@ -830,8 +940,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute13" class="jucePos juceButton btn2-52x36" onclick="toggleMute(13)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo13" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(13)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart14" class="jucePos multiStripe" data-model="part14" style="left: 1729dp; top: 0dp; width: 118dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 118dp; height: 40dp; line-height: 40dp;">15</div>
@@ -853,8 +965,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 118dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 106dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 118dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute14" class="jucePos juceButton btn2-52x36" onclick="toggleMute(14)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo14" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(14)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 			<div id="MultiPart15" class="jucePos multiStripe" data-model="part15" style="left: 1853dp; top: 0dp; width: 117dp; height: 1125dp;">
 				<div class="jucePos juceLabel txtMultiHdr" style="left: 0dp; top: 12dp; width: 117dp; height: 40dp; line-height: 40dp;">16</div>
@@ -876,8 +990,10 @@
 				<combo class="jucePos txtMultiCombo" param="Part Output Select" style="left: 6dp; top: 893dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
 				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 942dp; width: 117dp; height: 26dp; line-height: 26dp;">Note Steal</div>
 				<combo class="jucePos txtMultiCombo" param="Note Steal Priority" style="left: 6dp; top: 968dp; width: 105dp; height: 34dp; line-height: 34dp;"><combotext>-</combotext></combo>
-				<div class="jucePos juceLabel txtMultiLbl" style="left: 0dp; top: 1017dp; width: 117dp; height: 26dp; line-height: 26dp;">Enable</div>
-				<button class="jucePos juceButton btn2-52x36" isToggle="1" param="Part Enable" style="left: 33dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 4dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Mute</div>
+				<div class="jucePos juceLabel txtMultiLbl" style="left: 61dp; top: 1017dp; width: 52dp; height: 26dp; line-height: 26dp;">Solo</div>
+				<button id="PartMute15" class="jucePos juceButton btn2-52x36" onclick="toggleMute(15)" style="left: 4dp; top: 1043dp; width: 52dp; height: 36dp;"/>
+				<button id="PartSolo15" class="jucePos juceButton btn2-52x36" onclick="toggleSolo(15)" style="left: 61dp; top: 1043dp; width: 52dp; height: 36dp;"/>
 			</div>
 		</div>
 		<div id="DonateInfo" class="jucePos juceTextButton juceHyperlinkButton txt9" url="https://paypal.me/dsp56300" style="left: 150dp; top: 1542dp; width: 533dp; height: 45dp; line-height: 45dp;">To donate: https://paypal.me/dsp56300</div>

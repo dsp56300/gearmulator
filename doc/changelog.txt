@@ -81,6 +81,11 @@ Osirus/OsTIrus:
 
 Osirus:
 
+- [Imp] BUG-10183 Galaxpel skin: every part on the Multi page has Mute and Solo
+        buttons. Mute switches the part off, as the Enable button did that it
+        replaces. Solo plays only the soloed parts, parts muted by hand stay
+        muted when the solo ends. A solo is saved with the project.
+
 - [Fix] #49 The Arp Clock selection showed the values of the LFO clock: it
         offered "Off", which the arpeggiator does not have, and labelled every
         setting with a different note value than the one it plays, 1/16 as
