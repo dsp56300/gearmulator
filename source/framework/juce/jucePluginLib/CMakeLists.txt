@@ -89,7 +89,3 @@ if(UNIX AND NOT APPLE)
 	find_package(Threads REQUIRED)
 	target_link_libraries(jucePluginLib PRIVATE Threads::Threads)
 endif()
-
-if(APPLE)
-	target_link_libraries(jucePluginLib PRIVATE "-framework CoreAudio")	# hostAudioWorkgroup.cpp
-endif()

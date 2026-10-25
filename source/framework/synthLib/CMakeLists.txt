@@ -18,6 +18,7 @@ set(SOURCES
 	deviceTypes.h
 	dspClockDevice.h
 	frontPanelSysex.cpp frontPanelSysex.h
+	hostAudioWorkgroup.cpp hostAudioWorkgroup.h
 	lcdfonts.cpp lcdfonts.h
 	lv2PresetExport.cpp lv2PresetExport.h
 	midiBufferParser.cpp midiBufferParser.h
@@ -65,6 +66,10 @@ endif()
 
 if(NOT MSVC)
 	target_link_libraries(synthLib PUBLIC dl)
+endif()
+
+if(APPLE)
+	target_link_libraries(synthLib PRIVATE "-framework CoreAudio")	# hostAudioWorkgroup.cpp
 endif()
 
 if(UNIX AND NOT APPLE)
