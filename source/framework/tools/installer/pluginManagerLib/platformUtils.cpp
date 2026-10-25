@@ -67,22 +67,24 @@ namespace pluginManager
 		default:                  return {};
 		}
 #elif JUCE_MAC
-		// The user's own plug-in folder, not /Library: that one needs a password, and this is where
-		// the plugins on a developer machine actually sit - it is what JUCE itself installs into.
-		// Anyone who wants them system wide can say so in Preferences.
-		const auto home = juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName().toStdString();
+		// The machine-wide plug-in folders, which is where the installers of nearly every other maker
+		// put theirs and so where people go looking (BUG-10526). Writing there may need a password,
+		// which the install asks for - see ElevatedTask.
+		const std::string library = "/Library/Audio/Plug-Ins";
 
 		switch (_format)
 		{
-		case PluginFormat::VST2:  return home + "/Library/Audio/Plug-Ins/VST";
-		case PluginFormat::VST3:  return home + "/Library/Audio/Plug-Ins/VST3";
-		case PluginFormat::CLAP:  return home + "/Library/Audio/Plug-Ins/CLAP";
-		case PluginFormat::AU:    return home + "/Library/Audio/Plug-Ins/Components";
-		case PluginFormat::LV2:   return home + "/Library/Audio/Plug-Ins/LV2";
+		case PluginFormat::VST2:  return library + "/VST";
+		case PluginFormat::VST3:  return library + "/VST3";
+		case PluginFormat::CLAP:  return library + "/CLAP";
+		case PluginFormat::AU:    return library + "/Components";
+		case PluginFormat::LV2:   return library + "/LV2";
 
-		// The user's own Applications folder, for the same reason as the plug-ins above: the
-		// one in / needs a password, and the Finder shows this one just the same.
-		case PluginFormat::Standalone: return home + "/Applications";
+		// The user's own Applications folder: the Finder shows it just the same, and a program is
+		// only found again by the record of where it went, so moving this default would lose every
+		// one installed so far.
+		case PluginFormat::Standalone:
+			return juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName().toStdString() + "/Applications";
 
 		default:                  return {};
 		}
@@ -169,9 +171,11 @@ namespace pluginManager
 		default: break;
 		}
 #elif JUCE_MAC
-		// The machine-wide tree. The default is the user's own because writing to this one needs a
-		// password, but it is where installers put a plugin, so it is where most of them are.
-		const std::string library = "/Library/Audio/Plug-Ins";
+		// The user's own tree beside the machine-wide default. It was the default until 2.2.28, so
+		// everything this installed before then is in there - and found there, it is upgraded where
+		// it is rather than installed a second time into the new default (see PluginManager::pathFor).
+		const auto library = juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName().toStdString()
+			+ "/Library/Audio/Plug-Ins";
 
 		switch (_format)
 		{

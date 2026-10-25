@@ -3572,6 +3572,16 @@ namespace
 		TEST_ASSERT(!real.empty());
 		TEST_ASSERT(real.front() == PlatformUtils::getDefaultPluginPath(PluginFormat::VST3));
 
+#if JUCE_MAC
+		// The machine-wide folder is the default, and the user's own, the default until 2.2.28, is
+		// still looked in: everything installed before then is there (BUG-10526).
+		const auto userVst3 = juce::File::getSpecialLocation(juce::File::userHomeDirectory)
+			.getChildFile("Library/Audio/Plug-Ins/VST3").getFullPathName().toStdString();
+
+		TEST_ASSERT(real.front() == "/Library/Audio/Plug-Ins/VST3");
+		TEST_ASSERT(std::find(real.begin(), real.end(), userVst3) != real.end());
+#endif
+
 		PlatformUtils::setSettingsFolder({});
 		dir.deleteRecursively();
 	}

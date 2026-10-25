@@ -29,9 +29,9 @@ namespace pluginManager
 
 		// Everywhere a build of this format is normally kept on this system, the default above
 		// first. For finding one that is already installed, which is nowhere near guaranteed to be
-		// in the one folder this would install it to: macOS keeps most plugins in the system
-		// /Library/Audio/Plug-Ins while the default here is the user's own, Linux has a /usr tree
-		// beside the ~/.vst3 default, and VST2 never had a standard place anywhere.
+		// in the one folder this would install it to: macOS has the user's own ~/Library/Audio/Plug-Ins
+		// as well as the system one that is the default here, Linux has a /usr tree beside the
+		// ~/.vst3 default, and VST2 never had a standard place anywhere.
 		//
 		// Only for looking. Where an install goes is still the location the settings name, and that
 		// folder is searched before any of these - see PluginManager::locateInstalled.

@@ -160,6 +160,11 @@ Plugin Manager:
         installed, an install into the same folder stops and says so, and an
         uninstall does not remove it.
 
+- [Imp] BUG-10526 macOS: plugins are installed into the system-wide folders in
+        /Library/Audio/Plug-Ins by default, where the plugins of other makers
+        are, rather than into the user's own in ~/Library. Plugins installed
+        there before are still found and are upgraded where they are.
+
 88emuPlayer:
 
 - [New] Devices: Added support for the SC-880.
