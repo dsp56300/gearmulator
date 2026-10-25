@@ -48,6 +48,9 @@ Framework:
         the name of a parameter was shown over it, for example in the OsTIrus
         skin right after a parameter was changed.
 
+- [Fix] BUG-10441 With the software renderer, an element with a CSS filter was
+        not drawn at all, for example a big rotary of a skin that brightens it.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

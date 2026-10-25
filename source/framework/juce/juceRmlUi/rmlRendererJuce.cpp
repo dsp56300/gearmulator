@@ -1375,11 +1375,14 @@ namespace juceRmlUi
 		const auto* source = reinterpret_cast<const Image*>(_source);
 		auto* destination = reinterpret_cast<Image*>(_destination);
 
+		// Handle 0 is the base layer, not the current one: an element with a filter composites its layer onto the layer
+		// below it, which is the base when it is not inside another layer. Onto the current layer it composited onto
+		// itself, and the pop then dropped what it had drawn (BUG-10441: such an element was not drawn at all)
 		if (!_source)
-			source = m_renderTarget;
+			source = m_renderTargetStack.empty() ? m_renderTarget : m_renderTargetStack.front();
 
 		if (!_destination)
-			destination = m_renderTarget;
+			destination = m_renderTargetStack.empty() ? m_renderTarget : m_renderTargetStack.front();
 
 		RMLUI_ASSERT(source && destination);
 		RMLUI_ASSERT(source->width == destination->width && "Source and destination width must match");
