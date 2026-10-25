@@ -37,6 +37,10 @@ Framework:
         the button and over other controls. It is shown for knobs and sliders
         only again.
 
+- [Fix] BUG-10219 The patch name could not be renamed with a double click while
+        the name of a parameter was shown over it, for example in the OsTIrus
+        skin right after a parameter was changed.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

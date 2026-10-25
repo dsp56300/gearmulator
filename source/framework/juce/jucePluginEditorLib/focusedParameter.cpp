@@ -55,10 +55,16 @@ namespace jucePluginEditorLib
 		m_focusedParameterName = _editor.findChild("FocusedParameterName", false);
 		m_focusedParameterValue = _editor.findChild("FocusedParameterValue", false);
 
-		if (m_focusedParameterName)
-			juceRmlUi::helper::setVisible(m_focusedParameterName, false);
-		if (m_focusedParameterValue)
-			juceRmlUi::helper::setVisible(m_focusedParameterValue, false);
+		for (auto* label : {m_focusedParameterName, m_focusedParameterValue})
+		{
+			if (!label)
+				continue;
+			juceRmlUi::helper::setVisible(label, false);
+
+			// They only show text, but a skin may place them over something that takes clicks: in the OsTIrus skin the
+			// name covers part of the patch name, which then could not be renamed while a parameter changed (BUG-10219)
+			label->SetProperty("pointer-events", "none");
+		}
 
 		// a skin may declare its own tooltip, all others get the default one styled by tus_default.rcss
 		auto* tooltip = _editor.findChild("FocusedParameterTooltip", false);
