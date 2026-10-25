@@ -74,6 +74,11 @@ Osirus/OsTIrus:
         patch that the plugin plays. It kept the patch that was selected before,
         or selected a wrong one.
 
+- [Fix] BUG-10183 A part that was switched off in multi mode played again when
+        the project was loaded or the play mode was changed. Its Note Steal
+        setting and its MIDI Volume, Hold Pedal, Keyb To Midi and Program
+        Change switches went back the same way.
+
 Osirus:
 
 - [Fix] #49 The Arp Clock selection showed the values of the LFO clock: it

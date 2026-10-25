@@ -1537,6 +1537,13 @@ void Microcontroller::applyToMultiEditBuffer(const Page _page, const uint8_t _pa
 			const auto idx = MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part;
 			m_multiEditBuffer[idx] = _value;
 		}
+		else if (_param >= PART_ENABLE && _param <= PART_PROG_CHANGE_ENABLE && _param != PURE_TUNING)
+		{
+			// the part's switches are the bits of its state byte, in the order of their parameters
+			const auto bit = 1 << (_param - PART_ENABLE);
+			auto& state = m_multiEditBuffer[MD_PART_STATE + _part];
+			state = static_cast<uint8_t>(_value ? (state | bit) : (state & ~bit));
+		}
 		break;
 	}
 }
