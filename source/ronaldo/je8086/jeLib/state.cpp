@@ -490,6 +490,16 @@ namespace jeLib
 		return false;
 	}
 
+	bool State::isSystemDump(const Dump& _dump, const bool _rack)
+	{
+		if (getAddress(_dump) != static_cast<uint32_t>(AddressArea::System))
+			return false;
+
+		const auto dataSize = static_cast<size_t>(_rack ? SystemParameter::DataSizeRack : SystemParameter::DataSizeKeyboard);
+
+		return _dump.size() == std::size(g_sysexHeader) + 1 + std::tuple_size_v<rLib::Storage::Address4> + dataSize + 2 /*checksum + eox*/;
+	}
+
 	bool State::createSystemDump(synthLib::SMidiEvent& _result) const
 	{
 		auto adr = static_cast<uint32_t>(AddressArea::System);

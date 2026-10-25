@@ -71,6 +71,9 @@ namespace jeLib
 		State m_state;
 		synthLib::FrontPanelTransport m_frontPanel;
 
+		// the other model's system block, never applied here, saved so that switching the ROM back restores it
+		synthLib::SysexBuffer m_otherModelSystemDump;
+
 		baseLib::EventListener<uint8_t, uint8_t, int32_t> m_paramChangedListener;
 
 		float m_masterVolume = 12.0f;

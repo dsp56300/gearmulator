@@ -72,6 +72,9 @@ namespace jeLib
 		bool receive(const synthLib::SMidiEvent& _event);
 		bool receive(const synthLib::SysexBuffer& _sysex);
 
+		// the System Parameter block as createSystemDump() makes it, its size tells the model
+		static bool isSystemDump(const Dump& _dump, bool _rack);
+
 		bool createSystemDump(synthLib::SMidiEvent& _result) const;
 		bool createTempPerformanceDumps(std::vector<synthLib::SMidiEvent>& _results, PerformanceData _data, uint32_t _sizeRack, uint32_t _sizeKeyboard) const;
 		bool createTempPerformanceDumps(std::vector<synthLib::SMidiEvent>& _results) const;

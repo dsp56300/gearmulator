@@ -100,6 +100,19 @@ JE8086:
         set a single channel to play the Upper and Lower parts on their own MIDI
         channels.
 
+- [Fix] BUG-10512 Switching the ROM from the JP-8080 back to the JP-8000 set the
+        Remote Ctrl CH of the JP-8000 to OFF, so Split and the arpeggiator no
+        longer played via MIDI until the plugin was loaded again. A ROM switch
+        no longer hands the system settings of one model to the other, each
+        model keeps its own and gets them back when it is selected again, also
+        in a saved project.
+
+- [Fix] BUG-10512 The plugin set the Remote KBD CH of the JP-8080 to 5, so Split
+        and the arpeggiator played only from MIDI channel 5. It stays at ALL,
+        the factory setting, now, and a channel chosen in the editor is no
+        longer reset when a project is loaded. Projects saved with channel 5
+        get ALL.
+
 - [Fix] BUG-10528 A JP-8080 performance loaded from a file, such as a bulk dump
         of the hardware, left Unison, Unison Detune, Patch Gain, Voice Modulator
         Send and External Trigger of its patches as they were, and set three
