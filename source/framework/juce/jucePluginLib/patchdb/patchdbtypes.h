@@ -57,6 +57,7 @@ namespace pluginLib::patchDB
 	static constexpr uint32_t g_invalidBank = ~0;
 	static constexpr uint32_t g_invalidProgram = ~0;
 	static constexpr uint32_t g_invalidMidiBankNumber = ~0;
+	static constexpr uint32_t g_midiBankNumberCount = 128 * 128;	// a bank select addresses MSB * 128 + LSB
 
 	struct Dirty
 	{

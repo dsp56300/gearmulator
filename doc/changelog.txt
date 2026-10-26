@@ -108,6 +108,11 @@ Osirus:
         setting with a different note value than the one it plays, 1/16 as
         1/8 for example. It now shows 1/128 to 1/2 as on the hardware.
 
+- [Fix] BUG-10184 The Patch Manager showed the ROM Arrangements with
+        "[Bank 4294901761]", a MIDI bank number that no bank select reaches.
+        They have no MIDI bank number now, one can be assigned to load them by
+        program change.
+
 OsTIrus:
 
 - [Fix] A changed Arp Mode was lost when the patch was loaded again, for example

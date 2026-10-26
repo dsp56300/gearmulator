@@ -1118,7 +1118,7 @@ namespace genericVirusUI
 		ds.type = pluginLib::patchDB::SourceType::Rom;
 		ds.bank = g_arrangementBank;
 		ds.name = "ROM Arrangements";
-		ds.midiBankNumber = g_arrangementBank;
+		// no MIDI bank number unless the user assigns one, g_arrangementBank is out of reach of a bank select
 		ds.romName = m_processor.getRomName();
 		return ds;
 	}

@@ -315,6 +315,9 @@ namespace pluginLib::patchDB
 
 	bool DB::setDataSourceMidiBankNumber(const DataSourceNodePtr& _ds, const uint32_t _midiBankNumber)
 	{
+		if (_midiBankNumber >= g_midiBankNumberCount)
+			return false;
+
 		{
 			std::unique_lock lock(m_dataSourcesMutex);
 
@@ -1603,6 +1606,11 @@ namespace pluginLib::patchDB
 
 				const auto midiBankNumber = static_cast<uint32_t>(static_cast<int>(var["midiBankNumber"]));
 
+				// out of reach of a bank select, such as the bank index that the ROM Arrangements of the Virus had as
+				// their MIDI bank number up to 2.2.27
+				if(midiBankNumber >= g_midiBankNumberCount)
+					continue;
+
 				// try to apply immediately if datasource already exists
 				const auto it = m_dataSources.find(key);
 				if(it != m_dataSources.end() && (rom.empty() || rom == it->second->romName))
@@ -2216,7 +2224,8 @@ namespace pluginLib::patchDB
 				}
 				ds->patches.clear();
 
-				if (ds->midiBankNumber != g_invalidMidiBankNumber)
+				// a number out of reach of a bank select is dropped, see loadJson
+				if (ds->midiBankNumber < g_midiBankNumberCount)
 					m_pendingMidiBankAssignments.insert({midiBankKey(*ds), ds->midiBankNumber});
 			}
 

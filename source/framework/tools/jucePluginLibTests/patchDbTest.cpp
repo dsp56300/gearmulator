@@ -165,11 +165,13 @@ namespace
 	class RomDb final : public DB
 	{
 	public:
-		RomDb(const juce::File& _settingsDir, DataList _presets, const uint32_t _bank = 0)
+		RomDb(const juce::File& _settingsDir, DataList _presets, const uint32_t _bank = 0, const uint32_t _midiBankNumber = g_invalidMidiBankNumber)
 			: DB(_settingsDir), m_presets(std::move(_presets)), m_bank(_bank)
 		{
 			startLoaderThread();
-			addDataSource(romBank(_bank));
+			auto ds = romBank(_bank);
+			ds.midiBankNumber = _midiBankNumber;
+			addDataSource(ds);
 		}
 
 		~RomDb() override { stopLoaderThread(); }
@@ -297,6 +299,45 @@ namespace
 
 		std::cout << "  ROM bank cache tests passed" << std::endl;
 	}
+
+	void testUnreachableMidiBankNumbersAreDropped()
+	{
+		std::cout << "Testing that MIDI bank numbers out of reach of a bank select are dropped..." << std::endl;
+
+		const auto root = juce::File::getSpecialLocation(juce::File::tempDirectory).getNonexistentChildFile("patchDbTest", "");
+		const auto settings = root.getChildFile("settings");
+
+		const auto preset = dump(0x00, 0x00, {0x11}, 0x40);
+
+		// up to 2.2.27 the Virus registered its ROM Arrangements with their bank index 0xFFFF0001 as MIDI bank number,
+		// which went into the json and the cache
+		{
+			RomDb db(settings, {preset}, 0, 0xFFFF0001);
+			TEST_ASSERT(db.waitIdle());
+
+			const auto bank = db.getDataSource(RomDb::romBank());
+			TEST_ASSERT(bank && bank->midiBankNumber == 0xFFFF0001 && bank->patches.size() == 1);
+			TEST_ASSERT(!db.setDataSourceMidiBankNumber(bank, g_midiBankNumberCount));
+			TEST_ASSERT(db.renamePatch(*bank->patches.begin(), "Renamed"));	// saves the json
+			TEST_ASSERT(db.waitIdle());
+		}
+
+		const auto midiBankNumber = [&]
+		{
+			RomDb db(settings, {preset});
+			const auto bank = db.waitIdle() ? db.getDataSource(RomDb::romBank()) : nullptr;
+			return bank ? bank->midiBankNumber : 0;
+		};
+
+		TEST_ASSERT(midiBankNumber() == g_invalidMidiBankNumber);		// from the cache
+
+		TEST_ASSERT(settings.getChildFile("patchmanagerdb.cache").deleteFile());
+		TEST_ASSERT(midiBankNumber() == g_invalidMidiBankNumber);		// from the json
+
+		root.deleteRecursively();
+
+		std::cout << "  unreachable MIDI bank number tests passed" << std::endl;
+	}
 }
 
 void testPatchDb()
@@ -305,4 +346,5 @@ void testPatchDb()
 	testLegacyModificationKeys();
 	testFolderFindsSubfolders();
 	testRomBanksAreNotTakenFromCache();
+	testUnreachableMidiBankNumbersAreDropped();
 }
