@@ -783,6 +783,10 @@ namespace pluginLib
 
 		updateLatencySamples();
 
+		// JUCE reports the buses it constructs before this class is there to hear it
+		updateOutputMap();
+		m_outputScratch.setSize(static_cast<int>(synthLib::TAudioOutputs().size()), samplesPerBlock);
+
 		// (Re)allocate the audio-capture buffer for this sample rate, hard-capped so a capture that is never
 		// stopped cannot grow unbounded. Done here (no audio running) so the audio thread never allocates.
 		{
@@ -793,6 +797,45 @@ namespace pluginLib
 			m_captureBuffer.setSize(g_captureChannels, static_cast<int>(captureMaxSeconds * sampleRate), false, true, true);
 			m_captureBuffer.clear();
 		}
+	}
+
+	void Processor::processorLayoutsChanged()
+	{
+		updateOutputMap();
+	}
+
+	void Processor::updateOutputMap()
+	{
+		std::vector<uint32_t> map;
+		bool inOrder = true;
+		uint32_t paired = 0;	// the outputs of the buses not declared mono so far
+		uint32_t single = 0;	// the buses declared mono so far
+
+		for(int b = 0; b < getBusCount(false); ++b)
+		{
+			const auto* bus = getBus(false, b);
+			if(!bus)
+				continue;
+
+			const auto& declared = bus->getDefaultLayout();
+			const bool mono = declared == juce::AudioChannelSet::mono();
+
+			for(int c = 0; bus->isEnabled() && c < bus->getNumberOfChannels(); ++c)
+			{
+				const auto output = mono ? single : paired + static_cast<uint32_t>(c);
+				inOrder &= output == map.size();
+				map.push_back(output);
+			}
+
+			if(mono)
+				++single;
+			else
+				paired += static_cast<uint32_t>(declared.size());
+		}
+
+		if(inOrder)
+			map.clear();
+		m_outputMap = std::move(map);
 	}
 
 	void Processor::releaseResources()
@@ -911,8 +954,23 @@ namespace pluginLib
 		for (int channel = 0; channel < totalNumInputChannels; ++channel)
 			inputs[channel] = buffer.getReadPointer(channel);
 
-		for (int channel = 0; channel < totalNumOutputChannels; ++channel)
-			outputs[channel] = buffer.getWritePointer(channel);
+		// With an output map, see updateOutputMap, the device renders into a buffer of its own and each channel gets a copy
+		// of its output below. Rendered in place, an output could overwrite another input the device still reads
+		const auto mapped = !m_outputMap.empty();
+		if(mapped)
+		{
+			m_outputScratch.setSize(static_cast<int>(outputs.size()), numSamples, false, false, true);
+			for(const auto o : m_outputMap)
+			{
+				if(o < outputs.size())
+					outputs[o] = m_outputScratch.getWritePointer(static_cast<int>(o));
+			}
+		}
+		else
+		{
+			for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+				outputs[channel] = buffer.getWritePointer(channel);
+		}
 
 		m_programChangeRouter.releaseStaleHold([this](const synthLib::SMidiEvent& _ev) { getPlugin().addMidiEvent(_ev); });
 
@@ -981,6 +1039,18 @@ namespace pluginLib
 			triggerAsyncUpdate();
 
 		applyOutputGain(outputs, numSamples);
+
+		if(mapped)
+		{
+			for(int channel = 0; channel < totalNumOutputChannels; ++channel)
+			{
+				const auto o = static_cast<size_t>(channel) < m_outputMap.size() ? m_outputMap[static_cast<size_t>(channel)] : outputs.size();
+				if(o < outputs.size())
+					buffer.copyFrom(channel, 0, outputs[o], numSamples);
+				else
+					buffer.clear(channel, 0, numSamples);
+			}
+		}
 
 		captureAudioBlock(buffer, numSamples);
 		m_outputLevels.process(buffer, getTotalNumOutputChannels(), numSamples, getSampleRate());

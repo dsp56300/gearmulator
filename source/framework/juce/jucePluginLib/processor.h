@@ -246,6 +246,13 @@ namespace pluginLib
 	private:
 		void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 		void releaseResources() override;
+		void processorLayoutsChanged() override;
+
+		// The device output of each output channel. The output buses carry the outputs in the order they are declared,
+		// whether the host turned some off or not. A bus declared mono carries one output alone, the n-th of them the
+		// n-th output: a product offers its outputs singly that way, beside the stereo pairs, off by default. Empty while
+		// each channel carries its own, in order
+		void updateOutputMap();
 
 		//==============================================================================
 		bool isBusesLayoutSupported(const BusesLayout&) const override;
@@ -356,6 +363,8 @@ namespace pluginLib
 		SkinVariables m_skinVariables;
 		MidiNotifier m_midiNotifier;
 		BypassBuffer m_bypassBuffer;
+		std::vector<uint32_t> m_outputMap;	// see updateOutputMap
+		juce::AudioBuffer<float> m_outputScratch;	// what the device renders while there is an output map
 		DeviceType m_deviceType = DeviceType::Local;
 		std::string m_remoteHost;
 		uint32_t m_remotePort = 0;
