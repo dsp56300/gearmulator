@@ -128,6 +128,23 @@ namespace rLib::sysex
 		return checksum(_msg + begin, _size - begin - 2) == _msg[_size - 2];
 	}
 
+	struct Rq1View
+	{
+		const uint8_t* address = nullptr;
+		const uint8_t* size = nullptr;
+	};
+
+	// An RQ1 of _model, terminated by F7. The checksum is not verified.
+	inline bool parseRQ1(const uint8_t* _msg, const size_t _size, const Model& _model, Rq1View& _out)
+	{
+		const auto sizeBegin = _model.headerSize() + _model.addressSize;
+		if(_size != sizeBegin + _model.addressSize + 2 || _msg[_size - 1] != Eox || !matchHeader(_msg, _size, _model, CmdRQ1))
+			return false;
+		_out.address = _msg + _model.headerSize();
+		_out.size = _msg + sizeBegin;
+		return true;
+	}
+
 	struct Dt1View
 	{
 		const uint8_t* address = nullptr;

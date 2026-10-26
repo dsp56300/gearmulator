@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cassert>
+#include <functional>
+#include <utility>
 #include <vector>
 #include <cstdint>
 
@@ -393,5 +395,34 @@ namespace synthLib
 	{
 		for (auto i = _first; i < _events.size(); ++i)
 			_events[i].replyTo = _requester;
+	}
+
+	// What a message is to a request: not its answer, a part of the answer with more to come, or all or the rest of it
+	enum class ReplyMatch : uint8_t
+	{
+		None,
+		Partial,
+		Complete
+	};
+
+	using ReplyMatcher = std::function<ReplyMatch(const SMidiEvent&)>;
+
+	// Answered by a SysEx that has these values at these positions: a dump known by its header
+	inline ReplyMatcher expectBytes(std::vector<std::pair<uint32_t, uint8_t>> _bytes)
+	{
+		return [bytes = std::move(_bytes)](const SMidiEvent& _ev)
+		{
+			const auto& s = _ev.sysex;
+
+			if (s.empty())
+				return ReplyMatch::None;
+
+			for (const auto& [index, value] : bytes)
+			{
+				if (index >= s.size() || s[index] != value)
+					return ReplyMatch::None;
+			}
+			return ReplyMatch::Complete;
+		};
 	}
 }

@@ -239,6 +239,10 @@ namespace jeLib
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
+		// the firmware answers an RQ1 a while later
+		if (auto matcher = State::createReplyMatcher(_ev.sysex))
+			expectReply(_ev.source, std::move(matcher));
+
 		// the master volume is applied here, everything goes to the board too: it consumes the panel frames on the
 		// emulation thread, see Je8086::addMidiEvent
 		m_frontPanel.receive(_ev.sysex);

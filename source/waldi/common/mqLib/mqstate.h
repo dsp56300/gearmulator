@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <utility>
 
 #include "mqmiditypes.h"
 
@@ -80,6 +81,10 @@ namespace mqLib
 		bool receive(Responses& _responses, const synthLib::SMidiEvent& _data, Origin _sender);
 		bool receive(Responses& _responses, const SysEx& _data, Origin _sender);
 		void createInitState();
+
+		// The edit buffers the state asked the firmware for since the last call, after a program change for example.
+		// Their dumps are for the state and the editor, see Device::stateReceive()
+		Responses takeOwnRequests() { return std::exchange(m_ownRequests, {}); }
 
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
@@ -195,8 +200,9 @@ namespace mqLib
 		void forwardToDevice(const SysEx& _data) const;
 
 		void requestGlobal() const;
-		void requestSingle(MidiBufferNum _buf, MidiSoundLocation _location) const;
-		void requestMulti(MidiBufferNum _buf, uint8_t _location) const;
+		void requestSingle(MidiBufferNum _buf, MidiSoundLocation _location);
+		void requestMulti(MidiBufferNum _buf, uint8_t _location);
+		void sendOwnRequest(SysEx&& _request);
 		void sendMulti(const std::vector<uint8_t>& _multiData) const;
 		void sendGlobalParameter(GlobalParameter _param, uint8_t _value);
 		void sendSysex(const std::initializer_list<uint8_t>& _data) const;
@@ -226,5 +232,7 @@ namespace mqLib
 
 		synthLib::SMidiEvent m_lastBankSelectMSB;
 		synthLib::SMidiEvent m_lastBankSelectLSB;
+
+		Responses m_ownRequests;
 	};
 }

@@ -96,6 +96,10 @@ namespace n2x
 			if(m_state.receive(_response, _ev))
 				return true;
 
+			// the firmware answers a single request a while later
+			if (auto matcher = State::createReplyMatcher(_ev.sysex))
+				expectReply(_ev.source, std::move(matcher));
+
 			m_hardware.sendMidi(_ev);
 		}
 		return true;

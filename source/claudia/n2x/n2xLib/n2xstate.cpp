@@ -595,6 +595,29 @@ namespace n2x
 		return _dump.size() == g_multiDumpSize || _dump.size() == g_multiDumpWithNameSize;
 	}
 
+	synthLib::ReplyMatcher State::createReplyMatcher(const synthLib::SysexBuffer& _request)
+	{
+		// f0 33 <device> 04 <bank> <program> f7
+		if (_request.size() != SysexIndex::IdxMsgSpec + 2 || _request[SysexIndex::IdxClavia] != SysexByte::IdClavia || _request[SysexIndex::IdxN2x] != SysexByte::IdN2X)
+			return {};
+
+		const auto bank = _request[SysexIndex::IdxMsgType];
+		if (bank < SysexByte::SingleRequestBankEditBuffer || bank > SysexByte::SingleRequestBankD)
+			return {};
+
+		const auto dumpBank = static_cast<uint8_t>(SysexByte::SingleDumpBankEditBuffer + bank - SysexByte::SingleRequestBankEditBuffer);
+		const auto program = _request[SysexIndex::IdxMsgSpec];
+
+		return [dumpBank, program](const synthLib::SMidiEvent& _ev)
+		{
+			const auto& s = _ev.sysex;
+
+			if (!isSingleDump(s) || s[SysexIndex::IdxMsgType] != dumpBank || s[SysexIndex::IdxMsgSpec] != program)
+				return synthLib::ReplyMatch::None;
+			return synthLib::ReplyMatch::Complete;
+		};
+	}
+
 	std::string State::extractPatchName(const synthLib::SysexBuffer& _dump)
 	{
 		if (!isDumpWithPatchName(_dump))

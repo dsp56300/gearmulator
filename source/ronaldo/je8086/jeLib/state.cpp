@@ -500,6 +500,27 @@ namespace jeLib
 		return _dump.size() == std::size(g_sysexHeader) + 1 + std::tuple_size_v<rLib::Storage::Address4> + dataSize + 2 /*checksum + eox*/;
 	}
 
+	synthLib::ReplyMatcher State::createReplyMatcher(const Dump& _request)
+	{
+		rLib::sysex::Rq1View rq1;
+		if (!rLib::sysex::parseRQ1(_request.data(), _request.size(), g_rolandModel, rq1))
+			return {};
+
+		const auto begin = rLib::sysex::fromDigits(rq1.address, g_rolandModel.addressSize);
+		const auto end = begin + rLib::sysex::fromDigits(rq1.size, g_rolandModel.addressSize);
+
+		// which block is the last one only the device knows, the request ends when no more come
+		return [begin, end](const synthLib::SMidiEvent& _ev)
+		{
+			rLib::sysex::Dt1View dt1;
+			if (!rLib::sysex::parseDT1(_ev.sysex.data(), _ev.sysex.size(), g_rolandModel, dt1))
+				return synthLib::ReplyMatch::None;
+
+			const auto address = rLib::sysex::fromDigits(dt1.address, g_rolandModel.addressSize);
+			return address >= begin && address < end ? synthLib::ReplyMatch::Partial : synthLib::ReplyMatch::None;
+		};
+	}
+
 	bool State::createSystemDump(synthLib::SMidiEvent& _result) const
 	{
 		auto adr = static_cast<uint32_t>(AddressArea::System);

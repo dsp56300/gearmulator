@@ -4,10 +4,18 @@
 
 #include "dsp56kBase/logging.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace synthLib
 {
+	namespace
+	{
+		// The time a firmware may take to start its answer or to send its next part. A JP-8000 answers an RQ1 about a
+		// second after a state load, with a DT1 per block 130 to 210 ms apart
+		constexpr float g_replyTimeoutSeconds = 3.0f;
+	}
+
 	Device::Device(const DeviceCreateParams& _params) : m_createParams(_params)  // NOLINT(modernize-pass-by-value) dll transition, do not mess with the input data
 	{
 	}
@@ -95,6 +103,8 @@ namespace synthLib
 
 		readMidiOut(_midiOut);
 
+		markExpectedReplies(_midiOut, _size);
+
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
@@ -103,6 +113,55 @@ namespace synthLib
 		m_midiOutParser.write(m_midiOutBytes);
 		m_midiOutBytes.clear();
 		m_midiOutParser.getEvents(_midiOut);
+	}
+
+	void Device::expectReply(const MidiEventSource _requester, ReplyMatcher _matcher)
+	{
+		m_expectedReplies.push_back({_requester, std::move(_matcher), getReplyTimeoutSamples()});
+	}
+
+	void Device::markExpectedReplies(std::vector<SMidiEvent>& _midiOut, const size_t _size)
+	{
+		if (m_expectedReplies.empty())
+			return;
+
+		for (auto& e : _midiOut)
+		{
+			// what the device answered in C++ is a reply already
+			if (e.sysex.empty() || e.replyTo != MidiEventSource::Unknown)
+				continue;
+
+			for (auto it = m_expectedReplies.begin(); it != m_expectedReplies.end(); ++it)
+			{
+				const auto match = it->matcher(e);
+
+				if (match == ReplyMatch::None)
+					continue;
+
+				e.replyTo = it->requester;
+
+				if (match == ReplyMatch::Complete)
+					m_expectedReplies.erase(it);
+				else
+					it->samplesLeft = getReplyTimeoutSamples();
+				break;
+			}
+		}
+
+		const auto samples = static_cast<uint32_t>(_size);
+
+		m_expectedReplies.erase(std::remove_if(m_expectedReplies.begin(), m_expectedReplies.end(), [samples](ExpectedReply& _r)
+		{
+			if (_r.samplesLeft <= samples)
+				return true;
+			_r.samplesLeft -= samples;
+			return false;
+		}), m_expectedReplies.end());
+	}
+
+	uint32_t Device::getReplyTimeoutSamples() const
+	{
+		return static_cast<uint32_t>(getSamplerate() * g_replyTimeoutSeconds);
 	}
 
 	const std::vector<SMidiEvent>& Device::arpeggiate(const std::vector<SMidiEvent>& _midiIn, const size_t _size)

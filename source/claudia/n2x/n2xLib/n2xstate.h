@@ -147,6 +147,10 @@ namespace n2x
 		static bool isSingleDump(const synthLib::SysexBuffer& _dump);
 		static bool isMultiDump(const synthLib::SysexBuffer& _dump);
 
+		// What the device sends for _request: the dump of the single it asks for, see synthLib::Device::expectReply().
+		// Empty if _request is no single request
+		static synthLib::ReplyMatcher createReplyMatcher(const synthLib::SysexBuffer& _request);
+
 		static std::string extractPatchName(const synthLib::SysexBuffer& _dump);
 		static bool isDumpWithPatchName(const synthLib::SysexBuffer& _dump);
 		static synthLib::SysexBuffer stripPatchName(const synthLib::SysexBuffer& _dump);

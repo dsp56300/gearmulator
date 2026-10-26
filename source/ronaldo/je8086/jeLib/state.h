@@ -75,6 +75,10 @@ namespace jeLib
 		// the System Parameter block as createSystemDump() makes it, its size tells the model
 		static bool isSystemDump(const Dump& _dump, bool _rack);
 
+		// What the device sends for RQ1 _request: a DT1 for each block it has in the requested range, see
+		// synthLib::Device::expectReply(). Empty if _request is no RQ1
+		static synthLib::ReplyMatcher createReplyMatcher(const Dump& _request);
+
 		bool createSystemDump(synthLib::SMidiEvent& _result) const;
 		bool createTempPerformanceDumps(std::vector<synthLib::SMidiEvent>& _results, PerformanceData _data, uint32_t _sizeRack, uint32_t _sizeKeyboard) const;
 		bool createTempPerformanceDumps(std::vector<synthLib::SMidiEvent>& _results) const;

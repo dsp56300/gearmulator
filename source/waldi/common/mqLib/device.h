@@ -35,7 +35,7 @@ namespace mqLib
 
 		void receiveMidiBytes(std::vector<uint8_t>& _bytes) override { m_mq.receiveMidi(_bytes); }
 		void sendMidiToSynth(const synthLib::SMidiEvent& _ev) override { m_mq.sendMidiEvent(_ev); }
-		bool stateReceive(wLib::Responses& _responses, const synthLib::SMidiEvent& _ev, const wLib::State::Origin _origin) override { return m_state.receive(_responses, _ev, _origin); }
+		bool stateReceive(wLib::Responses& _responses, const synthLib::SMidiEvent& _ev, wLib::State::Origin _origin) override;
 
 	private:
 		void sendLcd(std::vector<synthLib::SMidiEvent>& _dst);

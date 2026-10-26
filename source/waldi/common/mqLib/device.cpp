@@ -139,6 +139,17 @@ namespace mqLib
 		synthLib::fp::sendLedMask(_dst, leds);
 	}
 
+	bool Device::stateReceive(wLib::Responses& _responses, const synthLib::SMidiEvent& _ev, const wLib::State::Origin _origin)
+	{
+		const auto res = m_state.receive(_responses, _ev, _origin);
+
+		// nobody outside asked for what the state requests itself
+		for (const auto& request : m_state.takeOwnRequests())
+			expectDump(synthLib::MidiEventSource::Internal, request);
+
+		return res;
+	}
+
 	dsp56k::EsxiClock* Device::getDspEsxiClock() const
 	{
 		auto& mq = const_cast<MicroQ&>(m_mq);

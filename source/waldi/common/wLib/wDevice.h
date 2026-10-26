@@ -26,6 +26,9 @@ namespace wLib
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 
+		// the firmware answers dump request _request with the dump, a reply to _requester
+		void expectDump(synthLib::MidiEventSource _requester, const SysEx& _request);
+
 		// front panel frames from the editor, before the state cache or the firmware see them. The product handles
 		// its events, its answers and the frames it sends go to m_customSysexOut, ahead of the firmware's output
 		synthLib::FrontPanelTransport		m_frontPanel;

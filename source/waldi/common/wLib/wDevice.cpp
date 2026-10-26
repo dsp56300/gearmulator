@@ -1,7 +1,22 @@
 #include "wDevice.h"
 
+#include "wMidiTypes.h"
+
 namespace wLib
 {
+	namespace
+	{
+		// commands 00 to 0f ask for a dump, which has the command plus 10
+		constexpr uint8_t g_dumpCommand = 0x10;
+		constexpr uint8_t g_multiRequest = 0x01;
+
+		bool isDumpRequest(const SysEx& _sysex)
+		{
+			return _sysex.size() > IdxCommand + 1 && _sysex.front() == 0xf0 && _sysex.back() == 0xf7 &&
+				_sysex[IdxIdWaldorf] == IdWaldorf && _sysex[IdxCommand] < g_dumpCommand;
+		}
+	}
+
 	Device::Device(const synthLib::DeviceCreateParams& _params) : DspClockDevice(_params)
 	{
 	}
@@ -56,6 +71,10 @@ namespace wLib
 			std::swap(response, r.sysex);
 		}
 
+		// the cache could not answer, the firmware does
+		if (responses.empty() && isDumpRequest(_ev.sysex))
+			expectDump(_ev.source, _ev.sysex);
+
 		// do not forward to device if our cache was able to reply. It might have sent something to the device already on its own if a cache miss occured
 		if(res)
 			return true;
@@ -72,5 +91,24 @@ namespace wLib
 		}
 
 		return true;
+	}
+
+	void Device::expectDump(const synthLib::MidiEventSource _requester, const SysEx& _request)
+	{
+		const auto command = _request[IdxCommand];
+
+		// the dump has the buffer and location of the request, if it names them. There is one multi edit buffer, the
+		// location in its dump is not always that of the request.
+		// ponytail: a request for a whole bank (buffer 10) gets dumps with the bank's own buffer, which match nothing and
+		// go out as before. Only a librarian on a port asks for one, the editor never does
+		std::optional<uint8_t> buffer;
+		std::optional<uint8_t> location;
+
+		if (_request.size() > IdxBuffer + 1)
+			buffer = _request[IdxBuffer];
+		if (_request.size() > IdxLocation + 1 && command != g_multiRequest)
+			location = _request[IdxLocation];
+
+		expectReply(_requester, synthLib::expectBytes(getDumpHeader(_request[IdxIdMachine], static_cast<uint8_t>(command + g_dumpCommand), buffer, location)));
 	}
 }

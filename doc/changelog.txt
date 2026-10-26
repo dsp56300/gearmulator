@@ -148,6 +148,13 @@ OsTIrus:
         As in the firmware, switching Delay or Reverb off takes effect with the
         next patch, switching on at once.
 
+Vavra/Xenia:
+
+- [Fix] EMU-294 The sounds the editor reads from the emulator went to the MIDI
+        output selected in the MIDI settings as well, and Vavra sent its sound
+        there after a program change. They now stay inside the plugin, a
+        request that arrives at the MIDI input is still answered there.
+
 Vavra:
 
 - [Fix] With voice expansion turned on, playback could crash the plugin when the
@@ -193,10 +200,23 @@ JE8086:
         display and PERFORM/PATCH SELECT did not react meanwhile. A performance
         or patch that a newer click replaces is no longer sent.
 
+- [Fix] EMU-294 The system settings and the performance the editor reads from
+        the emulator went to the MIDI output selected in the MIDI settings as
+        well, whenever the plugin or a project was loaded or a patch was sent.
+        A JP-8000 or JP-8080 connected there took them over. They now stay
+        inside the plugin, a request that arrives at the MIDI input is still
+        answered there.
+
 NodalRed2x:
 
 - [Fix] BUG-10509 With enough voices playing, the voices of the second DSP cut in
         and out on the left channel.
+
+- [Fix] EMU-294 The four slots the editor reads from the emulator went to the
+        MIDI output selected in the MIDI settings as well, whenever the plugin
+        or a project was loaded or a patch was sent. They now stay inside the
+        plugin, a request that arrives at the MIDI input is still answered
+        there.
 
 Plugin Manager:
 
