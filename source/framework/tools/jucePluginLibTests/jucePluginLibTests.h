@@ -10,6 +10,7 @@ void testMcpDiscovery();
 int mcpDiscoveryChild(int _argc, char* _argv[]);	// -1 unless this process is one testMcpDiscovery started
 void testMcpPorts();
 void testMidiNotifier();
+void testMidiPorts();
 void testParameterDescriptions();
 void testPatchDb();
 void testPatchManager();

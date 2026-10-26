@@ -7,6 +7,7 @@ set(SOURCES
 	mcpDiscoveryTest.cpp
 	mcpPortTest.cpp
 	midiNotifierTest.cpp
+	midiPortsTest.cpp
 	parameterDescriptionsTest.cpp
 	patchDbTest.cpp
 	patchManagerTest.cpp

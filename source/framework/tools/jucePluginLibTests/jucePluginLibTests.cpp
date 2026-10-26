@@ -15,6 +15,7 @@ int main(int argc, char* argv[])
 		testMcpDiscovery();
 		testMcpPorts();
 		testMidiNotifier();
+		testMidiPorts();
 		testParameterDescriptions();
 		testPatchDb();
 		testPatchManager();

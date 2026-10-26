@@ -58,6 +58,18 @@ Framework:
         it is loaded. A project saved by an earlier version loads with nothing
         locked, as before.
 
+- [Fix] The MIDI ports chosen in the settings open again by themselves when
+        their device is plugged in again or comes back after a USB hiccup. A
+        port whose device is not connected stays selected, also in the project,
+        and opens once the device is there.
+
+- [Fix] Windows: a MIDI output whose device was not connected sent everything
+        to the Microsoft GS Wavetable Synth instead.
+
+- [Fix] A MIDI input that was selected once stayed open until the plugin was
+        unloaded, also after another one was selected. On Windows, selecting
+        it again after its device was plugged in again received nothing.
+
 - [Imp] DSPBridge: The interface between the plugins and DSPBridgeServer changed
         again in this version, and with it the bridge protocol version: update
         DSPBridgeServer together with the plugins. A server of 2.2.27 or older
