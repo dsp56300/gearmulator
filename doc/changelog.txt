@@ -58,6 +58,12 @@ Framework:
         it is loaded. A project saved by an earlier version loads with nothing
         locked, as before.
 
+- [Imp] DSPBridge: The interface between the plugins and DSPBridgeServer changed
+        again in this version, and with it the bridge protocol version: update
+        DSPBridgeServer together with the plugins. A server of 2.2.27 or older
+        does not work with the plugins of this version, and this server does
+        not work with plugins of 2.2.27 or older.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on
