@@ -75,6 +75,11 @@ namespace synthLib
 
 		bool enabled(const SMidiEvent& _event, const MidiEventSource _destination) const
 		{
+			// A device's reply goes back to whoever asked, and to the editor, which follows the device. A synth on the
+			// physical port would otherwise store the banks that the editor asked the emulator for
+			if (_event.replyTo != MidiEventSource::Unknown && _destination != _event.replyTo && _destination != MidiEventSource::Editor)
+				return false;
+
 			return enabled(_event.source, _destination, getEventType(_event));
 		}
 

@@ -33,7 +33,7 @@ namespace
 	bool same(const SMidiEvent& _a, const SMidiEvent& _b)
 	{
 		return _a.a == _b.a && _a.b == _b.b && _a.c == _b.c && _a.sysex == _b.sysex && _a.offset == _b.offset &&
-			_a.source == _b.source && _a.type == _b.type && sameTransport(_a.transport, _b.transport);
+			_a.source == _b.source && _a.replyTo == _b.replyTo && _a.type == _b.type && sameTransport(_a.transport, _b.transport);
 	}
 }
 
@@ -43,9 +43,11 @@ int main()
 
 	SMidiEvent note(MidiEventSource::Host, M_NOTEON | 3, 60, 100, 17);
 
-	SMidiEvent dump(MidiEventSource::Editor);
+	// the device's reply to a request of the editor, it has to come back as one
+	SMidiEvent dump(MidiEventSource::Device);
 	dump.sysex = {M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, M_ENDOFSYSEX};
 	dump.offset = 4;
+	dump.replyTo = MidiEventSource::Editor;
 
 	SMidiEvent transport(MidiEventSource::Internal);
 	transport.type = MidiEventType::HostTransport;
@@ -54,8 +56,8 @@ int main()
 
 	baseLib::BinaryStream stream;
 	bridgeLib::writeMidiEvent(stream, transport);
-	bridgeLib::writeMidiEvent(stream, note);
 	bridgeLib::writeMidiEvent(stream, dump);
+	bridgeLib::writeMidiEvent(stream, note);
 	stream.setReadPos(0);
 
 	// One event for all of them, as the receiver does it: nothing of one may stay in the next
@@ -65,11 +67,11 @@ int main()
 	EXPECT(same(received, transport));
 
 	bridgeLib::readMidiEvent(stream, received);
-	EXPECT(same(received, note));
-	EXPECT(received.type == MidiEventType::Midi);
+	EXPECT(same(received, dump));
 
 	bridgeLib::readMidiEvent(stream, received);
-	EXPECT(same(received, dump));
+	EXPECT(same(received, note));
+	EXPECT(received.type == MidiEventType::Midi);
 
 	std::puts("bridgeLib_test: all passed");
 	return 0;

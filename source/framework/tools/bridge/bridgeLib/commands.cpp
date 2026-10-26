@@ -195,6 +195,7 @@ namespace bridgeLib
 		_s.write(_ev.sysex);
 		_s.write(_ev.offset);
 		_s.write(static_cast<uint8_t>(_ev.source));
+		_s.write(static_cast<uint8_t>(_ev.replyTo));
 		_s.write(static_cast<uint8_t>(_ev.type));
 
 		if(_ev.type == synthLib::MidiEventType::HostTransport)
@@ -214,6 +215,7 @@ namespace bridgeLib
 		_s.read(_ev.sysex);
 		_s.read(_ev.offset);
 		_ev.source = static_cast<synthLib::MidiEventSource>(_s.read<uint8_t>());
+		_ev.replyTo = static_cast<synthLib::MidiEventSource>(_s.read<uint8_t>());
 		_ev.type = static_cast<synthLib::MidiEventType>(_s.read<uint8_t>());
 
 		// The receiver reuses one event, nothing of the last one may stay

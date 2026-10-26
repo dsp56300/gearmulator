@@ -77,7 +77,18 @@ namespace synthLib
 			m_midiTranslator.process(m_translatorOut, ev);
 
 			for(auto & e : m_translatorOut)
+			{
+				if (e.sysex.empty())
+				{
+					sendMidi(e, _midiOut);
+					continue;
+				}
+
+				// requests are SysEx, what a device answers to one right away is its reply
+				const auto first = _midiOut.size();
 				sendMidi(e, _midiOut);
+				markReplies(_midiOut, first, e.source);
+			}
 		}
 
 		processAudio(_inputs, _outputs, _size);

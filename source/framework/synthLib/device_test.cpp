@@ -5,6 +5,7 @@
 // on at least one device turned every "play" into a Program Change.
 #include "consoleTools.h"
 #include "device.h"
+#include "midiRoutingMatrix.h"
 #include "plugin.h"
 #include "baseLib/os.h"
 
@@ -89,6 +90,22 @@ namespace
 		{
 			const uint8_t cells[] = {'H', 'i'};
 			fp::sendLcdText(_midiOut, 2, 1, cells);
+		}
+	};
+
+	// Answers every SysEx right away, as a device does that keeps what is asked for in C++, and plays a note of its own
+	class ReplyingDevice final : public TestDevice
+	{
+	protected:
+		bool sendMidi(const SMidiEvent& _ev, std::vector<SMidiEvent>& _response) override
+		{
+			if (!_ev.sysex.empty())
+				_response.emplace_back(MidiEventSource::Device).sysex = {0xf0, 0x01, 0xf7};
+			return true;
+		}
+		void readMidiOut(std::vector<SMidiEvent>& _midiOut) override
+		{
+			_midiOut.emplace_back(MidiEventSource::Device, 0x90, 0x40, 0x7f);
 		}
 	};
 
@@ -226,6 +243,56 @@ namespace
 
 		expect(!device.m_heardOutput);
 	}
+
+	// A device's reply goes back to whoever asked and to the editor. A Virus on the physical port stored both RAM banks
+	// that the editor had asked the emulator for. What the device plays goes wherever the routing sends it
+	void testRepliesGoBackToWhoAsked()
+	{
+		ReplyingDevice device;
+
+		auto request = [](const MidiEventSource _source)
+		{
+			SMidiEvent ev(_source);
+			ev.sysex = {0xf0, 0x02, 0xf7};
+			return ev;
+		};
+
+		std::vector<SMidiEvent> midiOut;
+		float buffer[8] = {};
+		float* const ptr = buffer;
+		const TAudioInputs in = {ptr, ptr, nullptr, nullptr};
+		const TAudioOutputs out = {ptr, ptr};
+
+		device.process(in, out, 8, {request(MidiEventSource::Editor), request(MidiEventSource::Physical)}, midiOut);
+
+		expect(midiOut.size() == 3);
+		const auto& editorReply = midiOut[0];
+		const auto& physicalReply = midiOut[1];
+		const auto& note = midiOut[2];
+
+		expect(editorReply.replyTo == MidiEventSource::Editor);
+		expect(physicalReply.replyTo == MidiEventSource::Physical);
+		expect(note.replyTo == MidiEventSource::Unknown);
+
+		MidiRoutingMatrix matrix;
+		matrix.setEnabled(MidiEventSource::Device, MidiEventSource::Host, MidiRoutingMatrix::EventType::All, true);
+
+		expect(matrix.enabled(editorReply, MidiEventSource::Editor));
+		expect(!matrix.enabled(editorReply, MidiEventSource::Physical));
+		expect(!matrix.enabled(editorReply, MidiEventSource::Host));
+
+		// a librarian on the physical port gets its answer, the editor sees it too
+		expect(matrix.enabled(physicalReply, MidiEventSource::Physical));
+		expect(matrix.enabled(physicalReply, MidiEventSource::Editor));
+		expect(!matrix.enabled(physicalReply, MidiEventSource::Host));
+
+		expect(matrix.enabled(note, MidiEventSource::Physical));
+		expect(matrix.enabled(note, MidiEventSource::Host));
+
+		// the routing still decides whether a reply may go there at all
+		matrix.setEnabled(MidiEventSource::Device, MidiEventSource::Physical, MidiRoutingMatrix::EventType::SysEx, false);
+		expect(!matrix.enabled(physicalReply, MidiEventSource::Physical));
+	}
 } // namespace
 
 int main()
@@ -237,5 +304,6 @@ int main()
 	testDeviceRunner();
 	testChunkedSysexReachesDeviceOnce();
 	testMissingInputDoesNotHearMissingOutput();
+	testRepliesGoBackToWhoAsked();
 	return 0;
 }

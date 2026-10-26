@@ -1388,9 +1388,16 @@ void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 			const auto& input = pending[count];
 
 			if (input.ev.sysex.empty())
+			{
 				processMIDI(input.ev, input.fpState);
+			}
 			else
+			{
+				// a request answered late is still a reply, like those synthLib::Device::process() marks
+				const auto first = _midiOut.size();
 				sendSysex(input.ev.sysex, _midiOut, input.ev.source);
+				markReplies(_midiOut, first, input.ev.source);
+			}
 		}
 
 		m_pendingInput.insert(m_pendingInput.begin(), std::make_move_iterator(pending.begin() + static_cast<ptrdiff_t>(count)), std::make_move_iterator(pending.end()));

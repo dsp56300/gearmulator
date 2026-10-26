@@ -96,6 +96,14 @@ Osirus/OsTIrus:
         dragging them out, had wrong checksums, so a hardware Virus ignored
         them.
 
+- [Fix] EMU-294 The plugin sent what its editor reads from the emulator to the
+        MIDI output selected in the MIDI settings as well, for example all RAM
+        banks and the global settings whenever the plugin or a project was
+        loaded. A Virus connected there stored them over its own. These answers
+        now stay inside the plugin. What the emulator plays, arpeggiator notes
+        for example, still goes to the MIDI output, and a request that arrives
+        at the MIDI input is still answered there.
+
 Osirus:
 
 - [Imp] BUG-10183 Galaxpel skin: every part on the Multi page has Mute and Solo

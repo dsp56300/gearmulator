@@ -287,6 +287,9 @@ namespace synthLib
 		SysexBuffer sysex;
 		uint32_t offset;
 		MidiEventSource source;
+		// A device's reply to a request carries the source of the request: the reply goes back there and to the editor
+		// only, see MidiRoutingMatrix::enabled() and markReplies(). Unknown for anything that is not a reply
+		MidiEventSource replyTo = MidiEventSource::Unknown;
 		MidiEventType type = MidiEventType::Midi;
 		uint32_t transportGeneration = 0;
 		// File-player SysEx may be discarded before transmission on a song change.
@@ -305,7 +308,7 @@ namespace synthLib
 		}
 
 		SMidiEvent(const SMidiEvent& _e)
-			: a(_e.a), b(_e.b), c(_e.c), sysex(_e.sysex), offset(_e.offset), source(_e.source), type(_e.type)
+			: a(_e.a), b(_e.b), c(_e.c), sysex(_e.sysex), offset(_e.offset), source(_e.source), replyTo(_e.replyTo), type(_e.type)
 			, transportGeneration(_e.transportGeneration), cancelOnTransportChange(_e.cancelOnTransportChange), port(_e.port)
 			, lead(_e.lead), transport(_e.transport)
 		{
@@ -313,7 +316,7 @@ namespace synthLib
 		}
 
 		SMidiEvent(SMidiEvent&& _e) noexcept
-			: a(_e.a), b(_e.b), c(_e.c), sysex(std::move(_e.sysex)), offset(_e.offset), source(_e.source), type(_e.type)
+			: a(_e.a), b(_e.b), c(_e.c), sysex(std::move(_e.sysex)), offset(_e.offset), source(_e.source), replyTo(_e.replyTo), type(_e.type)
 			, transportGeneration(_e.transportGeneration), cancelOnTransportChange(_e.cancelOnTransportChange), port(_e.port)
 			, lead(_e.lead), transport(_e.transport)
 		{
@@ -330,6 +333,7 @@ namespace synthLib
 			sysex = _e.sysex;
 			offset = _e.offset;
 			source = _e.source;
+			replyTo = _e.replyTo;
 			type = _e.type;
 			transportGeneration = _e.transportGeneration;
 			cancelOnTransportChange = _e.cancelOnTransportChange;
@@ -348,6 +352,7 @@ namespace synthLib
 			sysex = std::move(_e.sysex);
 			offset = _e.offset;
 			source = _e.source;
+			replyTo = _e.replyTo;
 			type = _e.type;
 			transportGeneration = _e.transportGeneration;
 			cancelOnTransportChange = _e.cancelOnTransportChange;
@@ -381,5 +386,12 @@ namespace synthLib
 		_event.a = _data[0];
 		_event.b = _size > 1 ? _data[1] : 0;
 		_event.c = _size > 2 ? _data[2] : 0;
+	}
+
+	// Marks the events from _first on as a device's reply to a request from _requester, see SMidiEvent::replyTo
+	inline void markReplies(std::vector<SMidiEvent>& _events, const size_t _first, const MidiEventSource _requester)
+	{
+		for (auto i = _first; i < _events.size(); ++i)
+			_events[i].replyTo = _requester;
 	}
 }
