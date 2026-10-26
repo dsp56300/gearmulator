@@ -54,6 +54,10 @@ Framework:
 - [Fix] BUG-10441 A skin that uses CSS filters no longer floods the log with
         "Could not compile filter" on renderers without filter support.
 
+- [Fix] Without a configured refresh rate limit, the OpenGL renderer draws the
+        user interface at 30 Hz again, 60 Hz on NVIDIA and AMD graphics and on
+        macOS, instead of as often as the display refreshes.
+
 - [Fix] BUG-10180 Lock Regions are saved with the project and locked again when
         it is loaded. A project saved by an earlier version loads with nothing
         locked, as before.

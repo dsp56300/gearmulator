@@ -268,7 +268,8 @@ namespace juceRmlUi
 		double m_time = 0;
 		double m_lastFrameEventTime = 0;
 		float m_fps = 0;
-		float m_targetFPS = 0;
+		// 0 = no limit. newOpenGLContextCreated() sets the default on the GL thread, the message thread reads it
+		std::atomic<float> m_targetFPS{0};
 
 		uint32_t m_pendingUpdates = 0;
 		std::atomic<bool> m_renderDone;

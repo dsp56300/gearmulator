@@ -280,7 +280,7 @@ namespace juceRmlUi
 
 		m_openGLContext->setSwapInterval(1);
 
-		bool haveCustomFPS = m_targetFPS >= 0;
+		bool haveCustomFPS = m_targetFPS > 0;
 
 		if (!haveCustomFPS)
 		{
