@@ -92,6 +92,10 @@ Osirus/OsTIrus:
 - [Fix] BUG-10180 With regions locked, loading a project or a host preset kept
         values from before the load in the parts that had locked regions.
 
+- [Fix] Singles and multis exported from the Patch Manager, to a file or by
+        dragging them out, had wrong checksums, so a hardware Virus ignored
+        them.
+
 Osirus:
 
 - [Imp] BUG-10183 Galaxpel skin: every part on the Multi page has Mute and Solo

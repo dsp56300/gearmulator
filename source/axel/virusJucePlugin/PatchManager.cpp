@@ -617,10 +617,10 @@ namespace genericVirusUI
 		result[249 + 11] = val0;
 		result[249 + 12] = val1;
 
-		result[265] = virusLib::Microcontroller::calcChecksum(result, 267 - 2);
+		result[265] = virusLib::Microcontroller::calcChecksum(result, 5, 265);
 
 		if (result.size() > 267)
-			result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, result.size() - 2);
+			result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, 5, result.size() - 2);
 
 		return result;
 	}
@@ -650,11 +650,8 @@ namespace genericVirusUI
 			result[7] = static_cast<uint8_t>(result[7] + bankOffset);
 		}
 
-		// Recalculate trailing checksum. For TI-family multis there may be an
-		// intermediate checksum too, but we only changed name+bank+program which
-		// live in the ABC portion — the trailing checksum covers the full
-		// payload so recomputing it is sufficient.
-		result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, result.size() - 2);
+		// A multi is 256 bytes on every model, TI included, so its only checksum is the trailing one
+		result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, 5, result.size() - 2);
 
 		return result;
 	}
