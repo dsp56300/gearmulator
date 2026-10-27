@@ -60,6 +60,10 @@ namespace virusLib
 
 		DspSingle& getDSP2() { return m_dsp2; }
 
+		// A busy DSP hands notes to the other one, which plays them late. Makes the DSP play every note itself
+		// (BUG-10510)
+		static bool disableNoteHandover(DspSingle& _dsp);
+
 	private:
 		// The OS of each DSP talks to the other one in the second slot of the ESAI_1 frames: a marker once per ring of
 		// 256 samples, then per block its clock, load and parts, and commands such as a note it hands over because it

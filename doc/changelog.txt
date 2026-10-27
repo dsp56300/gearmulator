@@ -148,11 +148,11 @@ OsTIrus:
 - [Fix] A changed Arp Mode was lost when the patch was loaded again, for example
         with the project: the patch played the arpeggiator mode it had before.
 
-- [Imp] BUG-10510 The arpeggiator plays its notes ahead, as the Virus TI's own
-        arpeggiator does, so that they keep time with a patch that keeps a DSP
-        busy: the TI hands notes to its second DSP then. Notes played by the
-        host, such as an arpeggio of a piano roll, come late on that DSP, as on
-        the hardware.
+- [Fix] BUG-10510 Notes keep time again with a patch that keeps a DSP busy:
+        since 2.2.27 the TI handed notes to its second DSP then, as the
+        hardware does, and that DSP played them about 17 ms late. Each DSP
+        plays its notes itself now, as up to 2.2.25, so such a patch has the
+        voices of one DSP.
 
 - [Imp] #216 TrancyTI skin: knobs of bipolar parameters, such as Key Follow,
         the LFO amounts or Panorama, light their value ring from the centre to

@@ -1,6 +1,10 @@
 #include "dspMultiTI.h"
 
+#include <iterator>
+
 #include "dsp56kBase/logging.h"
+
+#include "dsp56kEmu/dsp.h"
 
 namespace virusLib
 {
@@ -153,6 +157,40 @@ namespace virusLib
 
 		DspSingle::stopDSPThread();
 		m_dsp2.stopDSPThread();
+	}
+
+	bool DspMultiTI::disableNoteHandover(DspSingle& _dsp)
+	{
+		// The OS hands a note-on to the other DSP when its load is above $280000 and above the load the other DSP
+		// reported, (r5) plays it here: move #$28,x0 / cmp x0,a x:>otherLoad,x0 / jle (r5) / cmp x0,a / jle (r5),
+		// at P:$053cfe in TI and TI2 OS 5.0.7 and 5.1.7. The other DSP starts the note once it arrived over ESAI_1,
+		// about 11 ms late on the chip, so the notes of the host jitter with a patch that keeps a DSP busy. Each DSP
+		// plays its notes itself, as before the DSPs were connected (EMU-240): the second jle becomes a jmp
+		constexpr dsp56k::TWord sig[] = {0x242800, 0x44f045, 0, 0x0ae5af, 0x200045, 0x0ae5af};
+		constexpr dsp56k::TWord jmpR5 = 0x0ae580;
+
+		auto& mem = _dsp.getMemory();
+		const auto* p = mem.getMemAreaPtr(dsp56k::MemArea_P);
+
+		for(dsp56k::TWord i=0; i + std::size(sig) <= mem.sizeP(); ++i)
+		{
+			if(p[i] != sig[0] || p[i+1] != sig[1] || p[i+3] != sig[3] || p[i+4] != sig[4] || p[i+5] != sig[5])
+				continue;
+
+			const auto addr = i + 5;
+
+			// the JIT may run that code right now
+			_dsp.runOnDspThread([&dsp = _dsp.getDSP(), addr]
+			{
+				dsp.memWriteP(addr, jmpR5);
+			});
+
+			LOG("Note handover to the other DSP disabled at P:$" << HEX(addr));
+			return true;
+		}
+
+		LOG("Note handover not found in this OS, a busy DSP keeps handing notes to the other one");
+		return false;
 	}
 
 	void DspMultiTI::connect(DspSingle& _dsp, ControlLink& _in, ControlLink& _out)

@@ -73,6 +73,13 @@ namespace virusLib
 		// as we do not connect them
 		m_midiTimestamps = m_rom.isTIFamily() && m_mc->enableMidiTimestamps();
 
+		// a busy TI DSP hands notes to the other one, which plays them late (BUG-10510)
+		if(m_dsp2)
+		{
+			DspMultiTI::disableNoteHandover(*m_dsp);
+			DspMultiTI::disableNoteHandover(*m_dsp2);
+		}
+
 		// the OS loses what does not fit into its input rings, send it only as much as they hold (EMU-239)
 		m_mc->enableHdi08FlowControl();
 
