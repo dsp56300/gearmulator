@@ -40,11 +40,13 @@ void Ports::reset() {
 u8 Ports::read_dr(unsigned port) const {
   const P& p = p_[idx(port)];
   if (cfg_.model == ChipModel::H8_532) {
-    // Expanded modes: ports 1 and 2 are the address bus, port 3 the data bus.
-    // Port 8 is input only.  (H8/532 hardware manual, section 8.)
+    // Expanded modes: port 2 reads its latch, port 3 is the data bus. Port 1 is
+    // general I/O whose pins double as bus control and IRQ0/IRQ1 (P1CR), so its
+    // input pins read as pins. Port 8 is input only.  (H8/532 hardware manual,
+    // section 8.)
     const bool expanded = cfg_.mode != 7;
     switch (port) {
-      case 1: case 2: if (expanded) return p.dr; break;
+      case 2: if (expanded) return p.dr; break;
       case 3: if (expanded) return 0xFF; break;
       case 8: return p.pins;
       default: break;

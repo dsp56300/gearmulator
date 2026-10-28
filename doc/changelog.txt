@@ -299,6 +299,9 @@ Plugin Manager:
         the page mode and refresh of their DRAM and, on the MIIG5, the
         instruction cache of its CPU.
 
+- [Fix] SC-55 family: the CPU read back what it last wrote to port 1 instead
+        of the levels of its input pins.
+
 2.2.27:
 
 Framework:
