@@ -80,6 +80,10 @@ Framework:
         does not work with the plugins of this version, and this server does
         not work with plugins of 2.2.27 or older.
 
+- [Fix] The latency reported to the host could be a sample short: the
+        emulator's own latency was cut down to whole samples before the rest
+        was added. It is now rounded once.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

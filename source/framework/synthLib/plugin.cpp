@@ -348,8 +348,8 @@ namespace synthLib
 		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize * m_extraLatencyBlocks) * m_device->getSamplerate() * m_hostSamplerateInv));
 		m_device->setExtraLatencySamples(latency);
 
-		m_deviceLatencyMidiToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyMidiToOutput()) * m_hostSamplerate / m_device->getSamplerate());
-		m_deviceLatencyInputToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyInputToOutput()) * m_hostSamplerate / m_device->getSamplerate());
+		m_deviceLatencyMidiToOutput = static_cast<float>(m_device->getInternalLatencyMidiToOutput()) * m_hostSamplerate / m_device->getSamplerate();
+		m_deviceLatencyInputToOutput = static_cast<float>(m_device->getInternalLatencyInputToOutput()) * m_hostSamplerate / m_device->getSamplerate();
 
 		updateLatencies();
 	}
@@ -360,8 +360,10 @@ namespace synthLib
 		const auto out = m_resampler.getOutputLatency();
 		const auto in = m_resampler.getInputLatency();
 
-		m_latencyMidiToOutput.store(blocks + m_deviceLatencyMidiToOutput + out, std::memory_order_relaxed);
-		m_latencyInputToOutput.store(blocks + m_deviceLatencyInputToOutput + out + in, std::memory_order_relaxed);
+		const auto round = [](const float _samples) { return static_cast<uint32_t>(std::lround(_samples)); };
+
+		m_latencyMidiToOutput.store(blocks + round(m_deviceLatencyMidiToOutput + out), std::memory_order_relaxed);
+		m_latencyInputToOutput.store(blocks + round(m_deviceLatencyInputToOutput + out + in), std::memory_order_relaxed);
 	}
 
 	void Plugin::processMidiInEvents()
