@@ -189,7 +189,7 @@ namespace xpLib
 					}
 					if ((_voice.pitchRamp_1700 & rampHold) == 0 && tickDue(_voice.pitchRamp_1700, slowCounter))
 					{
-						const auto parity = static_cast<uint8_t>((slowCounter ^ 1) & 1);
+						const auto parity = static_cast<uint8_t>((rampServiceCount(_voice.pitchRamp_1700, slowCounter) ^ 1) & 1);
 						if (linear)
 							stepLinearRamp(_voice.pitchCurrent_1b00, target, _voice.pitchStep_2400, parity);
 						else
@@ -239,7 +239,7 @@ namespace xpLib
 					}
 					if ((_voice.tvfFRamp_1800 & rampHold) == 0 && tickDue(_voice.tvfFRamp_1800, slowCounter))
 					{
-						const auto parity = static_cast<uint8_t>((slowCounter ^ 1) & 1);
+						const auto parity = static_cast<uint8_t>((rampServiceCount(_voice.tvfFRamp_1800, slowCounter) ^ 1) & 1);
 						if (linear)
 							stepLinearRamp(_voice.tvfFCurrent_1c00, target, _voice.tvfFStep_2500, parity);
 						else

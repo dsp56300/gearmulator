@@ -141,6 +141,24 @@ namespace xpLib::xpInternal
 		}
 	}
 
+	// The service count of a slow ramp: the slow counter shifted by its interval, so its low bit toggles once per
+	// service at every interval. Measured on the SC-88 XP: a linear pitch ramp at interval 1 steps B53, B52, B53,
+	// the half-count rounding alternating per service, where the clock bit alone does not change between services.
+	inline uint64_t rampServiceCount(const uint32_t _control, const uint64_t _slowCounter)
+	{
+		switch ((_control & rampIntervalMask) >> 12)
+		{
+		case 0:
+			return _slowCounter;
+		case 1:
+			return _slowCounter >> 3;
+		case 2:
+			return _slowCounter >> 5;
+		default:
+			return _slowCounter >> 7;
+		}
+	}
+
 	inline uint32_t calculateLinearRampStep(const uint32_t _current, const uint32_t _target, const uint32_t _control)
 	{
 		const auto difference = static_cast<int32_t>(_target) - static_cast<int32_t>(_current);
