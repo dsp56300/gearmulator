@@ -8,6 +8,10 @@
 namespace xpLib
 {
 	using namespace xpInternal;
+	static bool voiceLoopAtOrBeforeEnd(const XP::VoiceState& _voice)
+	{
+		return (_voice.sampleLoop_0200 & voiceAddressMask) <= (_voice.sampleEnd_0300 & voiceAddressMask);
+	}
 	XP::VoiceStepResult XP::stepVoiceSource(const size_t _voiceIndex, VoiceState& _voice)
 	{
 		raiseVoiceMuteEvent(_voiceIndex, _voice);
@@ -75,6 +79,15 @@ namespace xpLib
 							_voice.waveCircularBuffer_0800[i] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
 							const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
 							refreshExponentCacheAfterAdvance(_voice, looped);
+							// Measured on the SC-88 XP: a pair cut by the wrap ends the preload after its first cell.
+							if (looped && voiceUses16BitWaveBus(_voice) && !reverse && voiceLoopAtOrBeforeEnd(_voice) && (i & 1) == 0)
+							{
+								// the cut pair's second cell is still written, from the loop point, but not counted
+								if (i + 1 < _voice.waveCircularBuffer_0800.size())
+									_voice.waveCircularBuffer_0800[i + 1] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
+								preloadCount = i + 1;
+								break;
+							}
 						}
 					}
 					_voice.waveFetchState_0400 =
@@ -292,7 +305,19 @@ namespace xpLib
 		_voice.waveCircularBuffer_0800[cell] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
 		auto looped = advanceVoiceAddress(_voiceIndex, _voice);
 		refreshExponentCacheAfterAdvance(_voice, looped);
-		_voice.waveCircularBuffer_0800[(cell + 1) & 7] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
+		if (looped && voiceLoopAtOrBeforeEnd(_voice))
+		{
+			// Measured on the SC-88 XP: the pair that reaches the end produces only its first cell; the pointer
+			// moves by one and the next pair starts aligned at the loop point.
+			_voice.waveFetchState_0400 = (static_cast<uint32_t>((pointer + 1) & 0x0f) << 16) | (_voice.waveFetchState_0400 & 0xffff);
+			return;
+		}
+		// Measured on the SC-88 XP: with the loop point past the end, the end word is fetched whole but its sample
+		// past the end repeats the end sample.
+		const auto pastEnd = !voiceLoopAtOrBeforeEnd(_voice) && voiceUses16BitWaveBus(_voice) &&
+							 ((_voice.sampleCurrent_0100 & voiceAddressMask) == ((_voice.sampleEnd_0300 & voiceAddressMask) | 1));
+		_voice.waveCircularBuffer_0800[(cell + 1) & 7] =
+			pastEnd ? _voice.waveCircularBuffer_0800[cell] : readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
 		looped = advanceVoiceAddress(_voiceIndex, _voice);
 		refreshExponentCacheAfterAdvance(_voice, looped);
 
@@ -433,7 +458,14 @@ namespace xpLib
 
 		const auto directionState = (_voice.waveControl_0000 & WaveControl::directionState) != 0;
 		const auto boundary = directionState ? _voice.sampleLoop_0200 : _voice.sampleEnd_0300;
-		if ((_voice.sampleCurrent_0100 & voiceAddressMask) == (boundary & voiceAddressMask))
+		// Measured on the SC-88 XP: with the loop point past the end, the end word is consumed whole (both cells)
+		// before the jump; with the loop at or before the end, the wrap is at the end cell itself.
+		const auto wholeEndWord = voiceUses16BitWaveBus(_voice) && !reverse && !directionState && !voiceLoopAtOrBeforeEnd(_voice);
+		const auto atBoundary = wholeEndWord
+			? (((_voice.sampleCurrent_0100 | 1) & voiceAddressMask) == ((boundary | 1) & voiceAddressMask) &&
+			   (_voice.sampleCurrent_0100 & 1) != 0)
+			: ((_voice.sampleCurrent_0100 & voiceAddressMask) == (boundary & voiceAddressMask));
+		if (atBoundary)
 		{
 			if ((_voice.waveControl_0000 & WaveControl::alternateLoop) != 0)
 			{
