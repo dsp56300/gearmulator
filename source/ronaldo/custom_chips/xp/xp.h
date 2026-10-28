@@ -317,6 +317,7 @@ namespace xpLib
 		void raiseVoiceLoopMarkerEvent(size_t _voiceIndex, VoiceState& _voice);
 		bool voiceAddressRunsReverse(const VoiceState& _voice) const;
 		bool voiceUses16BitWaveBus(const VoiceState& _voice) const;
+		size_t preloadForwardLoopWords(size_t _voiceIndex, VoiceState& _voice, size_t _maxCells);
 		uint16_t encodeVoiceSample(const VoiceState& _voice, uint8_t _mantissa, uint8_t _exponent) const;
 		int32_t decodeVoiceDelta(const VoiceState& _voice, uint16_t _encoded) const;
 		int32_t interpolateVoice(const VoiceState& _voice, uint32_t _phase) const;

@@ -53,11 +53,22 @@ namespace xpLib
 				{
 					// One or two exponent-byte pairs plus at most eight mantissa reads fit the 12-cycle voice slot.
 					_voice.waveFetchState_0400 = readExponentCache(_voice, _voice.sampleCurrent_0100);
-					for (size_t i = 0; i < preloadCount; ++i)
+					const auto start = _voice.sampleCurrent_0100 & voiceAddressMask;
+					const auto loop = _voice.sampleLoop_0200 & voiceAddressMask;
+					const auto end = _voice.sampleEnd_0300 & voiceAddressMask;
+					// A loop point past the end replays the end word first; a normal loop, at or
+					// before the end, preloads the plain sequence.
+					if (voiceUses16BitWaveBus(_voice) && !reverse && (_voice.waveControl_0000 & WaveControl::alternateLoop) == 0 &&
+						loop > end && start <= end)
+						preloadCount = preloadForwardLoopWords(_voiceIndex, _voice, preloadCount);
+					else
 					{
-						_voice.waveCircularBuffer_0800[i] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-						const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
-						refreshExponentCacheAfterAdvance(_voice, looped);
+						for (size_t i = 0; i < preloadCount; ++i)
+						{
+							_voice.waveCircularBuffer_0800[i] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
+							const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
+							refreshExponentCacheAfterAdvance(_voice, looped);
+						}
 					}
 					_voice.waveFetchState_0400 =
 						(static_cast<uint32_t>(preloadCount) << 16) | (_voice.waveFetchState_0400 & 0xffff);
@@ -192,6 +203,59 @@ namespace xpLib
 	{
 		const auto chipSelect = static_cast<size_t>((_voice.waveControl_0000 >> 4) & 7);
 		return (m_state.waveRomConfig[chipSelect] & 1) != 0;
+	}
+
+	size_t XP::preloadForwardLoopWords(const size_t _voiceIndex, VoiceState& _voice, const size_t _maxCells)
+	{
+		// The 16-bit preload with a loop point past the end is four word fetches. The word entered
+		// (at the start, or after the jump to the loop point) gives the cells from the pointer on, later words
+		// whole, and the pointer moves on by two. A word holding the end is fetched once more, its samples past
+		// the end clamped to the end sample, before the jump. Steady-state playback does not repeat the end word.
+		const auto loop = _voice.sampleLoop_0200 & voiceAddressMask;
+		const auto end = _voice.sampleEnd_0300 & voiceAddressMask;
+		auto pointer = _voice.sampleCurrent_0100 & voiceAddressMask;
+		auto block = pointer >> 6;
+		size_t cells = 0;
+		bool entry = true;
+		bool replay = false;
+		uint32_t replayBase = 0;
+		for (unsigned word = 0; word < 4 && cells < _maxCells; ++word)
+		{
+			const auto base = replay ? replayBase : pointer & ~uint32_t{1};
+			const auto holdsEnd = base <= end && end <= base + 1;
+			for (auto address = entry ? pointer : base; address <= base + 1 && cells < _maxCells; ++address)
+			{
+				const auto read = holdsEnd ? std::min(address, end) : address;
+				if ((read >> 6) != block)
+				{
+					// the exponent cache follows the 64-byte block being read
+					block = read >> 6;
+					_voice.sampleCurrent_0100 = read;
+					refreshExponentCacheAfterAdvance(_voice, true);
+				}
+				if (read >= loop)
+					raiseVoiceLoopMarkerEvent(_voiceIndex, _voice);
+				_voice.waveCircularBuffer_0800[cells++] = readVoiceSampleFromCache(_voice, read);
+			}
+			entry = false;
+			if (replay)
+			{
+				replay = false;
+				pointer = loop;
+				entry = true;
+			}
+			else if (holdsEnd)
+			{
+				replay = true;
+				replayBase = base;
+			}
+			else
+				pointer += 2;
+		}
+		_voice.sampleCurrent_0100 = pointer;
+		if ((pointer >> 6) != block)
+			refreshExponentCacheAfterAdvance(_voice, true);
+		return cells;
 	}
 
 	void XP::refillVoiceCell(const size_t _voiceIndex, VoiceState& _voice)

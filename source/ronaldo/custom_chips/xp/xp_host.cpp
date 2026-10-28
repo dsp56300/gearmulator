@@ -348,7 +348,17 @@ namespace xpLib
 
 		if (const auto reg = findVoiceWideRegister(_address); reg.value != nullptr)
 		{
+			// A running producer keeps its live marker (bit 7) and the first loop-marker stage (bit 17)
+			// through a host write of wave control, unless the write halts the wave engine or requests a
+			// mute.
+			const bool waveControl = (_address & 0xff02) == (Address::waveControl_0000 | 2);
+			auto& voice = m_state.voices[static_cast<size_t>(_address & 0x00ff) / voiceWideStride];
+			const auto before = voice.waveControl_0000;
 			writeWide(reg, _address, _value);
+			if (waveControl && voice.runtimeCache.runtimePhase == VoiceRuntimePhaseCache::running &&
+				(voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::waveEngineHalt)) == 0)
+				voice.waveControl_0000 |=
+					before & (WaveControl::fceDpcmExponent0OrProducerLive | WaveControl::loopMarkerFirstStage);
 			if ((_address & 0xff02) == (Address::ampRamp_1a00 | 2))
 			{
 				const auto voiceIndex = static_cast<size_t>(_address & 0x00ff) / voiceWideStride;

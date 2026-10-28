@@ -341,6 +341,11 @@ Plugin Manager:
 - [Fix] SC-8850: the text on the display was laid out with the visible line
         width instead of the line pitch the firmware sets.
 
+- [Imp] More accurate sound generation on all models with the XP chip, the
+        SC-88 series, SC-8820, SC-8850, NU-10B and MIIG5: envelope steps,
+        volume smoothing, effect sends, voice mutes and samples that loop
+        past their end.
+
 2.2.27:
 
 Framework:

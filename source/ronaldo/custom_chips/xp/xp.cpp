@@ -182,15 +182,14 @@ namespace xpLib
 					if (pending || _voice.pitchCurrent_1b00 != target)
 						_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
 					const auto linear = (_voice.pitchRamp_1700 & rampCurveMask) == 0x04000;
-					if (pending)
+					// Only a linear ramp acknowledges its destination and takes its step, at the first service
+					// after the write, held or not. Other curves leave it pending until they turn linear.
+					if (pending && linear)
 					{
 						_voice.pitchDestination_1200 |= rampAcknowledge;
-						if (linear)
-						{
-							_voice.pitchStep_2400 =
-								calculateLinearRampStep(_voice.pitchCurrent_1b00, target, _voice.pitchRamp_1700);
-							break;
-						}
+						_voice.pitchStep_2400 =
+							calculateLinearRampStep(_voice.pitchCurrent_1b00, target, _voice.pitchRamp_1700);
+						break;
 					}
 					if ((_voice.pitchRamp_1700 & rampHold) == 0 && tickDue(_voice.pitchRamp_1700, slowCounter))
 					{
@@ -206,9 +205,8 @@ namespace xpLib
 				}
 			case 0: // Amp modulation
 				{
+					// Amp-mod and TVF-Q never acknowledge their destination, held or not, in any curve.
 					const auto target = _voice.ampModDestination_1400 & ~rampAcknowledge;
-					if (destinationPending(_voice.ampModDestination_1400))
-						_voice.ampModDestination_1400 |= rampAcknowledge;
 					if ((_voice.ampModRamp_1900 & rampHold) == 0 && tickDue(_voice.ampModRamp_1900, slowCounter))
 					{
 						stepLogRamp(_voice.ampModCurrent_1d00, target, _voice.ampModRamp_1900, 1,
@@ -221,8 +219,6 @@ namespace xpLib
 			case 2: // TVF-Q
 				{
 					const auto target = ((_voice.tvfQDestination_1100 & ~rampAcknowledge) << 2) & rampScratchMask;
-					if (destinationPending(_voice.tvfQDestination_1100))
-						_voice.tvfQDestination_1100 |= rampAcknowledge;
 					if ((_voice.tvfQRamp_1600 & rampHold) == 0 && tickDue(_voice.tvfQRamp_1600, slowCounter))
 					{
 						stepLogRamp(_voice.tvfQCurrent_2100, target, _voice.tvfQRamp_1600, 4, 0);
@@ -238,15 +234,12 @@ namespace xpLib
 					if (pending || _voice.tvfFCurrent_1c00 != target)
 						_voice.tvfFCoefficient_2200 = (decodePitch(_voice.tvfFCurrent_1c00) << 2) & rampScratchMask;
 					const auto linear = (_voice.tvfFRamp_1800 & rampCurveMask) == 0x04000;
-					if (pending)
+					if (pending && linear)
 					{
 						_voice.tvfFDestination_1300 |= rampAcknowledge;
-						if (linear)
-						{
-							_voice.tvfFStep_2500 =
-								calculateLinearRampStep(_voice.tvfFCurrent_1c00, target, _voice.tvfFRamp_1800);
-							break;
-						}
+						_voice.tvfFStep_2500 =
+							calculateLinearRampStep(_voice.tvfFCurrent_1c00, target, _voice.tvfFRamp_1800);
+						break;
 					}
 					if ((_voice.tvfFRamp_1800 & rampHold) == 0 && tickDue(_voice.tvfFRamp_1800, slowCounter))
 					{
@@ -273,7 +266,10 @@ namespace xpLib
 
 		const auto curve = static_cast<uint8_t>((_voice.ampRamp_1a00 & rampCurveMask) >> 14);
 		const auto pending = destinationPending(_voice.ampDestination_1500);
-		if (curve == 2 && (_voice.runtimeCache.ampCurve2EntryPending || pending))
+		const auto held = (_voice.ampRamp_1a00 & rampHold) != 0;
+		// The trunk entry belongs to the unheld curve-2 control write; a later destination write does not
+		// re-enter it.
+		if (curve == 2 && !held && _voice.runtimeCache.ampCurve2EntryPending)
 		{
 			_voice.ampDestination_1500 = (_voice.ampCurrent_1e00 >> 1) | rampAcknowledge;
 			_voice.ampStep_2600 = 0;
@@ -282,17 +278,13 @@ namespace xpLib
 		}
 
 		const auto target = _voice.ampDestination_1500 & ~rampAcknowledge;
-		// A held ramp leaves its destination pending. The firmware holds the ramp, rewrites current and destination,
-		// then releases it with the new curve; the linear step must come from that final state.
-		const auto held = (_voice.ampRamp_1a00 & rampHold) != 0;
-		if (pending && curve != 3 && !held)
+		// As for pitch and TVF-F: only the linear curve acknowledges and takes its step, held or not, so a ramp
+		// switched to linear later computes it from that moment's current.
+		if (pending && curve == 1)
 		{
 			_voice.ampDestination_1500 |= rampAcknowledge;
-			if (curve == 1)
-			{
-				_voice.ampStep_2600 = calculateLinearRampStep(_voice.ampCurrent_1e00, target, _voice.ampRamp_1a00);
-				return;
-			}
+			_voice.ampStep_2600 = calculateLinearRampStep(_voice.ampCurrent_1e00, target, _voice.ampRamp_1a00);
+			return;
 		}
 		if (held || !tickDue(_voice.ampRamp_1a00, ampCounter))
 			return;
@@ -319,8 +311,21 @@ namespace xpLib
 		if (next < 0 || next > rampFieldMask)
 			next = 0;
 		_voice.ampCurrent_1e00 = static_cast<uint32_t>(next);
+		// At zero both trunk curves end: a negative step still decelerates by the rate, but only up to the -1
+		// sentinel, which then holds, so the current stays at zero (the step never turns positive).
+		const auto rate = static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask);
+		const auto zeroBoundaryStep = [&]
+		{
+			return static_cast<uint32_t>(accumulator < 0 ? std::min<int64_t>(accumulator + rate, -1) : -1) &
+				rampScratchMask;
+		};
 		if (curve == 2)
 		{
+			if (previous == 0)
+			{
+				_voice.ampStep_2600 = zeroBoundaryStep();
+				return;
+			}
 			const auto threshold = _voice.ampDestination_1500 & ~rampAcknowledge;
 			const auto delta = previous > threshold ? -static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask)
 													: static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask);
@@ -339,10 +344,7 @@ namespace xpLib
 			// Curve 3 treats the zero boundary before its ordinary steering
 			// update. Negative velocity is decelerated by the programmed rate;
 			// zero or positive velocity is replaced by the -1 sentinel.
-			_voice.ampStep_2600 = accumulator < 0
-				? static_cast<uint32_t>(accumulator + static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask)) &
-					rampScratchMask
-				: rampScratchMask;
+			_voice.ampStep_2600 = zeroBoundaryStep();
 			raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
 			return;
 		}
@@ -475,9 +477,12 @@ namespace xpLib
 	{
 		// 0x2700 is updated before the frame's TVA multiplication. Smoothing begins in the starting phase; preload
 		// and initialization retain the firmware seed. Reset voices use the truncating decay at the start of step().
-		const auto gain = _voice.tvaGain_2700;
-		const auto target = (_voice.combinedAmp_2300 & rampScratchMask) >> 4;
-		_voice.tvaGain_2700 = static_cast<uint16_t>((uint64_t{7} * gain + target + 3) >> 3);
+		// Each frame closes an eighth of the gap, rounded away from the current gain, so it lands exactly on the
+		// target (0 -> FFFF runs 2000, 3C00, 5480, ...; FFFF -> 0 runs DFFF, C3FF, ...).
+		const auto gain = static_cast<int32_t>(_voice.tvaGain_2700);
+		const auto target = static_cast<int32_t>((_voice.combinedAmp_2300 & rampScratchMask) >> 4);
+		const auto step = (std::abs(target - gain) + 7) >> 3;
+		_voice.tvaGain_2700 = static_cast<uint16_t>(target > gain ? gain + step : gain - step);
 	}
 
 	void XP::prepareMixer(const size_t _voiceCount)
@@ -506,12 +511,18 @@ namespace xpLib
 				}
 				continue;
 			}
+			// Sends C and D of one voice deposit as a read-modify-write pair: aimed at the same slot, both read its
+			// old value and D's write lands, so C adds nothing. Every other pair of sends adds up.
+			const auto cdShareSlot =
+				(voice.mixer_3a00[2] & mixerDestinationMask) == (voice.mixer_3a00[3] & mixerDestinationMask);
 			for (size_t sendIndex = 0; sendIndex < voice.mixer_3a00.size(); ++sendIndex)
 			{
 				const auto send = voice.mixer_3a00[sendIndex];
 				const auto destination = static_cast<size_t>(send & mixerDestinationMask);
 				const auto level = static_cast<uint32_t>(send >> mixerLevelShift);
-				const auto contribution = (static_cast<int64_t>(output) * level) / (int64_t{1} << mixerProductShift);
+				const auto contribution = sendIndex == 2 && cdShareSlot
+					? 0
+					: (static_cast<int64_t>(output) * level) / (int64_t{1} << mixerProductShift);
 				sends[sendIndex] = {destination, contribution};
 				m_mixerSummary.add(destination, contribution);
 
@@ -579,10 +590,16 @@ namespace xpLib
 
 	void XP::raiseVoiceMuteEvent(const size_t _voiceIndex, VoiceState& _voice)
 	{
-		if ((_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus)) !=
-				WaveControl::muteRequest ||
-			(_voice.waveControl_0000 & WaveControl::irqEnable) == 0 ||
-			(m_state.irqConfigMask & (uint16_t{1} << IrqReason::muteTransition)) == 0)
+		if ((_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus)) != WaveControl::muteRequest)
+			return;
+		// A voice without IRQ enable mutes at once; with it the status waits for the event's delivery, and a
+		// masked event never sets it.
+		if ((_voice.waveControl_0000 & WaveControl::irqEnable) == 0)
+		{
+			_voice.waveControl_0000 |= WaveControl::muteStatus;
+			return;
+		}
+		if ((m_state.irqConfigMask & (uint16_t{1} << IrqReason::muteTransition)) == 0)
 			return;
 		if (!acceptVoiceEvent(_voiceIndex, IrqReason::muteTransition))
 			return;
