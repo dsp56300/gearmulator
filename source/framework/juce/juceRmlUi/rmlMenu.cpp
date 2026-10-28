@@ -45,10 +45,10 @@ namespace juceRmlUi
 		m_entries.push_back({ {}, false, true, true, {}, {} });
 	}
 
-	void Menu::addSubMenu(const std::string& _name, const std::shared_ptr<Menu>& _subMenu)
+	void Menu::addSubMenu(const std::string& _name, const std::shared_ptr<Menu>& _subMenu, const bool _checked)
 	{
 		if (_subMenu)
-			m_entries.push_back({ _name, false, false, true, {}, _subMenu });
+			m_entries.push_back({ _name, _checked, false, true, {}, _subMenu });
 	}
 
 	void Menu::open(const Rml::Element* _parent, const Rml::Vector2f& _position, const uint32_t _itemsPerColumn)

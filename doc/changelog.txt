@@ -110,6 +110,10 @@ Framework:
 - [Fix] A skin that changes its own size could show one frame cut off, or
         with an empty band, before the window followed.
 
+- [Imp] Skins: a dropdown with drag-step="N" steps through its entries while
+        it is dragged, one entry per N dp, and a click still opens its menu.
+        With group-size="N" a long list opens as submenus of N entries.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

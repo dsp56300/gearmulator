@@ -37,7 +37,7 @@ namespace juceRmlUi
 		void addEntry(const std::string& _name, bool _checked, std::function<void()> _action);
 		void addEntry(const std::string& _name, bool _enabled, bool _checked, std::function<void()> _action, const std::string& _className = {});
 		void addSeparator();
-		void addSubMenu(const std::string& _name, const std::shared_ptr<Menu>& _subMenu);
+		void addSubMenu(const std::string& _name, const std::shared_ptr<Menu>& _subMenu, bool _checked = false);
 		void addSubMenu(const std::string& _name, Menu&& _subMenu)
 		{
 			addSubMenu(_name, std::make_shared<Menu>(std::move(_subMenu)));

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <set>
 
 #include "rmlHelper.h"
 #include "rmlPopupWindow.h"
@@ -19,12 +20,16 @@ namespace juceRmlUi
 	{
 		AddEventListener(Rml::EventId::Click, this);
 		AddEventListener(Rml::EventId::Mousescroll, this);
+		AddEventListener(Rml::EventId::Mousedown, this);
+		AddEventListener(Rml::EventId::Drag, this);
 	}
 
 	ElemComboBox::~ElemComboBox()
 	{
 		RemoveEventListener(Rml::EventId::Click, this);
 		RemoveEventListener(Rml::EventId::Mousescroll, this);
+		RemoveEventListener(Rml::EventId::Mousedown, this);
+		RemoveEventListener(Rml::EventId::Drag, this);
 	}
 
 	void ElemComboBox::setEntries(const std::vector<Entry>& _options)
@@ -95,12 +100,82 @@ namespace juceRmlUi
 	{
 		if (_event.GetId() == Rml::EventId::Click)
 		{
-			onClick(_event);
+			// the release that ends a drag is no click
+			if (m_dragged)
+				m_dragged = false;
+			else
+				onClick(_event);
 		}
 		else if (_event.GetId() == Rml::EventId::Mousescroll)
 		{
 			onMouseScroll(_event);
 		}
+		else if (_event.GetId() == Rml::EventId::Mousedown)
+		{
+			onMouseDown(_event);
+		}
+		else if (_event.GetId() == Rml::EventId::Drag)
+		{
+			onDrag(_event);
+		}
+	}
+
+	void ElemComboBox::OnAttributeChange(const Rml::ElementAttributes& _changedAttributes)
+	{
+		ElemValue::OnAttributeChange(_changedAttributes);
+
+		if (_changedAttributes.find("drag-step") == _changedAttributes.end())
+			return;
+
+		m_dragStep = std::max(0.0f, GetAttribute<float>("drag-step", 0.0f));
+		if (m_dragStep > 0.0f)
+			SetProperty(Rml::PropertyId::Drag, Rml::Property(Rml::Style::Drag::Drag));
+		else
+			RemoveProperty(Rml::PropertyId::Drag);
+	}
+
+	void ElemComboBox::onMouseDown(const Rml::Event& _event)
+	{
+		m_dragged = false;
+		if (m_dragStep <= 0.0f || helper::getMouseButton(_event) != MouseButton::Left)
+			return;
+		m_dragStart = helper::getMousePos(_event);
+		m_dragStartIndex = getSelectedIndex();
+	}
+
+	void ElemComboBox::onDrag(const Rml::Event& _event)
+	{
+		if (m_dragStep <= 0.0f || m_dragStartIndex < 0)
+			return;
+
+		const auto delta = helper::getMousePos(_event) - m_dragStart;
+		const auto step = m_dragStep * GetContext()->GetDensityIndependentPixelRatio();
+		const auto steps = static_cast<int>(std::trunc((delta.x - delta.y) / step));
+
+		// a press that wobbles a little still opens the menu
+		if (!m_dragged && steps == 0)
+			return;
+		m_dragged = true;
+
+		const auto index = stepIndex(m_dragStartIndex, steps);
+		if (index >= 0 && index != getSelectedIndex())
+			setSelectedIndex(static_cast<size_t>(index));
+	}
+
+	int ElemComboBox::stepIndex(const int _index, const int _steps) const
+	{
+		const int offset = _steps < 0 ? -1 : 1;
+		int result = _index;
+		int remaining = std::abs(_steps);
+
+		for (int i = _index + offset; remaining > 0 && i >= 0 && static_cast<size_t>(i) < m_options.size(); i += offset)
+		{
+			if (m_options[static_cast<size_t>(i)].hidden)
+				continue;
+			result = i;
+			--remaining;
+		}
+		return result;
 	}
 
 	void ElemComboBox::onClick(const Rml::Event&)
@@ -118,15 +193,52 @@ namespace juceRmlUi
 
 		const auto currentValue = static_cast<int>(getValue());
 
+		std::set<std::string> seenLabels;
+		std::vector<const Entry*> shown;
+
 		for (auto& option : m_options)
 		{
-			if (option.text.empty())
+			if (option.text.empty() || option.hidden)
 				continue;
 
-			m_menu->addEntry(option.text, option.value == currentValue, [this, v = option.value]
+			if (m_collapseDuplicates && !seenLabels.insert(option.text).second)
+				continue;
+
+			shown.push_back(&option);
+		}
+
+		const auto addEntry = [this, currentValue](Menu& _menu, const Entry& _option)
+		{
+			_menu.addEntry(_option.text, _option.value == currentValue, [this, v = _option.value]
 			{
 				setValue(static_cast<float>(v));
 			});
+		};
+
+		const auto groupSize = static_cast<size_t>(std::max(0, GetAttribute<int>("group-size", 0)));
+
+		if (groupSize > 0 && shown.size() > groupSize)
+		{
+			const auto firstWord = [](const std::string& _text) { return _text.substr(0, _text.find(' ')); };
+
+			for (size_t first = 0; first < shown.size(); first += groupSize)
+			{
+				const auto last = std::min(first + groupSize, shown.size()) - 1;
+				auto group = std::make_shared<Menu>();
+				group->setItemsPerColumn(static_cast<uint32_t>(groupSize));
+				bool current = false;
+				for (size_t i = first; i <= last; ++i)
+				{
+					addEntry(*group, *shown[i]);
+					current |= shown[i]->value == currentValue;
+				}
+				m_menu->addSubMenu(firstWord(shown[first]->text) + " - " + firstWord(shown[last]->text), group, current);
+			}
+		}
+		else
+		{
+			for (const auto* option : shown)
+				addEntry(*m_menu, *option);
 		}
 
 		m_menu->open(this, GetAbsoluteOffset(Rml::BoxArea::Border), getProperty("items-per-column", 16));
@@ -142,11 +254,16 @@ namespace juceRmlUi
 
 		const auto currentValue = static_cast<int>(getValue());
 
+		std::set<std::string> seenLabels;
+
 		for (size_t i = 0; i < m_options.size(); ++i)
 		{
 			const auto& option = m_options[i];
 
-			if (option.text.empty())
+			if (option.text.empty() || option.hidden)
+				continue;
+
+			if (m_collapseDuplicates && !seenLabels.insert(option.text).second)
 				continue;
 
 			// item ids must be positive, 0 is "dismissed"
@@ -190,7 +307,10 @@ namespace juceRmlUi
 
 		const auto offset = delta < 0.0f ? -1 : 1;
 
-		const auto next = current + offset;
+		auto next = current + offset;
+
+		while (next >= 0 && static_cast<size_t>(next) < m_options.size() && m_options[static_cast<size_t>(next)].hidden)
+			next += offset;
 
 		if (next < 0 || static_cast<size_t>(next) >= m_options.size())
 			return;
