@@ -165,10 +165,7 @@ namespace xpLib
 			(_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus)) == WaveControl::muteRequest)
 		{
 			if (playbackCounter == 6)
-			{
 				_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
-				_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
-			}
 			stepVoiceRamps(_voiceIndex, _voice);
 			// Measured on the SC-88 XP: a muted or halted voice stops its producer only. The filter and the TVA keep
 			// running on the sample held at the frozen phase (zero for a voice halted from launch: the chip's states
@@ -213,10 +210,7 @@ namespace xpLib
 				refillVoiceCell(_voiceIndex, _voice);
 		}
 		if (playbackCounter == 6)
-		{
 			_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
-			_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
-		}
 		stepVoiceRamps(_voiceIndex, _voice);
 		return {interpolatedSample, true};
 	}

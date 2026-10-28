@@ -97,7 +97,7 @@ namespace xpLib::xpInternal
 
 	// The TVF-F coefficient (0x2200) keeps one more bit of the interpolated sum than the pitch increment does:
 	// measured on the SC-88 XP, 3FFFF decodes to FFFD2 and 3FFFE to FFFA6 (two above the halved value), every
-	// lower cutoff to the same value either way.
+	// lower cutoff to the same value either way; the register's bit 0 always reads 0 (39B1A -> 55D54, not 55D55).
 	inline uint32_t decodeTvfCoefficient(const uint32_t _pitch)
 	{
 		if (_pitch == 0)
@@ -108,7 +108,7 @@ namespace xpLib::xpInternal
 		const auto next = index + 1 == pitchMantissa.size() ? 0x8000 : pitchMantissa[index + 1];
 		const auto b = (fraction * next) >> 2;
 		const auto octaveShift = (~(_pitch >> 14)) & 0x0f;
-		return (((a + b) << 1) >> octaveShift) & rampScratchMask;
+		return (((a + b) << 1) >> octaveShift) & (rampScratchMask & ~uint32_t{1});
 	}
 
 	inline uint32_t unpackAddressPhase(const uint32_t _packed)

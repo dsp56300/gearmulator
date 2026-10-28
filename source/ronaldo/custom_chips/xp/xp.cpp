@@ -244,8 +244,11 @@ namespace xpLib
 				{
 					const auto pending = destinationPending(_voice.tvfFDestination_1300);
 					const auto target = _voice.tvfFDestination_1300 & ~rampAcknowledge;
-					if (pending || _voice.tvfFCurrent_1c00 != target)
-						_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
+					// Measured on the SC-88 XP at pitch 38000 with the firmware's running TVF-F ramp: the coefficient
+					// is decoded in the TVF-F service from the current BEFORE that service's step (0x2200 reads the
+					// previous current's value, 39B1A -> 55D82 = decode(39B1D)), and nowhere else per frame; the
+					// filter therefore runs one service behind the current, which was the last count of the output.
+					_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
 					const auto linear = (_voice.tvfFRamp_1800 & rampCurveMask) == 0x04000;
 					if (pending && linear)
 					{
