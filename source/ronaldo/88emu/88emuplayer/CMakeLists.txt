@@ -94,12 +94,12 @@ target_sources(88emuplayer PRIVATE
 	ui/Emu88EditorWindows.h
 	ui/Emu88EditorBindings.h
 	ui/panel.cpp ui/panel.hpp
-	ui/lcd_font.cpp
 )
 removeJuceDependencies(88emuplayer)
 target_link_libraries(88emuplayer PRIVATE
 	88emuplayer_BinaryData
 	88lib
+	hardwareLib
 	jucePlayerLib
 	juceMidiPorts
 	juceRmlUi

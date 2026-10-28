@@ -12,7 +12,7 @@
 //
 #include <cstdint>
 
-extern uint8_t lcd_font[240][10];
+#include "hardwareLib/lcdFontSc55.h"
 
 namespace sc88panel
 {
