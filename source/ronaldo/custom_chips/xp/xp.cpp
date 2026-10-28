@@ -506,12 +506,12 @@ namespace xpLib
 	{
 		// 0x2700 is updated before the frame's TVA multiplication. Smoothing begins in the starting phase; preload
 		// and initialization retain the firmware seed. Reset voices use the truncating decay at the start of step().
-		// Each frame closes an eighth of the gap, rounded away from the current gain, so it lands exactly on the
-		// target (0 -> FFFF runs 2000, 3C00, 5480, ...; FFFF -> 0 runs DFFF, C3FF, ...).
+		// Measured frame by frame on the SC-88 XP: each frame closes an eighth of the gap rounded half down, so the
+		// gain rests four counts short of a higher target (0 -> 1933 ends at 192F) and three counts above a lower one
+		// (-> 0 ends at 3): a silent voice keeps a gain of 3 and leaks a few counts into the mixer.
 		const auto gain = static_cast<int32_t>(_voice.tvaGain_2700);
 		const auto target = static_cast<int32_t>((_voice.combinedAmp_2300 & rampScratchMask) >> 4);
-		const auto step = (std::abs(target - gain) + 7) >> 3;
-		_voice.tvaGain_2700 = static_cast<uint16_t>(target > gain ? gain + step : gain - step);
+		_voice.tvaGain_2700 = static_cast<uint16_t>(gain + (((target - gain) * 2 + 7) >> 4));
 	}
 
 	void XP::prepareMixer(const size_t _voiceCount)
