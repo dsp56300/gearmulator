@@ -232,7 +232,7 @@ namespace xpLib
 					const auto pending = destinationPending(_voice.tvfFDestination_1300);
 					const auto target = _voice.tvfFDestination_1300 & ~rampAcknowledge;
 					if (pending || _voice.tvfFCurrent_1c00 != target)
-						_voice.tvfFCoefficient_2200 = (decodePitch(_voice.tvfFCurrent_1c00) << 2) & rampScratchMask;
+						_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
 					const auto linear = (_voice.tvfFRamp_1800 & rampCurveMask) == 0x04000;
 					if (pending && linear)
 					{
