@@ -1,6 +1,6 @@
-// rLib::BoardThread against a single-threaded model of the per-device worker threads it replaced.
+// synthLib::BoardThread against a single-threaded model of the per-device worker threads it replaced.
 
-#include "common/boardThread.h"
+#include "synthLib/boardThread.h"
 
 #include <atomic>
 #include <chrono>
@@ -93,7 +93,7 @@ namespace
 	{
 		EchoBoard board;
 		std::vector<int32_t> out;
-		rLib::BoardThread<EchoBoard> thread(board, "echo");
+		synthLib::BoardThread<EchoBoard> thread(board, "echo");
 		std::vector<synthLib::SMidiEvent> midiIn, midiOut;
 		std::vector<EchoBoard::SampleFrame> in;
 		int32_t h = 0;
@@ -237,7 +237,7 @@ namespace
 		FakeBoard board(_spin);
 		Result res;
 		{
-			rLib::BoardThread<FakeBoard> thread(board, "test");
+			synthLib::BoardThread<FakeBoard> thread(board, "test");
 			for(const auto& b : _blocks)
 			{
 				auto midi = b.midi;

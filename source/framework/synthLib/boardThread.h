@@ -16,7 +16,7 @@
 
 #include "synthLib/midiTypes.h"
 
-namespace rLib
+namespace synthLib
 {
 	// Runs a board on a worker thread. TBoard provides SampleFrame renderSample(), addMidiEvent(const SMidiEvent&)
 	// and readMidiOut(std::vector<SMidiEvent>&). A board with audio input also provides setInput(const SampleFrame&),
