@@ -323,7 +323,10 @@ namespace xpLib
 		{
 			if (previous == 0)
 			{
+				// Held at zero the ramp is complete: as curve 3, every service reports the terminal, so a release
+				// applied to a silent voice, or one whose first report was blocked, still reaches the host.
 				_voice.ampStep_2600 = zeroBoundaryStep();
+				raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
 				return;
 			}
 			const auto threshold = _voice.ampDestination_1500 & ~rampAcknowledge;
