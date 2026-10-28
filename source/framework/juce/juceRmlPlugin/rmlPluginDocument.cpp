@@ -401,7 +401,7 @@ namespace rmlPlugin
 			{
 				// if a button has only a value-on attribute, it might be part of a radio button group. We want to scroll
 				// through the buttons in that group with the mouse wheel
-				juceRmlUi::EventListener::Add(button, Rml::EventId::Mousescroll, [button, this](const Rml::Event& _event)
+				juceRmlUi::EventListener::Add(button, Rml::EventId::Mousescroll, [button, this](Rml::Event& _event)
 				{
 					const auto isUp = juceRmlUi::helper::isMouseWheelUp(_event);
 					const auto isDown = juceRmlUi::helper::isMouseWheelDown(_event);
@@ -439,6 +439,9 @@ namespace rmlPlugin
 
 					if (!checkedButton)
 						return;
+
+					// the group takes the wheel, a view around it does not scroll as well
+					_event.StopPropagation();
 
 					auto getCoordValue = [](Rml::Element* _e)
 					{

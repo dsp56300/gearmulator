@@ -87,6 +87,17 @@ Framework:
 - [Fix] MCP server: stopping it, or closing the plugin, could hang while a
         client kept its connection open.
 
+- [Fix] Turning the mouse wheel over a dropdown or a radio button group also
+        scrolled the view around it.
+
+- [Fix] Dropdowns raced through their entries when scrolled with a trackpad
+        or a smooth-scrolling mouse. They now move one entry per wheel notch.
+
+- [Fix] A dropdown bound to a parameter without a list of values showed an
+        empty menu, and opening the editor set that parameter to its lowest
+        value. Where the range does not start at zero, the entries showed the
+        text of a neighbouring value.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

@@ -41,7 +41,7 @@ namespace juceRmlUi
 		// window and scroll rather than wrap into columns. Selected by the RML attribute
 		// popup="window"; the default keeps the skinnable in-document menu.
 		void openPopupWindow();
-		void onMouseScroll(const Rml::Event& _event);
+		void onMouseScroll(Rml::Event& _event);
 
 		void setSelectedIndex(size_t _index, bool _sendChangeEvent = true);
 		int getSelectedIndex() const;
@@ -60,5 +60,7 @@ namespace juceRmlUi
 		Rml::Element* m_textElem = nullptr;
 
 		bool m_valueTextDirty;
+
+		float m_wheelAccum = 0.0f;	// wheel delta short of a notch
 	};
 }

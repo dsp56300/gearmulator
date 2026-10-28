@@ -1,6 +1,7 @@
 #include "rmlElemComboBox.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "rmlHelper.h"
 #include "rmlPopupWindow.h"
@@ -42,6 +43,9 @@ namespace juceRmlUi
 			max = std::max(option.value, max);
 
 		setMaxValue(static_cast<float>(max));
+
+		// new texts for the same value
+		updateValueText();
 	}
 
 	void ElemComboBox::setOptions(const std::vector<Rml::String>& _options)
@@ -160,14 +164,31 @@ namespace juceRmlUi
 			});
 	}
 
-	void ElemComboBox::onMouseScroll(const Rml::Event& _event)
+	void ElemComboBox::onMouseScroll(Rml::Event& _event)
 	{
-		const auto offset = helper::isMouseWheelUp(_event) ? -1 : 1;
+		const auto delta = helper::getMouseWheelDelta(_event).y;
+		if (delta == 0.0f)
+			return;
 
 		const auto current = getSelectedIndex();
 
 		if (current < 0)
 			return;
+
+		// the control takes the wheel, a view around it does not scroll as well
+		_event.StopPropagation();
+
+		// one entry per wheel notch: a trackpad or a smooth wheel sends many small
+		// deltas per gesture, they add up until they make a notch. A turn the other
+		// way starts over.
+		if ((delta > 0.0f) != (m_wheelAccum > 0.0f))
+			m_wheelAccum = 0.0f;
+		m_wheelAccum += delta;
+		if (std::abs(m_wheelAccum) < 1.0f)
+			return;
+		m_wheelAccum = std::fmod(m_wheelAccum, 1.0f);
+
+		const auto offset = delta < 0.0f ? -1 : 1;
 
 		const auto next = current + offset;
 
