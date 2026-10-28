@@ -5,11 +5,28 @@
 #include "networkLib/tcpServer.h"
 #include "networkLib/tcpStream.h"
 
+#include "ptypes/pinet.h"
+
 #include <algorithm>
 #include <sstream>
 
 namespace mcpServer
 {
+	namespace
+	{
+		// Wakes a thread blocked reading or writing this socket: the call fails and the thread leaves. Not
+		// TcpStream::close(), which frees ptypes buffers the client thread may be using at that moment
+		void shutdownSocket(networkLib::TcpStream& _stream)
+		{
+			auto* s = _stream.getPtypesStream();
+			if (!s)
+				return;
+			const int handle = s->get_handle();
+			if (handle != ptypes::invhandle)
+				::shutdown(handle, SHUT_RDWR);
+		}
+	}
+
 	HttpServer::HttpServer(const int _port, RequestHandler _handler)
 		: m_port(_port)
 		, m_handler(std::move(_handler))
@@ -26,15 +43,32 @@ namespace mcpServer
 
 	HttpServer::~HttpServer()
 	{
+		stop();
+	}
+
+	void HttpServer::stop()
+	{
+		// A keep-alive client sits in a read until it sends the next request, so wake them all up first
+		std::vector<std::unique_ptr<Client>> clients;
+		{
+			std::lock_guard lock(m_clientsMutex);
+			m_stopping = true;
+			for (const auto& c : m_clients)
+			{
+				if (!c->finished)
+					shutdownSocket(*c->stream);
+			}
+			clients.swap(m_clients);
+		}
+
+		// Joins the accept thread, nothing connects after this
 		m_tcpServer.reset();
 
-		std::lock_guard lock(m_clientsMutex);
-		for (auto& t : m_clientThreads)
+		for (const auto& c : clients)
 		{
-			if (t && t->joinable())
-				t->join();
+			if (c->thread.joinable())
+				c->thread.join();
 		}
-		m_clientThreads.clear();
 	}
 
 	bool HttpServer::isRunning() const
@@ -46,29 +80,48 @@ namespace mcpServer
 	{
 		LOGNET(networkLib::LogLevel::Info, "New TCP connection accepted");
 
-		auto shared = std::shared_ptr<networkLib::TcpStream>(std::move(_stream));
-
 		std::lock_guard lock(m_clientsMutex);
 
-		// Clean up finished threads
-		m_clientThreads.erase(
-			std::remove_if(m_clientThreads.begin(), m_clientThreads.end(),
-				[](const std::shared_ptr<std::thread>& _t) { return false; }),
-			m_clientThreads.end());
+		// Destroying the stream closes the connection
+		if (m_stopping)
+			return;
 
-		auto thread = std::make_shared<std::thread>([this, s = shared]()
+		// Reap the threads of clients that have gone. They are past the lock already, so joining is quick
+		for (auto it = m_clients.begin(); it != m_clients.end();)
 		{
-			handleClient(s);
-		});
+			if (!(*it)->finished)
+			{
+				++it;
+				continue;
+			}
+			(*it)->thread.join();
+			it = m_clients.erase(it);
+		}
 
-		m_clientThreads.push_back(thread);
+		m_clients.push_back(std::make_unique<Client>());
+		auto* client = m_clients.back().get();
+		client->stream = std::move(_stream);
+
+		client->thread = std::thread([this, client]
+		{
+			handleClient(*client->stream);
+
+			{
+				std::lock_guard l(m_clientsMutex);
+				client->finished = true;
+			}
+
+			// stop() leaves finished clients alone, so this does not race with its shutdown. Closing here
+			// lets the peer see the disconnect now rather than when the next connection reaps the entry
+			client->stream->close();
+		});
 	}
 
-	void HttpServer::handleClient(std::shared_ptr<networkLib::TcpStream> _stream)
+	void HttpServer::handleClient(networkLib::TcpStream& _stream)
 	{
-		networkLib::Stream& stream = *_stream;
+		networkLib::Stream& stream = _stream;
 
-		while (_stream->isValid())
+		while (_stream.isValid())
 		{
 			try
 			{

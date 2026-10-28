@@ -31,26 +31,9 @@
 #include <chrono>
 #include <functional>
 
-namespace
-{
-	// JUCE parameter gestures (begin/endChangeGesture inside setValueNotifyingHost) and other host-facing
-	// mutations must run on the message thread. The MCP HTTP server invokes tool handlers on its own
-	// worker thread, so route those mutations through here, blocking until the message thread has run them.
-	void runOnMessageThread(const std::function<void()>& _fn)
-	{
-		auto* mm = juce::MessageManager::getInstanceWithoutCreating();
-		if (!mm || mm->isThisTheMessageThread())
-		{
-			_fn();
-			return;
-		}
-		mm->callFunctionOnMessageThread([](void* _userData) -> void*
-		{
-			(*static_cast<const std::function<void()>*>(_userData))();
-			return nullptr;
-		}, const_cast<void*>(static_cast<const void*>(&_fn)));
-	}
-}
+// Tool handlers run on an HTTP worker thread. JUCE parameter gestures (begin/endChangeGesture inside
+// setValueNotifyingHost), host state and other UI-facing work go through McpServer::runOnMessageThread,
+// which gives up when the server stops. What is passed there captures by value.
 
 namespace mcpServer
 {
@@ -199,11 +182,11 @@ namespace mcpServer
 			tool.inputSchema.addIntProperty("id", "The dialog's id from get_dialogs", true, 1);
 			tool.inputSchema.addEnumProperty("result", "Message box: the button", {"ok", "cancel", "yes", "no"}, false);
 			tool.inputSchema.addProperty("files", "array", "File dialog: the chosen files or folders, full paths", false);
-			tool.handler = [](const JsonValue& _params) -> JsonValue
+			tool.handler = [this](const JsonValue& _params) -> JsonValue
 			{
 				const auto id = static_cast<uint32_t>(_params.get("id").getInt());
 
-				bool closed = false;
+				JsonValue closed;
 				if(_params.hasProperty("files"))
 				{
 					std::vector<std::string> files;
@@ -212,16 +195,22 @@ namespace mcpServer
 						files.push_back(list.getArrayElement(i).getString().toStdString());
 
 					// the callback continues the UI flow that opened the dialog
-					runOnMessageThread([&] { closed = MessageBox::answer(id, files); });
+					closed = m_server.runOnMessageThread([id, files]() -> JsonValue
+					{
+						return JsonValue::fromBool(MessageBox::answer(id, files));
+					});
 				}
 				else
 				{
 					const auto r = _params.hasProperty("result") ? _params.get("result").getString() : juce::String("ok");
 					const auto res = r == "no" || r == "cancel" ? MessageBox::Result::No : MessageBox::Result::Yes;
-					runOnMessageThread([&] { closed = MessageBox::answer(id, res); });
+					closed = m_server.runOnMessageThread([id, res]() -> JsonValue
+					{
+						return JsonValue::fromBool(MessageBox::answer(id, res));
+					});
 				}
 
-				if(!closed)
+				if(!closed.getBool())
 					throw std::runtime_error("No open dialog " + std::to_string(id) + " of that kind, see get_dialogs");
 
 				auto result = JsonValue::object();
@@ -479,32 +468,32 @@ namespace mcpServer
 			tool.inputSchema.addIntProperty("part", "Part number (0-15)", false, 0, 15);
 			tool.handler = [this](const JsonValue& _params) -> JsonValue
 			{
-				if (!m_processor.hasController())
-					throw std::runtime_error("Controller not available");
-
-				auto& controller = m_processor.getController();
-				const auto name = _params.get("name").getString().toStdString();
-				const int value = _params.get("value").getInt();
-				const uint8_t part = _params.hasProperty("part")
-					? static_cast<uint8_t>(_params.get("part").getInt())
-					: controller.getCurrentPart();
-
-				auto* param = controller.getParameter(name, part);
-				if (!param)
-					throw std::runtime_error("Parameter not found: " + name);
-
 				// Must run on the message thread (parameter gesture); otherwise JUCE asserts and the call hangs.
-				runOnMessageThread([&]
+				return m_server.runOnMessageThread([processor = &m_processor, _params]() -> JsonValue
 				{
-					param->setUnnormalizedValueNotifyingHost(value, pluginLib::Parameter::Origin::Ui);
-				});
+					if (!processor->hasController())
+						throw std::runtime_error("Controller not available");
 
-				auto result = JsonValue::object();
-				result.set("success", JsonValue::fromBool(true));
-				result.set("name", JsonValue::fromString(name));
-				result.set("value", JsonValue::fromInt(param->getUnnormalizedValue()));
-				result.set("text", JsonValue::fromString(param->getText(param->getValue(), 64).toStdString()));
-				return result;
+					auto& controller = processor->getController();
+					const auto name = _params.get("name").getString().toStdString();
+					const int value = _params.get("value").getInt();
+					const uint8_t part = _params.hasProperty("part")
+						? static_cast<uint8_t>(_params.get("part").getInt())
+						: controller.getCurrentPart();
+
+					auto* param = controller.getParameter(name, part);
+					if (!param)
+						throw std::runtime_error("Parameter not found: " + name);
+
+					param->setUnnormalizedValueNotifyingHost(value, pluginLib::Parameter::Origin::Ui);
+
+					auto result = JsonValue::object();
+					result.set("success", JsonValue::fromBool(true));
+					result.set("name", JsonValue::fromString(name));
+					result.set("value", JsonValue::fromInt(param->getUnnormalizedValue()));
+					result.set("text", JsonValue::fromString(param->getText(param->getValue(), 64).toStdString()));
+					return result;
+				});
 			};
 			m_server.registerTool(std::move(tool));
 		}
@@ -518,25 +507,25 @@ namespace mcpServer
 			tool.inputSchema.addIntProperty("part", "Part number (0-15)", false, 0, 15);
 			tool.handler = [this](const JsonValue& _params) -> JsonValue
 			{
-				if (!m_processor.hasController())
-					throw std::runtime_error("Controller not available");
-
-				auto& controller = m_processor.getController();
-				const uint8_t part = _params.hasProperty("part")
-					? static_cast<uint8_t>(_params.get("part").getInt())
-					: controller.getCurrentPart();
-
 				const auto parameters = _params.get("parameters");
 				if (!parameters.isArray())
 					throw std::runtime_error("'parameters' must be an array of {name, value} objects");
 
-				auto results = JsonValue::array();
-				const int count = parameters.getArraySize();
-
 				// Parameter gestures must run on the message thread (see set_parameter); set the whole batch
 				// in one message-thread round-trip.
-				runOnMessageThread([&]
+				return m_server.runOnMessageThread([processor = &m_processor, _params, parameters]() -> JsonValue
 				{
+					if (!processor->hasController())
+						throw std::runtime_error("Controller not available");
+
+					auto& controller = processor->getController();
+					const uint8_t part = _params.hasProperty("part")
+						? static_cast<uint8_t>(_params.get("part").getInt())
+						: controller.getCurrentPart();
+
+					auto results = JsonValue::array();
+					const int count = parameters.getArraySize();
+
 					for (int i = 0; i < count; ++i)
 					{
 						const auto entry = parameters.getArrayElement(i);
@@ -561,9 +550,9 @@ namespace mcpServer
 						}
 						results.append(r);
 					}
-				});
 
-				return results;
+					return results;
+				});
 			};
 			m_server.registerTool(std::move(tool));
 		}
@@ -637,8 +626,8 @@ namespace mcpServer
 				noteOn.c = velocity;
 				m_processor.addMidiEvent(noteOn);
 
-				// Wait
-				std::this_thread::sleep_for(std::chrono::milliseconds(durationMs));
+				// Cut short when the server stops, the note-off still goes out so that nothing hangs
+				m_server.waitForStop(std::chrono::milliseconds(durationMs));
 
 				// Note off
 				synthLib::SMidiEvent noteOff(source);
@@ -778,15 +767,19 @@ namespace mcpServer
 			tool.description = "Get the full plugin state as saved by the DAW (getStateInformation). Returns base64-encoded binary. Use this to capture a snapshot that can be restored with set_plugin_state.";
 			tool.handler = [this](const JsonValue&) -> JsonValue
 			{
-				juce::MemoryBlock destData;
-				static_cast<juce::AudioProcessor&>(m_processor).getStateInformation(destData);
+				// The host calls it on the message thread, and it reads editor and patch manager state
+				return m_server.runOnMessageThread([processor = &m_processor]() -> JsonValue
+				{
+					juce::MemoryBlock destData;
+					static_cast<juce::AudioProcessor*>(processor)->getStateInformation(destData);
 
-				const auto base64 = juce::Base64::toBase64(destData.getData(), destData.getSize()).toStdString();
+					const auto base64 = juce::Base64::toBase64(destData.getData(), destData.getSize()).toStdString();
 
-				auto result = JsonValue::object();
-				result.set("size", JsonValue::fromInt(static_cast<int>(destData.getSize())));
-				result.set("data", JsonValue::fromString(base64));
-				return result;
+					auto result = JsonValue::object();
+					result.set("size", JsonValue::fromInt(static_cast<int>(destData.getSize())));
+					result.set("data", JsonValue::fromString(base64));
+					return result;
+				});
 			};
 			m_server.registerTool(std::move(tool));
 		}
@@ -805,12 +798,17 @@ namespace mcpServer
 				if (!juce::Base64::convertFromBase64(decoded, base64Str))
 					throw std::runtime_error("Invalid base64 data");
 
-				static_cast<juce::AudioProcessor&>(m_processor).setStateInformation(decoded.getData(), static_cast<int>(decoded.getDataSize()));
+				// The host calls it on the message thread. It reaches the editor, the patch manager, the MIDI
+				// ports and may reboot the device
+				return m_server.runOnMessageThread([processor = &m_processor, data = decoded.getMemoryBlock()]() -> JsonValue
+				{
+					static_cast<juce::AudioProcessor*>(processor)->setStateInformation(data.getData(), static_cast<int>(data.getSize()));
 
-				auto result = JsonValue::object();
-				result.set("success", JsonValue::fromBool(true));
-				result.set("size", JsonValue::fromInt(static_cast<int>(decoded.getDataSize())));
-				return result;
+					auto result = JsonValue::object();
+					result.set("success", JsonValue::fromBool(true));
+					result.set("size", JsonValue::fromInt(static_cast<int>(data.getSize())));
+					return result;
+				});
 			};
 			m_server.registerTool(std::move(tool));
 		}
@@ -841,21 +839,21 @@ namespace mcpServer
 			tool.inputSchema.addIntProperty("part", "Part number", true, 0, 15);
 			tool.handler = [this](const JsonValue& _params) -> JsonValue
 			{
-				if (!m_processor.hasController())
-					throw std::runtime_error("Controller not available");
-
 				const uint8_t part = static_cast<uint8_t>(_params.get("part").getInt());
 
 				// Parameter bindings, the editor and the patch manager all follow the part, and they are UI state.
-				runOnMessageThread([&]
+				return m_server.runOnMessageThread([processor = &m_processor, part]() -> JsonValue
 				{
-					m_processor.getController().setCurrentPart(part);
-				});
+					if (!processor->hasController())
+						throw std::runtime_error("Controller not available");
 
-				auto result = JsonValue::object();
-				result.set("success", JsonValue::fromBool(true));
-				result.set("part", JsonValue::fromInt(part));
-				return result;
+					processor->getController().setCurrentPart(part);
+
+					auto result = JsonValue::object();
+					result.set("success", JsonValue::fromBool(true));
+					result.set("part", JsonValue::fromInt(part));
+					return result;
+				});
 			};
 			m_server.registerTool(std::move(tool));
 		}
@@ -870,24 +868,28 @@ namespace mcpServer
 			tool.description = "Get device information: model, sample rate, channel count, DSP clock, validity";
 			tool.handler = [this](const JsonValue&) -> JsonValue
 			{
-				auto& plugin = m_processor.getPlugin();
-
-				auto result = JsonValue::object();
-				result.set("valid", JsonValue::fromBool(plugin.isValid()));
-				result.set("hostSamplerate", JsonValue::fromDouble(static_cast<double>(plugin.getHostSamplerate())));
-				result.set("dspClockPercent", JsonValue::fromInt(static_cast<int>(m_processor.getDspClockPercent())));
-				result.set("dspClockHz", JsonValue::fromInt64(static_cast<int64_t>(m_processor.getDspClockHz())));
-				result.set("canModifyDspClock", JsonValue::fromBool(m_processor.canModifyDspClock()));
-				result.set("outputGain", JsonValue::fromDouble(static_cast<double>(m_processor.getOutputGain())));
-
-				if (m_processor.hasController())
+				// The device is replaced on the message thread (device type switch, state load), with no lock
+				return m_server.runOnMessageThread([processor = &m_processor]() -> JsonValue
 				{
-					auto& controller = m_processor.getController();
-					result.set("currentPart", JsonValue::fromInt(controller.getCurrentPart()));
-					result.set("partCount", JsonValue::fromInt(controller.getPartCount()));
-				}
+					auto& plugin = processor->getPlugin();
 
-				return result;
+					auto result = JsonValue::object();
+					result.set("valid", JsonValue::fromBool(plugin.isValid()));
+					result.set("hostSamplerate", JsonValue::fromDouble(static_cast<double>(plugin.getHostSamplerate())));
+					result.set("dspClockPercent", JsonValue::fromInt(static_cast<int>(processor->getDspClockPercent())));
+					result.set("dspClockHz", JsonValue::fromInt64(static_cast<int64_t>(processor->getDspClockHz())));
+					result.set("canModifyDspClock", JsonValue::fromBool(processor->canModifyDspClock()));
+					result.set("outputGain", JsonValue::fromDouble(static_cast<double>(processor->getOutputGain())));
+
+					if (processor->hasController())
+					{
+						auto& controller = processor->getController();
+						result.set("currentPart", JsonValue::fromInt(controller.getCurrentPart()));
+						result.set("partCount", JsonValue::fromInt(controller.getPartCount()));
+					}
+
+					return result;
+				});
 			};
 			m_server.registerTool(std::move(tool));
 		}
@@ -899,92 +901,93 @@ namespace mcpServer
 			tool.description = "Read the device's LCD and LEDs as its front panel last reported them: columns, rows, raw cells (8-15 are the custom CGRAM characters, shown as '?' in text), one text line per row, and the LED states. A graphic LCD comes as width, height and one line per pixel row, '#' = on. Works with the editor closed. Products without a front panel report available=false";
 			tool.handler = [this](const JsonValue&) -> JsonValue
 			{
-				bool hasLcd = false, hasLeds = false, hasBitmap = false;
-				uint32_t cols = 0, rows = 0, width = 0, height = 0;
-				std::vector<uint8_t> cells, pixels;
-				std::vector<bool> leds;
-
-				runOnMessageThread([&]
+				return m_server.runOnMessageThread([processor = &m_processor]() -> JsonValue
 				{
-					if (!m_processor.hasController())
-						return;
-					auto& panel = m_processor.getController().getFrontPanel();
+					bool hasLcd = false, hasLeds = false, hasBitmap = false;
+					uint32_t cols = 0, rows = 0, width = 0, height = 0;
+					std::vector<uint8_t> cells, pixels;
+					std::vector<bool> leds;
 
-					// the events are retained, a listener gets the current state at once
-					const baseLib::EventListener<uint32_t, uint32_t, std::vector<uint8_t>> lcd(panel.evLcdText,
-						[&](const uint32_t _cols, const uint32_t _rows, const std::vector<uint8_t>& _cells)
+					if (processor->hasController())
 					{
-						hasLcd = true;
-						cols = _cols;
-						rows = _rows;
-						cells = _cells;
-					});
-					const baseLib::EventListener<uint32_t, uint32_t, std::vector<uint8_t>> bitmap(panel.evLcdBitmap,
-						[&](const uint32_t _width, const uint32_t _height, const std::vector<uint8_t>& _pixels)
-					{
-						hasBitmap = true;
-						width = _width;
-						height = _height;
-						pixels = _pixels;
-					});
-					const baseLib::EventListener<std::vector<bool>> ledMask(panel.evLedMask, [&](const std::vector<bool>& _leds)
-					{
-						hasLeds = true;
-						leds = _leds;
-					});
-				});
+						auto& panel = processor->getController().getFrontPanel();
 
-				auto result = JsonValue::object();
-				result.set("available", JsonValue::fromBool(hasLcd || hasLeds || hasBitmap));
-
-				if (hasBitmap)
-				{
-					const auto stride = synthLib::fp::bitmapStride(width);
-					auto lines = JsonValue::array();
-					for (uint32_t y = 0; y < height; ++y)
-					{
-						std::string line;
-						for (uint32_t x = 0; x < width; ++x)
-							line += (pixels[y * stride + x / 8] >> (7 - x % 8)) & 1 ? '#' : '.';
-						lines.append(JsonValue::fromString(line));
-					}
-					result.set("width", JsonValue::fromInt(static_cast<int>(width)));
-					result.set("height", JsonValue::fromInt(static_cast<int>(height)));
-					result.set("bitmap", lines);
-				}
-
-				if (hasLcd)
-				{
-					result.set("cols", JsonValue::fromInt(static_cast<int>(cols)));
-					result.set("rows", JsonValue::fromInt(static_cast<int>(rows)));
-
-					auto raw = JsonValue::array();
-					for (const auto c : cells)
-						raw.append(JsonValue::fromInt(c));
-					result.set("cells", raw);
-
-					auto lines = JsonValue::array();
-					for (uint32_t r = 0; r < rows; ++r)
-					{
-						std::string line;
-						for (uint32_t c = 0; c < cols && r * cols + c < cells.size(); ++c)
+						// the events are retained, a listener gets the current state at once
+						const baseLib::EventListener<uint32_t, uint32_t, std::vector<uint8_t>> lcd(panel.evLcdText,
+							[&](const uint32_t _cols, const uint32_t _rows, const std::vector<uint8_t>& _cells)
 						{
-							const auto ch = cells[r * cols + c];
-							line += ch >= 0x20 && ch < 0x7f ? static_cast<char>(ch) : '?';
-						}
-						lines.append(JsonValue::fromString(line));
+							hasLcd = true;
+							cols = _cols;
+							rows = _rows;
+							cells = _cells;
+						});
+						const baseLib::EventListener<uint32_t, uint32_t, std::vector<uint8_t>> bitmap(panel.evLcdBitmap,
+							[&](const uint32_t _width, const uint32_t _height, const std::vector<uint8_t>& _pixels)
+						{
+							hasBitmap = true;
+							width = _width;
+							height = _height;
+							pixels = _pixels;
+						});
+						const baseLib::EventListener<std::vector<bool>> ledMask(panel.evLedMask, [&](const std::vector<bool>& _leds)
+						{
+							hasLeds = true;
+							leds = _leds;
+						});
 					}
-					result.set("text", lines);
-				}
 
-				if (hasLeds)
-				{
-					auto list = JsonValue::array();
-					for (const bool on : leds)
-						list.append(JsonValue::fromBool(on));
-					result.set("leds", list);
-				}
-				return result;
+					auto result = JsonValue::object();
+					result.set("available", JsonValue::fromBool(hasLcd || hasLeds || hasBitmap));
+
+					if (hasBitmap)
+					{
+						const auto stride = synthLib::fp::bitmapStride(width);
+						auto lines = JsonValue::array();
+						for (uint32_t y = 0; y < height; ++y)
+						{
+							std::string line;
+							for (uint32_t x = 0; x < width; ++x)
+								line += (pixels[y * stride + x / 8] >> (7 - x % 8)) & 1 ? '#' : '.';
+							lines.append(JsonValue::fromString(line));
+						}
+						result.set("width", JsonValue::fromInt(static_cast<int>(width)));
+						result.set("height", JsonValue::fromInt(static_cast<int>(height)));
+						result.set("bitmap", lines);
+					}
+
+					if (hasLcd)
+					{
+						result.set("cols", JsonValue::fromInt(static_cast<int>(cols)));
+						result.set("rows", JsonValue::fromInt(static_cast<int>(rows)));
+
+						auto raw = JsonValue::array();
+						for (const auto c : cells)
+							raw.append(JsonValue::fromInt(c));
+						result.set("cells", raw);
+
+						auto lines = JsonValue::array();
+						for (uint32_t r = 0; r < rows; ++r)
+						{
+							std::string line;
+							for (uint32_t c = 0; c < cols && r * cols + c < cells.size(); ++c)
+							{
+								const auto ch = cells[r * cols + c];
+								line += ch >= 0x20 && ch < 0x7f ? static_cast<char>(ch) : '?';
+							}
+							lines.append(JsonValue::fromString(line));
+						}
+						result.set("text", lines);
+					}
+
+					if (hasLeds)
+					{
+						auto list = JsonValue::array();
+						for (const bool on : leds)
+							list.append(JsonValue::fromBool(on));
+						result.set("leds", list);
+					}
+					return result;
+				});
 			};
 			m_server.registerTool(std::move(tool));
 		}

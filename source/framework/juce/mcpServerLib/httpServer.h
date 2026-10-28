@@ -10,6 +10,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace networkLib
@@ -31,9 +32,20 @@ namespace mcpServer
 		int getPort() const { return m_port; }
 		bool isRunning() const;
 
+		// Stops accepting, wakes every client thread blocked on its socket and joins them all. A handler
+		// waiting on anything else must give up by itself, see McpServer::stop. Safe to call more than once
+		void stop();
+
 	private:
+		struct Client
+		{
+			std::unique_ptr<networkLib::TcpStream> stream;
+			std::thread thread;
+			bool finished = false;	// guarded by m_clientsMutex
+		};
+
 		void onClientConnected(std::unique_ptr<networkLib::TcpStream> _stream);
-		void handleClient(std::shared_ptr<networkLib::TcpStream> _stream);
+		void handleClient(networkLib::TcpStream& _stream);
 
 		static bool parseRequest(HttpRequest& _request, networkLib::Stream& _stream);
 		static bool readLine(std::string& _line, networkLib::Stream& _stream);
@@ -44,6 +56,7 @@ namespace mcpServer
 		std::unique_ptr<networkLib::TcpServer> m_tcpServer;
 
 		std::mutex m_clientsMutex;
-		std::vector<std::shared_ptr<std::thread>> m_clientThreads;
+		std::vector<std::unique_ptr<Client>> m_clients;
+		bool m_stopping = false;	// guarded by m_clientsMutex
 	};
 }

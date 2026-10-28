@@ -3,6 +3,12 @@
 #include "networkLib/exception.h"
 #include "networkLib/logging.h"
 
+#include <juce_events/juce_events.h>
+
+#include <condition_variable>
+#include <exception>
+#include <stdexcept>
+
 #ifdef _WIN32
 #include <process.h>
 #else
@@ -11,7 +17,44 @@
 
 namespace mcpServer
 {
-	McpServer::McpServer(const int _port) : m_port(_port)
+	namespace
+	{
+		constexpr const char* g_stoppingError = "The MCP server is stopping";
+
+		struct MessageThreadCall
+		{
+			enum class State
+			{
+				Queued,
+				Running,
+				Done,
+				Abandoned
+			};
+
+			std::function<JsonValue()> func;
+			State state = State::Queued;
+			JsonValue result;
+			std::exception_ptr error;
+		};
+
+		bool isMessageThread()
+		{
+			const auto* mm = juce::MessageManager::getInstanceWithoutCreating();
+			return mm && mm->isThisTheMessageThread();
+		}
+	}
+
+	// One mutex and condition variable for everything a handler can wait for: stop(), and the message thread
+	// finishing a call. The guarded state also tells a queued call whether it may still run
+	struct McpServer::StopState
+	{
+		std::mutex mutex;
+		std::condition_variable cv;
+		bool stopping = false;
+		bool stoppingOnMessageThread = false;
+	};
+
+	McpServer::McpServer(const int _port) : m_port(_port), m_stopState(std::make_shared<StopState>())
 	{
 	}
 
@@ -30,6 +73,9 @@ namespace mcpServer
 	{
 		if (m_httpServer)
 			return false;
+
+		// Calls still queued from before a stop() keep the old one, which stays stopped
+		m_stopState = std::make_shared<StopState>();
 
 		// Try the configured port, and if it fails, try subsequent ports
 		constexpr int maxPortAttempts = 100;
@@ -61,14 +107,107 @@ namespace mcpServer
 	void McpServer::stop()
 	{
 		{
+			std::lock_guard lock(m_stopState->mutex);
+			m_stopState->stopping = true;
+			// Seen from the message thread, a call that is running can only be the one this is nested in
+			m_stopState->stoppingOnMessageThread = isMessageThread();
+		}
+		m_stopState->cv.notify_all();
+
+		// Shuts the client sockets down and joins every client thread
+		m_httpServer.reset();
+
+		{
 			std::lock_guard lock(m_sseMutex);
-			for (auto* client : m_sseClients)
-				client->close();
 			m_sseClients.clear();
 		}
-
-		m_httpServer.reset();
 		m_initialized = false;
+	}
+
+	bool McpServer::isStopping() const
+	{
+		std::lock_guard lock(m_stopState->mutex);
+		return m_stopState->stopping;
+	}
+
+	bool McpServer::waitForStop(const std::chrono::milliseconds _timeout)
+	{
+		std::unique_lock lock(m_stopState->mutex);
+		return m_stopState->cv.wait_for(lock, _timeout, [this] { return m_stopState->stopping; });
+	}
+
+	JsonValue McpServer::runOnMessageThread(std::function<JsonValue()> _func)
+	{
+		if (!juce::MessageManager::getInstanceWithoutCreating() || isMessageThread())
+			return _func();
+
+		using State = MessageThreadCall::State;
+
+		auto stopState = m_stopState;
+		auto call = std::make_shared<MessageThreadCall>();
+		call->func = std::move(_func);
+
+		if (isStopping())
+			throw std::runtime_error(g_stoppingError);
+
+		// Captures shared state only: it may run after the server and everything the call would touch are gone
+		const bool posted = juce::MessageManager::callAsync([call, stopState]
+		{
+			{
+				std::lock_guard lock(stopState->mutex);
+				if (call->state != State::Queued || stopState->stopping)
+				{
+					call->state = State::Abandoned;
+					return;
+				}
+				call->state = State::Running;
+			}
+
+			JsonValue result;
+			std::exception_ptr error;
+			try
+			{
+				result = call->func();
+			}
+			catch (...)
+			{
+				error = std::current_exception();
+			}
+
+			{
+				std::lock_guard lock(stopState->mutex);
+				call->result = std::move(result);
+				call->error = error;
+				call->state = State::Done;
+			}
+			stopState->cv.notify_all();
+		});
+
+		if (!posted)
+			throw std::runtime_error("Failed to post to the message thread");
+
+		std::unique_lock lock(stopState->mutex);
+		stopState->cv.wait(lock, [&]
+		{
+			if (call->state == State::Done)
+				return true;
+			if (!stopState->stopping)
+				return false;
+			// A queued call is dropped. A running one is waited for, unless the message thread itself is
+			// stopping the server: then it is stopping from inside this call, which cannot finish before
+			// stop() has joined us
+			return call->state == State::Queued || stopState->stoppingOnMessageThread;
+		});
+
+		if (call->state != State::Done)
+		{
+			call->state = State::Abandoned;
+			throw std::runtime_error(g_stoppingError);
+		}
+
+		if (call->error)
+			std::rethrow_exception(call->error);
+		return call->result;
 	}
 
 	bool McpServer::isRunning() const
@@ -202,7 +341,8 @@ namespace mcpServer
 		{
 			while (_stream.isValid())
 			{
-				std::this_thread::sleep_for(std::chrono::seconds(15));
+				if (waitForStop(std::chrono::seconds(15)))
+					break;
 				// Send keep-alive comment
 				const std::string keepAlive = ": keepalive\n\n";
 				_stream.write(keepAlive.data(), static_cast<uint32_t>(keepAlive.size()));
@@ -270,46 +410,59 @@ namespace mcpServer
 
 		LOGNET(networkLib::LogLevel::Info, "Tool call: " << toolName);
 
-		std::lock_guard lock(m_toolsMutex);
-
-		for (const auto& tool : m_tools)
+		// Not called under the lock: a handler may wait for the message thread for a long time
+		ToolHandler handler;
 		{
-			if (tool.name == toolName)
+			std::lock_guard lock(m_toolsMutex);
+			for (const auto& tool : m_tools)
 			{
-				try
+				if (tool.name == toolName)
 				{
-					auto toolResult = tool.handler(arguments);
-					LOGNET(networkLib::LogLevel::Info, "Tool " << toolName << " completed successfully");
-
-					auto content = JsonValue::array();
-					auto textContent = JsonValue::object();
-					textContent.set("type", JsonValue::fromString("text"));
-					textContent.set("text", JsonValue::fromString(toolResult.toJsonString()));
-					content.append(textContent);
-
-					auto result = JsonValue::object();
-					result.set("content", content);
-					return JsonRpcResponse::success(_request.id, result);
-				}
-				catch (const std::exception& e)
-				{
-					LOGNET(networkLib::LogLevel::Error, "Tool " << toolName << " failed: " << e.what());
-					auto content = JsonValue::array();
-					auto textContent = JsonValue::object();
-					textContent.set("type", JsonValue::fromString("text"));
-					textContent.set("text", JsonValue::fromString(std::string("Error: ") + e.what()));
-					content.append(textContent);
-
-					auto result = JsonValue::object();
-					result.set("content", content);
-					result.set("isError", JsonValue::fromBool(true));
-					return JsonRpcResponse::success(_request.id, result);
+					handler = tool.handler;
+					break;
 				}
 			}
 		}
 
-		return JsonRpcResponse::error(_request.id, ErrorCode::InvalidParams,
-			"Unknown tool: " + toolName);
+		if (!handler)
+		{
+			return JsonRpcResponse::error(_request.id, ErrorCode::InvalidParams,
+				"Unknown tool: " + toolName);
+		}
+
+		// The plugin is about to be torn down, start nothing new. One that slips past this is joined by stop()
+		if (isStopping())
+			return JsonRpcResponse::error(_request.id, ErrorCode::InternalError, g_stoppingError);
+
+		try
+		{
+			auto toolResult = handler(arguments);
+			LOGNET(networkLib::LogLevel::Info, "Tool " << toolName << " completed successfully");
+
+			auto content = JsonValue::array();
+			auto textContent = JsonValue::object();
+			textContent.set("type", JsonValue::fromString("text"));
+			textContent.set("text", JsonValue::fromString(toolResult.toJsonString()));
+			content.append(textContent);
+
+			auto result = JsonValue::object();
+			result.set("content", content);
+			return JsonRpcResponse::success(_request.id, result);
+		}
+		catch (const std::exception& e)
+		{
+			LOGNET(networkLib::LogLevel::Error, "Tool " << toolName << " failed: " << e.what());
+			auto content = JsonValue::array();
+			auto textContent = JsonValue::object();
+			textContent.set("type", JsonValue::fromString("text"));
+			textContent.set("text", JsonValue::fromString(std::string("Error: ") + e.what()));
+			content.append(textContent);
+
+			auto result = JsonValue::object();
+			result.set("content", content);
+			result.set("isError", JsonValue::fromBool(true));
+			return JsonRpcResponse::success(_request.id, result);
+		}
 	}
 
 	JsonRpcResponse McpServer::handlePing(const JsonRpcRequest& _request)

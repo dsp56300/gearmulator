@@ -84,6 +84,9 @@ Framework:
         emulator's own latency was cut down to whole samples before the rest
         was added. It is now rounded once.
 
+- [Fix] MCP server: stopping it, or closing the plugin, could hang while a
+        client kept its connection open.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on
