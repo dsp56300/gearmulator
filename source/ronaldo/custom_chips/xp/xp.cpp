@@ -347,7 +347,7 @@ namespace xpLib
 		};
 		if (curve == 2)
 		{
-			if (previous == 0)
+			if ((previous >> 1) == 0)   // measured on the SC-88 XP: the trunk's zero test is on the half-value, 1 counts as zero
 			{
 				// Held at zero the ramp is complete: as curve 3, every service reports the terminal, so a release
 				// applied to a silent voice, or one whose first report was blocked, still reaches the host.
@@ -366,7 +366,7 @@ namespace xpLib
 		}
 
 		const auto destination = _voice.ampDestination_1500 & ~rampAcknowledge;
-		if (previous == 0)
+		if ((previous >> 1) == 0)   // measured on the SC-88 XP: the trunk's zero test is on the half-value, 1 counts as zero
 		{
 			// Curve 3 treats the zero boundary before its ordinary steering
 			// update. Negative velocity is decelerated by the programmed rate;
@@ -375,13 +375,9 @@ namespace xpLib
 			raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
 			return;
 		}
-		if (_voice.ampCurrent_1e00 == 0)
-		{
-			// A nonzero-to-zero crossing reports the incoming scratch value;
-			// the ordinary steering delta is not applied on the terminal service.
-			raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
-			return;
-		}
+		// Measured on the SC-88 XP: the service that brings the current to zero steers like any other and reports
+		// nothing; the next service, at zero, applies the zero-boundary step and raises the terminal (one service
+		// later than the crossing), after which the delivery's hold freezes the accumulator.
 		_voice.ampStep_2600 = steerTrunkStep(accumulator, previous, destination, rate);
 	}
 
