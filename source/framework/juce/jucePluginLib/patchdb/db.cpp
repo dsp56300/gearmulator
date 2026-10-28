@@ -149,6 +149,7 @@ namespace pluginLib::patchDB
 			const auto it = m_dataSources.find(_ds);
 			if (it == m_dataSources.end())
 				return;
+			m_cacheDirty = true;
 
 			const auto ds = it->second;
 
@@ -1119,6 +1120,9 @@ namespace pluginLib::patchDB
 				addDsToList();
 				loadPatchModifications(ds, patches);
 				addPatches(patches);
+				// A source that had to be loaded is not in the cache yet (or was
+				// dropped from it): the cache needs rewriting at shutdown.
+				m_cacheDirty = true;
 			}
 		}
 	}

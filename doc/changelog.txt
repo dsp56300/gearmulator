@@ -98,6 +98,12 @@ Framework:
         value. Where the range does not start at zero, the entries showed the
         text of a neighbouring value.
 
+- [Fix] Patch Manager: a ROM bank that was loaded instead of taken from the
+        cache never went into it, so it was loaded again at every start.
+
+- [Fix] Patch Manager: the name of a ROM bank with a slash in it was cut at
+        the slash.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on
