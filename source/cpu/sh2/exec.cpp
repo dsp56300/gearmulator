@@ -129,8 +129,11 @@ struct ExecImpl {
     [[maybe_unused]] const u8 fetch = c->fetch;
     [[maybe_unused]] const Handler slot = c->real;
     if constexpr (kLine) {
-      // A fused delayed branch owns exactly one line start: its own word or its slot's.
-      cpu.fetch_line_at(is_delayed_branch(O) && !kBad ? (pc + 2) & ~3u : pc);
+      // A fused delayed branch owns exactly one line start: its own word or its slot's. The cell knows
+      // the class unless that is the slot's, beyond the cell's attribute line.
+      const u32 line = is_delayed_branch(O) && !kBad ? (pc + 2) & ~3u : pc;
+      if (EMU_LIKELY(((line ^ pc) >> Bus::kLineShift) == 0)) cpu.fetch_line(line, u8(c->flags & Bus::kClassMask));
+      else cpu.fetch_line_at(line);
     }
 
     // ---- the family's instructions ---------------------------------------------

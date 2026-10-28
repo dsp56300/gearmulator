@@ -75,6 +75,8 @@ class Bus final : public emu::PagedBus<Bus, BusPolicy> {
     dram_ras_down_ = ras_down;
     dram_write_wait_delta_ = write_wait_delta;
     close_dram_row();
+    update_row_closers();
+    update_dram_costs();
   }
   void close_dram_row() { dram_row_ = 0xFFFFFFFFu; }
   u32 access_cycles(u32 address, u8 attr, unsigned bytes, bool write = false) {
@@ -94,24 +96,82 @@ class Bus final : public emu::PagedBus<Bus, BusPolicy> {
     dram_row_ = k.burst ? row : 0xFFFFFFFFu;
     return cycles;
   }
+  // The same as access_cycles, from tables: every class but DRAM costs what
+  // its tables say and at most closes the open row, DRAM looks up the cost of
+  // a row hit or miss.
   u32 access_penalty(u32 address, u8 attr, unsigned log2_bytes, bool write = false) {
-    return BusPolicy::penalty(access_cycles(address, attr, 1u << log2_bytes, write));
+    const unsigned cls = attr & kClassMask;
+    if (cls == kClsDram) return dram_cost_[write][log2_bytes][dram_hit(address)].penalty;
+    if ((row_closers_ >> cls) & 1) close_dram_row();
+    return penalty(attr, log2_bytes);
+  }
+  // access_cycles of a 4-byte instruction line.
+  u32 fetch_cycles(u32 address, u8 cls) {
+    cls &= kClassMask;
+    if (cls == kClsDram) return dram_cost_[0][2][dram_hit(address)].cycles;
+    if ((row_closers_ >> cls) & 1) close_dram_row();
+    return fetch_fill_[cls];
   }
 
  private:
   friend class emu::PagedBus<Bus, BusPolicy>;
+  // The row history step of access_cycles for an external DRAM class:
+  // whether the access hits the open row, which it then leaves open.
+  unsigned dram_hit(u32 address) {
+    if (!dram_external_) return 0;
+    const u32 row = address >> dram_row_bits_;
+    const unsigned hit = dram_burst_ && row == dram_row_;
+    dram_row_ = dram_burst_ ? row : 0xFFFFFFFFu;
+    return hit;
+  }
+  void update_dram_costs() {
+    const AccessClass& k = classes_[kClsDram];
+    dram_external_ = k.external;
+    dram_burst_ = k.burst != 0;
+    for (unsigned write = 0; write < 2; ++write) {
+      for (unsigned lg = 0; lg < 3; ++lg) {
+        for (unsigned hit = 0; hit < 2; ++hit) {
+          const unsigned bytes = 1u << lg;
+          u32 cycles = k.cycles(bytes);
+          if (k.external) {
+            const unsigned beats = std::max(1u, bytes / (k.width / 8));
+            if (write) cycles = u32(s32(cycles) + s32(beats) * dram_write_wait_delta_);
+            if (hit) cycles -= k.base + k.wait - k.burst;
+          }
+          dram_cost_[write][lg][hit] = {cycles, BusPolicy::penalty(cycles)};
+        }
+      }
+    }
+  }
+
   void on_retime(unsigned i) {
-    if (i == kClsDram) close_dram_row();
+    if (i == kClsDram) {
+      close_dram_row();
+      update_dram_costs();
+    }
     const AccessClass& k = classes_[i];
     const u32 fill = k.cycles(4);
     fetch_fill_[i] = u16(fill);
     fetch_static_[i] = u16(fill > 2 ? fill - 2 : 0);
     const u16 bit = u16(1u << i);
     cacheable_mask_ = k.cacheable ? u16(cacheable_mask_ | bit) : u16(cacheable_mask_ & ~bit);
+    update_row_closers();
+  }
+  // The external classes other than DRAM, whose accesses close the open row
+  // unless RASD keeps it.
+  void update_row_closers() {
+    u16 mask = 0;
+    for (unsigned c = 0; c < 16; ++c)
+      if (c != kClsDram && classes_[c].external) mask = u16(mask | (1u << c));
+    row_closers_ = dram_ras_down_ ? u16(0) : mask;
   }
 
   u16 fetch_fill_[16] = {}, fetch_static_[16] = {};
   u16 cacheable_mask_ = 0;
+  u16 row_closers_ = 0;
+  struct DramCost { u32 cycles, penalty; };
+  DramCost dram_cost_[2][3][2] = {};  // [write][log2 bytes][row hit]
+  bool dram_external_ = false, dram_burst_ = false;
   u32 dram_row_ = 0xFFFFFFFFu;
   unsigned dram_row_bits_ = 9;
   bool dram_ras_down_ = false;

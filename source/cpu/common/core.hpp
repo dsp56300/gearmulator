@@ -8,9 +8,11 @@
 #if defined(__GNUC__) || defined(__clang__)
 #define EMU_UNLIKELY(x) __builtin_expect(!!(x), 0)
 #define EMU_LIKELY(x) __builtin_expect(!!(x), 1)
+#define EMU_ALWAYS_INLINE [[gnu::always_inline]] inline
 #else
 #define EMU_UNLIKELY(x) (x)
 #define EMU_LIKELY(x) (x)
+#define EMU_ALWAYS_INLINE __forceinline
 #endif
 
 // EMU_HAS_MUSTTAIL / EMU_TAILCALL: guaranteed tail calls where the host has them
