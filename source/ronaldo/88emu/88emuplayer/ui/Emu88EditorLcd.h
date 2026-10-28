@@ -47,7 +47,11 @@ namespace emu88Player
 				return;
 			}
 			if(geometry.width)
+			{
 				composeGraphic(geometry.width, geometry.height, nullptr);
+				if (_model == emu88Lib::DeviceModel::Sc880)
+					drawDigitalSegments(nullptr);
+			}
 			else
 				m_canvas->setFixedTextureSize(sc88panel::kWidth, sc88panel::kHeight);
 			m_canvas->repaint();
@@ -61,6 +65,10 @@ namespace emu88Player
 				   _snapshot.mono.size() != static_cast<size_t>(_snapshot.width) * _snapshot.height)
 					return;
 				composeGraphic(_snapshot.width, _snapshot.height, _snapshot.displayOn ? _snapshot.mono.data() : nullptr);
+				if (_snapshot.hasDigitalSegment)
+				{
+					drawDigitalSegments(_snapshot.dseg.data());
+				}
 				m_canvas->repaint();
 				return;
 			}
@@ -126,7 +134,7 @@ namespace emu88Player
 
 		// The SC-880's 136 x 34 dots: dark blue on its pale blue backlit glass, in the 209 x 76 dp window. The texture
 		// has the window's shape so the glass fills it, with the dots on a 6 px pitch centred.
-		static constexpr GraphicStyle kSc880Style{0xff7cc8f0u, 0xff6fbbe6u, 0xff0b2340u, 6, 5, 0, 0, 880, 320, 32, 58, 0,
+		static constexpr GraphicStyle kSc880Style{0xff7cc8f0u, 0xff6fbbe6u, 0xff0b2340u, 6, 5, 0, 0, 880, 320, 32, 76, 0,
 		                                          0};
 
 		// What each panel is drawn as: its dot grid, and the style that paints it. A zero width
@@ -155,7 +163,7 @@ namespace emu88Player
 			if(emu88Lib::isLaModel(_model)) return kCm32lPanel;
 			if(_model == DeviceModel::Sc8850) return {kSc8850Style, 160, 64};
 			if(_model == DeviceModel::Mv30) return {kMv30Style, 240, 64};
-			if(_model == DeviceModel::Sc880) return {kSc880Style, 136, 34};
+			if(_model == DeviceModel::Sc880) return {kSc880Style, 136, 32};
 			return kNoGraphic;
 		}
 
@@ -248,6 +256,82 @@ namespace emu88Player
 				}
 			}
 			return shadow;
+		}
+
+		// Draws the SC-880's 25 seven-segment digits in the strip above the dots. _dseg holds one byte per
+		// digit, bit 0 = a ... bit 6 = g (bit 7, the point, is not drawn); null (display off) leaves every segment dark.
+		static constexpr size_t kStripDigits = 25;
+
+		void drawDigitalSegments(const uint8_t* _dseg)
+		{
+			juce::Graphics pixels(m_source);
+
+			// The digits span the dots' width, one slot each plus half a slot of margin.
+			const float span = static_cast<float>(m_graphicWidth * m_style.pitch);
+			const float pitch = span / (static_cast<float>(kStripDigits) + 0.5f);
+			const float digitW = pitch * 0.66f;
+			const float digitH = 45.0f;
+			const float digitTop = 20.0f;
+			const float thick = 4.0f;
+			const float half = thick / 2.0f;
+			const float gap = 1.0f;
+			constexpr float kSlant = 0.2f;
+
+			// Each segment is a hexagon with pointed ends that meets its neighbours at a diagonal.
+			const auto segmentPath = [&](const float _x0, const int _index)
+			{
+				juce::Path path;
+				const auto polygon = [&](std::initializer_list<juce::Point<float>> _points)
+				{
+					bool first = true;
+					for(const auto& p : _points)
+					{
+						if(first) path.startNewSubPath(p); else path.lineTo(p);
+						first = false;
+					}
+					path.closeSubPath();
+				};
+				const auto horizontal = [&](const float _x1, const float _x2, const float _y)
+				{
+					const float y = digitTop + _y;
+					polygon({{_x0 + _x1 + gap, y}, {_x0 + _x1 + gap + half, y - half},
+					         {_x0 + _x2 - gap - half, y - half}, {_x0 + _x2 - gap, y},
+					         {_x0 + _x2 - gap - half, y + half}, {_x0 + _x1 + gap + half, y + half}});
+				};
+				const auto vertical = [&](const float _x, const float _y1, const float _y2)
+				{
+					const float y1 = digitTop + _y1, y2 = digitTop + _y2;
+					polygon({{_x0 + _x, y1 + gap}, {_x0 + _x + half, y1 + gap + half},
+					         {_x0 + _x + half, y2 - gap - half}, {_x0 + _x, y2 - gap},
+					         {_x0 + _x - half, y2 - gap - half}, {_x0 + _x - half, y1 + gap + half}});
+				};
+				const float left = half, right = digitW - half, mid = digitH / 2, top = half, bottom = digitH - half;
+				switch(_index)
+				{
+				case 0: horizontal(left, right, top); break;		// a
+				case 1: vertical(right, top, mid); break;			// b
+				case 2: vertical(right, mid, bottom); break;		// c
+				case 3: horizontal(left, right, bottom); break;		// d
+				case 4: vertical(left, mid, bottom); break;			// e
+				case 5: vertical(left, top, mid); break;			// f
+				case 6: horizontal(left, right, mid); break;		// g
+				default: /* path.addRectangle(_x0 + digitW + 1, digitTop + digitH - thick, thick, thick); */break;
+				}
+				// Slanted like the glass's digits: the top leans right, the digit's middle stays put.
+				path.applyTransform(juce::AffineTransform::shear(-kSlant, 0.0f).translated(kSlant * (digitTop + digitH / 2.0f), 0.0f));
+				return path;
+			};
+
+			for(size_t slot = 0; slot < kStripDigits; ++slot)
+			{
+				const float x0 = static_cast<float>(m_style.originX) + pitch * (static_cast<float>(slot) + 0.5f) - digitW / 2.0f;
+				const uint8_t lit = _dseg ? _dseg[slot] : uint8_t(0);
+				for(int i = 0; i < 7; ++i)
+				{
+					pixels.setColour(juce::Colour((lit >> i) & 1 ? m_style.on : m_style.off));
+					pixels.fillPath(segmentPath(x0, i));
+				}
+			}
 		}
 
 

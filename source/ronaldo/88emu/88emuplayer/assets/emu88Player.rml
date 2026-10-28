@@ -122,6 +122,7 @@
 			<button id="bt880Exit" class="hit sc880Key" style="left: 575dp; top: 92dp;" title="EXIT (Backspace)"><svg class="buttonGraphic" src="sc880_key.svg"/></button>
 			<button id="bt880Preview" class="hit preview" style="left: 116dp; top: 74dp;" title="PHRASE PREVIEW (Tab)"><svg class="buttonGraphic" src="preview.svg"/></button>
 			<knob id="bt880Value" class="hit sc880Value" style="left: 444dp; top: 32dp; width: 44dp; height: 44dp; border-radius: 22dp;" title="VALUE: drag or scroll to turn, click to push (Space)"/>
+			<img id="lcdOverlay" class="overlay" src="sc880_overlay.png"/>
 		</div>
 
 		<!-- The CM bezel (CM-32P, CM-32L, CM-64, and the MT-32s' dark one): the
