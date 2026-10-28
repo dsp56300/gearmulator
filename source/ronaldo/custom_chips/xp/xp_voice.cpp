@@ -164,8 +164,9 @@ namespace xpLib
 		// RAM M sees three interpolation reads, at most four DPCM reads, then at most four producer writes.
 		const auto interpolatedSample = interpolateVoice(_voice, phase);
 		// The Q16 bits below readable 0x0e00 are ordered-dithered by the chip-global four-frame phase. The threshold
-		// order is 0,2,1,3 (two-bit reversal), applied to the sample-clock phase shifted by two.
-		const auto ditherPhase = static_cast<uint8_t>((m_state.sampleClock + 3) & 3);
+		// order is 0,2,1,3 (two-bit reversal) on the sample clock itself: measured frame-exact on the SC-88 XP
+		// against the reset-anchored clock (every other phase offset misses the fraction register).
+		const auto ditherPhase = static_cast<uint8_t>(m_state.sampleClock & 3);
 		const auto phaseIncrement =
 			(_voice.pitchIncrement_0d00 >> 2) + ((_voice.pitchIncrement_0d00 & 3) > reverseTwoBits(ditherPhase));
 		const auto nextPhase = phase + phaseIncrement;
