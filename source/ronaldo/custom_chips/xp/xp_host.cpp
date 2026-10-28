@@ -227,7 +227,21 @@ namespace xpLib
 		}
 
 		if (const auto reg = findDspWideRegister(_address); reg.value != nullptr)
+		{
+			// Measured on the SC-88 XP: the mixer's two deposit banks ping-pong per frame, and the host sees only
+			// the live one: a slot's deposit reads from IRAM1 on one frame and from IRAM2 on the next, the other
+			// bank reading zero (the DSP side keeps both). Readback only.
+			const auto bank = _address >= Address::iram1_3000 && _address < Address::iram1_3000 + 0x200
+				? static_cast<unsigned>((_address - Address::iram1_3000) >> 8)
+				: 2u;
+			if (bank < 2 && bank == (m_state.sampleClock & 1))
+			{
+				if ((_address & 2) != 0)
+					m_state.readbackLatch = 0;
+				return 0;
+			}
 			return readWide(reg, _address);
+		}
 
 		if (_address >= Address::cram_2c00 && _address < cramEnd)
 		{
