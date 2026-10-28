@@ -29,9 +29,9 @@
 //     cycles, which an AccessClass cannot express: they are stored and exposed
 //     but not charged.
 //   * The WAIT pin (external waits, 8.3.2) is not modelled.
-//   * DRAM: RAS-up-mode timing only (Tp Tr Tc1 Tc2 + waits, figure 8.7); the
-//     read wait count DWR is used for both directions; high-speed page mode /
-//     RAS down mode (8.4.4) are not modelled.  Refresh cycles themselves
+//   * DRAM: BE page-mode timing, independent DWR/DWW waits and RASD row
+//     retention across CS accesses. CPU fetches, literal reads, data accesses
+//     and DMA transfers share row history. Refresh closes the row, but its cycles
 //     (CAS-before-RAS, self-refresh, 8.4.5) are not modelled: they cost no bus
 //     time and DRAM contents never decay; the number of refresh requests is
 //     counted for boards that want to check the refresh interval.

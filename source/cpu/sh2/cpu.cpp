@@ -37,6 +37,7 @@ void Cpu::reset() {
   ccr_ = 0;
   cache_miss_last_ = false;
   cache_tags_.fill(0);
+  bus_.close_dram_row();
   reeval_irq();
   cells_for(regs_.pc);  // branch_to() assumes a current page
 }

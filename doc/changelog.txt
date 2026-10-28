@@ -295,6 +295,10 @@ Plugin Manager:
 
 - [New] Devices: Added support for the SC-880.
 
+- [Imp] SC-8820, SC-8850, NU-10B and MIIG5: more accurate CPU timing, with
+        the page mode and refresh of their DRAM and, on the MIIG5, the
+        instruction cache of its CPU.
+
 2.2.27:
 
 Framework:

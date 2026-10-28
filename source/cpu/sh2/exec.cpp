@@ -3,7 +3,7 @@
 // One template `h<Op, Var>` implements every instruction; the variant says how
 // the cell is executed.  Plain executes and chains to the next cell.  Line
 // first charges the external fetch of the 4-byte line through the instruction
-// cache model.  Slot executes the instruction as the delay slot of the branch
+// cache and BSC models. Slot executes the instruction as the delay slot of the branch
 // that owns the cell (operands from the slot fields) and chains to the
 // branch's completion.  Bad / BadLine are delayed branches whose slot holds a
 // slot-illegal instruction.  The effects of the ordinary instructions are the
@@ -130,12 +130,14 @@ struct ExecImpl {
     [[maybe_unused]] const Handler slot = c->real;
     if constexpr (kLine) {
       // A fused delayed branch owns exactly one line start: its own word or its slot's.
-      cpu.fetch_line_cached(is_delayed_branch(O) && !kBad ? (pc + 2) & ~3u : pc, u8(c->flags & Bus::kClassMask));
+      cpu.fetch_line_at(is_delayed_branch(O) && !kBad ? (pc + 2) & ~3u : pc);
     }
 
     // ---- the family's instructions ---------------------------------------------
     if constexpr (Insn::handles(O)) {
-      Insn::template exec<O>(cpu, pc, n, m, uimm);
+      if constexpr (O == Op::MovwPc) r[n] = u32(s32(s16(cpu.read16(pc + 4 + uimm, true))));
+      else if constexpr (O == Op::MovlPc) r[n] = cpu.read32(((pc + 4) & ~3u) + uimm, true);
+      else Insn::template exec<O>(cpu, pc, n, m, uimm);
       // Table 5.9 note 2: no interrupt is accepted after a control / system
       // register move.
       if constexpr (disables_interrupt(O)) cpu.raise(Cpu::kPendDefer);
@@ -271,11 +273,10 @@ void Cpu::fill_cell(Cell* c, u32 pc) {
   c->m = d.m;
   c->cyc = d.cycles;
   bus_.mark_code(pc);
-  // External code pays for each 4-byte fetch line: through the cache model
-  // when CCR enables the cache for the area, otherwise as a constant.
+  // External fetches update BSC bus history when they execute; cache hits
+  // do not generate a bus transaction.
   const bool external = bus_.external(at);
-  const bool cached = external && bus_.cacheable(at) && cache_covers(pc);
-  const u8 static_fetch = external && !cached ? u8(std::min<u32>(bus_.fetch_static(at), 255)) : 0;
+  c->fetch = 0;
   const bool line_start = (pc & 3) == 0;
 
   if (is_delayed_branch(d.op)) {
@@ -285,23 +286,20 @@ void Cpu::fill_cell(Cell* c, u32 pc) {
     const DecodedInsn sd = (slot_at & Bus::kNoExec) ? DecodedInsn{} : decode(bus_.read16(slot_pc));
     const bool bad = (slot_at & Bus::kNoExec) || sd.op == Op::Illegal || writes_pc(sd.op);
     if (bad) {
-      c->fn = ExecImpl::select(d.op, cached && line_start ? Var::BadLine : Var::Bad);
-      c->fetch = line_start ? static_fetch : 0;
+      c->fn = ExecImpl::select(d.op, external && line_start ? Var::BadLine : Var::Bad);
     } else {
       // Exactly one of the two words starts a fetch line.
-      c->fn = ExecImpl::select(d.op, cached ? Var::Line : Var::Plain);
+      c->fn = ExecImpl::select(d.op, external ? Var::Line : Var::Plain);
       c->real = ExecImpl::select(sd.op, Var::Slot);
       c->slot_imm = sd.imm;
       c->slot_n = sd.n;
       c->slot_m = sd.m;
       c->slot_cyc = sd.cycles;
-      c->fetch = static_fetch;
       if ((pc & (kPageSize - 1)) >= kPageSize - 4) c->flags |= kFlagPageEdge;
       bus_.mark_code(slot_pc);
     }
   } else {
-    c->fn = ExecImpl::select(d.op, cached && line_start ? Var::Line : Var::Plain);
-    c->fetch = line_start ? static_fetch : 0;
+    c->fn = ExecImpl::select(d.op, external && line_start ? Var::Line : Var::Plain);
   }
 
   // PC-relative targets inside the page are resolved to a cell delta.

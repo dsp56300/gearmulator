@@ -68,9 +68,40 @@ class Bus final : public emu::PagedBus<Bus, BusPolicy> {
   u32 fetch_static(u8 cls) const { return fetch_static_[cls & kClassMask]; }
   bool cacheable(u8 attr) const { return (cacheable_mask_ >> (attr & kClassMask)) & 1; }
 
+  // BSC page-mode history belongs to bus transactions, not to instructions:
+  // on-chip accesses and cache hits leave the external DRAM row alone.
+  void configure_dram(unsigned row_bits, bool ras_down, int write_wait_delta) {
+    dram_row_bits_ = row_bits;
+    dram_ras_down_ = ras_down;
+    dram_write_wait_delta_ = write_wait_delta;
+    close_dram_row();
+  }
+  void close_dram_row() { dram_row_ = 0xFFFFFFFFu; }
+  u32 access_cycles(u32 address, u8 attr, unsigned bytes, bool write = false) {
+    const unsigned cls = attr & kClassMask;
+    const auto& k = classes_[cls];
+    u32 cycles = k.cycles(bytes);
+    if (!k.external) return cycles;
+    if (cls != kClsDram) {
+      if (!dram_ras_down_) close_dram_row();
+      return cycles;
+    }
+    const unsigned beats = std::max(1u, bytes / (k.width / 8));
+    if (write) cycles = u32(s32(cycles) + s32(beats) * dram_write_wait_delta_);
+    const u32 row = address >> dram_row_bits_;
+    if (k.burst && row == dram_row_)
+      cycles -= k.base + k.wait - k.burst;
+    dram_row_ = k.burst ? row : 0xFFFFFFFFu;
+    return cycles;
+  }
+  u32 access_penalty(u32 address, u8 attr, unsigned log2_bytes, bool write = false) {
+    return BusPolicy::penalty(access_cycles(address, attr, 1u << log2_bytes, write));
+  }
+
  private:
   friend class emu::PagedBus<Bus, BusPolicy>;
   void on_retime(unsigned i) {
+    if (i == kClsDram) close_dram_row();
     const AccessClass& k = classes_[i];
     const u32 fill = k.cycles(4);
     fetch_fill_[i] = u16(fill);
@@ -81,6 +112,10 @@ class Bus final : public emu::PagedBus<Bus, BusPolicy> {
 
   u16 fetch_fill_[16] = {}, fetch_static_[16] = {};
   u16 cacheable_mask_ = 0;
+  u32 dram_row_ = 0xFFFFFFFFu;
+  unsigned dram_row_bits_ = 9;
+  bool dram_ras_down_ = false;
+  int dram_write_wait_delta_ = 0;
 };
 
 }  // namespace sh2

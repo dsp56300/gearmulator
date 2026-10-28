@@ -10,7 +10,7 @@
 // manual) is the superset: four DMAC channels, five MTU channels, two
 // mid-speed A/D units (ADDRn at H'FFFF8400 / 8408, ADCSR at 8410 / 8411,
 // ADCR at 8412 / 8413), ports A-F with the DTC and flash registers, and its
-// own interrupt layout; it has no cache, so CCR is a plain register.
+// own interrupt layout. Both families have the 1 KB instruction cache.
 #pragma once
 #include <algorithm>
 
@@ -37,23 +37,22 @@ namespace sh2 {
 class SysRegs final : public Device {
  public:
   static constexpr u32 kSbycr = 0xFFFF8614u, kCcr = 0xFFFF8740u;
-  // has_cache: the SH7014/16/17 have the 1 KB instruction cache CCR controls;
-  // the SH7042 has none, so its CCR bits are stored but drive nothing.
-  SysRegs(Cpu& cpu, bool has_cache) : cpu_(cpu), has_cache_(has_cache) {}
+  // SH7014 section 7 and SH7040 section 9: CCR enables the 1 KB cache
+  // independently for CS0-CS3 and DRAM.
+  explicit SysRegs(Cpu& cpu) : cpu_(cpu) {}
   void map(emu::IoMux& mux) {
     mux.assign(kSbycr, 1, this);
     mux.assign(kCcr, 2, this);
   }
   void reset() {
     sbycr_ = 0x1F;
-    ccr_stored_ = 0;
     cpu_.set_standby_request(false);
     cpu_.set_cache_control(0);
   }
   u8 read8(u32 a) override {
     if (a == kSbycr) return sbycr_;
     if (a == kCcr) return 0;
-    if (a == kCcr + 1) return has_cache_ ? cpu_.cache_control() : ccr_stored_;
+    if (a == kCcr + 1) return cpu_.cache_control();
     return 0xFF;
   }
   void write8(u32 a, u8 v) override {
@@ -61,17 +60,14 @@ class SysRegs final : public Device {
       sbycr_ = u8((v & 0xC0) | 0x1F);
       cpu_.set_standby_request((v & 0x80) != 0);
     } else if (a == kCcr + 1) {
-      if (has_cache_) cpu_.set_cache_control(v & 0x1F);
-      else ccr_stored_ = v & 0x1F;
+      cpu_.set_cache_control(v & 0x1F);
     }
   }
   u8 sbycr() const { return sbycr_; }
 
  private:
   Cpu& cpu_;
-  bool has_cache_;
   u8 sbycr_ = 0x1F;
-  u8 ccr_stored_ = 0;
 };
 
 class Machine final : public WdtResetSink {
@@ -83,7 +79,7 @@ class Machine final : public WdtResetSink {
         cpu_(bus_, cfg_),
         io_(cfg_.regfield_base, cfg_.regfield_size),
         intc_(cpu_, intc_layout(model)),
-        sysregs_(cpu_, model != ChipModel::SH7042),
+        sysregs_(cpu_),
         bsc_(sched_, cpu_, intc_, bus_, cfg_),
         dmac_(sched_, cpu_, intc_, bus_, cpu_, model == ChipModel::SH7042 ? 4 : 2),
         mtu_(sched_, cpu_, intc_, model == ChipModel::SH7042 ? 5 : 3),

@@ -23,6 +23,7 @@ struct AccessClass {
   u8 wait = 0;          // software/hardware wait states per bus cycle
   bool external = false;  // fetched through the external bus (instruction fetch costs bus cycles)
   bool cacheable = false; // CS / DRAM space: subject to the instruction cache
+  u8 burst = 0;        // subsequent bus beats of one operand; 0 repeats base + wait
 
   bool operator==(const AccessClass&) const = default;
 
@@ -30,7 +31,7 @@ struct AccessClass {
   constexpr u32 cycles(unsigned bytes) const {
     const unsigned per = width / 8;
     const unsigned n = bytes > per ? bytes / per : 1;
-    return n * u32(base + wait);
+    return u32(base + wait) + (n - 1) * u32(burst ? burst : base + wait);
   }
 };
 
