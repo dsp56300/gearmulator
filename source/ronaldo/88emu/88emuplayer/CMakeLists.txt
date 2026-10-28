@@ -18,6 +18,7 @@ set(HARDWARE_ASSETS
 	${HARDWARE_SKIN_DIR}/sc88pro_panel.png
 	${HARDWARE_SKIN_DIR}/sc8850_panel.png
 	${HARDWARE_SKIN_DIR}/sc880_panel.png
+	${HARDWARE_SKIN_DIR}/sc880_overlay.png
 	${HARDWARE_SKIN_DIR}/sc55_panel.png
 	${HARDWARE_SKIN_DIR}/sc55mk2_panel.png
 	${HARDWARE_SKIN_DIR}/sc8820_panel.png
