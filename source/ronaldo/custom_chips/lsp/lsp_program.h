@@ -114,8 +114,8 @@ namespace lspLib
 			for(uint32_t pc = 1; pc < ProgramWords; ++pc)
 			{
 				LSPInstr& o = instr[pc];
-				const LSPInstr& prev = instr[pc - 1];
-				o.prevMem = prev.memOffs;
+				LSPInstr& prev = instr[pc - 1];
+				resolveOperand(o, prev);
 
 				if(prev.op != Op::Special)
 					continue;
@@ -143,13 +143,32 @@ namespace lspLib
 					instr[o.jumpDest].isJumpTarget = true;
 			}
 
+			// Slot 0x12 skips to the next half of the pass, slot 192 or the end,
+			// whichever is at least three slots past it. It acts at fetch: the
+			// two instructions before it and the special itself do not run either.
+			// The skip is carried by the instruction before them.
 			for(uint32_t pc = 0; pc < ProgramWords; ++pc)
 			{
-				const EramAccess a = decodeEram(pc);
-				instr[pc].eramRead = a.read;
-				instr[pc].eramWrite = a.write;
-				instr[pc].eramSecondTap = a.secondTap;
-				eramAddr[pc] = a.base;
+				if(instr[pc].op != Op::Special || instr[pc].slot != SlotSkipToHalf)
+					continue;
+				LSPInstr& o = instr[pc >= 3 ? pc - 3 : pc];
+				if(o.jump != Jump::None)
+					continue;
+				o.jump = Jump::Skip;
+				o.jumpDest = static_cast<uint16_t>(pc + 3 <= ChannelSplit ? ChannelSplit : ProgramWords);
+				hasJump = true;
+				if(o.jumpDest < ProgramWords)
+					instr[o.jumpDest].isJumpTarget = true;
+			}
+
+			EramAccess access[ProgramWords];
+			decodeEram(access);
+			for(uint32_t pc = 0; pc < ProgramWords; ++pc)
+			{
+				instr[pc].eramRead = access[pc].read;
+				instr[pc].eramWrite = access[pc].write;
+				instr[pc].eramSecondTap = access[pc].secondTap;
+				eramAddr[pc] = access[pc].base;
 			}
 
 			assignRegs();
@@ -177,6 +196,7 @@ namespace lspLib
 
 			const uint8_t opcode = o.ii & 0xe0;
 			o.memOffs = o.rr & 0x7f;
+			o.opMem = o.memOffs;
 			o.scaler = (o.rr & 0x80) ? 5 : 7;
 			switch(o.ii & 0x18)
 			{
@@ -194,9 +214,21 @@ namespace lspLib
 				o.mulLower  = (o.cc & 0x40) != 0;
 				o.accB      = (o.cc & 0x10) != 0;
 				o.mulNegate = (o.cc & 0x04) != 0;
-				o.replace   = (o.cc & 0x08) != 0 && !o.mulLower;
+				o.replace   = (o.cc & 0x08) != 0;
+				o.mulCcCoef = (o.cc & 0x03) == 0;
 				o.mulCoef2  = (o.cc & 0x02) != 0;
 				o.mulZero   = o.cc == 0;
+				o.opMem     = o.memOffs;
+				o.opImmShift = o.immShift;
+				o.writesAcc = true;
+			}
+			else if((opcode == 0xc0 || opcode == 0xe0) && (o.rr & 0x40) == 0)
+			{
+				// A special without rr bit 6 is a MAC on ring offset rr & 0x3f,
+				// with the special's accumulator and replace bits.
+				o.op = Op::Mac;
+				o.accB    = (o.ii & 0x20) != 0;
+				o.replace = (o.rr & 0x20) != 0;
 				o.writesAcc = true;
 			}
 			else if(opcode == 0xc0 || opcode == 0xe0)
@@ -206,29 +238,10 @@ namespace lspLib
 				o.replace = (o.rr & 0x20) != 0;
 				o.slot    = o.rr & 0x1f;
 				o.imm50d0 = o.src == Src::None && o.slot == SlotEramWriteLatch;
-				switch(o.slot)
-				{
-				case SlotJumpIfNegative:
-				case SlotJumpIfNonNegative:
-				case SlotJumpAlways:
-				case SlotEramWriteLatch:
-				case SlotMulCoef1:
-				case SlotMulCoef2:
-					break;
-				case SlotEramTapAndCoef1:
-					break;
-				case SlotAudioOut:
-				case SlotEramRead0: case SlotEramRead0 + 1: case SlotEramRead0 + 2: case SlotEramRead0 + 3:
-				case SlotAudioIn:
-					o.writesAcc = true;
-					break;
-				default:
-					break;
-				}
-				if(o.imm50d0)
-				{
-					o.writesAcc = true;
-				}
+				// Every register special also adds its source times cc into
+				// the accumulator, or replaces it: the coefficient loads, the
+				// write latch and the jumps too, whose cc is their target.
+				o.writesAcc = true;
 			}
 			else if(opcode != 0x80)
 			{
@@ -240,10 +253,10 @@ namespace lspLib
 			}
 
 			// An op that accumulates a zero coefficient leaves the accumulator
-			// alone (MUL excepted: its zero form still saturates the running
-			// value). The ERAM address-run filler words are such MACs, a fifth
+			// alone. The ERAM address-run filler words are such MACs, a fifth
 			// of every program, so they drop out of the pipeline plan and a JIT
-			// emits only their store.
+			// emits only their store. MUL keeps its write: its coefficient byte
+			// is a flag field.
 			if(o.writesAcc && o.op != Op::Mul && !o.replace && o.cc == 0)
 			{
 				o.zeroCoef = true;
@@ -252,56 +265,108 @@ namespace lspLib
 			return o;
 		}
 
-		// An access is addressed by the six instructions before it, each
-		// contributing three bits through its ext-RAM control field — eight
-		// slots back for a write, twelve for a read.
-		EramAccess decodeEram(const uint32_t _pc) const
+		// The multiplier input of the previous instruction feeds a low-half MUL
+		// and 50/d0: a MAC's or MUL's operand (a skip reads ring offset 0), a
+		// register special's source, passed along by low-half MULs and 50/d0.
+		// After a run of low-half MULs the next MAC or MUL takes the run's first
+		// operand field for the immediate select: an immediate there replaces
+		// its own operand, a ring offset there makes it read the ring at its own
+		// field, even an immediate one.
+		static void resolveOperand(LSPInstr& _o, LSPInstr& _prev)
 		{
-			EramAccess a;
-			const LSPInstr& o = instr[_pc];
-			if(o.op != Op::Special || o.src == Src::None)
-				return a;
-			a.read  = o.slot >= SlotEramRead0 && o.slot <= SlotEramRead0 + 3;
-			a.write = o.slot == SlotEramWriteLatch;
-			if(!a.read && !a.write)
-				return a;
-
-			const int start = static_cast<int>(_pc) - (a.write ? 8 : 12);
-			if(start < 0)
-				return a;
-
-			const auto ctrl = [&](const int _i) { return static_cast<uint8_t>((words[start + _i] >> 16) & 0x07); };
-			a.secondTap = (ctrl(0) & 0x06) == 0x04;
-			uint32_t base = 0;
-			for(int i = 1; i <= 6; ++i)
+			const bool prevLower = _prev.op == Op::Mul && _prev.mulLower;
+			if(_o.op == Op::Mul && _o.mulLower)
+				_o.lowerRunMem = prevLower ? _prev.lowerRunMem : _o.memOffs;
+			if(prevLower && (_o.op == Op::Mac || (_o.op == Op::Mul && !_o.mulLower)))
 			{
-				uint16_t incr = static_cast<uint16_t>(ctrl(i) << ((i - 1) * 3));
-				if(a.secondTap)
-					incr = (ctrl(i) == 0x02 && i == 1) ? 1 : 0;
-				if(i < 6 || (ctrl(i) & 1))
-					base += incr;
+				const uint8_t field = _prev.lowerRunMem;
+				const uint8_t imm = field >= 1 && field <= 4 ? static_cast<uint8_t>(2 + field * 5) : 0;
+				_o.opMem = _o.memOffs;
+				if(_o.op == Op::Mac)
+					_o.immShift = imm;
+				else
+					_o.opImmShift = imm;
+				return;
 			}
-			a.base = static_cast<uint16_t>(base);
-			return a;
+			if(!((_o.op == Op::Mul && _o.mulLower) || _o.imm50d0))
+				return;
+			if(prevLower || _prev.imm50d0 || _prev.op == Op::Mul)
+			{
+				_o.opMem = _prev.opMem;
+				_o.opImmShift = _prev.opImmShift;
+				_o.opFromLatch = _prev.opFromLatch;
+			}
+			else if(_prev.op == Op::Special)
+			{
+				_o.opFromLatch = true;
+				_prev.latchesSrc = true;
+			}
+			else
+			{
+				_o.opMem = _prev.memOffs;
+				_o.opImmShift = _prev.immShift;
+				_o.opFromLatch = false;
+			}
 		}
 
-		// A write that moved only ext-RAM control bits at _pc affects the
-		// accesses in the twelve slots after it. Live-patch their addresses if
-		// nothing else about them changed.
-		bool patchEramAddresses(const uint32_t _pc)
+		// The ERAM controller idles until an instruction's control field (ii & 7)
+		// has type bits 2-1 set: 11 write, 01 read, 10 read at the second tap
+		// offset. The six instructions after it hold the address, three bits
+		// each, the sixth only its bit 0 (address bit 15), and that sixth one is
+		// the next command. A write lands eight slots after its command, a read
+		// twelve, whatever the instruction there; the latch specials only move
+		// the data.
+		void decodeEram(EramAccess (&_access)[ProgramWords]) const
 		{
-			EramAccess fresh[13];
-			const uint32_t end = _pc + 12 < ProgramWords ? _pc + 12 : ProgramWords - 1;
-			for(uint32_t pc = _pc; pc <= end; ++pc)
+			for(auto& a : _access)
+				a = EramAccess{};
+			const auto ctrl = [&](const uint32_t _pc) { return _pc < ProgramWords ? static_cast<uint8_t>((words[_pc] >> 16) & 0x07) : uint8_t{0}; };
+			uint32_t pc = 0;
+			while(pc < ProgramWords)
+			{
+				const uint8_t type = (ctrl(pc) >> 1) & 3;
+				if(type == 0)
+				{
+					++pc;
+					continue;
+				}
+				EramAccess a;
+				a.write = type == 3;
+				a.read = !a.write;
+				a.secondTap = type == 2;
+				uint32_t base = 0;
+				for(uint32_t i = 1; i <= 6; ++i)
+				{
+					const uint8_t c = ctrl(pc + i);
+					uint16_t incr = static_cast<uint16_t>(c << ((i - 1) * 3));
+					if(a.secondTap)
+						incr = (c == 0x02 && i == 1) ? 1 : 0;
+					if(i < 6 || (c & 1))
+						base += incr;
+				}
+				a.base = static_cast<uint16_t>(base);
+				const uint32_t at = pc + (a.write ? 8 : 12);
+				if(at < ProgramWords)
+					_access[at] = a;
+				pc += 6;
+			}
+		}
+
+		// A write that moved only ext-RAM control bits keeps every access in
+		// place if none appears, disappears or changes kind: then only the
+		// addresses are patched.
+		bool patchEramAddresses(const uint32_t)
+		{
+			EramAccess fresh[ProgramWords];
+			decodeEram(fresh);
+			for(uint32_t pc = 0; pc < ProgramWords; ++pc)
 			{
 				const LSPInstr& o = instr[pc];
-				const EramAccess a = decodeEram(pc);
-				if(a.read != o.eramRead || a.write != o.eramWrite || a.secondTap != o.eramSecondTap)
+				if(fresh[pc].read != o.eramRead || fresh[pc].write != o.eramWrite || fresh[pc].secondTap != o.eramSecondTap)
 					return false;
-				fresh[pc - _pc] = a;
 			}
-			for(uint32_t pc = _pc; pc <= end; ++pc)
-				eramAddr[pc] = fresh[pc - _pc].base;
+			for(uint32_t pc = 0; pc < ProgramWords; ++pc)
+				eramAddr[pc] = fresh[pc].base;
 			return true;
 		}
 

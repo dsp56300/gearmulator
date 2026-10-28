@@ -326,7 +326,7 @@ void test_dma_auto_request() {
   s.reg32(kDar0, kRam + 0x200);
   s.reg32(kDmatcr0, 4);
   s.reg16(kDmaor, 0x0001);  // DME
-  s.reg32(kChcr0, 0x00005425u);  // dst/src increment, auto request, longword, IE, DE
+  s.reg32(kChcr0, 0x00005415u);  // dst/src increment, auto request, longword, IE, DE
   s.m.run(50);
   for (u32 i = 0; i < 4; ++i) CHECK_EQ(s.reg32(kRam + 0x200 + i * 4), 0x11110000u + i);
   CHECK(s.reg32(kChcr0) & 0x2);  // TE

@@ -230,6 +230,10 @@ namespace juceRmlUi
 		NSView* metalView = [metalViewClass.createInstance() initWithFrame:NSMakeRect(0, 0, 100, 100)];
 		metalView.wantsLayer = YES;
 		metalView.layer = layer;
+		// While the window changes size, Core Animation shows the last frame until a new one is drawn. The
+		// default placement stretches it to the new size, which squashes the whole UI for a moment; pinned to
+		// the top left it stays as drawn, as the window grows or shrinks below it.
+		metalView.layerContentsPlacement = NSViewLayerContentsPlacementTopLeft;
 
 		// Use JUCE's NSViewComponent::attachViewToComponent to embed the view.
 		// This handles plugin host view hierarchies correctly (AU, VST3, etc.),

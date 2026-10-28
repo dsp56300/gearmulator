@@ -774,9 +774,12 @@ namespace emu88Lib
 			// core's left as word 0 reproduces that (8.1 dB); either half
 			// swapped alone mirrors the effect, which is what made the two
 			// overdrives trade places.
+			// The XP sends each word as its 18 high bits (0x3932 = 0x0010) and
+			// the LSP samples those 18.
+			constexpr int32_t sendBits = ~0x3f;
 			const SampleFrame lspInput{
-				sendCount > 0 ? busB[0] : 0,
-				sendCount > 1 ? busB[1] : 0,
+				sendCount > 0 ? busB[0] & sendBits : 0,
+				sendCount > 1 ? busB[1] & sendBits : 0,
 			};
 			const auto lspOutput = m_lsp.process(lspInput);
 			// The return enters the XP eight bits below the LSP's 24-bit datapath.

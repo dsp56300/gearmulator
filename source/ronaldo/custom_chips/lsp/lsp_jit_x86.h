@@ -205,6 +205,49 @@ namespace lspLib
 			m_asm->movsxd(acc(_i.destReg), _value.r32());
 		}
 
+		// The operand of a MUL or 50/d0, clobbers t2
+		void emitOperand(const LSPInstr& _i, const asmjit::x86::Gpq& _dst)
+		{
+			if(_i.opFromLatch)
+				m_asm->movsxd(_dst, rt(offsetof(LSPRuntime, mulInput)));
+			else if(_i.opImmShift)
+				m_asm->mov(_dst, int64_t{1} << _i.opImmShift);
+			else
+				emitRingLoad(_dst, _i.opMem);
+		}
+
+		// _v = eramQuantize(_v), clobbers t0 and t3
+		void emitEramQuantize(const asmjit::x86::Gpq& _v)
+		{
+			using namespace asmjit;
+			auto& a = *m_asm;
+			const Label done = a.newLabel();
+			const Label exp1 = a.newLabel();
+			const Label exp2 = a.newLabel();
+			a.mov(t0, _v);
+			a.sar(t0, 63);
+			a.xor_(t0, _v);
+			a.cmp(t0, 0x2000);
+			a.jl(done);
+			a.cmp(t0, 0x8000);
+			a.jl(exp1);
+			a.cmp(t0, 0x20000);
+			a.jl(exp2);
+			a.and_(_v, -0x40);
+			a.jmp(done);
+			a.bind(exp1);
+			a.and_(_v, -4);
+			a.jmp(done);
+			a.bind(exp2);
+			a.mov(t3, _v);
+			a.and_(t3, 1);
+			a.and_(_v, -0x10);
+			a.or_(_v, t3);
+			a.add(t3, t3);
+			a.or_(_v, t3);
+			a.bind(done);
+		}
+
 		// t2 = (eramPos + eramAddr[pc] [+ secondTapOffs]) & 0xffff
 		void emitEramAddr(const uint32_t _pc, const bool _secondTap)
 		{
@@ -328,7 +371,7 @@ namespace lspLib
 				}
 				else
 				{
-					emitRingLoad(t1, i.memOffs);
+					emitRingLoad(t1, i.opMem);
 					a.movsxd(t3, coef(_pc));
 					a.imul(t1, t3);
 				}
@@ -336,48 +379,52 @@ namespace lspLib
 				emitAccWrite(i, t1);
 				if(i.abs)
 				{
+					// abs judges the sign by bit 24 and negates the whole value
 					a.mov(t1, acc(i.destReg));
 					a.neg(t1);
-					a.test(acc(i.destReg), acc(i.destReg));
-					a.cmovs(acc(i.destReg), t1);
+					a.test(acc(i.destReg).r32(), 0x1000000);
+					a.cmovnz(acc(i.destReg), t1);
 					a.movsxd(acc(i.destReg), acc(i.destReg).r32());
 				}
 				break;
 
 			case Op::Mul:
-				// The store first: emitSrc's saturation uses t3, which then holds
-				// the multiplier coefficient.
+				// A low half reads the previous multiplier input, before its own
+				// write-back. Then the store: emitSrc's saturation uses t3, which
+				// then holds the multiplier coefficient.
+				if(i.mulLower && !i.mulZero)
+					emitOperand(i, t1);
 				if(i.src != Src::None)
 				{
 					emitSrc(i, t0);
 					emitRingStore(t0, i.memOffs);
 				}
-				a.movsxd(t3, rt(i.mulCoef2 ? offsetof(LSPRuntime, multiplCoef2) : offsetof(LSPRuntime, multiplCoef1)));
-				if(i.mulLower)
-				{
-					a.and_(t3.r32(), 0xffff);
-					a.shr(t3.r32(), 9);
-				}
+				if(i.mulCcCoef)
+					a.mov(t3, i.mulLower ? static_cast<int64_t>(static_cast<uint8_t>(i.cc)) : static_cast<int64_t>(i.cc));
 				else
-					a.sar(t3, 16);
+				{
+					a.movsxd(t3, rt(i.mulCoef2 ? offsetof(LSPRuntime, multiplCoef2) : offsetof(LSPRuntime, multiplCoef1)));
+					if(i.mulLower)
+					{
+						a.shr(t3.r32(), 8);
+						a.and_(t3.r32(), 0xff);
+					}
+					else
+						a.sar(t3, 16);
+				}
 				if(i.mulZero)
 					a.xor_(t1.r32(), t1.r32());
 				else
 				{
-					if(i.immShift)
-						a.mov(t1, 1 << i.immShift);
-					else
-						emitRingLoad(t1, i.memOffs);
+					if(!i.mulLower)
+						emitOperand(i, t1);
 					a.imul(t1, t3);
 				}
-				a.sar(t1, i.scaler + (i.mulLower ? 7 : 0));
+				a.sar(t1, i.scaler + (i.mulLower ? 8 : 0));
 				if(i.mulNegate)
 					a.neg(t1);
 				if(!i.replace)
-				{
-					emitSat24(t2, acc(i.liveReg()));
-					a.add(t1, t2);
-				}
+					a.add(t1, acc(i.liveReg()));
 				a.movsxd(acc(i.destReg), t1.r32());
 				break;
 
@@ -388,17 +435,9 @@ namespace lspLib
 						break;
 					a.movsxd(t3, coef(_pc));
 					a.and_(t3.r32(), 0xff);
-					if(i.prevMem >= 1 && i.prevMem <= 4)
-					{
-						a.mov(t1, t3);
-						a.shl(t1, (i.prevMem - 1) * 5);
-					}
-					else
-					{
-						emitRingLoad(t1, i.prevMem);
-						a.imul(t1, t3);
-						a.sar(t1, 7);
-					}
+					emitOperand(i, t1);
+					a.imul(t1, t3);
+					a.sar(t1, 7);
 					a.sar(t1, 1 + i.scaler);
 					emitAccWrite(i, t1);
 					break;
@@ -440,6 +479,9 @@ namespace lspLib
 				case SlotMulCoef2:
 					a.mov(rt(offsetof(LSPRuntime, multiplCoef2)), t0.r32());
 					break;
+				case SlotRing76:
+					emitRingStore(t0, 0x76);
+					break;
 				case SlotAudioOut:
 					a.mov(rt(offsetof(LSPRuntime, audioOut)), t0.r32());
 					emitRingStore(t0, 0x78);
@@ -450,18 +492,20 @@ namespace lspLib
 					a.movsxd(t0, rt(offsetof(LSPRuntime, eramReadValue)));
 					emitRingStore(t0, static_cast<uint8_t>(0x60 + i.slot));
 					break;
-				case SlotAudioIn:
+				case SlotAudioIn: case SlotAudioIn2:
 					if(_pc >= ChannelSplit)
 					{
 						a.mov(t1.r32(), rt(offsetof(LSPRuntime, audioInL)));
 						a.mov(rt(offsetof(LSPRuntime, audioIn)), t1.r32());
 					}
 					a.movsxd(t0, rt(offsetof(LSPRuntime, audioIn)));
-					emitRingStore(t0, 0x7e);
+					emitRingStore(t0, static_cast<uint8_t>(0x60 + i.slot));
 					break;
 				default:
 					break;
 				}
+				if(i.latchesSrc)
+					a.mov(rt(offsetof(LSPRuntime, mulInput)), t0.r32());
 				if(i.writesAcc)
 				{
 					a.movsxd(t1, coef(_pc));
@@ -477,14 +521,36 @@ namespace lspLib
 
 			if(i.eramWrite)
 			{
+				a.movsxd(t1, rt(offsetof(LSPRuntime, eramWriteLatch)));
+				a.sar(t1, 4);
+				emitEramQuantize(t1);
 				emitEramAddr(_pc, false);
-				a.mov(t1.r32(), rt(offsetof(LSPRuntime, eramWriteLatch)));
-				a.sar(t1.r32(), 4);
 				a.mov(eramAt(t2), t1.r32());
+				// a write cycle leaves its data in the read latch too
+				a.shl(t1.r32(), 4);
+				a.mov(rt(offsetof(LSPRuntime, eramReadValue)), t1.r32());
 			}
 
 			if(i.jump == Jump::None)
 				return;
+
+			if(i.jump == Jump::Skip)
+			{
+				// the skipped slots still pass as idle cycles: the history moves on
+				emitParallelMove(i.stateOut);
+				a.mov(acc(0), acc(2));
+				a.mov(acc(1), acc(2));
+				a.mov(acc(3), acc(5));
+				a.mov(acc(4), acc(5));
+				if(i.jumpDest < ProgramWords)
+					a.jmp(m_labels[i.jumpDest]);
+				else
+				{
+					static constexpr uint8_t kCanonical[6] = {0, 1, 2, 3, 4, 5};
+					a.jmp(exitLabel(kCanonical));
+				}
+				return;
+			}
 
 			const asmjit::Label fallthrough = a.newLabel();
 			a.cmp(rt(offsetof(LSPRuntime, jumpPending)), 0);

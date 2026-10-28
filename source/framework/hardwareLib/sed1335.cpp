@@ -312,6 +312,9 @@ namespace hwLib
 		// byte as eight dots produces a seam every six pixels.
 		// So one cell decides both layers, and the character, its glyph row and the graphics byte
 		// only need fetching when the cell changes rather than once per pixel.
+		// AP is the line pitch in memory for text and graphics alike; a firmware may keep it wider
+		// than the C/R bytes it displays (C/R 27 over AP 32, with the text laid out on the 32-byte
+		// lines).
 		const int pitch = m_configAp ? m_configAp : cr;
 
 		for (int py = 0; py < int(m_height); ++py)
@@ -325,7 +328,7 @@ namespace hwLib
 			int cx = 0;		// cell column
 			int fx = 0;		// dot within the cell
 
-			uint8_t g1 = fontChar(textChar(m_scrollSad1, 0, cy, cr), fy);	// text glyph row
+			uint8_t g1 = fontChar(textChar(m_scrollSad1, 0, cy, pitch), fy);	// text glyph row
 			uint8_t g2 = m_memory[rowBase2 & m_memMask];						// graphics byte
 
 			for (int px = 0; px < int(m_width); ++px)
@@ -339,7 +342,7 @@ namespace hwLib
 
 				fx = 0;
 				++cx;
-				g1 = fontChar(textChar(m_scrollSad1, cx, cy, cr), fy);
+				g1 = fontChar(textChar(m_scrollSad1, cx, cy, pitch), fy);
 				g2 = m_memory[static_cast<uint16_t>(rowBase2 + cx) & m_memMask];
 			}
 		}

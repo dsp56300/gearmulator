@@ -151,13 +151,15 @@ namespace rmlPlugin
 
 			if(valueList.order.empty())
 			{
-				int i = 0;
-				const auto& allValues = p->getAllValueStrings();
-				for (const auto& vs : allValues)
+				// JUCE's getAllValueStrings() is empty for continuous parameters,
+				// including those with a formatter instead of a value list. Enumerate
+				// their integer range too: an empty menu clamps the bound value to
+				// zero and sends that change back to the synth when an editor opens.
+				for (int value = range.getStart(); value <= range.getEnd(); ++value)
 				{
-					if(vs.isNotEmpty() && i >= range.getStart() && i <= range.getEnd())
-						sortedValues.emplace_back(juceRmlUi::ElemComboBox::Entry{ vs.toStdString(), i });
-					++i;
+					const auto text = p->getText(p->convertTo0to1(static_cast<float>(value)), 0);
+					if (text.isNotEmpty())
+						sortedValues.emplace_back(juceRmlUi::ElemComboBox::Entry{ text.toStdString(), value });
 				}
 			}
 			else

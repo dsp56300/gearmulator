@@ -233,7 +233,7 @@ bool Dmac::transfer_unit(unsigned ch) {
   // (9.3.4), each as long as the BSC makes the accessed area (9.3.5).
   u32 states = 0;
   if (!src_is_dack) states += cost(c.sar, bytes);
-  if (!dst_is_dack) states += cost(c.dar, bytes);
+  if (!dst_is_dack) states += cost(c.dar, bytes, true);
   cpu_.stall(states);
 
   // Address update (SM / DM: 00 fixed, 01 increment, 10 decrement, 11

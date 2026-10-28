@@ -164,24 +164,17 @@ namespace lspLib
 		const LSPProgram& program() const { return *m_program; }
 
 	private:
-		// The firmware brackets program uploads through HostConfig: 0x0001
-		// starts, 0x1021 halts. Unknown values must not invent a run-state edge.
+		// The chip runs unless config bit 1 or bit 12 is set; the other bits
+		// change nothing visible. The firmware boots with
+		// 0x0001 then 0x1001, halts with 0x1021 around program uploads and
+		// starts with 0x0001.
 		void applyConfig(const uint16_t _config)
 		{
 			m_config = _config;
-			switch(_config)
-			{
-			case 0x0001:
-				if(m_program->tainted())
-					cacheProgram();
-				m_running = true;
-				break;
-			case 0x1021:
-				m_running = false;
-				break;
-			default:
-				break;
-			}
+			const bool run = (_config & 0x1002) == 0;
+			if(run && m_program->tainted())
+				cacheProgram();
+			m_running = run;
 		}
 
 		void fillSnapshot(Snapshot& _snapshot) const

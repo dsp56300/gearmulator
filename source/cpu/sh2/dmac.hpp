@@ -138,7 +138,7 @@ class Dmac final : public Device, public DmaRequestClient {
   bool any_ready() const;
   bool ready(unsigned ch) const;  // enabled and holding an auto / external request
   bool address_error(u32 addr, unsigned bytes) const;
-  u32 cost(u32 addr, unsigned bytes) const { return bus_.access_class_of(bus_.attr(addr)).cycles(bytes); }
+  u32 cost(u32 addr, unsigned bytes, bool write = false) { return bus_.access_cycles(addr, bus_.attr(addr), bytes, write); }
   // One transfer unit; false when the channel stopped (TE set or address error).
   bool transfer_unit(unsigned ch);
   void run_channel(unsigned ch);  // one unit, or the whole block in burst mode

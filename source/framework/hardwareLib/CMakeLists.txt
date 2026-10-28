@@ -12,6 +12,7 @@ set(SOURCES
 	hd44780.cpp hd44780.h
 	lcd.cpp lcd.h
 	lcdfonts.h
+	lcdFontSc55.cpp lcdFontSc55.h
 	lh28fbj.cpp lh28fbj.h
 	sciMidi.cpp sciMidi.h
 	sed1200.cpp sed1200.h

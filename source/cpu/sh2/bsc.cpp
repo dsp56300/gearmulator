@@ -80,11 +80,9 @@ void Bsc::install_classes() {
     bus_.set_class(Bus::kClsCs0 + area, k);
   }
   {
-    // DRAM (8.4.2, 8.4.3): Tp Tr Tc1 Tc2 plus DWR waits; TPC and RCD each add
-    // one precharge / row-address cycle.  RAS up mode is assumed (every access
-    // reopens the row): high-speed page mode and RAS down mode (8.4.4) would
-    // skip Tp/Tr for same-row accesses, which a per-class cost cannot express.
-    // The read wait count is used for writes as well (DWW is exposed raw).
+    // DRAM (8.4.2-8.4.4): the first beat opens the row, subsequent BE beats
+    // use just the column cycles. Bus tracks the row across CPU and DMA
+    // transactions; on-chip accesses and cache hits do not close it.
     AccessClass k;
     k.width = u8(dram_width());
     k.base = kOrdinaryBase;
@@ -92,7 +90,10 @@ void Bsc::install_classes() {
     k.wait = u8(std::min(wait, 255u));
     k.external = true;
     k.cacheable = true;
+    k.burst = dram_burst() ? u8(2 + dram_read_wait()) : 0;
     bus_.set_class(Bus::kClsDram, k);
+    bus_.configure_dram(dram_row_bits(), dram_ras_down(),
+                        int(dram_write_wait()) - int(dram_read_wait()));
   }
 }
 
@@ -131,7 +132,10 @@ void Bsc::sync(u64 now) {
   rtcnt_ = u8(remaining % period);
   tick_ = cur;
   rtcsr_ |= kCmf;
-  if ((rtcsr_ & (kRfsh | kRmd)) == kRfsh) refreshes_ += matches;
+  if ((rtcsr_ & (kRfsh | kRmd)) == kRfsh) {
+    refreshes_ += matches;
+    bus_.close_dram_row();
+  }
   update_requests();
 }
 
@@ -140,11 +144,13 @@ void Bsc::update_requests() {
   intc_.set_request(IrqSrc::Cmi, (rtcsr_ & kCmf) && (rtcsr_ & kCmie));
 }
 
-// One event at the next match that can raise CMI (CMIE set, CMF still clear).
+// Refreshes end an open DRAM page even when no CMI interrupt is enabled.
 void Bsc::reschedule() {
   if (event_) { sched_.cancel(event_); event_ = 0; }
   const unsigned shift = refresh_clock_shift();
-  if (shift == 0 || !(rtcsr_ & kCmie) || (rtcsr_ & kCmf)) return;
+  const bool refresh = (rtcsr_ & (kRfsh | kRmd)) == kRfsh;
+  const bool interrupt = (rtcsr_ & kCmie) && !(rtcsr_ & kCmf);
+  if (shift == 0 || (!refresh && !interrupt)) return;
   const u64 to_match = u64(u8(rtcor_ - rtcnt_)) + 1;
   event_ = sched_.schedule((tick_ + to_match) << shift, &Bsc::on_event, this);
 }

@@ -34,7 +34,7 @@ namespace sc88panel
 
 		const uint8_t* glyph(const uint8_t _ch, const uint8_t* _cgRam)
 		{
-			return _ch >= 16 ? &lcd_font[_ch - 16][0] : &_cgRam[(_ch & 7) * 8];
+			return _ch >= 16 ? &hwLib::g_lcdFontSc55[_ch - 16][0] : &_cgRam[(_ch & 7) * 8];
 		}
 
 	// 5x7 character cell, 6-pixel pitch, each dot drawn as a 5x5 block —

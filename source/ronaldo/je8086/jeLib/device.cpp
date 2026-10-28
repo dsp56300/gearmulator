@@ -8,7 +8,7 @@
 #include "baseLib/filesystem.h"
 #include "dsp56kBase/logging.h"
 
-#include "common/boardThread.h"
+#include "synthLib/boardThread.h"
 
 #include <algorithm>
 #include <cmath>
@@ -57,7 +57,7 @@ namespace jeLib
 
 		m_je8086.reset(new Je8086(_params.romData, ram));
 
-		m_thread.reset(new rLib::BoardThread<Je8086>(*m_je8086, "JE8086"));
+		m_thread.reset(new synthLib::BoardThread<Je8086>(*m_je8086, "JE8086"));
 
 		m_paramChangedListener.set(m_frontPanel.evParam, [this](const uint8_t _page, const uint8_t _index, const int32_t& _value)
 		{

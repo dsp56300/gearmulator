@@ -10,6 +10,7 @@ set(SOURCES
 	arpeggiator.cpp arpeggiator.h
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
+	boardThread.h
 	consoleTools.cpp consoleTools.h
 	dac.cpp dac.h
 	dcFilter.h
@@ -102,6 +103,11 @@ if(BUILD_TESTING)
 	target_link_libraries(resamplerLatency_test PRIVATE synthLib)
 	set_property(TARGET resamplerLatency_test PROPERTY FOLDER "Tests")
 	add_test(NAME resamplerLatency COMMAND resamplerLatency_test)
+
+	add_executable(boardThread_test boardThread_test.cpp)
+	target_link_libraries(boardThread_test PRIVATE synthLib)
+	set_property(TARGET boardThread_test PROPERTY FOLDER "Tests")
+	add_test(NAME boardThread COMMAND boardThread_test)
 
 	add_executable(midiRateLimiter_test midiRateLimiter_test.cpp)
 	target_link_libraries(midiRateLimiter_test PRIVATE synthLib)

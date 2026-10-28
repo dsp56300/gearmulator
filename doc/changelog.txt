@@ -80,6 +80,42 @@ Framework:
         does not work with the plugins of this version, and this server does
         not work with plugins of 2.2.27 or older.
 
+- [Fix] The latency reported to the host could be a sample short: the
+        emulator's own latency was cut down to whole samples before the rest
+        was added. It is now rounded once.
+
+- [Fix] MCP server: stopping it, or closing the plugin, could hang while a
+        client kept its connection open.
+
+- [Fix] Turning the mouse wheel over a dropdown or a radio button group also
+        scrolled the view around it.
+
+- [Fix] Dropdowns raced through their entries when scrolled with a trackpad
+        or a smooth-scrolling mouse. They now move one entry per wheel notch.
+
+- [Fix] A dropdown bound to a parameter without a list of values showed an
+        empty menu, and opening the editor set that parameter to its lowest
+        value. Where the range does not start at zero, the entries showed the
+        text of a neighbouring value.
+
+- [Fix] Patch Manager: a ROM bank that was loaded instead of taken from the
+        cache never went into it, so it was loaded again at every start.
+
+- [Fix] Patch Manager: the name of a ROM bank with a slash in it was cut at
+        the slash.
+
+- [Fix] macOS: while a window was resized, the user interface was squashed
+        for a moment.
+
+- [Fix] A skin that changes its own size could show one frame cut off, or
+        with an empty band, before the window followed.
+
+- [Imp] Skins: a dropdown with drag-step="N" steps through its entries while
+        it is dragged, one entry per N dp, and a click still opens its menu.
+        With group-size="N" a long list opens as submenus of N entries.
+
+- [Imp] Escape cancels a drag and drop.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on
@@ -294,6 +330,25 @@ Plugin Manager:
 88emuPlayer:
 
 - [New] Devices: Added support for the SC-880.
+
+- [Imp] SC-8820, SC-8850, NU-10B and MIIG5: more accurate CPU timing, with
+        the page mode and refresh of their DRAM and, on the MIIG5, the
+        instruction cache of its CPU.
+
+- [Fix] SC-55 family: the CPU read back what it last wrote to port 1 instead
+        of the levels of its input pins.
+
+- [Fix] SC-8850: the text on the display was laid out with the visible line
+        width instead of the line pitch the firmware sets.
+
+- [Imp] More accurate sound generation on all models with the XP chip, the
+        SC-88 series, SC-8820, SC-8850, NU-10B and MIIG5: envelope steps,
+        volume smoothing, effect sends, voice mutes and samples that loop
+        past their end.
+
+- [Imp] More accurate effects on the SC-88Pro, SC-8820, SC-8850 and the
+        models based on them: delay memory precision, the effect multiplier
+        and the effect input.
 
 2.2.27:
 

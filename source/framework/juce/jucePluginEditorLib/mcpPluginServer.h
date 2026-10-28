@@ -23,6 +23,9 @@ namespace mcpServer
 		~McpPluginServer();
 
 		bool start();
+
+		// Call before the processor starts tearing down, from any thread including the message thread. Once it
+		// returns no tool handler touches the processor again. The destructor calls it too
 		void stop();
 		bool isRunning() const;
 

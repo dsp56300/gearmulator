@@ -1119,6 +1119,9 @@ namespace juceRmlUi
 
 		auto frameEventActive = false;
 
+		// set when this frame is not drawn, see below
+		bool holdFrame = false;
+
 		{
 			std::scoped_lock lock(m_contextRenderMutex);
 
@@ -1152,9 +1155,15 @@ namespace juceRmlUi
 					if (safe)
 						safe->evDocumentSizeChanged(safe.getComponent());
 				});
+
+				// A skin that changed its own size in the fixed window mode gets the matching window size from
+				// the message thread, a frame or more later. Drawn now, the new layout would land in the old
+				// size - cut off, or with an empty band - so this frame is skipped and the last one stays until
+				// the window has its new size (or the next idle tick, should the host refuse it).
+				holdFrame = !m_freeWindowMode;
 			}
 
-			if (visible)
+			if (visible && !holdFrame)
 			{
 				m_rmlContext->Render();
 
@@ -1211,7 +1220,7 @@ namespace juceRmlUi
 		m_updating = false;
 
 		// trigger a repaint and wait for OpenGL to be done with it
-		if (!visible)
+		if (!visible || holdFrame)
 		{
 			// no frame was produced, unblock the next update
 			m_renderDone = true;

@@ -52,6 +52,10 @@ namespace jucePluginEditorLib::patchManagerRml
 			if (_ds->origin == pluginLib::patchDB::DataSourceOrigin::Manual)
 				return getDataSourceTitle(*_ds);
 
+			// only a file or folder name is a path, a ROM bank may have a slash in its name
+			if (_ds->type != pluginLib::patchDB::SourceType::File && _ds->type != pluginLib::patchDB::SourceType::Folder)
+				return getDataSourceTitle(*_ds);
+
 			auto t = getDataSourceTitle(*_ds);
 			const auto pos = t.find_last_of("\\/");
 			if (pos != std::string::npos)

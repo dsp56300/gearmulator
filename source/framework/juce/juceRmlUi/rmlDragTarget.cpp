@@ -102,7 +102,7 @@ namespace juceRmlUi
 			return;
 
 		auto* dragSource = helper::getDragSource(_event);
-		if (!dragSource)
+		if (!dragSource || dragSource->isCancelled())
 			return;
 
 		if (!canDrop(_event, dragSource))
@@ -135,7 +135,7 @@ namespace juceRmlUi
 		if (!m_currentDragSource)
 			return;
 
-		if (!canDrop(_event, m_currentDragSource))
+		if (m_currentDragSource->isCancelled() || !canDrop(_event, m_currentDragSource))
 		{
 			stopDrag();
 			return;

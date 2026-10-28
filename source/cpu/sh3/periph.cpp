@@ -896,7 +896,8 @@ bool Peripherals::dma_ext_request(unsigned ch) {
 void Peripherals::dma_transfer(unsigned ch, bool delayed_completion) {
   Dma& d = dma_[ch];
   const unsigned incd = (d.chcr >> 14) & 3, incs = (d.chcr >> 12) & 3;
-  const u32 size = kDmaSize[(d.chcr >> 4) & 3];
+  // SH7706/SH7709A CHCR.TS is bits 4:3 (unlike the SH-4 layout).
+  const u32 size = kDmaSize[(d.chcr >> 3) & 3];
   if (incd == 3 || incs == 3) return;  // reserved address modes: no transfer
   u32 src = d.sar & Bus::kPhysMask, dst = d.dar & Bus::kPhysMask;
   u32 count = d.tcr ? d.tcr : 0x1000000u;

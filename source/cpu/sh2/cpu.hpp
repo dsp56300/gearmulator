@@ -142,56 +142,56 @@ class Cpu final : public emu::SliceCore {
   friend const Cell* detail::page_end(Cpu&, const Cell*);
 
   // --- data access: alignment check, access penalty, slow path ---------------
-  u32 read8(u32 a) {
+  EMU_ALWAYS_INLINE u32 read8(u32 a) {
     a &= addr_mask_;
     u32 off;
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return 0xFF;
     const u8 at = bus_.attr_off(off);
-    budget_ -= s32(bus_.penalty(at, 0));
+    budget_ -= s32(bus_.access_penalty(a, at, 0));
     return (at & Bus::kRdSlow) ? bus_.slow_read8(a, off) : bus_.mem()[off];
   }
-  u32 read16(u32 a) {
+  EMU_ALWAYS_INLINE u32 read16(u32 a, bool pc_relative = false) {
     a &= addr_mask_;
     if (EMU_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
     u32 off;
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return 0xFFFF;
     const u8 at = bus_.attr_off(off);
-    budget_ -= s32(bus_.penalty(at, 1));
+    if (!pc_relative || !cache_pc_read(a, at)) budget_ -= s32(bus_.access_penalty(a, at, 1));
     return (at & Bus::kRdSlow) ? bus_.slow_read16(a, off) : Bus::get16(bus_.mem() + off);
   }
-  u32 read32(u32 a) {
+  EMU_ALWAYS_INLINE u32 read32(u32 a, bool pc_relative = false) {
     a &= addr_mask_;
     if (EMU_UNLIKELY(a & 3)) { raise(kPendAddrErr); a &= ~3u; }
     u32 off;
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return 0xFFFFFFFFu;
     const u8 at = bus_.attr_off(off);
-    budget_ -= s32(bus_.penalty(at, 2));
+    if (!pc_relative || !cache_pc_read(a, at)) budget_ -= s32(bus_.access_penalty(a, at, 2));
     return (at & Bus::kRdSlow) ? bus_.slow_read32(a, off) : Bus::get32(bus_.mem() + off);
   }
-  void write8(u32 a, u32 v) {
+  EMU_ALWAYS_INLINE void write8(u32 a, u32 v) {
     a &= addr_mask_;
     u32 off;
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return;
     const u8 at = bus_.attr_off(off);
-    budget_ -= s32(bus_.penalty(at, 0));
+    budget_ -= s32(bus_.access_penalty(a, at, 0, true));
     if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write8(a, off, u8(v)); else bus_.mem()[off] = u8(v);
   }
-  void write16(u32 a, u32 v) {
+  EMU_ALWAYS_INLINE void write16(u32 a, u32 v) {
     a &= addr_mask_;
     if (EMU_UNLIKELY(a & 1)) { raise(kPendAddrErr); a &= ~1u; }
     u32 off;
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return;
     const u8 at = bus_.attr_off(off);
-    budget_ -= s32(bus_.penalty(at, 1));
+    budget_ -= s32(bus_.access_penalty(a, at, 1, true));
     if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write16(a, off, u16(v)); else Bus::put16(bus_.mem() + off, u16(v));
   }
-  void write32(u32 a, u32 v) {
+  EMU_ALWAYS_INLINE void write32(u32 a, u32 v) {
     a &= addr_mask_;
     if (EMU_UNLIKELY(a & 3)) { raise(kPendAddrErr); a &= ~3u; }
     u32 off;
     if (EMU_UNLIKELY(!bus_.translate(a, off))) return;
     const u8 at = bus_.attr_off(off);
-    budget_ -= s32(bus_.penalty(at, 2));
+    budget_ -= s32(bus_.access_penalty(a, at, 2, true));
     if (EMU_UNLIKELY(at & Bus::kWrSlow)) bus_.slow_write32(a, off, v); else Bus::put32(bus_.mem() + off, v);
   }
   void push32(u32 v) { regs_.r[15] -= 4; write32(regs_.r[15], v); }
@@ -230,26 +230,38 @@ class Cpu final : public emu::SliceCore {
   void fetch_line_cached(u32 pc, u8 cls) {
     const unsigned entry = (pc >> 2) & 0xFF;
     const u16 tag = u16(((pc >> 10) & 0x7FFF) | 0x8000);
-    const u32 fill = bus_.fetch_fill(cls);
     if (cache_tags_[entry] == tag) {
       if (cache_miss_last_) {
         cache_miss_last_ = false;
-        budget_ -= s32(fill);
+        budget_ -= s32(bus_.fetch_cycles(pc, cls));
       }
       return;
     }
     cache_tags_[entry] = tag;
-    budget_ -= s32(fill + (cache_miss_last_ ? 0 : 1));
+    budget_ -= s32(bus_.fetch_cycles(pc, cls) + (cache_miss_last_ ? 0 : 1));
     cache_miss_last_ = true;
+  }
+  // Fetch accounting for the line at `pc`, whose class `cls` is external.
+  void fetch_line(u32 pc, u8 cls) {
+    pc &= ~3u;
+    if (bus_.cacheable(cls) && cache_covers(pc)) fetch_line_cached(pc, cls);
+    else {
+      const auto cycles = bus_.fetch_cycles(pc, cls);
+      budget_ -= s32(cycles > 2 ? cycles - 2 : 0);
+    }
   }
   // Fetch accounting for a branch landing on the second word of a line.
   void fetch_line_at(u32 pc) {
     const u8 at = bus_.attr(pc);
-    if (!bus_.external(at)) return;
-    const u8 cls = u8(at & Bus::kClassMask);
-    pc &= ~3u;
-    if (bus_.cacheable(at) && cache_covers(pc)) fetch_line_cached(pc, cls);
-    else budget_ -= s32(bus_.fetch_static(cls));
+    if (bus_.external(at)) fetch_line(pc, u8(at & Bus::kClassMask));
+  }
+
+  // PC-relative literal reads share instruction-cache tags and bus history.
+  // A hit performs no external transaction, including no DRAM row closure.
+  bool cache_pc_read(u32 address, u8 at) {
+    if (!bus_.external(at) || !bus_.cacheable(at) || !cache_covers(address)) return false;
+    fetch_line_cached(address & ~3u, u8(at & Bus::kClassMask));
+    return true;
   }
 
   // --- pending ---------------------------------------------------------------
