@@ -306,6 +306,9 @@ Plugin Manager:
 - [Fix] SC-55 family: the CPU read back what it last wrote to port 1 instead
         of the levels of its input pins.
 
+- [Fix] SC-8850: the text on the display was laid out with the visible line
+        width instead of the line pitch the firmware sets.
+
 2.2.27:
 
 Framework:
