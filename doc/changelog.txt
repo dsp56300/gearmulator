@@ -114,6 +114,8 @@ Framework:
         it is dragged, one entry per N dp, and a click still opens its menu.
         With group-size="N" a long list opens as submenus of N entries.
 
+- [Imp] Escape cancels a drag and drop.
+
 Osirus/OsTIrus:
 
 - [Imp] EMU-56 The arpeggiator follows the host exactly: its notes are placed on

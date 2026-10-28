@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "rmlEventListener.h"
+
 namespace Rml
 {
 	class Event;
@@ -36,6 +38,10 @@ namespace juceRmlUi
 		void setHandled() noexcept { m_handled = true; }
 		bool isHandled() const noexcept { return m_handled; }
 
+		// Escape during a drag cancels it: nothing is dropped and the drag ends as if released. Targets
+		// refuse a cancelled drag (DragTarget).
+		bool isCancelled() const noexcept { return m_cancelled; }
+
 		static DragSource* fromElement(const Rml::Element* _elem);
 
 		Rml::Element* getElement() const noexcept { return m_element; }
@@ -43,9 +49,13 @@ namespace juceRmlUi
 	private:
 		void onDragStart(const Rml::Event& _event);
 		void onDragEnd(const Rml::Event& _event);
+		void onKeyDown(Rml::Event& _event);
+		void endCancelledDrag();
 
 		std::unique_ptr<DragData> m_dragData;
 		bool m_handled = false;
+		bool m_cancelled = false;
+		ScopedListener m_escapeListener;
 
 		Rml::Element* m_element = nullptr;
 	};
