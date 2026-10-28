@@ -99,7 +99,7 @@ namespace xpLib
 			if (_voice.ampRamp_1a00 == 0x04005 && _voice.ampDestination_1500 == _voice.ampCurrent_1e00)
 				_voice.ampCurrent_1e00 &= ~rampAcknowledge;
 			_voice.pitchIncrement_0d00 = decodePitch(pitch);
-			_voice.tvfFCoefficient_2200 = (decodePitch(tvfF) << 2) & rampScratchMask;
+			_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(tvfF);
 			const auto pitchTarget = _voice.pitchDestination_1200 & ~rampAcknowledge;
 			if ((_voice.pitchRamp_1700 & rampHold) == 0 &&
 				((m_state.sampleClock >> 3) & rampDividerMask(_voice.pitchRamp_1700)) == 0 &&
@@ -154,9 +154,14 @@ namespace xpLib
 			if (playbackCounter == 6)
 			{
 				_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
-				_voice.tvfFCoefficient_2200 = (decodePitch(_voice.tvfFCurrent_1c00) << 2) & rampScratchMask;
+				_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
 			}
 			stepVoiceRamps(_voiceIndex, _voice);
+			// Measured on the SC-88 XP: a muted voice stops its producer only. The filter and the TVA keep running
+			// on the sample held at the frozen phase, so the mixer slot settles over some twenty frames to the
+			// filter's response to that input and keeps receiving it every frame.
+			if ((_voice.waveControl_0000 & (WaveControl::waveEngineHalt | WaveControl::muteStatus)) == WaveControl::muteStatus)
+				return {interpolateVoice(_voice, unpackAddressPhase(_voice.addressFraction_0e00)), true};
 			return {};
 		}
 
@@ -196,7 +201,7 @@ namespace xpLib
 		if (playbackCounter == 6)
 		{
 			_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
-			_voice.tvfFCoefficient_2200 = (decodePitch(_voice.tvfFCurrent_1c00) << 2) & rampScratchMask;
+			_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
 		}
 		stepVoiceRamps(_voiceIndex, _voice);
 		return {interpolatedSample, true};
