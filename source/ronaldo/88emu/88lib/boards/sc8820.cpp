@@ -133,7 +133,10 @@ namespace emu88Lib
 		m_xp.step();
 		const auto& send = dsp.serialOutput(xpLib::Dsp::SerialBus::b);
 		const auto sendCount = dsp.serialOutputCount(xpLib::Dsp::SerialBus::b);
-		const auto effect = m_lsp.process({sendCount > 0 ? send[0] : 0, sendCount > 1 ? send[1] : 0});
+		// The XP sends each word as its 18 high bits (0x3932 = 0x0010) and the
+		// LSP samples those 18.
+		constexpr int32_t sendBits = ~0x3f;
+		const auto effect = m_lsp.process({sendCount > 0 ? send[0] & sendBits : 0, sendCount > 1 ? send[1] & sendBits : 0});
 		// IC29 is non-inverting. Align the LSP result with the XP's 24-bit input.
 		m_lspReturn = {effect.first >> 8, effect.second >> 8};
 		const auto& output = dsp.serialOutput(xpLib::Dsp::SerialBus::d);

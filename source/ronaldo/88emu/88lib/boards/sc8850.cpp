@@ -673,10 +673,13 @@ namespace emu88Lib
 		// XP0 is the auxiliary chip. Its two SDOC half-pass words feed the LSP.
 		// The held SDIB node returns right at slot 0 and left at slot 128.
 		// Four later mode-0 reads consume XP1's first four SDOA words.
+		// The XP sends each word as its 18 high bits (0x3932 = 0x0010) and the
+		// LSP samples those 18.
 		const auto& xp0Sdoc = xp0Dsp.serialOutput(xpLib::Dsp::SerialBus::c);
+		constexpr int32_t sendBits = ~0x3f;
 		const auto lspOutput =
 			m_lspEnabled && xp0Dsp.serialOutputCount(xpLib::Dsp::SerialBus::c) >= 2
-				? m_lsp.process({xp0Sdoc[0], xp0Sdoc[1]})
+				? m_lsp.process({xp0Sdoc[0] & sendBits, xp0Sdoc[1] & sendBits})
 				: SampleFrame{0, 0};
 		const auto& xp1Serial = xp1Dsp.serialOutput(xpLib::Dsp::SerialBus::a);
 		// The 0x40 descriptor used for this SDIB link has the same eight-bit

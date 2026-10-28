@@ -346,6 +346,10 @@ Plugin Manager:
         volume smoothing, effect sends, voice mutes and samples that loop
         past their end.
 
+- [Imp] More accurate effects on the SC-88Pro, SC-8820, SC-8850 and the
+        models based on them: delay memory precision, the effect multiplier
+        and the effect input.
+
 2.2.27:
 
 Framework:

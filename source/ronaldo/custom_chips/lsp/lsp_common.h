@@ -7,6 +7,8 @@
 // Executes 384 instructions per sample with 24-bit arithmetic, a 128-word
 // internal ring and 64 Kiwords of external delay RAM.
 // Immediate MUL uses a unit mantissa; its coefficient byte contains flags.
+// External RAM words are 16-bit floats: sign, 13 mantissa bits, a 2-bit
+// exponent in steps of two bits.
 
 namespace lspLib
 {
@@ -35,13 +37,26 @@ namespace lspLib
 		return static_cast<int32_t>(static_cast<uint32_t>(_x) << 8) >> 8;
 	}
 
+	// An ERAM write keeps the top 20 bits of the latch at the precision the
+	// float word holds: whole below 2^13, then two bits fewer per exponent.
+	// The 2^15-2^17 exponent brings bit 0 back as two low bits.
+	constexpr int32_t eramQuantize(const int32_t _v)
+	{
+		const int32_t m = _v ^ (_v >> 31);
+		if(m < 0x2000) return _v;
+		if(m < 0x8000) return _v & ~3;
+		if(m < 0x20000) return (_v & ~0xf) | ((_v & 1) * 3);
+		return _v & ~0x3f;
+	}
+
 	enum class Op : uint8_t { Skip, Mac, Mul, Special };
 
 	// Write control: which accumulator history value a store or special reads.
 	enum class Src : uint8_t { None, ASat, BSat, ARaw };
 
 	// Jump condition, carried by the instruction AFTER the special that set it.
-	enum class Jump : uint8_t { None, Always, IfNegative, IfNonNegative };
+	// Skip is slot 0x12's: unconditional, at once, without the jump flag.
+	enum class Jump : uint8_t { None, Always, IfNegative, IfNonNegative, Skip };
 
 	// Special-register slots (rr & 0x1f)
 	enum Slot : uint8_t
@@ -50,12 +65,15 @@ namespace lspLib
 		SlotJumpIfNonNegative = 0x0e,
 		SlotJumpAlways        = 0x0f,
 		SlotEramWriteLatch    = 0x10,
+		SlotSkipToHalf        = 0x12,	// skips to slot 192 or the pass end, from two slots before it
 		SlotEramTapAndCoef1   = 0x13,
 		SlotMulCoef1          = 0x14,
 		SlotMulCoef2          = 0x15,
+		SlotRing76            = 0x16,	// stores its source at ring 0x76; any other effect unknown
 		SlotAudioOut          = 0x18,
 		SlotEramRead0         = 0x1a,	// ..0x1d
 		SlotAudioIn           = 0x1e,
+		SlotAudioIn2          = 0x1f,	// the same audio in, stored at ring 0x7f
 	};
 
 	// One decoded instruction. Trivially copyable: a compile worker snapshots
@@ -85,16 +103,28 @@ namespace lspLib
 		bool     abs = false;
 		bool     zeroCoef = false;	// accumulates a zero coefficient: the accumulator is unchanged
 
-		// MUL
+		// MUL. Select bits 00 make the coefficient byte itself the multiplier,
+		// signed for the high half, unsigned for the low half; a low-half MUL
+		// multiplies the previous instruction's operand by coefficient bits 15-8,
+		// eight bits further down.
 		bool     mulLower = false;
 		bool     mulNegate = false;
 		bool     mulCoef2 = false;
-		bool     mulZero = false;	// coefficient byte 0 forces a zero product
+		bool     mulCcCoef = false;
+		bool     mulZero = false;	// select bits 00 with a zero coefficient byte
 
 		// Special
 		uint8_t  slot = 0;
-		bool     imm50d0 = false;	// slot 0x10 without write control: immediate accumulate
-		uint8_t  prevMem = 0;		// previous instruction's memOffs, operand of 50/d0
+		bool     imm50d0 = false;	// slot 0x10 without write control: low coefficient byte of the MAC before
+		bool     latchesSrc = false;	// hands its source to the next instruction as multiplier input
+
+		// Operand of a MUL and of 50/d0: a ring offset, an immediate (opImmShift)
+		// or the source a register special latched (opFromLatch). A low-half MUL
+		// and 50/d0 take the previous instruction's multiplier input.
+		uint8_t  opMem = 0;
+		uint8_t  opImmShift = 0;
+		bool     opFromLatch = false;
+		uint8_t  lowerRunMem = 0;	// a low-half MUL: operand field of the first low half of its run
 
 		// Control flow
 		Jump     jump = Jump::None;
@@ -143,6 +173,7 @@ namespace lspLib
 		int32_t  audioOut = 0;				// slot 0x18
 		int32_t  audioIn = 0;				// slot 0x1e
 		int32_t  jumpPending = 0;			// set by a jump special, consumed (and cleared) by the next slot's jump
+		int32_t  mulInput = 0;				// a register special's source, for a low-half MUL or 50/d0 after it
 
 		uint8_t  bufferPos = 0;				// ring rotation, decremented per sample
 		uint16_t eramPos = 0;

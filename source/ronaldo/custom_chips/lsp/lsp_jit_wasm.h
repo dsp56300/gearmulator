@@ -411,6 +411,73 @@ namespace lspLib
 			f.end();
 		}
 
+		// -> [the operand of a MUL or 50/d0]
+		void pushOperand(const LSPInstr& _i)
+		{
+			auto& f = *m_f;
+			if(_i.opFromLatch)
+			{
+				f.address(&m_rt.mulInput);
+				f.i64Load32S();
+			}
+			else if(_i.opImmShift)
+				f.i64Const(int64_t{1} << _i.opImmShift);
+			else
+				pushRingLoad(_i.opMem);
+		}
+
+		// m_t1 = eramQuantize(writeLatch >> 4), clobbers m_t0 and m_t3
+		void emitEramQuantize()
+		{
+			auto& f = *m_f;
+			f.get(m_writeLatch);
+			f.i64Const(4);
+			f.i64ShrS();
+			f.set(m_t0);
+			f.get(m_t0);
+			f.i64Const(63);
+			f.i64ShrS();
+			f.get(m_t0);
+			f.i64Xor();
+			f.set(m_t3);
+			// exponent 2: v & ~0xf | (v & 1) * 3, exponent 3: v & ~0x3f
+			f.get(m_t0);
+			f.i64Const(~int64_t{0xf});
+			f.i64And();
+			f.get(m_t0);
+			f.i64Const(1);
+			f.i64And();
+			f.i64Const(3);
+			f.i64Mul();
+			f.i64Or();
+			f.get(m_t0);
+			f.i64Const(~int64_t{0x3f});
+			f.i64And();
+			f.get(m_t3);
+			f.i64Const(0x20000);
+			f.i64LtS();
+			f.select();
+			// exponent 1: v & ~3
+			f.set(m_t1);
+			f.get(m_t0);
+			f.i64Const(~int64_t{3});
+			f.i64And();
+			f.get(m_t1);
+			f.get(m_t3);
+			f.i64Const(0x8000);
+			f.i64LtS();
+			f.select();
+			// exponent 0: v
+			f.set(m_t1);
+			f.get(m_t0);
+			f.get(m_t1);
+			f.get(m_t3);
+			f.i64Const(0x2000);
+			f.i64LtS();
+			f.select();
+			f.set(m_t1);
+		}
+
 		void emitSlot(const uint32_t _pc)
 		{
 			auto& f = *m_f;
@@ -453,7 +520,7 @@ namespace lspLib
 				}
 				else
 				{
-					pushRingLoad(i.memOffs);
+					pushRingLoad(i.opMem);
 					pushCoef(_pc);
 					f.i64Mul();
 				}
@@ -462,14 +529,17 @@ namespace lspLib
 				emitAccWrite(i);
 				if(i.abs)
 				{
+					// abs judges the sign by bit 24 and negates the whole value
 					const auto dest = m_acc[i.destReg];
 					f.i64Const(0);
 					f.get(dest);
 					f.i64Sub();
 					f.get(dest);
 					f.get(dest);
+					f.i64Const(0x1000000);
+					f.i64And();
 					f.i64Const(0);
-					f.i64LtS();
+					f.i64Ne();
 					f.select();
 					f.i64SignExtend32();
 					f.set(dest);
@@ -477,20 +547,31 @@ namespace lspLib
 				break;
 
 			case Op::Mul:
-				f.get(i.mulCoef2 ? m_coef2 : m_coef1);
-				if(i.mulLower)
-				{
-					f.i64Const(9);
-					f.i64ShrU();
-					f.i64Const(0x7f);
-					f.i64And();
-				}
+				if(i.mulCcCoef)
+					f.i64Const(i.mulLower ? static_cast<int64_t>(static_cast<uint8_t>(i.cc)) : static_cast<int64_t>(i.cc));
 				else
 				{
-					f.i64Const(16);
-					f.i64ShrS();
+					f.get(i.mulCoef2 ? m_coef2 : m_coef1);
+					if(i.mulLower)
+					{
+						f.i64Const(8);
+						f.i64ShrU();
+						f.i64Const(0xff);
+						f.i64And();
+					}
+					else
+					{
+						f.i64Const(16);
+						f.i64ShrS();
+					}
 				}
 				f.set(m_t3);
+				// A low half reads the previous multiplier input, before its own write-back.
+				if(i.mulLower && !i.mulZero)
+				{
+					pushOperand(i);
+					f.set(m_t1);
+				}
 				if(i.src != Src::None)
 				{
 					emitSrc(i, m_t0);
@@ -500,14 +581,14 @@ namespace lspLib
 					f.i64Const(0);
 				else
 				{
-					if(i.immShift)
-						f.i64Const(int64_t(1) << i.immShift);
+					if(i.mulLower)
+						f.get(m_t1);
 					else
-						pushRingLoad(i.memOffs);
+						pushOperand(i);
 					f.get(m_t3);
 					f.i64Mul();
 				}
-				f.i64Const(i.scaler + (i.mulLower ? 7 : 0));
+				f.i64Const(i.scaler + (i.mulLower ? 8 : 0));
 				f.i64ShrS();
 				f.set(m_t1);
 				if(i.mulNegate)
@@ -519,9 +600,8 @@ namespace lspLib
 				}
 				if(!i.replace)
 				{
-					emitSat24(m_t3, m_acc[i.liveReg()]);
 					f.get(m_t1);
-					f.get(m_t3);
+					f.get(m_acc[i.liveReg()]);
 					f.i64Add();
 					f.set(m_t1);
 				}
@@ -539,20 +619,11 @@ namespace lspLib
 					f.i64Const(0xff);
 					f.i64And();
 					f.set(m_t3);
-					if(i.prevMem >= 1 && i.prevMem <= 4)
-					{
-						f.get(m_t3);
-						f.i64Const((i.prevMem - 1) * 5);
-						f.i64Shl();
-					}
-					else
-					{
-						pushRingLoad(i.prevMem);
-						f.get(m_t3);
-						f.i64Mul();
-						f.i64Const(7);
-						f.i64ShrS();
-					}
+					pushOperand(i);
+					f.get(m_t3);
+					f.i64Mul();
+					f.i64Const(7);
+					f.i64ShrS();
 					f.i64Const(1 + i.scaler);
 					f.i64ShrS();
 					emitAccWrite(i);
@@ -605,6 +676,9 @@ namespace lspLib
 					f.get(m_t0);
 					f.set(m_coef2);
 					break;
+				case SlotRing76:
+					emitRingStore(m_t0, 0x76);
+					break;
 				case SlotAudioOut:
 					storeRt(&m_rt.audioOut, m_t0);
 					emitRingStore(m_t0, 0x78);
@@ -616,15 +690,17 @@ namespace lspLib
 					f.set(m_t0);
 					emitRingStore(m_t0, static_cast<uint8_t>(0x60 + i.slot));
 					break;
-				case SlotAudioIn:
+				case SlotAudioIn: case SlotAudioIn2:
 					if(_pc >= ChannelSplit)
 						copyRt(&m_rt.audioIn, &m_rt.audioInL);
 					loadRt(m_t0, &m_rt.audioIn);
-					emitRingStore(m_t0, 0x7e);
+					emitRingStore(m_t0, static_cast<uint8_t>(0x60 + i.slot));
 					break;
 				default:
 					break;
 				}
+				if(i.latchesSrc)
+					storeRt(&m_rt.mulInput, m_t0);
 				if(i.writesAcc)
 				{
 					f.get(m_t0);
@@ -642,15 +718,40 @@ namespace lspLib
 
 			if(i.eramWrite)
 			{
+				emitEramQuantize();
 				pushEramAddr(_pc, false);
-				f.get(m_writeLatch);
-				f.i64Const(4);
-				f.i64ShrS();
+				f.get(m_t1);
 				f.i64Store32();
+				// a write cycle leaves its data in the read latch too
+				f.get(m_t1);
+				f.i64Const(4);
+				f.i64Shl();
+				f.i64SignExtend32();
+				f.set(m_readValue);
 			}
 
 			if(i.jump == Jump::None)
 				return;
+
+			if(i.jump == Jump::Skip)
+			{
+				// the skipped slots still pass as idle cycles: the history moves on
+				emitParallelMove(i.stateOut);
+				for(const int k : {0, 1, 3, 4})
+				{
+					f.get(m_acc[k < 3 ? 2 : 5]);
+					f.set(m_acc[k]);
+				}
+				if(i.jumpDest < ProgramWords)
+				{
+					f.i32Const(static_cast<int32_t>(m_segmentOf[i.jumpDest]));
+					f.set(m_entry);
+					f.br(m_top);
+				}
+				else
+					f.br(m_exit);
+				return;
+			}
 
 			// The jump flag set by the previous slot is taken after this one and cleared; a slot
 			// entered through a jump sees whatever the flag was. The audio-out sample of a
