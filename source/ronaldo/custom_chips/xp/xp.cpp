@@ -331,13 +331,10 @@ namespace xpLib
 		const auto steerTrunkStep = [](const int64_t _accumulator, const uint32_t _previous, const uint32_t _threshold,
 									   const int32_t _rate)
 		{
-			int64_t next;
-			if (_previous > _threshold)
-				next = _accumulator - _rate;
-			else if (_accumulator < 0)
-				next = std::min<int64_t>(_accumulator + _rate, -1);
-			else
-				next = _accumulator + _rate;
+			// Below the threshold the accumulator decelerates only up to the -1 sentinel, from any value: a trunk
+			// ramp never steers upward (a destination rewritten above the current after the entry leaves the
+			// current creeping down on the sentinel, measured on the SC-88 XP).
+			const auto next = _previous > _threshold ? _accumulator - _rate : std::min<int64_t>(_accumulator + _rate, -1);
 			return static_cast<uint32_t>(next) & rampScratchMask;
 		};
 		const auto zeroBoundaryStep = [&]
