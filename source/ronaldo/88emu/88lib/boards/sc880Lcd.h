@@ -24,7 +24,8 @@ namespace emu88Lib
 	{
 	public:
 		static constexpr uint32_t Width = 136;
-		static constexpr uint32_t Height = 34;
+		static constexpr uint32_t Height = 32;
+		static constexpr uint32_t StripDigits = 25;
 
 		void reset();
 		void writeInstruction(uint8_t _instr);
@@ -34,9 +35,13 @@ namespace emu88Lib
 		uint8_t contrast() const { return m_contrast; }
 
 		// One byte per dot, row major, Width x Height: 1 lit, 0 dark.
-		void renderMono(std::vector<uint8_t>& _output) const;
+		void renderMono(std::vector<uint8_t>& _output, std::array<uint8_t, 25>& _dseg) const;
 
 	private:
+		bool stripBit(const uint32_t _line, const uint32_t _column, const uint32_t _bit) const
+		{
+			return (m_ram[_line * Columns + _column] >> _bit) & 1;
+		}
 		static constexpr uint32_t Columns = 32;		// what a 5-bit column address reaches
 		static constexpr uint32_t Lines = 64;		// what a 6-bit line address reaches
 

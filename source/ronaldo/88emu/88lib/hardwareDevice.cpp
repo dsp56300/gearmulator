@@ -582,8 +582,9 @@ namespace emu88Lib
 			first.width = static_cast<uint16_t>(Sc880Lcd::Width);
 			first.height = static_cast<uint16_t>(Sc880Lcd::Height);
 			first.displayOn = lcd.isDisplayOn();
-			lcd.renderMono(first.mono);
+			lcd.renderMono(first.mono, first.dseg);
 			next.leds = m_sc88Pro->leds();
+			first.hasDigitalSegment = true;
 		}
 		else if(deviceHasLcd(m_model) && (m_sc88Pro || m_sc88 || (m_sc55 && m_sc55->hasDisplay())))
 		{

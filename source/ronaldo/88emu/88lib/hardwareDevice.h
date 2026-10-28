@@ -58,6 +58,7 @@ namespace emu88Lib
 				Type type = Type::None;
 				std::array<uint8_t, 80> ddRam{};
 				std::array<uint8_t, 64> cgRam{};
+				std::array<uint8_t, 25> dseg{};  //  SC-880 digital segment
 				std::vector<uint8_t> mono;
 				// The visible characters of a character display, one string per line, in the
 				// controller's character set (ASCII for the printable range). Empty on a
@@ -70,6 +71,7 @@ namespace emu88Lib
 				// leaves the glass dark, where a display that is merely off still shows its backlight.
 				// displayOn is false as well then.
 				bool powered = true;
+				bool hasDigitalSegment = false;
 			};
 
 			// Only a board with two panels fills the second - see deviceHasSecondLcd(), which is
