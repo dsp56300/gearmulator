@@ -157,10 +157,11 @@ namespace xpLib
 				_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
 			}
 			stepVoiceRamps(_voiceIndex, _voice);
-			// Measured on the SC-88 XP: a muted voice stops its producer only. The filter and the TVA keep running
-			// on the sample held at the frozen phase, so the mixer slot settles over some twenty frames to the
-			// filter's response to that input and keeps receiving it every frame.
-			if ((_voice.waveControl_0000 & (WaveControl::waveEngineHalt | WaveControl::muteStatus)) == WaveControl::muteStatus)
+			// Measured on the SC-88 XP: a muted or halted voice stops its producer only. The filter and the TVA keep
+			// running on the sample held at the frozen phase (zero for a voice halted from launch: the chip's states
+			// then run a pure recurrence from whatever the host seeds), so the mixer slot settles over some twenty
+			// frames to the filter's response to that input and keeps receiving it every frame.
+			if ((_voice.waveControl_0000 & (WaveControl::waveEngineHalt | WaveControl::muteStatus)) != 0)
 				return {interpolateVoice(_voice, unpackAddressPhase(_voice.addressFraction_0e00)), true};
 			return {};
 		}

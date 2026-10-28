@@ -38,12 +38,8 @@ namespace xpLib
 		const auto voiceCount = std::min<size_t>((m_state.highestVoice & 0x3f) + 1, nMaxVoices);
 		m_frameVoices = voiceCount;
 		prepareMixer(voiceCount);
-		for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex)
-		{
-			auto& voice = m_state.voices[voiceIndex];
-			if (!voice.resetState_3900.released && voice.tvaGain_2700 != 0)
-				voice.tvaGain_2700 = static_cast<uint16_t>(std::max<uint32_t>(1, (voice.tvaGain_2700 * 7u) >> 3));
-		}
+		// Measured on the SC-88 XP: a reset-held voice keeps its TVA gain as the host seeded it (0x1935 through a
+		// hold of a hundred frames and after a late launch); the chip does not decay it.
 		const auto updateTvaBeforeAudio = [this](VoiceState& _voice)
 		{
 			const auto phase = _voice.runtimeCache.runtimePhase;
@@ -398,12 +394,18 @@ namespace xpLib
 
 		// Both coefficients are unsigned Q19. Each of the Chamberlin operations saturates independently in the
 		// signed 24-bit state domain. The coefficient products truncate toward zero; this differs from an arithmetic
-		// right shift by one LSB for negative products with discarded fractional bits.
+		// right shift by one LSB for negative products with discarded fractional bits. Measured on the SC-88 XP on a
+		// zero-input run from seeded states through the rails (seven transitions, all exact): the multiplier takes
+		// only the top 16 bits of each coefficient, so the low four bits never reach the products.
 		const auto multiplyCoefficient = [](const int32_t _value, const uint32_t _coefficient)
-		{ return (static_cast<int64_t>(_value) * _coefficient) / (int64_t{1} << 19); };
+		{ return (static_cast<int64_t>(_value) * (_coefficient & ~uint32_t{0xf})) / (int64_t{1} << 19); };
 		const auto nextLp = saturateSigned24(static_cast<int64_t>(oldLp) + multiplyCoefficient(oldBp, frequency));
-		const auto highPass =
-			saturateSigned24(static_cast<int64_t>(_input) - nextLp - multiplyCoefficient(oldBp, damping));
+		// The highpass intermediate saturates symmetrically, to -7FFFFF rather than -800000: measured on the SC-88 XP
+		// at the rails, where the states cycle between 800301/7FFFFF and 7FFFFF/800901 and stay there.
+		const auto highPass = static_cast<int32_t>(std::max<int64_t>(
+			-((int64_t{1} << 23) - 1),
+			std::min<int64_t>((int64_t{1} << 23) - 1,
+							  static_cast<int64_t>(_input) - nextLp - multiplyCoefficient(oldBp, damping))));
 		const auto nextBp = saturateSigned24(static_cast<int64_t>(oldBp) + multiplyCoefficient(highPass, frequency));
 		_voice.filterLp_2900 = static_cast<uint32_t>(nextLp) & filterMask;
 		_voice.filterBp_2800 = static_cast<uint32_t>(nextBp) & filterMask;
