@@ -349,22 +349,27 @@ namespace xpLib
 		if (const auto reg = findVoiceWideRegister(_address); reg.value != nullptr)
 		{
 			// A running producer keeps its live marker (bit 7) and the first loop-marker stage (bit 17)
-			// through a host write of wave control, unless the write halts the wave engine or requests a
-			// mute.
+			// through a host write of wave control, unless the write halts the wave engine. Measured on the
+			// SC-88 XP: a write requesting a mute keeps them too (0000 reads C8081 after 88001 on a running voice).
 			const bool waveControl = (_address & 0xff02) == (Address::waveControl_0000 | 2);
 			auto& voice = m_state.voices[static_cast<size_t>(_address & 0x00ff) / voiceWideStride];
 			const auto before = voice.waveControl_0000;
 			writeWide(reg, _address, _value);
 			if (waveControl && voice.runtimeCache.runtimePhase == VoiceRuntimePhaseCache::running &&
-				(voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::waveEngineHalt)) == 0)
+				(voice.waveControl_0000 & WaveControl::waveEngineHalt) == 0)
 				voice.waveControl_0000 |=
 					before & (WaveControl::fceDpcmExponent0OrProducerLive | WaveControl::loopMarkerFirstStage);
 			if ((_address & 0xff02) == (Address::ampRamp_1a00 | 2))
 			{
 				const auto voiceIndex = static_cast<size_t>(_address & 0x00ff) / voiceWideStride;
-				const auto control = m_state.voices[voiceIndex].ampRamp_1a00;
-				m_state.voices[voiceIndex].runtimeCache.ampCurve2EntryPending =
-					(control & (rampCurveMask | rampHold)) == 0x08000;
+				auto& control = m_state.voices[voiceIndex].ampRamp_1a00;
+				// Measured on the SC-88 XP: a curve-2 write reads back as curve 3 from the write on, held or not;
+				// the trunk entry (half-value destination, zeroed accumulator) follows at the next service.
+				if ((control & rampCurveMask) == 0x08000)
+				{
+					control |= rampTrunkComplete;
+					m_state.voices[voiceIndex].runtimeCache.ampCurve2EntryPending = true;
+				}
 			}
 			return;
 		}

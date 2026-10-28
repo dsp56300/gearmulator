@@ -14,6 +14,13 @@ namespace xpLib
 
 		if (_voice.runtimeCache.runtimePhase == VoiceRuntimePhaseCache::preload)
 		{
+			// Measured on the SC-88 XP: a voice launched with a mute request does not preload (no live marker,
+			// the address stays) until the mute status is set, so with the mute reason masked it never starts.
+			if ((_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus)) == WaveControl::muteRequest)
+			{
+				_voice.runtimeCache.runtimePhase = VoiceRuntimePhaseCache::initialize;   // runs, producer idle
+				return {};
+			}
 			if ((_voice.waveControl_0000 & WaveControl::ldpcmFormat) != 0)
 				_voice.runtimeCache.waveSampleFormat = WaveSampleFormatCache::ldpcm;
 			else if ((_voice.waveControl_0000 & WaveControl::fceDpcmExponent0OrProducerLive) != 0)
@@ -141,7 +148,8 @@ namespace xpLib
 
 		const auto playbackCounter = (_voice.playbackStateConfig_1000 + 1) & 7;
 		_voice.playbackStateConfig_1000 = playbackRunning | (_voice.playbackStateConfig_1000 & 0x18) | playbackCounter;
-		if ((_voice.waveControl_0000 & (WaveControl::waveEngineHalt | WaveControl::producerBlocked)) != 0)
+		if ((_voice.waveControl_0000 & (WaveControl::waveEngineHalt | WaveControl::producerBlocked)) != 0 ||
+			(_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus)) == WaveControl::muteRequest)
 		{
 			if (playbackCounter == 6)
 			{

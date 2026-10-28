@@ -262,16 +262,20 @@ namespace xpLib
 		// The amp slot publishes the gain from the incoming currents, then advances amp. Amp-mod therefore becomes
 		// visible in 0x2300 on the following sample, and amp itself has one amp-slot (two-sample) latency there.
 		_voice.combinedAmp_2300 = combineAmp(_voice);
-		const auto parity = static_cast<uint8_t>((playbackCounter >> 1) & 1);
+		// Measured on the SC-88 XP: the amp parity is the complement of the playback counter bit (the upward log
+		// correction lands on the even services; a trunk ramp continuing from the -1 sentinel moves on its first).
+		const auto parity = static_cast<uint8_t>(((playbackCounter >> 1) & 1) ^ 1);
 
 		const auto curve = static_cast<uint8_t>((_voice.ampRamp_1a00 & rampCurveMask) >> 14);
 		const auto pending = destinationPending(_voice.ampDestination_1500);
 		const auto held = (_voice.ampRamp_1a00 & rampHold) != 0;
 		// The trunk entry belongs to the unheld curve-2 control write; a later destination write does not
 		// re-enter it.
-		if (curve == 2 && !held && _voice.runtimeCache.ampCurve2EntryPending)
+		if (_voice.runtimeCache.ampCurve2EntryPending)
 		{
-			_voice.ampDestination_1500 = (_voice.ampCurrent_1e00 >> 1) | rampAcknowledge;
+			// Half the current with bits 1 and 2 cleared: measured on the SC-88 XP for entry currents 1FE72, 1FCEE,
+			// 1FB6F, 1F9F6 and 1F599 (FF39, FE75, FDB5, FCF9, FACD).
+			_voice.ampDestination_1500 = ((_voice.ampCurrent_1e00 >> 3) << 2) | rampAcknowledge;
 			_voice.ampStep_2600 = 0;
 			_voice.runtimeCache.ampCurve2EntryPending = false;
 			return;
@@ -286,11 +290,22 @@ namespace xpLib
 			_voice.ampStep_2600 = calculateLinearRampStep(_voice.ampCurrent_1e00, target, _voice.ampRamp_1a00);
 			return;
 		}
-		if (held || !tickDue(_voice.ampRamp_1a00, ampCounter))
+		// Measured on the SC-88 XP: a held curve-0 ramp, and a curve-0 ramp resting at its target, leave the -1
+		// sentinel in the accumulator, which a later curve-3 write continues from (rate 7FF starts at -800). Held
+		// trunk curves keep their accumulator, the linear curve its step.
+		if (held)
+		{
+			if (curve == 0)
+				_voice.ampStep_2600 = rampScratchMask;
+			return;
+		}
+		if (!tickDue(_voice.ampRamp_1a00, ampCounter))
 			return;
 
 		if (curve == 0)
 		{
+			if (_voice.ampCurrent_1e00 == target)
+				_voice.ampStep_2600 = rampScratchMask;
 			stepLogRamp(_voice.ampCurrent_1e00, target, _voice.ampRamp_1a00, 1, parity);
 			// Ordinary amp curves terminate at any programmed target. Trunk curves retain their zero-boundary behavior.
 			if (_voice.ampCurrent_1e00 == target)
@@ -314,6 +329,21 @@ namespace xpLib
 		// At zero both trunk curves end: a negative step still decelerates by the rate, but only up to the -1
 		// sentinel, which then holds, so the current stays at zero (the step never turns positive).
 		const auto rate = static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask);
+		// Measured on the SC-88 XP: a downward ramp that is already below its threshold decelerates only up to the
+		// -1 sentinel, which then holds; the step never turns positive, so the current creeps to zero instead of
+		// wrapping (3FFFF -> 3FFFE at rate 7FF: -1, -800, then -1 per two services).
+		const auto steerTrunkStep = [](const int64_t _accumulator, const uint32_t _previous, const uint32_t _threshold,
+									   const int32_t _rate)
+		{
+			int64_t next;
+			if (_previous > _threshold)
+				next = _accumulator - _rate;
+			else if (_accumulator < 0)
+				next = std::min<int64_t>(_accumulator + _rate, -1);
+			else
+				next = _accumulator + _rate;
+			return static_cast<uint32_t>(next) & rampScratchMask;
+		};
 		const auto zeroBoundaryStep = [&]
 		{
 			return static_cast<uint32_t>(accumulator < 0 ? std::min<int64_t>(accumulator + rate, -1) : -1) &
@@ -330,9 +360,7 @@ namespace xpLib
 				return;
 			}
 			const auto threshold = _voice.ampDestination_1500 & ~rampAcknowledge;
-			const auto delta = previous > threshold ? -static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask)
-													: static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask);
-			_voice.ampStep_2600 = static_cast<uint32_t>(accumulator + delta) & rampScratchMask;
+			_voice.ampStep_2600 = steerTrunkStep(accumulator, previous, threshold, rate);
 			if (previous != 0 && _voice.ampCurrent_1e00 == 0)
 			{
 				_voice.ampRamp_1a00 |= rampTrunkComplete;
@@ -358,9 +386,7 @@ namespace xpLib
 			raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
 			return;
 		}
-		const auto delta = previous > destination ? -static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask)
-												  : static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask);
-		_voice.ampStep_2600 = static_cast<uint32_t>(accumulator + delta) & rampScratchMask;
+		_voice.ampStep_2600 = steerTrunkStep(accumulator, previous, destination, rate);
 	}
 
 	int32_t XP::stepVoiceFilter(VoiceState& _voice, const int32_t _input, const unsigned _mode)
@@ -595,13 +621,9 @@ namespace xpLib
 	{
 		if ((_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus)) != WaveControl::muteRequest)
 			return;
-		// A voice without IRQ enable mutes at once; with it the status waits for the event's delivery, and a
-		// masked event never sets it.
-		if ((_voice.waveControl_0000 & WaveControl::irqEnable) == 0)
-		{
-			_voice.waveControl_0000 |= WaveControl::muteStatus;
-			return;
-		}
+		// Measured on the SC-88 XP: the mute request raises its event and sets the status on delivery whether or
+		// not the voice has IRQ enable (reason 8 arrives, the IRQ asserts); a masked event never sets it, and the
+		// voice then never launches either (see the preload gate).
 		if ((m_state.irqConfigMask & (uint16_t{1} << IrqReason::muteTransition)) == 0)
 			return;
 		if (!acceptVoiceEvent(_voiceIndex, IrqReason::muteTransition))
