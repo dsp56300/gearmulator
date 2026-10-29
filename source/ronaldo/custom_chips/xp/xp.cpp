@@ -597,6 +597,11 @@ namespace xpLib
 		if ((_voice.waveControl_0000 & WaveControl::irqEnable) == 0 ||
 			(m_state.irqConfigMask & (uint16_t{1} << 5)) == 0)
 			return;
+		// Measured on the SC-88 XP: with the alternate loop the reason-6 select raises no marker at all (no event,
+		// no stage bits, through two bounces); without it the alternate loop reports reason 5 as a plain loop does.
+		if ((_voice.waveControl_0000 & (WaveControl::alternateLoop | WaveControl::loopReason6)) ==
+			(WaveControl::alternateLoop | WaveControl::loopReason6))
+			return;
 
 		const auto reason = (_voice.waveControl_0000 & WaveControl::loopReason6) != 0
 			? IrqReason::alternatePlaybackMarker
