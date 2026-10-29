@@ -46,12 +46,15 @@ namespace xpLib
 			if ((_voice.waveControl_0000 & WaveControl::waveEngineHalt) == 0)
 			{
 				const auto reverse = voiceAddressRunsReverse(_voice);
-				// TODO: reverse preload on an 8-bit wave bus is not modeled.
+				const auto wide = voiceUses16BitWaveBus(_voice);
+				// The preload is four word fetches on a 16-bit bus (eight cells, one less when the start is the odd
+				// cell of its word, forward; seven, one more for an odd start, in reverse) and seven cells on an
+				// 8-bit bus. Measured on the SC-88 XP: a consumer position left by the host caps it (positions 1-9
+				// leave no producer slots). TODO: reverse preload on an 8-bit wave bus is not modeled.
 				auto preloadCount = _voice.waveCircularBuffer_0800.size() - 1;
-				if (voiceUses16BitWaveBus(_voice))
+				if (wide)
 				{
-					preloadCount = reverse ? 7 + (_voice.sampleCurrent_0100 & 1)
-										   : _voice.waveCircularBuffer_0800.size() - (_voice.sampleCurrent_0100 & 1);
+					preloadCount = _voice.waveCircularBuffer_0800.size();
 					const auto consumer = static_cast<size_t>(_voice.addressFraction_0e00 & 0x0f);
 					if (consumer != 0)
 					{
@@ -82,11 +85,9 @@ namespace xpLib
 						preloadCount = preloadForwardLoopWords(_voiceIndex, _voice, preloadCount);
 					else
 					{
-						// Whole words from the start address; the counts above (8 less one for an odd start, 7 plus
-						// one for an odd reverse start) are what four words yield. Measured on the SC-88 XP: a word
-						// cut by the wrap ends the preload after its first cell.
+						// Measured on the SC-88 XP: a word cut by the wrap ends the preload after its first cell.
 						size_t cells = 0;
-						while (cells < preloadCount)
+						for (unsigned word = 0; word < (wide ? 4u : 7u) && cells < preloadCount; ++word)
 						{
 							const auto before = _voice.sampleCurrent_0100 & voiceAddressMask;
 							const auto fetched = fetchVoiceWord(_voiceIndex, _voice, cells, preloadCount - cells);
