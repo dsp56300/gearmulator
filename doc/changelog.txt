@@ -327,6 +327,11 @@ Plugin Manager:
         example, was reported as a damaged archive. It now says that it could
         not be written, and why.
 
+- [Fix] After the Plugin Manager updated itself, the formats ticked since it was
+        last refreshed were lost: formats unticked at the top came back ticked,
+        and "Install selected" installed builds nobody had asked for. What is
+        ticked is now saved as soon as it changes.
+
 88emuPlayer:
 
 - [New] Devices: Added support for the SC-880.

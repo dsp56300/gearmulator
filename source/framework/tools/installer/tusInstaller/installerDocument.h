@@ -147,15 +147,15 @@ namespace pluginManager
 		// Label, colour and whether the section is there at all, from the two flags below.
 		void updateTeamLogin() const;
 
-		// Read off the rows before they are thrown away, put back on the ones built in their place.
+		// Read off the rows whenever one of them changes, and put back on the ones built in place of
+		// them after a refresh.
 		void rememberSelection();
 
 		// And keeps it between runs, because somebody who installs one format only has said so
 		// already and should not have to say it again every time the window opens.
 		//
-		// What is written down is what was turned OFF. A format that turns up later - a plugin that
-		// gains one, or a Mac, which has AU where the others do not - is then ticked like everything
-		// else, rather than off for never having been in the file.
+		// What is written down is what was turned ON, so a format or a product that turns up later
+		// arrives unticked (EMU-248).
 		void loadSelection();
 		void saveSelection() const;
 		void applySelection(PluginEntryController& _entry) const;

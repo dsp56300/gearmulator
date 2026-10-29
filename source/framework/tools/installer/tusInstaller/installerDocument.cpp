@@ -416,20 +416,35 @@ namespace pluginManager
 		xml.writeTo(file);
 	}
 
+	// Written as soon as it changes rather than on the way out: an update starts the new copy of this
+	// program before this one has quit, and the new one reads the file straight away. Written only on
+	// the way out, every tick since the last refresh was lost to it - formats unticked at the top came
+	// back ticked, and "Install selected" put builds nobody had asked for on the machine.
+	//
+	// Only when something did change, since a row also reports every change of what is installed.
 	void InstallerDocument::rememberSelection()
 	{
+		bool changed = false;
+
 		for (const auto& entry : m_entries)
 		{
 			const auto selected = entry->getSelectedFormats();
 
-			auto& selection = m_selection[entry->getProductId()];
+			Selection now;
+			now.selectedFormats.insert(selected.begin(), selected.end());
+			now.fx = entry->isFxSelected();
 
-			selection.selectedFormats.clear();
-			selection.selectedFormats.insert(selected.begin(), selected.end());
-			selection.fx = entry->isFxSelected();
+			auto& known = m_selection[entry->getProductId()];
+
+			if (known.selectedFormats == now.selectedFormats && known.fx == now.fx)
+				continue;
+
+			known = std::move(now);
+			changed = true;
 		}
 
-		saveSelection();
+		if (changed)
+			saveSelection();
 	}
 
 	void InstallerDocument::applySelection(PluginEntryController& _entry) const
@@ -1075,7 +1090,11 @@ namespace pluginManager
 		// mistaken for the user doing it.
 		applySelection(*controller);
 
-		controller->setOnChanged([this] { updateBulkButtons(); });
+		controller->setOnChanged([this]
+		{
+			rememberSelection();
+			updateBulkButtons();
+		});
 
 		m_entries.push_back(std::move(controller));
 	}
