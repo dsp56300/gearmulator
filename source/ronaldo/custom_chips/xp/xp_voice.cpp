@@ -210,11 +210,20 @@ namespace xpLib
 
 		if (voiceUses16BitWaveBus(_voice))
 		{
-			const auto pairAlignment = (_voice.waveFetchState_0400 >> 16) & 1;
-			const auto phaseOffset = pairAlignment << 14;
-			const auto pairCount = ((nextPhase + phaseOffset) >> 15) - ((phase + phaseOffset) >> 15);
-			for (uint32_t pair = 0; pair < pairCount; ++pair)
+			// The producer fills by level, not by the consumer's pace: a word is fetched while the FIFO has room for
+			// one, the lead of the pointer over the consumer at most six of the eight cells, as the preload's room
+			// rule (positions 1-9 leave no producer slot, A/C/E leave one, two and three words) already says. A pace
+			// rule, one refill per pair boundary the consumer crosses, holds only while every refill yields two
+			// cells; after the one-cell word of a jump to an odd loop point it drifts a cell per loop at any
+			// fractional pitch (every rig table ran at exactly one cell per frame, where the two agree), and the
+			// consumer overruns the producer within a few loops (SC-88Pro 34H_LATN, loop DA259-DA2A5).
+			for (unsigned word = 0; word < 4; ++word)
+			{
+				const auto pointer = (_voice.waveFetchState_0400 >> 16) & 0x0f;
+				if (((pointer - (nextPhase >> 14)) & 0x0f) > 6)
+					break;
 				refillVoiceFifo(_voiceIndex, _voice);
+			}
 		}
 		else
 		{
