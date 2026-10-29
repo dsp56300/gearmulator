@@ -81,18 +81,21 @@ namespace xpLib
 						preloadCount = preloadForwardLoopWords(_voiceIndex, _voice, preloadCount);
 					else
 					{
-						for (size_t i = 0; i < preloadCount; ++i)
+						// Whole words from the start address; the counts above (8 less one for an odd start, 7 plus
+						// one for an odd reverse start) are what four words yield. Measured on the SC-88 XP: a word
+						// cut by the wrap ends the preload after its first cell.
+						size_t cells = 0;
+						while (cells < preloadCount)
 						{
-							_voice.waveCircularBuffer_0800[i] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-							const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
-							refreshExponentCacheAfterAdvance(_voice, looped);
-							// Measured on the SC-88 XP: a pair cut by the wrap ends the preload after its first cell.
-							if (looped && voiceUses16BitWaveBus(_voice) && !reverse && voiceLoopAtOrBeforeEnd(_voice) && (i & 1) == 0)
-							{
-								preloadCount = i + 1;
+							const auto before = _voice.sampleCurrent_0100 & voiceAddressMask;
+							const auto fetched = fetchVoiceWord(_voiceIndex, _voice, cells, preloadCount - cells);
+							cells += fetched;
+							const auto after = _voice.sampleCurrent_0100 & voiceAddressMask;
+							const auto wrapped = reverse ? after > before : after < before;
+							if (fetched == 1 && wrapped && voiceLoopBeforeEndInDirection(_voice, reverse))
 								break;
-							}
 						}
+						preloadCount = cells;
 					}
 					// Measured on the SC-88 XP: the preload writes the cell after the counted ones from the pointer
 					// without counting it (the cut pair's second cell from the loop point, the eighth cell of an odd
@@ -211,12 +214,12 @@ namespace xpLib
 			const auto phaseOffset = pairAlignment << 14;
 			const auto pairCount = ((nextPhase + phaseOffset) >> 15) - ((phase + phaseOffset) >> 15);
 			for (uint32_t pair = 0; pair < pairCount; ++pair)
-				refillVoicePair(_voiceIndex, _voice);
+				refillVoiceFifo(_voiceIndex, _voice);
 		}
 		else
 		{
 			for (uint32_t cell = 0; cell < cellCount; ++cell)
-				refillVoiceCell(_voiceIndex, _voice);
+				refillVoiceFifo(_voiceIndex, _voice);
 		}
 		if (playbackCounter == 6)
 			_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
@@ -289,56 +292,47 @@ namespace xpLib
 		return cells;
 	}
 
-	void XP::refillVoiceCell(const size_t _voiceIndex, VoiceState& _voice)
+	size_t XP::fetchVoiceWord(const size_t _voiceIndex, VoiceState& _voice, const size_t _slot, const size_t _limit)
 	{
-		const auto pointer = static_cast<size_t>(_voice.waveFetchState_0400 >> 16) & 0x0f;
-		const auto cell = pointer & 7;
-		_voice.waveCircularBuffer_0800[cell] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-		const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
-		refreshExponentCacheAfterAdvance(_voice, looped);
-
-		const auto nextPointer = static_cast<uint32_t>((pointer + 1) & 0x0f);
-		_voice.waveFetchState_0400 = (nextPointer << 16) | (_voice.waveFetchState_0400 & 0xffff);
+		// The producer's one ROM access, measured on the SC-88 XP: the 16-bit word that holds the voice's address
+		// (one cell on an 8-bit bus), written into the FIFO from _slot on. Forward it yields the cells from the
+		// address to the end of the word, in reverse down to its start, so a fetch entered at the odd cell of its
+		// word (after a jump to an odd loop point, or an even one in reverse) yields that one cell and the next
+		// fetch is the aligned word: loop 71/end 7F runs 71 | 72 73 | 74 75, a three-cell loop 7D..7F alternates
+		// one and two cells. In the loop-before-end regime (playback order) the word that reaches the end ends
+		// with that cell, the pointer then at the loop point. With the loop past the end the chip pairs from the
+		// loop address as written and fetches the end word whole, its sample past the end repeating the end
+		// sample; a one-shot voice parked on its end (loop == end) keeps producing pairs of the end sample.
+		const auto reverse = voiceAddressRunsReverse(_voice);
+		const auto wide = voiceUses16BitWaveBus(_voice);
+		const auto loopBeforeEnd = voiceLoopBeforeEndInDirection(_voice, reverse);
+		const auto end = _voice.sampleEnd_0300 & voiceAddressMask;
+		const auto parked = (_voice.sampleLoop_0200 & voiceAddressMask) == end;
+		size_t cells = 0;
+		while (cells < _limit)
+		{
+			const auto address = _voice.sampleCurrent_0100 & voiceAddressMask;
+			const auto lastCellOfWord =
+				!wide || (loopBeforeEnd && !(parked && address == end) && (((address & 1) != 0) != reverse));
+			const auto pastEnd = wide && !loopBeforeEnd && cells > 0 && address == (end | 1);
+			auto& cell = _voice.waveCircularBuffer_0800[(_slot + cells) & 7];
+			cell = pastEnd ? _voice.waveCircularBuffer_0800[(_slot + cells - 1) & 7]
+						   : readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
+			const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
+			refreshExponentCacheAfterAdvance(_voice, looped);
+			++cells;
+			if (lastCellOfWord || (looped && loopBeforeEnd) || cells == 2)
+				break;
+		}
+		return cells;
 	}
 
-	void XP::refillVoicePair(const size_t _voiceIndex, VoiceState& _voice)
+	void XP::refillVoiceFifo(const size_t _voiceIndex, VoiceState& _voice)
 	{
 		const auto pointer = static_cast<size_t>(_voice.waveFetchState_0400 >> 16) & 0x0f;
-		const auto cell = pointer & 7;
-		// Measured on the SC-88 XP: the chip reads the 16-bit ROM word that holds the address and takes only the
-		// cells from the address on (forward) or down to it (reverse). A pair entered at the odd cell of its word,
-		// as after a jump to an odd loop point (or an even one in reverse), yields that one cell and moves on to
-		// the next aligned word: loop 71/end 7F runs 71 | 72 73 | 74 75 ..., a three-cell loop 7D..7F alternates
-		// one and two cells per fetch.
-		// With the loop point past the end the chip pairs from the loop point as written (85 86 | 87 88), and a
-		// one-shot voice parked on its end (loop == end) keeps producing pairs of the end sample.
-		const auto reverse = voiceAddressRunsReverse(_voice);
-		const auto loopBeforeEnd = voiceLoopBeforeEndInDirection(_voice, reverse);
-		const auto address = _voice.sampleCurrent_0100 & voiceAddressMask;
-		const auto parked = (_voice.sampleLoop_0200 & voiceAddressMask) == (_voice.sampleEnd_0300 & voiceAddressMask) &&
-							address == (_voice.sampleEnd_0300 & voiceAddressMask);
-		const auto lastCellOfWord = loopBeforeEnd && !parked && (((address & 1) != 0) != reverse);
-		_voice.waveCircularBuffer_0800[cell] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-		auto looped = advanceVoiceAddress(_voiceIndex, _voice);
-		refreshExponentCacheAfterAdvance(_voice, looped);
-		if (lastCellOfWord || (looped && loopBeforeEnd))
-		{
-			// The pair that reaches the end likewise produces only its first cell; the pointer moves by one and
-			// the next pair starts aligned at the loop point.
-			_voice.waveFetchState_0400 = (static_cast<uint32_t>((pointer + 1) & 0x0f) << 16) | (_voice.waveFetchState_0400 & 0xffff);
-			return;
-		}
-		// Measured on the SC-88 XP: with the loop point past the end, the end word is fetched whole but its sample
-		// past the end repeats the end sample.
-		const auto pastEnd = !voiceLoopAtOrBeforeEnd(_voice) && voiceUses16BitWaveBus(_voice) &&
-							 ((_voice.sampleCurrent_0100 & voiceAddressMask) == ((_voice.sampleEnd_0300 & voiceAddressMask) | 1));
-		_voice.waveCircularBuffer_0800[(cell + 1) & 7] =
-			pastEnd ? _voice.waveCircularBuffer_0800[cell] : readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-		looped = advanceVoiceAddress(_voiceIndex, _voice);
-		refreshExponentCacheAfterAdvance(_voice, looped);
-
-		const auto nextPointer = static_cast<uint32_t>((pointer + 2) & 0x0f);
-		_voice.waveFetchState_0400 = (nextPointer << 16) | (_voice.waveFetchState_0400 & 0xffff);
+		const auto cells = fetchVoiceWord(_voiceIndex, _voice, pointer & 7, 2);
+		_voice.waveFetchState_0400 =
+			(static_cast<uint32_t>((pointer + cells) & 0x0f) << 16) | (_voice.waveFetchState_0400 & 0xffff);
 	}
 
 	uint8_t XP::readVoiceWaveByte(const VoiceState& _voice, const uint32_t _address) const

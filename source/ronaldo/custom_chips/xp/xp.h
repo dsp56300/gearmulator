@@ -331,8 +331,8 @@ namespace xpLib
 		Dsp::StepRequest dspStepRequest() const;
 		void finishSample();
 		void prepareMixer(size_t _voiceCount);
-		void refillVoiceCell(size_t _voiceIndex, VoiceState& _voice);
-		void refillVoicePair(size_t _voiceIndex, VoiceState& _voice);
+		size_t fetchVoiceWord(size_t _voiceIndex, VoiceState& _voice, size_t _slot, size_t _limit);
+		void refillVoiceFifo(size_t _voiceIndex, VoiceState& _voice);
 		uint16_t readWaveRom(uint16_t _address);
 
 		State m_state{};
