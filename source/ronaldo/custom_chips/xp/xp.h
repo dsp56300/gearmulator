@@ -308,6 +308,17 @@ namespace xpLib
 		void stepVoiceRamps(size_t _voiceIndex, VoiceState& _voice);
 		bool acceptVoiceEvent(size_t _voiceIndex, uint8_t _reason);
 		void raiseVoiceRampTerminalEvent(size_t _voiceIndex, uint32_t& _control, uint8_t _reason);
+		struct RampFamily
+		{
+			uint32_t& control;
+			uint32_t& current;
+			uint32_t& destination;
+			uint32_t* step;                  // the linear step register, nullptr for the families without one
+			uint8_t reason;
+			uint32_t quantum;                // 4 for TVF-Q, 1 otherwise
+			bool linearReportsInService;     // TVF-F and amp; pitch reports on the next slot like the log curve
+		};
+		void serviceLogLinearRamp(size_t _voiceIndex, const RampFamily& _ramp, uint64_t _counter);
 		void raiseVoiceMuteEvent(size_t _voiceIndex, VoiceState& _voice);
 		uint8_t readVoiceWaveByte(const VoiceState& _voice, uint32_t _address) const;
 		uint16_t readVoiceSampleFromCache(const VoiceState& _voice, uint32_t _address) const;

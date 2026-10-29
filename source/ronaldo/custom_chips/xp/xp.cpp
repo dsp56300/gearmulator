@@ -155,148 +155,108 @@ namespace xpLib
 			m_interruptCallback(level);
 	}
 
+	void XP::serviceLogLinearRamp(const size_t _voiceIndex, const RampFamily& _ramp, const uint64_t _counter)
+	{
+		// One ramp of the five, at its slot: pitch, TVF-F, amp-mod and TVF-Q on the slow counter, amp (curves 0 and
+		// 1) on the amp counter. Measured on the SC-88 XP, family by family:
+		// - Only a linear ramp acknowledges its destination and takes its step, at the first service after the
+		//   write, held or not; other curves leave it pending until they turn linear. Amp-mod and TVF-Q never
+		//   acknowledge (they have no step register).
+		// - A held ramp does nothing (its accumulator stays as it is).
+		// - The terminal is tested on every slot, ahead of the service divider, so it is reported on the slot after
+		//   the service that reached the target: the log curve in every family, the linear curve on pitch; the
+		//   linear curves of TVF-F and amp report in the service of their last step.
+		// - The half-count rounding alternates per service (the service count is the counter shifted by the
+		//   interval's divider); TVF-Q steps in quanta of four with a fixed half-quantum correction.
+		const auto pending = (_ramp.destination & rampAcknowledge) == 0;
+		const auto target = _ramp.quantum == 4 ? ((_ramp.destination & ~rampAcknowledge) << 2) & rampScratchMask
+												: _ramp.destination & ~rampAcknowledge;
+		const auto linear = _ramp.step != nullptr && (_ramp.control & rampCurveMask) == 0x04000;
+		if (pending && linear)
+		{
+			_ramp.destination |= rampAcknowledge;
+			*_ramp.step = calculateLinearRampStep(_ramp.current, target, _ramp.control);
+			return;
+		}
+		if ((_ramp.control & rampHold) != 0)
+			return;
+		if (!(linear && _ramp.linearReportsInService) && _ramp.current == target)
+		{
+			raiseVoiceRampTerminalEvent(_voiceIndex, _ramp.control, _ramp.reason);
+			return;
+		}
+		if ((_counter & rampDividerMask(_ramp.control)) != 0)
+			return;
+		const auto parity = _ramp.quantum == 4 ? uint8_t{0}
+											   : static_cast<uint8_t>((rampServiceCount(_ramp.control, _counter) ^ 1) & 1);
+		if (linear)
+		{
+			stepLinearRamp(_ramp.current, target, *_ramp.step, parity);
+			if (_ramp.linearReportsInService && _ramp.current == target)
+				raiseVoiceRampTerminalEvent(_voiceIndex, _ramp.control, _ramp.reason);
+		}
+		else
+			stepLogRamp(_ramp.current, target, _ramp.control, _ramp.quantum, parity);
+	}
+
 	void XP::stepVoiceRamps(const size_t _voiceIndex, VoiceState& _voice)
 	{
 		const auto playbackCounter = static_cast<uint8_t>(_voice.playbackStateConfig_1000 & 7);
 		const auto slowCounter = m_state.sampleClock >> 3;
 		const auto ampCounter = m_state.sampleClock >> 1;
-		const auto tickDue = [](const uint32_t _control, const uint64_t _counter)
-		{ return (_counter & rampDividerMask(_control)) == 0; };
-		const auto destinationPending = [](const uint32_t _destination)
-		{ return (_destination & rampAcknowledge) == 0; };
 
 		// The visible playback counter selects the voice's one envelope-RAM operation: amp on odd counters, with
 		// amp-mod, TVF-Q, TVF-F, and pitch on even counters 0, 2, 4, and 6 respectively.
-		if ((playbackCounter & 1) == 0)
+		switch (playbackCounter)
 		{
-			switch (playbackCounter)
+		case 6: // Pitch
 			{
-			case 6: // Pitch
-				{
-					const auto pending = destinationPending(_voice.pitchDestination_1200);
-					const auto target = _voice.pitchDestination_1200 & ~rampAcknowledge;
-					if (pending || _voice.pitchCurrent_1b00 != target)
-						_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
-					const auto linear = (_voice.pitchRamp_1700 & rampCurveMask) == 0x04000;
-					// Only a linear ramp acknowledges its destination and takes its step, at the first service
-					// after the write, held or not. Other curves leave it pending until they turn linear.
-					if (pending && linear)
-					{
-						_voice.pitchDestination_1200 |= rampAcknowledge;
-						_voice.pitchStep_2400 =
-							calculateLinearRampStep(_voice.pitchCurrent_1b00, target, _voice.pitchRamp_1700);
-						break;
-					}
-					if ((_voice.pitchRamp_1700 & rampHold) != 0)
-						break;
-					// Measured on the SC-88 XP: as for amp, pitch reports its terminal on the ramp's slot after the
-					// service that reached the target, log and linear alike (eight frames later at intervals 0 and 1,
-					// rates 400 and 7FF), so the test is on the resting current, ahead of the service divider. (TVF-F
-					// differs: its linear curve reports in the service of its last step.)
-					if (_voice.pitchCurrent_1b00 == target)
-					{
-						raiseVoiceRampTerminalEvent(_voiceIndex, _voice.pitchRamp_1700, IrqReason::pitchTerminal);
-						break;
-					}
-					if (tickDue(_voice.pitchRamp_1700, slowCounter))
-					{
-						const auto parity = static_cast<uint8_t>((rampServiceCount(_voice.pitchRamp_1700, slowCounter) ^ 1) & 1);
-						if (linear)
-							stepLinearRamp(_voice.pitchCurrent_1b00, target, _voice.pitchStep_2400, parity);
-						else
-							stepLogRamp(_voice.pitchCurrent_1b00, target, _voice.pitchRamp_1700, 1, parity);
-					}
-					break;
-				}
-			case 0: // Amp modulation
-				{
-					// Amp-mod and TVF-Q never acknowledge their destination, held or not, in any curve.
-					// Measured on the SC-88 XP: the amp-mod rounding alternates per service as for pitch and TVF-F (the
-					// trunk-bit case at interval 1 lands on 20057, one count above the clock-bit rule).
-					const auto target = _voice.ampModDestination_1400 & ~rampAcknowledge;
-					if ((_voice.ampModRamp_1900 & rampHold) != 0)
-						break;
-					if (_voice.ampModCurrent_1d00 == target)   // reported on the slot after the service that reached it
-					{
-						raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampModRamp_1900, IrqReason::ampModTerminal);
-						break;
-					}
-					if (tickDue(_voice.ampModRamp_1900, slowCounter))
-						stepLogRamp(_voice.ampModCurrent_1d00, target, _voice.ampModRamp_1900, 1,
-									static_cast<uint8_t>((rampServiceCount(_voice.ampModRamp_1900, slowCounter) ^ 1) & 1));
-					break;
-				}
-			case 2: // TVF-Q
-				{
-					const auto target = ((_voice.tvfQDestination_1100 & ~rampAcknowledge) << 2) & rampScratchMask;
-					if ((_voice.tvfQRamp_1600 & rampHold) != 0)
-						break;
-					if (_voice.tvfQCurrent_2100 == target)   // reported on the slot after the service that reached it
-					{
-						raiseVoiceRampTerminalEvent(_voiceIndex, _voice.tvfQRamp_1600, IrqReason::tvfQTerminal);
-						break;
-					}
-					if (tickDue(_voice.tvfQRamp_1600, slowCounter))
-						stepLogRamp(_voice.tvfQCurrent_2100, target, _voice.tvfQRamp_1600, 4, 0);
-					break;
-				}
-			case 4: // TVF-F
-				{
-					const auto pending = destinationPending(_voice.tvfFDestination_1300);
-					const auto target = _voice.tvfFDestination_1300 & ~rampAcknowledge;
-					// Measured on the SC-88 XP at pitch 38000 with the firmware's running TVF-F ramp: the coefficient
-					// is decoded in the TVF-F service from the current BEFORE that service's step (0x2200 reads the
-					// previous current's value, 39B1A -> 55D82 = decode(39B1D)), and nowhere else per frame; the
-					// filter therefore runs one service behind the current, which was the last count of the output.
-					_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
-					const auto linear = (_voice.tvfFRamp_1800 & rampCurveMask) == 0x04000;
-					if (pending && linear)
-					{
-						_voice.tvfFDestination_1300 |= rampAcknowledge;
-						_voice.tvfFStep_2500 =
-							calculateLinearRampStep(_voice.tvfFCurrent_1c00, target, _voice.tvfFRamp_1800);
-						break;
-					}
-					if ((_voice.tvfFRamp_1800 & rampHold) != 0)
-						break;
-					if (!linear && _voice.tvfFCurrent_1c00 == target)   // reported on the slot after the service that reached it
-					{
-						raiseVoiceRampTerminalEvent(_voiceIndex, _voice.tvfFRamp_1800, IrqReason::tvfFTerminal);
-						break;
-					}
-					if (tickDue(_voice.tvfFRamp_1800, slowCounter))
-					{
-						const auto parity = static_cast<uint8_t>((rampServiceCount(_voice.tvfFRamp_1800, slowCounter) ^ 1) & 1);
-						if (linear)
-						{
-							stepLinearRamp(_voice.tvfFCurrent_1c00, target, _voice.tvfFStep_2500, parity);
-							if (_voice.tvfFCurrent_1c00 == target)
-								raiseVoiceRampTerminalEvent(_voiceIndex, _voice.tvfFRamp_1800, IrqReason::tvfFTerminal);
-						}
-						else
-							stepLogRamp(_voice.tvfFCurrent_1c00, target, _voice.tvfFRamp_1800, 1, parity);
-					}
-					break;
-				}
-			default:
-				break;
+				const auto target = _voice.pitchDestination_1200 & ~rampAcknowledge;
+				if ((_voice.pitchDestination_1200 & rampAcknowledge) == 0 || _voice.pitchCurrent_1b00 != target)
+					_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
+				serviceLogLinearRamp(_voiceIndex,
+									 {_voice.pitchRamp_1700, _voice.pitchCurrent_1b00, _voice.pitchDestination_1200,
+									  &_voice.pitchStep_2400, IrqReason::pitchTerminal, 1, false},
+									 slowCounter);
+				return;
 			}
+		case 0: // Amp modulation
+			serviceLogLinearRamp(_voiceIndex,
+								 {_voice.ampModRamp_1900, _voice.ampModCurrent_1d00, _voice.ampModDestination_1400,
+								  nullptr, IrqReason::ampModTerminal, 1, false},
+								 slowCounter);
+			return;
+		case 2: // TVF-Q
+			serviceLogLinearRamp(_voiceIndex,
+								 {_voice.tvfQRamp_1600, _voice.tvfQCurrent_2100, _voice.tvfQDestination_1100, nullptr,
+								  IrqReason::tvfQTerminal, 4, false},
+								 slowCounter);
+			return;
+		case 4: // TVF-F
+			// Measured on the SC-88 XP at pitch 38000 with the firmware's running TVF-F ramp: the coefficient is
+			// decoded in the TVF-F service from the current BEFORE that service's step (0x2200 reads the previous
+			// current's value, 39B1A -> 55D82 = decode(39B1D)), and nowhere else per frame.
+			_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(_voice.tvfFCurrent_1c00);
+			serviceLogLinearRamp(_voiceIndex,
+								 {_voice.tvfFRamp_1800, _voice.tvfFCurrent_1c00, _voice.tvfFDestination_1300,
+								  &_voice.tvfFStep_2500, IrqReason::tvfFTerminal, 1, true},
+								 slowCounter);
+			return;
+		case 1:
+		case 3:
+		case 5:
+		case 7:
+			break;
+		default:
 			return;
 		}
 
 		// The amp slot publishes the gain from the incoming currents, then advances amp. Amp-mod therefore becomes
 		// visible in 0x2300 on the following sample, and amp itself has one amp-slot (two-sample) latency there.
 		_voice.combinedAmp_2300 = combineAmp(_voice);
-		// Measured on the SC-88 XP with a fixed-phase rig clock: the amp rounding alternates per service of the
-		// chip's own amp counter, not per service of the voice (two extra host frames before a launch invert it),
-		// at every interval: the first service after a write at an even service count rounds up ((acc + 1) >> 1),
-		// the next one down, so a trunk on the -1 sentinel moves on every second service and a seeded 12345 at
-		// interval 1 is applied as 91A3.
-		const auto parity = static_cast<uint8_t>((rampServiceCount(_voice.ampRamp_1a00, ampCounter) ^ 1) & 1);
-
 		const auto curve = static_cast<uint8_t>((_voice.ampRamp_1a00 & rampCurveMask) >> 14);
-		const auto pending = destinationPending(_voice.ampDestination_1500);
 		const auto held = (_voice.ampRamp_1a00 & rampHold) != 0;
+		const auto tickDue = (ampCounter & rampDividerMask(_voice.ampRamp_1a00)) == 0;
 		// The trunk entry belongs to the unheld curve-2 control write; a later destination write does not
 		// re-enter it.
 		if (_voice.runtimeCache.ampCurve2EntryPending)
@@ -307,71 +267,42 @@ namespace xpLib
 			// Measured on the SC-88 XP: the accumulator is zeroed only when the entry slot is itself a service (every
 			// slot at interval 0, a two-frame window per divider period above it) and the ramp is not held. Otherwise
 			// the accumulator stays, the first service applies it as velocity and steers it to the -1 sentinel.
-			if (!held && tickDue(_voice.ampRamp_1a00, ampCounter))
+			if (!held && tickDue)
 				_voice.ampStep_2600 = 0;
 			_voice.runtimeCache.ampCurve2EntryPending = false;
 			return;
 		}
-
-		const auto target = _voice.ampDestination_1500 & ~rampAcknowledge;
-		// As for pitch and TVF-F: only the linear curve acknowledges and takes its step, held or not, so a ramp
-		// switched to linear later computes it from that moment's current.
-		if (pending && curve == 1)
+		if (curve < 2)
 		{
-			_voice.ampDestination_1500 |= rampAcknowledge;
-			_voice.ampStep_2600 = calculateLinearRampStep(_voice.ampCurrent_1e00, target, _voice.ampRamp_1a00);
+			// Measured on the SC-88 XP with a fixed-phase rig clock: the amp rounding alternates per service of the
+			// chip's own amp counter, not per service of the voice (two extra host frames before a launch invert
+			// it), at every interval, as the slow families do on theirs.
+			serviceLogLinearRamp(_voiceIndex,
+								 {_voice.ampRamp_1a00, _voice.ampCurrent_1e00, _voice.ampDestination_1500,
+								  &_voice.ampStep_2600, IrqReason::ampTerminal, 1, true},
+								 ampCounter);
 			return;
 		}
-		// Measured on the SC-88 XP: a held ramp leaves its accumulator alone, whatever the curve (a seeded value
-		// survives held curve-0 and curve-3 writes at every interval).
+
+		// The trunk (a curve-2 write reads back as curve 3 from the write on, see the host write). Measured on the
+		// SC-88 XP: a held ramp leaves its accumulator alone; the terminal is tested on every amp slot, ahead of
+		// the service divider, and held at zero the ramp is complete, so every slot reports it (a release applied
+		// to a silent voice, or one whose first report was blocked, still reaches the host); the zero test is on
+		// the half-value, 1 counts as zero. The report itself touches nothing and the delivery's hold takes effect
+		// from the next slot: a service due in the reporting slot still runs.
 		if (held)
 			return;
-
+		if ((_voice.ampCurrent_1e00 >> 1) == 0)
+			raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
+		if (!tickDue)
+			return;
+		// The service that brings the current to zero steers like any other and reports nothing; the next slot
+		// reports, and the services at zero apply the zero-boundary step (the velocity first, so 1 reaches 0 on
+		// the sentinel, then negative velocity decelerated by the rate per service, zero or positive velocity
+		// replaced by the -1 sentinel) until the delivery's hold freezes the accumulator.
+		const auto parity = static_cast<uint8_t>((rampServiceCount(_voice.ampRamp_1a00, ampCounter) ^ 1) & 1);
 		const auto rate = static_cast<int32_t>(_voice.ampRamp_1a00 & rampRateMask);
 		const auto accumulator = signExtend(_voice.ampStep_2600, 20);
-		// At zero both trunk curves end: a negative step still decelerates by the rate, but only up to the -1
-		// sentinel, which then holds, so the current stays at zero (the step never turns positive).
-		const auto zeroBoundaryStep = [&]
-		{
-			return static_cast<uint32_t>(accumulator < 0 ? std::min<int64_t>(accumulator + rate, -1) : -1) &
-				rampScratchMask;
-		};
-
-		// Measured on the SC-88 XP: the terminals are tested on every amp slot, ahead of the service divider. The
-		// log curve reports on the slot after the service that reached its target, the trunk on the slot after the
-		// service that reached zero (two frames later at interval 0 and at interval 1 alike).
-		// The report itself touches nothing, and the delivery's hold takes effect from the next slot: a service due
-		// in the reporting slot still runs (at interval 0 a trunk delivered at zero takes one zero-boundary step, 1
-		// still reaches 0 on the sentinel; at interval 1 a delivery between services holds the value the last
-		// service left). A seeded value survives a log ramp resting at its target.
-		if (curve == 0 && _voice.ampCurrent_1e00 == target)
-			raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
-		// Held at zero the ramp is complete: every slot reports the terminal, so a release applied to a silent
-		// voice, or one whose first report was blocked, still reaches the host. The trunk's zero test is on the
-		// half-value, 1 counts as zero.
-		if (curve >= 2 && (_voice.ampCurrent_1e00 >> 1) == 0)
-			raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
-		if (!tickDue(_voice.ampRamp_1a00, ampCounter))
-			return;
-
-		if (curve == 0)
-		{
-			stepLogRamp(_voice.ampCurrent_1e00, target, _voice.ampRamp_1a00, 1, parity);
-			return;
-		}
-		if (curve == 1)
-		{
-			stepLinearRamp(_voice.ampCurrent_1e00, target, _voice.ampStep_2600, parity);
-			if (_voice.ampCurrent_1e00 == target)
-				raiseVoiceRampTerminalEvent(_voiceIndex, _voice.ampRamp_1a00, IrqReason::ampTerminal);
-			return;
-		}
-
-		// The trunk (a curve-2 write reads back as curve 3 from the write on, see the host write): the service that
-		// brings the current to zero steers like any other and reports nothing; the next slot reports, and the
-		// services at zero apply the zero-boundary step (the velocity first, so 1 reaches 0 on the sentinel, then
-		// negative velocity decelerated by the rate per service, zero or positive velocity replaced by the -1
-		// sentinel) until the delivery's hold freezes the accumulator.
 		const auto previous = _voice.ampCurrent_1e00;
 		auto next = static_cast<int64_t>(previous) + arithmeticShiftRight(accumulator + parity, 1);
 		if (next < 0 || next > rampFieldMask)
@@ -379,7 +310,8 @@ namespace xpLib
 		_voice.ampCurrent_1e00 = static_cast<uint32_t>(next);
 		if ((previous >> 1) == 0)
 		{
-			_voice.ampStep_2600 = zeroBoundaryStep();
+			_voice.ampStep_2600 =
+				static_cast<uint32_t>(accumulator < 0 ? std::min<int64_t>(accumulator + rate, -1) : -1) & rampScratchMask;
 			return;
 		}
 		// Measured on the SC-88 XP: a trunk ramp never steers upward. Above the threshold the accumulator
@@ -388,7 +320,8 @@ namespace xpLib
 		// 3FFFE at rate 7FF: -1, -800, then -1 per two services), a destination rewritten above the current
 		// leaves it creeping down on the sentinel, and a positive accumulator left from an earlier ramp is applied
 		// once and then steered to -1.
-		const auto steered = previous > target ? accumulator - rate : accumulator + rate;
+		const auto threshold = _voice.ampDestination_1500 & ~rampAcknowledge;
+		const auto steered = previous > threshold ? accumulator - rate : accumulator + rate;
 		_voice.ampStep_2600 = static_cast<uint32_t>(std::min<int64_t>(steered, -1)) & rampScratchMask;
 	}
 
