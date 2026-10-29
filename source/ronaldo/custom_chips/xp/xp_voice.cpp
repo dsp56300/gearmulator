@@ -12,12 +12,13 @@ namespace xpLib
 	{
 		return (_voice.sampleLoop_0200 & voiceAddressMask) <= (_voice.sampleEnd_0300 & voiceAddressMask);
 	}
-	// The same in playback order: a reverse voice runs down from the loop point to the end.
-	static bool voiceLoopBeforeEndInDirection(const XP::VoiceState& _voice, const bool _reverse)
+	// The same in the programmed playback order: a reverse voice runs down from the loop point to the end. The
+	// programmed direction, not the current one: an alternate loop bouncing back is still in its regime.
+	static bool voiceLoopBeforeEndInDirection(const XP::VoiceState& _voice)
 	{
 		const auto loop = _voice.sampleLoop_0200 & voiceAddressMask;
 		const auto end = _voice.sampleEnd_0300 & voiceAddressMask;
-		return _reverse ? loop >= end : loop <= end;
+		return (_voice.waveControl_0000 & XP::WaveControl::reverse) != 0 ? loop >= end : loop <= end;
 	}
 	XP::VoiceStepResult XP::stepVoiceSource(const size_t _voiceIndex, VoiceState& _voice)
 	{
@@ -92,16 +93,14 @@ namespace xpLib
 							cells += fetched;
 							const auto after = _voice.sampleCurrent_0100 & voiceAddressMask;
 							const auto wrapped = reverse ? after > before : after < before;
-							if (fetched == 1 && wrapped && voiceLoopBeforeEndInDirection(_voice, reverse))
+							if (fetched == 1 && wrapped && voiceLoopBeforeEndInDirection(_voice))
 								break;
 						}
 						preloadCount = cells;
 					}
-					// Measured on the SC-88 XP: the preload writes the cell after the counted ones from the pointer
-					// without counting it (the cut pair's second cell from the loop point, the eighth cell of an odd
-					// start or of a reverse launch); the first refill rewrites it with the same sample.
-					if (preloadCount < _voice.waveCircularBuffer_0800.size())
-						_voice.waveCircularBuffer_0800[preloadCount] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
+					// Measured on the SC-88 XP with a seeded FIFO: the preload writes only the counted cells; the cell
+					// after them keeps what it held (an odd start, a reverse launch, a preload cut by the wrap) until
+					// the first refill writes it.
 					_voice.waveFetchState_0400 =
 						(static_cast<uint32_t>(preloadCount) << 16) | (_voice.waveFetchState_0400 & 0xffff);
 					// The chip overlays this marker only after the producer has completed its preload.
@@ -305,7 +304,7 @@ namespace xpLib
 		// sample; a one-shot voice parked on its end (loop == end) keeps producing pairs of the end sample.
 		const auto reverse = voiceAddressRunsReverse(_voice);
 		const auto wide = voiceUses16BitWaveBus(_voice);
-		const auto loopBeforeEnd = voiceLoopBeforeEndInDirection(_voice, reverse);
+		const auto loopBeforeEnd = voiceLoopBeforeEndInDirection(_voice);
 		const auto end = _voice.sampleEnd_0300 & voiceAddressMask;
 		const auto parked = (_voice.sampleLoop_0200 & voiceAddressMask) == end;
 		size_t cells = 0;
@@ -314,10 +313,18 @@ namespace xpLib
 			const auto address = _voice.sampleCurrent_0100 & voiceAddressMask;
 			const auto lastCellOfWord =
 				!wide || (loopBeforeEnd && !(parked && address == end) && (((address & 1) != 0) != reverse));
-			const auto pastEnd = wide && !loopBeforeEnd && cells > 0 && address == (end | 1);
+			const auto pastEnd = wide && !loopBeforeEnd && cells > 0 && (end & 1) == 0 && address == end + 1;
+			// Measured on the SC-88 XP (loop points 85 and 91 past an end of 80 or 7F): with the loop past the end a
+			// pair started at an odd address delivers mantissa FB, not the ROM byte, as its second cell, under the
+			// exponent of the pair's first address. The first cell of such a pair is not host-readable and is
+			// taken from the ROM.
+			const auto oddPairSecond = wide && !loopBeforeEnd && cells > 0 && (address & 1) == 0;
 			auto& cell = _voice.waveCircularBuffer_0800[(_slot + cells) & 7];
 			cell = pastEnd ? _voice.waveCircularBuffer_0800[(_slot + cells - 1) & 7]
-						   : readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
+				: oddPairSecond
+				? encodeVoiceSample(_voice, 0xfb,
+									static_cast<uint8_t>((_voice.waveFetchState_0400 >> ((((address - 1) >> 4) & 3) * 4)) & 0x0f))
+				: readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
 			const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
 			refreshExponentCacheAfterAdvance(_voice, looped);
 			++cells;
