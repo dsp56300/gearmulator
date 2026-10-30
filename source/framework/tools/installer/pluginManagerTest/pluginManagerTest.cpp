@@ -2470,12 +2470,14 @@ namespace
 
 		TEST_ASSERT(install());
 
-		// The ROM the user put next to the binary, inside the bundle.
+		// The ROM the user put next to the binary, inside the bundle, and one at the top of it.
 		const auto inBundle = target.getChildFile("Thing.vst3/Contents/MacOS/thing_firmware.bin");
+		const auto atTop = target.getChildFile("Thing.vst3/other_firmware.mid");
 
 		TEST_ASSERT(inBundle.replaceWithText("irreplaceable"));
+		TEST_ASSERT(atTop.replaceWithText("also irreplaceable"));
 
-		// Updating moves it out. PluginInstaller rather than ZipExtractor, because the product name
+		// Updating moves them out. PluginInstaller rather than ZipExtractor, because the product name
 		// is what says which roms folder, and only the installer knows it.
 		PluginInstaller installer;
 
@@ -2485,9 +2487,11 @@ namespace
 
 		TEST_ASSERT(kept.existsAsFile());
 		TEST_ASSERT(kept.loadFileAsString() == "irreplaceable");
+		TEST_ASSERT(data.getChildFile("The Usual Suspects/Thing/roms/other_firmware.mid").loadFileAsString() == "also irreplaceable");
 
-		// And it is out of the bundle, not merely also in the folder - that is the whole point.
+		// And they are out of the bundle, not merely also in the folder - that is the whole point.
 		TEST_ASSERT(!inBundle.exists());
+		TEST_ASSERT(!atTop.exists());
 
 		// The plugin still arrived.
 		TEST_ASSERT(target.getChildFile("Thing.vst3/Contents/MacOS/Thing").existsAsFile());
@@ -2499,7 +2503,7 @@ namespace
 
 		const auto roms = data.getChildFile("The Usual Suspects/Thing/roms");
 
-		TEST_ASSERT(roms.findChildFiles(juce::File::findFiles, false).size() == 1);
+		TEST_ASSERT(roms.findChildFiles(juce::File::findFiles, false).size() == 2);
 
 		setDataFolder({});
 		root.deleteRecursively();
@@ -2556,41 +2560,48 @@ namespace
 		root.deleteRecursively();
 	}
 
-	// A ROM inside the bundle survives the update that replaces the bundle. RomLoader always
-	// searches the folder the binary sits in, which on macOS is inside the bundle, so that is a
-	// place people really do keep ROMs - and an update used to delete the lot. The one product
-	// that had not been updated was the only one that still had its ROM.
-	// A ROM the user kept inside a plugin survives an update - and ends up somewhere the update
-	// cannot break.
+	// What the user kept inside a plugin survives the update that replaces the plugin. A VST3 is a
+	// folder, and people keep sound sets in it - an update used to copy every file of them into the
+	// roms folder, flat, and the patch manager lost every folder of them it knew.
 	//
-	// It used to be carried into the new bundle, which keeps the file and breaks the plugin: a macOS
-	// bundle is sealed, one file the signature does not cover is enough for the system to refuse it,
-	// and the host then stops listing the plugin (BUG-10469). So it goes to the product's roms
-	// folder, which is the other place the ROM loader looks, and the bundle is left exactly as it
-	// was built.
+	// On Windows and Linux they go into the new bundle where they were. A macOS bundle is sealed: one
+	// file the signature does not cover is enough for the system to refuse it, and the host then
+	// stops listing the plugin (BUG-10469). So there the update stops and names them, and nothing is
+	// copied, moved or deleted until the user has taken them out. A ROM lying where the plugin reads
+	// one is moved to the roms folder either way, but never a .mid in a folder of the user's - a
+	// Virus bank is one of those.
 	void testAnUpdateKeepsWhatTheUserPutInTheBundle()
 	{
 		const auto root = juce::File::getSpecialLocation(juce::File::tempDirectory)
-			.getChildFile("tus_pm_test_bundle_roms");
+			.getChildFile("tus_pm_test_bundle_user_files");
 
 		root.deleteRecursively();
 		TEST_ASSERT(root.createDirectory().wasOk());
 
-		setDataFolder(root.getChildFile("data").getFullPathName().toStdString());
+		const auto data = root.getChildFile("data");
+		setDataFolder(data.getFullPathName().toStdString());
 
 		const auto target = root.getChildFile("plugins");
 
 		std::string error;
 		std::vector<std::string> files;
 
-		// The build that is already installed.
+		// The build that is already installed, signed, with a file the next build no longer has.
 		const auto first = root.getChildFile("first");
 
 		TEST_ASSERT(first.getChildFile("Thing.vst3/Contents/MacOS").createDirectory().wasOk());
 		TEST_ASSERT(first.getChildFile("Thing.vst3/Contents/MacOS/Thing").replaceWithText("v1"));
+		TEST_ASSERT(first.getChildFile("Thing.vst3/Contents/Resources").createDirectory().wasOk());
+		TEST_ASSERT(first.getChildFile("Thing.vst3/Contents/Resources/old.rsrc").replaceWithText("ours"));
 		TEST_ASSERT(first.getChildFile("Thing.vst3/Contents/_CodeSignature").createDirectory().wasOk());
-		TEST_ASSERT(first.getChildFile("Thing.vst3/Contents/_CodeSignature/CodeResources")
-			.replaceWithText("signature of v1"));
+		TEST_ASSERT(first.getChildFile("Thing.vst3/Contents/_CodeSignature/CodeResources").replaceWithText(
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+			"<plist version=\"1.0\"><dict>"
+			"<key>files</key><dict><key>Resources/old.rsrc</key><data>AAAA</data></dict>"
+			"<key>files2</key><dict><key>Resources/old.rsrc</key><dict><key>hash2</key><data>AAAA</data></dict></dict>"
+			"<key>rules</key><dict/>"
+			"</dict></plist>\n"));
 
 		const auto firstZip = root.getChildFile("first.zip");
 		makeZip(first, firstZip);
@@ -2598,14 +2609,17 @@ namespace
 		TEST_ASSERT(ZipExtractor::install(firstZip.getFullPathName().toStdString(),
 			target.getFullPathName().toStdString(), "Thing.vst3", "Thing", false, files, error));
 
-		// What the user then puts next to the binary, which is one of the two places the ROM loader
-		// looks, and the Finder's leavings from having opened the bundle to do it.
+		// What the user then puts in there: a ROM next to the binary, where the ROM loader looks, a
+		// folder of sound sets, and the Finder's leavings from having opened the bundle.
 		const auto rom = target.getChildFile("Thing.vst3/Contents/MacOS/thing_firmware.bin");
+		const auto bank = target.getChildFile("Thing.vst3/Contents/MacOS/Soundsets/bank.mid");
 
 		TEST_ASSERT(rom.replaceWithText("a ROM nobody can download again"));
+		TEST_ASSERT(bank.getParentDirectory().createDirectory().wasOk());
+		TEST_ASSERT(bank.replaceWithText("a bank somebody made"));
 		TEST_ASSERT(target.getChildFile("Thing.vst3/Contents/MacOS/.DS_Store").replaceWithText("finder"));
 
-		// And the next build, which knows nothing about it.
+		// And the next build, which knows nothing about any of it.
 		const auto second = root.getChildFile("second");
 
 		TEST_ASSERT(second.getChildFile("Thing.vst3/Contents/MacOS").createDirectory().wasOk());
@@ -2614,37 +2628,52 @@ namespace
 		const auto secondZip = root.getChildFile("second.zip");
 		makeZip(second, secondZip);
 
-		TEST_ASSERT(ZipExtractor::install(secondZip.getFullPathName().toStdString(),
-			target.getFullPathName().toStdString(), "Thing.vst3", "Thing", false, files, error));
+		Asset asset;
+		asset.product = "Thing";
+		asset.format = "VST3";
+		asset.version = "2.2.28";
+		asset.url = "file:///" + secondZip.getFullPathName().replaceCharacter('\\', '/').toStdString();
 
-		// The update happened...
-		TEST_ASSERT(target.getChildFile("Thing.vst3/Contents/MacOS/Thing").loadFileAsString() == "v2");
+		PluginInstaller installer;
 
-		// ...and the ROM is kept, in the folder the plugin reads ROMs from.
-		const auto kept = juce::File(juce::String(PlatformUtils::romFolder("Thing")))
-			.getChildFile("thing_firmware.bin");
+		const auto updated = installer.install(asset, {}, target.getFullPathName().toStdString(), {}, error);
 
-		TEST_ASSERT(kept.existsAsFile());
-		TEST_ASSERT(kept.loadFileAsString() == "a ROM nobody can download again");
+		// The ROM is in the folder the plugin reads ROMs from, whichever way the update went...
+		const auto roms = data.getChildFile("The Usual Suspects/Thing/roms");
 
-		// Nothing that was not built into it is inside the new bundle: not the ROM, not the signature
-		// of the build that is gone, not the file the Finder left. One file that the signature does
-		// not cover is all it takes for macOS to refuse the whole plugin.
+		TEST_ASSERT(roms.getChildFile("thing_firmware.bin").loadFileAsString() == "a ROM nobody can download again");
 		TEST_ASSERT(!rom.exists());
-		TEST_ASSERT(!target.getChildFile("Thing.vst3/Contents/_CodeSignature/CodeResources").exists());
-		TEST_ASSERT(!target.getChildFile("Thing.vst3/Contents/MacOS/.DS_Store").exists());
+
+		// ...and the bank is not: a folder of the user's is not taken apart.
+		TEST_ASSERT(!roms.getChildFile("bank.mid").exists());
+		TEST_ASSERT(bank.loadFileAsString() == "a bank somebody made");
+
+#if JUCE_MAC
+		// It is in the way, and the update says so - naming it, and nothing that is not the user's.
+		TEST_ASSERT(!updated);
+		TEST_ASSERT(error.find("Contents/MacOS/Soundsets/bank.mid") != std::string::npos);
+		TEST_ASSERT(error.find("old.rsrc") == std::string::npos);
+		TEST_ASSERT(error.find(".DS_Store") == std::string::npos);
+		TEST_ASSERT(error.find("thing_firmware") == std::string::npos);
+		TEST_ASSERT(error.find("_CodeSignature") == std::string::npos);
+
+		// Nothing was touched.
+		TEST_ASSERT(target.getChildFile("Thing.vst3/Contents/MacOS/Thing").loadFileAsString() == "v1");
+
+		// Once the user has taken it out, the update goes through, and the bundle is exactly the build:
+		// not the signature of the one that is gone, not the file the Finder left.
+		TEST_ASSERT(bank.getParentDirectory().deleteRecursively());
+		TEST_ASSERT(installer.install(asset, {}, target.getFullPathName().toStdString(), {}, error));
+		TEST_ASSERT(target.getChildFile("Thing.vst3/Contents/MacOS/Thing").loadFileAsString() == "v2");
 		TEST_ASSERT(target.getChildFile("Thing.vst3").findChildFiles(juce::File::findFiles, true).size() == 1);
+#else
+		// The update happened, and the bank is still where it was, in the new bundle.
+		TEST_ASSERT(updated);
+		TEST_ASSERT(target.getChildFile("Thing.vst3/Contents/MacOS/Thing").loadFileAsString() == "v2");
+#endif
 
-		// Nothing of the replaced copy is left lying beside it either.
+		// Nothing of the replaced copy is left lying beside it.
 		TEST_ASSERT(target.findChildFiles(juce::File::findDirectories, false).size() == 1);
-
-		// A third update keeps one copy rather than a numbered pile of them: the ROM is in the roms
-		// folder now, so the install finds nothing of the user's left in the bundle to carry out.
-		TEST_ASSERT(ZipExtractor::install(secondZip.getFullPathName().toStdString(),
-			target.getFullPathName().toStdString(), "Thing.vst3", "Thing", false, files, error));
-
-		TEST_ASSERT(juce::File(juce::String(PlatformUtils::romFolder("Thing")))
-			.findChildFiles(juce::File::findFiles, false).size() == 1);
 
 		setDataFolder({});
 		root.deleteRecursively();

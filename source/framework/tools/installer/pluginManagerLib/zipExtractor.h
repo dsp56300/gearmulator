@@ -40,8 +40,11 @@ namespace pluginManager
 		// face value, a Linux plugin lands several folders deep and nothing ever finds it again.
 		//
 		// _pluginFileName is what to look for - an empty one takes the archive as it comes.
-		// _dataProduct is the product whose roms folder takes what a user kept inside the bundle that is
-		// replaced - see Asset::dataProduct.
+		// _dataProduct is the product whose folder in Documents the user is pointed to when something of
+		// theirs inside a macOS bundle is in the way of an update - see Asset::dataProduct.
+		//
+		// What the user kept inside a bundle that is replaced goes into the new one at the same place,
+		// except on macOS, where a bundle is sealed and the update refuses instead.
 		// _withRights does the last step through ElevatedTask, for a folder that belongs to the
 		// system. Nothing is written into the install folder until the archive is out in one piece.
 		// _files comes back holding the names this put into the install folder - the plugin and
@@ -85,6 +88,13 @@ namespace pluginManager
 		{
 			return checkWriteAccess(_targetDir, _error) == WriteAccess::Yes;
 		}
+
+		// The ROMs a user kept inside a plugin bundle: .bin and .mid lying directly at the top of it or
+		// directly in the folder its binary sits in - Contents/MacOS, Contents/<arch>-win and -linux in
+		// a VST3, the top in an LV2. Never what is in a folder below either: that is a folder of the
+		// user's, sound sets far more likely than a ROM - Virus banks are .mid files as well - and
+		// draining it into the roms folder is what lost them. Empty for a plugin that is a file.
+		static std::vector<juce::File> romsInside(const juce::File& _plugin);
 
 	private:
 		static juce::File pluginRoot(const juce::File& _unpacked, const std::string& _pluginFileName);

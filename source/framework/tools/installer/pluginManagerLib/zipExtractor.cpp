@@ -4,6 +4,8 @@
 #include "log.h"
 #include "platformUtils.h"
 
+#include <algorithm>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -32,69 +34,101 @@ namespace pluginManager
 				".\n\nThis folder usually belongs to the system. " + waysOut();
 		}
 
-		// What the user kept inside a plugin that is being replaced, copied out to the folder the
-		// plugin reads ROMs from.
+		// What the user kept inside a plugin that an update replaces: a plugin is a folder in some
+		// formats - every one of them on macOS, LV2 and VST3 everywhere - and people keep things in
+		// it, sound sets in Osirus.vst3 more than anything. Replacing the bundle took them with it.
+		// They used to be copied out into the roms folder instead, every file into one folder, which
+		// to anybody looking for them was as good as gone, and the patch manager lost every folder of
+		// them it had been told about.
 		//
-		// A plugin is a folder in some formats - every one of them on macOS, and LV2 everywhere - and
-		// the folder its binary sits in is one of the two paths RomLoader searches, so a ROM put "next
-		// to the plugin" can be inside the bundle. An update that deleted the old bundle deleted the
-		// ROM with it, and the fix for that carried the ROM into the new bundle - which on macOS is
-		// worse. A bundle there is sealed: one file in it that the signature does not cover makes
-		// codesign report "a sealed resource is missing or invalid" and the system refuse to load it,
-		// so the plugin simply stopped appearing in the host.
-		//
-		// So nothing is written into a bundle at all. What the user put in one is copied to
-		// Documents/The Usual Suspects/<product>/roms/, the other path RomLoader searches, and the
-		// bundle itself is replaced exactly as it was built and signed.
-		//
-		// Copied before the install rather than moved after it, for two reasons: the copy into place
-		// may be made by the administrator half, which has no business writing into this user's
-		// Documents folder, and a file that is only copied leaves the install folder exactly as it was
-		// found if the install then cannot be made.
-		void rescueUserFiles(const juce::File& _newBuild, const juce::File& _targetDir, const juce::File& _roms)
+		// Each file the new build does not bring itself goes into the new bundle at the same place, so
+		// it is where it was. That also keeps a file the old build had and this one no longer does,
+		// since nothing tells the two apart - which is what unpacking an archive over the old install
+		// always did. Not on macOS, where a bundle is sealed - see install.
+#if !JUCE_MAC
+		bool carryOver(const juce::File& _old, const juce::File& _new, std::string& _error)
 		{
-			for (const auto& bundle : _newBuild.findChildFiles(juce::File::findDirectories, false))
+			for (const auto& file : _old.findChildFiles(juce::File::findFiles, true))
 			{
-				const auto existing = _targetDir.getChildFile(bundle.getFileName());
+				const auto dest = _new.getChildFile(file.getRelativePathFrom(_old));
 
-				if (!existing.isDirectory())
+				if (dest.exists())
 					continue;
 
-				for (const auto& file : existing.findChildFiles(juce::File::findFiles, true))
+				// Not a line in the log: the old bundle is deleted once this returns, and the file with it.
+				if (!dest.getParentDirectory().createDirectory().wasOk() || !file.copyFileTo(dest))
 				{
-					const auto relative = file.getRelativePathFrom(existing);
-
-					// Part of the build, and the seal of the build that is going. Neither is the user's.
-					if (bundle.getChildFile(relative).exists() || relative.contains("_CodeSignature"))
-						continue;
-
-					// Left in any folder the Finder has been asked to show, and worth nothing to anybody.
-					if (file.getFileName() == ".DS_Store")
-						continue;
-
-					if (!_roms.isDirectory() && !_roms.createDirectory().wasOk())
-					{
-						Log::write("Could not make " + _roms.getFullPathName().toStdString());
-						return;
-					}
-
-					auto dest = _roms.getChildFile(file.getFileName());
-
-					// Already carried out of there by an earlier update of the same plugin.
-					if (dest.existsAsFile() && dest.hasIdenticalContentTo(file))
-						continue;
-
-					// Something else of that name is there, and which of the two is wanted is not ours to say.
-					if (dest.exists())
-						dest = dest.getNonexistentSibling();
-
-					if (file.copyFileTo(dest))
-						Log::write("Kept " + file.getFullPathName().toStdString() + " as " + dest.getFullPathName().toStdString());
-					else
-						Log::write("Could not keep " + file.getFullPathName().toStdString());
+					_error = "Could not keep " + file.getFullPathName().toStdString() + " in the new " +
+						_new.getFileName().toStdString() + ".";
+					return false;
 				}
 			}
+
+			return true;
 		}
+#else
+		// What the signature of a bundle covers, by path inside the bundle: its own files, which a
+		// newer build may leave out without anything of the user's being lost. Empty for a bundle that
+		// is not signed.
+		std::set<juce::String> sealedFiles(const juce::File& _bundle)
+		{
+			std::set<juce::String> sealed;
+
+			const auto plist = juce::XmlDocument::parse(_bundle.getChildFile("Contents/_CodeSignature/CodeResources"));
+			const auto* top = plist ? plist->getChildByName("dict") : nullptr;
+
+			if (!top)
+				return sealed;
+
+			// <key>files2</key><dict><key>Resources/moduleinfo.json</key>... - relative to Contents.
+			for (const auto* key = top->getChildByName("key"); key; key = key->getNextElementWithTagName("key"))
+			{
+				const auto section = key->getAllSubText();
+				const auto* files = key->getNextElement();
+
+				if ((section != "files" && section != "files2") || !files || !files->hasTagName("dict"))
+					continue;
+
+				for (const auto* file = files->getChildByName("key"); file; file = file->getNextElementWithTagName("key"))
+					sealed.insert("Contents/" + file->getAllSubText());
+			}
+
+			return sealed;
+		}
+
+		// What the user put inside a bundle: neither part of the new build nor sealed by the old one.
+		// A ROM PluginInstaller has copied to the roms folder already does not count, even when it
+		// could not be taken out of a bundle that belongs to the system - that copy is what is used.
+		juce::StringArray userFilesIn(const juce::File& _old, const juce::File& _new, const juce::File& _roms)
+		{
+			const auto sealed = sealedFiles(_old);
+			const auto roms = ZipExtractor::romsInside(_old);
+
+			juce::StringArray found;
+
+			for (const auto& file : _old.findChildFiles(juce::File::findFiles, true))
+			{
+				const auto relative = file.getRelativePathFrom(_old).replaceCharacter('\\', '/');
+
+				// The seal of the build that is going, and what the Finder leaves in any folder it showed.
+				if (relative.contains("_CodeSignature") || file.getFileName() == ".DS_Store")
+					continue;
+
+				if (_new.getChildFile(relative).exists() || sealed.count(relative))
+					continue;
+
+				if (std::find(roms.begin(), roms.end(), file) != roms.end() &&
+					_roms.getChildFile(file.getFileName()).hasIdenticalContentTo(file))
+				{
+					continue;
+				}
+
+				found.add(relative);
+			}
+
+			return found;
+		}
+#endif
 
 		// Where what is being replaced waits until the copy is through. The name ends in something
 		// no host looks for, so an install folder never briefly holds a second plugin.
@@ -419,11 +453,19 @@ namespace pluginManager
 				undo();
 				return false;
 			}
+
+#if !JUCE_MAC
+			if (replaced.isDirectory() && placed.isDirectory() && !carryOver(replaced, placed, _error))
+			{
+				undo();
+				return false;
+			}
+#endif
 		}
 
-		// All of it arrived, so what it replaced is not needed any more. Nothing of it is carried
-		// into what replaced it - see rescueUserFiles, which takes what was the user's out of there
-		// before any of this, and leaves the new bundle as it was built and signed.
+		// All of it arrived, so what it replaced is not needed any more. What the user kept in it is
+		// in the new one by now - or on macOS, where nothing can go into a bundle, there was nothing of
+		// theirs in it, see install.
 		for (const auto& step : done)
 		{
 			if (step.second != juce::File())
@@ -526,9 +568,38 @@ namespace pluginManager
 			return false;
 		}
 
-		// Before anything is written, and as this user whichever way the copy is going to be made.
-		rescueUserFiles(root, juce::File(juce::String(_targetDir)),
-			juce::File(juce::String(PlatformUtils::romFolder(_dataProduct))));
+#if JUCE_MAC
+		// Before anything is written. A bundle is sealed here: one file in it that the signature does
+		// not cover makes the system refuse to load it, and the plugin vanishes from the host
+		// (BUG-10469). So what the user put into the old one cannot go into the new one, and replacing
+		// the bundle would delete it. The update stops instead and says what is in the way.
+		for (const auto& bundle : root.findChildFiles(juce::File::findDirectories, false))
+		{
+			const auto existing = juce::File(juce::String(_targetDir)).getChildFile(bundle.getFileName());
+
+			if (!existing.isDirectory())
+				continue;
+
+			const auto found = userFilesIn(existing, bundle, juce::File(juce::String(PlatformUtils::romFolder(_dataProduct))));
+
+			if (found.isEmpty())
+				continue;
+
+			constexpr int shown = 5;
+
+			auto list = found.joinIntoString("\n", 0, shown);
+
+			if (found.size() > shown)
+				list << "\n... and " << (found.size() - shown) << " more";
+
+			_error = existing.getFullPathName().toStdString() + " holds files that are not part of the plugin:\n\n" +
+				list.toStdString() + "\n\nmacOS does not allow anything to be added to a plugin, so updating it would "
+				"delete them. Move them somewhere else first, for example to " + PlatformUtils::dataFolder(_dataProduct) +
+				", then update again.";
+
+			return false;
+		}
+#endif
 
 		if (_withRights)
 		{
@@ -554,5 +625,31 @@ namespace pluginManager
 			juce::File(juce::String(_targetDir)).getChildFile(name).deleteFile();
 
 		return true;
+	}
+
+	std::vector<juce::File> ZipExtractor::romsInside(const juce::File& _plugin)
+	{
+		std::vector<juce::File> roms;
+
+		if (!_plugin.isDirectory())
+			return roms;
+
+		std::vector<juce::File> folders{_plugin};
+
+		for (const auto& dir : _plugin.getChildFile("Contents").findChildFiles(juce::File::findDirectories, false))
+		{
+			const auto name = dir.getFileName();
+
+			if (name == "MacOS" || name.endsWith("-win") || name.endsWith("-linux"))
+				folders.push_back(dir);
+		}
+
+		for (const auto& folder : folders)
+		{
+			for (const auto& file : folder.findChildFiles(juce::File::findFiles, false, "*.bin;*.mid"))
+				roms.push_back(file);
+		}
+
+		return roms;
 	}
 }

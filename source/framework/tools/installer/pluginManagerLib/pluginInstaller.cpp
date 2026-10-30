@@ -26,7 +26,8 @@ namespace pluginManager
 		// file that cannot be downloaded again is taken out by what it is.
 		//
 		// .bin and .mid because those are the two extensions the ROM loaders search for, and no
-		// build of ours ships either, so this can only ever find something somebody put there.
+		// build of ours ships either, so this can only ever find something somebody put there. Only
+		// the ones lying where a ROM lies, never a folder below - see ZipExtractor::romsInside.
 		// Documents/The Usual Suspects/<product>/roms/ because that is where the plugin looks
 		// anyway, and nothing in this program ever deletes from it.
 		void migrateRoms(const juce::File& _plugin, const std::string& _product)
@@ -37,7 +38,7 @@ namespace pluginManager
 
 			const auto roms = juce::File(juce::String(PlatformUtils::romFolder(_product)));
 
-			for (const auto& file : _plugin.findChildFiles(juce::File::findFiles, true, "*.bin;*.mid"))
+			for (const auto& file : ZipExtractor::romsInside(_plugin))
 			{
 				if (!roms.isDirectory() && !roms.createDirectory().wasOk())
 					return;
@@ -69,7 +70,8 @@ namespace pluginManager
 
 				// Taking the original away is what drains the bundle, but it is the lesser half: the
 				// copy is already safe, and an install folder this user may not write to would fail
-				// here. Then the file stays where it was and the install carries it on as before.
+				// here. Then the file stays where it was: carried into the new bundle on Windows and
+				// Linux, left behind with the old one on macOS, where the copy is what is used.
 				const auto removed = file.deleteFile();
 
 				Log::write("Moved " + file.getFullPathName().toStdString() + " to " +

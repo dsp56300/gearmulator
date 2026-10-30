@@ -332,6 +332,15 @@ Plugin Manager:
         and "Install selected" installed builds nobody had asked for. What is
         ticked is now saved as soon as it changes.
 
+- [Fix] Updating a plugin removed what you had kept inside it, sound sets in
+        the Osirus.vst3 folder for example: every file was moved into the roms
+        folder in Documents, out of its own folders, and the patch manager no
+        longer found them. On Windows and Linux they now stay where they are.
+        On macOS, where nothing may be added to a plugin, the update stops and
+        names them, so that you can move them elsewhere first. Only a .bin or
+        .mid ROM lying at the top of the plugin or next to its binary is still
+        moved to the roms folder, never one in a folder of its own.
+
 88emuPlayer:
 
 - [New] Devices: Added support for the SC-880.
