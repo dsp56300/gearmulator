@@ -6,12 +6,9 @@ namespace synthLib
 {
 	void AudioBuffer::insertZeroes(size_t _size)
 	{
-		TChannel zeroes;
-		zeroes.resize(_size, 0.0f);
-
 		for(size_t c=0; c<m_data.size(); ++c)
 		{
-			m_data[c].insert(m_data[c].begin(), zeroes.begin(), zeroes.end());
+			m_data[c].insert(m_data[c].begin(), _size, 0.0f);
 		}
 	}
 
