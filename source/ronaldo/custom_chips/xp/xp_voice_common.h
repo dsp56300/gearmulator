@@ -95,6 +95,22 @@ namespace xpLib::xpInternal
 		return ((a + b) >> 1) >> octaveShift;
 	}
 
+	// The TVF-F coefficient (0x2200) keeps one more bit of the interpolated sum than the pitch increment does:
+	// measured on the SC-88 XP, 3FFFF decodes to FFFD2 and 3FFFE to FFFA6 (two above the halved value), every
+	// lower cutoff to the same value either way; the register's bit 0 always reads 0 (39B1A -> 55D54, not 55D55).
+	inline uint32_t decodeTvfCoefficient(const uint32_t _pitch)
+	{
+		if (_pitch == 0)
+			return 0;
+		const auto index = static_cast<size_t>((_pitch >> 6) & 0xff);
+		const auto fraction = _pitch & 0x3f;
+		const auto a = ((64 - fraction) * pitchMantissa[index]) >> 2;
+		const auto next = index + 1 == pitchMantissa.size() ? 0x8000 : pitchMantissa[index + 1];
+		const auto b = (fraction * next) >> 2;
+		const auto octaveShift = (~(_pitch >> 14)) & 0x0f;
+		return (((a + b) << 1) >> octaveShift) & (rampScratchMask & ~uint32_t{1});
+	}
+
 	inline uint32_t unpackAddressPhase(const uint32_t _packed)
 	{
 		return ((_packed & 0x0f) << 14) | ((_packed >> 4) & addressPhaseFractionMask);
@@ -122,6 +138,24 @@ namespace xpLib::xpInternal
 			return 31;
 		default:
 			return 127;
+		}
+	}
+
+	// The service count of a slow ramp: the slow counter shifted by its interval, so its low bit toggles once per
+	// service at every interval. Measured on the SC-88 XP: a linear pitch ramp at interval 1 steps B53, B52, B53,
+	// the half-count rounding alternating per service, where the clock bit alone does not change between services.
+	inline uint64_t rampServiceCount(const uint32_t _control, const uint64_t _slowCounter)
+	{
+		switch ((_control & rampIntervalMask) >> 12)
+		{
+		case 0:
+			return _slowCounter;
+		case 1:
+			return _slowCounter >> 3;
+		case 2:
+			return _slowCounter >> 5;
+		default:
+			return _slowCounter >> 7;
 		}
 	}
 

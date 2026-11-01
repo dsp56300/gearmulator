@@ -8,12 +8,31 @@
 namespace xpLib
 {
 	using namespace xpInternal;
+	static bool voiceLoopAtOrBeforeEnd(const XP::VoiceState& _voice)
+	{
+		return (_voice.sampleLoop_0200 & voiceAddressMask) <= (_voice.sampleEnd_0300 & voiceAddressMask);
+	}
+	// The same in the programmed playback order: a reverse voice runs down from the loop point to the end. The
+	// programmed direction, not the current one: an alternate loop bouncing back is still in its regime.
+	static bool voiceLoopBeforeEndInDirection(const XP::VoiceState& _voice)
+	{
+		const auto loop = _voice.sampleLoop_0200 & voiceAddressMask;
+		const auto end = _voice.sampleEnd_0300 & voiceAddressMask;
+		return (_voice.waveControl_0000 & XP::WaveControl::reverse) != 0 ? loop >= end : loop <= end;
+	}
 	XP::VoiceStepResult XP::stepVoiceSource(const size_t _voiceIndex, VoiceState& _voice)
 	{
 		raiseVoiceMuteEvent(_voiceIndex, _voice);
 
 		if (_voice.runtimeCache.runtimePhase == VoiceRuntimePhaseCache::preload)
 		{
+			// Measured on the SC-88 XP: a voice launched with a mute request does not preload (no live marker,
+			// the address stays) until the mute status is set, so with the mute reason masked it never starts.
+			if ((_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus)) == WaveControl::muteRequest)
+			{
+				_voice.runtimeCache.runtimePhase = VoiceRuntimePhaseCache::initialize;   // runs, producer idle
+				return {};
+			}
 			if ((_voice.waveControl_0000 & WaveControl::ldpcmFormat) != 0)
 				_voice.runtimeCache.waveSampleFormat = WaveSampleFormatCache::ldpcm;
 			else if ((_voice.waveControl_0000 & WaveControl::fceDpcmExponent0OrProducerLive) != 0)
@@ -27,12 +46,15 @@ namespace xpLib
 			if ((_voice.waveControl_0000 & WaveControl::waveEngineHalt) == 0)
 			{
 				const auto reverse = voiceAddressRunsReverse(_voice);
-				// TODO: reverse preload on an 8-bit wave bus is not modeled.
+				const auto wide = voiceUses16BitWaveBus(_voice);
+				// The preload is four word fetches on a 16-bit bus (eight cells, one less when the start is the odd
+				// cell of its word, forward; seven, one more for an odd start, in reverse) and seven cells on an
+				// 8-bit bus. Measured on the SC-88 XP: a consumer position left by the host caps it (positions 1-9
+				// leave no producer slots). TODO: reverse preload on an 8-bit wave bus is not modeled.
 				auto preloadCount = _voice.waveCircularBuffer_0800.size() - 1;
-				if (voiceUses16BitWaveBus(_voice))
+				if (wide)
 				{
-					preloadCount = reverse ? 7 + (_voice.sampleCurrent_0100 & 1)
-										   : _voice.waveCircularBuffer_0800.size() - (_voice.sampleCurrent_0100 & 1);
+					preloadCount = _voice.waveCircularBuffer_0800.size();
 					const auto consumer = static_cast<size_t>(_voice.addressFraction_0e00 & 0x0f);
 					if (consumer != 0)
 					{
@@ -63,13 +85,23 @@ namespace xpLib
 						preloadCount = preloadForwardLoopWords(_voiceIndex, _voice, preloadCount);
 					else
 					{
-						for (size_t i = 0; i < preloadCount; ++i)
+						// Measured on the SC-88 XP: a word cut by the wrap ends the preload after its first cell.
+						size_t cells = 0;
+						for (unsigned word = 0; word < (wide ? 4u : 7u) && cells < preloadCount; ++word)
 						{
-							_voice.waveCircularBuffer_0800[i] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-							const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
-							refreshExponentCacheAfterAdvance(_voice, looped);
+							const auto before = _voice.sampleCurrent_0100 & voiceAddressMask;
+							const auto fetched = fetchVoiceWord(_voiceIndex, _voice, cells, preloadCount - cells);
+							cells += fetched;
+							const auto after = _voice.sampleCurrent_0100 & voiceAddressMask;
+							const auto wrapped = reverse ? after > before : after < before;
+							if (fetched == 1 && wrapped && voiceLoopBeforeEndInDirection(_voice))
+								break;
 						}
+						preloadCount = cells;
 					}
+					// Measured on the SC-88 XP with a seeded FIFO: the preload writes only the counted cells; the cell
+					// after them keeps what it held (an odd start, a reverse launch, a preload cut by the wrap) until
+					// the first refill writes it.
 					_voice.waveFetchState_0400 =
 						(static_cast<uint32_t>(preloadCount) << 16) | (_voice.waveFetchState_0400 & 0xffff);
 					// The chip overlays this marker only after the producer has completed its preload.
@@ -92,7 +124,7 @@ namespace xpLib
 			if (_voice.ampRamp_1a00 == 0x04005 && _voice.ampDestination_1500 == _voice.ampCurrent_1e00)
 				_voice.ampCurrent_1e00 &= ~rampAcknowledge;
 			_voice.pitchIncrement_0d00 = decodePitch(pitch);
-			_voice.tvfFCoefficient_2200 = (decodePitch(tvfF) << 2) & rampScratchMask;
+			_voice.tvfFCoefficient_2200 = decodeTvfCoefficient(tvfF);
 			const auto pitchTarget = _voice.pitchDestination_1200 & ~rampAcknowledge;
 			if ((_voice.pitchRamp_1700 & rampHold) == 0 &&
 				((m_state.sampleClock >> 3) & rampDividerMask(_voice.pitchRamp_1700)) == 0 &&
@@ -141,14 +173,18 @@ namespace xpLib
 
 		const auto playbackCounter = (_voice.playbackStateConfig_1000 + 1) & 7;
 		_voice.playbackStateConfig_1000 = playbackRunning | (_voice.playbackStateConfig_1000 & 0x18) | playbackCounter;
-		if ((_voice.waveControl_0000 & (WaveControl::waveEngineHalt | WaveControl::producerBlocked)) != 0)
+		if ((_voice.waveControl_0000 & (WaveControl::waveEngineHalt | WaveControl::producerBlocked)) != 0 ||
+			(_voice.waveControl_0000 & (WaveControl::muteRequest | WaveControl::muteStatus)) == WaveControl::muteRequest)
 		{
 			if (playbackCounter == 6)
-			{
 				_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
-				_voice.tvfFCoefficient_2200 = (decodePitch(_voice.tvfFCurrent_1c00) << 2) & rampScratchMask;
-			}
 			stepVoiceRamps(_voiceIndex, _voice);
+			// Measured on the SC-88 XP: a muted or halted voice stops its producer only. The filter and the TVA keep
+			// running on the sample held at the frozen phase (zero for a voice halted from launch: the chip's states
+			// then run a pure recurrence from whatever the host seeds), so the mixer slot settles over some twenty
+			// frames to the filter's response to that input and keeps receiving it every frame.
+			if ((_voice.waveControl_0000 & (WaveControl::waveEngineHalt | WaveControl::muteStatus)) != 0)
+				return {interpolateVoice(_voice, unpackAddressPhase(_voice.addressFraction_0e00)), true};
 			return {};
 		}
 
@@ -156,8 +192,9 @@ namespace xpLib
 		// RAM M sees three interpolation reads, at most four DPCM reads, then at most four producer writes.
 		const auto interpolatedSample = interpolateVoice(_voice, phase);
 		// The Q16 bits below readable 0x0e00 are ordered-dithered by the chip-global four-frame phase. The threshold
-		// order is 0,2,1,3 (two-bit reversal), applied to the sample-clock phase shifted by two.
-		const auto ditherPhase = static_cast<uint8_t>((m_state.sampleClock + 3) & 3);
+		// order is 0,2,1,3 (two-bit reversal) on the sample clock itself: measured frame-exact on the SC-88 XP
+		// against the reset-anchored clock (every other phase offset misses the fraction register).
+		const auto ditherPhase = static_cast<uint8_t>(m_state.sampleClock & 3);
 		const auto phaseIncrement =
 			(_voice.pitchIncrement_0d00 >> 2) + ((_voice.pitchIncrement_0d00 & 3) > reverseTwoBits(ditherPhase));
 		const auto nextPhase = phase + phaseIncrement;
@@ -173,22 +210,28 @@ namespace xpLib
 
 		if (voiceUses16BitWaveBus(_voice))
 		{
-			const auto pairAlignment = (_voice.waveFetchState_0400 >> 16) & 1;
-			const auto phaseOffset = pairAlignment << 14;
-			const auto pairCount = ((nextPhase + phaseOffset) >> 15) - ((phase + phaseOffset) >> 15);
-			for (uint32_t pair = 0; pair < pairCount; ++pair)
-				refillVoicePair(_voiceIndex, _voice);
+			// The producer fills by level, not by the consumer's pace: a word is fetched while the FIFO has room for
+			// one, the lead of the pointer over the consumer at most six of the eight cells, as the preload's room
+			// rule (positions 1-9 leave no producer slot, A/C/E leave one, two and three words) already says. A pace
+			// rule, one refill per pair boundary the consumer crosses, holds only while every refill yields two
+			// cells; after the one-cell word of a jump to an odd loop point it drifts a cell per loop at any
+			// fractional pitch (every rig table ran at exactly one cell per frame, where the two agree), and the
+			// consumer overruns the producer within a few loops (SC-88Pro 34H_LATN, loop DA259-DA2A5).
+			for (unsigned word = 0; word < 4; ++word)
+			{
+				const auto pointer = (_voice.waveFetchState_0400 >> 16) & 0x0f;
+				if (((pointer - (nextPhase >> 14)) & 0x0f) > 6)
+					break;
+				refillVoiceFifo(_voiceIndex, _voice);
+			}
 		}
 		else
 		{
 			for (uint32_t cell = 0; cell < cellCount; ++cell)
-				refillVoiceCell(_voiceIndex, _voice);
+				refillVoiceFifo(_voiceIndex, _voice);
 		}
 		if (playbackCounter == 6)
-		{
 			_voice.pitchIncrement_0d00 = decodePitch(_voice.pitchCurrent_1b00);
-			_voice.tvfFCoefficient_2200 = (decodePitch(_voice.tvfFCurrent_1c00) << 2) & rampScratchMask;
-		}
 		stepVoiceRamps(_voiceIndex, _voice);
 		return {interpolatedSample, true};
 	}
@@ -258,31 +301,55 @@ namespace xpLib
 		return cells;
 	}
 
-	void XP::refillVoiceCell(const size_t _voiceIndex, VoiceState& _voice)
+	size_t XP::fetchVoiceWord(const size_t _voiceIndex, VoiceState& _voice, const size_t _slot, const size_t _limit)
 	{
-		const auto pointer = static_cast<size_t>(_voice.waveFetchState_0400 >> 16) & 0x0f;
-		const auto cell = pointer & 7;
-		_voice.waveCircularBuffer_0800[cell] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-		const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
-		refreshExponentCacheAfterAdvance(_voice, looped);
-
-		const auto nextPointer = static_cast<uint32_t>((pointer + 1) & 0x0f);
-		_voice.waveFetchState_0400 = (nextPointer << 16) | (_voice.waveFetchState_0400 & 0xffff);
+		// The producer's one ROM access, measured on the SC-88 XP: the 16-bit word that holds the voice's address
+		// (one cell on an 8-bit bus), written into the FIFO from _slot on. Forward it yields the cells from the
+		// address to the end of the word, in reverse down to its start, so a fetch entered at the odd cell of its
+		// word (after a jump to an odd loop point, or an even one in reverse) yields that one cell and the next
+		// fetch is the aligned word: loop 71/end 7F runs 71 | 72 73 | 74 75, a three-cell loop 7D..7F alternates
+		// one and two cells. In the loop-before-end regime (playback order) the word that reaches the end ends
+		// with that cell, the pointer then at the loop point. With the loop past the end the chip pairs from the
+		// loop address as written and fetches the end word whole, its sample past the end repeating the end
+		// sample; a one-shot voice parked on its end (loop == end) keeps producing pairs of the end sample.
+		const auto reverse = voiceAddressRunsReverse(_voice);
+		const auto wide = voiceUses16BitWaveBus(_voice);
+		const auto loopBeforeEnd = voiceLoopBeforeEndInDirection(_voice);
+		const auto end = _voice.sampleEnd_0300 & voiceAddressMask;
+		const auto parked = (_voice.sampleLoop_0200 & voiceAddressMask) == end;
+		size_t cells = 0;
+		while (cells < _limit)
+		{
+			const auto address = _voice.sampleCurrent_0100 & voiceAddressMask;
+			const auto lastCellOfWord =
+				!wide || (loopBeforeEnd && !(parked && address == end) && (((address & 1) != 0) != reverse));
+			const auto pastEnd = wide && !loopBeforeEnd && cells > 0 && (end & 1) == 0 && address == end + 1;
+			// Measured on the SC-88 XP (loop points 85 and 91 past an end of 80 or 7F): with the loop past the end a
+			// pair started at an odd address delivers mantissa FB, not the ROM byte, as its second cell, under the
+			// exponent of the pair's first address. The first cell of such a pair is not host-readable and is
+			// taken from the ROM.
+			const auto oddPairSecond = wide && !loopBeforeEnd && cells > 0 && (address & 1) == 0;
+			auto& cell = _voice.waveCircularBuffer_0800[(_slot + cells) & 7];
+			cell = pastEnd ? _voice.waveCircularBuffer_0800[(_slot + cells - 1) & 7]
+				: oddPairSecond
+				? encodeVoiceSample(_voice, 0xfb,
+									static_cast<uint8_t>((_voice.waveFetchState_0400 >> ((((address - 1) >> 4) & 3) * 4)) & 0x0f))
+				: readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
+			const auto looped = advanceVoiceAddress(_voiceIndex, _voice);
+			refreshExponentCacheAfterAdvance(_voice, looped);
+			++cells;
+			if (lastCellOfWord || (looped && loopBeforeEnd) || cells == 2)
+				break;
+		}
+		return cells;
 	}
 
-	void XP::refillVoicePair(const size_t _voiceIndex, VoiceState& _voice)
+	void XP::refillVoiceFifo(const size_t _voiceIndex, VoiceState& _voice)
 	{
 		const auto pointer = static_cast<size_t>(_voice.waveFetchState_0400 >> 16) & 0x0f;
-		const auto cell = pointer & 7;
-		_voice.waveCircularBuffer_0800[cell] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-		auto looped = advanceVoiceAddress(_voiceIndex, _voice);
-		refreshExponentCacheAfterAdvance(_voice, looped);
-		_voice.waveCircularBuffer_0800[(cell + 1) & 7] = readVoiceSampleFromCache(_voice, _voice.sampleCurrent_0100);
-		looped = advanceVoiceAddress(_voiceIndex, _voice);
-		refreshExponentCacheAfterAdvance(_voice, looped);
-
-		const auto nextPointer = static_cast<uint32_t>((pointer + 2) & 0x0f);
-		_voice.waveFetchState_0400 = (nextPointer << 16) | (_voice.waveFetchState_0400 & 0xffff);
+		const auto cells = fetchVoiceWord(_voiceIndex, _voice, pointer & 7, 2);
+		_voice.waveFetchState_0400 =
+			(static_cast<uint32_t>((pointer + cells) & 0x0f) << 16) | (_voice.waveFetchState_0400 & 0xffff);
 	}
 
 	uint8_t XP::readVoiceWaveByte(const VoiceState& _voice, const uint32_t _address) const
@@ -411,14 +478,25 @@ namespace xpLib
 	bool XP::advanceVoiceAddress(const size_t _voiceIndex, VoiceState& _voice)
 	{
 		const auto reverse = voiceAddressRunsReverse(_voice);
-		const auto passedLoopMarker = reverse ? _voice.sampleCurrent_0100 <= _voice.sampleLoop_0200
-											  : _voice.sampleCurrent_0100 >= _voice.sampleLoop_0200;
+		// Measured on the SC-88 XP: the loop marker is tested per cell on the 16-bit WORD being fetched, so both
+		// cells of the word that holds the loop point qualify (an odd loop point 71 shows both marker stages after
+		// the one refill of 70/71, an even one 70 after the same word, never after 6E/6F).
+		const auto address = _voice.sampleCurrent_0100 & voiceAddressMask;
+		const auto loop = _voice.sampleLoop_0200 & voiceAddressMask;
+		const auto passedLoopMarker = reverse ? (address & ~uint32_t{1}) <= loop : (address | 1) >= loop;
 		if (passedLoopMarker)
 			raiseVoiceLoopMarkerEvent(_voiceIndex, _voice);
 
 		const auto directionState = (_voice.waveControl_0000 & WaveControl::directionState) != 0;
 		const auto boundary = directionState ? _voice.sampleLoop_0200 : _voice.sampleEnd_0300;
-		if ((_voice.sampleCurrent_0100 & voiceAddressMask) == (boundary & voiceAddressMask))
+		// Measured on the SC-88 XP: with the loop point past the end, the end word is consumed whole (both cells)
+		// before the jump; with the loop at or before the end, the wrap is at the end cell itself.
+		const auto wholeEndWord = voiceUses16BitWaveBus(_voice) && !reverse && !directionState && !voiceLoopAtOrBeforeEnd(_voice);
+		const auto atBoundary = wholeEndWord
+			? (((_voice.sampleCurrent_0100 | 1) & voiceAddressMask) == ((boundary | 1) & voiceAddressMask) &&
+			   (_voice.sampleCurrent_0100 & 1) != 0)
+			: ((_voice.sampleCurrent_0100 & voiceAddressMask) == (boundary & voiceAddressMask));
+		if (atBoundary)
 		{
 			if ((_voice.waveControl_0000 & WaveControl::alternateLoop) != 0)
 			{

@@ -309,6 +309,10 @@ namespace emu88Lib
 		// The SC-880's VALUE dial. It is two contacts in the matrix, and the firmware takes
 		// every closing of ENC_INC as a step up and of ENC_DEC as a step down, not a quadrature
 		// pair: each detent is a pulse on one of them, long enough for the panel scan to see.
+		// The scan and the page redraw take one closing per ~150 ms, too slow for a drag, so on
+		// a verified ROM all but the last pending detent go straight into the firmware's key
+		// queue and the last one closes the contact, whose own key event wakes the UI to take
+		// them all. Unknown ROMs get a pulse per detent.
 		void turnDial(int32_t _detents);
 		// Bits 0-7 are LDD0-7 (bit 7 is green); bit 8 is the red User Inst LED.
 		// The SK-88Pro's lamps are reported in the same order, as far as it has them.
@@ -394,9 +398,26 @@ namespace emu88Lib
 		// ---- front panel ----
 		uint32_t m_buttons = 0;
 		uint8_t  m_scanColumn = 0;
+		// Where a firmware keeps its panel key queue, selected by the control ROM's hash.
+		struct DialFirmware
+		{
+			uint16_t scannedRows;		// the matrix as last scanned, a byte per column
+			uint16_t processedRows;		// the matrix as the edge detector last took it
+			uint16_t keyReadPtr, keyWritePtr;
+			uint16_t keyRingFirst, keyRingEnd;
+			uint16_t keyState;			// a byte per key code; bit 1 = held
+			uint8_t  pushPage;			// the routine that pushes a key code, which the
+			uint16_t pushFirst, pushEnd;	// injection must not interrupt
+		};
+		static const DialFirmware* findDialFirmware(const std::vector<uint8_t>& _rom);
 		void     stepDial();
+		bool     dialKeyTaken(uint32_t _contact, bool _closed) const;
+		bool     canQueueDialKeys() const;
+		bool     queueDialDetent(uint8_t _code);
+		const DialFirmware* m_dialFirmware = nullptr;
 		int32_t  m_dialPending = 0;
 		uint32_t m_dialContact = 0;		// the matrix bit the dial holds closed
+		uint32_t m_dialReleased = 0;	// the matrix bit the dial last let go of
 		uint32_t m_dialCountdown = 0;	// samples left in the current pulse or gap
 
 		// ---- gate array ----

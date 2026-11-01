@@ -2,6 +2,8 @@
 
 #include "88lib/rom/rom.h"
 
+#include "baseLib/md5.h"
+
 #include <algorithm>
 #include <cstdio>
 
@@ -52,6 +54,8 @@ namespace emu88Lib
 			std::fprintf(stderr, "Sc88Pro: firmware must be %u bytes, got %zu\n", romSize, m_rom.size());
 			return;
 		}
+		if(_variant == Variant::Sc880)
+			m_dialFirmware = findDialFirmware(m_rom);
 
 		// Configure the existing xp core from the board: the Pro exposes
 		// five consecutive 4 MiB CS windows (A0/A1, B0/B1, C). Keep this
@@ -120,6 +124,7 @@ namespace emu88Lib
 		m_buttons = 0;
 		m_dialPending = 0;
 		m_dialContact = 0;
+		m_dialReleased = 0;
 		m_dialCountdown = 0;
 		m_scanColumn = 0;
 		m_gaInt.fill(false);
@@ -475,24 +480,100 @@ namespace emu88Lib
 	void Sc88Pro::stepDial()
 	{
 		// The scan reads the matrix every 24 ms or so; a pulse and the gap after it last two scans.
+		// With a known firmware they end as soon as its edge detector has taken them.
 		constexpr uint32_t pulseSamples = g_sampleRate * 80 / 1000;
 		if(m_dialCountdown)
 		{
 			--m_dialCountdown;
-			return;
+			const bool taken = m_dialContact ? dialKeyTaken(m_dialContact, true) : dialKeyTaken(m_dialReleased, false);
+			if(!taken)
+				return;
+			m_dialCountdown = 0;
 		}
 		if(m_dialContact)
 		{
+			m_dialReleased = m_dialContact;
 			m_dialContact = 0;
 			m_dialCountdown = pulseSamples;
 			return;
 		}
-		if(!m_dialPending)
+		if(!m_dialPending || !canQueueDialKeys())
 			return;
 		const auto contact = m_dialPending > 0 ? Sc880Button::DialInc : Sc880Button::DialDec;
+		const auto step = m_dialPending > 0 ? -1 : 1;
+		if(m_dialFirmware)
+		{
+			while(m_dialPending + step != 0 && queueDialDetent(static_cast<uint8_t>(contact)))
+				m_dialPending += step;
+		}
 		m_dialContact = uint32_t{1} << static_cast<uint8_t>(contact);
-		m_dialPending += m_dialPending > 0 ? -1 : 1;
+		m_dialPending += step;
 		m_dialCountdown = pulseSamples;
+	}
+
+	const Sc88Pro::DialFirmware* Sc88Pro::findDialFirmware(const std::vector<uint8_t>& _rom)
+	{
+		// SC-880 1.04. The scan (11:0084) stores a row byte per column at C0:4476; the edge
+		// detector (10:2958) turns every changed bit into key code column*8+row, bit 7 set
+		// on release, stores the rows it took at C0:4472 and pushes the code (11:00E2) onto
+		// a byte ring that the UI task pops (10:2B0E) once the push has woken it (TRAPA #11).
+		static const baseLib::MD5 sc880v104Hash("052707d6a9ec7c4f03d60d1f10464bf0");
+		static constexpr DialFirmware sc880v104{0x4476, 0x4472, 0x446e, 0x4470, 0x447a, 0x449b, 0x449d,
+		                                        0x11, 0x00e2, 0x0125};
+		return baseLib::MD5(_rom) == sc880v104Hash ? &sc880v104 : nullptr;
+	}
+
+	bool Sc88Pro::dialKeyTaken(const uint32_t _contact, const bool _closed) const
+	{
+		if(!m_dialFirmware || !_contact)
+			return false;
+		uint32_t bit = 0;
+		while(!(_contact & (uint32_t{1} << bit)))
+			++bit;
+		const bool open = m_sram[m_dialFirmware->processedRows + bit / 8] & (1u << (bit & 7));
+		return open != _closed;
+	}
+
+	bool Sc88Pro::canQueueDialKeys() const
+	{
+		if(!m_dialFirmware)
+			return true;
+		// Nothing for the edge detector to push, and the CPU is not halfway through a push.
+		const auto& fw = *m_dialFirmware;
+		for(uint16_t col = 0; col < 4; ++col)
+			if(m_sram[fw.scannedRows + col] != m_sram[fw.processedRows + col])
+				return false;
+		const auto& regs = m_machine.cpu().regs();
+		return regs.cp != fw.pushPage || regs.pc < fw.pushFirst || regs.pc >= fw.pushEnd;
+	}
+
+	bool Sc88Pro::queueDialDetent(const uint8_t _code)
+	{
+		// What the firmware's own push does for a press and its release, minus waking the UI.
+		const auto& fw = *m_dialFirmware;
+		const auto word = [this](const uint16_t _a)
+		{
+			return static_cast<uint16_t>(m_sram[_a] << 8 | m_sram[_a + 1]);
+		};
+		const auto advance = [&fw](const uint16_t _p)
+		{
+			return _p + 1 == fw.keyRingEnd ? fw.keyRingFirst : static_cast<uint16_t>(_p + 1);
+		};
+		const uint16_t read = word(fw.keyReadPtr);
+		const uint16_t press = word(fw.keyWritePtr);
+		if(press < fw.keyRingFirst || press >= fw.keyRingEnd)
+			return false;
+		const uint16_t release = advance(press);
+		const uint16_t next = advance(release);
+		if(release == read || next == read)
+			return false;
+		m_sram[press] = _code;
+		m_sram[release] = static_cast<uint8_t>(_code | 0x80);
+		m_sram[fw.keyWritePtr] = static_cast<uint8_t>(next >> 8);
+		m_sram[fw.keyWritePtr + 1] = static_cast<uint8_t>(next);
+		// The key's held flag, which the push sets on a press and clears on a release.
+		m_sram[fw.keyState + _code] &= static_cast<uint8_t>(~2);
+		return true;
 	}
 
 	uint8_t Sc88Pro::gateArrayRead(const uint16_t _addr)
