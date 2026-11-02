@@ -12,6 +12,7 @@
 #include "juceRmlUi/rmlHelper.h"
 
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/ElementUtilities.h"
 
 #include <algorithm>
@@ -112,9 +113,19 @@ namespace jucePluginEditorLib
 
 			const auto dpRatio = Rml::ElementUtilities::GetDensityIndependentPixelRatio(m_component);
 
+			// the offset parent is the layout parent, not necessarily positioned: the absolute
+			// overlay is placed in the padding box of the nearest positioned ancestor instead
+			Rml::Element* containingBlock = offsetParent;
+			while (containingBlock->GetParentNode() && containingBlock->GetComputedValues().position() == Rml::Style::Position::Static)
+				containingBlock = containingBlock->GetParentNode();
+
+			const auto pos = m_component->GetAbsoluteOffset(Rml::BoxArea::Border)
+				- containingBlock->GetAbsoluteOffset(Rml::BoxArea::Padding)
+				+ Rml::Vector2f(containingBlock->GetScrollLeft(), containingBlock->GetScrollTop());
+
 			overlay->SetProperty(Rml::PropertyId::Opacity, Rml::Property(_opacity, Rml::Unit::NUMBER));
-			overlay->SetProperty(Rml::PropertyId::Left, Rml::Property(m_component->GetOffsetLeft() / dpRatio, Rml::Unit::DP));
-			overlay->SetProperty(Rml::PropertyId::Top, Rml::Property(m_component->GetOffsetTop() / dpRatio, Rml::Unit::DP));
+			overlay->SetProperty(Rml::PropertyId::Left, Rml::Property(pos.x / dpRatio, Rml::Unit::DP));
+			overlay->SetProperty(Rml::PropertyId::Top, Rml::Property(pos.y / dpRatio, Rml::Unit::DP));
 			overlay->SetProperty(Rml::PropertyId::Width, Rml::Property(m_component->GetOffsetWidth() / dpRatio, Rml::Unit::DP));
 
 			auto* elem = offsetParent->AppendChild(std::move(overlay));

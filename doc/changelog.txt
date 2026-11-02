@@ -111,6 +111,10 @@ Framework:
 - [Fix] A skin that changes its own size could show one frame cut off, or
         with an empty band, before the window followed.
 
+- [Fix] The link and lock icons of a parameter could be drawn away from
+        their control when the element around the control is not
+        positioned.
+
 - [Imp] Skins: a dropdown with drag-step="N" steps through its entries while
         it is dragged, one entry per N dp, and a click still opens its menu.
         With group-size="N" a long list opens as submenus of N entries.
