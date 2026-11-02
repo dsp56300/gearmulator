@@ -82,6 +82,7 @@ namespace juceRmlUi
 		void metalContextCreated(MetalContext& _context) override;
 		void renderMetal(MetalContext& _context) override;
 		void metalContextClosing(MetalContext& _context) override;
+		void metalViewResized(MetalContext& _context) override;
 #endif
 
 		void mouseDown(const juce::MouseEvent& _event) override;
@@ -250,6 +251,8 @@ namespace juceRmlUi
 		juce::ModifierKeys m_currentModifierKeys;
 
 		bool m_updating = true;
+		// update() runs for metalViewResized(), which draws the frame itself
+		bool m_synchronousFrame = false;
 
 		Rml::Vector2i m_documentSize{0,0};
 		// The body size in dp and the dp ratio m_documentSize was measured at, to tell a size the skin changed

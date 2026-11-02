@@ -105,7 +105,8 @@ Framework:
         the slash.
 
 - [Fix] macOS: while a window was resized, the user interface was squashed
-        for a moment.
+        for a moment. The frame at the new size now reaches the screen
+        together with the resize.
 
 - [Fix] A skin that changes its own size could show one frame cut off, or
         with an empty band, before the window followed.

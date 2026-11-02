@@ -554,6 +554,28 @@ namespace juceRmlUi
 		}
 	}
 
+	void RmlComponent::metalViewResized(MetalContext& _context)
+	{
+		// AppKit commits the new view size with the transaction of this run loop pass, the next frame from the
+		// render thread arrives a frame or more later. Until then the old frame is stretched to the new size,
+		// which squashes the whole UI. Drawn here, the frame at the new size is presented with that transaction.
+		if (m_updating || !m_rmlContext || !isOnScreen())
+			return;
+
+		_context.renderSynchronously([this]
+		{
+			// The render thread is not drawing now. A frame it has not drawn yet is drawn together with this one.
+			m_renderDone = true;
+
+			m_synchronousFrame = true;
+			update();
+			m_synchronousFrame = false;
+
+			// whether update() produced a frame, it does not when it holds one back for a skin's own size change
+			return !m_renderDone;
+		});
+	}
+
 	void RmlComponent::metalContextClosing(MetalContext&)
 	{
 		if (m_renderType == Renderer::Software)
@@ -1254,7 +1276,8 @@ namespace juceRmlUi
 		{
 			// The layer geometry comes from AppKit objects, which only the message thread may read.
 			m_metalContext->updateDrawableSize();
-			m_metalContext->triggerRepaint();
+			if (!m_synchronousFrame)
+				m_metalContext->triggerRepaint();
 		}
 #endif
 

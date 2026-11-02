@@ -25,6 +25,9 @@ namespace juceRmlUi
 			virtual void metalContextCreated(MetalContext&) = 0;
 			virtual void renderMetal(MetalContext&) = 0;
 			virtual void metalContextClosing(MetalContext&) = 0;
+			// The view changed size, on the message thread, inside the Core Animation transaction that
+			// shows it. See renderSynchronously().
+			virtual void metalViewResized(MetalContext&) {}
 		};
 
 		MetalContext();
@@ -43,6 +46,13 @@ namespace juceRmlUi
 		// Reads the view geometry and resizes the layer to match. Message thread only, the render
 		// thread just consumes the result.
 		void updateDrawableSize();
+		// Draws a frame on the message thread and presents it with the current Core Animation
+		// transaction, so it reaches the screen together with a new view size instead of a frame or
+		// more after it. _prepareFrame produces the frame and returns whether there is one. Returns
+		// false if nothing was drawn, the render thread then draws the next frame as usual.
+		bool renderSynchronously(const std::function<bool()>& _prepareFrame);
+		// Called by the view when its size changes, see metalViewResized()
+		void viewResized();
 
 		double getRenderingScale() const;
 		int getViewportWidth() const;
@@ -75,13 +85,15 @@ namespace juceRmlUi
 		std::atomic<bool> m_continuousRepainting{false};
 		std::condition_variable m_renderCV;
 		std::mutex m_renderMutex;
+		// held while a frame is drawn, by the render thread or by renderSynchronously()
+		std::timed_mutex m_frameMutex;
 
 		std::atomic<int> m_viewportWidth{0};
 		std::atomic<int> m_viewportHeight{0};
 		std::atomic<double> m_renderingScale{1.0};
 
 		bool m_attached = false;
-		bool m_contextCreated = false;
+		std::atomic<bool> m_contextCreated{false};
 	};
 }
 

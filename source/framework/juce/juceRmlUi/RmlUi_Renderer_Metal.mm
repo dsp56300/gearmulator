@@ -1394,8 +1394,19 @@ bool RenderInterface_Metal::EndFrame(uint8_t* _screenshotDest, const uint32_t _d
 		}
 	}
 
-	[m_impl->commandBuffer presentDrawable:m_impl->currentDrawable];
-	[m_impl->commandBuffer commit];
+	if (m_impl->currentDrawable.layer.presentsWithTransaction)
+	{
+		// Presented with the caller's Core Animation transaction, which requires the commands to be scheduled
+		// first. See MetalContext::renderSynchronously.
+		[m_impl->commandBuffer commit];
+		[m_impl->commandBuffer waitUntilScheduled];
+		[m_impl->currentDrawable present];
+	}
+	else
+	{
+		[m_impl->commandBuffer presentDrawable:m_impl->currentDrawable];
+		[m_impl->commandBuffer commit];
+	}
 
 	bool captured = false;
 

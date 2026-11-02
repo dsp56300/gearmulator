@@ -33,7 +33,19 @@ namespace juceRmlUi
 		{
 			MetalViewClass() : ObjCClass("TUSMetalView_")
 			{
+				addIvar<MetalContext*>("owner");
 				addMethod(@selector(hitTest:), [](id, SEL, NSPoint) -> NSView* { return nil; });
+				// setFrame: ends up here as well. JUCE sets the frame after the component's resized(), so
+				// this is the first point at which the view has its new size.
+				addMethod(@selector(setFrameSize:), [](id _self, SEL _sel, NSSize _size)
+				{
+					const NSSize previous = static_cast<NSView*>(_self).frame.size;
+					sendSuperclassMessage<void>(_self, _sel, _size);
+					if (NSEqualSizes(previous, _size))
+						return;
+					if (auto* owner = juce::getIvar<MetalContext*>(_self, "owner"))
+						owner->viewResized();
+				});
 				registerClass();
 			}
 		};
@@ -192,6 +204,7 @@ namespace juceRmlUi
 				// the frame back to update(), and it already drops a frame it cannot draw. Skipping
 				// it left m_renderDone false with nothing to clear it, and the editor never updated
 				// again - a plain host-driven resize does not re-arm it.
+				std::lock_guard frameLock(m_frameMutex);
 				if (m_listener)
 					m_listener->renderMetal(*this);
 			}
@@ -230,10 +243,7 @@ namespace juceRmlUi
 		NSView* metalView = [metalViewClass.createInstance() initWithFrame:NSMakeRect(0, 0, 100, 100)];
 		metalView.wantsLayer = YES;
 		metalView.layer = layer;
-		// While the window changes size, Core Animation shows the last frame until a new one is drawn. The
-		// default placement stretches it to the new size, which squashes the whole UI for a moment; pinned to
-		// the top left it stays as drawn, as the window grows or shrinks below it.
-		metalView.layerContentsPlacement = NSViewLayerContentsPlacementTopLeft;
+		object_setInstanceVariable(metalView, "owner", this);
 
 		// Use JUCE's NSViewComponent::attachViewToComponent to embed the view.
 		// This handles plugin host view hierarchies correctly (AU, VST3, etc.),
@@ -261,6 +271,7 @@ namespace juceRmlUi
 		}
 		if (m_metalView)
 		{
+			object_setInstanceVariable((id)m_metalView, "owner", nullptr);
 			[(id)m_metalView release];
 			m_metalView = nullptr;
 		}
@@ -269,6 +280,48 @@ namespace juceRmlUi
 			[(id)m_metalLayer release];
 			m_metalLayer = nullptr;
 		}
+	}
+
+	void MetalContext::viewResized()
+	{
+		if (m_attached && m_contextCreated && m_listener)
+			m_listener->metalViewResized(*this);
+	}
+
+	bool MetalContext::renderSynchronously(const std::function<bool()>& _prepareFrame)
+	{
+		jassert(juce::MessageManager::getInstance()->isThisTheMessageThread());
+
+		if (!m_metalLayer || !m_listener || !m_contextCreated)
+			return false;
+
+		// The render thread may be drawing a frame, or be blocked in nextDrawable while the window is covered.
+		// Waiting longer than this would stall the resize, the frame then comes from the render thread.
+		std::unique_lock frameLock(m_frameMutex, std::defer_lock);
+		if (!frameLock.try_lock_for(std::chrono::milliseconds(20)))
+			return false;
+
+		if (!_prepareFrame())
+			return false;
+
+		updateDrawableSize();
+
+		// this frame is drawn here, the render thread has nothing to do for it
+		m_repaintRequested = false;
+
+		// With presentsWithTransaction, the drawable is presented by the transaction of the thread that calls
+		// present, here the one in which AppKit resizes the view, instead of on its own a frame or more later.
+		// Only for this frame: the render thread has no transaction to join.
+		CAMetalLayer* layer = MTL_LAYER;
+		layer.presentsWithTransaction = YES;
+
+		@autoreleasepool
+		{
+			m_listener->renderMetal(*this);
+		}
+
+		layer.presentsWithTransaction = NO;
+		return true;
 	}
 
 	void MetalContext::updateDrawableSize()
