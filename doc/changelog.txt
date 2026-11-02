@@ -119,6 +119,9 @@ Framework:
         skins folder either, is replaced by the default skin without a
         warning each time the editor opens.
 
+- [Imp] Settings: the option to enable advanced options is hidden when a
+        plugin has none.
+
 - [Imp] Skins: a dropdown with drag-step="N" steps through its entries while
         it is dragged, one entry per N dp, and a click still opens its menu.
         With group-size="N" a long list opens as submenus of N entries.

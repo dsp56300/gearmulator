@@ -38,6 +38,11 @@ namespace jucePluginEditorLib
 
 		auto* btAllowAdvanced = juceRmlUi::helper::findChild(_root, "btEnableAdvancedOptions");
 
+		// The toggle only unlocks sections marked settings-advanced (the DSP clock, some device pages); a plugin whose
+		// pages hide all of them gets no toggle.
+		if (!hasAdvancedOptions())
+			juceRmlUi::helper::setVisible(btAllowAdvanced, false);
+
 		auto* bt = juceRmlUi::helper::findChild(btAllowAdvanced, "button");
 
 		juceRmlUi::ElemButton::setChecked(bt, allowAdvanced);
@@ -120,6 +125,20 @@ namespace jucePluginEditorLib
 	Rml::Element* Settings::getPageParent() const
 	{
 		return juceRmlUi::helper::findChild(m_root, "pageContainer");
+	}
+
+	bool Settings::hasAdvancedOptions() const
+	{
+		Rml::ElementList elements;
+		Rml::ElementUtilities::GetElementsByClassName(elements, m_root, "settings-advanced");
+
+		for (auto* element : elements)
+		{
+			const auto* display = element->GetLocalProperty(Rml::PropertyId::Display);
+			if (!display || display->Get<Rml::Style::Display>(element->GetCoreInstance()) != Rml::Style::Display::None)
+				return true;
+		}
+		return false;
 	}
 
 	void Settings::enableAdvancedOptions(const bool _enable) const

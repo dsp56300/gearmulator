@@ -27,6 +27,7 @@ namespace jucePluginEditorLib
 		Rml::Element* getPageParent() const;
 
 	private:
+		bool hasAdvancedOptions() const;
 		void enableAdvancedOptions(bool _enable) const;
 
 		Editor& m_editor;
