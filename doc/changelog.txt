@@ -115,6 +115,10 @@ Framework:
         their control when the element around the control is not
         positioned.
 
+- [Imp] A skin that is no longer part of the plugin, and is not in the
+        skins folder either, is replaced by the default skin without a
+        warning each time the editor opens.
+
 - [Imp] Skins: a dropdown with drag-step="N" steps through its entries while
         it is dragged, one entry per N dp, and a click still opens its menu.
         With group-size="N" a long list opens as submenus of N entries.

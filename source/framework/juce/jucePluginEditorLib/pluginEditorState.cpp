@@ -184,6 +184,11 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		if(skin.folder.empty() && !m_processor.findResource(skin.filename))
 		{
 			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
+
+			// not there either: an embedded skin that this build no longer has, the default skin instead
+			const auto skinFile = Editor::getAbsoluteSkinFolder(m_processor, skin.folder) + skin.filename;
+			if (!m_includedSkins.empty() && !juce::File(juce::String::fromUTF8(skinFile.c_str())).existsAsFile())
+				skin = m_includedSkins[0];
 		}
 
 		if (!skin.folder.empty())
