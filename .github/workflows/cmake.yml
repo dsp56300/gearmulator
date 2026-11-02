@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-14, windows-2022, windows-11-arm ]
+        os: [ ubuntu-latest, macos-15, windows-2022, windows-11-arm ]
         cmake_generator: [ default, Ninja ]
       fail-fast: false
     name:  ${{ matrix.os }} build with ${{ matrix.cmake_generator }} cmake generator
