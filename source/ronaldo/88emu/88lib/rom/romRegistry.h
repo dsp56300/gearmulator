@@ -424,8 +424,8 @@ namespace emu88Lib
          "1.02", false},
         {romDevices(RomDevice::Cm32l), RomSlot::Control, 0, 0x10000, baseLib::MD5("099552dcbc6a94bb0d2abf1281873fa1"),
          "1.00, LAPC-I", false},
-        {romDevices(RomDevice::Cm32ln), RomSlot::Control, 0, 0x10000, {}, "1.00, CM-32LN/CM-500/LAPC-N", false, false,
-         false, baseLib::SHA1("dc1c5b1b90a4646d00f7daf3679733c7badc7077")},
+        {romDevices(RomDevice::Cm32ln), RomSlot::Control, 0, 0x10000, baseLib::MD5("88f459121acf32923b1d85742c67e9c9"),
+         "1.00, CM-32LN/CM-500/LAPC-N", false},
         {romDevices(RomDevice::Cm32l, RomDevice::Cm32ln), RomSlot::Wave, 0, 0x100000,
          baseLib::MD5("08cdcfa0ed93e9cb16afa76e6ac5f0a4"), "R15449121+R15179945", false},
         {romDevices(RomDevice::Cm32l, RomDevice::Cm32ln, RomDevice::Mt32New), RomSlot::Reverb, 0, 0x8000,
@@ -509,17 +509,16 @@ namespace emu88Lib
         // -----------------------------------------------------------------
         // A P8098 on an 8-bit bus, the firmware in a single banked 128 KiB mask ROM whose upper
         // half holds the ROM Play demo songs, and the reverb microcode R15179917 it shares with
-        // the CM-32L. Only 2.04 has been hashed here; the other three are catalogued from
-        // munt's published digests. 2.03 is the MT-100's firmware; that machine is an MT-32
-        // with a sequencer and a Quick Disk drive on the same main board.
-        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, {}, "2.07", false, false, false,
-         baseLib::SHA1("47b52adefedaec475c925e54340e37673c11707c")},
-        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, {}, "2.06", false, false, false,
-         baseLib::SHA1("2869cf4c235d671668cfcb62415e2ce8323ad4ed")},
+        // the CM-32L. 2.03 is the MT-100's firmware; that machine is an MT-32 with a sequencer
+        // and a Quick Disk drive on the same main board.
+        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, baseLib::MD5("8c4b2c7708be8e88a3ac14777575629c"),
+         "2.07", false},
+        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, baseLib::MD5("daa3ea8e557b85e1ae25a1348db37343"),
+         "2.06", false},
         {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, baseLib::MD5("615a866337ecb752768ac03ed4ddf85c"),
          "2.04, 88-11-11", false},
-        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, {}, "2.03, MT-100", false, false, false,
-         baseLib::SHA1("5837064c9df4741a55f7c4d8787ac158dff2d3ce")},
+        {romDevices(RomDevice::Mt32New), RomSlot::Control, 0, 0x20000, baseLib::MD5("ef4978c0a278f284d12b1632aa0b804b"),
+         "2.03, MT-100", false},
 
         {romDevices(RomDevice::Cm32p), RomSlot::Program, 0, 0x10000, baseLib::MD5("ccd61a220f433a62a53b48eb9bb36827"),
          "1.00", false},
@@ -744,26 +743,25 @@ namespace emu88Lib
         // three separate 1 MiB PCM mask ROMs. Five firmware revisions circulate, and
         // each one's H8/532 on-chip ROM belongs with its program ROM: the loader pairs
         // them by the revision number. 1.21 is the one hashed here and the preferred
-        // one; 1.20 shares its on-chip ROM, and 2.00 runs on the SC-155's. The others
-        // are catalogued from the SHA-256 digests.
+        // one; 1.20 shares its on-chip ROM, and 2.00 runs on the SC-155's.
         {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, baseLib::MD5("462cb3a2ce9e54f4e54a52f643931ffd"),
          "1.20/1.21, R15199778", false, false, false, {}, {}, 1},
         {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, baseLib::MD5("6b61186953b50d900e430ae6a996bda7"),
          "1.21, R15209363", false, false, false, {}, {}, 1},
-        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, {}, "1.20, R15209337", false, false, false, {},
-         baseLib::SHA256("22ce6ca59e6332143b335525e81fab501ea6fccce4b7e2f3bfc2cc8bf6612ff6"), 1},
-        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, {}, "2.00, R15199799", false, false, false, {},
-         baseLib::SHA256("24a65c97cdbaa847d6f59193523ce63c73394b4b693a6517ee79441f2fb8a3ee"), 2},
-        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, {}, "2.00, R15209387", false, false, false, {},
-         baseLib::SHA256("f5dac35d450ab986570a209dff3816eec75cee669e161f54b51224b467dd0bcc"), 2},
-        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, {}, "1.10, R15199736", false, false, false, {},
-         baseLib::SHA256("2fe88ec39f3ef4b1de8cdf74527419467975c47f7aacfcd07605e01d54bd89b5"), 3},
-        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, {}, "1.10, R15209275", false, false, false, {},
-         baseLib::SHA256("ec064d6c4fc70ec990911089d966043cb819fba0e26e6f6afdd0a05e5301b91b"), 3},
-        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, {}, "1.00, R15199748", false, false, false, {},
-         baseLib::SHA256("b4ecf44bc0520322b0d114d397951d3bf92ca6fa51d0d27b2407df58a6be2efe"), 4},
-        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, {}, "1.00, R15449258", false, false, false, {},
-         baseLib::SHA256("014e2e21ea30de7a1e4f1cdea14dd9a719960535e257a9e40e98dbb1a5870226"), 4},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, baseLib::MD5("181b86f1c5a81caa65b6cebbf7c2678b"),
+         "1.20, R15209337", false, false, false, {}, {}, 1},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, baseLib::MD5("6b74988a79c2a48239809f07a54175b3"),
+         "2.00, R15199799", false, false, false, {}, {}, 2},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, baseLib::MD5("d79cf9c9aa88416372cb0fd318f79beb"),
+         "2.00, R15209387", false, false, false, {}, {}, 2},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, baseLib::MD5("b301bfdaac9650ac97322f533396fdfb"),
+         "1.10, R15199736", false, false, false, {}, {}, 3},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, baseLib::MD5("c0f0c8c2ffcfaf9a56c7e0d2dd440857"),
+         "1.10, R15209275", false, false, false, {}, {}, 3},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Internal, 0, 0x8000, baseLib::MD5("c4e923344906aa630ab1b950720db386"),
+         "1.00, R15199748", false, false, false, {}, {}, 4},
+        {romDevices(RomDevice::Sc55Mk1), RomSlot::Program, 0, 0x40000, baseLib::MD5("7e90b34c777e2c5e1277ae559d959c26"),
+         "1.00, R15449258", false, false, false, {}, {}, 4},
         {romDevices(RomDevice::Sc55Mk1, RomDevice::Sc155), RomSlot::Wave, 0, 0x100000,
          baseLib::MD5("5f40d5297f47358ddea43b8d225874cc"), "R15209276", false},
         {romDevices(RomDevice::Sc55Mk1, RomDevice::Sc155), RomSlot::Wave, 1, 0x100000,
@@ -798,12 +796,12 @@ namespace emu88Lib
          baseLib::MD5("31883de733ad34858bfd262b8fcf2fb6"), "R15199827", false},
         {romDevices(RomDevice::Scb55), RomSlot::Program, 0, 0x40000, baseLib::MD5("89d8263a413326249c042da8bcd0fda1"),
          "R15279828", false},
-        // The RLP-3237's own program 2.01 and its single 16 Mbit wave ROM haven't been
-        // dumped here, so they are catalogued from the SHA-256 digests.
+        // The RLP-3237's own program 2.01 hasn't been dumped here, so it is catalogued
+        // from the SHA-256 digest.
         {romDevices(RomDevice::Rlp3237), RomSlot::Program, 0, 0x40000, {}, "2.01, R15209486", false, false, false, {},
          baseLib::SHA256("e0a3d6d9b05e82374a0d289901273ce560ce1ead86459c75f844158b32d204a9")},
-        {romDevices(RomDevice::Rlp3237), RomSlot::Wave, 0, 0x200000, {}, "R15279824", false, false, false, {},
-         baseLib::SHA256("dae2a8bc0fd3bcaf3f5e3ab6c4c6fd30e2663bf26ca17afe52924874c0afc4e2")},
+        {romDevices(RomDevice::Rlp3237), RomSlot::Wave, 0, 0x200000, baseLib::MD5("16c605f5c3e7c6870706b8b23dcca269"),
+         "R15279824", false},
         {romDevices(RomDevice::Sc155), RomSlot::Internal, 0, 0x8000, baseLib::MD5("6b74988a79c2a48239809f07a54175b3"),
          "R15199799", false},
         {romDevices(RomDevice::Sc155), RomSlot::Program, 0, 0x40000, baseLib::MD5("5c7c6ab34ef6da079b05a36fd23c9c91"),
