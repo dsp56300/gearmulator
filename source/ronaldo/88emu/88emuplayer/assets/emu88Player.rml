@@ -154,5 +154,55 @@
 			<button id="btMv30Right" class="hit mv30Arrow" style="left: 499dp; top: 35.333dp; width: 10dp; height: 18.333dp;" title="Cursor right (Right arrow)"><div class="mv30Face mv30_right"/></button>
 			<button id="btMv30Down" class="hit mv30Arrow" style="left: 478.667dp; top: 55dp; width: 18.667dp; height: 10dp;" title="Cursor down (Down arrow)"><div class="mv30Face mv30_down"/></button>
 		</div>
+
+		<!-- The PRO-E: the arranger's switches only, the ones a style is picked and played with; the panel's others
+		     edit its memory. No artwork has wells for them, so they are drawn here, with the lamps of those that have one;
+		     the beat lamps and the TEMPO / VALUE dial sit on the lip. -->
+		<div class="modelProEPanel">
+			<div class="proeCaption" style="left: 396dp; top: 5dp;">BANK</div>
+			<div class="proeCaption" style="left: 396dp; top: 27dp;">NUMBER</div>
+			<button id="btProEBank1" class="hit proeKey" style="left: 396dp; top: 13dp; width: 22dp; height: 11dp; line-height: 11dp;" title="BANK 1 (F1)">1</button>
+			<button id="btProEBank2" class="hit proeKey" style="left: 421dp; top: 13dp; width: 22dp; height: 11dp; line-height: 11dp;" title="BANK 2 (F2)">2</button>
+			<button id="btProEBank3" class="hit proeKey" style="left: 446dp; top: 13dp; width: 22dp; height: 11dp; line-height: 11dp;" title="BANK 3 (F3)">3</button>
+			<button id="btProEBank4" class="hit proeKey" style="left: 471dp; top: 13dp; width: 22dp; height: 11dp; line-height: 11dp;" title="BANK 4 (F4)">4</button>
+			<button id="btProEBank5" class="hit proeKey" style="left: 496dp; top: 13dp; width: 22dp; height: 11dp; line-height: 11dp;" title="BANK 5 (F5)">5</button>
+			<button id="btProEBank6" class="hit proeKey" style="left: 521dp; top: 13dp; width: 22dp; height: 11dp; line-height: 11dp;" title="BANK 6 (F6)">6</button>
+			<button id="btProEBank7" class="hit proeKey" style="left: 546dp; top: 13dp; width: 22dp; height: 11dp; line-height: 11dp;" title="BANK 7 (F7)">7</button>
+			<button id="btProEBank8" class="hit proeKey" style="left: 571dp; top: 13dp; width: 22dp; height: 11dp; line-height: 11dp;" title="BANK 8 (F8)">8</button>
+			<button id="btProENumber1" class="hit proeKey" style="left: 396dp; top: 35dp; width: 22dp; height: 11dp; line-height: 11dp;" title="NUMBER 1 (1)">1</button>
+			<button id="btProENumber2" class="hit proeKey" style="left: 421dp; top: 35dp; width: 22dp; height: 11dp; line-height: 11dp;" title="NUMBER 2 (2)">2</button>
+			<button id="btProENumber3" class="hit proeKey" style="left: 446dp; top: 35dp; width: 22dp; height: 11dp; line-height: 11dp;" title="NUMBER 3 (3)">3</button>
+			<button id="btProENumber4" class="hit proeKey" style="left: 471dp; top: 35dp; width: 22dp; height: 11dp; line-height: 11dp;" title="NUMBER 4 (4)">4</button>
+			<button id="btProENumber5" class="hit proeKey" style="left: 496dp; top: 35dp; width: 22dp; height: 11dp; line-height: 11dp;" title="NUMBER 5 (5)">5</button>
+			<button id="btProENumber6" class="hit proeKey" style="left: 521dp; top: 35dp; width: 22dp; height: 11dp; line-height: 11dp;" title="NUMBER 6 (6)">6</button>
+			<button id="btProENumber7" class="hit proeKey" style="left: 546dp; top: 35dp; width: 22dp; height: 11dp; line-height: 11dp;" title="NUMBER 7 (7)">7</button>
+			<button id="btProENumber8" class="hit proeKey" style="left: 571dp; top: 35dp; width: 22dp; height: 11dp; line-height: 11dp;" title="NUMBER 8 (8)">8</button>
+			<button id="btProEStyle" class="hit proeKey proeLampKey" style="left: 396dp; top: 54dp; width: 38dp; height: 15dp; line-height: 15dp;" title="STYLE (J)"><div class="proeLamp"/>STYLE</button>
+			<button id="btProEGroup" class="hit proeKey proeLampKey" style="left: 437dp; top: 54dp; width: 38dp; height: 15dp; line-height: 15dp;" title="GROUP A/B (B)"><div class="proeLamp"/>GROUP A/B</button>
+			<button id="btProEVariation" class="hit proeKey proeLampKey" style="left: 478dp; top: 54dp; width: 38dp; height: 15dp; line-height: 15dp;" title="VARIATION (V)"><div class="proeLamp"/>VARIATION</button>
+			<button id="btProEAdvArr" class="hit proeKey proeLampKey" style="left: 519dp; top: 54dp; width: 38dp; height: 15dp; line-height: 15dp;" title="ADVANCED ARRANGER (G)"><div class="proeLamp"/>ADV ARR</button>
+			<button id="btProEArrHold" class="hit proeKey proeLampKey" style="left: 560dp; top: 54dp; width: 38dp; height: 15dp; line-height: 15dp;" title="ARRANGER HOLD (H)"><div class="proeLamp"/>ARR HOLD</button>
+			<button id="btProEFillOrig" class="hit proeKey" style="left: 396dp; top: 74dp; width: 38dp; height: 15dp; line-height: 15dp;" title="FILL IN ORIGINAL (F)">FILL ORIG</button>
+			<button id="btProEFillVari" class="hit proeKey" style="left: 437dp; top: 74dp; width: 38dp; height: 15dp; line-height: 15dp;" title="FILL IN VARIATION (D)">FILL VARI</button>
+			<button id="btProETapTempo" class="hit proeKey" style="left: 478dp; top: 74dp; width: 38dp; height: 15dp; line-height: 15dp;" title="TAP TEMPO / BREAK (T)">TAP/BREAK</button>
+			<button id="btProEFadeIn" class="hit proeKey proeLampKey" style="left: 519dp; top: 74dp; width: 38dp; height: 15dp; line-height: 15dp;" title="FADE IN (N)"><div class="proeLamp"/>FADE IN</button>
+			<button id="btProEFadeOut" class="hit proeKey proeLampKey" style="left: 560dp; top: 74dp; width: 38dp; height: 15dp; line-height: 15dp;" title="FADE OUT (M)"><div class="proeLamp"/>FADE OUT</button>
+			<button id="btProEIntroEnd" class="hit proeKey proeLampKey" style="left: 396dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="INTRO/END (S)"><div class="proeLamp"/>INTRO/END</button>
+			<button id="btProESyncStart" class="hit proeKey proeLampKey" style="left: 437dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="SYNC START (C)"><div class="proeLamp"/>SYNC START</button>
+			<button id="btProESyncStop" class="hit proeKey proeLampKey" style="left: 478dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="SYNC STOP (X)"><div class="proeLamp"/>SYNC STOP</button>
+			<button id="btProEStartStop" class="hit proeKey proeLampKey" style="left: 519dp; top: 94dp; width: 79dp; height: 15dp; line-height: 15dp;" title="START/STOP (Space)"><div class="proeLamp"/>START/STOP</button>
+			<!-- The beat lamps: the bar's beats while a style plays, beat 1 blinking at the tempo while stopped. -->
+			<div class="proeCaption" style="left: 396dp; top: 140dp;">BEAT</div>
+			<div id="ledProEBeat1" class="proeBeat" style="left: 397dp; top: 149dp;"/>
+			<div class="proeCaption" style="left: 398dp; top: 157dp;">1</div>
+			<div id="ledProEBeat2" class="proeBeat" style="left: 409dp; top: 149dp;"/>
+			<div class="proeCaption" style="left: 410dp; top: 157dp;">2</div>
+			<div id="ledProEBeat3" class="proeBeat" style="left: 421dp; top: 149dp;"/>
+			<div class="proeCaption" style="left: 422dp; top: 157dp;">3</div>
+			<div id="ledProEBeat4" class="proeBeat" style="left: 433dp; top: 149dp;"/>
+			<div class="proeCaption" style="left: 434dp; top: 157dp;">4</div>
+			<div class="proeCaption proeDialCaption" style="left: 470dp; top: 151dp;">TEMPO / VALUE</div>
+			<knob id="btProEDial" class="hit proeDial" style="left: 548dp; top: 136dp; width: 40dp; height: 40dp; border-radius: 20dp;" title="TEMPO / VALUE: drag or scroll to turn (Up / Down)"/>
+		</div>
 	</body>
 </rml>

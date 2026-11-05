@@ -91,6 +91,8 @@ namespace emu88Lib
             return RomDevice::Cm32ln;
         case DeviceModel::Mv30:
             return RomDevice::Mv30;
+        case DeviceModel::ProE:
+            return RomDevice::ProE;
         }
         return RomDevice::Sc88;
     }
@@ -241,6 +243,18 @@ namespace emu88Lib
             if (!inventory.read(result.waves[i], RomDevice::Mv30, RomSlot::Wave, i))
                 return {};
         return result.isValid() ? result : Mv30RomSet{};
+    }
+
+    ProERomSet RomLoader::findProERomSet()
+    {
+        const auto inventory = scan();
+        ProERomSet result;
+        if (!inventory.read(result.program, RomDevice::ProE, RomSlot::Program))
+            return {};
+        for (uint8_t i = 0; i < result.patterns.size(); ++i)
+            if (!inventory.read(result.patterns[i], RomDevice::ProE, RomSlot::Data, i))
+                return {};
+        return result.isValid() ? result : ProERomSet{};
     }
 
     LaRomSet RomLoader::findLaRomSet(const LaModel _model)

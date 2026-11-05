@@ -58,13 +58,14 @@ namespace emu88Lib
         }};
 
         // Boards whose output circuit has been modelled. Auto leaves every other board digital.
-        constexpr std::array<std::pair<DeviceModel, AnalogModel>, 21> g_autoModels{{
+        constexpr std::array<std::pair<DeviceModel, AnalogModel>, 22> g_autoModels{{
             {DeviceModel::Cm32p, AnalogModel::Cm32p},
             {DeviceModel::Cm32l, AnalogModel::Cm32l},
             // The new-type MT-32 board is the CM-32L's design in the MT-32's case: the same
             // DAC, VCA and output stage. The old-type board's has not been read yet, and the
             // CM-32LN's PCM55 stage neither, so Auto leaves those two digital.
             {DeviceModel::Mt32New, AnalogModel::Cm32l},
+            {DeviceModel::ProE, AnalogModel::Cm32l},
             // The CM-64 is both boards at once: each half through its own reconstruction
             // filter, then the CM-32P's mixer and output network, which is where the LA
             // board's line output arrives. AnalogOutput::processSplit() runs the three.
@@ -159,6 +160,7 @@ namespace emu88Lib
         // than the unity of an unread board, which would drop it 4.5 dB under the other MT-32.
         case DeviceModel::Mt32New:
         case DeviceModel::Mt32Old:
+        case DeviceModel::ProE:
             return {static_cast<float>(g_cm32lGain), 1.0f, 1.0f};
         case DeviceModel::Cm32p:
             return {static_cast<float>(g_cm32pGain), 1.0f, g_cm32pRight};
@@ -200,6 +202,7 @@ namespace emu88Lib
         case DeviceModel::Cm32p: // PCM56P
         case DeviceModel::Cm64: // Both halves use 16-bit DACs, before analog mixing/VCA.
         case DeviceModel::Mv30: // The RCC's 16-bit words into one multiplexed DAC
+        case DeviceModel::ProE:
         case DeviceModel::Sc55Mk1: // uPD6376, and the boards that share it
         case DeviceModel::Cm300:
         case DeviceModel::Scc1a:

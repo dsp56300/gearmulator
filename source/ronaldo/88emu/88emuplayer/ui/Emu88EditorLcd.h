@@ -158,7 +158,8 @@ namespace emu88Player
 				return _screen == 0 ? kCm32pPanel : kCm32lPanel;
 			if(_screen)
 				return kNoGraphic;	// nothing else has a second panel
-			if(_model == DeviceModel::Cm32p) return kCm32pPanel;
+			// The PRO-E's 2 x 16 HD44780 sits in the CM-32P's window on its bezel.
+			if(_model == DeviceModel::Cm32p || _model == DeviceModel::ProE) return kCm32pPanel;
 			// The LA boards' SED1200, in the CM-32L's window - the MT-32s' front-panel display too.
 			if(emu88Lib::isLaModel(_model)) return kCm32lPanel;
 			if(_model == DeviceModel::Sc8850) return {kSc8850Style, 160, 64};

@@ -287,6 +287,8 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Nu10b:
 		case emu88Lib::DeviceModel::Miig5: panel = "sc88exp_panel.png"; break;
 		case emu88Lib::DeviceModel::Mv30: panel = "mv30_panel.png"; break;
+		// The CM bezel with its lamps and name taken off, see modelProE in the stylesheet.
+		case emu88Lib::DeviceModel::ProE: panel = "proe_panel.png"; break;
 		case emu88Lib::DeviceModel::Sc55St:
 		case emu88Lib::DeviceModel::Cm300:
 		case emu88Lib::DeviceModel::Scc1a:
@@ -302,7 +304,7 @@ namespace emu88Player
 		const bool cmBezel = emu88Lib::isCmModel(_model) || emu88Lib::isLaModel(_model);
 		const bool mt32 = _model == emu88Lib::DeviceModel::Mt32Old || _model == emu88Lib::DeviceModel::Mt32New;
 		const bool darkTransport = (cmBezel && !mt32) || _model == emu88Lib::DeviceModel::Sc8850 ||
-		                           _model == emu88Lib::DeviceModel::Sc8820;
+		                           _model == emu88Lib::DeviceModel::Sc8820 || _model == emu88Lib::DeviceModel::ProE;
 		for(const auto& [id, name] : {std::pair{"playerPlayGraphic", "player_play"}, std::pair{"playerPauseGraphic", "player_pause"},
 		                              std::pair{"playerStopGraphic", "player_stop"}})
 			if(auto* graphic = document->GetElementById(id))
@@ -324,6 +326,7 @@ namespace emu88Player
 			root->SetClass("modelMt32", mt32);
 			root->SetClass("modelSc8820", _model == emu88Lib::DeviceModel::Sc8820);
 			root->SetClass("modelMv30", _model == emu88Lib::DeviceModel::Mv30);
+			root->SetClass("modelProE", _model == emu88Lib::DeviceModel::ProE);
 			root->SetClass("modelNoPanel", noPanel);
 			root->SetClass("modelNoDisplay", !emu88Lib::deviceHasLcd(_model));
 		}

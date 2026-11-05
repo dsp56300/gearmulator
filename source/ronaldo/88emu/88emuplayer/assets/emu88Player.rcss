@@ -246,6 +246,27 @@ body { position: relative; left: 0dp; top: 0dp; width: 612dp; height: 187dp; bac
  * stays clear, since the arrows' boxes are larger than their triangles. */
 .modelMv30Panel { display: none; }
 .modelMv30 .modelMv30Panel { display: block; }
+
+/* The PRO-E on the CM bezel (proe_panel.png): its 16x2 window is the CM-32P's, its arranger switches are drawn
+ * as plain keys since the artwork has no wells for them. */
+.modelProEPanel { display: none; }
+.modelProE .modelProEPanel { display: block; }
+.modelProE .modelLegacy { display: none; }
+.modelProE .lcd { left: 162dp; top: 23dp; width: 218dp; height: 41dp; }
+.modelProE .powerOffDisplay { padding-top: 14dp; }
+.modelProE .volumeKnob { spriteprefix: cmknob_; decorator: image(cmknob_030 contain); }
+.modelProE .deviceSelect { width: 131dp; }
+.proeKey { background-color: #34342f; border-radius: 1.5dp; box-shadow: 0dp 0.6dp 0.8dp rgba(0, 0, 0, 120);
+	font-family: Roboto; font-size: 4.6dp; font-weight: bold; color: #e4e2d6; text-align: center; }
+.proeKey:active, .proeKey.pressed { background-color: #1d1d1a; color: #ffffff; box-shadow: inset 0dp 0.8dp 1dp rgba(0, 0, 0, 160); }
+.proeLamp { position: absolute; left: 1.8dp; top: 1.8dp; width: 3dp; height: 3dp; border-radius: 1.5dp; background-color: #4a1d16; pointer-events: none; }
+.proeKey.on .proeLamp { background-color: #ff4a2e; box-shadow: 0dp 0dp 1.5dp #ff4a2e; }
+.proeBeat { position: absolute; width: 5dp; height: 5dp; border-radius: 2.5dp; background-color: #4a1d16; box-shadow: inset 0dp 0.5dp 0.8dp rgba(0, 0, 0, 140); pointer-events: none; }
+.proeBeat.on { background-color: #ff4a2e; box-shadow: 0dp 0dp 2dp #ff4a2e; }
+.proeCaption { position: absolute; font-family: Roboto; font-size: 5dp; font-weight: bold; color: #2a2a26; pointer-events: none; }
+.proeDialCaption { width: 72dp; text-align: right; }
+.proeDial { frames: 33; spriteprefix: value_; decorator: image(value_000 contain); speed: 224; }
+.proeDial:active, .proeDial.pressed { image-color: #bbb; }
 .mv30Key { width: 54dp; height: 14dp; border-radius: 0.3dp; }
 .mv30Small { width: 16dp; height: 14dp; border-radius: 0.3dp; }
 .mv30Arrow:hover { box-shadow: none; }

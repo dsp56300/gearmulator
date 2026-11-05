@@ -23,6 +23,7 @@ endif()
 # the cores of 88emu, their tests are built along with it
 if(${CMAKE_PROJECT_NAME}_SYNTH_88EMU)
 	add_subdirectory(h8500 EXCLUDE_FROM_ALL)
+	add_subdirectory(m6801 EXCLUDE_FROM_ALL)
 	add_subdirectory(mcs96 EXCLUDE_FROM_ALL)
 	add_subdirectory(sh EXCLUDE_FROM_ALL)
 	add_subdirectory(sh2 EXCLUDE_FROM_ALL)

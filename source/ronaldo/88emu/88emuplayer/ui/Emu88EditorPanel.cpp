@@ -139,6 +139,7 @@ namespace emu88Player
 		}
 		for(const auto& binding : g_sc8850Buttons) wireButton(binding);
 		for(const auto& binding : g_sc880Buttons) wireButton(binding);
+		for(const auto& binding : g_proeButtons) wireButton(binding);
 		// The MV-30's faces hold their switch while the button is down, past the 32 the other panels have
 		for(const auto& binding : g_mv30Buttons)
 		{
@@ -278,6 +279,13 @@ namespace emu88Player
 				_event.StopPropagation();
 				return;
 			}
+			if(model == emu88Lib::DeviceModel::ProE && (key == g_proeDialUpKey || key == g_proeDialDownKey))
+			{
+				if(auto* hardware = m_processor.hardware())
+					hardware->turnPanelEncoder(key == g_proeDialUpKey ? 1 : -1);
+				_event.StopPropagation();
+				return;
+			}
 			if(model == emu88Lib::DeviceModel::Sc8850)
 				handleKey(g_sc8850Buttons);
 			else if(usesLaBoardButtons(model))
@@ -286,6 +294,8 @@ namespace emu88Player
 				handleKey(g_sk88Buttons);
 			else if(model == emu88Lib::DeviceModel::Sc880)
 				handleKey(g_sc880Buttons);
+			else if(model == emu88Lib::DeviceModel::ProE)
+				handleKey(g_proeButtons);
 			else
 				handleKey(g_sc88Buttons);
 		});
@@ -327,6 +337,8 @@ namespace emu88Player
 				handleKey(g_sk88Buttons);
 			else if(model == emu88Lib::DeviceModel::Sc880)
 				handleKey(g_sc880Buttons);
+			else if(model == emu88Lib::DeviceModel::ProE)
+				handleKey(g_proeButtons);
 			else
 				handleKey(g_sc88Buttons);
 		});
@@ -352,7 +364,8 @@ namespace emu88Player
 				m_processor.setOutputGain(value / static_cast<float>(g_volumeUnity));
 			});
 		}
-		for(const auto* id : {"bt8850Value", "bt880Value"})
+		// The SC-8850's and SC-880's VALUE encoders and the PRO-E's TEMPO / VALUE dial.
+		for(const auto* id : {"bt8850Value", "bt880Value", "btProEDial"})
 		{
 			auto* value = document->GetElementById(id);
 			if(!value)
@@ -515,6 +528,8 @@ namespace emu88Player
 			for(const auto& binding : g_mt32Buttons) add(binding);
 		else if(_model == emu88Lib::DeviceModel::Sc880)
 			for(const auto& binding : g_sc880Buttons) add(binding);
+		else if(_model == emu88Lib::DeviceModel::ProE)
+			for(const auto& binding : g_proeButtons) add(binding);
 		else if(_model == emu88Lib::DeviceModel::Sk88Pro)
 		{
 			// The SC-88Pro faces the SK-88Pro has no switch for stay on the artwork, disabled.
@@ -588,6 +603,12 @@ namespace emu88Player
 		case emu88Lib::DeviceModel::Mt32New:
 			// The bezel's only driven lamp, bit 0 of the board's leds(); POWER is painted on.
 			assign({"ledCmMidi"});
+			break;
+		case emu88Lib::DeviceModel::ProE:
+			// emu88Lib::ProELed bit order: the lamps of the arranger switches, then the four beat lamps.
+			assign({"btProEStartStop", "btProEIntroEnd", "btProESyncStart", "btProESyncStop", "btProEArrHold",
+			        "btProEAdvArr", "btProEVariation", "btProEFadeIn", "btProEFadeOut", "btProEStyle", "btProEGroup",
+			        "ledProEBeat1", "ledProEBeat2", "ledProEBeat3", "ledProEBeat4"});
 			break;
 		default:
 			// Gate-array LED port bit order, shared by SC-88, SC-88VL and SC-88Pro.
@@ -670,6 +691,31 @@ namespace emu88Player
 		return groups;
 	}
 
+	KeyboardShortcutGroups Editor::buildProEKeyboardGroups()
+	{
+		const auto rows = [](const std::initializer_list<ProEButton> _buttons)
+		{
+			std::vector<KeyboardShortcut> result;
+			for(const auto button : _buttons)
+				for(const auto& binding : g_proeButtons)
+					if(binding.button == static_cast<uint8_t>(button))
+						result.push_back({keyName(binding.key), binding.label});
+			return result;
+		};
+		KeyboardShortcutGroups groups{{"Power", {{"Q", "Power on / off"}}}};
+		groups.push_back({"Arranger", rows({ProEButton::StartStop, ProEButton::IntroEnd, ProEButton::FillOriginal,
+		                                    ProEButton::FillVariation, ProEButton::SyncStart, ProEButton::SyncStop,
+		                                    ProEButton::Variation, ProEButton::ArrangerHold,
+		                                    ProEButton::AdvancedArranger, ProEButton::TapTempo, ProEButton::FadeIn,
+		                                    ProEButton::FadeOut})});
+		groups.push_back({"Style", {{"F1 - F8", "BANK 1 - 8"}, {"1 - 8", "NUMBER 1 - 8"}}});
+		for(auto& row : rows({ProEButton::Style, ProEButton::GroupAB}))
+			groups.back().rows.push_back(std::move(row));
+		groups.push_back({"Dial", {{keyName(g_proeDialUpKey) + " / " + keyName(g_proeDialDownKey),
+		                            "TEMPO / VALUE dial, a detent"}}});
+		return groups;
+	}
+
 	KeyboardShortcutGroups Editor::buildKeyboardGroups()
 	{
 		const auto model = m_processor.deviceModel();
@@ -698,6 +744,8 @@ namespace emu88Player
 
 		if(model == emu88Lib::DeviceModel::Mv30)
 			return buildMv30KeyboardGroups();
+		if(model == emu88Lib::DeviceModel::ProE)
+			return buildProEKeyboardGroups();
 
 		KeyboardShortcutGroups groups{{"Power", {{"Q", "Power on / off"}}}};
 		if(emu88Lib::getPowerSwitch(model) == emu88Lib::PowerSwitch::Standby)

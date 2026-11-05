@@ -67,6 +67,8 @@ namespace emu88Lib
         Sk88Pro,
         // The SC-880: the SC-88Pro board with its own 2 MiB control ROM.
         Sc880,
+        // The PRO-E arranger: an HC11 program ROM and four pattern ROMs (Data 0-3).
+        ProE,
 
         Count
     };
@@ -253,6 +255,11 @@ namespace emu88Lib
         {RomDevice::Mv30, RomSlot::Wave, 5, 0x80000, "mv30_wave_f.bin", false},
         {RomDevice::Mv30, RomSlot::Font, 0, 0x400, "mv30_lcd_font.bin", false},
         {RomDevice::Mv30, RomSlot::Disk, 0, 0xb4000, "mv30_system.img", false},
+        {RomDevice::ProE, RomSlot::Program, 0, 0x4000, "proe_ic4.bin", false},
+        {RomDevice::ProE, RomSlot::Data, 0, 0x10000, "proe_ic6.bin", false},
+        {RomDevice::ProE, RomSlot::Data, 1, 0x10000, "proe_ic7.bin", false},
+        {RomDevice::ProE, RomSlot::Data, 2, 0x10000, "proe_ic17.bin", false},
+        {RomDevice::ProE, RomSlot::Data, 3, 0x10000, "proe_ic18.bin", false},
         {RomDevice::Sc8820, RomSlot::Internal, 0, 0x10000, "sc8820_internal.bin", false},
         {RomDevice::Sc8820, RomSlot::Program, 0, 0x200000, "sc8820_program.bin", false},
         {RomDevice::Sc8820, RomSlot::Wave, 0, 0x1000000, "sc8820_wave0.bin", false},
@@ -550,6 +557,22 @@ namespace emu88Lib
          "1.091", false},
         {romDevices(RomDevice::Mv30), RomSlot::Disk, 0, 0xb4000, baseLib::MD5("bea309a1fefa5ca4a43a3bf9417516db"),
          "1.08", false},
+
+        // -----------------------------------------------------------------
+        // PRO-E
+        // -----------------------------------------------------------------
+        // The program ROM says "ver 01.00 041389" on its test screen. The pattern ROMs hold
+        // code as well as the styles: the program calls into the banked window.
+        {romDevices(RomDevice::ProE), RomSlot::Program, 0, 0x4000, baseLib::MD5("359d35b9238cf7492218a681fd3003e0"),
+         "1.00", false},
+        {romDevices(RomDevice::ProE), RomSlot::Data, 0, 0x10000, baseLib::MD5("ddf9ba6a5690558107e81f10b2e5dc0d"),
+         "IC6", false},
+        {romDevices(RomDevice::ProE), RomSlot::Data, 1, 0x10000, baseLib::MD5("5fded9504cfd4142f6bfa8a3c194902a"),
+         "IC7", false},
+        {romDevices(RomDevice::ProE), RomSlot::Data, 2, 0x10000, baseLib::MD5("c5caa57249fcbc56f65c18a15373a0fa"),
+         "IC17", false},
+        {romDevices(RomDevice::ProE), RomSlot::Data, 3, 0x10000, baseLib::MD5("035f6449672d4c9e82a890adfe03d1af"),
+         "IC18", false},
 
         // -----------------------------------------------------------------
         // SC-88 / SC-88VL
@@ -933,6 +956,8 @@ namespace emu88Lib
             return "SK-88Pro";
         case RomDevice::Sc880:
             return "SC-880";
+        case RomDevice::ProE:
+            return "PRO-E";
         default:
             return "unknown";
         }

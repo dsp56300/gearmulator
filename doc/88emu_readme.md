@@ -69,6 +69,7 @@ If you find any, please report it as a bug.
 | CM-32P | `cm32p` | P8098 | LP + RCC | responds to MIDI channels 11–16 |
 | CM-64 | `cm64` | P8098 ×2 | LA32 + Boss reverb + LP + RCC | a CM-32L and a CM-32P in one case, channels 2–10 and 11–16 |
 | MV-30 | `mv30` | 80C196KB | LP + TVF + RCC | experimental, boots its operating system from the system disk image, parts on channels 1–7 and 10 |
+| PRO-E | `proe` | MC68HC11A0 | experimental, chords on channel 1 |
 | SC-55 | `sc55` | H8/532 | GP  | |
 | SC-55mkII | `sc55mk2` | H8/532 | GP4 | uses high-level sub-mcu emulation |
 | SC-55st | `sc55st` | H8/532 | GP4 | uses high-level sub-mcu emulation, no hardware panel present |
@@ -103,6 +104,7 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | --- | --- | --- |
 | CM-32P | `cm32p_program.bin` — 64 KiB | `cm32p_wave0.bin` — 512 KiB; `cm32p_wave1.bin` — 512 KiB; `cm32p_wave2.bin` — 512 KiB |
 | MV-30 | `mv30_boot.bin` — 16 KiB; `mv30_lcd_font.bin` — 1 KiB, the LCD's character ROM; `mv30_system.img` — 720 KiB, the system disk | `mv30_wave_a.bin` to `mv30_wave_f.bin` — 512 KiB each; A to C are the CM-32P's three |
+| PRO-E | `proe_ic4.bin` — 16 KiB, the program; `proe_ic6.bin`, `proe_ic7.bin`, `proe_ic17.bin`, `proe_ic18.bin` — 64 KiB each, the styles; and the CM-32L's set | — |
 | SC-55 | `sc55mk1_internal.bin` — 32 KiB; `sc55mk1_program.bin` — 256 KiB | `sc55mk1_wave0.bin` — 1 MiB; `sc55mk1_wave1.bin` — 1 MiB; `sc55mk1_wave2.bin` — 1 MiB |
 | SC-55mkII | `sc55mk2_internal.bin` — 32 KiB; `sc55mk2_program.bin` — 512 KiB | `sc55mk2_wave0.bin` — 2 MiB; `sc55mk2_wave1.bin` — 1 MiB |
 | SC-55ST (`--device` only) | `sc55st_internal.bin` — 32 KiB; `sc55st_program.bin` — 512 KiB | `sc55st_wave0.bin` — 2 MiB; `sc55st_wave1.bin` — 1 MiB |
@@ -195,6 +197,10 @@ The CM-32P is a PCM sound module related to the PCM half of the CM-64 and Roland
 ```
 
 The song must select card tones using MIDI Program Change values starting at **64 / 0x40** (often displayed as program **65** in software that numbers programs from 1). Those tones are silent when no card is inserted.
+
+### PRO-E Intelligent Arranger
+
+The PRO-E is an arranger module: it plays a style's drums, bass and accompaniment from the chord it reads on MIDI channel 1, and passes the other channels on. Its main board, an MC68HC11, runs the original firmware. It plays through a sound board of its own, the CK-34, a relative of the later MT-32 boards that it drives over a serial link with MT-32-style SysEx and MIDI.
 
 ### MV-30 Studio M
 
@@ -367,6 +373,19 @@ The MT-32's front panel has no faces in the skin yet, so its switches are keyboa
 | `↑` / `↓` | VOLUME/VALUE knob up / down, a 32nd of its travel per press (MT-32 only) |
 
 To enter the firmware's test mode, press **Q** to switch the power off, hold **3 + V** (PART 3 + VOLUME), then press **Q** to switch it on and keep holding until the screen changes. **4 + R + M** (PART 4 + RHYTHM + MASTER VOLUME) at power-on shows the firmware version instead. The CM-32P has no switches at all.
+
+### PRO-E
+
+| Keys | Hardware buttons |
+| --- | --- |
+| `Space` | START/STOP |
+| `S`, `F`, `D` | INTRO/END, FILL IN ORIGINAL, FILL IN VARIATION |
+| `C`, `X` | SYNC START, SYNC STOP |
+| `V`, `H`, `G` | VARIATION, ARRANGER HOLD, ADVANCED ARRANGER |
+| `T`, `N`, `M` | TAP TEMPO / BREAK, FADE IN, FADE OUT |
+| `F1`–`F8`, `1`–`8` | BANK 1–8, NUMBER 1–8 |
+| `J`, `B` | STYLE, GROUP A/B |
+| `↑` / `↓` | TEMPO / VALUE dial, a detent per press |
 
 ### MV-30
 

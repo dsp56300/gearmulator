@@ -158,6 +158,8 @@ namespace emu88Lib
         static Cm32pRomSet findCm32pRomSet();
         // The MV-30: boot ROM, wave ROMs A-F, the LCD's character ROM and the system disk.
         static Mv30RomSet findMv30RomSet();
+        // The PRO-E's program and pattern ROMs; its CM-32L stand-in comes from findLaRomSet().
+        static ProERomSet findProERomSet();
 
         // One of the LA boards: control ROM, the LA32's PCM image and the Boss reverb
         // microcode, at the sizes that board takes.

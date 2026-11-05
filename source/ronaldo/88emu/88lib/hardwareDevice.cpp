@@ -10,6 +10,7 @@
 #include "88lib/boards/miig5.h"
 #include "88lib/boards/mv30.h"
 #include "88lib/boards/nu10b.h"
+#include "88lib/boards/proe.h"
 #include "hardwareLib/lcdfonts.h"
 #include "88lib/boards/sc55Board.h"
 #include "88lib/boards/sc88pro.h"
@@ -143,6 +144,14 @@ namespace emu88Lib
 			m_mv30 = std::make_unique<Mv30>(roms, _pcmCard);
 			break;
 		}
+		case DeviceModel::ProE:
+		{
+			const auto roms = RomLoader::findProERomSet();
+			const auto sound = RomLoader::findLaRomSet(LaModel::Cm32l);
+			if(!roms.isValid() || !sound.isValid()) break;
+			m_proe = std::make_unique<ProE>(roms, sound);
+			break;
+		}
 		case DeviceModel::Sc8820:
 		{
 			const auto inventory = RomLoader::scan();
@@ -242,6 +251,7 @@ namespace emu88Lib
 			else if(m_sc55) m_sc55->setButtons(_boot.initialPanelButtons);
 			else if(m_la) m_la->setButtons(_boot.initialPanelButtons);
 			else if(m_cm64) m_cm64->setButtons(_boot.initialPanelButtons);
+			else if(m_proe) m_proe->setButtons(_boot.initialPanelButtons);
 		}
 
 		if(_boot.fastBoot && !_boot.initialPanelButtons)
@@ -307,6 +317,7 @@ namespace emu88Lib
 		if(m_nu10b) return static_cast<float>(Nu10b::SampleRate);
 		if(m_miig5) return static_cast<float>(Miig5::SampleRate);
 		if(m_mv30) return static_cast<float>(Mv30::SampleRate);
+		if(m_proe) return static_cast<float>(ProE::SampleRate);
 		return static_cast<float>(g_sampleRate);
 	}
 
@@ -321,6 +332,7 @@ namespace emu88Lib
 		if(m_nu10b) return Nu10b::CpuClockHz;
 		if(m_miig5) return Miig5::CpuClockHz;
 		if(m_mv30) return Mv30::CpuClock;
+		if(m_proe) return ProE::CpuClock;
 		return g_cpuClockHz;
 	}
 
@@ -330,7 +342,7 @@ namespace emu88Lib
 		       (m_sc8850 && m_sc8850->isValid()) || (m_sc8820 && m_sc8820->isValid()) || (m_cm32p && m_cm32p->isValid()) ||
 		       (m_la && m_la->isValid()) || (m_cm64 && m_cm64->isValid()) ||
 		       (m_sc55 && m_sc55->isValid()) || (m_nu10b && m_nu10b->isValid()) || (m_miig5 && m_miig5->isValid()) ||
-		       (m_mv30 && m_mv30->isValid());
+		       (m_mv30 && m_mv30->isValid()) || (m_proe && m_proe->isValid());
 	}
 
 	void HardwareDevice::setPanelButtons(const uint32_t _buttons)
@@ -414,6 +426,8 @@ namespace emu88Lib
 			m_miig5->addMidiEvent(_event);
 		else if(m_mv30)
 			m_mv30->addMidiEvent(_event);
+		else if(m_proe)
+			m_proe->addMidiEvent(_event);
 		else
 			return;
 	}
@@ -489,6 +503,8 @@ namespace emu88Lib
 			m_miig5->readMidiOut(_midiOut);
 		else if(m_mv30)
 			m_mv30->readMidiOut(_midiOut);
+		else if(m_proe)
+			m_proe->readMidiOut(_midiOut);
 	}
 
 	void HardwareDevice::collectPanelCommands()
@@ -518,6 +534,7 @@ namespace emu88Lib
 			else if(m_sc55) m_sc55->setButtons(buttons);
 			else if(m_la) m_la->setButtons(buttons);
 			else if(m_cm64) m_cm64->setButtons(buttons);
+			else if(m_proe) m_proe->setButtons(buttons);
 			m_nextPanelCommandSample = m_renderedSamples + g_minimumPanelEdgeSamples;
 		}
 		else if(command.type == PanelCommandType::Mv30Panel)
@@ -546,6 +563,10 @@ namespace emu88Lib
 		{
 			m_mv30->turnDial(command.value);
 		}
+		else if(m_proe)
+		{
+			m_proe->turnDial(std::clamp(command.value, -64, 64));
+		}
 	}
 
 	void HardwareDevice::renderBoardFrame()
@@ -567,6 +588,7 @@ namespace emu88Lib
 		else if(m_nu10b) m_heldFrame = m_nu10b->renderSample();
 		else if(m_miig5) m_heldFrame = m_miig5->renderSample();
 		else if(m_mv30) m_heldFrame = m_mv30->renderSample();
+		else if(m_proe) m_heldFrame = m_proe->renderSample();
 		++m_renderedSamples;
 	}
 
@@ -641,6 +663,13 @@ namespace emu88Lib
 			first.displayOn = (lcd.displayMode() & 0x0c) != 0;
 			lcd.renderMono(first.mono);
 		}
+		else if(m_proe)
+		{
+			// The 2 x 16 HD44780, in the CM-32P's window size.
+			renderCm32pDisplay(first, m_proe->lcd());
+			first.text = lcdText(m_proe->lcd());
+			next.leds = m_proe->leds();
+		}
 		if(m_mv30)
 			m_mv30->readParts(m_mv30PartsScratch);
 		std::unique_lock lock(m_displayMutex, std::try_to_lock);
@@ -707,10 +736,10 @@ namespace emu88Lib
 		// DAC words have already been converted before their analog bus sum and VCA:
 		// quantising again invents low-level distortion and clips a sum of otherwise valid
 		// buses.
-		if(m_la || m_cm32p || m_cm64)
+		if(m_la || m_cm32p || m_cm64 || m_proe)
 		{
 			const auto& sample = m_cm64 ? m_cm64->la().analogSample()
-				: m_la ? m_la->analogSample() : m_cm32p->analogSample();
+				: m_la ? m_la->analogSample() : m_proe ? m_proe->analogSample() : m_cm32p->analogSample();
 			left = sample.first * (1.0f / 32768.0f) * m_boardGain.a;
 			right = sample.second * (1.0f / 32768.0f) * m_boardGain.a * m_boardGain.rightA;
 		}
@@ -742,6 +771,7 @@ namespace emu88Lib
 		if(m_nu10b) m_nu10b->transportDiscontinuity(m_transportGeneration);
 		if(m_miig5) m_miig5->transportDiscontinuity(m_transportGeneration);
 		if(m_mv30) m_mv30->transportDiscontinuity(m_transportGeneration);
+		if(m_proe) m_proe->transportDiscontinuity(m_transportGeneration);
 		silenceActiveChannels();
 	}
 
@@ -751,9 +781,9 @@ namespace emu88Lib
 		// way is All Notes Off, which honours a held sustain pedal, so the pedal comes up first.
 		if(isRolandLaFamily(_model))
 			return {{synthLib::MC_SUSTAINPEDAL, 0}, {synthLib::MC_ALLNOTESOFF, 0}};
-		// The MV-30's MIDI implementation has not been checked for All Sound Off: send that and
-		// the LA boards' way both.
-		if(_model == DeviceModel::Mv30)
+		// The MV-30's and the PRO-E's MIDI implementations have not been checked for All Sound Off:
+		// send that and the LA boards' way both.
+		if(_model == DeviceModel::Mv30 || _model == DeviceModel::ProE)
 			return {{synthLib::MC_SUSTAINPEDAL, 0}, {synthLib::MC_ALLNOTESOFF, 0}, {synthLib::MC_ALLSOUNDOFF, 0}};
 		return {{synthLib::MC_ALLSOUNDOFF, 0}};
 	}

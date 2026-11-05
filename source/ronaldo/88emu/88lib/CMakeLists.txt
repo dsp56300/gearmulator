@@ -29,6 +29,7 @@ set(SOURCES
 	boards/miig5.cpp boards/miig5.h
 	boards/mv30.cpp boards/mv30.h boards/mv30types.h
 	boards/nu10b.cpp boards/nu10b.h
+	boards/proe.cpp boards/proe.h
 	hardwareDevice.cpp hardwareDevice.h
 	rom/rom.cpp rom/rom.h
 	rom/romloader.cpp rom/romloader.h
@@ -52,7 +53,7 @@ source_group("source" FILES ${SOURCES})
 set_property(TARGET 88lib PROPERTY FOLDER "Ronaldo/88emu")
 
 # lspLib is header-only and compiled into the boards; it brings the JIT library of the host.
-target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 sh2 mcs96 xpLib lspLib gpLib lpLib rccLib tvfLib hg62e33b08fLib la32Lib mt32ReverbLib)
+target_link_libraries(88lib PUBLIC synthLib hardwareLib h8500 m6801 sh2 mcs96 xpLib lspLib gpLib lpLib rccLib tvfLib hg62e33b08fLib la32Lib mt32ReverbLib)
 
 target_compile_definitions(88lib PRIVATE EMU88_VERSION_STRING="${CMAKE_PROJECT_VERSION}")
 
@@ -171,6 +172,12 @@ if(BUILD_TESTING)
 	set_property(TARGET mv30_test PROPERTY FOLDER "Ronaldo/tests")
 	add_test(NAME mv30 COMMAND mv30_test)
 	set_tests_properties(mv30 PROPERTIES TIMEOUT 60)
+
+	add_executable(proe_test tests/proe_test.cpp)
+	target_link_libraries(proe_test PRIVATE 88lib)
+	set_property(TARGET proe_test PROPERTY FOLDER "Ronaldo/tests")
+	add_test(NAME proe COMMAND proe_test)
+	set_tests_properties(proe PROPERTIES TIMEOUT 60)
 
 	add_executable(mt32Memory_test tests/mt32Memory_test.cpp)
 	target_link_libraries(mt32Memory_test PRIVATE 88lib)

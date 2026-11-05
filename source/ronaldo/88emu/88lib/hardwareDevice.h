@@ -30,6 +30,7 @@ namespace emu88Lib
 	class Nu10b;
 	class Miig5;
 	class Mv30;
+	class ProE;
 
 	// Offline work the device does at construction, before anyone can hear or see it.
 	struct BootOptions
@@ -166,6 +167,7 @@ namespace emu88Lib
 		std::unique_ptr<Nu10b> m_nu10b;
 		std::unique_ptr<Miig5> m_miig5;
 		std::unique_ptr<Mv30> m_mv30;
+		std::unique_ptr<ProE> m_proe;
 		std::unique_ptr<synthLib::MidiRateLimiter> m_sc55MidiIn;
 		std::array<synthLib::MidiBufferParser, 2> m_sc88ProMidiOut{
 			synthLib::MidiBufferParser{synthLib::MidiEventSource::Device},

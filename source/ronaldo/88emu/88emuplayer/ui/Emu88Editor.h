@@ -131,6 +131,7 @@ namespace emu88Player
 		void showKeyboard();
 		KeyboardShortcutGroups buildKeyboardGroups();
 		static KeyboardShortcutGroups buildMv30KeyboardGroups();
+		static KeyboardShortcutGroups buildProEKeyboardGroups();
 		void initialiseSettings(const char* _pageId, const char* _buttonId);
 		void selectSettingsPage(const char* _pageId, const char* _buttonId);
 		void populateSkinSettings();
@@ -179,7 +180,8 @@ namespace emu88Player
 		Rml::Element* m_playerPlayGraphic = nullptr;
 		Rml::Element* m_playerPauseGraphic = nullptr;
 		std::array<Rml::Element*, 32> m_buttonElements{};
-		std::array<Rml::Element*, 10> m_leds{};
+		// One per bit of the display snapshot's leds, in the board's order.
+		std::array<Rml::Element*, 16> m_leds{};
 		float m_valueKnobDownX = 0.0f;
 		float m_valueKnobDownY = 0.0f;
 		uint32_t m_pointerButtons = 0;

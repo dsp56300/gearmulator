@@ -44,6 +44,8 @@ namespace emu88Lib
         // no registry rows of its own; everything asked of it is asked of its two halves.
         constexpr std::array<RomDevice, 2> g_cm64Halves{RomDevice::Cm32l, RomDevice::Cm32p};
 
+        constexpr RomDevice g_proeSoundBoard = RomDevice::Cm32l;
+
         // A composite slot's chips are an alternative to its whole image, never an
         // additional requirement: has() reports the whole as available once both chips
         // are there, and each chip as available once the whole is.
@@ -348,6 +350,9 @@ namespace emu88Lib
         if (_device == RomDevice::Cm64)
             return isComplete(RomDevice::Cm32l) && isComplete(RomDevice::Cm32p);
 
+        if (_device == RomDevice::ProE && !isComplete(g_proeSoundBoard))
+            return false;
+
         const auto slots = requiredSlots(_device);
         if (slots.empty())
             return false;
@@ -388,6 +393,11 @@ namespace emu88Lib
             reported.push_back(slot);
             result.push_back(&entry);
         }
+        if (_device == RomDevice::ProE)
+        {
+            const auto rows = missing(g_proeSoundBoard);
+            result.insert(result.end(), rows.begin(), rows.end());
+        }
         return result;
     }
 
@@ -410,6 +420,11 @@ namespace emu88Lib
                 continue;
             result.push_back(&spec);
         }
+        if (_device == RomDevice::ProE)
+        {
+            const auto specs = missingFiles(g_proeSoundBoard);
+            result.insert(result.end(), specs.begin(), specs.end());
+        }
         return result;
     }
 
@@ -420,7 +435,9 @@ namespace emu88Lib
         {
             for (const auto half : g_cm64Halves)
                 result << warnings(half, includeCustom);
-            return result.str();
+            if (device == RomDevice::ProE)
+            result << warnings(g_proeSoundBoard, includeCustom);
+        return result.str();
         }
         for (const auto& rom : m_roms)
         {
@@ -566,6 +583,9 @@ namespace emu88Lib
             text << "\nSCCore.dll / SCCore00.dylib can supply the SC-8820 wave regions without manual extraction. "
                     "They supply waves only; a separate control ROM is still required.\n";
         }
+        if (_device == RomDevice::ProE)
+            text << "The PRO-E's sound board, the CM-32L roms work.\n\n== " << toString(g_proeSoundBoard) << " ==\n"
+                 << describeRequirements(g_proeSoundBoard);
         return text.str();
     }
 

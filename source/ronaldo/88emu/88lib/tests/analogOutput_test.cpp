@@ -281,6 +281,12 @@ int main()
 	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32New).a, getBoardOutputGain(DeviceModel::Cm32l).a);
 	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32Old).a, getBoardOutputGain(DeviceModel::Cm32l).a);
 	CHECK_EQ(getBoardOutputGain(DeviceModel::Mt32New).rightA, 1.0f);
+	// The PRO-E sounds through a CM-32L standing in for its sound board: that board's DAC and
+	// output stage, without one unit's trims.
+	CHECK_EQ(getDacBits(DeviceModel::ProE), 16);
+	CHECK(resolveAnalogModel(AnalogOutputMode::Auto, DeviceModel::ProE) == AnalogModel::Cm32l);
+	CHECK_EQ(getBoardOutputGain(DeviceModel::ProE).a, getBoardOutputGain(DeviceModel::Cm32l).a);
+	CHECK_EQ(getBoardOutputGain(DeviceModel::ProE).rightA, 1.0f);
 	CHECK_EQ(getDacBits(DeviceModel::Sc55Mk1), 16);
 	CHECK_EQ(getDacBits(DeviceModel::Cm300), 16);
 	CHECK_EQ(getDacBits(DeviceModel::Sc55Mk2), 18);

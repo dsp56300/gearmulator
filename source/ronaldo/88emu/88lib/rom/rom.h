@@ -59,6 +59,26 @@ namespace emu88Lib
         }
     };
 
+    // The PRO-E's images: the HC11's program ROM and the four pattern ROMs of its banked
+    // window, in bank order (IC6, IC7, IC17, IC18).
+    struct ProERomSet
+    {
+        static constexpr size_t ProgramSize = 0x4000;
+        static constexpr size_t PatternSize = 0x10000;
+        using PatternRoms = std::array<std::vector<uint8_t>, 4>;
+        std::vector<uint8_t> program;
+        PatternRoms patterns;
+        bool isValid() const
+        {
+            if (program.size() != ProgramSize)
+                return false;
+            for (const auto& pattern : patterns)
+                if (pattern.size() != PatternSize)
+                    return false;
+            return true;
+        }
+    };
+
     // The images of one of Roland's LA boards: the 8095's control ROM, the LA32's PCM mask
     // ROMs and the Boss reverb gate array's microcode ROM. Which board they belong to sets
     // their sizes: the CM-32L's wave image is the two 512 KiB mask ROMs concatenated in

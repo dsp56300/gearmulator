@@ -2,6 +2,7 @@
 
 #include "88lib/boards/laBoard.h"
 #include "88lib/boards/mv30types.h"
+#include "88lib/boards/proe.h"
 #include "88lib/boards/sc88types.h"
 #include "88lib/boards/sc88pro.h"
 #include "88lib/boards/sc8850.h"
@@ -265,6 +266,47 @@ namespace emu88Player::editor
 	constexpr Key g_mv30ValueUpKey = Key::KI_PRIOR;
 	constexpr Key g_mv30FootswitchKey = Key::KI_LCONTROL;
 
+	// The PRO-E's arranger switches, the ones a style is picked and played with (emu88Lib::ProEButton); the panel's
+	// others edit its memory and are left out. MAME's keys where they are free here: Q is the player's power key,
+	// so the BANK switches are on F1-F8, and START/STOP is Space as on the MV-30. The dial turns a detent per press.
+	using ProEButton = emu88Lib::ProEButton;
+	constexpr std::array g_proeButtons{
+		bind("btProEStartStop", ProEButton::StartStop, Key::KI_SPACE, "START/STOP"),
+		bind("btProEIntroEnd", ProEButton::IntroEnd, Key::KI_S, "INTRO/END"),
+		bind("btProEFillOrig", ProEButton::FillOriginal, Key::KI_F, "FILL IN ORIGINAL"),
+		bind("btProEFillVari", ProEButton::FillVariation, Key::KI_D, "FILL IN VARIATION"),
+		bind("btProESyncStart", ProEButton::SyncStart, Key::KI_C, "SYNC START"),
+		bind("btProESyncStop", ProEButton::SyncStop, Key::KI_X, "SYNC STOP"),
+		bind("btProEArrHold", ProEButton::ArrangerHold, Key::KI_H, "ARRANGER HOLD"),
+		bind("btProEAdvArr", ProEButton::AdvancedArranger, Key::KI_G, "ADVANCED ARRANGER"),
+		bind("btProEVariation", ProEButton::Variation, Key::KI_V, "VARIATION"),
+		bind("btProETapTempo", ProEButton::TapTempo, Key::KI_T, "TAP TEMPO / BREAK"),
+		bind("btProEFadeIn", ProEButton::FadeIn, Key::KI_N, "FADE IN"),
+		bind("btProEFadeOut", ProEButton::FadeOut, Key::KI_M, "FADE OUT"),
+		bind("btProEStyle", ProEButton::Style, Key::KI_J, "STYLE"),
+		bind("btProEGroup", ProEButton::GroupAB, Key::KI_B, "GROUP A/B"),
+		bind("btProEBank1", ProEButton::Bank1, Key::KI_F1, "BANK 1"),
+		bind("btProEBank2", ProEButton::Bank2, Key::KI_F2, "BANK 2"),
+		bind("btProEBank3", ProEButton::Bank3, Key::KI_F3, "BANK 3"),
+		bind("btProEBank4", ProEButton::Bank4, Key::KI_F4, "BANK 4"),
+		bind("btProEBank5", ProEButton::Bank5, Key::KI_F5, "BANK 5"),
+		bind("btProEBank6", ProEButton::Bank6, Key::KI_F6, "BANK 6"),
+		bind("btProEBank7", ProEButton::Bank7, Key::KI_F7, "BANK 7"),
+		bind("btProEBank8", ProEButton::Bank8, Key::KI_F8, "BANK 8"),
+		bind("btProENumber1", ProEButton::Number1, Key::KI_1, "NUMBER 1"),
+		bind("btProENumber2", ProEButton::Number2, Key::KI_2, "NUMBER 2"),
+		bind("btProENumber3", ProEButton::Number3, Key::KI_3, "NUMBER 3"),
+		bind("btProENumber4", ProEButton::Number4, Key::KI_4, "NUMBER 4"),
+		bind("btProENumber5", ProEButton::Number5, Key::KI_5, "NUMBER 5"),
+		bind("btProENumber6", ProEButton::Number6, Key::KI_6, "NUMBER 6"),
+		bind("btProENumber7", ProEButton::Number7, Key::KI_7, "NUMBER 7"),
+		bind("btProENumber8", ProEButton::Number8, Key::KI_8, "NUMBER 8"),
+	};
+	static_assert(g_proeButtons.size() == static_cast<size_t>(ProEButton::Count));
+	constexpr Key g_proeDialUpKey = Key::KI_UP;
+	constexpr Key g_proeDialDownKey = Key::KI_DOWN;
+	constexpr uint32_t g_proeButtonMask = (uint64_t{1} << static_cast<unsigned>(ProEButton::Count)) - 1;
+
 	// The bindings the help dialog has to spell out; RmlUi's identifiers are
 	// contiguous for the letter, digit and function-key runs.
 	inline std::string keyName(const Key _key)
@@ -298,7 +340,7 @@ namespace emu88Player::editor
 			return std::string(1, static_cast<char>('A' + (_key - Key::KI_A)));
 		if(_key >= Key::KI_0 && _key <= Key::KI_9)
 			return std::string(1, static_cast<char>('0' + (_key - Key::KI_0)));
-		if(_key >= Key::KI_F1 && _key <= Key::KI_F5)
+		if(_key >= Key::KI_F1 && _key <= Key::KI_F12)
 			return "F" + std::to_string(1 + (_key - Key::KI_F1));
 		return {};
 	}
@@ -349,6 +391,8 @@ namespace emu88Player::editor
 
 	constexpr uint32_t panelButtonsForDevice(const emu88Lib::DeviceModel _model, uint32_t _buttons)
 	{
+		if(_model == emu88Lib::DeviceModel::ProE)
+			return _buttons & g_proeButtonMask;
 		if(usesLaBoardButtons(_model))
 			return _buttons & g_mt32ButtonMask;
 		if(_model == emu88Lib::DeviceModel::Xpgs || _model == emu88Lib::DeviceModel::VeGsPro ||
