@@ -1,5 +1,6 @@
 #include "deviceException.h"
 
+#include <cstdint>
 #include <string>
 
 namespace synthLib
