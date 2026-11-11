@@ -75,7 +75,7 @@ void outfile::doopen()
         sa.lpSecurityDescriptor = NULL;
         sa.bInheritHandle = TRUE;
 
-        handle = int(CreateFileA(filename, GENERIC_WRITE,
+        handle = tosyshandle(CreateFileA(filename, GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, 
             (append ? OPEN_ALWAYS : CREATE_ALWAYS), 0, 0));
 #else
@@ -95,7 +95,7 @@ void outfile::flush()
 {
     outstm::flush();
 #ifdef WIN32
-    FlushFileBuffers(HANDLE(handle));
+    FlushFileBuffers(fromsyshandle(handle));
 #endif
 }
 

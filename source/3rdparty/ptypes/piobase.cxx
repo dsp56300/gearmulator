@@ -295,7 +295,7 @@ large iobase::doseek(large newpos, ioseekmode mode)
     static int wmode[3] = {FILE_BEGIN, FILE_CURRENT, FILE_END};
     LARGE_INTEGER li;
     li.QuadPart = newpos;
-    li.LowPart = SetFilePointer(HANDLE(handle), li.LowPart, &li.HighPart, wmode[mode]);
+    li.LowPart = SetFilePointer(fromsyshandle(handle), li.LowPart, &li.HighPart, wmode[mode]);
     if (li.LowPart == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR)
         return -1;
     return li.QuadPart;
@@ -309,7 +309,7 @@ large iobase::doseek(large newpos, ioseekmode mode)
 void iobase::doclose()
 {
 #ifdef WIN32
-    CloseHandle(HANDLE(pexchange(&handle, invhandle)));
+    CloseHandle(fromsyshandle(pexchange(&handle, invhandle)));
 #else
     ::close(pexchange(&handle, invhandle));
 #endif

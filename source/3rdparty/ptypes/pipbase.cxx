@@ -203,7 +203,7 @@ int ptdecl usockerrno()
 }
 
 //for VisualStudio2010
-#if (_MSC_VER>=1600)
+#if (_MSC_VER>=1600) || defined(__MINGW32__)
 #define EPFNOSUPPORT WSAEPFNOSUPPORT
 #define EHOSTDOWN WSAEHOSTDOWN
 #endif
