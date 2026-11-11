@@ -683,33 +683,43 @@ static ResonanceWave resonanceWave(const uint32_t _ramp, const uint32_t _cutoffL
 	return w;
 }
 
-// Sums the two waves of a slot into its output. With ring set, the slot's output becomes the
-// product of that sum and the previous slot's output instead, so ring pairs are adjacent slots.
+// Sums the two waves of a slot and passes the sum through the ring stage.
 int32_t LA32::mixWaves(const uint32_t _w1, const uint32_t _w2, const bool _ring)
 {
 	// The linear values carry five fractional bits; the mixer takes them as 15-bit signed.
 	const int32_t a = signExtend(_w1 >> 5, 15);
 	const int32_t b = signExtend(_w2 >> 5, 15);
-	if (!_ring)
-	{
-		// The D-550 bus shows the resonant wave added at full width on top of the halved base
-		// wave: the resonant peak measured on the chip is twice the half sum at every resonance
-		// and decay setting (tools/d50/la32_diff.py, cases resmid/resdec/rescut/respw). A ring
-		// slot multiplies with exactly this output: the DAC-bus ring cases with resonance on the
-		// modulator are bit-exact with it and far off with the half sum.
-		m_prevOutput = (a >> 1) + b + (a & 1);
-		return m_prevOutput;
-	}
 
-	// Ring modulation: the previous slot's output times the sum at full width, which the 8-bit
-	// multiplier does in two parts, the sum's top 7 bits with its sign and then its low 7 bits.
-	const int32_t full = (a >> 1) + b + (a & 1);
-	int32_t high = (full >> 7) & 127;
-	if (full & 0x2000)
+	// The D-550 bus shows the resonant wave added at full width on top of the halved base
+	// wave: the resonant peak measured on the chip is twice the half sum at every resonance
+	// and decay setting (tools/d50/la32_diff.py, cases resmid/resdec/rescut/respw). A ring
+	// slot multiplies with exactly this output: the DAC-bus ring cases with resonance on the
+	// modulator are bit-exact with it and far off with the half sum.
+	return ringOutput((a >> 1) + b + (a & 1), _ring);
+}
+
+// The ring stage. Slots 2n and 2n+1 are a pair: the even slot's sum is held for the odd slot,
+// whose ring bit replaces its own output with the product of the two. The even slot's ring bit
+// drops its own output, so the pair plays the product alone: the MT-32 firmware sets it, with
+// the odd one, for the ring-only structures 10-13 and never on its own; the D-50 has no such
+// structure and never sets it. Interpolated PCM does not come through here, see computeVoicePcm.
+int32_t LA32::ringOutput(const int32_t _sum, const bool _ring)
+{
+	const bool odd = (m_cycle & 1) != 0;
+	const int32_t modulator = m_prevOutput;
+	m_prevOutput = _sum;
+
+	if (!_ring)
+		return _sum;
+	if (!odd)
+		return 0;
+
+	// The modulator times the sum at full width, which the 8-bit multiplier does in two parts,
+	// the sum's top 7 bits with its sign and then its low 7 bits.
+	int32_t high = (_sum >> 7) & 127;
+	if (_sum & 0x2000)
 		high |= 128;
-	const int32_t product = (mul14x8(m_prevOutput, high) >> 6) + (mul14x8(m_prevOutput, full & 127) >> 13);
-	m_prevOutput = full;	// what a following ring slot would see: not measured, two ring slots in a row do not occur
-	return product;
+	return (mul14x8(modulator, high) >> 6) + (mul14x8(modulator, _sum & 127) >> 13);
 }
 
 // PCM partial: one or two ROM reads per slot. With interpolate set the second read is the next
@@ -767,7 +777,13 @@ int32_t LA32::computeVoicePcm(Voice& _voice, const uint32_t (&_tv)[2], const uin
 	const uint32_t interp = (_phase >> 1) & 127;
 	const int32_t o1 = mul14x8(static_cast<int32_t>(w1) >> 6, interp ^ 127) >> 7;
 	const int32_t o2 = mul14x8(static_cast<int32_t>(w2) >> 6, interp) >> 7;
+
+	// The interpolation has used both multiplier passes of the slot, so there is none left for
+	// a ring product: an interpolated partial is never ring modulated itself. Its sample is
+	// still held as the modulator of the next slot, and the even slot's ring bit still drops it.
 	m_prevOutput = o1 + o2;
+	if (_voice.regs.ring && (m_cycle & 1) == 0)
+		return 0;
 	return m_prevOutput;
 }
 

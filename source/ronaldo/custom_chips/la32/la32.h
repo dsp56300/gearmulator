@@ -182,6 +182,7 @@ namespace la32Lib
 		int32_t computeVoicePcm(Voice& _voice, const uint32_t (&_tv)[2], uint32_t _phase, bool _signFlip);
 		int32_t computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_tv)[2], uint32_t _phase, bool _signFlip);
 		int32_t mixWaves(uint32_t _w1, uint32_t _w2, bool _ring);
+		int32_t ringOutput(int32_t _sum, bool _ring);
 		void addToBus(int32_t _value, uint8_t _pan, uint8_t _pair);
 		PcmSample readSample(uint32_t _address, bool _muted) const;
 		void queuePcmEvent(bool _ended1, bool _ended2);
@@ -211,7 +212,7 @@ namespace la32Lib
 		std::array<PendingWrite, 8> m_pendingWrites{};
 		size_t m_pendingWriteCount = 0;
 		uint8_t m_inactiveHistory = 0;		// active flags of the last eight slots, bit 0 = current
-		int32_t m_prevOutput = 0;			// the previous slot's output, for ring modulation
+		int32_t m_prevOutput = 0;			// the previous slot's sum, the ring modulator of an odd slot
 		std::array<uint16_t, 3> m_groupMod{};	// the current group's smoothed r5 words, latched
 		Outputs m_summing{};				// the frame being summed
 		Outputs m_finished{};				// the last completed frame

@@ -357,7 +357,7 @@ Plugin Manager:
 
 - [New] Devices: Added support for the SC-880.
 
-- [New] Devices: Added support for the  PRO-E Arranger.
+- [New] Devices: Added support for the PRO-E Arranger.
 
 - [Imp] SC-8820, SC-8850, NU-10B and MIIG5: more accurate CPU timing, with
         the page mode and refresh of their DRAM and, on the MIIG5, the
@@ -377,6 +377,11 @@ Plugin Manager:
 - [Imp] More accurate effects on the SC-88Pro, SC-8820, SC-8850 and the
         models based on them: delay memory precision, the effect multiplier
         and the effect input.
+
+- [Fix] MT-32/CM-32L: timbres with a ring-only partial structure (10-13) played
+        their first partial on top of the ring product, up to 5 dB too loud and
+        with the wrong timbre; a synth first partial was also ring modulated
+        with the previous voice.
 
 2.2.27:
 
