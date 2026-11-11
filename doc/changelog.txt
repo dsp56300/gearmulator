@@ -83,6 +83,9 @@ Framework:
         (Bitwig on macOS) flash before the UI appears, it stays black until
         the first frame.
 
+- [Imp] BUG-10527 Linux: the standalone versions can play through JACK besides
+        ALSA, and with pipewire-jack straight into PipeWire.
+
 - [Imp] DSPBridge: The interface between the plugins and DSPBridgeServer changed
         again in this version, and with it the bridge protocol version: update
         DSPBridgeServer together with the plugins. A server of 2.2.27 or older

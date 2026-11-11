@@ -112,6 +112,20 @@ if(WIN32 AND ${CMAKE_PROJECT_NAME}_ASIO_SDK_PATH)
 	endif()
 endif()
 
+# JACK, which on Linux is also the way into PipeWire (pipewire-jack), for the standalones beside ALSA (BUG-10527). JUCE
+# loads libjack when it is used, so only the build needs it. One library serves every product, so the JACK client is
+# named after the program instead of after JucePlugin_Name, which would be "JUCEJack" here.
+if(UNIX AND NOT APPLE)
+	find_path(JACK_INCLUDE_DIR jack/jack.h)
+	if(JACK_INCLUDE_DIR)
+		target_compile_definitions(juce_plugin_modules PUBLIC JUCE_JACK=1
+			"JUCE_JACK_CLIENT_NAME=juce::File::getSpecialLocation(juce::File::currentExecutableFile).getFileNameWithoutExtension().toRawUTF8()")
+		target_include_directories(juce_plugin_modules PRIVATE ${JACK_INCLUDE_DIR})
+	else()
+		message(WARNING "jack/jack.h not found (libjack-jackd2-dev): the standalones are built without JACK and reach PipeWire through ALSA only")
+	endif()
+endif()
+
 target_include_directories(juce_plugin_modules
     INTERFACE
         $<TARGET_PROPERTY:juce_plugin_modules,INCLUDE_DIRECTORIES>)

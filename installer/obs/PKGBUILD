@@ -22,7 +22,8 @@ license=('GPL-3.0-or-later')
 # pacman detects no dependencies, and JUCE loads the X11 libraries at run time: list them all.
 depends=('alsa-lib' 'libglvnd' 'libx11' 'libxext' 'libxinerama' 'libxrandr' 'libxcursor')
 # freetype2 and fontconfig: JUCE builds juceaide as a host tool that needs the system headers.
-makedepends=('cmake' 'ninja' 'freetype2' 'fontconfig' 'libxcomposite')
+# jack2: the JACK headers for the standalones, JUCE loads libjack at run time (pipewire-jack or jack2).
+makedepends=('cmake' 'ninja' 'freetype2' 'fontconfig' 'libxcomposite' 'jack2')
 options=('!debug')
 source=("TheUsualSuspects-$pkgver.tar.xz")
 sha256sums=('SKIP')

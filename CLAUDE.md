@@ -248,7 +248,7 @@ The Microwave II/XT and microQ support voice expansion via extra DSP boards; in 
 
 ## CI/CD
 
-**GitHub Actions** (`.github/workflows/`): `cmake.yml` (matrix: Ubuntu, macOS 14, Windows 2022, default + Ninja generators), `nightly.yml`, `release.yml`. Linux CI deps: `sudo apt install -y libgl1-mesa-dev xorg-dev libasound2-dev`.
+**GitHub Actions** (`.github/workflows/`): `cmake.yml` (matrix: Ubuntu, macOS 15, Windows 2022, default + Ninja generators), `nightly.yml`, `release.yml`. Linux CI deps: `sudo apt install -y libgl1-mesa-dev xorg-dev libasound2-dev libcurl4-openssl-dev libjack-jackd2-dev` (without the JACK headers the Linux standalones lose JACK, CMake warns).
 
 **Jenkins** (private) — three jobs:
 - **`dsp56300_main`** — single-platform build, inline pipeline (`scripts/Jenkinsfile` is a manually-synced mirror, not loaded from SCM). Stages: Checkout → Compile → Pack → Integration Tests → Deploy → Upload → GitHub. Params: `Branch`, `AgentLabel`, `Synths` (cmake `-D` flag string), `DisplayName`, `FXPlugins`, `Deploy`, `Upload`, `GitHub`, `IntegrationTests`, `UploadFolder`.

@@ -24,6 +24,13 @@ BuildRequires:  pkgconfig(xcursor)
 BuildRequires:  pkgconfig(xext)
 BuildRequires:  pkgconfig(xinerama)
 BuildRequires:  pkgconfig(xrandr)
+# the JACK headers for the standalones, JUCE loads libjack at run time; a named package,
+# pkgconfig(jack) has two providers on both (jack and pipewire)
+%if 0%{?fedora}
+BuildRequires:  pipewire-jack-audio-connection-kit-devel
+%else
+BuildRequires:  libjack-devel
+%endif
 
 # The DSP56300 JIT only has x86_64 and aarch64 backends.
 ExclusiveArch:  x86_64 aarch64
