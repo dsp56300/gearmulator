@@ -65,6 +65,7 @@ namespace hwLib
 		uint32_t m_sysexDelaySize;
 
 		std::deque<uint8_t> m_pendingBytes;
+		std::deque<uint8_t> m_pendingRealtimeBytes;
 		uint32_t m_remainingByteDelay = 0;
 		float m_byteDelaySeconds = 0.0f;
 	};

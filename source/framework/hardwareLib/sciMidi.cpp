@@ -16,15 +16,20 @@ namespace hwLib
 	{
 	}
 
+	// MIDI real time messages may be sent at any time, also between the bytes of another message
+	static bool isRealtime(const uint8_t _byte)
+	{
+		return _byte >= 0xf8;
+	}
+
 	void SciMidi::process(const uint32_t _numSamples)
 	{
 		std::unique_lock lock(m_mutex);
 
-		if(m_readingSysex)
-			return;
-
-		// Move ready sysex messages into the byte buffer
+		// while the device sends a sysex it gets nothing but real time messages
+		if(!m_readingSysex)
 		{
+			// Move ready sysex messages into the byte buffer
 			auto remainingSamples = _numSamples;
 
 			while(!m_pendingSysexBuffers.empty())
@@ -50,11 +55,12 @@ namespace hwLib
 			}
 		}
 
-		// Drain all pending bytes to QSM with baud rate pacing
+		// Drain all pending bytes to QSM with baud rate pacing. A real time byte takes the next byte slot, a MIDI clock
+		// that waited behind a long sysex arrived late and in bursts
 		{
 			auto remainingSamples = _numSamples;
 
-			while(!m_pendingBytes.empty())
+			while(!m_pendingRealtimeBytes.empty() || (!m_readingSysex && !m_pendingBytes.empty()))
 			{
 				if(m_remainingByteDelay > 0)
 				{
@@ -66,8 +72,9 @@ namespace hwLib
 				if(m_remainingByteDelay)
 					break;
 
-				m_qsm.writeSciRX(m_pendingBytes.front());
-				m_pendingBytes.pop_front();
+				auto& bytes = m_pendingRealtimeBytes.empty() ? m_pendingBytes : m_pendingRealtimeBytes;
+				m_qsm.writeSciRX(bytes.front());
+				bytes.pop_front();
 				m_remainingByteDelay = static_cast<uint32_t>(m_samplerate * m_byteDelaySeconds);
 			}
 		}
@@ -76,6 +83,15 @@ namespace hwLib
 	void SciMidi::write(const uint8_t _byte)
 	{
 		std::unique_lock lock(m_mutex);
+
+		if(isRealtime(_byte))
+		{
+			if(m_byteDelaySeconds > 0.0f)
+				m_pendingRealtimeBytes.push_back(_byte);
+			else
+				m_qsm.writeSciRX(_byte);
+			return;
+		}
 
 		if(_byte == 0xf0)
 		{
