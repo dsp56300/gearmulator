@@ -79,6 +79,10 @@ Framework:
         that is built with JUCE too could otherwise share parts of JUCE with
         the plugin and fail while it scans or loads it.
 
+- [Fix] BUG-10559 The plugin window no longer shows a white (Windows) or red
+        (Bitwig on macOS) flash before the UI appears, it stays black until
+        the first frame.
+
 - [Imp] DSPBridge: The interface between the plugins and DSPBridgeServer changed
         again in this version, and with it the bridge protocol version: update
         DSPBridgeServer together with the plugins. A server of 2.2.27 or older

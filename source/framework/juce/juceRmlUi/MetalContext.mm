@@ -237,6 +237,8 @@ namespace juceRmlUi
 		layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
 		layer.framebufferOnly = NO; // We need to read back for screenshots
 		layer.opaque = YES;
+		// Shown until the first frame is presented. Without it the host's background shows through, red in Bitwig
+		layer.backgroundColor = CGColorGetConstantColor(kCGColorBlack);
 
 		// Create an NSView backed by the Metal layer.
 		static MetalViewClass metalViewClass;

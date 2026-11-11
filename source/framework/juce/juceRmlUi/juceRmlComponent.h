@@ -192,6 +192,8 @@ namespace juceRmlUi
 		Rml::Element* getLastElementByGetComponentAt() const { return m_lastGetComponentAt.get(); }
 
 	private:
+		void updateOpenGLAttachment();
+		void attachOpenGLContext();
 		void update();
 		void createRmlContext(const ContextCreatedCallback& _contextCreatedCallback);
 		void destroyRmlContext();

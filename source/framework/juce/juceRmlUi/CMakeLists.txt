@@ -37,6 +37,7 @@ set(SOURCES
 	rmlList.cpp rmlList.h
 	rmlListEntry.cpp rmlListEntry.h
 	rmlMenu.cpp rmlMenu.h
+	rmlNativeWindow.cpp rmlNativeWindow.h
 	rmlPopupWindow.cpp rmlPopupWindow.h
 	rmlPressSwallower.cpp rmlPressSwallower.h
 	rmlRendererProxy.cpp rmlRendererProxy.h
