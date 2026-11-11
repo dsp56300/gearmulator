@@ -32,6 +32,8 @@ source_group("source" FILES ${SOURCES})
 target_link_libraries(networkLib PUBLIC ptypes)
 if(MSVC)
 	target_link_libraries(networkLib PUBLIC ws2_32)
+elseif(MINGW)
+	target_link_libraries(networkLib PUBLIC ws2_32 iphlpapi)
 endif()
 
 if(UNIX AND NOT APPLE)
