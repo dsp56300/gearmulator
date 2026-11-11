@@ -177,6 +177,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(UNIX AND NOT APPLE)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
+# Only the plugin entry points are exported, they are marked as such. Everything else is hidden: on Linux the
+# dynamic linker binds equal names of two loaded plugins to one definition, on macOS weak definitions (inline
+# functions, template statics) are shared with every other image that has them, another plugin's or the host's JUCE
+if(UNIX)
 	set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 	set(CMAKE_C_VISIBILITY_PRESET hidden)
 	set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)

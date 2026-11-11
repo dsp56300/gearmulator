@@ -74,6 +74,11 @@ Framework:
         unloaded, also after another one was selected. On Windows, selecting
         it again after its device was plugged in again received nothing.
 
+- [Fix] BUG-10561 macOS: the plugins no longer export the symbols of JUCE and of
+        their other code, only their entry points. A host or another plugin
+        that is built with JUCE too could otherwise share parts of JUCE with
+        the plugin and fail while it scans or loads it.
+
 - [Imp] DSPBridge: The interface between the plugins and DSPBridgeServer changed
         again in this version, and with it the bridge protocol version: update
         DSPBridgeServer together with the plugins. A server of 2.2.27 or older
