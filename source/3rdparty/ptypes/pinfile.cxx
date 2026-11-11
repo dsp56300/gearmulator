@@ -70,7 +70,7 @@ void infile::doopen()
         sa.lpSecurityDescriptor = NULL;
         sa.bInheritHandle = TRUE;
 
-        handle = int(CreateFileA(filename, GENERIC_READ,
+        handle = tosyshandle(CreateFileA(filename, GENERIC_READ,
             FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, 
             FILE_FLAG_SEQUENTIAL_SCAN, 0));
 #else

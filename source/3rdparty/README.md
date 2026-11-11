@@ -46,7 +46,7 @@ None of them is under active upstream tracking.
 | `libresample` | libresample (Dominic Mazzoni, after Julius Smith's resample) | Autotools upstream; our CMake build and `resample_clear_history` API for prepared sample-rate switches |
 | `portaudio` | PortAudio | Used by the Vavra test console only |
 | `portmidi` | PortMidi (Roger B. Dannenberg) | Old release. A clone of current upstream exists as `portmidi-latest` on some branches |
-| `ptypes` | C++ Portable Types Library | Networking primitives behind `framework/networkLib` |
+| `ptypes` | C++ Portable Types Library | Networking primitives behind `framework/networkLib`. **Patched** for MinGW-w64: `pport.h` adds `tosyshandle()`/`fromsyshandle()` and every `HANDLE` conversion in the I/O classes goes through them instead of relying on MSVC's implicit (and GCC-rejected) casts; `pipbase.cxx` maps `EPFNOSUPPORT`/`EHOSTDOWN` for MinGW as it already did for MSVC |
 | `lua` | Lua 5.4.7 | Compiled as C++ for the RmlUi Lua bindings |
 | `vstsdk2.4.2` | Steinberg VST2 SDK | Not redistributable, so only a `CMakeLists.txt` is committed. The SDK itself is fetched via rclone by `source/cmake/findvst2.cmake`, which falls back to `fst` when unavailable |
 

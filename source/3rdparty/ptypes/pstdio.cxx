@@ -51,9 +51,9 @@ static HANDLE DuplicateSysHandle(DWORD stdh)
 _stdio_init::_stdio_init()
 {
 #ifdef WIN32
-    pin.set_syshandle(int(DuplicateSysHandle(STD_INPUT_HANDLE)));
-    pout.set_syshandle(int(DuplicateSysHandle(STD_OUTPUT_HANDLE)));
-    perr.set_syshandle(int(DuplicateSysHandle(STD_ERROR_HANDLE)));
+    pin.set_syshandle(tosyshandle(DuplicateSysHandle(STD_INPUT_HANDLE)));
+    pout.set_syshandle(tosyshandle(DuplicateSysHandle(STD_OUTPUT_HANDLE)));
+    perr.set_syshandle(tosyshandle(DuplicateSysHandle(STD_ERROR_HANDLE)));
 #else
     pin.set_syshandle(::dup(STDIN_FILENO));
     pout.set_syshandle(::dup(STDOUT_FILENO));

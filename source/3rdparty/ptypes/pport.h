@@ -113,8 +113,15 @@ typedef int*            pint;
 
 #ifdef WIN32
   typedef size_t       pintptr;
+
+  // a HANDLE is pointer sized, the syshandle API stores it in an int by design
+  inline int   tosyshandle(void* handle) { return int(pintptr(handle));   }
+  inline void* fromsyshandle(int handle) { return (void*)pintptr(handle); }
 #else
   typedef uintptr_t    pintptr;
+
+  // a syshandle already is an int file descriptor
+  inline int   tosyshandle(int handle)   { return handle;                 }
 #endif
 
 
