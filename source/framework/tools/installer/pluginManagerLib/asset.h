@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 
 namespace pluginManager
@@ -87,13 +88,20 @@ namespace pluginManager
 	// reinstall is what is left when there is nothing either of them needs.
 	InstallAction combineInstallActions(InstallAction _plugin, InstallAction _fx);
 
-	// Whether installing or upgrading a format of a plugin takes its effect build along: there has to
-	// be one, and either it was asked for - the FX chip - or it is installed already. An installed
-	// effect build is kept in step with its plugin, asked for or not. Going by the chip alone, which is
-	// off until somebody turns it on, left it out of date while "Updates available" counted it: the
-	// plugin stayed in that group after an upgrade and its effect build was never upgraded (BUG-10488).
-	// Removing goes by the chip alone, so nothing is taken away that was not asked for.
-	bool includesFxBuild(bool _offered, bool _wanted, bool _installed);
+	// Whether installing or upgrading a format takes one of its two parts along, the instrument or its
+	// effect build: there has to be a build of it, and either it was asked for - its chip - or it is
+	// installed already. An installed part is kept in step with the other, asked for or not. Going by
+	// the chip alone, which for the effect build is off until somebody turns it on, left it out of date
+	// while "Updates available" counted it: the plugin stayed in that group after an upgrade and its
+	// effect build was never upgraded (BUG-10488). The instrument is the same since it became optional
+	// (BUG-10562). Removing goes by the chips alone, so nothing is taken away that was not asked for.
+	bool includesBuild(bool _offered, bool _wanted, bool _installed);
+
+	// What the button of one format offers for its two parts, each counted only while it is included -
+	// see includesBuild. Empty when neither is: with only the effect build ticked, a format that it does
+	// not come in has nothing to install, and offering the instrument there would install what nobody
+	// asked for.
+	std::optional<InstallAction> columnAction(bool _withPlugin, InstallAction _plugin, bool _withFx, InstallAction _fx);
 
 	// Whether the button of a column fetches one of the parts it covers - the plugin or its effect
 	// build - given what that part needs (_part) and what the column offers for the two (_column). A

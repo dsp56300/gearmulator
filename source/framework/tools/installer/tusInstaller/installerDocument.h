@@ -98,10 +98,14 @@ namespace pluginManager
 		// What is wanted rather than what is not, so that a product or a format seen for the first
 		// time arrives unticked (EMU-248). Everything ticked was what a first start showed, and a
 		// first "Install selected" then put every format of every product on the machine.
+		//
+		// The instrument is the one part that is wanted unless somebody says otherwise (BUG-10562), so
+		// only its being unticked is written down.
 		struct Selection
 		{
 			std::set<std::string> selectedFormats;
 			bool fx = false;
+			bool instr = true;
 		};
 
 		Rml::ElementDocument* getDocument() const;

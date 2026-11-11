@@ -80,22 +80,31 @@ namespace pluginManager
 		void refreshRow(FormatRow& _row) const;
 		void refreshAll();
 
-		void setupFxToggle();
+		void setupPartToggles();
 
 		// Whether the effect builds are part of what this page is about: there has to be one, and
 		// the chip has to be ticked.
 		bool wantsFx() const { return !m_fxProduct.empty() && m_fxSelected; }
 
-		// Whether a row's install and upgrade take the effect build along: while the chip is ticked,
-		// and whenever it is installed, as in the list (BUG-10488).
+		// Whether the instrument is: always, unless there is an effect build to have instead and its
+		// own chip is unticked (BUG-10562).
+		bool wantsInstr() const { return m_fxProduct.empty() || m_instrSelected; }
+
+		// Whether a row's install and upgrade take a part along: while its chip is ticked, and
+		// whenever it is installed, as in the list (BUG-10488).
 		bool fxIncluded(const FormatRow& _row) const
 		{
-			return includesFxBuild(_row.fxOffered, wantsFx(), _row.fxInstalled);
+			return includesBuild(_row.fxOffered, wantsFx(), _row.fxInstalled);
 		}
 
-		// What the button in a row offers, which is about the plugin and, while the chip is ticked,
-		// about its effect build as well.
-		InstallAction actionFor(const FormatRow& _row) const;
+		bool instrIncluded(const FormatRow& _row) const { return includesBuild(true, wantsInstr(), _row.installed); }
+
+		// One of the two chips clicked. Either may be unticked, but not both.
+		void togglePart(bool& _selected, const bool& _other);
+
+		// What the button in a row offers, which is about the parts it includes. Nothing when it
+		// includes neither - see columnAction.
+		std::optional<InstallAction> actionFor(const FormatRow& _row) const;
 
 		// Installs what is queued one after the other, which is how a row fetches the plugin and
 		// its effect build without the two of them racing for the same folder.
@@ -149,10 +158,13 @@ namespace pluginManager
 		std::vector<FormatRow> m_rows;
 
 		// The effect build of the plugin on show, if the archives hold one: "OsirusFX" next to
-		// "Osirus". Empty when there is none, and then the chip is not on the page at all.
+		// "Osirus". Empty when there is none, and then neither chip is on the page at all.
 		std::string m_fxProduct;
 		bool m_fxSelected = false;
+		bool m_instrSelected = true;
+		Rml::Element* m_partToggles = nullptr;
 		Rml::Element* m_fxToggle = nullptr;
+		Rml::Element* m_instrToggle = nullptr;
 
 		// What is still to be installed after the current download finishes.
 		std::vector<Job> m_pending;

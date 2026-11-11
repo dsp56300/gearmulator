@@ -49,13 +49,14 @@
 				<img class="thumbnail-image" src="placeholder.png"/>
 			</div>
 			<div class="plugin-info">
-				<!-- What we call it, with the effect chip beside it. The chip is a product of its own
-				     in the archives and is not in the row at all for a plugin that has none; ticking it
-				     makes every column below about the two of them: what is installed, what the button
-				     offers, and what it then fetches. -->
+				<!-- What we call it, with the two parts beside it for a plugin that has an effect build:
+				     the instrument and the effect version, a product of its own in the archives. Either
+				     may be unticked, but not both, and what is ticked is what every column below is
+				     about: what is installed, what the button offers, and what it then fetches. Not in
+				     the row at all for a plugin without an effect build. -->
 				<div class="plugin-title">
 					<div class="plugin-name">Plugin Name</div>
-					<span class="fx-toggle format-label">FX version</span>
+					<span class="part-toggles"><span class="instr-toggle format-label"><span class="tick-box"><svg class="tick" src="icon_check.svg"/></span>Instrument</span><span class="fx-toggle format-label"><span class="tick-box"><svg class="tick" src="icon_check.svg"/></span>FX version</span></span>
 				</div>
 				<!-- What the hardware is, always on its own line. Beside the name it fitted on some rows
 				     and not on others, and a row that looks unlike the one above it reads worse than a
@@ -86,11 +87,12 @@
 
 	     It lives outside the list because the list is emptied on every refresh. -->
 	<div id="format-column-template" class="format-col">
-		<!-- Both state icons are here and the stylesheet shows the one that applies, so which icon
-		     means what stays out of the C++. The name is written once, when the row is built - it is
-		     what the column is for and never changes afterwards. All on one line, because the
-		     whitespace between the tags would otherwise collapse to a space inside the chip. -->
-		<span class="format-label checked"><span class="format-name">VST3</span><svg class="state-icon current" src="icon_check.svg"/><svg class="state-icon outdated" src="icon_update.svg"/></span>
+		<!-- The box says whether the format is ticked, the arrow after the name that a newer version
+		     is waiting; the stylesheet shows each when it applies, so which icon means what stays out
+		     of the C++. The name is written once, when the row is built - it is what the column is for
+		     and never changes afterwards. All on one line, because the whitespace between the tags
+		     would otherwise collapse to a space inside the chip. -->
+		<span class="format-label"><span class="tick-box"><svg class="tick" src="icon_check.svg"/></span><span class="format-name">VST3</span><svg class="state-icon outdated" src="icon_update.svg"/></span>
 		<span class="format-installed">-</span>
 		<span class="version-select">0.0.0</span>
 		<span class="format-buttons">
@@ -132,10 +134,10 @@
 			<div id="detail-text">
 				<div id="detail-description"></div>
 				<div id="detail-meta"></div>
-				<!-- The effect build, which is a product of its own in the archives and goes into the
-				     same folder as the plugin. Named after it in C++, and not in the row at all for a
-				     plugin that has none. Ticking it makes every row below about the two of them. -->
-				<span id="detail-fx-toggle" class="fx-toggle format-label">FX</span>
+				<!-- The instrument and its effect build, which is a product of its own in the archives
+				     and goes into the same folder. Named after the two in C++, and not on the page at all
+				     for a plugin without an effect build. What is ticked is what every row below is about. -->
+				<span id="detail-part-toggles" class="part-toggles"><span id="detail-instr-toggle" class="instr-toggle format-label"><span class="tick-box"><svg class="tick" src="icon_check.svg"/></span><span class="part-name">Instrument</span></span><span id="detail-fx-toggle" class="fx-toggle format-label"><span class="tick-box"><svg class="tick" src="icon_check.svg"/></span><span class="part-name">FX</span></span></span>
 			</div>
 		</div>
 		<div id="detail-formats">

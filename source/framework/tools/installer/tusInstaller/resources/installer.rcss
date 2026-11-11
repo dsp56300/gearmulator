@@ -20,7 +20,7 @@ body {
 	font-family: Roboto;
 	font-size: 14dp;
 	color: #d2d2d2;
-	width: 900dp;
+	width: 1080dp;
 	height: 100%;
 	overflow: hidden;
 	decorator: vertical-gradient( #1c1c1c #131313 );
@@ -523,7 +523,7 @@ scrollbarhorizontal sliderbar {
    format leaves the column empty rather than moving the ones after it. */
 .format-col {
 	display: inline-block;
-	width: 74dp;
+	width: 84dp;
 	margin-right: 6dp;
 	vertical-align: top;
 	text-align: center;
@@ -543,14 +543,53 @@ scrollbarhorizontal sliderbar {
 	decorator: vertical-gradient( #242424 #1a1a1a );
 }
 
-/* The effect build, offered where there is one. Drawn as a format chip because that is what it
-   behaves like - ticked or not - but it sits with the name rather than in the columns, since it
-   is about the whole row rather than about one format. */
-.fx-toggle {
-	/* .plugin-info is a flex column, whose children are stretched to its width unless they say
-	   otherwise. A chip is as wide as the word in it. */
-	align-self: flex-start;
+/* The instrument and its effect build, offered where there is one. Drawn as format chips because
+   that is what they behave like - ticked or not - but they sit with the name rather than in the
+   columns, since they are about the whole row rather than about one format. */
+.part-toggles {
+	display: flex;
+	flex-direction: row;
+	gap: 4dp;
 	margin-top: 2dp;
+}
+
+/* At the right of the space beside the picture rather than after the name: that space is as wide on
+   every row, since every row lays out a column for every format, so the chips of one row sit under
+   those of the next whatever the names are. On a line of their own, too, when a name leaves them none. */
+.plugin-title .part-toggles {
+	margin-left: auto;
+}
+
+#detail-part-toggles.hidden {
+	display: none;
+}
+
+/* The box in front of every chip that can be ticked, empty or with a tick: ticked and installed are
+   two different things, and the fill and border of a chip alone did not tell them apart well enough
+   to see which of the two a chip was saying (BUG-10562). */
+.format-label .tick-box {
+	display: inline-block;
+	width: 9dp;
+	height: 9dp;
+	margin-right: 4dp;
+	vertical-align: -1dp;
+	border: 1dp #5c5c5c;
+	border-radius: 2dp;
+}
+
+.format-label .tick-box .tick {
+	display: none;
+	width: 9dp;
+	height: 9dp;
+}
+
+.format-label.checked .tick-box {
+	border-color: #b5e853;
+}
+
+.format-label.checked .tick-box .tick {
+	display: block;
+	image-color: #b5e853;
 }
 
 .format-label.checked {
@@ -595,24 +634,18 @@ scrollbarhorizontal sliderbar {
 	decorator: vertical-gradient( #6b5320 #46340f );
 }
 
-/* Beside the name in the chip: a tick when the newest version is installed, an arrow when a newer
-   one is waiting. Coloured on their own, so they read on every one of the four chip states.
+/* Beside the name in the chip: an arrow when a newer version is waiting. Coloured on its own, so it
+   reads on every one of the four chip states. It is in the template and hidden by default; the
+   state class the controller sets decides whether it is shown.
 
-   Both are in the template and hidden by default; the state classes the controller sets decide
-   which one is shown. A chip that is installed but cannot say which version it is has neither
-   class, so it gets no icon - which is the point of a separate "current" rather than reading it
-   as "installed and not outdated". */
+   The newest version installed had a tick here, which beside the box that says whether the chip is
+   ticked read as a second one (BUG-10562). The version under the chip turning green says it now. */
 .format-label .state-icon {
 	display: none;
 	width: 10dp;
 	height: 10dp;
 	margin-left: 3dp;
 	vertical-align: -1dp;
-}
-
-.format-label.current .state-icon.current {
-	display: inline-block;
-	image-color: #b5e853;
 }
 
 .format-label.outdated .state-icon.outdated {
@@ -1049,10 +1082,6 @@ scrollbarhorizontal sliderbar {
 }
 
 /* Not in the row at all for a plugin the archives hold no effect build for. */
-#detail-fx-toggle.hidden {
-	display: none;
-}
-
 /* Only the heading uses this; the rows have an input in its place. */
 .detail-location {
 	color: #666;
@@ -1967,17 +1996,36 @@ scrollbarhorizontal sliderbar {
 	color: #9ac348;
 }
 
-/* The FX chip ticked, in the accent rather than a lighter grey: grey on grey left it looking the same
-   ticked or not, and nobody could tell whether the effect builds were part of what the buttons do
-   (BUG-10488). After the format chip rules, which it would otherwise lose to. */
-.fx-toggle.checked {
+/* The two part chips ticked, in the accent rather than a lighter grey: grey on grey left them looking
+   the same ticked or not, and nobody could tell whether the effect builds were part of what the
+   buttons do (BUG-10488). After the format chip rules, which they would otherwise lose to. */
+.part-toggles .format-label.checked {
 	color: #b5e853;
 	border-color: #b5e853;
 	decorator: vertical-gradient( #2a3318 #1e2412 );
 }
 
-.fx-toggle.checked.installed {
+.part-toggles .format-label.checked.installed {
 	color: #d4f28c;
 	border-color: #b5e853;
 	decorator: vertical-gradient( #3d4a22 #2c3618 );
+}
+
+/* Only the effect build ticked, and it does not come in this format: the button is there, so the
+   column keeps its shape, but plainly not for pressing. */
+.format-action.nothing, .format-action.nothing:hover {
+	decorator: vertical-gradient( #24242400 #1a1a1a00 );
+	border-color: #2b2b2b;
+}
+
+.format-action.nothing .btn-icon, .format-action.nothing:hover .btn-icon {
+	image-color: #4f4f4f;
+}
+
+/* The same in a row of the detail page. */
+.detail-install.disabled, .detail-install.disabled:hover {
+	color: #555;
+	decorator: vertical-gradient( #26262600 #26262600 );
+	background-color: #262626;
+	border-color: #333333;
 }

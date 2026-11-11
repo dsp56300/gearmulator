@@ -362,6 +362,23 @@ Plugin Manager:
         .mid ROM lying at the top of the plugin or next to its binary is still
         moved to the roms folder, never one in a folder of its own.
 
+- [Imp] BUG-10562 A plugin that has an effect version shows two chips beside
+        its name, Instrument and FX version, and either of them can be
+        unticked: the effect version can now be installed on its own.
+
+- [Imp] BUG-10562 Every chip that can be ticked has a box with a tick in it, so
+        that what is ticked is no longer told apart from what is installed by
+        shades of grey alone. The tick that marked the newest installed
+        version is gone from the format chips, the version under the chip
+        turning green says it.
+
+- [Fix] BUG-10562 Every format chip of every plugin looked ticked when the Plugin
+        Manager started, although none was.
+
+- [Imp] BUG-10562 The window is wider, so that the six formats on macOS leave
+        enough room for the name of a plugin and its two chips, and the format
+        chips for their tick boxes.
+
 88emuPlayer:
 
 - [New] Devices: Added support for the SC-880.

@@ -69,12 +69,16 @@ namespace pluginManager
 		// "is it ticked anywhere".
 		bool offersFormat(const std::string& _format) const;
 
-		// What has been ticked here, and whether the effect build goes along. A row is thrown away
-		// and built again whenever the catalog is read, so what the user chose has to be readable
+		// What has been ticked here, and which of the instrument and its effect build. A row is thrown
+		// away and built again whenever the catalog is read, so what the user chose has to be readable
 		// off it before it goes and settable on the one that takes its place.
+		//
+		// The two parts are each optional, but not both: unticking the one that is left does nothing.
 		std::vector<std::string> getSelectedFormats() const;
 		bool isFxSelected() const { return m_fxSelected; }
 		void setFxSelected(bool _selected);
+		bool isInstrSelected() const { return m_instrSelected; }
+		void setInstrSelected(bool _selected);
 
 		// How much this row would do, which is what the buttons above the list count up.
 		size_t countFor(const Bulk _what) const { return formatsFor(_what).size(); }
@@ -138,16 +142,23 @@ namespace pluginManager
 		bool wantsFx() const { return !m_fxProduct.empty() && m_fxSelected; }
 		bool hasFxBuild(const FormatRow& _row) const;
 
-		// Whether a column's install and upgrade take the effect build along: while the chip is
-		// ticked, and whenever it is installed - see includesFxBuild.
+		// Whether the instrument is: always, unless there is an effect build to have instead and its
+		// own chip is unticked (BUG-10562).
+		bool wantsInstr() const { return m_fxProduct.empty() || m_instrSelected; }
+
+		// Whether a column's install and upgrade take a part along: while its chip is ticked, and
+		// whenever it is installed - see includesBuild.
 		bool fxIncluded(const FormatRow& _row) const;
-		void updateFxToggle();
+		bool instrIncluded(const FormatRow& _row) const { return includesBuild(true, wantsInstr(), _row.installed); }
 
-		// What the button in a column offers, which is about the plugin and, while the FX chip is
-		// ticked, about its effect build as well.
-		InstallAction actionFor(const FormatRow& _row) const;
+		// The chips say whether any format of their part is on the disk, as a format chip does.
+		void updatePartToggles();
 
-		void setupFxToggle();
+		// What the button in a column offers, which is about the parts it includes. Nothing when it
+		// includes neither - see columnAction.
+		std::optional<InstallAction> actionFor(const FormatRow& _row) const;
+
+		void setupPartToggles();
 
 		void populate();
 		void addFormatRows();
@@ -223,10 +234,12 @@ namespace pluginManager
 		std::vector<Job> m_pending;
 
 		// The effect build of this plugin, if the archives hold one: "OsirusFX" next to "Osirus".
-		// Empty when there is none, and then the chip is not in the row at all.
+		// Empty when there is none, and then neither chip is in the row at all.
 		std::string m_fxProduct;
 		bool m_fxSelected = false;
+		bool m_instrSelected = true;
 		Rml::Element* m_fxToggle = nullptr;
+		Rml::Element* m_instrToggle = nullptr;
 
 		Rml::Element* m_thumbnailImg = nullptr;
 		Rml::Element* m_nameElem = nullptr;

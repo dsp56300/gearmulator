@@ -59,7 +59,9 @@ namespace pluginManager
 		, m_backupButton(_doc.GetElementById("detail-backup"))
 		, m_dataNote(_doc.GetElementById("detail-data-note"))
 		, m_backupList(_doc.GetElementById("detail-backup-list"))
+		, m_partToggles(_doc.GetElementById("detail-part-toggles"))
 		, m_fxToggle(_doc.GetElementById("detail-fx-toggle"))
+		, m_instrToggle(_doc.GetElementById("detail-instr-toggle"))
 	{
 		if (m_removeAll)
 			juceRmlUi::EventListener::Add(m_removeAll, Rml::EventId::Click, [this](Rml::Event&) { onRemoveAll(); });
@@ -68,17 +70,25 @@ namespace pluginManager
 			juceRmlUi::EventListener::Add(m_backupButton, Rml::EventId::Click, [this](Rml::Event&) { onBackup(); });
 
 		if (m_fxToggle)
-		{
-			juceRmlUi::EventListener::Add(m_fxToggle, Rml::EventId::Click, [this](Rml::Event&)
-			{
-				m_fxSelected = !m_fxSelected;
-				m_fxToggle->SetClass("checked", wantsFx());
+			juceRmlUi::EventListener::Add(m_fxToggle, Rml::EventId::Click, [this](Rml::Event&) { togglePart(m_fxSelected, m_instrSelected); });
 
-				// Every row says something different now: what its button offers, and what the trash
-				// can beside it would take.
-				refreshAll();
-			});
-		}
+		if (m_instrToggle)
+			juceRmlUi::EventListener::Add(m_instrToggle, Rml::EventId::Click, [this](Rml::Event&) { togglePart(m_instrSelected, m_fxSelected); });
+	}
+
+	void DetailPage::togglePart(bool& _selected, const bool& _other)
+	{
+		// Not both off: a page whose buttons install nothing is not a choice anybody makes.
+		if (_selected && !_other)
+			return;
+
+		_selected = !_selected;
+
+		setupPartToggles();
+
+		// Every row says something different now: what its button offers, and what the trash can
+		// beside it would take.
+		refreshAll();
 	}
 
 	DetailPage::~DetailPage()
@@ -100,6 +110,7 @@ namespace pluginManager
 		m_pending.clear();
 		m_fxProduct = _pluginManager.getCatalog().fxProductOf(_product.product);
 		m_fxSelected = false;
+		m_instrSelected = true;
 
 		// One task per product shown, so an install started here is forgotten when the page moves on.
 		m_installTask = std::make_unique<InstallTask>(_pluginManager, m_rmlComponent);
@@ -154,7 +165,7 @@ namespace pluginManager
 
 		updateThumbnail();
 
-		setupFxToggle();
+		setupPartToggles();
 
 		m_rows.clear();
 
@@ -192,19 +203,26 @@ namespace pluginManager
 		refreshBackups();
 	}
 
-	// Both the setup and the click: what the chip says and whether it is there at all depend on
-	// the product, and ticking it changes what every row below says about itself.
-	void DetailPage::setupFxToggle()
+	// Both the setup and the click: what the chips say and whether they are there at all depend on
+	// the product, and ticking one changes what every row below says about itself.
+	void DetailPage::setupPartToggles()
 	{
-		if (!m_fxToggle)
-			return;
+		// Named after the products they fetch rather than labelled "Instrument" and "FX": this page is
+		// the one that shows a plugin in full, and the archives hold the two under those names.
+		if (m_instrToggle)
+		{
+			setText(m_instrToggle->QuerySelector(".part-name"), m_product.name.empty() ? m_product.product : m_product.name);
+			m_instrToggle->SetClass("checked", wantsInstr());
+		}
 
-		// Named after the product it fetches rather than labelled "FX": this page is the one that
-		// shows a plugin in full, and the archives hold the effect build under that name.
-		setText(m_fxToggle, m_fxProduct.empty() ? std::string("FX") : m_fxProduct);
+		if (m_fxToggle)
+		{
+			setText(m_fxToggle->QuerySelector(".part-name"), m_fxProduct.empty() ? std::string("FX") : m_fxProduct);
+			m_fxToggle->SetClass("checked", wantsFx());
+		}
 
-		m_fxToggle->SetClass("hidden", m_fxProduct.empty());
-		m_fxToggle->SetClass("checked", wantsFx());
+		if (m_partToggles)
+			m_partToggles->SetClass("hidden", m_fxProduct.empty());
 
 		if (m_formats)
 			m_formats->SetClass("has-fx", !m_fxProduct.empty());
@@ -323,12 +341,14 @@ namespace pluginManager
 		if (_row.installButton)
 		{
 			// The same rules the list goes by, in words rather than as an icon. Only the newest
-			// version is offered here, so a downgrade is not one of the answers.
+			// version is offered here, so a downgrade is not one of the answers - and with only the
+			// effect build ticked, a format it does not come in has none at all.
 			const auto action = actionFor(_row);
 
-			_row.installButton->SetInnerRML(action == InstallAction::Install ? "Install"
-				: (action == InstallAction::Upgrade ? "Upgrade" : "Reinstall"));
+			_row.installButton->SetInnerRML(!action ? "-" : (*action == InstallAction::Install ? "Install"
+				: (*action == InstallAction::Upgrade ? "Upgrade" : "Reinstall")));
 
+			_row.installButton->SetClass("disabled", !action);
 			_row.installButton->SetClass("upgrade", action == InstallAction::Upgrade);
 
 			// The same version again, which is neither of the other two answers and is coloured as
@@ -336,21 +356,23 @@ namespace pluginManager
 			_row.installButton->SetClass("reinstall", action == InstallAction::Reinstall);
 		}
 
-		// What the trash can acts on, which is both of them while the chip is ticked.
+		// What the trash can acts on: each part whose chip is ticked.
 		if (_row.element)
-			_row.element->SetClass("is-installed", _row.installed || (wantsFx() && _row.fxInstalled));
+			_row.element->SetClass("is-installed", (wantsInstr() && _row.installed) || (wantsFx() && _row.fxInstalled));
 	}
 
-	InstallAction DetailPage::actionFor(const FormatRow& _row) const
+	std::optional<InstallAction> DetailPage::actionFor(const FormatRow& _row) const
 	{
 		const auto plugin = m_pluginManager->installAction(m_product.product, _row.format, _row.installed,
 			_row.installedVersion, _row.newest);
 
-		if (!fxIncluded(_row))
-			return plugin;
+		const auto withFx = fxIncluded(_row);
 
-		return combineInstallActions(plugin, m_pluginManager->installAction(m_fxProduct, _row.format, _row.fxInstalled,
-			_row.fxInstalledVersion, _row.newest));
+		const auto fx = withFx
+			? m_pluginManager->installAction(m_fxProduct, _row.format, _row.fxInstalled, _row.fxInstalledVersion, _row.newest)
+			: InstallAction::Reinstall;
+
+		return columnAction(instrIncluded(_row), plugin, withFx, fx);
 	}
 
 	void DetailPage::refreshAll()
@@ -358,7 +380,13 @@ namespace pluginManager
 		for (auto& row : m_rows)
 			refreshRow(row);
 
-		// Filled while an effect build is on the disk, as in the list.
+		// Filled while a part is on the disk, as in the list.
+		if (m_instrToggle)
+		{
+			m_instrToggle->SetClass("installed", std::any_of(m_rows.begin(), m_rows.end(),
+				[](const FormatRow& _row) { return _row.installed; }));
+		}
+
 		if (m_fxToggle)
 		{
 			m_fxToggle->SetClass("installed", std::any_of(m_rows.begin(), m_rows.end(),
@@ -415,9 +443,12 @@ namespace pluginManager
 		const auto& row = m_rows[_index];
 		const auto column = actionFor(row);
 
+		if (!column)
+			return;
+
 		// Only what the row's button is about - see fetchesPart.
-		if (fetchesPart(m_pluginManager->installAction(m_product.product, row.format, row.installed,
-			row.installedVersion, row.newest), column))
+		if (instrIncluded(row) && fetchesPart(m_pluginManager->installAction(m_product.product, row.format,
+			row.installed, row.installedVersion, row.newest), *column))
 		{
 			m_pending.push_back({_index, false});
 		}
@@ -425,7 +456,7 @@ namespace pluginManager
 		// After the plugin rather than beside it: both go into the same folder, and one archive
 		// unpacking over the other is how a half-written build ends up there.
 		if (fxIncluded(row) && fetchesPart(m_pluginManager->installAction(m_fxProduct, row.format,
-			row.fxInstalled, row.fxInstalledVersion, row.newest), column))
+			row.fxInstalled, row.fxInstalledVersion, row.newest), *column))
 		{
 			m_pending.push_back({_index, true});
 		}
@@ -492,20 +523,20 @@ namespace pluginManager
 	{
 		auto& row = m_rows[_index];
 
-		const auto alsoFx = wantsFx() && row.fxInstalled;
+		const auto fx = wantsFx() && row.fxInstalled;
+		const auto instr = wantsInstr() && row.installed;
 
-		if (!row.installed && !alsoFx)
+		if (!instr && !fx)
 			return;
 
-		// Both, while the chip is ticked: leaving the effect build behind after taking the plugin
-		// away is how a folder ends up holding something nobody asked to keep. In one call, so a
-		// system folder asks for administrator rights once for the two (EMU-221).
+		// Each part whose chip is ticked, as in the list. In one call, so a system folder asks for
+		// administrator rights once for the two (EMU-221).
 		std::vector<std::pair<std::string, std::string>> items;
 
-		if (alsoFx)
+		if (fx)
 			items.emplace_back(m_fxProduct, row.format);
 
-		if (row.installed)
+		if (instr)
 			items.emplace_back(m_product.product, row.format);
 
 		std::string failure;
@@ -747,7 +778,7 @@ namespace pluginManager
 
 		for (const auto& row : m_rows)
 		{
-			if (row.installed)
+			if (wantsInstr() && row.installed)
 				installed.push_back(row.format);
 
 			if (wantsFx() && row.fxInstalled)

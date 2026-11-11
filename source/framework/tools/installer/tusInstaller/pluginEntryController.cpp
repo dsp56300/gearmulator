@@ -95,7 +95,7 @@ namespace pluginManager
 		populate();
 		addFormatRows();
 		addAllColumn();
-		setupFxToggle();
+		setupPartToggles();
 
 		claimClick(m_cancelButton, [this](Rml::Event&) { onCancelClicked(); });
 
@@ -139,46 +139,67 @@ namespace pluginManager
 
 	// The effect builds go into the same folder as the plugin, under the same login - which
 	// findOwningProduct already arranges, since they are named after it. All that was missing was
-	// somewhere to ask for them.
-	void PluginEntryController::setupFxToggle()
+	// somewhere to ask for them, and then a way to ask for them alone: the instrument has a chip of
+	// its own beside theirs (BUG-10562).
+	void PluginEntryController::setupPartToggles()
 	{
+		m_instrToggle = m_element->QuerySelector(".instr-toggle");
 		m_fxToggle = m_element->QuerySelector(".fx-toggle");
 
-		if (!m_fxToggle)
-			return;
-
-		// Nothing to offer for this plugin, so the chip is not in the row rather than in it and
-		// doing nothing.
+		// Nothing to choose between for this plugin, so the chips are not in the row rather than in
+		// it and doing nothing.
 		if (m_fxProduct.empty())
 		{
-			m_fxToggle->SetProperty("display", "none");
+			if (auto* toggles = m_element->QuerySelector(".part-toggles"))
+				toggles->SetProperty("display", "none");
+
+			m_instrToggle = nullptr;
 			m_fxToggle = nullptr;
 			return;
 		}
 
-		m_fxToggle->SetClass("checked", m_fxSelected);
 		const auto& name = m_product.name.empty() ? m_product.product : m_product.name;
 
-		m_fxToggle->SetAttribute("title", "Also install " + m_fxProduct + ", the effect version. One that is "
-			"installed is always updated together with " + name + ".");
+		if (m_instrToggle)
+		{
+			m_instrToggle->SetClass("checked", m_instrSelected);
+			m_instrToggle->SetAttribute("title", "Install " + name + ", the instrument. Untick it to install "
+				"only " + m_fxProduct + ". One that is installed is always updated together with it.");
 
-		claimClick(m_fxToggle, [this](Rml::Event&) { setFxSelected(!m_fxSelected); });
+			claimClick(m_instrToggle, [this](Rml::Event&) { setInstrSelected(!m_instrSelected); });
+		}
+
+		if (m_fxToggle)
+		{
+			m_fxToggle->SetClass("checked", m_fxSelected);
+			m_fxToggle->SetAttribute("title", "Install " + m_fxProduct + ", the effect version. One that is "
+				"installed is always updated together with " + name + ".");
+
+			claimClick(m_fxToggle, [this](Rml::Event&) { setFxSelected(!m_fxSelected); });
+		}
 	}
 
-	// Filled while an effect build is on the disk, as a format chip is: whether it is there and whether
-	// it is ticked are two different things, and the chip is the only place the row says the former.
-	void PluginEntryController::updateFxToggle()
+	// Filled while a part is on the disk, as a format chip is: whether it is there and whether it is
+	// ticked are two different things, and the chip is the only place the row says the former.
+	void PluginEntryController::updatePartToggles()
 	{
-		if (!m_fxToggle)
-			return;
+		if (m_instrToggle)
+		{
+			m_instrToggle->SetClass("installed", std::any_of(m_formats.begin(), m_formats.end(),
+				[](const FormatRow& _row) { return _row.installed; }));
+		}
 
-		m_fxToggle->SetClass("installed", std::any_of(m_formats.begin(), m_formats.end(),
-			[](const FormatRow& _row) { return _row.fxInstalled; }));
+		if (m_fxToggle)
+		{
+			m_fxToggle->SetClass("installed", std::any_of(m_formats.begin(), m_formats.end(),
+				[](const FormatRow& _row) { return _row.fxInstalled; }));
+		}
 	}
 
 	void PluginEntryController::setFxSelected(const bool _selected)
 	{
-		if (m_fxSelected == _selected)
+		// Not both off: a row that installs nothing in every column is not a choice anybody makes.
+		if (m_fxSelected == _selected || (!_selected && !m_instrSelected))
 			return;
 
 		m_fxSelected = _selected;
@@ -190,13 +211,20 @@ namespace pluginManager
 
 		// Every column says something different now: what counts as installed, and what its
 		// button would do.
-		for (auto& row : m_formats)
-		{
-			refreshInstalledState(row);
-			updateRow(row);
-		}
+		refreshAll();
+	}
 
-		updateAllColumn();
+	void PluginEntryController::setInstrSelected(const bool _selected)
+	{
+		if (m_instrSelected == _selected || (!_selected && !m_fxSelected))
+			return;
+
+		m_instrSelected = _selected;
+
+		if (m_instrToggle)
+			m_instrToggle->SetClass("checked", m_instrSelected);
+
+		refreshAll();
 	}
 
 	bool PluginEntryController::hasFxBuild(const FormatRow& _row) const
@@ -210,21 +238,22 @@ namespace pluginManager
 
 	bool PluginEntryController::fxIncluded(const FormatRow& _row) const
 	{
-		return includesFxBuild(hasFxBuild(_row), wantsFx(), _row.fxInstalled);
+		return includesBuild(hasFxBuild(_row), wantsFx(), _row.fxInstalled);
 	}
 
-	InstallAction PluginEntryController::actionFor(const FormatRow& _row) const
+	std::optional<InstallAction> PluginEntryController::actionFor(const FormatRow& _row) const
 	{
 		const auto plugin = m_pluginManager.installAction(m_product.product, _row.format, _row.installed,
 			_row.installedVersion, _row.selectedVersion());
 
-		if (!fxIncluded(_row))
-			return plugin;
+		const auto withFx = fxIncluded(_row);
 
-		const auto fx = m_pluginManager.installAction(m_fxProduct, _row.format, _row.fxInstalled,
-			_row.fxInstalledVersion, _row.selectedVersion());
+		const auto fx = withFx
+			? m_pluginManager.installAction(m_fxProduct, _row.format, _row.fxInstalled, _row.fxInstalledVersion,
+				_row.selectedVersion())
+			: InstallAction::Reinstall;
 
-		return combineInstallActions(plugin, fx);
+		return columnAction(instrIncluded(_row), plugin, withFx, fx);
 	}
 
 	void PluginEntryController::populate()
@@ -278,6 +307,11 @@ namespace pluginManager
 
 			row.column = column;
 			row.label = column->QuerySelector(".format-label");
+
+			// Said here rather than left to the template, which drew every chip ticked while nothing
+			// was until somebody ticked it (EMU-248) - it took the box in it to show (BUG-10562).
+			if (row.label)
+				row.label->SetClass("checked", row.selected);
 
 			// Once: the chip says which format the column is for, and that does not change while the
 			// row exists. Rewriting it on every refresh is what used to take the state icons with it.
@@ -358,11 +392,11 @@ namespace pluginManager
 
 			const auto action = actionFor(row);
 
-			// Removing takes away whatever of the two is there, and the other two go by what the
-			// column now offers - which already takes the effect build into account.
+			// Removing takes away whatever of the ticked parts is there, and the other two go by what
+			// the column now offers - which already takes both parts into account.
 			const auto applies = _what == Bulk::Remove
-				? (row.installed || (wantsFx() && row.fxInstalled))
-				: (_what == Bulk::Install ? action == InstallAction::Install : action == InstallAction::Upgrade);
+				? ((wantsInstr() && row.installed) || (wantsFx() && row.fxInstalled))
+				: (action && *action == (_what == Bulk::Install ? InstallAction::Install : InstallAction::Upgrade));
 
 			if (applies)
 				formats.push_back(i);
@@ -537,7 +571,14 @@ namespace pluginManager
 		if (!_row.label)
 			return;
 
-		_row.label->SetClass("installed", _row.installed);
+		// What the column is about: the instrument, unless only its effect build is ticked - then the
+		// column says what is installed of that, since that is all its button acts on (BUG-10562).
+		const auto fxOnly = !wantsInstr();
+		const auto& product = fxOnly ? m_fxProduct : m_product.product;
+		const auto installed = fxOnly ? _row.fxInstalled : _row.installed;
+		const auto& installedVersion = fxOnly ? _row.fxInstalledVersion : _row.installedVersion;
+
+		_row.label->SetClass("installed", installed);
 
 		// Installed, but not what is on offer. Only said when the installed version is known: a
 		// format that cannot tell us is left looking plainly installed rather than wrongly outdated.
@@ -545,35 +586,32 @@ namespace pluginManager
 
 		// A newer version number, or - when the number is the same - a newer file, or a copy that cannot
 		// say its version and is older than what is on offer. See PluginManager::isOutdated.
-		const auto outdated = _row.installed &&
-			m_pluginManager.isOutdated(m_product.product, _row.format, _row.installedVersion, newest);
+		const auto outdated = installed && m_pluginManager.isOutdated(product, _row.format, installedVersion, newest);
 
 		_row.label->SetClass("outdated", outdated);
 
-		// The state at a glance beside the name: a tick for the newest, an arrow for one that has a
-		// newer version waiting. Neither for a build that cannot say which version it is, for the same
-		// reason as above. Which icon that means is the stylesheet's to decide - both are in the
-		// template and this only says what the chip is.
-		const auto current = _row.installed && !_row.installedVersion.empty() && !outdated;
+		// An arrow beside the name for one that has a newer version waiting. Not for a build that
+		// cannot say which version it is, for the same reason as above. The newest one used to get a
+		// tick there, which next to the box that says whether the chip is ticked read as a second one
+		// (BUG-10562): the version under the chip turning green says it instead.
+		const auto current = installed && !installedVersion.empty() && !outdated;
 
 		_row.label->SetClass("current", current);
 
-		_row.label->SetAttribute("title", current ? _row.format + " " + _row.installedVersion + " is the newest version"
-			: (outdated ? _row.format + " " + _row.installedVersion + " is installed, " + newest + " is available"
+		_row.label->SetAttribute("title", current ? product + " " + _row.format + " " + installedVersion + " is the newest version"
+			: (outdated ? product + " " + _row.format + " " + installedVersion + " is installed, " + newest + " is available"
 				: std::string()));
 
 		if (_row.column)
-			_row.column->SetClass("is-installed", _row.installed);
+			_row.column->SetClass("is-installed", installed);
 
 		if (_row.installedLabel)
 		{
 			// An installed build that cannot say which version it is says so, rather than being left
 			// looking uninstalled.
-			_row.installedLabel->SetInnerRML(_row.installed
-				? (_row.installedVersion.empty() ? "installed" : _row.installedVersion)
-				: "-");
+			_row.installedLabel->SetInnerRML(installed ? (installedVersion.empty() ? "installed" : installedVersion) : "-");
 
-			_row.installedLabel->SetClass("current", _row.installed && !outdated);
+			_row.installedLabel->SetClass("current", installed && !outdated);
 			_row.installedLabel->SetClass("outdated", outdated);
 		}
 
@@ -584,20 +622,36 @@ namespace pluginManager
 
 		const auto action = actionFor(_row);
 
-		_row.actionButton->SetClass("install", action == InstallAction::Install);
-		_row.actionButton->SetClass("reinstall", action == InstallAction::Reinstall);
-		_row.actionButton->SetClass("upgrade", action == InstallAction::Upgrade);
-		_row.actionButton->SetClass("downgrade", action == InstallAction::Downgrade);
+		// Only the effect build ticked, and it does not come in this format at this version: the button
+		// says so rather than offering the instrument that was not asked for.
+		_row.actionButton->SetClass("nothing", !action);
 
-		_row.actionButton->SetInnerRML(iconHtml(action));
-		_row.actionButton->SetAttribute("title", actionTitle(action, _row.format, _row.selectedVersion()));
+		if (!action)
+		{
+			_row.actionButton->SetInnerRML(iconHtml(InstallAction::Install));
+			_row.actionButton->SetAttribute("title", m_fxProduct + " " + _row.selectedVersion() +
+				" does not come in " + _row.format);
+
+			for (const auto* name : {"install", "reinstall", "upgrade", "downgrade"})
+				_row.actionButton->SetClass(name, false);
+
+			return;
+		}
+
+		_row.actionButton->SetClass("install", *action == InstallAction::Install);
+		_row.actionButton->SetClass("reinstall", *action == InstallAction::Reinstall);
+		_row.actionButton->SetClass("upgrade", *action == InstallAction::Upgrade);
+		_row.actionButton->SetClass("downgrade", *action == InstallAction::Downgrade);
+
+		_row.actionButton->SetInnerRML(iconHtml(*action));
+		_row.actionButton->SetAttribute("title", actionTitle(*action, _row.format, _row.selectedVersion()));
 	}
 
 	// How much of the row is installed, and which of the three things are worth offering. An action
 	// with nothing to act on stays visible but dim: the column keeps its shape down the whole list.
 	void PluginEntryController::updateAllColumn()
 	{
-		updateFxToggle();
+		updatePartToggles();
 
 		if (!m_allSummary)
 			return;
@@ -612,7 +666,8 @@ namespace pluginManager
 
 			++selected;
 
-			if (row.installed)
+			// Of the part the columns are about, as they show it.
+			if (wantsInstr() ? row.installed : row.fxInstalled)
 				++installed;
 		}
 
@@ -685,32 +740,28 @@ namespace pluginManager
 		confirmUninstall(m_rmlComponent, m_product.name.empty() ? m_product.product : m_product.name, names,
 			m_alive, [this, formats, names]
 			{
-				// The effect builds go with them, and are not counted: a format may well have one and
-				// not the other, and what is asked for here is that neither is left behind. All of it in
-				// one call, so a system folder asks for administrator rights once (EMU-221).
+				// Each ticked part that is there: a format may well have one and not the other, and what
+				// is asked for here is that neither is left behind. The effect builds first, and all of it
+				// in one call, so a system folder asks for administrator rights once (EMU-221).
 				std::vector<std::pair<std::string, std::string>> items;
 
-				if (wantsFx())
+				for (const auto& [part, wanted] : {std::make_pair(m_fxProduct, wantsFx()),
+				                                   std::make_pair(m_product.product, wantsInstr())})
 				{
 					for (const auto& name : names)
 					{
-						if (m_pluginManager.isInstalled(m_fxProduct, name))
-							items.emplace_back(m_fxProduct, name);
+						if (wanted && m_pluginManager.isInstalled(part, name))
+							items.emplace_back(part, name);
 					}
 				}
-
-				const auto first = items.size();
-
-				for (const auto& name : names)
-					items.emplace_back(m_product.product, name);
 
 				std::string message;
 
 				const auto results = m_pluginManager.uninstallMany(items, message);
-				const auto removed = static_cast<size_t>(std::count(results.begin() + static_cast<std::ptrdiff_t>(first), results.end(), true));
+				const auto all = std::find(results.begin(), results.end(), false) == results.end();
 
 				if (message.empty())
-					message = "Removed " + std::to_string(removed) + (removed == 1 ? " format" : " formats");
+					message = "Removed " + std::to_string(names.size()) + (names.size() == 1 ? " format" : " formats");
 
 				for (const auto index : formats)
 				{
@@ -721,9 +772,9 @@ namespace pluginManager
 
 				updateAllColumn();
 
-				setStatus(removed == names.size() ? message : "Failed: " + message);
+				setStatus(all ? message : "Failed: " + message);
 
-				if (removed == names.size())
+				if (all)
 					return;
 
 				juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
@@ -745,7 +796,10 @@ namespace pluginManager
 				_row.selectedVersion());
 
 			if (!_skipUpToDate)
-				return fetchesPart(action, actionFor(_row));
+			{
+				const auto column = actionFor(_row);
+				return column && fetchesPart(action, *column);
+			}
 
 			return action == InstallAction::Install || action == InstallAction::Upgrade;
 		};
@@ -756,7 +810,7 @@ namespace pluginManager
 		{
 			const auto& row = m_formats[index];
 
-			if (worthDoing(m_product.product, row.installed, row.installedVersion, row))
+			if (instrIncluded(row) && worthDoing(m_product.product, row.installed, row.installedVersion, row))
 				jobs.push_back({index, false});
 
 			if (fxIncluded(row) && worthDoing(m_fxProduct, row.fxInstalled, row.fxInstalledVersion, row))
@@ -791,20 +845,22 @@ namespace pluginManager
 	{
 		auto& row = m_formats[_index];
 
-		const auto alsoFx = wantsFx() && row.fxInstalled;
+		const auto fx = wantsFx() && row.fxInstalled;
+		const auto instr = wantsInstr() && row.installed;
 
-		if (!row.installed && !alsoFx)
+		if (!instr && !fx)
 			return;
 
-		// Both, while the chip is ticked: leaving the effect build behind after taking the plugin
-		// away is how a folder ends up holding something nobody asked to keep. In one call, so a
-		// system folder asks for administrator rights once for the two (EMU-221).
+		// Each part whose chip is ticked: leaving the effect build behind after taking the plugin away
+		// is how a folder ends up holding something nobody asked to keep, and taking the instrument
+		// away with only the effect build ticked is removing what nobody asked to remove. In one call,
+		// so a system folder asks for administrator rights once for the two (EMU-221).
 		std::vector<std::pair<std::string, std::string>> items;
 
-		if (alsoFx)
+		if (fx)
 			items.emplace_back(m_fxProduct, row.format);
 
-		if (row.installed)
+		if (instr)
 			items.emplace_back(m_product.product, row.format);
 
 		std::string failure;

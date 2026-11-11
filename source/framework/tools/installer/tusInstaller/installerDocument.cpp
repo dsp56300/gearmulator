@@ -334,7 +334,11 @@ namespace pluginManager
 			// anywhere - and asking the rows is what carries it through a rebuild, since the rows are
 			// built before this runs and carry what they were given back.
 			chip->SetClassNames(isFormatSelectedAnywhere(format) ? "format-label checked" : "format-label");
-			chip->SetInnerRML(format);
+
+			// The box says whether it is ticked, as on the chips in the rows (BUG-10562). The format is
+			// kept on the chip as well, since its text is no longer only the name.
+			chip->SetAttribute("format", format);
+			chip->SetInnerRML(R"(<span class="tick-box"><svg class="tick" src="icon_check.svg"/></span>)" + format);
 
 			juceRmlUi::EventListener::Add(chip, Rml::EventId::Click, [this, chip, format](Rml::Event&)
 			{
@@ -374,6 +378,7 @@ namespace pluginManager
 			auto& selection = m_selection[id];
 
 			selection.fx = e->getIntAttribute("fx", 0) != 0;
+			selection.instr = e->getIntAttribute("instr", 1) != 0;
 
 			for (const auto& format : juce::StringArray::fromTokens(
 				e->getStringAttribute("selected"), ",", {}))
@@ -392,7 +397,7 @@ namespace pluginManager
 		{
 			// Nothing ticked and no effect build asked for is what a row looks like untouched. Writing
 			// those out would put every product on the server into the file to say nothing.
-			if (selection.selectedFormats.empty() && !selection.fx)
+			if (selection.selectedFormats.empty() && !selection.fx && selection.instr)
 				continue;
 
 			auto* e = xml.createNewChildElement("product");
@@ -400,6 +405,9 @@ namespace pluginManager
 
 			if (selection.fx)
 				e->setAttribute("fx", 1);
+
+			if (!selection.instr)
+				e->setAttribute("instr", 0);
 
 			juce::StringArray formats;
 
@@ -433,10 +441,11 @@ namespace pluginManager
 			Selection now;
 			now.selectedFormats.insert(selected.begin(), selected.end());
 			now.fx = entry->isFxSelected();
+			now.instr = entry->isInstrSelected();
 
 			auto& known = m_selection[entry->getProductId()];
 
-			if (known.selectedFormats == now.selectedFormats && known.fx == now.fx)
+			if (known.selectedFormats == now.selectedFormats && known.fx == now.fx && known.instr == now.instr)
 				continue;
 
 			known = std::move(now);
@@ -457,7 +466,9 @@ namespace pluginManager
 		for (const auto& format : it->second.selectedFormats)
 			_entry.setFormatSelected(format, true);
 
+		// The effect build first: the instrument cannot be unticked while it is not ticked.
 		_entry.setFxSelected(it->second.fx);
+		_entry.setInstrSelected(it->second.instr);
 	}
 
 	// Empty rather than vacuously true when there is nothing on offer: a list with no rows must not
@@ -503,7 +514,7 @@ namespace pluginManager
 			if (!chip->IsClassSet("format-label"))
 				continue;
 
-			chip->SetClass("checked", isFormatSelectedAnywhere(chip->GetInnerRML()));
+			chip->SetClass("checked", isFormatSelectedAnywhere(chip->GetAttribute<Rml::String>("format", "")));
 		}
 	}
 

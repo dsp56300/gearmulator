@@ -10,18 +10,23 @@ namespace pluginManager
 {
 	namespace
 	{
-		// The window the app opens with. The document is laid out at 900dp wide and scaled to
+		// The window the app opens with. The document is laid out at 1080dp wide and scaled to
 		// whatever the window is, so this is also how big everything in it starts out.
-		constexpr int g_windowWidth = 1080;
+		//
+		// 1080 rather than the 900 it was: a Mac has a sixth format column, AU, the format chips got
+		// a box in front of their names, and the instrument and effect chips beside the name took the
+		// room the text had left there (BUG-10562). The window grew by the same factor, so everything
+		// in it is as big as before.
+		constexpr int g_windowWidth = 1296;
 		constexpr int g_windowHeight = 840;
 
 		// And how small it may be made. The document does not reflow when the window shrinks, it is
 		// scaled, so without a floor the window can be dragged down to a few hundred pixels with the
 		// whole list still in it and none of it readable.
 		//
-		// The width is just under the 900dp the document is laid out at, so the text is never much
+		// The width is just under the 1080dp the document is laid out at, so the text is never much
 		// smaller than it was drawn. The height is what shows the header and about five rows.
-		constexpr int g_minWidth = 800;
+		constexpr int g_minWidth = 960;
 		constexpr int g_minHeight = 500;
 
 		// Kept free around the window on a screen too small for the size above.

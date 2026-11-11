@@ -259,20 +259,40 @@ namespace
 	void testEffectBuildIsIncludedWhenAskedForOrInstalled()
 	{
 		// Asked for with the FX chip, whether it is installed yet or not.
-		TEST_ASSERT(includesFxBuild(true, true, false));
-		TEST_ASSERT(includesFxBuild(true, true, true));
+		TEST_ASSERT(includesBuild(true, true, false));
+		TEST_ASSERT(includesBuild(true, true, true));
 
 		// Not asked for but installed: kept in step with its plugin. Going by the chip alone, an
 		// installed effect build was never upgraded while "Updates available" counted it.
-		TEST_ASSERT(includesFxBuild(true, false, true));
+		TEST_ASSERT(includesBuild(true, false, true));
 
 		// Neither: an install of the plugin does not bring an effect build nobody asked for.
-		TEST_ASSERT(!includesFxBuild(true, false, false));
+		TEST_ASSERT(!includesBuild(true, false, false));
 
 		// No effect build of that version to fetch, whatever else is true.
-		TEST_ASSERT(!includesFxBuild(false, true, true));
-		TEST_ASSERT(!includesFxBuild(false, true, false));
-		TEST_ASSERT(!includesFxBuild(false, false, true));
+		TEST_ASSERT(!includesBuild(false, true, true));
+		TEST_ASSERT(!includesBuild(false, true, false));
+		TEST_ASSERT(!includesBuild(false, false, true));
+	}
+
+	// The instrument and its effect build are two parts of one format, either of them optional
+	// (BUG-10562): what the column's button offers is about the parts that are included only.
+	void testAColumnOffersWhatIsIncluded()
+	{
+		using IA = InstallAction;
+
+		// Both, as before: the more pressing of the two.
+		TEST_ASSERT(columnAction(true, IA::Reinstall, true, IA::Install) == IA::Install);
+		TEST_ASSERT(columnAction(true, IA::Upgrade, true, IA::Reinstall) == IA::Upgrade);
+
+		// One of them: that one alone, so the instrument being current does not hide a missing
+		// effect build, nor an effect build being missing make the instrument look missing.
+		TEST_ASSERT(columnAction(false, IA::Install, true, IA::Reinstall) == IA::Reinstall);
+		TEST_ASSERT(columnAction(true, IA::Reinstall, false, IA::Install) == IA::Reinstall);
+
+		// Neither - only the effect build ticked, for a format it does not come in: nothing to offer,
+		// rather than the instrument that was not asked for.
+		TEST_ASSERT(!columnAction(false, IA::Install, false, IA::Install));
 	}
 
 	// A trimmed but faithful copy of what the server actually returns for a channel folder: it is
@@ -3167,7 +3187,7 @@ namespace
 			// what the group it sits in says: an upgrade.
 			const auto fxInstalled = pm.isInstalled("Prototype-9FX", "VST3");
 			TEST_ASSERT(fxInstalled);
-			TEST_ASSERT(includesFxBuild(true, false, fxInstalled));
+			TEST_ASSERT(includesBuild(true, false, fxInstalled));
 			TEST_ASSERT(combineInstallActions(plugin, fx) == InstallAction::Upgrade);
 
 			// And that upgrade fetches the effect build alone, not the plugin that is current (BUG-10486).
@@ -4192,6 +4212,7 @@ int main()
 		testInstallActions();
 		testPairedInstallActions();
 		testEffectBuildIsIncludedWhenAskedForOrInstalled();
+		testAColumnOffersWhatIsIncluded();
 		testAColumnFetchesOnlyWhatNeedsIt();
 		testDirectoryIndex();
 		testDirectoryIndexDoesNotDuplicate();
