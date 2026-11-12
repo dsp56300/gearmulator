@@ -232,7 +232,8 @@ namespace wLib
 			m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
 		}
 
-		const auto esaiFrameIndex = m_esaiFrameIndex;
+		// one snapshot: the delta and m_lastEsaiFrameIndex must see the same frame index
+		const uint32_t esaiFrameIndex = m_esaiFrameIndex.load();
 
 		const auto ucClock = getUc().getSim().getSystemClockHz();
 
