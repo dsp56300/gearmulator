@@ -86,6 +86,13 @@ Framework:
 - [Imp] BUG-10527 Linux: the standalone versions can play through JACK besides
         ALSA, and with pipewire-jack straight into PipeWire.
 
+- [Fix] macOS: a standalone version could stay silent until it was restarted
+        after another app changed the sample rate of the audio device, for
+        example when Logic Pro was opened.
+
+- [Fix] VST2: protect audio buffers when a host suspends or resumes the plugin
+        concurrently with audio processing, avoiding a crash seen in VSTHost.
+
 - [Imp] DSPBridge: The interface between the plugins and DSPBridgeServer changed
         again in this version, and with it the bridge protocol version: update
         DSPBridgeServer together with the plugins. A server of 2.2.27 or older
