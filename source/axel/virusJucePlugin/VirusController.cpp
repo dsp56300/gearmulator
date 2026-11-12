@@ -217,8 +217,9 @@ namespace virus
 		}
 		else if(_source == synthLib::MidiEventSource::Device)
 		{
-			// TI DSP sends parameter changes back as sysex, unsure why. Ignore them as it stops
-			// host automation because the host thinks we "edit" the parameter
+			// The TI OS reports a parameter change that reached it as a front panel command, while ours reach it as MIDI
+			// (Microcontroller::sendParameterChange). Ignore reports anyway, a host stops its automation of a parameter
+			// it thinks we edited
 			return;
 		}
 

@@ -47,8 +47,8 @@ namespace virusLib
 		bool enableTimestamps();
 
 	private:
-		// _lead: the event sounds that many samples after now, see synthLib::SMidiEvent::lead
-		void sendMidiToDSP(uint8_t _a, uint8_t _b, uint8_t _c, uint16_t _lead);
+		// _lead: the event sounds that many samples after now, see synthLib::SMidiEvent::lead. _sysex instead of the bytes
+		void sendMidiToDSP(uint8_t _a, uint8_t _b, uint8_t _c, uint16_t _lead, const synthLib::SysexBuffer* _sysex = nullptr);
 		void updateDspTime();
 
 		Hdi08Queue& m_output;

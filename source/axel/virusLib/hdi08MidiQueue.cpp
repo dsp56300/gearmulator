@@ -41,7 +41,7 @@ namespace virusLib
 		{
 			const auto& ev = m_pendingMidiEvents.front();
 
-			sendMidiToDSP(ev.a, ev.b, ev.c, ev.lead);
+			sendMidiToDSP(ev.a, ev.b, ev.c, ev.lead, ev.sysex.empty() ? nullptr : &ev.sysex);
 
 			m_pendingMidiEvents.pop_front();
 		}	
@@ -57,7 +57,7 @@ namespace virusLib
 		m_pendingMidiEvents.refill();
 	}
 
-	void Hdi08MidiQueue::sendMidiToDSP(uint8_t _a, const uint8_t _b, const uint8_t _c, const uint16_t _lead)
+	void Hdi08MidiQueue::sendMidiToDSP(uint8_t _a, const uint8_t _b, const uint8_t _c, const uint16_t _lead, const synthLib::SysexBuffer* _sysex)
 	{
 		m_lastMidiSample = m_numSamplesWritten;
 
@@ -90,6 +90,14 @@ namespace virusLib
 				m_lastTimestampFrame = m_numSamplesWritten;
 				m_lastTimestamp = t;
 			}
+		}
+
+		// a parameter change of the TI family, as its USB controller passes them, see Microcontroller::sendParameterChange
+		if(_sysex)
+		{
+			for(const auto b : *_sysex)
+				sendMIDItoDSP(b);
+			return;
 		}
 
 		const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(_a);
