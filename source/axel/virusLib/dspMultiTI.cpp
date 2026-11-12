@@ -68,9 +68,11 @@ namespace virusLib
 		{
 			// The slave moves its ring once it finds the marker of the master (EMU-240), by whole frames, so the marker
 			// stays in the same channel. Only that one counts once the block start is known, the others carry audio
+			const auto* const buf = data();
+
 			for(uint32_t i=g_esai1TxPadding; i<g_esai1TxBlockSize * _frames + g_esai1TxPadding; ++i)
 			{
-				if(at(i) != g_magicNumber)
+				if(buf[i] != g_magicNumber)
 					continue;
 
 				constexpr uint32_t frameSize = g_esai1TxBlockSize >> 1;
@@ -116,12 +118,15 @@ namespace virusLib
 		// The OS reads the analog input from RX1 of slot 1, L in the first frame of a sample, R in the second. Until
 		// dsp56300 8ae1681e, a transmitter that the OS switched on while another one was already running (TE0, then
 		// TE1) added a slot to the transmit frame, and the OS picked the input up from slot 0 instead.
-		static volatile uint32_t offset = 5;
+		constexpr uint32_t offset = 5;
+
+		auto* const rx = data();
+		constexpr uint32_t half = g_esai1RxBlockSize >> 1;
 
 		for(uint32_t i=0; i<_frames; ++i)
 		{
-			at(blockIdx + offset                          ) = dsp56k::sample2dsp<T>(_inputs[0][i]);
-			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[1][i]);
+			rx[blockIdx + offset      ] = dsp56k::sample2dsp<T>(_inputs[0][i]);
+			rx[blockIdx + offset + half] = dsp56k::sample2dsp<T>(_inputs[1][i]);
 
 			blockIdx += g_esai1RxBlockSize;
 		}
